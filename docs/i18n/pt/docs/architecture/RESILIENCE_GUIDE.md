@@ -79,7 +79,7 @@ Proteção de regressão: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 **Campos por ligação:**
 
-- `rateLimitedUntil` — timestamp até ao qual o cooldown expira
+- `rateLimitedUntil` — timestamp até o cooldown expirar
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
 - `backoffLevel` — contador de backoff exponencial
@@ -88,40 +88,54 @@ Proteção de regressão: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 - Base OAuth: 5s
 - Base de chave API: 3s
-- 429 de chave API: prefere os cabeçalhos `Retry-After`/reset do upstream ou texto de reset analisável
+- 429 de chave API: prefere os cabeçalhos a montante `Retry-After`/de reposição/texto de reposição analisável
 - Backoff: `baseCooldownMs * 2 ** failureIndex`
 
 **Proteção anti-thundering-herd:** impede que falhas concorrentes prolonguem excessivamente o cooldown ou incrementem duas vezes o `backoffLevel`.
 
-**Os 429 de limite de concorrência não sobem a escada de backoff.** Um `429` cujo corpo indica um
+**Os 429 de limite de concorrência não sobem a escada de backoff.** Um `429` cujo corpo reporta um
 limite de concorrência ("too many concurrent requests", "concurrency limit", "parallel request
-limit", GLM `并发数过高`) significa que a conta está saudável mas ocupada.
-`checkFallbackError()` devolve a razão `concurrency_limited`: faz failover imediato para a ligação
-seguinte, coloca esta em cooldown durante um valor fixo de `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) ou
-a sugestão de retry do upstream, mantém o `backoffLevel` inalterado e define `skipProviderBreaker`.
+limit", GLM `并发数过高`) significa que a conta está saudável, mas ocupada.
+`checkFallbackError()` devolve a razão `concurrency_limited`: muda de imediato para a ligação
+seguinte, coloca esta em cooldown por um valor fixo `CONCURRENCY_LIMIT_COOLDOWN_MS` (1s) ou pela
+indicação de nova tentativa a montante, mantém o `backoffLevel` inalterado e define `skipProviderBreaker`.
 Um corpo de quota explícita continua a prevalecer, pelo que um corpo que também corresponda a um
-padrão de quota continua a ser um veredito de quota. Deteção: `looksLikeConcurrencyLimit()` em
-`src/shared/utils/classify429.ts`; veredito: `open-sse/services/accountFallback/concurrencyLimit429.ts`.
-`classify429()` (o `FailureKind` do breaker) permanece inalterado e continua a ler `rate_limit`
+padrão de quota permanece um veredicto de quota. Deteção: `looksLikeConcurrencyLimit()` em
+`src/shared/utils/classify429.ts`; veredicto: `open-sse/services/accountFallback/concurrencyLimit429.ts`.
+`classify429()` (o `FailureKind` do breaker) permanece inalterado e continua a devolver `rate_limit`
 para estes corpos.
 
-**As paragens de conteúdo do stream não arrefecem a conta.** Quando o watchdog de paragem de
-conteúdo (`open-sse/utils/streamHandler.ts`) desiste de um stream que não enviou saída do modelo
-a tempo, `markAccountUnavailable()` regista o erro na ligação mas não define cooldown: a paragem
-pertence a esse pedido — na maioria das vezes um turno de raciocínio longo ainda sem saída.
-Os operadores podem reativar este comportamento com `resilienceSettings.streamStallCooldown.enabled`
-(predefinição `false`).
+**As estagnações de conteúdo do stream não colocam a conta em cooldown.** Quando o watchdog de
+estagnação de conteúdo (`open-sse/utils/streamHandler.ts`) desiste de um stream que não enviou
+saída do modelo a tempo, `markAccountUnavailable()` regista o erro na ligação, mas não define
+cooldown: a estagnação pertence a esse pedido, na maioria das vezes um turno de raciocínio longo
+ainda sem saída. Os operadores podem voltar a ativar este comportamento com
+`resilienceSettings.streamStallCooldown.enabled` (predefinição `false`).
 
-**As frames de raciocínio reiniciam o orçamento de paragem de conteúdo.** Um modelo de raciocínio
-pode pensar durante minutos antes do seu primeiro token visível: o Claude transmite frames
-`thinking_delta` cujo texto de raciocínio pode estar vazio, e a Responses API transmite um item de
-raciocínio atrás do outro. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`)
-reconhece estas frames, e o watchdog reinicia o seu orçamento em cada uma em vez de cancelar o
-turno. Continuam a não ser saída do modelo, pelo que um turno que termina apenas com raciocínio
-continua a ser reportado como vazio, e um turno que deixa de raciocinar e passa apenas a enviar
-heartbeats continua a acionar o watchdog.
+**Sinal de latência opt-in para a seleção de contas `p2c`.** Cada tentativa despachada regista o
+seu tempo até ao primeiro byte e o resultado por ligação (e por ligação + modelo) numa janela
+deslizante em memória: as últimas 20 amostras em 15 minutos
+(`open-sse/services/connectionLatencyTracker.ts`, registado a partir de `safeLogEvents()` em
+`src/sse/handlers/chatHelpers.ts`). Quando `resilienceSettings.p2cLatency.weight` é superior a `0`
+(intervalo 0-20, predefinição `0` = desligado), `compareP2CConnections()` em `src/sse/services/auth.ts`
+adiciona até `weight` pontos a cada candidato do par. Metade desse valor vem da latência como
+proporção relativamente ao candidato mais rápido (duas vezes mais lento recebe a metade completa)
+e a outra metade vem da taxa de erros da janela deslizante. O termo aplica-se apenas quando ambos
+os candidatos têm pelo menos 3 amostras, para que as contas novas não sejam penalizadas, e o seu
+teto máximo permanece abaixo das penalizações de quota bloqueada e quota esgotada. Não adiciona
+nenhum circuito próprio: as contas com falhas continuam a ser tratadas pelas camadas de cooldown,
+lockout e breaker. Defina-o com `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-As frames binárias `reasoningContentEvent` do Kiro com assinatura não vazia preservam esta
+**As frames de raciocínio reiniciam o orçamento de estagnação de conteúdo.** Um modelo de
+raciocínio pode pensar durante minutos antes do seu primeiro token visível: o Claude envia em
+stream frames `thinking_delta` cujo texto de pensamento pode estar vazio, e a Responses API envia
+em stream um item de raciocínio após outro. `isReasoningProgressFrame()`
+(`open-sse/utils/streamReadiness.ts`) reconhece estas frames, e o watchdog reinicia o seu orçamento
+em cada uma em vez de cancelar o turno. Ainda assim, não são saída do modelo, por isso um turno que
+termina apenas com raciocínio continua a ser reportado como vazio, e um turno que deixa de
+raciocinar e passa a enviar apenas heartbeats continua a disparar o watchdog.
+
+As frames binárias `reasoningContentEvent` do Kiro com uma assinatura não vazia preservam esta
 atividade de raciocínio através do executor como um delta `reasoning_content` vazio. A assinatura
 não é reencaminhada. Metadados, frames incompletas e assinaturas vazias não reiniciam o orçamento
 de conteúdo; o timeout independente de stream ativo e o cancelamento pelo cliente continuam a
@@ -129,130 +143,131 @@ aplicar-se (`open-sse/executors/kiro/reasoning.ts`).
 
 **Estados terminais (NÃO são cooldowns):**
 
-- `banned` — definido pela deteção de palavras-chave banidas / banimento de conta (ver [BAN_DETECTION](../security/BAN_DETECTION.md)) e por três recusas consecutivas do upstream por pedido (`request_rejected`, p. ex. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); uma única recusa apenas coloca a ligação em cooldown
-- `expired` (transita para terminal após um número limitado de tentativas — `EXPIRED_RETRY_MAX = 3` com backoff exponencial — para que erros OAuth transitórios possam resolver-se sozinhos antes de a conta ser desativada permanentemente)
+- `banned` — definido pela deteção de palavras-chave banidas / banimento de conta (ver [BAN_DETECTION](../security/BAN_DETECTION.md)), e por três recusas consecutivas por pedido a montante (`request_rejected`, p. ex. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); uma única recusa apenas coloca a ligação em cooldown
+- `expired` (transita para terminal após tentativas limitadas — `EXPIRED_RETRY_MAX = 3` com backoff exponencial — para que erros OAuth transitórios se possam resolver sozinhos antes de a conta ser permanentemente desativada)
 - `credits_exhausted`
 
-Estes estados persistem até as credenciais mudarem ou um operador os repuser. Não substituir estados terminais por estado transitório de cooldown.
+Estes estados persistem até as credenciais mudarem ou um operador os repuser. Não sobreponha estados terminais com estado transitório de cooldown.
 
-**Recuperação preguiçosa (lazy):** quando `rateLimitedUntil` já passou, a ligação volta a ficar elegível. Após uma utilização bem-sucedida, `clearAccountError()` limpa todos os campos de erro.
+**Recuperação diferida (lazy):** quando `rateLimitedUntil` já passou, a ligação volta a ficar elegível. Após uma utilização bem-sucedida, `clearAccountError()` limpa todos os campos de erro.
 
-### Muro de utilização OAuth do Claude: via de prioridade mais baixa + reposição do limite de sessão
+### Barreira de utilização do Claude OAuth: via de prioridade reduzida + reposição do limite de sessão
 
 **Âmbito:** uma ligação de subscrição Claude (OAuth). Ambas as funcionalidades são **opt-in por
 ligação** (Editar ligação → secção Claude → `lowPriorityMode` / `autoLimitReset` em
-`providerSpecificData`, ambas desativadas por predefinição) e espelham os comandos `/low-priority` e
+`providerSpecificData`, ambas desligadas por predefinição) e espelham os comandos `/low-priority` e
 `/limit-reset` do Claude Code (contrato de comunicação capturado a partir do Claude Code 2.1.263).
 
 **Implementação:**
 
 - Máquina de estados + classificação de respostas: `open-sse/services/claudeLowPriority.ts`
-- Cliente de estado/reivindicação de reposição: `open-sse/services/claudeLimitReset.ts`
+- Cliente de estado/pedido de reposição: `open-sse/services/claudeLimitReset.ts`
 - Hook do executor (injeção de cabeçalhos + nova tentativa na mesma conta): `open-sse/executors/base.ts::execute()`
-- Persistência do opt-in: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Persistência opcional (opt-in): `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Gatilho:** o muro de utilização de 5 horas — um `429` cujos cabeçalhos trazem
+**Desencadeador:** a barreira de utilização de 5 horas — um `429` cujos cabeçalhos transportam
 `anthropic-ratelimit-unified-status: rejected` e, quando a conta é elegível,
-`anthropic-ratelimit-unified-slow-offer: treatment`. Nada é enviado antes desse primeiro 429 do
-muro; um 429 de rajada sem cabeçalhos unified segue o caminho normal de cooldown.
+`anthropic-ratelimit-unified-slow-offer: treatment`. Nada é enviado antes desse primeiro 429 da barreira; um 429 de rajada sem cabeçalhos unificados segue o percurso normal de cooldown.
 
-**Via de prioridade mais baixa** (`lowPriorityMode`):
+**Via de prioridade reduzida** (`lowPriorityMode`):
 
-- No 429 do muro, o executor aceita a oferta e tenta imediatamente de novo a **mesma**
+- No 429 da barreira, o executor aceita a oferta e tenta de imediato novamente a **mesma**
   conta com `anthropic-usage-limit: slow`; a via permanece ativa até ao
-  `anthropic-ratelimit-unified-reset` anunciado (+60s de tolerância) e todos os pedidos nessa
-  janela transportam o cabeçalho. O 429 intercetado nunca chega ao `handleChatCore`, pelo que a
-  ligação **não** é colocada em cooldown nem é afastada por rotação.
-- `anthropic-ratelimit-unified-slow-status` em respostas posteriores: `active` / `not_needed`
-  mantêm a via; `slot_busy` (429) ou um `529` aguardam o
-  `anthropic-ratelimit-unified-slow-retry-after` do servidor (predefinição 20s, com clamp de
-  5–600s, jitter de ±30%) e tentam de novo, limitados pelo
-  `anthropic-ratelimit-unified-slow-max-wait` (predefinição 20 min, com clamp de
-  1 min–6 h) — para além disso, a via termina e um cool-off de 10 minutos bloqueia a
-  reaceitação. A espera é adicionalmente limitada pelo que resta do timeout de início de
-  upstream do próprio pedido (`resolveFetchStartTimeout`, 10 min por predefinição) menos uma
-  margem de 5 s: sem esse teto, o max-wait predefinido de 20 minutos sobreviveria ao pedido e
-  o sleep seria abortado a meio da espera, fazendo surgir um `TimeoutError` em vez do fim
-  gracioso `max_wait` + cool-off.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, uma rotação da janela de 5 h, ou
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (que a termina como
-  `extra_usage` em qualquer estado, uma vez que o overage pago passa a cobrir o muro) terminam
-  a via; a resposta flui então para o percurso normal de cooldown. `budget_exhausted` fica
-  memorizado até ao reset de orçamento anunciado (≤ 8 dias).
-- A verificação do muro corre depois das novas tentativas intra-tentativa do próprio executor
-  motivadas por 400 (edição de contexto, clamps de thinking/effort, auto-aprendizagem de
-  parâmetros), pelo que um 429 do muro que só surja numa dessas novas tentativas é ainda assim
-  intercetado em vez de chegar ao percurso de cooldown.
-- O estado é em memória por ligação (um reinício custa um 429 do muro extra para reaceitar).
+  `anthropic-ratelimit-unified-reset` anunciado (+60 s de tolerância) e cada pedido nessa
+  janela transporta o cabeçalho. O 429 intercetado nunca chega ao `handleChatCore`, pelo que
+  a ligação **não** é colocada em cooldown nem é afastada por rotação.
+- `anthropic-ratelimit-unified-slow-status` em respostas posteriores: `active` /
+  `not_needed` mantêm a via; `slot_busy` (429) ou um `529` aguardam o
+  `anthropic-ratelimit-unified-slow-retry-after` do servidor (predefinição: 20 s, limitado
+  a 5–600 s, jitter de ±30%) e tentam novamente, limitados pelo
+  `anthropic-ratelimit-unified-slow-max-wait` (predefinição: 20 min, limitado a 1 min–6 h)
+  — ultrapassado esse limite, a via termina e um período de espera de 10 minutos bloqueia a
+  reaceitação. A espera é adicionalmente limitada pelo que resta do timeout de início
+  upstream do próprio pedido (`resolveFetchStartTimeout`, 10 min por predefinição) menos
+  uma margem de 5 s: sem esse teto, a espera máxima predefinida de 20 minutos sobreviveria
+  ao pedido e a suspensão seria interrompida a meio da espera, fazendo surgir um
+  `TimeoutError` em vez do fim `max_wait` controlado + período de espera.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, uma renovação da janela de
+  5 h, ou `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (que a termina
+  como `extra_usage` em qualquer estado, uma vez que o excedente pago passa a cobrir a
+  barreira) terminam a via; a resposta segue então para o percurso normal de cooldown.
+  `budget_exhausted` é memorizado até à reposição de orçamento anunciada (≤ 8 dias).
+- A verificação da barreira é executada após as retentativas internas do próprio executor
+  motivadas por erros 400 (edição de contexto, limitações de thinking/effort, aprendizagem
+  automática de parâmetros), pelo que um 429 da barreira que só surja numa dessas
+  retentativas continua a ser intercetado em vez de chegar ao percurso de cooldown.
+- O estado é mantido em memória por ligação (um reinício custa um 429 da barreira adicional
+  para voltar a aceitar).
 
-**Reset do limite de sessão** (`autoLimitReset`, tentado antes da via quando ambos estão ativos):
+**Reposição do limite de sessão** (`autoLimitReset`, tentada antes da via quando ambas estão ativas):
 
 - `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → bloco
   `juniper_tide`; quando `arm: "reset"` e `available: true`,
   `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` com
-  `{ "program": "juniper_tide" }` (UUID da organização obtido de
-  `providerSpecificData.organizationUUID`, com fallback de bootstrap).
-- `result: reset|not_limited` → o pedido é tentado de novo à velocidade máxima (sem cabeçalho
-  slow). `already_used` / `not_offered` memoizam `next_available_at` (predefinição: uma
-  semana); qualquer falha recua 15 minutos. O reset é uma vez por semana e continua a contar
-  para o limite semanal.
+  `{ "program": "juniper_tide" }` (UUID da organização a partir de
+  `providerSpecificData.organizationUUID`, com fallback para bootstrap).
+- `result: reset|not_limited` → o pedido é repetido a velocidade máxima (sem cabeçalho
+  slow). `already_used` / `not_offered` memorizam `next_available_at` (predefinição: uma
+  semana); qualquer falha impõe um backoff de 15 minutos. A reposição ocorre uma vez por
+  semana e continua a contar para o limite semanal.
 
-Proteções contra regressões: `tests/unit/claude-low-priority-mode.test.ts`,
+Proteções de regressão: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
 ### Afinidade de sessão (#7274)
 
 **Âmbito:** uma sessão de cliente (cabeçalho `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) fixada a uma ligação, para **qualquer** fornecedor.
 
-**Objetivo:** manter um agente multi-turno (Claude Code, aider, agentes personalizados) na mesma conta ao longo dos pedidos, reduzindo a perda de contexto entre contas e os 429 repetidos de arranque a frio em fornecedores com estado de sessão por conta.
+**Objetivo:** manter um agente multi-turno (Claude Code, aider, agentes personalizados) na mesma conta ao longo dos pedidos, reduzindo a perda de contexto entre contas e os repetidos 429 de arranque a frio em fornecedores com estado de sessão por conta.
 
 **Implementação:**
 
 - Resolução do TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
 - Seleção/criação da fixação: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Extração de cabeçalhos (genérica, qualquer fornecedor): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Tabela de fixações persistida: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Definição: `sessionAffinityTtlMs` (TTL global em ms, `0` desativa) — `src/lib/db/settings.ts`. Renomeada a partir de `codexSessionAffinityTtlMs`, exclusiva do Codex, pela migração `124_generic_session_affinity_ttl.sql`, que transporta qualquer TTL de Codex previamente configurado como a nova predefinição.
+- Extração do cabeçalho (genérica, qualquer fornecedor): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Tabela de fixações persistidas: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Definição: `sessionAffinityTtlMs` (TTL global em ms, `0` desativa) — `src/lib/db/settings.ts`. Renomeada a partir de `codexSessionAffinityTtlMs`, exclusiva do Codex, pela migração `124_generic_session_affinity_ttl.sql`, que transfere qualquer TTL de Codex previamente configurado como a nova predefinição.
 
-Antes do #7274, `resolveSessionAffinityTtlMs()` devolvia imediatamente `0` para todos os fornecedores exceto `codex`, pelo que a definição de TTL (e os cabeçalhos de sessão) não tinham qualquer efeito nos restantes, apesar de o mecanismo de fixação e a extração de cabeçalhos já serem agnósticos quanto ao fornecedor. A correção removeu esse retorno antecipado; o TTL passa a aplicar-se uniformemente a todos os fornecedores quando definido globalmente acima de `0`.
+Antes de #7274, `resolveSessionAffinityTtlMs()` devolvia de imediato `0` para todos os fornecedores exceto `codex`, pelo que a definição de TTL (e os cabeçalhos de sessão) não tinham efeito em mais lado nenhum, apesar de o mecanismo de fixação e a extração do cabeçalho já serem agnósticos quanto ao fornecedor. A correção removeu essa saída antecipada; o TTL aplica-se agora uniformemente a todos os fornecedores, uma vez definido globalmente acima de `0`.
 
-Os três cabeçalhos de afinidade de sessão nunca são reencaminhados para upstream — os executores constroem os seus próprios cabeçalhos de upstream de raiz em vez de deixarem passar os cabeçalhos do cliente, pelo que este permanece apenas um id de correlação interno.
+Os três cabeçalhos de afinidade de sessão nunca são reencaminhados upstream — os executores constroem os seus próprios cabeçalhos upstream de raiz em vez de transmitirem os cabeçalhos do cliente, pelo que permanecem apenas um identificador de correlação interno.
 
-### Leases exclusivos de ligação de sessão gerida
+### Concessões exclusivas de ligações para sessões geridas
 
-**Âmbito:** um cliente/sessão HTTP gerido ativo possui uma ligação OmniRoute elegível.
+**Âmbito:** um cliente/sessão HTTP gerido ativo detém uma ligação OmniRoute elegível.
 
-**Objetivo:** proporcionar posse exclusiva e duradoura de ligações a clientes que precisam de uma
-barreira rígida de encaminhamento entre pedidos. Isto difere da afinidade de sessão, que é uma
-preferência flexível de continuidade: um lease exclusivo persiste o estado do ciclo de vida em
-SQLite, impõe a unicidade global do proprietário ativo e da ligação ativa e rejeita uma geração
-obsoleta antes do despacho para o fornecedor.
+**Objetivo:** fornecer posse exclusiva e duradoura de ligações a clientes que precisam de
+uma barreira estrita de encaminhamento entre pedidos. Isto difere da afinidade de sessão,
+que é uma preferência flexível de continuidade: uma concessão exclusiva persiste o estado
+do ciclo de vida em SQLite, impõe a unicidade global do proprietário ativo e da ligação
+ativa, e rejeita uma geração obsoleta antes do despacho para o fornecedor.
 
-A funcionalidade é opt-in por chave de API. Uma chave gerida tem de ter o scope `lease:exclusive` e
-uma lista `allowedConnections` explícita e não vazia. Qualquer cliente HTTP pode usar o endpoint de
-ciclo de vida; não é exigido nome de cliente, user-agent, fornecedor, método OAuth nem modelo. O
-lease detém uma ligação, não um modelo, pelo que uma mudança de modelo mantém o vínculo enquanto a
-ligação permanecer elegível nos termos normais. As regras normais de modelo, quota, saúde,
-cooldown e allowlist mantêm-se autoritativas e podem transitar a mesma geração para outra ligação
-elegível livre.
+A funcionalidade é opt-in por chave de API. Uma chave gerida tem de ter o âmbito `lease:exclusive` e
+uma lista `allowedConnections` explícita e não vazia. Qualquer cliente HTTP pode utilizar o endpoint
+de ciclo de vida; não é necessário nome de cliente, user-agent, fornecedor, método OAuth ou modelo.
+O lease possui uma ligação, não um modelo, pelo que uma alteração de modelo mantém a vinculação
+enquanto a ligação permanecer normalmente elegível. As regras normais de modelo, quota, saúde,
+cooldown e allowlist mantêm-se autoritativas e podem fazer transitar a mesma geração para outra
+ligação elegível e livre.
 
 O ciclo de vida é `POST /api/v1/session-leases` com as ações JSON `acquire`, `renew` e `release`.
-Os pedidos de inferência geridos apresentam o valor opaco `X-OmniRoute-Lease-Owner` e o valor exato de
-`X-OmniRoute-Lease-Generation`. O proprietário usa `vlo_` seguido de 43 caracteres base64url; apenas
-o seu hash SHA-256 é armazenado. Cada barreira de envio final também vincula o ID da chave de API autenticada e
-o ID da ligação ativa. Os cabeçalhos de controlo de concessões são removidos dos registos, dos instantâneos de pedidos retidos e
-dos cabeçalhos do executor a montante.
+Os pedidos de inferência gerida apresentam o valor opaco de `X-OmniRoute-Lease-Owner` e a
+`X-OmniRoute-Lease-Generation` exata. O proprietário usa `vlo_` seguido de 43 caracteres base64url;
+apenas o seu hash SHA-256 é armazenado. Cada fence de despacho final também vincula o ID da chave
+de API autenticada e o ID da ligação ativa. Os cabeçalhos de controlo de lease são removidos dos
+registos, dos snapshots de pedidos retidos e dos cabeçalhos do executor upstream.
 
-Se o encaminhamento normal tiver candidatos geridos elegíveis, mas todos os candidatos livres estiverem ocupados por uma
-concessão ativa externa, o OmniRoute devolve HTTP `429`, um código de capacidade de concessão indisponível, um
-estado de espera por capacidade e um `Retry-After` limitado, derivado da expiração relevante mais próxima.
-A elegibilidade vazia normal não é contenção de concessões e mantém a semântica de erro de encaminhamento existente.
+Se o encaminhamento normal tiver candidatos geridos elegíveis, mas todos os candidatos livres
+estiverem ocupados por um lease ativo externo, o OmniRoute devolve HTTP `429`, um código
+lease-capacity-unavailable, um estado waiting-for-capacity e um `Retry-After` limitado derivado da
+expiração relevante mais próxima. A elegibilidade vazia normal não é contenção de leases e mantém a
+sua semântica de erro de encaminhamento existente.
 
-Os mecanismos relacionados permanecem separados:
+Os mecanismos relacionados mantêm-se separados:
 
-- A ocupação de sessões OAuth é uma distribuição flexível, local ao processo, para contas OAuth.
-- Os semáforos de conta concedem autorizações de concorrência de pedidos e terminam quando um pedido é concluído.
-- As concessões de sessão geridas exclusivas são propriedade durável do ciclo de vida com uma barreira de geração.
+- A ocupação de sessão OAuth é uma distribuição flexível, local ao processo, para contas OAuth.
+- Os semáforos de conta concedem permissões de concorrência de pedidos e terminam quando um pedido é concluído.
+- Os leases exclusivos de sessão gerida são posse durável do ciclo de vida com um fence de geração.
 
 ---
 

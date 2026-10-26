@@ -16,47 +16,41 @@ Gizlilik funksiyaları OmniRoute-un istifadəçiyə məxsus rəsmi hesablar (Cla
 
 ---
 
-## TLS Rəqəmsal İz Qatı
+## TLS Barmaq İzi Qatı
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Davamlı `wreq-js` sessiyaları hər hesab əhatə dairəsi və müəyyənləşdirilmiş proksi üçün tənbəl şəkildə yaradılır. Proses miqyaslı `TlsClient`, Cloudflare arxasındakı yuxarı axın xidmətləri üçün **macOS üzərində Chrome 124** kimi davranan ən çoxu 128 sessiyanı hovuzda saxlayır. Yerli icra mühiti əlçatan olmadıqda `TlsClient.fetch()` qapalı şəkildə xəta verir; çağıran tərəf bu örtükdən kənarda açıq şəkildə ehtiyat variant seçə bilər.
+Davamlı `wreq-js` sessiyaları hər hesab əhatə dairəsi və müəyyən edilmiş proksi üçün tənbəl şəkildə yaradılır. Proses miqyaslı `TlsClient`, Cloudflare arxasındakı yuxarı axın xidmətləri üçün **macOS-da Chrome 124** kimi görünən ən çox 128 sessiyanı hovuzda saxlayır. Yerli icra mühiti əlçatan olmadıqda `TlsClient.fetch()` təhlükəsiz şəkildə uğursuz olur; çağıran tərəf bu örtükdən kənarda ehtiyat variantı açıq şəkildə seçə bilər.
 
 - Sessiya profili: `browser: "chrome_124", os: "macos"`
-- Proksinin müəyyənləşdirilməsi (prioritet): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (kiçik hərfli variantlar da daxil olmaqla)
-- Taymaut: `TLS_CLIENT_TIMEOUT_MS` (`FETCH_TIMEOUT_MS` dəyərindən miras alınır, standart olaraq 600000)
+- Proksinin müəyyən edilməsi (prioritet): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (həmçinin kiçik hərfli variantlar)
+- Taymaut: `TLS_CLIENT_TIMEOUT_MS` (`FETCH_TIMEOUT_MS` parametrindən miras alınır, standart olaraq 600000)
 - `wreq-js` Response fetch ilə uyğundur (`headers`, `text()`, `json()`, `clone()`, `body`).
 - İlk bayt nəzarətçisi (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  yuxarı axın başlıqları çatan kimi tamamlanır, buna görə də yalnız `TLS_CLIENT_TIMEOUT_MS` heç vaxt
-  ilk baytı verməyən gövdəni məhdudlaşdıra bilməz. `guardTlsFirstByte()` gövdənin ilk `read()`
-  əməliyyatını `TLS_FIRST_BYTE_WATCHDOG_MS` (standart `10000`, `0` onu deaktiv edir) ilə yarışdırır;
-  sağlam gövdəyə təsir edilmir, ilişib qalmış gövdə isə wreq oxuyucusunu ləğv edir və `proxyFetch`-in
-  mövcud TLS ehtiyat məntiqinin birbaşa/proksi dispetçerinə keçməsinə imkan verir (təhlükəsiz şəkildə
-  təkrar göndərilə bilməyən sorğu, məsələn, gövdəsi olan POST, səssizcə yenidən cəhd edilmək əvəzinə
-  yenə də xəta verir).
+  yuxarı axın başlıqları daxil olan kimi tamamlanır, buna görə yalnız `TLS_CLIENT_TIMEOUT_MS` ilk baytı heç vaxt təqdim etməyən gövdəni məhdudlaşdıra bilməz. `guardTlsFirstByte()` gövdənin ilk `read()` əməliyyatı ilə `TLS_FIRST_BYTE_WATCHDOG_MS` müddətini (standart `10000`, `0` onu deaktiv edir) yarışdırır; sağlam gövdəyə təsir edilmir, ilişib qalmış gövdə isə wreq oxuyucusunu ləğv edir və `proxyFetch` funksiyasının mövcud TLS ehtiyat məntiqinin birbaşa/proksi dispetçerinə keçməsinə imkan verir (təkrar icrası təhlükəsiz olmayan sorğu, məsələn, gövdəli POST sorğusu, səssizcə yenidən cəhd edilmək əvəzinə yenə də xəta yaradır).
 
-### Veb kuki provayderi nəqliyyatı — wreq-js 3.2.0
+### Veb-kuki provayderi nəqli — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` aşağıdakı beş ixtisaslaşdırılmış veb kuki nəqliyyatı üçün ortaq adapterdir. Hər yığcam provayder örtüyü brauzer/ƏS profilini seçir. Adapter profil + ƏS + müəyyənləşdirilmiş proksi açarı ilə `open-sse/utils/tlsClient.ts` daxilindəki vahid wreq icra mühiti yükləyicisindən və nəqliyyat hovuzundan istifadə edir, hər sorğu isə `cookieMode: "ephemeral"` istifadə edir. Buna görə hesablar və sorğular nəqliyyat səviyyəli bağlantıları paylaşır, lakin heç vaxt wreq sessiyasını və ya kuki anbarını paylaşmır.
+`open-sse/services/tlsClientBase.ts` aşağıdakı beş ixtisaslaşdırılmış veb-kuki nəqli üçün ortaq adapterdir. Hər bir yüngül provayder örtüyü brauzer/ƏS profilini seçir. Adapter `open-sse/utils/tlsClient.ts` faylındakı, profil + ƏS + müəyyən edilmiş proksiyə görə açarlandırılan vahid wreq icra mühiti yükləyicisindən və nəqliyyat hovuzundan istifadə edir, hər sorğu isə `cookieMode: "ephemeral"` parametrindən istifadə edir. Buna görə hesablar və sorğular nəqliyyat səviyyəli bağlantıları paylaşır, lakin heç vaxt wreq sessiyasını və ya kuki anbarını paylaşmır.
 
-| Provayder  | Profil        | Emulyasiya edilən ƏS | Axın EOF siyasəti                       |
-| ---------- | ------------- | -------------------- | --------------------------------------- |
-| Claude     | `chrome_146`  | Linux                | `[DONE]` daxil edilsin                  |
-| Perplexity | `firefox_148` | macOS                | `event: end_of_stream` daxil edilsin    |
-| Grok       | `chrome_146`  | Linux                | `[DONE]` istisna edilsin                |
-| Notion     | `chrome_146`  | Windows              | `[DONE]` daxil edilsin                  |
-| LMArena    | `chrome_146`  | Windows              | sentinel yoxdur; yerli EOF-da bağlansın |
+| Provayder  | Profil        | Emulyasiya edilən ƏS | Axın EOF siyasəti                          |
+| ---------- | ------------- | -------------------- | ------------------------------------------ |
+| Claude     | `chrome_146`  | Linux                | `[DONE]` daxil edilir                      |
+| Perplexity | `firefox_151` | macOS                | `event: end_of_stream` daxil edilir        |
+| Grok       | `chrome_146`  | Linux                | `[DONE]` xaric edilir                      |
+| Notion     | `chrome_146`  | Windows              | `[DONE]` daxil edilir                      |
+| LMArena    | `chrome_146`  | Windows              | sentinel yoxdur; yerli EOF zamanı bağlanır |
 
-- Axın ötürülməsi yerli cavabın `ReadableStream` obyektini birbaşa istehlak edir; müvəqqəti fayl və ya köməkçi proses yaradılmır.
-- Axın təqdim edilməzdən əvvəl ilkin 256 bayta qədər məlumat yoxlanılır. SSE provayderləri qeyri-SSE xətalarını buferləşdirir; Grok/LMArena Cloudflare çağırışlarını `403`, HTML aralıq səhifələrini isə `502` ilə əlaqələndirir.
-- Yerli sorğu taymautu mütləq JS sərt son müddəti ilə əhatələnməyə davam edir. İlişmə yalnız təsirə məruz qalan profil/ƏS/proksi nəqliyyatını etibarsız edir və bağlayır; növbəti sorğudan əvvəl o, yenidən yaradılır.
-- Proksinin müəyyənləşdirilməsi prioriteti hər çağırış üçün `proxyUrl` → sorğu əhatəli hesab/idarəetmə paneli konteksti → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (kiçik hərfli variantlar daxil olmaqla) şəklindədir. Müəyyənləşdirmə xətaları birbaşa bağlantının sızmasının qarşısını almaq üçün qapalı şəkildə xəta verir. LMArena bilərəkdən `arena.ai` əsasında müəyyənləşdirmə aparır.
-- `byteResponse` UTF-8 təhrifinə yol vermədən məzmun tipi göstərilmiş `data:` URL-si qaytarır.
-- Xətalar bunlardır: `TlsClientUnavailableError` (paket/əlavə əlçatan deyil), `TlsClientHangError` (son müddət aşılıb) və bütün 128 məhdud profil/ƏS/proksi yuvası aktiv və ya bağlanma mərhələsində olduqda `WreqTransportCapacityError` (ortaq sessiya tutumu xətasının kodu).
+- Axın emalı yerli cavabın `ReadableStream` obyektini birbaşa istehlak edir; müvəqqəti fayl və ya köməkçi proses yaradılmır.
+- Axın təqdim edilməzdən əvvəl ilkin 256 bayta qədər məlumat yoxlanılır. SSE provayderləri SSE olmayan xətaları buferləşdirir; Grok/LMArena Cloudflare yoxlamalarını `403`, HTML aralıq səhifələrini isə `502` ilə uyğunlaşdırır.
+- Yerli sorğu taymautu mütləq JS sərt son müddəti ilə əhatələnməyə davam edir. İlişmə yalnız təsirlənmiş profil/ƏS/proksi nəqliyyatını etibarsız edir və bağlayır; növbəti sorğudan əvvəl həmin nəqliyyat yenidən yaradılır.
+- Proksinin müəyyən edilməsi prioriteti hər çağırış üzrə `proxyUrl` → sorğu əhatəli hesab/idarəetmə paneli konteksti → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (kiçik hərfli variantlar daxil olmaqla) şəklindədir. Müəyyənetmə xətaları birbaşa bağlantının sızmasına yol vermək əvəzinə təhlükəsiz şəkildə uğursuz olur. LMArena qəsdən `arena.ai` ünvanına əsasən müəyyənetmə aparır.
+- `byteResponse` UTF-8 korlanması olmadan məzmun tipi göstərilmiş `data:` URL qaytarır.
+- Xətalar bütün 128 məhdud profil/ƏS/proksi yuvası aktiv və ya bağlanmaqda olduqda `TlsClientUnavailableError` (paket/əlavə əlçatan deyil), `TlsClientHangError` (son müddət keçilib) və `WreqTransportCapacityError` (ortaq sessiya tutumu xəta kodu) olur.
 
-Yuxarıdakı ümumi `TlsClient` sessiyası davamlı, brauzer tərəfindən dəstəklənən kuki vəziyyəti üçün ixtisaslaşmış olaraq qalır. Hər iki yol bir keşlənmiş wreq modul yükləyicisindən və prosesin həyat dövrü qarmağından təkrar istifadə edir; kukilərinin ömür müddətləri bilərəkdən fərqli olduğuna görə onların hovuzları ayrı qalır.
+Yuxarıdakı ümumi `TlsClient` sessiyası brauzer tərəfindən dəstəklənən davamlı kuki vəziyyəti üçün ixtisaslaşdırılmış olaraq qalır. Hər iki yol bir keşlənmiş wreq modul yükləyicisindən və prosesin həyat dövrü qarmağından təkrar istifadə edir; kukilərinin istifadə müddətləri qəsdən fərqli olduğuna görə hovuzları ayrı qalır.
 
-Profillər sabitlənmiş paket tərəfindən dəstəklənir, lakin real WAF qəbulu yerli müqavilə testlərindən asılı olmayaraq dəyişə bilər. Yuxarı axın brauzeri ilə paritet olduğunu iddia etməzdən əvvəl rəqəmsal iz dəyişikliklərini açıq şəkildə icazə verilmiş canlı hesab üzərində yoxlayın.
+Profillər sabitlənmiş paket tərəfindən dəstəklənir, lakin real WAF qəbulu yerli müqavilə testlərindən asılı olmayaraq dəyişə bilər. Yuxarı axın brauzeri ilə uyğunluq iddia etməzdən əvvəl barmaq izi dəyişikliklərini açıq şəkildə icazə verilmiş canlı hesabla yoxlayın.
 
 ---
 

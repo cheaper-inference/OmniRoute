@@ -1313,7 +1313,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 също го п�
   <tr><td nowrap><b>Среда за изпълнение</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Език</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> в <code>src/</code> и <code>open-sse/</code> (нула <code>any</code> в ядрото от v2.0)</td></tr>
   <tr><td nowrap><b>Рамка</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>База данни</b></td><td>better-sqlite3 (SQLite, WAL журналиране) + LowDB (наследен JSON) — 147 домейн модула, 209 миграции</td></tr>
+  <tr><td nowrap><b>База данни</b></td><td>better-sqlite3 (SQLite, WAL журналиране) + LowDB (наследен JSON) — 147 домейн модула, 210 миграции</td></tr>
   <tr><td nowrap><b>Памет</b></td><td>SQLite FTS5 пълнотекстов + int8-квантовани векторни embedding-и, типизирано затихване</td></tr>
   <tr><td nowrap><b>Схеми</b></td><td>Zod 4 — валидиране на I/O на MCP инструменти + API договори</td></tr>
   <tr><td nowrap><b>Протоколи</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

@@ -5,6 +5,7 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { EXPECTED_CODE_COUNT } from "@/shared/schemas/cliCatalog";
 import type { ToolBatchStatusMap } from "@/shared/types/cliBatchStatus";
+import enMessages from "@/i18n/messages/en.json";
 
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
@@ -248,6 +249,16 @@ describe("CliCodePageClient", () => {
     // Concept + comparison cards present
     expect(container.querySelector('[data-testid="cli-concept-card"]')).not.toBeNull();
     expect(container.querySelector('[data-testid="cli-comparison-card"]')).not.toBeNull();
+  });
+
+  it("1b. page header renders the cliCode.title catalog value, not a missing-key fallback", async () => {
+    // Pins the key the component reads: the catalog renamed cliCode.pageTitle to
+    // cliCode.title, so reading the old key would render the raw "pageTitle" fallback.
+    const container = await renderPage();
+    const heading = container.querySelector("h1");
+    expect(heading?.textContent).toBe(enMessages.cliCode.title);
+    expect(heading?.textContent).toBe("CLI Code");
+    expect(container.textContent).not.toContain("pageTitle");
   });
 
   it("2. renders every code tool card when catalogue is OK", async () => {

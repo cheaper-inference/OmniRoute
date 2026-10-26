@@ -27,8 +27,8 @@ test("pt-BR has acpAgents namespace", () => {
 // ─── PT-BR page titles ────────────────────────────────────────────────────────
 // PR-4 retranslated the verbatim-English page titles; pt-BR now carries real Portuguese.
 
-test("pt-BR cliCode.pageTitle is 'Códigos da CLI'", () => {
-  assert.equal(pt.cliCode.pageTitle, "Códigos da CLI");
+test("pt-BR cliCode.title is 'Código de CLI'", () => {
+  assert.equal(pt.cliCode.title, "Código de CLI");
 });
 
 test("pt-BR cliAgents.pageTitle is 'Agentes de CLI'", () => {
@@ -89,8 +89,8 @@ test("en has acpAgents namespace", () => {
 
 // ─── EN page titles ───────────────────────────────────────────────────────────
 
-test("en cliCode.pageTitle is 'CLI Code's'", () => {
-  assert.equal(en.cliCode.pageTitle, "CLI Code's");
+test("en cliCode.title is 'CLI Code'", () => {
+  assert.equal(en.cliCode.title, "CLI Code");
 });
 
 test("en cliAgents.pageTitle is 'CLI Agents'", () => {

@@ -13,72 +13,104 @@ OmniRoute 具有一個路由感知授權管道，用於把關每個 API 請求�
 
 > 來源：[diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
-## 兩種認證模式
+## 兩種驗證模式
 
 ### 1. API 金鑰（Bearer）
 
-用於相容 OpenAI、Anthropic、Gemini 的用戶端 API，以及金鑰具有 `manage` 範圍時的部分管理路由。
+用於與 OpenAI/Anthropic/Gemini 相容的用戶端 API，以及少數管理路由（當金鑰具有 `manage` 範圍時）。
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-由 `src/sse/services/auth.ts` 中的 `isValidApiKey()` / `extractApiKey()` 驗證，並透過 `src/shared/utils/apiAuth.ts` 重新匯出。驗證器也會把 `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` 環境變數視為持久的直通金鑰（issue #1350）。
+由 `src/sse/services/auth.ts` 中的 `isValidApiKey()` / `extractApiKey()` 驗證，並透過 `src/shared/utils/apiAuth.ts` 重新匯出。驗證器也接受 `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` 環境變數作為持久性的直通金鑰（議題 #1350）。
 
 ### 2. 儀表板工作階段（auth_token Cookie）
 
-用於儀表板頁面與管理操作。
+用於儀表板頁面與管理員操作。
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-只有當 JWT 通過驗證**且**帶有 `authenticated: true` 時，該 Cookie 才算是工作階段（`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`）。Cookie 的每個使用端（儀表板路由守衛（`isDashboardSessionAuthenticated()`）、授權管線的刷新、WebSocket 交握、即時伺服器、`/api/settings/require-login`、`/api/auth/status`）都透過該輔助函式判斷。另外，使用 `JWT_SECRET` 簽署的其他 JWT 也存在：Cursor CLI 直通會為金鑰持有者核發 `iss "omniroute" / aud "cursor-cli"` 的權杖，這些權杖永遠不會被視為工作階段（#13298）。
+只有在 JWT 驗證通過且帶有 `authenticated: true` 時，Cookie 才會被視為工作階段
+（`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`）。所有
+使用此 Cookie 的元件（儀表板路由守衛（`isDashboardSessionAuthenticated()`）、授權管線重新整理、WebSocket 交握、即時
+伺服器、`/api/settings/require-login`、`/api/auth/status`）都會經過該輔助函式。
+此外也存在其他以 `JWT_SECRET` 簽署的 JWT——Cursor CLI 直通機制會為金鑰持有者簽發
+`iss "omniroute" / aud "cursor-cli"` 權杖——但它們絕不會被視為工作階段
+（#13298）。
 
-由 `src/shared/utils/apiAuth.ts` 中的 `isDashboardSessionAuthenticated()` 驗證。當 JWT 在其 30 天效期內剩餘不到 7 天時，授權管線會自動刷新它。
+由 `src/shared/utils/apiAuth.ts` 中的 `isDashboardSessionAuthenticated()` 驗證。當 JWT 的 30 天有效期剩餘不到 7 天時，管線會自動重新整理 JWT。
 
-工作階段也可能在 30 天到期前結束，因為每個核發者都透過 `mintDashboardSessionToken`（包含核發時間 `iat` 與識別碼 `jti`）產生 JWT，而驗證器會檢查兩項設定：`sessionsValidAfter`（修改密碼時設定，使此前核發的所有工作階段全部失效，修改密碼的瀏覽器會取得新的 Cookie），以及 `revokedDashboardSessions`（`POST /api/auth/logout` 會把已登出工作階段的 `jti` 加入其中）。舊版本核發的工作階段不帶這兩項宣告，在首次修改密碼之前一直有效。若無法讀取這些設定，則不信任該工作階段。
+工作階段也可能在 30 天有效期結束前終止，因為每個簽發器都會經過 `mintDashboardSessionToken`（包含簽發時間 `iat` 和識別碼 `jti`），而驗證器會檢查兩項設定：`sessionsValidAfter`，此設定會在密碼變更時更新，使此前簽發的所有工作階段都無法再通過驗證（變更密碼的瀏覽器會取得新的 Cookie）；以及 `revokedDashboardSessions`，`POST /api/auth/logout` 會將已登出工作階段的 `jti` 加入其中。由較舊版本簽發的工作階段不包含這兩項宣告，且在第一次變更密碼前仍維持有效。若無法讀取設定，則不信任該工作階段。
 
-部分管理路由**二擇一**即可：Cookie，或在 API 金鑰具有 `manage`（或 `admin`）範圍時使用 `Bearer <key>`。這正是 v3.8 新增的「可透過 API 呼叫設定」工作流程的基礎。
+部分管理路由接受**任一**模式：Cookie，或當 API 金鑰具有 `manage`（或 `admin`）範圍時使用 `Bearer <key>`。這使 v3.8 中新增的「可透過 API 呼叫進行設定」工作流程得以實現。
 
 #### 選用的 OIDC 登入閘門（#6973）
 
-儀表板管理員登入也支援一種**選用的** OIDC（OpenID Connect）流程，與預設的密碼登入並存，密碼登入不會被移除，只是作為補充：
+儀表板管理員登入除了預設的密碼登入外，也支援**選擇啟用**的 OIDC（OpenID Connect）流程——密碼登入永遠不會被移除，只會增加另一種登入方式：
 
-- 僅當 `settings.oidcEnabled === true` **並且** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` 全部已設定（設定 → 認證）時才啟用。否則
-  `GET /api/auth/oidc/login` 回傳 `400`。
-- `GET /api/auth/oidc/login` 從核發者的 `/.well-known/openid-configuration` 探索
-  `authorization_endpoint`（退回為 `<issuer>/authorize`），根據傳入請求建立重新導向 URI
-  （會辨識 `x-forwarded-proto`），並帶著隨機的 `state` 重新導向至身分提供者；該 `state` 存放在
-  `httpOnly` 的 `oidc_state` Cookie 中。
-- `GET /api/auth/oidc/callback` 驗證 `state`，交換授權碼，並透過核發者的 JWKS
-  （`jose` 的 `createRemoteJWKSet`，依 JWKS URI 快取）驗證 ID 權杖簽章，同時檢查
-  `issuer` / `audience`。必須設定 `oidcAllowedSubjects` 允許清單：它會與權杖的 `sub` 宣告或
-  `email` 宣告比對。僅當 `email_verified === true` 時才採信 email 宣告，因此身分提供者上未驗證的信箱永遠無法通過閘門；
-  若清單為空，回呼會拒絕所有登入（`not_configured`）。
-- 登入成功後，它核發的 `auth_token` JWT 與密碼登入完全**相同**（同為 30 天效期，見
-  `src/app/api/auth/login/route.ts`），因此儀表板工作階段管線的其餘部分（自動刷新、Cookie 旗標）保持不變。
-  OIDC 只改變 Cookie 的核發方式，不改變它授予的權限。
-- 所有 `oidc*` 設定（`oidcEnabled`、`oidcDisablePasswordLogin`、`oidcIssuer`、`oidcClientId`、
-  `oidcClientSecret`、`oidcAllowedSubjects`、`oidcRedirectPath`、`oidcScopes`）都位於
-  `SECURITY_IMPACTING_SETTINGS_KEYS`（`src/shared/constants/securityImpactingSettings.ts`）中：
-  除非請求主體以 `currentPassword` 帶上管理密碼，否則 `PATCH /api/settings` 會回傳 `400 PASSWORD_REQUIRED`
-  （密碼錯誤時回傳 `401 PASSWORD_MISMATCH`）。`oidcDisablePasswordLogin` 會拒絕密碼 _登入_
-  （`POST /api/auth/login`），但保留已儲存的密碼雜湊，重新驗證時仍會以 `currentPassword` 與之比對。
-- `corsOrigins` 與 `bruteForceProtection` 同樣位於 `SECURITY_IMPACTING_SETTINGS_KEYS` 中：放寬其中任一項都會削弱登入防護，
-  因此它們同樣需要以 `currentPassword` 重新驗證（安全分頁會要求輸入），而且 JSON 匯入時會捨棄它們。
-- 每一個安全策略鍵（`SECURITY_IMPACTING_SETTINGS_KEYS` 中的項目、所有 `oidc*` 鍵，以及儀表板工作階段狀態）在
-  `PATCH /api/settings` 上都**僅限操作員**：即使送出正確的 `currentPassword`，具有 `manage` 範圍的 API 金鑰或
-  `oma_` 存取權杖也會被以 `403` 拒絕，且此拒絕會被記錄為 `settings.update_failed`，原因為
-  `reason: OPERATOR_REQUIRED`（`src/lib/api/operatorCredential.ts` 中的 `requireOperatorCredential()`）。
-  一般設定（佈景主題、顯示偏好）對 `manage` 金鑰或 `admin` 存取權杖仍可寫入。對 `/api/settings` 本身的每次修改
-  （以及 `/api/settings/require-login` 的修改）還需要 `admin` 存取權杖範圍（`src/server/authz/accessScopes.ts`
-  中的 `ADMIN_MUTATION_EXACT_PATHS`，精確路徑比對）。`GET` 仍為 `read`；其他 `/api/settings/*` 子路由
-  （代理、組合預設值、模型別名、壓縮、清理……）維持依方法推斷的 `write` 範圍。
-- `POST /api/settings/import-json` 會略過該重新驗證，因此在寫入前會移除 `IMPORT_STRIPPED_SETTINGS_KEYS`
-  （同一檔案）中的所有鍵：密碼與 `currentPassword`、每個 `SECURITY_IMPACTING_SETTINGS_KEYS` 項目，以及儀表板工作階段狀態
-  （`sessionsValidAfter`、`revokedDashboardSessions`）。因此，匯入較舊的備份無法讓已因密碼修改或登出而結束的工作階段復活。
+- 除非 `settings.oidcEnabled === true` **且** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` 均已設定（設定 → 驗證），否則停用。
+  若不符合條件，`GET /api/auth/oidc/login` 會回傳 `400`。
+- `GET /api/auth/oidc/login` 會從發行者的
+  `/.well-known/openid-configuration` 探索 `authorization_endpoint`（若無法取得，
+  則退回使用 `<issuer>/authorize`），根據傳入的請求建立重新導向 URI
+  （支援 `x-forwarded-proto`），然後將使用者重新導向至 IdP，並把隨機產生的
+  `state` 儲存在 `httpOnly` 的 `oidc_state` Cookie 中。
+- `GET /api/auth/oidc/callback` 會驗證 `state`、交換授權碼，並透過發行者的
+  JWKS 驗證 ID 權杖的簽章（使用 `jose` 的 `createRemoteJWKSet`，依每個 JWKS URI
+  快取），同時檢查 `issuer`/`audience`。若要獲准進入儀表板，必須設定非空的
+  `oidcAllowedSubjects` 清單、`oidcAdmissionClaim` 原則，或兩者皆設定。只有在
+  `email_verified === true` 時，主體清單才會比對 `sub` 或 `email`。選用的宣告
+  原則會採用以點號分隔的 ID 權杖宣告路徑（例如 `realm_access.roles`）以及一組
+  可接受值的陣列；解析出的宣告必須是字串陣列，且至少包含一個可接受值。若同時
+  設定兩種原則，則兩者都必須通過。缺少宣告或宣告格式錯誤時會採取封閉式失敗，
+  而且若兩種原則皆未設定，回呼會拒絕登入（`not_configured`）。現有僅設定主體
+  的組態會繼續維持原有行為。
+- Keycloak 通常會將領域角色對應至存取權杖，而不一定是 ID 權杖。若要要求領域角色
+  `admin`，請為此用戶端設定通訊協定對應程式，將 `realm_access.roles` 包含在其
+  **ID 權杖**中，然後將 `oidcAdmissionClaim` 設定為
+  `{ "path": "realm_access.roles", "values": ["admin"] }`。啟用僅限角色的准入機制
+  之前，請先檢查此用戶端實際的 ID 權杖宣告；應用程式不會讀取存取權杖中的角色。
+  IdP 端的權杖拒絕機制可以作為補充，但不能取代此應用程式端的檢查。
+- 成功後，它會簽發與密碼登入所簽發的 **完全相同**、有效期為 30 天的
+  `auth_token` JWT（`src/app/api/auth/login/route.ts`），因此儀表板工作階段流程
+  的其餘部分（自動重新整理、Cookie 旗標）維持不變——OIDC 只會取代 Cookie 的
+  簽發方式，不會改變其授予的權限。IdP 角色／群組的變更不會使現有 OmniRoute
+  工作階段失效；其生命週期仍由登出、密碼輪替或工作階段到期所控制。
+- 每個 `oidc*` 設定（`oidcEnabled`、`oidcDisablePasswordLogin`、
+  `oidcIssuer`、`oidcClientId`、`oidcClientSecret`、`oidcAllowedSubjects`、
+  `oidcAdmissionClaim`、`oidcRedirectPath`、`oidcScopes`）都位於
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  （`src/shared/constants/securityImpactingSettings.ts`）中：除非要求本文攜帶
+  管理密碼作為 `currentPassword`，否則 `PATCH /api/settings` 會回應
+  `400 PASSWORD_REQUIRED`（密碼錯誤時則為 `401 PASSWORD_MISMATCH`）。
+  `oidcDisablePasswordLogin` 會拒絕密碼_登入_（`POST /api/auth/login`），
+  但仍會保留已儲存的密碼雜湊，而且重新驗證仍會以該雜湊檢查
+  `currentPassword`。
+- `corsOrigins` 和 `bruteForceProtection` 也位於
+  `SECURITY_IMPACTING_SETTINGS_KEYS` 中：放寬任一設定都會削弱登入防禦，因此
+  它們需要使用相同的 `currentPassword` 重新驗證（「安全性」分頁會要求輸入），
+  而 JSON 匯入會移除這些設定。
+- 每個安全性原則鍵——`SECURITY_IMPACTING_SETTINGS_KEYS` 中的項目、
+  每個 `oidc*` 鍵以及儀表板工作階段狀態——在 `PATCH /api/settings` 上都
+  **僅限操作員**：具有 `manage` 範圍的 API 金鑰或 `oma_` 存取權杖，即使傳送正確的
+  `currentPassword` 也會遭到 `403` 拒絕，而且拒絕事件會以
+  `settings.update_failed` 進行稽核，並包含 `reason: OPERATOR_REQUIRED`
+  （`src/lib/api/operatorCredential.ts` 中的 `requireOperatorCredential()`）。
+  一般設定（佈景主題、顯示偏好設定）仍可由 `manage` 金鑰或 `admin` 存取權杖寫入。
+  `/api/settings` 本身（以及 `/api/settings/require-login`）的每次變更也都需要
+  `admin` 存取權杖範圍（`src/server/authz/accessScopes.ts` 中的
+  `ADMIN_MUTATION_EXACT_PATHS`，採用完全路徑比對）；`GET` 仍使用 `read`，而其他
+  `/api/settings/*` 子路由（代理、組合預設值、模型別名、壓縮、清除等）則保留
+  依方法推斷的 `write` 範圍。
+- `POST /api/settings/import-json` 會略過該重新驗證，因此在寫入之前，會移除
+  `IMPORT_STRIPPED_SETTINGS_KEYS`（同一檔案）中的每個鍵：密碼和
+  `currentPassword`、`SECURITY_IMPACTING_SETTINGS_KEYS` 中的每個項目，以及
+  儀表板工作階段狀態（`sessionsValidAfter`、`revokedDashboardSessions`）。
+  因此，匯入較舊的備份無法恢復已因密碼變更或登出而終止的工作階段。
 
 ## 路由類別
 

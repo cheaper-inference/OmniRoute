@@ -1305,7 +1305,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 ମଧ୍ୟ ଏ�
   <tr><td nowrap><b>ରନ୍ଟାଇମ୍</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>ଭାଷା</b></td><td>TypeScript 6.0 — <code>src/</code> ଏବଂ <code>open-sse/</code> ମଧ୍ୟରେ <b>100% TypeScript</b> (v2.0 ପରଠାରୁ କୋରରେ ଶୂନ୍ୟ <code>any</code>)</td></tr>
   <tr><td nowrap><b>ଫ୍ରେମ୍ୱାର୍କ</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL ଜର୍ଣ୍ଣାଲିଂ) + LowDB (JSON ଲେଗାସି) — 147 ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 209 ମାଇଗ୍ରେସନ୍</td></tr>
+  <tr><td nowrap><b>ଡାଟାବେସ୍</b></td><td>better-sqlite3 (SQLite, WAL ଜର୍ଣ୍ଣାଲିଂ) + LowDB (JSON ଲେଗାସି) — 147 ଡୋମେନ୍ ମଡ୍ୟୁଲ୍, 210 ମାଇଗ୍ରେସନ୍</td></tr>
   <tr><td nowrap><b>ମେମୋରି</b></td><td>SQLite FTS5 ଫୁଲ୍-ଟେକ୍ଷ୍ଟ + int8-କ୍ୱାଣ୍ଟାଇଜ୍ କରାଯାଇଥିବା ଭେକ୍ଟର ଏମ୍ବେଡିଂ, ଟାଇପ୍ କରାଯାଇଥିବା ଡିକେ</td></tr>
   <tr><td nowrap><b>ସ୍କିମା</b></td><td>Zod 4 — MCP ଟୁଲ୍ I/O ବୈଧୀକରଣ + API କଣ୍ଟ୍ରାକ୍ଟ</td></tr>
   <tr><td nowrap><b>ପ୍ରୋଟୋକଲ୍</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

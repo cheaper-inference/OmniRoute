@@ -1313,7 +1313,7 @@ Kanonické metriky k 2026-10-18: **1.976 unikátních videí** · **20.220.289 z
   <tr><td nowrap><b>Běhové prostředí</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jazyk</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> v <code>src/</code> a <code>open-sse/</code> (nula <code>any</code> v jádru od v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databáze</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 doménových modulů, 209 migrací</td></tr>
+  <tr><td nowrap><b>Databáze</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 doménových modulů, 210 migrací</td></tr>
   <tr><td nowrap><b>Paměť</b></td><td>SQLite FTS5 fulltext + int8-kvantované vektorové embeddingy, typovaný decay</td></tr>
   <tr><td nowrap><b>Schémata</b></td><td>Zod 4 — validace I/O nástrojů MCP + API kontrakty</td></tr>
   <tr><td nowrap><b>Protokoly</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
