@@ -1,0 +1,1 @@
+Update the evaluation tool and scoped transitive dependencies to remove the remaining npm audit findings across the five lockfiles. Preserve injection-guard evaluation of HTTP 400 JSON responses and reject incorrect codes/statuses with the pinned CLI.

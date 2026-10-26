@@ -69,6 +69,9 @@
   },
   "overrides": {
     "esbuild": "^0.28.1",
-    "toml": "^5.0.1"
+    "toml": "^5.0.1",
+    "@opencode-ai/plugin": {
+      "zod": "^4.6.7"
+    }
   }
 }
