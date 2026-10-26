@@ -5,7 +5,6 @@
  * upstream STT provider. In particular, Telegram file URLs may embed a bot
  * token in their path; only audio bytes are sent upstream.
  */
-import { fetchRemoteMedia } from "@/shared/network/remoteImageFetch";
 import { errorResponse } from "./error.ts";
 
 const MAX_AUDIO_URL_LENGTH = 4096;
@@ -53,8 +52,25 @@ export class TranscriptionAudioUrlError extends Error {
   }
 }
 
-type RemoteMediaFetcher = typeof fetchRemoteMedia;
-type RemoteMedia = Awaited<ReturnType<RemoteMediaFetcher>>;
+/**
+ * The SSRF-hardened downloader lives in the app layer
+ * (src/shared/network/remoteImageFetch.ts) and is injected by the API route, so the
+ * engine does not import from src/ (check:boundary:ratchet). These are the structural
+ * subsets of fetchRemoteMedia's contract that downloadAudio actually relies on.
+ */
+export type RemoteMediaFetchOptions = {
+  guard?: "none" | "public-only" | "block-metadata";
+  pinDns?: boolean;
+  enforceHttps?: boolean;
+  maxRedirects?: number;
+  maxBytes?: number;
+  timeoutMs?: number;
+};
+export type RemoteMedia = { buffer: Uint8Array<ArrayBuffer>; contentType: string; url: string };
+export type RemoteMediaFetcher = (
+  input: string,
+  options: RemoteMediaFetchOptions
+) => Promise<RemoteMedia>;
 type TranscriptionFile = Blob & { name?: unknown };
 
 const ALLOWED_NON_AUDIO_TYPES = new Set(["video/mp4", "video/webm", "application/octet-stream"]);
@@ -104,7 +120,10 @@ function toAudioFetchError(error: unknown): TranscriptionAudioUrlError {
   return new TranscriptionAudioUrlError(502, "Audio URL could not be fetched");
 }
 
-async function downloadAudio(url: URL, fetcher: RemoteMediaFetcher): Promise<RemoteMedia> {
+async function downloadAudio(url: URL, fetcher?: RemoteMediaFetcher): Promise<RemoteMedia> {
+  // No downloader wired in (a caller outside the API route): refuse URL input instead
+  // of silently delegating the URL upstream, which is exactly what this module prevents.
+  if (!fetcher) throw new TranscriptionAudioUrlError(400, "Audio URL input is not available");
   try {
     return await fetcher(url.toString(), {
       guard: "public-only",
@@ -142,12 +161,13 @@ function resolveAudioExtension(media: RemoteMedia, contentType: string): string 
 
 /**
  * A multipart file takes precedence to preserve existing file+url clients.
- * Tests may inject a fetcher; production always uses the shared SSRF-hardened
- * downloader (public-only host/DNS guard, pinned DNS, per-hop HTTPS, redirects).
+ * The API route injects the shared SSRF-hardened downloader (public-only host/DNS
+ * guard, pinned DNS, per-hop HTTPS, redirects); tests inject fakes. Without a fetcher,
+ * URL-only input is refused.
  */
 export async function resolveTranscriptionFile(
   formData: FormData,
-  fetcher: RemoteMediaFetcher = fetchRemoteMedia
+  fetcher?: RemoteMediaFetcher
 ): Promise<TranscriptionFile> {
   const suppliedFile = formData.get("file");
   if (suppliedFile instanceof Blob) return suppliedFile as TranscriptionFile;
@@ -169,7 +189,7 @@ export async function resolveTranscriptionFile(
  */
 export async function resolveTranscriptionFileOrResponse(
   formData: FormData,
-  fetcher: RemoteMediaFetcher = fetchRemoteMedia
+  fetcher?: RemoteMediaFetcher
 ): Promise<{ file: TranscriptionFile } | { response: Response }> {
   try {
     return { file: await resolveTranscriptionFile(formData, fetcher) };

@@ -172,84 +172,84 @@ Scope များ (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `doc
 
 ---
 
-## Test များ လုပ်ဆောင်ခြင်း
+## စမ်းသပ်မှုများ လုပ်ဆောင်ခြင်း
 
 ```bash
-# Test အားလုံး (unit + vitest + ecosystem + e2e)
+# စမ်းသပ်မှုအားလုံး (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Test file တစ်ခုတည်း (Node.js ၏ မူရင်း test runner — test အများစုက ၎င်းကို အသုံးပြုသည်)
+# စမ်းသပ်မှုဖိုင်တစ်ခုတည်း (Node.js မူရင်း test runner — စမ်းသပ်မှုအများစုက ဒါကို အသုံးပြုသည်)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# သင်၏ပြောင်းလဲမှုကြောင့် သက်ရောက်မှုရှိသော unit test များသာ (CI gate၊ #8084 နှင့် တူညီသော TIA selector)
-npm run test:scoped            # နောက်ဆုံး commit (သို့မဟုတ် working tree) ရှိ ပြောင်းလဲမှုများ
-npm run test:scoped:staged     # staged လုပ်ထားသော ပြောင်းလဲမှုများသာ — pre-commit run နှင့် ကောင်းမွန်စွာ တွဲဖက်အသုံးပြုနိုင်သည်
-npm run test:scoped:full       # import-graph map ကို ဦးစွာ ပြန်လည်တည်ဆောက်ပါ (file များ ထည့်သွင်း/ရွှေ့ပြောင်းပြီးနောက်)
-# Exit 1 + "run the full suite" ဆိုသည်မှာ hub file (tsconfig, package.json, …) သို့မဟုတ်
-# mapping မရှိသော source ပြောင်းလဲသွားခြင်းကို ဆိုလိုသည် — selector သည် ဘေးကင်းစွာ fail ဖြစ်ပြီး မည်သည့်အရာကိုမျှ တိတ်တဆိတ် မကျော်သွားပါ။
+# သင့်ပြောင်းလဲမှုကြောင့် သက်ရောက်မှုရှိသော unit စမ်းသပ်မှုများသာ (CI gate နှင့်တူညီသော TIA selector၊ #8084)
+npm run test:scoped            # နောက်ဆုံး commit အတွင်းရှိ ပြောင်းလဲမှုများ (သို့မဟုတ် working tree)
+npm run test:scoped:staged     # staged လုပ်ထားသော ပြောင်းလဲမှုများသာ — pre-commit လုပ်ဆောင်မှုနှင့် တွဲဖက်ရန် သင့်တော်သည်
+npm run test:scoped:full       # import-graph မြေပုံကို ဦးစွာ ပြန်လည်တည်ဆောက်သည် (ဖိုင်များ ထည့်သွင်း/ရွှေ့ပြောင်းပြီးနောက်)
+# Exit 1 + "suite အပြည့်အစုံကို လုပ်ဆောင်ပါ" ဆိုသည်မှာ hub ဖိုင်တစ်ခု (tsconfig, package.json, …) သို့မဟုတ်
+# မြေပုံတွင် မပါဝင်သော source တစ်ခု ပြောင်းလဲထားခြင်းကို ဆိုလိုသည် — selector သည် ဘေးကင်းစွာ ပျက်ကွက်ပြီး တိတ်တဆိတ် ကျော်သွားခြင်း မရှိပါ။
 
-# Vitest (MCP server၊ autoCombo၊ cache)
+# Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
 
-# E2E test များ (Playwright လိုအပ်သည်)
+# E2E စမ်းသပ်မှုများ (Playwright လိုအပ်သည်)
 npm run test:e2e
 
-# Protocol client E2E (MCP transport များ၊ A2A)
+# Protocol client E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem လိုက်ဖက်ညီမှု test များ
+# Ecosystem လိုက်ဖက်ညီမှု စမ်းသပ်မှုများ
 npm run test:ecosystem
 
-# Coverage gate: statement/line/function/branch များ၏ 60%
+# Coverage gate: statements/lines/functions/branches အတွက် 60%
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format စစ်ဆေးခြင်း
+# Lint + format စစ်ဆေးမှု
 npm run lint
 npm run check
 
-# Gate ဖြင့် ကန့်သတ်ထားသော အမှန်တကယ် upstream combo smoke test (VPS အသုံးပြုခွင့် + provider credit အစစ်များ လိုအပ်သည်)
-# အမှန်တကယ် provider များကို ခေါ်ယူသည် — အနည်းငယ် ကုန်ကျမည်။ CI တွင် လုံးဝ မလုပ်ဆောင်ပါ။ Gate မရှိပါက ပြဿနာမဖြစ်စေဘဲ ကျော်သွားမည်။
-# လိုအပ်ချက်: ssh root@192.168.0.15 အသုံးပြုခွင့် (VPS မှ read-only DB snapshot ကို source လုပ်သည်)။
+# Gate ဖြင့် ကန့်သတ်ထားသော တကယ့် upstream combo smoke စမ်းသပ်မှု (VPS ဝင်ရောက်ခွင့် + တကယ့် provider credits လိုအပ်သည်)
+# တကယ့် provider များကို အသုံးပြုသည် — ကုန်ကျစရိတ် အနည်းငယ်ရှိသည်။ CI တွင် လုံးဝ မလုပ်ဆောင်ပါ။ Gate မရှိပါက ပြဿနာမရှိဘဲ ကျော်သွားသည်။
+# လိုအပ်ချက်: ssh root@192.168.0.15 ဝင်ရောက်ခွင့် (VPS မှ read-only DB snapshot တစ်ခုကို ရယူအသုံးပြုသည်)။
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — ရိုးရိုး Node ESM script များဖြစ်ပြီး live .15 server ကို တိုက်ရိုက်ခေါ်ယူသည်။
-# လိုအပ်ချက်: ssh root@192.168.0.15 အသုံးပြုခွင့် (combo များကို SSH sqlite မှတစ်ဆင့် ဖန်တီး/ဖျက်သိမ်းသည်)။
-# အမှန်တကယ် provider များကို ခေါ်ယူသည် (ကုန်ကျစရိတ် အနည်းငယ်ရှိသည်)။ __live_test__* combo များကိုသာ ဖန်တီး/ဖျက်ပစ်သည်။ CI တွင် လုံးဝ မလုပ်ဆောင်ပါ။
-# .15 တွင် REQUIRE_API_KEY=false ဖြစ်သဖြင့် API key မလိုအပ်သော်လည်း သတ်မှတ်ထားပါက COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ကို လိုက်နာအသုံးပြုသည်။
+# Phase-3 VPS live smoke စမ်းသပ်မှု — ရိုးရိုး Node ESM scripts များဖြစ်ပြီး live .15 server ကို တိုက်ရိုက် အသုံးပြုသည်။
+# လိုအပ်ချက်: ssh root@192.168.0.15 ဝင်ရောက်ခွင့် (combo များကို SSH sqlite မှတစ်ဆင့် ဖန်တီး/ဖျက်သိမ်းသည်)။
+# တကယ့် provider များကို အသုံးပြုသည် (ကုန်ကျစရိတ်အနည်းငယ်ရှိသည်)။ __live_test__* combo များကိုသာ ဖန်တီး/ဖျက်သည်။ CI တွင် လုံးဝ မလုပ်ဆောင်ပါ။
+# .15 တွင် REQUIRE_API_KEY=false ဖြစ်သောကြောင့် API key မလိုအပ်သော်လည်း သတ်မှတ်ထားပါက COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ကို လိုက်နာသည်။
 npm run test:combo:live:vps              # HTTP scenario 7 ခု (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # အမှန်တကယ် cross-provider failover scenario တစ်ခု ထပ်ထည့်သည် (စုစုပေါင်း 8 ခု)
+npm run test:combo:live:vps:failover     # တကယ့် cross-provider failover scenario တစ်ခု ထည့်သွင်းသည် (စုစုပေါင်း 8 ခု)
 ```
 
-Coverage မှတ်ချက်များ-
+Coverage မှတ်ချက်များ:
 
-- `npm run test:coverage` သည် အဓိက unit test suite အတွက် source coverage ကို တိုင်းတာပြီး `tests/**` ကို ချန်လှပ်ကာ `open-sse/**` ကို ထည့်သွင်းသည်
-- Pull request များသည် statement/line/function/branch များအတွက် coverage gate ကို **60%+** တွင် ထိန်းထားရမည်
-- PR တစ်ခုက `src/`, `open-sse/`, `electron/` သို့မဟုတ် `bin/` ရှိ production code ကို ပြောင်းလဲပါက တူညီသော PR ထဲတွင် automated test များကို ထည့်သွင်းရန် သို့မဟုတ် အပ်ဒိတ်လုပ်ရန် လိုအပ်သည်
-- `npm run coverage:report` သည် နောက်ဆုံး coverage run မှ file တစ်ခုချင်းစီအလိုက် အသေးစိတ် report ကို ဖော်ပြသည်
-- `npm run test:coverage:legacy` သည် ယခင်အခြေအနေနှင့် နှိုင်းယှဉ်နိုင်ရန် အဟောင်း metric ကို ထိန်းသိမ်းထားသည်
-- အဆင့်လိုက် coverage မြှင့်တင်ရေး လမ်းပြအစီအစဉ်အတွက် `docs/ops/COVERAGE_PLAN.md` ကို ကြည့်ပါ
+- `npm run test:coverage` သည် အဓိက unit test suite အတွက် source coverage ကို တိုင်းတာပြီး `tests/**` ကို ဖယ်ထုတ်ကာ `open-sse/**` ကို ထည့်သွင်းသည်
+- Pull request များသည် statements/lines/functions/branches အတွက် coverage gate ကို **60%+** တွင် ထိန်းသိမ်းရမည်
+- PR တစ်ခုက `src/`, `open-sse/`, `electron/`, သို့မဟုတ် `bin/` အတွင်းရှိ production code ကို ပြောင်းလဲပါက ထို PR တစ်ခုတည်းအတွင်း automated test များကို ထည့်သွင်း သို့မဟုတ် အပ်ဒိတ်လုပ်ရမည်
+- `npm run coverage:report` သည် နောက်ဆုံး coverage လုပ်ဆောင်မှုမှ ဖိုင်တစ်ဖိုင်ချင်းစီအလိုက် အသေးစိတ် report ကို ဖော်ပြသည်
+- `npm run test:coverage:legacy` သည် သမိုင်းကြောင်းအလိုက် နှိုင်းယှဉ်ရန် ယခင် metric ကို ထိန်းသိမ်းထားသည်
+- အဆင့်လိုက် coverage တိုးတက်ရေး လမ်းပြမြေပုံအတွက် `docs/ops/COVERAGE_PLAN.md` ကို ကြည့်ပါ
 
 ### Pull Request လိုအပ်ချက်များ
 
-PR တစ်ခု မဖွင့်မီ သင်ပြောင်းလဲထားသည့်အရာအတွက် သီးသန့်အာရုံစိုက်ထားသော လုပ်ငန်းစဉ်ကို လုပ်ဆောင်ရန်
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ကို အသုံးပြုပါ။
-Unit suite အပြည့်အစုံ (CI shard 4 ခု)၊ Vitest၊ **60%+** coverage gate နှင့်
+PR တစ်ခု မဖွင့်မီ သင်ပြောင်းလဲထားသည့်အရာအတွက် အာရုံစိုက်ထားသော လုပ်ငန်းစဉ်ကို လုပ်ဆောင်ရန်
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ကို အသုံးပြုပါ။ Unit suite အပြည့်အစုံ (CI shard 4 ခု)၊ Vitest၊ **60%+** coverage gate နှင့်
 production build တို့သည် CI ၏ တာဝန်ဖြစ်သည် — ၎င်းတို့ကို local တွင် လုပ်ဆောင်ခြင်းသည် PR
-စစ်ဆေးမှုများက မပေးနိုင်သေးသော နောက်ထပ်အချက်အလက် မပေးနိုင်သည့်အပြင် စွမ်းဆောင်ရည်နိမ့်သော စက်များတွင် host ကို အပြည့်အဝ အသုံးပြုမိစေနိုင်သည် (#8084)-
+စစ်ဆေးမှုများက ပေးမည့်အရာထက် ပိုမိုအသုံးဝင်သော အချက်အလက် မပေးသည့်အပြင် စက်ငယ်များတွင် host ကို ဝန်ပိစေနိုင်သည် (#8084):
 
-- သင်၏ပြောင်းလဲမှုကို လွှမ်းခြုံသော test file များကို လုပ်ဆောင်ပါ- `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- သင့်ပြောင်းလဲမှုကို လွှမ်းခြုံသော test file များကို လုပ်ဆောင်ပါ: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` ကို လုပ်ဆောင်ပါ
-- Production code ပြောင်းလဲသည့်အခါတိုင်း တူညီသော PR ထဲတွင် automated test များကို ထည့်သွင်းပါ သို့မဟုတ် အပ်ဒိတ်လုပ်ပါ
-- Production code ပြောင်းလဲသည့်အခါ ပြောင်းလဲထားသော သို့မဟုတ် အသစ်ထည့်ထားသော test file များကို PR ဖော်ပြချက်ထဲတွင် ထည့်သွင်းပါ
-- Project secret များကို CI တွင် configure လုပ်ထားပါက PR ပေါ်ရှိ SonarQube ရလဒ်ကို စစ်ဆေးပါ
+- Production code ပြောင်းလဲသည့်အခါတိုင်း တူညီသော PR အတွင်း automated test များကို ထည့်သွင်း သို့မဟုတ် အပ်ဒိတ်လုပ်ပါ
+- `node:test` ဖိုင်များတွင် top-level `await` တစ်ခုစီ (ဥပမာ `await import(...)`) ကို ပထမဆုံး `test()` / `describe()` မတိုင်မီ ထားပါ: `--test-force-exit` အောက်တွင် ၎င်းနောက်မှ register လုပ်ထားသော စမ်းသပ်မှုများသည် တိတ်တဆိတ် လုံးဝ မလုပ်ဆောင်ဘဲ ဖြစ်နိုင်သည် (#18045; `npm run check:test-tla-order` ဖြင့် စည်းကမ်းသတ်မှတ်ထားသည်)
+- Production code ပြောင်းလဲထားပါက ပြောင်းလဲထားသော သို့မဟုတ် ထည့်သွင်းထားသော test file များကို PR ဖော်ပြချက်တွင် ထည့်သွင်းပါ
+- Project secrets များကို CI တွင် configure လုပ်ထားသည့်အခါ PR ပေါ်ရှိ SonarQube ရလဒ်ကို စစ်ဆေးပါ
 
-လက်ရှိ test အခြေအနေ- အောက်ပါတို့ကို လွှမ်းခြုံထားသည့် **unit test file 122 ခု**-
+လက်ရှိ စမ်းသပ်မှုအခြေအနေ: အောက်ပါတို့ကို လွှမ်းခြုံထားသော **unit test ဖိုင် 122 ခု**:
 
-- Provider translator များနှင့် format ပြောင်းလဲခြင်း
+- Provider translator များနှင့် format ပြောင်းလဲမှု
 - Rate limiting၊ circuit breaker နှင့် resilience
 - Semantic cache၊ idempotency နှင့် progress tracking
-- Database operation များနှင့် schema (DB module 21 ခု)
+- Database လုပ်ဆောင်ချက်များနှင့် schema (DB module 21 ခု)
 - OAuth flow များနှင့် authentication
 - API endpoint validation (Zod v4)
 - MCP server tool များနှင့် scope enforcement

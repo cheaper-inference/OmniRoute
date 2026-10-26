@@ -156,8 +156,17 @@ export const COLLECTORS = [
     sources: ["vitest.config.ts"],
     anchors: { "vitest.config.ts": "tests/unit/encryption.test.ts" },
   },
-  // Playwright — test:e2e (o script passa tests/e2e/*.spec.ts; testMatch **/*.spec.ts)
-  { glob: "tests/e2e/*.spec.ts", sources: ["package.json"] },
+  // Playwright — test:e2e: o script chama o runner sem glob (assim `npm run test:e2e -- <spec>`
+  // filtra de verdade) e a coleta vem do playwright.config.ts (testDir ./tests/e2e +
+  // testMatch **/*.spec.ts).
+  {
+    glob: "tests/e2e/*.spec.ts",
+    sources: ["package.json", "playwright.config.ts"],
+    anchors: {
+      "package.json": '"test:e2e": "node scripts/dev/run-playwright-tests.mjs"',
+      "playwright.config.ts": 'testDir: "./tests/e2e"',
+    },
+  },
   // Runners custom — test:ecosystem / test:protocols:e2e (spawnam vitest com o arquivo)
   { glob: "tests/e2e/ecosystem.test.ts", sources: ["scripts/dev/run-ecosystem-tests.mjs"] },
   {
