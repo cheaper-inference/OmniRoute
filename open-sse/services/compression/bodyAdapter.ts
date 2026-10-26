@@ -18,6 +18,13 @@ type CodexMessageLike = MessageLike & {
   [CODEX_RESPONSE_ITEM_META]?: CodexResponseItemMeta;
 };
 
+/** True for a synthesized `role:"tool"` message created from a Responses output item. */
+export function isResponsesToolOutputMessage(message: unknown): boolean {
+  if (!isRecord(message)) return false;
+  const m = message as CodexMessageLike;
+  return m.role === "tool" && m[CODEX_RESPONSE_ITEM_META] !== undefined;
+}
+
 type ResponsesItem = {
   type?: unknown;
   role?: unknown;
@@ -235,6 +242,14 @@ function messageToResponsesItem(message: MessageLike, originalItem: ResponsesIte
     content: fromChatContent(message.content, originalItem.content),
   };
 }
+/**
+ * Engines can inject messages that have no source `input[]` item (CCR prepends its
+ * protocol instruction). Restore them as new input items instead of dropping them.
+ */
+function injectedMessageToResponsesItem(message: MessageLike): ResponsesItem {
+  const role = typeof message.role === "string" && message.role.length > 0 ? message.role : "user";
+  return { type: "message", role, content: message.content };
+}
 
 function hasTextContent(message: MessageLike): boolean {
   if (typeof message.content === "string") return message.content.length > 0;
@@ -327,6 +342,31 @@ function adaptChatBodyForCompression(body: Record<string, unknown>): Compression
   };
 }
 
+/**
+ * Re-attach the restored `input` to a Responses body. A string `input` collapses back to a
+ * string unless an engine injected messages, in which case it becomes an array of items with
+ * the injected items first.
+ */
+function finalizeResponsesInput(
+  rest: Record<string, unknown>,
+  originalInput: unknown,
+  items: unknown[],
+  injectedItems: unknown[]
+): Record<string, unknown> {
+  if (typeof originalInput === "string") {
+    const first = items[0];
+    const content = isRecord(first) ? (first.content ?? originalInput) : originalInput;
+    return {
+      ...rest,
+      input:
+        injectedItems.length === 0
+          ? content
+          : [...injectedItems, { type: "message", role: "user", content }],
+    };
+  }
+  return { ...rest, input: [...injectedItems, ...items] };
+}
+
 export function adaptBodyForCompression(
   body: Record<string, unknown>,
   preserveToolNames: string[] = []
@@ -385,13 +425,18 @@ export function adaptBodyForCompression(
     restore(compressedBody, options = {}) {
       const dropMissingMappedItems = options.dropMissingMappedItems === true;
       const compressedMessagesByIndex = new Map<number, MessageLike>();
+      const injectedMessages: MessageLike[] = [];
       if (Array.isArray(compressedBody.messages)) {
         for (const message of compressedBody.messages as MessageLike[]) {
           if (typeof message[COMPRESSION_INPUT_INDEX] === "number") {
             compressedMessagesByIndex.set(message[COMPRESSION_INPUT_INDEX], message);
+          } else if (isRecord(message)) {
+            injectedMessages.push(message);
           }
         }
       }
+      // Messages an engine injected have no source item (CCR prepends its protocol instruction).
+      const injectedItems = injectedMessages.map(injectedMessageToResponsesItem);
 
       if (!dropMissingMappedItems) {
         // Legacy restore: patch survivors in place; leave missing mapped items untouched
@@ -404,11 +449,7 @@ export function adaptBodyForCompression(
         });
         const rest = { ...compressedBody };
         delete rest.messages;
-        if (typeof body.input === "string") {
-          const first = nextInput[0];
-          return { ...rest, input: isRecord(first) ? (first.content ?? body.input) : body.input };
-        }
-        return { ...rest, input: nextInput };
+        return finalizeResponsesInput(rest, body.input, nextInput, injectedItems);
       }
 
       // Compaction restore (#8560): rebuild input so Layer-3 history drops actually shrink
@@ -468,11 +509,7 @@ export function adaptBodyForCompression(
 
       const rest = { ...compressedBody };
       delete rest.messages;
-      if (typeof body.input === "string") {
-        const first = cleanedInput[0];
-        return { ...rest, input: isRecord(first) ? (first.content ?? body.input) : body.input };
-      }
-      return { ...rest, input: cleanedInput };
+      return finalizeResponsesInput(rest, body.input, cleanedInput, injectedItems);
     },
   };
 }

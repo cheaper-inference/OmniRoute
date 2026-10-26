@@ -11,32 +11,32 @@
 
 ---
 
-## Đây Là Gì
+## Giới thiệu
 
-OmniRoute đăng ký 374 nhà cung cấp, bao gồm 155 mục danh mục được đánh dấu là **miễn phí/không cần xác thực**
-(không cần xác thực,
-OAuth gói miễn phí hoặc API key gói miễn phí — xem
-[Hướng dẫn về Gói Miễn phí](../getting-started/FREE-TIERS-GUIDE.md) và toàn bộ
-[Thư mục Gói Miễn phí](../reference/FREE_TIERS.md)). Điểm cần lưu ý: chất lượng mô hình của các nhà cung cấp miễn phí
-có sự khác biệt rất lớn. Một nhà cung cấp không cần xác thực cung cấp mô hình tiên tiến sẽ hữu ích hơn nhiều
-so với nhà cung cấp chỉ có mô hình cũ quy mô nhỏ.
+OmniRoute đăng ký 375 nhà cung cấp, trong đó có 155 mục danh mục được đánh dấu **free/no-auth**
+(no-auth,
+OAuth có tầng miễn phí, hoặc API key có tầng miễn phí — xem
+[Hướng dẫn về các tầng miễn phí](../getting-started/FREE-TIERS-GUIDE.md) và toàn bộ
+[Danh mục các tầng miễn phí](../reference/FREE_TIERS.md)). Điểm khó là: chất lượng mô hình của các nhà cung cấp miễn phí
+chênh lệch rất lớn. Một nhà cung cấp no-auth phục vụ một mô hình tiên phong hữu ích hơn nhiều
+so với một nhà cung cấp chỉ phục vụ một mô hình cũ, quy mô nhỏ.
 
-**Bảng xếp hạng Nhà cung cấp Miễn phí** trả lời câu hỏi "**nhà cung cấp miễn phí nào mang lại cho tôi mô hình tốt nhất?**" bằng cách
+**Free Provider Rankings** (Bảng xếp hạng nhà cung cấp miễn phí) trả lời câu hỏi "**nhà cung cấp miễn phí nào cho tôi mô hình tốt nhất?**" bằng cách
 kết hợp danh mục của từng nhà cung cấp miễn phí với **điểm chất lượng do cộng đồng đóng góp** từ
-**bảng xếp hạng Arena AI** (ELO dựa trên lựa chọn ưu tiên của con người, cùng ý tưởng đứng sau đấu trường chatbot
-LMArena). Sau đó, các nhà cung cấp được xếp hạng theo chất lượng của **mô hình miễn phí tốt nhất** mà họ cung cấp.
+**bảng xếp hạng Arena AI** (ELO dựa trên sự ưu tiên của con người, cùng ý tưởng đằng sau
+sàn đấu chatbot LMArena). Các nhà cung cấp sau đó được xếp hạng theo sức mạnh của **mô hình miễn phí tốt nhất** của họ.
 
 Bảng xếp hạng được tính toán từ ba nguồn thực tế:
 
-1. Các danh sách nhà cung cấp miễn phí — `NOAUTH_PROVIDERS`, cùng với các mục `OAUTH_PROVIDERS` /
+1. Các danh sách nhà cung cấp miễn phí — `NOAUTH_PROVIDERS`, cùng các mục `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` được gắn cờ `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Danh mục mô hình của từng nhà cung cấp từ sổ đăng ký nhà cung cấp
+2. Danh mục mô hình của từng nhà cung cấp lấy từ registry nhà cung cấp
    (`open-sse/config/providerRegistry.ts`).
-3. Điểm mức độ phù hợp với tác vụ được suy ra từ ELO, được lưu trữ trong bảng DB `model_intelligence` bởi
-   công cụ đồng bộ Arena ELO (`src/lib/arenaEloSync.ts`).
+3. Điểm mức độ phù hợp với tác vụ (task-fit) suy ra từ ELO, được lưu trong bảng DB `model_intelligence` bởi
+   engine đồng bộ Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Logic kết hợp nằm trong `src/lib/freeProviderRankings.ts`.
+Logic kết hợp (join) nằm trong `src/lib/freeProviderRankings.ts`.
 
 ---
 

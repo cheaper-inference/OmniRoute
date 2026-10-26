@@ -61,7 +61,7 @@ FROM oven/bun:1.4.3-slim AS runner-base
 LABEL org.opencontainers.image.title="omniroute" \
   org.opencontainers.image.description="Unified AI proxy — route any LLM through one endpoint (Bun Native)" \
   org.opencontainers.image.url="https://omniroute.online" \
-  org.opencontainers.image.source="https://github.com/diegosouzapw/OmniRoute" \
+  org.opencontainers.image.source="https://github.com/cheaper-inference/OmniRoute" \
   org.opencontainers.image.licenses="MIT"
 
 WORKDIR /app

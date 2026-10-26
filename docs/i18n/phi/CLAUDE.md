@@ -11,17 +11,18 @@ assistant (arkitektura, mga kumbensiyon, pagsubok, mga quality gate, git workflo
 mga natutunan tungkol sa PII). Basahin ito nang buo; huwag muling idagdag dito ang mga tuntunin ng proyekto. Ang lahat ng nasa ibaba ay nalalapat LAMANG
 sa Claude Code — mga operasyonal na pagpipino ng mga tuntuning tinukoy na sa `AGENTS.md`.
 
-## Pagbubukod ng worktree — mga partikular na tagubilin para sa Claude Code
+## Paghihiwalay ng worktree — mga detalyeng partikular sa Claude Code
 
-Ang buong mandatoryong protocol ng worktree (pagkumpirma sa base branch, canonical na
-path na `.claude/worktrees/`, `cp -al` node_modules, mga tuntunin sa teardown) ay nasa `AGENTS.md` → Git Workflow → "Worktree
-isolation". Mga puntong partikular sa Claude Code:
+Ang buong sapilitang protocol ng worktree (pagkumpirma ng base branch, ang kanonikal na path na `.claude/worktrees/`, `cp -al` node_modules, mga tuntunin sa teardown) ay nasa
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (may buod sa `AGENTS.md` →
+Git Workflow → "Worktree isolation"). Mga puntong partikular sa Claude Code:
 
-- Kumpirmahin ang base branch sa operator sa pamamagitan ng `AskUserQuestion` (Hard Rule #19) maliban kung
-  nasabi na nila ito sa iyo.
-- Mas piliin ang native na tool na `EnterWorktree` — awtomatiko na itong gumagawa ng mga worktree sa ilalim ng
-  `.claude/worktrees/` (ang canonical na path). Gawin ang worktree gamit ang nakadokumentong command na `git
-worktree add`, pagkatapos ay tawagin ang `EnterWorktree` gamit ang `path` nito.
+- Kumpirmahin ang base branch sa operator gamit ang `AskUserQuestion` (Hard Rule #19) maliban kung
+  sinabi na nila ito sa iyo.
+- Mas mainam na gamitin ang native na `EnterWorktree` tool — lumilikha na ito ng mga worktree sa
+  ilalim ng `.claude/worktrees/` (ang kanonikal na path). Likhain ang worktree gamit ang
+  nakadokumentong command na `git worktree add`, pagkatapos ay tawagan ang `EnterWorktree` kasama
+  ang `path` nito.
 
 ## Kaligtasan sa iba't ibang session — mga partikular na tagubilin para sa Claude Code
 

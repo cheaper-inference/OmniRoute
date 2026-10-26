@@ -1,31 +1,33 @@
 "use client";
 
+import { Badge as KitBadge } from "@omniroute/ui-kit/badge";
 import { cn } from "@/shared/utils/cn";
+import Icon from "./Icon";
 
-const variants = {
-  default: "bg-black/5 dark:bg-white/10 text-text-muted",
-  primary: "bg-primary/10 text-primary",
-  success: "bg-green-500/10 text-green-600 dark:text-green-400",
-  warning: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
-  error: "bg-red-500/10 text-red-600 dark:text-red-400",
-  info: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
-};
+// Kit Badge variants are default/secondary/destructive/outline/live; OmniRoute's status
+// variants are an outline kit badge with a `data-tone` (globals.css → "Badge status tones").
+const TONES = {
+  default: null,
+  primary: "primary",
+  success: "success",
+  warning: "warning",
+  error: "danger",
+  info: "info",
+} as const;
+// Tailwind utilities win over kit components (layer order), so sizes stay utilities.
+const SIZES = { sm: "text-[10px] px-2 py-0.5", md: "", lg: "text-sm px-3 py-1.5" } as const;
 
-const sizes = {
-  sm: "px-2 py-0.5 text-[10px]",
-  md: "px-2.5 py-1 text-xs",
-  lg: "px-3 py-1.5 text-sm",
-};
-
-interface BadgeProps {
+interface BadgeProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children"> {
   children?: React.ReactNode;
-  variant?: keyof typeof variants;
-  size?: keyof typeof sizes;
+  variant?: keyof typeof TONES;
+  size?: keyof typeof SIZES;
   dot?: boolean;
+  /** Material Symbols name (rendered through <Icon>) or any node. */
   icon?: React.ReactNode;
   className?: string;
 }
 
+/** Badge — adapter over the kit Badge (pill shape, like the legacy badge). */
 export default function Badge({
   children,
   variant = "default",
@@ -33,36 +35,25 @@ export default function Badge({
   dot = false,
   icon,
   className,
+  ...props
 }: BadgeProps) {
+  const tone = TONES[variant] ?? null;
   return (
-    <span
-      className={cn(
-        "inline-flex items-center gap-1.5 rounded-full font-semibold",
-        variants[variant],
-        sizes[size],
-        className
-      )}
+    <KitBadge
+      {...props}
+      variant={tone ? "outline" : "secondary"}
+      shape="pill"
+      data-tone={tone ?? undefined}
+      icon={typeof icon === "string" ? <Icon name={icon} size={14} /> : icon}
+      className={cn(SIZES[size], className)}
     >
       {dot && (
         <span
           aria-hidden="true"
-          className={cn(
-            "size-1.5 rounded-full",
-            variant === "success" && "bg-green-500",
-            variant === "warning" && "bg-yellow-500",
-            variant === "error" && "bg-red-500",
-            variant === "info" && "bg-blue-500",
-            variant === "primary" && "bg-primary",
-            variant === "default" && "bg-gray-500"
-          )}
+          className="oi-badge-dot inline-block size-1.5 rounded-full bg-current"
         />
       )}
-      {icon && (
-        <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-          {icon}
-        </span>
-      )}
       {children}
-    </span>
+    </KitBadge>
   );
 }

@@ -21,3 +21,17 @@ test("computeFinishReason: tool_calls on index > 0 or a sticky open call id", ()
     "tool_calls"
   );
 });
+
+test("computeFinishReason: incomplete terminals retain their reason unless a tool was emitted", () => {
+  assert.equal(computeFinishReason({ incompleteReason: "max_output_tokens" }), "length");
+  assert.equal(computeFinishReason({ incompleteReason: "content_filter" }), "content_filter");
+  assert.equal(computeFinishReason({ incompleteReason: "unknown_upstream_reason" }), "stop");
+  assert.equal(
+    computeFinishReason({ toolCallIndex: 1, incompleteReason: "max_output_tokens" }),
+    "tool_calls"
+  );
+  assert.equal(
+    computeFinishReason({ currentToolCallId: "call_pending", incompleteReason: "content_filter" }),
+    "tool_calls"
+  );
+});

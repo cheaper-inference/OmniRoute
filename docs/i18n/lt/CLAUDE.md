@@ -11,17 +11,18 @@ asistentui (architektūra, susitarimai, testavimas, kokybės patikros, git darbo
 su PII susijusios įžvalgos). Perskaitykite jį visą; projekto taisyklių čia iš naujo neįtraukite. Visa toliau
 pateikta informacija taikoma TIK Claude Code — tai `AGENTS.md` jau apibrėžtų taisyklių praktiniai patikslinimai.
 
-## Darbinių medžių izoliavimas — Claude Code ypatumai
+## Worktree izoliavimas — Claude Code specifika
 
-Visas privalomas darbinių medžių protokolas (bazinės šakos patvirtinimas, kanoninis
-`.claude/worktrees/` kelias, `cp -al` node_modules, išvalymo taisyklės) pateiktas `AGENTS.md` → Git darbo eiga → „Darbinių medžių
-izoliavimas“. Claude Code skirti punktai:
+Visas privalomas worktree protokolas (bazinės šakos patvirtinimas, kanoninis `.claude/worktrees/`
+kelias, `cp -al` node_modules, išmontavimo taisyklės) pateiktas
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (apibendrinta `AGENTS.md` →
+Git Workflow → "Worktree isolation"). Claude Code specifiniai punktai:
 
-- Patvirtinkite bazinę šaką su operatoriumi naudodami `AskUserQuestion` (griežtoji taisyklė Nr. 19), nebent jis
-  ją jau nurodė.
-- Pirmenybę teikite integruotajam `EnterWorktree` įrankiui — jis jau kuria darbinius medžius
-  `.claude/worktrees/` kataloge (kanoniniame kelyje). Sukurkite darbinį medį dokumentuota `git
-worktree add` komanda, tada iškvieskite `EnterWorktree`, nurodydami jo `path`.
+- Patvirtinkite bazinę šaką su operatoriumi naudodami `AskUserQuestion` (Griežtoji taisyklė Nr. 19),
+  nebent jis jau jums ją nurodė.
+- Pirmenybę teikite integruotajam `EnterWorktree` įrankiui — jis jau sukuria worktree katalogus
+  `.claude/worktrees/` kataloge (kanoninis kelias). Sukurkite worktree dokumentuota `git
+worktree add` komanda, tada iškvieskite `EnterWorktree` su atitinkamu `path`.
 
 ## Saugumas tarp sesijų — Claude Code ypatumai
 

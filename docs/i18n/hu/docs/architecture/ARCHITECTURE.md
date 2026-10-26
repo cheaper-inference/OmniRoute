@@ -10,77 +10,77 @@ _Utolsó frissítés: 2026-06-28_
 
 ## Vezetői összefoglaló
 
-Az OmniRoute egy Next.js alapú, helyi AI-útválasztó átjáró és irányítópult.
-Egyetlen, OpenAI-kompatibilis végpontot (`/v1/*`) biztosít, és fordítással, tartalék útvonalakkal, tokenfrissítéssel, valamint használatkövetéssel irányítja a forgalmat több felsőbb szintű szolgáltató között.
+Az OmniRoute egy Next.js-alapú, helyben futó AI-útválasztási átjáró és irányítópult.
+Egyetlen OpenAI-kompatibilis végpontot (`/v1/*`) biztosít, és több felsőbb szintű szolgáltató között irányítja a forgalmat, formátumátalakítással, tartalék útvonalakkal, tokenfrissítéssel és használatkövetéssel.
 
 Fő képességek:
 
-- OpenAI-kompatibilis API-felület CLI-khez/eszközökhöz (375 szolgáltató, 156 végrehajtómodul)
-- Kérések és válaszok fordítása a szolgáltatói formátumok között
-- Modellkombinációs tartalék útvonal (többmodelles sorozat)
-- Strukturált kombinációs lépések (`provider + model + connection`), futásidejű rendezéssel a `compositeTiers` alapján
+- OpenAI-kompatibilis API-felület CLI-khez és eszközökhöz (375 szolgáltató, 156 végrehajtómodul)
+- Kérések és válaszok átalakítása a szolgáltatói formátumok között
+- Modellkombinációs tartalék útvonal (többmodellből álló sorozat)
+- Strukturált kombinációs lépések (`provider + model + connection`), futásidejű sorrendezéssel a `compositeTiers` alapján
 - Fiókszintű tartalék útvonal (szolgáltatónként több fiók)
 - Kvóta-előellenőrzés és kvótatudatos P2C-fiókválasztás a fő csevegési útvonalon
-- OAuth- és API-kulcs-alapú szolgáltatói kapcsolatkezelés (27 OAuth-szolgáltatói modul)
-- Beágyazások generálása a `/v1/embeddings` végponton keresztül (18 szolgáltató)
-- Képgenerálás a `/v1/images/generations` végponton keresztül (10+ szolgáltató, 20+ modell)
+- OAuth- és API-kulcs-alapú szolgáltatói kapcsolatok kezelése (27 OAuth-szolgáltatói modul)
+- Beágyazások létrehozása a `/v1/embeddings` végponton keresztül (18 szolgáltató)
+- Képgenerálás a `/v1/images/generations` végponton keresztül (több mint 10 szolgáltató, több mint 20 modell)
 - Hangátírás a `/v1/audio/transcriptions` végponton keresztül (18 szolgáltató)
 - Szövegfelolvasás a `/v1/audio/speech` végponton keresztül (24 beépített szolgáltató)
 - Videógenerálás a `/v1/videos/generations` végponton keresztül (ComfyUI + SD WebUI)
 - Zenegenerálás a `/v1/music/generations` végponton keresztül (ComfyUI)
 - Webes keresés a `/v1/search` végponton keresztül (20 szolgáltató)
-- Moderálás a `/v1/moderations` végponton keresztül
+- Moderáció a `/v1/moderations` végponton keresztül
 - Újrarangsorolás a `/v1/rerank` végponton keresztül
-- Gondolkodási címkék (``) feldolgozása következtetési modellekhez
-- Válaszok megtisztítása a szigorú OpenAI SDK-kompatibilitás érdekében
-- Szerepkör-normalizálás (developer→system, system→user) a szolgáltatók közötti kompatibilitás érdekében
-- Strukturált kimenet átalakítása (json_schema → Gemini responseSchema)
-- Szolgáltatók, kulcsok, aliasok, kombinációk, beállítások és árazás helyi tárolása (122 adatbázismodul)
-- Használat- és költségkövetés, valamint kérések naplózása
-- Opcionális felhőszinkronizálás több eszköz és állapot szinkronizálásához
-- IP-engedélyezési és -tiltási lista az API-hozzáférés szabályozásához
+- Think címkék (`<think>...</think>`) feldolgozása következtető modellekhez
+- Válaszok tisztítása a szigorú OpenAI SDK-kompatibilitás érdekében
+- Szerepkörök normalizálása (developer→system, system→user) a szolgáltatók közötti kompatibilitás érdekében
+- Strukturált kimenetek átalakítása (json_schema → Gemini responseSchema)
+- Szolgáltatók, kulcsok, aliasok, kombinációk, beállítások és díjszabások helyi tartós tárolása (122 adatbázismodul)
+- Használat- és költségkövetés, valamint kérésnaplózás
+- Opcionális felhőszinkronizálás a több eszköz közötti és állapotszinkronizáláshoz
+- IP-engedélyezési és -tiltólista az API-hozzáférés szabályozásához
 - Gondolkodási keret kezelése (változatlan továbbítás/automatikus/egyéni/adaptív)
-- Globális rendszerüzenet beszúrása
+- Globális rendszerprompt beszúrása
 - Munkamenetek követése és ujjlenyomat-képzés
 - Fiókonkénti továbbfejlesztett sebességkorlátozás szolgáltatóspecifikus profilokkal
-- Áramkör-megszakító minta a szolgáltatói hibatűréshez
-- Lavinahatás elleni védelem mutex-alapú zárolással
-- Aláírás-alapú kérésduplikáció-kiszűrő gyorsítótár
+- Áramkör-megszakító minta a szolgáltatók ellenálló képességéhez
+- Tömeges egyidejű újrapróbálkozás elleni védelem mutex zárolással
+- Aláírás-alapú kérésduplikáció-szűrő gyorsítótár
 - Tartományi réteg: költségszabályok, tartalékútvonal-szabályzat, kizárási szabályzat
-- Context Relay: munkamenet-átadási összefoglalók a folytonosság fenntartásához fiókváltáskor
-- Tartományi állapot tárolása (SQLite azonnali visszaírású gyorsítótár tartalék útvonalakhoz, keretekhez, kizárásokhoz és áramkör-megszakítókhoz)
+- Context Relay: munkamenet-átadási összefoglalók a folytonosság megőrzéséhez fiókváltáskor
+- Tartományi állapot tartós tárolása (SQLite write-through gyorsítótár a tartalék útvonalakhoz, keretekhez, kizárásokhoz és áramkör-megszakítókhoz)
 - Szabályzatmotor a kérések központosított kiértékeléséhez (kizárás → keret → tartalék útvonal)
-- Kéréstelemetria p50/p95/p99 késleltetési összesítéssel
-- Kombinációs célpontok telemetriája és korábbi állapotadatai a `combo_execution_key` / `combo_step_id` segítségével
-- Korrelációs azonosító (X-Request-Id) a végpontok közötti teljes nyomkövetéshez
-- Megfelelőségi auditnaplózás API-kulcsonkénti kikapcsolási lehetőséggel
+- Kéréstelemetria p50/p95/p99 késleltetés-összesítéssel
+- Kombinációs célpontok telemetriája és korábbi állapotadatai a `combo_execution_key` / `combo_step_id` használatával
+- Korrelációs azonosító (X-Request-Id) a teljes folyamat nyomon követéséhez
+- Megfelelőségi auditnaplózás API-kulcsonkénti letiltási lehetőséggel
 - Kiértékelési keretrendszer az LLM-ek minőségbiztosításához
 - Állapot-irányítópult a szolgáltatói áramkör-megszakítók valós idejű állapotával
-- MCP Server (110 eszköz) 3 átviteli móddal (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) képességekkel és feladat-életciklussal
-- Memóriarendszer (kinyerés, beillesztés, visszakeresés, összegzés)
-- Képességrendszer (jegyzék, végrehajtó, elkülönített környezet, beépített képességek)
+- MCP-kiszolgáló (110 eszköz) 3 átviteli móddal (stdio/SSE/Streamable HTTP)
+- A2A-kiszolgáló (JSON-RPC 2.0 + SSE) képességekkel és feladat-életciklussal
+- Memóriarendszer (kinyerés, beszúrás, visszakeresés, összegzés)
+- Képességrendszer (nyilvántartás, végrehajtó, sandbox, beépített képességek)
 - MITM-proxy tanúsítványkezeléssel és DNS-kezeléssel
-- Promptinjektálás elleni köztesréteg
-- Prompttömörítési folyamat Caveman és RTK támogatással, halmozott folyamatokkal, tömörítési kombinációkkal, nyelvi csomagokkal és analitikával
-- ACP (Agent Communication Protocol) jegyzék
-- Moduláris OAuth-szolgáltatók (22 különálló modul a `src/lib/oauth/providers/` alatt)
-- Eltávolítási/teljes eltávolítási szkriptek
+- Promptinjektálás elleni védelmi köztesréteg
+- Prompttömörítési folyamat Caveman, RTK, egymásra épülő folyamatok, tömörítési kombinációk, nyelvi csomagok és analitika használatával
+- ACP-nyilvántartás (Agent Communication Protocol)
+- Moduláris OAuth-szolgáltatók (22 önálló modul a `src/lib/oauth/providers/` alatt)
+- Eltávolítási és teljes eltávolítási szkriptek
 - OAuth-környezet javítására szolgáló művelet
 - WebSocket-híd OpenAI-kompatibilis WS-kliensekhez (`/v1/ws`)
-- Szinkronizációstoken-kezelés (kibocsátás/visszavonás, ETag-verziózott konfigurációscsomag-letöltés)
-- Első osztályú GLM Thinking (`glmt`) szolgáltatói előbeállítás
+- Szinkronizációs tokenek kezelése (kiadás/visszavonás, ETag-verziózott konfigurációs csomag letöltése)
+- A GLM Thinking (`glmt`) teljes értékű szolgáltatói előbeállítása
 - Hibrid tokenszámlálás (szolgáltatói oldali `/messages/count_tokens`, becslési tartalékmegoldással)
-- Modellaliasok automatikus inicializálása (30+ proxyk közötti dialektusnormalizálás indításkor)
+- Modellaliasok automatikus kezdeti feltöltése (több mint 30, proxyk közötti dialektusnormalizálás indításkor)
 - Biztonságos kimenő lekérés SSRF-védelemmel, privát URL-ek blokkolásával és konfigurálható újrapróbálkozással
-- Lehűlési időt figyelembe vevő csevegési újrapróbálkozások konfigurálható `requestRetry` és `maxRetryIntervalSec` beállításokkal
-- Futásidejű környezet ellenőrzése Zod segítségével indításkor
-- Megfelelőségi audit v2 lapozással, szolgáltatói CRUD-eseményekkel és az SSRF miatt blokkolt ellenőrzések naplózásával
+- Várakozási időt figyelembe vevő csevegési újrapróbálkozások konfigurálható `requestRetry` és `maxRetryIntervalSec` értékekkel
+- Futásidejű környezetellenőrzés Zod használatával indításkor
+- Megfelelőségi audit v2 lapozással, szolgáltatói CRUD-eseményekkel és az SSRF által blokkolt ellenőrzések naplózásával
 
 Elsődleges futásidejű modell:
 
-- A `src/app/api/*` alatti Next.js-alkalmazásútvonalak valósítják meg az irányítópult API-jait és a kompatibilitási API-kat
-- A `src/sse/*` + `open-sse/*` közös SSE- és útválasztási magja kezeli a szolgáltatói végrehajtást, a fordítást, a streamelést, a tartalék útvonalakat és a használatot
+- A `src/app/api/*` alatti Next.js-alkalmazásútvonalak valósítják meg mind az irányítópult API-jait, mind a kompatibilitási API-kat
+- A `src/sse/*` és az `open-sse/*` megosztott SSE- és útválasztási magja kezeli a szolgáltatói végrehajtást, az átalakítást, a streamelést, a tartalék útvonalakat és a használatot
 
 ## Referenciadiagramok
 
@@ -114,43 +114,51 @@ a többi a saját szakterületéhez tartozó útmutatóból érhető el.
 - A helyi folyamaton kívüli szolgáltatói SLA/vezérlősík
 - Maguk a külső CLI-binárisok (Claude CLI, Codex CLI stb.)
 
-## Az irányítópult jelenlegi felülete
+## Irányítópult-felület (jelenlegi)
 
-A `src/app/(dashboard)/dashboard/` alatti fő oldalak:
+Fő oldalak a `src/app/(dashboard)/dashboard/` alatt:
 
-- `/dashboard` — gyors kezdés és a szolgáltatók áttekintése
-- `/dashboard/endpoint` — végpontproxy, valamint MCP-, A2A- és API-végpontlapok
+- `/dashboard` — gyors kezdés és szolgáltatói áttekintés
+- `/dashboard/endpoint` — végpontproxy, valamint MCP-, A2A- és API-végpontfülek
 - `/dashboard/providers` — szolgáltatói kapcsolatok és hitelesítő adatok
-- `/dashboard/combos` — kombinációs stratégiák, sablonok, lépésalapú összeállító, modellútválasztási szabályok és manuálisan tartósított sorrend
+- `/dashboard/combos` — kombinációs stratégiák, sablonok, lépésalapú összeállító, modellútválasztási szabályok és kézzel beállított, tartós sorrend
 - `/dashboard/auto-combo` — Auto Combo Engine: pontozási súlyok, módcsomagok, virtuális gyári előbeállítások és telemetria
-- `/dashboard/costs` — költségösszesítés és az árazás áttekinthetősége
-- `/dashboard/analytics` — használati analitika, kiértékelések és kombinációs célok állapota
+- `/dashboard/costs` — költségösszesítés és árképzési áttekinthetőség
+- `/dashboard/analytics` — használati analitika, kiértékelések és a kombinációs célok állapota
 - `/dashboard/limits` — kvóta- és sebességkorlátozási vezérlők
 - `/dashboard/cli-tools` — CLI-bevezetés, futtatókörnyezet-észlelés és konfigurációgenerálás
-- `/dashboard/agents` — észlelt ACP-ügynökök és egyéni ügynökök regisztrálása
+- `/dashboard/agents` — észlelt ACP-ügynökök és egyéni ügynökök regisztrációja
 - `/dashboard/cloud-agents` — felhőben futtatott ügynökfeladatok (Codex Cloud, Devin, Jules) és a feladatok életciklusa
-- `/dashboard/skills` — A2A-képességjegyzék, izolált végrehajtás és beépített képességkatalógus
-- `/dashboard/memory` — tartós társalgási memória vizsgálata és lekérése
-- `/dashboard/webhooks` — kimenő webhook-előfizetések, titokrotáció és újrapróbálkozási statisztikák
+- `/dashboard/skills` — A2A-képességjegyzék, homokozókörnyezetben történő végrehajtás és beépített képességkatalógus
+- `/dashboard/memory` — tartós társalgási memória vizsgálata és visszakeresése
+- `/dashboard/webhooks` — kimenő webhook-előfizetések, titokkulcs-rotáció és újrapróbálkozási statisztikák
 - `/dashboard/batch` — kötegelt feladatok beküldése és előrehaladása
-- `/dashboard/cache` — olvasás közben feltöltődő gyorsítótár és következtetési gyorsítótár statisztikái, valamint kiürítési vezérlők
-- `/dashboard/playground` — interaktív csevegési tesztfelület bármely konfigurált kombinációval vagy modellel
-- `/dashboard/changelog` — alkalmazáson belüli változásnapló-megjelenítő (a `CHANGELOG.md` fájlt jeleníti meg)
+- `/dashboard/cache` — átengedéses és következtetési gyorsítótár statisztikái, valamint kiürítési vezérlők
+- `/dashboard/playground` — interaktív csevegési tesztkörnyezet bármely konfigurált kombinációval vagy modellel
+- `/dashboard/changelog` — alkalmazáson belüli változásnapló-megjelenítő (a `CHANGELOG.md` fájlt rendereli)
 - `/dashboard/system` — futtatókörnyezeti diagnosztika, verzióinformációk és környezet-ellenőrzési felület
-- `/dashboard/onboarding` — első futtatáskor megjelenő beállítási varázsló új telepítésekhez
-- `/dashboard/media` — kép-, videó- és zenei tesztfelület
+- `/dashboard/onboarding` — első futtatási beállítóvarázsló új telepítésekhez
+- `/dashboard/media` — kép-, videó- és zenetesztkörnyezet
 - `/dashboard/search-tools` — keresési szolgáltatók tesztelése és előzmények
-- `/dashboard/health` — rendelkezésre állási idő, megszakítók, sebességkorlátok és kvótafigyelt munkamenetek
+- `/dashboard/health` — rendelkezésre állás, megszakítók, sebességkorlátok és kvótafigyelt munkamenetek
 - `/dashboard/logs` — kérés-, proxy-, audit- és konzolnaplók
-- `/dashboard/settings` — rendszerbeállítási lapok (általános, útválasztás, kombinációs alapértékek stb.)
-- `/dashboard/context/caveman` — Caveman-tömörítési szabályok, nyelvi csomagok, előnézet és kimeneti mód
-- `/dashboard/context/rtk` — RTK-parancskimeneti szűrők, előnézet és futtatókörnyezeti biztonsági beállítások
+- `/dashboard/settings` — rendszerbeállítási fülek (általános, útválasztás, kombinációs alapértelmezések stb.)
+- `/dashboard/context/caveman` — Caveman tömörítési szabályok, nyelvi csomagok, előnézet és kimeneti mód
+- `/dashboard/context/rtk` — RTK parancskimeneti szűrők, előnézet és futásidejű biztonsági beállítások
 - `/dashboard/context/combos` — útválasztási kombinációkhoz rendelt, elnevezett tömörítési folyamatláncok
-- `/dashboard/translator` — a fordító vizsgálata és a kérésformátum átalakításának előnézete
+- `/dashboard/translator` — fordítóvizsgálat és kérésformátum-konverziós előnézet
 - `/dashboard/audit` — megfelelőségi auditnaplók lapozható böngészője strukturált metaadatokkal
-- `/dashboard/usage` — a `usage_history` adataihoz kapcsolódó, kérésenkénti használati böngésző
+- `/dashboard/usage` — kérésenkénti használati böngésző a `usage_history` adataihoz kapcsolva
 - `/dashboard/compression` — tömörítési analitika, statisztikák és folyamatlánc-hozzárendelés
 - `/dashboard/api-manager` — API-kulcsok életciklusa és modellengedélyek
+
+Felhasználói felületi réteg: minden oldal egyetlen kereten belül jelenik meg — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (a készlet
+`SidebarProvider`/`SidebarInset` elemei, valamint az OmniRoute `Sidebar.tsx` és `Header.tsx` fájljai). Az oldalak az
+építőelemeiket a `@/shared/components` modulból (a `packages/ui-kit` alatt szállított Keak CI UI Kit adapterei)
+vagy a készlet komponens-alútvonalairól (`@omniroute/ui-kit/table`, `…/page-header`) importálják, az ikonokat pedig
+az `<Icon>` elemen keresztül (`ICON_MAP` → Lucide). A téma (alapértelmezés szerint `system`, világos/sötét) és a tokenek
+a készletből származnak a `src/app/globals.css` fájlban található hídon keresztül. Részletek: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Magas szintű rendszerkörnyezet
 

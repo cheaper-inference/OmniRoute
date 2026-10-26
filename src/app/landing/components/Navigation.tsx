@@ -1,9 +1,11 @@
 "use client";
+
+import Icon from "@/shared/components/Icon";
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
-import OmniRouteLogo from "@/shared/components/OmniRouteLogo";
+import { OmniRouteLockup } from "@/shared/components/OmniRouteLogo";
 
 export default function Navigation() {
   const t = useTranslations("landing");
@@ -20,12 +22,8 @@ export default function Navigation() {
           onClick={() => router.push("/")}
           aria-label={t("navigateHome")}
         >
-          <div className="size-8 rounded bg-linear-to-br from-[#E54D5E] to-[#C93D4E] flex items-center justify-center text-white">
-            <OmniRouteLogo size={20} className="text-white" />
-          </div>
-          <h2 className="text-white text-lg sm:text-xl font-bold tracking-tight truncate sm:max-w-none max-w-[160px]">
-            {t("brandName")}
-          </h2>
+          {/* Fixed dark surface: white ink in both themes (the kit wordmark sets its own color). */}
+          <OmniRouteLockup className="text-white [&_.ci-keak-logo]:text-white" />
         </button>
 
         {/* Desktop menu */}
@@ -50,14 +48,12 @@ export default function Navigation() {
           </Link>
           <a
             className="text-gray-300 hover:text-white text-sm font-medium transition-colors flex items-center gap-1"
-            href="https://github.com/diegosouzapw/OmniRoute"
+            href="https://github.com/cheaper-inference/OmniRoute"
             target="_blank"
             rel="noopener noreferrer"
           >
             {t("github")}
-            <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-              open_in_new
-            </span>
+            <Icon name="open_in_new" size={14} />
           </a>
         </div>
 
@@ -74,9 +70,7 @@ export default function Navigation() {
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             aria-label={t("toggleMenu")}
           >
-            <span className="material-symbols-outlined" aria-hidden="true">
-              {mobileMenuOpen ? "close" : "menu"}
-            </span>
+            <Icon name={mobileMenuOpen ? "close" : "menu"} />
           </button>
         </div>
       </div>
@@ -108,7 +102,7 @@ export default function Navigation() {
             </Link>
             <a
               className="text-gray-300 hover:text-white text-sm font-medium transition-colors"
-              href="https://github.com/diegosouzapw/OmniRoute"
+              href="https://github.com/cheaper-inference/OmniRoute"
               target="_blank"
               rel="noopener noreferrer"
             >
