@@ -287,3 +287,29 @@ test("Codex capacity classifier requires explicit transient evidence and preserv
     "empty/non-numeric rate-limit metadata is not proof of exhaustion"
   );
 });
+
+test("transient Codex capacity cannot clear an earlier genuine scoped quota cooldown", async () => {
+  const { persistCodexChildCooldown } =
+    await import("../../open-sse/services/codexAccount/index.ts");
+  const conn = await seed("codex", true);
+  const previousUntil = new Date(Date.now() + 120_000).toISOString();
+  await persistCodexChildCooldown({
+    connectionId: conn.id,
+    model: "gpt-5.3-codex",
+    rateLimitedUntil: previousUntil,
+  });
+  await auth.markAccountUnavailable(
+    conn.id,
+    429,
+    "Codex is at capacity, please try again later",
+    "codex",
+    "gpt-5.3-codex",
+    profile
+  );
+  const persisted = await providers.getProviderConnectionById(conn.id);
+  assert.ok(persisted);
+  const scoped = (persisted.providerSpecificData as Record<string, unknown>)
+    .codexScopeRateLimitedUntil as Record<string, unknown>;
+  assert.equal(scoped.codex, previousUntil, "known quota reset must not be cleared");
+});
+
