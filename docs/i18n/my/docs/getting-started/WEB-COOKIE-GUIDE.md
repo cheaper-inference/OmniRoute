@@ -4,141 +4,141 @@
 
 ---
 
-Web Cookie ပံ့ပိုးသူများသည် OmniRoute အား API key အစား သင့်လက်ရှိ browser session မှတစ်ဆင့် AI ဝန်ဆောင်မှုတစ်ခုကို အသုံးပြုနိုင်စေသည်။ ဝန်ဆောင်မှုတစ်ခုကို ၎င်း၏ website မှတစ်ဆင့် အသုံးပြုခွင့်ရှိပြီးဖြစ်ကာ OmniRoute ကိုလည်း အလားတူ အထောက်အထားစိစစ်ပြီးသော session ကို အသုံးပြုစေလိုသည့်အခါ ၎င်းတို့သည် အသုံးဝင်သည်။
+Web Cookie provider များသည် API key အစား သင့်လက်ရှိ browser session ကို အသုံးပြု၍ OmniRoute က AI service တစ်ခုကို အသုံးပြုနိုင်စေသည်။ Website မှတစ်ဆင့် service တစ်ခုကို အသုံးပြုခွင့်ရှိပြီးသားဖြစ်ကာ OmniRoute ကိုလည်း အလားတူ authenticated session ဖြင့် အသုံးပြုစေလိုသည့်အခါ ၎င်းတို့သည် အသုံးဝင်သည်။
 
-API-key ပံ့ပိုးသူများနှင့်မတူဘဲ Web Cookie ပံ့ပိုးသူများသည် သင့် browser က website သို့ ပေးပို့သည့် အထောက်အထားများကို အသုံးပြု၍ အထောက်အထားစိစစ်သည်။
+API-key provider များနှင့် မတူဘဲ Web Cookie provider များသည် သင့် browser က website သို့ ပေးပို့သော အထောက်အထားများကို အသုံးပြု၍ authenticate လုပ်သည်။
 
 ---
 
 # မစတင်မီ
 
-> **အရေးကြီးသည်:** အထောက်အထားများကို browser ၏ cookie storage မှ ကူးယူခြင်းမပြုဘဲ **တိုက်ရိုက် network request** တစ်ခုမှသာ အမြဲကူးယူပါ။
+> **အရေးကြီးသည်:** အထောက်အထားများကို သင့် browser ၏ cookie storage မှ **မဟုတ်ဘဲ** **လက်ရှိအသုံးပြုနေသော network request** တစ်ခုမှ အမြဲကူးယူပါ။
 
-အထောက်အထားစိစစ်ခြင်းဆိုင်ရာ ပြဿနာအများအပြားသည် နေရာမှားမှ cookie များကို ကူးယူခြင်းကြောင့် ဖြစ်ပေါ်သည်။
+Authentication ပြဿနာများစွာသည် နေရာမှားမှ cookie များကို ကူးယူခြင်းကြောင့် ဖြစ်ပေါ်သည်။
 
 ## Cookie Storage မှ မကူးယူပါနှင့်
 
-Browser အများစုသည် သိမ်းဆည်းထားသော cookie များကို အောက်ပါနေရာမှတစ်ဆင့် ပြသပေးသည်-
+Browser အများစုတွင် သိမ်းဆည်းထားသော cookie များကို အောက်ပါနေရာမှ ကြည့်ရှုနိုင်သည်-
 
 ```
 DevTools
-→ Application (သို့မဟုတ် Storage)
+→ Application (or Storage)
 → Cookies
 ```
 
-ဤ cookie များသည် မှန်ကန်သည့်ပုံပေါ်သော်လည်း ၎င်းတို့သည်-
+ဤ cookie များသည် မှန်ကန်ပုံပေါ်သော်လည်း အောက်ပါအခြေအနေများ ဖြစ်နိုင်သည်-
 
-- သက်တမ်းလွန်နေနိုင်သည်
-- မပြည့်စုံနိုင်သည်
-- အထောက်အထားစိစစ်ထားသော request များတွင်သာ ပေးပို့သည့် cookie များ မပါဝင်နိုင်သည်
+- သက်တမ်းမမီတော့ခြင်း
+- မပြည့်စုံခြင်း
+- authenticated request များတွင်သာ ပေးပို့သော cookie များ မပါဝင်ခြင်း
 
-ဤတန်ဖိုးများသည် မှန်ကန်သည့်ပုံပေါ်နေသော်လည်း ၎င်းတို့ကို အသုံးပြုပါက အထောက်အထားစိစစ်ခြင်း မအောင်မြင်နိုင်ပါ။
+ဤတန်ဖိုးများသည် မှန်ကန်ပုံပေါ်နေသော်လည်း ၎င်းတို့ကို အသုံးပြုပါက authentication မအောင်မြင်မှုများ ဖြစ်ပေါ်နိုင်သည်။
 
-## တိုက်ရိုက် Request တစ်ခုမှ ကူးယူပါ
+## လက်ရှိအသုံးပြုနေသော Request မှ ကူးယူပါ
 
-ထိုသို့မလုပ်ဘဲ အောင်မြင်သော request တစ်ခုမှ cookie များကို အသုံးပြုပါ-
+ထိုအစား အောင်မြင်သော request တစ်ခုမှ cookie များကို အသုံးပြုပါ-
 
 ```
 DevTools
 → Network
-→ စာမျက်နှာကို ပြန်လည်စတင်ပါ
-→ chat သို့မဟုတ် conversation request တစ်ခုကို ဖွင့်ပါ
+→ Refresh the page
+→ Open a chat or conversation request
 → Request Headers
 → Cookie
 ```
 
-`Cookie` request header တွင် သင့် browser က အောင်မြင်စွာ အသုံးပြုခဲ့သည့် အတိအကျ အထောက်အထားစိစစ်မှု အချက်အလက်များ ပါဝင်သည်။
+`Cookie` request header တွင် သင့် browser က အောင်မြင်စွာ အသုံးပြုခဲ့သော authentication အချက်အလက် အတိအကျ ပါဝင်သည်။
 
-Web Cookie ပံ့ပိုးသူအများစုအတွက် ဤတန်ဖိုးကို OmniRoute ထဲသို့ ကူးထည့်သင့်သည်။
+Web Cookie provider အများစုအတွက် ဤတန်ဖိုးကို OmniRoute ထဲသို့ ထည့်သွင်းသင့်သည်။
 
 ---
 
-# အထွေထွေ ပြင်ဆင်သတ်မှတ်မှု
+# ယေဘုယျ စနစ်ထည့်သွင်းပုံ
 
-Web Cookie ပံ့ပိုးသူအများစုအတွက် ပြင်ဆင်သတ်မှတ်မှု လုပ်ငန်းစဉ်သည် အတူတူပင်ဖြစ်သည်။
+Web Cookie provider အများစုအတွက် စနစ်ထည့်သွင်းပုံသည် တူညီသည်။
 
-1. ပံ့ပိုးသူ၏ website သို့ ဝင်ရောက်ပါ။
+1. Provider ၏ website သို့ sign in ဝင်ပါ။
 2. Browser ၏ Developer Tools ကို ဖွင့်ပါ။
 3. **Network** tab ကို ဖွင့်ပါ။
-4. စာမျက်နှာကို ပြန်လည်စတင်ပါ။
-5. အထောက်အထားစိစစ်ထားသော chat သို့မဟုတ် conversation request တစ်ခုကို ဖွင့်ပါ။
-6. လိုအပ်သော အထောက်အထားစိစစ်မှု အချက်အလက်များကို ကူးယူပါ။
+4. စာမျက်နှာကို refresh လုပ်ပါ။
+5. Authenticated ဖြစ်သော chat သို့မဟုတ် conversation request တစ်ခုကို ဖွင့်ပါ။
+6. လိုအပ်သော authentication အထောက်အထားများကို ကူးယူပါ။
 7. OmniRoute ကို ဖွင့်ပါ။
 8. **Providers → Add Provider** သို့ သွားပါ။
-9. သင်၏ Web Cookie ပံ့ပိုးသူကို ရွေးချယ်ပါ။
-10. အထောက်အထားများကို ကူးထည့်ပါ။
+9. သင့် Web Cookie provider ကို ရွေးချယ်ပါ။
+10. အထောက်အထားများကို ထည့်သွင်းပါ။
 11. **Test Connection** ကို နှိပ်ပါ။
-12. ပံ့ပိုးသူကို သိမ်းဆည်းပါ။
+12. Provider ကို သိမ်းဆည်းပါ။
 
-လိုအပ်သော အထောက်အထား အတိအကျသည် ပံ့ပိုးသူအပေါ် မူတည်သည်။
+အတိအကျ လိုအပ်သော အထောက်အထားများသည် provider အလိုက် ကွဲပြားသည်။
 
 ---
 
-# ပံ့ပိုးသူ အထောက်အထား ဖော်မတ်များ
+# Provider အထောက်အထား ဖော်မတ်များ
 
-Website အမျိုးမျိုးသည် အထောက်အထားစိစစ်မှုကို ပုံစံအမျိုးမျိုးဖြင့် သိမ်းဆည်းကြသည်။ အချို့သည် cookie များသာ လိုအပ်သော်လည်း အခြားအချို့တွင် ထပ်ဆောင်း header များ သို့မဟုတ် token များ လိုအပ်နိုင်သည်။
+Website အသီးသီးသည် authentication ကို မတူညီသောပုံစံများဖြင့် သိမ်းဆည်းသည်။ အချို့မှာ cookie များသာ လိုအပ်သော်လည်း အခြား website များတွင် ထပ်ဆောင်း header များ သို့မဟုတ် token များ လိုအပ်နိုင်သည်။
 
-| ပံ့ပိုးသူ                       | အထောက်အထား ဖော်မတ်               | ပံ့ပိုးသူ လမ်းညွှန်              |
+| Provider                        | အထောက်အထား ဖော်မတ်               | Provider လမ်းညွှန်               |
 | ------------------------------- | -------------------------------- | -------------------------------- |
 | Claude Web                      | Cookie request header အပြည့်အစုံ | `docs/providers/CLAUDE_WEB.md`   |
 | ChatGPT Web (Codex)             | Cookie header အပြည့်အစုံ         | `docs/providers/CHATGPT_WEB.md`  |
-| Gemini Web                      | _(စစ်ဆေးရန်)_                    |                                  |
-| Copilot Web                     | _(စစ်ဆေးရန်)_                    | `docs/providers/COPILOT-M365.md` |
+| Gemini Web                      | `_(verify)_`                     |                                  |
+| Copilot Web                     | `_(verify)_`                     | `docs/providers/COPILOT-M365.md` |
 | Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath    | `docs/providers/COPILOT-M365.md` |
-| Grok Web                        | _(စစ်ဆေးရန်)_                    |                                  |
+| Grok Web                        | `_(verify)_`                     |                                  |
 | ...                             | ...                              | ...                              |
 
-> Web Cookie ပံ့ပိုးသူအသစ်များ ထည့်သွင်းသည့်အခါ သို့မဟုတ် လက်ရှိပံ့ပိုးသူများ၏ အထောက်အထားစိစစ်မှု လိုအပ်ချက်များ ပြောင်းလဲသည့်အခါ ဤဇယားကို အပ်ဒိတ်လုပ်ပါ။
+> Web Cookie provider အသစ်များ ထည့်သွင်းသည့်အခါ သို့မဟုတ် ရှိပြီးသား provider များ၏ authentication လိုအပ်ချက်များ ပြောင်းလဲသည့်အခါ ဤဇယားကို အပ်ဒိတ်လုပ်ပါ။
 
 ## NoTrack (notrack-web)
 
-NoTrack ([notrack.ai](https://notrack.ai)) သည် အကောင့်ဖွင့်ရန် မလိုအပ်သော အခမဲ့ အသုံးပြုသူသုံး chat platform တစ်ခုဖြစ်သည် — ပထမဆုံး ဝင်ရောက်ချိန်တွင် session ကို အမည်မဖော်ဘဲ ဖန်တီးပြီး `uid`, `si_usr_id` နှင့် `si_ses_id` ဟူသော cookie သုံးခုမှတစ်ဆင့် ဆက်လက်တည်ရှိစေသည်။ OmniRoute သည် model id တစ်ခုတည်း (`notrack-c`, alias `ntw`) မှတစ်ဆင့် တူညီသော `/api/dispatch` endpoint ကို proxy လုပ်ပေးသည်။
+NoTrack ([notrack.ai](https://notrack.ai)) သည် စာရင်းသွင်းရန်မလိုအပ်သော အခမဲ့ အသုံးပြုသူ ချတ်ပလက်ဖောင်းတစ်ခုဖြစ်သည် — ပထမဆုံးအကြိမ် ဝင်ရောက်သည့်အခါ session ကို အမည်မဖော်ဘဲ ဖန်တီးပြီး `uid`, `si_usr_id` နှင့် `si_ses_id` ဟူသော cookie သုံးခုမှတစ်ဆင့် ဆက်လက်သိမ်းဆည်းထားသည်။ OmniRoute သည် တူညီသော `/api/dispatch` endpoint ကို model id တစ်ခုတည်း (`notrack-c`, alias `ntw`) မှတစ်ဆင့် proxy လုပ်ပေးသည်။
 
 ### ချိတ်ဆက်ရန် အဆင့်များ
 
 1. သင့် browser တွင် [notrack.ai](https://notrack.ai) ကိုဖွင့်ပြီး အမည်မဖော်သော session cookie ကို သတ်မှတ်ခွင့်ပြုပါ။
 2. **DevTools → Network** ကိုဖွင့်ပြီး စာမျက်နှာကို refresh လုပ်ကာ `/api` request တစ်ခုခုကို နှိပ်ပါ။
-3. **Request Headers** တွင် `Cookie` header တန်ဖိုးအပြည့်အစုံကို ကူးယူပါ။
+3. **Request Headers** ထဲရှိ `Cookie` header value အပြည့်အစုံကို ကူးယူပါ။
 4. OmniRoute တွင် **Providers → Add Provider → NoTrack Web (Free)** သို့သွားပါ။
-5. Cookie string ကို `apiKey` field ထဲသို့ ကူးထည့်ပြီး **Save** လုပ်ပါ။
+5. Cookie string ကို `apiKey` field ထဲသို့ ထည့်ပြီး **Save** ကိုနှိပ်ပါ။
 
-OmniRoute သည် ကူးထည့်ထားသော string မှ `uid`, `si_usr_id` နှင့် `si_ses_id` တို့ကို ထုတ်ယူပြီး အဆိုပါအတွဲများသာ ပါဝင်သည့် သန့်ရှင်းသော `Cookie` header ကို ပြန်လည်တည်ဆောက်သည် — ထို့အပြင် ရှိနေပါက `nt_session` (အကောင့်ဝင်ထားသော account များအတွက် သတ်မှတ်ထားသည့် `ntk_…` token) ကိုလည်း ထည့်သွင်းသည်။ သုံးခုအနက် တစ်ခုခု မပါရှိပါက operator များက အခြားပုံစံများဖြင့် စမ်းသပ်နိုင်ရန် မူရင်းကူးထည့်ထားသော string ကို မပြောင်းလဲဘဲ ဆက်လက်ပေးပို့သည်။
+OmniRoute သည် ထည့်သွင်းထားသော string မှ `uid`, `si_usr_id` နှင့် `si_ses_id` ကို ထုတ်ယူပြီး အဆိုပါအတွဲများသာပါဝင်သည့် သန့်ရှင်းသော `Cookie` header ကို ပြန်လည်တည်ဆောက်သည် — ရှိနေပါက အကောင့်ဝင်ထားသော account များအတွက် သတ်မှတ်ထားသည့် `nt_session` (`ntk_…` token) ကိုလည်း ထည့်သွင်းသည်။ အဆိုပါ သုံးခုအနက် တစ်ခုခုမရှိပါက operator များသည် အခြားပုံစံများဖြင့် စမ်းသပ်နိုင်ရန် ထည့်သွင်းထားသော မူရင်း string ကို မပြောင်းလဲဘဲ ဆက်လက်ပို့ပေးသည်။
 
 ### Model id များ
 
 | Model id    | ပြသမည့်အမည် | မှတ်ချက်များ                                             |
 | ----------- | ----------- | -------------------------------------------------------- |
 | `notrack-c` | NoTrack C   | မူလသတ်မှတ်ချက် — upstream dispatch model `C`။            |
-| `C`         | NoTrack C   | `notrack-c` အတွက် alias (မူရင်း upstream dispatch code)။ |
+| `C`         | NoTrack C   | `notrack-c` အတွက် alias (upstream dispatch code အကြမ်း)။ |
 | `notrack`   | NoTrack C   | `notrack-c` အတွက် alias။                                 |
 | `ntw`       | NoTrack C   | `notrack-c` အတွက် အတိုကောက် alias။                       |
 
-Model id လေးခုစလုံးသည် တူညီသော upstream dispatch model (`C`) သို့ ချိတ်ဆက်သည်။
+Model id လေးခုစလုံးသည် တူညီသော upstream dispatch model (`C`) သို့ ချိတ်ဆက်ထားသည်။
 
 ### Request ရွေးချယ်စရာများ
 
-Executor သည် request body ပေါ်ရှိ အောက်ပါ optional field များကို လက်ခံသည်-
+Executor သည် request body ပေါ်ရှိ အောက်ပါ မဖြစ်မနေမဟုတ်သော field များကို လက်ခံသည်-
 
-| Body field            | မူလတန်ဖိုး | ရည်ရွယ်ချက်                                                                                 |
-| --------------------- | ---------- | ------------------------------------------------------------------------------------------- |
-| `notrack_mode`        | `usual`    | Dispatch mode (လွတ်လပ်စွာ သတ်မှတ်နိုင်သော string; upstream သည် `usual`, … တို့ကို လက်ခံသည်) |
-| `notrack_max_turns`   | `6`        | အဖြေမပေးမီ upstream က ပြုလုပ်နိုင်သည့် အတွင်းပိုင်း turn အရေအတွက်။                          |
-| `notrack_chat_id`     | `null`     | ရှိပြီးသား upstream chat ကို ပြန်လည်ဆက်လက်လုပ်ဆောင်ရန် (chat အသစ်အတွက် မထည့်ပါနှင့်)။       |
-| `notrack_attachments` | `[]`       | Upstream attachment descriptor များ၏ ဖြတ်သန်းပေးပို့မည့် array။                             |
-| `notrack_regenerate`  | `false`    | ယခင် turn အတွက် အဖြေကို ပြန်လည်ထုတ်ပေးရန် တောင်းဆိုလိုပါက `true` ဟု သတ်မှတ်ပါ။              |
+| Body field            | မူလတန်ဖိုး | ရည်ရွယ်ချက်                                                                    |
+| --------------------- | ---------- | ------------------------------------------------------------------------------ |
+| `notrack_mode`        | `usual`    | Dispatch mode (လွတ်လပ်သောပုံစံ string; upstream သည် `usual`, … ကို လက်ခံသည်)   |
+| `notrack_max_turns`   | `6`        | အဖြေမပေးမီ upstream က လုပ်ဆောင်နိုင်သည့် internal turn အရေအတွက်။               |
+| `notrack_chat_id`     | `null`     | ရှိပြီးသား upstream chat ကို ဆက်လက်အသုံးပြုရန် (chat အသစ်အတွက် မထည့်ပါနှင့်)။  |
+| `notrack_attachments` | `[]`       | Upstream attachment descriptor များ၏ pass-through array။                       |
+| `notrack_regenerate`  | `false`    | ယခင် turn အတွက် အဖြေကို ပြန်လည်ထုတ်ပေးရန် တောင်းဆိုလိုပါက `true` ဟု သတ်မှတ်ပါ။ |
 
 ### စွမ်းဆောင်ရည်များ
 
 - **Streaming နှင့် non-streaming** chat completion များ။
-- **Tool calling** — request တွင် `tools: [...]` ကို သတ်မှတ်ပါ။ Executor သည် ၎င်းတို့ကို tool-call envelope contract အဖြစ် serialize လုပ်ပြီး model ၏ response များကို OpenAI `tool_calls` အဖြစ် ပြန်လည် parse လုပ်သည်။
-- **`response_format`** — `json_object` နှင့် `json_schema` တို့ကို ပံ့ပိုးထားသည်။ Executor သည် model ၏ reply မှ ပထမဆုံး JSON object ကို ထုတ်ယူကာ မပြန်ပို့မီ string အဖြစ် ပြောင်းလဲသည်။
-- **Reasoning hint** — upstream က `thinking` event တစ်ခု ပေးပို့သည့်အခါ executor သည် `reasoning` delta တစ်ခုကို ထုတ်ပေးသည်။
+- **Tool calling** — request တွင် `tools: [...]` ကို သတ်မှတ်ပါ။ Executor သည် ၎င်းတို့ကို tool-call envelope contract အဖြစ် serialize လုပ်ပြီး model ၏ response များကို OpenAI `tool_calls` အဖြစ် ပြန်လည် parse လုပ်ပေးသည်။
+- **`response_format`** — `json_object` နှင့် `json_schema` ကို ပံ့ပိုးထားသည်။ Executor သည် model ၏ reply မှ ပထမဆုံး JSON object ကို ထုတ်ယူပြီး ပြန်မပို့မီ string အဖြစ် ပြောင်းလဲပေးသည်။
+- **Reasoning hint** — upstream က `thinking` event တစ်ခု ပို့သည့်အခါ executor သည် `reasoning` delta တစ်ခု ထုတ်ပေးသည်။
 
 ### ကန့်သတ်ချက်များ
 
-- Upstream သည် အမည်မဖော်သော အသုံးပြုမှု quota များကို ကန့်သတ်ထားသည် — ကန့်သတ်ချက်ပြည့်သွားပါက executor သည် နားလည်ရလွယ်ကူသော message တစ်ခုနှင့်အတူ 429 ကို ဖော်ပြသည်။
-- Model id အားလုံးသည် တူညီသော upstream dispatch model သို့သာ ညွှန်းဆိုသည်။ Model တစ်ခုချင်းစီအလိုက် ပြောင်းလဲရွေးချယ်နိုင်ခြင်း မရှိပါ။
-- Executor သည် upstream ၏ `/api/chats` endpoint ကို မခေါ်သောကြောင့် chat history / session များကို အလိုအလျောက် စီမံမပေးပါ။ ရှိပြီးသား upstream chat ကို ပြန်လည်ဆက်လက်လုပ်ဆောင်ရန် `notrack_chat_id` ကို အသုံးပြုပါ။
+- Upstream သည် အမည်မဖော်သော အသုံးပြုမှု quota များကို သတ်မှတ်ထားသည် — quota ပြည့်သွားပါက executor သည် နားလည်ရလွယ်သော message နှင့်အတူ 429 ကို ပြန်ပေးသည်။
+- Model id အားလုံးသည် တူညီသော upstream dispatch model သို့ ချိတ်ဆက်ထားပြီး model တစ်ခုချင်းစီအလိုက် ပြောင်းလဲရွေးချယ်နိုင်ခြင်းမရှိပါ။
+- Executor သည် upstream ၏ `/api/chats` endpoint ကို မခေါ်သောကြောင့် chat history / session များကို အလိုအလျောက် စီမံမပေးပါ။ ရှိပြီးသား upstream chat ကို ဆက်လက်အသုံးပြုရန် `notrack_chat_id` ကို အသုံးပြုပါ။
 
 ---
 
@@ -146,34 +146,34 @@ Executor သည် request body ပေါ်ရှိ အောက်ပါ opti
 
 Web Cookie provider များသည် website တစ်ခု၏ chat interface ကို ပြန်လည်အသုံးပြုသည်။ ၎င်းတို့သည် တရားဝင် API များနှင့် တူညီသော စွမ်းဆောင်ရည်များကို **မပေးပါ**။
 
-## ပံ့ပိုးထားသော လုပ်ဆောင်ချက်များ
+## ပံ့ပိုးထားသည်များ
 
 - လက်ရှိ browser session ကို အသုံးပြု၍ authentication ပြုလုပ်ခြင်း
-- သင့်အကောင့်မှ ရရှိနိုင်သော models များကို အသုံးပြုခြင်း
-- Chat တုံ့ပြန်ချက်များကို stream လုပ်ခြင်း
+- သင့် account မှ ရရှိနိုင်သော model များကို အသုံးပြုခြင်း
+- Chat response များကို stream ပြုလုပ်ခြင်း
 - API key မလိုအပ်ခြင်း
 
-## ပံ့ပိုးမထားသော လုပ်ဆောင်ချက်များ
+## ပံ့ပိုးမထားသည်များ
 
 - Function calling
 - Tool calling
-- အလိုအလျောက် file editing
-- Agentic IDE workflows
-- API တွင်သာ ရရှိနိုင်သော လုပ်ဆောင်ချက်များ
+- အလိုအလျောက် file တည်းဖြတ်ခြင်း
+- Agent အခြေပြု IDE workflow များ
+- API သီးသန့် feature များ
 
-ဤသည်မှာ မျှော်လင့်ထားသည့် လုပ်ဆောင်ပုံဖြစ်ပြီး **bug မဟုတ်ပါ**။
+ဤအရာသည် မျှော်လင့်ထားသော အပြုအမူဖြစ်ပြီး **bug မဟုတ်ပါ**။
 
-Tool execution၊ အလိုအလျောက် file editing သို့မဟုတ် အခြား agent workflows များ လိုအပ်ပါက Web Cookie provider အစား **API-key provider** ကို အသုံးပြုပါ။
+Tool ကို execute လုပ်ခြင်း၊ အလိုအလျောက် file တည်းဖြတ်ခြင်း သို့မဟုတ် အခြား agent workflow များကို လိုအပ်ပါက Web Cookie provider အစား **API-key provider** ကို အသုံးပြုပါ။
 
 ---
 
 # Validation ဆိုင်ရာ သတိပြုရန်အချက်
 
-**Test Connection** အောင်မြင်ခြင်း သို့မဟုတ် cookie validation အောင်မြင်ခြင်းသည် ပေးထားသော credentials များသည် မျှော်လင့်ထားသည့် format နှင့် ကိုက်ညီပုံရကြောင်းကိုသာ အတည်ပြုပေးပါသည်။
+**Test Connection** အောင်မြင်ခြင်း သို့မဟုတ် cookie validation အောင်မြင်ခြင်းသည် ပေးထားသော credential များသည် မျှော်လင့်ထားသော format ဖြင့် ဖြစ်ပုံရကြောင်းကိုသာ အတည်ပြုပါသည်။
 
-Issue #7857 ကို မဖြေရှင်းရသေးသရွေ့ validation အောင်မြင်ခြင်းက provider သည် authentication အောင်မြင်မည်ဟု **အာမမခံပါ**။
+Issue #7857 ကို မဖြေရှင်းရသေးမီအထိ validation အောင်မြင်ခြင်းက provider သည် authentication အောင်မြင်မည်ဟု **အာမမခံပါ**။
 
-Authentication မအောင်မြင်သေးပါက credentials များကို browser cookie storage မှ ကူးယူထားခြင်းမဟုတ်ဘဲ လက်ရှိအသုံးပြုနေသော network request တစ်ခုမှ ကူးယူထားကြောင်း စစ်ဆေးပါ။
+Authentication မအောင်မြင်သေးပါက credential များကို browser cookie storage မှမဟုတ်ဘဲ လက်ရှိအသုံးပြုနေသော network request တစ်ခုမှ ကူးယူထားကြောင်း စစ်ဆေးပါ။
 
 ---
 
@@ -181,7 +181,7 @@ Authentication မအောင်မြင်သေးပါက credentials မ�
 
 ## Authentication မအောင်မြင်ခြင်း
 
-Credentials များကို အောက်ပါနေရာမှ ကူးယူထားကြောင်း စစ်ဆေးပါ-
+Credential များကို အောက်ပါနေရာမှ ကူးယူထားကြောင်း စစ်ဆေးပါ။
 
 ```
 Network
@@ -189,7 +189,7 @@ Network
 → Cookie
 ```
 
-အောက်ပါနေရာမှ **မဟုတ်ရပါ**-
+အောက်ပါနေရာမှ **မဟုတ်ရပါ**။
 
 ```
 Application
@@ -200,42 +200,59 @@ Application
 
 ## Cookie သည် Browser တွင် အလုပ်လုပ်သော်လည်း OmniRoute တွင် အလုပ်မလုပ်ခြင်း
 
-Provider အချို့တွင် authenticated requests ပြုလုပ်သည့်အချိန်၌သာ ပေးပို့သော cookies များ ပါဝင်ပါသည်။
+Provider အချို့တွင် authentication ပြုလုပ်ထားသော request များအတွင်း၌သာ ပေးပို့သည့် cookie များ ပါဝင်သည်။
 
-Conversation တစ်ခုကို အောင်မြင်စွာ ဖွင့်ပြီးနောက် network request အသစ်တစ်ခုမှ credentials များကို ထပ်မံကူးယူပါ။
+Conversation တစ်ခုကို အောင်မြင်စွာ ဖွင့်ပြီးနောက် အသစ်ဖြစ်သော network request တစ်ခုမှ credential များကို ထပ်မံကူးယူပါ။
 
 ---
 
 ## Session သက်တမ်းကုန်ဆုံးခြင်း
 
-Web Cookie providers များသည် သင့်လက်ရှိ browser session ကို အသုံးပြုပါသည်။
+Web Cookie provider များသည် သင့်လက်ရှိ browser session ကို အသုံးပြုပါသည်။
 
-သင့် browser session သက်တမ်းကုန်ဆုံးသွားပါက သို့မဟုတ် sign out လုပ်လိုက်ပါက credentials အသစ်တစ်စုံကို ကူးယူရပါမည်။ ပံ့ပိုးထားသော web providers များအတွက် cookie သက်တမ်းတိုးခြင်းကို အလိုအလျောက်လုပ်ဆောင်ရန် [Browser Session Sync Extension](../guides/SESSION-SYNC-EXTENSION.md) companion tool ကို ကြည့်ပါ။
+သင့် browser session သက်တမ်းကုန်ဆုံးသွားပါက သို့မဟုတ် sign out လုပ်ပါက credential အသစ်တစ်စုံကို ကူးယူရပါမည်။ ပံ့ပိုးထားသော web provider များအတွက် cookie အသစ်ပြန်လည်ရယူခြင်းကို အလိုအလျောက်လုပ်ဆောင်ရန် အထောက်အကူပြု tool ဖြစ်သည့် [Browser Session Sync Extension](../guides/SESSION-SYNC-EXTENSION.md) ကို ကြည့်ပါ။
 
 ---
 
-## Test Connection အောင်မြင်သော်လည်း Requests များ မအောင်မြင်ခြင်း
+## Test Connection အောင်မြင်သော်လည်း Request များ မအောင်မြင်ခြင်း
 
-Issue #7857 ကို မဖြေရှင်းရသေးသရွေ့ validation အောင်မြင်ခြင်းက authentication request အောင်မြင်မည်ဟု အာမမခံပါ။
+Issue #7857 ကို မဖြေရှင်းရသေးမီအထိ validation အောင်မြင်ခြင်းက authentication request အောင်မြင်မည်ဟု အာမမခံပါ။
 
-နောက်ထပ်ပြဿနာမဖြေရှင်းမီ authenticated request အသစ်တစ်ခုမှ သင့် credentials များကို ထပ်မံကူးယူပါ။
+နောက်ထပ်ပြဿနာမဖြေရှင်းမီ အသစ်ဖြစ်သော authenticated request တစ်ခုမှ သင့် credential များကို ထပ်မံကူးယူပါ။
+
+---
+
+## ChatGPT Web တွင် "Unsupported ChatGPT integrity dependency" ဖြင့် မအောင်မြင်ခြင်း
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Credential တွင် ပြဿနာမရှိပါ — ထို error သည် session မှမဟုတ်ဘဲ bridge မှ ဖြစ်ပေါ်လာခြင်းဖြစ်သည်။ chatgpt.com သည် deployment တစ်ခုချင်းစီအလိုက် ၎င်း၏
+module id များကို သတ်မှတ်ပြီး bridge သည် ယခင်က ၎င်း instantiate လုပ်သည့် Sentinel helper ၏ id ကို pin လုပ်ထားသောကြောင့်
+helper ကို အမည်ပြောင်းခဲ့သည့် chatgpt.com rebuild တစ်ခုကြောင့် cookie မှန်ကန်နေသော်လည်း turn အားလုံး ပျက်သွားခဲ့သည်။ Connection ကို ပြန်လည် authorize လုပ်ခြင်းဖြင့်
+၎င်းကို မဖြေရှင်းနိုင်ပါ။
+
+Page ၏ ကိုယ်ပိုင် runtime မှတစ်ဆင့် module ကို resolve လုပ်သော build များသည် မည်သည့် id ကိုမျှ pin မလုပ်သောကြောင့် ဤပြဿနာ မဖြစ်ပေါ်ပါ။ ထို
+error ကို တွေ့ပါက OmniRoute ကို upgrade လုပ်ပြီး connection စစ်ဆေးမှုကို ပြန်လည်လုပ်ဆောင်ပါ။
 
 ---
 
 # Provider နမူနာ
 
-Provider အလိုက် ပြည့်စုံသော လုပ်ဆောင်ပုံအဆင့်ဆင့်အတွက် အောက်ပါတို့ကို ကြည့်ပါ-
+Provider တစ်ခုအတွက် အစအဆုံး ပြည့်စုံသော လမ်းညွှန်ကို အောက်တွင် ကြည့်ပါ။
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
-Claude Web လမ်းညွှန်သည် Web Cookie provider တစ်ခုအတွက် ပြည့်စုံသော setup လုပ်ငန်းစဉ်ကို သရုပ်ပြထားပြီး reference implementation အဖြစ် အသုံးပြုနိုင်ပါသည်။
+Claude Web လမ်းညွှန်တွင် Web Cookie provider တစ်ခုအတွက် အစအဆုံး setup လုပ်ငန်းစဉ်ကို ပြသထားပြီး reference implementation အဖြစ် အသုံးပြုနိုင်ပါသည်။
 
 ---
 
 # အကောင်းဆုံး လုပ်ဆောင်နည်းများ
 
-- လက်ရှိ authenticated request အသစ်တစ်ခုမှ credentials များကို ကူးယူပါ။
-- Cookies အဟောင်းများကို ပြန်လည်အသုံးပြုခြင်းမှ ရှောင်ကြဉ်ပါ။
-- Web Cookie providers များကို အသုံးပြုနေစဉ် သင့် browser session ကို active ဖြစ်နေအောင် ထားပါ။
-- ကူးယူထားသော cookies များကို အရေးကြီးလျှို့ဝှက် credentials များအဖြစ် သဘောထားပါ။
-- Function calling သို့မဟုတ် agent workflows များ လိုအပ်သည့်အခါ API-key providers များကို အသုံးပြုပါ။
+- အသစ်ဖြစ်သော authenticated request တစ်ခုမှ credential များကို ကူးယူပါ။
+- Cookie အဟောင်းများကို ပြန်လည်အသုံးပြုခြင်းမှ ရှောင်ကြဉ်ပါ။
+- Web Cookie provider များကို အသုံးပြုနေစဉ် သင့် browser session ကို active အဖြစ် ထားရှိပါ။
+- ကူးယူထားသော cookie များကို အရေးကြီးသော credential များအဖြစ် သဘောထားပါ။
+- Function calling သို့မဟုတ် agent workflow များ လိုအပ်ပါက API-key provider များကို အသုံးပြုပါ။

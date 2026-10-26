@@ -2140,6 +2140,14 @@ export function createSSEStream(options: StreamOptions = {}) {
                       const deltaArgs =
                         typeof tc?.function?.arguments === "string" ? tc.function.arguments : "";
                       if (!existing) {
+                        // A fragment that opens a new slot must carry an id — strict
+                        // OpenAI-compatible clients (@ai-sdk/openai-compatible) throw
+                        // "Expected 'id' to be a string." otherwise. Fill a stable one
+                        // and force re-serialization so the client sees it (9router #4992).
+                        if (tc && (tc.id == null || tc.id === "")) {
+                          tc.id = `call_${crypto.randomUUID().replace(/-/g, "").slice(0, 24)}`;
+                          toolCallIdCoerced = true;
+                        }
                         passthroughToolCalls.set(key, {
                           id: tc?.id != null ? String(tc.id) : null,
                           index: Number.isInteger(tc?.index) ? tc.index : passthroughToolCalls.size,
