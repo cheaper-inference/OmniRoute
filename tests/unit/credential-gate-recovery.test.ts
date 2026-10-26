@@ -53,16 +53,19 @@ test(
   { timeout: 2000 },
   () => {
     delete process.env[FLAG];
+    assert.deepEqual(TRANSPORT_FAILURES, [
+      "network_error",
+      "upstream_unavailable",
+      "upstream_rate_limited",
+    ]);
+    assert.ok(AUTH_FAILURES.length > 0 && OTHER_INCONCLUSIVE_FAILURES.length > 0);
     for (const type of TRANSPORT_FAILURES) {
       setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
       assert.equal(isCredentialHealthy("synthetic"), undefined, type);
       assert.notEqual(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
       assert.equal(getCredentialHealth("synthetic")?.lastErrorType, type);
     }
-    for (const type of [
-      ...AUTH_FAILURES,
-      ...OTHER_INCONCLUSIVE_FAILURES,
-    ]) {
+    for (const type of [...AUTH_FAILURES, ...OTHER_INCONCLUSIVE_FAILURES]) {
       setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
       assert.equal(isCredentialHealthy("synthetic"), false, String(type));
       assert.equal(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
@@ -78,16 +81,22 @@ test("a throwing flag resolver fails closed to the release gate", { timeout: 200
   const store = globalThis as Record<symbol, unknown>;
   const previous = store[key];
   process.env[FLAG] = "true";
+  let resolverCalls = 0;
   try {
     store[key] = () => {
+      resolverCalls++;
       throw new Error("flag store unavailable");
     };
     setCredentialHealth("synthetic", "codex", "error", "Probe timed out", "network_error");
     assert.equal(isCredentialHealthy("synthetic"), undefined);
     assert.notEqual(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
-    // A throwing feature-flag resolver must still fail closed for OTHER diagnoses.
-    setCredentialHealth("synthetic", "codex", "error", "Probe failed", "runtime_error");
-    assert.equal(isCredentialHealthy("synthetic"), false);
+    // A throwing feature-flag resolver still fails closed for OTHER diagnoses.
+    for (const type of OTHER_INCONCLUSIVE_FAILURES) {
+      setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
+      assert.equal(isCredentialHealthy("synthetic"), false, String(type));
+      assert.equal(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
+    }
+    assert.ok(resolverCalls > 0, "the throwing resolver must actually be called");
   } finally {
     if (previous === undefined) delete store[key];
     else store[key] = previous;
