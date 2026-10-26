@@ -209,4 +209,9 @@ test("blocked credential-gate messages distinguish auth failures from ambiguous 
   const sanitized = checkCredentialGate("unsafe", "codex", "codex/model").reason ?? "";
   assert.match(sanitized, /diagnosis: unknown/);
   assert.doesNotMatch(sanitized, /secret/);
+  // An untrusted, enum-shaped string must not bypass log sanitization either.
+  setCredentialHealth("unsafe", "codex", "error", "Private text", "secret_payload");
+  const enumShaped = checkCredentialGate("unsafe", "codex", "codex/model").reason ?? "";
+  assert.match(enumShaped, /diagnosis: unknown/);
+  assert.doesNotMatch(enumShaped, /secret_payload/);
 });
