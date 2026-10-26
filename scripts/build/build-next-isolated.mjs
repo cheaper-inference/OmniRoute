@@ -97,10 +97,30 @@ export function ensureWindowsBuildProfileDirs(env, mkdirImpl = mkdirSync) {
   mkdirImpl(env.LOCALAPPDATA, { recursive: true });
 }
 
+/**
+ * #18184: Turbopack's native RSS is not bounded by NODE_OPTIONS. Small hosts
+ * should see the supported webpack escape hatch BEFORE compilation begins.
+ * Only installed RAM is used: os.freemem() excludes reclaimable cache on Linux.
+ * This warning never changes an operator's chosen bundler.
+ */
+export function getLowMemoryBuildWarning(
+  baseEnv = process.env,
+  totalMemoryBytes = os.totalmem()
+) {
+  if (resolveNextBuildBundlerFlag(baseEnv) !== "--turbopack") return null;
+  if (!Number.isFinite(totalMemoryBytes) || totalMemoryBytes <= 0) return null;
+  const gib = 1024 ** 3;
+  if (totalMemoryBytes > 16 * gib) return null;
+  const installed = (totalMemoryBytes / gib).toFixed(1);
+  return `[build-next-isolated] Memory advisory (#18184): this host has ${installed} GiB RAM. Turbopack production compilation has exceeded 10 GiB RSS in this repository and may not fit alongside other workloads. Consider OMNIROUTE_USE_TURBOPACK=0 npm run build for webpack, or npm run build:contributor for a smaller validation build. Your bundler choice is unchanged; --max-old-space-size cannot limit Turbopack native memory.`;
+}
+
 function runNextBuild() {
   return new Promise((resolve) => {
     const nextBin = path.join(projectRoot, "node_modules", "next", "dist", "bin", "next");
     const buildEnv = resolveNextBuildEnv(process.env);
+    const memoryWarning = getLowMemoryBuildWarning(process.env);
+    if (memoryWarning) console.warn(memoryWarning);
     ensureWindowsBuildProfileDirs(buildEnv);
     const nextArgs = process.versions.bun
       ? [
