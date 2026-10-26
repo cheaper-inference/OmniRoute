@@ -576,14 +576,15 @@ test("combo test route still probes every target beyond 180s accumulated elapsed
   Date.now = () => clock;
 
   globalThis.fetch = async (_url, init: RequestInit = {}) => {
-    probed.push(JSON.parse(String(init.body)).model);
-    // Simulate three long-lived but individually completed probes. The original
-    // cumulative deadline skipped second/third targets without dispatching them.
+    const model = JSON.parse(String(init.body)).model as string;
+    probed.push(model);
+    // Simulate completed probes with long elapsed times. The old cumulative
+    // deadline skipped later targets even when they would have passed.
     clock += 180_000;
-    return new Response(JSON.stringify({ error: { message: "boom" } }), {
-      status: 502,
-      headers: { "content-type": "application/json" },
-    });
+    if (model === "provider/third") {
+      return Response.json({ choices: [{ message: { role: "assistant", content: "healthy" } }] });
+    }
+    return Response.json({ error: { message: "boom" } }, { status: 502 });
   };
 
   try {
@@ -598,10 +599,12 @@ test("combo test route still probes every target beyond 180s accumulated elapsed
       [
         { status: "error", statusCode: 502 },
         { status: "error", statusCode: 502 },
-        { status: "error", statusCode: 502 },
+        { status: "ok", statusCode: undefined },
       ]
     );
-    assert.ok(body.results.every((result) => result.error === "boom"));
+    assert.deepEqual(body.results.slice(0, 2).map((result) => result.error), ["boom", "boom"]);
+    assert.equal(body.resolvedBy, "provider/third");
+    assert.equal(body.results[2].responseText, "healthy");
   } finally {
     Date.now = realNow;
   }
