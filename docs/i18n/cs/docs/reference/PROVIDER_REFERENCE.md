@@ -4,11 +4,11 @@
 
 ---
 
-> **Automaticky vygenerováno** z `src/shared/constants/providers.ts` — neupravujte ručně.
-> Regenerujte pomocí: `npm run gen:provider-reference`
-> **Naposledy vygenerováno:** 2026-10-18
+> **Automaticky vygenerováno** ze souboru `src/shared/constants/providers.ts` — neupravujte ručně.
+> Znovu vygenerujte pomocí: `npm run gen:provider-reference`
+> **Naposledy vygenerováno:** 2026-10-20
 
-Celkem poskytovatelů: **375**. Rozpis podle kategorií naleznete níže.
+Celkový počet poskytovatelů: **375**. Níže naleznete rozdělení podle kategorií.
 
 ## Kategorie
 
@@ -460,9 +460,9 @@ Jednotlivé poskytovatele můžete povolit, nakonfigurovat a otestovat na řídi
 ## Zdroje pravdy
 
 - Katalog: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Registr (podrobnosti o jednotlivých modelech): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Executors: [`open-sse/executors/`](../../open-sse/executors/) (154 implementací)
-- Translators: [`open-sse/translator/`](../../open-sse/translator/)
+- Registr (podrobnosti pro jednotlivé modely): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Exekutory: [`open-sse/executors/`](../../open-sse/executors/) (156 implementací)
+- Překladače: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Viz také
 

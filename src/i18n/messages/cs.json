@@ -998,7 +998,13 @@
     "batchFileUsedByCount": "Použito {count, plural, one {# dávka} other {# dávky}}",
     "batchFilePreview": "Náhled",
     "batchFilePreviewTruncated": "Zobrazuji prvních {shown} řádků ({total} celkem řádků)",
-    "batchFileDownloadFull": "Stáhnout celý soubor"
+    "batchFileDownloadFull": "Stáhnout celý soubor",
+    "dialogTitleFallback": "Dialog",
+    "pagination": "Stránkování",
+    "clearFilters": "Vymazat filtry",
+    "tokensPageTitle": "Tokeny",
+    "tokensPageDescription": "Posílejte tokeny mezi API klíči, sdílejte pozvánkové kódy a připojujte komunitní servery.",
+    "tokensServerUrlLabel": "URL serveru"
   },
   "disabled": "Zakázáno",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Směrovat požadavky s vyčerpaným rozpočtem na nouzového bezplatného záložního poskytovatele/model.",
@@ -1485,7 +1491,11 @@
       "chatIdPlaceholder": "-100123456789 nebo @channelname",
       "chatIdHint": "Jedinečný číselný identifikátor nebo veřejné uživatelské jméno chatu/kanálu.",
       "tutorial": "Jak nakonfigurovat webhook pro Telegram:"
-    }
+    },
+    "copy": "Kopírovat",
+    "copied": "Zkopírováno!",
+    "expandDetails": "Zobrazit podrobnosti",
+    "collapseDetails": "Skrýt podrobnosti"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1597,7 +1607,8 @@
     "mcpMetricCalls24h": "Hovory (24h)",
     "mcpMetricSuccessRate": "Úspěšnost",
     "mcpMetricAvgDuration": "Průměrná doba",
-    "mcpMetricTopTool": "Nejlepší nástroj"
+    "mcpMetricTopTool": "Nejlepší nástroj",
+    "dismissError": "Skrýt chybu"
   },
   "themesPage": {
     "title": "Motivy",
@@ -1713,7 +1724,9 @@
     "settingsAdvancedDescription": "Pokročilá pravidla datové části, limity požadavků a nastavení proxy API",
     "mitmProxyDescription": "Konfigurace nastavení MITM proxy pro kontrolu provozu a ladění",
     "oneProxyDescription": "Konfigurace nastavení 1Proxy pro pokročilé řetězení proxy serverů",
-    "omniSkillsDescription": "Instalujte a spravujte dovednosti sandboxu pro automatizované spouštění promptů a nástrojů"
+    "omniSkillsDescription": "Instalujte a spravujte dovednosti sandboxu pro automatizované spouštění promptů a nástrojů",
+    "openMenu": "Otevřít nabídku",
+    "products": "Produkty Keak"
   },
   "cloudSyncStatus": {
     "synced": "Synchronizováno",
@@ -2495,7 +2508,12 @@
     "onlySelectedConnections": "Pouze vybraná připojení",
     "selectAtLeastOneConnection": "Vyberte alespoň jedno připojení nebo zvolte Všechna připojení.",
     "allConnectionsDesc": "Tento klíč může používat libovolné aktivní připojení.",
-    "restrictedToConnections": "Omezeno na {count, plural, one {# připojení} few {# připojení} other {# připojení}}."
+    "restrictedToConnections": "Omezeno na {count, plural, one {# připojení} few {# připojení} other {# připojení}}.",
+    "preferredConnections": "Preferovaná připojení",
+    "preferredConnectionsDesc": "Pořadí priority pro každý klíč. Pokud preferované připojení není dostupné, směrování přejde na další způsobilé.",
+    "preferredConnectionsNone": "Není nastavena žádná preference — použije se výchozí strategie směrování.",
+    "preferredConnectionsClear": "Vymazat",
+    "removeSelection": "Odebrat {name}"
   },
   "auditLog": {
     "title": "Audit Protokolů",
@@ -2607,7 +2625,9 @@
     "imageToTextBridgeCta": "Nakonfigurujte most Image→Text v nastavení Modality Bridge",
     "sttBridgeCta": "Nastavte most Řeč→Text v nastavení Modality Bridge",
     "existingConnection": "Existující připojení",
-    "openrouterSttDescription": "Modely převodu řeči na text OpenRouter používají vaše nakonfigurované připojení OpenRouter. Není vyžadováno žádné samostatné pověření."
+    "openrouterSttDescription": "Modely převodu řeči na text OpenRouter používají vaše nakonfigurované připojení OpenRouter. Není vyžadováno žádné samostatné pověření.",
+    "modalityTabsAria": "Typ média",
+    "serviceKindsAria": "Typ služby"
   },
   "search": {
     "searchQuery": "Vyhledávací dotaz",
@@ -3278,7 +3298,8 @@
     "cliproxyapiUnknown": "Neznámý",
     "cliproxyapiUpdate": "Aktualizovat",
     "cliproxyapiUpdateAvailable": "K dispozici je aktualizace: v{current} → v{latest}",
-    "cliproxyapiVersion": "Verze"
+    "cliproxyapiVersion": "Verze",
+    "removeMapping": "Odebrat mapování"
   },
   "modelCatalog": {
     "title": "Modely a komba",
@@ -3936,6 +3957,7 @@
     "builderComboRefStep": "Přidat referenci kombinace",
     "builderPinnedAccount": "Připnutý účet",
     "builderLegacyEntry": "Starší položka",
+    "builderStaleModel": "Není v aktuálním katalogu",
     "reviewName": "Název",
     "reviewStrategy": "Strategie",
     "reviewSteps": "Kroky",
@@ -4014,7 +4036,13 @@
     "duplicateAutoComboSnapshotMsg": "Tím se zachytí aktuálně připojení poskytovatelé/modely, které odpovídají této šabloně, do upravitelné kombinace.",
     "duplicateAutoComboFailedPrefix": "Duplikace automatické kombinace selhala:",
     "duplicateAutoComboUnknownError": "Neznámá chyba",
-    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}"
+    "duplicateAutoComboTitle": "Vytvořte statickou kombinaci z {name}",
+    "weightPercent": "Váha (%)",
+    "clearSearch": "Vymazat hledání",
+    "responseValidationRemoveCheck": "Odebrat kontrolu",
+    "responseValidationPath": "Cesta JSON",
+    "responseValidationCondition": "Podmínka",
+    "responseValidationValue": "Očekávaná hodnota"
   },
   "costs": {
     "title": "Náklady",
@@ -5288,7 +5316,8 @@
         "skipped": "již nakonfigurováno",
         "failed": "neúspěšné"
       }
-    }
+    },
+    "stepProgress": "Průběh nastavení"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Tento poskytovatel je ve výchozím nastavení z auto vyloučen",
@@ -7255,7 +7284,7 @@
       "nextSwitchNow": "Nyní",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -8951,7 +8980,8 @@
       "statsTitle": "Detekce od restartu",
       "statsEmpty": "Zatím žádné detekce.",
       "statsRequest": "Požadavky"
-    }
+    },
+    "modelOverrideKey": "Klíč přepsání"
   },
   "contextRtk": {
     "title": "Modul RTK",
@@ -9035,7 +9065,8 @@
     "tomlTestPassed": "Prošlo",
     "tomlTestFailed": "Selhalo",
     "tomlImportError": "Nepodařilo se zpracovat soubor RTK TOML.",
-    "tomlFileReadError": "Nepodařilo se přečíst vybraný soubor TOML."
+    "tomlFileReadError": "Nepodařilo se přečíst vybraný soubor TOML.",
+    "viewMode": "Režim zobrazení"
   },
   "compressionEngineConfig": {
     "loading": "Načítání…",
@@ -9257,7 +9288,8 @@
     "languagePacksList": "Jazykové balíčky: {packs}",
     "dragToReorder": "Přetažením změňte pořadí kroku",
     "engine": "Modul",
-    "intensity": "Intenzita"
+    "intensity": "Intenzita",
+    "compressionOverride": "Přepsání komprese"
   },
   "compressionStudio": {
     "noRun": "Není k dispozici žádný běh komprese.",
@@ -9317,7 +9349,8 @@
     "encoderWinner": "vítěz: {winner}",
     "encoder": "enkodér",
     "bytes": "bajty",
-    "tokensCl100k": "tokeny (cl100k)"
+    "tokensCl100k": "tokeny (cl100k)",
+    "studioViews": "Zobrazení Studia"
   },
   "omniglyph": {
     "preview": "Náhled",
@@ -9523,7 +9556,9 @@
     "tooltipMinLength": "Zprávy kratší než toto nejsou komprimovány. Nižší = větší komprese.",
     "tooltipMinSavings": "Komprimujte pouze v případě, že uložíte alespoň tolik tokenů.",
     "ultraSettings": "Ultra nastavení",
-    "ultraSettingsDesc": "Sémantická komprese poháněná SLM"
+    "ultraSettingsDesc": "Sémantická komprese poháněná SLM",
+    "defaultLanguage": "Výchozí jazyk",
+    "viewMode": "Režim zobrazení"
   },
   "translator": {
     "title": "Překladatel",
@@ -10291,7 +10326,11 @@
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "codexPaidCreditsUnlimited": "Unlimited",
+    "claudeResetCreditDefaultTitle": "Reset limitu Claude",
+    "confirmRedeemClaudeResetCredit": "Uplatnění okamžitě resetuje příslušné limity využití Claude a trvale spotřebuje tento kredit.",
+    "claudeResetCreditsModalTitle": "Kredity na reset Claude",
+    "claudeResetCreditsModalExplainer": "Dostupné kredity na reset Claude a týdenní resety relací pro tento účet."
   },
   "modals": {
     "waitingAuth": "Očekávám Autorizaci",
@@ -11078,7 +11117,8 @@
       "message": "Zpráva",
       "error": "Chyba",
       "completion": "Dokončení"
-    }
+    },
+    "statusFilter": "Stav"
   },
   "templateNames": {
     "simple-chat": "Jednoduchý chat",
@@ -11259,7 +11299,8 @@
     "minutesAgo": "před {minutes} m",
     "hoursAgo": "před {hours} h",
     "daysAgo": "před {days} d",
-    "entries": "Položky"
+    "entries": "Položky",
+    "viewSwitcherAria": "Zobrazení mezipaměti"
   },
   "proxyConfigModal": {
     "levelGlobal": "Globální",
@@ -11526,7 +11567,7 @@
     "bulkImportNoValidEntries": "Nebyly nalezeny žádné platné záznamy. Zkontrolujte formát a zkuste to znovu.",
     "bulkImportSuccess": "Import dokončen: {created} vytvořeno, {updated} aktualizováno, {failed} se nezdařilo",
     "bulkImportErrorLine": "Řádek {line}: {reason}",
-    "bulkImportMaxExceeded": "Maximálně 100 proxy na import",
+    "bulkImportMaxExceeded": "Maximálně {max} proxy na import",
     "bulkImportPreview": "Náhled",
     "clearAssignment": "(jasné zadání)",
     "bulkProxyAssignment": "Hromadné přiřazení proxy",
@@ -11587,6 +11628,7 @@
     "poolSetAsideKindIpQuota429": "omezení rychlosti podle IP (429)",
     "poolSetAsideKindSlow": "pomalé odpovědi",
     "poolSetAsideKindGeoBlocked": "blokovaný region (403/451)",
+    "poolSetAsideKindOperatorReported": "výpadek nahlášený operátorem",
     "poolSetAsideUntil": "Zpět v rotaci {endsAt}",
     "poolSetAsideRepeat": "Odloženo {count, plural, one {#krát} other {#krát}}",
     "poolUnknownAddress": "Neznámá adresa",
@@ -11603,7 +11645,8 @@
     "notMeasured": "Neměřeno",
     "upstream4xx": "{count} chyby klienta ve výstupním směru",
     "upstream5xx": "{count} chyby serveru ve výstupním směru",
-    "uniformEgressLine": "{affected} z {exits} výstupů selhávají společně na {provider} (posledních {hours}h) — nejedná se o problém výstupu"
+    "uniformEgressLine": "{affected} z {exits} výstupů selhávají společně na {provider} (posledních {hours}h) — nejedná se o problém výstupu",
+    "moreActions": "Další akce"
   },
   "playground": {
     "title": "Title",
@@ -11809,7 +11852,8 @@
       "nextButton": "Další",
       "runButton": "Spustit",
       "promptPlaceholder": "Napište zprávu… (Enter pro odeslání, Shift+Enter pro nový řádek)"
-    }
+    },
+    "playgroundTabs": "Režimy Playgroundu"
   },
   "miniPlayground": {
     "endpoint": "Koncový bod",
@@ -11880,7 +11924,8 @@
     "assistant": "Asistent",
     "errorLabel": "Chyba",
     "requestFailed": "Požadavek selhal",
-    "stop": "Zastavit"
+    "stop": "Zastavit",
+    "messageInputAria": "Zpráva"
   },
   "requestLogger": {
     "recording": "Zaznamenávání",
@@ -12067,8 +12112,18 @@
       "resilienceRotations": "{count} rotací účtů",
       "resilienceRetried": "Prázdný tah zopakován",
       "resilienceContinued": "Obnoveno uprostřed streamu",
-      "resilienceRecovered": "Obnoveno akcí odolnosti"
-    }
+      "resilienceRecovered": "Obnoveno akcí odolnosti",
+      "conversationContext": "Kontext konverzace",
+      "goToBottom": "Přejít dolů",
+      "liveRefreshOn": "Živá aktualizace: zapnuta",
+      "liveRefreshOff": "Živá aktualizace: vypnuta",
+      "liveRefresh": "Živá aktualizace",
+      "continuesFromParent": "pokračuje z nadřazené položky",
+      "continuesFrom": "Pokračuje z {id}",
+      "viewConversation": "zobrazit konverzaci",
+      "openConversation": "Otevřít konverzaci {id}"
+    },
+    "tableLabel": "Protokoly požadavků"
   },
   "proxyLogger": {
     "filterAll": "Vše",
@@ -12113,7 +12168,9 @@
     "colServedBy": "Poskytováno",
     "filterTraffic": "Provoz",
     "filterTests": "Testy",
-    "filterSource": "Zdroj"
+    "filterSource": "Zdroj",
+    "tableLabel": "Protokoly proxy serveru",
+    "sortLogs": "Seřadit protokoly"
   },
   "endpointOptions": {
     "speech": "Řeč",
@@ -12198,7 +12255,8 @@
     "statusExhausted": "VYČERPÁNO",
     "statusAlerting": "VÝSTRAHA",
     "statusError": "CHYBA",
-    "moreSuffix": "+{count} dalších"
+    "moreSuffix": "+{count} dalších",
+    "feedFilterLabel": "Filtrovat události"
   },
   "quotaShare": {
     "weightPercent": "Váha %",
@@ -12365,7 +12423,10 @@
     "ungroupedTitle": "Bez skupiny",
     "ungroupedHint": "Tyto pooly nejsou přiřazeny k žádné známé skupině. Upravte pool a přesuňte jej do skutečné skupiny.",
     "removeFailed": "Tento fond se nepodařilo odebrat.",
-    "dismiss": "Zavřít"
+    "dismiss": "Zavřít",
+    "allocationsHeading": "Přidělení",
+    "wizardRemoveDimension": "Odebrat dimenzi",
+    "wizardRemoveKey": "Odebrat klíč"
   },
   "plugins": {
     "title": "Pluginy",
@@ -12523,7 +12584,8 @@
       "settingsUpdateFailed": "Aktualizace nastavení selhala",
       "serviceRevealApiKey": "{actor} odkryl API klíč pro {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Zavřít chybu"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12656,7 +12718,21 @@
       "goNow": "Přejít nyní",
       "message": "MITM Proxy se nyní nachází v sekci AgentBridge.",
       "title": "Tato stránka byla přesunuta"
-    }
+    },
+    "dnsOn": "DNS zapnuto",
+    "dnsOff": "DNS vypnuto",
+    "showServerSettings": "Zobrazit nastavení serveru",
+    "hideServerSettings": "Skrýt nastavení serveru",
+    "upstreamCaTesting": "Testování…",
+    "removeMapping": "Odebrat mapování",
+    "mappingSourcePlaceholder": "např. gemini-3.6-flash-medium nebo * pro všechny nenamapované modely",
+    "mappingWildcardHint": "Použijte * jako zdroj, chcete-li přes OmniRoute směrovat každý model bez explicitního mapování na vybraný cíl. Přesná shoda zdroje má vždy přednost před *.",
+    "wizardDetectingModels": "Zjišťování modelů ze zachyceného provozu...",
+    "wizardDetectedModels": "V zachyceném provozu nalezeno: {count, plural, one {# model} other {# modelů}}. Vyberte modely, které chcete přidat:",
+    "wizardSelectedModels": "Vybráno: {count, plural, one {# model} other {# modelů}}. Na další obrazovce je namapujete na modely OmniRoute.",
+    "wizardAddModels": "Přidat {count, plural, one {# model} other {# modelů}}",
+    "wizardNoModelsDetected": "Zatím nebyly zjištěny žádné modely. Pomocí {agent} odešlete požadavek a poté tohoto průvodce spusťte znovu, aby automaticky zjistil modely z provozu.",
+    "wizardNoModelsHint": "Případně tohoto průvodce zavřete a přidejte mapování ručně na kartě agenta."
   },
   "providerStats": {
     "unknownError": "Neznámá chyba",
@@ -12686,7 +12762,11 @@
     "avgTtft": "Průměrné TTFT",
     "avgTotal": "Průměr celkem",
     "requestTelemetry": "Telemetrie požadavků",
-    "requestTelemetryDescription": "Rozdělení 7fázové pipeline (posledních 5 minut)"
+    "requestTelemetryDescription": "Rozdělení 7fázové pipeline (posledních 5 minut)",
+    "title": "Statistiky poskytovatelů",
+    "description": "Provoz, latence a míry úspěšnosti podle poskytovatelů a modelů",
+    "combo": "Kombinace",
+    "toggleModels": "Zobrazit modely poskytovatele {provider}"
   },
   "relay": {
     "title": "Serverless relay proxy",
@@ -12847,7 +12927,18 @@
     "noRequestBody": "Žádné tělo požadavku.",
     "noResponseBody": "Žádné tělo odpovědi.",
     "formatted": "Formátováno",
-    "raw": "Nezpracované"
+    "raw": "Nezpracované",
+    "requestCount": "{count, plural, one {# požadavek} other {# požadavků}}",
+    "expandList": "Rozbalit seznam",
+    "collapseList": "Sbalit seznam",
+    "snippetLanguage": "Jazyk úryvku",
+    "headersTable": "Hlavičky",
+    "showSecrets": "Zobrazit tajné údaje",
+    "maskSecrets": "Skrýt tajné údaje",
+    "llmNotAvailable": "Metadata LLM nejsou pro tento požadavek k dispozici.",
+    "llmStreamYes": "ano (SSE)",
+    "llmStreamNo": "ne",
+    "llmTotalTokens": "Celkem: {count} tokenů"
   },
   "cliCommon": {
     "companion": {
@@ -13306,7 +13397,8 @@
     "colReliabilityHelp": "Podíl volání, na která tento poskytovatel skutečně odpověděl za posledních 24 hodin. Pomlčka znamená, že obsloužil příliš málo provozu na to, aby bylo možné určit míru úspěšnosti.",
     "reliabilitySample": "Za posledních {hours} h uspělo {successes} z {requests} volání",
     "reliabilityTooFew": "Za posledních {hours} h proběhlo pouze {requests} volání — příliš málo na určení míry úspěšnosti",
-    "reliabilityNoTraffic": "Za posledních 24 h nebyla zaznamenána žádná volání"
+    "reliabilityNoTraffic": "Za posledních 24 h nebyla zaznamenána žádná volání",
+    "categoryFilter": "Kategorie úlohy"
   },
   "discovery": {
     "title": "Zjišťování poskytovatelů",
@@ -13331,7 +13423,11 @@
     "method": "Metoda",
     "auth": "Ověření",
     "feasibility": "Proveditelnost",
-    "models": "Modely"
+    "models": "Modely",
+    "provider": "Poskytovatel",
+    "status": "Stav",
+    "endpoint": "Koncový bod",
+    "actions": "Akce"
   },
   "noAuthProvider": {
     "title": "Není vyžadováno žádné ověření",
@@ -13380,7 +13476,8 @@
     "ownProxy": "Vlastní proxy",
     "freeTierPause": "Model {model} pozastaven (429), zpět v {time}",
     "freeTierPauseProvider": "Pozastaveno (429), zpět v {time}",
-    "freeTierPauseNote": "Pozastavení v rámci procesu na této instanci"
+    "freeTierPauseNote": "Pozastavení v rámci procesu na této instanci",
+    "proxyType": "Typ proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13553,7 +13650,10 @@
         "description": "Čeká na vás skrytý úspěch...",
         "criteria": "Dokončete skrytý úspěch pro odhalení tohoto odznaku."
       }
-    }
+    },
+    "leaderboardTitle": "Žebříček",
+    "leaderboardDescription": "Pořadí a úspěchy napříč vašimi klíči API",
+    "badgeLocked": "Uzamčeno"
   },
   "featureFlags": {
     "title": "Feature flagy",
@@ -13848,7 +13948,8 @@
     "unknown": "neznámý",
     "unknownProvider": "neznámý poskytovatel",
     "unknownModel": "neznámý model",
-    "resolvedTargetMetrics": "{requests} pož. · {success} úspěchů · {latency} · kvóta {quota}"
+    "resolvedTargetMetrics": "{requests} pož. · {success} úspěchů · {latency} · kvóta {quota}",
+    "timeRange": "Časové období"
   },
   "usageLimits": {
     "usdUsageQuota": "Kvóta využití v USD",
@@ -13995,7 +14096,11 @@
     "learnMore": "Další informace",
     "changelogLoadFailed": "Seznam změn se nepodařilo načíst. Zkuste to prosím znovu později.",
     "retry": "Opakovat",
-    "viewFullHistory": "Zobrazit celou historii na GitHubu"
+    "viewFullHistory": "Zobrazit celou historii na GitHubu",
+    "title": "Novinky a přehled změn",
+    "description": "Oznámení týmu OmniRoute a nejnovější poznámky k vydání",
+    "viewLabel": "Zobrazit",
+    "loadingNews": "Načítání oznámení..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14546,7 +14651,9 @@
       "circuitBreakerState": "Stav Obvodu Poskytovatele",
       "lastUpdate": "Poslední aktualizace: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours} h {minutes} min"
+      "uptimeHoursMinutes": "{hours} h {minutes} min",
+      "breakerClosed": "Uzavřeno",
+      "breakerNotClosed": "Otevřeno nebo polootevřeno"
     },
     "statusPages": {
       "400": {
@@ -14621,6 +14728,9 @@
         "primaryAction": "Podrobnosti o údržbě",
         "secondaryAction": "Stav Systému"
       }
+    },
+    "miniapp": {
+      "askAnything": "Zeptejte se na cokoli…"
     }
   },
   "kiroAuthModal": {
@@ -14811,7 +14921,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "Viditelných: {visible} / celkem: {total}",
+    "modeLabel": "Režim zobrazení",
+    "jumpToNow": "Přejít na aktuální čas, čára NYNÍ se vrátí na pozici {position} %",
+    "laneReuse": "Opětovné použití řádku",
+    "laneReuseLabel": "Časové okno pro opětovné použití řádku (minuty)",
+    "laneReuseHint": "Požadavky se stejným ID konverzace zůstávají ve stejném řádku časové osy, pokud je časový odstup mezi nimi kratší než tento počet minut.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automatické obnovení",
+    "autoRefreshLabel": "Interval automatického obnovení (sekundy)",
+    "autoRefreshHint": "Jak často časová osa znovu načítá seznam požadavků ze serveru.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Oddálit",
+    "zoomIn": "Přiblížit"
   },
   "metadata": {
     "compressionTitle": "Komprese",
