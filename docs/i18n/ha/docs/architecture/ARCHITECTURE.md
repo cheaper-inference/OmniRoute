@@ -8,79 +8,79 @@
 
 _An sabunta na ƙarshe: 2026-06-28_
 
-## Taƙaitaccen Bayani ga Masu Zartarwa
+## Taƙaitaccen Bayani
 
-OmniRoute wata ƙofar sarrafa zirga-zirgar AI ta cikin gida ce tare da dashboard, wadda aka gina bisa Next.js.
-Tana samar da endpoint guda ɗaya mai dacewa da OpenAI (`/v1/*`) sannan tana rarraba zirga-zirga tsakanin upstream providers da yawa tare da fassara, fallback, sabunta token, da bibiyar amfani.
+OmniRoute ƙofar karkatar da zirga-zirgar AI ce ta cikin gida tare da dashboard, wadda aka gina a kan Next.js.
+Tana samar da maƙura guda ɗaya mai jituwa da OpenAI (`/v1/*`) kuma tana karkatar da zirga-zirga zuwa masu samarwa na waje da yawa tare da fassara, madadin gazawa, sabunta token, da bin diddigin amfani.
 
-Manyan ƙwarewa:
+Muhimman ƙwarewa:
 
-- API mai dacewa da OpenAI don CLI/kayan aiki (providers 375, executor modules 156)
-- Fassarar request/response tsakanin tsare-tsaren providers
-- Fallback na haɗin models (jerin models da yawa)
-- Matakan combo masu tsari (`provider + model + connection`) tare da jeren lokacin aiki bisa `compositeTiers`
-- Fallback na matakin account (accounts da yawa ga kowane provider)
-- Binciken quota kafin aiwatarwa da zaɓin account na P2C mai la'akari da quota a babban hanyar chat
-- Gudanar da haɗin provider ta OAuth + API-key (OAuth provider modules 27)
-- Samar da embeddings ta `/v1/embeddings` (providers 18)
-- Samar da hotuna ta `/v1/images/generations` (providers 10+, models 20+)
-- Sauya sauti zuwa rubutu ta `/v1/audio/transcriptions` (providers 18)
-- Sauya rubutu zuwa magana ta `/v1/audio/speech` (built-in providers 24)
+- API mai jituwa da OpenAI don CLI/kayan aiki (masu samarwa 375, executor modules 156)
+- Fassarar buƙata/amsa tsakanin tsarin masu samarwa
+- Madadin haɗin model (jerin model da yawa)
+- Matakan haɗi masu tsari (`provider + model + connection`) tare da tsara jeri a lokacin aiki bisa `compositeTiers`
+- Madadin a matakin asusu (asusun da yawa ga kowane mai samarwa)
+- Binciken farko na quota da zaɓin asusun P2C mai la'akari da quota a babban hanyar chat
+- Gudanar da haɗin masu samarwa ta OAuth + API key (OAuth provider modules 27)
+- Samar da embedding ta `/v1/embeddings` (masu samarwa 18)
+- Samar da hoto ta `/v1/images/generations` (masu samarwa 10+, model 20+)
+- Rubuta sauti zuwa rubutu ta `/v1/audio/transcriptions` (masu samarwa 18)
+- Juya rubutu zuwa magana ta `/v1/audio/speech` (ginannun masu samarwa 24)
 - Samar da bidiyo ta `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Samar da kiɗa ta `/v1/music/generations` (ComfyUI)
-- Binciken yanar gizo ta `/v1/search` (providers 20)
+- Binciken yanar gizo ta `/v1/search` (masu samarwa 20)
 - Tantance abun ciki ta `/v1/moderations`
-- Sake jeri ta `/v1/rerank`
-- Tantance think tag (``) don reasoning models
-- Tsabtace response don cikakkiyar dacewa da OpenAI SDK
-- Daidaita roles (developer→system, system→user) don dacewa tsakanin providers
+- Sake tsara matsayi ta `/v1/rerank`
+- Tantance think tag (`<think>...</think>`) don model masu yin tunani
+- Tsabtace amsa don cikakkiyar jituwa da OpenAI SDK
+- Daidaita role (developer→system, system→user) don jituwa tsakanin masu samarwa
 - Sauya structured output (json_schema → Gemini responseSchema)
-- Adana bayanan cikin gida don providers, keys, aliases, combos, settings, pricing (DB modules 122)
-- Bibiyar amfani/farashi da yin rikodin requests
-- Cloud sync na zaɓi don daidaita na'urori da yawa/halin bayanai
-- IP allowlist/blocklist don sarrafa damar shiga API
+- Adana masu samarwa, keys, aliases, combos, saituna, da farashi a cikin gida (DB modules 122)
+- Bin diddigin amfani/kuɗi da rajistar buƙata
+- Cloud sync na zaɓi don daidaita na'urori da yawa/yanayi
+- IP allowlist/blocklist don sarrafa damar API
 - Gudanar da thinking budget (passthrough/auto/custom/adaptive)
-- Shigar da global system prompt
-- Bibiyar sessions da fingerprinting
-- Ingantaccen rate limiting na kowane account tare da takamaiman profiles na provider
-- Tsarin circuit breaker don juriya ga gazawar provider
-- Kariyar anti-thundering herd ta amfani da mutex locking
-- Cache na cire maimaitattun requests bisa signature
-- Domain layer: dokokin farashi, fallback policy, lockout policy
-- Context Relay: taƙaitaccen miƙa session don ci gaba yayin juyawar account
+- Saka global system prompt
+- Bin diddigin session da fingerprinting
+- Ingantaccen rate limiting ga kowane asusu tare da bayanan martaba na musamman ga mai samarwa
+- Tsarin circuit breaker don juriya ga matsalolin masu samarwa
+- Kariya daga anti-thundering herd ta amfani da mutex locking
+- Cache na cire maimaitattun buƙatu bisa signature
+- Domain layer: ƙa’idojin kuɗi, manufofin fallback, manufofin lockout
+- Context Relay: taƙaitaccen bayanin miƙa session don ci gaba yayin juya asusu
 - Adana domain state (SQLite write-through cache don fallbacks, budgets, lockouts, circuit breakers)
-- Policy engine don tantance requests a wuri guda (lockout → budget → fallback)
-- Request telemetry tare da tara latency na p50/p95/p99
-- Combo target telemetry da tarihin lafiyar combo target ta `combo_execution_key` / `combo_step_id`
-- Correlation ID (X-Request-Id) don bin sawu daga farko zuwa ƙarshe
-- Rikodin compliance audit tare da damar opt-out ga kowane API key
-- Eval framework don tabbatar da ingancin LLM
-- Health dashboard tare da matsayin circuit breaker na provider a ainihin lokaci
+- Policy engine don kimanta buƙatu a wuri guda (lockout → budget → fallback)
+- Telemetry na buƙata tare da tara latency na p50/p95/p99
+- Telemetry na combo target da tarihin lafiyar combo target ta `combo_execution_key` / `combo_step_id`
+- Correlation ID (X-Request-Id) don bin diddigi daga farko zuwa ƙarshe
+- Rajistar binciken compliance tare da damar ficewa ga kowane API key
+- Tsarin eval don tabbatar da ingancin LLM
+- Dashboard na lafiya tare da matsayin circuit breaker na masu samarwa a ainihin lokaci
 - MCP Server (kayan aiki 110) tare da hanyoyin sufuri 3 (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) tare da skills da tsarin rayuwar task
+- A2A Server (JSON-RPC 2.0 + SSE) tare da skills da zagayowar rayuwar task
 - Tsarin memory (extraction, injection, retrieval, summarization)
-- Tsarin skills (registry, executor, sandbox, built-in skills)
-- MITM proxy tare da gudanar da certificates da sarrafa DNS
+- Tsarin skills (registry, executor, sandbox, ginannun skills)
+- MITM proxy tare da gudanar da certificate da sarrafa DNS
 - Prompt injection guard middleware
 - Tsarin prompt compression tare da Caveman, RTK, stacked pipelines, compression combos, language packs, da analytics
-- Rajistar ACP (Agent Communication Protocol)
-- Modular OAuth providers (modules guda 22 a ƙarƙashin `src/lib/oauth/providers/`)
+- ACP (Agent Communication Protocol) registry
+- Masu samar da OAuth na modular (modules guda 22 a ƙarƙashin `src/lib/oauth/providers/`)
 - Scripts na uninstall/full-uninstall
-- Aikin gyaran OAuth environment
-- WebSocket bridge don OpenAI-compatible WS clients (`/v1/ws`)
+- Aikin gyaran muhallin OAuth
+- WebSocket bridge don abokan cinikin WS masu jituwa da OpenAI (`/v1/ws`)
 - Gudanar da sync token (issue/revoke, sauke config bundle mai sigar ETag)
 - GLM Thinking (`glmt`) a matsayin cikakken provider preset
-- Hybrid token counting (ƙirga daga provider ta `/messages/count_tokens` tare da estimation fallback)
-- Shuka model aliases ta atomatik (daidaita cross-proxy dialect fiye da 30 yayin farawa)
-- Safe outbound fetch tare da SSRF guard, hana private URLs, da retry mai iya saitawa
-- Chat retries masu la'akari da cooldown tare da `requestRetry` da `maxRetryIntervalSec` masu iya saitawa
+- Ƙirga token ta haɗaɗɗiyar hanya (ta ɓangaren mai samarwa `/messages/count_tokens` tare da komawa ga estimation)
+- Shuka model alias ta atomatik (daidaita dialect na cross-proxy sama da 30 yayin farawa)
+- Safe outbound fetch tare da SSRF guard, toshe private URL, da retry mai daidaitawa
+- Sake gwada chat mai la'akari da cooldown tare da `requestRetry` da `maxRetryIntervalSec` masu daidaitawa
 - Tabbatar da runtime environment ta amfani da Zod yayin farawa
-- Compliance audit v2 tare da pagination, provider CRUD events, da rikodin validation da SSRF ta hana
+- Compliance audit v2 tare da pagination, provider CRUD events, da rajistar tabbatarwa lokacin da SSRF ya toshe
 
-Babban tsarin runtime:
+Babban tsarin aiki:
 
-- Next.js app routes da ke ƙarƙashin `src/app/api/*` suna aiwatar da dashboard APIs da compatibility APIs
-- Babban tushen SSE/routing da ake rabawa a `src/sse/*` + `open-sse/*` yana kula da aiwatar da provider, fassara, streaming, fallback, da amfani
+- Next.js app routes a ƙarƙashin `src/app/api/*` suna aiwatar da dashboard APIs da compatibility APIs
+- Cibiyar SSE/routing da ake rabawa a `src/sse/*` + `open-sse/*` tana sarrafa aiwatarwar mai samarwa, fassara, streaming, fallback, da amfani
 
 ## Zanen Bayani
 
@@ -114,43 +114,51 @@ sauran suna da hanyoyin haɗi daga jagororinsu na takamaiman fanni.
 - SLA/filin sarrafa mai samarwa da ke wajen tsarin cikin gida
 - Su kansu binaries na CLI na waje (Claude CLI, Codex CLI, da sauransu)
 
-## Shafukan Dashboard (Na Yanzu)
+## Fuskar Dashboard (A Yanzu)
 
-Manyan shafuka da ke ƙarƙashin `src/app/(dashboard)/dashboard/`:
+Manyan shafukan da ke ƙarƙashin `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — farawa cikin sauri + taƙaitaccen bayani kan masu samarwa
-- `/dashboard/endpoint` — wakilin endpoint + MCP + A2A + shafukan API endpoint
-- `/dashboard/providers` — haɗin masu samarwa da bayanan shiga
-- `/dashboard/combos` — dabarun haɗaka, samfura, maginin mataki-mataki, ƙa'idojin tura model, tsarin jeri na hannu da ake adanawa
-- `/dashboard/auto-combo` — Injin Haɗaka ta Atomatik: ma'aunin ƙididdigewa, kunshin yanayi, saitattun masana'anta na kama-da-wane, telemetry
-- `/dashboard/costs` — tattara kuɗaɗe da bayyana farashi
-- `/dashboard/analytics` — nazarin amfani, tantancewa, lafiyar maƙasudin haɗaka
-- `/dashboard/limits` — sarrafa ƙayyadadden amfani/yawan buƙatu
-- `/dashboard/cli-tools` — shigar da CLI, gano yanayin gudanarwa, samar da saituna
-- `/dashboard/agents` — wakilan ACP da aka gano + rajistar wakili na al'ada
-- `/dashboard/cloud-agents` — ayyukan wakilai masu masaukin gajimare (Codex Cloud, Devin, Jules) da zagayowar rayuwar aiki
-- `/dashboard/skills` — rajistar ƙwarewar A2A, aiwatarwa a sandbox, jerin ginannun ƙwarewa
+- `/dashboard` — farawa cikin sauri + bayani game da masu samarwa
+- `/dashboard/endpoint` — wakilin endpoint + MCP + A2A + shafukan endpoint na API
+- `/dashboard/providers` — haɗin masu samarwa da bayanan shaida
+- `/dashboard/combos` — dabarun combo, samfura, magini mai matakai, ƙa'idojin karkatar da samfura, da jeri mai ɗorewa da ake yi da hannu
+- `/dashboard/auto-combo` — Injin Auto Combo: ma'aunin maki, tarin yanayi, saitattun ƙimar masana'anta ta kama-da-wane, da telemetri
+- `/dashboard/costs` — tara kuɗaɗe da bayyana farashi
+- `/dashboard/analytics` — nazarin amfani, kimantawa, da lafiyar maƙasudin combo
+- `/dashboard/limits` — sarrafa ƙayyadaddun kaso/sauri
+- `/dashboard/cli-tools` — shiryarwar fara amfani da CLI, gano yanayin aiki, da samar da saituna
+- `/dashboard/agents` — wakilan ACP da aka gano + rajistar wakili na musamman
+- `/dashboard/cloud-agents` — ayyukan wakilai da aka masauƙa a gajimare (Codex Cloud, Devin, Jules) da zagayowar rayuwar aiki
+- `/dashboard/skills` — rajistar ƙwarewar A2A, aiwatarwa a sandbox, da kundin ƙwarewar da aka gina a ciki
 - `/dashboard/memory` — dubawa da dawo da ƙwaƙwalwar tattaunawa mai ɗorewa
-- `/dashboard/webhooks` — rajistar webhook masu fita, sauya sirri, ƙididdigar sake gwadawa
-- `/dashboard/batch` — ƙaddamar da aikin rukuni da ci gabansa
-- `/dashboard/cache` — ƙididdigar cache na karantawa kai tsaye da tunani, sarrafa fitarwa
-- `/dashboard/playground` — filin gwajin hira mai hulɗa da duk wani haɗaka/model da aka saita
-- `/dashboard/changelog` — mai duba tarihin canje-canje a cikin manhaja (yana nuna `CHANGELOG.md`)
-- `/dashboard/system` — binciken yanayin gudanarwa, bayanin siga, wajen tabbatar da muhalli
-- `/dashboard/onboarding` — jagoran saiti na farkon amfani don sabbin girkawa
+- `/dashboard/webhooks` — rajistar webhook masu fita, sabunta sirri, da ƙididdigar sake gwadawa
+- `/dashboard/batch` — miƙa ayyukan rukuni da bin diddigin ci gaba
+- `/dashboard/cache` — ƙididdigar cache na read-through da tunani, da sarrafa gogewa
+- `/dashboard/playground` — filin gwajin hira mai hulɗa da kowane combo/samfuri da aka saita
+- `/dashboard/changelog` — mai nuna rajistar sauye-sauye a cikin manhaja (yana nuna `CHANGELOG.md`)
+- `/dashboard/system` — binciken yanayin aiki, bayanan siga, da fuskar tabbatar da muhalli
+- `/dashboard/onboarding` — mayen saitin amfani na farko don sabbin girkawa
 - `/dashboard/media` — filin gwajin hoto/bidiyo/kiɗa
-- `/dashboard/search-tools` — gwajin mai samar da bincike da tarihin bincike
-- `/dashboard/health` — lokacin aiki, circuit breakers, iyakokin yawan buƙatu, zaman da ake sa ido kan ƙayyadadden amfani
-- `/dashboard/logs` — rajistan buƙata/wakili/binciken bin doka/console
-- `/dashboard/settings` — shafukan saitunan tsarin (gaba ɗaya, turawa, tsoffin saitunan haɗaka, da sauransu)
-- `/dashboard/context/caveman` — ƙa'idojin matsawar Caveman, kunshin harsuna, samfoti, da yanayin fitarwa
-- `/dashboard/context/rtk` — matatun sakamakon umarnin RTK, samfoti, da saitunan amincin yanayin gudanarwa
-- `/dashboard/context/combos` — bututun matsawa masu suna da aka sanya wa haɗakar turawa
-- `/dashboard/translator` — dubawar mai fassara da samfotin sauya tsarin buƙata
-- `/dashboard/audit` — mai binciken rajistan bin ƙa'idoji tare da rarraba shafuka da tsararrun metadata
-- `/dashboard/usage` — mai binciken amfani na kowace buƙata da ke da alaƙa da `usage_history`
-- `/dashboard/compression` — nazarin matsawa, ƙididdiga, da sanya bututun aiki
-- `/dashboard/api-manager` — zagayowar rayuwar API key da izinin model
+- `/dashboard/search-tools` — gwajin masu samar da bincike da tarihin bincike
+- `/dashboard/health` — lokacin aiki, masu katse da'ira, iyakokin sauri, da zaman da ake sa ido kan ƙayyadaddun kasonsu
+- `/dashboard/logs` — rajistan buƙata/wakili/binciken aiki/console
+- `/dashboard/settings` — shafukan saitunan tsarin (na gaba ɗaya, karkatarwa, saitattun ƙimar combo, da sauransu)
+- `/dashboard/context/caveman` — ƙa'idojin matsewa na Caveman, fakitin harsuna, samfoti, da yanayin fitarwa
+- `/dashboard/context/rtk` — matatan fitarwar umarnin RTK, samfoti, da saitunan amincin yanayin aiki
+- `/dashboard/context/combos` — jerin ayyukan matsewa masu suna waɗanda aka sanya wa combos na karkatarwa
+- `/dashboard/translator` — duba mai fassara da samfotin sauya tsarin buƙata
+- `/dashboard/audit` — burauzar rajistar binciken bin ƙa'ida mai rarraba shafuka da tsararrun metadata
+- `/dashboard/usage` — burauzar amfani ta kowace buƙata da ke da alaƙa da `usage_history`
+- `/dashboard/compression` — nazarin matsewa, ƙididdiga, da sanya jerin ayyuka
+- `/dashboard/api-manager` — zagayowar rayuwar maɓallin API da izinin samfura
+
+Matakin UI: kowane shafi yana bayyana a cikin shell guda — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset` na kit, da
+`Sidebar.tsx` da `Header.tsx` na OmniRoute). Shafuka suna shigo da tubalan gina su
+daga `@/shared/components` (adapters a kan Keak CI UI Kit da aka haɗa a
+`packages/ui-kit`) ko daga ƙananan hanyoyin components na kit (`@omniroute/ui-kit/table`, `…/page-header`), sannan
+icons ta hanyar `<Icon>` (`ICON_MAP` → Lucide). Theme (`system` ne na asali, mai haske/duhu) da tokens suna fitowa
+daga kit ta hanyar bridge da ke cikin `src/app/globals.css`. Cikakkun bayanai: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Mahallin Tsarin Gabaɗaya
 

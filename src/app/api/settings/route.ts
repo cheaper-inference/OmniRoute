@@ -8,6 +8,7 @@ import {
 } from "@/lib/db/settings";
 import { getRuntimePorts } from "@/lib/runtime/ports";
 import { updateSettingsSchema } from "@/shared/validation/settingsSchemas";
+import { oidcAdmissionClaimSchema } from "@/shared/utils/oidcAdmissionClaim";
 import {
   DASHBOARD_SESSION_STATE_SETTINGS_KEYS,
   SECURITY_IMPACTING_SETTINGS_KEYS,
@@ -257,6 +258,47 @@ function readCookie(request: Request, name: string): string | null {
   return null;
 }
 
+type OidcPolicyError = { code: string; message: string };
+
+/**
+ * Cross-field OIDC admission rules for a settings PATCH: when OIDC is (or becomes) enabled the
+ * admission claim policy must be well-formed, and at least one admission rule (an allowed
+ * subject/email or a claim policy) must exist. Returns the error body, or null when valid.
+ */
+async function validateOidcPolicyPatch(
+  body: Record<string, unknown>
+): Promise<OidcPolicyError | null> {
+  if (
+    body.oidcEnabled === undefined &&
+    body.oidcAllowedSubjects === undefined &&
+    body.oidcAdmissionClaim === undefined
+  ) {
+    return null;
+  }
+  const current = await getSettings();
+  const enabled = (body.oidcEnabled as boolean | undefined) ?? current.oidcEnabled === true;
+  if (!enabled) return null;
+  const subjects = Array.isArray(body.oidcAllowedSubjects)
+    ? (body.oidcAllowedSubjects as unknown[])
+    : ((current.oidcAllowedSubjects as unknown[] | undefined) ?? []);
+  const hasAtLeastOne = subjects.some((s) => typeof s === "string" && s.trim().length > 0);
+  const admissionClaim =
+    body.oidcAdmissionClaim === undefined ? current.oidcAdmissionClaim : body.oidcAdmissionClaim;
+  if (admissionClaim != null && !oidcAdmissionClaimSchema.safeParse(admissionClaim).success) {
+    return {
+      code: "OIDC_ADMISSION_CLAIM_INVALID",
+      message: "Invalid OIDC admission claim policy",
+    };
+  }
+  if (!hasAtLeastOne && !admissionClaim) {
+    return {
+      code: "OIDC_ALLOWED_SUBJECTS_REQUIRED",
+      message: "OIDC requires at least one allowed subject/email or an admission claim policy",
+    };
+  }
+  return null;
+}
+
 export async function PATCH(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
@@ -321,26 +363,10 @@ export async function PATCH(request: Request) {
       }) as typeof body.modelLockout;
     }
 
-    if (body.oidcEnabled !== undefined || body.oidcAllowedSubjects !== undefined) {
-      const current = await getSettings();
-      const enabled = body.oidcEnabled ?? current.oidcEnabled === true;
-      const subjects = Array.isArray(body.oidcAllowedSubjects)
-        ? (body.oidcAllowedSubjects as unknown[])
-        : ((current.oidcAllowedSubjects as unknown[] | undefined) ?? []);
-      const hasAtLeastOne = subjects.some((s) => typeof s === "string" && s.trim().length > 0);
-      if (enabled && !hasAtLeastOne) {
-        emitSettingsFailureAudit(request, actor, "OIDC_ALLOWED_SUBJECTS_REQUIRED", attemptedKeys);
-        return NextResponse.json(
-          {
-            error: {
-              code: "OIDC_ALLOWED_SUBJECTS_REQUIRED",
-              message:
-                "oidcAllowedSubjects must contain at least one subject or email when oidcEnabled is true",
-            },
-          },
-          { status: 400 }
-        );
-      }
+    const oidcPolicyError = await validateOidcPolicyPatch(body);
+    if (oidcPolicyError) {
+      emitSettingsFailureAudit(request, actor, oidcPolicyError.code, attemptedKeys);
+      return NextResponse.json({ error: oidcPolicyError }, { status: 400 });
     }
 
     // VALIDATED body so we never trip on stray unknown keys. If any security
