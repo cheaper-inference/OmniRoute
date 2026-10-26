@@ -520,6 +520,13 @@ function trimmedString(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
 }
 
+/** Resolve the context length from a live /api/models row, with a safe default. */
+function resolveContextLength(rec: Record<string, unknown>): number {
+  if (typeof rec.contextWindow === "number") return rec.contextWindow;
+  if (typeof rec.maxTokens === "number") return rec.maxTokens;
+  return CHATPLAYGROUND_DEFAULT_CONTEXT;
+}
+
 /**
  * Build a full ChatPlaygroundModel from one live /api/models item. Returns null
  * for unusable rows (missing botId, non-chat group).
@@ -550,12 +557,7 @@ function buildCatalogModel(item: unknown, seen: Set<string>): ChatPlaygroundMode
     active,
     creditWeight: typeof rec.creditWeight === "number" ? rec.creditWeight : 1,
     premiumOnly: rec.premiumOnly === true,
-    contextLength:
-      typeof rec.contextWindow === "number"
-        ? rec.contextWindow
-        : typeof rec.maxTokens === "number"
-          ? rec.maxTokens
-          : CHATPLAYGROUND_DEFAULT_CONTEXT,
+    contextLength: resolveContextLength(rec),
   };
 }
 
