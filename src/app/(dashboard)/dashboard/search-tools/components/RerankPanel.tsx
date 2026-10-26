@@ -21,6 +21,7 @@ interface RerankPanelProps {
 
 export default function RerankPanel({ query, results, onClose }: RerankPanelProps) {
   const t = useTranslations("search");
+  const tc = useTranslations("common");
   const [models, setModels] = useState<{ value: string; label: string }[]>([]);
   const [selectedModel, setSelectedModel] = useState("");
   const [reranked, setReranked] = useState<RerankResult[]>([]);
@@ -96,9 +97,14 @@ export default function RerankPanel({ query, results, onClose }: RerankPanelProp
         <span className="text-xs font-semibold text-text-main flex items-center gap-1.5">
           ⇅ {t("rerankResults")}
         </span>
-        <button onClick={onClose} className="text-text-muted text-xs hover:text-text-main">
-          ✕
-        </button>
+        <Button
+          variant="ghost"
+          size="icon"
+          icon="close"
+          onClick={onClose}
+          aria-label={tc("close")}
+          title={tc("close")}
+        />
       </div>
       <div className="p-4">
         {noModels ? (
@@ -107,10 +113,8 @@ export default function RerankPanel({ query, results, onClose }: RerankPanelProp
           <>
             <div className="flex gap-2 items-end mb-3">
               <div className="flex-1">
-                <label className="block text-[10px] text-text-muted uppercase tracking-wider mb-1">
-                  {t("rerankModel")}
-                </label>
                 <Select
+                  label={t("rerankModel")}
                   value={selectedModel}
                   onChange={(e: any) => setSelectedModel(e.target.value)}
                   options={models}

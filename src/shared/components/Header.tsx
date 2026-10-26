@@ -2,6 +2,8 @@
 
 import { useSyncExternalStore } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { ProductSwitcher } from "@omniroute/ui-kit/keak-brand";
+import { SidebarTrigger, useSidebar } from "@omniroute/ui-kit/sidebar";
 
 const subscribePlatform = () => () => {};
 const getPlatformIsMac = () => {
@@ -10,6 +12,33 @@ const getPlatformIsMac = () => {
   return /Mac|iPhone|iPad|iPod/.test(platform);
 };
 const getPlatformIsMacServer = () => false;
+
+// One title per page (F4): 67+ dashboard pages render a kit PageHeader (their own h1), and the
+// shell title repeated it ("API Keys" × "API Key Management", two h1s). The shell title is
+// dropped from the DOM while a PageHeader is mounted — removed, not CSS-hidden, so `h1` locators
+// and the accessibility tree see exactly one page heading. SSR and hydration render the title
+// (server snapshot false); client navigation re-checks through the observer. Scoped to the shell's
+// content region (#main-content): a PageHeader inside a portalled dialog does not count, and the
+// observer does not wake on unrelated body mutations (review M-1/N-6).
+const PAGE_HEADER_SELECTOR = "#main-content .ci-page-header";
+const contentRoot = () => document.getElementById("main-content") ?? document.body;
+function subscribePageHeader(onChange: () => void) {
+  let frame = 0;
+  const observer = new MutationObserver(() => {
+    if (frame) return;
+    frame = requestAnimationFrame(() => {
+      frame = 0;
+      onChange();
+    });
+  });
+  observer.observe(contentRoot(), { childList: true, subtree: true });
+  return () => {
+    observer.disconnect();
+    if (frame) cancelAnimationFrame(frame);
+  };
+}
+const getPageHasHeader = () => document.querySelector(PAGE_HEADER_SELECTOR) !== null;
+const getPageHasHeaderServer = () => false;
 import ThemeToggle from "./ThemeToggle";
 import TokenHealthBadge from "./TokenHealthBadge";
 import DegradationBadge from "./DegradationBadge";
@@ -31,12 +60,19 @@ import {
   type HideableSidebarItemId,
 } from "@/shared/constants/sidebarVisibility";
 import { useIsElectron } from "@/shared/hooks/useElectron";
+import { KEAK_ACTIVE_PRODUCT, KEAK_PRODUCT_LINKS } from "@/shared/constants/keakProducts";
+import Button from "./Button";
+import Icon from "./Icon";
 
 const isE2EMode = process.env.NEXT_PUBLIC_OMNIROUTE_E2E_MODE === "1";
 
 // Map sidebar item id → header description i18n key
 // "omni-skills" is an extended key for the /dashboard/omni-skills route (graceful fallback during deploy)
-const HEADER_DESCRIPTIONS: Partial<Record<HideableSidebarItemId | "omni-skills", string>> = {
+// `proxy` is a live (non-hideable) item id with its own description, so the key type names it;
+// the dead `settings` key (no item has that id) was dropped.
+const HEADER_DESCRIPTIONS: Partial<
+  Record<HideableSidebarItemId | "omni-skills" | "proxy", string>
+> = {
   home: "homeDescription",
   endpoints: "endpointDescription",
   "api-manager": "apiManagerDescription",
@@ -57,7 +93,6 @@ const HEADER_DESCRIPTIONS: Partial<Record<HideableSidebarItemId | "omni-skills",
   skills: "skillsDescription",
   "agent-skills": "agentSkillsDescription",
   "omni-skills": "omniSkillsDescription",
-  settings: "settingsDescription",
   "context-caveman": "contextCavemanDescription",
   "context-rtk": "contextRtkDescription",
   "context-combos": "contextCombosDescription",
@@ -129,9 +164,7 @@ function getSidebarItem(pathname: string): SidebarItemDefinition | undefined {
 }
 
 type HeaderProps = {
-  onMenuClick?: () => void;
   onOpenCommandPalette?: () => void;
-  showMenuButton?: boolean;
 };
 
 type PageInfo = {
@@ -175,21 +208,38 @@ function usePageInfo(pathname: string | null): PageInfo {
   return { title: "", description: "" };
 }
 
-export default function Header({
-  onMenuClick,
-  onOpenCommandPalette,
-  showMenuButton = true,
-}: HeaderProps) {
+/**
+ * Dashboard top bar on the kit shell header (`.ci-sidebar-shell-header`). Renders inside the
+ * kit `SidebarProvider`; its `SidebarTrigger` is the shell's only sidebar toggle (collapse on
+ * desktop, opens the mobile Sheet below the shell's 1024 px breakpoint).
+ */
+export default function Header({ onOpenCommandPalette }: HeaderProps) {
   const isMac = useSyncExternalStore(subscribePlatform, getPlatformIsMac, getPlatformIsMacServer);
+  const pageHasHeader = useSyncExternalStore(
+    subscribePageHeader,
+    getPageHasHeader,
+    getPageHasHeaderServer
+  );
   const pathname = usePathname();
   const router = useRouter();
   const isElectron = useIsElectron();
   const t = useTranslations("header");
+  const tc = useTranslations("common");
+  const ts = useTranslations("sidebar");
+  const { isMobile, open, openMobile } = useSidebar();
+  const triggerLabel = isMobile
+    ? openMobile
+      ? tc("close")
+      : t("openMenu")
+    : open
+      ? ts("collapseSidebar")
+      : ts("expandSidebar");
   const { title, description, icon, providerId } = usePageInfo(pathname);
   const isMacElectron =
     isElectron &&
     typeof window !== "undefined" &&
     (window as any).electronAPI?.platform === "darwin";
+  const safeTop = isMacElectron ? "var(--desktop-safe-top)" : "var(--ios-safe-top, 0px)";
 
   const handleLogout = async () => {
     try {
@@ -204,84 +254,82 @@ export default function Header({
   };
 
   return (
+    // No explicit role="banner": the kit shell mounts this inside SidebarInset's <main>, and a
+    // banner landmark must stay top-level. The kit header has a fixed height, so the safe-area
+    // inset (macOS Electron title bar / iOS standalone notch) is added to it, not carved out of it.
     <header
-      className="sticky top-0 z-10 flex items-center justify-between border-b border-black/5 bg-bg px-8 py-4 dark:border-white/5"
-      style={{
-        paddingTop: isMacElectron
-          ? "calc(1rem + var(--desktop-safe-top))"
-          : "calc(1rem + var(--ios-safe-top, 0px))",
-      }}
+      className="ci-sidebar-shell-header sticky top-0 z-10 bg-bg"
+      style={{ paddingTop: safeTop, height: `calc(4rem + var(--ci-border-default) + ${safeTop})` }}
     >
-      {/* Mobile menu button */}
-      <div className="flex items-center gap-3 lg:hidden">
-        {showMenuButton && (
-          <button
-            onClick={onMenuClick}
-            className="text-text-main hover:text-primary transition-colors"
-          >
-            <span className="material-symbols-outlined">menu</span>
-          </button>
-        )}
-      </div>
-
-      {/* Page title with icon - desktop */}
-      <div className="hidden lg:flex items-center gap-3">
-        {(icon || providerId) && (
-          <div className="flex items-center justify-center size-9 rounded-lg bg-primary/10 shrink-0">
+      <SidebarTrigger aria-label={triggerLabel}>
+        <Icon name="menu" size={18} />
+      </SidebarTrigger>
+      <div className="hidden min-w-0 items-center gap-3 lg:flex">
+        {/* The icon tile goes with the title: alone it would be an orphan glyph (review M-2). */}
+        {(icon || providerId) && !pageHasHeader && (
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-control bg-accent-light text-heading">
             {icon ? (
-              <span className="material-symbols-outlined text-primary text-[20px]">{icon}</span>
+              <Icon name={icon} size={20} />
             ) : (
               providerId && <ProviderIcon providerId={providerId} size={22} type="color" />
             )}
-          </div>
+          </span>
         )}
-        {title && (
-          <div>
-            <h1 className="text-xl font-semibold text-text-main tracking-tight">{title}</h1>
-            {description && <p className="text-xs text-text-muted mt-0.5">{description}</p>}
+        {title && !pageHasHeader && (
+          <div className="min-w-0">
+            <h1 className="ci-heading truncate text-lg">{title}</h1>
+            {description && <p className="truncate text-xs text-text-muted">{description}</p>}
           </div>
         )}
       </div>
-
-      {/* Right actions */}
-      <div className="flex items-center gap-3 ml-auto">
+      <div className="ms-auto flex items-center gap-2">
+        <ProductSwitcher
+          items={KEAK_PRODUCT_LINKS}
+          activeProduct={KEAK_ACTIVE_PRODUCT}
+          className="hidden md:block"
+          aria-label={t("products")}
+        />
         {onOpenCommandPalette && (
-          <>
-            <button
-              type="button"
-              onClick={onOpenCommandPalette}
-              className="hidden md:inline-flex items-center gap-2 px-2.5 py-1.5 rounded-lg border border-black/10 dark:border-white/10 bg-bg-subtle text-text-muted hover:text-text-main hover:bg-black/[0.04] dark:hover:bg-white/[0.04] transition-colors"
-              title={t("quickNavigationTitle")}
-              aria-label={t("openQuickNavigation")}
-            >
-              <span className="material-symbols-outlined text-[16px]">search</span>
-              <span className="text-xs">{t("quickNavigation")}</span>
-              <kbd className="hidden lg:inline-flex font-mono text-[10px] px-1 py-0.5 rounded bg-black/5 dark:bg-white/5 border border-black/10 dark:border-white/10">
-                {isMac ? "⌘K" : "Ctrl+K"}
-              </kbd>
-            </button>
-            <button
-              type="button"
-              onClick={onOpenCommandPalette}
-              className="md:hidden p-2 rounded-lg text-text-muted hover:text-text-main hover:bg-black/5 dark:hover:bg-white/5 transition-colors"
-              aria-label={t("openQuickNavigation")}
-            >
-              <span className="material-symbols-outlined">search</span>
-            </button>
-          </>
+          <Button
+            variant="outline"
+            size="sm"
+            icon="search"
+            onClick={onOpenCommandPalette}
+            title={t("quickNavigationTitle")}
+            aria-label={t("openQuickNavigation")}
+            className="hidden md:inline-flex"
+          >
+            <span className="text-xs">{t("quickNavigation")}</span>
+            <kbd className="hidden rounded border border-border bg-bg-subtle px-1 py-0.5 font-mono text-[10px] lg:inline-flex">
+              {isMac ? "⌘K" : "Ctrl+K"}
+            </kbd>
+          </Button>
+        )}
+        {onOpenCommandPalette && (
+          <Button
+            variant="ghost"
+            size="icon"
+            className="md:hidden"
+            onClick={onOpenCommandPalette}
+            aria-label={t("openQuickNavigation")}
+          >
+            <Icon name="search" size={20} />
+          </Button>
         )}
         <LanguageSelector />
         <ThemeToggle />
         {!isE2EMode && <DegradationBadge />}
         {!isE2EMode && <TokenHealthBadge />}
-        <button
+        <Button
+          variant="ghost"
+          size="icon"
+          className="hover:text-error"
           onClick={handleLogout}
-          className="flex items-center justify-center p-2 rounded-lg text-text-muted hover:text-red-500 hover:bg-red-500/10 transition-all"
           title={t("logout")}
           aria-label={t("logout")}
         >
-          <span className="material-symbols-outlined">logout</span>
-        </button>
+          <Icon name="logout" size={20} />
+        </Button>
       </div>
     </header>
   );

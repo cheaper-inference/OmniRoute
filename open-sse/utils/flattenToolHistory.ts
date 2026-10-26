@@ -43,6 +43,49 @@ function isMessage(m: unknown): m is Message {
   return m != null && typeof m === "object";
 }
 
+function flattenOpenAIToolCalls(msg: Message, calls: ToolCall[]): Message {
+  const { tool_calls, ...rest } = msg;
+  const names = calls.map((c) => c?.function?.name || c?.name || "tool").join(", ");
+  const base =
+    extractTextContent(rest.content) || (typeof rest.content === "string" ? rest.content : "");
+  return {
+    ...rest,
+    content: `${base}${base ? "\n" : ""}${TOOL_CALL_PREFIX}${names}]`,
+  };
+}
+
+function collectToolBlocks(blocks: ContentBlock[]) {
+  const textParts: string[] = [];
+  const toolNames: string[] = [];
+  const toolResults: string[] = [];
+  for (const block of blocks) {
+    if (block?.type === "text" && typeof block.text === "string") {
+      textParts.push(block.text);
+    } else if (block?.type === "tool_use") {
+      toolNames.push(block.name || "tool");
+    } else if (block?.type === "tool_result") {
+      toolResults.push(extractTextContent(block.content) || String(block.content ?? ""));
+    }
+  }
+  return { textParts, toolNames, toolResults };
+}
+
+function flattenContentBlocks(msg: Message, blocks: ContentBlock[]): Message {
+  const hasToolUse = blocks.some((c) => c?.type === "tool_use");
+  const hasToolResult = blocks.some((c) => c?.type === "tool_result");
+  if (!hasToolUse && !hasToolResult) return msg;
+
+  const { textParts, toolNames, toolResults } = collectToolBlocks(blocks);
+  let content = textParts.join("\n");
+  if (toolNames.length > 0) {
+    content = `${content}${content ? "\n" : ""}${TOOL_CALL_PREFIX}${toolNames.join(", ")}]`;
+  }
+  if (toolResults.length > 0) {
+    content = `${content}${content ? "\n" : ""}${TOOL_RESULT_PREFIX}${toolResults.join("\n")}]`;
+  }
+  return { ...msg, content };
+}
+
 export function flattenToolHistory<T extends Message>(
   messages: ReadonlyArray<T | null | undefined>
 ): Message[] {
@@ -53,8 +96,7 @@ export function flattenToolHistory<T extends Message>(
 
     // OpenAI tool / function role -> assistant prose
     if (msg.role === "tool" || msg.role === "function") {
-      const text =
-        extractTextContent(msg.content) || String(msg.content ?? "");
+      const text = extractTextContent(msg.content) || String(msg.content ?? "");
       out.push({
         role: "assistant",
         content: `${TOOL_RESULT_PREFIX}${text}]`,
@@ -64,50 +106,14 @@ export function flattenToolHistory<T extends Message>(
 
     // OpenAI assistant with structured tool_calls -> flatten into prose
     if (msg.role === "assistant" && Array.isArray(msg.tool_calls)) {
-      const { tool_calls, ...rest } = msg;
-      const names = tool_calls
-        .map((c) => c?.function?.name || c?.name || "tool")
-        .join(", ");
-      const base =
-        extractTextContent(rest.content) ||
-        (typeof rest.content === "string" ? rest.content : "");
-      out.push({
-        ...rest,
-        content: `${base}${base ? "\n" : ""}${TOOL_CALL_PREFIX}${names}]`,
-      });
+      out.push(flattenOpenAIToolCalls(msg, msg.tool_calls));
       continue;
     }
 
     // Anthropic-style tool_use / tool_result blocks in content array
     if (Array.isArray(msg.content)) {
-      const blocks = msg.content as ContentBlock[];
-      const hasToolUse = blocks.some((c) => c?.type === "tool_use");
-      const hasToolResult = blocks.some((c) => c?.type === "tool_result");
-      if (hasToolUse || hasToolResult) {
-        const textParts: string[] = [];
-        const toolNames: string[] = [];
-        const toolResults: string[] = [];
-        for (const block of blocks) {
-          if (block?.type === "text" && typeof block.text === "string") {
-            textParts.push(block.text);
-          } else if (block?.type === "tool_use") {
-            toolNames.push(block.name || "tool");
-          } else if (block?.type === "tool_result") {
-            toolResults.push(
-              extractTextContent(block.content) || String(block.content ?? "")
-            );
-          }
-        }
-        let newContent = textParts.join("\n");
-        if (toolNames.length > 0) {
-          newContent = `${newContent}${newContent ? "\n" : ""}${TOOL_CALL_PREFIX}${toolNames.join(", ")}]`;
-        }
-        if (toolResults.length > 0) {
-          newContent = `${newContent}${newContent ? "\n" : ""}${TOOL_RESULT_PREFIX}${toolResults.join("\n")}]`;
-        }
-        out.push({ ...msg, content: newContent });
-        continue;
-      }
+      out.push(flattenContentBlocks(msg, msg.content as ContentBlock[]));
+      continue;
     }
 
     out.push(msg);

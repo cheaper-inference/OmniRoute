@@ -50,8 +50,11 @@ export default function SearchHistory({ onReplay }: SearchHistoryProps) {
       </span>
       <div className="mt-2 space-y-1.5">
         {entries.map((entry, i) => (
+          // kit-exception: Two-line history entry (query + provider/age): stays a native <button> on kit tokens
+          // (the kit Button is a single-line pill).
           <button
             key={`${entry.timestamp}:${entry.provider}:${entry.query}`}
+            type="button"
             onClick={() => onReplay(entry)}
             className="w-full text-left p-2 bg-surface border border-border rounded-lg hover:border-primary/30 transition-colors"
           >

@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { Card } from "@/shared/components";
 import { useTranslations } from "next-intl";
 import { cn } from "@/shared/utils/cn";
@@ -8,13 +10,13 @@ import { useServiceStatus } from "../hooks/useServiceStatus";
 function StateDot({ state, health }: { state: string; health: string }) {
   const color =
     state === "running" && health === "ok"
-      ? "bg-green-500"
+      ? "bg-success"
       : state === "running"
-        ? "bg-yellow-500"
+        ? "bg-warning"
         : state === "starting"
-          ? "bg-blue-400 animate-pulse"
+          ? "bg-info animate-pulse"
           : state === "error"
-            ? "bg-red-500"
+            ? "bg-error"
             : "bg-border";
 
   return <span className={cn("inline-block size-2 rounded-full shrink-0", color)} />;
@@ -39,7 +41,7 @@ export function ServiceStatusCard({ name }: ServiceStatusCardProps) {
   if (error && !data) {
     return (
       <Card padding="md">
-        <p className="text-xs text-red-500">{error}</p>
+        <p className="text-xs text-error">{error}</p>
       </Card>
     );
   }
@@ -75,9 +77,7 @@ export function ServiceStatusCard({ name }: ServiceStatusCardProps) {
           <div className="text-right shrink-0">
             <p className="text-xs font-mono text-text-muted">v{data.installedVersion}</p>
             {data.updateAvailable && data.latestVersion && (
-              <p className="text-xs text-yellow-600 dark:text-yellow-400">
-                → v{data.latestVersion}
-              </p>
+              <p className="text-xs text-warning">→ v{data.latestVersion}</p>
             )}
           </div>
         )}
@@ -86,8 +86,8 @@ export function ServiceStatusCard({ name }: ServiceStatusCardProps) {
       {/* Adopted-process note — English literal, not an i18n key; see
           AutoRestartAdoptedToggle.tsx's header comment for why. */}
       {data.adopted && (
-        <p className="mt-2 text-xs text-yellow-600 dark:text-yellow-400 flex items-start gap-1">
-          <span className="material-symbols-outlined text-[14px] shrink-0 mt-0.5">info</span>
+        <p className="mt-2 text-xs text-warning flex items-start gap-1">
+          <Icon name="info" size={14} className="mt-0.5" />
           <span>
             This process was adopted from an already-running instance, not started by this
             supervisor — live log tailing isn&apos;t available until you restart it (Stop, then
@@ -96,7 +96,7 @@ export function ServiceStatusCard({ name }: ServiceStatusCardProps) {
         </p>
       )}
 
-      {data.lastError && <p className="mt-2 text-xs text-red-500 break-words">{data.lastError}</p>}
+      {data.lastError && <p className="mt-2 text-xs text-error break-words">{data.lastError}</p>}
     </Card>
   );
 }

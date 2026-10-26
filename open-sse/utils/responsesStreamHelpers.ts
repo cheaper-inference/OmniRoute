@@ -28,6 +28,24 @@ function normalizeResponsesOutputItemIds(item: unknown): unknown {
   return changed ? normalized : item;
 }
 
+function normalizeNestedResponseIds(response: JsonRecord): JsonRecord {
+  let changed = false;
+  const normalized = { ...response };
+  const responseId = stringifyIdValue(response.id);
+  if (responseId !== null && response.id !== responseId) {
+    normalized.id = responseId;
+    changed = true;
+  }
+  if (Array.isArray(response.output)) {
+    const output = response.output.map(normalizeResponsesOutputItemIds);
+    if (output.some((item, index) => item !== response.output[index])) {
+      normalized.output = output;
+      changed = true;
+    }
+  }
+  return changed ? normalized : response;
+}
+
 export function normalizeResponsesSseIds(payload: JsonRecord): boolean {
   let changed = false;
 
@@ -53,24 +71,8 @@ export function normalizeResponsesSseIds(payload: JsonRecord): boolean {
     !Array.isArray(payload.response)
   ) {
     const response = payload.response as JsonRecord;
-    let responseChanged = false;
-    const normalizedResponse = { ...response };
-
-    const responseId = stringifyIdValue(response.id);
-    if (responseId !== null && response.id !== responseId) {
-      normalizedResponse.id = responseId;
-      responseChanged = true;
-    }
-
-    if (Array.isArray(response.output)) {
-      const normalizedOutput = response.output.map(normalizeResponsesOutputItemIds);
-      if (normalizedOutput.some((item, index) => item !== response.output[index])) {
-        normalizedResponse.output = normalizedOutput;
-        responseChanged = true;
-      }
-    }
-
-    if (responseChanged) {
+    const normalizedResponse = normalizeNestedResponseIds(response);
+    if (normalizedResponse !== response) {
       payload.response = normalizedResponse;
       changed = true;
     }

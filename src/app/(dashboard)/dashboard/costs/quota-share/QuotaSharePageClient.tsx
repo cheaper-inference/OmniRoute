@@ -2,7 +2,14 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Button } from "@/shared/components";
+import EmptyState from "@/shared/components/EmptyState";
+import Input from "@/shared/components/Input";
+import { Skeleton } from "@/shared/components/Loading";
+import Select from "@/shared/components/Select";
+import Icon from "@/shared/components/Icon";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { maskEmailLikeValue } from "@/shared/utils/maskEmail";
 import type { QuotaPool } from "@/lib/quota/dimensions";
@@ -65,14 +72,14 @@ function StatCard({
 }) {
   const color =
     tone === "amber"
-      ? "text-amber-400"
+      ? "text-warning"
       : tone === "red"
-        ? "text-red-400"
+        ? "text-error"
         : tone === "green"
-          ? "text-emerald-400"
+          ? "text-success"
           : "text-text-main";
   return (
-    <div className="rounded-lg border border-border/40 bg-bg-subtle/30 px-4 py-3">
+    <div className="rounded-lg border border-border bg-bg-subtle px-4 py-3">
       <div className="text-[10px] uppercase tracking-wide text-text-muted font-semibold">
         {label}
       </div>
@@ -413,69 +420,64 @@ export default function QuotaSharePageClient() {
     <div className="flex flex-col gap-4">
       {/* Falha ao remover: dispensável, mas nunca silenciosa. */}
       {removeError && (
-        <div
-          role="alert"
-          className="flex items-start gap-2 rounded-lg border border-red-500/40 bg-red-500/10 px-3 py-2 text-[12px] text-red-700 dark:text-red-200"
-        >
-          <span className="material-symbols-outlined text-[16px] text-red-500 shrink-0">error</span>
-          <span className="flex-1">{removeError}</span>
-          <button
-            type="button"
-            onClick={() => setRemoveError(null)}
-            aria-label={t("dismiss")}
-            className="shrink-0 text-red-500 hover:text-red-400 cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-[16px]">close</span>
-          </button>
-        </div>
+        <Alert
+          variant="critical"
+          icon={<Icon name="error" size={16} />}
+          dismissLabel={t("dismiss")}
+          onDismiss={() => setRemoveError(null)}
+          description={removeError}
+        />
       )}
 
       {/* Header */}
-      <div className="flex items-start justify-between flex-wrap gap-3">
-        <div>
-          <h1 className="text-xl font-bold text-text-main flex items-center gap-2">
-            <span className="material-symbols-outlined text-[24px] text-primary">pie_chart</span>
+      <PageHeader
+        compact
+        title={
+          <span className="flex items-center gap-2">
+            <Icon name="pie_chart" size={24} className="text-primary" />
             {t("title")}
-          </h1>
-          <p className="text-sm text-text-muted mt-0.5">{t("description")}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button variant="primary" size="sm" onClick={() => setCreateOpen(true)}>
-            <span className="material-symbols-outlined text-[14px] mr-1">add</span>
+          </span>
+        }
+        description={t("description")}
+        actions={
+          <Button variant="primary" size="sm" icon="add" onClick={() => setCreateOpen(true)}>
             {t("newPool")}
           </Button>
-        </div>
-      </div>
+        }
+      />
 
-      {/* Beta banner — scoped to this page only */}
-      <div className="flex items-center gap-2 rounded-lg border border-amber-500/40 bg-amber-500/10 px-3 py-2 text-[12px] text-amber-700 dark:text-amber-200">
-        <span className="material-symbols-outlined text-[16px] text-amber-500 shrink-0">
-          science
-        </span>
-        <span className="flex-1">
-          <span className="font-semibold">{t("betaTitle")}</span> — {t("betaText")}
-        </span>
-        <a
-          href="https://github.com/cheaper-inference/OmniRoute/issues/new?labels=quota-share,beta&title=%5Bquota-share%5D%20"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="shrink-0 inline-flex items-center gap-1 font-medium text-amber-600 dark:text-amber-300 hover:underline"
-        >
-          <span className="material-symbols-outlined text-[14px]">bug_report</span>
-          {t("betaReportLink")}
-        </a>
-      </div>
+      {/* Beta banner — scoped to this page only (always shown: no dismiss) */}
+      <Alert
+        variant="warning"
+        icon={<Icon name="science" size={16} />}
+        className="[&>.ci-alert__dismiss]:hidden"
+        description={
+          <span>
+            <span className="font-semibold">{t("betaTitle")}</span> — {t("betaText")}
+          </span>
+        }
+        actions={
+          <a
+            href="https://github.com/cheaper-inference/OmniRoute/issues/new?labels=quota-share,beta&title=%5Bquota-share%5D%20"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 font-medium underline-offset-2 hover:underline"
+          >
+            <Icon name="bug_report" size={14} />
+            {t("betaReportLink")}
+          </a>
+        }
+      />
 
       {/* Group bar */}
-      <div className="flex items-center gap-2 flex-wrap rounded-lg border border-border/40 bg-bg-subtle/20 px-3 py-2">
-        <span className="text-[11px] uppercase tracking-wide text-text-muted font-semibold shrink-0">
-          {t("groupLabel")}
-        </span>
-        <select
+      <div className="flex flex-wrap items-center gap-2 rounded-lg border border-border bg-bg-subtle px-3 py-2">
+        <Select
+          compact
+          label={t("groupLabel")}
           value={selectedGroupId}
           onChange={(e) => setSelectedGroupId(e.target.value)}
           title={t("groupSelectHint")}
-          className="px-2 py-1 rounded border border-border bg-bg-base text-sm text-text-main min-w-[120px]"
+          selectClassName="min-w-[120px]"
         >
           <option value="all">{t("allGroups")}</option>
           {groups.map((g) => (
@@ -483,11 +485,12 @@ export default function QuotaSharePageClient() {
               {g.name}
             </option>
           ))}
-        </select>
+        </Select>
         {showNewGroupInput ? (
           <div className="flex items-center gap-1">
-            <input
+            <Input
               type="text"
+              aria-label={t("groupNamePrompt")}
               value={newGroupInput}
               onChange={(e) => setNewGroupInput(e.target.value)}
               onKeyDown={(e) => {
@@ -499,57 +502,53 @@ export default function QuotaSharePageClient() {
               }}
               placeholder={t("groupNamePrompt")}
               autoFocus
-              className="px-2 py-1 rounded border border-border bg-bg-base text-sm w-36"
+              inputClassName="h-8 min-h-8 w-36"
             />
-            <button
-              type="button"
+            <Button
+              variant="secondary"
+              size="sm"
               onClick={() => void handleCreateGroup()}
               disabled={!newGroupInput.trim()}
-              className="text-xs px-2 py-1 rounded bg-primary/15 text-primary hover:bg-primary/25 transition-colors disabled:opacity-40"
             >
               {t("newGroup")}
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
               onClick={() => {
                 setShowNewGroupInput(false);
                 setNewGroupInput("");
               }}
-              className="text-xs px-2 py-1 rounded border border-border text-text-muted hover:text-text-main transition-colors"
             >
               {t("cancel")}
-            </button>
+            </Button>
           </div>
         ) : (
-          <button
-            type="button"
-            onClick={() => setShowNewGroupInput(true)}
-            className="flex items-center gap-1 text-xs text-text-muted hover:text-text-main transition-colors"
-          >
-            <span className="material-symbols-outlined text-[14px]">add</span>
+          <Button variant="ghost" size="sm" icon="add" onClick={() => setShowNewGroupInput(true)}>
             {t("newGroup")}
-          </button>
+          </Button>
         )}
         {selectedGroupId !== "all" && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
+            icon="edit"
             onClick={() => void handleRenameGroup()}
             disabled={renaming}
-            className="flex items-center gap-1 text-xs text-text-muted hover:text-text-main transition-colors ml-1 disabled:opacity-40"
           >
-            <span className="material-symbols-outlined text-[14px]">edit</span>
             {t("renameGroup")}
-          </button>
+          </Button>
         )}
         {selectedGroupId !== "all" && selectedGroupId !== "group-demo" && (
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
+            icon="delete"
             onClick={() => void handleDeleteGroup()}
-            className="flex items-center gap-1 text-xs text-text-muted hover:text-red-400 transition-colors"
+            className="hover:text-error"
           >
-            <span className="material-symbols-outlined text-[14px]">delete</span>
             {t("deleteGroup")}
-          </button>
+          </Button>
         )}
       </div>
 
@@ -582,19 +581,18 @@ export default function QuotaSharePageClient() {
 
       {/* Pool list */}
       {loading ? (
-        <div className="text-text-muted text-sm py-10 text-center animate-pulse">
-          {t("loading")}
+        <div className="flex flex-col gap-3" aria-busy="true">
+          <span className="ci-sr-only">{t("loading")}</span>
+          <Skeleton className="h-40 w-full" />
         </div>
       ) : pools.length === 0 ? (
-        <div className="rounded-xl border border-border bg-surface py-16 text-center">
-          <span className="material-symbols-outlined text-[64px] opacity-15">pie_chart</span>
-          <h3 className="mt-3 text-base font-semibold text-text-main">{t("emptyTitle")}</h3>
-          <p className="mt-1 text-sm text-text-muted max-w-md mx-auto">{t("emptyDescription")}</p>
-          <Button variant="primary" size="sm" className="mt-4" onClick={() => setCreateOpen(true)}>
-            <span className="material-symbols-outlined text-[14px] mr-1">add</span>
-            {t("newPool")}
-          </Button>
-        </div>
+        <EmptyState
+          icon="pie_chart"
+          title={t("emptyTitle")}
+          description={t("emptyDescription")}
+          actionLabel={t("newPool")}
+          onAction={() => setCreateOpen(true)}
+        />
       ) : (
         <>
           {groupsToRender.length === 0 ? (
@@ -604,9 +602,9 @@ export default function QuotaSharePageClient() {
                 variant="primary"
                 size="sm"
                 className="mt-3"
+                icon="add"
                 onClick={() => setCreateOpen(true)}
               >
-                <span className="material-symbols-outlined text-[14px] mr-1">add</span>
                 {t("newPool")}
               </Button>
             </div>
@@ -619,9 +617,7 @@ export default function QuotaSharePageClient() {
                 <div key={g.id} className="flex flex-col gap-3">
                   {/* Per-group heading */}
                   <div className="flex items-center gap-2">
-                    <span className="material-symbols-outlined text-[16px] text-text-muted">
-                      folder
-                    </span>
+                    <Icon name="folder" size={16} className="text-text-muted" />
                     <span className="text-sm font-semibold text-text-main">{g.name}</span>
                     <span className="text-[11px] text-text-muted">({groupPools.length})</span>
                   </div>
@@ -632,9 +628,9 @@ export default function QuotaSharePageClient() {
                         variant="primary"
                         size="sm"
                         className="mt-3"
+                        icon="add"
                         onClick={() => setCreateOpen(true)}
                       >
-                        <span className="material-symbols-outlined text-[14px] mr-1">add</span>
                         {t("newPool")}
                       </Button>
                     </div>
@@ -669,13 +665,11 @@ export default function QuotaSharePageClient() {
           {selectedGroupId === "all" && orphanPools.length > 0 && (
             <div className="flex flex-col gap-3">
               <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[16px] text-amber-400">
-                  folder_off
-                </span>
+                <Icon name="folder_off" size={16} className="text-warning" />
                 <span className="text-sm font-semibold text-text-main">{t("ungroupedTitle")}</span>
                 <span className="text-[11px] text-text-muted">({orphanPools.length})</span>
               </div>
-              <p className="text-[11px] text-amber-400/80">{t("ungroupedHint")}</p>
+              <p className="text-[11px] text-warning">{t("ungroupedHint")}</p>
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
                 {orphanPools.map((pool) => (
                   <PoolCardWithUsage

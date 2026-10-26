@@ -90,6 +90,10 @@ function warn(subscriptionId: string, message: string): void {
   console.warn(`[ProxySubscription] core apply ${subscriptionId}: ${message}`);
 }
 
+function checkOutput(error: { stderr?: unknown; stdout?: unknown }): string {
+  return [error.stderr, error.stdout].filter((part) => typeof part === "string" && part).join("\n");
+}
+
 function stderrHead(stderr: unknown): string {
   return typeof stderr === "string" ? stderr.slice(0, STDERR_HEAD_LENGTH) : "";
 }
@@ -219,11 +223,10 @@ async function runNativeCheck(
       opts.subscriptionId,
       `native check failed (${stderrHead((error as { stderr?: unknown }).stderr) || (error as Error).message})`
     );
-    const raw = (error as { stderr?: unknown }).stderr;
-    const mark =
-      opts.offending && typeof raw === "string"
-        ? opts.offending.resolve(raw, opts.offending.table)
-        : null;
+    // sing-box reports on stderr, Mihomo logs its errors on stdout: the
+    // resolver reads both.
+    const raw = checkOutput(error as { stderr?: unknown; stdout?: unknown });
+    const mark = opts.offending && raw ? opts.offending.resolve(raw, opts.offending.table) : null;
     if (mark) {
       return {
         ok: false,

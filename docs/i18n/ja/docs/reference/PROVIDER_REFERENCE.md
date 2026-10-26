@@ -4,11 +4,11 @@
 
 ---
 
-> `src/shared/constants/providers.ts` から**自動生成**されています — 手動で編集しないでください。
+> **自動生成**: `src/shared/constants/providers.ts` から生成されています。手動で編集しないでください。
 > 再生成するには: `npm run gen:provider-reference`
-> **最終生成日:** 2026-10-18
+> **最終生成日:** 2026-10-20
 
-プロバイダー総数: **375**。カテゴリー別の内訳は以下を参照してください。
+プロバイダー総数: **375**。以下のカテゴリ別内訳を参照してください。
 
 ## カテゴリ
 
@@ -457,12 +457,12 @@
 | ------ | ---------- | --------------- | -------- | ------------ | ---- |
 | `auto` | `auto`     | 自動 (ゼロ設定) | システム | —            | —    |
 
-## 信頼できる情報源（Sources of truth）
+## 信頼できる情報源
 
-- カタログ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- レジストリ（モデルごとの詳細）: [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- エグゼキューター: [`open-sse/executors/`](../../open-sse/executors/)（154件の実装）
-- トランスレーター: [`open-sse/translator/`](../../open-sse/translator/)
+- カタログ：[`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- レジストリ（モデルごとの詳細）：[`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- エグゼキューター：[`open-sse/executors/`](../../open-sse/executors/)（156 実装）
+- トランスレーター：[`open-sse/translator/`](../../open-sse/translator/)
 
 ## 関連項目
 

@@ -4,11 +4,11 @@
 
 ---
 
-> **An ƙirƙira ta atomatik** daga `src/shared/constants/providers.ts` — kada a gyara da hannu.
-> Sake ƙirƙira da: `npm run gen:provider-reference`
-> **An ƙarshe ƙirƙira:** 2026-10-18
+> **An samar ta atomatik** daga `src/shared/constants/providers.ts` — kada a gyara da hannu.
+> Sake samarwa da: `npm run gen:provider-reference`
+> **Ƙarshen samarwa:** 2026-10-20
 
-Jimillar masu bayarwa: **375**. Duba rabe-raben rukuni a ƙasa.
+Jimillar masu samarwa: **375**. Duba rabon rukuni a ƙasa.
 
 ## Rukunoni
 
@@ -457,12 +457,12 @@ Yi amfani da dashboard da ke `/dashboard/providers` don kunna, saita, da gwada k
 | ------ | ------ | --------------------------------- | ------- | ---------- | ------------ |
 | `auto` | `auto` | Na Atomatik (Ba Tare da Saiti ba) | Tsari   | —          | —            |
 
-## Tushen gaskiya
+## Tushen ingantattun bayanai
 
-- Katalogi: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- Rajista (cikakkun bayanai na kowace model): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- Masu aiwatarwa: [`open-sse/executors/`](../../open-sse/executors/) (ayyuka 154)
-- Masu fassarawa: [`open-sse/translator/`](../../open-sse/translator/)
+- Kundin bayanai: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- Rijista (cikakkun bayanai na kowane samfuri): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- Masu aiwatarwa: [`open-sse/executors/`](../../open-sse/executors/) (aiwatarwa guda 156)
+- Masu fassara: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## Duba Kuma
 
