@@ -320,6 +320,33 @@ function buildAgentrouterRules(): ProviderErrorRule[] {
   ];
 }
 
+// ─── CodeBuddy Intl ─────────────────────────────────────────────────────────
+// CodeBuddy Intl wraps its WAF / anti-abuse block in an HTTP 400 code 11128
+// "request illegal". The block is connection-wide (every request fails while it lasts
+// and the identical request succeeds minutes later), so it is throttling semantics on
+// a non-standard 400 — the same shape as the MiMoCode high-frequency 400 (#4976), and
+// classified the same way: rate_limit_exceeded at connection scope with no explicit
+// cooldown, so the scaled exponential backoff applies and repeated blocks back off
+// further instead of re-firing into the block at cooldown 0.
+// Code 11128 is overloaded: "first message is not system prompt" is request-scoped and
+// keeps the generic zero-cooldown 400, so the rule matches the text, never the code.
+const CODEBUDDY_INTL_RULE_FAMILY = ["codebuddy-intl", "cbai"];
+
+function buildCodebuddyIntlRules(): ProviderErrorRule[] {
+  return [
+    {
+      id: "codebuddy-intl-request-illegal",
+      match: ({ status, body }) => {
+        if (status !== 400) return null;
+        const text = (typeof body === "string" ? body : JSON.stringify(body ?? "")).toLowerCase();
+        if (!text.includes("request illegal")) return null;
+        if (text.includes("first message is not system prompt")) return null;
+        return { reason: "rate_limit_exceeded", scope: "connection" };
+      },
+    },
+  ];
+}
+
 /** Providers sharing the opencode upstream envelope, hence the opencode catalog rules. */
 const OPENCODE_RULE_FAMILY = ["opencode-zen", "opencode-go", "opencode-cli"];
 
@@ -335,6 +362,10 @@ export const providerRuleRegistry = new Map<string, ProviderErrorRule[]>([
   ["cloudflare-ai", buildCloudflareAiRules()],
   ["openrouter", buildOpenrouterRules()],
   ["agentrouter", buildAgentrouterRules()],
+  ...CODEBUDDY_INTL_RULE_FAMILY.map((id): [string, ProviderErrorRule[]] => [
+    id,
+    buildCodebuddyIntlRules(),
+  ]),
 ]);
 
 /**
@@ -715,4 +746,22 @@ export function getOpencodeModelUnavailableMatch(
   }
   const match = getProviderErrorRuleMatch(provider, status, headers, errorText);
   return match?.scope === "model" && match.reason === "model_capacity" ? match : null;
+}
+
+/**
+ * CodeBuddy Intl 400 "request illegal" WAF block: the rule's connection-scope backoff
+ * match, or null for any other provider, status or body. Takes the raw error text so
+ * it stays independent of FULL_TEXT_RULE_PROVIDERS (same approach as
+ * getOpencodeModelUnavailableMatch, #10880).
+ */
+export function getCodebuddyRequestIllegalMatch(
+  provider: string | null | undefined,
+  status: number,
+  headers: Headers | Record<string, string> | null | undefined,
+  errorText: unknown
+): ProviderErrorRuleMatch | null {
+  if (status !== 400 || !provider || !CODEBUDDY_INTL_RULE_FAMILY.includes(provider.toLowerCase())) {
+    return null;
+  }
+  return getProviderErrorRuleMatch(provider, status, headers, errorText);
 }

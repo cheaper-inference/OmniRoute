@@ -198,6 +198,8 @@ export interface NonStreamingClientTranslateInput {
    * reports through `onReasoningReplayHistory` instead.
    */
   historyMessages?: unknown[] | null;
+  /** Connection+family scoped Gemini thought-signature namespace (#17912). */
+  signatureNamespace?: string | null;
   responseToolNameMap: Map<string, string> | null;
   customToolNames?: ReadonlySet<string>;
   requestToolIdentityMap: Map<string, { namespace?: string; name: string }> | null;
