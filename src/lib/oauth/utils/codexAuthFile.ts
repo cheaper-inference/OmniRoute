@@ -9,6 +9,7 @@ import {
   updateProviderCredentials,
 } from "@/sse/services/tokenRefresh";
 import { isUnrecoverableRefreshError } from "@omniroute/open-sse/services/tokenRefresh.ts";
+import { toRecord, toNonEmptyString, decodeJwtPayload } from "./codexAuthValues";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -60,27 +61,6 @@ export class CodexAuthFileError extends Error {
 }
 
 const CODEX_REFRESH_BUFFER_MS = Math.max(TOKEN_EXPIRY_BUFFER_MS, 5 * 60 * 1000);
-
-function toRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
-function toNonEmptyString(value: unknown): string | null {
-  if (typeof value !== "string") return null;
-  const trimmed = value.trim();
-  return trimmed ? trimmed : null;
-}
-
-function decodeJwtPayload(jwt: string): JsonRecord | null {
-  try {
-    const parts = jwt.split(".");
-    if (parts.length !== 3) return null;
-    const payload = Buffer.from(parts[1], "base64url").toString("utf8");
-    return toRecord(JSON.parse(payload));
-  } catch {
-    return null;
-  }
-}
 
 function extractCodexAccountId(idToken: string, providerSpecificData: unknown): string | null {
   const payload = decodeJwtPayload(idToken);
