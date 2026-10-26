@@ -24,7 +24,7 @@ usage() {
   cat >&2 <<'EOF'
 usage: audit-worktree.sh <worktree-path> [--base <ref>] [--repo <owner/repo>]
   --base <ref>   ref to diff against (default origin/<highest release/v*> on origin)
-  --repo <slug>  GitHub repository for the PR lookup (default: origin URL, else diegosouzapw/OmniRoute)
+  --repo <slug>  GitHub repository for the PR lookup (default: origin URL, else cheaper-inference/OmniRoute)
 env: GH_BIN (gh binary)
 EOF
 }
@@ -183,7 +183,7 @@ PR_NUM="none"
 HEAD_STATE="none"
 if [ -z "$REPO" ]; then
   REPO=$(git remote get-url origin 2>/dev/null | sed -nE 's#.*github\.com[:/]([^/]+/[^/.]+)(\.git)?/?$#\1#p' || true)
-  [ -n "$REPO" ] || REPO="diegosouzapw/OmniRoute"
+  [ -n "$REPO" ] || REPO="cheaper-inference/OmniRoute"
 fi
 echo "pull request:"
 if [ "$BRANCH" = "HEAD" ]; then

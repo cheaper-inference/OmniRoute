@@ -33,4 +33,34 @@ describe("MCP tool profile from env (cardinality opt-in)", () => {
     assert.equal(reduceToolManifest([{ name: "keep_me", scopes: [] }], profile).length, 1);
     assert.equal(reduceToolManifest([{ name: "other", scopes: [] }], profile).length, 0);
   });
+
+  it("keeps the full manifest by default and gives deny priority when opt-in rules overlap", () => {
+    const tools = [
+      { name: "route_request", scopes: [] },
+      { name: "check_quota", scopes: [] },
+      { name: "get_health", scopes: [] },
+    ];
+    const unset = readMcpToolProfileFromEnv({
+      MCP_TOOL_DENY: " ",
+      MCP_TOOL_ALLOW: "",
+    });
+    assert.equal(unset, null);
+    // Mirrors the server's opt-in registration guard: no profile means no filter.
+    const defaultManifest = unset ? reduceToolManifest(tools, unset) : tools;
+    assert.deepEqual(
+      defaultManifest.map((entry) => entry.name),
+      ["route_request", "check_quota", "get_health"]
+    );
+
+    const profile = readMcpToolProfileFromEnv({
+      MCP_TOOL_ALLOW: "route_request, check_quota",
+      MCP_TOOL_DENY: "check_quota",
+    });
+    assert.ok(profile);
+    assert.deepEqual(
+      reduceToolManifest(tools, profile).map((entry) => entry.name),
+      ["route_request"],
+      "MCP_TOOL_DENY must override MCP_TOOL_ALLOW even when both are present"
+    );
+  });
 });

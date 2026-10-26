@@ -45,9 +45,9 @@ L-A2A huwa kkontrollat mill-bidla **Endpoints → A2A** u huwa diżattivat b'mod
 
 ## Metodi JSON-RPC 2.0
 
-### `message/send` — Eżekuzzjoni Sinniċka
+### `message/send` — Eżekuzzjoni Sinkronika
 
-Jibgħat messaġġ lill-għarfien u jistenna r-risposta kompluta.
+Jibgħat messaġġ lil ħila u jistenna r-risposta sħiħa.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Għal `smart-routing`, `metadata.combo` huwa sostituzzjoni espliċita ta'
+`metadata.model` għat-talba tal-gateway; jintbagħat bħala l-`model` reali,
+mhux bħala qasam JSON `x-combo` injorat. L-awtorizzazzjoni normali tal-gateway
+permezz taċ-ċavetta tal-API u għal kull mira xorta tibqa' tapplika. Combo invalidu jew vojt jiġi miċħud.
+
+Ir-riżultat jesponi `requested_combo` (l-intenzjoni ta' min jagħmel it-talba), `dispatched_model`
+(it-talba effettiva lill-gateway), `response_model` (ir-risposta tal-gateway) u
+`confirmed_combo`. L-aħħar qasam ikun `null` sakemm il-gateway ma jidentifikax
+combo b'mod espliċitu. Ir-reġistri tad-deċiżjonijiet A2A jattribwixxu l-eżekuzzjoni biss lil
+combo kkonfermat, filwaqt li jżommu talba mhux ikkonfermata bħala `requestedCombo`.
+
 **Risposta:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE Streaming
+### `message/stream` — Streaming permezz ta' SSE
 
-Identika għal `message/send` imma jirritorna Eventi SSE għal streaming f'ħin reali.
+L-istess bħal `message/send`, iżda jirritorna Server-Sent Events għal streaming f'ħin reali.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Eventi SSE:**
+**Avvenimenti SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Staqsi l-Status tal-Kompitu
+### `tasks/get` — Ikkonsulta l-Istatus tal-Kompitu
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Kanċella Kompitu
+### `tasks/cancel` — Ikkanċella Kompitu
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Ħiliet Disponibbli
 
-OmniRoute jesponi 6 ħiliet A2A konnessi f’`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kull modulu ta’ ħila jinsab f’`src/lib/a2a/skills/`.
+OmniRoute jesponi 6 ħiliet A2A konnessi f'`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kull modulu ta' ħila jinsab f'`src/lib/a2a/skills/`.
 
-| Ħila                   | ID                   | Deskrizzjoni                                                                                                                                                                              | Tikketti                  | Eżempji                                      |
-| :--------------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------ | :------------------------------------------- |
-| Rotot Intelliġenti     | `smart-routing`      | Jgħaddi prompt mill-aħjar fornitur/kombinazzjoni bl-użu tal-magna tal-kombinazzjonijiet u l-punteġġi ta’ OmniRoute                                                                        | rotot, fornituri          | "Għaddi dan il-prompt mill-aħjar mudell"     |
-| Ġestjoni tal-Kwoti     | `quota-management`   | Jirrapporta l-istat tal-kwota għal kull fornitur u jgħin lil min isejjaħ jiddeċiedi meta jillimita/jaqleb                                                                                 | kwota, fornituri          | "Iċċekkja l-kwota għal anthropic"            |
-| Skoperta tal-Fornituri | `provider-discovery` | Jelenka l-fornituri installati bil-kapaċitajiet, l-indikaturi tal-livell bla ħlas u l-istat ta’ OAuth                                                                                     | fornituri, skoperta       | "Liema fornituri huma disponibbli?"          |
-| Analiżi tal-Ispejjeż   | `cost-analysis`      | Jistma l-ispiża ta’ talba/konverżazzjoni abbażi tal-katalgu u l-użu reċenti                                                                                                               | spiża, użu                | "Stima l-ispiża għal din il-konverżazzjoni"  |
-| Rapport dwar is-Saħħa  | `health-report`      | Jagħmel aggregazzjoni tal-istat tas-circuit breaker, tal-cooldown u tal-lockout għal kull fornitur                                                                                        | saħħa, reżiljenza         | "Uri l-istat tas-saħħa tal-fornituri kollha" |
-| Elenka l-Kapaċitajiet  | `list-capabilities`  | Jirritorna l-katalgu sħiħ ta’ 45 entrata ta’ Agent Skills (23 API + 21 CLI + konfigurazzjoni waħda) bħala tabella markdown b’URLs SKILL.md mhux ipproċessati għall-injezzjoni tal-kuntest | katalgu, skoperta, ħiliet | "Elenka l-kapaċitajiet kollha ta’ OmniRoute" |
+| Ħila               | ID                   | Deskrizzjoni                                                                                                                                                            | Tikketti                   | Eżempji                                        |
+| :----------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------- |
+| Smart Routing      | `smart-routing`      | Irotta prompt permezz tal-provider/combo ottimali billi juża l-magna tal-combo ta' OmniRoute flimkien mal-iskorjar                                                      | routing, providers         | "Irotta dan il-prompt l-aħjar mudell"          |
+| Quota Management   | `quota-management`   | Jirrapporta l-istat tal-kwota għal kull provider, jgħin lill-sejħa jiddeċiedu meta jnaqqsu r-rata jew jibdlu                                                            | quota, providers           | "Iċċekkja l-kwota għal anthropic"              |
+| Provider Discovery | `provider-discovery` | Jelenka l-providers installati bil-kapaċitajiet, il-bandieri tal-free-tier, u l-istatus tal-OAuth                                                                       | providers, discovery       | "Liema providers huma disponibbli?"            |
+| Cost Analysis      | `cost-analysis`      | Jistima l-ispiża ta' talba/konversazzjoni abbażi tal-katalgu u l-użu reċenti                                                                                            | cost, usage                | "Istima l-ispiża ta' din il-konversazzjoni"    |
+| Health Report      | `health-report`      | Jaggrèga l-istat ta' circuit breaker, cooldown, u lockout għal kull provider                                                                                            | health, resilience         | "Uri l-istatus tas-saħħa tal-providers kollha" |
+| List Capabilities  | `list-capabilities`  | Jirritorna l-katalgu sħiħ ta' 45-il dħul tal-Agent Skills (23 API + 21 CLI + 1 config) bħala tabella markdown bil-URLs grezzi tas-SKILL.md għall-injezzjoni tal-kuntest | catalog, discovery, skills | "Elenka l-kapaċitajiet kollha ta' OmniRoute"   |
 
-> L-Agent Card għandha tinżamm allinjata mal-katalgu attiv ta’ 374 fornitur; l-għadd tal-fornituri u l-metadata dwar dawk bla ħlas/mingħajr awtentikazzjoni jinkisbu mir-reġistru waqt it-tħaddim.
+> L-Agent Card għandu jinżamm allinjat mal-katalgu ħaj ta' 375 provider; il-għadd tal-providers u l-metadata ta' b'xejn/bla avtentikazzjoni jittieħdu mir-reġistru tal-runtime.
 
-### Dettalji tal-Ħila `list-capabilities`
+### Dettall tal-Ħila `list-capabilities`
 
-Il-ħila `list-capabilities` hija partikolarment utli għal aġenti esterni li jeħtieġu jiskopru x’jesponi OmniRoute qabel jibagħtu sejħiet API. Hija tirritorna artifact strutturat bħala tabella markdown:
+Il-ħila `list-capabilities` hija partikolarment utli għal aġenti esterni li jeħtieġilhom jiskopru x'jesponi OmniRoute qabel ma jibagħtu sejħiet API. Tirritorna artefatt b'tabella markdown strutturata:
 
 ```
-| ID | Isem | Kategorija | Qasam | Endpoints/Kmandi | URL Mhux Ipproċessat |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Awtentikazzjoni u Sessjonijiet | api | awtentikazzjoni | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Kull ringiela tinkludi l-kolonna `rawUrl` sabiex l-aġenti jkunu jistgħu minnufih iniżżlu l-SKILL.md sħiħ. Il-qasam `metadata.totalSkills` jirrifletti d-daqs tal-katalgu (45 illum). Implimentazzjoni: `src/lib/a2a/skills/listCapabilities.ts`. Ara wkoll [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Kull ringiela tinkludi l-kolonna `rawUrl` sabiex l-aġenti jkunu jistgħu minnufih jġibu s-SKILL.md sħiħ. Il-qasam `metadata.totalSkills` jirrifletti d-daqs tal-katalgu (45 illum). Implementazzjoni: `src/lib/a2a/skills/listCapabilities.ts`. Ara wkoll [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

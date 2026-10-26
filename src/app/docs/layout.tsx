@@ -45,7 +45,7 @@ export default async function Layout({ children }: { children: ReactNode }) {
         secondary: true,
       },
     ],
-    githubUrl: "https://github.com/diegosouzapw/OmniRoute",
+    githubUrl: "https://github.com/cheaper-inference/OmniRoute",
   };
 
   return (

@@ -1,0 +1,1 @@
+- **perf(logging):** the `HH:MM:SS` clock prefix in `streamHandler.ts` and `usageTracking.ts` is built with `padStart` instead of `toLocaleTimeString`, removing a locale-formatter call (~63 µs vs ~0.3 µs) from two hot-path log lines per request with identical output ([#17149](https://github.com/diegosouzapw/OmniRoute/pull/17149)) — thanks @opensource-elearning

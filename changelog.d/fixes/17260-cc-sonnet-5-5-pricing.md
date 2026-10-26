@@ -1,0 +1,1 @@
+- **fix(pricing):** price `claude-sonnet-5-5` on the `cc` provider — `cc/claude-sonnet-5-5` requests were logged with no cost because the `cc` pricing table had no entry for it; it now uses the Sonnet 5.5 list price ($2 / $10 per MTok, cache read $0.20) ([#17260](https://github.com/diegosouzapw/OmniRoute/pull/17260)) — thanks @aminHZDEV

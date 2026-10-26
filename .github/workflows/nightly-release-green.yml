@@ -66,11 +66,125 @@ env:
   OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
 
 jobs:
+  # Schedule/dispatch only: the commit the hosted suites and the slot validation share.
+  # Resolved once so a push landing mid-sweep cannot split the lanes across two commits.
+  resolve-target:
+    name: Resolve sweep target
+    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      target: ${{ steps.resolve.outputs.target }}
+      sha: ${{ steps.resolve.outputs.sha }}
+      node-version: ${{ steps.runtime.outputs.node-version }}
+    steps:
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        id: runtime
+        with:
+          node-version: "24"
+          package-manager-cache: false
+      - name: Resolve the active release branch and its tip
+        id: resolve
+        env:
+          GH_TOKEN: ${{ github.token }}
+          INPUT_BRANCH: ${{ github.event.inputs.branch }}
+        run: |
+          set -euo pipefail
+          if [ -n "${INPUT_BRANCH:-}" ]; then
+            TARGET="$INPUT_BRANCH"
+          else
+            TARGET=$(gh api "repos/$GITHUB_REPOSITORY/branches?per_page=100" --paginate \
+              --jq '.[].name' | grep -E '^release/v[0-9]+\.[0-9]+\.[0-9]+$' | sort -t/ -k2 -V | tail -1)
+          fi
+          if ! printf '%s' "$TARGET" | grep -qE '^release/v[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "Refusing non-canonical branch name: $TARGET"; exit 1
+          fi
+          SHA=$(gh api "repos/$GITHUB_REPOSITORY/branches/$TARGET" --jq '.commit.sha')
+          if ! printf '%s' "$SHA" | grep -qE '^[0-9a-f]{40}$'; then echo "No tip for $TARGET"; exit 1; fi
+          echo "target=$TARGET" >> "$GITHUB_OUTPUT"
+          echo "sha=$SHA" >> "$GITHUB_OUTPUT"
+          echo "Sweep target: $TARGET @ $SHA"
+
+  # The full sweep's unit, integration and vitest lanes, on hosted runners with ci.yml's own
+  # shards and commands. On the 8-core omni-release slot they took ~4h15 per sweep and failed
+  # timing tests on CPU starvation (2026-10-19/20); hosted, a shard takes ~13 min. The shard
+  # counts must match ci.yml (tests/unit/validate-release-green.test.ts pins it).
+  suites:
+    name: Hosted suite (${{ matrix.name }})
+    needs: resolve-target
+    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { name: unit-1, script: "test:unit:ci:shard", shard: "1/8" }
+          - { name: unit-2, script: "test:unit:ci:shard", shard: "2/8" }
+          - { name: unit-3, script: "test:unit:ci:shard", shard: "3/8" }
+          - { name: unit-4, script: "test:unit:ci:shard", shard: "4/8" }
+          - { name: unit-5, script: "test:unit:ci:shard", shard: "5/8" }
+          - { name: unit-6, script: "test:unit:ci:shard", shard: "6/8" }
+          - { name: unit-7, script: "test:unit:ci:shard", shard: "7/8" }
+          - { name: unit-8, script: "test:unit:ci:shard", shard: "8/8" }
+          - { name: integration-1, script: "test:integration:ci", shard: "1/2" }
+          - { name: integration-2, script: "test:integration:ci", shard: "2/2" }
+          - { name: vitest, script: "test:vitest", shard: "" }
+    env:
+      JWT_SECRET: ci-nightly-secret-with-sufficient-length-for-validation
+      API_KEY_SECRET: ci-nightly-api-key-secret-long
+      DISABLE_SQLITE_AUTO_BACKUP: "true"
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.resolve-target.outputs.sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: ${{ needs.resolve-target.outputs.node-version }}
+          cache: npm
+      - uses: ./.github/actions/npm-ci-retry
+      - name: Run the suite and record its result
+        env:
+          NAME: ${{ matrix.name }}
+          SUITE: ${{ matrix.script }}
+          TEST_SHARD: ${{ matrix.shard }}
+          NODE_OPTIONS: --max-old-space-size=8192
+        run: |
+          set +e
+          if [[ "$NAME" == integration-* ]]; then
+            # as ci.yml's test-integration job
+            export DATA_DIR="/tmp/omniroute-ci-${NAME#integration-}"
+            export INITIAL_PASSWORD=ci-test-password-for-integration
+          fi
+          (
+            if [ "$NAME" = "vitest" ]; then
+              npm run test:vitest && npm run test:vitest:ui
+            else
+              npm run "$SUITE"
+            fi
+          ) 2>&1 | tee suite.log
+          code=${PIPESTATUS[0]}
+          node scripts/ci/release-green-suite.mjs "$NAME" "$code" suite.log suite-results \
+            "$GITHUB_WORKFLOW_SHA" "$SUITE" "$TEST_SHARD" || exit "$?"
+          exit "$code"
+      - name: Upload the suite result
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-green-suite-${{ github.run_attempt }}-${{ matrix.name }}
+          path: suite-results/
+          if-no-files-found: ignore
+          retention-days: 7
+
   release-green:
     name: Validate active release branch
     # On a push, only run for release/* pushes — a push to main is handled by the
     # main-green job below. Schedule/dispatch always run (they validate the highest release).
-    if: ${{ (github.event_name != 'push' || startsWith(github.ref_name, 'release/')) && (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') }}
+    # On push the two jobs above are skipped; !cancelled() keeps this job from being skipped
+    # with them, and on schedule/dispatch it still reports when a suite job failed.
+    needs: [resolve-target, suites]
+    if: ${{ !cancelled() && (github.event_name != 'push' || startsWith(github.ref_name, 'release/')) && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     # Dynamic runner: with USE_VPS_RUNNER=true (release window / on-demand pre-flight)
     # this runs on the dedicated VPS runner — clean env (no operator OMNIROUTE_API_KEY,
     # no local noauth CLIs => zero machine-specific false positives) and no contention.
@@ -98,9 +212,13 @@ jobs:
           INPUT_BRANCH: ${{ github.event.inputs.branch }}
           EVENT_NAME: ${{ github.event_name }}
           PUSHED_REF: ${{ github.ref_name }}
+          SWEEP_TARGET: ${{ needs.resolve-target.outputs.target }}
         run: |
           set -euo pipefail
-          if [ -n "${INPUT_BRANCH:-}" ]; then
+          if [ -n "${SWEEP_TARGET:-}" ]; then
+            # schedule/dispatch: the branch the hosted suites tested
+            TARGET="$SWEEP_TARGET"
+          elif [ -n "${INPUT_BRANCH:-}" ]; then
             TARGET="$INPUT_BRANCH"
           elif [ "$EVENT_NAME" = "push" ]; then
             # validate exactly what was pushed, not the highest branch
@@ -126,10 +244,14 @@ jobs:
           TARGET: ${{ steps.branch.outputs.target }}
           EVENT_NAME: ${{ github.event_name }}
           PUSH_SHA: ${{ github.sha }}
+          SWEEP_SHA: ${{ needs.resolve-target.outputs.sha }}
         run: |
           set -euo pipefail
           if [ "$EVENT_NAME" = "push" ]; then
             git checkout --detach "$PUSH_SHA"
+          elif [ -n "${SWEEP_SHA:-}" ]; then
+            # the exact commit the hosted suites tested
+            git checkout --detach "$SWEEP_SHA"
           else
             git checkout --detach "origin/$TARGET"
           fi
@@ -141,10 +263,33 @@ jobs:
 
       - uses: actions/setup-node@v7
         with:
-          node-version: "24"
+          node-version: ${{ needs.resolve-target.outputs.node-version || '24' }}
           cache: npm
 
       - uses: ./.github/actions/npm-ci-retry
+
+      - name: Collect the hosted suite results
+        if: github.event_name != 'push'
+        continue-on-error: true
+        uses: actions/download-artifact@v8
+        with:
+          # A partial re-run cannot reuse receipts from an earlier attempt;
+          # rerun all suite jobs for a new complete observation of the same tip.
+          pattern: release-green-suite-${{ github.run_attempt }}-*
+          path: suite-results
+          merge-multiple: true
+
+      # Use the immutable workflow revision, not the target checkout (which may
+      # predate this installer). Both scanners are required even for --quick.
+      - name: Prepare pinned workflow scanners
+        id: workflow_scanners
+        env:
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        run: |
+          set -euo pipefail
+          installer=$(mktemp "${RUNNER_TEMP:?}/workflow-scanners-installer.XXXXXX")
+          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installer"
+          bash "$installer"
 
       - name: Release-green validation (full)
         id: validate
@@ -164,12 +309,15 @@ jobs:
           if [ "$EVENT_NAME" = "push" ]; then
             MODE="--quick"
           else
-            MODE="--with-build --full-ci"
+            # unit/integration/vitest ran in the hosted `suites` jobs; a missing result fails
+            mkdir -p suite-results
+            MODE="--with-build --full-ci --suites-from suite-results"
           fi
           echo "[release-green] mode: $MODE (event: $EVENT_NAME)"
           # MODE is an intentional flag list, so word-splitting is wanted here
           # shellcheck disable=SC2086
           node scripts/quality/validate-release-green.mjs --json --hermetic $MODE \
+            --suites-workflow-sha "$GITHUB_WORKFLOW_SHA" \
             1> release-green.json 2> release-green.log
           validation_exit=$?
           node scripts/ci/release-green-result.mjs release-green.json "$validation_exit" "$VALIDATED_SHA" "$EVENT_NAME" >> release-green.log
@@ -264,6 +412,7 @@ jobs:
           path: |
             release-green.json
             release-green.log
+            suite-results/
             _artifacts/release-green/
           if-no-files-found: error
           retention-days: 14
@@ -290,7 +439,7 @@ jobs:
     # re-validated the same commit and held the single `omni-release` slot for ~2 h each
     # (2026-10-19: 08:04–10:01 right after the 2 h20 release sweep, while a `--quick` push
     # run waited ~4 h in the group). The release branch keeps all three sweeps.
-    if: ${{ (github.event_name != 'push' || github.ref_name == 'main') && (github.event_name != 'schedule' || (github.repository == 'diegosouzapw/OmniRoute' && github.event.schedule == '23 5 * * *')) }}
+    if: ${{ (github.event_name != 'push' || github.ref_name == 'main') && (github.event_name != 'schedule' || (github.repository == 'cheaper-inference/OmniRoute' && github.event.schedule == '23 5 * * *')) }}
     # Own slot (docs/ops/RUNNER_BOX.md): `omni-release` is omniroute-113-6 only, so the
     # validation no longer queues on the single `omni-build` slot (the 2026-10-18 05:29
     # sweep waited 6 h for it). That slot is capped at 24 GB, so the validation's build
@@ -319,6 +468,17 @@ jobs:
           cache: npm
 
       - uses: ./.github/actions/npm-ci-retry
+
+      # main can predate the installer: obtain tooling from the workflow SHA.
+      - name: Prepare pinned workflow scanners
+        id: workflow_scanners
+        env:
+          WORKFLOW_SHA: ${{ github.workflow_sha }}
+        run: |
+          set -euo pipefail
+          installer=$(mktemp "${RUNNER_TEMP:?}/workflow-scanners-installer.XXXXXX")
+          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installer"
+          bash "$installer"
 
       - name: Main-green validation
         id: validate
@@ -457,7 +617,7 @@ jobs:
   # walk each time. Detection stays on push (release-green above); banking is batched.
   bank-ratchet-shrinks:
     name: Bank ratchet shrinks
-    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') }}
+    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -588,7 +748,7 @@ jobs:
   # out of the issue queue; the existing quality gates still enforce their budgets.
   baseline-headroom:
     name: Baseline headroom
-    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute') }}
+    if: ${{ github.event_name != 'push' && (github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute') }}
     timeout-minutes: 60
     runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     permissions:

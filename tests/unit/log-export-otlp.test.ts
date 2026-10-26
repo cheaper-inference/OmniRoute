@@ -583,7 +583,9 @@ test("429 respects Retry-After then succeeds; 5xx and timeout retries bounded an
     try {
       await assert.rejects(
         otlp.otlpHttpDestination
-          .createClient(config({ endpoint: s.endpoint, timeoutMs: 30 }))
+          .createClient(
+            config({ endpoint: s.endpoint, timeoutMs: mode === "timeout" ? 30 : 5_000 })
+          )
           .send([record]),
         {
           message:

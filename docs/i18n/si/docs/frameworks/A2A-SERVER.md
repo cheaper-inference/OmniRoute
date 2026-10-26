@@ -47,7 +47,7 @@ JSON-RPC දෝෂ කේතය `-32000` සමඟ HTTP 503 ආපසු ලබ�
 
 ### `message/send` — සමමුහුර්ත ක්රියාත්මක කිරීම
 
-කුසලතාවකට පණිවිඩයක් යවා සම්පූර්ණ ප්රතිචාරය ලැබෙන තෙක් රැඳී සිටී.
+කුසලතාවකට පණිවිඩයක් යවා සම්පූර්ණ ප්රතිචාරය ලැබෙන තෙක් රැඳී සිටියි.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing` සඳහා, `metadata.combo` යනු ද්වාර ඉල්ලීම සඳහා
+`metadata.model` පැහැදිලිව අතික්රමණය කිරීමකි; එය නොසලකා හරින ලද `x-combo`
+JSON ක්ෂේත්රයක් ලෙස නොව, සැබෑ `model` ලෙස යවනු ලැබේ. ද්වාරයේ සාමාන්ය API යතුරු සහ
+එක් එක් ඉලක්කයට අදාළ අවසර දීම තවමත් ක්රියාත්මක වේ. වලංගු නොවන හෝ හිස් combo එකක් ප්රතික්ෂේප කෙරේ.
+
+ප්රතිඵලය මඟින් `requested_combo` (අමතන්නාගේ අභිප්රාය), `dispatched_model`
+(සැබෑ ද්වාර ඉල්ලීම), `response_model` (ද්වාර ප්රතිචාරය) සහ
+`confirmed_combo` අනාවරණය කරයි. ද්වාරය combo එකක් පැහැදිලිව හඳුනා නොගන්නේ නම් අවසාන ක්ෂේත්රය `null` වේ.
+A2A තීරණ ලොග් මඟින් ක්රියාත්මක කිරීම ආරෝපණය කරන්නේ තහවුරු කළ combo එකකට පමණක් වන අතර,
+තහවුරු නොකළ ඉල්ලීමක් `requestedCombo` ලෙස රඳවා ගනියි.
+
 **ප්රතිචාරය:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE ප්රවාහකරණය
 
-`message/send` හා සමාන නමුත් තත්ය කාලීන ප්රවාහකරණය සඳහා සේවාදායකයෙන් යවන ලද සිදුවීම් ආපසු ලබා දෙයි.
+`message/send` හා සමාන නමුත් තත්ය කාලීන ප්රවාහකරණය සඳහා සර්වර්-යැවූ සිදුවීම් ආපසු ලබා දෙයි.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## ලබා ගත හැකි කුසලතා
+## පවතින කුසලතා
 
-OmniRoute මඟින් `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` තුළ සම්බන්ධ කර ඇති A2A කුසලතා 6ක් නිරාවරණය කරයි. සෑම කුසලතා මොඩියුලයක්ම `src/lib/a2a/skills/` තුළ පිහිටා ඇත.
+OmniRoute, `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` හි සම්බන්ධ කර ඇති A2A කුසලතා 6ක් නිරාවරණය කරයි. සෑම කුසලතා මොඩියුලයක්ම `src/lib/a2a/skills/` හි පිහිටා ඇත.
 
-| කුසලතාව                    | ID                   | විස්තරය                                                                                                                                                 | ටැග්                        | උදාහරණ                                         |
-| :------------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------- | :--------------------------------------------- |
-| ස්මාර්ට් රවුටින්           | `smart-routing`      | OmniRoute හි combo එන්ජිම + ලකුණුකරණය භාවිතයෙන් ප්රශස්ත සැපයුම්කරු/combo හරහා prompt එකක් යොමු කරයි                                                     | රවුටින්, සැපයුම්කරුවන්      | "මෙම prompt එක හොඳම model එක හරහා යොමු කරන්න"  |
-| කෝටා කළමනාකරණය             | `quota-management`   | එක් එක් සැපයුම්කරුගේ කෝටා තත්ත්වය වාර්තා කරමින්, වේගය සීමා කළ යුතු හෝ සැපයුම්කරු මාරු කළ යුතු අවස්ථා තීරණය කිරීමට කැඳවුම්කරුවන්ට උපකාර කරයි             | කෝටා, සැපයුම්කරුවන්         | "anthropic සඳහා කෝටාව පරීක්ෂා කරන්න"           |
-| සැපයුම්කරු සොයාගැනීම       | `provider-discovery` | හැකියාවන්, නොමිලේ ස්ථර සලකුණු සහ OAuth තත්ත්වය සමඟ ස්ථාපිත සැපයුම්කරුවන් ලැයිස්තුගත කරයි                                                                | සැපයුම්කරුවන්, සොයාගැනීම    | "ලබා ගත හැකි සැපයුම්කරුවන් මොනවාද?"            |
-| පිරිවැය විශ්ලේෂණය          | `cost-analysis`      | නාමාවලිය + මෑත භාවිතය අනුව ඉල්ලීමක/සංවාදයක පිරිවැය ඇස්තමේන්තු කරයි                                                                                      | පිරිවැය, භාවිතය             | "මෙම සංවාදය සඳහා පිරිවැය ඇස්තමේන්තු කරන්න"     |
-| සෞඛ්ය වාර්තාව              | `health-report`      | එක් එක් සැපයුම්කරු සඳහා circuit breaker, cooldown සහ lockout තත්ත්වයන් ඒකාබද්ධ කරයි                                                                     | සෞඛ්යය, ප්රත්යස්ථතාව        | "සියලු සැපයුම්කරුවන්ගේ සෞඛ්ය තත්ත්වය පෙන්වන්න" |
-| හැකියාවන් ලැයිස්තුගත කිරීම | `list-capabilities`  | සන්දර්භ ඇතුළත් කිරීම සඳහා අමු SKILL.md URLs සමඟ සම්පූර්ණ අයිතම 45ක Agent Skills නාමාවලිය (23 API + 21 CLI + 1 config) markdown වගුවක් ලෙස ආපසු ලබා දෙයි | නාමාවලිය, සොයාගැනීම, කුසලතා | "සියලු OmniRoute හැකියාවන් ලැයිස්තුගත කරන්න"   |
+| කුසලතාවය           | ID                   | විස්තරය                                                                                                                                              | ටැග                        | උදාහරණ                                        |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :-------------------------------------------- |
+| Smart Routing      | `smart-routing`      | OmniRoute හි combo engine + scoring භාවිතයෙන් prompt එකක් ප්රශස්ත provider/combo එක හරහා යොමු කරයි                                                   | routing, providers         | "මෙම prompt එක හොඳම model එක හරහා යොමු කරන්න" |
+| Quota Management   | `quota-management`   | එක් එක් provider සඳහා quota තත්ත්වය වාර්තා කරයි, ඇමතුම්කරුවන්ට throttle/switch කළ යුත්තේ කවදාද යනු තීරණය කිරීමට උදව් වේ                              | quota, providers           | "anthropic සඳහා quota පරීක්ෂා කරන්න"          |
+| Provider Discovery | `provider-discovery` | ස්ථාපිත providers, හැකියාවන්, free-tier ධජ, OAuth තත්ත්වය සමඟ ලැයිස්තුගත කරයි                                                                        | providers, discovery       | "පවතින providers මොනවාද?"                     |
+| Cost Analysis      | `cost-analysis`      | catalog එක + මෑත භාවිතය සලකා request/conversation එකක පිරිවැය ඇස්තමේන්තු කරයි                                                                        | cost, usage                | "මෙම සංවාදය සඳහා පිරිවැය ඇස්තමේන්තු කරන්න"    |
+| Health Report      | `health-report`      | එක් එක් provider සඳහා circuit breaker, cooldown, lockout තත්ත්ව එකතු කරයි                                                                            | health, resilience         | "සියලුම providers හි සෞඛ්ය තත්ත්වය පෙන්වන්න"  |
+| List Capabilities  | `list-capabilities`  | සම්පූර්ණ Agent Skills catalog එක (entries 45: API 23 + CLI 21 + config 1) context injection සඳහා අමු SKILL.md URLs සහිත markdown වගුවක් ලෙස ලබා දෙයි | catalog, discovery, skills | "සියලුම OmniRoute හැකියාවන් ලැයිස්තුගත කරන්න" |
 
-> Agent Card එක සජීවී සැපයුම්කරුවන් 374ක නාමාවලිය සමඟ සමපාතව තබා ගත යුතුය; සැපයුම්කරුවන් ගණන සහ නොමිලේ/සත්යාපනය අවශ්ය නොවන පාරදත්ත runtime registry වෙතින් ලබා ගනී.
+> Agent Card එක සජීවී providers 375ක catalog එක සමඟ ගැලපෙන පරිදි තබා ගත යුතුය; provider ගණන සහ free/no-auth metadata runtime registry එකෙන් ලබාගැනේ.
 
-### `list-capabilities` කුසලතාව පිළිබඳ විස්තර
+### `list-capabilities` කුසලතා විස්තර
 
-API ඇමතුම් යැවීමට පෙර OmniRoute නිරාවරණය කරන දේ සොයා ගැනීමට අවශ්ය බාහිර agents සඳහා `list-capabilities` කුසලතාව විශේෂයෙන් ප්රයෝජනවත් වේ. එය ව්යුහගත markdown වගු artifact එකක් ආපසු ලබා දෙයි:
+`list-capabilities` කුසලතාවය, API ඇමතුම් යැවීමට පෙර OmniRoute නිරාවරණය කරන දේ සොයා ගැනීමට අවශ්ය බාහිර agents සඳහා විශේෂයෙන් ප්රයෝජනවත් වේ. එය ව්යුහගත markdown වගු artifact එකක් ලබා දෙයි:
 
 ```
-| ID | නම | ප්රවර්ගය | ක්ෂේත්රය | Endpoints/Commands | අමු URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | සත්යාපනය සහ සැසි | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-සෑම පේළියකම `rawUrl` තීරුව ඇතුළත් වන බැවින් agents හට සම්පූර්ණ SKILL.md එක වහාම ලබා ගත හැකිය. `metadata.totalSkills` ක්ෂේත්රය නාමාවලියේ ප්රමාණය පිළිබිඹු කරයි (අද වන විට 45). ක්රියාත්මක කිරීම: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md) ද බලන්න.
+සෑම පේළියක්ම `rawUrl` තීරය ඇතුළත් කරයි, එබැවින් agents වලට සම්පූර්ණ SKILL.md එක වහාම ලබා ගත හැක. `metadata.totalSkills` ක්ෂේත්රය catalog ප්රමාණය පිළිබිඹු කරයි (අද 45). ක්රියාත්මක කිරීම: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md) ද බලන්න.
 
 ---
 

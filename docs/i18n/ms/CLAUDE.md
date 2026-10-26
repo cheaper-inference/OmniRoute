@@ -11,17 +11,18 @@ pembantu AI (seni bina, konvensyen, pengujian, gerbang kualiti, aliran kerja git
 pembelajaran PII). Baca sepenuhnya; jangan tambahkan semula peraturan projek di sini. Semua perkara di bawah terpakai HANYA
 untuk Claude Code — penambahbaikan operasi terhadap peraturan yang telah ditakrifkan dalam `AGENTS.md`.
 
-## Pengasingan worktree — perkara khusus Claude Code
+## Pengasingan worktree — Perkara khusus Claude Code
 
-Protokol worktree mandatori yang lengkap (pengesahan cabang asas, laluan kanonik
-`.claude/worktrees/`, `cp -al` node_modules, peraturan penghapusan) terdapat dalam `AGENTS.md` → Aliran Kerja Git → "Pengasingan
-worktree". Perkara khusus Claude Code:
+Protokol worktree mandatori penuh (pengesahan cabang asas, laluan kanonikal `.claude/worktrees/`,
+`cp -al` node_modules, peraturan teardown) terdapat dalam
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (diringkaskan dalam `AGENTS.md` →
+Git Workflow → "Worktree isolation"). Perkara khusus Claude Code:
 
 - Sahkan cabang asas dengan operator melalui `AskUserQuestion` (Peraturan Tegas #19) melainkan mereka
-  telah memaklumkannya kepada anda.
-- Utamakan alat natif `EnterWorktree` — alat ini sememangnya mencipta worktree di bawah
-  `.claude/worktrees/` (laluan kanonik). Cipta worktree menggunakan perintah `git
-worktree add` yang didokumentasikan, kemudian panggil `EnterWorktree` dengan `path` worktree tersebut.
+  telah memberitahu anda.
+- Utamakan alat `EnterWorktree` asli — ia sudah pun mencipta worktree di bawah
+  `.claude/worktrees/` (laluan kanonikal). Cipta worktree dengan perintah `git worktree add` yang
+  didokumentasikan, kemudian panggil `EnterWorktree` dengan `path`-nya.
 
 ## Keselamatan merentas sesi — perkara khusus Claude Code
 

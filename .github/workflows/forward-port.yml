@@ -36,7 +36,7 @@ concurrency:
 jobs:
   forward-port:
     name: Cherry-pick onto develop
-    if: github.ref == 'refs/heads/stable/v3' && github.repository == 'diegosouzapw/OmniRoute'
+    if: github.ref == 'refs/heads/stable/v3' && github.repository == 'cheaper-inference/OmniRoute'
     runs-on: ubuntu-latest
     permissions:
       contents: write # push forward-port/<sha7>

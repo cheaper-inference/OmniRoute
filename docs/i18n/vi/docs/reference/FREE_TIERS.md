@@ -44,17 +44,17 @@ Các nguồn đóng góp **đã được ghi nhận trong tài liệu** lớn nh
 
 ---
 
-## Bản cập nhật 2026-06-17 — những thay đổi kể từ 2026-06-05
+## Bản cập nhật 2026-06-17 — những gì đã thay đổi kể từ 2026-06-05
 
-Một lượt nghiên cứu web với 50 tác tử (tài liệu chính thức + tin tức trong 7 ngày gần nhất, được kiểm chứng theo hướng đối kháng) đã cập nhật toàn bộ danh mục. Các điểm nổi bật:
+Một lượt nghiên cứu web với 50 tác nhân (tài liệu chính thức + tin tức trong 7 ngày gần nhất, được kiểm chứng theo hướng đối kháng) đã cập nhật toàn bộ danh mục. Các điểm nổi bật:
 
-- **Đã loại bỏ / không còn gói miễn phí (2026):** `chutes` (gói miễn phí kết thúc vào 2026-03), `phind` (công ty đóng cửa vào 2026-01), `kluster` (ngừng hoạt động vào 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (quyền truy cập MiMo miễn phí bị thu hồi vào 2026-05-24, chương trình khuyến mãi Nemotron kết thúc vào 2026-06 — được xác minh lại vào 2026-06-18), `aimlapi` (gói miễn phí bị tạm dừng — được xác minh lại vào 2026-06-18), `yi` (Yi-Light ngừng hoạt động, chuyển sang trả theo mức sử dụng — được xác minh lại vào 2026-06-18), `featherless-ai` (hiện không có gói miễn phí), `chipotle` ("Pepper AI" của Chipotle — tiện ích trò chuyện Amelia tại `amelia.chipotle.com` được thiết kế ngược mà nhà cung cấp đã giao tiếp nay trả về 404 trên mọi tuyến, bao gồm cả tuyến gốc; backend đã ngừng hoạt động/được di chuyển, xác nhận vào 2026-09-15 — đã bị loại bỏ hoàn toàn khỏi danh mục, #13131/#4037). `iflytek` / `sparkdesk` vẫn được liệt kê nhưng có ghi chú thận trọng về ToS (Spark Lite miễn phí; ToS hạn chế việc sử dụng proxy/relay).
+- **Đã xóa / không còn gói miễn phí (2026):** `chutes` (gói miễn phí kết thúc vào 2026-03), `phind` (công ty ngừng hoạt động vào 2026-01), `kluster` (ngừng cung cấp vào 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (quyền truy cập MiMo miễn phí bị thu hồi vào 2026-05-24, chương trình khuyến mãi Nemotron kết thúc vào 2026-06 — được xác minh lại vào 2026-06-18), `aimlapi` (gói miễn phí bị tạm dừng — được xác minh lại vào 2026-06-18), `yi` (Yi-Light đã ngừng cung cấp, chuyển sang trả tiền theo mức sử dụng — được xác minh lại vào 2026-06-18), `featherless-ai` (hiện không có gói miễn phí), `chipotle` ("Pepper AI" của Chipotle — tiện ích trò chuyện Amelia tại `amelia.chipotle.com` được thiết kế ngược mà nhà cung cấp từng giao tiếp hiện trả về lỗi 404 trên mọi tuyến, kể cả tuyến gốc; backend đã bị ngừng hoạt động/di chuyển, được xác nhận vào 2026-09-15 — đã bị xóa hoàn toàn khỏi danh mục, #13131/#4037). `iflytek` / `sparkdesk` vẫn được liệt kê nhưng có ghi chú cảnh báo về Điều khoản dịch vụ (Spark Lite miễn phí; Điều khoản dịch vụ hạn chế việc sử dụng proxy/relay).
 - **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` đã ngừng hoạt động vào 2026-06-01 và `2.5 Pro` rời khỏi gói miễn phí (2026-04); gói miễn phí hiện **chỉ dành cho dòng Flash** (2.5/3/3.1/3.5 Flash + Gemma). Danh mục hiện **gộp chung** dòng Flash (trước đây bị thổi phồng do tính riêng từng biến thể: 462M → 60M).
-- **Các số liệu đã hiệu chỉnh:** `cloudflare-ai` 122M → **30M** (mức thực tế là 10k Neuron/ngày), `doubao` được phân loại lại thành tín dụng đăng ký một lần (không định kỳ), `llm7` 4M → **150M** (tài liệu ghi rõ 5M token/ngày), các endpoint "-Free" của `together` đã ngừng hoạt động → tín dụng đăng ký $25 cũng bị loại bỏ (yêu cầu mua tối thiểu $5, không có bản dùng thử miễn phí), giai đoạn Preview của `longcat` đã kết thúc + các mô hình Flash đã ngừng hoạt động → chỉ còn **LongCat-2.0**, được phân loại lại thành tín dụng đăng ký một lần trị giá **10M** token (yêu cầu KYC, không định kỳ).
-- **Các nhà cung cấp miễn phí mới được phát hiện:** ⭐ **Kilo Code** (`kilo-gateway` — tập hợp "Auto Free" luân phiên: dòng NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 mô hình lập trình miễn phí luân phiên), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash miễn phí vĩnh viễn + phần thưởng đăng ký 20M), và Trinity Large Preview của `arcee-ai`.
-- **Các hạng trung thực mới** (xem Phương pháp luận): một danh mục _miễn phí vĩnh viễn nhưng không giới hạn_ (quyền truy cập định kỳ thực tế, không có giới hạn token để tính) và một _mức tăng nhờ nạp tiền để mở khóa_ (OpenRouter $10 → +24M/tháng), cả hai đều được trình bày **riêng biệt** để không bao giờ làm tăng số liệu tiêu đề.
+- **Các số liệu đã sửa:** `cloudflare-ai` 122M → **30M** (mức thực tế là 10k Neuron/ngày), `doubao` được phân loại lại thành tín dụng đăng ký một lần (không định kỳ), `llm7` 4M → **150M** (tài liệu ghi rõ 5M token/ngày), các endpoint "-Free" của `together` đã ngừng cung cấp → khoản tín dụng đăng ký $25 cũng bị xóa (yêu cầu mua tối thiểu $5, không có bản dùng thử miễn phí), giai đoạn Preview của `longcat` đã kết thúc + các mô hình Flash đã ngừng cung cấp → chỉ còn **LongCat-2.0**, được phân loại lại thành khoản tín dụng đăng ký một lần trị giá **10M** token (yêu cầu KYC, không định kỳ).
+- **Các nhà cung cấp miễn phí mới được phát hiện:** ⭐ **Kilo Code** (`kilo-gateway` — nhóm "Auto Free" luân phiên: dòng NVIDIA Nemotron 3, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 mô hình lập trình miễn phí luân phiên, được cập nhật vào 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash miễn phí vĩnh viễn + phần thưởng đăng ký 20M), và Trinity Large Preview của `arcee-ai`.
+- **Các cấp mới phản ánh trung thực hơn** (xem Phương pháp luận): một danh mục _miễn phí vĩnh viễn nhưng không giới hạn_ (quyền truy cập định kỳ thực sự, không có giới hạn token để tính) và một _mức tăng sau khi nạp tiền_ (OpenRouter $10 → +24M/tháng), cả hai đều được trình bày **riêng biệt** để không bao giờ làm tăng số liệu tiêu đề.
 
-> Bảng chi tiết theo từng nhà cung cấp ở bên dưới là **ảnh chụp nhanh ngày 2026-06-05**; các thay đổi ở trên thay thế bảng đó. Nguồn chuẩn đang được cập nhật trực tiếp là danh mục theo từng mô hình `open-sse/config/freeModelCatalog.ts`.
+> Bảng chi tiết theo từng nhà cung cấp ở phần dưới là **ảnh chụp nhanh tại thời điểm 2026-06-05**; các thay đổi ở trên thay thế nội dung đó. Nguồn chính tắc, được cập nhật trực tiếp là danh mục theo từng mô hình `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
@@ -228,9 +228,9 @@ Hầu hết các số liệu về "token miễn phí mỗi tháng" trong lĩnh v
 
 ## Gói miễn phí theo từng nhà cung cấp (Bytez/Nous được kiểm tra ngày 2026-10-15; các hàng được kiểm toán lại ngày 2026-09-02; các nhà cung cấp khác ngày 2026-06-17)
 
-> Được tạo lại từ danh mục theo từng mô hình (`open-sse/config/freeModelCatalog.ts`), đã loại bỏ trùng lặp theo pool. Được sắp xếp theo số token ổn định định kỳ mỗi tháng. `uncapped*` = miễn phí vĩnh viễn nhưng không công bố giới hạn token (bị giới hạn về tốc độ/số yêu cầu đồng thời) — quyền truy cập thực tế, **không** được cộng vào tổng số nổi bật. `—` = chỉ có tín dụng / không cần khóa / không thể định lượng bằng token.
+> Được tạo lại từ danh mục theo từng mô hình (`open-sse/config/freeModelCatalog.ts`), đã loại bỏ trùng lặp theo nhóm. Được sắp xếp theo số token định kỳ ổn định mỗi tháng. `uncapped*` = miễn phí vĩnh viễn nhưng không công bố giới hạn token (bị giới hạn về tốc độ/số tác vụ đồng thời) — có thể truy cập thực tế, **không** được cộng vào con số tổng nổi bật. `—` = chỉ có tín dụng / không cần khóa / không thể định lượng theo token.
 
-| Nhà cung cấp     | Loại miễn phí      | Token ổn định/tháng | Tín dụng tháng đầu | Điều khoản | Mô hình |
+| Nhà cung cấp     | Loại miễn phí      | Token ổn định/tháng | Tín dụng tháng đầu | ĐKDV       | Mô hình |
 | ---------------- | ------------------ | ------------------- | ------------------ | ---------- | ------- |
 | `mistral`        | định kỳ            | ~1.00B              | —                  | thận trọng | 5       |
 | `nara`           | định kỳ            | ~210M               | —                  | thận trọng | 8       |
@@ -250,42 +250,42 @@ Hầu hết các số liệu về "token miễn phí mỗi tháng" trong lĩnh v
 | `huggingchat`    | định kỳ            | ~500K               | —                  | thận trọng | 4       |
 | `morph`          | định kỳ            | ~400K               | —                  | ổn         | 2       |
 | `huggingface`    | định kỳ            | ~200K               | —                  | thận trọng | 6       |
-| `kiro`           | định kỳ            | ~25K                | —                  | nên tránh  | 12      |
+| `kiro`           | định kỳ            | ~25K                | —                  | tránh      | 12      |
 | `glm-cn`         | không giới hạn     | không giới hạn\*    | ~20M               | ổn         | 4       |
 | `baidu`          | không giới hạn     | không giới hạn\*    | —                  | thận trọng | 1       |
 | `gemini`         | không giới hạn     | không giới hạn\*    | —                  | thận trọng | 4       |
 | `kilo-gateway`   | không giới hạn     | không giới hạn\*    | —                  | thận trọng | 7       |
 | `ollama-cloud`   | không giới hạn     | không giới hạn\*    | —                  | mơ hồ      | 8       |
-| `opencode-zen`   | không giới hạn     | không giới hạn\*    | —                  | thận trọng | 6       |
+| `opencode-zen`   | không giới hạn     | không giới hạn\*    | —                  | thận trọng | 10      |
 | `tencent`        | không giới hạn     | không giới hạn\*    | —                  | thận trọng | 1       |
 | `vertex`         | tín dụng đăng ký   | —                   | ~300M              | thận trọng | 10      |
 | `agentrouter`    | tín dụng đăng ký   | —                   | ~200M              | thận trọng | 4       |
 | `predibase`      | tín dụng đăng ký   | —                   | ~25M               | thận trọng | 1       |
 | `doubao`         | tín dụng đăng ký   | —                   | ~15M               | mơ hồ      | 1       |
-| `ai21`           | tín dụng đăng ký   | —                   | ~10M               | nên tránh  | 2       |
+| `ai21`           | tín dụng đăng ký   | —                   | ~10M               | tránh      | 2       |
 | `deepseek`       | tín dụng đăng ký   | —                   | ~5M                | ổn         | 2       |
 | `hyperbolic`     | tín dụng đăng ký   | —                   | ~5M                | ổn         | 8       |
 | `nscale`         | tín dụng đăng ký   | —                   | ~5M                | thận trọng | 6       |
 | `bytez`          | tín dụng (định kỳ) | —                   | không rõ           | mơ hồ      | 1       |
 | `deepinfra`      | tín dụng đăng ký   | —                   | ~1M                | thận trọng | 22      |
-| `fireworks`      | tín dụng đăng ký   | —                   | ~1M                | nên tránh  | 10      |
+| `fireworks`      | tín dụng đăng ký   | —                   | ~1M                | tránh      | 10      |
 | `nebius`         | tín dụng đăng ký   | —                   | ~1M                | thận trọng | 1       |
 | `qoder`          | tín dụng đăng ký   | —                   | ~1M                | thận trọng | 14      |
 | `scaleway`       | tín dụng đăng ký   | —                   | ~1M                | ổn         | 6       |
 | `novita`         | tín dụng đăng ký   | —                   | ~500K              | thận trọng | 1       |
-| `agy`            | không cần khóa     | —                   | —                  | nên tránh  | 16      |
+| `agy`            | không cần khóa     | —                   | —                  | tránh      | 16      |
 | `baichuan`       | không cần khóa     | —                   | —                  | mơ hồ      | 1       |
-| `blackbox`       | không cần khóa     | —                   | —                  | nên tránh  | 6       |
-| `coze`           | không cần khóa     | —                   | —                  | nên tránh  | 1       |
-| `duckduckgo-web` | không cần khóa     | —                   | —                  | nên tránh  | 6       |
+| `blackbox`       | không cần khóa     | —                   | —                  | tránh      | 6       |
+| `coze`           | không cần khóa     | —                   | —                  | tránh      | 1       |
+| `duckduckgo-web` | không cần khóa     | —                   | —                  | tránh      | 6       |
 | `freemodel-dev`  | không cần khóa     | —                   | —                  | không rõ   | 4       |
-| `friendliai`     | không cần khóa     | —                   | —                  | nên tránh  | 2       |
-| `iflytek`        | không cần khóa     | —                   | —                  | nên tránh  | 1       |
+| `friendliai`     | không cần khóa     | —                   | —                  | tránh      | 2       |
+| `iflytek`        | không cần khóa     | —                   | —                  | tránh      | 1       |
 | `inference-net`  | không cần khóa     | —                   | —                  | thận trọng | 3       |
 | `liquid`         | không cần khóa     | —                   | —                  | không rõ   | 1       |
 | `monsterapi`     | không cần khóa     | —                   | —                  | mơ hồ      | 1       |
-| `muse-spark-web` | không cần khóa     | —                   | —                  | nên tránh  | 3       |
-| `nlpcloud`       | không cần khóa     | —                   | —                  | nên tránh  | 1       |
+| `muse-spark-web` | không cần khóa     | —                   | —                  | tránh      | 3       |
+| `nlpcloud`       | không cần khóa     | —                   | —                  | tránh      | 1       |
 | `nvidia`         | không cần khóa     | —                   | —                  | thận trọng | 13      |
 | `pollinations`   | không cần khóa     | —                   | —                  | thận trọng | 31      |
 | `publicai`       | không cần khóa     | —                   | —                  | thận trọng | 3       |

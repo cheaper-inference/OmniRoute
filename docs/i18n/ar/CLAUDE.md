@@ -11,17 +11,18 @@
 والدروس المستفادة بشأن PII). اقرأه بالكامل؛ ولا تُعِد إضافة قواعد المشروع هنا. كل ما يلي ينطبق فقط
 على Claude Code — تحسينات تشغيلية للقواعد المعرّفة بالفعل في `AGENTS.md`.
 
-## عزل worktree — تفاصيل خاصة بـ Claude Code
+## عزل Worktree — تفاصيل خاصة بـ Claude Code
 
-يوجد بروتوكول worktree الإلزامي الكامل (تأكيد الفرع الأساسي، والمسار القياسي `.claude/worktrees/`،
-و`cp -al` لـ node_modules، وقواعد الإزالة) في `AGENTS.md` ← سير عمل Git ← "عزل
-worktree". نقاط خاصة بـ Claude Code:
+بروتوكول عزل Worktree الإلزامي الكامل (تأكيد الفرع الأساسي، المسار القياسي
+`.claude/worktrees/`، نسخ node_modules باستخدام `cp -al`، قواعد الإزالة) موجود في
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (وملخّص في `AGENTS.md` →
+سير عمل Git → "عزل Worktree"). النقاط الخاصة بـ Claude Code:
 
 - أكّد الفرع الأساسي مع المشغّل عبر `AskUserQuestion` (القاعدة الصارمة رقم 19) ما لم يكن قد
-  أخبرك به بالفعل.
-- فضّل أداة `EnterWorktree` الأصلية — فهي تنشئ بالفعل أشجار العمل ضمن
-  `.claude/worktrees/` (المسار القياسي). أنشئ شجرة العمل باستخدام أمر `git
-worktree add` الموثّق، ثم استدعِ `EnterWorktree` باستخدام `path` الخاص بها.
+  أخبرك به مسبقًا.
+- فضّل الأداة الأصلية `EnterWorktree` — فهي تنشئ worktrees بالفعل تحت
+  `.claude/worktrees/` (المسار القياسي). أنشئ worktree باستخدام الأمر الموثّق `git
+worktree add`، ثم استدعِ `EnterWorktree` مع قيمة `path` الخاصة به.
 
 ## السلامة عبر الجلسات — تفاصيل خاصة بـ Claude Code
 
