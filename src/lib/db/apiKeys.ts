@@ -25,6 +25,7 @@ import { setNoLog } from "../compliance/noLog";
 import { resolveModelAlias } from "@omniroute/open-sse/services/modelDeprecation.ts";
 import { stripNoThinkingAlias } from "@omniroute/open-sse/utils/noThinkingAlias.ts";
 import { getProviderAlias, resolveProviderId } from "@/shared/constants/providers";
+import { evaluateModelAccess } from "@/domain/modelAccessPolicy";
 import { isSelfLoopBearer, selfLoopKeyOverrides } from "./apiKeys/selfLoopKey";
 import {
   backfillApiKeySecretsAtRest,
@@ -44,7 +45,6 @@ import {
   addModelCandidate,
   addProviderAliasScopedCandidates,
   modelPatternMatches,
-  hasClaudeCodeWildcardPermission,
   matchesWildcardPattern,
 } from "./apiKeys/modelPermissions";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
@@ -1641,93 +1641,27 @@ export async function isModelAllowedForKey(
   // SECURITY: Key not found in database = deny access (invalid/non-existent key)
   if (!metadata) return false;
 
-  const { modelAccessMode, allowedModels, blockedModels, disableNonPublicModels } = metadata;
-  // Preserve requested aliases for allow-list matching while applying resolved
-  // target candidates to deny rules and group access checks.
-  const modelPermissionCandidates = Array.from(
-    new Set([
-      ...(await getModelPermissionCandidates(modelId)),
-      ...(resolvedModelId ? await getModelPermissionCandidates(resolvedModelId) : []),
-    ])
+  const decision = await evaluateModelAccess(
+    metadata,
+    { modelId, resolvedModelId },
+    {
+      getCandidates: getModelPermissionCandidates,
+      resolveAlias: resolveModelAlias,
+      getPublishedTarget: getPublishedModelLookupTarget,
+      findPublishedModel,
+      isPublishedModelHidden,
+      checkGroupAccess: checkKeyModelAccess,
+      isDeniedUnderCanonicalProvider,
+    }
   );
 
-  // Deny-list patterns win over any allow-list entry. This lets operators keep
-  // broad dynamic scopes like cc/* while excluding expensive families.
-  if (blockedModels?.some((pattern) => modelPatternMatches(pattern, modelPermissionCandidates))) {
-    return false;
-  }
-
-  // Check disableNonPublicModels flag
-  if (disableNonPublicModels) {
-    const effectiveModelId = resolvedModelId || resolveModelAlias(modelId) || modelId;
-    const publicationCandidates = resolvedModelId
-      ? await getModelPermissionCandidates(resolvedModelId)
-      : modelPermissionCandidates;
-
-    if (!hasClaudeCodeWildcardPermission(allowedModels, publicationCandidates)) {
-      const lookupTarget = await getPublishedModelLookupTarget(effectiveModelId);
-      const providerOrAlias = lookupTarget?.providerId || effectiveModelId.split("/")[0];
-      const shortModelId = lookupTarget?.modelId || effectiveModelId.split("/").slice(1).join("/");
-      if (!providerOrAlias || !shortModelId) return false;
-
-      const published = await findPublishedModel(providerOrAlias, shortModelId);
-      if (!published) return false;
-      const { providerId, publishedModelId } = published;
-
-      // An effort variant dispatches to its base model, so a deny rule on the
-      // base model must also deny the variant.
-      if (publishedModelId !== shortModelId && blockedModels?.length) {
-        const baseCandidates = await getModelPermissionCandidates(
-          `${providerId}/${publishedModelId}`
-        );
-        if (blockedModels.some((pattern) => modelPatternMatches(pattern, baseCandidates))) {
-          return false;
-        }
-      }
-
-      // A model hidden under the alias the client used stays hidden.
-      if (isPublishedModelHidden(providerId, providerOrAlias, publishedModelId)) return false;
-    }
-  }
-
-  // Only explicit allow-all permits an empty list; restricted + [] is deny-all.
-  // No early return here: group deny rules (checked below) must still apply to
-  // keys with an empty per-key allow-list (#8817 regression guard — groups only
-  // AND-deny, so restricted+[] stays deny-all).
-  // Support exact match and prefix match (e.g., "openai/*" allows all OpenAI models)
-  let allowed =
-    !allowedModels || allowedModels.length === 0
-      ? modelAccessMode !== "restricted"
-      : allowedModels.some((pattern) => modelPatternMatches(pattern, modelPermissionCandidates));
-
-  // Group rules must see the requested alias and the concrete target. An allowed
-  // alias cannot hide a resolved target denied by group policy.
-  if (metadata.id) {
-    for (const groupModelId of new Set([modelId, ...(resolvedModelId ? [resolvedModelId] : [])])) {
-      const hasGroupProviderPrefix = groupModelId.includes("/");
-      const groupProvider = hasGroupProviderPrefix ? groupModelId.split("/")[0] : undefined;
-      const groupModelTarget = hasGroupProviderPrefix
-        ? groupModelId.split("/").slice(1).join("/")
-        : groupModelId;
-      const targetOk = checkKeyModelAccess(metadata.id, groupModelTarget, groupProvider).allowed;
-      const fullOk = checkKeyModelAccess(metadata.id, groupModelId, groupProvider).allowed;
-      if (!targetOk || !fullOk) allowed = false;
-
-      if (
-        allowed &&
-        (await isDeniedUnderCanonicalProvider(metadata.id, groupProvider, groupModelTarget))
-      ) {
-        allowed = false;
-      }
-    }
-  }
-  // Cache the result
-  if (!usesSettingDependentClaudeRouting) {
+  // Preserve the cache boundary: early block/publication denials were never cached.
+  if (decision.reason === "permissions" && !usesSettingDependentClaudeRouting) {
     evictModelPermissionCache();
-    setCachedModelPermission(cacheKey, allowed, now, catalogGeneration);
+    setCachedModelPermission(cacheKey, decision.allowed, now, catalogGeneration);
   }
 
-  return allowed;
+  return decision.allowed;
 }
 
 /**

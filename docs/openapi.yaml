@@ -6786,9 +6786,12 @@ paths:
       description: |
         Validates the `state` cookie, exchanges the authorization `code` for tokens,
         verifies the ID token against the issuer's JWKS (audience = client id), and
-        checks the token's `sub`/`email` against `oidcAllowedSubjects`, which must hold at
-        least one entry (an empty list ends in `not_configured`). On success it mints the same 30-day `auth_token` dashboard-session
-        JWT used by password login and redirects to `/dashboard`.
+        requires at least one dashboard admission policy: `oidcAllowedSubjects`
+        (matching `sub` or verified `email`) or `oidcAdmissionClaim` (matching a
+        configured array claim in the verified ID token). When both are present,
+        both must match. Without either policy the callback returns `not_configured`.
+        On success it mints the same 30-day `auth_token` dashboard-session JWT
+        used by password login and redirects to `/dashboard`.
       parameters:
         - name: code
           in: query
@@ -6804,7 +6807,7 @@ paths:
         "302":
           description: >-
             Redirect to `/dashboard` on success, or to
-            `/login?oidc_error={missing_code|invalid_state|not_configured|token_exchange|token_response|no_id_token|subject_not_allowed|id_token_invalid|server_misconfigured}`
+            `/login?oidc_error={missing_code|invalid_state|not_configured|token_exchange|token_response|no_id_token|subject_not_allowed|role_not_allowed|id_token_invalid|server_misconfigured}`
             on failure.
 
   /api/init:

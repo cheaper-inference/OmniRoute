@@ -1,5 +1,5 @@
 import { CORS_HEADERS } from "../utils/cors.ts";
-import { upstreamErrorResponse } from "../utils/audioResponse.ts";
+import { audioErrorResponse, upstreamErrorResponse } from "../utils/audioResponse.ts";
 import { Buffer } from "node:buffer";
 /**
  * Audio Transcription Handler
@@ -1133,6 +1133,6 @@ export async function handleAudioTranscription({
     });
   } catch (err) {
     const error = err instanceof Error ? err : new Error(String(err));
-    return errorResponse(500, `Transcription request failed: ${error.message}`);
+    return audioErrorResponse(500, `Transcription request failed: ${error.message}`);
   }
 }
