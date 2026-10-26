@@ -121,7 +121,7 @@ function isAuthDiagnosesOnlyGateEnabled(): boolean {
   try {
     return resolveRegisteredFeatureFlag(CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG);
   } catch {
-    return false; // fail closed: the release gate (any error blocks)
+    return false; // fail closed for non-transport probe errors
   }
 }
 
@@ -129,7 +129,7 @@ function isAuthDiagnosesOnlyGateEnabled(): boolean {
  * Check if a connection's credential health is "active" (recently tested and passing).
  * Returns:
  *   - true  → healthy, proceed
- *   - false → known-bad, skip
+ *   - false → blocked (confirmed bad auth or legacy strict mode)
  *   - undefined → unknown / not cached (proceed but mark as unchecked)
  */
 export function isCredentialHealthy(connectionId: string): boolean | undefined {
