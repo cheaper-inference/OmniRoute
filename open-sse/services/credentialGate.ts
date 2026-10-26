@@ -16,6 +16,8 @@
 import {
   isCredentialHealthy,
   isCredentialStale,
+  getCredentialHealth,
+  INVALID_CREDENTIAL_DIAGNOSES,
   getCredentialHealthSummary,
 } from "@/lib/credentialHealth/cache";
 
@@ -46,9 +48,15 @@ export function checkCredentialGate(
   const healthy = isCredentialHealthy(connectionId);
 
   if (healthy === false) {
+    const rawType = getCredentialHealth(connectionId)?.lastErrorType;
+    // Diagnosis names are internal enum-style codes; do not log arbitrary raw
+    // probe error text, which can include private upstream response content.
+    const diagnosis =
+      typeof rawType === "string" && /^[a-z_]{1,64}$/.test(rawType) ? rawType : "unknown";
+    const knownBad = INVALID_CREDENTIAL_DIAGNOSES.has(diagnosis);
     return {
       allowed: false,
-      reason: `Credential gate: ${modelStr} — connection ${connectionId} has known-bad credentials (skipping)`,
+      reason: `Credential gate: ${modelStr} — connection ${connectionId} ${knownBad ? "has known-bad credentials" : "has a failed health probe"} (diagnosis: ${diagnosis}; skipping)`,
     };
   }
 
