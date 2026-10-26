@@ -1152,6 +1152,16 @@ test("#18058: Claude model-credit entitlement scopes a cold or stale quota snaps
     cooldownMs: 120_000,
   });
   assert.deepEqual(decide({ nowMs: now + 6 * 60_000 }), modelFallback);
+
+  // A fresh blocking window for this same model WITHOUT a usable reset is
+  // still a model-only entitlement failure, never a connection-wide park.
+  quotaCache.setQuotaCache(
+    connectionId,
+    "claude",
+    {},
+    { "weekly Fable (7d)": { ...scopedQuota(futureReset), resetAt: null } }
+  );
+  assert.deepEqual(decide(), modelFallback);
 });
 
 test("#18058: unrelated model quota cannot override entitlement, but a global blocker can", () => {
