@@ -2,7 +2,7 @@
  * `POST /v1/systemone` — typed decision requests (System One / Jev).
  *
  * A System One model answers `noul` / `choice` / `score` questions with
- * calibrated probabilities instead of text, so this route is deliberately NOT a
+ * provider-reported probabilities instead of text, so this route is deliberately NOT a
  * chat path: no translation, no streaming, no combo expansion. It validates the
  * envelope, resolves the client's model id into ordered `(provider, model)`
  * candidates, and hands the attempt loop to `./dispatch.ts`, which selects

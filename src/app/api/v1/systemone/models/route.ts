@@ -2,8 +2,8 @@
  * `GET /v1/systemone/models` — the typed-decision model catalog.
  *
  * Read-only companion to `POST /v1/systemone`: it lists the decision models
- * this installation can actually route right now, assembled per configured
- * backend by `handleSystemOneModels`. Decision models are deliberately absent
+ * exposed by eligible configured backend connections, assembled by
+ * `handleSystemOneModels`. Listing does not establish inference entitlement. Decision models are deliberately absent
  * from the unified `/v1/models` catalog (they answer questions, not chats), so
  * this is the only place a client can discover them.
  *

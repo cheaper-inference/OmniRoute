@@ -2,7 +2,7 @@
  * System One (typed decision) backend registry.
  *
  * System One models answer typed questions — `noul` (yes/no), `choice` and
- * `score` — with calibrated probabilities instead of text, so they are not chat
+ * `score` — with provider-reported probabilities instead of text, so they are not chat
  * models and are never dispatched by a chat executor. This module is the single
  * place that knows which OmniRoute providers can serve them, where their
  * decision and catalog endpoints live, and how a client-supplied model id maps
@@ -142,8 +142,8 @@ export const SYSTEMONE_MAX_FALLBACK_CANDIDATES = 3;
 
 /**
  * Bare, user-facing aliases and the concrete upstream model id each backend
- * serves them with. Order is the fan-out order for a bare alias: cheapest
- * documented first, then unknown-price gateways in registry order. A free alias
+ * serves them with. The fixed compatibility order below is not a cost ranking.
+ * Provider-qualified ids bypass cross-provider alias fallback. A free alias
  * lists only free-tier model ids, so it can never resolve onto a paid model.
  */
 const SYSTEMONE_MODEL_ALIASES: Readonly<

@@ -7,8 +7,8 @@
  * direct TypeSafe's native name/description catalog. Upstream release_date is
  * accepted by the shared parser but is not part of the catalog projection.
  * A backend with no usable connection is never advertised: the catalog is a
- * statement about what this installation can actually route, so a model is
- * listed only when some eligible connection of that provider could serve it
+ * metadata view of eligible configured connections, not an inference or
+ * entitlement test. A model is listed when such a connection is available
  * (including the free/paid tier rule) and the calling key is allowed to use it.
  *
  * No credential selection, usage or cooldown writes. The existing shared lease guard may

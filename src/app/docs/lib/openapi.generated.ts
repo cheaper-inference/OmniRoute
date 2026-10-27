@@ -1135,7 +1135,7 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     method: "GET",
     summary: "List typed decision models",
     description:
-      "Decision models this installation can actually route, assembled live from the configured backends. Decision-only models are deliberately absent from `GET /api/v1/models`, so this is the only catalog that lists them. Read-only and never cached; the calling key's connection allowlist and model rules are both applied.",
+      "Decision-model metadata from eligible configured backend connections. Listing does not establish inference entitlement. Decision-only models are deliberately absent from `GET /api/v1/models`, so this is the only catalog that lists them. Read-only and never cached; the calling key's connection allowlist and model rules are both applied.",
     tag: "System One",
     tags: ["System One"],
     requiresAuth: true,
