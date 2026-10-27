@@ -8,79 +8,79 @@
 
 _최종 업데이트: 2026-06-28_
 
-## 개요
+## 요약
 
-OmniRoute는 Next.js를 기반으로 구축된 로컬 AI 라우팅 게이트웨이이자 대시보드입니다.
-단일 OpenAI 호환 엔드포인트(`/v1/*`)를 제공하며, 변환, 폴백, 토큰 갱신 및 사용량 추적 기능을 통해 여러 업스트림 공급자 간에 트래픽을 라우팅합니다.
+OmniRoute는 Next.js를 기반으로 구축된 로컬 AI 라우팅 게이트웨이 및 대시보드입니다.
+단일 OpenAI 호환 엔드포인트(`/v1/*`)를 제공하며, 변환, 폴백, 토큰 갱신 및 사용량 추적을 통해 여러 업스트림 공급자에 트래픽을 라우팅합니다.
 
 핵심 기능:
 
-- CLI/도구를 위한 OpenAI 호환 API 인터페이스(공급자 375개, 실행기 모듈 156개)
+- CLI/도구를 위한 OpenAI 호환 API 인터페이스(공급자 376개, 실행기 모듈 156개)
 - 공급자 형식 간 요청/응답 변환
-- 모델 콤보 폴백(다중 모델 시퀀스)
-- 구조화된 콤보 단계(`provider + model + connection`) 및 `compositeTiers`에 따른 런타임 순서 지정
+- 모델 조합 폴백(다중 모델 시퀀스)
+- 구조화된 조합 단계(`provider + model + connection`) 및 `compositeTiers`에 따른 런타임 순서 지정
 - 계정 수준 폴백(공급자별 다중 계정)
-- 기본 채팅 경로에서 할당량 사전 확인 및 할당량을 고려한 P2C 계정 선택
-- OAuth + API 키 기반 공급자 연결 관리(OAuth 공급자 모듈 27개)
+- 기본 채팅 경로에서 할당량 사전 확인 및 할당량 인식 P2C 계정 선택
+- OAuth 및 API 키 기반 공급자 연결 관리(OAuth 공급자 모듈 27개)
 - `/v1/embeddings`를 통한 임베딩 생성(공급자 18개)
-- `/v1/images/generations`를 통한 이미지 생성(10개 이상의 공급자, 20개 이상의 모델)
+- `/v1/images/generations`를 통한 이미지 생성(공급자 10개 이상, 모델 20개 이상)
 - `/v1/audio/transcriptions`를 통한 오디오 전사(공급자 18개)
 - `/v1/audio/speech`를 통한 텍스트 음성 변환(기본 제공 공급자 24개)
-- `/v1/videos/generations`를 통한 비디오 생성(ComfyUI + SD WebUI)
+- `/v1/videos/generations`를 통한 동영상 생성(ComfyUI + SD WebUI)
 - `/v1/music/generations`를 통한 음악 생성(ComfyUI)
 - `/v1/search`를 통한 웹 검색(공급자 20개)
 - `/v1/moderations`를 통한 콘텐츠 검토
-- `/v1/rerank`를 통한 재순위화
-- 추론 모델을 위한 Think 태그 파싱(``)
-- 엄격한 OpenAI SDK 호환성을 위한 응답 정리
+- `/v1/rerank`를 통한 재순위 지정
+- 추론 모델을 위한 Think 태그 파싱(`<think>...</think>`)
+- 엄격한 OpenAI SDK 호환성을 위한 응답 정제
 - 공급자 간 호환성을 위한 역할 정규화(developer→system, system→user)
 - 구조화된 출력 변환(json_schema → Gemini responseSchema)
-- 공급자, 키, 별칭, 콤보, 설정 및 가격 정보의 로컬 영속화(DB 모듈 122개)
+- 공급자, 키, 별칭, 조합, 설정 및 가격 정보의 로컬 영속성(DB 모듈 122개)
 - 사용량/비용 추적 및 요청 로깅
 - 다중 기기/상태 동기화를 위한 선택적 클라우드 동기화
-- API 액세스 제어를 위한 IP 허용 목록/차단 목록
-- 사고 예산 관리(통과/자동/사용자 지정/적응형)
-- 전역 시스템 프롬프트 주입
-- 세션 추적 및 핑거프린팅
+- API 접근 제어를 위한 IP 허용 목록/차단 목록
+- 추론 예산 관리(패스스루/자동/사용자 지정/적응형)
+- 전역 시스템 프롬프트 삽입
+- 세션 추적 및 지문 생성
 - 공급자별 프로필을 사용하는 계정별 고급 속도 제한
 - 공급자 복원력을 위한 서킷 브레이커 패턴
-- 뮤텍스 잠금을 사용하는 썬더링 허드 방지
+- 뮤텍스 잠금을 통한 동시 요청 폭주 방지
 - 서명 기반 요청 중복 제거 캐시
 - 도메인 계층: 비용 규칙, 폴백 정책, 잠금 정책
-- Context Relay: 계정 전환 시 연속성을 유지하기 위한 세션 인계 요약
-- 도메인 상태 영속화(폴백, 예산, 잠금, 서킷 브레이커를 위한 SQLite 연속 기입 캐시)
+- Context Relay: 계정 전환 시 연속성을 위한 세션 인계 요약
+- 도메인 상태 영속성(폴백, 예산, 잠금 및 서킷 브레이커를 위한 SQLite 연속 기입 캐시)
 - 중앙 집중식 요청 평가를 위한 정책 엔진(잠금 → 예산 → 폴백)
 - p50/p95/p99 지연 시간 집계를 지원하는 요청 텔레메트리
-- `combo_execution_key` / `combo_step_id`를 통한 콤보 대상 텔레메트리 및 과거 콤보 대상 상태
+- `combo_execution_key` / `combo_step_id`를 통한 조합 대상 텔레메트리 및 과거 조합 대상 상태
 - 엔드투엔드 추적을 위한 상관관계 ID(X-Request-Id)
 - API 키별 옵트아웃을 지원하는 규정 준수 감사 로깅
 - LLM 품질 보증을 위한 평가 프레임워크
 - 실시간 공급자 서킷 브레이커 상태를 제공하는 상태 대시보드
 - 3가지 전송 방식(stdio/SSE/Streamable HTTP)을 지원하는 MCP Server(도구 110개)
 - 스킬 및 작업 수명 주기를 지원하는 A2A Server(JSON-RPC 2.0 + SSE)
-- 메모리 시스템(추출, 주입, 검색, 요약)
+- 메모리 시스템(추출, 삽입, 검색, 요약)
 - 스킬 시스템(레지스트리, 실행기, 샌드박스, 기본 제공 스킬)
 - 인증서 관리 및 DNS 처리를 지원하는 MITM 프록시
 - 프롬프트 인젝션 방어 미들웨어
-- Caveman, RTK, 스택형 파이프라인, 압축 콤보, 언어 팩 및 분석을 지원하는 프롬프트 압축 파이프라인
-- ACP(Agent Communication Protocol) 레지스트리
+- Caveman, RTK, 스택형 파이프라인, 압축 조합, 언어 팩 및 분석을 지원하는 프롬프트 압축 파이프라인
+- ACP (Agent Communication Protocol) 레지스트리
 - 모듈식 OAuth 공급자(`src/lib/oauth/providers/` 아래의 개별 모듈 22개)
 - 제거/완전 제거 스크립트
 - OAuth 환경 복구 작업
 - OpenAI 호환 WS 클라이언트를 위한 WebSocket 브리지(`/v1/ws`)
-- 동기화 토큰 관리(발급/취소, ETag 버전 기반 구성 번들 다운로드)
-- 일급 공급자 프리셋으로 제공되는 GLM Thinking(`glmt`)
+- 동기화 토큰 관리(발급/폐기, ETag 버전 관리형 구성 번들 다운로드)
+- 일급 공급자 프리셋인 GLM Thinking(`glmt`)
 - 하이브리드 토큰 계산(공급자 측 `/messages/count_tokens` 및 추정 폴백)
 - 모델 별칭 자동 시딩(시작 시 30개 이상의 프록시 간 방언 정규화)
-- SSRF 방어, 비공개 URL 차단 및 구성 가능한 재시도를 지원하는 안전한 아웃바운드 가져오기
+- SSRF 방어, 비공개 URL 차단 및 구성 가능한 재시도를 지원하는 안전한 아웃바운드 fetch
 - 구성 가능한 `requestRetry` 및 `maxRetryIntervalSec`를 사용하는 쿨다운 인식 채팅 재시도
 - 시작 시 Zod를 사용하는 런타임 환경 검증
 - 페이지네이션, 공급자 CRUD 이벤트 및 SSRF 차단 검증 로깅을 지원하는 규정 준수 감사 v2
 
 기본 런타임 모델:
 
-- `src/app/api/*` 아래의 Next.js 앱 라우트는 대시보드 API와 호환성 API를 모두 구현합니다
-- `src/sse/*` + `open-sse/*`의 공유 SSE/라우팅 코어는 공급자 실행, 변환, 스트리밍, 폴백 및 사용량을 처리합니다
+- `src/app/api/*` 아래의 Next.js 앱 라우트가 대시보드 API와 호환성 API를 모두 구현
+- `src/sse/*` + `open-sse/*`의 공유 SSE/라우팅 코어가 공급자 실행, 변환, 스트리밍, 폴백 및 사용량을 처리
 
 ## 참조 다이어그램
 
@@ -114,14 +114,14 @@ v3.8.0 플랫폼의 표준 버전 관리 Mermaid 소스는
 - 로컬 프로세스 외부의 공급자 SLA/제어 플레인
 - 외부 CLI 바이너리 자체(Claude CLI, Codex CLI 등)
 
-## 대시보드 화면(현재)
+## 대시보드 화면 (현재)
 
 `src/app/(dashboard)/dashboard/` 아래의 주요 페이지:
 
-- `/dashboard` — 빠른 시작 + 공급자 개요
+- `/dashboard` — 빠른 시작 + 제공자 개요
 - `/dashboard/endpoint` — 엔드포인트 프록시 + MCP + A2A + API 엔드포인트 탭
-- `/dashboard/providers` — 공급자 연결 및 자격 증명
-- `/dashboard/combos` — 콤보 전략, 템플릿, 단계 기반 빌더, 모델 라우팅 규칙, 수동 영속 순서 지정
+- `/dashboard/providers` — 제공자 연결 및 자격 증명
+- `/dashboard/combos` — 콤보 전략, 템플릿, 단계 기반 빌더, 모델 라우팅 규칙, 수동 영구 정렬
 - `/dashboard/auto-combo` — Auto Combo Engine: 점수 가중치, 모드 팩, 가상 팩토리 프리셋, 텔레메트리
 - `/dashboard/costs` — 비용 집계 및 가격 가시성
 - `/dashboard/analytics` — 사용량 분석, 평가, 콤보 대상 상태
@@ -130,27 +130,35 @@ v3.8.0 플랫폼의 표준 버전 관리 Mermaid 소스는
 - `/dashboard/agents` — 감지된 ACP 에이전트 + 사용자 정의 에이전트 등록
 - `/dashboard/cloud-agents` — 클라우드 호스팅 에이전트 작업(Codex Cloud, Devin, Jules) 및 작업 수명 주기
 - `/dashboard/skills` — A2A 스킬 레지스트리, 샌드박스 실행, 기본 제공 스킬 카탈로그
-- `/dashboard/memory` — 영속적 대화 메모리 검사 및 검색
-- `/dashboard/webhooks` — 아웃바운드 웹훅 구독, 시크릿 교체, 재시도 통계
+- `/dashboard/memory` — 영구 대화 메모리 검사 및 검색
+- `/dashboard/webhooks` — 아웃바운드 웹후크 구독, 시크릿 교체, 재시도 통계
 - `/dashboard/batch` — 배치 작업 제출 및 진행 상황
 - `/dashboard/cache` — 읽기 통과 및 추론 캐시 통계, 제거 제어
 - `/dashboard/playground` — 구성된 모든 콤보/모델을 대상으로 하는 대화형 채팅 플레이그라운드
 - `/dashboard/changelog` — 앱 내 변경 로그 뷰어(`CHANGELOG.md` 렌더링)
 - `/dashboard/system` — 런타임 진단, 버전 정보, 환경 검증 화면
-- `/dashboard/onboarding` — 새 설치를 위한 최초 실행 설정 마법사
+- `/dashboard/onboarding` — 신규 설치를 위한 최초 실행 설정 마법사
 - `/dashboard/media` — 이미지/비디오/음악 플레이그라운드
-- `/dashboard/search-tools` — 검색 공급자 테스트 및 기록
-- `/dashboard/health` — 가동 시간, 회로 차단기, 속도 제한, 할당량 모니터링 세션
+- `/dashboard/search-tools` — 검색 제공자 테스트 및 기록
+- `/dashboard/health` — 가동 시간, 서킷 브레이커, 속도 제한, 할당량 모니터링 세션
 - `/dashboard/logs` — 요청/프록시/감사/콘솔 로그
 - `/dashboard/settings` — 시스템 설정 탭(일반, 라우팅, 콤보 기본값 등)
 - `/dashboard/context/caveman` — Caveman 압축 규칙, 언어 팩, 미리 보기 및 출력 모드
 - `/dashboard/context/rtk` — RTK 명령 출력 필터, 미리 보기 및 런타임 안전 설정
 - `/dashboard/context/combos` — 라우팅 콤보에 할당된 명명된 압축 파이프라인
-- `/dashboard/translator` — 변환기 검사 및 요청 형식 변환 미리 보기
-- `/dashboard/audit` — 페이지네이션 및 구조화된 메타데이터를 갖춘 규정 준수 감사 로그 브라우저
+- `/dashboard/translator` — 번역기 검사 및 요청 형식 변환 미리 보기
+- `/dashboard/audit` — 페이지네이션 및 구조화된 메타데이터를 지원하는 규정 준수 감사 로그 브라우저
 - `/dashboard/usage` — `usage_history`에 연결된 요청별 사용량 브라우저
 - `/dashboard/compression` — 압축 분석, 통계 및 파이프라인 할당
 - `/dashboard/api-manager` — API 키 수명 주기 및 모델 권한
+
+UI 계층: 모든 페이지는 하나의 셸 내부에서 렌더링됩니다 — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx`(키트의
+`SidebarProvider`/`SidebarInset`, OmniRoute의 `Sidebar.tsx` 및 `Header.tsx`). 페이지는
+`@/shared/components`(`packages/ui-kit`에 벤더링된 Keak CI UI Kit의 어댑터) 또는 키트 컴포넌트
+하위 경로(`@omniroute/ui-kit/table`, `…/page-header`)에서 구성 요소를 가져오며, 아이콘은
+`<Icon>`(`ICON_MAP` → Lucide)을 통해 가져옵니다. 테마(기본값은 `system`, 라이트/다크)와 토큰은
+`src/app/globals.css`의 브리지를 통해 키트에서 제공됩니다. 자세한 내용: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## 상위 수준 시스템 컨텍스트
 

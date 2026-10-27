@@ -18,7 +18,7 @@ const SERVER_ITEM_ID_PREFIX_BY_TYPE: Record<string, string> = {
   message: "msg_",
   reasoning: "rs_",
 };
-const SERVER_ITEM_ID_PATTERN = /^(fc|msg|rs|resp)_/;
+const SERVER_ITEM_ID_PATTERN = /^(fc|msg|rs|resp|ws)_/;
 // Validated per input item of type function_call / function_call_output (the agentic
 // Responses path), so kept as a module constant instead of an inline literal.
 const FUNCTION_NAME_VALID_RE = /^[a-zA-Z0-9_-]{1,128}$/;

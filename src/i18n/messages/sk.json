@@ -25,8 +25,10 @@
     "confirm": "si si istý?",
     "refresh": "Obnoviť",
     "close": "Zavrieť",
+    "dialogTitleFallback": "Dialóg",
     "previousPage": "Predchádzajúca stránka",
     "nextPage": "Nasledujúca stránka",
+    "pagination": "Stránkovanie",
     "capsLockOn": "Caps Lock je zapnutý",
     "dismissNotification": "Zatvoriť upozornenie",
     "toggleColumns": "Prepnúť stĺpce",
@@ -182,6 +184,7 @@
     "combos": "Kombinácie",
     "noModelsFound": "Nenašli sa žiadne modely",
     "clear": "Vymazať",
+    "clearFilters": "Vymazať filtre",
     "done": "Hotovo",
     "selectAll": "Vybrať všetko",
     "unselectAll": "Zrušiť výber",
@@ -998,7 +1001,10 @@
     "batchFileUsedByCount": "Používa sa {count, plural, one {# dávka} other {# dávok}}",
     "batchFilePreview": "Náhľad",
     "batchFilePreviewTruncated": "Zobrazenie prvých {shown} riadkov ({total} celkom riadkov)",
-    "batchFileDownloadFull": "Stiahnuť celý súbor"
+    "batchFileDownloadFull": "Stiahnuť celý súbor",
+    "tokensPageTitle": "Tokeny",
+    "tokensPageDescription": "Posielajte tokeny medzi kľúčmi API, zdieľajte pozývacie kódy a pripájajte komunitné servery.",
+    "tokensServerUrlLabel": "URL servera"
   },
   "disabled": "Zakázané",
   "featureFlagOmnirouteEmergencyFallbackDescription": "Smerovať požiadavky s vyčerpaným rozpočtom na núdzového bezplatného záložného poskytovateľa/model.",
@@ -1085,17 +1091,8 @@
     "serverDisconnectedMsg": "Proxy server bol zastavený alebo sa reštartuje.",
     "expandSidebar": "Rozbaliť bočný panel",
     "collapseSidebar": "Zbaliť bočný panel",
-    "themes": "Motívy",
-    "presetColors": "Obľúbené farby",
     "createTheme": "Vytvoriť motív",
     "chooseColor": "Vyberte jednu farbu",
-    "themeCoral": "Koralová",
-    "themeBlue": "Modrá",
-    "themeRed": "Červená",
-    "themeGreen": "Zelená",
-    "themeViolet": "Fialová",
-    "themeOrange": "Oranžová",
-    "themeCyan": "Azúrová",
     "cliToolsShort": "Nástroje",
     "cache": "Cache",
     "cacheShort": "Cache",
@@ -1103,12 +1100,10 @@
     "themeSystem": "Systém tém",
     "whitelabelingDesc": "Popis prispôsobenia značky",
     "switchThemes": "Prepínať témy",
-    "themeAccentDesc": "Popis zvýrazňujúcej farby motívu",
     "uploadFavicon": "Nahrať favicon",
     "themeDark": "Tmavá téma",
     "customLogoDesc": "Popis vlastného loga",
     "sidebarVisibilityToggle": "Prepínač viditeľnosti bočného panela",
-    "themeAccent": "Akcentová farba",
     "resetFavicon": "Obnoviť favicon",
     "whitelabeling": "Prispôsobenie značky",
     "darkMode": "Tmavý režim",
@@ -1122,10 +1117,8 @@
     "customLogo": "Vlastné logo",
     "appearance": "Vzhľad",
     "themeSelectionAria": "ARIA označenie výberu témy",
-    "themeCreate": "Vytvoriť tému",
     "customFaviconDesc": "Popis vlastného faviconu",
     "logoPreview": "Ukážka loga",
-    "themeCustom": "Vlastná téma",
     "hideHealthLogsDesc": "Popis skrytia protokolov stavu",
     "faviconPreview": "Ukážka faviconu",
     "changelog": "Zoznam zmien",
@@ -1485,7 +1478,11 @@
       "chatIdPlaceholder": "-100123456789 alebo @channelname",
       "chatIdHint": "Jedinečný číselný identifikátor alebo verejné používateľské meno chatu/kanála.",
       "tutorial": "Ako nakonfigurovať webhook pre Telegram:"
-    }
+    },
+    "copy": "Kopírovať",
+    "copied": "Skopírované!",
+    "expandDetails": "Zobraziť podrobnosti",
+    "collapseDetails": "Skryť podrobnosti"
   },
   "compliance": {
     "auditTitle": "Audit",
@@ -1597,22 +1594,16 @@
     "mcpMetricCalls24h": "Hovory (24h)",
     "mcpMetricSuccessRate": "Miera úspešnosti",
     "mcpMetricAvgDuration": "Priemerná dĺžka",
-    "mcpMetricTopTool": "Najlepší nástroj"
-  },
-  "themesPage": {
-    "title": "Témy",
-    "description": "Vyberte si prednastavenú tému alebo si vytvorte vlastnú pomocou jednej farby",
-    "presetColors": "Obľúbené farby",
-    "customTheme": "Vlastná téma",
-    "customThemeDesc": "Kliknite na položku Vytvoriť tému a vyberte jednu farbu",
-    "createTheme": "Vytvoriť tému",
-    "activePreset": "Aktívna téma"
+    "mcpMetricTopTool": "Najlepší nástroj",
+    "dismissError": "Zavrieť chybu"
   },
   "header": {
     "logout": "Odhlásiť sa",
     "quickNavigation": "Rýchla navigácia",
     "quickNavigationTitle": "Rýchla navigácia (⌘K / Ctrl+K)",
     "openQuickNavigation": "Otvoriť rýchlu navigáciu",
+    "openMenu": "Otvoriť ponuku",
+    "products": "Produkty Keak",
     "switchToLightMode": "Prepnúť na svetlý režim",
     "switchToDarkMode": "Prepnúť na tmavý režim",
     "language": "Jazyk",
@@ -1640,8 +1631,6 @@
     "anthropicCompatible": "Antropické kompatibilné",
     "media": "Médiá",
     "mediaDescription": "Generujte obrázky, videá a hudbu",
-    "themes": "Témy",
-    "themesDescription": "Vyberte farebnú tému pre celý panel ovládacieho centra",
     "costsDescription": "Sledujte výdavky, analyzujte trendy a spravujte svoj rozpočet na AI naprieč všetkými poskytovateľmi",
     "cacheDescription": "Monitorujte efektivitu vyrovnávacej pamäte promptov poskytovateľov a lokálne opätovné využitie sémantických odpovedí.",
     "limitsDescription": "Nakonfigurujte limity frekvencie požiadaviek a kvóty pre jednotlivé kľúče API a poskytovateľov",
@@ -2495,7 +2484,12 @@
     "onlySelectedConnections": "Iba vybrané pripojenia",
     "selectAtLeastOneConnection": "Vyberte aspoň jedno pripojenie alebo možnosť Všetky pripojenia.",
     "allConnectionsDesc": "Tento kľúč môže používať ľubovoľné aktívne pripojenie.",
-    "restrictedToConnections": "Obmedzené na {count, plural, one {# pripojenie} other {# pripojení}}."
+    "restrictedToConnections": "Obmedzené na {count, plural, one {# pripojenie} other {# pripojení}}.",
+    "preferredConnections": "Preferované pripojenia",
+    "preferredConnectionsDesc": "Poradie priority pre každý kľúč. Ak preferované pripojenie nie je dostupné, smerovanie prejde na ďalšie vhodné.",
+    "preferredConnectionsNone": "Nie je nastavená žiadna preferencia — použije sa predvolená stratégia smerovania.",
+    "preferredConnectionsClear": "Vymazať",
+    "removeSelection": "Odstrániť {name}"
   },
   "auditLog": {
     "title": "Protokol auditu",
@@ -2607,7 +2601,9 @@
     "imageToTextBridgeCta": "Nastavte most Obraz→Text v nastaveniach Modality Bridge",
     "sttBridgeCta": "Nakonfigurujte most Reč→Text v nastaveniach Modality Bridge",
     "existingConnection": "Existujúce pripojenie",
-    "openrouterSttDescription": "Modely prevodu reči na text OpenRouter používajú vaše nakonfigurované pripojenie OpenRouter. Nie sú potrebné žiadne samostatné poverenia."
+    "openrouterSttDescription": "Modely prevodu reči na text OpenRouter používajú vaše nakonfigurované pripojenie OpenRouter. Nie sú potrebné žiadne samostatné poverenia.",
+    "modalityTabsAria": "Typ média",
+    "serviceKindsAria": "Typ služby"
   },
   "search": {
     "searchQuery": "Vyhľadávací dopyt",
@@ -3278,7 +3274,8 @@
     "cliproxyapiUnknown": "Neznáme",
     "cliproxyapiUpdate": "Aktualizovať",
     "cliproxyapiUpdateAvailable": "Aktualizácia je k dispozícii: v{current} → v{latest}",
-    "cliproxyapiVersion": "Verzia"
+    "cliproxyapiVersion": "Verzia",
+    "removeMapping": "Odstrániť mapovanie"
   },
   "modelCatalog": {
     "title": "Modely a kombá",
@@ -3400,13 +3397,13 @@
     "comboRefMember": "Kombinácia → {name}"
   },
   "combos": {
-    "autoTosIncludeLabel": "Zahrnúť do auto poskytovateľov označených ToS: avoid",
-    "autoTosDescription": "Predvolene vypnuté. Platí pre všetky kombinácie auto, nielen pre jeden účet. Pripojenie poskytovateľa túto možnosť nezapne.",
-    "autoTosSaveError": "Pravidlá ToS sa nepodarilo uložiť. Stále sa zobrazuje predchádzajúce nastavenie. Skúste to znova.",
-    "autoTosLoadError": "Pravidlá ToS sa nepodarilo načítať. Pred ich zmenou to skúste znova.",
     "title": "kombá",
     "description": "Vytvárajte kombinácie modelov s váženým smerovaním a záložnou podporou",
     "autoCatalogTitle": "Katalóg automatického smerovania",
+    "autoTosLoadError": "Pravidlá ToS sa nepodarilo načítať. Pred ich zmenou to skúste znova.",
+    "autoTosSaveError": "Pravidlá ToS sa nepodarilo uložiť. Stále sa zobrazuje predchádzajúce nastavenie. Skúste to znova.",
+    "autoTosIncludeLabel": "Zahrnúť do auto poskytovateľov označených ToS: avoid",
+    "autoTosDescription": "Predvolene vypnuté. Platí pre všetky kombinácie auto, nielen pre jeden účet. Pripojenie poskytovateľa túto možnosť nezapne.",
     "autoCatalogTemplateCount": "{count} šablón",
     "autoCatalogDescription": "Vstavané automatické/* kombá rozlíšené dynamicky od pripojených poskytovateľov. Ako pole modelu použite ktorýkoľvek z týchto identifikátorov – nie je potrebné žiadne nastavenie.",
     "autoCatalogExpand": "Rozbaľte katalóg automatického smerovania",
@@ -3559,6 +3556,7 @@
     "playgroundNoCombosYet": "Zatiaľ nie sú nakonfigurované žiadne kombinácie.",
     "playgroundCreateFirst": "Najprv ju vytvorte",
     "weighted": "Vážené",
+    "weightPercent": "Váha (%)",
     "leastUsed": "Najmenej používané",
     "costOpt": "Optimalizácia nákladov",
     "strategyGuideTitle": "Ako používať túto stratégiu",
@@ -3720,6 +3718,7 @@
     "builderGlobalAccountCount": "{count, plural, one {# účet} other {# účtov}}",
     "builderGlobalAdded": "Pridané",
     "builderGlobalAdd": "Pridať",
+    "clearSearch": "Vymazať vyhľadávanie",
     "manualModel": "Manuálny model",
     "manualModelInvalid": "Zadajte model vo formáte poskytovateľ/model.",
     "manualModelUnknownProvider": "Neznámy prefix poskytovateľa.",
@@ -3936,6 +3935,7 @@
     "builderComboRefStep": "Pridať referenciu kombinácie",
     "builderPinnedAccount": "Pripnutý účet",
     "builderLegacyEntry": "Staršia položka",
+    "builderStaleModel": "Nie je v aktuálnom katalógu",
     "reviewName": "Názov",
     "reviewStrategy": "Stratégia",
     "reviewSteps": "Kroky",
@@ -3973,6 +3973,10 @@
     "responseValidationMinLength": "Minimálna dĺžka obsahu (znaky)",
     "responseValidationJsonPaths": "Kontroly JSON-path",
     "responseValidationAddCheck": "+ Pridať kontrolu",
+    "responseValidationRemoveCheck": "Odstrániť kontrolu",
+    "responseValidationPath": "Cesta JSON",
+    "responseValidationCondition": "Podmienka",
+    "responseValidationValue": "Očakávaná hodnota",
     "agentFeaturesSystemMessageOverride": "Prepísať systémové hlásenie",
     "agentFeaturesSystemMessagePlaceholder": "Ste odborný asistent...",
     "agentFeaturesSystemMessageHint": "Prepísanie systémovej správy pre agentov",
@@ -5288,7 +5292,8 @@
         "skipped": "už nakonfigurované",
         "failed": "zlyhalo"
       }
-    }
+    },
+    "stepProgress": "Priebeh nastavenia"
   },
   "providers": {
     "tosAvoidNoticeTitle": "Tento poskytovateľ je predvolene vylúčený z auto",
@@ -5797,6 +5802,7 @@
     "contextWindowOverridePlaceholder": "napr. 131072",
     "contextWindowOverrideHint": "Manuálne nastavte skutočné kontextové okno tohto modelu (v tokenoch), ak ho poskytovateľ nesprávne uvádza. Má prednosť pred automaticky zistenými/katalógovými hodnotami a zabraňuje vyradeniu modelu pri kombinovanom smerovaní.",
     "contextWindowOverrideInvalid": "Prepísanie kontextového okna musí byť kladné celé číslo tokenov",
+    "maxOutputTokenOverrideInvalid": "Prepísanie maximálneho výstupu tokenov musí byť kladné celé číslo tokenov",
     "visionCapableLabel": "Podpora spracovania obrazu",
     "visionCapableHint": "Manuálne označte tento model ako schopný spracovávať obraz, ak metaúdaje zisťovania poskytovateľa neuvádzajú modalitu vstupu obrázkov (bežné pri lokálnych/self-hosted backendoch).",
     "compatParamFiltersLabel": "Filtre parametrov",
@@ -6055,10 +6061,10 @@
     "apiFormatLabel": "Označenie formátu API",
     "apiKeyOptionalHint": "Api Key Optional Hint",
     "apiKeyOptionalLabel": "Api Key Optional Label",
-    "apiRegionChina": "Oblasť API: Čína",
-    "apiRegionHint": "Pomôcka pre oblasť API",
-    "apiRegionInternational": "Medzinárodná oblasť API",
-    "apiRegionLabel": "Označenie oblasti API",
+    "apiRegionChina": "Pevninská Čína",
+    "apiRegionHint": "Vyberte región koncového bodu, ktorý sa používa na prístup k API a sledovanie kvót.",
+    "apiRegionInternational": "Medzinárodný",
+    "apiRegionLabel": "Región API",
     "apikey": "Kľúč API",
     "audio": "Zvuk",
     "audioProvidersHeading": "Nadpis poskytovateľov zvukových služieb",
@@ -6079,6 +6085,13 @@
     "claudeLowPriorityModeDescription": "Keď tento účet dosiahne svoj 5-hodinový limit používania a Anthropic ponúkne režim s nižšou prioritou, OmniRoute ho prijme a bude naďalej odosielať požiadavky s anthropic-usage-limit: slow až do obnovenia časového okna namiesto pozastavenia pripojenia. Týždenný limit sa naďalej uplatňuje a odpovede môžu čakať na voľnú kapacitu.",
     "claudeAutoLimitResetLabel": "Automaticky obnoviť limit relácie (raz týždenne)",
     "claudeAutoLimitResetDescription": "Keď tento účet dosiahne svoj 5-hodinový limit používania a je k dispozícii obnovenie limitu relácie, OmniRoute ho automaticky aktivuje a zopakuje pokus plnou rýchlosťou. Využije sa tým obnovenie účtu dostupné raz týždenne, pričom používanie sa naďalej započítava do týždenného limitu.",
+    "codexPaidCreditsShort": "Extra credits",
+    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
+    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
+    "codexPaidCreditsDisabled": "Codex paid credits disabled",
+    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
+    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
+    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled.",
     "disableCoolingDescription": "Preskočiť prechodný cooldown (doba chladnutia), aby toto pripojenie zostalo oprávnené aj po odstrániteľných chybách (konečné stavy ako zablokované/vypršané stále platia).",
     "disableCoolingLabel": "Zakázať cooldown pre toto pripojenie",
     "bulkPasteAdded": "{count, plural, one {Pridaný 1 kľúč} few {Pridané # kľúče} other {Pridaných # kľúčov}}",
@@ -6532,6 +6545,7 @@
       "monsterapi": "Získajte API kľúč na monsterapi.ai",
       "moonshot": "Pripojte Moonshot AI pomocou API kľúča.",
       "morph": "Bezplatná úroveň: 250 tisíc kreditov/mesiac, 0 $",
+      "apmix": "Pripojte Apmix pomocou API kľúča z apmix.ai/dashboard — jedno predplatné, mnoho modelov.",
       "nanogpt": "Pripojte NanoGPT pomocou API kľúča.",
       "nebius": "Skúšobný kredit cca 1 $ pri registrácii na testovanie API",
       "nlpcloud": "NLP Cloud používa proprietárne API pre chatbotov namiesto OpenAI chat/completions. OmniRoute prispôsobuje správy OpenAI pre vstup/kontext/históriu a poskytuje lokálny katalóg podporovaných modelov chatbotov.",
@@ -6620,7 +6634,7 @@
       "claude": "Pripojte Claude Code pomocou existujúceho toku OAuth.",
       "cline": "Pripojte Cline pomocou existujúceho toku OAuth.",
       "cursor": "Pripojte Cursor IDE pomocou existujúceho toku OAuth.",
-      "cursor-api": "Pripojte Cursor pomocou používateľského kľúča API (crsr_...) z cursor.com/dashboard/api; relácia IDE nie je potrebná.",
+      "cursor-api": "Pripojte Cursor pomocou používateľského API kľúča (crsr_... alebo grok_...) z cursor.com/dashboard/api; relácia IDE nie je potrebná.",
       "github": "Pripojte GitHub Copilot pomocou existujúceho toku OAuth.",
       "gitlab-duo": "Aplikácia OAuth s rozsahmi (scopes) ai_features + read_user. Nakonfigurujte GITLAB_DUO_OAUTH_CLIENT_ID a voliteľne GITLAB_DUO_OAUTH_CLIENT_SECRET na tejto inštancii OmniRoute.",
       "kilocode": "Pripojte Kilo Code pomocou existujúceho toku OAuth.",
@@ -6628,8 +6642,7 @@
       "kiro": "Bezplatná úroveň: 50 kreditov/mesiac (~25k – 100k tokenov). ⚠️ Podmienky používania (ToS) Kiro zakazujú používanie proxy/harness tretích strán.",
       "codex": "Pripojte OpenAI Codex pomocou existujúceho toku OAuth.",
       "qwen": "Pripojte Qwen Code pomocou existujúceho toku OAuth.",
-      "github-models": "Vytvorte si GitHub PAT s rozsahom 'models: read' na adrese github.com/settings/tokens",
-      "apmix": "Pripojte Apmix pomocou API kľúča z apmix.ai/dashboard — jedno predplatné, mnoho modelov."
+      "github-models": "Vytvorte si GitHub PAT s rozsahom 'models: read' na adrese github.com/settings/tokens"
     },
     "passthroughModelsDescription": "{provider} akceptuje ID modelu natívneho poskytovateľa. Importujte z /models alebo pridajte vlastné ID pre smerovanie.",
     "bedrockModelsDescription": "Modely Amazon Bedrock sú vymedzené podľa regiónu AWS. Importovať z /models alebo pridať ID modelu Bedrock povolené vo vybranom regióne.",
@@ -6801,14 +6814,7 @@
     "rateLimitOverridesModelConcurrencyLabel": "Per-model concurrency caps",
     "rateLimitOverridesModelConcurrencyPlaceholder": "glm-5=1\nglm-4.7=3",
     "rateLimitOverridesModelConcurrencyHint": "Optional: one model=cap per line, matched against the exact upstream model id. Queues excess requests locally; blank means no per-model cap.",
-    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}.",
-    "codexPaidCreditsShort": "Extra credits",
-    "codexPaidCreditsToggleTitle": "Allow paid Codex credits after subscription quota runs out (additional charges may apply)",
-    "codexPaidCreditsEnabled": "Codex paid credits enabled (additional charges may apply)",
-    "codexPaidCreditsDisabled": "Codex paid credits disabled",
-    "failedUpdateCodexPaidCredits": "Failed to update Codex paid-credit policy",
-    "allowCodexPaidCreditsLabel": "Allow paid Codex credits",
-    "allowCodexPaidCreditsDescription": "Allow this account to use paid credits after its subscription quota reaches the cutoff. Requires available credits reported by OpenAI; may incur charges. Spark limits and upstream cooldowns still apply. Credit availability is checked even if quota preflight is disabled."
+    "rateLimitOverridesModelConcurrencyInvalid": "Invalid per-model concurrency entry \"{entry}\" — use model=cap with a whole number from 1 to {max}."
   },
   "settings": {
     "title": "Nastavenia",
@@ -7104,16 +7110,6 @@
     "settingsSidebarDesc": "Vyberte položky, ktoré sa majú zobrazovať na bočnom paneli. Režim Základné zachová možnosť vyhľadávať rozšírené nástroje.",
     "hideHealthLogs": "Skryť denníky kontroly stavu",
     "hideHealthLogsDesc": "Keď je ZAPNUTÉ, potláčajte správy [HealthCheck] v konzole servera",
-    "themeAccent": "Farba témy",
-    "themeAccentDesc": "Vyberte prednastavenú farbu alebo si vytvorte vlastnú tému jednou farbou",
-    "themeCreate": "Vytvoriť tému",
-    "themeCustom": "Vlastná téma",
-    "themeBlue": "Modrá",
-    "themeRed": "Červená",
-    "themeGreen": "Zelená",
-    "themeViolet": "Fialová",
-    "themeOrange": "Oranžová",
-    "themeCyan": "Azúrová",
     "whitelabeling": "Branding",
     "whitelabelingDesc": "Prispôsobte názov a logo aplikácie",
     "appName": "Názov aplikácie",
@@ -7254,7 +7250,7 @@
       "nextSwitchNow": "Teraz",
       "coreConfigPath": "Core config file",
       "coreConfigPathPlaceholder": "/var/lib/omniroute/sing-box/config.json",
-      "coreConfigPathDesc": "Absolute .json path (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
+      "coreConfigPathDesc": "Absolute .json path for sing-box, or .yaml/.yml for Mihomo (lowercase extension). Empty = no generation. Each sync writes '<path>'.generated beside the adopted file, never into it.",
       "lastSwitchKind": "Switch reason",
       "switchKind": {
         "ip_quota_429": "quota",
@@ -7706,6 +7702,7 @@
     "configured": "nakonfigurované",
     "none": "Žiadne",
     "modelOverrideValuePlaceholder": "Číselná hodnota",
+    "modelOverrideKey": "Kľúč prepísania",
     "modelOverrideReasoningEffortsPlaceholder": "Anglické hodnoty oddelené čiarkami, napr. low, medium, high",
     "addKeyValue": "Pridať kľúč – hodnotu",
     "noModelOverrides": "Pre tento model nie sú nakonfigurované žiadne prepísania.",
@@ -7754,7 +7751,6 @@
     "customPricingNote": "Predvolené ceny pre konkrétne modely môžete prepísať. Vlastné prepísania majú prednosť pred automaticky zistenými cenami.",
     "editPricing": "Upraviť ceny",
     "viewFullDetails": "Zobraziť úplné podrobnosti",
-    "themeCoral": "Korál",
     "adaptiveVolumeRouting": "Adaptívne smerovanie podľa objemu",
     "adaptiveVolumeRoutingDesc": "Dynamicky škáluje pripojenia podľa objemu dát a tlaku na priepustnosť.",
     "lkgpToggleTitle": "Posledný známy funkčný poskytovateľ (LKGP)",
@@ -9034,7 +9030,8 @@
     "tomlTestPassed": "Úspešné",
     "tomlTestFailed": "Zlyhalo",
     "tomlImportError": "Nepodarilo sa spracovať súbor RTK TOML.",
-    "tomlFileReadError": "Nepodarilo sa prečítať vybraný súbor TOML."
+    "tomlFileReadError": "Nepodarilo sa prečítať vybraný súbor TOML.",
+    "viewMode": "Režim zobrazenia"
   },
   "compressionEngineConfig": {
     "loading": "Načítava sa…",
@@ -9256,7 +9253,8 @@
     "languagePacksList": "Jazykové balíčky: {packs}",
     "dragToReorder": "Potiahnutím zmeníte poradie kroku",
     "engine": "Nástroj",
-    "intensity": "Intenzita"
+    "intensity": "Intenzita",
+    "compressionOverride": "Prepísanie kompresie"
   },
   "compressionStudio": {
     "noRun": "Nie je k dispozícii žiadny beh kompresie.",
@@ -9316,7 +9314,8 @@
     "encoderWinner": "víťaz: {winner}",
     "encoder": "enkodér",
     "bytes": "bajty",
-    "tokensCl100k": "tokeny (cl100k)"
+    "tokensCl100k": "tokeny (cl100k)",
+    "studioViews": "Zobrazenia štúdia"
   },
   "omniglyph": {
     "preview": "Náhľad",
@@ -9522,7 +9521,9 @@
     "tooltipMinLength": "Správy kratšie ako toto nie sú komprimované. Nižšia = väčšia kompresia.",
     "tooltipMinSavings": "Komprimujte iba vtedy, ak uložíte aspoň toľko tokenov.",
     "ultraSettings": "Ultra nastavenia",
-    "ultraSettingsDesc": "Sémantická kompresia poháňaná SLM"
+    "ultraSettingsDesc": "Sémantická kompresia poháňaná SLM",
+    "defaultLanguage": "Predvolený jazyk",
+    "viewMode": "Režim zobrazenia"
   },
   "translator": {
     "title": "Prekladateľ",
@@ -9834,6 +9835,10 @@
     "streamTransformFailed": "Nepodarilo sa transformovať stream"
   },
   "usage": {
+    "codexPaidCreditsLabel": "Paid Codex credits",
+    "codexPaidCreditsAvailable": "Available (balance not reported)",
+    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
+    "codexPaidCreditsUnlimited": "Unlimited",
     "title": "Použitie",
     "grokExtraUsageCredits": "Extra Kredit na Použitie",
     "grokAutoTopUp": "Automatické dobíjanie",
@@ -10287,10 +10292,10 @@
     "lastRefreshed": "Naposledy obnovené",
     "providerQuota": "Kvóta poskytovateľa",
     "providerQuotaHomeHint": "Aktuálny stav naprieč pripojenými účtami",
-    "codexPaidCreditsLabel": "Paid Codex credits",
-    "codexPaidCreditsAvailable": "Available (balance not reported)",
-    "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",
-    "codexPaidCreditsUnlimited": "Unlimited"
+    "claudeResetCreditDefaultTitle": "Reset limitu Claude",
+    "confirmRedeemClaudeResetCredit": "Uplatnenie okamžite resetuje príslušné limity využitia Claude a natrvalo spotrebuje tento kredit.",
+    "claudeResetCreditsModalTitle": "Kredity na reset Claude",
+    "claudeResetCreditsModalExplainer": "Dostupné kredity na reset Claude a týždenné resety relácií pre tento účet."
   },
   "modals": {
     "waitingAuth": "Čaká sa na autorizáciu",
@@ -11077,7 +11082,8 @@
       "message": "Správa",
       "error": "Chyba",
       "completion": "Dokončenie"
-    }
+    },
+    "statusFilter": "Stav"
   },
   "templateNames": {
     "simple-chat": "Jednoduchý chat",
@@ -11258,7 +11264,8 @@
     "minutesAgo": "pred {minutes}m",
     "hoursAgo": "pred {hours}h",
     "daysAgo": "pred {days}d",
-    "entries": "Záznamy"
+    "entries": "Záznamy",
+    "viewSwitcherAria": "Zobrazenie vyrovnávacej pamäte"
   },
   "proxyConfigModal": {
     "levelGlobal": "globálne",
@@ -11446,6 +11453,7 @@
     "tableHealth": "Table Health",
     "tableUsage": "Table Usage",
     "tableActions": "Table Actions",
+    "moreActions": "Ďalšie akcie",
     "test": "Otestovať",
     "edit": "Upraviť",
     "delete": "Odstrániť",
@@ -11525,7 +11533,7 @@
     "bulkImportNoValidEntries": "Nenašli sa žiadne platné záznamy. Skontrolujte formát a skúste to znova.",
     "bulkImportSuccess": "Import dokončený: {created} vytvorené, {updated} aktualizované, {failed} zlyhalo",
     "bulkImportErrorLine": "Riadok {line}: {reason}",
-    "bulkImportMaxExceeded": "Maximálne 100 proxy na import",
+    "bulkImportMaxExceeded": "Maximálne {max} proxy na import",
     "bulkImportPreview": "Ukážka",
     "clearAssignment": "(jasné zadanie)",
     "bulkProxyAssignment": "Hromadné pridelenie proxy",
@@ -11586,6 +11594,7 @@
     "poolSetAsideKindIpQuota429": "obmedzenie rýchlosti podľa IP (429)",
     "poolSetAsideKindSlow": "pomalé odpovede",
     "poolSetAsideKindGeoBlocked": "blokovaný región (403/451)",
+    "poolSetAsideKindOperatorReported": "výpadok nahlásený operátorom",
     "poolSetAsideUntil": "Späť v rotácii {endsAt}",
     "poolSetAsideRepeat": "Odložené {count, plural, one {#krát} other {#krát}}",
     "poolUnknownAddress": "Neznáma adresa",
@@ -11695,7 +11704,6 @@
     "exportCodeTitle": "Exportovať kód",
     "exportShort": "Exportovať",
     "noStateToExport": "Nie je k dispozícii žiadny stav testovacieho prostredia na export.",
-    "closeExportModal": "Zavrieť modálne okno exportu",
     "close": "Zavrieť",
     "exportRealKeyWarning": "Bezpečnostné upozornenie: export bol zablokovaný — vo výstupe bol zistený skutočný API kľúč. Resetujte svoj API kľúč a skúste to znova.",
     "placeholderHintPrefix": "Nahradiť",
@@ -11808,7 +11816,8 @@
       "nextButton": "Ďalej",
       "runButton": "Spustiť",
       "promptPlaceholder": "Zadajte svoju správu… (Enter na odoslanie, Shift+Enter pre nový riadok)"
-    }
+    },
+    "playgroundTabs": "Režimy Playground"
   },
   "miniPlayground": {
     "endpoint": "Koncový bod",
@@ -11879,7 +11888,8 @@
     "assistant": "Asistent",
     "errorLabel": "Chyba",
     "requestFailed": "Požiadavka zlyhala",
-    "stop": "Zastaviť"
+    "stop": "Zastaviť",
+    "messageInputAria": "Správa"
   },
   "requestLogger": {
     "recording": "Nahrávanie",
@@ -12066,8 +12076,18 @@
       "resilienceRotations": "{count} rotácií účtov",
       "resilienceRetried": "Prázdny ťah zopakovaný",
       "resilienceContinued": "Obnovené uprostred streamu",
-      "resilienceRecovered": "Obnovené akciou odolnosti"
-    }
+      "resilienceRecovered": "Obnovené akciou odolnosti",
+      "conversationContext": "Kontext konverzácie",
+      "goToBottom": "Prejsť nadol",
+      "liveRefreshOn": "Živé obnovovanie: zapnuté",
+      "liveRefreshOff": "Živé obnovovanie: vypnuté",
+      "liveRefresh": "Živé obnovovanie",
+      "continuesFromParent": "pokračuje z nadradenej konverzácie",
+      "continuesFrom": "Pokračuje z {id}",
+      "viewConversation": "zobraziť konverzáciu",
+      "openConversation": "Otvoriť konverzáciu {id}"
+    },
+    "tableLabel": "Záznamy požiadaviek"
   },
   "proxyLogger": {
     "filterAll": "Všetko",
@@ -12112,7 +12132,9 @@
     "colServedBy": "Poskytované",
     "filterTraffic": "Prevádzka",
     "filterTests": "Testy",
-    "filterSource": "Zdroj"
+    "filterSource": "Zdroj",
+    "tableLabel": "Záznamy proxy",
+    "sortLogs": "Zoradiť záznamy"
   },
   "endpointOptions": {
     "speech": "Reč",
@@ -12197,7 +12219,8 @@
     "statusExhausted": "VYČERPANÉ",
     "statusAlerting": "UPOZORNENIE",
     "statusError": "CHYBA",
-    "moreSuffix": "+{count} ďalších"
+    "moreSuffix": "+{count} ďalších",
+    "feedFilterLabel": "Filtrovať udalosti"
   },
   "quotaShare": {
     "weightPercent": "Váha %",
@@ -12364,7 +12387,10 @@
     "ungroupedTitle": "Nezoskupené",
     "ungroupedHint": "Tieto fondy nie sú priradené k žiadnej známej skupine. Upravte fond a presuňte ho do skutočnej skupiny.",
     "removeFailed": "Tento fond sa nepodarilo odstrániť.",
-    "dismiss": "Zavrieť"
+    "dismiss": "Zavrieť",
+    "allocationsHeading": "Alokácie",
+    "wizardRemoveDimension": "Odstrániť dimenziu",
+    "wizardRemoveKey": "Odstrániť kľúč"
   },
   "plugins": {
     "title": "Pluginy",
@@ -12522,7 +12548,8 @@
       "settingsUpdateFailed": "Aktualizácia nastavení zlyhala",
       "serviceRevealApiKey": "{actor} zobrazil API kľúč pre {target}",
       "genericEvent": "{actor} {target}"
-    }
+    },
+    "dismissError": "Zavrieť chybu"
   },
   "agentBridge": {
     "title": "AgentBridge",
@@ -12655,7 +12682,21 @@
       "goNow": "Prejsť teraz",
       "message": "MITM Proxy sa teraz nachádza pod AgentBridge.",
       "title": "Táto stránka sa presunula"
-    }
+    },
+    "dnsOn": "DNS zapnuté",
+    "dnsOff": "DNS vypnuté",
+    "showServerSettings": "Zobraziť nastavenia servera",
+    "hideServerSettings": "Skryť nastavenia servera",
+    "upstreamCaTesting": "Testuje sa…",
+    "removeMapping": "Odstrániť mapovanie",
+    "mappingSourcePlaceholder": "napr. gemini-3.6-flash-medium alebo * pre všetky nezmapované modely",
+    "mappingWildcardHint": "Použite * ako zdroj na smerovanie každého modelu bez explicitného mapovania cez OmniRoute do vybraného cieľa. Presná zhoda zdroja má vždy prednosť pred *.",
+    "wizardDetectingModels": "Zisťujú sa modely zo zachytenej prevádzky...",
+    "wizardDetectedModels": "V zachytenej prevádzke sa našlo {count, plural, one {# model} other {# modelov}}. Vyberte tie, ktoré chcete pridať:",
+    "wizardSelectedModels": "Vybrané: {count, plural, one {# model} other {# modelov}}. Na ďalšej obrazovke ich namapujete na modely OmniRoute.",
+    "wizardAddModels": "Pridať {count, plural, one {# model} other {# modelov}}",
+    "wizardNoModelsDetected": "Zatiaľ neboli zistené žiadne modely. Pomocou {agent} odošlite požiadavku a potom znova spustite tohto sprievodcu, aby sa modely z prevádzky zistili automaticky.",
+    "wizardNoModelsHint": "Prípadne zatvorte tohto sprievodcu a pridajte mapovania manuálne na karte agenta."
   },
   "providerStats": {
     "unknownError": "Neznáma chyba",
@@ -12685,7 +12726,11 @@
     "avgTtft": "Priem. TTFT",
     "avgTotal": "Priem. celkovo",
     "requestTelemetry": "Telemetria požiadaviek",
-    "requestTelemetryDescription": "Rozpis 7-fázovej pipeline (posledných 5 minút)"
+    "requestTelemetryDescription": "Rozpis 7-fázovej pipeline (posledných 5 minút)",
+    "title": "Štatistiky poskytovateľov",
+    "description": "Prevádzka, latencia a miera úspešnosti podľa poskytovateľa a modelu",
+    "combo": "Kombinácia",
+    "toggleModels": "Zobraziť modely pre {provider}"
   },
   "relay": {
     "title": "Serverless relay proxy",
@@ -12846,7 +12891,18 @@
     "noRequestBody": "Žiadne telo požiadavky.",
     "noResponseBody": "Žiadne telo odpovede.",
     "formatted": "Formátované",
-    "raw": "Surové"
+    "raw": "Surové",
+    "requestCount": "{count, plural, one {# požiadavka} other {# požiadaviek}}",
+    "expandList": "Rozbaliť zoznam",
+    "collapseList": "Zbaliť zoznam",
+    "snippetLanguage": "Jazyk úryvku",
+    "headersTable": "Hlavičky",
+    "showSecrets": "Zobraziť tajné údaje",
+    "maskSecrets": "Maskovať tajné údaje",
+    "llmNotAvailable": "Metadáta LLM nie sú pre túto požiadavku k dispozícii.",
+    "llmStreamYes": "áno (SSE)",
+    "llmStreamNo": "nie",
+    "llmTotalTokens": "Celkom: {count} tokenov"
   },
   "cliCommon": {
     "companion": {
@@ -13305,7 +13361,8 @@
     "colReliabilityHelp": "Podiel volaní, na ktoré tento poskytovateľ skutočne odpovedal za posledných 24 hodín. Pomlčka znamená, že spracoval príliš málo volaní na určenie miery.",
     "reliabilitySample": "Za posledných {hours} h bolo úspešných {successes} z {requests} volaní",
     "reliabilityTooFew": "Za posledných {hours} h bolo iba {requests} volaní — príliš málo na určenie miery",
-    "reliabilityNoTraffic": "Za posledných 24 h neboli zaznamenané žiadne volania"
+    "reliabilityNoTraffic": "Za posledných 24 h neboli zaznamenané žiadne volania",
+    "categoryFilter": "Kategória úlohy"
   },
   "discovery": {
     "title": "Vyhľadávanie poskytovateľov",
@@ -13330,7 +13387,11 @@
     "method": "Metóda",
     "auth": "Overenie",
     "feasibility": "Realizovateľnosť",
-    "models": "Modely"
+    "models": "Modely",
+    "provider": "Poskytovateľ",
+    "status": "Stav",
+    "endpoint": "Koncový bod",
+    "actions": "Akcie"
   },
   "noAuthProvider": {
     "title": "Nevyžaduje sa žiadne overenie",
@@ -13379,7 +13440,8 @@
     "ownProxy": "Vlastné proxy",
     "freeTierPause": "Model {model} pozastavený (429), späť o {time}",
     "freeTierPauseProvider": "Pozastavené (429), späť o {time}",
-    "freeTierPauseNote": "Pozastavenie vnútri procesu na tejto inštancii"
+    "freeTierPauseNote": "Pozastavenie vnútri procesu na tejto inštancii",
+    "proxyType": "Typ proxy"
   },
   "gamification": {
     "leaderboardScopes": {
@@ -13552,7 +13614,10 @@
         "description": "Čaká na vás skrytý úspech...",
         "criteria": "Dokončite skrytý úspech, aby ste odhalili tento odznak."
       }
-    }
+    },
+    "leaderboardTitle": "Rebríček",
+    "leaderboardDescription": "Poradie a úspechy naprieč vašimi API kľúčmi",
+    "badgeLocked": "Uzamknuté"
   },
   "featureFlags": {
     "title": "Feature flags",
@@ -13793,6 +13858,7 @@
     "latency": "Latencia",
     "quota": "Kvóta",
     "rangeWindow": "Okno {range}",
+    "timeRange": "Časový rozsah",
     "runtimeHealthBlend": "kombinácia runtime/stavu",
     "averageResponseTime": "priemerný čas odozvy",
     "worstQuota": "Najhoršia kvóta",
@@ -13994,7 +14060,11 @@
     "learnMore": "Zistiť viac",
     "changelogLoadFailed": "Nepodarilo sa načítať zoznam zmien. Skúste to znova neskôr.",
     "retry": "Skúsiť znova",
-    "viewFullHistory": "Zobraziť celú históriu na GitHube"
+    "viewFullHistory": "Zobraziť celú históriu na GitHube",
+    "title": "Novinky a zoznam zmien",
+    "description": "Oznámenia tímu OmniRoute a najnovšie poznámky k vydaniam",
+    "viewLabel": "Zobraziť",
+    "loadingNews": "Načítavajú sa oznámenia..."
   },
   "reasoningRouting": {
     "editor": {
@@ -14545,7 +14615,9 @@
       "circuitBreakerState": "Stav obvodu poskytovateľa",
       "lastUpdate": "Posledná aktualizácia: {timestamp}",
       "uptimeMinutes": "{minutes} min",
-      "uptimeHoursMinutes": "{hours} h {minutes} min"
+      "uptimeHoursMinutes": "{hours} h {minutes} min",
+      "breakerClosed": "Zatvorené",
+      "breakerNotClosed": "Otvorené alebo polootvorené"
     },
     "statusPages": {
       "400": {
@@ -14620,6 +14692,9 @@
         "primaryAction": "Podrobnosti o údržbe",
         "secondaryAction": "Stav systému"
       }
+    },
+    "miniapp": {
+      "askAnything": "Opýtajte sa na čokoľvek…"
     }
   },
   "kiroAuthModal": {
@@ -14810,7 +14885,20 @@
     "mcp": "MCP",
     "mcpTool": "MCP tool",
     "scope": "Scope",
-    "apiKey": "API key"
+    "apiKey": "API key",
+    "visibleCount": "{visible} viditeľných / {total} celkom",
+    "modeLabel": "Režim zobrazenia",
+    "jumpToNow": "Prejsť na aktuálny čas, čiara NOW sa vráti na pozíciu {position} %",
+    "laneReuse": "Opätovné použitie riadka",
+    "laneReuseLabel": "Časové okno opätovného použitia riadka (v minútach)",
+    "laneReuseHint": "Požiadavky s rovnakým ID konverzácie zostanú v rovnakom riadku časovej osi, pokiaľ je odstup medzi nimi kratší než tento počet minút.",
+    "laneReuseUnit": "min",
+    "autoRefresh": "Automatické obnovenie",
+    "autoRefreshLabel": "Interval automatického obnovenia (v sekundách)",
+    "autoRefreshHint": "Ako často časová os opätovne načíta zo servera zoznam požiadaviek.",
+    "autoRefreshUnit": "s",
+    "zoomOut": "Oddialiť",
+    "zoomIn": "Priblížiť"
   },
   "metadata": {
     "compressionTitle": "Komprimácia",

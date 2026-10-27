@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isAutostartEnabled } from "./autostart.mjs";
+import { persistTrayFailure } from "../runtime/processSupervisor.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -71,7 +72,8 @@ export async function initSystrayUnix(
       debug: false,
       copyDir: false,
     });
-  } catch {
+  } catch (err) {
+    persistTrayFailure("constructor", err);
     return null;
   }
 

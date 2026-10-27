@@ -11,6 +11,7 @@ import {
 import { filterToOpenAIFormat } from "./helpers/openaiHelper.ts";
 import {
   providerHonorsOpenAIFormatCacheControl,
+  providerAcceptsPromptCacheBreakpoint,
   resolveConnectionCacheOverride,
 } from "../utils/cacheControlPolicy.ts";
 import {
@@ -666,6 +667,7 @@ export function translateRequest(
       preserveCacheControl:
         options?.preserveCacheControl === true &&
         providerHonorsOpenAIFormatCacheControl(provider, connectionCacheOverride),
+      preservePromptCacheBreakpoint: providerAcceptsPromptCacheBreakpoint(provider),
       // #4849 regression guard: keep client reasoning_content for replay providers.
       preserveReasoningContent: isReasoner,
       // Per-provider/model preserveVideoUrl flag from compat overrides.

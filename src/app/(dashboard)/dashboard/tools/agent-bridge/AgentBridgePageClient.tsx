@@ -3,6 +3,11 @@
 import { useCallback, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import Card from "@/shared/components/Card";
+import Icon from "@/shared/components/Icon";
 import { RiskNoticeBanner } from "./components/RiskNoticeBanner";
 import { AgentBridgeServerCard } from "./components/AgentBridgeServerCard";
 import { AgentBridgeMaintenanceCard } from "./components/AgentBridgeMaintenanceCard";
@@ -255,62 +260,50 @@ export default function AgentBridgePageClient({
 
   return (
     <div className="flex flex-col gap-5">
+      <PageHeader compact title={t("title")} description={t("subtitle")} />
+
       {/* Risk banner */}
       <RiskNoticeBanner />
 
       {/* Error alert */}
       {actionError && (
-        <div
-          role="alert"
-          className="flex items-center gap-2 rounded-xl border border-red-500/30 bg-red-500/5 px-4 py-3 text-sm text-red-600 dark:text-red-400"
-        >
-          <span className="material-symbols-outlined text-[16px]">error</span>
-          {actionError}
-          <button
-            type="button"
-            onClick={() => setActionError(null)}
-            className="ml-auto text-red-500 hover:text-red-400"
-            aria-label={tc("dismissNotification")}
-          >
-            <span className="material-symbols-outlined text-[16px]">close</span>
-          </button>
-        </div>
+        <Alert
+          variant="critical"
+          icon={<Icon name="error" size={16} />}
+          description={actionError}
+          dismissLabel={tc("dismissNotification")}
+          onDismiss={() => setActionError(null)}
+        />
       )}
 
       {/* Manual cert-install guide (container / headless fallback) */}
       {certGuide && (
-        <div
-          role="status"
-          className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-4 py-3 text-sm text-amber-700 dark:text-amber-300"
-        >
-          <div className="flex items-center gap-2 font-medium">
-            <span className="material-symbols-outlined text-[16px]">info</span>
-            {t("certManualTitle")}
-            <button
-              type="button"
-              onClick={() => setCertGuide(null)}
-              className="ml-auto text-amber-600 hover:text-amber-500"
-              aria-label={tc("dismissNotification")}
+        <Alert
+          variant="warning"
+          icon={<Icon name="info" size={16} />}
+          title={t("certManualTitle")}
+          dismissLabel={tc("dismissNotification")}
+          onDismiss={() => setCertGuide(null)}
+          description={
+            <ol className="mt-1 list-decimal space-y-1 pl-6">
+              {certGuide.steps.map((step, i) => (
+                <li key={i} className="break-all font-mono text-xs">
+                  {step}
+                </li>
+              ))}
+            </ol>
+          }
+          actions={
+            <a
+              href={certGuide.downloadUrl}
+              download
+              className={buttonVariants({ variant: "outline", size: "sm" })}
             >
-              <span className="material-symbols-outlined text-[16px]">close</span>
-            </button>
-          </div>
-          <ol className="mt-2 list-decimal pl-6 space-y-1">
-            {certGuide.steps.map((step, i) => (
-              <li key={i} className="font-mono text-xs break-all">
-                {step}
-              </li>
-            ))}
-          </ol>
-          <a
-            href={certGuide.downloadUrl}
-            download
-            className="mt-2 inline-flex items-center gap-1.5 text-xs font-medium underline hover:no-underline"
-          >
-            <span className="material-symbols-outlined text-[14px]">download</span>
-            {t("downloadCert")}
-          </a>
-        </div>
+              <Icon name="download" size={14} />
+              {t("downloadCert")}
+            </a>
+          }
+        />
       )}
 
       {/* Empty state: no providers */}
@@ -351,27 +344,25 @@ export default function AgentBridgePageClient({
           />
 
           {/* Quick links */}
-          <div className="rounded-xl border border-border/40 bg-card px-5 py-4">
-            <h3 className="text-xs font-semibold text-text-muted mb-2 uppercase tracking-wide">
-              {t("quickLinks")}
-            </h3>
-            <div className="flex flex-wrap gap-3">
+          <Card padding="sm">
+            <h3 className="ci-eyebrow mb-2">{t("quickLinks")}</h3>
+            <div className="flex flex-wrap gap-2">
               <Link
                 href="/dashboard/providers"
-                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                className={buttonVariants({ variant: "ghost", size: "sm" })}
               >
-                <span className="material-symbols-outlined text-[14px]">dns</span>
+                <Icon name="dns" size={14} />
                 {t("quickLinkProviders")}
               </Link>
               <Link
                 href="/dashboard/tools/traffic-inspector"
-                className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+                className={buttonVariants({ variant: "ghost", size: "sm" })}
               >
-                <span className="material-symbols-outlined text-[14px]">network_check</span>
+                <Icon name="network_check" size={14} />
                 {t("quickLinkInspector")}
               </Link>
             </div>
-          </div>
+          </Card>
         </>
       )}
 

@@ -2247,6 +2247,50 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorResponse"
 
+  /api/v1/models/health:
+    get:
+      tags: [Models]
+      summary: Per-model pause state for the caller's key
+      description: >-
+        Read-only liveness view over the in-memory model lockout store. `ok`
+        means no pause observed by this instance (not a health verdict);
+        connection-level pauses live outside the store read here. Additive:
+        leaves GET /v1/models and its cache untouched. `retry_after` carries
+        the shortest remaining lockout in seconds, rounded up, only when
+        `state` is `cooling`. One documented difference from the dispatch 429
+        `model_cooldown` rule: a model with one lockout-covered connection and
+        one connection-level cooldown still reads `cooling` here, while the
+        429 requires every connection to carry a model cooldown.
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: ids
+          required: false
+          description: >-
+            Optional comma-separated model ids to look up. Ids in this
+            list that resolve to no visible model are returned with
+            `state: unknown` instead of being omitted.
+          schema:
+            type: string
+      responses:
+        "200":
+          description: Model health list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  object:
+                    type: string
+                    example: list
+                  data:
+                    type: array
+                    items:
+                      $ref: "#/components/schemas/ModelHealth"
+        "401":
+          description: Authentication required
+
   /api/v1/providers/{provider}/models:
     get:
       tags: [Models]
@@ -3854,8 +3898,9 @@ paths:
                   type: string
                   nullable: true
                   description: >-
-                    Absolute adopted sing-box config path (lowercase .json).
-                    Empty means no generation; each sync writes
+                    Absolute adopted config path: lowercase `.json` renders
+                    sing-box, `.yaml`/`.yml` renders Mihomo. Empty means no
+                    generation; each sync writes
                     `<path>.generated` beside it, never into it.
                 coreBinaryPath:
                   type: string
@@ -6741,9 +6786,12 @@ paths:
       description: |
         Validates the `state` cookie, exchanges the authorization `code` for tokens,
         verifies the ID token against the issuer's JWKS (audience = client id), and
-        checks the token's `sub`/`email` against `oidcAllowedSubjects`, which must hold at
-        least one entry (an empty list ends in `not_configured`). On success it mints the same 30-day `auth_token` dashboard-session
-        JWT used by password login and redirects to `/dashboard`.
+        requires at least one dashboard admission policy: `oidcAllowedSubjects`
+        (matching `sub` or verified `email`) or `oidcAdmissionClaim` (matching a
+        configured array claim in the verified ID token). When both are present,
+        both must match. Without either policy the callback returns `not_configured`.
+        On success it mints the same 30-day `auth_token` dashboard-session JWT
+        used by password login and redirects to `/dashboard`.
       parameters:
         - name: code
           in: query
@@ -6759,7 +6807,7 @@ paths:
         "302":
           description: >-
             Redirect to `/dashboard` on success, or to
-            `/login?oidc_error={missing_code|invalid_state|not_configured|token_exchange|token_response|no_id_token|subject_not_allowed|id_token_invalid|server_misconfigured}`
+            `/login?oidc_error={missing_code|invalid_state|not_configured|token_exchange|token_response|no_id_token|subject_not_allowed|role_not_allowed|id_token_invalid|server_misconfigured}`
             on failure.
 
   /api/init:
@@ -9205,6 +9253,368 @@ paths:
           description: Every configured `elevenlabs` credential is rate limited.
         "500":
           $ref: "#/components/responses/InternalError"
+  /api/v1/sound-generation:
+    post:
+      tags: [Audio]
+      summary: Create an ElevenLabs sound effect
+      description: >-
+        Proxies POST /v1/sound-generation using the stored ElevenLabs connection selected
+        within the caller key's scope. Native response bytes and Content-Type are
+        preserved without buffering, including multipart boundaries. Query parameters
+        are forwarded unchanged. Endpoint, model, budget and connection restrictions apply.
+        Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: output_format
+          in: query
+          description: Native ElevenLabs audio encoding; availability depends on the upstream plan.
+          schema:
+            type: string
+        - name: enable_logging
+          in: query
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ElevenLabsSoundGeneration"
+      responses:
+        "200":
+          description: Native ElevenLabs response, relayed unchanged.
+          headers:
+            character-cost:
+              description: Credits consumed, when reported by ElevenLabs.
+              schema:
+                type: string
+            song-id:
+              description: Generated song identifier, when reported by ElevenLabs music.
+              schema:
+                type: string
+            request-id:
+              schema:
+                type: string
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          description: The ElevenLabs plan does not permit this operation.
+        "403":
+          description: The caller key does not permit this endpoint, model or connection.
+        "422":
+          description: Native ElevenLabs request validation failed.
+        "429":
+          description: OmniRoute policy, provider cooldown or upstream quota exceeded.
+        "502":
+          description: Could not reach ElevenLabs.
+  /api/v1/music:
+    post:
+      tags: [Audio]
+      summary: Compose ElevenLabs music
+      description: >-
+        Proxies POST /v1/music using the stored ElevenLabs connection selected
+        within the caller key's scope. Native response bytes and Content-Type are
+        preserved without buffering, including multipart boundaries. Query parameters
+        are forwarded unchanged. Endpoint, model, budget and connection restrictions apply.
+        Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: output_format
+          in: query
+          description: Native ElevenLabs audio encoding; availability depends on the upstream plan.
+          schema:
+            type: string
+        - name: enable_logging
+          in: query
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ElevenLabsMusicGeneration"
+      responses:
+        "200":
+          description: Native ElevenLabs response, relayed unchanged.
+          headers:
+            character-cost:
+              description: Credits consumed, when reported by ElevenLabs.
+              schema:
+                type: string
+            song-id:
+              description: Generated song identifier, when reported by ElevenLabs music.
+              schema:
+                type: string
+            request-id:
+              schema:
+                type: string
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          description: The ElevenLabs plan does not permit this operation.
+        "403":
+          description: The caller key does not permit this endpoint, model or connection.
+        "422":
+          description: Native ElevenLabs request validation failed.
+        "429":
+          description: OmniRoute policy, provider cooldown or upstream quota exceeded.
+        "502":
+          description: Could not reach ElevenLabs.
+  /api/v1/music/stream:
+    post:
+      tags: [Audio]
+      summary: Stream ElevenLabs music
+      description: >-
+        Proxies POST /v1/music/stream using the stored ElevenLabs connection selected
+        within the caller key's scope. Native response bytes and Content-Type are
+        preserved without buffering, including multipart boundaries. Query parameters
+        are forwarded unchanged. Endpoint, model, budget and connection restrictions apply.
+        Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: output_format
+          in: query
+          description: Native ElevenLabs audio encoding; availability depends on the upstream plan.
+          schema:
+            type: string
+        - name: enable_logging
+          in: query
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ElevenLabsMusicGeneration"
+      responses:
+        "200":
+          description: Native ElevenLabs response, relayed unchanged.
+          headers:
+            character-cost:
+              description: Credits consumed, when reported by ElevenLabs.
+              schema:
+                type: string
+            song-id:
+              description: Generated song identifier, when reported by ElevenLabs music.
+              schema:
+                type: string
+            request-id:
+              schema:
+                type: string
+          content:
+            audio/mpeg:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          description: The ElevenLabs plan does not permit this operation.
+        "403":
+          description: The caller key does not permit this endpoint, model or connection.
+        "422":
+          description: Native ElevenLabs request validation failed.
+        "429":
+          description: OmniRoute policy, provider cooldown or upstream quota exceeded.
+        "502":
+          description: Could not reach ElevenLabs.
+  /api/v1/music/detailed:
+    post:
+      tags: [Audio]
+      summary: Compose ElevenLabs music with its composition plan
+      description: >-
+        Proxies POST /v1/music/detailed using the stored ElevenLabs connection selected
+        within the caller key's scope. Native response bytes and Content-Type are
+        preserved without buffering, including multipart boundaries. Query parameters
+        are forwarded unchanged. Endpoint, model, budget and connection restrictions apply.
+        Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: output_format
+          in: query
+          description: Native ElevenLabs audio encoding; availability depends on the upstream plan.
+          schema:
+            type: string
+        - name: enable_logging
+          in: query
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ElevenLabsMusicGeneration"
+      responses:
+        "200":
+          description: Native ElevenLabs response, relayed unchanged.
+          headers:
+            character-cost:
+              description: Credits consumed, when reported by ElevenLabs.
+              schema:
+                type: string
+            song-id:
+              description: Generated song identifier, when reported by ElevenLabs music.
+              schema:
+                type: string
+            request-id:
+              schema:
+                type: string
+          content:
+            multipart/mixed:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          description: The ElevenLabs plan does not permit this operation.
+        "403":
+          description: The caller key does not permit this endpoint, model or connection.
+        "422":
+          description: Native ElevenLabs request validation failed.
+        "429":
+          description: OmniRoute policy, provider cooldown or upstream quota exceeded.
+        "502":
+          description: Could not reach ElevenLabs.
+  /api/v1/music/detailed/stream:
+    post:
+      tags: [Audio]
+      summary: Stream ElevenLabs music and metadata as SSE
+      description: >-
+        Proxies POST /v1/music/detailed/stream using the stored ElevenLabs connection selected
+        within the caller key's scope. Native response bytes and Content-Type are
+        preserved without buffering, including multipart boundaries. Query parameters
+        are forwarded unchanged. Endpoint, model, budget and connection restrictions apply.
+        Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: output_format
+          in: query
+          description: Native ElevenLabs audio encoding; availability depends on the upstream plan.
+          schema:
+            type: string
+        - name: enable_logging
+          in: query
+          schema:
+            type: boolean
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ElevenLabsMusicGeneration"
+      responses:
+        "200":
+          description: Native ElevenLabs response, relayed unchanged.
+          headers:
+            character-cost:
+              description: Credits consumed, when reported by ElevenLabs.
+              schema:
+                type: string
+            song-id:
+              description: Generated song identifier, when reported by ElevenLabs music.
+              schema:
+                type: string
+            request-id:
+              schema:
+                type: string
+          content:
+            text/event-stream:
+              schema:
+                type: string
+                format: binary
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          description: The ElevenLabs plan does not permit this operation.
+        "403":
+          description: The caller key does not permit this endpoint, model or connection.
+        "422":
+          description: Native ElevenLabs request validation failed.
+        "429":
+          description: OmniRoute policy, provider cooldown or upstream quota exceeded.
+        "502":
+          description: Could not reach ElevenLabs.
+  /api/v1/music/plan:
+    post:
+      tags: [Audio]
+      summary: Create an ElevenLabs music composition plan
+      description: >-
+        Proxies POST /v1/music/plan using the stored ElevenLabs connection selected
+        within the caller key's scope. Native response bytes and Content-Type are
+        preserved without buffering, including multipart boundaries. Query parameters
+        are forwarded unchanged. Endpoint, model, budget and connection restrictions apply.
+        Upstream plan restrictions (402) are preserved; a credit balance does not override them.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ElevenLabsMusicPlan"
+      responses:
+        "200":
+          description: Native ElevenLabs response, relayed unchanged.
+          headers:
+            character-cost:
+              description: Credits consumed, when reported by ElevenLabs.
+              schema:
+                type: string
+            song-id:
+              description: Generated song identifier, when reported by ElevenLabs music.
+              schema:
+                type: string
+            request-id:
+              schema:
+                type: string
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "402":
+          description: The ElevenLabs plan does not permit this operation.
+        "403":
+          description: The caller key does not permit this endpoint, model or connection.
+        "422":
+          description: Native ElevenLabs request validation failed.
+        "429":
+          description: OmniRoute policy, provider cooldown or upstream quota exceeded.
+        "502":
+          description: Could not reach ElevenLabs.
   /api/v1/explain/routing:
     get:
       tags: [Telemetry]
@@ -13317,6 +13727,11 @@ paths:
                     type: string
                     description: Latest published version, or "unavailable" when every lookup failed.
                   updateAvailable: { type: boolean }
+                  updateCheckDisabled:
+                    type: boolean
+                    description: >-
+                      True when OMNIROUTE_NO_UPDATE_NOTIFIER is set. No npm, GitHub or news lookup
+                      runs, `latest` is "unavailable" and `updateAvailable` is false.
                   channel:
                     type: string
                     enum: [npm, source, docker-compose]
@@ -14801,6 +15216,99 @@ components:
             requestId: 0a1b2c3d-4e5f-6a7b-8c9d-0e1f2a3b4c5d
 
   schemas:
+    ElevenLabsSoundGeneration:
+      type: object
+      additionalProperties: true
+      required: [text]
+      properties:
+        text:
+          type: string
+          minLength: 1
+        model_id:
+          type: string
+          nullable: true
+          default: eleven_text_to_sound_v2
+        duration_seconds:
+          type: number
+          nullable: true
+          minimum: 0.5
+          maximum: 30
+        prompt_influence:
+          type: number
+          nullable: true
+          minimum: 0
+          maximum: 1
+        loop:
+          type: boolean
+    ElevenLabsMusicGeneration:
+      type: object
+      additionalProperties: true
+      description: Provide exactly one of prompt or composition_plan. Plan internals are validated by ElevenLabs.
+      oneOf:
+        - required: [prompt]
+          properties:
+            prompt:
+              type: string
+            composition_plan:
+              nullable: true
+              enum: [null]
+        - required: [composition_plan]
+          properties:
+            composition_plan:
+              type: object
+            prompt:
+              nullable: true
+              enum: [null]
+      properties:
+        prompt:
+          type: string
+          nullable: true
+          minLength: 1
+          maxLength: 4100
+        composition_plan:
+          type: object
+          nullable: true
+          additionalProperties: true
+        model_id:
+          type: string
+          nullable: true
+          default: music_v1
+        music_length_ms:
+          type: integer
+          nullable: true
+          minimum: 3000
+          maximum: 600000
+        force_instrumental:
+          type: boolean
+        respect_sections_durations:
+          type: boolean
+        seed:
+          type: integer
+          nullable: true
+          minimum: 0
+          maximum: 2147483647
+    ElevenLabsMusicPlan:
+      type: object
+      additionalProperties: true
+      required: [prompt]
+      properties:
+        prompt:
+          type: string
+          minLength: 1
+          maxLength: 4100
+        model_id:
+          type: string
+          nullable: true
+          default: music_v1
+        music_length_ms:
+          type: integer
+          nullable: true
+          minimum: 3000
+          maximum: 600000
+        source_composition_plan:
+          type: object
+          nullable: true
+          additionalProperties: true
     ExclusiveConnectionLeaseLifecycle:
       type: object
       description: >-
@@ -16099,6 +16607,25 @@ components:
         system:
           type: string
 
+    ModelHealth:
+      type: object
+      description: >-
+        Per-model pause state. `ok` means no pause observed by this instance;
+        `unknown` marks ids that resolve to no routable provider model.
+      properties:
+        id:
+          type: string
+        state:
+          type: string
+          enum: [ok, cooling, unknown]
+        retry_after:
+          type: integer
+          description: Shortest remaining lockout in seconds, rounded up; only when cooling.
+          nullable: true
+        observed_at:
+          type: string
+          format: date-time
+
     Model:
       type: object
       properties:
@@ -16109,6 +16636,58 @@ components:
           example: model
         owned_by:
           type: string
+        pricing:
+          $ref: "#/components/schemas/ModelPricing"
+
+    ModelPricing:
+      type: object
+      description: >-
+        Model price from the same pricing table OmniRoute uses for cost accounting.
+        Omitted when the price is unknown. A combo carries the price of its first
+        visible target. A model with no pricing row that the catalog marks free is
+        `"0"`. The string fields are OpenRouter-compatible (USD per token, plain
+        decimals, no exponent). The numeric fields are USD per 1M tokens.
+        Credit-metered providers (billed per request) carry only the numeric fields,
+        so `prompt` and `completion` are absent for them.
+      required: [input, output]
+      properties:
+        prompt:
+          type: string
+          description: USD per input token.
+          example: "0.000005"
+        completion:
+          type: string
+          description: USD per output token.
+          example: "0.000025"
+        input_cache_read:
+          type: string
+          description: USD per cached input token read. Present when there is a cache price.
+          example: "0.0000005"
+        input_cache_write:
+          type: string
+          description: USD per input token written to the cache. Present when there is a cache price.
+          example: "0.00000625"
+        input:
+          type: number
+          description: USD per 1M input tokens.
+          example: 5
+        output:
+          type: number
+          description: USD per 1M output tokens.
+          example: 25
+        cached:
+          type: number
+          description: USD per 1M cached input tokens read.
+        cache_creation:
+          type: number
+          description: USD per 1M input tokens written to the cache.
+        reasoning:
+          type: number
+          description: USD per 1M reasoning tokens, when the pricing row sets one.
+        long_context:
+          type: object
+          additionalProperties: true
+          description: Long-context rate tier from the pricing row, when it has one.
 
     ProxySubscription:
       type: object
@@ -16145,8 +16724,9 @@ components:
           type: string
           nullable: true
           description: >-
-            Absolute adopted sing-box config path (lowercase .json).
-            Empty means no generation.
+            Absolute adopted config path: lowercase `.json` renders
+            sing-box, `.yaml`/`.yml` renders Mihomo. Empty means no
+            generation.
         coreBinaryPath:
           type: string
           nullable: true

@@ -394,6 +394,17 @@ export async function executeTargetAttempt(
         // unhealthy, so the sticky pin's lazy headroom recheck would never
         // catch it either — release it here, on the failing response.
         deps.releaseStickyPinOnFailure(deps.sticky.messageHash, effectiveConnectionId);
+        // #919: a quality-rejected 200 leaves the same stale LKGP pin as a
+        // classic failure — clear it so the next request re-resolves.
+        deps.clearStaleLKGP(
+          deps.combo.name,
+          target.executionKey,
+          deps.combo.id,
+          deps.log,
+          "COMBO",
+          undefined,
+          target
+        );
         recordComboRequest(deps.combo.name, modelStr, {
           success: false,
           latencyMs: Date.now() - deps.startTime,
@@ -889,7 +900,12 @@ export async function executeTargetAttempt(
     // only holds within a homogeneous same-model pool).
     // #15917: with CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED on, a content-policy refusal
     // stops the combo even with different models remaining.
-    const remainderHomogeneous = remainderIsHomogeneous(state.orderedTargets, i, modelStr);
+    const remainderHomogeneous =
+      remainderIsHomogeneous(state.orderedTargets, i, modelStr) &&
+      // Earlier heterogeneous attempts can still be pending in a hedge.
+      // Preserve suffix short-circuiting for serial dispatch.
+      (!(deps.config.zeroLatencyOptimizationsEnabled && deps.config.hedging) ||
+        state.orderedTargets.every((candidate) => candidate.modelStr === modelStr));
     const isInputBoundFailure = shouldAbortOnInputBoundFailure({
       structuredError,
       remainderIsHomogeneous: remainderHomogeneous,

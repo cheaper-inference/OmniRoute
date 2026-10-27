@@ -180,26 +180,26 @@ npm run test:all
 # ឯកសារតេស្តតែមួយ (កម្មវិធីដំណើរការតេស្តដើមរបស់ Node.js — តេស្តភាគច្រើនប្រើវា)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# តែ unit tests ដែលរងផលប៉ះពាល់ដោយការផ្លាស់ប្ដូររបស់អ្នកប៉ុណ្ណោះ (ប្រើ TIA selector ដូចគ្នានឹង CI gate, #8084)
-npm run test:scoped            # ការផ្លាស់ប្ដូរនៅក្នុង commit ចុងក្រោយ (ឬ working tree)
-npm run test:scoped:staged     # តែការផ្លាស់ប្ដូរដែលបាន staged — ដំណើរការល្អជាមួយ pre-commit
+# ដំណើរការតែ unit tests ដែលរងផលប៉ះពាល់ពីការផ្លាស់ប្តូររបស់អ្នក (ប្រើកម្មវិធីជ្រើសរើស TIA ដូចគ្នានឹងច្រកត្រួតពិនិត្យ CI, #8084)
+npm run test:scoped            # ការផ្លាស់ប្តូរនៅក្នុង commit ចុងក្រោយ (ឬ working tree)
+npm run test:scoped:staged     # តែការផ្លាស់ប្តូរដែលបាន staged ប៉ុណ្ណោះ — សមស្របសម្រាប់ប្រើជាមួយការដំណើរការ pre-commit
 npm run test:scoped:full       # បង្កើតផែនទី import-graph ឡើងវិញជាមុន (បន្ទាប់ពីបន្ថែម/ផ្លាស់ទីឯកសារ)
-# Exit 1 + "run the full suite" មានន័យថា hub file មួយ (tsconfig, package.json, …) ឬ
-# source ដែលមិនបានផ្គូផ្គងត្រូវបានផ្លាស់ប្ដូរ — selector បរាជ័យដោយសុវត្ថិភាព ហើយវាមិនដែលរំលងដោយស្ងៀមស្ងាត់ឡើយ។
+# Exit 1 + "ដំណើរការ suite ពេញលេញ" មានន័យថាឯកសារមជ្ឈមណ្ឌលមួយ (tsconfig, package.json, …) ឬប្រភព
+# ដែលមិនទាន់បានផ្គូផ្គងបានផ្លាស់ប្តូរ — កម្មវិធីជ្រើសរើសបរាជ័យដោយសុវត្ថិភាព ហើយវាមិនដែលរំលងដោយស្ងាត់ៗទេ។
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (ម៉ាស៊ីនមេ MCP, autoCombo, cache)
 npm run test:vitest
 
 # តេស្ត E2E (តម្រូវឱ្យមាន Playwright)
 npm run test:e2e
 
-# E2E របស់ protocol clients (MCP transports, A2A)
+# តេស្ត E2E សម្រាប់ protocol clients (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# តេស្តភាពត្រូវគ្នានៃ ecosystem
+# តេស្តភាពឆបគ្នានៃ ecosystem
 npm run test:ecosystem
 
-# Coverage gate៖ 60% សម្រាប់ statements/lines/functions/branches
+# ច្រកត្រួតពិនិត្យ coverage៖ 60% សម្រាប់ statements/lines/functions/branches
 npm run test:coverage
 npm run coverage:report
 
@@ -207,51 +207,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# ការធ្វើ combo smoke ជាមួយ upstream ពិតដែលមាន gate (តម្រូវឱ្យចូលប្រើ VPS + មាន credits ពិតរបស់ provider)
-# វាហៅទៅកាន់ providers ពិត — ចំណាយបន្តិចបន្តួច។ មិនដែលដំណើរការនៅក្នុង CI ឡើយ។ រំលងដោយត្រឹមត្រូវបើគ្មាន gate។
-# តម្រូវការ៖ សិទ្ធិចូលប្រើ ssh root@192.168.0.15 (ទាញប្រភព DB snapshot ដែលបានតែអានពី VPS)។
+# តេស្ត smoke សម្រាប់ combo ជាមួយ upstream ពិតដែលមានច្រកត្រួតពិនិត្យ (តម្រូវឱ្យមានសិទ្ធិចូលប្រើ VPS + credits ពិតរបស់ provider)
+# ភ្ជាប់ទៅ provider ពិត — មានការចំណាយបន្តិចបន្តួច។ មិនដំណើរការក្នុង CI ជាដាច់ខាត។ រំលងដោយគ្មានបញ្ហា ប្រសិនបើគ្មានច្រកត្រួតពិនិត្យ។
+# តម្រូវឱ្យ៖ មានសិទ្ធិចូលប្រើ ssh root@192.168.0.15 (ទាញយក snapshot នៃ DB ដែលបានតែអានពី VPS)។
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS live smoke — scripts ជា Node ESM ធម្មតា ដែលហៅទៅកាន់ live .15 server ដោយផ្ទាល់។
-# តម្រូវការ៖ សិទ្ធិចូលប្រើ ssh root@192.168.0.15 (combos ត្រូវបានបង្កើត/លុបតាមរយៈ SSH sqlite)។
-# វាហៅទៅកាន់ providers ពិត (ចំណាយតិចតួច)។ បង្កើត/លុបតែ combos ដែលមានឈ្មោះ __live_test__* ប៉ុណ្ណោះ។ មិនដែលដំណើរការនៅក្នុង CI ឡើយ។
-# REQUIRE_API_KEY=false នៅលើ .15 ដូច្នេះមិនត្រូវការ API key ទេ ប៉ុន្តែគោរព COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ប្រសិនបើបានកំណត់។
-npm run test:combo:live:vps              # 7 HTTP scenarios (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # បន្ថែម cross-provider failover scenario ពិតមួយ (សរុប 8)
+# តេស្ត smoke ផ្ទាល់លើ VPS ដំណាក់កាលទី 3 — ស្គ្រីប Node ESM ធម្មតា ដែលភ្ជាប់ដោយផ្ទាល់ទៅម៉ាស៊ីនមេ .15 ដែលកំពុងដំណើរការ។
+# តម្រូវឱ្យ៖ មានសិទ្ធិចូលប្រើ ssh root@192.168.0.15 (combo ត្រូវបានបង្កើត/លុបចោលតាមរយៈ SSH sqlite)។
+# ភ្ជាប់ទៅ provider ពិត (ចំណាយតិចតួច)។ បង្កើត/លុបតែ combo ដែលមានឈ្មោះ __live_test__* ប៉ុណ្ណោះ។ មិនដំណើរការក្នុង CI ជាដាច់ខាត។
+# REQUIRE_API_KEY=false នៅលើ .15 ដូច្នេះមិនត្រូវការ API key ទេ ប៉ុន្តែគោរពតាម COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ប្រសិនបើបានកំណត់។
+npm run test:combo:live:vps              # សេណារីយ៉ូ HTTP ចំនួន 7 (អាទិភាព/ប្តូរវេន/ទម្ងន់/តម្លៃ/បញ្ចូលគ្នា/ស្វ័យប្រវត្តិ + ស្ថានភាព)
+npm run test:combo:live:vps:failover     # បន្ថែមសេណារីយ៉ូ failover ឆ្លង provider ពិតមួយ (សរុប 8)
 ```
 
-កំណត់ចំណាំអំពី coverage៖
+កំណត់សម្គាល់អំពី coverage៖
 
-- `npm run test:coverage` វាស់ source coverage សម្រាប់ unit test suite ចម្បង មិនរាប់បញ្ចូល `tests/**` និងរាប់បញ្ចូល `open-sse/**`
-- Pull requests ត្រូវរក្សា coverage gate ឱ្យនៅ **60%+** សម្រាប់ statements/lines/functions/branches
-- ប្រសិនបើ PR ផ្លាស់ប្ដូរ production code នៅក្នុង `src/`, `open-sse/`, `electron/`, ឬ `bin/` វាត្រូវបន្ថែម ឬធ្វើបច្ចុប្បន្នភាព automated tests នៅក្នុង PR ដូចគ្នា
+- `npm run test:coverage` វាស់ source coverage សម្រាប់ suite នៃ unit test ចម្បង ដោយមិនរាប់បញ្ចូល `tests/**` និងរាប់បញ្ចូល `open-sse/**`
+- Pull request ត្រូវតែរក្សាច្រកត្រួតពិនិត្យ coverage ឱ្យបាន **60%+** សម្រាប់ statements/lines/functions/branches
+- ប្រសិនបើ PR ផ្លាស់ប្តូរកូដ production ក្នុង `src/`, `open-sse/`, `electron/`, ឬ `bin/` វាត្រូវតែបន្ថែម ឬធ្វើបច្ចុប្បន្នភាពតេស្តស្វ័យប្រវត្តិនៅក្នុង PR ដូចគ្នា
 - `npm run coverage:report` បង្ហាញរបាយការណ៍លម្អិតតាមឯកសារនីមួយៗពីការដំណើរការ coverage ចុងក្រោយ
-- `npm run test:coverage:legacy` រក្សាទុករង្វាស់ចាស់សម្រាប់ការប្រៀបធៀបប្រវត្តិសាស្ត្រ
-- សូមមើល `docs/ops/COVERAGE_PLAN.md` សម្រាប់ផែនការកែលម្អ coverage ជាដំណាក់កាល
+- `npm run test:coverage:legacy` រក្សាទុកមាត្រដ្ឋានចាស់សម្រាប់ការប្រៀបធៀបជាប្រវត្តិសាស្ត្រ
+- សូមមើល `docs/ops/COVERAGE_PLAN.md` សម្រាប់ផែនការអភិវឌ្ឍការកែលម្អ coverage ជាដំណាក់កាល
 
-### តម្រូវការរបស់ Pull Request
+### តម្រូវការសម្រាប់ Pull Request
 
 មុនពេលបើក PR សូមប្រើ
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ដើម្បីដំណើរការ focused loop សម្រាប់
-អ្វីដែលអ្នកបានផ្លាស់ប្ដូរ។ unit suite ពេញលេញ (4 CI shards), Vitest, coverage gate **60%+** និង
-production build គឺជាការទទួលខុសត្រូវរបស់ CI — ការដំណើរការពួកវានៅ local មិនផ្ដល់ព័ត៌មានបន្ថែមដែលការត្រួតពិនិត្យ
-PR មិនបានផ្ដល់ឱ្យអ្នករួចហើយទេ ហើយនៅលើម៉ាស៊ីនតូចៗ វាអាចប្រើធនធាន host រហូតដល់អតិបរមា (#8084)៖
+[មាគ៌ាស្តង់ដារសម្រាប់ការរួមចំណែក](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) ដើម្បីដំណើរការវដ្តដែលផ្តោតលើ
+អ្វីដែលអ្នកបានផ្លាស់ប្តូរ។ unit suite ពេញលេញ (CI ចំនួន 4 shards), Vitest, ច្រកត្រួតពិនិត្យ coverage **60%+** និង
+production build គឺជាការទទួលខុសត្រូវរបស់ CI — ការដំណើរការពួកវានៅមូលដ្ឋានមិនផ្តល់ព័ត៌មានបន្ថែមដែលការត្រួតពិនិត្យ PR
+មិនបានផ្តល់ឱ្យរួចហើយទេ ហើយនៅលើម៉ាស៊ីនតូចៗ វាអាចប្រើប្រាស់ធនធានម៉ាស៊ីនរហូតដល់ពេញ (#8084)៖
 
-- ដំណើរការឯកសារតេស្តដែលគ្របដណ្ដប់ការផ្លាស់ប្ដូររបស់អ្នក៖ `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- ដំណើរការឯកសារតេស្តដែលគ្របដណ្តប់ការផ្លាស់ប្តូររបស់អ្នក៖ `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - ដំណើរការ `npm run lint`
-- បន្ថែម ឬធ្វើបច្ចុប្បន្នភាព automated tests នៅក្នុង PR ដូចគ្នា រាល់ពេល production code ផ្លាស់ប្ដូរ
-- រាយបញ្ចូលឯកសារតេស្តដែលបានផ្លាស់ប្ដូរ ឬបន្ថែមនៅក្នុងការពិពណ៌នា PR នៅពេល production code បានផ្លាស់ប្ដូរ
-- ពិនិត្យលទ្ធផល SonarQube នៅលើ PR នៅពេល project secrets ត្រូវបានកំណត់នៅក្នុង CI
+- បន្ថែម ឬធ្វើបច្ចុប្បន្នភាពតេស្តស្វ័យប្រវត្តិនៅក្នុង PR ដូចគ្នា រាល់ពេលដែលកូដ production ផ្លាស់ប្តូរ
+- ក្នុងឯកសារ `node:test` ដាក់ `await` កម្រិតកំពូលទាំងអស់ (ដូចជា `await import(...)`) មុន `test()` / `describe()` ដំបូង៖ នៅក្រោម `--test-force-exit` តេស្តដែលបានចុះឈ្មោះបន្ទាប់ពីវា អាចមិនដំណើរការដោយស្ងាត់ៗ (#18045; អនុវត្តដោយ `npm run check:test-tla-order`)
+- បញ្ចូលឯកសារតេស្តដែលបានផ្លាស់ប្តូរ ឬបន្ថែមទៅក្នុងសេចក្តីពិពណ៌នា PR នៅពេលកូដ production បានផ្លាស់ប្តូរ
+- ពិនិត្យលទ្ធផល SonarQube នៅលើ PR នៅពេលដែល project secrets ត្រូវបានកំណត់រចនាសម្ព័ន្ធក្នុង CI
 
-ស្ថានភាពតេស្តបច្ចុប្បន្ន៖ **122 ឯកសារ unit test** ដែលគ្របដណ្ដប់លើ៖
+ស្ថានភាពតេស្តបច្ចុប្បន្ន៖ **ឯកសារ unit test ចំនួន 122** ដែលគ្របដណ្តប់លើ៖
 
-- Provider translators និងការបម្លែង format
-- Rate limiting, circuit breaker និង resilience
-- Semantic cache, idempotency និង progress tracking
-- ប្រតិបត្តិការ database និង schema (21 DB modules)
-- OAuth flows និង authentication
+- កម្មវិធីបកប្រែរបស់ provider និងការបម្លែង format
+- ការកំណត់អត្រា circuit breaker និងភាពធន់
+- Semantic cache, idempotency និងការតាមដានវឌ្ឍនភាព
+- ប្រតិបត្តិការ database និង schema (ម៉ូឌុល DB ចំនួន 21)
+- លំហូរ OAuth និងការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ
 - ការផ្ទៀងផ្ទាត់ API endpoint (Zod v4)
-- ឧបករណ៍ MCP server និងការអនុវត្ត scope
+- ឧបករណ៍ម៉ាស៊ីនមេ MCP និងការអនុវត្តដែនសិទ្ធិ
 - ប្រព័ន្ធ Memory និង Skills
 
 ---

@@ -1,31 +1,12 @@
 "use client";
 
 import { Handle, Position, type NodeProps } from "@xyflow/react";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
+import { strategyColorVar } from "../../strategyPalette";
 
-// ── Strategy color map ────────────────────────────────────────────────────
-
-const STRATEGY_COLORS: Record<string, string> = {
-  priority: "#3b82f6",
-  weighted: "#8b5cf6",
-  "round-robin": "#06b6d4",
-  "fill-first": "#f59e0b",
-  p2c: "#10b981",
-  random: "#6b7280",
-  "least-used": "#84cc16",
-  "cost-optimized": "#22c55e",
-  "reset-aware": "#f97316",
-  "reset-window": "#f97316",
-  "strict-random": "#a855f7",
-  auto: "#6366f1",
-  lkgp: "#ec4899",
-  "context-optimized": "#14b8a6",
-  "context-relay": "#0ea5e9",
-  "quota-weighted": "#0d9488",
-};
-
-function getStrategyColor(strategy: string): string {
-  return STRATEGY_COLORS[strategy] ?? "#6b7280";
-}
+// ── Strategy colour ───────────────────────────────────────────────────────
+// Shared combos strategy palette on the kit chart tokens (strategyPalette.ts, KEA-7886 P8):
+// the token paints the pill border/glow and the count chip tint; the text stays neutral ink.
 
 // ── Node data shape ───────────────────────────────────────────────────────
 
@@ -45,7 +26,7 @@ export interface StrategyNodeData {
  */
 export function StrategyNode({ data }: NodeProps) {
   const { strategy, targetCount } = data as StrategyNodeData;
-  const color = getStrategyColor(strategy as string);
+  const color = strategyColorVar(strategy as string);
   const label = (strategy as string) || "combo";
   const count = targetCount as number;
 
@@ -54,7 +35,7 @@ export function StrategyNode({ data }: NodeProps) {
       className="flex flex-col items-center gap-1 px-3 py-2 rounded-full border-2 bg-bg transition-all duration-300"
       style={{
         borderColor: color,
-        boxShadow: `0 0 10px ${color}30`,
+        boxShadow: `0 0 10px ${flowColorAlpha(color, 19)}`,
         minWidth: "110px",
       }}
       data-testid="strategy-node"
@@ -71,16 +52,15 @@ export function StrategyNode({ data }: NodeProps) {
       />
 
       <span
-        className="text-xs font-semibold uppercase tracking-wide truncate"
-        style={{ color }}
+        className="text-xs font-semibold uppercase tracking-wide truncate text-text-main"
         data-testid="strategy-label"
       >
         {label}
       </span>
       {count > 0 && (
         <span
-          className="text-[10px] font-mono px-1.5 rounded-full"
-          style={{ backgroundColor: `${color}20`, color }}
+          className="text-[10px] font-mono px-1.5 rounded-full text-text-muted"
+          style={{ backgroundColor: flowColorAlpha(color, 13) }}
           data-testid="strategy-target-count"
         >
           {count} target{count !== 1 ? "s" : ""}

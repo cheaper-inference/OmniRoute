@@ -173,15 +173,15 @@ Domenii (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`,
 # Toate testele (unitare + vitest + ecosistem + e2e)
 npm run test:all
 
-# Un singur fișier de test (executorul de teste nativ Node.js — majoritatea testelor îl folosesc)
+# Un singur fișier de testare (executorul de teste nativ Node.js — majoritatea testelor îl folosesc)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Doar testele unitare afectate de modificarea dvs. (același selector TIA ca poarta CI, #8084)
+# Doar testele unitare afectate de modificarea dvs. (același selector TIA ca pragul CI, #8084)
 npm run test:scoped            # modificările din ultimul commit (sau din arborele de lucru)
 npm run test:scoped:staged     # doar modificările pregătite — se potrivește bine cu o rulare pre-commit
 npm run test:scoped:full       # reconstruiește mai întâi harta grafului de importuri (după adăugarea/mutarea fișierelor)
-# Codul de ieșire 1 + „rulați întreaga suită” înseamnă că un fișier central (tsconfig, package.json, …) sau o
-# sursă necartografiată s-a modificat — selectorul eșuează în siguranță și nu omite niciodată în mod silențios.
+# Exit 1 + „rulați întreaga suită” înseamnă că un fișier central (tsconfig, package.json, …) sau o
+# sursă necartografiată s-a modificat — selectorul eșuează în siguranță, nu omite niciodată ceva în mod silențios.
 
 # Vitest (server MCP, autoCombo, cache)
 npm run test:vitest
@@ -189,26 +189,26 @@ npm run test:vitest
 # Teste E2E (necesită Playwright)
 npm run test:e2e
 
-# Teste E2E pentru clienții de protocol (transporturi MCP, A2A)
+# E2E pentru clienții de protocol (transporturi MCP, A2A)
 npm run test:protocols:e2e
 
 # Teste de compatibilitate cu ecosistemul
 npm run test:ecosystem
 
-# Prag de acoperire: 60% instrucțiuni/linii/funcții/ramuri
+# Prag de acoperire: 60% pentru instrucțiuni/linii/funcții/ramuri
 npm run test:coverage
 npm run coverage:report
 
-# Verificarea lint + formatare
+# Verificare lint + formatare
 npm run lint
 npm run check
 
-# Test smoke combinat, condiționat, cu servicii reale din amonte (necesită acces VPS + credite reale la furnizori)
-# Accesează furnizori REALI — costă puțin. Nu rulează NICIODATĂ în CI. Este omis fără erori în lipsa activării.
-# Necesită: acces ssh root@192.168.0.15 (încarcă un instantaneu numai în citire al bazei de date de pe VPS).
+# Test smoke combinat condiționat, cu servicii upstream reale (necesită acces VPS + credite reale la furnizori)
+# Accesează furnizori REALI — costă puțin. Nu rulează NICIODATĂ în CI. Este omis fără erori în absența condiției.
+# Necesită: acces ssh root@192.168.0.15 (încarcă un instantaneu DB doar în citire de pe VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Test smoke live VPS din faza 3 — scripturi Node ESM simple, accesează direct serverul live .15.
+# Test smoke live VPS de faza 3 — scripturi Node ESM simple, accesează direct serverul live .15.
 # Necesită: acces ssh root@192.168.0.15 (combinațiile sunt create/eliminate prin SSH sqlite).
 # Accesează furnizori REALI (cost redus). Creează/șterge doar combinații __live_test__*. Nu rulează NICIODATĂ în CI.
 # REQUIRE_API_KEY=false pe .15, deci nu este necesară nicio cheie API, dar respectă COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY dacă sunt setate.
@@ -218,37 +218,38 @@ npm run test:combo:live:vps:failover     # adaugă un scenariu real de failover 
 
 Note privind acoperirea:
 
-- `npm run test:coverage` măsoară acoperirea codului-sursă pentru suita principală de teste unitare, exclude `tests/**` și include `open-sse/**`
+- `npm run test:coverage` măsoară acoperirea codului sursă pentru suita principală de teste unitare, exclude `tests/**` și include `open-sse/**`
 - Solicitările de integrare trebuie să mențină pragul de acoperire la **60%+** pentru instrucțiuni/linii/funcții/ramuri
-- Dacă un PR modifică codul de producție din `src/`, `open-sse/`, `electron/` sau `bin/`, trebuie să adauge sau să actualizeze teste automate în același PR
-- `npm run coverage:report` afișează raportul detaliat, fișier cu fișier, din cea mai recentă rulare de acoperire
+- Dacă un PR modifică codul de producție din `src/`, `open-sse/`, `electron/` sau `bin/`, acesta trebuie să adauge sau să actualizeze teste automate în același PR
+- `npm run coverage:report` afișează raportul detaliat, fișier cu fișier, de la cea mai recentă rulare a acoperirii
 - `npm run test:coverage:legacy` păstrează metrica mai veche pentru comparații istorice
 - Consultați `docs/ops/COVERAGE_PLAN.md` pentru foaia de parcurs etapizată privind îmbunătățirea acoperirii
 
 ### Cerințe pentru solicitările de integrare
 
 Înainte de a deschide un PR, utilizați
-[Fluxul recomandat pentru contribuții](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) pentru a rula ciclul focalizat aferent
-modificărilor efectuate. Suita completă de teste unitare (4 partiții CI), Vitest, pragul de acoperire de **60%+** și
-compilarea pentru producție sunt responsabilitatea CI — rularea lor locală nu oferă informații suplimentare față de cele
-pe care verificările PR le vor furniza deja, iar pe sistemele mai puțin performante poate satura gazda (#8084):
+[Fluxul recomandat pentru contribuții](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) pentru a rula ciclul focalizat pentru
+ceea ce ați modificat. Suita completă de teste unitare (4 partiții CI), Vitest, pragul de acoperire de **60%+** și
+buildul de producție sunt responsabilitatea CI — rularea lor locală nu oferă informații suplimentare față de cele
+pe care vi le vor furniza deja verificările PR-ului, iar pe sistemele mai mici poate satura gazda (#8084):
 
-- Rulați fișierele de test care acoperă modificarea: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Rulați fișierele de testare care acoperă modificarea dvs.: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Rulați `npm run lint`
 - Includeți sau actualizați teste automate în același PR ori de câte ori se modifică codul de producție
-- Includeți în descrierea PR-ului fișierele de test modificate sau adăugate atunci când s-a modificat codul de producție
-- Verificați rezultatul SonarQube din PR atunci când secretele proiectului sunt configurate în CI
+- În fișierele `node:test`, plasați fiecare `await` de nivel superior (precum `await import(...)`) înaintea primului `test()` / `describe()`: cu `--test-force-exit`, testele înregistrate după acesta pot să nu ruleze niciodată, fără nicio avertizare (#18045; regulă verificată prin `npm run check:test-tla-order`)
+- Includeți în descrierea PR-ului fișierele de testare modificate sau adăugate atunci când s-a modificat codul de producție
+- Verificați rezultatul SonarQube pentru PR atunci când secretele proiectului sunt configurate în CI
 
 Starea actuală a testelor: **122 de fișiere de teste unitare** care acoperă:
 
 - Translatoare pentru furnizori și conversia formatelor
-- Limitarea ratei, disjunctorul și reziliența
-- Cache-ul semantic, idempotența, urmărirea progresului
-- Operațiunile și schema bazei de date (21 de module DB)
+- Limitarea ratei, întrerupătorul de circuit și reziliența
+- Cache-ul semantic, idempotenta și urmărirea progresului
+- Operațiunile bazei de date și schema (21 de module DB)
 - Fluxurile OAuth și autentificarea
 - Validarea endpointurilor API (Zod v4)
-- Instrumentele serverului MCP și aplicarea domeniului de acces
-- Sistemele de memorie și abilități
+- Instrumentele serverului MCP și aplicarea domeniilor de acces
+- Sistemele Memory și Skills
 
 ---
 
