@@ -88343,7 +88343,7 @@
       }
     },
     "docs/reference/ENVIRONMENT.md": {
-      "source_hash": "8c6696e999442cf8833a4cc418740b116c7f4cbccbbf81ff38ac100b65295764",
+      "source_hash": "5305f707931c42718276166fc1cf3d2d79b92c75968baeb212cef18a79e5efdb",
       "locales": {
         "ar": {
           "source_hash": "8c6696e999442cf8833a4cc418740b116c7f4cbccbbf81ff38ac100b65295764",
@@ -88661,8 +88661,8 @@
           "updated_at": "2026-10-25T21:28:05.120Z"
         },
         "es": {
-          "source_hash": "8c6696e999442cf8833a4cc418740b116c7f4cbccbbf81ff38ac100b65295764",
-          "target_hash": "e115fcae652a2d36d14233c0d53d99cdb97b9cb6749468b6cbdcbda170b248b5",
+          "source_hash": "5305f707931c42718276166fc1cf3d2d79b92c75968baeb212cef18a79e5efdb",
+          "target_hash": "395ced3de853858b8d239ebaef244dbeb660b70d79f47b81a3f77297f85db7b4",
           "section_hashes": [
             "c7914887e077",
             "93c63cd7c00b",
@@ -88671,10 +88671,10 @@
             "5d6e2e2bb145",
             "06ea53631a21",
             "11f6045331b1",
-            "8fdecd0251bf",
+            "fe1aa9211b66",
             "576e40d93b73",
             "210823abcce1",
-            "9ba9eb1a2d94",
+            "641b736403e4",
             "1cc812d7297e",
             "5308fdace09a",
             "a09a5b17b822",
@@ -88703,7 +88703,7 @@
             "d39016889d36",
             "10eef854ef66"
           ],
-          "updated_at": "2026-10-25T21:30:36.214Z"
+          "updated_at": "2026-10-27T22:38:07.008Z"
         },
         "fa": {
           "source_hash": "8c6696e999442cf8833a4cc418740b116c7f4cbccbbf81ff38ac100b65295764",
@@ -89606,8 +89606,8 @@
           "updated_at": "2026-10-25T22:33:45.732Z"
         },
         "sk": {
-          "source_hash": "8c6696e999442cf8833a4cc418740b116c7f4cbccbbf81ff38ac100b65295764",
-          "target_hash": "98d483adb09fe3159383181b02b59bd24d0715f497a4cba9b5d1cf32b2e73965",
+          "source_hash": "5305f707931c42718276166fc1cf3d2d79b92c75968baeb212cef18a79e5efdb",
+          "target_hash": "dfee5949138412ff0b54966157e245fa7700e7fe644736d68f09dce2d7f4c191",
           "section_hashes": [
             "c7914887e077",
             "93c63cd7c00b",
@@ -89616,10 +89616,10 @@
             "5d6e2e2bb145",
             "06ea53631a21",
             "11f6045331b1",
-            "8fdecd0251bf",
+            "fe1aa9211b66",
             "576e40d93b73",
             "210823abcce1",
-            "9ba9eb1a2d94",
+            "641b736403e4",
             "1cc812d7297e",
             "5308fdace09a",
             "a09a5b17b822",
@@ -89648,7 +89648,7 @@
             "d39016889d36",
             "10eef854ef66"
           ],
-          "updated_at": "2026-10-25T22:36:13.376Z"
+          "updated_at": "2026-10-27T22:46:40.683Z"
         },
         "sv": {
           "source_hash": "8c6696e999442cf8833a4cc418740b116c7f4cbccbbf81ff38ac100b65295764",
@@ -91181,8 +91181,8 @@
           "updated_at": "2026-10-25T22:39:40.964Z"
         },
         "uz": {
-          "source_hash": "8c6696e999442cf8833a4cc418740b116c7f4cbccbbf81ff38ac100b65295764",
-          "target_hash": "6b966bdac035637610fcef3204cc33725017df67ccfc4b23110c4030109bc6d2",
+          "source_hash": "5305f707931c42718276166fc1cf3d2d79b92c75968baeb212cef18a79e5efdb",
+          "target_hash": "4bc0440ece2e1f9d5165f200d4d0b9810f488c368dff04db8c5fbf40030cb817",
           "section_hashes": [
             "c7914887e077",
             "93c63cd7c00b",
@@ -91191,10 +91191,10 @@
             "5d6e2e2bb145",
             "06ea53631a21",
             "11f6045331b1",
-            "8fdecd0251bf",
+            "fe1aa9211b66",
             "576e40d93b73",
             "210823abcce1",
-            "9ba9eb1a2d94",
+            "641b736403e4",
             "1cc812d7297e",
             "5308fdace09a",
             "a09a5b17b822",
@@ -91223,7 +91223,7 @@
             "d39016889d36",
             "10eef854ef66"
           ],
-          "updated_at": "2026-10-25T22:52:22.720Z"
+          "updated_at": "2026-10-27T22:46:30.756Z"
         },
         "yo": {
           "source_hash": "8c6696e999442cf8833a4cc418740b116c7f4cbccbbf81ff38ac100b65295764",
