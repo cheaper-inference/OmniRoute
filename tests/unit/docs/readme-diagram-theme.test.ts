@@ -116,6 +116,12 @@ test("every new KIT value equals what its kit token resolves to in ci-tokens.css
   }
 });
 
+test("the light border is pinned to the kit's --ci-color-border (the dark border is not)", () => {
+  assert.equal(KIT.light.border, resolve("--ci-color-border", lightBlock));
+  // KIT.dark.border (0.18 alpha) is softer than the kit's dark --ci-color-border (0.24): a
+  // hero-era value every committed SVG carries — see the module header; not pinned on purpose.
+});
+
 test("themeCss declares the light palette and a dark override behind prefers-color-scheme", () => {
   const css = themeCss();
   assert.match(css, /:root\{[^}]*--bg:#fbfbf8[^}]*--accent:#d8ff00/);
@@ -178,7 +184,7 @@ test("text roles use the kit stacks and end in a generic family", () => {
   assert.match(css, /\.num\{[^}]*"CI Mono"[^}]*monospace/);
 });
 
-test("the original nine text classes and the fill line stay first, in their original order", () => {
+test("ordering pin: textRoleCss() lines keep their positions — the original nine classes and the fill line first, then the type scale", () => {
   const lines = textRoleCss().split("\n");
   const heads = [
     ".kicker{",

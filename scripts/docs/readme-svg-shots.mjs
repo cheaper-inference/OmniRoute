@@ -4,7 +4,9 @@
 // media query are judged under the same constraints the README will meet, and reports how
 // many external font requests the page made (must be 0: camo blocks every external fetch).
 //
-//   node scripts/docs/readme-svg-shots.mjs <file.svg> <outdir> [--size 1200x548]
+//   node scripts/docs/readme-svg-shots.mjs <file.svg> <outdir> [--size WxH]
+//   (the frame defaults to the file's own viewBox — 1200×548 for the hero, 1200×842 for the
+//    budget card — so --size is only an override)
 //
 // Companion to the studio's svg-shots.mjs (multi-timestamp frames prove animation runs).
 import { createServer } from "node:http";
@@ -17,10 +19,20 @@ if (!file || !outdir) {
   console.error("usage: node scripts/docs/readme-svg-shots.mjs <file.svg> <outdir> [--size WxH]");
   process.exit(1);
 }
-const sizeArg = process.argv.indexOf("--size");
-const [W, H] = sizeArg > 0 ? process.argv[sizeArg + 1].split("x").map(Number) : [1200, 548];
 mkdirSync(outdir, { recursive: true });
 const svg = readFileSync(resolve(file));
+
+// Frame size: --size WxH when given, otherwise the file's viewBox="0 0 W H".
+const sizeArg = process.argv.indexOf("--size");
+const viewBox = svg.toString("utf8").match(/viewBox="0 0 (\d+(?:\.\d+)?) (\d+(?:\.\d+)?)"/);
+if (sizeArg < 0 && !viewBox) {
+  console.error(`no viewBox="0 0 W H" in ${file} — pass --size WxH`);
+  process.exit(1);
+}
+const [W, H] =
+  sizeArg > 0
+    ? process.argv[sizeArg + 1].split("x").map(Number)
+    : [Math.round(Number(viewBox[1])), Math.round(Number(viewBox[2]))];
 
 // camo's observed response headers for SVG README images
 const CAMO_CSP = "default-src 'none'; style-src 'unsafe-inline'; sandbox";

@@ -8,6 +8,9 @@
 // The files are Google's *latin* subsets (@fontsource/<pkg>/unicode.json → latin): arrows and
 // geometric shapes are not in them, so those characters fall back to the next family in the
 // stack by design — allowed one by one in SYMBOL_FALLBACKS; any other uncovered glyph throws.
+// Coverage is decided by those unicode *ranges*, not by the font's cmap — a range character the
+// face lacked would pass here; tests/unit/docs/readme-glyph-coverage.test.ts is the cmap oracle
+// on the committed SVGs.
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { dirname, join } from "node:path";

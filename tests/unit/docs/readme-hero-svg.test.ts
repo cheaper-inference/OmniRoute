@@ -51,4 +51,6 @@ test("light and dark palettes are both declared", async () => {
   const svg = await renderReadmeHero();
   assert.match(svg, /:root\{[^}]*--bg:#fbfbf8/);
   assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#040d10/);
+  // after the stylesheet every colour is a var(): no literal hex in the drawing
+  assert.doesNotMatch(svg.slice(svg.indexOf("</style>")), /#[0-9a-fA-F]{3,8}(?![\w-])/);
 });

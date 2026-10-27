@@ -11,6 +11,9 @@
 // Output paths are resolved from the repository root, so the command works from any cwd.
 // A generator that throws stops the run with a non-zero exit; the files already written stay
 // on disk (they are the generators' own output, never a partial write).
+//
+// README_DIAGRAMS is exported for tests/unit/docs/readme-diagrams-driver.test.ts (the list must
+// equal the gen-readme-*.mjs glob, in README order) and readme-glyph-coverage.test.ts.
 import { writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -30,7 +33,7 @@ import { renderCompressionPipeline } from "./gen-readme-compression-pipeline.mjs
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 // README order (top to bottom). `out` is relative to the repository root.
-const README_DIAGRAMS = [
+export const README_DIAGRAMS = [
   { name: "readme-hero", render: renderReadmeHero, out: "docs/diagrams/readme-hero.svg" },
   {
     name: "free-tier-budget",
