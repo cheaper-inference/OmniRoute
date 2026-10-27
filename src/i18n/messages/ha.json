@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Yana toshe wannan maɓalli da kuskuren API na 400 bayan adadin USD da aka kashe a gida ya kai iyakar yau da kullum ko ta mako-mako da aka saita.",
     "dailyQuotaUsd": "Iyakar yau da kullum (USD)",
     "weeklyQuotaUsd": "Iyakar mako-mako (USD)",
+    "fiveHourQuotaUsd": "Iyakar awa 5 (USD)",
+    "fiveHourQuotaHint": "Taga mai motsi: ana ƙidaya kuɗin kowace buƙata na awa 5, sannan a sake shi.",
     "quotaWindowDescription": "Iyakar mako-mako tana bin lokacin sake saitawar Claude na mako-mako da aka adana a ma'ajiyar wucin gadi idan yana samuwa; in ba haka ba, tana komawa ga taga mai motsi ta kwanaki 7. Iyakar yau da kullum tana amfani da ranar kalandar Fortaleza.",
     "apiKeyUsdQuota": "Iyakar USD ta maɓallin API",
     "apiKeyUsdQuotaDescription": "Idan an kunna, @@om-usage yana dawo da iyakar yau da kullum, iyakar mako-mako, adadin kuɗin da aka kashe yau da kullum, da adadin kuɗin da aka kashe mako-mako a USD. Iyakar mako-mako tana bin sake saitawar Claude da aka adana a ma'ajiyar wucin gadi idan yana samuwa.",

@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Mahalliy USD xarajati sozlangan kunlik yoki haftalik kvotaga yetgach, ushbu kalitni 400 API xatosi bilan bloklaydi.",
     "dailyQuotaUsd": "Kunlik kvota (USD)",
     "weeklyQuotaUsd": "Haftalik kvota (USD)",
+    "fiveHourQuotaUsd": "5 soatlik kvota (USD)",
+    "fiveHourQuotaHint": "Siljuvchi oyna: har bir so‘rov xarajati 5 soat davomida hisoblanadi, so‘ng bo‘shatiladi.",
     "quotaWindowDescription": "Haftalik kvota mavjud bo‘lganda keshlangan Claude haftalik tiklanish vaqtiga amal qiladi; aks holda, sirpanma 7 kunlik davrdan foydalanadi. Kunlik kvota Fortaleza kalendar kunidan foydalanadi.",
     "apiKeyUsdQuota": "API kalitining USD kvotasi",
     "apiKeyUsdQuotaDescription": "Yoqilganda, @@om-usage kunlik kvota, haftalik kvota, kunlik xarajat va haftalik xarajatni USDda qaytaradi. Haftalik kvota mavjud bo‘lganda keshlangan Claude tiklanish vaqtiga amal qiladi.",

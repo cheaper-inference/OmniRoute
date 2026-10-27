@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "የዚህ ቁልፍ አካባቢያዊ የUSD ወጪ የተዋቀረው ዕለታዊ ወይም ሳምንታዊ ኮታ ላይ ከደረሰ በኋላ፣ በ400 API ስህተት ያግደዋል።",
     "dailyQuotaUsd": "ዕለታዊ ኮታ (USD)",
     "weeklyQuotaUsd": "ሳምንታዊ ኮታ (USD)",
+    "fiveHourQuotaUsd": "የ5 ሰዓት ኮታ (USD)",
+    "fiveHourQuotaHint": "ተንቀሳቃሽ መስኮት፦ የእያንዳንዱ ጥያቄ ወጪ ለ5 ሰዓታት ይቆጠራል፣ ከዚያ ይለቀቃል።",
     "quotaWindowDescription": "ሳምንታዊ ኮታው ሲገኝ በመሸጎጫ የተያዘውን የClaude ሳምንታዊ ዳግም ማስጀመሪያ ይከተላል፤ ካልሆነ ተንከባላይ የ7 ቀናት ጊዜ መስኮትን ይጠቀማል። ዕለታዊ ኮታው የFortaleza የቀን መቁጠሪያ ቀንን ይጠቀማል።",
     "apiKeyUsdQuota": "የAPI ቁልፍ USD ኮታ",
     "apiKeyUsdQuotaDescription": "ሲነቃ፣ @@om-usage ዕለታዊ ኮታን፣ ሳምንታዊ ኮታን፣ ዕለታዊ ወጪን እና ሳምንታዊ ወጪን በUSD ይመልሳል። ሳምንታዊው ሲገኝ በመሸጎጫ የተያዘውን የClaude ዳግም ማስጀመሪያ ይከተላል።",

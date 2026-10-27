@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Blochează această cheie cu o eroare API 400 după ce cheltuielile locale în USD ating cota zilnică sau săptămânală configurată.",
     "dailyQuotaUsd": "Cotă zilnică (USD)",
     "weeklyQuotaUsd": "Cotă săptămânală (USD)",
+    "fiveHourQuotaUsd": "Cotă pe 5 ore (USD)",
+    "fiveHourQuotaHint": "Fereastră glisantă: cheltuiala fiecărei cereri contează timp de 5 ore, apoi se eliberează.",
     "quotaWindowDescription": "Cota săptămânală urmează resetarea săptămânală Claude stocată în cache, când este disponibilă; în caz contrar, revine la o fereastră glisantă de 7 zile. Cota zilnică folosește ziua calendaristică din Fortaleza.",
     "apiKeyUsdQuota": "Cotă USD cheie API",
     "apiKeyUsdQuotaDescription": "Când este activat, @@om-usage returnează cota zilnică, cota săptămânală, cheltuielile zilnice și cheltuielile săptămânale în USD. Cea săptămânală urmează resetarea Claude stocată în cache, când este disponibilă.",

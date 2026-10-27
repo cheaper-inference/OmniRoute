@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "로컬 USD 지출이 설정된 일일 또는 주간 할당량에 도달하면 400 API 오류와 함께 이 키를 차단합니다.",
     "dailyQuotaUsd": "일일 할당량 (USD)",
     "weeklyQuotaUsd": "주간 할당량 (USD)",
+    "fiveHourQuotaUsd": "5시간 할당량 (USD)",
+    "fiveHourQuotaHint": "롤링 윈도우: 각 요청의 지출은 5시간 동안 집계된 후 해제됩니다.",
     "quotaWindowDescription": "주간 할당량은 사용 가능한 경우 캐시된 Claude 주간 리셋을 따르며, 그렇지 않은 경우 롤링 7일 기간으로 대체됩니다. 일일 할당량은 포르탈레자(Fortaleza) 달력 기준일을 사용합니다.",
     "apiKeyUsdQuota": "API 키 USD 할당량",
     "apiKeyUsdQuotaDescription": "활성화되면 @@om-usage가 일일 할당량, 주간 할당량, 일일 지출 및 주간 지출을 USD 단위로 반환합니다. 주간은 사용 가능한 경우 캐시된 Claude 리셋을 따릅니다.",

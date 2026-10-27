@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Zablokuje tento klíč s chybou API 400 poté, co jeho místní útrata v USD dosáhne nakonfigurované denní nebo týdenní kvóty.",
     "dailyQuotaUsd": "Denní kvóta (USD)",
     "weeklyQuotaUsd": "Týdenní kvóta (USD)",
+    "fiveHourQuotaUsd": "5hodinová kvóta (USD)",
+    "fiveHourQuotaHint": "Klouzavé okno: útrata každého požadavku se počítá 5 hodin, poté se uvolní.",
     "quotaWindowDescription": "Týdenní kvóta se řídí mezipamětí týdenního resetu Claude, pokud je k dispozici; v opačném případě se použije klouzavé 7denní okno. Denní kvóta využívá kalendářní den časového pásma Fortaleza.",
     "apiKeyUsdQuota": "Kvóta API klíče v USD",
     "apiKeyUsdQuotaDescription": "Při povolení vrací @@om-usage denní kvótu, týdenní kvótu, denní útratu a týdenní útratu v USD. Týdenní se řídí mezipamětí resetu Claude, pokud je k dispozici.",

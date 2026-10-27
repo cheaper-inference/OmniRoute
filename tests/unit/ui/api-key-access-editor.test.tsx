@@ -442,6 +442,7 @@ describe("ApiKeyAccessEditorClient", () => {
       usageLimitEnabled: false,
       dailyUsageLimitUsd: null,
       weeklyUsageLimitUsd: null,
+      fiveHourUsageLimitUsd: null,
       chaosModeEnabled: false,
       forcedModel: null,
     });

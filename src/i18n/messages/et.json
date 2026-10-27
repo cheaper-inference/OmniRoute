@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Blokeerib selle võtme API veakoodiga 400, kui selle kohalikud USD-kulud jõuavad seadistatud päeva- või nädalakvoodini.",
     "dailyQuotaUsd": "Päevakvoot (USD)",
     "weeklyQuotaUsd": "Nädalakvoot (USD)",
+    "fiveHourQuotaUsd": "5 tunni kvoot (USD)",
+    "fiveHourQuotaHint": "Libisev aken: iga päringu kulu loetakse 5 tundi, seejärel see vabaneb.",
     "quotaWindowDescription": "Nädalakvoot järgib võimaluse korral vahemällu salvestatud Claude’i iganädalast lähtestamist; muul juhul kasutatakse liikuvat 7-päevast ajavahemikku. Päevakvoot kasutab Fortaleza kalendripäeva.",
     "apiKeyUsdQuota": "API-võtme USD-kvoot",
     "apiKeyUsdQuotaDescription": "Kui see on lubatud, tagastab @@om-usage päevakvoodi, nädalakvoodi, päevakulu ja nädalakulu USA dollarites. Nädalakvoot järgib võimaluse korral vahemällu salvestatud Claude’i lähtestamist.",

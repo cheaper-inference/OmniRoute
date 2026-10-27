@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Bina-block ang key na ito gamit ang isang 400 API error pagkatapos maabot ng lokal na nagastos nitong USD ang na-configure na pang-araw-araw o lingguhang quota.",
     "dailyQuotaUsd": "Pang-araw-araw na quota (USD)",
     "weeklyQuotaUsd": "Lingguhang quota (USD)",
+    "fiveHourQuotaUsd": "5-oras na quota (USD)",
+    "fiveHourQuotaHint": "Rolling window: binibilang ang gastos ng bawat request nang 5 oras, saka ito napapalaya.",
     "quotaWindowDescription": "Sumusunod ang lingguhang quota sa naka-cache na lingguhang pag-reset ng Claude kapag available; kung hindi, babalik ito sa isang rolling na 7 araw na window. Ginagamit ng pang-araw-araw na quota ang araw ng kalendaryo ng Fortaleza.",
     "apiKeyUsdQuota": "Quota sa USD ng API key",
     "apiKeyUsdQuotaDescription": "Kapag pinagana, ibinabalik ng @@om-usage ang pang-araw-araw na quota, lingguhang quota, pang-araw-araw na nagastos, at lingguhang nagastos sa USD. Sumusunod ang lingguhan sa naka-cache na pag-reset ng Claude kapag available.",

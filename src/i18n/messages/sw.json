@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Huzuia ufunguo huu kwa kosa la API la 400 baada ya matumizi yake ya ndani ya USD kufikia kiwango kilichosanidiwa cha kila siku au kila wiki.",
     "dailyQuotaUsd": "Kiwango cha kila siku (USD)",
     "weeklyQuotaUsd": "Kiwango cha kila wiki (USD)",
+    "fiveHourQuotaUsd": "Kiwango cha saa 5 (USD)",
+    "fiveHourQuotaHint": "Dirisha linalosonga: matumizi ya kila ombi yanahesabiwa kwa saa 5, kisha yanaachiliwa.",
     "quotaWindowDescription": "Kiwango cha kila wiki hufuata uwekaji upya wa kila wiki wa Claude uliohifadhiwa kwenye kache unapopatikana; vinginevyo hurudi kwenye kipindi cha siku 7 kinachoendelea. Kiwango cha kila siku kinatumia siku ya kalenda ya Fortaleza.",
     "apiKeyUsdQuota": "Kiwango cha USD cha ufunguo wa API",
     "apiKeyUsdQuotaDescription": "Inapowezeshwa, @@om-usage inarudisha kiwango cha kila siku, kiwango cha kila wiki, matumizi ya kila siku, na matumizi ya kila wiki katika USD. Kila wiki hufuata uwekaji upya wa Claude uliohifadhiwa kwenye kache unapopatikana.",

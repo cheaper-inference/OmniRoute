@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Bloķē šo atslēgu, atgriežot API kļūdu ar kodu 400, kad tās lokālie izdevumi USD sasniedz konfigurēto dienas vai nedēļas kvotu.",
     "dailyQuotaUsd": "Dienas kvota (USD)",
     "weeklyQuotaUsd": "Nedēļas kvota (USD)",
+    "fiveHourQuotaUsd": "5 stundu kvota (USD)",
+    "fiveHourQuotaHint": "Slīdošais logs: katra pieprasījuma izdevumi tiek skaitīti 5 stundas, pēc tam atbrīvoti.",
     "quotaWindowDescription": "Nedēļas kvotas periods atbilst kešotajam Claude iknedēļas atiestatīšanas periodam, ja tas ir pieejams; pretējā gadījumā tiek izmantots slīdošs 7 dienu periods. Dienas kvotai tiek izmantota Fortalezas kalendārā diena.",
     "apiKeyUsdQuota": "API atslēgas USD kvota",
     "apiKeyUsdQuotaDescription": "Ja šī funkcija ir iespējota, @@om-usage atgriež dienas kvotu, nedēļas kvotu, dienas izdevumus un nedēļas izdevumus USD. Nedēļas kvotas periods atbilst kešotajam Claude atiestatīšanas periodam, ja tas ir pieejams.",

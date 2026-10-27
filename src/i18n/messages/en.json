@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Blocks this key with a 400 API error after its local USD spend reaches the configured daily or weekly quota.",
     "dailyQuotaUsd": "Daily quota (USD)",
     "weeklyQuotaUsd": "Weekly quota (USD)",
+    "fiveHourQuotaUsd": "5-hour quota (USD)",
+    "fiveHourQuotaHint": "Rolling window: each request's spend counts for 5 hours, then frees up.",
     "quotaWindowDescription": "Weekly quota follows the cached Claude weekly reset when available; otherwise it falls back to a rolling 7 day window. Daily quota uses the Fortaleza calendar day.",
     "apiKeyUsdQuota": "API key USD quota",
     "apiKeyUsdQuotaDescription": "When enabled, @@om-usage returns daily quota, weekly quota, daily spend, and weekly spend in USD. Weekly follows the cached Claude reset when available.",

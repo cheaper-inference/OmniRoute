@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Jimblokka din iċ-ċavetta bi żball API 400 wara li l-infiq lokali tagħha f'USD jilħaq il-kwota kkonfigurata ta' kuljum jew ta' kull ġimgħa.",
     "dailyQuotaUsd": "Kwota ta' kuljum (USD)",
     "weeklyQuotaUsd": "Kwota ta' kull ġimgħa (USD)",
+    "fiveHourQuotaUsd": "Kwota ta' 5 sigħat (USD)",
+    "fiveHourQuotaHint": "Tieqa li timxi: l-infiq ta' kull talba jgħodd għal 5 sigħat, imbagħad jinħeles.",
     "quotaWindowDescription": "Il-kwota ta' kull ġimgħa ssegwi r-reset ta' kull ġimgħa ta' Claude miżmum fil-cache meta dan ikun disponibbli; inkella tuża perjodu mobbli ta' 7 ijiem. Il-kwota ta' kuljum tuża l-jum kalendarju ta' Fortaleza.",
     "apiKeyUsdQuota": "Kwota f'USD taċ-ċavetta API",
     "apiKeyUsdQuotaDescription": "Meta tkun attivata, @@om-usage jirritorna l-kwota ta' kuljum, il-kwota ta' kull ġimgħa, l-infiq ta' kuljum u l-infiq ta' kull ġimgħa f'USD. Il-kwota ta' kull ġimgħa ssegwi r-reset ta' Claude miżmum fil-cache meta dan ikun disponibbli.",

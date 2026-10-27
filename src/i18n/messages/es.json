@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Bloquea esta clave con un error 400 de la API cuando su gasto local en USD alcanza la cuota diaria o semanal configurada.",
     "dailyQuotaUsd": "Cuota diaria (USD)",
     "weeklyQuotaUsd": "Cuota semanal (USD)",
+    "fiveHourQuotaUsd": "Cuota de 5 horas (USD)",
+    "fiveHourQuotaHint": "Ventana móvil: el gasto de cada solicitud cuenta durante 5 horas y luego se libera.",
     "quotaWindowDescription": "La cuota semanal sigue el restablecimiento semanal de Claude almacenado en caché cuando está disponible; de lo contrario, utiliza una ventana móvil de 7 días. La cuota diaria utiliza el día natural de Fortaleza.",
     "apiKeyUsdQuota": "Cuota en USD de la clave de API",
     "apiKeyUsdQuotaDescription": "Cuando está habilitado, @@om-usage devuelve la cuota diaria, la cuota semanal, el gasto diario y el gasto semanal en USD. El cálculo semanal sigue el restablecimiento de Claude almacenado en caché cuando está disponible.",

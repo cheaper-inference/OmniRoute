@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Chặn khóa này bằng lỗi API 400 khi chi tiêu USD cục bộ đạt hạn ngạch ngày hoặc tuần đã cấu hình.",
     "dailyQuotaUsd": "Hạn ngạch ngày (USD)",
     "weeklyQuotaUsd": "Hạn ngạch tuần (USD)",
+    "fiveHourQuotaUsd": "Hạn ngạch 5 giờ (USD)",
+    "fiveHourQuotaHint": "Cửa sổ trượt: chi phí của mỗi yêu cầu được tính trong 5 giờ, sau đó được giải phóng.",
     "quotaWindowDescription": "Hạn ngạch tuần dùng mốc đặt lại Claude đã cache khi có; nếu không sẽ dùng khung trượt 7 ngày. Hạn ngạch ngày dùng ngày theo lịch Fortaleza.",
     "apiKeyUsdQuota": "Hạn ngạch USD của khóa API",
     "apiKeyUsdQuotaDescription": "Khi bật, @@om-usage trả về hạn ngạch ngày, hạn ngạch tuần, chi tiêu ngày và chi tiêu tuần bằng USD. Hạn ngạch tuần dùng mốc đặt lại Claude đã cache khi có.",

@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "當此金鑰的本地 USD 支出達到設定的每日或每週配額後，會以 400 API 錯誤封鎖該金鑰。",
     "dailyQuotaUsd": "每日配額（USD）",
     "weeklyQuotaUsd": "每週配額（USD）",
+    "fiveHourQuotaUsd": "5 小時配額（USD）",
+    "fiveHourQuotaHint": "滾動視窗：每個請求的花費計入 5 小時，之後釋放。",
     "quotaWindowDescription": "每週配額在可用時會遵循快取的 Claude 每週重置時間，否則會備用滾動 7 天區間。每日配額使用 Fortaleza 日曆日。",
     "apiKeyUsdQuota": "API 金鑰 USD 配額",
     "apiKeyUsdQuotaDescription": "啟用後，@@om-usage 會傳回每日配額、每週配額、每日支出和每週支出（以 USD 計）。每週配額在可用時會遵循快取的 Claude 重置時間。",

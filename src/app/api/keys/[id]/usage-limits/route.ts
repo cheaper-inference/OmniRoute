@@ -23,6 +23,8 @@ export async function GET(request: Request, { params }: { params: Promise<{ id: 
         typeof key.dailyUsageLimitUsd === "number" ? key.dailyUsageLimitUsd : null,
       weeklyUsageLimitUsd:
         typeof key.weeklyUsageLimitUsd === "number" ? key.weeklyUsageLimitUsd : null,
+      fiveHourUsageLimitUsd:
+        typeof key.fiveHourUsageLimitUsd === "number" ? key.fiveHourUsageLimitUsd : null,
     });
 
     return NextResponse.json({

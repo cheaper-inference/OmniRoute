@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Bloqueia esta chave com um erro de API 400 após o seu gasto local em USD atingir a quota diária ou semanal configurada.",
     "dailyQuotaUsd": "Quota diária (USD)",
     "weeklyQuotaUsd": "Quota semanal (USD)",
+    "fiveHourQuotaUsd": "Quota de 5 horas (USD)",
+    "fiveHourQuotaHint": "Janela móvel: o gasto de cada pedido conta durante 5 horas e depois é libertado.",
     "quotaWindowDescription": "A quota semanal segue a reposição semanal em cache do Claude, quando disponível; caso contrário, recorre a uma janela deslizante de 7 dias. A quota diária utiliza o dia do calendário de Fortaleza.",
     "apiKeyUsdQuota": "Quota em USD da chave de API",
     "apiKeyUsdQuotaDescription": "Quando ativado, @@om-usage devolve a quota diária, quota semanal, gasto diário e gasto semanal em USD. O semanal segue a reposição em cache do Claude, quando disponível.",

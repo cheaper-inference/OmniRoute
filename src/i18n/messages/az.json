@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Lokal USD xərci konfiqurasiya edilmiş gündəlik və ya həftəlik kvotaya çatdıqdan sonra bu açarı 400 API xətası ilə bloklayır.",
     "dailyQuotaUsd": "Gündəlik kvota (USD)",
     "weeklyQuotaUsd": "Həftəlik kvota (USD)",
+    "fiveHourQuotaUsd": "5 saatlıq kvota (USD)",
+    "fiveHourQuotaHint": "Sürüşən pəncərə: hər sorğunun xərci 5 saat hesablanır, sonra azad olur.",
     "quotaWindowDescription": "Həftəlik kvota mövcud olduqda keşlənmiş Claude həftəlik sıfırlanmasını izləyir; əks halda, 7 günlük sürüşən pəncərəyə keçir. Gündəlik kvota Fortaleza təqvim günündən istifadə edir.",
     "apiKeyUsdQuota": "API açarı USD kvotası",
     "apiKeyUsdQuotaDescription": "Aktiv olduqda, @@om-usage gündəlik kvota, həftəlik kvota, gündəlik xərc və həftəlik xərci USD ilə qaytarır. Həftəlik mövcud olduqda keşlənmiş Claude sıfırlanmasını izləyir.",

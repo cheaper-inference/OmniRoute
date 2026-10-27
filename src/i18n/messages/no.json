@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Blokkerer denne nøkkelen med en 400 API-feil etter at det lokale USD-forbruket når den konfigurerte daglige eller ukentlige kvoten.",
     "dailyQuotaUsd": "Daglig kvote (USD)",
     "weeklyQuotaUsd": "Ukentlig kvote (USD)",
+    "fiveHourQuotaUsd": "5-timers kvote (USD)",
+    "fiveHourQuotaHint": "Glidende vindu: hver forespørsels forbruk teller i 5 timer og frigjøres deretter.",
     "quotaWindowDescription": "Ukentlig kvote følger den bufrede ukentlige tilbakestillingen for Claude når den er tilgjengelig; ellers faller den tilbake til et rullende 7-dagers vindu. Daglig kvote bruker kalenderdagen for Fortaleza.",
     "apiKeyUsdQuota": "API-nøkkel USD-kvote",
     "apiKeyUsdQuotaDescription": "Når aktivert, returnerer @@om-usage daglig kvote, ukentlig kvote, daglig forbruk og ukentlig forbruk i USD. Ukentlig følger den bufrede Claude-tilbakestillingen når den er tilgjengelig.",

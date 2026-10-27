@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Yerel USD harcaması yapılandırılmış günlük veya haftalık kotaya ulaştığında bu anahtarı 400 API hatasıyla engeller.",
     "dailyQuotaUsd": "Günlük kota (USD)",
     "weeklyQuotaUsd": "Haftalık kota (USD)",
+    "fiveHourQuotaUsd": "5 saatlik kota (USD)",
+    "fiveHourQuotaHint": "Kayan pencere: her isteğin harcaması 5 saat boyunca sayılır, ardından serbest kalır.",
     "quotaWindowDescription": "Haftalık kota, mevcut olduğunda önbelleğe alınmış Claude haftalık sıfırlamasını takip eder; aksi takdirde 7 günlük hareketli bir pencereye geri döner. Günlük kota, Fortaleza takvim gününü kullanır.",
     "apiKeyUsdQuota": "API anahtarı USD kotası",
     "apiKeyUsdQuotaDescription": "Etkinleştirildiğinde, @@om-usage günlük kotayı, haftalık kotayı, günlük harcamayı ve haftalık harcamayı USD cinsinden döndürür. Haftalık kota, mevcut olduğunda önbelleğe alınmış Claude sıfırlamasını takip eder.",

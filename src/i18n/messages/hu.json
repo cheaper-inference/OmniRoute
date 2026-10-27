@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Letiltja ezt a kulcsot egy 400-as API-hibával, miután a helyi USD-költése eléri a beállított napi vagy heti kvótát.",
     "dailyQuotaUsd": "Napi kvóta (USD)",
     "weeklyQuotaUsd": "Heti kvóta (USD)",
+    "fiveHourQuotaUsd": "5 órás kvóta (USD)",
+    "fiveHourQuotaHint": "Gördülő ablak: minden kérés költsége 5 órán át számít, utána felszabadul.",
     "quotaWindowDescription": "A heti kvóta a gyorsítótárazott Claude heti visszaállítást követi, ha elérhető; ellenkező esetben egy gördülő 7 napos időszakra vált vissza. A napi kvóta a Fortaleza naptári napot használja.",
     "apiKeyUsdQuota": "API-kulcs USD kvótája",
     "apiKeyUsdQuotaDescription": "Ha engedélyezve van, a(z) @@om-usage visszaadja a napi kvótát, a heti kvótát, a napi költést és a heti költést USD-ben. A heti a gyorsítótárazott Claude visszaállítást követi, ha elérhető.",

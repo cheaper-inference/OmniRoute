@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Blockiert diesen Schlüssel mit einem 400-API-Fehler, nachdem seine lokalen USD-Ausgaben das konfigurierte tägliche oder wöchentliche Kontingent erreichen.",
     "dailyQuotaUsd": "Tägliches Kontingent (USD)",
     "weeklyQuotaUsd": "Wöchentliches Kontingent (USD)",
+    "fiveHourQuotaUsd": "5-Stunden-Kontingent (USD)",
+    "fiveHourQuotaHint": "Gleitendes Fenster: Die Kosten jeder Anfrage zählen 5 Stunden lang und werden dann wieder frei.",
     "quotaWindowDescription": "Das wöchentliche Kontingent folgt dem zwischengespeicherten wöchentlichen Claude-Reset, sofern verfügbar; andernfalls fällt es auf ein rollierendes 7-Tage-Fenster zurück. Das tägliche Kontingent verwendet den Fortaleza-Kalendertag.",
     "apiKeyUsdQuota": "API-Schlüssel-USD-Kontingent",
     "apiKeyUsdQuotaDescription": "Wenn aktiviert, gibt @@om-usage das tägliche Kontingent, das wöchentliche Kontingent, die täglichen Ausgaben und die wöchentlichen Ausgaben in USD zurück. Wöchentlich folgt dem zwischengespeicherten Claude-Reset, sofern verfügbar.",

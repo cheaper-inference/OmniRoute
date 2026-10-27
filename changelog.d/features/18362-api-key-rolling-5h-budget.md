@@ -1,0 +1,1 @@
+- **feat(api-keys):** rolling 5-hour USD budget per API key, enforced next to the daily/weekly limits and reported in `/v1/me/status` ([#18362](https://github.com/cheaper-inference/OmniRoute/pull/18362)) — thanks @sajjadsaharkhan

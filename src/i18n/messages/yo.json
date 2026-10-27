@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Yóò dí kọ́kọ́rọ́ yìí pẹ̀lú àṣìṣe API 400 lẹ́yìn tí ìnáwó USD àdúgbò rẹ̀ bá dé ìwọ̀n ojoojúmọ́ tàbí ọ̀sọ̀ọ̀sẹ̀ tí a ṣètò.",
     "dailyQuotaUsd": "Ìwọ̀n ojoojúmọ́ (USD)",
     "weeklyQuotaUsd": "Ìwọ̀n ọ̀sọ̀ọ̀sẹ̀ (USD)",
+    "fiveHourQuotaUsd": "Ìwọ̀n wákàtí 5 (USD)",
+    "fiveHourQuotaHint": "Fèrèsé tí ń yí: a máa ń ka ìnáwó ìbéèrè kọ̀ọ̀kan fún wákàtí 5, lẹ́yìn náà a tú u sílẹ̀.",
     "quotaWindowDescription": "Ìwọ̀n ọ̀sọ̀ọ̀sẹ̀ ń tẹ̀lé àtúntò ọ̀sọ̀ọ̀sẹ̀ Claude tí a fi pamọ́ sínú kaṣe nígbà tó bá wà; bí kò bá sí, yóò lo àkókò ọjọ́ 7 tó ń yípo. Ìwọ̀n ojoojúmọ́ ń lo ọjọ́ kàlẹ́ńdà Fortaleza.",
     "apiKeyUsdQuota": "Ìwọ̀n USD fún kọ́kọ́rọ́ API",
     "apiKeyUsdQuotaDescription": "Nígbà tí a bá mú un ṣiṣẹ́, @@om-usage máa ń dá ìwọ̀n ojoojúmọ́, ìwọ̀n ọ̀sọ̀ọ̀sẹ̀, ìnáwó ojoojúmọ́ àti ìnáwó ọ̀sọ̀ọ̀sẹ̀ padà ní USD. Ìwọ̀n ọ̀sọ̀ọ̀sẹ̀ ń tẹ̀lé àtúntò Claude tí a fi pamọ́ sínú kaṣe nígbà tó bá wà.",

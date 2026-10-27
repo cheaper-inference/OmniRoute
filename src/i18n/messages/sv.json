@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Blockerar denna nyckel med ett 400 API-fel efter att dess lokala USD-förbrukning når den konfigurerade dagliga eller veckovisa kvoten.",
     "dailyQuotaUsd": "Daglig kvot (USD)",
     "weeklyQuotaUsd": "Veckovis kvot (USD)",
+    "fiveHourQuotaUsd": "5-timmarskvot (USD)",
+    "fiveHourQuotaHint": "Rullande fönster: varje förfrågans kostnad räknas i 5 timmar och frigörs sedan.",
     "quotaWindowDescription": "Veckovis kvot följer den cachade veckovisa Claude-återställningen när den är tillgänglig; annars faller den tillbaka på ett rullande 7-dagarsfönster. Daglig kvot använder Fortaleza-kalenderdagen.",
     "apiKeyUsdQuota": "API-nyckel USD-kvot",
     "apiKeyUsdQuotaDescription": "När aktiverad returnerar @@om-usage daglig kvot, veckovis kvot, daglig förbrukning och veckovis förbrukning i USD. Veckovis följer den cachade Claude-återställningen när den är tillgänglig.",

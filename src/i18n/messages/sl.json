@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Uporabo tega ključa blokira z napako API 400, ko njegova lokalna poraba v USD doseže nastavljeno dnevno ali tedensko kvoto.",
     "dailyQuotaUsd": "Dnevna kvota (USD)",
     "weeklyQuotaUsd": "Tedenska kvota (USD)",
+    "fiveHourQuotaUsd": "5-urna kvota (USD)",
+    "fiveHourQuotaHint": "Drseče okno: strošek vsake zahteve se šteje 5 ur, nato se sprosti.",
     "quotaWindowDescription": "Tedenska kvota upošteva predpomnjeno tedensko ponastavitev za Claude, ko je ta na voljo; sicer uporabi drseče 7-dnevno obdobje. Dnevna kvota uporablja koledarski dan v Fortalezi.",
     "apiKeyUsdQuota": "Kvota ključa API v USD",
     "apiKeyUsdQuotaDescription": "Ko je omogočeno, @@om-usage vrne dnevno kvoto, tedensko kvoto, dnevno porabo in tedensko porabo v USD. Tedenska kvota upošteva predpomnjeno ponastavitev za Claude, ko je ta na voljo.",

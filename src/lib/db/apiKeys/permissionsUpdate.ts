@@ -33,6 +33,7 @@ export interface ApiKeyPermissionsUpdate {
   usageLimitEnabled?: boolean;
   dailyUsageLimitUsd?: number | null;
   weeklyUsageLimitUsd?: number | null;
+  fiveHourUsageLimitUsd?: number | null;
   chaosModeEnabled?: boolean;
   compressionEnabled?: boolean;
   allowAutoCombos?: boolean;
@@ -79,6 +80,7 @@ export function normalizeApiKeyPermissionsUpdate(
     usageLimitEnabled: update.usageLimitEnabled,
     dailyUsageLimitUsd: update.dailyUsageLimitUsd,
     weeklyUsageLimitUsd: update.weeklyUsageLimitUsd,
+    fiveHourUsageLimitUsd: update.fiveHourUsageLimitUsd,
     chaosModeEnabled: update.chaosModeEnabled,
     compressionEnabled: update.compressionEnabled,
     allowAutoCombos: update.allowAutoCombos,

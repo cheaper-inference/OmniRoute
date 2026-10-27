@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Užblokuoja šį raktą, grąžinant 400 API klaidą, kai jo vietoje apskaičiuotos išlaidos USD pasiekia nustatytą dienos arba savaitės kvotą.",
     "dailyQuotaUsd": "Dienos kvota (USD)",
     "weeklyQuotaUsd": "Savaitės kvota (USD)",
+    "fiveHourQuotaUsd": "5 valandų kvota (USD)",
+    "fiveHourQuotaHint": "Slenkantis langas: kiekvienos užklausos išlaidos skaičiuojamos 5 valandas, po to atlaisvinamos.",
     "quotaWindowDescription": "Kai įmanoma, savaitės kvota nustatoma pagal talpykloje išsaugotą Claude savaitinio atstatymo laiką; kitu atveju naudojamas slenkantis 7 dienų laikotarpis. Dienos kvotai naudojama Fortalezos kalendorinė diena.",
     "apiKeyUsdQuota": "API rakto USD kvota",
     "apiKeyUsdQuotaDescription": "Įjungus, @@om-usage pateikia dienos kvotą, savaitės kvotą, dienos išlaidas ir savaitės išlaidas USD. Kai įmanoma, savaitės laikotarpis nustatomas pagal talpykloje išsaugotą Claude atstatymo laiką.",

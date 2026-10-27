@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Memblokir kunci ini dengan error API 400 setelah pengeluaran USD lokalnya mencapai kuota harian atau mingguan yang dikonfigurasi.",
     "dailyQuotaUsd": "Kuota harian (USD)",
     "weeklyQuotaUsd": "Kuota mingguan (USD)",
+    "fiveHourQuotaUsd": "Kuota 5 jam (USD)",
+    "fiveHourQuotaHint": "Jendela bergulir: biaya setiap permintaan dihitung selama 5 jam, lalu dibebaskan.",
     "quotaWindowDescription": "Kuota mingguan mengikuti reset mingguan Claude yang di-cache jika tersedia; jika tidak, kuota akan beralih ke jendela 7 hari bergulir. Kuota harian menggunakan hari kalender Fortaleza.",
     "apiKeyUsdQuota": "Kuota USD kunci API",
     "apiKeyUsdQuotaDescription": "Saat diaktifkan, @@om-usage mengembalikan kuota harian, kuota mingguan, pengeluaran harian, dan pengeluaran mingguan dalam USD. Mingguan mengikuti reset Claude yang di-cache jika tersedia.",

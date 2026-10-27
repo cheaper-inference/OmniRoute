@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Blokuje ten klucz błędem API 400, gdy lokalne wydatki w USD osiągną skonfigurowany limit dzienny lub tygodniowy.",
     "dailyQuotaUsd": "Limit dzienny (USD)",
     "weeklyQuotaUsd": "Limit tygodniowy (USD)",
+    "fiveHourQuotaUsd": "Limit 5-godzinny (USD)",
+    "fiveHourQuotaHint": "Okno kroczące: wydatek każdego żądania liczy się przez 5 godzin, a potem się zwalnia.",
     "quotaWindowDescription": "Limit tygodniowy jest zgodny z zapisanym w pamięci podręcznej cotygodniowym resetem Claude, jeśli jest dostępny; w przeciwnym razie przełącza się na ruchome okno 7-dniowe. Limit dzienny korzysta z dnia kalendarzowego Fortaleza.",
     "apiKeyUsdQuota": "Limit klucza API w USD",
     "apiKeyUsdQuotaDescription": "Gdy włączone, @@om-usage zwraca limit dzienny, limit tygodniowy, wydatki dzienne oraz wydatki tygodniowe w USD. Limit tygodniowy jest zgodny z zapisanym w pamięci podręcznej resetem Claude, jeśli jest dostępny.",

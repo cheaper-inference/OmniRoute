@@ -34,6 +34,10 @@ export async function GET(request: Request) {
       name: metadata.name,
       scopes: metadata.scopes,
       allowedConnections: metadata.allowedConnections,
+      usageLimitEnabled: metadata.usageLimitEnabled,
+      dailyUsageLimitUsd: metadata.dailyUsageLimitUsd,
+      weeklyUsageLimitUsd: metadata.weeklyUsageLimitUsd,
+      fiveHourUsageLimitUsd: metadata.fiveHourUsageLimitUsd,
     });
 
     return NextResponse.json(status);

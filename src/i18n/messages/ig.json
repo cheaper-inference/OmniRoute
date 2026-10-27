@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Na-egbochi igodo a site na njehie 400 API mgbe mmefu USD mpaghara ya ruru oke kwa ụbọchị ma ọ bụ kwa izu ahaziri.",
     "dailyQuotaUsd": "Oke kwa ụbọchị (USD)",
     "weeklyQuotaUsd": "Oke kwa izu (USD)",
+    "fiveHourQuotaUsd": "Oke awa 5 (USD)",
+    "fiveHourQuotaHint": "Windo na-agagharị: a na-agụ mmefu nke arịrịọ ọ bụla ruo awa 5, mgbe ahụ a tọhapụ ya.",
     "quotaWindowDescription": "Oke kwa izu na-agbaso nrụgharị Claude kwa izu echekwara mgbe ọ dị; ma ọ bụghị ya, ọ na-eji windo ụbọchị 7 na-agagharị. Oke kwa ụbọchị na-eji ụbọchị kalenda nke Fortaleza.",
     "apiKeyUsdQuota": "Oke USD nke igodo API",
     "apiKeyUsdQuotaDescription": "Mgbe agbanyere ya, @@om-usage na-eweghachi oke kwa ụbọchị, oke kwa izu, mmefu kwa ụbọchị, na mmefu kwa izu na USD. Nke kwa izu na-agbaso nrụgharị Claude echekwara mgbe ọ dị.",

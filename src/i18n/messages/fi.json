@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Estää tämän avaimen 400 API -virheellä, kun sen paikallinen USD-kulutus saavuttaa määritetyn päivittäisen tai viikoittaisen kiintiön.",
     "dailyQuotaUsd": "Päivittäinen kiintiö (USD)",
     "weeklyQuotaUsd": "Viikoittainen kiintiö (USD)",
+    "fiveHourQuotaUsd": "5 tunnin kiintiö (USD)",
+    "fiveHourQuotaHint": "Liukuva ikkuna: jokaisen pyynnön kulut lasketaan 5 tunnin ajan, minkä jälkeen ne vapautuvat.",
     "quotaWindowDescription": "Viikoittainen kiintiö noudattaa välimuistiin tallennettua Clauden viikoittaista nollausta, jos se on saatavilla; muussa tapauksessa se palaa liukuvaan 7 päivän jaksoon. Päivittäinen kiintiö käyttää Fortalezan kalenteripäivää.",
     "apiKeyUsdQuota": "API-avaimen USD-kiintiö",
     "apiKeyUsdQuotaDescription": "Kun käytössä, @@om-usage palauttaa päivittäisen kiintiön, viikoittaisen kiintiön, päivittäisen kulutuksen ja viikoittaisen kulutuksen USD-valuutassa. Viikoittainen noudattaa välimuistiin tallennettua Clauden nollausta, jos se on saatavilla.",

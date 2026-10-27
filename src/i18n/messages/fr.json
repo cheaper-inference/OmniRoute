@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Bloque cette clé avec une erreur API 400 lorsque ses dépenses locales en USD atteignent le quota quotidien ou hebdomadaire configuré.",
     "dailyQuotaUsd": "Quota quotidien (USD)",
     "weeklyQuotaUsd": "Quota hebdomadaire (USD)",
+    "fiveHourQuotaUsd": "Quota sur 5 heures (USD)",
+    "fiveHourQuotaHint": "Fenêtre glissante : la dépense de chaque requête compte pendant 5 heures, puis se libère.",
     "quotaWindowDescription": "Le quota hebdomadaire suit la réinitialisation hebdomadaire de Claude mise en cache lorsqu'elle est disponible ; sinon, il bascule sur une fenêtre glissante de 7 jours. Le quota quotidien utilise le jour calendaire de Fortaleza.",
     "apiKeyUsdQuota": "Quota en USD de la clé API",
     "apiKeyUsdQuotaDescription": "Lorsqu'il est activé, @@om-usage renvoie le quota quotidien, le quota hebdomadaire, les dépenses quotidiennes et les dépenses hebdomadaires en USD. Le quota hebdomadaire suit la réinitialisation de Claude mise en cache lorsqu'elle est disponible.",

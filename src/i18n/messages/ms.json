@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Menyekat kunci ini dengan ralat API 400 selepas perbelanjaan USD tempatannya mencapai kuota harian atau mingguan yang dikonfigurasikan.",
     "dailyQuotaUsd": "Kuota harian (USD)",
     "weeklyQuotaUsd": "Kuota mingguan (USD)",
+    "fiveHourQuotaUsd": "Kuota 5 jam (USD)",
+    "fiveHourQuotaHint": "Tetingkap bergolek: perbelanjaan setiap permintaan dikira selama 5 jam, kemudian dibebaskan.",
     "quotaWindowDescription": "Kuota mingguan mengikut tetapan semula mingguan Claude yang dicache apabila tersedia; jika tidak, ia akan kembali ke tetingkap 7 hari berturut-turut. Kuota harian menggunakan hari kalendar Fortaleza.",
     "apiKeyUsdQuota": "Kuota USD kunci API",
     "apiKeyUsdQuotaDescription": "Apabila didayakan, @@om-usage mengembalikan kuota harian, kuota mingguan, perbelanjaan harian dan perbelanjaan mingguan dalam USD. Mingguan mengikut tetapan semula Claude yang dicache apabila tersedia.",

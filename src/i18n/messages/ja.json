@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "ローカルのUSD消費額が設定された日次または週次のクォータに達すると、このキーを400 APIエラーでブロックします。",
     "dailyQuotaUsd": "日次クォータ (USD)",
     "weeklyQuotaUsd": "週次クォータ (USD)",
+    "fiveHourQuotaUsd": "5時間クォータ (USD)",
+    "fiveHourQuotaHint": "ローリングウィンドウ: 各リクエストの支出は5時間カウントされ、その後解放されます。",
     "quotaWindowDescription": "週次クォータは、利用可能な場合はキャッシュされたClaudeの週次リセットに従います。それ以外の場合は、ローリング7日間のウィンドウにフォールバックします。日次クォータはFortalezaのカレンダー日を使用します。",
     "apiKeyUsdQuota": "APIキーのUSDクォータ",
     "apiKeyUsdQuotaDescription": "有効にすると、@@om-usageは日次クォータ、週次クォータ、日次消費額、および週次消費額をUSDで返します。週次は、利用可能な場合はキャッシュされたClaudeのリセットに従います。",

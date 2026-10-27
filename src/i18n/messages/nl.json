@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Blokkeert deze sleutel met een 400 API-fout nadat de lokale USD-uitgaven het geconfigureerde dagelijkse of wekelijkse quotum bereiken.",
     "dailyQuotaUsd": "Dagelijks quotum (USD)",
     "weeklyQuotaUsd": "Wekelijks quotum (USD)",
+    "fiveHourQuotaUsd": "Quotum per 5 uur (USD)",
+    "fiveHourQuotaHint": "Rollend venster: de kosten van elk verzoek tellen 5 uur mee en komen daarna weer vrij.",
     "quotaWindowDescription": "Wekelijks quotum volgt de gecachte wekelijkse reset van Claude indien beschikbaar; anders valt het terug op een voortschrijdend venster van 7 dagen. Dagelijks quotum gebruikt de kalenderdag van Fortaleza.",
     "apiKeyUsdQuota": "USD-quotum voor API-sleutel",
     "apiKeyUsdQuotaDescription": "Indien ingeschakeld, retourneert @@om-usage het dagelijkse quotum, wekelijkse quotum, de dagelijkse uitgaven en de wekelijkse uitgaven in USD. Wekelijks volgt de gecachte Claude-reset indien beschikbaar.",

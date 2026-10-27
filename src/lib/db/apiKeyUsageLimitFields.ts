@@ -4,6 +4,7 @@ export interface ApiKeyUsageLimitFields {
   usageLimitEnabled: boolean;
   dailyUsageLimitUsd: number | null;
   weeklyUsageLimitUsd: number | null;
+  fiveHourUsageLimitUsd: number | null;
 }
 
 export function parseUsageLimitEnabled(value: unknown): boolean {
@@ -30,6 +31,9 @@ export function parseApiKeyUsageLimitFields(record: UsageLimitRecord): ApiKeyUsa
     weeklyUsageLimitUsd: parseNullablePositiveNumber(
       record.weekly_usage_limit_usd ?? record.weeklyUsageLimitUsd
     ),
+    fiveHourUsageLimitUsd: parseNullablePositiveNumber(
+      record.five_hour_usage_limit_usd ?? record.fiveHourUsageLimitUsd
+    ),
   };
 }
 
@@ -37,7 +41,8 @@ export function hasUsageLimitUpdate(update: UsageLimitRecord): boolean {
   return (
     update.usageLimitEnabled !== undefined ||
     update.dailyUsageLimitUsd !== undefined ||
-    update.weeklyUsageLimitUsd !== undefined
+    update.weeklyUsageLimitUsd !== undefined ||
+    update.fiveHourUsageLimitUsd !== undefined
   );
 }
 
@@ -48,6 +53,7 @@ export function appendUsageLimitUpdates(
     usageLimitEnabled?: number;
     dailyUsageLimitUsd?: number | null;
     weeklyUsageLimitUsd?: number | null;
+    fiveHourUsageLimitUsd?: number | null;
   }
 ) {
   if (update.usageLimitEnabled !== undefined) {
@@ -61,5 +67,9 @@ export function appendUsageLimitUpdates(
   if (update.weeklyUsageLimitUsd !== undefined) {
     updates.push("weekly_usage_limit_usd = @weeklyUsageLimitUsd");
     params.weeklyUsageLimitUsd = parseNullablePositiveNumber(update.weeklyUsageLimitUsd);
+  }
+  if (update.fiveHourUsageLimitUsd !== undefined) {
+    updates.push("five_hour_usage_limit_usd = @fiveHourUsageLimitUsd");
+    params.fiveHourUsageLimitUsd = parseNullablePositiveNumber(update.fiveHourUsageLimitUsd);
   }
 }

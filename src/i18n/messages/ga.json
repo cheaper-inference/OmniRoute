@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "Bacann sé an eochair seo le hearráid API 400 nuair a shroicheann a caiteachas áitiúil USD an cuóta laethúil nó seachtainiúil cumraithe.",
     "dailyQuotaUsd": "Cuóta laethúil (USD)",
     "weeklyQuotaUsd": "Cuóta seachtainiúil (USD)",
+    "fiveHourQuotaUsd": "Cuóta 5 uair an chloig (USD)",
+    "fiveHourQuotaHint": "Fuinneog rollta: comhairtear caiteachas gach iarratais ar feadh 5 uair an chloig, ansin scaoiltear é.",
     "quotaWindowDescription": "Leanann an cuóta seachtainiúil athshocrú seachtainiúil Claude atá i dtaisce nuair atá sé ar fáil; murach sin, úsáidtear fuinneog rollach 7 lá. Úsáideann an cuóta laethúil lá féilire Fortaleza.",
     "apiKeyUsdQuota": "Cuóta USD na heochrach API",
     "apiKeyUsdQuotaDescription": "Nuair atá sé cumasaithe, tugann @@om-usage an cuóta laethúil, an cuóta seachtainiúil, an caiteachas laethúil agus an caiteachas seachtainiúil ar ais in USD. Leanann an cuóta seachtainiúil athshocrú Claude atá i dtaisce nuair atá sé ar fáil.",

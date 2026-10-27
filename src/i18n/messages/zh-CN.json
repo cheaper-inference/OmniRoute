@@ -13920,6 +13920,8 @@
     "usdUsageQuotaDescription": "在此密钥的本地美元支出达到配置的每日或每周配额后，将阻止该密钥并返回 400 API 错误。",
     "dailyQuotaUsd": "每日配额 (USD)",
     "weeklyQuotaUsd": "每周配额 (USD)",
+    "fiveHourQuotaUsd": "5 小时配额 (USD)",
+    "fiveHourQuotaHint": "滚动窗口：每个请求的花费计入 5 小时，之后释放。",
     "quotaWindowDescription": "每周配额在可用时遵循缓存的 Claude 每周重置规则；否则将回退到滚动 7 天窗口。每日配额使用福塔莱萨 (Fortaleza) 日历日。",
     "apiKeyUsdQuota": "API 密钥美元配额",
     "apiKeyUsdQuotaDescription": "启用后，@@om-usage 将返回以美元为单位的每日配额、每周配额、每日支出和每周支出。每周配额在可用时遵循缓存的 Claude 重置规则。",
