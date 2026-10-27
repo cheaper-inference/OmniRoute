@@ -18666,8 +18666,8 @@
           "updated_at": "2026-10-27T13:38:48.792Z"
         },
         "pt-BR": {
-          "source_hash": "e7e658cb522ebbc195a514db505d696ca835325ba16db4dfcfbad2d2f093861d",
-          "target_hash": "f5bb8742b3cf81b3de9d16f8df5a5732d49f849cd28808389dff492bae088c10",
+          "source_hash": "afa113682c12274e348575b3a8fccf448340a5a36f9644150f2558462cde4bd3",
+          "target_hash": "48ce0a240f324c5aeddddcbdec1f3cb0c3945d2c28dd88a179e7ca13f9538a55",
           "section_hashes": [
             "f7207ebf7e7d",
             "d1d88554fd64",
@@ -18679,7 +18679,7 @@
             "1870c95b7c76",
             "4cd013a886d5",
             "cf8c928ec79e",
-            "bd3abf92b849",
+            "b6b2f4f05eba",
             "ec8eb8e8e8e3",
             "fc00b85417fb",
             "b81d794916d7",
@@ -18691,7 +18691,7 @@
             "2c14c63f3cb0",
             "11fc5c5c741c"
           ],
-          "updated_at": "2026-10-27T12:45:07.946Z"
+          "updated_at": "2026-10-27T13:56:24.660Z"
         },
         "pt": {
           "source_hash": "afa113682c12274e348575b3a8fccf448340a5a36f9644150f2558462cde4bd3",
@@ -19114,8 +19114,8 @@
           "updated_at": "2026-10-27T13:42:54.300Z"
         },
         "uk-UA": {
-          "source_hash": "e7e658cb522ebbc195a514db505d696ca835325ba16db4dfcfbad2d2f093861d",
-          "target_hash": "d39807684ecd05899c8fea9b7439950f4e0009af5b6a5262e7a5b7fcbbff957d",
+          "source_hash": "afa113682c12274e348575b3a8fccf448340a5a36f9644150f2558462cde4bd3",
+          "target_hash": "cf82fd48532ce461c1b808abcd06b6b40ef2e861d7e31d58ed88293200f3cd0e",
           "section_hashes": [
             "f7207ebf7e7d",
             "d1d88554fd64",
@@ -19127,7 +19127,7 @@
             "1870c95b7c76",
             "4cd013a886d5",
             "cf8c928ec79e",
-            "bd3abf92b849",
+            "b6b2f4f05eba",
             "ec8eb8e8e8e3",
             "fc00b85417fb",
             "b81d794916d7",
@@ -19139,7 +19139,7 @@
             "2c14c63f3cb0",
             "11fc5c5c741c"
           ],
-          "updated_at": "2026-10-27T12:45:08.066Z"
+          "updated_at": "2026-10-27T13:55:23.744Z"
         },
         "ur": {
           "source_hash": "afa113682c12274e348575b3a8fccf448340a5a36f9644150f2558462cde4bd3",
