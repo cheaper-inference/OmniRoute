@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Ang Libreng AI Gateway
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Huwag tumigil sa pag-code. Bawat AI tool → 375 provider — 150+ libre — sa pamamagitan ng iisang endpoint. Claude Code, Codex, Cursor, Cline, Copilot at Antigravity sa LIBRENG Claude / GPT / Gemini na may awtomatikong fallback. Ang pinagsamang compression ng RTK + Caveman ay nakakatipid ng 15–95% ng mga token (~89% sa karaniwan) — huwag nang maabot ang mga limitasyon. 375 AI provider · 150+ libreng tier · ~1.62B libreng token/buwan · 20 diskarte sa routing · $0 para magsimula."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Huwag tumigil sa pag-code. Bawat AI tool → 376 provider — 150+ libre — sa pamamagitan ng iisang endpoint. Claude Code, Codex, Cursor, Cline, Copilot at Antigravity sa LIBRENG Claude / GPT / Gemini na may awtomatikong fallback. Ang pinagsamang compression ng RTK + Caveman ay nakakatipid ng 15–95% ng mga token (~89% sa karaniwan) — huwag nang maabot ang mga limitasyon. 376 AI provider · 150+ libreng tier · ~1.62B libreng token/buwan · 20 diskarte sa routing · $0 para magsimula."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Gamitin ang sarili mong mga provider account.** Isa itong tinatayang kabuuan mula sa magkakahiwalay na kwalipikadong libreng tier ng mga third-party, hindi isang token grant mula sa OmniRoute. Mag-sign up, kumuha ng mga credential kung kinakailangan, at ikonekta ang mga provider na magagamit mo; bawat provider ang kumokontrol sa sarili nitong mga limitasyon, availability, at tuntunin.
 >
-> Mahirap pagsama-samahin nang mano-mano ang mga libreng tier — dose-dosenang SDK, dose-dosenang rate limit, at walang paraan para malaman kung gaano karami talaga ang mayroon ka. Itinatala ng OmniRoute ang **471 entry ng libreng tier sa 34 na umuulit na pool key** at kinakalkula ang pangunahing bilang ng token mula sa **17 pool na may naka-publish na positibong buwanang budget at limang per-model na cap ng Groq**, na inaalis ang mga duplicate batay sa nakabahaging pool. Ang mga quota na nagiging available lamang pagkatapos ng panrehiyong identity check (sa kasalukuyan: ModelScope) ay hiwalay na ipinapakita, +~6M sa likod ng panrehiyong identity verification, at hindi kailanman isinasama sa pangunahing bilang. Patuloy na makikita ang resulta sa dashboard (`/dashboard/free-tiers`).
+> Mahirap pagsama-samahin nang mano-mano ang mga libreng tier — dose-dosenang SDK, dose-dosenang rate limit, at walang paraan para malaman kung gaano karami talaga ang mayroon ka. Itinatala ng OmniRoute ang **484 entry ng libreng tier sa 34 na umuulit na pool key** at kinakalkula ang pangunahing bilang ng token mula sa **17 pool na may naka-publish na positibong buwanang budget at limang per-model na cap ng Groq**, na inaalis ang mga duplicate batay sa nakabahaging pool. Ang mga quota na nagiging available lamang pagkatapos ng panrehiyong identity check (sa kasalukuyan: ModelScope) ay hiwalay na ipinapakita, +~6M sa likod ng panrehiyong identity verification, at hindi kailanman isinasama sa pangunahing bilang. Patuloy na makikita ang resulta sa dashboard (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Card ng budget para sa libreng tier ng OmniRoute: ~1.62B libreng token bawat buwan sa regular na paggamit, hanggang ~2.22B sa unang buwan kasama ang mga signup credit, mula sa 34 na dokumentadong umuulit na pool key na sumasaklaw sa 471 nakatalang entry ng libreng tier sa likod ng iisang endpoint. Tapat na kalkulasyong nag-aalis ng duplicate ayon sa pool — isang beses lang binibilang ang bawat nakabahaging pool, kabilang ang 17 umuulit na pool na may naka-publish na positibong buwanang token budget at limang per-model na cap ng Groq; 12 provider ang minarkahang iwasan sa catalog ng panganib sa mga tuntunin upang ikaw ang magpasya. Kasama sa budget bar ang Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (limang per-model na cap), at mas maliliit na pool, kasama ang mga signup credit sa unang buwan at mga provider na permanenteng libre at walang token cap na hiwalay na ipinapakita upang hindi nila mapalaki ang pangunahing bilang. Live na nagamit/natitira sa /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Card ng budget para sa libreng tier ng OmniRoute: ~1.62B libreng token bawat buwan sa regular na paggamit, hanggang ~2.22B sa unang buwan kasama ang mga signup credit, mula sa 34 na dokumentadong umuulit na pool key na sumasaklaw sa 484 nakatalang entry ng libreng tier sa likod ng iisang endpoint. Tapat na kalkulasyong nag-aalis ng duplicate ayon sa pool — isang beses lang binibilang ang bawat nakabahaging pool, kabilang ang 17 umuulit na pool na may naka-publish na positibong buwanang token budget at limang per-model na cap ng Groq; 12 provider ang minarkahang iwasan sa catalog ng panganib sa mga tuntunin upang ikaw ang magpasya. Kasama sa budget bar ang Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (limang per-model na cap), at mas maliliit na pool, kasama ang mga signup credit sa unang buwan at mga provider na permanenteng libre at walang token cap na hiwalay na ipinapakita upang hindi nila mapalaki ang pangunahing bilang. Live na nagamit/natitira sa /dashboard/free-tiers."/>
 
 > Animated na buod ng live na page na `/dashboard/free-tiers`. Kumpletong metodolohiya (pag-aalis ng duplicate na pool, mga tier ng credit, mga tuntunin ng provider): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Mga Feature</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Mga Combo</a></td>
-    <td align="center"><a href="#-375-ai-providers--153-catalog-marked-free">🌐 Mga Provider</a></td>
+    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Mga Provider</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI at MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ang Pangako — Isang endpoint at 375 provider. Pinapanatili ng awtomatikong fallback ang routing habang may available na isa pang maayos na target. Anim na haligi: matatag na fallback sa 375 provider · hanggang 95% na pagtitipid sa token para sa mga kwalipikadong workload · $0 upang magsimula gamit ang 150+ libreng tier at 51 umuulit/keyless na provider na libre magpakailanman · 37 integrasyon ng CLI/agent sa pamamagitan ng iisang config · compatibility sa OpenAI, Claude, Gemini, at Responses API sa /v1 · mga kontrol para sa production kabilang ang mga circuit breaker, TLS stealth, MCP na may 110 tool, A2A, memory, guardrail, eval, at 56,000+ static na test declaration sa 7,800+ sinusubaybayang test file."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Ang Pangako — Isang endpoint at 376 provider. Pinapanatili ng awtomatikong fallback ang routing habang may available na isa pang maayos na target. Anim na haligi: matatag na fallback sa 376 provider · hanggang 95% na pagtitipid sa token para sa mga kwalipikadong workload · $0 upang magsimula gamit ang 150+ libreng tier at 52 umuulit/keyless na provider na libre magpakailanman · 37 integrasyon ng CLI/agent sa pamamagitan ng iisang config · compatibility sa OpenAI, Claude, Gemini, at Responses API sa /v1 · mga kontrol para sa production kabilang ang mga circuit breaker, TLS stealth, MCP na may 110 tool, A2A, memory, guardrail, eval, at 56,000+ static na test declaration sa 7,800+ sinusubaybayang test file."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Lahat ng **20** diskarte — paghalu-haluin at pagtugmain sa bawat hakbang ng co
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ang nagpapabukod-tangi sa OmniRoute — isang napetsahang snapshot ng mga feature kumpara sa 9router, OpenRouter, CLIProxyAPI, at LiteLLM sa 13 kakayahan. OmniRoute: 375 provider, 150+ built-in na libreng tier, 20 diskarte sa pagruruta, 12-engine na pag-compress ng token, built-in na MCP server na may 110 tool, A2A agent protocol, persistent memory, mga guardrail, mga cloud agent, stealth gamit ang TLS fingerprint, Desktop/Termux/PWA, at 67 i18n UI locale. Ang OmniRoute ay lisensiyado sa ilalim ng MIT at maaaring i-self-host. Maaaring magbago ang mga kakayahan at bilang ng mga kakumpitensya; tingnan ang naka-link na metodolohiya."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Ang nagpapabukod-tangi sa OmniRoute — isang napetsahang snapshot ng mga feature kumpara sa 9router, OpenRouter, CLIProxyAPI, at LiteLLM sa 13 kakayahan. OmniRoute: 376 provider, 150+ built-in na libreng tier, 20 diskarte sa pagruruta, 12-engine na pag-compress ng token, built-in na MCP server na may 110 tool, A2A agent protocol, persistent memory, mga guardrail, mga cloud agent, stealth gamit ang TLS fingerprint, Desktop/Termux/PWA, at 67 i18n UI locale. Ang OmniRoute ay lisensiyado sa ilalim ng MIT at maaaring i-self-host. Maaaring magbago ang mga kakayahan at bilang ng mga kakumpitensya; tingnan ang naka-link na metodolohiya."/>
 
 <sub>📊 Kumpletong metodolohiya &amp; mga detalye ng bawat feature kumpara sa 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Ang Radar ay opt-in at GET-only. Hindi nag-a-upload ang OmniRoute client ng mga 
 - **🖼️ Mga bagong endpoint** — kinukumpleto ng `/v1/ocr` (Mistral OCR) at `/v1/audio/translations` (Whisper-style) ang media surface. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Pagbuo ng image / video / audio** — isang API para sa media: xAI Grok Imagine at Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, at mga speech provider tulad ng ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Deployment at ops** — reverse-proxy `basePath`, auto-detect ng wika ng browser, per-key device tracking, root-less MITM trust, localization sa zh-TW. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Mas maraming provider at agent** — mga cloud agent (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) na may browser + OAuth login, first-class card ng Ollama, Claude Opus 5 at Sonnet 5, opisyal na partnership sa Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… at na-refresh na **375-provider catalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Mas maraming provider at agent** — mga cloud agent (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) na may browser + OAuth login, first-class card ng Ollama, Claude Opus 5 at Sonnet 5, opisyal na partnership sa Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… at na-refresh na **376-provider catalog**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparency sa routing** — bawat response ay may `X-OmniRoute-Decision` header na nagpapangalan sa strategy/provider/latency na naghatid nito, isang bagong `cache-optimized` combo strategy + Auto-Combo `cacheAffinity` factor na nagro-route ng mga paulit-ulit na request pabalik sa koneksyong may hawak ng cached prefix, at ang read-only na `/v1/auto-combo/{channel}/candidates` endpoint ay naglalabas ng live candidate pool ng isang `auto/*` channel. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokal na performance at infra** — one-click na lokal na Redis, Cloudflare Workers / Deno Deploy relay deployers, Bifrost at Mux bilang mga supervised embedded service. → [Embedded Services](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Kasama rin sa kahon** — plugin framework + marketplace, Omni/Agent/GitHub skills frameworks, Obsidian vault integration (22 MCP tools), OpenAI-compatible na Batch at Files APIs, semantic response cache, gamification na may mga leaderboard, ACP agent discovery (15 built-in na agent), naka-iskedyul na log export sa BigQuery, `auto/chaos` parallel multi-model fan-out, isang Telegram bot bridge, isang in-app na version manager at LMArena-ELO free-provider rankings. → [Docs](docs/README.md)
@@ -687,11 +687,11 @@ sa iyong shell history. → [Mga Integrasyon ng CLI](docs/guides/CLI-INTEGRATION
 
 <div align="center">
 
-## 🌐 375 Provider ng AI — 153 ang Minarkahang Libre sa Catalog
+## 🌐 376 Provider ng AI — 153 ang Minarkahang Libre sa Catalog
 
 </div>
 
-> **375 nakarehistrong provider** sa mga canonical na koleksyon para sa chat, media, paghahanap, lokal, cloud-agent, at system, kabilang ang **153 na may `hasFree: true` discovery metadata**. Saklaw ng registry ng chat model ang **239 na provider / 3,059 natatanging pares ng provider-model / 1,475 raw model ID**; ang hiwalay na catalog ng libreng badyet ay may **471 row bawat modelo**, **34 umuulit na pool**, at **51 umuulit/keyless na provider na libre magpakailanman**. Magkakaiba ang mga denominator na ito ayon sa disenyo; makikita ang mga depinisyon at kalkulasyong may pool deduplication sa [Sanggunian ng Provider](docs/reference/PROVIDER_REFERENCE.md) at [Mga Libreng Tier](docs/reference/FREE_TIERS.md).
+> **376 nakarehistrong provider** sa mga canonical na koleksyon para sa chat, media, paghahanap, lokal, cloud-agent, at system, kabilang ang **153 na may `hasFree: true` discovery metadata**. Saklaw ng registry ng chat model ang **239 na provider / 3,059 natatanging pares ng provider-model / 1,475 raw model ID**; ang hiwalay na catalog ng libreng badyet ay may **471 row bawat modelo**, **34 umuulit na pool**, at **52 umuulit/keyless na provider na libre magpakailanman**. Magkakaiba ang mga denominator na ito ayon sa disenyo; makikita ang mga depinisyon at kalkulasyong may pool deduplication sa [Sanggunian ng Provider](docs/reference/PROVIDER_REFERENCE.md) at [Mga Libreng Tier](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1302,7 +1302,7 @@ Mga canonical na sukatan noong 2026-10-18: **1.976 natatanging video** · **20.2
   <tr><td nowrap><b>Runtime</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Wika</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> sa buong <code>src/</code> at <code>open-sse/</code> (walang <code>any</code> sa core mula noong v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 na domain module, 209 na migration</td></tr>
+  <tr><td nowrap><b>Database</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 na domain module, 211 na migration</td></tr>
   <tr><td nowrap><b>Memory</b></td><td>SQLite FTS5 full-text + int8-quantized vector embeddings, typed decay</td></tr>
   <tr><td nowrap><b>Mga Schema</b></td><td>Zod 4 — MCP tool I/O validation + mga kontrata ng API</td></tr>
   <tr><td nowrap><b>Mga Protocol</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1365,7 +1365,7 @@ Mga canonical na sukatan noong 2026-10-18: **1.976 natatanging video** · **20.2
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Gabay sa Resilience</a></b></td><td>Mga circuit breaker, cooldown, queue, pag-iwas sa thundering herd, TLS spoofing</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo Engine</a></b></td><td>Pagmamarka batay sa 16 na salik, mga mode pack, awtomatikong pag-aayos</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Gabay sa Proxy</a></b></td><td>3-level na proxy system, 1proxy marketplace, registry CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Mga Libreng Tier</a></b></td><td>Pinagsama-samang direktoryo: 34 na nakadokumentong umuulit na pool / 471 nakatalogong entry ng libreng tier</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Mga Libreng Tier</a></b></td><td>Pinagsama-samang direktoryo: 34 na nakadokumentong umuulit na pool / 484 nakatalogong entry ng libreng tier</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Gallery ng Mga Feature</a></b></td><td>Biswal na paglilibot sa dashboard na may mga screenshot</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentasyon ng Codebase</a></b></td><td>Madaling sundang paglilibot sa codebase para sa mga baguhan</td></tr>
 </table>

@@ -72,6 +72,16 @@ curl -i \
 
 Une clé sans portée `manage` (ou l’absence de jeton Bearer) renvoie `403 LOCAL_ONLY`. Le préfixe voisin `/api/cli-tools/runtime/*` ne peut intentionnellement PAS bénéficier de ce contournement — consultez [Niveaux de protection des routes — exception pour la portée manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Validation de l'Origin
+
+Après l'authentification, chaque requête vers `/api/mcp/*` — les transports et les routes de gestion comme `status`, `tools`, `audit`, `restart` — voit son en-tête `Origin` validé, quel que soit l'appelant (clé API, jeton CLI, session du dashboard ou loopback anonyme avec la connexion désactivée). C'est la protection contre le DNS rebinding qu'exige la spécification MCP Streamable HTTP.
+
+- **Pas d'en-tête `Origin`** → autorisé. La CLI OmniRoute, le SDK et les clients IDE n'en envoient pas.
+- **`Origin` autorisé** → `localhost` / `127.0.0.1` / `[::1]` sur n'importe quel port, ou l'origine publique d'OmniRoute : `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, l'origine transmise par un proxy inverse de confiance (`OMNIROUTE_TRUST_PROXY`, uniquement si aucune base URL n'est définie) ou un hôte IP loopback/LAN en accès direct. L'en-tête `Host` seul ne rend jamais une origine fiable.
+- **Tout autre `Origin`, y compris `null`** → `403` avec un corps d'erreur JSON-RPC : `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Une session du dashboard qui présente un jeton CSRF valide reste acceptée, comme pour les autres écritures du dashboard.
+
+Un client MCP navigateur servi derrière un proxy inverse doit définir `OMNIROUTE_PUBLIC_BASE_URL` ; il n'existe pas de liste d'autorisation pour d'autres origines. La requête préliminaire CORS (`OPTIONS`) n'est pas contrôlée ; la requête qui suit l'est.
+
 ## Configuration de l’IDE
 
 Consultez [Configuration du client MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) pour configurer Claude Desktop,

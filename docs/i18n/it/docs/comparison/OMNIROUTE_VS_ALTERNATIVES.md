@@ -39,7 +39,7 @@ Confronto oggettivo delle funzionalità rispetto ai più diffusi router AI open-
 
 ## Quando scegliere OmniRoute
 
-- Fai self-hosting e vuoi la **massima copertura di provider** (375 provider, 155 voci di catalogo gratuite/senza autenticazione)
+- Fai self-hosting e vuoi la **massima copertura di provider** (376 provider, 155 voci di catalogo gratuite/senza autenticazione)
 - Hai bisogno di un **server MCP integrato** (strumenti LLM, memoria, skill esposte come strumenti)
 - Hai bisogno del **protocollo A2A** per flussi di lavoro agente-a-agente
 - Vuoi lo **stealth delle fingerprint** (JA3/JA4) per evitare il rilevamento da parte dei CAPTCHA a monte

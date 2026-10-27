@@ -90,13 +90,13 @@
 
 ## 2. నియమాలు
 
-1. లిటరల్స్ను కాకుండా టోకెన్లను ఉపయోగించండి. ఉద్దేశపూర్వకంగా ఉంచిన మినహాయింపులు: ఎల్లప్పుడూ డార్క్గా ఉండే కన్సోల్ టెర్మినల్, `STATUS_HEX` (`src/shared/constants/statusColors.ts`) ద్వారా ReactFlow SVG స్ట్రోక్స్, అలాగే `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) మరియు `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`) కేటగిరికల్ పాలెట్లు.
-2. `packages/ui-kit/src`ను ఎప్పుడూ చేతితో ప్యాచ్ చేయవద్దు: `scripts/dev/sync-ui-kit.sh <commit>`తో సింక్ చేయండి; పిన్ చేసిన అప్స్ట్రీమ్ కమిట్తో ఏ ఒక్క బైట్ తేడా ఉన్నా, ప్రీ-కమిట్ గేట్ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) విఫలమవుతుంది (అప్స్ట్రీమ్ క్లోన్, `UI_KIT_CLONE` లేదా `_references/cheaper-inference-ui-kit`, లేకపోతే హెచ్చరికతో దాటవేస్తుంది). కిట్లో ఏదైనా లేకపోతే, అడాప్టర్ లేదా స్క్రీన్లో ప్రత్యామ్నాయ పరిష్కారాన్ని అమలు చేసి, దానిని అప్స్ట్రీమ్లో కోరండి.
-3. కిట్ టెక్స్ట్ డిఫాల్ట్లు ఇంగ్లీష్లో ఉంటాయి (`label = "Loading"`, `loadingLabel = "Loading table"`…) — కిట్ కాంపోనెంట్ టెక్స్ట్ను రెండర్ చేసినప్పుడల్లా `useTranslations(...)` నుంచి అనువదించిన స్ట్రింగ్లను పాస్ చేయండి.
-4. కిట్ కాంపోనెంట్ క్లాస్ల కంటే Tailwind యుటిలిటీలు ప్రాధాన్యం పొందుతాయి (కిట్ `@layer theme, base, components, utilities`ను ప్రకటిస్తుంది మరియు దాని రూల్స్ `components`లో ఉంటాయి) — స్పేసింగ్, లేఅవుట్ కోసం యుటిలిటీలను ఉపయోగించండి; కిట్ కాంపోనెంట్లకు మళ్లీ రంగులు వేయడానికి ఉపయోగించవద్దు.
-5. హెడ్డింగ్లు: పేజీ, విభాగ శీర్షికల కోసం `.ci-heading` (Inter, ట్రాకింగ్ లేకుండా); ఎరర్ పేజీ స్టేటస్ కోడ్ వంటి పెద్దగా, తక్కువ సాంద్రతతో ఉండే డిస్ప్లే టెక్స్ట్ కోసం మాత్రమే `.ci-dashboard-display` (Instrument Serif).
-6. `tests/unit/dashboard-kit-sweep.test.ts` కిట్ స్వీకరణను పర్యవేక్షిస్తుంది: `src/app` లేదా `src/shared/components` కింద Material లిగేచర్ span ఉండకూడదు; డ్యాష్బోర్డ్ ట్రీలో (`src/app/(dashboard)` మరియు `src/shared/components`) ముడి `<select>`, `<textarea>` లేదా `<table>` ఉండకూడదు, అలాగే జాబితాలోని మినహాయింపులకు (`Select` అడాప్టర్ యొక్క నేటివ్ బ్రాంచ్, `RequestLoggerDetail`) వెలుపల స్వయంగా రూపొందించిన `role="dialog"` ఉండకూడదు; అక్కడి ప్రతి ముడి `<button>` లేదా `<input>`కు దాని కంటే గరిష్ఠంగా 3 లైన్ల పైన ముగిసేలా కారణంతో కూడిన `kit-exception:` వ్యాఖ్య అవసరం; పాలెట్ హ్యూలు మరియు `dark:` వేరియంట్లు టెస్ట్ జాబితా చేసిన ఫైళ్లలో మాత్రమే ఉండాలి.
-7. PRకు ముందు రెండు థీమ్లను మరియు 390 px వ్యూపోర్ట్ను ధృవీకరించండి (స్క్రీన్షాట్లు); `tests/e2e/a11y.spec.ts` axeను అమలు చేస్తుంది.
+1. టోకెన్లు, ఎప్పుడూ లిటరల్లు కాదు. ఉద్దేశపూర్వకంగా ఉంచిన మినహాయింపులు: ఎల్లప్పుడూ డార్క్గా ఉండే కన్సోల్ టెర్మినల్ మరియు `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — ఇది లిటరల్ హెక్స్ అవసరమైన కాలర్ల కోసం కిట్ స్టేటస్ పాలెట్ యొక్క రిజాల్వ్ చేసిన హెక్స్ మిర్రర్. కేటగొరికల్ పాలెట్లు ఇకపై మినహాయింపు కావు: అవి `src/shared/utils/categoricalPalette.ts` ద్వారా మరియు రూటింగ్ స్ట్రటజీల కోసం `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` ద్వారా కిట్ యొక్క ఐదు చార్ట్ టోకెన్ల (`--color-chart-1..5`) మీద నడుస్తాయి; ReactFlow ఎడ్జ్లు మరియు ఆర్కెస్ట్రేషన్ కాన్వాస్ థీమ్-అవేర్ `--orch-status-*` వేరియబుల్లను చదువుతాయి (`src/shared/components/flow/edgeStyles.ts`).
+2. `packages/ui-kit/src` ను చేతితో ఎప్పుడూ ప్యాచ్ చేయవద్దు: `scripts/dev/sync-ui-kit.sh <commit>` తో సింక్ చేయండి; పిన్ చేసిన అప్స్ట్రీమ్ కమిట్ నుండి భిన్నమైన ఏ బైట్ అయినా ఉంటే ప్రీ-కమిట్ గేట్ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) విఫలమవుతుంది (అప్స్ట్రీమ్ క్లోన్, `UI_KIT_CLONE` లేదా `_references/cheaper-inference-ui-kit`, లేనప్పుడు అది హెచ్చరికతో స్కిప్ అవుతుంది). కిట్లో ఏదైనా లేనప్పుడు, అడాప్టర్లో లేదా స్క్రీన్లో దాని చుట్టూ పని చేసి, అప్స్ట్రీమ్ను కోరండి.
+3. కిట్ టెక్స్ట్ డిఫాల్ట్లు ఇంగ్లీష్లో ఉంటాయి (`label = "Loading"`, `loadingLabel = "Loading table"`…) — కిట్ కాంపోనెంట్ టెక్స్ట్ను రెండర్ చేసినప్పుడల్లా `useTranslations(...)` నుండి అనువదించిన స్ట్రింగ్లను పంపండి.
+4. Tailwind యుటిలిటీలు కిట్ కాంపోనెంట్ క్లాస్లను అధిగమిస్తాయి (కిట్ `@layer theme, base, components, utilities` ను డిక్లేర్ చేస్తుంది మరియు దాని రూల్స్ `components` లో ఉంటాయి) — స్పేసింగ్ మరియు లేఅవుట్ కోసం యుటిలిటీలను ఉపయోగించండి, కిట్ కాంపోనెంట్ల రంగును మార్చడానికి కాదు.
+5. హెడింగ్లు: పేజీ మరియు సెక్షన్ టైటిల్ల కోసం `.ci-heading` (Inter, ట్రాకింగ్ లేదు); ఎర్రర్-పేజీ స్టేటస్ కోడ్ వంటి పెద్ద, విరలమైన డిస్ప్లే టెక్స్ట్ కోసం మాత్రమే `.ci-dashboard-display` (Instrument Serif).
+6. `tests/unit/dashboard-kit-sweep.test.ts` కిట్ అడాప్షన్ను కాపాడుతుంది: `src/app` లేదా `src/shared/components` కింద Material లిగేచర్ స్పాన్ ఉండకూడదు; డ్యాష్బోర్డ్ ట్రీలో (`src/app/(dashboard)` మరియు `src/shared/components`) జాబితా చేసిన మినహాయింపుల (`Select` అడాప్టర్ యొక్క నేటివ్ బ్రాంచ్, `RequestLoggerDetail`) వెలుపల రా `<select>`, `<textarea>` లేదా `<table>` ఉండకూడదు మరియు హ్యాండ్-రోల్డ్ `role="dialog"` ఉండకూడదు; అక్కడ ప్రతి రా `<button>` లేదా `<input>` కు దానికి గరిష్టంగా 3 లైన్ల పైన ముగిసే, `kit-exception:` (కారణంతో) కలిగిన కామెంట్ అవసరం; పాలెట్ హ్యూలు మరియు `dark:` వేరియంట్లు టెస్ట్ జాబితా చేసిన ఫైల్లలో మాత్రమే.
+7. PR కు ముందు రెండు థీమ్లను మరియు 390 px వ్యూపోర్ట్ను ధృవీకరించండి (స్క్రీన్షాట్లు); `tests/e2e/a11y.spec.ts` axe ను నడుపుతుంది.
 
 ## 3. స్క్రీన్ను జోడించడం
 
@@ -126,12 +126,12 @@ relative imports నుండి `.js` suffixను తొలగిస్తు�
 usage మరియు endpointలను దృశ్యపరంగా తనిఖీ చేయండి, `npm run check:ui-kit-snapshot` మరియు `npm run test:vitest:ui`ను అమలు చేయండి, అలాగే
 upstream changelogతో PRను తెరవండి.
 
-## 6. సూచిక
+## 6. రిఫరెన్స్ సూచిక
 
-- `src/app/globals.css` — token bridge, `.dark` overrides, OmniRoute `@layer components` extensions
-- `packages/ui-kit/UPSTREAM.md` — pin చేసిన upstream commit మరియు license authorization; `packages/ui-kit/PATCHES.md`
+- `src/app/globals.css` — టోకెన్ బ్రిడ్జ్, `.dark` ఓవర్రైడ్లు, OmniRoute `@layer components` పొడిగింపులు
+- `packages/ui-kit/UPSTREAM.md` — పిన్ చేయబడిన అప్స్ట్రీమ్ కమిట్ మరియు లైసెన్స్ అధీకరణ; `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` మరియు దాని పక్కన ఉన్న adapters; `src/shared/components/layouts/DashboardShell.tsx`,
+- `src/shared/components/index.tsx` మరియు దాని పక్కన ఉన్న అడాప్టర్లు; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`

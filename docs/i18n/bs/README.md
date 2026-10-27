@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Besplatni AI pristupnik
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikada ne prestajte programirati. Svaki AI alat → 375 pružalaca usluga — više od 150 besplatnih — putem jedne krajnje tačke. Claude Code, Codex, Cursor, Cline, Copilot i Antigravity povezuju se s BESPLATNIM modelima Claude / GPT / Gemini uz automatsko prebacivanje na rezervnu opciju. Kombinovana RTK + Caveman kompresija štedi 15–95% tokena (prosječno ~89%) — nikada ne dosegnite ograničenja. 375 AI pružalaca usluga · više od 150 besplatnih nivoa · ~1,62 milijarde besplatnih tokena mjesečno · 20 strategija usmjeravanja · početak uz trošak od $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nikada ne prestajte programirati. Svaki AI alat → 376 pružalaca usluga — više od 150 besplatnih — putem jedne krajnje tačke. Claude Code, Codex, Cursor, Cline, Copilot i Antigravity povezuju se s BESPLATNIM modelima Claude / GPT / Gemini uz automatsko prebacivanje na rezervnu opciju. Kombinovana RTK + Caveman kompresija štedi 15–95% tokena (prosječno ~89%) — nikada ne dosegnite ograničenja. 376 AI pružalaca usluga · više od 150 besplatnih nivoa · ~1,62 milijarde besplatnih tokena mjesečno · 20 strategija usmjeravanja · početak uz trošak od $0."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Koristite vlastite račune kod pružalaca usluga.** Ovo je procijenjeni zbir zasebno dostupnih besplatnih nivoa trećih strana, a ne dodjela tokena od OmniRoutea. Registrujte se, pribavite pristupne podatke gdje su potrebni i povežite pružaoce usluga koje možete koristiti; svaki pružalac kontroliše svoja ograničenja, dostupnost i uslove.
 >
-> Ručno objedinjavanje besplatnih nivoa je mukotrpno — desetine SDK-ova, desetine ograničenja brzine i nikakva predstava o tome koliko zapravo imate. OmniRoute katalogizira **471 stavku besplatnih nivoa raspoređenu u 34 ključa periodičnih skupova** i izračunava istaknuti broj tokena na osnovu **17 skupova s objavljenim pozitivnim mjesečnim budžetom i pet Groq ograničenja po modelu**, uz uklanjanje duplikata prema zajedničkom skupu. Kvote koje postaju dostupne tek nakon regionalne provjere identiteta (trenutno: ModelScope) prikazane su zasebno, +~6M iza regionalne provjere identiteta, i nikada se ne uračunavaju u istaknuti broj. Rezultat ostaje vidljiv na kontrolnoj ploči (`/dashboard/free-tiers`).
+> Ručno objedinjavanje besplatnih nivoa je mukotrpno — desetine SDK-ova, desetine ograničenja brzine i nikakva predstava o tome koliko zapravo imate. OmniRoute katalogizira **484 stavku besplatnih nivoa raspoređenu u 34 ključa periodičnih skupova** i izračunava istaknuti broj tokena na osnovu **17 skupova s objavljenim pozitivnim mjesečnim budžetom i pet Groq ograničenja po modelu**, uz uklanjanje duplikata prema zajedničkom skupu. Kvote koje postaju dostupne tek nakon regionalne provjere identiteta (trenutno: ModelScope) prikazane su zasebno, +~6M iza regionalne provjere identiteta, i nikada se ne uračunavaju u istaknuti broj. Rezultat ostaje vidljiv na kontrolnoj ploči (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kartica budžeta besplatnih nivoa OmniRoutea: stabilnih ~1,62 mlrd. besplatnih tokena mjesečno, do ~2,22 mlrd. u prvom mjesecu uz kredite za registraciju, iz 34 dokumentovana ključa periodičnih skupova koji obuhvataju 471 katalogiziranu stavku besplatnih nivoa iza jedne krajnje tačke. Transparentan izračun s uklanjanjem duplikata skupova — svaki zajednički skup broji se jednom, uključujući 17 periodičnih skupova s objavljenim pozitivnim mjesečnim budžetom tokena i pet Groq ograničenja po modelu; 12 pružalaca označeno je za izbjegavanje u katalogu rizika uslova korištenja, tako da vi odlučujete. Traka budžeta uključuje Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (pet ograničenja po modelu) i manje skupove, uz kredite za registraciju tokom prvog mjeseca i trajno besplatne pružaoce bez ograničenja tokena prikazane zasebno, tako da nikada ne povećavaju istaknuti broj. Trenutno iskorišteno/preostalo na /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Kartica budžeta besplatnih nivoa OmniRoutea: stabilnih ~1,62 mlrd. besplatnih tokena mjesečno, do ~2,22 mlrd. u prvom mjesecu uz kredite za registraciju, iz 34 dokumentovana ključa periodičnih skupova koji obuhvataju 484 katalogiziranu stavku besplatnih nivoa iza jedne krajnje tačke. Transparentan izračun s uklanjanjem duplikata skupova — svaki zajednički skup broji se jednom, uključujući 17 periodičnih skupova s objavljenim pozitivnim mjesečnim budžetom tokena i pet Groq ograničenja po modelu; 12 pružalaca označeno je za izbjegavanje u katalogu rizika uslova korištenja, tako da vi odlučujete. Traka budžeta uključuje Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (pet ograničenja po modelu) i manje skupove, uz kredite za registraciju tokom prvog mjeseca i trajno besplatne pružaoce bez ograničenja tokena prikazane zasebno, tako da nikada ne povećavaju istaknuti broj. Trenutno iskorišteno/preostalo na /dashboard/free-tiers."/>
 
 > Animirani sažetak aktivne stranice `/dashboard/free-tiers`. Potpuna metodologija (uklanjanje duplikata skupova, nivoi kredita, uslovi pružalaca): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Funkcije</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombinacije</a></td>
-    <td align="center"><a href="#-375-ai-providers--153-catalog-marked-free">🌐 Pružaoci usluga</a></td>
+    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Pružaoci usluga</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI i MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — jedna krajnja tačka i 375 pružatelja usluga. Automatski rezervni prelazak održava usmjeravanje sve dok je dostupno drugo ispravno odredište. Šest stubova: otporan rezervni prelazak između 375 pružatelja usluga · do 95% uštede tokena za podržana radna opterećenja · početak bez troškova uz više od 150 besplatnih nivoa i 51 trajno besplatnog pružatelja usluga s periodičnim pogodnostima ili bez ključa · 37 CLI/agentskih integracija putem jedne konfiguracije · kompatibilnost s OpenAI, Claude, Gemini i Responses API na /v1 · produkcijske kontrole, uključujući automatske prekidače, TLS prikrivanje, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i više od 56.000 deklaracija statičkih testova u više od 7.800 praćenih testnih datoteka."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Obećanje — jedna krajnja tačka i 376 pružatelja usluga. Automatski rezervni prelazak održava usmjeravanje sve dok je dostupno drugo ispravno odredište. Šest stubova: otporan rezervni prelazak između 376 pružatelja usluga · do 95% uštede tokena za podržana radna opterećenja · početak bez troškova uz više od 150 besplatnih nivoa i 52 trajno besplatnog pružatelja usluga s periodičnim pogodnostima ili bez ključa · 37 CLI/agentskih integracija putem jedne konfiguracije · kompatibilnost s OpenAI, Claude, Gemini i Responses API na /v1 · produkcijske kontrole, uključujući automatske prekidače, TLS prikrivanje, MCP sa 110 alata, A2A, memoriju, zaštitne mehanizme, evaluacije i više od 56.000 deklaracija statičkih testova u više od 7.800 praćenih testnih datoteka."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Svih **20** strategija — kombinirajte ih po želji za svaki korak kombinacije:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Po čemu se OmniRoute izdvaja — vremenski označen pregled funkcionalnosti u poređenju sa 9router, OpenRouter, CLIProxyAPI i LiteLLM kroz 13 mogućnosti. OmniRoute: 375 pružalaca usluga, više od 150 ugrađenih besplatnih paketa, 20 strategija usmjeravanja, kompresija tokena pomoću 12 mehanizama, ugrađeni MCP server sa 110 alata, A2A protokol za agente, trajna memorija, zaštitne mjere, agenti u oblaku, prikrivanje TLS otiska, Desktop/Termux/PWA i korisničko sučelje na 67 lokaliziranih jezika. OmniRoute je licenciran pod MIT licencom i može se samostalno hostovati. Mogućnosti i brojke konkurenata mogu se promijeniti; pogledajte povezanu metodologiju."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Po čemu se OmniRoute izdvaja — vremenski označen pregled funkcionalnosti u poređenju sa 9router, OpenRouter, CLIProxyAPI i LiteLLM kroz 13 mogućnosti. OmniRoute: 376 pružalaca usluga, više od 150 ugrađenih besplatnih paketa, 20 strategija usmjeravanja, kompresija tokena pomoću 12 mehanizama, ugrađeni MCP server sa 110 alata, A2A protokol za agente, trajna memorija, zaštitne mjere, agenti u oblaku, prikrivanje TLS otiska, Desktop/Termux/PWA i korisničko sučelje na 67 lokaliziranih jezika. OmniRoute je licenciran pod MIT licencom i može se samostalno hostovati. Mogućnosti i brojke konkurenata mogu se promijeniti; pogledajte povezanu metodologiju."/>
 
 <sub>📊 Potpuna metodologija i detalji po funkcionalnostima u poređenju sa 9router, OpenRouter, CLIProxyAPI i LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -611,7 +611,7 @@ trenutnom katalogu na **[radar.omniroute.online/planos](https://radar.omniroute.
 - **🖼️ Novi endpointi** — `/v1/ocr` (Mistral OCR) i `/v1/audio/translations` (Whisper-style) zaokružuju medijsku površinu. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 Generisanje slika / videa / zvuka** — jedan API za medije: xAI Grok Imagine i Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind, i provajderi govora kao što je ElevenLabs. → [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 Implementacija i operacije** — reverse-proxy `basePath`, automatska detekcija jezika preglednika, praćenje uređaja po ključu, root-less MITM trust, zh-TW lokalizacija. → [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 Više provajdera i agenata** — cloud agenti (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s browser + OAuth prijavom, Ollama kao prvoklasna kartica, Claude Opus 5 i Sonnet 5, Kimi službeno partnerstvo (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… i osvježen **katalog od 375 provajdera**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Više provajdera i agenata** — cloud agenti (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) s browser + OAuth prijavom, Ollama kao prvoklasna kartica, Claude Opus 5 i Sonnet 5, Kimi službeno partnerstvo (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… i osvježen **katalog od 376 provajdera**. → [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparentnost rutiranja** — svaki odgovor nosi `X-OmniRoute-Decision` zaglavlje koje navodi strategiju/provajdera/latenciju koji su ga poslužili, nova `cache-optimized` combo strategija + Auto-Combo `cacheAffinity` faktor vraćaju ponovljene zahtjeve nazad na konekciju koja drži keširani prefiks, a read-only endpoint `/v1/auto-combo/{channel}/candidates` izlaže trenutni bazen kandidata `auto/*` kanala. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Lokalne performanse i infrastruktura** — lokalni Redis jednim klikom, alati za postavljanje Cloudflare Workers / Deno Deploy relay-a, Bifrost i Mux kao nadzirane ugrađene usluge. → [Ugrađene usluge](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Također u paketu** — okvir za plugine + marketplace, Omni/Agent/GitHub okviri za vještine, integracija Obsidian vault-a (22 MCP alata), OpenAI-kompatibilni Batch & Files API-ji, semantički keš odgovora, gamifikacija s rang listama, otkrivanje ACP agenata (15 ugrađenih agenata), zakazani izvoz logova u BigQuery, `auto/chaos` paralelno razgranavanje na više modela, most za Telegram bot, menadžer verzija unutar aplikacije i LMArena-ELO rangiranja besplatnih provajdera. → [Dokumentacija](docs/README.md)
@@ -695,11 +695,11 @@ historije vaše ljuske. → [CLI integracije](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🌐 375 AI pružalaca usluga — 153 označena u katalogu kao besplatna
+## 🌐 376 AI pružalaca usluga — 153 označena u katalogu kao besplatna
 
 </div>
 
-> **375 registriranih pružalaca usluga** u kanonskim kolekcijama za chat, medije, pretraživanje, lokalne modele, agente u oblaku i sistem, uključujući **153 s metapodacima za otkrivanje `hasFree: true`**. Registar chat modela obuhvata **239 pružalaca usluga / 3.059 različitih parova pružalac-model / 1.475 sirovih ID-ova modela**; zasebni katalog besplatnih kvota sadrži **471 red po modelu**, **34 periodično obnavljana skupa** i **51 pružaoca usluga s trajno besplatnim pristupom koji se periodično obnavlja ili ne zahtijeva ključ**. Ovo su namjerno različiti nazivnici; definicije i izračuni s uklonjenim duplikatima skupova nalaze se u dokumentima [Referenca pružalaca usluga](docs/reference/PROVIDER_REFERENCE.md) i [Besplatni paketi](docs/reference/FREE_TIERS.md).
+> **376 registriranih pružalaca usluga** u kanonskim kolekcijama za chat, medije, pretraživanje, lokalne modele, agente u oblaku i sistem, uključujući **153 s metapodacima za otkrivanje `hasFree: true`**. Registar chat modela obuhvata **239 pružalaca usluga / 3.059 različitih parova pružalac-model / 1.475 sirovih ID-ova modela**; zasebni katalog besplatnih kvota sadrži **471 red po modelu**, **34 periodično obnavljana skupa** i **52 pružaoca usluga s trajno besplatnim pristupom koji se periodično obnavlja ili ne zahtijeva ključ**. Ovo su namjerno različiti nazivnici; definicije i izračuni s uklonjenim duplikatima skupova nalaze se u dokumentima [Referenca pružalaca usluga](docs/reference/PROVIDER_REFERENCE.md) i [Besplatni paketi](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1312,7 +1312,7 @@ Kanonske metrike na dan 2026-10-18: **1.976 jedinstvenih videozapisa** · **20.2
   <tr><td nowrap><b>Okruženje</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Jezik</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kroz <code>src/</code> i <code>open-sse/</code> (nula <code>any</code> u jezgru od v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 domenskih modula, 209 migracija</td></tr>
+  <tr><td nowrap><b>Baza podataka</b></td><td>better-sqlite3 (SQLite, WAL journaling) + LowDB (JSON legacy) — 147 domenskih modula, 211 migracija</td></tr>
   <tr><td nowrap><b>Memorija</b></td><td>SQLite FTS5 full-text + int8-kvantizovani vektorski embeddings, tipizirano opadanje</td></tr>
   <tr><td nowrap><b>Šeme</b></td><td>Zod 4 — MCP validacija ulaza/izlaza alata + API ugovori</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1375,7 +1375,7 @@ Kanonske metrike na dan 2026-10-18: **1.976 jedinstvenih videozapisa** · **20.2
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Vodič za otpornost</a></b></td><td>Prekidači strujnog kruga, periodi hlađenja, red čekanja, sprečavanje stampeda zahtjeva, TLS lažiranje</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo mehanizam</a></b></td><td>Bodovanje na osnovu 16 faktora, paketi načina rada, samooporavak</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Vodič za proxy</a></b></td><td>Proxy sistem s 3 nivoa, 1proxy tržište, CRUD registra</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Besplatni nivoi</a></b></td><td>Objedinjeni direktorij: 34 dokumentovana ponavljajuća skupa / 471 katalogizirani unos besplatnog nivoa</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Besplatni nivoi</a></b></td><td>Objedinjeni direktorij: 34 dokumentovana ponavljajuća skupa / 484 katalogizirani unos besplatnog nivoa</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galerija funkcionalnosti</a></b></td><td>Vizuelni obilazak nadzorne ploče sa snimcima ekrana</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Dokumentacija baze koda</a></b></td><td>Pregled baze koda prilagođen početnicima</td></tr>
 </table>

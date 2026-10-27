@@ -1,3 +1,4 @@
+import { resolveStreamIndices } from "./streamIndices";
 import { createSseTextTransform, FieldCategory, classifyField } from "./sseTextTransform";
 import { sanitizePII, getPiiResponseMode } from "./piiSanitizer";
 
@@ -304,18 +305,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
     ) => {
       if (!obj || typeof obj !== "object") return;
 
-      let choiceIdx = currentChoiceIdx;
-      let toolIdx = currentToolIdx;
-
-      if (typeof obj.index === "number") {
-        if (obj.delta || obj.message || obj.finish_reason) {
-          choiceIdx = obj.index;
-        } else if (obj.function || obj.id || obj.type === "function") {
-          toolIdx = obj.index;
-        } else {
-          choiceIdx = obj.index;
-        }
-      }
+      const { choiceIdx, toolIdx } = resolveStreamIndices(obj, currentChoiceIdx, currentToolIdx);
 
       const compositeKey = `${choiceIdx}_${toolIdx}`;
       const isArray = Array.isArray(obj);
@@ -351,4 +341,61 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
   };
 
   return createSseTextTransform(processor, onFlush);
+}
+
+/**
+ * Per-request gate for the streaming PII transform. Same truth as the
+ * non-streaming post-call guardrail: `pii-masker` in the disabled list
+ * skips the transform so bytes pass through untouched.
+ */
+export interface PiiGate {
+  piiDisabledGuardrails: string[];
+}
+
+/**
+ * Decide whether the PII transform joins the chain. Pure: the list comes
+ * from the resolver, already normalized (`pii_masker` reads as
+ * `pii-masker`).
+ */
+export function isPiiTransformEnabled(gate: PiiGate): boolean {
+  return !gate.piiDisabledGuardrails.includes("pii-masker");
+}
+
+/**
+ * Resolve the per-request gate from injected readers.
+ * `resolveDisabledGuardrails` defaults to the production reader; tests
+ * inject fakes. Fail-open to the historical behavior on reader errors.
+ */
+export async function resolvePiiGate(args: {
+  resolveDisabledGuardrails?: (input: {
+    apiKeyInfo?: unknown;
+    body?: unknown;
+    headers?: unknown;
+  }) => string[];
+  apiKeyInfo?: unknown;
+  body?: unknown;
+  headers?: unknown;
+}): Promise<PiiGate> {
+  let disabled: string[] = [];
+  try {
+    if (args.resolveDisabledGuardrails) {
+      disabled =
+        args.resolveDisabledGuardrails({
+          apiKeyInfo: args.apiKeyInfo,
+          body: args.body,
+          headers: args.headers,
+        }) ?? [];
+    } else {
+      const { resolveDisabledGuardrails } = await import("./guardrails");
+      disabled =
+        resolveDisabledGuardrails({
+          apiKeyInfo: args.apiKeyInfo as Record<string, unknown> | null | undefined,
+          body: args.body,
+          headers: args.headers as Headers | Record<string, unknown> | null | undefined,
+        }) ?? [];
+    }
+  } catch {
+    disabled = [];
+  }
+  return { piiDisabledGuardrails: disabled };
 }

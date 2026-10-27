@@ -499,7 +499,7 @@ moduly pro jednotlivé poskytovatele (schémata nástrojů, adaptéry pro načí
 (sdílený pomocný modul identity) a `index.ts` (registr).
 
 > Poznámka: poskytovatelé, kteří zde nejsou uvedeni, jsou obsluhováni souborem `default.ts` pomocí obecného
-> exekutoru kompatibilního s OpenAI. Úplný katalog poskytovatelů (375 poskytovatelů) se nachází v
+> exekutoru kompatibilního s OpenAI. Úplný katalog poskytovatelů (376 poskytovatelů) se nachází v
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

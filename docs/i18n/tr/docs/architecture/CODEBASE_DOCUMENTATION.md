@@ -501,7 +501,7 @@ Yürütücüler şunları içerir:
 (paylaşılan kimlik yardımcısı) ve `index.ts` (kayıt defteri).
 
 > Not: burada listelenmeyen sağlayıcılara, genel OpenAI uyumlu yürütücü kullanılarak
-> `default.ts` tarafından hizmet verilir. Tam sağlayıcı kataloğu (375 sağlayıcı)
+> `default.ts` tarafından hizmet verilir. Tam sağlayıcı kataloğu (376 sağlayıcı)
 > `src/shared/constants/providers.ts` içinde bulunur.
 
 ### 4.3 `open-sse/translator/`

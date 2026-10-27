@@ -20,7 +20,7 @@ Kapag ang isang IDE agent (hal., GitHub Copilot, Cursor, Claude Code) ay gumagaw
 
 Ibig sabihin nito, maaari mong:
 
-- **I-reroute ang anumang agent sa anumang provider**: Ang Copilot ay nakikipag-usap sa OpenAI? I-redirect ito sa Anthropic Claude, Gemini, o alinman sa 375 provider ng OmniRoute.
+- **I-reroute ang anumang agent sa anumang provider**: Ang Copilot ay nakikipag-usap sa OpenAI? I-redirect ito sa Anthropic Claude, Gemini, o alinman sa 376 provider ng OmniRoute.
 - **Mag-apply ng model mappings**: `gemini-3-flash` → `claude-sonnet-4.7` nang transparent sa antas ng handler.
 - **Obserbahan ang lahat ng traffic ng agent**: ang bawat naharang na request ay nai-publish sa [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
 - **I-apply ang resilience ng OmniRoute**: gumagana rin ang combo routing, circuit breakers, fallbacks, at cost tracking para sa traffic ng IDE agent.

@@ -33,6 +33,7 @@ import {
 import { CODEX_NATIVE_UNPREFIXED_MODELS } from "@omniroute/open-sse/services/model";
 import { isModelSelectable } from "@omniroute/open-sse/services/modelLifecycle";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo";
+import { expandProviderWildcardsInCollection } from "@omniroute/open-sse/services/combo/providerWildcard";
 import {
   prepareBuiltinAutoComboInputs,
   isPaidTierAutoId,
@@ -470,6 +471,8 @@ async function buildUnifiedModelsResponseCore(
     await yieldCatalogBuildTurn();
     try {
       combos = await getCombos();
+      // Match inference before nested resolution and metadata lookup; keep saved wildcards intact.
+      combos = await expandProviderWildcardsInCollection(combos);
     } catch (e) {
       console.log("Could not fetch combos");
     }

@@ -92,29 +92,39 @@
 
 ## 2. നിയമങ്ങൾ
 
-1. ലിറ്ററലുകൾക്ക് പകരം എപ്പോഴും ടോക്കണുകൾ ഉപയോഗിക്കുക. ഉദ്ദേശ്യപൂർവം നിലനിർത്തിയിട്ടുള്ള ഒഴിവുകൾ: എപ്പോഴും ഡാർക്ക് ആയ കൺസോൾ ടെർമിനൽ, `STATUS_HEX` (`src/shared/constants/statusColors.ts`) വഴിയുള്ള ReactFlow SVG
-   സ്ട്രോക്കുകൾ, കൂടാതെ `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`),
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`) എന്നീ വർഗ്ഗീകരണ പാലറ്റുകൾ.
-2. `packages/ui-kit/src` ഒരിക്കലും കൈകൊണ്ട് പാച്ച് ചെയ്യരുത്: `scripts/dev/sync-ui-kit.sh <commit>` ഉപയോഗിച്ച് സമന്വയിപ്പിക്കുക; പിൻ ചെയ്ത അപ്സ്ട്രീം കമ്മിറ്റിൽനിന്ന് ഏതെങ്കിലും ബൈറ്റ്
-   വ്യത്യസ്തമാണെങ്കിൽ പ്രീ-കമ്മിറ്റ് ഗേറ്റ് `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) പരാജയപ്പെടും (അപ്സ്ട്രീം ക്ലോൺ,
-   `UI_KIT_CLONE` അല്ലെങ്കിൽ `_references/cheaper-inference-ui-kit`, ലഭ്യമല്ലെങ്കിൽ മുന്നറിയിപ്പോടെ ഇത് ഒഴിവാക്കപ്പെടും). കിറ്റിൽ എന്തെങ്കിലും ഇല്ലെങ്കിൽ,
-   അഡാപ്റ്ററിലോ സ്ക്രീനിലോ അതിനുള്ള പരിഹാരമാർഗം നടപ്പിലാക്കി അത് അപ്സ്ട്രീമിനോട് ആവശ്യപ്പെടുക.
-3. കിറ്റിലെ ടെക്സ്റ്റിന്റെ ഡിഫോൾട്ടുകൾ ഇംഗ്ലീഷിലാണ് (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ഒരു കിറ്റ് ഘടകം ടെക്സ്റ്റ് റെൻഡർ ചെയ്യുമ്പോഴെല്ലാം
-   `useTranslations(...)`-ൽനിന്നുള്ള വിവർത്തനം ചെയ്ത സ്ട്രിങ്ങുകൾ കൈമാറുക.
-4. കിറ്റ് ഘടക ക്ലാസുകളേക്കാൾ Tailwind യൂട്ടിലിറ്റികൾക്കാണ് മുൻഗണന (കിറ്റ്
-   `@layer theme, base, components, utilities` പ്രഖ്യാപിക്കുന്നു, അതിന്റെ നിയമങ്ങൾ `components`-ലാണ്) — സ്പേസിങ്ങിനും
-   ലേഔട്ടിനും യൂട്ടിലിറ്റികൾ ഉപയോഗിക്കുക; കിറ്റ് ഘടകങ്ങളുടെ നിറം മാറ്റാൻ അവ ഉപയോഗിക്കരുത്.
-5. തലക്കെട്ടുകൾ: പേജ്, വിഭാഗ തലക്കെട്ടുകൾക്കായി `.ci-heading` (Inter, ട്രാക്കിങ് ഇല്ലാതെ); പിശക് പേജിലെ സ്റ്റാറ്റസ് കോഡ് പോലുള്ള വലുതും വിരളവുമായ ഡിസ്പ്ലേ ടെക്സ്റ്റിന് മാത്രം `.ci-dashboard-display`
+1. ടോക്കനുകൾ മാത്രം, ലിറ്ററലുകൾ ഒരിക്കലുമല്ല. ബോധപൂർവ്വം നിലനിർത്തിയ അപവാദങ്ങൾ: എപ്പോഴും ഇരുണ്ട കൺസോൾ
+   ടെർമിനലും `STATUS_HEX`-ഉം (`src/shared/constants/statusColors.ts`) — ലിറ്ററൽ hex ആവശ്യമുള്ള
+   വിളിക്കുന്നവർക്കായി കിറ്റ് സ്റ്റാറ്റസ് പാലറ്റിന്റെ resolved-hex പ്രതിബിംബം. വിഭാഗീയ പാലറ്റുകൾ ഇനി
+   അപവാദമല്ല: അവ കിറ്റിന്റെ അഞ്ച് ചാർട്ട് ടോക്കനുകളിൽ (`--color-chart-1..5`) ആധാരപ്പെട്ട്
+   `src/shared/utils/categoricalPalette.ts` വഴിയും, റൂട്ടിംഗ് തന്ത്രങ്ങൾക്കായി
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` വഴിയും പ്രവർത്തിക്കുന്നു; ReactFlow
+   എഡ്ജുകളും ഓർക്കസ്ട്രേഷൻ ക്യാൻവാസും തീം-അവയർ `--orch-status-*` വേരിയബിളുകൾ വായിക്കുന്നു
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. `packages/ui-kit/src` കൈകൊണ്ട് ഒരിക്കലും പാച്ച് ചെയ്യരുത്: `scripts/dev/sync-ui-kit.sh <commit>`
+   ഉപയോഗിച്ച് സിങ്ക് ചെയ്യുക; pinned അപ്പ്സ്ട്രീം കമ്മിറ്റിൽ നിന്ന് വ്യത്യസ്തമായ ഏത് ബൈറ്റിലും
+   pre-commit ഗേറ്റായ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) പരാജയപ്പെടും (അപ്പ്സ്ട്രീം
+   ക്ലോൺ — `UI_KIT_CLONE` അല്ലെങ്കിൽ `_references/cheaper-inference-ui-kit` — ഇല്ലാത്തപ്പോൾ അത്
+   മുന്നറിയിപ്പോടെ ഒഴിവാക്കും). കിറ്റിന് എന്തെങ്കിലും കുറവുണ്ടെങ്കിൽ, അഡാപ്റ്ററിലോ സ്ക്രീനിലോ അതിനെ
+   താൽക്കാലികമായി പരിഹരിച്ച് അപ്പ്സ്ട്രീമിനോട് അത് ആവശ്യപ്പെടുക.
+3. കിറ്റ് ടെക്സ്റ്റ് ഡിഫോൾട്ടുകൾ ഇംഗ്ലീഷാണ് (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   ഒരു കിറ്റ് കമ്പോണന്റ് ടെക്സ്റ്റ് റെൻഡർ ചെയ്യുമ്പോഴെല്ലാം `useTranslations(...)`-ൽ നിന്ന് വിവർത്തനം
+   ചെയ്ത സ്ട്രിംഗുകൾ നൽകുക.
+4. Tailwind യൂട്ടിലിറ്റികൾ കിറ്റ് കമ്പോണന്റ് ക്ലാസുകളെ മറികടക്കും (കിറ്റ്
+   `@layer theme, base, components, utilities` പ്രഖ്യാപിക്കുന്നു, അതിന്റെ റൂളുകൾ `components`-ൽ ആണ്) —
+   അകലത്തിനും ലേഔട്ടിനും യൂട്ടിലിറ്റികൾ ഉപയോഗിക്കുക, കിറ്റ് കമ്പോണന്റുകൾക്ക് വീണ്ടും നിറം നൽകാൻ അല്ല.
+5. തലക്കെട്ടുകൾ: പേജ്, സെക്ഷൻ ശീർഷകങ്ങൾക്ക് `.ci-heading` (Inter, ട്രാക്കിംഗ് ഇല്ലാത്തത്); എറർ-പേജ്
+   സ്റ്റാറ്റസ് കോഡ് പോലുള്ള വലിയ, വിരളമായ ഡിസ്പ്ലേ ടെക്സ്റ്റിന് മാത്രം `.ci-dashboard-display`
    (Instrument Serif).
-6. `tests/unit/dashboard-kit-sweep.test.ts` കിറ്റ് സ്വീകരണം ഉറപ്പാക്കുന്നു:
-   `src/app` അല്ലെങ്കിൽ `src/shared/components` എന്നതിനുകീഴിൽ Material ലിഗേച്ചർ സ്പാൻ പാടില്ല; ഡാഷ്ബോർഡ് ട്രീയിൽ (`src/app/(dashboard)`-ലും
-   `src/shared/components`-ലും) അസംസ്കൃത `<select>`, `<textarea>`, `<table>` എന്നിവയും പട്ടികപ്പെടുത്തിയ ഒഴിവുകൾക്ക് പുറത്തുള്ള കൈകൊണ്ട് നിർമ്മിച്ച
-   `role="dialog"`-ഉം പാടില്ല (`Select` അഡാപ്റ്ററിന്റെ നേറ്റീവ് ബ്രാഞ്ച്,
-   `RequestLoggerDetail` എന്നിവയാണ് ഒഴിവുകൾ); അവിടെയുള്ള ഓരോ അസംസ്കൃത `<button>` അല്ലെങ്കിൽ `<input>`-നും അതിന് പരമാവധി 3 വരികൾ മുകളിൽ അവസാനിക്കുന്ന,
-   കാരണം ഉൾപ്പെടെയുള്ള `kit-exception:` അടങ്ങിയ ഒരു കമന്റ് ആവശ്യമാണ്; പാലറ്റ് ഹ്യൂകളും `dark:` വേരിയന്റുകളും
-   ടെസ്റ്റ് പട്ടികപ്പെടുത്തിയ ഫയലുകളിൽ മാത്രമേ പാടുള്ളൂ.
-7. PR-ന് മുമ്പ് രണ്ട് തീമുകളും 390 px വ്യൂപോർട്ടും പരിശോധിക്കുക (സ്ക്രീൻഷോട്ടുകൾ); `tests/e2e/a11y.spec.ts`
-   axe പ്രവർത്തിപ്പിക്കുന്നു.
+6. `tests/unit/dashboard-kit-sweep.test.ts` കിറ്റ് അഡോപ്ഷനെ സംരക്ഷിക്കുന്നു: `src/app`-ലോ
+   `src/shared/components`-ലോ Material ligature span പാടില്ല; ഡാഷ്ബോർഡ് ട്രീയിൽ (`src/app/(dashboard)`-
+   ഉം `src/shared/components`-ഉം) raw `<select>`, `<textarea>` അല്ലെങ്കിൽ `<table>` പാടില്ല,
+   പട്ടികപ്പെടുത്തിയ അപവാദങ്ങൾക്ക് (`Select` അഡാപ്റ്ററിന്റെ നേറ്റീവ് ബ്രാഞ്ച്, `RequestLoggerDetail`)
+   പുറത്ത് കൈകൊണ്ട് നിർമ്മിച്ച `role="dialog"`-ഉം പാടില്ല; അവിടെയുള്ള ഓരോ raw `<button>` അല്ലെങ്കിൽ
+   `<input>`-നും `kit-exception:` (കാരണത്തോടെ) അടങ്ങിയ ഒരു കമന്റ് അതിനു മുകളിൽ പരമാവധി 3 വരികൾക്കുള്ളിൽ
+   അവസാനിക്കുന്നതായിരിക്കണം; പാലറ്റ് ഹ്യൂകളും `dark:` വേരിയന്റുകളും ടെസ്റ്റ് പട്ടികപ്പെടുത്തുന്ന
+   ഫയലുകളിൽ മാത്രം.
+7. PR-ന് മുമ്പ് രണ്ട് തീമുകളും 390 px വ്യൂപോർട്ടും പരിശോധിക്കുക (സ്ക്രീൻഷോട്ടുകൾ);
+   `tests/e2e/a11y.spec.ts` axe പ്രവർത്തിപ്പിക്കുന്നു.
 
 ## 3. ഒരു സ്ക്രീൻ ചേർക്കൽ
 
@@ -153,10 +163,10 @@ upstream changelog സഹിതം PR തുറക്കുക.
 
 ## 6. റഫറൻസ് സൂചിക
 
-- `src/app/globals.css` — token bridge, `.dark` overrides, OmniRoute `@layer components` extensions
-- `packages/ui-kit/UPSTREAM.md` — pinned upstream commit-ഉം license authorization-ഉം; `packages/ui-kit/PATCHES.md`
+- `src/app/globals.css` — ടോക്കൺ ബ്രിഡ്ജ്, `.dark` ഓവർറൈഡുകൾ, OmniRoute `@layer components` വിപുലീകരണങ്ങൾ
+- `packages/ui-kit/UPSTREAM.md` — പിൻ ചെയ്ത അപ്പ്സ്ട്രീം കമ്മിറ്റും ലൈസൻസ് അധികാരവും; `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx`-ഉം അതിനടുത്തുള്ള adapters-ഉം; `src/shared/components/layouts/DashboardShell.tsx`,
+- `src/shared/components/index.tsx` ഉം അതിനടുത്തുള്ള അഡാപ്റ്ററുകളും; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`

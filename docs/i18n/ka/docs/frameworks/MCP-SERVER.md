@@ -72,6 +72,16 @@ curl -i \
 
 გასაღები `manage` მოქმედების სფეროს გარეშე (ან Bearer-ის არარსებობა) აბრუნებს `403 LOCAL_ONLY`-ს. მომიჯნავე პრეფიქსისთვის `/api/cli-tools/runtime/*` გამონაკლისის დაშვება განზრახ შეუძლებელია — იხილეთ [Route Guard-ის დონეები — manage-მოქმედების სფეროს გამონაკლისი](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Origin-ის შემოწმება
+
+ავთენტიფიკაციის შემდეგ `/api/mcp/*`-ზე ყოველ მოთხოვნას — ტრანსპორტებსა და მართვის მარშრუტებს, როგორიცაა `status`, `tools`, `audit`, `restart` — `Origin` სათაური უმოწმდება, მიუხედავად გამომძახებლისა (API გასაღები, CLI ტოკენი, dashboard-ის სესია ან ანონიმური loopback გამორთული შესვლით). ეს არის DNS rebinding-ისგან დაცვა, რომელსაც MCP Streamable HTTP სპეციფიკაცია მოითხოვს.
+
+- **`Origin` სათაური არ არის** → დაშვებულია. OmniRoute CLI, SDK და IDE კლიენტები მას არ აგზავნიან.
+- **დაშვებული `Origin`** → `localhost` / `127.0.0.1` / `[::1]` ნებისმიერ პორტზე, ან თავად OmniRoute-ის საჯარო origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, სანდო საპირისპირო პროქსის მიერ გადმოგზავნილი origin (`OMNIROUTE_TRUST_PROXY`, მხოლოდ მაშინ, როცა base URL არ არის მითითებული), ან პირდაპირ მიმართული loopback/LAN IP ჰოსტი. მხოლოდ `Host` სათაური origin-ს არასოდეს ხდის სანდოს.
+- **ნებისმიერი სხვა `Origin`, მათ შორის `null`** → `403` JSON-RPC შეცდომის სხეულით: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. dashboard-ის სესია ვალიდური CSRF ტოკენით კვლავ მიიღება, ისევე როგორც dashboard-ის სხვა ჩაწერებისას.
+
+საპირისპირო პროქსის უკან მომსახურე ბრაუზერის MCP კლიენტს სჭირდება `OMNIROUTE_PUBLIC_BASE_URL`; სხვა origin-ებისთვის დაშვებული სია არ არსებობს. CORS წინასწარი მოთხოვნა (`OPTIONS`) Origin-ზე არ მოწმდება; მომდევნო მოთხოვნა — მოწმდება.
+
 ## IDE-ის კონფიგურაცია
 
 Claude Desktop-ის, Cursor-ის, Cline-ისა და თავსებადი MCP კლიენტების გამართვისთვის იხილეთ [MCP კლიენტის კონფიგურაცია](../guides/SETUP_GUIDE.md#mcp-client-configuration).

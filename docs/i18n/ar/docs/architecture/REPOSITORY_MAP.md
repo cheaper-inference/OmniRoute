@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | واجهة API لمكوّنات لوحة المعلومات: محوّلات فوق `packages/ui-kit` — راجع `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: أسماء الأيقونات التي تستخدمها الشاشات ← مكوّنات Lucide (`<Icon>`)                                |
-| `constants/providers.ts`         | **375 مزوّدًا** مع التحقق باستخدام Zod (مصدر الحقيقة)                                                        |
+| `constants/providers.ts`         | **376 مزوّدًا** مع التحقق باستخدام Zod (مصدر الحقيقة)                                                        |
 | `constants/cliTools.ts`          | سجل أدوات CLI الخارجية                                                                                       |
 | `constants/routingStrategies.ts` | **20 استراتيجية توجيه** مع الأولويات                                                                         |
 | `constants/publicApiRoutes.ts`   | المسارات التي تتطلب مصادقة Bearer (بدلًا من مصادقة الإدارة)                                                  |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | عمليات تكامل أدوات CLI الخارجية + أداة OmniRoute CLI الداخلية                               |
 | `I18N.md`                   | بنية i18n، وإضافة لغة، و67 إعداداً محلياً                                                   |
 | `UNINSTALL.md`              | خطوات إلغاء التثبيت النظيف                                                                  |
-| `PROVIDER_REFERENCE.md`     | كتالوج **مولّد تلقائياً** يضم 375 مزوّداً (إعادة التوليد: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | كتالوج **مولّد تلقائياً** يضم 376 مزوّداً (إعادة التوليد: `npm run gen:provider-reference`) |
 
 ### استعراضات متعمقة للأنظمة الفرعية
 

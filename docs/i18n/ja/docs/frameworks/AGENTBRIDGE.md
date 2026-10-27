@@ -20,7 +20,7 @@ IDE エージェント(GitHub Copilot、Cursor、Claude Code など)が API コ�
 
 これにより、次のことが可能になります。
 
-- **任意のエージェントを任意のプロバイダーへ振り替え**: Copilot が OpenAI と通信している? Anthropic Claude、Gemini、あるいは OmniRoute の 375 のプロバイダーのいずれかにリダイレクトできます。
+- **任意のエージェントを任意のプロバイダーへ振り替え**: Copilot が OpenAI と通信している? Anthropic Claude、Gemini、あるいは OmniRoute の 376 のプロバイダーのいずれかにリダイレクトできます。
 - **モデルマッピングの適用**: `gemini-3-flash` → `claude-sonnet-4.7` をハンドラーレベルで透過的に変換します。
 - **すべてのエージェントトラフィックを可視化**: インターセプトされたすべてのリクエストは [Traffic Inspector](./TRAFFIC_INSPECTOR.md) に公開されます。
 - **OmniRoute のレジリエンスを適用**: コンボルーティング、サーキットブレーカー、フォールバック、コスト追跡が IDE エージェントのトラフィックにもそのまま機能します。
