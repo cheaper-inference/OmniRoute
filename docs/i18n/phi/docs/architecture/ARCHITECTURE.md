@@ -8,79 +8,79 @@
 
 _Huling na-update: 2026-06-28_
 
-## Ehekutibong Buod
+## Buod para sa mga Ehekutibo
 
 Ang OmniRoute ay isang lokal na AI routing gateway at dashboard na binuo gamit ang Next.js.
-Nagbibigay ito ng iisang endpoint na compatible sa OpenAI (`/v1/*`) at nagruruta ng trapiko sa maraming upstream provider na may translation, fallback, token refresh, at pagsubaybay sa paggamit.
+Nagbibigay ito ng iisang endpoint na compatible sa OpenAI (`/v1/*`) at nagruruta ng trapiko sa maraming upstream provider gamit ang translation, fallback, pag-refresh ng token, at pagsubaybay sa paggamit.
 
 Mga pangunahing kakayahan:
 
-- API surface na compatible sa OpenAI para sa CLI/mga tool (375 provider, 156 executor module)
+- API surface na compatible sa OpenAI para sa mga CLI/tool (375 provider, 156 executor module)
 - Translation ng request/response sa iba't ibang format ng provider
-- Model combo fallback (sunod-sunod na paggamit ng maraming modelo)
-- Mga structured combo step (`provider + model + connection`) na may runtime ordering ayon sa `compositeTiers`
-- Fallback sa antas ng account (maraming account sa bawat provider)
-- Quota preflight at quota-aware na pagpili ng P2C account sa pangunahing chat path
+- Fallback ng kumbinasyon ng mga modelo (sequence ng maraming modelo)
+- Mga structured na hakbang ng kumbinasyon (`provider + model + connection`) na may runtime ordering ayon sa `compositeTiers`
+- Fallback sa antas ng account (maraming account bawat provider)
+- Paunang pagsusuri ng quota at pagpili ng P2C account na isinasaalang-alang ang quota sa pangunahing chat path
 - Pamamahala ng koneksyon sa provider gamit ang OAuth + API key (27 OAuth provider module)
 - Pagbuo ng embedding sa pamamagitan ng `/v1/embeddings` (18 provider)
 - Pagbuo ng larawan sa pamamagitan ng `/v1/images/generations` (10+ provider, 20+ modelo)
-- Transkripsyon ng audio sa pamamagitan ng `/v1/audio/transcriptions` (18 provider)
+- Transkripsiyon ng audio sa pamamagitan ng `/v1/audio/transcriptions` (18 provider)
 - Text-to-speech sa pamamagitan ng `/v1/audio/speech` (24 built-in na provider)
 - Pagbuo ng video sa pamamagitan ng `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Pagbuo ng musika sa pamamagitan ng `/v1/music/generations` (ComfyUI)
 - Paghahanap sa web sa pamamagitan ng `/v1/search` (20 provider)
-- Moderation sa pamamagitan ng `/v1/moderations`
+- Mga moderation sa pamamagitan ng `/v1/moderations`
 - Muling pagraranggo sa pamamagitan ng `/v1/rerank`
-- Pag-parse ng think tag (``) para sa mga reasoning model
-- Sanitization ng response para sa mahigpit na compatibility sa OpenAI SDK
-- Normalization ng role (developer→system, system→user) para sa compatibility sa iba't ibang provider
+- Pag-parse ng think tag (`<think>...</think>`) para sa mga reasoning model
+- Paglilinis ng response para sa mahigpit na compatibility sa OpenAI SDK
+- Normalisasyon ng role (developer→system, system→user) para sa compatibility sa iba't ibang provider
 - Conversion ng structured output (json_schema → Gemini responseSchema)
-- Lokal na persistence para sa mga provider, key, alias, combo, setting, at pricing (122 DB module)
+- Lokal na persistence para sa mga provider, key, alias, kumbinasyon, setting, at presyo (122 DB module)
 - Pagsubaybay sa paggamit/gastos at pag-log ng request
-- Opsyonal na cloud sync para sa pag-sync ng estado sa maraming device
-- IP allowlist/blocklist para sa kontrol ng access sa API
+- Opsyonal na cloud sync para sa pag-sync ng state sa maraming device
+- Allowlist/blocklist ng IP para sa pagkontrol ng access sa API
 - Pamamahala ng thinking budget (passthrough/auto/custom/adaptive)
-- Pag-inject ng global system prompt
-- Pagsubaybay sa session at fingerprinting
-- Pinahusay na rate limiting sa bawat account gamit ang mga profile na partikular sa provider
+- Global na pag-inject ng system prompt
+- Pagsubaybay at fingerprinting ng session
+- Pinahusay na rate limiting sa bawat account na may mga profile na partikular sa provider
 - Circuit breaker pattern para sa katatagan ng provider
-- Proteksyon laban sa thundering herd gamit ang mutex locking
-- Cache para sa pag-deduplicate ng request batay sa signature
-- Domain layer: mga tuntunin sa gastos, patakaran sa fallback, patakaran sa lockout
-- Context Relay: mga buod para sa paglilipat ng session upang mapanatili ang continuity kapag nagpapalit ng account
+- Proteksiyon laban sa thundering herd gamit ang mutex locking
+- Cache para sa deduplication ng request batay sa signature
+- Domain layer: mga panuntunan sa gastos, fallback policy, lockout policy
+- Context Relay: mga buod ng session handoff para sa pagpapatuloy kapag nagpapalit ng account
 - Persistence ng domain state (SQLite write-through cache para sa mga fallback, budget, lockout, at circuit breaker)
 - Policy engine para sa sentralisadong pagsusuri ng request (lockout → budget → fallback)
-- Telemetry ng request na may aggregation ng p50/p95/p99 latency
-- Telemetry ng combo target at historikal na kalagayan ng combo target sa pamamagitan ng `combo_execution_key` / `combo_step_id`
+- Telemetry ng request na may pagsasama-sama ng p50/p95/p99 latency
+- Telemetry ng target ng kumbinasyon at makasaysayang kalagayan ng target ng kumbinasyon sa pamamagitan ng `combo_execution_key` / `combo_step_id`
 - Correlation ID (X-Request-Id) para sa end-to-end tracing
-- Compliance audit logging na maaaring i-opt out sa bawat API key
+- Compliance audit logging na may opt-out sa bawat API key
 - Eval framework para sa quality assurance ng LLM
 - Health dashboard na may real-time na status ng circuit breaker ng provider
 - MCP Server (110 tool) na may 3 transport (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) na may mga skill at lifecycle ng task
 - Memory system (extraction, injection, retrieval, summarization)
 - Skills system (registry, executor, sandbox, mga built-in na skill)
-- MITM proxy na may pamamahala ng certificate at paghawak ng DNS
+- MITM proxy na may pamamahala ng certificate at pangangasiwa ng DNS
 - Middleware na panangga laban sa prompt injection
-- Pipeline ng prompt compression na may Caveman, RTK, mga stacked pipeline, compression combo, language pack, at analytics
+- Pipeline ng prompt compression na may Caveman, RTK, mga stacked pipeline, kumbinasyon ng compression, language pack, at analytics
 - Registry ng ACP (Agent Communication Protocol)
 - Mga modular na OAuth provider (22 indibidwal na module sa ilalim ng `src/lib/oauth/providers/`)
 - Mga script para sa uninstall/full-uninstall
-- Aksyon para sa pagkukumpuni ng OAuth environment
+- Aksiyon sa pagkukumpuni ng OAuth environment
 - WebSocket bridge para sa mga WS client na compatible sa OpenAI (`/v1/ws`)
 - Pamamahala ng sync token (pag-isyu/pagbawi, pag-download ng config bundle na may ETag versioning)
 - GLM Thinking (`glmt`) bilang first-class na preset ng provider
-- Hybrid token counting (`/messages/count_tokens` sa panig ng provider na may estimation fallback)
-- Awtomatikong pag-seed ng model alias (30+ normalization ng cross-proxy dialect sa pagsisimula)
+- Hybrid na pagbibilang ng token (`/messages/count_tokens` sa panig ng provider na may estimation fallback)
+- Awtomatikong pag-seed ng model alias (30+ normalisasyon ng cross-proxy dialect sa pagsisimula)
 - Ligtas na outbound fetch na may SSRF guard, pag-block ng pribadong URL, at nako-configure na retry
-- Cooldown-aware na mga chat retry na may nako-configure na `requestRetry` at `maxRetryIntervalSec`
+- Mga chat retry na isinasaalang-alang ang cooldown, na may nako-configure na `requestRetry` at `maxRetryIntervalSec`
 - Validation ng runtime environment gamit ang Zod sa pagsisimula
-- Compliance audit v2 na may pagination, mga provider CRUD event, at pag-log ng validation na na-block ng SSRF
+- Compliance audit v2 na may pagination, mga CRUD event ng provider, at pag-log ng validation na na-block ng SSRF
 
 Pangunahing runtime model:
 
-- Ipinatutupad ng mga Next.js app route sa ilalim ng `src/app/api/*` ang parehong mga dashboard API at compatibility API
-- Isang pinagsasaluhang SSE/routing core sa `src/sse/*` + `open-sse/*` ang namamahala sa execution ng provider, translation, streaming, fallback, at paggamit
+- Ipinapatupad ng mga ruta ng Next.js app sa ilalim ng `src/app/api/*` ang parehong mga dashboard API at compatibility API
+- Pinangangasiwaan ng shared SSE/routing core sa `src/sse/*` + `open-sse/*` ang execution ng provider, translation, streaming, fallback, at paggamit
 
 ## Mga Reference Diagram
 
@@ -114,43 +114,51 @@ ang iba pa ay naka-link mula sa mga gabay na partikular sa kani-kanilang domain.
 - SLA/control plane ng provider sa labas ng lokal na proseso
 - Ang mismong mga external CLI binary (Claude CLI, Codex CLI, atbp.)
 
-## Saklaw ng Dashboard (Kasalukuyan)
+## Mga Bahagi ng Dashboard (Kasalukuyan)
 
-Mga pangunahing page sa ilalim ng `src/app/(dashboard)/dashboard/`:
+Mga pangunahing pahina sa ilalim ng `src/app/(dashboard)/dashboard/`:
 
 - `/dashboard` — mabilisang pagsisimula + pangkalahatang-ideya ng provider
-- `/dashboard/endpoint` — endpoint proxy + MCP + A2A + mga tab ng API endpoint
-- `/dashboard/providers` — mga koneksyon at credential ng provider
-- `/dashboard/combos` — mga combo strategy, template, step-based builder, panuntunan sa pag-route ng modelo, manu-manong naka-persist na pagkakasunod-sunod
-- `/dashboard/auto-combo` — Auto Combo Engine: mga timbang sa pagmamarka, mode pack, virtual factory preset, telemetry
-- `/dashboard/costs` — pagsasama-sama ng gastos at visibility ng pagpepresyo
-- `/dashboard/analytics` — analytics ng paggamit, mga ebalwasyon, kalagayan ng combo target
+- `/dashboard/endpoint` — endpoint proxy + mga tab ng MCP + A2A + API endpoint
+- `/dashboard/providers` — mga koneksyon at kredensyal ng provider
+- `/dashboard/combos` — mga estratehiya ng combo, template, step-based builder, mga panuntunan sa pag-route ng modelo, mano-manong pinapanatiling pagkakasunod-sunod
+- `/dashboard/auto-combo` — Auto Combo Engine: mga timbang sa pagmamarka, mode pack, mga preset ng virtual factory, telemetriya
+- `/dashboard/costs` — pagsasama-sama ng gastos at visibility ng presyo
+- `/dashboard/analytics` — analytics ng paggamit, mga pagsusuri, kalagayan ng target ng combo
 - `/dashboard/limits` — mga kontrol sa quota/rate
-- `/dashboard/cli-tools` — onboarding sa CLI, pagtukoy sa runtime, pagbuo ng config
+- `/dashboard/cli-tools` — pag-onboard sa CLI, pagtukoy ng runtime, pagbuo ng config
 - `/dashboard/agents` — mga natukoy na ACP agent + pagpaparehistro ng custom agent
-- `/dashboard/cloud-agents` — mga task ng agent na naka-host sa cloud (Codex Cloud, Devin, Jules) at lifecycle ng task
-- `/dashboard/skills` — registry ng A2A skill, sandbox execution, built-in na catalog ng skill
-- `/dashboard/memory` — inspeksyon at retrieval ng persistent na memorya ng pag-uusap
-- `/dashboard/webhooks` — mga outbound webhook subscription, pag-rotate ng secret, mga istatistika ng retry
+- `/dashboard/cloud-agents` — mga gawain ng agent na naka-host sa cloud (Codex Cloud, Devin, Jules) at lifecycle ng gawain
+- `/dashboard/skills` — registry ng A2A skill, pagpapatakbo sa sandbox, catalog ng mga built-in na skill
+- `/dashboard/memory` — inspeksyon at pagkuha ng persistent na memorya ng pag-uusap
+- `/dashboard/webhooks` — mga subscription sa outbound webhook, pag-rotate ng secret, mga istatistika ng muling pagsubok
 - `/dashboard/batch` — pagsusumite ng batch job at progreso
 - `/dashboard/cache` — mga istatistika ng read-through at reasoning cache, mga kontrol sa eviction
-- `/dashboard/playground` — interactive na chat playground para sa anumang naka-configure na combo/modelo
-- `/dashboard/changelog` — viewer ng changelog sa loob ng app (nire-render ang `CHANGELOG.md`)
-- `/dashboard/system` — mga diagnostic ng runtime, impormasyon ng bersyon, surface para sa validation ng environment
-- `/dashboard/onboarding` — wizard para sa unang setup ng mga bagong installation
-- `/dashboard/media` — playground para sa image/video/music
-- `/dashboard/search-tools` — pagsubok sa search provider at history
-- `/dashboard/health` — uptime, mga circuit breaker, rate limit, mga session na mino-monitor ang quota
+- `/dashboard/playground` — interactive na chat playground laban sa anumang naka-configure na combo/modelo
+- `/dashboard/changelog` — viewer ng changelog sa app (nire-render ang `CHANGELOG.md`)
+- `/dashboard/system` — mga diagnostic ng runtime, impormasyon ng bersyon, surface para sa pag-validate ng environment
+- `/dashboard/onboarding` — wizard sa paunang pag-setup para sa mga bagong installation
+- `/dashboard/media` — playground para sa larawan/video/musika
+- `/dashboard/search-tools` — pagsubok at history ng search provider
+- `/dashboard/health` — uptime, mga circuit breaker, mga rate limit, mga session na sinusubaybayan ang quota
 - `/dashboard/logs` — mga log ng request/proxy/audit/console
-- `/dashboard/settings` — mga tab ng system setting (pangkalahatan, routing, mga default ng combo, atbp.)
-- `/dashboard/context/caveman` — mga panuntunan sa Caveman compression, language pack, preview, at output mode
-- `/dashboard/context/rtk` — mga filter ng output ng RTK command, preview, at mga setting sa kaligtasan ng runtime
-- `/dashboard/context/combos` — mga pinangalanang compression pipeline na nakatalaga sa mga routing combo
+- `/dashboard/settings` — mga tab ng setting ng system (pangkalahatan, routing, mga default ng combo, atbp.)
+- `/dashboard/context/caveman` — mga panuntunan sa compression ng Caveman, language pack, preview, at output mode
+- `/dashboard/context/rtk` — mga filter ng command output ng RTK, preview, at mga setting sa kaligtasan ng runtime
+- `/dashboard/context/combos` — mga pinangalanang compression pipeline na itinalaga sa mga routing combo
 - `/dashboard/translator` — inspeksyon ng translator at preview ng conversion ng format ng request
 - `/dashboard/audit` — browser ng compliance audit log na may pagination at structured metadata
 - `/dashboard/usage` — browser ng paggamit sa bawat request na nakaugnay sa `usage_history`
-- `/dashboard/compression` — analytics ng compression, mga istatistika, at pagtatalaga ng pipeline
+- `/dashboard/compression` — analytics at mga istatistika ng compression, at pagtatalaga ng pipeline
 - `/dashboard/api-manager` — lifecycle ng API key at mga pahintulot sa modelo
+
+Layer ng UI: nire-render ang bawat pahina sa loob ng iisang shell — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (ang
+`SidebarProvider`/`SidebarInset` ng kit, at ang `Sidebar.tsx` at `Header.tsx` ng OmniRoute). Ini-import ng mga pahina ang kanilang
+mga building block mula sa `@/shared/components` (mga adapter para sa isinamang Keak CI UI Kit sa
+`packages/ui-kit`) o mula sa mga subpath ng component ng kit (`@omniroute/ui-kit/table`, `…/page-header`), at
+ang mga icon sa pamamagitan ng `<Icon>` (`ICON_MAP` → Lucide). Ang theme (`system` bilang default, light/dark) at mga token ay nagmumula
+sa kit sa pamamagitan ng bridge sa `src/app/globals.css`. Mga detalye: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Mataas na Antas na Konteksto ng System
 

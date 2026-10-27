@@ -29,6 +29,7 @@ import {
 import { errorResponse, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import {
   applyDiscoveryDegradation,
+  fromCopilotDiscoveryFailure,
   toDiscoveryFailure,
   type DiscoveryFailure,
 } from "@/shared/discovery/degradedCause";
@@ -320,20 +321,23 @@ export async function GET(
       );
     };
 
-    const buildCachedDiscoveryResponse = (warning?: string, failure?: DiscoveryFailure) =>
+    const buildCachedDiscoveryResponse = (
+      warning?: string,
+      extraPayload: Record<string, unknown> = {}
+    ) =>
       buildResponse({
         provider,
         connectionId,
         models: cachedDiscoveryModels,
         source: "cache",
         ...(warning ? { warning } : {}),
-        ...(failure ? { failure } : {}),
+        ...extraPayload,
       });
 
     const buildLocalCatalogResponse = (
       warning?: string,
       intentional = false,
-      failure?: DiscoveryFailure
+      extraPayload: Record<string, unknown> = {}
     ) => {
       const localModels = toLocalCatalogModels();
       if (localModels.length === 0) return null;
@@ -347,7 +351,7 @@ export async function GET(
         // of treating them as a degraded remote-fetch failure (502).
         ...(intentional ? { intentional: true } : {}),
         ...(warning ? { warning } : {}),
-        ...(failure ? { failure } : {}),
+        ...extraPayload,
       });
     };
 
@@ -356,16 +360,21 @@ export async function GET(
       localWarning = "API unavailable — using local catalog",
       localIntentional = false,
       failure,
+      extraPayload = {},
     }: {
       cacheWarning?: string;
       localWarning?: string;
       localIntentional?: boolean;
       failure?: DiscoveryFailure;
+      extraPayload?: Record<string, unknown>;
     } = {}) => {
+      // The reason of the fallback (closed vocabulary) rides next to any
+      // diagnostics the caller already publishes.
+      const payload = { ...extraPayload, ...(failure ? { failure } : {}) };
       if (cachedDiscoveryModels.length > 0) {
-        return buildCachedDiscoveryResponse(cacheWarning, failure);
+        return buildCachedDiscoveryResponse(cacheWarning, payload);
       }
-      return buildLocalCatalogResponse(localWarning, localIntentional, failure);
+      return buildLocalCatalogResponse(localWarning, localIntentional, payload);
     };
 
     const buildDiscoveryErrorFallbackResponse = (
@@ -1814,7 +1823,14 @@ export async function GET(
       const fallback = buildDiscoveryFallbackResponse({
         cacheWarning: "Copilot models API unavailable — using cached catalog",
         localWarning: "Copilot models API unavailable — using local catalog",
-        failure: discovery.failure,
+        // One reason: the safe diagnostics stay published as `discoveryFailure`,
+        // and the closed-vocabulary cause is derived from them.
+        ...(discovery.failure
+          ? {
+              failure: fromCopilotDiscoveryFailure(discovery.failure),
+              extraPayload: { discoveryFailure: discovery.failure },
+            }
+          : {}),
       });
       if (fallback) return fallback;
       return buildResponse({
@@ -1823,7 +1839,12 @@ export async function GET(
         models: discovery.models,
         source: "local_catalog",
         warning: "Copilot models API unavailable — using local catalog",
-        ...(discovery.failure ? { failure: discovery.failure } : {}),
+        ...(discovery.failure
+          ? {
+              failure: fromCopilotDiscoveryFailure(discovery.failure),
+              discoveryFailure: discovery.failure,
+            }
+          : {}),
       });
     }
 
@@ -2219,12 +2240,45 @@ export async function GET(
       // The fallback catalog stands in for the live one: the live failure is the
       // reason, and the public catalog failure is the fallback reason.
       const codexFallbackFailure = liveDiscovery.failure ?? githubCatalogDiscovery.failure;
-      if (cachedDiscoveryModels.length > 0) {
-        const catalog = reconcileCodexCatalog(
-          cachedDiscoveryModels,
-          "live",
-          "Codex live catalog unavailable — using cached catalog"
-        );
+      // One fallback chain covers both an empty catalog and a failed call:
+      // cached account view, then the public manifest, then the local catalog.
+      // An empty answer may be transient, so it never clears the cached catalog;
+      // the warning says which situation it was and which fallback answered.
+      // The live helper tells them apart: a recognised empty list carries
+      // EMPTY_CATALOG, every other failure carries another (or no) code.
+      const liveEmpty = liveModels.length === 0 && liveDiscovery.failure?.code === "EMPTY_CATALOG";
+      const liveFailed = liveModels.length === 0 && !liveEmpty;
+      const hasGithubCatalog = Boolean(githubCatalogModels && githubCatalogModels.length > 0);
+      const fallbackSource: "github_catalog" | "cache" | "local_catalog" =
+        cachedDiscoveryModels.length > 0
+          ? "cache"
+          : hasGithubCatalog
+            ? "github_catalog"
+            : "local_catalog";
+      const liveFailureWarning: Record<typeof fallbackSource, string> = {
+        cache: "Codex live catalog unavailable — using cached catalog",
+        github_catalog: "Codex live catalog unavailable — using GitHub model catalog",
+        local_catalog: "Codex live and GitHub catalogs unavailable — using local catalog",
+      };
+      // An empty catalog still falls back, and still says so: model-sync's
+      // isDegraded* gates key off `source` plus a non-empty `warning`, so a
+      // silent fallback would let the public manifest persist as the account's
+      // synced catalog (spec 3.7). The wording separates two situations that
+      // used to share one string: "upstream did not answer" versus "upstream
+      // answered with nothing to discover".
+      const emptyCatalogWarning: Record<typeof fallbackSource, string> = {
+        cache: "Codex returned no models — using the cached catalog",
+        github_catalog: "Codex returned no models — using the public catalog",
+        local_catalog: "Codex returned no models — using the local catalog",
+      };
+      const fallbackWarning = liveFailed
+        ? liveFailureWarning[fallbackSource]
+        : liveEmpty
+          ? emptyCatalogWarning[fallbackSource]
+          : undefined;
+
+      if (fallbackSource === "cache") {
+        const catalog = reconcileCodexCatalog(cachedDiscoveryModels, "live", fallbackWarning);
         await persistFilteredCacheIfNeeded(catalog.activeModels);
         return buildResponse({
           provider,
@@ -2235,12 +2289,9 @@ export async function GET(
           ...(codexFallbackFailure ? { failure: codexFallbackFailure } : {}),
         });
       }
-      if (githubCatalogModels && githubCatalogModels.length > 0) {
-        const catalog = reconcileCodexCatalog(
-          githubCatalogModels,
-          "github",
-          "Codex live catalog unavailable — using GitHub model catalog"
-        );
+
+      if (fallbackSource === "github_catalog" && githubCatalogModels) {
+        const catalog = reconcileCodexCatalog(githubCatalogModels, "github", fallbackWarning);
         return buildResponse({
           provider,
           connectionId,
@@ -2259,7 +2310,7 @@ export async function GET(
         models: buildCodexLocalFallbackCatalog(staticCodexCatalog),
         source: "local_catalog",
         intentional: true,
-        warning: "Codex live and GitHub catalogs unavailable — using local catalog",
+        warning: fallbackWarning,
       });
     }
 

@@ -846,6 +846,16 @@ function flattenAnyOfOneOf(obj: unknown): void {
   forEachSubschema(record, flattenAnyOfOneOf);
 }
 
+// Gemini only accepts `items` on an ARRAY node and `properties` on an OBJECT node
+// ("items: field predicate failed: $type == Type.ARRAY", 9router #5000),
+// so a union that keeps those keywords must collapse to the member they belong to.
+function pickUnionType(types: unknown[], record: JsonRecord): unknown {
+  const nonNullTypes = types.filter((t) => t !== "null");
+  if (record.items !== undefined && nonNullTypes.includes("array")) return "array";
+  if (record.properties !== undefined && nonNullTypes.includes("object")) return "object";
+  return nonNullTypes.length > 0 ? nonNullTypes[0] : "string";
+}
+
 // Flatten type arrays
 function flattenTypeArrays(obj: unknown): void {
   if (!obj || typeof obj !== "object") return;
@@ -859,8 +869,7 @@ function flattenTypeArrays(obj: unknown): void {
 
   const record = obj as JsonRecord;
   if (record.type && Array.isArray(record.type)) {
-    const nonNullTypes = record.type.filter((t) => t !== "null");
-    record.type = nonNullTypes.length > 0 ? nonNullTypes[0] : "string";
+    record.type = pickUnionType(record.type, record);
   }
 
   forEachSubschema(record, flattenTypeArrays);
@@ -1094,6 +1103,9 @@ export function cleanJSONSchemaForAntigravity(
     const record = obj as JsonRecord;
     if (!record.type && (record.properties !== undefined || record.required !== undefined)) {
       record.type = "object";
+    } else if (!record.type && record.items !== undefined) {
+      // Gemini rejects `items` on an untyped node (9router #5000).
+      record.type = "array";
     }
 
     forEachSubschema(record, injectObjectType);

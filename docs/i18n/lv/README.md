@@ -1305,7 +1305,7 @@ Kanoniskie rādītāji 2026-10-18: **1.976 unikāli videoklipi** · **20.220.289
   <tr><td nowrap><b>Izpildvide</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Valoda</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> visā <code>src/</code> un <code>open-sse/</code> (neviena <code>any</code> kodolā kopš v2.0)</td></tr>
   <tr><td nowrap><b>Ietvars</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Datubāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (JSON mantojums) — 147 domēnu moduļi, 209 migrācijas</td></tr>
+  <tr><td nowrap><b>Datubāze</b></td><td>better-sqlite3 (SQLite, WAL žurnalēšana) + LowDB (JSON mantojums) — 147 domēnu moduļi, 210 migrācijas</td></tr>
   <tr><td nowrap><b>Atmiņa</b></td><td>SQLite FTS5 pilnteksta meklēšana + int8-kvantizēti vektoru iedegumi (embeddings), tipizēta novecošana</td></tr>
   <tr><td nowrap><b>Shēmas</b></td><td>Zod 4 — MCP rīku I/O validācija + API līgumi</td></tr>
   <tr><td nowrap><b>Protokoli</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

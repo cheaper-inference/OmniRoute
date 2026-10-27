@@ -43,7 +43,11 @@ function resetStorage() {
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
-async function createConnection(provider: string, name: string) {
+async function createConnection(
+  provider: string,
+  name: string,
+  providerSpecificData: Record<string, unknown> = { autoFetchModels: true }
+) {
   return providersDb.createProviderConnection({
     provider,
     name,
@@ -51,7 +55,7 @@ async function createConnection(provider: string, name: string) {
     apiKey: `${provider}-${name}-key`,
     isActive: true,
     testStatus: "active",
-    providerSpecificData: { autoFetchModels: true },
+    providerSpecificData,
   });
 }
 
@@ -115,7 +119,10 @@ test("a failed discovery is remembered for its connection", () => {
 });
 
 test("a later read does not erase the remembered failure", async () => {
-  const connection = await createConnection("aimlapi", "remembered");
+  // Auto-fetch is off: a plain read answers from the catalog WITHOUT running a
+  // discovery, so it has no outcome of its own to record. (With auto-fetch on, a
+  // plain read is a live discovery and legitimately records its own outcome.)
+  const connection = await createConnection("aimlapi", "remembered", { autoFetchModels: false });
   recordDiscoveryOutcome({
     provider: "aimlapi",
     connectionId: connection.id,
@@ -252,6 +259,36 @@ test("a failed upstream discovery answers with its cause and is remembered", asy
   const [row] = await listConnections("aimlapi");
   assert.equal(row.discoveryState?.status, "degraded");
   assert.equal(row.discoveryState?.cause, "HTTP 500");
+});
+
+test("a failed Copilot discovery is remembered with the cause derived from its structured failure", async () => {
+  // The Copilot result carries the structured diagnostics (#17984); the stored
+  // cause must be the closed-vocabulary one derived from them, not a generic
+  // upstream error.
+  const connection = await providersDb.createProviderConnection({
+    provider: "github",
+    authType: "oauth",
+    name: "copilot-upstream-failure",
+    accessToken: "github-access-token",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: { copilotToken: "copilot-token" },
+  });
+  globalThis.fetch = async () =>
+    new Response("nope", { status: 503, headers: { "content-type": "text/plain" } });
+
+  const response = await discoveryRoute.GET(
+    new Request(`http://localhost/api/providers/${connection.id}/models?refresh=true`),
+    { params: { id: connection.id } }
+  );
+  const body = (await response.json()) as { degraded?: unknown; error?: unknown };
+  assert.equal(response.status, 200);
+  assert.equal(body.degraded, true);
+  assert.equal(body.error, "HTTP 503");
+
+  const [row] = await listConnections("github");
+  assert.equal(row.discoveryState?.status, "degraded");
+  assert.equal(row.discoveryState?.cause, "HTTP 503");
 });
 
 test("a no-auth provider whose live catalog fails is remembered too", async () => {

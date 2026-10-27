@@ -1313,7 +1313,7 @@ Kanoniska mätvärden den 2026-10-18: **1.976 unika videor** · **20.220.289 kä
   <tr><td nowrap><b>Körmiljö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Språk</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> i hela <code>src/</code> och <code>open-sse/</code> (noll <code>any</code> i kärnan sedan v2.0)</td></tr>
   <tr><td nowrap><b>Ramverk</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (JSON, äldre) — 147 domänmoduler, 209 migreringar</td></tr>
+  <tr><td nowrap><b>Databas</b></td><td>better-sqlite3 (SQLite, WAL-journalföring) + LowDB (JSON, äldre) — 147 domänmoduler, 210 migreringar</td></tr>
   <tr><td nowrap><b>Minne</b></td><td>SQLite FTS5 fulltextsökning + int8-kvantiserade vektorembeddings, typad decay</td></tr>
   <tr><td nowrap><b>Scheman</b></td><td>Zod 4 — validering av MCP-verktygs I/O + API-kontrakt</td></tr>
   <tr><td nowrap><b>Protokoll</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>

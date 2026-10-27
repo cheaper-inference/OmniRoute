@@ -6,6 +6,7 @@ import {
   fetchCodexGithubCatalogModels,
   clearCodexGithubCatalogCacheForTests,
 } from "../../src/app/api/providers/[id]/models/discovery/codex";
+import { fromCopilotDiscoveryFailure } from "../../src/shared/discovery/degradedCause";
 import { fetchAntigravityDiscoveryModelsCached } from "../../src/app/api/providers/[id]/models/discovery/normalizers";
 import {
   fetchGitHubCopilotModels,
@@ -46,26 +47,38 @@ test.beforeEach(() => {
 });
 
 test("the copilot discovery reports why it fell back to the static catalog", async () => {
+  // The Copilot result keeps its structured diagnostics (#17984); the closed
+  // vocabulary is derived from them by fromCopilotDiscoveryFailure.
   const withoutToken = await fetchGitHubCopilotModels({
     token: null,
     fetchImpl: async () => {
       assert.fail("no token must not fetch");
     },
   });
-  assert.deepEqual(withoutToken.failure, NO_CREDENTIAL);
+  assert.deepEqual(withoutToken.failure, { kind: "missing_token" });
+  assert.deepEqual(fromCopilotDiscoveryFailure(withoutToken.failure), NO_CREDENTIAL);
   assert.equal(withoutToken.source, "fallback");
 
   const unauthorized = await fetchGitHubCopilotModels({
     token: "tok",
     fetchImpl: async () => new Response("nope", { status: 401 }),
   });
-  assert.deepEqual(unauthorized.failure, { status: 401 });
+  assert.equal(unauthorized.failure?.kind, "http_status");
+  assert.deepEqual(fromCopilotDiscoveryFailure(unauthorized.failure), { status: 401 });
 
   const emptyCatalog = await fetchGitHubCopilotModels({
     token: "tok",
     fetchImpl: async () => Response.json({ data: [] }),
   });
-  assert.deepEqual(emptyCatalog.failure, EMPTY_CATALOG);
+  assert.equal(emptyCatalog.failure?.kind, "empty_catalog");
+  assert.deepEqual(fromCopilotDiscoveryFailure(emptyCatalog.failure), EMPTY_CATALOG);
+
+  const notJson = await fetchGitHubCopilotModels({
+    token: "tok",
+    fetchImpl: async () => new Response("<html>nope</html>", { status: 200 }),
+  });
+  assert.equal(notJson.failure?.kind, "invalid_json");
+  assert.deepEqual(fromCopilotDiscoveryFailure(notJson.failure), { code: "INVALID_RESPONSE" });
 
   const broken = await fetchGitHubCopilotModels({
     token: "tok",
@@ -73,8 +86,9 @@ test("the copilot discovery reports why it fell back to the static catalog", asy
       throw new Error('{"key":"sk-abc"} network down');
     },
   });
-  assert.deepEqual(broken.failure, UPSTREAM_ERROR);
-  assertCarriesNoUpstreamText(broken.failure);
+  assert.equal(broken.failure?.kind, "network");
+  assert.deepEqual(fromCopilotDiscoveryFailure(broken.failure), { code: "NETWORK_ERROR" });
+  assertCarriesNoUpstreamText(fromCopilotDiscoveryFailure(broken.failure));
 
   const live = await fetchGitHubCopilotModels({
     token: "tok",

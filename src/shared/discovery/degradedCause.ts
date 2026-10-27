@@ -16,7 +16,8 @@ export type DiscoveryFailure = { status?: number; code?: string };
  * (a blocked redirect, a timeout, a blocked URL, a network error) and the
  * local conditions of a discovery that could not even be attempted (no
  * credential, no endpoint, a refused local request, an empty upstream
- * catalog, a client too old for the catalog).
+ * catalog, a client too old for the catalog, an upstream answer that is not
+ * the JSON catalog).
  *
  * A code outside this list is ignored, so no upstream text can reach the
  * response through this channel.
@@ -32,6 +33,7 @@ const CLOSED_FAILURE_CODES: readonly string[] = [
   "LOCALITY_REFUSED",
   "EMPTY_CATALOG",
   "CLIENT_TOO_OLD",
+  "INVALID_RESPONSE",
 ];
 
 /** The reason of a failure that was observed but carries no readable detail. */
@@ -84,6 +86,36 @@ export function toDiscoveryFailure(error: unknown): DiscoveryFailure {
   const status = readHttpStatus(error.status) ?? readHttpStatus(error.statusCode);
   if (status !== null) return { status };
   return {};
+}
+
+/**
+ * The structured failure a Copilot discovery reports (`kind` plus safe
+ * diagnostics, published as `discoveryFailure`), reduced to the closed
+ * vocabulary of this module — so a Copilot fallback states the same reason as
+ * every other fallback instead of a generic upstream error.
+ */
+export type CopilotDiscoveryFailureLike = { kind?: unknown; upstreamStatus?: unknown };
+
+export function fromCopilotDiscoveryFailure(
+  failure: CopilotDiscoveryFailureLike | null | undefined
+): DiscoveryFailure {
+  if (!isRecord(failure)) return {};
+  switch (failure.kind) {
+    case "missing_token":
+      return { code: "NO_CREDENTIAL" };
+    case "empty_catalog":
+      return { code: "EMPTY_CATALOG" };
+    case "network":
+      return { code: "NETWORK_ERROR" };
+    case "invalid_json":
+      return { code: "INVALID_RESPONSE" };
+    case "http_status": {
+      const status = readHttpStatus(failure.upstreamStatus);
+      return status !== null ? { status } : {};
+    }
+    default:
+      return {};
+  }
 }
 
 /**
