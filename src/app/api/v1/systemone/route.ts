@@ -52,6 +52,7 @@ import * as log from "@/sse/utils/logger";
 import { dispatchSystemOne } from "./dispatch.ts";
 
 import { rejectNativeManagedLease } from "@omniroute/open-sse/handlers/systemOneLease.ts";
+import { revalidateNativeConnection } from "@/lib/providerModels/nativeConnectionAdmission";
 
 export const dynamic = "force-dynamic";
 
@@ -124,9 +125,14 @@ function resolveCandidates(
 export async function POST(request: Request): Promise<Response> {
   let rawBody: unknown;
   try {
-    const bytes = await readRequestBodyWithLimit(request, JEV_SYSTEMONE_LIMITS.maxBodyBytes);
+    const bytes = await readRequestBodyWithLimit(
+      request,
+      JEV_SYSTEMONE_LIMITS.maxBodyBytes,
+      request.signal
+    );
     rawBody = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes));
   } catch (error) {
+    if (request.signal.aborted) return errorResponse(499, "System One request aborted by caller");
     if (error instanceof RequestBodyTooLargeError)
       return errorResponse(413, "System One request body exceeds the byte budget");
     return errorResponse(HTTP_STATUS.BAD_REQUEST, "Invalid JSON body");
@@ -189,7 +195,7 @@ export async function POST(request: Request): Promise<Response> {
         if (credentials && allowed?.length && !allowed.includes(credentials.connectionId ?? "")) {
           return errorResponse(403, "The selected connection is excluded by this API key");
         }
-        return null;
+        return credentials ? revalidateNativeConnection(candidate, credentials) : null;
       },
     }
   );

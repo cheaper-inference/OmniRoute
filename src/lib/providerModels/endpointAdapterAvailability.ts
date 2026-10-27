@@ -5,6 +5,7 @@
  * Static registrations are positive evidence. Unknown dynamic/gateway providers
  * remain "unknown", not falsely labeled supported or rejected.
  */
+import { SYSTEMONE_BACKENDS } from "@omniroute/open-sse/config/systemOneRegistry.ts";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry";
 import { getEmbeddingProvider } from "@omniroute/open-sse/config/embeddingRegistry";
 import { getRerankProvider } from "@omniroute/open-sse/config/rerankRegistry";
@@ -30,6 +31,7 @@ export function getRegisteredEndpointAdapterStatuses(provider: string): Endpoint
   const audioMissing = hasChatRegistry;
   return {
     chat: status(hasChatRegistry),
+    systemone: status(Object.hasOwn(SYSTEMONE_BACKENDS, provider)),
     responses: status(hasChatRegistry),
     embeddings: status(Boolean(getEmbeddingProvider(provider))),
     rerank: status(Boolean(getRerankProvider(provider))),

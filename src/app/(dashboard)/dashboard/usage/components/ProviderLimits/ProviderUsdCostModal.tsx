@@ -6,7 +6,14 @@ import { Slider } from "@omniroute/ui-kit/slider";
 import Modal from "@/shared/components/Modal";
 import Icon from "@/shared/components/Icon";
 
-interface ProviderWindowCostRow {
+interface NativeCostCompleteness {
+  costStatus?: "partial";
+  unpricedNativeCount?: number;
+  unallocatedRecordedCostUsd?: number;
+  recordedCostProvenance?: "unallocated_api_key_ledger";
+}
+
+interface ProviderWindowCostRow extends NativeCostCompleteness {
   apiKeyKey: string;
   apiKeyId: string | null;
   apiKeyName: string;
@@ -20,7 +27,7 @@ interface ProviderWindowCostRow {
   lastUsed: string | null;
 }
 
-interface ProviderWindowCostPayload {
+interface ProviderWindowCostPayload extends NativeCostCompleteness {
   provider: string;
   connectionId: string | null;
   windowStartAt: string;
@@ -84,6 +91,24 @@ export default function ProviderUsdCostModal({
   accountLabel,
 }: Props) {
   const t = useTranslations("usageLimits");
+  const nativeCostCount = (value: NativeCostCompleteness) =>
+    Number.isSafeInteger(value.unpricedNativeCount) && value.unpricedNativeCount > 0
+      ? value.unpricedNativeCount
+      : 0;
+  const partialCost = (value: NativeCostCompleteness) =>
+    value.costStatus === "partial" || nativeCostCount(value) > 0;
+  const renderLedger = (value: NativeCostCompleteness) =>
+    value.recordedCostProvenance === "unallocated_api_key_ledger" &&
+    typeof value.unallocatedRecordedCostUsd === "number" &&
+    Number.isFinite(value.unallocatedRecordedCostUsd) &&
+    value.unallocatedRecordedCostUsd >= 0 ? (
+      <div className="mt-2 rounded-md border border-border px-3 py-2 text-xs text-text-muted">
+        <p>
+          {t("unallocatedRecordedCost")}: {formatUsd(value.unallocatedRecordedCostUsd)}
+        </p>
+        <p>{t("unallocatedRecordedCostWarning")}</p>
+      </div>
+    ) : null;
   const [payload, setPayload] = useState<ProviderWindowCostPayload | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -127,7 +152,10 @@ export default function ProviderUsdCostModal({
     [payload]
   );
   const simulatedUsd =
-    payload?.estimatedFullQuotaUsd !== null && payload?.estimatedFullQuotaUsd !== undefined
+    payload &&
+    !partialCost(payload) &&
+    payload.estimatedFullQuotaUsd !== null &&
+    payload.estimatedFullQuotaUsd !== undefined
       ? (payload.estimatedFullQuotaUsd * simulatedPercent) / 100
       : null;
 
@@ -154,11 +182,16 @@ export default function ProviderUsdCostModal({
             <div className="grid grid-cols-2 gap-2 md:grid-cols-4">
               <div className="rounded-md border border-border bg-bg-subtle px-3 py-2">
                 <div className="text-[10px] uppercase tracking-wide text-text-muted">
-                  {t("used")}
+                  {t(partialCost(payload) ? "knownSubtotal" : "used")}
                 </div>
                 <div className="mt-1 text-lg font-semibold tabular-nums text-text-main">
                   {formatUsd(payload.totalCostUsd)}
                 </div>
+                {nativeCostCount(payload) > 0 && (
+                  <p className="mt-1 text-xs text-text-muted">
+                    {t("unpricedNativeRequests", { count: nativeCostCount(payload) })}
+                  </p>
+                )}
               </div>
               <div className="rounded-md border border-border bg-bg-subtle px-3 py-2">
                 <div className="text-[10px] uppercase tracking-wide text-text-muted">
@@ -173,7 +206,7 @@ export default function ProviderUsdCostModal({
                   {t("estimatedFullQuota")}
                 </div>
                 <div className="mt-1 text-lg font-semibold tabular-nums text-text-main">
-                  {payload.estimatedFullQuotaUsd === null
+                  {partialCost(payload) || payload.estimatedFullQuotaUsd === null
                     ? "n/a"
                     : formatUsd(payload.estimatedFullQuotaUsd)}
                 </div>
@@ -188,6 +221,10 @@ export default function ProviderUsdCostModal({
               </div>
             </div>
 
+            {renderLedger(payload)}
+            {partialCost(payload) && (
+              <p className="text-xs text-text-muted">{t("partialQuotaEstimateUnavailable")}</p>
+            )}
             <div className="rounded-md border border-border bg-surface px-3 py-3">
               <div className="flex flex-wrap items-center justify-between gap-2 text-xs text-text-muted">
                 <span>
@@ -219,7 +256,7 @@ export default function ProviderUsdCostModal({
                   showValue={false}
                   value={simulatedPercent}
                   onValueChange={setSimulatedPercent}
-                  disabled={payload.estimatedFullQuotaUsd === null}
+                  disabled={partialCost(payload) || payload.estimatedFullQuotaUsd === null}
                 />
               </div>
             </div>
@@ -251,11 +288,21 @@ export default function ProviderUsdCostModal({
                         </div>
                         <div className="text-right">
                           <div className="text-sm font-semibold tabular-nums text-text-main">
-                            {formatUsd(row.costUsd)}
+                            {partialCost(row)
+                              ? `${t("knownSubtotal")}: ${formatUsd(row.costUsd)}`
+                              : formatUsd(row.costUsd)}
                           </div>
+                          {nativeCostCount(row) > 0 && (
+                            <p className="mt-1 text-xs text-text-muted">
+                              {t("unpricedNativeRequests", { count: nativeCostCount(row) })}
+                            </p>
+                          )}
                           {row.limitUsd ? (
                             <div className="mt-0.5 text-[11px] tabular-nums text-text-muted">
-                              {formatPercent(row.limitUsedPercent)} of {formatUsd(row.limitUsd)}
+                              {partialCost(row)
+                                ? t("unknown")
+                                : formatPercent(row.limitUsedPercent)}{" "}
+                              of {formatUsd(row.limitUsd)}
                               {row.limitPeriod ? ` ${row.limitPeriod}` : ""}
                             </div>
                           ) : (
@@ -265,6 +312,7 @@ export default function ProviderUsdCostModal({
                           )}
                         </div>
                       </div>
+                      {renderLedger(row)}
                       <div className="mt-2 h-2 overflow-hidden rounded-sm bg-border/60">
                         <div
                           className="h-full rounded-sm bg-chart-1"

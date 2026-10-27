@@ -39,6 +39,8 @@ import { CORS_HEADERS } from "../utils/cors.ts";
 import { errorResponse, sanitizeErrorMessage, buildErrorBody } from "../utils/error.ts";
 import {
   nativeSystemOnePricing,
+  systemOneCredentialToken,
+  systemOneAllowsGenericTokenPricing,
   systemOneBackend,
   type SystemOneTier,
 } from "../config/systemOneRegistry.ts";
@@ -47,6 +49,10 @@ import {
   parseSystemOneAnswers,
   parseSystemOneUsage,
 } from "../services/typesafe/systemOneAnswers.ts";
+import {
+  fromOpenAiDecisionResponse,
+  toOpenAiDecisionRequest,
+} from "../services/decisions/openAiDecisions.ts";
 import {
   SystemOneEndpointError,
   fetchSystemOne as defaultFetchSystemOne,
@@ -171,6 +177,27 @@ function parseUpstreamBody(text: string): UpstreamBody {
   } catch {
     return null;
   }
+}
+
+function nativeRequestBody(provider: string, body: Record<string, unknown>) {
+  return systemOneBackend(provider).requestFormat === "openai-decisions"
+    ? toOpenAiDecisionRequest(body)
+    : { ok: true as const, body };
+}
+
+function nativeResponseBody(
+  provider: string,
+  parsed: UpstreamBody,
+  text: string,
+  request: Record<string, unknown>
+): { body: UpstreamBody; text: string } {
+  if (systemOneBackend(provider).requestFormat !== "openai-decisions")
+    return { body: parsed, text };
+  const normalized = fromOpenAiDecisionResponse(parsed, request);
+  if (normalized.ok) return { body: normalized.body, text: JSON.stringify(normalized.body) };
+  // A billed malformed response must use the same once-only failure accounting.
+  // Keep raw usage, but make invalid answers impossible to accept as System One.
+  return { body: { ...parsed, answers: null }, text };
 }
 
 type CallContext = {
@@ -321,7 +348,7 @@ function hasDispatchableCredentials(provider: string, credentials: unknown): boo
   if (isCredentialDiagnosticSentinel(credentials)) return false;
   const record = credentials as SystemOneCredentials & Record<string, unknown>;
   if (record.leaseFenceStale || record.leaseRequired || record.waitingForCapacity) return false;
-  const hasToken = Boolean(record.apiKey || record.accessToken);
+  const hasToken = Boolean(systemOneCredentialToken(record));
   if (systemOneBackend(provider).requiresKey) return hasToken;
   return hasToken || typeof record.connectionId === "string";
 }
@@ -358,13 +385,17 @@ async function resolveCost(
   if (usage.inputTokens === null || usage.outputTokens === null) return null;
   const tokens = tokenCounts(usage.inputTokens, usage.outputTokens);
   const pricingModel = call.upstreamModel || call.canonicalModel;
-  const priced = await deps
-    .calculateCost(call.provider, pricingModel, {
-      input_tokens: tokens.prompt_tokens,
-      output_tokens: tokens.completion_tokens,
-    })
-    .catch(() => ({ costUsd: 0, priced: false }));
-  if (priced.priced) return priced.costUsd;
+  // Dedicated decision contracts can use GPU/per-question billing or share ids
+  // with other endpoints; their missing USD must not inherit a chat tariff.
+  if (systemOneAllowsGenericTokenPricing(call.provider)) {
+    const priced = await deps
+      .calculateCost(call.provider, pricingModel, {
+        input_tokens: tokens.prompt_tokens,
+        output_tokens: tokens.completion_tokens,
+      })
+      .catch(() => ({ costUsd: 0, priced: false }));
+    if (priced.priced) return priced.costUsd;
+  }
   const published = nativeSystemOnePricing(call.provider, pricingModel);
   if (!published) return null;
   return (
@@ -539,7 +570,7 @@ async function handleSuccessfulResponse(
   parsed: UpstreamBody,
   body: SystemOneProxyOptions["body"]
 ): Promise<Response> {
-  const answers = parseSystemOneAnswers(parsed, body);
+  const answers = parseSystemOneAnswers(parsed, body, call.provider);
   if (answers.ok === false) {
     const message = `System One upstream returned an invalid response body: ${answers.detail}`;
     // HTTP success may be billed even when its answer contract is malformed.
@@ -714,6 +745,9 @@ export async function handleSystemOneProxy(
     return errorResponse(400, sanitizeErrorMessage(error));
   }
 
+  const outbound = nativeRequestBody(options.provider, options.body);
+  if (outbound.ok === false) return errorResponse(outbound.status, outbound.message);
+
   const credentialRejection = validateProxyCredentials(options);
   if (credentialRejection) return credentialRejection;
   const credentials = options.credentials;
@@ -749,7 +783,7 @@ export async function handleSystemOneProxy(
       const response = await deps.fetchSystemOne(url, credentials ?? {}, {
         method: "POST",
         headers: systemOneHeaders(options.provider, credentials ?? {}),
-        body: JSON.stringify(options.body),
+        body: JSON.stringify(outbound.body),
         signal,
       });
       updateFromHeaders(
@@ -781,7 +815,14 @@ export async function handleSystemOneProxy(
 
       if (!response.ok) return await upstreamFailure(deps, call, response, parsed, text, options);
 
-      return await handleSuccessfulResponse(deps, call, text, parsed, options.body);
+      const normalized = nativeResponseBody(options.provider, parsed, text, options.body);
+      return await handleSuccessfulResponse(
+        deps,
+        call,
+        normalized.text,
+        normalized.body,
+        options.body
+      );
     });
   } catch (error) {
     try {

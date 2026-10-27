@@ -16,6 +16,7 @@
  * Contract-shaped transports; live entitlement is not established by this registry.
  */
 
+import { HOSTED_SYSTEMONE_BACKENDS } from "./systemOneHostedBackends.ts";
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
 
 /** Thrown for a caller-supplied target that cannot be resolved. Carries no request state. */
@@ -41,6 +42,7 @@ export type SystemOneLimits = {
   maxQuestions: number;
   minCriteria: number;
   maxChoiceCriteria: number;
+  minScoreLevels: number;
   maxScoreLevels: number;
   maxBodyBytes: number;
 };
@@ -49,6 +51,7 @@ export const JEV_SYSTEMONE_LIMITS: SystemOneLimits = {
   maxQuestions: 64,
   minCriteria: 1,
   maxChoiceCriteria: 255,
+  minScoreLevels: 2,
   maxScoreLevels: 10,
   maxBodyBytes: 1_048_576,
 };
@@ -67,6 +70,29 @@ export type SystemOneBackend = {
   timeoutMs: number;
   /** Request-shape limits for this backend. */
   limits: SystemOneLimits;
+  /** Backend schema requires instructions and forbids unrecognized question fields. */
+  strictQuestionShape?: boolean;
+  /** Per-model bounds; explicit constraints do not silently affect sibling models. */
+  modelLimits?: Readonly<Record<string, Partial<SystemOneLimits>>>;
+  requestLimitNotes?: Readonly<Record<string, string>>;
+  maxTotalOptions?: number;
+  maxStateChars?: number;
+  maxStateBytes?: number;
+  plainInstructions?: boolean;
+  rejectRecognizedMediaParts?: boolean;
+  stringOrObjectState?: boolean;
+  supportedModelPattern?: RegExp;
+  /** Only explicit native receipts/pricing may price these dedicated contracts. */
+  allowGenericTokenPricing?: boolean;
+  authorizationScheme?: "Bearer" | "Api-Key";
+  /** Native upstream envelope. Omitted keeps the System One contract unchanged. */
+  requestFormat?: "openai-decisions";
+  /** Exact documented ids when a backend has a closed native model set. */
+  supportedModels?: readonly string[];
+  /** Documentation-only seeds; unlike supportedModels this never restricts dispatch. */
+  documentedModels?: readonly string[];
+  /** Source-pinned endpoint capabilities, used only when a row declares none. */
+  documentedModelEndpoints?: Readonly<Record<string, readonly string[]>>;
   /**
    * Fallback filter for a catalog that lists chat and decision models together
    * (OpenCode Console's `/inference/v1/models`) or carries no modality metadata. A row
@@ -81,6 +107,32 @@ export type SystemOneBackend = {
  * model discovery stays at `/inference/v1/models` on the same allowlisted host.
  */
 export const SYSTEMONE_BACKENDS = {
+  ...HOSTED_SYSTEMONE_BACKENDS,
+  openai: {
+    provider: "openai",
+    label: "OpenAI Decisions",
+    decisionUrl: "https://api.openai.com/v1/decisions",
+    modelsUrl: "https://api.openai.com/v1/models",
+    allowedHosts: ["api.openai.com"],
+    requiresKey: true,
+    timeoutMs: 30_000,
+    requestFormat: "openai-decisions",
+    allowGenericTokenPricing: false,
+    supportedModels: ["gpt-6-luna"],
+    // Existing OpenAI registry serves chat; public Decisions guide adds native support.
+    documentedModelEndpoints: { "gpt-6-luna": ["chat", "responses", "systemone"] },
+    limits: {
+      maxQuestions: 400,
+      minCriteria: 2,
+      maxChoiceCriteria: 255,
+      minScoreLevels: 2,
+      maxScoreLevels: 10,
+      maxBodyBytes: 1_048_576,
+    },
+    // Direct OpenAI currently documents this exact model only. Aggregator ids
+    // and ordinary chat models are not inferred as native decision models.
+    decisionModelPattern: /^gpt-6-luna$/,
+  },
   "opencode-zen": {
     provider: "opencode-zen",
     label: "OpenCode Zen",
@@ -120,6 +172,33 @@ export const SYSTEMONE_BACKENDS = {
     // OpenRouter tags decision models in `architecture.output_modalities`, so
     // the pattern is only a fallback for a row that carries none.
     decisionModelPattern: /(?:^|\/)jev(?:[-.]|$)/i,
+  },
+  deepinfra: {
+    provider: "deepinfra",
+    label: "DeepInfra",
+    // https://docs.deepinfra.com/api-reference/decisions/systemone
+    decisionUrl: "https://api.deepinfra.com/v1/decisions",
+    // https://docs.deepinfra.com/api-reference/decisions/list-models
+    modelsUrl: "https://api.deepinfra.com/typesafe/v1/models",
+    allowedHosts: ["api.deepinfra.com"],
+    requiresKey: true,
+    timeoutMs: 30_000,
+    // Choice 2–52, Score 2–10 and 64 questions are vendor schema limits.
+    // The 1 MiB text-body bound remains an OmniRoute guard; images are deferred.
+    limits: { ...JEV_SYSTEMONE_LIMITS, minCriteria: 2, maxChoiceCriteria: 52 },
+    strictQuestionShape: true,
+    documentedModels: [
+      "Cloudflare/clef",
+      "Cloudflare/clef-flash",
+      "nace-ai/drex-max",
+      "nace-ai/drex-v2.0",
+    ],
+    modelLimits: { "nace-ai/drex-max": { maxQuestions: 16 } },
+    requestLimitNotes: {
+      "nace-ai/drex-max":
+        "Conservative intersection: model page limits 16 questions; API schema says 64. Retain API-schema Choice 2–52 and Score 2–10 while the model page advertises 1–255. https://deepinfra.com/nace-ai/drex-max and /api",
+    },
+    decisionModelPattern: /^(?:Cloudflare\/clef(?:-flash)?|nace-ai\/drex-(?:max|v2\.0))$/,
   },
   typesafe: {
     provider: "typesafe",
@@ -191,6 +270,33 @@ export function systemOneBackend(provider: string): SystemOneBackend {
   return SYSTEMONE_BACKENDS[provider];
 }
 
+/** Known model-specific endpoint fallback; never classifies an entire provider as chat/native. */
+export function systemOneDocumentedModelEndpoints(
+  provider: string | null | undefined,
+  model: string
+): string[] | undefined {
+  if (!provider || !isSystemOneProvider(provider)) return undefined;
+  const backend = systemOneBackend(provider);
+  const explicit = backend.documentedModelEndpoints?.[model];
+  if (explicit) return [...explicit];
+  return backend.supportedModels?.includes(model) || backend.documentedModels?.includes(model)
+    ? ["systemone"]
+    : undefined;
+}
+
+/** Whether a native endpoint may reuse existing operator/global token tariffs. */
+export function systemOneAllowsGenericTokenPricing(provider: string): boolean {
+  return (
+    !isSystemOneProvider(provider) || systemOneBackend(provider).allowGenericTokenPricing !== false
+  );
+}
+
+/** Effective backend/model request bounds, including explicitly documented conservative clamps. */
+export function systemOneRequestLimits(provider: string, model?: string): SystemOneLimits {
+  const backend = systemOneBackend(provider);
+  return { ...backend.limits, ...(model ? backend.modelLimits?.[model] : undefined) };
+}
+
 /**
  * Free-tier detection is explicit per provider spelling: OpenCode Zen suffixes
  * its free models with `-free`, OpenRouter with the `:free` variant suffix.
@@ -240,6 +346,13 @@ function candidate(
   model: string,
   pinned: boolean
 ): SystemOneCandidate {
+  const backend = systemOneBackend(provider);
+  const supported = backend.supportedModels;
+  if (
+    (supported && !supported.includes(model)) ||
+    (backend.supportedModelPattern && !backend.supportedModelPattern.test(model))
+  )
+    throw new SystemOneTargetError("This model is not supported by the selected native backend");
   return {
     provider,
     model,
@@ -312,27 +425,41 @@ type ConnectionTierFields = {
   providerSpecificData?: Record<string, unknown> | null;
 };
 
-/**
- * Whether a provider connection may serve a model of this tier.
- *
- * A free-tier model is dispatchable only on a connection the operator explicitly
- * tagged `systemOneTier: "free"`. A paid model, conversely, always needs the backend's
- * normal credential when `requiresKey` is true. A free-tier model may still need
- * a credential; the tier tag prevents paid fallback, it does not bypass auth.
+/** The same trimmed token used by transport also defines credential presence. */
+export function systemOneCredentialToken(connection: {
+  apiKey?: unknown;
+  accessToken?: unknown;
+}): string {
+  for (const value of [connection.apiKey, connection.accessToken]) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return "";
+}
+
+/** Credential-free tier policy shared by catalog visibility and physical dispatch.
+ * Zen's explicit free-account opt-in is not an entitlement rule for other vendors.
+ * A model's explicit free SKU never creates a paid candidate or establishes USD price.
  */
+export function systemOneTierAllowed(
+  provider: string | undefined,
+  tier: SystemOneTier,
+  providerSpecificData?: Record<string, unknown> | null
+): boolean {
+  const declared = providerSpecificData?.systemOneTier;
+  if (tier === "paid") return declared !== "free";
+  if (declared === "free") return true;
+  if (declared != null) return false;
+  return !!provider && isSystemOneProvider(provider) && provider !== "opencode-zen";
+}
+
+/** Tier policy never makes a key-requiring hosted endpoint anonymous. */
 export function isConnectionEligibleForTier(
   tier: SystemOneTier,
   connection: ConnectionTierFields,
   provider?: string
 ): boolean {
-  const declared = connection.providerSpecificData?.systemOneTier;
-  const hasCredential = Boolean(connection.apiKey || connection.accessToken);
+  if (!systemOneTierAllowed(provider, tier, connection.providerSpecificData)) return false;
   const requiresKey =
     provider && isSystemOneProvider(provider) ? !!systemOneBackend(provider).requiresKey : false;
-  if (tier === "free") {
-    if (declared !== "free") return false;
-    return requiresKey ? hasCredential : true;
-  }
-  if (declared === "free") return false;
-  return requiresKey ? hasCredential : true;
+  return requiresKey ? Boolean(systemOneCredentialToken(connection)) : true;
 }

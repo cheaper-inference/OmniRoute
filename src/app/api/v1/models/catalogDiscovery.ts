@@ -34,20 +34,26 @@ export function catalogBadRequest(message: string, headers: Record<string, strin
  * are dropped (paging is re-applied after filtering); every other param — `prefix`,
  * `configuredOnly`, … — and the caller's headers, including auth, are preserved.
  */
-function buildUnfilteredCatalogRequest(request: Request): Request {
+function buildUnfilteredCatalogRequest(
+  request: Request,
+  filters?: CatalogDiscoveryFilters
+): Request {
   const url = new URL(request.url);
   for (const name of [...CATALOG_DISCOVERY_PARAMS, "limit", "after"]) {
     url.searchParams.delete(name);
   }
+  // Native decisions use a separate local source inventory, never the chat cache.
+  if (filters?.kind === "decision") url.searchParams.set("kind", "decision");
   const headers = new Headers(request.headers);
   // The POST shortlist forwards its auth headers, not its body framing.
   for (const name of ["content-length", "content-type", "transfer-encoding"]) headers.delete(name);
-  return new Request(url.toString(), { method: "GET", headers });
+  return new Request(url.toString(), { method: "GET", headers, signal: request.signal });
 }
 
 async function loadCatalogRows(
   request: Request,
-  loadCatalog: CatalogLoader
+  loadCatalog: CatalogLoader,
+  filters?: CatalogDiscoveryFilters
 ): Promise<
   | {
       ok: true;
@@ -57,7 +63,7 @@ async function loadCatalogRows(
     }
   | { ok: false; response: Response }
 > {
-  const response = await loadCatalog(buildUnfilteredCatalogRequest(request));
+  const response = await loadCatalog(buildUnfilteredCatalogRequest(request, filters));
   if (response.status !== 200) return { ok: false, response };
   const body = (await response.json()) as CatalogBody;
   const rows = Array.isArray(body?.data) ? (body.data as Record<string, unknown>[]) : [];
@@ -80,7 +86,7 @@ export async function getFilteredCatalogResponse(
   // `=== false`, not `!ok`: without strictNullChecks only the literal comparison narrows.
   if (parsed.ok === false) return catalogBadRequest(parsed.message);
 
-  const loaded = await loadCatalogRows(request, loadCatalog);
+  const loaded = await loadCatalogRows(request, loadCatalog, parsed.value);
   if (loaded.ok === false) return loaded.response;
 
   const page = parseCatalogPage(request);
@@ -100,7 +106,7 @@ export async function queryCatalogResponse(
   limit: number,
   loadCatalog: CatalogLoader
 ): Promise<Response> {
-  const loaded = await loadCatalogRows(request, loadCatalog);
+  const loaded = await loadCatalogRows(request, loadCatalog, filters);
   if (loaded.ok === false) return loaded.response;
 
   const data = filterCatalogModels(loaded.rows, filters)

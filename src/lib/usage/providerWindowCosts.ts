@@ -19,6 +19,14 @@ import {
   type RecordedCostRow,
 } from "./recordedCostMatcher";
 
+import {
+  addUnpricedNativeCoverage,
+  nativeUsageSql,
+  createNativeUsagePricingScope,
+  type NativeUsagePricingScope,
+  type NativeCostCoverage,
+} from "./nativeUsagePricing";
+
 const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
 const RECORDED_COST_MATCH_TOLERANCE_MS = 30_000;
 
@@ -30,6 +38,8 @@ interface UsageHistoryFilter {
 }
 
 interface AggregatedUsageCostRow {
+  nativeRequests: number;
+  unpricedNativeCount: number;
   apiKeyId: string | null;
   apiKeyName: string | null;
   provider: string;
@@ -54,6 +64,7 @@ interface AggregatedUsageCostRow {
 }
 
 interface UsageCostRow {
+  nativeUsage: number;
   id: number;
   apiKeyId: string | null;
   apiKeyName: string | null;
@@ -76,7 +87,7 @@ interface RecordedCostSummary {
   entryCount: number;
 }
 
-interface ProviderWindowCostModelRow {
+interface ProviderWindowCostModelRow extends NativeCostCoverage {
   model: string;
   provider: string;
   serviceTier: string;
@@ -85,7 +96,14 @@ interface ProviderWindowCostModelRow {
   costUsd: number;
 }
 
-export interface ProviderWindowCostBreakdownRow {
+interface UnallocatedRecordedCost {
+  /** Key-level records may overlap known costs; this amount is NOT added to the subtotal. */
+  unallocatedRecordedCostUsd?: number;
+  recordedCostProvenance?: "unallocated_api_key_ledger";
+}
+
+export interface ProviderWindowCostBreakdownRow
+  extends NativeCostCoverage, UnallocatedRecordedCost {
   apiKeyKey: string;
   apiKeyId: string | null;
   apiKeyName: string;
@@ -106,7 +124,7 @@ interface ProviderWindowCostAggregateRow extends ProviderWindowCostBreakdownRow 
   modelMap: Map<string, ProviderWindowCostModelRow>;
 }
 
-export interface ProviderWindowCostBreakdown {
+export interface ProviderWindowCostBreakdown extends NativeCostCoverage, UnallocatedRecordedCost {
   provider: string;
   connectionId: string | null;
   windowStartAt: string;
@@ -328,7 +346,7 @@ function buildUsageHistoryFilter(
     "LOWER(provider) = @provider",
     "timestamp >= @since",
     "timestamp <= @nowIso",
-    "COALESCE(success, 1) = 1",
+    `(COALESCE(success, 1) = 1 OR ${nativeUsageSql()})`,
   ];
   const params: Record<string, unknown> = {
     provider: providerKey,
@@ -346,7 +364,10 @@ function buildUsageHistoryFilter(
   return { whereSql: where.join(" AND "), params };
 }
 
-function fetchAggregatedUsageRows(filter: UsageHistoryFilter): AggregatedUsageCostRow[] {
+function fetchAggregatedUsageRows(
+  filter: UsageHistoryFilter,
+  pricing: NativeUsagePricingScope
+): AggregatedUsageCostRow[] {
   return getDbInstance()
     .prepare<AggregatedUsageCostRow>(
       `
@@ -357,6 +378,8 @@ function fetchAggregatedUsageRows(filter: UsageHistoryFilter): AggregatedUsageCo
         LOWER(model) as model,
         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
         COUNT(*) as requests,
+        SUM(CASE WHEN ${nativeUsageSql()} THEN 1 ELSE 0 END) as nativeRequests,
+        SUM(CASE WHEN ${pricing.unpricedUsageSql()} THEN 1 ELSE 0 END) as unpricedNativeCount,
         COALESCE(SUM(tokens_input), 0) as promptTokens,
         COALESCE(SUM(tokens_output), 0) as completionTokens,
         COALESCE(SUM(tokens_cache_read), 0) as cacheReadTokens,
@@ -365,11 +388,11 @@ function fetchAggregatedUsageRows(filter: UsageHistoryFilter): AggregatedUsageCo
         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
         MAX(timestamp) as lastUsed,
         COALESCE(SUM(provider_cost_usd), 0) as storedCost,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) as costPromptTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) as costCompletionTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END), 0) as costCacheReadTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as costCacheCreationTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END), 0) as costReasoningTokens
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_input ELSE 0 END), 0) as costPromptTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_output ELSE 0 END), 0) as costCompletionTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_cache_read ELSE 0 END), 0) as costCacheReadTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_cache_creation ELSE 0 END), 0) as costCacheCreationTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_reasoning ELSE 0 END), 0) as costReasoningTokens
       FROM usage_history
       WHERE ${filter.whereSql}
       GROUP BY
@@ -427,7 +450,8 @@ function fetchDetailedUsageRowsForApiKey(
         COALESCE(tokens_reasoning, 0) as reasoningTokens,
         COALESCE(tokens_input + tokens_output, 0) as totalTokens,
         timestamp,
-        provider_cost_usd as storedCost
+        provider_cost_usd as storedCost,
+        CASE WHEN ${nativeUsageSql()} THEN 1 ELSE 0 END as nativeUsage
       FROM usage_history
       WHERE ${filter.whereSql}
         AND api_key_id = @apiKeyId
@@ -549,6 +573,8 @@ async function getUsageRowCostUsd(
   if (row.storedCost !== null && row.storedCost !== undefined) {
     return Math.max(0, toNumber(row.storedCost));
   }
+  // Generic key-level ledger records cannot establish a native request charge.
+  if (row.nativeUsage) return 0;
   const usageTimestampMs = Date.parse(row.timestamp ?? "");
   const recordedCost = matcher.takeClosest(usageTimestampMs, RECORDED_COST_MATCH_TOLERANCE_MS);
   if (recordedCost) return Math.max(0, toNumber(recordedCost.cost));
@@ -614,6 +640,12 @@ async function buildApiKeyCostAllocations(args: {
     if (calculatedCosts.length % COST_MATCH_BATCH_SIZE === 0) await yieldToEventLoop();
   }
 
+  // The legacy ledger has no endpoint identity. Never distribute chat charges
+  // over native rows or overwrite a reported native amount (including zero).
+  if (args.groups.some((group) => group.nativeRequests > 0)) {
+    return calculatedCosts;
+  }
+
   if (!args.recordedSummary || args.recordedSummary.entryCount <= 0) {
     return calculatedCosts;
   }
@@ -665,7 +697,8 @@ export async function getProviderWindowCostBreakdown({
     connectionId
   );
 
-  const aggregatedRows = fetchAggregatedUsageRows(filter);
+  const pricing = await createNativeUsagePricingScope();
+  const aggregatedRows = fetchAggregatedUsageRows(filter, pricing);
   const usageRequestCounts = fetchUsageRequestCountByApiKey(filter);
   const currentApiKeyNames = await getCurrentApiKeyNames();
   const apiKeyIds = uniqueApiKeyIds(aggregatedRows);
@@ -744,6 +777,12 @@ export async function getProviderWindowCostBreakdown({
       modelMap: new Map(),
     };
 
+    const recordedSummary = apiKeyId ? recordedSummaries.get(apiKeyId) : undefined;
+    if (groups.some((group) => group.nativeRequests > 0) && recordedSummary?.entryCount) {
+      aggregate.unallocatedRecordedCostUsd = recordedSummary.totalCost;
+      aggregate.recordedCostProvenance = "unallocated_api_key_ledger";
+    }
+
     groups.forEach((row, index) => {
       const costUsd = groupCosts[index] ?? 0;
       aggregate.requests += toNumber(row.requests);
@@ -751,6 +790,7 @@ export async function getProviderWindowCostBreakdown({
       aggregate.completionTokens += toNumber(row.completionTokens);
       aggregate.totalTokens += toNumber(row.totalTokens);
       aggregate.costUsd = roundUsd(aggregate.costUsd + costUsd);
+      addUnpricedNativeCoverage(aggregate, toNumber(row.unpricedNativeCount));
       if (!aggregate.lastUsed || (row.lastUsed && row.lastUsed > aggregate.lastUsed)) {
         aggregate.lastUsed = row.lastUsed || aggregate.lastUsed;
       }
@@ -767,6 +807,7 @@ export async function getProviderWindowCostBreakdown({
       model.requests += toNumber(row.requests);
       model.totalTokens += toNumber(row.totalTokens);
       model.costUsd = roundUsd(model.costUsd + costUsd);
+      addUnpricedNativeCoverage(model, toNumber(row.unpricedNativeCount));
       aggregate.modelMap.set(modelKey, model);
     });
 
@@ -792,8 +833,21 @@ export async function getProviderWindowCostBreakdown({
     .sort((left, right) => right.costUsd - left.costUsd);
 
   const totalCostUsd = roundUsd(breakdownRows.reduce((sum, row) => sum + row.costUsd, 0));
+  const coverage: NativeCostCoverage = {};
+  for (const row of breakdownRows)
+    addUnpricedNativeCoverage(coverage, row.unpricedNativeCount || 0);
+  const recordedCoverage: UnallocatedRecordedCost = {};
+  for (const row of breakdownRows) {
+    if (row.unallocatedRecordedCostUsd === undefined) continue;
+    recordedCoverage.unallocatedRecordedCostUsd =
+      (recordedCoverage.unallocatedRecordedCostUsd || 0) + row.unallocatedRecordedCostUsd;
+    recordedCoverage.recordedCostProvenance = "unallocated_api_key_ledger";
+  }
   const estimatedFullQuotaUsd =
-    totalCostUsd > 0 && window.quotaUsedPercent && window.quotaUsedPercent > 0
+    !coverage.unpricedNativeCount &&
+    totalCostUsd > 0 &&
+    window.quotaUsedPercent &&
+    window.quotaUsedPercent > 0
       ? roundUsd(totalCostUsd / (window.quotaUsedPercent / 100))
       : null;
 
@@ -812,5 +866,7 @@ export async function getProviderWindowCostBreakdown({
     totalCostUsd,
     estimatedFullQuotaUsd,
     rows: breakdownRows,
+    ...coverage,
+    ...recordedCoverage,
   };
 }

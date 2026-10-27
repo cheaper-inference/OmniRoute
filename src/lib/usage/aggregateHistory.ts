@@ -7,7 +7,12 @@
 
 import { getDbInstance } from "../db/core";
 import { getUserDatabaseSettings } from "../db/databaseSettings";
-import { calculateCost } from "./costCalculator";
+import { calculateCost, calculateCostDetailed } from "./costCalculator";
+import {
+  createNativeUsagePricingScope,
+  nativeUsageSql,
+  type NativeUsagePricingScope,
+} from "./nativeUsagePricing";
 
 interface AggregationResult {
   processed: number;
@@ -143,7 +148,10 @@ export async function rollupHourlyQuota(
  * @param beforeDate - ISO timestamp/date boundary. Rows strictly before this value are rolled up.
  * @returns Aggregation result with counts
  */
-export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<AggregationResult> {
+export async function rollupUsageHistoryBeforeDate(
+  beforeDate: string,
+  providedPricingScope?: NativeUsagePricingScope
+): Promise<AggregationResult> {
   const db = getDbInstance();
 
   const result: AggregationResult = {
@@ -153,6 +161,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
   };
 
   try {
+    const pricing = providedPricingScope ?? (await createNativeUsagePricingScope());
     const rows = db
       .prepare(
         `SELECT
@@ -161,6 +170,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           DATE(timestamp) as date,
           COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
           COUNT(*) as totalRequests,
+          CASE WHEN ${nativeUsageSql()} THEN 1 ELSE 0 END as nativeUsage,
           COALESCE(tokens_input, 0) as requestInputTokens,
           COALESCE(tokens_output, 0) as requestOutputTokens,
           COALESCE(tokens_cache_read, 0) as requestCacheReadTokens,
@@ -175,17 +185,19 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           COALESCE(SUM(provider_cost_usd), 0) as storedCost
         FROM usage_history
         WHERE timestamp < ?
+          AND NOT ${pricing.retainedGroupSql()}
           AND provider IS NOT NULL AND provider != ''
           AND model IS NOT NULL AND model != ''
         GROUP BY LOWER(provider), LOWER(model), DATE(timestamp), serviceTier,
           requestInputTokens, requestOutputTokens, requestCacheReadTokens,
-          requestCacheCreationTokens, requestReasoningTokens, hasStoredCost`
+          requestCacheCreationTokens, requestReasoningTokens, hasStoredCost, nativeUsage`
       )
       .all(beforeDate) as Array<{
       provider: string;
       model: string;
       date: string;
       serviceTier: string;
+      nativeUsage: number;
       totalRequests: number;
       requestInputTokens: number;
       requestOutputTokens: number;
@@ -202,44 +214,46 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
     }>;
 
     const pricedRows = await Promise.all(
-      rows.map(async (row) => ({
-        ...row,
-        // Price one request of this exact token shape, then multiply by how many
-        // identical requests the group holds. Pricing is a pure function of the
-        // token shape, so this equals per-request pricing while still collapsing
-        // duplicates. Pricing the day's SUMMED tokens instead would be wrong:
-        // non-cached input is clamped at zero per request, and summing first lets
-        // one cache-heavy request's clamped surplus cancel another request's
-        // billable input.
-        //
-        // A request with a provider-reported exact cost (`provider_cost_usd`) is
-        // archived at that cost; none of its tokens are priced.
-        totalCost: row.hasStoredCost
-          ? row.storedCost
-          : (await calculateCost(
-              row.provider,
-              row.model,
-              {
-                input: row.requestInputTokens,
-                output: row.requestOutputTokens,
-                cacheRead: row.requestCacheReadTokens,
-                cacheCreation: row.requestCacheCreationTokens,
-                reasoning: row.requestReasoningTokens,
-              },
-              {
-                provider: row.provider,
-                model: row.model,
-                serviceTier: row.serviceTier,
-                // The archive stores API-equivalent value. Billed-cost consumers
-                // still mask flat-rate providers when they read this value.
-                flatRateAsZero: false,
-              }
-            )) * row.totalRequests,
-      }))
+      rows.map(async (row) => {
+        if (row.hasStoredCost) return { ...row, totalCost: row.storedCost, unpriced: false };
+        // Preserve per-request token shapes (not summed tokens) for tier/cache
+        // pricing. Native rates may have disappeared since scope construction.
+        const tokens = {
+          input: row.requestInputTokens,
+          output: row.requestOutputTokens,
+          cacheRead: row.requestCacheReadTokens,
+          cacheCreation: row.requestCacheCreationTokens,
+          reasoning: row.requestReasoningTokens,
+        };
+        const options = {
+          provider: row.provider,
+          model: row.model,
+          serviceTier: row.serviceTier,
+          flatRateAsZero: false,
+        };
+        if (!row.nativeUsage) {
+          return {
+            ...row,
+            totalCost:
+              (await calculateCost(row.provider, row.model, tokens, options)) * row.totalRequests,
+            unpriced: false,
+          };
+        }
+        const result = await calculateCostDetailed(row.provider, row.model, tokens, options);
+        const unpriced = !result.priced || result.failed === true;
+        if (unpriced) pricing.markUnpriced(row.provider, row.model);
+        return { ...row, totalCost: result.costUsd * row.totalRequests, unpriced };
+      })
+    );
+    const heldDays = new Set(
+      pricedRows
+        .filter((row) => row.unpriced)
+        .map((row) => `${row.provider}\u0000${row.model}\u0000${row.date}`)
     );
 
     const archivedRows = Array.from(
       pricedRows
+        .filter((row) => !heldDays.has(`${row.provider}\u0000${row.model}\u0000${row.date}`))
         .reduce((byDay, row) => {
           const key = `${row.provider}\u0000${row.model}\u0000${row.date}`;
           const existing = byDay.get(key);

@@ -134,29 +134,46 @@ export class RequestBodyTooLargeError extends Error {
  */
 export async function readRequestBodyWithLimit(
   request: Request,
-  limit: number
+  limit: number,
+  signal?: AbortSignal
 ): Promise<Uint8Array<ArrayBuffer>> {
   const declaredLength = Number.parseInt(request.headers.get("content-length") || "", 10);
   if (!Number.isNaN(declaredLength) && declaredLength > limit) {
     throw new RequestBodyTooLargeError(limit);
   }
-  if (!request.body) return new Uint8Array(0);
+  if (!request.body) {
+    signal?.throwIfAborted();
+    return new Uint8Array(0);
+  }
 
   const reader = request.body.getReader();
+  const cancel = (reason: unknown) => {
+    // Underlying cancellation may never settle. It must not hold admission or
+    // reader cleanup open after the caller has left or the byte limit is hit.
+    void reader.cancel(reason).catch(() => {});
+  };
+  const onAbort = () => cancel(signal?.reason);
   const chunks: Uint8Array[] = [];
   let total = 0;
   try {
+    signal?.addEventListener("abort", onAbort, { once: true });
+    if (signal?.aborted) {
+      cancel(signal.reason);
+      signal.throwIfAborted();
+    }
     while (true) {
       const { done, value } = await reader.read();
+      signal?.throwIfAborted();
       if (done) break;
       total += value.byteLength;
       if (total > limit) {
-        await reader.cancel("request body too large");
+        cancel("request body too large");
         throw new RequestBodyTooLargeError(limit);
       }
       chunks.push(value);
     }
   } finally {
+    signal?.removeEventListener("abort", onAbort);
     reader.releaseLock();
   }
 

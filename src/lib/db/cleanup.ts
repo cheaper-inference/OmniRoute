@@ -5,6 +5,10 @@
  */
 
 import { rollupUsageHistoryBeforeDate } from "@/lib/usage/aggregateHistory";
+import {
+  createNativeUsagePricingScope,
+  type NativeUsagePricingScope,
+} from "@/lib/usage/nativeUsagePricing";
 import { purgeCallLogArtifactDirectory } from "@/lib/usage/callLogArtifacts";
 
 import { getDbInstance } from "./core";
@@ -124,7 +128,14 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
   // returned result, so we inspect that rather than relying on a thrown exception.
   // If the rollup failed, abort the DELETE to avoid permanently losing raw usage data
   // that was never aggregated.
-  const rollupResult = await rollupUsageHistoryBeforeDate(cutoffDateStr);
+  let pricing: NativeUsagePricingScope;
+  try {
+    pricing = await createNativeUsagePricingScope();
+  } catch {
+    result.errors++;
+    return result;
+  }
+  const rollupResult = await rollupUsageHistoryBeforeDate(cutoffDateStr, pricing);
   if (rollupResult.errors > 0) {
     console.error(
       "[Cleanup] Aborting usage_history deletion because the pre-delete rollup failed."
@@ -134,7 +145,8 @@ export async function cleanupUsageHistory(): Promise<CleanupResult> {
   }
 
   try {
-    const stmt = db.prepare("DELETE FROM usage_history WHERE timestamp < ?");
+    const stmt = db.prepare(`DELETE FROM usage_history WHERE timestamp < ?
+      AND NOT ${pricing.retainedGroupSql()}`);
     const runResult = stmt.run(cutoffDateStr);
     result.deleted = runResult.changes;
 

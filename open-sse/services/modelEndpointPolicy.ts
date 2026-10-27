@@ -7,7 +7,10 @@
  * provider knowledge here so discovery, import, and catalog projection agree.
  */
 
-import { SYSTEMONE_BACKENDS } from "../config/systemOneRegistry.ts";
+import {
+  SYSTEMONE_BACKENDS,
+  systemOneDocumentedModelEndpoints,
+} from "../config/systemOneRegistry.ts";
 
 export type ModelEndpointKind =
   "chat" | "image" | "video" | "embedding" | "rerank" | "decision" | "non-chat" | "unknown";
@@ -23,6 +26,9 @@ type ModelEndpointMetadata = {
   supportedEndpoints?: unknown;
   supported_endpoints?: unknown;
   architecture?: unknown;
+  output_modalities?: unknown;
+  apiFormat?: unknown;
+  modelType?: unknown;
 };
 
 type EndpointAwareModel = ModelEndpointMetadata & { id: string };
@@ -33,14 +39,24 @@ export function getDeclaredModelEndpoints(
 ): string[] | undefined {
   const declared = model.supportedEndpoints ?? model.supported_endpoints;
   if (Array.isArray(declared)) {
-    return declared.filter((endpoint): endpoint is string => typeof endpoint === "string");
+    return canonicalModelEndpoints(
+      declared.filter((endpoint): endpoint is string => typeof endpoint === "string")
+    );
   }
+  if (model.apiFormat === "systemone" || model.modelType === "decision") return ["systemone"];
+  const documented =
+    typeof model.id === "string"
+      ? systemOneDocumentedModelEndpoints(provider, model.id)
+      : undefined;
+  if (documented) return documented;
   const architecture = model.architecture;
   const rawOutput =
     architecture && typeof architecture === "object"
       ? (architecture as { output_modalities?: unknown }).output_modalities
-      : undefined;
-  const output = Array.isArray(rawOutput) ? rawOutput : [];
+      : model.output_modalities;
+  const output = Array.isArray(rawOutput ?? model.output_modalities)
+    ? ((rawOutput ?? model.output_modalities) as unknown[])
+    : [];
   if (output.includes("decisions")) {
     return output.includes("text") ? ["chat", "systemone"] : ["systemone"];
   }
@@ -61,6 +77,7 @@ const CHAT_ENDPOINTS = new Set([
   "chat",
   "chat-completions",
   "chat/completions",
+  "chat.completions",
   "messages",
   "responses",
 ]);
@@ -77,6 +94,23 @@ const DECISION_ENDPOINTS = new Set(["systemone", "decision", "decisions"]);
 
 function normalizeEndpoint(endpoint: string): string {
   return endpoint.trim().toLowerCase().replace(/^\/+/, "").replace(/^v1\//, "");
+}
+
+/** Canonical native/chat boundary aliases, preserving all other declared endpoints. */
+export function canonicalModelEndpoints(endpoints: readonly string[]): string[] {
+  return [
+    ...new Set(
+      endpoints
+        .map((value) => {
+          const endpoint = normalizeEndpoint(value);
+          if (DECISION_ENDPOINTS.has(endpoint)) return "systemone";
+          if (["chat-completions", "chat/completions", "chat.completions"].includes(endpoint))
+            return "chat";
+          return endpoint;
+        })
+        .filter(Boolean)
+    ),
+  ];
 }
 
 function classifyExplicitEndpoints(
@@ -186,9 +220,10 @@ export function getModelEndpointDecision(
   }
 
   if (explicit) return explicit;
-  if (getDeclaredModelEndpoints({ id: modelId }, provider)?.includes("systemone")) {
-    return { kind: "decision", chatSelectable: false, reason: "provider-policy" };
-  }
+  const documented = classifyExplicitEndpoints(
+    getDeclaredModelEndpoints({ id: modelId }, provider)
+  );
+  if (documented) return { ...documented, reason: "provider-policy" };
   return { kind: "unknown", chatSelectable: true, reason: "unclassified" };
 }
 

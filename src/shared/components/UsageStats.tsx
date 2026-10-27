@@ -37,6 +37,28 @@ function MiniBarGraph({
 
 export default function UsageStats() {
   const t = useTranslations("stats");
+  const nativeCostCount = (value: { unpricedNativeCount?: number }) =>
+    Number.isSafeInteger(value.unpricedNativeCount) && value.unpricedNativeCount > 0
+      ? value.unpricedNativeCount
+      : 0;
+  const partialCost = (value: { costStatus?: string; unpricedNativeCount?: number }) =>
+    value.costStatus === "partial" || nativeCostCount(value) > 0;
+  const renderRowCost = (value: {
+    totalCost: number;
+    costStatus?: string;
+    unpricedNativeCount?: number;
+  }) => (
+    <>
+      {partialCost(value)
+        ? `${t("knownSubtotal")}: ${fmtCost(value.totalCost)}`
+        : fmtCost(value.totalCost)}
+      {nativeCostCount(value) > 0 && (
+        <span className="block text-xs font-normal text-text-muted">
+          {t("unpricedNativeRequests", { count: nativeCostCount(value) })}
+        </span>
+      )}
+    </>
+  );
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -318,9 +340,14 @@ export default function UsageStats() {
             <div className="w-px bg-border self-stretch mx-2" />
             <div className="flex flex-col gap-1 flex-1">
               <span className="text-text-muted text-sm uppercase font-semibold">
-                {t("totalCost")}
+                {t(partialCost(stats) ? "knownSubtotal" : "totalCost")}
               </span>
               <span className="text-2xl font-bold text-warning">{fmtCost(stats.totalCost)}</span>
+              {nativeCostCount(stats) > 0 && (
+                <span className="text-xs text-text-muted">
+                  {t("unpricedNativeRequests", { count: nativeCostCount(stats) })}
+                </span>
+              )}
             </div>
           </div>
         </Card>
@@ -489,13 +516,13 @@ export default function UsageStats() {
                 ) : (
                   <>
                     <TableCell className="px-6 py-3 text-right text-text-muted">
-                      {fmtCost(data.inputCost)}
+                      {partialCost(data) ? t("costUnknown") : fmtCost(data.inputCost)}
                     </TableCell>
                     <TableCell className="px-6 py-3 text-right text-text-muted">
-                      {fmtCost(data.outputCost)}
+                      {partialCost(data) ? t("costUnknown") : fmtCost(data.outputCost)}
                     </TableCell>
                     <TableCell className="px-6 py-3 text-right font-medium text-warning">
-                      {fmtCost(data.totalCost)}
+                      {renderRowCost(data)}
                     </TableCell>
                   </>
                 )}
@@ -695,13 +722,13 @@ export default function UsageStats() {
                 ) : (
                   <>
                     <TableCell className="px-6 py-3 text-right text-text-muted">
-                      {fmtCost(data.inputCost)}
+                      {partialCost(data) ? t("costUnknown") : fmtCost(data.inputCost)}
                     </TableCell>
                     <TableCell className="px-6 py-3 text-right text-text-muted">
-                      {fmtCost(data.outputCost)}
+                      {partialCost(data) ? t("costUnknown") : fmtCost(data.outputCost)}
                     </TableCell>
                     <TableCell className="px-6 py-3 text-right font-medium text-warning">
-                      {fmtCost(data.totalCost)}
+                      {renderRowCost(data)}
                     </TableCell>
                   </>
                 )}

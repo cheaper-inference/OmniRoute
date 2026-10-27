@@ -1,3 +1,4 @@
+import { getLocalDecisionCatalogResponse, isDecisionCatalogKind } from "./catalogDecisions";
 import { createCatalogConnectionExclusionFilter } from "@/lib/providerModels/copilotCatalogRejections";
 import { PROVIDER_MODELS, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { NOAUTH_PROVIDERS } from "@/shared/constants/providers";
@@ -232,6 +233,12 @@ export async function getUnifiedModelsResponse(
   }
 
   try {
+    if (isDecisionCatalogKind(new URL(request.url).searchParams.get("kind"))) {
+      const response = await getLocalDecisionCatalogResponse(request);
+      const headers = new Headers({ ...corsHeaders, ...diagnosticHeaders });
+      response.headers.forEach((value, name) => headers.set(name, value));
+      return new Response(response.body, { status: response.status, headers });
+    }
     return await resolveCachedCatalogResponse(
       request,
       { corsHeaders, diagnosticHeaders },

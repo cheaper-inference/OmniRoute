@@ -34,10 +34,17 @@ function captureError(fn: () => unknown): SystemOneTargetError {
   throw new Error("expected the call to throw");
 }
 
-test("the four explicit native backends are registered and nothing else", () => {
+test("the explicit native backends are registered and nothing else", () => {
   assert.deepEqual(listSystemOneProviders().sort(), [
+    "baseten",
+    "deepinfra",
+    "fireworks",
+    "inception",
+    "liquid",
+    "openai",
     "opencode-zen",
     "openrouter",
+    "perplexity",
     "typesafe",
     "vercel-ai-gateway",
   ]);
@@ -275,4 +282,73 @@ test("pricing provenance is explicit — unknown rates are not reported as free"
   assert.equal(nativeSystemOnePricing("openrouter", "typesafe/jev-1.13"), null);
   assert.equal(nativeSystemOnePricing("vercel-ai-gateway", "typesafe-ai/jev"), null);
   assert.equal(nativeSystemOnePricing("opencode-zen", "jev-1.13"), null);
+});
+
+test("whitespace and non-string credentials do not make a hosted native connection eligible", () => {
+  for (const connection of [{ apiKey: "   " }, { accessToken: "\n\t" }, { apiKey: 123 }]) {
+    assert.equal(
+      isConnectionEligibleForTier(
+        "paid",
+        connection as { apiKey?: string; accessToken?: string },
+        "openrouter"
+      ),
+      false
+    );
+    assert.equal(
+      isConnectionEligibleForTier(
+        "free",
+        { ...connection, providerSpecificData: { systemOneTier: "free" } } as {
+          apiKey?: string;
+          accessToken?: string;
+          providerSpecificData: Record<string, unknown>;
+        },
+        "opencode-zen"
+      ),
+      false
+    );
+  }
+  assert.equal(
+    isConnectionEligibleForTier(
+      "paid",
+      { apiKey: " ", accessToken: " synthetic-token " },
+      "openrouter"
+    ),
+    true
+  );
+});
+
+test("native free-tier policy is provider-specific and explicit restrictions stay binding", () => {
+  assert.equal(isConnectionEligibleForTier("free", { apiKey: "synthetic" }, "openrouter"), true);
+  assert.equal(isConnectionEligibleForTier("free", { apiKey: "synthetic" }, "opencode-zen"), false);
+  assert.equal(isConnectionEligibleForTier("free", { apiKey: "synthetic" }), false);
+  assert.equal(isConnectionEligibleForTier("free", { apiKey: "synthetic" }, "unregistered"), false);
+  assert.equal(
+    isConnectionEligibleForTier(
+      "free",
+      { apiKey: "synthetic", providerSpecificData: { systemOneTier: "paid" } },
+      "openrouter"
+    ),
+    false
+  );
+  assert.equal(
+    isConnectionEligibleForTier(
+      "paid",
+      { apiKey: "synthetic", providerSpecificData: { systemOneTier: "free" } },
+      "openrouter"
+    ),
+    false
+  );
+});
+
+test("DeepInfra documentation seeds preserve future explicitly qualified native identities", () => {
+  assert.deepEqual(systemOneBackend("deepinfra").documentedModels, [
+    "Cloudflare/clef",
+    "Cloudflare/clef-flash",
+    "nace-ai/drex-max",
+    "nace-ai/drex-v2.0",
+  ]);
+  assert.equal(
+    resolveSystemOneCandidates("deepinfra/example/future-native")[0].model,
+    "example/future-native"
+  );
 });

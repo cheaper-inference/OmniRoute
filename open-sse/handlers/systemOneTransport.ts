@@ -10,7 +10,11 @@
  * No URL or header ever comes from the client request body.
  */
 
-import { systemOneBackend, type SystemOneBackend } from "../config/systemOneRegistry.ts";
+import {
+  systemOneBackend,
+  systemOneCredentialToken,
+  type SystemOneBackend,
+} from "../config/systemOneRegistry.ts";
 import { safeOutboundFetch } from "@/shared/network/safeOutboundFetch";
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { parseAndValidateNonMetadataUrl } from "@/shared/network/outboundUrlGuard";
@@ -126,15 +130,13 @@ export function systemOneHeaders(
   provider: string,
   credentials: SystemOneCredentials
 ): Record<string, string> {
-  systemOneBackend(provider);
-  const token =
-    (typeof credentials.apiKey === "string" ? credentials.apiKey.trim() : "") ||
-    (typeof credentials.accessToken === "string" ? credentials.accessToken.trim() : "");
+  const backend = systemOneBackend(provider);
+  const token = systemOneCredentialToken(credentials);
   return {
     Accept: "application/json",
     "Content-Type": "application/json",
     "User-Agent": SYSTEMONE_USER_AGENT,
-    ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    ...(token ? { Authorization: `${backend.authorizationScheme ?? "Bearer"} ${token}` } : {}),
   };
 }
 

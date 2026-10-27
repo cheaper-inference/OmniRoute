@@ -1003,9 +1003,9 @@ async function evaluateApiKeyPolicy(
 
   // No API key = local/session mode, skip policy checks
   if (!apiKey) {
-    // An explicitly narrowed playground identity must not become unrestricted
-    // local mode if its key was removed while the request was queued.
-    if (revalidation && request.headers.get(PLAYGROUND_KEY_ID_HEADER)?.trim()) {
+    // An explicitly narrowed playground identity must never become unrestricted
+    // local mode when its selected key cannot be resolved, including initial admission.
+    if (request.headers.get(PLAYGROUND_KEY_ID_HEADER)?.trim()) {
       return {
         apiKey: null,
         apiKeyInfo: null,

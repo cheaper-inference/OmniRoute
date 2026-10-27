@@ -41,7 +41,7 @@ test("explicit known zero pricing remains known", () => {
   });
   assert.deepEqual(model.pricing, { prompt: "0", completion: "0" });
   assert.equal(model.pricing_source, "upstream");
-  assert.equal(model.pricing_status, undefined);
+  assert.equal(model.pricing_status, "known");
 });
 
 test("partial or invalid operator overrides preserve existing upstream price provenance", () => {

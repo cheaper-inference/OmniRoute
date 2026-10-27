@@ -325,7 +325,7 @@ test("question criteria reject unsupported shapes before dispatch", () => {
     { type: "noul", criteria: { true: 1, false: "No" } },
     { type: "choice", criteria: { a: true, b: "B" } },
     { type: "choice", criteria: { a: 1 } },
-    { type: "score", criteria: ["only one"] },
+    { type: "score", criteria: [] },
     { type: "score", criteria: ["low", null] },
     { type: "score", criteria: ["low", 1] },
   ];

@@ -62,6 +62,30 @@ export async function GET(request: Request) {
         ...(Array.isArray(model.supported_endpoints)
           ? { supported_endpoints: model.supported_endpoints }
           : {}),
+        ...(model.type === "decision"
+          ? {
+              native_adapter: model.native_adapter ?? "unknown",
+              inference_access: "unverified",
+              context_length:
+                typeof model.context_length === "number" ? model.context_length : null,
+              input_modalities: model.input_modalities ?? null,
+              output_modalities: model.output_modalities ?? null,
+              decision_primitives: model.decision_primitives ?? null,
+              pricing_status: model.pricing_status ?? "unknown",
+              ...(model.pricing ? { pricing: model.pricing } : {}),
+              ...(model.pricing_source ? { pricing_source: model.pricing_source } : {}),
+              ...(model.pricing_currency ? { pricing_currency: model.pricing_currency } : {}),
+              ...(model.pricing_unit ? { pricing_unit: model.pricing_unit } : {}),
+              ...(model.canonical_model_id ? { canonical_model_id: model.canonical_model_id } : {}),
+              ...(model.catalog_source ? { catalog_source: model.catalog_source } : {}),
+              ...(model.author ? { author: model.author } : {}),
+              ...(model.model_owner ? { model_owner: model.model_owner } : {}),
+              ...(model.upstream_root ? { upstream_root: model.upstream_root } : {}),
+              ...(model.resolved_alias_target
+                ? { resolved_alias_target: model.resolved_alias_target }
+                : {}),
+            }
+          : {}),
       });
 
       catalog[providerId] = bucket;

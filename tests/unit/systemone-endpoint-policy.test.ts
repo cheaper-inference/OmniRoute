@@ -90,7 +90,7 @@ test("the category is selectable in the API-key editor list", () => {
   assert.ok(category, "systemone must be a selectable endpoint category");
   assert.ok(category.label.length > 0);
   assert.ok(category.description.length > 0);
-  assert.deepEqual(category.prefixes, ["/v1/systemone"]);
+  assert.deepEqual(category.prefixes, ["/v1/systemone", "/v1/decisions"]);
 });
 
 test("a systemone-only key may call both System One routes", async () => {

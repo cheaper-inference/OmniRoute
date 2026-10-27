@@ -3,9 +3,10 @@
  *
  * Read-only companion to `POST /v1/systemone`: it lists the decision models
  * exposed by eligible configured backend connections, assembled by
- * `handleSystemOneModels`. Listing does not establish inference entitlement. Decision models are deliberately absent
- * from the unified `/v1/models` catalog (they answer questions, not chats), so
- * this is the only place a client can discover them.
+ * `handleSystemOneModels`. Listing does not establish inference entitlement. This explicit operation reads
+ * configured remote catalogs; `/v1/models?kind=decision` separately reads the
+ * locally imported/custom decision inventory without provider network access.
+ * Ordinary chat discovery excludes decision-only models.
  *
  * Same gates as the decision route — authentication first, then the API-key
  * policy (which covers the shared `systemone` endpoint category) — and the

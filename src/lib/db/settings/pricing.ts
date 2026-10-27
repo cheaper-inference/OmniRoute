@@ -199,6 +199,13 @@ export function findModelPricing(
   );
 }
 
+/** Explicit operator rows only; never borrows default or imported tariff fields. */
+export async function getUserPricingForModel(provider: string, model: string) {
+  const user = readPricingNamespace(getDbInstance(), "pricing");
+  const providerPricing = findProviderPricing(user, provider);
+  return providerPricing ? findModelPricing(providerPricing, model) : null;
+}
+
 export async function getPricingForModel(provider: string, model: string) {
   const pricing = (await getCachedPricing()) as PricingByProvider;
   const providerPricing = findProviderPricing(pricing, provider);

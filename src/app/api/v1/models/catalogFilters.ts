@@ -32,6 +32,7 @@ export const CATALOG_CAPABILITY_FILTERS = [
  */
 export const CATALOG_KIND_FILTERS = [
   "chat",
+  "decision",
   "audio",
   "embedding",
   "image",
@@ -70,9 +71,13 @@ const kindList = CATALOG_KIND_FILTERS.join(", ");
 const capabilitySchema = z.enum(CATALOG_CAPABILITY_FILTERS, {
   error: () => `Unknown capability. Valid: ${capabilityList}`,
 });
-const kindSchema = z.enum(CATALOG_KIND_FILTERS, {
-  error: () => `Unknown kind. Valid: ${kindList}`,
-});
+const kindSchema = z
+  .enum([...CATALOG_KIND_FILTERS, "decisions", "systemone"], {
+    error: () => `Unknown kind. Valid: ${kindList} (decision aliases: decisions, systemone)`,
+  })
+  .transform((kind) =>
+    kind === "decisions" || kind === "systemone" ? ("decision" as const) : kind
+  );
 const nonNegativeIntegerSchema = (name: string) =>
   z
     .number({ error: () => `${name} must be a non-negative integer` })

@@ -15,6 +15,12 @@ export interface CatalogModel {
   input_modalities?: string[];
   output_modalities?: string[];
   supported_endpoints?: string[];
+  decision_primitives?: string[];
+  canonical_model_id?: string;
+  pricing?: Record<string, unknown> | null;
+  pricing_status?: string;
+  inference_access?: string;
+  native_adapter?: string;
 }
 
 export interface CatalogModelRow extends CatalogModel {
@@ -51,6 +57,36 @@ function isString(value: unknown): value is string {
   return typeof value === "string";
 }
 
+/** Explicit native metadata, never a guess from a model's name or price. */
+export function isDecisionCatalogModel(
+  model: Pick<CatalogModel, "type" | "supported_endpoints">
+): boolean {
+  const endpoints = model.supported_endpoints ?? [];
+  if (endpoints.includes("chat") || endpoints.includes("responses")) return false;
+  return (
+    ["decision", "decisions", "systemone"].includes(model.type) ||
+    endpoints.some((endpoint) => ["systemone", "decision", "decisions"].includes(endpoint))
+  );
+}
+
+/** The existing health tester emits chat payloads, so it cannot test native decisions. */
+export function chatTestableCatalogModels(models: CatalogModelRow[]): CatalogModelRow[] {
+  return models.filter((model) => !isDecisionCatalogModel(model));
+}
+
+export async function fetchCatalogModelRows(
+  kind: string,
+  signal: AbortSignal
+): Promise<CatalogModelRow[]> {
+  const response = await fetch(
+    kind === "decision" ? "/api/models/catalog?kind=decision" : "/api/models/catalog",
+    { signal }
+  );
+  if (!response.ok) throw new Error("catalog request failed");
+  const payload: unknown = await response.json();
+  return flattenCatalog(isRecord(payload) ? payload.catalog : null);
+}
+
 /** Convert the provider-grouped API payload into stable rows for the dashboard table. */
 export function flattenCatalog(catalog: unknown): CatalogModelRow[] {
   if (!isRecord(catalog)) return [];
@@ -63,12 +99,29 @@ export function flattenCatalog(catalog: unknown): CatalogModelRow[] {
     for (const rawModel of rawBucket.models) {
       if (!isRecord(rawModel) || typeof rawModel.id !== "string") continue;
       const id = rawModel.id;
+      const declaredType =
+        typeof rawModel.type === "string"
+          ? rawModel.type
+          : typeof rawModel.modelType === "string"
+            ? rawModel.modelType
+            : "unknown";
+      const endpoints = Array.isArray(rawModel.supported_endpoints)
+        ? rawModel.supported_endpoints.filter(isString)
+        : undefined;
+      const pricing: Record<string, unknown> | null | undefined =
+        rawModel.pricing === null
+          ? null
+          : isRecord(rawModel.pricing)
+            ? rawModel.pricing
+            : undefined;
       rows.push({
         providerId,
         provider,
         id,
         name: typeof rawModel.name === "string" ? rawModel.name : id,
-        type: typeof rawModel.type === "string" ? rawModel.type : "unknown",
+        type: isDecisionCatalogModel({ type: declaredType, supported_endpoints: endpoints })
+          ? "decision"
+          : declaredType,
         ...(typeof rawModel.subtype === "string" ? { subtype: rawModel.subtype } : {}),
         ...(rawModel.custom === true ? { custom: true } : {}),
         ...(rawModel.free === true ? { free: true } : {}),
@@ -87,6 +140,22 @@ export function flattenCatalog(catalog: unknown): CatalogModelRow[] {
           : {}),
         ...(Array.isArray(rawModel.supported_endpoints)
           ? { supported_endpoints: rawModel.supported_endpoints.filter(isString) }
+          : {}),
+        ...(Array.isArray(rawModel.decision_primitives)
+          ? { decision_primitives: rawModel.decision_primitives.filter(isString) }
+          : {}),
+        ...(typeof rawModel.canonical_model_id === "string"
+          ? { canonical_model_id: rawModel.canonical_model_id }
+          : {}),
+        ...(pricing === undefined ? {} : { pricing }),
+        ...(typeof rawModel.pricing_status === "string"
+          ? { pricing_status: rawModel.pricing_status }
+          : {}),
+        ...(typeof rawModel.inference_access === "string"
+          ? { inference_access: rawModel.inference_access }
+          : {}),
+        ...(typeof rawModel.native_adapter === "string"
+          ? { native_adapter: rawModel.native_adapter }
           : {}),
       });
     }
@@ -198,7 +267,8 @@ function matchesProviderHealth(
   providerHealthMap: Record<string, "healthy" | "degraded" | "down">
 ): boolean {
   if (!isActiveChoice(providerHealth)) return true;
-  const health = providerHealthMap[model.providerId] ?? "healthy";
+  const health =
+    providerHealthMap[model.providerId] ?? (isDecisionCatalogModel(model) ? undefined : "healthy");
   return health === providerHealth;
 }
 

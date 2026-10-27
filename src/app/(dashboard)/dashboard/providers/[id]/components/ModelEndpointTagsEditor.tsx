@@ -2,7 +2,7 @@
 
 import { Button, Checkbox } from "@/shared/components";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   normalizeModelSupportedEndpoints,
   type ModelSupportedEndpoint,
@@ -11,6 +11,7 @@ import {
 const OPTIONS: ModelSupportedEndpoint[] = [
   "chat",
   "responses",
+  "systemone",
   "embeddings",
   "rerank",
   "images",
@@ -33,7 +34,7 @@ interface Props extends ModelEndpointEditorInfo {
   modelId: string;
   t: (key: string, values?: Record<string, unknown>) => string;
 }
-export default function ModelEndpointTagsEditor({
+function ModelEndpointTagsEditorState({
   provider,
   modelId,
   supportedEndpoints,
@@ -45,19 +46,23 @@ export default function ModelEndpointTagsEditor({
 }: Props) {
   const effective = supportedEndpoints?.length
     ? normalizeModelSupportedEndpoints(supportedEndpoints)
-    : ["chat"];
+    : [];
   const [editing, setEditing] = useState(false);
   const [selection, setSelection] = useState<string[]>(effective);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pending = useRef<AbortController | null>(null);
+  useEffect(() => () => pending.current?.abort(), []);
   const provenance =
-    endpointCapabilitySource === "operator"
-      ? t("endpointCapabilitiesOperator")
-      : endpointCapabilitySource === "inferred"
-        ? t("endpointCapabilitiesInferred")
-        : endpointCapabilitySource === "declared"
-          ? t("endpointCapabilitiesDeclared")
-          : t("endpointCapabilitiesDefaulted");
+    effective.length === 0
+      ? t("endpointCapabilitiesUnknown")
+      : endpointCapabilitySource === "operator"
+        ? t("endpointCapabilitiesOperator")
+        : endpointCapabilitySource === "inferred"
+          ? t("endpointCapabilitiesInferred")
+          : endpointCapabilitySource === "declared"
+            ? t("endpointCapabilitiesDeclared")
+            : t("endpointCapabilitiesDefaulted");
 
   const beginEdit = () => {
     setSelection(effective);
@@ -65,12 +70,16 @@ export default function ModelEndpointTagsEditor({
     setEditing(true);
   };
   async function submit(reset: boolean) {
+    if (pending.current) return;
     if (!reset && selection.length === 0) {
       setError(t("selectSupportedEndpoint"));
       return;
     }
     setSaving(true);
     setError(null);
+    const controller = new AbortController();
+    pending.current = controller;
+    let saved = false;
     try {
       const response = await (reset
         ? fetch(
@@ -80,23 +89,29 @@ export default function ModelEndpointTagsEditor({
                 model: modelId,
                 resetEndpoints: "true",
               }),
-            { method: "DELETE" }
+            { method: "DELETE", signal: controller.signal }
           )
         : fetch("/api/provider-models", {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ provider, modelId, supportedEndpoints: selection }),
+            signal: controller.signal,
           }));
+      if (controller.signal.aborted) return;
       if (!response.ok)
         throw new Error(
           t(reset ? "endpointCapabilitiesResetFailed" : "endpointCapabilitiesSaveFailed")
         );
+      saved = true;
       await onChanged?.();
+      if (controller.signal.aborted) return;
       setEditing(false);
-    } catch (cause) {
-      setError(cause instanceof Error ? cause.message : t("endpointCapabilitiesSaveFailed"));
+    } catch {
+      if (!controller.signal.aborted)
+        setError(t(saved ? "endpointCapabilitiesRefreshFailed" : "endpointCapabilitiesSaveFailed"));
     } finally {
-      setSaving(false);
+      if (!controller.signal.aborted) setSaving(false);
+      pending.current = null;
     }
   }
   return (
@@ -110,7 +125,9 @@ export default function ModelEndpointTagsEditor({
           title={
             adapterStatuses[endpoint] === "unavailable"
               ? t("endpointCapabilitiesNoAdapter")
-              : undefined
+              : adapterStatuses[endpoint] === "available"
+                ? undefined
+                : t("endpointCapabilitiesUnknown")
           }
           className={
             adapterStatuses[endpoint] === "unavailable"
@@ -174,4 +191,8 @@ export default function ModelEndpointTagsEditor({
       )}
     </div>
   );
+}
+
+export default function ModelEndpointTagsEditor(props: Props) {
+  return <ModelEndpointTagsEditorState key={`${props.provider}\0${props.modelId}`} {...props} />;
 }

@@ -3,10 +3,12 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { after, beforeEach, test } from "node:test";
+import { SignJWT } from "jose";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-native-revalidation-"));
 process.env.DATA_DIR = dataDir;
 process.env.API_KEY_SECRET = "native-revalidation-fixture-only";
+process.env.JWT_SECRET = "native-revalidation-fixture-jwt-only";
 process.env.USAGE_LIMIT_IGNORE_UNPRICED = "false";
 
 const db = await import("../../src/lib/db/core.ts");
@@ -273,4 +275,35 @@ test("a scoped internal identity gets full fresh budget checks only on revalidat
   const result = await policy.revalidateApiKeyPolicy(incoming, model);
   assert.equal(result.rejection?.status, 429);
   assert.equal((await result.rejection?.json()).error.code, "budget_exceeded");
+});
+
+test("initial admission cannot broaden a missing or deleted selected playground key", async () => {
+  const token = await new SignJWT({ authenticated: true, sub: "admin" })
+    .setProtectedHeader({ alg: "HS256" })
+    .setExpirationTime("1h")
+    .sign(new TextEncoder().encode(process.env.JWT_SECRET));
+  const selected = await admittedKey();
+  const scoped = new Request("http://localhost/v1/systemone", {
+    method: "POST",
+    headers: { cookie: `auth_token=${token}`, "x-omniroute-playground-key-id": selected.id },
+  });
+  assert.equal((await policy.enforceApiKeyPolicy(scoped, model)).rejection, null);
+  await keys.deleteApiKey(selected.id);
+  assert.equal((await policy.enforceApiKeyPolicy(scoped, model)).rejection?.status, 403);
+  const absent = new Request("http://localhost/v1/systemone", {
+    method: "POST",
+    headers: { cookie: `auth_token=${token}`, "x-omniroute-playground-key-id": "missing-fixture" },
+  });
+  assert.equal((await policy.enforceApiKeyPolicy(absent, model)).rejection?.status, 403);
+  assert.equal((await policy.enforceApiKeyPolicy(request(), model)).rejection, null);
+
+  const bearer = await admittedKey();
+  const bearerWins = new Request("http://localhost/v1/systemone", {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${bearer.key}`,
+      "x-omniroute-playground-key-id": "missing-fixture",
+    },
+  });
+  assert.equal((await policy.enforceApiKeyPolicy(bearerWins, model)).rejection, null);
 });

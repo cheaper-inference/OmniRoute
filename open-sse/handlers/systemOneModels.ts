@@ -39,7 +39,7 @@ import {
   type SystemOneCredentials,
 } from "./systemOneTransport.ts";
 import { getProviderConnections } from "@/lib/db/providers";
-import { getPricingForModel } from "@/lib/db/settings";
+import { getNativeCatalogPricing } from "@/lib/usage/nativeCatalogPricing";
 import { isModelExcludedByConnection } from "@/domain/connectionModelRules";
 import { isModelLocked } from "../services/accountFallback.ts";
 import { isNativeConnectionUnavailable } from "./systemOneLease.ts";
@@ -76,6 +76,7 @@ export type SystemOneModelsDeps = {
   listConnections: () => Promise<SystemOneCatalogConnection[]>;
   isConnectionUnavailable: (connectionId: string) => boolean;
   fetchSystemOne: typeof defaultFetchSystemOne;
+  /** Trusted native USER override only, in USD per million tokens. Never a merged chat tariff. */
   getPricingForModel: (
     provider: string,
     model: string
@@ -87,7 +88,7 @@ export const defaultSystemOneModelsDeps: SystemOneModelsDeps = {
     (await getProviderConnections({ isActive: true })) as unknown as SystemOneCatalogConnection[],
   fetchSystemOne: defaultFetchSystemOne,
   isConnectionUnavailable: isNativeConnectionUnavailable,
-  getPricingForModel: (provider, model) => getPricingForModel(provider, model),
+  getPricingForModel: (provider, model) => getNativeCatalogPricing(provider, model),
 };
 
 function isCoolingDown(rateLimitedUntil: string | null | undefined): boolean {

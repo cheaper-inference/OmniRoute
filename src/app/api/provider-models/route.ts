@@ -244,6 +244,7 @@ export async function PUT(request) {
       modelId,
       modelName,
       apiFormat,
+      modelType,
       supportedEndpoints,
       targetFormat,
       normalizeToolCallId,
@@ -261,6 +262,16 @@ export async function PUT(request) {
     const updates: Record<string, unknown> = {};
     if ("modelName" in raw) updates.modelName = modelName;
     if ("apiFormat" in raw) updates.apiFormat = apiFormat;
+    if ("modelType" in raw || ("apiFormat" in raw && apiFormat === "systemone"))
+      updates.modelType = modelType;
+    if (
+      !("supportedEndpoints" in raw) &&
+      (("apiFormat" in raw && apiFormat === "systemone") ||
+        ("modelType" in raw && modelType === "decision"))
+    ) {
+      updates.supportedEndpoints = supportedEndpoints;
+      if (!("apiFormat" in raw)) updates.apiFormat = "systemone";
+    }
     if ("supportedEndpoints" in raw) updates.supportedEndpoints = supportedEndpoints;
     if ("targetFormat" in raw) updates.targetFormat = targetFormat;
     if ("normalizeToolCallId" in raw) updates.normalizeToolCallId = normalizeToolCallId;

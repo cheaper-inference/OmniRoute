@@ -3,6 +3,7 @@ import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 import { getProviderQuotaWindowStartIso } from "@/lib/db/quotaResetEvents";
 import { sumSearchLedgerSpendSince } from "@/lib/db/costLedger";
 import { calculateCostDetailed } from "./costCalculator";
+import { systemOneAllowsGenericTokenPricing } from "@omniroute/open-sse/config/systemOneRegistry.ts";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 import {
   calendarWeekWindowMs,
@@ -59,6 +60,7 @@ export interface ApiKeyUsageLimitDeps {
 }
 
 interface UsageCostRow {
+  nativeDecisions: number | null;
   storedCost: number | null;
   unmeteredRequests: number | null;
   incompleteRequests: number | null;
@@ -468,6 +470,8 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
       SELECT
         LOWER(provider) as provider,
         LOWER(model) as model,
+        CASE WHEN LOWER(COALESCE(endpoint, '')) IN ('/v1/systemone', '/v1/decisions')
+          THEN 1 ELSE 0 END as nativeDecisions,
         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
         COALESCE(SUM(provider_cost_usd), 0) as storedCost,
         COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL
@@ -481,8 +485,9 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
       FROM usage_history
       WHERE api_key_id = @apiKeyId
         AND timestamp >= @sinceIso
-        AND (success = 1 OR provider_cost_usd IS NOT NULL OR endpoint = '/v1/systemone')
-      GROUP BY LOWER(provider), LOWER(model), serviceTier
+        AND (success = 1 OR provider_cost_usd IS NOT NULL
+          OR LOWER(COALESCE(endpoint, '')) IN ('/v1/systemone', '/v1/decisions'))
+      GROUP BY LOWER(provider), LOWER(model), serviceTier, nativeDecisions
     `
     )
     .all({ apiKeyId, sinceIso }) as UsageCostRow[];
@@ -499,6 +504,15 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
     // unpriced: only rows without a stored cost are priced from tokens.
     total += toNumber(row.storedCost);
     if (toNumber(row.unmeteredRequests) === 0) continue;
+
+    // Some native providers use distinct token tariffs or deployment/GPU billing.
+    // Their registry explicitly excludes generic chat/operator token prices.
+    // Keep native tokens separate even when the same id also serves chat; a
+    // reported amount (including zero) above remains authoritative in either lane.
+    if (toNumber(row.nativeDecisions) === 1 && !systemOneAllowsGenericTokenPricing(provider)) {
+      hasUnpricedUsage = true;
+      continue;
+    }
 
     if (toNumber(row.incompleteRequests) > 0) {
       hasUnpricedUsage = true;

@@ -446,6 +446,9 @@ test("missing or sentinel credentials are rejected before any upstream call", as
     { allRateLimited: true },
     { allExpired: true },
     { blockedByKeyPolicy: true },
+    { apiKey: "   ", connectionId: "synthetic-blank-key" },
+    { accessToken: "\n\t", connectionId: "synthetic-blank-token" },
+    { apiKey: 123, connectionId: "synthetic-wrong-type" },
   ]) {
     const recorded = recorder();
     const response = await handleSystemOneProxy(
@@ -625,4 +628,35 @@ test("a zero failure charge remains known even when token counts are absent", as
   assert.equal((r.usage[0].tokens as Record<string, unknown>).prompt_tokens, null);
   assert.equal((r.usage[0].tokens as Record<string, unknown>).completion_tokens, null);
   assert.equal(r.costs[0].costUsd, 0);
+});
+
+test("ordinary OpenRouter key may execute the exact free SKU without paid fallback", async () => {
+  const r = recorder();
+  const response = await handleSystemOneProxy(
+    options({
+      tier: "free",
+      canonicalModel: "openrouter/typesafe/jev-1.13:free",
+      body: {
+        model: "typesafe/jev-1.13:free",
+        state: "synthetic",
+        questions: { urgent: { type: "noul", instructions: "Synthetic?" } },
+      },
+    }),
+    deps(r, async (_url, init) => {
+      assert.equal(JSON.parse(String(init.body)).model, "typesafe/jev-1.13:free");
+      return jsonResponse(ANSWER_BODY);
+    })
+  );
+  assert.equal(response.status, 200);
+  assert.equal(r.requests.length, 1);
+  const denied = recorder();
+  const rejection = await handleSystemOneProxy(
+    options({
+      tier: "paid",
+      credentials: { apiKey: "synthetic-key", providerSpecificData: { systemOneTier: "free" } },
+    }),
+    deps(denied, async () => jsonResponse(ANSWER_BODY))
+  );
+  assert.equal(rejection.status, 401);
+  assert.equal(denied.requests.length, 0);
 });

@@ -16,8 +16,13 @@
  * TypeSafe API docs (https://docs.typesafe.ai/api).
  */
 
+import { systemOneBackendRuleError } from "./systemOneBackendRules.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
-import { systemOneBackend, type SystemOneLimits } from "../../config/systemOneRegistry.ts";
+import {
+  systemOneBackend,
+  systemOneRequestLimits,
+  type SystemOneLimits,
+} from "../../config/systemOneRegistry.ts";
 
 export const SYSTEMONE_QUESTION_TYPES = ["noul", "choice", "score"] as const;
 export type SystemOneQuestionType = (typeof SYSTEMONE_QUESTION_TYPES)[number];
@@ -126,9 +131,12 @@ function parseConfidence(value: unknown): number | null | "invalid" {
   return confidence;
 }
 
-function parseAnswer(raw: unknown): SystemOneAnswer | SystemOneAnswersFailure {
+function parseAnswer(
+  raw: unknown,
+  defaultType?: SystemOneQuestionType
+): SystemOneAnswer | SystemOneAnswersFailure {
   if (!isRecord(raw)) return invalid("System One answer was not an object");
-  const type = raw.type;
+  const type = raw.type === undefined ? defaultType : raw.type;
   if (type === "refusal") return { type, probabilities: null, confidence: null };
   if (
     typeof type !== "string" ||
@@ -171,7 +179,7 @@ function parseAnswer(raw: unknown): SystemOneAnswer | SystemOneAnswersFailure {
   const levels = Object.keys(probabilities);
   const legend = raw.legend;
   if (
-    levels.length < 2 ||
+    levels.length < 1 ||
     levels.length > 10 ||
     levels.some((level, index) => level !== String(index)) ||
     !isRecord(legend) ||
@@ -236,7 +244,11 @@ function matchesQuestion(answer: SystemOneAnswer, question: unknown): boolean {
  * preserved with their probabilities, confidence and usage; a body that answers
  * no question at all is a failure, not an empty success.
  */
-export function parseSystemOneAnswers(body: unknown, request?: unknown): SystemOneAnswersResult {
+export function parseSystemOneAnswers(
+  body: unknown,
+  request?: unknown,
+  provider?: string
+): SystemOneAnswersResult {
   if (!isRecord(body)) return invalid("System One response was not a JSON object");
   if (!isRecord(body.answers)) return invalid("System One response missing answers");
 
@@ -249,7 +261,16 @@ export function parseSystemOneAnswers(body: unknown, request?: unknown): SystemO
 
   const answers: Record<string, SystemOneAnswer> = {};
   for (const [name, raw] of entries) {
-    const parsed = parseAnswer(raw);
+    // DeepInfra's output schema gives type a default instead of requiring it.
+    // Apply only that documented provider default, never invent a refusal/type.
+    const question = questions?.[name];
+    const defaultType =
+      provider === "deepinfra" &&
+      isRecord(question) &&
+      SYSTEMONE_QUESTION_TYPES.includes(question.type as SystemOneQuestionType)
+        ? (question.type as SystemOneQuestionType)
+        : undefined;
+    const parsed = parseAnswer(raw, defaultType);
     if ("ok" in parsed) return parsed;
     if (
       questions &&
@@ -294,11 +315,11 @@ function validateCriteria(type: SystemOneQuestionType, criteria: unknown): strin
       : "must be a non-empty map of text, structured descriptions or null";
   }
   return Array.isArray(criteria) &&
-    criteria.length >= 2 &&
+    criteria.length >= 1 &&
     criteria.length <= 10 &&
     criteria.every(isContent)
     ? null
-    : "must contain 2–10 text or structured score levels";
+    : "must contain 1–10 text or structured score levels";
 }
 
 function validateQuestion(name: string, raw: unknown): SystemOneValidation {
@@ -379,12 +400,24 @@ function validateLimits(
     const counted = candidateCount(question);
     if (!counted) continue;
     const max = counted.kind === "choice" ? limits.maxChoiceCriteria : limits.maxScoreLevels;
-    const min = counted.kind === "score" ? 2 : limits.minCriteria;
+    const min = counted.kind === "score" ? limits.minScoreLevels : limits.minCriteria;
     if (counted.count < min || counted.count > max) {
       return fail(
         `questions.${name}.criteria must contain ${min}–${max} candidates for ${provider}`
       );
     }
+  }
+  return OK;
+}
+
+function validateStrictQuestionShape(body: Record<string, unknown>): SystemOneValidation {
+  const questions = isRecord(body.questions) ? body.questions : {};
+  for (const [name, question] of Object.entries(questions)) {
+    if (!isRecord(question)) continue;
+    if (!isContent(question.instructions))
+      return fail(`questions.${name}.instructions is required for this backend`);
+    if (Object.keys(question).some((key) => !["type", "instructions", "criteria"].includes(key)))
+      return fail(`questions.${name} contains unsupported fields for this backend`);
   }
   return OK;
 }
@@ -400,12 +433,22 @@ export function validateSystemOneBackendBody(
 ): SystemOneValidation {
   const envelope = validateSystemOneRequestBody(body);
   if (!envelope.ok) return envelope;
-  const { limits } = systemOneBackend(provider);
+  const backend = systemOneBackend(provider);
+  const limits = systemOneRequestLimits(
+    provider,
+    typeof body.model === "string" ? body.model : undefined
+  );
+  if (backend.strictQuestionShape) {
+    const strict = validateStrictQuestionShape(body);
+    if (!strict.ok) return strict;
+  }
   const shape = validateLimits(provider, body, limits);
   if (!shape.ok) return shape;
   const bytes = Buffer.byteLength(JSON.stringify(body ?? null), "utf8");
   if (bytes > limits.maxBodyBytes) {
     return fail(`Request body must not exceed ${limits.maxBodyBytes} bytes for ${provider}`, 413);
   }
+  const ruleError = systemOneBackendRuleError(backend, body);
+  if (ruleError) return fail(ruleError);
   return OK;
 }

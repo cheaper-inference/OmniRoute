@@ -2312,9 +2312,13 @@ Token, manage-scoped API key) and how they differ from inference keys.
 
 ### Native System One scope
 
+See [Native decision models](../guides/NATIVE-DECISIONS.md) for provider discovery,
+model controls, the standalone editor and supported contract boundaries.
+
 The local native lane supports text/structured-JSON `state` with Noul, Choice and Score
-through direct TypeSafe, OpenRouter, Vercel's TypeSafe-compatible endpoint and the
-documented OpenCode Console native endpoint.
+through explicit registered provider adapters, including TypeSafe, OpenRouter,
+Vercel's TypeSafe-compatible endpoint, DeepInfra and direct OpenAI Decisions.
+The optional OpenCode Console native adapter remains available without promising free access.
 `jev` and `jev-1.13` intentionally pin Jev 1.13 (Vercel spelling `typesafe-ai/jev-1.13.0`);
 use a provider-qualified catalog ID for other versions. `jev-free` stays on the keyed,
 explicitly free-tagged OpenCode connection pool. A catalog entry does not prove account
@@ -2323,8 +2327,21 @@ entitlement or a successful inference test.
 The OpenCode POST URL is `https://opencode.ai/inference/systemone/v1/systemone`;
 its model catalog remains `https://opencode.ai/inference/v1/models`.
 Vercel uses `/typesafe/v1/systemone`, not its different `/v1/evaluate` or `/v1/decisions`
-contracts. OpenAI Decisions, images, experimental headers, ordinary-LLM fallback
-and smart chat model/effort selection are outside this lane's supported scope.
+contracts. Direct OpenAI uses an explicit Decisions codec rather than chat.
+`POST /v1/decisions` accepts the documented named-question text/JSON subset
+(predicate/choice/score) and delegates in process to the same native admission and
+accounting lane. Unsupported images, conversation/tool histories, caching controls
+and complex instructions fail before dispatch. Images, experimental headers,
+ordinary-LLM fallback and smart model/effort routing are not enabled by these APIs.
+
+Decision-only rows remain outside default chat discovery. Explicit
+`GET /v1/models?kind=decision` (also accepting `decisions` and `systemone`) and
+`POST /v1/models/query` read the locally imported/custom decision inventory, subject
+to client-key scopes, without provider calls. `GET /v1/systemone/models` explicitly
+contacts configured native catalogs. Discovery is not an inference or account-access
+test. The dashboard supports explicit provider discovery/import, model type/endpoint
+editing, the Decisions catalog filter and a standalone native Decisions request editor.
+No discovery or inference starts automatically when opening the native editor.
 
 Only `model`, `state` and `questions` are accepted at the top level. Decisions never
 substitute ordinary chat. Named explicit refusal answers remain refusal outcomes,

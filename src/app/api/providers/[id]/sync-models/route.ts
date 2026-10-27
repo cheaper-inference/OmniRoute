@@ -1,3 +1,8 @@
+import { normalizeDiscoveredModels } from "@/lib/providerModels/modelDiscovery";
+import { normalizeSyncedAvailableModels } from "@/lib/db/models/synced";
+import { isSystemOneProvider } from "@omniroute/open-sse/config/systemOneRegistry";
+import { isDecisionCatalogKind } from "@/app/api/v1/models/catalogDecisions";
+import { getDeclaredModelEndpoints } from "@omniroute/open-sse/services/modelEndpointPolicy";
 import { NextResponse } from "next/server";
 import { defaultLogger as log } from "@omniroute/open-sse/utils/logger";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
@@ -163,6 +168,68 @@ function summarizeModelChanges(previousModels: unknown, nextModels: unknown) {
     updated,
     total: added + removed + updated,
   };
+}
+
+/** Preserve other endpoint inventories during an explicit native-only refresh. */
+export function mergeNativeDecisionSnapshot(
+  previous: unknown,
+  incoming: unknown,
+  provider: string
+): JsonRecord[] {
+  const existing = Array.isArray(previous) ? previous.map(asRecord) : [];
+  const next = new Map<string, JsonRecord>();
+  for (const row of existing) {
+    const endpoints = getDeclaredModelEndpoints(row, provider) ?? [];
+    const ordinaryEndpoints = endpoints.filter(
+      (endpoint) => !["systemone", "decision", "decisions"].includes(endpoint)
+    );
+    if (typeof row.id !== "string") continue;
+    if (!endpoints.some((endpoint) => ["systemone", "decision", "decisions"].includes(endpoint))) {
+      next.set(row.id, row);
+    } else if (ordinaryEndpoints.length > 0) {
+      // A model disappearing from the native list may still serve chat/media.
+      next.set(row.id, {
+        ...row,
+        supportedEndpoints: ordinaryEndpoints,
+        ...(row.apiFormat === "systemone" ? { apiFormat: undefined } : {}),
+        ...(row.modelType === "decision" ? { modelType: undefined } : {}),
+      });
+    }
+  }
+  for (const row of Array.isArray(incoming) ? incoming.map(asRecord) : []) {
+    if (typeof row.id !== "string") continue;
+    const endpoints = getDeclaredModelEndpoints(row, provider) ?? [];
+    const prior = existing.find((entry) => entry.id === row.id);
+    const priorOrdinaryEndpoints =
+      prior?.endpointCapabilitySource === "defaulted"
+        ? []
+        : (getDeclaredModelEndpoints(prior ?? {}, provider) ?? []).filter(
+            (endpoint) => !["systemone", "decision", "decisions"].includes(endpoint)
+          );
+    if (priorOrdinaryEndpoints.length > 0) {
+      // A decision-only catalog cannot retract explicit chat/media support.
+      const mixedEndpoints = [...new Set([...priorOrdinaryEndpoints, ...endpoints])];
+      next.set(row.id, {
+        ...prior,
+        ...row,
+        supportedEndpoints: mixedEndpoints,
+        ...(prior?.apiFormat && prior.apiFormat !== "systemone"
+          ? { apiFormat: prior.apiFormat }
+          : {}),
+        ...(row.modelType === "decision"
+          ? {
+              modelType:
+                prior?.modelType && prior.modelType !== "decision"
+                  ? prior.modelType
+                  : mixedEndpoints.some((endpoint) => ["chat", "responses"].includes(endpoint))
+                    ? "chat"
+                    : undefined,
+            }
+          : {}),
+      });
+    } else next.set(row.id, row);
+  }
+  return [...next.values()];
 }
 
 function getModelSyncChannelLabel(connection: unknown) {
@@ -368,13 +435,28 @@ export async function selfFetchWithRetry(
 
 async function fetchProviderModelsForSync(request: Request, connectionId: string) {
   const safeOrigin = getModelSyncInternalBaseUrl();
+  const nativeDecisions = isDecisionCatalogKind(new URL(request.url).searchParams.get("kind"));
   const modelsPath =
     `/api/providers/${encodeURIComponent(connectionId)}/models` +
-    "?refresh=true&excludeCustom=true";
+    "?refresh=true&excludeCustom=true" +
+    (nativeDecisions ? "&kind=decision" : "");
   const headers = {
     cookie: request.headers.get("cookie") || "",
     ...buildModelSyncInternalHeaders(),
   };
+
+  // Explicit native import reuses this process's authenticated metadata route.
+  // There is one selected account and no loopback retry or secondary account.
+  if (nativeDecisions) {
+    return getProviderModels(
+      new Request(new URL(modelsPath, "http://localhost"), {
+        method: "GET",
+        headers,
+        signal: request.signal,
+      }),
+      { params: { id: connectionId } }
+    );
+  }
 
   const targetUrl = `${safeOrigin}${modelsPath}`;
 
@@ -435,13 +517,21 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     logProvider = toNonEmptyString(connection.provider) || "unknown";
+    const nativeDecisions = isDecisionCatalogKind(requestUrl.searchParams.get("kind"));
+    // Native intent is checked before legacy console discovery or provider-wide cleanup.
+    if (nativeDecisions && !isSystemOneProvider(logProvider)) {
+      return NextResponse.json(
+        { error: "Provider does not support native decision discovery" },
+        { status: 400 }
+      );
+    }
     channelLabel = getModelSyncChannelLabel(connection);
 
     // Volcano Ark plan providers: discover models live from the console API
     // (cookie+csrf captured at bind time). The chat API has no /models
     // endpoint, so the default discovery path below cannot serve them.
     const volcPlanKind = providerToVolcPlanKind(logProvider);
-    if (volcPlanKind) {
+    if (!nativeDecisions && volcPlanKind) {
       const psd =
         connection.providerSpecificData && typeof connection.providerSpecificData === "object"
           ? (connection.providerSpecificData as JsonRecord)
@@ -515,7 +605,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     }
 
     const isSearchProvider = getSearchProvider(logProvider) !== null;
-    if (providerUsesCuratedModelsOnly(logProvider) || isSearchProvider) {
+    if (!nativeDecisions && (providerUsesCuratedModelsOnly(logProvider) || isSearchProvider)) {
       const [removedSyncedLists, removedImportedModelIds] = await Promise.all([
         deleteSyncedAvailableModelsForProvider(logProvider),
         deleteImportedCustomModels(logProvider),
@@ -618,7 +708,38 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       );
     }
 
-    const allFetchedModels = modelsData.models || [];
+    if (request.signal.aborted)
+      return NextResponse.json({ error: "Request cancelled" }, { status: 499 });
+    const fetchedInventory = Array.isArray(modelsData.models) ? modelsData.models : [];
+    if (nativeDecisions) {
+      const freeOnly = Boolean(asRecord(connection.providerSpecificData).importFreeModelsOnly);
+      const selected = selectModelsForImport(logProvider, fetchedInventory, freeOnly);
+      const nativeModels = normalizeDiscoveredModels(selected.models, logProvider);
+      const snapshot = normalizeSyncedAvailableModels(
+        mergeNativeDecisionSnapshot(
+          previousSyncedAvailableModelsForConnection,
+          nativeModels,
+          logProvider
+        ),
+        logProvider
+      );
+      if (request.signal.aborted)
+        return NextResponse.json({ error: "Request cancelled" }, { status: 499 });
+      // Native-only import changes this connection's inventory, never provider-wide
+      // custom models, aliases, profiles, combos, or another account's snapshot.
+      await replaceSyncedAvailableModelsForConnection(logProvider, id, snapshot);
+      return NextResponse.json({
+        success: true,
+        provider: logProvider,
+        connectionId: id,
+        source: "upstream",
+        models: nativeModels,
+        syncedModels: nativeModels.length,
+        availableModelsCount: snapshot.length,
+        freeFilterEmpty: selected.freeFilterEmpty,
+      });
+    }
+    const allFetchedModels = fetchedInventory;
     const importFreeOnly = Boolean(
       (connection.providerSpecificData as Record<string, unknown> | undefined)?.importFreeModelsOnly
     );

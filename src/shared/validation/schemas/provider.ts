@@ -272,80 +272,99 @@ export const bulkWebSessionImportSchema = z.object({
   globalPriority: z.number().int().min(1).max(100).nullable().optional(),
 });
 
-export const providerModelMutationSchema = z.object({
-  provider: z.string().trim().min(1, "provider is required").max(120),
-  modelId: z.string().trim().min(1, "modelId is required").max(240),
-  modelName: z.string().trim().max(240).optional(),
-  source: z.string().trim().max(80).optional(),
-  apiFormat: z
-    .enum([
-      "chat-completions",
-      "responses",
-      "embeddings",
-      "rerank",
-      "audio-transcriptions",
-      "audio-speech",
-      "images-generations",
-      "video",
-    ])
-    .default("chat-completions"),
-  supportedEndpoints: z
-    .array(z.enum(MODEL_SUPPORTED_ENDPOINT_VALUES))
-    .transform(normalizeModelSupportedEndpoints)
-    .default(["chat"]),
-  endpointCapabilitySource: z.enum(["declared", "inferred", "defaulted", "operator"]).optional(),
-  // #2905: optional per-model wire format override for custom models (e.g. a
-  // custom opencode-go model that must use the Anthropic Messages shape).
-  targetFormat: z
-    .enum(["openai", "openai-responses", "claude", "gemini", "antigravity"])
-    .optional(),
-  // #1294: optional token limits set in the "add custom model" form. The wire
-  // shape uses max_input_tokens / max_output_tokens (mirrors the /v1/models
-  // catalog); they persist as inputTokenLimit / outputTokenLimit.
-  max_input_tokens: z.number().int().positive().optional(),
-  max_output_tokens: z.number().int().positive().optional(),
-  // #4125: manual context-window override for a specific provider/model. Persisted
-  // via the Feature-5004 `model_context_overrides` table (source="manual") so it wins
-  // over the auto-discovery/static-catalog context window in `getModelContextLimit()`
-  // — fixes the "provider misreports context length" combo-drop case. `null` clears
-  // a previously set override.
-  maxOutputTokenOverride: z.number().int().positive().nullable().optional(),
-  contextWindowOverride: z.number().int().positive().nullable().optional(),
-  // #1904: manual vision-capability override for custom OpenAI-compatible models whose
-  // upstream discovery metadata does not self-report an image input modality (many
-  // self-hosted/local backends). Mirrors the auto-discovery `supportsVision` field so
-  // the same flag flows through `getCustomVisionCapabilityFields()` in the /v1/models
-  // catalog. `null` clears a manual override back to the id-based heuristic.
-  supportsVision: z.boolean().nullable().optional(),
-  dimensions: z.number().int().positive().nullable().optional(),
-  supportedInputTypes: z.array(z.string()).optional(),
-  modelType: z.enum(["chat", "embedding", "image", "rerank"]).optional(),
-  isFree: z.boolean().nullable().optional(),
-  normalizeToolCallId: z.boolean().optional(),
-  preserveOpenAIDeveloperRole: z.boolean().nullable().optional(),
-  upstreamHeaders: upstreamHeadersRecordSchema.nullable().optional(),
-  /** Zod 4: `z.record(z.enum([...]), …)` requires every enum key; use `partialRecord` for sparse patches. */
-  compatByProtocol: z
-    .partialRecord(z.enum(["openai", "openai-responses", "claude"]), modelCompatPerProtocolSchema)
-    .optional(),
-  // #9820: optional async video-generation job preset for a custom
-  // OpenAI-compatible provider whose /videos surface is a submit→poll API
-  // (agnes-video-job, agnes-video-2.5-job, muapi-video-job, sora-job). Persisted on the custom model
-  // row; the /v1/videos/generations handler branches on it between the
-  // synchronous OpenAI-compatible path and the job/poll path. `"openai-video"`
-  // is a legacy no-op value that keeps the sync handler selected.
-  generationConfig: z
-    .object({
-      preset: z.enum([
-        "agnes-video-job",
-        "agnes-video-2.5-job",
-        "muapi-video-job",
-        "sora-job",
-        "openai-video",
-      ]),
-    })
-    .optional(),
-});
+export const providerModelMutationSchema = z
+  .object({
+    provider: z.string().trim().min(1, "provider is required").max(120),
+    modelId: z.string().trim().min(1, "modelId is required").max(240),
+    modelName: z.string().trim().max(240).optional(),
+    source: z.string().trim().max(80).optional(),
+    apiFormat: z
+      .enum([
+        "chat-completions",
+        "responses",
+        "embeddings",
+        "rerank",
+        "audio-transcriptions",
+        "audio-speech",
+        "images-generations",
+        "video",
+        "systemone",
+      ])
+      .optional(),
+    supportedEndpoints: z
+      .array(z.enum(MODEL_SUPPORTED_ENDPOINT_VALUES))
+      .transform(normalizeModelSupportedEndpoints)
+      .optional(),
+    endpointCapabilitySource: z.enum(["declared", "inferred", "defaulted", "operator"]).optional(),
+    // #2905: optional per-model wire format override for custom models (e.g. a
+    // custom opencode-go model that must use the Anthropic Messages shape).
+    targetFormat: z
+      .enum(["openai", "openai-responses", "claude", "gemini", "antigravity"])
+      .optional(),
+    // #1294: optional token limits set in the "add custom model" form. The wire
+    // shape uses max_input_tokens / max_output_tokens (mirrors the /v1/models
+    // catalog); they persist as inputTokenLimit / outputTokenLimit.
+    max_input_tokens: z.number().int().positive().optional(),
+    max_output_tokens: z.number().int().positive().optional(),
+    // #4125: manual context-window override for a specific provider/model. Persisted
+    // via the Feature-5004 `model_context_overrides` table (source="manual") so it wins
+    // over the auto-discovery/static-catalog context window in `getModelContextLimit()`
+    // — fixes the "provider misreports context length" combo-drop case. `null` clears
+    // a previously set override.
+    maxOutputTokenOverride: z.number().int().positive().nullable().optional(),
+    contextWindowOverride: z.number().int().positive().nullable().optional(),
+    // #1904: manual vision-capability override for custom OpenAI-compatible models whose
+    // upstream discovery metadata does not self-report an image input modality (many
+    // self-hosted/local backends). Mirrors the auto-discovery `supportsVision` field so
+    // the same flag flows through `getCustomVisionCapabilityFields()` in the /v1/models
+    // catalog. `null` clears a manual override back to the id-based heuristic.
+    supportsVision: z.boolean().nullable().optional(),
+    dimensions: z.number().int().positive().nullable().optional(),
+    supportedInputTypes: z.array(z.string()).optional(),
+    modelType: z.preprocess(
+      (value) => (value === "decisions" || value === "systemone" ? "decision" : value),
+      z.enum(["chat", "embedding", "image", "rerank", "decision"]).nullable().optional()
+    ),
+    isFree: z.boolean().nullable().optional(),
+    normalizeToolCallId: z.boolean().optional(),
+    preserveOpenAIDeveloperRole: z.boolean().nullable().optional(),
+    upstreamHeaders: upstreamHeadersRecordSchema.nullable().optional(),
+    /** Zod 4: `z.record(z.enum([...]), …)` requires every enum key; use `partialRecord` for sparse patches. */
+    compatByProtocol: z
+      .partialRecord(z.enum(["openai", "openai-responses", "claude"]), modelCompatPerProtocolSchema)
+      .optional(),
+    // #9820: optional async video-generation job preset for a custom
+    // OpenAI-compatible provider whose /videos surface is a submit→poll API
+    // (agnes-video-job, agnes-video-2.5-job, muapi-video-job, sora-job). Persisted on the custom model
+    // row; the /v1/videos/generations handler branches on it between the
+    // synchronous OpenAI-compatible path and the job/poll path. `"openai-video"`
+    // is a legacy no-op value that keeps the sync handler selected.
+    generationConfig: z
+      .object({
+        preset: z.enum([
+          "agnes-video-job",
+          "agnes-video-2.5-job",
+          "muapi-video-job",
+          "sora-job",
+          "openai-video",
+        ]),
+      })
+      .optional(),
+  })
+  .transform((value) => ({
+    ...value,
+    apiFormat:
+      value.apiFormat ??
+      (value.modelType === "decision" ? ("systemone" as const) : ("chat-completions" as const)),
+    supportedEndpoints:
+      value.supportedEndpoints ??
+      (value.apiFormat === "systemone" || value.modelType === "decision"
+        ? ["systemone"]
+        : ["chat"]),
+    ...(value.apiFormat === "systemone" && value.modelType === undefined
+      ? { modelType: "decision" as const }
+      : {}),
+  }));
 
 export const updateModelAliasesSchema = z.object({
   aliases: z.record(z.string().trim().min(1), z.string().trim().min(1)),

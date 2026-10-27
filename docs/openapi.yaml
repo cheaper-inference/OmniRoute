@@ -2070,7 +2070,8 @@ paths:
         Typed decision endpoint. A System One model answers `noul` (yes/no),
         `choice` and `score` questions about the supplied `state` with
         backend-reported probabilities instead of text, so this is not a chat path:
-        no streaming, no translation, no combo expansion. `model` is either a
+        no streaming, no chat substitution, no combo expansion. An explicitly
+        registered native codec translates distinct provider contracts. `model` is either a
         bare alias (`jev`, `jev-free`) or a provider-qualified id
         (`openrouter/typesafe/jev-1.13`); a qualified id and a free-tier alias
         are dispatched to exactly one backend. Restricted API keys need the
@@ -2102,12 +2103,11 @@ paths:
                 questions:
                   type: object
                   minProperties: 1
-                  maxProperties: 64
                   description: >-
                     One entry per question, keyed by the name the answer comes
                     back under. Each value is `{ type: noul | choice | score,
                     instructions?, criteria? }` — `criteria` is an option map
-                    for `choice` (1–255 options) and 2–10 ordered levels for
+                    for `choice` (provider-specific option limits) and ordered levels for
                     `score`. Instructions accept text or structured JSON;
                     `noul` requires instructions or a described true/false
                     outcome. Choice/score instructions may be omitted or null.
@@ -2163,15 +2163,77 @@ paths:
         "504":
           description: Dispatch deadline or upstream timeout; no further fallback after cancellation.
 
+  /api/v1/decisions:
+    post:
+      tags: [System One]
+      summary: Ask named native Decisions questions
+      description: >-
+        OpenAI-shaped subset over the same native admission, credential,
+        dispatch and accounting lane, delegated once in process. Requires a
+        provider-qualified model. Accepts input text or one JSON user message
+        and named predicate/choice/score questions. Choice values must be
+        strings; score levels may have text labels/descriptions. Images,
+        tool/conversation histories, caching controls and complex instructions
+        explicitly reject before dispatch. Question count and option bounds
+        remain provider-specific. Per-question refusal and missing USD cost
+        retain their meaning. This is not an alias for a different JSON shape.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, input, questions]
+              additionalProperties: false
+              properties:
+                model: { type: string, example: openai/gpt-6-luna }
+                input:
+                  description: Text or one user message containing one input_json part.
+                  oneOf:
+                    - { type: string }
+                    - { type: array, maxItems: 1, items: { type: object } }
+                questions:
+                  type: array
+                  minItems: 1
+                  maxItems: 400
+                  items:
+                    type: object
+                    required: [name, type, instructions]
+                    properties:
+                      name: { type: string }
+                      type: { type: string, enum: [predicate, choice, score] }
+                      instructions: { type: string }
+                      choices: { type: array, items: { type: object } }
+                      levels: { type: array, items: { type: object } }
+      responses:
+        "200":
+          {
+            description: Named typed answer array; refusal remains explicit and unknown cost is not free.,
+          }
+        "400": { description: Unsupported shape, model or provider-specific limits; no inference. }
+        "401": { description: Authentication required. }
+        "403": { description: Client key or upstream access denied. }
+        "429":
+          {
+            description: Policy or provider rate restriction; scope is not inferred from HTTP status alone.,
+          }
+        "502":
+          {
+            description: Native response cannot satisfy the requested contract; charged usage remains recorded.,
+          }
+
   /api/v1/systemone/models:
     get:
       tags: [System One]
       summary: List typed decision models
       description: >-
         Decision-model metadata from eligible configured backend connections.
-        Listing does not establish inference entitlement. Decision-only models are deliberately
-        absent from `GET /api/v1/models`, so this is the only catalog that
-        lists them. Read-only and never cached; the calling key's connection
+        Listing does not establish inference entitlement. Ordinary chat discovery excludes decision-only models.
+        `GET /api/v1/models?kind=decision` reads locally imported/custom decision
+        inventory without provider access; this operation explicitly contacts
+        eligible configured native provider catalogs. Read-only and never cached; the calling key's connection
         allowlist and model rules are both applied.
       security:
         - BearerAuth: []
@@ -2246,7 +2308,20 @@ paths:
           description: Catalog surface (`type`); models without a `type` are `chat`.
           schema:
             type: string
-            enum: [chat, audio, embedding, image, moderation, music, rerank, video]
+            enum:
+              [
+                chat,
+                audio,
+                embedding,
+                image,
+                moderation,
+                music,
+                rerank,
+                video,
+                decision,
+                decisions,
+                systemone,
+              ]
         - in: query
           name: q
           required: false
@@ -2334,7 +2409,20 @@ paths:
                   description: Keep models whose `max_output_tokens` is at least this value.
                 kind:
                   type: string
-                  enum: [chat, audio, embedding, image, moderation, music, rerank, video]
+                  enum:
+                    [
+                      chat,
+                      audio,
+                      embedding,
+                      image,
+                      moderation,
+                      music,
+                      rerank,
+                      video,
+                      decision,
+                      decisions,
+                      systemone,
+                    ]
                 q:
                   type: string
                   minLength: 1
