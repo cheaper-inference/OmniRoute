@@ -22,7 +22,7 @@ import { AsyncLocalStorage } from "node:async_hooks";
 
 // Providers mapped to the same string share one serialized lane. Codex and the
 // raw `openai` provider use the same Auth0 backend, so they MUST share a lane.
-const ROTATION_LOCK_GROUP: Record<string, string> = {
+export const ROTATION_LOCK_GROUP: Record<string, string> = {
   codex: "openai-auth0",
   openai: "openai-auth0",
   claude: "anthropic-oauth",
@@ -35,6 +35,12 @@ const ROTATION_LOCK_GROUP: Record<string, string> = {
   // already listed in tokenHealthCheck's ROTATING_REFRESH_PROVIDERS, so sibling
   // connections could refresh concurrently and present superseded tokens.
   cline: "cline",
+  // Amazon Q dispatches to the same refreshKiroToken backend as kiro, so sibling
+  // Kiro-IdP connections must not POST their rotating refresh tokens concurrently.
+  "amazon-q": "kiro",
+  // Openference rotates one-time-use refresh tokens on its own endpoint; a
+  // concurrent sibling refresh would burn the token, so it gets its own lane.
+  openference: "openference",
 };
 
 // Protective settle gap (ms) between two consecutive sibling refreshes when the

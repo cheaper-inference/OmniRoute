@@ -494,7 +494,7 @@ open-sse/
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, además de `claudeIdentity.ts`
 (auxiliar de identidad compartido) e `index.ts` (registro).
 
-> Nota: los proveedores que no aparecen aquí son atendidos por `default.ts` mediante el ejecutor genérico compatible con OpenAI. El catálogo completo de proveedores (375 proveedores) se encuentra en `src/shared/constants/providers.ts`.
+> Nota: los proveedores que no aparecen aquí son atendidos por `default.ts` mediante el ejecutor genérico compatible con OpenAI. El catálogo completo de proveedores (376 proveedores) se encuentra en `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 

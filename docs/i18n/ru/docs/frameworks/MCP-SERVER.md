@@ -72,6 +72,16 @@ curl -i \
 
 Ключ без области manage (или отсутствие Bearer) приводит к ответу `403 LOCAL_ONLY`. Для соседнего префикса `/api/cli-tools/runtime/*` обход намеренно НЕ предусмотрен — см. [Уровни Route Guard — исключение для области manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Проверка Origin
+
+После аутентификации у каждого запроса к `/api/mcp/*` — транспортам и управляющим маршрутам вроде `status`, `tools`, `audit`, `restart` — проверяется заголовок `Origin`, кем бы ни был вызывающий (API-ключ, токен CLI, сессия дашборда или анонимный loopback при отключённом входе). Это защита от DNS rebinding, которую требует спецификация MCP Streamable HTTP.
+
+- **Нет заголовка `Origin`** → разрешено. CLI OmniRoute, SDK и IDE-клиенты его не отправляют.
+- **Допустимый `Origin`** → `localhost` / `127.0.0.1` / `[::1]` на любом порту или собственный публичный origin OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin, переданный доверенным обратным прокси (`OMNIROUTE_TRUST_PROXY`, только если base URL не задан), или прямое обращение к loopback/LAN IP-хосту. Один лишь заголовок `Host` никогда не делает origin доверенным.
+- **Любой другой `Origin`, включая `null`** → `403` с телом ошибки JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Сессия дашборда с действительным CSRF-токеном по-прежнему принимается, как и для других операций записи дашборда.
+
+Браузерному MCP-клиенту за обратным прокси нужен `OMNIROUTE_PUBLIC_BASE_URL`; списка разрешённых других origin нет. Предварительный CORS-запрос (`OPTIONS`) не проверяется по Origin; последующий запрос — проверяется.
+
 ## Конфигурация IDE
 
 См. раздел [Конфигурация клиента MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration), чтобы настроить Claude Desktop,

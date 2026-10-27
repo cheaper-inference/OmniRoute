@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — nemokamas DI šliuzas
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — niekada nenustokite programuoti. Kiekvienas DI įrankis → 375 teikėjai — daugiau nei 150 nemokamų — per vieną galinį tašką. Claude Code, Codex, Cursor, Cline, Copilot ir Antigravity į NEMOKAMUS Claude / GPT / Gemini su automatiniu atsarginiu perjungimu. RTK + Caveman daugiasluoksnis glaudinimas sutaupo 15–95 % žetonų (vid. ~89 %) — niekada nepasiekite limitų. 375 DI teikėjai · daugiau nei 150 nemokamų planų · ~1,62 mlrd. nemokamų žetonų per mėn. · 20 maršruto parinkimo strategijų · pradėkite nuo 0 $."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — niekada nenustokite programuoti. Kiekvienas DI įrankis → 376 teikėjai — daugiau nei 150 nemokamų — per vieną galinį tašką. Claude Code, Codex, Cursor, Cline, Copilot ir Antigravity į NEMOKAMUS Claude / GPT / Gemini su automatiniu atsarginiu perjungimu. RTK + Caveman daugiasluoksnis glaudinimas sutaupo 15–95 % žetonų (vid. ~89 %) — niekada nepasiekite limitų. 376 DI teikėjai · daugiau nei 150 nemokamų planų · ~1,62 mlrd. nemokamų žetonų per mėn. · 20 maršruto parinkimo strategijų · pradėkite nuo 0 $."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Naudokite savo paslaugų teikėjų paskyras.** Tai yra apytikslė bendra suma iš atskirai prieinamų trečiųjų šalių nemokamų planų, o ne OmniRoute suteikiami žetonai. Užsiregistruokite, prireikus gaukite prisijungimo duomenis ir prijunkite paslaugų teikėjus, kuriais galite naudotis; kiekvienas paslaugų teikėjas pats nustato savo limitus, prieinamumą ir sąlygas.
 >
-> Rankiniu būdu sujungti nemokamus planus sudėtinga — dešimtys SDK, dešimtys užklausų dažnio limitų ir jokio aiškumo, kiek išteklių iš tikrųjų turite. OmniRoute kataloge yra **471 nemokamo plano įrašas, apimantis 34 pasikartojančių telkinių raktus**, o antraštėje rodomą žetonų skaičių apskaičiuoja pagal **17 telkinių, kuriems paskelbtas teigiamas mėnesio biudžetas, ir penkis atskirų Groq modelių limitus**, pašalindamas bendrų telkinių dublikatus. Kvotos, kurios tampa prieinamos tik patvirtinus tapatybę konkrečiame regione (šiuo metu: ModelScope), rodomos atskirai — +~6M po regioninio tapatybės patvirtinimo — ir niekada neįtraukiamos į antraštėje pateikiamą sumą. Rezultatas visada matomas valdymo skydelyje (`/dashboard/free-tiers`).
+> Rankiniu būdu sujungti nemokamus planus sudėtinga — dešimtys SDK, dešimtys užklausų dažnio limitų ir jokio aiškumo, kiek išteklių iš tikrųjų turite. OmniRoute kataloge yra **484 nemokamo plano įrašas, apimantis 34 pasikartojančių telkinių raktus**, o antraštėje rodomą žetonų skaičių apskaičiuoja pagal **17 telkinių, kuriems paskelbtas teigiamas mėnesio biudžetas, ir penkis atskirų Groq modelių limitus**, pašalindamas bendrų telkinių dublikatus. Kvotos, kurios tampa prieinamos tik patvirtinus tapatybę konkrečiame regione (šiuo metu: ModelScope), rodomos atskirai — +~6M po regioninio tapatybės patvirtinimo — ir niekada neįtraukiamos į antraštėje pateikiamą sumą. Rezultatas visada matomas valdymo skydelyje (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute nemokamų planų biudžeto kortelė: stabiliai ~1.62B nemokamų žetonų per mėnesį, o pirmąjį mėnesį su registracijos kreditais — iki ~2.22B, iš 34 dokumentuotų pasikartojančių telkinių raktų, apimančių 471 kataloge esantį nemokamo plano įrašą ir pasiekiamų per vieną galinį tašką. Sąžiningi skaičiavimai pašalinant telkinių dublikatus — kiekvienas bendras telkinys skaičiuojamas vieną kartą, įskaitant 17 pasikartojančių telkinių su paskelbtu teigiamu mėnesio žetonų biudžetu ir penkis atskirų Groq modelių limitus; sąlygų rizikos kataloge 12 paslaugų teikėjų pažymėti kaip vengtini, kad galėtumėte apsispręsti patys. Biudžeto juostoje pateikiami Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (penki atskirų modelių limitai) ir mažesni telkiniai, taip pat pirmojo mėnesio registracijos kreditai ir nuolat nemokami paslaugų teikėjai be žetonų limito, rodomi atskirai, kad niekada dirbtinai nepadidintų antraštėje pateikiamo skaičiaus. Tiesioginiai panaudotų ir likusių išteklių duomenys pateikiami /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute nemokamų planų biudžeto kortelė: stabiliai ~1.62B nemokamų žetonų per mėnesį, o pirmąjį mėnesį su registracijos kreditais — iki ~2.22B, iš 34 dokumentuotų pasikartojančių telkinių raktų, apimančių 484 kataloge esantį nemokamo plano įrašą ir pasiekiamų per vieną galinį tašką. Sąžiningi skaičiavimai pašalinant telkinių dublikatus — kiekvienas bendras telkinys skaičiuojamas vieną kartą, įskaitant 17 pasikartojančių telkinių su paskelbtu teigiamu mėnesio žetonų biudžetu ir penkis atskirų Groq modelių limitus; sąlygų rizikos kataloge 12 paslaugų teikėjų pažymėti kaip vengtini, kad galėtumėte apsispręsti patys. Biudžeto juostoje pateikiami Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (penki atskirų modelių limitai) ir mažesni telkiniai, taip pat pirmojo mėnesio registracijos kreditai ir nuolat nemokami paslaugų teikėjai be žetonų limito, rodomi atskirai, kad niekada dirbtinai nepadidintų antraštėje pateikiamo skaičiaus. Tiesioginiai panaudotų ir likusių išteklių duomenys pateikiami /dashboard/free-tiers."/>
 
 > Tiesioginio `/dashboard/free-tiers` puslapio animuota santrauka. Visa metodika (telkinių dublikatų šalinimas, kreditų lygiai, paslaugų teikėjų sąlygos): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Funkcijos</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Deriniai</a></td>
-    <td align="center"><a href="#-375-ai-providers--153-catalog-marked-free">🌐 Teikėjai</a></td>
+    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Teikėjai</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI ir MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis taškas ir 375 teikėjai. Automatinis perjungimas į atsarginį variantą palaiko maršrutizavimą, kol yra kitas sveikas taikinys. Šeši ramsčiai: atsparus perjungimas tarp 375 teikėjų · iki 95 % žetonų sutaupymas tinkamose darbo apkrovose · 0 $ pradžiai su 150+ nemokamų planų ir 51 pasikartojančiu arba be rakto veikiančiu visam laikui nemokamu teikėju · 37 CLI/agentų integracijos per vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas ties /v1 · produkcijos lygio valdikliai, įskaitant grandinių pertraukiklius, TLS stealth, 110 MCP įrankių, A2A, atmintį, apsaugas, vertinimus ir 56 000+ statinių testų deklaracijų daugiau nei 7 800 sekamuose testų failuose."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis taškas ir 376 teikėjai. Automatinis perjungimas į atsarginį variantą palaiko maršrutizavimą, kol yra kitas sveikas taikinys. Šeši ramsčiai: atsparus perjungimas tarp 376 teikėjų · iki 95 % žetonų sutaupymas tinkamose darbo apkrovose · 0 $ pradžiai su 150+ nemokamų planų ir 52 pasikartojančiu arba be rakto veikiančiu visam laikui nemokamu teikėju · 37 CLI/agentų integracijos per vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas ties /v1 · produkcijos lygio valdikliai, įskaitant grandinių pertraukiklius, TLS stealth, 110 MCP įrankių, A2A, atmintį, apsaugas, vertinimus ir 56 000+ statinių testų deklaracijų daugiau nei 7 800 sekamuose testų failuose."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Visos **20** strategijų – derinkite jas kiekviename kombinacijos žingsnyje:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kuo išsiskiria „OmniRoute“ — tam tikros datos funkcijų palyginimas su „9router“, „OpenRouter“, „CLIProxyAPI“ ir „LiteLLM“ pagal 13 galimybių. „OmniRoute“: 375 paslaugų teikėjai, integruota daugiau nei 150 nemokamų planų, 20 maršruto parinkimo strategijų, 12 variklių žetonų glaudinimas, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, nuolatinė atmintis, apsaugos priemonės, debesijos agentai, nepastebimas TLS kontrolinis atspaudas, „Desktop“ / „Termux“ / PWA ir 67 internacionalizuotos naudotojo sąsajos lokalės. „OmniRoute“ platinama pagal MIT licenciją ir gali būti talpinama savarankiškai. Konkurentų galimybės ir jų skaičius gali keistis; žr. pateiktą nuorodą į metodiką."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kuo išsiskiria „OmniRoute“ — tam tikros datos funkcijų palyginimas su „9router“, „OpenRouter“, „CLIProxyAPI“ ir „LiteLLM“ pagal 13 galimybių. „OmniRoute“: 376 paslaugų teikėjai, integruota daugiau nei 150 nemokamų planų, 20 maršruto parinkimo strategijų, 12 variklių žetonų glaudinimas, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, nuolatinė atmintis, apsaugos priemonės, debesijos agentai, nepastebimas TLS kontrolinis atspaudas, „Desktop“ / „Termux“ / PWA ir 67 internacionalizuotos naudotojo sąsajos lokalės. „OmniRoute“ platinama pagal MIT licenciją ir gali būti talpinama savarankiškai. Konkurentų galimybės ir jų skaičius gali keistis; žr. pateiktą nuorodą į metodiką."/>
 
 <sub>📊 Visa metodika ir išsami informacija apie kiekvieną funkciją, palyginti su „9router“, „OpenRouter“, „CLIProxyAPI“ ir „LiteLLM“ → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -611,7 +611,7 @@ dabartinį katalogą rasite **[radar.omniroute.online/planos](https://radar.omni
 - **🖼️ Nauji galutiniai taškai** — `/v1/ocr` (Mistral OCR) ir `/v1/audio/translations` (Whisper stiliaus) užbaigia medijos galimybių rinkinį. → [API žinynas](docs/reference/API_REFERENCE.md)
 - **🎨 Paveikslėlių / vaizdo įrašų / garso generavimas** — viena API visai medijai: xAI Grok Imagine ir Novita AI vaizdo įrašai, ComfyUI, Magnific, Adobe Firefly, Segmind ir kalbos tiekėjai, tokie kaip ElevenLabs. → [API žinynas](docs/reference/API_REFERENCE.md)
 - **🌍 Diegimas ir eksploatavimas** — atvirkštinio tarpinio serverio `basePath`, automatinis naršyklės kalbos aptikimas, įrenginių sekimas pagal raktą, MITM pasitikėjimas be root teisių, zh-TW lokalizacija. → [Aplinka](docs/reference/ENVIRONMENT.md)
-- **🤝 Daugiau tiekėjų ir agentų** — debesijos agentai (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) su prisijungimu per naršyklę + OAuth, visaverte Ollama kortelė, Claude Opus 5 ir Sonnet 5, oficiali Kimi partnerystė (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ir atnaujintas **375 tiekėjų katalogas**. → [Tiekėjai](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Daugiau tiekėjų ir agentų** — debesijos agentai (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) su prisijungimu per naršyklę + OAuth, visaverte Ollama kortelė, Claude Opus 5 ir Sonnet 5, oficiali Kimi partnerystė (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ir atnaujintas **376 tiekėjų katalogas**. → [Tiekėjai](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Maršrutizavimo skaidrumas** — kiekvienas atsakymas pateikiamas su `X-OmniRoute-Decision` antrašte, nurodančia jį aptarnavusią strategiją/tiekėją/delą, nauja `cache-optimized` kombinacijų strategija + Auto-Combo `cacheAffinity` faktorius nukreipia pasikartojančias užklausas atgal į ryšį, kuriame laikomas talpykloje esantis prefiksas, o tik skaitymui skirtas `/v1/auto-combo/{channel}/candidates` galutinis taškas atskleidžia `auto/*` kanalo kandidatų telkinį realiu laiku. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Vietinis našumas ir infrastruktūra** — vienu spustelėjimu paleidžiamas vietinis Redis, Cloudflare Workers / Deno Deploy relay diegikliai, Bifrost ir Mux kaip prižiūrimos įterptosios paslaugos. → [Įterptosios paslaugos](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Taip pat komplekte** — papildinių karkasas + turgavietė, Omni/Agent/GitHub įgūdžių karkasai, Obsidian vault integracija (22 MCP įrankiai), su OpenAI suderinamos Batch ir Files API, semantinis atsakymų podėlis, gamifikacija su lyderių lentelėmis, ACP agentų aptikimas (15 integruotų agentų), suplanuotas žurnalų eksportas į BigQuery, `auto/chaos` lygiagretus kelių modelių platinimas (fan-out), Telegram boto tiltas, programoje integruotas versijų tvarkytuvas ir LMArena-ELO nemokamų teikėjų reitingai. → [Dokumentacija](docs/README.md)
@@ -695,11 +695,11 @@ patekti į jūsų apvalkalo istoriją. → [CLI integracijos](docs/guides/CLI-IN
 
 <div align="center">
 
-## 🌐 375 DI teikėjai — 153 kataloge pažymėti kaip nemokami
+## 🌐 376 DI teikėjai — 153 kataloge pažymėti kaip nemokami
 
 </div>
 
-> **375 registruoti teikėjai** kanoniniuose pokalbių, medijos, paieškos, vietinių, debesijos agentų ir sistemos rinkiniuose, įskaitant **153 su `hasFree: true` paieškos metaduomenimis**. Pokalbių modelių registras apima **239 teikėjus / 3 059 skirtingas teikėjo ir modelio poras / 1 475 neapdorotus modelių ID**; atskirame nemokamų limitų kataloge yra **471 kiekvieno modelio įrašas**, **34 periodiškai atsinaujinančių limitų telkiniai** ir **51 periodiškai atsinaujinantis arba be rakto visam laikui nemokamas teikėjas**. Šie vardikliai skiriasi sąmoningai; apibrėžtys ir skaičiavimai, kuriuose pašalinti telkinių dublikatai, pateikiami [Teikėjų žinyne](docs/reference/PROVIDER_REFERENCE.md) ir [Nemokamuose planuose](docs/reference/FREE_TIERS.md).
+> **376 registruoti teikėjai** kanoniniuose pokalbių, medijos, paieškos, vietinių, debesijos agentų ir sistemos rinkiniuose, įskaitant **153 su `hasFree: true` paieškos metaduomenimis**. Pokalbių modelių registras apima **239 teikėjus / 3 059 skirtingas teikėjo ir modelio poras / 1 475 neapdorotus modelių ID**; atskirame nemokamų limitų kataloge yra **471 kiekvieno modelio įrašas**, **34 periodiškai atsinaujinančių limitų telkiniai** ir **52 periodiškai atsinaujinantis arba be rakto visam laikui nemokamas teikėjas**. Šie vardikliai skiriasi sąmoningai; apibrėžtys ir skaičiavimai, kuriuose pašalinti telkinių dublikatai, pateikiami [Teikėjų žinyne](docs/reference/PROVIDER_REFERENCE.md) ir [Nemokamuose planuose](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1316,7 +1316,7 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
   <tr><td nowrap><b>Vykdymo aplinka</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Kalba</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> kataloguose <code>src/</code> ir <code>open-sse/</code> (nulis <code>any</code> branduolyje nuo v2.0)</td></tr>
   <tr><td nowrap><b>Karkasas</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalizavimas) + LowDB (JSON senoji sistema) — 147 domenų moduliai, 210 migracijos</td></tr>
+  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalizavimas) + LowDB (JSON senoji sistema) — 147 domenų moduliai, 211 migracijos</td></tr>
   <tr><td nowrap><b>Atmintis</b></td><td>SQLite FTS5 visateksčio paieška + int8 kvantuoti vektorių įterpiniai, tipizuotas blukimas</td></tr>
   <tr><td nowrap><b>Schemos</b></td><td>Zod 4 — MCP įrankių įvesties/išvesties validacija + API sutartys</td></tr>
   <tr><td nowrap><b>Protokolai</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1379,7 +1379,7 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Atsparumo vadovas</a></b></td><td>Grandinės pertraukikliai, atvėsimo laikotarpiai, eilė, apsauga nuo lavininio užklausų srauto, TLS klastojimas</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo modulis</a></b></td><td>16 veiksnių vertinimas, režimų paketai, automatinis atsikūrimas</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Tarpinio serverio vadovas</a></b></td><td>3 lygių tarpinių serverių sistema, 1proxy prekyvietė, registro CRUD operacijos</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Nemokami planai</a></b></td><td>Sujungtas katalogas: 34 dokumentuoti pasikartojantys fondai / 471 kataloguotas nemokamo plano įrašas</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Nemokami planai</a></b></td><td>Sujungtas katalogas: 34 dokumentuoti pasikartojantys fondai / 484 kataloguotas nemokamo plano įrašas</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funkcijų galerija</a></b></td><td>Vaizdinė prietaisų skydelio apžvalga su ekrano kopijomis</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Programinio kodo bazės dokumentacija</a></b></td><td>Pradedantiesiems pritaikyta programinio kodo bazės apžvalga</td></tr>
 </table>

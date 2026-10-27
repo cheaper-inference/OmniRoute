@@ -114,6 +114,81 @@ test("wasRefreshTokenRotated: true only when the DB token changed to a non-empty
   assert.equal(wasRefreshTokenRotated(42, "rt-new"), false);
 });
 
+// Amazon Q dispatches to the same refresh backend as kiro, and Openference
+// rotates one-time-use refresh tokens on its own endpoint: both need lanes.
+test("amazon-q shares the kiro rotation lane", () => {
+  const lane = rotationGroupFor("amazon-q");
+  assert.notEqual(lane, null, "amazon-q must be a rotating provider with a lane");
+  assert.equal(
+    lane,
+    rotationGroupFor("kiro"),
+    "amazon-q dispatches to the same refresh backend as kiro"
+  );
+});
+
+test("openference gets its own rotation lane", () => {
+  const lane = rotationGroupFor("openference");
+  assert.notEqual(lane, null, "openference must be a rotating provider with a lane");
+  assert.notEqual(
+    lane,
+    rotationGroupFor("kiro"),
+    "openference has its own endpoint, not the kiro backend"
+  );
+  assert.notEqual(lane, rotationGroupFor("codex"));
+});
+
+test("two amazon-q refreshes never overlap in the shared kiro lane", async () => {
+  __resetRefreshSerializerForTest();
+  let active = 0;
+  let maxActive = 0;
+  const refresh = (provider: string) =>
+    serializeRefresh(provider, async () => {
+      active++;
+      maxActive = Math.max(maxActive, active);
+      await delay(20);
+      active--;
+    });
+  await Promise.all([refresh("amazon-q"), refresh("amazon-q")]);
+  assert.equal(maxActive, 1, "two amazon-q refreshes in the kiro lane must serialize");
+  let crossActive = 0;
+  let crossMax = 0;
+  const cross = (provider: string) =>
+    serializeRefresh(provider, async () => {
+      crossActive++;
+      crossMax = Math.max(crossMax, crossActive);
+      await delay(20);
+      crossActive--;
+    });
+  await Promise.all([cross("amazon-q"), cross("openference")]);
+  assert.equal(crossMax, 2, "amazon-q and openference are independent lanes");
+});
+
+test("two openference refreshes never overlap in their own lane", async () => {
+  __resetRefreshSerializerForTest();
+  let active = 0;
+  let maxActive = 0;
+  const refresh = (provider: string) =>
+    serializeRefresh(provider, async () => {
+      active++;
+      maxActive = Math.max(maxActive, active);
+      await delay(20);
+      active--;
+    });
+  await Promise.all([refresh("openference"), refresh("openference")]);
+  assert.equal(maxActive, 1, "two openference refreshes in their own lane must serialize");
+  let crossActive = 0;
+  let crossMax = 0;
+  const cross = (provider: string) =>
+    serializeRefresh(provider, async () => {
+      crossActive++;
+      crossMax = Math.max(crossMax, crossActive);
+      await delay(20);
+      crossActive--;
+    });
+  await Promise.all([cross("openference"), cross("amazon-q")]);
+  assert.equal(crossMax, 2, "openference and amazon-q are independent lanes");
+});
+
 test("a nested refresh in the same group runs inside the held lane instead of deadlocking", async () => {
   // refreshAndUpdateCredentials serializes executor.refreshCredentials(), and the
   // Codex/Claude executors call getAccessToken(), which serializes again on the

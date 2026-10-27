@@ -15,7 +15,7 @@ Tek bir OpenAI uyumlu uç nokta (`/v1/*`) sağlar ve trafiği çeviri, geri dön
 
 Temel yetenekler:
 
-- CLI/araçlar için OpenAI uyumlu API yüzeyi (375 sağlayıcı, 156 yürütücü modülü)
+- CLI/araçlar için OpenAI uyumlu API yüzeyi (376 sağlayıcı, 156 yürütücü modülü)
 - Sağlayıcı biçimleri arasında istek/yanıt çevirisi
 - Model kombinasyonu geri dönüşü (çok modelli sıra)
 - `compositeTiers` tarafından çalışma zamanında sıralanan yapılandırılmış kombinasyon adımları (`provider + model + connection`)

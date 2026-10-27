@@ -72,6 +72,16 @@ curl -i \
 
 Ufunguo usio na `manage` (au bila Bearer) hurejesha `403 LOCAL_ONLY`. Kiambishi awali kinachohusiana `/api/cli-tools/runtime/*` hakiruhusiwi kupitwa kimakusudi — tazama [Viwango vya Route Guard — ruhusa maalum ya upeo wa manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Uthibitishaji wa Origin
+
+Baada ya uthibitishaji, kila ombi kwa `/api/mcp/*` — transport na njia za usimamizi kama `status`, `tools`, `audit`, `restart` — hukaguliwa kichwa chake cha `Origin`, bila kujali mpigaji ni nani (ufunguo wa API, tokeni ya CLI, kipindi cha dashibodi, au loopback isiyojulikana wakati kuingia kumezimwa). Hii ndiyo kinga dhidi ya DNS rebinding inayotakiwa na vipimo vya MCP Streamable HTTP.
+
+- **Hakuna kichwa cha `Origin`** → inaruhusiwa. OmniRoute CLI, SDK na wateja wa IDE hawakitumi.
+- **`Origin` inayoruhusiwa** → `localhost` / `127.0.0.1` / `[::1]` kwenye mlango wowote, au origin ya umma ya OmniRoute yenyewe: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin iliyopitishwa na reverse proxy inayoaminika (`OMNIROUTE_TRUST_PROXY`, pale tu base URL haijawekwa), au seva pangishi ya IP ya loopback/LAN inayofikiwa moja kwa moja. Kichwa cha `Host` pekee hakiwezi kamwe kufanya origin iaminike.
+- **`Origin` nyingine yoyote, ikiwemo `null`** → `403` pamoja na mwili wa hitilafu wa JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Kipindi cha dashibodi kinachowasilisha tokeni halali ya CSRF bado kinakubaliwa, kama ilivyo kwa maandishi mengine ya dashibodi.
+
+Mteja wa MCP wa kivinjari anayehudumiwa nyuma ya reverse proxy anahitaji `OMNIROUTE_PUBLIC_BASE_URL`; hakuna orodha ya kuruhusu origin nyingine. Ombi la awali la CORS (`OPTIONS`) halikaguliwi Origin; ombi linalofuata hukaguliwa.
+
 ## Usanidi wa IDE
 
 Tazama [Usanidi wa Mteja wa MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) kwa usanidi wa Claude Desktop,

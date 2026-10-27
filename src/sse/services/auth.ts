@@ -2891,7 +2891,18 @@ export async function markAccountUnavailable(
       return { shouldFallback: true, cooldownMs: connectionCooldownMs };
     }
 
-    const isNvidiaModelGone = provider === "nvidia" && status === 410;
+    // A provider that retires ONE model answers 410 ("Model X has been
+    // deprecated. Use Y instead."). The credential is healthy and every other
+    // model on it still works, so the lock must be per-model — never a
+    // connection-wide cooldown. NVIDIA was the first case (#9833); the OpenCode
+    // family retires free models the same way (Zen/Go answer 410 for a delisted
+    // model id) and used to cool the whole connection for 24h, taking every
+    // healthy sibling model down with it (#17472). Status-only, like the NVIDIA
+    // case: an empty body still means the model is gone.
+    const isModelGone =
+      status === 410 &&
+      (provider === "nvidia" ||
+        (typeof provider === "string" && provider.toLowerCase().startsWith("opencode")));
     const modelLockoutOptions = { maxCooldownMs: effectiveProviderProfile?.maxCooldownMs };
     // Same persisted reason the agentrouter 403 model-scope branch hard-codes
     // ("forbidden"): the lock key is the getModelLockKey tuple shared with the
@@ -2938,10 +2949,10 @@ export async function markAccountUnavailable(
       provider &&
       provider !== "codex" &&
       model &&
-      isModelScopedFailure(status, isNvidiaModelGone, fallbackResult, errorText, model)
+      isModelScopedFailure(status, isModelGone, fallbackResult, errorText, model)
     ) {
       const reason =
-        status === 404 || isNvidiaModelGone || isModelUnsupported401(status, errorText)
+        status === 404 || isModelGone || isModelUnsupported401(status, errorText)
           ? "not_found"
           : isQuotaExhaustedSignal(fallbackResult)
             ? "quota_exhausted"
@@ -2994,7 +3005,7 @@ export async function markAccountUnavailable(
         model,
         reason,
         status,
-        status === 404 || isNvidiaModelGone || isModelUnsupported401(status, errorText)
+        status === 404 || isModelGone || isModelUnsupported401(status, errorText)
           ? (effectiveProviderProfile?.baseCooldownMs ?? COOLDOWN_MS.notFoundLocal)
           : (claudeQuotaScope.cooldownMs ??
               antigravityFamilyInferredBaseCooldownMs ??

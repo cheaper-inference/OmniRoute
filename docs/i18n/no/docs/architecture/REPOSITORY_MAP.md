@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API for kontrollpanelkomponenter: adaptere over `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnavn som brukes av skjermbildene → Lucide-komponenter (`<Icon>`)                            |
-| `constants/providers.ts`         | **375 leverandører** med Zod-validering (autoritativ kilde)                                                 |
+| `constants/providers.ts`         | **376 leverandører** med Zod-validering (autoritativ kilde)                                                 |
 | `constants/cliTools.ts`          | Register over eksterne CLI-verktøy                                                                          |
 | `constants/routingStrategies.ts` | **20 rutingsstrategier** med prioriteter                                                                    |
 | `constants/publicApiRoutes.ts`   | Ruter som krever Bearer-autentisering (i motsetning til administrasjonsautentisering)                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI-integrasjoner + intern OmniRoute-CLI                                                   |
 | `I18N.md`                   | i18n-arkitektur, hvordan legge til et språk, 67 lokaliteter                                         |
 | `UNINSTALL.md`              | Fremgangsmåte for ren avinstallering                                                                |
-| `PROVIDER_REFERENCE.md`     | **Automatisk generert** katalog over 375 leverandører (regenerer: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatisk generert** katalog over 376 leverandører (regenerer: `npm run gen:provider-reference`) |
 
 ### Fordypninger i delsystemer
 

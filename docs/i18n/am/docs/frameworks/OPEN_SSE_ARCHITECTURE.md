@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ፋይል                             | ዓላማ                              |
 | ------------------------------- | -------------------------------- |
-| `providerRegistry.ts`           | ከ375 አቅራቢዎች ዝርዝር ላይ የቻት-ሞዴል ምዝገባ |
+| `providerRegistry.ts`           | ከ376 አቅራቢዎች ዝርዝር ላይ የቻት-ሞዴል ምዝገባ |
 | `providerModels.ts`             | የሞዴል ተለዋዋጭ ስሞች፣ የቅርጸት ካርታ        |
 | `constants.ts`                  | የጊዜ ማብቂያዎች፣ ገደቦች፣ የሁኔታ ኮዶች       |
 | `defaultThinkingSignature.ts`   | ነባሪው የClaude አስተሳሰብ ፊርማ          |

@@ -499,7 +499,7 @@ cho từng nhà cung cấp (schema công cụ, adapter fetch/TTS, trình xử l�
 (helper danh tính dùng chung) và `index.ts` (registry).
 
 > Lưu ý: các nhà cung cấp không được liệt kê tại đây được phục vụ bởi `default.ts` bằng executor
-> tương thích OpenAI dùng chung. Danh mục nhà cung cấp đầy đủ (375 nhà cung cấp) nằm trong
+> tương thích OpenAI dùng chung. Danh mục nhà cung cấp đầy đủ (376 nhà cung cấp) nằm trong
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

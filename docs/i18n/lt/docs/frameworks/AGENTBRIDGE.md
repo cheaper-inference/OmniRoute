@@ -20,7 +20,7 @@ Kai IDE agentas (pvz., GitHub Copilot, Cursor, Claude Code) atlieka API užklaus
 
 Tai reiškia, kad galite:
 
-- **Peradresuoti bet kurį agentą bet kuriam teikėjui**: Copilot bendrauja su OpenAI? Nukreipkite jį į Anthropic Claude, Gemini ar bet kurį iš 375 OmniRoute teikėjų.
+- **Peradresuoti bet kurį agentą bet kuriam teikėjui**: Copilot bendrauja su OpenAI? Nukreipkite jį į Anthropic Claude, Gemini ar bet kurį iš 376 OmniRoute teikėjų.
 - **Taikyti modelių susiejimus**: `gemini-3-flash` → `claude-sonnet-4.7` skaidriai apdorotojo (handler) lygmenyje.
 - **Stebėti visą agentų srautą**: kiekviena perimta užklausa publikuojama [Srauto inspektoriuje](./TRAFFIC_INSPECTOR.md).
 - **Pasinaudoti OmniRoute atsparumu**: kombinuotas maršrutizavimas, grandinės pertraukikliai, atsarginiai variantai ir sąnaudų stebėjimas veikia ir IDE agentų srautui.

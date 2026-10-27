@@ -499,7 +499,7 @@ skirti pagalbiniai moduliai (įrankių schemos, užklausų / TTS adapteriai, ypa
 (bendrinamas tapatybės pagalbinis modulis) ir `index.ts` (registras).
 
 > Pastaba: čia nenurodytus teikėjus aptarnauja `default.ts`, naudodamas bendrąjį
-> su OpenAI suderinamą vykdiklį. Visas teikėjų katalogas (375 teikėjai) yra
+> su OpenAI suderinamą vykdiklį. Visas teikėjų katalogas (376 teikėjai) yra
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

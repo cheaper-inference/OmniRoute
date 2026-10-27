@@ -12,7 +12,7 @@ const EXPECTED_MODEL_IDS = [
   "google/gemma-4-31b-it",
   "google/diffusiongemma-26b-a4b-it",
   "nvidia/nemotron-3-ultra-550b-a55b",
-  "nvidia/nemotron-3-super-120b-a12b",
+  "nvidia/nemotron-3.5-super-vl-120b-a12b",
   "nvidia/nemotron-3.5-lightning-30b-a3b",
   "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning",
   "openai/gpt-oss-120b",
