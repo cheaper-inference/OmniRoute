@@ -108,6 +108,18 @@ test("resolveNextBuildEnv forces stable build worker mode unless already provide
   assert.equal(preservedEnv.NODE_ENV, "production");
 });
 
+test("isolated build forwards the cache opt-out and preserves an explicit heap ceiling", () => {
+  const env = resolveNextBuildEnv({
+    NODE_ENV: "production",
+    NODE_OPTIONS: "--max-old-space-size=6144",
+    OMNIROUTE_USE_TURBOPACK: "0",
+    OMNIROUTE_BUILD_WEBPACK_CACHE: "0",
+  });
+  assert.equal(env.OMNIROUTE_USE_TURBOPACK, "0");
+  assert.equal(env.OMNIROUTE_BUILD_WEBPACK_CACHE, "0");
+  assert.equal(env.NODE_OPTIONS, "--max-old-space-size=6144");
+});
+
 // Escalated bug (WhatsApp BR, cmqiuhd7600): a local `npm run build` stalls/OOMs
 // during the webpack production pass ("Compiling instrumentation" bundles the whole
 // server graph). #4076/#4104 raised the heap only in the Docker builder stage; the
