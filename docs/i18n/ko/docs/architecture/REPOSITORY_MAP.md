@@ -391,49 +391,49 @@ open-sse/
 
 ---
 
-## `docs/` — 공개 문서(루트 파일 7개 + 하위 디렉터리 17개)
+## `docs/` — 공개 문서 (루트 파일 7개 + 하위 디렉터리 17개)
 
 ### 최상위 가이드
 
-| 문서                        | 목적                                                                                |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | 상위 수준 아키텍처, 하위 시스템 맵, 대시보드 화면                                   |
-| `CODEBASE_DOCUMENTATION.md` | 엔지니어링 참조 문서: 디렉터리, 모듈, 규칙                                          |
-| `FEATURES.md`               | v3.8 주요 기능을 포함한 기능 매트릭스                                               |
-| `USER_GUIDE.md`             | 최종 사용자 매뉴얼(설정, 모델, 콤보, CLI, 오디오 등)                                |
-| `API_REFERENCE.md`          | 인증 모델을 포함한 API 엔드포인트 참조 문서                                         |
-| `openapi.yaml`              | OpenAPI 3.0 명세(경로 121개)                                                        |
-| `SETUP_GUIDE.md`            | 설치 방법(npm, npx, Docker, Electron, Termux, 소스)                                 |
-| `ENVIRONMENT.md`            | 모든 환경 변수(약 800개 문서화, `.env.example` 약 3,050줄)                          |
-| `TROUBLESHOOTING.md`        | 일반적인 오류 + v3.8.0 알려진 문제                                                  |
-| `RELEASE_CHECKLIST.md`      | 전체 릴리스 흐름(스킬, husky, conventional commits, 배포)                           |
-| `COVERAGE_PLAN.md`          | 커버리지 목표 및 현재 상태                                                          |
-| `FREE_TIERS.md`             | 엄선된 무료 티어 제공업체(무료 48개 이상 + OAuth 11개)                              |
-| `CLI-TOOLS.md`              | 외부 CLI 통합 + 내부 OmniRoute CLI                                                  |
-| `I18N.md`                   | i18n 아키텍처, 언어 추가 방법, 로케일 67개                                          |
-| `UNINSTALL.md`              | 완전한 제거 절차                                                                    |
-| `PROVIDER_REFERENCE.md`     | 376개 제공업체의 **자동 생성된** 카탈로그(재생성: `npm run gen:provider-reference`) |
+| 문서                        | 목적                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | 상위 수준 아키텍처, 서브시스템 맵, 대시보드 표면                                     |
+| `CODEBASE_DOCUMENTATION.md` | 엔지니어링 레퍼런스: 디렉터리, 모듈, 컨벤션                                          |
+| `FEATURES.md`               | v3.8 하이라이트가 포함된 기능 매트릭스                                               |
+| `USER_GUIDE.md`             | 최종 사용자 매뉴얼 (설정, 모델, 콤보, CLI, 오디오 등)                                |
+| `API_REFERENCE.md`          | 인증 모델이 포함된 API 엔드포인트 레퍼런스                                           |
+| `openapi.yaml`              | OpenAPI 3.0 명세 (121개 경로)                                                        |
+| `SETUP_GUIDE.md`            | 설치 방법 (npm, npx, Docker, Electron, Termux, 소스)                                 |
+| `ENVIRONMENT.md`            | 모든 환경 변수 (약 800개 문서화, 약 3,050줄의 `.env.example`)                        |
+| `TROUBLESHOOTING.md`        | 일반적인 오류 + v3.8.0 알려진 이슈                                                   |
+| `RELEASE_CHECKLIST.md`      | 전체 릴리스 흐름 (스킬, husky, conventional commits, 배포)                           |
+| `COVERAGE_PLAN.md`          | 커버리지 목표 및 현재 상태                                                           |
+| `FREE_TIERS.md`             | 선별된 무료 티어 프로바이더 (48개 이상 무료 + 11개 OAuth)                            |
+| `CLI-TOOLS.md`              | 외부 CLI 통합 + 내부 OmniRoute CLI                                                   |
+| `I18N.md`                   | i18n 아키텍처, 언어 추가 방법, 67개 로케일                                           |
+| `UNINSTALL.md`              | 깔끔한 제거 단계                                                                     |
+| `PROVIDER_REFERENCE.md`     | 376개 프로바이더의 **자동 생성** 카탈로그 (재생성: `npm run gen:provider-reference`) |
 
-### 하위 시스템 심층 분석
+### 서브시스템 심층 분석
 
-| 문서                                        | 목적                                                                    |
-| ------------------------------------------- | ----------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | MCP 서버: 도구 110개, 전송 방식 3개, 범위 33개, REST 엔드포인트         |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 스킬 6개, REST 헬퍼, 에이전트 카드                  |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | 통합 가이드: A2A와 ACP 및 Cloud Agents 비교                             |
-| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules 오케스트레이션                              |
-| `SKILLS.md`                                 | 스킬 프레임워크(내장 + 마켓플레이스 + SkillsSH + 샌드박스)              |
-| `RADAR.md`                                  | Radar 무료 모델 카탈로그 오버레이(`RADAR_ENABLED`, 기본적으로 비활성화) |
-| `MEMORY.md`                                 | 메모리 시스템(SQLite FTS5 + Qdrant)                                     |
-| `EVALS.md`                                  | 평가 프레임워크(스위트, 실행, 평가 기준)                                |
-| `GUARDRAILS.md`                             | PII 마스커, 프롬프트 인젝션, 비전 브리지                                |
-| `COMPLIANCE.md`                             | 감사 로그, 보존, noLog 옵트아웃                                         |
-| `WEBHOOKS.md`                               | HMAC 서명 웹후크 전송                                                   |
-| `REASONING_REPLAY.md`                       | `reasoning_content`용 하이브리드 메모리/SQLite 캐시                     |
-| `AUTHZ_GUIDE.md`                            | 권한 부여 파이프라인(`classify` → `policies` → `enforce`)               |
-| `RESILIENCE_GUIDE.md`                       | 서킷 브레이커 + 쿨다운 + 모델 잠금                                      |
-| `docs/security/STEALTH_GUIDE.md` (git 전용) | TLS 핑거프린팅(JA3/JA4), Claude Code CCH, MITM 인증서                   |
-| `AUTO-COMBO.md`                             | Auto Combo 엔진(16개 요소 점수화, 6개 모드 팩, 가상 팩토리)             |
+| 문서                                        | 목적                                                               |
+| ------------------------------------------- | ------------------------------------------------------------------ |
+| `MCP-SERVER.md`                             | MCP 서버: 110개 도구, 3개 트랜스포트, 33개 스코프, REST 엔드포인트 |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6개 스킬, REST 헬퍼, 에이전트 카드             |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | 통합 가이드: A2A vs ACP vs Cloud Agents                            |
+| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules 오케스트레이션                         |
+| `SKILLS.md`                                 | 스킬 프레임워크 (내장 + 마켓플레이스 + SkillsSH + 샌드박스)        |
+| `RADAR.md`                                  | Radar 무료 모델 카탈로그 오버레이 (`RADAR_ENABLED`, 기본 비활성화) |
+| `MEMORY.md`                                 | 메모리 시스템 (SQLite FTS5 + Qdrant)                               |
+| `EVALS.md`                                  | 평가 프레임워크 (스위트, 실행, 루브릭)                             |
+| `GUARDRAILS.md`                             | PII 마스커, 프롬프트 인젝션, 비전 브리지                           |
+| `COMPLIANCE.md`                             | 감사 로그, 보존 정책, noLog 옵트아웃                               |
+| `WEBHOOKS.md`                               | HMAC 서명 웹훅 전달                                                |
+| `REASONING_REPLAY.md`                       | `reasoning_content`를 위한 하이브리드 메모리/SQLite 캐시           |
+| `AUTHZ_GUIDE.md`                            | 인가 파이프라인 (`classify` → `policies` → `enforce`)              |
+| `RESILIENCE_GUIDE.md`                       | 서킷 브레이커 + 쿨다운 + 모델 잠금                                 |
+| `docs/security/STEALTH_GUIDE.md` (git 전용) | TLS 핑거프린팅 (JA3/JA4), Claude Code CCH, MITM 인증서             |
+| `AUTO-COMBO.md`                             | Auto Combo 엔진 (16개 팩터 스코어링, 6개 모드 팩, 가상 팩토리)     |
 
 ### 압축
 
@@ -442,29 +442,29 @@ open-sse/
 | `COMPRESSION_GUIDE.md`          | 압축 모드 개요 + 로드맵             |
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK 엔진, 레지스트리 계약 |
 | `COMPRESSION_RULES_FORMAT.md`   | Caveman 규칙 팩 JSON 스키마         |
-| `COMPRESSION_LANGUAGE_PACKS.md` | 언어별 규칙 팩 목록                 |
-| `RTK_COMPRESSION.md`            | RTK 선언형 파이프라인(필터 49개)    |
+| `COMPRESSION_LANGUAGE_PACKS.md` | 언어별 규칙 팩 인벤토리             |
+| `RTK_COMPRESSION.md`            | RTK 선언적 파이프라인 (56개 필터)   |
 
 ### 배포
 
-| 문서                         | 목적                                                           |
-| ---------------------------- | -------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker 빌드, 프로필(base/cli/host/cliproxyapi), Redis 사이드카 |
-| `VM_DEPLOYMENT_GUIDE.md`     | 일반 VM/VPS 배포(Ubuntu/Debian + nginx + systemd)              |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io 배포(현재 중국어로만 제공)                              |
-| `TERMUX_GUIDE.md`            | Termux를 통한 Android 헤드리스 실행                            |
-| `PWA_GUIDE.md`               | 프로그레시브 웹 앱 설치 + 서비스 워커                          |
-| `ELECTRON_GUIDE.md`          | 데스크톱 앱 빌드 + 서명 + 배포                                 |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                         |
-| `PROXY_GUIDE.md`             | 4단계 아웃바운드 프록시 + 1proxy 마켓플레이스                  |
+| 문서                         | 목적                                                            |
+| ---------------------------- | --------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker 빌드, 프로필 (base/cli/host/cliproxyapi), Redis 사이드카 |
+| `VM_DEPLOYMENT_GUIDE.md`     | 범용 VM/VPS 배포 (Ubuntu/Debian + nginx + systemd)              |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io 배포 (현재 중국어만 제공)                                |
+| `TERMUX_GUIDE.md`            | Termux를 통한 Android 헤드리스 실행                             |
+| `PWA_GUIDE.md`               | Progressive Web App 설치 + 서비스 워커                          |
+| `ELECTRON_GUIDE.md`          | 데스크톱 앱 빌드 + 서명 + 배포                                  |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                          |
+| `PROXY_GUIDE.md`             | 4단계 아웃바운드 프록시 + 1proxy 마켓플레이스                   |
 
-### 하위 디렉터리
+### 하위 디렉토리
 
-| 하위 디렉터리         | 목적                                                                                                                                                                                                 |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | 현지화된 문서 번역(41개 로케일)                                                                                                                                                                      |
-| `docs/screenshots/`   | 가이드용 이미지 자산                                                                                                                                                                                 |
-| `_tasks/superpowers/` | superpowers의 계획/사양(`writing-plans`/`brainstorming`) + 연구 자료 — 격리되어 별도로 버전 관리되는 저장소이며, 기본 트리에서 gitignore 처리됩니다. CLAUDE.md → "계획 및 연구 산출물"을 참조하세요. |
+| 하위 디렉토리         | 목적                                                                                                                                                                                                              |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | 현지화된 문서 번역 (41개 로케일)                                                                                                                                                                                  |
+| `docs/screenshots/`   | 가이드용 이미지 에셋                                                                                                                                                                                              |
+| `_tasks/superpowers/` | superpowers에서 생성된 계획/명세 (`writing-plans`/`brainstorming`) + 리서치 — 독립적이고 별도로 버전 관리되는 리포지토리이며, 메인 트리에서는 gitignore 처리됨. CLAUDE.md → "Planning & Research Artifacts" 참조. |
 
 ---
 

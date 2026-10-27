@@ -389,80 +389,80 @@ open-sse/
 
 ---
 
-## `docs/` — ឯកសារសាធារណៈ (ឯកសារឫស ៧ + ថតរង ១៧)
+## `docs/` — ឯកសារសាធារណៈ (ឯកសារឫស 7 + ថតរង 17)
 
-### មគ្គុទ្ទេសក៍កម្រិតកំពូល
+### មគ្គុទ្ទេសក៍កម្រិតខ្ពស់
 
-| ឯកសារ                       | គោលបំណង                                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | ស្ថាបត្យកម្មកម្រិតខ្ពស់ ផែនទីប្រព័ន្ធរង និងផ្ទៃផ្ទាំងគ្រប់គ្រង                                          |
-| `CODEBASE_DOCUMENTATION.md` | ឯកសារយោងវិស្វកម្ម៖ ថតឯកសារ ម៉ូឌុល និងអនុសញ្ញា                                                           |
-| `FEATURES.md`               | ម៉ាទ្រីសមុខងារ ជាមួយចំណុចសំខាន់ៗ នៃ v3.8                                                                |
-| `USER_GUIDE.md`             | សៀវភៅណែនាំអ្នកប្រើប្រាស់ (ការដំឡើង ម៉ូដែល combos CLIs អូឌីយ៉ូ ជាដើម)                                    |
-| `API_REFERENCE.md`          | ឯកសារយោង endpoint របស់ API ជាមួយម៉ូដែលផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវ                                          |
-| `openapi.yaml`              | សេចក្តីបញ្ជាក់ OpenAPI 3.0 (121 paths)                                                                  |
-| `SETUP_GUIDE.md`            | វិធីសាស្ត្រដំឡើង (npm, npx, Docker, Electron, Termux, source)                                           |
-| `ENVIRONMENT.md`            | អថេរបរិស្ថានទាំងអស់ (~800 បានពន្យល់, `.env.example` ~3,050 បន្ទាត់)                                     |
-| `TROUBLESHOOTING.md`        | កំហុសទូទៅ + បញ្ហាដែលស្គាល់នៅ v3.8.0                                                                     |
-| `RELEASE_CHECKLIST.md`      | លំហូរចេញផ្សាយពេញលេញ (skills, husky, conventional commits, deploy)                                       |
-| `COVERAGE_PLAN.md`          | គោលដៅ coverage និងស្ថានភាពបច្ចុប្បន្ន                                                                   |
-| `FREE_TIERS.md`             | អ្នកផ្តល់សេវាកម្រិតឥតគិតថ្លៃដែលបានជ្រើសរើស (48+ ឥតគិតថ្លៃ + 11 OAuth)                                   |
-| `CLI-TOOLS.md`              | ការរួមបញ្ចូល CLI ខាងក្រៅ + CLI OmniRoute ខាងក្នុង                                                       |
-| `I18N.md`                   | ស្ថាបត្យកម្ម i18n ការបន្ថែមភាសា 67 locales                                                              |
-| `UNINSTALL.md`              | ជំហានលុបចេញយ៉ាងស្អាត                                                                                    |
-| `PROVIDER_REFERENCE.md`     | កាតាឡុកអ្នកផ្តល់សេវា 376 ដែល**បង្កើតដោយស្វ័យប្រវត្តិ** (បង្កើតឡើងវិញ៖ `npm run gen:provider-reference`) |
+| ឯកសារ                       | គោលបំណង                                                                                              |
+| --------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | ស្ថាបត្យកម្មកម្រិតខ្ពស់ ផែនទីប្រព័ន្ធរង ផ្ទៃផ្ទាំងគ្រប់គ្រង                                          |
+| `CODEBASE_DOCUMENTATION.md` | ឯកសារយោងបច្ចេកទេស៖ ថតឯកសារ ម៉ូឌុល អនុសញ្ញា                                                           |
+| `FEATURES.md`               | តារាងមុខងារជាមួយចំណុចសំខាន់ v3.8                                                                     |
+| `USER_GUIDE.md`             | សៀវភៅណែនាំអ្នកប្រើប្រាស់ចុងក្រោយ (ការដំឡើង ម៉ូដែល combos CLIs សំឡេង ជាដើម)                           |
+| `API_REFERENCE.md`          | ឯកសារយោង API endpoint ជាមួយម៉ូដែល auth                                                               |
+| `openapi.yaml`              | សេចក្តីបរិយាយ OpenAPI 3.0 (paths 121)                                                                |
+| `SETUP_GUIDE.md`            | វិធីដំឡើង (npm, npx, Docker, Electron, Termux, ប្រភពកូដ)                                             |
+| `ENVIRONMENT.md`            | អថេរបរិស្ថានទាំងអស់ (~800 បានពិពណ៌នា បន្ទាត់ ~3,050 ក្នុង `.env.example`)                            |
+| `TROUBLESHOOTING.md`        | កំហុសទូទៅ + បញ្ហាដែលបានស្គាល់ v3.8.0                                                                 |
+| `RELEASE_CHECKLIST.md`      | ដំណើរការចេញផ្សាយពេញលេញ (skills, husky, conventional commits, deploy)                                 |
+| `COVERAGE_PLAN.md`          | គោលដៅការគ្រប់គ្រង និងស្ថានភាពបច្ចុប្បន្ន                                                             |
+| `FREE_TIERS.md`             | អ្នកផ្តល់សេវាកម្រិតឥតគិតថ្លៃដែលបានជ្រើសរើស (48+ ឥតគិតថ្លៃ + 11 OAuth)                                |
+| `CLI-TOOLS.md`              | ការរួមបញ្ចូល CLI ខាងក្រៅ + OmniRoute CLI ខាងក្នុង                                                    |
+| `I18N.md`                   | ស្ថាបត្យកម្ម i18n ការបន្ថែមភាសា locales 67                                                           |
+| `UNINSTALL.md`              | ជំហានលុបកម្មវិធីចេញយ៉ាងស្អាត                                                                         |
+| `PROVIDER_REFERENCE.md`     | កាតាឡុកអ្នកផ្តល់សេវា 376 **បង្កើតដោយស្វ័យប្រវត្តិ** (បង្កើតឡើងវិញ៖ `npm run gen:provider-reference`) |
 
-### ការស្រាវជ្រាវស៊ីជម្រៅលើប្រព័ន្ធរង
+### ការស្រាវជ្រាវស៊ីជម្រៅប្រព័ន្ធរង
 
-| ឯកសារ                                       | គោលបំណង                                                              |
-| ------------------------------------------- | -------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | MCP server៖ ឧបករណ៍ 110, transports 3, scopes 33, REST endpoints      |
-| `A2A-SERVER.md`                             | A2A v0.3៖ JSON-RPC, ជំនាញ 6, REST helpers, agent card                |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | មគ្គុទ្ទេសក៍រួម៖ A2A vs ACP vs Cloud Agents                          |
-| `CLOUD_AGENT.md`                            | ការសម្រុះសម្រួល Codex Cloud / Devin / Jules                          |
-| `SKILLS.md`                                 | ក្របខ័ណ្ឌ Skills (មានស្រាប់ + marketplace + SkillsSH + sandbox)      |
-| `RADAR.md`                                  | ផ្ទៃលើកាតាឡុកម៉ូដែលឥតគិតថ្លៃ Radar (`RADAR_ENABLED`, បិទជាលំនាំដើម)  |
-| `MEMORY.md`                                 | ប្រព័ន្ធអង្គចងចាំ (SQLite FTS5 + Qdrant)                             |
-| `EVALS.md`                                  | ក្របខ័ណ្ឌវាយតម្លៃ (suites, runs, rubrics)                            |
-| `GUARDRAILS.md`                             | ឧបករណ៍បិទបាំង PII, prompt injection, vision bridge                   |
-| `COMPLIANCE.md`                             | កំណត់ហេតុសវនកម្ម ការរក្សាទុក និង opt-out របស់ noLog                  |
-| `WEBHOOKS.md`                               | ការបញ្ជូន webhook ដែលចុះហត្ថលេខាដោយ HMAC                             |
-| `REASONING_REPLAY.md`                       | cache ចម្រុះ memory/SQLite សម្រាប់ `reasoning_content`               |
-| `AUTHZ_GUIDE.md`                            | ខ្សែសង្វាក់អនុញ្ញាត (`classify` → `policies` → `enforce`)            |
-| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + ការចាក់សោម៉ូដែល                         |
-| `docs/security/STEALTH_GUIDE.md` (git only) | TLS fingerprinting (JA3/JA4), Claude Code CCH, វិញ្ញាបនបត្រ MITM     |
-| `AUTO-COMBO.md`                             | ម៉ាស៊ីន Auto Combo (ដាក់ពិន្ទុ 16 កត្តា កញ្ចប់ម៉ូដ 6 រោងចក្រនិម្មិត) |
+| ឯកសារ                                           | គោលបំណង                                                                 |
+| ----------------------------------------------- | ----------------------------------------------------------------------- |
+| `MCP-SERVER.md`                                 | ម៉ាស៊ីនមេ MCP៖ ឧបករណ៍ 110, transports 3, scopes 33, REST endpoints      |
+| `A2A-SERVER.md`                                 | A2A v0.3៖ JSON-RPC ជំនាញ 6, REST helpers កាតភ្នាក់ងារ                   |
+| `AGENT_PROTOCOLS_GUIDE.md`                      | មគ្គុទ្ទេសក៍រួម៖ A2A ទល់នឹង ACP ទល់នឹង Cloud Agents                     |
+| `CLOUD_AGENT.md`                                | ការសម្រុះសម្រួល Codex Cloud / Devin / Jules                             |
+| `SKILLS.md`                                     | ក្របខ័ណ្ឌ Skills (មានស្រាប់ + marketplace + SkillsSH + sandbox)         |
+| `RADAR.md`                                      | ធាតុលាបពីលើកាតាឡុកម៉ូដែលឥតគិតថ្លៃ Radar (`RADAR_ENABLED` បិទជាលំនាំដើម) |
+| `MEMORY.md`                                     | ប្រព័ន្ធអង្គចងចាំ (SQLite FTS5 + Qdrant)                                |
+| `EVALS.md`                                      | ក្របខ័ណ្ឌ Eval (suites, runs, rubrics)                                  |
+| `GUARDRAILS.md`                                 | ឧបករណ៍បិទបាំង PII, prompt injection, vision bridge                      |
+| `COMPLIANCE.md`                                 | កំណត់ហេតុសវនកម្ម ការរក្សាទុក noLog opt-out                              |
+| `WEBHOOKS.md`                                   | ការបញ្ជូន webhook ដែលចុះហត្ថលេខាដោយ HMAC                                |
+| `REASONING_REPLAY.md`                           | ឃ្លាំងផ្សំ memory/SQLite សម្រាប់ `reasoning_content`                    |
+| `AUTHZ_GUIDE.md`                                | ខ្សែបំពង់ការផ្តល់សិទ្ធិ (`classify` → `policies` → `enforce`)           |
+| `RESILIENCE_GUIDE.md`                           | Circuit breaker + cooldown + ការចាក់សោម៉ូដែល                            |
+| `docs/security/STEALTH_GUIDE.md` (git ប៉ុណ្ណោះ) | TLS fingerprinting (JA3/JA4), Claude Code CCH, វិញ្ញាបនបត្រ MITM        |
+| `AUTO-COMBO.md`                                 | ម៉ាស៊ីន Auto Combo (ការដាក់ពិន្ទុកត្តា 16 កញ្ចប់របៀប 6 រោងចក្រនិម្មិត)  |
 
 ### ការបង្ហាប់
 
-| ឯកសារ                           | គោលបំណង                                      |
-| ------------------------------- | -------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | ទិដ្ឋភាពទូទៅនៃរបៀបបង្ហាប់ + ផែនការផ្លូវ      |
-| `COMPRESSION_ENGINES.md`        | ម៉ាស៊ីន Caveman + RTK និងកិច្ចសន្យា registry |
-| `COMPRESSION_RULES_FORMAT.md`   | ស្គីម៉ា JSON របស់កញ្ចប់ច្បាប់ Caveman        |
-| `COMPRESSION_LANGUAGE_PACKS.md` | បញ្ជីសារពើភ័ណ្ឌកញ្ចប់ច្បាប់តាមភាសា           |
-| `RTK_COMPRESSION.md`            | ខ្សែសង្វាក់ប្រកាស RTK (តម្រង 49)             |
+| ឯកសារ                           | គោលបំណង                                   |
+| ------------------------------- | ----------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | ទិដ្ឋភាពទូទៅនៃរបៀបបង្ហាប់ + ផែនទីផ្លូវ    |
+| `COMPRESSION_ENGINES.md`        | ម៉ាស៊ីន Caveman + RTK កិច្ចសន្យា registry |
+| `COMPRESSION_RULES_FORMAT.md`   | ស្គីម៉ា JSON កញ្ចប់ច្បាប់ Caveman         |
+| `COMPRESSION_LANGUAGE_PACKS.md` | បញ្ជីកញ្ចប់ច្បាប់តាមភាសា                  |
+| `RTK_COMPRESSION.md`            | ខ្សែបំពង់បែបប្រកាស RTK (តម្រង 56)         |
 
-### ការដាក់ពង្រាយ
+### ការដាក់ឱ្យប្រើប្រាស់
 
-| ឯកសារ                        | គោលប្រយោជន៍                                                              |
-| ---------------------------- | ------------------------------------------------------------------------ |
-| `DOCKER_GUIDE.md`            | ការបណ្តុះ Docker, ប្រវត្តិរូប (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | ការដំឡើង VM/VPS ទូទៅ (Ubuntu/Debian + nginx + systemd)                   |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | ការដំឡើង Fly.io (បច្ចុប្បន្នមានតែជាភាសាចិនប៉ុណ្ណោះ)                      |
-| `TERMUX_GUIDE.md`            | ដំណើរការ Android ដោយគ្មានអេក្រង់ (headless) តាមរយៈ Termux                |
-| `PWA_GUIDE.md`               | ការដំឡើង Progressive Web App + service worker                            |
-| `ELECTRON_GUIDE.md`          | ការបណ្តុះកម្មវិធីផ្ទៃតុ + ចុះហត្ថលេខា + ចែកចាយ                           |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                   |
-| `PROXY_GUIDE.md`             | proxy ចេញ ៤ កម្រិត + ទីផ្សារ 1proxy                                      |
+| ឯកសារ                        | គោលបំណង                                                                    |
+| ---------------------------- | -------------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | ការ build ជាមួយ Docker, profile (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | ការដំឡើង VM/VPS ទូទៅ (Ubuntu/Debian + nginx + systemd)                     |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | ការដំឡើងលើ Fly.io (បច្ចុប្បន្នមានតែជាភាសាចិនប៉ុណ្ណោះ)                      |
+| `TERMUX_GUIDE.md`            | Android headless តាមរយៈ Termux                                             |
+| `PWA_GUIDE.md`               | ការដំឡើង Progressive Web App + service worker                              |
+| `ELECTRON_GUIDE.md`          | ការ build + sign + ចែកចាយកម្មវិធី desktop                                  |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                     |
+| `PROXY_GUIDE.md`             | outbound proxy 4 កម្រិត + ទីផ្សារ 1proxy                                   |
 
 ### ថតរង
 
-| ថតរង                  | គោលប្រយោជន៍                                                                                                                                                                                                            |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ការបកប្រែឯកសារជាភាសាផ្សេងៗ (41 ភាសា)                                                                                                                                                                                   |
-| `docs/screenshots/`   | រូបភាពសម្រាប់មគ្គុទ្ទេសក៍                                                                                                                                                                                              |
-| `_tasks/superpowers/` | ផែនការ/លក្ខណៈបច្ចេកទេសពី superpowers (`writing-plans`/`brainstorming`) + ការស្រាវជ្រាវ — ជា repo ដាច់ដោយឡែក មានកំណែផ្សេងគ្នា ហើយត្រូវបាន gitignore ដោយ tree ចម្បង។ សូមមើល CLAUDE.md → "Planning & Research Artifacts"។ |
+| ថតរង                  | គោលបំណង                                                                                                                                                                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | ការបកប្រែឯកសារជាភាសាផ្សេងៗ (41 locale)                                                                                                                                                                    |
+| `docs/screenshots/`   | រូបភាពសម្រាប់មគ្គុទ្ទេសក៍                                                                                                                                                                                 |
+| `_tasks/superpowers/` | ផែនការ/spec ពី superpowers (`writing-plans`/`brainstorming`) + ការស្រាវជ្រាវ — repo ដាច់ដោយឡែក ដែលមានកំណែផ្សេងគ្នា និងត្រូវបាន gitignore ដោយ tree ចម្បង។ មើល CLAUDE.md → "Planning & Research Artifacts"។ |
 
 ---
 

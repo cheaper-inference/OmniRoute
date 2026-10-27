@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Veřejná dokumentace (7 souborů v kořenovém adresáři + 17 podadresářů)
+## `docs/` — Veřejná dokumentace (7 kořenových souborů + 17 podadresářů)
 
-### Hlavní příručky
+### Průvodci nejvyšší úrovně
 
-| Dokument                    | Účel                                                                                              |
-| --------------------------- | ------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Vysokoúrovňová architektura, mapa subsystémů, rozhraní dashboardu                                 |
-| `CODEBASE_DOCUMENTATION.md` | Technická reference: adresáře, moduly, konvence                                                   |
-| `FEATURES.md`               | Matice funkcí s nejdůležitějšími novinkami verze v3.8                                             |
-| `USER_GUIDE.md`             | Uživatelská příručka (nastavení, modely, kombinace, nástroje CLI, zvuk atd.)                      |
-| `API_REFERENCE.md`          | Reference endpointů API s modelem ověřování                                                       |
-| `openapi.yaml`              | Specifikace OpenAPI 3.0 (121 cest)                                                                |
-| `SETUP_GUIDE.md`            | Způsoby instalace (npm, npx, Docker, Electron, Termux, ze zdrojového kódu)                        |
-| `ENVIRONMENT.md`            | Všechny proměnné prostředí (~800 zdokumentovaných, `.env.example` má ~3 050 řádků)                |
-| `TROUBLESHOOTING.md`        | Běžné chyby + známé problémy verze v3.8.0                                                         |
-| `RELEASE_CHECKLIST.md`      | Kompletní postup vydání (dovednosti, husky, konvenční commity, nasazení)                          |
-| `COVERAGE_PLAN.md`          | Cíle pokrytí a aktuální stav                                                                      |
-| `FREE_TIERS.md`             | Spravovaný seznam poskytovatelů s bezplatnými tarify (48+ zdarma + 11 OAuth)                      |
-| `CLI-TOOLS.md`              | Integrace externích nástrojů CLI + interní CLI OmniRoute                                          |
-| `I18N.md`                   | Architektura i18n, přidání jazyka, 67 lokalizací                                                  |
-| `UNINSTALL.md`              | Postup čisté odinstalace                                                                          |
-| `PROVIDER_REFERENCE.md`     | **Automaticky generovaný** katalog 376 poskytovatelů (obnovení: `npm run gen:provider-reference`) |
+| Dokument                    | Účel                                                                                                |
+| --------------------------- | --------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Architektura vysoké úrovně, mapa subsystémů, vrstva dashboardu                                      |
+| `CODEBASE_DOCUMENTATION.md` | Technická reference: adresáře, moduly, konvence                                                     |
+| `FEATURES.md`               | Matice funkcí s novinkami verze v3.8                                                                |
+| `USER_GUIDE.md`             | Uživatelská příručka (nastavení, modely, komba, CLI, zvuk atd.)                                     |
+| `API_REFERENCE.md`          | Reference API endpointů s modelem autentizace                                                       |
+| `openapi.yaml`              | Specifikace OpenAPI 3.0 (121 cest)                                                                  |
+| `SETUP_GUIDE.md`            | Způsoby instalace (npm, npx, Docker, Electron, Termux, ze zdroje)                                   |
+| `ENVIRONMENT.md`            | Všechny proměnné prostředí (~800 zdokumentováno, ~3 050 řádků `.env.example`)                       |
+| `TROUBLESHOOTING.md`        | Běžné chyby + známé problémy verze v3.8.0                                                           |
+| `RELEASE_CHECKLIST.md`      | Kompletní postup vydání (skills, husky, conventional commits, nasazení)                             |
+| `COVERAGE_PLAN.md`          | Cíle pokrytí a aktuální stav                                                                        |
+| `FREE_TIERS.md`             | Vybraní poskytovatelé s bezplatnou úrovní (48+ zdarma + 11 OAuth)                                   |
+| `CLI-TOOLS.md`              | Integrace externích CLI + interní OmniRoute CLI                                                     |
+| `I18N.md`                   | Architektura i18n, přidání jazyka, 67 lokalizací                                                    |
+| `UNINSTALL.md`              | Kroky pro čistou odinstalaci                                                                        |
+| `PROVIDER_REFERENCE.md`     | **Automaticky generovaný** katalog 376 poskytovatelů (regenerace: `npm run gen:provider-reference`) |
 
-### Podrobné popisy subsystémů
+### Hloubkové rozbory subsystémů
 
-| Dokument                                        | Účel                                                                                         |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                                 | Server MCP: 110 nástrojů, 3 transporty, 33 rozsahů, endpointy REST                           |
-| `A2A-SERVER.md`                                 | A2A v0.3: JSON-RPC, 6 dovedností, pomocné funkce REST, karta agenta                          |
-| `AGENT_PROTOCOLS_GUIDE.md`                      | Jednotná příručka: A2A vs ACP vs cloudoví agenti                                             |
-| `CLOUD_AGENT.md`                                | Orchestrace Codex Cloud / Devin / Jules                                                      |
-| `SKILLS.md`                                     | Framework dovedností (vestavěné + tržiště + SkillsSH + sandbox)                              |
-| `RADAR.md`                                      | Nadstavba katalogu bezplatných modelů Radar (`RADAR_ENABLED`, ve výchozím nastavení vypnuto) |
-| `MEMORY.md`                                     | Paměťový systém (SQLite FTS5 + Qdrant)                                                       |
-| `EVALS.md`                                      | Evaluační framework (sady, běhy, hodnoticí kritéria)                                         |
-| `GUARDRAILS.md`                                 | Maskování PII, vkládání promptů, most pro zpracování obrazu                                  |
-| `COMPLIANCE.md`                                 | Auditní protokol, uchovávání, odhlášení pomocí noLog                                         |
-| `WEBHOOKS.md`                                   | Doručování webhooků podepsaných pomocí HMAC                                                  |
-| `REASONING_REPLAY.md`                           | Hybridní mezipaměť v paměti/SQLite pro `reasoning_content`                                   |
-| `AUTHZ_GUIDE.md`                                | Autorizační pipeline (`classify` → `policies` → `enforce`)                                   |
-| `RESILIENCE_GUIDE.md`                           | Jistič + doba zklidnění + uzamčení modelu                                                    |
-| `docs/security/STEALTH_GUIDE.md` (pouze v gitu) | Fingerprinting TLS (JA3/JA4), Claude Code CCH, certifikát MITM                               |
-| `AUTO-COMBO.md`                                 | Engine Auto Combo (hodnocení podle 16 faktorů, 6 balíčků režimů, virtuální továrna)          |
+| Dokument                                     | Účel                                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | Server MCP: 110 nástrojů, 3 transporty, 33 rozsahů, REST endpointy                     |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 dovedností, REST pomocníci, karta agenta                         |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Jednotný průvodce: A2A vs ACP vs Cloud Agents                                          |
+| `CLOUD_AGENT.md`                             | Orchestrace Codex Cloud / Devin / Jules                                                |
+| `SKILLS.md`                                  | Framework Skills (vestavěné + marketplace + SkillsSH + sandbox)                        |
+| `RADAR.md`                                   | Overlay katalogu bezplatných modelů Radar (`RADAR_ENABLED`, ve výchozím stavu vypnuto) |
+| `MEMORY.md`                                  | Systém paměti (SQLite FTS5 + Qdrant)                                                   |
+| `EVALS.md`                                   | Framework Eval (sady, běhy, rubriky)                                                   |
+| `GUARDRAILS.md`                              | Maskování PII, prompt injection, vision bridge                                         |
+| `COMPLIANCE.md`                              | Audit log, retence, opt-out pro noLog                                                  |
+| `WEBHOOKS.md`                                | Doručování webhooků podepsaných HMAC                                                   |
+| `REASONING_REPLAY.md`                        | Hybridní paměťová/SQLite cache pro `reasoning_content`                                 |
+| `AUTHZ_GUIDE.md`                             | Pipeline autorizace (`classify` → `policies` → `enforce`)                              |
+| `RESILIENCE_GUIDE.md`                        | Circuit breaker + cooldown + blokování modelů                                          |
+| `docs/security/STEALTH_GUIDE.md` (pouze git) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM certifikát                         |
+| `AUTO-COMBO.md`                              | Engine Auto Combo (bodování podle 16 faktorů, 6 balíčků režimů, virtuální továrna)     |
 
 ### Komprese
 
-| Dokument                        | Účel                                           |
-| ------------------------------- | ---------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Přehled režimů komprese + plán dalšího vývoje  |
-| `COMPRESSION_ENGINES.md`        | Enginy Caveman + RTK, kontrakt registru        |
-| `COMPRESSION_RULES_FORMAT.md`   | Schéma JSON balíčku pravidel Caveman           |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Přehled balíčků pravidel pro jednotlivé jazyky |
-| `RTK_COMPRESSION.md`            | Deklarativní pipeline RTK (49 filtrů)          |
+| Dokument                        | Účel                                    |
+| ------------------------------- | --------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Přehled režimů komprese + roadmapa      |
+| `COMPRESSION_ENGINES.md`        | Enginy Caveman + RTK, kontrakt registru |
+| `COMPRESSION_RULES_FORMAT.md`   | JSON schéma balíčku pravidel Caveman    |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Inventář balíčků pravidel podle jazyka  |
+| `RTK_COMPRESSION.md`            | Deklarativní pipeline RTK (56 filtrů)   |
 
 ### Nasazení
 
-| Dokument                     | Účel                                                                               |
-| ---------------------------- | ---------------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Sestavení Dockeru, profily (base/cli/host/cliproxyapi), doprovodný kontejner Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | Obecné nasazení na VM/VPS (Ubuntu/Debian + nginx + systemd)                        |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Nasazení na Fly.io (aktuálně pouze v čínštině)                                     |
-| `TERMUX_GUIDE.md`            | Bezobslužný provoz na Androidu prostřednictvím Termuxu                             |
-| `PWA_GUIDE.md`               | Instalace progresivní webové aplikace + service worker                             |
-| `ELECTRON_GUIDE.md`          | Sestavení desktopové aplikace + podepsání + distribuce                             |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                             |
-| `PROXY_GUIDE.md`             | Čtyřúrovňová odchozí proxy + tržiště 1proxy                                        |
+| Dokument                     | Účel                                                                    |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Sestavení v Dockeru, profily (base/cli/host/cliproxyapi), sidecar Redis |
+| `VM_DEPLOYMENT_GUIDE.md`     | Obecné nasazení na VM/VPS (Ubuntu/Debian + nginx + systemd)             |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Nasazení na Fly.io (aktuálně pouze v čínštině)                          |
+| `TERMUX_GUIDE.md`            | Headless provoz na Androidu pomocí Termuxu                              |
+| `PWA_GUIDE.md`               | Instalace Progressive Web App + service worker                          |
+| `ELECTRON_GUIDE.md`          | Sestavení desktopové aplikace + podepsání + distribuce                  |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                  |
+| `PROXY_GUIDE.md`             | Čtyřúrovňová odchozí proxy + tržiště 1proxy                             |
 
 ### Podadresáře
 
-| Podadresář            | Účel                                                                                                                                                                                                                  |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokalizované překlady dokumentace (41 jazykových variant)                                                                                                                                                             |
-| `docs/screenshots/`   | Obrázkové materiály pro průvodce                                                                                                                                                                                      |
-| `_tasks/superpowers/` | Plány/specifikace ze superpowers (`writing-plans`/`brainstorming`) + výzkum — izolovaný repozitář se samostatným verzováním, ignorovaný pomocí git v hlavním stromu. Viz CLAUDE.md → „Artefakty plánování a výzkumu“. |
+| Podadresář            | Účel                                                                                                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokalizované překlady dokumentace (41 jazykových verzí)                                                                                                                                                                   |
+| `docs/screenshots/`   | Obrazové materiály pro návody                                                                                                                                                                                             |
+| `_tasks/superpowers/` | Plány a specifikace ze superpowers (`writing-plans`/`brainstorming`) + výzkum — izolovaný, samostatně verzovaný repozitář, který hlavní strom ignoruje pomocí gitignore. Viz CLAUDE.md → „Artefakty plánování a výzkumu“. |
 
 ---
 

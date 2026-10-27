@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — පොදු ලේඛන (මූල ගොනු 7ක් + උපනාමාවලි 17ක්)
+## `docs/` — පොදු ලේඛනය (මූල ගොනු 7 + උප නාමාවලි 17)
 
 ### ඉහළ මට්ටමේ මාර්ගෝපදේශ
 
 | ලේඛනය                       | අරමුණ                                                                                             |
 | --------------------------- | ------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | ඉහළ මට්ටමේ නිර්මාණ ශිල්පය, උපපද්ධති සිතියම, උපකරණ පුවරු අතුරුමුහුණත                               |
+| `ARCHITECTURE.md`           | ඉහළ මට්ටමේ ගෘහ නිර්මාණ ශිල්පය, උපපද්ධති සිතියම, උපකරණ පුවරු මතුපිට                                |
 | `CODEBASE_DOCUMENTATION.md` | ඉංජිනේරු යොමුව: නාමාවලි, මොඩියුල, සම්මුතීන්                                                       |
-| `FEATURES.md`               | v3.8 විශේෂ අවධාරණයන් සහිත විශේෂාංග අනුකෘතිය                                                       |
-| `USER_GUIDE.md`             | අවසාන පරිශීලක අත්පොත (සැකසුම, මාදිලි, සංයෝජන, CLI, ශ්රව්ය ආදිය)                                   |
-| `API_REFERENCE.md`          | සත්යාපන ආකෘතිය සහිත API අන්ත ලක්ෂ්ය යොමුව                                                         |
-| `openapi.yaml`              | OpenAPI 3.0 පිරිවිතර (මාර්ග 121ක්)                                                                |
+| `FEATURES.md`               | v3.8 කැපී පෙනෙන අංග සමඟ අංග න්යාසය                                                                |
+| `USER_GUIDE.md`             | අවසන් පරිශීලක අත්පොත (ස්ථාපනය, ආකෘති, combos, CLIs, ශ්රව්ය ආදි)                                   |
+| `API_REFERENCE.md`          | සත්යාපන ආකෘතිය සමඟ API endpoint යොමුව                                                             |
+| `openapi.yaml`              | OpenAPI 3.0 පිරිවිතරය (paths 121)                                                                 |
 | `SETUP_GUIDE.md`            | ස්ථාපන ක්රම (npm, npx, Docker, Electron, Termux, මූලාශ්රය)                                        |
-| `ENVIRONMENT.md`            | සියලු පරිසර විචල්ය (~800ක් ලේඛනගත කර ඇත, `.env.example` පේළි ~3,050ක්)                            |
-| `TROUBLESHOOTING.md`        | පොදු දෝෂ + v3.8.0 හි දන්නා ගැටලු                                                                  |
-| `RELEASE_CHECKLIST.md`      | සම්පූර්ණ නිකුතු ප්රවාහය (කුසලතා, husky, සම්මත commits, යෙදවීම)                                    |
+| `ENVIRONMENT.md`            | සියලුම පරිසර විචල්යයන් (~800 ලේඛනගත, පේළි ~3,050 `.env.example`)                                  |
+| `TROUBLESHOOTING.md`        | පොදු දෝෂ + v3.8.0 දන්නා ගැටලු                                                                     |
+| `RELEASE_CHECKLIST.md`      | සම්පූර්ණ නිකුතු ප්රවාහය (skills, husky, conventional commits, යෙදවුම)                             |
 | `COVERAGE_PLAN.md`          | ආවරණ ඉලක්ක සහ වත්මන් තත්ත්වය                                                                      |
-| `FREE_TIERS.md`             | තෝරා සකස් කළ නොමිලේ-ස්තර සැපයුම්කරුවන් (නොමිලේ 48+ක් + OAuth 11ක්)                                |
-| `CLI-TOOLS.md`              | බාහිර CLI අනුකලන + අභ්යන්තර OmniRoute CLI                                                         |
-| `I18N.md`                   | i18n නිර්මාණ ශිල්පය, භාෂාවක් එක් කිරීම, ස්ථානීය සැකසුම් 67ක්                                      |
+| `FREE_TIERS.md`             | තෝරාගත් නොමිලේ-මට්ටමේ සැපයුම්කරුවන් (නොමිලේ 48+ + OAuth 11)                                       |
+| `CLI-TOOLS.md`              | බාහිර CLI ඒකාබද්ධ කිරීම් + අභ්යන්තර OmniRoute CLI                                                 |
+| `I18N.md`                   | i18n ගෘහ නිර්මාණ ශිල්පය, භාෂාවක් එකතු කිරීම, locales 67                                           |
 | `UNINSTALL.md`              | පිරිසිදු අස්ථාපන පියවර                                                                            |
-| `PROVIDER_REFERENCE.md`     | සැපයුම්කරුවන් 376ක **ස්වයංක්රීයව ජනනය කළ** නාමාවලිය (නැවත ජනනය: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | සැපයුම්කරුවන් 376 ක **ස්වයං-උත්පාදිත** නාමාවලිය (නැවත උත්පාදනය: `npm run gen:provider-reference`) |
 
-### උපපද්ධති පිළිබඳ ගැඹුරු විමසුම්
+### උපපද්ධති ගැඹුරු විශ්ලේෂණ
 
-| ලේඛනය                                       | අරමුණ                                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | MCP සේවාදායකය: මෙවලම් 110ක්, ප්රවාහන 3ක්, විෂය පථ 33ක්, REST අන්ත ලක්ෂ්ය        |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, කුසලතා 6ක්, REST උපකාරක, නියෝජිත කාඩ්පත                     |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | ඒකාබද්ධ මාර්ගෝපදේශය: A2A එදිරිව ACP එදිරිව Cloud Agents                         |
-| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules සම්බන්ධීකරණය                                        |
-| `SKILLS.md`                                 | කුසලතා රාමුව (අන්තර්ගත + වෙළඳපොළ + SkillsSH + sandbox)                          |
-| `RADAR.md`                                  | Radar නොමිලේ-මාදිලි නාමාවලි අතිස්තරය (`RADAR_ENABLED`, පෙරනිමියෙන් අක්රියයි)    |
-| `MEMORY.md`                                 | මතක පද්ධතිය (SQLite FTS5 + Qdrant)                                              |
-| `EVALS.md`                                  | ඇගයීම් රාමුව (කට්ටල, ධාවන, ඇගයීම් නිර්ණායක)                                     |
-| `GUARDRAILS.md`                             | PII ආවරණකය, ප්රේරක ඇතුල්කිරීම, දෘශ්ය පාලම                                       |
-| `COMPLIANCE.md`                             | විගණන ලොගය, රඳවාගැනීම, noLog ඉවත් වීමේ විකල්පය                                  |
-| `WEBHOOKS.md`                               | HMAC-අත්සන් කළ webhook බෙදාහැරීම                                                |
-| `REASONING_REPLAY.md`                       | `reasoning_content` සඳහා දෙමුහුන් මතක/SQLite හැඹිලිය                            |
-| `AUTHZ_GUIDE.md`                            | අවසර දීමේ නළ මාර්ගය (`classify` → `policies` → `enforce`)                       |
-| `RESILIENCE_GUIDE.md`                       | පරිපථ බිඳිනය + සිසිලන කාලය + මාදිලි අගුලු දැමීම                                 |
-| `docs/security/STEALTH_GUIDE.md` (git පමණි) | TLS ඇඟිලි සලකුණුකරණය (JA3/JA4), Claude Code CCH, MITM සහතිකය                    |
-| `AUTO-COMBO.md`                             | Auto Combo එන්ජිම (සාධක 16ක ලකුණුකරණය, මාදිලි ඇසුරුම් 6ක්, අතථ්ය කර්මාන්තශාලාව) |
+| ලේඛනය                                       | අරමුණ                                                                  |
+| ------------------------------------------- | ---------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | MCP සේවාදායකය: මෙවලම් 110, transports 3, scopes 33, REST endpoints     |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, skills 6, REST උපකාරක, agent card                  |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | ඒකාබද්ධ මාර්ගෝපදේශය: A2A vs ACP vs Cloud Agents                        |
+| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules සම්බන්ධීකරණය                               |
+| `SKILLS.md`                                 | Skills රාමුව (built-in + marketplace + SkillsSH + sandbox)             |
+| `RADAR.md`                                  | Radar නොමිලේ-ආකෘති නාමාවලි ආවරණය (`RADAR_ENABLED`, පෙරනිමියෙන් අක්රීය) |
+| `MEMORY.md`                                 | මතක පද්ධතිය (SQLite FTS5 + Qdrant)                                     |
+| `EVALS.md`                                  | Eval රාමුව (suites, runs, rubrics)                                     |
+| `GUARDRAILS.md`                             | PII ආවරකය, prompt injection, vision bridge                             |
+| `COMPLIANCE.md`                             | විගනන ලොගය, රඳවා තබා ගැනීම, noLog opt-out                              |
+| `WEBHOOKS.md`                               | HMAC-අත්සන් කළ webhook බෙදාහැරීම                                       |
+| `REASONING_REPLAY.md`                       | `reasoning_content` සඳහා දෙමුහුන් memory/SQLite කෑෂය                   |
+| `AUTHZ_GUIDE.md`                            | අවසර පයිප්පය (`classify` → `policies` → `enforce`)                     |
+| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + ආකෘති අගුළු දැමීම                         |
+| `docs/security/STEALTH_GUIDE.md` (git only) | TLS ඇඟිලි සලකුණු (JA3/JA4), Claude Code CCH, MITM සහතිකය               |
+| `AUTO-COMBO.md`                             | Auto Combo එන්ජිම (සාධක-16 ලකුණු දීම, mode packs 6, virtual factory)   |
 
 ### සම්පීඩනය
 
-| ලේඛනය                           | අරමුණ                                             |
-| ------------------------------- | ------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | සම්පීඩන මාදිලි + මාර්ග සිතියම පිළිබඳ දළ විශ්ලේෂණය |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK එන්ජින්, රෙජිස්ට්රි ගිවිසුම         |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman රීති ඇසුරුම් JSON යෝජනා ක්රමය             |
-| `COMPRESSION_LANGUAGE_PACKS.md` | එක් එක් භාෂාව සඳහා රීති ඇසුරුම් ඉන්වෙන්ටරිය       |
-| `RTK_COMPRESSION.md`            | RTK ප්රකාශනාත්මක නළ මාර්ගය (පෙරහන් 49ක්)          |
+| ලේඛනය                           | අරමුණ                                         |
+| ------------------------------- | --------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | සම්පීඩන ආකාර සහ සැලැස්ම සමාලෝචනය              |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK එන්ජින්, registry කොන්ත්රාත්තුව |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman රීති පැකේජ JSON schema                |
+| `COMPRESSION_LANGUAGE_PACKS.md` | භාෂාව අනුව රීති පැකේජ ඉන්වෙන්ටරිය             |
+| `RTK_COMPRESSION.md`            | RTK ප්රකාශාත්මක පයිප්පය (පෙරහන් 56)           |
 
-### යෙදවීම
+### යෙදවුම
 
 | ලේඛනය                        | අරමුණ                                                              |
 | ---------------------------- | ------------------------------------------------------------------ |
 | `DOCKER_GUIDE.md`            | Docker ගොඩනැගීම, පැතිකඩ (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | සාමාන්ය VM/VPS යෙදවීම (Ubuntu/Debian + nginx + systemd)            |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io යෙදවීම (දැනට චීන භාෂාවෙන් පමණි)                             |
-| `TERMUX_GUIDE.md`            | Termux හරහා headless Android ක්රියාත්මක කිරීම                      |
+| `VM_DEPLOYMENT_GUIDE.md`     | සාමාන්ය VM/VPS යොදවීම (Ubuntu/Debian + nginx + systemd)            |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io යොදවීම (දැනට චීන භාෂාවෙන් පමණි)                             |
+| `TERMUX_GUIDE.md`            | Termux හරහා Android headless                                       |
 | `PWA_GUIDE.md`               | Progressive Web App ස්ථාපනය + service worker                       |
 | `ELECTRON_GUIDE.md`          | ඩෙස්ක්ටොප් යෙදුම ගොඩනැගීම + අත්සන් කිරීම + බෙදාහැරීම               |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                             |
-| `PROXY_GUIDE.md`             | මට්ටම් 4ක පිටතට යන proxy + 1proxy වෙළඳපොළ                          |
+| `PROXY_GUIDE.md`             | මට්ටම්-4 outbound proxy + 1proxy marketplace                       |
 
 ### උපනාමාවලි
 
-| උපනාමාවලිය            | අරමුණ                                                                                                                                                                                                                   |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | දේශීයකරණය කළ ලේඛන පරිවර්තන (භාෂා කලාප 41ක්)                                                                                                                                                                             |
-| `docs/screenshots/`   | මාර්ගෝපදේශ සඳහා රූප සම්පත්                                                                                                                                                                                              |
-| `_tasks/superpowers/` | superpowers වෙතින් සැලසුම්/පිරිවිතර (`writing-plans`/`brainstorming`) + පර්යේෂණ — හුදකලා කළ, වෙනම අනුවාදගත කළ repo එකක් වන අතර ප්රධාන tree එක මඟින් gitignore කර ඇත. CLAUDE.md → "Planning & Research Artifacts" බලන්න. |
+| උපනාමාවලිය            | අරමුණ                                                                                                                                                                                                             |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | දේශීයකරණය කළ ලේඛන පරිවර්තන (locales 41)                                                                                                                                                                           |
+| `docs/screenshots/`   | මාර්ගෝපදේශ සඳහා රූප සම්පත්                                                                                                                                                                                        |
+| `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) වෙතින් සැලසුම්/පිරිවිතර + පර්යේෂණ — හුදෙකලා කළ, වෙනම අනුවාදනය කරන ලද repo එකක්, ප්රධාන ගස මඟින් gitignore කර ඇත. CLAUDE.md → "Planning & Research Artifacts" බලන්න. |
 
 ---
 

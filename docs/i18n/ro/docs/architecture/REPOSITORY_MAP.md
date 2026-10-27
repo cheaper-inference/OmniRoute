@@ -393,78 +393,78 @@ open-sse/
 
 ## `docs/` — Documentație publică (7 fișiere rădăcină + 17 subdirectoare)
 
-### Ghiduri principale
+### Ghiduri de nivel superior
 
-| Document                    | Scop                                                                                           |
+| Doc                         | Scop                                                                                           |
 | --------------------------- | ---------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Arhitectură de nivel înalt, harta subsistemelor, interfața tabloului de bord                   |
-| `CODEBASE_DOCUMENTATION.md` | Referință tehnică: directoare, module, convenții                                               |
-| `FEATURES.md`               | Matrice de funcționalități cu noutățile v3.8                                                   |
-| `USER_GUIDE.md`             | Manual pentru utilizatorii finali (configurare, modele, combinații, CLI-uri, audio etc.)       |
-| `API_REFERENCE.md`          | Referință pentru endpointurile API, cu modelul de autentificare                                |
-| `openapi.yaml`              | Specificație OpenAPI 3.0 (121 de căi)                                                          |
+| `ARCHITECTURE.md`           | Arhitectură de nivel înalt, harta subsistemelor, suprafața dashboard-ului                      |
+| `CODEBASE_DOCUMENTATION.md` | Referință de inginerie: directoare, module, convenții                                          |
+| `FEATURES.md`               | Matricea funcționalităților cu aspectele importante din v3.8                                   |
+| `USER_GUIDE.md`             | Manual pentru utilizatorul final (configurare, modele, combinații, CLI-uri, audio etc.)        |
+| `API_REFERENCE.md`          | Referință pentru endpoint-urile API cu modelul de autentificare                                |
+| `openapi.yaml`              | Specificația OpenAPI 3.0 (121 de căi)                                                          |
 | `SETUP_GUIDE.md`            | Metode de instalare (npm, npx, Docker, Electron, Termux, sursă)                                |
 | `ENVIRONMENT.md`            | Toate variabilele de mediu (~800 documentate, ~3.050 de linii în `.env.example`)               |
 | `TROUBLESHOOTING.md`        | Erori frecvente + probleme cunoscute în v3.8.0                                                 |
-| `RELEASE_CHECKLIST.md`      | Flux complet de lansare (abilități, husky, commituri convenționale, implementare)              |
+| `RELEASE_CHECKLIST.md`      | Fluxul complet de lansare (skills, husky, conventional commits, deploy)                        |
 | `COVERAGE_PLAN.md`          | Obiectivele de acoperire și starea actuală                                                     |
-| `FREE_TIERS.md`             | Furnizori atent selectați cu nivel gratuit (48+ gratuiți + 11 OAuth)                           |
+| `FREE_TIERS.md`             | Furnizori cu nivel gratuit selecționați (48+ gratuite + 11 OAuth)                              |
 | `CLI-TOOLS.md`              | Integrări CLI externe + CLI-ul intern OmniRoute                                                |
-| `I18N.md`                   | Arhitectura i18n, adăugarea unei limbi, 67 de configurări regionale                            |
-| `UNINSTALL.md`              | Pași pentru dezinstalarea completă                                                             |
+| `I18N.md`                   | Arhitectura i18n, adăugarea unei limbi, 67 de localizări                                       |
+| `UNINSTALL.md`              | Pași pentru dezinstalare curată                                                                |
 | `PROVIDER_REFERENCE.md`     | Catalog **generat automat** cu 376 de furnizori (regenerare: `npm run gen:provider-reference`) |
 
-### Analize aprofundate ale subsistemelor
+### Analize detaliate ale subsistemelor
 
-| Document                                    | Scop                                                                                      |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | Server MCP: 110 instrumente, 3 transporturi, 33 de domenii de acces, endpointuri REST     |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 abilități, utilitare REST, fișa agentului                           |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | Ghid unificat: A2A comparativ cu ACP și agenții cloud                                     |
-| `CLOUD_AGENT.md`                            | Orchestrarea Codex Cloud / Devin / Jules                                                  |
-| `SKILLS.md`                                 | Cadru pentru abilități (încorporate + marketplace + SkillsSH + sandbox)                   |
-| `RADAR.md`                                  | Suprapunerea catalogului Radar de modele gratuite (`RADAR_ENABLED`, dezactivată implicit) |
-| `MEMORY.md`                                 | Sistem de memorie (SQLite FTS5 + Qdrant)                                                  |
-| `EVALS.md`                                  | Cadru de evaluare (suite, rulări, grile de evaluare)                                      |
-| `GUARDRAILS.md`                             | Mascarea PII, injectarea prompturilor, punte pentru procesarea vizuală                    |
-| `COMPLIANCE.md`                             | Jurnal de audit, retenție, opțiune de excludere noLog                                     |
-| `WEBHOOKS.md`                               | Livrarea webhookurilor semnate cu HMAC                                                    |
-| `REASONING_REPLAY.md`                       | Cache hibrid de memorie/SQLite pentru `reasoning_content`                                 |
-| `AUTHZ_GUIDE.md`                            | Flux de autorizare (`classify` → `policies` → `enforce`)                                  |
-| `RESILIENCE_GUIDE.md`                       | Întrerupător de circuit + perioadă de așteptare + blocarea modelului                      |
-| `docs/security/STEALTH_GUIDE.md` (doar git) | Amprentare TLS (JA3/JA4), Claude Code CCH, certificat MITM                                |
-| `AUTO-COMBO.md`                             | Motor Auto Combo (evaluare pe baza a 16 factori, 6 pachete de moduri, fabrică virtuală)   |
+| Doc                                         | Scop                                                                                     |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | Server MCP: 110 unelte, 3 transporturi, 33 de scope-uri, endpoint-uri REST               |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 skill-uri, helper-e REST, agent card                               |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | Ghid unificat: A2A vs ACP vs Cloud Agents                                                |
+| `CLOUD_AGENT.md`                            | Orchestrare Codex Cloud / Devin / Jules                                                  |
+| `SKILLS.md`                                 | Cadrul de skills (integrate + marketplace + SkillsSH + sandbox)                          |
+| `RADAR.md`                                  | Suprapunerea catalogului de modele gratuite Radar (`RADAR_ENABLED`, dezactivat implicit) |
+| `MEMORY.md`                                 | Sistemul de memorie (SQLite FTS5 + Qdrant)                                               |
+| `EVALS.md`                                  | Cadrul de evaluare (suite-uri, rulări, rubrici)                                          |
+| `GUARDRAILS.md`                             | Mascare PII, prompt injection, vision bridge                                             |
+| `COMPLIANCE.md`                             | Jurnal de audit, retenție, opt-out noLog                                                 |
+| `WEBHOOKS.md`                               | Livrare de webhook-uri semnate HMAC                                                      |
+| `REASONING_REPLAY.md`                       | Cache hibrid memorie/SQLite pentru `reasoning_content`                                   |
+| `AUTHZ_GUIDE.md`                            | Pipeline-ul de autorizare (`classify` → `policies` → `enforce`)                          |
+| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + blocare de model                                            |
+| `docs/security/STEALTH_GUIDE.md` (doar git) | Amprentare TLS (JA3/JA4), Claude Code CCH, certificat MITM                               |
+| `AUTO-COMBO.md`                             | Motorul Auto Combo (scoring cu 16 factori, 6 pachete de moduri, fabrică virtuală)        |
 
 ### Compresie
 
-| Document                        | Scop                                                            |
-| ------------------------------- | --------------------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Prezentare generală a modurilor de compresie + foaie de parcurs |
-| `COMPRESSION_ENGINES.md`        | Motoarele Caveman + RTK, contractul registrului                 |
-| `COMPRESSION_RULES_FORMAT.md`   | Schema JSON a pachetului de reguli Caveman                      |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Inventarul pachetelor de reguli pentru fiecare limbă            |
-| `RTK_COMPRESSION.md`            | Flux declarativ RTK (49 de filtre)                              |
+| Doc                             | Scop                                                   |
+| ------------------------------- | ------------------------------------------------------ |
+| `COMPRESSION_GUIDE.md`          | Prezentare generală a modurilor de compresie + roadmap |
+| `COMPRESSION_ENGINES.md`        | Motoarele Caveman + RTK, contractul registrului        |
+| `COMPRESSION_RULES_FORMAT.md`   | Schema JSON a pachetului de reguli Caveman             |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Inventarul pachetelor de reguli pe limbă               |
+| `RTK_COMPRESSION.md`            | Pipeline-ul declarativ RTK (56 de filtre)              |
 
 ### Implementare
 
-| Document                     | Scop                                                                             |
-| ---------------------------- | -------------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Compilare Docker, profiluri (base/cli/host/cliproxyapi), serviciu auxiliar Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | Implementare generică pe VM/VPS (Ubuntu/Debian + nginx + systemd)                |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Implementare pe Fly.io (momentan disponibilă doar în chineză)                    |
-| `TERMUX_GUIDE.md`            | Android fără interfață grafică prin Termux                                       |
-| `PWA_GUIDE.md`               | Instalarea aplicației web progresive + service worker                            |
-| `ELECTRON_GUIDE.md`          | Compilarea + semnarea + distribuirea aplicației desktop                          |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                           |
-| `PROXY_GUIDE.md`             | Proxy de ieșire pe 4 niveluri + marketplace-ul 1proxy                            |
+| Doc                          | Scop                                                               |
+| ---------------------------- | ------------------------------------------------------------------ |
+| `DOCKER_GUIDE.md`            | Build Docker, profiluri (base/cli/host/cliproxyapi), sidecar Redis |
+| `VM_DEPLOYMENT_GUIDE.md`     | Implementare generică pe VM/VPS (Ubuntu/Debian + nginx + systemd)  |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Implementare Fly.io (momentan doar în chineză)                     |
+| `TERMUX_GUIDE.md`            | Android headless prin Termux                                       |
+| `PWA_GUIDE.md`               | Instalare Progressive Web App + service worker                     |
+| `ELECTRON_GUIDE.md`          | Build + semnare + distribuție aplicație desktop                    |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                             |
+| `PROXY_GUIDE.md`             | Proxy de ieșire pe 4 niveluri + marketplace 1proxy                 |
 
 ### Subdirectoare
 
-| Subdirector           | Scop                                                                                                                                                                                                                                       |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | Traduceri localizate ale documentației (41 de limbi)                                                                                                                                                                                       |
-| `docs/screenshots/`   | Resurse de imagine pentru ghiduri                                                                                                                                                                                                          |
-| `_tasks/superpowers/` | Planuri/specificații din superpowers (`writing-plans`/`brainstorming`) + cercetare — depozit izolat, cu versiuni gestionate separat, ignorat de git în arborele principal. Consultați CLAUDE.md → „Artefacte de planificare și cercetare”. |
+| Subdir                | Scop                                                                                                                                                                                                           |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Traduceri localizate ale documentației (41 de localizări)                                                                                                                                                      |
+| `docs/screenshots/`   | Resurse de imagini pentru ghiduri                                                                                                                                                                              |
+| `_tasks/superpowers/` | Planuri/specificații de la superpowers (`writing-plans`/`brainstorming`) + cercetare — repo izolat, versionat separat, ignorat de git în arborele principal. Vezi CLAUDE.md → „Planning & Research Artifacts”. |
 
 ---
 

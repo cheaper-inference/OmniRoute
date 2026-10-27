@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Takardun Jama'a (fayilolin tushe 7 + ƙananan kundin adireshi 17)
+## `docs/` — Takaddun Jama'a (fayilolin tushe 7 + ƙananan kundayen 17)
 
-### Jagororin matakin sama
+### Jagororin babban mataki
 
-| Takarda                     | Manufa                                                                                                    |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Tsarin gine-gine na gaba ɗaya, taswirar ƙananan tsare-tsare, fuskar dashboard                             |
-| `CODEBASE_DOCUMENTATION.md` | Manazartar injiniyanci: kundin adireshi, modules, ƙa'idoji                                                |
-| `FEATURES.md`               | Jadawalin fasaloli tare da muhimman abubuwan v3.8                                                         |
-| `USER_GUIDE.md`             | Jagorar mai amfani (saiti, models, combos, CLIs, sauti, da sauransu)                                      |
-| `API_REFERENCE.md`          | Manazartar API endpoints tare da tsarin tantancewa                                                        |
-| `openapi.yaml`              | Bayanin OpenAPI 3.0 (paths 121)                                                                           |
-| `SETUP_GUIDE.md`            | Hanyoyin girkawa (npm, npx, Docker, Electron, Termux, source)                                             |
-| `ENVIRONMENT.md`            | Duk env vars (~800 da aka rubuta bayaninsu, ~3,050 layuka na `.env.example`)                              |
-| `TROUBLESHOOTING.md`        | Kurakurai gama-gari + sanannun matsalolin v3.8.0                                                          |
-| `RELEASE_CHECKLIST.md`      | Cikakken tsarin fitarwa (skills, husky, conventional commits, deploy)                                     |
-| `COVERAGE_PLAN.md`          | Manufofin coverage da halin da ake ciki                                                                   |
-| `FREE_TIERS.md`             | Zaɓaɓɓun masu samar da free-tier (48+ kyauta + 11 OAuth)                                                  |
-| `CLI-TOOLS.md`              | Haɗaɗɗun CLI na waje + CLI na OmniRoute na ciki                                                           |
-| `I18N.md`                   | Tsarin gine-ginen i18n, ƙara harshe, locales 67                                                           |
-| `UNINSTALL.md`              | Matakan cire girkawa gaba ɗaya                                                                            |
-| `PROVIDER_REFERENCE.md`     | Kundin masu samarwa 376 da aka **ƙirƙira ta atomatik** (sake ƙirƙirawa: `npm run gen:provider-reference`) |
+| Takarda                     | Maƙasudi                                                                                              |
+| --------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Gine-ginen matakin sama, taswirar ƙananan tsarin, saman dashboard                                     |
+| `CODEBASE_DOCUMENTATION.md` | Nassar injiniya: kundayen, modules, al'adu                                                            |
+| `FEATURES.md`               | Jadawalin fasali tare da manyan abubuwan v3.8                                                         |
+| `USER_GUIDE.md`             | Littafin mai amfani na ƙarshe (kafawa, samfura, combos, CLIs, audio, da sauransu)                     |
+| `API_REFERENCE.md`          | Nassar ƙarshen API tare da samfurin tantancewa                                                        |
+| `openapi.yaml`              | Ƙayyadaddun OpenAPI 3.0 (hanyoyi 121)                                                                 |
+| `SETUP_GUIDE.md`            | Hanyoyin shigarwa (npm, npx, Docker, Electron, Termux, source)                                        |
+| `ENVIRONMENT.md`            | Duk masu canjin muhalli (~800 da aka rubuta, ~3,050 layukan `.env.example`)                           |
+| `TROUBLESHOOTING.md`        | Kurakurai na yau da kullum + sanannun matsalolin v3.8.0                                               |
+| `RELEASE_CHECKLIST.md`      | Cikakken kwararar fitarwa (skills, husky, conventional commits, deploy)                               |
+| `COVERAGE_PLAN.md`          | Manufofin rufewa da yanayin yanzu                                                                     |
+| `FREE_TIERS.md`             | Masu samar da matakin kyauta da aka zaɓa (48+ kyauta + 11 OAuth)                                      |
+| `CLI-TOOLS.md`              | Haɗin CLI na waje + CLI na ciki na OmniRoute                                                          |
+| `I18N.md`                   | Gine-ginen i18n, ƙara yare, locales 67                                                                |
+| `UNINSTALL.md`              | Matakan cirewa mai tsabta                                                                             |
+| `PROVIDER_REFERENCE.md`     | Katalog na masu samarwa 376 da aka **samartar ta atomatik** (regen: `npm run gen:provider-reference`) |
 
-### Cikakken bayani kan ƙananan tsare-tsare
+### Zurfin nazarin ƙananan tsarin
 
-| Takarda                                      | Manufa                                                                            |
-| -------------------------------------------- | --------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                              | Sabar MCP: kayan aiki 110, hanyoyin jigila 3, scopes 33, REST endpoints           |
-| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, skills 6, mataimakan REST, katin agent                        |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | Haɗaɗɗiyar jagora: A2A da ACP da Cloud Agents                                     |
-| `CLOUD_AGENT.md`                             | Tsara ayyukan Codex Cloud / Devin / Jules                                         |
-| `SKILLS.md`                                  | Tsarin skills (na ciki + marketplace + SkillsSH + sandbox)                        |
-| `RADAR.md`                                   | Ƙarin kundin free-model na Radar (`RADAR_ENABLED`, a kashe ta tsohuwa)            |
-| `MEMORY.md`                                  | Tsarin ƙwaƙwalwa (SQLite FTS5 + Qdrant)                                           |
-| `EVALS.md`                                   | Tsarin eval (suites, runs, rubrics)                                               |
-| `GUARDRAILS.md`                              | Mai ɓoye PII, prompt injection, gadar vision                                      |
-| `COMPLIANCE.md`                              | Kundin bincike, riƙe bayanai, ficewar noLog                                       |
-| `WEBHOOKS.md`                                | Isar da webhook mai sa hannun HMAC                                                |
-| `REASONING_REPLAY.md`                        | Ma'ajiyar cache ta haɗaɗɗiyar ƙwaƙwalwa/SQLite don `reasoning_content`            |
-| `AUTHZ_GUIDE.md`                             | Bututun ba da izini (`classify` → `policies` → `enforce`)                         |
-| `RESILIENCE_GUIDE.md`                        | Circuit breaker + cooldown + kulle model                                          |
-| `docs/security/STEALTH_GUIDE.md` (git kawai) | TLS fingerprinting (JA3/JA4), Claude Code CCH, takardar shaidar MITM              |
-| `AUTO-COMBO.md`                              | Injin Auto Combo (ƙididdigar abubuwa 16, mode packs 6, masana'antar kama-da-wane) |
+| Takarda                                      | Maƙasudi                                                                      |
+| -------------------------------------------- | ----------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | Sabar MCP: kayan aiki 110, transports 3, scopes 33, ƙarshen REST              |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, ƙwarewa 6, masu taimakon REST, katin wakili               |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Jagora mai haɗewa: A2A vs ACP vs Cloud Agents                                 |
+| `CLOUD_AGENT.md`                             | Orchestration na Codex Cloud / Devin / Jules                                  |
+| `SKILLS.md`                                  | Tsarin ƙwarewa (na cikin gini + kasuwa + SkillsSH + sandbox)                  |
+| `RADAR.md`                                   | Rufin katalog na samfuran kyauta na Radar (`RADAR_ENABLED`, a kashe ta tsoho) |
+| `MEMORY.md`                                  | Tsarin ƙwaƙwalwa (SQLite FTS5 + Qdrant)                                       |
+| `EVALS.md`                                   | Tsarin kimantawa (suites, runs, rubrics)                                      |
+| `GUARDRAILS.md`                              | Mai ɓoye PII, prompt injection, gadar vision                                  |
+| `COMPLIANCE.md`                              | Rajistar bincike, riƙewa, zaɓin ficewa daga noLog                             |
+| `WEBHOOKS.md`                                | Isar da webhook da aka sa wa hannu da HMAC                                    |
+| `REASONING_REPLAY.md`                        | Haɗakakkiyar cache na ƙwaƙwalwa/SQLite don `reasoning_content`                |
+| `AUTHZ_GUIDE.md`                             | Layin aiki na izini (`classify` → `policies` → `enforce`)                     |
+| `RESILIENCE_GUIDE.md`                        | Circuit breaker + cooldown + kulle samfuri                                    |
+| `docs/security/STEALTH_GUIDE.md` (git kawai) | TLS fingerprinting (JA3/JA4), Claude Code CCH, takardar shaidar MITM          |
+| `AUTO-COMBO.md`                              | Injin Auto Combo (kimar abubuwa 16, fakitin yanayi 6, masana'antar virtual)   |
 
-### Matsewa
+### Matsawa
 
-| Takarda                         | Manufa                                              |
-| ------------------------------- | --------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Bayanin hanyoyin matsewa gaba ɗaya + taswirar hanya |
-| `COMPRESSION_ENGINES.md`        | Injinan Caveman + RTK, yarjejeniyar registry        |
-| `COMPRESSION_RULES_FORMAT.md`   | JSON schema na kunshin ƙa'idojin Caveman            |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Jerin kunshin ƙa'idoji na kowane harshe             |
-| `RTK_COMPRESSION.md`            | Bututun RTK na bayani (filters 49)                  |
+| Takarda                         | Maƙasudi                                              |
+| ------------------------------- | ----------------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Taƙaitaccen bayani na yanayin matsawa + taswirar aiki |
+| `COMPRESSION_ENGINES.md`        | Injunan Caveman + RTK, kwangilar rajista              |
+| `COMPRESSION_RULES_FORMAT.md`   | Tsarin JSON na fakitin dokokin Caveman                |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Ƙidayar fakitin dokoki ga kowane yare                 |
+| `RTK_COMPRESSION.md`            | Layin aiki na bayyana na RTK (matata 56)              |
 
-### Turawa zuwa aiki
+### Turawa
 
-| Takarda                      | Manufa                                                                     |
-| ---------------------------- | -------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Gina Docker, bayanan martaba (base/cli/host/cliproxyapi), sidecar na Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | Tura manhaja zuwa VM/VPS na gama-gari (Ubuntu/Debian + nginx + systemd)    |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Tura manhaja zuwa Fly.io (a halin yanzu da Sinanci kawai)                  |
-| `TERMUX_GUIDE.md`            | Android mara mu'amalar allo ta hanyar Termux                               |
-| `PWA_GUIDE.md`               | Shigar da Manhajar Yanar Gizo Mai Ci-gaba + ma'aikacin sabis               |
-| `ELECTRON_GUIDE.md`          | Gina manhajar tebur + sanya hannu + rarrabawa                              |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                     |
-| `PROXY_GUIDE.md`             | Proxy mai fita mai matakai 4 + kasuwar 1proxy                              |
+| Takarda                      | Manufa                                                           |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Gina Docker, profiles (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Shigar da VM/VPS na gama-gari (Ubuntu/Debian + nginx + systemd)  |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Shigarwa a Fly.io (a halin yanzu Sinanci kawai)                  |
+| `TERMUX_GUIDE.md`            | Android headless ta hanyar Termux                                |
+| `PWA_GUIDE.md`               | Shigar da Progressive Web App + service worker                   |
+| `ELECTRON_GUIDE.md`          | Gina app na desktop + sanya hannu + rarraba                      |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                           |
+| `PROXY_GUIDE.md`             | Outbound proxy mai matakai 4 + kasuwar 1proxy                    |
 
-### Ƙananan kundin adireshi
+### Ƙananan Kundaye
 
-| Ƙaramin kundin adireshi | Manufa                                                                                                                                                                                                                              |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`            | Fassarar takardu zuwa harsunan gida (harsuna 41)                                                                                                                                                                                    |
-| `docs/screenshots/`     | Albarkatun hotuna don jagorori                                                                                                                                                                                                      |
-| `_tasks/superpowers/`   | Tsare-tsare/ƙayyadaddun bayanai daga superpowers (`writing-plans`/`brainstorming`) + bincike — keɓaɓɓen repo mai sarrafa siga daban, wanda babban bishiyar ke yin watsi da shi ta git. Duba CLAUDE.md → "Kayan Tsarawa da Bincike". |
+| Ƙaramin Kundi         | Manufa                                                                                                                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Fassarorin takardu na harsunan gida (locales 41)                                                                                                                                                                                   |
+| `docs/screenshots/`   | Kayan hoto don jagorori                                                                                                                                                                                                            |
+| `_tasks/superpowers/` | Tsare-tsare/ƙayyadaddun bayanai daga superpowers (`writing-plans`/`brainstorming`) + bincike — repo da aka keɓance, mai siga daban, wanda babban bishiyar ta yi masa gitignore. Duba CLAUDE.md → "Abubuwan Tsare-tsare & Bincike". |
 
 ---
 

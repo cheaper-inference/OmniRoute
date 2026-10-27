@@ -393,66 +393,66 @@ open-sse/
 
 ## `docs/` — Dokumentasi Awam (7 fail akar + 17 subdirektori)
 
-### Panduan peringkat teratas
+### Panduan tahap atas
 
-| Dokumen                     | Tujuan                                                                                                |
-| --------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Seni bina peringkat tinggi, peta subsistem, permukaan papan pemuka                                    |
-| `CODEBASE_DOCUMENTATION.md` | Rujukan kejuruteraan: direktori, modul, konvensyen                                                    |
-| `FEATURES.md`               | Matriks ciri dengan sorotan v3.8                                                                      |
-| `USER_GUIDE.md`             | Manual pengguna akhir (persediaan, model, gabungan, CLI, audio dan sebagainya)                        |
-| `API_REFERENCE.md`          | Rujukan titik akhir API dengan model pengesahan                                                       |
-| `openapi.yaml`              | Spesifikasi OpenAPI 3.0 (121 laluan)                                                                  |
-| `SETUP_GUIDE.md`            | Kaedah pemasangan (npm, npx, Docker, Electron, Termux, sumber)                                        |
-| `ENVIRONMENT.md`            | Semua pemboleh ubah persekitaran (~800 didokumentasikan, ~3,050 baris `.env.example`)                 |
-| `TROUBLESHOOTING.md`        | Ralat lazim + isu v3.8.0 yang diketahui                                                               |
-| `RELEASE_CHECKLIST.md`      | Aliran keluaran penuh (kemahiran, husky, komit konvensional, penggunaan)                              |
-| `COVERAGE_PLAN.md`          | Matlamat liputan dan keadaan semasa                                                                   |
-| `FREE_TIERS.md`             | Penyedia peringkat percuma terpilih (48+ percuma + 11 OAuth)                                          |
-| `CLI-TOOLS.md`              | Penyepaduan CLI luaran + CLI OmniRoute Dalaman                                                        |
-| `I18N.md`                   | Seni bina i18n, menambahkan bahasa, 67 penempatan                                                     |
-| `UNINSTALL.md`              | Langkah nyahpasang yang bersih                                                                        |
-| `PROVIDER_REFERENCE.md`     | Katalog 376 penyedia yang **dijana secara automatik** (jana semula: `npm run gen:provider-reference`) |
+| Dok                         | Tujuan                                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Senibina aras tinggi, peta subsistem, permukaan papan pemuka                                   |
+| `CODEBASE_DOCUMENTATION.md` | Rujukan kejuruteraan: direktori, modul, konvensyen                                             |
+| `FEATURES.md`               | Matriks ciri dengan sorotan v3.8                                                               |
+| `USER_GUIDE.md`             | Manual pengguna akhir (persediaan, model, kombo, CLI, audio, dll.)                             |
+| `API_REFERENCE.md`          | Rujukan titik hujung API dengan model pengesahan                                               |
+| `openapi.yaml`              | Spesifikasi OpenAPI 3.0 (121 laluan)                                                           |
+| `SETUP_GUIDE.md`            | Kaedah pemasangan (npm, npx, Docker, Electron, Termux, sumber)                                 |
+| `ENVIRONMENT.md`            | Semua pembolehubah persekitaran (~800 didokumentasikan, ~3,050 baris `.env.example`)           |
+| `TROUBLESHOOTING.md`        | Ralat biasa + isu diketahui v3.8.0                                                             |
+| `RELEASE_CHECKLIST.md`      | Aliran keluaran penuh (skills, husky, conventional commits, deploy)                            |
+| `COVERAGE_PLAN.md`          | Matlamat liputan dan keadaan semasa                                                            |
+| `FREE_TIERS.md`             | Penyedia peringkat percuma terpilih (48+ percuma + 11 OAuth)                                   |
+| `CLI-TOOLS.md`              | Integrasi CLI luaran + CLI OmniRoute dalaman                                                   |
+| `I18N.md`                   | Senibina i18n, menambah bahasa, 67 lokal                                                       |
+| `UNINSTALL.md`              | Langkah nyahpasang bersih                                                                      |
+| `PROVIDER_REFERENCE.md`     | Katalog **dijana automatik** bagi 376 penyedia (jana semula: `npm run gen:provider-reference`) |
 
-### Kupasan mendalam subsistem
+### Penerokaan mendalam subsistem
 
-| Dokumen                                       | Tujuan                                                                        |
-| --------------------------------------------- | ----------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | Pelayan MCP: 110 alat, 3 pengangkutan, 33 skop, titik akhir REST              |
-| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 kemahiran, pembantu REST, kad ejen                      |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | Panduan bersepadu: A2A lwn ACP lwn Ejen Awan                                  |
-| `CLOUD_AGENT.md`                              | Orkestrasi Codex Cloud / Devin / Jules                                        |
-| `SKILLS.md`                                   | Rangka kerja kemahiran (terbina dalam + pasaran + SkillsSH + kotak pasir)     |
-| `RADAR.md`                                    | Lapisan katalog model percuma Radar (`RADAR_ENABLED`, dimatikan secara lalai) |
-| `MEMORY.md`                                   | Sistem memori (SQLite FTS5 + Qdrant)                                          |
-| `EVALS.md`                                    | Rangka kerja penilaian (suite, pelaksanaan, rubrik)                           |
-| `GUARDRAILS.md`                               | Penopeng PII, suntikan gesaan, jambatan penglihatan                           |
-| `COMPLIANCE.md`                               | Log audit, pengekalan, pilihan keluar noLog                                   |
-| `WEBHOOKS.md`                                 | Penghantaran webhook bertandatangan HMAC                                      |
-| `REASONING_REPLAY.md`                         | Cache memori/SQLite hibrid untuk `reasoning_content`                          |
-| `AUTHZ_GUIDE.md`                              | Saluran kebenaran (`classify` → `policies` → `enforce`)                       |
-| `RESILIENCE_GUIDE.md`                         | Pemutus litar + tempoh bertenang + sekatan model                              |
-| `docs/security/STEALTH_GUIDE.md` (git sahaja) | Pengecaman cap jari TLS (JA3/JA4), Claude Code CCH, sijil MITM                |
-| `AUTO-COMBO.md`                               | Enjin Auto Combo (pemarkahan 16 faktor, 6 pek mod, kilang maya)               |
+| Dok                                           | Tujuan                                                                         |
+| --------------------------------------------- | ------------------------------------------------------------------------------ |
+| `MCP-SERVER.md`                               | Pelayan MCP: 110 alat, 3 pengangkutan, 33 skop, titik hujung REST              |
+| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 kemahiran, pembantu REST, kad ejen                       |
+| `AGENT_PROTOCOLS_GUIDE.md`                    | Panduan bersatu: A2A vs ACP vs Cloud Agents                                    |
+| `CLOUD_AGENT.md`                              | Orkestrasi Codex Cloud / Devin / Jules                                         |
+| `SKILLS.md`                                   | Rangka kerja Skills (bawaan + pasaran + SkillsSH + kotak pasir)                |
+| `RADAR.md`                                    | Tindihan katalog model percuma Radar (`RADAR_ENABLED`, dimatikan secara lalai) |
+| `MEMORY.md`                                   | Sistem memori (SQLite FTS5 + Qdrant)                                           |
+| `EVALS.md`                                    | Rangka kerja Eval (suit, larian, rubrik)                                       |
+| `GUARDRAILS.md`                               | Pemtopeng PII, suntikan prompt, jambatan penglihatan                           |
+| `COMPLIANCE.md`                               | Log audit, pengekalan, pilihan keluar noLog                                    |
+| `WEBHOOKS.md`                                 | Penghantaran webhook bertandatangan HMAC                                       |
+| `REASONING_REPLAY.md`                         | Cache hibrid memori/SQLite untuk `reasoning_content`                           |
+| `AUTHZ_GUIDE.md`                              | Talian paip kebenaran (`classify` → `policies` → `enforce`)                    |
+| `RESILIENCE_GUIDE.md`                         | Pemutus litar + tempoh reda + penguncian model                                 |
+| `docs/security/STEALTH_GUIDE.md` (git sahaja) | Pengecapan jari TLS (JA3/JA4), Claude Code CCH, sijil MITM                     |
+| `AUTO-COMBO.md`                               | Enjin Auto Combo (penskoran 16 faktor, 6 pek mod, kilang maya)                 |
 
-### Pemampatan
+### Mampatan
 
-| Dokumen                         | Tujuan                                                |
-| ------------------------------- | ----------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Gambaran keseluruhan mod pemampatan + pelan hala tuju |
-| `COMPRESSION_ENGINES.md`        | Enjin Caveman + RTK, kontrak daftar                   |
-| `COMPRESSION_RULES_FORMAT.md`   | Skema JSON pek peraturan Caveman                      |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Inventori pek peraturan bagi setiap bahasa            |
-| `RTK_COMPRESSION.md`            | Saluran deklaratif RTK (49 penapis)                   |
+| Dok                             | Tujuan                                         |
+| ------------------------------- | ---------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Gambaran keseluruhan mod mampatan + peta jalan |
+| `COMPRESSION_ENGINES.md`        | Enjin Caveman + RTK, kontrak pendaftar         |
+| `COMPRESSION_RULES_FORMAT.md`   | Skema JSON pek peraturan Caveman               |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Inventori pek peraturan mengikut bahasa        |
+| `RTK_COMPRESSION.md`            | Talian paip deklaratif RTK (56 penapis)        |
 
-### Penggunaan
+### Penggelaran
 
-| Dokumen                      | Tujuan                                                           |
+| Dok                          | Tujuan                                                           |
 | ---------------------------- | ---------------------------------------------------------------- |
 | `DOCKER_GUIDE.md`            | Binaan Docker, profil (base/cli/host/cliproxyapi), sidecar Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | Penggunaan VM/VPS generik (Ubuntu/Debian + nginx + systemd)      |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Penggunaan Fly.io (kini tersedia dalam bahasa Cina sahaja)       |
-| `TERMUX_GUIDE.md`            | Android tanpa paparan melalui Termux                             |
+| `VM_DEPLOYMENT_GUIDE.md`     | Penyebaran VM/VPS generik (Ubuntu/Debian + nginx + systemd)      |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Penyebaran Fly.io (ketika ini dalam Bahasa Cina sahaja)          |
+| `TERMUX_GUIDE.md`            | Android headless melalui Termux                                  |
 | `PWA_GUIDE.md`               | Pemasangan Progressive Web App + service worker                  |
 | `ELECTRON_GUIDE.md`          | Binaan aplikasi desktop + tandatangan + pengedaran               |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                           |
@@ -460,11 +460,11 @@ open-sse/
 
 ### Subdirektori
 
-| Subdirektori          | Tujuan                                                                                                                                                                                                                                        |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Terjemahan dokumentasi disetempatkan (41 penempatan)                                                                                                                                                                                          |
-| `docs/screenshots/`   | Aset imej untuk panduan                                                                                                                                                                                                                       |
-| `_tasks/superpowers/` | Pelan/spesifikasi daripada superpowers (`writing-plans`/`brainstorming`) + penyelidikan — repositori berasingan dengan pemversian tersendiri, diabaikan oleh git dalam pepohon utama. Lihat CLAUDE.md → "Artifak Perancangan & Penyelidikan". |
+| Subdirektori          | Tujuan                                                                                                                                                                                                                 |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Terjemahan dokumen yang dilokalkan (41 locale)                                                                                                                                                                         |
+| `docs/screenshots/`   | Aset imej untuk panduan                                                                                                                                                                                                |
+| `_tasks/superpowers/` | Pelan/spesifikasi daripada superpowers (`writing-plans`/`brainstorming`) + penyelidikan — repo terpencil, berversi berasingan, diabaikan git oleh pokok utama. Lihat CLAUDE.md → "Artifak Perancangan & Penyelidikan". |
 
 ---
 

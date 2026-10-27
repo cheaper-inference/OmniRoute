@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Pampublikong Dokumentasyon (7 root file + 17 subdirectory)
+## `docs/` — Pampublikong Dokumentasyon (7 root na file + 17 subdir)
 
-### Mga gabay sa pinakamataas na antas
+### Mga gabay sa top-level
 
-| Dokumento                   | Layunin                                                                                            |
-| --------------------------- | -------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Pangkalahatang arkitektura, mapa ng subsystem, saklaw ng dashboard                                 |
-| `CODEBASE_DOCUMENTATION.md` | Sanggunian sa engineering: mga directory, module, convention                                       |
-| `FEATURES.md`               | Matrix ng feature na may mga highlight ng v3.8                                                     |
-| `USER_GUIDE.md`             | Manwal ng end user (setup, mga model, combo, CLI, audio, atbp.)                                    |
-| `API_REFERENCE.md`          | Sanggunian ng API endpoint na may modelo ng authentication                                         |
-| `openapi.yaml`              | OpenAPI 3.0 specification (121 path)                                                               |
-| `SETUP_GUIDE.md`            | Mga paraan ng pag-install (npm, npx, Docker, Electron, Termux, source)                             |
-| `ENVIRONMENT.md`            | Lahat ng env var (~800 ang dokumentado, ~3,050 linya sa `.env.example`)                            |
-| `TROUBLESHOOTING.md`        | Mga karaniwang error + mga kilalang isyu sa v3.8.0                                                 |
-| `RELEASE_CHECKLIST.md`      | Kumpletong daloy ng release (skills, husky, conventional commits, deploy)                          |
-| `COVERAGE_PLAN.md`          | Mga layunin sa coverage at kasalukuyang kalagayan                                                  |
-| `FREE_TIERS.md`             | Piniling mga free-tier provider (48+ libre + 11 OAuth)                                             |
-| `CLI-TOOLS.md`              | Mga external CLI integration + Internal OmniRoute CLI                                              |
-| `I18N.md`                   | Arkitektura ng i18n, pagdaragdag ng wika, 67 locale                                                |
-| `UNINSTALL.md`              | Mga hakbang para sa malinis na pag-uninstall                                                       |
-| `PROVIDER_REFERENCE.md`     | **Awtomatikong binuo** na catalog ng 376 provider (muling buuin: `npm run gen:provider-reference`) |
+| Dok                         | Layunin                                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | High-level na arkitektura, mapa ng subsystem, surface ng dashboard                           |
+| `CODEBASE_DOCUMENTATION.md` | Sanggunian ng engineering: mga direktoryo, module, kombensyon                                |
+| `FEATURES.md`               | Matrix ng mga feature na may mga highlight ng v3.8                                           |
+| `USER_GUIDE.md`             | Manwal para sa end-user (setup, mga modelo, combo, mga CLI, audio, atbp.)                    |
+| `API_REFERENCE.md`          | Sanggunian ng API endpoint na may modelo ng auth                                             |
+| `openapi.yaml`              | Spec ng OpenAPI 3.0 (121 paths)                                                              |
+| `SETUP_GUIDE.md`            | Mga paraan ng pag-install (npm, npx, Docker, Electron, Termux, source)                       |
+| `ENVIRONMENT.md`            | Lahat ng env var (~800 dokumentado, ~3,050 linya ng `.env.example`)                          |
+| `TROUBLESHOOTING.md`        | Mga karaniwang error + mga kilalang isyu ng v3.8.0                                           |
+| `RELEASE_CHECKLIST.md`      | Buong daloy ng release (mga skill, husky, conventional commits, deploy)                      |
+| `COVERAGE_PLAN.md`          | Mga layunin ng coverage at kasalukuyang estado                                               |
+| `FREE_TIERS.md`             | Mga piniling free-tier provider (48+ libre + 11 OAuth)                                       |
+| `CLI-TOOLS.md`              | Mga integrasyon ng external na CLI + Panloob na OmniRoute CLI                                |
+| `I18N.md`                   | Arkitektura ng i18n, pagdaragdag ng wika, 67 locales                                         |
+| `UNINSTALL.md`              | Mga hakbang sa malinis na pag-uninstall                                                      |
+| `PROVIDER_REFERENCE.md`     | **Awtomatikong binuo** na katalogo ng 376 provider (regen: `npm run gen:provider-reference`) |
 
-### Masusing pagtalakay sa mga subsystem
+### Mga masusing deep-dive sa subsystem
 
-| Dokumento                                     | Layunin                                                                                 |
-| --------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | MCP server: 110 tool, 3 transport, 33 saklaw, mga REST endpoint                         |
-| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 na skill, mga REST helper, agent card                             |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | Pinag-isang gabay: A2A vs ACP vs Cloud Agents                                           |
-| `CLOUD_AGENT.md`                              | Orchestration ng Codex Cloud / Devin / Jules                                            |
-| `SKILLS.md`                                   | Framework ng skill (built-in + marketplace + SkillsSH + sandbox)                        |
-| `RADAR.md`                                    | Overlay ng catalog ng libreng model ng Radar (`RADAR_ENABLED`, naka-off bilang default) |
-| `MEMORY.md`                                   | Sistema ng memory (SQLite FTS5 + Qdrant)                                                |
-| `EVALS.md`                                    | Framework ng eval (mga suite, run, rubric)                                              |
-| `GUARDRAILS.md`                               | PII masker, prompt injection, vision bridge                                             |
-| `COMPLIANCE.md`                               | Audit log, retention, opsyong hindi gumamit ng noLog                                    |
-| `WEBHOOKS.md`                                 | Paghahatid ng webhook na nilagdaan gamit ang HMAC                                       |
-| `REASONING_REPLAY.md`                         | Hybrid memory/SQLite cache para sa `reasoning_content`                                  |
-| `AUTHZ_GUIDE.md`                              | Pipeline ng authorization (`classify` → `policies` → `enforce`)                         |
-| `RESILIENCE_GUIDE.md`                         | Circuit breaker + cooldown + pag-lockout ng model                                       |
-| `docs/security/STEALTH_GUIDE.md` (git lamang) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM certificate                         |
-| `AUTO-COMBO.md`                               | Auto Combo engine (16-factor scoring, 6 na mode pack, virtual factory)                  |
+| Dok                                         | Layunin                                                                                    |
+| ------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `MCP-SERVER.md`                             | MCP server: 110 tool, 3 transport, 33 scope, mga REST endpoint                             |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 na skill, mga REST helper, agent card                                |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | Pinag-isang gabay: A2A vs ACP vs Cloud Agents                                              |
+| `CLOUD_AGENT.md`                            | Orchestration ng Codex Cloud / Devin / Jules                                               |
+| `SKILLS.md`                                 | Framework ng mga skill (built-in + marketplace + SkillsSH + sandbox)                       |
+| `RADAR.md`                                  | Overlay ng katalogo ng libreng modelo ng Radar (`RADAR_ENABLED`, nakapatay bilang default) |
+| `MEMORY.md`                                 | Sistema ng memorya (SQLite FTS5 + Qdrant)                                                  |
+| `EVALS.md`                                  | Framework ng eval (mga suite, run, rubric)                                                 |
+| `GUARDRAILS.md`                             | PII masker, prompt injection, vision bridge                                                |
+| `COMPLIANCE.md`                             | Audit log, retention, noLog opt-out                                                        |
+| `WEBHOOKS.md`                               | Paghahatid ng webhook na may HMAC signature                                                |
+| `REASONING_REPLAY.md`                       | Hybrid na memory/SQLite cache para sa `reasoning_content`                                  |
+| `AUTHZ_GUIDE.md`                            | Pipeline ng awtorisasyon (`classify` → `policies` → `enforce`)                             |
+| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + lockout ng modelo                                             |
+| `docs/security/STEALTH_GUIDE.md` (git lang) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM cert                                   |
+| `AUTO-COMBO.md`                             | Auto Combo engine (16-factor na scoring, 6 na mode pack, virtual factory)                  |
 
 ### Kompresyon
 
-| Dokumento                       | Layunin                                                |
-| ------------------------------- | ------------------------------------------------------ |
-| `COMPRESSION_GUIDE.md`          | Pangkalahatang-ideya ng mga compression mode + roadmap |
-| `COMPRESSION_ENGINES.md`        | Mga Caveman + RTK engine, registry contract            |
-| `COMPRESSION_RULES_FORMAT.md`   | JSON schema ng Caveman rule pack                       |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Imbentaryo ng rule pack para sa bawat wika             |
-| `RTK_COMPRESSION.md`            | Declarative pipeline ng RTK (49 na filter)             |
+| Dok                             | Layunin                                                  |
+| ------------------------------- | -------------------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Pangkalahatang-ideya ng mga mode ng kompresyon + roadmap |
+| `COMPRESSION_ENGINES.md`        | Mga engine na Caveman + RTK, kontrata ng registry        |
+| `COMPRESSION_RULES_FORMAT.md`   | JSON schema ng Caveman rule pack                         |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Imbentaryo ng rule pack bawat wika                       |
+| `RTK_COMPRESSION.md`            | RTK declarative pipeline (56 na filter)                  |
 
 ### Pag-deploy
 
-| Doc                          | Layunin                                                                  |
-| ---------------------------- | ------------------------------------------------------------------------ |
-| `DOCKER_GUIDE.md`            | Pagbuo ng Docker, mga profile (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Pangkalahatang deployment sa VM/VPS (Ubuntu/Debian + nginx + systemd)    |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Deployment sa Fly.io (kasalukuyang nasa Chinese lamang)                  |
-| `TERMUX_GUIDE.md`            | Headless na Android sa pamamagitan ng Termux                             |
-| `PWA_GUIDE.md`               | Pag-install ng Progressive Web App + service worker                      |
-| `ELECTRON_GUIDE.md`          | Pagbuo + pag-sign + pamamahagi ng desktop app                            |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                   |
-| `PROXY_GUIDE.md`             | 4-level na outbound proxy + 1proxy marketplace                           |
+| Dok                          | Layunin                                                              |
+| ---------------------------- | -------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker build, mga profile (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Generic na VM/VPS deployment (Ubuntu/Debian + nginx + systemd)       |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io deployment (kasalukuyang Chinese lamang)                      |
+| `TERMUX_GUIDE.md`            | Android headless sa pamamagitan ng Termux                            |
+| `PWA_GUIDE.md`               | Pag-install ng Progressive Web App + service worker                  |
+| `ELECTRON_GUIDE.md`          | Pag-build ng desktop app + pag-sign + pamamahagi                     |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                               |
+| `PROXY_GUIDE.md`             | 4-level na outbound proxy + 1proxy marketplace                       |
 
-### Mga subdirectory
+### Mga Subdirektoryo
 
-| Subdir                | Layunin                                                                                                                                                                                                                                         |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Mga lokal na salin ng dokumentasyon (41 locale)                                                                                                                                                                                                 |
-| `docs/screenshots/`   | Mga image asset para sa mga gabay                                                                                                                                                                                                               |
-| `_tasks/superpowers/` | Mga plano/spec mula sa superpowers (`writing-plans`/`brainstorming`) + pananaliksik — nakahiwalay at may sariling versioning na repo, naka-gitignore sa pangunahing tree. Tingnan ang CLAUDE.md → "Mga Artifact ng Pagpaplano at Pananaliksik". |
+| Subdir                | Layunin                                                                                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | Mga lokalisadong salin ng dokumentasyon (41 locale)                                                                                                                                                                      |
+| `docs/screenshots/`   | Mga image asset para sa mga gabay                                                                                                                                                                                        |
+| `_tasks/superpowers/` | Mga plano/spec mula sa superpowers (`writing-plans`/`brainstorming`) + pananaliksik — hiwalay, magkahiwalay na bersyon na repo, gitignored ng pangunahing tree. Tingnan ang CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 
