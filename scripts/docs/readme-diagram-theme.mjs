@@ -20,6 +20,7 @@
 //   .cmd      mono     500  16px  --accent-ink
 //   .mono     mono     500  13px  --body
 //   .term     mono     500  13px  --inverse-text   terminal text on an inverse surface
+//   .term-lg  mono     500  16px  --inverse-text   terminal screen lines on an inverse surface
 //   .mono-sm  mono     500  11px  --body       small code, ids, chips
 //   .lbl/.foot mono    500  10px  --muted      (letter-spacing 0.16em)
 //   .mono-xs  mono     500   9px  --muted      axis ticks, tiny labels (letter-spacing 0.08em)
@@ -115,6 +116,7 @@ export function textRoleCss() {
     `.mono-sm{${fontStack("mono")};font-weight:500;font-size:11px;fill:var(--body)}`,
     `.mono-xs{${fontStack("mono")};font-weight:500;font-size:9px;letter-spacing:0.08em;fill:var(--muted)}`,
     `.term{${fontStack("mono")};font-weight:500;font-size:13px;fill:var(--inverse-text)}`,
+    `.term-lg{${fontStack("mono")};font-weight:500;font-size:16px;fill:var(--inverse-text)}`,
     `.ok{fill:var(--ok)} .warn{fill:var(--warn)} .err{fill:var(--err)} .info{fill:var(--info)} .ok-bg{fill:var(--ok-bg)} .warn-bg{fill:var(--warn-bg)} .err-bg{fill:var(--err-bg)} .info-bg{fill:var(--info-bg)} .stroke-ok{stroke:var(--ok)} .stroke-warn{stroke:var(--warn)} .stroke-err{stroke:var(--err)} .stroke-info{stroke:var(--info)} .stroke-accent{stroke:var(--accent)} .stroke-ink{stroke:var(--ink)} .surface-subtle{fill:var(--surface-subtle)} .surface-muted{fill:var(--surface-muted)} .inverse{fill:var(--inverse-bg)} .track{fill:var(--track)} .accent-soft{fill:var(--accent-soft)} .ink{fill:var(--ink)} .body-fill{fill:var(--body)} .muted{fill:var(--muted)}`,
   ].join("\n");
 }

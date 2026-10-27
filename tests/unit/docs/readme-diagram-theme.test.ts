@@ -193,6 +193,23 @@ test("the original nine text classes and the fill line stay first, in their orig
     ".bg{",
   ];
   heads.forEach((h, i) => assert.ok(lines[i].startsWith(h), `line ${i} starts with ${h}`));
+  // the appended type scale keeps the brief's order, .term-lg sits between .term and the helpers
+  const appended = [
+    ".h2{",
+    ".h3{",
+    ".h4{",
+    ".cell{",
+    ".small{",
+    ".num-sm{",
+    ".mono-sm{",
+    ".mono-xs{",
+    ".term{",
+    ".term-lg{",
+    ".ok{",
+  ];
+  appended.forEach((h, i) =>
+    assert.ok(lines[heads.length + i]?.startsWith(h), `line ${heads.length + i} starts with ${h}`)
+  );
   assert.ok(lines.length > heads.length, "the diagram type scale is appended after them");
 });
 
@@ -207,6 +224,7 @@ const TYPE_SCALE: Record<string, [string, number, number, string]> = {
   ".mono-sm": ['"CI Mono"', 500, 11, "var(--body)"],
   ".mono-xs": ['"CI Mono"', 500, 9, "var(--muted)"],
   ".term": ['"CI Mono"', 500, 13, "var(--inverse-text)"],
+  ".term-lg": ['"CI Mono"', 500, 16, "var(--inverse-text)"],
 };
 
 test("the diagram type scale classes exist with the brief's face, weight, size and fill", () => {
