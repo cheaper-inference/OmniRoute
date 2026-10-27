@@ -1,5 +1,6 @@
 // Codex quota-snapshot parsing + reset/cooldown scheduling (pure).
 import {
+  classifyCodexQuotaWindow,
   parseCodexFiniteNumber,
   parseCodexLegacyReset,
   parseCodexOfficialQuotaHeaders,
@@ -55,12 +56,8 @@ export function parseCodexQuotaHeaders(
   }
   const official = parseCodexOfficialQuotaHeaders(lower, model);
   for (const window of official?.windows ?? []) {
-    const seconds = window.durationProvided
-      ? window.windowSeconds
-      : window.id === "primary"
-        ? 18000
-        : 604800;
-    const slot = seconds === 18000 ? "5h" : seconds === 604800 ? "7d" : null;
+    const family = classifyCodexQuotaWindow(window);
+    const slot = family === "session" ? "5h" : family === "weekly" ? "7d" : null;
     // This legacy DTO cannot represent arbitrary durations. Keep them in the
     // normalized signal rather than inventing a 5h/7d identity for persistence.
     if (!slot || observed.has(slot)) continue;

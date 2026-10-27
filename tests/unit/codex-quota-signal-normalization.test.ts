@@ -165,7 +165,7 @@ test("impossible legacy reset timestamps cannot create an absurd cooldown", () =
 
 for (const value of [undefined, null, "", "garbage", "12junk", true, -1, 101, [], {}]) {
   test(`malformed usage percentage ${JSON.stringify(value)} is not healthy`, async () => {
-    const window = { used_percent: value, reset_after_seconds: 60 };
+    const window = { limit_window_seconds: 18000, used_percent: value, reset_after_seconds: 60 };
     const payload = { rate_limit: { primary_window: window } };
     assert.equal(await fetchPayload(payload), null);
     assert.deepEqual(buildCodexUsageQuotas(payload).quotas, {});
@@ -175,8 +175,12 @@ for (const value of [undefined, null, "", "garbage", "12junk", true, -1, 101, []
 test("one malformed window cannot fabricate health or hide a valid exhausted sibling", async () => {
   const payload = {
     rate_limit: {
-      primary_window: { used_percent: "bad", reset_after_seconds: 60 },
-      secondary_window: { used_percent: 100, reset_after_seconds: 600 },
+      primary_window: { limit_window_seconds: 18000, used_percent: "bad", reset_after_seconds: 60 },
+      secondary_window: {
+        limit_window_seconds: 604800,
+        used_percent: 100,
+        reset_after_seconds: 600,
+      },
     },
   };
   const result = await fetchPayload(payload);
@@ -191,7 +195,9 @@ test("one malformed window cannot fabricate health or hide a valid exhausted sib
 
 test("explicit zero and camelCase compatibility are evidence, not missing data", async () => {
   const result = await fetchPayload({
-    rateLimit: { primaryWindow: { usedPercent: "0", resetAfterSeconds: 60 } },
+    rateLimit: {
+      primaryWindow: { limitWindowSeconds: 18000, usedPercent: "0", resetAfterSeconds: 60 },
+    },
   });
   assert.ok(result);
   assert.equal(result.percentUsed, 0);
@@ -200,7 +206,10 @@ test("explicit zero and camelCase compatibility are evidence, not missing data",
 
 test("usage allowed=false is an explicit hard stop, even below the percentage threshold", async () => {
   const result = await fetchPayload({
-    rate_limit: { allowed: false, primary_window: { used_percent: 20 } },
+    rate_limit: {
+      allowed: false,
+      primary_window: { limit_window_seconds: 18000, used_percent: 20 },
+    },
   });
   assert.equal(result?.limitReached, true);
 });
@@ -208,7 +217,10 @@ test("usage allowed=false is an explicit hard stop, even below the percentage th
 test("usage API projects explicit allowed=false as a hard stop", async () => {
   setCodexUsageFetchForTests(async () =>
     Response.json({
-      rate_limit: { allowed: false, primary_window: { used_percent: 20 } },
+      rate_limit: {
+        allowed: false,
+        primary_window: { limit_window_seconds: 18000, used_percent: 20 },
+      },
     })
   );
   const result = await getCodexUsage("synthetic-usage-token");
@@ -217,14 +229,21 @@ test("usage API projects explicit allowed=false as a hard stop", async () => {
 
 test("usage string false is not a boolean hard stop", async () => {
   const result = await fetchPayload({
-    rate_limit: { limit_reached: "false", primary_window: { used_percent: 20 } },
+    rate_limit: {
+      limit_reached: "false",
+      primary_window: { limit_window_seconds: 18000, used_percent: 20 },
+    },
   });
   assert.equal(result?.limitReached, false);
 });
 
 for (const reset of ["12junk", -1, 1e20, Date.now() + 60_000]) {
   test(`usage reset_at is epoch seconds, not milliseconds or parseFloat ${reset}`, async () => {
-    const payload = { rate_limit: { primary_window: { used_percent: 100, reset_at: reset } } };
+    const payload = {
+      rate_limit: {
+        primary_window: { limit_window_seconds: 18000, used_percent: 100, reset_at: reset },
+      },
+    };
     const result = await fetchPayload(payload);
     assert.ok(result, "valid exhaustion evidence survives a malformed optional reset");
     assert.equal(result.percentUsed, 1);
@@ -235,7 +254,9 @@ for (const reset of ["12junk", -1, 1e20, Date.now() + 60_000]) {
 
 test("paid/unlimited credits and banked reset credits do not erase subscription exhaustion", async () => {
   const payload = {
-    rate_limit: { primary_window: { used_percent: 100, reset_after_seconds: 60 } },
+    rate_limit: {
+      primary_window: { limit_window_seconds: 18000, used_percent: 100, reset_after_seconds: 60 },
+    },
     credits: { has_credits: true, unlimited: true, balance: "42" },
     rate_limit_reset_credits: { available_count: 3 },
   };
@@ -247,11 +268,17 @@ test("paid/unlimited credits and banked reset credits do not erase subscription 
 
 test("normal and Spark usage stay independent when one scope is malformed", async () => {
   const payload = {
-    rate_limit: { primary_window: { used_percent: "bad" } },
+    rate_limit: { primary_window: { limit_window_seconds: 18000, used_percent: "bad" } },
     additional_rate_limits: [
       {
         limit_id: "codex_bengalfox",
-        rate_limit: { primary_window: { used_percent: 100, reset_after_seconds: 60 } },
+        rate_limit: {
+          primary_window: {
+            limit_window_seconds: 18000,
+            used_percent: 100,
+            reset_after_seconds: 60,
+          },
+        },
       },
     ],
   };

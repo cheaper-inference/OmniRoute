@@ -47,6 +47,6 @@ describe("Codex usage windows", () => {
     });
 
     assert.equal(quotas.session.windowSeconds, 18_000);
-    assert.equal(quotas.weekly.windowSeconds, null);
+    assert.equal(quotas.unknown_secondary.windowSeconds, null);
   });
 });

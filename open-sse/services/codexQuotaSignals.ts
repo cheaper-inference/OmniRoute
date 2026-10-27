@@ -233,3 +233,23 @@ export function parseCodexRateLimitEvent(
   const scope = scopeForLimit(id);
   return scope ? signal(parsed.data.rate_limits, scope, id, "websocket", now, true) : null;
 }
+
+/** Fixed routing slots require an explicit duration, never the upstream position. */
+export function classifyCodexQuotaWindow(
+  window: Pick<CodexQuotaWindow, "windowSeconds">
+): "session" | "weekly" | null {
+  if (window.windowSeconds === 18000) return "session";
+  if (window.windowSeconds === 604800) return "weekly";
+  return null;
+}
+
+/** Preserve unclassified evidence under a neutral key; do not fabricate known quota. */
+export function codexQuotaWindowKey(
+  window: CodexQuotaWindow,
+  names: { primary: string; secondary: string }
+): string {
+  const family = classifyCodexQuotaWindow(window);
+  if (family === "session") return names.primary;
+  if (family === "weekly") return names.secondary;
+  return `${names.primary.replace(/session$/, "")}unknown_${window.id}`;
+}
