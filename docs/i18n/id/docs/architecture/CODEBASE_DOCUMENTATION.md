@@ -500,7 +500,7 @@ per penyedia (skema alat, adaptor fetch/TTS, handler kekhususan). Eksekutor menc
 (helper identitas bersama) dan `index.ts` (registri).
 
 > Catatan: penyedia yang tidak tercantum di sini dilayani oleh `default.ts` menggunakan eksekutor
-> generik yang kompatibel dengan OpenAI. Katalog lengkap penyedia (375 penyedia) berada di
+> generik yang kompatibel dengan OpenAI. Katalog lengkap penyedia (376 penyedia) berada di
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

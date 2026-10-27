@@ -15,7 +15,7 @@ OmniRoute bụ ọnụ ụzọ ntụgharị AI mpaghara na dashboard e wuru n’
 
 Ike ndị bụ isi:
 
-- Elu API dakọtara na OpenAI maka CLI/ngwaọrụ (ndị na-eweta ọrụ 375, modulu mmebe 156)
+- Elu API dakọtara na OpenAI maka CLI/ngwaọrụ (ndị na-eweta ọrụ 376, modulu mmebe 156)
 - Ntughari arịrịọ/azịza n’etiti usoro ndị na-eweta ọrụ
 - Nhọrọ ndabere nke ngwakọta model (usoro ọtụtụ model)
 - Usoro ngwakọta ahaziri ahazi (`provider + model + connection`) nwere nhazi n’oge nrụọrụ site na `compositeTiers`
