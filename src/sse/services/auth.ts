@@ -25,6 +25,7 @@ import {
   touchConnectionLastUsed,
   clearConnectionErrorIfUnchanged,
 } from "@/lib/db/providers";
+import { applyCodexWindowPolicy } from "@/lib/providers/codexQuotaWindowPolicy";
 import { getDbInstance } from "@/lib/db/core";
 import { getRecentEgressIpForConnection, EGRESS_IP_LOOKUP_WINDOW_MS } from "@/lib/db/proxyLogs";
 import { validateApiKey } from "@/lib/db/apiKeys";
@@ -256,16 +257,6 @@ function toStringOrNull(value: unknown): string | null {
 function toBooleanOrDefault(value: unknown, fallback: boolean): boolean {
   return typeof value === "boolean" ? value : fallback;
 }
-function getCodexLimitPolicy(providerSpecificData: JsonRecord): {
-  use5h: boolean;
-  useWeekly: boolean;
-} {
-  const policy = asRecord(providerSpecificData.codexLimitPolicy);
-  return {
-    use5h: toBooleanOrDefault(policy.use5h, true),
-    useWeekly: toBooleanOrDefault(policy.useWeekly, true),
-  };
-}
 interface QuotaLimitPolicy {
   enabled: boolean;
   thresholdPercent: number;
@@ -294,34 +285,6 @@ function normalizeWindowName(windowName: unknown): string | null {
 }
 function uniqueWindows(windows: string[]): string[] {
   return [...new Set(windows)];
-}
-function normalizeCodexWindowName(windowName: unknown): string | null {
-  if (typeof windowName !== "string") return null;
-  const normalized = windowName.trim().toLowerCase();
-  if (normalized === "session (5h)" || normalized === "5h" || normalized === "five_hour") {
-    return "session";
-  }
-  if (normalized === "weekly (7d)" || normalized === "7d" || normalized === "seven_day") {
-    return "weekly";
-  }
-  return toCodexBaseQuotaWindowName(normalized);
-}
-function applyCodexWindowPolicy(rawWindows: string[], providerSpecificData: JsonRecord): string[] {
-  const codexPolicy = getCodexLimitPolicy(providerSpecificData);
-  const normalizedRaw = rawWindows.map(normalizeCodexWindowName).filter(Boolean) as string[];
-
-  // Preserve explicitly configured custom windows, but enforce canonical Codex windows
-  // from toggles so weekly exhaustion is never skipped when useWeekly=true.
-  let windows = [...normalizedRaw];
-  windows = windows.filter((windowName) => {
-    if (windowName === "session") return codexPolicy.use5h;
-    if (windowName === "weekly") return codexPolicy.useWeekly;
-    return true;
-  });
-  if (codexPolicy.use5h) windows.push("session");
-  if (codexPolicy.useWeekly) windows.push("weekly");
-
-  return uniqueWindows(windows);
 }
 function normalizeStatus(value: string | null): string {
   return (value || "").trim().toLowerCase();

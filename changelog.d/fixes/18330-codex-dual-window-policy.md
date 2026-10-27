@@ -1,0 +1,1 @@
+- Honor Codex session and weekly tracking toggles consistently in cached routing and live quota preflight, including explicit cutoffs, while retaining unknown-window exhaustion and paid-credit controls (#18330).

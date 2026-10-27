@@ -40,6 +40,7 @@ import {
 } from "@omniroute/open-sse/services/codexAccount/index.ts";
 import { selectAntigravityQuotaWindowNames } from "@omniroute/open-sse/services/antigravityQuotaFamily.ts";
 import { isClaudeExtraUsageAllowed } from "@/lib/providers/claudeExtraUsage";
+import { filterCodexQuotaWindows } from "@/lib/providers/codexQuotaWindowPolicy";
 import { isCodexQuotaFilteringDisabled } from "@/lib/providers/codexQuotaFiltering";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
@@ -433,13 +434,16 @@ export function hydrateCodexQuotaCacheForRequest(
 function isCodexQuotaExhausted(
   connectionId: string,
   entry: QuotaCacheEntry,
-  requestedModel: string | null
+  requestedModel: string | null,
+  providerSpecificData: unknown
 ): boolean {
-  if (!requestedModel) return entry.exhausted;
-  const quotaNames = Object.keys(entry.quotas || {});
-  if (quotaNames.length === 0) return entry.exhausted;
+  if (Object.keys(entry.quotas).length === 0) return entry.exhausted;
+  const windows = filterCodexQuotaWindows(entry.quotas, providerSpecificData);
+  if (!requestedModel && windows === entry.quotas) return entry.exhausted;
   const filterWindow = getCodexQuotaWindowFilterForModel(requestedModel);
-  const scopedWindowNames = quotaNames.filter((windowName) => filterWindow?.(windowName));
+  const scopedWindowNames = Object.keys(windows).filter(
+    (name) => !filterWindow || filterWindow(name)
+  );
   return (
     scopedWindowNames.length > 0 &&
     scopedWindowNames.every(
@@ -707,7 +711,7 @@ export function isQuotaExhaustedForRequest(
   }
 
   if (provider === "codex") {
-    return isCodexQuotaExhausted(connectionId, entry, requestedModel);
+    return isCodexQuotaExhausted(connectionId, entry, requestedModel, providerSpecificData);
   }
 
   if (resolveProviderId(provider) === "claude") {
