@@ -1,0 +1,1 @@
+- **fix(sse):** Preserve caller-owned system content arrays when injecting JSON schema fallback instructions, including frozen arrays and repeated transformations of the same request.
