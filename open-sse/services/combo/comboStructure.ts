@@ -677,7 +677,8 @@ export type CompatFilterOptions = {
  * limit (`getExplicitModelOutputCap` into `enforceOutputTokenBudget`). Size its
  * context-window check with the same cap, so it is not demoted for a budget it
  * would never be sent. The output_tokens check still sees the full request, and
- * an unknown limit keeps the full requested budget.
+ * an unknown limit keeps the full requested budget. A limit of zero or less
+ * counts as unknown, as it does at dispatch.
  */
 function contextRequirementsForTarget(
   target: ResolvedComboTarget,
@@ -691,6 +692,7 @@ function contextRequirementsForTarget(
   });
   if (
     typeof maxOutputTokens !== "number" ||
+    maxOutputTokens <= 0 ||
     !exceedsKnownOutputLimit(requirements.requestedOutputTokens, maxOutputTokens)
   ) {
     return requirements;
