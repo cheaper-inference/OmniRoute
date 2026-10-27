@@ -168,61 +168,78 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
       throw new Error("Google Flow session is expired or requires re-authentication");
     }
 
-    // Always create a FRESH new project so we never touch canvas from previous runs
+    // Always create a FRESH new project:
+    // If we land inside an existing project URL (e.g. redirected to /project/xxx), navigate back home first
+    if (page.url().includes("/project/")) {
+      const backHomeBtn = page
+        .locator(
+          "a[href='/'], a[aria-label='Home'], a[aria-label='Главная'], button.back-button, button:has-text('arrow_back')"
+        )
+        .first();
+      if (await backHomeBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+        await backHomeBtn.click().catch(() => {});
+        await page.waitForTimeout(2_000);
+      } else {
+        await page.goto("https://flow.google.com/", { waitUntil: "domcontentloaded" });
+        await page.waitForTimeout(2_000);
+      }
+    }
+
+    // Now click New Project on the main dashboard
     let newProjectCreated = false;
     const newProjBtn = page
       .locator(
-        "button.new-project-button, button:has-text('Новый проект'), button:has-text('New project'), button:has-text('Start Creating'), a[href*='/project/new'], button:has-text('add')"
+        "button.new-project-button, button:has-text('Новый проект'), button:has-text('New project'), button:has-text('Start Creating'), a[href*='/project/new'], [role='button']:has-text('Новый проект'), [role='button']:has-text('New project')"
       )
       .first();
 
-    if (await newProjBtn.isVisible({ timeout: 4_000 }).catch(() => false)) {
+    if (await newProjBtn.isVisible({ timeout: 6_000 }).catch(() => false)) {
       try {
         await newProjBtn.click();
         await page.waitForURL(/\/project\/[a-zA-Z0-9_-]+/, { timeout: 15_000 });
         newProjectCreated = true;
         console.log("[FLOW_DEBUG] Created fresh project via button:", page.url());
-      } catch {}
-    }
-
-    // If still on home or existing project, try clicking new project / plus inside project
-    if (!newProjectCreated && page.url().includes("/project/")) {
-      const homeOrNewBtn = page
-        .locator(
-          "button[aria-label='Начать новый сеанс'], button:has-text('edit_square'), a[href='/']"
-        )
-        .first();
-      if (await homeOrNewBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-        await homeOrNewBtn.click().catch(() => {});
-        await page.waitForTimeout(2_000);
+      } catch (err) {
+        console.log("[FLOW_DEBUG] Failed to wait for new project URL:", err);
       }
     }
 
-    // Collect existing videos and video asset IDs already on the page/project canvas
+    // 2. Pre-scan existing asset IDs from BOTH DOM attributes, img/video tags, and script/JSON payloads
     const existingVideoUrls = new Set<string>();
     const existingAssetIds = new Set<string>();
 
-    const extractAssetId = (url: string) => {
-      const match = /\/video\/([a-f0-9-]{36})/.exec(url);
-      return match ? match[1] : null;
+    const extractAssetId = (str: string) => {
+      const match =
+        /(?:video\/|[a-f0-9-]{36})([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i.exec(
+          str
+        );
+      return match ? match[1].toLowerCase() : null;
     };
 
     try {
-      const existing = await page.$$eval("video", (els: any[]) =>
-        els.map((e: any) => e.src || e.currentSrc).filter((s: string) => s && s.startsWith("http"))
-      );
-      for (const u of existing) {
-        existingVideoUrls.add(u);
-        const aid = extractAssetId(u);
-        if (aid) existingAssetIds.add(aid);
+      const pageContent = await page.content();
+      const allUuids =
+        pageContent.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi) || [];
+      for (const u of allUuids) {
+        existingAssetIds.add(u.toLowerCase());
       }
+      console.log(
+        "[FLOW_DEBUG] Pre-scanned existing asset UUIDs from page DOM:",
+        existingAssetIds.size
+      );
     } catch {}
-    console.log(
-      "[FLOW_DEBUG] Existing video URLs count:",
-      existingVideoUrls.size,
-      "existing asset IDs:",
-      existingAssetIds.size
-    );
+
+    const initialAssetListener = async (response: any) => {
+      try {
+        const text = await response.text();
+        const foundUuids =
+          text.match(/[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}/gi) || [];
+        for (const u of foundUuids) {
+          existingAssetIds.add(u.toLowerCase());
+        }
+      } catch {}
+    };
+    page.on("response", initialAssetListener);
 
     let promptSentAt = 0;
     let videoUrl = "";
@@ -303,6 +320,9 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     promptSentAt = Date.now();
     console.log("[FLOW_DEBUG] Clicking send button...");
 
+    // Remove the initial asset listener once prompt is sent so we don't accidentally blackhole the new asset
+    page.off("response", initialAssetListener);
+
     const sendBtn = page
       .locator(
         "button.generate-icon-button, button[aria-label='Начать генерацию'], button:has-text('arrow_forward')"
@@ -339,12 +359,17 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
           await approveBtnLater.click().catch(() => {});
         }
 
-        const vidContainer = page.locator(".video-container").first();
-        if (await vidContainer.isVisible({ timeout: 1_000 }).catch(() => false)) {
-          const containerText = await vidContainer.innerText().catch(() => "");
-          if (!containerText.includes("%")) {
-            await vidContainer.click().catch(() => {});
-            await page.waitForTimeout(2_000);
+        // Check if there is an active generation progress card or container
+        const progressEl = page
+          .locator(
+            ".video-container, .generation-card, [class*='generation-progress'], [class*='rendering']"
+          )
+          .first();
+        if (await progressEl.isVisible({ timeout: 500 }).catch(() => false)) {
+          const text = await progressEl.innerText().catch(() => "");
+          if (text.includes("%") && !text.includes("100%")) {
+            console.log("[FLOW_DEBUG] Generation in progress:", text.replace(/\n/g, " "));
+            continue;
           }
         }
         const videos = await page.$$eval("video", (els: any[]) =>
