@@ -1,7 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { createSseHeartbeatTransform } = await import("../../open-sse/utils/sseHeartbeat.ts");
+const { createSseHeartbeatTransform, shapeForClientFormat, OPENAI_RESPONSES_IN_PROGRESS_FRAME } =
+  await import("../../open-sse/utils/sseHeartbeat.ts");
 
 function withFakeIntervals(fn) {
   const originalSetInterval = globalThis.setInterval;
@@ -101,8 +102,6 @@ test("createSseHeartbeatTransform clears the interval when aborted", async () =>
   );
 });
 
-const { shapeForClientFormat } = await import("../../open-sse/utils/sseHeartbeat.ts");
-
 test("shape: anthropic-ping emits event: ping with empty JSON data", async () => {
   await withFakeIntervals(async (intervals) => {
     const transform = createSseHeartbeatTransform({ intervalMs: 100, shape: "anthropic-ping" });
@@ -155,7 +154,7 @@ test("shape: openai-chunk emits valid chat.completion.chunk with empty delta", a
   });
 });
 
-test("shape: openai-responses-in-progress emits response.in_progress data event", async () => {
+test("shape: Responses heartbeat is transport-only, not a response snapshot", async () => {
   await withFakeIntervals(async (intervals) => {
     const transform = createSseHeartbeatTransform({
       intervalMs: 100,
@@ -176,21 +175,28 @@ test("shape: openai-responses-in-progress emits response.in_progress data event"
     await writer.close();
     await pump;
 
-    // #14330 / #15202: the frame now carries a required `sequence_number`, a
-    // `response` object, and a STRING `response.id` so a strict Responses decoder
-    // does not abort on it.
-    // #17825: the frame is now a complete Response (created_at/model/output/object).
-    assert.match(emitted[0], /^data: .*\n\n$/s);
-    const parsed = JSON.parse(emitted[0].slice("data: ".length));
-    assert.equal(parsed.type, "response.in_progress");
-    assert.equal(parsed.sequence_number, 1);
-    assert.equal(parsed.response.id, "resp_keepalive_omniroute");
-    assert.equal(parsed.response.status, "in_progress");
-    assert.equal(parsed.response.object, "response");
-    assert.equal(typeof parsed.response.created_at, "number");
-    assert.equal(typeof parsed.response.model, "string");
-    assert.deepEqual(parsed.response.output, []);
+    assert.equal(emitted[0], "\n\n");
+    assert.equal(
+      emitted.some((chunk) => /data:|event:/.test(chunk)),
+      false
+    );
   });
+});
+
+test("legacy exported Responses frame stays spec-valid, independently of transport timers", () => {
+  // Keep the existing public frame-builder compatibility contract. Only timer
+  // emission changed: that must not fabricate an application response snapshot.
+  const payload = decodeChunk(OPENAI_RESPONSES_IN_PROGRESS_FRAME);
+  assert.match(payload, /^data: .*\n\n$/s);
+  const parsed = JSON.parse(payload.slice("data: ".length));
+  assert.equal(parsed.type, "response.in_progress");
+  assert.equal(parsed.sequence_number, 1);
+  assert.equal(parsed.response.id, "resp_keepalive_omniroute");
+  assert.equal(parsed.response.status, "in_progress");
+  assert.equal(parsed.response.object, "response");
+  assert.equal(typeof parsed.response.created_at, "number");
+  assert.equal(typeof parsed.response.model, "string");
+  assert.deepEqual(parsed.response.output, []);
 });
 
 test("shape default is comment (back-compat)", async () => {

@@ -567,10 +567,9 @@ test("handleResponsesCore restores custom tools nested in namespaces", async () 
   assert.doesNotMatch(sse, /"type":"function_call","arguments"/);
 });
 
-test("handleResponsesCore injects SSE keepalive frames for Responses streams", async (t) => {
-  // PR #2233 changed the Responses-API heartbeat shape from a SSE comment
-  // (`: keepalive ...`) to a `data: {"type":"response.in_progress"}` frame,
-  // because strict proxies only count `data:` lines as activity.
+test("handleResponsesCore keeps transport alive without inventing Responses lifecycle events", async (t) => {
+  // A timer must not establish a synthetic SDK response before the actual
+  // response.created event. Liveness bytes carry no application event.
   t.mock.timers.enable({ apis: ["setInterval"] });
   try {
     const { result } = await invokeResponsesCore({
@@ -585,8 +584,14 @@ test("handleResponsesCore injects SSE keepalive frames for Responses streams", a
 
     const sse = await result.response.text();
 
-    // #14572 (#14330) gives the synthesized frame a sequence_number (seed 1) and a response.
-    assert.match(sse, /data: \{"type":"response\.in_progress","sequence_number":1,/);
+    assert.ok(sse.startsWith("\n\n"), "transport liveness bytes precede real output");
+    const payloads = sse
+      .split("\n")
+      .filter((line) => line.startsWith("data: {"))
+      .map((line) => JSON.parse(line.slice(6)));
+    assert.equal(payloads[0].type, "response.created");
+    assert.equal(payloads.filter((event) => event.type === "response.in_progress").length, 1);
+    assert.doesNotMatch(sse, /resp_keepalive_/);
     assert.match(sse, /event: response\.created/);
     assert.match(sse, /data: \[DONE\]/);
   } finally {

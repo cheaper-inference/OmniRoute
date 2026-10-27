@@ -939,6 +939,12 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
     ? (toRecord(openaiResponse.choices[0]) ?? {})
     : {};
   const message = toRecord(choice.message) || {};
+  const incompleteReason =
+    choice.finish_reason === "length"
+      ? "max_output_tokens"
+      : choice.finish_reason === "content_filter"
+        ? "content_filter"
+        : null;
   const output: JsonRecord[] = [];
 
   const reasoningContent =
@@ -959,6 +965,7 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
       id: `msg_${responseId}_0`,
       type: "message",
       role: toString(message.role) || "assistant",
+      ...(incompleteReason ? { status: "incomplete" } : {}),
       content:
         messageContent.length > 0
           ? messageContent
@@ -996,7 +1003,8 @@ function convertOpenAIResponseToResponses(openaiResponse: JsonRecord): JsonRecor
     object: "response",
     created_at: createdAt,
     model,
-    status: "completed",
+    status: incompleteReason ? "incomplete" : "completed",
+    ...(incompleteReason ? { incomplete_details: { reason: incompleteReason } } : {}),
     background: false,
     error: null,
     output,
@@ -1098,7 +1106,7 @@ export function sanitizeStreamingChunk(parsed: unknown): unknown {
           if (deltaRecord.content !== undefined) {
             delta.content =
               typeof deltaRecord.content === "string"
-                ? collapseExcessiveNewlines(stripZeroWidthText(deltaRecord.content))
+                ? stripZeroWidthText(deltaRecord.content)
                 : deltaRecord.content;
           }
           copyOpenAICompatibleReasoningFields(deltaRecord, delta);

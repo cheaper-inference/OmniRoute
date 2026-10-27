@@ -40,7 +40,6 @@
     "tests/unit/retrieval-scoring-split.test.ts",
     "tests/unit/security-fase01.test.ts",
     "tests/unit/security-s1-s2-s4.test.ts",
-    "tests/unit/sse-heartbeat.test.ts",
     "tests/unit/stream-failure-after-output-no-model-lockout.test.ts",
     "tests/unit/trae-executor.test.ts",
     "tests/unit/triage-bugs-2026-08-02.test.ts",

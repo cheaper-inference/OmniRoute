@@ -5,6 +5,7 @@ import { clearPendingRequestOnce } from "./pendingRequestCleanup.ts";
 import { resolveTrailingUsageSummary } from "./passthroughTrailingUsage.ts";
 import { createByteLengthQueueStrategies } from "./byteQueueStrategy.ts";
 import { initTranslateStreamState } from "./streamTranslateState.ts";
+import { createNativeClaudeUsageTracker } from "./nativeClaudeUsage.ts";
 import {
   extractUsage,
   hasValidUsage,
@@ -886,6 +887,17 @@ export function createSSEStream(options: StreamOptions = {}) {
 
   // Track content length for usage estimation (both modes)
   let totalContentLength = 0;
+  const nativeClaudeUsage =
+    mode === STREAM_MODE.TRANSLATE && targetFormat === FORMATS.CLAUDE
+      ? createNativeClaudeUsageTracker(body)
+      : null;
+  // Translator state is a client projection (cache creation is deliberately
+  // separate there). Accounting must instead use the native provider receipt.
+  const getAccountingUsage = (): UsageLike | null | undefined =>
+    nativeClaudeUsage
+      ? (nativeClaudeUsage.getUsage() ??
+        (totalContentLength > 0 ? estimateUsage(body, totalContentLength, sourceFormat) : null))
+      : state?.usage;
   // Passthrough: accumulate content and reasoning separately for call log response body
   let passthroughAccumulatedContent = "";
   let passthroughAccumulatedReasoning = "";
@@ -1358,7 +1370,7 @@ export function createSSEStream(options: StreamOptions = {}) {
     onFailure,
     onComplete,
     attachFailureSnapshot: () => buildStreamFailureSnapshot(providerPayloadCollector),
-    getUsage: () => state?.usage,
+    getUsage: getAccountingUsage,
     timing,
     buildProviderPayload: () =>
       providerPayloadCollector.build(providerPayloadCollector.getSummary(), {
@@ -2359,6 +2371,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             reasoningObserver.note(parsed, Date.now());
 
           if (shouldDropResponsesCommentary && dropCommentary(parsed as JsonRecord)) continue;
+          nativeClaudeUsage?.observe(parsed);
           providerPayloadCollector.push(parsed);
           if (parsed && parsed.done) {
             continue;
@@ -3004,7 +3017,10 @@ export function createSSEStream(options: StreamOptions = {}) {
               isDuplicateSequence: (value) => isDuplicateResponsesSequence(value),
               shouldDropCommentary: (parsed) =>
                 shouldDropResponsesCommentary ? dropCommentary(parsed as JsonRecord) : false,
-              pushProviderPayload: (payload) => providerPayloadCollector.push(payload),
+              pushProviderPayload: (payload) => {
+                nativeClaudeUsage?.observe(payload);
+                providerPayloadCollector.push(payload);
+              },
               emitFailureAndAbort: (ctrl, parsed) =>
                 emitTranslatedFailureAndAbort(
                   ctrl as TransformStreamDefaultController<Uint8Array>,
@@ -3033,6 +3049,7 @@ export function createSSEStream(options: StreamOptions = {}) {
             if (parsed && !parsed.done) {
               if (emitTranslatedFailureAndAbort(controller, parsed)) return;
               if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);
+              nativeClaudeUsage?.observe(parsed);
               providerPayloadCollector.push(parsed);
               // Extract usage from remaining buffer — if the usage-bearing event
               // (e.g. response.completed) is the last SSE line, it ends up here
@@ -3206,8 +3223,15 @@ export function createSSEStream(options: StreamOptions = {}) {
             }
           }
 
-          if (hasValidUsage(state?.usage)) {
-            logUsage(state.provider || targetFormat, state.usage, model, connectionId, apiKeyInfo);
+          const accountingUsage = getAccountingUsage();
+          if (hasValidUsage(accountingUsage)) {
+            logUsage(
+              state.provider || targetFormat,
+              accountingUsage,
+              model,
+              connectionId,
+              apiKeyInfo
+            );
           } else {
             appendRequestLog({
               model,
@@ -3220,7 +3244,7 @@ export function createSSEStream(options: StreamOptions = {}) {
           // Notify caller for call log persistence (include full response body with accumulated content)
           if (onComplete) {
             try {
-              const u = state?.usage as Record<string, unknown> | null | undefined;
+              const u = accountingUsage;
               const prompt = Number(u?.prompt_tokens ?? u?.input_tokens ?? 0);
               const completion = Number(u?.completion_tokens ?? u?.output_tokens ?? 0);
               let content = (state?.accumulatedContent ?? "").trim() || "";
@@ -3280,7 +3304,7 @@ export function createSSEStream(options: StreamOptions = {}) {
               };
               onComplete({
                 status: 200,
-                usage: state?.usage,
+                usage: accountingUsage,
                 responseBody,
                 ...timing.completionTiming(),
                 reasoningMeta: reasoningObserver.take(),
@@ -3336,7 +3360,10 @@ export function createSSEStream(options: StreamOptions = {}) {
     }),
     ...createByteLengthQueueStrategies(streamBufferBytes)
   );
-  trackStreamPartialUsage(sseStream, body, () => [state?.usage ?? usage, totalContentLength]);
+  trackStreamPartialUsage(sseStream, body, () => [
+    nativeClaudeUsage ? getAccountingUsage() : (state?.usage ?? usage),
+    totalContentLength,
+  ]);
   return registerStreamTiming(sseStream, timing);
 }
 

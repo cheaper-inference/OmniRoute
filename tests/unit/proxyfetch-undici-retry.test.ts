@@ -78,7 +78,7 @@ test("retry-succeeds: undici fails once then succeeds, native fallback is NOT in
   assert.equal(await res.text(), "undici-retry-success");
 });
 
-test("#2463 — undici error with a NON-STRING code must not crash on errCode.startsWith (NVIDIA NIM)", async () => {
+test("#2463 — safe GET with a NON-STRING error code must not crash on errCode.startsWith (NVIDIA NIM)", async () => {
   // Real-world: the undici v8 dispatcher can throw an error whose `.code` is a
   // number (system errno) rather than a string. The fallback guard checked only
   // `errCode !== undefined` before calling `errCode.startsWith("UND_ERR")`, so a
@@ -104,9 +104,11 @@ test("#2463 — undici error with a NON-STRING code must not crash on errCode.st
     return new Response("native-fallback-body", { status: 200 });
   };
 
+  // Exercise code classification on a safe read. Ambiguous generation POSTs
+  // must not retry, regardless of whether their body bytes are replayable.
   const res = await proxyFetch(
-    "https://integrate.api.nvidia.com/v1/chat/completions",
-    { method: "POST" },
+    "https://integrate.api.nvidia.com/v1/models",
+    { method: "GET" },
     { undiciFetch: mockUndici, nativeFetch: mockNative }
   );
 

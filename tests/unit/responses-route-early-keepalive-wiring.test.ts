@@ -30,6 +30,11 @@ test("Responses route wires dual-cadence neutral keepalives", () => {
   assert.doesNotMatch(routeSource, /RESPONSES_STARTUP_THINKING_FRAME/);
 });
 
+test("Responses route timers do not invent an upstream response lifecycle", () => {
+  assert.match(routeSource, /const keepaliveFrame = RESPONSES_KEEPALIVE_FRAME/);
+  assert.doesNotMatch(routeSource, /buildResponsesInProgressFrame|buildKeepaliveResponseId/);
+});
+
 test("Responses route applies heavyweight admission through the SSE lifecycle", () => {
   assert.match(routeSource, /admitChatRequest\(request,/);
   assert.match(routeSource, /admitChatStructure\(parsedBody, admission\.lease,/);

@@ -5,10 +5,7 @@
  * @changes
  * - [2026-07-28] [Cursor Grok 4.5] - Brand-neutral default OpenAI keepalive id/model
  */
-import {
-  buildResponsesInProgressPayload,
-  createResponsesInProgressTracker,
-} from "./responsesKeepaliveFrame.ts";
+import { buildResponsesInProgressPayload } from "./responsesKeepaliveFrame.ts";
 
 const HEARTBEAT_ENCODER = new TextEncoder();
 // #14330 / #15202 / #17825: the keepalive must be a complete, spec-valid Responses event
@@ -17,7 +14,10 @@ const OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD = buildResponsesInProgressPayload();
 
 export const DEFAULT_SSE_HEARTBEAT_INTERVAL_MS = 15_000;
 
-/** Shared Responses API heartbeat frame for early and mid-stream keepalives. */
+/** Transport liveness without inventing a response identity or lifecycle event. */
+export const RESPONSES_KEEPALIVE_FRAME = HEARTBEAT_ENCODER.encode("\n\n");
+
+/** Legacy application-event frame. Timers must use RESPONSES_KEEPALIVE_FRAME instead. */
 export const OPENAI_RESPONSES_IN_PROGRESS_FRAME = HEARTBEAT_ENCODER.encode(
   OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD
 );
@@ -50,13 +50,15 @@ export function shapeForClientFormat(
 
 function buildHeartbeatPayload(
   shape: HeartbeatShape,
-  opts: { chunkId?: string; chunkModel?: string; responsesPayload?: () => string } = {}
+  opts: { chunkId?: string; chunkModel?: string } = {}
 ): string {
   switch (shape) {
     case HEARTBEAT_SHAPES.ANTHROPIC_PING:
       return 'event: ping\ndata: {"type":"ping"}\n\n';
     case HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS:
-      return opts.responsesPayload?.() ?? OPENAI_RESPONSES_IN_PROGRESS_PAYLOAD;
+      // A synthetic snapshot can replace the official SDK's real response,
+      // including completed output. Empty SSE lines dispatch no application event.
+      return "\n\n";
     case HEARTBEAT_SHAPES.OPENAI_CHUNK: {
       const payload = {
         id: opts.chunkId ?? "chatcmpl-keepalive",
@@ -116,10 +118,27 @@ export function createSseHeartbeatTransform({
   }
 
   let intervalId: ReturnType<typeof setInterval> | undefined;
-  const responsesTracker =
-    shape === HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS
-      ? createResponsesInProgressTracker()
-      : null;
+  let atEventBoundary = true;
+  let lineHasBytes = false;
+  let pendingCR = false;
+  const noteFraming = (chunk: Uint8Array) => {
+    // Scan ASCII separators, not payload characters. A chunk can end inside
+    // JSON, a CRLF pair or a UTF-8 code point; no timer may splice bytes there.
+    for (const byte of chunk) {
+      if (pendingCR) {
+        pendingCR = false;
+        if (byte === 10) continue;
+      }
+      if (byte === 10 || byte === 13) {
+        atEventBoundary = !lineHasBytes;
+        lineHasBytes = false;
+        pendingCR = byte === 13;
+      } else {
+        lineHasBytes = true;
+        atEventBoundary = false;
+      }
+    }
+  };
 
   const stop = () => {
     if (!intervalId) return;
@@ -135,15 +154,10 @@ export function createSseHeartbeatTransform({
           return;
         }
 
+        if (!atEventBoundary) return;
         try {
           controller.enqueue(
-            HEARTBEAT_ENCODER.encode(
-              buildHeartbeatPayload(shape, {
-                chunkId,
-                chunkModel,
-                responsesPayload: responsesTracker ? () => responsesTracker.payload() : undefined,
-              })
-            )
+            HEARTBEAT_ENCODER.encode(buildHeartbeatPayload(shape, { chunkId, chunkModel }))
           );
         } catch {
           stop();
@@ -158,7 +172,7 @@ export function createSseHeartbeatTransform({
     },
 
     transform(chunk, controller) {
-      responsesTracker?.observe(chunk);
+      noteFraming(chunk);
       controller.enqueue(chunk);
     },
 
