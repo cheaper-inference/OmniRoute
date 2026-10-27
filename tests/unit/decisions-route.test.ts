@@ -98,11 +98,11 @@ function request(value: unknown, key?: string, signal?: AbortSignal) {
     },
   });
 }
-async function fixture() {
+async function fixture(provider = "openai") {
   const connection = await providers.createProviderConnection({
-    provider: "openai",
+    provider,
     authType: "apikey",
-    apiKey: "fixture-only-openai-token",
+    apiKey: `fixture-only-${provider}-token`,
     name: "Synthetic Decisions route connection",
     isActive: true,
   });
@@ -227,6 +227,143 @@ test("real delegated refusal and access-denial paths do not cause hidden calls",
     }
   }
 });
+
+// Authored contract fixtures only: this exercises the public O -> S -> O boundary,
+// not live provider availability, account entitlement or complete vendor schemas.
+const systemOneTargets = [
+  ["typesafe", "jev-1.14.0", "https://api.typesafe.ai/v1/systemone", "Bearer"],
+  ["openrouter", "typesafe/jev-1.14", "https://openrouter.ai/api/v1/systemone", "Bearer"],
+  [
+    "vercel-ai-gateway",
+    "typesafe-ai/jev",
+    "https://ai-gateway.vercel.sh/typesafe/v1/systemone",
+    "Bearer",
+  ],
+  ["deepinfra", "Cloudflare/clef", "https://api.deepinfra.com/v1/decisions", "Bearer"],
+  ["liquid", "d1.1", "https://api.liquid.ai/decisions/v1/systemone", "Bearer"],
+  ["perplexity", "pplx-decider-v1.2", "https://api.perplexity.ai/v1/decisions", "Bearer"],
+  ["inception", "mercury-decide", "https://api.inceptionlabs.ai/v1/decisions", "Bearer"],
+  [
+    "baseten",
+    "decision-models/baseten-elephant-9b-latest",
+    "https://inference.baseten.co/v1/systemone",
+    "Api-Key",
+  ],
+  [
+    "fireworks",
+    "accounts/synthetic/models/synthetic-decision",
+    "https://api.fireworks.ai/inference/v1/systemone",
+    "Bearer",
+  ],
+  ["opencode-zen", "jev-1.13", "https://opencode.ai/inference/systemone/v1/systemone", "Bearer"],
+] as const;
+
+for (const [provider, model, endpoint, scheme] of systemOneTargets) {
+  test(`public Decisions preserves all three modes and mixed refusal through ${provider}'s native adapter`, async () => {
+    const { key, connection } = await fixture(provider);
+    const saved = globalThis.fetch;
+    let calls = 0;
+    globalThis.fetch = (async (url, init) => {
+      calls++;
+      assert.equal(String(url), endpoint);
+      assert.equal(init?.method, "POST");
+      assert.equal(
+        new Headers(init?.headers).get("authorization"),
+        `${scheme} fixture-only-${provider}-token`
+      );
+      assert.deepEqual(JSON.parse(String(init?.body)), {
+        model,
+        state: INPUT,
+        questions: {
+          lamp: { type: "noul", instructions: "Is it on?" },
+          color: {
+            type: "choice",
+            instructions: "Which color?",
+            criteria: { red: null, blue: null },
+          },
+          amount: {
+            type: "score",
+            instructions: "How much?",
+            criteria: body().questions[2].levels,
+          },
+        },
+      });
+      return Response.json({
+        model,
+        answers: {
+          lamp: calls === 1 ? { type: "noul", noul: 0 } : { type: "refusal" },
+          color: {
+            type: "choice",
+            choice: "red",
+            confidence: 1,
+            probabilities: { red: 1, blue: 0 },
+          },
+          amount: {
+            type: "score",
+            score: 0.5,
+            confidence: 0,
+            probabilities: { "0": 0.5, "1": 0.5 },
+            legend: {
+              "0": { label: "Low", description: "A small synthetic amount" },
+              "1": { label: "High", description: "A large synthetic amount" },
+            },
+          },
+        },
+        usage: { input_tokens: 31, output_tokens: 4, cost: 0.00002 },
+      });
+    }) as typeof fetch;
+    try {
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        const result = await route.POST(
+          request({ ...body(), model: `${provider}/${model}` }, key.key)
+        );
+        assert.equal(result.status, 200, await result.clone().text());
+        assert.equal(calls, attempt, "one physical dispatch, no catalog bootstrap or hidden retry");
+        const value = await result.json();
+        assert.equal(value.model, `${provider}/${model}`);
+        assert.deepEqual(
+          value.answers[0],
+          attempt === 1
+            ? { name: "lamp", type: "predicate", probability: 0 }
+            : { name: "lamp", type: "refusal" }
+        );
+        assert.equal(value.answers[1].choice, "red");
+        assert.deepEqual(value.answers[1].probabilities, [
+          { value: "red", probability: 1 },
+          { value: "blue", probability: 0 },
+        ]);
+        assert.equal(value.answers[2].score, 0.5);
+        assert.equal(value.answers[2].confidence, 0);
+        assert.deepEqual(value.answers[2].probabilities, [
+          { value: 0, label: "Low", probability: 0.5 },
+          { value: 1, label: "High", probability: 0.5 },
+        ]);
+        assert.equal(result.headers.get("x-omniroute-cost-status"), "known");
+        assert.equal(result.headers.get("x-omniroute-response-cost"), "0.0000200000");
+      }
+      assert.deepEqual(
+        core
+          .getDbInstance()
+          .prepare(
+            "SELECT provider, model, connection_id, endpoint, tokens_input, tokens_output, provider_cost_usd FROM usage_history WHERE api_key_id = ? ORDER BY rowid"
+          )
+          .all(key.id),
+        Array.from({ length: 2 }, () => ({
+          provider,
+          model,
+          connection_id: connection.id,
+          endpoint: "/v1/systemone",
+          tokens_input: 31,
+          tokens_output: 4,
+          provider_cost_usd: 0.00002,
+        }))
+      );
+    } finally {
+      globalThis.fetch = saved;
+      await providers.deleteProviderConnection(String(connection.id));
+    }
+  });
+}
 
 test("factory protocol seam preserves caller headers and cancellation without HTTP loopback", async () => {
   const controller = new AbortController();
