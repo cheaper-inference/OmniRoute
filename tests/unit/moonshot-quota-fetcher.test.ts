@@ -9,7 +9,7 @@ import {
 } from "../../open-sse/services/moonshotQuotaFetcher.ts";
 import { getUsageForProvider } from "../../open-sse/services/usage.ts";
 import { isKimiCodingBaseUrl } from "../../open-sse/services/usage/moonshotOpenPlatform.ts";
-import { getKimiUsage } from "../../open-sse/services/usage/kimi.ts";
+import { getKimiUsage, resolveKimiUsageUrl } from "../../open-sse/services/usage/kimi.ts";
 import { getQuotaFetcher } from "../../open-sse/services/quotaPreflight.ts";
 
 const originalFetch = globalThis.fetch;
@@ -410,4 +410,57 @@ test("registerMoonshotFetchersForNodes wires an api.kimi.ai/coding node (#18180)
   ]);
   assert.equal(typeof getQuotaFetcher("coding-node-ai"), "function");
   assert.equal(typeof getQuotaFetcher("kcode-ai"), "function");
+});
+
+test("resolveKimiUsageUrl resolves full request URLs to canonical regional /coding/v1/usages (#18180)", () => {
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.com/coding/v1/messages?beta=true" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.com/coding/v1/chat/completions" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.ai/coding/v1/messages?beta=true" }),
+    "https://api.kimi.ai/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "https://api.kimi.ai/coding/v1/chat/completions" }),
+    "https://api.kimi.ai/coding/v1/usages"
+  );
+});
+
+test("resolveKimiUsageUrl enforces secure HTTPS and does not carry credentials over HTTP (#18180)", () => {
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "http://api.kimi.com/coding/v1" }),
+    "https://api.kimi.com/coding/v1/usages"
+  );
+  assert.equal(
+    resolveKimiUsageUrl({ baseUrl: "http://api.kimi.ai/coding/v1" }),
+    "https://api.kimi.ai/coding/v1/usages"
+  );
+});
+
+test("getKimiUsage sends requests to canonical regional HTTPS /usages even with full request URLs or HTTP override (#18180)", async () => {
+  const calls: string[] = [];
+  globalThis.fetch = (async (url: unknown) => {
+    calls.push(String(url));
+    return jsonResponse({
+      plan: "Kimi Coding",
+      usage: { limit: "100", used: "10", remaining: "90" },
+    });
+  }) as typeof fetch;
+
+  await getKimiUsage(undefined, "sk-test", {
+    baseUrl: "https://api.kimi.com/coding/v1/messages?beta=true",
+  });
+  await getKimiUsage(undefined, "sk-test", {
+    baseUrl: "http://api.kimi.ai/coding/v1",
+  });
+
+  assert.deepEqual(calls, [
+    "https://api.kimi.com/coding/v1/usages",
+    "https://api.kimi.ai/coding/v1/usages",
+  ]);
 });

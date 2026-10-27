@@ -35,18 +35,9 @@ export function resolveKimiUsageUrl(providerSpecificData?: JsonRecord): string {
   if (customBaseUrl) {
     try {
       const url = new URL(customBaseUrl);
-      if (url.protocol === "https:" || url.protocol === "http:") {
-        const host = url.hostname.toLowerCase();
-        if (host === "api.kimi.ai" || host === "api.kimi.com") {
-          const path = url.pathname.replace(/\/+$/, "");
-          if (path.endsWith("/usages")) {
-            return `${url.origin}${path}`;
-          }
-          if (path === "/coding") {
-            return `${url.origin}/coding/v1/usages`;
-          }
-          return `${url.origin}${path}/usages`;
-        }
+      const host = url.hostname.toLowerCase();
+      if (host === "api.kimi.ai" || host === "api.kimi.com") {
+        return `https://${host}/coding/v1/usages`;
       }
     } catch {
       // fall back to default
