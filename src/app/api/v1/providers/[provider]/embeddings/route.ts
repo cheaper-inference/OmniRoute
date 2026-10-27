@@ -10,6 +10,11 @@ import {
 import { handleEmbedding } from "@omniroute/open-sse/handlers/embeddings.ts";
 import * as log from "@/sse/utils/logger";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import {
+  isKeyScopeBlockedCredentials,
+  keyScopeBlockedResponse,
+  resolveKeyConnectionScope,
+} from "@/sse/services/keyConnectionScope";
 import { v1EmbeddingsSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 
@@ -59,6 +64,10 @@ export async function POST(request, { params }) {
   // Enforce API key policies (model restrictions + budget limits)
   const policy = await enforceApiKeyPolicy(request, body.model);
   if (policy.rejection) return policy.rejection;
+  // GHSA-3w2r: credential selection stays inside the key's connection scope,
+  // the same scope chat applies.
+  const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
+  if (scope.rejection) return scope.rejection;
 
   // Validate provider match
   if (body.model) {
@@ -71,9 +80,16 @@ export async function POST(request, { params }) {
     }
   }
 
-  const credentials = await getProviderCredentialsWithQuotaPreflight(providerEntry.id);
+  const credentials = await getProviderCredentialsWithQuotaPreflight(
+    providerEntry.id,
+    null,
+    scope.allowedConnections
+  );
   if (!credentials) {
     return errorResponse(HTTP_STATUS.BAD_REQUEST, `No credentials for provider: ${rawProvider}`);
+  }
+  if (isKeyScopeBlockedCredentials(credentials)) {
+    return keyScopeBlockedResponse(rawProvider, credentials);
   }
   if (credentials.allRateLimited) {
     return unavailableResponse(

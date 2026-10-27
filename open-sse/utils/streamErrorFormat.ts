@@ -1,6 +1,9 @@
 import { FORMATS } from "../translator/formats.ts";
+import { isContentPolicyRefusal } from "./contentPolicyError.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "./error.ts";
+import { classifyProviderSafetyError, isProviderSafetyStopsEnabled } from "./providerSafety.ts";
 import { projectResponsesFailureOutput } from "./responsesFailureOutput.ts";
+import { SYNTHETIC_RESPONSES_SEQUENCE_NUMBER } from "./responsesSequence.ts";
 
 /**
  * Upstream stream-failure normalization + client-format error framing.
@@ -11,11 +14,19 @@ import { projectResponsesFailureOutput } from "./responsesFailureOutput.ts";
 
 type JsonRecord = Record<string, unknown>;
 
+export type StreamFailureSnapshot = {
+  providerEventCount: number;
+  providerSummary?: unknown;
+};
+
 export type StreamFailurePayload = {
   status: number;
   message: string;
   code?: string;
   type?: string;
+  /** The stream had already forwarded text/reasoning/tool output to the client. */
+  outputEmitted?: boolean;
+  streamSnapshot?: StreamFailureSnapshot;
 };
 
 export type ProjectedStreamFailureEvent = {
@@ -38,12 +49,20 @@ export function projectCompletedStreamError(
   const status = Number.isInteger(failure.status) ? failure.status : 502;
   return buildErrorBody(status, failure.message, undefined, {
     type: failure.type ?? "server_error",
-    code: String(failure.status ?? 502),
+    // PROVIDER_SAFETY_STOPS_TERMINAL (#17049) keeps the upstream code; off, the status is the code.
+    code:
+      (isProviderSafetyStopsEnabled() ? failure.code : undefined) ?? String(failure.status ?? 502),
   }).error;
 }
 
 function asRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
+}
+
+function copyFailureSnapshot(record: JsonRecord): Pick<StreamFailurePayload, "streamSnapshot"> {
+  const snapshot = record.streamSnapshot;
+  if (snapshot === undefined) return {};
+  return { streamSnapshot: snapshot as StreamFailureSnapshot };
 }
 
 const RESPONSES_FAILURE_SCALAR_FIELDS = [
@@ -188,20 +207,48 @@ export function normalizeStreamFailurePayload(payload: unknown): StreamFailurePa
             : typeof record.message === "string" && record.message.trim()
               ? record.message
               : "Upstream failure";
-  const status =
+  const requestScopedInputFailure =
+    isContentPolicyRefusal(error) ||
+    type === "invalid_request" ||
+    code === "invalid_request" ||
+    type === "invalid_request_error" ||
+    code === "invalid_request_error" ||
+    type === "context_length_exceeded" ||
+    code === "context_length_exceeded" ||
+    type === "context_window_exceeded" ||
+    code === "context_window_exceeded";
+  const explicitStatus =
     toStreamFailureStatus(error.status_code) ??
     toStreamFailureStatus(error.status) ??
     toStreamFailureStatus(response.status_code) ??
     toStreamFailureStatus(response.status) ??
     toStreamFailureStatus(record.status_code) ??
-    toStreamFailureStatus(record.status) ??
-    (looksLikeStreamRateLimit(code, type || "", message) ? 429 : 502);
+    toStreamFailureStatus(record.status);
+  const safety = classifyProviderSafetyError({
+    status: explicitStatus,
+    code: error.code,
+    type,
+    message,
+  });
+  const status =
+    explicitStatus ??
+    safety?.status ??
+    (requestScopedInputFailure
+      ? 400
+      : type === "authentication_error" || code === "invalid_api_key"
+        ? 401
+        : type === "permission_error" || code === "permission_denied"
+          ? 403
+          : looksLikeStreamRateLimit(code, type || "", message)
+            ? 429
+            : 502);
 
   return {
     status,
     message,
-    code,
-    ...(type ? { type } : {}),
+    code: safety?.code ?? code,
+    ...(safety ? { type: "invalid_request_error" } : type ? { type } : {}),
+    ...copyFailureSnapshot(record),
   };
 }
 
@@ -279,6 +326,35 @@ export function projectStreamFailureEvent(payload: unknown): ProjectedStreamFail
   };
 }
 
+// Anthropic's documented error types. Claude clients treat an unknown type (for example the
+// OpenAI-only `server_error`) like a bad request and fail the turn instead of retrying (9router #5185).
+const ANTHROPIC_ERROR_TYPES = new Set([
+  "invalid_request_error",
+  "authentication_error",
+  "billing_error",
+  "permission_error",
+  "not_found_error",
+  "request_too_large",
+  "rate_limit_error",
+  "api_error",
+  "overloaded_error",
+]);
+
+/** Map a stream failure onto Anthropic's error-type vocabulary (status table per the API docs). */
+function toAnthropicErrorType(type: unknown, status: number): string {
+  if (typeof type === "string" && ANTHROPIC_ERROR_TYPES.has(type)) return type;
+  if (status === 400) return "invalid_request_error";
+  if (status === 401) return "authentication_error";
+  if (status === 402) return "billing_error";
+  if (status === 403) return "permission_error";
+  if (status === 404) return "not_found_error";
+  if (status === 413) return "request_too_large";
+  if (status === 429) return "rate_limit_error";
+  if (status === 529) return "overloaded_error";
+  if (status >= 400 && status < 500) return "invalid_request_error";
+  return "api_error";
+}
+
 export function formatTranslatedStreamError(payload: unknown, sourceFormat?: string): string {
   const failure = normalizeStreamFailurePayload(payload) ?? {
     status: 502,
@@ -303,13 +379,16 @@ export function formatTranslatedStreamError(payload: unknown, sourceFormat?: str
         error: errorBody.error,
         output: [],
       },
-      sequence_number: 0,
+      // #14330: was hardcoded to 0 — see OPENAI_RESPONSES_ERROR_FRAME's comment in
+      // earlyStreamKeepalive.ts for why this collided with the real emitter's first event.
+      sequence_number: SYNTHETIC_RESPONSES_SEQUENCE_NUMBER,
     };
     return `event: response.failed\ndata: ${JSON.stringify(failed)}\n\n`;
   }
 
   if (sourceFormat === FORMATS.CLAUDE) {
-    return `event: error\ndata: ${JSON.stringify({ type: "error", error: errorBody.error })}\n\n`;
+    const error = { ...errorBody.error, type: toAnthropicErrorType(failure.type, failure.status) };
+    return `event: error\ndata: ${JSON.stringify({ type: "error", error })}\n\n`;
   }
 
   return `data: ${JSON.stringify(errorBody)}\n\ndata: [DONE]\n\n`;

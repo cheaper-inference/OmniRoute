@@ -3,7 +3,7 @@
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { StatusDot } from "@/shared/components/flow/StatusDot";
-import { FLOW_EDGE_COLORS } from "@/shared/components/flow/edgeStyles";
+import { FLOW_EDGE_COLORS, flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import type { TargetState, FailKind, CbState } from "../comboFlowModel";
 
 // ── State → visual mapping ────────────────────────────────────────────────
@@ -26,11 +26,11 @@ function getStateBorderColor(state: TargetState): string {
 function getStateGlow(state: TargetState): string {
   switch (state) {
     case "attempting":
-      return `0 0 12px ${FLOW_EDGE_COLORS.last}40`;
+      return `0 0 12px ${flowColorAlpha(FLOW_EDGE_COLORS.last, 25)}`;
     case "failed":
-      return `0 0 12px ${FLOW_EDGE_COLORS.error}40`;
+      return `0 0 12px ${flowColorAlpha(FLOW_EDGE_COLORS.error, 25)}`;
     case "succeeded":
-      return `0 0 12px ${FLOW_EDGE_COLORS.active}40`;
+      return `0 0 12px ${flowColorAlpha(FLOW_EDGE_COLORS.active, 25)}`;
     default:
       return "none";
   }
@@ -173,14 +173,14 @@ export function ProviderCascadeNode({ data }: NodeProps) {
       {/* Body: model + latency */}
       <div className="px-2.5 py-1.5 flex flex-col gap-0.5">
         <span
-          className="text-[10px] text-muted font-mono truncate"
+          className="text-[10px] text-text-muted font-mono truncate"
           title={model as string}
           data-testid="model-name"
         >
           {model as string}
         </span>
         {latencyMs != null && (
-          <span className="text-[10px] text-muted">{(latencyMs as number).toFixed(0)}ms</span>
+          <span className="text-[10px] text-text-muted">{(latencyMs as number).toFixed(0)}ms</span>
         )}
       </div>
 
@@ -190,7 +190,7 @@ export function ProviderCascadeNode({ data }: NodeProps) {
           <span
             className="text-[9px] font-semibold px-1.5 py-0.5 rounded"
             style={{
-              backgroundColor: `${FLOW_EDGE_COLORS.error}20`,
+              backgroundColor: flowColorAlpha(FLOW_EDGE_COLORS.error, 13),
               color: FLOW_EDGE_COLORS.error,
             }}
             data-testid="fail-kind-badge"

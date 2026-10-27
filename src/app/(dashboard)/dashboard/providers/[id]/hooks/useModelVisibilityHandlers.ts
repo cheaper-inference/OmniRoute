@@ -116,7 +116,9 @@ export function useModelVisibilityHandlers({
   const [clearingModels, setClearingModels] = useState(false);
   const [modelFilter, setModelFilter] = useState("");
   const [testingModelId, setTestingModelId] = useState<string | null>(null);
-  const [modelTestStatus, setModelTestStatus] = useState<Record<string, "ok" | "error" | "quota">>({});
+  const [modelTestStatus, setModelTestStatus] = useState<Record<string, "ok" | "error" | "quota">>(
+    {}
+  );
   const [testingAll, setTestingAll] = useState(false);
   const [testProgress, setTestProgress] = useState<{ done: number; total: number } | null>(null);
   const [autoHideFailed, setAutoHideFailed] = useState(false);
@@ -212,7 +214,10 @@ export function useModelVisibilityHandlers({
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ isHidden: hidden }),
+          // #12172: this page manages only Chat models — scope the hide/unhide to
+          // "chat" so it never suppresses an identically-ID'd model registered
+          // under a different modality's registry (e.g. Image).
+          body: JSON.stringify({ isHidden: hidden, modality: "chat" }),
         }
       );
       if (!res.ok) {
@@ -239,7 +244,8 @@ export function useModelVisibilityHandlers({
       const res = await fetch(`/api/provider-models?provider=${encodeURIComponent(providerKey)}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isHidden: hidden, modelIds }),
+        // #12172: same "chat"-only scoping as the single-model toggle above.
+        body: JSON.stringify({ isHidden: hidden, modelIds, modality: "chat" }),
       });
       if (!res.ok) {
         const detail = await res.text().catch(() => "");
@@ -312,6 +318,11 @@ export function useModelVisibilityHandlers({
           )
         );
         setModelTestStatus((prev) => ({ ...prev, [modelId]: "ok" }));
+      } else if (data.skipped) {
+        // A skipped probe never ran — neither healthy nor broken, so no status icon.
+        notify.info(
+          extractApiErrorMessage(data, providerText(t, "modelTestFailed", "Model test failed"))
+        );
       } else {
         // extractApiErrorMessage coerces any object-shaped `error` (e.g. a Zod
         // format object) to a string so notify.error never hands the toast a

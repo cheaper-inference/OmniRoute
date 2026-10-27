@@ -1,7 +1,7 @@
 ---
 title: "OmniRoute MCP Server Documentation"
-version: 3.8.50
-lastUpdated: 2026-08-08
+version: 3.8.51
+lastUpdated: 2026-09-22
 ---
 
 # OmniRoute MCP Server Documentation
@@ -24,6 +24,23 @@ Or via the open-sse transport:
 # HTTP streamable transport (port 20130)
 omniroute --dev  # MCP auto-starts on /mcp endpoint
 ```
+
+The HTTP transports (`sse` / `streamable-http`, served in-process by the dashboard server) are
+off by default and were previously toggleable only from the `/dashboard/mcp` page. As of v3.8.51
+the CLI has parity:
+
+```bash
+omniroute mcp status                                  # enabled/online, transport, tool count
+omniroute mcp enable [--transport stdio|sse|streamable-http]
+omniroute mcp disable
+omniroute mcp restart                                 # resets active sse/streamable-http sessions
+```
+
+`mcp enable`/`mcp disable` PATCH the same `mcpEnabled` (and optionally `mcpTransport`) setting
+the dashboard toggles via `/api/settings`. `mcp restart` calls `POST /api/mcp/restart`: it tears
+down active `sse`/`streamable-http` sessions so the next request re-initializes cleanly, returns
+`409` if MCP is disabled, and `501` for the `stdio` transport (stdio clients own their own
+subprocess — there is no in-process handle to restart).
 
 ## Transports
 
@@ -56,6 +73,16 @@ curl -i \
 ```
 
 A non-manage key (or no Bearer) returns `403 LOCAL_ONLY`. The sibling prefix `/api/cli-tools/runtime/*` is intentionally NOT bypassable — see [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
+
+### Origin validation
+
+After authentication, every request to `/api/mcp/*` — the transports and the management routes such as `status`, `tools`, `audit` and `restart` — has its `Origin` header validated, whatever the caller (API key, CLI token, dashboard session, or anonymous loopback with login disabled). This is the DNS-rebinding protection the MCP Streamable HTTP spec requires.
+
+- **No `Origin` header** → allowed. The OmniRoute CLI, SDK and IDE clients do not send one.
+- **Allowed `Origin`** → `localhost`, `127.0.0.1` or `[::1]` on any port, or OmniRoute's own public origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, a trusted reverse proxy's forwarded origin (`OMNIROUTE_TRUST_PROXY`, only when no base URL is set), or a direct loopback/LAN IP host. The `Host` header alone never makes an origin trusted.
+- **Any other `Origin`, including `null`** → `403` with a JSON-RPC error body: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. A dashboard session that presents a valid CSRF token is still accepted, as for other dashboard writes.
+
+A browser MCP client served behind a reverse proxy needs `OMNIROUTE_PUBLIC_BASE_URL`; there is no allow-list for other origins. CORS preflight (`OPTIONS`) is not Origin-checked; the request that follows is.
 
 ## IDE Configuration
 
@@ -276,8 +303,111 @@ Both SSE and Streamable HTTP transports are blocked until the MCP server is enab
 
 ## Authentication & Scopes
 
-MCP tools are authenticated through API key scopes. Scope enforcement is centralized in
-`open-sse/mcp-server/scopeEnforcement.ts`. Each tool requires specific scopes:
+MCP tool calls read scope strings from the caller. That check is one of three
+independent namespaces. A pass from one checker is not a pass from the others.
+The rules are [Three scope namespaces](#three-scope-namespaces).
+The tool catalog is [MCP tool scopes](#mcp-tool-scopes).
+
+### Three scope namespaces
+
+`manage` on an API key, `read:compression` on an MCP tool, and `read` on an
+`oma_live_…` access token are three different grants. Callers who send a `read`
+access token to a mutating management route get HTTP 403
+`Access token scope 'read' is insufficient; 'write' required.`
+That rank is `scopeSatisfies`. It does not consult the MCP table, and the MCP
+matcher does not consult it.
+
+| Namespace          | Credential                                                | Checker                | A pass allows                                                |
+| :----------------- | :-------------------------------------------------------- | :--------------------- | :----------------------------------------------------------- |
+| API-key management | `api_keys.scopes`                                         | `hasManageScope`       | Management REST for that Bearer key                          |
+| API-key additive   | same array, one exact string                              | the helper named below | Only that one capability                                     |
+| MCP tool scopes    | same array, else MCP `_meta`, else `OMNIROUTE_MCP_SCOPES` | `scopeMatches`         | That tool, once enforcement is on                            |
+| Access token       | `oma_live_…`                                              | `scopeSatisfies`       | The management route whose method and path require that rank |
+
+Minting each credential is covered in
+[Management Authentication](../guides/MANAGEMENT-AUTH.md).
+
+#### API-key scopes
+
+One `api_keys.scopes` array feeds two jobs. They use different functions.
+
+**Management REST.** `manage` and `admin` are the members of
+`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
+`hasManageScope` is what authorizes management routes for that key. `admin` is
+management-capable on those routes. The word `admin` here is not the
+access-token rank and it does not expand into MCP tool scopes.
+
+**Additive strings.** Each one is an exact membership test, and each one stays
+outside `MANAGEMENT_API_KEY_SCOPES`.
+
+| Scope                          | A pass allows                                                                                                                                                   |
+| :----------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | The non-loopback `/api/mcp/` LOCAL_ONLY carve-out only (`hasMcpConnectOrManageScope`). A key with `manage` or `admin` still passes that carve-out.              |
+| `self:usage`                   | `GET /api/v1/me/status` for this key (`src/app/api/v1/me/status/route.ts`). `POST /api/keys` adds this scope on create (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | Upstream account quotas inside that status payload (`src/lib/usage/apiKeySelfService.ts`). The status route still requires `self:usage`.                        |
+| `policy:bypass-provider-quota` | This key's inference calls skip the provider-quota policy (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`).                                        |
+
+#### Matching
+
+The catalog is the table under [MCP tool scopes](#mcp-tool-scopes). Do not
+treat `MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` as that catalog:
+it is the original typed subset. Later tools declare further scopes beside it
+(`read:notion`, `read:skills`, `read:local-corpus`, and the rest of the table).
+
+`evaluateToolScopes` in `open-sse/mcp-server/scopeEnforcement.ts` allows a call
+when every required scope matches some granted scope:
+
+- `*` matches every required scope.
+- A granted scope that ends in `*` matches a required scope that starts with
+  the prefix before the star. `read:*` matches `read:compression`.
+- Every other granted scope matches only the identical required string.
+
+A key whose scopes are `["manage"]` fails `scopeMatches` for `read:compression`.
+The same call fails for `admin`, `mcp:connect`, `read`, and `write` when those
+are the only granted strings. There is no hierarchy among MCP tool scopes
+beyond the trailing `*`.
+
+Enforcement is off unless `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (default
+`false`). While it is off, `evaluateToolScopes` allows the call and skips the
+catalog. While it is on, HTTP uses the Bearer key's `api_keys.scopes` as
+`authInfo` (see [Per-key HTTP scope binding](#per-key-http-scope-binding-7895)).
+When no key scopes resolve, the granted set falls through to MCP `_meta`, then
+`OMNIROUTE_MCP_SCOPES`.
+
+#### Access-token scopes
+
+`oma_live_…` tokens (`src/lib/accessTokens/scopes.ts`) carry `read`, `write`,
+or `admin`. `scopeSatisfies` is a rank: `admin` covers `write` and `read`, and
+`write` covers `read`. Unknown scopes cover nothing.
+
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) compares that
+rank with `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+
+- `GET`, `HEAD`, and `OPTIONS` require `read`.
+- Every other method requires `write`.
+- Paths in `ADMIN_SCOPE_PREFIXES` require `admin` for every method. `/api/mcp`
+  is on that list, so a `write` access token still cannot call the MCP HTTP
+  surface.
+- Paths in `ADMIN_MUTATION_PREFIXES` require `admin` only for mutations.
+- Paths in `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`,
+  `/api/settings/require-login`) require `admin` only for mutations, and only on
+  that exact path — other `/api/settings/*` sub-routes keep `write`.
+
+`PATCH /api/keys/{id}` is a mutation and is not on those admin lists, so a
+`read` token receives 403
+`Access token scope 'read' is insufficient; 'write' required.`
+A `write` or `admin` access token satisfies that route. A dashboard JWT, the
+loopback CLI machine-id token, and an API key with `manage` or `admin` take
+other branches and are not narrowed by this rank.
+
+An access token that passes `scopeSatisfies` for `/api/mcp` has cleared the
+management gate only. Tool calls still run `scopeMatches` against API-key
+scopes. The access-token rank is not an input to `scopeMatches`.
+
+### MCP tool scopes
+
+Scope enforcement is centralized in `open-sse/mcp-server/scopeEnforcement.ts`.
+Each tool requires specific scopes:
 
 | Scope                 | Tools                                                                                                                                                                        |
 | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -340,28 +470,40 @@ and passes it to the MCP SDK's `transport.handleRequest(req, { authInfo })`, so
 the `_meta` and `OMNIROUTE_MCP_SCOPES` env fallback — this only populates that first,
 highest-priority source, which was previously unfed over HTTP. When no API key resolves
 (no header, invalid key), `authInfo` stays `undefined` and resolution falls through to the
-existing `meta`/env chain unchanged. This does NOT flip `OMNIROUTE_MCP_ENFORCE_SCOPES`'s
-default — enforcement still has to be explicitly enabled; this change only makes the
-per-key path take precedence once it is. stdio has no per-caller identity (see
+existing `meta`/env chain unchanged. stdio has no per-caller identity (see
 `mcpCallerIdentity.ts`) and is unaffected — it stays on the `_meta`/env fallback chain.
+
+**Enforcement is forced on for narrow-scoped HTTP/SSE callers regardless of
+`OMNIROUTE_MCP_ENFORCE_SCOPES`.** `OMNIROUTE_MCP_ENFORCE_SCOPES` defaulting to `false` is only
+safe for the local/stdio single-operator flow, where there is no per-caller identity to scope
+against. `open-sse/mcp-server/server.ts::withScopeEnforcement()` turns per-tool scope
+enforcement on unconditionally (`shouldForceScopeEnforcement()` in `scopeEnforcement.ts`)
+whenever `resolveCallerScopeContext()` resolved
+`source === "authInfo"` (i.e. a real per-key HTTP Authorization header, HTTP/SSE-only) AND that
+key does not hold full `manage`/`admin` scope. This closes the gap where a key holding ONLY
+the narrow `mcp:connect` bypass scope — documented above as authorizing nothing but the
+`/api/mcp/` LOCAL_ONLY carve-out — could otherwise invoke every MCP tool once an operator
+enabled remote/non-loopback MCP access, simply because `OMNIROUTE_MCP_ENFORCE_SCOPES` ships
+`false` by default. A full `manage`/`admin` key over HTTP, and every stdio/local caller, keep
+the existing `OMNIROUTE_MCP_ENFORCE_SCOPES`-gated behavior unchanged.
 
 ---
 
 ## Environment Variables
 
-| Variable                                | Default                            | Purpose                                                                                                                  |
-| :-------------------------------------- | :--------------------------------- | :----------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`           | Base URL the MCP server uses when calling OmniRoute internal APIs                                                        |
-| `OMNIROUTE_API_KEY`                     | (empty)                            | API key forwarded as `Authorization: Bearer` to internal API calls                                                       |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (only `"true"` enables it) | When enabled, missing scopes deny tool calls and log `scope_denied:<reason>` in audit log                                |
-| `OMNIROUTE_MCP_SCOPES`                  | (empty)                            | Comma-separated allowlist of scopes considered "available" by default (used when caller does not provide its own scopes) |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (unset = on)                       | When set to `0/false/off/no`, disables MCP description compression at registration time                                  |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (unset = on)                       | Alternate alias for the same toggle as above                                                                             |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                            | Abort budget for internal management reads (health, resilience, combos, quota, usage)                                    |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                            | Abort budget for hops that wait on a provider (`route_request`, `web_search`, `web_fetch`)                               |
-| `MCP_TOOL_DENY`                         | (unset = no filter)                | Comma-separated tool names to drop from `tools/list` (tool-cardinality reduction — see below)                            |
-| `MCP_TOOL_ALLOW`                        | (unset = no filter)                | Comma-separated tool names to keep exclusively (allow-list mode — see below)                                             |
-| `DATA_DIR`                              | `~/.omniroute`                     | Heartbeat file is written to `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                    |
+| Variable                                | Default                            | Purpose                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| :-------------------------------------- | :--------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`           | Base URL the MCP server uses when calling OmniRoute internal APIs                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `OMNIROUTE_API_KEY`                     | (empty)                            | API key forwarded as `Authorization: Bearer` to internal API calls                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (only `"true"` enables it) | When enabled, missing scopes deny tool calls and log `scope_denied:<reason>` in audit log. Enforcement is ALSO forced on regardless of this flag for any HTTP/SSE caller resolved from a per-key Authorization header (`source === "authInfo"`) that lacks full `manage`/`admin` scope — e.g. a key holding only the narrow `mcp:connect` bypass scope — so this default is safe only for the local/stdio single-operator flow, never for remote non-loopback access |
+| `OMNIROUTE_MCP_SCOPES`                  | (empty)                            | Comma-separated allowlist of scopes considered "available" by default (used when caller does not provide its own scopes)                                                                                                                                                                                                                                                                                                                                             |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (unset = on)                       | When set to `0/false/off/no`, disables MCP description compression at registration time                                                                                                                                                                                                                                                                                                                                                                              |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (unset = on)                       | Alternate alias for the same toggle as above                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                            | Abort budget for internal management reads (health, resilience, combos, quota, usage)                                                                                                                                                                                                                                                                                                                                                                                |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                            | Abort budget for hops that wait on a provider (`route_request`, `web_search`, `web_fetch`)                                                                                                                                                                                                                                                                                                                                                                           |
+| `MCP_TOOL_DENY`                         | (unset = no filter)                | Comma-separated tool names to drop from `tools/list` (tool-cardinality reduction — see below)                                                                                                                                                                                                                                                                                                                                                                        |
+| `MCP_TOOL_ALLOW`                        | (unset = no filter)                | Comma-separated tool names to keep exclusively (allow-list mode — see below)                                                                                                                                                                                                                                                                                                                                                                                         |
+| `DATA_DIR`                              | `~/.omniroute`                     | Heartbeat file is written to `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                                                                                                                                                |
 
 ---
 

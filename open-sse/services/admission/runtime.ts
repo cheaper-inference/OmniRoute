@@ -5,6 +5,7 @@
 
 import { AdaptiveAdmissionController } from "./controller.ts";
 import { validateConfig } from "./config.ts";
+import { resolveCostConfig } from "./cost.ts";
 import { extractAdmissionCostFeatures } from "./requestFeatures.ts";
 import {
   type AdaptiveAdmissionConfig,
@@ -19,6 +20,7 @@ import {
   type ShadowDecision,
 } from "./types.ts";
 import { buildErrorBody } from "../../utils/error.ts";
+import { getProcessStore } from "@/shared/utils/processSingleton";
 import { CORS_HEADERS } from "../../utils/cors.ts";
 import {
   checkResourcePressureGuard,
@@ -42,24 +44,14 @@ export const DEFAULT_ADAPTIVE_ADMISSION_CONFIG: Readonly<AdaptiveAdmissionConfig
   virtualLanes: false,
 });
 
-const RUNTIME_STORE_KEY = Symbol.for("omniroute.adaptiveAdmission.runtime");
-
 type RuntimeStore = {
   runtime: AdaptiveAdmissionRuntime | null;
 };
 
-type GlobalWithRuntimeStore = typeof globalThis & {
-  [RUNTIME_STORE_KEY]?: RuntimeStore;
-};
-
 function getRuntimeStore(): RuntimeStore {
-  const globalWithStore = globalThis as GlobalWithRuntimeStore;
-  let store = globalWithStore[RUNTIME_STORE_KEY];
-  if (!store) {
-    store = { runtime: null };
-    globalWithStore[RUNTIME_STORE_KEY] = store;
-  }
-  return store;
+  return getProcessStore("adaptiveAdmission.runtime", () => ({
+    runtime: null,
+  }));
 }
 
 const ENV_KEYS = {
@@ -323,6 +315,7 @@ function classifyHttpOutcome(status: number, signal?: AbortSignal): AdmissionRel
 
 class AdaptiveAdmissionRuntimeImpl implements AdaptiveAdmissionRuntime {
   private readonly controller: AdaptiveAdmissionController;
+  private readonly costConfig: ReturnType<typeof resolveCostConfig>;
   private readonly checkResourcePressure: () => ResourcePressureGuardResult | null;
   private readonly getResourcePressureObservation: () => ResourcePressureObservation;
   private readonly onPressureObserved?: (pressure: AdmissionPressure) => void;
@@ -338,6 +331,7 @@ class AdaptiveAdmissionRuntimeImpl implements AdaptiveAdmissionRuntime {
 
   constructor(options: AdaptiveAdmissionRuntimeOptions, config: AdaptiveAdmissionConfig) {
     this.controller = new AdaptiveAdmissionController(config, options.clock);
+    this.costConfig = resolveCostConfig(config.cost);
     this.checkResourcePressure = options.checkResourcePressure ?? checkResourcePressureGuard;
     this.getResourcePressureObservation =
       options.getResourcePressureObservation ?? getResourcePressureObservation;
@@ -372,7 +366,10 @@ class AdaptiveAdmissionRuntimeImpl implements AdaptiveAdmissionRuntime {
 
     const features = extractAdmissionCostFeatures(
       input.body,
-      input.streaming === undefined ? undefined : { streaming: input.streaming }
+      {
+        streaming: input.streaming,
+        cost: this.costConfig,
+      }
     );
     let result: AdmissionAcquireResult;
     try {

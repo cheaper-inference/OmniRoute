@@ -23,8 +23,9 @@ const { getProviderModels } = await import("../../open-sse/config/providerModels
 
 const PROVIDER = "github";
 const CONNECTION_ID = "github-live-catalog-8926";
-const LIVE_MODEL = "gpt-4.1";
-const PHANTOM_MODEL = "oswe-vscode-prime";
+const LIVE_MODEL = "gpt-5.6-sol";
+// Present in both Copilot static catalogs, but absent from this connection's live discovery.
+const PHANTOM_MODEL = "claude-opus-4.8-fast";
 
 function seedProviderCatalog(
   providerId: string,
@@ -200,4 +201,68 @@ test("#8926: partial passthrough discovery remains non-authoritative", async () 
     catalog.models.map((model) => model.id),
     ["gpt-5.6-luna"]
   );
+});
+
+test("#12866: agy CLI catalog is visible after parseModel folds the prefix to antigravity", async () => {
+  // Production shape: combo steps are `agy/gemini-3.8-flash-high` on CLI-card
+  // rows. parseModel canonicalizes `agy/` → `antigravity` (#8013), then live
+  // authority looks up the IDE catalog keyed `antigravity:<id>`. Those two
+  // catalogs are distinct stored ids — CLI has flash-high, IDE does not —
+  // so the request 400s even though the pinned agy connection serves the model.
+  await seedProviderCatalog("agy", "agy-cli-catalog-12866", ["gemini-3.8-flash-high"]);
+  await seedProviderCatalog("antigravity", "antigravity-ide-catalog-12866", [
+    "gemini-3.8-flash-tiered",
+  ]);
+
+  const resolved = await getModelInfo("agy/gemini-3.8-flash-high");
+
+  assert.equal(resolved.errorType, undefined, resolved.errorMessage);
+  assert.equal(resolved.model, "gemini-3.8-flash-high");
+  assert.ok(
+    resolved.provider === "agy" || resolved.provider === "antigravity",
+    `expected agy/antigravity, got ${resolved.provider}`
+  );
+
+  const antigravityCatalog = await getActiveSyncedCatalog("antigravity");
+  assert.equal(
+    antigravityCatalog.models.some((model) => model.id === "gemini-3.8-flash-high"),
+    true,
+    "antigravity live lookup must union the sibling agy CLI catalog"
+  );
+});
+
+test("#16929: batched /v1/models source honors same-id operator endpoints", async () => {
+  const [original] = (await getAllActiveSyncedModels())[PROVIDER] || [];
+  assert.ok(original, "synced row must be visible before operator override");
+
+  const { updateCustomModel } = await import("../../src/lib/db/models.ts");
+  const savedOverride = await updateCustomModel(
+    PROVIDER,
+    LIVE_MODEL,
+    {
+      supportedEndpoints: ["embeddings"],
+    },
+    { createIfMissing: true }
+  );
+  assert.equal(
+    savedOverride?.source,
+    "endpoint-override",
+    "a synced-only model needs an explicit virtual endpoint override"
+  );
+  const [withOverride] = (await getAllActiveSyncedModels())[PROVIDER] || [];
+  assert.deepEqual(withOverride.supportedEndpoints, ["embeddings"]);
+  assert.equal(withOverride.endpointCapabilitySource, "operator");
+
+  // A fresh discovery does not wipe the operator's choice.
+  await replaceSyncedAvailableModelsForConnection(PROVIDER, CONNECTION_ID, [
+    {
+      id: LIVE_MODEL,
+      name: LIVE_MODEL,
+      source: "imported",
+      supportedEndpoints: ["chat"],
+      endpointCapabilitySource: "declared",
+    },
+  ]);
+  const [afterSync] = (await getAllActiveSyncedModels())[PROVIDER] || [];
+  assert.deepEqual(afterSync.supportedEndpoints, ["embeddings"]);
 });

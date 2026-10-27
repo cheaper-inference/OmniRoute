@@ -721,7 +721,8 @@ export function geminiToOpenAIResponse(chunk, state) {
     state.usage = {
       prompt_tokens: promptTokens,
       completion_tokens: completionTokens,
-      total_tokens: totalTokens,
+      // Gemini may omit totalTokenCount; derive it instead of reporting 0.
+      total_tokens: totalTokens || promptTokens + completionTokens,
     };
     if (typeof effectiveCachedTokens === "number") {
       state.usage.prompt_tokens_details = {

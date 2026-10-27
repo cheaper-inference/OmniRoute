@@ -85,6 +85,11 @@ describe("Cache Control Policy", () => {
         providerSupportsCaching("antigravity", "openai", null, "gpt-oss-120b-medium"),
         false
       );
+      // Vertex is mixed-format: only Claude partner models use cache_control.
+      assert.equal(providerSupportsCaching("vertex", "claude"), true);
+      assert.equal(providerSupportsCaching("vertex-partner", "claude"), true);
+      assert.equal(providerSupportsCaching("vertex", "gemini"), false);
+      assert.equal(providerSupportsCaching("vertex-partner", "gemini"), false);
     });
 
     test("rejects non-caching providers", () => {
@@ -146,6 +151,20 @@ describe("Cache Control Policy", () => {
         }),
         true
       );
+    });
+
+    test("preserves Claude Code cache markers for both Vertex provider IDs", () => {
+      for (const targetProvider of ["vertex", "vertex-partner"]) {
+        assert.equal(
+          shouldPreserveCacheControl({
+            userAgent: "claude-code/0.1.0",
+            isCombo: false,
+            targetProvider,
+            targetFormat: "claude",
+          }),
+          true
+        );
+      }
     });
 
     test("preserves for combo with priority strategy + Claude client + caching provider", () => {

@@ -1,0 +1,369 @@
+# Providers Guide: Connect AI Models to OmniRoute (Igbo)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../getting-started/PROVIDERS-GUIDE.md) · 🇪🇹 [am](../../../am/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/getting-started/PROVIDERS-GUIDE.md) · 🇦🇿 [az](../../../az/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/getting-started/PROVIDERS-GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/getting-started/PROVIDERS-GUIDE.md) · 🇩🇰 [da](../../../da/docs/getting-started/PROVIDERS-GUIDE.md) · 🇩🇪 [de](../../../de/docs/getting-started/PROVIDERS-GUIDE.md) · 🇬🇷 [el](../../../el/docs/getting-started/PROVIDERS-GUIDE.md) · 🇪🇸 [es](../../../es/docs/getting-started/PROVIDERS-GUIDE.md) · 🇪🇪 [et](../../../et/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/getting-started/PROVIDERS-GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇱 [he](../../../he/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/getting-started/PROVIDERS-GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇩 [id](../../../id/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇹 [it](../../../it/docs/getting-started/PROVIDERS-GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/getting-started/PROVIDERS-GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/getting-started/PROVIDERS-GUIDE.md) · 🇰🇭 [km](../../../km/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/getting-started/PROVIDERS-GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇲🇲 [my](../../../my/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇴 [no](../../../no/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [or](../../../or/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/getting-started/PROVIDERS-GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/getting-started/PROVIDERS-GUIDE.md) · 🇱🇰 [si](../../../si/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/getting-started/PROVIDERS-GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/getting-started/PROVIDERS-GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/getting-started/PROVIDERS-GUIDE.md) · 🇮🇳 [te](../../../te/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇭 [th](../../../th/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/getting-started/PROVIDERS-GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/getting-started/PROVIDERS-GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/getting-started/PROVIDERS-GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/getting-started/PROVIDERS-GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/getting-started/PROVIDERS-GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/getting-started/PROVIDERS-GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/getting-started/PROVIDERS-GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/getting-started/PROVIDERS-GUIDE.md)
+
+---
+
+> **TL;DR**: Onye na-enye ọrụ bụ njikọ na ọrụ AI (dịka OpenAI, Anthropic, Google). Ị chọrọ opekata mpe otu onye na-enye ọrụ iji OmniRoute.
+
+---
+
+## Gịnị Bụ Onye Na-eweta Ọrụ?
+
+Were onye na-eweta ọrụ dị ka **ụlọ ọrụ netwọkụ ekwentị**. Dị nnọọ ka ịchọrọ ụlọ ọrụ netwọkụ ekwentị iji kpọọ oku, ị ga-achọ onye na-eweta ọrụ AI iji jiri ụdịdị AI. OmniRoute dị ka ekwentị nke na-arụ ọrụ na **netwọkụ niile** — ị nwere ike ịgbanwe n'etiti ha na-akpaghị aka.
+
+### Ụdị Ndị Na-eweta Ọrụ
+
+| Ụdị            | Ihe Ọ Bụ                      | Ọmụmaatụ                        | Ọnụ Ahịa                      |
+| -------------- | ----------------------------- | ------------------------------- | ----------------------------- |
+| **N'efu**      | Achọghị ịkwụ ụgwọ             | Kiro, Pollinations              | $0                            |
+| **Igodo API**  | Ị chọrọ igodo API             | OpenAI, Anthropic, Google       | Kwụọ ụgwọ dịka ojiji gị si dị |
+| **OAuth**      | Jiri akaụntụ gị banye         | Claude Code, GitHub Copilot     | Ndebanye aha                  |
+| **Kuki Weebụ** | Na-eji nnọkọ ihe nchọgharị gị | ChatGPT Web (Codex), Gemini Web | $0 (na-eji akaụntụ gị)        |
+
+### Ndị Na-eweta Ọrụ Kuki Weebụ
+
+Lee **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)** maka ntuziaka nhazi izugbe, oke ndị dị na ya, idozi nsogbu, na ntụziaka nyocha njirimara akọwapụtara maka onye na-eweta ọrụ ọ bụla.
+---
+
+## Mmalite Ngwa Ngwa: Jikọọ Onye Na-enye Ọrụ Mbụ Gị
+
+### Nhazi nhọrọ nke ndị na-enye ọrụ n’efu n’oge mmalite mbụ
+
+Ọkachamara nhazi nke mmalite mbụ na-enye kaadị **Hazie ndị na-enye ọrụ n’efu** doro anya. Ọ na-enweta ndepụta ndị
+tozuru ugbu a site na ndekọ ndị na-enye ọrụ OmniRoute na-achọghị nkwenye njirimara, ma nye gị ohere inyocha ma wepụ nhọrọ nke onye
+na-enye ọrụ ọ bụla tupu ị kwado. OmniRoute na-egosi ọkwa ịdọ aka ná ntị nke onye na-enye ọrụ na njikọ gaa na saịtị ya
+ka i nwee ike ibu ụzọ nyochaa usoro ndị ọzọ, nzuzo, nnweta, na oke ọnụego.
+
+Omume a bụ nhọrọ: imecha ọkachamara nhazi anaghị emepụta njikọ ndị na-enye ọrụ n’efu na nzuzo.
+Ọ na-emepụta naanị ndị na-enye ọrụ ka na-efu, na-ahapụ njikọ ndị dị adị ahaziri n’ụzọ pụrụ iche
+n’enweghị mgbanwe, ma na-akọ ndị emepụtara, ndị ahazilarị, na ndị dara ada n’otu n’otu. Ị nwere ike
+ịnwaleghachi naanị ndị dara ada n’enweghị nsogbu mgbe nsonaazụ ezughị ezu gasịrị.
+
+### Nhọrọ A: Onye Na-enye Ọrụ N’efu (Achọghị Kaadị Ebe E Si Anata Ego)
+
+1. Mepee dashboard na `http://localhost:20128`
+2. Gaa na **Ndị Na-enye Ọrụ** → **Tinye Onye Na-enye Ọrụ**
+3. Họrọ otu n’ime ndị na-enye ọrụ n’efu ndị a:
+   - **Kiro AI** — Ụdị Claude n’efu (achọghị nkwenye njirimara)
+   - **Pollinations** — GPT-5, Claude, Gemini n’efu (achọghị igodo)
+   - **LongCat** — Token 10M n’efu (onyinye naanị otu ugboro, chọrọ akaụntụ + KYC)
+   - **Cloudflare AI** — Ụdị 50+, neuron 10K kwa ụbọchị
+   - **MLX Gemma 26B** — Ụdị Apple Silicon mpaghara (~38.5 tok/s, ~15.9GB RAM)
+   - **MLX Qwen 3.8 27B** — Ụdị Apple Silicon mpaghara (~9.1 tok/s, ~13.1GB RAM)
+4. Pịa **Jikọọ**
+5. Emechaala! Ugbu a ị nwere ohere iji AI n’efu.
+
+### Nhọrọ B: Onye Na-enye Ọrụ Igodo API (A Na-akwụ Ụgwọ)
+
+1. Nweta igodo API site na webụsaịtị onye na-enye ọrụ:
+   - **OpenAI**: https://platform.openai.com/api-keys
+   - **Anthropic**: https://console.anthropic.com/
+   - **Google**: https://aistudio.google.com/apikey
+   - **DeepSeek**: https://platform.deepseek.com/
+   - **Groq**: https://console.groq.com/
+2. Mepee dashboard na `http://localhost:20128`
+3. Gaa na **Ndị Na-enye Ọrụ** → **Tinye Onye Na-enye Ọrụ**
+4. Họrọ onye na-enye gị ọrụ
+5. Mado igodo API gị
+6. Pịa **Jikọọ**
+7. Emechaala! Ugbu a ị nwere ohere iji ụdị nke onye na-enye ọrụ ahụ.
+
+### Nhọrọ C: Onye Na-enye Ọrụ OAuth (Ndebanye Aha)
+
+1. Mepee dashboard na `http://localhost:20128`
+2. Gaa na **Ndị Na-enye Ọrụ** → **Tinye Onye Na-enye Ọrụ**
+3. Họrọ onye na-enye gị ọrụ (dịka ọmụmaatụ, Claude Code, GitHub Copilot)
+4. Pịa **Jikọọ site na OAuth**
+5. Jiri akaụntụ gị banye
+6. Emechaala! Ugbu a ị nwere ohere iji ụdị ndị dị na ndebanye aha gị.
+
+### Nhọrọ D: Ụdị MLX Mpaghara (Apple Silicon)
+
+Maka kọmputa Mac Apple Silicon nwere ebe nchekwa jikọrọ ọnụ, OmniRoute na-akwado ijikọ na ụdị MLX mpaghara na-agba site na `mlx-lm.server` dịka ndị na-enye ọrụ mpaghara kwekọrọ na OpenAI.
+
+#### Ihe Ndị A Chọrọ Tupu Amalite
+
+- **Apple Silicon Mac** (M1/M2/M3/M4) nwere ebe nchekwa jikọrọ ọnụ 24GB+ ka akwadoro
+- Onye njikwa ngwugwu **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
+- **mlx-lm**: `uv pip install mlx-lm`
+
+#### Mmalite Ngwa Ngwa
+
+1. **Wụnye ihe ndị a dabere na ha**:
+
+   ```bash
+   # Wụnye uv ma ọ bụrụ na awụnyebeghị ya
+   curl -LsSf https://astral.sh/uv/install.sh | sh
+
+   # Wụnye mlx-lm
+   uv pip install mlx-lm
+   ```
+
+2. **Jiri aka malite sava MLX** (na terminal dị iche iche):
+
+   ```bash
+   # Terminal 1: Gemma 4 26B A4B IT-QAT (ọdụ ụgbọ mmiri 11435)
+   uv run mlx_lm.server --model mlx-community/gemma-4-26B-A4B-it-qat-q4_0-mlx-aligned --port 11435 --host 127.0.0.1
+
+   # Terminal 2: Qwen 3.8 27B MLX Mixed (ọdụ ụgbọ mmiri 11436)
+   uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
+   ```
+
+3. **Jikọọ na Dashboard OmniRoute**:
+   - Gaa na **Ndị Na-enye Ọrụ** → **Tinye Onye Na-enye Ọrụ**
+   - Họrọ **MLX Gemma 26B** ma ọ bụ **MLX Qwen 3.8 27B**
+   - Pịa **Jikọọ** (achọghị igodo API)
+
+4. **Jiri ya na OpenCode**:
+   ```bash
+   # Hazie OpenCode ka o jiri OmniRoute
+   opencode config set api.base_url http://localhost:20128/v1
+   opencode config set api.key <your-omniroute-api-key>
+
+   # Jiri ụdị MLX
+   opencode run --model mlx-gemma/gemma-4-26b
+   opencode run --model mlx-qwen/qwen3.8-27b
+   ```
+
+#### Njikwa Ebe Nchekwa
+
+**Ihe dị mkpa**: Site na ebe nchekwa jikọrọ ọnụ 24GB, naanị **otu nnukwu ụdị MLX nwere ike ịgba n’otu oge**.
+
+- Gemma 26B: ebe nchekwa kachasị elu ~15.9GB
+- Qwen 3.8 27B: ebe nchekwa kachasị elu ~13.1GB
+
+Ị ga-eji aka jikwaa nke a:
+
+- Mee ka naanị otu sava MLX gbaa n’otu oge, ma ọ bụ
+- Mee ka ha abụọ gbaa na igwe dị iche iche, ma ọ bụ
+- Kwụsị otu tupu ịmalite nke ọzọ
+
+OmniRoute anaghị ejikwa usoro sava MLX na-akpaghị aka — ọ na-ebufe arịrịọ naanị gaa na endpoint kwekọrọ na OpenAI nke ị haziri.
+
+#### Nkwado Ịkpọ Ngwaọrụ
+
+Ụdị abụọ ahụ na-akwado ịkpọ ngwaọrụ kwekọrọ na OpenAI. Jiri nke a nwalee:
+
+```bash
+curl -X POST http://localhost:20128/v1/chat/completions \
+  -H "Authorization: Bearer <key>" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "model": "mlx-gemma/gemma-4-26b",
+    "messages": [{"role": "user", "content": "What is 2+2? Use the calculator tool."}],
+    "tools": [{"type": "function", "function": {"name": "calculator", "description": "Calculate", "parameters": {"type": "object", "properties": {"expression": {"type": "string"}}, "required": ["expression"]}}}]
+  }'
+```
+
+#### Ịchọpụta na Idozi Nsogbu
+
+| Nsogbu                | Ngwọta                                                                                 |
+| --------------------- | -------------------------------------------------------------------------------------- |
+| Sava anaghị amalite   | Lelee `uv run mlx_lm.server --help` ma chọpụta na ID ụdị ndị ahụ ziri ezi              |
+| Ebe nchekwa agwụla    | Gbaa mbọ hụ na naanị otu ụdị na-agba; mechie ngwa ndị ọzọ; lelee Activity Monitor      |
+| A jụrụ njikọ          | Chọpụta na sava na-agba n’ọdụ ụgbọ mmiri ziri ezi (11435/11436)                        |
+| Nzaghachi dị nwayọ    | Arịrịọ mbụ na-ebunye ụdị ahụ n’ebe nchekwa (~30-60s); arịrịọ ndị sochirinụ na-adị ngwa |
+| Ịkpọ ngwaọrụ dara ada | Gbaa mbọ hụ na ụdị ahụ na-akwado ngwaọrụ; lelee ndekọ OmniRoute maka njehie ntụgharị   |
+
+---
+
+## Ndị Na-enye Ọrụ Efughị Ego Kachasị Mma
+
+Ndị na-enye ọrụ ndị a na-enye **ohere iji ha n'efu** na-enweghị kaadị kredit:
+
+| Onye Na-enye Ọrụ  | Oke Efughị Ego                 | Ụdị Modelụ                               | Otu E Si Jikọọ            |
+| ----------------- | ------------------------------ | ---------------------------------------- | ------------------------- |
+| **Kiro AI**       | kredit 50 kwa ọnwa             | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Achọghị nkwenye njirimara |
+| **Pollinations**  | Achọghị igodo                  | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Achọghị nkwenye njirimara |
+| **LongCat**       | 10M otu ugboro                 | LongCat-2.0                              | Igodo API + KYC           |
+| **Cloudflare AI** | neuron 10K kwa ụbọchị          | modelụ 50+                               | Achọghị nkwenye njirimara |
+| **NVIDIA NIM**    | ~40 RPM                        | modelụ 129                               | A chọrọ igodo API         |
+| **Cerebras**      | kredit $5 mgbe ị debanyere aha | GLM 4.7, GPT-OSS 120B                    | Igodo API + kaadị         |
+
+**Ndụmọdụ**: Jikọọ ọtụtụ ndị na-enye ọrụ efughị ego iji nweta **AI efughị ego na-enweghị oke** nke ga-eji nke ọzọ na-akpaghị aka ma ọ bụrụ na otu ada!
+
+---
+
+## Ndị Na-enye Ọrụ A Na-akwụ Ụgwọ Kachasị Mma
+
+Ndị na-enye ọrụ ndị a na-enye **model dị elu** site na API key:
+
+| Onye Na-enye Ọrụ | Model Kachasị Mma           | Ọnụ Ahịa              | Ọkwa Efughị Ego               |
+| ---------------- | --------------------------- | --------------------- | ----------------------------- |
+| **OpenAI**       | GPT-5, GPT-4o               | $2.50-$10/token 1M    | kredit $5 n'efu               |
+| **Anthropic**    | Claude Opus 4.6, Sonnet 4.6 | $3-$15/token 1M       | kredit $5 n'efu               |
+| **Google**       | Gemini 2.5 Pro, Flash       | $0.075-$1.25/token 1M | arịrịọ 1,500 kwa ụbọchị n'efu |
+| **DeepSeek**     | DeepSeek V4                 | $0.14-$0.28/token 1M  | token 5M n'efu                |
+| **Groq**         | Llama 4, Mixtral            | $0.05-$0.27/token 1M  | 30 RPM n'efu                  |
+| **xAI**          | Grok 3                      | $0.30-$0.60/token 1M  | —                             |
+
+---
+
+## Otu E Si Jikọọ Onye Na-enye Ọrụ (Nzọụkwụ n'Otu n'Otu)
+
+### Nzọụkwụ 1: Mepee Dashboard
+
+Gaa na `http://localhost:20128` na ihe nchọgharị gị.
+
+### Nzọụkwụ 2: Gaa na Providers
+
+Pịa **Providers** n'akụkụ menu.
+
+### Nzọụkwụ 3: Pịa Add Provider
+
+Pịa bọtịnụ **+ Add Provider**.
+
+### Nzọụkwụ 4: Họrọ Onye Na-enye Gị Ọrụ
+
+Legharịa ndepụta ahụ anya ma ọ bụ chọọ onye na-enye gị ọrụ. Pịa ya.
+
+### Nzọụkwụ 5: Tinye Ozi Nnweta
+
+- **Ndị na-enye ọrụ efughị ego**: Achọghị ozi nnweta — naanị pịa **Connect**
+- **Ndị na-enye ọrụ API key**: Mado API key gị
+- **Ndị na-enye ọrụ OAuth**: Pịa **Connect with OAuth** wee banye
+
+### Nzọụkwụ 6: Nwalee Njikọ Ahụ
+
+Pịa **Test Connection** iji chọpụta na ọ na-arụ ọrụ.
+
+### Nzọụkwụ 7: Emechala!
+
+Ejikọọla onye na-enye gị ọrụ ugbu a. Ị nwere ike iji ya na `model: "auto"` ma ọ bụ họpụta onye na-enye ọrụ ahụ ozugbo.
+
+---
+
+## Iji Ọtụtụ Ndị Na-enye Ọrụ
+
+OmniRoute na-arụ ọrụ nke ọma karịa mgbe ejiri **ọtụtụ ndị na-enye ọrụ**. Nke a na-enye gị:
+
+- **Ịgafere na nke ọzọ na-akpaghị aka** — Ọ bụrụ na otu onye na-enye ọrụ ada, OmniRoute ga-anwale nke na-esote
+- **Ịkwalite ọnụ ahịa** — OmniRoute na-ahọrọ onye na-enye ọrụ dị ọnụ ala karịa maka arịrịọ ọ bụla
+- **Ịkwalite ọsọ** — OmniRoute na-ahọrọ onye na-enye ọrụ kachasị ọsọ maka arịrịọ ọ bụla
+- **Ịkwalite ogo** — OmniRoute na-ahọrọ onye na-enye ọrụ kachasị mma maka ọrụ ọ bụla
+
+### Nhazi A Tụrụ Aro
+
+Jikọọ ma ọ dịkarịa ala **ndị na-enye ọrụ 3** iji nweta ahụmịhe kachasị mma:
+
+1. **Otu onye na-enye ọrụ n'efu** (Kiro ma ọ bụ Pollinations) — Ọ na-adị mgbe niile
+2. **Otu onye na-enye ọrụ ngwa ngwa** (Groq, Cerebras) — Maka nzaghachi ngwa ngwa
+3. **Otu onye na-enye ọrụ dị elu n'ogo** (OpenAI, Anthropic, Google) — Maka ọrụ ndị dị mgbagwoju anya
+
+Mgbe ahụ, jiri `model: "auto"` ma OmniRoute ga-ahọrọ nke kachasị mma maka arịrịọ ọ bụla na-akpaghị aka.
+
+---
+
+## Nhazi Pụrụ Iche Maka Onye Na-enye Ọrụ
+
+### OpenAI
+
+1. Nweta igodo API: https://platform.openai.com/api-keys
+2. Na OmniRoute: Ndị Na-enye Ọrụ → Tinye Onye Na-enye Ọrụ → OpenAI
+3. Tapawa igodo API → Jikọọ
+
+### Anthropic
+
+1. Nweta igodo API: https://console.anthropic.com/
+2. Na OmniRoute: Ndị Na-enye Ọrụ → Tinye Onye Na-enye Ọrụ → Anthropic
+3. Tapawa igodo API → Jikọọ
+
+### Google (Gemini)
+
+1. Nweta igodo API: https://aistudio.google.com/apikey
+2. Na OmniRoute: Ndị Na-enye Ọrụ → Tinye Onye Na-enye Ọrụ → Gemini
+3. Tapawa igodo API → Jikọọ
+
+### DeepSeek
+
+1. Nweta igodo API: https://platform.deepseek.com/
+2. Na OmniRoute: Ndị Na-enye Ọrụ → Tinye Onye Na-enye Ọrụ → DeepSeek
+3. Tapawa igodo API → Jikọọ
+
+### Qoder: họrọ ụzọ mbufe nzere
+
+Qoder chọrọ nzere. Ụzọ mbufe abụọ ya nwere ikike dị iche iche; aha model
+naanị anaghị akọwa ihe njikọ ọ bụla nwere ike ime.
+
+| Nzere                                        | Ụzọ mbufe OmniRoute                           | Ịkpọ ngwaọrụ nke onye na-akpọ oku                    | Mgbasa data                                                          |
+| -------------------------------------------- | --------------------------------------------- | ---------------------------------------------------- | -------------------------------------------------------------------- |
+| PAT nke na-amalite na `pt-`                  | Usoro `qodercli` mpaghara na host OmniRoute   | Anaghị akwado ya                                     | E debere ya: a na-ezipụ SSE naanị mgbe CLI weghachiri azịza zuru ezu |
+| Access token na-abụghị PAT ma ọ bụ igodo API | Endpoint HTTP nke DashScope kwekọrọ na OpenAI | A na-ebufe ya ozugbo, dabere na model/igodo upstream | Ụzọ HTTP/SSE upstream                                                |
+
+Maka PAT, wụnye Qoder CLI n'otu host ma ọ bụ container ebe OmniRoute dị. A ga-enwerịrị ike
+ịchọta executable ahụ dịka `qodercli`, ma ọ bụ tọọ `CLI_QODER_BIN` ka ọ bụrụ ụzọ executable ya. CLI
+arụnyere naanị na host Docker anaghị adị na container na-akpaghị aka. Ọ bụrụ na
+binaries adịghị, a ga-ewepụta njehie doro anya nke ga-eduzi gị na nrụnye ma ọ bụ nhazi ụzọ ahụ.
+
+Ụzọ nkata PAT nwere oke oge usoro nke sekọnd 45. Ọ na-eme ka mkparịta ụka ahụ bụrụ otu
+prompt ma kpọọ CLI n'ụdị mbipụta na-enweghị mgbasa data. Ịrịọ `stream: true` na-agbanwe
+envelope nzaghachi ka ọ bụrụ SSE; ọ naghị enye nnyefe token upstream n'usoro obere obere.
+Nkwado CLI/ndepụta model na-eji oke oge sekọnd 20 dị iche. Ndị a bụ ndabara koodu dị
+ugbu a, ọ bụghị ntọala dashboard a pụrụ ịhazi.
+
+Jiri njikọ PAT maka nkata nkịtị. Arịrịọ agent ndị nwere `tools` ma ọ bụ `functions` ochie
+na-ewepụ akaụntụ PAT n'oge nhọpụta nzere, gụnyere combo targets ndị a kpọgidere. Otu Qoder
+agwakọtara ka nwere ike ịhọrọ akaụntụ HTTP ya. Oku kpọmkwem na PAT executor ga-adakwa
+n'ụzọ doro anya tupu ebupute CLI kama ịhapụ nkọwa ngwaọrụ na nzuzo. Mmachi a
+metụtara ngwaọrụ onye na-akpọ API nyere, ọ bụghị ngwaọrụ ime ọ bụla Qoder
+CLI nwere ike iji n'onwe ya. Igodo HTTP anaghị ekwe nkwa na model ọ bụla na-akwado ngwaọrụ; nyocha
+ikike model nkịtị ka na-arụ ọrụ.
+
+OAuth nchọgharị dị naanị mgbe onye nchịkwa haziri ntọala ise niile:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID`, na `QODER_OAUTH_CLIENT_SECRET`. Ha na-abụ efu na ndabara; nrụnye
+a na-ahazibeghị kwesịrị iji mbubata nzere akwadoro kama iche na
+usoro nbanye nchọgharị adịla njikere.
+
+Ntụaka mmejuputa: [Qoder executor](../../open-sse/executors/qoder.ts),
+[oge ọrụ CLI](../../open-sse/services/qoderCli.ts), na
+[nhazi OAuth](../../src/lib/oauth/constants/oauth.ts). Mgbasa PAT n'usoro obere obere
+na oke oge a pụrụ ịhazi bụ nkwalite dị iche iche; omume a anaghị ekwe nkwa ha.
+
+### Groq
+
+1. Nweta igodo API: https://console.groq.com/
+2. Na OmniRoute: Ndị Na-enye Ọrụ → Tinye Onye Na-enye Ọrụ → Groq
+3. Tapawa igodo API → Jikọọ
+
+---
+
+## Ajụjụ Ndị A Na-ajụkarị
+
+### "Ọ̀ dị m mkpa ịkwụ ụgwọ iji OmniRoute?"
+
+**Mba!** OmniRoute bụ n'efu ma bụrụkwa sọftụwia mepere emepe. Ị nwere ike iji ndị na-eweta ọrụ n'efu (Kiro, Pollinations) n'akwụghị ụgwọ ọ bụla. Ị ga-akwụ ụgwọ naanị ma ọ bụrụ na ịhọrọ iji ndị na-eweta ọrụ a na-akwụ ụgwọ.
+
+### "Kedu onye na-eweta ọrụ m kwesịrị ibido na ya?"
+
+Bido na **Kiro AI** — ọ bụ n'efu, ọ chọghị API key, ma na-enye gị ohere iji ụdị Claude. Mgbe ahụ, tinye ndị na-eweta ọrụ ndị ọzọ dịka mkpa gị si dị.
+
+### "Enwere m ike iji ọtụtụ ndị na-eweta ọrụ n'otu oge?"
+
+**Ee!** Nke ahụ bụ isi ebumnuche OmniRoute. Jikọọ ọtụtụ ndị na-eweta ọrụ ma jiri `model: "auto"` mee ka OmniRoute họrọ nke kacha mma maka arịrịọ ọ bụla.
+
+### "Gịnị ga-eme ma ọ bụrụ na onye na-eweta ọrụ akwụsị ịrụ ọrụ?"
+
+OmniRoute na-awụfe ndị na-eweta ọrụ dara ada na-akpaghị aka ma nwalee nke na-esote. Ọ dịghị ihe ọ bụla ị ga-eme.
+
+### "Kedu ka m ga-esi kwụsị njikọ onye na-eweta ọrụ?"
+
+Gaa na Ndị na-eweta ọrụ → pịa onye na-eweta ọrụ ahụ → pịa **Kwụsị njikọ**.
+
+### "Enwere m ike iji API keys m nwere ugbu a?"
+
+**Ee!** Ọ bụrụ na ị nweelarị API keys maka OpenAI, Anthropic, Google, wdg., ị nwere ike iji ha na OmniRoute. Naanị mado ha mgbe ị na-ejikọ onye na-eweta ọrụ ahụ.
+
+---
+
+## Gịnị Na-esote?
+
+- **[Ntuziaka Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Kwe ka OmniRoute họrọ AI kacha mma maka gị
+- **[Ntuziaka Ọkwa N'efu](./FREE-TIERS-GUIDE.md)** — Nweta AI n'efu na-enweghị kaadị kredit
+- **[Idozi Nsogbu](../guides/TROUBLESHOOTING.md)** — Dozie nsogbu ndị a na-enwekarị
+- **[Ntụaka Ndị Na-enye Ọrụ](../reference/PROVIDER_REFERENCE.md)** — Ndepụta zuru ezu nke ndị na-enye ọrụ 226
+
+## Onyonyo Cursor
+
+Onyonyo atụmatụ Cursor na-eji `IMAGE_PROVIDERS.cursor` (`cursor-agent-image`). Lee [CURSOR_IMAGE.md](../providers/CURSOR_IMAGE.md).

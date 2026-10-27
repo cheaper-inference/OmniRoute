@@ -23,11 +23,13 @@ import { providerText, type CompatModelRow } from "../providerPageHelpers";
 export interface ModelMeta {
   customModels: CompatModelRow[];
   modelCompatOverrides: Array<CompatModelRow & { id: string }>;
+  endpointAdapters: Record<string, "available" | "unavailable" | "unknown">;
 }
 
 export interface UseProviderModelsReturn {
   modelMeta: ModelMeta;
   syncedAvailableModels: any[];
+  syncedCatalogAuthoritative: boolean;
   modelAliases: Record<string, string>;
   fetchProviderModelMeta: () => Promise<void>;
   fetchAliases: () => Promise<void>;
@@ -45,8 +47,16 @@ export function useProviderModels(
   const [modelMeta, setModelMeta] = useState<ModelMeta>({
     customModels: [],
     modelCompatOverrides: [],
+    endpointAdapters: {},
   });
-  const [syncedAvailableModels, setSyncedAvailableModels] = useState<any[]>([]);
+  const [syncedCatalog, setSyncedCatalog] = useState({
+    providerId: "",
+    models: [] as any[],
+    authoritative: false,
+  });
+  const syncedAvailableModels = syncedCatalog.providerId === providerId ? syncedCatalog.models : [];
+  const syncedCatalogAuthoritative =
+    syncedCatalog.providerId === providerId && syncedCatalog.authoritative;
   const [modelAliases, setModelAliases] = useState<Record<string, string>>({});
 
   const fetchAliases = useCallback(async () => {
@@ -125,6 +135,7 @@ export function useProviderModels(
       setModelMeta({
         customModels: data.models || [],
         modelCompatOverrides: data.modelCompatOverrides || [],
+        endpointAdapters: data.endpointAdapters || {},
       });
       try {
         const syncRes = await fetch(
@@ -133,12 +144,16 @@ export function useProviderModels(
         );
         if (syncRes.ok) {
           const syncData = await syncRes.json();
-          setSyncedAvailableModels(syncData.models || []);
-        } else {
-          setSyncedAvailableModels([]);
+          if (Array.isArray(syncData.models)) {
+            setSyncedCatalog({
+              providerId,
+              models: syncData.models,
+              authoritative: syncData.authoritative === true,
+            });
+          }
         }
       } catch {
-        setSyncedAvailableModels([]);
+        // A transient dashboard request failure must not resurrect retired static models.
       }
     } catch (e) {
       console.error("fetchProviderModelMeta", e);
@@ -148,6 +163,7 @@ export function useProviderModels(
   return {
     modelMeta,
     syncedAvailableModels,
+    syncedCatalogAuthoritative,
     modelAliases,
     fetchProviderModelMeta,
     fetchAliases,

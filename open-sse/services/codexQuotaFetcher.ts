@@ -22,10 +22,17 @@ import {
   getCodexModelScope,
   isCodexSparkLimitDescriptor,
 } from "../config/codexQuotaScopes.ts";
-import { registerQuotaFetcher, registerQuotaWindows, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  registerQuotaWindows,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 import { getCodexBackendIdentityHeaders } from "../config/codexClient.ts";
+import { parseCodexPaidCredits } from "@/lib/providers/codexPaidCredits";
 
 /**
  * Stable identifiers for Codex's quota windows. These match the quota keys
@@ -239,11 +246,12 @@ export async function fetchCodexQuota(
     // configurable (OMNIROUTE_QUOTA_FETCH_MIN_INTERVAL_MS, 0 = disabled).
     await throttleQuotaFetch();
 
-    const response = await fetch(CODEX_USAGE_URL, {
+    const response = await fetchWithConnectionProxy(connectionId, CODEX_USAGE_URL, {
       method: "GET",
       headers,
       signal: AbortSignal.timeout(8_000),
     });
+    if (!response) return null;
 
     if (!response.ok) {
       // Non-2xx: could be token expired or quota API down.
@@ -395,6 +403,11 @@ function getSelectedCodexRateLimit(
   return normalRateLimit;
 }
 
+function parseCodexPlan(data: Record<string, unknown>): string | undefined {
+  const rawPlan = data["plan_type"] ?? data["planType"];
+  return typeof rawPlan === "string" && rawPlan.trim() ? rawPlan.trim() : undefined;
+}
+
 function parseCodexUsageResponse(
   data: unknown,
   requestedModel?: string | null
@@ -443,9 +456,12 @@ function parseCodexUsageResponse(
   });
 
   const bankedResetCredits = parseBankedResetCredits(obj);
+  const paidCredits = parseCodexPaidCredits(obj.credits);
   const rateLimitReachedType = parseRateLimitReachedType(obj);
+  const plan = parseCodexPlan(obj);
 
   return {
+    ...(plan ? { plan } : {}),
     used: Math.round(worstPercentUsed * 100),
     total: 100,
     percentUsed: worstPercentUsed,
@@ -463,6 +479,7 @@ function parseCodexUsageResponse(
     limitReached,
     // Banked reset credits (display-only, eligibility-gated — issue #5199).
     ...(bankedResetCredits !== undefined ? { bankedResetCredits } : {}),
+    ...(paidCredits ? { paidCredits } : {}),
     ...(rateLimitReachedType !== undefined ? { rateLimitReachedType } : {}),
   };
 }
@@ -517,6 +534,7 @@ export function invalidateCodexQuotaCache(connectionId: string): void {
  */
 export function registerCodexQuotaFetcher(): void {
   registerQuotaFetcher("codex", fetchCodexQuota);
+  registerQuotaCacheInvalidator("codex", invalidateCodexQuotaCache);
   registerMonitorFetcher("codex", fetchCodexQuota);
   registerQuotaWindows("codex", [
     CODEX_WINDOW_SESSION,

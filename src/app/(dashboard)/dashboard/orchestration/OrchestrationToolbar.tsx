@@ -7,7 +7,10 @@
  */
 import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
 import { isEmptyFilter } from "./model/filterSnapshot";
+import { toggleCsv } from "./model/urlParams";
 import type { OrchFilter } from "./model/filterSnapshot";
 import { ORCH_STATES } from "./model/orchestrationTypes";
 import type { OrchSource, OrchState } from "./model/orchestrationTypes";
@@ -30,19 +33,6 @@ const SOURCE_KEY: Record<(typeof SOURCES)[number], string> = {
 
 const SEARCH_DEBOUNCE_MS = 300;
 
-/** Toggle `value` in `current`, returning the next CSV (or `null` to drop the param). */
-function toggleCsv<T extends string>(current: ReadonlySet<T>, value: T): string | null {
-  const next = new Set(current);
-  if (next.has(value)) next.delete(value);
-  else next.add(value);
-  return next.size > 0 ? [...next].sort().join(",") : null;
-}
-
-const chipClass = (active: boolean) =>
-  `text-[10px] px-2 py-0.5 rounded-full border whitespace-nowrap ${
-    active ? "border-primary bg-primary/10 text-primary" : "border-border text-muted"
-  }`;
-
 /**
  * One labeled row of toggle chips (states / sources / providers). Pure presentation:
  * `active` drives the pressed style + `aria-pressed`, `onToggle` writes the URL param
@@ -63,17 +53,18 @@ function ChipGroup<T extends string>({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-1">
-      <span className="text-[10px] text-muted">{label}</span>
+      <span className="text-[10px] text-text-muted">{label}</span>
       {values.map((v) => (
-        <button
+        <Button
           key={v}
-          type="button"
-          className={chipClass(active.has(v))}
+          size="sm"
+          variant={active.has(v) ? "primary" : "outline"}
+          className="h-6 min-h-6 rounded-full px-2 text-[10px]"
           aria-pressed={active.has(v)}
           onClick={() => onToggle(v)}
         >
           {renderLabel(v)}
-        </button>
+        </Button>
       ))}
     </div>
   );
@@ -99,40 +90,56 @@ export function OrchestrationToolbar({
     []
   );
 
+  const cancelPendingSearch = () => {
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = null;
+  };
+
   const handleSearchChange = (v: string) => {
     setText(v);
-    if (timerRef.current) clearTimeout(timerRef.current);
+    cancelPendingSearch();
     timerRef.current = setTimeout(() => setParams({ q: v || null }), SEARCH_DEBOUNCE_MS);
+  };
+
+  /**
+   * Every chip write goes through here so a debounce timer armed by a keystroke moments
+   * earlier is dropped first. Left pending it would fire ~300ms later with a `setParams`
+   * closed over the PRE-chip search params and silently revert the chip the user just
+   * clicked (the writer rebuilds the whole query string from `params`).
+   */
+  const patchParams = (patch: Record<string, string | null>) => {
+    cancelPendingSearch();
+    setParams(patch);
   };
 
   const handleClear = () => {
     setText("");
-    if (timerRef.current) clearTimeout(timerRef.current);
-    setParams({ q: null, state: null, source: null, provider: null });
+    patchParams({ q: null, state: null, source: null, provider: null });
   };
 
   return (
     <div className="flex flex-wrap items-center gap-3 rounded-lg border border-border bg-surface px-3 py-2">
-      <input
+      <Input
         type="search"
         value={text}
         onChange={(e) => handleSearchChange(e.target.value)}
         placeholder={t("searchPlaceholder")}
-        className="text-xs px-2 py-1 rounded border border-border bg-transparent min-w-[160px]"
+        aria-label={t("searchPlaceholder")}
+        className="min-w-[160px]"
       />
       <ChipGroup
         label={t("filterStates")}
         values={ORCH_STATES}
         active={filter.states}
         renderLabel={(s) => t(STATE_KEY[s])}
-        onToggle={(s) => setParams({ state: toggleCsv(filter.states, s) })}
+        onToggle={(s) => patchParams({ state: toggleCsv(filter.states, s) })}
       />
       <ChipGroup
         label={t("filterSources")}
         values={SOURCES}
         active={filter.sources}
         renderLabel={(s) => t(SOURCE_KEY[s])}
-        onToggle={(s) => setParams({ source: toggleCsv(filter.sources, s) })}
+        onToggle={(s) => patchParams({ source: toggleCsv(filter.sources, s) })}
       />
       {providerKeys.length > 0 && (
         <ChipGroup
@@ -140,17 +147,13 @@ export function OrchestrationToolbar({
           values={providerKeys}
           active={filter.providers}
           renderLabel={(p) => p}
-          onToggle={(p) => setParams({ provider: toggleCsv(filter.providers, p) })}
+          onToggle={(p) => patchParams({ provider: toggleCsv(filter.providers, p) })}
         />
       )}
       {!isEmptyFilter(filter) && (
-        <button
-          type="button"
-          className="text-[10px] underline text-muted ml-auto"
-          onClick={handleClear}
-        >
+        <Button variant="ghost" size="sm" className="ml-auto" onClick={handleClear}>
           {t("clearFilters")}
-        </button>
+        </Button>
       )}
     </div>
   );

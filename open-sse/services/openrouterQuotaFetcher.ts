@@ -33,13 +33,19 @@
  * Registration: call registerOpenrouterQuotaFetcher() once at server startup.
  */
 
-import { registerQuotaFetcher, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 import {
   getFreeWindowStatus,
   isFreeVariantModel,
   resolveAccountKey,
+  syncPurchasedTierFromQuota,
   type FreeWindowStatus,
 } from "./openrouterFreeWindow.ts";
 
@@ -282,11 +288,12 @@ function checkFreeWindowExhausted(
 // ─── Core Fetcher ────────────────────────────────────────────────────────────
 
 async function fetchJson(
+  connectionId: string,
   url: string,
   apiKey: string
 ): Promise<{ status: number; data: unknown } | null> {
   try {
-    const response = await fetch(url, {
+    const response = await fetchWithConnectionProxy(connectionId, url, {
       method: "GET",
       headers: {
         Authorization: `Bearer ${apiKey}`,
@@ -294,6 +301,7 @@ async function fetchJson(
       },
       signal: AbortSignal.timeout(8_000),
     });
+    if (!response) return null;
     if (!response.ok) return { status: response.status, data: null };
     const data = await response.json();
     return { status: response.status, data };
@@ -311,6 +319,30 @@ function isAuthRejected(result: EndpointResult): boolean {
 function rememberQuota(connectionId: string, quota: OpenrouterQuota): OpenrouterQuota {
   quotaCache.set(connectionId, { quota, fetchedAt: Date.now() });
   return quota;
+}
+
+/**
+ * Feed the quota's purchase-history signals into the `:free`-window tier
+ * state so the local 50-vs-1000/day limit tracks OpenRouter's documented
+ * $10 lifetime-purchase tier (https://openrouter.ai/docs/limits) instead of
+ * staying stuck at the 50/day default. Never throws — tier sync must never
+ * break quota fetching.
+ */
+function syncTierFromQuota(
+  connectionId: string,
+  connection: Record<string, unknown> | undefined,
+  quota: Pick<OpenrouterQuota, "totalCredits" | "isFreeTier"> | null | undefined
+): void {
+  if (!quota) return;
+  try {
+    const accountKey = resolveAccountKey(connectionId, connection);
+    syncPurchasedTierFromQuota(accountKey, {
+      totalCredits: quota.totalCredits,
+      isFreeTier: quota.isFreeTier,
+    });
+  } catch {
+    // Fail open: a tier-sync problem must not fail the quota fetch.
+  }
 }
 
 function mergeOpenrouterResults(
@@ -346,6 +378,7 @@ export async function fetchOpenrouterQuota(
 ): Promise<QuotaInfo | null> {
   const cached = quotaCache.get(connectionId);
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
+    syncTierFromQuota(connectionId, connection, cached.quota);
     return cached.quota;
   }
 
@@ -359,10 +392,12 @@ export async function fetchOpenrouterQuota(
     await throttleQuotaFetch();
 
     const keyResult = await fetchJson(
+      connectionId,
       `${OPENROUTER_CONFIG.baseUrl}${OPENROUTER_CONFIG.keyPath}`,
       apiKey
     );
     const creditsResult = await fetchJson(
+      connectionId,
       `${OPENROUTER_CONFIG.baseUrl}${OPENROUTER_CONFIG.creditsPath}`,
       apiKey
     );
@@ -375,6 +410,7 @@ export async function fetchOpenrouterQuota(
     }
 
     const quota = mergeOpenrouterResults(keyResult, creditsResult);
+    if (quota) syncTierFromQuota(connectionId, connection, quota);
     return quota ? rememberQuota(connectionId, quota) : null;
   } catch {
     // Network error, timeout, etc. — fail open (graceful "unknown").
@@ -399,12 +435,33 @@ export async function fetchOpenrouterQuotaWithFreeWindowPreflight(
   connectionId: string,
   connection?: Record<string, unknown>
 ): Promise<QuotaInfo | null> {
-  const freeWindowExhausted = checkFreeWindowExhausted(
+  const initiallyExhausted = checkFreeWindowExhausted(
     connectionId,
     connection,
     connection?.requestedModel
   );
-  return freeWindowExhausted ?? fetchOpenrouterQuota(connectionId, connection);
+  if (!initiallyExhausted) {
+    return fetchOpenrouterQuota(connectionId, connection);
+  }
+  // The local daily counter says exhausted, but it may be enforcing a stale
+  // 50/day tier: fetchOpenrouterQuota() syncs the 1000/day tier from
+  // /credits as a side effect (cached when fresh, fetched otherwise), so
+  // re-evaluate after the refresh instead of returning the stale verdict.
+  // Without this, an exhausted 50-counter short-circuits before the fetch
+  // that would prove the $10+ tier — stuck until UTC midnight.
+  try {
+    const quota = await fetchOpenrouterQuota(connectionId, connection);
+    const accountKey = resolveAccountKey(connectionId, connection);
+    const status = getFreeWindowStatus(accountKey);
+    if (status.dailyRemaining > 0) {
+      // Tier refresh unlocked headroom (e.g. 50 -> 1000/day): allow the
+      // request by returning the fresh quota (null = unknown = fail open).
+      return quota;
+    }
+    return buildFreeWindowExhaustedQuota(status);
+  } catch {
+    return initiallyExhausted;
+  }
 }
 
 // ─── Registration ─────────────────────────────────────────────────────────────
@@ -415,5 +472,6 @@ export async function fetchOpenrouterQuotaWithFreeWindowPreflight(
  */
 export function registerOpenrouterQuotaFetcher(): void {
   registerQuotaFetcher("openrouter", fetchOpenrouterQuotaWithFreeWindowPreflight);
+  registerQuotaCacheInvalidator("openrouter", invalidateOpenrouterQuotaCache);
   registerMonitorFetcher("openrouter", fetchOpenrouterQuotaWithFreeWindowPreflight);
 }

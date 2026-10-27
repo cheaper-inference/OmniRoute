@@ -16,18 +16,20 @@
  * tests) can discover which windows that provider exposes.
  */
 
+import { toNumberOrNull } from "@/shared/utils/numeric";
+
+import { hasOllamaPurchasedCredits } from "./ollamaPurchasedCredits.ts";
 import { getUsageForProvider, USAGE_FETCHER_PROVIDERS } from "./usage.ts";
 import {
+  getQuotaCacheInvalidator,
   getQuotaFetcher,
   registerQuotaFetcher,
   registerQuotaWindows,
   type QuotaFetcher,
   type QuotaInfo,
 } from "./quotaPreflight.ts";
-import {
-  getAntigravityQuotaFamily,
-  getQuotaFetchScope,
-} from "./antigravityQuotaFamily.ts";
+import { getAntigravityQuotaFamily, getQuotaFetchScope } from "./antigravityQuotaFamily.ts";
+import { boundedMap } from "../../src/lib/quota/boundedMap.ts";
 
 type UsageFetcher = (
   connection: Parameters<typeof getUsageForProvider>[0],
@@ -77,29 +79,19 @@ export function __resetGenericQuotaFetcherForTests(): void {
   pendingForceRefreshMiss.clear();
 }
 
-interface CacheEntry {
-  quota: QuotaInfo;
-  fetchedAt: number;
-}
-
-const cache = new Map<string, CacheEntry>();
+// One entry per (provider, connection); 4096 keeps even very large account pools
+// from ever evicting. An evicted entry only costs one extra upstream quota read.
+const cache = boundedMap<QuotaInfo | null>("quota-fetcher-cache", 4096, "ttl", CACHE_TTL_MS);
 
 function connectionKey(provider: string, connectionId: string): string {
   return `${provider.trim()}::${connectionId.trim()}`;
 }
 
-function quotaCacheScope(
-  provider: string,
-  requestedModel?: string | null
-): string {
+function quotaCacheScope(provider: string, requestedModel?: string | null): string {
   return getQuotaFetchScope(provider, requestedModel);
 }
 
-function cacheKey(
-  provider: string,
-  connectionId: string,
-  requestedModel?: string | null
-): string {
+function cacheKey(provider: string, connectionId: string, requestedModel?: string | null): string {
   return `${connectionKey(provider, connectionId)}::${quotaCacheScope(provider, requestedModel)}`;
 }
 
@@ -129,18 +121,13 @@ function cachedQuotaIfFresh(
   key: string,
   forceRefresh: boolean,
   now: number
-): QuotaInfo | null {
-  if (forceRefresh) return null;
-  const cached = cache.get(key);
-  if (cached && now - cached.fetchedAt < CACHE_TTL_MS) return cached.quota;
-  return null;
+): QuotaInfo | null | undefined {
+  if (forceRefresh) return undefined;
+  // undefined is a miss; null is a confirmed paid observation with unknown total headroom.
+  return cache.get(key, now);
 }
 
-function isForceRefreshMissCooling(
-  key: string,
-  forceRefresh: boolean,
-  now: number
-): boolean {
+function isForceRefreshMissCooling(key: string, forceRefresh: boolean, now: number): boolean {
   if (!forceRefresh) return false;
   const missedAt = pendingForceRefreshMiss.get(key);
   return missedAt !== undefined && now - missedAt < CACHE_TTL_MS;
@@ -150,18 +137,35 @@ function isForceRefreshMissCooling(
 function isConcurrentForceRefresh(key: string, refreshStamp: number | undefined): boolean {
   const currentStamp = pendingForceRefresh.get(key);
   if (currentStamp === refreshStamp) return false;
-  return (
-    currentStamp !== undefined &&
-    Date.now() - currentStamp <= PENDING_FORCE_REFRESH_TTL_MS
-  );
+  return currentStamp !== undefined && Date.now() - currentStamp <= PENDING_FORCE_REFRESH_TTL_MS;
 }
 
-// 5min — same as Codex. Expiry is lazy on read (`isPendingForceRefresh`);
-// this timer only reaps keys nobody fetches after the 5min TTL.
+function recordUnmeasurableQuotaRead(
+  usage: unknown,
+  provider: string,
+  key: string,
+  forceKey: string,
+  refreshStamp: number | undefined
+): void {
+  if (!hasOllamaPurchasedCredits(usage, provider)) {
+    markPendingForceRefreshMiss(forceKey);
+    return;
+  }
+  if (isConcurrentForceRefresh(forceKey, refreshStamp)) return;
+  pendingForceRefresh.delete(forceKey);
+  pendingForceRefreshMiss.delete(forceKey);
+  // Cache the successful observation without inventing a quota or clearing the window catalog.
+  cache.set(key, null);
+}
+
+// 5min — same TTL as the original reap (CACHE_TTL_MS * 5). Expiry lazy on read
+// (boundedMap ttl policy); this timer only keeps the sweep of
+// pendingForceRefresh (5-min TTL, no systematic lazy read) + an opportunistic purge
+// of stale cache entries along the way (get auto-purges).
 const _cacheCleanup = setInterval(() => {
   const now = Date.now();
-  for (const [key, entry] of cache) {
-    if (now - entry.fetchedAt > CACHE_TTL_MS * 5) cache.delete(key);
+  for (const key of cache.keys()) {
+    cache.get(key);
   }
   for (const key of pendingForceRefresh.keys()) {
     dropExpiredPendingForceRefresh(key, now);
@@ -169,15 +173,6 @@ const _cacheCleanup = setInterval(() => {
 }, 5 * 60_000);
 if (typeof _cacheCleanup === "object" && "unref" in _cacheCleanup) {
   (_cacheCleanup as { unref?: () => void }).unref?.();
-}
-
-function toNumber(value: unknown): number | null {
-  if (typeof value === "number" && Number.isFinite(value)) return value;
-  if (typeof value === "string") {
-    const parsed = parseFloat(value);
-    if (Number.isFinite(parsed)) return parsed;
-  }
-  return null;
 }
 
 /**
@@ -197,15 +192,15 @@ function percentUsedForQuota(entry: unknown): number | null {
   // otherwise one unreported model falsely exhausts the whole connection.
   if (q.fractionReported === false) return null;
 
-  const remainingPercentage = toNumber(q.remainingPercentage);
+  const remainingPercentage = toNumberOrNull(q.remainingPercentage);
   if (remainingPercentage !== null) {
     // remainingPercentage is 0-100 in the usage.ts contract.
     const used = (100 - Math.max(0, Math.min(100, remainingPercentage))) / 100;
     return used;
   }
 
-  const used = toNumber(q.used);
-  const total = toNumber(q.total);
+  const used = toNumberOrNull(q.used);
+  const total = toNumberOrNull(q.total);
   if (used !== null && total !== null && total > 0) {
     return Math.max(0, Math.min(1, used / total));
   }
@@ -240,12 +235,43 @@ type UsageToQuotaContext = {
   provider?: string | null;
 };
 
+function aggregateGroupedQuotaValues(
+  windows: Record<string, { percentUsed: number; resetAt: string | null }>
+): { percentUsed: number; resetAt: string | null } {
+  const effectiveByBase = new Map<string, { percentUsed: number; resetAt: string | null }>();
+  for (const [key, entry] of Object.entries(windows)) {
+    const base = key.endsWith("_freetrial") ? key.slice(0, -10) : key;
+    const cur = effectiveByBase.get(base);
+    if (!cur || entry.percentUsed < cur.percentUsed) {
+      effectiveByBase.set(base, { percentUsed: entry.percentUsed, resetAt: entry.resetAt ?? null });
+    }
+  }
+  let percentUsed = 0;
+  let resetAt: string | null = null;
+  for (const eff of effectiveByBase.values()) {
+    if (eff.percentUsed > percentUsed) {
+      percentUsed = eff.percentUsed;
+      resetAt = eff.resetAt;
+    }
+  }
+  return { percentUsed, resetAt };
+}
+
+function quotaUsageRecord(
+  usage: unknown,
+  provider?: string | null
+): Record<string, unknown> | null {
+  if (!usage || typeof usage !== "object") return null;
+  const record = usage as Record<string, unknown>;
+  return hasOllamaPurchasedCredits(record, provider) ? null : record;
+}
+
 export function convertUsageToQuotaInfo(
   usage: unknown,
   context: UsageToQuotaContext = {}
 ): QuotaInfo | null {
-  if (!usage || typeof usage !== "object") return null;
-  const usageRecord = usage as Record<string, unknown>;
+  const usageRecord = quotaUsageRecord(usage, context.provider);
+  if (!usageRecord) return null;
   if (
     typeof usageRecord.message === "string" &&
     (!usageRecord.quotas || typeof usageRecord.quotas !== "object")
@@ -268,7 +294,17 @@ export function convertUsageToQuotaInfo(
     windows[name] = { percentUsed, resetAt: resetAtForQuota(entry) };
   }
 
-  if (Object.keys(windows).length === 0) return null;
+  if (Object.keys(windows).length === 0) {
+    // #15347: every reported window is unlimited. That is a known reading (the provider
+    // has no cap), not a failed one, so it must not look like the `null` of a failed read.
+    const reportsUnlimited = Object.values(quotasObj as Record<string, unknown>).some(
+      (entry) =>
+        !!entry &&
+        typeof entry === "object" &&
+        (entry as { unlimited?: unknown }).unlimited === true
+    );
+    return reportsUnlimited ? { used: 0, total: 0, percentUsed: 0, unlimited: true } : null;
+  }
 
   const requestedFamily =
     isAntigravityProvider(context.provider) && context.requestedModel
@@ -288,18 +324,15 @@ export function convertUsageToQuotaInfo(
   if (Object.keys(providerScopedWindows).length === 0) return null;
 
   const normalized = normalizeQuotaWindows(providerScopedWindows, context);
-  const scopedEntries = Object.values(providerScopedWindows);
-  const percentUsed = scopedEntries.reduce(
-    (worst, entry) => Math.max(worst, entry.percentUsed),
-    0
-  );
-  const resetAt =
-    scopedEntries.reduce<{ percentUsed: number; resetAt: string | null } | null>(
-      (worst, entry) => (!worst || entry.percentUsed > worst.percentUsed ? entry : worst),
-      null
-    )?.resetAt ?? null;
+  const { percentUsed, resetAt } = aggregateGroupedQuotaValues(providerScopedWindows);
+  const bootstrap = usageRecord.bootstrap as Record<string, unknown> | null | undefined;
+  const plan = [bootstrap?.organization_rate_limit_tier, usageRecord.plan]
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .find((value) => value.length > 0);
 
   return {
+    ...(plan ? { plan } : {}),
     used: 0,
     total: 0,
     percentUsed,
@@ -322,13 +355,23 @@ function isAntigravityProvider(provider: string | null | undefined): boolean {
   return provider === "antigravity" || provider === "agy";
 }
 
-function antigravityWeeklyWindowMatchesFamily(
-  key: string,
-  family: "gemini" | "claude"
-): boolean {
+function antigravityWeeklyWindowMatchesFamily(key: string, family: "gemini" | "claude"): boolean {
   if (!key.endsWith("_weekly")) return false;
   return family === "gemini" ? key === "gemini_weekly" : key === "claude_gpt_weekly";
 }
+
+const TIME_WINDOW_KEYS = new Set([
+  "session",
+  "weekly",
+  "daily",
+  "monthly",
+  "session (5h)",
+  "weekly (7d)",
+  "AFPFiveHour",
+  "AFPWeekly",
+  "AFPDaily",
+  "AFPMonthly",
+]);
 
 function normalizeQuotaWindows(
   windows: Record<string, { percentUsed: number; resetAt: string | null }>,
@@ -340,12 +383,14 @@ function normalizeQuotaWindows(
       ? getAntigravityQuotaFamily(context.requestedModel)
       : null;
 
-  // Claude-style explicit time windows.
-  if (windows["session (5h)"] && !normalized.window5h) {
-    normalized.window5h = windows["session (5h)"];
+  // Explicit time windows (canonical and legacy aliases).
+  const fiveHourWindow = windows["session (5h)"] || windows["session"] || windows.code_5h;
+  if (fiveHourWindow && !normalized.window5h) {
+    normalized.window5h = fiveHourWindow;
   }
-  if (windows["weekly (7d)"] && !normalized.window7d) {
-    normalized.window7d = windows["weekly (7d)"];
+  const sevenDayWindow = windows["weekly (7d)"] || windows["weekly"] || windows.code_7d;
+  if (sevenDayWindow && !normalized.window7d) {
+    normalized.window7d = sevenDayWindow;
   }
 
   // Antigravity-style per-model windows: pick worst only inside requested family.
@@ -356,6 +401,7 @@ function normalizeQuotaWindows(
       !key.startsWith("window") &&
       !key.includes("(5h)") &&
       !key.includes("(7d)") &&
+      !TIME_WINDOW_KEYS.has(key) &&
       (requestedFamily === null ||
         requestedFamily === "other" ||
         getAntigravityQuotaFamily(key) === requestedFamily)
@@ -400,7 +446,7 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
   const now = Date.now();
   const forceRefresh = isPendingForceRefresh(forceKey, now);
   const hit = cachedQuotaIfFresh(key, forceRefresh, now);
-  if (hit) return hit;
+  if (hit !== undefined) return hit;
   // convert-null / throw keep the force-refresh flag (agy inner caches are
   // still stale) but must not hammer those endpoints on every routing tick.
   if (isForceRefreshMissCooling(forceKey, forceRefresh, now)) return null;
@@ -422,7 +468,7 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
 
   const quota = convertUsageToQuotaInfo(usage, { provider, requestedModel });
   if (!quota) {
-    markPendingForceRefreshMiss(forceKey);
+    recordUnmeasurableQuotaRead(usage, provider, key, forceKey, refreshStamp);
     return null;
   }
 
@@ -440,7 +486,7 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
   const unscopedQuota = convertUsageToQuotaInfo(usage, { provider });
   registerQuotaWindows(provider, Object.keys(unscopedQuota?.windows || quota.windows || {}));
 
-  cache.set(key, { quota, fetchedAt: Date.now() });
+  cache.set(key, quota);
   return quota;
 };
 
@@ -463,11 +509,13 @@ export function invalidateGenericQuotaCache(provider: string, connectionId: stri
 }
 
 /**
- * Drop the generic quota cache after an upstream 429, matching Codex's
- * `invalidateCodexQuotaCache` on 429. Probe-origin failures must not mutate
- * routing caches (#9817).
+ * Drop the provider's cached quota snapshot after an upstream 429 so the next
+ * preflight reads fresh usage instead of serving a stale snapshot. A bespoke
+ * fetcher drops its own cache through the invalidator it registered for the
+ * provider; providers served by the generic wrapper keep the generic cache drop.
+ * Probe-origin failures must not mutate routing caches (#9817).
  */
-export function invalidateGenericQuotaCacheOnStatus(args: {
+export function invalidateQuotaCacheOnStatus(args: {
   provider: string | null | undefined;
   connectionId: string | null | undefined;
   status: number;
@@ -478,7 +526,9 @@ export function invalidateGenericQuotaCacheOnStatus(args: {
   const provider = typeof args.provider === "string" ? args.provider.trim() : "";
   const connectionId = typeof args.connectionId === "string" ? args.connectionId.trim() : "";
   if (!provider || !connectionId) return false;
-  invalidateGenericQuotaCache(provider, connectionId);
+  const invalidator = getQuotaCacheInvalidator(provider);
+  if (invalidator) invalidator(connectionId);
+  else invalidateGenericQuotaCache(provider, connectionId);
   return true;
 }
 

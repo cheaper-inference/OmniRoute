@@ -1,5 +1,7 @@
 "use client";
 
+import { Card } from "@/shared/components";
+
 /**
  * ProviderInterceptionSection — provider-level toggles for OmniRoute web
  * search/fetch tool interception (#3384 Phases 1-2 shipped the DB schema +
@@ -32,19 +34,20 @@ type Translate = (key: string, values?: Record<string, string>) => string;
 
 const DEFAULT_TOGGLES: InterceptionToggles = { interceptSearch: false, interceptFetch: false };
 
+async function throwOnErrorResponse(res: Response): Promise<void> {
+  if (res.ok) return;
+  const errData = await res.json().catch(() => ({}));
+  throw new Error(errData.error || `HTTP ${res.status}`);
+}
+
 async function fetchInterceptionToggles(providerId: string): Promise<InterceptionToggles> {
   const res = await fetch(`/api/providers/${providerId}/interception-rules`);
+  await throwOnErrorResponse(res);
   const data = await res.json();
   return {
     interceptSearch: data?.interceptSearch === true,
     interceptFetch: data?.interceptFetch === true,
   };
-}
-
-async function throwOnErrorResponse(res: Response): Promise<void> {
-  if (res.ok) return;
-  const errData = await res.json().catch(() => ({}));
-  throw new Error(errData.error || `HTTP ${res.status}`);
 }
 
 async function putInterceptionToggles(
@@ -121,10 +124,10 @@ function useProviderInterceptionToggles(providerId: string, t: Translate) {
 
 function InterceptionSectionSkeleton() {
   return (
-    <div className="rounded-xl border border-border bg-white p-5 dark:bg-zinc-950">
-      <div className="h-5 w-56 animate-pulse rounded bg-zinc-200 dark:bg-zinc-800" />
-      <div className="mt-4 h-16 animate-pulse rounded bg-zinc-100 dark:bg-zinc-900" />
-    </div>
+    <Card padding="sm" className="p-5">
+      <div className="h-5 w-56 animate-pulse rounded bg-bg-subtle" />
+      <div className="mt-4 h-16 animate-pulse rounded bg-bg-subtle" />
+    </Card>
   );
 }
 
@@ -142,7 +145,7 @@ export default function ProviderInterceptionSection({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-white p-5 dark:bg-zinc-950">
+    <Card padding="sm" className="p-5">
       <h2 className="text-base font-semibold text-text-main mb-1">
         {t("interceptionSectionTitle")}
       </h2>
@@ -165,6 +168,6 @@ export default function ProviderInterceptionSection({
           description={t("interceptFetchHint")}
         />
       </div>
-    </div>
+    </Card>
   );
 }

@@ -1,7 +1,8 @@
 "use client";
 
-import { useRef } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import EmptyState from "@/shared/components/EmptyState";
 import type { InterceptedRequest } from "@/mitm/inspector/types";
 import { useVirtualList } from "../hooks/useVirtualList";
 import { RequestRow } from "./RequestRow";
@@ -35,31 +36,29 @@ export function RequestStreamingList({
     return (
       <div className="h-full flex flex-col">
         {sameContextKey && (
-          <div className="shrink-0 flex items-center gap-2 px-2 py-1 bg-blue-900/30 border-b border-blue-500/40 text-xs text-blue-300 font-mono">
+          <div className="shrink-0 flex items-center gap-2 border-b border-border bg-info-bg px-2 py-1 font-mono text-xs text-info">
             <span>{t("filteringContext", { context: sameContextKey.slice(0, 6) })}</span>
-            <button
-              type="button"
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="close"
+              className="h-auto min-h-0 px-1 py-0 text-xs"
               onClick={onClearContextFilter}
-              className="ml-1 underline hover:text-blue-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-400"
             >
-              [{t("clear")}]
-            </button>
+              {t("clearContextFilter")}
+            </Button>
           </div>
         )}
         <div
           ref={containerRef}
-          className="flex-1 flex items-center justify-center text-sm text-text-muted"
+          data-testid="request-list"
+          className="flex-1 flex items-center justify-center p-2"
         >
-          <div className="text-center space-y-2">
-            <span
-              className="material-symbols-outlined text-[36px] text-text-muted block"
-              aria-hidden="true"
-            >
-              network_check
-            </span>
-            <p>{t("noRequests")}</p>
-            <p className="text-xs">{t("noRequestsDesc")}</p>
-          </div>
+          <EmptyState
+            icon="network_check"
+            title={t("noRequests")}
+            description={t("noRequestsDesc")}
+          />
         </div>
       </div>
     );
@@ -68,19 +67,22 @@ export function RequestStreamingList({
   return (
     <div className="h-full flex flex-col">
       {sameContextKey && (
-        <div className="shrink-0 flex items-center gap-2 px-2 py-1 bg-blue-900/30 border-b border-blue-500/40 text-xs text-blue-300 font-mono">
+        <div className="shrink-0 flex items-center gap-2 border-b border-border bg-info-bg px-2 py-1 font-mono text-xs text-info">
           <span>{t("filteringContext", { context: sameContextKey.slice(0, 6) })}</span>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="sm"
+            icon="close"
+            className="h-auto min-h-0 px-1 py-0 text-xs"
             onClick={onClearContextFilter}
-            className="ml-1 underline hover:text-blue-100 focus:outline-none focus-visible:ring-1 focus-visible:ring-blue-400"
           >
-            [{t("clear")}]
-          </button>
+            {t("clearContextFilter")}
+          </Button>
         </div>
       )}
       <div
         ref={containerRef as React.RefObject<HTMLDivElement>}
+        data-testid="request-list"
         className="flex-1 overflow-y-auto relative"
         style={{ contain: "strict" }}
       >

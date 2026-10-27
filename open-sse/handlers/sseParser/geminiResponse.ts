@@ -22,6 +22,16 @@ type GeminiSSEAccumulator = {
 
 function stripZeroWidth(value: unknown): unknown {
   if (typeof value === "string") return stripObfuscationZeroWidth(value);
+  if (value && typeof value === "object") {
+    if (Array.isArray(value)) {
+      return value.map(stripZeroWidth);
+    }
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = stripZeroWidth(v);
+    }
+    return out;
+  }
   return value;
 }
 
@@ -54,7 +64,25 @@ function extractGeminiMarkdownShortcut(parsed: Record<string, unknown>): string 
 
 /** Append one candidate content part (text or textual tool call) onto the accumulator. */
 function applyCandidatePart(part: Record<string, unknown>, acc: GeminiSSEAccumulator): void {
-  if (typeof part.text !== "string" || part.thought || part.thoughtSignature) return;
+  // Native function calls (Gemini 3.x / Antigravity)
+  const fc = part.functionCall as Record<string, unknown> | undefined;
+  if (fc && typeof fc.name === "string") {
+    acc.toolCalls.push({
+      id:
+        typeof fc.id === "string" && fc.id.length > 0
+          ? fc.id
+          : `${fc.name}-${Date.now()}-${acc.toolCalls.length}`,
+      index: acc.toolCalls.length,
+      type: "function",
+      function: {
+        name: fc.name,
+        arguments: JSON.stringify(stripZeroWidth(fc.args ?? {})),
+      },
+    });
+    return;
+  }
+
+  if (typeof part.text !== "string" || part.thought === true) return;
 
   const textualToolCall = tryParseTextualToolCall(part.text);
   if (textualToolCall) {
@@ -97,44 +125,68 @@ function applyFinishReason(
   );
 }
 
+/** A finite, non-negative number from `value`, else `fallback`. */
+function nonNegativeOr<T>(value: unknown, fallback: T): number | T {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0 ? value : fallback;
+}
+
+/**
+ * Resolve the cached-token count of a usage snapshot. A reported count larger than the prompt
+ * is invalid; a snapshot that omits the field keeps the last valid count (snapshots are cumulative).
+ */
+function resolveCachedTokens(
+  um: Record<string, unknown>,
+  promptTokens: number | undefined,
+  previousCachedTokens: number | undefined
+): number | undefined {
+  if (!Object.prototype.hasOwnProperty.call(um, "cachedContentTokenCount")) {
+    return previousCachedTokens;
+  }
+  const reported = nonNegativeOr(um.cachedContentTokenCount, undefined);
+  return reported !== undefined && typeof promptTokens === "number" && reported <= promptTokens
+    ? reported
+    : undefined;
+}
+
+/**
+ * Fold the resolved cached-token count into the accumulated usage. A positive count is exposed as
+ * `prompt_tokens_details.cached_tokens` (a breakdown of the inclusive prompt count, not extra
+ * input). A reported zero or an invalid count keeps the plain usage shape: this object is returned
+ * to clients as-is, so no internal evidence marker is added to it. A snapshot that omits the field
+ * keeps the last valid count.
+ */
+function applyCacheEvidence(
+  usage: Record<string, unknown>,
+  um: Record<string, unknown>,
+  cachedTokens: number | undefined
+): void {
+  if (typeof cachedTokens === "number" && cachedTokens > 0) {
+    usage.prompt_tokens_details = { cached_tokens: cachedTokens };
+  } else if (Object.prototype.hasOwnProperty.call(um, "cachedContentTokenCount")) {
+    delete usage.prompt_tokens_details;
+  }
+}
+
 /** Extract usageMetadata into the OpenAI-shaped usage object, if present. */
 function applyUsageMetadata(parsed: Record<string, unknown>, acc: GeminiSSEAccumulator): void {
-  const response = parsed.response as Record<string, unknown> | undefined;
-  const um = (response?.usageMetadata ?? parsed.usageMetadata) as
-    Record<string, unknown> | undefined;
+  const response = (parsed.response ?? parsed) as Record<string, unknown>;
+  const um = response?.usageMetadata as Record<string, unknown> | undefined;
   if (!um) return;
 
   const previousUsage = acc.usage ?? {};
-  const promptTokens =
-    typeof um.promptTokenCount === "number" &&
-    Number.isFinite(um.promptTokenCount) &&
-    um.promptTokenCount >= 0
-      ? um.promptTokenCount
-      : previousUsage.prompt_tokens;
-  const completionTokens =
-    typeof um.candidatesTokenCount === "number" &&
-    Number.isFinite(um.candidatesTokenCount) &&
-    um.candidatesTokenCount >= 0
-      ? um.candidatesTokenCount
-      : previousUsage.completion_tokens;
+  const promptTokens = nonNegativeOr(um.promptTokenCount, previousUsage.prompt_tokens);
+  const completionTokens = nonNegativeOr(um.candidatesTokenCount, previousUsage.completion_tokens);
+  // Gemini may omit totalTokenCount (or report 0); keep the last total, else derive it.
   const totalTokens =
-    typeof um.totalTokenCount === "number" &&
-    Number.isFinite(um.totalTokenCount) &&
-    um.totalTokenCount >= 0
-      ? um.totalTokenCount
-      : previousUsage.total_tokens;
-  const hasCachedCount = Object.prototype.hasOwnProperty.call(um, "cachedContentTokenCount");
-  const reportedCachedTokens = um.cachedContentTokenCount;
-  const cachedTokens =
-    typeof reportedCachedTokens === "number" &&
-    Number.isFinite(reportedCachedTokens) &&
-    reportedCachedTokens >= 0 &&
-    typeof promptTokens === "number" &&
-    reportedCachedTokens <= promptTokens
-      ? reportedCachedTokens
-      : !hasCachedCount
-        ? previousUsage.cached_tokens
-        : undefined;
+    nonNegativeOr(um.totalTokenCount, 0) ||
+    previousUsage.total_tokens ||
+    (typeof promptTokens === "number" && typeof completionTokens === "number"
+      ? promptTokens + completionTokens
+      : undefined);
+  const previousCachedTokens = (
+    previousUsage.prompt_tokens_details as { cached_tokens?: number } | undefined
+  )?.cached_tokens;
+  const cachedTokens = resolveCachedTokens(um, promptTokens, previousCachedTokens);
 
   const nextUsage = {
     ...previousUsage,
@@ -142,12 +194,7 @@ function applyUsageMetadata(parsed: Record<string, unknown>, acc: GeminiSSEAccum
     ...(typeof completionTokens === "number" ? { completion_tokens: completionTokens } : {}),
     ...(typeof totalTokens === "number" ? { total_tokens: totalTokens } : {}),
   } as Record<string, unknown>;
-  if (typeof cachedTokens === "number") {
-    nextUsage.cached_tokens = cachedTokens;
-  } else if (hasCachedCount) {
-    delete nextUsage.cached_tokens;
-    nextUsage.cache_evidence = "invalid";
-  }
+  applyCacheEvidence(nextUsage, um, cachedTokens);
   acc.usage = nextUsage;
 }
 
@@ -162,7 +209,7 @@ function applyGeminiSSEDataLine(payload: string, acc: GeminiSSEAccumulator): voi
       acc.sawContent = true;
     }
 
-    const response = parsed.response as Record<string, unknown> | undefined;
+    const response = (parsed.response ?? parsed) as Record<string, unknown>;
     const candidates = response?.candidates;
     const candidate = Array.isArray(candidates)
       ? (candidates[0] as Record<string, unknown> | undefined)

@@ -1252,9 +1252,12 @@ test("Gemini stream: explicit zero cache usage remains reported", () => {
       state
     ) || [];
 
-  assert.deepEqual(result.find((event: OpenAIStreamEvent) => event.usage)?.usage.prompt_tokens_details, {
-    cached_tokens: 0,
-  });
+  assert.deepEqual(
+    result.find((event: OpenAIStreamEvent) => event.usage)?.usage.prompt_tokens_details,
+    {
+      cached_tokens: 0,
+    }
+  );
 });
 
 test("Gemini stream: absent prompt and total fields preserve earlier usage", () => {
@@ -1271,10 +1274,14 @@ test("Gemini stream: absent prompt and total fields preserve earlier usage", () 
     },
     state
   );
-  const result = geminiToOpenAIResponse(
-    { candidates: [{ content: { parts: [] }, finishReason: "STOP" }], usageMetadata: { candidatesTokenCount: 5 } },
-    state
-  ) || [];
+  const result =
+    geminiToOpenAIResponse(
+      {
+        candidates: [{ content: { parts: [] }, finishReason: "STOP" }],
+        usageMetadata: { candidatesTokenCount: 5 },
+      },
+      state
+    ) || [];
   assert.deepEqual(result.find((event: OpenAIStreamEvent) => event.usage)?.usage, {
     prompt_tokens: 100,
     completion_tokens: 5,
@@ -1297,14 +1304,22 @@ test("Gemini stream: invalid cache count clears an earlier hit", () => {
     },
     state
   );
-  const result = geminiToOpenAIResponse(
-    {
-      candidates: [{ content: { parts: [] }, finishReason: "STOP" }],
-      usageMetadata: { promptTokenCount: 100, candidatesTokenCount: 5, cachedContentTokenCount: 200 },
-    },
-    state
-  ) || [];
-  assert.equal(result.find((event: OpenAIStreamEvent) => event.usage)?.usage.prompt_tokens_details, undefined);
+  const result =
+    geminiToOpenAIResponse(
+      {
+        candidates: [{ content: { parts: [] }, finishReason: "STOP" }],
+        usageMetadata: {
+          promptTokenCount: 100,
+          candidatesTokenCount: 5,
+          cachedContentTokenCount: 200,
+        },
+      },
+      state
+    ) || [];
+  assert.equal(
+    result.find((event: OpenAIStreamEvent) => event.usage)?.usage.prompt_tokens_details,
+    undefined
+  );
 });
 
 test("Gemini stream: invalid cached usage is not exposed as a hit", () => {
@@ -1323,7 +1338,10 @@ test("Gemini stream: invalid cached usage is not exposed as a hit", () => {
       state
     ) || [];
 
-  assert.equal(result.find((event: OpenAIStreamEvent) => event.usage)?.usage.prompt_tokens_details, undefined);
+  assert.equal(
+    result.find((event: OpenAIStreamEvent) => event.usage)?.usage.prompt_tokens_details,
+    undefined
+  );
 });
 
 test("Gemini stream: open textual reasoning is flushed before a signed native tool call", () => {

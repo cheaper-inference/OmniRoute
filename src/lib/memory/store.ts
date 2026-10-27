@@ -7,7 +7,7 @@ import { upsertSemanticMemoryPoint, deleteSemanticMemoryPoint } from "./qdrant";
 import { Memory, MemoryType } from "./types";
 import { logger } from "../../../open-sse/utils/logger.ts";
 import { sanitizeErrorMessage } from "../../../open-sse/utils/error.ts";
-import { resolveEmbeddingSource, embed, withMeasuredDimensions } from "./embedding";
+import { resolveEmbeddingSource, embedWithRetry, withMeasuredDimensions } from "./embedding";
 import { getVectorStore } from "./vectorStore";
 import { getMemorySettings } from "./settings";
 import { markMemoryNeedsReindex } from "@/lib/db/memoryVec";
@@ -137,7 +137,9 @@ function scheduleVectorUpsert(id: string, content: string): void {
       const resolution = resolveEmbeddingSource(settings);
       if (!resolution.source) return;
 
-      const embeddingResult = await embed(content, settings);
+      // #13601: one retry before giving up — a single transient embed failure
+      // must not skip vectorization. The warn below keeps the cause visible.
+      const embeddingResult = await embedWithRetry(content, settings);
       if (!("vector" in embeddingResult)) {
         log.warn("memory.vec.embed.fail", {
           id,
@@ -202,14 +204,7 @@ export async function createMemory(
       now,
       memory.sessionId,
       memory.type,
-      memory.expiresAt ?? null,
-      existing.id
-    );
-
-    // Self-heal rows created before the insert-time memory_id sync (see the
-    // INSERT branch below): set memory_id from the rowid when still NULL so the
-    // FTS JOIN keeps working for legacy rows. No-op for rows already synced.
-    db.prepare("UPDATE memories SET memory_id = rowid WHERE id = ? AND memory_id IS NULL").run(
+      memory.expiresAt?.toISOString() ?? null,
       existing.id
     );
 
@@ -287,13 +282,7 @@ export async function createMemory(
     memory.expiresAt?.toISOString() ?? null
   );
 
-  // Keep memory_id in sync with the SQLite rowid. Migration 023 made the FTS5
-  // external-content trigger key off `memory_id` (JOIN memories.memory_id =
-  // memory_fts.rowid in retrieval.ts), but a plain INSERT leaves it NULL — the
-  // trigger then stores an auto-assigned FTS5 rowid and every keyword/hybrid
-  // search silently returns 0 results. The AFTER UPDATE trigger re-syncs FTS
-  // when memory_id is set here.
-  db.prepare("UPDATE memories SET memory_id = rowid WHERE id = ?").run(id);
+  // memory_id (the FTS5 content_rowid) is assigned by the memory_fts_ai_assign trigger.
 
   const createdMemory: Memory = {
     id,

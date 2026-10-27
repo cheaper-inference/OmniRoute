@@ -1,7 +1,10 @@
 import { NextResponse } from "next/server";
 import { getApiKeyById } from "@/lib/db/apiKeys";
 import { isApiKeyRevealEnabled } from "@/lib/apiKeyExposure";
-import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import {
+  requireCredentialForManagementScopedKey,
+  requireManagementAuth,
+} from "@/lib/api/requireManagementAuth";
 import * as log from "@/sse/utils/logger";
 
 // GET /api/keys/[id]/reveal - Reveal full API key for explicit copy actions
@@ -20,6 +23,9 @@ export async function GET(request, { params }) {
     if (!key || typeof key.key !== "string") {
       return NextResponse.json({ error: "Key not found" }, { status: 404 });
     }
+
+    const scopeAuthError = await requireCredentialForManagementScopedKey(request, key.scopes);
+    if (scopeAuthError) return scopeAuthError;
 
     return NextResponse.json({ key: key.key });
   } catch (error) {

@@ -3,6 +3,7 @@ import {
   type ProviderBillingStatus,
 } from "@/shared/utils/providerBilling";
 import { getDbInstance, isBuildPhase, isCloud } from "./core";
+import { parseCodexPaidCredits, type CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -24,12 +25,15 @@ interface KeyValueRow {
 
 export interface ProviderLimitsCacheEntry {
   quotas: JsonRecord | null;
+  modelQuotas?: JsonRecord;
   plan: unknown;
   message: string | null;
   fetchedAt: string;
   source?: string | null;
   bankedResetCredits?: number;
+  paidCredits?: CodexPaidCredits;
   billing?: ProviderBillingStatus;
+  quotaGroups?: Array<Record<string, unknown>>;
 }
 
 const PROVIDER_LIMITS_CACHE_NAMESPACE = "providerLimitsCache";
@@ -61,16 +65,23 @@ function normalizeCacheEntry(value: unknown): ProviderLimitsCacheEntry | null {
   if (!fetchedAt) return null;
 
   const bankedResetCredits = Number(record.bankedResetCredits);
+  const paidCredits = parseCodexPaidCredits(record.paidCredits);
   const billing = sanitizeProviderBillingStatus(record.billing);
+  const modelQuotas = toRecord(record.modelQuotas);
 
   return {
     quotas: toRecord(record.quotas),
+    ...(modelQuotas ? { modelQuotas } : {}),
     plan: record.plan ?? null,
     message: typeof record.message === "string" ? record.message : null,
     fetchedAt,
     source: typeof record.source === "string" ? record.source : null,
     ...(Number.isFinite(bankedResetCredits) ? { bankedResetCredits } : {}),
+    ...(paidCredits ? { paidCredits } : {}),
     ...(billing ? { billing } : {}),
+    ...(Array.isArray(record.quotaGroups)
+      ? { quotaGroups: record.quotaGroups as Array<Record<string, unknown>> }
+      : {}),
   };
 }
 

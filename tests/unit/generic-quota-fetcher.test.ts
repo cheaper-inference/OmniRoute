@@ -8,7 +8,7 @@ const {
   convertUsageToQuotaInfo,
   fetchGenericQuota,
   invalidateGenericQuotaCache,
-  invalidateGenericQuotaCacheOnStatus,
+  invalidateQuotaCacheOnStatus,
   registerGenericQuotaFetchers,
   __setGenericUsageFetcherForTests,
   __agePendingForceRefreshForTests,
@@ -62,6 +62,20 @@ test("convertUsageToQuotaInfo maps remainingPercentage into per-window percentUs
   assert.equal(result!.resetAt, "2026-05-21T00:00:00Z");
 });
 
+test("convertUsageToQuotaInfo maps Kimi Coding code_5h/code_7d onto structural windows", () => {
+  const result = convertUsageToQuotaInfo({
+    quotas: {
+      code_5h: { remainingPercentage: 81.2298, resetAt: "2099-09-19T14:24:04.000Z" },
+      code_7d: { remainingPercentage: 85.2949, resetAt: "2099-09-25T02:24:04.000Z" },
+    },
+  });
+  assert.ok(result);
+  assert.equal(Number(result!.window5h?.percentUsed.toFixed(6)), 0.187702);
+  assert.equal(Number(result!.window7d?.percentUsed.toFixed(6)), 0.147051);
+  assert.equal(result!.window5h?.resetAt, "2099-09-19T14:24:04.000Z");
+  assert.equal(result!.window7d?.resetAt, "2099-09-25T02:24:04.000Z");
+});
+
 test("convertUsageToQuotaInfo falls back to used/total when remainingPercentage is absent", () => {
   const result = convertUsageToQuotaInfo({
     quotas: { session: { used: 45, total: 100, resetAt: null } },
@@ -84,9 +98,18 @@ test("convertUsageToQuotaInfo skips unlimited and unmeasurable windows", () => {
   assert.deepEqual(Object.keys(result!.windows || {}), ["session"]);
 });
 
-test("convertUsageToQuotaInfo returns null when no windows are measurable", () => {
+test("convertUsageToQuotaInfo marks an unlimited-only provider as unlimited, not as a failed read (#15347)", () => {
+  // `null` from a fetcher means "could not read it" and is ranked below real readings in
+  // auto-combo; a provider with no cap is a real, known reading of full headroom.
   const result = convertUsageToQuotaInfo({
     quotas: { unlimited_thing: { unlimited: true } },
+  });
+  assert.deepEqual(result, { used: 0, total: 0, percentUsed: 0, unlimited: true });
+});
+
+test("convertUsageToQuotaInfo returns null when no window is measurable and none is unlimited", () => {
+  const result = convertUsageToQuotaInfo({
+    quotas: { unknown_shape: { resetAt: null }, unreported: { fractionReported: false } },
   });
   assert.equal(result, null);
 });
@@ -142,6 +165,15 @@ test("registerGenericQuotaFetchers registers Claude, GLM, and OpenCode Go via th
   // semantics are exercised by the source code review.
 });
 
+test("convertUsageToQuotaInfo skips Antigravity quota entries with an unknown fraction", () => {
+  const result = convertUsageToQuotaInfo({
+    quotas: {
+      gemini: { fractionReported: false, resetAt: "2026-05-14T20:00:00Z" },
+    },
+  });
+  assert.equal(result, null);
+});
+
 test.afterEach(() => {
   __setGenericUsageFetcherForTests(null);
   __resetGenericQuotaFetcherForTests();
@@ -193,7 +225,7 @@ test("invalidateGenericQuotaCache makes the next fetch bypass provider-inner usa
   invalidateGenericQuotaCache("agy", connectionId);
 });
 
-test("invalidateGenericQuotaCacheOnStatus drops cache on 429 and ignores 200", async () => {
+test("invalidateQuotaCacheOnStatus drops cache on 429 and ignores 200", async () => {
   const connectionId = `agy-429-${Date.now()}`;
   const calls: Array<{ forceRefresh?: boolean }> = [];
   __setGenericUsageFetcherForTests(async (_conn, options) => {
@@ -205,7 +237,7 @@ test("invalidateGenericQuotaCacheOnStatus drops cache on 429 and ignores 200", a
   await fetchGenericQuota(connectionId, connection);
   assert.equal(calls.length, 1);
 
-  invalidateGenericQuotaCacheOnStatus({
+  invalidateQuotaCacheOnStatus({
     provider: "agy",
     connectionId,
     status: 200,
@@ -214,7 +246,7 @@ test("invalidateGenericQuotaCacheOnStatus drops cache on 429 and ignores 200", a
   await fetchGenericQuota(connectionId, connection);
   assert.equal(calls.length, 1, "200 must not drop the generic quota cache");
 
-  const dropped429 = invalidateGenericQuotaCacheOnStatus({
+  const dropped429 = invalidateQuotaCacheOnStatus({
     provider: "agy",
     connectionId,
     status: 429,
@@ -225,7 +257,7 @@ test("invalidateGenericQuotaCacheOnStatus drops cache on 429 and ignores 200", a
   assert.equal(calls.length, 2, "429 must drop the generic quota cache");
   assert.equal(calls[1]?.forceRefresh, true);
 
-  invalidateGenericQuotaCacheOnStatus({
+  invalidateQuotaCacheOnStatus({
     provider: "agy",
     connectionId,
     status: 429,
@@ -235,7 +267,7 @@ test("invalidateGenericQuotaCacheOnStatus drops cache on 429 and ignores 200", a
   assert.equal(calls.length, 2, "probe-origin 429 must not touch routing caches");
 
   assert.doesNotThrow(() =>
-    invalidateGenericQuotaCacheOnStatus({
+    invalidateQuotaCacheOnStatus({
       provider: "agy",
       connectionId: null,
       status: 429,
@@ -245,7 +277,7 @@ test("invalidateGenericQuotaCacheOnStatus drops cache on 429 and ignores 200", a
   invalidateGenericQuotaCache("agy", connectionId);
 });
 
-test("invalidateGenericQuotaCacheOnStatus trims to the same key fetchGenericQuota uses", async () => {
+test("invalidateQuotaCacheOnStatus trims to the same key fetchGenericQuota uses", async () => {
   const connectionId = `agy-trim-${Date.now()}`;
   const calls: Array<{ forceRefresh?: boolean }> = [];
   __setGenericUsageFetcherForTests(async (_conn, options) => {
@@ -257,7 +289,7 @@ test("invalidateGenericQuotaCacheOnStatus trims to the same key fetchGenericQuot
   await fetchGenericQuota(`  ${connectionId}  `, connection);
   assert.equal(calls.length, 1);
 
-  const dropped = invalidateGenericQuotaCacheOnStatus({
+  const dropped = invalidateQuotaCacheOnStatus({
     provider: "  agy  ",
     connectionId: `  ${connectionId}  `,
     status: 429,
@@ -329,7 +361,11 @@ test("in-flight fetch must not drop a concurrent 429 force-refresh", async () =>
   assert.equal(first?.percentUsed, 0.2);
 
   const second = await fetchGenericQuota(connectionId, connection);
-  assert.equal(calls.length, 2, "concurrent 429 must not let the in-flight recache wipe force-refresh");
+  assert.equal(
+    calls.length,
+    2,
+    "concurrent 429 must not let the in-flight recache wipe force-refresh"
+  );
   assert.equal(calls[1]?.forceRefresh, true);
   assert.equal(second?.percentUsed, 0.9);
   invalidateGenericQuotaCache("agy", connectionId);
@@ -387,4 +423,29 @@ test("stamp expiry during in-flight fetch still writes the wrapper cache", async
   await fetchGenericQuota(connectionId, connection);
   assert.equal(calls.length, 2, "expired stamp during await is not a 429; cache the result");
   invalidateGenericQuotaCache("agy", connectionId);
+});
+
+test("convertUsageToQuotaInfo aggregates _freetrial and non-freetrial windows using best remaining", async () => {
+  const usage = {
+    quotas: {
+      credit: { used: 50, total: 50 },
+      credit_freetrial: { used: 0, total: 500 },
+    },
+  };
+  const result = convertUsageToQuotaInfo(usage, { provider: "kiro" });
+  // Used: min of 100% and 0% = 0%
+  assert.equal(result?.percentUsed, 0);
+  assert.equal(result?.limitReached, false);
+});
+
+test("convertUsageToQuotaInfo blocks when both base and freetrial are exhausted", async () => {
+  const usage = {
+    quotas: {
+      credit: { used: 50, total: 50 },
+      credit_freetrial: { used: 500, total: 500 },
+    },
+  };
+  const result = convertUsageToQuotaInfo(usage, { provider: "kiro" });
+  assert.equal(result?.percentUsed, 1);
+  assert.equal(result?.limitReached, true);
 });

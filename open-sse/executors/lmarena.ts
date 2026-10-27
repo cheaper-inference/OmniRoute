@@ -10,7 +10,9 @@
 import { v7 as uuidv7 } from "uuid";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { tlsFetchLMArena, TlsClientUnavailableError } from "../services/lmarenaTlsClient.ts";
+import { currentAppliedProxySink } from "../utils/proxyFetch.ts";
 import { readLMArenaCookie, reconstructLMArenaCookie } from "./lmarena/cookie.ts";
+import { sanitizeLMArenaError } from "./lmarena/error.ts";
 import {
   LMARENA_STREAM_URL,
   LMARENA_USER_AGENT,
@@ -23,6 +25,7 @@ import {
   type LMArenaModelMetadata,
 } from "./lmarena/models.ts";
 import { formatArenaPrompt, parseArenaSSE } from "./lmarena/stream.ts";
+import { resolveLMArenaClientInteraction } from "./lmarena/clientInteraction.ts";
 import {
   buildArenaUpstreamHttpResponse,
   createOpenAIArenaStream,
@@ -50,6 +53,15 @@ interface OpenAIMessage {
   content?: unknown;
 }
 
+function isTlsClientUnavailableError(error: unknown): error is TlsClientUnavailableError {
+  try {
+    return error instanceof TlsClientUnavailableError;
+  } catch {
+    // A rejected Proxy may throw while instanceof walks its prototype chain.
+    return false;
+  }
+}
+
 /** Optional browser-issued reCAPTCHA v3 token (operator-supplied). */
 function readRecaptchaToken(credentials: unknown, body: unknown): string | null {
   const fromObj = (v: unknown): string | null => {
@@ -66,6 +78,12 @@ function readRecaptchaToken(credentials: unknown, body: unknown): string | null 
     return null;
   };
   return fromObj(credentials) ?? fromObj(body);
+}
+
+// Publish the received status so proxy health counts it as upstream.
+function recordLMArenaUpstreamStatus(status: number): void {
+  const sink = currentAppliedProxySink();
+  if (sink && status >= 400) sink.upstreamStatus = status;
 }
 
 export class LMArenaExecutor extends BaseExecutor {
@@ -98,6 +116,9 @@ export class LMArenaExecutor extends BaseExecutor {
     const messages = Array.isArray(openaiBody.messages)
       ? (openaiBody.messages as OpenAIMessage[])
       : [];
+    // `cx` only when the operator supplied providerSpecificData.cx, or the synthesised
+    // blob behind the default-off LMARENA_SYNTHESIZED_CX_ENABLED flag (#16895).
+    const cx = resolveLMArenaClientInteraction(credentials);
     return {
       id: uuidv7(),
       mode: "direct-battle",
@@ -111,6 +132,7 @@ export class LMArenaExecutor extends BaseExecutor {
       },
       modality: "chat",
       recaptchaV3Token: readRecaptchaToken(credentials, body),
+      ...(cx ? { cx } : {}),
     };
   }
 
@@ -146,13 +168,13 @@ export class LMArenaExecutor extends BaseExecutor {
         log,
       });
     } catch (error) {
-      if (error instanceof TlsClientUnavailableError) {
-        log?.error?.("LMArenaExecutor", `TLS client unavailable: ${error.message}`);
-        return mapTlsUnavailable(error, url, headers, transformedBody);
+      if (isTlsClientUnavailableError(error)) {
+        log?.error?.("LMArenaExecutor", `TLS client unavailable: ${sanitizeLMArenaError(error)}`);
+        return mapTlsUnavailable(url, headers, transformedBody);
       }
-      const message = error instanceof Error ? error.message : String(error);
-      log?.error?.("LMArenaExecutor", `Request failed: ${message}`);
-      return mapNetworkError(message, url, headers, transformedBody);
+      const logMessage = sanitizeLMArenaError(error);
+      log?.error?.("LMArenaExecutor", `Request failed: ${logMessage}`);
+      return mapNetworkError(url, headers, transformedBody);
     }
   }
 
@@ -175,6 +197,7 @@ export class LMArenaExecutor extends BaseExecutor {
       signal: ctx.signal,
       stream: ctx.stream,
     });
+    recordLMArenaUpstreamStatus(tlsResult.status);
 
     const failed = mapFailedTlsResult({
       status: tlsResult.status,

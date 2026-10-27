@@ -1,0 +1,227 @@
+# Claude Code CLI — Configuration with OmniRoute (ไทย)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇹 [am](../../../am/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇿 [az](../../../az/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇦 [bs](../../../bs/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇰 [da](../../../da/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇩🇪 [de](../../../de/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇷 [el](../../../el/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇸 [es](../../../es/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇪🇪 [et](../../../et/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ha](../../../ha/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇱 [he](../../../he/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇩 [id](../../../id/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇹 [it](../../../it/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇭 [km](../../../km/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇲🇲 [my](../../../my/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇴 [no](../../../no/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [or](../../../or/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇱🇰 [si](../../../si/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇮🇳 [te](../../../te/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLAUDE-CODE-CONFIGURATION.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLAUDE-CODE-CONFIGURATION.md)
+
+---
+
+กำหนดให้ CLI ของ **Claude Code** (`claude`) ชี้ไปยัง OmniRoute — ทั้งแบบภายในเครื่องหรือ VPS ระยะไกล —
+พร้อมโปรไฟล์แยกตามโมเดล โดยเลียนแบบการตั้งค่าของ Codex
+
+---
+
+## เริ่มต้นอย่างรวดเร็ว
+
+```bash
+# เปิด Claude Code โดยเชื่อมต่อกับ OmniRoute ภายในเครื่อง (ตรวจหาคอนเท็กซ์ที่ใช้งานอยู่โดยอัตโนมัติ)
+omniroute launch
+
+# เชื่อมต่อกับ OmniRoute ระยะไกล (หลังจาก `omniroute connect <host>` ขั้นตอนนี้จะเป็นอัตโนมัติ)
+omniroute launch --remote http://192.168.0.15:20128 --api-key oma_live_xxx
+
+# สร้างโปรไฟล์แยกตามโมเดล จากนั้นเปิดใช้งานโปรไฟล์หนึ่ง
+omniroute setup-claude            # เขียนไปยัง ~/.claude/profiles/<name>/settings.json
+omniroute launch --profile glm52  # Claude Code ที่ใช้ glm/glm-5.2 ผ่าน OmniRoute
+```
+
+---
+
+## วิธีที่ Claude Code เชื่อมต่อกับเกตเวย์
+
+Claude Code สื่อสารผ่าน **Anthropic Messages API** และถูกกำหนดให้ชี้ไปยัง
+เอนด์พอยต์แบบกำหนดเองด้วยตัวแปรสภาพแวดล้อม (ไม่มีแฟล็ก `--base-url`):
+
+| ตัวแปร                                       | วัตถุประสงค์                                                                                      |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | URL รากของเกตเวย์ (Claude Code จะต่อท้ายด้วย `/v1/messages`) **ห้ามมีส่วนต่อท้าย `/v1`**          |
+| `ANTHROPIC_AUTH_TOKEN`                       | ส่งเป็น `Authorization: Bearer …` — ใช้โทเค็นการเข้าถึง / API key ของ OmniRoute                   |
+| `ANTHROPIC_API_KEY`                          | ทางเลือก: ส่งเป็น `x-api-key` หากกำหนดทั้งสองค่า `ANTHROPIC_AUTH_TOKEN` จะมีลำดับความสำคัญสูงกว่า |
+| `ANTHROPIC_MODEL`                            | บังคับใช้โมเดลที่ระบุ (แทนที่ค่าเริ่มต้นของตัวเลือก `/model`)                                     |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ตัวเลือก `/model` แบบเนทีฟจะแสดงโมเดล `claude*`/`anthropic*` จาก `/v1/models`               |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | จำกัดจำนวนโทเค็นเอาต์พุตต่อการตอบกลับ (เช่น `65536`)                                              |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | เกณฑ์จำนวนโทเค็นสำหรับการย่ออัตโนมัติ                                                             |
+
+> ตัวแปรสภาพแวดล้อมจะถูกอ่าน **เพียงครั้งเดียวเมื่อเริ่มต้น** — ให้รีสตาร์ต Claude Code หลังจากเปลี่ยนแปลงค่า
+
+`omniroute launch` จะตั้งค่าทั้งหมดนี้ให้คุณ: คำสั่งนี้จะค้นหา URL ฐานและโทเค็น
+จากคอนเท็กซ์ที่ใช้งานอยู่ (ดังนั้นเมื่อใช้ `omniroute connect <vps>` แล้วตามด้วย `omniroute launch`
+ก็จะใช้งานได้ทันที) ตรวจสอบสถานะของเซิร์ฟเวอร์ และเรียกใช้ `claude`
+
+---
+
+## Discovery aliases — แสดงโมเดลที่ไม่ใช่ Claude ในตัวเลือก `/model`
+
+การค้นหาโมเดลผ่านเกตเวย์ของ Claude Code จะแสดงเฉพาะ id ที่ขึ้นต้นด้วย `claude` หรือ `anthropic` เท่านั้น ดังนั้นเมื่อตั้งค่า `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` ตัวเลือก `/model` ดั้งเดิมจะแสดง**เฉพาะ**โมเดล Claude/Anthropic ของ OmniRoute — `kimi/kimi-k2.6` หรือ `glm/glm-5.2` จะไม่ปรากฏขึ้นมาเลย แม้ว่าจะสามารถเราต์คำขอได้ตามปกติ
+
+OmniRoute สามารถสร้างมิเรอร์ให้โมเดลใดก็ได้ที่เปิดใช้งาน (รวมถึง combo) ภายใต้ id แบบ `claude/…` เพื่อให้ผ่านตัวกรองดังกล่าวและปรากฏในตัวเลือก:
+
+```
+kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
+glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
+```
+
+เมื่อคุณเลือกรายการใดรายการหนึ่งเหล่านี้ใน Claude Code OmniRoute จะถอดส่วนครอบ `claude/` ออกเพื่อให้กลับเป็น id จริงก่อนทำการเราต์ — ส่วน id `claude/<real-claude-model>` ที่แท้จริง (ผู้ให้บริการ Claude OAuth ตัวจริง) จะไม่ถูกแตะต้องเสมอ
+
+ตามค่าเริ่มต้น จะมีการสร้างมิเรอร์เฉพาะ id พื้นฐานเท่านั้น เมื่อเปิด feature flag แบบ opt-in ชื่อ `CATALOG_MIRROR_REFINEMENTS_ENABLED` variant ระดับ reasoning-effort ที่แคตตาล็อกแสดงอยู่แล้ว (เช่น `codex/gpt-6-sol-high`) จะถูกสร้างมิเรอร์เหมือน id อื่น ๆ เพื่อให้ Claude Code สามารถเลือกระดับ effort ที่ต้องการได้อย่างชัดเจน ส่วน id `auto/*` ที่มีอยู่ในตัวซึ่งเส้นทางการประมวลผลคำขอไม่สามารถสร้างขึ้นมาได้จริง จะไม่ถูกสร้างมิเรอร์ การที่ variant ระดับ effort จะถูกแสดงหรือไม่นั้นยังคงถูกกำกับโดย `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — มิเรอร์จะไม่เพิ่ม variant ใดที่แคตตาล็อกพื้นฐานไม่มีอยู่
+
+**ฟีเจอร์นี้ปิดอยู่ตามค่าเริ่มต้น** และถูกควบคุมด้วยเกตสามระดับ (ระดับที่เจาะจงที่สุดจะมีผลเหนือกว่า) เพื่อให้ OmniRoute ทั่วไปไม่ต้องทำแคตตาล็อกของตัวเองเพิ่มเป็นสองเท่าสำหรับไคลเอนต์ที่ไม่ได้ใช้ Claude Code:
+
+| ระดับ        | ตำแหน่งที่ตั้งค่า                                                                              |
+| ------------ | ---------------------------------------------------------------------------------------------- |
+| โมเดล        | หน้ารายละเอียดผู้ให้บริการ → สวิตช์ "Expose in Claude Code" สำหรับแต่ละโมเดล                   |
+| ผู้ให้บริการ | หน้ารายละเอียดผู้ให้บริการ → สวิตช์ระดับผู้ให้บริการ (ครอบคลุมโมเดลทั้งหมดของผู้ให้บริการนั้น) |
+| ทั่วไป       | การตั้งค่า → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (ค่าเริ่มต้นคือปิด)                 |
+
+ตัวแปรสภาพแวดล้อม `EXPOSE_CC_DISCOVERY_ALIASES` จะบังคับเปิดระดับทั่วไปและมีผลเหนือกว่าการกำหนดค่าจากแดชบอร์ด (หน้าจอ Feature Flags จะแสดงหมายเหตุ "active via environment variable" เมื่อเป็นเช่นนั้น) สวิตช์ระดับผู้ให้บริการและระดับโมเดลจะปรับแต่งต่อจากจุดนั้น — เช่น ระดับทั่วไปปิด + เปิดผู้ให้บริการ Kimi จะเปิดเผยเฉพาะโมเดลของ Kimi เท่านั้น
+
+> ⚠️ **ขนาด context window ไม่ตรงกันบนโมเดลที่ไม่ใช่ Claude** Claude Code จะตีความว่ามี context window ขนาด 200K สำหรับ id ใดก็ตามที่ไม่รู้จัก (เพราะไม่สามารถอ่านขนาด window จริงจาก `/v1/models` ได้) สำหรับโมเดลที่มี window ใหญ่กว่านั้น (เช่น Kimi K2 ที่ 256K) ให้ตั้งค่า `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ให้ต่ำกว่า window จริงของโมเดล เพื่อไม่ให้ auto-compaction ทำงานเร็วเกินไป โปรไฟล์ที่สร้างขึ้นข้างต้นได้จัดการเรื่องนี้ไว้แล้วในระดับรายโมเดล
+
+---
+
+## บล็อกการเริ่มต้นใช้งานบนแดชบอร์ด
+
+การ์ดเครื่องมือ Claude (**Dashboard → CLI Code**) จะแสดงส่วนย่อยของ `settings.json` ที่ตรงกับอินสแตนซ์นี้ทุกประการ ถัดจากปุ่มข้อมูล alias สำหรับการค้นหา พร้อมปุ่มคัดลอก:
+
+```jsonc
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://<OmniRoute ของคุณ>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<คีย์ API ของ OmniRoute ของคุณ>",
+    "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
+  },
+}
+```
+
+URL ฐานคือค่าที่การ์ดกำหนดได้ (รวมถึงค่ากำหนดเองที่คุณป้อน) และผ่านการปรับให้อยู่ในรูปแบบมาตรฐานแล้ว — ไม่มีส่วนต่อท้าย `/v1` และไม่มีเครื่องหมายทับปิดท้าย **คีย์จะไม่ถูกแสดงเด็ดขาด**: บล็อกนี้ใช้ข้อความตัวแทน ดังนั้นภาพหน้าจอหรือส่วนย่อยที่นำไปวางจะไม่สามารถทำให้คีย์รั่วไหลได้ ให้วางคีย์ของคุณทับข้อความตัวแทนนั้น
+
+เพิ่ม `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ภายใต้บล็อก `env` เดียวกันสำหรับโมเดลใดๆ ที่มีขนาดหน้าต่างบริบทจริงไม่ใช่ 200K — Claude Code จะถือว่าทุก id ที่ไม่รู้จักมีขนาด 200K ดังนั้นมิฉะนั้นการย่ออัตโนมัติจะเกิดขึ้นผิดจังหวะ (ดูคำเตือนในส่วนก่อนหน้า) ตัวสร้างส่วนย่อยรองรับค่านี้ด้วย ดังนั้นผู้เรียกที่ทราบขนาดหน้าต่างของโมเดลเป้าหมายจึงสามารถส่งค่านี้ออกมาได้โดยตรง
+
+แหล่งที่มา: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (ตัวสร้างแบบ pure ที่ผ่านการทดสอบหน่วย) ซึ่งแสดงผลโดย `ClaudeGatewayOnboardingBlock`
+
+### ปักหมุดบัญชีเดียว (ไม่บังคับ)
+
+หากต้องการส่งทุกคำขอของ Claude Code ผ่านบัญชีผู้ให้บริการที่ระบุเพียงบัญชีเดียว ให้เพิ่มส่วนหัว `x-omniroute-connection` ผ่าน `ANTHROPIC_CUSTOM_HEADERS` ในบล็อก `env` เดียวกัน:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+คัดลอก id จากชิป `xxxxxxxx…` ในแถวการเชื่อมต่อของหน้าผู้ให้บริการ การปักหมุดนี้ใช้ได้เฉพาะกับ id ของโมเดลเดี่ยว (`provider/model`) ไม่ใช่คอมโบ ดูลักษณะการทำงานสำรองโดยละเอียดได้ที่ [การปักหมุดบัญชีต่อคำขอ](../reference/API_REFERENCE.md#account-pinning-per-request)
+
+---
+
+## โปรไฟล์ (`CLAUDE_CONFIG_DIR`)
+
+Claude Code **ไม่มีไฟล์โปรไฟล์แบบเนทีฟ** (ต่างจาก `~/.codex/<name>.config.toml` ของ Codex)
+กลไกที่นิยมใช้คือ `CLAUDE_CONFIG_DIR` ซึ่งเป็นไดเรกทอรีการกำหนดค่าที่แยกกันสำหรับแต่ละ
+โปรไฟล์ โดยแต่ละโปรไฟล์มี `settings.json`, ข้อมูลประจำตัว, ประวัติ และแคชเป็นของตนเอง
+
+`omniroute setup-claude` จะดึงแค็ตตาล็อก `/v1/models` ปัจจุบันและเขียนหนึ่ง
+โปรไฟล์ต่อหนึ่งโมเดลไว้ที่ `~/.claude/profiles/<name>/settings.json` โดยใช้
+**ชื่อเดียวกันกับ `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
+
+```jsonc
+// ~/.claude/profiles/glm52/settings.json
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "model": "glm/glm-5.2",
+  "effortLevel": "xhigh",
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://192.168.0.15:20128",
+    "ANTHROPIC_MODEL": "glm/glm-5.2",
+    "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
+    "CLAUDE_CODE_AUTO_COMPACT_WINDOW": "190000",
+  },
+}
+```
+
+> **โทเค็นการยืนยันตัวตนจะไม่ถูกเขียนลงในโปรไฟล์โดยเด็ดขาด** เปิดใช้งานด้วย
+> `omniroute launch --profile <name>` (คำสั่งนี้จะแทรก `ANTHROPIC_AUTH_TOKEN` จาก
+> บริบทที่ใช้งานอยู่) หรือ export `ANTHROPIC_AUTH_TOKEN` ด้วยตนเองแล้วเรียกใช้
+> `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`
+
+**ซิงค์อัตโนมัติหลังจากค้นพบโมเดล (เลือกเปิดใช้ได้)** OmniRoute สามารถสร้างไฟล์
+`~/.claude/profiles/<name>/settings.json` ชุดเดิมเหล่านี้ใหม่โดยอัตโนมัติทุกครั้งที่การซิงค์โมเดล
+ของผู้ให้บริการทำให้แค็ตตาล็อกปัจจุบันเปลี่ยนแปลง เพื่อให้โมเดลใหม่หรือโมเดลที่เปลี่ยนชื่อมีโปรไฟล์
+โดยไม่ต้องเรียกใช้คำสั่งอีกครั้ง ฟีเจอร์นี้ **ปิดไว้โดยค่าเริ่มต้น**: เปิดหรือปิดได้จากแดชบอร์ด
+**CLI Code** ("CLI profile auto-sync" → Claude Code) หรือตั้งค่า
+`OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (และยังเคารพค่า `CLI_ALLOW_CONFIG_WRITES`
+ซึ่งเปิดไว้โดยค่าเริ่มต้น) เมื่อเปิดใช้งาน ฟีเจอร์นี้จะเขียนเฉพาะไฟล์โปรไฟล์เท่านั้น และจะไม่
+เปลี่ยนการกำหนดค่า Claude ที่ใช้งานอยู่/เป็นค่าเริ่มต้น, การยืนยันตัวตน หรือ `~/.claude/settings.json`
+
+### การสร้าง + การใช้งานโปรไฟล์
+
+```bash
+# OmniRoute ภายในเครื่อง
+omniroute setup-claude
+
+# VPS ระยะไกล (ฝัง URL ของ VPS ลงในทุกโปรไฟล์)
+omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
+
+# เฉพาะผู้ให้บริการบางราย
+omniroute setup-claude --only glm,kimi
+
+# เขียนโปรไฟล์สำหรับผู้ให้บริการ CLI ภายในเครื่องด้วย (zcode, auggie, devin-cli-agentic,
+# codex-app-server) ซึ่งตรวจไม่พบบนโฮสต์นี้ (โดยค่าเริ่มต้นจะข้ามสำหรับเป้าหมายภายในเครื่อง)
+omniroute setup-claude --include-local
+
+# แสดงตัวอย่างโดยไม่เขียนไฟล์
+omniroute setup-claude --dry-run
+
+# เปิดใช้งานโปรไฟล์
+omniroute launch --profile kimi-k27
+```
+
+---
+
+## ระดับโมเดล (ไม่บังคับ)
+
+Claude Code จะกำหนดเส้นทางไปยังระดับความสามารถต่าง ๆ คุณสามารถแมปแต่ละระดับกับโมเดล OmniRoute ผ่าน env /
+การตั้งค่าได้ หากต้องการใช้ผู้ให้บริการที่แตกต่างกันในแต่ละระดับ:
+
+```bash
+export ANTHROPIC_DEFAULT_OPUS_MODEL="glm/glm-5.2"
+export ANTHROPIC_DEFAULT_SONNET_MODEL="kmc/kimi-k2.6"
+export ANTHROPIC_DEFAULT_HAIKU_MODEL="glm/glm-4.7-flash"
+```
+
+มิฉะนั้น ระบบจะใช้ `ANTHROPIC_MODEL` รายการเดียว (ที่โปรไฟล์กำหนดไว้) สำหรับทุกอย่าง
+
+---
+
+## โหมดระยะไกล
+
+เมื่อคุณเรียกใช้ `omniroute connect <host>` แล้ว (ดู
+[โหมดระยะไกล](./REMOTE-MODE.md)) `omniroute launch` และ `omniroute setup-claude`
+จะกำหนดเป้าหมายไปยังเซิร์ฟเวอร์ระยะไกลนั้นโดยอัตโนมัติ และใช้โทเค็นการเข้าถึงที่จำกัดขอบเขตของเซิร์ฟเวอร์ — ไม่
+จำเป็นต้องใช้แฟล็กเพิ่มเติม คุณสามารถเขียนทับเป็นรายคำสั่งได้ด้วย `--remote` / `--api-key`
+
+---
+
+## การแก้ไขปัญหา
+
+**Claude Code ไม่ใช้เกตเวย์** — ตรวจสอบว่า `ANTHROPIC_BASE_URL` **ไม่มี
+`/v1`** และรีสตาร์ต `claude` (ระบบจะอ่าน env เพียงครั้งเดียวเมื่อเริ่มทำงาน) `omniroute launch`
+จะจัดการเรื่องนี้ให้คุณ
+
+**ตัวเลือก `/model` ว่างเปล่า / ไม่มีโมเดลของเกตเวย์** — ต้องใช้ Claude Code
+v2.1.219+ และ `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` เฉพาะ ID โมเดล `claude*` /
+`anthropic*` เท่านั้นที่จะแสดงในตัวเลือก หากต้องการบังคับใช้โมเดลอื่น ให้ใช้
+`ANTHROPIC_MODEL=<id>` (นี่คือสิ่งที่โปรไฟล์ทำ)
+
+**`400 Ambiguous model 'claude-…'`** — Claude Code จะส่ง ID โมเดลแบบ **ไม่มีคำนำหน้า**
+เสมอ (เช่น `claude-opus-4-8`) ดังนั้นเมื่อเชื่อมต่อทั้งผู้ให้บริการ Claude Code (`cc/…`) และ
+Claude (`claude/…`) แล้ว ID ที่ไม่มีคำนำหน้าจะตรงกับสองเส้นทาง และ
+OmniRoute จะไม่คาดเดาให้ แก้ไขได้สองวิธี: ระบุ ID ที่มีคำนำหน้าด้วย
+`ANTHROPIC_MODEL=cc/claude-opus-4-8` หรือเปิดใช้ **เลือก Claude Code ก่อน
+สำหรับโมเดล Claude ที่ไม่มีคำนำหน้า** — ใช้สวิตช์ในหน้าผู้ให้บริการ Claude หรือ
+`OMNIROUTE_PREFER_CLAUDE_CODE_FOR_UNPREFIXED_CLAUDE_MODELS=true` (ปิดไว้โดยค่าเริ่มต้น;
+ดู [สภาพแวดล้อม](../reference/ENVIRONMENT.md)) — ซึ่งจะกำหนดเส้นทาง ID `claude-*`
+ที่ไม่มีคำนำหน้าไปยัง Claude Code แทน คำนำหน้าผู้ให้บริการที่ระบุไว้อย่างชัดเจนจะมีลำดับความสำคัญสูงสุดเสมอ
+
+**ข้อผิดพลาดด้านการยืนยันตัวตน** — โปรไฟล์ไม่มีโทเค็น ให้ใช้ `omniroute launch --profile`
+(เพื่อแทรกโทเค็น) หรือ export `ANTHROPIC_AUTH_TOKEN`
+
+**โปรไฟล์ไม่แยกจากกัน** — แต่ละโปรไฟล์ใช้ `CLAUDE_CONFIG_DIR` ที่แตกต่างกัน;
+ตรวจสอบว่า `echo $CLAUDE_CONFIG_DIR` ภายในเซสชันชี้ไปที่
+`~/.claude/profiles/<name>`

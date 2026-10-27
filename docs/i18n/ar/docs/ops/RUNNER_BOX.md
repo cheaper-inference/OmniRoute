@@ -1,0 +1,165 @@
+# Self-Hosted Runner Box Operations (.113 pool) (العربية)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../ops/RUNNER_BOX.md) · 🇪🇹 [am](../../../am/docs/ops/RUNNER_BOX.md) · 🇦🇿 [az](../../../az/docs/ops/RUNNER_BOX.md) · 🇧🇬 [bg](../../../bg/docs/ops/RUNNER_BOX.md) · 🇧🇩 [bn](../../../bn/docs/ops/RUNNER_BOX.md) · 🇧🇦 [bs](../../../bs/docs/ops/RUNNER_BOX.md) · 🇨🇿 [cs](../../../cs/docs/ops/RUNNER_BOX.md) · 🇩🇰 [da](../../../da/docs/ops/RUNNER_BOX.md) · 🇩🇪 [de](../../../de/docs/ops/RUNNER_BOX.md) · 🇬🇷 [el](../../../el/docs/ops/RUNNER_BOX.md) · 🇪🇸 [es](../../../es/docs/ops/RUNNER_BOX.md) · 🇪🇪 [et](../../../et/docs/ops/RUNNER_BOX.md) · 🇮🇷 [fa](../../../fa/docs/ops/RUNNER_BOX.md) · 🇫🇮 [fi](../../../fi/docs/ops/RUNNER_BOX.md) · 🇫🇷 [fr](../../../fr/docs/ops/RUNNER_BOX.md) · 🇮🇪 [ga](../../../ga/docs/ops/RUNNER_BOX.md) · 🇮🇳 [gu](../../../gu/docs/ops/RUNNER_BOX.md) · 🇳🇬 [ha](../../../ha/docs/ops/RUNNER_BOX.md) · 🇮🇱 [he](../../../he/docs/ops/RUNNER_BOX.md) · 🇮🇳 [hi](../../../hi/docs/ops/RUNNER_BOX.md) · 🇭🇷 [hr](../../../hr/docs/ops/RUNNER_BOX.md) · 🇭🇺 [hu](../../../hu/docs/ops/RUNNER_BOX.md) · 🇦🇲 [hy](../../../hy/docs/ops/RUNNER_BOX.md) · 🇮🇩 [id](../../../id/docs/ops/RUNNER_BOX.md) · 🇳🇬 [ig](../../../ig/docs/ops/RUNNER_BOX.md) · 🇮🇹 [it](../../../it/docs/ops/RUNNER_BOX.md) · 🇯🇵 [ja](../../../ja/docs/ops/RUNNER_BOX.md) · 🇬🇪 [ka](../../../ka/docs/ops/RUNNER_BOX.md) · 🇰🇭 [km](../../../km/docs/ops/RUNNER_BOX.md) · 🇮🇳 [kn](../../../kn/docs/ops/RUNNER_BOX.md) · 🇰🇷 [ko](../../../ko/docs/ops/RUNNER_BOX.md) · 🇱🇹 [lt](../../../lt/docs/ops/RUNNER_BOX.md) · 🇱🇻 [lv](../../../lv/docs/ops/RUNNER_BOX.md) · 🇮🇳 [ml](../../../ml/docs/ops/RUNNER_BOX.md) · 🇮🇳 [mr](../../../mr/docs/ops/RUNNER_BOX.md) · 🇲🇾 [ms](../../../ms/docs/ops/RUNNER_BOX.md) · 🇲🇹 [mt](../../../mt/docs/ops/RUNNER_BOX.md) · 🇲🇲 [my](../../../my/docs/ops/RUNNER_BOX.md) · 🇳🇵 [ne](../../../ne/docs/ops/RUNNER_BOX.md) · 🇳🇱 [nl](../../../nl/docs/ops/RUNNER_BOX.md) · 🇳🇴 [no](../../../no/docs/ops/RUNNER_BOX.md) · 🇮🇳 [or](../../../or/docs/ops/RUNNER_BOX.md) · 🇮🇳 [pa](../../../pa/docs/ops/RUNNER_BOX.md) · 🇵🇭 [phi](../../../phi/docs/ops/RUNNER_BOX.md) · 🇵🇱 [pl](../../../pl/docs/ops/RUNNER_BOX.md) · 🇵🇹 [pt](../../../pt/docs/ops/RUNNER_BOX.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/ops/RUNNER_BOX.md) · 🇷🇴 [ro](../../../ro/docs/ops/RUNNER_BOX.md) · 🇷🇺 [ru](../../../ru/docs/ops/RUNNER_BOX.md) · 🇱🇰 [si](../../../si/docs/ops/RUNNER_BOX.md) · 🇸🇰 [sk](../../../sk/docs/ops/RUNNER_BOX.md) · 🇸🇮 [sl](../../../sl/docs/ops/RUNNER_BOX.md) · 🇷🇸 [sr](../../../sr/docs/ops/RUNNER_BOX.md) · 🇸🇪 [sv](../../../sv/docs/ops/RUNNER_BOX.md) · 🇰🇪 [sw](../../../sw/docs/ops/RUNNER_BOX.md) · 🇮🇳 [ta](../../../ta/docs/ops/RUNNER_BOX.md) · 🇮🇳 [te](../../../te/docs/ops/RUNNER_BOX.md) · 🇹🇭 [th](../../../th/docs/ops/RUNNER_BOX.md) · 🇹🇷 [tr](../../../tr/docs/ops/RUNNER_BOX.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/ops/RUNNER_BOX.md) · 🇵🇰 [ur](../../../ur/docs/ops/RUNNER_BOX.md) · 🇺🇿 [uz](../../../uz/docs/ops/RUNNER_BOX.md) · 🇻🇳 [vi](../../../vi/docs/ops/RUNNER_BOX.md) · 🇳🇬 [yo](../../../yo/docs/ops/RUNNER_BOX.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/ops/RUNNER_BOX.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/ops/RUNNER_BOX.md)
+
+---
+
+تعمل مجموعة التشغيل ذاتية الاستضافة على الجهاز **.113** (`tomni-proxmox-113`). منذ 2026-10-18، أصبح لكل
+مشغّل OmniRoute **دور واحد** وتسمية واحدة وميزانية للذاكرة/CPU تتناسب مع قياسات حمل العمل
+الخاص به. تحصل فتحة Turbopack على ما تحتاج إليه عملية البناء، بينما تُضبط الفتحات الأخرى وفقًا
+للذروات المقاسة لديها. لا يتجاوز الجهاز موارده إلا عندما تتزامن عملية بناء Turbopack مع عملية بناء
+webpack الخاصة بـ Release-Green ومهمة lint؛ وتمتص ذاكرة التبديل الخاصة بالمضيف (16 GB) ذلك، وبما أن عمليات
+بناء طلبات السحب تعمل على مشغّلات مستضافة، تظل فتحة Turbopack خاملة معظم الوقت:
+
+| المشغّل              | التسمية        | الدور                                                                                                                                                                   | `MemoryHigh` / `MemoryMax`       | `CPUQuota`      |
+| -------------------- | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------- | --------------- |
+| `omniroute-113-5`    | `omni-build`   | عمليات بناء Turbopack: ‏`ci.yml` ‏`Build` (للدفع/التشغيل اليدوي فقط)، وDocker amd64، و`npm-publish`، و`nightly-v4-build`، و`preview-artifact`، وعملية بناء a11y الليلية | 56 GB / 60 GB (ذاكرة تبديل 0)    | 1600 %          |
+| `omniroute-113-6`    | `omni-release` | ‏Release-Green ‏(`release-green` + `main-green`)، وعملية بناء webpack                                                                                                   | 20 GB / 24 GB (ذاكرة تبديل 4 GB) | 800 %           |
+| `omniroute-113-2`    | `omni-light`   | المهام الليلية (Schemathesis وpromptfoo وgarak وk6) و`quality.yml` ‏`lint-guard`                                                                                        | 12 GB / 16 GB (ذاكرة تبديل 4 GB) | 600 %           |
+| `omniroute-113`      | `omni-light`   | المجموعة نفسها المذكورة أعلاه                                                                                                                                           | 8 GB / 12 GB                     | 400 %           |
+| OmniHeuris, OmniMind | (مستودعاتهما)  | ‏Dependabot فقط (ذروة قدرها 155 MB لكل منهما، 2026-10-18)                                                                                                               | 4 GB / 6 GB                      | 200 % لكل منهما |
+
+القياسات بتاريخ 2026-10-18:
+
+| المورد        | القيمة                       | ما يعنيه ذلك للجدولة                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| RAM / CPU     | **78 GB / 32 نواة**          | بلغت ذروة عملية بناء إنتاجية باستخدام Turbopack مقدار 49 GB دون حد أقصى (`tests/unit/ci-build-bundler-webpack.test.ts`)؛ وفي Next 16.3.8، تحتفظ مرحلة التجميع وحدها بنحو 40 GB ‏(36 GB من RSS في `next-build` بالإضافة إلى 17 عامل تحميل بذاكرة 3 GB، وفق قياسات 2026-10-18)؛ بينما تستخدم عملية بناء webpack نحو 14–16 GB. يمكن تشغيل عملية بناء Turbopack واحدة وعملية بناء webpack واحدة معًا؛ ولا يمكن تشغيل عمليتي بناء Turbopack معًا |
+| ذاكرة التبديل | 16 GB                        | يعمل `omniroute-113-5` مع تعطيل ذاكرة التبديل (`MemorySwapMax=0`)، لذا تُوقَف عملية البناء المنفلتة عند حدها الأقصى بدلًا من إجبار الجهاز على استخدام ذاكرة التبديل                                                                                                                                                                                                                                                                         |
+| `/tmp`        | **12 GB tmpfs = RAM**        | أي شيء يُترك هناك يستهلك الذاكرة؛ وتُزال البقايا بعد 3 ساعات                                                                                                                                                                                                                                                                                                                                                                                |
+| CPU           | لوحظ حمل قدره 60 على 32 نواة | قبل فرض الحصص، تسببت عملية بناء Turbopack واحدة (نحو 1166 % من CPU) إلى جانب حزمة اختبارات تغطية على الجهاز نفسه في حرمان إشارات نبض المستمعين الآخرين من الموارد (`The self-hosted runner lost communication`، #16853)                                                                                                                                                                                                                     |
+| المشغّلات     | **6 مستمعين**                | ‏4 لـ OmniRoute بالإضافة إلى OmniHeuris وOmniMind؛ المشغّلات `omniroute-113-3/-4/-7/-8` معطلة (`systemctl enable --now` يعيد تشغيل أحدها)                                                                                                                                                                                                                                                                                                   |
+
+توجد الحدود في `/etc/systemd/system/actions.runner.<…>.service.d/override.conf` لكل وحدة
+(مع الاحتفاظ بالقيم السابقة في `override.conf.bak-20261018`)، وقد طُبّقت مباشرة باستخدام
+`systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` — دون إعادة تشغيل، لذلك لم
+تتأثر أي مهمة قيد التشغيل. تُغيّر التسميات عبر واجهة API الخاصة بالمشغّلات
+(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+`gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`)، مباشرة أيضًا.
+
+## تثبيت أداة التنظيف (مرة واحدة، على الخادم)
+
+```bash
+scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
+ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
+# cron ‏(root): كل 30 دقيقة، مع التسجيل في /var/log/runner-janitor.log
+*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+```
+
+الأداة `lsof` مطلوبة: تتحقق أداة التنظيف من أن المسار خامل باستخدام لقطة واحدة للملفات
+المفتوحة قبل إزالته، ومن دون هذه الأداة لا تزيل شيئًا وتوضح ذلك
+(exit 1). جرّب أي تغيير باستخدام `--dry-run` أولًا — إذ تطبع بالضبط ما ستفعله
+من دون أن تمس أي شيء.
+
+ما تفعله عند كل تشغيل: تنظّف مخلفاتنا (`runner-*` و`omniroute-*`
+و`next-build*` و`e2e-build.tar.gz`) بعد **3 ساعات على tmpfs** و24 ساعة على قرص
+`_work/_temp`؛ وتنهي عملية `next-build` أقدم من 75 دقيقة (لا تستغرق أي مهمة كل هذه المدة — ففي
+2026-08-27 استمرت إحداها 70 دقيقة بعد أن أعلن GitHub فقدان مهمتها)؛ وتحذف نسخ العمل الأقدم من 48 ساعة
+الخاصة بالمشغّلات التي تكون وحدتها **متوقفة**؛ وتطلق تنبيهًا عندما يكون استخدام القرص ≥ 85%، أو قيمة PSI للذاكرة
+`full/avg60` ‏≥ 10%، أو عندما يزيد عدد المستمعين على `MAX_ACTIVE_RUNNERS` (مع
+تفصيل omniroute/other). ‏Exit 1 = يلزم الانتباه؛ اقرأ السجل.
+
+قاعدة الـ75 دقيقة لا تكتشف عملية بناء تخلّى GitHub عن مهمتها بالفعل. عندما يتعذر على
+`Runner.Listener` تجديد مهمته، يعرض `_diag/Runner_*.log`
+`POST request to …/renewjob timed out after 100 seconds`، وتبلّغ واجهة API بأن المهمة `completed`
+(فشلت) بعد نحو عشر دقائق من آخر تجديد ناجح، بينما تواصل `next-build` العمل
+من دون مهمة مرتبطة بها (2026-10-18: فشلت عملية Build الخاصة بـ #17066 عند 19:43، وكانت عملية بنائها لا تزال
+تشغل 40 GB بعد خمس دقائق). تأكد من المرجع في أحدث `_diag/Worker_*.log`، ثم
+أرسل SIGTERM إلى شجرة البناء فقط حسب PID — أي `next-build` و`npm run build` و`build-next-isolated.mjs`
+وعمليات `_work`. لا تمس مطلقًا `Runner.Listener` أو `RunnerService.js` أو `Runner.Worker`: إذ
+يبلّغ العامل بأن المهمة أُلغيت، ويعود المستمع إلى الاتصال تلقائيًا.
+
+## وحدات المشغّل: KillMode
+
+تترك القيمة الافتراضية `KillMode=process` للمشغّل السلسلة `Runner.Worker → npm → next-build`
+قيد التشغيل عند إيقاف وحدة أو إعادة تشغيلها — فتواصل عملية بناء يتيمة استهلاك RAM و
+CPU من دون مهمة مرتبطة بها. تحتوي كل وحدة OmniRoute على ملف إعداد إضافي
+(`/etc/systemd/system/actions.runner.diegosouzapw-OmniRoute.<name>.service.d/10-killmode.conf`)
+يتضمن `KillMode=mixed`: تُرسل SIGTERM إلى المستمع أولًا، ثم SIGKILL إلى مجموعة cgroup بأكملها عند
+`TimeoutStop`. يسري ذلك عند إعادة التشغيل التالية للوحدة — أعد تشغيل **مشغّل واحد في
+كل مرة، وفقط عندما يكون خاملًا**، مع تنفيذ فحص الخمول وإعادة التشغيل في الأمر نفسه.
+
+## قواعد التشغيل
+
+- **بناء Turbopack واحد في كل مرة — يُفرض بواسطة التصنيف.** كل مهمة تشغّل أمر
+  `next build` كاملًا باستخدام Turbopack تستهدف `[self-hosted, omni-build]`، ولا يحمل هذا
+  التصنيف سوى **`omniroute-113-5`**: مهمة `Build` في `ci.yml`، ومهمة `publish` في `npm-publish.yml`،
+  و`nightly-v4-build`، و`preview-artifact`، وبناء a11y الليلي (#16853)، ومهمة **amd64** في
+  `docker-publish.yml` (باستخدام webpack داخل BuildKit — تعطل Turbopack هناك، في التشغيل 33253576569).
+  يظل مسار Docker الخاص بـ arm64 على `ubuntu-24.04-arm`.
+  تشترك مهمة amd64 في `docker-publish` في مجموعة التزامن `heavy-build-main` مع مهمة `Build`
+  في `ci.yml` (`cancel-in-progress: false`). يجب أن يكون Docker Engine موجودًا على `omniroute-113-5`.
+  لا تتسع ذاكرة 78 GB لخانة Turbopack ثانية (2 × 33–37 GB بالإضافة إلى بقية أحمال الجهاز)؛ ولا تكون
+  الخانة الثانية آمنة إلا لعمليات البناء باستخدام webpack.
+- **تعمل عمليات بناء طلبات السحب على مستضيف مُدار (2026-10-18).** لا تصل مهمة `Build` في `ci.yml`
+  إلى `omni-build` إلا مع `push` و`workflow_dispatch`؛ بينما تعمل مهمة Build لكل `pull_request`
+  (سواء من المصدر نفسه أو من fork) ولكل `merge_group` على `ubuntu-latest` باستخدام webpack.
+  عندما كان كل طلب سحب من المصدر نفسه يُوجَّه إلى الخانة، كان بناء Turbopack يشغلها لمدة 29–58 دقيقة،
+  واصطفت 18 عملية Build لمدة وصلت إلى 18 ساعة، ولم يحصل بناء push الخاص بسطر الإصدار نفسه على الخانة
+  إلا مرة واحدة ضمن 40 مهمة. على المستضيف المُدار، تستغرق عملية Build نفسها لطلب السحب 8–12 دقيقة
+  بالتوازي مع مهام طلب السحب الأخرى. يظل Turbopack، وهو المُجمِّع الذي ينشره `npm-publish`، قيد الاختبار
+  على سطر الإصدار من خلال بناء a11y الليلي للفرع الافتراضي (04:41 UTC)، ومن خلال كل عملية Build ناتجة
+  عن push أو dispatch تصل إلى الخانة، ومن خلال `npm-publish` نفسه.
+  يثبّت `tests/unit/build/heavy-build-queue.test.ts` البوابة ذات الشروط الأربعة.
+- **لا تضبط حجم خانة Turbopack أبدًا دون احتياجها المقاس.** في 2026-10-18 عند 18:06، خُفّضت الخانة
+  من 56G/60G إلى 40G/44G لإفساح المجال لـ `omni-release`. ظلت مرحلة الترجمة البرمجية عند حد
+  `MemoryHigh` طوال مدة تشغيلها (بلغ مؤشر ضغط الذاكرة PSI للحالة `full` نسبة 30–43 %)، ولم يتمكن
+  `Runner.Listener`، الذي يشارك cgroup نفسه، من تجديد مهمته. أُعيد إعداد المالك البالغ 56G/60G
+  والمؤرخ في 2026-10-17 في اليوم نفسه. دون هذه القيمة لا يفشل البناء؛ بل يتخبط، وتُفقد المهمة.
+- **لدى Release-Green خانته الخاصة (2026-10-18).** حتى ذلك الحين، كان كلا تحققي Release-Green يعملان
+  على `omni-build`: عند كل push (نحو 10/ساعة، مع إلغاء 97 من أصل 100 تشغيل push في منتصف العمل خلال يوم
+  واحد)، وثلاث عمليات فحص كاملة مدة كل منها نحو ساعتين يوميًا (انتظر فحص 05:29 ست ساعات للحصول على
+  الخانة) — كانت خانة البناء الوحيدة محجوزة بما يفوق سعتها عدة مرات، وانتظرت عمليات Build لطلبات السحب
+  من المصدر نفسه لساعات. يستهدف `release-green` و`main-green` الآن `omni-release`
+  (`omniroute-113-6` فقط) مع `OMNIROUTE_USE_TURBOPACK=0`، ولم يعد التشغيل الذي بدأ يُلغى بسبب push
+  أحدث (لكن الخانة المعلقة لا تزال تدمج سيل الطلبات). يثبّت
+  `tests/unit/build/runner-capacity-routing.test.ts` التوجيه، والتحويل إلى webpack، وحقيقة أن لا شيء
+  على `omni-release` يُبنى باستخدام Turbopack.
+- **المجموعة الخفيفة: `omni-light`.** يشغّل `omniroute-113` و`omniroute-113-2` المهام الليلية التي
+  تحتاج إلى `next build` للخلفية فقط (نحو 5–6 GB؛ باستخدام webpack)، ومهمة `lint-guard` في
+  `quality.yml`. كان لدى `omniroute-113` الإعداد `MemoryHigh=4G` حتى 2026-10-18 — أمضى بناء promptfoo
+  54 دقيقة هناك وهو يستعيد الذاكرة بصعوبة؛ وتزيل سعة 8 GB هذا الاختناق.
+- **عدد أقل من المستمعين عن قصد.** عُطّلت أربع وحدات OmniRoute في 2026-08-29 — فكل مستمع إضافي
+  هو مستأجر آخر لميزانية الذاكرة المذكورة أعلاه. الحد الأقصى لبرنامج التنظيف هو 6
+  (`MAX_ACTIVE_RUNNERS=6` في cron): فهو يحسب كل `Runner.Listener` على الجهاز، ويضيف OmniHeuris
+  وOmniMind اثنين إلى وحداتنا الأربع.
+- **لا تنظّف `/tmp` أو `_work` يدويًا أبدًا أثناء انشغال أي مشغّل.** إن إجراء
+  فحص ثم حذف مع وجود فاصل بينهما هو ما تسبب في فقدان مهمة Build نشطة لمجلد
+  `_work` الخاص بها في 2026-08-27. ينفّذ برنامج التنظيف الفحص والإزالة في خطوة واحدة؛
+  فاترك المهمة له.
+- يؤدي إيقاف مشغّل في منتصف المهمة إلى إلغاء المهمة (رُصد ذلك مباشرةً): لا تستخدم `systemctl stop`
+  إلا عندما لا تكون لدى المستمع الخاص به عملية `Runner.Worker` فرعية — ونفّذ ذلك بأمر واحد.
+- يجب ألا تخزّن مسارات العمل العناصر الناتجة في `/tmp` (فهو موجود في RAM). نزّلها إلى
+  `$RUNNER_TEMP` (على القرص، لكل مشغّل) — استغرق وصول عنصر `next-build` الناتج بحجم 1.3 GB إلى
+  tmpfs مدة 27–32 دقيقة، بينما استغرق رفعه من القرص دقيقتين.
+- خادم VPS ذو اللاحقة `.15` مخصص للاختبارات التمهيدية فقط — ولا يشغّل مشغّلات CI أبدًا.
+
+## المسار المستضاف (مشغّلات مستضافة على GitHub)
+
+الحساب ضمن خطة **Pro**: **40 مهمة مستضافة متزامنة**، تتشاركها جميع عمليات التحقق من طلبات السحب،
+وكل سير عمل يُشغَّل عند الدفع، والإعداد الافتراضي لـ CodeQL. أظهرت القياسات في 2026-10-18 أثناء
+حملة دمج (نحو 10 عمليات دمج/ساعة على `release/v3.8.52`) أنه تم إنشاء **2,500 تشغيل لسير العمل خلال
+24 ساعة**، مع 44 عملية دفع إلى الفرع خلال 6 ساعات، ووجود **106 مهام مستضافة في قائمة الانتظار** بينما انتظرت عمليات التحقق من طلبات السحب
+لساعات، ودُمجت طلبات السحب من دونها. كانت تسعة تدفقات عمل تُشغَّل عند كل عملية دفع إلى الفرع:
+
+| لكل عملية دفع إلى `release/v*`              | المهام المستضافة | النتيجة أثناء العاصفة                                                  | منذ 2026-10-18                                                            |
+| ------------------------------------------- | ---------------: | ---------------------------------------------------------------------- | ------------------------------------------------------------------------- |
+| `ci.yml` (المصفوفة الكاملة)                 |           حتى 30 | ألغتها عملية الدفع التالية، 24 من أصل 24 خلال يوم                      | لا يبدأ عند الدفع إلى `release/**` (تشغيل طلب السحب + Release-Green)      |
+| `quality.yml`                               |               ~6 | أُلغيت، 23 من أصل 23                                                   | لا يبدأ عند الدفع إلى `release/**`                                        |
+| `Release-Green` `--quick`                   |                0 | عمل على `omni-build`، وأُلغي 97 من أصل 100                             | خانة `omni-release`، لا يُلغى مطلقًا، وتُدمج عمليات التشغيل المعلّقة      |
+| `Lock released branch`، `OpenSSF Scorecard` |                2 | تشغيل واحد في قائمة الانتظار لكل عملية دفع                             | تشغيل واحد لكل مرجع (`tests/unit/build/hosted-lane-concurrency.test.ts`)  |
+| `Release acceptance` (تقرير الظل)           |                1 | عملية `npm ci` مستضافة واحدة لكل عملية دفع، ولا تُلغى مطلقًا           | بلا تغيير — مرشح لمرشح `paths:`                                           |
+| `Publish to Docker Hub` → `Deploy to VPS`   |                2 | يُلغى عند كل عملية دفع؛ يتنافس مسار amd64 على `omni-build`             | بلا تغيير — قناة النشر الخاصة بالمالك                                     |
+| الإعداد الافتراضي لـ CodeQL (`dynamic`)     |                4 | `javascript-typescript`، و`actions`، و`c-cpp`، و`python` لكل عملية دفع | بلا تغيير — Settings → Code security؛ لا يفحص `c-cpp`/`python` أي شيء هنا |
+
+يثبّت `tests/unit/build/push-storm-diet.test.ts` مشغّل الدفع الخاص بفرع `main` فقط في `ci.yml` و
+`quality.yml`. أثر جانبي: لم يعد Codecov يتلقى رفعًا أساسيًا عند كل عملية دفع إلى فرع إصدار (هذه
+الخطوة معلوماتية وتستخدم `continue-on-error`)؛ ولا تتأثر بوابة التغطية داخل المستودع ولا تعليق طلب السحب.
+
+**لا تؤدي زيادة السعة ذاتية الاستضافة إلى حل مشكلة قائمة انتظار المهام المستضافة.** يمكن لجهاز التطوير
+(`devbox-vm-06-dev002`،‏ 24 vCPU / 54 GB) استضافة مشغّل، لكن جلسات الوكلاء تُبقي
+حِمله بالفعل عند 20–26، ولا تحتوي حاوية الوكيل على Docker daemon، كما أن المسار المشبع هو
+المسار المستضاف. كان لدى جهاز `.113` مساحة خالية تبلغ 71 GB وحِمل يتراوح بين 5 و8 في اللحظة نفسها؛ ويتمثل القيد
+لديه في ميزانية الذاكرة لكل مستمع المذكورة أعلاه (بحد أقصى 6 مستمعين)، وليس في وحدة المعالجة المركزية. أما الأدوات المتبقية
+فهي إجرائية: دمج طلبات السحب الخاصة بالحملة عبر قائمة انتظار Mergify (`label=queue`، حيث تشترك الدُفعات
+في تشغيل CI واحد من نوع `merge_group` بدلًا من تشغيل لكل طلب سحب وآخر لكل عملية دفع)، وتقليص لغات
+الإعداد الافتراضي لـ CodeQL، وترشيح `release-acceptance.yml` بحسب الملفات التي يقرأها.

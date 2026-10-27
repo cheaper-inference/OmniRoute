@@ -83,8 +83,20 @@ test("web session credential metadata identifies cookie, token, and no-auth prov
     acceptsFullCookieHeader: true,
     storageKeys: ["cookie", "hf-chat"],
   });
-  // veoaifree-web is now a NOAUTH provider — not in WEB_SESSION_CREDENTIAL_REQUIREMENTS
-  assert.equal(webSessionCredentials.getWebSessionCredentialRequirement("veoaifree-web"), null);
+  assert.deepEqual(webSessionCredentials.getWebSessionCredentialRequirement("veoaifree-web"), {
+    kind: "cookie",
+    credentialName: "wordpress_logged_in cookie",
+    placeholder: "wordpress_logged_in_...=... or full Cookie header from veoaifree.com",
+    acceptsFullCookieHeader: true,
+    storageKeys: ["cookie", "wordpress_logged_in"],
+  });
+  assert.deepEqual(webSessionCredentials.getWebSessionCredentialRequirement("veo-free"), {
+    kind: "cookie",
+    credentialName: "wordpress_logged_in cookie",
+    placeholder: "wordpress_logged_in_...=... or full Cookie header from veoaifree.com",
+    acceptsFullCookieHeader: true,
+    storageKeys: ["cookie", "wordpress_logged_in"],
+  });
   assert.deepEqual(webSessionCredentials.getWebSessionCredentialRequirement("t3-web"), {
     kind: "cookie",
     credentialName: "convex-session-id + Cookie header",
@@ -154,10 +166,28 @@ test("web session credential validator requires provider-specific non-empty valu
     webSessionCredentials.hasUsableWebSessionCredential("perplexity-web", { unrelated: "value" }),
     false
   );
+  assert.equal(
+    webSessionCredentials.hasUsableWebSessionCredential("veoaifree-web", {
+      wordpress_logged_in_hash: "user|123|session",
+    }),
+    true
+  );
+  assert.equal(
+    webSessionCredentials.hasUsableWebSessionCredential("veo-free", {
+      cookie: "wordpress_logged_in_hash=user%7C123",
+    }),
+    true
+  );
+  assert.equal(
+    webSessionCredentials.hasUsableWebSessionCredential("veoaifree-web", { unrelated: "value" }),
+    false
+  );
 });
 
 test("no-auth web providers can be saved without an API key", () => {
   assert.equal(providers.providerAllowsOptionalApiKey("veoaifree-web"), true);
-  assert.equal(webSessionCredentials.requiresWebSessionCredential("veoaifree-web"), false);
+  assert.equal(webSessionCredentials.requiresWebSessionCredential("veoaifree-web"), true);
   assert.equal(webSessionCredentials.requiresWebSessionCredential("perplexity-web"), true);
+  assert.equal(providers.providerAllowsOptionalApiKey("aihorde"), true);
+  assert.equal(webSessionCredentials.requiresWebSessionCredential("aihorde"), false);
 });

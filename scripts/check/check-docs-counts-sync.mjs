@@ -27,10 +27,19 @@
 // (providers / MCP tools / routing strategies / free-tier pools).
 
 import fs from "node:fs";
-import { spawnSync } from "node:child_process";
+import { spawnSync as _spawnSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildReadmeMigrationChecks } from "./lib/readmeMigrationCount.mjs";
+
+let _spawnSyncImpl = _spawnSync;
+export function __setSpawnSyncForTest(fn) {
+  _spawnSyncImpl = fn;
+}
+export function __resetSpawnSyncForTest() {
+  _spawnSyncImpl = _spawnSync;
+}
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(__dirname, "..", "..");
@@ -141,7 +150,8 @@ export function countLocales() {
 
 // PURE: tally STRICT vs SOFT drift for a list of checks, given a content lookup.
 // `getContent(file) -> string | null`. A check whose `actual` is 0 is skipped (the
-// source count could not be determined). Returns { strict, soft, lines }.
+// source count could not be determined). `actual==="ERR"` is a STRICT failure, not a skip.
+// Returns { strict, soft, lines }.
 export function tallyDrift(checks, getContent) {
   let strict = 0;
   let soft = 0;
@@ -149,7 +159,22 @@ export function tallyDrift(checks, getContent) {
   for (const c of checks) {
     const tier = c.strict ? "STRICT" : "soft";
     lines.push(`\n• ${c.label}: ${c.actual} (real) [${tier}]`);
-    if (!c.actual) {
+    if (c.actual === "ERR") {
+      if (c.validate) {
+        const v = c.validate("", `code facts:${c.actual}`);
+        lines.push(`  ${v.ok ? "✓" : c.strict ? "✗" : "⚠"} ${c.label} — ${v.detail}`);
+        if (!v.ok) {
+          if (c.strict) strict++;
+          else soft++;
+        }
+      } else {
+        lines.push(`  ${c.strict ? "✗" : "⚠"} ${c.label} — readCodeFacts unavailable`);
+        if (c.strict) strict++;
+        else soft++;
+      }
+      continue;
+    }
+    if (c.actual === 0 || c.actual === "0") {
       lines.push(`  ⚠ could not determine ${c.docKey} count from source — skipping`);
       continue;
     }
@@ -178,13 +203,35 @@ export function tallyDrift(checks, getContent) {
   return { strict, soft, lines };
 }
 
+// Lightweight literal claim helper — checks that the expected string appears in the file.
+function makeLiteralClaimValidator(expected, opts) {
+  return (content) =>
+    content.includes(String(expected))
+      ? { ok: true, detail: `literal "${expected}" present — ${opts?.what ?? "literal"}` }
+      : {
+          ok: false,
+          detail: `expected literal "${expected}" not found — ${opts?.what ?? "literal"}`,
+        };
+}
+
 // Reads every code-derived fact in ONE tsx subprocess — the same functions the app
 // serves at runtime, never a hardcoded copy. DATA_DIR is redirected to a throwaway dir
 // so importing the MCP tool modules cannot touch the operator's real SQLite file.
-// Returns null when tsx is unavailable so the gate degrades to a skip, not a false red.
+// Returns null when tsx is unavailable — caller must treat it as a failing check, not a skip.
 function readCodeFacts() {
   const script = [
     'import {computeFreeModelTotals,FREE_MODEL_BUDGETS} from "./open-sse/config/freeModelCatalog.ts";',
+    'import {FREE_TIER_PROVIDER_SET} from "./open-sse/config/freeTierProviders.ts";',
+    'import {generateProviderPluginManifest} from "./open-sse/config/providerPluginManifestRegistry.ts";',
+    'import {REGISTRY} from "./open-sse/config/providers/index.ts";',
+    'import fs2 from "node:fs";',
+    'import path2 from "node:path";',
+    'const __rtxt=fs2.readFileSync(path2.join(process.cwd(),"src/lib/freeProviderRankings.ts"),"utf8");',
+    'const __dtxt=fs2.readFileSync(path2.join(process.cwd(),"open-sse/config/freeModelCatalog.data.ts"),"utf8");',
+    'const __itxt=fs2.readFileSync(path2.join(process.cwd(),"src/lib/combos/intelligentRouting.ts"),"utf8");',
+    'const __cat=__dtxt.match(/FREE_CATALOG_CURATED_AT\\s*=\\s*"([^"]+)"/)?.[1]??null;',
+    'const __sb=(__rtxt.match(/sortBy\\?\\s*:\\s*"elo"\\s*\\|\\s*"reliability"/)?"reliability":null);',
+    'const __ik=__itxt.match(/DEFAULT_INTELLIGENT_WEIGHTS[^=]*=\\s*\\{([\\s\\S]*?)\\n\\};/)?.[1]?.split("\\n").filter(l=>l.includes(":")).length??0;',
     'import {MODE_PACKS} from "./open-sse/services/autoCombo/modePacks.ts";',
     'import {ENGINE_IDS} from "./open-sse/services/compression/engineCatalog.ts";',
     'import {CLI_TOOLS} from "./src/shared/constants/cliTools.ts";',
@@ -230,13 +277,16 @@ function readCodeFacts() {
     "freePools:t.poolCount,engines:ENGINE_IDS.length,",
     "cliTotal:cli.length,cliCode:by('code'),cliAgent:by('agent'),",
     "mcpTools:countUniqueMcpTools(cols),mcpScopes:sc.size,providers:pids.size,freeForever:ff.size,",
-    "modePacks:Object.keys(MODE_PACKS),",
+    "modePacks:Object.keys(MODE_PACKS),catalogDate:__cat,sortBy:__sb,intelligentKeys:__ik,",
     "hardStop:FREE_MODEL_BUDGETS.filter(e=>e.hardStopGuaranteed===true).length,",
-    "trainsOnPrompts:FREE_MODEL_BUDGETS.filter(e=>e.trainsOnPrompts===true).length}));",
+    "trainsOnPrompts:FREE_MODEL_BUDGETS.filter(e=>e.trainsOnPrompts===true).length,",
+    "freeTierCount:FREE_TIER_PROVIDER_SET.size,",
+    "freeTierReg:FREE_TIER_PROVIDER_SET.size-[...FREE_TIER_PROVIDER_SET].filter(x=>!(x in REGISTRY)).length,",
+    'manifestFreeTier:generateProviderPluginManifest().providers.filter(p=>p.capabilities.includes("free-tier")).length}));',
   ].join("");
   const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "docs-counts-"));
   try {
-    const r = spawnSync(process.execPath, ["--import", "tsx/esm", "-e", script], {
+    const r = _spawnSyncImpl(process.execPath, ["--import", "tsx/esm", "-e", script], {
       cwd: ROOT,
       encoding: "utf8",
       timeout: 180000,
@@ -334,16 +384,128 @@ export function readPackageVersion() {
   }
 }
 
+/**
+ * The BLOCKING coverage floors from config/quality/quality-baseline.json.
+ *
+ * Read from the baseline rather than hardcoded so G-08's validator and the gate
+ * that actually blocks can never drift apart: a rebaseline moves both at once.
+ *
+ * @returns {{statements:number,lines:number,functions:number,branches:number}}
+ */
+export function readCoverageRatchetFloors() {
+  const fallback = { statements: 60, lines: 60, functions: 60, branches: 60 };
+  try {
+    const baseline = JSON.parse(
+      fs.readFileSync(path.join(ROOT, "config/quality/quality-baseline.json"), "utf8")
+    );
+    const metrics = baseline?.metrics ?? {};
+    const pick = (key) => metrics[key]?.value;
+    return {
+      statements: pick("coverage.statements") ?? fallback.statements,
+      lines: pick("coverage.lines") ?? fallback.lines,
+      functions: pick("coverage.functions") ?? fallback.functions,
+      branches: pick("coverage.branches") ?? fallback.branches,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function isTableRowAt(content, index) {
+  const lineStart = content.lastIndexOf("\n", index - 1) + 1;
+  return content.slice(lineStart, index).trimStart().startsWith("|");
+}
+
 export function makeVersionClaimValidator(expected) {
+  // G-06 (#15159): the original list matched only TWO literal phrasings, so the
+  // gate saw at most one claim per file and four stale strings shipped through
+  // it — README.md "reported by OmniRoute 3.8.51", the compatibility table's
+  // "**v3.8.50**", "Recent highlights from v3.8.20 → v3.8.50", and llm.txt's
+  // "## Key Features (v3.8.50)".
+  //
+  // The load-bearing lesson: fixing those four STRINGS is not enough. Any new
+  // phrasing nobody anticipated slips through again.
+  //
+  // The subtlety that makes widening safe: a version NUMBER alone is not a
+  // defect. `v3.8.49` in a compatibility table, `v3.9.0 LTS` in a roadmap, and
+  // the `v3.8.20` end of a "from X → Y" range are all CORRECT. Only a claim
+  // that asserts which version is CURRENT is checkable. So each pattern below
+  // is anchored to a context that marks the version as the current one, and
+  // captures exactly the asserting version:
+  //
+  //   1. the product name immediately before it   "OmniRoute 3.8.51"
+  //   2. an explicit "Current version:" label
+  //   3. a bold range — emphasis picks out the target, so capture the SECOND
+  //      endpoint ("**v3.8.20 → v3.8.50**" asserts the right one is current)
+  //   4. a single bold version — emphasis marks the notable/current one
+  //      (outside markdown table rows; see isTableRowAt below)
+  //   5. a version inside a heading's parentheses ("## Key Features (v3.8.50)")
+  //   6. an inline range's target ("from v3.8.20 → v3.8.50")
+  //   7. a backticked floor ("`v3.8.51+`") — a floor below current understates
+  //      what users on that version actually get
+  //
+  // A naive `/\d+\.\d+\.\d+/` would redden on Node (22.22.2), TypeScript and
+  // every dependency version; that was the failure mode avoided here.
+  const SEMVER = String.raw`\d+\.\d+\.\d+`;
+  // Written as ordinary escaped strings, NOT String.raw templates: a template
+  // literal ending in `\*\*` immediately before the closing backtick makes the
+  // `**` ambiguous to the reader and easy to corrupt (it once produced `s***`
+  // and a "Nothing to repeat" SyntaxError at import time).
+  const BOLD = "\\*\\*";
+  const B = "(?:\\u2192|->|\\u2014|\\u2013)";
   const PATTERNS = [
-    /OmniRoute v(\d+\.\d+\.\d+)/g,
-    /Current version:\*{0,2}\s*\*{0,2}(\d+\.\d+\.\d+)/g,
+    // 1. product-named
+    new RegExp(`OmniRoute\\s+v?(${SEMVER})`, "g"),
+    // 2. explicit label
+    new RegExp(`[Cc]urrent\\s+version:?\\s*\\**\\s*v?(${SEMVER})`, "g"),
+    // 3. bold range — capture the TARGET (last endpoint)
+    new RegExp(`${BOLD}\\s*v?${SEMVER}\\s*${B}\\s*v?(${SEMVER})\\s*${BOLD}`, "g"),
+    // 4. single bold version
+    new RegExp(`${BOLD}\\s*v?(${SEMVER})\\s*${BOLD}`, "g"),
+    // 5. heading with a parenthesised/backticked version
+    new RegExp(`^#{1,6}[^\\n]*?[\\(\\\`]\\s*v?(${SEMVER})`, "gm"),
+    // 6. inline range target
+    new RegExp(`v${SEMVER}\\s*${B}\\s*v?(${SEMVER})`, "g"),
+    // 7. backticked floor, e.g. `v3.8.51+`
+    new RegExp("\\`\\s*v?(" + SEMVER + ")\\s*\\+\\s*\\`", "g"),
   ];
+
+  // Ranges are matched by patterns 3 and 6, but their LEFT endpoint also looks
+  // like a plain bold/inline version. Record the ranges first and ignore any
+  // other pattern's match that falls inside one, so "**v3.8.20 → v3.8.52**"
+  // yields a single claim (3.8.52) instead of also claiming 3.8.20.
+  const RANGE_RE = new RegExp(`v?${SEMVER}\\s*${B}\\s*v?${SEMVER}`, "g");
+
   return (content) => {
     if (!expected) return { ok: false, detail: "package.json version could not be read" };
+
+    const rangeSpans = [];
+    for (const m of content.matchAll(RANGE_RE)) {
+      rangeSpans.push([m.index ?? 0, (m.index ?? 0) + m[0].length]);
+    }
+    const insideRange = (index) => rangeSpans.some(([s, e]) => index >= s && index < e);
+
     const claims = [];
-    for (const pattern of PATTERNS)
-      for (const m of content.matchAll(pattern)) claims.push({ value: m[1], text: m[0].trim() });
+    for (const pattern of PATTERNS) {
+      for (const m of content.matchAll(pattern)) {
+        const index = m.index ?? 0;
+        const value = m[1];
+        // Patterns 3 and 6 capture a range's TARGET, which legitimately sits
+        // inside the range span. Every other match inside a range is that
+        // range's left endpoint being double-counted — skip it.
+        const isRangeTarget = pattern === PATTERNS[2] || pattern === PATTERNS[5];
+        if (insideRange(index) && !isRangeTarget) continue;
+        // A bold version inside a markdown TABLE row is a column marker, not a
+        // current-version claim: the README compatibility table bolds the last
+        // SHIPPED release (`| v3.8.50 | **v3.8.51** | \`v3.8.52+\` |`) while
+        // package.json already carries the in-development version. In such a
+        // row the current version is asserted by the backticked floor
+        // (pattern 7), which is still checked.
+        if (pattern === PATTERNS[3] && isTableRowAt(content, index)) continue;
+        claims.push({ value, text: m[0].trim(), index });
+      }
+    }
+
     if (!claims.length) return { ok: true, detail: "no version claim in this file" };
     const stale = claims.filter((c) => c.value !== expected);
     if (!stale.length)
@@ -357,6 +519,72 @@ export function makeVersionClaimValidator(expected) {
         `stale version: ${[...new Set(stale.map((c) => `"${c.text}"`))].join(", ")} — ` +
         `package.json is ${expected}`,
     };
+  };
+}
+
+/**
+ * G-08 (#15159): validate a documented coverage floor against the BLOCKING
+ * ratchet, not against `npm run test:coverage`.
+ *
+ * AGENTS.md advertised `60/60/60/60` (statements/lines/functions/branches).
+ * That number is accurate in isolation — it is what test:coverage hardcodes —
+ * but the blocking gate enforces 67.33 / 67.33 / 72.02 / 65.08 from
+ * config/quality/quality-baseline.json. So an agent reading AGENTS.md alone
+ * would run the floor below the real one and be surprised by a red quality-gate
+ * on correct work. AGENTS.md is also an agent-instruction surface: a wrong floor
+ * there misleads every future session, not just a human reading docs.
+ *
+ * Deliberately narrow: it only fires on an explicit four-number coverage-floor
+ * claim, so ordinary prose about coverage is untouched.
+ *
+ * @param {{statements:number,lines:number,functions:number,branches:number}} floors
+ * @returns {(content: string) => {ok: boolean, detail: string}}
+ */
+export function makeCoverageFloorClaimValidator(floors) {
+  // "60/60/60/60", "67.33 / 67.33 / 72.02 / 65.08", "60 / 60 / 60 / 60".
+  const PATTERN =
+    /(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/g;
+
+  return (content) => {
+    const claims = [];
+    for (const m of content.matchAll(PATTERN)) {
+      claims.push({
+        values: [m[1], m[2], m[3], m[4]].map(Number),
+        text: m[0],
+        index: m.index ?? 0,
+      });
+    }
+    if (!claims.length) return { ok: true, detail: "no coverage-floor claim in this file" };
+
+    const required = [floors.statements, floors.lines, floors.functions, floors.branches];
+    const problems = [];
+    for (const claim of claims) {
+      // Only compare against the requirement it can actually fail: a floor claim
+      // sits BELOW the blocking floor, so any component below its requirement is
+      // a real understatement. Being above is harmless (stricter than required).
+      const shortfalls = required
+        .map((required_, i) => ({ required: required_, claimed: claim.values[i] }))
+        .filter((c) => c.claimed < c.required);
+      if (shortfalls.length) {
+        // Show the surrounding line so the report names the offending text.
+        const lineStart = content.lastIndexOf("\n", claim.index) + 1;
+        const lineEnd = content.indexOf("\n", claim.index);
+        const line = content.slice(lineStart, lineEnd === -1 ? undefined : lineEnd).trim();
+        problems.push(
+          `${claim.text} understates the blocking coverage floor ` +
+            `(${shortfalls
+              .map((c) => `claims ${c.claimed}, gate requires ${c.required}`)
+              .join("; ")}) — ${line}`
+        );
+      }
+    }
+
+    if (!problems.length)
+      return {
+        ok: true,
+        detail: `${claims.length} coverage-floor claim(s) meet or exceed the blocking ratchet`,
+      };
+    return { ok: false, detail: problems.join(" | ") };
   };
 }
 
@@ -492,14 +720,51 @@ const SVG_DIAGRAM_FILES = [
   "public/images/tier-flow-light.svg",
 ];
 
+function makeProviderCountValidator(expected, requireClaim = false) {
+  return makeNumberClaimValidator(expected, {
+    what: "aggregate provider count",
+    // Subsets and approximate counts (100+) have their own denominators.
+    pattern:
+      /\b(\d{3,4})\*{0,2}(?:\s+(?:(?:AI|LLM|registered|unique)\s+)?providers\b|-provider\b)/gi,
+    skipBefore: /chat model registry covers\s+\*{0,2}$/i,
+    skipAfter: /^\s+in\s+(?:>\s*)?OmniRoute v\d+\.\d+\.\d+/i,
+    requireClaim,
+  });
+}
+
 export function buildChecks() {
   return [
+    ...buildReadmeMigrationChecks(ROOT, countMigrations()),
     {
       label: "Provider count",
       actual: readProviderTotal(),
       docKey: "providers",
       strict: true,
       files: ["README.md", "AGENTS.md", "llm.txt"],
+      validate: makeProviderCountValidator(readProviderTotal(), true),
+    },
+    {
+      label: "Provider count (secondary docs and skills)",
+      actual: readProviderTotal(),
+      docKey: "providers",
+      strict: true,
+      files: [
+        "docs/architecture/ARCHITECTURE.md",
+        "docs/architecture/CODEBASE_DOCUMENTATION.md",
+        "docs/architecture/REPOSITORY_MAP.md",
+        "docs/frameworks/A2A-SERVER.md",
+        "docs/frameworks/ACP.md",
+        "docs/frameworks/AGENTBRIDGE.md",
+        "docs/frameworks/OPEN_SSE_ARCHITECTURE.md",
+        "docs/getting-started/FREE-TIERS-GUIDE.md",
+        "docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md",
+        "docs/guides/FREE_PROVIDER_RANKINGS.md",
+        "src/shared/constants/agentSkills.ts",
+        "skills/README.md",
+        "skills/omni-auth/SKILL.md",
+        "skills/omni-providers/SKILL.md",
+      ],
+      validate: makeProviderCountValidator(readProviderTotal()),
     },
     {
       label: "Provider count (package.json description)",
@@ -532,6 +797,18 @@ export function buildChecks() {
       validate: makeVersionClaimValidator(readPackageVersion()),
     },
     {
+      // G-08 (#15159): AGENTS.md advertised `60/60/60/60`, which is what
+      // test:coverage hardcodes but NOT what the BLOCKING ratchet enforces. Read
+      // the real floors from quality-baseline.json rather than hardcoding them
+      // here, so a future rebaseline cannot leave the docs silently wrong.
+      label: "Coverage floor (docs vs blocking ratchet)",
+      actual: Object.values(readCoverageRatchetFloors()).join(" / "),
+      docKey: "coverage floor",
+      strict: true,
+      files: ["AGENTS.md", "README.md"],
+      validate: makeCoverageFloorClaimValidator(readCoverageRatchetFloors()),
+    },
+    {
       label: "i18n locales count",
       actual: countLocales(),
       docKey: "i18n locales",
@@ -544,10 +821,14 @@ export function buildChecks() {
         return [
           {
             label: "Code-derived counts",
-            actual: 0,
+            actual: "ERR",
             docKey: "code facts",
-            strict: false,
+            strict: true,
             files: [],
+            validate: () => ({
+              ok: false,
+              detail: "readCodeFacts unavailable — tsx/spawnSync failed",
+            }),
           },
         ];
       const claim = (expected, what, opts, files) => ({
@@ -609,12 +890,45 @@ export function buildChecks() {
           validate: makeModePackNamesValidator(packs),
         },
         {
+          // Every pack must pin `quality` explicitly (6 pins, 0.02/0.03) so
+          // no pack silently inherits a future DEFAULT. Validates live code,
+          // not docs — the gate loops `files` content through `validate`.
+          label: "mode packs pin quality explicitly (live code)",
+          actual: 6,
+          docKey: "packs quality pins",
+          strict: true,
+          files: ["open-sse/services/autoCombo/modePacks.ts"],
+          validate: (content) => {
+            const pins = (content.match(/^\s*quality:\s*0\.0\d,?\s*$/gm) ?? []).length;
+            return pins >= 6
+              ? { ok: true, detail: `${pins} quality pins` }
+              : { ok: false, detail: `only ${pins} quality pins — every pack must pin quality` };
+          },
+        },
+        {
           label: "Provider reference total (doc vs live modules)",
           actual: f.providers,
           docKey: "providers (live)",
           strict: true,
           files: ["docs/reference/PROVIDER_REFERENCE.md"],
           validate: makeProviderReferenceValidator(f.providers),
+        },
+        // Gate: manifest emission vs catalogue intersection. Both numbers are
+        // live code facts from the same spawnSync computeur. The catalogue can
+        // name providers the registry does not serve yet (arcee-ai at
+        // 9d1a896c6), so the leaf raw size is informational — the gate
+        // compares the intersected count, never the raw size, and the script
+        // itself always exists so tallyDrift runs validate (skips null only).
+        {
+          label: "Manifest free-tier capability count (live code)",
+          actual: f.manifestFreeTier,
+          docKey: "free-tier capability",
+          strict: true,
+          files: ["scripts/check/check-docs-counts-sync.mjs"],
+          validate: () => ({
+            ok: f.manifestFreeTier === f.freeTierReg,
+            detail: `manifest ${f.manifestFreeTier} vs leaf∩registry ${f.freeTierReg} (leaf ${f.freeTierCount})`,
+          }),
         },
         {
           label: "SVG canonical numbers (live code)",
@@ -722,17 +1036,82 @@ export function buildChecks() {
           f.trainsOnPrompts,
           "training-disclosure entries",
           {
-            // `requireClaim`: this page is the one place that states the number,
-            // so a reworded or deleted sentence must fail rather than pass as
-            // "no claim in this file" — otherwise the gate is one edit from silent.
             requireClaim: true,
             pattern:
               /(\d+) entr(?:y|ies) (?:that )?(?:carry|carries) a (?:prompt-)?training disclosure/gi,
           },
           ["docs/reference/FREE_TIERS.md"]
         ),
+        {
+          label: "Free provider rankings sortBy (live code)",
+          actual: f.sortBy ?? "reliability",
+          docKey: "rankings sortBy",
+          strict: true,
+          files: ["src/lib/freeProviderRankings.ts", "src/app/api/free-provider-rankings/route.ts"],
+          validate: (content) => {
+            // Disjunctive: the gate loops over two files with different shapes —
+            // freeProviderRankings.ts carries the union + branch, route.ts the z.enum.
+            const hasUnion = /sortBy\?\s*:\s*"elo"\s*\|\s*"reliability"/.test(content);
+            const hasReliabilityBranch =
+              /sortBy\s*===\s*"reliability"|sortBy\s*!==\s*"reliability"/.test(content);
+            const hasZEnum = /z\.enum\(\["elo",\s*"reliability"\]\)/.test(content);
+            return (hasUnion && hasReliabilityBranch) || hasZEnum
+              ? { ok: true, detail: "union+branch (rankings) or z.enum (route) present" }
+              : { ok: false, detail: "ELO-only regression: union+branch and z.enum both missing" };
+          },
+        },
+        {
+          label: "FREE_CATALOG_CURATED_AT (live code)",
+          actual: f.catalogDate ?? 0,
+          docKey: "FREE_CATALOG_CURATED_AT",
+          strict: false,
+          files: ["open-sse/config/freeModelCatalog.data.ts"],
+          validate: makeLiteralClaimValidator(f.catalogDate, { what: "FREE_CATALOG_CURATED_AT" }),
+        },
+        // Duplicate coverage with combo-scoring-weights-schema-coverage.test.ts — soft gate only.
+        {
+          label: "INTELLIGENT vs DEFAULT (live code)",
+          actual: f.intelligentKeys ?? 16,
+          docKey: "INTELLIGENT vs DEFAULT",
+          strict: false,
+          files: ["src/lib/combos/intelligentRouting.ts", "open-sse/services/autoCombo/scoring.ts"],
+          validate: (content) =>
+            content.includes("DEFAULT_INTELLIGENT_WEIGHTS") || content.includes("DEFAULT_WEIGHTS")
+              ? {
+                  ok: true,
+                  detail:
+                    "weight constant present (strict coverage in combo-scoring-weights-schema-coverage:66)",
+                }
+              : { ok: false, detail: "no weight constant found" },
+        },
       ];
     })(),
+    {
+      label: "ToS caution (16) (live docs)",
+      actual: 16,
+      docKey: "ToS caution (16)",
+      strict: false,
+      files: ["docs/reference/FREE_TIERS.md"],
+      validate: makeNumberClaimValidator(16, {
+        what: "ToS caution (16)",
+        pattern: /Caution[^\n]*\(\s*(16)\s*\)/gi,
+        requireClaim: true,
+      }),
+    },
+    {
+      label: "quality neutral prose (live docs)",
+      actual: "quality neutral 0.5",
+      docKey: "quality neutral",
+      strict: false,
+      files: ["docs/routing/AUTO-COMBO.md"],
+      validate: (content) =>
+        /quality.*neutral.*0\.5/is.test(content)
+          ? { ok: true, detail: "quality neutral 0.5 mentioned" }
+          : {
+              ok: false,
+              detail: "quality neutral 0.5 not found — prose must carry quality neutral 0.5",
+            },
+    },
     {
       label: "Executors count",
       actual: countFiles("open-sse/executors"),

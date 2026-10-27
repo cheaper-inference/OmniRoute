@@ -1,0 +1,432 @@
+# Contributing to OmniRoute (Oʻzbekcha)
+
+🌐 **Languages:** 🇺🇸 [English](../../../CONTRIBUTING.md) · 🇪🇹 [am](../am/CONTRIBUTING.md) · 🇸🇦 [ar](../ar/CONTRIBUTING.md) · 🇦🇿 [az](../az/CONTRIBUTING.md) · 🇧🇬 [bg](../bg/CONTRIBUTING.md) · 🇧🇩 [bn](../bn/CONTRIBUTING.md) · 🇧🇦 [bs](../bs/CONTRIBUTING.md) · 🇨🇿 [cs](../cs/CONTRIBUTING.md) · 🇩🇰 [da](../da/CONTRIBUTING.md) · 🇩🇪 [de](../de/CONTRIBUTING.md) · 🇬🇷 [el](../el/CONTRIBUTING.md) · 🇪🇸 [es](../es/CONTRIBUTING.md) · 🇪🇪 [et](../et/CONTRIBUTING.md) · 🇮🇷 [fa](../fa/CONTRIBUTING.md) · 🇫🇮 [fi](../fi/CONTRIBUTING.md) · 🇫🇷 [fr](../fr/CONTRIBUTING.md) · 🇮🇪 [ga](../ga/CONTRIBUTING.md) · 🇮🇳 [gu](../gu/CONTRIBUTING.md) · 🇳🇬 [ha](../ha/CONTRIBUTING.md) · 🇮🇱 [he](../he/CONTRIBUTING.md) · 🇮🇳 [hi](../hi/CONTRIBUTING.md) · 🇭🇷 [hr](../hr/CONTRIBUTING.md) · 🇭🇺 [hu](../hu/CONTRIBUTING.md) · 🇦🇲 [hy](../hy/CONTRIBUTING.md) · 🇮🇩 [id](../id/CONTRIBUTING.md) · 🇳🇬 [ig](../ig/CONTRIBUTING.md) · 🇮🇹 [it](../it/CONTRIBUTING.md) · 🇯🇵 [ja](../ja/CONTRIBUTING.md) · 🇬🇪 [ka](../ka/CONTRIBUTING.md) · 🇰🇭 [km](../km/CONTRIBUTING.md) · 🇮🇳 [kn](../kn/CONTRIBUTING.md) · 🇰🇷 [ko](../ko/CONTRIBUTING.md) · 🇱🇹 [lt](../lt/CONTRIBUTING.md) · 🇱🇻 [lv](../lv/CONTRIBUTING.md) · 🇮🇳 [ml](../ml/CONTRIBUTING.md) · 🇮🇳 [mr](../mr/CONTRIBUTING.md) · 🇲🇾 [ms](../ms/CONTRIBUTING.md) · 🇲🇹 [mt](../mt/CONTRIBUTING.md) · 🇲🇲 [my](../my/CONTRIBUTING.md) · 🇳🇵 [ne](../ne/CONTRIBUTING.md) · 🇳🇱 [nl](../nl/CONTRIBUTING.md) · 🇳🇴 [no](../no/CONTRIBUTING.md) · 🇮🇳 [or](../or/CONTRIBUTING.md) · 🇮🇳 [pa](../pa/CONTRIBUTING.md) · 🇵🇭 [phi](../phi/CONTRIBUTING.md) · 🇵🇱 [pl](../pl/CONTRIBUTING.md) · 🇵🇹 [pt](../pt/CONTRIBUTING.md) · 🇧🇷 [pt-BR](../pt-BR/CONTRIBUTING.md) · 🇷🇴 [ro](../ro/CONTRIBUTING.md) · 🇷🇺 [ru](../ru/CONTRIBUTING.md) · 🇱🇰 [si](../si/CONTRIBUTING.md) · 🇸🇰 [sk](../sk/CONTRIBUTING.md) · 🇸🇮 [sl](../sl/CONTRIBUTING.md) · 🇷🇸 [sr](../sr/CONTRIBUTING.md) · 🇸🇪 [sv](../sv/CONTRIBUTING.md) · 🇰🇪 [sw](../sw/CONTRIBUTING.md) · 🇮🇳 [ta](../ta/CONTRIBUTING.md) · 🇮🇳 [te](../te/CONTRIBUTING.md) · 🇹🇭 [th](../th/CONTRIBUTING.md) · 🇹🇷 [tr](../tr/CONTRIBUTING.md) · 🇺🇦 [uk-UA](../uk-UA/CONTRIBUTING.md) · 🇵🇰 [ur](../ur/CONTRIBUTING.md) · 🇻🇳 [vi](../vi/CONTRIBUTING.md) · 🇳🇬 [yo](../yo/CONTRIBUTING.md) · 🇨🇳 [zh-CN](../zh-CN/CONTRIBUTING.md) · 🇹🇼 [zh-TW](../zh-TW/CONTRIBUTING.md)
+
+---
+
+Hissa qoʻshishga qiziqish bildirganingiz uchun rahmat! Ushbu qoʻllanma ishni boshlash uchun kerak boʻladigan barcha maʼlumotlarni qamrab oladi.
+
+Har bir oʻzgarish uchun rasmiy ish jarayonini
+[Hissa qoʻshishning asosiy yoʻli](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) bilan boshlang. Unda provayder, marshrutlash,
+UI/UX, i18n, CLI, maʼlumotlar bazasi hamda build/deploy oʻzgarishlari ularning shartnomalari, yoʻnaltirilgan testlari, CI
+qamrovi va muvofiqlashtirish bosqichlari bilan bogʻlangan.
+
+---
+
+## Ishlab chiqish muhitini sozlash
+
+### Dastlabki talablar
+
+- **Node.js** `>=22.22.2 <23` yoki `>=24.0.0 <27` (tavsiya etiladi: 24 LTS)
+- **npm** 10+
+
+> **npm v11+ foydalanuvchilari (Node 24+):** `npm install` buyrugʻidan soʻng mahalliy modullar oʻrnatilganini tekshiring:
+> `node -e "require('better-sqlite3')"`. Agar u `MODULE_NOT_FOUND` xatosi bilan bajarilmasa,
+> `npm approve-scripts better-sqlite3 && npm install` buyrugʻini ishga tushiring. Batafsil:
+> [Nosozliklarni bartaraf etish](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+
+- **Git**
+
+### Klonlash va oʻrnatish
+
+```bash
+git clone https://github.com/diegosouzapw/OmniRoute.git
+cd OmniRoute
+npm install
+```
+
+### Muhit oʻzgaruvchilari
+
+```bash
+# Shablondan .env faylingizni yarating
+cp .env.example .env
+
+# Talab qilinadigan maxfiy kalitlarni yarating
+echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
+echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
+```
+
+Ishlab chiqish uchun asosiy oʻzgaruvchilar:
+
+| Oʻzgaruvchi            | Ishlab chiqishdagi standart qiymat | Tavsif                          |
+| ---------------------- | ---------------------------------- | ------------------------------- |
+| `PORT`                 | `20128`                            | Server porti                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | Frontend uchun asosiy URL       |
+| `JWT_SECRET`           | (yuqorida yarating)                | JWT imzolash uchun maxfiy kalit |
+| `INITIAL_PASSWORD`     | `CHANGEME`                         | Birinchi kirish uchun parol     |
+| `APP_LOG_LEVEL`        | `info`                             | Jurnal tafsilotlari darajasi    |
+
+### Boshqaruv paneli sozlamalari
+
+Boshqaruv paneli muhit oʻzgaruvchilari orqali ham sozlanishi mumkin boʻlgan funksiyalar uchun UI almashtirgichlarini taqdim etadi:
+
+| Sozlama joylashuvi          | Almashtirgich                 | Tavsif                                                 |
+| --------------------------- | ----------------------------- | ------------------------------------------------------ |
+| Sozlamalar → Kengaytirilgan | Nosozliklarni tuzatish rejimi | Nosozliklarni tuzatish soʻrov jurnallarini yoqish (UI) |
+| Sozlamalar → Umumiy         | Yon panel koʻrinishi          | Yon panel boʻlimlarini koʻrsatish/yashirish            |
+
+Bu sozlamalar maʼlumotlar bazasida saqlanadi va qayta ishga tushirishlar orasida saqlanib qoladi; oʻrnatilganda ular muhit oʻzgaruvchilarining standart qiymatlarini bekor qiladi.
+
+### Mahalliy muhitda ishga tushirish
+
+```bash
+# Ishlab chiqish rejimi (avtomatik qayta yuklash)
+npm run dev
+
+# Ishlab chiqarish uchun yigʻish
+npm run build    # next build → .build/next/, keyin assembleStandalone → dist/
+npm run start
+
+# Hissa qoʻshuvchilar oʻzgarishlari uchun faqat backend/API’ni tezkor kompilyatsiya qilish
+npm run build:contributor
+
+# Reliz yigʻilishi (toza qayta yigʻish + HEAD nazorat belgisi — joylashtirish uchun talab qilinadi)
+npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA fayliga yozadi
+
+# Keng tarqalgan port sozlamasi
+PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
+```
+
+Hissa qoʻshuvchilar yigʻilishi faqat kompilyatsiya tekshiruvini bajaradi: u mustaqil distributivni yigʻmaydi yoki ixtiyoriy mahalliy paketlash resurslarini yaratmaydi. Yetkazib beriladigan toʻplamni tekshirish kerak boʻlganda, odatiy ishlab chiqarish yigʻilishidan foydalaning.
+
+### Yigʻish natijasi tuzilishi
+
+| Katalog   | Tarkibi                                                                                                        | Kuzatiladimi |
+| --------- | -------------------------------------------------------------------------------------------------------------- | ------------ |
+| `src/`    | Ilova manba kodi (TypeScript / TSX)                                                                            | Ha           |
+| `.build/` | Oraliq fayllar — `next build` natijasi (git tomonidan eʼtiborsiz qoldiriladi, `distDir = .build/next`)         | Yoʻq         |
+| `dist/`   | Yetkazib beriladigan toʻplam — `assembleStandalone` tomonidan yigʻiladi (git tomonidan eʼtiborsiz qoldiriladi) | Yoʻq         |
+
+Yigʻish jarayoni bir bosqichda amalga oshiriladi:
+
+```
+npm run build
+  └─ next build → .build/next/standalone  (Next.js natijasi)
+  └─ assembleStandalone()                 (mustaqil fayllar + statik fayllar + ommaviy fayllar + mahalliy resurslarni nusxalaydi)
+       └─ natija: dist/                   (server.js, .next/static/, public/, node_modules/)
+```
+
+`npm run build:release` qoʻshimcha ravishda avval har ikkala katalogni tozalaydi va joylashtirish yaxlitligini tekshirish belgisi sifatida `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) faylini yozadi.
+
+`npm run build:contributor` faqat backend uchun moʻljallangan yigʻish profilidan foydalanadi. Yigʻish vaqtida u boshqaruv paneli UI fayllarini vaqtincha almashtiradi, API marshrut ishlov beruvchilarini saqlab qoladi va yigʻishdan soʻng asl fayllarni tiklaydi. Boshqaruv paneli UI’iga taʼsir qiladigan oʻzgarishlar yoki toʻliq reliz tekshiruvi uchun `npm run build` buyrugʻidan foydalaning; hissa qoʻshuvchi profili reliz yigʻilishini almashtirmaydi.
+
+> **VPS’ga joylashtirish eslatmasi:** masofaviy obraz katalogi `/usr/lib/node_modules/omniroute/app/`
+> oʻzgarishsiz qoladi. Joylashtirish vositalari `dist/` tarkibini unga rsync orqali nusxalaydi.
+> Faqat repozitoriy ichidagi yigʻish natijasi yoʻli oʻzgardi (`app/` → `dist/`).
+
+Standart URL’lar:
+
+- **Boshqaruv paneli**: `http://localhost:20128/dashboard`
+- **API**: `http://localhost:20128/v1`
+
+---
+
+## Git ish jarayoni
+
+> ⚠️ **HECH QACHON toʻgʻridan-toʻgʻri `main` tarmogʻiga commit qilmang.** Har doim xususiyat tarmoqlaridan foydalaning.
+>
+> **PR bazasi:** faol `release/vX.Y.Z` tarmogʻini (`main` emas) maqsad qilib belgilang. Har bir reliz uchun alohida tarmoq + chiqarishda teg qoʻyish modeli haqida
+> [`docs/ops/BRANCHING_MODEL.md`](docs/ops/BRANCHING_MODEL.md) fayliga
+> qarang.
+
+```bash
+# Faol relizning eng soʻnggi nuqtasidan tarmoq yarating (misol: release/v3.8.49)
+git fetch origin
+git checkout -b feat/your-feature-name origin/release/v3.8.49
+# ... oʻzgartirishlar kiriting ...
+git commit -m "feat: describe your change"
+git push -u origin feat/your-feature-name
+# base = release/v3.8.49 bilan Pull Request oching
+```
+
+### Tarmoqlarni nomlash
+
+| Prefiks     | Maqsad                              |
+| ----------- | ----------------------------------- |
+| `feat/`     | Yangi xususiyatlar                  |
+| `fix/`      | Xatolarni tuzatish                  |
+| `refactor/` | Kod tuzilishini qayta tashkil etish |
+| `docs/`     | Hujjatlardagi oʻzgartirishlar       |
+| `test/`     | Testlarni qoʻshish/tuzatish         |
+| `chore/`    | Vositalar, CI, bogʻliqliklar        |
+
+### Commit xabarlari
+
+[Conventional Commits](https://www.conventionalcommits.org/) qoidalariga amal qiling:
+
+```
+feat: add circuit breaker for provider calls
+fix: resolve JWT secret validation edge case
+docs: update SECURITY.md with PII protection
+test: add observability unit tests
+refactor(db): consolidate rate limit tables
+```
+
+Qoʻllanish sohalari (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`.
+
+---
+
+## Testlarni ishga tushirish
+
+```bash
+# Barcha testlar (unit + vitest + ecosystem + e2e)
+npm run test:all
+
+# Bitta test fayli (Node.js mahalliy test ishga tushirgichi — aksariyat testlar bundan foydalanadi)
+node --import tsx/esm --test tests/unit/your-file.test.ts
+
+# Faqat o‘zgartirishingiz ta’sir qilgan unit testlar (CI nazoratidagi bilan bir xil TIA selektori, #8084)
+npm run test:scoped            # oxirgi commitdagi (yoki ishchi daraxtdagi) o‘zgarishlar
+npm run test:scoped:staged     # faqat stage qilingan o‘zgarishlar — pre-commit ishga tushirilishi bilan yaxshi mos keladi
+npm run test:scoped:full       # avval import-graf xaritasini qayta quradi (fayllarni qo‘shish/ko‘chirishdan keyin)
+# Exit 1 + "to‘liq to‘plamni ishga tushiring" hub fayli (tsconfig, package.json, …) yoki
+# xaritada yo‘q manba o‘zgarganini anglatadi — selektor xavfsiz tarzda to‘xtaydi, hech qachon indamay o‘tkazib yubormaydi.
+
+# Vitest (MCP serveri, autoCombo, kesh)
+npm run test:vitest
+
+# E2E testlari (Playwright talab qilinadi)
+npm run test:e2e
+
+# Protokol klientlari E2E testlari (MCP transportlari, A2A)
+npm run test:protocols:e2e
+
+# Ekotizim mosligi testlari
+npm run test:ecosystem
+
+# Qamrov nazorati: operatorlar/satrlar/funksiyalar/tarmoqlar uchun 60%
+npm run test:coverage
+npm run coverage:report
+
+# Lint + format tekshiruvi
+npm run lint
+npm run check
+
+# Nazorat qilinadigan haqiqiy upstream combo smoke testi (VPS ruxsati + haqiqiy provayder kreditlarini talab qiladi)
+# HAQIQIY provayderlarga murojaat qiladi — ozgina xarajat qiladi. CI’da HECH QACHON ishga tushmaydi. Nazoratsiz toza tarzda o‘tkazib yuboriladi.
+# Talab qilinadi: ssh root@192.168.0.15 ruxsati (VPS’dan faqat o‘qish uchun DB snapshotini yuklaydi).
+RUN_COMBO_LIVE=1 npm run test:combo:live
+
+# Phase-3 VPS jonli smoke testi — oddiy Node ESM skriptlari, jonli .15 serveriga bevosita murojaat qiladi.
+# Talab qilinadi: ssh root@192.168.0.15 ruxsati (combo’lar SSH sqlite orqali yaratiladi/o‘chiriladi).
+# HAQIQIY provayderlarga murojaat qiladi (kichik xarajat). Faqat __live_test__* combo’larini yaratadi/o‘chiradi. CI’da HECH QACHON ishga tushmaydi.
+# .15 da REQUIRE_API_KEY=false, shuning uchun API kaliti kerak emas, ammo o‘rnatilgan bo‘lsa COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY hisobga olinadi.
+npm run test:combo:live:vps              # 7 ta HTTP ssenariysi (priority/round-robin/weighted/cost/fusion/auto + health)
+npm run test:combo:live:vps:failover     # haqiqiy provayderlararo failover ssenariysini qo‘shadi (jami 8 ta)
+```
+
+Qamrov bo‘yicha izohlar:
+
+- `npm run test:coverage` asosiy unit testlar to‘plami uchun manba qamrovini o‘lchaydi, `tests/**` ni chiqarib tashlaydi va `open-sse/**` ni o‘z ichiga oladi
+- Pull requestlar operatorlar/satrlar/funksiyalar/tarmoqlar qamrovi nazoratini **60%+** darajasida saqlashi kerak
+- Agar PR `src/`, `open-sse/`, `electron/` yoki `bin/` ichidagi production kodini o‘zgartirsa, ayni PR’da avtomatlashtirilgan testlarni qo‘shishi yoki yangilashi kerak
+- `npm run coverage:report` oxirgi qamrov ishga tushirilishidan olingan batafsil faylma-fayl hisobotni chiqaradi
+- `npm run test:coverage:legacy` tarixiy taqqoslash uchun eski metrikani saqlab qoladi
+- Qamrovni bosqichma-bosqich yaxshilash yo‘l xaritasi uchun `docs/ops/COVERAGE_PLAN.md` ga qarang
+
+### Pull Request talablari
+
+PR ochishdan oldin o‘zgartirgan narsangiz uchun yo‘naltirilgan siklni ishga tushirish maqsadida
+[Hissa qo‘shishning asosiy yo‘li](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) dan foydalaning.
+To‘liq unit testlar to‘plami (4 ta CI shard), Vitest, **60%+** qamrov nazorati va
+production build CI zimmasida — ularni lokal ravishda ishga tushirish PR tekshiruvlari sizga
+allaqachon taqdim etmaydigan hech qanday qo‘shimcha ma’lumot bermaydi va kichikroq mashinalarda hostni to‘liq band qilishi mumkin (#8084):
+
+- O‘zgartirishingizni qamrab oluvchi test fayllarini ishga tushiring: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- `npm run lint` ni ishga tushiring
+- Production kodi o‘zgargan har safar ayni PR’da avtomatlashtirilgan testlarni qo‘shing yoki yangilang
+- `node:test` fayllarida har bir yuqori darajadagi `await` ni (masalan, `await import(...)`) birinchi `test()` / `describe()` dan oldin joylashtiring: `--test-force-exit` ostida undan keyin ro‘yxatdan o‘tkazilgan testlar indamay umuman ishga tushmasligi mumkin (#18045; `npm run check:test-tla-order` orqali majburiy tekshiriladi)
+- Production kodi o‘zgargan bo‘lsa, o‘zgartirilgan yoki qo‘shilgan test fayllarini PR tavsifiga kiriting
+- Loyiha sirlari CI’da sozlangan bo‘lsa, PR’dagi SonarQube natijasini tekshiring
+
+Joriy test holati: quyidagilarni qamrab oluvchi **122 ta unit test fayli**:
+
+- Provayder tarjimonlari va format konvertatsiyasi
+- Tezlikni cheklash, circuit breaker va chidamlilik
+- Semantik kesh, idempotentlik va jarayonni kuzatish
+- Ma’lumotlar bazasi operatsiyalari va sxemasi (21 ta DB moduli)
+- OAuth jarayonlari va autentifikatsiya
+- API endpoint validatsiyasi (Zod v4)
+- MCP server vositalari va scope talablarini majburiy qo‘llash
+- Xotira va Skills tizimlari
+
+---
+
+## Kod uslubi
+
+- **ESLint** — Oʻzgarishlarni yuborishdan oldin `npm run lint` buyrugʻini ishga tushiring
+- **Prettier** — Oʻzgarishlarni yuborishda `lint-staged` orqali avtomatik formatlanadi (2 ta boʻsh joy, nuqtali vergullar, qoʻsh tirnoqlar, 100 ta belgi kengligi, es5 uslubidagi yakuniy vergullar)
+- **TypeScript** — Barcha `src/` kodi `.ts`/`.tsx` dan foydalanadi; `open-sse/` esa `.ts`/`.js` dan foydalanadi; TSDoc (`@param`, `@returns`, `@throws`) bilan hujjatlashtiring
+- **`eval()` taqiqlanadi** — ESLint `no-eval`, `no-implied-eval`, `no-new-func` qoidalarini majburiy qoʻllaydi
+- **Zod validatsiyasi** — Barcha API kirish maʼlumotlarini tekshirish uchun Zod v4 sxemalaridan foydalaning
+- **Nomlash**: Fayllar = camelCase/kebab-case, komponentlar = PascalCase, konstantalar = UPPER_SNAKE
+
+### Xatolarni qayta ishlash / boʻsh catch bloklari
+
+Hech qachon `catch` blokini izohsiz qoldirmang. Uni quyidagi ikki toifadan biriga ajrating (bu
+“SSE oqimlaridagi xatolarni hech qachon indamay yutib yubormang” qatʼiy qoidasini amalda qoʻllaydi):
+
+- **Ataylab (oʻzimizning imkon qadar bajariladigan tozalash/telemetriya kodimiz)** — bu yerdagi xatolik kutiladi va
+  zararsizdir; bir qatorli sabab izohini qoʻshing, jurnalga yozmang (har bir soʻrovni jurnalga yozish
+  ushbu kelishuv oldini oladigan ortiqcha shovqindir).
+
+  ```ts
+  } catch {} // mijoz uzilganidan keyin allaqachon yopilgan kontrollerni yopishga urinish kutiladi
+  ```
+
+- **Jurnalga yozilishi kerak (tashqi/chaqiruvchi taqdim etgan kod yoki xatoni yutish boshqaruv oqimini oʻzgartirsa)** — `catch`
+  blokini saqlang (uning oqimni buzishiga hech qachon yoʻl qoʻymang), ammo xatoni aniqlash mumkin boʻlishi uchun kontekstli
+  `console.debug`/`warn` xabarini chiqaring.
+
+  ```ts
+  } catch (e) {
+    console.debug("[STREAM] onFailure qayta chaqiruv funksiyasi xatosi:", e);
+  }
+  ```
+
+Amalda qoʻllangan misollar uchun `open-sse/utils/stream.ts` va `open-sse/utils/streamHandler.ts` fayllariga qarang.
+
+---
+
+## Loyiha tuzilmasi
+
+```
+src/                        # TypeScript (.ts / .tsx)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Boshqaruv paneli sahifalari (23 ta bo‘lim)
+│   ├── api/                # API marshrutlari (51 ta katalog)
+│   └── login/              # Autentifikatsiya sahifalari (.tsx)
+├── domain/                 # Siyosat mexanizmi (policyEngine, comboResolver, costRules va boshqalar)
+├── lib/                    # Asosiy biznes mantiqi (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protokoli serveri
+│   ├── acp/                # Agent Communication Protocol reyestri
+│   ├── compliance/         # Muvofiqlik siyosati mexanizmi
+│   ├── db/                 # SQLite domen modullari + 130 ta migratsiya
+│   ├── memory/             # Doimiy suhbat xotirasi
+│   ├── oauth/              # OAuth provayderlari, xizmatlari va yordamchi vositalari
+│   ├── skills/             # Kengaytiriladigan ko‘nikmalar freymvorki
+│   ├── usage/              # Foydalanishni kuzatish va xarajatlarni hisoblash
+│   └── localDb.ts          # Faqat qayta eksport qilish qatlami — bu yerga hech qachon mantiq qo‘shmang
+├── middleware/              # So‘rov oraliq dasturi (promptInjectionGuard)
+├── mitm/                   # MITM proksi (sertifikat, DNS, maqsadli marshrutlash)
+├── shared/
+│   ├── components/         # React komponentlari (.tsx)
+│   ├── constants/          # Provayder ta’riflari (329 ta), MCP qamrovlari, 20 ta marshrutlash strategiyasi
+│   ├── utils/              # O‘chirgich, tozalovchi, autentifikatsiya yordamchilari
+│   └── validation/         # Zod v4 sxemalari
+└── sse/                    # SSE proksi konveyeri
+
+open-sse/                   # @omniroute/open-sse ish maydoni
+├── executors/              # 150 ta ijrochi modul (ijrochi sinflar + har bir provayder uchun yordamchilar)
+├── handlers/               # 11 ta so‘rov ishlovchisi (chat, javoblar, embeddinglar, tasvirlar va boshqalar)
+├── mcp-server/             # MCP serveri (110 ta noyob vosita, 3 ta transport, 33 ta qamrov)
+├── services/               # 178 ta yuqori darajadagi xizmat (combo, autoCombo, rateLimitManager va boshqalar)
+├── translator/             # Format tarjimonlari (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformeri
+└── utils/                  # 22 ta yordamchi modul (oqim, TLS, proksi, jurnallash)
+
+electron/                   # Electron ish stoli ilovasi (ko‘p platformali)
+
+tests/
+├── unit/                   # Node.js test bajaruvchisi (1 574 ta test fayli)
+├── integration/            # Integratsion testlar
+├── e2e/                    # Playwright testlari
+├── security/               # Xavfsizlik testlari
+├── translator/             # Tarjimonga xos testlar
+└── load/                   # Yuklama testlari
+
+docs/
+├── adr/                     # Arxitektura qarorlari qaydlari
+├── architecture/            # Tizim arxitekturasi va barqarorligi
+├── comparison/              # OmniRoute va muqobillar taqqoslanishi
+├── compression/             # Siqish bo‘yicha qo‘llanmalar va qoidalar
+├── dev/                     # Ishlab chiqish bo‘yicha qo‘llanmalar
+├── diagrams/                # Arxitektura diagrammalari
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # Foydalanuvchi qo‘llanmasi, Docker, sozlash, muammolarni bartaraf etish
+├── i18n/                    # Xalqarolashtirilgan README tarjimalari
+├── marketing/               # Marketing materiallari
+├── ops/                     # Joylashtirish, proksi, qamrov, relizlar
+├── providers/               # Provayderga xos hujjatlar
+├── reference/               # API ma’lumotnomasi, muhit o‘zgaruvchilari, CLI vositalari, bepul tariflar
+├── releases/                # Reliz qaydlari
+├── routing/                 # Avtomatik kombinatsiya mexanizmi, mulohazalarni takrorlash
+├── screenshots/             # Boshqaruv paneli skrinshotlari
+├── security/                # Himoya cheklovlari, muvofiqlik, yashirinlik, tokenlar
+└── specs/                   # Dizayn spetsifikatsiyalari
+```
+
+---
+
+## Yangi provayder qoʻshish
+
+### 1-qadam: Provayder konstantalarini roʻyxatdan oʻtkazish
+
+`src/shared/constants/providers.ts` fayliga qoʻshing — modul yuklanganda Zod yordamida tekshiriladi.
+
+### 2-qadam: Ijrochini qoʻshish (agar maxsus mantiq kerak boʻlsa)
+
+Asosiy ijrochini kengaytiruvchi ijrochini `open-sse/executors/your-provider.ts` faylida yarating.
+
+### 3-qadam: Tarjimonni qoʻshish (agar format OpenAI formatida boʻlmasa)
+
+Soʻrov/javob tarjimonlarini `open-sse/translator/` ichida yarating.
+
+### 4-qadam: OAuth konfiguratsiyasini qoʻshish (agar OAuth asosida boʻlsa)
+
+OAuth hisob maʼlumotlarini `src/lib/oauth/constants/oauth.ts` fayliga, xizmatni esa `src/lib/oauth/services/` ichiga qoʻshing.
+
+Agar yuqori oqim provayderi ommaviy OAuth client_id/secret yoki Firebase Web API kalitini oʻzining ommaviy CLI / brauzer toʻplami ichida tarqatsa, uni satr literali sifatida joylashtirmang. `open-sse/utils/publicCreds.ts` faylidagi `resolvePublicCred()` funksiyasidan foydalaning va `EMBEDDED_DEFAULTS` ichiga niqoblangan bayt yozuvini qoʻshing. Toʻliq majburiy ish jarayoni [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) hujjatida bayon qilingan.
+
+Ishlov beruvchilar/ijrochilar ichida mijozga yetib boradigan xato xabarlari `open-sse/utils/error.ts` faylidagi `buildErrorBody()` / `sanitizeErrorMessage()` orqali oʻtishi shart — hech qachon xom `err.stack` yoki `err.message` qiymatini Response tanasiga joylashtirmang. [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) hujjatiga qarang.
+
+### 5-qadam: Modellarni roʻyxatdan oʻtkazish
+
+Model taʼriflarini `open-sse/config/providerRegistry.ts` fayliga qoʻshing.
+
+### 6-qadam: Testlarni qoʻshish
+
+`tests/unit/` ichida kamida quyidagilarni qamrab oluvchi birlik testlarini yozing:
+
+- Provayderni roʻyxatdan oʻtkazish
+- Soʻrov/javobni tarjima qilish
+- Xatolarni qayta ishlash
+
+---
+
+## Pull Request tekshiruv roʻyxati
+
+- [ ] Testlar muvaffaqiyatli oʻtadi (`npm test`)
+- [ ] Linting tekshiruvi muvaffaqiyatli oʻtadi (`npm run lint`)
+- [ ] Build muvaffaqiyatli yakunlanadi (`npm run build`)
+- [ ] Yangi ommaviy funksiyalar va interfeyslar uchun TypeScript turlari qoʻshilgan
+- [ ] Hardkodlangan maxfiy maʼlumotlar yoki zaxira qiymatlar mavjud emas
+- [ ] Ommaviy upstream hisob maʼlumotlari literal qiymatlar sifatida emas, `resolvePublicCred()` orqali kiritilgan ([`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ga qarang)
+- [ ] Xato javoblari `buildErrorBody()` / `sanitizeErrorMessage()` orqali yoʻnaltirilgan — javob tanalarida xom stack trace mavjud emas ([`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) ga qarang)
+- [ ] Shell buyruqlari (`exec` / `spawn`) bajarilish vaqtidagi qiymatlarni satr interpolyatsiyasi orqali emas, `env` orqali uzatadi
+- [ ] Barcha kirish maʼlumotlari Zod sxemalari bilan tekshirilgan
+- [ ] Foydalanuvchiga taʼsir qiluvchi oʻzgarishlar uchun `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` ostiga changelog **fragmenti** qoʻshilgan ([`changelog.d/README.md`](./changelog.d/README.md) ga qarang) — `CHANGELOG.md` faylini toʻgʻridan-toʻgʻri tahrirlamang; fragmentlar reliz vaqtida birlashtiriladi va PRlar oʻrtasida hech qachon ziddiyatga olib kelmaydi
+- [ ] Hujjatlar yangilangan (agar tegishli boʻlsa)
+- [ ] Yangi CodeQL / Secret-Scanning ogohlantirishlari yaratilmagan yoki ularning har biri tegishli `docs/security/` hujjatiga havola qilingan texnik asos bilan rad etilgan
+- [ ] Quyi jarayonlarni ishga tushiradigan marshrutlar (`/api/mcp/`, `/api/cli-tools/runtime/`) `src/server/authz/routeGuard.ts` ichida `isLocalOnlyPath()` sifatida tasniflangan — [Qatʼiy qoida #15](docs/security/ROUTE_GUARD_TIERS.md) ga qarang
+- [ ] Commit xabarlarida AI/botga tegishli `Co-authored-by` treylerlari mavjud emas (Qatʼiy qoida #16) — ishidan qayta foydalanilgan inson hamkorlar standart `Co-authored-by: Name <email>` treylerlari bilan eʼtirof etiladi
+
+---
+
+## Reliz qilish
+
+Relizlar `/generate-release` ish jarayoni orqali boshqariladi. Yangi GitHub Release yaratilganda, paket GitHub Actions orqali **avtomatik ravishda npm’ga nashr qilinadi**.
+
+VPS’ga joylashtirish uchun `npm run build:release` buyrug‘idan foydalaning (`npm run build` emas) — u toza
+qayta yig‘ishni amalga oshiradi, to‘plamni `dist/` ichiga jamlaydi va `dist/BUILD_SHA` nazorat faylini yozadi.
+So‘ng `dist/` tarkibini masofaviy `app/` katalogiga rsync orqali sinxronlaydigan `/deploy-vps-*-cc` ko‘nikmalaridan foydalaning.
+
+---
+
+## Yordam olish
+
+- **Arxitektura**: [`docs/architecture/ARCHITECTURE.md`](docs/architecture/ARCHITECTURE.md) fayliga qarang
+- **API maʼlumotnomasi**: [`docs/reference/API_REFERENCE.md`](docs/reference/API_REFERENCE.md) fayliga qarang
+- **Xavfsizlik hujjatlari**: [`docs/security/CLI_TOKEN.md`](docs/security/CLI_TOKEN.md), [`docs/security/ROUTE_GUARD_TIERS.md`](docs/security/ROUTE_GUARD_TIERS.md), [`docs/security/ERROR_SANITIZATION.md`](docs/security/ERROR_SANITIZATION.md), [`docs/security/PUBLIC_CREDS.md`](docs/security/PUBLIC_CREDS.md)
+- **Operatsion hujjatlar**: [`docs/ops/SQLITE_RUNTIME.md`](docs/ops/SQLITE_RUNTIME.md)
+- **Muammolar**: [github.com/diegosouzapw/OmniRoute/issues](https://github.com/diegosouzapw/OmniRoute/issues)

@@ -1,0 +1,1073 @@
+import { test } from "node:test";
+import assert from "node:assert/strict";
+import type {
+  ChatCoreExecutorResult,
+  PipelineConnectionContext,
+  PipelineStateHooks,
+  PipelineTargetContext,
+  PipelineWireState,
+  ProviderExecutionPipelineInput,
+  ProviderExecutionPolicy,
+} from "../../open-sse/handlers/chatCore/providerExecutionPipeline.ts";
+
+test("runProviderExecutionPipeline is importable", async () => {
+  const mod = await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  assert.equal(typeof mod.runProviderExecutionPipeline, "function");
+});
+
+function jsonResponse(body: unknown, status: number, extraHeaders: Record<string, string> = {}) {
+  return new Response(JSON.stringify(body), {
+    status,
+    headers: { "content-type": "application/json", ...extraHeaders },
+  });
+}
+
+function makeAttempt(
+  body: unknown,
+  status: number,
+  extra: Partial<ChatCoreExecutorResult> = {}
+): ChatCoreExecutorResult {
+  const response = jsonResponse(body, status, extra.headers as Record<string, string> | undefined);
+  return {
+    response,
+    url: extra.url ?? "https://upstream.test/v1/chat/completions",
+    headers: extra.headers ?? { "content-type": "application/json" },
+    transformedBody: extra.transformedBody ?? { model: "gpt-5" },
+    ...extra,
+  };
+}
+
+function noopState(): PipelineStateHooks {
+  return {
+    updatePendingStage: () => {},
+    recordRateLimitHeaders: () => {},
+    recordRateLimitBody: () => {},
+    writeTerminalStatus: async () => {},
+    persistConnectionPatch: () => {},
+    setConnectionRateLimitedUntil: () => {},
+    lockModel: () => {},
+    recordAntigravityQuotaState: async () => {},
+    markAccountSemaphoreBlocked: () => {},
+    isolateProbeFailures: () => false,
+  };
+}
+
+function makeInput(opts: {
+  policy: ProviderExecutionPolicy;
+  provider: string;
+  model?: string;
+  stream?: boolean;
+  connectionId?: string;
+  send: (model: string, allowDedup: boolean) => Promise<ChatCoreExecutorResult>;
+  getProviderCredentials?: PipelineConnectionContext["getProviderCredentials"];
+  replaceCredentials?: PipelineConnectionContext["replaceCredentials"];
+  getCurrentConnectionId?: () => string | undefined;
+  refreshCredentials?: PipelineConnectionContext["refreshCredentials"];
+  onCredentialsRefreshed?: PipelineConnectionContext["onCredentialsRefreshed"];
+  getNextFamilyFallback?: ProviderExecutionPipelineInput["getNextFamilyFallback"];
+  state?: Partial<PipelineStateHooks>;
+}): ProviderExecutionPipelineInput {
+  const model = opts.model ?? "gpt-5";
+  const connectionId = opts.connectionId ?? "conn-a";
+  let currentId: string | undefined = connectionId;
+  let credentials: Record<string, unknown> = { connectionId };
+  const target: PipelineTargetContext = {
+    provider: opts.provider,
+    requestedModel: model,
+    sourceFormat: "openai",
+    targetFormat: "openai",
+    stream: opts.stream ?? false,
+  };
+  const wire: PipelineWireState = {
+    body: { model, messages: [{ role: "user", content: "hi" }] },
+    currentModel: model,
+    triedModels: new Set([model]),
+    setBodyAndModel: (body, nextModel) => {
+      wire.body = body;
+      wire.currentModel = nextModel;
+      wire.triedModels.add(nextModel);
+    },
+  };
+  const connection: PipelineConnectionContext = {
+    initialConnectionId: connectionId,
+    getCurrentConnectionId: opts.getCurrentConnectionId ?? (() => currentId),
+    getCredentials: () => credentials,
+    replaceCredentials:
+      opts.replaceCredentials ??
+      ((next) => {
+        credentials = next;
+        currentId = typeof next.connectionId === "string" ? next.connectionId : currentId;
+      }),
+    onCredentialsRefreshed: opts.onCredentialsRefreshed ?? (() => {}),
+    assertManagedLeaseFence: () => {},
+    refreshCredentials: opts.refreshCredentials,
+    getProviderCredentials:
+      opts.getProviderCredentials ??
+      (async () => {
+        throw new Error("getProviderCredentials must not be called in this fixture");
+      }),
+  };
+  return {
+    policy: opts.policy,
+    target,
+    connection,
+    wire,
+    state: { ...noopState(), ...(opts.state || {}) },
+    sendProviderAttempt: opts.send,
+    getNextFamilyFallback: opts.getNextFamilyFallback,
+  };
+}
+
+test("initial Codex 429: rotation resolver>=1 and successful retry", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  let resolverCallCount = 0;
+  const input = makeInput({
+    policy: {
+      allowAccountRotation: true,
+      allowModelFallback: true,
+      expectedConnectionId: undefined,
+    },
+    provider: "codex",
+    connectionId: "conn-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        return makeAttempt({ error: { message: "rate limited", type: "rate_limit_error" } }, 429, {
+          headers: { "retry-after": "1" },
+        });
+      }
+      return makeAttempt(
+        {
+          id: "chatcmpl-ok",
+          choices: [{ message: { role: "assistant", content: "rotated" }, finish_reason: "stop" }],
+        },
+        200
+      );
+    },
+    getProviderCredentials: (async () => {
+      resolverCallCount += 1;
+      return { connectionId: "conn-b", allRateLimited: false };
+    }) as PipelineConnectionContext["getProviderCredentials"],
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(resolverCallCount >= 1, true, "resolver must run on initial Codex 429");
+  assert.equal(sendCount, 2, "second send after rotation");
+  assert.equal(outcome.kind, "response");
+  if (outcome.kind === "response") {
+    assert.equal(outcome.connectionId, "conn-b");
+    assert.equal(outcome.response.status, 200);
+  }
+});
+
+test("initial Antigravity 422 gcp_project_required: rotation resolver>=1 and successful retry", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  let resolverCallCount = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "antigravity",
+    connectionId: "agy-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        return makeAttempt(
+          { error: { message: "gcp_project_required", type: "invalid_request" } },
+          422
+        );
+      }
+      return makeAttempt(
+        {
+          id: "chatcmpl-ok",
+          choices: [{ message: { role: "assistant", content: "rotated" }, finish_reason: "stop" }],
+        },
+        200
+      );
+    },
+    getProviderCredentials: (async () => {
+      resolverCallCount += 1;
+      return { connectionId: "agy-b", allRateLimited: false };
+    }) as PipelineConnectionContext["getProviderCredentials"],
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(resolverCallCount >= 1, true, "resolver must run on initial Antigravity BYOP 422");
+  assert.equal(sendCount, 2, "second send after BYOP rotation");
+  assert.equal(outcome.kind, "response");
+  if (outcome.kind === "response") {
+    assert.equal(outcome.connectionId, "agy-b");
+    assert.equal(outcome.response.status, 200);
+  }
+});
+
+test("terminal error carries only the final attempt diagnostic outside ChatCoreErrorResult", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const diagnostic = {
+    httpStatus: 400,
+    validationCategory: "tool_schema",
+  };
+  const input = makeInput({
+    policy: { allowAccountRotation: false, allowModelFallback: false },
+    provider: "antigravity",
+    connectionId: "agy-a",
+    send: async () =>
+      makeAttempt({ error: { message: "Antigravity upstream error (400)" } }, 400, {
+        upstreamDiagnostic: diagnostic,
+      }),
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind !== "error") return;
+  assert.deepEqual(outcome.upstreamDiagnostic, diagnostic);
+  assert.equal(
+    Object.prototype.hasOwnProperty.call(outcome.result, "upstreamDiagnostic"),
+    false,
+    "the internal diagnostic must not widen the client-facing ChatCoreErrorResult"
+  );
+});
+
+test("successful retry clears the diagnostic from the failed attempt", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: false },
+    provider: "antigravity",
+    connectionId: "agy-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        return makeAttempt({ error: { message: "gcp_project_required" } }, 422, {
+          upstreamDiagnostic: {
+            httpStatus: 422,
+            validationCategory: "unknown_validation",
+          },
+        });
+      }
+      return makeAttempt(
+        {
+          id: "chatcmpl-ok",
+          choices: [{ message: { role: "assistant", content: "rotated" } }],
+        },
+        200
+      );
+    },
+    getProviderCredentials: (async () => ({
+      connectionId: "agy-b",
+      allRateLimited: false,
+    })) as PipelineConnectionContext["getProviderCredentials"],
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(sendCount, 2);
+  assert.equal(outcome.kind, "response");
+  if (outcome.kind !== "response") return;
+  assert.equal(outcome.response.status, 200);
+  assert.equal(outcome.upstreamDiagnostic, undefined);
+});
+
+test("failed replacement exposes its own diagnostic rather than the first attempt's", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  const replacementDiagnostic = {
+    httpStatus: 400,
+    validationCategory: "tool_pairing",
+  };
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: false },
+    provider: "antigravity",
+    connectionId: "agy-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        return makeAttempt({ error: { message: "gcp_project_required" } }, 422, {
+          upstreamDiagnostic: {
+            httpStatus: 422,
+            validationCategory: "unknown_validation",
+          },
+        });
+      }
+      return makeAttempt({ error: { message: "Antigravity upstream error (400)" } }, 400, {
+        upstreamDiagnostic: replacementDiagnostic,
+      });
+    },
+    getProviderCredentials: (async () => ({
+      connectionId: "agy-b",
+      allRateLimited: false,
+    })) as PipelineConnectionContext["getProviderCredentials"],
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(sendCount, 2);
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind !== "error") return;
+  assert.equal(outcome.result.response.status, 400);
+  assert.deepEqual(outcome.upstreamDiagnostic, replacementDiagnostic);
+});
+
+test("follow-up rotation blocks resolver on Antigravity 422", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  let resolverCallCount = 0;
+  const input = makeInput({
+    policy: {
+      allowAccountRotation: false,
+      allowModelFallback: false,
+      expectedConnectionId: "agy-a",
+    },
+    provider: "antigravity",
+    connectionId: "agy-a",
+    send: async () => {
+      sendCount += 1;
+      return makeAttempt(
+        { error: { message: "gcp_project_required", type: "invalid_request" } },
+        422
+      );
+    },
+    getProviderCredentials: (async () => {
+      resolverCallCount += 1;
+      return { connectionId: "agy-b", allRateLimited: false };
+    }) as PipelineConnectionContext["getProviderCredentials"],
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(resolverCallCount, 0, "follow-up must not call credentials resolver");
+  assert.equal(sendCount, 1, "follow-up sends once");
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind === "error") {
+    assert.equal(outcome.result.status, 422);
+    assert.equal(outcome.connectionId, "agy-a");
+  }
+});
+
+test("follow-up rotation blocks resolver on Codex 429", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  let resolverCallCount = 0;
+  const input = makeInput({
+    policy: {
+      allowAccountRotation: false,
+      allowModelFallback: false,
+      expectedConnectionId: "conn-a",
+    },
+    provider: "codex",
+    connectionId: "conn-a",
+    send: async () => {
+      sendCount += 1;
+      return makeAttempt({ error: { message: "rate limited", type: "rate_limit_error" } }, 429);
+    },
+    getProviderCredentials: (async () => {
+      resolverCallCount += 1;
+      return { connectionId: "conn-b", allRateLimited: false };
+    }) as PipelineConnectionContext["getProviderCredentials"],
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(resolverCallCount, 0, "follow-up must not call credentials resolver");
+  assert.equal(sendCount, 1, "follow-up sends once");
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind === "error") {
+    assert.equal(outcome.result.status, 429);
+    assert.equal(outcome.connectionId, "conn-a");
+  }
+});
+
+test("401 refresh succeeds then retries once on same connection", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  let refreshCount = 0;
+  let persistCount = 0;
+  let resolverCallCount = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "openai",
+    connectionId: "conn-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        return makeAttempt(
+          { error: { message: "invalid_api_key", type: "authentication_error" } },
+          401
+        );
+      }
+      return makeAttempt(
+        {
+          id: "chatcmpl-ok",
+          choices: [
+            { message: { role: "assistant", content: "refreshed" }, finish_reason: "stop" },
+          ],
+        },
+        200
+      );
+    },
+    refreshCredentials: async (creds) => {
+      refreshCount += 1;
+      return { ...creds, accessToken: "new-token" };
+    },
+    onCredentialsRefreshed: async () => {
+      persistCount += 1;
+    },
+    getProviderCredentials: (async () => {
+      resolverCallCount += 1;
+      return { connectionId: "conn-b", allRateLimited: false };
+    }) as PipelineConnectionContext["getProviderCredentials"],
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(refreshCount, 1, "refresh once");
+  assert.equal(persistCount, 1, "onCredentialsRefreshed once");
+  assert.equal(resolverCallCount, 0, "401 refresh must not rotate accounts");
+  assert.equal(sendCount, 2, "retry once after refresh");
+  assert.equal(outcome.kind, "response");
+  if (outcome.kind === "response") {
+    assert.equal(outcome.connectionId, "conn-a");
+    assert.equal(outcome.response.status, 200);
+  }
+});
+
+test("status restatement rewrites agentrouter 403 quota exhaustion to 429 before classification", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "agentrouter",
+    connectionId: "ar-a",
+    send: async () => {
+      sendCount += 1;
+      return makeAttempt({ error: { message: "用户额度不足", type: "forbidden" } }, 403);
+    },
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(sendCount, 1);
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind === "error") {
+    assert.equal(outcome.result.status, 429, "restated before classification");
+    assert.equal(outcome.connectionId, "ar-a");
+  }
+});
+
+test("thinking-signature recovery returns winning response", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "claude",
+    connectionId: "cl-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        return makeAttempt(
+          {
+            error: {
+              message: "invalid signature in thinking block",
+              type: "invalid_request_error",
+            },
+          },
+          400
+        );
+      }
+      return makeAttempt(
+        {
+          id: "msg-ok",
+          type: "message",
+          role: "assistant",
+          content: [{ type: "text", text: "recovered" }],
+        },
+        200
+      );
+    },
+  });
+  input.wire.body = {
+    model: "gpt-5",
+    messages: [
+      { role: "user", content: "q1" },
+      {
+        role: "assistant",
+        content: [
+          { type: "thinking", thinking: "old" },
+          { type: "text", text: "a1" },
+        ],
+      },
+      { role: "user", content: "q2" },
+    ],
+  };
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(sendCount, 2, "one recovery send after signature error");
+  assert.equal(outcome.kind, "response");
+  if (outcome.kind === "response") {
+    assert.equal(outcome.response.status, 200);
+    assert.equal(outcome.connectionId, "cl-a");
+  }
+});
+
+test("onSignatureFailure fires once with the FIRST failed wire body and recovery outcome", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  const firstBody = {
+    model: "gpt-5",
+    messages: [
+      { role: "user", content: "q1" },
+      {
+        role: "assistant",
+        content: [{ type: "thinking", thinking: "old", signature: "SIG_15534_A" }],
+      },
+      { role: "user", content: "q2" },
+    ],
+  };
+  const failures: Array<Record<string, unknown>> = [];
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "claude",
+    connectionId: "cl-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        return makeAttempt(
+          {
+            error: {
+              message: "invalid signature in thinking block",
+              type: "invalid_request_error",
+            },
+          },
+          400,
+          { transformedBody: firstBody }
+        );
+      }
+      return makeAttempt(
+        {
+          id: "msg-ok",
+          type: "message",
+          role: "assistant",
+          content: [{ type: "text", text: "r" }],
+        },
+        200
+      );
+    },
+  });
+  input.wire.body = firstBody as Record<string, unknown>;
+  input.onSignatureFailure = (failure) => {
+    failures.push({ ...failure, outboundBody: failure.outboundBody });
+  };
+
+  await runProviderExecutionPipeline(input);
+  assert.equal(sendCount, 2, "one recovery send after signature error");
+  assert.equal(failures.length, 1, "exactly one diagnostics report");
+  assert.equal(failures[0].status, 400);
+  assert.equal(failures[0].model, "gpt-5");
+  assert.equal(failures[0].recoveryAttempted, true);
+  assert.equal(failures[0].recoverySucceeded, true);
+  assert.equal(
+    (failures[0].outboundBody as { messages?: unknown[] })?.messages?.length,
+    3,
+    "outboundBody is the first failed wire body, not the recovery body"
+  );
+});
+
+test("onSignatureFailure records the first failed body when recovery dispatch throws", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const firstBody = {
+    messages: [{ role: "assistant", content: [{ type: "thinking", signature: "first" }] }],
+  };
+  const failures: Array<Record<string, unknown>> = [];
+  let sends = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: false, allowModelFallback: false },
+    provider: "claude",
+    send: async () => {
+      sends += 1;
+      if (sends === 1) {
+        return makeAttempt({ error: { message: "Invalid `signature` in `thinking` block" } }, 400, {
+          transformedBody: firstBody,
+        });
+      }
+      throw new Error("recovery transport failed");
+    },
+  });
+  input.wire.body = firstBody;
+  input.onSignatureFailure = (failure) => failures.push(failure);
+
+  await assert.rejects(runProviderExecutionPipeline(input), /recovery transport failed/);
+  assert.equal(sends, 2);
+  assert.equal(failures.length, 1);
+  assert.equal(failures[0].outboundBody, firstBody);
+  assert.equal(failures[0].recoveryAttempted, true);
+  assert.equal(failures[0].recoverySucceeded, false);
+});
+
+test("onSignatureFailure uses the last captured wire body after executor-internal retries", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const initialBody = { messages: [{ role: "user", content: "before" }] };
+  const rejectedBody = {
+    messages: [{ role: "assistant", content: [{ type: "thinking", signature: "rejected" }] }],
+  };
+  const failures: Array<Record<string, unknown>> = [];
+  const input = makeInput({
+    policy: { allowAccountRotation: false, allowModelFallback: false },
+    provider: "claude",
+    send: async () =>
+      makeAttempt({ error: { message: "Invalid `signature` in `thinking` block" } }, 400, {
+        transformedBody: initialBody,
+      }),
+  });
+  input.wire.body = initialBody;
+  input.getLastOutboundBody = () => rejectedBody;
+  input.onSignatureFailure = (failure) => failures.push(failure);
+
+  await runProviderExecutionPipeline(input);
+  assert.equal(failures.length, 1);
+  assert.equal(failures[0].outboundBody, rejectedBody);
+  assert.equal(failures[0].recoveryAttempted, false);
+});
+
+test("onSignatureFailure stays silent for non-signature 400s and other providers", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  for (const scenario of [
+    {
+      provider: "claude",
+      status: 400,
+      body: { error: { message: "max_tokens must be between 1 and 4096" } },
+    },
+    {
+      provider: "openai",
+      status: 400,
+      body: { error: { message: "invalid signature in thinking block" } },
+    },
+  ]) {
+    const failures: unknown[] = [];
+    const input = makeInput({
+      policy: { allowAccountRotation: false, allowModelFallback: false },
+      provider: scenario.provider,
+      send: async () =>
+        makeAttempt(scenario.body, scenario.status, {
+          transformedBody: { model: "m", messages: [] },
+        }),
+    });
+    input.onSignatureFailure = (failure) => failures.push(failure);
+    const outcome = await runProviderExecutionPipeline(input);
+    assert.equal(outcome.kind, "error");
+    assert.equal(failures.length, 0, `no diagnostics report for ${scenario.provider} 400`);
+  }
+});
+
+test("initial model-unavailable falls back to sibling model", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  let fallbackLookupCount = 0;
+  const sentModels: string[] = [];
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "openai",
+    model: "gpt-5",
+    connectionId: "conn-a",
+    send: async (model) => {
+      sendCount += 1;
+      sentModels.push(model);
+      if (model === "gpt-5") {
+        return makeAttempt(
+          { error: { message: "model is not available", type: "invalid_request_error" } },
+          404
+        );
+      }
+      return makeAttempt(
+        {
+          id: "chatcmpl-ok",
+          choices: [{ message: { role: "assistant", content: "fallback" }, finish_reason: "stop" }],
+        },
+        200
+      );
+    },
+    getNextFamilyFallback: (current) => {
+      fallbackLookupCount += 1;
+      return current === "gpt-5" ? "gpt-5-mini" : null;
+    },
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(fallbackLookupCount >= 1, true, "family fallback consulted");
+  assert.deepEqual(sentModels, ["gpt-5", "gpt-5-mini"]);
+  assert.equal(sendCount, 2);
+  assert.equal(outcome.kind, "response");
+  if (outcome.kind === "response") {
+    assert.equal(outcome.model, "gpt-5-mini");
+    assert.equal(outcome.response.status, 200);
+  }
+});
+
+test("follow-up allowModelFallback=false blocks model-unavailable fallback", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  let fallbackLookupCount = 0;
+  const input = makeInput({
+    policy: {
+      allowAccountRotation: false,
+      allowModelFallback: false,
+      expectedConnectionId: "conn-a",
+    },
+    provider: "openai",
+    model: "gpt-5",
+    connectionId: "conn-a",
+    send: async () => {
+      sendCount += 1;
+      return makeAttempt(
+        { error: { message: "model is not available", type: "invalid_request_error" } },
+        404
+      );
+    },
+    getNextFamilyFallback: () => {
+      fallbackLookupCount += 1;
+      return "gpt-5-mini";
+    },
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(fallbackLookupCount, 0, "follow-up must not consult family fallback");
+  assert.equal(sendCount, 1);
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind === "error") {
+    assert.equal(outcome.result.status, 404);
+    assert.equal(outcome.model, "gpt-5");
+  }
+});
+
+test("Codex 429 rotation calls scope-rate-limit, affinity-clear, and audit hooks", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const rateLimited: Array<Record<string, unknown>> = [];
+  const affinityCleared: string[] = [];
+  const audits: Array<Record<string, unknown>> = [];
+  let sendCount = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "codex",
+    connectionId: "conn-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        return makeAttempt({ error: { message: "rate limited", type: "rate_limit_error" } }, 429, {
+          headers: { "retry-after": "2" },
+        });
+      }
+      return makeAttempt(
+        {
+          id: "chatcmpl-ok",
+          choices: [{ message: { role: "assistant", content: "rotated" }, finish_reason: "stop" }],
+        },
+        200
+      );
+    },
+    getProviderCredentials: (async () => ({
+      connectionId: "conn-b",
+      allRateLimited: false,
+    })) as PipelineConnectionContext["getProviderCredentials"],
+    state: {
+      onCodexScopeRateLimited: (params) => {
+        rateLimited.push(params as unknown as Record<string, unknown>);
+      },
+      onClearSessionAffinity: (params) => {
+        affinityCleared.push(params.failedConnectionId);
+      },
+      onAuditAccountRotation: (params) => {
+        audits.push(params as unknown as Record<string, unknown>);
+      },
+    },
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(outcome.kind, "response");
+  assert.equal(rateLimited.length, 1, "must persist Codex model-scope cooldown");
+  assert.equal(rateLimited[0]?.failedConnectionId, "conn-a");
+  assert.deepEqual(affinityCleared, ["conn-a"]);
+  assert.equal(audits.length, 1);
+  assert.equal(audits[0]?.action, "codex.account_rotation");
+  assert.equal(audits[0]?.failedConnectionId, "conn-a");
+  assert.equal(audits[0]?.newConnectionId, "conn-b");
+});
+
+test("Codex 429 cooldown reads Retry-After from the response, not request headers", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const rateLimited: Array<Record<string, unknown>> = [];
+  let sendCount = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "codex",
+    connectionId: "conn-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        // BaseExecutor puts REQUEST headers on attempt.headers (Authorization).
+        // Upstream Retry-After lives on the Response. Mixing the two bags is the
+        // extract regression: cooldown silently falls back to 60s.
+        return {
+          response: jsonResponse(
+            { error: { message: "rate limited", type: "rate_limit_error" } },
+            429,
+            { "Retry-After": "5" }
+          ),
+          url: "https://upstream.test/v1/chat/completions",
+          headers: { Authorization: "Bearer request-token", "content-type": "application/json" },
+          transformedBody: { model: "gpt-5" },
+        };
+      }
+      return makeAttempt(
+        {
+          id: "chatcmpl-ok",
+          choices: [{ message: { role: "assistant", content: "rotated" }, finish_reason: "stop" }],
+        },
+        200
+      );
+    },
+    getProviderCredentials: (async () => ({
+      connectionId: "conn-b",
+      allRateLimited: false,
+    })) as PipelineConnectionContext["getProviderCredentials"],
+    state: {
+      onCodexScopeRateLimited: (params) => {
+        rateLimited.push(params as unknown as Record<string, unknown>);
+      },
+    },
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(outcome.kind, "response");
+  assert.equal(rateLimited.length, 1, "must persist Codex model-scope cooldown");
+  const until = new Date(String(rateLimited[0]?.rateLimitedUntil)).getTime();
+  const delta = until - Date.now();
+  assert.ok(
+    delta > 4_000 && delta < 8_000,
+    `Retry-After: 5 must yield ~5s cooldown, got ${delta}ms (60s = still reading request headers)`
+  );
+});
+
+test("Antigravity BYOP 422 rotation persists cooldown via setConnectionRateLimitedUntil", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const cooldowns: Array<{ id: string; untilMs: number | null }> = [];
+  let sendCount = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "antigravity",
+    connectionId: "agy-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        return makeAttempt(
+          { error: { message: "gcp_project_required", type: "invalid_request" } },
+          422
+        );
+      }
+      return makeAttempt(
+        {
+          id: "chatcmpl-ok",
+          choices: [{ message: { role: "assistant", content: "rotated" }, finish_reason: "stop" }],
+        },
+        200
+      );
+    },
+    getProviderCredentials: (async () => ({
+      connectionId: "agy-b",
+      allRateLimited: false,
+    })) as PipelineConnectionContext["getProviderCredentials"],
+    state: {
+      setConnectionRateLimitedUntil: (id, untilMs) => {
+        cooldowns.push({ id, untilMs });
+      },
+    },
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(outcome.kind, "response");
+  assert.equal(sendCount, 2);
+  assert.equal(cooldowns.length, 1, "BYOP rotate must persist cooldown before picking sibling");
+  assert.equal(cooldowns[0]?.id, "agy-a");
+  assert.equal(typeof cooldowns[0]?.untilMs, "number");
+  assert.equal((cooldowns[0]?.untilMs ?? 0) > Date.now(), true);
+});
+
+const SIGNATURE_ERROR_BODY = {
+  error: { message: "invalid signature in thinking block", type: "invalid_request_error" },
+};
+
+/** Body shaped so a thinking-signature recovery is attempted for it. */
+function signatureRecoveryBody() {
+  return {
+    model: "gpt-5",
+    messages: [
+      { role: "user", content: "q1" },
+      {
+        role: "assistant",
+        content: [
+          { type: "thinking", thinking: "old" },
+          { type: "text", text: "a1" },
+        ],
+      },
+      { role: "user", content: "q2" },
+    ],
+  };
+}
+
+test("a successful signature recovery clears the failed attempt's diagnostic (#3229)", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "claude",
+    connectionId: "cl-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        return makeAttempt(SIGNATURE_ERROR_BODY, 400, {
+          upstreamDiagnostic: { antigravityValidation: { httpStatus: 400 } },
+        });
+      }
+      // The retry that actually wins carries no diagnostic: it did not fail.
+      return makeAttempt({ id: "msg-ok", type: "message", role: "assistant", content: [] }, 200);
+    },
+  });
+  input.wire.body = signatureRecoveryBody();
+
+  const outcome = await runProviderExecutionPipeline(input);
+
+  assert.equal(sendCount, 2, "one recovery send after the signature error");
+  assert.equal(outcome.kind, "response");
+  // The diagnostic describes a response that no longer exists. Carrying it onto the
+  // winning 200 would attribute a validation failure to a request that succeeded.
+  assert.equal(outcome.upstreamDiagnostic, undefined);
+});
+
+test("after signature recovery the diagnostic still describes the returned response (#3229)", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  let sendCount = 0;
+  const input = makeInput({
+    policy: { allowAccountRotation: false, allowModelFallback: false },
+    provider: "claude",
+    connectionId: "cl-a",
+    send: async () => {
+      sendCount += 1;
+      if (sendCount === 1) {
+        return makeAttempt({ ...SIGNATURE_ERROR_BODY, marker: "first" }, 400, {
+          upstreamDiagnostic: { antigravityValidation: { httpStatus: 400 }, marker: "first" },
+        });
+      }
+      return makeAttempt({ error: { message: "still bad" }, marker: "retry" }, 400, {
+        upstreamDiagnostic: { antigravityValidation: { httpStatus: 400 }, marker: "retry" },
+      });
+    },
+  });
+  input.wire.body = signatureRecoveryBody();
+
+  const outcome = await runProviderExecutionPipeline(input);
+
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind !== "error") return;
+
+  // Do not pin WHICH attempt the pipeline settles on -- pin the invariant that the
+  // metadata and the response travel together, so a log can never describe attempt A
+  // while returning attempt B.
+  const returned = (await outcome.result.response!.clone().json()) as { marker?: string };
+  const diagnostic = outcome.upstreamDiagnostic as { marker?: string } | undefined;
+  assert.ok(diagnostic, "a terminal upstream failure must keep its diagnostic");
+  assert.equal(diagnostic.marker, returned.marker);
+});
+
+test("upstream error code/type survive into the error outcome", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const input = makeInput({
+    policy: {
+      allowAccountRotation: false,
+      allowModelFallback: false,
+      expectedConnectionId: "agy-a",
+    },
+    provider: "antigravity",
+    connectionId: "agy-a",
+    send: async () =>
+      makeAttempt(
+        {
+          error: {
+            message: "Missing Google projectId for Antigravity account.",
+            type: "oauth_missing_project_id",
+            code: "missing_project_id",
+          },
+        },
+        422
+      ),
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind === "error") {
+    // #12867 dropped this pair when the leg moved into the pipeline, so
+    // downstream gates that key on BOTH fields (e.g.
+    // isAntigravityMissingProjectError) silently stopped firing and a
+    // config-class 422 degraded into a generic account cooldown.
+    assert.equal(outcome.result.errorCode, "missing_project_id");
+    assert.equal(outcome.result.errorType, "oauth_missing_project_id");
+    assert.equal(outcome.result.status, 422);
+  }
+});
+
+test("Gemini PerDay QuotaFailure reaches the classification text, not the client message", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const { hasGoogleDailyQuotaViolation } =
+    await import("../../open-sse/services/retryAfterJson.ts");
+  const message = "You exceeded your current quota.\nPlease retry in 26.6s.";
+  const input = makeInput({
+    policy: { allowAccountRotation: false, allowModelFallback: false },
+    provider: "gemini",
+    model: "gemini-2.5-flash",
+    send: async () =>
+      makeAttempt(
+        {
+          error: {
+            code: 429,
+            message,
+            status: "RESOURCE_EXHAUSTED",
+            details: [
+              {
+                "@type": "type.googleapis.com/google.rpc.QuotaFailure",
+                violations: [{ quotaId: "GenerateRequestsPerDayPerProjectPerModel-FreeTier" }],
+              },
+              { "@type": "type.googleapis.com/google.rpc.RetryInfo", retryDelay: "26s" },
+            ],
+          },
+        },
+        429
+      ),
+  });
+
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.equal(outcome.kind, "error");
+  if (outcome.kind === "error") {
+    const rawMessage = String(outcome.result.rawMessage);
+    assert.ok(rawMessage.startsWith(message), "the upstream message is kept verbatim");
+    assert.equal(hasGoogleDailyQuotaViolation(rawMessage), true);
+    assert.equal(
+      hasGoogleDailyQuotaViolation(outcome.result.error),
+      false,
+      "client text unchanged"
+    );
+  }
+});

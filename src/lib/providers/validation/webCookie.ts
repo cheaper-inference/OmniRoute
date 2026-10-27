@@ -55,7 +55,7 @@ function resolveWebCookieProbe(
   // regardless of cookie validity, which would silently report an expired/garbage
   // cookie as "OK" (worse than an honest "not supported"). The same refusal covers
   // providers whose registry entry exists only for the model catalog and whose
-  // baseUrl is a browser console rather than an API host (#12107, gemini-business).
+  // baseUrl is a browser console rather than an API host (#12107).
   if (!entry || WEB_COOKIE_PROVIDERS_WITHOUT_AUTH_PROBE.has(provider)) {
     return { rejection: UNSUPPORTED };
   }
@@ -69,6 +69,22 @@ function resolveWebCookieProbe(
   const baseUrl = normalizeBaseUrl(entry.baseUrl || "");
   if (!/^https?:\/\//i.test(baseUrl) || baseUrl.includes("?")) {
     return { rejection: UNSUPPORTED };
+  }
+
+  // lmarena's baseUrl is the create-evaluation POST endpoint, so `${baseUrl}/models` is a
+  // 404 and its catalog routes (`/nextjs-api/model-catalog`) answer 200 with no session at
+  // all — neither discriminates a live cookie. `/api/me/pulse` is the session-scoped
+  // identity endpoint: 200 with a live cookie, 401 {"message":"User not found"} without
+  // one (verified live 2026-10).
+  if (provider === "lmarena") {
+    return {
+      testUrl: new URL("/api/me/pulse", baseUrl).toString(),
+      headers: {
+        Accept: "application/json",
+        "User-Agent": STANDARD_USER_AGENT,
+        Cookie: cookie,
+      },
+    };
   }
 
   // zai-web is the one web-cookie provider whose session is a localStorage Bearer JWT

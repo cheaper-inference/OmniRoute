@@ -28,6 +28,8 @@ export interface RequestQueueSettings {
    * only after a job leaves QUEUED). Kept separate from `maxWaitMs` because
    * non-incremental gateways legitimately take minutes before first bytes;
    * the backstop must never undercut the upstream fetch-start timeout.
+   * Per-connection `rateLimitOverrides.executionMaxWaitMs` can override this
+   * global default (bounded 0..600000 via provider schema; 0 falls through).
    */
   executionMaxWaitMs: number;
   /**
@@ -70,6 +72,22 @@ export interface ConnectionCooldownProfileSettings {
    */
   useUpstream429BreakerHints?: boolean;
   maxBackoffSteps: number;
+}
+
+/**
+ * Scope of the token-refresh breaker. `provider` keeps the current
+ * provider-wide behavior; `connection` isolates failures per connection so
+ * one dead account does not block healthy accounts on the same provider.
+ */
+export type TokenRefreshBreakerScope = "provider" | "connection";
+
+export interface TokenRefreshBreakerSettings {
+  /** Breaker scope. Default "provider" (current behavior). */
+  scope: TokenRefreshBreakerScope;
+  /** Consecutive failures before tripping. Default 5. Bounded 1-100. */
+  failureThreshold: number;
+  /** Pause after tripping, in ms. Default 1800000 (30 min). Bounded 60000-86400000. */
+  cooldownMs: number;
 }
 
 export interface ProviderBreakerProfileSettings {
@@ -121,6 +139,26 @@ export interface ComboCooldownWaitSettings {
  */
 export interface QuotaShareConcurrencyLimitSettings {
   enabled: boolean;
+}
+
+/**
+ * Whether a stream content stall (the watchdog giving up on a stream that sent no
+ * model output in time) cools down the account that served it. Off by default: the
+ * stall is about one request — most often a long reasoning turn that had not produced
+ * output yet — so cooling the account took healthy capacity out of routing.
+ */
+export interface StreamStallCooldownSettings {
+  enabled: boolean;
+}
+
+/**
+ * Opt-in latency term for p2c account selection. `weight` is the most score points
+ * the rolling per-connection TTFB/error-rate signal can add to a p2c candidate
+ * (open-sse/services/connectionLatencyTracker.ts). Default 0 = off, so p2c picks
+ * exactly as before. Bounded 0-20, below the quota-blocked/exhausted penalties.
+ */
+export interface P2CLatencySettings {
+  weight: number;
 }
 
 export interface ProviderCooldownSettings {
@@ -237,9 +275,12 @@ export interface ResilienceSettings {
   requestQueue: RequestQueueSettings;
   connectionCooldown: Record<AuthCategory, ConnectionCooldownProfileSettings>;
   providerBreaker: Record<AuthCategory, ProviderBreakerProfileSettings>;
+  tokenRefreshBreaker: TokenRefreshBreakerSettings;
   waitForCooldown: WaitForCooldownSettings;
   comboCooldownWait: ComboCooldownWaitSettings;
   quotaShareConcurrencyLimit: QuotaShareConcurrencyLimitSettings;
+  streamStallCooldown: StreamStallCooldownSettings;
+  p2cLatency: P2CLatencySettings;
   providerCooldown: ProviderCooldownSettings;
   quotaPreflight: QuotaPreflightSettings;
   streamRecovery: StreamRecoverySettings;
@@ -251,9 +292,12 @@ export interface ResilienceSettingsPatch {
   requestQueue?: Partial<RequestQueueSettings>;
   connectionCooldown?: Partial<Record<AuthCategory, Partial<ConnectionCooldownProfileSettings>>>;
   providerBreaker?: Partial<Record<AuthCategory, Partial<ProviderBreakerProfileSettings>>>;
+  tokenRefreshBreaker?: Partial<TokenRefreshBreakerSettings>;
   waitForCooldown?: Partial<WaitForCooldownSettings>;
   comboCooldownWait?: Partial<ComboCooldownWaitSettings>;
   quotaShareConcurrencyLimit?: Partial<QuotaShareConcurrencyLimitSettings>;
+  streamStallCooldown?: Partial<StreamStallCooldownSettings>;
+  p2cLatency?: Partial<P2CLatencySettings>;
   providerCooldown?: Partial<ProviderCooldownSettings>;
   quotaPreflight?: Partial<QuotaPreflightSettings>;
   streamRecovery?: Partial<StreamRecoverySettings>;

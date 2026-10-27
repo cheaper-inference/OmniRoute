@@ -2,9 +2,12 @@
 
 import { useCallback, useEffect, useState } from "react";
 
-import { getQuotaVisibilityKey } from "./utils";
-
-type QuotaVisibilityMap = Record<string, { hidden?: string[] }>;
+import {
+  buildNextQuotaVisibility,
+  getQuotaVisibilityKey,
+  type QuotaVisibilityMap,
+  type QuotaVisibilityScope,
+} from "./utils";
 
 type Translate = (key: string, fallback: string) => string;
 
@@ -14,7 +17,9 @@ interface NotifyLike {
 
 /**
  * Per-operator quota row visibility (upstream 9router#2371 port). Keyed by
- * provider id → { hidden: [<quota visibility key>] }, persisted server-side
+ * connection id → { hidden: [<quota visibility key>] } so accounts of the same
+ * provider stay independent (9router#4767); legacy provider-id entries are still
+ * read as a fallback until that account is changed. Persisted server-side
  * via PATCH /api/settings so it survives refresh/reload.
  *
  * Extracted from ProviderLimits/index.tsx to keep the container under the
@@ -57,30 +62,24 @@ export function useQuotaVisibility(tr: Translate, notify: NotifyLike) {
   );
 
   const toggleQuotaKey = useCallback(
-    (provider: string, quotaRow: any, hide: boolean) => {
+    (scope: QuotaVisibilityScope, quotaRow: any, hide: boolean) => {
       const key = getQuotaVisibilityKey(quotaRow);
-      if (!provider || !key) return;
+      if (!key) return;
       const previous = quotaVisibility;
-      const providerVisibility = previous[provider] || {};
-      const hidden = new Set(providerVisibility.hidden || []);
-      if (hide) hidden.add(key);
-      else hidden.delete(key);
-      const next = {
-        ...previous,
-        [provider]: { ...providerVisibility, hidden: [...hidden] },
-      };
+      const next = buildNextQuotaVisibility(previous, scope, key, hide);
+      if (next === previous) return;
       persistQuotaVisibility(next, previous);
     },
     [quotaVisibility, persistQuotaVisibility]
   );
 
   const handleHideQuota = useCallback(
-    (provider: string, quotaRow: any) => toggleQuotaKey(provider, quotaRow, true),
+    (scope: QuotaVisibilityScope, quotaRow: any) => toggleQuotaKey(scope, quotaRow, true),
     [toggleQuotaKey]
   );
 
   const handleShowQuota = useCallback(
-    (provider: string, quotaRow: any) => toggleQuotaKey(provider, quotaRow, false),
+    (scope: QuotaVisibilityScope, quotaRow: any) => toggleQuotaKey(scope, quotaRow, false),
     [toggleQuotaKey]
   );
 

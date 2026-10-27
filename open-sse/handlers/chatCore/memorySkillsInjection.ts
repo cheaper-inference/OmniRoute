@@ -5,13 +5,20 @@ import {
   toMemoryRetrievalConfig,
 } from "@/lib/memory/settings";
 import { injectMemory, shouldInjectMemory } from "@/lib/memory/injection";
-import { injectSkills } from "@/lib/skills/injection";
+import { injectSkillsWithMetadata } from "@/lib/skills/injection";
 import { buildMemoryToolsForProvider } from "@/lib/skills/memoryBuiltins";
 import { skillRegistry } from "@/lib/skills/registry";
 import { FORMATS } from "../../translator/formats.ts";
 import { detectCachingContext } from "../../services/compression/cachingAware.ts";
 
 type MemorySkillsLogger = { debug?: (...args: unknown[]) => void } | null | undefined;
+
+export interface MemorySkillsInjectionResult {
+  body: Record<string, unknown>;
+  memorySettings: { enabled: boolean; skillsEnabled: boolean; maxTokens: number } | null;
+  builtinToolNames: string[];
+  injectedCustomSkillNames: string[];
+}
 
 function getToolName(tool: unknown): string {
   if (!tool || typeof tool !== "object") return "";
@@ -27,6 +34,14 @@ function getToolName(tool: unknown): string {
 export function sortToolsByName<T>(tools: T[]): T[] {
   if (!Array.isArray(tools) || tools.length <= 1) return tools;
   return [...tools].sort((a, b) => getToolName(a).localeCompare(getToolName(b)));
+}
+
+// #12234: injected tools (memory / skills) are sorted by name so the prompt-cache prefix
+// is deterministic; they follow the client's tools, which keep the client's own order.
+function orderToolsForCaching<T>(tools: T[], clientToolNames: Set<string>): T[] {
+  const fromClient = tools.filter((tool) => clientToolNames.has(getToolName(tool)));
+  const injected = tools.filter((tool) => !clientToolNames.has(getToolName(tool)));
+  return [...fromClient, ...sortToolsByName(injected)];
 }
 
 export function getSkillsProviderForFormat(
@@ -60,10 +75,18 @@ export async function injectMemoryAndSkills({
   targetFormat: string;
   backgroundReason: string | null;
   log: MemorySkillsLogger;
-}) {
+}): Promise<MemorySkillsInjectionResult> {
   const memorySettings = memoryOwnerId
     ? await getMemorySettings().catch(() => DEFAULT_MEMORY_SETTINGS)
     : null;
+
+  // Tools the client sent keep their order: a later cap (upstreamBody) keeps the head of
+  // the list, so sorting client tools alphabetically made it drop the built-ins (#18120).
+  const clientToolNames = new Set(
+    Array.isArray(body.tools) ? body.tools.map((tool) => getToolName(tool)) : []
+  );
+  const builtinOwnerSet: string[] = [];
+  const injectedCustomSkillNames: string[] = [];
 
   if (
     memoryOwnerId &&
@@ -178,34 +201,48 @@ export async function injectMemoryAndSkills({
         return [];
       })
     );
-    const memoryTools = buildMemoryToolsForProvider(
+    const newMemoryTools = buildMemoryToolsForProvider(
       getSkillsProviderForFormat(sourceFormat)
     ).filter((tool) => {
       const record = tool as Record<string, unknown>;
       const name = (record.function as Record<string, unknown> | undefined)?.name ?? record.name;
       return typeof name === "string" && !existingToolNames.has(name);
     });
-    if (memoryTools.length > 0) {
+    if (newMemoryTools.length > 0) {
       body = {
         ...body,
-        tools: [...existingTools, ...memoryTools],
+        tools: [...existingTools, ...newMemoryTools],
       };
+      // Track the names of newly injected memory tools for the owner set.
+      builtinOwnerSet.push(
+        ...newMemoryTools
+          .map((tool) => {
+            const record = tool as Record<string, unknown>;
+            const name =
+              (record.function as Record<string, unknown> | undefined)?.name ?? record.name;
+            return typeof name === "string" ? name : "";
+          })
+          .filter(Boolean)
+      );
       log?.debug?.(
         "MEMORY",
-        `Injected ${memoryTools.length} memory tool(s) for key=${memoryOwnerId}`
+        `Injected ${newMemoryTools.length} memory tool(s) for key=${memoryOwnerId}`
       );
     }
   }
 
-  if (memoryOwnerId && memorySettings?.skillsEnabled) {
+  if (memoryOwnerId && memorySettings?.skillsEnabled && body.stream !== true) {
     // Ensure the registry cache is warm before listing: on a cold/fresh
     // process skills that exist only in the DB would be missed (false
     // negative -> silent skip). loadFromDatabase() is a no-op when the cache
     // is already warm (TTL = 60 s), so repeated calls are cheap. Mirrors the
     // pattern in src/lib/skills/interception.ts (#2815).
+    // Memory builtins and registered Skills are only executed by the
+    // non-streaming server-owned tool loop; stream clients execute tools
+    // client-side, so we skip injection for stream requests.
     await skillRegistry.loadFromDatabase(memoryOwnerId);
     const existingTools = Array.isArray(body.tools) ? body.tools : [];
-    const mergedTools = injectSkills({
+    const { tools: mergedTools, injectedNames } = injectSkillsWithMetadata({
       provider: getSkillsProviderForFormat(sourceFormat),
       existingTools,
       apiKeyId: memoryOwnerId,
@@ -225,6 +262,7 @@ export async function injectMemoryAndSkills({
         ...body,
         tools: mergedTools,
       };
+      injectedCustomSkillNames.push(...injectedNames);
       log?.debug?.("SKILLS", `Injected ${mergedTools.length - existingTools.length} skills`);
     }
   }
@@ -232,9 +270,49 @@ export async function injectMemoryAndSkills({
   if (Array.isArray(body.tools) && body.tools.length > 1) {
     body = {
       ...body,
-      tools: sortToolsByName(body.tools),
+      tools: orderToolsForCaching(body.tools, clientToolNames),
     };
   }
 
-  return { body, memorySettings };
+  return { body, memorySettings, builtinToolNames: builtinOwnerSet, injectedCustomSkillNames };
+}
+
+interface FallbackPlan {
+  enabled: boolean;
+  toolName: string | null;
+  convertedToolCount: number;
+}
+
+/**
+ * Pure helper: merge web-search/web-fetch fallback tool names into the
+ * builtin owner set. Adds a name only when plan.enabled===true,
+ * plan.convertedToolCount>0, plan.toolName is non-null, and that name
+ * did not already exist in the pre-conversion client tools (builtinToolNames)
+ * OR in the original client tool names captured before fallback injection.
+ * Does not mutate its input; returns a new result.
+ */
+export function mergeInjectedFallbackOwnerNames(
+  injectionResult: { builtinToolNames: string[] },
+  plans: FallbackPlan[],
+  preConversionClientToolNames?: string[]
+): { builtinToolNames: string[] } {
+  const existing = new Set(injectionResult.builtinToolNames);
+  if (preConversionClientToolNames) {
+    for (const name of preConversionClientToolNames) {
+      existing.add(name);
+    }
+  }
+  const extraNames: string[] = [];
+  for (const plan of plans) {
+    if (
+      plan.enabled &&
+      plan.convertedToolCount > 0 &&
+      plan.toolName &&
+      !existing.has(plan.toolName)
+    ) {
+      extraNames.push(plan.toolName);
+      existing.add(plan.toolName);
+    }
+  }
+  return { builtinToolNames: [...injectionResult.builtinToolNames, ...extraNames] };
 }

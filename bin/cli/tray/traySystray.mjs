@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 import { isAutostartEnabled } from "./autostart.mjs";
+import { persistTrayFailure } from "../runtime/processSupervisor.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -29,7 +30,9 @@ async function loadSystray2() {
 function getIconBase64() {
   // Icon ships at bin/cli/tray/icon.png — the previous "icons/icon.png" path
   // never existed, so the tray was created with an empty icon (#4605).
-  const iconPath = join(__dirname, "icon.png");
+  // systray2 expects an ICO payload on Windows; the PNG asset is used elsewhere.
+  // (ported from #13991, credit @prabhtheone)
+  const iconPath = join(__dirname, process.platform === "win32" ? "icon.ico" : "icon.png");
   if (existsSync(iconPath)) return readFileSync(iconPath).toString("base64");
   return "";
 }
@@ -69,7 +72,8 @@ export async function initSystrayUnix(
       debug: false,
       copyDir: false,
     });
-  } catch {
+  } catch (err) {
+    persistTrayFailure("constructor", err);
     return null;
   }
 

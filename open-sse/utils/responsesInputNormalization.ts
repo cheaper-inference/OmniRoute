@@ -1,12 +1,25 @@
+import {
+  restoreReadableCompactionItem,
+  isEmptyContextCompactionMarker,
+} from "./readableCompaction.ts";
+
 type JsonRecord = Record<string, unknown>;
 
-function normalizeAgentMessageForChat(item: JsonRecord): JsonRecord | null {
-  if (item.type !== "agent_message") return null;
+function isAgentMessageItem(item: JsonRecord): boolean {
+  return item.type === "agent_message" || item.role === "agent_message";
+}
 
+function collectAgentMessageText(item: JsonRecord): string | null {
+  if (typeof item.content === "string") return item.content;
+  if (typeof item.text === "string") return item.text;
   if (!Array.isArray(item.content)) return null;
 
   const textParts: string[] = [];
   for (const partValue of item.content) {
+    if (typeof partValue === "string") {
+      textParts.push(partValue);
+      continue;
+    }
     if (!partValue || typeof partValue !== "object" || Array.isArray(partValue)) {
       return null;
     }
@@ -17,12 +30,21 @@ function normalizeAgentMessageForChat(item: JsonRecord): JsonRecord | null {
       // partial plaintext envelope or forward an opaque payload the model cannot use.
       return null;
     }
-    if (part.type !== "input_text" || typeof part.text !== "string") return null;
+    if (part.type !== "input_text" && part.type !== "output_text" && part.type !== "text") {
+      return null;
+    }
+    if (typeof part.text !== "string") return null;
     textParts.push(part.text);
   }
 
-  const text = textParts.join("\n");
-  if (!text.trim()) return null;
+  return textParts.join("\n");
+}
+
+function normalizeAgentMessageForChat(item: JsonRecord): JsonRecord | null {
+  if (!isAgentMessageItem(item)) return null;
+
+  const text = collectAgentMessageText(item);
+  if (typeof text !== "string" || !text.trim()) return null;
 
   return {
     type: "message",
@@ -74,6 +96,8 @@ function normalizeCodexResponsesInputItem(itemValue: unknown): unknown {
   if (!itemValue || typeof itemValue !== "object" || Array.isArray(itemValue)) return itemValue;
 
   const item = { ...(itemValue as JsonRecord) };
+  const restored = restoreReadableCompactionItem(item);
+  if (restored) return restored;
   const role = typeof item.role === "string" ? item.role : "user";
   const type = typeof item.type === "string" ? item.type : "";
 
@@ -101,15 +125,11 @@ function normalizeCodexResponsesInputItem(itemValue: unknown): unknown {
 }
 
 export function normalizeCodexResponsesInput(body: JsonRecord): void {
-  if (Array.isArray(body.input)) {
-    body.input = body.input.map(normalizeCodexResponsesInputItem);
-    return;
-  }
-
-  // undefined → leave as-is; null → empty list (not [null], which would surface a bogus
-  // item downstream); anything else → wrap the single item.
   if (body.input === undefined) return;
-  body.input = body.input === null ? [] : [normalizeCodexResponsesInputItem(body.input)];
+  const items = body.input === null ? [] : Array.isArray(body.input) ? body.input : [body.input];
+  body.input = items
+    .filter((item) => !isEmptyContextCompactionMarker(item))
+    .map(normalizeCodexResponsesInputItem);
 }
 
 function normalizeResponsesInputItemForChat(value: unknown): unknown {
@@ -120,12 +140,15 @@ function normalizeResponsesInputItemForChat(value: unknown): unknown {
   if (!value || typeof value !== "object" || Array.isArray(value)) return value;
 
   const item = { ...(value as JsonRecord) };
+  const restored = restoreReadableCompactionItem(item);
+  if (restored) return restored;
+  if (isEmptyContextCompactionMarker(item)) return { type: "reasoning" };
   const hasType = typeof item.type === "string" && item.type.length > 0;
   const hasRole = typeof item.role === "string" && item.role.length > 0;
 
   const agentMessage = normalizeAgentMessageForChat(item);
   if (agentMessage) return agentMessage;
-  if (item.type === "agent_message") {
+  if (isAgentMessageItem(item)) {
     // Encrypted or malformed agent messages have no lossless Chat equivalent.
     // Treat them like other Responses-only metadata instead of failing the whole turn.
     return { type: "reasoning" };

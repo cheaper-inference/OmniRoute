@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { parseIntegerQueryParam } from "@/lib/api/queryIntegerParam";
 export const dynamic = "force-dynamic";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
 import {
@@ -15,14 +16,25 @@ export async function GET(req: NextRequest) {
 
   try {
     const { searchParams } = new URL(req.url);
-    const page = Math.max(1, parseInt(searchParams.get("page") || "1", 10));
-    const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20", 10)));
+    const parsedPage = parseIntegerQueryParam(searchParams, "page", 1);
+    if (parsedPage.ok === false) return parsedPage.response;
+    const parsedLimit = parseIntegerQueryParam(searchParams, "limit", 20);
+    if (parsedLimit.ok === false) return parsedLimit.response;
+    const page = Math.max(1, parsedPage.value);
+    const limit = Math.min(100, Math.max(1, parsedLimit.value));
     const search = searchParams.get("search") || "";
     const model = searchParams.get("model") || "";
     const sortBy = searchParams.get("sortBy") || "created_at";
     const sortOrder = searchParams.get("sortOrder") || "desc";
 
-    const { entries, total } = listSemanticCacheEntries({ page, limit, search, model, sortBy, sortOrder });
+    const { entries, total } = listSemanticCacheEntries({
+      page,
+      limit,
+      search,
+      model,
+      sortBy,
+      sortOrder,
+    });
 
     return NextResponse.json({
       entries,

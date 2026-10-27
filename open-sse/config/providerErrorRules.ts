@@ -32,7 +32,7 @@ export type ProviderErrorRuleMatch = {
   /**
    * Intended lock scope. #10334: for a BUILT-IN catalog rule, this field is
    * CONSUMED end-to-end only for providers in `HONORS_RULE_LOCK_SCOPE_PROVIDERS`
-   * (agentrouter-exclusive today, gated by `honorsRuleLockScope()`) — for those,
+   * (agentrouter + the opencode family, gated by `honorsRuleLockScope()`) — for
    * `checkFallbackError` surfaces it as `ruleScope` on its return value for the
    * persistence layer to honor instead of re-deriving scope from
    * `hasPerModelQuota()`. For every other built-in-rule provider it remains
@@ -105,6 +105,23 @@ export function setOperatorProviderErrorRules(
 function buildOpencodeRules(): ProviderErrorRule[] {
   return [
     {
+      // A 400/429 reading "endpoint is unavailable" fails over to a short model-scope
+      // cooldown so the next request skips the refused model instead of
+      // retrying it. First: the body marker is the most specific signal and
+      // wins over the generic header/counter rules below on conflicts.
+      id: "opencode-endpoint-unavailable",
+      match: ({ status, body }) => {
+        if (status !== 400 && status !== 429) return null;
+        const text = JSON.stringify(body ?? "").toLowerCase();
+        if (!text.includes("endpoint is unavailable")) return null;
+        return {
+          reason: "model_capacity",
+          scope: "model",
+          cooldownMs: 300_000,
+        };
+      },
+    },
+    {
       id: "opencode-monthly-quota-resets-in",
       match: ({ status, body }) => {
         if (status !== 429) return null;
@@ -153,6 +170,19 @@ function buildOpencodeRules(): ProviderErrorRule[] {
           return { reason: "quota_exhausted", scope: "connection" };
         }
         return null;
+      },
+    },
+    {
+      id: "opencode-400-model-unavailable",
+      match: ({ status, body }) => {
+        if (status !== 400) return null;
+        const text = JSON.stringify(body ?? "").toLowerCase();
+        if (!text.includes("upstream request failed: model is unavailable.")) return null;
+        return {
+          reason: "model_capacity",
+          scope: "model",
+          cooldownMs: 3_600_000,
+        };
       },
     },
   ];
@@ -290,20 +320,52 @@ function buildAgentrouterRules(): ProviderErrorRule[] {
   ];
 }
 
+// ─── CodeBuddy Intl ─────────────────────────────────────────────────────────
+// CodeBuddy Intl wraps its WAF / anti-abuse block in an HTTP 400 code 11128
+// "request illegal". The block is connection-wide (every request fails while it lasts
+// and the identical request succeeds minutes later), so it is throttling semantics on
+// a non-standard 400 — the same shape as the MiMoCode high-frequency 400 (#4976), and
+// classified the same way: rate_limit_exceeded at connection scope with no explicit
+// cooldown, so the scaled exponential backoff applies and repeated blocks back off
+// further instead of re-firing into the block at cooldown 0.
+// Code 11128 is overloaded: "first message is not system prompt" is request-scoped and
+// keeps the generic zero-cooldown 400, so the rule matches the text, never the code.
+const CODEBUDDY_INTL_RULE_FAMILY = ["codebuddy-intl", "cbai"];
+
+function buildCodebuddyIntlRules(): ProviderErrorRule[] {
+  return [
+    {
+      id: "codebuddy-intl-request-illegal",
+      match: ({ status, body }) => {
+        if (status !== 400) return null;
+        const text = (typeof body === "string" ? body : JSON.stringify(body ?? "")).toLowerCase();
+        if (!text.includes("request illegal")) return null;
+        if (text.includes("first message is not system prompt")) return null;
+        return { reason: "rate_limit_exceeded", scope: "connection" };
+      },
+    },
+  ];
+}
+
+/** Providers sharing the opencode upstream envelope, hence the opencode catalog rules. */
+const OPENCODE_RULE_FAMILY = ["opencode-zen", "opencode-go", "opencode-cli"];
+
 /**
  * Global registry. Provider name → ordered list of rules (first match wins).
  * Add new providers here; the matcher in classifyError will pick them up
  * automatically.
  */
 export const providerRuleRegistry = new Map<string, ProviderErrorRule[]>([
-  ["opencode", buildOpencodeRules()],
-  ["opencode-go", buildOpencodeRules()],
-  ["opencode-cli", buildOpencodeRules()],
+  ...OPENCODE_RULE_FAMILY.map((id): [string, ProviderErrorRule[]] => [id, buildOpencodeRules()]),
   ["minimax", buildMinimaxRules()],
   ["minimax-passthrough", buildMinimaxRules()],
   ["cloudflare-ai", buildCloudflareAiRules()],
   ["openrouter", buildOpenrouterRules()],
   ["agentrouter", buildAgentrouterRules()],
+  ...CODEBUDDY_INTL_RULE_FAMILY.map((id): [string, ProviderErrorRule[]] => [
+    id,
+    buildCodebuddyIntlRules(),
+  ]),
 ]);
 
 /**
@@ -323,7 +385,7 @@ export const providerRuleRegistry = new Map<string, ProviderErrorRule[]>([
  * mechanism (#11104) silently inert for every provider except the ones listed
  * below. See `hasOperatorRuleForProvider`.
  */
-const HONORS_RULE_LOCK_SCOPE_PROVIDERS = new Set(["agentrouter"]);
+const HONORS_RULE_LOCK_SCOPE_PROVIDERS = new Set(["agentrouter", ...OPENCODE_RULE_FAMILY]);
 
 export function honorsRuleLockScope(provider: string | null | undefined): boolean {
   if (!provider) return false;
@@ -343,10 +405,107 @@ export function honorsRuleLockScope(provider: string | null | undefined): boolea
  * HONORS_RULE_LOCK_SCOPE_PROVIDERS (#10334): a provider must opt in, and any
  * widening is an explicit owner decision.
  */
-const EGRESS_BUCKETED_LOCK_PROVIDERS = new Set(["opencode", "opencode-go", "opencode-cli"]);
+// Default free-tier set (#9611). PAID plans are account-bucketed, not
+// IP-bucketed, so operators running paid subscriptions can disable or trim
+// the egress-IP lockout via OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS:
+//   unset            → default set below (free-tier behavior)
+//   none/off/false/0 → empty set (egress-IP lockout fully disabled)
+//   "a,b,c"          → exact replacement set
+// Static default as a plain lookup table; the runtime set is env-derived
+// (dynamic membership), so a Set is the right structure there.
+const EGRESS_BUCKETED_LOCK_PROVIDERS_DEFAULT: Record<string, true> = {
+  "opencode-go": true,
+  "opencode-cli": true,
+};
+
+/**
+ * Pure parser for OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS (exported for tests).
+ * Returns the effective provider set: default free-tier family when unset,
+ * empty for none/off/false/0, otherwise the comma-separated replacement set.
+ */
+export function egressIpLockProvidersFromEnv(
+  raw: string | undefined,
+  fallback: Record<string, true> = EGRESS_BUCKETED_LOCK_PROVIDERS_DEFAULT
+): Set<string> {
+  const trimmed = raw?.trim();
+  if (trimmed === undefined || trimmed === "") return new Set(Object.keys(fallback));
+  if (/^(none|off|false|0)$/i.test(trimmed)) return new Set<string>();
+  return new Set(
+    trimmed
+      .split(",")
+      .map((s) => s.trim().toLowerCase())
+      .filter(Boolean)
+  );
+}
+
+const EGRESS_BUCKETED_LOCK_PROVIDERS = egressIpLockProvidersFromEnv(
+  process.env.OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS
+);
+
+/**
+ * Feature-flag reader injected by a module that is allowed to read the flag store
+ * (`open-sse/services/accountFallback.ts` registers `isFeatureFlagEnabled`). This file
+ * stays free of `src/` imports: it is reachable from client bundles and the
+ * open-sse → src boundary is ratcheted. Unregistered or throwing reader = flag off, so
+ * every flag below fails closed to the release default.
+ */
+let featureFlagReader: ((key: string) => boolean) | null = null;
+
+export function setProviderErrorRuleFlagReader(reader: ((key: string) => boolean) | null): void {
+  featureFlagReader = reader;
+}
+
+function isRuleFlagEnabled(key: string): boolean {
+  if (!featureFlagReader) return false;
+  try {
+    return featureFlagReader(key) === true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Opt-in (#16797): OpenCode Zen joins the default egress-IP lock family. Off by default
+ * because Zen is keyed (account-bucketed paid plans would see one 429 park every sibling
+ * connection sharing an egress IP). An explicit OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS value
+ * (a list or `none`) always wins over the flag.
+ */
+export const OPENCODE_ZEN_EGRESS_IP_LOCK_FLAG = "OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED";
+const OPENCODE_ZEN_PROVIDER_ID = "opencode-zen";
+
+/**
+ * Pure resolver for the effective egress-lock set (exported for tests): the explicit env
+ * value wins; otherwise the default family, plus `opencode-zen` when the opt-in flag is on.
+ */
+export function resolveEgressIpLockProviders(
+  raw: string | undefined,
+  zenOptIn: boolean
+): Set<string> {
+  const set = egressIpLockProvidersFromEnv(raw);
+  if (zenOptIn && (raw === undefined || raw.trim() === "")) set.add(OPENCODE_ZEN_PROVIDER_ID);
+  return set;
+}
+
+const EGRESS_LOCK_ENV_IS_EXPLICIT = Boolean(process.env.OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS?.trim());
+const EGRESS_BUCKETED_LOCK_PROVIDERS_WITH_ZEN = resolveEgressIpLockProviders(
+  process.env.OMNIROUTE_EGRESS_IP_LOCK_PROVIDERS,
+  true
+);
+
+/** The effective set: the flag is read per call so a dashboard override applies live. */
+function effectiveEgressBucketedLockProviders(): Set<string> {
+  if (EGRESS_LOCK_ENV_IS_EXPLICIT) return EGRESS_BUCKETED_LOCK_PROVIDERS;
+  return isRuleFlagEnabled(OPENCODE_ZEN_EGRESS_IP_LOCK_FLAG)
+    ? EGRESS_BUCKETED_LOCK_PROVIDERS_WITH_ZEN
+    : EGRESS_BUCKETED_LOCK_PROVIDERS;
+}
 
 export function isEgressBucketedLockScope(provider: string | null | undefined): boolean {
-  return !!provider && EGRESS_BUCKETED_LOCK_PROVIDERS.has(provider.toLowerCase());
+  if (!provider) return false;
+  const key = provider.toLowerCase();
+  if (EGRESS_BUCKETED_LOCK_PROVIDERS.has(key)) return true;
+  // Only an opencode-zen lookup ever reads the flag store (hot path for everyone else).
+  return key === OPENCODE_ZEN_PROVIDER_ID && effectiveEgressBucketedLockProviders().has(key);
 }
 
 /**
@@ -358,7 +517,40 @@ export function isEgressBucketedLockScope(provider: string | null | undefined): 
  * applied.
  */
 export function egressBucketedLockProviders(): string[] {
-  return [...EGRESS_BUCKETED_LOCK_PROVIDERS].sort();
+  return [...effectiveEgressBucketedLockProviders()].sort();
+}
+
+/**
+ * Pure parser for OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS (exported for tests).
+ * Only the literal `all` widens the quota-refusal egress scope; anything else — including a
+ * provider list — is ignored rather than guessed, because the widened scope parks a pool
+ * member for EVERY provider, and a typo must not silently turn that on.
+ */
+export function egressQuotaRotationAllFromEnv(raw: string | undefined): boolean {
+  return (raw ?? "").trim().toLowerCase() === "all";
+}
+
+/**
+ * Providers whose 429 is treated as per-egress-IP QUOTA evidence: the pool member the refusal
+ * came through is set aside so the next pick egresses elsewhere. True for the IP-bucketed
+ * family above (#9611) and, when the operator sets
+ * OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS=all, for every provider — the free and keyless
+ * ones answer 429 per IP too, because there is no account key to bucket by.
+ *
+ * Read per call, not at module load: this is an operator switch on a refusal path (one env
+ * lookup per response outcome, never on the request's selection hot path), so it applies
+ * live. Unset keeps the pre-existing scope byte-for-byte.
+ *
+ * WIDENING TRADE-OFF: the refusal store is keyed by egress address, not by
+ * (provider, egress), so a widened 429 parks that member for every provider until the period
+ * elapses (5 min, doubling to 15 min). Only the per-address quota providers justify that;
+ * an account-scoped 429 parks a member other providers could still use.
+ */
+export function rotatesEgressOnQuotaRefusal(provider: string | null | undefined): boolean {
+  return (
+    isEgressBucketedLockScope(provider) ||
+    egressQuotaRotationAllFromEnv(process.env.OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS)
+  );
 }
 
 /**
@@ -377,6 +569,31 @@ export function egressBucketedLockProviders(): string[] {
  * never match anything, defeating the point of declaring it.
  */
 const FULL_TEXT_RULE_PROVIDERS = new Set(["agentrouter"]);
+
+/**
+ * Opt-in widenings of FULL_TEXT_RULE_PROVIDERS (#16797), one flag per provider family.
+ * The opencode and cloudflare-ai catalog rules above match on body-text markers
+ * ("organization_quota_exceeded", "monthly usage limit reached", "daily free
+ * allocation", ...) that the stripped structured error never carries, so today they
+ * cannot fire through checkFallbackError. Letting them fire changes the classification
+ * (rate_limit → quota_exhausted) and the cooldown/lock scope, hence default-off flags.
+ */
+export const OPENCODE_FULL_TEXT_ERROR_RULES_FLAG = "OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED";
+export const CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_FLAG =
+  "CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED";
+const OPT_IN_FULL_TEXT_RULE_PROVIDERS: ReadonlyArray<{
+  flag: string;
+  providers: ReadonlySet<string>;
+}> = [
+  { flag: OPENCODE_FULL_TEXT_ERROR_RULES_FLAG, providers: new Set(OPENCODE_RULE_FAMILY) },
+  { flag: CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_FLAG, providers: new Set(["cloudflare-ai"]) },
+];
+
+function usesFullTextRuleBody(key: string): boolean {
+  if (FULL_TEXT_RULE_PROVIDERS.has(key)) return true;
+  const optIn = OPT_IN_FULL_TEXT_RULE_PROVIDERS.find((entry) => entry.providers.has(key));
+  return !!optIn && isRuleFlagEnabled(optIn.flag);
+}
 
 /**
  * True when an operator has declared at least one rule for this provider via
@@ -403,8 +620,7 @@ export function resolveRuleMatchBody(
 ): unknown {
   if (
     provider &&
-    (FULL_TEXT_RULE_PROVIDERS.has(provider.toLowerCase()) ||
-      hasOperatorRuleForProvider(provider)) &&
+    (usesFullTextRuleBody(provider.toLowerCase()) || hasOperatorRuleForProvider(provider)) &&
     errorText
   ) {
     return errorText;
@@ -508,4 +724,44 @@ export function parseResetCountdownMs(text: string): number | null {
     default:
       return null;
   }
+}
+
+/**
+ * Opencode-family "Upstream request failed: Model is unavailable." 400/429: the rule's
+ * model-scope match, or null for any other provider, status or rule. Takes the raw
+ * error text so it stays independent of FULL_TEXT_RULE_PROVIDERS (#10880).
+ */
+export function getOpencodeModelUnavailableMatch(
+  provider: string | null | undefined,
+  status: number,
+  headers: Headers | Record<string, string> | null | undefined,
+  errorText: unknown
+): ProviderErrorRuleMatch | null {
+  if (
+    (status !== 400 && status !== 429) ||
+    !provider ||
+    !OPENCODE_RULE_FAMILY.includes(provider.toLowerCase())
+  ) {
+    return null;
+  }
+  const match = getProviderErrorRuleMatch(provider, status, headers, errorText);
+  return match?.scope === "model" && match.reason === "model_capacity" ? match : null;
+}
+
+/**
+ * CodeBuddy Intl 400 "request illegal" WAF block: the rule's connection-scope backoff
+ * match, or null for any other provider, status or body. Takes the raw error text so
+ * it stays independent of FULL_TEXT_RULE_PROVIDERS (same approach as
+ * getOpencodeModelUnavailableMatch, #10880).
+ */
+export function getCodebuddyRequestIllegalMatch(
+  provider: string | null | undefined,
+  status: number,
+  headers: Headers | Record<string, string> | null | undefined,
+  errorText: unknown
+): ProviderErrorRuleMatch | null {
+  if (status !== 400 || !provider || !CODEBUDDY_INTL_RULE_FAMILY.includes(provider.toLowerCase())) {
+    return null;
+  }
+  return getProviderErrorRuleMatch(provider, status, headers, errorText);
 }

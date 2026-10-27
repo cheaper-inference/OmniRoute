@@ -1,38 +1,53 @@
 # OmniRoute A2A Server Documentation (Română)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
 
 ---
 
-> Agent-to-Agent Protocol v0.3 — OmniRoute as an intelligent routing agent
+> Protocol Agent-to-Agent v0.3 — OmniRoute ca agent de rutare inteligentă
 
-## Agent Discovery
+Interfața A2A are două componente:
+
+- **JSON-RPC 2.0** la `POST /a2a` (punctul de intrare canonic, definit în `src/app/a2a/route.ts`).
+- **REST** sub `/api/a2a/*` pentru panouri de control și instrumente (stare, lista sarcinilor, anulare).
+
+Sarcinile sunt gestionate de `A2ATaskManager` (`src/lib/a2a/taskManager.ts`, TTL implicit de 5 minute). Abilitățile sunt direcționate prin `A2A_SKILL_HANDLERS` în `src/lib/a2a/taskExecution.ts`.
+
+## Descoperirea agentului
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Returns the Agent Card describing OmniRoute's capabilities, skills, and authentication requirements.
+Returnează Cardul agentului, care descrie capabilitățile, abilitățile și cerințele de autentificare ale OmniRoute.
+
+Câmpul `version` al Cardului agentului este preluat din `process.env.npm_package_version` (consultați `src/app/.well-known/agent.json/route.ts:13`), astfel încât rămâne sincronizat automat cu `package.json` la fiecare versiune lansată.
 
 ---
 
-## Authentication
+## Autentificare
 
-All `/a2a` requests require an API key via the `Authorization` header:
+Toate solicitările către `/a2a` necesită o cheie API transmisă prin antetul `Authorization`:
 
 ```
 Authorization: Bearer YOUR_OMNIROUTE_API_KEY
 ```
 
-If no API key is configured on the server, authentication is bypassed.
+Dacă pe server nu este configurată nicio cheie API, autentificarea este omisă.
+
+## Activare
+
+A2A este controlat prin comutatorul **Puncte finale → A2A** și este dezactivat în mod implicit. Când este dezactivat,
+`GET /api/a2a/status` raportează `status: "disabled"` și `online: false`; apelurile JSON-RPC către
+`POST /a2a` returnează HTTP 503 cu codul de eroare JSON-RPC `-32000`.
 
 ---
 
-## JSON-RPC 2.0 Methods
+## Metode JSON-RPC 2.0
 
-### `message/send` — Synchronous Execution
+### `message/send` — Execuție sincronă
 
-Sends a message to a skill and waits for the complete response.
+Trimite un mesaj către o abilitate și așteaptă răspunsul complet.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -50,7 +65,18 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Response:**
+Pentru `smart-routing`, `metadata.combo` suprascrie în mod explicit
+`metadata.model` pentru cererea către gateway; acesta este trimis drept câmpul `model` real,
+nu drept un câmp JSON `x-combo` ignorat. Autorizarea obișnuită a gateway-ului, bazată pe cheia API și
+specifică fiecărei destinații, se aplică în continuare. Un combo nevalid sau gol este respins.
+
+Rezultatul expune `requested_combo` (intenția apelantului), `dispatched_model`
+(cererea efectivă către gateway), `response_model` (răspunsul gateway-ului) și
+`confirmed_combo`. Ultimul câmp este `null`, cu excepția cazului în care gateway-ul
+identifică în mod explicit un combo. Jurnalele de decizie A2A atribuie execuția numai unui
+combo confirmat, păstrând o cerere neconfirmată drept `requestedCombo`.
+
+**Răspuns:**
 
 ```json
 {
@@ -61,6 +87,10 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
       "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
         { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
@@ -71,9 +101,9 @@ curl -X POST http://localhost:20128/a2a \
 }
 ```
 
-### `message/stream` — SSE Streaming
+### `message/stream` — Streaming SSE
 
-Same as `message/send` but returns Server-Sent Events for real-time streaming.
+La fel ca `message/send`, dar returnează evenimente trimise de server pentru streaming în timp real.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -90,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE Events:**
+**Evenimente SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -100,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Query Task Status
+### `tasks/get` — Interogarea stării sarcinii
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -109,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Cancel a Task
+### `tasks/cancel` — Anularea unei sarcini
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -120,42 +150,123 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Available Skills
+## Skill-uri disponibile
 
-| Skill              | Description                                                                                                                     |
-| :----------------- | :------------------------------------------------------------------------------------------------------------------------------ |
-| `smart-routing`    | Routes prompts through OmniRoute's intelligent pipeline. Returns response with routing explanation, cost, and resilience trace. |
-| `quota-management` | Answers natural-language queries about provider quotas, suggests free combos, and provides quota rankings.                      |
+OmniRoute expune 6 skill-uri A2A conectate în `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Fiecare modul de skill se află în `src/lib/a2a/skills/`.
 
----
+| Skill              | ID                   | Descriere                                                                                                                                                                    | Etichete                   | Exemple                                              |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------- |
+| Smart Routing      | `smart-routing`      | Direcționează un prompt prin providerul/combinația optimă folosind motorul de combo-uri și scorarea OmniRoute                                                                | routing, providers         | "Direcționează acest prompt prin cel mai bun model"  |
+| Quota Management   | `quota-management`   | Raportează starea cotelor per provider, ajutând apelanții să decidă când să limiteze/comute                                                                                  | quota, providers           | "Verifică cota pentru anthropic"                     |
+| Provider Discovery | `provider-discovery` | Listează providerii instalați cu capabilități, indicatori de nivel gratuit și stare OAuth                                                                                    | providers, discovery       | "Ce provideri sunt disponibili?"                     |
+| Cost Analysis      | `cost-analysis`      | Estimează costul unei cereri/conversații pe baza catalogului și al utilizării recente                                                                                        | cost, usage                | "Estimează costul acestei conversații"               |
+| Health Report      | `health-report`      | Agregă starea circuit breaker, cooldown și lockout per provider                                                                                                              | health, resilience         | "Afișează starea de sănătate a tuturor providerilor" |
+| List Capabilities  | `list-capabilities`  | Returnează catalogul complet de 45 de intrări Agent Skills (23 API + 21 CLI + 1 config) sub formă de tabel markdown cu URL-uri raw către SKILL.md pentru injecția de context | catalog, discovery, skills | "Listează toate capabilitățile OmniRoute"            |
 
-## Task Lifecycle
+> Cardul de agent ar trebui menținut aliniat cu catalogul live de 376 de provideri; numărul de provideri și metadatele free/no-auth provin din registrul de runtime.
+
+### Detalii despre skill-ul `list-capabilities`
+
+Skill-ul `list-capabilities` este deosebit de util pentru agenții externi care trebuie să descopere ce expune OmniRoute înainte de a trimite apeluri API. Returnează un artefact sub formă de tabel markdown structurat:
 
 ```
-submitted → working → completed
-                    → failed
-                    → cancelled
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
+| --- | --- | --- | --- | --- | --- |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+...
 ```
 
-- Tasks expire after 5 minutes (configurable)
-- Terminal states: `completed`, `failed`, `cancelled`
-- Event log tracks every state transition
+Fiecare rând include coloana `rawUrl`, astfel încât agenții pot prelua imediat SKILL.md complet. Câmpul `metadata.totalSkills` reflectă dimensiunea catalogului (45 în prezent). Implementare: `src/lib/a2a/skills/listCapabilities.ts`. Vezi și [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
-## Error Codes
+## API REST (auxiliar)
 
-| Code   | Meaning                        |
-| :----- | :----------------------------- |
-| -32700 | Parse error (invalid JSON)     |
-| -32600 | Invalid request / Unauthorized |
-| -32601 | Method or skill not found      |
-| -32602 | Invalid params                 |
-| -32603 | Internal error                 |
+Punctul final JSON-RPC `/a2a` este punctul de intrare A2A canonic. Punctele finale REST de mai jos oferă acces auxiliar pentru tablouri de bord și instrumente externe:
+
+| Punct final                  | Metodă | Descriere                                                         | Autentificare                                |
+| :--------------------------- | :----- | :---------------------------------------------------------------- | :------------------------------------------- |
+| `/api/a2a/status`            | GET    | Starea serverului, competențe înregistrate                        | (public)                                     |
+| `/api/a2a/tasks`             | GET    | Listează sarcinile folosind filtre                                | administrare                                 |
+| `/api/a2a/tasks/[id]`        | GET    | Obține sarcina după ID                                            | administrare                                 |
+| `/api/a2a/tasks/[id]/cancel` | POST   | Anulează sarcina în curs de execuție                              | administrare                                 |
+| `/.well-known/agent.json`    | GET    | Fișa agentului (descoperire A2A)                                  | (public, memorat în cache timp de 3600s)     |
+| `/api/a2a/tasks`             | POST   | Delegare de intrare către flota OmniConductor (Conductor PRD RF5) | Bearer vs `OMNIROUTE_API_KEY` + `a2aEnabled` |
+
+**Delegare Conductor de intrare (`POST /api/a2a/tasks`):** agenții A2A externi deleagă activități de programare flotei OmniConductor prin OmniRoute. Corp: `{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — numai competențele flotei Conductor (cele anunțate în Fișa agentului) pot fi delegate; `metadata.conductor.repo.url` este obligatoriu (flota lucrează cu depozite git). Ruta se traduce în `POST /v1/tasks` al hubului, folosind `CONDUCTOR_ORCHESTRATOR_TOKEN` de pe server (alternativ, `CONDUCTOR_HUB_TOKEN`) și returnează `201 { conductor_task_id, state: "submitted" }`; stările sarcinilor sunt retransmise prin oglinda SSE→A2A (RF1) și sunt vizibile prin `GET /api/a2a/tasks?skill=conductor`.
 
 ---
 
-## Integration Examples
+## Adăugarea unei competențe noi
+
+1. **Creați fișierul competenței:** `src/lib/a2a/skills/<your-skill>.ts`
+
+   Exportați o funcție asincronă `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Urmați structura competențelor existente, precum `smartRouting.ts`.
+
+2. **Înregistrați gestionarul:** în `src/lib/a2a/taskExecution.ts`, adăugați o intrare în `A2A_SKILL_HANDLERS`:
+
+   ```typescript
+   export const A2A_SKILL_HANDLERS = {
+     // ...competențe existente
+     "your-skill": async (task) => {
+       const skillModule = await import("./skills/yourSkill");
+       return skillModule.executeYourSkill(task);
+     },
+   };
+   ```
+
+3. **Expuneți în Fișa agentului:** în `src/app/.well-known/agent.json/route.ts`, adăugați la sfârșitul matricei `skills`:
+
+   ```json
+   {
+     "id": "your-skill",
+     "name": "Competența dvs.",
+     "description": "Descriere scurtă, axată pe intenție",
+     "tags": ["rutare", "cotă"],
+     "examples": ["Exemplu de invocare în limbaj natural"]
+   }
+   ```
+
+4. **Scrieți teste:** `tests/unit/a2a-<your-skill>.test.ts`. Acoperiți scenariul reușit și scenariul de eroare.
+
+5. **Documentați** noua competență în tabelul `Competențe disponibile` din acest fișier.
+
+---
+
+## TTL-ul sarcinilor
+
+Sarcinile expiră după `ttlMinutes` (implicit 5 min) — configurat în constructorul `A2ATaskManager` din `src/lib/a2a/taskManager.ts:82`. Pentru personalizare, creați o variantă proprie a instanțierii `A2ATaskManager` și transmiteți o valoare diferită (de exemplu, `new A2ATaskManager(15)` pentru un TTL de 15 minute). Un interval de fundal elimină sarcinile expirate la fiecare 60 de secunde.
+
+---
+
+## Ciclul de viață al sarcinilor
+
+```
+trimisă → în lucru → finalizată
+                     → eșuată
+                     → anulată
+```
+
+- Sarcinile expiră implicit după 5 minute (consultați [TTL-ul sarcinilor](#task-ttl))
+- Stări terminale: `completed`, `failed`, `cancelled`
+- Jurnalul de evenimente urmărește fiecare tranziție de stare
+
+---
+
+## Coduri de eroare
+
+| Cod    | Semnificație                           |
+| :----- | :------------------------------------- |
+| -32700 | Eroare de parsare (JSON nevalid)       |
+| -32600 | Cerere nevalidă / Neautorizat          |
+| -32601 | Metoda sau abilitatea nu a fost găsită |
+| -32602 | Parametri nevalizi                     |
+| -32603 | Eroare internă                         |
+| -32000 | Endpoint-ul A2A este dezactivat        |
+
+---
+
+## Exemple de integrare
 
 ### Python (requests)
 

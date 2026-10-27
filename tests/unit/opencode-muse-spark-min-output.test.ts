@@ -148,3 +148,96 @@ test("closes the Muse Responses stream at response.completed before post-complet
     globalThis.fetch = originalFetch;
   }
 });
+
+// Responses path (`/v1/responses`, Muse Spark Contributor): the budget travels as
+// `max_output_tokens`. muse-spark-*-contributor-free burns ~1-2k tokens on hidden
+// reasoning and answers `incomplete` with `output: []` below ~8k; the upstream
+// rejects > 1M; OpenCode Zen 400s any max_output_tokens below 16.
+const {
+  applyOpencodeOutputBudgetFloors,
+  MUSE_SPARK_RESPONSES_MIN_OUTPUT_TOKENS,
+  MUSE_SPARK_MAX_OUTPUT_TOKENS,
+  OPENCODE_MIN_OUTPUT_TOKENS,
+} = await import("../../open-sse/executors/opencodeMuseSpark.ts");
+
+test("muse-spark Responses max_output_tokens below the floor is raised", () => {
+  const body: Record<string, unknown> = { max_output_tokens: 100 };
+  applyOpencodeOutputBudgetFloors("muse-spark-1.3-contributor-free", body);
+  assert.equal(MUSE_SPARK_RESPONSES_MIN_OUTPUT_TOKENS, 8000);
+  assert.equal(body.max_output_tokens, MUSE_SPARK_RESPONSES_MIN_OUTPUT_TOKENS);
+});
+
+test("muse-spark Responses max_output_tokens above 1M is clamped to the upstream ceiling", () => {
+  const body: Record<string, unknown> = { max_output_tokens: 2_000_000 };
+  applyOpencodeOutputBudgetFloors("muse-spark-1.2-contributor-free", body);
+  assert.equal(body.max_output_tokens, MUSE_SPARK_MAX_OUTPUT_TOKENS);
+  assert.equal(MUSE_SPARK_MAX_OUTPUT_TOKENS, 1_000_000);
+});
+
+test("muse-spark Responses budgets inside the window are untouched", () => {
+  for (const value of [8000, 32000, 1_000_000]) {
+    const body: Record<string, unknown> = { max_output_tokens: value };
+    applyOpencodeOutputBudgetFloors("muse-spark-1.3-contributor-free", body);
+    assert.equal(body.max_output_tokens, value);
+  }
+});
+
+test("no budget is synthesized when the caller set none (both fields)", () => {
+  for (const model of ["muse-spark-1.3-contributor-free", "big-pickle"]) {
+    const body: Record<string, unknown> = { input: [] };
+    applyOpencodeOutputBudgetFloors(model, body);
+    assert.equal("max_output_tokens" in body, false, model);
+    assert.equal("max_tokens" in body, false, model);
+  }
+});
+
+test("any opencode model: max_output_tokens below 16 is raised to 16", () => {
+  assert.equal(OPENCODE_MIN_OUTPUT_TOKENS, 16);
+  const body: Record<string, unknown> = { max_output_tokens: 1 };
+  applyOpencodeOutputBudgetFloors("big-pickle", body);
+  assert.equal(body.max_output_tokens, 16);
+  const ok: Record<string, unknown> = { max_output_tokens: 16 };
+  applyOpencodeOutputBudgetFloors("big-pickle", ok);
+  assert.equal(ok.max_output_tokens, 16);
+});
+
+test("chat path is unchanged: muse-spark max_tokens floor stays 512, other models untouched", () => {
+  const muse: Record<string, unknown> = { max_tokens: 64 };
+  applyOpencodeOutputBudgetFloors("muse-spark-1.2-contributor", muse);
+  assert.equal(muse.max_tokens, MUSE_SPARK_MIN_OUTPUT_TOKENS);
+  const other: Record<string, unknown> = { max_tokens: 1 };
+  applyOpencodeOutputBudgetFloors("big-pickle", other);
+  assert.equal(other.max_tokens, 1);
+});
+
+test("OpencodeExecutor floors max_output_tokens before dispatching a Responses body", async () => {
+  const originalFetch = globalThis.fetch;
+  const sentBodies: Record<string, unknown>[] = [];
+  try {
+    globalThis.fetch = (async (_url: unknown, init?: RequestInit) => {
+      sentBodies.push(JSON.parse(String(init?.body ?? "{}")));
+      return new Response(
+        [
+          "event: response.completed",
+          'data: {"type":"response.completed","response":{"usage":{"input_tokens":1,"output_tokens":1}}}',
+          "",
+        ].join("\n"),
+        { status: 200, headers: { "Content-Type": "text/event-stream" } }
+      );
+    }) as typeof fetch;
+
+    const result = await new OpencodeExecutor("opencode").execute({
+      model: "muse-spark-1.2-contributor-free",
+      body: { model: "muse-spark-1.2-contributor-free", max_output_tokens: 100, stream: true },
+      stream: true,
+      credentials: {
+        providerSpecificData: { fingerprints: ["test-account-a"], accountProxies: [] },
+      },
+    });
+    await result.response.text();
+    assert.ok(sentBodies.length > 0);
+    assert.equal(sentBodies[0].max_output_tokens, MUSE_SPARK_RESPONSES_MIN_OUTPUT_TOKENS);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

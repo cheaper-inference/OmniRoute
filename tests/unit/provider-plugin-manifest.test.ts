@@ -8,6 +8,7 @@ import {
 import type { RegistryEntry } from "../../open-sse/config/providers/shared.ts";
 import { USAGE_FETCHER_PROVIDERS } from "../../open-sse/services/usage/fetcherProviders.ts";
 import { USAGE_SUPPORTED_PROVIDERS } from "../../open-sse/services/usage/supportedProviders.ts";
+import { hasFreeTierProvider } from "../../open-sse/config/freeTierProviders.ts";
 
 const registryFixture: Record<string, RegistryEntry> = {
   openai: {
@@ -123,21 +124,23 @@ test("manifest does not export OAuth client secrets or dynamic functions", () =>
 });
 
 test("manifest advertises usage-fetch for providers with a wired usage fetcher (#11722)", () => {
-  const claude = getProviderPluginManifestEntryFromRegistry(registryFixture, "claude");
+  for (const providerId of ["claude", "anthropic"]) {
+    const entry = getProviderPluginManifestEntryFromRegistry(registryFixture, providerId);
 
-  assert.ok(claude);
-  assert.ok(
-    (USAGE_FETCHER_PROVIDERS as readonly string[]).includes("claude"),
-    "fixture guard: claude must stay in USAGE_FETCHER_PROVIDERS for this test to mean anything"
-  );
-  assert.ok(
-    claude.capabilities.includes("usage-fetch"),
-    "claude has a wired usage fetcher, so the manifest must advertise usage-fetch"
-  );
+    assert.ok(entry, `fixture guard: ${providerId} must resolve`);
+    assert.ok(
+      (USAGE_FETCHER_PROVIDERS as readonly string[]).includes(entry.id),
+      `fixture guard: ${entry.id} must stay in USAGE_FETCHER_PROVIDERS for this test to mean anything`
+    );
+    assert.ok(
+      entry.capabilities.includes("usage-fetch"),
+      `${entry.id} has a wired usage fetcher, so the manifest must advertise usage-fetch`
+    );
+  }
 });
 
 test("manifest omits usage-fetch for providers without a usage fetcher (#11722)", () => {
-  for (const providerId of ["openai", "anthropic", "claude-web"]) {
+  for (const providerId of ["openai", "claude-web"]) {
     const entry = getProviderPluginManifestEntryFromRegistry(registryFixture, providerId);
 
     assert.ok(entry, `fixture guard: ${providerId} must resolve`);
@@ -185,23 +188,23 @@ test("usage-fetch matches the fetcher list by alias too (#11722)", () => {
 });
 
 test("manifest advertises usage-supported for providers whose usage API is accepted (#10078)", () => {
-  // claude is in USAGE_SUPPORTED_PROVIDERS, openai is not — assert against the real
-  // list so the test cannot drift silently if the list moves.
-  const claude = getProviderPluginManifestEntryFromRegistry(registryFixture, "claude");
+  for (const providerId of ["claude", "anthropic"]) {
+    const entry = getProviderPluginManifestEntryFromRegistry(registryFixture, providerId);
 
-  assert.ok(claude);
-  assert.ok(
-    (USAGE_SUPPORTED_PROVIDERS as readonly string[]).includes("claude"),
-    "fixture guard: claude must stay in USAGE_SUPPORTED_PROVIDERS for this test to mean anything"
-  );
-  assert.ok(
-    claude.capabilities.includes("usage-supported"),
-    "claude is in USAGE_SUPPORTED_PROVIDERS, so the manifest must advertise usage-supported"
-  );
+    assert.ok(entry, `fixture guard: ${providerId} must resolve`);
+    assert.ok(
+      (USAGE_SUPPORTED_PROVIDERS as readonly string[]).includes(entry.id),
+      `fixture guard: ${entry.id} must stay in USAGE_SUPPORTED_PROVIDERS for this test to mean anything`
+    );
+    assert.ok(
+      entry.capabilities.includes("usage-supported"),
+      `${entry.id} is in USAGE_SUPPORTED_PROVIDERS, so the manifest must advertise usage-supported`
+    );
+  }
 });
 
 test("manifest omits usage-supported for providers outside USAGE_SUPPORTED_PROVIDERS (#10078)", () => {
-  for (const providerId of ["openai", "anthropic", "claude-web"]) {
+  for (const providerId of ["openai", "claude-web"]) {
     const entry = getProviderPluginManifestEntryFromRegistry(registryFixture, providerId);
 
     assert.ok(entry, `fixture guard: ${providerId} must resolve`);
@@ -260,4 +263,139 @@ test("usage-supported matches only on id, not alias (#10078)", () => {
     "fixture guard: claude must also be in USAGE_FETCHER_PROVIDERS for the divergence check"
   );
   assert.ok(entry.capabilities.includes("usage-fetch"));
+});
+
+test("manifest emits free-tier for a provider with documented free models", () => {
+  const entry = getProviderPluginManifestEntryFromRegistry(
+    {
+      ...registryFixture,
+      "api-airforce": {
+        id: "api-airforce",
+        alias: "af",
+        format: "openai",
+        executor: "default",
+        baseUrl: "https://api.airforce/v1/chat/completions",
+        authType: "apikey",
+        authHeader: "bearer",
+        defaultContextLength: 128000,
+        models: [{ id: "x-ai/grok-3", name: "Grok-3 (Free)" }],
+      },
+      "legacy-free": {
+        id: "legacy-free",
+        alias: "api-airforce",
+        format: "openai",
+        executor: "default",
+        baseUrl: "https://legacy.example/v1",
+        authType: "apikey",
+        authHeader: "bearer",
+        models: [{ id: "legacy-model", name: "Legacy" }],
+      },
+      "definitely-not-a-provider-xyz": {
+        id: "definitely-not-a-provider-xyz",
+        format: "openai",
+        executor: "default",
+        baseUrl: "https://xyz.example/v1",
+        authType: "apikey",
+        authHeader: "bearer",
+        models: [{ id: "xyz-model", name: "Xyz" }],
+      },
+      pollinations: {
+        id: "pollinations",
+        format: "openai",
+        executor: "default",
+        baseUrl: "https://text.pollinations.ai/v1",
+        authType: "optional",
+        authHeader: "bearer",
+        models: [{ id: "openai", name: "OpenAI (free)" }],
+      },
+    },
+    "api-airforce"
+  );
+  assert.ok(entry);
+  assert.ok(entry.capabilities.includes("free-tier"));
+});
+
+test("manifest emits free-tier via alias-only branch (id outside set, alias inside)", () => {
+  assert.equal(hasFreeTierProvider("legacy-free"), false);
+  assert.equal(hasFreeTierProvider("api-airforce"), true);
+  const entry = getProviderPluginManifestEntryFromRegistry(
+    {
+      ...registryFixture,
+      "legacy-free": {
+        id: "legacy-free",
+        alias: "api-airforce",
+        format: "openai",
+        executor: "default",
+        baseUrl: "https://legacy.example/v1",
+        authType: "apikey",
+        authHeader: "bearer",
+        models: [{ id: "legacy-model", name: "Legacy" }],
+      },
+    },
+    "legacy-free"
+  );
+  assert.ok(entry);
+  assert.ok(entry.capabilities.includes("free-tier"));
+});
+
+test("manifest omits free-tier for a provider with no free models", () => {
+  const entry = getProviderPluginManifestEntryFromRegistry(
+    {
+      ...registryFixture,
+      "definitely-not-a-provider-xyz": {
+        id: "definitely-not-a-provider-xyz",
+        format: "openai",
+        executor: "default",
+        baseUrl: "https://xyz.example/v1",
+        authType: "apikey",
+        authHeader: "bearer",
+        models: [{ id: "xyz-model", name: "Xyz" }],
+      },
+    },
+    "definitely-not-a-provider-xyz"
+  );
+  assert.ok(entry);
+  assert.equal(entry.capabilities.includes("free-tier"), false);
+});
+
+test("manifest emits free-tier for pollinations despite discontinued rows", () => {
+  const entry = getProviderPluginManifestEntryFromRegistry(
+    {
+      ...registryFixture,
+      pollinations: {
+        id: "pollinations",
+        format: "openai",
+        executor: "default",
+        baseUrl: "https://text.pollinations.ai/v1",
+        authType: "optional",
+        authHeader: "bearer",
+        models: [{ id: "openai", name: "OpenAI (free)" }],
+      },
+    },
+    "pollinations"
+  );
+  assert.ok(entry);
+  assert.ok(entry.capabilities.includes("free-tier"));
+});
+
+test("free-tier capability keeps capabilities sorted", () => {
+  const entry = getProviderPluginManifestEntryFromRegistry(
+    {
+      ...registryFixture,
+      "api-airforce": {
+        id: "api-airforce",
+        alias: "af",
+        format: "openai",
+        executor: "default",
+        baseUrl: "https://api.airforce/v1/chat/completions",
+        authType: "apikey",
+        authHeader: "bearer",
+        defaultContextLength: 128000,
+        models: [{ id: "x-ai/grok-3", name: "Grok-3 (Free)" }],
+      },
+    },
+    "api-airforce"
+  );
+  assert.ok(entry);
+  assert.deepEqual(entry.capabilities, [...entry.capabilities].sort());
 });

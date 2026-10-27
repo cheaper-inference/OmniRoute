@@ -18,8 +18,10 @@ function render(el: React.ReactElement) {
   document.body.appendChild(c);
   const root = createRoot(c);
   act(() => root.render(el));
+  // The drawer is the kit Sheet (KEA-7886), portalled to document.body: queries run against the
+  // whole body (which also holds the render host), the host is still what gets removed.
   return {
-    c,
+    c: document.body,
     cleanup: () => {
       act(() => root.unmount());
       c.remove();
@@ -336,6 +338,55 @@ describe("OrchestrationDrawer", () => {
       await Promise.resolve();
     });
     expect(c.textContent).toContain("actionFailed");
+    cleanup();
+  });
+
+  // Task B3.7 — a stale error banner must not survive an action that then worked.
+  it("clears the error banner when a retried action succeeds", async () => {
+    let failNext = true;
+    const fetchMock = vi.fn((_url: string, init?: RequestInit) => {
+      if (init?.method === "POST") {
+        const ok = !failNext;
+        failNext = false;
+        return Promise.resolve({
+          ok,
+          status: ok ? 200 : 500,
+          json: () => Promise.resolve({}),
+        });
+      }
+      return Promise.resolve({ ok: true, status: 200, json: () => Promise.resolve({ data: {} }) });
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    const node = {
+      id: "cloud-agent:t1",
+      kind: "work",
+      source: "cloud-agent",
+      state: "waiting_approval",
+      label: "x",
+    };
+    const { c, cleanup } = render(
+      <OrchestrationDrawer node={node as never} onClose={() => {}} onActionDone={() => {}} />
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const approve = () =>
+      Array.from(c.querySelectorAll("button")).find((b) =>
+        b.textContent?.includes("actionApprove")
+      ) as HTMLButtonElement;
+
+    await act(async () => {
+      approve().click();
+      await Promise.resolve();
+    });
+    expect(c.textContent).toContain("actionFailed");
+
+    await act(async () => {
+      approve().click();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    expect(c.textContent).not.toContain("actionFailed");
     cleanup();
   });
 

@@ -10,9 +10,10 @@ import { createComboSchema, paginationSchema } from "@/shared/validation/schemas
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { comboErrorResponse } from "@/lib/api/comboErrorResponse";
-import { computeComboContextLength } from "@/lib/combos/comboContext";
+import { computeComboContextLength, createComboContextResolution } from "@/lib/combos/comboContext";
 import { ComboInvariantError } from "@/lib/combos/invariants";
 import { buildComboNameCollisionWarning } from "@/lib/combos/modelNameCollision";
+import { stripDeadComboConfigKeys } from "@/lib/combos/deadConfigKeys";
 
 // GET /api/combos - Get all combos
 export async function GET(request: Request) {
@@ -33,9 +34,10 @@ export async function GET(request: Request) {
     const range = validation.data;
     const total = getCombosCount();
     const rawCombos = await getCombos(range.limit, range.offset);
+    const resolution = createComboContextResolution();
     const combos = rawCombos.map((combo) => ({
       ...combo,
-      computed_context_length: computeComboContextLength(combo, rawCombos),
+      computed_context_length: computeComboContextLength(combo, rawCombos, resolution),
     }));
     return NextResponse.json({ combos, total });
   } catch (error) {
@@ -70,6 +72,9 @@ export async function POST(request) {
       ...validation.data,
       models: normalizedModels,
     };
+    if (comboInput.config && typeof comboInput.config === "object") {
+      comboInput.config = stripDeadComboConfigKeys(comboInput.config);
+    }
     const { name, strategy, config } = comboInput;
     const compositeValidation = validateCompositeTiersConfig(comboInput);
     if (compositeValidation.success === false) {

@@ -31,6 +31,8 @@ omniroute
 
 Dashboard opens at `http://localhost:20128` and API base URL is `http://localhost:20128/v1`.
 
+> **npm users:** If npm warns that install scripts were blocked (e.g., `omniroute`, `better-sqlite3`), see [Troubleshooting — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+
 ### pnpm
 
 ```bash
@@ -180,6 +182,7 @@ omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # prints Cursor's in-app steps
 omniroute setup-roo          # Roo Code import + autoImport pointer
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env

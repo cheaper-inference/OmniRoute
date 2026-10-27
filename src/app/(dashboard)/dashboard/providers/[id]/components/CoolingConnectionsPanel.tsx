@@ -1,5 +1,7 @@
 "use client";
 
+import { Button } from "@/shared/components";
+
 /**
  * CoolingConnectionsPanel — Dashboard readout of connections currently in a
  * persisted 429 cooldown. Sourced from `useProviderConnections().connections`
@@ -56,6 +58,19 @@ function isCoolingNow(connection: ConnectionRowConnection, now: number): boolean
   return Number.isFinite(until) && until > now;
 }
 
+/** Visible last-error text (truncated) plus the full string for the tooltip. */
+function coolingRecordedError(connection: ConnectionRowConnection): {
+  display: string;
+  title: string;
+} | null {
+  const raw = typeof connection.lastError === "string" ? connection.lastError.trim() : "";
+  if (!raw) return null;
+  return {
+    display: raw.length > 160 ? `${raw.slice(0, 157)}...` : raw,
+    title: raw,
+  };
+}
+
 interface ClearCooldownButtonProps {
   /** Row's connection id — without one there is nothing to PUT, so no button. */
   readonly connectionId: string | undefined;
@@ -74,8 +89,9 @@ function ClearCooldownButton(props: ClearCooldownButtonProps) {
   const t = useTranslations("providers");
   if (!onClearCooldown || !connectionId) return null;
   return (
-    <button
-      type="button"
+    <Button
+      variant="outline"
+      size="sm"
       data-testid={`clear-cooldown-${connectionId}`}
       disabled={clearing}
       onClick={() => onClearCooldown(connectionId)}
@@ -84,12 +100,12 @@ function ClearCooldownButton(props: ClearCooldownButtonProps) {
         "clearConnectionCooldownTitle",
         "Clear the cooldown now — use when the quota has already refreshed upstream"
       )}
-      className="rounded border border-amber-500/50 px-2 py-0.5 text-xs text-amber-700 transition-colors hover:bg-amber-500/10 disabled:cursor-not-allowed disabled:opacity-50 dark:text-amber-300"
+      className="h-6 min-h-0 rounded px-2 text-xs"
     >
       {clearing
         ? providerText(t, "clearConnectionCooldownInProgress", "Clearing…")
         : providerText(t, "clearConnectionCooldown", "Clear cooldown")}
-    </button>
+    </Button>
   );
 }
 
@@ -109,14 +125,11 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
   return (
     <div
       data-testid="cooling-connections-panel"
-      className="mb-4 rounded-card border border-amber-500/40 bg-amber-500/5 p-4 shadow-sm"
+      className="mb-4 rounded-card border border-warning/40 bg-warning/5 p-4 shadow-sm"
     >
       <div className="mb-2 flex items-center gap-2">
-        <span
-          aria-hidden
-          className="inline-block h-2 w-2 animate-pulse rounded-full bg-amber-500"
-        />
-        <h3 className="text-sm font-medium text-amber-700 dark:text-amber-300">
+        <span aria-hidden className="inline-block h-2 w-2 animate-pulse rounded-full bg-warning" />
+        <h3 className="text-sm font-medium text-warning">
           {providerText(t, "coolingConnectionsTitle", "Currently cooling ({count})", {
             count: cooling.length,
           })}
@@ -126,7 +139,7 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
         {providerText(
           t,
           "coolingConnectionsDescription",
-          "These connections returned a 429 (rate-limit) on their last request. OmniRoute will skip them until the timer expires — no manual disable required."
+          "These connections are cooling after their last request. OmniRoute will skip them until the timer expires — no manual disable required."
         )}
       </p>
       <ul className="space-y-1">
@@ -139,18 +152,27 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
             (c.id
               ? `${providerText(t, "connectionFallback", "connection")} ${c.id.slice(0, 8)}`
               : providerText(t, "connectionFallback", "connection"));
+          const recorded = coolingRecordedError(c);
           const clearing = clearingCooldownId != null && clearingCooldownId === c.id;
           return (
             <li
               key={c.id ?? label}
-              className="flex items-center justify-between gap-2 rounded border border-amber-500/30 bg-background/40 px-3 py-2 text-sm"
+              className="flex items-center justify-between gap-2 rounded border border-warning/30 bg-bg/40 px-3 py-2 text-sm"
             >
-              <span className="font-medium">{label}</span>
+              <span className="min-w-0">
+                <span className="font-medium">{label}</span>
+                {recorded ? (
+                  <span
+                    className="mt-0.5 block truncate text-xs text-muted-foreground"
+                    data-testid="cooling-last-error"
+                    title={recorded.title}
+                  >
+                    {recorded.display}
+                  </span>
+                ) : null}
+              </span>
               <span className="flex items-center gap-2">
-                <span
-                  className="font-mono text-xs text-amber-700 dark:text-amber-300"
-                  data-testid="cooling-countdown"
-                >
+                <span className="font-mono text-xs text-warning" data-testid="cooling-countdown">
                   {formatResetCountdown(until)}
                 </span>
                 <ClearCooldownButton

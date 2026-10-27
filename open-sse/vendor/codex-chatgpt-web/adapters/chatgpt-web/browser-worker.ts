@@ -1,14 +1,15 @@
+import {
+  releasePersistentChatGptPage,
+  openChatGptContext,
+  openChatGptPage,
+  usePersistentCdpProfile,
+} from "../../persistent-cdp-context";
 /* Adapted from miuuyy/codex-chatgpt-web v4.0.7 commit b59d7dc51b84fb1f465ff1d00f5207f3b2b4a494 (MIT). */
 import { randomUUID } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { basename, extname, join, resolve } from "node:path";
-import {
-  chromium,
-  type Browser,
-  type BrowserContext,
-  type Locator,
-  type Page,
-} from "playwright-core";
+import type { Browser, BrowserContext, Locator, Page } from "playwright-core";
+import { loadPlaywrightCore } from "../../../../utils/optionalPlaywrightCore.ts";
 import {
   atomicWriteFile,
   CHATGPT_CONNECTOR_NAME,
@@ -20,6 +21,7 @@ import {
   legacyChatGptConnectorMigrationMessage,
   LEGACY_CHATGPT_CONNECTOR_NAMES,
 } from "../../config";
+import { cdpConnectOptions } from "../../cdp-auth";
 import { estimateTokens } from "../../lib/token-estimate";
 import type { CodexProviderConfig } from "../../types";
 import { parseDataUrl } from "../image";
@@ -65,8 +67,9 @@ import {
   CHATGPT_USER_TURN_SELECTOR,
   detectChatGptAccountCapabilities,
   parseChatGptEffortSliderState,
+  parseChatGptEffortStepperState,
 } from "../../chatgpt-session";
-import { loginVerificationMarkerPath } from "../../browser-login";
+import { browserContextForStoredState, loginVerificationMarkerPath } from "../../browser-login";
 import {
   connectLauncherBrowserHost,
   LauncherBrowserTurnCancelledError,
@@ -107,7 +110,6 @@ import type {
 export { MAX_CHATGPT_BROWSER_TABS } from "./concurrency";
 
 const workers = new Map<string, ChatGptBrowserWorker>();
-
 type ChatGptBrowserStorageState = Awaited<ReturnType<BrowserContext["storageState"]>>;
 
 function isVerifiedChatGptAuthCookie(name: string): boolean {
@@ -190,6 +192,8 @@ const CHATGPT_SMOKE_EXPECTED = "CODEX WEB GPT READY";
  */
 export const CHATGPT_UI_SETTLE_MS = 250;
 export const CHATGPT_SEND_ENABLE_GRACE_MS = 5_000;
+export const CHATGPT_SEND_BUTTON_SELECTOR =
+  'button[data-testid="send-button"], button[type="submit"][aria-label]';
 
 const CHATGPT_DOM_REVISION_ATTRIBUTES = [
   "aria-hidden",
@@ -201,6 +205,8 @@ const CHATGPT_DOM_REVISION_ATTRIBUTES = [
   "data-item-anchor",
   "data-is-last-node",
   "data-message-author-role",
+  "data-chatgpt-search-unit-key",
+  "data-talvt-turn-state",
   "data-state",
   "data-streaming-response-status",
   "data-testid",
@@ -245,6 +251,7 @@ export type ChatGptPersonalizationPreflight = "already-personalized" | "enabled"
 const CHATGPT_PERSONALIZATION_CONTROL_SELECTOR = [
   '[data-testid="thread-header-right-actions"] button[aria-haspopup="menu"]',
   '#conversation-header-actions button[aria-haspopup="menu"]',
+  "[data-content-sheet-root] > button[aria-expanded][aria-controls]",
 ].join(", ");
 const CHATGPT_PERSONALIZATION_CHOICE_SELECTOR = '[role="menuitemradio"], [role="radio"]';
 
@@ -1078,6 +1085,11 @@ export async function setChatGptThinkMode(
   await captureDiagnostic?.(enabled ? "think-enabled" : "think-disabled");
 }
 
+export function chatGptTurnIdentitySelector(identity: string): string {
+  const encoded = JSON.stringify(identity);
+  return `[data-testid=${encoded}], [data-chatgpt-search-unit-key=${encoded}]`;
+}
+
 export function chatGptNewTurnIdentity(
   initial: readonly string[],
   current: readonly string[]
@@ -1710,6 +1722,13 @@ export class ChatGptBrowserWorker {
     await Promise.allSettled([...this.activeRuns.values()]);
     await this.maintenanceTail;
     const browser = this.browser;
+    if (
+      this.config.browserHost !== "launcher" &&
+      !usePersistentCdpProfile(this.config.cdpEndpoint) &&
+      this.page &&
+      !this.page.isClosed()
+    )
+      await this.page.close();
     this.browser = undefined;
     this.context = undefined;
     this.page = undefined;
@@ -1771,7 +1790,7 @@ export class ChatGptBrowserWorker {
   }
 
   private async ensurePage(): Promise<Page> {
-    if (this.page && !this.page.isClosed()) return this.page;
+    if (this.page && !this.page.isClosed() && this.browser?.isConnected()) return this.page;
     if (this.config.browserHost === "launcher") {
       const connection = await connectLauncherBrowserHost(this.config.browserHostDescriptorPath!);
       this.browser = connection.browser;
@@ -1797,19 +1816,47 @@ export class ChatGptBrowserWorker {
         `Configured Chrome executable does not exist: ${this.config.chromeExecutablePath}`
       );
     }
+    const { chromium } = await loadPlaywrightCore();
     this.browser = this.config.cdpEndpoint
-      ? await chromium.connectOverCDP(this.config.cdpEndpoint)
+      ? await chromium.connectOverCDP(this.config.cdpEndpoint, cdpConnectOptions())
       : await chromium.launch({
           executablePath: this.config.chromeExecutablePath,
           headless: !this.config.headed,
         });
-    this.context = await this.browser.newContext({ storageState: this.config.storageStatePath });
-    this.page = await this.context.newPage();
+    this.context = usePersistentCdpProfile(this.config.cdpEndpoint)
+      ? await openChatGptContext(this.browser, this.config.storageStatePath, true)
+      : (
+          await browserContextForStoredState(
+            this.browser,
+            this.config.storageStatePath,
+            Boolean(this.config.cdpEndpoint)
+          )
+        ).context;
+    this.page = await openChatGptPage(
+      this.context,
+      usePersistentCdpProfile(this.config.cdpEndpoint),
+      false
+    );
     return this.page;
   }
 
   private async ensureManagedBrowser(): Promise<{ browser: Browser; context: BrowserContext }> {
-    if (this.managedBrowserReady) return this.managedBrowserReady;
+    if (this.managedBrowserReady) {
+      const pending = this.managedBrowserReady;
+      const ready = await pending;
+      if (ready.browser.isConnected()) {
+        if (usePersistentCdpProfile(this.config.cdpEndpoint)) {
+          await openChatGptContext(ready.browser, this.config.storageStatePath, true);
+        }
+        return ready;
+      }
+      // Another caller may already be replacing this disconnected CDP session.
+      if (this.managedBrowserReady !== pending) return this.ensureManagedBrowser();
+      this.managedBrowserReady = undefined;
+      this.browser = undefined;
+      this.context = undefined;
+      this.page = undefined;
+    }
     const opening = (async () => {
       if (
         !existsSync(this.config.storageStatePath) ||
@@ -1829,13 +1876,28 @@ export class ChatGptBrowserWorker {
           `Configured Chrome executable does not exist: ${this.config.chromeExecutablePath}`
         );
       }
+      const { chromium } = await loadPlaywrightCore();
       const browser = this.config.cdpEndpoint
-        ? await chromium.connectOverCDP(this.config.cdpEndpoint)
+        ? await chromium.connectOverCDP(this.config.cdpEndpoint, cdpConnectOptions())
         : await chromium.launch({
             executablePath: this.config.chromeExecutablePath,
             headless: !this.config.headed,
           });
-      const context = await browser.newContext({ storageState: this.config.storageStatePath });
+      let context: BrowserContext;
+      try {
+        context = usePersistentCdpProfile(this.config.cdpEndpoint)
+          ? await openChatGptContext(browser, this.config.storageStatePath, true)
+          : (
+              await browserContextForStoredState(
+                browser,
+                this.config.storageStatePath,
+                Boolean(this.config.cdpEndpoint)
+              )
+            ).context;
+      } catch (error) {
+        await browser.close();
+        throw error;
+      }
       this.browser = browser;
       this.context = context;
       return { browser, context };
@@ -1859,7 +1921,44 @@ export class ChatGptBrowserWorker {
       throw new Error("Launcher turns require an explicitly leased browser surface");
     }
     const { context } = await this.ensureManagedBrowser();
-    return await context.newPage();
+    if (usePersistentCdpProfile(this.config.cdpEndpoint)) {
+      const page = await openChatGptPage(context, usePersistentCdpProfile(this.config.cdpEndpoint));
+      if (usePersistentCdpProfile(this.config.cdpEndpoint)) {
+        try {
+          await page.bringToFront();
+          if (
+            (await page.locator(CHATGPT_USER_TURN_SELECTOR).count()) > 0 ||
+            page.url() !== CHATGPT_TEMPORARY_CHAT_URL
+          ) {
+            await page.goto(CHATGPT_TEMPORARY_CHAT_URL, { waitUntil: "load", timeout: 60_000 });
+          }
+          if ((await page.locator(CHATGPT_USER_TURN_SELECTOR).count()) > 0) {
+            throw new Error("ChatGPT did not reset the previous temporary conversation");
+          }
+        } catch (error) {
+          releasePersistentChatGptPage(page);
+          throw error;
+        }
+      }
+      return page;
+    }
+    try {
+      return await context.newPage();
+    } catch (error) {
+      if (
+        !(error instanceof Error) ||
+        !/Target page, context or browser has been closed/i.test(error.message)
+      ) {
+        throw error;
+      }
+      const staleBrowser = this.browser;
+      this.browser = undefined;
+      this.context = undefined;
+      this.managedBrowserReady = undefined;
+      await staleBrowser?.close().catch(() => {});
+      const replacement = await this.ensureManagedBrowser();
+      return await replacement.context.newPage();
+    }
   }
 
   private async selectModelAndEffort(
@@ -1921,6 +2020,30 @@ export class ChatGptBrowserWorker {
       // below remains the authoritative postcondition, so this cannot become an unproved click.
       await currentEffort.click({ force: true });
     }
+    if ((await page.locator("[data-model-picker-view-toggle]").count()) > 0) {
+      const familyName = modelId === "gpt-5.6-sol" ? "GPT-5.6 Sol" : "GPT-5.6 Luna";
+      const visibleFamily = page.getByRole("menuitemradio", { name: familyName, exact: true });
+      if ((await visibleFamily.count()) === 0) {
+        await page
+          .locator('[data-model-picker-view-toggle="true"]:not([aria-hidden="true"])')
+          .filter({ visible: true })
+          .click({ force: true });
+      }
+      await visibleFamily.waitFor({ state: "visible", timeout: 10_000 });
+      await visibleFamily.click({ force: true });
+      const selectedFamily = page.getByRole("menuitemradio", {
+        name: familyName,
+        exact: true,
+        includeHidden: true,
+      });
+      for (let attempt = 0; attempt < 20; attempt += 1) {
+        if ((await selectedFamily.getAttribute("aria-checked")) === "true") break;
+        await new Promise((resolve) => setTimeout(resolve, 100));
+      }
+      if ((await selectedFamily.getAttribute("aria-checked")) !== "true") {
+        throw new Error("ChatGPT did not confirm the requested model family");
+      }
+    }
     await captureDiagnostic?.("effort-menu-open-requested");
     const effortChoices = effortMenu.locator(CHATGPT_EFFORT_ITEM_SELECTOR);
     const effortChoice = effortChoices.nth(uiEffortIndex);
@@ -1928,8 +2051,16 @@ export class ChatGptBrowserWorker {
       .locator(CHATGPT_EFFORT_SLIDER_SELECTOR)
       .filter({ visible: true })
       .last();
+    const effortStepperStatus = page.locator('[role="status"]').last();
+    const readEffortStepperState = async () => {
+      for (const text of await page.locator('[role="status"]').allTextContents()) {
+        const state = parseChatGptEffortStepperState(text);
+        if (state) return state;
+      }
+      return undefined;
+    };
     const waitAbort = new AbortController();
-    let ready: "effort" | "slider" | "rate-limit" | "session-expired";
+    let ready: "effort" | "slider" | "stepper" | "rate-limit" | "session-expired";
     try {
       ready = await Promise.race([
         effortChoice
@@ -1938,6 +2069,9 @@ export class ChatGptBrowserWorker {
         effortSlider
           .waitFor({ state: "visible", timeout: 70_000, signal: waitAbort.signal })
           .then(() => "slider" as const),
+        effortStepperStatus
+          .waitFor({ state: "visible", timeout: 70_000, signal: waitAbort.signal })
+          .then(() => "stepper" as const),
         chatGptRateLimitDialog(page)
           .waitFor({ state: "visible", timeout: 70_000, signal: waitAbort.signal })
           .then(() => "rate-limit" as const),
@@ -1951,8 +2085,15 @@ export class ChatGptBrowserWorker {
       // Those rows can win the locator race even though they are not effort choices.
       if (ready !== "slider" && (await effortSlider.isVisible().catch(() => false)))
         ready = "slider";
+      else if (
+        ready === "effort" &&
+        parseChatGptEffortStepperState(await effortStepperStatus.textContent().catch(() => null))
+      )
+        ready = "stepper";
       await captureDiagnostic?.(
-        ready === "slider" ? "effort-slider-visible" : "effort-choice-visible"
+        ready === "slider" || ready === "stepper"
+          ? "effort-slider-visible"
+          : "effort-choice-visible"
       );
     } catch (error) {
       if (error instanceof ChatGptWebAdapterError) throw error;
@@ -1966,12 +2107,16 @@ export class ChatGptBrowserWorker {
     } finally {
       waitAbort.abort();
     }
-    if (ready === "slider") {
-      let sliderState = parseChatGptEffortSliderState(
-        await effortSlider.getAttribute("aria-valuemin"),
-        await effortSlider.getAttribute("aria-valuemax"),
-        await effortSlider.getAttribute("aria-valuenow")
-      );
+    if (ready === "slider" || ready === "stepper") {
+      const readSliderState = async () =>
+        (ready === "slider"
+          ? parseChatGptEffortSliderState(
+              await effortSlider.getAttribute("aria-valuemin"),
+              await effortSlider.getAttribute("aria-valuemax"),
+              await effortSlider.getAttribute("aria-valuenow")
+            )
+          : undefined) ?? (await readEffortStepperState());
+      let sliderState = await readSliderState();
       if (!sliderState) {
         throw new ChatGptWebAdapterError("ChatGPT effort slider exposed an invalid ARIA range", {
           status: 502,
@@ -1993,20 +2138,22 @@ export class ChatGptBrowserWorker {
           }
         );
       }
-      const sliderControl = effortSlider.locator("xpath=ancestor::*[@role='menuitem'][1]");
+      const sliderControl =
+        ready === "slider"
+          ? (await effortSlider.getAttribute("role")) === "menuitem"
+            ? effortSlider
+            : effortSlider.locator("xpath=ancestor::*[@role='menuitem'][1]")
+          : undefined;
       while (sliderState.value !== targetValue) {
         await throwIfChatGptRateLimitDialog(page);
         const direction = targetValue > sliderState.value ? 1 : -1;
         const key = direction > 0 ? "ArrowRight" : "ArrowLeft";
         const previousValue = sliderState.value;
-        await sliderControl.press(key);
+        if (sliderControl) await sliderControl.press(key);
+        else await page.keyboard.press(key);
         const changeDeadline = Date.now() + 5_000;
         do {
-          sliderState = parseChatGptEffortSliderState(
-            await effortSlider.getAttribute("aria-valuemin"),
-            await effortSlider.getAttribute("aria-valuemax"),
-            await effortSlider.getAttribute("aria-valuenow")
-          );
+          sliderState = await readSliderState();
           if (!sliderState) throw new Error("ChatGPT effort slider lost its semantic ARIA state");
           if (sliderState.value !== previousValue) break;
           await new Promise((resolveSleep) => setTimeout(resolveSleep, 50));
@@ -2260,15 +2407,21 @@ export class ChatGptBrowserWorker {
         const observerKey = `${observerState.id}:${observerState.revision}`;
         if (options.knownKey === observerKey) return { key: observerKey };
         const identities = (selector: string): string[] => {
-          const values = [...document.querySelectorAll(selector)].map((element) =>
-            element.getAttribute("data-testid")
+          const values = [...document.querySelectorAll(selector)].map(
+            (element) =>
+              element.getAttribute("data-testid") ||
+              element.getAttribute("data-chatgpt-search-unit-key")
           );
           if (
             values.some(
-              (value) => typeof value !== "string" || !value.startsWith("conversation-turn-")
+              (value) =>
+                typeof value !== "string" ||
+                (!value.startsWith("conversation-turn-") &&
+                  !value.startsWith("fallback-turn-") &&
+                  !/:(?:user|assistant)$/.test(value))
             )
           ) {
-            throw new Error("ChatGPT conversation turn has no stable data-testid identity");
+            throw new Error("ChatGPT conversation turn has no stable DOM identity");
           }
           const typed = values as string[];
           if (new Set(typed).size !== typed.length) {
@@ -2407,7 +2560,7 @@ export class ChatGptBrowserWorker {
       if (identity)
         return {
           identity,
-          locator: page.locator(`[data-testid=${JSON.stringify(identity)}]`),
+          locator: page.locator(chatGptTurnIdentitySelector(identity)),
           acceptedUserTurnIdentities: state.userIdentities,
         };
       await this.waitForTurnDomOrExternalProgress(
@@ -2444,7 +2597,7 @@ export class ChatGptBrowserWorker {
     if (!identity || identity === binding.identity) return binding;
     return {
       identity,
-      locator: page.locator(`[data-testid=${JSON.stringify(identity)}]`),
+      locator: page.locator(chatGptTurnIdentitySelector(identity)),
       acceptedUserTurnIdentities: state.userIdentities,
     };
   }
@@ -2456,7 +2609,7 @@ export class ChatGptBrowserWorker {
         const clone = element.cloneNode(true) as HTMLElement;
         clone
           .querySelectorAll(
-            '[data-id^="plugin:"][data-keyword], [data-inline-selection-pill-cursor-target]'
+            '[data-id^="plugin:"][data-keyword], [app-mention-path^="app://"][contenteditable="false"], [data-inline-selection-pill-cursor-target]'
           )
           .forEach((part) => part.remove());
         return [...clone.childNodes]
@@ -2492,14 +2645,22 @@ export class ChatGptBrowserWorker {
 
   private selectedConnectorControl(composer: Locator): Locator {
     return composer
-      .locator('[data-id^="plugin:"][data-keyword]')
-      .filter({ hasText: this.config.appName, visible: true });
+      .locator(
+        [
+          `[data-id^="plugin:"][data-keyword=${JSON.stringify(this.config.appName)}]`,
+          `[app-mention-path^="app://"][app-mention-display-name=${JSON.stringify(this.config.appName)}][contenteditable="false"]`,
+        ].join(", ")
+      )
+      .filter({ visible: true });
   }
 
   private async connectorIsSelected(composer: Locator): Promise<boolean> {
     const selected = this.selectedConnectorControl(composer);
     const keywords = await selected.evaluateAll((elements) =>
-      elements.map((element) => element.getAttribute("data-keyword"))
+      elements.map(
+        (element) =>
+          element.getAttribute("data-keyword") ?? element.getAttribute("app-mention-display-name")
+      )
     );
     const exactMatches = keywords.filter((keyword) => keyword === this.config.appName).length;
     if (exactMatches > 1) {
@@ -2559,7 +2720,9 @@ export class ChatGptBrowserWorker {
     attemptBudget: ChatGptConnectorAttemptBudget = { triggerAttempts: 0 }
   ): Promise<Locator> {
     let composer: Locator;
-    const menuRows = page.locator('.__menu-item[tabindex="0"]');
+    const menuRows = page.locator(
+      '.__menu-item[tabindex="0"], [data-mention-list-scroll-area] button[data-list-navigation-item="true"]'
+    );
     const appResult = menuRows.filter({
       has: page.getByText(this.config.appName, { exact: true }),
     });
@@ -2648,11 +2811,13 @@ export class ChatGptBrowserWorker {
     // ChatGPT's keyboard highlight first; otherwise move the menu highlight until it does. Keep
     // focus on the composer, activate through the menu's real keyboard owner, then prove the exact
     // selected connector pill below.
-    const rowHighlighted = async () => (await appResult.getAttribute("data-highlighted")) !== null;
+    const rowHighlighted = async () =>
+      (await appResult.getAttribute("data-highlighted")) !== null ||
+      (await appResult.getAttribute("aria-current")) === "true";
     if (!(await rowHighlighted())) {
       const visibleRowCount = await menuRows.filter({ visible: true }).count();
       for (let step = 0; step < visibleRowCount && !(await rowHighlighted()); step += 1) {
-        await page.keyboard.press("ArrowDown");
+        await composer.press("ArrowDown");
       }
     }
     if (!(await rowHighlighted())) {
@@ -2660,7 +2825,7 @@ export class ChatGptBrowserWorker {
         `ChatGPT connector menu could not highlight ${JSON.stringify(this.config.appName)}`
       );
     }
-    await page.keyboard.press("Enter");
+    await composer.press("Enter");
     await captureDiagnostic?.("connector-choice-activated");
     // Selecting a connector replaces the Lexical composer subtree. Resolve the active composer
     // again instead of returning the pre-selection locator, otherwise the real turn can focus a
@@ -2696,6 +2861,16 @@ export class ChatGptBrowserWorker {
       // then transport the complete text through the browser's plain-text editing command.
       await composer.fill("");
       await composer.focus();
+      if (usePersistentCdpProfile(this.config.cdpEndpoint)) {
+        await composer.press("ControlOrMeta+A");
+        await composer.press("Backspace");
+        await settleChatGptUi();
+        if ((await composer.innerText()).trim()) {
+          throw new ChatGptPromptAttachmentIntegrityError(
+            "ChatGPT did not clear the previous draft"
+          );
+        }
+      }
       await this.insertPromptText(page, prompt, abortSignal);
       await this.assertPromptAttached(page, prompt, abortSignal);
       return;
@@ -2720,8 +2895,7 @@ export class ChatGptBrowserWorker {
     externalProgress?: ChatGptTurnProgressReader,
     submissionLifecycle?: Pick<BrowserTurn, "onSendActivated" | "onSubmitted">
   ): Promise<ChatGptSubmissionEvidence> {
-    const composer = await this.activeComposer(page);
-    const sendButton = composer.locator("xpath=ancestor::form[1]").getByTestId("send-button");
+    const sendButton = page.locator(CHATGPT_SEND_BUTTON_SELECTOR).filter({ visible: true }).last();
     await sendButton.waitFor({ state: "visible", timeout: browserStageTimeouts.send });
     await settleChatGptUi();
     const sendEnableDeadline = Date.now() + CHATGPT_SEND_ENABLE_GRACE_MS;
@@ -2742,7 +2916,7 @@ export class ChatGptBrowserWorker {
     await captureDiagnostic?.("send-ready");
     const initialToolBatchRevision = externalProgress?.snapshot().lastToolBatchRevision ?? 0;
     await submissionLifecycle?.onSendActivated?.();
-    await sendButton.press("Enter");
+    await sendButton.click();
     const evidence = await this.waitForSubmissionAccepted(
       page,
       baseline,
@@ -3054,7 +3228,7 @@ export class ChatGptBrowserWorker {
           (alerts.length > 0 ? `: ${alerts.join(" | ")}` : "")
       );
     }
-    const send = composerForm.getByTestId("send-button");
+    const send = page.locator(CHATGPT_SEND_BUTTON_SELECTOR).filter({ visible: true }).last();
     const deadline = Date.now() + 60_000;
     while (Date.now() < deadline) {
       if (await send.isEnabled().catch(() => false)) return;
@@ -3127,8 +3301,9 @@ export class ChatGptBrowserWorker {
           // render a completed commentary Markdown root immediately before that live status container.
           // Final-answer Markdown follows the live status instead, so DOM order remains the semantic
           // boundary without relying on localized labels such as "Pro thinking".
-          const allMarkdownRoots = [...root.querySelectorAll<HTMLElement>(".markdown")]
-            .filter((candidate) => !candidate.parentElement?.closest(".markdown"))
+          const markdownRootSelector = '.markdown, [data-markdown-text-style="assistant-message"]';
+          const allMarkdownRoots = [...root.querySelectorAll<HTMLElement>(markdownRootSelector)]
+            .filter((candidate) => !candidate.parentElement?.closest(markdownRootSelector))
             .filter(renderedInDom);
           const streamingStatusContainers = [
             ...root.querySelectorAll<HTMLElement>("[data-streaming-response-status]"),
@@ -3342,7 +3517,11 @@ export class ChatGptBrowserWorker {
           }));
           const rendered = renderedRoots.at(-1);
           const completionAction = rendered
-            ? [...root.querySelectorAll<HTMLElement>(options.completionActionSelector)]
+            ? [
+                ...root.ownerDocument.querySelectorAll<HTMLElement>(
+                  options.completionActionSelector
+                ),
+              ]
                 .filter(renderedInDom)
                 .find(
                   (candidate) =>
@@ -3508,7 +3687,10 @@ export class ChatGptBrowserWorker {
                 .join("\n\n"),
               fullHtml: renderedRoots.map((candidate) => candidate.innerHTML).join(""),
               markdownSegments,
-              completionActionVisible: completionAction !== undefined,
+              completionActionVisible:
+                completionAction !== undefined ||
+                root.closest("[data-talvt-turn-state]")?.getAttribute("data-talvt-turn-state") ===
+                  "complete",
               stoppedThinkingVisible,
               traceBlocks,
             },
@@ -3736,6 +3918,9 @@ export class ChatGptBrowserWorker {
     let turnConnection: Browser | undefined;
     let managedPage: Page | undefined;
     let diagnosticPage: Page | undefined;
+    const closeManagedPageOnAbort = (): void => {
+      if (managedPage && !managedPage.isClosed()) void managedPage.close().catch(() => {});
+    };
     try {
       if (turn.abortSignal?.aborted)
         throw new DOMException("ChatGPT web turn aborted", "AbortError");
@@ -3825,7 +4010,9 @@ export class ChatGptBrowserWorker {
           if (!launcherSurfaceId) {
             const managed = await this.pageForNewTurn();
             if (abortSignal.aborted) {
-              await managed.close().catch(() => {});
+              if (usePersistentCdpProfile(this.config.cdpEndpoint))
+                releasePersistentChatGptPage(managed);
+              else await managed.close().catch(() => {});
               throw new DOMException("ChatGPT browser page acquisition aborted", "AbortError");
             }
             return managed;
@@ -3846,6 +4033,7 @@ export class ChatGptBrowserWorker {
         }
       );
       if (!maintenancePage && !launcherSurfaceId) managedPage = page;
+      turn.abortSignal?.addEventListener("abort", closeManagedPageOnAbort, { once: true });
       diagnosticPage = page;
       const rebindLauncherPage = async (attempt: number, cause: Error): Promise<void> => {
         if (!launcherSurfaceId || !this.config.browserHostDescriptorPath) throw cause;
@@ -4188,7 +4376,7 @@ export class ChatGptBrowserWorker {
               };
               responseTurn = {
                 ...responseTurn,
-                locator: page.locator(`[data-testid=${JSON.stringify(responseTurn.identity)}]`),
+                locator: page.locator(chatGptTurnIdentitySelector(responseTurn.identity)),
               };
               responseDomCache.key = undefined;
               responseDomCache.snapshot = undefined;
@@ -4360,18 +4548,21 @@ export class ChatGptBrowserWorker {
       }
       throw error;
     } finally {
+      turn.abortSignal?.removeEventListener("abort", closeManagedPageOnAbort);
       prepared.release();
       if (managedPage && verifiedStorageState) {
         try {
           const context = managedPage.context();
-          const mergedState = mergeChatGptRuntimeStorageState(
-            verifiedStorageState,
-            await context.storageState()
-          );
+          const persistent = usePersistentCdpProfile(this.config.cdpEndpoint);
+          const currentState = await context.storageState();
+          const mergedState = persistent
+            ? { ...JSON.parse(readFileSync(this.config.storageStatePath, "utf8")), ...currentState }
+            : mergeChatGptRuntimeStorageState(verifiedStorageState, currentState);
           const verifiedAuthCookies = mergedState.cookies.filter((cookie) =>
             isVerifiedChatGptAuthCookie(cookie.name)
           );
-          if (verifiedAuthCookies.length > 0) await context.addCookies(verifiedAuthCookies);
+          if (!persistent && verifiedAuthCookies.length > 0)
+            await context.addCookies(verifiedAuthCookies);
           atomicWriteFile(this.config.storageStatePath, `${JSON.stringify(mergedState)}\n`);
         } catch (storageError) {
           console.error(
@@ -4385,6 +4576,8 @@ export class ChatGptBrowserWorker {
             `[chatgpt-web] failed to release launcher browser connection for ${turn.traceId}: ${error instanceof Error ? error.message : String(error)}`
           );
         });
+      } else if (managedPage && usePersistentCdpProfile(this.config.cdpEndpoint)) {
+        releasePersistentChatGptPage(managedPage);
       } else if (managedPage && !managedPage.isClosed()) {
         await managedPage.close().catch((error) => {
           console.error(

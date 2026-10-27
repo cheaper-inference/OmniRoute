@@ -1,4 +1,5 @@
 import { getModelsByProviderId } from "@omniroute/open-sse/config/providerModels.ts";
+import { getProviderConnectionFamilyIds } from "@/shared/constants/providers";
 import { safePercentage } from "@/shared/utils/formatting";
 
 const GLM_QUOTA_ORDER: Record<string, number> = { session: 0, weekly: 1, mcp_monthly: 2 };
@@ -9,8 +10,8 @@ const CODEX_QUOTA_ORDER: Record<string, number> = {
   gpt_5_3_codex_spark_weekly: 3,
   banked_reset_credits: 4,
 };
-const GLM_FAMILY_PROVIDERS = ["glm", "glm-cn", "glmt", "opencode-go"];
-const KIMI_CODING_PROVIDERS = ["kimi-coding", "kimi-coding-apikey"];
+const GLM_FAMILY_PROVIDERS = ["glm", "glm-cn", "glmt", "zai", "opencode-go"];
+const KIMI_CODING_PROVIDERS: readonly string[] = getProviderConnectionFamilyIds("kimi-coding");
 
 /**
  * Providers whose quotas already get a deterministic fixed-window order below
@@ -147,7 +148,12 @@ function normalizeQuotaEntry(name: string, quota: any = {}, extras: any = {}) {
 }
 
 function parseGeneric(data: any) {
-  return quotaEntries(data).map(([name, quota]) => normalizeQuotaEntry(name, quota));
+  const quotas = quotaEntries(data).map(([name, quota]) => normalizeQuotaEntry(name, quota));
+  const bankedResetCredits = Number(data?.bankedResetCredits);
+  if (Number.isFinite(bankedResetCredits) && bankedResetCredits >= 0) {
+    quotas.push(buildBankedResetCreditsQuota(bankedResetCredits));
+  }
+  return quotas;
 }
 
 function parseGithub(data: any) {
@@ -157,7 +163,7 @@ function parseGithub(data: any) {
 }
 
 function parseGlmFamily(data: any) {
-  return quotaEntries(data).map(([name, quota]) =>
+  const quotas = quotaEntries(data).map(([name, quota]) =>
     normalizeQuotaEntry(name, quota, {
       displayName: quota?.displayName,
       details: Array.isArray(quota?.details) ? quota.details : undefined,
@@ -165,6 +171,14 @@ function parseGlmFamily(data: any) {
         Number(quota?.total || 0) === 100 && quota?.remainingPercentage !== undefined,
     })
   );
+
+  // GLM Coding Plan Reset Cards, surfaced by getGlmUsage alongside the windows.
+  const bankedResetCredits = Number(data?.bankedResetCredits);
+  if (Number.isFinite(bankedResetCredits) && bankedResetCredits > 0) {
+    quotas.push(buildBankedResetCreditsQuota(bankedResetCredits));
+  }
+
+  return quotas;
 }
 
 function buildCreditsQuota(
@@ -237,9 +251,18 @@ function parseCodex(data: any) {
   return quotas;
 }
 
+// #15635: extra_usage amounts arrive in minor units; decimal_places gives the exponent.
+function claudeExtraUsageScale(extraUsage: any): number {
+  const decimalPlaces = Number(extraUsage?.decimal_places);
+  return Number.isInteger(decimalPlaces) && decimalPlaces > 0 && decimalPlaces <= 6
+    ? 10 ** decimalPlaces
+    : 1;
+}
+
 function buildClaudeExtraUsageQuota(extraUsage: any) {
-  const monthlyLimit = Number(extraUsage?.monthly_limit ?? 0);
-  const usedCredits = Number(extraUsage?.used_credits ?? 0);
+  const scale = claudeExtraUsageScale(extraUsage);
+  const monthlyLimit = Number(extraUsage?.monthly_limit ?? 0) / scale;
+  const usedCredits = Number(extraUsage?.used_credits ?? 0) / scale;
   const utilization = Number(extraUsage?.utilization ?? 0);
   const remainingPercentage = Number.isFinite(utilization)
     ? Math.max(0, 100 - utilization)
@@ -261,12 +284,23 @@ function parseClaude(data: any) {
   if (data?.message)
     return [{ name: "error", used: 0, total: 0, resetAt: null, message: data.message }];
 
-  const quotas = quotaEntries(data).map(([name, quota]) =>
-    normalizeQuotaEntry(name, quota, { isPercentageOnly: true })
-  );
+  const visibleQuotas = (
+    quotas: Record<string, { fractionReported?: boolean } | null> | null | undefined
+  ) =>
+    Object.fromEntries(
+      Object.entries(quotas ?? {}).filter(([, quota]) => quota?.fractionReported !== false)
+    );
+  const quotas = quotaEntries({
+    quotas: { ...visibleQuotas(data.quotas), ...visibleQuotas(data.modelQuotas) },
+  }).map(([name, quota]) => normalizeQuotaEntry(name, quota, { isPercentageOnly: true }));
 
   if (data?.extraUsage?.is_enabled) {
     quotas.push(buildClaudeExtraUsageQuota(data.extraUsage));
+  }
+
+  const bankedResetCredits = Number(data?.bankedResetCredits);
+  if (Number.isFinite(bankedResetCredits) && bankedResetCredits > 0) {
+    quotas.push(buildBankedResetCreditsQuota(bankedResetCredits));
   }
 
   return quotas;
@@ -307,6 +341,24 @@ function parseAgentrouter(data: any) {
   return quotaEntries(data).map(([quotaKey, quota]) => parseAgentrouterQuota(quotaKey, quota));
 }
 
+// Ollama Cloud `/api/balance` (open-sse/services/ollamaCloudBalance.ts) reports purchased
+// credits as a `credits` USD balance next to the monthly/session/weekly percent windows. Route
+// that row through buildCreditsQuota() so it renders as "$X.XX", not as a percentage bar.
+function normalizeOllamaWindow(name: string, quota: any) {
+  if (quota?.ollamaApiBalance !== true) return normalizeQuotaEntry(name, quota);
+  // A fresh API balance is authoritative even when the reported period end is in the past.
+  return normalizeQuotaEntry(name, { ...quota, resetAt: null }, { resetAt: quota.resetAt });
+}
+
+function parseOllamaCloud(data: any) {
+  return quotaEntries(data).map(([quotaKey, quota]) => {
+    if (quotaKey !== "credits") return normalizeOllamaWindow(quotaKey, quota);
+    const remaining = Math.max(0, Number(quota?.remaining ?? 0) || 0);
+    const currency = quota?.currency || "USD";
+    return buildCreditsQuota("credits", remaining, remaining > 0 ? 100 : 0, { currency });
+  });
+}
+
 // OpenRouter is credit-based, not subscription-based: the `credits` quota entry
 // (open-sse/services/usage/openrouter.ts) carries the account balance in
 // `remaining` + `currency: "USD"` with `unlimited: true` / total 0. The generic
@@ -317,13 +369,26 @@ function parseAgentrouter(data: any) {
 // USD. Free-tier request windows keep the generic percentage treatment.
 function parseOpenrouterQuota(quotaKey: string, quota: any) {
   if (quotaKey !== "credits") return normalizeQuotaEntry(quotaKey, quota);
+  // OpenRouter backend (PRs #12256 + #12468) reports a positive-denominator
+  // PAYG payload (used, total, remaining, remainingPercentage) and a
+  // balance-only payload under legacy keys. The credits renderer in
+  // QuotaCardExpanded short-circuits when `isCredits: true` and only shows
+  // the remaining balance as USD - so a positive-denominator PAYG row
+  // must NOT take that branch. Positive denominators go through the regular
+  // normalizeQuotaEntry() path (which keeps currency as an extra); only a
+  // missing/non-positive denominator falls back to buildCreditsQuota() so
+  // the balance row stays renderable without inventing a 100% percentage.
+  const total = Number(quota?.total ?? 0);
+  if (Number.isFinite(total) && total > 0) {
+    return normalizeQuotaEntry(quotaKey, quota, {
+      currency: quota?.currency ?? "USD",
+    });
+  }
   const remaining = Math.max(0, Number(quota?.remaining ?? 0));
-  const currency = quota?.currency || "USD";
-  const remainingPercentage =
-    safePercentage(quota?.remainingPercentage) ?? (remaining > 0 ? 100 : 0);
+  const currency = quota?.currency ?? "USD";
+  const remainingPercentage = safePercentage(quota?.remainingPercentage) ?? 0;
   return buildCreditsQuota("credits", remaining, remainingPercentage, { currency });
 }
-
 function parseOpenrouter(data: any) {
   return quotaEntries(data).map(([quotaKey, quota]) => parseOpenrouterQuota(quotaKey, quota));
 }
@@ -434,20 +499,49 @@ export function isKiloPassDisplayRow(quota: any): boolean {
   return quota?.kiloPass === true || quota?.name === KILO_PASS_DISPLAY_ROW;
 }
 
+function parseMoonshotBalanceQuota(quotaKey: string, quota: any) {
+  if (quotaKey !== "available" && quotaKey !== "voucher" && quotaKey !== "cash") {
+    return normalizeQuotaEntry(quotaKey, quota);
+  }
+  const remaining = Math.max(0, Number(quota?.remaining ?? 0));
+  const currency = quota?.currency || "CNY";
+  const remainingPercentage =
+    safePercentage(quota?.remainingPercentage) ?? (remaining > 0 ? 100 : 0);
+  return buildCreditsQuota(quotaKey, remaining, remainingPercentage, {
+    currency,
+    displayName: quota?.displayName,
+  });
+}
+
+function parseMoonshotBalance(data: any) {
+  return quotaEntries(data).map(([quotaKey, quota]) => parseMoonshotBalanceQuota(quotaKey, quota));
+}
+
+function looksLikeMoonshotBalance(data: any): boolean {
+  const quotas = data?.quotas;
+  if (!quotas || typeof quotas !== "object" || Array.isArray(quotas)) return false;
+  return "available" in quotas && "voucher" in quotas && "cash" in quotas;
+}
+
 function parseProviderQuotas(providerId: string, data: any) {
+  if (looksLikeMoonshotBalance(data)) return parseMoonshotBalance(data);
   if (providerId === "github") return parseGithub(data);
-  if (["glm", "glm-cn", "glmt", "opencode-go"].includes(providerId)) return parseGlmFamily(data);
+  if (GLM_FAMILY_PROVIDERS.includes(providerId)) return parseGlmFamily(data);
   if (providerId === "antigravity" || providerId === "agy") return parseAntigravity(data);
   if (providerId === "codex") return parseCodex(data);
   if (providerId === "claude") return parseClaude(data);
   if (providerId === "deepseek") return parseDeepseek(data);
   if (providerId === "kilocode") return parseKilocode(data);
   if (providerId === "agentrouter") return parseAgentrouter(data);
+  if (providerId === "ollama-cloud") return parseOllamaCloud(data);
   if (providerId === "openrouter") return parseOpenrouter(data);
   return parseGeneric(data);
 }
 
 function sortProviderModelOrder(provider: string, quotas: any[]) {
+  // Antigravity/AGY model IDs are discovered live. Static ordering would rank a model
+  // Google ships tomorrow at 999 and bury it below the collapsed three-row cutoff.
+  if (provider === "antigravity" || provider === "agy") return;
   const modelOrder = getModelsByProviderId(provider);
   if (modelOrder.length === 0) return;
   const orderMap = new Map(modelOrder.map((m, i) => [m.id, i]));

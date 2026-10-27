@@ -20,7 +20,13 @@
  * are also used by `xaiOauthQuotaFetcher.ts` (connection OAuth token path).
  */
 
-import { registerQuotaFetcher, registerQuotaWindows, type QuotaInfo } from "./quotaPreflight.ts";
+import {
+  registerQuotaCacheInvalidator,
+  registerQuotaFetcher,
+  registerQuotaWindows,
+  type QuotaInfo,
+} from "./quotaPreflight.ts";
+import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 import { registerMonitorFetcher } from "./quotaMonitor.ts";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
@@ -204,15 +210,20 @@ function writeRefreshedTokens(
   }
 }
 
-async function discoverTokenEndpoint(issuer: string, signal: AbortSignal): Promise<string> {
+async function discoverTokenEndpoint(
+  issuer: string,
+  signal: AbortSignal,
+  connectionId: string
+): Promise<string> {
   const discoveryUrl = `${issuer.replace(/\/$/, "")}/.well-known/openid-configuration`;
   if (!isAllowedXaiUrl(discoveryUrl)) {
     throw new Error("invalid oidc issuer");
   }
-  const res = await fetch(discoveryUrl, {
+  const res = await fetchWithConnectionProxy(connectionId, discoveryUrl, {
     headers: { Accept: "application/json" },
     signal,
   });
+  if (!res) throw new Error("proxy quota fetch failed");
   if (!res.ok) throw new Error(`token refresh failed (discovery HTTP ${res.status})`);
   const json = (await res.json()) as { token_endpoint?: string };
   const endpoint = String(json.token_endpoint || "");
@@ -220,7 +231,11 @@ async function discoverTokenEndpoint(issuer: string, signal: AbortSignal): Promi
   return endpoint;
 }
 
-async function refreshAccessToken(auth: ResolvedAuth, signal: AbortSignal): Promise<ResolvedAuth> {
+async function refreshAccessToken(
+  auth: ResolvedAuth,
+  signal: AbortSignal,
+  connectionId: string
+): Promise<ResolvedAuth> {
   if (!auth.refreshToken) {
     throw new Error("auth expired — run `grok login`");
   }
@@ -228,8 +243,8 @@ async function refreshAccessToken(auth: ResolvedAuth, signal: AbortSignal): Prom
     throw new Error("auth missing client id — run `grok login`");
   }
 
-  const tokenEndpoint = await discoverTokenEndpoint(auth.issuer, signal);
-  const res = await fetch(tokenEndpoint, {
+  const tokenEndpoint = await discoverTokenEndpoint(auth.issuer, signal, connectionId);
+  const res = await fetchWithConnectionProxy(connectionId, tokenEndpoint, {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
@@ -238,11 +253,12 @@ async function refreshAccessToken(auth: ResolvedAuth, signal: AbortSignal): Prom
     },
     body: new URLSearchParams({
       grant_type: "refresh_token",
-      client_id: auth.clientId,
-      refresh_token: auth.refreshToken,
+      client_id: auth.clientId ?? "",
+      refresh_token: auth.refreshToken ?? "",
     }).toString(),
     signal,
   });
+  if (!res) throw new Error("proxy quota fetch failed");
 
   if (!res.ok) {
     throw new Error(`token refresh failed (HTTP ${res.status})`);
@@ -286,13 +302,13 @@ function needsRefresh(auth: ResolvedAuth): boolean {
   return auth.expiresAtMs <= Date.now() + EXPIRY_SKEW_MS;
 }
 
-async function resolveAuth(signal: AbortSignal): Promise<ResolvedAuth> {
+async function resolveAuth(signal: AbortSignal, connectionId: string): Promise<ResolvedAuth> {
   const file = readAuthFile();
   if (!file) throw new Error("no grok auth — run `grok login`");
   const auth = pickAuthEntry(file);
   if (!auth) throw new Error("no usable Grok credentials — run `grok login`");
   if (needsRefresh(auth)) {
-    return refreshAccessToken(auth, signal);
+    return refreshAccessToken(auth, signal, connectionId);
   }
   return auth;
 }
@@ -329,12 +345,13 @@ function resetLocalLabel(endIso?: string): string {
  */
 export async function fetchGrokBillingWithToken(
   token: string,
-  signal?: AbortSignal
+  signal: AbortSignal | undefined,
+  connectionId: string
 ): Promise<GrokBillingSnapshot> {
   const controller = signal ? null : new AbortController();
   const timeout = controller ? setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS) : null;
   try {
-    return await fetchBilling(token, signal ?? controller!.signal);
+    return await fetchBilling(token, signal ?? controller!.signal, connectionId);
   } finally {
     if (timeout) clearTimeout(timeout);
   }
@@ -348,8 +365,12 @@ export function grokBillingSnapshotToQuotaInfo(snap: GrokBillingSnapshot): Quota
   return snapshotToQuotaInfo(snap);
 }
 
-async function fetchBilling(token: string, signal: AbortSignal): Promise<UsageSnapshot> {
-  const res = await fetch(BILLING_URL, {
+async function fetchBilling(
+  token: string,
+  signal: AbortSignal,
+  connectionId: string
+): Promise<UsageSnapshot> {
+  const res = await fetchWithConnectionProxy(connectionId, BILLING_URL, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -359,6 +380,7 @@ async function fetchBilling(token: string, signal: AbortSignal): Promise<UsageSn
     },
     signal,
   });
+  if (!res) throw new Error("proxy quota fetch failed");
 
   if (res.status === 401 || res.status === 403) {
     throw new Error(`auth ${res.status}`);
@@ -444,7 +466,7 @@ export async function fetchGrokWebQuota(
     try {
       let auth: ResolvedAuth;
       try {
-        auth = await resolveAuth(controller.signal);
+        auth = await resolveAuth(controller.signal, connectionId);
       } catch {
         // No local grok auth — fail open
         quotaCache.set(connectionId, { quota: null, error: null, fetchedAt: Date.now() });
@@ -452,7 +474,7 @@ export async function fetchGrokWebQuota(
       }
 
       try {
-        const snap = await fetchBilling(auth.token, controller.signal);
+        const snap = await fetchBilling(auth.token, controller.signal, connectionId);
         const quota = snapshotToQuotaInfo(snap);
         quotaCache.set(connectionId, { quota, error: null, fetchedAt: Date.now() });
         return quota;
@@ -460,8 +482,8 @@ export async function fetchGrokWebQuota(
         const msg = err instanceof Error ? err.message : "";
         // One retry with token refresh on auth errors
         if (msg.startsWith("auth ") && auth.refreshToken) {
-          auth = await refreshAccessToken(auth, controller.signal);
-          const snap = await fetchBilling(auth.token, controller.signal);
+          auth = await refreshAccessToken(auth, controller.signal, connectionId);
+          const snap = await fetchBilling(auth.token, controller.signal, connectionId);
           const quota = snapshotToQuotaInfo(snap);
           quotaCache.set(connectionId, { quota, error: null, fetchedAt: Date.now() });
           return quota;
@@ -497,6 +519,7 @@ export function invalidateGrokWebQuotaCache(connectionId: string): void {
  */
 export function registerGrokWebQuotaFetcher(): void {
   registerQuotaFetcher("grok-web", fetchGrokWebQuota);
+  registerQuotaCacheInvalidator("grok-web", invalidateGrokWebQuotaCache);
   registerMonitorFetcher("grok-web", fetchGrokWebQuota);
   registerQuotaWindows("grok-web", [GROK_WINDOW_WEEKLY]);
 }

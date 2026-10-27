@@ -41,17 +41,27 @@ import { gotoDashboardRoute } from "./helpers/dashboardAuth";
 // Conditional import — skip entire suite if @axe-core/playwright is absent.
 // ---------------------------------------------------------------------------
 
-let AxeBuilder: (new (args: { page: Page }) => {
-  analyze(): Promise<{ violations: Array<{ id: string; description: string; impact: string | null; nodes: unknown[] }> }>;
-  withTags(tags: string[]): unknown;
-  exclude(selector: string): unknown;
-  disableRules(rules: string[]): unknown;
-}) | null = null;
+let AxeBuilder:
+  | (new (args: { page: Page }) => {
+      analyze(): Promise<{
+        violations: Array<{
+          id: string;
+          description: string;
+          impact: string | null;
+          nodes: unknown[];
+        }>;
+      }>;
+      withTags(tags: string[]): unknown;
+      exclude(selector: string): unknown;
+      disableRules(rules: string[]): unknown;
+    })
+  | null = null;
 
 try {
   // Dynamic import so the module parse does not fail when the package is absent.
   const mod = await import("@axe-core/playwright");
-  AxeBuilder = mod.default ?? (mod as unknown as { AxeBuilder: typeof AxeBuilder }).AxeBuilder ?? null;
+  AxeBuilder =
+    mod.default ?? (mod as unknown as { AxeBuilder: typeof AxeBuilder }).AxeBuilder ?? null;
 } catch {
   // Package not installed — suite will skip gracefully below.
   AxeBuilder = null;
@@ -69,11 +79,15 @@ try {
 // wcag2a/2aa/21a/21aa). Each value is the actual `axeViolationCount` for that page —
 // existing violations are grandfathered; a NEW violation (count grows) fails the gate.
 // Lower a value (and re-run) whenever a violation is fixed.
+// Lowered 2026-10-22 after the Keak CI UI Kit migration (KEA-7886): measured 0 / 1 / 0 / 0 with
+// REQUIRE_AXE=1 (login was 1, /dashboard 4, providers 3, settings 5). The one /dashboard violation
+// left was color-contrast on the /home partner banners; lowered to 0 on 2026-10-25 after their
+// notes and the Kimi CTA ink went AA (KEA-7886 P7).
 const VIOLATION_BASELINES: Record<string, number> = {
-  "/login": 1,
-  "/dashboard": 4,
-  "/dashboard/providers": 3,
-  "/dashboard/settings": 5,
+  "/login": 0,
+  "/dashboard": 0,
+  "/dashboard/providers": 0,
+  "/dashboard/settings": 0,
 };
 
 // ---------------------------------------------------------------------------
@@ -87,10 +101,7 @@ type AxeViolation = {
   nodes: unknown[];
 };
 
-async function runAxe(
-  page: Page,
-  label: string
-): Promise<AxeViolation[]> {
+async function runAxe(page: Page, label: string): Promise<AxeViolation[]> {
   if (!AxeBuilder) {
     throw new Error("@axe-core/playwright not available");
   }
@@ -105,7 +116,10 @@ async function runAxe(
 
   if (results.violations.length > 0) {
     const summary = results.violations
-      .map((v) => `  [${v.impact ?? "unknown"}] ${v.id}: ${v.description} (${(v.nodes as unknown[]).length} nodes)`)
+      .map(
+        (v) =>
+          `  [${v.impact ?? "unknown"}] ${v.id}: ${v.description} (${(v.nodes as unknown[]).length} nodes)`
+      )
       .join("\n");
     console.log(`axeViolations page=${label}:\n${summary}`);
   }
@@ -243,7 +257,12 @@ test.describe("A11y — Dashboard key surfaces (@axe-core, nightly advisory)", (
     }
 
     // The settings route redirects to /dashboard/settings/general; follow it.
+    // The redirect lands as a client navigation a few hundred ms after the first
+    // load, so wait for it — otherwise axe's evaluate dies with "Execution context
+    // was destroyed" when the navigation races the analysis.
     await gotoDashboardRoute(page, "/dashboard/settings");
+    await page.waitForURL(/\/dashboard\/settings\/general(?:[?#].*)?$/, { timeout: 60_000 });
+    await page.waitForLoadState("load");
 
     const violations = await runAxe(page, "/dashboard/settings");
     const baseline = VIOLATION_BASELINES["/dashboard/settings"] ?? 0;

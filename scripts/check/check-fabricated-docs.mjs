@@ -114,6 +114,7 @@ const ENV_VAR_ALLOWLIST = new Set([
   "OPENAI_BASE_URL", // env var OmniRoute passes to downstream CLIs (AGENT_PROTOCOLS_GUIDE.md)
   "NINEROUTER_API_KEY", // injected into the 9router subprocess at spawn (EMBEDDED-SERVICES.md)
   "CLAUDE_CODE_MAX_OUTPUT_TOKENS", // Claude Code CLI's own env var (CODEX-CLI-CONFIGURATION.md)
+  "ANTHROPIC_CUSTOM_HEADERS", // Claude Code CLI's own env var (API_REFERENCE.md, CLAUDE-CODE-CONFIGURATION.md)
   "CODEX_HOME", // Codex CLI's own config-home env var (CODEX-CLI-CONFIGURATION.md)
   // Gemini CLI's own auth-routing env vars. `omniroute run gemini` DELETES them
   // from the spawned child's env (bin/cli/commands/run.mjs) so a stored Vertex /
@@ -128,12 +129,6 @@ const ENV_VAR_ALLOWLIST = new Set([
   "LINUX_GPG_KEY", // electron AppImage signing key, CI/build only (ELECTRON_GUIDE.md)
   "BRANCH_LOCK_TOKEN", // release branch-protection ops token (QUALITY_GATE_PLAYBOOK.md)
   "NEXT_LOCALE", // next-intl locale cookie name (I18N.md)
-  // Feature flags are resolved by key at runtime — `resolveFeatureFlag()` reads
-  // `process.env[key]` (src/shared/utils/featureFlags.ts), never a literal
-  // `process.env.MODELS_CATALOG_PREFIX_MODE`, so this scan cannot see the read.
-  // The flag is real: defined in featureFlagDefinitions.ts, overridable from the
-  // dashboard or the environment. (API_REFERENCE.md, VSCODE-COPILOT.md)
-  "MODELS_CATALOG_PREFIX_MODE",
   // Telegram Mini App integration (proposal TELEGRAM-MINIAPP.md, not yet implemented): env vars named in the feasibility analysis but no code reads them yet.
   "TELEGRAM_WEBHOOK_URL", // proposal-only: Telegram webhook public endpoint (TELEGRAM-MINIAPP.md, future feature)
   "TELEGRAM_WEBHOOK_SECRET", // proposal-only: Telegram webhook HMAC secret (TELEGRAM-MINIAPP.md, future feature)
@@ -377,6 +372,8 @@ const ENDPOINT_ALLOWLIST = new Set([
   // paths on the UPSTREAM service (Claude.ai web, Blackbox), not OmniRoute routes.
   "/api/organizations/{orgId}/chat_conversations/{convId}/completion", // claude-web upstream
   "/api/chat", // Blackbox Web upstream (validated-token target)
+  "/api/dispatch", // notrack-web upstream (chat dispatch endpoint on notrack.ai)
+  "/api/chats", // notrack-web upstream (chat history listing on notrack.ai)
 ]);
 
 /** Doc files to skip (auto-generated, vendored, or third-party). */
@@ -580,6 +577,24 @@ export function buildCodebaseIndex(root = ROOT) {
     }
   }
   readEnvContract();
+
+  // Feature flags are resolved by key at runtime — `resolveFeatureFlag()` reads
+  // `process.env[definition.key]` (src/shared/utils/featureFlags.ts), never a
+  // literal `process.env.<KEY>`, so the code-read index cannot see those reads.
+  // Every key in FEATURE_FLAG_DEFINITIONS is therefore a real, env-overridable
+  // knob (docs/reference/FEATURE_FLAGS.md documents the catalog 1:1).
+  function readFeatureFlagContract() {
+    try {
+      const t = fs.readFileSync(
+        path.join(root, "src", "shared", "constants", "featureFlagDefinitions.ts"),
+        "utf8"
+      );
+      for (const m of t.matchAll(/^\s*key:\s*"([A-Z][A-Z0-9_]+)"/gm)) envVars.add(m[1]);
+    } catch {
+      /* ignore */
+    }
+  }
+  readFeatureFlagContract();
 
   // Set of `omniroute <subcommand>` strings that exist in bin/
   const cliCommands = new Set();

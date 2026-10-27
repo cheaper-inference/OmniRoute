@@ -378,3 +378,191 @@ test("transformToOllama merges multi-chunk numeric tool_call id", async () => {
   assert.equal(toolCallLines[0].message.tool_calls[0].function.name, "test");
   assert.deepEqual(toolCallLines[0].message.tool_calls[0].function.arguments, { a: 1 });
 });
+
+// Helpers for the single-terminator / tail-drain cases below.
+function sseUpstream(chunks: Array<string | Uint8Array>): Response {
+  const encoder = new TextEncoder();
+  return new Response(
+    new ReadableStream({
+      start(controller) {
+        for (const chunk of chunks) {
+          controller.enqueue(typeof chunk === "string" ? encoder.encode(chunk) : chunk);
+        }
+        controller.close();
+      },
+    }),
+    { headers: { "Content-Type": "text/event-stream" } }
+  );
+}
+
+async function readNdjson(response: Response) {
+  return (await response.text())
+    .split("\n")
+    .filter(Boolean)
+    .map((line) => JSON.parse(line));
+}
+
+const sseLine = (payload: unknown) => `data: ${JSON.stringify(payload)}\n`;
+const contentDelta = (content: string) => sseLine({ choices: [{ index: 0, delta: { content } }] });
+const finishChunk = (reason: string) =>
+  sseLine({ choices: [{ index: 0, delta: {}, finish_reason: reason }] });
+
+test("reused tool indices retain completed calls and assemble later fragments independently", async () => {
+  const toolDelta = (tool_calls: unknown[]) => sseLine({ choices: [{ delta: { tool_calls } }] });
+  const out = await readNdjson(
+    transformToOllama(
+      sseUpstream([
+        toolDelta([{ index: 0, id: 1, function: { name: "first", arguments: "{}" } }]),
+        toolDelta([{ index: 0, id: "second", function: { name: "sec", arguments: '{"x":' } }]),
+        toolDelta([
+          { index: 0, function: { name: "ond", arguments: "1}" } },
+          { index: 1, id: "third", function: { name: "third", arguments: "bad json" } },
+        ]),
+        finishChunk("tool_calls"),
+        "data: [DONE]\n",
+      ]),
+      "m"
+    )
+  );
+  assert.equal(out.length, 1);
+  assert.equal(out[0].done, true);
+  assert.deepEqual(out[0].message.tool_calls, [
+    { function: { name: "first", arguments: {} } },
+    { function: { name: "second", arguments: { x: 1 } } },
+    { function: { name: "third", arguments: {} } },
+  ]);
+});
+
+test("transformToOllama ends the stream with exactly one done:true", async () => {
+  const out = await readNdjson(
+    transformToOllama(sseUpstream([contentDelta("hi"), finishChunk("stop"), "data: [DONE]\n"]), "m")
+  );
+
+  assert.equal(out.filter((m) => m.done).length, 1);
+  assert.deepEqual(out.at(-1), {
+    model: "m",
+    message: { role: "assistant", content: "" },
+    done: true,
+  });
+  assert.deepEqual(
+    out.filter((m) => !m.done).map((m) => m.message.content),
+    ["hi"]
+  );
+});
+
+test("transformToOllama emits a done:true terminator when the upstream sends none", async () => {
+  const out = await readNdjson(transformToOllama(sseUpstream([contentDelta("hi")]), "m"));
+
+  assert.equal(out.filter((m) => m.done).length, 1);
+  assert.equal(out.at(-1).done, true);
+});
+
+test("transformToOllama keeps tool calls on the single terminal message", async () => {
+  const out = await readNdjson(
+    transformToOllama(
+      sseUpstream([
+        sseLine({
+          choices: [
+            {
+              index: 0,
+              delta: {
+                tool_calls: [
+                  {
+                    index: 0,
+                    id: "call_1",
+                    function: { name: "get_weather", arguments: '{"city":' },
+                  },
+                ],
+              },
+            },
+          ],
+        }),
+        sseLine({
+          choices: [
+            {
+              index: 0,
+              delta: { tool_calls: [{ index: 0, function: { arguments: '"Hanoi"}' } }] },
+            },
+          ],
+        }),
+        finishChunk("tool_calls"),
+        "data: [DONE]\n",
+      ]),
+      "m"
+    )
+  );
+
+  const terminal = out.filter((m) => m.done);
+  assert.equal(terminal.length, 1);
+  assert.equal(out.at(-1).done, true);
+  assert.deepEqual(out.at(-1).message.tool_calls, [
+    { function: { name: "get_weather", arguments: { city: "Hanoi" } } },
+  ]);
+});
+
+test("transformToOllama delivers a content line that arrived without its newline", async () => {
+  const out = await readNdjson(
+    transformToOllama(sseUpstream([contentDelta("hello"), contentDelta(" world").trimEnd()]), "m")
+  );
+
+  assert.equal(
+    out
+      .filter((m) => !m.done)
+      .map((m) => m.message.content)
+      .join(""),
+    "hello world"
+  );
+  assert.equal(out.filter((m) => m.done).length, 1);
+  assert.equal(out.at(-1).done, true);
+});
+
+test("transformToOllama keeps a tool call whose arguments are malformed JSON", async () => {
+  const out = await readNdjson(
+    transformToOllama(
+      sseUpstream([
+        sseLine({
+          choices: [
+            {
+              index: 0,
+              delta: {
+                tool_calls: [
+                  {
+                    index: 0,
+                    id: "call_1",
+                    function: { name: "get_weather", arguments: '{"city":' },
+                  },
+                ],
+              },
+              finish_reason: "tool_calls",
+            },
+          ],
+        }),
+        "data: [DONE]\n",
+      ]),
+      "m"
+    )
+  );
+
+  const terminal = out.filter((m) => m.done);
+  assert.equal(terminal.length, 1);
+  assert.deepEqual(terminal[0].message.tool_calls, [
+    { function: { name: "get_weather", arguments: {} } },
+  ]);
+});
+
+test("transformToOllama emits nothing after the terminal message", async () => {
+  const out = await readNdjson(
+    transformToOllama(
+      sseUpstream([contentDelta("hi") + "data: [DONE]\n" + contentDelta("late")]),
+      "m"
+    )
+  );
+
+  assert.deepEqual(
+    out.map((m) => [m.message.content, m.done]),
+    [
+      ["hi", false],
+      ["", true],
+    ]
+  );
+});

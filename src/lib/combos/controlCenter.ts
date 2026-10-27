@@ -1,4 +1,5 @@
 import { normalizeComboModels, type ComboStep } from "./steps";
+import { resolveProviderAlias } from "../../../open-sse/services/providerAlias.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -31,10 +32,10 @@ export interface ComboControlCenterHealth {
     totalRequests?: number;
   };
   quotaHealth?: {
-    worstRemainingPct?: number;
+    worstRemainingPct?: number | null;
     providers?: Array<{
       provider: string;
-      remainingPct: number;
+      remainingPct: number | null;
       isExhausted: boolean;
       trend: "improving" | "stable" | "declining";
     }>;
@@ -108,9 +109,13 @@ function toString(value: unknown): string | null {
 
 function providerFromModel(model: string | null | undefined): string | null {
   if (!model) return null;
+  // Resolve through the general alias table that target resolution applies
+  // before dispatch, so this label matches what actually executed upstream
+  // instead of a raw, un-aliased prefix slice.
   const slashIndex = model.indexOf("/");
   if (slashIndex <= 0) return null;
-  return model.slice(0, slashIndex);
+  const prefix = model.slice(0, slashIndex);
+  return resolveProviderAlias(prefix) || prefix;
 }
 
 function normalizeSuccessRate(value: unknown): number {

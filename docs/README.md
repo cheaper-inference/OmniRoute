@@ -40,7 +40,9 @@ Simple guides for using OmniRoute — no technical background needed.
 - [TERMUX_GUIDE.md](guides/TERMUX_GUIDE.md) — running on Android via Termux.
 - [PWA_GUIDE.md](guides/PWA_GUIDE.md) — installing the dashboard as a PWA.
 - [REMOTE-MODE.md](guides/REMOTE-MODE.md) — exposing OmniRoute remotely + scoped tokens.
+- [HEADLESS.md](guides/HEADLESS.md) — headless mode: proxy engine only, no dashboard (`OMNIROUTE_HEADLESS=1` / `serve --headless`).
 - [CLI-INTEGRATIONS.md](guides/CLI-INTEGRATIONS.md) — master table of `setup-*` CLI integrations.
+- [OPENCODE-V2-PLUGIN.md](guides/OPENCODE-V2-PLUGIN.md) — installing and configuring the OpenCode v2 plugin.
 - [CLAUDE-CODE-CONFIGURATION.md](guides/CLAUDE-CODE-CONFIGURATION.md) — Claude Code CLI with OmniRoute.
 - [CODEX-CLI-CONFIGURATION.md](guides/CODEX-CLI-CONFIGURATION.md) — Codex CLI with OmniRoute.
 - [KIRO_SETUP.md](guides/KIRO_SETUP.md) — Kiro setup.
@@ -124,7 +126,7 @@ Pluggable subsystems exposed to clients, agents, and operators.
 
 Combo routing, scoring, and replay.
 
-- [AUTO-COMBO.md](routing/AUTO-COMBO.md) — Auto-Combo (multi-factor scoring, 19 strategies).
+- [AUTO-COMBO.md](routing/AUTO-COMBO.md) — Auto-Combo (multi-factor scoring, 20 strategies).
 - [QUOTA_SHARE.md](routing/QUOTA_SHARE.md) — quota sharing engine.
 - [REASONING_REPLAY.md](routing/REASONING_REPLAY.md) — reasoning replay cache.
 - [REASONING_ROUTING.md](routing/REASONING_ROUTING.md) — reasoning routing rules (effort/budget rule engine).
@@ -166,6 +168,7 @@ Provider-specific integration guides.
 
 - [CLAUDE_WEB.md](providers/CLAUDE_WEB.md) — Claude Web (cookie-auth) provider.
 - [CHATGPT_WEB.md](providers/CHATGPT_WEB.md) — ChatGPT Web (Codex) provider and common-provider retirement note.
+- [COPILOT-M365.md](providers/COPILOT-M365.md) — Microsoft 365 Copilot (BizChat) provider.
 - [ALIBABA-QWEN-PROVIDER-FAMILIES.md](providers/ALIBABA-QWEN-PROVIDER-FAMILIES.md) — Alibaba and Qwen provider families.
 - [AGENTROUTER.md](providers/AGENTROUTER.md) — AgentRouter setup.
 - [ZED-DOCKER.md](providers/ZED-DOCKER.md) — Zed IDE integration under Docker.
@@ -182,6 +185,7 @@ Release, deployment, proxies, tunnels, coverage, database, monitoring.
 - [RELEASE_CHECKLIST.md](ops/RELEASE_CHECKLIST.md) — release flow checklist.
 - [RELEASE_GREEN.md](ops/RELEASE_GREEN.md) — keeping the PR queue and release branch green.
 - [BRANCHING_MODEL.md](ops/BRANCHING_MODEL.md) — branching & release model.
+- [RELEASE_STRATEGY.md](ops/RELEASE_STRATEGY.md) — LTS rail: branches, npm channels, forward-port, rail labels.
 - [MERGE_TRAIN.md](ops/MERGE_TRAIN.md) — merge queue & manual merge-train runbook.
 - [HOMOLOGATION.md](ops/HOMOLOGATION.md) — homologation suite (`npm run homolog`).
 - [QUALITY_GATE_PLAYBOOK.md](ops/QUALITY_GATE_PLAYBOOK.md) — quality-gate playbook.
@@ -189,6 +193,7 @@ Release, deployment, proxies, tunnels, coverage, database, monitoring.
 - [BRANCH_PROTECTION_MAIN.md](ops/BRANCH_PROTECTION_MAIN.md) — `main` branch protection.
 - [CONTRIBUTION_GOLDEN_PATH.md](ops/CONTRIBUTION_GOLDEN_PATH.md) — contribution golden path (focused checks per change type).
 - [COVERAGE_PLAN.md](ops/COVERAGE_PLAN.md) — test coverage plan.
+- [LTS_GO_NO_GO.md](ops/LTS_GO_NO_GO.md) — 3.9.0 LTS GO/NO-GO checklist (rail gates + closing battery).
 - [DATABASE_GUIDE.md](ops/DATABASE_GUIDE.md) — DB schema and operations.
 - [SQLITE_RUNTIME.md](ops/SQLITE_RUNTIME.md) — SQLite driver resolution chain.
 - [REDIS_PRODUCTION_CONFIG.md](ops/REDIS_PRODUCTION_CONFIG.md) — Redis production configuration.
@@ -204,7 +209,7 @@ Mermaid sources and exported SVG/PNG diagrams referenced from the docs above. Se
 
 ## i18n/
 
-Translated mirrors of the documentation in 41 locales (plus the English originals — 42 languages in total). See [i18n/README.md](i18n/README.md) for the supported language list.
+Translated mirrors of the documentation in 66 locales (plus the English originals — 67 languages in total). See [i18n/README.md](i18n/README.md) for the supported language list.
 
 ## screenshots/
 

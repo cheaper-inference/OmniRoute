@@ -35,6 +35,7 @@ const { handleComboChat } = await import("../../../open-sse/services/combo.ts");
 const { lockExactModel } = await import("../../../open-sse/services/accountFallback.ts");
 const { tryPipelineDispatch } = await import("../../../open-sse/services/combo/dispatchPrelude.ts");
 const { resolveComboSetupConfig } = await import("../../../open-sse/services/comboConfig.ts");
+const { updateSettingsSchema } = await import("../../../src/shared/validation/settingsSchemas.ts");
 
 const noopLog = { warn: () => {}, info: () => {}, debug: () => {}, error: () => {} };
 
@@ -61,11 +62,23 @@ test.after(() => {
 // Gate: strategy + config resolution
 
 test("T0a: group B strategies are the 15 non-quota-aware strategies", () => {
-  const groupA = new Set(["reset-aware", "reset-window", "headroom", "quota-share", "auto"]);
+  const groupA = new Set([
+    "reset-aware",
+    "reset-window",
+    "headroom",
+    "quota-weighted",
+    "quota-share",
+    "auto",
+  ]);
   for (const strategy of CONNECTION_AWARE_EXPANSION_GROUP_B) {
     assert.ok(!groupA.has(strategy), `group B must not contain A-group strategy ${strategy}`);
   }
   assert.equal(CONNECTION_AWARE_EXPANSION_GROUP_B.length, 15);
+  assert.equal(
+    CONNECTION_AWARE_EXPANSION_GROUP_B.includes("quota-weighted"),
+    false,
+    "quota-weighted expands itself; must not sit in group B"
+  );
 });
 
 test("T0b: gate is closed by default and for A-group strategies", () => {
@@ -99,6 +112,13 @@ test("T0b: gate is closed by default and for A-group strategies", () => {
     }),
     false,
     "A-group strategies never double-expand"
+  );
+  assert.equal(
+    shouldApplyConnectionAwareExpansion("quota-weighted", {
+      connectionAwareExpansion: true,
+    }),
+    false,
+    "quota-weighted expands itself; never double-expand via group B"
   );
 });
 
@@ -672,4 +692,130 @@ test("Pipeline strategy: each stage picks the first healthy connection", async (
   assert.equal(executedStages.length, 2);
   assert.equal(executedStages[0], `${provider1}/model-1@${p1Conn.id}`);
   assert.equal(executedStages[1], `${provider2}/model-2@${p2Conn.id}`);
+});
+
+test("global cap applies when the combo sets none", async () => {
+  const provider = "cae-cap-global-" + randomUUID();
+  registerQuotaFetcher(provider, async () => ({ used: 0, total: 100, percentUsed: 0 }));
+  for (let i = 0; i < 20; i++) {
+    await providersDb.createProviderConnection({
+      provider,
+      authType: "apikey",
+      name: "conn" + i,
+      apiKey: "key-" + randomUUID(),
+      isActive: true,
+    });
+  }
+
+  const target = makeTarget({ modelStr: `${provider}/model-x`, provider });
+  const out = await expandTargetsForAllStrategies({
+    strategy: "priority",
+    targets: [target],
+    comboName: "cae-cap-global",
+    config: {},
+    settings: { connectionAwareExpansion: true, connectionAwareExpansionMaxPerTarget: 20 },
+    log: noopLog,
+  });
+
+  assert.equal(out.length, 20);
+});
+
+test("combo cap wins over the global cap", async () => {
+  const provider = "cae-cap-combo-" + randomUUID();
+  registerQuotaFetcher(provider, async () => ({ used: 0, total: 100, percentUsed: 0 }));
+  for (let i = 0; i < 20; i++) {
+    await providersDb.createProviderConnection({
+      provider,
+      authType: "apikey",
+      name: "conn" + i,
+      apiKey: "key-" + randomUUID(),
+      isActive: true,
+    });
+  }
+
+  const target = makeTarget({ modelStr: `${provider}/model-x`, provider });
+  const out = await expandTargetsForAllStrategies({
+    strategy: "priority",
+    targets: [target],
+    comboName: "cae-cap-combo",
+    config: { connectionAwareExpansion: true, connectionAwareExpansionMaxPerTarget: 3 },
+    settings: { connectionAwareExpansion: true, connectionAwareExpansionMaxPerTarget: 20 },
+    log: noopLog,
+  });
+
+  assert.equal(out.length, 3);
+});
+
+test("default cap applies when neither layer sets one", async () => {
+  const provider = "cae-cap-default-" + randomUUID();
+  registerQuotaFetcher(provider, async () => ({ used: 0, total: 100, percentUsed: 0 }));
+  for (let i = 0; i < 20; i++) {
+    await providersDb.createProviderConnection({
+      provider,
+      authType: "apikey",
+      name: "conn" + i,
+      apiKey: "key-" + randomUUID(),
+      isActive: true,
+    });
+  }
+
+  const target = makeTarget({ modelStr: `${provider}/model-x`, provider });
+  const out = await expandTargetsForAllStrategies({
+    strategy: "priority",
+    targets: [target],
+    comboName: "cae-cap-default",
+    config: { connectionAwareExpansion: true },
+    settings: null,
+    log: noopLog,
+  });
+
+  assert.equal(out.length, 8);
+});
+
+test("an unusable combo cap falls through to the global cap", async () => {
+  const provider = "cae-cap-unusable-" + randomUUID();
+  registerQuotaFetcher(provider, async () => ({ used: 0, total: 100, percentUsed: 0 }));
+  for (let i = 0; i < 20; i++) {
+    await providersDb.createProviderConnection({
+      provider,
+      authType: "apikey",
+      name: "conn" + i,
+      apiKey: "key-" + randomUUID(),
+      isActive: true,
+    });
+  }
+
+  const target = makeTarget({ modelStr: `${provider}/model-x`, provider });
+  const out = await expandTargetsForAllStrategies({
+    strategy: "priority",
+    targets: [target],
+    comboName: "cae-cap-unusable",
+    config: { connectionAwareExpansion: true, connectionAwareExpansionMaxPerTarget: 0 },
+    settings: { connectionAwareExpansion: true, connectionAwareExpansionMaxPerTarget: 20 },
+    log: noopLog,
+  });
+
+  assert.equal(out.length, 20);
+});
+
+test("the settings schema accepts the global cap beside the expansion switch", () => {
+  const validation = updateSettingsSchema.parse({
+    connectionAwareExpansion: true,
+    connectionAwareExpansionMaxPerTarget: 15,
+  });
+
+  assert.equal(validation.connectionAwareExpansion, true);
+  assert.equal(validation.connectionAwareExpansionMaxPerTarget, 15);
+  assert.throws(() =>
+    updateSettingsSchema.parse({
+      connectionAwareExpansion: true,
+      connectionAwareExpansionMaxPerTarget: 0,
+    })
+  );
+  assert.throws(() =>
+    updateSettingsSchema.parse({
+      connectionAwareExpansion: true,
+      connectionAwareExpansionMaxPerTarget: 65,
+    })
+  );
 });

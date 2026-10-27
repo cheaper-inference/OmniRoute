@@ -4,6 +4,8 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+import type { ComboHealthResponse } from "../../src/shared/types/utilization.ts";
+
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-combo-health-route-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
 
@@ -113,7 +115,7 @@ test("combo health route exposes step-level target health for structured combos"
   const response = await route.GET(
     new Request(`http://localhost/api/usage/combo-health?range=24h&comboId=${combo.id}`)
   );
-  const body = (await response.json()) as any;
+  const body = (await response.json()) as ComboHealthResponse;
 
   assert.equal(response.status, 200);
   assert.equal(body.combos.length, 1);
@@ -234,7 +236,7 @@ test("combo health route prefers historical call log target metrics over volatil
   const response = await route.GET(
     new Request(`http://localhost/api/usage/combo-health?range=24h&comboId=${combo.id}`)
   );
-  const body = (await response.json()) as any;
+  const body = (await response.json()) as ComboHealthResponse;
 
   assert.equal(response.status, 200);
   assert.equal(body.combos.length, 1);
@@ -316,7 +318,7 @@ test("combo health route aggregates target history without changing latest targe
   const response = await route.GET(
     new Request(`http://localhost/api/usage/combo-health?range=24h&comboId=${combo.id}`)
   );
-  const body = (await response.json()) as any;
+  const body = (await response.json()) as ComboHealthResponse;
   const [target] = body.combos[0].targetHealth;
 
   assert.equal(response.status, 200);
@@ -326,4 +328,165 @@ test("combo health route aggregates target history without changing latest targe
   assert.equal(target.avgLatencyMs, 150);
   assert.equal(target.lastStatus, "ok");
   assert.equal(target.lastUsedAt, timestamps[2]);
+});
+test("combo health aggregates credential executions for an unpinned model step", async () => {
+  const comboInput = {
+    name: "combo-health-model-level-history",
+    strategy: "priority",
+    models: [
+      {
+        kind: "model",
+        providerId: "opencode",
+        model: "opencode/x-preview-f-free",
+      },
+    ],
+  };
+
+  const combo = await combosDb.createCombo(comboInput);
+  const step = normalizeComboStep(comboInput.models[0], {
+    comboName: comboInput.name,
+    index: 0,
+  });
+
+  for (const [index, connectionId] of ["conn-opencode-a", "conn-opencode-b"].entries()) {
+    await callLogs.saveCallLog({
+      id: `combo-model-level-${index}`,
+      timestamp: new Date(Date.now() - (2 - index) * 60 * 1000).toISOString(),
+      method: "POST",
+      path: "/v1/chat/completions",
+      status: 200,
+      model: "opencode/x-preview-f-free",
+      requestedModel: comboInput.name,
+      provider: "opencode",
+      connectionId,
+      duration: 100 + index * 20,
+      comboName: comboInput.name,
+      comboStepId: step.id,
+      comboExecutionKey: `${step.id}@${connectionId}`,
+    });
+  }
+
+  const response = await route.GET(
+    new Request(`http://localhost/api/usage/combo-health?range=24h&comboId=${combo.id}`)
+  );
+  const body = (await response.json()) as ComboHealthResponse;
+  const [target] = body.combos[0].targetHealth;
+
+  assert.equal(response.status, 200);
+  assert.equal(target.stepId, step.id);
+  assert.equal(target.connectionId, null);
+  assert.equal(target.provider, "opencode");
+  assert.equal(target.requests, 2);
+  assert.equal(target.successRate, 100);
+});
+
+test("combo health preserves execution metrics for a connection-pinned step", async () => {
+  const comboInput = {
+    name: "combo-health-pinned-history",
+    strategy: "priority",
+    models: [
+      {
+        kind: "model",
+        providerId: "openai",
+        model: "openai/gpt-4o-mini",
+        connectionId: "conn-openai-a",
+      },
+    ],
+  };
+
+  const combo = await combosDb.createCombo(comboInput);
+  const step = normalizeComboStep(comboInput.models[0], {
+    comboName: comboInput.name,
+    index: 0,
+  });
+
+  for (const [index, connectionId] of [
+    "conn-openai-a",
+    "conn-openai-a",
+    "conn-openai-b",
+  ].entries()) {
+    await callLogs.saveCallLog({
+      id: `combo-pinned-${index}`,
+      timestamp: new Date(Date.now() - (3 - index) * 60 * 1000).toISOString(),
+      method: "POST",
+      path: "/v1/chat/completions",
+      status: 200,
+      model: "openai/gpt-4o-mini",
+      requestedModel: comboInput.name,
+      provider: "openai",
+      connectionId,
+      duration: 100,
+      comboName: comboInput.name,
+      comboStepId: step.id,
+      comboExecutionKey: `${step.id}@${connectionId}`,
+    });
+  }
+
+  const response = await route.GET(
+    new Request(`http://localhost/api/usage/combo-health?range=24h&comboId=${combo.id}`)
+  );
+  const body = (await response.json()) as ComboHealthResponse;
+  const [target] = body.combos[0].targetHealth;
+
+  assert.equal(response.status, 200);
+  assert.equal(target.connectionId, "conn-openai-a");
+  assert.equal(target.requests, 2);
+});
+
+test("combo health retains execution-key-only history for an unpinned target", async () => {
+  const comboInput = {
+    name: "combo-health-legacy-history",
+    strategy: "priority",
+    models: [{ kind: "model", providerId: "openai", model: "openai/gpt-4o-mini" }],
+  };
+  const combo = await combosDb.createCombo(comboInput);
+  const step = normalizeComboStep(comboInput.models[0], { comboName: comboInput.name, index: 0 });
+  await callLogs.saveCallLog({
+    id: "combo-legacy",
+    timestamp: new Date().toISOString(),
+    method: "POST",
+    path: "/v1/chat/completions",
+    status: 200,
+    duration: 120,
+    comboName: comboInput.name,
+    comboExecutionKey: step.id,
+  });
+  const response = await route.GET(
+    new Request(`http://localhost/api/usage/combo-health?range=24h&comboId=${combo.id}`)
+  );
+  const body = (await response.json()) as ComboHealthResponse;
+  assert.equal(response.status, 200);
+  assert.equal(body.combos[0].targetHealth[0].requests, 1);
+});
+
+test("combo health does not attribute sibling history to a pinned target without executions", async () => {
+  const comboInput = {
+    name: "combo-health-pinned-no-history",
+    strategy: "priority",
+    models: [
+      { kind: "model", providerId: "openai", model: "openai/gpt-4o-mini", connectionId: "conn-a" },
+    ],
+  };
+  const combo = await combosDb.createCombo(comboInput);
+  const step = normalizeComboStep(comboInput.models[0], { comboName: comboInput.name, index: 0 });
+  await callLogs.saveCallLog({
+    id: "combo-sibling",
+    timestamp: new Date().toISOString(),
+    method: "POST",
+    path: "/v1/chat/completions",
+    status: 503,
+    duration: 120,
+    comboName: comboInput.name,
+    comboStepId: step.id,
+    comboExecutionKey: `${step.id}@conn-b`,
+    connectionId: "conn-b",
+  });
+  const response = await route.GET(
+    new Request(`http://localhost/api/usage/combo-health?range=24h&comboId=${combo.id}`)
+  );
+  const body = (await response.json()) as ComboHealthResponse;
+  assert.equal(response.status, 200);
+  const target = body.combos[0].targetHealth[0];
+  assert.equal(target.requests, 0);
+  assert.equal(target.lastStatus, null);
 });

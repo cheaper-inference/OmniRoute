@@ -7,8 +7,19 @@
  * this file instead; the component re-exports it for existing callers.
  */
 
+import { getProviderConnectionFamilyIds } from "@/shared/constants/providers";
+
 /** Providers whose quota lives behind the Qwen/Model Studio console gateway (#9603). */
 export const QWEN_TOKEN_PLAN_PROVIDERS = new Set(["qwen-cloud-token-plan", "bailian-coding-plan"]);
+
+/** Providers whose quota lives behind the Volcano Engine console gateway. */
+export const VOLCENGINE_PLAN_PROVIDERS = new Set([
+  "volcengine-coding-plan",
+  "volcengine-agent-plan",
+]);
+
+/** Providers whose Token Plan quota lives behind the Xiaomi MiMo console (#15753). */
+export const XIAOMI_MIMO_PROVIDERS = new Set(["xiaomi-mimo", "xiaomi-mimo-token-plan"]);
 
 export type QuotaScrapingFieldValues = {
   ollamaCloudUsageCookie: string;
@@ -16,6 +27,8 @@ export type QuotaScrapingFieldValues = {
   alibabaConsoleSecToken: string;
   qwenCloudCookie: string;
   qwenCloudSecToken: string;
+  volcConsoleCookie: string;
+  xiaomiMimoConsoleCookie: string;
 };
 
 export const EMPTY_QUOTA_SCRAPING_FIELDS: QuotaScrapingFieldValues = {
@@ -24,6 +37,8 @@ export const EMPTY_QUOTA_SCRAPING_FIELDS: QuotaScrapingFieldValues = {
   alibabaConsoleSecToken: "",
   qwenCloudCookie: "",
   qwenCloudSecToken: "",
+  volcConsoleCookie: "",
+  xiaomiMimoConsoleCookie: "",
 };
 
 export function assignQuotaScrapingProviderData(
@@ -34,7 +49,7 @@ export function assignQuotaScrapingProviderData(
   if (provider === "ollama-cloud" && values.ollamaCloudUsageCookie.trim()) {
     target.ollamaCloudUsageCookie = values.ollamaCloudUsageCookie.trim();
   } else if (
-    (provider === "alibaba" || provider === "alibaba-cn") &&
+    getProviderConnectionFamilyIds("alibaba").includes(provider) &&
     values.alibabaConsoleCookie.trim()
   ) {
     target.alibabaConsoleCookie = values.alibabaConsoleCookie.trim();
@@ -49,5 +64,11 @@ export function assignQuotaScrapingProviderData(
     if (values.qwenCloudSecToken?.trim()) {
       target.qwenCloudSecToken = values.qwenCloudSecToken.trim();
     }
+  } else if (VOLCENGINE_PLAN_PROVIDERS.has(provider ?? "") && values.volcConsoleCookie?.trim()) {
+    target.volcConsoleCookie = values.volcConsoleCookie.trim();
+  } else if (XIAOMI_MIMO_PROVIDERS.has(provider ?? "") && values.xiaomiMimoConsoleCookie?.trim()) {
+    // Optional access: callers may pass a partial form object without the newer
+    // fields (same contract as the qwen branch above).
+    target.xiaomiMimoConsoleCookie = values.xiaomiMimoConsoleCookie.trim();
   }
 }

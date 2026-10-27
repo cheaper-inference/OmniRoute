@@ -37,6 +37,27 @@ function installNotionTlsMock(
   return () => __setTlsFetchOverrideForTesting(null);
 }
 
+function hostilePrototypeFailure(label: string): unknown {
+  return new Proxy(
+    {},
+    {
+      getPrototypeOf() {
+        throw new Error(`access_token=${label}-prototype-secret at /srv/private/${label}.ts:1:2`);
+      },
+      get(_target, property) {
+        if (property === "toString") {
+          return () => {
+            throw new Error(
+              `access_token=${label}-coercion-secret at /srv/private/${label}-coercion.ts:1:2`
+            );
+          };
+        }
+        return undefined;
+      },
+    }
+  );
+}
+
 describe("NotionWebExecutor — registry consistency", () => {
   it("is present in WEB_COOKIE_PROVIDERS with the expected shape", () => {
     const entry = (WEB_COOKIE_PROVIDERS as Record<string, Record<string, unknown>>)["notion-web"];
@@ -57,18 +78,38 @@ describe("NotionWebExecutor — registry consistency", () => {
         "gpt-5.6-sol",
         "gpt-5.6-terra",
         "gpt-5.6-luna",
+        "gpt-5.5",
+        "gpt-5.4",
         "gpt-5.4-mini",
         "gpt-5.4-nano",
+        "gpt-5.2",
         "gemini-3.7-flash",
+        "gemini-3.6-flash",
+        "gemini-3.5-flash",
+        "gemini-3-flash",
         "gemini-3.1-pro",
         "fable-5",
+        "opus-5.5",
         "opus-5",
+        "opus-4.8",
+        "opus-4.7",
+        "opus-4.6",
+        "sonnet-5.5",
         "sonnet-5",
+        "sonnet-4.6",
+        "haiku-5.5",
         "haiku-4.5",
         "grok-4.6",
+        "grok-4.5",
+        "grok-4.3",
+        "grok-build-0.1",
         "kimi-k3",
         "kimi-k2.7-code",
         "deepseek-v4-pro",
+        "deepseek-v4-flash",
+        "deepseek-v4.1-flash",
+        "glm-5.3-flash",
+        "glm-5.3",
         "glm-5.2",
       ]
     );
@@ -424,6 +465,68 @@ describe("NotionWebExecutor — upstream translation (mocked TLS fetch)", () => 
       globalThis.fetch = previousFetch;
       if (previousHttpsProxy === undefined) delete process.env.HTTPS_PROXY;
       else process.env.HTTPS_PROXY = previousHttpsProxy;
+    }
+  });
+
+  it("sanitizes credentials, private paths, and stack frames from TLS transport errors", async () => {
+    const executor = new mod.NotionWebExecutor();
+    const restore = installNotionTlsMock(async () => {
+      throw new Error(
+        "TLS transport failed; access token: notion-tls-secret while reading " +
+          "/srv/private/notion/request.ts:42:7\n    at send (/srv/private/notion/request.ts:42:7)"
+      );
+    });
+    try {
+      const result = await executor.execute({
+        model: "notion-ai",
+        body: { messages: [{ role: "user", content: "hi" }] },
+        stream: false,
+        credentials: { apiKey: COOKIE_WITH_SPACE },
+        signal: null,
+      } as never);
+
+      assert.equal(result.response.status, 502);
+      assert.equal(result.url, "https://app.notion.com/api/v3/runInferenceTranscript");
+      assert.equal(
+        (result.transformedBody as { spaceId?: string }).spaceId,
+        "space-1",
+        "the executor must preserve the upstream request body on transport failure"
+      );
+      const errBody = (await result.response.json()) as {
+        error: { message: string; type: string; code: string };
+      };
+      assert.match(errBody.error.message, /Notion fetch failed: TLS transport failed/);
+      assert.equal(errBody.error.type, "upstream_error");
+      assert.equal(errBody.error.code, "HTTP_502");
+      assert.ok(!errBody.error.message.includes("notion-tls-secret"));
+      assert.ok(!errBody.error.message.includes("/srv/private"));
+      assert.ok(!errBody.error.message.includes("at send"));
+    } finally {
+      restore();
+    }
+  });
+
+  it("fails closed when a TLS rejection has a hostile prototype", async () => {
+    const executor = new mod.NotionWebExecutor();
+    const restoreTls = installNotionTlsMock(async () => {
+      throw hostilePrototypeFailure("notion-tls-proxy");
+    });
+
+    try {
+      const result = await executor.execute({
+        model: "notion-ai",
+        body: { messages: [{ role: "user", content: "hi" }] },
+        stream: false,
+        credentials: { apiKey: COOKIE_WITH_SPACE },
+        signal: null,
+      } as never);
+
+      assert.equal(result.response.status, 502);
+      const responseText = await result.response.text();
+      assert.match(responseText, /Notion fetch failed: unknown error/);
+      assert.doesNotMatch(responseText, /prototype-secret|coercion-secret|\/srv\/private/);
+    } finally {
+      restoreTls();
     }
   });
 

@@ -1,8 +1,17 @@
 import { createHash } from "node:crypto";
 import * as nodeModule from "node:module";
 import { getTlsClientTimeoutConfig } from "@/shared/utils/runtimeTimeouts";
+// #12656 — re-exported so proxyFetch.ts (frozen at its file-size cap) can
+// import the first-byte watchdog alongside TlsClient without adding a line.
+export { guardTlsFirstByte } from "./tlsFirstByteWatchdog.ts";
 
-const runtimeRequire = nodeModule.createRequire(import.meta.url);
+// #12491 — anchor on process.argv[1]||cwd() rather than import.meta.url: the
+// standalone Docker runtime re-lays-out files at a different relative depth
+// than the build, so an import.meta.url-relative resolution can miss even
+// though this loader already keeps the specifier itself dynamic (see
+// loadRuntimeModule() below). Matches src/lib/machineToken.ts and
+// src/lib/db/adapters/runtimeRequire.ts's established anchor pattern.
+const runtimeRequire = nodeModule.createRequire(process.argv[1] || process.cwd());
 
 function loadRuntimeModule(moduleName: string): unknown {
   // Keep the specifier dynamic. Turbopack rewrites a literal createRequire call
@@ -479,6 +488,24 @@ function sanitizeWreqError(error: unknown, message: string): SafeWreqError {
   return sanitized;
 }
 
+// Keep body-phase cancellation compatible with wreq-js's request-phase errors.
+function createWreqAbortError(reason: unknown): Error {
+  if (reason instanceof DOMException) {
+    return reason.name === "AbortError"
+      ? reason
+      : new DOMException(reason.message || "The operation was aborted", "AbortError");
+  }
+  if (reason instanceof Error) {
+    const error = new Error(reason.message, { cause: reason });
+    error.name = "AbortError";
+    return error;
+  }
+  return new DOMException(
+    typeof reason === "string" ? reason : "The operation was aborted",
+    "AbortError"
+  );
+}
+
 function toNativeResponse(
   response: WreqResponse,
   onFinalize: () => void,
@@ -489,14 +516,17 @@ function toNativeResponse(
   let bodyFailureReported = false;
   let consumerCancelled = false;
   let consumerCancelReason: unknown;
+  let removeAbortListener = () => {};
+  let cancelBody: (reason: unknown) => Promise<void> = async () => {};
   const finalize = () => {
     if (finalized) return;
     finalized = true;
+    removeAbortListener();
     onFinalize();
   };
   const safeBodyError = (error: unknown): unknown => {
     if (signal?.aborted) {
-      return signal.reason ?? new DOMException("The operation was aborted", "AbortError");
+      return createWreqAbortError(signal.reason);
     }
     if (consumerCancelled) {
       return (
@@ -509,41 +539,74 @@ function toNativeResponse(
     }
     return sanitizeWreqError(error, "wreq-js response body failed");
   };
-  if (response instanceof Response) {
+  if (response instanceof Response && response.body === null) {
     finalize();
     return response;
   }
-
   try {
     const headers = new Headers();
     for (const [name, value] of response.headers) headers.append(name, value);
     let body: ReadableStream<Uint8Array> | null = null;
     if (response.body) {
       const reader = response.body.getReader();
+      let stopped = false;
+      let cancellation: Promise<void> | undefined;
+      cancelBody = (reason) => {
+        cancellation ??= (async () => {
+          try {
+            return reader.cancel(reason);
+          } finally {
+            // Cancel settles pending reads before native cleanup, which may stall.
+            reader.releaseLock();
+          }
+        })();
+        return cancellation;
+      };
       body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          if (!signal) return;
+          const onAbort = () => {
+            if (stopped) return;
+            stopped = true;
+            const error = createWreqAbortError(signal.reason);
+            finalize();
+            controller.error(error);
+            void cancelBody(error).catch(() => {});
+          };
+          // wreq-js stops observing the signal at headers; keep it for the body.
+          removeAbortListener = () => signal.removeEventListener("abort", onAbort);
+          signal.addEventListener("abort", onAbort, { once: true });
+          if (signal.aborted) onAbort();
+        },
         async pull(controller) {
           try {
             const chunk = await reader.read();
+            if (stopped) return;
             if (chunk.done) {
+              stopped = true;
+              reader.releaseLock();
               finalize();
               controller.close();
             } else {
               controller.enqueue(chunk.value);
             }
           } catch (error) {
+            if (stopped) return;
+            stopped = true;
+            reader.releaseLock();
             controller.error(safeBodyError(error));
             finalize();
           }
         },
         async cancel(reason) {
+          stopped = true;
           consumerCancelled = true;
           consumerCancelReason = reason;
+          finalize();
           try {
-            await reader.cancel(reason);
+            await cancelBody(reason);
           } catch (error) {
             throw safeBodyError(error);
-          } finally {
-            finalize();
           }
         },
       });
@@ -567,6 +630,7 @@ function toNativeResponse(
     return adapted;
   } catch (error) {
     finalize();
+    void cancelBody(error).catch(() => {});
     throw error;
   }
 }

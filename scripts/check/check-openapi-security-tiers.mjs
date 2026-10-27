@@ -115,12 +115,14 @@ const ALWAYS_PROTECTED_PATTERNS = parsePatterns("ALWAYS_PROTECTED_API_PATTERNS")
 if (
   LOCAL_ONLY_PREFIXES.length === 0 ||
   LOCAL_ONLY_PATTERNS.length === 0 ||
-  ALWAYS_PROTECTED_PATHS.length === 0
+  ALWAYS_PROTECTED_PATHS.length === 0 ||
+  ALWAYS_PROTECTED_PATTERNS.length === 0
 ) {
   console.error(
     `[openapi-security-tiers] FAIL — could not parse routeGuard.ts constants ` +
       `(prefixes=${LOCAL_ONLY_PREFIXES.length}, patterns=${LOCAL_ONLY_PATTERNS.length}, ` +
-      `alwaysProtected=${ALWAYS_PROTECTED_PATHS.length})`
+      `alwaysProtected=${ALWAYS_PROTECTED_PATHS.length}, ` +
+      `alwaysProtectedPatterns=${ALWAYS_PROTECTED_PATTERNS.length})`
   );
   process.exit(1);
 }
