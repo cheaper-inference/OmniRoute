@@ -73,7 +73,7 @@ export async function validateCursorApiProvider({ apiKey }: { apiKey?: string })
   if (!isCursorApiKey(key)) {
     return {
       valid: false,
-      error: "Cursor user API keys start with crsr_ (cursor.com/dashboard/api)",
+      error: "Cursor user API keys start with crsr_ or grok_ (cursor.com/dashboard/api)",
       unsupported: false,
       statusCode: 400,
     };

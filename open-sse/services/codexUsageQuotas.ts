@@ -134,7 +134,7 @@ function windowDurationLabel(window: JsonRecord): "Session" | "Weekly" | "Monthl
   return undefined;
 }
 
-function findCodexSparkRateLimit(data: JsonRecord): {
+export function findCodexSparkRateLimit(data: JsonRecord): {
   rateLimit: JsonRecord;
   /** The spark limit's own `limit_name` from the payload, when present. */
   limitName?: string;

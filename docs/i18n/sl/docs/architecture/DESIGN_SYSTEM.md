@@ -81,31 +81,38 @@
 
 ## 2. Pravila
 
-1. Žetoni, nikoli dobesedne vrednosti. Namerno ohranjene izjeme: vedno temni konzolni terminal, poteze SVG
-   ReactFlow prek `STATUS_HEX` (`src/shared/constants/statusColors.ts`) ter kategorični paleti
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) in
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Nikoli ročno ne popravljajte `packages/ui-kit/src`: sinhronizirajte ga z `scripts/dev/sync-ui-kit.sh <commit>`;
-   preverjanje pred commitom `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) spodleti ob vsakem bajtu,
-   ki se razlikuje od pripetega commita izvornega repozitorija (preverjanje se z opozorilom preskoči, če klon izvornega
-   repozitorija, `UI_KIT_CLONE` ali `_references/cheaper-inference-ui-kit`, ni na voljo). Ko kompletu kaj manjka,
-   to zaobidite v prilagoditveni komponenti ali na zaslonu in zahtevajte dopolnitev v izvornem repozitoriju.
-3. Privzeta besedila kompleta so v angleščini (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kadar
-   komponenta kompleta izrisuje besedilo, ji posredujte prevedene nize iz `useTranslations(...)`.
-4. Pripomočki Tailwind imajo prednost pred razredi komponent kompleta (komplet določa
-   `@layer theme, base, components, utilities`, njegova pravila pa so v plasti `components`) — pripomočke uporabljajte za
-   razmike in postavitev, ne za spreminjanje barv komponent kompleta.
-5. Naslovi: `.ci-heading` (Inter, brez prilagajanja razmika med črkami) za naslove strani in razdelkov; `.ci-dashboard-display`
-   (Instrument Serif) samo za veliko, redko prikazno besedilo, kot je koda stanja na strani z napako.
-6. `tests/unit/dashboard-kit-sweep.test.ts` nadzoruje uporabo kompleta: pod
-   `src/app` ali `src/shared/components` ne sme biti elementa span z ligaturo Material; v drevesu nadzorne plošče
-   (`src/app/(dashboard)` in `src/shared/components`) ne sme biti neobdelanih elementov `<select>`, `<textarea>` ali `<table>`
-   niti ročno izdelanega `role="dialog"` zunaj navedenih izjem (izvorna veja prilagoditvene komponente `Select`,
-   `RequestLoggerDetail`); vsak neobdelan `<button>` ali `<input>` tam mora imeti komentar, ki vsebuje
-   `kit-exception:` (z razlogom) in se konča največ 3 vrstice nad njim; odtenki palet in različice `dark:`
-   so dovoljeni samo v datotekah, ki jih našteva test.
-7. Pred PR-jem preverite obe temi in prikazno območje širine 390 px (s posnetki zaslona);
-   `tests/e2e/a11y.spec.ts` izvaja axe.
+1. Žetoni, nikoli literali. Izjeme so namerno ohranjene: vedno temni konzolni terminal in
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), zrcalo statusne palete kompleta z
+   razrešenimi hex-vrednostmi za klicatelje, ki potrebujejo dobesedni hex. Kategorične palete niso
+   več izjema: opirajo se na pet žetonov za grafikone kompleta (`--color-chart-1..5`) prek
+   `src/shared/utils/categoricalPalette.ts` in, za usmerjevalne strategije,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; povezave ReactFlow in platno
+   orkestracije berejo spremenljivke `--orch-status-*`, ki se prilagajajo temi
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Nikoli ročno ne popravljajte `packages/ui-kit/src`: sinhronizirajte s
+   `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit preverjanje `npm run check:ui-kit-snapshot`
+   (`.husky/pre-commit`) spodleti ob vsakem bajtu, ki se razlikuje od pripetega commita izvornega
+   repozitorija (preskoči z opozorilom, kadar klon izvornega repozitorija, `UI_KIT_CLONE` ali
+   `_references/cheaper-inference-ui-kit`, manjka). Ko kompletu nekaj manjka, to obidite v adapterju
+   ali na zaslonu in zahtevajte od izvornega projekta.
+3. Privzeta besedila kompleta so v angleščini (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   kadar koli komponenta kompleta izrisuje besedilo, ji posredujte prevedene nize iz
+   `useTranslations(...)`.
+4. Pripomočki Tailwind imajo prednost pred razredi komponent kompleta (komplet deklarira
+   `@layer theme, base, components, utilities` in njegova pravila živijo v `components`) —
+   pripomočke uporabljajte za razmike in postavitev, ne pa za prebarvanje komponent kompleta.
+5. Naslovi: `.ci-heading` (Inter, brez razmika med črkami) za naslove strani in razdelkov;
+   `.ci-dashboard-display` (Instrument Serif) samo za velika, redko pojavljajoča se prikazna
+   besedila, kot je statusna koda strani z napako.
+6. `tests/unit/dashboard-kit-sweep.test.ts` varuje sprejem kompleta: nobenega `<span>` z Material
+   ligaturami pod `src/app` ali `src/shared/components`; v drevesu nadzorne plošče
+   (`src/app/(dashboard)` in `src/shared/components`) nobenih surovih `<select>`, `<textarea>` ali
+   `<table>` in nobenih ročno izdelanih `role="dialog"` zunaj navedenih izjem (izvorna veja adapterja
+   `Select`, `RequestLoggerDetail`); vsak surovi `<button>` ali `<input>` tam potrebuje komentar, ki
+   vsebuje `kit-exception:` (z razlogom) in se konča največ 3 vrstice nad njim; odtenki palete in
+   variante `dark:` samo v datotekah, ki jih test našteva.
+7. Pred PR-jem preverite obe temi in viewport 390 px (posnetki zaslona); `tests/e2e/a11y.spec.ts`
+   izvaja axe.
 
 ## 3. Dodajanje zaslona
 

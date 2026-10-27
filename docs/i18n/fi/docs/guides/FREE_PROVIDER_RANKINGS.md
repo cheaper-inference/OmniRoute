@@ -10,17 +10,30 @@
 
 ---
 
-## Mikä tämä on
+## Mitä se on
 
-OmniRoute rekisteröi 375 palveluntarjoajaa, mukaan lukien 155 luettelomerkintää, jotka on merkitty **ilmainen/ei todennusta** (ei todennusta, ilmaisen tason OAuth tai ilmaisen tason API-avain — katso [Ilmaistasojen opas](../getting-started/FREE-TIERS-GUIDE.md) ja koko [Ilmaistasot-hakemisto](../reference/FREE_TIERS.md)). Siinä on kuitenkin muttansa: ilmaisten palveluntarjoajien mallien laatu vaihtelee suuresti. Huipputason mallia tarjoava todennukseton palveluntarjoaja on paljon hyödyllisempi kuin sellainen, joka tarjoaa pientä vanhentunutta mallia.
+OmniRoute rekisteröi 376 palveluntarjoajaa, mukaan lukien 155 luettelomerkintää, jotka on merkitty **free/no-auth**
+(ei todennusta,
+ilmaisen tason OAuth tai ilmaisen tason API-avain — katso
+[Free Tiers -opas](../getting-started/FREE-TIERS-GUIDE.md) ja täydellinen
+[Free Tiers -hakemisto](../reference/FREE_TIERS.md)). Juju on siinä, että ilmaisten palveluntarjoajien mallien laatu vaihtelee
+suuresti. Huippumallia tarjoava no-auth-palveluntarjoaja on paljon hyödyllisempi
+kuin pientä vanhanaikaista mallia tarjoava.
 
-**Ilmaisten palveluntarjoajien sijoitukset** vastaa kysymykseen "**mikä ilmainen palveluntarjoaja antaa minulle parhaan mallin?**" yhdistämällä kunkin ilmaisen palveluntarjoajan luettelon **joukkoutettuihin laatupisteisiin** **Arena AI -tulostaulusta** (ihmisten mieltymyksiin perustuva ELO, sama idea kuin LMArena-chatbot-areenan taustalla). Palveluntarjoajat sijoitetaan sitten niiden **parhaan ilmaisen mallin** vahvuuden mukaan.
+**Free Provider Rankings** vastaa kysymykseen "**mikä ilmainen palveluntarjoaja antaa minulle parhaan mallin?**"
+yhdistämällä kunkin ilmaisen palveluntarjoajan luettelon **yhteisön keräämiin laatupisteisiin**
+**Arena AI -tilastolistalta** (ihmisten mieltymyksiin perustuva ELO, sama idea kuin LMArena
+-chatbot-areenan taustalla). Palveluntarjoajat sijoitetaan sen mukaan, kuinka vahva heidän **paras ilmainen mallinsa** on.
 
 Sijoitus lasketaan kolmesta todellisesta lähteestä:
 
-1. Ilmaisten palveluntarjoajien luettelot — `NOAUTH_PROVIDERS`, sekä `OAUTH_PROVIDERS`- / `APIKEY_PROVIDERS`-merkinnät, joilla on `hasFree`-lippu (`src/shared/constants/providers.ts`).
-2. Kunkin palveluntarjoajan malliluettelo palveluntarjoajarekisteristä (`open-sse/config/providerRegistry.ts`).
-3. ELO-pohjaiset tehtäväsoveltuvuuspisteet, jotka Arena ELO -synkronointimoottori tallentaa tietokannan `model_intelligence`-tauluun (`src/lib/arenaEloSync.ts`).
+1. Ilmaisten palveluntarjoajien luettelot — `NOAUTH_PROVIDERS`, sekä `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` -merkinnät, jotka on liputettu `hasFree`
+   (`src/shared/constants/providers.ts`).
+2. Kunkin palveluntarjoajan malliluettelo palveluntarjoajarekisteristä
+   (`open-sse/config/providerRegistry.ts`).
+3. ELO-pohjaiset tehtäväsoveltuvuuspisteet, jotka tallennetaan `model_intelligence`-tietokantatauluun
+   Arena ELO -synkronointimoottorin toimesta (`src/lib/arenaEloSync.ts`).
 
 Yhdistämislogiikka sijaitsee tiedostossa `src/lib/freeProviderRankings.ts`.
 
@@ -106,101 +119,105 @@ Vastauksen rakenne:
 
 ---
 
-## Miten pisteet toimivat
+## Miten pistemäärät toimivat
 
 ### Lähde: Arena AI -tulostaulukko
 
 Arena ELO -synkronointimoottori (`src/lib/arenaEloSync.ts`) hakee kaksi tulostaulukkoa — `text`
-ja `code` — Arena AI -tulostaulukon API:sta
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Jokainen tulostaulukon tietue
-sisältää mallin nimen, toimittajan, ELO-`score`-arvon, luottamusvälin ja äänten määrän.
+ja `code` — Arena AI -tulostaulukko-API:sta
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Kun kyseinen API ei palauta
+käyttökelpoista taulukkoa, moottori turvautuu viralliseen `lmarena-ai/leaderboard-dataset`-aineistoon
+Hugging Face -datasets-serverillä (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` raportoi kentät `activeSource`, `lastError` ja
+`lastFailedAt`. Jokainen tulostaulukkomerkintä
+sisältää mallin nimen, toimittajan, ELO-`score`-pistemäärän, luottamusvälin ja äänimäärän.
 
-Tulostaulukoiden luokat yhdistetään OmniRouten tehtäväluokkiin seuraavasti:
+Tulostaulukoiden kategoriat vastaavat OmniRouten tehtäväkategorioita:
 
-| Arena-tulostaulukko | OmniRouten tehtäväluokat                          |
+| Arena-tulostaulukko | OmniRouten tehtäväkategoriat                      |
 | ------------------- | ------------------------------------------------- |
 | `text`              | `default`, `review`, `documentation`, `debugging` |
 | `code`              | `coding`                                          |
 
-### Normalisointi (tehtävään soveltuvuuden pisteet)
+### Normalisointi (tehtäväsoveltuvuuspisteet)
 
-Raaka-ELO-pisteet normalisoidaan tulostaulukohtaisesti **tehtävään soveltuvuuden arvoksi välillä `[0.4, 0.98]`**:
+Raat ELO-pistemäärät normalisoidaan tulostaulukokohtaisesti **tehtäväsoveltuvuusarvoksi välillä `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Pistemäärä ei koskaan saavuta arvoa `0` tai `1`, joten käyttäjän ohituksille jää liikkumavaraa. Tämä on
-API-vastauksessa näkyvä `score`-kenttä sekä hallintapaneelissa näkyvä tunniste.
+Pistemäärä ei koskaan saavuta arvoa `0` tai `1`, joten käyttäjien omiin ohituksiin jää
+liikkumavaraa. Tämä on se `score`-kenttä, jonka näet API-vastauksessa, ja hallintapaneelissa näkyvä selite.
 
 ### Luottamustaso
 
-Jokaiselle tietueelle määritetään luottamustaso Arenan äänimäärän perusteella:
+Jokainen merkintä saa luottamustason Arenan äänimäärän perusteella:
 
-| Luottamustaso | Ääniä   |
+| Luottamustaso | Äänet   |
 | ------------- | ------- |
-| `high`        | ≥ 5 000 |
-| `medium`      | ≥ 1 000 |
-| `low`         | < 1 000 |
+| `high`        | ≥ 5,000 |
+| `medium`      | ≥ 1,000 |
+| `low`         | < 1,000 |
 
-### Tallennus ja tietojen ajantasaisuus
+### Tallennus ja tietojen tuoreus
 
-Normalisoidut tietueet kirjoitetaan tietokannan `model_intelligence`-tauluun arvolla
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Tietueet **vanhenevat
-7 päivän kuluttua**, joten synkronoinnin lopettava palveluntarjoaja poistuu lopulta tiedoista vanhentuneiden
-tietojen näyttämisen sijaan.
+Normalisoidut merkinnät kirjoitetaan `model_intelligence`-tietokantataulukkoon arvolla
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Merkinnät **vanhenevat
+7 päivän kuluttua**, joten synkronoinnin lopettanut palveluntarjoaja putoaa ajan myötä pois
+listalta sen sijaan, että se tarjoaisi vanhentunutta tietoa.
 
-Synkronointi on **oletusarvoisesti käytössä**:
+Synkronointi on **oletuksena käytössä**:
 
-- Se suoritetaan kerran palvelimen käynnistyessä ja sen jälkeen säännöllisin väliajoin
-  (`src/lib/arenaEloSync.ts`, kytkentä tiedostossa `src/instrumentation-node.ts`).
-- Se **ei estä toimintaa eikä koskaan aiheuta vakavaa virhettä** — jos tietojen haku lähteestä epäonnistuu, OmniRoute jatkaa
-  toimintaansa ja sijoituksissa näytetään vain viimeisimmät onnistuneesti haetut tiedot (tai tyhjä tila).
+- Se suoritetaan kerran palvelimen käynnistyessä ja sen jälkeen määräajoin ajastimella
+  (`src/lib/arenaEloSync.ts`, kytketty tiedostossa `src/instrumentation-node.ts`).
+- Se on **ei-estävä eikä koskaan kriittinen** — jos haku ulkoisesta lähteestä epäonnistuu, OmniRoute jatkaa
+  toimintaansa ja sijoitukset näyttävät yksinkertaisesti viimeisimmät toimivat tiedot (tai tyhjän tilan).
 
-Sitä hallitaan kahdella ympäristömuuttujalla (dokumentoitu tiedostossa
+Kahta ympäristömuuttujaa käytetään sen ohjaamiseen (dokumentoitu kohdassa
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Muuttuja                  | Oletusarvo     | Tarkoitus                                                                  |
-| ------------------------- | -------------- | -------------------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`         | Aseta arvoksi `false`, jos haluat poistaa lähtevän synkronoinnin käytöstä. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 h) | Synkronointiväli sekunteina.                                               |
+| Muuttuja                  | Oletus        | Tarkoitus                                                 |
+| ------------------------- | ------------- | --------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Aseta arvoon `false` kieltääksesi lähtevän synkronoinnin. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Synkronointiväli sekunteina.                              |
 
 ### Manuaalinen synkronointi / tila / tyhjennys
 
-Operaattoreille todennettu hallintapäätepiste tarjoaa manuaalisen hallinnan
-(`src/app/api/intelligence/sync/route.ts` — edellyttää hallintatodennusta):
+Operaattoreille on käytettävissä todennettu hallintapäätepiste, joka tarjoaa manuaalisen ohjauksen
+(`src/app/api/intelligence/sync/route.ts` — vaatii hallintatunnistautumisen):
 
 ```
-GET    /api/intelligence/sync          # synkronoinnin nykyinen tila (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # käynnistä manuaalinen synkronointi; runko: { "dryRun": true } esikatselua varten ilman kirjoittamista
-DELETE /api/intelligence/sync          # tyhjennä kaikki synkronoidut arena_elo-älytietueet
+GET    /api/intelligence/sync          # synkronoinnin nykytila (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # käynnistä manuaalinen synkronointi; runko: { "dryRun": true } esikatseluun ilman kirjoitusta
+DELETE /api/intelligence/sync          # tyhjennä kaikki synkronoidut arena_elo-tietomerkinnät
 ```
 
-Jos sijoitussivu on tyhjä, manuaalinen `POST /api/intelligence/sync` (tai pelkkä
+Jos sijoitussivu on tyhjä, manuaalinen `POST /api/intelligence/sync`-pyyntö (tai yksinkertaisesti
 palvelimen uudelleenkäynnistys) täyttää sen uudelleen.
 
 ### Mallien yhdistäminen tulostaulukkoon
 
-Rekisterin mallitunnukset ja Arenan mallien nimet eivät aina vastaa täysin toisiaan. Sijoituksissa käytetään
-joustavaa vastaavuushakua (`findMatchingIntelligence` tiedostossa `src/lib/freeProviderRankings.ts`):
+Rekisterin mallitunnukset ja Arenan mallinimet eivät aina vastaa toisiaan täsmälleen. Sijoituksissa käytetään
+joustavaa yhdistämistä (`findMatchingIntelligence` tiedostossa `src/lib/freeProviderRankings.ts`):
 
-1. Normalisoidun mallitunnuksen täsmällinen vastaavuus.
-2. Vastaavuus lopussa olevan versiotunnisteen poistamisen jälkeen (esim. `kimi-k2.6` → `kimi-k2`).
-3. Etuliitteen vastaavuus (tulostaulukon mallin nimi on rekisteritunnuksen etuliite).
+1. Tarkka osuma normalisoituun mallitunnukseen.
+2. Osuma lopun versiopäätteen poistamisen jälkeen (esim. `kimi-k2.6` → `kimi-k2`).
+3. Etuliiteosuma (tulostaulukon mallinimi on rekisteritunnuksen etuliite).
 
-Synkronoinnin yhteydessä tunnetut toimittajien etuliitteet (`anthropic/`, `openai/`, `google/`, …)
-poistetaan ja pieni aliasmääritys laajentaa kanoniset nimet OmniRouten sisäisesti käyttämiin
-muunnelmiin, joten mallit löytyvät kaikilla nimillä.
+Synkronointipuolella tunnetut toimittajaetuliitteet (`anthropic/`, `openai/`, `google/`, …)
+poistetaan, ja pieni aliaskartta laajentaa kanoniset nimet niihin muotoihin, joita OmniRoute käyttää
+sisäisesti, joten mallit ovat löydettävissä millä tahansa nimellä.
 
 ### Miten palveluntarjoaja sijoitetaan
 
-Moottori pisteyttää kunkin ilmaisen palveluntarjoajan kaikki luettelossa olevat mallit, minkä jälkeen:
+Moottori pisteyttää jokaisen ilmaisen palveluntarjoajan katalogin kaikki mallit, minkä jälkeen:
 
-- **Paras malli** = palveluntarjoajan parhaiten pisteytetty malli.
-- **Keskimääräinen pistemäärä** = palveluntarjoajan kaikkien pisteytettyjen mallien pisteiden keskiarvo.
-- **Mallit** = niiden palveluntarjoajan mallien määrä, joilla oli Arena-pistemäärä.
+- **Huippumalli** = palveluntarjoajan korkeimmin pisteytetty malli.
+- **Keskiarvo** = kyseisen palveluntarjoajan kaikkien pisteytettyjen mallien pistemäärän keskiarvo.
+- **Mallit** = kuinka monella palveluntarjoajan mallista oli Arena-pistemäärä.
 
-Palveluntarjoajat järjestetään ensin **parhaan mallin pistemäärän** ja sitten keskimääräisen pistemäärän mukaan. Tämä palkitsee
+Palveluntarjoajat järjestetään ensisijaisesti **huippumallin pistemäärän** ja toissijaisesti keskiarvopistemäärän mukaan. Tämä palkitsee
 palveluntarjoajan, joka tarjoaa vähintään yhden vahvan ilmaisen mallin.
 
 ---

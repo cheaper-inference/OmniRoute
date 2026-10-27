@@ -163,7 +163,7 @@ Nag-eexpose ang OmniRoute ng 6 A2A skill na nakakabit sa `src/lib/a2a/taskExecut
 | Health Report      | `health-report`      | Nag-a-aggregate ng circuit breaker, cooldown, at lockout state ng bawat provider                                                                              | health, resilience         | "Show health status of all providers"  |
 | List Capabilities  | `list-capabilities`  | Nagbabalik ng buong 45-entry na Agent Skills catalog (23 API + 21 CLI + 1 config) bilang markdown table na may mga raw SKILL.md URL para sa context injection | catalog, discovery, skills | "List all OmniRoute capabilities"      |
 
-> Ang Agent Card ay dapat panatilihing naka-align sa live na 375-provider catalog; ang mga bilang ng provider at free/no-auth metadata ay mula sa runtime registry.
+> Ang Agent Card ay dapat panatilihing naka-align sa live na 376-provider catalog; ang mga bilang ng provider at free/no-auth metadata ay mula sa runtime registry.
 
 ### Detalye ng `list-capabilities` Skill
 

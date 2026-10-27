@@ -488,7 +488,7 @@ Ini mengendalikan:
 
 | Fail                          | Tujuan                                           |
 | ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Daftar model chat merentasi katalog 375 penyedia |
+| `providerRegistry.ts`         | Daftar model chat merentasi katalog 376 penyedia |
 | `providerModels.ts`           | Alias model, pemetaan format                     |
 | `constants.ts`                | Had masa, had, kod status                        |
 | `defaultThinkingSignature.ts` | Tandatangan pemikiran Claude lalai               |

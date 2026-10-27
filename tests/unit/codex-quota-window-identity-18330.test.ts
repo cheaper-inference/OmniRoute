@@ -15,6 +15,7 @@ const { fetchCodexQuota, unregisterCodexConnection } =
 const { evaluateQuotaCutoff, preflightQuota, registerQuotaFetcher } =
   await import("../../open-sse/services/quotaPreflight.ts");
 const { buildCodexUsageQuotas } = await import("../../open-sse/services/codexUsageQuotas.ts");
+const { parseCodexQuotaHeaders } = await import("../../open-sse/executors/codex/quota.ts");
 const { projectCodexAccountPool } = await import("../../open-sse/services/codexAccount/index.ts");
 const { markQuotaHealthy } = await import("../../src/domain/quotaCacheState.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
@@ -109,7 +110,6 @@ for (const enabled of [false, true]) {
   });
 }
 
-const { parseCodexQuotaHeaders } = await import("../../open-sse/executors/codex/quota.ts");
 for (const minutes of [undefined, "60", "bad"]) {
   test(`official headers with duration ${minutes} do not fabricate 5h/7d`, () => {
     const headers: Record<string, string> = { "x-codex-primary-used-percent": "94" };

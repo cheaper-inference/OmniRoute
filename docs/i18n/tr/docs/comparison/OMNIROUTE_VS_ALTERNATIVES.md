@@ -39,7 +39,7 @@ Popüler açık kaynak AI yönlendiricileriyle tarafsız özellik karşılaştı
 
 ## OmniRoute ne zaman seçilmeli
 
-- Kendi sunucunuzda barındırıyorsunuz ve **maksimum sağlayıcı kapsamı** istiyorsunuz (375 sağlayıcı, 155 ücretsiz/kimlik doğrulamasız katalog girdisi)
+- Kendi sunucunuzda barındırıyorsunuz ve **maksimum sağlayıcı kapsamı** istiyorsunuz (376 sağlayıcı, 155 ücretsiz/kimlik doğrulamasız katalog girdisi)
 - **Yerleşik bir MCP sunucusuna** ihtiyacınız var (araç olarak sunulan LLM araçları, bellek, yetenekler)
 - Ajanlar arası (agent-to-agent) iş akışları için **A2A protokolüne** ihtiyacınız var
 - Yukarı akış CAPTCHA'ları tarafından tespit edilmekten kaçınmak için **parmak izi gizliliği** (JA3/JA4) istiyorsunuz

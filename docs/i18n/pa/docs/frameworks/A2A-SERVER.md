@@ -158,7 +158,7 @@ OmniRoute 6 A2A ਸਕਿੱਲਾਂ ਐਕਸਪੋਜ਼ ਕਰਦਾ ਹੈ 
 | ਹੈਲਥ ਰਿਪੋਰਟ       | `health-report`      | ਹਰੇਕ ਪ੍ਰੋਵਾਈਡਰ ਲਈ circuit breaker, cooldown, lockout ਸਥਿਤੀ ਨੂੰ ਇਕੱਠਾ ਕਰਦਾ ਹੈ                                                                      | health, resilience         | "ਸਾਰੇ ਪ੍ਰੋਵਾਈਡਰਾਂ ਦੀ ਹੈਲਥ ਸਥਿਤੀ ਦਿਖਾਓ"          |
 | ਸਮਰੱਥਾਵਾਂ ਦੀ ਸੂਚੀ | `list-capabilities`  | ਪੂਰਾ 45-ਐਂਟਰੀ Agent Skills ਕੈਟਾਲਾਗ (23 API + 21 CLI + 1 config) context injection ਲਈ raw SKILL.md URLs ਦੇ ਨਾਲ ਇੱਕ markdown ਟੇਬਲ ਵਜੋਂ ਵਾਪਸ ਕਰਦਾ ਹੈ | catalog, discovery, skills | "ਸਾਰੀਆਂ OmniRoute ਸਮਰੱਥਾਵਾਂ ਸੂਚੀਬੱਧ ਕਰੋ"        |
 
-> Agent Card ਨੂੰ ਲਾਈਵ 375-ਪ੍ਰੋਵਾਈਡਰ ਕੈਟਾਲਾਗ ਨਾਲ ਸੰਰੇਖਿਤ ਰੱਖਿਆ ਜਾਣਾ ਚਾਹੀਦਾ ਹੈ; ਪ੍ਰੋਵਾਈਡਰ ਗਿਣਤੀਆਂ ਅਤੇ free/no-auth ਮੈਟਾਡੇਟਾ runtime registry ਤੋਂ ਲਿਆ ਜਾਂਦਾ ਹੈ।
+> Agent Card ਨੂੰ ਲਾਈਵ 376-ਪ੍ਰੋਵਾਈਡਰ ਕੈਟਾਲਾਗ ਨਾਲ ਸੰਰੇਖਿਤ ਰੱਖਿਆ ਜਾਣਾ ਚਾਹੀਦਾ ਹੈ; ਪ੍ਰੋਵਾਈਡਰ ਗਿਣਤੀਆਂ ਅਤੇ free/no-auth ਮੈਟਾਡੇਟਾ runtime registry ਤੋਂ ਲਿਆ ਜਾਂਦਾ ਹੈ।
 
 ### `list-capabilities` ਸਕਿੱਲ ਵੇਰਵਾ
 

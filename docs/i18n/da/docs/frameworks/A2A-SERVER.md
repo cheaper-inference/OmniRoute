@@ -163,7 +163,7 @@ OmniRoute eksponerer 6 A2A-færdigheder, der er konfigureret i `src/lib/a2a/task
 | Health Report      | `health-report`      | Samler circuit breaker-, cooldown- og lockout-tilstand pr. udbyder                                                                                   | health, resilience         | "Vis sundhedsstatus for alle udbydere"      |
 | List Capabilities  | `list-capabilities`  | Returnerer hele Agent Skills-kataloget med 45 poster (23 API + 21 CLI + 1 config) som en markdown-tabel med rå SKILL.md-URL'er til kontekstinjektion | catalog, discovery, skills | "List alle OmniRoute-funktioner"            |
 
-> Agent Card bør holdes ajour med det aktuelle katalog over 375 udbydere; udbyderantal og free/no-auth-metadata hentes fra runtime-registret.
+> Agent Card bør holdes ajour med det aktuelle katalog over 376 udbydere; udbyderantal og free/no-auth-metadata hentes fra runtime-registret.
 
 ### Detaljer om `list-capabilities`-færdigheden
 

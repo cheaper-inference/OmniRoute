@@ -39,7 +39,7 @@ Perbandingan fitur objektif dengan router AI open-source populer.
 
 ## Kapan memilih OmniRoute
 
-- Anda menghosting sendiri dan menginginkan **cakupan provider maksimal** (375 provider, 155 entri katalog gratis/tanpa autentikasi)
+- Anda menghosting sendiri dan menginginkan **cakupan provider maksimal** (376 provider, 155 entri katalog gratis/tanpa autentikasi)
 - Anda memerlukan **server MCP bawaan** (tool LLM, memori, skill yang diekspos sebagai tool)
 - Anda memerlukan **protokol A2A** untuk alur kerja antaragen
 - Anda menginginkan **fingerprint stealth** (JA3/JA4) untuk menghindari deteksi oleh CAPTCHA upstream

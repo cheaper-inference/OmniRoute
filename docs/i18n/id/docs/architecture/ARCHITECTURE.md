@@ -15,7 +15,7 @@ OmniRoute menyediakan satu endpoint yang kompatibel dengan OpenAI (`/v1/*`) dan 
 
 Kemampuan utama:
 
-- Antarmuka API yang kompatibel dengan OpenAI untuk CLI/alat (375 penyedia, 156 modul eksekutor)
+- Antarmuka API yang kompatibel dengan OpenAI untuk CLI/alat (376 penyedia, 156 modul eksekutor)
 - Penerjemahan permintaan/respons di antara berbagai format penyedia
 - Fallback kombinasi model (urutan multi-model)
 - Langkah kombinasi terstruktur (`provider + model + connection`) dengan pengurutan runtime berdasarkan `compositeTiers`

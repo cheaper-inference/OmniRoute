@@ -73,6 +73,16 @@ curl -i \
 
 `manage` scope မပါသော key (သို့မဟုတ် Bearer မပါခြင်း) သည် `403 LOCAL_ONLY` ကို ပြန်ပေးသည်။ ဆက်စပ် prefix ဖြစ်သော `/api/cli-tools/runtime/*` ကိုမူ ရည်ရွယ်ချက်ရှိရှိ ကျော်ဖြတ်၍မရနိုင်အောင် ပြုလုပ်ထားသည် — [Route Guard Tiers — Manage-scope ခြွင်းချက်](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) ကို ကြည့်ပါ။
 
+### Origin စစ်ဆေးခြင်း
+
+အထောက်အထားစိစစ်ပြီးနောက် `/api/mcp/*` သို့ ရောက်လာသော တောင်းဆိုမှုတိုင်း — transport များနှင့် `status`, `tools`, `audit`, `restart` ကဲ့သို့ စီမံခန့်ခွဲမှုလမ်းကြောင်းများ — ၏ `Origin` header ကို ခေါ်ဆိုသူ မည်သူပင်ဖြစ်စေ (API key၊ CLI token၊ dashboard session သို့မဟုတ် login ပိတ်ထားစဉ် အမည်မသိ loopback) စစ်ဆေးသည်။ ၎င်းသည် MCP Streamable HTTP သတ်မှတ်ချက်က လိုအပ်သော DNS rebinding ကာကွယ်မှုဖြစ်သည်။
+
+- **`Origin` header မရှိ** → ခွင့်ပြုသည်။ OmniRoute CLI၊ SDK နှင့် IDE client များသည် ၎င်းကို မပို့ပါ။
+- **ခွင့်ပြုထားသော `Origin`** → မည်သည့် port ပေါ်ရှိ `localhost` / `127.0.0.1` / `[::1]` မဆို၊ သို့မဟုတ် OmniRoute ၏ ကိုယ်ပိုင် အများသုံး origin — `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`၊ ယုံကြည်ရသော reverse proxy က ဆက်ပို့သော origin (`OMNIROUTE_TRUST_PROXY`၊ base URL မသတ်မှတ်ထားမှသာ)၊ သို့မဟုတ် တိုက်ရိုက်ဝင်ရောက်သော loopback/LAN IP host။ `Host` header တစ်ခုတည်းဖြင့် မည်သည့် origin ကိုမျှ ယုံကြည်ရသည်ဟု မသတ်မှတ်ပါ။
+- **`null` အပါအဝင် အခြား `Origin` မည်သည့်ဟာမဆို** → JSON-RPC error body နှင့်အတူ `403` — `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`။ မှန်ကန်သော CSRF token ပြသသည့် dashboard session ကို အခြား dashboard ရေးသားမှုများကဲ့သို့ပင် ဆက်လက်လက်ခံသည်။
+
+reverse proxy နောက်ကွယ်မှ ဝန်ဆောင်မှုပေးသော browser MCP client သည် `OMNIROUTE_PUBLIC_BASE_URL` လိုအပ်သည်၊ အခြား origin များအတွက် ခွင့်ပြုစာရင်း မရှိပါ။ CORS preflight (`OPTIONS`) ကို Origin အတွက် မစစ်ဆေးပါ၊ နောက်ဆက်တွဲ တောင်းဆိုမှုကိုမူ စစ်ဆေးသည်။
+
 ## IDE ဖွဲ့စည်းသတ်မှတ်မှု
 
 Claude Desktop၊ Cursor၊ Cline နှင့် ကိုက်ညီသော MCP client များကို စနစ်ထည့်သွင်းရန် [MCP Client ဖွဲ့စည်းသတ်မှတ်မှု](../guides/SETUP_GUIDE.md#mcp-client-configuration) ကို ကြည့်ပါ။

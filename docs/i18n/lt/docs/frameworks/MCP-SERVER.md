@@ -72,6 +72,16 @@ curl -i \
 
 Raktas be `manage` aprėpties (arba be Bearer) grąžina `403 LOCAL_ONLY`. Susijusio prefikso `/api/cli-tools/runtime/*` tyčia NEGALIMA apeiti — žr. [Maršrutų apsaugos lygiai — `manage` aprėpties išimtis](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Origin tikrinimas
+
+Po autentifikavimo kiekvienos užklausos į `/api/mcp/*` — transportų ir valdymo maršrutų, tokių kaip `status`, `tools`, `audit`, `restart` — `Origin` antraštė tikrinama nepriklausomai nuo kviečiančiojo (API raktas, CLI žetonas, valdymo skydelio sesija ar anoniminis loopback išjungus prisijungimą). Tai MCP Streamable HTTP specifikacijos reikalaujama apsauga nuo DNS rebinding.
+
+- **Nėra `Origin` antraštės** → leidžiama. OmniRoute CLI, SDK ir IDE klientai jos nesiunčia.
+- **Leidžiamas `Origin`** → `localhost` / `127.0.0.1` / `[::1]` bet kuriame prievade arba paties OmniRoute viešasis origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, patikimo atvirkštinio tarpinio serverio persiųstas origin (`OMNIROUTE_TRUST_PROXY`, tik kai nenustatytas base URL) arba tiesiogiai pasiekiamas loopback/LAN IP serveris. Vien `Host` antraštė niekada nepadaro origin patikimu.
+- **Bet koks kitas `Origin`, įskaitant `null`** → `403` su JSON-RPC klaidos turiniu: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Valdymo skydelio sesija su galiojančiu CSRF žetonu vis tiek priimama, kaip ir kitų valdymo skydelio rašymų atveju.
+
+Naršyklės MCP klientui už atvirkštinio tarpinio serverio reikia `OMNIROUTE_PUBLIC_BASE_URL`; kitiems origin leidžiamųjų sąrašo nėra. Išankstinė CORS užklausa (`OPTIONS`) pagal Origin netikrinama; po jos einanti užklausa — tikrinama.
+
 ## IDE konfigūracija
 
 Žr. [MCP kliento konfigūraciją](../guides/SETUP_GUIDE.md#mcp-client-configuration), skirtą Claude Desktop,

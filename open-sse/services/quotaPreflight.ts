@@ -142,6 +142,10 @@ export function registerQuotaFetcher(provider: string, fetcher: QuotaFetcher): v
   quotaFetcherRegistry.set(provider, fetcher);
 }
 
+export function getRegisteredQuotaFetchers(): ReadonlyMap<string, QuotaFetcher> {
+  return new Map(quotaFetcherRegistry);
+}
+
 export function getQuotaFetcher(provider: string): QuotaFetcher | undefined {
   return quotaFetcherRegistry.get(provider) || quotaFetcherRegistry.get(provider.toLowerCase());
 }
@@ -247,7 +251,7 @@ function exhaustedResult(
   };
 }
 
-function windowsForScope(
+export function windowsForScope(
   windows: NonNullable<QuotaInfo["windows"]>,
   scope?: QuotaCutoffScope
 ): NonNullable<QuotaInfo["windows"]> {
@@ -312,7 +316,7 @@ function evaluateQuotaGroup(
   return { exhausted, worstPercent: Math.max(0, worstPercent), worstWindow, worstResetAt };
 }
 
-function groupQuotaWindowsByBase(
+export function groupQuotaWindowsByBase(
   windows: NonNullable<QuotaInfo["windows"]>
 ): Map<string, Array<[string, QuotaWindowInfo]>> {
   const groups = new Map<string, Array<[string, QuotaWindowInfo]>>();
