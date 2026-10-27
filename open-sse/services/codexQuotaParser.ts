@@ -101,6 +101,10 @@ function getSelectedCodexRateLimit(
   if (useSparkWindows) return sparkRateLimit;
   return normalRateLimit;
 }
+function parseCodexPlan(data: Record<string, unknown>): string | undefined {
+  const rawPlan = data["plan_type"] ?? data["planType"];
+  return typeof rawPlan === "string" && rawPlan.trim() ? rawPlan.trim() : undefined;
+}
 function getDominantResetAt(
   quota: Pick<CodexDualWindowQuota, "window5h" | "window7d">
 ): string | null {
@@ -152,7 +156,9 @@ export function parseCodexUsageResponse(
   const bankedResetCredits = parseBankedResetCredits(obj);
   const paidCredits = parseCodexPaidCredits(obj.credits);
   const rateLimitReachedType = parseRateLimitReachedType(obj);
+  const plan = parseCodexPlan(obj);
   return {
+    ...(plan ? { plan } : {}),
     used: Math.round(worstPercentUsed * 100),
     total: 100,
     percentUsed: worstPercentUsed,

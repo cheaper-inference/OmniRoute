@@ -95,6 +95,60 @@ test("replacing the allowlist with another non-empty one is accepted", async () 
   assert.deepEqual((await settingsDb.getSettings()).oidcAllowedSubjects, ["other@example.com"]);
 });
 
+test("a nonempty claim policy can replace the subject allowlist", async () => {
+  await seedEnabled(["admin@example.com"]);
+  await seedPassword();
+
+  const policy = { path: "realm_access.roles", values: ["admin"] };
+  const result = await patch({
+    oidcAllowedSubjects: [],
+    oidcAdmissionClaim: policy,
+    currentPassword: PASSWORD,
+  });
+
+  assert.equal(result.status, 200);
+  const settings = await settingsDb.getSettings();
+  assert.deepEqual(settings.oidcAllowedSubjects, []);
+  assert.deepEqual(settings.oidcAdmissionClaim, policy);
+});
+
+test("the last admission policy cannot be removed while OIDC is enabled", async () => {
+  await seedEnabled([]);
+  await settingsDb.updateSettings({
+    oidcAdmissionClaim: { path: "realm_access.roles", values: ["admin"] },
+  });
+
+  const result = await patch({ oidcAdmissionClaim: null });
+  assert.equal(result.status, 400);
+  assert.equal(result.body.error.code, "OIDC_ALLOWED_SUBJECTS_REQUIRED");
+});
+
+test("a malformed persisted policy cannot replace the last subject", async () => {
+  await seedEnabled(["admin@example.com"]);
+  await settingsDb.updateSettings({
+    oidcAdmissionClaim: { path: "realm_access.roles", values: [] },
+  });
+  await seedPassword();
+
+  const result = await patch({ oidcAllowedSubjects: [], currentPassword: PASSWORD });
+  assert.equal(result.status, 400);
+  assert.equal(result.body.error.code, "OIDC_ADMISSION_CLAIM_INVALID");
+  assert.deepEqual((await settingsDb.getSettings()).oidcAllowedSubjects, ["admin@example.com"]);
+});
+
+test("malformed claim paths and empty role lists are rejected", async () => {
+  await seedEnabled(["admin@example.com"]);
+  await seedPassword();
+  for (const policy of [
+    { path: "realm_access.__proto__.roles", values: ["admin"] },
+    { path: "realm_access.roles", values: [] },
+    { path: "realm_access.roles", values: ["admin"], extra: true },
+  ]) {
+    const result = await patch({ oidcAdmissionClaim: policy, currentPassword: PASSWORD });
+    assert.equal(result.status, 400);
+  }
+});
+
 test("the allowlist can be emptied when OIDC is off", async () => {
   await settingsDb.updateSettings({ oidcEnabled: false, oidcAllowedSubjects: ["a@example.com"] });
   await seedPassword();

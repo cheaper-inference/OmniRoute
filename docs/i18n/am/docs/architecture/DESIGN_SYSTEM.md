@@ -4,228 +4,156 @@
 
 ---
 
-> **ሁኔታ:** ማጣቀሻ — እዚህ የተገለጸው ደረጃ ማውጣት **ተግባራዊ ሆኗል** (ደረጃዎች 1–6፦ የፍርግርግ ልጣፍ፣ መሠረታዊ አካላት፣ የሁኔታ-ቀለም ማዕከላዊነት፣ mono token፣ የDataTable token ፍልሰት፣ focus-ring → accent፣ Checkbox/Textarea መሠረታዊ አካላት፣ `cn()` → tailwind-merge፣ በእያንዳንዱ ራሱን በቻለ ማያ ገጽ ላይ ፍርግርግ፣ ፈሳሽ የ4K ይዘት shell፣ ድፍን የውሂብ-ሰንጠረዥ ገጽታዎች)። ይህ ሰነድ የዳሽቦርዱን የንድፍ tokens፣ ክፍሎች እና ልማዶች የሚገልጽ ዋና ማጣቀሻ ነው፤ ከታች ያለው በደረጃዎች የተዋቀረ አቀራረብ ለእያንዳንዱ ውሳኔ እንደ ምክንያታዊ መሠረት ተጠብቆ ቆይቷል።
-> **ወሰን:** የOmniRoute ዳሽቦርድ (`src/`) እና የግብይት ጣቢያው (`_mono_repo/omnirouteSite/`) **አንድ የእይታ ማንነት** ይጋራሉ — ተመሳሳይ የግራፍ-ወረቀት ፍርግርግ ዳራ (32px)፣ ተመሳሳይ የቀለም tokens፣ ደረጃውን የጠበቁ ክፍሎች።
->
-> ለጥገና አድራጊዎች ተግባራዊ ማስታወሻዎች፦
->
-> - አሁንም የቀሩ በቀጥታ የተጻፉ hex እሴቶች አንዳንዶቹ **ሆን ተብለው** የተቀመጡ ናቸው (ሁልጊዜ-ጨለማ የሆነ የኮንሶል ተርሚናል፣ ReactFlow SVG strokes) እና ወደ tokens **መዛወር የለባቸውም**።
-> - በሥራ ላይ ባለ ኢንስታንስ ላይ የሚታይ "ትልቅ" ፍርግርግ ጊዜው ያለፈበት build ነው እንጂ ኮድ አይደለም — የፍርግርጉ መጠን 32px ሲሆን ከጣቢያው ጋር ፍጹም ተመሳሳይ ነው።
-> - የጨለማ ገጽታ `--table-*` እሴቶች ከፍልሰቱ በፊት በቀጥታ ከተጻፉት rgba እሴቶች ጋር በባይት ደረጃ ተመሳሳይ ናቸው፤ የብርሃን ገጽታው ተስተካክሏል (በማይሠሩ `var()` fallbacks ምክንያት ሁልጊዜ-ጨለማ የሆነ ስህተት ነበረበት)።
+> **ሁኔታ:** ዳሽቦርዱ በ**Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`) ላይ የተገነባ ሲሆን፣
+> እንደ workspace `packages/ui-kit` (`@omniroute/ui-kit`) በፕሮጀክቱ ውስጥ ተካቷል፤ የ upstream snapshot ስሪት በ
+> `packages/ui-kit/UPSTREAM.md` ውስጥ ተወስኗል፣ እንዲሁም በ`npm run check:ui-kit-snapshot` ይጠበቃል። Light መደበኛው
+> ገጽታ ሲሆን፣ ነባሪ ምርጫው `system` ነው። የማድመቂያ ቀለሙ Keak lime (`--ci-color-accent`) ነው። Inter
+> (የፊደል ክፍተት 0፣ `--ci-letter-spacing-ui`) የUI የፊደል ቤተሰብ ሲሆን፣ Instrument Serif ለትልቅና ያልተጨናነቀ
+> የማሳያ ጽሑፍ (`.ci-dashboard-display`) ብቻ ይጠቀማል፤ IBM Plex Mono ደግሞ ለኮድ ይውላል—ሁሉም
+> በ`src/app/globals.css` አናት ላይ ባሉት `@fontsource/*` imports አማካኝነት በራስ አገልጋይ ላይ ይስተናገዳሉ። እያንዳንዱ አዶ የLucide glyph ነው።
 
----
+## 1. ነገሮች የሚገኙበት ቦታ
 
-## 1. ዓላማ
+- **ኪት።** `packages/ui-kit/src` በ
+  `packages/ui-kit/UPSTREAM.md` ውስጥ በተወሰነው commit ላይ ያለው የupstream `src/` ባይት-በ-ባይት ቅጂ ነው (ይህም የፈቃድ ማረጋገጫውን ይመዘግባል)፤ `PATCHES.md` የአካባቢ
+  patchesን ይዘረዝራል (ምንም የሉም)። ያለ build እንደ source ጥቅም ላይ ይውላል፦ `next.config.mjs` transpile ያደርገዋል፣ እና
+  `tsconfig.json` `@omniroute/ui-kit` → `packages/ui-kit/src` እና `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` በማለት map ያደርጋል (`vitest.config.ts` እና `vitest.mcp.config.ts` ተመሳሳዩን alias ይይዛሉ)። የኪት
+  componentን በsubpath ያስመጡ (`@omniroute/ui-kit/table`፣ `@omniroute/ui-kit/page-header`…)፤ በ
+  `@omniroute/ui-kit` barrel በኩል ፈጽሞ አያስመጡ፦ barrelው ሁሉንም component (date pickerን ጨምሮ)
+  ወደ እያንዳንዱ importer ያስገባል። የኪቱ stylesheet በ`src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`) በኩል ይገባል።
+- **Tokens።** `packages/ui-kit/src/ci-tokens.css` የ`--ci-*` tokensን ይገልጻል፤ `src/app/globals.css`
+  እነሱን ከቀድሞዎቹ የOmniRoute ስሞች (`--color-*`፣ `--radius-*`፣ `--font-sans`/`--font-mono`፣
+  `--table-*`፣ `--orch-status-*`፣ `--color-fd-*`) ጋር ያገናኛል፤ በዚህም ነባሮቹ `var(--color-*)` reads እና Tailwind
+  utilities መስራታቸውን ይቀጥላሉ። አዲስ code የTailwind utilitiesን (`bg-surface`፣ `text-text-muted`፣
+  `border-border`፣ `text-success`፣ `bg-success-bg`፣ `bg-chart-1`…) ወይም የኪት classesን ይጠቀማል — hex valueን
+  ፈጽሞ አይጠቀምም (`tests/unit/design-kit-bridge.test.ts` bridgeውን ያስገድዳል)። `text-primary` በ
+  `--text-color-primary` በኩል ወደ `--color-primary-ink` resolve ይደረጋል (በlight ውስጥ lime-800፣ በdark ውስጥ የlime accent)፤ ስለዚህ
+  primary text በቀላሉ የሚነበብ ሆኖ ሲቆይ `bg-primary`/`border-primary` የlime surfaceን ይዘው ይቆያሉ። የChart series
+  `--color-chart-1` … `--color-chart-5`ን ይጠቀማሉ።
+- **Themes።** `<html className="ci-theme">` (`src/app/layout.tsx`) documentውን በኪቱ theme ውስጥ ያስገባል።
+  preferenceው `light`፣ `dark` ወይም `system` ነው (`THEME_CONFIG.defaultTheme = "system"` በ
+  `src/shared/constants/appConfig.ts` ውስጥ፤ `system` `prefers-color-scheme`ን ይከተላል)። በ
+  `src/store/themeStore.ts` ውስጥ ያለው `applyTheme()` (ከhydration በፊት በሚሰራው በ`src/app/layout.tsx` ውስጥ ባለው inline bootstrap script የተንጸባረቀ)
+  `data-theme="dark"|"light"`ን ያዘጋጃል እና በ`<html>` ላይ ያለውን `.dark` class አብሮ ይቀያይራል።
+  የኪቱ dark token set በ`data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`) ላይ keyed ነው፤
+  የOmniRoute የራሱ dark overrides (በ`globals.css` ውስጥ ያለው `.dark` block) እና የቀድሞዎቹ Tailwind `dark:`
+  utilities በ`.dark` class ላይ keyed ናቸው። የaccent color presets የሉም፦ accentው ሁልጊዜ ከኪቱ
+  ይመጣል፣ እና ከአሮጌ build የቀረ persisted preset storeው ሲጫን ይወገዳል።
+- **Components (adapters)።** `src/shared/components/index.tsx` የOmniRoute component APIን (ተመሳሳይ
+  ስሞች፣ default exports እና props) እንዳለ ያቆያል፤ ከጀርባው ያሉት primitives ደግሞ በኪቱ ላይ የተገነቡ adapters ናቸው፦ forms
+  (`Button`፣ `Input`፣ `Textarea`፣ `Checkbox`፣ `Select`፣ `Toggle`፣ `Badge`፣ `Card`)፣ overlays እና feedback
+  (`Modal`/`ConfirmModal`፣ `Tooltip`/`InfoTooltip`፣ `NotificationToast`፣ `EmptyState`፣ `Loading`)፣
+  structure (`Collapsible`፣ `CollapsibleSection`፣ `SegmentedControl`፣ `Breadcrumbs`፣ `Avatar`) እና tables
+  (`DataTable`፣ `FilterBar`፣ `ColumnToggle`፣ `FilterPills`፣ `PresetSlider`)። Adapter የኪቱን
+  component በsubpath ያስመጣና የቀድሞዎቹን props ወደ እሱ map ያደርጋል — ለምሳሌ `Button variant="primary"` የኪቱ
+  `default` button ነው (`--ci-button-primary-*`፦ በlight ውስጥ inverse surface፣ በdark ውስጥ accent ከ
+  `--ci-color-accent-foreground` ink ጋር)፣ `danger` `destructive` ነው፣ እና `warning` `outline` ከ
+  `.ci-button--warning` extension ጋር ነው። በ`globals.css` መጨረሻ (`@layer components`) ላይ ያሉት
+  `.ci-button--warning` እና `.ci-badge[data-tone]` rules በኪቱ classes ላይ የተጨመሩ የOmniRoute extensions ናቸው።
+  `tests/unit/ui/adapters/*.test.tsx` እያንዳንዱን adapter ይወስናል።
+- **Shell።** `src/app/(dashboard)/layout.tsx` `DashboardLayout`ን render ያደርጋል፤ እሱም
+  `src/shared/components/layouts/DashboardShell.tsx`ን render ያደርጋል፦ የኪቱ `SidebarProvider` / `Sidebar` /
+  `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`)፣ ከOmniRoute navigation logic በ
+  `src/shared/components/Sidebar.tsx` ውስጥ ጋር። ወደ `#main-content` የሚወስድ “ወደ ይዘት ዝለል” link የመጀመሪያው focusable
+  element ነው። `src/shared/components/Header.tsx` የኪቱን `SidebarTrigger` (የshellው ብቸኛ sidebar
+  toggle)፣ የKeak `ProductSwitcher`ን እና የcommand-palette openerን ይይዛል፤ በ`#main-content` ውስጥ የኪቱ
+  `PageHeader` (`.ci-page-header`) mount ያልተደረገ ጊዜ ብቻ የroute titleን ያሳያል፤ ስለዚህ የራሱ
+  `PageHeader` ያለው page አንድ `h1` ብቻ ይኖረዋል። `src/shared/components/CommandPalette.tsx` የኪቱ `Dialog` ነው።
+- **Icons።** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) ስሙን (screens የሚጠቀሙበትን
+  Material Symbols vocabulary) በ`ICON_MAP` (`src/shared/constants/iconMap.ts`) በኩል ወደ
+  Lucide glyph resolve ያደርጋል። Material Symbols font እና package ተወግደዋል፦ ከmapው የጎደለ ስም
+  neutral placeholder glyph (`data-icon-missing="true"`) render ያደርጋል፣ እና ከproduction ውጭ console warning
+  ይመዘግባል። `npm run gen:icon-map` ከmapው የጎደሉትን ጥቅም ላይ ያሉ ስሞች ያትማል
+  (`tests/unit/icon-map-coverage.test.ts` Lucide icon በሌለው ማንኛውም ስም ላይ fail ይሆናል፤
+  `tests/unit/icon-map-object-values.test.ts` በlookup objects ውስጥ የተከማቹ ስሞችን ይሸፍናል)፤
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` literal
+  `<span className="material-symbols-outlined">` spansን ወደ `<Icon>` ይቀይራል።
+- **Brand።** `src/shared/components/OmniRouteLogo.tsx` ኪቱን wrap ያደርጋል፦ default export የሆነው `OmniRouteLogo`
+  `ProductIcon product="omniroute" variant="glyph"`ን (inline SVG፣ `basePath`-safe) render ያደርጋል፣ እና
+  `OmniRouteLockup` `ProductLockup product="omniroute"`ን (accessible name “Keak OmniRoute”) ወይም፣ ለ
+  white-label operators፣ የራሳቸውን `name`/`logoSrc` render ያደርጋል። የProduct-switcher destinations በ
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`፣ `KEAK_ACTIVE_PRODUCT`) ውስጥ ይገኛሉ። Standalone
+  screens — `src/app/login/page.tsx`፣ `src/app/status/page.tsx`፣ `src/app/maintenance/page.tsx`፣
+  `src/app/offline/page.tsx`፣ `src/app/not-found.tsx` እና `src/shared/components/ErrorPageScaffold.tsx`
+  — lockupውን ያሳያሉ፤ `tests/unit/brand-pages-static.test.ts` ይህን ይጠብቃል።
 
-የግብይት ጣቢያው (`viral.omniroute.online`፣ `why.omniroute.online`፣ `omniroute.online`) እና የምርቱ ዳሽቦርድ **አንድ ምርት** መስለው መታየት አለባቸው። ጣቢያው አስቀድሞ የቀለም ስብስቡን ከዳሽቦርዱ ወስዷል — የእሱ `css/tokens.css` እንኳን _"የቀለም ስብስቡ የOmniRoute ዳሽቦርድን (src/app/globals.css) ያንጸባርቃል"_ ይላል። ስለዚህ ሁለቱ በቀለም ደረጃ አስቀድመው ~80% ተመሳስለዋል። በዳሽቦርዱ ላይ የጎደለው፦
+## 2. ደንቦች
 
-1. ጣቢያው በእያንዳንዱ ገጽ ላይ የሚጠቀምበት **የግራፍ-ወረቀት ፍርግርግ ልጣፍ**።
-2. ጣቢያው ያሉት ነገር ግን ዳሽቦርዱ የሌሉት ጥቂት **የጋራ የንድፍ tokens** (የradius መለኪያ፣ የምርት ምልክት gradient፣ `surface-2`፣ mono font)።
-3. **በክፍል ደረጃ ያለ ወጥነት** — በርካታ የዳሽቦርድ ክፍሎች በቀጥታ የተጻፉ hex/rgba እሴቶችን በመጠቀም የገጽታ tokensን ያልፋሉ።
+1. ሁልጊዜ tokensን ይጠቀሙ፤ literalsን በፍጹም አይጠቀሙ። ሆን ተብለው የተቀመጡ ልዩ ሁኔታዎች፦ ሁልጊዜ ጨለማ የሆነው የconsole terminal፣ በ`STATUS_HEX` (`src/shared/constants/statusColors.ts`) በኩል የሚተገበሩ የReactFlow SVG
+   strokes፣ እንዲሁም ምድባዊ palettes የሆኑት
+   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) እና
+   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`) ናቸው።
+2. `packages/ui-kit/src`ን በእጅ ፈጽሞ patch አያድርጉ፦ በ`scripts/dev/sync-ui-kit.sh <commit>` ያመሳስሉት፤
+   የpre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ከተወሰነው upstream commit በአንድ byte እንኳ
+   የተለየ ነገር ካለ አይሳካም (የupstream clone፣
+   `UI_KIT_CLONE` ወይም `_references/cheaper-inference-ui-kit`፣ ከሌለ ከማስጠንቀቂያ ጋር ይዘለዋል)። kit አንድ ነገር ካልያዘ፣
+   በadapter ወይም በscreen ውስጥ አማራጭ መፍትሔ ይጠቀሙ እና upstream እንዲያክለው ይጠይቁ።
+3. የkit ነባሪ ጽሑፎች በእንግሊዝኛ ናቸው (`label = "Loading"`, `loadingLabel = "Loading table"`…) — የkit component ጽሑፍ በሚያሳይበት ጊዜ ሁሉ ከ`useTranslations(...)`
+   የተገኙ የተተረጎሙ ሕብረቁምፊዎችን ያስተላልፉ።
+4. የTailwind utilities ከkit component classes ቅድሚያ ያገኛሉ (kit
+   `@layer theme, base, components, utilities` ያውጃል እና ደንቦቹ በ`components` ውስጥ ይገኛሉ) — utilitiesን ለ
+   ክፍተት እና layout ይጠቀሙ፤ የkit componentsን ቀለም ለመቀየር አይጠቀሙባቸው።
+5. ርዕሶች፦ `.ci-heading` (Inter፣ tracking የሌለው) ለገጽ እና ለክፍል ርዕሶች፤ `.ci-dashboard-display`
+   (Instrument Serif) እንደ የerror-page status code ላሉ ትልቅና የተራራቁ display ጽሑፎች ብቻ።
+6. `tests/unit/dashboard-kit-sweep.test.ts` የkit አጠቃቀምን ይቆጣጠራል፦
+   በ`src/app` ወይም `src/shared/components` ስር Material ligature span መኖር የለበትም፤ በdashboard tree (`src/app/(dashboard)` እና
+   `src/shared/components`) ውስጥ raw `<select>`፣ `<textarea>` ወይም `<table>`፣ እንዲሁም ከተዘረዘሩት ልዩ ሁኔታዎች (የ`Select` adapter native branch፣
+   `RequestLoggerDetail`) ውጪ በእጅ የተሠራ
+   `role="dialog"` መኖር የለበትም፤ እያንዳንዱ raw `<button>` ወይም `<input>` ምክንያቱን የሚገልጽ
+   `kit-exception:` የያዘና ከእሱ ቢበዛ 3 መስመሮች በላይ የሚያልቅ comment ሊኖረው ይገባል፤ palette hues እና `dark:` variants
+   testው በዘረዘራቸው files ውስጥ ብቻ መኖር አለባቸው።
+7. PR ከመክፈትዎ በፊት ሁለቱንም themes እና የ390 px viewportን በscreenshots ያረጋግጡ፤ `tests/e2e/a11y.spec.ts`
+   axeን ያስኬዳል።
 
-ይህ ሰነድ ትንታኔው እና ዕቅዱ ነው።
+## 3. Screen ማከል
 
----
+1. ገጹን በkit `PageHeader` (`@omniroute/ui-kit/page-header`፣ በdashboard ውስጥ `compact`) ይክፈቱ — title፣ description እና `actions`። ከዚያ shell header የራሱን title አያሳይም።
+2. Controlsን ከ`@/shared/components` (adapters) ይገንቡ፤ adapter በሌለበት ቦታ ደግሞ የkit componentsን በsubpath ይጠቀሙ (`Table`/`TableScrollArea`/`DataTableShell`፣ `Field`፣ `Alert`፣ `Tabs`፣ `RadioGroup`፣
+   `Slider`…)።
+3. Icons፦ `<Icon name="…" />`። አዲስ name በትርጉም ከሚዛመደው Lucide
+   component ጋር ወደ`ICON_MAP` ይገባል፤ `npm run gen:icon-map` እስካሁን የጎደሉትን names ይዘረዝራል።
+4. ቀለሞች፦ semantic utilities (`text-success`, `bg-warning-bg`, `border-border`…) እና
+   ለchart series `var(--color-chart-N)` ይጠቀሙ፤ hex values እና ቀለምን ብቻ የሚደግሙ `dark:` variants አይጠቀሙ።
+5. ጽሑፍ፦ ለkit components የሚያስተላልፏቸውን labels ጨምሮ እያንዳንዱ ሕብረቁምፊ ከ`useTranslations` መምጣት አለበት። አዲስ
+   keys ወደ`src/i18n/messages/en.json`, `pt-BR.json` እና `vi.json` ይገባሉ (የVietnamese parity test
+   እያንዳንዱን English key ያረጋግጣል)፤ ሌሎቹ locales በi18n sync ይሞላሉ።
+6. PR ከመክፈትዎ በፊት እነዚህን guards ያስኪዱ፦ `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (በ`iconMap.ts` ውስጥ duplicated importን የሚያገኘው ብቸኛ check)፣
+   `npm run check:ui-icu`፣ እና የscreenውን የራሱ tests።
 
-## 2. መርሆዎች
+## 4. አስማሚ ማከል ወይም መቀየር
 
-- **አንድ የእውነት ምንጭ = `src/app/globals.css`።** ጣቢያው ዳሽቦርዱን ያንጸባርቃል፤ ዳሽቦርዱ ጣቢያውን አያንጸባርቅም። አዲስ tokens መጀመሪያ `globals.css` ውስጥ ይገባሉ።
-- **ሁልጊዜ tokens፣ literals በፍጹም አይደሉም።** ክፍሎች ትርጉማዊ tokensን (`bg-surface`፣ `text-primary`፣ `border-border`) ይጠቀማሉ እንጂ ጥሬ `#hex`ን አይጠቀሙም።
-- **ስውር፣ ጎልቶ የማይታይ።** ፍርግርጉ ከይዘቱ ጀርባ የሚቀመጥ ደብዛዛ ልጣፍ ነው — የጽሑፍን ንፅፅር መቀነስ ወይም ከUIው ጋር መፎካከር የለበትም።
-- **ከገጽታው ጋር የሚላመድ።** ሁሉም ነገር በ`.dark` (የምርቱ መለያ ገጽታ) እና በብርሃን ገጽታ ውስጥ ይሠራል።
-- **በጥንቃቄ የሚከናወን ልቀት።** መጀመሪያ ፍርግርጉን + tokensን ለቅቅ (ዝቅተኛ ስጋት፣ ከፍተኛ ታይነት)፣ ከዚያ የክፍሎችን ማጽዳት በየዙሩ አከናውን።
+1. የ`src/shared/components/index.tsx` ይፋዊ APIን እንዳለ ያቆዩ፦ ተመሳሳይ የወደ ውጭ መላኪያ ስሞች፣ ነባሪ ወደ ውጭ መላኪያዎች እና
+   ተቀባይነት ያላቸው props። የቆዩ propsን በአስማሚው ውስጥ ወደ ኪቱ ያዛምዱ (`Button.tsx`ን ይመልከቱ፦ `VARIANT_TO_KIT`፣
+   `SIZE_TO_KIT`)።
+2. ኪቱን በንዑስ ዱካ (`@omniroute/ui-kit/<component>`) ያስመጡ።
+3. ለኪቱ ክፍተቶች የሚደረጉ ጊዜያዊ መፍትሄዎች በአስማሚው ውስጥ (ወይም መፍትሄው ቅጥ ሲሆን በ`globals.css` `@layer components` ውስጥ)
+   መኖር አለባቸው፤ በ`packages/ui-kit/src` ውስጥ ፈጽሞ መኖር የለባቸውም።
+4. `tests/unit/ui/adapters/<name>.test.tsx`ን ያክሉ ወይም ያዘምኑ። ብዙ ጠሪዎች ላሉት አስማሚ፣
+   ከለውጡ በፊትና በኋላ የተቀረጸውን markup ያነጻጽሩ — የpadding ወይም የwrapper ለውጦች ወደ እያንዳንዱ ማያ ገጽ ይዛመታሉ።
 
----
+## 5. ኪቱን ማዘመን
 
-## 3. የአሁኑ ሁኔታ — አስቀድሞ የተጣጣመው እና ያልተጣጣመው
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` በዚያ commit ላይ ያለውን upstream `src/` ወደ
+`packages/ui-kit/src` ይቀዳል እና የተፈቀደውን ብቸኛ ለውጥ ይተገብራል (የ`.js` ቅጥያውን ከአንጻራዊ
+imports ያስወግዳል)። ከዚያ፦ `git diff packages/ui-kit`ን ይገምግሙ፣ በሁለቱም themes ውስጥ providers፣ settings፣ combos፣
+usage እና endpointን በእይታ ይፈትሹ፣ `npm run check:ui-kit-snapshot`ን እና `npm run test:vitest:ui`ን ያስኪዱ፣ እና
+PRን ከupstream changelog ጋር ይክፈቱ።
 
-### 3.1 ቀለሞች — አስቀድመው የተዋሐዱ ✅
+## 6. የማጣቀሻ ማውጫ
 
-እያንዳንዱ የምርት ምልክት ቀለም እና ገጽታ ከጣቢያው ጋር **በእሴት** አስቀድሞ ይዛመዳል (የሚለያዩት ስሞቹ ብቻ ናቸው — ዳሽቦርዱ `--color-` ቅድመ ቅጥያ ይጨምራል)። በ`src/app/globals.css:30-128` ውስጥ ተረጋግጧል፦
-
-| ጽንሰ-ሐሳብ              | የጣቢያ token (`tokens.css`)                   | የዳሽቦርድ token (`globals.css`)    | መዛመድ             |
-| -------------------- | ------------------------------------------- | ------------------------------- | ---------------- |
-| ዋና                   | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅               |
-| ዋና-hover             | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅               |
-| አጽንዖት                | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅               |
-| አጽንዖት-2              | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (እንደገና የተሰየመ) |
-| አጽንዖት-3              | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (እንደገና የተሰየመ) |
-| ስኬት / ማስጠንቀቂያ / ስህተት | `#22c55e / #f59e0b / #ef4444`               | ተመሳሳይ                           | ✅               |
-| የትራፊክ መብራቶች          | `#ff5f56 / #ffbd2e / #27c93f`               | ተመሳሳይ                           | ✅               |
-| ጨለማ bg / ገጽታ / ድንበር  | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | ተመሳሳይ                           | ✅               |
-| ብርሃን bg / ገጽታ / ጽሑፍ  | `#f9f9fb / #fff / #1a1a2e`                  | ተመሳሳይ                           | ✅               |
-
-**መደምደሚያ:** መከናወን ያለበት የቀለም ፍልሰት የለም። ማንነቱ አስቀድሞ የጋራ ነው፤ እኛ እየሠራን ያለነው እንደገና መገንባት ሳይሆን _ማጠናቀቅ_ ነው።
-
-### 3.2 ክፍተቶች — ዳሽቦርዱ የጎደለው
-
-| ክፍተት                   | በድረ ገጹ ላይ ያለ                                                                 | Dashboard                                             | እርምጃ              |
-| ---------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------- | ----------------- |
-| **የፍርግርግ ዳራ**          | `body::before` የግራፍ ወረቀት፣ `--grid-line`፣ `--grid-size 32px`፣ `--section-alt` | **✅ ታክሏል (ደረጃ 1)**                                   | **ክፍል A**         |
-| **የራዲየስ መለኪያ**         | `--radius 14px`፣ `--radius-sm 9px`                                           | `--radius 14px` ታክሏል፤ `-sm` + የኮምፖነንት ዳግም ማመላከት ይጠብቃል | **ክፍል B / ደረጃ 2** |
-| **የብራንድ ግራዲየንት**       | `--grad-brand 135deg primary→accent-3`                                       | **✅ ቶከን ታክሏል (ደረጃ 1)**፤ በደረጃ 2 ጥቅም ላይ ይውላል           | **ክፍል B**         |
-| **የተዋረደ ገጽታ**          | `--surface-2 #1c2230`                                                        | **✅ ታክሏል (ደረጃ 1)**                                   | **ክፍል B**         |
-| **ሞኖ ቅርጸ ቁምፊ**         | `--font-mono` (የui-monospace ቁልል)                                            | ይጠብቃል (ደረጃ 4፣ ከተጠቃሚዎቹ ጋር)                             | **ክፍል B**         |
-| **`text-muted` (ጨለማ)** | `#8b8b9e`                                                                    | `#a1a1aa` (zinc-400)                                  | ማጣጣም — **ክፍል B**  |
-
-### 3.3 የገጽታ ማስተካከያ አሠራር (ምንም ነገር እንዳናበላሽ)
-
-- **Tailwind v4፣ CSS-first** (`tailwind.config.*` የለም)። ቶከኖች በ`:root`/`.dark` ውስጥ ይገለጻሉ፣ እና በ`@theme inline` (`globals.css:130-179`) በኩል ለመገልገያዎች ይቀርባሉ።
-- **የጨለማ ገጽታ በ`.dark` ክፍል በኩል** በ`<html>` ላይ (`@custom-variant dark` በ`globals.css:22`)፣ በብጁ Zustand store (`src/store/themeStore.ts`) ይቀያየራል፤ ነባሪ ገጽታ = `system` (`src/shared/constants/appConfig.ts:11`)። ድረ ገጹ በምትኩ `html[data-theme="light"]` ይጠቀማል — **አሠራሮቹ የተለያዩ ቢሆኑም ፈጽሞ አይገናኙም** (የተለያዩ መነሻዎች)፣ ስለዚህ ግጭት የለም። የDashboardን `.dark` አሠራር እንደጠበቅነው እንቀጥላለን።
-- **በአሂድ ጊዜ የprimary ማሻሻያ** አለ (`themeStore.ts:85-97`፣ ቅድመ-ቅንብሮች በ`COLOR_THEMES`) — ተጠቃሚዎች `--color-primary`ን መቀየር ይችላሉ። `--color-primary`ን የሚጠቅስ ማንኛውም አዲስ ቶከን (ግራዲየንት፣ ወዘተ) እነዚያን ማሻሻያዎች ያለተጨማሪ ሥራ ይወርሳል። ✅
-- **የTailwind v4 የተያዙ የራዲየስ ስሞች፦** `--radius-sm/md/lg/...` ለ`rounded-*` መገልገያዎች መሠረት ናቸው። እነሱን እንደገና መግለጽ ያሉትን `rounded-*` ሁሉ በኋላ ተመልሶ ይቀይራል (ለምሳሌ፣ `rounded-sm` በ12 ፋይሎች ውስጥ ጥቅም ላይ ውሏል)። ስለዚህ የትንሹ ራዲየስ እሴት እና የኮምፖነንት ዳግም ማመላከት ሆን ተብለው ወደ ደረጃ 2 ተላልፈዋል፣ በዚያም ተጠቃሚዎቹ አብረው ይቀየራሉ።
-
----
-
-## 4. ክፍል A — የግራፍ-ወረቀት ፍርግርግ ዳራ (ዋናው ጥያቄ) — ተግባራዊ ሆኗል (ደረጃ 1)
-
-### 4.1 ምን እንደሆነ
-
-ከጣቢያው (`_mono_repo/omnirouteSite/css/base.css`) የተወሰደው ትክክለኛ አሠራር፦ ሁለት የ1px መስመር ቅልመቶችን የሚስል፣ **ቋሚ፣ ሙሉ-መመልከቻ-ክፍል pseudo-element** ሲሆን፣ ከሁሉም ይዘት ጀርባ `z-index:-1` ላይ ይቀመጣል።
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**`body` ደብዛዛ ያልሆነ `background-color` ቢኖረውም ይህ ለምን እንደሚሠራ፦** `z-index:-1` ያለው `::before` ከኤለመንቱ ራሱ ዳራ _በላይ_ ነገር ግን በመደበኛ ፍሰቱ ውስጥ ካለው ይዘት _በታች_ ይሳላል። ስለዚህ `--color-bg` መሠረታዊ ሙሌት ሲሆን፣ ፍርግርጉ በእሱ ላይ በንብርብር ይቀመጣል፣ መተግበሪያውም ከፍርግርጉ በላይ ይታያል።
-
-### 4.2 ቀድሞውኑ በኮድ መሠረቱ ውስጥ ያለ አብነት
-
-`src/app/landing/page.tsx:16-26` **ቀድሞውኑ ይህንኑ ፍርግርግ በእያንዳንዱ ገጽ ደረጃ ተግባራዊ ያደርጋል** — ነገር ግን በ50px ርቀት፣ **ቀይ** መስመሮችን (`#E54D5E`፣ opacity `0.06`) እና እነማ ያላቸውን ክቦች ይጠቀማል። ስለዚህ ይህ ንድፍ በምርቱ ውስጥ የተረጋገጠ ነው፤ ይህ ሥራ ወደ **ዓለም አቀፍ፣ ገጽታን የሚያውቅ** የዳራ ምስል ከፍ ያደርገዋል።
-
-### 4.3 የተጨመሩ ቶከኖች (በ`globals.css` ውስጥ)
-
-```css
-:root {
-  /* ብርሃናማ — በብዙ ነገሮች በተሞላው ዳሽቦርድ ላይ የዳራ ምስሉ በእርግጥ
-     እንዲታይ፣ የፍርግርጉ opacity ከጣቢያው 0.045 ከፍ ተደርጓል (ካርዶች/chrome አብዛኛውን የመመልከቻ ክፍል ይሸፍናሉ) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* ጨለማ — በተመሳሳይ ምክንያት ከ0.035 ከፍ ተደርጓል */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 ብቸኛው እንቅፋት — ተወግዷል
-
-ፍርግርጉ በአወቃቀሩ ዓለም አቀፋዊ ነው (ፓነሉን፣ `auth`/`login`ን፣ የስህተት ገጾችን — ሁሉንም route በአንድ ጊዜ — ይሸፍናል)። በፓነሉ ውስጥ የደበቀው በትክክል **አንድ** ኤለመንት ነበር፦
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — ውጫዊው wrapper ደብዛዛ ያልሆነ `bg-bg` ይስል ነበር። ከእሱ በታች ያሉት ነገሮች በሙሉ ቀድሞውኑ ግልጽ ናቸው (`<main>`፣ የማሸብለያ መያዣው፣ የውስጡ `max-w-7xl`)፤ ስለዚህ **`bg-bg`ን ማስወገድ** የbody ፍርግርግ በይዘት አካባቢው በኩል እንዲታይ ያደርጋል (የbody `--color-bg` መሠረታዊ ሙሌት ሆኖ ይቀጥላል)።
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 ከchrome ጋር ያለው መስተጋብር (sidebar / header)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) እና `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) **ደብዛዛ ያልሆኑ** ሆነው ይቀጥላሉ → ፍርግርጉ የሚታየው **በይዘት አካባቢው ብቻ** ሲሆን፣ ዙሪያውን ጠጣር chrome ይከበዋል። ይህ ረጋ ያለ ነባሪ ነው፣ እንዲሁም ጣቢያው chromeን ከcanvas ከሚለይበት መንገድ ጋር ይዛመዳል (ውሳኔ D3 = ጠጣር)።
-
-### 4.6 የLogin / auth / ስህተት ገጾች
-
-እነዚህ በቀጥታ ከ`<body>` ሥር ይታያሉ (የፓነል chrome የላቸውም)፣ ስለዚህ ዓለም አቀፋዊው ፍርግርግ በራስ-ሰር ከጀርባቸው መታየት አለበት። **ደረጃ 5 — ተጠናቋል፦** ራሳቸውን የቻሉት ሙሉ-ማያ wrapperዎች በእርግጥ ደብዛዛ ያልሆኑ ነበሩ (`min-h-screen … bg-bg`፣ በዚህም `bg-bg` ከ`<body>` ጋር ተመሳሳይ ጠጣር ሙሌት ነው)፤ ይህም ፍርግርጉን በሁሉም ከዳሽቦርድ ውጭ ባሉ ማያዎች ላይ ይደብቀው ነበር — በlogin ላይ ብቻ አይደለም። የጋራው የዳራ ምስል በእነሱ በኩል እንዲታይ፣ ሁሉም አሁን ግልጽ ተደርገዋል፦ `login`፣ `forgot-password`፣ `callback`፣ `maintenance`፣ `offline`፣ `status`፣ `terms`፣ `privacy`፣ `onboarding` እና `ErrorPageScaffold` (`400`/`401`ን ይሸፍናል)። ይህ **D4**ን ይዘጋል (ከlogin ብቻ ወደ ሁሉም ራሳቸውን ወደቻሉ ማያዎች ተስፋፍቷል)። በ`tests/unit/design-grid-background.test.ts` ጥበቃ ተደርጎለታል።
-
-### 4.7 የማረፊያ ገጽ
-
-`landing/page.tsx` ይበልጥ የበለጸገውን እነማ ያለው ዳራውን (ክቦች + vignette) ይዞ ይቀጥላል — የራሱ የግብይት መግቢያ ማሳያ ነው (ውሳኔ D5 = እንዳለ መተው)።
-
----
-
-## 5. ክፍል B — የቶከን ውህደት
-
-ደረጃ 1 ምንም ተጽዕኖ የሌላቸውንና ከግጭት ነጻ የሆኑ የመለያ ቶከኖችን (`--surface-2`/`--color-surface-2`፣ `--grad-brand`፣ `--radius`) ይጨምራል። ደረጃ 2 የራዲየስ ልኬቱን ከTailwind ጋር ያገናኛል እና ኮምፖነንቶችን ወደ እሱ እንዲጠቁሙ ያደርጋል፤ ደረጃ 4 `--font-mono`ን ከተጠቃሚዎቹ ጋር ይጨምራል።
-
-| ቶከን                        | ምክንያት                                         | ደረጃ                               |
-| -------------------------- | --------------------------------------------- | --------------------------------- |
-| `--radius` / `--radius-sm` | በዘፈቀደ ከተወሰኑ 6/8/12 ይልቅ አንድ የራዲየስ ልኬት (14/9)   | 1 (እሴት) / 2 (ማገናኘት + እንደገና ማመልከት) |
-| `--grad-brand`             | ከጣቢያው ጋር የሚጣጣም ለዋና CTAዎች የብራንድ ቅልመት (ቀይ→ቫዮሌት) | 1 (ቶከን) / 2 (Button)              |
-| `--surface-2`              | ውስጣዊ ፓነሎች / የሰንጠረዥ ራስጌዎች / ወደ ውስጥ የገቡ ረድፎች    | 1                                 |
-| `--font-mono`              | የኮድ ብሎኮች፣ ተርሚናል፣ IDዎች፣ endpoints              | 4                                 |
-| `--text-muted` ማስማማት       | በጣቢያ↔ፓነል መካከል አንድ እሴት ይምረጡ (`#a1a1aa` ይመከራል)  | 2                                 |
-
-**D2 (text-muted):** ጣቢያ `#8b8b9e` እና dashboard `#a1a1aa`። **የdashboardን `#a1a1aa`** እንዲቆይ እና _ጣቢያው_ ከእሱ ጋር እንዲጣጣም እንዲዘምን እንመክራለን። የመልክ ማሻሻያ ብቻ ነው።
-
----
-
-## 6. ክፍል C — የኮምፖነንት ደረጃ ማስተካከያ (ደረጃዎች 2–4)
-
-ብጁ ኮምፖነንቶች (shadcn/Radix የሉም)፣ Tailwind v4፣ የትርጉም ቶከኖች **በአብዛኛው** ጥቅም ላይ ውለዋል (195 ፋይሎች የጋራ barrelን import ያደርጋሉ)። ስራው **ማለፊያዎቹን** ማስወገድ ነው። መነሻ፦ `src/shared/components/`።
-
-| #   | ንጥል                                 | ፋይል(ሎች)                                                                                                                  | ችግር → ዒላማ                                                                                                   | ደረጃ |
-| --- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------- | --- |
-| C1  | **የራዲየስ ማስተካከያ**                    | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                | የተቀላቀሉ 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                           | 2   |
-| C2  | **የButton ቅልመት + `accent` variant** | `Button.tsx:5-12`                                                                                                        | primary ቀጥ ያለ ቀይ→ቀይ ነው፤ ከ`--grad-brand` ጋር ያስተካክሉ፤ የጎደለውን `accent` variant ያክሉ። ~195 importers — ከፍተኛው ታይነት | 2   |
-| C3  | **ሰንጠረዦች**                          | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                      | 100% inline በhardcode የተደረገ rgba + የማይኖሩ vars፤ ወደ ቶከኖች ያዛውሩ፣ የማይጣጣሙ ቅጦችን ከአገልግሎት ያውጡ                        | 3   |
-| C4  | **የሁኔታ ቀለሞችን ማዕከላዊ ማድረግ**           | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helpers | የተመሳሳይ hex 6+ ቅጂዎች → በ`--color-success/warning/error` ላይ የተመሠረተ አንድ module                                  | 3   |
-| C5  | **የCard ድንበር**                      | `Card.tsx:39`                                                                                                            | `border-white/5` → brand `/8`                                                                               | 2   |
-| C6  | **የFocus ring ማስማማት** ✅ ተጠናቋል      | `globals.css` `--focus-ring` (accent) እና የform controls `ring-primary/30`                                                | ከglobal ring ጋር እንዲጣጣም እና ከቀዩ error ring እንዲለይ **accent (ቫዮሌት)** ላይ አንድ ወጥ ሆኗል፤ error ቀይ ሆኖ ይቆያል            | 4   |
-| C7  | **`Checkbox` + `Textarea` ማከል**     | raw `<input>`/`<textarea>` ከinline `accentColor:#6366f1` ጋር                                                              | በቶከን የሚመሩ primitives                                                                                        | 4   |
-| C8  | **የHardcoded-hex ፍተሻ**              | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, Modal dots, ~14 chart files                                       | literals → tokens                                                                                           | 4   |
-| C9  | **`cn()` → clsx + tailwind-merge**  | `src/shared/utils/cn.ts`                                                                                                 | የሚጋጩ classes ይደራረባሉ፤ ለC1 overrides ያስፈልጋል                                                                   | 2   |
-
-**አስቀድሞ ከብራንዱ ጋር የሚጣጣሙ (በቶከን የሚመሩ፣ ራዲየስ ብቻ ያስፈልጋቸዋል)፦** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. የማሰማራት ዕቅድ
-
-- **ደረጃ 1 — ፍርግርግ + የማንነት ቶከኖች (ይህ PR)።** የ`globals.css` ፍርግርግ + `--surface-2`/`--grad-brand`/`--radius` ቶከኖች፤ `body::before` ልጣፍ፤ የ`bg-bg` እንቅፋትን ማስወገድ፤ ቋሚ የመከላከያ ሙከራ። አነስተኛ ስጋት ያለውና በአንድ commit መቀልበስ የሚቻል።
-- **ደረጃ 2 — መሠረታዊ ክፍሎች (C1, C2, C5) — በዚህ PR ውስጥ ተጠናቋል።** የትርጉም ያላቸው የራዲየስ ዩቲሊቲዎች `rounded-card` (14px) / `rounded-control` (9px) በ`@theme` በኩል ታክለዋል (ብጁ ስሞች ስለሆኑ፣ ነባሪዎቹ `rounded-sm/md/lg/xl` ሳይነኩ ይቀራሉ — 400 ፋይሎችን የሚያካትት ለውጥ የለም)፤ Card/Modal → 14px፣ Button/Input/Select → 9px፤ ዋና Button → `--grad-brand` (ቀይ→ቫዮሌት) + አዲስ `accent` ተለዋጭ፤ የCard ድንበሮች → የ`border-border` ቶከን (0.08)። **ለሌላ ጊዜ የተላለፈ:** `cn()`→tailwind-merge (C9) አዳዲስ deps ያስፈልገዋል፤ መሠረታዊ ክፍሎቹ የወለሉን አብዛኛውን ስለሚሸፍኑ፣ ጊዜያዊ የ`rounded-lg` ማስተካከያ (326 ፋይሎች) እንዳለ ተትቷል።
-- **ደረጃ 3 — የሁኔታ ቀለሞች + ሰንጠረዦች (C3, C4) — በዚህ PR ውስጥ ተጠናቋል።** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` ብቸኛ ምንጭ፤ `flow/edgeStyles.ts` + `TokenHealthBadge` ወደዚያ እንዲጠቁሙ ተደርገዋል፣ ተመሳሳዩን hex በትክክል ይዘዋል)። ✅ **`--font-mono`** ቶከን። ✅ **C3 (DataTable)** — እያንዳንዱ inline rgba እና ጥቅም ላይ የማይውሉት `var(--bg-table-header)` / `var(--text-secondary)` fallbacks በ`--table-*` የቶከን ስብስብ (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`) ተተክተዋል፤ **የጨለማ እሴቶቹ ከቀድሞዎቹ hardcoded rgba ጋር ፍጹም እኩል ናቸው** (dark ባይት-በ-ባይት ተመሳሳይ ነው)፣ የብርሃን እሴቶቹ ደግሞ ቀደም ሲል ሁልጊዜ ጨለማ የነበረውን የብርሃን ገጽታ ያስተካክላሉ። የራስጌ ድንበር → `--color-border`፣ ሁለተኛ ደረጃ ጽሑፍ → `--color-text-muted`። **ከመዋሃዱ በፊት የእይታ ፍተሻ ያስፈልገዋል።** (ያልተነኩ፦ `logTableStyles.ts` እና የቆዩት Ant `.ant-table` ደንቦች — የተለዩና ዝቅተኛ ቅድሚያ ያላቸው።)
-- **ደረጃ 4 — ማጽዳት (C6, C7, C9 ተጠናቀዋል፤ C8 ይጠብቃል)።** ✅ **C9** `cn()` → `twMerge(clsx(...))` (clsx + tailwind-merge እንደ deps ታክለዋል) — አሁን የጠሪው `className` ከመሠረታዊ ክፍሉ ጋር የሚጋጭን class ከመደራረብ ይልቅ በትክክል _ይተካል_። ✅ **C7** አዲስ `Checkbox` + `Textarea` መሠረታዊ ክፍሎች (በቶከን የሚመሩ፣ ከbarrel የሚላኩ፤ ተጨማሪ ብቻ ናቸው — 32ቱን ጥሬ checkboxes / 41ዱን ጥሬ textareas መቀበል በደረጃ ሊቀጥል ይችላል)። ✅ **C6** የfocus-ring ማስማማት — የቅጽ መቆጣጠሪያዎቹ (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) አሁን ከዓለም አቀፉ `--focus-ring` ጋር እንዲዛመዱና ከቀዩ የስህተት ቀለበት ጋር እንዳይጋጩ በ**accent (ቫዮሌት)** ቀለበት focus ያደርጋሉ፤ ቀዩ የስህተት ሁኔታ አልተለወጠም። ⏳ **የC8 hex ማጣራት ዓይነ ስውር find/replace አይደለም** — _ሆን ተብለው_ የተደረጉና መቆየት ያለባቸው የተረጋገጡ አጋጣሚዎች፦ `ConsoleLogViewer.tsx:240` (ሁልጊዜ-ጨለማ terminal)፣ የ`TokenHealthBadge` popover፣ ReactFlow SVG strokes። ወደ ገጽታው እንዲስማሙ በእውነት የታሰቡ hex ብቻ ይዛወሩ።
-
-እያንዳንዱ ደረጃ፦ `npm run lint` + `npm run typecheck:core` + የእይታ ፍተሻ።
-
----
-
-## 8. ክፍት ውሳኔዎች (ምክረ ሐሳቦች)
-
-- **D1 — ዋና Button፦** ቀይ→ቀይ ይቆይ ወይስ ወደ **ቀይ→ቫዮሌት `--grad-brand`** ይቀየር? ምክር፦ **ቀይ→ቫዮሌት** (ደረጃ 2)።
-- **D2 — የፍርግርግ መስመር ቀለም፦** **ገለልተኛ** (የጣቢያው ቅጥ) — ተመርጧል — ከbrand-red ጋር ሲነጻጸር። መጠን **32px** (በባለቤቱ ግብረ መልስ መሠረት ከመጀመሪያው 46px በ~30% ቀንሷል — 46px ሕዋሶች በdashboard አቀማመጥ ላይ በጣም ትልቅ ይመስሉ ነበር)።
-- **D3 — የChrome ጥርትነት፦** sidebar/header **ድፍን** — ተመርጧል።
-- **D4 — የAuth/login ፍርግርግ፦** ✅ **ተጠናቋል (ደረጃ 5)** — ግልጽነት የሌለው `bg-bg` ከሁሉም ራሳቸውን ከቻሉ ሙሉ-ማያ መጠቅለያዎች (ከlogin ብቻ ሳይሆን) ተወግዷል፣ ስለዚህ ፍርግርጉ በሁሉም ማያዎች ላይ ይታያል። §4.6ን ይመልከቱ።
-- **D5 — የማረፊያ ገጽ፦** እነማ ያለው splash እንዳለ ይቆይ። ተመርጧል።
-- **D6 — 14/9 ራዲየስ በምርቱ በሙሉ፦** ምክር፦ አዎ (ደረጃ 2)።
-- **D7 — ደረጃ 1 መጀመሪያ ይለቀቃል፦** ተመርጧል።
-- **D8 — የአቀማመጥ ስፋት (ደረጃ 5)፦** የdashboard ይዘት shell በ`max-w-7xl` (1280px) ተገድቦ ነበር፣ ይህም በትላልቅ monitors ላይ ሰፊ ባዶ የጎን ክፍተቶችን በመተው ይዘቱን መሃል ያደርገው ነበር። ✅ **ተጠናቋል** — ወደ ተለዋዋጭ `max-w-[3840px]` (እውነተኛ 4K) ከፍ ብሏል፦ አሁን ይዘቱ እስከ ~4K ድረስ viewportን ይከተላል፣ ከዚያ በላይ ብቻ መሃል ይሆናል (`DashboardLayout.tsx`)። ሆን ተብለው ጠባብ የተደረጉ ገጾች በንድፍ ጠባብ ሆነው ይቆያሉ (`ProviderOnboardingWizard` max-w-5xl፣ `Rtk`/`CavemanContextPageClient` max-w-6xl)።
-- **D9 — ግልጽነት የሌላቸው የውሂብ ሰንጠረዦች (ደረጃ 6)፦** የdashboard ይዘት ቦታ አሁን ግልጽ በመሆኑ (የፍርግርግ ልጣፉ እንዲታይ፣ ደረጃ 5)፣ መያዣቸው ግልጽነት የሌለው surface ያልነበረ የውሂብ ሰንጠረዦች ፍርግርጉ በግልጽ even-rows / ዝቅተኛ-alpha zebra በኩል እንዲታይ ያደርጉ ነበር። ✅ **ተጠናቋል** — እያንዳንዱ Card የሌለው ሰንጠረዥ አሁን `bg-surface`ን ይስላል (ወይም ለ`<DataTable>` መሠረታዊ ክፍል፣ በscroll መያዣው ላይ `background: var(--color-surface)`)። የተስተካከሉ፦ `DataTable` (መሠረታዊ ክፍል)፣ `ProxyLogger`/`RequestLoggerV2` (የእነሱ `<Card>` `bg-black/5 dark:bg-black/20` tint በtailwind-merge በኩል ከCard `bg-surface` በላይ እያሸነፈ ነበር → ~95% ግልጽ)፣ `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`፣ እንዲሁም በcache እይታዎች ውስጥ ያሉት ሁለቱ CSS-grid “ሰንጠረዦች” (`bg-surface/35` → `bg-surface`)። ቀድሞውኑ በ`<Card>`/Modal ውስጥ ያሉ ሰንጠረዦች ግልጽነት እንደሌላቸው ተረጋግጦ፣ ሆን ተብለው ሳይነኩ ቀርተዋል (በዚያ ያለው bg-surface የማያስፈልግ no-op ነው)። ፍርግርጉ ራሱ **ምንም ለውጥ አላስፈለገውም** — የdashboard `body::before` ከጣቢያው ጋር ባይት-በ-ባይት ተመሳሳይ ነው (`--grid-size: 32px`)፤ በሚሰራ instance ላይ የሚታይ ማንኛውም “ትልቅ ፍርግርግ” ጊዜ ያለፈበት ከ`#4143` በፊት ያለ build ነው እንጂ code አይደለም። በ`tests/unit/design-grid-background.test.ts` (የደረጃ 6 block) ተጠብቋል።
-
----
-
-## 9. ከወሰን ውጭ / ስጋቶች
-
-- **የቀለም ስብስብ ለውጥ የለም** — ቀለሞቹ አስቀድመው ይዛመዳሉ፤ እኛ የምንጨምረው የጎደሉ ቶከኖችን ብቻ ነው። የምርቱን ቀለም የመቀየር ስጋት የለም።
-- **የገጽታ ሞተር ለውጥ የለም** — `.dark` + Zustand store እንዳለ ይቆይ።
-- **የራዲየስ ለውጥ (ደረጃ 2) ሰፊ ነው** — እያንዳንዱን ካርድ/አዝራር/ግቤት ይነካል፤ ከማዋሃድ በፊት ብዙ ይዘት ያላቸውን ማያ ገጾች (ሰንጠረዦች፣ ሞዳሎች) በዓይን ይፈትሹ።
-- **ሰንጠረዦች (C3)** አብዛኛውን በቀጥታ የተቀመጠ ቅጥ እና ከፍተኛውን የዳግም ስህተት ስጋት ይይዛሉ — በራሳቸው PR ውስጥ ይለዩዋቸው።
-
----
-
-## 10. የማጣቀሻ ማውጫ
-
-| ክፍል                         | ዱካ                                                                                                                   |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| የዳሽቦርድ ቶከኖች                 | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| የገጽታ store                  | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| የፓነል shell (grid እዚህ ተከፍቷል) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                      | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| የGrid ቀዳሚ ምሳሌ               | `src/app/landing/page.tsx:16-26`                                                                                     |
-| መሠረታዊ አካላት                  | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| የሁኔታ-ቀለም ምንጮች               | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn` util                   | `src/shared/utils/cn.ts`                                                                                             |
-| የደረጃ 1 መከላከያ ሙከራ            | `tests/unit/design-grid-background.test.ts`                                                                          |
-| የጣቢያ ማጣቀሻ                   | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — የtoken ድልድይ፣ `.dark` overrides፣ OmniRoute `@layer components` ቅጥያዎች
+- `packages/ui-kit/UPSTREAM.md` — የተወሰነ upstream commit እና የፈቃድ ማረጋገጫ፤ `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` እና ከጎኑ ያሉት አስማሚዎች፤ `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

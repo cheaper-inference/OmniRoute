@@ -13,6 +13,25 @@ type Item = {
 type Group = { type: "group"; id: string; items: Item[] };
 type Section = { id: string; children: (Item | Group)[] };
 
+test("matching preserves field short-circuiting and accepts mixed-case keywords", () => {
+  const item: Item = {
+    id: "entry",
+    label: "Match",
+    get subtitle(): string {
+      throw new Error("later fields must not be read");
+    },
+  };
+  assert.equal(
+    filterSidebarSectionsByQuery([{ id: "s", children: [item] }], "match")[0].children[0],
+    item
+  );
+  const keywordItem: Item = { id: "entry", label: "Other", keywords: ["", "MiXeD"] };
+  assert.equal(
+    filterSidebarSectionsByQuery([{ id: "s", children: [keywordItem] }], "mixed")[0].children[0],
+    keywordItem
+  );
+});
+
 function makeSections(): Section[] {
   return [
     {
