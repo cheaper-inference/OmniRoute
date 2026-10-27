@@ -39,7 +39,7 @@ Comparáid oibiachtúil gnéithe le ródairí AI foinse oscailte coitianta.
 
 ## Cathain ar chóir OmniRoute a roghnú
 
-- Déanann tú féinóstáil agus teastaíonn uait **uaschumhdach soláthraithe** (375 soláthraí, 155 iontráil catalaige saor in aisce/gan údarú)
+- Déanann tú féinóstáil agus teastaíonn uait **uaschumhdach soláthraithe** (376 soláthraí, 155 iontráil catalaige saor in aisce/gan údarú)
 - Teastaíonn uait **freastalaí MCP ionsuite** (uirlisí LLM, cuimhne, scileanna nochta mar uirlisí)
 - Teastaíonn uait **prótacal A2A** do shreafaí oibre gníomhaire-go-gníomhaire
 - Teastaíonn uait **folach méarloirge** (JA3/JA4) chun braiteadh ó CAPTCHAs thuas an tsruth a sheachaint

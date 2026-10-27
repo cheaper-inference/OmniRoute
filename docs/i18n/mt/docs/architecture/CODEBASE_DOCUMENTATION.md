@@ -499,7 +499,7 @@ fornitur (schemas tal-għodod, adapters ta’ fetch/TTS, ħandlers għal karatte
 (helper tal-identità kondiviż) u `index.ts` (reġistru).
 
 > Nota: il-fornituri li mhumiex elenkati hawn jiġu servuti minn `default.ts` bl-użu tal-eżekutur ġeneriku
-> kompatibbli ma’ OpenAI. Il-katalgu sħiħ tal-fornituri (375 fornitur) jinsab f’
+> kompatibbli ma’ OpenAI. Il-katalgu sħiħ tal-fornituri (376 fornitur) jinsab f’
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

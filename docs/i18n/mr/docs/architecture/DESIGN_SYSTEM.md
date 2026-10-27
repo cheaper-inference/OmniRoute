@@ -64,30 +64,33 @@
 
 ## 2. नियम
 
-1. टोकन्स वापरा, लिटरल्स कधीही वापरू नका. जाणीवपूर्वक ठेवलेले अपवाद: नेहमी गडद असलेले कन्सोल टर्मिनल, `STATUS_HEX` (`src/shared/constants/statusColors.ts`) द्वारे ReactFlow SVG
-   स्ट्रोक्स आणि श्रेणीबद्ध पॅलेट्स
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) व
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. `packages/ui-kit/src` मध्ये कधीही हाताने बदल करू नका: `scripts/dev/sync-ui-kit.sh <commit>` वापरून समक्रमित करा;
-   पिन केलेल्या अपस्ट्रीम कमिटपेक्षा कोणताही बाइट वेगळा असल्यास pre-commit गेट
-   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) अयशस्वी होते (अपस्ट्रीम क्लोन,
-   `UI_KIT_CLONE` किंवा `_references/cheaper-inference-ui-kit`, उपलब्ध नसल्यास ते इशाऱ्यासह वगळले जाते). किटमध्ये एखादी गोष्ट उपलब्ध नसल्यास,
-   अॅडॅप्टर किंवा स्क्रीनमध्ये पर्यायी उपाय करा आणि ती अपस्ट्रीममध्ये जोडण्याची विनंती करा.
-3. किटमधील मजकुराची डीफॉल्ट मूल्ये इंग्रजीत आहेत (`label = "Loading"`, `loadingLabel = "Loading table"`…) — किट कॉम्पोनंट मजकूर रेंडर करत असताना नेहमी
-   `useTranslations(...)` मधील अनुवादित स्ट्रिंग्स द्या.
-4. Tailwind युटिलिटीजना किट कॉम्पोनंटच्या क्लासेसपेक्षा प्राधान्य मिळते (किट
-   `@layer theme, base, components, utilities` घोषित करते आणि त्याचे नियम `components` मध्ये असतात) — अंतर व लेआउटसाठी युटिलिटीज वापरा,
-   किट कॉम्पोनंट्सचे रंग बदलण्यासाठी नाही.
-5. शीर्षके: पृष्ठ व विभागांच्या शीर्षकांसाठी `.ci-heading` (Inter, ट्रॅकिंगविना); `.ci-dashboard-display`
-   (Instrument Serif) फक्त त्रुटी-पृष्ठावरील स्थिती कोडसारख्या मोठ्या आणि विरळ डिस्प्ले मजकुरासाठी वापरा.
-6. `tests/unit/dashboard-kit-sweep.test.ts` किटच्या अंगीकाराची खात्री करते: `src/app` किंवा
-   `src/shared/components` अंतर्गत Material लिगेचर span नसावा; डॅशबोर्ड ट्रीमध्ये (`src/app/(dashboard)` आणि
-   `src/shared/components`) कोणताही थेट `<select>`, `<textarea>` किंवा `<table>` नसावा आणि सूचीबद्ध अपवादांबाहेर
-   ( `Select` अॅडॅप्टरची नेटिव्ह शाखा,
-   `RequestLoggerDetail`) स्वतः तयार केलेला `role="dialog"` नसावा; तेथील प्रत्येक थेट `<button>` किंवा `<input>` साठी
-   कारणासह `kit-exception:` असलेली टिप्पणी आवश्यक आहे आणि ती त्याच्या जास्तीत जास्त 3 ओळी आधी संपलेली असावी; पॅलेटच्या रंगछटा आणि `dark:` व्हेरिएंट्स
-   फक्त चाचणीत सूचीबद्ध केलेल्या फाइल्समध्येच असावेत.
-7. PR पूर्वी दोन्ही थीम्स आणि 390 px व्ह्यूपोर्टची पडताळणी करा (स्क्रीनशॉट्स); `tests/e2e/a11y.spec.ts`
+1. टोकन, कधीही लिटरल नाही. जाणीवपूर्वक ठेवलेले अपवाद: नेहमी गडद असलेले कन्सोल टर्मिनल आणि
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — लिटरल हेक्स हवा असलेल्या कॉलरसाठी किट स्टेटस
+   पॅलेटचे रिझॉल्व्ह-हेक्स मिरर. कॅटेगोरिकल पॅलेट्स आता अपवाद राहिलेल्या नाहीत:
+   त्या किटच्या पाच चार्ट टोकनवर (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts`
+   मार्फत आणि रूटिंग स्ट्रॅटेजीसाठी
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` मार्फत चालतात; ReactFlow एजेस आणि ऑर्केस्ट्रेशन
+   कॅनव्हास थीम-जागरूक `--orch-status-*` व्हेरिएबल्स वाचतात (`src/shared/components/flow/edgeStyles.ts`).
+2. `packages/ui-kit/src` कधीही हाताने पॅच करू नका: `scripts/dev/sync-ui-kit.sh <commit>` सह सिंक करा;
+   pre-commit गेट `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) पिन केलेल्या अपस्ट्रीम कमिटपेक्षा
+   वेगळ्या कोणत्याही बाइटवर अयशस्वी होते (अपस्ट्रीम क्लोन,
+   `UI_KIT_CLONE` किंवा `_references/cheaper-inference-ui-kit`, अनुपस्थित असताना ते चेतावणीसह वगळते).
+   किटमध्ये काही कमी असल्यास, अॅडॅप्टर किंवा स्क्रीनमध्ये त्याभोवती काम करा आणि अपस्ट्रीमकडे त्याची मागणी करा.
+3. किट टेक्स्ट डीफॉल्ट इंग्रजी आहेत (`label = "Loading"`, `loadingLabel = "Loading table"`…) — किट
+   कम्पोनेंट टेक्स्ट रेंडर करताच `useTranslations(...)` मधून अनुवादित स्ट्रिंग्ज पास करा.
+4. Tailwind युटिलिटीज किट कम्पोनेंट क्लासेसवर जिंकतात (किट
+   `@layer theme, base, components, utilities` घोषित करते आणि तिचे नियम `components` मध्ये राहतात) — स्पेसिंग आणि
+   लेआउटसाठी युटिलिटीज वापरा, किट कम्पोनेंट्स पुन्हा रंगवण्यासाठी नाही.
+5. शीर्षके: पेज आणि सेक्शन शीर्षकांसाठी `.ci-heading` (Inter, ट्रॅकिंग नाही); `.ci-dashboard-display`
+   (Instrument Serif) फक्त एरर-पेज स्टेटस कोडसारख्या मोठ्या, विरळ डिस्प्ले टेक्स्टसाठी.
+6. `tests/unit/dashboard-kit-sweep.test.ts` किट अवलंबाचे रक्षण करते: `src/app` किंवा
+   `src/shared/components` खाली Material ligature स्पॅन नाही; डॅशबोर्ड ट्रीमध्ये (`src/app/(dashboard)` आणि
+   `src/shared/components`) रॉ `<select>`, `<textarea>` किंवा `<table>` नाही आणि सूचीबद्ध अपवादांच्या बाहेर
+   हाताने बनवलेले `role="dialog"` नाही (`Select` अॅडॅप्टरची नेटिव्ह शाखा,
+   `RequestLoggerDetail`); तेथील प्रत्येक रॉ `<button>` किंवा `<input>` ला `kit-exception:` असलेली कमेंट
+   (कारणासह) जास्तीत जास्त 3 ओळी वर संपणारी हवी; पॅलेट ह्यूज आणि `dark:` व्हेरिएंट्स
+   फक्त टेस्ट सूचीबद्ध करत असलेल्या फाइल्समध्ये.
+7. PR पूर्वी दोन्ही थीम आणि 390 px व्ह्यूपोर्ट तपासा (स्क्रीनशॉट्स); `tests/e2e/a11y.spec.ts`
    axe चालवते.
 
 ## 3. स्क्रीन जोडणे

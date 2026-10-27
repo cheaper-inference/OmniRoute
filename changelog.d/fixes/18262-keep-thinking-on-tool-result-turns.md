@@ -1,0 +1,1 @@
+- **fix(sse):** keep the `thinking` config on tool-result turns (OpenAI `tool`, Gemini `function`); only an assistant/model prefill strips it ([#18262](https://github.com/diegosouzapw/OmniRoute/pull/18262)) — thanks @claytontavaresdan

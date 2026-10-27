@@ -20,7 +20,7 @@ Khi một agent của IDE (ví dụ: GitHub Copilot, Cursor, Claude Code) thực
 
 Điều này có nghĩa là bạn có thể:
 
-- **Định tuyến lại bất kỳ agent nào tới bất kỳ provider nào**: Copilot đang giao tiếp với OpenAI? Hãy chuyển hướng nó sang Anthropic Claude, Gemini, hoặc bất kỳ provider nào trong số 375 provider của OmniRoute.
+- **Định tuyến lại bất kỳ agent nào tới bất kỳ provider nào**: Copilot đang giao tiếp với OpenAI? Hãy chuyển hướng nó sang Anthropic Claude, Gemini, hoặc bất kỳ provider nào trong số 376 provider của OmniRoute.
 - **Áp dụng ánh xạ model**: `gemini-3-flash` → `claude-sonnet-4.7` một cách trong suốt ở tầng handler.
 - **Quan sát toàn bộ lưu lượng agent**: mọi request bị chặn đều được đưa lên [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
 - **Áp dụng khả năng phục hồi của OmniRoute**: combo routing, circuit breaker, fallback và theo dõi chi phí cũng hoạt động với lưu lượng agent của IDE.

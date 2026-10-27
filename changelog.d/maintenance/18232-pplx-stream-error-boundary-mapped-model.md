@@ -1,0 +1,1 @@
+- **test(perplexity-web):** the stream error boundary test's delayed success hook case uses the mapped `pplx-sonar` model instead of the unmapped `pplx-auto-delayed-success-proof`, which #17822 now rejects with a local 404 before the stream starts ([#18232](https://github.com/diegosouzapw/OmniRoute/pull/18232)) — thanks @HouMinXi

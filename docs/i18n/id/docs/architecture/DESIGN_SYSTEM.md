@@ -82,13 +82,38 @@
 
 ## 2. Aturan
 
-1. Gunakan token, bukan literal. Pengecualian yang sengaja dipertahankan: terminal konsol yang selalu gelap, goresan SVG ReactFlow melalui `STATUS_HEX` (`src/shared/constants/statusColors.ts`), serta palet kategoris `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) dan `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Jangan pernah menambal `packages/ui-kit/src` secara manual: sinkronkan dengan `scripts/dev/sync-ui-kit.sh <commit>`; pemeriksaan pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) akan gagal jika ada byte yang berbeda dari commit upstream yang disematkan (pemeriksaan dilewati dengan peringatan ketika klona upstream, `UI_KIT_CLONE` atau `_references/cheaper-inference-ui-kit`, tidak tersedia). Jika kit tidak menyediakan sesuatu, buat solusi alternatif di adaptor atau layar dan mintalah agar hal tersebut ditambahkan di upstream.
-3. Teks bawaan kit menggunakan bahasa Inggris (`label = "Loading"`, `loadingLabel = "Loading table"`…) — teruskan string terjemahan dari `useTranslations(...)` setiap kali komponen kit merender teks.
-4. Utilitas Tailwind lebih diutamakan daripada class komponen kit (kit mendeklarasikan `@layer theme, base, components, utilities` dan aturannya berada di `components`) — gunakan utilitas untuk pengaturan spasi dan tata letak, bukan untuk mengubah warna komponen kit.
-5. Heading: `.ci-heading` (Inter, tanpa tracking) untuk judul halaman dan bagian; `.ci-dashboard-display` (Instrument Serif) hanya untuk teks tampilan yang besar dan renggang, seperti kode status pada halaman error.
-6. `tests/unit/dashboard-kit-sweep.test.ts` menjaga adopsi kit: tidak boleh ada span ligatur Material di bawah `src/app` atau `src/shared/components`; di dalam hierarki dashboard (`src/app/(dashboard)` dan `src/shared/components`) tidak boleh ada `<select>`, `<textarea>`, atau `<table>` mentah serta tidak boleh ada `role="dialog"` yang dibuat manual di luar pengecualian yang tercantum (cabang native adaptor `Select`, `RequestLoggerDetail`); setiap `<button>` atau `<input>` mentah di sana memerlukan komentar yang memuat `kit-exception:` (beserta alasannya) dan berakhir maksimal 3 baris di atasnya; rona palet dan varian `dark:` hanya diperbolehkan dalam file yang tercantum pada pengujian.
-7. Verifikasi kedua tema dan viewport 390 px sebelum membuat PR (dengan tangkapan layar); `tests/e2e/a11y.spec.ts` menjalankan axe.
+1. Token, jangan pernah literal. Pengecualian dipertahankan dengan sengaja: terminal konsol yang
+   selalu gelap dan `STATUS_HEX` (`src/shared/constants/statusColors.ts`), cermin hex yang sudah
+   di-resolve dari palet status kit untuk pemanggil yang membutuhkan hex literal. Palet kategorikal
+   tidak lagi menjadi pengecualian: palet tersebut memakai lima token chart milik kit
+   (`--color-chart-1..5`) melalui `src/shared/utils/categoricalPalette.ts` dan, untuk strategi
+   routing, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; edge ReactFlow dan kanvas
+   orkestrasi membaca variabel `--orch-status-*` yang peka tema
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Jangan pernah menambal `packages/ui-kit/src` secara manual: sinkronkan dengan
+   `scripts/dev/sync-ui-kit.sh <commit>`; gerbang pre-commit `npm run check:ui-kit-snapshot`
+   (`.husky/pre-commit`) gagal pada setiap byte yang berbeda dari commit upstream yang di-pin
+   (dilewati dengan peringatan ketika clone upstream, `UI_KIT_CLONE` atau
+   `_references/cheaper-inference-ui-kit`, tidak ada). Ketika kit tidak menyediakan sesuatu, atasi
+   di adapter atau di layar dan ajukan permintaan ke upstream.
+3. Default teks kit adalah bahasa Inggris (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   berikan string terjemahan dari `useTranslations(...)` setiap kali komponen kit merender teks.
+4. Utility Tailwind menang atas kelas komponen kit (kit mendeklarasikan
+   `@layer theme, base, components, utilities` dan aturannya berada di `components`) — gunakan
+   utility untuk spasi dan tata letak, bukan untuk mewarnai ulang komponen kit.
+5. Heading: `.ci-heading` (Inter, tanpa tracking) untuk judul halaman dan bagian;
+   `.ci-dashboard-display` (Instrument Serif) hanya untuk teks display besar yang jarang, seperti
+   kode status halaman error.
+6. `tests/unit/dashboard-kit-sweep.test.ts` menjaga adopsi kit: tidak boleh ada span ligatur
+   Material di bawah `src/app` atau `src/shared/components`; di pohon dashboard
+   (`src/app/(dashboard)` dan `src/shared/components`) tidak boleh ada `<select>`, `<textarea>`
+   atau `<table>` mentah maupun `role="dialog"` buatan sendiri di luar pengecualian yang tercantum
+   (cabang native milik adapter `Select`, `RequestLoggerDetail`); setiap `<button>` atau `<input>`
+   mentah di sana memerlukan komentar berisi `kit-exception:` (beserta alasannya) yang berakhir
+   paling banyak 3 baris di atasnya; hue palet dan varian `dark:` hanya di file yang tercantum
+   dalam test tersebut.
+7. Verifikasi kedua tema dan viewport 390 px sebelum membuat PR (screenshot);
+   `tests/e2e/a11y.spec.ts` menjalankan axe.
 
 ## 3. Menambahkan layar
 

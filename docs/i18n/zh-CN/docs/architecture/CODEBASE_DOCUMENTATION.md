@@ -487,7 +487,7 @@ open-sse/
 （共享身份辅助工具）和 `index.ts`（注册表）。
 
 > 注意：此处未列出的提供者由 `default.ts` 使用通用的
-> OpenAI 兼容执行器提供服务。完整的提供者目录（375 个提供者）位于
+> OpenAI 兼容执行器提供服务。完整的提供者目录（376 个提供者）位于
 > `src/shared/constants/providers.ts`。
 
 ### 4.3 `open-sse/translator/`

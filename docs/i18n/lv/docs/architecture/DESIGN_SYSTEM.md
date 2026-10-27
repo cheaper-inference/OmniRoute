@@ -81,31 +81,35 @@
 
 ## 2. Noteikumi
 
-1. Izmantojiet tokenus, nevis literāļus. Apzināti saglabātie izņēmumi: vienmēr tumšais konsoles terminālis, ReactFlow SVG
-   līnijas, izmantojot `STATUS_HEX` (`src/shared/constants/statusColors.ts`), kā arī kategoriju paletes
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) un
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Nekad manuāli nelabojiet `packages/ui-kit/src`: sinhronizējiet to ar `scripts/dev/sync-ui-kit.sh <commit>`;
-   pirmskomita pārbaude `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) neizdodas, ja kaut viens baits
-   atšķiras no piesaistītā augšupējā komita (tā tiek izlaista ar brīdinājumu, ja nav pieejams augšupējais klons
-   `UI_KIT_CLONE` vai `_references/cheaper-inference-ui-kit`). Ja komplektā kaut kā trūkst,
-   apejiet šo ierobežojumu adapterī vai ekrānā un pieprasiet to augšupējā projektā.
-3. Komplekta noklusējuma teksti ir angļu valodā (`label = "Loading"`, `loadingLabel = "Loading table"`…) — nododiet tulkotas
-   virknes no `useTranslations(...)` ikreiz, kad komplekta komponents atveido tekstu.
-4. Tailwind utilītas ir prioritāras pār komplekta komponentu klasēm (komplekts deklarē
-   `@layer theme, base, components, utilities`, un tā kārtulas atrodas slānī `components`) — izmantojiet utilītas
-   atstarpēm un izkārtojumam, nevis komplekta komponentu krāsu maiņai.
-5. Virsraksti: `.ci-heading` (Inter, bez rakstzīmju atstarpju izmaiņām) lapu un sadaļu virsrakstiem; `.ci-dashboard-display`
-   (Instrument Serif) tikai lielam, retam displeja tekstam, piemēram, kļūdas lapas statusa kodam.
-6. `tests/unit/dashboard-kit-sweep.test.ts` kontrolē komplekta ieviešanu: zem
-   `src/app` vai `src/shared/components` nedrīkst būt Material ligatūru span elementu; informācijas paneļa kokā (`src/app/(dashboard)` un
-   `src/shared/components`) nedrīkst būt neapstrādātu `<select>`, `<textarea>` vai `<table>` elementu un manuāli veidotu
-   `role="dialog"` ārpus uzskaitītajiem izņēmumiem (`Select` adaptera vietējā atzara,
-   `RequestLoggerDetail`); katram neapstrādātam `<button>` vai `<input>` elementam tur ir nepieciešams komentārs ar
-   `kit-exception:` (norādot iemeslu), kas beidzas ne vairāk kā 3 rindas virs tā; palešu nokrāsas un `dark:` varianti
-   ir atļauti tikai testa uzskaitītajos failos.
-7. Pirms PR pārbaudiet abus motīvus un 390 px skata apgabalu (ar ekrānuzņēmumiem); `tests/e2e/a11y.spec.ts` izpilda
-   axe.
+1. Tokeni, nekad literāļi. Izņēmumi atstāti apzināti: vienmēr tumšais konsoles terminālis un
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — kit statusa paletes atrisināto hex
+   vērtību spogulis izsaucējiem, kuriem nepieciešams literāls hex. Kategoriju paletes vairs nav
+   izņēmums: tās balstās uz kit pieciem diagrammu tokeniem (`--color-chart-1..5`) caur
+   `src/shared/utils/categoricalPalette.ts` un maršrutēšanas stratēģijām —
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow malas un orķestrācijas
+   audekls lasa no motīva atkarīgos `--orch-status-*` mainīgos (`src/shared/components/flow/edgeStyles.ts`).
+2. Nekad nelabot `packages/ui-kit/src` manuāli: sinhronizēt ar `scripts/dev/sync-ui-kit.sh <commit>`;
+   pre-commit pārbaude `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) neizdodas, ja kāds
+   baits atšķiras no piespraustā upstream commit (tā izlaižas ar brīdinājumu, kad upstream klons —
+   `UI_KIT_CLONE` vai `_references/cheaper-inference-ui-kit` — nav pieejams). Kad kit kaut kā trūkst,
+   apiet to adapterī vai ekrānā un pieprasīt to upstream.
+3. Kit teksta noklusējumi ir angļu valodā (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   nodot iztulkotas virknes no `useTranslations(...)`, ikreiz, kad kit komponents attēlo tekstu.
+4. Tailwind utilītklases ir pārākas par kit komponentu klasēm (kit deklarē
+   `@layer theme, base, components, utilities`, un tā noteikumi atrodas `components` slānī) —
+   utilītklases izmantot atstarpēm un izkārtojumam, nevis kit komponentu pārkrāsošanai.
+5. Virsraksti: `.ci-heading` (Inter, bez tracking) lapu un sadaļu virsrakstiem;
+   `.ci-dashboard-display` (Instrument Serif) tikai lielam, retam displeja tekstam, piemēram,
+   kļūdas lapas statusa kodam.
+6. `tests/unit/dashboard-kit-sweep.test.ts` sargā kit ieviešanu: zem `src/app` vai
+   `src/shared/components` nedrīkst būt Material ligatūru span elementu; dashboard kokā
+   (`src/app/(dashboard)` un `src/shared/components`) nedrīkst būt jēlu `<select>`, `<textarea>` vai
+   `<table>` un paštaisītu `role="dialog"` ārpus uzskaitītajiem izņēmumiem (`Select` adaptera
+   natīvais zars, `RequestLoggerDetail`); katram jēlam `<button>` vai `<input>` tur nepieciešams
+   komentārs, kas satur `kit-exception:` (ar iemeslu) un beidzas ne vairāk kā 3 rindas virs tā;
+   paletes toņi un `dark:` varianti — tikai failos, kurus tests uzskaita.
+7. Pirms PR pārbaudīt abus motīvus un 390 px skatlauku (ekrānuzņēmumi); `tests/e2e/a11y.spec.ts`
+   palaiž axe.
 
 ## 3. Ekrāna pievienošana
 
