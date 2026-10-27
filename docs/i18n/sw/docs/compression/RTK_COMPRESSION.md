@@ -23,22 +23,24 @@ Zilizopangwa:    1 - (1 - 0.80) * (1 - 0.46) = 89.2% imeokolewa
 Masafa:          1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Inachokandamiza
+## Kile Kinachobanwa
 
-Katalogi iliyojengewa ndani kwa sasa ina vichujio 49 katika kategoria hizi:
+Katalogi iliyojengwa ndani kwa sasa inatoka na vichujio 56 katika kategoria hizi:
 
-| Kategoria | Mifano                                                                     |
-| --------- | -------------------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                          |
-| `test`    | Vitest, Jest, Pytest, Playwright, majaribio ya Go, majaribio ya Cargo      |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx              |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler              |
-| `shell`   | `ls`, `find`, `grep`, kumbukumbu za kawaida za shell                       |
-| `docker`  | `docker ps`, kumbukumbu za Docker                                          |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                                    |
-| `generic` | Matokeo ya JSON, ufuatiliaji wa rundo, chaguo-msingi la matokeo ya kawaida |
+| Kategoria | Mifano                                                                  |
+| --------- | ----------------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                       |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, majaribio ya Cargo       |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx           |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler           |
+| `shell`   | `ls`, `find`, `grep`, kumbukumbu za shell za jumla                      |
+| `docker`  | `docker ps`, kumbukumbu za Docker                                       |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                                 |
+| `generic` | matokeo ya JSON, ufuatiliaji wa steki, njia mbadala ya matokeo ya jumla |
 
-Kitambuzi katika `open-sse/services/compression/engines/rtk/commandDetector.ts` huainisha matokeo kabla ya uteuzi wa kichujio. Vichujio vinaweza pia kulingana na muundo wa amri au regex ya matokeo wakati aina ya amri haitoshi.
+Kichunguzi kilicho katika `open-sse/services/compression/engines/rtk/commandDetector.ts` hupanga matokeo
+katika makundi kabla ya kuchagua kichujio. Vichujio pia vinaweza kuoana kwa muundo wa amri au regex ya
+matokeo wakati darasa la amri halitoshi.
 
 ## Utatuzi wa Vichujio
 
@@ -342,19 +344,19 @@ node --import tsx/esm --test \
 
 ## Viwango vya Ukali (v3.8.16+)
 
-RTK hutumia **viwango 3 vya ukali** vinavyosawazisha **ukali wa ubanaji** na **usalama**. Kiwango huwekwa kupitia `config.intensity` katika usanidi wa injini.
+RTK inasaidia **viwango 3 vya ukali** vinavyolinganisha kati ya **ushinikizaji wa ubanaaji** na **usalama**. Kiwango kinawekwa kupitia `config.intensity` katika usanidi wa injini.
 
-### Viwango 3
+### Viwango hivyo 3
 
-| Kiwango                    | Kizingiti cha ufupishaji   | Uokoaji wa tokeni | Hatari     | Kinafaa zaidi kwa                            |
-| -------------------------- | -------------------------- | ----------------- | ---------- | -------------------------------------------- |
-| `minimal`                  | Mistari 24 kwa kila sehemu | ~20-40%           | Ndogo sana | Uzalishaji wenye muktadha muhimu             |
-| `standard` (chaguo-msingi) | Mistari 24 kwa kila sehemu | ~50-70%           | Ndogo      | Vipindi vya kila siku vya uandishi wa msimbo |
-| `aggressive`               | Mistari 16 kwa kila sehemu | ~70-90%           | Wastani    | Vipindi virefu, uokoaji wa juu zaidi         |
+| Kiwango                   | Kikomo cha kukata     | Akiba ya tokeni | Hatari     | Bora kwa                          |
+| ------------------------- | --------------------- | --------------- | ---------- | --------------------------------- |
+| `minimal`                 | Mistari 24 kwa sehemu | ~20-40%         | Ndogo sana | Uzalishaji wenye muktadha muhimu  |
+| `standard` (chaguomsingi) | Mistari 24 kwa sehemu | ~50-70%         | Ndogo      | Vikao vya kodi vya kila siku      |
+| `aggressive`              | Mistari 16 kwa sehemu | ~70-90%         | Wastani    | Vikao virefu, akiba ya juu kabisa |
 
-### Mahali Ufupishaji Unapotokea
+### Mahali Kukata Kunapotokea
 
-Kizingiti cha ufupishaji huathiri `lineFilter.ts`:
+Kikomo cha kukata huathiri `lineFilter.ts`:
 
 ```ts
 // Kutoka open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -362,19 +364,19 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Sehemu za **mwanzo** na **mwisho** za kila sehemu huhifadhiwa; maudhui ya katikati huondolewa ufupishaji unapoanza kutumika.
+**Mwanzo** na **mwisho** wa kila sehemu huhifadhiwa; maudhui ya katikati huondolewa kukata kunapotekelezwa.
 
 ### Kinachobaki dhidi ya Kinachokatwa
 
-| Maudhui                                     | minimal        | standard       | aggressive     |
-| ------------------------------------------- | -------------- | -------------- | -------------- |
-| Hitilafu / ufuatiliaji wa rafu              | ✅ huhifadhiwa | ✅ huhifadhiwa | ✅ huhifadhiwa |
-| Majaribio yaliyoshindwa                     | ✅ huhifadhiwa | ✅ huhifadhiwa | ✅ huhifadhiwa |
-| Hitilafu za uundaji                         | ✅ huhifadhiwa | ✅ huhifadhiwa | ✅ huhifadhiwa |
-| Majaribio yaliyofaulu (yenye maelezo mengi) | ✅ huhifadhiwa | 🟡 hukunjwa    | 🟡 hukunjwa    |
-| Matokeo ya kawaida (kumbukumbu za taarifa)  | 🟡 hukunjwa    | 🟡 hukunjwa    | ❌ huondolewa  |
-| Pau za maendeleo                            | 🟡 hukunjwa    | ❌ huondolewa  | ❌ huondolewa  |
-| Bango / sanaa ya ASCII                      | 🟡 hukunjwa    | ❌ huondolewa  | ❌ huondolewa  |
+| Maudhui                           | minimal        | standard        | aggressive      |
+| --------------------------------- | -------------- | --------------- | --------------- |
+| Hitilafu / stack traces           | ✅ huhifadhiwa | ✅ huhifadhiwa  | ✅ huhifadhiwa  |
+| Kushindwa kwa majaribio           | ✅ huhifadhiwa | ✅ huhifadhiwa  | ✅ huhifadhiwa  |
+| Hitilafu za ujenzi                | ✅ huhifadhiwa | ✅ huhifadhiwa  | ✅ huhifadhiwa  |
+| Majaribio yaliyofaulu (verbose)   | ✅ huhifadhiwa | 🟡 yamekunjwa   | 🟡 yamekunjwa   |
+| Matokeo ya kawaida (logi za info) | 🟡 yamekunjwa  | 🟡 yamekunjwa   | ❌ yameondolewa |
+| Upau wa maendeleo                 | 🟡 yamekunjwa  | ❌ yameondolewa | ❌ yameondolewa |
+| Bango / sanaa ya ASCII            | 🟡 yamekunjwa  | ❌ yameondolewa | ❌ yameondolewa |
 
 ### Kuchagua Ukali Unaofaa
 
@@ -383,18 +385,18 @@ Sehemu za **mwanzo** na **mwisho** za kila sehemu huhifadhiwa; maudhui ya katika
                   │
       ┌───────────┼───────────┐
       │           │           │
-    NDIYO       HAPANA      HUNA UHAKIKA
+    NDIO       HAPANA    SINA UHAKIKA
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Ufanisi ni      Jaribu `standard` kwanza
-      │      muhimu kiasi    (hufaa kwa 80% ya
-      │      gani?           hali)
+      │      Je, kasi ya      Jaribu `standard` kwanza
+      │      kazi ni muhimu   (inafanya kazi kwa 80%
+      │      kiasi gani?      ya matukio)
       │      ┌────┴────┐
       │      │         │
-      │    MDOGO      MKUBWA
+      │    CHINI      JUU
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -417,11 +419,11 @@ Sehemu za **mwanzo** na **mwisho** za kila sehemu huhifadhiwa; maudhui ya katika
 }
 ```
 
-**Kwa njia ya kiprogramu**:
+**Kwa programu**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) ni
-`CompressionEngine` na haina mbinu ya `updateConfig`. Sasisha usanidi wa injini
-kupitia kisaidizi cha sajili badala yake:
+`CompressionEngine` na haina njia ya `updateConfig`. Sasisha usanidi wa injini
+kupitia msaidizi wa registry badala yake:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -431,7 +433,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Kuthibitisha Athari
 
-Tumia **Lango la Uthibitishaji** (tazama hapa chini) ili kuthibitisha kuwa kichujio chako ni salama katika ukali uliochagua:
+Tumia **Verify Gate** (tazama hapa chini) kuthibitisha kuwa kichujio chako ni salama kwenye ukali ulichochagua:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

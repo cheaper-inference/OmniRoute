@@ -23,22 +23,24 @@ Yığınlanmış:     1 - (1 - 0.80) * (1 - 0.46) = %89.2 tasarruf
 Aralık:          1 - (1 - 0.60..0.90) * (1 - 0.46) = %78.4-94.6
 ```
 
-## Neleri Sıkıştırır
+## Neyi Sıkıştırır?
 
-Yerleşik katalog şu anda aşağıdaki kategorilerde 49 filtre sunmaktadır:
+Yerleşik katalog şu anda şu kategorilerde 56 filtreyle birlikte gelir:
 
 | Kategori  | Örnekler                                                      |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go testleri, Cargo testleri |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testleri |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
 | `shell`   | `ls`, `find`, `grep`, genel kabuk günlükleri                  |
 | `docker`  | `docker ps`, Docker günlükleri                                |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON çıktısı, yığın izleri, genel çıktı için yedek seçenek    |
+| `generic` | JSON çıktısı, yığın izlemeleri, genel çıktı yedeği            |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` içindeki algılayıcı, filtre seçimi öncesinde çıktıyı sınıflandırır. Komut sınıfı yeterli olmadığında filtreler, komut kalıbına veya çıktı düzenli ifadesine göre de eşleşebilir.
+`open-sse/services/compression/engines/rtk/commandDetector.ts` içindeki algılayıcı,
+filtre seçiminden önce çıktıyı sınıflandırır. Bir komut sınıfı yeterli olmadığında
+filtreler, komut deseni veya çıktı regex'i ile de eşleşebilir.
 
 ## Filtre Çözümleme
 
@@ -317,59 +319,59 @@ node --import tsx/esm --test \
 
 ## Yoğunluk Seviyeleri (v3.8.16+)
 
-RTK, **sıkıştırma agresifliği** ile **güvenlik** arasında denge kuran **3 yoğunluk seviyesini** destekler. Seviye, motor yapılandırmasındaki `config.intensity` aracılığıyla ayarlanır.
+RTK, **sıkıştırma agresifliği** ile **güvenlik** arasında denge kuran **3 yoğunluk seviyesini** destekler. Seviye, motor yapılandırmasındaki `config.intensity` ile ayarlanır.
 
 ### 3 Seviye
 
-| Seviye                  | Kısaltma eşiği        | Token tasarrufu | Risk      | En uygun kullanım                     |
+| Seviye                  | Kırpma eşiği          | Token tasarrufu | Risk      | En uygun olduğu durum                 |
 | ----------------------- | --------------------- | --------------- | --------- | ------------------------------------- |
-| `minimal`               | Bölüm başına 24 satır | ~20-40%         | Çok düşük | Kritik bağlam içeren üretim ortamları |
-| `standard` (varsayılan) | Bölüm başına 24 satır | ~50-70%         | Düşük     | Günlük kodlama oturumları             |
-| `aggressive`            | Bölüm başına 16 satır | ~70-90%         | Orta      | Uzun oturumlar, maksimum tasarruf     |
+| `minimal`               | Bölüm başına 24 satır | ~%20-40         | Çok düşük | Kritik bağlam içeren üretim ortamları |
+| `standard` (varsayılan) | Bölüm başına 24 satır | ~%50-70         | Düşük     | Günlük kodlama oturumları             |
+| `aggressive`            | Bölüm başına 16 satır | ~%70-90         | Orta      | Uzun oturumlar, maksimum tasarruf     |
 
-### Kısaltmanın Gerçekleştiği Yer
+### Kırpma Nerede Gerçekleşir
 
-Kısaltma eşiği `lineFilter.ts` dosyasını etkiler:
+Kırpma eşiği `lineFilter.ts` dosyasını etkiler:
 
 ```ts
-// Kaynak: open-sse/services/compression/engines/rtk/index.ts:329-330
+// open-sse/services/compression/engines/rtk/index.ts:329-330 dosyasından
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Her bölümün hem **başı** hem de **sonu** korunur; kısaltma devreye girdiğinde ortadaki içerik çıkarılır.
+Her bölümün **başı** ve **sonu** korunur; kırpma devreye girdiğinde ortadaki içerik atılır.
 
 ### Neler Kalır, Neler Kesilir
 
 | İçerik                       | minimal       | standard      | aggressive    |
 | ---------------------------- | ------------- | ------------- | ------------- |
-| Hatalar / stack trace'ler    | ✅ korunur    | ✅ korunur    | ✅ korunur    |
-| Test başarısızlıkları        | ✅ korunur    | ✅ korunur    | ✅ korunur    |
+| Hatalar / yığın izleri       | ✅ korunur    | ✅ korunur    | ✅ korunur    |
+| Başarısız testler            | ✅ korunur    | ✅ korunur    | ✅ korunur    |
 | Derleme hataları             | ✅ korunur    | ✅ korunur    | ✅ korunur    |
 | Başarılı testler (ayrıntılı) | ✅ korunur    | 🟡 daraltılır | 🟡 daraltılır |
-| Rutin çıktı (bilgi log'ları) | 🟡 daraltılır | 🟡 daraltılır | ❌ çıkarılır  |
-| İlerleme çubukları           | 🟡 daraltılır | ❌ çıkarılır  | ❌ çıkarılır  |
-| Banner / ASCII sanatı        | 🟡 daraltılır | ❌ çıkarılır  | ❌ çıkarılır  |
+| Rutin çıktı (bilgi logları)  | 🟡 daraltılır | 🟡 daraltılır | ❌ atılır     |
+| İlerleme çubukları           | 🟡 daraltılır | ❌ atılır     | ❌ atılır     |
+| Banner / ASCII art           | 🟡 daraltılır | ❌ atılır     | ❌ atılır     |
 
 ### Doğru Yoğunluğu Seçme
 
 ```
-                  Bağlam kaybı felaketle sonuçlanır mı?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    EVET        HAYIR       EMİN DEĞİLİM
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Verim ne kadar   Önce `standard` deneyin
-      │      kritik?          (vakaların %80'inde
-      │           │           işe yarar)
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │    DÜŞÜK     YÜKSEK
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -379,7 +381,7 @@ Her bölümün hem **başı** hem de **sonu** korunur; kısaltma devreye girdiğ
 
 ### Yoğunluğu Yapılandırma
 
-**Kombinasyon başına** (kombinasyon yapılandırmasında):
+**Kombo bazında** (kombo yapılandırmasında):
 
 ```json
 {
@@ -392,11 +394,11 @@ Her bölümün hem **başı** hem de **sonu** korunur; kısaltma devreye girdiğ
 }
 ```
 
-**Program aracılığıyla**:
+**Programatik olarak**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) bir
-`CompressionEngine`'dir ve `updateConfig` metoduna sahip değildir. Bunun yerine motorun yapılandırmasını
-registry yardımcısı aracılığıyla güncelleyin:
+`CompressionEngine`'dir ve `updateConfig` metoduna sahip değildir. Bunun yerine
+bir motorun yapılandırmasını registry yardımcısı aracılığıyla güncelleyin:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -406,7 +408,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Etkiyi Doğrulama
 
-Filtrenizin seçtiğiniz yoğunlukta güvenli olduğunu doğrulamak için **Doğrulama Geçidi**ni (aşağıya bakın) kullanın:
+Filtrenizin seçtiğiniz yoğunlukta güvenli olduğunu onaylamak için **Verify Gate**'i (aşağıya bakın) kullanın:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

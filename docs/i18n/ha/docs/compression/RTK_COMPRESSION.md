@@ -27,24 +27,24 @@ A jere:          1 - (1 - 0.80) * (1 - 0.46) = 89.2% an adana
 Kewayo:          1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Abin da Take Matsewa
+## Abin Da Yake Tattarawa
 
-Kundin da aka gina a ciki a halin yanzu yana zuwa da filters 49 a waɗannan rukunan:
+Katalogin da aka gina a ciki a yanzu yana zo da filta 56 a cikin waɗannan rukunonin:
 
-| Rukuni    | Misalai                                                               |
-| --------- | --------------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                     |
-| `test`    | Vitest, Jest, Pytest, Playwright, gwaje-gwajen Go, gwaje-gwajen Cargo |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx         |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler         |
-| `shell`   | `ls`, `find`, `grep`, rajistan shell na gama-gari                     |
-| `docker`  | `docker ps`, rajistan Docker                                          |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                               |
-| `generic` | Fitarwar JSON, stack traces, madadin fitarwa na gama-gari             |
+| Rukuni    | Misalai                                                           |
+| --------- | ----------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                 |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, gwaje-gwajen Cargo |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
+| `shell`   | `ls`, `find`, `grep`, log ɗin shell na gama-gari                  |
+| `docker`  | `docker ps`, log ɗin Docker                                       |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                           |
+| `generic` | fitar JSON, bibiyar stack, madadin fitarwa na gama-gari           |
 
-Mai gano nau'i da ke cikin `open-sse/services/compression/engines/rtk/commandDetector.ts` yana rarraba fitarwa
-kafin zaɓin filter. Filters kuma za su iya daidaitawa bisa tsarin umarni ko regex na fitarwa idan rukunin umarni
-bai wadatar ba.
+Na'urar gano da ke cikin `open-sse/services/compression/engines/rtk/commandDetector.ts` tana rarraba fitarwa
+kafin zaɓin filta. Filta kuma na iya dacewa ta hanyar tsarin umarni ko regex na fitarwa lokacin da
+rukuni na umarni kaɗai bai isa ba.
 
 ## Tantance Filter
 
@@ -355,19 +355,19 @@ node --import tsx/esm --test \
 
 ## Matakan Ƙarfi (v3.8.16+)
 
-RTK yana goyon bayan **matakan ƙarfi 3** waɗanda ke yin daidaito tsakanin **tsananin matsawa** da **aminci**. Ana saita matakin ta `config.intensity` a cikin daidaitawar engine.
+RTK na goyon bayan **matakan ƙarfi 3** waɗanda ke yin musayya tsakanin **ƙarfin matsawa** da **aminci**. Ana saita matakin ta `config.intensity` a cikin saitin injin.
 
 ### Matakan 3
 
-| Mataki             | Iyakar yankewa           | Rage tokens | Haɗari       | Ya fi dacewa da                                       |
-| ------------------ | ------------------------ | ----------- | ------------ | ----------------------------------------------------- |
-| `minimal`          | Layuka 24 a kowane sashe | ~20-40%     | Ƙarami sosai | Production mai mahallin da yake da matuƙar muhimmanci |
-| `standard` (tsoho) | Layuka 24 a kowane sashe | ~50-70%     | Ƙarami       | Zaman rubuta lamba na yau da kullum                   |
-| `aggressive`       | Layuka 16 a kowane sashe | ~70-90%     | Matsakaici   | Dogayen zama, mafi girman ragewa                      |
+| Mataki                | Ƙofar yanke            | Adana token | Haɗari       | Mafi dacewa don                                |
+| --------------------- | ---------------------- | ----------- | ------------ | ---------------------------------------------- |
+| `minimal`             | layi 24 a kowace sashi | ~20-40%     | Ƙarami sosai | Samfura tare da mahalli mai matuƙar muhimmanci |
+| `standard` (na asali) | layi 24 a kowace sashi | ~50-70%     | Ƙarami       | Zaman shirye-shirye na yau da kullun           |
+| `aggressive`          | layi 16 a kowace sashi | ~70-90%     | Matsakaici   | Doguwan zaman, mafi yawan adana                |
 
-### Inda Yankewar Ke Faruwa
+### Inda Yanke Yake Faruwa
 
-Iyakar yankewa tana shafar `lineFilter.ts`:
+Ƙofar yanke tana shafar `lineFilter.ts`:
 
 ```ts
 // Daga open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -375,39 +375,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Ana kiyaye duka **farkon** da **ƙarshen** kowane sashe; ana cire abubuwan da ke tsakiya idan yankewa ta fara aiki.
+Ana adana duka **kan** da **ƙarshen** kowace sashi; ana jefar da abun da ke tsakiya lokacin da yanke ya fara aiki.
 
-### Abin da Ake Bari da Abin da Ake Yanke
+### Abin da Yake Ci gaba da Abin da Ake Yanke
 
-| Abun ciki                            | minimal          | standard         | aggressive       |
-| ------------------------------------ | ---------------- | ---------------- | ---------------- |
-| Kurakurai / stack traces             | ✅ ana kiyayewa  | ✅ ana kiyayewa  | ✅ ana kiyayewa  |
-| Gazawar gwaje-gwaje                  | ✅ ana kiyayewa  | ✅ ana kiyayewa  | ✅ ana kiyayewa  |
-| Kurakuran build                      | ✅ ana kiyayewa  | ✅ ana kiyayewa  | ✅ ana kiyayewa  |
-| Nasarar gwaje-gwaje (cikakke)        | ✅ ana kiyayewa  | 🟡 ana taƙaitawa | 🟡 ana taƙaitawa |
-| Fitarwa ta yau da kullum (info logs) | 🟡 ana taƙaitawa | 🟡 ana taƙaitawa | ❌ ana cirewa    |
-| Sandunan ci gaba                     | 🟡 ana taƙaitawa | ❌ ana cirewa    | ❌ ana cirewa    |
-| Banner / fasahar ASCII               | 🟡 ana taƙaitawa | ❌ ana cirewa    | ❌ ana cirewa    |
+| Abun ciki                                 | minimal       | standard      | aggressive    |
+| ----------------------------------------- | ------------- | ------------- | ------------- |
+| Kurakurai / stack traces                  | ✅ an adana   | ✅ an adana   | ✅ an adana   |
+| Gazawar gwaje-gwaje                       | ✅ an adana   | ✅ an adana   | ✅ an adana   |
+| Kurakuran gina                            | ✅ an adana   | ✅ an adana   | ✅ an adana   |
+| Nasarar gwaje-gwaje (verbose)             | ✅ an adana   | 🟡 an tattara | 🟡 an tattara |
+| Fitowar aiki na yau da kullun (info logs) | 🟡 an tattara | 🟡 an tattara | ❌ an jefa    |
+| Sandunan ci gaba                          | 🟡 an tattara | ❌ an jefa    | ❌ an jefa    |
+| Banner / zanen ASCII                      | 🟡 an tattara | ❌ an jefa    | ❌ an jefa    |
 
-### Zaɓar Ƙarfin da Ya Dace
+### Zaɓin Ƙarfin da Ya Dace
 
 ```
-                  Shin rasa mahalli zai zama bala'i?
+                  Shin asarar mahalli bala'i ne?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     EH           A'A       BA A TABBATA BA
+     EH          A'A       BA TABBAS
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Yaya muhimmancin Fara gwada `standard`
-      │      throughput yake? (yana aiki ga kashi 80%
-      │           │          na lokuta)
+      │      Yaya muhimmancin  Ku fara da `standard`
+      │      throughput yake?  (yana aiki don 80% na
+      │           │            lokuta)
       │      ┌────┴────┐
       │      │         │
-      │    ƘASA      SAMA
+      │     ƘARAMI    BABBA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -415,9 +415,9 @@ Ana kiyaye duka **farkon** da **ƙarshen** kowane sashe; ana cire abubuwan da ke
       └──────┴─────────┘
 ```
 
-### Daidaita Ƙarfi
+### Saita Ƙarfi
 
-**Ga kowane combo** (a cikin daidaitawar combo):
+**Ga kowace combo** (a cikin saitin combo):
 
 ```json
 {
@@ -432,9 +432,7 @@ Ana kiyaye duka **farkon** da **ƙarshen** kowane sashe; ana cire abubuwan da ke
 
 **Ta hanyar shirye-shirye**:
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) wani
-`CompressionEngine` ne kuma ba shi da hanyar `updateConfig`. Sabunta daidaitawar engine
-ta hanyar mataimakin registry maimakon haka:
+`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) `CompressionEngine` ne kuma ba ya da hanyar `updateConfig`. Maimakon haka, ku sabunta saitin injin ta hanyar mataimakin rajista:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -442,9 +440,9 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Tabbatar da Tasirin
+### Tabbatar da Sakamako
 
-Yi amfani da **Ƙofar Tabbatarwa** (duba ƙasa) don tabbatar da cewa matacinka yana da aminci a ƙarfin da ka zaɓa:
+Yi amfani da **Ƙofar Tabbatarwa** (dubi a ƙasa) don tabbatar da cewa matacenku yana da aminci a ƙarfin da kuka zaɓa:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

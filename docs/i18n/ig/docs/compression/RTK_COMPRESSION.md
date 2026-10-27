@@ -27,24 +27,24 @@ Ejikọtara ọnụ: 1 - (1 - 0.80) * (1 - 0.46) = echekwara 89.2%
 Oke:           1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Ihe Ọ Na-achịkọta
+## Ihe Ọ Na-akpakọ
 
-Catalog e wuru n'ime ya nwere filter 49 ugbu a n'ofe category ndị a:
+Ndepụta ihe e wuru n'ime ya na-abịa ugbu a na ihe nzacha 56 n'ofe ìgwè ndị a:
 
-| Category  | Ihe atụ                                                       |
-| --------- | ------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, ule Go, ule Cargo           |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, ndekọ shell izugbe                      |
-| `docker`  | `docker ps`, ndekọ Docker                                     |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | Nsonaazụ JSON, stack trace, fallback nsonaazụ izugbe          |
+| Ụdị       | Ọmụmaatụ                                                             |
+| --------- | -------------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                    |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, ule Cargo             |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx        |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler        |
+| `shell`   | `ls`, `find`, `grep`, ndekọ shell izugbe                             |
+| `docker`  | `docker ps`, ndekọ Docker                                            |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                              |
+| `generic` | ihe mmepụta JSON, ndekọ stack, ihe ndọghachi maka ihe mmepụta izugbe |
 
-Detector dị na `open-sse/services/compression/engines/rtk/commandDetector.ts` na-ekewa nsonaazụ
-tupu ịhọrọ filter. Filter nwekwara ike ime matching site na ụkpụrụ iwu ma ọ bụ regex nsonaazụ mgbe class iwu
-ezughị oke.
+Ihe nrịba ama dị na `open-sse/services/compression/engines/rtk/commandDetector.ts` na-ekewapụ ihe mmepụta
+tupu e họọrọ ihe nzacha. Ihe nzacha nwekwara ike ịdabara n'usoro iwu ma ọ bụ regex nke ihe mmepụta mgbe
+klas iwu adịghị ezu.
 
 ## Mkpebi Filter
 
@@ -355,19 +355,19 @@ node --import tsx/esm --test \
 
 ## Ọkwa Ike (v3.8.16+)
 
-RTK na-akwado **ọkwa ike 3** nke na-eme mgbanwe n'etiti **ike compression** na **nchekwa**. A na-edobe ọkwa ahụ site na `config.intensity` n'ime config nke engine.
+RTK na-akwado **ọkwa ike 3** nke na-atụle nhọrọ n'etiti **ike mkpakọ** na **nchebe**. A na-ahazi ọkwa ahụ site na `config.intensity` na nhazi engine ahụ.
 
-### Ọkwa 3 Ahụ
+### Ọkwa 3 ahụ
 
-| Ọkwa                 | Oke truncation       | Nchekwa token | Ihe ize ndụ | Nke kacha mma maka                   |
-| -------------------- | -------------------- | ------------- | ----------- | ------------------------------------ |
-| `minimal`            | Ahịrị 24 kwa ngalaba | ~20-40%       | Dị nnọọ ala | Production nwere context dị oke mkpa |
-| `standard` (ndabara) | Ahịrị 24 kwa ngalaba | ~50-70%       | Ala         | Oge coding kwa ụbọchị                |
-| `aggressive`         | Ahịrị 16 kwa ngalaba | ~70-90%       | Etiti       | Oge ogologo, nchekwa kachasị ukwuu   |
+| Ọkwa                 | Oke ịbe n'etiti    | Nchekwa token | Ihe ize ndụ | Kacha mma maka                 |
+| -------------------- | ------------------ | ------------- | ----------- | ------------------------------ |
+| `minimal`            | akara 24 kwa nkebi | ~20-40%       | Dị ala nnọọ | Mmeputa nwere ọnọdụ dị mkpa    |
+| `standard` (ndabara) | akara 24 kwa nkebi | ~50-70%       | Dị ala      | Oge ide koodu kwa ụbọchị       |
+| `aggressive`         | akara 16 kwa nkebi | ~70-90%       | N'etiti     | Oge ogologo, nchekwa kacha elu |
 
-### Ebe Truncation Na-eme
+### Ebe Ịbe N'etiti Na-eme
 
-Oke truncation na-emetụta `lineFilter.ts`:
+Oke ịbe n'etiti na-emetụta `lineFilter.ts`:
 
 ```ts
 // Site na open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -375,36 +375,36 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-A na-edobe ma **isi** ma **ọdụ** nke ngalaba ọ bụla; a na-ewepụ ọdịnaya dị n'etiti mgbe truncation malitere.
+A na-edebe **isi** na **ọdụ** nke nkebi ọ bụla; a na-ahapụ ọdịnaya dị n'etiti mgbe ịbe n'etiti malitere.
 
-### Ihe Na-adịgide na Ihe A Na-ebipụ
+### Ihe Na-anọ vs. Ihe A Na-epụ
 
-| Ọdịnaya                   | minimal      | standard     | aggressive   |
-| ------------------------- | ------------ | ------------ | ------------ |
-| Njehie / stack traces     | ✅ echekwara | ✅ echekwara | ✅ echekwara |
-| Ọdịda ule                 | ✅ echekwara | ✅ echekwara | ✅ echekwara |
-| Njehie build              | ✅ echekwara | ✅ echekwara | ✅ echekwara |
-| Ule gafere (verbose)      | ✅ echekwara | 🟡 chịkọtara | 🟡 chịkọtara |
-| Mmepụta nkịtị (info logs) | 🟡 chịkọtara | 🟡 chịkọtara | ❌ wepụrụ    |
-| Progress bars             | 🟡 chịkọtara | ❌ wepụrụ    | ❌ wepụrụ    |
-| Banner / ASCII art        | 🟡 chịkọtara | ❌ wepụrụ    | ❌ wepụrụ    |
+| Ọdịnaya                        | minimal    | standard   | aggressive |
+| ------------------------------ | ---------- | ---------- | ---------- |
+| Njehie / stack traces          | ✅ edebere | ✅ edebere | ✅ edebere |
+| Nnwale dara ada                | ✅ edebere | ✅ edebere | ✅ edebere |
+| Njehie build                   | ✅ edebere | ✅ edebere | ✅ edebere |
+| Nnwale gafere (nkọwa zuru ezu) | ✅ edebere | 🟡 akọtara | 🟡 akọtara |
+| Mmepụta ọdịnala (ndekọ info)   | 🟡 akọtara | 🟡 akọtara | ❌ ehapụrụ |
+| Ogwe ọganihu                   | 🟡 akọtara | ❌ ehapụrụ | ❌ ehapụrụ |
+| Banner / ihe nka ASCII         | 🟡 akọtara | ❌ ehapụrụ | ❌ ehapụrụ |
 
-### Ịhọrọ Ike Kwesịrị Ekwesị
+### Ịhọrọ Ọkwa Ike Ziri Ezi
 
 ```
-                  Ịtụfu context ọ ga-abụ ọdachi?
+                  Ịfunahụ ọnọdụ ọ bụ ihe mgbu?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     EE          MBA       AMAGHỊ M
+     EE          MBA        AMAGHỊ M
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Olee mkpa       Buru ụzọ nwalee `standard`
-      │      throughput dị?  (ọ na-arụ ọrụ maka
-      │           │          80% nke ọnọdụ)
+      │      Ka throughput    Nwalaa `standard` mbụ
+      │      dị mkpa ole?     (na-arụ ọrụ maka 80%
+      │           │           nke ọnọdụ)
       │      ┌────┴────┐
       │      │         │
       │     ALA       ELU
@@ -415,9 +415,9 @@ A na-edobe ma **isi** ma **ọdụ** nke ngalaba ọ bụla; a na-ewepụ ọd�
       └──────┴─────────┘
 ```
 
-### Ịhazigharị Ike
+### Ịhazi Ọkwa Ike
 
-**Kwa-combo** (n'ime combo config):
+**Kwa combo** (na nhazi combo):
 
 ```json
 {
@@ -430,11 +430,11 @@ A na-edobe ma **isi** ma **ọdụ** nke ngalaba ọ bụla; a na-ewepụ ọd�
 }
 ```
 
-**Site na program**:
+**Site na koodu**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) bụ
-`CompressionEngine`, ọ nweghịkwa method `updateConfig`. Melite config nke engine
-site na registry helper kama:
+`CompressionEngine` ma ọ nweghị usoro `updateConfig`. Kama nke ahụ, melite nhazi
+engine site na enyemaka registry:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -442,16 +442,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Ịkwado Mmetụta Ahụ
+### Ịlele Mmetụta Ahụ
 
-Jiri **Ọnụ Ụzọ Nkwenye** (lee n'okpuru) iji kwado na filter gị dị nchebe n'ike ị họọrọ:
+Jiri **Verify Gate** (lee n'okpuru) iji kwenye na ihe nzacha gị dị nchebe na ọkwa ike ị họọrọ:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filters dara na ike aggressive");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

@@ -25,20 +25,22 @@ Caveman 輸入： 節省 46%
 
 ## 壓縮內容
 
-內建目錄目前涵蓋以下類別，共提供 49 個篩選器：
+內建目錄目前提供 56 個篩選器，涵蓋以下類別：
 
 | 類別      | 範例                                                          |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`、`git branch`、`git diff`、`git log`             |
-| `test`    | Vitest、Jest、Pytest、Playwright、Go 測試、Cargo 測試         |
+| `test`    | Vitest、Jest、Pytest、PHPUnit、Playwright、Go、Cargo 測試     |
 | `build`   | TypeScript、ESLint、Biome、Prettier、Vite、Webpack、Turbo、Nx |
 | `package` | `npm install`、`npm audit`、`pip`、`uv sync`、Poetry、Bundler |
-| `shell`   | `ls`、`find`、`grep`、一般 shell 日誌                         |
+| `shell`   | `ls`、`find`、`grep`、通用 shell 日誌                         |
 | `docker`  | `docker ps`、Docker 日誌                                      |
 | `infra`   | Terraform、OpenTofu、`systemctl status`                       |
-| `generic` | JSON 輸出、堆疊追蹤、一般輸出後備方案                         |
+| `generic` | JSON 輸出、堆疊追蹤、通用輸出後備方案                         |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` 中的偵測器會在選擇篩選器之前對輸出進行分類。當命令類別不足以判斷時，篩選器也可以透過命令模式或輸出正規表示式進行比對。
+`open-sse/services/compression/engines/rtk/commandDetector.ts` 中的偵測器會在
+選擇篩選器之前先對輸出進行分類。當命令類別不足以判斷時，篩選器也可以透過命令模式
+或輸出正規表達式來比對。
 
 ## 篩選器解析
 
@@ -298,13 +300,13 @@ DATA_DIR/rtk/raw-output/
 
 ## 驗證關卡
 
-重點驗證關卡會執行內建的行內篩選器測試，而不呼叫外部 shell 命令：
+聚焦的驗證關卡會執行內建的行內篩選器測試，無需呼叫外部命令：
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-verify.test.ts
 ```
 
-較完整的 RTK 關卡為：
+較廣泛的 RTK 關卡為：
 
 ```bash
 node --import tsx/esm --test \
@@ -313,7 +315,7 @@ node --import tsx/esm --test \
   tests/unit/compression/context-compression-api.test.ts
 ```
 
-發布前請執行完整的壓縮關卡：
+在發布前執行完整的壓縮關卡：
 
 ```bash
 node --import tsx/esm --test \
@@ -336,56 +338,56 @@ node --import tsx/esm --test \
 
 ## 強度等級 (v3.8.16+)
 
-RTK 支援 **3 個強度等級**，用於在**壓縮積極程度**與**安全性**之間取捨。此等級透過引擎設定中的 `config.intensity` 設定。
+RTK 支援 **3 種強度等級**，可在**壓縮積極度**與**安全性**之間取捨。等級透過引擎設定中的 `config.intensity` 來設定。
 
-### 3 個等級
+### 3 種等級
 
-| 等級                 | 截斷閾值       | Token 節省量 | 風險 | 最適合                         |
-| -------------------- | -------------- | ------------ | ---- | ------------------------------ |
-| `minimal`            | 每個區段 24 行 | ~20-40%      | 極低 | 需要保留關鍵上下文的正式環境   |
-| `standard`（預設值） | 每個區段 24 行 | ~50-70%      | 低   | 日常程式設計工作階段           |
-| `aggressive`         | 每個區段 16 行 | ~70-90%      | 中等 | 長時間工作階段、追求最大節省量 |
+| 等級               | 截斷閾值     | Token 節省量 | 風險 | 適用情境                   |
+| ------------------ | ------------ | ------------ | ---- | -------------------------- |
+| `minimal`          | 每區段 24 行 | ~20-40%      | 極低 | 需保留關鍵上下文的正式環境 |
+| `standard`（預設） | 每區段 24 行 | ~50-70%      | 低   | 日常編碼工作階段           |
+| `aggressive`       | 每區段 16 行 | ~70-90%      | 中   | 長時間工作階段、最大化節省 |
 
 ### 截斷發生的位置
 
 截斷閾值會影響 `lineFilter.ts`：
 
 ```ts
-// 來源：open-sse/services/compression/engines/rtk/index.ts:329-330
+// 來自 open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-每個區段的**開頭**與**結尾**都會保留；觸發截斷時，中間內容會被捨棄。
+每個區段的**開頭**與**結尾**都會保留；當截斷觸發時，中間的內容會被捨棄。
 
-### 保留與刪減的內容
+### 哪些內容會保留、哪些會被裁減
 
 | 內容                 | minimal | standard | aggressive |
 | -------------------- | ------- | -------- | ---------- |
-| 錯誤／堆疊追蹤       | ✅ 保留 | ✅ 保留  | ✅ 保留    |
+| 錯誤 / 堆疊追蹤      | ✅ 保留 | ✅ 保留  | ✅ 保留    |
 | 測試失敗             | ✅ 保留 | ✅ 保留  | ✅ 保留    |
 | 建置錯誤             | ✅ 保留 | ✅ 保留  | ✅ 保留    |
 | 測試通過（詳細輸出） | ✅ 保留 | 🟡 摺疊  | 🟡 摺疊    |
 | 例行輸出（資訊日誌） | 🟡 摺疊 | 🟡 摺疊  | ❌ 捨棄    |
-| 進度列               | 🟡 摺疊 | ❌ 捨棄  | ❌ 捨棄    |
-| 橫幅／ASCII 圖案     | 🟡 摺疊 | ❌ 捨棄  | ❌ 捨棄    |
+| 進度條               | 🟡 摺疊 | ❌ 捨棄  | ❌ 捨棄    |
+| 橫幅 / ASCII 字圖    | 🟡 摺疊 | ❌ 捨棄  | ❌ 捨棄    |
 
-### 選擇適當的強度
+### 選擇合適的強度
 
 ```
                   遺失上下文是否會造成災難性後果？
                   │
       ┌───────────┼───────────┐
       │           │           │
-     是           否         不確定
+     是           否          不確定
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      輸送量有多      請先嘗試 `standard`
-      │      關鍵？          （適用於 80% 的
-      │           │          情況）
+      │      吞吐量有多       先試試 `standard`
+      │      重要？          （適用於 80%
+      │           │           的情況）
       │      ┌────┴────┐
       │      │         │
       │      低        高
@@ -398,7 +400,7 @@ config.intensity === "aggressive" ? 16 : 24,
 
 ### 設定強度
 
-**個別組合**（在組合設定中）：
+**針對單一 combo**（在 combo 設定中）：
 
 ```json
 {
@@ -414,7 +416,8 @@ config.intensity === "aggressive" ? 16 : 24,
 **以程式方式設定**：
 
 `rtkEngine`（`@omniroute/open-sse/services/compression/engines/rtk`）是一個
-`CompressionEngine`，且沒有 `updateConfig` 方法。請改為透過登錄輔助函式更新引擎設定：
+`CompressionEngine`，並沒有 `updateConfig` 方法。請改用 registry 輔助函式
+來更新引擎的設定：
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -424,14 +427,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### 驗證效果
 
-使用**驗證關卡**（請參閱下方）確認篩選器在所選強度下是安全的：
+使用 **Verify Gate**（見下文）來確認篩選器在你所選的強度下是安全的：
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("篩選器在 aggressive 強度下失敗");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

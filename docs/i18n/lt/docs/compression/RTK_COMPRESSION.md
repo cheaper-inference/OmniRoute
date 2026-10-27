@@ -23,22 +23,24 @@ Sudėtinis:       1 - (1 - 0.80) * (1 - 0.46) = sutaupyta 89.2%
 Diapazonas:      1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Ką jis glaudina
+## Ką jis suspaudžia
 
-Integruotame kataloge šiuo metu pateikiami 49 šių kategorijų filtrai:
+Įtaisytajame kataloge šiuo metu pateikiami 56 filtrai šiose kategorijose:
 
-| Kategorija | Pavyzdžiai                                                    |
-| ---------- | ------------------------------------------------------------- |
-| `git`      | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`     | Vitest, Jest, Pytest, Playwright, Go testai, Cargo testai     |
-| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
-| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`    | `ls`, `find`, `grep`, bendrieji apvalkalo žurnalai            |
-| `docker`   | `docker ps`, Docker žurnalai                                  |
-| `infra`    | Terraform, OpenTofu, `systemctl status`                       |
-| `generic`  | JSON išvestis, dėklo pėdsakai, bendroji atsarginė išvestis    |
+| Kategorija | Pavyzdžiai                                                            |
+| ---------- | --------------------------------------------------------------------- |
+| `git`      | `git status`, `git branch`, `git diff`, `git log`                     |
+| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testai           |
+| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx         |
+| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler         |
+| `shell`    | `ls`, `find`, `grep`, bendrieji shell žurnalai                        |
+| `docker`   | `docker ps`, Docker žurnalai                                          |
+| `infra`    | Terraform, OpenTofu, `systemctl status`                               |
+| `generic`  | JSON išvestis, steko pėdsakai, bendros išvesties atsarginis variantas |
 
-Detektorius, esantis `open-sse/services/compression/engines/rtk/commandDetector.ts`, klasifikuoja išvestį prieš parenkant filtrą. Filtrai taip pat gali būti parenkami pagal komandos šabloną arba išvesties reguliariąją išraišką, kai komandos klasės nepakanka.
+Detektorius, esantis `open-sse/services/compression/engines/rtk/commandDetector.ts`, klasifikuoja išvestį
+prieš pasirenkant filtrą. Filtrai taip pat gali atitikti pagal komandos šabloną arba išvesties
+reguliarųjį reiškinį, kai vien komandos klasės nepakanka.
 
 ## Filtrų parinkimas
 
@@ -341,19 +343,19 @@ node --import tsx/esm --test \
 
 ## Intensyvumo lygiai (v3.8.16+)
 
-RTK palaiko **3 intensyvumo lygius**, leidžiančius pasirinkti kompromisą tarp **glaudinimo agresyvumo** ir **saugumo**. Lygis nustatomas naudojant `config.intensity` variklio konfigūracijoje.
+RTK palaiko **3 intensyvumo lygius**, kurie balansuoja tarp **suspaudimo agresyvumo** ir **saugumo**. Lygis nustatomas per `config.intensity` variklio konfigūracijoje.
 
 ### 3 lygiai
 
-| Lygis                    | Trumpinimo slenkstis         | Žetonų sutaupymas | Rizika     | Geriausiai tinka                           |
-| ------------------------ | ---------------------------- | ----------------- | ---------- | ------------------------------------------ |
-| `minimal`                | 24 eilutės vienoje sekcijoje | ~20-40%           | Labai maža | Produkcinei aplinkai su kritiniu kontekstu |
-| `standard` (numatytasis) | 24 eilutės vienoje sekcijoje | ~50-70%           | Maža       | Kasdienėms programavimo sesijoms           |
-| `aggressive`             | 16 eilučių vienoje sekcijoje | ~70-90%           | Vidutinė   | Ilgoms sesijoms, didžiausiam sutaupymui    |
+| Lygis                    | Kirtimo riba        | Žetonų santaupos | Rizika     | Geriausiai tinka                  |
+| ------------------------ | ------------------- | ---------------- | ---------- | --------------------------------- |
+| `minimal`                | 24 eilutės sekcijai | ~20-40%          | Labai žema | Produkcija su kritiniu kontekstu  |
+| `standard` (numatytasis) | 24 eilutės sekcijai | ~50-70%          | Žema       | Kasdieniams programavimo seansams |
+| `aggressive`             | 16 eilučių sekcijai | ~70-90%          | Vidutinė   | Ilgiems seansams, maks. santaupos |
 
-### Kur vyksta trumpinimas
+### Kur vyksta kirtimas
 
-Trumpinimo slenkstis veikia `lineFilter.ts`:
+Kirtimo riba veikia `lineFilter.ts`:
 
 ```ts
 // Iš open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -361,39 +363,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Išsaugoma kiekvienos sekcijos **pradžia** ir **pabaiga**; įsijungus trumpinimui vidurinė turinio dalis pašalinama.
+Išsaugoma ir kiekvienos sekcijos **pradžia**, ir **pabaiga**; vidurinis turinys atmetamas, kai įsigalioja kirtimas.
 
-### Kas lieka ir kas pašalinama
+### Kas lieka ir kas nukertama
 
-| Turinys                                   | minimal        | standard       | aggressive     |
-| ----------------------------------------- | -------------- | -------------- | -------------- |
-| Klaidos / dėklo pėdsakai                  | ✅ išsaugoma   | ✅ išsaugoma   | ✅ išsaugoma   |
-| Testų triktys                             | ✅ išsaugoma   | ✅ išsaugoma   | ✅ išsaugoma   |
-| Kompiliavimo klaidos                      | ✅ išsaugoma   | ✅ išsaugoma   | ✅ išsaugoma   |
-| Sėkmingi testai (išsamūs)                 | ✅ išsaugoma   | 🟡 sutraukiama | 🟡 sutraukiama |
-| Įprasta išvestis (informaciniai žurnalai) | 🟡 sutraukiama | 🟡 sutraukiama | ❌ pašalinama  |
-| Eigos juostos                             | 🟡 sutraukiama | ❌ pašalinama  | ❌ pašalinama  |
-| Antraštė / ASCII piešinys                 | 🟡 sutraukiama | ❌ pašalinama  | ❌ pašalinama  |
+| Turinys                          | minimal      | standard     | aggressive   |
+| -------------------------------- | ------------ | ------------ | ------------ |
+| Klaidos / stack traces           | ✅ išsaugota | ✅ išsaugota | ✅ išsaugota |
+| Testų nesėkmės                   | ✅ išsaugota | ✅ išsaugota | ✅ išsaugota |
+| Kompiliavimo klaidos             | ✅ išsaugota | ✅ išsaugota | ✅ išsaugota |
+| Sėkmingi testai (išsamūs)        | ✅ išsaugota | 🟡 sutraukta | 🟡 sutraukta |
+| Įprasta išvestis (info žurnalai) | 🟡 sutraukta | 🟡 sutraukta | ❌ atmesta   |
+| Pažangos juostos                 | 🟡 sutraukta | ❌ atmesta   | ❌ atmesta   |
+| Antraštės / ASCII grafika        | 🟡 sutraukta | ❌ atmesta   | ❌ atmesta   |
 
 ### Tinkamo intensyvumo pasirinkimas
 
 ```
-                  Ar konteksto praradimas būtų katastrofiškas?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    TAIP         NE        NEŽINAU
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Kiek svarbus    Pirmiausia išbandykite
-      │      našumas?        `standard` (tinka 80%
-      │           │          atvejų)
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │    MAŽAI     LABAI
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -403,7 +405,7 @@ Išsaugoma kiekvienos sekcijos **pradžia** ir **pabaiga**; įsijungus trumpinim
 
 ### Intensyvumo konfigūravimas
 
-**Kiekvienam deriniui** (derinio konfigūracijoje):
+**Pagal combo** (combo konfigūracijoje):
 
 ```json
 {
@@ -419,8 +421,8 @@ Išsaugoma kiekvienos sekcijos **pradžia** ir **pabaiga**; įsijungus trumpinim
 **Programiškai**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) yra
-`CompressionEngine` ir neturi `updateConfig` metodo. Vietoje jo atnaujinkite variklio konfigūraciją
-naudodami registro pagalbinę funkciją:
+`CompressionEngine` ir neturi `updateConfig` metodo. Vietoj to variklio konfigūraciją
+atnaujinkite per registro pagalbinę funkciją:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -428,9 +430,9 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Poveikio tikrinimas
+### Poveikio patikrinimas
 
-Naudokite **patikros barjerą** (žr. toliau), kad patvirtintumėte, jog jūsų filtras yra saugus pasirinkus norimą intensyvumą:
+Naudokite **Verify Gate** (žr. žemiau), kad patvirtintumėte, jog filtras yra saugus pasirinktu intensyvumu:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

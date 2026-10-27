@@ -23,22 +23,22 @@ Caveman 输入：     节省 46%
 范围：             1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## 压缩内容
+## 压缩对象
 
-内置目录目前包含 49 个过滤器，涵盖以下类别：
+内置目录目前提供 56 个过滤器，涵盖以下类别：
 
 | 类别      | 示例                                                          |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`、`git branch`、`git diff`、`git log`             |
-| `test`    | Vitest、Jest、Pytest、Playwright、Go 测试、Cargo 测试         |
+| `test`    | Vitest、Jest、Pytest、PHPUnit、Playwright、Go、Cargo 测试     |
 | `build`   | TypeScript、ESLint、Biome、Prettier、Vite、Webpack、Turbo、Nx |
 | `package` | `npm install`、`npm audit`、`pip`、`uv sync`、Poetry、Bundler |
-| `shell`   | `ls`、`find`、`grep`、通用 Shell 日志                         |
+| `shell`   | `ls`、`find`、`grep`、通用 shell 日志                         |
 | `docker`  | `docker ps`、Docker 日志                                      |
 | `infra`   | Terraform、OpenTofu、`systemctl status`                       |
-| `generic` | JSON 输出、堆栈跟踪、通用输出后备方案                         |
+| `generic` | JSON 输出、堆栈跟踪、通用输出兜底                             |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` 中的检测器会在选择过滤器之前对输出进行分类。当命令类别不足以进行匹配时，过滤器还可以通过命令模式或输出正则表达式进行匹配。
+`open-sse/services/compression/engines/rtk/commandDetector.ts` 中的检测器会在选择过滤器之前对输出进行分类。当命令类别不足以判断时，过滤器还可以通过命令模式或输出正则表达式进行匹配。
 
 ## 过滤器解析
 
@@ -298,15 +298,15 @@ DATA_DIR/rtk/raw-output/
 AWS 访问密钥，以及赋值形式的 `token=...`、`secret=...`、`password=...` 值。分析数据
 仅存储指针 ID、大小和哈希元数据。
 
-## 验证门禁
+## 验证门禁（Verify Gate）
 
-聚焦验证门禁会运行内置的内联过滤器测试，而不会通过 shell 调用外部命令：
+聚焦的验证门禁运行内置的内联过滤器测试，无需调用外部命令：
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-verify.test.ts
 ```
 
-更全面的 RTK 门禁为：
+更广泛的 RTK 门禁为：
 
 ```bash
 node --import tsx/esm --test \
@@ -315,7 +315,7 @@ node --import tsx/esm --test \
   tests/unit/compression/context-compression-api.test.ts
 ```
 
-发布前请运行完整的压缩门禁：
+在发布前运行完整的压缩门禁：
 
 ```bash
 node --import tsx/esm --test \
@@ -336,21 +336,21 @@ node --import tsx/esm --test \
 
 ---
 
-## 强度级别 (v3.8.16+)
+## 强度等级（v3.8.16+）
 
-RTK 支持 **3 个强度级别**，用于在**压缩激进程度**与**安全性**之间进行权衡。该级别通过引擎配置中的 `config.intensity` 设置。
+RTK 支持 **3 个强度等级**，在**压缩激进程度**与**安全性**之间进行权衡。等级通过引擎配置中的 `config.intensity` 设置。
 
-### 3 个级别
+### 3 个等级
 
-| 级别               | 截断阈值       | token 节省量 | 风险 | 最适合                     |
-| ------------------ | -------------- | ------------ | ---- | -------------------------- |
-| `minimal`          | 每个分段 24 行 | ~20-40%      | 极低 | 具有关键上下文的生产环境   |
-| `standard`（默认） | 每个分段 24 行 | ~50-70%      | 低   | 日常编码会话               |
-| `aggressive`       | 每个分段 16 行 | ~70-90%      | 中等 | 长会话、最大程度节省 token |
+| 等级               | 截断阈值   | Token 节省量 | 风险   | 适用场景                 |
+| ------------------ | ---------- | ------------ | ------ | ------------------------ |
+| `minimal`          | 每段 24 行 | ~20-40%      | 非常低 | 需要关键上下文的生产环境 |
+| `standard`（默认） | 每段 24 行 | ~50-70%      | 低     | 日常编码会话             |
+| `aggressive`       | 每段 16 行 | ~70-90%      | 中     | 长会话，最大化节省       |
 
 ### 截断发生的位置
 
-截断阈值会影响 `lineFilter.ts`：
+截断阈值作用于 `lineFilter.ts`：
 
 ```ts
 // 来自 open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -358,16 +358,16 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-每个分段的**开头**和**结尾**都会保留；触发截断时，中间内容会被丢弃。
+每个段的**头部**和**尾部**都会被保留；当截断触发时，中间内容会被丢弃。
 
-### 保留与截断的内容
+### 保留内容 vs. 被裁剪内容
 
 | 内容                 | minimal | standard | aggressive |
 | -------------------- | ------- | -------- | ---------- |
 | 错误 / 堆栈跟踪      | ✅ 保留 | ✅ 保留  | ✅ 保留    |
 | 测试失败             | ✅ 保留 | ✅ 保留  | ✅ 保留    |
 | 构建错误             | ✅ 保留 | ✅ 保留  | ✅ 保留    |
-| 测试通过（详细输出） | ✅ 保留 | 🟡 折叠  | 🟡 折叠    |
+| 测试通过（冗长输出） | ✅ 保留 | 🟡 折叠  | 🟡 折叠    |
 | 常规输出（信息日志） | 🟡 折叠 | 🟡 折叠  | ❌ 丢弃    |
 | 进度条               | 🟡 折叠 | ❌ 丢弃  | ❌ 丢弃    |
 | 横幅 / ASCII 艺术字  | 🟡 折叠 | ❌ 丢弃  | ❌ 丢弃    |
@@ -379,18 +379,18 @@ config.intensity === "aggressive" ? 16 : 24,
                   │
       ┌───────────┼───────────┐
       │           │           │
-     是           否         不确定
+    是           否          不确定
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
       │      吞吐量有多      先尝试 `standard`
-      │      重要？          （适用于 80% 的
-      │           │          情况）
+      │      关键？         （适用于 80% 的
+      │           │          场景）
       │      ┌────┴────┐
       │      │         │
-      │     低         高
+      │     低        高
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -400,7 +400,7 @@ config.intensity === "aggressive" ? 16 : 24,
 
 ### 配置强度
 
-**按组合配置**（在组合配置中）：
+**按 combo 配置**（在 combo 配置中）：
 
 ```json
 {
@@ -413,11 +413,10 @@ config.intensity === "aggressive" ? 16 : 24,
 }
 ```
 
-**通过编程方式**：
+**编程方式**：
 
 `rtkEngine`（`@omniroute/open-sse/services/compression/engines/rtk`）是一个
-`CompressionEngine`，且没有 `updateConfig` 方法。请改为通过注册表辅助函数
-更新引擎配置：
+`CompressionEngine`，没有 `updateConfig` 方法。请改用注册表辅助函数来更新引擎配置：
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -427,14 +426,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### 验证效果
 
-使用**验证门禁**（见下文）确认过滤器在所选强度下是安全的：
+使用**验证门禁**（见下文）确认你的过滤器在所选强度下是安全的：
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("过滤器在 aggressive 强度下未通过");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

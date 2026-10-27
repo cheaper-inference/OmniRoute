@@ -29,22 +29,22 @@ Rozsah:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Čo komprimuje
 
-Vstavaný katalóg v súčasnosti obsahuje 49 filtrov v týchto kategóriách:
+Vstavaný katalóg momentálne obsahuje 56 filtrov v týchto kategóriách:
 
 | Kategória | Príklady                                                      |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, testy Go, testy Cargo       |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, testy Cargo    |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, všeobecné protokoly shellu              |
-| `docker`  | `docker ps`, protokoly Dockeru                                |
+| `shell`   | `ls`, `find`, `grep`, všeobecné logy shellu                   |
+| `docker`  | `docker ps`, logy Dockeru                                     |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | Výstup JSON, trasovania zásobníka, všeobecný záložný výstup   |
+| `generic` | výstup JSON, stack trace, všeobecná záložná voľba pre výstup  |
 
 Detektor v `open-sse/services/compression/engines/rtk/commandDetector.ts` klasifikuje výstup
-pred výberom filtra. Filtre sa môžu zhodovať aj podľa vzoru príkazu alebo regulárneho výrazu výstupu, keď
-trieda príkazu nestačí.
+pred výberom filtra. Filtre sa môžu zhodovať aj podľa vzoru príkazu alebo regulárneho výrazu
+výstupu, keď trieda príkazu nestačí.
 
 ## Rozlíšenie filtrov
 
@@ -317,7 +317,7 @@ ukladá iba identifikátor odkazu, veľkosť a metadáta hašu.
 
 ## Overovacia brána
 
-Cielená overovacia brána spúšťa vstavané inline testy filtrov bez volania externých príkazov prostredníctvom shellu:
+Cielená overovacia brána spúšťa vstavané inline testy filtrov bez volania externých príkazov:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-verify.test.ts
@@ -332,7 +332,7 @@ node --import tsx/esm --test \
   tests/unit/compression/context-compression-api.test.ts
 ```
 
-Pred vydaním spustite širokú bránu kompresie:
+Pred vydaním spustite širokú kompresnú bránu:
 
 ```bash
 node --import tsx/esm --test \
@@ -355,17 +355,17 @@ node --import tsx/esm --test \
 
 ## Úrovne intenzity (v3.8.16+)
 
-RTK podporuje **3 úrovne intenzity**, ktoré vyvažujú **agresivitu kompresie** a **bezpečnosť**. Úroveň sa nastavuje prostredníctvom `config.intensity` v konfigurácii enginu.
+RTK podporuje **3 úrovne intenzity**, ktoré balansujú medzi **agresivitou kompresie** a **bezpečnosťou**. Úroveň sa nastavuje pomocou `config.intensity` v konfigurácii enginu.
 
 ### 3 úrovne
 
-| Úroveň                  | Prah skrátenia       | Úspora tokenov | Riziko      | Najvhodnejšie pre                |
-| ----------------------- | -------------------- | -------------- | ----------- | -------------------------------- |
-| `minimal`               | 24 riadkov na sekciu | ~20-40%        | Veľmi nízke | Produkciu s kritickým kontextom  |
-| `standard` (predvolená) | 24 riadkov na sekciu | ~50-70%        | Nízke       | Každodenné programovacie relácie |
-| `aggressive`            | 16 riadkov na sekciu | ~70-90%        | Stredné     | Dlhé relácie, maximálnu úsporu   |
+| Úroveň               | Prah skrátenia       | Úspora tokenov | Riziko      | Najlepšie pre                     |
+| -------------------- | -------------------- | -------------- | ----------- | --------------------------------- |
+| `minimal`            | 24 riadkov na sekciu | ~20-40%        | Veľmi nízke | Produkcia s kritickým kontextom   |
+| `standard` (default) | 24 riadkov na sekciu | ~50-70%        | Nízke       | Každodenné programátorské relácie |
+| `aggressive`         | 16 riadkov na sekciu | ~70-90%        | Stredné     | Dlhé relácie, maximálna úspora    |
 
-### Kde dochádza ku skráteniu
+### Kde dochádza ku skracovaniu
 
 Prah skrátenia ovplyvňuje `lineFilter.ts`:
 
@@ -375,19 +375,19 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Zachová sa **začiatok** aj **koniec** každej sekcie; po aktivácii skrátenia sa obsah uprostred odstráni.
+**Začiatok** aj **koniec** každej sekcie sa zachovávajú; stredný obsah sa pri aktivácii skracovania zahodí.
 
-### Čo zostáva a čo sa odstráni
+### Čo zostáva vs. čo sa odstráni
 
-| Obsah                               | minimal      | standard      | aggressive    |
-| ----------------------------------- | ------------ | ------------- | ------------- |
-| Chyby/zásobníky volaní              | ✅ zachované | ✅ zachované  | ✅ zachované  |
-| Zlyhania testov                     | ✅ zachované | ✅ zachované  | ✅ zachované  |
-| Chyby zostavenia                    | ✅ zachované | ✅ zachované  | ✅ zachované  |
-| Úspešné testy (podrobné)            | ✅ zachované | 🟡 zbalené    | 🟡 zbalené    |
-| Rutinný výstup (informačné záznamy) | 🟡 zbalené   | 🟡 zbalené    | ❌ odstránené |
-| Indikátory priebehu                 | 🟡 zbalené   | ❌ odstránené | ❌ odstránené |
-| Banner/grafika ASCII                | 🟡 zbalené   | ❌ odstránené | ❌ odstránené |
+| Obsah                      | minimal      | standard     | aggressive   |
+| -------------------------- | ------------ | ------------ | ------------ |
+| Chyby / stack trace        | ✅ zachované | ✅ zachované | ✅ zachované |
+| Zlyhania testov            | ✅ zachované | ✅ zachované | ✅ zachované |
+| Chyby buildu               | ✅ zachované | ✅ zachované | ✅ zachované |
+| Úspešné testy (podrobné)   | ✅ zachované | 🟡 zbalené   | 🟡 zbalené   |
+| Rutinný výstup (info logy) | 🟡 zbalené   | 🟡 zbalené   | ❌ zahodené  |
+| Ukazovatele priebehu       | 🟡 zbalené   | ❌ zahodené  | ❌ zahodené  |
+| Banner / ASCII art         | 🟡 zbalené   | ❌ zahodené  | ❌ zahodené  |
 
 ### Výber správnej intenzity
 
@@ -396,15 +396,15 @@ Zachová sa **začiatok** aj **koniec** každej sekcie; po aktivácii skrátenia
                   │
       ┌───────────┼───────────┐
       │           │           │
-     ÁNO         NIE       NIE SOM SI ISTÝ
+     ÁNO         NIE      NIE STE SI ISTÍ
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Aká kritická    Najprv skúste `standard`
+      │      Ako kritická     Najprv skúste `standard`
       │      je priepustnosť? (funguje v 80 %
-      │           │          prípadov)
+      │           │           prípadov)
       │      ┌────┴────┐
       │      │         │
       │    NÍZKA     VYSOKÁ
@@ -417,7 +417,7 @@ Zachová sa **začiatok** aj **koniec** každej sekcie; po aktivácii skrátenia
 
 ### Konfigurácia intenzity
 
-**Pre jednotlivú kombináciu** (v konfigurácii kombinácie):
+**Pre konkrétne kombo** (v konfigurácii komba):
 
 ```json
 {
@@ -434,7 +434,7 @@ Zachová sa **začiatok** aj **koniec** každej sekcie; po aktivácii skrátenia
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je
 `CompressionEngine` a nemá metódu `updateConfig`. Konfiguráciu enginu
-aktualizujte prostredníctvom pomocnej funkcie registra:
+namiesto toho aktualizujte prostredníctvom pomocnej funkcie registra:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -444,14 +444,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Overenie účinku
 
-Pomocou **overovacej brány** (pozrite nižšie) potvrďte, že je váš filter pri zvolenej intenzite bezpečný:
+Použite **Verify Gate** (pozri nižšie) na potvrdenie, že je váš filter pri zvolenej intenzite bezpečný:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filtre zlyhali pri agresívnej intenzite");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

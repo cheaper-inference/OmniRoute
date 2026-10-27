@@ -27,23 +27,23 @@ Xếp chồng:       1 - (1 - 0.80) * (1 - 0.46) = tiết kiệm 89.2%
 Phạm vi:         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Nội Dung Được Nén
+## Những gì được nén
 
-Danh mục tích hợp hiện cung cấp 49 bộ lọc thuộc các danh mục sau:
+Danh mục tích hợp sẵn hiện cung cấp 56 bộ lọc thuộc các nhóm sau:
 
-| Danh mục  | Ví dụ                                                              |
-| --------- | ------------------------------------------------------------------ |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                  |
-| `test`    | Vitest, Jest, Pytest, Playwright, kiểm thử Go, kiểm thử Cargo      |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx      |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler      |
-| `shell`   | `ls`, `find`, `grep`, nhật ký shell chung                          |
-| `docker`  | `docker ps`, nhật ký Docker                                        |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                            |
-| `generic` | đầu ra JSON, dấu vết ngăn xếp, phương án dự phòng cho đầu ra chung |
+| Nhóm      | Ví dụ                                                         |
+| --------- | ------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, kiểm thử Cargo |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
+| `shell`   | `ls`, `find`, `grep`, log shell chung                         |
+| `docker`  | `docker ps`, log Docker                                       |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
+| `generic` | Đầu ra JSON, stack trace, phương án dự phòng cho đầu ra chung |
 
-Bộ phát hiện trong `open-sse/services/compression/engines/rtk/commandDetector.ts` phân loại đầu ra
-trước khi lựa chọn bộ lọc. Các bộ lọc cũng có thể khớp theo mẫu lệnh hoặc biểu thức chính quy của đầu ra khi chỉ
+Trình phát hiện trong `open-sse/services/compression/engines/rtk/commandDetector.ts` phân loại đầu ra
+trước khi chọn bộ lọc. Các bộ lọc cũng có thể khớp theo mẫu lệnh hoặc regex đầu ra khi chỉ dựa vào
 lớp lệnh là chưa đủ.
 
 ## Phân Giải Bộ Lọc
@@ -354,19 +354,19 @@ node --import tsx/esm --test \
 
 ---
 
-## Các mức cường độ (v3.8.16+)
+## Các Mức Cường độ (v3.8.16+)
 
-RTK hỗ trợ **3 mức cường độ** cân bằng giữa **mức độ nén mạnh** và **độ an toàn**. Mức này được thiết lập qua `config.intensity` trong cấu hình engine.
+RTK hỗ trợ **3 mức cường độ**, đánh đổi giữa **mức độ nén quyết liệt** và **độ an toàn**. Mức này được đặt qua `config.intensity` trong cấu hình của engine.
 
-### 3 mức
+### 3 Mức
 
-| Mức                   | Ngưỡng cắt bớt   | Mức tiết kiệm token | Rủi ro     | Phù hợp nhất với                           |
-| --------------------- | ---------------- | ------------------- | ---------- | ------------------------------------------ |
-| `minimal`             | 24 dòng mỗi phần | ~20-40%             | Rất thấp   | Môi trường production có ngữ cảnh hệ trọng |
-| `standard` (mặc định) | 24 dòng mỗi phần | ~50-70%             | Thấp       | Các phiên lập trình hằng ngày              |
-| `aggressive`          | 16 dòng mỗi phần | ~70-90%             | Trung bình | Phiên dài, tiết kiệm tối đa                |
+| Mức                   | Ngưỡng cắt bớt   | Tiết kiệm token | Rủi ro     | Phù hợp nhất cho                   |
+| --------------------- | ---------------- | --------------- | ---------- | ---------------------------------- |
+| `minimal`             | 24 dòng mỗi phần | ~20-40%         | Rất thấp   | Production với ngữ cảnh quan trọng |
+| `standard` (mặc định) | 24 dòng mỗi phần | ~50-70%         | Thấp       | Các phiên lập trình hằng ngày      |
+| `aggressive`          | 16 dòng mỗi phần | ~70-90%         | Trung bình | Phiên dài, tiết kiệm tối đa        |
 
-### Vị trí diễn ra việc cắt bớt
+### Vị Trí Xảy Ra Việc Cắt Bớt
 
 Ngưỡng cắt bớt ảnh hưởng đến `lineFilter.ts`:
 
@@ -376,40 +376,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Cả phần **đầu** và **cuối** của mỗi phần đều được giữ lại; nội dung ở giữa sẽ bị loại bỏ khi việc cắt bớt được kích hoạt.
+Cả **phần đầu** và **phần cuối** của mỗi section đều được giữ lại; nội dung ở giữa bị loại bỏ khi việc cắt bớt được kích hoạt.
 
-### Nội dung được giữ lại và nội dung bị cắt
+### Nội Dung Nào Được Giữ vs. Bị Cắt
 
-| Nội dung                            | minimal         | standard        | aggressive      |
-| ----------------------------------- | --------------- | --------------- | --------------- |
-| Lỗi / stack trace                   | ✅ được giữ lại | ✅ được giữ lại | ✅ được giữ lại |
-| Kiểm thử thất bại                   | ✅ được giữ lại | ✅ được giữ lại | ✅ được giữ lại |
-| Lỗi build                           | ✅ được giữ lại | ✅ được giữ lại | ✅ được giữ lại |
-| Kiểm thử thành công (chi tiết)      | ✅ được giữ lại | 🟡 được thu gọn | 🟡 được thu gọn |
-| Đầu ra thông thường (log thông tin) | 🟡 được thu gọn | 🟡 được thu gọn | ❌ bị loại bỏ   |
-| Thanh tiến trình                    | 🟡 được thu gọn | ❌ bị loại bỏ   | ❌ bị loại bỏ   |
-| Banner / nghệ thuật ASCII           | 🟡 được thu gọn | ❌ bị loại bỏ   | ❌ bị loại bỏ   |
+| Nội dung                       | minimal     | standard      | aggressive    |
+| ------------------------------ | ----------- | ------------- | ------------- |
+| Lỗi / stack trace              | ✅ được giữ | ✅ được giữ   | ✅ được giữ   |
+| Test thất bại                  | ✅ được giữ | ✅ được giữ   | ✅ được giữ   |
+| Lỗi build                      | ✅ được giữ | ✅ được giữ   | ✅ được giữ   |
+| Test đạt (dạng chi tiết)       | ✅ được giữ | 🟡 thu gọn    | 🟡 thu gọn    |
+| Output thông thường (log info) | 🟡 thu gọn  | 🟡 thu gọn    | ❌ bị loại bỏ |
+| Thanh tiến trình               | 🟡 thu gọn  | ❌ bị loại bỏ | ❌ bị loại bỏ |
+| Banner / ASCII art             | 🟡 thu gọn  | ❌ bị loại bỏ | ❌ bị loại bỏ |
 
-### Chọn cường độ phù hợp
+### Chọn Mức Cường Độ Phù Hợp
 
 ```
-                  Việc mất ngữ cảnh có gây hậu quả nghiêm trọng không?
+                  Mất ngữ cảnh có gây hậu quả nghiêm trọng?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     CÓ          KHÔNG      KHÔNG CHẮC
+     CÓ         KHÔNG      KHÔNG CHẮC
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Thông lượng     Hãy thử `standard` trước
-      │      quan trọng      (phù hợp với 80%
-      │      đến mức nào?    trường hợp)
-      │           │
+      │     Throughput có    Hãy thử `standard` trước
+      │     quan trọng       (phù hợp với 80%
+      │     đến mức nào?     trường hợp)
       │      ┌────┴────┐
       │      │         │
-      │     THẤP       CAO
+      │    THẤP       CAO
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -417,7 +416,7 @@ Cả phần **đầu** và **cuối** của mỗi phần đều được giữ l
       └──────┴─────────┘
 ```
 
-### Cấu hình cường độ
+### Cấu Hình Mức Cường Độ
 
 **Theo từng combo** (trong cấu hình combo):
 
@@ -432,11 +431,11 @@ Cả phần **đầu** và **cuối** của mỗi phần đều được giữ l
 }
 ```
 
-**Bằng mã**:
+**Bằng mã chương trình**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) là một
-`CompressionEngine` và không có phương thức `updateConfig`. Thay vào đó, hãy cập nhật cấu hình
-của engine thông qua helper registry:
+`CompressionEngine` và không có phương thức `updateConfig`. Thay vào đó, hãy cập nhật
+cấu hình của engine thông qua helper của registry:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -444,16 +443,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Xác minh hiệu quả
+### Kiểm Chứng Hiệu Quả
 
-Sử dụng **Cổng xác minh** (xem bên dưới) để xác nhận bộ lọc của bạn an toàn ở cường độ đã chọn:
+Sử dụng **Verify Gate** (xem bên dưới) để xác nhận bộ lọc của bạn an toàn ở mức cường độ đã chọn:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Bộ lọc thất bại ở cường độ aggressive");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

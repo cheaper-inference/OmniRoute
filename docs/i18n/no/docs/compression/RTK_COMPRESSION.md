@@ -29,21 +29,21 @@ Intervall:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Hva den komprimerer
 
-Den innebygde katalogen leveres for øyeblikket med 49 filtre fordelt på disse kategoriene:
+Den innebygde katalogen leveres for øyeblikket med 56 filtre fordelt på disse kategoriene:
 
 | Kategori  | Eksempler                                                     |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, Go-tester, Cargo-tester     |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo-tester   |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
 | `shell`   | `ls`, `find`, `grep`, generiske skalllogger                   |
 | `docker`  | `docker ps`, Docker-logger                                    |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON-utdata, stakksporinger, generisk reserve for utdata      |
+| `generic` | JSON-utdata, stack traces, generisk reserve for utdata        |
 
 Detektoren i `open-sse/services/compression/engines/rtk/commandDetector.ts` klassifiserer utdata
-før filtervalg. Filtre kan også samsvare etter kommandomønster eller regulært uttrykk for utdata når en
+før filtervalg. Filtre kan også matche på kommandomønster eller regulære uttrykk for utdata når en
 kommandoklasse ikke er tilstrekkelig.
 
 ## Filteroppløsning
@@ -356,19 +356,19 @@ node --import tsx/esm --test \
 
 ## Intensitetsnivåer (v3.8.16+)
 
-RTK støtter **3 intensitetsnivåer** som balanserer **komprimeringsaggressivitet** mot **sikkerhet**. Nivået angis via `config.intensity` i motorkonfigurasjonen.
+RTK støtter **3 intensitetsnivåer** som balanserer **komprimeringsaggressivitet** mot **sikkerhet**. Nivået settes via `config.intensity` i motorkonfigurasjonen.
 
 ### De 3 nivåene
 
-| Nivå                       | Terskel for avkorting | Tokenbesparelse | Risiko    | Best egnet for                     |
-| -------------------------- | --------------------- | --------------- | --------- | ---------------------------------- |
-| `minimal`                  | 24 linjer per seksjon | ~20-40%         | Svært lav | Produksjon med kritisk kontekst    |
-| `standard` (standardverdi) | 24 linjer per seksjon | ~50-70%         | Lav       | Daglige kodeøkter                  |
-| `aggressive`               | 16 linjer per seksjon | ~70-90%         | Middels   | Lange økter, maksimale besparelser |
+| Nivå                      | Trunkeringsterskel    | Token-besparelse | Risiko     | Passer best for                  |
+| ------------------------- | --------------------- | ---------------- | ---------- | -------------------------------- |
+| `minimal`                 | 24 linjer per seksjon | ~20-40%          | Veldig lav | Produksjon med kritisk kontekst  |
+| `standard` (standardvalg) | 24 linjer per seksjon | ~50-70%          | Lav        | Daglige kodeøkter                |
+| `aggressive`              | 16 linjer per seksjon | ~70-90%          | Middels    | Lange økter, maksimal besparelse |
 
-### Hvor avkortingen skjer
+### Hvor trunkeringen skjer
 
-Terskelen for avkorting påvirker `lineFilter.ts`:
+Trunkeringsterskelen påvirker `lineFilter.ts`:
 
 ```ts
 // Fra open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -376,35 +376,35 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Både **begynnelsen** og **slutten** av hver seksjon bevares. Innhold i midten fjernes når avkortingen trer i kraft.
+Både **hodet** og **halen** i hver seksjon bevares; innholdet i midten droppes når trunkeringen trer i kraft.
 
-### Hva som beholdes kontra hva som fjernes
+### Hva som bevares vs. hva som kuttes
 
-| Innhold                                   | minimal         | standard        | aggressive      |
-| ----------------------------------------- | --------------- | --------------- | --------------- |
-| Feil / stakksporinger                     | ✅ bevart       | ✅ bevart       | ✅ bevart       |
-| Mislykkede tester                         | ✅ bevart       | ✅ bevart       | ✅ bevart       |
-| Byggefeil                                 | ✅ bevart       | ✅ bevart       | ✅ bevart       |
-| Beståtte tester (detaljerte)              | ✅ bevart       | 🟡 slått sammen | 🟡 slått sammen |
-| Rutinemessige utdata (informasjonslogger) | 🟡 slått sammen | 🟡 slått sammen | ❌ fjernet      |
-| Fremdriftsindikatorer                     | 🟡 slått sammen | ❌ fjernet      | ❌ fjernet      |
-| Banner / ASCII-grafikk                    | 🟡 slått sammen | ❌ fjernet      | ❌ fjernet      |
+| Innhold                           | minimal      | standard     | aggressive   |
+| --------------------------------- | ------------ | ------------ | ------------ |
+| Feil / stakkspor                  | ✅ bevart    | ✅ bevart    | ✅ bevart    |
+| Testfeil                          | ✅ bevart    | ✅ bevart    | ✅ bevart    |
+| Byggfeil                          | ✅ bevart    | ✅ bevart    | ✅ bevart    |
+| Beståtte tester (utførlige)       | ✅ bevart    | 🟡 kollapset | 🟡 kollapset |
+| Rutinemessig utdata (info-logger) | 🟡 kollapset | 🟡 kollapset | ❌ droppet   |
+| Fremdriftslinjer                  | 🟡 kollapset | ❌ droppet   | ❌ droppet   |
+| Banner / ASCII-kunst              | 🟡 kollapset | ❌ droppet   | ❌ droppet   |
 
-### Valg av riktig intensitet
+### Velge riktig intensitet
 
 ```
                   Er tap av kontekst katastrofalt?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     JA          NEI        USIKKER
+     JA          NEI     IKKE SIKKER
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
       │      Hvor kritisk    Prøv `standard` først
-      │      er kapasiteten? (fungerer i 80 % av
+      │      er throughput?  (fungerer i 80 % av
       │           │          tilfellene)
       │      ┌────┴────┐
       │      │         │
@@ -416,9 +416,9 @@ Både **begynnelsen** og **slutten** av hver seksjon bevares. Innhold i midten f
       └──────┴─────────┘
 ```
 
-### Konfigurering av intensitet
+### Konfigurere intensitet
 
-**Per kombinasjon** (i kombinasjonskonfigurasjonen):
+**Per combo** (i combo-konfigurasjonen):
 
 ```json
 {
@@ -434,8 +434,8 @@ Både **begynnelsen** og **slutten** av hver seksjon bevares. Innhold i midten f
 **Programmatisk**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) er en
-`CompressionEngine` og har ingen `updateConfig`-metode. Oppdater konfigurasjonen til en motor
-via registerhjelperen i stedet:
+`CompressionEngine` og har ingen `updateConfig`-metode. Oppdater en motors
+konfigurasjon via registerhjelperen i stedet:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -443,9 +443,9 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Verifisering av effekten
+### Verifisere effekten
 
-Bruk **verifiseringsporten** (se nedenfor) for å bekrefte at filteret er sikkert ved den valgte intensiteten:
+Bruk **Verify Gate** (se nedenfor) for å bekrefte at filteret ditt er trygt ved den valgte intensiteten:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

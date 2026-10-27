@@ -27,24 +27,24 @@ Compus:          1 - (1 - 0.80) * (1 - 0.46) = 89.2% economisit
 Interval:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Ce comprimă
+## Ce Comprimă
 
-Catalogul încorporat include în prezent 49 de filtre din următoarele categorii:
+Catalogul integrat include în prezent 56 de filtre în următoarele categorii:
 
-| Categorie | Exemple                                                                |
-| --------- | ---------------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                      |
-| `test`    | Vitest, Jest, Pytest, Playwright, teste Go, teste Cargo                |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx          |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler          |
-| `shell`   | `ls`, `find`, `grep`, jurnale shell generice                           |
-| `docker`  | `docker ps`, jurnale Docker                                            |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                                |
-| `generic` | Ieșire JSON, urme de stivă, soluție de rezervă pentru ieșirea generică |
+| Categorie | Exemple                                                       |
+| --------- | ------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, teste Cargo    |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
+| `shell`   | `ls`, `find`, `grep`, jurnale shell generice                  |
+| `docker`  | `docker ps`, jurnale Docker                                   |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
+| `generic` | ieșire JSON, stack trace-uri, fallback generic pentru ieșire  |
 
 Detectorul din `open-sse/services/compression/engines/rtk/commandDetector.ts` clasifică ieșirea
-înainte de selectarea filtrului. Filtrele se pot potrivi și după modelul comenzii sau după expresia regulată aplicată ieșirii atunci când o clasă
-de comenzi nu este suficientă.
+înainte de selectarea filtrului. Filtrele se pot potrivi și după un model de comandă sau un regex
+al ieșirii atunci când o clasă de comenzi nu este suficientă.
 
 ## Rezolvarea filtrelor
 
@@ -352,15 +352,15 @@ node --import tsx/esm --test \
 
 ## Niveluri de intensitate (v3.8.16+)
 
-RTK acceptă **3 niveluri de intensitate** care realizează un compromis între **agresivitatea compresiei** și **siguranță**. Nivelul este setat prin `config.intensity` în configurația motorului.
+RTK acceptă **3 niveluri de intensitate** care stabilesc compromisul între **agresivitatea compresiei** și **siguranță**. Nivelul se setează prin `config.intensity` în configurația motorului.
 
 ### Cele 3 niveluri
 
-| Nivel                 | Prag de trunchiere      | Economie de tokenuri | Risc          | Recomandat pentru              |
-| --------------------- | ----------------------- | -------------------- | ------------- | ------------------------------ |
-| `minimal`             | 24 de linii pe secțiune | ~20-40%              | Foarte scăzut | Producție cu un context critic |
-| `standard` (implicit) | 24 de linii pe secțiune | ~50-70%              | Scăzut        | Sesiuni zilnice de programare  |
-| `aggressive`          | 16 linii pe secțiune    | ~70-90%              | Mediu         | Sesiuni lungi, economii maxime |
+| Nivel                 | Prag de trunchiere      | Economii de tokeni | Risc          | Recomandat pentru              |
+| --------------------- | ----------------------- | ------------------ | ------------- | ------------------------------ |
+| `minimal`             | 24 de linii pe secțiune | ~20-40%            | Foarte scăzut | Producție cu context critic    |
+| `standard` (implicit) | 24 de linii pe secțiune | ~50-70%            | Scăzut        | Sesiuni zilnice de programare  |
+| `aggressive`          | 16 linii pe secțiune    | ~70-90%            | Mediu         | Sesiuni lungi, economii maxime |
 
 ### Unde are loc trunchierea
 
@@ -372,19 +372,19 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Atât **începutul**, cât și **sfârșitul** fiecărei secțiuni sunt păstrate; conținutul din mijloc este eliminat atunci când se activează trunchierea.
+Atât **începutul**, cât și **sfârșitul** fiecărei secțiuni sunt păstrate; conținutul din mijloc este eliminat atunci când intervine trunchierea.
 
-### Ce se păstrează și ce se elimină
+### Ce se păstrează vs. ce se elimină
 
-| Conținut                           | minimal      | standard     | aggressive   |
-| ---------------------------------- | ------------ | ------------ | ------------ |
-| Erori / urme de stivă              | ✅ păstrate  | ✅ păstrate  | ✅ păstrate  |
-| Teste eșuate                       | ✅ păstrate  | ✅ păstrate  | ✅ păstrate  |
-| Erori de compilare                 | ✅ păstrate  | ✅ păstrate  | ✅ păstrate  |
-| Teste reușite (detaliate)          | ✅ păstrate  | 🟡 restrânse | 🟡 restrânse |
-| Rezultate de rutină (jurnale info) | 🟡 restrânse | 🟡 restrânse | ❌ eliminate |
-| Bare de progres                    | 🟡 restrânse | ❌ eliminate | ❌ eliminate |
-| Bannere / artă ASCII               | 🟡 restrânse | ❌ eliminate | ❌ eliminate |
+| Conținut                       | minimal     | standard    | aggressive  |
+| ------------------------------ | ----------- | ----------- | ----------- |
+| Erori / stack trace-uri        | ✅ păstrat  | ✅ păstrat  | ✅ păstrat  |
+| Teste eșuate                   | ✅ păstrat  | ✅ păstrat  | ✅ păstrat  |
+| Erori de build                 | ✅ păstrat  | ✅ păstrat  | ✅ păstrat  |
+| Teste reușite (detaliate)      | ✅ păstrat  | 🟡 restrâns | 🟡 restrâns |
+| Output de rutină (loguri info) | 🟡 restrâns | 🟡 restrâns | ❌ eliminat |
+| Bare de progres                | 🟡 restrâns | ❌ eliminat | ❌ eliminat |
+| Banner / artă ASCII            | 🟡 restrâns | ❌ eliminat | ❌ eliminat |
 
 ### Alegerea intensității potrivite
 
@@ -399,12 +399,12 @@ Atât **începutul**, cât și **sfârșitul** fiecărei secțiuni sunt păstrat
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Cât de critică   Încercați mai întâi `standard`
-      │      este viteza?     (funcționează pentru 80%
-      │           │           din cazuri)
+      │      Cât de critic Încearcă mai întâi `standard`
+      │      este debitul? (funcționează în
+      │           │         80% din cazuri)
       │      ┌────┴────┐
       │      │         │
-      │   SCĂZUTĂ    RIDICATĂ
+      │    SCĂZUT  RIDICAT
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -414,7 +414,7 @@ Atât **începutul**, cât și **sfârșitul** fiecărei secțiuni sunt păstrat
 
 ### Configurarea intensității
 
-**Per combinație** (în configurația combinației):
+**Per combo** (în configurația combo):
 
 ```json
 {
@@ -430,8 +430,8 @@ Atât **începutul**, cât și **sfârșitul** fiecărei secțiuni sunt păstrat
 **Programatic**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) este un
-`CompressionEngine` și nu are nicio metodă `updateConfig`. Actualizați configurația unui motor
-prin intermediul funcției ajutătoare a registrului:
+`CompressionEngine` și nu are o metodă `updateConfig`. Actualizează în schimb
+configurația unui motor prin helperul din registry:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -441,14 +441,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Verificarea efectului
 
-Utilizați **Poarta de verificare** (consultați mai jos) pentru a confirma că filtrul este sigur la intensitatea aleasă:
+Folosește **Verify Gate** (vezi mai jos) pentru a confirma că filtrul tău este sigur la intensitatea aleasă:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filtrele au eșuat la intensitatea agresivă");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

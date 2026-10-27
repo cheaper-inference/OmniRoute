@@ -29,22 +29,20 @@ Caveman ان پٹ:         46% بچت
 
 ## یہ کیا کمپریس کرتا ہے
 
-بلٹ اِن کیٹلاگ میں فی الحال ان زمروں میں 49 فلٹرز شامل ہیں:
+بلٹ اِن کیٹلاگ فی الحال ان زمروں میں 56 فلٹرز فراہم کرتا ہے:
 
 | زمرہ      | مثالیں                                                        |
 | --------- | ------------------------------------------------------------- |
-| `git`     | `git status`، `git branch`، `git diff`، `git log`             |
-| `test`    | Vitest، Jest، Pytest، Playwright، Go ٹیسٹس، Cargo ٹیسٹس       |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`    | Vitest، Jest، Pytest، PHPUnit، Playwright، Go، Cargo ٹیسٹس    |
 | `build`   | TypeScript، ESLint، Biome، Prettier، Vite، Webpack، Turbo، Nx |
-| `package` | `npm install`، `npm audit`، `pip`، `uv sync`، Poetry، Bundler |
-| `shell`   | `ls`، `find`، `grep`، عمومی شیل لاگز                          |
-| `docker`  | `docker ps`، Docker لاگز                                      |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry، Bundler |
+| `shell`   | `ls`, `find`, `grep`, عمومی شیل لاگز                          |
+| `docker`  | `docker ps`, Docker لاگز                                      |
 | `infra`   | Terraform، OpenTofu، `systemctl status`                       |
 | `generic` | JSON آؤٹ پٹ، اسٹیک ٹریسز، عمومی آؤٹ پٹ فال بیک                |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` میں موجود ڈیٹیکٹر فلٹر منتخب کرنے
-سے پہلے آؤٹ پٹ کی درجہ بندی کرتا ہے۔ جب کمانڈ کلاس کافی نہ ہو تو فلٹرز کمانڈ پیٹرن یا آؤٹ پٹ ریجیکس
-کی بنیاد پر بھی مماثلت تلاش کر سکتے ہیں۔
+`open-sse/services/compression/engines/rtk/commandDetector.ts` میں موجود ڈیٹیکٹر فلٹر کے انتخاب سے پہلے آؤٹ پٹ کی درجہ بندی کرتا ہے۔ جب کمانڈ کلاس کافی نہ ہو تو فلٹرز کمانڈ پیٹرن یا آؤٹ پٹ regex کے ذریعے بھی میل کر سکتے ہیں۔
 
 ## فلٹر کا تعین
 
@@ -356,59 +354,59 @@ node --import tsx/esm --test \
 
 ## شدت کی سطحیں (v3.8.16+)
 
-RTK **شدت کی 3 سطحوں** کو سپورٹ کرتا ہے جو **کمپریشن کی جارحیت** اور **حفاظت** کے درمیان توازن قائم کرتی ہیں۔ سطح انجن کنفگ میں `config.intensity` کے ذریعے سیٹ کی جاتی ہے۔
+RTK **3 شدت کی سطحوں** کی حمایت کرتا ہے جو **کمپریشن کی جارحیت** اور **حفاظت** کے درمیان توازن قائم کرتی ہیں۔ یہ سطح engine config میں `config.intensity` کے ذریعے سیٹ کی جاتی ہے۔
 
-### 3 سطحیں
+### یہ 3 سطحیں
 
-| سطح                 | تراشنے کی حد       | ٹوکن کی بچت | خطرہ    | بہترین استعمال                 |
-| ------------------- | ------------------ | ----------- | ------- | ------------------------------ |
-| `minimal`           | فی سیکشن 24 لائنیں | ~20-40%     | بہت کم  | اہم سیاق و سباق والی پروڈکشن   |
-| `standard` (ڈیفالٹ) | فی سیکشن 24 لائنیں | ~50-70%     | کم      | روزمرہ کوڈنگ سیشنز             |
-| `aggressive`        | فی سیکشن 16 لائنیں | ~70-90%     | درمیانہ | طویل سیشنز، زیادہ سے زیادہ بچت |
+| سطح                         | Truncation کی حد  | Token کی بچت | خطرہ    | کس کے لیے بہترین                  |
+| --------------------------- | ----------------- | ------------ | ------- | --------------------------------- |
+| `minimal`                   | فی سیکشن 24 سطریں | ~20-40%      | بہت کم  | اہم context کے ساتھ production    |
+| `standard` (پہلے سے طے شدہ) | فی سیکشن 24 سطریں | ~50-70%      | کم      | روزمرہ کی coding sessions         |
+| `aggressive`                | فی سیکشن 16 سطریں | ~70-90%      | درمیانہ | لمبی sessions، زیادہ سے زیادہ بچت |
 
-### تراشنا کہاں ہوتا ہے
+### Truncation کہاں ہوتی ہے
 
-تراشنے کی حد `lineFilter.ts` پر اثر انداز ہوتی ہے:
+Truncation کی حد `lineFilter.ts` کو متاثر کرتی ہے:
 
 ```ts
-// open-sse/services/compression/engines/rtk/index.ts:329-330 سے
+// From open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-ہر سیکشن کا **ابتدائی** اور **آخری** دونوں حصہ محفوظ رکھا جاتا ہے؛ تراشنا فعال ہونے پر درمیانی مواد ہٹا دیا جاتا ہے۔
+ہر سیکشن کا **آغاز (head)** اور **اختتام (tail)** دونوں محفوظ رہتے ہیں؛ truncation نافذ ہونے پر درمیانی مواد ہٹا دیا جاتا ہے۔
 
-### کیا باقی رہتا ہے بمقابلہ کیا کاٹا جاتا ہے
+### کیا رہتا ہے اور کیا کٹ جاتا ہے
 
-| مواد                        | minimal       | standard      | aggressive    |
-| --------------------------- | ------------- | ------------- | ------------- |
-| ایررز / اسٹیک ٹریسز         | ✅ محفوظ      | ✅ محفوظ      | ✅ محفوظ      |
-| ٹیسٹ کی ناکامیاں            | ✅ محفوظ      | ✅ محفوظ      | ✅ محفوظ      |
-| بِلڈ ایررز                  | ✅ محفوظ      | ✅ محفوظ      | ✅ محفوظ      |
-| کامیاب ٹیسٹس (تفصیلی)       | ✅ محفوظ      | 🟡 مختصر کردہ | 🟡 مختصر کردہ |
-| معمول کا آؤٹ پٹ (انفو لاگز) | 🟡 مختصر کردہ | 🟡 مختصر کردہ | ❌ حذف شدہ    |
-| پروگریس بارز                | 🟡 مختصر کردہ | ❌ حذف شدہ    | ❌ حذف شدہ    |
-| بینر / ASCII آرٹ            | 🟡 مختصر کردہ | ❌ حذف شدہ    | ❌ حذف شدہ    |
+| مواد                        | minimal       | standard       | aggressive     |
+| --------------------------- | ------------- | -------------- | -------------- |
+| Errors / stack traces       | ✅ محفوظ      | ✅ محفوظ       | ✅ محفوظ       |
+| Test کی ناکامیاں            | ✅ محفوظ      | ✅ محفوظ       | ✅ محفوظ       |
+| Build کی errors             | ✅ محفوظ      | ✅ محفوظ       | ✅ محفوظ       |
+| کامیاب tests (verbose)      | ✅ محفوظ      | 🟡 سکیڑی گئی   | 🟡 سکیڑی گئی   |
+| معمول کا output (info logs) | 🟡 سکیڑا گیا  | 🟡 سکیڑا گیا   | ❌ ہٹا دیا گیا |
+| Progress bars               | 🟡 سکیڑی گئیں | ❌ ہٹا دی گئیں | ❌ ہٹا دی گئیں |
+| Banner / ASCII art          | 🟡 سکیڑا گیا  | ❌ ہٹا دیا گیا | ❌ ہٹا دیا گیا |
 
 ### درست شدت کا انتخاب
 
 ```
-                  کیا سیاق و سباق کا ضائع ہونا تباہ کن ہے؟
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    ہاں          نہیں       یقین نہیں
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      تھروپُٹ کتنا     پہلے `standard` آزمائیں
-      │      اہم ہے؟          (80% صورتوں میں
-      │           │          کارگر ہے)
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │     کم        زیادہ
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -416,9 +414,9 @@ config.intensity === "aggressive" ? 16 : 24,
       └──────┴─────────┘
 ```
 
-### شدت کی کنفگریشن
+### شدت کی ترتیب
 
-**فی کومبو** (کومبو کنفگ میں):
+**فی-combo** (combo config میں):
 
 ```json
 {
@@ -431,11 +429,11 @@ config.intensity === "aggressive" ? 16 : 24,
 }
 ```
 
-**پروگرامی طور پر**:
+**پروگرام کے ذریعے**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) ایک
-`CompressionEngine` ہے اور اس میں کوئی `updateConfig` میتھڈ نہیں ہے۔ اس کے بجائے رجسٹری ہیلپر کے ذریعے
-انجن کی کنفگ اپ ڈیٹ کریں:
+`CompressionEngine` ہے اور اس میں کوئی `updateConfig` طریقہ نہیں ہے۔ اس کے بجائے
+registry helper کے ذریعے engine کا config اپڈیٹ کریں:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -445,7 +443,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### اثر کی تصدیق
 
-یہ تصدیق کرنے کے لیے **تصدیقی گیٹ** (نیچے دیکھیں) استعمال کریں کہ آپ کا فلٹر آپ کی منتخب کردہ شدت پر محفوظ ہے:
+اپنی منتخب شدت پر اپنے filter کی حفاظت کی تصدیق کے لیے **Verify Gate** استعمال کریں (نیچے دیکھیں):
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

@@ -27,24 +27,24 @@ F'saffi:        1 - (1 - 0.80) * (1 - 0.46) = 89.2% iffrankat
 Firxa:          1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Dak li Jikkompressa
+## X'Jikkompressa
 
-Il-katalgu inkorporat bħalissa jinkludi 49 filtru f'dawn il-kategoriji:
+Il-katalgu inkorporat bħalissa joffri 56 filtru f'dawn il-kategoriji:
 
-| Kategorija | Eżempji                                                         |
-| ---------- | --------------------------------------------------------------- |
-| `git`      | `git status`, `git branch`, `git diff`, `git log`               |
-| `test`     | Vitest, Jest, Pytest, Playwright, testijiet Go, testijiet Cargo |
-| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx   |
-| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler   |
-| `shell`    | `ls`, `find`, `grep`, reġistri ġeneriċi tax-shell               |
-| `docker`   | `docker ps`, reġistri ta' Docker                                |
-| `infra`    | Terraform, OpenTofu, `systemctl status`                         |
-| `generic`  | Output JSON, stack traces, alternattiva ġenerika għall-output   |
+| Kategorija | Eżempji                                                            |
+| ---------- | ------------------------------------------------------------------ |
+| `git`      | `git status`, `git branch`, `git diff`, `git log`                  |
+| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, testijiet ta' Cargo |
+| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx      |
+| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler      |
+| `shell`    | `ls`, `find`, `grep`, log ġeneriċi tas-shell                       |
+| `docker`   | `docker ps`, log ta' Docker                                        |
+| `infra`    | Terraform, OpenTofu, `systemctl status`                            |
+| `generic`  | output JSON, stack traces, fallback ġeneriku tal-output            |
 
-Id-detettur f'`open-sse/services/compression/engines/rtk/commandDetector.ts` jikklassifika l-output
-qabel l-għażla tal-filtru. Il-filtri jistgħu wkoll jaqblu skont mudell ta' kmand jew regex tal-output meta klassi ta'
-kmand ma tkunx biżżejjed.
+Id-detektor f'`open-sse/services/compression/engines/rtk/commandDetector.ts` jikklassifika l-output
+qabel l-għażla tal-filtru. Il-filtri jistgħu wkoll jaqblu permezz ta' mudell tal-kmand jew regex
+tal-output meta klassi ta' kmand ma tkunx biżżejjed.
 
 ## Riżoluzzjoni tal-Filtri
 
@@ -353,21 +353,21 @@ node --import tsx/esm --test \
 
 ---
 
-## Livelli ta’ Intensità (v3.8.16+)
+## Livelli ta' Intensità (v3.8.16+)
 
-RTK jappoġġja **3 livelli ta’ intensità** li jibbilanċjaw bejn l-**aggressività tal-kompressjoni** u s-**sikurezza**. Il-livell jiġi ssettjat permezz ta’ `config.intensity` fil-konfigurazzjoni tal-engine.
+RTK jappoġġja **3 livelli ta' intensità** li jikkontrobilanċjaw bejn **l-aggressività tal-kompressjoni** u **s-sigurtà**. Il-livell jiġi ssettjat permezz ta' `config.intensity` fil-konfigurazzjoni tal-magna.
 
 ### It-3 Livelli
 
-| Livell               | Limitu tat-tronkament     | Iffrankar ta’ tokens | Riskju     | L-aħjar għal                               |
-| -------------------- | ------------------------- | -------------------- | ---------- | ------------------------------------------ |
-| `minimal`            | 24 linja kull sezzjoni    | ~20-40%              | Baxx ħafna | Produzzjoni b’kuntest kritiku              |
-| `standard` (default) | 24 linja kull sezzjoni    | ~50-70%              | Baxx       | Sessjonijiet ta’ kuljum għall-ipprogrammar |
-| `aggressive`         | 16-il linja kull sezzjoni | ~70-90%              | Medju      | Sessjonijiet twal, iffrankar massimu       |
+| Livell               | Limitu tat-trunkament     | Iffrankar ta' tokens | Riskju     | L-aħjar għal                         |
+| -------------------- | ------------------------- | -------------------- | ---------- | ------------------------------------ |
+| `minimal`            | 24 linja għal sezzjoni    | ~20-40%              | Baxx ħafna | Produzzjoni b'kontest kritiku        |
+| `standard` (default) | 24 linja għal sezzjoni    | ~50-70%              | Baxx       | Sessjonijiet ta' coding ta' kuljum   |
+| `aggressive`         | 16-il linja għal sezzjoni | ~70-90%              | Medju      | Sessjonijiet twal, iffrankar massimu |
 
-### Fejn Iseħħ it-Tronkament
+### Fejn Jseħħ it-Trunkament
 
-Il-limitu tat-tronkament jaffettwa `lineFilter.ts`:
+Il-limitu tat-trunkament jaffettwa `lineFilter.ts`:
 
 ```ts
 // Minn open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -375,36 +375,35 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Kemm il-**bidu** kif ukoll it-**tmiem** ta’ kull sezzjoni jiġu ppreservati; il-kontenut tan-nofs jitneħħa meta jidħol fis-seħħ it-tronkament.
+Kemm ir-**ras** kif ukoll id-**denb** ta' kull sezzjoni jiġu ppreservati; il-kontenut tan-nofs jitħalla barra meta jidħol fis-seħħ it-trunkament.
 
-### X’Jibqa’ u X’Jinqata’
+### X'Jibqa' u X'Jintaqta'
 
-| Kontenut                       | minimal         | standard        | aggressive      |
-| ------------------------------ | --------------- | --------------- | --------------- |
-| Żbalji / stack traces          | ✅ ippreservati | ✅ ippreservati | ✅ ippreservati |
-| Fallimenti tat-testijiet       | ✅ ippreservati | ✅ ippreservati | ✅ ippreservati |
-| Żbalji tal-build               | ✅ ippreservati | ✅ ippreservati | ✅ ippreservati |
-| Testijiet li jgħaddu (verbose) | ✅ ippreservati | 🟡 ikkollassati | 🟡 ikkollassati |
-| Output ta’ rutina (info logs)  | 🟡 ikkollassat  | 🟡 ikkollassat  | ❌ imneħħi      |
-| Vireg tal-progress             | 🟡 ikkollassati | ❌ imneħħija    | ❌ imneħħija    |
-| Banner / arti ASCII            | 🟡 ikkollassati | ❌ imneħħija    | ❌ imneħħija    |
+| Kontenut                                   | minimal        | standard         | aggressive       |
+| ------------------------------------------ | -------------- | ---------------- | ---------------- |
+| Żbalji / stack traces                      | ✅ ppreservati | ✅ ppreservati   | ✅ ppreservati   |
+| Testijiet li fallu                         | ✅ ppreservati | ✅ ppreservati   | ✅ ppreservati   |
+| Żbalji tal-build                           | ✅ ppreservati | ✅ ppreservati   | ✅ ppreservati   |
+| Testijiet li jgħaddu (verbosi)             | ✅ ppreservati | 🟡 kollapsati    | 🟡 kollapsati    |
+| Output ta' rutina (logs ta' informazzjoni) | 🟡 kollapsat   | 🟡 kollapsat     | ❌ mħalli barra  |
+| Vireg tal-progress                         | 🟡 kollapsati  | ❌ mħallin barra | ❌ mħallin barra |
+| Banners / ASCII art                        | 🟡 kollapsati  | ❌ mħallin barra | ❌ mħallin barra |
 
-### Għażla tal-Intensità t-Tajba
+### Kif Tagħżel l-Intensità T-Tajba
 
 ```
-                  It-telf tal-kuntest huwa katastrofiku?
+                  It-telf ta' kontest huwa katastrofiku?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     IVA         LE         MHUX ĊERT
+     IVA          LE       M'INIX ĊERT
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Kemm huwa       Ipprova `standard` l-ewwel
-      │      kritiku         (jaħdem għal 80%
-      │      t-throughput?   tal-każijiet)
+      │      Kemm hu kritiku   Ipprova `standard` l-ewwel
+      │      t-throughput?     (jaħdem f'80% tal-każijiet)
       │           │
       │      ┌────┴────┐
       │      │         │
@@ -431,11 +430,11 @@ Kemm il-**bidu** kif ukoll it-**tmiem** ta’ kull sezzjoni jiġu ppreservati; i
 }
 ```
 
-**B’mod programmatiku**:
+**B'mod programmatiku**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) huwa
-`CompressionEngine` u m’għandux metodu `updateConfig`. Aġġorna l-konfigurazzjoni ta’ engine
-permezz tar-registry helper minflok:
+`CompressionEngine` u m'għandux metodu `updateConfig`. Minflok, aġġorna
+l-konfigurazzjoni ta' magna permezz tal-helper tar-reġistru:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -445,14 +444,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Verifika tal-Effett
 
-Uża l-**Punt ta’ Verifika** (ara hawn taħt) biex tikkonferma li l-filtru tiegħek huwa sikur fl-intensità magħżula:
+Uża l-**Bieb tal-Verifika** (Verify Gate — ara hawn taħt) biex tikkonferma li l-filtru tiegħek huwa sikur fl-intensità li għażilt:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Il-filtri fallew bl-intensità aggressive");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

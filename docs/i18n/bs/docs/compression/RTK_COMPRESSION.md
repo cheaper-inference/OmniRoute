@@ -25,22 +25,24 @@ Stacked:       1 - (1 - 0.80) * (1 - 0.46) = 89.2% saved
 Range:         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Šta komprimuje
+## Što komprimuje
 
-Ugrađeni katalog trenutno isporučuje 49 filtera kroz ove kategorije:
+Ugrađeni katalog trenutno sadrži 56 filtera raspoređenih u sljedeće kategorije:
 
 | Kategorija | Primjeri                                                      |
 | ---------- | ------------------------------------------------------------- |
 | `git`      | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`     | Vitest, Jest, Pytest, Playwright, Go tests, Cargo tests       |
+| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testovi  |
 | `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`    | `ls`, `find`, `grep`, generički shell logovi                  |
+| `shell`    | `ls`, `find`, `grep`, generički logovi ljuske                 |
 | `docker`   | `docker ps`, Docker logovi                                    |
 | `infra`    | Terraform, OpenTofu, `systemctl status`                       |
-| `generic`  | JSON izlaz, stack trace-ovi, generički izlazni fallback       |
+| `generic`  | JSON izlaz, stack trace-ovi, generički rezervni izlaz         |
 
-Detektor u `open-sse/services/compression/engines/rtk/commandDetector.ts` klasifikuje izlaz prije odabira filtera. Filteri se također mogu podudarati prema uzorku komande ili regex-u izlaza kada klasa komande nije dovoljna.
+Detektor u `open-sse/services/compression/engines/rtk/commandDetector.ts` klasificira izlaz
+prije odabira filtera. Filteri se također mogu poklapati po obrascu komande ili regex-u izlaza
+kada klasa komande nije dovoljna.
 
 ## Rezolucija filtera
 
@@ -330,11 +332,11 @@ RTK podržava **3 nivoa intenziteta** koji balansiraju između **agresivnosti ko
 
 ### 3 nivoa
 
-| Nivo                 | Prag skraćivanja     | Ušteda tokena | Rizik       | Najbolje za                        |
-| -------------------- | -------------------- | ------------- | ----------- | ---------------------------------- |
-| `minimal`            | 24 linije po sekciji | ~20-40%       | Veoma nizak | Produkcija sa kritičnim kontekstom |
-| `standard` (default) | 24 linije po sekciji | ~50-70%       | Nizak       | Dnevne sesije kodiranja            |
-| `aggressive`         | 16 linija po sekciji | ~70-90%       | Srednji     | Duge sesije, maksimalna ušteda     |
+| Nivo                | Prag skraćivanja     | Ušteda tokena | Rizik      | Najbolje za                       |
+| ------------------- | -------------------- | ------------- | ---------- | --------------------------------- |
+| `minimal`           | 24 linije po sekciji | ~20-40%       | Vrlo nizak | Produkcija s kritičnim kontekstom |
+| `standard` (zadano) | 24 linije po sekciji | ~50-70%       | Nizak      | Svakodnevne sesije kodiranja      |
+| `aggressive`        | 16 linija po sekciji | ~70-90%       | Srednji    | Duge sesije, maksimalna ušteda    |
 
 ### Gdje se dešava skraćivanje
 
@@ -346,19 +348,19 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-I **početak** i **kraj** svake sekcije se čuvaju; srednji sadržaj se odbacuje kada se aktivira skraćivanje.
+I **početak** i **kraj** svake sekcije se čuvaju; sadržaj u sredini se odbacuje kada skraćivanje stupi na snagu.
 
-### Šta ostaje, a šta se reže
+### Šta ostaje, a šta se uklanja
 
 | Sadržaj                      | minimal     | standard    | aggressive  |
 | ---------------------------- | ----------- | ----------- | ----------- |
 | Greške / stack trace-ovi     | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
-| Padovi testova               | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
-| Greške pri izgradnji         | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
-| Prolazi testova (opširno)    | 🟡 sažeto   | 🟡 sažeto   | 🟡 sažeto   |
-| Rutinski izlaz (info logovi) | 🟡 sažeto   | 🟡 sažeto   | ❌ odbačeno |
-| Trake napretka               | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
-| Baner / ASCII umjetnost      | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
+| Neuspjeli testovi            | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
+| Greške pri buildanju         | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
+| Uspješni testovi (opširno)   | ✅ sačuvano | 🟡 sažeto   | 🟡 sažeto   |
+| Rutinski ispis (info logovi) | 🟡 sažeto   | 🟡 sažeto   | ❌ odbačeno |
+| Progress barovi              | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
+| Baner / ASCII art            | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
 
 ### Odabir pravog intenziteta
 
@@ -367,18 +369,19 @@ I **početak** i **kraj** svake sekcije se čuvaju; srednji sadržaj se odbacuje
                   │
       ┌───────────┼───────────┐
       │           │           │
-     DA          NE        NISAM SIGURAN
+     DA          NE      NISAM SIGURAN
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Koliko je       Prvo isprobajte `standard`
-      │      kritičan protok? (radi u 80% slučajeva)
+      │      Koliko je      Prvo probajte `standard`
+      │      kritična       (radi u 80%
+      │      propusnost?    slučajeva)
       │           │
       │      ┌────┴────┐
       │      │         │
-      │    NIZAK     VISOK
+      │    NISKA    VISOKA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -386,9 +389,9 @@ I **početak** i **kraj** svake sekcije se čuvaju; srednji sadržaj se odbacuje
       └──────┴─────────┘
 ```
 
-### Konfigurisanje intenziteta
+### Konfiguriranje intenziteta
 
-**Po kombinaciji** (u konfiguraciji kombinacije):
+**Po combo-u** (u konfiguraciji combo-a):
 
 ```json
 {
@@ -403,7 +406,9 @@ I **početak** i **kraj** svake sekcije se čuvaju; srednji sadržaj se odbacuje
 
 **Programski**:
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je `CompressionEngine` i nema `updateConfig` metodu. Umjesto toga, ažurirajte konfiguraciju engine-a putem pomoćnika registra (registry helper):
+`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je
+`CompressionEngine` i nema metodu `updateConfig`. Konfiguraciju engine-a
+umjesto toga ažurirajte putem pomoćne funkcije registra:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -411,16 +416,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Verifikacija efekta
+### Provjera efekta
 
-Koristite **Kapiju za verifikaciju** (pogledajte ispod) da potvrdite da je vaš filter siguran pri odabranom intenzitetu:
+Koristite **Verify Gate** (vidi ispod) da potvrdite da je vaš filter siguran pri odabranom intenzitetu:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filteri nisu prošli pri agresivnom intenzitetu");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

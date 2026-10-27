@@ -29,22 +29,22 @@ Rozsah:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Co komprimuje
 
-Vestavěný katalog v současnosti obsahuje 49 filtrů napříč těmito kategoriemi:
+Vestavěný katalog aktuálně obsahuje 56 filtrů v těchto kategoriích:
 
-| Kategorie | Příklady                                                         |
-| --------- | ---------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                |
-| `test`    | Vitest, Jest, Pytest, Playwright, testy Go, testy Cargo          |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx    |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler    |
-| `shell`   | `ls`, `find`, `grep`, obecné protokoly shellu                    |
-| `docker`  | `docker ps`, protokoly Dockeru                                   |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                          |
-| `generic` | Výstup JSON, trasování zásobníku, záložní filtr obecného výstupu |
+| Kategorie | Příklady                                                          |
+| --------- | ----------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                 |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, testy Cargo        |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
+| `shell`   | `ls`, `find`, `grep`, obecné protokoly shellu                     |
+| `docker`  | `docker ps`, protokoly Dockeru                                    |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                           |
+| `generic` | výstup JSON, trasování zásobníku, obecná náhradní možnost výstupu |
 
 Detektor v `open-sse/services/compression/engines/rtk/commandDetector.ts` klasifikuje výstup
-před výběrem filtru. Filtry mohou také odpovídat podle vzoru příkazu nebo regulárního výrazu výstupu, pokud
-samotná třída příkazu nestačí.
+před výběrem filtru. Filtry mohou také odpovídat vzoru příkazu nebo regulárnímu výrazu výstupu,
+když samotná třída příkazu nestačí.
 
 ## Vyhodnocování filtrů
 
@@ -316,7 +316,7 @@ ukládá pouze ID ukazatele, velikost a metadata hashe.
 
 ## Ověřovací brána
 
-Cílená ověřovací brána spouští vestavěné inline testy filtrů bez volání externích příkazů prostředí:
+Cílená ověřovací brána spouští vestavěné inline testy filtrů bez volání externích příkazů:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-verify.test.ts
@@ -331,7 +331,7 @@ node --import tsx/esm --test \
   tests/unit/compression/context-compression-api.test.ts
 ```
 
-Před vydáním spusťte širokou bránu komprese:
+Před vydáním spusťte širokou kompresní bránu:
 
 ```bash
 node --import tsx/esm --test \
@@ -354,59 +354,59 @@ node --import tsx/esm --test \
 
 ## Úrovně intenzity (v3.8.16+)
 
-RTK podporuje **3 úrovně intenzity**, které vyvažují **agresivitu komprese** a **bezpečnost**. Úroveň se nastavuje pomocí `config.intensity` v konfiguraci enginu.
+RTK podporuje **3 úrovně intenzity**, které představují kompromis mezi **agresivitou komprese** a **bezpečností**. Úroveň se nastavuje pomocí `config.intensity` v konfiguraci enginu.
 
 ### 3 úrovně
 
-| Úroveň               | Práh zkrácení     | Úspora tokenů | Riziko      | Nejvhodnější použití                    |
-| -------------------- | ----------------- | ------------- | ----------- | --------------------------------------- |
-| `minimal`            | 24 řádků na sekci | ~20-40%       | Velmi nízké | Produkce s kriticky důležitým kontextem |
-| `standard` (výchozí) | 24 řádků na sekci | ~50-70%       | Nízké       | Každodenní programovací relace          |
-| `aggressive`         | 16 řádků na sekci | ~70-90%       | Střední     | Dlouhé relace, maximální úspora         |
+| Úroveň               | Práh zkrácení     | Úspora tokenů | Riziko      | Nejvhodnější pro                |
+| -------------------- | ----------------- | ------------- | ----------- | ------------------------------- |
+| `minimal`            | 24 řádků na sekci | ~20-40%       | Velmi nízké | Produkce s kritickým kontextem  |
+| `standard` (výchozí) | 24 řádků na sekci | ~50-70%       | Nízké       | Každodenní programování         |
+| `aggressive`         | 16 řádků na sekci | ~70-90%       | Střední     | Dlouhé relace, maximální úspora |
 
 ### Kde dochází ke zkrácení
 
 Práh zkrácení ovlivňuje `lineFilter.ts`:
 
 ```ts
-// Z open-sse/services/compression/engines/rtk/index.ts:329-330
+// Ze souboru open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Zachovává se **začátek** i **konec** každé sekce; při aktivaci zkrácení je prostřední obsah odstraněn.
+Zachovává se **začátek** i **konec** každé sekce; prostřední obsah se při zkrácení zahodí.
 
-### Co zůstává a co se odstraňuje
+### Co zůstává vs. co se odřízne
 
-| Obsah                       | minimal      | standard      | aggressive    |
-| --------------------------- | ------------ | ------------- | ------------- |
-| Chyby / trasování zásobníku | ✅ zachováno | ✅ zachováno  | ✅ zachováno  |
-| Selhání testů               | ✅ zachováno | ✅ zachováno  | ✅ zachováno  |
-| Chyby sestavení             | ✅ zachováno | ✅ zachováno  | ✅ zachováno  |
-| Úspěšné testy (podrobné)    | ✅ zachováno | 🟡 sloučeno   | 🟡 sloučeno   |
-| Rutinní výstup (info logy)  | 🟡 sloučeno  | 🟡 sloučeno   | ❌ odstraněno |
-| Ukazatele průběhu           | 🟡 sloučeno  | ❌ odstraněno | ❌ odstraněno |
-| Banner / ASCII grafika      | 🟡 sloučeno  | ❌ odstraněno | ❌ odstraněno |
+| Obsah                      | minimal      | standard     | aggressive   |
+| -------------------------- | ------------ | ------------ | ------------ |
+| Chyby / stack traces       | ✅ zachováno | ✅ zachováno | ✅ zachováno |
+| Selhání testů              | ✅ zachováno | ✅ zachováno | ✅ zachováno |
+| Chyby sestavení            | ✅ zachováno | ✅ zachováno | ✅ zachováno |
+| Úspěšné testy (podrobné)   | ✅ zachováno | 🟡 sbaleno   | 🟡 sbaleno   |
+| Rutinní výstup (info logy) | 🟡 sbaleno   | 🟡 sbaleno   | ❌ zahozeno  |
+| Indikátory průběhu         | 🟡 sbaleno   | ❌ zahozeno  | ❌ zahozeno  |
+| Banner / ASCII art         | 🟡 sbaleno   | ❌ zahozeno  | ❌ zahozeno  |
 
 ### Výběr správné intenzity
 
 ```
-                  Je ztráta kontextu katastrofická?
+              Je ztráta kontextu katastrofální?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    ANO          NE         NEVÍTE
+     ANO         NE       NEVÍM JISTĚ
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Jak kritická    Nejprve zkuste `standard`
-      │      je propustnost? (funguje v 80 %
+      │     Jak kritická    Nejprve zkuste `standard`
+      │     je propustnost? (funguje v 80 %
       │           │          případů)
       │      ┌────┴────┐
       │      │         │
-      │    NÍZKÁ     VYSOKÁ
+      │    NÍZKÁ    VYSOKÁ
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -416,7 +416,7 @@ Zachovává se **začátek** i **konec** každé sekce; při aktivaci zkrácení
 
 ### Konfigurace intenzity
 
-**Pro jednotlivé combo** (v konfiguraci combo):
+**Pro jednotlivé kombo** (v konfiguraci komba):
 
 ```json
 {
@@ -431,9 +431,9 @@ Zachovává se **začátek** i **konec** každé sekce; při aktivaci zkrácení
 
 **Programově**:
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je
-`CompressionEngine` a nemá metodu `updateConfig`. Konfiguraci enginu
-místo toho aktualizujte pomocí pomocné funkce registru:
+`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je typu
+`CompressionEngine` a nemá metodu `updateConfig`. Konfiguraci enginu místo toho
+aktualizujte pomocí pomocné funkce registru:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -443,14 +443,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Ověření účinku
 
-Pomocí **ověřovací brány** (viz níže) potvrďte, že je filtr při zvolené intenzitě bezpečný:
+Pomocí **Verify Gate** (viz níže) ověřte, že je váš filtr při zvolené intenzitě bezpečný:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filtry selhaly při agresivní intenzitě");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

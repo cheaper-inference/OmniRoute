@@ -25,20 +25,22 @@ Saklaw:           1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Ano ang Kino-compress Nito
 
-Ang built-in na catalog ay kasalukuyang may kasamang 49 na filter sa mga kategoryang ito:
+Ang built-in na catalog ay kasalukuyang naglalaman ng 56 na filter sa mga sumusunod na kategorya:
 
-| Kategorya | Mga Halimbawa                                                 |
-| --------- | ------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, mga Go test, mga Cargo test |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, mga generic na shell log                |
-| `docker`  | `docker ps`, mga Docker log                                   |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON output, mga stack trace, generic na output fallback      |
+| Kategorya | Mga Halimbawa                                                      |
+| --------- | ------------------------------------------------------------------ |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                  |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, mga test ng Go at Cargo |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx      |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler      |
+| `shell`   | `ls`, `find`, `grep`, mga generic na log ng shell                  |
+| `docker`  | `docker ps`, mga log ng Docker                                     |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                            |
+| `generic` | output na JSON, mga stack trace, generic na fallback ng output     |
 
-Kinaklasipika ng detector sa `open-sse/services/compression/engines/rtk/commandDetector.ts` ang output bago pumili ng filter. Maaari ding tumugma ang mga filter ayon sa command pattern o output regex kapag hindi sapat ang isang command class.
+Ang detector sa `open-sse/services/compression/engines/rtk/commandDetector.ts` ang nag-uuri ng
+output bago ang pagpili ng filter. Maaari ring tumugma ang mga filter batay sa pattern ng command
+o regex ng output kapag hindi sapat ang isang command class.
 
 ## Pagresolba ng Filter
 
@@ -342,19 +344,19 @@ node --import tsx/esm --test \
 
 ## Mga Antas ng Intensity (v3.8.16+)
 
-Sinusuportahan ng RTK ang **3 antas ng intensity** na nagbabalanse sa **agresibong compression** at **kaligtasan**. Itinatakda ang antas sa pamamagitan ng `config.intensity` sa config ng engine.
+Sinusuportahan ng RTK ang **3 antas ng intensity** na nagbabalanse sa pagitan ng **agresibidad ng compression** at **kaligtasan**. Ang antas ay itinatakda sa pamamagitan ng `config.intensity` sa config ng engine.
 
 ### Ang 3 Antas
 
-| Antas                | Threshold ng truncation   | Matitipid na token | Panganib   | Pinakamainam para sa                          |
-| -------------------- | ------------------------- | ------------------ | ---------- | --------------------------------------------- |
-| `minimal`            | 24 na linya bawat seksyon | ~20-40%            | Napakababa | Production na may kritikal na konteksto       |
-| `standard` (default) | 24 na linya bawat seksyon | ~50-70%            | Mababa     | Pang-araw-araw na coding session              |
-| `aggressive`         | 16 na linya bawat seksyon | ~70-90%            | Katamtaman | Mahahabang session, pinakamalaking pagtitipid |
+| Antas                | Threshold ng truncation   | Token savings | Panganib   | Pinakamainam para sa                  |
+| -------------------- | ------------------------- | ------------- | ---------- | ------------------------------------- |
+| `minimal`            | 24 na linya bawat seksyon | ~20-40%       | Napakababa | Production na may kritikal na context |
+| `standard` (default) | 24 na linya bawat seksyon | ~50-70%       | Mababa     | Pang-araw-araw na coding sessions     |
+| `aggressive`         | 16 na linya bawat seksyon | ~70-90%       | Katamtaman | Mahahabang session, max na savings    |
 
-### Kung Saan Nangyayari ang Truncation
+### Kung Saan Nagaganap ang Truncation
 
-Nakaaapekto ang threshold ng truncation sa `lineFilter.ts`:
+Ang threshold ng truncation ay nakakaapekto sa `lineFilter.ts`:
 
 ```ts
 // Mula sa open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -362,28 +364,28 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Parehong pinapanatili ang **simula** at **dulo** ng bawat seksyon; inaalis ang nilalaman sa gitna kapag nagsimula ang truncation.
+Parehong pinapanatili ang **head** at **tail** ng bawat seksyon; ang nilalaman sa gitna ay inaalis kapag pumasok ang truncation.
 
-### Ano ang Nananatili kumpara sa Pinuputol
+### Ano ang Nananatili vs. Ano ang Naaalis
 
-| Nilalaman                        | minimal          | standard         | aggressive       |
-| -------------------------------- | ---------------- | ---------------- | ---------------- |
-| Mga error / stack trace          | ✅ pinapanatili  | ✅ pinapanatili  | ✅ pinapanatili  |
-| Mga kabiguan sa test             | ✅ pinapanatili  | ✅ pinapanatili  | ✅ pinapanatili  |
-| Mga error sa build               | ✅ pinapanatili  | ✅ pinapanatili  | ✅ pinapanatili  |
-| Mga pumasa sa test (verbose)     | ✅ pinapanatili  | 🟡 kino-collapse | 🟡 kino-collapse |
-| Karaniwang output (mga info log) | 🟡 kino-collapse | 🟡 kino-collapse | ❌ inaalis       |
-| Mga progress bar                 | 🟡 kino-collapse | ❌ inaalis       | ❌ inaalis       |
-| Banner / ASCII art               | 🟡 kino-collapse | ❌ inaalis       | ❌ inaalis       |
+| Nilalaman                  | minimal         | standard        | aggressive      |
+| -------------------------- | --------------- | --------------- | --------------- |
+| Mga error / stack trace    | ✅ napananatili | ✅ napananatili | ✅ napananatili |
+| Mga test failure           | ✅ napananatili | ✅ napananatili | ✅ napananatili |
+| Mga build error            | ✅ napananatili | ✅ napananatili | ✅ napananatili |
+| Mga test pass (verbose)    | ✅ napananatili | 🟡 tiniklop     | 🟡 tiniklop     |
+| Routine output (info logs) | 🟡 tiniklop     | 🟡 tiniklop     | ❌ inalis       |
+| Mga progress bar           | 🟡 tiniklop     | ❌ inalis       | ❌ inalis       |
+| Banner / ASCII art         | 🟡 tiniklop     | ❌ inalis       | ❌ inalis       |
 
 ### Pagpili ng Tamang Intensity
 
 ```
-                  Sakuna ba ang pagkawala ng konteksto?
+                  Ang pagkawala ba ng context ay sakuna?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     OO          HINDI      DI-TIYAK
+     OO         HINDI     HINDI SIGURADO
       │           │           │
       ▼           │           │
    minimal        │           │
@@ -417,10 +419,10 @@ Parehong pinapanatili ang **simula** at **dulo** ng bawat seksyon; inaalis ang n
 }
 ```
 
-**Sa pamamagitan ng program**:
+**Sa paraang programmatic**:
 
 Ang `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) ay isang
-`CompressionEngine` at walang `updateConfig` method. Sa halip, i-update ang config
+`CompressionEngine` at walang `updateConfig` na method. Sa halip, i-update ang config
 ng engine sa pamamagitan ng registry helper:
 
 ```ts
@@ -429,16 +431,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Pag-verify sa Epekto
+### Pag-verify ng Epekto
 
-Gamitin ang **Gate ng Pag-verify** (tingnan sa ibaba) upang kumpirmahing ligtas ang iyong filter sa napili mong intensity:
+Gamitin ang **Verify Gate** (tingnan sa ibaba) upang kumpirmahin na ligtas ang iyong filter sa napiling intensity:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Nabigo ang mga filter sa aggressive na intensity");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

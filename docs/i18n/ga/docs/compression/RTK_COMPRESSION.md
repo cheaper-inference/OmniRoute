@@ -27,24 +27,24 @@ Cruachta:       1 - (1 - 0.80) * (1 - 0.46) = coigilteas 89.2%
 Raon:           1 - (1 - 0.60..0.90) * (1 - 0.46) = coigilteas 78.4-94.6%
 ```
 
-## An Méid a Chomhbhrúnn Sé
+## Cad a Chomhbhrúitear
 
-Faoi láthair, tá 49 scagaire sna catagóirí seo a leanas sa chatalóg ionsuite:
+Tá 56 scagaire sa chatagóir ionsuite faoi láthair sna catagóirí seo:
 
-| Catagóir  | Samplaí                                                           |
-| --------- | ----------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                 |
-| `test`    | Vitest, Jest, Pytest, Playwright, tástálacha Go, tástálacha Cargo |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
-| `shell`   | `ls`, `find`, `grep`, logaí ginearálta blaosc                     |
-| `docker`  | `docker ps`, logaí Docker                                         |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                           |
-| `generic` | Aschur JSON, rianta cruaiche, cúltaca ginearálta aschuir          |
+| Catagóir  | Samplaí                                                         |
+| --------- | --------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`               |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, tástálacha Cargo |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx   |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler   |
+| `shell`   | `ls`, `find`, `grep`, logaí ginearálta bhlaosc                  |
+| `docker`  | `docker ps`, logaí Docker                                       |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                         |
+| `generic` | aschur JSON, rianú cruacha, scagaire cúltaca ginearálta         |
 
-Aicmíonn an brathadóir in `open-sse/services/compression/engines/rtk/commandDetector.ts` aschur
-sula roghnaítear scagaire. Is féidir le scagairí meaitseáil de réir patrún ordaithe nó slonn ionadaíochta aschuir freisin nuair
-nach leor aicme ordaithe.
+Déanann an braiteoir in `open-sse/services/compression/engines/rtk/commandDetector.ts` an t-aschur
+a rangú roimh an scagaire a roghnú. Is féidir le scagairí mheaitseáil freisin de réir patrún ordaithe
+nó regex aschuir nuair nach leor aicme ordaithe amháin.
 
 ## Réiteach Scagairí
 
@@ -353,19 +353,19 @@ node --import tsx/esm --test \
 
 ## Leibhéil Déine (v3.8.16+)
 
-Tacaíonn RTK le **3 leibhéal déine** a dhéanann comhréiteach idir **ionsaitheacht an chomhbhrúite** agus **sábháilteacht**. Socraítear an leibhéal trí `config.intensity` i gcumraíocht an innill.
+Tacaíonn RTK le **3 leibhéal déine** a chothromaíonn idir **déine an chomhbhrúite** agus **sábháilteacht**. Socraítear an leibhéal trí `config.intensity` i gcumrú an innill.
 
 ### Na 3 Leibhéal
 
-| Leibhéal                 | Tairseach teasctha      | Coigilteas comharthaí | Riosca    | Is fearr le haghaidh                   |
-| ------------------------ | ----------------------- | --------------------- | --------- | -------------------------------------- |
-| `minimal`                | 24 líne in aghaidh ailt | ~20-40%               | An-íseal  | Táirgeadh le comhthéacs ríthábhachtach |
-| `standard` (réamhshocrú) | 24 líne in aghaidh ailt | ~50-70%               | Íseal     | Seisiúin laethúla códaithe             |
-| `aggressive`             | 16 líne in aghaidh ailt | ~70-90%               | Measartha | Seisiúin fhada, coigilteas uasta       |
+| Leibhéal                     | Tairseach ghearrtha           | Coigiltis comharthaí | Riosca   | Is fearr do                        |
+| ---------------------------- | ----------------------------- | -------------------- | -------- | ---------------------------------- |
+| `minimal`                    | 24 líne in aghaidh an rannáin | ~20-40%              | An-íseal | Táirgeadh le comhthéacs criticiúil |
+| `standard` (réamhshocraithe) | 24 líne in aghaidh an rannáin | ~50-70%              | Íseal    | Seisiúin chódaithe laethúla        |
+| `aggressive`                 | 16 líne in aghaidh an rannáin | ~70-90%              | Meánach  | Seisiúin fhada, coigiltis uasta    |
 
-### An Áit a dtarlaíonn an Teascadh
+### Cá dTarlaíonn an Gearradh
 
-Téann tairseach an teasctha i bhfeidhm ar `lineFilter.ts`:
+Bíonn tionchar ag an tairseach ghearrtha ar `lineFilter.ts`:
 
 ```ts
 // Ó open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -373,36 +373,35 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Caomhnaítear **ceann** agus **deireadh** gach ailt; caitear amach an t-ábhar sa lár nuair a chuirtear an teascadh i bhfeidhm.
+Caomhnaítear **ceann** agus **eireaball** gach rannáin araon; scartar an t-ábhar sa lár nuair a thagann an gearradh i bhfeidhm.
 
-### An Méid a Fhanann i gComparáid leis an Méid a Ghearrtar
+### Cad a Fhanann vs. Cad a Ghearrtar
 
-| Ábhar                          | minimal        | standard       | aggressive     |
-| ------------------------------ | -------------- | -------------- | -------------- |
-| Earráidí / loirg chruaiche     | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
-| Teipeanna tástála              | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
-| Earráidí tógála                | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
-| Tástálacha rathúla (foclach)   | ✅ caomhnaithe | 🟡 comhdhlúite | 🟡 comhdhlúite |
-| Gnáth-aschur (logaí faisnéise) | 🟡 comhdhlúite | 🟡 comhdhlúite | ❌ caite amach |
-| Barraí dul chun cinn           | 🟡 comhdhlúite | ❌ caite amach | ❌ caite amach |
-| Meirge / ealaín ASCII          | 🟡 comhdhlúite | ❌ caite amach | ❌ caite amach |
+| Ábhar                              | minimal        | standard       | aggressive     |
+| ---------------------------------- | -------------- | -------------- | -------------- |
+| Earráidí / rianta cruachta         | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
+| Teipeanna tástála                  | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
+| Earráidí tógála                    | ✅ caomhnaithe | ✅ caomhnaithe | ✅ caomhnaithe |
+| Pasanna tástála (mionsonraithe)    | ✅ caomhnaithe | 🟡 fillte      | 🟡 fillte      |
+| Aschur gnáthaimh (logaí faisnéise) | 🟡 fillte      | 🟡 fillte      | ❌ scarta      |
+| Barraí dul chun cinn               | 🟡 fillte      | ❌ scarta      | ❌ scarta      |
+| Meirge / ealaín ASCII              | 🟡 fillte      | ❌ scarta      | ❌ scarta      |
 
-### An Déine Cheart a Roghnú
+### An Déine Chuí a Roghnú
 
 ```
-                  An tubaisteach é comhthéacs a chailleadh?
+                  An bhfuil sé tubaisteach comhthéacs a chailleadh?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    IS EA       NÍ HEA      NÍLIM CINNTE
+     TÁ         NÍL       NÍL MÉ CINNTE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Cé chomh       Bain triail as `standard` ar dtús
-      │      ríthábhachtach  (oibríonn sé i 80% de na
-      │      is atá tréchur? cásanna)
+      │      Cé chomh tábhachtach   Bain triail as `standard` ar dtús
+      │      is atá an tréchur?     (oibríonn sé i 80% de chásanna)
       │           │
       │      ┌────┴────┐
       │      │         │
@@ -416,7 +415,7 @@ Caomhnaítear **ceann** agus **deireadh** gach ailt; caitear amach an t-ábhar s
 
 ### Déine a Chumrú
 
-**De réir teaglama** (i gcumraíocht an teaglama):
+**De réir teaglaim** (i gcumrú an teaglaim):
 
 ```json
 {
@@ -431,8 +430,9 @@ Caomhnaítear **ceann** agus **deireadh** gach ailt; caitear amach an t-ábhar s
 
 **Go ríomhchláraithe**:
 
-Is `CompressionEngine` é `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) agus níl modh `updateConfig` aige. Nuashonraigh cumraíocht innill
-trí chúntóir na clárlainne ina ionad sin:
+Is `CompressionEngine` é `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`)
+agus níl modh `updateConfig` aige. Nuashonraigh cumrú innill trí chúntóir an
+chlárlainne ina ionad sin:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -440,9 +440,9 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### An Éifeacht a Fhíorú
+### An Éifeacht a Dheimhniú
 
-Úsáid an **Geata Fíoraithe** (féach thíos) chun a dheimhniú go bhfuil do scagaire sábháilte ag an déine atá roghnaithe agat:
+Úsáid an **Geata Deimhnithe** (féach thíos) le deimhniú go bhfuil do scagaire slán ag an déine atá roghnaithe agat:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

@@ -29,22 +29,22 @@ Vahemik:           1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Mida see tihendab
 
-Sisseehitatud kataloog sisaldab praegu 49 filtrit järgmistes kategooriates:
+Sisseehitatud kataloog sisaldab praegu 56 filtrit järgmistes kategooriates:
 
 | Kategooria | Näited                                                        |
 | ---------- | ------------------------------------------------------------- |
 | `git`      | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`     | Vitest, Jest, Pytest, Playwright, Go testid, Cargo testid     |
+| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testid   |
 | `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`    | `ls`, `find`, `grep`, üldised shell'i logid                   |
+| `shell`    | `ls`, `find`, `grep`, üldised shelli logid                    |
 | `docker`   | `docker ps`, Dockeri logid                                    |
 | `infra`    | Terraform, OpenTofu, `systemctl status`                       |
 | `generic`  | JSON-väljund, pinujäljed, üldine väljundi varuvariant         |
 
-Failis `open-sse/services/compression/engines/rtk/commandDetector.ts` olev detektor klassifitseerib väljundi
-enne filtri valimist. Filtrid võivad sobituda ka käsu mustri või väljundi regulaaravaldise järgi, kui käsu
-klassist ei piisa.
+Detektor failis `open-sse/services/compression/engines/rtk/commandDetector.ts` klassifitseerib
+väljundi enne filtri valikut. Kui käsuklassist ei piisa, võivad filtrid klappida ka käsu mustri
+või väljundi regulaaravaldisega.
 
 ## Filtrite lahendamine
 
@@ -353,19 +353,19 @@ node --import tsx/esm --test \
 
 ## Intensiivsustasemed (v3.8.16+)
 
-RTK toetab **3 intensiivsustaset**, mis võimaldavad tasakaalustada **tihendamise agressiivsust** ja **ohutust**. Tase määratakse mootori konfiguratsioonis võtmega `config.intensity`.
+RTK toetab **3 intensiivsustaset**, mis loovad tasakaalu **pakkimise agressiivsuse** ja **ohutuse** vahel. Taset määratakse mootori konfiguratsioonis `config.intensity` kaudu.
 
-### 3 taset
+### Kolm taset
 
-| Tase                   | Kärpimislävi          | Lubade kokkuhoid | Risk       | Sobib kõige paremini                   |
-| ---------------------- | --------------------- | ---------------- | ---------- | -------------------------------------- |
-| `minimal`              | 24 rida jaotise kohta | ~20-40%          | Väga madal | Kriitilise kontekstiga tootmiskeskkond |
-| `standard` (vaikimisi) | 24 rida jaotise kohta | ~50-70%          | Madal      | Igapäevased programmeerimisseansid     |
-| `aggressive`           | 16 rida jaotise kohta | ~70-90%          | Keskmine   | Pikad seansid, maksimaalne kokkuhoid   |
+| Tase                   | Lõikamiselävi            | Tokenite kokkuhoid | Risk       | Sobib kõige paremini                    |
+| ---------------------- | ------------------------ | ------------------ | ---------- | --------------------------------------- |
+| `minimal`              | 24 rida sektsiooni kohta | ~20-40%            | Väga madal | Tootmine kriitilise kontekstiga         |
+| `standard` (vaikimisi) | 24 rida sektsiooni kohta | ~50-70%            | Madal      | Igapäevased kodeerimissessioonid        |
+| `aggressive`           | 16 rida sektsiooni kohta | ~70-90%            | Keskmine   | Pikad sessioonid, maksimaalne kokkuhoid |
 
-### Kus kärpimine toimub
+### Kus lõikamine toimub
 
-Kärpimislävi mõjutab faili `lineFilter.ts`:
+Lõikamiselävi mõjutab faili `lineFilter.ts`:
 
 ```ts
 // Failist open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -373,39 +373,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Iga jaotise **algus** ja **lõpp** säilitatakse; kärpimise rakendumisel eemaldatakse keskosa sisu.
+Iga sektsiooni **algus** ja **lõpp** säilitatakse; lõikamise rakendumisel jäetakse keskmine sisu välja.
 
 ### Mis säilib ja mis eemaldatakse
 
-| Sisu                            | minimal         | standard        | aggressive      |
-| ------------------------------- | --------------- | --------------- | --------------- |
-| Vead / pinujäljed               | ✅ säilitatakse | ✅ säilitatakse | ✅ säilitatakse |
-| Testitõrked                     | ✅ säilitatakse | ✅ säilitatakse | ✅ säilitatakse |
-| Järguvead                       | ✅ säilitatakse | ✅ säilitatakse | ✅ säilitatakse |
-| Läbitud testid (paljusõnalised) | ✅ säilitatakse | 🟡 koondatakse  | 🟡 koondatakse  |
-| Tavapärane väljund (teabelogid) | 🟡 koondatakse  | 🟡 koondatakse  | ❌ eemaldatakse |
-| Edenemisribad                   | 🟡 koondatakse  | ❌ eemaldatakse | ❌ eemaldatakse |
-| Bänner / ASCII-graafika         | 🟡 koondatakse  | ❌ eemaldatakse | ❌ eemaldatakse |
+| Sisu                         | minimal       | standard      | aggressive    |
+| ---------------------------- | ------------- | ------------- | ------------- |
+| Vead / pinujäljed            | ✅ säilitatud | ✅ säilitatud | ✅ säilitatud |
+| Testide ebaõnnestumised      | ✅ säilitatud | ✅ säilitatud | ✅ säilitatud |
+| Ehitusvead                   | ✅ säilitatud | ✅ säilitatud | ✅ säilitatud |
+| Läbitud testid (detailsed)   | ✅ säilitatud | 🟡 ahendatud  | 🟡 ahendatud  |
+| Rutiinne väljund (infologid) | 🟡 ahendatud  | 🟡 ahendatud  | ❌ eemaldatud |
+| Edenemisribad                | 🟡 ahendatud  | ❌ eemaldatud | ❌ eemaldatud |
+| Bänner / ASCII-kunst         | 🟡 ahendatud  | ❌ eemaldatud | ❌ eemaldatud |
 
 ### Õige intensiivsuse valimine
 
 ```
-                  Kas konteksti kaotamine on katastroofiline?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     JAH         EI        POLE KINDEL
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Kui oluline on  Proovige esmalt taset `standard`
-      │      läbilaskevõime? (toimib 80% juhtudest)
-      │           │
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │    MADAL      KÕRGE
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -415,7 +415,7 @@ Iga jaotise **algus** ja **lõpp** säilitatakse; kärpimise rakendumisel eemald
 
 ### Intensiivsuse seadistamine
 
-**Kombinatsioonipõhiselt** (kombinatsiooni konfiguratsioonis):
+**Kombo kohta** (kombo konfiguratsioonis):
 
 ```json
 {
@@ -431,8 +431,8 @@ Iga jaotise **algus** ja **lõpp** säilitatakse; kärpimise rakendumisel eemald
 **Programmiliselt**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) on
-`CompressionEngine` ja sellel puudub meetod `updateConfig`. Värskendage mootori konfiguratsiooni
-selle asemel registri abifunktsiooni kaudu:
+`CompressionEngine` ning sellel pole `updateConfig`-meetodit. Uuenda mootori
+konfiguratsiooni selle asemel registri abifunktsiooni kaudu:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -442,14 +442,14 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Mõju kontrollimine
 
-Kasutage **kontrollväravat** (vt allpool), et kinnitada filtri ohutust valitud intensiivsusel:
+Kasuta funktsiooni **Verify Gate** (vt allpool), et veenduda, et sinu filter on valitud intensiivsuse juures ohutu:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("Filtrid ebaõnnestusid agressiivsel intensiivsusel");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 
