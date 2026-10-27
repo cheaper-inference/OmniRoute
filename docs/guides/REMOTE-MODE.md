@@ -254,6 +254,15 @@ omniroute tokens scopes               # explain the three scopes
 `tokens` commands require an **admin** credential. You can also manage tokens in
 the dashboard under **Settings → Access Tokens** (create, revoke, copy-once).
 
+A token can never be minted with more privilege than its creator holds. An
+`admin` token can only be created by the operator — the dashboard session, the
+local CLI on the server itself, or `omniroute connect` with the password.
+Machine credentials (an `admin` access token, or an API key with the
+`manage`/`admin` scope) can mint `write` and `read` tokens only; asking them
+for `--scope admin` returns `403`. Disabling login does not open minting: an
+access token of any scope is a credential the always-authenticated routes
+accept, so an anonymous call gets `401` at any scope.
+
 ---
 
 ## Configuring a coding CLI from the remote catalog
@@ -322,6 +331,7 @@ context, or `--remote <url> --api-key <key>`):
 | Cursor      | `omniroute setup-cursor`   | prints the in-app steps (Settings → Models → Override OpenAI Base URL **with** `/v1` + key + model). Cursor config is opaque SQLite — chat panel only                |
 | Roo Code    | `omniroute setup-roo`      | writes a Roo import JSON (`~/.omniroute/roo-settings.json`) + sets `roo-cline.autoImportSettingsPath` + prints UI steps (OpenAI-compatible, Base URL **with** `/v1`) |
 | Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` provider, `base_url` **with** `/v1`, key via `$OMNIROUTE_API_KEY`                                                     |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **with** `/v1`, key read by Zed from `$OMNIROUTE_API_KEY` (never written)   |
 | Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **without** `/v1` + `GOOSE_MODEL`) + env recipe                                               |
 | Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **without** `/v1` + `model: openai/<id>`) + env recipe (`aider --message --yes`)                                              |
 | Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` entry + `OMNIROUTE_API_KEY` in `~/.qwen/.env`                                                                     |

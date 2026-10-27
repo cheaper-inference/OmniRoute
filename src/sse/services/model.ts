@@ -7,17 +7,21 @@ import { getSyncedAutoAliases } from "@/lib/providerModels/syncedAutoAliases.ts"
 import { getActiveSyncedCatalog } from "@/lib/db/models/activeSyncedCatalog";
 import { getModelCompatOverrides } from "@/lib/db/models/compat";
 import { getNoAuthHydrationProviderIds } from "./noAuthProviderSiblings";
+import { inferGithubUnsyncedTargetFormat } from "./githubResponsesFallback";
 import {
   parseModel,
   getModelInfoCore,
   splitSyncedEffortSuffix,
   stripContextWindowSuffix,
+  resolveProviderAlias,
+  isKnownCatalogModelId,
 } from "@omniroute/open-sse/services/model.ts";
 import { getLearnedReasoningEffortForModel } from "@omniroute/open-sse/services/learnedReasoningEffortCaps.ts";
 import { REGISTRY } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { ANTIGRAVITY_MODEL_ALIASES } from "@omniroute/open-sse/config/antigravityModelAliases.ts";
 import { getRegisteredProviderEffortBaseModelId } from "@omniroute/open-sse/utils/registeredEffortVariants.ts";
 import { getReservedProviderPrefixes } from "@/shared/constants/reservedProviderPrefixes";
+import { getProviderByAlias } from "@/shared/constants/providers";
 import {
   assertMicrosoftDesignerWebProviderAvailable,
   isMicrosoftDesignerWebProviderRetiredError,
@@ -76,7 +80,7 @@ function buildWildcardAliasMap(settings: Record<string, unknown>): Record<string
  * are folded in last: they are keyed by pattern string (containing `*`/`?`), which
  * cannot collide with a real model id, so ordering never affects exact-alias lookups.
  */
-async function getCombinedModelAliases(): Promise<Record<string, unknown>> {
+export async function getCombinedModelAliases(): Promise<Record<string, unknown>> {
   const [dbAliases, settings, autoAliases] = await Promise.all([
     getModelAliases().catch(() => ({})),
     getCachedSettings().catch(() => ({}) as Record<string, unknown>),
@@ -166,6 +170,27 @@ function resolveRegistryModelIdAndEffort(
   return { modelId, effort: null };
 }
 
+function registryFoldDespiteLiveCatalog(
+  providerId: string,
+  modelId: string
+): { modelId: string; effort: string } | null {
+  const registryModels = REGISTRY[providerId]?.models;
+  if (!Array.isArray(registryModels)) return null;
+  for (const candidate of registryModels) {
+    const folds = candidate?.effortSuffixesThatFoldDespiteLiveCatalog;
+    if (!Array.isArray(folds) || typeof candidate?.id !== "string") continue;
+    for (const effort of folds) {
+      if (typeof effort !== "string" || !effort) continue;
+      const suffix = `-${effort}`;
+      if (modelId.length > suffix.length && modelId.endsWith(suffix)) {
+        const baseModelId = modelId.slice(0, -suffix.length);
+        if (baseModelId === candidate.id) return { modelId: baseModelId, effort };
+      }
+    }
+  }
+  return null;
+}
+
 function findRegistryModel(providerId: string, modelId: string): any {
   const registryModels = REGISTRY[providerId]?.models;
   return Array.isArray(registryModels)
@@ -182,12 +207,16 @@ function findRegistryModel(providerId: string, modelId: string): any {
  * `modelId` with `effort: null` when nothing matches or the provider already owns its
  * own suffix mechanism.
  */
-function resolveSyncedModelIdAndEffort(
+export function resolveSyncedModelIdAndEffort(
   providerId: string,
   modelId: string,
   syncedModels: unknown
 ): { modelId: string; effort: string | null } {
-  if (providerId === "codex" && findRegistryModel(providerId, modelId)) {
+  if (
+    providerId === "codex" &&
+    findRegistryModel(providerId, modelId) &&
+    findSyncedModelMeta(syncedModels, modelId)
+  ) {
     return { modelId, effort: null };
   }
   if (isSyncedEffortSkippedProvider(providerId) || !Array.isArray(syncedModels)) {
@@ -385,9 +414,9 @@ async function lookupModelMeta(
       getActiveSyncedCatalog(providerId),
       // #10898 / #7620: model-compat overrides (apiFormat/targetFormat/
       // supportsVision, isHidden, ...) are stored keyed on the id the operator
-      // wrote them under. For a no-auth alias the model prefix resolves to the
-      // APIKEY gateway id (e.g. "opencode/x" -> providerId "opencode-zen") but
-      // the override was written on the sibling "opencode" row. Merge overrides
+      // wrote them under. For a no-auth alias the model prefix can resolve to an
+      // APIKEY gateway id while the override was written on the sibling no-auth
+      // row (see noAuthProviderSiblings.ts). Merge overrides
       // across the provider AND its no-auth sibling ids (requested id first)
       // instead of canonicalizing the low-level compat key, which would break
       // paths that legitimately key on the raw id (e.g. getHiddenModelsByProvider).
@@ -397,17 +426,15 @@ async function lookupModelMeta(
     ]);
     const syncedModels = liveCatalog.models;
 
-    // #7694: no direct match on the raw modelId? try a synced-declared `-{effort}`
-    // suffix before falling back to the literal id, so `<prefix>/<model>-<tier>`
-    // resolves to the real base model + a resolved effort.
-    // #7694: no direct match on the raw modelId? try a synced-declared `-{effort}`
-    // suffix before falling back to the literal id, so `<prefix>/<model>-<tier>`
-    // resolves to the real base model + a resolved effort.
-    let { modelId: resolvedModelId, effort } = resolveSyncedModelIdAndEffort(
-      providerId,
-      modelId,
-      syncedModels
-    );
+    // A declared effort suffix folds even when the live catalog lists that
+    // full id as its own SKU. An operator custom model of the same id still
+    // wins: it is an explicit override, not a catalog accident.
+    const foldedDespiteLiveCatalog = findCustomModelMeta(customModels, modelId)
+      ? null
+      : registryFoldDespiteLiveCatalog(providerId, modelId);
+    let { modelId: resolvedModelId, effort } = foldedDespiteLiveCatalog
+      ? foldedDespiteLiveCatalog
+      : resolveSyncedModelIdAndEffort(providerId, modelId, syncedModels);
     // Short-circuit registry suffix resolution when the raw id is already a direct
     // custom or synced model — otherwise a model literally named
     // `deepseek-v4-flash-low` gets rewritten to `deepseek-v4-flash` + effort `low`
@@ -453,6 +480,10 @@ async function lookupModelMeta(
       compatOverrideMatch
     );
     if (effort) metadata.resolvedThinkingEffort = effort;
+    if (!metadata.targetFormat && !syncedMatch && !registryMatch) {
+      const inferredTargetFormat = inferGithubUnsyncedTargetFormat(providerId, resolvedModelId);
+      if (inferredTargetFormat) metadata.targetFormat = inferredTargetFormat;
+    }
 
     return { modelId: resolvedModelId, metadata, available };
   } catch {
@@ -689,6 +720,66 @@ export async function getCombo(modelStr) {
     return combo;
   }
 
+  return await getComboByClientNamespacedName(modelStr);
+}
+
+/**
+ * True when `segment` names a provider the router would dispatch to: a built-in
+ * registry id/alias (incl. retired tombstones), a provider-catalog id/alias, a manual
+ * alias (`xiaomi`, `llamacpp`, …) or a custom compatible-node prefix/internal id.
+ * Compared as typed and lowercased, so `OpenAI/…` is still treated as a provider pin.
+ */
+async function isKnownProviderSegment(segment: string): Promise<boolean> {
+  const candidates = Array.from(new Set([segment, segment.toLowerCase()]));
+  const reserved = getReservedProviderPrefixes();
+  for (const candidate of candidates) {
+    if (reserved.has(candidate)) return true;
+    if (getProviderByAlias(candidate)) return true;
+    if (resolveProviderAlias(candidate) !== candidate) return true;
+  }
+  const nodes = await getCachedProviderNodes();
+  return nodes.some(
+    (node) =>
+      !!node && candidates.some((candidate) => node.prefix === candidate || node.id === candidate)
+  );
+}
+
+/**
+ * Last-resort combo lookup for client-namespaced names (`<namespace>/<comboName>`):
+ * clients such as OpenCode register an OmniRoute combo under their own provider key
+ * and send `<thatKey>/<comboName>`. The bare name (after the last `/`) is tried only
+ * when NO namespace segment is a known provider and the full string is not a
+ * catalogued model id — an explicit `provider/model` pin always reaches the provider,
+ * even when a combo shares the model's bare name (#6940 per-model fallback combos).
+ * `combo/<name>` or a model-combo mapping remain the way to target a combo under a
+ * provider-named namespace.
+ */
+async function getComboByClientNamespacedName(modelStr: unknown) {
+  if (typeof modelStr !== "string") return null;
+  const lastSlash = modelStr.lastIndexOf("/");
+  if (lastSlash <= 0) return null;
+  const baseName = modelStr.slice(lastSlash + 1).trim();
+  if (!baseName) return null;
+  if (isKnownCatalogModelId(modelStr)) return null;
+
+  const namespaceSegments = modelStr
+    .slice(0, lastSlash)
+    .split("/")
+    .map((segment) => segment.trim())
+    .filter(Boolean);
+  if (namespaceSegments.length === 0) return null;
+  for (const segment of namespaceSegments) {
+    if (await isKnownProviderSegment(segment)) return null;
+  }
+
+  let combo = await getComboByName(baseName);
+  if (!combo || !Array.isArray(combo.models) || combo.models.length === 0) {
+    combo = await getComboByNameInsensitive(baseName);
+  }
+  if (combo && Array.isArray(combo.models) && combo.models.length > 0) {
+    console.info(`[MODEL] "${modelStr}" → combo "${combo.name}" (client namespace stripped)`);
+    return combo;
+  }
   return null;
 }
 

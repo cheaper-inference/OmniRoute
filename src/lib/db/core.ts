@@ -20,6 +20,7 @@ import { isNextBuildPhase } from "../buildPhase";
 import { runMigrations } from "./migrationRunner";
 import { runDbHealthCheck, getPagerCorruption } from "./healthCheck";
 import { createManagedDbBackup as writeManagedDbBackup } from "./managedBackup";
+import { DB_SECRET_DIR_MODE, hardenDbFilePermissions } from "./filePermissions";
 import { createDbHealthCoordinator, runDbHealthInChild } from "./healthCheckRunner";
 import { resetAllDbModuleState } from "./stateReset";
 import { parseStoredPayload } from "../logPayloads";
@@ -203,7 +204,7 @@ function openSqliteDatabase(sqliteFile: string, options?: Record<string, unknown
 // Ensure data directory exists — with fallback for restricted home directories (#133)
 if (!isCloud && !fs.existsSync(DATA_DIR)) {
   try {
-    fs.mkdirSync(DATA_DIR, { recursive: true });
+    fs.mkdirSync(DATA_DIR, { recursive: true, mode: DB_SECRET_DIR_MODE });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(
@@ -339,6 +340,7 @@ const SCHEMA_SQL = `
   CREATE INDEX IF NOT EXISTS idx_uh_timestamp ON usage_history(timestamp);
   CREATE INDEX IF NOT EXISTS idx_uh_provider ON usage_history(provider);
   CREATE INDEX IF NOT EXISTS idx_uh_model ON usage_history(model);
+  CREATE INDEX IF NOT EXISTS idx_uh_connection_timestamp ON usage_history(connection_id, timestamp);
 
   CREATE TABLE IF NOT EXISTS call_logs (
     id TEXT PRIMARY KEY,
@@ -1210,7 +1212,21 @@ export function getDbInstance(): SqliteDatabase {
             `Original error: ${message}`
         );
       }
-      if (!retryProbeIfTransient(sqliteFile, e, openSqliteDatabase, closeProbeIfSafe)) {
+      const probeOutcome = retryProbeIfTransient(
+        sqliteFile,
+        e,
+        openSqliteDatabase,
+        closeProbeIfSafe
+      );
+      if (probeOutcome === "readonly" || probeOutcome === "transient_exhausted") {
+        // #17995: neither proves corruption — fail closed, leave the DB untouched.
+        throw new Error(
+          `[DB] Could not probe ${sqliteFile} (${probeOutcome}); the database was left untouched. ` +
+            `Check that the data volume is writable and no other process holds the lock, then restart. ` +
+            `Original error: ${message}`
+        );
+      }
+      if (probeOutcome === "not_transient") {
         preservedCriticalState = captureCriticalDbState(sqliteFile);
         // SAFETY: Never delete the database — rename to backup so data can be recovered.
         // The old code would silently destroy all user data on any probe failure.
@@ -1359,6 +1375,8 @@ export function getDbInstance(): SqliteDatabase {
     // gate on its own way through, recursing without end (each recursion opens
     // its own real DB connection and re-runs migrations-check, so this is a
     // real resource-exhaustion loop, not just a deep call stack). #13717 rework.
+    // Owner-only DB + -wal/-shm (also repairs a 0644 file from an older install).
+    hardenDbFilePermissions(sqliteFile);
     setDb(db);
   } catch (error) {
     try {
@@ -1609,8 +1627,7 @@ function migrateFromJson(db: SqliteDatabase, jsonPath: string) {
         let rateLimitOverridesJson = serializeJsonField(conn.rateLimitOverrides);
         if (!hasOverrides && typeof conn.id === "string") {
           const existing = selectExistingOverrides.get(conn.id) as
-            | { rate_limit_overrides_json: string | null }
-            | undefined;
+            { rate_limit_overrides_json: string | null } | undefined;
           if (existing) rateLimitOverridesJson = existing.rate_limit_overrides_json;
         }
         insertConn.run({

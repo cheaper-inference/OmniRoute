@@ -23,7 +23,11 @@ function hasUsableCachedData(cache: ProviderLimitsCacheEntry | null | undefined)
 export function toProviderLimitsCacheEntry(
   usage: JsonRecord,
   source: string,
-  fetchedAt = new Date().toISOString()
+  // A fetcher that serves its last known quota (e.g. Claude during a 429 cooldown) flags it
+  // `_stale` with the original read time — keep that time instead of stamping it as fresh.
+  fetchedAt = usage._stale === true && typeof usage._staleSince === "string"
+    ? usage._staleSince
+    : new Date().toISOString()
 ): ProviderLimitsCacheEntry {
   const bankedResetCredits = Number(usage.bankedResetCredits);
   return {

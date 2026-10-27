@@ -1,5 +1,5 @@
 /**
- * Repro for #6557 — "disabled provider still used by router (opencode/big-pickle)"
+ * Repro for #6557 — "disabled provider still used by router (duckduckgo-web/gpt-5.6-luna)"
  *
  * Root-cause hypothesis: OmniRoute exposes TWO different "disable this no-auth
  * provider" affordances that write to two DISCONNECTED places:
@@ -8,7 +8,7 @@
  *     -> handleToggleProvider() -> PUT /api/providers/:id { isActive: false }
  *     This only works once a real `provider_connections` row exists for the
  *     no-auth provider (created e.g. via "Add Account" in NoAuthAccountCard for
- *     fingerprint-account providers like opencode/mimocode).
+ *     fingerprint-account providers like duckduckgo-web/mimocode).
  *
  *  2. Provider detail page toggle (NoAuthProviderControls/NoAuthProviderToggle)
  *     -> handleEnabledChange() -> PATCH /api/settings { blockedProviders: [...] }
@@ -45,7 +45,7 @@ async function resetStorage() {
 test.beforeEach(async () => {
   await resetStorage();
   // contract changed by #15979 (on top of #15839): `excludeTosAvoid` defaults to on and
-  // uncataloged models inherit the provider's curated `tos: "avoid"` verdict, so every opencode
+  // uncataloged models inherit the provider's curated `tos: "avoid"` verdict, so every duckduckgo-web
   // model is ToS-filtered out of auto/*. Opt out so this file keeps guarding the #6557
   // connection-disable behaviour; the ToS default is covered by
   // issue-15059-tos-avoid-auto-default.
@@ -63,18 +63,18 @@ test.after(async () => {
   }
 });
 
-test("#6557: disabling the opencode no-auth provider's own connection (isActive=false, the toggle on the main Providers grid card) does NOT remove it from the auto-combo candidate pool", async () => {
+test("#6557: disabling the duckduckgo-web no-auth provider's own connection (isActive=false, the toggle on the main Providers grid card) removes it from the auto-combo candidate pool", async () => {
   const conn = await providersDb.createProviderConnection({
-    provider: "opencode",
+    provider: "duckduckgo-web",
     authType: "no-auth",
-    name: "OpenCode Free Account 1",
+    name: "DuckDuckGo Account 1",
     providerSpecificData: { fingerprints: ["11111111111111111111111111111111"] },
   });
 
   const beforeCombo = await virtualFactory.createVirtualAutoCombo(undefined);
   assert.ok(
-    beforeCombo.autoConfig.candidatePool.includes("opencode"),
-    "baseline: opencode should be a candidate before any disable action"
+    beforeCombo.autoConfig.candidatePool.includes("duckduckgo-web"),
+    "baseline: duckduckgo-web should be a candidate before any disable action"
   );
 
   // Simulates exactly what the main Providers grid toggle does:
@@ -86,8 +86,8 @@ test("#6557: disabling the opencode no-auth provider's own connection (isActive=
 
   const afterCombo = await virtualFactory.createVirtualAutoCombo(undefined);
   assert.ok(
-    !afterCombo.autoConfig.candidatePool.includes("opencode"),
-    "BUG #6557: opencode must NOT be routed to after its connection was disabled via the " +
+    !afterCombo.autoConfig.candidatePool.includes("duckduckgo-web"),
+    "BUG #6557: duckduckgo-web must NOT be routed to after its connection was disabled via the " +
       "main Providers-grid toggle (isActive=false), but it still is — the no-auth candidate " +
       "builder ignores provider_connections.isActive entirely."
   );
@@ -96,7 +96,7 @@ test("#6557: disabling the opencode no-auth provider's own connection (isActive=
 test("#6557 regression guard: a no-auth provider with ZERO connection rows (default auto-generated account path) is still included in the auto-combo candidate pool", async () => {
   const combo = await virtualFactory.createVirtualAutoCombo(undefined);
   assert.ok(
-    combo.autoConfig.candidatePool.includes("opencode"),
+    combo.autoConfig.candidatePool.includes("duckduckgo-web"),
     "a no-auth provider with no connection row at all must still be included by default"
   );
 });

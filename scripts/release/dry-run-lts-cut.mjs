@@ -9,7 +9,8 @@
  * Default `--dry-run` prints and VALIDATES the whole sequence and executes
  * nothing (read-only git/gh queries only):
  *
- *   0. preconditions — source resolves, previous tag (v3.8.59) exists,
+ *   0. preconditions — source resolves, the source repository has full history
+ *      (a shallow clone cannot push stable/v3), previous tag (v3.8.59) exists,
  *      package.json at the source is the target version (3.9.0), the
  *      release-freeze of the cut is open, the release branch is green (no open
  *      "Release branch not green: <branch>" issue), stable/v3 + develop absent
@@ -42,7 +43,9 @@ import { fileURLToPath } from "node:url";
 import { load as yamlLoad } from "js-yaml";
 import { resolveDistTag } from "./dist-tag.mjs";
 
-export const CANONICAL_REPO = "diegosouzapw/OmniRoute";
+export const CANONICAL_REPO = "cheaper-inference/OmniRoute";
+/** Former names GitHub still redirects to the canonical repository (transfer of 2026-10-21). */
+export const LEGACY_REPOS = ["diegosouzapw/OmniRoute"];
 const PACKAGE_NAME = "omniroute";
 
 export const DEFAULTS = Object.freeze({
@@ -55,6 +58,7 @@ export const DEFAULTS = Object.freeze({
 
 const PRECONDITION_IDS = [
   "source",
+  "source-full-history",
   "tag",
   "version",
   "freeze",
@@ -160,11 +164,17 @@ export function parseCutArgs(argv) {
   };
 }
 
-/** True when a git remote URL (https / ssh / scp-like, with or without .git) is `repo`. */
+/**
+ * True when a git remote URL (https / ssh / scp-like, with or without .git) is `repo` — or one
+ * of its former names: GitHub redirects those to the same repository, so a clone that still
+ * carries the old owner must be treated as canonical too.
+ */
 export function isCanonicalRemoteUrl(url, repo = CANONICAL_REPO) {
   const match = /github\.com[:/]([^/\s]+)\/([^/\s]+?)(?:\.git)?\/?$/i.exec(String(url ?? ""));
   if (!match) return false;
-  return `${match[1]}/${match[2]}`.toLowerCase() === repo.toLowerCase();
+  const slug = `${match[1]}/${match[2]}`.toLowerCase();
+  const names = repo === CANONICAL_REPO ? [repo, ...LEGACY_REPOS] : [repo];
+  return names.some((name) => slug === name.toLowerCase());
 }
 
 // ── preconditions ───────────────────────────────────────────────────────────
@@ -241,6 +251,21 @@ export function evaluatePreconditions(facts, opts) {
       "a commit SHA",
       Boolean(facts.sourceSha),
       facts.sourceSha ?? `${opts.from} does not resolve to a commit`
+    ),
+    // A shallow checkout cannot be the cut source: the push of stable/v3 ships the full
+    // history and the receiving side rejects the pack ("did not receive expected
+    // object") at the first grafted parent. Seen on the 2026-10-16 rehearsal from a
+    // devbox clone with 31 shallow boundary commits — run the cut from a full clone.
+    check(
+      "source-full-history",
+      "cut source repository has full history (not a shallow clone)",
+      "git rev-parse --is-shallow-repository = false",
+      facts.sourceIsShallow === false,
+      facts.sourceIsShallow === null
+        ? "unknown (git rev-parse --is-shallow-repository failed)"
+        : facts.sourceIsShallow
+          ? "shallow clone — the stable/v3 push would be rejected; unshallow first (git fetch --unshallow origin)"
+          : "full history"
     ),
     check(
       "tag",
@@ -705,6 +730,15 @@ export function createRealIo(cwd) {
     remoteUrl: (name) => tryExec("git", ["remote", "get-url", name], { cwd }),
     async gatherFacts(opts) {
       const sourceSha = tryExec("git", ["rev-parse", "--verify", `${opts.from}^{commit}`], { cwd });
+      const shallowOut = tryExec("git", ["rev-parse", "--is-shallow-repository"], { cwd });
+      const sourceIsShallow =
+        shallowOut === null
+          ? null
+          : shallowOut.trim() === "true"
+            ? true
+            : shallowOut.trim() === "false"
+              ? false
+              : null;
       let sourceVersion = null;
       if (sourceSha) {
         const pkg = tryExec("git", ["show", `${sourceSha}:package.json`], { cwd });
@@ -741,6 +775,7 @@ export function createRealIo(cwd) {
       }
       return {
         sourceSha,
+        sourceIsShallow,
         sourceVersion,
         previousTagExists,
         sourceBranchExists: branchExists(opts.sourceBranch),

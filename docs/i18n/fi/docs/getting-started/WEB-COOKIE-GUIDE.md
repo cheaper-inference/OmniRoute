@@ -4,21 +4,21 @@
 
 ---
 
-Web Cookie -palveluntarjoajien avulla OmniRoute voi käyttää tekoälypalvelua olemassa olevan selainistuntosi kautta API-avaimen sijaan. Ne ovat hyödyllisiä, kun sinulla on jo pääsy palveluun sen verkkosivuston kautta ja haluat OmniRouten käyttävän samaa todennettua istuntoa.
+Web Cookie -palveluntarjoajien avulla OmniRoute voi käyttää tekoälypalvelua nykyisen selainistuntosi kautta API-avaimen sijaan. Ne ovat hyödyllisiä, kun sinulla on jo pääsy palveluun sen verkkosivuston kautta ja haluat OmniRouten käyttävän samaa todennettua istuntoa.
 
-API-avainta käyttävistä palveluntarjoajista poiketen Web Cookie -palveluntarjoajat todentavat käyttäjän selaimen verkkosivustolle lähettämien tunnistetietojen avulla.
+API-avainta käyttävistä palveluntarjoajista poiketen Web Cookie -palveluntarjoajat todentavat käyttäjän tunnistetiedoilla, jotka selaimesi lähettää verkkosivustolle.
 
 ---
 
 # Ennen aloittamista
 
-> **Tärkeää:** Kopioi tunnistetiedot aina **aktiivisesta verkkopyynnöstä**, **älä** selaimen evästetallennustilasta.
+> **Tärkeää:** Kopioi tunnistetiedot aina **aktiivisesta verkkopyynnöstä**, **älä** selaimesi evästetallennustilasta.
 
 Monet todennusongelmat johtuvat evästeiden kopioimisesta väärästä paikasta.
 
 ## ÄLÄ kopioi evästetallennustilasta
 
-Useimmat selaimet näyttävät tallennetut evästeet seuraavassa paikassa:
+Useimmissa selaimissa tallennetut evästeet löytyvät seuraavasta paikasta:
 
 ```
 Kehittäjätyökalut
@@ -26,7 +26,7 @@ Kehittäjätyökalut
 → Evästeet
 ```
 
-Vaikka nämä evästeet näyttäisivät oikeilta, ne voivat olla:
+Vaikka nämä evästeet näyttäisivät oikeilta, ne saattavat olla:
 
 - vanhentuneita
 - puutteellisia
@@ -42,14 +42,14 @@ Käytä sen sijaan onnistuneen pyynnön evästeitä:
 Kehittäjätyökalut
 → Verkko
 → Päivitä sivu
-→ Avaa keskustelu- tai chat-pyyntö
+→ Avaa keskustelu- tai viestipyyntö
 → Pyynnön otsakkeet
-→ Cookie
+→ Eväste
 ```
 
-`Cookie`-pyyntöotsake sisältää täsmälleen ne todennustiedot, joita selaimesi käytti onnistuneesti.
+`Cookie`-pyyntöotsake sisältää täsmälliset todennustiedot, joita selaimesi käytti onnistuneesti.
 
-Useimmilla Web Cookie -palveluntarjoajilla tämä arvo tulee liittää OmniRouteen.
+Useimpien Web Cookie -palveluntarjoajien kohdalla tämä arvo tulee liittää OmniRouteen.
 
 ---
 
@@ -61,7 +61,7 @@ Määritysprosessi on sama useimmille Web Cookie -palveluntarjoajille.
 2. Avaa selaimen kehittäjätyökalut.
 3. Avaa **Verkko**-välilehti.
 4. Päivitä sivu.
-5. Avaa todennettu keskustelu- tai chat-pyyntö.
+5. Avaa todennettu keskustelu- tai viestipyyntö.
 6. Kopioi tarvittavat todennustiedot.
 7. Avaa OmniRoute.
 8. Siirry kohtaan **Palveluntarjoajat → Lisää palveluntarjoaja**.
@@ -70,37 +70,87 @@ Määritysprosessi on sama useimmille Web Cookie -palveluntarjoajille.
 11. Napsauta **Testaa yhteys**.
 12. Tallenna palveluntarjoaja.
 
-Vaaditut tunnistetiedot riippuvat palveluntarjoajasta.
+Tarvittavat tunnistetiedot riippuvat palveluntarjoajasta.
 
 ---
 
 # Palveluntarjoajien tunnistetietomuodot
 
-Eri verkkosivustot tallentavat todennustiedot eri tavoin. Jotkin vaativat vain evästeitä, kun taas toiset voivat vaatia lisäotsakkeita tai tunnuksia.
+Eri verkkosivustot tallentavat todennustiedot eri tavoin. Jotkin edellyttävät vain evästeitä, kun taas toiset saattavat edellyttää lisäksi otsakkeita tai tunnuksia.
 
-| Palveluntarjoaja                | Tunnistetietomuoto            | Palveluntarjoajan opas           |
-| ------------------------------- | ----------------------------- | -------------------------------- |
-| Claude Web                      | Koko Cookie-pyyntöotsake      | `docs/providers/CLAUDE_WEB.md`   |
-| ChatGPT Web (Codex)             | Koko Cookie-otsake            | `docs/providers/CHATGPT_WEB.md`  |
-| Gemini Web                      | _(tarkistettava)_             |                                  |
-| Copilot Web                     | _(tarkistettava)_             | `docs/providers/COPILOT-M365.md` |
-| Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath | `docs/providers/COPILOT-M365.md` |
-| Grok Web                        | _(tarkistettava)_             |                                  |
-| ...                             | ...                           | ...                              |
+| Palveluntarjoaja                | Tunnistetietomuoto              | Palveluntarjoajan opas           |
+| ------------------------------- | ------------------------------- | -------------------------------- |
+| Claude Web                      | Täydellinen Cookie-pyyntöotsake | `docs/providers/CLAUDE_WEB.md`   |
+| ChatGPT Web (Codex)             | Täydellinen Cookie-otsake       | `docs/providers/CHATGPT_WEB.md`  |
+| Gemini Web                      | _(tarkista)_                    |                                  |
+| Copilot Web                     | _(tarkista)_                    | `docs/providers/COPILOT-M365.md` |
+| Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath   | `docs/providers/COPILOT-M365.md` |
+| Grok Web                        | _(tarkista)_                    |                                  |
+| ...                             | ...                             | ...                              |
 
 > Päivitä tätä taulukkoa, kun uusia Web Cookie -palveluntarjoajia lisätään tai nykyisten palveluntarjoajien todennusvaatimukset muuttuvat.
 
+## NoTrack (notrack-web)
+
+NoTrack ([notrack.ai](https://notrack.ai)) on maksuton kuluttajille tarkoitettu keskustelualusta, joka ei edellytä rekisteröitymistä — istunto luodaan anonyymisti ensimmäisellä käynnillä ja säilytetään kolmen evästeen avulla: `uid`, `si_usr_id` ja `si_ses_id`. OmniRoute välittää saman `/api/dispatch`-päätepisteen yhden mallitunnuksen (`notrack-c`, alias `ntw`) kautta.
+
+### Yhdistämisen vaiheet
+
+1. Avaa [notrack.ai](https://notrack.ai) selaimessasi ja anna anonyymin istuntoevästeen asettua.
+2. Avaa **Kehittäjätyökalut → Verkko**, päivitä sivu ja napsauta mitä tahansa `/api`-pyyntöä.
+3. Kopioi **Pyynnön otsakkeet** -kohdasta koko `Cookie`-otsakkeen arvo.
+4. Siirry OmniRoutessa kohtaan **Palveluntarjoajat → Lisää palveluntarjoaja → NoTrack Web (maksuton)**.
+5. Liitä evästemerkkijono `apiKey`-kenttään ja valitse **Tallenna**.
+
+OmniRoute poimii liitetystä merkkijonosta arvot `uid`, `si_usr_id` ja `si_ses_id` sekä muodostaa siistin `Cookie`-otsakkeen, joka sisältää vain nämä parit — ja lisäksi arvon `nt_session` (kirjautuneille tileille asetettu `ntk_…`-tunnus), jos se on käytettävissä. Jos jokin näistä kolmesta puuttuu, liitetty merkkijono välitetään sellaisenaan, jotta ylläpitäjät voivat kokeilla vaihtoehtoisia muotoja.
+
+### Mallitunnukset
+
+| Mallitunnus | Näyttönimi | Huomautukset                                             |
+| ----------- | ---------- | -------------------------------------------------------- |
+| `notrack-c` | NoTrack C  | Oletus — ylävirran välitysmalli `C`.                     |
+| `C`         | NoTrack C  | `notrack-c`-mallin alias (raaka ylävirran välityskoodi). |
+| `notrack`   | NoTrack C  | `notrack-c`-mallin alias.                                |
+| `ntw`       | NoTrack C  | `notrack-c`-mallin lyhyt alias.                          |
+
+Kaikki neljä mallitunnusta vastaavat samaa ylävirran välitysmallia (`C`).
+
+### Pyyntöasetukset
+
+Suoritin hyväksyy pyynnön rungossa seuraavat valinnaiset kentät:
+
+| Runkokenttä           | Oletus  | Tarkoitus                                                                         |
+| --------------------- | ------- | --------------------------------------------------------------------------------- |
+| `notrack_mode`        | `usual` | Välitystila (vapaamuotoinen merkkijono; ylävirta hyväksyy arvon `usual`, …)       |
+| `notrack_max_turns`   | `6`     | Sisäisten vuorojen enimmäismäärä ennen kuin ylävirta vastaa.                      |
+| `notrack_chat_id`     | `null`  | Jatka olemassa olevaa ylävirran keskustelua (jätä pois uutta keskustelua varten). |
+| `notrack_attachments` | `[]`    | Ylävirran liitekuvausten läpivälitettävä taulukko.                                |
+| `notrack_regenerate`  | `false` | Aseta arvoksi `true`, jos haluat luoda edellisen vuoron vastauksen uudelleen.     |
+
+### Ominaisuudet
+
+- Keskustelutäydennykset **suoratoistona ja ilman suoratoistoa**.
+- **Työkalukutsut** — aseta pyynnössä `tools: [...]`; suoritin sarjallistaa ne työkalukutsun kuorisopimukseen ja jäsentää mallin vastaukset takaisin OpenAI-muotoisiksi `tool_calls`-kutsuiksi.
+- **`response_format`** — arvoja `json_object` ja `json_schema` tuetaan. Suoritin poimii mallin vastauksesta ensimmäisen JSON-objektin ja muuntaa sen merkkijonoksi ennen palauttamista.
+- **Päättelyvihje** — suoritin lähettää `reasoning`-deltan, kun ylävirta lähettää `thinking`-tapahtuman.
+
+### Rajoitukset
+
+- Ylävirta rajoittaa anonyymin käytön kiintiöillä — kun kiintiö ylittyy, suoritin palauttaa 429-virheen ja selkeän viestin.
+- Kaikki mallitunnukset viittaavat samaan ylävirran välitysmalliin; mallikohtaista vaihtoa ei ole.
+- Suoritin ei kutsu ylävirran `/api/chats`-päätepistettä, joten keskusteluhistoriaa tai istuntoja ei hallita automaattisesti. Jatka olemassa olevaa ylävirran keskustelua käyttämällä arvoa `notrack_chat_id`.
+
 ---
 
-# Mitä Web Cookie -palveluntarjoajat voivat tehdä ja mitä eivät
+# Mitä verkkoevästeitä käyttävät palveluntarjoajat voivat ja eivät voi tehdä
 
-Web Cookie -palveluntarjoajat käyttävät uudelleen verkkosivuston chat-käyttöliittymää. Ne **eivät** tarjoa samoja ominaisuuksia kuin viralliset API-rajapinnat.
+Verkkoevästeitä käyttävät palveluntarjoajat hyödyntävät verkkosivuston keskustelukäyttöliittymää. Ne **eivät** tarjoa samoja ominaisuuksia kuin viralliset API-rajapinnat.
 
 ## Tuettu
 
-- Todennus olemassa olevan selainistuntosi avulla
-- Pääsy tililläsi käytettävissä oleviin malleihin
-- Chat-vastausten suoratoisto
+- Todentaminen olemassa olevan selainistunnon avulla
+- Tilisi kautta käytettävissä olevien mallien käyttö
+- Keskusteluvastausten suoratoisto
 - API-avainta ei tarvita
 
 ## Ei tuettu
@@ -109,41 +159,41 @@ Web Cookie -palveluntarjoajat käyttävät uudelleen verkkosivuston chat-käytt�
 - Työkalukutsut
 - Automaattinen tiedostojen muokkaus
 - Agenttipohjaiset IDE-työnkulut
-- Vain API-rajapinnan kautta saatavilla olevat ominaisuudet
+- Vain API:n kautta käytettävissä olevat ominaisuudet
 
-Tämä on odotettua toimintaa, **ei** ohjelmavirhe.
+Tämä on odotettua toimintaa eikä **ole** virhe.
 
-Jos tarvitset työkalujen suorittamista, automaattista tiedostojen muokkausta tai muita agenttityönkulkuja, käytä Web Cookie -palveluntarjoajan sijaan **API-avainta käyttävää palveluntarjoajaa**.
+Jos tarvitset työkalujen suorittamista, automaattista tiedostojen muokkausta tai muita agenttipohjaisia työnkulkuja, käytä Web Cookie -palveluntarjoajan sijaan **API-avainpalveluntarjoajaa**.
 
 ---
 
-# Vahvistukseen liittyvä huomautus
+# Validointia koskeva huomautus
 
-Onnistunut **Testaa yhteys** -toiminto tai evästeiden vahvistus varmistaa vain, että annetut tunnistetiedot vaikuttavat olevan odotetussa muodossa.
+Onnistunut **Test Connection** tai evästeen validointi varmistaa vain, että annetut tunnistetiedot vaikuttavat olevan odotetussa muodossa.
 
-Ennen kuin ongelma #7857 on ratkaistu, onnistunut vahvistus **ei takaa**, että palveluntarjoajan todennus onnistuu.
+Kunnes ongelma #7857 on ratkaistu, onnistunut validointi **ei takaa**, että palveluntarjoajan todentaminen onnistuu.
 
-Jos todennus epäonnistuu edelleen, varmista, että kopioit tunnistetiedot aktiivisesta verkkopyynnöstä etkä selaimen evästetallennustilasta.
+Jos todentaminen epäonnistuu edelleen, varmista, että kopioit tunnistetiedot aktiivisesta verkkopyynnöstä etkä selaimen evästetallennustilasta.
 
 ---
 
 # Vianmääritys
 
-## Todennus epäonnistuu
+## Todentaminen epäonnistuu
 
-Varmista, että tunnistetiedot kopioitiin seuraavasta paikasta:
+Varmista, että tunnistetiedot kopioitiin kohdasta:
 
 ```
-Verkko
-→ Pyynnön otsakkeet
+Network
+→ Request Headers
 → Cookie
 ```
 
-eikä seuraavasta:
+eikä kohdasta:
 
 ```
-Sovellus
-→ Evästeet
+Application
+→ Cookies
 ```
 
 ---
@@ -160,21 +210,34 @@ Kopioi tunnistetiedot uudelleen tuoreesta verkkopyynnöstä sen jälkeen, kun ol
 
 Web Cookie -palveluntarjoajat käyttävät olemassa olevaa selainistuntoasi.
 
-Jos selainistuntosi vanhenee tai kirjaudut ulos, sinun on kopioitava uudet tunnistetiedot.
+Jos selainistuntosi vanhentuu tai kirjaudut ulos, sinun on kopioitava uudet tunnistetiedot. Voit automatisoida evästeiden uusimisen tuetuille verkkopalveluntarjoajille käyttämällä [Browser Session Sync Extension](../guides/SESSION-SYNC-EXTENSION.md) -oheistyökalua.
 
 ---
 
-## Yhteystesti onnistuu mutta pyynnöt epäonnistuvat
+## Test Connection onnistuu mutta pyynnöt epäonnistuvat
 
-Ennen kuin ongelma #7857 on ratkaistu, vahvistuksen läpäiseminen ei takaa todennuspyynnön onnistumista.
+Kunnes ongelma #7857 on ratkaistu, validoinnin läpäiseminen ei takaa todentamispyynnön onnistumista.
 
 Kopioi tunnistetietosi uudelleen tuoreesta todennetusta pyynnöstä ennen vianmäärityksen jatkamista.
 
 ---
 
+## ChatGPT Web epäonnistuu virheellä "Unsupported ChatGPT integrity dependency"
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Tunnistetieto on kunnossa — virhe johtuu sillasta, ei istunnosta. chatgpt.com määrittää moduulitunnisteensa käyttöönottokohtaisesti, ja silta kiinnitti aiemmin luomansa Sentinel-apumoduulin tunnisteen. Tämän vuoksi chatgpt.com-sivuston uudelleenkoonti, jossa apumoduuli nimettiin uudelleen, rikkoi jokaisen vuoron, vaikka eväste pysyi voimassa. Yhteyden uudelleenvaltuuttaminen ei korjaa ongelmaa.
+
+Koontiversiot, jotka ratkaisevat moduulin sivun oman ajonaikaisen ympäristön kautta, eivät kiinnitä mitään tunnistetta eikä tämä ongelma koske niitä. Jos näet virheen, päivitä OmniRoute ja suorita yhteystarkistus uudelleen.
+
+---
+
 # Esimerkki palveluntarjoajasta
 
-Täydelliset palveluntarjoajakohtaiset ohjeet ovat täällä:
+Täydellinen palveluntarjoajakohtainen vaiheittainen ohje on täällä:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
@@ -188,4 +251,4 @@ Claude Web -opas esittelee Web Cookie -palveluntarjoajan koko määritysprosessi
 - Vältä vanhojen evästeiden uudelleenkäyttöä.
 - Pidä selainistuntosi aktiivisena käyttäessäsi Web Cookie -palveluntarjoajia.
 - Käsittele kopioituja evästeitä arkaluonteisina tunnistetietoina.
-- Käytä API-avainta käyttäviä palveluntarjoajia, kun tarvitset funktiokutsuja tai agenttityönkulkuja.
+- Käytä API-avainpalveluntarjoajia, kun tarvitset funktiokutsuja tai agenttipohjaisia työnkulkuja.

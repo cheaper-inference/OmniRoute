@@ -298,13 +298,13 @@ Viktig atferd:
 
 ## 🔑 Synkroniseringstokener og konfigurasjonspakke _(v3.6.6+)_
 
-Tilgang fra flere enheter og eksterne operatører er nå mulig via **omfangsbegrensede synkroniseringstokener**:
+Tilgang fra flere enheter og eksterne operatører er nå mulig via **avgrensede synkroniseringstokener**:
 
-- **`POST /api/sync/tokens`** — Utsted et nytt synkroniseringstoken (omfangsbegrenset, med valgfri utløpstid)
+- **`POST /api/sync/tokens`** — Utsted et nytt synkroniseringstoken (avgrenset, med valgfri utløpstid)
 - **`DELETE /api/sync/tokens/:id`** — Tilbakekall et token
-- **`GET /api/sync/bundle`** — Last ned et versjonert, ETag-nøkkelbasert JSON-øyeblikksbilde av alle ikke-sensitive innstillinger (passord er skjult)
+- **`GET /api/sync/bundle`** — Last ned et versjonert JSON-øyeblikksbilde av konfigurasjonen, identifisert med ETag (kun autentisert med et synkroniseringstoken). Autentiseringsinnstillinger, som passordet til kontrollpanelet, fjernes, men leverandørlegitimasjon og API-nøkler er inkludert, så behandle filen som en hemmelighet
 
-Konfigurasjonspakken bygges av `src/lib/sync/bundle.ts`. Konsumenter sammenligner responsheaderen `ETag` for å oppdage endringer uten å laste ned hele nyttelasten på nytt.
+Konfigurasjonspakken bygges av `src/lib/sync/bundle.ts`. Klienter sammenligner responsheaderen `ETag` for å oppdage endringer uten å laste ned hele nyttelasten på nytt. Fra kommandolinjen lagrer `omniroute sync bundle <outPath> --token <syncToken>` (eller `OMNIROUTE_SYNC_TOKEN`) den i en fil som bare eieren har tilgang til.
 
 ---
 
@@ -320,10 +320,10 @@ Konfigurasjonspakken bygges av `src/lib/sync/bundle.ts`. Konsumenter sammenligne
 
 Alle kall for leverandørvalidering og modelloppdagelse går nå gjennom en tolagsbeskyttelse for utgående trafikk:
 
-1. **URL-beskyttelse** (`src/shared/network/outboundUrlGuard.ts`) — Blokkerer private, lokale tilbakekoblings- og lenkelokale IP-områder før sokkelen åpnes.
-2. **Sikker fetch-innpakning** (`src/shared/network/safeOutboundFetch.ts`) — Bruker URL-beskyttelsen, normaliserer tidsavbrudd og prøver midlertidige feil på nytt med eksponentiell tilbakeholdelse.
+1. **URL-beskyttelse** (`src/shared/network/outboundUrlGuard.ts`) — Kontrollerer først målets vertsnavn eller IP-literal slik det er skrevet. I modus for kun offentlige adresser løser wrapperen for sikker henting også opp navnet og avviser private adresser. Som standard blokkeres endepunkter for skymetadata — hele 169.254.0.0/16 samt kjente vertsnavn for metadata. `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` blokkerer også private verter og loopback-verter. `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (eller den eldre `OUTBOUND_SSRF_GUARD_ENABLED=false`) deaktiverer kontrollene. En verdi som lagres via innstillingens bryter i kontrollpanelet, har forrang over den tilhørende variabelen, og innebygde lokale leverandører hopper over beskyttelsen under nøkkelvalidering. Se `docs/reference/ENVIRONMENT.md`.
+2. **Wrapper for sikker henting** (`src/shared/network/safeOutboundFetch.ts`) — Bruker URL-beskyttelsen, normaliserer tidsavbrudd og prøver midlertidige feil på nytt med eksponentiell tilbakekobling.
 
-Brudd på beskyttelsesreglene returneres som HTTP 422 (`URL_GUARD_BLOCKED`) og skrives til revisjonsloggen for samsvar via `providerAudit.ts`.
+Brudd på beskyttelsen vises som `URL_GUARD_BLOCKED` — HTTP 503 via `getSafeOutboundFetchErrorStatus` (400 på ruten for modelloppdagelse) — og reelle SSRF-blokkeringer under validering skrives til revisjonsloggen som `provider.validation.ssrf_blocked`-hendelser.
 
 ---
 

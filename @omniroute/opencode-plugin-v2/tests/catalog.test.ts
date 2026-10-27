@@ -188,8 +188,12 @@ describe("catalog fail-open", () => {
     } finally {
       console.warn = origWarn;
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /combos fetch failed/);
+    assert.equal(warns.filter((w) => /combos fetch failed/.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /combos fetch failed/.test(w))!,
+      /combos fetch failed/
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
     assert.ok(draft.models.has("omniroute/m1"));
   });
 
@@ -214,9 +218,12 @@ describe("catalog fail-open", () => {
     } finally {
       console.warn = origWarn;
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /combos fetch failed/);
-    assert.match(warns[0], /403/);
+    assert.equal(warns.filter((w) => /combos fetch failed/.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /combos fetch failed/.test(w))!,
+      /403/
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
     assert.ok(draft.models.has("omniroute/m1"));
   });
 
@@ -241,9 +248,12 @@ describe("catalog fail-open", () => {
     } finally {
       console.warn = origWarn;
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /combos fetch failed/);
-    assert.match(warns[0], /500/);
+    assert.equal(warns.filter((w) => /combos fetch failed/.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /combos fetch failed/.test(w))!,
+      /500/
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
     assert.ok(draft.models.has("omniroute/m1"));
   });
 
@@ -268,8 +278,12 @@ describe("catalog fail-open", () => {
     } finally {
       console.warn = origWarn;
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /combos fetch failed/);
+    assert.equal(warns.filter((w) => /combos fetch failed/.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /combos fetch failed/.test(w))!,
+      /combos fetch failed/
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
     assert.ok(draft.models.has("omniroute/m1"));
   });
 });
@@ -306,7 +320,10 @@ describe("catalog combo vs combo", () => {
     // Under name-based keying the combos publish at their own keys
     // (`omniroute/Dupe Combo` and `omniroute/Dupe Combo Again`) — they no
     // longer collide with the model `dupe` at `omniroute/dupe`.
-    assert.equal(warns.length, 0);
+    assert.deepEqual(
+      warns.filter((w) => !/catalog refresh:/.test(w)),
+      []
+    );
     const m = draft.models.get("omniroute/dupe");
     assert.ok(m, "raw model remains at its own key");
     assert.equal(m?.name, "dupe");
@@ -345,14 +362,21 @@ describe("catalog model bare vs combo", () => {
     // Name-based keying: the combo advertises `Dupe Combo`, so it sits at
     // `omniroute/Dupe Combo` instead of collapsing onto the raw model's
     // `omniroute/dupe` key (the accidental-collision class the warn was
-    // written for). Both entries publish, nothing warns.
-    assert.equal(warns.length, 0);
+    // written for). Both entries publish; only the refresh summary warns.
+    assert.deepEqual(
+      warns.filter((w) => !/catalog refresh:/.test(w)),
+      []
+    );
     assert.ok(draft.models.get("omniroute/dupe"), "raw model keeps its id key");
     assert.ok(draft.models.get("omniroute/Dupe Combo"), "combo published under its name");
   });
 });
 
 describe("catalog capability presets", () => {
+  function freeOverlay(ids: string[]): Map<string, { freeType: "keyless" }> {
+    return new Map(ids.map((id) => [id, { freeType: "keyless" as const }]));
+  }
+
   function captureWarns() {
     const warns: string[] = [];
     const origWarn = console.warn;
@@ -402,8 +426,12 @@ describe("catalog capability presets", () => {
     } finally {
       restore();
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /freeOnly.*enrichment|enrichment.*free/i);
+    assert.equal(warns.filter((w) => /freeOnly.*enrichment|enrichment.*free/i.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /freeOnly.*enrichment|enrichment.*free/i.test(w))!,
+      /freeOnly.*enrichment|enrichment.*free/i
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
   });
 
   it("freeOnly with enrichment disabled publishes nothing", async () => {
@@ -422,26 +450,38 @@ describe("catalog capability presets", () => {
     } finally {
       restore();
     }
-    assert.equal(warns.length, 1);
-    assert.match(warns[0], /freeOnly.*enrichment|enrichment.*free/i);
+    assert.equal(warns.filter((w) => /freeOnly.*enrichment|enrichment.*free/i.test(w)).length, 1);
+    assert.match(
+      warns.find((w) => /freeOnly.*enrichment|enrichment.*free/i.test(w))!,
+      /freeOnly.*enrichment|enrichment.*free/i
+    );
+    assert.ok(warns.some((w) => /catalog refresh:/.test(w)));
   });
 
-  it("freeOnly drops combos without an enrichment entry", async () => {
+  it("freeOnly publishes a combo whose members are all free", async () => {
     const draft = fakeDraft();
     const res = await publishCatalog(
       draft,
       { ...baseOpts, freeOnly: true },
       {
-        fetcher: async () => [{ id: "m1" }],
-        enrichmentFetcher: async () => new Map([["m1", { freeType: "keyless" as const }]]),
+        fetcher: async () => [{ id: "m1" }, { id: "m2" }, { id: "m3" }],
+        enrichmentFetcher: async () => freeOverlay(["m1", "m2", "m3"]),
         combosFetcher: async () => [
-          { id: "combo-a", name: "Combo A", models: [{ kind: "model", model: "m1" }] },
+          {
+            id: "combo-a",
+            name: "Combo A",
+            models: [
+              { kind: "model", model: "m1" } as never,
+              { kind: "model", model: "m2" } as never,
+              { kind: "model", model: "m3" } as never,
+            ],
+          },
         ],
       }
     );
-    assert.equal(res.models, 1);
-    assert.equal(res.combos, 0);
-    assert.ok(!draft.models.has("omniroute/Combo A"));
+    assert.equal(res.models, 3);
+    assert.equal(res.combos, 1);
+    assert.ok(draft.models.has("omniroute/Combo A"));
   });
 
   it("toolsOnly keeps only tool-calling models", async () => {
@@ -603,6 +643,84 @@ describe("catalog capability presets", () => {
     );
     // #15392 stopped publishing auto combos, so counts no longer include autoCombos.
     assert.deepEqual(res, { models: 2, combos: 0 });
+  });
+
+  it("freeOnly drops single-use and retired entries but keeps them without the flag", async () => {
+    async function publishWith(freeOnly: boolean) {
+      const draft = fakeDraft();
+      const res = await publishCatalog(
+        draft,
+        { ...baseOpts, freeOnly, visibleModels: ["*"] },
+        {
+          fetcher: async () => [{ id: "cf/one-time-m" }, { id: "cf/retired-m" }],
+          enrichmentFetcher: async () =>
+            new Map([
+              ["cf/one-time-m", { freeType: "one-time-initial" as const }],
+              ["cf/retired-m", { freeType: "discontinued" as const }],
+            ]),
+          combosFetcher: async () => [],
+        }
+      );
+      return { draft, res };
+    }
+    const filtered = await publishWith(true);
+    assert.deepEqual(filtered.res, { models: 0, combos: 0 });
+    const unfiltered = await publishWith(false);
+    assert.equal(unfiltered.res.models, 2);
+    assert.match(String(unfiltered.draft.models.get("omniroute/cf/one-time-m")?.name), /one-time/);
+    assert.match(
+      String(unfiltered.draft.models.get("omniroute/cf/retired-m")?.name),
+      /discontinued/
+    );
+  });
+
+  it("freeOnly keeps uncapped entries with a non-empty budget", async () => {
+    const draft = fakeDraft();
+    const res = await publishCatalog(
+      draft,
+      { ...baseOpts, freeOnly: true, visibleModels: ["*"] },
+      {
+        fetcher: async () => [{ id: "cf/open-m" }],
+        enrichmentFetcher: async () =>
+          new Map([["cf/open-m", { freeType: "recurring-uncapped" as const }]]) as never,
+        combosFetcher: async () => [],
+      }
+    );
+    assert.equal(res.models, 1);
+    assert.match(String(draft.models.get("omniroute/cf/open-m")?.name), /uncapped/);
+  });
+
+  it("freeOnly predicate admits recurring and keyless entries, refuses the rest", async () => {
+    const { passesCapabilityPresets } = await import("../src/capability-presets.js");
+    const { isFreeOnlyFreeType } = (await import("../src/shared/naming.js")) as unknown as {
+      isFreeOnlyFreeType: (v: unknown) => boolean;
+    };
+    const admitted = [
+      "recurring-daily",
+      "recurring-monthly",
+      "recurring-credit",
+      "recurring-uncapped",
+      "keyless",
+    ];
+    for (const freeType of admitted) {
+      assert.equal(isFreeOnlyFreeType(freeType), true);
+      assert.equal(
+        passesCapabilityPresets({} as never, { freeType: freeType as never }, { freeOnly: true }),
+        true
+      );
+    }
+    const refused: unknown[] = ["one-time-initial", "discontinued", "some-future-type", undefined];
+    for (const freeType of refused) {
+      assert.equal(isFreeOnlyFreeType(freeType), false);
+      assert.equal(
+        passesCapabilityPresets(
+          {} as never,
+          freeType === undefined ? undefined : ({ freeType: freeType as never } as never),
+          { freeOnly: true }
+        ),
+        false
+      );
+    }
   });
 
   it("presets shrink a large stub catalog below threshold", async () => {

@@ -302,9 +302,9 @@ L’accès depuis plusieurs appareils et par des opérateurs externes est désor
 
 - **`POST /api/sync/tokens`** — Émet un nouveau jeton de synchronisation (à portée limitée, avec une expiration facultative)
 - **`DELETE /api/sync/tokens/:id`** — Révoque un jeton
-- **`GET /api/sync/bundle`** — Télécharge un instantané JSON versionné de tous les paramètres non sensibles, identifié par un ETag (mots de passe masqués)
+- **`GET /api/sync/bundle`** — Télécharge un instantané JSON versionné de la configuration, identifié par un ETag (authentification uniquement avec un jeton de synchronisation). Les paramètres d’authentification, tels que le mot de passe du tableau de bord, sont supprimés, mais les identifiants des fournisseurs et les clés API sont inclus ; ce fichier doit donc être traité comme un secret
 
-Le bundle de configuration est généré par `src/lib/sync/bundle.ts`. Les clients comparent l’en-tête de réponse `ETag` afin de détecter les modifications sans télécharger à nouveau l’intégralité de la charge utile.
+Le bundle de configuration est généré par `src/lib/sync/bundle.ts`. Les clients comparent l’en-tête de réponse `ETag` afin de détecter les modifications sans télécharger à nouveau l’intégralité de la charge utile. Depuis la CLI, `omniroute sync bundle <outPath> --token <syncToken>` (ou `OMNIROUTE_SYNC_TOKEN`) l’enregistre dans un fichier accessible uniquement par son propriétaire.
 
 ---
 

@@ -332,24 +332,38 @@ RTK rejimi **[RTK AI](https://github.com/rtk-ai)** tərəfindən hazırlanmış 
 
 ---
 
-## Təkmil Sıxılma Sistemləri
+## Təkmil Sıxışdırma Sistemləri
 
-Yuxarıda təsvir edilən 7 rejimdən əlavə (mənbə həmçinin bu təlimatda əhatə olunmayan `codex-responses` və `omniglyph` rejimlərini qəbul edir), aşağıdakı bölmələr həmin rejimlərin daxilində və ya onlarla yanaşı işləyən funksiyaları əhatə edir: Alət Nəticəsinin Sıxılması və Proqressiv Köhnəlmə aggressive mühərrikinin 1-ci və 2-ci addımlarıdır (Aggressive rejimi və stacked konveyerinin `aggressive` addımı), Yığılmış Konveyer Stacked rejiminin işləmə üsuludur, Keşdən Xəbərdar Sıxılma sıxılma aktiv olduğu müddətdə keşləmə provayderləri üçün `aggressive` və `ultra` strategiyalarını `standard` strategiyasına endirir, Caveman Çıxış Rejimi və Çıxış Üslubları isə standart olaraq söndürülmüş, sorğunu sıxmaq əvəzinə modelin çıxışını formalaşdıran, seçim əsasında aktivləşdirilən sistem promptu təlimatlarıdır.
+Yuxarıda təsvir edilən 7 rejimdən əlavə (mənbə həmçinin bu təlimatda əhatə olunmayan
+`codex-responses` və `omniglyph` rejimlərini qəbul edir), aşağıdakı bölmələr həmin
+rejimlərin daxilində və ya onlarla yanaşı işləyən funksiyaları əhatə edir: Alət Nəticəsinin
+Sıxışdırılması və Proqressiv Köhnəlmə aqressiv mühərrikin 1-ci və 2-ci addımlarıdır
+(Aqressiv rejim və yığılmış konveyerin `aggressive` addımı), Yığılmış Konveyer Yığılmış
+rejimin necə işlədiyini müəyyən edir, Keşdən Xəbərdar Sıxışdırma sıxışdırma aktiv olduqda
+keşləmə provayderləri üçün `aggressive` və `ultra` strategiyalarını `standard` səviyyəsinə
+endirir, Mağara Adamı Çıxış Rejimi və Çıxış Üslubları isə standart olaraq deaktiv olan,
+sorğunu sıxışdırmaq əvəzinə modelin çıxışını formalaşdıran, seçimlə aktivləşdirilən sistem
+promptu təlimatlarıdır.
 
-### Keşdən Xəbərdar Sıxılma
+### Keşdən Xəbərdar Sıxışdırma
 
-Bəzi provayderlər (məsələn, prompt keşləməsindən istifadə edən Anthropic) **prompt keşləməsini** dəstəkləyir; bu, xərcləri və gecikməni azaltmaq üçün promptun hissələrini keşləməyə imkan verir. Keşləmə aktiv olduqda, aqressiv sıxılma əslində məhsuldarlığa **zərər verə bilər**, çünki keşlənmiş tokenləri dəyişdirərək keşi etibarsız edir.
+Bəzi provayderlər (məsələn, prompt keşləməsi ilə Anthropic) **prompt keşləməsini**
+dəstəkləyir; bu, xərcləri və gecikməni azaltmaq üçün promptun müəyyən hissələrini
+keşləməyə imkan verir. Keşləmə aktiv olduqda aqressiv sıxışdırma, keşlənmiş tokenləri
+dəyişdirərək keşi etibarsız etdiyinə görə, performansa əslində **zərər verə bilər**.
 
-`cachingAware.ts` modulu bunu **keşləmə kontekstini aşkarlamaq** və **sıxılma strategiyasını** müvafiq şəkildə tənzimləməklə həll edir.
+`cachingAware.ts` modulu bunu **keşləmə kontekstini aşkarlamaqla** və
+**sıxışdırma strategiyasını** müvafiq qaydada tənzimləməklə həll edir.
 
 #### Necə işləyir
 
-1. **Keşləmə kontekstini aşkarlayır** — Sorğu gövdəsində `cache_control` markerlərini axtarır
+1. **Keşləmə kontekstini aşkarlayır** — Sorğunun gövdəsində `cache_control` markerlərini axtarır
 2. **Keşləmə provayderlərini müəyyənləşdirir** — Hədəf provayderin keşləməni dəstəkləyib-dəstəkləmədiyini yoxlayır
-3. **Strategiyanı tənzimləyir** — Keşləmə provayderləri üçün `aggressive`/`ultra` strategiyalarını `standard` strategiyasına endirir
-4. **Sistem promptunu ötürür** — Sistem promptları adətən keşlənir, buna görə onları sıxmır
+3. **Strategiyanı tənzimləyir** — Keşləmə provayderləri üçün `aggressive`/`ultra` strategiyalarını `standard` səviyyəsinə endirir
+4. **Sistem promptunu ötürür** — Sistem promptları adətən keşlənir, buna görə də onları sıxışdırmır
 
-Strategiya köməkçisi həmçinin `deterministicOnly` bayrağını qaytarır, lakin plan qurucusu yalnız strategiyadan istifadə edir — hazırda aşağı axında heç nə bu bayrağı oxumur.
+Strategiya köməkçisi həmçinin `deterministicOnly` bayrağını qaytarır, lakin plan qurucusu
+yalnız strategiyadan istifadə edir — hazırda sonrakı mərhələlərin heç biri bu bayrağı oxumur.
 
 #### Kod nümunəsi
 
@@ -374,19 +388,28 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### Nə zaman istifadə edilməlidir
 
-Keşdən xəbərdar sıxılma **həmişə aktivdir** — heç bir konfiqurasiya tələb olunmur. Sıxılma aktiv olduqda və hədəf provayder prompt keşləməsini dəstəklədikdə (Anthropic, OpenAI və s.) işə düşür; açıq `cache_control` markerləri tələb olunmur — yalnız keşləmə provayderinin olması strategiyanın aşağı salınmasına səbəb olur, təkcə markerlər isə bunu heç vaxt etmir (marker aşkarlanması strategiya qərarına deyil, keş telemetriyasına məlumat verir).
+Keşdən xəbərdar sıxışdırma **həmişə aktivdir** — heç bir konfiqurasiya tələb olunmur.
+Sıxışdırma aktiv olduqda və hədəf provayder prompt keşləməsini dəstəklədikdə (Anthropic,
+OpenAI və s.) işə düşür; açıq şəkildə göstərilmiş `cache_control` markerləri tələb olunmur —
+təkcə keşləmə provayderinin olması səviyyənin endirilməsini işə salır, təkcə markerlər isə
+bunu heç vaxt etmir (marker aşkarlaması strategiya qərarına deyil, keş telemetriyasına
+məlumat verir).
 
 ### Proqressiv Köhnəlmə
 
-Uzun söhbətlər çoxlu mesaj növbələri toplayır, lakin köhnə növbələr getdikcə daha az aktual olur. `progressiveAging.ts` modulu **mesajların keyfiyyətini növbə məsafəsinə görə azaldır** (məsafə söhbətin sonundan ölçülür). Təqdim edilən standart parametrlərlə (`verbatim: 2, light: 2, moderate: 3`):
+Uzun söhbətlərdə çoxsaylı mesaj növbələri toplanır, lakin köhnə növbələrin aktuallığı
+azalır. `progressiveAging.ts` modulu **mesajları növbə məsafəsinə görə zəiflədir**
+(məsafə söhbətin sonundan hesablanır). Təqdim edilən standart parametrlərlə
+(`verbatim: 2, light: 2, moderate: 3`):
 
-- **Son 2 gediş (məsafə ≤ 2)**: Olduğu kimi saxlanılır
-- **Məsafə 3**: Mağara adamı sıxışdırması (dolğu sözlərinin silinməsi)
-- **Məsafə 4+**: Assistent mesajları xülasələşdirilir; istifadəçi mesajları ilk
-  sətrə qədər qısaldılır və 120 simvolla məhdudlaşdırılır; digər rollara toxunulmur. Sistem promptları, artıq köhnəlmiş
-  mesajlar və ən son istifadəçi mesajı məsafədən asılı olmayaraq həmişə olduğu kimi saxlanılır.
-  Heç nə tamamilə silinmir və təqdim edilən standart parametrlərlə `light`
-  diapazonuna çatmaq mümkün deyil (`light`, `verbatim` ilə eynidir).
+- **Son 2 növbə (məsafə ≤ 2)**: Olduğu kimi saxlanılır
+- **Məsafə 3**: Mağara adamı sıxışdırması (doldurucu ifadələrin silinməsi)
+- **Məsafə 4+**: Assistent mesajları xülasə edilir; istifadəçi mesajları ilk
+  sətirlə məhdudlaşdırılır və maksimum 120 simvol saxlanılır; digər rollara toxunulmur.
+  Sistem promptları, artıq köhnəldilmiş mesajlar və ən son istifadəçi mesajı məsafədən
+  asılı olmayaraq həmişə olduğu kimi saxlanılır. Heç nə tamamilə silinmir və təqdim
+  edilən standart parametrlərlə `light` diapazonu əlçatmazdır (`light`, `verbatim`
+  ilə eynidir).
 
 #### Kod nümunəsi
 
@@ -397,68 +420,69 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... daha 50 gediş ...
+  // ... daha 50 növbə ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // son 3 gediş: olduğu kimi
+  verbatim: 3, // son 3 növbə: olduğu kimi
   light: 8, // məsafə <= 8: yüngül sıxışdırma
   moderate: 20, // məsafə <= 20: mağara adamı sıxışdırması
   fullSummary: 5, // tip tərəfindən tələb olunur, diapazonlaşdırma kodu tərəfindən oxunmur
-  // məsafə > 20: xülasələşdirilir (assistent) / ilk sətir saxlanılır (istifadəçi)
+  // məsafə > 20: xülasə edilir (assistent) / ilk sətir saxlanılır (istifadəçi)
 });
 
 // saved = qənaət edilən tokenlərin sayı
 ```
 
-#### Nə vaxt istifadə etməli
+#### Nə zaman istifadə edilməlidir
 
 Proqressiv köhnəlmə `aggressive` rejimi üçün **həmişə aktivdir** — bu,
-`compressAggressive()` funksiyasının 2-ci addımıdır. Ultra rejim onu işə salmır. O,
-xüsusilə aşağıdakılar üçün effektivdir:
+`compressAggressive()` funksiyasının 2-ci addımıdır. Ultra rejimində işə salınmır.
+Xüsusilə aşağıdakılar üçün effektivdir:
 
 - Uzunmüddətli kodlaşdırma sessiyaları
 - Bir neçə gün davam edən söhbətlər
-- Çoxlu alət çağırışı olan agent əsaslı iş axınları
+- Çoxsaylı alət çağırışları olan agent əsaslı iş axınları
 
 ### Mağara Adamı Çıxış Rejimi
 
-Mağara adamı çıxış rejimi modelin özündən yığcam çıxış istəyən **sistem promptu təlimatları**
-əlavə edir — `lite` səviyyəsi tam cümlələri saxlayan qısa cavablar, `full`
-səviyyəsi ondan "ağıllı mağara adamı kimi yığcam cavab verməyi", `ultra` səviyyəsi isə teleqrafik çıxış
-istəyir; təlimatlar yalnız tələb edir, buna zəmanət verə bilməz. Sorğular onları
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) vasitəsilə alır:
-`open-sse/handlers/chatCore.ts` əvvəlcə seçimi geriyə uyğunluq vasitəçisi ilə həll edir
+Mağara adamı çıxış rejimi modelin özündən qısa çıxış verməsini istəyən **sistem promptu
+təlimatları** əlavə edir — `lite` səviyyəsi tam cümlələri saxlayan yığcam cavablar istəyir,
+`full` ondan "ağıllı mağara adamı kimi qısa cavab verməsini", `ultra` isə teleqrafik çıxış
+verməsini istəyir; təlimatlar bunu yalnız tələb edir, ona zəmanət verə bilməz. Sorğular bu
+təlimatları `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`)
+vasitəsilə alır: `open-sse/handlers/chatCore.ts` əvvəlcə seçimi geriyə uyğunluq adaptoru
 (`open-sse/services/compression/outputStyles/backCompat.ts` daxilindəki
-`resolveOutputStyleSelection()`); `outputStyles` boş olduqda, bu vasitəçi aktiv
-`cavemanOutputMode` parametrini `cavemanOutputMode.intensity` intensivliyində
-`terse-prose` çıxış üslubuna uyğunlaşdırır (aşağıdakı Geriyə uyğunluq bölməsinə baxın); boş olmayan `outputStyles`
-seçimi olduğu kimi istifadə edilir və bundan sonra `cavemanOutputMode.enabled` və `intensity`
-heç bir təsir göstərmir, lakin onun `autoClarity` keçidi yenə də tətbiq olunur. `outputMode.ts`
-təlimat mətnlərini (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), məzmunun yan keçmə mexanizmini və
-yeritmə zamanı istifadə edilən yerləşdirmə köməkçisini ehtiva edir; onun öz
-`applyCavemanOutputMode()` yeridicisinin istehsalat mühitində çağırıcısı yoxdur.
+`resolveOutputStyleSelection()`) ilə müəyyənləşdirir; `outputStyles` boş olduqda bu
+adapter aktiv `cavemanOutputMode` parametrini `cavemanOutputMode.intensity`
+intensivliyində `terse-prose` çıxış üslubuna uyğunlaşdırır (aşağıdakı Geriyə uyğunluq
+bölməsinə baxın); boş olmayan `outputStyles` seçimi olduğu kimi istifadə edilir və bundan
+sonra `cavemanOutputMode.enabled` və `intensity` heç bir təsir göstərmir, lakin onun
+`autoClarity` keçidi hələ də tətbiq olunur. `outputMode.ts` təlimat mətnlərini
+(`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), məzmunun yan keçmə mexanizmini və daxil etmənin
+istifadə etdiyi yerləşdirmə köməkçisini ehtiva edir; onun öz `applyCavemanOutputMode()`
+daxiledicisinin istehsal mühitində çağırıcısı yoxdur.
 
 #### Necə işləyir
 
-Bu rejim girişi sıxışdırmır. O, sistem promptuna təlimat bloku əlavə edir
-(aşağıdakı Yeritmənin necə işlədiyi bölməsinə baxın) və sorğu üçün seçilmiş istənilən giriş sıxışdırma rejimi
-daha sonra artıq həmin bloku ehtiva edən gövdə üzərində işləyir. Hər səviyyənin sonunda olan ortaq
-sərhədlər bəndindən əvvəl ingiliscə `full` səviyyəsi belədir:
+Bu rejim girişi sıxmır. O, sistem promptuna təlimat bloku əlavə edir
+(aşağıda İnyeksiyanın necə işlədiyinə baxın) və sorğu üçün seçilmiş istənilən giriş sıxılma rejimi
+daha sonra, artıq bloku daşıyan mətn üzərində yenə işləyir. Hər səviyyənin sonunda olan ortaq
+məhdudiyyətlər bəndindən əvvəl ingiliscə `full` səviyyəsi belədir:
 
-> "Ağıllı mağara adamı kimi yığcam cavab ver. Artiklları (a/an/the), dolğu sözlərini (just/really/basically/actually/simply), nəzakət ifadələrini və tərəddüd bildirən ifadələri çıxar. Natamam cümlələr olar. Qısa sinonimlərdən istifadə et (extensive yox, big; implement yox, fix). Bütün texniki məzmunu, kodu, xətaları, URL-ləri və identifikatorları olduğu kimi saxla."
+> "Ağıllı mağara adamı kimi qısa cavab ver. Artiklləri (a/an/the), doldurucu sözləri (just/really/basically/actually/simply), nəzakət ifadələrini və qeyri-müəyyən ifadələri çıxar. Natamam cümlələr olar. Qısa sinonimlər işlət (extensive yox, big; implement yox, fix). Bütün texniki məzmunu, kodu, xətaları, URL-ləri və identifikatorları dəqiq saxla."
 
 Bu, xüsusilə aşağıdakılar üçün yaxşı işləyir:
 
 - Kod generasiyası (daha yığcam çıxış = daha az token)
 - Sürətli sual-cavab (ətraflı izahlara ehtiyac yoxdur)
-- Toplu emal (ötürmə qabiliyyətini maksimuma çatdırır)
+- Paket emalı (məhsuldarlığı maksimuma çatdırır)
 
 #### Nə vaxt istifadə etməli
 
-Mağara adamı çıxış rejimi **istəyə bağlıdır**. Sıxışdırma aktiv olduqda (`enabled: true`,
-Sıxışdırma Parametrləri səhifəsindəki əsas keçid), onu `cavemanOutputMode.enabled` ilə aktiv edin;
-`intensity` isə `lite`, `full` və ya `ultra` seçir:
+Caveman çıxış rejimi **istəyə bağlıdır**. Sıxılma aktiv olduqda (`enabled: true`, Compression Settings səhifəsindəki əsas keçid
+aktivdir), onu `cavemanOutputMode.enabled` ilə aktivləşdirin; `intensity`
+`lite`, `full` və ya `ultra` səviyyəsini seçir:
 
 ```json
 {
@@ -470,98 +494,99 @@ Sıxışdırma Parametrləri səhifəsindəki əsas keçid), onu `cavemanOutputM
 }
 ```
 
-Sıxışdırma kombinasiyasının **Çıxış Rejimi** keçidi (`outputMode`, səviyyə isə `outputModeIntensity`
-daxilindədir) həmin kombinasiyanın tətbiq olunduğu sorğular üçün eyni keçidi təyin edir və
+Sıxılma kombinasiyasının **Output Mode** keçidi (`outputMode`, səviyyə isə `outputModeIntensity` daxilindədir)
+həmin kombinasiyanın tətbiq olunduğu sorğular üçün eyni keçidi təyin edir və
 `omniroute_set_compression_engine` MCP aləti bunu özünün məntiqi `outputMode`
 arqumenti vasitəsilə yazır. Boş olmayan `outputStyles` seçimi bu keçiddən üstündür. İdarəetmə
-panelində **Yığcam nəsr** çıxış üslubunun aktivləşdirilməsi eyni bloku yeridir (aşağıdakı Çıxış
-Üslubları bölməsinə baxın).
+panelində **Terse prose** çıxış stilinin aktivləşdirilməsi eyni bloku inyeksiya edir (aşağıda Output
+Styles bölməsinə baxın).
 
-### Çıxış Üslubları (kataloq)
+### Çıxış stilləri (kataloq)
 
-Yuxarıdakı mağara adamı çıxış rejimi **köhnə tək üslublu yoldur**. 4-cü mərhələ onu
-birləşdirilə bilən çıxış üslubları kataloquna ümumiləşdirdi:
-`open-sse/services/compression/outputStyles/catalog.ts` daxilindəki `OUTPUT_STYLE_CATALOG`.
-Hər üslub modelin özündən daha az xərc tələb edən çıxış istəyən sistem promptu təlimatıdır;
-üslublar birlikdə aktivləşdirilə bilər və kataloq sırası ilə yeridilir.
+Yuxarıdakı Caveman çıxış rejimi **köhnə tək-stil yoludur**. Phase 4 bunu
+birləşdirilə bilən çıxış stilləri kataloquna ümumiləşdirdi: `open-sse/services/compression/outputStyles/catalog.ts` daxilindəki
+`OUTPUT_STYLE_CATALOG`. Hər stil modelin özündən daha ucuz çıxış istəyən sistem promptu
+təlimatıdır; stillər birlikdə aktivləşdirilə bilər və kataloq sırası ilə inyeksiya edilir.
 
-| Üslub                               | `id`          | Nə edir                                                                                                                                                                                                                                | Təlimat dilləri                                  |
-| ----------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| Yığcam mətn                         | `terse-prose` | Doldurucu sözləri/artiklləri/tərəddüd ifadələrini çıxarır; texniki məzmunu dəqiq saxlayır. Köhnə mağara adamı çıxış rejimi ilə eyni mətndir (istinad edilir, yenidən yazılmır).                                                        | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi    |
-| Daha az kod                         | `less-code`   | YAGNI pillələri: işləyən ən kiçik dəyişiklik, tələb olunmayan abstraksiyalar yoxdur.                                                                                                                                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi    |
-| Atquyruğu (tənbəl senior proqramçı) | `ponytail`    | "Ən yaxşı kod heç vaxt yazılmayan koddur": təkrar istifadə > yenidən yazma, əsas səbəb > simptom, işləyən ən qısa diff.                                                                                                                | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi    |
-| Məndə ADHD var (əvvəlcə əməl)       | `i-have-adhd` | Əvvəlcə əməl (mətndən əvvəl əmr/yol/snippet), nömrələnmiş məhdud addımlar, BİR konkret növbəti addım, giriş/xülasə/yekun ifadələri yoxdur. [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT) əsasında uyğunlaşdırılıb. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi    |
-| Yığcam CJK (文言)                   | `terse-cjk`   | `full`/`ultra` cavabı Klassik Çin dilindədir (文言); `lite` yalnız köməkçi sözlər, nəzakət ifadələri və ya bəzək olmadan qısa cavablar tələb edir.                                                                                     | zh (lokala görə məhdudlaşdırılıb, aşağıya baxın) |
+| Stil                               | `id`            | Nə edir                                                                                                                                                                                                                                                                                            | Təlimat dilləri                               |
+| ---------------------------------- | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Yığcam mətn                        | `terse-prose`   | Doldurucu sözləri/artiklləri/qeyri-müəyyən ifadələri çıxarır; texniki məzmunu dəqiq saxlayır. Köhnə caveman çıxış rejimi ilə eyni mətndir (yenidən yazılmır, ona istinad edilir).                                                                                                                  | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Daha az kod                        | `less-code`     | YAGNI pilləsi: işləyən ən kiçik dəyişiklik, istənilməyən abstraksiyalar yoxdur.                                                                                                                                                                                                                    | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| At quyruğu (tənbəl baş tərtibatçı) | `ponytail`      | "Ən yaxşı kod heç vaxt yazılmayan koddur": təkrar istifadə > yenidən yazma, əsas səbəb > simptom, işləyən ən qısa diff.                                                                                                                                                                            | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Məndə ADHD var (öncə fəaliyyət)    | `i-have-adhd`   | Əvvəl fəaliyyət (mətndən əvvəl əmr/yol/snippet), nömrələnmiş məhdud addımlar, BİR konkret növbəti addım, giriş/xülasə/sonluq yoxdur. [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) layihəsindən uyğunlaşdırılıb (MIT).                                                               | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop UI filtri                 | `antislop-ui`   | Hər vizual üsul məqsəd testindən keçməlidir (iyerarxiya, kimlik, oxunaqlılıq); standart qradientlər/şüşə effekti/parıltı yoxdur, palitra məhduddur, şablon tərtibatlar yoxdur. Hər iki antislop stili işləməyən idarəetmə elementlərinin və uydurma iddiaların olmaması məhdudiyyətini əlavə edir. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Antislop mətn və insan filtri      | `antislop-copy` | Konkret mətn (uzun tire, ümumi CTA-lar, dəbdə olan sözlər, çatbot sonluqları və uydurma faktlar yoxdur), üstəlik insanlara dair qaydalar: WCAG AA kontrastı, görünən fokus, klaviatura ilə əlçatanlıq, boş/yüklənmə/xəta vəziyyətləri, mobil uyğunlaşma.                                           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Yığcam CJK (文言)                  | `terse-cjk`     | `full`/`ultra` cavabları Klassik Çin dilindədir (文言); `lite` yalnız köməkçi sözlər, nəzakət ifadələri və bəzəklər olmadan qısa cavablar istəyir.                                                                                                                                                 | zh (lokalla məhdudlaşdırılıb, aşağıya baxın)  |
 
-Hər üslub üç intensivlik səviyyəsi ilə təqdim olunur — `lite`, `full`, `ultra` — və hər səviyyə
-kod bloklarını, fayl yollarını, əmrləri, xətaları və URL-ləri dəqiq saxlayan ortaq
-məhdudiyyətlər bəndi (`outputMode.ts` daxilində `SHARED_BOUNDARIES`) ilə bitir. `terse-prose` və
+Hər stil üç intensivlik səviyyəsi ilə təqdim olunur — `lite`, `full`, `ultra` — və hər səviyyə
+ortaq məhdudiyyətlər bəndi ilə bitir (`outputMode.ts` daxilindəki `SHARED_BOUNDARIES`); bu bənd
+kod bloklarını, fayl yollarını, əmrləri, xətaları və URL-ləri dəqiq saxlayır. `terse-prose` və
 `terse-cjk` səviyyə mətnləri həmin siyahıya identifikatorları da əlavə edir.
 
-`terse-cjk` iki yerdə `zh` lokalı ilə məhdudlaşdırılıb. Sıxılma Parametrləri səhifəsi
+`terse-cjk` iki yerdə `zh` lokalı ilə məhdudlaşdırılıb. Compression Settings səhifəsi
 onun sətrini yalnız idarəetmə panelinin UI dili Çin dili (`zh-CN` və ya `zh-TW`) olduqda göstərir və
-`applyOutputStyles()` onu yalnız sorğunun müəyyən edilmiş dili (aşağıdakı Dil
-seçimi bölməsinə baxın) `zh` olduqda əlavə edir. Sətrin gizlədilməsi saxlanılmış `terse-cjk` seçimini
-təmizləmir: parametrlər API-si istənilən üslub id-sini qəbul edir və səhifədə digər üslubların
-saxlanılması onu qoruyur. Sorğu zamanı `applyOutputStyles()` dil yoxlaması yeganə lokal
-məhdudiyyətidir.
+`applyOutputStyles()` onu yalnız sorğunun müəyyən edilmiş dili (aşağıda Dil
+seçiminə baxın) `zh` olduqda inyeksiya edir. Sətrin gizlədilməsi yadda saxlanmış `terse-cjk` seçimini silmir:
+parametrlər API-si istənilən stil id-sini qəbul edir və səhifədə digər stillərin yadda saxlanması onu qoruyur. Sorğu
+zamanı `applyOutputStyles()` dil yoxlaması yeganə lokal məhdudiyyətidir.
 
-#### Əlavəetmə necə işləyir
+#### İnyeksiya necə işləyir
 
 `applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) seçimi
-kataloq üzrə müəyyən edir (naməlum id-lər və lokala uyğun gəlməyən üslublar
-silinir, heç vaxt xəta yaranmır; nəticədə heç bir üsluba uyğun gəlməyən seçim gövdəni
-dəyişmədən saxlayır və `no_styles` kimi ötürülür), seçilmiş təlimatları kataloq
-ardıcıllığı ilə birləşdirir,
-məhdudiyyətlər bəndini **bir dəfə** əlavə edir (üstəlik `less-code` və ya `ponytail`
-seçildikdə təhlükəsizlik bəndini, `SAFETY_BOUNDARIES` və ya onun tərcüməsini) və bloku
-vahid idempotentlik markeri (`[OmniRoute Output Styles]`) ilə başlayır; beləliklə, onun
-yenidən tətbiqi heç bir dəyişiklik etmir. Müəyyən edilmiş dil (aşağıdakı Dil seçimi
-bölməsinə baxın) üçün tərcümə olduqda, ingiliscə təlimat əvəzinə lokallaşdırılmış
-təlimat əlavə edilir.
+kataloqla tutuşdurur (naməlum id-lər və lokalı uyğun olmayan üslublar kənarlaşdırılır,
+heç vaxt xəta baş vermir; heç bir üsluba uyğun gəlməyən seçim gövdəni dəyişməz saxlayır
+və `no_styles` kimi ötürülür), seçilmiş təlimatları kataloq sırası ilə birləşdirir,
+sərhədlər bəndini **bir dəfə** əlavə edir (həmçinin `less-code` və ya `ponytail`
+seçildikdə təhlükəsizlik bəndini, `SAFETY_BOUNDARIES` və ya onun tərcüməsini əlavə edir)
+və bloku vahid idempotentlik markeri (`[OmniRoute Output Styles]`) ilə başladır; beləliklə,
+təkrar tətbiq heç bir əməliyyat yaratmır. Müəyyən edilmiş dilin (aşağıdakı Dil seçimi
+bölməsinə baxın) tərcüməsi olduqda ingiliscə təlimat əvəzinə lokallaşdırılmış təlimat
+daxil edilir.
 
-Boş olmayan `messages` massivi olan gövdədə idempotentlik yoxlaması məzmunun
-ötürülməsi yoxlamasından əvvəl işləyir: `[OmniRoute Output Styles]` markeri artıq üst səviyyəli
+Boş olmayan `messages` massivi olan gövdədə idempotentlik yoxlaması məzmuna görə yan
+keçmədən əvvəl icra olunur: `[OmniRoute Output Styles]` markeri artıq yuxarı səviyyəli
 `system` sahəsində (sətir və ya məzmun blokları massivi) yaxud sətir məzmunlu sistem
-mesajında olduqda, gövdə `already_applied` kimi dəyişdirilmədən saxlanılır və heç bir
-açar söz yoxlaması aparılmır. Əks halda məzmunun ötürülməsi yoxlaması
-(`open-sse/services/compression/outputMode.ts` daxilində `shouldBypassCavemanOutputMode()`)
-rolundan asılı olmayaraq son üç mesajın mətnini yoxlayır və həmin mətn təhlükəsizlik,
-geri qaytarılması mümkün olmayan əməl və ya aydınlaşdırma açar sözlərinə, yaxud
-ardıcıllıqdan asılı bir kombinasiya ilə uyğun gəldikdə bütün gediş üçün üslubları
-ötürür: `first`, `then`, `after that`, `before`, `rollback` və ya
-`backup` sözündən sonra 240 simvol daxilində `delete`, `drop`, `migrate`, `deploy` və ya
-`release` gəlməsi. Ötürmə yoxlaması **Auto-Clarity Bypass** keçidi
+mesajında olduqda gövdə `already_applied` kimi dəyişməz saxlanılır və açar söz yoxlaması
+aparılmır. Əks halda məzmuna görə yan keçmə
+(`open-sse/services/compression/outputMode.ts` daxilində
+`shouldBypassCavemanOutputMode()`) rolundan asılı olmayaraq son üç mesajın mətnini
+yoxlayır və həmin mətn təhlükəsizlik, geri qaytarılması mümkün olmayan əməl və ya
+aydınlaşdırma açar sözlərinə, yaxud ardıcıllığa həssas olan bir kombinasiyaya uyğun
+gəldikdə bütün növbə üçün üslubları ötürür: `first`, `then`, `after that`, `before`,
+`rollback` və ya `backup` sözündən sonra 240 simvol daxilində `delete`, `drop`,
+`migrate`, `deploy` və ya `release` gəlməsi. Yan keçmə **Auto-Clarity Bypass** keçidi
 (`cavemanOutputMode.autoClarity`, standart olaraq aktivdir) aktiv olduğu müddətdə işləyir;
 keçidin söndürülməsi açar söz yoxlamasını ötürür.
 
-Ötürmə mexanizmi gedişə icazə verdikdə `placeSystemInstruction()` (eyni fayl)
-heç vaxt yeni `messages[0]` yaratmır və bloku tapdığı ilk uyğun yerə yerləşdirir:
+Yan keçmə növbənin davam etməsinə icazə verdikdə `placeSystemInstruction()` (eyni fayl)
+heç vaxt yeni `messages[0]` yaratmır və bloku aşağıdakılardan ilk tapdığı yerə
+yerləşdirir:
 
 1. Sətir məzmunlu başlanğıc sistem mesajı: blok onun mətnindən sonra əlavə edilir.
-2. Üst səviyyəli `system` sahəsi: blok sətirin mətnindən sonra əlavə edilir və ya
+2. Yuxarı səviyyəli `system` sahəsi: blok sətirin mətnindən sonra əlavə edilir və ya
    məzmun blokları massivinə yeni mətn bloku kimi daxil edilir.
-3. Sətir məzmunlu ilk sonrakı sistem mesajı: blok onun mətnindən sonra əlavə edilir.
-4. Yuxarıdakılardan heç biri: blok `messages` massivinin sonunda yeni sistem mesajına yerləşdirilir.
+3. Daha sonra gələn ilk sətir məzmunlu sistem mesajı: blok onun mətnindən sonra əlavə
+   edilir.
+4. Yuxarıdakılardan heç biri: blok `messages` massivinin sonunda yeni sistem mesajına
+   yerləşdirilir.
 
-`messages` massivi olmayan (və ya boş massivli) gövdədə məzmunun ötürülməsi yoxlaması
-aparılmır və üst səviyyəli `system` sahəsi nəzərə alınmır. Blok sətir tipli
-`instructions` sahəsinin mətnindən sonra əlavə edilir; həmin sahə artıq
-`[OmniRoute Output Styles]` markerini ehtiva edirsə, gövdə `already_applied` kimi
-dəyişdirilmədən saxlanılır. Gövdədə sətir tipli `instructions` sahəsi olmadıqda, lakin
-`input` (sətir və ya massiv) olduqda, blok `instructions` olur və həmin sahədəki
-istənilən qeyri-sətir dəyəri əvəz edir. Nə sətir tipli `instructions` sahəsi, nə də
-sətir və ya massiv tipli `input` olan gövdə dəyişdirilmədən saxlanılır və `no_messages`
-kimi ötürülür.
+`messages` massivi olmayan (və ya massivi boş olan) gövdədə məzmuna görə yan keçmə
+işləmir və yuxarı səviyyəli `system` sahəsi nəzərə alınmır. Blok sətir tipli
+`instructions` sahəsinin mətnindən sonra əlavə edilir; həmin sahədə artıq
+`[OmniRoute Output Styles]` markeri varsa, gövdə `already_applied` kimi dəyişməz
+saxlanılır. Gövdədə sətir tipli `instructions` sahəsi olmadıqda, lakin `input` (sətir və
+ya massiv) olduqda blok `instructions` dəyərinə çevrilərək bu sahənin əvvəlki qeyri-sətir
+dəyərini əvəz edir. Nə sətir tipli `instructions` sahəsi, nə də sətir və ya massiv tipli
+`input` olan gövdə dəyişməz saxlanılır və `no_messages` kimi ötürülür.
 
-#### Necə aktivləşdirmək olar
+#### Necə aktivləşdirməli
 
 İdarəetmə panelində: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), Output styles bölməsində: hər üslub üçün aktiv/deaktiv
-keçidi və səviyyə seçicisi olan bir sətir mövcuddur. Sıxılmanın özü aktiv olduqda
-(səhifənin əsas keçidi, `enabled`) üslublar əlavə edilir. **Auto-Clarity Bypass** keçidi
-**Caveman** səhifəsində (`/dashboard/context/caveman`), onun **Output Mode** kartındadır.
-Proqram səviyyəsində sıxılma konfiqurasiyası seçimi belə yadda saxlayır:
+(`/dashboard/context/settings`), Output styles bölməsi: hər üslub üçün aktiv/deaktiv
+keçidi və səviyyə seçicisi olan bir sətir. Üslublar sıxışdırmanın özü (səhifənin əsas
+`enabled` keçidi) aktiv olduqda daxil edilir. **Auto-Clarity Bypass** keçidi **Caveman**
+səhifəsində (`/dashboard/context/caveman`), onun **Output Mode** kartındadır. Proqram
+vasitəsilə sıxışdırma konfiqurasiyası seçimi belə saxlayır:
 
 ```json
 {
@@ -574,148 +599,139 @@ Proqram səviyyəsində sıxılma konfiqurasiyası seçimi belə yadda saxlayır
 
 Geriyə uyğunluq: `outputStyles` boş olduğu müddətdə köhnə
 `cavemanOutputMode.enabled` parametri `cavemanOutputMode.intensity` səviyyəsində
-`terse-prose` üslubuna uyğunlaşdırılır. Bundan sonra blok `[OmniRoute Output Styles]`
-markeri ilə başlayır; köhnə `applyCavemanOutputMode()` injektoru isə
-`[OmniRoute Caveman Output Mode]` yazısını əlavə edirdi. Marker altında mətn en, pt-BR,
-es, de, fr, it, ru, id və vi dillərində köhnə əlavə edilən mətnlə eynidir; ja və zh
-dillərində sərhədlər bəndindən əvvəl bir əlavə boşluq var. `terse-prose` pt-BR, es, de,
-fr, it, ru, zh, ja, id və vi dillərinə tərcümə olunur, buna görə müəyyən edilmiş dili
-`hu` olan sorğu, köhnə injektorun macar dilindəki mətndən istifadə etdiyi yerdə ingilis
-dilindəki mətni alır.
+`terse-prose` ilə əlaqələndirilir. Bundan sonra blok `[OmniRoute Output Styles]` markeri
+ilə başlayır; köhnə `applyCavemanOutputMode()` inyektoru isə
+`[OmniRoute Caveman Output Mode]` yazırdı. Markerin altında mətn en, pt-BR, es, de, fr,
+it, ru, id və vi dillərində köhnə inyeksiya ilə eynidir; ja və zh dillərində sərhədlər
+bəndindən əvvəl bir əlavə boşluq olur. `terse-prose` pt-BR, es, de, fr, it, ru, zh, ja,
+id və vi dillərinə tərcümə olunur; buna görə müəyyən edilmiş dili `hu` olan sorğuya köhnə
+inyektorun macar dilindəki mətnindən fərqli olaraq ingiliscə mətn verilir.
 
-Çıxış üslubu dilinin seçilməsi (`outputStyles/apply.ts` daxilində
-`resolveOutputStyleLanguage()`): `languageConfig.enabled` aktiv olduqda, `autoDetect`
-sorğunun `messages` massivində mətni olan ən son istifadəçi mesajını (sətir məzmunu və
-ya məzmun hissələrinin `text` sahəsi) nümunə kimi götürür və Caveman mühərrikinin
-detektorunu (`detectCompressionLanguage()`) onun üzərində işlədir. Mətn kana işarələri
-olmadan Han simvolları ehtiva edirsə, detektor `zh` qaytarır; əks halda `it`, `pt-BR`,
-`es`, `de`, `fr`, `ru`, `ja`, `hu` və `id` arasında ən çox ipucu uyğunluğu olan dili,
-heç bir uyğunluq olmadıqda isə `en` qaytarır — təsnif edə bilmədiyi mətn üçün
-`defaultLanguage` deyil, ingilis dili seçilir və üslublar `vi` mətnini ehtiva etsə də,
-`vi` heç vaxt aşkarlanmır. Responses API gövdəsi dialoq növbələrini `input` daxilində
-saxlayır və bu hissə nümunə kimi götürülmür, buna görə əvvəlcə `defaultLanguage`, sonra
-isə ingilis dili seçilir. `messages` daxilində heç bir istifadəçi mesajında mətn
-olmadıqda və ya `autoDetect` deaktiv olduqda, əvvəlcə `defaultLanguage`, sonra isə
-ingilis dili tətbiq edilir. `languageConfig.enabled` deaktiv olduqda dil ingilis dili
-olur — sorğuya sıxılma kombinasiyası tətbiq edilmədiyi halda (sorğunun marşrutlaşdırma
-kombinasiyasına təyin edilmiş kombinasiya və ya daxili yığılmış konveyer üçün chatCore-un
-geri qayıtdığı standart sıxılma kombinasiyası): kombinasiyanın tətbiqi həmin sorğu üçün
-`languageConfig.enabled` parametrini aktivləşdirir və `defaultLanguage` parametrini
-kombinasiyanın dil paketlərinə əsasən təyin edir (saxlanmış dəyər kombinasiyanın
+Çıxış üslubunun dil seçimi (`outputStyles/apply.ts` daxilində
+`resolveOutputStyleLanguage()`): `languageConfig.enabled` aktiv olduqda `autoDetect`
+sorğunun `messages` massivində mətni olan ən son istifadəçi mesajından nümunə götürür
+(sətir məzmun və ya onun məzmun hissələrinin `text` dəyəri) və Caveman mühərrikinin
+detektorunu (`detectCompressionLanguage()`) onun üzərində işlədir. Mətn kana olmadan Han
+simvolları ehtiva etdikdə detektor `zh` qaytarır; əks halda `it`, `pt-BR`, `es`, `de`,
+`fr`, `ru`, `ja`, `hu` və `id` arasından ən çox işarə uyğunluğu olan dili, heç bir uyğunluq
+olmadıqda isə `en` qaytarır — təsnif edə bilmədiyi mətn üçün `defaultLanguage` deyil,
+həmişə ingilis dili seçilir və üslublarda `vi` mətni olsa da `vi` heç vaxt aşkar edilmir.
+Responses API gövdəsi növbələri `input` daxilində saxlayır və bu sahədən nümunə
+götürülmür; buna görə əvvəlcə `defaultLanguage`, sonra isə ingilis dili seçilir.
+`messages` daxilində mətni olan istifadəçi mesajı olmadıqda və ya `autoDetect` deaktiv
+olduqda əvvəlcə `defaultLanguage`, sonra ingilis dili tətbiq edilir.
+`languageConfig.enabled` deaktiv olduqda dil ingilis dilidir — sorğuya sıxışdırma
+kombinasiyası tətbiq edilmədiyi halda (sorğunun marşrutlaşdırma kombinasiyasına təyin
+edilmiş kombinasiya və ya daxili yığılmış konveyer üçün chatCore-un geri qayıtdığı
+standart sıxışdırma kombinasiyası): kombinasiyanın tətbiqi həmin sorğu üçün
+`languageConfig.enabled` parametrini aktivləşdirir və `defaultLanguage` dəyərini
+kombinasiyanın dil paketlərindən müəyyən edir (saxlanmış dəyər kombinasiyanın
 paketlərindən biridirsə həmin dəyər, əks halda standart olaraq `en` olan kombinasiyanın
-ilk paketi), saxlanmış `autoDetect` parametri isə (standart olaraq aktivdir) yenə də
-tətbiq olunur. Caveman giriş mühərriki qayda paketi dilini fərqli şəkildə seçir — hər
-mətn hissəsi üçün ayrıca və avtomatik aşkarlama deaktiv olduqda `enabledPacks` ilə
-məhdudlaşdırılaraq.
+ilk paketi), bu zaman saxlanmış `autoDetect` dəyəri (standart olaraq aktivdir) yenə də
+tətbiq olunur. Caveman giriş mühərriki qayda paketinin dilini fərqli şəkildə — hər mətn
+hissəsi üzrə və avtomatik aşkarlama deaktiv olduqda `enabledPacks` əsasında məhdudlaşdıraraq
+seçir.
 
-Üslub × dil matrisi
-`tests/unit/compression/output-styles-i18n-matrix.test.ts` tərəfindən sabitlənir:
-kataloqdakı hər üslubun testin `BASELINE_LANGUAGES` siyahısında qeydi olmalıdır;
-lokalla məhdudlaşdırılmayan üslub pt-BR tərcüməsi ilə təqdim edilməlidir (lokalla
-məhdudlaşdırılan `terse-cjk` bu qaydadan azaddır), yalnız heç bir tərcüməsi olmayan
-üslubları saxlaya bilən `KNOWN_ENGLISH_ONLY` siyahısında olmadığı təqdirdə — siyahıya
-daxil edilmiş üslubun hər hansı tərcüməsi varsa, test uğursuz olur; həmçinin üslub
-`BASELINE_LANGUAGES` qeydində göstərilən dillərdən birini itirdikdə test uğursuz olur.
-Üslub əlavə etmək üçün
-[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style) sənədinə
-baxın.
+Stil × dil matrisi
+`tests/unit/compression/output-styles-i18n-matrix.test.ts` tərəfindən sabitlənir: hər bir kataloq stilinin testdəki `BASELINE_LANGUAGES` daxilində qeydi olmalıdır; lokal ilə məhdudlaşdırılmayan stil pt-BR tərcüməsi ilə təqdim edilməlidir (lokal ilə məhdudlaşdırılan `terse-cjk` bu qaydadan azaddır), yalnız `KNOWN_ENGLISH_ONLY` siyahısında olduğu hallar istisnadır; bu siyahıda yalnız heç bir tərcüməsi olmayan stillər ola bilər — siyahıya daxil edilmiş stilin hər hansı tərcüməsi varsa, test uğursuz olur; həmçinin stil `BASELINE_LANGUAGES` qeydində göstərilən dillərdən birini itirdikdə test uğursuz olur. Stil əlavə etmək üçün
+[EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style) sənədinə baxın.
 
 ### Alət Nəticəsinin Sıxılması
 
-`open-sse/services/compression/toolResultCompressor.ts` daxilindəki
-`compressToolResult()` alət nəticəsi mətnini **5 strategiya** ilə sıxır. O, strategiyaları
-bu ardıcıllıqla sınayır və yoxlaması məzmuna uyğun gələn ilk aktiv strategiya nəticəni
-müəyyən edir:
+`open-sse/services/compression/toolResultCompressor.ts` faylındakı `compressToolResult()`
+alət nəticəsinin mətnini **5 strategiya** ilə sıxır. O, bunları aşağıdakı ardıcıllıqla
+sınayır və yoxlaması məzmuna uyğun gələn ilk aktiv strategiya nəticəni müəyyən edir:
 
-1. **`fileContent`**: 3 və ya daha çox sətirdən ibarət məzmun; bu sətirlərdən ən azı biri başlanğıcdakı
-   girintiyə məhəl qoymadan `import `, `export `, `function `, `class `,
-   `const `, `let `, `var ` və ya `return ` ilə (açar söz və ardınca boşluq), yaxud `(`
-   və ya ` (` ilə davam edən `if`, `for` və ya `while` ilə başlayırsa, ixtisar edilmiş
-   orta hissə işarələnməklə ilk 20 və son 5 sətir saxlanılır.
+1. **`fileContent`**: 3 və ya daha çox sətirdən ibarət olan və aparıcı girintilər nəzərə
+   alınmadıqda ən azı bir sətri `import `, `export `, `function `, `class `,
+   `const `, `let `, `var ` və ya `return ` ilə (açar söz və ardınca boşluq), yaxud
+   `(` və ya ` (` ilə davam edən `if`, `for` və ya `while` ilə başlayan məzmunun ilk
+   20 və son 5 sətrini saxlayır, ixtisar edilmiş orta hissəni isə işarələyir.
 2. **`grepSearch`**: `<path>:<digits>:` formasında ən azı bir sətri olan məzmunda,
-   ilk iki nöqtədən əvvəlki mətndə boşluq yoxdursa, yalnız həmin sətirlər, maksimum
-   30 sətir saxlanılır, ardınca əlavə uyğunluqların sayı və uyğunluq tapılan faylların
-   siyahısı verilir; bütün digər sətirlər silinir. Strategiyanı işə salmaq üçün belə
+   ilk iki nöqtədən əvvəlki mətndə boşluq yoxdursa, yalnız belə sətirləri saxlayır;
+   maksimum 30 sətirdən sonra əlavə uyğunluqların sayı və uyğunluq tapılan faylların
+   siyahısı verilir; bütün digər sətirlər silinir. Strategiyanın işə düşməsi üçün belə
    bir sətir kifayətdir, buna görə `12:30:45` kimi vaxt möhürü ilə başlayan jurnal
-   sətri də uyğun sayılır.
-3. **`shellOutput`**: ANSI CSI ardıcıllığı (`ESC[`, sonra rəqəmlər və ya nöqtəli
-   vergüllər, ardınca isə rəng kodlarında olduğu kimi hərf) və ya mətnin hər hansı
-   yerində ardınca boşluq gələn `$` ehtiva edən çıxışdan həmin ardıcıllıqlar silinir
-   (digər qaçış ardıcıllıqları, məsələn `ESC[?25l` və ya OSC pəncərə başlığı ardıcıllığı
+   sətri də uyğunluq sayılır.
+3. **`shellOutput`**: ANSI CSI ardıcıllığı (`ESC[`, ardınca rəqəmlər və ya nöqtəli
+   vergüllər, sonra isə rəng kodlarında olduğu kimi hərf) və ya mətnin istənilən yerində
+   ardınca boşluq gələn `$` ehtiva edən çıxışda həmin ardıcıllıqlar silinir (digər
+   escape ardıcıllıqları, məsələn `ESC[?25l` və ya OSC pəncərə başlığı ardıcıllığı
    saxlanılır) və ardıcıl təkrarlanan sətirlər birləşdirilməklə son 50 sətir saxlanılır.
-   Bu yoxlama `json` və `errorMessage` strategiyalarından əvvəl icra edildiyinə görə
-   belə bir `$` ehtiva edən JSON və ya xəta çıxışı `shellOutput` aktiv olduqda onlara
-   heç vaxt çatmır.
-4. **`json`**: isteğe bağlı boşluqdan sonra `{` və ya `[` ilə başlayan, sintaktik
-   təhlildən keçən və 2.000 simvoldan uzun JSON faydalı yükü xülasələşdirilir: 7-dən
-   çox elementi olan massivdə ilk 5 və son 2 element, eləcə də elementlərin ümumi sayı
-   saxlanılır; obyektdə isə ilk 20 açar saxlanılır, hər bir iç-içə obyekt və ya massiv
-   dəyəri `{…N keys}` yer tutucusu ilə əvəzlənir (massiv üçün N onun uzunluğudur) və
+   Bu yoxlama `json` və `errorMessage` strategiyalarından əvvəl icra edildiyinə görə,
+   belə bir `$` ehtiva edən JSON və ya xəta çıxışı `shellOutput` aktiv olduqda heç vaxt
+   onlara çatmır.
+4. **`json`**: istəyə bağlı boşluqlardan sonra `{` və ya `[` ilə başlayan, düzgün
+   təhlil olunan və 2.000 simvoldan uzun JSON faydalı yükü xülasə edilir: 7-dən çox
+   elementli massivdə ilk 5 və son 2 element, həmçinin elementlərin ümumi sayı
+   saxlanılır; obyektdə isə ilk 20 açar saxlanılır, hər daxili obyekt və ya massiv
+   dəyəri `{…N keys}` yer tutucusu ilə əvəz olunur (massiv üçün N onun uzunluğudur) və
    ilk 20 açardan sonra silinən açarların sayını göstərən `_remaining_<N>_keys`
-   işarələyicisi əlavə olunur. Skalyar dəyərlər bütövlükdə köçürülür, buna görə iç-içə
-   dəyərləri olmayan və 20 və ya daha az açarı olan obyekt sadəcə yenidən girintilənir —
-   minifikasiya edilmiş obyektin simvol sayı artır və o, dəyişməz saxlanılır.
-5. **`errorMessage`**: hər hansı yerində və hərf registrindən asılı olmayaraq `error:`,
-   `error ` (`no error found` nümunəsində olduğu kimi sözdən sonra boşluq), `[error]`,
-   `exception:`, `exception `, `[exception]` və ya `traceback` olan çıxışda ilk sətir,
-   sonrakı 10 sətir və son 3 sətir saxlanılır, onların arasındakı sətirlərin yerinə
-   `… [N frames elided] …` işarələyicisi qoyulur. İşarələyici yalnız ilk sətirdən sonra
-   13-dən çox sətir olduqda görünür, buna görə 14 və ya daha az sətirlik xəta çıxışı
+   işarəsi əlavə edilir. Skalyar dəyərlər bütövlükdə köçürülür, buna görə daxili
+   dəyərləri olmayan və 20 və ya daha az açara malik obyekt yalnız yenidən girintilənir
+   — minifikasiya edilmiş obyekt uzanır və dəyişmədən saxlanılır.
+5. **`errorMessage`**: istənilən yerdə və böyük-kiçik hərfdən asılı olmayaraq `error:`,
+   `error ` (`no error found` nümunəsində olduğu kimi ardınca boşluq gələn söz),
+   `[error]`, `exception:`, `exception `, `[exception]` və ya `traceback` ehtiva edən
+   çıxış ilk sətri, sonrakı 10 sətri və son 3 sətri saxlayır, aradakı sətirləri isə
+   `… [N frames elided] …` işarəsi ilə əvəz edir. İşarə yalnız ilk sətirdən sonra
+   13-dən çox sətir olduqda görünür, buna görə 14 və ya daha az sətirli xəta çıxışı
    qısaldılmır (12 və ya 13 sətir olduqda son 3 sətir artıq saxlanılmış sətirləri
    təkrarlayır).
 
-Strategiya uyğun gəldikdən sonra, heç bir qənaət təmin etməsə belə, sonrakı strategiyalar
-sınaqdan keçirilmir. Uyğun gələn strategiya təxmini tokenlərə (uzunluq ÷ 4, yuxarıya
-yuvarlaqlaşdırılır) qənaət etmədikdə — məsələn, 25 və ya daha az sətirlik koda bənzər
-fayl, yaxud 2.000 simvoldan uzun, 7 və ya daha az elementi olan JSON massivi —
-aqressiv mühərrik ilkin alət nəticəsini saxlayır: hər iki çağıran (`compressAggressive()`
-və `compressAnthropicToolResultBlock()`) `saved` 0 və ya daha az olduqda ilkin nəticəni
-saxlayır, `compressToolResult()` özü isə yenə də həmin strategiyanın çıxışını qaytarır.
-Alət nəticəsi mərhələsi son qərar deyil: mühərrikin ehtiyat xülasələşdiricisi 8.192
-simvoldan uzun `tool` və ya `function` mesajını (`maxTokensPerMessage`, 2.048, 4-ə
-vurulur) yenə də qısalda bilər.
+Strategiya uyğun gəldikdən sonra, hətta heç bir qənaət təmin etməsə belə, sonrakı
+strategiyalar sınanmır. Uyğun gələn strategiya təxmini tokenlərə (uzunluq ÷ 4,
+yuxarıya yuvarlaqlaşdırılmaqla) qənaət etmədikdə — məsələn, 25 və ya daha az sətirli
+koda bənzər fayl, yaxud 2.000 simvoldan uzun və 7 və ya daha az elementli JSON massivi
+olduqda — aqressiv mühərrik ilkin alət nəticəsini saxlayır: hər iki çağıran
+(`compressAggressive()` və `compressAnthropicToolResultBlock()`) `saved` dəyəri 0 və
+ya daha az olduqda ilkin nəticəni saxlayır, `compressToolResult()` özü isə yenə də
+həmin strategiyanın çıxışını qaytarır. Alət nəticəsi addımı son qərar deyil: mühərrikin
+ehtiyat xülasələyicisi 8.192 simvoldan uzun `tool` və ya `function` mesajını yenə də
+qısalda bilər (`maxTokensPerMessage`, 2.048, 4-ə vurulmaqla).
 
-#### Nə vaxt istifadə edilməlidir
+#### Nə zaman istifadə etməli
 
-Alət nəticəsinin sıxılması aqressiv mühərrikin 1-ci mərhələsidir (`compressAggressive()`,
-`open-sse/services/compression/aggressive.ts`), buna görə o, Aqressiv rejimdə və
-yığılmış konveyerin `aggressive` mərhələsində işləyir. O, OpenAI formatlı `tool` və
-`function` mesajlarını, eləcə də Anthropic `tool_result` bloklarının daxilindəki mətni
-sıxır. Hər strategiyanın `aggressive.toolStrategies` altında ayrıca keçidi var və
-hamısı standart olaraq aktivdir. İdarə panelində sıxılma aktiv və standart rejim
-Aqressiv olduqda keçidlər Caveman səhifəsinin **Qabaqcıl** görünüşündə yerləşir.
+Alət nəticəsinin sıxılması aqressiv mühərrikin 1-ci addımıdır
+(`open-sse/services/compression/aggressive.ts` faylındakı `compressAggressive()`), buna
+görə o, Aggressive rejimində və yığılmış konveyerin `aggressive` addımında işləyir.
+O, OpenAI formatlı `tool` və `function` mesajlarını, həmçinin Anthropic `tool_result`
+bloklarının daxilindəki mətni sıxır. Hər strategiyanın `aggressive.toolStrategies`
+altında öz keçidi var və onların hamısı standart olaraq aktivdir. İdarəetmə panelində,
+sıxılma aktiv və standart rejim Aggressive olduqda, keçidlər Caveman səhifəsinin
+**Advanced** görünüşündə yerləşir.
 
-### Yığılmış konveyer
+### Yığılmış Konveyer
 
-Yığılmış rejim **bir neçə mühərriki ardıcıllıqla** işlədir — adətən əvvəlcə RTK
-(alət çıxışında 60-90% qənaət), sonra isə qalan mətndə Caveman (girişdə təxminən 46%
-qənaət). Birləşdirildikdə bu, **78-95% uyğun diapazon** deməkdir (yuxarıdakı Yuxarı
-Axın Qənaətləri Riyaziyyatına baxın): `1 - (1 - 0.60..0.90) × (1 - 0.46)` orta hesabla
-≈89% təşkil edir.
+Yığılmış rejim **bir neçə mühərriki ardıcıllıqla** işə salır — adətən əvvəlcə RTK
+(alət çıxışında 60-90% qənaət), sonra isə qalan mətn üzərində Caveman (~46% giriş
+qənaəti). Birləşdirildikdə bu, **78-95% uyğun diapazon** deməkdir (yuxarıdakı Upstream
+Savings Math bölməsinə baxın): `1 - (1 - 0.60..0.90) × (1 - 0.46)` orta hesabla ≈89%
+təşkil edir.
 
 #### Necə işləyir
 
 ```
 Giriş (1000 token)
   → RTK (əmri nəzərə alan filtr) → 200 token
-    → Caveman (doldurucu mətnin silinməsi) → 108 token
+    → Caveman (artıq mətnin silinməsi) → 108 token
   → Çıxış (108 token, ~89% qənaət)
 ```
 
-#### Nə vaxt istifadə edilməlidir
+#### Nə zaman istifadə etməli
 
 Yığılmış rejimi aşağıdakı hallarda istifadə edin:
 
-- Alətlərdən intensiv istifadə edilən iş axınları (agent əsaslı kodlaşdırma, araşdırma)
-- Xərclərə həssas toplu emal
-- Maksimum token qənaətinə ehtiyac olduqda
+- Alətlərdən intensiv istifadə edən iş axınları (agent əsaslı kodlaşdırma, araşdırma)
+- Xərclərə həssas paket emalı
+- Maksimum token qənaətinə ehtiyacınız olduqda
 
 Yığılmış konveyerlər qlobal `stackedPipeline` sıxılma parametri vasitəsilə və ya
 marşrutlaşdırma kombinasiyasına təyin edilmiş adlandırılmış sıxılma kombinasiyası
-vasitəsilə konfiqurasiya edilir (yuxarıdakı Kombinasiya üzrə Yenidən Müəyyənləşdirməyə
-baxın) — avtomatik kombinasiya `modePack` sahəsi vasitəsilə deyil (həmin sahə yalnız
-avtomatik kombinasiya üçün model seçiminin çəkilərini dəyişir və `stacked` etibarlı
-paket adı deyil).
+vasitəsilə konfiqurasiya olunur (yuxarıdakı Per-Combo Override bölməsinə baxın) —
+avtomatik kombinasiyanın `modePack` sahəsi vasitəsilə deyil (həmin sahə yalnız avtomatik
+kombinasiyanın model seçimi çəkilərini yenidən tənzimləyir və `stacked` etibarlı paket
+adı deyil).
 
 ---
 

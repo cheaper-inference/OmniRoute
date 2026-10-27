@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 # Cria uma worktree isolada seguindo o protocolo obrigatório do AGENTS.md
 # (Git Workflow → "Worktree isolation" / Hard Rule #19), incluindo os dois
 # passos que são fáceis de esquecer e falham em silêncio:
@@ -12,13 +12,25 @@
 #      commits com identidade trocada passaram pelo gate entre 29/08 e 02/09
 #      (ver .mailmap e scripts/check/check-git-identity.sh).
 #
+# Concorrência: várias sessões criam worktrees ao mesmo tempo no mesmo .git.
+# Sem exclusão mútua, invocações paralelas disputam .git/config ("could not lock
+# config file", exit 255) depois que `git branch` já rodou, deixando a branch sem
+# worktree (campanha 2026-10: 3 de 6 falharam). Por isso o script:
+#   - serializa as invocações com um lock em <git-common-dir>/omniroute-new-worktree.lock
+#     (flock; fallback por mkdir quando flock não existe), esperando até
+#     NEW_WORKTREE_LOCK_WAIT segundos (padrão 600) com aviso visível;
+#   - se `git worktree add` falhar depois de criar a branch, remove a branch
+#     (só a que ESTA execução criou) e avisa — repetir o comando basta.
+#
 # Uso:  scripts/dev/new-worktree.sh <branch> [base-branch]
 # Ex.:  scripts/dev/new-worktree.sh fix/12345-algo release/v3.8.51
+# Env:  NEW_WORKTREE_LOCK_WAIT  segundos de espera pelo lock (padrão 600)
+#       NEW_WORKTREE_NO_FLOCK   força o fallback por mkdir (usado nos testes)
 
-set -e
+set -euo pipefail
 
-BRANCH="$1"
-BASE="$2"
+BRANCH="${1:-}"
+BASE="${2:-}"
 
 if [ -z "$BRANCH" ]; then
   echo "uso: scripts/dev/new-worktree.sh <branch> [base-branch]" >&2
@@ -28,8 +40,50 @@ fi
 
 # O checkout PRINCIPAL, mesmo quando este script roda de dentro de outra worktree:
 # `--show-toplevel` devolveria a worktree atual, e a nova nasceria aninhada nela.
-MAIN=$(dirname "$(git rev-parse --path-format=absolute --git-common-dir)")
+COMMON_DIR=$(git rev-parse --path-format=absolute --git-common-dir)
+MAIN=$(dirname "$COMMON_DIR")
 cd "$MAIN"
+
+# ---- exclusão mútua entre invocações paralelas ------------------------------
+LOCK="$COMMON_DIR/omniroute-new-worktree.lock"
+LOCK_WAIT="${NEW_WORKTREE_LOCK_WAIT:-600}"
+MKDIR_LOCK=""
+
+release_lock() {
+  if [ -n "$MKDIR_LOCK" ]; then
+    rmdir "$MKDIR_LOCK" 2>/dev/null || true
+  fi
+}
+trap release_lock EXIT
+
+acquire_lock() {
+  if [ -z "${NEW_WORKTREE_NO_FLOCK:-}" ] && command -v flock >/dev/null 2>&1; then
+    exec 9>"$LOCK"
+    if ! flock -n 9; then
+      echo "another new-worktree.sh is running — waiting (lock $LOCK, up to ${LOCK_WAIT}s)" >&2
+      flock -w "$LOCK_WAIT" 9 || {
+        echo "lock not released in ${LOCK_WAIT}s: $LOCK" >&2
+        exit 1
+      }
+    fi
+    return 0
+  fi
+  # Fallback sem flock: mkdir é atômico em qualquer sistema de arquivos POSIX.
+  local dir="$LOCK.d" waited=0
+  until mkdir "$dir" 2>/dev/null; do
+    if [ "$waited" -eq 0 ]; then
+      echo "another new-worktree.sh is running — waiting (lock $dir, up to ${LOCK_WAIT}s)" >&2
+    fi
+    if [ "$waited" -ge "$LOCK_WAIT" ]; then
+      echo "lock not released in ${LOCK_WAIT}s: $dir" >&2
+      exit 1
+    fi
+    sleep 1
+    waited=$((waited + 1))
+  done
+  MKDIR_LOCK="$dir"
+}
+acquire_lock
 
 # Sem base explícita, usa a release ativa (maior release/* por semver) — nunca
 # `main` e nunca "a branch em que eu estou", conforme a Hard Rule #19.
@@ -44,7 +98,37 @@ DIR=".claude/worktrees/${BRANCH##*/}"
 [ -e "$DIR" ] && { echo "já existe: $DIR" >&2; exit 1; }
 
 git fetch origin "$BASE" --quiet
+
+# ---- criação com rollback da branch ----------------------------------------
+# `git worktree add -b` cria a branch ANTES da worktree; se a worktree falhar, a
+# branch sobra e o próximo `-b` morre com "already exists". Só removemos a branch
+# que esta execução criou, e só enquanto nenhuma worktree a tiver em uso.
+BRANCH_PREEXISTED=0
+git show-ref --verify --quiet "refs/heads/$BRANCH" && BRANCH_PREEXISTED=1
+
+rollback_branch() {
+  [ "$BRANCH_PREEXISTED" -eq 0 ] || return 0
+  git show-ref --verify --quiet "refs/heads/$BRANCH" || return 0
+  git worktree prune
+  if git worktree list --porcelain | grep -qx "branch refs/heads/$BRANCH"; then
+    return 0
+  fi
+  if git branch -D "$BRANCH" >/dev/null 2>&1; then
+    echo "rollback: branch $BRANCH removida (a worktree não chegou a existir) — basta repetir o comando" >&2
+  else
+    echo "rollback: não consegui remover a branch $BRANCH; remova com 'git branch -D $BRANCH' antes de repetir" >&2
+  fi
+}
+
+set +e
 git worktree add "$DIR" -b "$BRANCH" "origin/$BASE"
+ADD_RC=$?
+set -e
+if [ "$ADD_RC" -ne 0 ]; then
+  echo "git worktree add falhou (rc=$ADD_RC)" >&2
+  rollback_branch
+  exit "$ADD_RC"
+fi
 
 # `.husky/_` PRIMEIRO: é minúsculo e é o que decide se os gates locais rodam.
 # Copiar node_modules antes seria arriscar abortar (set -e) numa árvore de ~10 GB

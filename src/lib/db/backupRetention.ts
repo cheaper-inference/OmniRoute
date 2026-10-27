@@ -295,11 +295,14 @@ function removeEmptyPortableDirectory(backupDir: string, directory?: string): vo
 /**
  * Delete backup families beyond `maxFiles` (newest kept), older than `retentionDays`
  * (0 disables the age rule), or orphaned (sidecars whose primary is already gone).
+ * Families in `exemptBases` skip the age rule only; `maxFiles` and orphan rules
+ * still apply to them.
  */
 export function pruneBackupDirectory(options: {
   backupDir: string;
   maxFiles: number;
   retentionDays: number;
+  exemptBases?: Set<string>;
 }): PruneResult {
   const { backupDir } = options;
   const maxFiles = Math.max(1, options.maxFiles);
@@ -327,7 +330,8 @@ export function pruneBackupDirectory(options: {
 
   for (const family of families) {
     const isOverflowPrimary = family.hasPrimary && !keepPrimaryBases.has(family.base);
-    const isExpired = retentionDays > 0 && family.latestMtimeMs < cutoffMs;
+    const isExempt = options.exemptBases?.has(family.base) ?? false;
+    const isExpired = retentionDays > 0 && !isExempt && family.latestMtimeMs < cutoffMs;
     const isOrphan = !family.hasPrimary;
     if (!isOverflowPrimary && !isExpired && !isOrphan) continue;
 

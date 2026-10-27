@@ -140,15 +140,15 @@ omniroute providers validate
 
 ### 1) Qabbad il-Fornituri u Oħloq Ċavetta API
 
-1. Iftaħ id-Dashboard → `Providers` u qabbad mill-inqas fornitur wieħed (OAuth jew ċavetta API).
-2. Iftaħ id-Dashboard → `Endpoints` u oħloq ċavetta API.
-3. (Mhux obbligatorju) Iftaħ id-Dashboard → `Combos` u ssettja l-katina ta’ riżerva tiegħek.
+1. Iftaħ Dashboard → `Providers` u qabbad mill-inqas fornitur wieħed (OAuth jew ċavetta API).
+2. Iftaħ Dashboard → `Endpoints` u oħloq ċavetta API.
+3. (Fakultattiv) Iftaħ Dashboard → `Combos` u ssettja l-katina alternattiva tiegħek.
 
-### 2) Ipponta l-Għodda tal-Kodifikazzjoni Tiegħek
+### 2) Ikkonfigura l-Għodda tal-Ikkowdjar Tiegħek
 
 ```txt
 URL Bażi: http://localhost:20128/v1
-Ċavetta API:  [ikkopja mill-paġna Endpoint]
+Ċavetta API:  [ikkopjaha mill-paġna tal-Endpoint]
 Mudell:    if/qwen3.8-max-preview (jew kwalunkwe prefiss fornitur/mudell)
 ```
 
@@ -166,34 +166,35 @@ Jaħdem ma’ Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, u SDKs 
 #### Ikkonfigura awtomatikament b’`setup-*`
 
 Minflok twaħħal il-URL bażi u ċ-ċavetta manwalment, ħalli lil OmniRoute jikteb il-konfigurazzjoni
-proprja ta’ kull għodda mill-katalgu tal-mudelli attiv. Kmand wieħed għal kull għodda:
+ta’ kull għodda mill-katalgu attiv tal-mudelli. Kmand wieħed għal kull għodda:
 
 ```bash
 omniroute setup-codex        # profili ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (kompatibbli ma’ OpenAI)
-omniroute setup-cline        # Cline CLI + settings tal-estensjoni ta’ VS Code
+omniroute setup-cline        # settings tas-CLI ta’ Cline + l-estensjoni ta’ VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # jistampa l-passi fl-app ta’ Cursor
+omniroute setup-cursor       # jistampa l-passi ta’ Cursor fl-app
 omniroute setup-roo          # importazzjoni ta’ Roo Code + pointer autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
 Kull wieħed jaċċetta `--remote <url> --api-key <key>` biex jikkonfigura għodda lokali ma’
-OmniRoute **remot**, flimkien ma’ `--dry-run` għal previżjoni. Biex tħaddem CLI bl-env
-ittrasmess b’mod korrett u mingħajr ma tinkiteb ebda konfigurazzjoni, uża l-launcher ġeneriku
+OmniRoute **remot**, kif ukoll `--dry-run` għal previżjoni. Biex tniedi CLI bl-env
+korrett injettat mingħajr ma tinkiteb l-ebda konfigurazzjoni, uża l-launcher ġeneriku
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
 il-launchers preċedenti għal kull għodda `omniroute launch` (Claude Code) u
-`omniroute launch-codex` (Codex) għadhom disponibbli.
+`omniroute launch-codex` (Codex) jibqgħu disponibbli.
 
 Għat-tabella sħiħa (x’jikteb kull kmand, kull flag, lokali kontra remot, il-konvenzjonijiet tal-URL
-bażi `/v1`), ara **[Integrazzjonijiet CLI](./CLI-INTEGRATIONS.md)**.
+bażi `/v1`), ara **[Integrazzjonijiet tas-CLI](./CLI-INTEGRATIONS.md)**.
 
-Għal konfigurazzjoni dettaljata għal kull għodda (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, u aktar), ara l-**[Gwida għall-Għodod CLI](../reference/CLI-TOOLS.md)** iddedikata.
+Għal konfigurazzjoni dettaljata għal kull għodda (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, u oħrajn), ara l-**[Gwida għall-Għodod CLI](../reference/CLI-TOOLS.md)** apposta.
 
 ---
 
@@ -324,7 +325,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Mudell għal Void Linux (xbps-src)
 
-L-utenti ta' Void Linux jistgħu jibnu pakkett nattiv permezz ta' `xbps-src`. Issejvja din il-blokka bħala `srcpkgs/omniroute/template`:
+Għall-utenti ta’ Void Linux, tista’ tibni pakkett nattiv billi tuża `xbps-src`. Issejvja din il-blokka bħala `srcpkgs/omniroute/template`:
 
 ```bash
 # Fajl tal-mudell għal 'omniroute'
@@ -338,7 +339,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Iġġenera mill-ġdid iċ-checksum għal kull rilaxx permezz ta':
+# Iġġenera mill-ġdid is-somma ta’ kontroll għal kull rilaxx permezz ta’:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

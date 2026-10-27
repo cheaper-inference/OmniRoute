@@ -20,11 +20,12 @@ import {
   isUserVisibleAntigravityQuotaModelId,
   toClientAntigravityQuotaModelId,
 } from "../../config/antigravityModelAliases.ts";
-import { isDiscoverableAgyModelId } from "../../config/agyModels.ts";
+import { isUserVisibleAgyQuotaModelId } from "../../config/agyModels.ts";
 import { getDbInstance } from "@/lib/db/core";
 import {
   applyAntigravityClientProfileHeaders,
   getAntigravityClientProfile,
+  resolveAntigravityClientVersion,
   type AntigravityClientProfile,
 } from "../antigravityClientProfile.ts";
 import {
@@ -576,6 +577,11 @@ export async function getAntigravityUsage(
   let subscriptionInfo: unknown = null;
   try {
     const clientProfile = getAntigravityClientProfile({ providerSpecificData });
+    // Warm the client-version cache before any Cloud Code call: every request below builds
+    // its User-Agent from the synchronous cache, and on a cold process (dashboard poll before
+    // any chat request) that would otherwise be the static fallback. Best-effort — the
+    // resolver swallows feed errors, caches for 6h and coalesces concurrent lookups.
+    await resolveAntigravityClientVersion(clientProfile);
     subscriptionInfo = await getAntigravitySubscriptionInfoCached(
       accessToken,
       providerSpecificData,
@@ -656,7 +662,7 @@ export async function getAntigravityUsage(
         !modelKey ||
         info.isInternal === true ||
         !(provider === "agy"
-          ? isDiscoverableAgyModelId(modelKey)
+          ? isUserVisibleAgyQuotaModelId(modelKey)
           : isUserVisibleAntigravityQuotaModelId(modelKey)) ||
         Object.keys(quotaInfo).length === 0
       ) {
@@ -714,7 +720,7 @@ export async function getAntigravityUsage(
       if (
         quotas[modelKey] ||
         !(provider === "agy"
-          ? isDiscoverableAgyModelId(modelKey)
+          ? isUserVisibleAgyQuotaModelId(modelKey)
           : isUserVisibleAntigravityQuotaModelId(modelKey))
       ) {
         continue;

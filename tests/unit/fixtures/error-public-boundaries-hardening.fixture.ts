@@ -269,6 +269,7 @@ test("public identifier vocabulary preserves current internal machine-readable c
     "orphan_tool_result",
     "bedrock_stream_error",
     "invalid_kiro_tool_call",
+    "kiro_tool_call_repair_retry_failed",
     "devin_cli_error",
     "upstream_websocket_error",
     "upstream_websocket_connect_failed",

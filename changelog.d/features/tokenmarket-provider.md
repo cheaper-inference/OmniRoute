@@ -1,1 +1,0 @@
-- **feat(providers):** add Token Market (`tokenmarket`) as an OpenAI-compatible multi-model API gateway with Bearer-key authentication and live model discovery from `/v1/models`.

@@ -15,6 +15,7 @@ import type {
   RefusalState,
   SharedRefusalStore,
   SlowOverrun,
+  SlowServe,
   TransportFailure,
   TransportSuccess,
 } from "./proxyTransitionListeners.ts";
@@ -68,6 +69,7 @@ export const REFUSAL_POLICIES: {
   transport: { baseMs: 60_000; maxMs: 600_000 };
   slow: { baseMs: 60_000; maxMs: 600_000 };
   geo_blocked: { baseMs: 60_000; maxMs: 600_000 };
+  operator_reported: { baseMs: 60_000; maxMs: 600_000 };
 } = {
   /** The TCP probe could not open a connection to the proxy. */
   proxy_unreachable: { baseMs: 60_000, maxMs: 600_000 },
@@ -87,6 +89,8 @@ export const REFUSAL_POLICIES: {
   slow: { baseMs: 60_000, maxMs: 600_000 },
   /** The provider refused this region through this member; short set-aside. */
   geo_blocked: { baseMs: 60_000, maxMs: 600_000 },
+  /** The operator reported this member as failed; short set-aside. */
+  operator_reported: { baseMs: 60_000, maxMs: 600_000 },
 };
 
 export type ProxyRefusalKind = keyof typeof REFUSAL_POLICIES;
@@ -378,14 +382,13 @@ export interface ProxySetAsideSnapshot {
   streak: number;
 }
 
-export function snapshotProxySetAside(
-  key: string | null,
-  nowMs: number = Date.now()
+function snapshotLatestSetAside(
+  read: (kind: ProxyRefusalKind) => RefusalState | undefined,
+  nowMs: number
 ): ProxySetAsideSnapshot | null {
-  if (key === null || memory.size === 0) return null;
   let latest: (ProxySetAsideSnapshot & { seq: number }) | null = null;
   for (const kind of REFUSAL_KINDS) {
-    const state = readState(key, kind, nowMs);
+    const state = read(kind);
     if (!state || state.until <= nowMs || (latest !== null && state.seq <= latest.seq)) continue;
     // Recompute the period from the stored streak with the same doubling curve as
     // noteProxyRefusal so setAsideAt = until - periodMs (read-only, no state change).
@@ -404,6 +407,46 @@ export function snapshotProxySetAside(
   return snapshot;
 }
 
+export function snapshotProxySetAside(
+  key: string | null,
+  nowMs: number = Date.now()
+): ProxySetAsideSnapshot | null {
+  if (key === null || memory.size === 0) return null;
+  return snapshotLatestSetAside((kind) => readState(key, kind, nowMs), nowMs);
+}
+
+/**
+ * Read-only set-aside state across every refusal motive still in force for
+ * one proxy egress key. Unlike the latest-event snapshot above, quotaOnly is
+ * true only when every motive in force is a quota refusal, and endsAt is the
+ * end of the real set-aside (the latest motive end), so one stale slow or
+ * transport record cannot pass the quota filter by recency.
+ */
+export interface ProxySetAsideStatus {
+  setAside: boolean;
+  quotaOnly: boolean;
+  endsAt: number | null;
+}
+
+export function proxySetAsideStatus(
+  key: string | null,
+  nowMs: number = Date.now()
+): ProxySetAsideStatus {
+  if (key === null || memory.size === 0) return { setAside: false, quotaOnly: false, endsAt: null };
+  let found = false;
+  let quotaOnly = true;
+  let endsAt = 0;
+  for (const kind of REFUSAL_KINDS) {
+    const state = readState(key, kind, nowMs);
+    if (!state || state.until <= nowMs) continue;
+    found = true;
+    if (kind !== "ip_quota_429") quotaOnly = false;
+    if (state.until > endsAt) endsAt = state.until;
+  }
+  if (!found) return { setAside: false, quotaOnly: false, endsAt: null };
+  return { setAside: true, quotaOnly, endsAt };
+}
+
 /**
  * Read-only snapshot of the set-aside state still in force for one
  * (entry, selector member) pair, or null when the member is not set aside.
@@ -417,23 +460,7 @@ export function snapshotMemberSetAside(
   nowMs: number = Date.now()
 ): ProxySetAsideSnapshot | null {
   if (entryKey === null || member === null || memory.size === 0) return null;
-  let latest: (ProxySetAsideSnapshot & { seq: number }) | null = null;
-  for (const kind of REFUSAL_KINDS) {
-    const state = readMemberState(entryKey, member, kind, nowMs);
-    if (!state || state.until <= nowMs || (latest !== null && state.seq <= latest.seq)) continue;
-    const policy = REFUSAL_POLICIES[kind];
-    const periodMs = Math.min(policy.baseMs * 2 ** (state.streak - 1), policy.maxMs);
-    latest = {
-      kind,
-      setAsideAt: state.until - periodMs,
-      endsAt: state.until,
-      streak: state.streak,
-      seq: state.seq,
-    };
-  }
-  if (!latest) return null;
-  const { seq: _seq, ...snapshot } = latest;
-  return snapshot;
+  return snapshotLatestSetAside((kind) => readMemberState(entryKey, member, kind, nowMs), nowMs);
 }
 
 /**
@@ -682,13 +709,18 @@ export const SLOW_OVERRUN_THRESHOLD = 3;
 const MAX_SLOW_OVERRUNS = 1000;
 
 const slowOverruns: SlowOverrun[] = store.slowOverruns;
+const slowServes: SlowServe[] = store.slowServes;
 
 // Lazy purge mirrors readState: entries older than the evidence window plus
-// twice the slow cap can no longer contribute, so drop them on record.
+// twice the slow cap can no longer contribute, so drop them on record. Slow
+// serves share the same window, so one purge covers both stores.
 function purgeSlowOverruns(nowMs: number): void {
   const cutoff = nowMs - SLOW_OVERRUN_WINDOW_MS - 2 * REFUSAL_POLICIES.slow.maxMs;
   while (slowOverruns.length > 0 && slowOverruns[0].at < cutoff) {
     slowOverruns.shift();
+  }
+  while (slowServes.length > 0 && slowServes[0].at < cutoff) {
+    slowServes.shift();
   }
 }
 
@@ -702,13 +734,30 @@ export function recordSlowOverrun(key: string | null, nowMs: number = Date.now()
 
 /**
  * True when this egress waited out the headers window at least
- * SLOW_OVERRUN_THRESHOLD times inside SLOW_OVERRUN_WINDOW_MS. Overruns for
- * other keys never count.
+ * SLOW_OVERRUN_THRESHOLD times inside SLOW_OVERRUN_WINDOW_MS, with
+ * cross-egress proof: another egress served the same destination inside the
+ * window. Without any other egress active in the window the repetition alone
+ * decides (a lone upstream queue still condemns a lone member). A null
+ * destination keeps the repetition rule (callers without a destination).
  */
-export function hasSlowOverrunEvidence(key: string | null, nowMs: number = Date.now()): boolean {
+export function hasSlowOverrunEvidence(
+  key: string | null,
+  destinationOrNowMs: string | null | number = Date.now(),
+  nowMs: number = Date.now()
+): boolean {
+  const destination = typeof destinationOrNowMs === "number" ? null : (destinationOrNowMs ?? null);
+  const at = typeof destinationOrNowMs === "number" ? destinationOrNowMs : nowMs;
   if (key === null || key === "") return false;
-  purgeSlowOverruns(nowMs);
-  const from = nowMs - SLOW_OVERRUN_WINDOW_MS;
+  if (!hasSlowOverrunRepetition(key, at)) return false;
+  if (destination === null || destination === "") return true;
+  if (hasSlowServeCrossEvidence(key, destination, at)) return true;
+  return !hasOtherSlowEgressActivity(key, at);
+}
+
+// Three settled waits through the same key inside the window: repetition alone.
+function hasSlowOverrunRepetition(key: string, at: number): boolean {
+  purgeSlowOverruns(at);
+  const from = at - SLOW_OVERRUN_WINDOW_MS;
   let overruns = 0;
   for (const o of slowOverruns) {
     if (o.key === key && o.at >= from) {
@@ -719,14 +768,66 @@ export function hasSlowOverrunEvidence(key: string | null, nowMs: number = Date.
   return false;
 }
 
-/** Test-only: forget slow overruns (refusal memory is separate). */
+// Any overrun or serve by another live egress inside the window. The direct
+// sentinel never counts: it can never be accused, so it can never witness.
+function hasOtherSlowEgressActivity(key: string, at: number): boolean {
+  const from = at - SLOW_OVERRUN_WINDOW_MS;
+  for (const o of slowOverruns) {
+    if (o.key !== key && o.key !== "direct" && o.at >= from) return true;
+  }
+  for (const s of slowServes) {
+    if (s.key !== key && s.key !== "direct" && s.at >= from) return true;
+  }
+  return false;
+}
+
+/**
+ * True when another egress served the same destination inside the slow
+ * window: a headers wait answered in time there, so the destination answers
+ * and the accused member — not the destination — is at fault. The egress
+ * itself is never its own witness.
+ */
+export function hasSlowServeCrossEvidence(
+  key: string | null,
+  destination: string | null,
+  nowMs: number = Date.now()
+): boolean {
+  if (key === null || destination === null || destination === "") return false;
+  purgeSlowOverruns(nowMs);
+  const from = nowMs - SLOW_OVERRUN_WINDOW_MS;
+  return slowServes.some((s) => s.destination === destination && s.key !== key && s.at >= from);
+}
+
+/**
+ * Record one headers wait answered in time through this egress. The writers
+ * (never this store) keep the sentinel out: `direct` is never recorded, so
+ * readers need no sentinel filter. Never throws, never writes refusal memory.
+ */
+export function recordSlowServe(
+  key: string | null,
+  destination: string | null,
+  nowMs: number = Date.now()
+): void {
+  if (key === null || key === "" || destination === null || destination === "") return;
+  purgeSlowOverruns(nowMs);
+  slowServes.push({ key, destination, at: nowMs });
+  while (slowServes.length > MAX_SLOW_OVERRUNS) slowServes.shift();
+}
+
+/** Test-only: forget slow overruns and slow serves (refusal memory is separate). */
 export function __resetSlowOverrunsForTesting(): void {
   slowOverruns.length = 0;
+  slowServes.length = 0;
 }
 
 /** Test-only: current slow-overrun store size. */
 export function __slowOverrunSizeForTesting(): number {
   return slowOverruns.length;
+}
+
+/** Test-only: current slow-serve store size. */
+export function __slowServeSizeForTesting(): number {
+  return slowServes.length;
 }
 
 /** Test-only: number of (key, kind) entries held. */

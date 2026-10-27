@@ -48,15 +48,11 @@ yóò kàn ṣiṣẹ́), ó máa ń yẹ ìlera server wò, ó sì máa ń ṣi
 
 ---
 
-## Àwọn alias ìṣàwárí — mú àwọn awoṣe tí kì í ṣe Claude hàn nínú olùyan `/model`
+## Àwọn orúkọ àkóbí ìwárí — fi àwọn àwọṣe tí kì í ṣe Claude hàn nínú yíyan `/model`
 
-Ìṣàwárí awoṣe gateway ti Claude Code máa ń ṣàkójọ àwọn id tó bẹ̀rẹ̀ pẹ̀lú `claude`
-tàbí `anthropic` nìkan, nítorí náà pẹ̀lú `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, olùyan
-`/model` àbínibí sábà máa ń fi àwọn awoṣe Claude/Anthropic ti OmniRoute **nìkan** hàn — awoṣe
-`kimi/kimi-k2.6` tàbí `glm/glm-5.2` kì í farahàn rárá, bó tilẹ̀ jẹ́ pé routing rẹ̀ ń ṣiṣẹ́ dáadáa.
+Ìwárí àwọṣe ẹnubode Claude Code máa ń ṣe àkójọ àwọn id tí ó bẹ̀rẹ̀ pẹ̀lú `claude` tàbí `anthropic` nìkan, nítorí náà pẹ̀lú `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` yíyan `/model` abínibí sábà máa ń fi **àwọn** àwọṣe Claude/Anthropic OmniRoute nìkan hàn — `kimi/kimi-k2.6` tàbí `glm/glm-5.2` kì í farahàn rárá, bí ó tilẹ̀ jẹ́ pé ó ń ṣiṣẹ́ dáadáa.
 
-OmniRoute lè ṣe àfarawé awoṣe èyíkéyìí tó ti ṣiṣẹ́ (àti combo) lábẹ́ id `claude/…` kí ó lè
-kọjá filter yẹn kí ó sì farahàn nínú olùyan náà:
+OmniRoute lè ṣe àwòrán àwọṣe èyíkéyìí tí ó ṣíṣẹ́ (àti àkópọ̀) lábẹ́ id `claude/…` kí ó lè kọjá àlẹmọ́ yẹn kí ó sì farahàn nínú yíyan:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,73 +60,76 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Nígbà tí o bá yan ọ̀kan lára wọ̀nyí nínú Claude Code, OmniRoute máa ń yọ wrapper `claude/`
-kúrò, yóò sì dá a padà sí id gidi kí ó tó ṣe routing — id `claude/<real-claude-model>` gidi kan
-(olùpèsè Claude OAuth gangan) ni a máa ń fi sílẹ̀ láìfọwọ́kàn ní gbogbo ìgbà.
+Nígbà tí o bá yan ọ̀kan nínú àwọn wọ̀nyí nínú Claude Code, OmniRoute máa ń yọ ìbòrí `claude/` kúrò, ó sì padà sí id gidi kí ó tó ṣe ìtọ́sọ́nà — id `claude/<real-claude-model>` gidi (olùpèsè OAuth Claude gan-an) ni a kì í fọwọ́ kàn rárá.
 
-**Èyí wà ní pípa ní àkọ́kọ́** a sì ń darí rẹ̀ pẹ̀lú ẹnu-ọ̀nà ipele mẹ́ta (èyí tó
-pàtó jù ni ó máa ń borí), kí OmniRoute lásán má bàa ṣe àdàkọ katalogi rẹ̀ fún àwọn client tí kì í lo
-Claude Code:
+Ní àkọ́kọ́, àwọn id ìpìlẹ̀ nìkan ni a ṣe àwòrán wọn. Pẹ̀lú fíláàgì ẹ̀yà `CATALOG_MIRROR_REFINEMENTS_ENABLED` tí a yàn láti mú ṣiṣẹ́, àwọn oríṣiríṣi ìsapá ìrònú tí àkójọ ti ṣe àkọsílẹ̀ wọn tẹ́lẹ̀ (bí àpẹẹrẹ `codex/gpt-6-sol-high`) ni a ṣe àwòrán wọn gẹ́gẹ́ bí id mìíràn, kí Claude Code lè yan ìpele ìsapá kan pàtó, àwọn id `auto/*` tí a kọ́ sínú tí ipa ìbéèrè kò lè mú wá ni a kò sì ṣe àwòrán wọn. Bóyá a ṣe àkọsílẹ̀ àwọn oríṣiríṣi ìsapá rárá ṣì wà lábẹ́ ìṣàkóso `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — àwòrán kì í fi oríṣi kan kún àkójọ ìpìlẹ̀ tí kò ní.
 
-| Ipele   | Ibi                                                                              |
-| ------- | -------------------------------------------------------------------------------- |
-| Awoṣe   | Ojú-ìwé àlàyé olùpèsè → toggle "Ṣí i hàn nínú Claude Code" fún awoṣe kọ̀ọ̀kan      |
-| Olùpèsè | Ojú-ìwé àlàyé olùpèsè → toggle ipele olùpèsè (ó kan gbogbo àwọn awoṣe rẹ̀)        |
-| Àgbáyé  | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (ó wà ní pípa ní àkọ́kọ́) |
+**Èyí kò ṣiṣẹ́ ní àkọ́kọ́** a sì ń ṣàkóso rẹ̀ pẹ̀lú ẹnubode ìpele mẹ́ta (èyí tí ó pàtó jù ni ó máa ń borí), nítorí náà OmniRoute lasan kì í ní í ṣe ìlọ́po àkójọ rẹ̀ fún àwọn aṣàmúlò tí kò lò Claude Code:
 
-Environment variable `EXPOSE_CC_DISCOVERY_ALIASES` máa ń fipá mú kí ipele àgbáyé ṣiṣẹ́,
-ó sì máa ń borí àtúnṣe dashboard (ojú Feature Flags máa ń fi àkíyèsí
-"ń ṣiṣẹ́ nípasẹ̀ environment variable" hàn nígbà tó bá rí bẹ́ẹ̀). Àwọn toggle fún olùpèsè
-kọ̀ọ̀kan àti awoṣe kọ̀ọ̀kan máa ń tún un ṣe láti ibẹ̀ — fún àpẹẹrẹ, tí àgbáyé bá wà ní pípa + tí olùpèsè Kimi bá wà ní ṣíṣí,
-àwọn awoṣe Kimi nìkan ni yóò farahàn.
+| Ìpele   | Ibí                                                                                 |
+| ------- | ----------------------------------------------------------------------------------- |
+| Àwọṣe   | Ojú-ìwé àlàyé olùpèsè → tógùlù "Expose in Claude Code" fún àwọṣe kọ̀ọ̀kan             |
+| Olùpèsè | Ojú-ìwé àlàyé olùpèsè → tógùlù ìpele olùpèsè (ó bo gbogbo àwọn àwọṣe rẹ̀)            |
+| Àgbáyé  | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (ó wà ní òkùnkùn ní àkọ́kọ́) |
 
-> ⚠️ **Àìbáramu window lórí àwọn awoṣe tí kì í ṣe Claude.** Claude Code gbà pé context
-> window 200K ni ó wà fún id èyíkéyìí tí kò mọ̀ (kò lè ka window gidi láti
-> `/v1/models`). Fún awoṣe tó ní window tó tóbi jù (fún àpẹẹrẹ 256K ti Kimi K2), ṣètò
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sí iye tó kéré ju window gidi awoṣe náà lọ kí
-> ìkójọpọ̀ aládàáṣe má bàa bẹ̀rẹ̀ ṣáájú àkókò. Àwọn prófáìlì tí a ṣẹ̀dá lókè ti ṣe
-> èyí fún awoṣe kọ̀ọ̀kan tẹ́lẹ̀.
+Ètò àyíká `EXPOSE_CC_DISCOVERY_ALIASES` máa ń fipá mú ìpele àgbáyé ṣiṣẹ́, ó sì borí àyípadà ojú-ìwé ìṣàkóso (ojú-ìwé Feature Flags máa ń fi àkọsílẹ̀ "active via environment variable" hàn nígbà tí ó bá ṣe bẹ́ẹ̀). Àwọn tógùlù ìpele olùpèsè àti àwọṣe kọ̀ọ̀kan máa ń tún un ṣe láti ibẹ̀ — bí àpẹẹrẹ àgbáyé ní òkùnkùn + olùpèsè Kimi ní ṣíṣí máa ń fi àwọn àwọṣe Kimi nìkan hàn.
+
+> ⚠️ **Àìbáramu fèrèsé lórí àwọn àwọṣe tí kì í ṣe Claude.** Claude Code máa ń gbà pé fèrèsé ọ̀rọ̀-ìtumọ̀ 200K ni fún id èyíkéyìí tí kò mọ̀ (kò lè ka fèrèsé gidi láti `/v1/models`). Fún àwọṣe tí ó ní fèrèsé ńlá (bí àpẹẹrẹ 256K ti Kimi K2), ṣètò `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sí iye tí ó kéré ju fèrèsé gidi àwọṣe náà kí ìṣùpọ̀ aládáwà má baà ṣẹlẹ̀ kíákíá. Àwọn prófáìlì tí a ṣẹ̀dá lókè ti ṣe èyí tẹ́lẹ̀ fún àwọṣe kọ̀ọ̀kan.
 
 ---
 
-## Àkọsílẹ̀ ìbẹ̀rẹ̀ lórí dashboard
+## Ìdínà ìtọ́sọ́nà ìbẹ̀rẹ̀ lórí pánẹ́ẹ̀lì ìṣàkóso
 
-Káàdì irinṣẹ́ Claude (**Dashboard → CLI Code**) ń ṣàfihàn àjákù `settings.json` gangan
+Káàdì irinṣẹ́ Claude (**Dashboard → CLI Code**) ń ṣàfihàn àjẹkù `settings.json` gangan
 fún instance yìí, lẹ́gbẹ̀ẹ́ bọ́tìnì ìwífún discovery-alias, pẹ̀lú bọ́tìnì àdàkọ:
 
 ```jsonc
 {
   "env": {
     "ANTHROPIC_BASE_URL": "http://<OmniRoute rẹ>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<kọ́kọ́rọ́ OmniRoute API rẹ>",
+    "ANTHROPIC_AUTH_TOKEN": "<kọ́kọ́rọ́ API OmniRoute rẹ>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-URL ìpìlẹ̀ náà ni èyí tí káàdì náà yànjú (pẹ̀lú àtúnṣe àkànṣe tí o tẹ̀), tí a sì ti
-ṣe àtúnṣe rẹ̀ sí ìlànà tó yẹ — kò ní ìfikún `/v1`, kò sì ní slash ní ìparí. **A kì í ṣe àfihàn kọ́kọ́rọ́ náà láé**: àkọsílẹ̀ náà ní
-ọ̀rọ̀ amúrópò, nítorí náà screenshot tàbí àjákù tí a lẹ̀ mọ́ ibòmíràn kò lè tú u jáde. Lẹ kọ́kọ́rọ́ rẹ sórí rẹ̀.
+URL ìpìlẹ̀ náà ni èyí tí káàdì náà pinnu (pẹ̀lú àtúnṣe àkànṣe tí o tẹ̀), tí a sì ti
+ṣe déédéé — kò ní ìfikún `/v1`, kò sì ní slash ní òpin. **A kì í ṣàfihàn kọ́kọ́rọ́ náà láé**: ìdínà náà ní
+ọrọ̀ amúpòró, nítorí náà àwòrán ojú tàbí àjẹkù tí a lẹ̀ mọ́ ibòmíràn kò le tú ọ̀kan jáde. Lẹ kọ́kọ́rọ́ rẹ sórí rẹ̀.
 
-Ṣàfikún `CLAUDE_CODE_AUTO_COMPACT_WINDOW` lábẹ́ block `env` kan náà fún model èyíkéyìí tí
-context window gidi rẹ̀ kì í ṣe 200K — Claude Code máa ń gbà pé gbogbo id tí kò mọ̀ ní 200K, nítorí náà
-auto-compaction yóò bẹ̀rẹ̀ ní ibi tí kò tọ́ bí kò bá ṣe bẹ́ẹ̀ (wo ìkìlọ̀ ní abala tó ṣáájú).
-Snippet builder náà tún gba iye yẹn, nítorí náà caller tó mọ window model àfojúsùn
-lè ṣe àgbéjáde rẹ̀ ní tààrà.
+Ṣàfikún `CLAUDE_CODE_AUTO_COMPACT_WINDOW` lábẹ́ ìdínà `env` kan náà fún model èyíkéyìí tí
+context window gidi rẹ̀ kì í ṣe 200K — Claude Code máa ń rò pé gbogbo id tí kò mọ̀ ní 200K, nítorí náà
+auto-compaction yóò ṣẹlẹ̀ ní ibi tí kò tọ́ bí kò bá sí èyí (wo ìkìlọ̀ ní abala tó ṣáájú).
+Olùkọ́ àjẹkù náà tún gba iye yẹn, kí olùpè tí ó mọ window model àfojúsùn náà
+le mú un jáde ní tààrà.
 
-Orísun: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (builder
-mímọ́, tí a ti dán wò ní unit test) tí `ClaudeGatewayOnboardingBlock` ṣe àfihàn rẹ̀.
+Orísun: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (olùkọ́
+mímọ́, tí a dánwò pẹ̀lú unit test) tí `ClaudeGatewayOnboardingBlock` ṣàfihàn.
+
+### So account kan mọ́lẹ̀ (àṣàyàn)
+
+Láti fi gbogbo ìbéèrè Claude Code ránṣẹ́ nípasẹ̀ account provider kan pàtó, ṣàfikún header
+`x-omniroute-connection` nípasẹ̀ `ANTHROPIC_CUSTOM_HEADERS` nínú ìdínà `env` kan náà:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Da id náà kọ láti inú chip `xxxxxxxx…` tó wà lórí ìlà connection ní ojú-ewé provider. Ìsopọ̀ mímọ́lẹ̀ náà
+kan àwọn id model kan ṣoṣo (`provider/model`) nìkan, kì í kan combos. Wo
+[Ìsọ account mọ́lẹ̀ fún ìbéèrè kọ̀ọ̀kan](../reference/API_REFERENCE.md#account-pinning-per-request) fún
+ìhùwàsí fallback gangan.
 
 ---
 
-## Àwọn profile (`CLAUDE_CONFIG_DIR`)
+## Àwọn prófáìlì (`CLAUDE_CONFIG_DIR`)
 
-Claude Code **kò ní àwọn fáìlì profile abinibi** (yàtọ̀ sí `~/.codex/<name>.config.toml` ti Codex).
-Ọ̀nà tó bójú mu ni `CLAUDE_CONFIG_DIR` — directory ìṣètò ọ̀tọ̀ọ̀tọ̀ fún
-profile kọ̀ọ̀kan, tí ọ̀kọ̀ọ̀kan ní `settings.json`, credentials, history àti cache tirẹ̀.
+Claude Code **kò ní fáìlì prófáìlì abinibi** (yàtọ̀ sí `~/.codex/<name>.config.toml` ti Codex).
+Ọ̀nà tí ó bá ìlànà mu ni `CLAUDE_CONFIG_DIR` — àkọsílẹ̀ ìṣètò ọ̀tọ̀ fún
+prófáìlì kọ̀ọ̀kan, tí ọ̀kọ̀ọ̀kan ní `settings.json`, ẹ̀rí ìdánimọ̀, ìtàn àti cache tirẹ̀.
 
-`omniroute setup-claude` máa ń gba catalog `/v1/models` tó ń ṣiṣẹ́ lọ́wọ́, ó sì máa ń kọ
-profile kan fún model kọ̀ọ̀kan sí `~/.claude/profiles/<name>/settings.json`, nípa lílo
+`omniroute setup-claude` máa ń gba àkójọ `/v1/models` tó wà láàyè, ó sì máa ń kọ
+prófáìlì kan fún model kọ̀ọ̀kan sí `~/.claude/profiles/<name>/settings.json`, nípa lílo
 **àwọn orúkọ kan náà bí `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
@@ -148,35 +147,39 @@ profile kan fún model kọ̀ọ̀kan sí `~/.claude/profiles/<name>/settings.js
 }
 ```
 
-> **A kì í kọ auth token sínú profile láé.** Ṣí i pẹ̀lú
+> **A kì í kọ token ìfàṣẹsí sínú prófáìlì láé.** Bẹ̀rẹ̀ rẹ̀ pẹ̀lú
 > `omniroute launch --profile <name>` (ó máa ń fi `ANTHROPIC_AUTH_TOKEN` láti inú
-> context tó ń ṣiṣẹ́ sínú rẹ̀), tàbí ṣe export `ANTHROPIC_AUTH_TOKEN` fúnra rẹ kí o sì ṣiṣẹ́
+> àyíká tó ń ṣiṣẹ́ lọ́wọ́ sínú rẹ̀), tàbí kí o export `ANTHROPIC_AUTH_TOKEN` fúnra rẹ, kí o sì ṣiṣẹ́
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Auto-sync lẹ́yìn model discovery (nípasẹ̀ yíyàn láti ṣiṣẹ́).** OmniRoute lè tún àwọn fáìlì
-`~/.claude/profiles/<name>/settings.json` kan náà ṣe láìfọwọ́yí nígbàkúùgbà tí sync model provider kan
-bá yí catalog tó ń ṣiṣẹ́ padà — kí àwọn model tuntun/tí a tún lorúkọ lè ní profile láìsí àtúnsá
-command náà. Ó **wà ní pípa nípa ìpilẹ̀**: tan-an láti **CLI Code dashboard** ("CLI profile
-auto-sync" → Claude Code), tàbí ṣètò `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (ó tún ń tẹ̀lé
-`CLI_ALLOW_CONFIG_WRITES`, èyí tó wà ní títàn nípa ìpilẹ̀). Nígbà tí ó bá ṣiṣẹ́, àwọn fáìlì profile nìkan ló ń kọ; kò ní
-yí ìṣètò Claude tó ń ṣiṣẹ́/tó jẹ́ àìyípadà rẹ, auth, tàbí `~/.claude/settings.json` padà láé.
+**Ìmúdójúìwọ̀n aládàáṣe lẹ́yìn ìṣàwárí model (àṣàyàn ni).** OmniRoute lè tún àwọn fáìlì
+`~/.claude/profiles/<name>/settings.json` kan náà ṣe ní aládàáṣe nígbàkigbà tí ìmúdójúìwọ̀n model
+olùpèsè kan bá yí àkójọ tó wà láàyè padà — nítorí náà, àwọn model tuntun/tí a tún lorúkọ máa gba prófáìlì láìsí pé a tún
+ṣiṣẹ́ àṣẹ náà. Ó jẹ́ **pípà ní àkọ́kọ́**: yí i padà láti inú **CLI Code dashboard** ("Ìmúdójúìwọ̀n
+prófáìlì CLI aládàáṣe" → Claude Code), tàbí ṣètò `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (ó tún máa ń tẹ̀lé
+`CLI_ALLOW_CONFIG_WRITES`, tí ó jẹ́ títàn ní àkọ́kọ́). Nígbà tí a bá tàn án, fáìlì prófáìlì nìkan ni ó máa ń kọ; kò ní
+yí ìṣètò Claude tó ń ṣiṣẹ́/àìpé, ìfàṣẹsí, tàbí `~/.claude/settings.json` padà láé.
 
-### Ṣíṣẹ̀dá + lílo àwọn profile
+### Ṣíṣe + lílo àwọn prófáìlì
 
 ```bash
-# OmniRoute abẹ́lẹ̀
+# OmniRoute ti agbègbè
 omniroute setup-claude
 
-# VPS jíjìn (fi URL VPS sínú gbogbo profile)
+# VPS jíjìnnà (ó fi URL VPS sínú gbogbo prófáìlì)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
-# Àwọn provider kan ṣoṣo
+# Àwọn olùpèsè kan nìkan
 omniroute setup-claude --only glm,kimi
 
-# Ṣàkọ́wò láìkọ ohunkóhun
+# Tún kọ àwọn prófáìlì fún àwọn olùpèsè CLI-agbègbè (zcode, auggie, devin-cli-agentic,
+# codex-app-server) tí a kò rí lórí host yìí (a máa ń fò wọ́n ré ní àkọ́kọ́ fún ibi àfojúsùn agbègbè)
+omniroute setup-claude --include-local
+
+# Ṣàwòkọ́kọ́ láìkọ ohunkóhun
 omniroute setup-claude --dry-run
 
-# Ṣí profile kan
+# Bẹ̀rẹ̀ prófáìlì kan
 omniroute launch --profile kimi-k27
 ```
 

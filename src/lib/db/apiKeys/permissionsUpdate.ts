@@ -9,6 +9,7 @@ export interface ApiKeyPermissionsUpdate {
   blockedModels?: string[];
   allowedCombos?: string[];
   allowedConnections?: string[];
+  preferredConnections?: string[];
   allowedQuotas?: string[];
   noLog?: boolean;
   autoResolve?: boolean;
@@ -36,6 +37,7 @@ export interface ApiKeyPermissionsUpdate {
   compressionEnabled?: boolean;
   allowAutoCombos?: boolean;
   catalogScope?: "all" | "combos" | "models";
+  forcedModel?: string | null;
 }
 
 export function normalizeApiKeyPermissionsUpdate(
@@ -53,6 +55,7 @@ export function normalizeApiKeyPermissionsUpdate(
     blockedModels: update.blockedModels,
     allowedCombos: update.allowedCombos,
     allowedConnections: update.allowedConnections,
+    preferredConnections: update.preferredConnections,
     allowedQuotas: update.allowedQuotas,
     noLog: update.noLog,
     autoResolve: update.autoResolve,
@@ -80,5 +83,6 @@ export function normalizeApiKeyPermissionsUpdate(
     compressionEnabled: update.compressionEnabled,
     allowAutoCombos: update.allowAutoCombos,
     catalogScope: update.catalogScope,
+    forcedModel: update.forcedModel,
   };
 }

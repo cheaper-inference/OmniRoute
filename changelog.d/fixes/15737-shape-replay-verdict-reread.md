@@ -1,1 +1,0 @@
-- **fix(open-sse):** a replayed shape refusal reuses the verdict read once instead of reading the refused body again ([#15737](https://github.com/diegosouzapw/OmniRoute/pull/15737)) — thanks @maxmad64bis

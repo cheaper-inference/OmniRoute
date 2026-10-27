@@ -45,6 +45,8 @@ const BASELINE_LANGUAGES: Record<string, string[]> = {
   "i-have-adhd": ["pt-BR", "vi", "ja", "id", "es", "de", "fr", "it", "ru", "zh"],
   // locale-gated to zh: the single-language instruction IS the feature.
   "terse-cjk": [],
+  "antislop-ui": ["pt-BR", "vi", "ja", "id", "es", "de", "fr", "it", "ru", "zh"],
+  "antislop-copy": ["pt-BR", "vi", "ja", "id", "es", "de", "fr", "it", "ru", "zh"],
 };
 
 function languagesOf(id: string): string[] {

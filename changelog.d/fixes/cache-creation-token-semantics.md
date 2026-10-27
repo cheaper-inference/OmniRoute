@@ -1,1 +1,0 @@
-- Preserve whether cache-creation tokens are included in prompt totals across Chat, Responses, and Claude translations, preventing negative round-trip input counts and downstream double counting while retaining legacy unmarked usage behavior.

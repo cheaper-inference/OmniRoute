@@ -38,3 +38,43 @@ export function resolveBundledNpmEntry(
   }
   return null;
 }
+
+/** Executable + argv for an npm subcommand (no shell, no `.cmd` shim). */
+export interface NpmInvocation {
+  command: string;
+  args: string[];
+}
+
+export interface NpmInvocationDeps extends ResolveNpmEntryDeps {
+  platform?: NodeJS.Platform;
+  /** Pre-resolved `npm-cli.js` path; `null` forces the plain-command fallback. */
+  npmEntry?: string | null;
+}
+
+/**
+ * Build the executable + argv used to run an npm subcommand from a build script.
+ *
+ * Prefers `process.execPath <npm-cli.js> <args>` — the reliable cross-platform
+ * form that never touches a `.cmd` shim (#8858). Crucially it does NOT trust
+ * `npm_execpath` as a JS entry point: non-npm runners set it to their own
+ * executable, so `bun run` leaves it pointing at the bare `bun` binary. Feeding
+ * that to `process.execPath` produced `node /path/to/bun …`, and Node dumped the
+ * raw ELF bytes into the caller's error output (#16321).
+ *
+ * Falls back to the plain `npm` (`npm.cmd` on Windows) command only when no
+ * bundled `npm-cli.js` can be located.
+ */
+export function resolveNpmInvocation(
+  args: readonly string[],
+  deps: NpmInvocationDeps = {}
+): NpmInvocation {
+  const platform = deps.platform ?? process.platform;
+  const execPath = deps.execPath ?? process.execPath;
+  const npmEntry =
+    deps.npmEntry !== undefined ? deps.npmEntry : resolveBundledNpmEntry("npm-cli.js", deps);
+
+  if (npmEntry) {
+    return { command: execPath, args: [npmEntry, ...args] };
+  }
+  return { command: platform === "win32" ? "npm.cmd" : "npm", args: [...args] };
+}

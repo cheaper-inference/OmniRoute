@@ -12,12 +12,12 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### Mahitaji ya Awali
 
-- **Node.js** `>=22.22.3 <23`, au `>=24.0.0 <27` (inapendekezwa: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, au `>=24.0.0 <27` (inapendekezwa: 24 LTS)
 - **npm** 10+
 
-> **Watumiaji wa npm v11+ (Node 24+):** Baada ya `npm install`, hakikisha moduli asilia zilisakinishwa:
-> `node -e "require('better-sqlite3')"`. Ikishindwa kwa `MODULE_NOT_FOUND`,
-> tekeleza `npm approve-scripts better-sqlite3 && npm install`. Angalia
+> **Watumiaji wa npm v11+ (Node 24+):** Baada ya `npm install`, thibitisha kuwa moduli asilia zilisakinishwa:
+> `node -e "require('better-sqlite3')"`. Ikiwa itashindwa kwa `MODULE_NOT_FOUND`,
+> endesha `npm approve-scripts better-sqlite3 && npm install`. Tazama
 > [Utatuzi wa Matatizo](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
@@ -41,15 +41,15 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Vigezo muhimu kwa maendeleo:
+Vigezo muhimu kwa ajili ya maendeleo:
 
-| Kigezo                 | Chaguo-msingi la Maendeleo | Maelezo                                |
-| ---------------------- | -------------------------- | -------------------------------------- |
-| `PORT`                 | `20128`                    | Mlango wa seva                         |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | URL msingi ya kiolesura cha mbele      |
-| `JWT_SECRET`           | (tengeneza hapo juu)       | Siri ya kutia saini JWT                |
-| `INITIAL_PASSWORD`     | `CHANGEME`                 | Nenosiri la kuingia kwa mara ya kwanza |
-| `APP_LOG_LEVEL`        | `info`                     | Kiwango cha kina cha kumbukumbu        |
+| Kigezo                 | Chaguo-msingi la Maendeleo | Maelezo                            |
+| ---------------------- | -------------------------- | ---------------------------------- |
+| `PORT`                 | `20128`                    | Mlango wa seva                     |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | URL ya msingi ya upande wa mbele   |
+| `JWT_SECRET`           | (tengeneza hapo juu)       | Siri ya kutia saini JWT            |
+| `INITIAL_PASSWORD`     | `CHANGEME`                 | Nenosiri la kuingia mara ya kwanza |
+| `APP_LOG_LEVEL`        | `info`                     | Kiwango cha kina cha kumbukumbu    |
 
 ### Mipangilio ya Dashibodi
 
@@ -60,41 +60,41 @@ Dashibodi hutoa vitufe vya UI vya kuwasha au kuzima vipengele ambavyo vinaweza p
 | Mipangilio → Mahiri | Hali ya Utatuzi              | Washa kumbukumbu za maombi ya utatuzi (UI) |
 | Mipangilio → Jumla  | Mwonekano wa Upau wa Pembeni | Onyesha/ficha sehemu za upau wa pembeni    |
 
-Mipangilio hii huhifadhiwa kwenye hifadhidata na hudumu baada ya kuwasha upya, huku ikibatilisha chaguo-msingi za vigezo vya mazingira inapowekwa.
+Mipangilio hii huhifadhiwa kwenye hifadhidata na huendelea kuwepo baada ya kuwasha upya, ikibatilisha chaguo-msingi za vigezo vya mazingira inapowekwa.
 
 ### Kuendesha Ndani ya Mfumo
 
 ```bash
-# Hali ya maendeleo (upakiaji upya wa papo hapo)
+# Hali ya maendeleo (upakiaji upya wa moja kwa moja)
 npm run dev
 
 # Muundo wa uzalishaji
 npm run build    # next build → .build/next/ kisha assembleStandalone → dist/
 npm run start
 
-# Ukompilishaji wa haraka wa backend/API pekee kwa mabadiliko ya wachangiaji
+# Ukusanyaji wa haraka wa backend/API pekee kwa mabadiliko ya wachangiaji
 npm run build:contributor
 
-# Muundo wa toleo (kujenga upya kutoka mwanzo + kiashirio cha HEAD — kinahitajika kwa upelekaji)
-npm run build:release   # rm -rf .build dist && kujenga + huandika dist/BUILD_SHA
+# Muundo wa toleo (ujenzi upya safi + kiashiria cha HEAD — unahitajika kwa upelekaji)
+npm run build:release   # rm -rf .build dist && build + huandika dist/BUILD_SHA
 
 # Usanidi wa kawaida wa mlango
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Muundo wa mchangiaji hufanya uthibitishaji wa ukompilishaji pekee: haukusanyi
-usambazaji unaojitegemea wala kujenga rasilimali hiari za upakiaji asilia. Tumia muundo wa kawaida wa uzalishaji unapohitaji
-kuthibitisha kifurushi kinachoweza kusambazwa.
+Muundo wa wachangiaji hufanya uthibitishaji wa ukusanyaji pekee: haukusanyi
+usambazaji wa pekee wala kujenga rasilimali za hiari za ufungashaji asilia. Tumia muundo wa kawaida wa uzalishaji wakati
+unahitaji kuthibitisha kifurushi kinachoweza kusambazwa.
 
 ### Mpangilio wa Matokeo ya Muundo
 
-| Saraka    | Yaliyomo                                                                                     | Inafuatiliwa |
-| --------- | -------------------------------------------------------------------------------------------- | ------------ |
-| `src/`    | Msimbo chanzo wa programu (TypeScript / TSX)                                                 | Ndiyo        |
-| `.build/` | Matokeo ya kati — matokeo ya `next build` (hayafuatiliwi na git, `distDir = .build/next`)    | Hapana       |
-| `dist/`   | Kifurushi kinachoweza kusambazwa — hukusanywa na `assembleStandalone` (hakifuatiliwi na git) | Hapana       |
+| Saraka    | Yaliyomo                                                                                    | Inafuatiliwa |
+| --------- | ------------------------------------------------------------------------------------------- | ------------ |
+| `src/`    | Chanzo cha programu (TypeScript / TSX)                                                      | Ndiyo        |
+| `.build/` | Faili za kati — matokeo ya `next build` (yamepuuzwa na git, `distDir = .build/next`)        | Hapana       |
+| `dist/`   | Kifurushi kinachoweza kusambazwa — kimekusanywa na `assembleStandalone` (kimepuuzwa na git) | Hapana       |
 
-Mtiririko wa ujenzi ni awamu moja:
+Mchakato wa ujenzi ni wa hatua moja:
 
 ```
 npm run build
@@ -104,16 +104,16 @@ npm run build
 ```
 
 `npm run build:release` pia husafisha saraka zote mbili kwanza na kuandika
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kama kiashirio cha uadilifu wa upelekaji.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) kama kiashiria cha uadilifu wa upelekaji.
 
-`npm run build:contributor` hutumia wasifu wa ujenzi wa backend pekee. Hubadilisha kwa muda
-faili za UI ya dashibodi na kuweka vibadala wakati wa kujenga, huhifadhi vishughulikiaji vya njia za API, na kurejesha faili asili
-baada ya ujenzi. Tumia `npm run build` kwa mabadiliko yanayoathiri UI ya dashibodi au kwa
-uthibitishaji kamili wa toleo; wasifu wa mchangiaji si mbadala wa muundo wa toleo.
+`npm run build:contributor` hutumia wasifu wa muundo wa backend pekee. Huweka vibadala kwa muda
+kwa faili za UI ya dashibodi wakati wa kujenga, huhifadhi vidhibiti vya njia za API, na kurejesha faili asili
+baada ya ujenzi. Tumia `npm run build` kwa mabadiliko yanayoathiri UI ya dashibodi au kwa uthibitishaji kamili
+wa toleo; wasifu wa wachangiaji si mbadala wa muundo wa toleo.
 
-> **Dokezo la upelekaji wa VPS:** saraka ya picha ya mbali `/usr/lib/node_modules/omniroute/app/`
+> **Dokezo la upelekaji wa VPS:** saraka ya mbali ya taswira `/usr/lib/node_modules/omniroute/app/`
 > haijabadilika. Zana za upelekaji hutumia rsync kusawazisha yaliyomo kwenye `dist/` hadi humo.
-> Ni njia ya matokeo ya ujenzi ndani ya hazina pekee iliyohamishwa (`app/` → `dist/`).
+> Ni njia ya matokeo ya muundo ndani ya hazina pekee ndiyo iliyohamishwa (`app/` → `dist/`).
 
 URL chaguo-msingi:
 
@@ -170,18 +170,18 @@ Mawanda (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`,
 ## Kuendesha Majaribio
 
 ```bash
-# Majaribio yote (unit + vitest + ecosystem + e2e)
+# Majaribio yote (unit + vitest + mfumo ikolojia + e2e)
 npm run test:all
 
-# Faili moja ya jaribio (kiendesha majaribio asili cha Node.js — majaribio mengi hutumia hiki)
+# Faili moja ya majaribio (kiendesha majaribio asilia cha Node.js — majaribio mengi hutumia hiki)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Majaribio ya unit pekee yaliyoathiriwa na mabadiliko yako (kiteuzi sawa cha TIA kama kizuizi cha CI, #8084)
-npm run test:scoped            # mabadiliko katika commit ya mwisho (au mti wa kazi)
-npm run test:scoped:staged     # mabadiliko yaliyowekwa kwenye staging pekee — huendana vizuri na utekelezaji wa pre-commit
-npm run test:scoped:full       # kwanza jenga upya ramani ya grafu ya import (baada ya kuongeza/kuhamisha faili)
-# Exit 1 + "run the full suite" humaanisha faili ya kitovu (tsconfig, package.json, …) au chanzo
-# kisichowekwa kwenye ramani kilibadilika — kiteuzi hushindwa kwa usalama, hakiruki chochote kimyakimya.
+# Majaribio ya unit yaliyoathiriwa tu na mabadiliko yako (kiteuzi sawa cha TIA na kizuizi cha CI, #8084)
+npm run test:scoped            # mabadiliko katika commit ya mwisho (au working tree)
+npm run test:scoped:staged     # mabadiliko yaliyowekwa kwenye staging pekee — hufanya kazi vizuri na utekelezaji wa pre-commit
+npm run test:scoped:full       # jenga upya ramani ya grafu ya import kwanza (baada ya kuongeza/kuhamisha faili)
+# Exit 1 + "run the full suite" inamaanisha faili kitovu (tsconfig, package.json, …) au chanzo
+# kisicho kwenye ramani kilibadilika — kiteuzi hushindwa kwa usalama, hakiruki majaribio kimya kimya.
 
 # Vitest (seva ya MCP, autoCombo, cache)
 npm run test:vitest
@@ -189,13 +189,13 @@ npm run test:vitest
 # Majaribio ya E2E (yanahitaji Playwright)
 npm run test:e2e
 
-# E2E ya viteja vya itifaki (usafirishaji wa MCP, A2A)
+# E2E ya wateja wa itifaki (usafirishaji wa MCP, A2A)
 npm run test:protocols:e2e
 
-# Majaribio ya uoanifu wa mfumo-ikolojia
+# Majaribio ya uoanifu wa mfumo ikolojia
 npm run test:ecosystem
 
-# Kizuizi cha coverage: 60% ya statements/lines/functions/branches
+# Kizuizi cha coverage: 60% ya taarifa/mistari/vitendaji/matawi
 npm run test:coverage
 npm run coverage:report
 
@@ -203,48 +203,49 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Jaribio la haraka la combo halisi ya upstream lililowekewa kizuizi (linahitaji ufikiaji wa VPS + salio halisi la mtoa huduma)
-# Huwasiliana na watoa huduma HALISI — hugharimu kiasi kidogo. HALITEKELEZWI KAMWE kwenye CI. Hurukwa bila hitilafu bila kizuizi.
-# Linahitaji: ufikiaji wa ssh root@192.168.0.15 (hupakia snapshot ya DB ya kusoma pekee kutoka VPS).
+# Jaribio la msingi la combo lililodhibitiwa kwa upstream halisi (linahitaji ufikiaji wa VPS + salio halisi la watoa huduma)
+# Hufikia watoa huduma HALISI — hugharimu kiasi kidogo. KAMWE haliendeshwi katika CI. Hurukwa kwa usahihi bila kizuizi.
+# Inahitaji: ufikiaji wa ssh root@192.168.0.15 (huchota snapshot ya DB ya kusoma tu kutoka VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Jaribio la moja kwa moja la VPS la awamu ya 3 — hati za kawaida za Node ESM, huwasiliana moja kwa moja na seva hai ya .15.
-# Linahitaji: ufikiaji wa ssh root@192.168.0.15 (combo huundwa/huondolewa kupitia SSH sqlite).
-# Huwasiliana na watoa huduma HALISI (gharama ndogo). Huunda/hufuta combo za __live_test__* pekee. HALITEKELEZWI KAMWE kwenye CI.
-# REQUIRE_API_KEY=false kwenye .15 kwa hivyo hakuna ufunguo wa API unaohitajika, lakini huzingatia COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ikiwa vimewekwa.
-npm run test:combo:live:vps              # hali 7 za HTTP (priority/round-robin/weighted/cost/fusion/auto + health)
+# Jaribio hai la msingi la VPS la Awamu ya 3 — script za kawaida za Node ESM, hufikia seva hai ya .15 moja kwa moja.
+# Inahitaji: ufikiaji wa ssh root@192.168.0.15 (combo huundwa/huondolewa kupitia SSH sqlite).
+# Hufikia watoa huduma HALISI (gharama ndogo). Huunda/hufuta combo za __live_test__* pekee. KAMWE haliendeshwi katika CI.
+# REQUIRE_API_KEY=false kwenye .15 kwa hivyo hakuna API key inayohitajika, lakini huheshimu COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY ikiwa zimewekwa.
+npm run test:combo:live:vps              # hali 7 za HTTP (priority/round-robin/weighted/cost/fusion/auto + afya)
 npm run test:combo:live:vps:failover     # huongeza hali halisi ya failover kati ya watoa huduma (jumla 8)
 ```
 
 Maelezo ya coverage:
 
 - `npm run test:coverage` hupima coverage ya chanzo kwa mkusanyiko mkuu wa majaribio ya unit, huondoa `tests/**`, na hujumuisha `open-sse/**`
-- Pull request lazima zidumishe kizuizi cha coverage cha **60%+** kwa statements/lines/functions/branches
-- Ikiwa PR inabadilisha msimbo wa uzalishaji katika `src/`, `open-sse/`, `electron/`, au `bin/`, lazima iongeze au isasishe majaribio ya kiotomatiki katika PR hiyo hiyo
-- `npm run coverage:report` huchapisha ripoti ya kina ya kila faili kutoka katika utekelezaji wa hivi karibuni wa coverage
-- `npm run test:coverage:legacy` huhifadhi kipimo cha zamani kwa ajili ya ulinganisho wa kihistoria
-- Tazama `docs/ops/COVERAGE_PLAN.md` kwa ramani ya hatua kwa hatua ya kuboresha coverage
+- Pull request lazima zidumishe kizuizi cha coverage cha **60%+** cha taarifa/mistari/vitendaji/matawi
+- Ikiwa PR inabadilisha msimbo wa production katika `src/`, `open-sse/`, `electron/`, au `bin/`, lazima iongeze au isasishe majaribio ya kiotomatiki katika PR hiyo hiyo
+- `npm run coverage:report` huchapisha ripoti ya kina ya kila faili kutoka kwenye utekelezaji wa hivi karibuni wa coverage
+- `npm run test:coverage:legacy` huhifadhi kipimo cha zamani kwa ulinganisho wa kihistoria
+- Tazama `docs/ops/COVERAGE_PLAN.md` kwa ramani ya utekelezaji ya kuboresha coverage kwa awamu
 
 ### Mahitaji ya Pull Request
 
 Kabla ya kufungua PR, tumia
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) kuendesha mzunguko uliolenga
-kile ulichobadilisha. Mkusanyiko kamili wa majaribio ya unit (sehemu 4 za CI), Vitest, kizuizi cha coverage cha **60%+**, na
-build ya uzalishaji ni jukumu la CI — kuviendesha ndani ya mazingira yako hakuongezi taarifa yoyote ambayo ukaguzi wa PR
-hautakupa tayari, na kwenye mashine ndogo kunaweza kujaza kabisa rasilimali za host (#8084):
+[Golden Path ya Uchangiaji](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) kuendesha mzunguko unaolenga
+ulichobadilisha. Mkusanyiko kamili wa majaribio ya unit (shard 4 za CI), Vitest, kizuizi cha coverage cha **60%+**, na
+build ya production ni jukumu la CI — kuyaendesha ndani ya mazingira yako hakuongezi taarifa ambayo ukaguzi wa PR
+hautakupa tayari, na kwenye mashine ndogo kunaweza kutumia rasilimali zote za host (#8084):
 
-- Endesha faili za majaribio zinazohusiana na mabadiliko yako: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Endesha faili za majaribio zinazoshughulikia mabadiliko yako: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Endesha `npm run lint`
-- Jumuisha au sasisha majaribio ya kiotomatiki katika PR hiyo hiyo kila msimbo wa uzalishaji unapobadilika
-- Jumuisha faili za majaribio zilizobadilishwa au kuongezwa katika maelezo ya PR wakati msimbo wa uzalishaji umebadilika
-- Kagua matokeo ya SonarQube kwenye PR wakati siri za mradi zimesanidiwa katika CI
+- Jumuisha au sasisha majaribio ya kiotomatiki katika PR hiyo hiyo kila msimbo wa production unapobadilika
+- Katika faili za `node:test`, weka kila `await` ya kiwango cha juu (kama vile `await import(...)`) kabla ya `test()` / `describe()` ya kwanza: chini ya `--test-force-exit`, majaribio yaliyosajiliwa baada yake yanaweza kutotekelezwa kabisa bila onyo (#18045; inatekelezwa na `npm run check:test-tla-order`)
+- Jumuisha faili za majaribio zilizobadilishwa au kuongezwa katika maelezo ya PR wakati msimbo wa production umebadilika
+- Angalia matokeo ya SonarQube kwenye PR wakati siri za mradi zimesanidiwa katika CI
 
 Hali ya sasa ya majaribio: **faili 122 za majaribio ya unit** zinazoshughulikia:
 
-- Vigeuzi vya watoa huduma na ubadilishaji wa umbizo
+- Vitafsiri vya watoa huduma na ubadilishaji wa umbizo
 - Uzuiaji wa kasi, circuit breaker, na ustahimilivu
 - Cache ya kisemantiki, idempotency, ufuatiliaji wa maendeleo
-- Operesheni za hifadhidata na schema (moduli 21 za DB)
+- Operesheni za database na schema (moduli 21 za DB)
 - Mitiririko ya OAuth na uthibitishaji
 - Uthibitishaji wa endpoint za API (Zod v4)
 - Zana za seva ya MCP na utekelezaji wa scope
@@ -288,65 +289,72 @@ Tazama `open-sse/utils/stream.ts` na `open-sse/utils/streamHandler.ts` kwa mifan
 
 ---
 
-## Project Structure
+## Muundo wa Mradi
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # Kurasa za dashibodi (sehemu 23)
+│   ├── api/                # Njia za API (saraka 51)
+│   └── login/              # Kurasa za uthibitishaji (.tsx)
+├── domain/                 # Injini ya sera (policyEngine, comboResolver, costRules, n.k.)
+├── lib/                    # Mantiki kuu ya biashara (.ts)
+│   ├── a2a/                # Seva ya itifaki ya Agent-to-Agent v0.3
+│   ├── acp/                # Sajili ya Agent Communication Protocol
+│   ├── compliance/         # Injini ya sera ya uzingatiaji
+│   ├── db/                 # Moduli za kikoa za SQLite + uhamishaji 130
+│   ├── memory/             # Kumbukumbu endelevu ya mazungumzo
+│   ├── oauth/              # Watoa huduma, huduma, na zana za OAuth
+│   ├── skills/             # Mfumo unaoweza kupanuliwa wa ujuzi
+│   ├── usage/              # Ufuatiliaji wa matumizi na ukokotoaji wa gharama
+│   └── localDb.ts          # Safu ya kusafirisha upya pekee — usiongeze kamwe mantiki hapa
+├── middleware/              # Programu kati ya ombi (promptInjectionGuard)
+├── mitm/                   # Proksi ya MITM (cheti, DNS, uelekezaji lengwa)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # Vijenzi vya React (.tsx)
+│   ├── constants/          # Ufafanuzi wa watoa huduma (329), mawanda ya MCP, mikakati 20 ya uelekezaji
+│   ├── utils/              # Kivunja saketi, kisafishaji, visaidizi vya uthibitishaji
+│   └── validation/         # Skima za Zod v4
+└── sse/                    # Msururu wa proksi wa SSE
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # Nafasi ya kazi ya @omniroute/open-sse
+├── executors/              # Moduli 150 za utekelezaji (madarasa ya utekelezaji + visaidizi vya kila mtoa huduma)
+├── handlers/               # Vishughulikiaji 11 vya maombi (gumzo, majibu, upachikaji, picha, n.k.)
+├── mcp-server/             # Seva ya MCP (zana 110 za kipekee, njia 3 za usafirishaji, mawanda 33)
+├── services/               # Huduma 178 za kiwango cha juu (combo, autoCombo, rateLimitManager, n.k.)
+├── translator/             # Vigeuzi vya umbizo (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Kigeuzi cha Responses API
+└── utils/                  # Moduli 22 za matumizi (mtiririko, TLS, proksi, uwekaji kumbukumbu)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Programu ya eneo-kazi ya Electron (ya majukwaa mbalimbali)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Kiendesha majaribio cha Node.js (faili 1,574 za majaribio)
+├── integration/            # Majaribio ya ujumuishaji
+├── e2e/                    # Majaribio ya Playwright
+├── security/               # Majaribio ya usalama
+├── translator/             # Majaribio mahususi ya kigeuzi
+└── load/                   # Majaribio ya mzigo
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # Rekodi za Maamuzi ya Usanifu
+├── architecture/            # Usanifu na ustahimilivu wa mfumo
+├── comparison/              # OmniRoute dhidi ya mbadala
+├── compression/             # Miongozo na kanuni za ubanaji
+├── dev/                     # Miongozo ya usanidi
+├── diagrams/                # Michoro ya usanifu
+├── frameworks/              # MCP, A2A, OpenCode, Kumbukumbu, Ujuzi
+├── guides/                  # Mwongozo wa mtumiaji, Docker, usanidi, utatuzi wa matatizo
+├── i18n/                    # Tafsiri za README zilizotafsiriwa kimataifa
+├── marketing/               # Nyenzo za uuzaji
+├── ops/                     # Usambazaji, proksi, ufunikaji, matoleo
+├── providers/               # Nyaraka mahususi za watoa huduma
+├── reference/               # Rejea ya API, vigeu vya mazingira, zana za CLI, viwango vya bila malipo
+├── releases/                # Maelezo ya matoleo
+├── routing/                 # Injini ya mchanganyiko otomatiki, urudiaji wa mchakato wa kufikiri
+├── screenshots/             # Picha za skrini za dashibodi
+├── security/                # Vizuizi vya ulinzi, uzingatiaji, ufichaji, tokeni
+└── specs/                   # Vipimo vya usanifu
 ```
 
 ---
@@ -406,9 +414,12 @@ Andika majaribio ya vipengele katika `tests/unit/` yanayojumuisha angalau:
 
 ---
 
-## Releasing
+## Kutoa Toleo
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+Matoleo yanasimamiwa kupitia mtiririko wa kazi wa `/generate-release`. GitHub Release mpya inapoundwa, kifurushi **huchapishwa kiotomatiki kwenye npm** kupitia GitHub Actions.
+
+Kwa upelekaji kwenye VPS, tumia `npm run build:release` (si `npm run build`) — hufanya ujenzi upya ulio safi, hukusanya kifurushi kwenye `dist/`, na huandika kiashiria cha `dist/BUILD_SHA`.
+Kisha tumia stadi za `/deploy-vps-*-cc` ambazo husawazisha `dist/` kupitia rsync hadi kwenye saraka ya mbali ya `app/`.
 
 ---
 

@@ -313,7 +313,18 @@ test.describe("provider journey — Gemini client format (openai-compatible upst
   });
 
   test("STEP 6: /v1beta/models lists the synced model for Gemini clients", async () => {
-    const response = await v1betaModelsRoute.GET();
+    // #16208: the Gemini catalog now enforces the same requireAuthForModels gate as
+    // /v1/models — an anonymous caller is refused, a keyed Gemini caller gets in.
+    const anonResponse = await v1betaModelsRoute.GET(
+      new Request("http://localhost/v1beta/models")
+    );
+    assert.equal(anonResponse.status, 401, "anonymous catalog listing must be rejected");
+
+    const response = await v1betaModelsRoute.GET(
+      new Request("http://localhost/v1beta/models", {
+        headers: { "x-goog-api-key": apiKeyValue },
+      })
+    );
     const body = await readJsonObject(response);
     assert.equal(response.status, 200);
     const names = asArray<{ name?: string }>(body.models).map((m) => m.name ?? "");
@@ -323,21 +334,17 @@ test.describe("provider journey — Gemini client format (openai-compatible upst
     );
   });
 
-  // Known gap, recorded as TODO so it is visible in every run without turning CI red:
-  // /v1beta/models names custom-provider models `models/<raw node id>/<model>`, i.e. the
-  // provider-node UUID that #8327 removed from /v1/models still leaks on the Gemini
-  // catalog (src/app/api/v1beta/models/route.ts, synced-models loop).
-  test(
-    "STEP 7: /v1beta/models names the model under the configured prefix, never the UUID",
-    { todo: "#8327 residue on the Gemini catalog surface (rail 3.8.55 Task 13 finding)" },
-    async () => {
-      const response = await v1betaModelsRoute.GET();
-      const body = await readJsonObject(response);
-      const names = asArray<{ name?: string }>(body.models).map((m) => m.name ?? "");
-      assert.ok(names.includes(`models/${PUBLISHED_MODEL_ID}`), JSON.stringify(names));
-      for (const name of names) {
-        assert.equal(UUID_SHAPE_RE.test(name), false, `raw UUID in /v1beta/models: ${name}`);
-      }
+  test("STEP 7: /v1beta/models names the model under the configured prefix, never the UUID", async () => {
+    const response = await v1betaModelsRoute.GET(
+      new Request("http://localhost/v1beta/models", {
+        headers: { "x-goog-api-key": apiKeyValue },
+      })
+    );
+    const body = await readJsonObject(response);
+    const names = asArray<{ name?: string }>(body.models).map((m) => m.name ?? "");
+    assert.ok(names.includes(`models/${PUBLISHED_MODEL_ID}`), JSON.stringify(names));
+    for (const name of names) {
+      assert.equal(UUID_SHAPE_RE.test(name), false, `raw UUID in /v1beta/models: ${name}`);
     }
-  );
+  });
 });

@@ -11,9 +11,11 @@
  * The resolver lives on `globalThis` so duplicated module instances (route
  * bundles vs. instrumentation) still see the same registration.
  */
+import { sharedSymbol } from "@/shared/utils/processSingleton";
+
 type FeatureFlagResolver = (key: string) => boolean;
 
-const RESOLVER_KEY = Symbol.for("omniroute.featureFlagResolver");
+const RESOLVER_KEY = sharedSymbol("featureFlagResolver");
 
 type ResolverStore = { [RESOLVER_KEY]?: FeatureFlagResolver };
 

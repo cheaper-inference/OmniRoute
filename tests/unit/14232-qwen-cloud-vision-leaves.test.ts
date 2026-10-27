@@ -53,5 +53,9 @@ test("#14232 an image request keeps the qwen-cloud-token-plan leaf in the combo 
     imageBody,
     noopLog
   ).map((t) => t.modelStr);
-  assert.deepEqual(kept, ["qwen-cloud-token-plan/qwen3.8-flash"]);
+  assert.equal(getResolvedModelCapabilities("groq/llama-3.1-8b-instant").supportsVision, null);
+  assert.deepEqual(kept, [
+    "qwen-cloud-token-plan/qwen3.8-flash",
+    "groq/llama-3.1-8b-instant",
+  ], "vision-confirmed leaf must stay first; unknown remains a last-resort fallback");
 });

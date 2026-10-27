@@ -4,228 +4,159 @@
 
 ---
 
-> **סטטוס:** מסמך עזר — התקינה המתוארת כאן **מיושמת** (שלבים 1–6: רקע רשת, רכיבים בסיסיים, ריכוז צבעי סטטוס, אסימון mono, העברת DataTable לאסימונים, focus-ring → accent, רכיבי Checkbox/Textarea בסיסיים, `cn()` → tailwind-merge, רשת בכל מסך עצמאי, מעטפת תוכן גמישה ל-4K, משטחי טבלת נתונים אטומים). מסמך זה הוא התיאור הקנוני של אסימוני העיצוב, הרכיבים והמוסכמות של לוח הבקרה; החלוקה לשלבים להלן נשמרת כהנמקה לכל החלטה.
-> **תחום:** לוח הבקרה של OmniRoute (`src/`) ואתר השיווק (`_mono_repo/omnirouteSite/`) חולקים **זהות חזותית אחת** — אותו רקע רשת בסגנון נייר משבצות (32px), אותם אסימוני צבע ורכיבים מתוקננים.
->
-> הערות מעשיות למתחזקים:
->
-> - כמה ערכי hex קשיחים שנותרו הם **מכוונים** (מסוף קונסולה שתמיד כהה, קווי SVG של ReactFlow), ו**אסור** להעביר אותם באופן גורף לאסימונים.
-> - רשת "גדולה יותר" במופע פעיל נובעת מבנייה מיושנת, לא מהקוד — גודל הרשת הוא 32px, זהה לאתר.
-> - ערכי `--table-*` בערכת הנושא הכהה זהים ברמת הבתים לערכי rgba הקשיחים שקדמו להעברה; ערכת הנושא הבהירה תוקנה (היא הייתה כהה תמיד עקב חלופות `var()` לא פעילות).
+> **סטטוס:** לוח הבקרה מבוסס על **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), שנכלל
+> ישירות כמרחב העבודה `packages/ui-kit` (`@omniroute/ui-kit`; תמונת המצב ממקור upstream מקובעת בקובץ
+> `packages/ui-kit/UPSTREAM.md` ומוגנת באמצעות `npm run check:ui-kit-snapshot`). מצב בהיר הוא ערכת הנושא
+> הקנונית; העדפת ברירת המחדל היא `system`. צבע ההדגשה הוא Keak lime (`--ci-color-accent`). הגופן Inter
+> (ריווח אותיות 0, `--ci-letter-spacing-ui`) הוא משפחת הגופנים של ממשק המשתמש, Instrument Serif משמש רק לטקסט תצוגה גדול ומרווח
+> (`.ci-dashboard-display`), ו-IBM Plex Mono משמש לקוד — כולם מתארחים באופן עצמאי באמצעות ייבואי
+> `@fontsource/*` שבראש `src/app/globals.css`. כל סמל הוא גליף של Lucide.
 
----
+## 1. היכן נמצאים הדברים
 
-## 1. מטרה
+- **ערכה.** `packages/ui-kit/src` הוא עותק זהה ברמת הבתים של `src/` במאגר המקור, ב-commit המקובע
+  ב-`packages/ui-kit/UPSTREAM.md` (שמתעד גם את הרשאת הרישיון); הקובץ `PATCHES.md` מפרט תיקונים מקומיים
+  (אין כאלה). הוא נצרך כקוד מקור, ללא build: הקובץ `next.config.mjs` מבצע לו transpilation, והקובץ
+  `tsconfig.json` ממפה את `@omniroute/ui-kit` אל `packages/ui-kit/src` ואת `@omniroute/ui-kit/*` אל
+  `packages/ui-kit/src/*` (הקבצים `vitest.config.ts` ו-`vitest.mcp.config.ts` כוללים את אותו alias). יש לייבא
+  רכיב מהערכה באמצעות נתיב המשנה שלו (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), ולעולם לא
+  דרך קובץ ה-barrel ‏`@omniroute/ui-kit`: ה-barrel מושך כל רכיב (כולל בורר התאריכים)
+  אל כל מודול שמייבא אותו. גיליון הסגנונות של הערכה נטען דרך `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **טוקנים.** `packages/ui-kit/src/ci-tokens.css` מגדיר את הטוקנים `--ci-*`; הקובץ `src/app/globals.css`
+  מגשר ביניהם לבין השמות הישנים של OmniRoute ‏(`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), כך שהקריאות הקיימות ל-`var(--color-*)` וכלי העזר של Tailwind
+  ממשיכים לעבוד. קוד חדש משתמש בכלי העזר של Tailwind ‏(`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) או במחלקות הערכה — ולעולם לא בערך הקסדצימלי
+  (`tests/unit/design-kit-bridge.test.ts` אוכף את הגישור). `text-primary` נפתר אל
+  `--color-primary-ink` דרך `--text-color-primary` (‏lime-800 במצב בהיר, וגוון ה-lime הדומיננטי במצב כהה), כך
+  שטקסט ראשי נשאר קריא בעוד `bg-primary`/`border-primary` שומרים על משטח ה-lime. סדרות בתרשימים משתמשות
+  ב-`--color-chart-1` … `--color-chart-5`.
+- **ערכות נושא.** `<html className="ci-theme">` ‏(`src/app/layout.tsx`) מחיל על המסמך את ערכת הנושא של הערכה.
+  ההעדפה היא `light`, ‏`dark` או `system` ‏(`THEME_CONFIG.defaultTheme = "system"` בתוך
+  `src/shared/constants/appConfig.ts`; ‏`system` פועל לפי `prefers-color-scheme`). הפונקציה `applyTheme()` בתוך
+  `src/store/themeStore.ts` (שהסקריפט המוטמע לאתחול בתוך `src/app/layout.tsx` משקף אותה ופועל
+  לפני hydration) מגדירה את `data-theme="dark"|"light"` ומשנה במקביל את מצב המחלקה `.dark` על `<html>`.
+  קבוצת הטוקנים הכהה של הערכה מופעלת לפי `data-theme="dark"` ‏(`packages/ui-kit/src/ci-tokens.css`);
+  הגדרות המצב הכהה של OmniRoute עצמה (הבלוק `.dark` בתוך `globals.css`) וכלי העזר הישנים של Tailwind מסוג `dark:`
+  מופעלים לפי המחלקה `.dark`. אין הגדרות צבע דומיננטי מוכנות מראש: הצבע הדומיננטי מגיע תמיד
+  מהערכה, והגדרה שמורה מ-build ישן נמחקת בעת טעינת ה-store.
+- **רכיבים (מתאמים).** `src/shared/components/index.tsx` משמר את ה-API של רכיבי OmniRoute (אותם
+  שמות, ייצואי ברירת מחדל ו-props), וה-primitives שמאחוריו הם מתאמים מעל הערכה: טפסים
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), שכבות-על ומשוב
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  מבנה (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) וטבלאות
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). מתאם מייבא את רכיב הערכה
+  באמצעות נתיב משנה וממפה אליו את ה-props הישנים — לדוגמה, `Button variant="primary"` הוא כפתור
+  ה-`default` של הערכה (`--ci-button-primary-*`: המשטח ההפוך במצב בהיר, והצבע הדומיננטי עם צבע הטקסט
+  `--ci-color-accent-foreground` שלו במצב כהה), `danger` הוא `destructive`, ו-`warning` הוא `outline` בתוספת
+  ההרחבה `.ci-button--warning`. הכללים `.ci-button--warning` ו-`.ci-badge[data-tone]` שבסוף
+  `globals.css` ‏(`@layer components`) הם הרחבות של OmniRoute מעל מחלקות הערכה.
+  הקבצים `tests/unit/ui/adapters/*.test.tsx` מקבעים את ההתנהגות של כל מתאם.
+- **מעטפת.** `src/app/(dashboard)/layout.tsx` מרנדר את `DashboardLayout`, שמרנדר את
+  `src/shared/components/layouts/DashboardShell.tsx`: רכיבי הערכה `SidebarProvider` / `Sidebar` /
+  `SidebarInset` ‏(`packages/ui-kit/src/sidebar.tsx`), עם לוגיקת הניווט של OmniRoute בתוך
+  `src/shared/components/Sidebar.tsx`. קישור "דלגו לתוכן" אל `#main-content` הוא האלמנט הראשון
+  שניתן להעביר אליו מיקוד. `src/shared/components/Header.tsx` מכיל את `SidebarTrigger` של הערכה (מתג סרגל
+  הצד היחיד במעטפת), את `ProductSwitcher` של Keak ואת הלחצן לפתיחת לוח הפקודות; הוא מציג את כותרת הנתיב רק כאשר
+  לא מותקן `PageHeader` של הערכה (`.ci-page-header`) בתוך `#main-content`, כך שבעמוד הכולל
+  `PageHeader` משלו יש `h1` יחיד. `src/shared/components/CommandPalette.tsx` הוא `Dialog` של הערכה.
+- **סמלים.** `<Icon name="material_name">` ‏(`src/shared/components/Icon.tsx`) ממפה את השם (מאוצר המילים
+  של Material Symbols שבו משתמשים המסכים) באמצעות `ICON_MAP` ‏(`src/shared/constants/iconMap.ts`) לסמל של
+  Lucide. הגופן והחבילה של Material Symbols הוסרו: שם שחסר במפה מרנדר סמל מציין מקום ניטרלי
+  (`data-icon-missing="true"`) ומתעד אזהרה ב-console מחוץ לסביבת production.
+  הפקודה `npm run gen:icon-map` מדפיסה את השמות שבשימוש וחסרים במפה
+  (`tests/unit/icon-map-coverage.test.ts` נכשל עבור כל שם שאין לו סמל Lucide;
+  `tests/unit/icon-map-object-values.test.ts` מכסה שמות המאוחסנים באובייקטי חיפוש);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` משכתב רכיבי span מילוליים מסוג
+  `<span className="material-symbols-outlined">` ל-`<Icon>`.
+- **מותג.** `src/shared/components/OmniRouteLogo.tsx` עוטף את הערכה: ייצוא ברירת המחדל `OmniRouteLogo`
+  מרנדר `ProductIcon product="omniroute" variant="glyph"` ‏(SVG מוטמע, בטוח לשימוש עם `basePath`) ו-
+  `OmniRouteLockup` מרנדר `ProductLockup product="omniroute"` ‏(שם נגיש "Keak OmniRoute"), או, עבור
+  מפעילי white-label, את ה-`name`/`logoSrc` שלהם. יעדי בורר המוצרים נמצאים בתוך
+  `src/shared/constants/keakProducts.ts` ‏(`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). המסכים העצמאיים
+  — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` ו-`src/shared/components/ErrorPageScaffold.tsx`
+  — מציגים את ה-lockup; הקובץ `tests/unit/brand-pages-static.test.ts` מגן על התנהגות זו.
 
-אתר השיווק (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) ולוח הבקרה של המוצר צריכים להיראות כמו **מוצר אחד**. האתר כבר שאל את לוח הצבעים שלו מלוח הבקרה — בקובץ `css/tokens.css` שלו אף נכתב _"לוח הצבעים משקף את לוח הבקרה של OmniRoute ‏(src/app/globals.css)"_. לכן השניים כבר מיושרים בכ-80% ברמת הצבעים. מה שחסר בלוח הבקרה:
+## 2. כללים
 
-1. **רקע הרשת בסגנון נייר משבצות** שבו האתר משתמש בכל עמוד.
-2. כמה **אסימוני עיצוב משותפים** שקיימים באתר אך חסרים בלוח הבקרה (סולם רדיוסים, מעבר צבע של המותג, `surface-2`, גופן ברוחב אחיד).
-3. **עקביות ברמת הרכיבים** — כמה רכיבים בלוח הבקרה עוקפים את אסימוני ערכת הנושא באמצעות ערכי hex/rgba קשיחים.
+1. טוקנים, לעולם לא ליטרלים. חריגים נשמרים בכוונה: טרמינל הקונסולה שהוא כהה-תמיד ו-`STATUS_HEX`
+   (`src/shared/constants/statusColors.ts`), השיקוף ב-hex המפוענח של פלטת הסטטוסים של הקיט עבור
+   קוראים שזקוקים ל-hex ליטרלי. הפלטות הקטגוריות כבר אינן חריגה: הן נשענות על חמשת טוקני הגרפים
+   של הקיט (`--color-chart-1..5`) דרך `src/shared/utils/categoricalPalette.ts` ועבור אסטרטגיות
+   ניתוב, דרך `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; הקשתות של ReactFlow וקנבס
+   התזמור קוראים את משתני `--orch-status-*` המודעים לערכת הנושא
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. אסור לעולם לתקן את `packages/ui-kit/src` ידנית: מסנכרנים בעזרת
+   `scripts/dev/sync-ui-kit.sh <commit>`; שער ה-pre-commit‏ `npm run check:ui-kit-snapshot`
+   (`.husky/pre-commit`) נכשל על כל בייט ששונה מה-commit הנעוץ של ה-upstream (הוא מדלג עם אזהרה
+   כאשר שיבוט ה-upstream, `UI_KIT_CLONE` או `_references/cheaper-inference-ui-kit`, נעדר). כאשר
+   הקיט חסר משהו, עוקפים זאת ב-adapter או במסך ומבקשים זאת מה-upstream.
+3. ברירות המחדל של טקסטים בקיט הן באנגלית (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   מעבירים מחרוזות מתורגמות מ-`useTranslations(...)` בכל פעם שרכיב קיט מרנדר טקסט.
+4. ה-utilities של Tailwind גוברים על קלאסים של רכיבי הקיט (הקיט מכריז
+   `@layer theme, base, components, utilities` והכללים שלו חיים ב-`components`) — משתמשים ב-utilities
+   למרווחים ולפריסה, לא כדי לצבוע מחדש רכיבי קיט.
+5. כותרות: `.ci-heading` (Inter, ללא tracking) לכותרות עמודים ומקטעים; `.ci-dashboard-display`
+   (Instrument Serif) רק לטקסט תצוגה גדול ודליל, כגון קוד הסטטוס של עמוד השגיאה.
+6. `tests/unit/dashboard-kit-sweep.test.ts` שומר על אימוץ הקיט: אין span של ליגטורות Material תחת
+   `src/app` או `src/shared/components`; בעץ הדשבורד (`src/app/(dashboard)` ו-`src/shared/components`)
+   אין `<select>`, `<textarea>` או `<table>` גולמיים ואין `role="dialog"` בנוי-יד מחוץ לחריגים
+   הרשומים (הענף הטבעי של ה-adapter של `Select`, `RequestLoggerDetail`); כל `<button>` או `<input>`
+   גולמי שם זקוק להערה המכילה `kit-exception:` (עם הסיבה) המסתיימת לכל היותר 3 שורות מעליו; גווני
+   פלטה ווריאנטים של `dark:` רק בקבצים שהמבחן מפרט.
+7. לאמת את שתי ערכות הנושא ואת ה-viewport ברוחב 390 פיקסלים לפני PR (צילומי מסך);
+   `tests/e2e/a11y.spec.ts` מריץ את axe.
 
-מסמך זה כולל את הניתוח ואת התוכנית.
+## 3. הוספת מסך
 
----
+1. יש לפתוח את העמוד באמצעות `PageHeader` של הערכה (`@omniroute/ui-kit/page-header`, עם `compact` בתוך
+   לוח הבקרה) — כותרת, תיאור ו-`actions`. לאחר מכן כותרת המעטפת אינה מציגה כותרת משלה.
+2. יש לבנות פקדים מ-`@/shared/components` (המתאמים) ולהשתמש ברכיבי הערכה דרך נתיב משנה כאשר
+   אין מתאם (`Table`/`TableScrollArea`/`DataTableShell`, ‏`Field`, ‏`Alert`, ‏`Tabs`, ‏`RadioGroup`,
+   `Slider`…).
+3. סמלים: `<Icon name="…" />`. שם חדש נוסף אל `ICON_MAP` עם רכיב Lucide התואם מבחינה
+   סמנטית; `npm run gen:icon-map` מציג את השמות שעדיין חסרים.
+4. צבעים: כלי שירות סמנטיים (`text-success`, ‏`bg-warning-bg`, ‏`border-border`…) ו-
+   `var(--color-chart-N)` עבור סדרות בתרשימים; ללא ערכי hex וללא וריאנטים של `dark:` שרק חוזרים על צבע.
+5. טקסט: כל מחרוזת, לרבות התוויות המועברות לרכיבי הערכה, מגיעה מ-`useTranslations`. מפתחות חדשים
+   נוספים אל `src/i18n/messages/en.json`, ‏`pt-BR.json` ו-`vi.json` (בדיקת התאימות לווייטנאמית מקבעת
+   כל מפתח באנגלית); שאר אזורי השפה מתמלאים באמצעות סנכרון ה-i18n.
+6. יש להריץ את בדיקות ההגנה לפני ה-PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, ‏`tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (הבדיקה היחידה שמזהה ייבוא כפול ב-`iconMap.ts`),
+   `npm run check:ui-icu`, והבדיקות של המסך עצמו.
 
-## 2. עקרונות
+## 4. הוספה או שינוי של מתאם
 
-- **מקור אמת יחיד = `src/app/globals.css`.** האתר משקף את לוח הבקרה, ולעולם לא להפך. אסימונים חדשים מתווספים תחילה ל-`globals.css`.
-- **אסימונים, לעולם לא ערכים מילוליים.** רכיבים צורכים אסימונים סמנטיים (`bg-surface`, `text-primary`, `border-border`), ולעולם לא ערך `#hex` גולמי.
-- **עדין, לא צעקני.** הרשת היא רקע מעודן שנמצא מאחורי התוכן — אסור לה לפגוע בניגודיות הטקסט או להתחרות בממשק המשתמש.
-- **מודע לערכת הנושא.** הכול פועל הן במצב `.dark` (המראה המזוהה עם המוצר) והן במצב בהיר.
-- **פריסה הדרגתית וממוקדת.** תחילה משחררים את הרשת והאסימונים (סיכון נמוך, נראות גבוהה), ולאחר מכן מבצעים ניקוי רכיבים בגלים.
+1. שמרו על ה-API הציבורי של `src/shared/components/index.tsx`: אותם שמות ייצוא, ייצואי ברירת מחדל ו-props נתמכים. מפו את ה-props הישנים אל ה-kit בתוך המתאם (ראו `Button.tsx`:‏ `VARIANT_TO_KIT`,‏
+   `SIZE_TO_KIT`).
+2. ייבאו את ה-kit באמצעות נתיב משנה (`@omniroute/ui-kit/<component>`).
+3. מעקפים עבור חוסרים ב-kit נמצאים במתאם (או ב-`globals.css` בתוך `@layer components` כאשר התיקון הוא
+   סגנון), ולעולם לא ב-`packages/ui-kit/src`.
+4. הוסיפו או עדכנו את `tests/unit/ui/adapters/<name>.test.tsx`. עבור מתאם עם קוראים רבים, השוו את
+   הסימון שנוצר לפני השינוי ואחריו — שינויי ריווח פנימי או מעטפת מתפשטים לכל מסך.
 
----
+## 5. עדכון ה-kit
 
-## 3. המצב הנוכחי — מה כבר מיושר ומה לא
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` מעתיק את `src/` ממקור ה-upstream ב-commit הנתון אל
+`packages/ui-kit/src` ומחיל את הטרנספורמציה היחידה המותרת (הוא מסיר את הסיומת `.js` מייבואים
+יחסיים). לאחר מכן: סקרו את `git diff packages/ui-kit`, בצעו בדיקה חזותית של ספקים, הגדרות, שילובים,
+שימוש ונקודת קצה בשתי ערכות הנושא, הריצו את `npm run check:ui-kit-snapshot` ואת `npm run test:vitest:ui`, ופתחו
+את ה-PR עם יומן השינויים של ה-upstream.
 
-### 3.1 צבעים — כבר מאוחדים ✅
+## 6. אינדקס עזר
 
-כל צבעי המותג והמשטחים כבר תואמים לאתר **בערכם** (רק השמות שונים — בלוח הבקרה קיימת הקידומת `--color-`). אומת ב-`src/app/globals.css:30-128`:
-
-| מושג                     | אסימון באתר (`tokens.css`)                  | אסימון בלוח הבקרה (`globals.css`) | התאמה        |
-| ------------------------ | ------------------------------------------- | --------------------------------- | ------------ |
-| ראשי                     | `--primary #e54d5e`                         | `--color-primary #e54d5e`         | ✅           |
-| ראשי במעבר עכבר          | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e`   | ✅           |
-| הדגשה                    | `--accent #6366f1`                          | `--color-accent #6366f1`          | ✅           |
-| הדגשה 2                  | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`    | ✅ (שונה שם) |
-| הדגשה 3                  | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`    | ✅ (שונה שם) |
-| הצלחה / אזהרה / שגיאה    | `#22c55e / #f59e0b / #ef4444`               | זהים                              | ✅           |
-| רמזורי תעבורה            | `#ff5f56 / #ffbd2e / #27c93f`               | זהים                              | ✅           |
-| רקע / משטח / גבול כהים   | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | זהים                              | ✅           |
-| רקע / משטח / טקסט בהירים | `#f9f9fb / #fff / #1a1a2e`                  | זהים                              | ✅           |
-
-**מסקנה:** אין צורך בהעברת צבעים. הזהות כבר משותפת; אנחנו _משלימים_ אותה, לא בונים אותה מחדש.
-
-### 3.2 פערים — מה חסר בלוח הבקרה
-
-| פער                    | מה יש באתר                                                                             | לוח הבקרה                                              | פעולה               |
-| ---------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------- |
-| **רקע רשת**            | נייר משבצות מסוג `body::before`,‏ `--grid-line`,‏ `--grid-size 32px`,‏ `--section-alt` | **✅ נוסף (שלב 1)**                                    | **חלק א׳**          |
-| **סולם רדיוסים**       | `--radius 14px`,‏ `--radius-sm 9px`                                                    | `--radius 14px` נוסף; `-sm` + שיוך מחדש לרכיבים בהמתנה | **חלק ב׳ / שלב 2**  |
-| **גרדיאנט המותג**      | `--grad-brand 135deg primary→accent-3`                                                 | **✅ הטוקן נוסף (שלב 1)**; ייעשה בו שימוש בשלב 2       | **חלק ב׳**          |
-| **משטח מקונן**         | `--surface-2 #1c2230`                                                                  | **✅ נוסף (שלב 1)**                                    | **חלק ב׳**          |
-| **גופן ברוחב אחיד**    | `--font-mono` (מחסנית ui-monospace)                                                    | בהמתנה (שלב 4, יחד עם הצרכנים)                         | **חלק ב׳**          |
-| **`text-muted` (כהה)** | `#8b8b9e`                                                                              | `#a1a1aa` (zinc-400)                                   | להתאים — **חלק ב׳** |
-
-### 3.3 מנגנוני ערכות הנושא (כדי שלא נשבור דבר)
-
-- **Tailwind v4, בגישת CSS-first** (ללא `tailwind.config.*`). הטוקנים מוגדרים בתוך `:root`/`.dark` ונחשפים לכלי העזר באמצעות `@theme inline` (`globals.css:130-179`).
-- **מצב כהה באמצעות המחלקה `.dark`** על `<html>` (`@custom-variant dark` ב־`globals.css:22`), המוחלפת באמצעות מאגר Zustand מותאם אישית (`src/store/themeStore.ts`); ערכת הנושא המוגדרת כברירת מחדל = `system` (`src/shared/constants/appConfig.ts:11`). במקום זאת, האתר משתמש ב־`html[data-theme="light"]` — **המנגנונים שונים אך לעולם אינם נפגשים** (מקורות נפרדים), ולכן אין התנגשות. נשמור על מנגנון ה־`.dark` של לוח הבקרה.
-- **קיימת דריסת צבע ראשי בזמן ריצה** (`themeStore.ts:85-97`, הגדרות מוכנות מראש ב־`COLOR_THEMES`) — משתמשים יכולים להחליף את `--color-primary`. כל טוקן חדש (גרדיאנט וכדומה) שמפנה אל `--color-primary` יורש את הדריסות האלה ללא צורך בפעולה נוספת. ✅
-- **שמות רדיוסים שמורים ב־Tailwind v4:**‏ `--radius-sm/md/lg/...` משמשים כבסיס לכלי העזר `rounded-*`. הגדרה מחדש שלהם משנה בדיעבד כל שימוש קיים ב־`rounded-*` (לדוגמה, `rounded-sm` נמצא בשימוש ב־12 קבצים). לכן ערך הרדיוס הקטן והשיוך מחדש של הרכיבים נדחים במכוון לשלב 2, שבו הצרכנים משתנים יחד.
-
----
-
-## 4. חלק א׳ — רקע רשת נייר המשבצות (הבקשה המרכזית) — מומש (שלב 1)
-
-### 4.1 מה זה
-
-המתכון המדויק מהאתר (`_mono_repo/omnirouteSite/css/base.css`): **פסאודו-אלמנט קבוע בגודל חלון התצוגה כולו**, המצייר שני גרדיאנטים של קווים בעובי 1px וממוקם ב-`z-index:-1` מאחורי כל התוכן.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**מדוע זה עובד אף על פי של-`body` יש `background-color` אטום:** `::before` עם `z-index:-1` מצויר _מעל_ לרקע של האלמנט עצמו, אך _מתחת_ לתוכן שלו שנמצא בזרימה. לכן `--color-bg` הוא מילוי הבסיס, הרשת מונחת מעליו בשכבה, והיישום מוצג מעל הרשת.
-
-### 4.2 תקדים שכבר קיים בבסיס הקוד
-
-`src/app/landing/page.tsx:16-26` **כבר מממש את אותה הרשת ברמת העמוד** — אך עם קווים **אדומים** (`#E54D5E`, אטימות `0.06`) במרווחים של **50px**, בתוספת כדורים מונפשים. לכן התבנית כבר הוכחה במוצר; עבודה זו הופכת אותה לטפט **גלובלי ומותאם לערכת הנושא**.
-
-### 4.3 אסימונים שנוספו (ב-`globals.css`)
-
-```css
-:root {
-  /* בהיר — אטימות הרשת הוגדלה לעומת 0.045 של האתר, כדי שהטפט יהיה
-     גלוי בפועל בלוח הבקרה הצפוף (כרטיסים ומעטפת הממשק מכסים את רוב חלון התצוגה) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* כהה — הוגדל לעומת 0.035 מאותה סיבה */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 החסם היחיד — הוסר
-
-הרשת גלובלית מעצם הגדרתה (היא מכסה בבת אחת את הפאנל, `auth`/`login`, דפי שגיאה — כל נתיב). בדיוק אלמנט **אחד** הסתיר אותה בתוך הפאנל:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — העוטף החיצוני צייר `bg-bg` אטום. כל מה שמתחתיו כבר שקוף (`<main>`, מכל הגלילה והאלמנט הפנימי `max-w-7xl`), ולכן **הסרת `bg-bg`** מאפשרת לרשת של ה-`body` להופיע דרך אזור התוכן (ה-`--color-bg` של ה-`body` נשאר מילוי הבסיס).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 אינטראקציה עם מעטפת הממשק (סרגל צד / כותרת)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) ו-`Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) נשארים **אטומים** ← הרשת מופיעה **רק באזור התוכן**, בעוד שמעטפת ממשק אחידה ממסגרת אותו. זוהי ברירת מחדל רגועה, התואמת לאופן שבו האתר מפריד בין מעטפת הממשק למשטח התוכן (החלטה D3 = אחיד).
-
-### 4.6 דפי כניסה / אימות / שגיאה
-
-אלה מוצגים ישירות תחת `<body>` (ללא מעטפת הפאנל), ולכן הרשת הגלובלית אמורה להופיע מאחוריהם באופן אוטומטי. **שלב 5 — הושלם:** העוטפים העצמאיים במסך מלא אכן היו אטומים (`min-h-screen … bg-bg`, כאשר `bg-bg` הוא אותו מילוי אחיד כמו `<body>`), דבר שהסתיר את הרשת בכל מסך שאינו לוח הבקרה — לא רק בדף הכניסה. כולם שקופים כעת, כך שהטפט המשותף מופיע דרכם: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` ו-`ErrorPageScaffold` (המכסה את `400`/`401`). בכך נסגרת **D4** (הורחבה מדף הכניסה בלבד לכל מסך עצמאי). ההתנהגות מוגנת באמצעות `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 דף נחיתה
-
-`landing/page.tsx` שומר על הרקע המונפש והעשיר יותר שלו (כדורים + וינייטה) — פתיח השיווק הייחודי שלו (החלטה D5 = להשאיר כפי שהוא).
-
----
-
-## 5. חלק ב׳ — איחוד טוקנים
-
-שלב 1 מוסיף את טוקני הזהות הפסיביים וללא ההתנגשויות (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). שלב 2 מחבר את סולם הרדיוסים ל-Tailwind ומפנה אליו מחדש את הרכיבים; שלב 4 מוסיף את `--font-mono` ואת הצרכנים שלו.
-
-| טוקן                       | סיבה                                                        | שלב                              |
-| -------------------------- | ----------------------------------------------------------- | -------------------------------- |
-| `--radius` / `--radius-sm` | סולם רדיוסים יחיד (14/9) במקום ערכי 6/8/12 אד־הוק           | 1 (ערך) / 2 (חיבור + הפניה מחדש) |
-| `--grad-brand`             | גרדיאנט מותג לקריאות לפעולה ראשיות (אדום→סגול), בהתאמה לאתר | 1 (טוקן) / 2 (Button)            |
-| `--surface-2`              | פאנלים מקוננים / כותרות טבלה / שורות משובצות                | 1                                |
-| `--font-mono`              | בלוקי קוד, מסוף, מזהים, נקודות קצה                          | 4                                |
-| התאמת `--text-muted`       | בחירת ערך יחיד לאתר↔פאנל (`#a1a1aa` מומלץ)                  | 2                                |
-
-**D2 (text-muted):** באתר `#8b8b9e` לעומת `#a1a1aa` בלוח הבקרה. מומלץ לשמור על **`#a1a1aa` של לוח הבקרה** ולעדכן את _האתר_ בהתאם. שינוי קוסמטי.
-
----
-
-## 6. חלק ג׳ — סטנדרטיזציה של רכיבים (שלבים 2–4)
-
-רכיבים מותאמים אישית (ללא shadcn/Radix), Tailwind v4, טוקנים סמנטיים אומצו **ברובם** (195 קבצים מייבאים את קובץ ה-barrel המשותף). העבודה היא הסרת **המעקפים**. מיקום מרכזי: `src/shared/components/`.
-
-| #   | פריט                                | קבצים                                                                                                                    | בעיה → יעד                                                                                                              | שלב |
-| --- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | --- |
-| C1  | **יישור רדיוסים**                   | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                | שילוב של 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                     | 2   |
-| C2  | **גרדיאנט כפתור + וריאנט `accent`** | `Button.tsx:5-12`                                                                                                        | הכפתור הראשי הוא אדום→אדום שטוח; התאמה ל-`--grad-brand`; הוספת וריאנט `accent` חסר. כ-195 מייבאים — הנראות הגבוהה ביותר | 2   |
-| C3  | **טבלאות**                          | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                      | 100% סגנונות inline עם ערכי rgba מקודדים קשיח ומשתנים שאינם קיימים; מעבר לטוקנים והוצאה משימוש של סגנונות סותרים        | 3   |
-| C4  | **ריכוז צבעי סטטוס**                | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helpers | יותר מ-6 עותקים של אותם ערכי hex → מודול אחד המבוסס על `--color-success/warning/error`                                  | 3   |
-| C5  | **מסגרת כרטיס**                     | `Card.tsx:39`                                                                                                            | `border-white/5` → מותג `/8`                                                                                            | 2   |
-| C6  | **התאמת טבעת מיקוד** ✅ הושלם       | `globals.css` `--focus-ring` (הדגשה) לעומת `ring-primary/30` של פקדי הטופס                                               | אוחד על **הדגשה (סגול)** כדי להתאים לטבעת הגלובלית ולהבדיל מטבעת השגיאה האדומה; השגיאה נשארת אדומה                      | 4   |
-| C7  | **הוספת `Checkbox` + `Textarea`**   | `<input>`/`<textarea>` גולמיים עם `accentColor:#6366f1` בתוך השורה                                                       | רכיבים בסיסיים מונחי-טוקנים                                                                                             | 4   |
-| C8  | **סריקת ערכי hex מקודדים קשיח**     | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, נקודות Modal, כ-14 קובצי תרשימים                                  | ליטרלים → טוקנים                                                                                                        | 4   |
-| C9  | **`cn()` → clsx + tailwind-merge**  | `src/shared/utils/cn.ts`                                                                                                 | מחלקות מתנגשות מצטברות; נדרש עבור הדריסות של C1                                                                         | 2   |
-
-**כבר תואמי מותג (מונחי-טוקנים, נדרש רק רדיוס):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. תוכנית השקה
-
-- **שלב 1 — גריד + טוקנים של זהות (PR זה).** גריד ב־`globals.css` + הטוקנים `--surface-2`/`--grad-brand`/`--radius`; טפט `body::before`; הסרת החסימה של `bg-bg`; בדיקת הגנה סטטית. סיכון נמוך, ניתן לביטול ב־commit יחיד.
-- **שלב 2 — רכיבי בסיס (C1, C2, C5) — הושלם ב־PR זה.** נוספו באמצעות `@theme` מחלקות radius סמנטיות: `rounded-card`‏ (14px) /‏ `rounded-control`‏ (9px) (שמות מותאמים אישית, כך שברירות המחדל `rounded-sm/md/lg/xl` נשארות ללא שינוי — בלי פיצוץ של 400 קבצים); Card/Modal ← 14px,‏ Button/Input/Select ← 9px;‏ Button ראשי ← `--grad-brand` (אדום←סגול) + וריאנט `accent` חדש; גבולות Card ← הטוקן `border-border`‏ (0.08). **נדחה:** `cn()`←tailwind-merge‏ (C9) דורש תלויות חדשות; הסריקה הנקודתית של `rounded-lg`‏ (326 קבצים) נשארה כפי שהיא, מכיוון שרכיבי הבסיס מכסים את רוב הממשק.
-- **שלב 3 — צבעי סטטוס + טבלאות (C3, C4) — הושלם ב־PR זה.** ✅ **C4**‏ (`src/shared/constants/statusColors.ts` —‏ `STATUS_HEX` כמקור יחיד; `flow/edgeStyles.ts` +‏ `TokenHealthBadge` הופנו אליו מחדש, בנאמנות/עם אותו hex). ✅ הטוקן **`--font-mono`**. ✅ **C3 (DataTable)** — כל ערכי ה־rgba המוטבעים וה־fallbacks המתים `var(--bg-table-header)` / `var(--text-secondary)` הוחלפו בקבוצת טוקנים `--table-*`‏ (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), שערכי המצב הכהה שלה **זהים בדיוק לערכי ה־rgba הקודמים שהוגדרו בקוד** (זהות ברמת הבתים במצב כהה), וערכי המצב הבהיר מתקנים את ערכת הנושא הבהירה שהייתה כהה תמיד קודם לכן. גבול הכותרת ← `--color-border`, טקסט משני ← `--color-text-muted`. **נדרשת בדיקה חזותית לפני המיזוג.** (לא שונו: `logTableStyles.ts` וכללי Ant הישנים של `.ant-table` — נפרדים ובעדיפות נמוכה יותר.)
-- **שלב 4 — ניקוי (C6, C7, C9 הושלמו; C8 ממתין).** ✅ **C9**‏ `cn()` ← `twMerge(clsx(...))`‏ (clsx + tailwind-merge נוספו כתלויות) — ה־`className` של הקוד הקורא כעת _מחליף_ כראוי מחלקה מתנגשת של רכיב בסיס במקום להיערם מעליה. ✅ **C7** רכיבי בסיס חדשים `Checkbox` +‏ `Textarea` (מונעי־טוקנים, מיוצאים מקובץ ה־barrel; תוספתיים — ניתן לאמץ בהדרגה את 32 תיבות הסימון הגולמיות / 41 אזורי הטקסט הגולמיים). ✅ **C6** התאמת טבעות המיקוד — פקדי הטופס (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) מציגים כעת במיקוד טבעת בצבע **accent (סגול)**, כדי להתאים ל־`--focus-ring` הגלובלי ולהפסיק להתנגש עם טבעת השגיאה האדומה; מצב השגיאה האדום נותר ללא שינוי. ⏳ **סריקת ה־hex של C8 אינה חיפוש/החלפה עיוורים** — נמצא ואושר כי המקרים הבאים _מכוונים_ וחייבים להישאר: `ConsoleLogViewer.tsx:240` (מסוף שתמיד כהה), חלונית ה־popover של `TokenHealthBadge`, קווי SVG של ReactFlow. יש להעביר רק ערכי hex שבאמת אמורים להיות מודעי־ערכת־נושא.
-
-בכל שלב: `npm run lint` +‏ `npm run typecheck:core` + בדיקה חזותית.
-
----
-
-## 8. החלטות פתוחות (המלצות)
-
-- **D1 — כפתור ראשי:** להשאיר אדום←אדום או לעבור ל־**אדום←סגול `--grad-brand`**? המלצה: **אדום←סגול** (שלב 2).
-- **D2 — צבע קווי הגריד:** **ניטרלי** (סגנון האתר) — נבחר — לעומת אדום המותג. גודל **32px** (הוקטן בכ־30% מה־46px המקוריים בעקבות משוב מהבעלים — תאי 46px נראו גדולים מדי בפריסת לוח המחוונים).
-- **D3 — חיוניות ה־Chrome:** סרגל צד/כותרת **אטומים** — נבחר.
-- **D4 — גריד אימות/כניסה:** ✅ **הושלם (שלב 5)** — `bg-bg` האטום הוסר מכל מעטפת עצמאית במסך מלא (לא רק מהכניסה), כך שהגריד מוצג בכל המסכים. ראו §4.6.
-- **D5 — דף נחיתה:** להשאיר את מסך הפתיחה המונפש כפי שהוא. נבחר.
-- **D6 — Radius‏ 14/9 בכל המוצר:** המלצה: כן (שלב 2).
-- **D7 — שלב 1 מופץ ראשון:** נבחר.
-- **D8 — רוחב הפריסה (שלב 5):** מעטפת התוכן של לוח המחוונים הוגבלה ל־`max-w-7xl`‏ (1280px), מה שגרם למרכוז עם שוליים צדדיים ריקים ורחבים בצגים גדולים. ✅ **הושלם** — הועלה ל־`max-w-[3840px]` נזיל (4K אמיתי): התוכן עוקב כעת אחר רוחב אזור התצוגה עד לכ־4K, וממורכז רק מעבר לכך (`DashboardLayout.tsx`). דפים צרים במכוון נשארים צרים כחלק מהעיצוב (`ProviderOnboardingWizard`‏ max-w-5xl,‏ `Rtk`/`CavemanContextPageClient`‏ max-w-6xl).
-- **D9 — טבלאות נתונים אטומות (שלב 6):** לאחר שאזור התוכן של לוח המחוונים הפך לשקוף (כדי שטפט הגריד יוצג דרכו, שלב 5), טבלאות נתונים שהמכל שלהן _לא_ היה משטח אטום אפשרו לגריד להשתקף דרך השורות הזוגיות השקופות / דוגמת הזברה בעלת האלפא הנמוכה. ✅ **הושלם** — כל טבלה שאינה בתוך card מציירת כעת `bg-surface` (או, עבור רכיב הבסיס `<DataTable>`,‏ `background: var(--color-surface)` על מכל הגלילה שלה). תוקנו: `DataTable` (רכיב בסיס), `ProxyLogger`/`RequestLoggerV2` (גוון ה־`bg-black/5 dark:bg-black/20` של ה־`<Card>` שלהם גבר על ה־`bg-surface` של ה־Card באמצעות tailwind-merge ← שקיפות של כ־95%), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, וכן שתי ה״טבלאות״ מבוססות CSS-grid בתצוגות המטמון (`bg-surface/35` ← `bg-surface`). טבלאות שכבר נמצאות בתוך `<Card>`/Modal אומתו כאטומות ונשארו בכוונה ללא שינוי (`bg-surface` שם הוא פעולה עודפת ללא השפעה). הגריד עצמו **לא דרש שום שינוי** — `body::before` בלוח המחוונים זהה לאתר ברמת הבתים (`--grid-size: 32px`); כל ״גריד גדול יותר״ שנראה במופע פעיל מקורו בגרסת build ישנה מלפני `#4143`, ולא בקוד. מוגן באמצעות `tests/unit/design-grid-background.test.ts` (מקטע שלב 6).
-
----
-
-## 9. מחוץ להיקף / סיכונים
-
-- **ללא שינוי בפלטת הצבעים** — הצבעים כבר תואמים; אנו מוסיפים רק טוקנים חסרים. אין כל סיכון לצביעה מחדש של המוצר.
-- **ללא שינוי במנוע ערכות הנושא** — יש להשאיר את `.dark` ואת מאגר Zustand.
-- **שינוי הרדיוס (שלב 2) הוא רחב היקף** — הוא משפיע על כל כרטיס/כפתור/שדה קלט; יש לבדוק חזותית מסכים עמוסים (טבלאות, חלונות מודאליים) לפני המיזוג.
-- **טבלאות (C3)** כוללות את הכמות הגדולה ביותר של עיצוב מקודד באופן קשיח ואת פוטנציאל הרגרסיה הגבוה ביותר — יש לבודד אותן ב-PR נפרד.
-
----
-
-## 10. אינדקס הפניות
-
-| אזור                           | נתיב                                                                                                                 |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
-| טוקנים של לוח המחוונים         | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| מאגר ערכת הנושא                | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| מעטפת הפאנל (הגריד מתאפשר כאן) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| מעטפת הממשק                    | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| תקדים לגריד                    | `src/app/landing/page.tsx:16-26`                                                                                     |
-| רכיבים בסיסיים                 | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| מקורות לצבעי סטטוס             | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| כלי העזר `cn`                  | `src/shared/utils/cn.ts`                                                                                             |
-| בדיקת הגנה לשלב 1              | `tests/unit/design-grid-background.test.ts`                                                                          |
-| הפניית האתר                    | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — גשר אסימונים, דריסות `.dark`, הרחבות OmniRoute בתוך `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — commit ה-upstream המקובע והרשאת הרישיון; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` והמתאמים שלצידו; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

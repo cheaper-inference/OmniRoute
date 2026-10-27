@@ -18,7 +18,7 @@ import { needsTranslation } from "../../translator/index.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { translateNonStreamingResponse } from "../responseTranslator.ts";
 import { extractToolSchemaMap } from "../../translator/response/openai-responses/toolSchemas.ts";
-import { stripMarkdownCodeFence } from "../../utils/aiSdkCompat.ts";
+import { unfenceJsonOutput } from "../../utils/jsonFence.ts";
 import { normalizeOpenAIToolFinishReasons } from "./passthroughToolNames.ts";
 import {
   cacheReasoningFromAssistantMessage,
@@ -31,8 +31,17 @@ import {
 } from "../responseSanitizer.ts";
 import { isStripReasoningRequested } from "./headers.ts";
 import { applyClientUsageBuffer } from "./clientUsageBuffer.ts";
+import { storeClaudeThinkingFromResponse } from "../../services/claudeThinkingStore.ts";
 import { resolveRequestToolIdentity } from "../../translator/response/openai-responses/requestToolIdentity.ts";
+import { matchesCustomToolDeclaration } from "../../utils/toolCallName.ts";
 import { plaintextCollaborationFields } from "../../translator/response/openai-responses/collaborationPlaintextMarker.ts";
+import { finalizeResponsesTerminalStatus } from "../../translator/helpers/responsesTerminalStatus.ts";
+import {
+  canonicalizeDeclaredToolName,
+  collectDeclaredToolNames,
+  mergeDeclaredToolNames,
+  toolNameSideChannelNames,
+} from "../../translator/response/openai-responses/declaredToolName.ts";
 
 export type { NonStreamingClientTranslateInput, NonStreamingClientTranslateResult };
 
@@ -51,7 +60,6 @@ export function translateNonStreamingClientResponse(
     responseBody,
     responsePayloadFormat,
     clientResponseFormat,
-    sourceFormat,
     provider,
     model,
     requestBody,
@@ -67,7 +75,26 @@ export function translateNonStreamingClientResponse(
 
   // ── Extract tool schemas for schema-aware translation ──────────────────────
   const finalBody = requestBody as Record<string, unknown> | null;
-  const responseToolSchemas = extractToolSchemaMap(finalBody || responseBody);
+  const responseToolSchemas =
+    (clientResponseFormat === FORMATS.CLAUDE
+      ? extractToolSchemaMap(input.clientRequestBody)
+      : null) ?? extractToolSchemaMap(finalBody || responseBody);
+
+  // ── Claude signed-thinking continuity ─────────────────────────────────────
+  // A non-Claude client never holds the signed thinking blocks of this tool turn;
+  // keep them server-side so openai-to-claude can restore them next turn.
+  // Never retained for a response that may echo video transcript cues.
+  if (
+    responsePayloadFormat === FORMATS.CLAUDE &&
+    clientResponseFormat !== FORMATS.CLAUDE &&
+    !input.videoTranscriptSensitive
+  ) {
+    try {
+      storeClaudeThinkingFromResponse(responseBody, { provider, model });
+    } catch {
+      // Continuity capture is best-effort — never block the response
+    }
+  }
 
   // ── Translate response to client's expected format ─────────────────────────
   let translatedResponse = needsTranslation(responsePayloadFormat, clientResponseFormat)
@@ -77,19 +104,12 @@ export function translateNonStreamingClientResponse(
         clientResponseFormat,
         responseToolNameMap,
         responseToolSchemas,
-        requestedThinking
+        requestedThinking,
+        (input.clientRequestBody as Record<string, unknown> | null | undefined)?.tools ?? null,
+        { signatureNamespace: input.signatureNamespace ?? null }
       )
     : responseBody;
   const responseForMemoryExtraction = translatedResponse;
-
-  // ── T26: Strip markdown code blocks if provider format is Claude ───────────
-  if (sourceFormat === "claude") {
-    if (typeof translatedResponse?.choices?.[0]?.message?.content === "string") {
-      translatedResponse.choices[0].message.content = stripMarkdownCodeFence(
-        translatedResponse.choices[0].message.content
-      ) as string;
-    }
-  }
 
   // ── T18: Normalize finish_reason to 'tool_calls' if tool calls present ─────
   normalizeOpenAIToolFinishReasons(translatedResponse);
@@ -106,7 +126,10 @@ export function translateNonStreamingClientResponse(
             responsePayloadFormat,
             FORMATS.OPENAI,
             responseToolNameMap,
-            responseToolSchemas
+            responseToolSchemas,
+            undefined,
+            undefined,
+            { signatureNamespace: input.signatureNamespace ?? null }
           )
         : responseBody;
     const firstChoice = cacheResponse?.choices?.[0];
@@ -128,11 +151,44 @@ export function translateNonStreamingClientResponse(
   }
   // ── Sanitize response for SDK compatibility ────────────────────────────────
   if (clientResponseFormat === FORMATS.OPENAI_RESPONSES) {
+    // A Chat body's truncation or filter must reach the client as status
+    // "incomplete", as the streaming path does (#14806).
+    const chatFinishReason = translatedResponse?.choices?.[0]?.finish_reason;
     translatedResponse = sanitizeResponsesApiResponse(translatedResponse);
+    if (chatFinishReason) finalizeResponsesTerminalStatus(translatedResponse, chatFinishReason);
     const sanitizedOutput = translatedResponse?.output;
+    // Map provider-injected prefixes (`functions.exec`) back to a declared tool
+    // name — same rule as the streaming translator. Runs before custom
+    // classification and identity restore, which both key on declared names.
+    if (responsePayloadFormat !== FORMATS.OPENAI_RESPONSES && Array.isArray(sanitizedOutput)) {
+      const declaredToolNames = mergeDeclaredToolNames(
+        collectDeclaredToolNames(finalBody),
+        customToolNames,
+        toolNameSideChannelNames(requestToolIdentityMap),
+        toolNameSideChannelNames(responseToolNameMap)
+      );
+      for (const item of sanitizedOutput) {
+        if (item?.type !== "function_call" || typeof item.name !== "string") continue;
+        if (resolveRequestToolIdentity(requestToolIdentityMap, item.name)) continue;
+        item.name = canonicalizeDeclaredToolName(item.name, declaredToolNames).name;
+      }
+    }
     if (customToolNames && Array.isArray(sanitizedOutput)) {
       for (const item of sanitizedOutput) {
-        if (item?.type !== "function_call" || !customToolNames.has(item.name)) continue;
+        // Accept the qualified (`functions__exec`), dotted (`functions.exec`) and
+        // unique-bare (`exec`) spellings so a provider that dropped the namespace
+        // prefix still yields a custom_tool_call with raw input instead of a
+        // function_call with JSON arguments. A flat declaration of the same bare
+        // name keeps its own identity (responseToolSchemas guard).
+        if (
+          item?.type !== "function_call" ||
+          !matchesCustomToolDeclaration({
+            customToolNames,
+            declaredFunctionSchemas: responseToolSchemas,
+            toolName: item.name,
+          })
+        )
+          continue;
 
         let rawInput = item.arguments;
         if (typeof item.arguments === "string") {
@@ -197,6 +253,13 @@ export function translateNonStreamingClientResponse(
       parseTextualReasoningTags: shouldParseTextualReasoningTags(provider, model),
     });
   }
+
+  // ── JSON mode: unwrap a ```json fence the provider put around the object ──
+  // Prompt-instructed structured output (Claude-backed targets especially) often
+  // comes back fenced, which breaks clients that JSON.parse the content. Gated on
+  // the CLIENT's request (the upstream body may no longer carry response_format),
+  // every choice / output_text part, whole-content fences only.
+  unfenceJsonOutput(input.clientRequestBody ?? finalBody, translatedResponse);
 
   // ── Client usage buffer (#8331) ───────────────────────────────────────────
   // Only apply for final phase; intermediate preserves raw usage for aggregation.

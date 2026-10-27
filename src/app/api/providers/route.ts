@@ -1,5 +1,8 @@
 import { getAllProviderLimitsCache } from "@/lib/db/providerLimits";
 import { NextResponse } from "next/server";
+import { getSettings } from "@/lib/db/settings";
+import { resolveResilienceSettings } from "@/lib/resilience/settings";
+import { isConnectionAutoProtected } from "@omniroute/open-sse/services/rateLimitManager/autoProtection.ts";
 export const dynamic = "force-dynamic";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance/index";
 import {
@@ -21,6 +24,7 @@ import {
   isOpenAICompatibleProvider,
   isAnthropicCompatibleProvider,
   providerAllowsOptionalApiKey,
+  NOAUTH_PROVIDERS,
   resolveProviderId,
 } from "@/shared/constants/providers";
 import { getConsistentMachineId } from "@/shared/utils/machineId";
@@ -141,9 +145,10 @@ export async function GET(request: Request) {
       : {};
 
     // Hide or mask sensitive fields
+    const requestQueueSettings = resolveResilienceSettings(await getSettings()).requestQueue;
     const safeConnections = connections.map((c) => {
       const providerSpecificData = c.providerSpecificData
-        ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData)
+        ? sanitizeProviderSpecificDataForResponse(c.providerSpecificData, { revealKeys })
         : undefined;
       return {
         ...c,
@@ -152,6 +157,17 @@ export async function GET(request: Request) {
         refreshToken: undefined,
         idToken: undefined,
         providerSpecificData,
+        // #16940: the row mapper drops null columns; keep "never synced" an
+        // explicit null so the dashboard contract does not depend on absence.
+        syncedModelsAt: typeof c.syncedModelsAt === "string" ? c.syncedModelsAt : null,
+        rateLimitAutoProtected: isConnectionAutoProtected(
+          {
+            provider: String(c.provider),
+            isActive: c.isActive === true,
+            rateLimitProtection: c.rateLimitProtection === true,
+          },
+          requestQueueSettings
+        ),
         ...(c.provider === "codex"
           ? {
               codexAccountPool: projectCodexAccountPoolWithRoutingQuota(
@@ -226,11 +242,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // Business validation
+    // Business validation. Own-property only: `in` is also true for Object.prototype
+    // keys ("toString", "constructor"), which are not catalogued providers.
+    const isNoAuthProvider =
+      typeof provider === "string" && Object.hasOwn(NOAUTH_PROVIDERS, provider);
     const isValidProvider =
       isManagedProviderConnectionId(provider) ||
       isOpenAICompatibleProvider(provider) ||
-      isAnthropicCompatibleProvider(provider);
+      isAnthropicCompatibleProvider(provider) ||
+      isNoAuthProvider;
 
     if (!isValidProvider) {
       return NextResponse.json({ error: "Invalid provider" }, { status: 400 });
@@ -567,7 +587,7 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ error: "Invalid JSON body" }, { status: 400 });
   }
 
-  if (!Array.isArray(body.ids) || body.ids.length === 0) {
+  if (!body || typeof body !== "object" || !Array.isArray(body.ids) || body.ids.length === 0) {
     return NextResponse.json(
       { error: "ids must be a non-empty array of connection IDs" },
       { status: 400 }

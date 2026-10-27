@@ -23,6 +23,7 @@
  * scripts/dev/peer-stamp.mjs -> outDir/peer-stamp.mjs         Y               Y           -    SHARED (extra module)
  * scripts/dev/responses-ws-proxy.mjs -> outDir/responses-ws-  Y               Y           -    SHARED (extra module)
  * scripts/dev/head-response-guard.cjs -> outDir/head-respons  Y               Y           -    SHARED (extra module)
+ * scripts/dev/h2c-upgrade-guard.cjs -> outDir/h2c-upgrade-g  Y               Y           -    SHARED (extra module)
  * scripts/build/runtime-env.mjs -> outDir/build/runtime-env   Y               -           -    SHARED (extra module)
  * scripts/build/bootstrap-env.mjs -> outDir/build/bootstrap-  Y               -           -    SHARED (extra module)
  * scripts/dev/healthcheck.mjs -> outDir/healthcheck.mjs       Y               -           -    SHARED (extra module)
@@ -360,6 +361,11 @@ export const EXTRA_MODULE_ENTRIES = [
     label: "HEAD response guard (server-ws.mjs dependency)",
     src: ["scripts", "dev", "head-response-guard.cjs"],
     dest: ["head-response-guard.cjs"],
+  },
+  {
+    label: "h2c upgrade guard (server-ws.mjs dependency)",
+    src: ["scripts", "dev", "h2c-upgrade-guard.cjs"],
+    dest: ["h2c-upgrade-guard.cjs"],
   },
   {
     label: "responses-ws-proxy (server-ws.mjs dependency)",

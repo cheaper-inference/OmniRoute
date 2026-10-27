@@ -331,34 +331,36 @@ Yanayin RTK ya samo wahayi daga **[RTK - Rust Token Killer](https://github.com/r
 
 ## Tsarukan Matsewa na Ci-gaba
 
-Baya ga yanayi 7 da aka bayyana a sama (tushen kuma yana karɓar yanayin `codex-responses` da
+Bayan hanyoyi 7 da aka bayyana a sama (tushen kuma yana karɓar hanyoyin `codex-responses` da
 `omniglyph`, waɗanda wannan jagorar ba ta rufe ba), sassan da ke ƙasa suna bayyana fasalolin
-da ke aiki a ciki ko tare da waɗannan yanayin: Tool Result Compression da Progressive Aging
-su ne matakai na 1 da na 2 na injin aggressive (yanayin Aggressive da matakin `aggressive` na
-bututun stacked), Stacked Pipeline shi ne yadda yanayin Stacked ke gudana, Cache-Aware Compression
-yana saukar da `aggressive` da `ultra` zuwa `standard` ga masu bayarwa masu caching yayin da matsewa
-ke kunne, sannan Caveman Output Mode da Output Styles umarnin system-prompt ne na zaɓin shiga,
-waɗanda suke a kashe ta tsohuwa, kuma suna tsara fitarwar samfurin maimakon matse buƙatar.
+da ke aiki a cikin ko tare da waɗannan hanyoyin: Matse Sakamakon Kayan Aiki da Tsufa Mai Ci-gaba
+su ne matakai na 1 da 2 na injin mai tsanani (yanayin Aggressive da matakin `aggressive` na
+bututun da aka jera), Bututun da Aka Jera shi ne yadda yanayin Stacked ke aiki, Matsewa Mai
+La'akari da Ma'ajiyar Wucin Gadi yana saukar da `aggressive` da `ultra` zuwa `standard` ga
+masu samarwa masu amfani da ma'ajiyar wucin gadi yayin da matsewa ke kunne, sannan Yanayin
+Fitowar Caveman da Salon Fitarwa umarnin faɗakarwar tsarin ne da ake zaɓar kunnawa,
+waɗanda suke kashe a tsoho, kuma suna tsara fitowar samfurin maimakon matse buƙatar.
 
-### Matsewa Mai La'akari da Cache
+### Matsewa Mai La'akari da Ma'ajiyar Wucin Gadi
 
-Wasu masu bayarwa (kamar Anthropic tare da prompt caching) suna goyon bayan **prompt caching**,
-wanda ke ba su damar adana sassan prompt a cache don rage farashi da jinkiri. Lokacin da
-aka kunna caching, matsewa mai tsanani na iya **cutar da** aiki
-saboda yana canza tokens da aka adana a cache, yana mai da cache ɗin mara inganci.
+Wasu masu samarwa (kamar Anthropic mai amfani da ma'ajiyar wucin gadi ta faɗakarwa) suna
+goyan bayan **ma'ajiyar wucin gadi ta faɗakarwa**, wadda ke ba su damar adana wasu sassan
+faɗakarwar domin rage kuɗi da jinkiri. Lokacin da aka kunna ma'ajiyar wucin gadi, matsewa
+mai tsanani na iya **lalata** aiki saboda yana canza token ɗin da aka adana, yana mai
+kawar da ingancin ma'ajiyar.
 
-Module ɗin `cachingAware.ts` yana warware wannan ta hanyar **gano mahallin caching** da
-**daidaita dabarar matsewa** yadda ya dace.
+Modul ɗin `cachingAware.ts` yana warware wannan ta hanyar **gano mahallin ma'ajiyar wucin gadi**
+da kuma **daidaita dabarar matsewa** yadda ya dace.
 
 #### Yadda yake aiki
 
-1. **Gano mahallin caching** — Yana bincika jikin buƙatar don alamomin `cache_control`
-2. **Gano masu bayarwa masu caching** — Yana duba ko mai bayarwar da aka nufa yana goyon bayan caching
-3. **Daidaita dabara** — Yana saukar da `aggressive`/`ultra` zuwa `standard` ga masu bayarwa masu caching
-4. **Tsallake system prompt** — Yawanci ana adana system prompts a cache, don haka kada a matse su
+1. **Gano mahallin ma'ajiyar wucin gadi** — Yana bincika jikin buƙatar don alamomin `cache_control`
+2. **Gano masu samarwa masu amfani da ma'ajiyar wucin gadi** — Yana bincika ko mai samarwar da aka nufa yana goyan bayan ma'ajiyar wucin gadi
+3. **Daidaita dabara** — Yana saukar da `aggressive`/`ultra` zuwa `standard` ga masu samarwa masu amfani da ma'ajiyar wucin gadi
+4. **Tsallake faɗakarwar tsarin** — Yawanci ana adana faɗakarwar tsarin, don haka kada a matse su
 
-Mataimakin dabarar kuma yana mayar da tutar `deterministicOnly`, amma maginin tsari yana amfani
-da dabarar kawai — babu wani abu a ƙasa da ke karanta tutar a halin yanzu.
+Mataimakin dabarar yana kuma dawo da tutar `deterministicOnly`, amma maginin tsari yana
+amfani da dabarar kawai — babu wani abu a matakan da ke biyo baya da ke karanta tutar a yanzu.
 
 #### Misalin lamba
 
@@ -371,7 +373,7 @@ import {
 const body = {
   model: "anthropic/claude-sonnet-4.5",
   messages: [{ role: "user", content: "Hello" }],
-  cache_control: { type: "ephemeral" }, // ← Alamar cache
+  cache_control: { type: "ephemeral" }, // ← Alamar ma'ajiyar wucin gadi
 };
 
 const ctx = detectCachingContext(body, { provider: "anthropic" });
@@ -383,26 +385,27 @@ const strategy = getCacheAwareStrategy("aggressive", ctx);
 
 #### Lokacin amfani
 
-Matsewa mai la'akari da cache **koyaushe yana kunne** — ba a buƙatar saitawa. Yana fara aiki duk lokacin da
-matsewa ke kunne kuma mai bayarwar da aka nufa yana goyon bayan prompt caching (Anthropic, OpenAI,
-da sauransu); ba a buƙatar takamaiman alamomin `cache_control` — kasancewar mai bayarwa mai caching kaɗai
-yana haifar da saukarwar, kuma alamomi kaɗai ba sa taɓa yin hakan (gano alama yana samar da bayanai ga
-telemetry na cache, ba shawarar dabara ba).
+Matsewa mai la'akari da ma'ajiyar wucin gadi **kullum yana kunne** — ba a buƙatar wani saiti.
+Yana fara aiki duk lokacin da matsewa ke kunne kuma mai samarwar da aka nufa yana goyan bayan
+ma'ajiyar wucin gadi ta faɗakarwa (Anthropic, OpenAI, da sauransu); ba dole ba ne a samu
+alamomin `cache_control` a bayyane — kasancewar mai samarwa mai amfani da ma'ajiyar wucin
+gadi kaɗai yana jawo saukar da matakin, kuma alamomi kaɗai ba sa yin hakan (gano alama yana
+ba da bayanai ga na'urar auna ma'ajiyar wucin gadi, ba shawarar dabara ba).
 
-### Tsufar Ci-gaba
+### Tsufa Mai Ci-gaba
 
-Dogayen tattaunawa suna tara zagayen saƙonni da yawa, amma tsofaffin zagaye suna zama marasa
-muhimmanci. Module ɗin `progressiveAging.ts` yana **rage ingancin saƙonni bisa nisan zagaye**
-(ana auna nisan daga ƙarshen tattaunawar). Tare da tsoffin saitunan da aka fitar
+Dogayen tattaunawa suna tara saƙonni masu yawa, amma tsofaffin saƙonni suna raguwa a
+muhimmanci. Modul ɗin `progressiveAging.ts` yana **rage cikakken bayanin saƙonni bisa nisan zagaye**
+(ana auna nisan daga ƙarshen tattaunawar). Tare da tsoffin saitunan da aka samar
 (`verbatim: 2, light: 2, moderate: 3`):
 
-- **Juyowa 2 na ƙarshe (nisa ≤ 2)**: Ana riƙe su yadda suke
-- **Nisa 3**: Matsewar caveman (cire kalmomin cikawa)
+- **Zagaye 2 na ƙarshe (nisa ≤ 2)**: Ana adana su yadda suke
+- **Nisa 3**: Matsewar Caveman (cire kalmomin cike gurbi)
 - **Nisa 4+**: Ana taƙaita saƙonnin mataimaki; ana rage saƙonnin mai amfani zuwa layinsu na farko,
-  tare da iyakar haruffa 120; sauran matsayin ba a taɓa su. Saƙonnin tsarin, saƙonnin da aka riga aka tsufar
-  da kuma sabon saƙon mai amfani koyaushe ana riƙe su yadda suke ba tare da la'akari da nisa ba.
-  Ba a yar da komai gaba ɗaya, kuma ba za a iya kaiwa rukunin `light`
-  da tsoffin saitunan da ake turo da su ba (`light` yana daidai da `verbatim`).
+  tare da iyakar haruffa 120; ba a taɓa sauran rawar ba. Faɗakarwar tsarin, saƙonnin da aka
+  riga aka tsufar, da sabon saƙon mai amfani koyaushe ana adana su yadda suke ba tare da la'akari
+  da nisa ba. Ba a yar da komai gaba ɗaya, kuma ba za a iya isa rukunin `light`
+  da tsoffin saitunan da aka samar ba (`light` yana daidai da `verbatim`).
 
 #### Misalin lamba
 
@@ -413,15 +416,15 @@ const messages = [
   { role: "system", content: "You are a helpful assistant" },
   { role: "user", content: "What is 2+2?" },
   { role: "assistant", content: "4" },
-  // ... ƙarin juyowa 50 ...
+  // ... ƙarin zagaye 50 ...
 ];
 
 const { messages: aged, saved } = applyAging(messages, {
-  verbatim: 3, // juyowa 3 na ƙarshe: yadda suke
+  verbatim: 3, // zagaye 3 na ƙarshe: yadda suke
   light: 8, // nisa <= 8: matsewa mai sauƙi
   moderate: 20, // nisa <= 20: matsewar caveman
   fullSummary: 5, // nau'in yana buƙatarsa, amma lambar rarraba rukuni ba ta karanta shi
-  // nisa > 20: an taƙaita (mataimaki) / an riƙe layin farko (mai amfani)
+  // nisa > 20: ana taƙaitawa (mataimaki) / ana adana layin farko (mai amfani)
 });
 
 // saved = adadin token da aka adana
@@ -429,50 +432,52 @@ const { messages: aged, saved } = applyAging(messages, {
 
 #### Lokacin amfani
 
-Tsufarwa mai ci gaba tana **kunne koyaushe** a yanayin `aggressive` — ita ce mataki na 2 na
-`compressAggressive()`. Yanayin Ultra ba ya gudanar da ita. Tana da tasiri musamman ga:
+Tsufa mai ci-gaba **kullum yana kunne** a yanayin `aggressive` — shi ne mataki na 2 na
+`compressAggressive()`. Yanayin Ultra ba ya gudanar da shi. Yana da tasiri musamman ga:
 
-- Zaman rubuta lamba masu ɗaukar lokaci
-- Tattaunawa ta kwanaki da yawa
-- Gudanawar aiki ta wakili mai kiran kayan aiki da yawa
+- Dogayen zaman rubuta lamba
+- Tattaunawar da take ɗaukar kwanaki da yawa
+- Gudanawar aiki ta wakilai mai kiran kayan aiki da yawa
 
-### Yanayin Fitarwa na Caveman
+### Yanayin Fitowar Caveman
 
-Yanayin fitarwa na caveman yana ƙara **umarnin saƙon tsarin** waɗanda ke neman samfurin da kansa ya ba da
-gajeriyar fitarwa — matakin `lite` yana neman amsoshi taƙaitattu masu kiyaye cikakkun jimloli, `full`
-yana neman ya “amsa a taƙaice kamar caveman mai wayo”, sannan `ultra` yana neman fitarwa irin ta saƙon telegram;
-umarnin buƙata kawai suke yi, ba za su iya tabbatar da hakan ba. Buƙatu suna karɓar su ta hanyar
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`):
-da farko `open-sse/handlers/chatCore.ts` yana warware zaɓin ta amfani da shim ɗin dacewa da tsohon tsari
-(`resolveOutputStyleSelection()` a cikin
+Yanayin fitowar Caveman yana ƙara **umarnin faɗakarwar tsarin** waɗanda ke neman samfurin
+da kansa ya bayar da gajeriyar fitarwa — matakin `lite` yana neman amsoshi taƙaitattu waɗanda
+ke riƙe da cikakkun jimloli, `full` yana neman ya "amsa a taƙaice kamar caveman mai wayo",
+kuma `ultra` yana neman fitarwa irin ta saƙon gaggawa; umarnin roƙo kawai suke yi, ba za su
+iya tabbatar da hakan ba. Buƙatu suna karɓar su ta hanyar `applyOutputStyles()`
+(`open-sse/services/compression/outputStyles/apply.ts`):
+`open-sse/handlers/chatCore.ts` da farko yana warware zaɓin ta amfani da shim ɗin dacewa
+da tsohon tsari (`resolveOutputStyleSelection()` a cikin
 `open-sse/services/compression/outputStyles/backCompat.ts`), wanda, yayin da `outputStyles`
-ba shi da komai, yake danganta `cavemanOutputMode` da aka kunna zuwa salon fitarwa na `terse-prose` a
-`cavemanOutputMode.intensity` (duba Dacewa da tsohon tsari a ƙasa); ana amfani da zaɓin `outputStyles`
-wanda ba fanko ba yadda yake, sannan `cavemanOutputMode.enabled` da `intensity` ba sa
-yin tasiri, yayin da maɓallin `autoClarity` nasa har yanzu yake aiki. `outputMode.ts` yana ɗauke da
-rubutun umarnin (`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), ƙetare abun ciki da kuma
-mataimakin sanya wuri da allurar ke amfani da shi; mai allurar `applyCavemanOutputMode()` nasa ba shi da
-mai kiransa a samarwa.
+ba ya ɗauke da komai, yake daidaita `cavemanOutputMode` da aka kunna zuwa salon fitarwa
+`terse-prose` a matakin `cavemanOutputMode.intensity` (duba Dacewa da tsohon tsari a ƙasa);
+ana amfani da zaɓin `outputStyles` marar komai ba yadda yake, sannan
+`cavemanOutputMode.enabled` da `intensity` ba sa yin wani tasiri, yayin da maɓallin
+`autoClarity` nasa har yanzu yake aiki. `outputMode.ts` yana ɗauke da rubutun umarnin
+(`CAVEMAN_INSTRUCTION_BY_LANGUAGE`), hanyar ƙetare abun ciki, da mataimakin sanya wurin da
+shigarwa ke amfani da shi; nasa mai shigarwa `applyCavemanOutputMode()` ba shi da wani
+mai kiransa a tsarin samarwa.
 
 #### Yadda yake aiki
 
-Wannan yanayin ba ya matse shigarwa. Yana ƙara tubalin umarni ga saƙon tsarin
-(duba Yadda allura ke aiki a ƙasa), kuma duk wani yanayin matse shigarwa da aka zaɓa don buƙatar
-har yanzu yana gudana daga baya, a kan jikin da yanzu yake ɗauke da tubalin. Kafin jumlar
-iyakoki ta gama-gari da kowane mataki ke ƙarewa da ita, matakin Turanci na `full` yana cewa:
+Wannan yanayin ba ya matse shigarwar. Yana ƙara toshe na umarni zuwa system prompt
+(duba Yadda sakawa ke aiki a ƙasa), kuma duk yanayin matse shigarwa da aka zaɓa don buƙatar
+har yanzu yana gudana daga baya, a kan jikin da yanzu ke ɗauke da toshen. Kafin jimlar
+iyakoki ta gama-gari da kowane mataki ke ƙarewa da ita, matakin `full` na Turanci yana cewa:
 
-> “Amsa a taƙaice kamar caveman mai wayo. Cire articles (a/an/the), kalmomin cikawa (just/really/basically/actually/simply), gaisuwar ladabi, da nuna shakku. Gutsattsarin jimla sun yi. Yi amfani da gajerun kalmomi masu ma'ana ɗaya (big ba extensive ba, fix ba implement ba). Kiyaye duk cikakkun bayanan fasaha, lamba, kurakurai, URLs, da identifiers yadda suke.”
+> "Amsa a taƙaice kamar gogaggen mutumin kogo. Cire articles (a/an/the), kalmomin ciko (just/really/basically/actually/simply), gaisuwa, kalmomin nuna rashin tabbas. Yankakkun jimloli sun yi. Yi amfani da gajerun kalmomi masu ma’ana ɗaya (big ba extensive ba, fix ba implement ba). Kiyaye dukkan muhimman bayanan fasaha, code, errors, URLs, identifiers daidai."
 
-Wannan yana aiki da kyau musamman ga:
+Wannan yana aiki musamman da kyau don:
 
-- Samar da lamba (gajeriyar fitarwa = ƙarancin token)
-- Tambaya da amsa cikin sauri (ba a buƙatar dogon bayani)
-- Sarrafa rukuni (ƙara yawan abin da ake sarrafawa)
+- Samar da code (amsa mafi taƙaituwa = ƙarancin tokens)
+- Tambaya da amsa cikin sauri (ba a buƙatar dogayen bayanai)
+- Sarrafa tarin ayyuka (ƙara yawan abin da ake sarrafawa)
 
 #### Lokacin amfani
 
-Yanayin fitarwa na caveman **na zaɓi ne**. Tare da matsewa a kunne (`enabled: true`, babban maɓallin kunnawa
-a shafin Compression Settings), kunna shi da `cavemanOutputMode.enabled`; `intensity`
+Yanayin fitarwa na Caveman na buƙatar **opt-in**. Idan an kunna matsawa (`enabled: true`, babban maɓallin
+kunna a shafin Compression Settings), kunna shi da `cavemanOutputMode.enabled`; `intensity`
 yana zaɓar `lite`, `full` ko `ultra`:
 
 ```json
@@ -485,95 +490,100 @@ yana zaɓar `lite`, `full` ko `ultra`:
 }
 ```
 
-Maɓallin **Output Mode** na haɗin matsewa (`outputMode`, tare da mataki a cikin `outputModeIntensity`)
-yana saita maɓalli iri ɗaya ga buƙatun da haɗin yake aiki a kansu, kuma
-kayan aikin MCP na `omniroute_set_compression_engine` yana rubuta shi ta hanyar hujjar boolean ɗinsa ta `outputMode`.
-Zaɓin `outputStyles` wanda ba fanko ba yana da fifiko a kan wannan maɓalli. A cikin
-dashboard, kunna salon fitarwa na **Terse prose** yana allura tubali iri ɗaya (duba Output
+Maɓallin **Output Mode** na haɗin matsawa (`outputMode`, tare da mataki a `outputModeIntensity`)
+yana saita wannan maɓalli ga buƙatun da wannan haɗin ya shafa, kuma kayan aikin MCP na
+`omniroute_set_compression_engine` yana rubuta shi ta hanyar hujjar boolean ɗinsa ta `outputMode`.
+Zaɓin `outputStyles` marar fanko yana da fifiko a kan wannan maɓalli. A cikin dashboard,
+kunna salon fitarwa na **Terse prose** yana saka wannan toshe ɗin (duba Output
 Styles a ƙasa).
 
-### Salon Fitarwa (kundin zaɓuɓɓuka)
+### Salon Fitarwa (kasida)
 
-Yanayin fitarwa na caveman da ke sama shi ne **tsohuwar hanyar salo guda ɗaya**. Phase 4 ta faɗaɗa shi
-zuwa kundin salo na fitarwa waɗanda za a iya haɗawa: `OUTPUT_STYLE_CATALOG` a cikin
-`open-sse/services/compression/outputStyles/catalog.ts`. Kowane salo umarnin saƙon tsarin ne
-wanda ke neman samfurin da kansa ya ba da fitarwa mai rahusa; ana iya kunna salo
-tare kuma ana allura su bisa jerin kundin zaɓuɓɓuka.
+Yanayin fitarwa na Caveman da ke sama shi ne **tsohuwar hanyar salo guda ɗaya**. Phase 4 ya faɗaɗa shi
+zuwa kasidar salon fitarwa masu iya haɗuwa: `OUTPUT_STYLE_CATALOG` a cikin
+`open-sse/services/compression/outputStyles/catalog.ts`. Kowane salo umarni ne na system-prompt
+wanda ke neman samfurin da kansa ya samar da fitarwa mai rahusa; ana iya kunna salo
+tare kuma ana saka su bisa jerin kasidar.
 
-| Salo                            | `id`          | Abin da yake yi                                                                                                                                                                                                                              | Harsunan umarni                               |
-| ------------------------------- | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
-| Takaitacciyar magana            | `terse-prose` | Cire ciko/maƙaloli/kalamai masu nuna shakku; kiyaye ainihin ma’anar fasaha. Rubutu iri ɗaya da tsohon yanayin fitarwa na caveman (an yi ishara da shi, ba a sake rubuta shi ba).                                                             | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ƙarancin lamba                  | `less-code`   | Matakan YAGNI: canji mafi ƙanƙanta da ke aiki, babu abstractions da ba a nema ba.                                                                                                                                                            | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ponytail (malalacin babban dev) | `ponytail`    | "Mafi kyawun lamba ita ce wadda ba a taɓa rubutawa ba": sake amfani > sake rubutawa, tushen matsala > alama, diff mafi gajarta da ke aiki.                                                                                                   | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Ina da ADHD (aiki-farko)        | `i-have-adhd` | Aiki da farko (umarni/hanya/snippet kafin bayani), matakai masu lamba da iyaka, mataki na gaba guda ƊAYA takamaimai, babu gabatarwa/taƙaitawa/kammalawa. An daidaita daga [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT). | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
-| Taƙaitaccen CJK (文言)          | `terse-cjk`   | Amsa ta `full`/`ultra` cikin Sinanci na Gargajiya (文言); `lite` kawai yana neman gajerun amsoshi ba tare da kalmomin aiki, ladabi ko ƙawatawa ba.                                                                                           | zh (an takaita bisa locale, duba ƙasa)        |
+| Salo                                   | `id`            | Abin da yake yi                                                                                                                                                                                                                                         | Harsunan umarni                               |
+| -------------------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------- |
+| Gajeriyar lafazi                       | `terse-prose`   | Cire kalmomin ciko/articles/kalmomin nuna rashin tabbas; kiyaye muhimman bayanan fasaha daidai. Rubutu iri ɗaya da tsohon yanayin fitarwa na caveman (an yi nuni da shi, ba a sake rubuta shi ba).                                                      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Ƙarancin code                          | `less-code`     | Tsarin YAGNI: mafi ƙarancin canjin da ke aiki, babu ƙirƙirar abstractions da ba a nema ba.                                                                                                                                                              | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Ponytail (malalacin babban dev)        | `ponytail`      | "Mafi kyawun code shi ne code da ba a taɓa rubutawa ba": sake amfani > sake rubutawa, tushen matsala > alama, mafi gajeren diff mai aiki.                                                                                                               | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Ina da ADHD (aiki-farko)               | `i-have-adhd`   | Aiki da farko (command/path/snippet kafin bayani), matakai masu lamba da iyaka, mataki na gaba guda ƊAYA takamaimai, babu gabatarwa/taƙaitawa/kalmomin rufewa. An daidaita daga [ayghri/i-have-adhd](https://github.com/ayghri/i-have-adhd) (MIT).      | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Matatar UI ta Antislop                 | `antislop-ui`   | Dole kowace dabarar gani ta ci gwajin manufa (tsari, ainihi, sauƙin karantawa); babu gradients/glass/glow na tsoho, iyakantaccen palette, babu shimfidar template. Duk salon antislop biyu suna ƙara iyakar hana controls marasa aiki / ikirarin ƙarya. | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Matatar rubutu da ɗan Adam ta Antislop | `antislop-copy` | Takamaiman rubutu (babu em dash, generic CTAs, buzzwords, rufewar chatbot, ƙagaggun bayanai) tare da dokokin mutane: bambancin launi na WCAG AA, focus mai gani, isa da keyboard, yanayin babu komai/loading/error, sake daidaitawa a mobile.           | en, pt-BR, es, de, fr, it, ru, zh, ja, id, vi |
+| Taƙaitaccen CJK (文言)                 | `terse-cjk`     | Amsa ta `full`/`ultra` cikin Sinanci na Gargajiya (文言); `lite` kawai yana neman gajerun amsoshi ba tare da function words, gaisuwa ko ƙawatawa ba.                                                                                                    | zh (an kayyade ta locale, duba ƙasa)          |
 
-Kowane salo yana zuwa da matakan ƙarfi uku — `lite`, `full`, `ultra` — kuma kowane mataki
-yana ƙarewa da sashe na iyakoki na bai ɗaya (`SHARED_BOUNDARIES` a cikin `outputMode.ts`), wanda
-ke kiyaye code blocks, hanyoyin fayil, umarni, kurakurai da URLs yadda suke. Rubutun matakan
-`terse-prose` da `terse-cjk` suna ƙara identifiers cikin wannan jerin.
+Kowane salo yana zuwa da matakan intensity uku — `lite`, `full`, `ultra` — kuma kowane mataki
+yana ƙarewa da jimlar iyakoki ta gama-gari (`SHARED_BOUNDARIES` a cikin `outputMode.ts`), wadda
+ke kiyaye code blocks, file paths, commands, errors da URLs daidai. Rubutun matakan `terse-prose` da
+`terse-cjk` suna ƙara identifiers cikin wannan jerin.
 
-An takaita `terse-cjk` ga locale na `zh` a wurare biyu. Shafin Saitunan Matsawa yana jera
+An kayyade `terse-cjk` ga locale na `zh` a wurare biyu. Shafin Compression Settings yana nuna
 layinsa ne kawai idan harshen UI na dashboard Sinanci ne (`zh-CN` ko `zh-TW`), kuma
-`applyOutputStyles()` yana saka shi ne kawai idan harshen da aka ƙayyade na buƙatar (duba Zaɓin
-harshe a ƙasa) shi ne `zh`. Ɓoye layin ba ya share zaɓin `terse-cjk` da aka adana:
-API na saituna yana karɓar kowane style id, kuma adana wasu salo a shafin yana barin shi. A
-lokacin buƙata, binciken harshe na `applyOutputStyles()` shi kaɗai ne shingen locale.
+`applyOutputStyles()` yana saka shi ne kawai idan harshen da aka tantance na buƙatar (duba Zaɓin
+Harshe a ƙasa) shi ne `zh`. Ɓoye layin ba ya share zaɓin `terse-cjk` da aka adana:
+API na settings yana karɓar kowane style id, kuma adana wasu salo a shafin yana riƙe da shi. A
+lokacin buƙata, binciken harshe na `applyOutputStyles()` shi ne kaɗai ƙofar locale.
 
 #### Yadda sakawa ke aiki
 
-`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) yana tantance
-zaɓin bisa catalog (ana watsar da ids da ba a sani ba da salo marasa dacewa da locale,
-ba tare da kuskure ba; zaɓin da bai samar da wani salo ba yana barin body
-ba tare da canji ba, an tsallake shi a matsayin `no_styles`), yana haɗa umarnin da aka zaɓa bisa tsarin
-catalog,
-yana ƙara sashen iyakoki **sau ɗaya** (tare da sashen tsaro, `SAFETY_BOUNDARIES` ko
-fassararsa, idan an zaɓi `less-code` ko `ponytail`), sannan yana fara block ɗin da
-idempotency marker guda ɗaya (`[OmniRoute Output Styles]`), don haka sake aiwatarwa ba ya yin komai. Idan
-harshen da aka ƙayyade (duba Zaɓin harshe a ƙasa) yana da fassara, ana saka umarnin
-da aka fassara maimakon na Turanci.
+`applyOutputStyles()` (`open-sse/services/compression/outputStyles/apply.ts`) yana daidaita
+zaɓin da katalog (ana cire ids da ba a sani ba da salailan da harshensu bai dace ba,
+ba tare da kuskure ba; zaɓin da bai haifar da wani salo ba yana barin jikin
+ba tare da canji ba, ana tsallake shi a matsayin `no_styles`), yana haɗa umarnin da aka zaɓa bisa
+jerin katalog,
+yana ƙara ƙa'idar iyakoki **sau ɗaya** (tare da ƙa'idar tsaro, `SAFETY_BOUNDARIES` ko
+fassararta, idan an zaɓi `less-code` ko `ponytail`), kuma yana fara tubalin da
+alama guda ta hana maimaita aiki (`[OmniRoute Output Styles]`), don haka sake aiwatarwa
+ba ya yin komai. Idan harshen da aka tantance (duba Zaɓin harshe a ƙasa) yana da fassara,
+ana saka umarnin da aka fassara maimakon na Turanci.
 
-A body mai `messages` array wanda ba komai ba ne, binciken idempotency yana gudana kafin
-content bypass: idan marker ɗin `[OmniRoute Output Styles]` ya riga ya kasance a filin
-`system` na matakin sama (string ko content-block array) ko a system message mai string
-content, ana barin body ba tare da canji ba a matsayin `already_applied` kuma ba a gudanar da binciken keyword ba.
-In ba haka ba, content bypass (`shouldBypassCavemanOutputMode()` a cikin
-`open-sse/services/compression/outputMode.ts`) yana bincika rubutun messages uku na ƙarshe,
-ko mene ne role ɗinsu, kuma yana tsallake salo na duk turn ɗin idan rubutun ya dace
-da keywords na tsaro, aiki marar iya juyawa ko neman bayani, ko kuma jerin da tsarinsu ke da
-muhimmanci: `first`, `then`, `after that`, `before`, `rollback` ko
+A jikin da ke da jerin `messages` mara komai ba, ana gudanar da binciken hana maimaitawa kafin
+kaucewa abun ciki: idan alamar `[OmniRoute Output Styles]` ta riga ta kasance a filin
+`system` na babban mataki (string ko jerin tubalan abun ciki) ko kuma a saƙon system mai
+abun ciki na string, ana barin jikin ba tare da canji ba a matsayin `already_applied` kuma ba a
+gudanar da binciken kalmomin maɓalli. In ba haka ba, kaucewar abun ciki
+(`shouldBypassCavemanOutputMode()` a cikin
+`open-sse/services/compression/outputMode.ts`) tana duba rubutun saƙonni uku na ƙarshe,
+ko da menene matsayinsu, sannan ta tsallake salailan na dukan zagayen idan rubutun ya
+dace da kalmomin maɓalli na tsaro, aikin da ba za a iya juyawa ba, ko neman ƙarin bayani,
+ko wani jeri mai la'akari da oda: `first`, `then`, `after that`, `before`, `rollback` ko
 `backup` wanda `delete`, `drop`, `migrate`, `deploy` ko
-`release` ya biyo bayansa cikin haruffa 240. Bypass ɗin yana aiki muddin toggle na **Auto-Clarity Bypass**
-(`cavemanOutputMode.autoClarity`, a kunne ta tsohuwa) yana kunne; kashe toggle ɗin yana tsallake
-binciken keyword.
+`release` ya biyo bayansa cikin haruffa 240. Kaucewar tana aiki yayin da maɓallin
+**Auto-Clarity Bypass** (`cavemanOutputMode.autoClarity`, wanda yake kunne ta tsohuwa)
+yake kunne; kashe maɓallin yana tsallake binciken kalmomin maɓalli.
 
-Idan bypass ya bar turn ɗin ya wuce, `placeSystemInstruction()` (fayil ɗaya), wanda
-ba ya taɓa ƙirƙirar sabon `messages[0]`, yana sanya block ɗin a na farko daga cikin waɗannan da ya samu:
+Idan kaucewar ta ƙyale zagayen ya wuce, `placeSystemInstruction()` (a fayil ɗin nan),
+wanda ba ya taɓa ƙirƙirar sabon `messages[0]`, yana sanya tubalin a na farko daga cikin
+waɗannan da ya samu:
 
-1. System message na farko mai string content: ana ƙara block ɗin bayan rubutunsa.
-2. Filin `system` na matakin sama: ana ƙara block ɗin bayan rubutun string, ko
-   a ƙara shi a matsayin sabon text block cikin content-block array.
-3. System message na farko daga baya mai string content: ana ƙara block ɗin bayan
+1. Saƙon system na farko mai abun ciki na string: ana ƙara tubalin bayan rubutunsa.
+2. Filin `system` na babban mataki: ana ƙara tubalin bayan rubutun string, ko
+   a ƙara shi a matsayin sabon tubalin rubutu zuwa jerin tubalan abun ciki.
+3. Saƙon system na farko da ya zo daga baya mai abun ciki na string: ana ƙara tubalin bayan
    rubutunsa.
-4. Idan babu ɗaya daga sama: block ɗin yana shiga sabon system message a ƙarshen `messages`.
+4. Idan babu ɗaya daga sama: tubalin yana shiga sabon saƙon system a ƙarshen `messages`.
 
-A body da ba shi da `messages` array (ko yana da wanda babu komai a ciki), ba a gudanar da content bypass kuma
-ba a duba filin `system` na matakin sama. Ana ƙara block ɗin bayan rubutun filin
-`instructions` mai string, sai dai idan filin ya riga ya ƙunshi marker ɗin
-`[OmniRoute Output Styles]`, inda za a bar body ba tare da canji ba a matsayin
-`already_applied`. Idan body ba shi da filin `instructions` mai string amma yana ɗauke da `input`
-(string ko array), block ɗin ya zama `instructions`, yana maye gurbin duk wata ƙima marar string
-da filin ke ɗauke da ita. Body da ba shi da filin `instructions` mai string ko `input` mai string ko array
-ana barinsa ba tare da canji ba kuma a tsallake shi a matsayin `no_messages`.
+A jikin da ba shi da jerin `messages` (ko yake da wanda babu komai a ciki), ba a gudanar da
+kaucewar abun ciki kuma ba a duba filin `system` na babban mataki. Ana ƙara tubalin bayan
+rubutun filin `instructions` na string, sai dai idan filin ya riga ya ƙunshi
+alamar `[OmniRoute Output Styles]`, inda a wannan yanayin ake barin jikin ba tare da canji ba
+a matsayin `already_applied`. Idan jikin ba shi da filin `instructions` na string amma yana
+ɗauke da `input` (string ko jeri), tubalin yana zama `instructions`, yana maye gurbin duk
+ƙimar da ba string ba da filin ya riƙe. Jikin da ba shi da filin `instructions` na string
+ko `input` na string ko jeri ana barinsa ba tare da canji ba kuma ana tsallake shi a matsayin
+`no_messages`.
 
 #### Yadda ake kunnawa
 
-A cikin dashboard: **Compression Context → Compression Settings**
-(`/dashboard/context/settings`), sashen Output styles: layi guda ga kowane salo tare da maɓallin
-kunna/kashe da mai zaɓar mataki. Ana saka salo yayin da matsawa kanta take kunne (babban
-maɓallin shafin, `enabled`). Maɓallin **Auto-Clarity Bypass** yana kan shafin **Caveman**
-(`/dashboard/context/caveman`), a cikin katin **Output Mode** ɗinsa. Ta fuskar shirye-shirye,
-saitin matsawa yana adana zaɓin kamar haka:
+A dashboard: **Compression Context → Compression Settings**
+(`/dashboard/context/settings`), sashen Output styles: layi ɗaya ga kowane salo tare da
+maɓallin kunna/kashewa da mai zaɓar mataki. Ana saka salailan yayin da compression kansa
+yake kunne (babban maɓallin shafin, `enabled`). Maɓallin **Auto-Clarity Bypass** yana kan
+shafin **Caveman** (`/dashboard/context/caveman`), a cikin katinsa na **Output Mode**.
+Ta hanyar shirye-shirye, tsarin compression yana adana zaɓin kamar haka:
 
 ```json
 {
@@ -584,141 +594,135 @@ saitin matsawa yana adana zaɓin kamar haka:
 }
 ```
 
-Daidaituwa da tsofaffin sigogi: yayin da `outputStyles` yake babu komai, tsohon saitin
-`cavemanOutputMode.enabled` yana taswirar zuwa `terse-prose` a matakin
+Daidaituwa da tsoffin nau'ikan: yayin da `outputStyles` yake babu komai, tsohon saitin
+`cavemanOutputMode.enabled` yana daidaituwa da `terse-prose` a
 `cavemanOutputMode.intensity`. Daga nan tubalin yana farawa da alamar
 `[OmniRoute Output Styles]`, inda tsohon mai saka `applyCavemanOutputMode()` ya rubuta
-`[OmniRoute Caveman Output Mode]`. A ƙasan alamar, rubutun ya yi daidai da tsohuwar
-shigarwa a en, pt-BR, es, de, fr, it, ru, id da vi; a ja da zh kuwa yana da ƙarin
-sarari guda kafin sashen iyakoki. Ana fassara `terse-prose` zuwa pt-BR, es, de,
-fr, it, ru, zh, ja, id da vi, don haka buƙatar da aka warware harshenta zuwa `hu` za ta
-sami rubutun Turanci a inda tsohon mai saka yake amfani da na Harshen Hungariya.
+`[OmniRoute Caveman Output Mode]`. A ƙarƙashin alamar, rubutun yana daidai da tsohuwar
+sakawa a en, pt-BR, es, de, fr, it, ru, id da vi; a ja da zh yana ɗauke da ƙarin
+sarari guda kafin ƙa'idar iyakoki. Ana fassara `terse-prose` zuwa pt-BR, es, de,
+fr, it, ru, zh, ja, id da vi, don haka buƙatar da harshenta da aka tantance yake `hu`
+tana samun rubutun Turanci a inda tsohon mai saka yake amfani da na Hungarian.
 
-Zaɓin harshen salon fitarwa (`resolveOutputStyleLanguage()` a cikin
-`outputStyles/apply.ts`): idan `languageConfig.enabled` yana kunne, `autoDetect` yana ɗaukar
-samfuri daga saƙon mai amfani na baya-bayan nan a cikin jerin `messages` na buƙatar wanda
-ke da rubutu (abun ciki na nau'in string, ko `text` na sassan abun cikinsa), sannan ya
-gudanar da mai gano harshen injin Caveman (`detectCompressionLanguage()`) a kansa. Mai
-ganowar yana dawo da `zh` ga rubutun da ke da haruffan Han amma babu kana; in ba haka ba,
-yana dawo da duk wanda ya fi samun alamun dacewa daga cikin `it`, `pt-BR`, `es`, `de`,
+Zaɓin harshen salo na fitarwa (`resolveOutputStyleLanguage()` a cikin
+`outputStyles/apply.ts`): idan `languageConfig.enabled` yana kunne, `autoDetect` yana
+ɗaukar samfurin sabon saƙon mai amfani na ƙarshe a cikin jerin `messages` na buƙatar wanda
+ke da rubutu (abun ciki na string, ko `text` na sassan abun cikinsa) sannan ya gudanar da
+mai ganowa na injin Caveman (`detectCompressionLanguage()`) a kansa. Mai ganowar yana
+mayar da `zh` ga rubutun da ke da haruffan Han kuma babu kana; in ba haka ba yana mayar
+da duk wanda yake da mafi yawan daidaituwar alamomi daga cikin `it`, `pt-BR`, `es`, `de`,
 `fr`, `ru`, `ja`, `hu` da `id`, sannan `en` idan babu wanda ya dace — rubutun da ba zai
-iya rarrabewa ba yana samun Turanci, ba `defaultLanguage` ba, kuma ba a taɓa gano `vi`
-duk da cewa salo suna zuwa da rubutun `vi`. Jikin Responses API yana ajiye zagayensa a
-cikin `input`, wanda ba a ɗaukar samfurinsa, don haka yana samun `defaultLanguage`,
-sannan Turanci. Idan babu saƙon mai amfani a cikin `messages` da ke da rubutu, ko kuma
-idan `autoDetect` yana kashe, ana amfani da `defaultLanguage`, sannan Turanci. Idan
-`languageConfig.enabled` yana kashe, harshen shi ne Turanci — sai dai idan wani haɗin
-matsawa ya shafi buƙatar (haɗin da aka sanya wa routing combo na buƙatar, ko tsohon
-haɗin matsawa da chatCore yake komawa gare shi don ginannen stacked pipeline): amfani
-da haɗi yana kunna `languageConfig.enabled` ga wannan buƙatar kuma yana saita
+iya rarrabawa ba yana samun Turanci, ba `defaultLanguage` ba, kuma ba a taɓa gano `vi`
+duk da cewa salailan suna zuwa da rubutun `vi`. Jikin Responses API yana ajiye zagayensa
+a cikin `input`, wanda ba a ɗaukar samfurinsa, don haka yana samun `defaultLanguage`,
+sannan Turanci. Idan babu saƙon mai amfani a cikin `messages` da ke da rubutu, ko idan
+`autoDetect` yana kashe, ana amfani da `defaultLanguage`, sannan Turanci. Idan
+`languageConfig.enabled` yana kashe, harshen shi ne Turanci — sai dai idan haɗin
+compression ya shafi buƙatar (haɗin da aka sanya wa routing combo na buƙatar, ko tsohon
+haɗin compression da chatCore yake komawa gare shi don ginannen stacked pipeline):
+aiwatar da haɗi yana kunna `languageConfig.enabled` ga wannan buƙatar kuma yana saita
 `defaultLanguage` daga fakitin harsunan haɗin (ƙimar da aka adana idan tana ɗaya daga
-cikin fakitin haɗin, in ba haka ba fakitin farko na haɗin, wanda tsohon zaɓinsa shi ne
-`en`), yayin da `autoDetect` da aka adana (wanda yake kunne ta asali) har yanzu yake aiki.
+fakitin haɗin, in ba haka ba fakitin farko na haɗin, wanda ke komawa `en` ta tsohuwa),
+yayin da `autoDetect` da aka adana (wanda yake kunne ta tsohuwa) har yanzu yake aiki.
 Injin shigarwa na Caveman yana zaɓar harshen rule-pack ta wata hanya dabam — ga kowane
-ɓangaren rubutu kuma, idan auto-detect yana kashe, bisa sharadin `enabledPacks`.
+ɓangaren rubutu, kuma idan auto-detect yana kashe, ana sarrafa shi ta `enabledPacks`.
 
-An ƙayyade matrix na salo × harshe ta
-`tests/unit/compression/output-styles-i18n-matrix.test.ts`: kowane salo na kundin dole ne
-ya kasance da shigarwa a cikin `BASELINE_LANGUAGES` na gwajin; salon da ba a ƙuntata shi
-ga locale ba dole ne ya zo da fassarar pt-BR (an keɓe `terse-cjk` mai ƙuntatawa ga locale
-daga wannan ƙa'ida) sai dai idan yana cikin `KNOWN_ENGLISH_ONLY`, wanda zai iya ƙunsar
-salon da ba su da wata fassara kwata-kwata kawai — salon da aka jera wanda ke da kowace
-irin fassara zai faɗi gwajin; haka kuma salo zai faɗi gwajin idan ya rasa harshen da
-shigarwar `BASELINE_LANGUAGES` tasa ta lissafo. Don ƙara salo, duba
+An ƙayyade matrix ɗin salo × harshe ta
+`tests/unit/compression/output-styles-i18n-matrix.test.ts`: kowane salon katalog yana buƙatar
+shigarwa a cikin `BASELINE_LANGUAGES` na gwajin; salon da ba a taƙaita shi ga wani locale ba dole ne ya zo da
+fassarar pt-BR (an keɓe `terse-cjk` mai taƙaituwar locale daga wannan ƙa’ida) sai dai idan yana
+cikin `KNOWN_ENGLISH_ONLY`, wanda zai iya ƙunsar salo marasa kowane irin fassara kawai —
+salon da aka jera wanda yake da kowace irin fassara zai faɗi gwajin; haka kuma salo zai faɗi gwajin idan
+ya rasa harshen da shigarwar `BASELINE_LANGUAGES` ɗinsa ta jera. Don ƙara salo, duba
 [EXTENDING_COMPRESSION.md](./EXTENDING_COMPRESSION.md#adding-an-output-style).
 
-### Matsawar Sakamakon Kayan Aiki
+### Matse Sakamakon Kayan Aiki
 
 `compressToolResult()` a cikin `open-sse/services/compression/toolResultCompressor.ts`
-yana matse rubutun sakamakon kayan aiki ta amfani da **dabaru 5**. Yana gwada su a wannan
-jeri, kuma dabarar farko da aka kunna wadda bincikenta ya dace da abun ciki ita ce ke
-ƙayyade sakamakon:
+yana matse rubutun sakamakon kayan aiki da **dabaru 5**. Yana gwada su a wannan jeri, kuma
+dabara ta farko da aka kunna wadda gwajinta ya dace da abun ciki ce ke ƙayyade sakamakon:
 
-1. **`fileContent`**: abun ciki mai layuka 3 ko fiye wanda aƙalla layi ɗaya, idan aka yi watsi da
-   ja-gaban shigarwa, yake farawa da `import `, `export `, `function `, `class `,
+1. **`fileContent`**: abun ciki mai layi 3 ko fiye wanda aƙalla layi ɗaya, bayan yin watsi da
+   tazarar gabatarwa, yake farawa da `import `, `export `, `function `, `class `,
    `const `, `let `, `var ` ko `return ` (kalmar maɓalli tare da sarari), ko da `if`,
-   `for` ko `while` sannan `(` ko ` (` ya biyo baya, yana riƙe layuka 20 na farko da 5
-   na ƙarshe, tare da alamar nuna an cire ɓangaren tsakiya.
-2. **`grepSearch`**: abun ciki mai aƙalla layi ɗaya a tsarin `<path>:<digits>:`,
-   inda rubutun da ke gaban waƙafi mai hawa na farko ba shi da farin sarari, yana riƙe
-   waɗannan layukan kawai, har zuwa 30, sannan adadin duk wasu sakamakon da suka rage da
-   jerin fayilolin da aka sami daidaito a cikinsu; ana watsar da kowane layi dabam. Layi
-   guda irin wannan ya isa ya kunna dabarar, don haka layin rajista da ya fara da tambarin
-   lokaci kamar `12:30:45` shi ma yana ƙirguwa.
-3. **`shellOutput`**: fitarwa da ke ɗauke da jerin ANSI CSI (`ESC[` sannan lambobi ko
-   alamomin rabin-waƙafi sannan harafi, kamar yadda yake a lambobin launi) ko `$` wanda
-   farin sarari ke biye da shi a ko’ina cikin rubutun yana rasa waɗannan jerin (ana riƙe
-   sauran tserewa, kamar `ESC[?25l` ko jerin taken taga na OSC) kuma yana riƙe layuka 50
-   na ƙarshe, tare da haɗe layukan da aka maimaita a jere. Saboda wannan binciken yana gudana
-   kafin `json` da `errorMessage`, fitarwar JSON ko kuskure da ke ɗauke da irin wannan `$`
-   ba ta taɓa isa gare su yayin da `shellOutput` yake kunne.
-4. **`json`**: ana taƙaita bayanan JSON masu haruffa sama da 2,000 waɗanda suka fara da `{`
-   ko `[` (bayan farin sarari na zaɓi) kuma aka yi nasarar tantance su: jerin da ke da abubuwa
-   sama da 7 yana riƙe abubuwa 5 na farko da 2 na ƙarshe da jimillar adadinsa, yayin da abu
-   yake riƙe maɓallansa 20 na farko, tare da maye gurbin kowace ƙimar abu ko jeri da ke ciki
-   da alamar `{…N keys}` (ga jeri, N shi ne tsawonsa) da alamar `_remaining_<N>_keys` da ke
-   ƙirga maɓallan da aka watsar bayan 20 na farko. Ana kwafe ƙimomin scalar gaba ɗaya, don
-   haka abu mai maɓallai 20 ko ƙasa da haka wanda ba shi da ƙimomi masu zurfi ana sake masa
-   shigarwa ne kawai — wanda aka matse yana ƙara haruffa kuma ya kasance ba a canza shi ba.
-5. **`errorMessage`**: fitarwa da ke ɗauke da, a ko’ina kuma ba tare da la’akari da girman
-   haruffa ba, `error:`, `error ` (kalmar da sarari ke biye da ita, kamar a `no error found`),
-   `[error]`, `exception:`, `exception `, `[exception]` ko `traceback` tana riƙe layinta na
-   farko, layuka 10 masu biyo baya da 3 na ƙarshe, tare da alamar `… [N frames elided] …`
-   a madadin layukan da ke tsakaninsu. Alamar tana bayyana ne kawai idan layuka sama da 13
-   suka biyo bayan layin farko, don haka ba a gajarta fitarwar kuskure mai layuka 14 ko ƙasa
-   da haka (a layuka 12 ko 13, layuka 3 na ƙarshe suna maimaita layukan da aka riga aka riƙe).
+   `for` ko `while` sannan `(` ko ` (`, yana riƙe layuka 20 na farko da 5 na ƙarshe, tare da
+   alamar nuna an cire tsakiyar.
+2. **`grepSearch`**: abun ciki mai aƙalla layi ɗaya mai tsarin `<path>:<digits>:`,
+   inda rubutun da ke gaban colon na farko ba shi da whitespace, yana riƙe waɗannan layuka kawai, har
+   zuwa 30, sannan ya biyo da adadin duk ƙarin abubuwan da suka dace da kuma jerin fayilolin da suka dace;
+   ana zubar da kowane sauran layi. Layi guda irin wannan ya isa ya kunna dabarar, don haka
+   layin log da ya fara da timestamp kamar `12:30:45` shi ma yana ƙirguwa.
+3. **`shellOutput`**: fitarwa da ta ƙunshi jerin ANSI CSI (`ESC[` sannan lambobi ko
+   semicolons sannan harafi, kamar a lambobin launi) ko `$` da whitespace ya biyo bayansa
+   a ko’ina cikin rubutun tana rasa waɗannan jerin (ana riƙe sauran escapes, kamar `ESC[?25l` ko
+   jerin taken taga na OSC) kuma tana riƙe layuka 50 na ƙarshe, tare da haɗe
+   maimaitattun layuka masu jere. Saboda wannan gwajin yana gudana kafin `json` da `errorMessage`,
+   fitarwar JSON ko ta kuskure da ta ƙunshi irin wannan `$` ba za ta taɓa isa gare su ba muddin
+   `shellOutput` yana kunne.
+4. **`json`**: JSON payload mai haruffa sama da 2,000 wanda yake farawa da `{` ko `[` (bayan
+   whitespace na zaɓi) kuma aka iya parse ɗinsa ana taƙaita shi: array mai abubuwa fiye da 7 yana riƙe
+   abubuwa 5 na farko da 2 na ƙarshe da jimillar adadinsa, yayin da object yake riƙe keys 20 na farko,
+   tare da maye gurbin kowace nested object ko array value da placeholder na `{…N keys}`
+   (ga array, N shi ne tsawonsa) da alamar `_remaining_<N>_keys` mai ƙirga keys da
+   aka zubar bayan 20 na farko. Ana kwafe scalar values gaba ɗaya, don haka object mai keys 20
+   ko ƙasa da haka wanda ba shi da nested values kawai ana sake tsara indentation ɗinsa — minified object yana ƙaruwa da haruffa
+   kuma ya kasance ba a canza shi ba.
+5. **`errorMessage`**: fitarwa da ta ƙunshi, a ko’ina kuma ba tare da la’akari da girman haruffa ba, `error:`,
+   `error ` (kalmar da sarari ya biyo baya, kamar a `no error found`), `[error]`,
+   `exception:`, `exception `, `[exception]` ko `traceback` tana riƙe layinta na farko,
+   layuka 10 na gaba da 3 na ƙarshe, tare da alamar `… [N frames elided] …` a madadin
+   layukan da ke tsakaninsu. Alamar tana bayyana ne kawai idan layuka fiye da 13 suka biyo bayan layin farko,
+   don haka fitarwar kuskure mai layuka 14 ko ƙasa ba a gajarta ta (a layuka 12 ko 13,
+   layuka 3 na ƙarshe suna maimaita layukan da aka riga aka riƙe).
 
-Bayan dabara ta dace, ko da ba ta adana komai ba, ba a gwada dabarun da ke bayanta.
-Idan dabarar da ta dace ba ta adana kiyasin token ko ɗaya ba (tsawo ÷ 4, an zagaye zuwa
-sama) — misali fayil mai kama da lamba mai layuka 25 ko ƙasa da haka, ko jerin JSON mai
-haruffa sama da 2,000 da abubuwa 7 ko ƙasa da haka — injin tsanani yana riƙe sakamakon
-kayan aiki na asali: duka masu kira (`compressAggressive()` da
-`compressAnthropicToolResultBlock()`) suna riƙe na asali idan `saved` ya kasance 0 ko
-ƙasa da haka, yayin da `compressToolResult()` kansa har yanzu yake dawo da fitarwar
-wannan dabarar. Matakin sakamakon kayan aiki ba shi ne hukuncin ƙarshe ba: mai taƙaita
-na madadin na injin har yanzu zai iya gajarta saƙon `tool` ko `function` mai haruffa sama
-da 8,192 (`maxTokensPerMessage`, 2,048, sau 4).
+Bayan dabara ta dace, ko da wadda ba ta adana komai ba, ba a gwada dabarun da ke baya.
+Idan dabarar da ta dace ba ta adana estimated tokens ba (tsawo ÷ 4, an zagaye zuwa sama) —
+misali fayil mai kama da code mai layuka 25 ko ƙasa, ko JSON array mai haruffa sama da 2,000
+wanda yake da abubuwa 7 ko ƙasa — aggressive engine yana riƙe ainihin sakamakon kayan aikin:
+duk masu kira (`compressAggressive()` da `compressAnthropicToolResultBlock()`)
+suna riƙe ainihin idan `saved` ya zama 0 ko ƙasa, yayin da `compressToolResult()` da kansa har yanzu
+yake mayar da fitarwar dabarar. Matakin sakamakon kayan aiki ba shi ne hukunci na ƙarshe ba:
+fallback summarizer na engine har yanzu zai iya gajarta saƙon `tool` ko `function` mai tsawon
+sama da haruffa 8,192 (`maxTokensPerMessage`, 2,048, sau 4).
 
 #### Lokacin amfani
 
-Matse sakamakon kayan aiki shi ne mataki na 1 na injin tsanani (`compressAggressive()` a
-cikin `open-sse/services/compression/aggressive.ts`), don haka yana gudana a yanayin
-Aggressive da kuma a matakin `aggressive` na tsarin bututun da aka jera. Yana matse
-saƙonnin `tool` da `function` masu tsarin OpenAI da rubutun da ke cikin tubalan Anthropic
-`tool_result`. Kowace dabara tana da nata maɓallin kunnawa a ƙarƙashin
-`aggressive.toolStrategies`, kuma duk suna kunne ta tsohuwa. A allon sarrafawa, maɓallan
-suna cikin kallon **Advanced** na shafin Caveman yayin da matsewa yake kunne kuma yanayin
-tsohuwa shi ne Aggressive.
+Matse sakamakon kayan aiki shi ne mataki na 1 na aggressive engine (`compressAggressive()` a cikin
+`open-sse/services/compression/aggressive.ts`), don haka yana gudana a yanayin Aggressive da kuma a
+matakin `aggressive` na stacked pipeline. Yana matse saƙonnin `tool` da `function` masu tsarin OpenAI
+da kuma rubutun da ke cikin blocks na Anthropic `tool_result`. Kowace dabara tana da nata
+switch ƙarƙashin `aggressive.toolStrategies`, duk suna kunne ta default. A dashboard,
+switches ɗin suna cikin kallon **Advanced** na shafin Caveman yayin da compression yake kunne kuma
+default mode ɗin shi ne Aggressive.
 
-### Bututun da Aka Jera
+### Stacked Pipeline
 
-Yanayin da aka jera yana gudanar da **injuna da yawa a jere** — yawanci RTK da farko
-(ajiyar 60-90% a fitarwar kayan aiki), sannan Caveman a kan sauran rubutun (~46% ajiyar
-shigarwa). Idan aka haɗa su, wannan shi ne **kewayon cancanta na 78-95%** (duba Lissafin
-Ajiyar Upstream a sama): `1 - (1 - 0.60..0.90) × (1 - 0.46)` yana da matsakaicin ≈89%.
+Yanayin stacked yana gudanar da **engines da yawa a jere** — yawanci RTK da farko
+(ajiya 60-90% a kan fitarwar kayan aiki), sannan Caveman a kan sauran rubutun (~46% na ajiyar
+input). Idan aka haɗa, wannan shi ne **eligible range na 78-95%** (duba Upstream Savings Math
+a sama): `1 - (1 - 0.60..0.90) × (1 - 0.46)` matsakaicinsa ≈89%.
 
 #### Yadda yake aiki
 
 ```
-Shigarwa (token 1000)
-  → RTK (tacewa mai fahimtar umarni) → token 200
-    → Caveman (cire ƙarin kalmomi) → token 108
-  → Fitarwa (token 108, ~89% ajiyar kuɗi)
+Input (tokens 1000)
+  → RTK (tace mai fahimtar command) → tokens 200
+    → Caveman (cire ƙarin kalmomi) → tokens 108
+  → Output (tokens 108, ~89% na ajiya)
 ```
 
 #### Lokacin amfani
 
-Yi amfani da yanayin da aka jera don:
+Yi amfani da yanayin stacked don:
 
-- Hanyoyin aiki masu yawan amfani da kayan aiki (shirya lamba ta wakili, bincike)
-- Sarrafa rukuni mai kula da tsada
-- Lokacin da kake buƙatar mafi girman ajiyar token
+- Workflows masu yawan amfani da kayan aiki (agentic coding, bincike)
+- Batch processing mai kula da tsada
+- Lokacin da kake buƙatar matsakaicin ajiyar token
 
-Ana saita bututun da aka jera ta hanyar saitin matsewa na duniya `stackedPipeline`,
-ko kuma ta hanyar haɗin matsewa mai suna wanda aka ɗora wa haɗin turawa (duba
-Per-Combo Override a sama) — ba ta hanyar `modePack` na auto-combo ba (wannan filin
-yana sake daidaita nauyin zaɓin samfurin auto-combo ne kawai, kuma `stacked` ba ingantaccen
-sunan pack ba ne).
+Ana saita stacked pipelines ta global `stackedPipeline` compression
+setting, ko ta named compression combo da aka sanya wa routing combo (duba
+Per-Combo Override a sama) — ba ta auto-combo `modePack` ba (wannan field ɗin yana
+sake daidaita nauyin zaɓin model na auto-combo kawai, kuma `stacked` ba ingantaccen sunan pack ba ne).
 
 ---
 

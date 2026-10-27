@@ -1,1 +1,0 @@
-- Stop sending the Claude Code identity beta by default for the plain Anthropic API-key provider, while preserving OAuth/Claude Code headers and explicit compatible-provider overrides.

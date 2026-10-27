@@ -39,12 +39,12 @@ Studio cu trei file, care unifică funcțiile de căutare web, extragere de con�
 
 ### Fila Căutare
 
-Dezvoltă componentele existente `SearchForm` + `ResultsPanel` + `RerankPanel` într-o filă:
+Transformă componentele existente `SearchForm` + `ResultsPanel` + `RerankPanel` într-o filă:
 
 - Interogare → rezultate (titlu, URL, fragment, scor de relevanță).
 - Metadatele furnizorului în panoul Configurare (cost, cotă, stare).
-- Secțiunea de rerank: selectarea unui model de rerank, reordonarea rezultatelor, afișarea `positionDelta`.
-- Stare goală cu îndemn la acțiune atunci când nu este configurat niciun furnizor de căutare.
+- Secțiune de rerangare: selectarea unui model de rerangare, reordonarea rezultatelor, afișarea `positionDelta`.
+- Stare goală cu CTA atunci când nu este configurat niciun furnizor de căutare.
 - Istoricul căutărilor prin `SearchHistory.tsx`.
 - Apelează `POST /v1/search` (endpoint existent, fără modificări).
 
@@ -53,10 +53,10 @@ Dezvoltă componentele existente `SearchForm` + `ResultsPanel` + `RerankPanel` �
 Filă nouă pentru extragerea conținutului dintr-un URL prin `POST /v1/web/fetch` (creat în planul 05):
 
 - Intrare: URL + comutator pentru pagina completă + selector de format (markdown / text / HTML).
-- Trimitere → preluare → randare `ScrapeResult.tsx`.
-- `ScrapeResult` randează previzualizarea markdown + comutatorul pentru conținutul brut.
-- Limită: dacă corpul răspunsului depășește **256 KB**, interfața afișează `(trunchiat, vizualizați conținutul brut)` și deschide conținutul brut într-o fereastră modală Monaco (D21).
-- Panou de metadate: furnizor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latență, cost, dimensiunea răspunsului, numărul de linkuri.
+- Trimitere → preluare → afișare în `ScrapeResult.tsx`.
+- `ScrapeResult` afișează previzualizarea markdown + un comutator pentru conținutul brut.
+- Limită: dacă corpul răspunsului depășește **256 KB**, interfața afișează `(trunchiat, vizualizează conținutul brut)` și deschide conținutul brut într-o fereastră modală Monaco (D21).
+- Panou de metadate: furnizor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latență, cost, dimensiunea răspunsului, numărul de linkuri.
 - Utilizează hook-ul `useScrapeFetch.ts`.
 
 ### Fila Comparare
@@ -64,8 +64,8 @@ Filă nouă pentru extragerea conținutului dintr-un URL prin `POST /v1/web/fetc
 Rulează aceeași interogare/același URL prin maximum **4 furnizori în paralel** (D22):
 
 - Coloane alăturate pentru fiecare furnizor.
-- Metrici: latență, cost, numărul de rezultate, dimensiunea răspunsului.
-- Calcularea suprapunerii URL-urilor pentru căutare (numărul de URL-uri comune față de rezultatul inițial).
+- Metrici: latență, cost, număr de rezultate, dimensiunea răspunsului.
+- Calcularea suprapunerii URL-urilor pentru căutare (numărul de URL-uri comune raportat la rezultatul inițial).
 - Apelează `POST /v1/search` (căutare) sau `POST /v1/web/fetch` (extragere) pentru fiecare furnizor.
 
 ---
@@ -99,15 +99,15 @@ Rulează aceeași interogare/același URL prin maximum **4 furnizori în paralel
 
 ---
 
-## Catalogul furnizorilor
+## Catalog de furnizori
 
 `ProviderCatalog.tsx` expune lista completă de furnizori din `GET /api/search/providers`
 (extinsă în F4 pentru a include furnizorii de preluare):
 
-| `kind` | `"search"` (20 de furnizori) sau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 de furnizori) sau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Starea este **determinată în momentul solicitării**, verificând dacă există acreditări și dacă
-toate cheile se află momentan în perioada de așteptare.
+Starea este **determinată în momentul solicitării**, verificând dacă există credențiale și dacă
+toate cheile se află în prezent în perioada de așteptare.
 
 ---
 
@@ -119,17 +119,17 @@ Substituentul pentru cheia API este întotdeauna `$OMNIROUTE_API_KEY` (D11, part
 
 ---
 
-## Modificări în backend
+## Modificări backend
 
-Pentru această funcționalitate a fost necesară o singură modificare în backend:
+A fost necesară o singură modificare de backend pentru această funcționalitate:
 
-### `GET /api/search/providers` extins
+### Extinderea `GET /api/search/providers`
 
 `src/app/api/search/providers/route.ts` a fost extins pentru a:
 
-- Include toți cei 6 furnizori de preluare (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) în listă.
-- Adăuga `kind: "search" | "fetch"` fiecărui element.
-- Adăuga `status: "configured" | "missing" | "rate_limited"`, determinat din starea actuală a acreditărilor.
+- Include fiecare furnizor de preluare (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) în listă.
+- Adăuga `kind: "search" | "fetch"` la fiecare element.
+- Adăuga `status: "configured" | "missing" | "rate_limited"`, derivat din starea curentă a acreditărilor.
 - Menține compatibilitatea cu versiunile anterioare — câmpurile existente (`id`, `name` etc.) rămân neschimbate.
 
 ---

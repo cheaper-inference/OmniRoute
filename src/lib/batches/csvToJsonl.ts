@@ -46,7 +46,7 @@ function parseCsvRow(line: string): string[] {
  * Split CSV text into logical lines, preserving inline newlines inside quoted fields.
  * Handles CRLF and LF; does not collapse multiple empty lines.
  */
-function splitLines(s: string): string[] {
+function splitLines(s: string, limit = Infinity): string[] {
   const out: string[] = [];
   let buf = "";
   let inQuotes = false;
@@ -66,6 +66,7 @@ function splitLines(s: string): string[] {
     if ((ch === "\n" || ch === "\r") && !inQuotes) {
       if (ch === "\r" && s[i + 1] === "\n") i++;
       if (buf.length > 0) out.push(buf);
+      if (out.length >= limit) return out;
       buf = "";
       continue;
     }
@@ -73,6 +74,12 @@ function splitLines(s: string): string[] {
   }
   if (buf.length > 0) out.push(buf);
   return out;
+}
+
+/** Read the first logical CSV record using the same parser as batch conversion. */
+export function parseCsvHeaders(csv: string): string[] {
+  const firstLine = splitLines(csv.replace(/^\uFEFF/, ""), 1)[0];
+  return firstLine === undefined ? [] : parseCsvRow(firstLine);
 }
 
 // ── Prototype-pollution guard ─────────────────────────────────────────────────

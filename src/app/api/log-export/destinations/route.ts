@@ -29,7 +29,7 @@ const createDestinationSchema = z.object({
 });
 
 export async function GET(request: Request) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   try {
@@ -45,7 +45,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
 
   try {

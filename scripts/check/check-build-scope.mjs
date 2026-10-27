@@ -36,8 +36,13 @@ try {
   console.error("[build-scope] could not read tsconfig.json exclude — aborting");
   process.exit(2);
 }
-// Always skip VCS + the exclude dirs (normalise to bare top-level names).
-const SKIP_DIRS = new Set([".git", ...exclude.map((e) => e.replace(/^\.\//, "").replace(/\/.*$/, ""))]);
+// Always skip VCS + the exclude dirs, matched as root-relative paths: a nested entry such as
+// `packages/browser-pool` skips only that subdir — collapsing it to its top-level name would
+// silently drop the rest of `packages/` (the vendored kit) from the count.
+const SKIP_DIRS = new Set([
+  ".git",
+  ...exclude.map((e) => e.replace(/^\.\//, "").replace(/\/+$/, "")),
+]);
 
 let count = 0;
 const byTop = {};
@@ -52,6 +57,7 @@ function walk(dir, top) {
     if (e.isSymbolicLink()) continue; // don't follow symlinks (e.g. node_modules)
     const full = path.join(dir, e.name);
     if (e.isDirectory()) {
+      if (SKIP_DIRS.has(path.relative(ROOT, full).split(path.sep).join("/"))) continue;
       walk(full, top);
     } else if (EXT.has(path.extname(e.name))) {
       count++;

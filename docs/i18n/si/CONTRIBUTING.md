@@ -17,17 +17,17 @@ UI/UX, i18n, CLI, database, සහ build/deploy වෙනස්කම් ඒව�
 
 ### පූර්ව අවශ්යතා
 
-- **Node.js** `>=22.22.3 <23`, හෝ `>=24.0.0 <27` (නිර්දේශිත: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, හෝ `>=24.0.0 <27` (නිර්දේශිත: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ පරිශීලකයන් (Node 24+):** `npm install` ධාවනය කිරීමෙන් පසු, native modules ස්ථාපනය වී ඇති බව තහවුරු කරන්න:
+> **npm v11+ පරිශීලකයින් (Node 24+):** `npm install` ක්රියාත්මක කිරීමෙන් පසු, ස්වදේශීය මොඩියුල ස්ථාපනය වී ඇති බව තහවුරු කරන්න:
 > `node -e "require('better-sqlite3')"`. එය `MODULE_NOT_FOUND` සමඟ අසාර්ථක වුවහොත්,
-> `npm approve-scripts better-sqlite3 && npm install` ධාවනය කරන්න. බලන්න
+> `npm approve-scripts better-sqlite3 && npm install` ක්රියාත්මක කරන්න. බලන්න
 > [දෝෂ නිරාකරණය](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Clone කිරීම සහ ස්ථාපනය
+### ක්ලෝන කිරීම සහ ස්ථාපනය
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -38,7 +38,7 @@ npm install
 ### පරිසර විචල්ය
 
 ```bash
-# අච්චුවෙන් ඔබගේ .env ගොනුව සාදන්න
+# අච්චුවෙන් ඔබේ .env ගොනුව සාදන්න
 cp .env.example .env
 
 # අවශ්ය රහස් ජනනය කරන්න
@@ -48,81 +48,81 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 සංවර්ධනය සඳහා ප්රධාන විචල්ය:
 
-| විචල්යය                | සංවර්ධන පෙරනිමිය         | විස්තරය                    |
-| ---------------------- | ------------------------ | -------------------------- |
-| `PORT`                 | `20128`                  | සේවාදායක port එක           |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | frontend සඳහා මූලික URL එක |
-| `JWT_SECRET`           | (ඉහත ජනනය කරන්න)         | JWT අත්සන් කිරීමේ රහස      |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | පළමු පිවිසුම් මුරපදය       |
-| `APP_LOG_LEVEL`        | `info`                   | log විස්තරාත්මක මට්ටම      |
+| විචල්යය                | සංවර්ධන පෙරනිමිය         | විස්තරය                   |
+| ---------------------- | ------------------------ | ------------------------- |
+| `PORT`                 | `20128`                  | සේවාදායක පෝට් එක          |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ඉදිරිපස සඳහා මූලික URL එක |
+| `JWT_SECRET`           | (ඉහත පරිදි ජනනය කරන්න)   | JWT අත්සන් කිරීමේ රහස     |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | පළමු පිවිසුම් මුරපදය      |
+| `APP_LOG_LEVEL`        | `info`                   | ලොග් විස්තර මට්ටම         |
 
-### Dashboard සැකසුම්
+### උපකරණ පුවරු සැකසුම්
 
-පරිසර විචල්ය හරහා ද වින්යාස කළ හැකි විශේෂාංග සඳහා dashboard එක UI toggles සපයයි:
+පරිසර විචල්ය හරහාද වින්යාස කළ හැකි විශේෂාංග සඳහා උපකරණ පුවරුව UI මාරු සපයයි:
 
-| සැකසුම පිහිටි ස්ථානය | Toggle එක          | විස්තරය                              |
-| -------------------- | ------------------ | ------------------------------------ |
-| Settings → Advanced  | Debug Mode         | debug ඉල්ලීම් logs සක්රිය කරන්න (UI) |
-| Settings → General   | Sidebar Visibility | sidebar කොටස් පෙන්වන්න/සඟවන්න        |
+| සැකසුම් ස්ථානය    | මාරුව              | විස්තරය                               |
+| ----------------- | ------------------ | ------------------------------------- |
+| සැකසුම් → උසස්    | දෝෂහරණ ප්රකාරය     | දෝෂහරණ ඉල්ලීම් ලොග් සක්රීය කරන්න (UI) |
+| සැකසුම් → සාමාන්ය | පැති තීරු දෘශ්යතාව | පැති තීරු කොටස් පෙන්වන්න/සඟවන්න       |
 
-මෙම සැකසුම් database එකේ ගබඩා වන අතර නැවත ආරම්භ කිරීම් අතරතුර ද පවතිමින්, සකසා ඇති විට env var පෙරනිමි අගයන් අභිබවා යයි.
+මෙම සැකසුම් දත්ත සමුදායේ ගබඩා වන අතර නැවත ආරම්භ කිරීම් හරහා පවතිමින්, සකසා ඇති විට පරිසර විචල්යවල පෙරනිමි අගයන් අභිබවා යයි.
 
 ### දේශීයව ධාවනය කිරීම
 
 ```bash
-# සංවර්ධන ප්රකාරය (hot reload)
+# සංවර්ධන ප්රකාරය (ක්ෂණික නැවත පූරණය)
 npm run dev
 
-# නිෂ්පාදන build එක
+# නිෂ්පාදන ගොඩනැගීම
 npm run build    # next build → .build/next/ ඉන්පසු assembleStandalone → dist/
 npm run start
 
-# දායක වෙනස්කම් සඳහා වේගවත් backend/API-පමණක් compile කිරීම
+# දායක වෙනස්කම් සඳහා වේගවත් පසු-අන්ත/API-පමණක් සම්පාදනය
 npm run build:contributor
 
-# නිකුතු build එක (පිරිසිදු නැවත build කිරීම + HEAD sentinel — deploy සඳහා අවශ්යයි)
+# නිකුතු ගොඩනැගීම (පිරිසිදු නැවත ගොඩනැගීම + HEAD මුර සලකුණ — යෙදවීම සඳහා අවශ්යයි)
 npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA ලියයි
 
-# පොදු port වින්යාසය
+# පොදු පෝට් වින්යාසය
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-දායක build එක compile-පමණක් වලංගුකරණය සිදු කරයි: එය standalone
-බෙදාහැරීම එකලස් කිරීම හෝ විකල්ප native packaging assets build කිරීම සිදු නොකරයි. බෙදාහැරිය හැකි bundle එක
-වලංගු කිරීමට අවශ්ය විට සාමාන්ය නිෂ්පාදන build එක භාවිත කරන්න.
+දායක ගොඩනැගීම සම්පාදනය-පමණක් වලංගු කිරීම සිදු කරයි: එය ස්වාධීන
+බෙදාහැරීම එකලස් කිරීම හෝ විකල්ප ස්වදේශීය ඇසුරුම් සම්පත් ගොඩනැගීම සිදු නොකරයි. බෙදාහැරිය හැකි මිටිය
+වලංගු කිරීමට අවශ්ය විට සාමාන්ය නිෂ්පාදන ගොඩනැගීම භාවිත කරන්න.
 
-### Build ප්රතිදාන සැලැස්ම
+### ගොඩනැගීමේ ප්රතිදාන සැකැස්ම
 
-| නාමාවලිය  | අන්තර්ගතය                                                                     | නිරීක්ෂණය කෙරේද |
-| --------- | ----------------------------------------------------------------------------- | --------------- |
-| `src/`    | යෙදුම් source එක (TypeScript / TSX)                                           | ඔව්             |
-| `.build/` | අතරමැදි ගොනු — `next build` ප්රතිදානය (gitignored, `distDir = .build/next`)   | නැත             |
-| `dist/`   | බෙදාහැරිය හැකි bundle එක — `assembleStandalone` මඟින් එකලස් කෙරේ (gitignored) | නැත             |
+| නාමාවලිය  | අන්තර්ගතය                                                                   | හඹා යයිද |
+| --------- | --------------------------------------------------------------------------- | -------- |
+| `src/`    | යෙදුම් මූලාශ්රය (TypeScript / TSX)                                          | ඔව්      |
+| `.build/` | අතරමැදි ගොනු — `next build` ප්රතිදානය (gitignored, `distDir = .build/next`) | නැත      |
+| `dist/`   | බෙදාහැරිය හැකි මිටිය — `assembleStandalone` මඟින් එකලස් කරයි (gitignored)   | නැත      |
 
-Build pipeline එක එක් වටයකි:
+ගොඩනැගීමේ නල මාර්ගය තනි වාරයකින් ක්රියාත්මක වේ:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js ප්රතිදානය)
-  └─ assembleStandalone()                 (standalone + static + public + native assets පිටපත් කරයි)
-       └─ ප්රතිදානය: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (standalone + static + public + ස්වදේශීය සම්පත් පිටපත් කරයි)
+       └─ ප්රතිදානය: dist/               (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` අමතරව පළමුව නාමාවලි දෙකම පිරිසිදු කර,
-deploy අඛණ්ඩතා sentinel එකක් ලෙස `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ලියයි.
+`npm run build:release` මඟින් අතිරේකව පළමුව නාමාවලි දෙකම පිරිසිදු කර,
+යෙදවීමේ අඛණ්ඩතා මුර සලකුණක් ලෙස `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ලියයි.
 
-`npm run build:contributor` backend-පමණක් build profile එක භාවිත කරයි. එය build කරන අතරතුර
-dashboard UI ගොනු තාවකාලිකව stub කර, API route handlers තබාගෙන, build එකෙන් පසු මුල් ගොනු
-ප්රතිසාධනය කරයි. dashboard UI එකට බලපාන වෙනස්කම් සඳහා හෝ සම්පූර්ණ
-නිකුතු වලංගුකරණය සඳහා `npm run build` භාවිත කරන්න; දායක profile එක නිකුතු build එක වෙනුවට භාවිත කළ නොහැක.
+`npm run build:contributor` පසු-අන්ත-පමණක් ගොඩනැගීමේ පැතිකඩ භාවිත කරයි. එය ගොඩනැගීමේදී
+උපකරණ පුවරු UI ගොනු තාවකාලිකව ආදේශ කර, API මාර්ග හසුරුවන්නන් තබාගෙන, ගොඩනැගීමෙන්
+පසු මුල් ගොනු ප්රතිසාධනය කරයි. උපකරණ පුවරු UI වෙත බලපාන වෙනස්කම් සඳහා හෝ සම්පූර්ණ
+නිකුතු වලංගු කිරීම සඳහා `npm run build` භාවිත කරන්න; දායක පැතිකඩ නිකුතු ගොඩනැගීම සඳහා ආදේශකයක් නොවේ.
 
-> **VPS deploy සටහන:** දුරස්ථ image නාමාවලිය `/usr/lib/node_modules/omniroute/app/`
-> වෙනස් වී නොමැත. deploy skills මඟින් `dist/` හි අන්තර්ගතය එයට rsync කරයි.
-> repository එක තුළ ඇති build ප්රතිදාන path එක පමණක් වෙනස් විය (`app/` → `dist/`).
+> **VPS යෙදවීමේ සටහන:** දුරස්ථ අනුරූ නාමාවලිය `/usr/lib/node_modules/omniroute/app/`
+> වෙනස් වී නොමැත. යෙදවීමේ කුසලතා `dist/` හි අන්තර්ගතය එයට rsync කරයි.
+> ගබඩාව තුළ ඇති ගොඩනැගීමේ ප්රතිදාන මාර්ගය පමණක් මාරු වී ඇත (`app/` → `dist/`).
 
-පෙරනිමි URLs:
+පෙරනිමි URL:
 
-- **Dashboard**: `http://localhost:20128/dashboard`
+- **උපකරණ පුවරුව**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -175,85 +175,85 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 ## පරීක්ෂණ ධාවනය කිරීම
 
 ```bash
-# සියලුම පරීක්ෂණ (unit + vitest + ecosystem + e2e)
+# සියලු පරීක්ෂණ (ඒකක + vitest + පරිසර පද්ධති + e2e)
 npm run test:all
 
-# තනි පරීක්ෂණ ගොනුවක් (Node.js ස්වදේශීය test runner — බොහෝ පරීක්ෂණ මෙය භාවිත කරයි)
+# තනි පරීක්ෂණ ගොනුවක් (Node.js ස්වදේශීය පරීක්ෂණ ධාවකය — බොහෝ පරීක්ෂණ මෙය භාවිත කරයි)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# ඔබේ වෙනසෙන් බලපෑමට ලක්වූ unit tests පමණක් (CI gate එකේ ඇති TIA selector එකමයි, #8084)
-npm run test:scoped            # අවසන් commit එකේ (හෝ working tree එකේ) වෙනස්කම්
-npm run test:scoped:staged     # staged වෙනස්කම් පමණයි — pre-commit ධාවනයක් සමඟ හොඳින් ගැළපේ
-npm run test:scoped:full       # පළමුව import-graph සිතියම නැවත ගොඩනඟන්න (ගොනු එක් කිරීමෙන්/ගෙනයාමෙන් පසු)
-# Exit 1 + "run the full suite" යන්නෙන් අදහස් වන්නේ hub ගොනුවක් (tsconfig, package.json, …) හෝ
-# සිතියම්ගත නොකළ source එකක් වෙනස් වී ඇති බවයි — selector එක ආරක්ෂිතව අසාර්ථක වන අතර කිසිවිටෙක නිහඬව මඟ නොහරියි.
+# ඔබේ වෙනස්කමෙන් බලපෑමට ලක් වූ ඒකක පරීක්ෂණ පමණි (CI සීමාවට සමාන TIA තේරීම්කාරකය, #8084)
+npm run test:scoped            # අවසන් commit එකේ (හෝ වැඩ කරන tree එකේ) වෙනස්කම්
+npm run test:scoped:staged     # stage කළ වෙනස්කම් පමණි — pre-commit ධාවනයක් සමඟ හොඳින් ගැළපේ
+npm run test:scoped:full       # පළමුව import-graph සිතියම නැවත ගොඩනඟයි (ගොනු එක් කිරීමෙන්/ගෙනයාමෙන් පසු)
+# Exit 1 + "සම්පූර්ණ කට්ටලය ධාවනය කරන්න" යන්නෙන් අදහස් වන්නේ කේන්ද්රීය ගොනුවක් (tsconfig, package.json, …) හෝ
+# සිතියම්ගත නොකළ මූලාශ්රයක් වෙනස් වී ඇති බවයි — තේරීම්කාරකය ආරක්ෂිත ලෙස අසමත් වන අතර කිසි විටෙක නිහඬව මඟ නොහරියි.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (MCP සේවාදායකය, autoCombo, cache)
 npm run test:vitest
 
 # E2E පරීක්ෂණ (Playwright අවශ්යයි)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# Protocol සේවාලාභී E2E (MCP transports, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem අනුකූලතා පරීක්ෂණ
+# පරිසර පද්ධති අනුකූලතා පරීක්ෂණ
 npm run test:ecosystem
 
-# Coverage gate: statements/lines/functions/branches 60%
+# ආවරණ සීමාව: ප්රකාශ/පේළි/ශ්රිත/ශාඛා 60%
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format පරීක්ෂාව
+# Lint + ආකෘති පරීක්ෂාව
 npm run lint
 npm run check
 
-# Gate කළ සැබෑ-upstream combo smoke පරීක්ෂණය (VPS ප්රවේශය + සැබෑ provider credits අවශ්යයි)
-# සැබෑ providers වෙත පිවිසේ — සුළු පිරිවැයක් ඇත. කිසිවිටෙක CI තුළ ධාවනය නොවේ. Gate එක නොමැති විට නිසි ලෙස මඟ හරියි.
-# අවශ්ය දේ: ssh root@192.168.0.15 ප්රවේශය (VPS වෙතින් read-only DB snapshot එකක් source කරයි).
+# සීමා කළ සැබෑ-upstream සංයෝජන මූලික සත්යාපන පරීක්ෂණය (VPS ප්රවේශය + සැබෑ සැපයුම්කරු credits අවශ්යයි)
+# සැබෑ සැපයුම්කරුවන් වෙත ප්රවේශ වේ — සුළු පිරිවැයක් දරයි. CI තුළ කිසි විටෙක ධාවනය නොවේ. සීමාව නොමැති විට නිසි ලෙස මඟ හරියි.
+# අවශ්ය වන්නේ: ssh root@192.168.0.15 ප්රවේශය (VPS වෙතින් read-only DB snapshot එකක් ලබාගනී).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS සජීවී smoke පරීක්ෂණය — සරල Node ESM scripts, සජීවී .15 server එකට සෘජුව පිවිසේ.
-# අවශ්ය දේ: ssh root@192.168.0.15 ප්රවේශය (SSH sqlite හරහා combos සාදා/ඉවත් කරයි).
-# සැබෑ providers වෙත පිවිසේ (සුළු පිරිවැයක්). __live_test__* combos පමණක් සාදයි/මකයි. කිසිවිටෙක CI තුළ ධාවනය නොවේ.
-# .15 මත REQUIRE_API_KEY=false නිසා API key එකක් අවශ්ය නැත, නමුත් සකසා ඇත්නම් COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY අනුගමනය කරයි.
-npm run test:combo:live:vps              # HTTP අවස්ථා 7ක් (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # සැබෑ cross-provider failover අවස්ථාවක් එක් කරයි (මුළු ගණන 8යි)
+# Phase-3 VPS සජීවී මූලික සත්යාපන පරීක්ෂණය — සරල Node ESM scripts, සජීවී .15 සේවාදායකයට ඍජුව ප්රවේශ වේ.
+# අවශ්ය වන්නේ: ssh root@192.168.0.15 ප්රවේශය (SSH sqlite හරහා සංයෝජන සාදා/ඉවත් කරයි).
+# සැබෑ සැපයුම්කරුවන් වෙත ප්රවේශ වේ (සුළු පිරිවැයක්). __live_test__* සංයෝජන පමණක් සාදා/මකයි. CI තුළ කිසි විටෙක ධාවනය නොවේ.
+# .15 හි REQUIRE_API_KEY=false බැවින් API key එකක් අවශ්ය නොවන නමුත්, සකසා ඇත්නම් COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY භාවිත කරයි.
+npm run test:combo:live:vps              # HTTP අවස්ථා 7ක් (ප්රමුඛතාව/round-robin/බරිත/පිරිවැය/fusion/ස්වයංක්රීය + සෞඛ්යය)
+npm run test:combo:live:vps:failover     # සැබෑ හරස්-සැපයුම්කරු failover අවස්ථාවක් එක් කරයි (මුළු ගණන 8)
 ```
 
-Coverage සටහන්:
+ආවරණ සටහන්:
 
-- `npm run test:coverage` ප්රධාන unit test suite එක සඳහා source coverage මනින අතර, `tests/**` බැහැර කර `open-sse/**` ඇතුළත් කරයි
-- Pull requests විසින් statements/lines/functions/branches සඳහා coverage gate එක **60%+** ලෙස පවත්වා ගත යුතුය
-- PR එකක් `src/`, `open-sse/`, `electron/`, හෝ `bin/` තුළ production code වෙනස් කරන්නේ නම්, එම PR එක තුළම automated tests එක් කිරීම හෝ යාවත්කාලීන කිරීම අවශ්යයි
-- `npm run coverage:report` මඟින් නවතම coverage ධාවනයේ සවිස්තරාත්මක ගොනුවෙන්-ගොනුවට වාර්තාව මුද්රණය කරයි
-- `npm run test:coverage:legacy` ඓතිහාසික සැසඳීම සඳහා පැරණි metric එක සුරකියි
-- අදියරගත coverage වැඩිදියුණු කිරීමේ මාර්ග සිතියම සඳහා `docs/ops/COVERAGE_PLAN.md` බලන්න
+- `npm run test:coverage` ප්රධාන ඒකක පරීක්ෂණ කට්ටලය සඳහා මූලාශ්ර ආවරණය මනින අතර, `tests/**` බැහැර කර, `open-sse/**` ඇතුළත් කරයි
+- Pull request මඟින් ප්රකාශ/පේළි/ශ්රිත/ශාඛා සඳහා ආවරණ සීමාව **60%+** ලෙස පවත්වාගත යුතුය
+- PR එකක් `src/`, `open-sse/`, `electron/`, හෝ `bin/` තුළ නිෂ්පාදන කේතය වෙනස් කරන්නේ නම්, එම PR එක තුළම ස්වයංක්රීය පරීක්ෂණ එක් කිරීම හෝ යාවත්කාලීන කිරීම කළ යුතුය
+- `npm run coverage:report` නවතම ආවරණ ධාවනයෙන් ගොනුවෙන්-ගොනුවට සවිස්තර වාර්තාව මුද්රණය කරයි
+- `npm run test:coverage:legacy` ඓතිහාසික සැසඳීම සඳහා පැරණි මිනුම සුරකියි
+- අදියර අනුව ආවරණය වැඩිදියුණු කිරීමේ මාර්ග සිතියම සඳහා `docs/ops/COVERAGE_PLAN.md` බලන්න
 
 ### Pull Request අවශ්යතා
 
-PR එකක් විවෘත කිරීමට පෙර, ඔබ වෙනස් කළ දේ සඳහා අවධානය යොමු කළ චක්රය ධාවනය කිරීමට
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) භාවිත කරන්න.
-සම්පූර්ණ unit suite එක (CI shards 4ක්), Vitest, **60%+** coverage gate එක සහ production build එක
-CI හි වගකීමයි — ඒවා දේශීයව ධාවනය කිරීමෙන් PR පරීක්ෂණ දැනටමත් ලබා නොදෙන අමතර සංඥාවක් නොලැබෙන අතර,
-කුඩා යන්ත්රවලදී එය host එකේ සම්පත් උපරිමයෙන් භාවිත කළ හැක (#8084):
+PR එකක් විවෘත කිරීමට පෙර, ඔබ වෙනස් කළ දේ සඳහා ඉලක්කගත ක්රියාවලිය ධාවනය කිරීමට
+[දායකත්ව Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) භාවිත කරන්න. සම්පූර්ණ ඒකක පරීක්ෂණ කට්ටලය (CI shards 4ක්), Vitest, **60%+** ආවරණ සීමාව සහ
+නිෂ්පාදන build එක CI හි වගකීම වේ — ඒවා දේශීයව ධාවනය කිරීමෙන් PR
+පරීක්ෂාවන් දැනටමත් ලබා නොදෙන අමතර තොරතුරක් නොලැබෙන අතර, කුඩා යන්ත්රවලදී එය host එකේ ධාරිතාව සම්පූර්ණයෙන් භාවිත කළ හැකිය (#8084):
 
-- ඔබේ වෙනස ආවරණය කරන test files ධාවනය කරන්න: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- ඔබේ වෙනස ආවරණය කරන පරීක්ෂණ ගොනු ධාවනය කරන්න: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` ධාවනය කරන්න
-- production code වෙනස් වන සෑමවිටම එම PR එක තුළම automated tests ඇතුළත් කරන්න හෝ යාවත්කාලීන කරන්න
-- production code වෙනස් වූ විට වෙනස් කළ හෝ එක් කළ test files PR විස්තරයට ඇතුළත් කරන්න
-- project secrets CI තුළ සකසා ඇති විට PR එකේ SonarQube ප්රතිඵලය පරීක්ෂා කරන්න
+- නිෂ්පාදන කේතය වෙනස් වන සෑම විටම එම PR එක තුළම ස්වයංක්රීය පරීක්ෂණ ඇතුළත් කරන්න හෝ යාවත්කාලීන කරන්න
+- `node:test` ගොනු තුළ, සෑම ඉහළ මට්ටමේ `await` එකක්ම (`await import(...)` වැනි) පළමු `test()` / `describe()` එකට පෙර තබන්න: `--test-force-exit` යටතේ, ඊට පසු ලියාපදිංචි කරන පරීක්ෂණ නිහඬව කිසි විටෙක ධාවනය නොවිය හැකිය (#18045; `npm run check:test-tla-order` මඟින් බලාත්මක කරයි)
+- නිෂ්පාදන කේතය වෙනස් වූ විට, වෙනස් කළ හෝ එක් කළ පරීක්ෂණ ගොනු PR විස්තරයට ඇතුළත් කරන්න
+- ව්යාපෘති රහස් CI තුළ වින්යාස කර ඇති විට PR එකේ SonarQube ප්රතිඵලය පරීක්ෂා කරන්න
 
-වත්මන් පරීක්ෂණ තත්ත්වය: පහත දේ ආවරණය කරන **unit test files 122ක්**:
+වත්මන් පරීක්ෂණ තත්ත්වය: පහත දෑ ආවරණය කරන **ඒකක පරීක්ෂණ ගොනු 122ක්**:
 
-- Provider translators සහ format conversion
-- Rate limiting, circuit breaker සහ resilience
-- Semantic cache, idempotency සහ progress tracking
-- Database මෙහෙයුම් සහ schema (DB modules 21ක්)
-- OAuth flows සහ authentication
-- API endpoint සත්යාපනය (Zod v4)
-- MCP server tools සහ scope enforcement
-- Memory සහ Skills systems
+- සැපයුම්කරු පරිවර්තක සහ ආකෘති පරිවර්තනය
+- අනුපාත සීමා කිරීම, circuit breaker සහ ප්රත්යස්ථතාව
+- අර්ථකථන cache, idempotency සහ ප්රගති නිරීක්ෂණය
+- දත්ත සමුදා මෙහෙයුම් සහ schema (DB modules 21ක්)
+- OAuth ප්රවාහ සහ සත්යාපනය
+- API endpoint වලංගුකරණය (Zod v4)
+- MCP සේවාදායක මෙවලම් සහ scope බලාත්මක කිරීම
+- Memory සහ Skills පද්ධති
 
 ---
 
@@ -298,66 +298,66 @@ CI හි වගකීමයි — ඒවා දේශීයව ධාවනය
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard පිටු (කොටස් 23ක්)
-│   ├── api/                # API routes (නාමාවලි 51ක්)
+│   ├── (dashboard)/        # උපකරණ පුවරු පිටු (කොටස් 23)
+│   ├── api/                # API මාර්ග (නාමාවලි 51)
 │   └── login/              # සත්යාපන පිටු (.tsx)
-├── domain/                 # ප්රතිපත්ති යන්ත්රය (policyEngine, comboResolver, costRules, ආදිය)
+├── domain/                 # ප්රතිපත්ති එන්ජිම (policyEngine, comboResolver, costRules, ආදිය)
 ├── lib/                    # මූලික ව්යාපාරික තර්කනය (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol ලේඛනාගාරය
-│   ├── compliance/         # අනුකූලතා ප්රතිපත්ති යන්ත්රය
-│   ├── db/                 # SQLite domain modules + migrations 130ක්
+│   ├── a2a/                # Agent-to-Agent v0.3 ප්රොටෝකෝල සේවාදායකය
+│   ├── acp/                # Agent Communication Protocol ලේඛනය
+│   ├── compliance/         # අනුකූලතා ප්රතිපත්ති එන්ජිම
+│   ├── db/                 # SQLite වසම් මොඩියුල + සංක්රමණ 130
 │   ├── memory/             # ස්ථිර සංවාද මතකය
-│   ├── oauth/              # OAuth providers, services සහ utilities
-│   ├── skills/             # පුළුල් කළ හැකි skill framework එක
-│   ├── usage/              # භාවිතය නිරීක්ෂණය සහ පිරිවැය ගණනය කිරීම
-│   └── localDb.ts          # නැවත export කරන ස්තරයක් පමණි — මෙහි කිසිවිටෙකත් තර්කනය එක් නොකරන්න
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (සහතික, DNS, ඉලක්ක routing)
+│   ├── oauth/              # OAuth සපයන්නන්, සේවා සහ උපයෝගිතා
+│   ├── skills/             # විස්තීරණය කළ හැකි කුසලතා රාමුව
+│   ├── usage/              # භාවිත ලුහුබැඳීම සහ පිරිවැය ගණනය කිරීම
+│   └── localDb.ts          # නැවත-නිර්යාත ස්තරය පමණි — මෙහි කිසිවිටෙක තර්කනය එක් නොකරන්න
+├── middleware/              # ඉල්ලීම් මධ්යස්ථ මෘදුකාංගය (promptInjectionGuard)
+├── mitm/                   # MITM ප්රොක්සිය (සහතික, DNS, ඉලක්ක මාර්ගගත කිරීම)
 ├── shared/
 │   ├── components/         # React සංරචක (.tsx)
-│   ├── constants/          # Provider නිර්වචන (329), MCP scopes, routing උපායමාර්ග 19ක්
-│   ├── utils/              # Circuit breaker, sanitizer, සත්යාපන helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── constants/          # සපයන්නන්ගේ නිර්වචන (329), MCP විෂය පථ, මාර්ගගත කිරීමේ උපායමාර්ග 20
+│   ├── utils/              # පරිපථ බිඳිනය, පිරිසිදුකාරකය, සත්යාපන සහායක
+│   └── validation/         # Zod v4 ස්කීමා
+└── sse/                    # SSE ප්රොක්සි නල මාර්ගය
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # executor ක්රියාත්මක කිරීමේ modules 89ක්
-├── handlers/               # request handlers 11ක් (chat, responses, embeddings, images, ආදිය)
-├── mcp-server/             # MCP server (අනන්ය tools 110ක්, transports 3ක්, scopes 33ක්)
-├── services/               # ඉහළ මට්ටමේ services 178ක් (combo, autoCombo, rateLimitManager, ආදිය)
+open-sse/                   # @omniroute/open-sse වැඩබිම
+├── executors/              # ක්රියාත්මක කිරීමේ මොඩියුල 150 (ක්රියාත්මක කිරීමේ පන්ති + එක් එක් සපයන්නා සඳහා සහායක)
+├── handlers/               # ඉල්ලීම් හසුරුවන්නන් 11 (කතාබස්, ප්රතිචාර, කාවැද්දීම්, රූප, ආදිය)
+├── mcp-server/             # MCP සේවාදායකය (අද්විතීය මෙවලම් 110, ප්රවාහන 3, විෂය පථ 33)
+├── services/               # ඉහළ මට්ටමේ සේවා 178 (combo, autoCombo, rateLimitManager, ආදිය)
 ├── translator/             # ආකෘති පරිවර්තක (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # utility modules 22ක් (stream, TLS, proxy, logging)
+├── transformer/            # Responses API පරිණාමකය
+└── utils/                  # උපයෝගිතා මොඩියුල 22 (ප්රවාහ, TLS, ප්රොක්සි, ලොග්කරණය)
 
-electron/                   # Electron desktop app (බහු-වේදිකා)
+electron/                   # Electron ඩෙස්ක්ටොප් යෙදුම (බහු-වේදිකා)
 
 tests/
-├── unit/                   # Node.js test runner (test ගොනු 1,574ක්)
-├── integration/            # ඒකාබද්ධතා tests
-├── e2e/                    # Playwright tests
-├── security/               # ආරක්ෂක tests
-├── translator/             # පරිවර්තකයට විශේෂිත tests
-└── load/                   # බර tests
+├── unit/                   # Node.js පරීක්ෂණ ධාවකය (පරීක්ෂණ ගොනු 1,574)
+├── integration/            # ඒකාබද්ධතා පරීක්ෂණ
+├── e2e/                    # Playwright පරීක්ෂණ
+├── security/               # ආරක්ෂක පරීක්ෂණ
+├── translator/             # පරිවර්තකයට විශේෂිත පරීක්ෂණ
+└── load/                   # භාර පරීක්ෂණ
 
 docs/
-├── adr/                     # වාස්තු විද්යාත්මක තීරණ වාර්තා
-├── architecture/            # පද්ධති වාස්තු විද්යාව සහ ප්රත්යස්ථතාව
+├── adr/                     # ගෘහනිර්මාණ තීරණ වාර්තා
+├── architecture/            # පද්ධති ගෘහනිර්මාණය සහ ප්රත්යාස්ථතාව
 ├── comparison/              # OmniRoute සහ විකල්ප අතර සැසඳීම
-├── compression/             # සම්පීඩන මාර්ගෝපදේශ සහ රීති
+├── compression/             # සම්පීඩන මාර්ගෝපදේශ සහ නීති
 ├── dev/                     # සංවර්ධන මාර්ගෝපදේශ
-├── diagrams/                # වාස්තු විද්යා රූප සටහන්
+├── diagrams/                # ගෘහනිර්මාණ රූපසටහන්
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
 ├── guides/                  # පරිශීලක මාර්ගෝපදේශය, Docker, පිහිටුවීම, දෝෂ නිරාකරණය
 ├── i18n/                    # ජාත්යන්තරකරණය කළ README පරිවර්තන
 ├── marketing/               # අලෙවිකරණ ද්රව්ය
-├── ops/                     # යෙදවීම, proxy, coverage, releases
-├── providers/               # Provider-විශේෂිත ලේඛන
-├── reference/               # API යොමුව, env vars, CLI tools, නොමිලේ භාවිත මට්ටම්
+├── ops/                     # යෙදවීම, ප්රොක්සි, ආවරණය, නිකුතු
+├── providers/               # සපයන්නාට විශේෂිත ලේඛන
+├── reference/               # API යොමුව, පරිසර විචල්ය, CLI මෙවලම්, නොමිලේ මට්ටම්
 ├── releases/                # නිකුතු සටහන්
-├── routing/                 # Auto-combo engine, reasoning replay
-├── screenshots/             # Dashboard තිර රූ
-├── security/                # Guardrails, අනුකූලතාව, stealth, tokens
+├── routing/                 # ස්වයංක්රීය-සංයෝජන එන්ජිම, තර්කන නැවත ධාවනය
+├── screenshots/             # උපකරණ පුවරු තිර රූ
+├── security/                # ආරක්ෂණ සීමා, අනුකූලතාව, රහස්යභාවය, ටෝකන
 └── specs/                   # සැලසුම් පිරිවිතර
 ```
 

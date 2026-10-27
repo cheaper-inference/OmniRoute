@@ -17,6 +17,7 @@
  */
 
 import type { OmniRouteRawCombo } from "./shared/combos-map.js";
+import type { OmniRouteEnrichmentMap } from "./shared/enrich.js";
 import type { Logger } from "./shared/logger.js";
 
 /** Compiled allowlist. `undefined` means inactive (empty/absent = full catalog). */
@@ -253,6 +254,44 @@ export function warnUnknownProviders(
   );
 }
 
+/**
+ * Provider-allowlist preamble: build the filter/resolve tables from the
+ * same alias pairs the collection passes use, and warn on an active
+ * filter with no vocabulary or unknown names. Returns the three values
+ * both collection points read, so the preamble cannot drift from them.
+ */
+export function resolveProviderFilter(
+  providersAllow: string[] | undefined,
+  enrichment: OmniRouteEnrichmentMap,
+  canonicalToAlias: ReadonlyMap<string, string>,
+  usableCanonicals: Iterable<string> | undefined,
+  warned: Set<string>,
+  log: Pick<Logger, "warn">
+): {
+  providerFilter: ProviderFilter | undefined;
+  providerResolve: ProviderResolve | undefined;
+  providerAllUnknown: boolean;
+} {
+  const providerFilter = compileProviderFilter(providersAllow);
+  let providerResolve: ProviderResolve | undefined;
+  let providerAllUnknown = false;
+  if (providerFilter) {
+    const pairs: Array<{ alias?: string; canonical?: string }> = [];
+    for (const entry of enrichment.values()) {
+      pairs.push({ alias: entry.providerAlias, canonical: entry.providerCanonical });
+    }
+    for (const [canonical, alias] of canonicalToAlias) {
+      pairs.push({ alias, canonical });
+    }
+    providerResolve = buildProviderResolve(pairs, usableCanonicals);
+    providerAllUnknown = filterAllUnknown(providerFilter, providerResolve);
+    if (providerResolve.known.size === 0)
+      warnNoVocabulary(providerFilter, providerResolve.known, warned, log);
+    else warnUnknownProviders(providerFilter, providerResolve.known, warned, log);
+  }
+  return { providerFilter, providerResolve, providerAllUnknown };
+}
+
 /** Warn once when the filter is active but no vocabulary exists. */
 export function warnNoVocabulary(
   filter: ProviderFilter | undefined,
@@ -268,5 +307,20 @@ export function warnNoVocabulary(
   log.warn(
     `[omniroute-v2] provider filter active but no provider vocabulary available, ` +
       `keeping the full catalog.`
+  );
+}
+
+/** Warn once when the provider filter drops the whole catalog. */
+export function warnProviderMatchedNothing(
+  filter: ProviderFilter | undefined,
+  warned: Set<string>,
+  log: Pick<Logger, "warn">
+): void {
+  if (!filter) return;
+  const key = `provider-matched-nothing::${[...filter.allow].sort().join(",")}`;
+  if (warned.has(key)) return;
+  warned.add(key);
+  log.warn(
+    `[omniroute-v2] providersAllow [${filter.originals.join(", ")}] matched nothing, publishing empty catalog.`
   );
 }

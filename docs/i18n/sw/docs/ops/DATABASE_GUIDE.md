@@ -511,9 +511,9 @@ Ikiwa inarejesha chochote tofauti na `ok`, **acha kutumia hifadhidata mara moja*
 
 ## Urejeshaji Baada ya Maafa
 
-### Hali ya 1: Faili ya WAL Imepotea
+### Hali ya 1: Faili la WAL Limepotea
 
-Faili ya `-wal` haipo lakini `-shm` na DB kuu ziko salama:
+Faili la `-wal` halipo, lakini `-shm` na hifadhidata kuu bado ziko salama:
 
 ```bash
 # Hujirejesha kiotomatiki inapofunguliwa tena
@@ -528,26 +528,29 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Hali ya 2: Faili Kuu ya DB Imeharibika
+### Hali ya 2: Faili Kuu la Hifadhidata Limeharibika
 
 Rejesha kutoka kwenye nakala rudufu:
 
 ```bash
-omniroute sync pull --merge   # au: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` hupakua tu jalada kamili la `.tar.gz` kutoka kwenye seva inayoendeshwa
+(`GET /api/db-backups/exportAll`, kitambulisho cha mwendeshaji kinahitajika); hairejeshi chochote.
 
 ### Hali ya 3: Ufunguo wa Usimbaji Fiche Umepotea
 
-**Hakuna uwezekano wa kurejesha** bila ufunguo. Sehemu zilizosimbwa kwa njia fiche haziwezi kusomeka. Ongeza upya watoa huduma wote wewe mwenyewe ukitumia vitambulisho vipya.
+**Urejeshaji hauwezekani** bila ufunguo. Sehemu zilizosimbwa kwa njia fiche haziwezi kusomeka. Ongeza tena watoa huduma wote wewe mwenyewe ukitumia vitambulisho vipya.
 
-> **Hatua ya kupunguza hatari**: Daima hifadhi nakala rudufu ya ufunguo wa usimbaji fiche kando, ikiwezekana katika kidhibiti cha manenosiri au KMS.
+> **Hatua ya kupunguza athari**: Daima hifadhi nakala rudufu ya ufunguo wa usimbaji fiche kando, ikiwezekana kwenye kidhibiti cha nywila au KMS.
 
 ### Hali ya 4: Diski Imejaa
 
-SQLite itarejesha hitilafu za `SQLITE_FULL`. Futa baadhi ya data ili kupata nafasi ya diski, kisha:
+SQLite itarudisha hitilafu za `SQLITE_FULL`. Futa nafasi kwenye diski, kisha:
 
 ```bash
-# Weka kituo cha ukaguzi cha WAL ili kupata nafasi zaidi
+# Weka kituo hakikishi cha WAL ili kufungua nafasi
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

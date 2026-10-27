@@ -293,39 +293,40 @@ test("memoryManager.configure rejects an unregistered primary backend", () => {
   assert.equal(memory.memoryManager.getPrimaryBackend().id, "sqlite");
 });
 
-test("characterization: createMemory UPSERT with a Date expiresAt currently throws (insert path stores it)", async () => {
+test("createMemory UPSERT persists a Date expiresAt like the insert path (#16182)", async () => {
   const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
-  // INSERT path: converts expiresAt with toISOString() — works.
   const created = await memory.createMemory(newMemory({ key: "char:upsert-expiry", expiresAt }));
   assert.ok(created.expiresAt instanceof Date);
 
-  // UPDATE (upsert) path: binds the raw Date to SQLite — better-sqlite3 refuses it.
-  await assert.rejects(
-    memory.createMemory(newMemory({ key: "char:upsert-expiry", expiresAt, content: "v2" })),
-    (err: Error) =>
-      err instanceof TypeError &&
-      /can only bind numbers, strings, bigints, buffers, and null/.test(err.message)
+  const updated = await memory.createMemory(
+    newMemory({ key: "char:upsert-expiry", expiresAt, content: "v2" })
   );
+  assert.equal(updated.id, created.id);
+  assert.equal(updated.content, "v2");
+  assert.equal(updated.expiresAt?.toISOString(), expiresAt.toISOString());
+  const listed = await memory.listMemories({ apiKeyId: created.apiKeyId });
+  const persisted = listed.data.find((entry) => entry.id === created.id);
+  assert.equal(persisted?.expiresAt?.toISOString(), expiresAt.toISOString());
 });
 
-test("characterization: sqliteBackend.search without maxTokens currently throws a ZodError", async () => {
-  await memory.createMemory(
+test("sqliteBackend and memoryManager preserve the default search budget (#16183)", async () => {
+  const created = await memory.createMemory(
     newMemory({ apiKeyId: "char-nomax", content: "Search without budget fixture" })
   );
-  // SearchConfig.maxTokens is optional, but the backend forwards `maxTokens: undefined`,
-  // which overrides retrieveMemories' 2000 default and fails MemoryConfigSchema.
-  await assert.rejects(
-    memory.sqliteBackend.search({ apiKeyId: "char-nomax", query: "budget" }),
-    (err: Error) => err.name === "ZodError"
-  );
-  // memoryManager.search swallows the primary failure and (with no fallbacks) returns [].
+  // Omitting the optional budget preserves the central retrieval default.
+  const direct = await memory.sqliteBackend.search({ apiKeyId: "char-nomax", query: "budget" });
+  const managed = await memory.memoryManager.search({ apiKeyId: "char-nomax", query: "budget" });
   assert.deepEqual(
-    await memory.memoryManager.search({ apiKeyId: "char-nomax", query: "budget" }),
-    []
+    direct.map((item) => item.id),
+    [created.id]
+  );
+  assert.deepEqual(
+    managed.map((item) => item.id),
+    [created.id]
   );
 });
 
-test("characterization: sqliteBackend.search currently ignores SearchConfig.limit", async () => {
+test("sqliteBackend.search honors SearchConfig.limit (#16185)", async () => {
   for (const n of [1, 2, 3]) {
     await memory.createMemory(
       newMemory({ apiKeyId: "char-limit", content: `limit fixture number ${n} widget` })
@@ -337,5 +338,7 @@ test("characterization: sqliteBackend.search currently ignores SearchConfig.limi
     limit: 1,
     maxTokens: 2000,
   });
-  assert.equal(hits.length, 3);
+  assert.equal(hits.length, 1);
+  assert.equal(hits[0].apiKeyId, "char-limit");
+  assert.match(hits[0].content, /widget/);
 });

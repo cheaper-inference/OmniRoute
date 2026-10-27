@@ -120,6 +120,33 @@ export const streamStallCooldownSettingsSchema = z
   })
   .strict();
 
+// Opt-in latency term for p2c account selection. Bounds mirror normalizeP2CLatencySettings.
+export const p2cLatencySettingsSchema = z
+  .object({
+    weight: z.number().int().min(0).max(20).optional(),
+  })
+  .strict();
+
+// Mid-stream recovery block. Bounds mirror normalizeStreamRecoverySettings in
+// src/lib/resilience/settings/normalize.ts.
+export const throughputWatchdogSettingsSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    warmupMs: z.number().int().min(0).max(600_000).optional(),
+    windowMs: z.number().int().min(1_000).max(600_000).optional(),
+    minUsefulBytesPerSecond: z.number().int().min(1).max(1_000_000).optional(),
+    minUsefulBytes: z.number().int().min(1).max(1_000_000).optional(),
+  })
+  .strict();
+
+export const streamRecoverySettingsSchema = z
+  .object({
+    enabled: z.boolean().optional(),
+    continueMidStream: z.boolean().optional(),
+    throughputWatchdog: throughputWatchdogSettingsSchema.optional(),
+  })
+  .strict();
+
 // Quota preflight cutoff (auth-level account skipping). Thresholds use
 // "minimum remaining %" semantics to match the dashboard's quota bars, and the
 // per-(provider, window) defaults override the global default per window.
@@ -197,6 +224,8 @@ export const updateResilienceSchema = z
     comboCooldownWait: comboCooldownWaitSettingsSchema.optional(),
     quotaShareConcurrencyLimit: quotaShareConcurrencyLimitSettingsSchema.optional(),
     streamStallCooldown: streamStallCooldownSettingsSchema.optional(),
+    p2cLatency: p2cLatencySettingsSchema.optional(),
+    streamRecovery: streamRecoverySettingsSchema.optional(),
     providerCooldown: providerCooldownSettingsSchema.optional(),
     // Quota preflight cutoff (auth-level account skipping) — surfaced in the
     // Settings → Routing UI. Mirrors QuotaPreflightSettings in
@@ -231,22 +260,25 @@ export const updateResilienceSchema = z
   })
   .strict()
   .superRefine((value, ctx) => {
-    if (
-      !value.requestQueue &&
-      !value.connectionCooldown &&
-      !value.providerBreaker &&
-      !value.tokenRefreshBreaker &&
-      !value.waitForCooldown &&
-      !value.comboCooldownWait &&
-      !value.quotaShareConcurrencyLimit &&
-      !value.streamStallCooldown &&
-      !value.providerCooldown &&
-      !value.quotaPreflight &&
-      !value.profiles &&
-      !value.defaults &&
-      !value.providerQuotaOverrides &&
-      !value.credentialHealthCheck
-    ) {
+    const provided = [
+      value.requestQueue,
+      value.connectionCooldown,
+      value.providerBreaker,
+      value.tokenRefreshBreaker,
+      value.waitForCooldown,
+      value.comboCooldownWait,
+      value.quotaShareConcurrencyLimit,
+      value.streamStallCooldown,
+      value.p2cLatency,
+      value.streamRecovery,
+      value.providerCooldown,
+      value.quotaPreflight,
+      value.profiles,
+      value.defaults,
+      value.providerQuotaOverrides,
+      value.credentialHealthCheck,
+    ].some(Boolean);
+    if (!provided) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         message: "Must provide resilience settings to update",
@@ -259,6 +291,10 @@ export const updateRequireLoginSchema = z
   .object({
     requireLogin: z.boolean().optional(),
     password: z.string().min(4, "Password must be at least 4 characters").optional(),
+    // Proof of the current password for a password change. Whether it is required depends on
+    // the caller's credential kind (a dashboard session must send it, the local CLI and the
+    // bootstrap window must not have to), so the route enforces it, not the schema.
+    currentPassword: z.string().optional(),
   })
   .superRefine((value, ctx) => {
     if (value.requireLogin === undefined && !value.password) {

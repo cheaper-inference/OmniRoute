@@ -123,7 +123,9 @@
       "maxCostOpt": "Chi phí tối đa mỗi ngày (USD)",
       "allowedModelsOpt": "Danh sách các mô hình được phép, phân tách bằng dấu phẩy",
       "nothingToSet": "Chưa cung cấp trường chính sách nào. Hãy sử dụng --rate-limit, --max-cost hoặc --allowed-models.",
-      "updated": "Đã cập nhật chính sách."
+      "updated": "Đã cập nhật chính sách.",
+      "modelAccessModeOpt": "Chế độ truy cập mô hình (all | restricted)",
+      "unrestrictedOpt": "Cho phép tất cả mô hình (--model-access-mode all)"
     },
     "expiration": {
       "title": "Thời hạn khóa",
@@ -1169,32 +1171,18 @@
   "sync": {
     "description": "Đồng bộ cấu hình giữa các phiên bản OmniRoute",
     "push": {
-      "description": "Đẩy cấu hình lên đám mây hoặc phiên bản từ xa",
-      "target": "Đích (cloud hoặc context:name)",
-      "bundle": "Các phần của gói cần đồng bộ",
-      "dryRun": "Xem trước mà không áp dụng"
+      "description": "Đẩy cấu hình lên đám mây hoặc phiên bản từ xa"
     },
     "pull": {
-      "description": "Kéo cấu hình từ đám mây hoặc máy chủ từ xa",
-      "source": "Nguồn (cloud hoặc context:name)",
-      "merge": "Hợp nhất với cấu hình hiện có",
-      "replace": "Thay thế cấu hình hiện có",
-      "dryRun": "Xem trước mà không áp dụng"
-    },
-    "diff": {
-      "source": "Ngữ cảnh nguồn",
-      "target": "Ngữ cảnh đích"
+      "description": "Kéo cấu hình từ đám mây hoặc máy chủ từ xa"
     },
     "bundle": {
       "description": "Xuất cấu hình dưới dạng tệp gói",
-      "include": "Các phần cần bao gồm (phân tách bằng dấu phẩy)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Nhập tệp gói",
       "dryRun": "Xác thực mà không áp dụng"
-    },
-    "initialize": {
-      "fromCloud": "Khởi tạo từ bản sao lưu đám mây"
     },
     "tokens": {
       "description": "Quản lý token đồng bộ",
@@ -1206,9 +1194,6 @@
       "revoke": {
         "yes": "Bỏ qua bước xác nhận"
       }
-    },
-    "resolve": {
-      "description": "Giải quyết xung đột đồng bộ theo cách tương tác"
     }
   },
   "config": {

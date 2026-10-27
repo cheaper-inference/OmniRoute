@@ -1,1 +1,0 @@
-- fix(tests): align Muse Code's non-JSON polling regression with its fixed-error contract and reject exposure of arbitrary upstream response text (#15869).

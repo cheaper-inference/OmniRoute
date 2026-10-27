@@ -1,1 +1,0 @@
-- **perf(db):** Serve repeated synced vision verdicts from a version-gated memo instead of re-reading the catalog ([#15378](https://github.com/diegosouzapw/OmniRoute/pull/15378)) — thanks @maxmad64bis

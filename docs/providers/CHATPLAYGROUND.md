@@ -1,3 +1,9 @@
+---
+title: "ChatPlayground Provider Integration"
+version: 3.8.52
+lastUpdated: 2026-10-11
+---
+
 # ChatPlayground Provider Integration
 
 OmniRoute supports **ChatPlayground** (`chatplayground`, alias `cpl`), allowing access to diverse model endpoints (Azure, LMSYS, and Perplexity) routed through ChatPlayground with automated Clerk session JWT minting and model discovery.

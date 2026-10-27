@@ -201,6 +201,29 @@ or runtime bundling. Use `npm run build:release` only for release/deploy validat
 the final cross-platform signal; platform-specific Electron changes need the matching focused build
 or smoke evidence.
 
+## Developer scripts for a shared machine
+
+Two `scripts/dev/` helpers encode the local loop on a devbox where other sessions are active:
+
+```bash
+scripts/dev/typecheck-touched.sh --base release/vX.Y.Z   # files from merge-base(HEAD, base)..HEAD
+scripts/dev/typecheck-touched.sh src/a.ts tests/unit/b.test.ts   # exactly these files
+scripts/dev/new-worktree.sh fix/1234-slug release/vX.Y.Z  # isolated worktree, safe in parallel
+```
+
+- `typecheck-touched.sh` typechecks only the touched `.ts/.tsx` files through a temporary
+  `tsconfig.touched.tmp.json` (`extends ./tsconfig.json`, `types: ["node"]`, `noEmit`,
+  `incremental: false`) under a 6 GB heap, so it replaces the project-wide `tsc -p tsconfig.json`
+  that OOMs a loaded machine. It prints the errors in touched files plus one summary line and exits
+  `1` for errors in touched files, `2` when the only errors are in imported files or tsc died
+  without diagnostics (read the log it names under `_artifacts/typecheck-touched/`), `0` when
+  clean. The temp tsconfig is always removed; never commit one.
+- `new-worktree.sh` serialises concurrent runs on `<git-common-dir>/omniroute-new-worktree.lock`
+  (waits up to 600 s by default, with a visible message; the script header documents the
+  override) and rolls
+  back the branch it created when `git worktree add` fails before the worktree exists, so a retry
+  needs no manual `git branch -D`. The hard-linked `node_modules` and `.husky/_` copy are unchanged.
+
 ## Local candidate loop
 
 Source tests cannot prove that the packaged artifact boots: packaging lists, pruned dependencies,

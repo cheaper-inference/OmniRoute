@@ -6,14 +6,14 @@ import {
   parseApiKeyCodexServiceMode,
   type ApiKeyCodexServiceMode,
 } from "../../shared/constants/codexServiceMode";
-import { createHash } from "crypto";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import { v4 as uuidv4 } from "uuid";
 import { getDbInstance, rowToCamel } from "./core";
 import { backupDbFile } from "./backup";
 import { registerDbStateResetter } from "./stateReset";
 import { invalidateReasoningRoutingRuleCache } from "./reasoningRoutingRules";
 import { getKeyGroupsForApiKey, checkKeyModelAccess } from "./apiKeyGroups";
-import { API_KEY_COLUMN_FALLBACKS } from "./apiKeyColumnFallbacks";
+import { ensureApiKeyFallbackColumns } from "./apiKeyColumnFallbacks";
 import { SYNTHETIC_ENV_API_KEY_ID } from "@/shared/constants/apiKeyIdentities";
 import { timingSafeCompare } from "@/shared/utils/timingSafeCompare";
 import {
@@ -23,8 +23,15 @@ import {
 } from "./apiKeyUsageLimitFields";
 import { setNoLog } from "../compliance/noLog";
 import { resolveModelAlias } from "@omniroute/open-sse/services/modelDeprecation.ts";
+import { stripNoThinkingAlias } from "@omniroute/open-sse/utils/noThinkingAlias.ts";
 import { getProviderAlias, resolveProviderId } from "@/shared/constants/providers";
+import { evaluateModelAccess } from "@/domain/modelAccessPolicy";
 import { isSelfLoopBearer, selfLoopKeyOverrides } from "./apiKeys/selfLoopKey";
+import {
+  backfillApiKeySecretsAtRest,
+  decryptApiKeySecret,
+  encryptApiKeySecret,
+} from "./apiKeys/secretAtRest";
 import {
   findPublishedModel,
   isDeniedUnderCanonicalProvider,
@@ -38,7 +45,6 @@ import {
   addModelCandidate,
   addProviderAliasScopedCandidates,
   modelPatternMatches,
-  hasClaudeCodeWildcardPermission,
   matchesWildcardPattern,
 } from "./apiKeys/modelPermissions";
 import { ALL_COMBOS_ACCESS_RULE } from "@/shared/constants/comboAccess";
@@ -63,6 +69,7 @@ import {
   parseCompressionEnabled,
   parseAllowAutoCombos,
   parseCatalogScope,
+  parseForcedModel,
   parseModelAccessMode,
 } from "./apiKeys/rowParsers";
 import {
@@ -96,6 +103,7 @@ interface CreateApiKeyOptions {
   allowedModels?: string[];
   allowedCombos?: string[];
   allowedConnections?: string[];
+  preferredConnections?: string[];
   expiresAt?: string | null;
 }
 
@@ -110,6 +118,7 @@ interface ApiKeyMetadata {
   blockedModels: string[];
   allowedCombos: string[];
   allowedConnections: string[];
+  preferredConnections: string[];
   allowedQuotas: string[];
   noLog: boolean;
   autoResolve: boolean;
@@ -140,6 +149,7 @@ interface ApiKeyMetadata {
   compressionEnabled: boolean;
   allowAutoCombos: boolean;
   catalogScope: "all" | "combos" | "models";
+  forcedModel: string | null;
 }
 
 interface ApiKeyRow extends JsonRecord {
@@ -158,6 +168,8 @@ interface ApiKeyRow extends JsonRecord {
   allowedCombos?: unknown;
   allowed_connections?: unknown;
   allowedConnections?: unknown;
+  preferred_connections?: unknown;
+  preferredConnections?: unknown;
   allowed_quotas?: unknown;
   allowedQuotas?: unknown;
   no_log?: unknown;
@@ -193,6 +205,8 @@ interface ApiKeyRow extends JsonRecord {
   allowAutoCombos?: unknown;
   catalog_scope?: unknown;
   catalogScope?: unknown;
+  forced_model?: unknown;
+  forcedModel?: unknown;
 }
 
 interface StatementLike<TRow = unknown> {
@@ -222,6 +236,7 @@ interface ApiKeyView extends JsonRecord {
   blockedModels: string[];
   allowedCombos: string[];
   allowedConnections: string[];
+  preferredConnections: string[];
   allowedQuotas: string[];
   noLog: boolean;
   autoResolve: boolean;
@@ -246,6 +261,7 @@ interface ApiKeyView extends JsonRecord {
   compressionEnabled: boolean;
   allowAutoCombos: boolean;
   catalogScope: "all" | "combos" | "models";
+  forcedModel: string | null;
 }
 
 // LRU cache for API key validation (valid keys only)
@@ -426,30 +442,35 @@ async function getPublishedModelLookupTarget(
   return null;
 }
 
-function ensureApiKeyColumn(
-  db: ApiKeysDbLike,
-  columnNames: Set<string>,
-  column: (typeof API_KEY_COLUMN_FALLBACKS)[number]
-): void {
-  if (columnNames.has(column.name)) return;
-  db.exec(`ALTER TABLE api_keys ADD COLUMN ${column.definition}`);
-  console.log(`[DB] Added api_keys.${column.name} column`);
-}
-
 function ensureApiKeysColumns(db: ApiKeysDbLike) {
   if (_schemaChecked) return;
 
   try {
-    const columns = db.prepare<ApiKeyRow>("PRAGMA table_info(api_keys)").all();
-    const columnNames = new Set(columns.map((column) => String(column.name ?? "")));
-    for (const column of API_KEY_COLUMN_FALLBACKS) {
-      ensureApiKeyColumn(db, columnNames, column);
-    }
+    ensureApiKeyFallbackColumns(db);
+    // Legacy rows (plaintext secret, key_hash NULL) are hashed and encrypted in place here,
+    // before the first lookup, so the hash-only auth below keeps accepting them.
+    backfillApiKeySecretsAtRest(db);
     _schemaChecked = true;
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     console.warn("[DB] Failed to verify api_keys schema:", message);
   }
+}
+
+/**
+ * Hash-only lookup for the auth hot path — the plaintext column is never matched or
+ * decrypted. A miss re-runs the legacy backfill once (cheap: it selects only rows that
+ * still lack a hash or sit in plaintext) so a row written by an older writer or a restore
+ * after module init still resolves on its first use.
+ */
+function lookupByKeyHash<TRow>(
+  db: ApiKeysDbLike,
+  statement: StatementLike<TRow>,
+  hashedKey: string
+): TRow | undefined {
+  const row = statement.get(hashedKey);
+  if (row) return row;
+  return backfillApiKeySecretsAtRest(db) > 0 ? statement.get(hashedKey) : undefined;
 }
 
 let _stmtDb: ApiKeysDbLike | null = null;
@@ -469,13 +490,13 @@ function getPreparedStatements(db: ApiKeysDbLike): ApiKeysStatements {
     _stmtGetAllKeys = db.prepare<ApiKeyRow>("SELECT * FROM api_keys ORDER BY created_at");
     _stmtGetKeyById = db.prepare<ApiKeyRow>("SELECT * FROM api_keys WHERE id = ?");
     _stmtValidateKey = db.prepare<JsonRecord>(
-      "SELECT id, expires_at, revoked_at, is_active, is_banned FROM api_keys WHERE key = ? OR key_hash = ?"
+      "SELECT id, expires_at, revoked_at, is_active, is_banned FROM api_keys WHERE key_hash = ?"
     );
     _stmtGetKeyMetadata = db.prepare<ApiKeyRow>(
-      "SELECT id, name, machine_id, model_access_mode, allowed_models, blocked_models, allowed_combos, allowed_connections, allowed_quotas, no_log, auto_resolve, is_active, access_schedule, max_requests_per_day, max_requests_per_minute, throttle_delay_ms, max_sessions, revoked_at, expires_at, ip_allowlist, scopes, rate_limits, is_banned, key_hash, allowed_endpoints, stream_default_mode, cache_default_mode, codex_service_mode, disable_non_public_models, allow_usage_command, usage_limit_enabled, daily_usage_limit_usd, weekly_usage_limit_usd, chaos_mode_enabled, compression_enabled, allow_auto_combos, catalog_scope, proxy_id FROM api_keys WHERE key = ? OR key_hash = ?"
+      "SELECT id, name, machine_id, model_access_mode, allowed_models, blocked_models, allowed_combos, allowed_connections, preferred_connections, allowed_quotas, no_log, auto_resolve, is_active, access_schedule, max_requests_per_day, max_requests_per_minute, throttle_delay_ms, max_sessions, revoked_at, expires_at, ip_allowlist, scopes, rate_limits, is_banned, key_hash, allowed_endpoints, stream_default_mode, cache_default_mode, codex_service_mode, disable_non_public_models, allow_usage_command, usage_limit_enabled, daily_usage_limit_usd, weekly_usage_limit_usd, chaos_mode_enabled, compression_enabled, allow_auto_combos, catalog_scope, forced_model, proxy_id FROM api_keys WHERE key_hash = ?"
     );
     _stmtInsertKey = db.prepare(
-      "INSERT INTO api_keys (id, name, key, machine_id, model_access_mode, allowed_models, allowed_combos, allowed_connections, no_log, created_at, key_prefix, key_hash, scopes, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+      "INSERT INTO api_keys (id, name, key, machine_id, model_access_mode, allowed_models, allowed_combos, allowed_connections, preferred_connections, no_log, created_at, key_prefix, key_hash, scopes, expires_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
     );
     _stmtDeleteKey = db.prepare("DELETE FROM api_keys WHERE id = ?");
   }
@@ -513,6 +534,8 @@ export async function getApiKeys(limit?: number, offset?: number) {
   }
   return rows.map((row) => {
     const camelRow = toRecord(rowToCamel(row)) as ApiKeyView;
+    // Raw secret for the operator-only JSON export and internal probes; stored encrypted.
+    camelRow.key = decryptApiKeySecret(camelRow.key);
     camelRow.modelAccessMode = parseModelAccessMode(
       camelRow.modelAccessMode,
       camelRow.allowedModels
@@ -521,6 +544,7 @@ export async function getApiKeys(limit?: number, offset?: number) {
     camelRow.blockedModels = parseAllowedModels(camelRow.blockedModels);
     camelRow.allowedCombos = parseAllowedCombos(camelRow.allowedCombos);
     camelRow.allowedConnections = parseAllowedConnections(camelRow.allowedConnections);
+    camelRow.preferredConnections = parseAllowedConnections(camelRow.preferredConnections);
     camelRow.allowedQuotas = parseAllowedQuotas((camelRow as JsonRecord).allowedQuotas);
     camelRow.noLog = parseNoLog(camelRow.noLog);
     camelRow.autoResolve = parseAutoResolve(camelRow.autoResolve);
@@ -545,6 +569,7 @@ export async function getApiKeys(limit?: number, offset?: number) {
     );
     camelRow.allowAutoCombos = parseAllowAutoCombos((camelRow as JsonRecord).allowAutoCombos);
     camelRow.catalogScope = parseCatalogScope((camelRow as JsonRecord).catalogScope);
+    camelRow.forcedModel = parseForcedModel((camelRow as JsonRecord).forcedModel);
     Object.assign(camelRow, parseApiKeyUsageLimitFields(camelRow));
     if (typeof camelRow.id === "string" && camelRow.id.length > 0) {
       setNoLog(camelRow.id, camelRow.noLog === true);
@@ -658,11 +683,14 @@ export async function getApiKeyById(id: string) {
   const row = stmt.getKeyById.get(id);
   if (!row) return null;
   const camelRow = toRecord(rowToCamel(row)) as ApiKeyView;
+  // Raw secret for the admin reveal route and by-id consumers; stored encrypted.
+  camelRow.key = decryptApiKeySecret(camelRow.key);
   camelRow.modelAccessMode = parseModelAccessMode(camelRow.modelAccessMode, camelRow.allowedModels);
   camelRow.allowedModels = parseAllowedModels(camelRow.allowedModels);
   camelRow.blockedModels = parseAllowedModels(camelRow.blockedModels);
   camelRow.allowedCombos = parseAllowedCombos(camelRow.allowedCombos);
   camelRow.allowedConnections = parseAllowedConnections(camelRow.allowedConnections);
+  camelRow.preferredConnections = parseAllowedConnections(camelRow.preferredConnections);
   camelRow.allowedQuotas = parseAllowedQuotas((camelRow as JsonRecord).allowedQuotas);
   camelRow.noLog = parseNoLog(camelRow.noLog);
   camelRow.autoResolve = parseAutoResolve(camelRow.autoResolve);
@@ -687,6 +715,7 @@ export async function getApiKeyById(id: string) {
   );
   camelRow.allowAutoCombos = parseAllowAutoCombos((camelRow as JsonRecord).allowAutoCombos);
   camelRow.catalogScope = parseCatalogScope((camelRow as JsonRecord).catalogScope);
+  camelRow.forcedModel = parseForcedModel((camelRow as JsonRecord).forcedModel);
   Object.assign(camelRow, parseApiKeyUsageLimitFields(camelRow));
   if (typeof camelRow.id === "string" && camelRow.id.length > 0) {
     setNoLog(camelRow.id, camelRow.noLog === true);
@@ -696,12 +725,10 @@ export async function getApiKeyById(id: string) {
 
 async function hashKey(key: string): Promise<string> {
   if (!key || typeof key !== "string") return "";
-  // CodeQL: This is intentionally SHA-256, NOT password hashing. API keys are
-  // high-entropy random tokens (not user-chosen passwords) and need fast O(1)
-  // comparison for per-request validation. bcrypt/scrypt would add ~100ms per
-  // request, which is unacceptable for an API proxy.
-  // lgtm[js/insufficient-password-hash]
-  return createHash("sha256").update(key).digest("hex"); // nosemgrep: insufficient-password-hash
+  // Fast SHA-256 fingerprint on purpose, NOT password hashing: API keys are high-entropy
+  // random tokens validated on every request. The rationale and the single CodeQL sink live
+  // in open-sse/utils/opaqueTokenFingerprint.ts.
+  return opaqueTokenFingerprint(key);
 }
 
 export async function createApiKey(
@@ -714,6 +741,7 @@ export async function createApiKey(
     throw new Error("machineId is required");
   }
   const allowedConnections = options.allowedConnections ?? [];
+  const preferredConnections = options.preferredConnections ?? [];
   const modelAccess = normalizeApiKeyPermissionsUpdate({
     modelAccessMode: options.modelAccessMode,
     allowedModels: options.allowedModels,
@@ -738,6 +766,7 @@ export async function createApiKey(
     allowedModels,
     allowedCombos,
     allowedConnections,
+    preferredConnections,
     noLog: false,
     allowUsageCommand: false,
     createdAt: now,
@@ -746,15 +775,18 @@ export async function createApiKey(
   };
 
   const stmt = getPreparedStatements(db);
+  // The secret is stored through the enc:v1: envelope (reversible for the admin reveal and
+  // the operator export); auth matches key_hash only. See apiKeys/secretAtRest.ts.
   stmt.insertKey.run(
     apiKey.id,
     apiKey.name,
-    apiKey.key,
+    encryptApiKeySecret(apiKey.key),
     apiKey.machineId,
     apiKey.modelAccessMode,
     JSON.stringify(apiKey.allowedModels),
     JSON.stringify(apiKey.allowedCombos),
     JSON.stringify(allowedConnections),
+    JSON.stringify(preferredConnections),
     0,
     apiKey.createdAt,
     apiKey.key.slice(0, 12),
@@ -784,7 +816,7 @@ export async function regenerateApiKey(id: string) {
   const updateStmt = db.prepare(
     "UPDATE api_keys SET key = ?, key_hash = ?, key_prefix = ? WHERE id = ?"
   );
-  updateStmt.run(newKey, newHash, newPrefix, id);
+  updateStmt.run(encryptApiKeySecret(newKey), newHash, newPrefix, id);
 
   // Invalidate all caches
   clearApiKeyCaches();
@@ -815,10 +847,12 @@ export async function updateApiKeyPermissions(
     normalized.blockedModels !== undefined ||
     normalized.allowedCombos !== undefined ||
     normalized.allowedConnections !== undefined ||
+    normalized.preferredConnections !== undefined ||
     normalized.allowedQuotas !== undefined ||
     normalized.disableNonPublicModels !== undefined ||
     normalized.allowAutoCombos !== undefined ||
-    normalized.catalogScope !== undefined;
+    normalized.catalogScope !== undefined ||
+    normalized.forcedModel !== undefined;
 
   if (
     normalized.name === undefined &&
@@ -827,6 +861,7 @@ export async function updateApiKeyPermissions(
     normalized.blockedModels === undefined &&
     normalized.allowedCombos === undefined &&
     normalized.allowedConnections === undefined &&
+    normalized.preferredConnections === undefined &&
     (normalized as Record<string, unknown>).allowedQuotas === undefined &&
     normalized.noLog === undefined &&
     normalized.autoResolve === undefined &&
@@ -851,6 +886,7 @@ export async function updateApiKeyPermissions(
     normalized.compressionEnabled === undefined &&
     normalized.allowAutoCombos === undefined &&
     normalized.catalogScope === undefined &&
+    normalized.forcedModel === undefined &&
     !hasUsageLimitUpdate(normalized as Record<string, unknown>)
   ) {
     return false;
@@ -865,6 +901,7 @@ export async function updateApiKeyPermissions(
     blockedModels?: string;
     allowedCombos?: string;
     allowedConnections?: string;
+    preferredConnections?: string;
     allowedQuotas?: string;
     noLog?: number;
     autoResolve?: number;
@@ -891,6 +928,7 @@ export async function updateApiKeyPermissions(
     compressionEnabled?: number;
     allowAutoCombos?: number;
     catalogScope?: string;
+    forcedModel?: string | null;
   } = { id };
 
   if (normalized.name !== undefined) {
@@ -923,6 +961,12 @@ export async function updateApiKeyPermissions(
     // Empty array means all connections are allowed
     updates.push("allowed_connections = @allowedConnections");
     params.allowedConnections = JSON.stringify(normalized.allowedConnections || []);
+  }
+
+  if (normalized.preferredConnections !== undefined) {
+    // Ordered preference only; access/health/quota gates still define eligibility.
+    updates.push("preferred_connections = @preferredConnections");
+    params.preferredConnections = JSON.stringify(normalized.preferredConnections || []);
   }
 
   const allowedQuotasUpdate = (normalized as Record<string, unknown>).allowedQuotas;
@@ -1015,6 +1059,11 @@ export async function updateApiKeyPermissions(
   if (normalized.catalogScope !== undefined) {
     updates.push("catalog_scope = @catalogScope");
     params.catalogScope = normalized.catalogScope;
+  }
+
+  if (normalized.forcedModel !== undefined) {
+    updates.push("forced_model = @forcedModel");
+    params.forcedModel = parseForcedModel(normalized.forcedModel);
   }
 
   appendUsageLimitUpdates(normalized as Record<string, unknown>, updates, params);
@@ -1308,7 +1357,7 @@ export async function validateApiKey(key: string | null | undefined) {
 
   const db = getDbInstance() as ApiKeysDbLike;
   const stmt = getPreparedStatements(db);
-  const row = stmt.validateKey.get(key, hashedKey) as JsonRecord | undefined;
+  const row = lookupByKeyHash(db, stmt.validateKey, hashedKey);
 
   if (!row) return false;
 
@@ -1403,6 +1452,7 @@ export async function getApiKeyMetadata(
       blockedModels: [],
       allowedCombos: [ALL_COMBOS_ACCESS_RULE],
       allowedConnections: [],
+      preferredConnections: [],
       allowedQuotas: [],
       noLog: false,
       autoResolve: true,
@@ -1433,6 +1483,7 @@ export async function getApiKeyMetadata(
       compressionEnabled: true,
       allowAutoCombos: true,
       catalogScope: "all",
+      forcedModel: null,
       ...selfLoopKeyOverrides(key),
     };
   }
@@ -1446,7 +1497,7 @@ export async function getApiKeyMetadata(
 
   const db = getDbInstance() as ApiKeysDbLike;
   const stmt = getPreparedStatements(db);
-  const row = stmt.getKeyMetadata.get(key, hashedKey);
+  const row = lookupByKeyHash(db, stmt.getKeyMetadata, hashedKey);
 
   if (!row) return null;
 
@@ -1476,6 +1527,9 @@ export async function getApiKeyMetadata(
     allowedCombos: parseAllowedCombos(record.allowed_combos ?? record.allowedCombos),
     allowedConnections: parseAllowedConnections(
       record.allowed_connections ?? record.allowedConnections
+    ),
+    preferredConnections: parseAllowedConnections(
+      record.preferred_connections ?? record.preferredConnections
     ),
     allowedQuotas: parseAllowedQuotas(
       (record as JsonRecord).allowed_quotas ?? (record as JsonRecord).allowedQuotas
@@ -1530,6 +1584,7 @@ export async function getApiKeyMetadata(
     catalogScope: parseCatalogScope(
       (record as JsonRecord).catalog_scope ?? (record as JsonRecord).catalogScope
     ),
+    forcedModel: parseForcedModel(record.forced_model ?? record.forcedModel),
     ...parseApiKeyUsageLimitFields(record as JsonRecord),
   };
 
@@ -1561,6 +1616,10 @@ export async function isModelAllowedForKey(
   // If no modelId provided, deny (invalid request)
   if (!key) return true;
   if (!modelId) return false;
+  // `no-think/<provider>/<model>` is stripped before the chat handler's key check, so
+  // judge it as the real model. The catalog then lists exactly the variants that dispatch.
+  modelId = stripNoThinkingAlias(modelId);
+  if (!modelId) return false;
 
   // Create cache key
   const cacheKey = resolvedModelId
@@ -1582,93 +1641,27 @@ export async function isModelAllowedForKey(
   // SECURITY: Key not found in database = deny access (invalid/non-existent key)
   if (!metadata) return false;
 
-  const { modelAccessMode, allowedModels, blockedModels, disableNonPublicModels } = metadata;
-  // Preserve requested aliases for allow-list matching while applying resolved
-  // target candidates to deny rules and group access checks.
-  const modelPermissionCandidates = Array.from(
-    new Set([
-      ...(await getModelPermissionCandidates(modelId)),
-      ...(resolvedModelId ? await getModelPermissionCandidates(resolvedModelId) : []),
-    ])
+  const decision = await evaluateModelAccess(
+    metadata,
+    { modelId, resolvedModelId },
+    {
+      getCandidates: getModelPermissionCandidates,
+      resolveAlias: resolveModelAlias,
+      getPublishedTarget: getPublishedModelLookupTarget,
+      findPublishedModel,
+      isPublishedModelHidden,
+      checkGroupAccess: checkKeyModelAccess,
+      isDeniedUnderCanonicalProvider,
+    }
   );
 
-  // Deny-list patterns win over any allow-list entry. This lets operators keep
-  // broad dynamic scopes like cc/* while excluding expensive families.
-  if (blockedModels?.some((pattern) => modelPatternMatches(pattern, modelPermissionCandidates))) {
-    return false;
-  }
-
-  // Check disableNonPublicModels flag
-  if (disableNonPublicModels) {
-    const effectiveModelId = resolvedModelId || resolveModelAlias(modelId) || modelId;
-    const publicationCandidates = resolvedModelId
-      ? await getModelPermissionCandidates(resolvedModelId)
-      : modelPermissionCandidates;
-
-    if (!hasClaudeCodeWildcardPermission(allowedModels, publicationCandidates)) {
-      const lookupTarget = await getPublishedModelLookupTarget(effectiveModelId);
-      const providerOrAlias = lookupTarget?.providerId || effectiveModelId.split("/")[0];
-      const shortModelId = lookupTarget?.modelId || effectiveModelId.split("/").slice(1).join("/");
-      if (!providerOrAlias || !shortModelId) return false;
-
-      const published = await findPublishedModel(providerOrAlias, shortModelId);
-      if (!published) return false;
-      const { providerId, publishedModelId } = published;
-
-      // An effort variant dispatches to its base model, so a deny rule on the
-      // base model must also deny the variant.
-      if (publishedModelId !== shortModelId && blockedModels?.length) {
-        const baseCandidates = await getModelPermissionCandidates(
-          `${providerId}/${publishedModelId}`
-        );
-        if (blockedModels.some((pattern) => modelPatternMatches(pattern, baseCandidates))) {
-          return false;
-        }
-      }
-
-      // A model hidden under the alias the client used stays hidden.
-      if (isPublishedModelHidden(providerId, providerOrAlias, publishedModelId)) return false;
-    }
-  }
-
-  // Only explicit allow-all permits an empty list; restricted + [] is deny-all.
-  // No early return here: group deny rules (checked below) must still apply to
-  // keys with an empty per-key allow-list (#8817 regression guard — groups only
-  // AND-deny, so restricted+[] stays deny-all).
-  // Support exact match and prefix match (e.g., "openai/*" allows all OpenAI models)
-  let allowed =
-    !allowedModels || allowedModels.length === 0
-      ? modelAccessMode !== "restricted"
-      : allowedModels.some((pattern) => modelPatternMatches(pattern, modelPermissionCandidates));
-
-  // Group rules must see the requested alias and the concrete target. An allowed
-  // alias cannot hide a resolved target denied by group policy.
-  if (metadata.id) {
-    for (const groupModelId of new Set([modelId, ...(resolvedModelId ? [resolvedModelId] : [])])) {
-      const hasGroupProviderPrefix = groupModelId.includes("/");
-      const groupProvider = hasGroupProviderPrefix ? groupModelId.split("/")[0] : undefined;
-      const groupModelTarget = hasGroupProviderPrefix
-        ? groupModelId.split("/").slice(1).join("/")
-        : groupModelId;
-      const targetOk = checkKeyModelAccess(metadata.id, groupModelTarget, groupProvider).allowed;
-      const fullOk = checkKeyModelAccess(metadata.id, groupModelId, groupProvider).allowed;
-      if (!targetOk || !fullOk) allowed = false;
-
-      if (
-        allowed &&
-        (await isDeniedUnderCanonicalProvider(metadata.id, groupProvider, groupModelTarget))
-      ) {
-        allowed = false;
-      }
-    }
-  }
-  // Cache the result
-  if (!usesSettingDependentClaudeRouting) {
+  // Preserve the cache boundary: early block/publication denials were never cached.
+  if (decision.reason === "permissions" && !usesSettingDependentClaudeRouting) {
     evictModelPermissionCache();
-    setCachedModelPermission(cacheKey, allowed, now, catalogGeneration);
+    setCachedModelPermission(cacheKey, decision.allowed, now, catalogGeneration);
   }
 
-  return allowed;
+  return decision.allowed;
 }
 
 /**

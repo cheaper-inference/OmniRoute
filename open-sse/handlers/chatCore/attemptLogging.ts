@@ -25,6 +25,7 @@ import { isEstimatedUsage } from "../../utils/usageTracking.ts";
 import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
 import { attachLogMeta } from "./cacheUsageMeta.ts";
 import { readAddedWait } from "../../utils/proxyFetch.ts";
+import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
 
 const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
 
@@ -282,7 +283,7 @@ export type PersistAttemptLogsContext = {
   detailedLoggingEnabled: boolean;
   reqLogger: { getPipelinePayloads?: () => Record<string, unknown> | undefined } | null | undefined;
   pendingRequestId: unknown;
-  clientRawRequest: { endpoint?: string } | null | undefined;
+  clientRawRequest: { endpoint?: string; headers?: unknown; body?: unknown } | null | undefined;
   requestedModel: unknown;
   credentials: { connectionId?: string } | null | undefined;
   startTime: number;
@@ -466,7 +467,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
       : redactedRequest;
   const retainedResponse = videoContentRemoved
     ? { _omniroute_omitted: "video-transcript" }
-    : responseBody;
+    : (responseBody ?? (status >= 400 ? providerResponse : undefined));
   const retainedError = videoContentRemoved && error ? "[omitted: video transcript]" : error;
 
   const providerWarnings = extractProviderWarnings(providerResponse, clientResponse, responseBody);
@@ -624,6 +625,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     correlationId: correlationId || traceId,
     modelPinned: modelPinned || false,
     sessionTag: sessionTag || null,
+    clientSessionId: clientSessionIdFromRawRequest(clientRawRequest),
     responseId: extractResponsesId(sourceFormat, clientResponse),
     videoContentRemoved: videoContentRemoved || false,
     addedWaitMs: addedWait?.ms ?? null,

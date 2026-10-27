@@ -20,7 +20,6 @@ import {
   type RequestCapSettings,
 } from "./rateLimitManager/requestCap.ts";
 import { getAntigravityQuotaFamily } from "./antigravityQuotaFamily.ts";
-import { getProviderCategory } from "../config/providerRegistry.ts";
 import { getCodexRateLimitKey } from "../executors/codex.ts";
 import { awaitProviderDefaultSlot, setProviderQuotaOverrides } from "./providerDefaultRateLimit.ts";
 import {
@@ -31,10 +30,12 @@ import {
 import {
   STANDARD_HEADERS,
   ANTHROPIC_HEADERS,
+  describeRetryAfter,
   parseResetTime,
   toPlainHeaders,
 } from "./rateLimitManager/headers";
 import { checkQueueAdmission } from "./rateLimitManager/admission";
+import { isConnectionAutoProtected } from "./rateLimitManager/autoProtection";
 import { buildOverrideUpdates, loadOverrideMap } from "./rateLimitManager/overrideUpdates";
 import {
   markLocalRateLimitError,
@@ -44,6 +45,8 @@ import {
 } from "./rateLimitManager/errors";
 import { LimiterWedgeWatchdog, WATCHDOG_INTERVAL_MS } from "./rateLimitManager/wedgeWatchdog";
 import { createCancellableJob } from "./rateLimitManager/queuedJobCancel";
+import * as bodyRetryPause from "./rateLimitManager/bodyRetryPause";
+import { errorRateLimit, logRateLimit, warnRateLimit } from "./rateLimitManager/log";
 import { toNumber } from "@/shared/utils/numeric";
 import type { ConnectionRateLimitOverrides } from "@/lib/db/providers/columns";
 import {
@@ -78,22 +81,6 @@ type JsonRecord = Record<string, unknown>;
 
 function toRecord(value: unknown): JsonRecord {
   return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
-
-function isNodeTestRunnerChild(): boolean {
-  return typeof process.env.NODE_TEST_CONTEXT === "string";
-}
-
-function logRateLimit(...args: unknown[]): void {
-  if (!isNodeTestRunnerChild()) console.log(...args);
-}
-
-function warnRateLimit(...args: unknown[]): void {
-  if (!isNodeTestRunnerChild()) console.warn(...args);
-}
-
-function errorRateLimit(...args: unknown[]): void {
-  if (!isNodeTestRunnerChild()) console.error(...args);
 }
 
 // Store limiters keyed by "provider:connectionId" (and optionally ":model")
@@ -149,21 +136,6 @@ let watchdogInterval: ReturnType<typeof setInterval> | null = null;
 type LimiterFactory = (options: Bottleneck.ConstructorOptions) => Bottleneck;
 const defaultLimiterFactory: LimiterFactory = (options) => new Bottleneck(options);
 let limiterFactory: LimiterFactory = defaultLimiterFactory;
-
-/**
- * Env-var override for the auto-enable safety net. Highest priority — wins
- * over the persisted dashboard setting. Use to disable in an incident without
- * needing dashboard access.
- *   RATE_LIMIT_AUTO_ENABLE=false  → never auto-enable
- *   RATE_LIMIT_AUTO_ENABLE=true   → force on regardless of dashboard
- *   (unset)                        → use dashboard setting
- */
-function isAutoEnableActive(settings: RequestQueueSettings): boolean {
-  const env = process.env.RATE_LIMIT_AUTO_ENABLE?.trim().toLowerCase();
-  if (env === "false" || env === "0" || env === "off") return false;
-  if (env === "true" || env === "1" || env === "on") return true;
-  return settings.autoEnableApiKeyProviders;
-}
 
 // Sentinels for "no rate limit" / effectively infinite capacity. The reservoir
 // value uses Number.MAX_SAFE_INTEGER so the bucket can never realistically be
@@ -292,6 +264,7 @@ function updateLimiterSettings(
 ): Bottleneck {
   const effective = limiterEffectiveSettings.get(limiter) ?? {};
   limiterEffectiveSettings.set(limiter, { ...effective, ...updates });
+  bodyRetryPause.noteLimiterUpdate(limiter, updates);
   return limiter.updateSettings(updates);
 }
 
@@ -341,9 +314,7 @@ function reconcileEnabledConnections(
     }
 
     if (
-      isAutoEnableActive(requestQueueSettings) &&
-      getProviderCategory(provider) === "apikey" &&
-      isActive
+      isConnectionAutoProtected({ provider, isActive, rateLimitProtection }, requestQueueSettings)
     ) {
       nextEnabledConnections.add(connectionId);
       autoCount++;
@@ -782,6 +753,10 @@ export async function withRateLimit(
     LEGACY_RATE_LIMIT_QUEUE_TIMEOUT_CODE
   );
   if (!queueWaitDisabled && queueRemainingMs <= 0) throw queueTimeoutErr;
+  const pauseErr = queueWaitDisabled
+    ? null
+    : bodyRetryPause.checkLimiterPause(limiter, queueRemainingMs, `${provider}/${model ?? ""}`);
+  if (pauseErr) throw pauseErr;
   const timeoutPromise = new Promise<never>((_, reject) => {
     if (queueWaitDisabled) return; // sentinel: never fires
     delayId = setTimeout(() => {
@@ -796,6 +771,7 @@ export async function withRateLimit(
   // would kill a 300ms execution that correctly left the queue immediately).
   const wrappedFn = () => {
     if (queueTimedOut) return Promise.reject(queueTimeoutErr);
+    if (signal?.aborted) return Promise.reject(signal.reason);
     if (delayId) {
       clearTimeout(delayId);
       delayId = null;
@@ -810,8 +786,9 @@ export async function withRateLimit(
   const scheduled = limiter.schedule(scheduleOpts, boundFn as unknown as () => Promise<unknown>);
   scheduled.catch(() => {});
   // If timeoutPromise or the abort wins while the job is still QUEUED,
-  // abandonQueuedJob() removes it (see queuedJobCancel.ts); a job already past
-  // QUEUED is kept from calling fn by wrappedFn's queueTimedOut guard.
+  // abandonQueuedJob() removes it (see queuedJobCancel.ts). A job already past
+  // QUEUED (with capacity free, Bottleneck dispatches before that removal runs)
+  // is kept from calling fn by wrappedFn's guards; the race already settled.
 
   try {
     if (signal) {
@@ -947,11 +924,10 @@ export function updateFromHeaders(provider, connectionId, headers, status, model
 
   // Handle 429 — rate limited
   if (status === 429) {
-    const retryAfterMs = parseResetTime(retryAfterStr) || 60000; // Default 60s
     const counts = limiter.counts();
     const limiterKey = getLimiterKey(provider, connectionId, model);
     logRateLimit(
-      `🚫 [RATE-LIMIT] ${provider}:${connectionId.slice(0, 8)} — 429 received, pausing for ${Math.ceil(retryAfterMs / 1000)}s, dropping ${counts.QUEUED} queued request(s)`
+      `🚫 [RATE-LIMIT] ${provider}:${connectionId.slice(0, 8)} — 429 received (${describeRetryAfter(retryAfterStr)}), resetting the limiter (headers set no local pause), dropping ${counts.QUEUED} queued request(s)`
     );
 
     // Evict from the cache so follow-up learning from the same error body
@@ -1266,23 +1242,39 @@ async function loadPersistedLimits() {
  * @param {string|object} responseBody - Response body (string or parsed JSON)
  * @param {number} status - HTTP status code
  * @param {string} model - Model name (for per-model lockouts)
+ * @param {string} requestedModel - Model name before alias resolution (locked with `model`)
  */
-export function updateFromResponseBody(provider, connectionId, responseBody, status, model = null) {
+export function updateFromResponseBody(
+  provider,
+  connectionId,
+  responseBody,
+  status,
+  model = null,
+  requestedModel = null
+) {
   if (!enabledConnections.has(connectionId)) return;
 
   const { retryAfterMs, reason } = parseRetryAfterFromBody(responseBody);
 
   if (retryAfterMs && retryAfterMs > 0) {
-    const limiter = getLimiter(provider, connectionId, model);
-    logRateLimit(
-      `🚫 [RATE-LIMIT] ${provider}:${connectionId.slice(0, 8)} — body-parsed retry: ${Math.ceil(retryAfterMs / 1000)}s (${reason})`
-    );
-
-    updateLimiterSettings(limiter, {
-      reservoir: 0,
-      reservoirRefreshAmount: 60,
-      reservoirRefreshInterval: retryAfterMs,
-    });
+    const key = getLimiterKey(provider, connectionId, model);
+    const scopedModel = key === getLimiterKey(provider, connectionId) ? null : model;
+    const budgetMs = resolveRequestQueueMaxWaitMs(provider, undefined, connectionId);
+    const retry = { provider, connectionId, scopedModel, requestedModel, status, reason };
+    if (!bodyRetryPause.lockModelForLongBodyRetry(retry, budgetMs, responseBody)) {
+      const fresh = !limiters.has(key);
+      const pausedAt = Date.now(); // Bottleneck's refresh clock starts when the limiter is built
+      const limiter = getLimiter(provider, connectionId, model);
+      logRateLimit(
+        `🚫 [RATE-LIMIT] ${provider}:${connectionId.slice(0, 8)} — body-parsed retry: ${Math.ceil(retryAfterMs / 1000)}s (${reason})`
+      );
+      updateLimiterSettings(limiter, {
+        reservoir: 0,
+        reservoirRefreshAmount: 60,
+        reservoirRefreshInterval: retryAfterMs,
+      });
+      if (fresh) bodyRetryPause.rememberLimiterPause(limiter, pausedAt + retryAfterMs);
+    }
   }
 
   if (status !== 429) return;

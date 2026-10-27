@@ -12,13 +12,13 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### ముందస్తు అవసరాలు
 
-- **Node.js** `>=22.22.3 <23`, లేదా `>=24.0.0 <27` (సిఫార్సు చేయబడినది: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, లేదా `>=24.0.0 <27` (సిఫార్సు: 24 LTS)
 - **npm** 10+
 
 > **npm v11+ వినియోగదారులు (Node 24+):** `npm install` తర్వాత, స్థానిక మాడ్యూల్లు ఇన్స్టాల్ అయ్యాయో లేదో ధృవీకరించండి:
-> `node -e "require('better-sqlite3')"`. ఇది `MODULE_NOT_FOUND` లోపంతో విఫలమైతే,
-> `npm approve-scripts better-sqlite3 && npm install` అమలు చేయండి. మరిన్ని వివరాలకు
-> [ట్రబుల్షూటింగ్](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) చూడండి.
+> `node -e "require('better-sqlite3')"`. ఇది `MODULE_NOT_FOUND`తో విఫలమైతే,
+> `npm approve-scripts better-sqlite3 && npm install` అమలు చేయండి. చూడండి:
+> [సమస్య పరిష్కారం](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
@@ -33,10 +33,10 @@ npm install
 ### ఎన్విరాన్మెంట్ వేరియబుల్స్
 
 ```bash
-# టెంప్లేట్ నుండి మీ .env ఫైల్ను సృష్టించండి
+# టెంప్లేట్ నుండి మీ .envను సృష్టించండి
 cp .env.example .env
 
-# అవసరమైన రహస్యాలను రూపొందించండి
+# అవసరమైన సీక్రెట్లను రూపొందించండి
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
@@ -46,8 +46,8 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 | వేరియబుల్              | డెవలప్మెంట్ డిఫాల్ట్     | వివరణ                  |
 | ---------------------- | ------------------------ | ---------------------- |
 | `PORT`                 | `20128`                  | సర్వర్ పోర్ట్          |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ఫ్రంటెండ్ బేస్ URL     |
-| `JWT_SECRET`           | (పైన రూపొందించండి)       | JWT సంతకం రహస్యం       |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | ఫ్రంట్ఎండ్ బేస్ URL    |
+| `JWT_SECRET`           | (పైన రూపొందించండి)       | JWT సంతకం సీక్రెట్     |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | మొదటి లాగిన్ పాస్వర్డ్ |
 | `APP_LOG_LEVEL`        | `info`                   | లాగ్ వివరాల స్థాయి     |
 
@@ -55,46 +55,46 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 ఎన్విరాన్మెంట్ వేరియబుల్స్ ద్వారా కూడా కాన్ఫిగర్ చేయగల ఫీచర్ల కోసం డ్యాష్బోర్డ్ UI టాగుల్లను అందిస్తుంది:
 
-| సెట్టింగ్ స్థానం      | టాగుల్              | వివరణ                                       |
-| --------------------- | ------------------- | ------------------------------------------- |
-| సెట్టింగ్లు → అధునాతన | డీబగ్ మోడ్          | డీబగ్ రిక్వెస్ట్ లాగ్లను ప్రారంభించండి (UI) |
-| సెట్టింగ్లు → సాధారణ  | సైడ్బార్ విజిబిలిటీ | సైడ్బార్ విభాగాలను చూపండి/దాచండి            |
+| సెట్టింగ్ స్థానం      | టాగుల్             | వివరణ                                       |
+| --------------------- | ------------------ | ------------------------------------------- |
+| సెట్టింగ్లు → అధునాతన | డీబగ్ మోడ్         | డీబగ్ రిక్వెస్ట్ లాగ్లను ప్రారంభించండి (UI) |
+| సెట్టింగ్లు → సాధారణ  | సైడ్బార్ దృశ్యమానత | సైడ్బార్ విభాగాలను చూపండి/దాచండి            |
 
-ఈ సెట్టింగ్లు డేటాబేస్లో నిల్వ చేయబడతాయి మరియు రీస్టార్ట్ల తర్వాత కూడా కొనసాగుతాయి; సెట్ చేసినప్పుడు env var డిఫాల్ట్లను ఓవర్రైడ్ చేస్తాయి.
+ఈ సెట్టింగ్లు డేటాబేస్లో నిల్వ చేయబడతాయి, పునఃప్రారంభాల తర్వాత కూడా కొనసాగుతాయి, అలాగే సెట్ చేసినప్పుడు env var డిఫాల్ట్లను ఓవర్రైడ్ చేస్తాయి.
 
-### లోకల్గా అమలు చేయడం
+### స్థానికంగా అమలు చేయడం
 
 ```bash
 # డెవలప్మెంట్ మోడ్ (హాట్ రీలోడ్)
 npm run dev
 
 # ప్రొడక్షన్ బిల్డ్
-npm run build    # next build → .build/next/ తర్వాత assembleStandalone → dist/
+npm run build    # next build → .build/next/ ఆపై assembleStandalone → dist/
 npm run start
 
-# కంట్రిబ్యూటర్ మార్పుల కోసం వేగవంతమైన బ్యాకెండ్/API-మాత్రమే కంపైల్
+# కాంట్రిబ్యూటర్ మార్పుల కోసం వేగవంతమైన బ్యాకెండ్/API-మాత్రమే కంపైల్
 npm run build:contributor
 
-# రిలీజ్ బిల్డ్ (క్లీన్ రీబిల్డ్ + HEAD సెంటినెల్ — డిప్లాయ్ కోసం అవసరం)
+# రిలీజ్ బిల్డ్ (క్లీన్ రీబిల్డ్ + HEAD సెంటినల్ — డిప్లాయ్కు అవసరం)
 npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHAను వ్రాస్తుంది
 
 # సాధారణ పోర్ట్ కాన్ఫిగరేషన్
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-కంట్రిబ్యూటర్ బిల్డ్ కంపైల్-మాత్రమే ధృవీకరణను నిర్వహిస్తుంది: ఇది స్టాండ్అలోన్
+కాంట్రిబ్యూటర్ బిల్డ్ కంపైల్-మాత్రమే ధ్రువీకరణను నిర్వహిస్తుంది: ఇది స్టాండ్అలోన్
 డిస్ట్రిబ్యూషన్ను అసెంబుల్ చేయదు లేదా ఐచ్ఛిక స్థానిక ప్యాకేజింగ్ అసెట్లను బిల్డ్ చేయదు. పంపిణీ చేయగల బండిల్ను
-ధృవీకరించాల్సినప్పుడు సాధారణ ప్రొడక్షన్ బిల్డ్ను ఉపయోగించండి.
+ధ్రువీకరించాల్సినప్పుడు సాధారణ ప్రొడక్షన్ బిల్డ్ను ఉపయోగించండి.
 
 ### బిల్డ్ అవుట్పుట్ లేఅవుట్
 
-| డైరెక్టరీ | కంటెంట్లు                                                                           | ట్రాక్ చేయబడుతుందా |
-| --------- | ----------------------------------------------------------------------------------- | ------------------ |
-| `src/`    | అప్లికేషన్ సోర్స్ (TypeScript / TSX)                                                | అవును              |
-| `.build/` | మధ్యంతర ఫైళ్లు — `next build` అవుట్పుట్ (gitignored, `distDir = .build/next`)       | కాదు               |
-| `dist/`   | పంపిణీ చేయగల బండిల్ — `assembleStandalone` ద్వారా అసెంబుల్ చేయబడుతుంది (gitignored) | కాదు               |
+| డైరెక్టరీ | కంటెంట్లు                                                                         | ట్రాక్ చేయబడుతుందా |
+| --------- | --------------------------------------------------------------------------------- | ------------------ |
+| `src/`    | అప్లికేషన్ సోర్స్ (TypeScript / TSX)                                              | అవును              |
+| `.build/` | మధ్యంతర ఫైల్లు — `next build` అవుట్పుట్ (gitignored, `distDir = .build/next`)     | కాదు               |
+| `dist/`   | పంపిణీ చేయగల బండిల్ — `assembleStandalone` ద్వారా అసెంబుల్ చేయబడింది (gitignored) | కాదు               |
 
-బిల్డ్ పైప్లైన్ ఒకే పాస్గా ఉంటుంది:
+బిల్డ్ పైప్లైన్ ఒకే పాస్లో ఉంటుంది:
 
 ```
 npm run build
@@ -103,13 +103,13 @@ npm run build
        └─ అవుట్పుట్: dist/               (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` అదనంగా ముందుగా రెండు డైరెక్టరీలను క్లీన్ చేసి, డిప్లాయ్ సమగ్రత
-సెంటినెల్గా `dist/BUILD_SHA` (= `git rev-parse --short HEAD`)ను వ్రాస్తుంది.
+`npm run build:release` అదనంగా ముందుగా రెండు డైరెక్టరీలను క్లీన్ చేసి, డిప్లాయ్ సమగ్రత సెంటినల్గా
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`)ను వ్రాస్తుంది.
 
 `npm run build:contributor` బ్యాకెండ్-మాత్రమే బిల్డ్ ప్రొఫైల్ను ఉపయోగిస్తుంది. ఇది బిల్డ్ చేస్తున్నప్పుడు
-డ్యాష్బోర్డ్ UI ఫైళ్లను తాత్కాలికంగా స్టబ్ చేస్తుంది, API రూట్ హ్యాండ్లర్లను అలాగే ఉంచుతుంది, మరియు బిల్డ్ తర్వాత
-అసలు ఫైళ్లను పునరుద్ధరిస్తుంది. డ్యాష్బోర్డ్ UIపై ప్రభావం చూపే మార్పులకు లేదా పూర్తి
-రిలీజ్ ధృవీకరణ కోసం `npm run build` ఉపయోగించండి; కంట్రిబ్యూటర్ ప్రొఫైల్ రిలీజ్ బిల్డ్కు ప్రత్యామ్నాయం కాదు.
+డ్యాష్బోర్డ్ UI ఫైల్లను తాత్కాలికంగా స్టబ్ చేస్తుంది, API రూట్ హ్యాండ్లర్లను ఉంచుతుంది, బిల్డ్ తర్వాత అసలు ఫైల్లను
+పునరుద్ధరిస్తుంది. డ్యాష్బోర్డ్ UIపై ప్రభావం చూపే మార్పుల కోసం లేదా పూర్తి
+రిలీజ్ ధ్రువీకరణ కోసం `npm run build`ను ఉపయోగించండి; కాంట్రిబ్యూటర్ ప్రొఫైల్ రిలీజ్ బిల్డ్కు ప్రత్యామ్నాయం కాదు.
 
 > **VPS డిప్లాయ్ గమనిక:** రిమోట్ ఇమేజ్ డైరెక్టరీ `/usr/lib/node_modules/omniroute/app/`
 > మారలేదు. డిప్లాయ్ స్కిల్స్ `dist/`లోని కంటెంట్లను దానిలోకి rsync చేస్తాయి.
@@ -169,84 +169,85 @@ refactor(db): రేట్ లిమిట్ టేబుల్లను ఏక
 ## పరీక్షలను అమలు చేయడం
 
 ```bash
-# అన్ని పరీక్షలు (unit + vitest + ecosystem + e2e)
+# అన్ని పరీక్షలు (యూనిట్ + vitest + ఎకోసిస్టమ్ + e2e)
 npm run test:all
 
-# ఒకే పరీక్ష ఫైల్ (Node.js స్థానిక టెస్ట్ రన్నర్ — చాలా పరీక్షలు దీనినే ఉపయోగిస్తాయి)
+# ఒకే పరీక్ష ఫైల్ (Node.js స్థానిక టెస్ట్ రన్నర్ — చాలా పరీక్షలు దీన్నే ఉపయోగిస్తాయి)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# మీ మార్పు ప్రభావితం చేసిన unit పరీక్షలు మాత్రమే (CI గేట్లోని అదే TIA సెలెక్టర్, #8084)
-npm run test:scoped            # చివరి commitలోని మార్పులు (లేదా working tree)
-npm run test:scoped:staged     # staged మార్పులు మాత్రమే — pre-commit అమలుతో బాగా సరిపోతుంది
-npm run test:scoped:full       # ముందుగా import-graph మ్యాప్ను మళ్లీ నిర్మిస్తుంది (ఫైళ్లను జోడించిన/తరలించిన తర్వాత)
-# Exit 1 + "run the full suite" అంటే hub ఫైల్ (tsconfig, package.json, …) లేదా మ్యాప్ చేయని
-# source మారిందని అర్థం — selector సురక్షితంగా విఫలమవుతుంది, అది ఎప్పుడూ నిశ్శబ్దంగా దాటవేయదు.
+# మీ మార్పు ప్రభావితం చేసిన యూనిట్ పరీక్షలు మాత్రమే (CI గేట్లో ఉన్న అదే TIA సెలెక్టర్, #8084)
+npm run test:scoped            # చివరి కమిట్లోని మార్పులు (లేదా వర్కింగ్ ట్రీలోనివి)
+npm run test:scoped:staged     # స్టేజ్ చేసిన మార్పులు మాత్రమే — ప్రీ-కమిట్ అమలుతో బాగా సరిపోతుంది
+npm run test:scoped:full       # ముందుగా ఇంపోర్ట్-గ్రాఫ్ మ్యాప్ను మళ్లీ నిర్మిస్తుంది (ఫైళ్లను జోడించిన/తరలించిన తర్వాత)
+# Exit 1 + "పూర్తి సూట్ను అమలు చేయండి" అంటే హబ్ ఫైల్ (tsconfig, package.json, …) లేదా
+# మ్యాప్ చేయని సోర్స్ మారిందని అర్థం — సెలెక్టర్ సురక్షితంగా విఫలమవుతుంది, అది ఎప్పుడూ నిశ్శబ్దంగా దాటవేయదు.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (MCP సర్వర్, autoCombo, క్యాష్)
 npm run test:vitest
 
 # E2E పరీక్షలు (Playwright అవసరం)
 npm run test:e2e
 
-# Protocol clients E2E (MCP transports, A2A)
+# ప్రోటోకాల్ క్లయింట్ల E2E (MCP ట్రాన్స్పోర్ట్లు, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem అనుకూలత పరీక్షలు
+# ఎకోసిస్టమ్ అనుకూలత పరీక్షలు
 npm run test:ecosystem
 
-# Coverage గేట్: statements/lines/functions/branchesకు 60%
+# కవరేజ్ గేట్: స్టేట్మెంట్లు/లైన్లు/ఫంక్షన్లు/బ్రాంచ్లకు 60%
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format తనిఖీ
+# లింట్ + ఫార్మాట్ తనిఖీ
 npm run lint
 npm run check
 
-# గేట్ చేయబడిన నిజమైన upstream combo smoke (VPS యాక్సెస్ + నిజమైన provider credits అవసరం)
-# ఇది నిజమైన providersను ఉపయోగిస్తుంది — కొద్దిగా ఖర్చవుతుంది. CIలో ఎప్పుడూ అమలు కాదు. గేట్ లేకపోతే సక్రమంగా దాటవేయబడుతుంది.
-# అవసరం: ssh root@192.168.0.15 యాక్సెస్ (VPS నుండి read-only DB snapshotను source చేస్తుంది).
+# గేట్ చేయబడిన వాస్తవ అప్స్ట్రీమ్ కాంబో స్మోక్ పరీక్ష (VPS యాక్సెస్ + వాస్తవ ప్రొవైడర్ క్రెడిట్లు అవసరం)
+# వాస్తవ ప్రొవైడర్లను ఉపయోగిస్తుంది — కొంత ఖర్చవుతుంది. CIలో ఎప్పుడూ అమలు కాదు. గేట్ లేకపోతే సజావుగా దాటవేస్తుంది.
+# అవసరం: ssh root@192.168.0.15 యాక్సెస్ (VPS నుండి రీడ్-ఓన్లీ DB స్నాప్షాట్ను సోర్స్ చేస్తుంది).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS ప్రత్యక్ష smoke — సాధారణ Node ESM scripts, ప్రత్యక్ష .15 serverను నేరుగా ఉపయోగిస్తాయి.
-# అవసరం: ssh root@192.168.0.15 యాక్సెస్ (SSH sqlite ద్వారా combos సృష్టించబడతాయి/తొలగించబడతాయి).
-# నిజమైన providersను ఉపయోగిస్తుంది (చిన్న ఖర్చు). __live_test__* combosను మాత్రమే సృష్టిస్తుంది/తొలగిస్తుంది. CIలో ఎప్పుడూ అమలు కాదు.
-# .15లో REQUIRE_API_KEY=false కాబట్టి API key అవసరం లేదు, కానీ సెట్ చేసి ఉంటే COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEYను గౌరవిస్తుంది.
-npm run test:combo:live:vps              # 7 HTTP సందర్భాలు (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # నిజమైన cross-provider failover సందర్భాన్ని జోడిస్తుంది (మొత్తం 8)
+# Phase-3 VPS లైవ్ స్మోక్ పరీక్ష — సాధారణ Node ESM స్క్రిప్ట్లు, లైవ్ .15 సర్వర్ను నేరుగా ఉపయోగిస్తాయి.
+# అవసరం: ssh root@192.168.0.15 యాక్సెస్ (SSH sqlite ద్వారా కాంబోలు సృష్టించబడతాయి/తొలగించబడతాయి).
+# వాస్తవ ప్రొవైడర్లను ఉపయోగిస్తుంది (స్వల్ప ఖర్చు). __live_test__* కాంబోలను మాత్రమే సృష్టిస్తుంది/తొలగిస్తుంది. CIలో ఎప్పుడూ అమలు కాదు.
+# .15లో REQUIRE_API_KEY=false కాబట్టి API కీ అవసరం లేదు, అయితే సెట్ చేసి ఉంటే COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEYలను గౌరవిస్తుంది.
+npm run test:combo:live:vps              # 7 HTTP సందర్భాలు (ప్రాధాన్యత/రౌండ్-రాబిన్/వెయిటెడ్/ఖర్చు/ఫ్యూజన్/ఆటో + హెల్త్)
+npm run test:combo:live:vps:failover     # వాస్తవ క్రాస్-ప్రొవైడర్ ఫెయిల్ఓవర్ సందర్భాన్ని జోడిస్తుంది (మొత్తం 8)
 ```
 
-Coverage గమనికలు:
+కవరేజ్ గమనికలు:
 
-- `npm run test:coverage` ప్రధాన unit test suiteకు source coverageను కొలుస్తుంది, `tests/**`ను మినహాయిస్తుంది, అలాగే `open-sse/**`ను చేర్చుతుంది
-- Pull requests తప్పనిసరిగా statements/lines/functions/branches coverage గేట్ను **60%+** వద్ద ఉంచాలి
-- ఒక PR `src/`, `open-sse/`, `electron/`, లేదా `bin/`లోని production codeను మార్చితే, అదే PRలో automated testsను జోడించాలి లేదా నవీకరించాలి
-- `npm run coverage:report` తాజా coverage run నుండి వివరణాత్మక file-by-file reportను ముద్రిస్తుంది
-- `npm run test:coverage:legacy` చారిత్రక పోలిక కోసం పాత metricను అలాగే ఉంచుతుంది
-- దశలవారీ coverage మెరుగుదల roadmap కోసం `docs/ops/COVERAGE_PLAN.md` చూడండి
+- `npm run test:coverage` ప్రధాన యూనిట్ టెస్ట్ సూట్కు సంబంధించిన సోర్స్ కవరేజ్ను కొలుస్తుంది, `tests/**`ను మినహాయిస్తుంది మరియు `open-sse/**`ను చేర్చుతుంది
+- పుల్ రిక్వెస్ట్లు స్టేట్మెంట్లు/లైన్లు/ఫంక్షన్లు/బ్రాంచ్ల కవరేజ్ గేట్ను **60%+** వద్ద తప్పనిసరిగా కొనసాగించాలి
+- ఒక PR `src/`, `open-sse/`, `electron/` లేదా `bin/`లోని ప్రొడక్షన్ కోడ్ను మార్చితే, అదే PRలో ఆటోమేటెడ్ పరీక్షలను జోడించాలి లేదా నవీకరించాలి
+- `npm run coverage:report` తాజా కవరేజ్ అమలు నుంచి వివరణాత్మకమైన ఫైల్-వారీ నివేదికను ముద్రిస్తుంది
+- `npm run test:coverage:legacy` చారిత్రక పోలిక కోసం పాత మెట్రిక్ను అలాగే ఉంచుతుంది
+- దశలవారీ కవరేజ్ మెరుగుదల రోడ్మ్యాప్ కోసం `docs/ops/COVERAGE_PLAN.md`ను చూడండి
 
-### Pull Request అవసరాలు
+### పుల్ రిక్వెస్ట్ అవసరాలు
 
-PRను తెరవడానికి ముందు, మీరు మార్చిన వాటికి సంబంధించిన focused loopను అమలు చేయడానికి
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)ను ఉపయోగించండి. పూర్తి unit suite (4 CI shards), Vitest, **60%+** coverage గేట్, మరియు
-production build CI బాధ్యత — వాటిని స్థానికంగా అమలు చేయడం వల్ల PR
-తనిఖీలు ఇప్పటికే అందించని అదనపు సంకేతమేదీ రాదు, అలాగే చిన్న machinesలో అది hostను పూర్తిగా వినియోగించవచ్చు (#8084):
+PRను తెరవడానికి ముందు, మీరు మార్చిన అంశానికి సంబంధించిన కేంద్రీకృత లూప్ను అమలు చేయడానికి
+[కాంట్రిబ్యూషన్ గోల్డెన్ పాత్](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)ను ఉపయోగించండి. పూర్తి యూనిట్ సూట్ (4 CI షార్డ్లు), Vitest, **60%+** కవరేజ్ గేట్ మరియు
+ప్రొడక్షన్ బిల్డ్ CI బాధ్యత — వాటిని స్థానికంగా అమలు చేయడం వల్ల PR తనిఖీలు ఇప్పటికే ఇవ్వని అదనపు సంకేతమేదీ లభించదు,
+అలాగే చిన్న మెషీన్లలో అది హోస్ట్ను పూర్తిగా వినియోగించవచ్చు (#8084):
 
-- మీ మార్పును cover చేసే test filesను అమలు చేయండి: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- మీ మార్పును కవర్ చేసే టెస్ట్ ఫైళ్లను అమలు చేయండి: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint`ను అమలు చేయండి
-- production code మారినప్పుడల్లా అదే PRలో automated testsను చేర్చండి లేదా నవీకరించండి
-- production code మారినప్పుడు, మార్చిన లేదా జోడించిన test filesను PR వివరణలో చేర్చండి
-- CIలో project secrets configure చేసి ఉన్నప్పుడు PRపై SonarQube ఫలితాన్ని తనిఖీ చేయండి
+- ప్రొడక్షన్ కోడ్ మారినప్పుడల్లా అదే PRలో ఆటోమేటెడ్ పరీక్షలను చేర్చండి లేదా నవీకరించండి
+- `node:test` ఫైళ్లలో, ప్రతి టాప్-లెవల్ `await`ను (`await import(...)` వంటిది) మొదటి `test()` / `describe()`కు ముందు ఉంచండి: `--test-force-exit` కింద, దాని తర్వాత నమోదు చేసిన పరీక్షలు నిశ్శబ్దంగా అసలు అమలు కాకపోవచ్చు (#18045; `npm run check:test-tla-order` ద్వారా అమలు చేయబడుతుంది)
+- ప్రొడక్షన్ కోడ్ మారినప్పుడు, మార్చిన లేదా జోడించిన టెస్ట్ ఫైళ్లను PR వివరణలో చేర్చండి
+- CIలో ప్రాజెక్ట్ సీక్రెట్లు కాన్ఫిగర్ చేసి ఉన్నప్పుడు, PRలో SonarQube ఫలితాన్ని తనిఖీ చేయండి
 
-ప్రస్తుత పరీక్ష స్థితి: కింది వాటిని cover చేసే **122 unit test files**:
+ప్రస్తుత పరీక్ష స్థితి: వీటిని కవర్ చేస్తున్న **122 యూనిట్ టెస్ట్ ఫైళ్లు**:
 
-- Provider translators మరియు format conversion
-- Rate limiting, circuit breaker, మరియు resilience
-- Semantic cache, idempotency, progress tracking
-- Database operations మరియు schema (21 DB modules)
-- OAuth flows మరియు authentication
-- API endpoint validation (Zod v4)
-- MCP server tools మరియు scope enforcement
-- Memory మరియు Skills systems
+- ప్రొవైడర్ ట్రాన్స్లేటర్లు మరియు ఫార్మాట్ మార్పిడి
+- రేట్ లిమిటింగ్, సర్క్యూట్ బ్రేకర్ మరియు స్థితిస్థాపకత
+- సెమాంటిక్ క్యాష్, ఐడెంపొటెన్సీ, పురోగతి ట్రాకింగ్
+- డేటాబేస్ ఆపరేషన్లు మరియు స్కీమా (21 DB మాడ్యూల్లు)
+- OAuth ఫ్లోలు మరియు ప్రామాణీకరణ
+- API ఎండ్పాయింట్ ధ్రువీకరణ (Zod v4)
+- MCP సర్వర్ టూల్స్ మరియు స్కోప్ అమలు
+- మెమరీ మరియు స్కిల్స్ సిస్టమ్లు
 
 ---
 
@@ -281,65 +282,72 @@ production build CI బాధ్యత — వాటిని స్థాని
 
 ---
 
-## Project Structure
+## ప్రాజెక్ట్ నిర్మాణం
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # డ్యాష్బోర్డ్ పేజీలు (23 విభాగాలు)
+│   ├── api/                # API రూట్లు (51 డైరెక్టరీలు)
+│   └── login/              # ప్రామాణీకరణ పేజీలు (.tsx)
+├── domain/                 # పాలసీ ఇంజిన్ (policyEngine, comboResolver, costRules, మొదలైనవి)
+├── lib/                    # ప్రధాన వ్యాపార లాజిక్ (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 ప్రోటోకాల్ సర్వర్
+│   ├── acp/                # Agent Communication Protocol రిజిస్ట్రీ
+│   ├── compliance/         # అనుగుణ్యత పాలసీ ఇంజిన్
+│   ├── db/                 # SQLite డొమైన్ మాడ్యూల్స్ + 130 మైగ్రేషన్లు
+│   ├── memory/             # నిరంతర సంభాషణాత్మక మెమరీ
+│   ├── oauth/              # OAuth ప్రొవైడర్లు, సేవలు మరియు యుటిలిటీలు
+│   ├── skills/             # విస్తరించగల స్కిల్ ఫ్రేమ్వర్క్
+│   ├── usage/              # వినియోగ ట్రాకింగ్ మరియు ఖర్చు గణన
+│   └── localDb.ts          # రీ-ఎక్స్పోర్ట్ లేయర్ మాత్రమే — ఇక్కడ లాజిక్ను ఎప్పుడూ జోడించవద్దు
+├── middleware/              # అభ్యర్థన మిడిల్వేర్ (promptInjectionGuard)
+├── mitm/                   # MITM ప్రాక్సీ (సర్టిఫికేట్, DNS, లక్ష్య రూటింగ్)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React కాంపోనెంట్లు (.tsx)
+│   ├── constants/          # ప్రొవైడర్ నిర్వచనాలు (329), MCP స్కోప్లు, 20 రూటింగ్ వ్యూహాలు
+│   ├── utils/              # సర్క్యూట్ బ్రేకర్, శానిటైజర్, ప్రామాణీకరణ సహాయకాలు
+│   └── validation/         # Zod v4 స్కీమాలు
+└── sse/                    # SSE ప్రాక్సీ పైప్లైన్
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse వర్క్స్పేస్
+├── executors/              # 150 ఎగ్జిక్యూటర్ మాడ్యూల్స్ (ఎగ్జిక్యూటర్ క్లాసులు + ప్రతి ప్రొవైడర్కు సహాయకాలు)
+├── handlers/               # 11 అభ్యర్థన హ్యాండ్లర్లు (చాట్, ప్రతిస్పందనలు, ఎంబెడ్డింగ్లు, చిత్రాలు, మొదలైనవి)
+├── mcp-server/             # MCP సర్వర్ (110 ప్రత్యేక టూల్స్, 3 ట్రాన్స్పోర్ట్లు, 33 స్కోప్లు)
+├── services/               # 178 అగ్ర-స్థాయి సేవలు (combo, autoCombo, rateLimitManager, మొదలైనవి)
+├── translator/             # ఫార్మాట్ ట్రాన్స్లేటర్లు (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API ట్రాన్స్ఫార్మర్
+└── utils/                  # 22 యుటిలిటీ మాడ్యూల్స్ (స్ట్రీమ్, TLS, ప్రాక్సీ, లాగింగ్)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Electron డెస్క్టాప్ యాప్ (బహుళ-ప్లాట్ఫారమ్)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js టెస్ట్ రన్నర్ (1,574 టెస్ట్ ఫైళ్లు)
+├── integration/            # ఇంటిగ్రేషన్ పరీక్షలు
+├── e2e/                    # Playwright పరీక్షలు
+├── security/               # భద్రతా పరీక్షలు
+├── translator/             # ట్రాన్స్లేటర్-నిర్దిష్ట పరీక్షలు
+└── load/                   # లోడ్ పరీక్షలు
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # ఆర్కిటెక్చర్ నిర్ణయ రికార్డులు
+├── architecture/            # సిస్టమ్ ఆర్కిటెక్చర్ & స్థితిస్థాపకత
+├── comparison/              # OmniRoute మరియు ప్రత్యామ్నాయాల మధ్య పోలిక
+├── compression/             # కంప్రెషన్ మార్గదర్శకాలు & నియమాలు
+├── dev/                     # అభివృద్ధి మార్గదర్శకాలు
+├── diagrams/                # ఆర్కిటెక్చర్ రేఖాచిత్రాలు
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # వినియోగదారు మార్గదర్శకం, Docker, సెటప్, సమస్య పరిష్కారం
+├── i18n/                    # అంతర్జాతీయీకరించిన README అనువాదాలు
+├── marketing/               # మార్కెటింగ్ సామగ్రి
+├── ops/                     # డిప్లాయ్మెంట్, ప్రాక్సీ, కవరేజ్, విడుదలలు
+├── providers/               # ప్రొవైడర్-నిర్దిష్ట డాక్యుమెంటేషన్
+├── reference/               # API సూచన, పర్యావరణ వేరియబుల్స్, CLI టూల్స్, ఉచిత టియర్లు
+├── releases/                # విడుదల గమనికలు
+├── routing/                 # ఆటో-కాంబో ఇంజిన్, రీజనింగ్ రీప్లే
+├── screenshots/             # డ్యాష్బోర్డ్ స్క్రీన్షాట్లు
+├── security/                # గార్డ్రైల్స్, అనుగుణ్యత, స్టెల్త్, టోకెన్లు
+└── specs/                   # డిజైన్ స్పెసిఫికేషన్లు
 ```
 
 ---
@@ -399,9 +407,13 @@ docs/                       # Documentation
 
 ---
 
-## Releasing
+## విడుదల చేయడం
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+విడుదలలు `/generate-release` వర్క్ఫ్లో ద్వారా నిర్వహించబడతాయి. కొత్త GitHub Release సృష్టించబడినప్పుడు, ప్యాకేజీ GitHub Actions ద్వారా **స్వయంచాలకంగా npmకు ప్రచురించబడుతుంది**.
+
+VPS డిప్లాయ్మెంట్ల కోసం, `npm run build` కాకుండా `npm run build:release` ఉపయోగించండి — ఇది పూర్తిగా
+మళ్లీ బిల్డ్ చేసి, బండిల్ను `dist/`లో సమీకరించి, `dist/BUILD_SHA` సెంటినెల్ను వ్రాస్తుంది.
+ఆ తర్వాత `dist/`ను రిమోట్ `app/` డైరెక్టరీకి rsync చేసే `/deploy-vps-*-cc` స్కిల్లను ఉపయోగించండి.
 
 ---
 

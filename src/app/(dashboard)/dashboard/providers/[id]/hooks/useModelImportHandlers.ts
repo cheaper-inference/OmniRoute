@@ -14,6 +14,7 @@
  */
 
 import React, { useState } from "react";
+import { settleBoundedSyncRequests } from "@/lib/providerModels/immediateSyncBatch";
 import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { providerText, type ProviderMessageTranslator } from "../providerPageHelpers";
 import { classifyModelImport, resolveNoNewModelsPhase } from "./modelImportWarning";
@@ -72,6 +73,18 @@ export interface UseModelImportHandlersReturn {
   handleCompatibleImportWithProgress: (connectionId: string) => Promise<void>;
   handleToggleAutoSync: () => Promise<void>;
   handleToggleAutoFetchModels: () => Promise<void>;
+}
+
+/** Only successfully enabled connections need an immediate upstream discovery. */
+function newlyEnabledAutoSyncIds(
+  connections: UseModelImportHandlersParams["connections"],
+  results: PromiseSettledResult<Response>[]
+): string[] {
+  return connections.flatMap((connection, index) => {
+    const result = results[index];
+    if (connection.providerSpecificData?.autoSync === true || !connection.id) return [];
+    return result?.status === "fulfilled" && result.value.ok ? [connection.id] : [];
+  });
 }
 
 // ──── hook ───────────────────────────────────────────────────────────────────
@@ -259,6 +272,9 @@ export function useModelImportHandlers({
             ...(typeof model.apiFormat === "string" ? { apiFormat: model.apiFormat } : {}),
             ...(Array.isArray(model.supportedEndpoints)
               ? { supportedEndpoints: model.supportedEndpoints }
+              : {}),
+            ...(typeof model.endpointCapabilitySource === "string"
+              ? { endpointCapabilitySource: model.endpointCapabilitySource }
               : {}),
             ...(typeof model.dimensions === "number" && model.dimensions > 0
               ? { dimensions: model.dimensions }
@@ -485,16 +501,37 @@ export function useModelImportHandlers({
           })
         )
       );
+      // Only newly enabled connections need an immediate sync; existing
+      // enabled accounts remain on their scheduler cadence.
+      const syncIds = newValue ? newlyEnabledAutoSyncIds(activeWithId, results) : [];
+      // A provider may have many accounts sharing one upstream/IP. Fan out
+      // the setting writes as before, but cap *live* discovery calls at two
+      // to avoid a burst that can trigger shared upstream rate limits.
+      const syncResults = await settleBoundedSyncRequests(syncIds, async (id) => {
+        const response = await fetch(`/api/providers/${id}/sync-models`, {
+          method: "POST",
+          signal: AbortSignal.timeout(60_000),
+        });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      });
       await fetchConnections();
+      if (syncIds.length > 0) await fetchProviderModelMeta();
+      const syncFailed = syncResults.some((r) => r.status === "rejected");
       const fulfilled = results.filter((r) => r.status === "fulfilled" && r.value.ok).length;
-      if (fulfilled === results.length) {
+      if (fulfilled === results.length && !syncFailed) {
         notify[newValue ? "success" : "info"](
           newValue ? t("autoSyncEnabled") : t("autoSyncDisabled")
         );
       } else if (fulfilled === 0) {
         notify.error(t("autoSyncToggleFailed"));
       } else {
-        notify.warning(t("autoSyncPartialFailure"));
+        notify.warning(
+          t(
+            syncFailed && fulfilled === results.length
+              ? "autoSyncImmediatePartialFailure"
+              : "autoSyncPartialFailure"
+          )
+        );
       }
     } catch (error) {
       console.error("Error toggling auto-sync:", error);

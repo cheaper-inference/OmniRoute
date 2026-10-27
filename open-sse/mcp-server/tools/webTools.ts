@@ -84,7 +84,8 @@ export async function handleWebFetch(args: {
     | "tinyfish"
     | "context7"
     | "nimble-search"
-    | "anysearch-search";
+    | "anysearch-search"
+    | "parallel-search";
   format?: "markdown" | "html" | "links" | "screenshot";
   include_metadata?: boolean;
   depth?: number;

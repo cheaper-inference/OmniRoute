@@ -76,31 +76,32 @@ kiezer nooit een raadsel is.
 
 ## Opties
 
-| Sleutel                          | Standaardwaarde                                   | Opmerkingen                                                                                                                  |
-| -------------------------------- | ------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                     | Provider-id, integratie-id en het voorvoegsel waaronder modellen worden weergegeven                                          |
-| `baseURL`                        | vereist                                           | Hoofdadres van de gateway, alleen `http(s)`; het achtervoegsel `/v1` wordt waar nodig toegevoegd                             |
-| `apiKey`                         | gekoppelde referentie, daarna `OMNIROUTE_API_KEY` | Chatsleutel voor `/v1/*`                                                                                                     |
-| `managementReadToken`            | valt terug op `apiKey`                            | Sleutel voor `/api/*` — meestal **niet** dezelfde                                                                            |
-| `displayName`                    | `"OmniRoute"`                                     | Providernaam in de keuzelijst                                                                                                |
-| `timeoutMs`                      | `10000`                                           | Time-out per endpoint voor ophalen (automatische combinaties gebruiken 5 s)                                                  |
-| `modelCacheTtlMs`                | `300000`                                          | TTL van de cataloguscache; een momentopname op schijf versnelt koude starts                                                  |
-| `timeouts`                       | valt terug op `timeoutMs`                         | Tijdslimieten per endpoint in ms: `models`, `combos`, `autoCombos`, `enrichment`                                             |
-| `enrichment`                     | `true`                                            | Namen, prijzen en budgetten voor de gratis laag ophalen                                                                      |
-| `providerTag`                    | `true`                                            | Een weergavenaam vooraf laten gaan door de bovenliggende provider waarnaar deze routeert                                     |
-| `usableOnly`                     | `false`                                           | Alleen providers behouden die volgens de gateway zijn ingericht                                                              |
-| `showcasePerOwner`               | `10`                                              | Aantal items per provider dat in de standaardweergave wordt behouden                                                         |
-| `freshPerOwner`                  | `10`                                              | Aantal recente items per provider dat in de standaardweergave wordt behouden                                                 |
-| `freshWindowDays`                | `90`                                              | Versheidsvenster in dagen voor de tak met recente items                                                                      |
-| `usageMemory`                    | `true`                                            | Statisch verwijderde items herstellen die in de gebruiksanalyses van 30 dagen worden genoemd (vereist een beheertoken)       |
-| `visibleModels` / `hiddenModels` | `[]`                                              | Toestaanlijsten met exacte overeenkomsten of overeenkomsten op achtervoegsel; weigeren heeft voorrang                        |
-| `geminiSanitization`             | `true`                                            | De JSON-Schema-sleutelwoorden die Gemini afwijst uit toolschema's verwijderen (`$ref`-tools worden ongewijzigd doorgestuurd) |
-| `apiFormat.allowAnthropic`       | `false`                                           | Id's op de toestaanlijst via het Anthropic API-blok routeren                                                                 |
-| `apiFormat.anthropicModels`      | `[]`                                              | Volledige model-id's die naar Anthropic worden gerouteerd                                                                    |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                  | Uitgebreidheid van de logboekregistratie                                                                                     |
+| Sleutel                          | Standaard                                         | Opmerkingen                                                                                                                                                                 |
+| -------------------------------- | ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                     | Provider-ID, integratie-ID en het voorvoegsel waaronder modellen worden weergegeven                                                                                         |
+| `baseURL`                        | vereist                                           | Gateway-root, alleen `http(s)`; het achtervoegsel `/v1` wordt waar nodig toegevoegd                                                                                         |
+| `apiKey`                         | gekoppelde referentie, daarna `OMNIROUTE_API_KEY` | Chatsleutel voor `/v1/*`                                                                                                                                                    |
+| `managementReadToken`            | valt terug op `apiKey`                            | Sleutel voor `/api/*` — meestal **niet** dezelfde                                                                                                                           |
+| `displayName`                    | `"OmniRoute"`                                     | Providernaam in de keuzelijst                                                                                                                                               |
+| `timeoutMs`                      | `10000`                                           | Time-out per eindpunt voor ophalen (automatische combinaties gebruiken 5 s)                                                                                                 |
+| `modelCacheTtlMs`                | `300000`                                          | TTL van de cataloguscache; een momentopname op schijf versnelt koude starts                                                                                                 |
+| `timeouts`                       | valt terug op `timeoutMs`                         | Budgetten per eindpunt in ms: `models`, `combos`, `autoCombos`, `enrichment`                                                                                                |
+| `enrichment`                     | `true`                                            | Namen, prijzen en budgetten voor de gratis laag ophalen                                                                                                                     |
+| `providerTag`                    | `true`                                            | Een weergavenaam vooraf laten gaan door de upstreamprovider waarnaar deze routeert                                                                                          |
+| `usableOnly`                     | `false`                                           | Alleen providers behouden die volgens de gateway zijn ingericht                                                                                                             |
+| `combosSource`                   | `"api"`                                           | `"models"` slaat `/api/combos` over en publiceert de combinatierijen van `/v1/models`; filters op lidniveau behouden `"api"`                                                |
+| `showcasePerOwner`               | `10`                                              | Items per provider die in de standaardweergave worden behouden                                                                                                              |
+| `freshPerOwner`                  | `10`                                              | Recente items per provider die in de standaardweergave worden behouden                                                                                                      |
+| `freshWindowDays`                | `90`                                              | Versheidsvenster in dagen voor de tak met recente items                                                                                                                     |
+| `usageMemory`                    | `true`                                            | Statisch verwijderde items herstellen die worden genoemd in gebruiksanalyses over 30 dagen (vereist een beheertoken)                                                        |
+| `visibleModels` / `hiddenModels` | `[]`                                              | Toestaanlijsten met exacte overeenkomsten of achtervoegselovereenkomsten; weigeren gaat voor; `*` publiceert de volledige catalogus (andere filters blijven van toepassing) |
+| `geminiSanitization`             | `true`                                            | De JSON Schema-trefwoorden die Gemini weigert uit toolschema's verwijderen (tools met `$ref` worden ongewijzigd doorgestuurd)                                               |
+| `apiFormat.allowAnthropic`       | `false`                                           | ID's op de toestaanlijst via het Anthropic API-blok routeren                                                                                                                |
+| `apiFormat.anthropicModels`      | `[]`                                              | Volledige model-ID's die naar Anthropic worden gerouteerd                                                                                                                   |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                  | Uitgebreidheid van logboekregistratie                                                                                                                                       |
 
 Gebruiksgeheugen is standaard ingeschakeld. Zonder beheertoken blijft het inactief
-(er wordt bij het opstarten een melding gelogd) en wordt er niets hersteld.
+(er wordt bij het opstarten een melding geregistreerd) en wordt er niets hersteld.
 
 ## Hoe de catalogus actueel blijft
 
@@ -115,13 +116,19 @@ Er is geen handmatige vernieuwingsopdracht: OpenCode v2-opdrachten zijn promptsj
 Gemini weigert een volledige aanvraag wanneer de tooldeclaraties `$schema` of `additionalProperties` bevatten en antwoordt met `400 INVALID_ARGUMENT`. De plugin verwijdert die trefwoorden uit toolschema's die bestemd zijn voor een Gemini-model van deze provider en laat alle andere aanvragen ongewijzigd. Een tool met een `$ref` wordt ongewijzigd doorgestuurd in plaats van opgeschoond, omdat het verwijderen van de verwijzing het schema zou verruimen tot "alles accepteren".
 Stel `"geminiSanitization": false` in om dit uit te schakelen.
 
-## Probleemoplossing
+## Problemen oplossen
 
-| Symptoom                                    | Oorzaak                                                                                                               |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Modelkiezer toont geen OmniRoute-model      | Geen sleutel gevonden (controleer de waarschuwing bij het opstarten), of de gateway is onbereikbaar                   |
-| Ruwe model-id's, geen combo's, geen prijzen | De beheereindpunten hebben het token geweigerd — stel `managementReadToken` in                                        |
-| Een sessie vastgezet op `opencode-<id>/…`   | De v1-plugin publiceerde `opencode-<id>`; v2 publiceert alleen `<id>`, dus selecteer het model opnieuw onder `<id>/…` |
+| Symptoom                                         | Oorzaak                                                                                                                              |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| De modelkiezer toont geen OmniRoute-model        | Er is geen sleutel gevonden (controleer de waarschuwing bij het opstarten), of de gateway is onbereikbaar                            |
+| Ruwe model-ID's, geen combinaties, geen prijzen  | De beheerendpoints hebben het token geweigerd — stel `managementReadToken` in                                                        |
+| Korte of lege `freeOnly`-catalogus               | Geen beheertoken of een geweigerd token — lees de samenvattingsregel van de vernieuwing (aantal `unmatched-free`) in het hostlogboek |
+| Een sessie die is vastgezet op `opencode-<id>/…` | De v1-plug-in publiceerde `opencode-<id>`; v2 publiceert alleen `<id>`, dus selecteer het model opnieuw onder `<id>/…`               |
+
+Omgevingsvariabelen moeten het opencode-serverproces bereiken: wanneer de host
+als een service wordt uitgevoerd, verschillen de shell waarin `opencode models`
+wordt uitgevoerd en de serveromgeving van elkaar. Exporteer de sleutel daarom
+op de locatie waar de server deze leest.
 
 ## Zie ook
 

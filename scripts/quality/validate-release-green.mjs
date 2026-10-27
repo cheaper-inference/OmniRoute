@@ -44,13 +44,16 @@
 //     --hermetic    scrub OMNIROUTE_API_KEY/OMNIROUTE_URL from gate env so live
 //                   tests self-skip exactly like CI (dev machines otherwise run
 //                   them against localhost and produce false-positive reds)
+//     --suites-from <dir>  consume hosted receipts instead of local suite execution;
+//                   requires --suites-workflow-sha <sha> from the producing workflow.
 //
 // Per-gate output is saved to _artifacts/release-green/<gate>.log (gitignored) —
 // diagnose a red from the file instead of re-running the gate.
 
 import { execFileSync } from "node:child_process";
-import { randomUUID } from "node:crypto";
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { createHash, randomUUID } from "node:crypto";
+import { mkdirSync, readdirSync, readFileSync, writeFileSync } from "node:fs";
+import { availableParallelism } from "node:os";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load as parseYaml } from "js-yaml";
@@ -255,6 +258,59 @@ export function parseCognitiveCount(out) {
   return m ? Number(m[1]) : null;
 }
 
+/** Translate the shared complexity walk into the two metric records. */
+export function evaluateComplexityRun({ code, out }, cogBase) {
+  // The shared walk emits both machine counts followed by both ratchet verdicts.
+  // Do not use the legacy generic "N violações" fallback here: a partial walk
+  // containing only the cyclomatic summary would masquerade as cognitive data.
+  const cogMatch = /^cognitiveComplexity=(\d+)\r?$/m.exec(out);
+  const cycMatch = /^complexity=(\d+)\r?$/m.exec(out);
+  const cogSummary = /^\[cognitive-complexity\] (OK|REGRESSÃO) — (\d+) violações /m.exec(out);
+  const cycSummary = /^\[complexity\] (OK|REGRESSÃO) — (\d+) violações /m.exec(out);
+  const cogCurrent = cogMatch ? Number(cogMatch[1]) : null;
+  const cycCurrent = cycMatch ? Number(cycMatch[1]) : null;
+  const cogOver = isDrift(cogCurrent, cogBase);
+  const cycRegressed = cycSummary?.[1] === "REGRESSÃO";
+  const measured =
+    [cogCurrent, cycCurrent, cogBase].every((count) => Number.isSafeInteger(count) && count >= 0) &&
+    Number(cogSummary?.[2]) === cogCurrent &&
+    Number(cycSummary?.[2]) === cycCurrent &&
+    (cogSummary?.[1] === "REGRESSÃO") === cogOver;
+  // Exit 1 is expected only for a complete, measured ratchet regression. A
+  // cancelled/crashed tool or missing metrics is execution failure, not drift.
+  const measuredDrift = code === 1 && measured && (cogOver || cycRegressed);
+  if (!measured || (code !== 0 && !measuredDrift)) {
+    return [
+      {
+        id: "complexity",
+        label: "Complexity measurement",
+        kind: "hard",
+        ok: false,
+        detail:
+          code !== 0
+            ? `Complexity process exited ${code}: ${firstFailureLine(out)}`
+            : "Complexity process did not report complete finite metrics and baseline",
+      },
+    ];
+  }
+  return [
+    {
+      id: "cognitive-complexity",
+      label: "Cognitive complexity (ratchet)",
+      kind: "drift",
+      ok: !cogOver,
+      detail: `${cogCurrent} vs baseline ${cogBase}${cogOver ? ` (+${cogCurrent - cogBase} drift → rebaseline at release)` : ""}`,
+    },
+    {
+      id: "complexity",
+      label: "Cyclomatic complexity (ratchet)",
+      kind: "drift",
+      ok: !cycRegressed,
+      detail: `complexity=${cycCurrent} (shared walk with cognitive)${cycRegressed ? " REGRESSED" : ""}`,
+    },
+  ];
+}
+
 /**
  * Drift verdict for a ratchet: a metric that grew past its committed baseline is
  * "drift" (reported, never blocking). `direction:"down"` metrics (warnings,
@@ -388,6 +444,196 @@ export function extractCiGates(
   return gates;
 }
 
+// ─── Unit shards (2026-10-19 full sweep) ─────────────────────────────────────
+
+/**
+ * ci.yml's unit shard count, read from its `test-unit` job: the matrix must be 1..N and the
+ * step's TEST_SHARD must be `${{ matrix.shard }}/N`, so this validator runs exactly the shards a
+ * PR's "Unit Tests (i/N)" jobs run. Anything it cannot reproduce exactly (no matrix, a gap, a
+ * different denominator, unparsable YAML) returns null: the caller then runs the unsharded suite.
+ */
+export function unitShardCountFromCi(yamlText) {
+  return shardCountFromCi(yamlText, "test-unit");
+}
+
+/** Same reading for any sharded ci.yml job (`test-unit`, `test-integration`). */
+export function shardCountFromCi(yamlText, jobId) {
+  let doc;
+  try {
+    doc = parseYaml(yamlText);
+  } catch {
+    return null;
+  }
+  const job = doc?.jobs?.[jobId];
+  const matrix = job?.strategy?.matrix?.shard;
+  if (!Array.isArray(matrix) || matrix.length < 2) return null;
+  if (!matrix.every((value, index) => value === index + 1)) return null;
+  const denominators = (Array.isArray(job.steps) ? job.steps : [])
+    .map((step) =>
+      /^\$\{\{\s*matrix\.shard\s*\}\}\/(\d+)$/.exec(String(step?.env?.TEST_SHARD ?? ""))
+    )
+    .filter(Boolean)
+    .map((match) => Number(match[1]));
+  if (denominators.length === 0 || denominators.some((n) => n !== matrix.length)) return null;
+  return matrix.length;
+}
+
+/**
+ * Unit shards running at once: one per four cores (each shard runs --test-concurrency=4),
+ * capped at the shard count. `cpus` is availableParallelism(), which honours the runner's
+ * cgroup cpu.max: the omni-release slot (CPUQuota=800% on the 32-core .113) reports 8, so 2
+ * shards run at once there; a hosted 4-vCPU runner runs them one at a time.
+ */
+export function unitShardPool(shards, cpus) {
+  return Math.max(1, Math.min(shards, Math.floor(cpus / 4)));
+}
+
+/** Runs `worker` over `items` with at most `limit` in flight; results keep the input order. */
+export async function runPool(items, limit, worker) {
+  const results = new Array(items.length);
+  let next = 0;
+  const lanes = Array.from({ length: Math.max(1, Math.min(limit, items.length)) }, async () => {
+    while (next < items.length) {
+      const index = next++;
+      results[index] = await worker(items[index], index);
+    }
+  });
+  await Promise.all(lanes);
+  return results;
+}
+
+/**
+ * Folds the per-shard results into the single `unit` gate: exit 0 only when every shard passed,
+ * otherwise the first failing shard's code. `out` keeps each shard's output under a header;
+ * `detail` names the failing shards plus the first failure line of the first shard that failed
+ * on a test. A shard killed at its ceiling contributes no line of its own: its log is full of
+ * deliberate fixture errors (the batch route's SQLITE_CANTOPEN headed the 2026-10-19 report).
+ */
+export function mergeUnitShardResults(shardResults) {
+  const status = (r) => (r.code === 0 ? "PASS" : r.code === 124 ? "TIMEOUT" : `exit ${r.code}`);
+  const out = shardResults
+    .map((r) => `──── unit shard ${r.shard}/${r.total}: ${status(r)} ────\n${r.out ?? ""}`)
+    .join("\n");
+  const failed = shardResults.filter((r) => r.code !== 0);
+  if (failed.length === 0) return { code: 0, out, detail: "pass" };
+  const named = failed.map((r) => `${r.shard}/${r.total} ${status(r)}`).join(", ");
+  const testFailure = failed.find((r) => r.code !== 124);
+  const line = testFailure ? ` — ${firstFailureLine(testFailure.out)}` : "";
+  return { code: failed[0].code, out, detail: `unit shard ${named}${line}` };
+}
+
+// ─── Hosted suite results (2026-10-20) ───────────────────────────────────────
+
+/**
+ * Names of the hosted Release-Green suite jobs, in the order they are reported: ci.yml's unit
+ * shards, its integration shards, then vitest (MCP + UI). The workflow's `suites` matrix writes
+ * one `<name>.json` per job; a name with no file is a job that never reported.
+ */
+export function hostedSuiteNames(unitShards, integrationShards) {
+  const range = (n, prefix) => Array.from({ length: n }, (_, i) => `${prefix}-${i + 1}`);
+  return [...range(unitShards, "unit"), ...range(integrationShards, "integration"), "vitest"];
+}
+
+/** Exact execution identity shared by hosted writers and their consuming observer. */
+export function hostedSuiteIdentity(cwd, workflowSha) {
+  try {
+    const identity = {
+      schemaVersion: 1,
+      candidateSha: execFileSync("git", ["rev-parse", "HEAD"], { cwd, encoding: "utf8" }).trim(),
+      workflowSha,
+      runId: process.env.GITHUB_RUN_ID,
+      runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+      nodeVersion: process.version,
+      lockfileSha256: createHash("sha256")
+        .update(readFileSync(join(cwd, "package-lock.json")))
+        .digest("hex"),
+    };
+    if (
+      ![identity.candidateSha, identity.workflowSha].every((value) =>
+        /^[a-f0-9]{40}$/.test(value ?? "")
+      ) ||
+      ![identity.runId, identity.runAttempt].every((value) => /^[1-9][0-9]*$/.test(value ?? ""))
+    )
+      return null;
+    return identity;
+  } catch {
+    return null;
+  }
+}
+
+/** Parses one hosted suite result file; anything malformed counts as "no result". */
+export function parseHostedSuiteResult(text, expected) {
+  try {
+    const r = JSON.parse(text);
+    if (typeof r?.name !== "string" || !Number.isInteger(r?.code) || r.code < 0 || r.code > 255)
+      return null;
+    if (
+      expected === null ||
+      (expected && Object.entries(expected).some(([key, value]) => r[key] !== value))
+    )
+      return null;
+    return { name: r.name, code: r.code, detail: typeof r.detail === "string" ? r.detail : "" };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Folds the hosted suite results into the `unit`, `integration` and `vitest` HARD gates the
+ * local lanes used to record, so the verdict, the tracking issue and every reader of
+ * release-green.json keep the same ids. A lane passes only when every expected job reported
+ * exit 0; a job that never reported (cancelled, timed out, upload lost) fails it.
+ */
+export function foldHostedSuiteResults(results, { unitShards, integrationShards }) {
+  const byName = new Map(results.filter(Boolean).map((r) => [r.name, r]));
+  const lane = (id, label, names) => {
+    const parts = [];
+    let line = "";
+    for (const name of names) {
+      const r = byName.get(name);
+      if (!r) {
+        parts.push(`${name} no result`);
+        continue;
+      }
+      if (r.code === 0) continue;
+      parts.push(`${name} ${r.code === 124 ? "TIMEOUT" : `exit ${r.code}`}`);
+      if (!line && r.code !== 124 && r.detail) line = r.detail;
+    }
+    return {
+      id,
+      label,
+      kind: "hard",
+      ok: parts.length === 0,
+      detail: parts.length === 0 ? "pass" : `${parts.join(", ")}${line ? ` — ${line}` : ""}`,
+    };
+  };
+  const names = hostedSuiteNames(unitShards, integrationShards);
+  return [
+    ...(results.some((r) => !r || !names.includes(r.name)) || byName.size !== results.length
+      ? [
+          {
+            id: "hosted-suites",
+            label: "Hosted suite receipt integrity",
+            kind: "hard",
+            ok: false,
+            detail: "invalid, unexpected or duplicate hosted suite receipt",
+          },
+        ]
+      : []),
+    lane(
+      "unit",
+      `Unit tests (ci.yml's ${unitShards} shards on hosted runners)`,
+      names.filter((n) => n.startsWith("unit-"))
+    ),
+    lane(
+      "integration",
+      `Integration tests (ci.yml's ${integrationShards} shards on hosted runners)`,
+      names.filter((n) => n.startsWith("integration-"))
+    ),
+    lane("vitest", "Vitest (MCP + UI, hosted runner)", ["vitest"]),
+  ];
+}
+
 // ─── Orchestration (only when run directly) ─────────────────────────────────
 
 /**
@@ -432,6 +678,15 @@ let hermetic = false;
  */
 const PACK_GATE_ENV = { OMNIROUTE_RELEASE_REF: "HEAD" };
 
+/**
+ * Heap for the sweep's webpack build. build-next-isolated.mjs defaults to 8192 MB, and on the
+ * omni-release slot the Next build worker died with "JavaScript heap out of memory" after
+ * ~20 min (sweep 39254440706, 2026-10-19); the earlier sweeps sat in the same phase until their
+ * ceiling. docker-publish builds with 12288 (proven 2026-10-16/17); the build runs alone in the
+ * slot's 20 GB memory.high, so 12 GB of V8 heap fits.
+ */
+const BUILD_GATE_ENV = { OMNIROUTE_BUILD_MEMORY_MB: "12288" };
+
 function buildGateEnv(extra) {
   const env = { ...process.env, FORCE_COLOR: "0", ...(extra || {}) };
   if (hermetic) for (const k of HERMETIC_SCRUB) delete env[k];
@@ -442,7 +697,7 @@ const commandReceipts = [];
 const cancellation = new AbortController();
 
 async function run(cmd, cmdArgs, opts = {}) {
-  const label = `${cmd} ${cmdArgs.join(" ")}`;
+  const label = opts.label || `${cmd} ${cmdArgs.join(" ")}`;
   const logPath = join(LOG_DIR, "commands", `${randomUUID()}.log`);
   const result = await runGateProcess(cmd, cmdArgs, {
     cwd: ROOT,
@@ -473,7 +728,7 @@ const runAsync = run;
 async function runPackArtifactGate(timeoutMs) {
   const deadline = Date.now() + timeoutMs;
   const steps = [
-    { cmd: npmCmd, args: ["run", "build:cli"] },
+    { cmd: npmCmd, args: ["run", "build:cli"], env: BUILD_GATE_ENV },
     { cmd: process.execPath, args: ["scripts/build/write-build-sha.mjs"] },
     {
       cmd: npmCmd,
@@ -492,6 +747,23 @@ async function runPackArtifactGate(timeoutMs) {
   return { code: 0, out };
 }
 
+/**
+ * The unit lane: ci.yml's own shards (`npm run test:unit:ci:shard` with TEST_SHARD=i/N, the
+ * command each "Unit Tests (i/N)" job runs), `pool` at a time, each under its own ceiling.
+ */
+async function runUnitShards(total, pool, timeout) {
+  const shards = Array.from({ length: total }, (_, index) => index + 1);
+  const results = await runPool(shards, pool, async (shard) => {
+    const { code, out } = await runAsync(npmCmd, ["run", "test:unit:ci:shard"], {
+      timeout,
+      env: { TEST_SHARD: `${shard}/${total}` },
+      label: `${npmCmd} run test:unit:ci:shard (TEST_SHARD=${shard}/${total})`,
+    });
+    return { shard, total, code, out };
+  });
+  return mergeUnitShardResults(results);
+}
+
 async function main() {
   for (const signal of ["SIGINT", "SIGTERM"]) {
     process.once(signal, () => cancellation.abort(signal));
@@ -502,6 +774,14 @@ async function main() {
   const QUICK = args.has("--quick");
   const FULL_CI = args.has("--full-ci");
   hermetic = args.has("--hermetic");
+  // --suites-from <dir>: unit, integration and vitest already ran as hosted jobs (the
+  // workflow's `suites` matrix); read their results instead of running them on this slot.
+  const suitesFromIndex = process.argv.indexOf("--suites-from");
+  const SUITES_FROM = suitesFromIndex >= 0 ? process.argv[suitesFromIndex + 1] : null;
+  // Explicit workflow identity accompanies hosted receipts; it is not application .env config.
+  const suitesWorkflowIndex = process.argv.indexOf("--suites-workflow-sha");
+  const SUITES_WORKFLOW_SHA =
+    suitesWorkflowIndex >= 0 ? process.argv[suitesWorkflowIndex + 1] : null;
 
   const results = [];
   const record = (r) => {
@@ -593,42 +873,11 @@ async function main() {
   // Complexity + cognitive (one ESLint walk; both still recorded as drift)
   {
     announce("Complexity + cognitive ratchets (shared ESLint walk)");
-    const { out } = await run(npmCmd, ["run", "check:complexity-ratchets"]);
-    saveGateLog("complexity-ratchets", out);
-    const cogCurrent = parseCognitiveCount(out);
-    const cogBase = baselineValue("cognitiveComplexity");
-    const cogOver = isDrift(cogCurrent, cogBase);
-    const cycMatch = /(?:^|\n)complexity=(\d+)/.exec(out);
-    const cycOkMatch = /\[complexity\] OK — (\d+)/.exec(out);
-    const cycRegMatch = /\[complexity\] REGRESSÃO — (\d+)/.exec(out);
-    const cycCurrent = cycMatch
-      ? Number(cycMatch[1])
-      : cycOkMatch
-        ? Number(cycOkMatch[1])
-        : cycRegMatch
-          ? Number(cycRegMatch[1])
-          : null;
-    const cycRegressed = /\[complexity\] REGRESSÃO/.test(out);
-    record({
-      id: "cognitive-complexity",
-      label: "Cognitive complexity (ratchet)",
-      kind: "drift",
-      ok: !cogOver,
-      detail:
-        cogCurrent == null
-          ? "could not parse count"
-          : `${cogCurrent} vs baseline ${cogBase}${cogOver ? ` (+${cogCurrent - cogBase} drift → rebaseline at release)` : ""}`,
-    });
-    record({
-      id: "complexity",
-      label: "Cyclomatic complexity (ratchet)",
-      kind: "drift",
-      ok: !cycRegressed,
-      detail:
-        cycCurrent == null
-          ? firstFailureLine(out) || "measured via check:complexity-ratchets"
-          : `complexity=${cycCurrent} (shared walk with cognitive)${cycRegressed ? " REGRESSED" : ""}`,
-    });
+    const result = await run(npmCmd, ["run", "check:complexity-ratchets"]);
+    saveGateLog("complexity-ratchets", result.out);
+    for (const metric of evaluateComplexityRun(result, baselineValue("cognitiveComplexity"))) {
+      record(metric);
+    }
   }
 
   // file-size (drift)
@@ -719,37 +968,112 @@ async function main() {
     // absent. These gates run SILENTLY for many minutes; the announce line above + these
     // hard ceilings keep a long-but-healthy run from being mistaken for a hang (the ceiling also
     // converts a genuine DB-handle hang into a visible failure instead of an infinite block).
-    // The slow suites are INDEPENDENT processes (each self-isolates DATA_DIR) with
-    // no shared state, so they run CONCURRENTLY — the pre-flight wall time becomes
-    // ~the slowest single suite instead of their sum (unit ~25-35min + vitest
-    // ~3-8min + integration ~3-10min + pack-artifact ~15min was ~1h serial in the
-    // v3.8.45 run). pack-artifact (--with-build) joins the same wave. Integration
-    // runs ONLY on the release PR full CI, so a regression here is invisible until
-    // release — that is why it is a HARD pre-flight gate.
+    // Integration runs ONLY on the release PR full CI, so a regression there is invisible
+    // until release — that is why it is a HARD pre-flight gate.
+    //
+    // The lanes run ONE AT A TIME (they ran as one Promise.all wave from v3.8.45 until
+    // 2026-10-19). The 2026-10-18 sweep (omni-build, 56 GB, no CPU quota yet) and the 10-19
+    // one (omni-release: 8 cores by CPUQuota, 20 GB memory.high) both killed unit, integration
+    // and the package build at their ceilings inside that wave, where four suites and a webpack
+    // build (14-16 GB) shared one slot. On 10-19 the cgroup also passed memory.high, the kernel
+    // throttled every lane, and the app's own resourcePressure guard read that cgroup and
+    // answered 503 inside unit tests (3 false reds). Both days the single unit process
+    // (--test-concurrency=4) had run ~29k of its ~32k tests when its 80 min ceiling hit, while
+    // ci.yml spreads the same suite over 8 shard jobs of 11-18 min. So unit runs as ci.yml's
+    // shards, as many at once as the slot has cores for, and each lane has the slot to itself.
+    let unitShards = null;
+    try {
+      unitShards = unitShardCountFromCi(
+        readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8")
+      );
+    } catch {
+      unitShards = null; // unreadable ci.yml: the unsharded suite below still runs
+    }
+    const unitPool = unitShards ? unitShardPool(unitShards, availableParallelism()) : 1;
+    if (SUITES_FROM) {
+      // The 2026-10-19/20 sweeps showed the 8-core slot cannot run the suites in useful time
+      // (4h15 per sweep, shards 26-40 min against ~13 min hosted, timing tests failing on CPU
+      // starvation such as the catalog's 8 s build bound). The suites now run on hosted
+      // runners exactly like a PR's CI; this slot keeps the static gates and the build.
+      let integrationShards = null;
+      try {
+        integrationShards = shardCountFromCi(
+          readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8"),
+          "test-integration"
+        );
+      } catch {
+        integrationShards = null;
+      }
+      if (!unitShards || !integrationShards) {
+        record({
+          id: "hosted-suites",
+          label: "Hosted suites: read ci.yml's unit and integration matrices",
+          kind: "hard",
+          ok: false,
+          detail: "could not read the shard counts from .github/workflows/ci.yml",
+        });
+      } else {
+        let files = [];
+        try {
+          files = readdirSync(SUITES_FROM).filter((f) => f.endsWith(".json"));
+        } catch {
+          files = [];
+        }
+        const expected = hostedSuiteIdentity(ROOT, SUITES_WORKFLOW_SHA);
+        const names = hostedSuiteNames(unitShards, integrationShards);
+        const results = files.map((f) => {
+          try {
+            const name = f.slice(0, -5);
+            if (!names.includes(name)) return null;
+            const log = readFileSync(join(SUITES_FROM, `${name}.log`));
+            if (log.length === 0) return null;
+            const isUnit = name.startsWith("unit-");
+            const script =
+              name === "vitest"
+                ? "test:vitest+test:vitest:ui"
+                : isUnit
+                  ? "test:unit:ci:shard"
+                  : "test:integration:ci";
+            const shard =
+              name === "vitest"
+                ? ""
+                : `${name.split("-")[1]}/${isUnit ? unitShards : integrationShards}`;
+            return parseHostedSuiteResult(
+              readFileSync(join(SUITES_FROM, f), "utf8"),
+              expected && {
+                ...expected,
+                name,
+                script,
+                shard,
+                logSha256: createHash("sha256").update(log).digest("hex"),
+              }
+            );
+          } catch {
+            return null;
+          }
+        });
+        for (const r of foldHostedSuiteResults(results, { unitShards, integrationShards })) {
+          announce(r.label);
+          record(r);
+        }
+      }
+    }
     const slow = [
-      {
-        // Raised 45→100min 2026-08-05: a hermetic-env run on the loaded devbox
-        // (load 7-26) was still inside invocation 1 of 3 at 76min when killed;
-        // contention factor 2-3× was measured against idle windows, and no idle
-        // measurement exists yet. The pre-flight's REAL condition is exactly
-        // this contended one (unit runs in Promise.all with integration+vitest
-        // plus whatever else the devbox carries), and there 45min provably
-        // killed a healthy suite and fabricated a false base-red. The ceiling's
-        // purpose — turning a genuine hang (stuck SQLite handle = zero progress
-        // forever) into a visible failure — survives at 100min.
-        // Measured on idle .113: unavailable (checkout not found). Tightened to 80min from 100min as a conservative step. TODO: re-measure on idle .113 and tighten to ~1.8× measured.
-        id: "unit",
-        label:
-          "Unit tests (full suite, CI concurrency — ~30-50min idle, up to ~80min under load (awaiting idle .113 measurement, #9532))",
-        args: ["run", "test:unit:ci"],
-        timeout: 80 * 60 * 1000,
-      },
-      {
-        id: "vitest",
-        label: "Vitest (MCP / autoCombo / cache — ~3-8min)",
-        args: ["run", "test:vitest"],
-        timeout: 15 * 60 * 1000,
-      },
+      unitShards
+        ? {
+            id: "unit",
+            label: `Unit tests (ci.yml's ${unitShards} shards, ${unitPool} at a time — ~13min per shard on a hosted runner)`,
+            run: (timeout) => runUnitShards(unitShards, unitPool, timeout),
+            // Per shard. ci.yml gives a shard 25 min including setup; 40 min still turns a
+            // stuck SQLite handle (zero progress forever) into a visible failure.
+            timeout: 40 * 60 * 1000,
+          }
+        : {
+            id: "unit",
+            label: "Unit tests (full suite unsharded — ci.yml's unit matrix was not readable)",
+            args: ["run", "test:unit:ci"],
+            timeout: 120 * 60 * 1000,
+          },
       {
         // Measured 2026-08-05 on an idle 16-core box: 22m08s hermetic (935 tests,
         // 112 files at --test-concurrency=1, i.e. strictly serial because ~16 of
@@ -762,8 +1086,15 @@ async function main() {
         args: ["run", "test:integration"],
         timeout: 40 * 60 * 1000,
       },
+      {
+        id: "vitest",
+        label: "Vitest (MCP / autoCombo / cache — ~3-8min)",
+        args: ["run", "test:vitest"],
+        timeout: 15 * 60 * 1000,
+      },
     ];
     if (WITH_BUILD) {
+      // Last, alone: ci.yml's unit and integration jobs never see a built tree either.
       slow.push({
         id: "pack-artifact",
         label: "Package artifact (npm pack policy)",
@@ -771,30 +1102,31 @@ async function main() {
         timeout: 20 * 60 * 1000,
       });
     }
-    slow.forEach((g) => announce(`${g.label} [parallel]`));
-    const slowResults = await Promise.all(
-      slow.map((g) =>
-        g.run ? g.run(g.timeout) : runAsync(npmCmd, g.args, { timeout: g.timeout, env: g.env })
-      )
-    );
-    slow.forEach((g, i) => {
-      const { code, out } = slowResults[i];
-      saveGateLog(g.id, out);
+    // With --suites-from only the build lane is left for this slot.
+    const lanes = SUITES_FROM ? slow.filter((g) => g.id === "pack-artifact") : slow;
+    const slowResults = [];
+    for (const g of lanes) {
+      announce(g.label);
+      const result = await (g.run
+        ? g.run(g.timeout)
+        : runAsync(npmCmd, g.args, { timeout: g.timeout, env: g.env }));
+      slowResults.push(result);
+      saveGateLog(g.id, result.out);
       record({
         id: g.id,
         label: g.label,
         kind: "hard",
-        ok: code === 0,
-        detail: code === 0 ? "pass" : firstFailureLine(out),
+        ok: result.code === 0,
+        detail: result.code === 0 ? "pass" : result.detail || firstFailureLine(result.out),
       });
-    });
+    }
 
     if (WITH_BUILD) {
       // WS1.2 (#7065 class): boot the REAL packed tarball from a clean install.
       // check:pack-artifact is the builder for dist/ when staging is absent, so the
-      // boot smoke MUST run after it completes. Running both in the parallel wave
-      // races check:pack-boot against dist/server.js creation on clean worktrees.
-      const packArtifactIndex = slow.findIndex((g) => g.id === "pack-artifact");
+      // boot smoke MUST run after it completes, never alongside it: it would race
+      // check:pack-boot against dist/server.js creation on clean worktrees.
+      const packArtifactIndex = lanes.findIndex((g) => g.id === "pack-artifact");
       const packArtifactResult = slowResults[packArtifactIndex];
       const bootLabel = "Tarball boot-smoke (installed CLI serves /health)";
 

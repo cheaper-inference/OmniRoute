@@ -12,11 +12,11 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ### 사전 요구 사항
 
-- **Node.js** `>=22.22.3 <23` 또는 `>=24.0.0 <27`(권장: 24 LTS)
+- **Node.js** `>=22.22.2 <23` 또는 `>=24.0.0 <27`(권장: 24 LTS)
 - **npm** 10+
 
 > **npm v11+ 사용자(Node 24+):** `npm install` 실행 후 네이티브 모듈이 설치되었는지 확인하세요:
-> `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` 오류가 발생하면
+> `node -e "require('better-sqlite3')"`. `MODULE_NOT_FOUND` 오류와 함께 실패하면
 > `npm approve-scripts better-sqlite3 && npm install`을 실행하세요. 자세한 내용은
 > [문제 해결](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)을 참조하세요.
 
@@ -33,21 +33,21 @@ npm install
 ### 환경 변수
 
 ```bash
-# 템플릿에서 .env 생성
+# 템플릿을 사용하여 .env 생성
 cp .env.example .env
 
-# 필수 시크릿 생성
+# 필수 비밀 값 생성
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-개발을 위한 주요 변수:
+개발에 필요한 주요 변수:
 
 | 변수                   | 개발 기본값              | 설명                 |
 | ---------------------- | ------------------------ | -------------------- |
 | `PORT`                 | `20128`                  | 서버 포트            |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | 프런트엔드 기본 URL  |
-| `JWT_SECRET`           | (위에서 생성)            | JWT 서명 시크릿      |
+| `JWT_SECRET`           | (위에서 생성)            | JWT 서명 비밀 값     |
 | `INITIAL_PASSWORD`     | `CHANGEME`               | 최초 로그인 비밀번호 |
 | `APP_LOG_LEVEL`        | `info`                   | 로그 상세 수준       |
 
@@ -60,7 +60,7 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 | 설정 → 고급 | 디버그 모드        | 디버그 요청 로그 활성화(UI) |
 | 설정 → 일반 | 사이드바 표시 여부 | 사이드바 섹션 표시/숨기기   |
 
-이 설정은 데이터베이스에 저장되며 재시작 후에도 유지됩니다. 설정된 경우 환경 변수 기본값보다 우선합니다.
+이러한 설정은 데이터베이스에 저장되어 재시작 후에도 유지되며, 설정된 경우 환경 변수 기본값보다 우선합니다.
 
 ### 로컬에서 실행
 
@@ -75,45 +75,43 @@ npm run start
 # 기여자 변경 사항을 위한 빠른 백엔드/API 전용 컴파일
 npm run build:contributor
 
-# 릴리스 빌드(클린 재빌드 + HEAD 센티널 — 배포에 필수)
+# 릴리스 빌드(클린 빌드 + HEAD 센티널 — 배포 시 필수)
 npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA 기록
 
 # 일반적인 포트 구성
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-기여자 빌드는 컴파일 전용 검증을 수행합니다. 독립 실행형 배포판을 구성하거나 선택적
-네이티브 패키징 자산을 빌드하지 않습니다. 배포 가능한 번들을 검증해야 하는 경우에는
-일반 프로덕션 빌드를 사용하세요.
+기여자 빌드는 컴파일 전용 검증을 수행합니다. 독립 실행형 배포판을 조립하거나 선택적 네이티브 패키징 에셋을 빌드하지 않습니다. 배포 가능한 번들을 검증해야 할 때는 일반 프로덕션 빌드를 사용하세요.
 
 ### 빌드 출력 구조
 
-| 디렉터리  | 내용                                                                  | 추적 여부 |
-| --------- | --------------------------------------------------------------------- | --------- |
-| `src/`    | 애플리케이션 소스(TypeScript / TSX)                                   | 예        |
-| `.build/` | 중간 산출물 — `next build` 출력(gitignore됨, `distDir = .build/next`) | 아니요    |
-| `dist/`   | 배포 가능한 번들 — `assembleStandalone`로 구성됨(gitignore됨)         | 아니요    |
+| 디렉터리  | 내용                                                                     | 추적 여부 |
+| --------- | ------------------------------------------------------------------------ | --------- |
+| `src/`    | 애플리케이션 소스(TypeScript / TSX)                                      | 예        |
+| `.build/` | 중간 산출물 — `next build` 출력(gitignore 적용, `distDir = .build/next`) | 아니요    |
+| `dist/`   | 배포 가능한 번들 — `assembleStandalone`로 조립(gitignore 적용)           | 아니요    |
 
-빌드 파이프라인은 단일 패스로 진행됩니다:
+빌드 파이프라인은 단일 패스로 실행됩니다:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js 출력)
-  └─ assembleStandalone()                 (독립 실행형 파일 + 정적 파일 + public + 네이티브 자산 복사)
+  └─ assembleStandalone()                 (독립 실행형 파일 + 정적 파일 + public + 네이티브 에셋 복사)
        └─ 출력: dist/                     (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release`는 먼저 두 디렉터리를 모두 정리하고, 배포 무결성 센티널로
-`dist/BUILD_SHA`(= `git rev-parse --short HEAD`)를 추가로 기록합니다.
+`npm run build:release`는 먼저 두 디렉터리를 모두 정리하고 배포 무결성 센티널로
+`dist/BUILD_SHA`(= `git rev-parse --short HEAD`)도 기록합니다.
 
 `npm run build:contributor`는 백엔드 전용 빌드 프로필을 사용합니다. 빌드하는 동안
-대시보드 UI 파일을 임시 스텁으로 대체하고 API 라우트 핸들러는 유지하며 빌드 후 원본 파일을
+대시보드 UI 파일을 임시 스텁으로 대체하고 API 경로 핸들러는 유지하며 빌드 후 원본 파일을
 복원합니다. 대시보드 UI에 영향을 주는 변경 사항이나 전체 릴리스 검증에는 `npm run build`를
 사용하세요. 기여자 프로필은 릴리스 빌드를 대체하지 않습니다.
 
 > **VPS 배포 참고:** 원격 이미지 디렉터리 `/usr/lib/node_modules/omniroute/app/`는
-> 변경되지 않았습니다. 배포 스킬은 `dist/`의 내용을 이 디렉터리로 rsync합니다.
-> 저장소 내부의 빌드 출력 경로만 이동했습니다(`app/` → `dist/`).
+> 변경되지 않습니다. 배포 스킬은 `dist/`의 내용을 이 디렉터리로 rsync합니다.
+> 저장소 내 빌드 출력 경로만 변경되었습니다(`app/` → `dist/`).
 
 기본 URL:
 
@@ -177,11 +175,11 @@ npm run test:all
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # 변경 사항의 영향을 받는 단위 테스트만 실행(CI 게이트와 동일한 TIA 선택기, #8084)
-npm run test:scoped            # 마지막 커밋(또는 작업 트리)의 변경 사항
+npm run test:scoped            # 마지막 커밋의 변경 사항(또는 작업 트리)
 npm run test:scoped:staged     # 스테이징된 변경 사항만 — pre-commit 실행과 함께 사용하기 좋음
 npm run test:scoped:full       # 먼저 import-graph 맵을 다시 빌드(파일 추가/이동 후)
 # 종료 코드 1 + "전체 스위트를 실행하세요"는 허브 파일(tsconfig, package.json, …) 또는
-# 매핑되지 않은 소스가 변경되었음을 의미함 — 선택기는 안전하게 실패하며 절대로 조용히 건너뛰지 않음.
+# 매핑되지 않은 소스가 변경되었음을 의미함 — 선택기는 안전하게 실패하며 절대 조용히 건너뛰지 않음.
 
 # Vitest(MCP 서버, autoCombo, 캐시)
 npm run test:vitest
@@ -203,52 +201,53 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# 게이트가 적용된 실제 업스트림 콤보 스모크 테스트(VPS 접근 권한 + 실제 제공자 크레딧 필요)
-# 실제 제공자를 호출하므로 약간의 비용이 발생함. CI에서는 절대로 실행되지 않음. 게이트가 없으면 문제없이 건너뜀.
+# 게이트가 적용된 실제 업스트림 콤보 스모크 테스트(VPS 접근 권한 + 실제 공급자 크레딧 필요)
+# 실제 공급자를 호출하므로 약간의 비용이 발생함. CI에서는 절대 실행되지 않음. 게이트가 없으면 문제없이 건너뜀.
 # 필요 사항: ssh root@192.168.0.15 접근 권한(VPS에서 읽기 전용 DB 스냅샷을 가져옴).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
 # Phase-3 VPS 라이브 스모크 테스트 — 일반 Node ESM 스크립트로 라이브 .15 서버를 직접 호출함.
-# 필요 사항: ssh root@192.168.0.15 접근 권한(SSH sqlite를 통해 콤보를 생성/삭제함).
-# 실제 제공자를 호출함(소액의 비용 발생). __live_test__* 콤보만 생성/삭제함. CI에서는 절대로 실행되지 않음.
-# .15에서는 REQUIRE_API_KEY=false이므로 API 키가 필요하지 않지만, 설정된 경우 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY를 따름.
-npm run test:combo:live:vps              # HTTP 시나리오 7개(priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # 실제 제공자 간 장애 조치 시나리오 추가(총 8개)
+# 필요 사항: ssh root@192.168.0.15 접근 권한(SSH sqlite를 통해 콤보 생성/삭제).
+# 실제 공급자를 호출함(소액의 비용). __live_test__* 콤보만 생성/삭제함. CI에서는 절대 실행되지 않음.
+# .15에서는 REQUIRE_API_KEY=false이므로 API 키가 필요하지 않지만, 설정된 경우 COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY를 사용함.
+npm run test:combo:live:vps              # HTTP 시나리오 7개(priority/round-robin/weighted/cost/fusion/auto + 상태 검사)
+npm run test:combo:live:vps:failover     # 실제 공급자 간 장애 조치 시나리오 추가(총 8개)
 ```
 
 커버리지 참고 사항:
 
-- `npm run test:coverage`는 기본 단위 테스트 스위트의 소스 커버리지를 측정하고, `tests/**`를 제외하며, `open-sse/**`를 포함합니다
-- 풀 리퀘스트는 구문/라인/함수/분기 커버리지 게이트를 **60%+**로 유지해야 합니다
-- PR에서 `src/`, `open-sse/`, `electron/` 또는 `bin/`의 프로덕션 코드를 변경하는 경우 동일한 PR에서 자동화된 테스트를 추가하거나 업데이트해야 합니다
-- `npm run coverage:report`는 가장 최근 커버리지 실행의 상세한 파일별 보고서를 출력합니다
-- `npm run test:coverage:legacy`는 과거 비교를 위해 이전 측정 지표를 유지합니다
+- `npm run test:coverage`는 기본 단위 테스트 스위트의 소스 커버리지를 측정하고 `tests/**`를 제외하며 `open-sse/**`를 포함합니다
+- 풀 리퀘스트는 구문/라인/함수/분기 기준 **60%+** 커버리지 게이트를 유지해야 합니다
+- PR에서 `src/`, `open-sse/`, `electron/` 또는 `bin/`의 프로덕션 코드를 변경하는 경우 동일한 PR에 자동화 테스트를 추가하거나 업데이트해야 합니다
+- `npm run coverage:report`는 가장 최근의 커버리지 실행 결과를 파일별로 자세히 출력합니다
+- `npm run test:coverage:legacy`는 과거 비교를 위해 이전 메트릭을 유지합니다
 - 단계별 커버리지 개선 로드맵은 `docs/ops/COVERAGE_PLAN.md`를 참조하세요
 
 ### 풀 리퀘스트 요구 사항
 
 PR을 열기 전에
-[기여 골든 패스](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)를 사용하여 변경한 항목에 맞는 집중 루프를
+[기여 골든 패스](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)를 사용하여 변경한 내용에 맞는 집중 루프를
 실행하세요. 전체 단위 테스트 스위트(CI 샤드 4개), Vitest, **60%+** 커버리지 게이트 및
-프로덕션 빌드는 CI가 담당합니다. 이를 로컬에서 실행해도 PR 검사가 이미 제공하는 것 이상의
-정보를 얻을 수 없으며, 사양이 낮은 머신에서는 호스트의 자원을 소진할 수 있습니다(#8084):
+프로덕션 빌드는 CI의 책임입니다. 이를 로컬에서 실행해도 PR 검사가 이미 제공하는 것 이상의
+정보를 얻을 수 없으며, 사양이 낮은 시스템에서는 호스트 리소스를 포화시킬 수 있습니다(#8084):
 
 - 변경 사항을 다루는 테스트 파일을 실행하세요: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint`를 실행하세요
-- 프로덕션 코드가 변경될 때마다 동일한 PR에 자동화된 테스트를 추가하거나 업데이트하세요
-- 프로덕션 코드가 변경된 경우 변경되거나 추가된 테스트 파일을 PR 설명에 포함하세요
+- 프로덕션 코드가 변경될 때마다 동일한 PR에 자동화 테스트를 추가하거나 업데이트하세요
+- `node:test` 파일에서는 모든 최상위 `await`(`await import(...)` 등)를 첫 번째 `test()` / `describe()` 앞에 배치하세요. `--test-force-exit`에서는 그 뒤에 등록된 테스트가 아무런 경고 없이 실행되지 않을 수 있습니다(#18045, `npm run check:test-tla-order`로 강제 적용)
+- 프로덕션 코드가 변경된 경우 변경하거나 추가한 테스트 파일을 PR 설명에 포함하세요
 - CI에 프로젝트 시크릿이 구성되어 있다면 PR에서 SonarQube 결과를 확인하세요
 
-현재 테스트 상태: 다음 항목을 다루는 **단위 테스트 파일 122개**:
+현재 테스트 상태: 다음 항목을 다루는 **122개의 단위 테스트 파일**:
 
-- 제공자 변환기 및 형식 변환
-- 속도 제한, 회로 차단기 및 복원력
+- 공급자 변환기 및 형식 변환
+- 속도 제한, 서킷 브레이커 및 복원력
 - 시맨틱 캐시, 멱등성, 진행 상황 추적
 - 데이터베이스 작업 및 스키마(DB 모듈 21개)
 - OAuth 흐름 및 인증
 - API 엔드포인트 검증(Zod v4)
 - MCP 서버 도구 및 범위 적용
-- 메모리 및 Skills 시스템
+- Memory 및 Skills 시스템
 
 ---
 
@@ -287,65 +286,72 @@ PR을 열기 전에
 
 ---
 
-## Project Structure
+## 프로젝트 구조
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Dashboard pages (23 sections)
-│   ├── api/                # API routes (51 directories)
-│   └── login/              # Auth pages (.tsx)
-├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Core business logic (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
-│   ├── acp/                # Agent Communication Protocol registry
-│   ├── compliance/         # Compliance policy engine
-│   ├── db/                 # SQLite database layer (110 top-level modules + 130 migrations)
-│   ├── memory/             # Persistent conversational memory
-│   ├── oauth/              # OAuth providers, services, and utilities
-│   ├── skills/             # Extensible skill framework
-│   ├── usage/              # Usage tracking and cost calculation
-│   └── localDb.ts          # Re-export layer only — never add logic here
-├── middleware/              # Request middleware (promptInjectionGuard)
-├── mitm/                   # MITM proxy (cert, DNS, target routing)
+│   ├── (dashboard)/        # 대시보드 페이지(23개 섹션)
+│   ├── api/                # API 라우트(51개 디렉터리)
+│   └── login/              # 인증 페이지(.tsx)
+├── domain/                 # 정책 엔진(policyEngine, comboResolver, costRules 등)
+├── lib/                    # 핵심 비즈니스 로직(.ts)
+│   ├── a2a/                # 에이전트 간 v0.3 프로토콜 서버
+│   ├── acp/                # Agent Communication Protocol 레지스트리
+│   ├── compliance/         # 컴플라이언스 정책 엔진
+│   ├── db/                 # SQLite 도메인 모듈 + 마이그레이션 130개
+│   ├── memory/             # 영구 대화 메모리
+│   ├── oauth/              # OAuth 제공자, 서비스 및 유틸리티
+│   ├── skills/             # 확장 가능한 스킬 프레임워크
+│   ├── usage/              # 사용량 추적 및 비용 계산
+│   └── localDb.ts          # 재내보내기 계층 전용 — 여기에 로직을 추가하지 마세요
+├── middleware/              # 요청 미들웨어(promptInjectionGuard)
+├── mitm/                   # MITM 프록시(인증서, DNS, 대상 라우팅)
 ├── shared/
-│   ├── components/         # React components (.tsx)
-│   ├── constants/          # Provider definitions (329), MCP scopes, routing strategies
-│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
-│   └── validation/         # Zod v4 schemas
-└── sse/                    # SSE proxy pipeline
+│   ├── components/         # React 컴포넌트(.tsx)
+│   ├── constants/          # 제공자 정의(329개), MCP 범위, 라우팅 전략 20개
+│   ├── utils/              # 서킷 브레이커, 새니타이저, 인증 헬퍼
+│   └── validation/         # Zod v4 스키마
+└── sse/                    # SSE 프록시 파이프라인
 
-open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 89 executor implementation modules
-├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
-├── mcp-server/             # MCP server (107 tools, 3 transports, 32 scopes)
-├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformer
-└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
+open-sse/                   # @omniroute/open-sse 워크스페이스
+├── executors/              # 실행기 모듈 150개(실행기 클래스 + 제공자별 헬퍼)
+├── handlers/               # 요청 핸들러 11개(채팅, 응답, 임베딩, 이미지 등)
+├── mcp-server/             # MCP 서버(고유 도구 110개, 전송 방식 3개, 범위 33개)
+├── services/               # 최상위 서비스 178개(combo, autoCombo, rateLimitManager 등)
+├── translator/             # 형식 변환기(OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API 변환기
+└── utils/                  # 유틸리티 모듈 22개(스트림, TLS, 프록시, 로깅)
 
-electron/                   # Electron desktop app (cross-platform)
+electron/                   # Electron 데스크톱 앱(크로스 플랫폼)
 
 tests/
-├── unit/                   # Node.js test runner (122 test files)
-├── integration/            # Integration tests
-├── e2e/                    # Playwright tests
-├── security/               # Security tests
-├── translator/             # Translator-specific tests
-└── load/                   # Load tests
+├── unit/                   # Node.js 테스트 러너(테스트 파일 1,574개)
+├── integration/            # 통합 테스트
+├── e2e/                    # Playwright 테스트
+├── security/               # 보안 테스트
+├── translator/             # 변환기 전용 테스트
+└── load/                   # 부하 테스트
 
-docs/                       # Documentation
-├── ARCHITECTURE.md         # System architecture
-├── API_REFERENCE.md        # All endpoints
-├── USER_GUIDE.md           # Provider setup, CLI integration
-├── TROUBLESHOOTING.md      # Common issues
-├── MCP-SERVER.md           # MCP server (107 tools)
-├── A2A-SERVER.md           # A2A agent protocol
-├── AUTO-COMBO.md           # Auto-combo engine
-├── CLI-TOOLS.md            # CLI tools integration
-├── COVERAGE_PLAN.md        # Test coverage improvement plan
-├── openapi.yaml            # OpenAPI specification
-└── adr/                    # Architecture Decision Records
+docs/
+├── adr/                     # 아키텍처 결정 기록
+├── architecture/            # 시스템 아키텍처 및 복원력
+├── comparison/              # OmniRoute와 대안 비교
+├── compression/             # 압축 가이드 및 규칙
+├── dev/                     # 개발 가이드
+├── diagrams/                # 아키텍처 다이어그램
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # 사용자 가이드, Docker, 설정, 문제 해결
+├── i18n/                    # 국제화된 README 번역
+├── marketing/               # 마케팅 자료
+├── ops/                     # 배포, 프록시, 커버리지, 릴리스
+├── providers/               # 제공자별 문서
+├── reference/               # API 레퍼런스, 환경 변수, CLI 도구, 무료 티어
+├── releases/                # 릴리스 노트
+├── routing/                 # 자동 콤보 엔진, 추론 재생
+├── screenshots/             # 대시보드 스크린샷
+├── security/                # 가드레일, 컴플라이언스, 스텔스, 토큰
+└── specs/                   # 설계 명세
 ```
 
 ---
@@ -405,9 +411,13 @@ handler/executor 내부에서 클라이언트에 전달되는 오류 메시지�
 
 ---
 
-## Releasing
+## 릴리스
 
-Releases are managed via the `/generate-release` workflow. When a new GitHub Release is created, the package is **automatically published to npm** via GitHub Actions.
+릴리스는 `/generate-release` 워크플로를 통해 관리됩니다. 새 GitHub 릴리스가 생성되면 GitHub Actions를 통해 패키지가 **자동으로 npm에 게시됩니다**.
+
+VPS 배포에는 `npm run build`가 아닌 `npm run build:release`를 사용하세요. 이 명령은 클린
+재빌드를 수행하고, 번들을 `dist/`에 구성하며, `dist/BUILD_SHA` 센티널 파일을 작성합니다.
+그런 다음 `dist/`를 원격 `app/` 디렉터리에 rsync하는 `/deploy-vps-*-cc` 스킬을 사용하세요.
 
 ---
 

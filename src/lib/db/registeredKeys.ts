@@ -8,7 +8,8 @@
  *   - Quota status queries for rate-limiting decisions
  */
 
-import { createHash, randomBytes } from "crypto";
+import { randomBytes } from "crypto";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import { v4 as uuidv4 } from "uuid";
 import { getDbInstance, rowToCamel } from "./core";
 
@@ -89,7 +90,7 @@ function nowHour(): string {
 
 function hashKey(raw: string): string {
   if (!raw || typeof raw !== "string") return "";
-  return createHash("sha256").update(raw).digest("hex");
+  return opaqueTokenFingerprint(raw);
 }
 
 function generateRawKey(): string {

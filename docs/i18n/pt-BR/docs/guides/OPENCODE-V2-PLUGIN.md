@@ -75,24 +75,25 @@ indicando o endpoint e o que foi perdido — assim, um seletor degradado nunca �
 | Chave                            | Padrão                                           | Observações                                                                                                                                         |
 | -------------------------------- | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `providerId`                     | `"omniroute"`                                    | ID do provedor, ID da integração e prefixo sob o qual os modelos aparecem                                                                           |
-| `baseURL`                        | obrigatório                                      | Raiz do gateway, apenas `http(s)`; o sufixo `/v1` é adicionado quando necessário                                                                    |
+| `baseURL`                        | obrigatório                                      | Raiz do gateway, somente `http(s)`; o sufixo `/v1` é adicionado quando necessário                                                                   |
 | `apiKey`                         | credencial conectada, depois `OMNIROUTE_API_KEY` | Chave de chat para `/v1/*`                                                                                                                          |
 | `managementReadToken`            | usa `apiKey` como alternativa                    | Chave para `/api/*` — geralmente **não** é a mesma                                                                                                  |
 | `displayName`                    | `"OmniRoute"`                                    | Nome do provedor no seletor                                                                                                                         |
-| `timeoutMs`                      | `10000`                                          | Tempo limite de busca por endpoint (combinações automáticas usam 5 s)                                                                               |
+| `timeoutMs`                      | `10000`                                          | Tempo limite de busca por endpoint (combinações automáticas usam 5s)                                                                                |
 | `modelCacheTtlMs`                | `300000`                                         | TTL do cache do catálogo; um snapshot em disco acelera inicializações a frio                                                                        |
 | `timeouts`                       | usa `timeoutMs` como alternativa                 | Limites por endpoint em ms: `models`, `combos`, `autoCombos`, `enrichment`                                                                          |
 | `enrichment`                     | `true`                                           | Busca nomes, preços e limites do nível gratuito                                                                                                     |
-| `providerTag`                    | `true`                                           | Prefixa o nome de exibição com o provedor upstream para o qual ele direciona                                                                        |
-| `usableOnly`                     | `false`                                          | Mantém apenas os provedores que o gateway relata como provisionados                                                                                 |
+| `providerTag`                    | `true`                                           | Adiciona ao nome de exibição o prefixo do provedor upstream para o qual ele roteia                                                                  |
+| `usableOnly`                     | `false`                                          | Mantém somente os provedores que o gateway informa como provisionados                                                                               |
+| `combosSource`                   | `"api"`                                          | `"models"` ignora `/api/combos` e publica as linhas de combinação de `/v1/models`; filtros por membro mantêm `"api"`                                |
 | `showcasePerOwner`               | `10`                                             | Entradas da visualização padrão mantidas por provedor                                                                                               |
 | `freshPerOwner`                  | `10`                                             | Entradas recentes da visualização padrão mantidas por provedor                                                                                      |
 | `freshWindowDays`                | `90`                                             | Janela de atualização, em dias, para a ramificação de itens recentes                                                                                |
-| `usageMemory`                    | `true`                                           | Restaura entradas descartadas estaticamente e identificadas pela análise de uso dos últimos 30 dias (requer um token de gerenciamento)              |
-| `visibleModels` / `hiddenModels` | `[]`                                             | Listas de permissão por correspondência exata ou de sufixo; a negação prevalece                                                                     |
+| `usageMemory`                    | `true`                                           | Restaura entradas removidas estaticamente e identificadas pelas análises de uso de 30 dias (requer um token de gerenciamento)                       |
+| `visibleModels` / `hiddenModels` | `[]`                                             | Listas de permissão por correspondência exata ou sufixo; a negação prevalece; `*` publica o catálogo completo (os demais filtros ainda se aplicam)  |
 | `geminiSanitization`             | `true`                                           | Remove dos esquemas de ferramentas as palavras-chave do JSON Schema rejeitadas pelo Gemini (ferramentas com `$ref` são encaminhadas sem alterações) |
-| `apiFormat.allowAnthropic`       | `false`                                          | Encaminha IDs permitidos pelo bloco da API Anthropic                                                                                                |
-| `apiFormat.anthropicModels`      | `[]`                                             | IDs completos de modelos encaminhados para a Anthropic                                                                                              |
+| `apiFormat.allowAnthropic`       | `false`                                          | Roteia IDs permitidos pelo bloco da API da Anthropic                                                                                                |
+| `apiFormat.anthropicModels`      | `[]`                                             | IDs completos dos modelos roteados para a Anthropic                                                                                                 |
 | `logLevel` / `startupDebug`      | `warn` / `false`                                 | Nível de detalhamento do logger                                                                                                                     |
 
 A memória de uso fica ativada por padrão. Sem um token de gerenciamento, ela permanece inativa
@@ -125,11 +126,16 @@ Defina `"geminiSanitization": false` para desativar esse comportamento.
 
 ## Solução de problemas
 
-| Sintoma                                      | Causa                                                                                                                |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| O seletor não mostra nenhum modelo OmniRoute | Nenhuma chave foi resolvida (verifique o aviso de inicialização), ou o gateway está inacessível                      |
-| IDs de modelo brutos, sem combos nem preços  | Os endpoints de gerenciamento recusaram o token — defina `managementReadToken`                                       |
-| Uma sessão fixada em `opencode-<id>/…`       | O plugin v1 publicava `opencode-<id>`; a v2 publica apenas `<id>`, portanto selecione novamente o modelo em `<id>/…` |
+| Sintoma                                          | Causa                                                                                                                                     |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| O seletor não mostra nenhum modelo do OmniRoute  | Nenhuma chave foi resolvida (verifique o aviso de inicialização) ou o gateway está inacessível                                            |
+| IDs de modelo brutos, sem combinações nem preços | Os endpoints de gerenciamento recusaram o token — defina `managementReadToken`                                                            |
+| Catálogo `freeOnly` curto ou vazio               | Nenhum token de gerenciamento ou token recusado — consulte a linha de resumo da atualização (contagem de `unmatched-free`) no log do host |
+| Uma sessão fixada em `opencode-<id>/…`           | O plugin v1 publicou `opencode-<id>`; a v2 publica apenas `<id>`, então selecione novamente o modelo em `<id>/…`                          |
+
+As variáveis de ambiente devem chegar ao processo do servidor opencode: quando o host
+é executado como um serviço, o shell que executa `opencode models` e o ambiente
+do servidor são diferentes; portanto, exporte a chave onde o servidor a lê.
 
 ## Veja também
 

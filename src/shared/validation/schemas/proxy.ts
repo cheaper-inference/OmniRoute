@@ -15,6 +15,7 @@ import {
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
 import { PROXY_REGISTRY_STATUS_VALUES } from "@/shared/constants/proxyRegistryStatus";
+import { PROXY_BULK_IMPORT_LIMIT_DEFAULT } from "@/shared/constants/proxyBulkImport";
 
 export const proxyConfigSchema = z
   .object({
@@ -165,17 +166,34 @@ export const updateProxyRegistrySchema = partialWithoutDefaults(proxyRegistryFie
   .extend({
     id: z.string().trim().min(1, "id is required"),
     assignment: inlineProxyAssignmentSchema.optional(),
+    subscriptionId: z.string().trim().min(1).nullable().optional(),
   })
   .strict();
 
-export const bulkImportProxiesSchema = z
-  .object({
-    items: z
-      .array(proxyRegistryFieldsSchema)
-      .min(1, "At least one proxy is required")
-      .max(100, "Maximum 100 proxies per import"),
-  })
-  .strict();
+/**
+ * Bulk-import schema for a specific limit (#13917).
+ *
+ * A factory rather than a constant because the limit is an operator setting and
+ * Zod bakes `.max()` in at construction. The caller resolves the configured
+ * value and builds the schema per request, so the server can never validate
+ * against a different number than the dashboard showed.
+ */
+export function makeBulkImportProxiesSchema(limit: number) {
+  return z
+    .object({
+      items: z
+        .array(proxyRegistryFieldsSchema)
+        .min(1, "At least one proxy is required")
+        .max(limit, `Maximum ${limit} proxies per import`),
+    })
+    .strict();
+}
+
+/**
+ * Default-limit schema, kept so existing importers and tests that do not care
+ * about the setting keep working unchanged.
+ */
+export const bulkImportProxiesSchema = makeBulkImportProxiesSchema(PROXY_BULK_IMPORT_LIMIT_DEFAULT);
 
 export const proxyAssignmentSchema = z
   .object({
@@ -253,7 +271,19 @@ export const proxyRotationStrategySchema = z
 // address in that member's batch; the store keeps the freshest timestamp per
 // address. Bounds: at most 10 addresses per member, at most 100 members per
 // batch. Liveness checks (routable literal, no far-future date) live in the
-// route — Zod pins the shape here.
+// route — Zod pins the shape here. An optional `refusals` batch carries dated
+// outage signals for the refusal memory under the operator reason.
+export const proxyOperatorRefusalSchema = z
+  .object({
+    entry: z.union([z.string().trim().min(1), z.record(z.string(), z.unknown())]),
+    host: z.string().trim().min(1),
+    port: z.coerce.number().int().min(1).max(65535),
+    reason: z.literal("operator_reported"),
+    observedAt: z.string().datetime(),
+    recovered: z.boolean().optional(),
+  })
+  .strict();
+
 export const proxyOperatorEgressPushSchema = z
   .object({
     version: z.literal(1),
@@ -270,5 +300,6 @@ export const proxyOperatorEgressPushSchema = z
       )
       .min(1)
       .max(100),
+    refusals: z.array(proxyOperatorRefusalSchema).max(100).optional(),
   })
   .strict();

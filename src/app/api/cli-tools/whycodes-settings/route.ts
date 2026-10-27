@@ -60,39 +60,57 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
-  const authError = await requireCliToolsAuth(request);
-  if (authError) return authError;
+type SettingsInput = z.infer<typeof settingsSchema>;
 
+async function readSettingsBody(
+  request: Request
+): Promise<{ data: SettingsInput } | { error: Response }> {
   let rawBody: unknown;
   try {
     rawBody = await request.json();
   } catch {
-    return NextResponse.json({ error: "Invalid JSON" }, { status: 400 });
+    return { error: NextResponse.json({ error: "Invalid JSON" }, { status: 400 }) };
   }
 
   const parsed = settingsSchema.safeParse(rawBody);
   if (!parsed.success) {
-    return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "Invalid request" },
-      { status: 400 }
-    );
+    return {
+      error: NextResponse.json(
+        { error: parsed.error.issues[0]?.message ?? "Invalid request" },
+        { status: 400 }
+      ),
+    };
   }
-
-  const { baseUrl, keyId, apiKey, model, dryRun, preview } = parsed.data;
-  if (!validateBaseUrl(baseUrl)) {
-    return NextResponse.json({ error: "baseUrl must be a valid http(s) URL" }, { status: 400 });
+  if (!validateBaseUrl(parsed.data.baseUrl)) {
+    return {
+      error: NextResponse.json({ error: "baseUrl must be a valid http(s) URL" }, { status: 400 }),
+    };
   }
+  return { data: parsed.data };
+}
 
-  let resolvedApiKey = apiKey ?? "";
+async function resolveApiKey(keyId?: string | null, apiKey?: string | null) {
+  let resolved = apiKey ?? "";
   if (keyId) {
     try {
       const keyRecord = await getApiKeyById(keyId);
-      if (keyRecord?.key) resolvedApiKey = keyRecord.key as string;
+      if (keyRecord?.key) resolved = keyRecord.key as string;
     } catch {
       // Fall through to whatever apiKey (if any) was already provided.
     }
   }
+  return resolved;
+}
+
+export async function POST(request: Request) {
+  const authError = await requireCliToolsAuth(request);
+  if (authError) return authError;
+
+  const body = await readSettingsBody(request);
+  if ("error" in body) return body.error;
+
+  const { baseUrl, keyId, apiKey, model, dryRun, preview } = body.data;
+  const resolvedApiKey = await resolveApiKey(keyId, apiKey);
   if (!resolvedApiKey) {
     return NextResponse.json({ error: "API key is required" }, { status: 400 });
   }

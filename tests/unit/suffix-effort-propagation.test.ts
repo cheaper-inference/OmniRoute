@@ -111,7 +111,7 @@ for (const choice of [{ reasoning: false }, { thinking: { type: "disabled" } }, 
   });
 }
 
-test("connection default replacement does not inherit a bare alias suffix", async () => {
+async function sendBareAliasWithConnectionDefault(): Promise<Record<string, unknown> | undefined> {
   await harness.resetStorage();
   const connection = await seedConnection("agnes");
   const { updateProviderConnection } = await import("../../src/lib/db/providers.ts");
@@ -143,8 +143,27 @@ test("connection default replacement does not inherit a bare alias suffix", asyn
     })
   );
   assert.equal(response.status, 200, await response.text());
-  assert.equal(sent?.model, "agnes-default-replacement");
-  assert.equal(sent?.reasoning_effort, undefined);
+  return sent;
+}
+
+test("a bare alias keeps its concrete target and suffix effort over a connection default", async () => {
+  const sent = await sendBareAliasWithConnectionDefault();
+  assert.equal(sent?.model, MODEL);
+  assert.equal(sent?.reasoning_effort, "max");
+});
+
+test("connection default replacement does not inherit a bare alias suffix", async () => {
+  // The default only replaces a concrete bare model under the legacy override.
+  const before = process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
+  process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = "true";
+  try {
+    const sent = await sendBareAliasWithConnectionDefault();
+    assert.equal(sent?.model, "agnes-default-replacement");
+    assert.equal(sent?.reasoning_effort, undefined);
+  } finally {
+    if (before === undefined) delete process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY;
+    else process.env.BARE_MODEL_DEFAULT_OVERRIDE_LEGACY = before;
+  }
 });
 
 test("a different combo provider does not inherit the original suffix", async () => {
@@ -232,6 +251,8 @@ for (const failure of ["empty"]) {
       };
       const response = await handleChat(
         buildRequest({
+          // #16810: a cross-version family hop (4.6 → 4.5) only runs when the caller opts in.
+          headers: { "x-omniroute-allow-cross-version-fallback": "true" },
           body: {
             model: `${provider}/${model}${mode === "suffix" ? "-high" : ""}`,
             stream: false,

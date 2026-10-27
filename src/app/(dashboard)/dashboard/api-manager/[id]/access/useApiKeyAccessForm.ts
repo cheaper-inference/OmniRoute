@@ -104,6 +104,9 @@ export interface ApiKeyAccessData {
   // `connectionAccessMode` is a PATCH-only input: the stored key has no such column, so
   // GET never returns it and an empty list is what "all connections" looks like.
   allowedConnections?: string[] | null;
+  // Ordered per-key connection preference (#13102). A ranking hint only — never an access
+  // grant; when connections are restricted it must stay a subset of allowedConnections.
+  preferredConnections?: string[] | null;
   noLog?: boolean | null;
   autoResolve?: boolean | null;
   isActive?: boolean | null;
@@ -119,6 +122,7 @@ export interface ApiKeyAccessData {
   compressionEnabled?: boolean | null;
   allowAutoCombos?: boolean | null;
   catalogScope?: CatalogScope | null;
+  forcedModel?: string | null;
   disableNonPublicModels?: boolean | null;
   allowUsageCommand?: boolean | null;
   usageLimitEnabled?: boolean | null;
@@ -142,6 +146,7 @@ export interface ApiKeyAccessFormState {
   selectedCombos: string[];
   allowAllConnections: boolean;
   selectedConnections: string[];
+  selectedPreferredConnections: string[];
   allowAllEndpoints: boolean;
   selectedEndpoints: string[];
   noLog: boolean;
@@ -165,6 +170,8 @@ export interface ApiKeyAccessFormState {
   compressionEnabled: boolean;
   allowAutoCombos: boolean;
   catalogScope: CatalogScope;
+  /** Per-key enforced routing target; "" = not pinned. */
+  forcedModel: string;
   disableNonPublicModels: boolean;
   allowUsageCommand: boolean;
   usageLimitEnabled: boolean;
@@ -236,6 +243,7 @@ function initialAccessListState(apiKey: StoredApiKey) {
     (combo) => combo !== ALL_COMBOS_ACCESS_RULE
   );
   const initialConnections = arrayOrEmpty(apiKey?.allowedConnections);
+  const initialPreferredConnections = arrayOrEmpty(apiKey?.preferredConnections);
   const initialEndpoints = arrayOrEmpty(apiKey?.allowedEndpoints);
 
   const allowAllModels =
@@ -252,6 +260,11 @@ function initialAccessListState(apiKey: StoredApiKey) {
     selectedCombos: [...initialCombos],
     allowAllConnections,
     selectedConnections: [...initialConnections],
+    selectedPreferredConnections: prunePreferredConnections(
+      initialPreferredConnections,
+      allowAllConnections,
+      initialConnections
+    ),
     allowAllEndpoints: initialEndpoints.length === 0,
     selectedEndpoints: [...initialEndpoints],
   };
@@ -296,6 +309,7 @@ type BehaviourStateField =
   | "compressionEnabled"
   | "allowAutoCombos"
   | "catalogScope"
+  | "forcedModel"
   | "disableNonPublicModels"
   | "allowUsageCommand"
   | "usageLimitEnabled"
@@ -311,6 +325,7 @@ function initialBehaviourState(
     compressionEnabled: apiKey?.compressionEnabled !== false,
     allowAutoCombos: apiKey?.allowAutoCombos !== false,
     catalogScope: apiKey?.catalogScope ?? "all",
+    forcedModel: apiKey?.forcedModel ?? "",
     disableNonPublicModels: apiKey?.disableNonPublicModels === true,
     allowUsageCommand: apiKey?.allowUsageCommand === true,
     usageLimitEnabled: apiKey?.usageLimitEnabled === true,
@@ -367,9 +382,33 @@ function buildValidCombos(formState: ApiKeyAccessFormState): string[] {
   );
 }
 
+function isConnectionId(id: unknown): id is string {
+  return typeof id === "string" && /^[0-9a-f-]{36}$/i.test(id);
+}
+
 function buildValidConnections(formState: ApiKeyAccessFormState): string[] {
   const allowedConnections = formState.allowAllConnections ? [] : formState.selectedConnections;
-  return allowedConnections.filter((id) => typeof id === "string" && /^[0-9a-f-]{36}$/i.test(id));
+  return allowedConnections.filter(isConnectionId);
+}
+
+/**
+ * Keep the ordered preference list consistent with the access list (#13102): drop malformed
+ * ids and duplicates and, when connections are restricted, every id that is no longer
+ * allowed. With "all connections" every connection is allowed, so only the shape is checked.
+ */
+export function prunePreferredConnections(
+  preferred: string[],
+  allowAllConnections: boolean,
+  selectedConnections: string[]
+): string[] {
+  const allowed = allowAllConnections ? null : new Set(selectedConnections);
+  const seen = new Set<string>();
+  return preferred.filter((id) => {
+    if (!isConnectionId(id) || seen.has(id)) return false;
+    if (allowed && !allowed.has(id)) return false;
+    seen.add(id);
+    return true;
+  });
 }
 
 function normalizeMaxSessions(maxSessions: number): number {
@@ -438,6 +477,11 @@ export function buildApiKeyAccessPayload(
     blockedModels: validBlockedModels,
     allowedCombos: validCombos,
     allowedConnections: validConnections,
+    preferredConnections: prunePreferredConnections(
+      formState.selectedPreferredConnections,
+      formState.allowAllConnections,
+      validConnections
+    ),
     noLog: formState.noLog,
     autoResolve: formState.autoResolve,
     isActive: formState.isActive,
@@ -459,6 +503,7 @@ export function buildApiKeyAccessPayload(
     dailyUsageLimitUsd: parseUsdLimitInput(formState.dailyUsageLimitUsd),
     weeklyUsageLimitUsd: parseUsdLimitInput(formState.weeklyUsageLimitUsd),
     chaosModeEnabled: formState.chaosModeEnabled,
+    forcedModel: formState.forcedModel.trim() || null,
   };
 }
 
@@ -703,7 +748,28 @@ function useModelPolicySetters(setFormState: FormStateSetter) {
     [setFormState]
   );
 
-  return { blockClaudeCodeFamily, setCatalogScope, setDisableNonPublicModels };
+  const setForcedModel = useCallback(
+    (forcedModel: string) => {
+      setFormState((prev) => ({ ...prev, forcedModel }));
+    },
+    [setFormState]
+  );
+
+  return { blockClaudeCodeFamily, setCatalogScope, setDisableNonPublicModels, setForcedModel };
+}
+
+/** Swap a preferred connection with its neighbour; out-of-range moves are a no-op. */
+export function movePreferredConnectionId(
+  preferred: string[],
+  connectionId: string,
+  direction: -1 | 1
+): string[] {
+  const index = preferred.indexOf(connectionId);
+  const nextIndex = index + direction;
+  if (index < 0 || nextIndex < 0 || nextIndex >= preferred.length) return preferred;
+  const next = [...preferred];
+  [next[index], next[nextIndex]] = [next[nextIndex], next[index]];
+  return next;
 }
 
 /** Combo and connection setters (Combos and Connections tabs). */
@@ -752,6 +818,14 @@ function useComboAndConnectionSetters(setFormState: FormStateSetter) {
         ...prev,
         allowAllConnections,
         ...(allowAllConnections ? { selectedConnections: [] } : {}),
+        // Narrowing to "only selected" must not keep a preference outside the selection.
+        selectedPreferredConnections: allowAllConnections
+          ? prev.selectedPreferredConnections
+          : prunePreferredConnections(
+              prev.selectedPreferredConnections,
+              false,
+              prev.selectedConnections
+            ),
       }));
     },
     [setFormState]
@@ -759,14 +833,64 @@ function useComboAndConnectionSetters(setFormState: FormStateSetter) {
 
   const setSelectedConnections = useCallback(
     (connections: string[] | ((prev: string[]) => string[])) => {
+      setFormState((prev) => {
+        const selectedConnections =
+          typeof connections === "function" ? connections(prev.selectedConnections) : connections;
+        return {
+          ...prev,
+          selectedConnections,
+          // Unchecking a connection also removes it from the preference order.
+          selectedPreferredConnections: prunePreferredConnections(
+            prev.selectedPreferredConnections,
+            prev.allowAllConnections,
+            selectedConnections
+          ),
+        };
+      });
+    },
+    [setFormState]
+  );
+
+  const togglePreferredConnection = useCallback(
+    (connectionId: string) => {
+      setFormState((prev) => {
+        if (prev.selectedPreferredConnections.includes(connectionId)) {
+          return {
+            ...prev,
+            selectedPreferredConnections: prev.selectedPreferredConnections.filter(
+              (id) => id !== connectionId
+            ),
+          };
+        }
+        const isAllowed =
+          prev.allowAllConnections || prev.selectedConnections.includes(connectionId);
+        if (!isAllowed) return prev;
+        return {
+          ...prev,
+          selectedPreferredConnections: [...prev.selectedPreferredConnections, connectionId],
+        };
+      });
+    },
+    [setFormState]
+  );
+
+  const movePreferredConnection = useCallback(
+    (connectionId: string, direction: -1 | 1) => {
       setFormState((prev) => ({
         ...prev,
-        selectedConnections:
-          typeof connections === "function" ? connections(prev.selectedConnections) : connections,
+        selectedPreferredConnections: movePreferredConnectionId(
+          prev.selectedPreferredConnections,
+          connectionId,
+          direction
+        ),
       }));
     },
     [setFormState]
   );
+
+  const clearPreferredConnections = useCallback(() => {
+    setFormState((prev) => ({ ...prev, selectedPreferredConnections: [] }));
+  }, [setFormState]);
 
   return {
     setAllowAllCombos,
@@ -775,6 +899,9 @@ function useComboAndConnectionSetters(setFormState: FormStateSetter) {
     setAllowAutoCombos,
     setAllowAllConnections,
     setSelectedConnections,
+    togglePreferredConnection,
+    movePreferredConnection,
+    clearPreferredConnections,
   };
 }
 

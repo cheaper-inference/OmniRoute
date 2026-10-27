@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 const TEST_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-chatcore-translation-"));
 const TEST_DATA_DIR = path.join(TEST_ROOT, "data");
 const TEST_PLUGINS_DIR = path.join(TEST_ROOT, "plugins");
@@ -352,7 +353,7 @@ async function flushAsyncSideEffects() {
 }
 
 async function getLatestCallLog() {
-  await waitForCallLogSaves(5000);
+  await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS);
   const rows = await getCallLogs({ limit: 5 });
   if (!Array.isArray(rows) || rows.length === 0) return null;
   return getCallLogById(rows[0].id);

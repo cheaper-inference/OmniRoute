@@ -1,7 +1,7 @@
 ---
 title: "🐳 Docker Guide — OmniRoute"
 version: 3.8.51
-lastUpdated: 2026-09-18
+lastUpdated: 2026-10-16
 ---
 
 # 🐳 Docker Guide — OmniRoute
@@ -22,6 +22,7 @@ lastUpdated: 2026-09-18
 - [Docker Compose with Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
 - [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
 - [Image Tags](#image-tags)
+- [Dashboard updates in Docker](#dashboard-updates-in-docker)
 - [Availability: default SQLite is single-replica](#availability-default-sqlite-is-single-replica)
 - [Gemini regional errors inside Docker](#gemini-regional-errors-inside-docker)
 - [Important Notes](#important-notes)
@@ -574,6 +575,77 @@ A release-branch build can never move `latest`; only an eligible stable semantic
 | Follow published stables and accept a recreate on each release | `:latest`                          |
 | Test unreleased `release/v*` commits                           | `:next` (not production)           |
 | Test `main`                                                    | `:main` (not production)           |
+
+## Dashboard updates in Docker
+
+A published-image container cannot replace itself. When OmniRoute detects it runs inside a
+container (no `.git` checkout, not an npm install), the home dashboard's update banner shows the
+host command to run instead of the npm/git instructions, with a copy button:
+
+```bash
+docker compose pull omniroute && docker compose up -d --force-recreate omniroute
+```
+
+The service name comes from `AUTO_UPDATE_SERVICE` (default `omniroute`, the service in
+`docker-compose.selfhost.yml`). `pull` only moves a floating tag (`latest`, `next`); with a pinned
+`:X.Y.Z` tag, edit the tag first.
+
+### One-click updates with a host trigger file
+
+To keep **Update Now** working without mounting `/var/run/docker.sock` (which gives the container
+root on the host — see the `cli` profile warning above), set `DOCKER_UPDATE_TRIGGER_FILE` on the
+OmniRoute service and run a watcher on the host:
+
+```yaml
+services:
+  omniroute:
+    environment:
+      DOCKER_UPDATE_TRIGGER_FILE: /app/data/update/docker-update.request
+    volumes:
+      - ./data:/app/data
+```
+
+The path must be inside `DATA_DIR` (relative values resolve against it); anything else is
+rejected. **Update Now** then writes `{ "requestedAt": "...", "targetVersion": "X.Y.Z" }` to that
+file, answers `202`, and the dashboard polls `/api/system/version` until the new version is live
+and reloads. OmniRoute never runs a shell or Docker command in this mode. Like every update
+action, the request is accepted only from loopback/LAN clients.
+
+A bind-mounted data directory gives the host a stable path to watch. Sample `systemd` units
+(adjust `/srv/omniroute` to the directory holding your compose file and `data/`):
+
+```ini
+# /etc/systemd/system/omniroute-update.path
+[Unit]
+Description=Watch for OmniRoute dashboard update requests
+
+[Path]
+PathExists=/srv/omniroute/data/update/docker-update.request
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```ini
+# /etc/systemd/system/omniroute-update.service
+[Unit]
+Description=Pull and recreate the OmniRoute container
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/omniroute
+ExecStartPre=/usr/bin/rm -f /srv/omniroute/data/update/docker-update.request
+ExecStart=/bin/sh -c 'docker compose pull omniroute || (sleep 15 && docker compose pull omniroute)'
+ExecStart=/usr/bin/docker compose up -d --force-recreate omniroute
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now omniroute-update.path
+```
+
+The service removes the request before pulling so a failed run does not loop. Without
+`DOCKER_UPDATE_TRIGGER_FILE` the dashboard keeps the manual command flow.
 
 ## Availability: default SQLite is single-replica
 

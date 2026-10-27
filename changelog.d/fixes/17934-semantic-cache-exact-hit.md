@@ -1,0 +1,1 @@
+- **fix(cache):** Count semantic-cache hits by exact signature so one hit no longer increments unrelated entries sharing an API-key prefix; preserve global metrics and use the existing unique index ([#17934](https://github.com/cheaper-inference/OmniRoute/pull/17934)) — thanks @xiaoyaner0201

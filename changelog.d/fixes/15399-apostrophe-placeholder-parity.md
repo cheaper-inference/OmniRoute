@@ -1,1 +1,0 @@
-- **fix(i18n):** keep quoted placeholders working in Maltese and Korean messages ([#15399](https://github.com/diegosouzapw/OmniRoute/pull/15399)) — thanks @maxmad64bis

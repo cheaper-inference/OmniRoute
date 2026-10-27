@@ -99,32 +99,43 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## API-Key တင်သွင်းမှုလုပ်ငန်းစဉ်
+## API ကီး ထည့်သွင်းမှု လုပ်ငန်းစဉ်
 
-API-key အထောက်အထားစစ်ဆေးခြင်းသည် သက်တမ်းရှည်အသုံးပြုနိုင်သော Kiro / AWS CodeWhisperer bearer အထောက်အထားများအတွက် ဖြစ်သည်။ ၎င်းသည်
-OAuth refresh ကို အသုံးမပြုသဖြင့် မျှဝေထားသော OIDC session ပျက်ပြယ်မှုကို ရှောင်ရှားနိုင်သည်။
+API ကီးဖြင့် အထောက်အထားစစ်ဆေးခြင်းသည် သက်တမ်းရှည် Kiro / AWS CodeWhisperer bearer အထောက်အထားများအတွက် ဖြစ်သည်။ ၎င်းသည်
+OAuth refresh ကို အသုံးမပြုသောကြောင့် မျှဝေထားသည့် OIDC session ပျက်ပြယ်မှုကို ရှောင်ရှားနိုင်သည်။
 
-### ဒက်ရှ်ဘုတ်
+### Dashboard
 
-1. **ဒက်ရှ်ဘုတ် -> ပံ့ပိုးသူများ -> Kiro** ကို ဖွင့်ပါ။
+1. **Dashboard -> Providers -> Kiro** ကို ဖွင့်ပါ။
 2. **API Key** ကို ရွေးချယ်ပါ။
-3. API key နှင့် ရွေးချယ်နိုင်သော AWS region (မူလတန်ဖိုးမှာ `us-east-1`) ကို ထည့်သွင်းပါ။
-4. OmniRoute သည် key ကို စစ်ဆေးအတည်ပြုပြီး ချိတ်ဆက်မှုကို သိမ်းဆည်းသည်။
+3. API ကီးကို ကူးထည့်ပြီး AWS region ကို ရွေးချယ်ပါ- **Auto-detect** (မူလသတ်မှတ်ချက်), **US East
+   (N. Virginia)** သို့မဟုတ် **Europe (Frankfurt)**။
+4. OmniRoute သည် ကီးကို အတည်ပြုပြီး ကီး အလုပ်လုပ်သည့် region နှင့် ချိတ်ဆက်ထားသော connection ကို
+   သိမ်းဆည်းသည်။
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` သည် `auto` (မူလသတ်မှတ်ချက်), `us-east-1` သို့မဟုတ် `eu-central-1` ကို လက်ခံသည်။ အခြားတန်ဖိုးများကို
+HTTP 400 ဖြင့် ငြင်းပယ်သည်။
 
 ### အတွင်းပိုင်း သဘောတူညီချက်
 
-API route သည် `KiroService.validateApiKey()` ကို ခေါ်ဆိုခြင်းဖြင့် key ကို စစ်ဆေးအတည်ပြုသည်။ ၎င်းသည်
-region နှင့် ကိုက်ညီသော CodeWhisperer/Amazon Q endpoint တွင် `ListAvailableProfiles` ကို အသုံးပြုပြီး `profileArn` တစ်ခုကို သတ်မှတ်ရယူသည်။
+API route သည် `KiroService.validateApiKey()` ကို ခေါ်၍ ကီးကို အတည်ပြုသည်။ ၎င်းက
+`GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+(Amazon Q surface API ကီး inference အသုံးပြုသည့် API) ကို region တစ်ခုလျှင် 10 s timeout ဖြင့် ခေါ်သည်။
+`auto` mode တွင် `us-east-1` ကို ဦးစွာ စမ်းသပ်ပြီးနောက် `eu-central-1` ကို စမ်းသပ်ကာ
+ကီးကို လက်ခံသည့် ပထမဆုံး region ကို သိမ်းဆည်းသည်။ စမ်းသပ်သည့် region အားလုံးတွင် ငြင်းပယ်ခံရသော ကီးသည်
+HTTP 400 ဖြင့် ထည့်သွင်းမှု မအောင်မြင်ပါ။ ထို့နောက် မဖြစ်မနေ မဟုတ်သော
+`profileArn` ကို ရှာဖွေရန် `ListAvailableProfiles` ကို အောင်မြင်နိုင်သမျှ ခေါ်ဆိုသည်
+(API ကီးအများစုအတွက် AWS က ယင်းကို ငြင်းပယ်သည်)။
 
-သိမ်းဆည်းထားသော ချိတ်ဆက်မှုတွင် အောက်ပါတို့ကို အသုံးပြုသည်-
+သိမ်းဆည်းထားသော connection သည် အောက်ပါတို့ကို အသုံးပြုသည်-
 
 ```json
 {
@@ -137,10 +148,13 @@ region နှင့် ကိုက်ညီသော CodeWhisperer/Amazon Q end
 }
 ```
 
-အလုပ်လုပ်နေချိန်တွင် `KiroExecutor.buildHeaders()` သည် key ကို
-`Authorization: Bearer <key>` အဖြစ် ပို့ပြီး `tokentype: API_KEY` ကို ထည့်သွင်းသည်။ Quota/profile ခေါ်ဆိုမှုများသည်လည်း
-တူညီသော အမှတ်အသားကို အသုံးပြုသဖြင့် AWS သည် bearer ကို OIDC သို့မဟုတ် လူမှုကွန်ရက် access token အဖြစ်မဟုတ်ဘဲ
-သက်တမ်းရှည် API key အဖြစ် သတ်မှတ်သည်။
+Runtime တွင် `KiroExecutor.buildHeaders()` သည် ကီးကို
+`Authorization: Bearer <key>` အဖြစ် ပေးပို့ပြီး `tokentype: API_KEY` ကို ထည့်သွင်းသည်။ Quota/profile ခေါ်ဆိုမှုများသည်လည်း
+တူညီသော အမှတ်အသားကို အသုံးပြုသဖြင့် AWS သည် bearer ကို OIDC သို့မဟုတ် social access token အစား
+သက်တမ်းရှည် API ကီးအဖြစ် သတ်မှတ်သည်။ `KiroExecutor.execute()` သည် API ကီး inference ကို
+`https://q.<region>.amazonaws.com/generateAssistantResponse` သို့သာ ပေးပို့သည် — `us-east-1`
+အပါအဝင် — အဘယ်ကြောင့်ဆိုသော် Kiro IDE gateway သည် `TokenType=API_KEY` ကို ငြင်းပယ်ပြီး
+`codewhisperer.us-east-1` သည် API ကီး payload များကို မမှန်ကန်သော request body (HTTP 400) အဖြစ် ငြင်းပယ်သောကြောင့် ဖြစ်သည်။
 
 ---
 

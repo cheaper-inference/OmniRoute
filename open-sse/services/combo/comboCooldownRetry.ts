@@ -99,7 +99,13 @@ function toFiniteWaitMs(value: unknown): number {
   return 0;
 }
 
-function isRetryableComboCooldownReason(reason: unknown): boolean {
+/**
+ * Whether a model-lockout reason qualifies as a short/transient cooldown:
+ * allow-listed (unknown or empty reasons fail closed) and not in the
+ * non-retryable set. Exported for the pre-dispatch retry-after scan
+ * (#16319), which must exclude the same reasons the wait decision does.
+ */
+export function isTransientComboCooldownReason(reason: unknown): boolean {
   if (typeof reason !== "string" || reason.length === 0) return false;
   if (COMBO_COOLDOWN_NON_RETRYABLE_REASONS.has(reason)) return false;
   return COMBO_COOLDOWN_RETRYABLE_REASONS.has(reason);
@@ -125,7 +131,7 @@ export function shouldWaitForComboCooldown(
 
   const wait =
     settings.enabled === true &&
-    isRetryableComboCooldownReason(reason) &&
+    isTransientComboCooldownReason(reason) &&
     waitMs > 0 &&
     waitMs <= settings.maxWaitMs &&
     attempt < settings.maxAttempts &&

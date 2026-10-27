@@ -115,30 +115,36 @@ curl -X POST http://localhost:20128/api/oauth/kiro/import \
 
 ---
 
-## የAPI ቁልፍ ማስመጣት ፍሰት
+## የAPI ቁልፍ ማስመጣት ሂደት
 
-የAPI ቁልፍ ማረጋገጫ ለረጅም ጊዜ የሚያገለግሉ Kiro / AWS CodeWhisperer bearer ምስክርነቶች ነው።
-የOAuth እድሳትን አይጠቀምም፣ ስለዚህ የጋራ OIDC ክፍለ-ጊዜ ዋጋ መሰረዝን ያስወግዳል።
+የAPI ቁልፍ ማረጋገጫ ለረጅም ጊዜ የሚያገለግሉ Kiro / AWS CodeWhisperer bearer ምስክርነቶች ነው። OAuth ማደሻን አይጠቀምም፤ ስለዚህ የጋራ OIDC ክፍለ-ጊዜ መሰረዝን ያስወግዳል።
 
-### Dashboard
+### ዳሽቦርድ
 
-1. **Dashboard -> Providers -> Kiro**ን ይክፈቱ።
-2. **API Key**ን ይምረጡ።
-3. የAPI ቁልፉን እና አማራጭ የAWS ክልልን ይለጥፉ (በነባሪ `us-east-1`)።
-4. OmniRoute ቁልፉን ያረጋግጣል እና ግንኙነቱን ያስቀምጣል።
+1. **ዳሽቦርድ -> አቅራቢዎች -> Kiro**ን ይክፈቱ።
+2. **API ቁልፍ**ን ይምረጡ።
+3. የAPI ቁልፉን ይለጥፉ እና የAWS ክልሉን ይምረጡ፦ **በራስ-ሰር ለይ** (ነባሪ)፣ **የአሜሪካ ምሥራቅ
+   (ሰሜናዊ ቨርጂኒያ)** ወይም **አውሮፓ (ፍራንክፈርት)**።
+4. OmniRoute ቁልፉን ያረጋግጣል እና ግንኙነቱን ቁልፉ በሚሠራበት ክልል ላይ አጣብቆ ያስቀምጣል።
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` `auto`ን (ነባሪ)፣ `us-east-1`ን ወይም `eu-central-1`ን ይቀበላል፤ ማንኛውም ሌላ እሴት በHTTP 400 ውድቅ ይደረጋል።
 
 ### ውስጣዊ ውል
 
 የAPI መስመሩ `KiroService.validateApiKey()`ን በመጥራት ቁልፉን ያረጋግጣል፤ ይህም
-ከክልሉ ጋር በሚዛመደው CodeWhisperer/Amazon Q endpoint ላይ `ListAvailableProfiles`ን በመጠቀም `profileArn`ን ይፈታል።
+`GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`ን
+(የAmazon Q ገጽታ የAPI ቁልፍ ግምት ማድረጊያ የሚጠቀምበትን) ለእያንዳንዱ ክልል በ10 ሰከንድ የጊዜ ገደብ ይጠራል።
+በ`auto` ሁነታ በመጀመሪያ `us-east-1`ን፣ ከዚያም `eu-central-1`ን ይሞክራል፣ እና ቁልፉን የተቀበለውን የመጀመሪያ ክልል ያከማቻል። በሁሉም የእጩ ክልሎች ውድቅ የተደረገ ቁልፍ ማስመጣቱን በHTTP 400 ያሳንፋል። ከዚያም አማራጭ
+`profileArn`ን ለማግኘት `ListAvailableProfiles` በተቻለ መጠን ይጠራል
+(AWS ለአብዛኞቹ የAPI ቁልፎች ይህን አይፈቅድም)።
 
 የተቀመጠው ግንኙነት የሚከተለውን ይጠቀማል፦
 
@@ -153,10 +159,12 @@ curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
 }
 ```
 
-በruntime ጊዜ፣ `KiroExecutor.buildHeaders()` ቁልፉን እንደ
+በአሂድ ጊዜ፣ `KiroExecutor.buildHeaders()` ቁልፉን እንደ
 `Authorization: Bearer <key>` ይልካል እና `tokentype: API_KEY`ን ይጨምራል። የኮታ/መገለጫ ጥሪዎች
-ተመሳሳዩን ምልክት ይጠቀማሉ፤ በዚህም AWS bearer-ን እንደ OIDC ወይም የማህበራዊ መዳረሻ token ሳይሆን
-እንደ ረጅም ጊዜ የሚያገለግል API ቁልፍ ይቆጥረዋል።
+ተመሳሳይ ምልክትን ይጠቀማሉ፤ በዚህም AWS bearer-ውን እንደ OIDC ወይም የማኅበራዊ መዳረሻ ቶከን ሳይሆን ለረጅም ጊዜ እንደሚያገለግል የAPI ቁልፍ ይቆጥረዋል። `KiroExecutor.execute()` የAPI ቁልፍ ግምት ማድረጊያን ወደ
+`https://q.<region>.amazonaws.com/generateAssistantResponse` ብቻ ይልካል — `us-east-1`
+ንም ጨምሮ — ምክንያቱም የKiro IDE ጌትዌይ `TokenType=API_KEY`ን ውድቅ ያደርጋል፣ እና
+`codewhisperer.us-east-1` የAPI ቁልፍ ጭነቶችን ልክ ያልሆነ የጥያቄ አካል በማለት ውድቅ ያደርጋል (HTTP 400)።
 
 ---
 

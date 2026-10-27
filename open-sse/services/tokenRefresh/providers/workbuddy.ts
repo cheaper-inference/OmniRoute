@@ -26,6 +26,8 @@ function postRefreshRequest(url: string, refreshToken: string, proxyConfig: unkn
         Accept: "application/json",
         "X-Refresh-Token": refreshToken,
         "X-Product": "SaaS",
+        "X-Domain": "www.workbuddy.ai",
+        "User-Agent": "WorkBuddy/5.5.6",
       },
       body: "{}",
     })

@@ -14,33 +14,35 @@
 
 ## Bu Nədir
 
-OmniRoute **pulsuz/autentifikasiyasız** olaraq işarələnmiş 155 kataloq qeydi də daxil olmaqla
-329 provayderi qeydiyyata alır (autentifikasiyasız, pulsuz səviyyəli OAuth və ya pulsuz
-səviyyəli API açarı — [Pulsuz Səviyyələr üzrə Təlimata](../getting-started/FREE-TIERS-GUIDE.md)
-və tam [Pulsuz Səviyyələr kataloquna](../reference/FREE_TIERS.md) baxın). Çətinlik
-ondadır ki, pulsuz provayderlərin model keyfiyyəti kəskin şəkildə fərqlənir. Ən qabaqcıl
-modeli təqdim edən autentifikasiyasız provayder, kiçik köhnə modeli təqdim edən
+OmniRoute 375 provayderi qeydiyyata alır, o cümlədən **free/no-auth** kimi
+işarələnmiş 155 kataloq qeydi
+(no-auth,
+pulsuz səviyyəli OAuth və ya pulsuz səviyyəli API açarı — bax:
+[Pulsuz Səviyyələr Bələdçisi](../getting-started/FREE-TIERS-GUIDE.md) və tam
+[Pulsuz Səviyyələr kataloqu](../reference/FREE_TIERS.md)). Çətinlik ondadır ki:
+pulsuz provayderlər model keyfiyyətinə görə kəskin şəkildə fərqlənir. Qabaqcıl
+model təqdim edən no-auth provayder, kiçik köhnə model təqdim edən
 provayderdən qat-qat faydalıdır.
 
-**Pulsuz Provayderlərin Reytinqi** hər bir pulsuz provayderin kataloqunu **Arena AI
-liderlər cədvəlindən** əldə edilən **izdiham mənbəli keyfiyyət xalları** ilə
-(insan seçimlərinə əsaslanan ELO — LMArena çatbot arenasının arxasındakı eyni yanaşma)
-birləşdirərək "**hansı pulsuz provayder mənə ən yaxşı modeli təqdim edir?**" sualını
-cavablandırır. Daha sonra provayderlər özlərinin **ən yaxşı pulsuz modelinin** gücünə
-görə sıralanır.
+**Pulsuz Provayder Reytinqləri** hər bir pulsuz provayderin kataloqunu
+**Arena AI liderlər cədvəlindən** (insan üstünlüyünə əsaslanan ELO, LMArena
+chatbot arenasının əsasında duran eyni ideya) götürülmüş **kütləvi şəkildə
+toplanmış keyfiyyət balları** ilə birləşdirməklə "**hansı pulsuz provayder mənə
+ən yaxşı modeli verir?**" sualına cavab verir. Provayderlər sonra **ən yaxşı
+pulsuz modellərinin** gücünə görə sıralanır.
 
-Reytinq üç real mənbə əsasında hesablanır:
+Reytinq üç real mənbədən hesablanır:
 
-1. Pulsuz provayder siyahıları — `NOAUTH_PROVIDERS`, həmçinin `hasFree` ilə işarələnmiş
-   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` qeydləri
+1. Pulsuz provayder siyahıları — `NOAUTH_PROVIDERS`, üstəgəl `hasFree` ilə
+   işarələnmiş `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` qeydləri
    (`src/shared/constants/providers.ts`).
-2. Provayder reyestrindəki hər bir provayderin model kataloqu
+2. Provayder reyestrindən hər provayderin model kataloqu
    (`open-sse/config/providerRegistry.ts`).
-3. Arena ELO sinxronizasiya mexanizmi (`src/lib/arenaEloSync.ts`) tərəfindən
-   `model_intelligence` DB cədvəlində saxlanılan, ELO-dan əldə edilmiş tapşırığa
-   uyğunluq xalları.
+3. Arena ELO sinxronizasiya mühərriki (`src/lib/arenaEloSync.ts`) tərəfindən
+   `model_intelligence` verilənlər bazası cədvəlində saxlanılan ELO-dan
+   törədilmiş tapşırığa-uyğunluq balları.
 
-Birləşdirmə məntiqi `src/lib/freeProviderRankings.ts` faylında yerləşir.
+Birləşmə məntiqi `src/lib/freeProviderRankings.ts` faylında yerləşir.
 
 ---
 

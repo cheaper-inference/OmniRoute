@@ -35,6 +35,7 @@ import {
 } from "@/shared/utils/compressionHeaderEcho";
 import { resolveModelAliasWithSeedFallbackOnBody } from "@/lib/modelAliasResolver";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
+import { enforceClientApiRouteAuth } from "@/shared/utils/clientApiRouteAuth";
 import {
   assertRuntimeModelProviderAvailable,
   isRuntimeProviderRetirementError,
@@ -44,6 +45,18 @@ import {
   isCommonChatGptWebRetirementError,
 } from "@/shared/constants/chatgptWebRetirement";
 import { ensureSemanticCacheDbBridge } from "@/lib/cache/semanticCacheDbBridge";
+import {
+  getBifrostRoutingConfig,
+  resolveRelayRoutingBackend,
+  shouldTryBifrostForRequest,
+  getActiveBifrostCooldown,
+  recordBifrostFailure,
+  clearBifrostFailure,
+  getRoutingFallbackHeader,
+  getRoutingFallbackReasonHeader,
+} from "@/shared/services/bifrost/bifrostRouting";
+import { dispatchToBifrost } from "@/shared/services/bifrost/bifrostClient";
+import { gateBifrostFastPath } from "@/shared/services/bifrost/bifrostFastPathGate";
 
 let initPromise = null;
 
@@ -99,6 +112,13 @@ export async function OPTIONS() {
 
 export async function POST(request) {
   await ensureInitialized();
+
+  // Defense-in-depth: the authz proxy (src/proxy.ts) is the primary gate, but
+  // its matcher can miss path variants (e.g. uppercase /V1/ aliases), so the
+  // handler enforces authentication independently. Without this, a proxy
+  // bypass means unauthenticated upstream dispatch.
+  const authRejection = await enforceClientApiRouteAuth(request);
+  if (authRejection) return authRejection;
 
   // Content-Type guard (#6414) — reject non-JSON POST bodies with 415 per RFC 7231.
   // OpenAI/Anthropic reject `text/plain` or missing Content-Type at the edge; matching
@@ -309,12 +329,75 @@ export async function POST(request) {
       request.headers.get("x-correlation-id")
     );
 
+    // Bifrost Go sidecar fast-path routing check
+    const relayBackend = resolveRelayRoutingBackend();
+    const bifrostConfig = getBifrostRoutingConfig();
+    let fallbackHeaderValue: string | undefined = undefined;
+
+    if (parsedBodyIsRecord && bifrostConfig) {
+      const bifrostDecision = shouldTryBifrostForRequest(relayBackend, bifrostConfig, parsedBody);
+
+      if (bifrostDecision.tryBifrost) {
+        const cooldown =
+          relayBackend === "auto" ? getActiveBifrostCooldown(bifrostConfig.baseUrl) : null;
+        // The sidecar answers before handleChat(), which owns the API-key policy
+        // (allowedModels, budget, schedule, rate limit): gate it first, or a disabled
+        // key would be served with the server's BIFROST_API_KEY. Skipped during a
+        // cooldown, where handleChat() serves (and polices) the request itself.
+        const fastPathGate = cooldown
+          ? null
+          : await gateBifrostFastPath(request, parsedBody as Record<string, unknown>);
+        if (fastPathGate?.rejection) {
+          return finishAdmission(fastPathGate.rejection);
+        }
+        if (cooldown) {
+          fallbackHeaderValue = `bifrost-cooldown; remaining=${cooldown.remainingMs}`;
+        } else if (fastPathGate && !fastPathGate.allow) {
+          fallbackHeaderValue = "bifrost-ineligible";
+        } else {
+          try {
+            const bifrostResult = await dispatchToBifrost({
+              request,
+              body: parsedBody as Record<string, unknown>,
+              config: bifrostConfig,
+            });
+
+            if (bifrostResult.statusCode < 500) {
+              clearBifrostFailure(bifrostConfig.baseUrl);
+              return finishAdmission(
+                withCompressionHeaderEcho(bifrostResult.response, compressionRequestHeader)
+              );
+            }
+
+            // Bifrost returned 5xx -> trip circuit cooldown & fall through to native handleChat
+            recordBifrostFailure(bifrostConfig.baseUrl, `http_${bifrostResult.statusCode}`);
+            fallbackHeaderValue = "bifrost-error";
+          } catch (error) {
+            const message = error instanceof Error ? error.message : String(error);
+            recordBifrostFailure(bifrostConfig.baseUrl, message);
+            fallbackHeaderValue = "bifrost-error";
+          }
+        }
+      }
+    }
+
+    const applyFallbackHeaders = (res: Response) => {
+      if (!bifrostConfig) return res;
+      const fallbackHeader = getRoutingFallbackHeader(relayBackend, bifrostConfig);
+      if (fallbackHeader || fallbackHeaderValue) {
+        res.headers.set("X-Routing-Fallback", fallbackHeaderValue || fallbackHeader || "bifrost");
+        const reasonCode = getRoutingFallbackReasonHeader(fallbackHeaderValue);
+        if (reasonCode) {
+          res.headers.set("X-Routing-Fallback-Reason", reasonCode);
+        }
+      }
+      return res;
+    };
+
     if (wantsStreaming) {
       const reqId = callerCorrelationId ?? generateRequestId();
-      const {
-        signal: routeDeadlineSignal,
-        deadlineController: routeDeadlineController,
-      } = createStreamDeadlineSignal(request.signal);
+      const { signal: routeDeadlineSignal, deadlineController: routeDeadlineController } =
+        createStreamDeadlineSignal(request.signal);
       // Wrap the real handler response, not the synthetic early-keepalive response. If the
       // client cancels while handleChat is still pending, earlyStreamKeepalive will cancel the
       // eventual handler body; only that confirmed cleanup releases heavyweight capacity.
@@ -333,12 +416,17 @@ export async function POST(request) {
         extraHeaders: { "X-Correlation-Id": reqId },
         deadlineController: routeDeadlineController,
       });
-      return withCompressionHeaderEcho(streamedResponse, compressionRequestHeader);
+      return withCompressionHeaderEcho(
+        applyFallbackHeaders(streamedResponse),
+        compressionRequestHeader
+      );
     }
 
     return finishAdmission(
       withCompressionHeaderEcho(
-        await handleChat(request, null, parsedBody, callerCorrelationId ?? undefined),
+        applyFallbackHeaders(
+          await handleChat(request, null, parsedBody, callerCorrelationId ?? undefined)
+        ),
         compressionRequestHeader
       )
     );

@@ -1,1 +1,0 @@
-- **fix(dispatch):** rebuild the shared cloud dispatcher pool after an unreachable error instead of reusing its stale sockets ([#15908](https://github.com/diegosouzapw/OmniRoute/pull/15908)) — thanks @maxmad64bis

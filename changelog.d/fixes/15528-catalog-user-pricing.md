@@ -1,1 +1,0 @@
-- fix(api): honor user pricing overrides (PATCH /api/pricing) in GET /v1/models catalog pricing (#15528)

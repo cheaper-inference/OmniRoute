@@ -509,7 +509,7 @@ Jos se palauttaa jotain muuta kuin `ok`, **lopeta tietokannan käyttäminen väl
 
 ---
 
-## Palautuminen häiriötilanteista
+## Palautuminen katastrofitilanteesta
 
 ### Skenaario 1: WAL-tiedosto on kadonnut
 
@@ -533,21 +533,24 @@ mv recovered.db ~/.omniroute/storage.sqlite
 Palauta varmuuskopiosta:
 
 ```bash
-omniroute sync pull --merge   # tai: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` lataa vain täydellisen `.tar.gz`-arkiston käynnissä olevalta palvelimelta
+(`GET /api/db-backups/exportAll`, operaattorin tunnistetiedot vaaditaan); se ei palauta mitään.
 
 ### Skenaario 3: Salausavain on kadonnut
 
-**Palautuminen ei ole mahdollista** ilman avainta. Salattuja kenttiä ei voida lukea. Lisää kaikki palveluntarjoajat uudelleen manuaalisesti uusilla tunnistetiedoilla.
+**Palautuminen ei ole mahdollista** ilman avainta. Salattuja kenttiä ei voi lukea. Lisää kaikki palveluntarjoajat uudelleen manuaalisesti uusilla tunnistetiedoilla.
 
-> **Varotoimi**: Varmuuskopioi salausavain aina erikseen, mieluiten salasanojen hallintasovellukseen tai KMS-järjestelmään.
+> **Riskin pienentäminen**: Varmuuskopioi salausavain aina erikseen, mieluiten salasanojen hallintaohjelmaan tai KMS-palveluun.
 
 ### Skenaario 4: Levy on täynnä
 
 SQLite palauttaa `SQLITE_FULL`-virheitä. Vapauta levytilaa ja suorita sitten:
 
 ```bash
-# Tee WAL-tarkistuspiste tilan vapauttamiseksi
+# Tee WAL-tarkistuspiste ja vapauta tilaa
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

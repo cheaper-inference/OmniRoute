@@ -1,8 +1,10 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import { Card } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import { Slider } from "@omniroute/ui-kit/slider";
+import { Button, Card, Toggle } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 interface ModelsDevStatus {
   enabled: boolean;
@@ -215,10 +217,8 @@ export default function ModelsDevSyncTab() {
     return (
       <Card>
         <div className="flex items-center gap-3">
-          <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              sync
-            </span>
+          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+            <Icon name="sync" size={20} />
           </div>
           <div>
             <h3 className="text-lg font-semibold">{t("modelsDevTitle")}</h3>
@@ -248,10 +248,8 @@ export default function ModelsDevSyncTab() {
       {/* Main sync card */}
       <Card>
         <div className="flex items-center gap-3 mb-5">
-          <div className="p-2 rounded-lg bg-blue-500/10 text-blue-500">
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              database
-            </span>
+          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+            <Icon name="database" size={20} />
           </div>
           <div>
             <h3 className="text-lg font-semibold">{t("modelsDevTitle")}</h3>
@@ -260,12 +258,10 @@ export default function ModelsDevSyncTab() {
           {feedback && (
             <span
               className={`ml-auto text-xs font-medium flex items-center gap-1 ${
-                feedback.type === "success" ? "text-emerald-500" : "text-red-500"
+                feedback.type === "success" ? "text-success" : "text-error"
               }`}
             >
-              <span className="material-symbols-outlined text-[14px]">
-                {feedback.type === "success" ? "check_circle" : "error"}
-              </span>{" "}
+              <Icon name={feedback.type === "success" ? "check_circle" : "error"} size={14} />{" "}
               {feedback.message}
             </span>
           )}
@@ -277,44 +273,28 @@ export default function ModelsDevSyncTab() {
             <p className="text-sm font-medium">{t("modelsDevEnabled")}</p>
             <p className="text-xs text-text-muted mt-0.5">{t("modelsDevEnabledDesc")}</p>
           </div>
-          <button
-            onClick={toggleEnabled}
+          <Toggle
+            checked={enabled}
+            onChange={toggleEnabled}
             disabled={saving}
-            className={`relative w-11 h-6 rounded-full transition-colors ${
-              enabled ? "bg-blue-500" : "bg-border"
-            }`}
-            role="switch"
-            aria-checked={enabled}
-          >
-            <span
-              className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform ${
-                enabled ? "translate-x-5" : "translate-x-0"
-              }`}
-            />
-          </button>
+            ariaLabel={t("modelsDevEnabled")}
+          />
         </div>
 
         {/* Sync interval */}
         {enabled && (
           <div className="p-4 rounded-lg bg-surface/30 border border-border/30 mb-4">
-            <div className="flex items-center justify-between mb-3">
-              <p className="text-sm font-medium">{t("modelsDevInterval")}</p>
-              <span className="text-sm font-mono tabular-nums text-blue-400">
-                {formatInterval(positionToHours(draftPos))}
-              </span>
-            </div>
-            <input
-              type="range"
-              min="0"
+            <Slider
+              label={t("modelsDevInterval")}
+              min={0}
               max={INTERVAL_CHECKPOINTS.length - 1}
               step="any"
               value={draftPos}
-              onChange={(e) => setDraftPos(parseFloat(e.target.value))}
+              onValueChange={setDraftPos}
+              formatValue={(pos) => formatInterval(positionToHours(pos))}
               onMouseUp={commitDraftInterval}
               onTouchEnd={commitDraftInterval}
               onBlur={commitDraftInterval}
-              aria-label={t("modelsDevInterval")}
-              className="w-full accent-blue-500"
             />
             <div className="flex justify-between text-xs text-text-muted mt-1">
               <span>1h</span>
@@ -327,18 +307,15 @@ export default function ModelsDevSyncTab() {
 
         {/* Manual sync button */}
         <div className="flex items-center gap-3">
-          <button
+          <Button
+            variant="primary"
+            icon="sync"
+            loading={syncing}
             onClick={triggerSync}
             disabled={syncing}
-            className="px-4 py-2 text-sm font-medium rounded-lg bg-blue-500 text-white hover:bg-blue-600 disabled:opacity-50 transition-colors flex items-center gap-2"
           >
-            <span
-              className={`material-symbols-outlined text-[16px] ${syncing ? "animate-spin" : ""}`}
-            >
-              sync
-            </span>
             {syncing ? t("syncing") : t("syncNow")}
-          </button>
+          </Button>
           {status?.lastSync && (
             <span className="text-xs text-text-muted">
               {t("lastSync")}: {formatLastSync(status.lastSync)}
@@ -351,10 +328,8 @@ export default function ModelsDevSyncTab() {
       {status && (status.providerCount > 0 || status.modelCount > 0) && (
         <Card>
           <div className="flex items-center gap-3 mb-5">
-            <div className="p-2 rounded-lg bg-emerald-500/10 text-emerald-500">
-              <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-                bar_chart
-              </span>
+            <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+              <Icon name="bar_chart" size={20} />
             </div>
             <div>
               <h3 className="text-lg font-semibold">{t("modelsDevStats")}</h3>
@@ -364,25 +339,25 @@ export default function ModelsDevSyncTab() {
 
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-blue-400">
+              <p className="text-2xl font-bold text-info">
                 {status.providerCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("providers")}</p>
             </div>
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-emerald-400">
+              <p className="text-2xl font-bold text-success">
                 {status.modelCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("modelsWithPricing")}</p>
             </div>
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-violet-400">
+              <p className="text-2xl font-bold text-primary">
                 {status.capabilityCount.toLocaleString()}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("capabilities")}</p>
             </div>
             <div className="p-4 rounded-lg bg-surface/30 border border-border/30 text-center">
-              <p className="text-2xl font-bold text-amber-400">
+              <p className="text-2xl font-bold text-warning">
                 {status.lastSyncModelCount > 0 ? status.lastSyncModelCount.toLocaleString() : "—"}
               </p>
               <p className="text-xs text-text-muted mt-1">{t("lastSyncCount")}</p>
@@ -400,10 +375,8 @@ export default function ModelsDevSyncTab() {
       {/* Info card */}
       <Card>
         <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-amber-500/10 text-amber-500">
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              info
-            </span>
+          <div className="p-2 rounded-lg bg-bg-subtle text-text-muted">
+            <Icon name="info" size={20} />
           </div>
           <div>
             <h3 className="text-lg font-semibold">{t("modelsDevInfo")}</h3>

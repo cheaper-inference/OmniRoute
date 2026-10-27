@@ -4856,20 +4856,6 @@ paths:
         "500":
           description: OS command failed (permission error)
 
-  /api/tools/traffic-inspector/capture-modes/tls-intercept:
-    post:
-      tags: [Traffic Inspector]
-      summary: Toggle TLS body decryption in HTTP_PROXY mode
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/InspectorTlsInterceptToggle"
-      responses:
-        "200":
-          description: TLS intercept mode updated
-
   /api/tools/traffic-inspector/sessions:
     get:
       tags: [Traffic Inspector]
@@ -5627,12 +5613,12 @@ components:
           type: string
           format: uri
           description: GitHub raw URL of the SKILL.md file
-          example: "https://raw.githubusercontent.com/diegosouzapw/OmniRoute/refs/heads/main/skills/omni-providers/SKILL.md"
+          example: "https://raw.githubusercontent.com/cheaper-inference/OmniRoute/refs/heads/main/skills/omni-providers/SKILL.md"
         githubUrl:
           type: string
           format: uri
           description: GitHub blob URL for viewing the SKILL.md in the browser
-          example: "https://github.com/diegosouzapw/OmniRoute/blob/main/skills/omni-providers/SKILL.md"
+          example: "https://github.com/cheaper-inference/OmniRoute/blob/main/skills/omni-providers/SKILL.md"
 
     SkillCoverage:
       type: object
@@ -6033,13 +6019,6 @@ components:
           type: integer
           minimum: 1
           example: 30
-
-    InspectorTlsInterceptToggle:
-      type: object
-      required: [enabled]
-      properties:
-        enabled:
-          type: boolean
 
     InspectorAnnotationPut:
       type: object

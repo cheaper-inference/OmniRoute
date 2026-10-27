@@ -138,13 +138,13 @@ omniroute providers validate
 
 ## CLI ツールの設定
 
-### 1) プロバイダーを接続して API キーを作成
+### 1) プロバイダーを接続して API キーを作成する
 
-1. Dashboard → `Providers` を開き、少なくとも 1 つのプロバイダーを接続します（OAuth または API キー）。
-2. Dashboard → `Endpoints` を開き、API キーを作成します。
-3. （任意）Dashboard → `Combos` を開き、フォールバックチェーンを設定します。
+1. ダッシュボード → `Providers` を開き、少なくとも 1 つのプロバイダー（OAuth または API キー）を接続します。
+2. ダッシュボード → `Endpoints` を開き、API キーを作成します。
+3. （任意）ダッシュボード → `Combos` を開き、フォールバックチェーンを設定します。
 
-### 2) コーディングツールの接続先を設定
+### 2) コーディングツールの接続先を設定する
 
 ```txt
 ベース URL: http://localhost:20128/v1
@@ -152,7 +152,7 @@ API キー:   [Endpoint ページからコピー]
 モデル:     if/qwen3.8-max-preview（または任意のプロバイダー/モデルのプレフィックス）
 ```
 
-エディターが `Authorization: Bearer ...` を送信できない場合は、代わりにトークン埋め込み形式の互換ベース URL を使用します。
+エディターが `Authorization: Bearer ...` を送信できない場合は、代わりにトークンを含む互換性ベース URL を使用してください。
 
 ```txt
 ベース URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -165,10 +165,10 @@ Claude Code、Codex CLI、Cursor、Cline、OpenClaw、OpenCode、および OpenA
 
 #### `setup-*` による自動設定
 
-ベース URL とキーを手動で貼り付ける代わりに、OmniRoute にライブモデルカタログから各ツール固有の設定を書き込ませることができます。ツールごとにコマンドを 1 つ使用します。
+ベース URL とキーを手動で貼り付ける代わりに、OmniRoute にライブモデルカタログから各ツール固有の設定を書き込ませることができます。ツールごとに 1 つのコマンドを使用します。
 
 ```bash
-omniroute setup-codex        # ~/.codex/<name>.config.toml プロファイル
+omniroute setup-codex        # ~/.codex/<name>.config.toml のプロファイル
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json（OpenAI 互換）
 omniroute setup-cline        # Cline CLI + VS Code 拡張機能の設定
@@ -177,16 +177,17 @@ omniroute setup-continue     # ~/.continue/config.yaml（Continue / cn）
 omniroute setup-cursor       # Cursor のアプリ内設定手順を表示
 omniroute setup-roo          # Roo Code のインポート + autoImport ポインター
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json（openai_compatible）
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-各コマンドでは `--remote <url> --api-key <key>` を指定して、ローカルツールを**リモート**の OmniRoute に接続するよう設定できます。また、`--dry-run` で設定内容を事前確認できます。適切な環境変数を注入し、設定を一切書き込まずに CLI を起動するには、汎用ランチャー `omniroute run <target>`（claude、codex、aider、goose、opencode、qwen、gemini）を使用します。従来のツール別ランチャー `omniroute launch`（Claude Code）および `omniroute launch-codex`（Codex）も引き続き利用できます。
+各コマンドでは、`--remote <url> --api-key <key>` を指定して、ローカルツールを**リモート**の OmniRoute に接続するよう設定できます。また、`--dry-run` で事前確認もできます。適切な環境変数を注入し、設定を一切書き込まずに CLI を起動するには、汎用ランチャーの `omniroute run <target>`（claude、codex、aider、goose、opencode、qwen、gemini）を使用します。従来のツール別ランチャーである `omniroute launch`（Claude Code）および `omniroute launch-codex`（Codex）も引き続き利用できます。
 
 完全な一覧（各コマンドが書き込む内容、すべてのフラグ、ローカルとリモートの違い、ベース URL の `/v1` 規則）については、**[CLI インテグレーション](./CLI-INTEGRATIONS.md)**を参照してください。
 
-ツールごとの詳細な設定（Claude Code、Codex CLI、Cursor、Cline、OpenClaw、Kilo Code、Copilot など）については、専用の**[CLI ツールガイド](../reference/CLI-TOOLS.md)**を参照してください。
+ツール別の詳細な設定（Claude Code、Codex CLI、Cursor、Cline、OpenClaw、Kilo Code、Copilot など）については、専用の**[CLI ツールガイド](../reference/CLI-TOOLS.md)**を参照してください。
 
 ---
 
@@ -315,23 +316,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux（xbps-src）テンプレート
+## Void Linux (xbps-src) テンプレート
 
-Void Linux ユーザーは、`xbps-src` を使用してネイティブパッケージをビルドできます。このブロックを `srcpkgs/omniroute/template` として保存してください：
+Void Linux ユーザーは、`xbps-src` を使用してネイティブパッケージをビルドできます。次のブロックを `srcpkgs/omniroute/template` として保存してください：
 
 ```bash
-# 'omniroute' のテンプレートファイル
+# 'omniroute' 用テンプレートファイル
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+short_desc="複数の LLM プロバイダーに対応したスマートルーティング機能付きユニバーサル AI ゲートウェイ"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# リリースごとに次のコマンドでチェックサムを再生成してください：
+# 各リリースで次のコマンドを使用してチェックサムを再生成してください：
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

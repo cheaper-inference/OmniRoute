@@ -95,6 +95,46 @@ export function resolveClaudeExtraUsageResetAt(usage: unknown): string | null {
   return earliest;
 }
 
+/**
+ * Detects "extra usage is being (or is about to be) billed" for accounts whose usage API never
+ * sends `extraUsage.queued` (e.g. Claude Team reports `{ is_enabled, monthly_limit, used_credits,
+ * utilization, ... }` only). Once a plan window is used up, Claude keeps answering as pay-as-you-go
+ * extra usage, so an enabled extra usage plus an exhausted plan window is the same condition.
+ *
+ * Only the windows in `quotas` count (the 5h session and the weekly all-models window): an exhausted
+ * model-scoped weekly window does not stop the other models from being served by the plan.
+ *
+ * Returns `null` when extra usage is not enabled on the account or no plan window is exhausted.
+ * Otherwise `resetAt` is the LATEST future reset among the exhausted windows (the connection stays
+ * blocked until every one of them is back), or `null` when none of them reports a future reset.
+ */
+function findExhaustedPlanWindows(usage: unknown): { resetAt: string | null } | null {
+  const record = asRecord(usage);
+  if (asRecord(record.extraUsage).is_enabled !== true) return null;
+
+  let exhausted = false;
+  let latest: string | null = null;
+  let latestMs = Number.NEGATIVE_INFINITY;
+
+  for (const quota of Object.values(asRecord(record.quotas))) {
+    const window = asRecord(quota);
+    if (asRecord(window.claudeQuota).kind === "weekly_scoped") continue;
+    const remaining = window.remainingPercentage ?? window.remaining;
+    if (typeof remaining !== "number" || remaining > 0) continue;
+
+    exhausted = true;
+    const resetAt = toFutureIso(window.resetAt);
+    if (!resetAt) continue;
+    const ms = new Date(resetAt).getTime();
+    if (ms > latestMs) {
+      latest = resetAt;
+      latestMs = ms;
+    }
+  }
+
+  return exhausted ? { resetAt: latest } : null;
+}
+
 function hasClaudeUsageSnapshot(usage: unknown): boolean {
   const record = asRecord(usage);
   return Object.prototype.hasOwnProperty.call(record, "extraUsage") || !!record.quotas;
@@ -138,11 +178,13 @@ export function buildClaudeExtraUsageConnectionUpdate(
     return buildClaudeExtraUsageStateClearUpdate(connection);
   }
 
-  if (!isClaudeExtraUsageQueued(snapshot)) {
+  const exhaustedPlan = findExhaustedPlanWindows(snapshot);
+  if (!isClaudeExtraUsageQueued(snapshot) && !exhaustedPlan) {
     return buildClaudeExtraUsageStateClearUpdate(connection);
   }
 
   const rateLimitedUntil =
+    exhaustedPlan?.resetAt ||
     resolveClaudeExtraUsageResetAt(snapshot) ||
     new Date(Date.now() + EXTRA_USAGE_FALLBACK_BLOCK_MS).toISOString();
 

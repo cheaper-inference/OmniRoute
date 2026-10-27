@@ -34,16 +34,16 @@ const ENV_KEYS = [
 
 async function withEnv(env: EnvState, fn: () => Promise<void> | void): Promise<void> {
   const prior = Object.fromEntries(ENV_KEYS.map((key) => [key, process.env[key]]));
+  for (const key of ENV_KEYS) delete process.env[key];
   for (const key of ENV_KEYS) {
-    if (env[key] === undefined) delete process.env[key];
-    else process.env[key] = env[key];
+    if (env[key] !== undefined) process.env[key] = env[key];
   }
   try {
     await fn();
   } finally {
+    for (const key of ENV_KEYS) delete process.env[key];
     for (const key of ENV_KEYS) {
-      if (prior[key] === undefined) delete process.env[key];
-      else process.env[key] = prior[key];
+      if (prior[key] !== undefined) process.env[key] = prior[key];
     }
     setTlsClientForTest(null);
   }
@@ -676,9 +676,10 @@ test("bounded session cache closes the least-recently-used idle session", async 
     };
   }, 2);
 
-  await client.fetch("https://upstream.example/v1", { proxy: "http://proxy-1:8080" });
-  await client.fetch("https://upstream.example/v1", { proxy: "http://proxy-2:8080" });
-  await client.fetch("https://upstream.example/v1", { proxy: "http://proxy-3:8080" });
+  for (const proxy of ["http://proxy-1:8080", "http://proxy-2:8080", "http://proxy-3:8080"]) {
+    const response = await client.fetch("https://upstream.example/v1", { proxy });
+    assert.equal(await response.text(), "ok");
+  }
 
   assert.deepEqual(closed, ["http://proxy-1:8080"]);
   await client.exit();

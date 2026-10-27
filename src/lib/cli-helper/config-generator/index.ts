@@ -87,6 +87,16 @@ const GENERATORS: Record<string, ConfigGenerator> = {
   whycodes: generateWhyCodesConfig,
 };
 
+// Generators that need the resolved config path (to merge into an existing file).
+const PATH_AWARE_GENERATORS: Record<
+  string,
+  (options: GenerateOptions & { configPath: string }) => string | Promise<string>
+> = {
+  opencode: generateOpencodeConfig,
+  codex: generateCodexConfig,
+  whycodes: generateWhyCodesConfig,
+};
+
 export async function generateConfig(
   toolId: string,
   options: GenerateOptions
@@ -110,14 +120,10 @@ export async function generateConfig(
       return { success: false, configPath: "", error: `Unknown tool: ${toolId}` };
     }
     const configPath = getToolConfigPath(canonicalToolId);
-    const content =
-      canonicalToolId === "opencode"
-        ? await generateOpencodeConfig({ ...options, configPath })
-        : canonicalToolId === "codex"
-          ? await generateCodexConfig({ ...options, configPath })
-          : canonicalToolId === "whycodes"
-            ? generateWhyCodesConfig({ ...options, configPath })
-            : await generate(options);
+    const pathAware = PATH_AWARE_GENERATORS[canonicalToolId];
+    const content = pathAware
+      ? await pathAware({ ...options, configPath })
+      : await generate(options);
 
     let migration: string | undefined;
     if (canonicalToolId === "codex") {

@@ -38,6 +38,7 @@ export const DEFAULT_API_BRIDGE_SERVER_SOCKET_TIMEOUT_MS = 0;
 // idle-pool window, mirroring the API bridge server's pattern.
 export const DEFAULT_MAIN_SERVER_KEEPALIVE_TIMEOUT_MS = 65_000;
 export const DEFAULT_MAIN_SERVER_HEADERS_TIMEOUT_MS = 66_000;
+export const DEFAULT_MAIN_SERVER_TCP_KEEPALIVE_MS = 30_000;
 // A client that closes its connection right after reading a fully-completed
 // SSE stream can race OmniRoute's own completion bookkeeping (#9653): the
 // bytes already reached the client, but the disconnect handler can fire
@@ -98,6 +99,7 @@ export type ApiBridgeTimeoutConfig = {
 export type MainServerTimeoutConfig = {
   keepAliveTimeoutMs: number;
   headersTimeoutMs: number;
+  tcpKeepAliveInitialDelayMs: number;
 };
 
 function readTimeoutMs(
@@ -397,6 +399,16 @@ export function getMainServerTimeoutConfig(
     }
   );
 
+  const tcpKeepAliveInitialDelayMs = readTimeoutMs(
+    env,
+    "MAIN_SERVER_TCP_KEEPALIVE_MS",
+    DEFAULT_MAIN_SERVER_TCP_KEEPALIVE_MS,
+    {
+      allowZero: true,
+      logger,
+    }
+  );
+
   return {
     keepAliveTimeoutMs,
     // Node requires headersTimeout > keepAliveTimeout to avoid its internal
@@ -405,5 +417,6 @@ export function getMainServerTimeoutConfig(
       headersTimeoutMs > 0 && keepAliveTimeoutMs > 0
         ? Math.max(headersTimeoutMs, keepAliveTimeoutMs + 1_000)
         : headersTimeoutMs,
+    tcpKeepAliveInitialDelayMs,
   };
 }

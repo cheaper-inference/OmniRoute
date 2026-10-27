@@ -17,7 +17,7 @@ const {
   reconcile,
 } = mod;
 
-const REPO = "diegosouzapw/OmniRoute";
+const REPO = "cheaper-inference/OmniRoute";
 const link = (n: number) => `[#${n}](https://github.com/${REPO}/pull/${n})`;
 
 test("primaryRefs: /pull links and the LAST #N count, incidental mentions do not", () => {
@@ -136,14 +136,96 @@ test("computeCoverage: own PR must be a primary ref; incidental mention leaves t
     "- **fix(ui):** direct push (direct commit `f0f0f0f0f0`)",
   ];
   const { uncovered } = computeCoverage(rows, bullets, {
-    closingPrs: new Set([12000]), // PR 12000 closes issue 7000, which is cited
     skipHashes: new Set(["eeeeeeeee"]),
   });
   assert.deepEqual(
     uncovered.map((r) => r.hash),
-    ["aaaaaaaaa1"],
-    "only the incidentally-mentioned PR is uncovered"
+    ["aaaaaaaaa1", "ddddddddd4"],
+    "the incidentally-mentioned PR and the PR whose bullet only cites its closed issue are uncovered"
   );
+});
+
+test("reconcile: a bullet citing the ISSUE a PR closes does not cover that PR (v3.8.52 lesson)", () => {
+  // Nine external PRs (#15113 #15415 #15423 #15703 #15754 #15772 #16091 #16269 #16445) lost their
+  // own bullet in the v3.8.52 reconciliation because another bullet mentioned the issue they closed.
+  const changelog = `# Changelog
+
+## [Unreleased]
+
+## [3.8.52] — TBD
+
+### ✨ New Features
+
+### 🐛 Bug Fixes
+
+- **fix(auth):** maintainer bullet that mentions the issue in passing (see #15700) (#16000)
+- **fix(ui):** contributor bullet with its own PR as primary ref (#15754)
+
+### 📝 Maintenance
+
+---
+
+## [3.8.51] — 2026-09-30
+
+---
+`;
+  const row = (hash: string, pr: number, subject: string, authorName: string) => ({
+    hash,
+    date: "2026-10-01",
+    authorName,
+    authorEmail: `${authorName}@x`,
+    subject,
+    refs: [pr],
+    pr,
+    coauthors: [],
+  });
+  const rows = [
+    row("aaaaaaaaa1aaaa", 16000, "fix(auth): maintainer thing (#16000)", "diegosouzapw"),
+    row(
+      "bbbbbbbbb2bbbb",
+      15703,
+      "fix(models): closes an issue cited elsewhere (#15703)",
+      "lacijowo"
+    ),
+    row("ccccccccc3cccc", 15754, "fix(ui): already has its own bullet (#15754)", "timootten"),
+  ];
+  const pr = (number: number, login: string, closes: number[] = []) => ({
+    number,
+    title: `pr ${number}`,
+    author: { login },
+    body: "",
+    closingIssuesReferences: closes.map((n) => ({ number: n })),
+  });
+  const prs = [
+    pr(16000, "diegosouzapw"),
+    pr(15703, "lacijowo", [15700]), // closes #15700, which the maintainer bullet cites
+    pr(15754, "timootten", [15750]),
+  ];
+  const { changelog: next, report } = reconcile({
+    changelog,
+    version: "3.8.52",
+    repo: REPO,
+    rows,
+    prs,
+    fragments: [],
+    today: "2026-10-18",
+    baseTip: "0000000",
+    headTip: "1111111",
+  });
+  const section = next.slice(next.indexOf("## [3.8.52]"), next.indexOf("## [3.8.51]"));
+  assert.ok(
+    section.includes(
+      `- **fix(models):** closes an issue cited elsewhere (${link(15703)}) — thanks @lacijowo`
+    ),
+    `#15703 must get its own bullet — citing its closed issue #15700 is not coverage:\n${section}`
+  );
+  assert.equal(
+    (section.match(/#15754/g) || []).length,
+    1,
+    "#15754 is covered by its own primary ref — no second bullet"
+  );
+  assert.equal(report.generated.fixes, 1);
+  assert.equal(report.uncovered, 1);
 });
 
 test("versionSectionRange / otherSectionsText isolate exactly one version block", () => {
