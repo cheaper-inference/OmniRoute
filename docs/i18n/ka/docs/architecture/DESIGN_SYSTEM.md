@@ -81,30 +81,37 @@
 
 ## 2. წესები
 
-1. გამოიყენეთ ტოკენები და არასდროს — ლიტერალები. განზრახ დატოვებული გამონაკლისებია: მუდამ მუქი კონსოლის ტერმინალი, ReactFlow SVG-ის
-   ხაზები `STATUS_HEX`-ის მეშვეობით (`src/shared/constants/statusColors.ts`) და კატეგორიული პალიტრები
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) და
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. არასდროს შეცვალოთ `packages/ui-kit/src` ხელით: სინქრონიზაციისთვის გამოიყენეთ `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit შემოწმება `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ჩავარდება, თუ რომელიმე ბაიტი
-   დამაგრებულ upstream commit-ს არ ემთხვევა (თუ upstream-ის კლონი,
-   `UI_KIT_CLONE` ან `_references/cheaper-inference-ui-kit`, არ არსებობს, შემოწმება გაფრთხილებით გამოტოვებულია). როდესაც ნაკრებს რამე აკლია,
-   გვერდი აუარეთ ადაპტერში ან ეკრანში და upstream-ს მისი დამატება სთხოვეთ.
-3. ნაკრების ტექსტის ნაგულისხმევი მნიშვნელობები ინგლისურია (`label = "Loading"`, `loadingLabel = "Loading table"`…) — როდესაც ნაკრების კომპონენტი ტექსტს რენდერავს,
-   გადაეცით `useTranslations(...)`-იდან მიღებული ნათარგმნი სტრიქონები.
-4. Tailwind-ის utility-ებს ნაკრების კომპონენტების კლასებზე უპირატესობა აქვთ (ნაკრები აცხადებს
-   `@layer theme, base, components, utilities`-ს, ხოლო მისი წესები `components`-შია) — utility-ები გამოიყენეთ
-   ინტერვალებისა და განლაგებისთვის და არა ნაკრების კომპონენტების ფერების შესაცვლელად.
-5. სათაურები: `.ci-heading` (Inter, ასოთა დამატებითი დაშორების გარეშე) გვერდისა და სექციის სათაურებისთვის; `.ci-dashboard-display`
-   (Instrument Serif) — მხოლოდ დიდი, მეჩხერი საჩვენებელი ტექსტისთვის, როგორიცაა შეცდომის გვერდის სტატუსის კოდი.
-6. `tests/unit/dashboard-kit-sweep.test.ts` ნაკრების დანერგვას აკონტროლებს: `src/app`-ში ან `src/shared/components`-ში
-   Material-ის ლიგატურის `span` არ უნდა იყოს; dashboard-ის ხეში (`src/app/(dashboard)` და
-   `src/shared/components`) არ უნდა იყოს ნედლი `<select>`, `<textarea>` ან `<table>` და არც ხელით შექმნილი
-   `role="dialog"` ჩამოთვლილი გამონაკლისების მიღმა (`Select` ადაპტერის native განშტოება,
-   `RequestLoggerDetail`); იქ ყოველ ნედლ `<button>`-ს ან `<input>`-ს უნდა ჰქონდეს კომენტარი, რომელიც შეიცავს
-   `kit-exception:`-ს (მიზეზთან ერთად) და მის ზემოთ მაქსიმუმ 3 ხაზით ადრე სრულდება; პალიტრის ტონები და `dark:` ვარიანტები
-   დაშვებულია მხოლოდ ტესტში ჩამოთვლილ ფაილებში.
-7. PR-მდე შეამოწმეთ ორივე თემა და 390 px სიგანის viewport (ეკრანის ანაბეჭდებით); `tests/e2e/a11y.spec.ts`
+1. ტოკენები, არასდროს ლიტერალები. გამონაკლისები განზრახ არის დატოვებული: ყოველთვის მუქი
+   კონსოლის ტერმინალი და `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — კიტის
+   სტატუს-პალიტრის hex-ში გადაჭრილი ანარეკლი მათთვის, ვისაც ლიტერალური hex სჭირდება.
+   კატეგორიული პალიტრები აღარ არის გამონაკლისი: ისინი ეფუძნებიან კიტის ხუთ ჩარტ-ტოკენს
+   (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts`-ის მეშვეობით და,
+   მარშრუტიზაციის სტრატეგიებისთვის, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`-ის
+   მეშვეობით; ReactFlow-ის წიბოები და ორკესტრაციის კანვასი კითხულობს თემაზე მორგებულ
+   `--orch-status-*` ცვლადებს (`src/shared/components/flow/edgeStyles.ts`).
+2. არასდროს დააპატჩოთ `packages/ui-kit/src` ხელით: სინქრონიზაცია გააკეთეთ
+   `scripts/dev/sync-ui-kit.sh <commit>`-ით; pre-commit შემოწმება `npm run check:ui-kit-snapshot`
+   (`.husky/pre-commit`) ჩავარდება ნებისმიერ ბაიტზე, რომელიც განსხვავდება დაფიქსირებული upstream
+   კომიტისგან (ის გამოტოვებს გაფრთხილებით, როდესაც upstream კლონი, `UI_KIT_CLONE` ან
+   `_references/cheaper-inference-ui-kit`, არ არსებობს). როდესაც კიტს რაღაც აკლია, შემოუარეთ მას
+   ადაპტერში ან ეკრანში და სთხოვეთ ეს upstream-ს.
+3. კიტის ტექსტების ნაგულისხმევი მნიშვნელობები ინგლისურია (`label = "Loading"`,
+   `loadingLabel = "Loading table"`…) — გადასცეთ თარგმნილი სტრიქონები `useTranslations(...)`-დან
+   ყოველთვის, როდესაც კიტის კომპონენტი ტექსტს რენდერებს.
+4. Tailwind-ის უტილიტები უპირატესობენ კიტის კომპონენტის კლასებთან (კიტი აცხადებს
+   `@layer theme, base, components, utilities`-ს და მისი წესები `components`-შია) —
+   გამოიყენეთ უტილიტები დაშორებისა და განლაგებისთვის და არა კიტის კომპონენტების გადასაღებად.
+5. სათაურები: `.ci-heading` (Inter, ტრეკინგის გარეშე) გვერდისა და სექციების სათაურებისთვის;
+   `.ci-dashboard-display` (Instrument Serif) მხოლოდ დიდი, იშვიათად გამოყენებული დისპლე-ტექსტისთვის,
+   როგორიცაა შეცდომის გვერდის სტატუს-კოდი.
+6. `tests/unit/dashboard-kit-sweep.test.ts` იცავს კიტის დანერგვას: არ უნდა იყოს Material ligature
+   span `src/app`-ის ან `src/shared/components`-ის ქვეშ; დეშბორდის ხეში (`src/app/(dashboard)` და
+   `src/shared/components`) არ უნდა იყოს ნედლი `<select>`, `<textarea>` ან `<table>` და ხელით
+   დაწერილი `role="dialog"` ჩამოთვლილი გამონაკლისების გარეთ (`Select` ადაპტერის ნატიური ტოტი,
+   `RequestLoggerDetail`); იქ ყოველ ნედლ `<button>`-ს ან `<input>`-ს სჭირდება კომენტარი, რომელიც
+   შეიცავს `kit-exception:`-ს (მიზეზით) და მთავრდება მისგან მაქსიმუმ 3 ხაზით ზემოთ; პალიტრის
+   ელფერები და `dark:` ვარიანტები მხოლოდ იმ ფაილებში, რომლებსაც ტესტი ჩამოთვლის.
+7. შეამოწმეთ ორივე თემა და 390 px-ის ვიუპორტი PR-მდე (სკრინშოტები); `tests/e2e/a11y.spec.ts`
    უშვებს axe-ს.
 
 ## 3. ეკრანის დამატება

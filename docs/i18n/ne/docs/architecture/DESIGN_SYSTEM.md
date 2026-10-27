@@ -81,31 +81,35 @@
 
 ## 2. नियमहरू
 
-1. लिटरलहरू होइन, टोकनहरू प्रयोग गर्नुहोस्। जानाजानी राखिएका अपवादहरू: सधैँ-गाढा हुने कन्सोल टर्मिनल, `STATUS_HEX` (`src/shared/constants/statusColors.ts`) मार्फत ReactFlow SVG
-   स्ट्रोकहरू, र वर्गीकृत प्यालेटहरू
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) तथा
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`)।
-2. `packages/ui-kit/src` लाई कहिल्यै हातैले प्याच नगर्नुहोस्: `scripts/dev/sync-ui-kit.sh <commit>` मार्फत सिङ्क गर्नुहोस्; प्रि-कमिट गेट
-   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) पिन गरिएको अपस्ट्रिम कमिटभन्दा कुनै पनि बाइट
-   फरक भएमा असफल हुन्छ (अपस्ट्रिम क्लोन,
-   `UI_KIT_CLONE` वा `_references/cheaper-inference-ui-kit`, उपलब्ध नभएमा यसले चेतावनीसहित जाँच छोड्छ)। किटमा कुनै कुरा नभएमा,
-   एडाप्टर वा स्क्रिनमा वैकल्पिक समाधान प्रयोग गर्नुहोस् र त्यसका लागि अपस्ट्रिमसँग अनुरोध गर्नुहोस्।
-3. किटका पाठका पूर्वनिर्धारित मानहरू अंग्रेजीमा हुन्छन् (`label = "Loading"`, `loadingLabel = "Loading table"`…) — किट कम्पोनेन्टले पाठ रेन्डर गर्दा सधैँ
-   `useTranslations(...)` बाट अनुवादित स्ट्रिङहरू पठाउनुहोस्।
-4. Tailwind युटिलिटीहरूले किट कम्पोनेन्टका क्लासहरूलाई प्राथमिकतामा जित्छन् (किटले
-   `@layer theme, base, components, utilities` घोषणा गर्छ र यसका नियमहरू `components` मा हुन्छन्) — स्पेसिङ र लेआउटका लागि युटिलिटीहरू प्रयोग गर्नुहोस्,
-   किट कम्पोनेन्टहरूको रङ बदल्न होइन।
-5. शीर्षकहरू: पृष्ठ र खण्डका शीर्षकहरूका लागि `.ci-heading` (Inter, ट्र्याकिङबिना); `.ci-dashboard-display`
-   (Instrument Serif) केवल त्रुटि-पृष्ठको स्थिति कोडजस्ता ठूला र विरल डिस्प्ले पाठका लागि प्रयोग गर्नुहोस्।
-6. `tests/unit/dashboard-kit-sweep.test.ts` ले किटको प्रयोग सुनिश्चित गर्छ: `src/app` वा
-   `src/shared/components` अन्तर्गत Material ligature span हुनु हुँदैन; ड्यासबोर्ड ट्री (`src/app/(dashboard)` र
-   `src/shared/components`) मा कच्चा `<select>`, `<textarea>` वा `<table>` तथा सूचीबद्ध अपवादहरू (`Select` एडाप्टरको नेटिभ शाखा,
-   `RequestLoggerDetail`) बाहेक हातैले बनाइएको
-   `role="dialog"` हुनु हुँदैन; त्यहाँका प्रत्येक कच्चा `<button>` वा `<input>` भन्दा बढीमा 3 लाइन माथि समाप्त हुने,
-   कारणसहितको `kit-exception:` समावेश भएको टिप्पणी हुनुपर्छ; प्यालेटका ह्युहरू र `dark:` भेरियन्टहरू
-   परीक्षणले सूचीबद्ध गरेका फाइलहरूमा मात्र प्रयोग गर्न पाइन्छ।
-7. PR अघि दुवै थिम र 390 px भ्यूपोर्ट प्रमाणित गर्नुहोस् (स्क्रिनसटहरू); `tests/e2e/a11y.spec.ts` ले
-   axe चलाउँछ।
+1. टोकनहरू, कहिल्यै लिटरलहरू होइन। जानबूझेर राखिएका अपवादहरू: सधैं-गाढा कन्सोल टर्मिनल र
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), जुन लिटरल हेक्स चाहिने कलरहरूका लागि किट
+   स्टेटस प्यालेटको रिजल्भ-हेक्स मिरर हो। कोटिगत प्यालेटहरू अब अपवाद रहेनन्: ती किटका पाँच चार्ट
+   टोकनहरू (`--color-chart-1..5`) मा `src/shared/utils/categoricalPalette.ts` मार्फत र, राउटिङ
+   रणनीतिहरूका लागि, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` मार्फत चल्छन्;
+   ReactFlow एजहरू र अर्केस्ट्रेसन क्यानभासले थिम-सचेत `--orch-status-*` भेरिएबलहरू पढ्छन्
+   (`src/shared/components/flow/edgeStyles.ts`)।
+2. `packages/ui-kit/src` लाई कहिल्यै हातले प्याच नगर्नुहोस्: `scripts/dev/sync-ui-kit.sh <commit>`
+   ले सिङ्क गर्नुहोस्; प्रि-कमिट गेट `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) पिन
+   गरिएको अपस्ट्रिम कमिटभन्दा फरक हुने जुनसुकै बाइटमा फेल हुन्छ (अपस्ट्रिम क्लोन, `UI_KIT_CLONE` वा
+   `_references/cheaper-inference-ui-kit`, नभएकोमा चेतावनीसहित छोड्छ)। किटमा केही कुरा नभएमा,
+   एडाप्टर वा स्क्रिनभित्र वैकल्पिक उपायले काम गर्नुहोस् र अपस्ट्रिमसँग त्यसको माग गर्नुहोस्।
+3. किट टेक्स्ट डिफल्टहरू अंग्रेजी हुन्छन् (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   किट कम्पोनेन्टले टेक्स्ट रेन्डर गर्दा जहिले पनि `useTranslations(...)` बाट अनुवादित स्ट्रिङहरू
+   पास गर्नुहोस्।
+4. Tailwind युटिलिटीहरूले किट कम्पोनेन्ट क्लासहरूलाई जित्छन् (किटले
+   `@layer theme, base, components, utilities` घोषणा गर्छ र यसका नियमहरू `components` मा बस्छन्) —
+   स्पेसिङ र लेआउटका लागि युटिलिटीहरू प्रयोग गर्नुहोस्, किट कम्पोनेन्टहरूलाई फेरि रंग दिन होइन।
+5. शीर्षकहरू: पेज र सेक्सन शीर्षकहरूका लागि `.ci-heading` (Inter, ट्र्याकिङ बिना); एरर-पेज स्टेटस
+   कोड जस्ता ठूला, विरल डिस्प्ले टेक्स्टका लागि मात्र `.ci-dashboard-display` (Instrument Serif)।
+6. `tests/unit/dashboard-kit-sweep.test.ts` ले किट अपनाइएको कुराको रक्षा गर्छ: `src/app` वा
+   `src/shared/components` मुनि कुनै Material ligature span छैन; ड्यासबोर्ड ट्रीमा
+   (`src/app/(dashboard)` र `src/shared/components`) सूचीबद्ध अपवादहरू बाहिर कुनै कच्चा `<select>`,
+   `<textarea>` वा `<table>` छैन र कुनै हातले बनाइएको `role="dialog"` छैन (`Select` एडाप्टरको
+   नेटिभ शाखा, `RequestLoggerDetail`); त्यहाँ हरेक कच्चा `<button>` वा `<input>` लाई
+   `kit-exception:` समावेश भएको कमेन्ट (कारणसहित) चाहिन्छ जुन यसभन्दा बढीमा 3 लाइन माथि सकिएको
+   हुनुपर्छ; प्यालेट ह्यूहरू र `dark:` भेरिएन्टहरू केवल टेस्टले सूचीबद्ध गरेका फाइलहरूमा मात्र।
+7. PR अघि दुवै थिमहरू र 390 px भ्युपोर्ट प्रमाणित गर्नुहोस् (स्क्रिनसटहरू);
+   `tests/e2e/a11y.spec.ts` ले axe चलाउँछ।
 
 ## 3. स्क्रिन थप्ने तरिका
 

@@ -80,23 +80,13 @@
 
 ## 2. စည်းမျဉ်းများ
 
-1. Literal များကို မသုံးဘဲ token များကိုသာ သုံးပါ။ ရည်ရွယ်ချက်ရှိရှိ ခြွင်းချက်ထားသည့်အရာများမှာ အမြဲတမ်း dark ဖြစ်သော console terminal၊ `STATUS_HEX` (`src/shared/constants/statusColors.ts`) မှတစ်ဆင့် ReactFlow SVG
-   stroke များ၊ ထို့ပြင် categorical palette များဖြစ်သော
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) နှင့်
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`) တို့ဖြစ်သည်။
-2. `packages/ui-kit/src` ကို လက်ဖြင့် လုံးဝ patch မလုပ်ပါနှင့်။ `scripts/dev/sync-ui-kit.sh <commit>` ဖြင့် sync လုပ်ပါ။ pre-commit gate ဖြစ်သော `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) သည် pin လုပ်ထားသည့် upstream commit နှင့် byte တစ်ခုခု ကွာခြားပါက fail ဖြစ်မည် (upstream clone၊
-   `UI_KIT_CLONE` သို့မဟုတ် `_references/cheaper-inference-ui-kit` မရှိလျှင် warning ဖြင့် ကျော်သွားမည်)။ Kit တွင် လိုအပ်သည့်အရာ မရှိပါက adapter သို့မဟုတ် screen တွင် workaround လုပ်ပြီး upstream ထံ တောင်းဆိုပါ။
-3. Kit ၏ မူလ text များသည် အင်္ဂလိပ်ဘာသာဖြစ်သည် (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit component တစ်ခုက text render လုပ်သည့်အခါတိုင်း `useTranslations(...)` မှ ဘာသာပြန်ထားသော string များကို ပေးပို့ပါ။
-4. Tailwind utility များသည် kit component class များထက် ဦးစားပေးခံရသည် (kit က
-   `@layer theme, base, components, utilities` ဟု ကြေညာထားပြီး ၎င်း၏ rule များသည် `components` တွင် ရှိသည်) — spacing နှင့် layout အတွက် utility များကို သုံးပါ၊ kit component များကို အရောင်ပြန်ပြောင်းရန် မသုံးပါနှင့်။
-5. Heading များ—page နှင့် section title များအတွက် `.ci-heading` (Inter၊ tracking မပါ) ကို သုံးပါ။ error page ၏ status code ကဲ့သို့ ကြီးမားပြီး နေရာလွတ်များသော display text များအတွက်သာ `.ci-dashboard-display`
-   (Instrument Serif) ကို သုံးပါ။
-6. `tests/unit/dashboard-kit-sweep.test.ts` က kit အသုံးပြုမှုကို စောင့်ကြည့်ကာကွယ်သည်—`src/app` သို့မဟုတ် `src/shared/components` အောက်တွင် Material ligature span မရှိရ။ Dashboard tree (`src/app/(dashboard)` နှင့်
-   `src/shared/components`) တွင် raw `<select>`, `<textarea>` သို့မဟုတ် `<table>` မရှိရသလို စာရင်းပြုထားသော ခြွင်းချက်များ (`Select` adapter ၏ native branch၊
-   `RequestLoggerDetail`) ပြင်ပတွင် ကိုယ်တိုင်ရေးထားသော `role="dialog"` မရှိရ။ ထိုနေရာရှိ raw `<button>` သို့မဟုတ် `<input>` တစ်ခုစီ၏ အပေါ်ဘက် အများဆုံး 3 လိုင်းအတွင်းတွင် အကြောင်းပြချက်နှင့်အတူ
-   `kit-exception:` ပါဝင်သော comment တစ်ခု လိုအပ်သည်။ Palette hue များနှင့် `dark:` variant များကို test တွင် စာရင်းပြုထားသော file များ၌သာ သုံးရမည်။
-7. PR မတင်မီ theme နှစ်မျိုးလုံးနှင့် 390 px viewport ကို screenshot များဖြင့် စစ်ဆေးပါ။ `tests/e2e/a11y.spec.ts` က
-   axe ကို run သည်။
+1. Token များကိုသာ သုံးပါ၊ literal များ ဘယ်တော့မှ မသုံးပါနှင့်။ ရည်ရွယ်ချက်ဖြင့် ထားရှိထားသော ခြွင်းချက်များမှာ အမြဲမှောင်နေသော console terminal နှင့် `STATUS_HEX` (`src/shared/constants/statusColors.ts`) တို့ဖြစ်ပြီး၊ ၎င်းသည် literal hex လိုအပ်သော caller များအတွက် kit status palette ၏ resolved-hex mirror ဖြစ်သည်။ categorical palette များကမူ ခြွင်းချက် မဟုတ်တော့ပါ- ၎င်းတို့သည် `src/shared/utils/categoricalPalette.ts` မှတစ်ဆင့်၊ routing strategy များအတွက်မူ `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` မှတစ်ဆင့် kit ၏ chart token ငါးခု (`--color-chart-1..5`) ပေါ်တွင် အမှီပြုနေကြသည်။ ReactFlow edge များနှင့် orchestration canvas သည်မူ theme-aware `--orch-status-*` variable များကို (`src/shared/components/flow/edgeStyles.ts`) ဖတ်ရှုသည်။
+2. `packages/ui-kit/src` ကို လက်ဖြင့် ဘယ်တော့မှ patch မလုပ်ပါနှင့်- `scripts/dev/sync-ui-kit.sh <commit>` ဖြင့် sync လုပ်ပါ။ pre-commit gate ဖြစ်သော `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) သည် pin ချထားသော upstream commit နှင့် ကွာခြားသော byte တစ်ခုခု ရှိပါက fail ဖြစ်သည် (upstream clone ဖြစ်သော `UI_KIT_CLONE` သို့မဟုတ် `_references/cheaper-inference-ui-kit` မရှိပါက သတိပေးချက်ဖြင့် ကျော်ဖြတ်သွားသည်)။ kit တွင် တစ်ခုခု လိုအပ်နေပါက adapter သို့မဟုတ် screen ၌ workaround ဖြင့် ဖြေရှင်းပြီး upstream သို့ တောင်းဆိုပါ။
+3. Kit text default များသည် အင်္ဂလိပ်ဘာသာဖြစ်သည် (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit component တစ်ခုခုက text ကို render လုပ်သည့်အခါတိုင်း `useTranslations(...)` မှ ဘာသာပြန်ထားသော string များကို ပေးပါ။
+4. Tailwind utility များသည် kit component class များထက် ဦးစားရသည် (kit သည် `@layer theme, base, components, utilities` ကို declare လုပ်ထားပြီး ၎င်း၏ rule များသည် `components` ၌ ရှိသည်) — utility များကို spacing နှင့် layout အတွက် သုံးပါ၊ kit component များ၏ အရောင်ကို ပြန်လည်ပြောင်းလဲရန်အတွက် မဟုတ်ပါ။
+5. Heading များ- စာမျက်နှာနှင့် section ခေါင်းစဉ်များအတွက် `.ci-heading` (Inter, tracking မရှိ) ကို သုံးပါ။ error-page status code ကဲ့သို့ ကြီးမားပြီး နည်းပါးသော display text များအတွက်သာ `.ci-dashboard-display` (Instrument Serif) ကို သုံးပါ။
+6. `tests/unit/dashboard-kit-sweep.test.ts` သည် kit အသုံးပြုမှုကို စောင့်ကြည့်ကာကွယ်သည်- `src/app` သို့မဟုတ် `src/shared/components` အောက်တွင် Material ligature span မရှိရ၊ dashboard tree (`src/app/(dashboard)` နှင့် `src/shared/components`) ၌ raw `<select>`, `<textarea>` သို့မဟုတ် `<table>` မရှိရပါ၊ စာရင်းပြစားထားသော ခြွင်းချက်များ (`Select` adapter ၏ native branch၊ `RequestLoggerDetail`) အပြင် လက်ဖြင့် ပြုလုပ်ထားသော `role="dialog"` လည်း မရှိရပါ။ ထိုနေရာရှိ raw `<button>` သို့မဟုတ် `<input>` တိုင်းတွင် ၎င်း၏အထက် အများဆုံး 3 ကြောင်းအတွင်းတွင် ဆုံးသော `kit-exception:` (အကြောင်းပြချက်နှင့်အတူ) ပါဝင်သော comment တစ်ခု လိုအပ်သည်။ palette hue များနှင့် `dark:` variant များကို test ၌ စာရင်းပြစားထားသော ဖိုင်များတွင်သာ သုံးနိုင်သည်။
+7. PR မတင်မီ (screenshot များဖြင့်) theme နှစ်မျိုးလုံးနှင့် 390 px viewport ကို စစ်ဆေးပါ။ `tests/e2e/a11y.spec.ts` သည် axe ကို run သည်။
 
 ## 3. Screen တစ်ခု ထည့်သွင်းခြင်း
 
