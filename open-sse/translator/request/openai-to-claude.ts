@@ -838,13 +838,20 @@ function getContentBlocksFromMessage(
     // Signed-thinking continuity: the client (OpenAI Chat / Responses) never held the
     // signed blocks Claude produced for this tool turn, but claude-to-openai stored them
     // keyed by the tool_use ids. Restore them verbatim before the owning tool_use —
-    // only for the same provider + model + connection, only when this request has
-    // thinking on and the client sent no thinking block of its own, never for a
-    // video-derived request. A miss keeps the #5312 placeholder.
+    // only for MANUAL extended thinking (`type:"enabled"`), for the same provider +
+    // model + connection, only when the client sent no thinking block of its own,
+    // never for a video-derived request. A miss keeps the #5312 placeholder.
+    // #17324 recurrence (2026-10-27): adaptive-only models (Opus 4.7+/5.x, Fable 5)
+    // accept a tool_use turn with NO thinking block at all, but replaying stored
+    // signed blocks there breaks Anthropic's warm-cache block-equality whenever the
+    // restore hits/misses differently than the turn that warmed the cache (TTL,
+    // eviction, completed-turn rewrite) → 400 "latest assistant message cannot be
+    // modified". Same gate as the fabricated placeholder below.
     if (
       !isKimiCoding &&
       !thinkingBinding.disabled &&
       thinkingEnabledForRequest &&
+      thinkingTypeForRequest === "enabled" &&
       hasToolUseBlock &&
       !hasThinkingBlock
     ) {

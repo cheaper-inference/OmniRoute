@@ -26,6 +26,7 @@ const { stripHistoricalThinkingForSignatureRecovery } =
   await import("../../open-sse/handlers/chatCore/passthroughHelpers.ts");
 
 const MODEL = "claude-sonnet-4-5-20250929";
+const CONN = "conn-test";
 const THINKING_TEXT = "I should read the file first, then decide.";
 const SIGNATURE = "EqQBCkYIBhgCKkA_real_signature_part1_part2";
 
@@ -190,9 +191,9 @@ test.beforeEach(() => {
 });
 
 test("Chat client: signed thinking from the Claude stream is restored before the owning tool_use", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
 
-  const turn = assistantTurn(translateChatTurn(chatHistory()));
+  const turn = assistantTurn(translateChatTurn(chatHistory(), { connectionId: CONN }));
   assert.deepEqual(stripCacheControl(turn.content[0]), {
     type: "thinking",
     thinking: THINKING_TEXT,
@@ -211,9 +212,9 @@ test("Chat client: signed thinking from the Claude stream is restored before the
 });
 
 test("Chat client: interleaved thinking + redacted_thinking keep their exact order", () => {
-  streamClaudeToChat(claudeToolTurnEvents({ withRedacted: true }));
+  streamClaudeToChat(claudeToolTurnEvents({ withRedacted: true }), "claude", CONN);
 
-  const turn = assistantTurn(translateChatTurn(chatHistory()));
+  const turn = assistantTurn(translateChatTurn(chatHistory(), { connectionId: CONN }));
   assert.deepEqual(turn.content.slice(0, 2).map(stripCacheControl), [
     { type: "thinking", thinking: THINKING_TEXT, signature: SIGNATURE },
     { type: "redacted_thinking", data: "REDACTED_OPAQUE_DATA" },
@@ -244,18 +245,22 @@ test("#17324: a thinking block stored on one connection is NOT restored on anoth
     "no cross-connection restore and no fabricated placeholder on adaptive"
   );
 
-  // Same connection "A": restore still hits.
+  // Same connection "A": adaptive thinking no longer restores at all — Anthropic
+  // accepts the bare tool_use shape, and any replayed signed block breaks warm-cache
+  // block-equality (#17324 recurrence, 2026-10-27). Restore is manual-thinking-only.
   const ownTurn = assistantTurn(
     translateChatTurn(chatHistory(), {
       model: ADAPTIVE_MODEL,
       connectionId: "conn-org-a",
     })
   );
-  assert.deepEqual(stripCacheControl(ownTurn.content[0]), {
-    type: "thinking",
-    thinking: THINKING_TEXT,
-    signature: SIGNATURE,
-  });
+  assert.equal(
+    ownTurn.content.some(
+      (block) => block.type === "thinking" || block.type === "redacted_thinking"
+    ),
+    false,
+    "adaptive thinking never replays stored blocks, even bound to the same connection"
+  );
 });
 
 test("#17324: entries stored without connection info restore only when the replay is unbound too", () => {
@@ -271,7 +276,7 @@ test("#17324: entries stored without connection info restore only when the repla
 });
 
 test("the stream output itself is unchanged (no signature leaks to the client)", () => {
-  const chunks = streamClaudeToChat(claudeToolTurnEvents());
+  const chunks = streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
   const serialized = JSON.stringify(chunks);
   assert.equal(serialized.includes(SIGNATURE), false);
   assert.equal(serialized.includes("signature"), false);
@@ -282,6 +287,7 @@ test("Responses client: end-to-end claude→responses stream then responses→cl
     ...(initState(FORMATS.OPENAI_RESPONSES) as Record<string, unknown>),
     provider: "claude",
     toolNameMap: new Map(),
+    connectionId: CONN,
   };
   for (const event of claudeToolTurnEvents({ toolUseId: "toolu_02RESP" })) {
     translateResponse(FORMATS.CLAUDE, FORMATS.OPENAI_RESPONSES, event, state);
@@ -316,7 +322,9 @@ test("Responses client: end-to-end claude→responses stream then responses→cl
     },
     true,
     null,
-    "claude"
+    "claude",
+    null,
+    { signatureNamespace: CONN }
   ) as { messages: ClaudeMessage[]; thinking?: unknown };
 
   assert.ok(body.thinking, "precondition: thinking is enabled for the outbound request");
@@ -331,9 +339,11 @@ test("Responses client: end-to-end claude→responses stream then responses→cl
 });
 
 test("different model: nothing is restored (falls back to the #5312 placeholder)", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
 
-  const turn = assistantTurn(translateChatTurn(chatHistory(), { model: "claude-opus-4-5" }));
+  const turn = assistantTurn(
+    translateChatTurn(chatHistory(), { model: "claude-opus-4-5", connectionId: CONN })
+  );
   assert.equal(
     turn.content.some((block) => block.type === "thinking"),
     false
@@ -345,18 +355,20 @@ test("different model: nothing is restored (falls back to the #5312 placeholder)
 });
 
 test("dated response model vs undated request alias still binds to the same model", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
 
-  const turn = assistantTurn(translateChatTurn(chatHistory(), { model: "claude-sonnet-4-5" }));
+  const turn = assistantTurn(
+    translateChatTurn(chatHistory(), { model: "claude-sonnet-4-5", connectionId: CONN })
+  );
   assert.equal(turn.content[0].type, "thinking");
   assert.equal(turn.content[0].signature, SIGNATURE);
 });
 
 test("different provider: nothing is restored", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
 
   const turn = assistantTurn(
-    translateChatTurn(chatHistory(), { provider: "anthropic-compatible-other" })
+    translateChatTurn(chatHistory(), { provider: "anthropic-compatible-other", connectionId: CONN })
   );
   assert.equal(
     turn.content.some((block) => block.type === "thinking"),
@@ -365,9 +377,11 @@ test("different provider: nothing is restored", () => {
 });
 
 test("unknown / tampered tool_call id restores nothing", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
 
-  const turn = assistantTurn(translateChatTurn(chatHistory("toolu_TAMPERED")));
+  const turn = assistantTurn(
+    translateChatTurn(chatHistory("toolu_TAMPERED"), { connectionId: CONN })
+  );
   assert.equal(
     turn.content.some((block) => block.type === "thinking"),
     false
@@ -375,7 +389,7 @@ test("unknown / tampered tool_call id restores nothing", () => {
 });
 
 test("thinking disabled for the outbound request: nothing is restored", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
 
   const turn = assistantTurn(translateChatTurn(chatHistory(), { reasoningEffort: null }));
   assert.equal(
@@ -385,7 +399,7 @@ test("thinking disabled for the outbound request: nothing is restored", () => {
 });
 
 test("assistant turn without tool_calls restores nothing", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
 
   const turn = assistantTurn(
     translateChatTurn([
@@ -415,7 +429,7 @@ test("oversized thinking is never stored", () => {
 });
 
 test("a client-supplied signed thinking block wins over the stored one (no duplication)", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
 
   const messages = chatHistory();
   messages[1] = {
@@ -430,7 +444,7 @@ test("a client-supplied signed thinking block wins over the stored one (no dupli
 });
 
 test("expired entries are not restored", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
   const realNow = Date.now;
   try {
     const later = realNow() + store.CLAUDE_THINKING_MEMORY_TTL_MS + 1;
@@ -449,8 +463,8 @@ test("expired entries are not restored", () => {
 });
 
 test("signature recovery drops a server-restored block in the active cycle and forgets it", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
-  const translated = translateChatTurn(chatHistory());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
+  const translated = translateChatTurn(chatHistory(), { connectionId: CONN });
   assert.equal(assistantTurn(translated).content[0].type, "thinking");
   // Adaptive thinking (the mode verified live for #17324): a tool_use turn without a
   // precursor is valid there. Manual "enabled" thinking is covered by the next test.
@@ -490,8 +504,8 @@ test("signature recovery drops a server-restored block in the active cycle and f
 });
 
 test("signature recovery under manual extended thinking keeps the #5312 placeholder", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
-  const translated = translateChatTurn(chatHistory());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
+  const translated = translateChatTurn(chatHistory(), { connectionId: CONN });
   assert.equal(assistantTurn(translated).content[0].type, "thinking");
   const body = { ...translated, thinking: { type: "enabled", budget_tokens: 2048 } };
 
@@ -544,6 +558,7 @@ function nonStreamInput(overrides: Record<string, unknown> = {}) {
     sourceFormat: FORMATS.OPENAI,
     provider: "claude",
     model: MODEL,
+    connectionId: CONN,
     requestBody: { messages: [] },
     responseToolNameMap: null,
     requestToolIdentityMap: null,
@@ -563,7 +578,7 @@ test("non-streaming Claude response: signed thinking is stored and restored next
     "the client response never carries the signature"
   );
 
-  const turn = assistantTurn(translateChatTurn(chatHistory("toolu_03NS")));
+  const turn = assistantTurn(translateChatTurn(chatHistory("toolu_03NS"), { connectionId: CONN }));
   assert.deepEqual(stripCacheControl(turn.content[0]), {
     type: "thinking",
     thinking: THINKING_TEXT,
@@ -577,7 +592,7 @@ test("non-streaming video-transcript-sensitive response is never retained", () =
 });
 
 test("video-transcript-sensitive request never replays stored thinking", () => {
-  streamClaudeToChat(claudeToolTurnEvents());
+  streamClaudeToChat(claudeToolTurnEvents(), "claude", CONN);
 
   const body = translateRequest(
     FORMATS.OPENAI,
@@ -597,8 +612,8 @@ test("video-transcript-sensitive request never replays stored thinking", () => {
 });
 
 test("forgetClaudeThinkingForClientResponse drops entries for Chat and Responses bodies", () => {
-  streamClaudeToChat(claudeToolTurnEvents({ toolUseId: "toolu_chat" }));
-  streamClaudeToChat(claudeToolTurnEvents({ toolUseId: "toolu_resp" }));
+  streamClaudeToChat(claudeToolTurnEvents({ toolUseId: "toolu_chat" }), "claude", CONN);
+  streamClaudeToChat(claudeToolTurnEvents({ toolUseId: "toolu_resp" }), "claude", CONN);
   assert.equal(store.getClaudeThinkingStoreSizeForTests(), 2);
 
   store.forgetClaudeThinkingForClientResponse({

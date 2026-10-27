@@ -61,8 +61,8 @@ test("#15534 diagnostics compare signatures in-memory and emit only aggregate st
     toolResultTurns: 1,
   });
   assert.deepEqual(compareThinkingSignatures(ingress, outbound), {
-    unchanged: 1,
-    removed: 1,
+    unchanged: 2,
+    removed: 0,
     added: 0,
   });
   const event = buildThinkingSignatureDiagnosticsEvent({

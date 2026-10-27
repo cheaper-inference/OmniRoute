@@ -136,6 +136,7 @@ test("Anthropic thinking-modified recovery contract", async (t) => {
       blocks: [{ type: "thinking", thinking: "server-restored", signature: "RESTORED_SIG" }],
       provider: "claude",
       model: "claude-opus-5-5",
+      connectionId: "conn-recovery",
     });
     assert.equal(stored, true);
 

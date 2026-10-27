@@ -328,8 +328,11 @@ function hasNoSafeThinkingRecovery(content: unknown[]): boolean {
  * it cannot be resent regardless of how it became unreplayable. A `tool_use`
  * left in the same message stays without a precursor thinking block: that is
  * a valid Anthropic request shape (#17324/#17344 — re-injecting the
- * fabricated placeholder re-triggers the same 400). Earlier turns and any
- * trailing tool-result messages are untouched. Returns the original body
+ * fabricated placeholder re-triggers the same 400). Earlier assistant turns
+ * also drop store-restored blocks: Anthropic flags the modified message by
+ * cache warmth, not recency (#17324 recurrence 2026-10-27). Under manual
+ * extended thinking a tool_use turn keeps the #5312 placeholder instead
+ * (that mode requires a thinking precursor). Returns the original body
  * reference when there is nothing safe to recover.
  */
 export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
@@ -343,33 +346,53 @@ export function stripLatestAssistantThinkingForModifiedRecovery<T>(body: T): T {
   while (index >= 0 && messages[index]?.role !== "assistant") index -= 1;
   if (index < 0) return body;
 
-  const message = messages[index];
-  if (!message || !Array.isArray(message.content) || !message.content.some(isThinkingBlock)) {
-    return body;
-  }
-  // Dropping every block would create an invalid empty assistant message.
-  // Keep the original failure when there is no safe content to retry.
-  if (hasNoSafeThinkingRecovery(message.content)) return body;
-  // Manual extended thinking requires the latest assistant tool_use turn to open with a
-  // thinking block: dropping it would trade this 400 for "expected thinking ... found
-  // tool_use", and the fabricated placeholder re-triggers this same 400. Keep the
-  // original failure instead of retrying (only adaptive thinking was verified live).
-  if (isManualExtendedThinking(record) && hasBlock(message, "tool_use")) return body;
+  // #17324 recurrence (2026-10-27): Anthropic flags the message by cache-warmth, not
+  // recency — live 400s pointed at messages.1/messages.3 while the LATEST assistant
+  // message was clean, so the strip no-oped and the request failed with
+  // recoveryAttempted:false. Drop server-restored (store-provenance) thinking blocks
+  // from EVERY assistant turn; they are blocks the client never sent, so removing
+  // them is always a legal fallback shape on adaptive thinking. The latest assistant
+  // message additionally drops any non-restored thinking block (unchanged behavior).
+  const manualThinking = isManualExtendedThinking(record);
+  let changed = false;
+  const recoveredMessages = messages.map((message) => {
+    if (!message || message.role !== "assistant" || !Array.isArray(message.content)) {
+      return message;
+    }
+    const isLatestAssistant = message === messages[index];
+    if (!message.content.some(isThinkingBlock)) return message;
 
-  // The guards above exclude empty and already-normalized recovery bodies
-  // before downgrading stored blocks, which also forgets their cached entries.
-  const downgraded = downgradeRestoredClaudeThinking(message.content);
-  const base = (downgraded ?? message.content) as unknown[];
-  // #17324/#17344: a tool_use turn left with NO thinking block at all is a valid
-  // Anthropic request shape (verified live: assistant[tool_use] + thinking:adaptive →
-  // 200). Re-injecting the fabricated DEFAULT_THINKING_CLAUDE_SIGNATURE blob here
-  // re-creates the exact "latest assistant message cannot be modified" 400 this
-  // recovery exists to escape (the blob never matches what Anthropic actually signed
-  // for those tool_use ids while their cache is warm). Omit the placeholder.
-  const content = base.filter((block) => !isThinkingBlock(block));
+    if (isLatestAssistant) {
+      // Dropping every block would create an invalid empty assistant message.
+      // Keep the original failure when there is no safe content to retry.
+      if (hasNoSafeThinkingRecovery(message.content)) return message;
+      // Manual extended thinking requires the latest assistant tool_use turn to open
+      // with a thinking block: dropping it would trade this 400 for "expected thinking
+      // ... found tool_use", and the fabricated placeholder re-triggers this same 400.
+      // Keep the original failure instead of retrying (only adaptive verified live).
+      if (manualThinking && hasBlock(message, "tool_use")) return message;
+      const downgraded = downgradeRestoredClaudeThinking(message.content);
+      const base = (downgraded ?? message.content) as unknown[];
+      const content = base.filter((block) => !isThinkingBlock(block));
+      if (content.length === base.length && base === message.content) return message;
+      changed = true;
+      return { ...message, content: content as typeof message.content };
+    }
 
-  const recoveredMessages = messages.slice();
-  recoveredMessages[index] = { ...message, content: content as typeof message.content };
+    // Manual extended thinking keeps the same precursor rule on earlier turns in the
+    // active cycle: the mode rejects a tool_use turn with no thinking block, so those
+    // get the #5312 placeholder back (mirrors thinkingSignatureRecovery's semantics).
+    const downgraded = downgradeRestoredClaudeThinking(message.content, {
+      keepToolUsePlaceholder: manualThinking,
+    });
+    if (downgraded) {
+      changed = true;
+      return { ...message, content: downgraded as typeof message.content };
+    }
+    return message;
+  });
+
+  if (!changed) return body;
   return { ...record, messages: recoveredMessages } as T;
 }
 

@@ -149,8 +149,11 @@ export function storeClaudeThinkingBlocks(args: {
   const now = Date.now();
   const provider = normalizeProvider(args.provider);
   // #17324: thinking signatures are scoped to the producing OAuth org (connection),
-  // so the serving connection id is part of the binding.
+  // so the serving connection id is part of the binding. An entry captured without
+  // connection info has unknown provenance — storing it invites cross-org replay on
+  // the next request that is equally unbound (""==="" would match). Refuse.
   const connectionId = typeof args.connectionId === "string" ? args.connectionId : "";
+  if (connectionId.length === 0) return false;
   for (const toolUseId of toolUseIds) {
     deleteKey(toolUseId);
     entries.set(toolUseId, {

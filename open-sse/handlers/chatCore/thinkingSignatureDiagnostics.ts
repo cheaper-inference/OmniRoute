@@ -80,9 +80,22 @@ function collectSignatures(body: unknown): string[] {
     const content = (messages[index] as { content?: unknown } | null)?.content;
     if (!Array.isArray(content)) continue;
     for (const block of content.slice(0, MAX_TRACKED_BLOCKS_PER_TURN)) {
-      const candidate = block as { type?: unknown; signature?: unknown } | null;
+      const candidate = block as {
+        type?: unknown;
+        signature?: unknown;
+        data?: unknown;
+      } | null;
       if (candidate?.type === "thinking" && typeof candidate.signature === "string") {
         signatures.push(candidate.signature);
+      } else if (
+        // #17324 recurrence: the store-restored blocks ARE redacted_thinking — the
+        // live diff read 0/0/0 while outbound gained +3 redacted blocks. Opaque data
+        // blobs are not secrets (encrypted reasoning, org-scoped), only the thinking
+        // TEXT is; counts-only output stays privacy-safe.
+        candidate?.type === "redacted_thinking" &&
+        typeof candidate.data === "string"
+      ) {
+        signatures.push(candidate.data);
       }
     }
   }
