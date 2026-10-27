@@ -498,7 +498,7 @@ xos yordamchilardir (vosita sxemalari, fetch/TTS adapterlari, oʻziga xos xatti-
 (umumiy identifikatsiya yordamchisi) va `index.ts` (reyestr).
 
 > Eslatma: bu yerda koʻrsatilmagan provayderlarga umumiy OpenAI bilan mos
-> ijrochidan foydalanuvchi `default.ts` xizmat koʻrsatadi. Provayderlarning toʻliq katalogi (375 ta provayder)
+> ijrochidan foydalanuvchi `default.ts` xizmat koʻrsatadi. Provayderlarning toʻliq katalogi (376 ta provayder)
 > `src/shared/constants/providers.ts` faylida joylashgan.
 
 ### 4.3 `open-sse/translator/`

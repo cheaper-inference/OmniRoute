@@ -13727,6 +13727,11 @@ paths:
                     type: string
                     description: Latest published version, or "unavailable" when every lookup failed.
                   updateAvailable: { type: boolean }
+                  updateCheckDisabled:
+                    type: boolean
+                    description: >-
+                      True when OMNIROUTE_NO_UPDATE_NOTIFIER is set. No npm, GitHub or news lookup
+                      runs, `latest` is "unavailable" and `updateAvailable` is false.
                   channel:
                     type: string
                     enum: [npm, source, docker-compose]

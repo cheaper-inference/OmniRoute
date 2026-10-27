@@ -499,7 +499,7 @@ pr. udbyder (værktøjsskemaer, fetch/TTS-adaptere, handlere til særheder). Eks
 (delt identitetshjælper) og `index.ts` (register).
 
 > Bemærk: Udbydere, der ikke er angivet her, betjenes af `default.ts` ved hjælp af den generiske
-> OpenAI-kompatible eksekutor. Det fulde udbyderkatalog (375 udbydere) findes i
+> OpenAI-kompatible eksekutor. Det fulde udbyderkatalog (376 udbydere) findes i
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

@@ -39,7 +39,7 @@ Objektiv funksjonssammenligning mot populære AI-rutere med åpen kildekode.
 
 ## Når du bør velge OmniRoute
 
-- Du kjører selv-hosting og ønsker **maksimal leverandørdekning** (375 leverandører, 155 gratis katalogoppføringer uten autentisering)
+- Du kjører selv-hosting og ønsker **maksimal leverandørdekning** (376 leverandører, 155 gratis katalogoppføringer uten autentisering)
 - Du trenger en **innebygd MCP-server** (LLM-verktøy, minne og ferdigheter eksponert som verktøy)
 - Du trenger **A2A-protokoll** for agent-til-agent-arbeidsflyter
 - Du vil ha **skjult fingeravtrykk** (JA3/JA4) for å unngå oppdagelse fra oppstrøms CAPTCHA-er

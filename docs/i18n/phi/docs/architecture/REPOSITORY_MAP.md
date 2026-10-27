@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API ng component ng dashboard: mga adapter sa ibabaw ng `packages/ui-kit` — tingnan ang `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: mga pangalan ng icon na ginagamit ng mga screen → mga component ng Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **375 provider** na may Zod validation (pinagmumulan ng katotohanan)                                                         |
+| `constants/providers.ts`         | **376 provider** na may Zod validation (pinagmumulan ng katotohanan)                                                         |
 | `constants/cliTools.ts`          | Registry ng external na CLI tool                                                                                             |
 | `constants/routingStrategies.ts` | **20 diskarte sa routing** na may mga priyoridad                                                                             |
 | `constants/publicApiRoutes.ts`   | Mga route na nangangailangan ng Bearer auth (kumpara sa management auth)                                                     |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Mga external CLI integration + Internal OmniRoute CLI                                              |
 | `I18N.md`                   | Arkitektura ng i18n, pagdaragdag ng wika, 67 locale                                                |
 | `UNINSTALL.md`              | Mga hakbang para sa malinis na pag-uninstall                                                       |
-| `PROVIDER_REFERENCE.md`     | **Awtomatikong binuo** na catalog ng 375 provider (muling buuin: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Awtomatikong binuo** na catalog ng 376 provider (muling buuin: `npm run gen:provider-reference`) |
 
 ### Masusing pagtalakay sa mga subsystem
 

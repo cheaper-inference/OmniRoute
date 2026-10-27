@@ -506,7 +506,7 @@ narzędziami pomocniczymi poszczególnych dostawców (schematy narzędzi, adapte
 (współdzielone narzędzie pomocnicze tożsamości) i `index.ts` (rejestr).
 
 > Uwaga: dostawcy niewymienieni tutaj są obsługiwani przez `default.ts` przy użyciu ogólnego
-> modułu wykonawczego zgodnego z OpenAI. Pełny katalog dostawców (375 dostawców) znajduje się w
+> modułu wykonawczego zgodnego z OpenAI. Pełny katalog dostawców (376 dostawców) znajduje się w
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

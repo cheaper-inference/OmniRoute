@@ -376,7 +376,13 @@ export function openaiToClaudeResponse(chunk, state) {
   const choice = chunkChoice || state.pendingClaudeFinishChoice;
   if (!choice) return null;
   if (flushingPendingFinish) state.pendingClaudeFinishChoice = null;
-  const delta = choice.delta;
+  // The deferred choice was already processed on the pass that received it: its
+  // text / reasoning / tool-arg fragments were emitted then, and only the
+  // terminal blocks were held back for the real usage. Re-reading the delta
+  // here replays the trailing fragment a second time, so an OpenAI→Claude
+  // client that concatenates input_json_delta into one JSON string receives the
+  // final fragment twice and fails to parse the tool input.
+  const delta = flushingPendingFinish ? undefined : choice.delta;
   // First chunk - ALWAYS send message_start first
   if (!state.messageStartSent) {
     state.messageStartSent = true;

@@ -39,7 +39,7 @@ Objektivno poređenje funkcija u odnosu na popularne open-source AI rutere.
 
 ## Kada izabrati OmniRoute
 
-- Sami hostujete i želite **maksimalnu pokrivenost provajdera** (375 provajdera, 155 besplatnih stavki kataloga bez autentifikacije)
+- Sami hostujete i želite **maksimalnu pokrivenost provajdera** (376 provajdera, 155 besplatnih stavki kataloga bez autentifikacije)
 - Potreban vam je **ugrađeni MCP server** (LLM alati, memorija, veštine izložene kao alati)
 - Potreban vam je **A2A protokol** za tokove rada između agenata
 - Želite **prikrivanje otiska** (JA3/JA4) da biste izbegli otkrivanje od strane upstream CAPTCHA provera

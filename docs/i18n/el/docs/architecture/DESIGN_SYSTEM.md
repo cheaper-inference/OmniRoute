@@ -81,31 +81,36 @@
 
 ## 2. Κανόνες
 
-1. Tokens, ποτέ literals. Εξαιρέσεις που διατηρούνται σκόπιμα: το πάντα σκοτεινό τερματικό της κονσόλας, τα SVG
-   strokes του ReactFlow μέσω του `STATUS_HEX` (`src/shared/constants/statusColors.ts`) και οι κατηγορικές παλέτες
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) και
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Ποτέ μην τροποποιείτε το `packages/ui-kit/src` με το χέρι: συγχρονίστε το με `scripts/dev/sync-ui-kit.sh <commit>`· ο
-   έλεγχος pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) αποτυγχάνει για οποιοδήποτε byte
-   διαφέρει από το καρφιτσωμένο upstream commit (παραλείπεται με προειδοποίηση όταν απουσιάζει το upstream clone,
-   `UI_KIT_CLONE` ή `_references/cheaper-inference-ui-kit`). Όταν λείπει κάτι από το kit,
-   παρακάμψτε το στον adapter ή στην οθόνη και ζητήστε το από το upstream.
-3. Οι προεπιλογές κειμένου του kit είναι στα Αγγλικά (`label = "Loading"`, `loadingLabel = "Loading table"`…) — περάστε μεταφρασμένες
-   συμβολοσειρές από το `useTranslations(...)` κάθε φορά που ένα component του kit αποδίδει κείμενο.
-4. Τα utilities του Tailwind υπερισχύουν των κλάσεων των components του kit (το kit δηλώνει
-   `@layer theme, base, components, utilities` και οι κανόνες του βρίσκονται στο `components`) — χρησιμοποιήστε utilities για
-   αποστάσεις και διάταξη, όχι για να αλλάξετε τα χρώματα των components του kit.
+1. Tokens, ποτέ literals. Εξαιρέσεις που τηρούνται σκόπιμα: το πάντα σκοτεινό τερματικό της κονσόλας και
+   το `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ο καθρέφτης resolved-hex της παλέτας κατάστασης
+   του kit για καλούντες που χρειάζονται ένα literal hex. Οι κατηγορικές παλέτες δεν αποτελούν πλέον εξαίρεση:
+   βασίζονται στα πέντε chart tokens του kit (`--color-chart-1..5`) μέσω του
+   `src/shared/utils/categoricalPalette.ts` και, για τις στρατηγικές δρομολόγησης,
+   του `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`· τα edges του ReactFlow και ο καμβάς
+   ενορχήστρωσης διαβάζουν τις theme-aware μεταβλητές `--orch-status-*`
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Ποτέ μην επιδιορθώνετε το `packages/ui-kit/src` χειροκίνητα: συγχρονίστε με
+   `scripts/dev/sync-ui-kit.sh <commit>`· η πύλη pre-commit `npm run check:ui-kit-snapshot`
+   (`.husky/pre-commit`) αποτυγχάνει σε οποιοδήποτε byte διαφέρει από το pinned upstream commit
+   (παραλείπεται με προειδοποίηση όταν το upstream clone, `UI_KIT_CLONE` ή
+   `_references/cheaper-inference-ui-kit`, απουσιάζει). Όταν στο kit λείπει κάτι, βρείτε λύση
+   στον adapter ή στην οθόνη και ζητήστε το από το upstream.
+3. Τα προεπιλεγμένα κείμενα του kit είναι στα Αγγλικά (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   περνάτε μεταφρασμένα strings από το `useTranslations(...)` κάθε φορά που ένα component του kit αποδίδει κείμενο.
+4. Τα Tailwind utilities υπερισχύουν των κλάσεων των components του kit (το kit δηλώνει
+   `@layer theme, base, components, utilities` και οι κανόνες του ζουν στο `components`) — χρησιμοποιήστε
+   utilities για spacing και layout, όχι για να ξαναχρωματίσετε components του kit.
 5. Επικεφαλίδες: `.ci-heading` (Inter, χωρίς tracking) για τίτλους σελίδων και ενοτήτων· `.ci-dashboard-display`
-   (Instrument Serif) μόνο για μεγάλο, αραιό κείμενο προβολής, όπως ο κωδικός κατάστασης στη σελίδα σφάλματος.
-6. Το `tests/unit/dashboard-kit-sweep.test.ts` επιβάλλει την υιοθέτηση του kit: κανένα span ligature του Material κάτω από
-   τα `src/app` ή `src/shared/components`· στο δέντρο του dashboard (`src/app/(dashboard)` και
-   `src/shared/components`) κανένα ανεπεξέργαστο `<select>`, `<textarea>` ή `<table>` και κανένα χειροποίητο
-   `role="dialog"` εκτός των καταγεγραμμένων εξαιρέσεων (το native branch του adapter `Select`,
-   `RequestLoggerDetail`)· κάθε ανεπεξέργαστο `<button>` ή `<input>` εκεί χρειάζεται ένα σχόλιο που να περιέχει
-   `kit-exception:` (με την αιτιολογία) και να τελειώνει το πολύ 3 γραμμές πιο πάνω· αποχρώσεις παλέτας και παραλλαγές `dark:`
-   επιτρέπονται μόνο στα αρχεία που παραθέτει το test.
-7. Επαληθεύστε και τα δύο themes και το viewport των 390 px πριν από ένα PR (στιγμιότυπα οθόνης)· το `tests/e2e/a11y.spec.ts` εκτελεί
-   το axe.
+   (Instrument Serif) μόνο για μεγάλο, αραιό display κείμενο όπως ο κωδικός κατάστασης της σελίδας σφάλματος.
+6. Το `tests/unit/dashboard-kit-sweep.test.ts` προστατεύει την υιοθέτηση του kit: κανένα Material ligature span
+   κάτω από `src/app` ή `src/shared/components`· στο δέντρο του dashboard (`src/app/(dashboard)` και
+   `src/shared/components`) κανένα γυμνό `<select>`, `<textarea>` ή `<table>` και κανένα χειροποίητο
+   `role="dialog"` εκτός των αναγραφόμενων εξαιρέσεων (ο native κλάδος του adapter `Select`,
+   το `RequestLoggerDetail`)· κάθε γυμνό `<button>` ή `<input>` εκεί χρειάζεται σχόλιο που περιέχει
+   `kit-exception:` (με την αιτιολογία) και τελειώνει το πολύ 3 γραμμές πιο πάνω· αποχρώσεις παλέτας και
+   παραλλαγές `dark:` μόνο στα αρχεία που παραθέτει το test.
+7. Επαληθεύστε και τα δύο θέματα και το viewport των 390 px πριν από ένα PR (screenshots)· το
+   `tests/e2e/a11y.spec.ts` τρέχει axe.
 
 ## 3. Προσθήκη οθόνης
 

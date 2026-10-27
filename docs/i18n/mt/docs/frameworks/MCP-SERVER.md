@@ -72,6 +72,16 @@ curl -i \
 
 Ċavetta li mhijiex manage (jew ebda Bearer) terġa `403 LOCAL_ONLY`. Il-prefiss wieħed `/api/cli-tools/runtime/*` huwa apposta mhux baxx passabbli — ara [Livelli tal-Gwardja tal-rott — Ħlas tal-iskop manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Validazzjoni tal-Origin
+
+Wara l-awtentikazzjoni, kull talba lejn `/api/mcp/*` — it-transports u r-rotot ta' ġestjoni bħal `status`, `tools`, `audit`, `restart` — għandha l-header `Origin` tagħha vvalidata, ikun min ikun is-sejjieħ (ċavetta API, token tas-CLI, sessjoni tad-dashboard, jew loopback anonimu bil-login mitfi). Din hija l-protezzjoni kontra DNS rebinding li teħtieġ l-ispeċifikazzjoni MCP Streamable HTTP.
+
+- **L-ebda header `Origin`** → permess. Is-CLI ta' OmniRoute, l-SDK u l-klijenti IDE ma jibagħtuhiex.
+- **`Origin` permess** → `localhost` / `127.0.0.1` / `[::1]` fuq kwalunkwe port, jew l-oriġini pubblika ta' OmniRoute stess: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, l-oriġini mgħoddija minn reverse proxy fdat (`OMNIROUTE_TRUST_PROXY`, biss meta ma jkunx issettjat base URL), jew host IP loopback/LAN aċċessat direttament. Il-header `Host` waħdu qatt ma jagħmel oriġini fdata.
+- **Kwalunkwe `Origin` ieħor, inkluż `null`** → `403` b'korp ta' żball JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Sessjoni tad-dashboard li tippreżenta token CSRF validu għadha tiġi aċċettata, bħal fil-kitbiet l-oħra tad-dashboard.
+
+Klijent MCP tal-browser servut wara reverse proxy jeħtieġ `OMNIROUTE_PUBLIC_BASE_URL`; m'hemm l-ebda lista ta' permess għal oriġini oħra. Il-preflight CORS (`OPTIONS`) ma jiġix iċċekkjat għall-Origin; it-talba ta' wara iva.
+
 ## Konfigurazzjoni tal-IDE
 
 Ara [Konfigurazjoni tal-Klijent MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) għal Claude Desktop,
