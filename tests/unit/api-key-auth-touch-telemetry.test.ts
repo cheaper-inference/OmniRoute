@@ -21,7 +21,13 @@ function resetStorage() {
   delete process.env.OMNIROUTE_API_KEY;
   delete process.env.ROUTER_API_KEY;
   delete process.env.OMNIROUTE_PEER_STAMP_TOKEN;
+  delete process.env.API_KEY_AUDIT_CLIENT_DETAILS_ENABLED;
   process.env.REQUIRE_API_KEY = "true";
+}
+
+/** Opt in to recording the client IP and user-agent on auth-touch rows. */
+function enableClientDetails() {
+  process.env.API_KEY_AUDIT_CLIENT_DETAILS_ENABLED = "true";
 }
 
 test.beforeEach(resetStorage);
@@ -69,6 +75,7 @@ function authTouchRows() {
 }
 
 test("successful discovery auth records bounded metadata without the credential or query", async () => {
+  enableClientDetails();
   const created = await apiKeysDb.createApiKey("operator discovery", "machine-auth-touch");
   const metadata = await apiKeysDb.getApiKeyMetadata(created.key);
   assert.ok(metadata?.keyHash);
@@ -120,6 +127,7 @@ test("successful discovery auth records bounded metadata without the credential 
 });
 
 test("multi-credential and path-token auth audit only the credential that validated", async () => {
+  enableClientDetails();
   const created = await apiKeysDb.createApiKey("alternate credential", "machine-alt-touch");
   const staleBearer = "stale-claude-session-secret";
   const policy = await loadPolicy();
@@ -157,6 +165,7 @@ test("multi-credential and path-token auth audit only the credential that valida
 });
 
 test("trusted proxy forwarding is recorded while a direct peer cannot spoof it", async () => {
+  enableClientDetails();
   const created = await apiKeysDb.createApiKey("proxy attribution", "machine-proxy-touch");
   const policy = await loadPolicy();
   const headers = new Headers({
@@ -200,6 +209,62 @@ test("trusted proxy forwarding is recorded while a direct peer cannot spoof it",
   assert.deepEqual(ips, ["198.51.100.21", "198.51.100.22", "203.0.113.44", "203.0.113.45"]);
 });
 
+test("with API_KEY_AUDIT_CLIENT_DETAILS_ENABLED off (default) the touch is recorded without IP or user-agent", async () => {
+  const created = await apiKeysDb.createApiKey("no client details", "machine-no-details");
+  const policy = await loadPolicy();
+  const outcome = await policy.evaluate(
+    context({
+      headers: new Headers({
+        authorization: `Bearer ${created.key}`,
+        "user-agent": "Codex/9.9 private-client",
+        "x-forwarded-for": "203.0.113.77",
+      }),
+      ip: "198.51.100.30",
+    })
+  );
+
+  assert.equal(outcome.allow, true);
+  const rows = authTouchRows();
+  assert.equal(rows.length, 1, "the key usage itself is still audited");
+  const [row] = rows;
+  assert.equal(row.target, created.id);
+  assert.equal(row.ip, null, "no client IP without the opt-in flag");
+  assert.deepEqual(row.metadata, { method: "GET", path: "/api/v1/models", userAgent: null });
+  const raw = JSON.stringify(
+    core
+      .getDbInstance()
+      .prepare("SELECT * FROM audit_log WHERE action = ?")
+      .get(compliance.API_KEY_AUTH_TOUCH_ACTION)
+  );
+  assert.doesNotMatch(raw, /198\.51\.100\.30|203\.0\.113\.77/);
+  assert.doesNotMatch(raw, /private-client/);
+});
+
+test("with API_KEY_AUDIT_CLIENT_DETAILS_ENABLED on the touch records the client IP and user-agent", async () => {
+  enableClientDetails();
+  const created = await apiKeysDb.createApiKey("client details", "machine-details");
+  const policy = await loadPolicy();
+  const outcome = await policy.evaluate(
+    context({
+      headers: new Headers({
+        authorization: `Bearer ${created.key}`,
+        "user-agent": "Codex/9.9 private-client",
+      }),
+      ip: "198.51.100.31",
+    })
+  );
+
+  assert.equal(outcome.allow, true);
+  const [row] = authTouchRows();
+  assert.ok(row);
+  assert.equal(row.ip, "198.51.100.31");
+  assert.deepEqual(row.metadata, {
+    method: "GET",
+    path: "/api/v1/models",
+    userAgent: "Codex/9.9 private-client",
+  });
+});
+
 test("failed auth, inference POSTs, noLog keys, and environment keys produce no touch", async () => {
   const policy = await loadPolicy();
 
@@ -235,6 +300,7 @@ test("failed auth, inference POSTs, noLog keys, and environment keys produce no 
 });
 
 test("a failure inside the touch helpers never changes the auth outcome of a valid key", async () => {
+  enableClientDetails();
   const created = await apiKeysDb.createApiKey("audit-failure", "machine-audit-failure");
   // Headers whose user-agent read throws: the touch path reads it after validation,
   // the credential extraction does not, so only the audit step can fail here.

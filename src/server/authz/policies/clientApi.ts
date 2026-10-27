@@ -1,7 +1,7 @@
 import { isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth.ts";
 import { recordApiKeyAuthTouch } from "@/lib/compliance/index";
 import { classifyIpScope, getClientIpFromRequest } from "@/lib/ipUtils";
-import { isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
+import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { extractApiKeyCandidates } from "@/sse/services/clientApiKeyResolver.ts";
 import type { AuthOutcome, PolicyContext, RoutePolicy } from "../context";
 import { allow, reject } from "../context";
@@ -54,9 +54,16 @@ function getAuthTouchClientIp(ctx: PolicyContext): string {
 }
 
 /**
+ * Opt-in (default off): record the caller's IP and user-agent on auth-touch rows.
+ * Off, the row still records which key was used, when, and on which path.
+ */
+export const API_KEY_AUDIT_CLIENT_DETAILS_FLAG = "API_KEY_AUDIT_CLIENT_DETAILS_ENABLED";
+
+/**
  * Best-effort audit of a successful GET/HEAD API-key authentication (metadata and
  * discovery reads that never reach the inference call log). Honours noLog keys and
  * the env key, and redacts every presented credential from the recorded path/UA.
+ * Client IP and user-agent are recorded only with API_KEY_AUDIT_CLIENT_DETAILS_FLAG on.
  */
 async function recordClientApiAuthTouch(
   ctx: PolicyContext,
@@ -71,15 +78,18 @@ async function recordClientApiAuthTouch(
     const { getApiKeyMetadata } = await import("../../../lib/db/apiKeys");
     const metadata = await getApiKeyMetadata(credential);
     if (!metadata || metadata.id === "env-key" || metadata.noLog === true) return;
+    const withClientDetails = isFeatureFlagEnabled(API_KEY_AUDIT_CLIENT_DETAILS_FLAG);
     recordApiKeyAuthTouch({
       apiKeyId: metadata.id,
       method,
       normalizedPath: redactCredentials(ctx.classification.normalizedPath, credentials) || "/",
-      ipAddress: getAuthTouchClientIp(ctx),
-      userAgent: redactCredentials(ctx.request.headers.get("user-agent"), [
-        ...credentials,
-        metadata.keyHash,
-      ]),
+      ipAddress: withClientDetails ? getAuthTouchClientIp(ctx) : null,
+      userAgent: withClientDetails
+        ? redactCredentials(ctx.request.headers.get("user-agent"), [
+            ...credentials,
+            metadata.keyHash,
+          ])
+        : null,
       requestId: ctx.requestId,
     });
   } catch {
