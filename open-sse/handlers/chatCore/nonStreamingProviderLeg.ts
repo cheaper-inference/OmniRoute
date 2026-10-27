@@ -36,6 +36,7 @@ import { isEmptyContentResponse } from "../../services/errorClassifier.ts";
 import { createRequestFamilyFallback } from "../../services/modelFamilyFallbackPolicy.ts";
 import { hasTrustedEmptyTurn } from "../../utils/emptyTurnPolicy.ts";
 import { FORMATS } from "../../translator/formats.ts";
+import { scopeGeminiThoughtSignatureNamespace } from "../../services/geminiThoughtSignatureStore.ts";
 import { hasActiveClaudeThinking } from "../../utils/thinkingBudget.ts";
 
 /* -- exported types -------------------------------------------------------- */
@@ -293,6 +294,7 @@ function finishOk(
     model: params.model,
     requestBody: params.requestBody,
     clientRequestBody: input.sourceBody ?? null,
+    signatureNamespace: scopeGeminiThoughtSignatureNamespace(params.connectionId, params.model),
     historyMessages:
       (input.translatedBody as { messages?: unknown[] } | null | undefined)?.messages ??
       input.reasoningReplayHistory ??

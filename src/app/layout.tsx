@@ -12,9 +12,14 @@ import { PwaRegister } from "@/shared/components/PwaRegister";
 import { LocaleAutoDetect } from "@/shared/components/LocaleAutoDetect";
 import { HIDDEN_TAB_REVEAL_SCRIPT } from "@/shared/utils/hiddenTabReveal";
 import { BasePathNetworkProvider } from "@/shared/components/BasePathNetworkProvider";
+import { PWA_THEME_COLORS } from "@/shared/constants/pwaThemeColors";
 
 export const viewport: Viewport = {
-  themeColor: "#0b0f1a",
+  // Kit page background per colour scheme (KEA-7886 P9; the pre-kit navy is gone).
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: PWA_THEME_COLORS.light },
+    { media: "(prefers-color-scheme: dark)", color: PWA_THEME_COLORS.dark },
+  ],
   viewportFit: "cover",
 };
 

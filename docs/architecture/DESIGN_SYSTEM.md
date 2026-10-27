@@ -82,10 +82,13 @@ lastUpdated: 2026-10-22
 
 ## 2. Rules
 
-1. Tokens, never literals. Exceptions kept on purpose: the always-dark console terminal, ReactFlow SVG
-   strokes via `STATUS_HEX` (`src/shared/constants/statusColors.ts`), and the categorical palettes
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) and
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
+1. Tokens, never literals. Exceptions kept on purpose: the always-dark console terminal and
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), the resolved-hex mirror of the kit status
+   palette for callers that need a literal hex. The categorical palettes are no exception any more:
+   they ride on the kit's five chart tokens (`--color-chart-1..5`) through
+   `src/shared/utils/categoricalPalette.ts` and, for routing strategies,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges and the orchestration
+   canvas read the theme-aware `--orch-status-*` variables (`src/shared/components/flow/edgeStyles.ts`).
 2. Never patch `packages/ui-kit/src` by hand: sync with `scripts/dev/sync-ui-kit.sh <commit>`; the
    pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) fails on any byte that
    differs from the pinned upstream commit (it skips with a warning when the upstream clone,

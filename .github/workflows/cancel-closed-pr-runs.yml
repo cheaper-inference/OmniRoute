@@ -1,0 +1,42 @@
+name: Cancel runs of closed PRs
+
+# A closed PR (merged or not) never gets a newer run on its ref, so the per-ref
+# `concurrency` + cancel-in-progress in ci.yml / quality.yml never supersedes its runs
+# and they keep their place in the hosted-runner queue. On 2026-10-26, 34 of 229 queued
+# PR runs belonged to closed PRs or superseded heads while the org's Free plan allows 20
+# concurrent hosted jobs. This job only calls the Actions API: it never checks out or runs
+# the PR's code. `pull_request` (not `_target`): fork PRs get a read-only token and are
+# skipped, which is fine — their runs wait for maintainer approval anyway.
+
+on:
+  pull_request:
+    types: [closed]
+
+permissions:
+  contents: read
+
+jobs:
+  cancel:
+    name: Cancel queued runs of this PR
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+          sparse-checkout: scripts/ci/cancel-closed-pr-runs.mjs
+          sparse-checkout-cone-mode: false
+      - name: Cancel this PR's queued and running workflow runs
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          SELF_RUN_ID: ${{ github.run_id }}
+        run: node scripts/ci/cancel-closed-pr-runs.mjs

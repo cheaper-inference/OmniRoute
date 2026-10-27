@@ -68,13 +68,21 @@ test("resolveTargetModel correctly maps OmniRoute auto groups to active provider
   assert.equal(resolveTargetModel("Auto: Best Coding (OmniRoute)"), "mistral/codestral-latest");
   assert.equal(
     resolveTargetModel("auto/best-reasoning"),
-    "nvidia/nvidia/nemotron-3-super-120b-a12b"
+    "nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b"
   );
   assert.equal(resolveTargetModel("auto/best-free"), "groq/qwen/qwen3.8-27b");
 });
 
 test("resolveTargetModel self-heals retired models and prevents upstream 410 crashes", () => {
   // Deprecated/retired on NVIDIA NIM
+  assert.equal(
+    resolveTargetModel("nvidia/nvidia/nemotron-3-super-120b-a12b"),
+    "nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b"
+  );
+  assert.equal(
+    resolveTargetModel("nvidia/nemotron-3-super-120b-a12b"),
+    "nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b"
+  );
   assert.equal(
     resolveTargetModel("nvidia/deepseek-ai/deepseek-v4-pro-0813"),
     "groq/openai/gpt-oss-120b"

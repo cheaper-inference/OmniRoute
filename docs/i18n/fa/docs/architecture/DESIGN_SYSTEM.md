@@ -86,29 +86,37 @@
 
 ## 2. قوانین
 
-1. از توکنها استفاده کنید، نه مقادیر صریح. استثناهایی که عمداً حفظ شدهاند: ترمینال کنسولِ همیشهتیره، خطوط SVG در ReactFlow از طریق `STATUS_HEX` (`src/shared/constants/statusColors.ts`)، و پالتهای دستهبندیشدهٔ
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) و
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. هرگز `packages/ui-kit/src` را بهصورت دستی وصله نکنید: آن را با `scripts/dev/sync-ui-kit.sh <commit>` همگامسازی کنید؛ دروازهٔ پیش از commit یعنی
-   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) در صورت تفاوت حتی یک بایت با commit بالادستیِ سنجاقشده شکست میخورد (اگر کلون بالادستی،
-   `UI_KIT_CLONE` یا `_references/cheaper-inference-ui-kit`، موجود نباشد، با یک هشدار از بررسی صرفنظر میکند). وقتی چیزی در کیت وجود ندارد،
-   در آداپتور یا صفحه راهحلی جایگزین پیادهسازی کنید و آن را از بالادست درخواست کنید.
-3. متنهای پیشفرض کیت انگلیسی هستند (`label = "Loading"`، `loadingLabel = "Loading table"` و غیره) — هرگاه یکی از کامپوننتهای کیت متنی را رندر میکند، رشتههای ترجمهشده را از
-   `useTranslations(...)` به آن ارسال کنید.
-4. utilityهای Tailwind بر کلاسهای کامپوننتهای کیت اولویت دارند (کیت
-   `@layer theme, base, components, utilities` را تعریف میکند و قواعد آن در `components` قرار دارند) — از utilityها برای
-   فاصلهگذاری و چیدمان استفاده کنید، نه برای تغییر دوبارهٔ رنگ کامپوننتهای کیت.
-5. عنوانها: `.ci-heading` (Inter، بدون فاصلهگذاری حروف) برای عنوان صفحهها و بخشها؛ `.ci-dashboard-display`
-   (Instrument Serif) فقط برای متن نمایشی بزرگ و کمتراکم، مانند کد وضعیت صفحهٔ خطا.
-6. `tests/unit/dashboard-kit-sweep.test.ts` بر پذیرش کیت نظارت میکند: هیچ span مربوط به ligatureهای Material در
-   `src/app` یا `src/shared/components` مجاز نیست؛ در درخت داشبورد (`src/app/(dashboard)` و
-   `src/shared/components`) هیچ `<select>`، `<textarea>` یا `<table>` خام و هیچ
-   `role="dialog"` دستساز خارج از استثناهای فهرستشده (شاخهٔ بومی آداپتور `Select`،
-   `RequestLoggerDetail`) مجاز نیست؛ هر `<button>` یا `<input>` خام در آنجا باید دارای توضیحی شامل
-   `kit-exception:` (همراه با دلیل) باشد که حداکثر ۳ خط بالاتر از آن پایان یابد؛ تهرنگهای پالت و گونههای `dark:`
-   فقط در فایلهایی مجازند که تست فهرست کرده است.
-7. پیش از PR، هر دو تم و viewport با عرض 390 px را بررسی کنید (با اسکرینشات)؛ `tests/e2e/a11y.spec.ts`
-   axe را اجرا میکند.
+1. توکنها، هرگز لیترال نه. استثناهایی که عمداً نگه داشته شدهاند: ترمینال کنسولِ همیشهتیره و
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`)، که بازتاب hex نهاییِ پالت وضعیت کیت
+   برای فراخوانندگانی است که به یک hex لیترال نیاز دارند. پالتهای مقولهای دیگر استثنا نیستند:
+   آنها از طریق `src/shared/utils/categoricalPalette.ts` و، برای راهبردهای مسیریابی،
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` روی پنج توکن نمودار کیت
+   (`--color-chart-1..5`) سوار میشوند؛ یالهای ReactFlow و بوم ارکستراسیون، متغیرهای آگاه از تم
+   `--orch-status-*` را میخوانند (`src/shared/components/flow/edgeStyles.ts`).
+2. هرگز `packages/ui-kit/src` را دستی وصله نکنید: با `scripts/dev/sync-ui-kit.sh <commit>`
+   همگامسازی کنید؛ دریچهٔ pre-commit یعنی `npm run check:ui-kit-snapshot` (`.husky/pre-commit`)
+   روی هر بایتی که با کامیت سنجاقشدهٔ بالادست متفاوت باشد شکست میخورد (وقتی کلون بالادست، یعنی
+   `UI_KIT_CLONE` یا `_references/cheaper-inference-ui-kit`، وجود نداشته باشد، با یک هشدار از آن
+   صرفنظر میکند). وقتی کیت چیزی را ندارد، در آداپتور یا صفحه دورش بزنید و آن را از بالادست
+   بخواهید.
+3. پیشفرضهای متنی کیت انگلیسی است (`label = "Loading"`، `loadingLabel = "Loading table"` و…) —
+   هر وقت یک کامپوننت کیت متنی رندر میکند، رشتههای ترجمهشده را از `useTranslations(...)` به آن
+   پاس بدهید.
+4. یوتیلیتیهای Tailwind بر کلاسهای کامپوننت کیت غلبه میکنند (کیت
+   `@layer theme, base, components, utilities` را اعلام میکند و قواعدش در `components` زندگی
+   میکنند) — از یوتیلیتیها برای فاصلهگذاری و چیدمان استفاده کنید، نه برای رنگآمیزی مجدد
+   کامپوننتهای کیت.
+5. سرفصلها: `.ci-heading` (Inter، بدون tracking) برای عناوین صفحه و بخش؛ `.ci-dashboard-display`
+   (Instrument Serif) فقط برای متن نمایشی بزرگ و پراکنده مانند کد وضعیتِ صفحهٔ خطا.
+6. `tests/unit/dashboard-kit-sweep.test.ts` از پذیرش کیت محافظت میکند: هیچ اسپن لیگاچر Material
+   زیر `src/app` یا `src/shared/components` مجاز نیست؛ در درخت داشبورد (`src/app/(dashboard)` و
+   `src/shared/components`) هیچ `<select>`، `<textarea>` یا `<table>` خام و هیچ `role="dialog"`
+   دستسازی خارج از استثناهای فهرستشده (شاخهٔ بومیِ آداپتور `Select`، `RequestLoggerDetail`)؛ هر
+   `<button>` یا `<input>` خام در آنجا به کامنتی حاوی `kit-exception:` (همراه با دلیل) نیاز دارد
+   که حداکثر ۳ خط بالاتر از آن تمام شود؛ رنگهای پالت و واریانتهای `dark:` فقط در فایلهایی که
+   تست فهرست میکند.
+7. قبل از PR، هر دو تم و ویوپورت ۳۹۰ پیکسلی را بررسی کنید (اسکرینشات)؛ `tests/e2e/a11y.spec.ts`
+   ابزار axe را اجرا میکند.
 
 ## 3. افزودن صفحه
 

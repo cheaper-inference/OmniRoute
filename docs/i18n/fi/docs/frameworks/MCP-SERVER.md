@@ -72,6 +72,16 @@ curl -i \
 
 Ei-manage-avain (tai ei Bearer-otsaketta) palauttaa `403 LOCAL_ONLY`. Sisarprefiksin `/api/cli-tools/runtime/*` ohitus ei ole tarkoituksellisesti mahdollista – katso [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Origin-tarkistus
+
+Todennuksen jälkeen jokaisen `/api/mcp/*`-pyynnön — transporttien ja hallintareittien, kuten `status`, `tools`, `audit`, `restart` — `Origin`-otsake tarkistetaan kutsujasta riippumatta (API-avain, CLI-tunniste, hallintapaneelin istunto tai anonyymi loopback kirjautumisen ollessa pois päältä). Tämä on MCP Streamable HTTP -määrityksen vaatima suojaus DNS rebindingia vastaan.
+
+- **Ei `Origin`-otsaketta** → sallittu. OmniRoute CLI, SDK ja IDE-asiakkaat eivät lähetä sitä.
+- **Sallittu `Origin`** → `localhost` / `127.0.0.1` / `[::1]` missä tahansa portissa tai OmniRouten oma julkinen origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, luotetun käänteisvälityspalvelimen välittämä origin (`OMNIROUTE_TRUST_PROXY`, vain kun base URL -osoitetta ei ole asetettu) tai suoraan käytetty loopback-/LAN-IP-isäntä. Pelkkä `Host`-otsake ei koskaan tee originista luotettua.
+- **Mikä tahansa muu `Origin`, myös `null`** → `403` ja JSON-RPC-virherunko: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Hallintapaneelin istunto, jolla on kelvollinen CSRF-tunniste, hyväksytään edelleen kuten muissakin hallintapaneelin kirjoituksissa.
+
+Käänteisvälityspalvelimen takana tarjoiltu selainpohjainen MCP-asiakas tarvitsee `OMNIROUTE_PUBLIC_BASE_URL`-asetuksen; muille origineille ei ole sallittujen luetteloa. CORS-esipyyntöä (`OPTIONS`) ei tarkisteta Originin osalta; sitä seuraava pyyntö tarkistetaan.
+
 ## IDE-kokoonpano
 
 Katso [MCP-asiakaskokoonpano](../guides/SETUP_GUIDE.md#mcp-client-configuration) Claude Desktopin, Cursorin, Clinen ja yhteensopivien MCP-asiakasohjelmien asetuksia varten.

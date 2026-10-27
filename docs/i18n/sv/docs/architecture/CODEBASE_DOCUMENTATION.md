@@ -500,7 +500,7 @@ Exekverarna omfattar:
 (delad identitetshjälpare) och `index.ts` (register).
 
 > Obs! Leverantörer som inte anges här hanteras av `default.ts` med den generiska
-> OpenAI-kompatibla exekveraren. Den fullständiga leverantörskatalogen (375 leverantörer) finns i
+> OpenAI-kompatibla exekveraren. Den fullständiga leverantörskatalogen (376 leverantörer) finns i
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

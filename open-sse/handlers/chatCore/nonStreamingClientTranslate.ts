@@ -105,7 +105,8 @@ export function translateNonStreamingClientResponse(
         responseToolNameMap,
         responseToolSchemas,
         requestedThinking,
-        (input.clientRequestBody as Record<string, unknown> | null | undefined)?.tools ?? null
+        (input.clientRequestBody as Record<string, unknown> | null | undefined)?.tools ?? null,
+        { signatureNamespace: input.signatureNamespace ?? null }
       )
     : responseBody;
   const responseForMemoryExtraction = translatedResponse;
@@ -125,7 +126,10 @@ export function translateNonStreamingClientResponse(
             responsePayloadFormat,
             FORMATS.OPENAI,
             responseToolNameMap,
-            responseToolSchemas
+            responseToolSchemas,
+            undefined,
+            undefined,
+            { signatureNamespace: input.signatureNamespace ?? null }
           )
         : responseBody;
     const firstChoice = cacheResponse?.choices?.[0];

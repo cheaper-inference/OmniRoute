@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API компоненти контролне табле: адаптери за `packages/ui-kit` — погледајте `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: називи икона које користе екрани → Lucide компоненте (`<Icon>`)                                     |
-| `constants/providers.ts`         | **375 провајдера** са Zod валидацијом (једини извор истине)                                                     |
+| `constants/providers.ts`         | **376 провајдера** са Zod валидацијом (једини извор истине)                                                     |
 | `constants/cliTools.ts`          | Регистар спољних CLI алата                                                                                      |
 | `constants/routingStrategies.ts` | **20 стратегија рутирања** са приоритетима                                                                      |
 | `constants/publicApiRoutes.ts`   | Руте које захтевају Bearer аутентификацију (уместо управљачке)                                                  |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Спољне CLI интеграције + интерни OmniRoute CLI                                                        |
 | `I18N.md`                   | i18n архитектура, додавање језика, 67 локалитета                                                      |
 | `UNINSTALL.md`              | Кораци за чисту деинсталацију                                                                         |
-| `PROVIDER_REFERENCE.md`     | **Аутоматски генерисан** каталог 375 добављача (поновно генерисање: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Аутоматски генерисан** каталог 376 добављача (поновно генерисање: `npm run gen:provider-reference`) |
 
 ### Детаљни прегледи подсистема
 

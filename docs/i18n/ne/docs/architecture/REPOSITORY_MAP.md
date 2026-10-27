@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | ड्यासबोर्ड कम्पोनेन्ट API: `packages/ui-kit` माथिका एडाप्टरहरू — `docs/architecture/DESIGN_SYSTEM.md` हेर्नुहोस् |
 | `constants/iconMap.ts`           | `ICON_MAP`: स्क्रिनहरूले प्रयोग गर्ने आइकन नामहरू → Lucide कम्पोनेन्टहरू (`<Icon>`)                              |
-| `constants/providers.ts`         | Zod प्रमाणीकरणसहितका **375 प्रदायकहरू** (आधिकारिक स्रोत)                                                         |
+| `constants/providers.ts`         | Zod प्रमाणीकरणसहितका **376 प्रदायकहरू** (आधिकारिक स्रोत)                                                         |
 | `constants/cliTools.ts`          | बाह्य CLI उपकरण रजिस्ट्री                                                                                        |
 | `constants/routingStrategies.ts` | प्राथमिकतासहितका **20 राउटिङ रणनीतिहरू**                                                                         |
 | `constants/publicApiRoutes.ts`   | Bearer (व्यवस्थापनको सट्टा) प्रमाणीकरण आवश्यक पर्ने रुटहरू                                                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | बाह्य CLI एकीकरणहरू + आन्तरिक OmniRoute CLI                                                        |
 | `I18N.md`                   | i18n वास्तुकला, भाषा थप्ने तरिका, 67 लोकेलहरू                                                      |
 | `UNINSTALL.md`              | सफा अनइन्स्टल गर्ने चरणहरू                                                                         |
-| `PROVIDER_REFERENCE.md`     | 375 प्रदायकहरूको **स्वतः उत्पन्न** सूची (पुनः उत्पन्न गर्नुहोस्: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 376 प्रदायकहरूको **स्वतः उत्पन्न** सूची (पुनः उत्पन्न गर्नुहोस्: `npm run gen:provider-reference`) |
 
 ### उपप्रणालीका विस्तृत विवरणहरू
 

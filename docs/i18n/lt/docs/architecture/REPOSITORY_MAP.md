@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Valdymo skydelio komponentų API: `packages/ui-kit` adapteriai — žr. `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranuose naudojami piktogramų pavadinimai → Lucide komponentai (`<Icon>`)                   |
-| `constants/providers.ts`         | **375 teikėjai** su Zod validavimu (vienintelis tiesos šaltinis)                                         |
+| `constants/providers.ts`         | **376 teikėjai** su Zod validavimu (vienintelis tiesos šaltinis)                                         |
 | `constants/cliTools.ts`          | Išorinių CLI įrankių registras                                                                           |
 | `constants/routingStrategies.ts` | **20 maršruto parinkimo strategijų** su prioritetais                                                     |
 | `constants/publicApiRoutes.ts`   | Maršrutai, kuriems reikalingas Bearer (o ne valdymo) autentifikavimas                                    |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Išorinės CLI integracijos ir vidinė OmniRoute CLI                                                            |
 | `I18N.md`                   | i18n architektūra, kalbos pridėjimas, 67 lokalės                                                             |
 | `UNINSTALL.md`              | Švaraus pašalinimo veiksmai                                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Automatiškai sugeneruotas** 375 teikėjų katalogas (generavimas iš naujo: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatiškai sugeneruotas** 376 teikėjų katalogas (generavimas iš naujo: `npm run gen:provider-reference`) |
 
 ### Išsamūs posistemių aprašai
 

@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | İdarə paneli komponent API-si: `packages/ui-kit` üzərində adapterlər — baxın: `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlarda istifadə olunan ikon adları → Lucide komponentləri (`<Icon>`)                               |
-| `constants/providers.ts`         | Zod validasiyalı **375 provayder** (əsas həqiqət mənbəyi)                                                          |
+| `constants/providers.ts`         | Zod validasiyalı **376 provayder** (əsas həqiqət mənbəyi)                                                          |
 | `constants/cliTools.ts`          | Xarici CLI alətləri reyestri                                                                                       |
 | `constants/routingStrategies.ts` | Prioritetləri olan **20 marşrutlaşdırma strategiyası**                                                             |
 | `constants/publicApiRoutes.ts`   | Bearer autentifikasiyası (idarəetmə autentifikasiyasından fərqli olaraq) tələb edən marşrutlar                     |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Xarici CLI inteqrasiyaları + daxili OmniRoute CLI                                                            |
 | `I18N.md`                   | i18n arxitekturası, dil əlavə edilməsi, 67 lokalizasiya                                                      |
 | `UNINSTALL.md`              | Təmiz silmə addımları                                                                                        |
-| `PROVIDER_REFERENCE.md`     | 375 provayderdən ibarət **avtomatik yaradılmış** kataloq (yenidən yaratma: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 376 provayderdən ibarət **avtomatik yaradılmış** kataloq (yenidən yaratma: `npm run gen:provider-reference`) |
 
 ### Alt sistemlər üzrə ətraflı icmallar
 

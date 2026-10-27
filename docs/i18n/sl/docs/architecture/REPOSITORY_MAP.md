@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | API komponent nadzorne plošče: prilagoditvene plasti nad `packages/ui-kit` — glejte `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: imena ikon, ki jih uporabljajo zasloni → komponente Lucide (`<Icon>`)                                        |
-| `constants/providers.ts`         | **375 ponudnikov** s preverjanjem veljavnosti Zod (vir resnice)                                                          |
+| `constants/providers.ts`         | **376 ponudnikov** s preverjanjem veljavnosti Zod (vir resnice)                                                          |
 | `constants/cliTools.ts`          | Register zunanjih orodij CLI                                                                                             |
 | `constants/routingStrategies.ts` | **20 strategij usmerjanja** s prioritetami                                                                               |
 | `constants/publicApiRoutes.ts`   | Poti, ki zahtevajo avtentikacijo Bearer (namesto upravljavske)                                                           |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Zunanje integracije CLI + notranji CLI OmniRoute                                                    |
 | `I18N.md`                   | Arhitektura i18n, dodajanje jezika, 67 področnih nastavitev                                         |
 | `UNINSTALL.md`              | Koraki za čisto odstranitev                                                                         |
-| `PROVIDER_REFERENCE.md`     | **Samodejno ustvarjen** katalog 375 ponudnikov (ponovna izdelava: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Samodejno ustvarjen** katalog 376 ponudnikov (ponovna izdelava: `npm run gen:provider-reference`) |
 
 ### Poglobljeni pregledi podsistemov
 

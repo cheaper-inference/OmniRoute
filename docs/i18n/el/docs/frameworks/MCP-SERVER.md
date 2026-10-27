@@ -72,6 +72,16 @@ curl -i \
 
 Ένα κλειδί χωρίς πεδίο εφαρμογής manage (ή χωρίς Bearer) επιστρέφει `403 LOCAL_ONLY`. Το συγγενικό πρόθεμα `/api/cli-tools/runtime/*` δεν είναι σκόπιμα παρακάμψιμο — βλέπε [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Επικύρωση Origin
+
+Μετά τον έλεγχο ταυτότητας, κάθε αίτημα προς `/api/mcp/*` — τα transports και τις διαδρομές διαχείρισης όπως `status`, `tools`, `audit`, `restart` — ελέγχεται ως προς την κεφαλίδα `Origin`, όποιος κι αν είναι ο καλών (κλειδί API, token του CLI, συνεδρία dashboard ή ανώνυμο loopback με απενεργοποιημένη σύνδεση). Αυτή είναι η προστασία από DNS rebinding που απαιτεί η προδιαγραφή MCP Streamable HTTP.
+
+- **Χωρίς κεφαλίδα `Origin`** → επιτρέπεται. Το CLI του OmniRoute, το SDK και οι πελάτες IDE δεν τη στέλνουν.
+- **Επιτρεπόμενο `Origin`** → `localhost` / `127.0.0.1` / `[::1]` σε οποιαδήποτε θύρα, ή το δημόσιο origin του ίδιου του OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, το origin που προωθεί ένας αξιόπιστος reverse proxy (`OMNIROUTE_TRUST_PROXY`, μόνο όταν δεν έχει οριστεί base URL), ή άμεση πρόσβαση σε host IP loopback/LAN. Η κεφαλίδα `Host` από μόνη της δεν κάνει ποτέ ένα origin αξιόπιστο.
+- **Οποιοδήποτε άλλο `Origin`, συμπεριλαμβανομένου του `null`** → `403` με σώμα σφάλματος JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Μια συνεδρία dashboard με έγκυρο token CSRF εξακολουθεί να γίνεται δεκτή, όπως και στις άλλες εγγραφές του dashboard.
+
+Ένας πελάτης MCP σε browser πίσω από reverse proxy χρειάζεται `OMNIROUTE_PUBLIC_BASE_URL`· δεν υπάρχει λίστα επιτρεπόμενων άλλων origin. Το CORS preflight (`OPTIONS`) δεν ελέγχεται για Origin· το αίτημα που ακολουθεί ελέγχεται.
+
 ## Διαμόρφωση IDE
 
 Δείτε το [Οδηγό Διαμόρφωσης MCP Client](../guides/SETUP_GUIDE.md#mcp-client-configuration) για Claude Desktop,

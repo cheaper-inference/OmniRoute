@@ -272,6 +272,14 @@
     "tests/unit/dashboard/material-icons-self-hosted.test.ts": {
       "replacement": "tests/unit/material-symbols-removed.test.ts",
       "reason": "KEA-7886 F4 (commit 2fc4c91e, Keak CI UI Kit migration): the Material Symbols icon font and its npm package were dropped from the dashboard, so the #3695 guard that pinned the self-hosted font import no longer has a subject. The same commit added tests/unit/material-symbols-removed.test.ts, which pins the inverse contract (no material-symbols import, no Google Fonts CDN preconnect) and is the replacement for this guard."
+    },
+    "tests/unit/design-grid-background.test.ts": {
+      "replacement": "tests/unit/design-kit-bridge.test.ts",
+      "reason": "0afbbcb5 (KEA-7886, UI kit bridge, 2026-10-19) dropped the grid wallpaper (body::before layer and its theme tokens) when the dashboard moved to the Keak CI UI Kit; the deleted file only pinned that wallpaper. design-kit-bridge pins the token bridge that replaced it. Release-green base-red #17219 (test-masking vs main, 2026-10-24)."
+    },
+    "tests/unit/sidebar-icon-accents-3812.test.ts": {
+      "replacement": "tests/unit/sidebar-nav-contrast-aa.test.ts",
+      "reason": "1e8125fe (KEA-7886, kit Sidebar family, 2026-10-20) removed the per-item curated icon accents (#3812): the kit Sidebar renders icons with the kit palette, so the accent map and its fallback hash no longer exist. The sidebar contrast test was rewritten in the same commit for the kit shell and pins the navigation colors that replaced the accents. Release-green base-red #17219 (test-masking vs main, 2026-10-24)."
     }
   },
   "tests/unit/catalog-updates-v3x.test.ts": "v3.8.45 #6248: fix(providers) remove deprecated MiMo V2 entries — os 5 asserts removidos pinavam specs de modelos mimo-v2-* que deixaram de existir no catálogo (54→49). Asserts seguem a remoção dos modelos, não enfraquecimento. Verificado legítimo. Prune após v3.8.45 mergear para main.",
@@ -330,5 +338,7 @@
   "tests/unit/virtual-auto-combo.test.ts": "v3.8.52 PR #16310: remove only the OpenCode Free pool case (42->38). The current emulated no-auth allowlist and all sibling provider lifecycle checks remain; the allowlist is not empty.",
   "@omniroute/opencode-plugin/tests/warm-startup.test.ts": "the v1 plugin no longer fetches /api/combos/auto on refresh (5 fetchers, was 6); one fan-out assert updated 6 to 5, retired stubs removed, and 9 model-key assertions realigned to the bare-id contract from #9178/#10821 (both already on the base). Coverage kept, not weakened.",
   "@omniroute/opencode-plugin/tests/log-level.test.ts": "the v1 plugin no longer fetches /api/combos/auto on refresh; the retired fetcher 404 test and its import are removed with the source (21 to 19). Remaining level coverage unchanged.",
-  "@omniroute/opencode-plugin/tests/config-shim.test.ts": "the v1 plugin no longer fetches /api/combos/auto on refresh; the retired twin-wins case and its fixtures are removed with the static publication block (162 to 159). Remaining builder coverage unchanged."
+  "@omniroute/opencode-plugin/tests/config-shim.test.ts": "the v1 plugin no longer fetches /api/combos/auto on refresh; the retired twin-wins case and its fixtures are removed with the static publication block (162 to 159). Remaining builder coverage unchanged.",
+  "tests/unit/stepfun-mono-fallback-and-sidebar-hydration-7743.test.ts": "ec27d84e (KEA-7886, F4, 2026-10-21): the legacy DashboardLayout and its synchronous localStorage collapse initializer were removed; the one dropped assert pinned that initializer. The replacement block pins the kit shell contract instead: no localStorage read in the layout files and the server passing the ci_sidebar_state cookie as sidebarDefaultOpen (3 new asserts in place of the old structure). Net count 9 -> 8 is the realignment, not a weakening. Release-green base-red #17219 (2026-10-24).",
+  "tests/unit/ui/rtl-logical-classes.test.tsx": "ec27d84e (KEA-7886, F4, 2026-10-21): the legacy mobile sidebar drawer (.dashboard-sidebar-mobile, start-0/-translate-x-full RTL rules) was removed with the legacy shell; its six drawer cases were replaced by the Kit shell block in the same file, which asserts the kit Sidebar Sheet anchoring by side. Net 21 -> 19 is the realignment, not a weakening. Release-green base-red #17219 (2026-10-24)."
 }
