@@ -136,7 +136,7 @@ function nonNegativeOr<T>(value: unknown, fallback: T): number | T {
  */
 function resolveCachedTokens(
   um: Record<string, unknown>,
-  promptTokens: number | undefined,
+  promptTokens: unknown,
   previousCachedTokens: number | undefined
 ): number | undefined {
   if (!Object.prototype.hasOwnProperty.call(um, "cachedContentTokenCount")) {
