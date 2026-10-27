@@ -76,7 +76,7 @@ export const RESILIENCE_LAYERS_COPY = {
     "HALF-OPEN",
   ],
   cooldown: ["provider · 3 keys", "key-1", "429", "key-2", "key-3", "cooling ×2ⁿ"],
-  lockout: ["model-a", "model-b", "model-c"],
+  lockout: ["key-1", "model-a", "model-b", "model-c"],
   foot: [
     "which failure trips what → ",
     "5xx / 408 : breaker",
@@ -245,7 +245,7 @@ function cooldownScene() {
     `  ` +
     dot(pA, "ok", 0.8, 0.88) +
     `  ` +
-    mark("check", 530, 375, 0.89, 0.96)
+    mark("check", 548, 375, 0.89, 0.96)
   );
 }
 
@@ -260,22 +260,22 @@ function lockoutScene() {
     `  ` +
     card(396, 560, 112, 48, 10, "stroke-accent", "accent-soft") +
     `  ` +
-    mono(412, 588, RESILIENCE_LAYERS_COPY.cooldown[1]) +
+    mono(412, 588, C[0]) +
     `  ` +
     card(580, 530, 130, 28, 6, "stroke-ok") +
     `  ` +
-    mono(594, 548, C[0]) +
+    mono(594, 548, C[1]) +
     `  ` +
     check(538) +
     `  ` +
     card(580, 570, 130, 28, 6, "stroke-err", "err-bg") +
     `  ` +
-    mono(594, 588, C[1], ' style="fill:var(--ink)"') +
+    mono(594, 588, C[2], ' style="fill:var(--ink)"') +
     `  <g transform="translate(682,577)" class="stroke-err" stroke-width="1.6" fill="none" stroke-linecap="round"><rect x="0" y="5" width="11" height="8" rx="1.5"/><path d="M 2,5 L 2,3 A 3.5,3.5 0 0 1 9,3 L 9,5"/></g>\n` +
     `  ` +
     card(580, 610, 130, 28, 6, "stroke-ok") +
     `  ` +
-    mono(594, 628, C[2]) +
+    mono(594, 628, C[3]) +
     `  ` +
     check(618) +
     `  ` +
