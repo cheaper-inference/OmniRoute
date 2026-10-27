@@ -16,6 +16,11 @@ import {
   type CfTransportConfig,
   type CfTransportStartResult,
 } from "../../open-sse/executors/cloudflare-playground.ts";
+import {
+  CF_COMPACT_HEADER,
+  CF_MAX_MESSAGE_CHARS,
+  cfMessageText,
+} from "../../open-sse/translator/cloudflarePlaygroundTools.ts";
 
 const identityFrame = JSON.stringify({
   name: "playground-test",
@@ -468,6 +473,38 @@ test("executor trims a long conversation to the playground's 10-user-message cap
   // The model still sees the tool contract and the current question.
   assert.ok(userMessages[0].parts[0].text.includes("# Tools"));
   assert.equal(userMessages[userMessages.length - 1].parts[0].text, "latest question");
-  // Oldest history is dropped first.
-  assert.ok(!userMessages.some((m) => m.parts[0].text.includes("turn 0")));
+  // Older history is compacted into the block, not dropped: the very first turn
+  // — the original task statement — survives.
+  const compacted = userMessages.find((m) => m.parts[0].text.includes(CF_COMPACT_HEADER));
+  assert.ok(compacted, "expected a compacted-history block");
+  assert.ok(compacted!.parts[0].text.includes("### USER"));
+  assert.ok(compacted!.parts[0].text.includes("turn 0"));
+  assert.ok(compacted!.parts[0].text.length <= CF_MAX_MESSAGE_CHARS);
+});
+
+test("the compacted block renders a turn exactly like the verbatim tail does", () => {
+  // Drift guard: the block and the live tail must stay indistinguishable in
+  // style, otherwise the model sees two dialects of the same conversation.
+  const cases = [
+    { role: "user" as const, content: "plain user turn" },
+    {
+      role: "assistant" as const,
+      content: "text before the call",
+      tool_calls: [
+        {
+          id: "call_1",
+          type: "function" as const,
+          function: { name: "bash", arguments: '{"command": "ls"}' },
+        },
+      ],
+    },
+    { role: "tool" as const, content: "result body", tool_call_id: "call_1" },
+    { role: "tool" as const, content: "" },
+  ];
+
+  for (const message of cases) {
+    const tailText = toCfMessages([message])[0].parts[0].text;
+    const blockItem = cfMessageText(message);
+    assert.equal(blockItem, tailText, `rendering drifted for role ${message.role}`);
+  }
 });

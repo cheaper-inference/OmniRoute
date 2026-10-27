@@ -16,9 +16,11 @@ import {
   hasMalformedCfToolIntent,
   buildCfToolConversationPrompt,
   trimCfConversation,
+  compactCfConversation,
   stripCfToolMarkup,
   CF_MAX_MESSAGE_CHARS,
   CF_MAX_CONVERSATION_MESSAGES,
+  CF_COMPACT_HEADER,
   type CfToolDef,
 } from "../../open-sse/translator/cloudflarePlaygroundTools.ts";
 
@@ -404,7 +406,114 @@ test("trimCfConversation returns nothing for a non-positive budget", () => {
   assert.deepEqual(trimCfConversation(messages, 0), []);
 });
 
-test("buildCfToolConversationPrompt trims the conversation to the 10 user-message cap", () => {
+// ── conversation compaction (old turns kept as one block) ────────────────────
+
+test("compactCfConversation leaves a fitting conversation untouched", () => {
+  const messages = [
+    { role: "user" as const, content: "hi" },
+    { role: "assistant" as const, content: "hello" },
+  ];
+  const { block, tail } = compactCfConversation(messages, 10);
+  assert.equal(block, null);
+  assert.deepEqual(tail, messages);
+});
+
+test("compactCfConversation folds older turns into one block with role headers", () => {
+  const messages = [
+    { role: "user" as const, content: "the original task" },
+    { role: "assistant" as const, content: "on it" },
+    { role: "user" as const, content: "a follow-up" },
+    { role: "assistant" as const, content: "done" },
+    { role: "user" as const, content: "the newest question" },
+  ];
+  const { block, tail } = compactCfConversation(messages, 1);
+
+  assert.ok(block, "expected a compacted block");
+  assert.ok(block!.startsWith(CF_COMPACT_HEADER));
+  assert.ok(block!.includes("### USER\nthe original task"));
+  assert.ok(block!.includes("### ASSISTANT\non it"));
+  assert.ok(block!.includes("a follow-up"));
+  // The verbatim window keeps the newest turn as a real message.
+  assert.deepEqual(tail, [messages[4]]);
+  assert.ok(!block!.includes("the newest question"));
+});
+
+test("compactCfConversation renders replayed tool calls and results", () => {
+  const messages = [
+    { role: "user" as const, content: "run it" },
+    {
+      role: "assistant" as const,
+      content: null,
+      tool_calls: [
+        {
+          id: "call_1",
+          type: "function" as const,
+          function: { name: "bash", arguments: '{"command": "ls"}' },
+        },
+      ],
+    },
+    { role: "tool" as const, content: "README.md", tool_call_id: "call_1" },
+    { role: "user" as const, content: "newest" },
+  ];
+  const { block } = compactCfConversation(messages, 1);
+  assert.ok(block!.includes('### ASSISTANT\n<tool name="bash">{"command": "ls"}</tool>'));
+  assert.ok(
+    block!.includes('### TOOL RESULT\n<tool_result call_id="call_1">README.md</tool_result>')
+  );
+});
+
+test("compactCfConversation drops system messages and keeps the first user turn", () => {
+  const messages = [
+    { role: "system" as const, content: "IGNORE ME" },
+    { role: "user" as const, content: "first" },
+    { role: "user" as const, content: "second" },
+  ];
+  const { block } = compactCfConversation(messages, 1);
+  assert.ok(!block!.includes("IGNORE ME"));
+  assert.ok(block!.includes("first"));
+});
+
+test("compactCfConversation caps each turn inside the block", () => {
+  const messages = [
+    { role: "user" as const, content: "u".repeat(5000) },
+    { role: "tool" as const, content: "t".repeat(5000), tool_call_id: "c" },
+    { role: "user" as const, content: "newest" },
+  ];
+  const { block } = compactCfConversation(messages, 1);
+  assert.ok(block!.length <= CF_MAX_MESSAGE_CHARS);
+  assert.ok(block!.includes("[+4300 chars]"), "the user turn is capped at 700 chars");
+  // The tool result is capped at 400 chars on top of its `<tool_result>` wrapper.
+  assert.match(block!, /\[\+46\d\d chars\]/, "the tool result is capped at 400 chars");
+});
+
+test("compactCfConversation elides the middle, never the newest turns", () => {
+  const messages = [
+    ...Array.from({ length: 40 }, (_, i) => ({
+      role: "user" as const,
+      content: `turn ${i} ${"x".repeat(600)}`,
+    })),
+    { role: "user" as const, content: "newest" },
+  ];
+  const { block, tail } = compactCfConversation(messages, 1);
+  assert.ok(block!.length <= CF_MAX_MESSAGE_CHARS, `block is ${block!.length} chars`);
+  // Head (the original task) and tail (closest to the live window) survive.
+  assert.ok(block!.includes("turn 0"));
+  assert.ok(block!.includes("turn 39"));
+  assert.ok(/\.\.\. \d+ earlier turns \([\d,]+ chars\) elided \.\.\./.test(block!));
+  assert.deepEqual(tail, [messages[messages.length - 1]]);
+});
+
+test("compactCfConversation returns no block when the budget is zero", () => {
+  const messages = [
+    { role: "user" as const, content: "one" },
+    { role: "user" as const, content: "two" },
+  ];
+  const { block, tail } = compactCfConversation(messages, 0);
+  assert.ok(block);
+  assert.deepEqual(tail, []);
+});
+
+test("buildCfToolConversationPrompt compacts older history to the 10 user-message cap", () => {
   // 12 user turns + their assistant replies + 1 contract = 13 user messages,
   // one past the playground's limit.
   const messages = Array.from({ length: 12 }, (_, i) => [
@@ -419,8 +528,10 @@ test("buildCfToolConversationPrompt trims the conversation to the 10 user-messag
   // The contract survives the trim and the caller's own turn is never dropped.
   assert.ok((result[0].content as string).includes("# Tools"));
   assert.equal(result[result.length - 1].content, "latest question");
-  // Oldest history goes first.
-  assert.ok(!result.some((m) => m.content === "turn 0"));
+  // The oldest turns are kept in one compacted block, so the model can still see
+  // what the session started from.
+  assert.ok((result[1].content as string).includes(CF_COMPACT_HEADER));
+  assert.ok((result[1].content as string).includes("### USER\nturn 0"));
 });
 
 test("buildCfToolConversationPrompt trims even when there are no tools", () => {

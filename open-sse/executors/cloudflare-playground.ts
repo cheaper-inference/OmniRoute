@@ -28,8 +28,9 @@
  *     `tool_calls`.
  *   - A conversation may carry at most 10 user-role messages; longer payloads
  *     are rejected in-band ("This demo is limited to 10 messages per
- *     conversation. Start a new chat to continue."). The oldest turns are
- *     trimmed to fit — the contract and replayed tool results included.
+ *     conversation. Start a new chat to continue."). Turns older than the
+ *     verbatim window are compacted into a single user message (contract and
+ *     replayed tool results included) instead of being dropped.
  *   - Upstream rate limits arrive in-band as `error:true` frames. Non-streaming
  *     requests surface them as HTTP 429/502; streaming requests emit an SSE
  *     error chunk before `[DONE]` (the response status is already committed).
@@ -49,7 +50,8 @@ import {
   parseCfToolCalls,
   buildCfToolConversationPrompt,
   stripCfToolMarkup,
-  CF_MAX_MESSAGE_CHARS,
+  cfMessageText,
+  truncateCfMessage,
   type CfToolDef,
 } from "../translator/cloudflarePlaygroundTools.ts";
 
@@ -211,43 +213,7 @@ export function toCfMessages(
   for (const message of messages ?? []) {
     if (message.role !== "user" && message.role !== "assistant" && message.role !== "tool")
       continue;
-    let text = "";
-    if (typeof message.content === "string") {
-      text = message.content;
-    } else if (Array.isArray(message.content)) {
-      text = message.content
-        .map((part) =>
-          typeof part === "string" ? part : ((part as { text?: string })?.text ?? "")
-        )
-        .filter(Boolean)
-        .join("\n");
-    }
-    // Handle tool_calls on assistant messages
-    if (message.role === "assistant" && (message as { tool_calls?: unknown }).tool_calls) {
-      const toolCalls = (
-        message as { tool_calls: Array<{ function: { name: string; arguments: string } }> }
-      ).tool_calls;
-      if (toolCalls.length > 0) {
-        const tcText = toolCalls
-          .map((tc) => `<tool name="${tc.function.name}">${tc.function.arguments}</tool>`)
-          .join("\n");
-        text = text ? `${text}\n${tcText}` : tcText;
-      }
-    }
-    // Handle tool results (role === "tool")
-    if (message.role === "tool") {
-      const toolCallId = (message as { tool_call_id?: string }).tool_call_id;
-      const resultText = text || "Tool executed successfully";
-      text = toolCallId
-        ? `<tool_result call_id="${toolCallId}">${resultText}</tool_result>`
-        : `<tool_result>${resultText}</tool_result>`;
-    }
-    // The playground rejects any single message >6000 chars. Truncate here so a
-    // large file read / tool result cannot take the whole request down.
-    if (text.length > CF_MAX_MESSAGE_CHARS) {
-      const marker = "\n…[truncated to fit the playground's 6000-char limit]";
-      text = text.slice(0, CF_MAX_MESSAGE_CHARS - marker.length) + marker;
-    }
+    const text = truncateCfMessage(cfMessageText(message));
     if (!text) continue;
     out.push({
       role: message.role === "tool" ? "user" : message.role,
