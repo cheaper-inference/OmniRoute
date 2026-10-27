@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | API សមាសភាគ Dashboard៖ អាដាប់ទ័រលើ `packages/ui-kit` — សូមមើល `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`៖ ឈ្មោះរូបតំណាងដែលអេក្រង់ប្រើ → សមាសភាគ Lucide (`<Icon>`)                                |
-| `constants/providers.ts`         | **អ្នកផ្តល់សេវា 375** ជាមួយការផ្ទៀងផ្ទាត់ Zod (ប្រភពពិតតែមួយ)                                      |
+| `constants/providers.ts`         | **អ្នកផ្តល់សេវា 377** ជាមួយការផ្ទៀងផ្ទាត់ Zod (ប្រភពពិតតែមួយ)                                      |
 | `constants/cliTools.ts`          | បញ្ជីឧបករណ៍ CLI ខាងក្រៅ                                                                            |
 | `constants/routingStrategies.ts` | **យុទ្ធសាស្ត្រកំណត់ផ្លូវ 20** ជាមួយអាទិភាព                                                         |
 | `constants/publicApiRoutes.ts`   | ផ្លូវដែលតម្រូវឱ្យមានការផ្ទៀងផ្ទាត់ Bearer (ផ្ទុយពីការផ្ទៀងផ្ទាត់សម្រាប់ការគ្រប់គ្រង)               |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ការរួមបញ្ចូល CLI ខាងក្រៅ + OmniRoute CLI ខាងក្នុង                                                       |
 | `I18N.md`                   | ស្ថាបត្យកម្ម i18n ការបន្ថែមភាសា និង locale ចំនួន 67                                                     |
 | `UNINSTALL.md`              | ជំហានលុបការដំឡើងឱ្យបានស្អាត                                                                             |
-| `PROVIDER_REFERENCE.md`     | កាតាឡុកអ្នកផ្តល់សេវា 375 ដែល**បង្កើតដោយស្វ័យប្រវត្តិ** (បង្កើតឡើងវិញ៖ `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | កាតាឡុកអ្នកផ្តល់សេវា 377 ដែល**បង្កើតដោយស្វ័យប្រវត្តិ** (បង្កើតឡើងវិញ៖ `npm run gen:provider-reference`) |
 
 ### ការពន្យល់ស៊ីជម្រៅអំពីប្រព័ន្ធរង
 

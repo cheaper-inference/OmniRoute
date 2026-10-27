@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API för dashboardkomponenter: adaptrar ovanpå `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnamn som används av skärmarna → Lucide-komponenter (`<Icon>`)                             |
-| `constants/providers.ts`         | **375 leverantörer** med Zod-validering (sanningskälla)                                                   |
+| `constants/providers.ts`         | **377 leverantörer** med Zod-validering (sanningskälla)                                                   |
 | `constants/cliTools.ts`          | Register över externa CLI-verktyg                                                                         |
 | `constants/routingStrategies.ts` | **20 routningsstrategier** med prioriteter                                                                |
 | `constants/publicApiRoutes.ts`   | Rutter som kräver Bearer-autentisering (i stället för hanteringsautentisering)                            |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externa CLI-integrationer + intern OmniRoute-CLI                                                        |
 | `I18N.md`                   | i18n-arkitektur, tillägg av ett språk, 67 språkvarianter                                                |
 | `UNINSTALL.md`              | Steg för ren avinstallation                                                                             |
-| `PROVIDER_REFERENCE.md`     | **Automatiskt genererad** katalog över 375 leverantörer (generera om: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatiskt genererad** katalog över 377 leverantörer (generera om: `npm run gen:provider-reference`) |
 
 ### Fördjupningar om delsystem
 

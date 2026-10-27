@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | API des composants du tableau de bord : adaptateurs au-dessus de `packages/ui-kit` — voir `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP` : noms d’icônes utilisés par les écrans → composants Lucide (`<Icon>`)                                              |
-| `constants/providers.ts`         | **375 fournisseurs** avec validation Zod (source de vérité)                                                                    |
+| `constants/providers.ts`         | **377 fournisseurs** avec validation Zod (source de vérité)                                                                    |
 | `constants/cliTools.ts`          | Registre des outils CLI externes                                                                                               |
 | `constants/routingStrategies.ts` | **20 stratégies de routage** avec priorités                                                                                    |
 | `constants/publicApiRoutes.ts`   | Routes qui nécessitent une authentification Bearer (plutôt qu’une authentification de gestion)                                 |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Intégrations de CLI externes + CLI OmniRoute interne                                                       |
 | `I18N.md`                   | Architecture i18n, ajout d’une langue, 67 paramètres régionaux                                             |
 | `UNINSTALL.md`              | Étapes de désinstallation propre                                                                           |
-| `PROVIDER_REFERENCE.md`     | Catalogue **généré automatiquement** de 375 fournisseurs (régénération : `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Catalogue **généré automatiquement** de 377 fournisseurs (régénération : `npm run gen:provider-reference`) |
 
 ### Présentations détaillées des sous-systèmes
 

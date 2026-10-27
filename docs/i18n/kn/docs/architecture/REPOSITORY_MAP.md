@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಕಾಂಪೊನೆಂಟ್ API: `packages/ui-kit` ಮೇಲಿನ ಅಡಾಪ್ಟರ್ಗಳು — `docs/architecture/DESIGN_SYSTEM.md` ನೋಡಿ |
 | `constants/iconMap.ts`           | `ICON_MAP`: ಸ್ಕ್ರೀನ್ಗಳು ಬಳಸುವ ಐಕಾನ್ ಹೆಸರುಗಳು → Lucide ಕಾಂಪೊನೆಂಟ್ಗಳು (`<Icon>`)                               |
-| `constants/providers.ts`         | Zod ಮೌಲ್ಯೀಕರಣದೊಂದಿಗೆ **375 ಪ್ರೊವೈಡರ್ಗಳು** (ಅಧಿಕೃತ ಮೂಲ)                                                       |
+| `constants/providers.ts`         | Zod ಮೌಲ್ಯೀಕರಣದೊಂದಿಗೆ **377 ಪ್ರೊವೈಡರ್ಗಳು** (ಅಧಿಕೃತ ಮೂಲ)                                                       |
 | `constants/cliTools.ts`          | ಬಾಹ್ಯ CLI ಟೂಲ್ ರಿಜಿಸ್ಟ್ರಿ                                                                                    |
 | `constants/routingStrategies.ts` | ಆದ್ಯತೆಗಳೊಂದಿಗೆ **20 ರೂಟಿಂಗ್ ತಂತ್ರಗಳು**                                                                       |
 | `constants/publicApiRoutes.ts`   | Bearer (ಮ್ಯಾನೇಜ್ಮೆಂಟ್ಗೆ ವಿರುದ್ಧವಾಗಿ) ದೃಢೀಕರಣ ಅಗತ್ಯವಿರುವ ರೂಟ್ಗಳು                                              |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ಬಾಹ್ಯ CLI ಏಕೀಕರಣಗಳು + ಆಂತರಿಕ OmniRoute CLI                                                      |
 | `I18N.md`                   | i18n ಆರ್ಕಿಟೆಕ್ಚರ್, ಭಾಷೆಯನ್ನು ಸೇರಿಸುವುದು, 67 ಲೊಕೇಲ್ಗಳು                                           |
 | `UNINSTALL.md`              | ಸ್ವಚ್ಛವಾಗಿ ಅಸ್ಥಾಪಿಸುವ ಹಂತಗಳು                                                                    |
-| `PROVIDER_REFERENCE.md`     | 375 ಪೂರೈಕೆದಾರರ **ಸ್ವಯಂಚಾಲಿತವಾಗಿ ರಚಿಸಲಾದ** ಕ್ಯಾಟಲಾಗ್ (ಮರುರಚನೆ: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 377 ಪೂರೈಕೆದಾರರ **ಸ್ವಯಂಚಾಲಿತವಾಗಿ ರಚಿಸಲಾದ** ಕ್ಯಾಟಲಾಗ್ (ಮರುರಚನೆ: `npm run gen:provider-reference`) |
 
 ### ಉಪವ್ಯವಸ್ಥೆಗಳ ಆಳವಾದ ವಿವರಣೆಗಳು
 
