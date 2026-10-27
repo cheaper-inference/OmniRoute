@@ -33,6 +33,7 @@ import { throttleQuotaFetch } from "./quotaFetchThrottle.ts";
 import { fetchWithConnectionProxy } from "./connectionProxyFetch.ts";
 import { getCodexBackendIdentityHeaders } from "../config/codexClient.ts";
 import { parseCodexPaidCredits } from "@/lib/providers/codexPaidCredits";
+import { isCodexLimitReached, parseCodexQuotaWindow } from "./codexQuotaSignals.ts";
 
 /**
  * Stable identifiers for Codex's quota windows. These match the quota keys
@@ -299,27 +300,11 @@ function toRecord(value: unknown): Record<string, unknown> {
     : {};
 }
 
-function parseWindowReset(window: Record<string, unknown>): string | null {
-  const resetAt = toNumber(window["reset_at"] ?? window["resetAt"], 0);
-  if (resetAt > 0) {
-    return new Date(resetAt * 1000).toISOString();
-  }
-  const resetAfterSeconds = toNumber(
-    window["reset_after_seconds"] ?? window["resetAfterSeconds"],
-    0
-  );
-  if (resetAfterSeconds > 0) {
-    return new Date(Date.now() + resetAfterSeconds * 1000).toISOString();
-  }
-  return null;
-}
-
 function parseCodexWindow(
   window: Record<string, unknown> | null | undefined
 ): { percentUsed: number; resetAt: string | null } | null {
-  if (!window || Object.keys(window).length === 0) return null;
-  const percentUsed = toNumber(window["used_percent"] ?? window["usedPercent"], 0) / 100;
-  return { percentUsed, resetAt: parseWindowReset(window) };
+  const parsed = parseCodexQuotaWindow(window);
+  return parsed ? { percentUsed: parsed.percentUsed, resetAt: parsed.resetAt } : null;
 }
 
 /**
@@ -431,9 +416,7 @@ function parseCodexUsageResponse(
   const window5h = parsedPrimary ?? { percentUsed: 0, resetAt: null };
   const window7d = parsedSecondary ?? { percentUsed: 0, resetAt: null };
   const worstPercentUsed = Math.max(window5h.percentUsed, window7d.percentUsed);
-  const limitReached = Boolean(
-    selectedRateLimit["limit_reached"] ?? selectedRateLimit["limitReached"]
-  );
+  const limitReached = isCodexLimitReached(selectedRateLimit);
 
   const windows: Record<string, { percentUsed: number; resetAt: string | null }> = {};
   assignCodexWindows(windows, selectedRateLimit, {
