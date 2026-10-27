@@ -319,6 +319,7 @@
       "tests/unit/combo-system-prompt-templates-5501.test.ts",
       "tests/unit/combo-target-defensive-modelstr.test.ts",
       "tests/unit/combo-vision-aware-routing.test.ts",
+      "tests/unit/combo-vision-unknown-fallback-17289.test.ts",
       "tests/unit/combo-vision-custom-node-alias-prefix-15563.test.ts",
       "tests/unit/combo-vision-prefixed-step-custom-override.test.ts",
       "tests/unit/model-compat-vision-canonical-resolution-14587.test.ts",

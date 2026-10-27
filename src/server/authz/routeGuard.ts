@@ -238,6 +238,24 @@ export const ALWAYS_PROTECTED_API_PATHS: ReadonlyArray<string> = [
   // or the local CLI when login is on; in open mode it fell back to "anyone".
   // The bundle itself stays a public route: it authenticates with the token.
   "/api/sync/tokens",
+  // Host CLI config writers. /apply overwrites the operator's CLI config (for Claude the
+  // whole ~/.claude/settings.json) with a caller-supplied base URL and token, repointing
+  // the operator's CLI at that endpoint; guide-settings and hermes-agent-settings write
+  // the same kind of config and backups restores one. The handlers only call
+  // requireCliToolsAuth() and guardCliConfigWrite() (CLI_ALLOW_CONFIG_WRITES defaults to
+  // true), so with login disabled they were anonymous while their sibling
+  // /api/cli-tools/codex-profiles above was not. Read-only CLI tool routes stay as is.
+  "/api/cli-tools/apply",
+  "/api/cli-tools/guide-settings",
+  "/api/cli-tools/hermes-agent-settings",
+  "/api/cli-tools/backups",
+  // Log export destinations: a destination is a caller-chosen BigQuery project with its
+  // own service account, and /[id]/run ships call_logs (prompts, responses, key names)
+  // into it. Same data as /api/logs/export above; the prefix covers destinations, their
+  // run/test children, status and types.
+  "/api/log-export",
+  // SIGTERMs the process, like its twin /api/shutdown above.
+  "/api/restart",
 ];
 
 /**

@@ -1,0 +1,1 @@
+- **ci:** closing a PR now cancels its queued and running workflow runs, so they stop holding hosted-runner slots against the organization's concurrent-job limit.
