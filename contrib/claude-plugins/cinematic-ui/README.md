@@ -15,9 +15,11 @@ claude plugin marketplace add shahass92-commits/omniroute --sparse .claude-plugi
 claude plugin install cinematic-ui@shahass92-plugins
 ```
 
-`--sparse` checks out only the marketplace manifest and the plugin folder, not the whole OmniRoute
-repository. Inside a Claude Code session, the same commands are `/plugin marketplace add …` and
-`/plugin install …`.
+`--sparse` limits the checkout to the repository's top-level files plus `.claude-plugin/` and
+`contrib/claude-plugins/`, about 20 MB instead of the whole OmniRoute tree. To install from a
+branch other than the default one, append `#<branch>` to the repository, for example
+`shahass92-commits/omniroute#my-branch`. Inside a Claude Code session, the same commands are
+`/plugin marketplace add …` and `/plugin install …`.
 
 To try the plugin from a local checkout for one session without installing it:
 
