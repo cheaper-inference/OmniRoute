@@ -29,6 +29,11 @@ const nb = (n) => NB.repeat(n);
 // sit at ~3:1 on it; the dark-block values are the ones designed for this background.
 const INV = KIT.dark;
 
+// The gate-checked provider total (scripts/check/check-docs-counts-sync.mjs reads
+// "<n> providers" from the title); the health line and the "… N more providers" footer of the
+// providers screen derive from it so the three numbers can never disagree.
+const PROVIDER_TOTAL = 376;
+
 // The three screens: command, then header + 4 lines + a dim footer line. Segments are plain
 // strings or { t, c } with c ∈ ok | warn | err | dim.
 const SCREENS = [
@@ -41,7 +46,7 @@ const SCREENS = [
       [`f4e0a97b${nb(2)}glm${nb(9)}GLM Coding Plan${nb(3)}`, { t: "active", c: "ok" }],
       [`03bd6e5f${nb(2)}kimi${nb(8)}Kimi K2 free${nb(6)}`, { t: "active", c: "ok" }],
     ],
-    footer: "… 353 more providers",
+    footer: null, // computed below: PROVIDER_TOTAL minus the rows listed
     // keyTimes, verbatim from the previous file
     typing: "0;0.012;0.018;0.024;0.030;0.036;0.042;0.048;0.054;1",
     caret: "0;0.011;0.012;0.022;0.032;0.042;0.052;0.074;1",
@@ -104,7 +109,7 @@ const SCREENS = [
         nb(2),
         { t: "○ 0 open", c: "err" },
       ],
-      [`${nb(2)}Providers: 376 registered${nb(3)}150+ free tiers`],
+      [`${nb(2)}Providers: ${PROVIDER_TOTAL} registered${nb(3)}150+ free tiers`],
     ],
     footer: "… live: /dashboard · omniroute status",
     typing: "0;0.678;0.684;0.690;0.696;0.702;0.708;0.714;0.720;1",
@@ -120,6 +125,8 @@ const SCREENS = [
     ],
   },
 ];
+
+SCREENS[0].footer = `… ${PROVIDER_TOTAL - SCREENS[0].lines.length} more providers`;
 
 // Subcommand ticker: 32 top-level commands, the lime ones are the diagram's brand emphasis.
 const TICKER = [
@@ -164,7 +171,7 @@ function tickerSegments() {
   TICKER.forEach(([word, hl], i) => {
     const sep = i === 0 ? "" : " · ";
     if (hl) {
-      if (plain + sep) segs.push({ t: plain + sep });
+      if ((plain + sep).length > 0) segs.push({ t: plain + sep });
       plain = "";
       segs.push({ t: word, hl: true });
     } else {
@@ -188,16 +195,17 @@ export const CLI_TERMINAL_COPY = {
   ticker: TICKER_SEGS.map((s) => s.t),
 };
 
-const TITLE =
-  "Animated terminal demoing the OmniRoute CLI: omniroute providers list (376 providers registered, anthropic, codex, glm, kimi shown active), omniroute combo list (always-on priority, cost-saver, fusion-panel, context-relay) and omniroute health (healthy, 18412 requests in 24h, p95 412ms, circuit breakers 24 closed, 1 half-open, 0 open), cycling over 89 top-level commands: providers, oauth, keys, combo, nodes, models, cache, compression, cost, usage, quota, health, resilience, telemetry, logs, audit, mcp, a2a, cloud, memory, skills, eval, doctor, repl, tunnel, backup, sync, webhooks, policy, pricing, translator, simulate and more.";
+const TITLE = `Animated terminal demoing the OmniRoute CLI: omniroute providers list (${PROVIDER_TOTAL} providers registered, anthropic, codex, glm, kimi shown active), omniroute combo list (always-on priority, cost-saver, fusion-panel, context-relay) and omniroute health (healthy, 18412 requests in 24h, p95 412ms, circuit breakers 24 closed, 1 half-open, 0 open), cycling over 89 top-level commands: providers, oauth, keys, combo, nodes, models, cache, compression, cost, usage, quota, health, resilience, telemetry, logs, audit, mcp, a2a, cloud, memory, skills, eval, doctor, repl, tunnel, backup, sync, webhooks, policy, pricing, translator, simulate and more.`;
 const DESC =
   "Compact animated terminal cycling three real OmniRoute CLI commands with a typewriter effect and a scrolling subcommand ticker; the first frame shows the completed providers-list screen.";
 
-// .term is 13 px IBM Plex Mono. The face advances 0.6 em (7.8 px), but renderers without
-// subpixel positioning (Chromium on Linux) round it to 8 px — so every typed/ticker text is
-// pinned to n × 8 px with textLength, and the clip, caret and ticker period use the same 8.
-const CHAR_W = 8;
-const pin = (s) => `textLength="${s.length * CHAR_W}" lengthAdjust="spacing"`;
+// Screen lines are .term-lg (16 px), the title bar and ticker .term (13 px) — IBM Plex Mono
+// advances 0.6 em (9.6 / 7.8 px), but renderers without subpixel positioning (Chromium on
+// Linux) round it to whole pixels (10 / 8), so every typed/ticker text is pinned to n × that
+// width with textLength and the clip, caret and ticker period use the same number.
+const CHAR_W = 10; // .term-lg screen lines
+const TICKER_CHAR_W = 8; // .term ticker
+const pin = (s, w = CHAR_W) => `textLength="${s.length * w}" lengthAdjust="spacing"`;
 const CMD_X = 64;
 const LINE_Y = [100, 128, 154, 180, 206, 232];
 const STEPS = 8; // the previous file typed each command in 8 discrete steps
@@ -223,12 +231,12 @@ function screenLines(s, animated) {
       : "";
   const op = animated ? ' opacity="0"' : "";
   const rows = [
-    `<text x="40" y="${LINE_Y[0]}" class="term" style="fill:var(--inv-info)"${op}>${reveal(0)}${esc(s.header)}</text>`,
+    `<text x="40" y="${LINE_Y[0]}" class="term-lg" style="fill:var(--inv-info)"${op}>${reveal(0)}${esc(s.header)}</text>`,
     ...s.lines.map(
       (l, i) =>
-        `<text x="40" y="${LINE_Y[i + 1]}" class="term" style="fill:var(--inv-muted)"${op}>${reveal(i + 1)}${lineMarkup(l)}</text>`
+        `<text x="40" y="${LINE_Y[i + 1]}" class="term-lg" style="fill:var(--inv-muted)"${op}>${reveal(i + 1)}${lineMarkup(l)}</text>`
     ),
-    `<text x="40" y="${LINE_Y[5]}" class="term" style="fill:var(--inv-muted)" fill-opacity="0.65"${op}>${reveal(5)}${esc(s.footer)}</text>`,
+    `<text x="40" y="${LINE_Y[5]}" class="term-lg" style="fill:var(--inv-muted)" fill-opacity="0.65"${op}>${reveal(5)}${esc(s.footer)}</text>`,
   ];
   return rows.map((r) => `  ${r}`).join("\n");
 }
@@ -247,23 +255,24 @@ export async function renderCliTerminal() {
     mono: Object.values(C).flat().join(""),
   });
 
+  // One typing ramp per screen: the clip widths and the caret x positions come from it.
+  const ramps = SCREENS.map((s) => typingValues(s.cmd));
+
   const clipPaths = SCREENS.map(
     (s, i) =>
       `    <clipPath id="cli-tw${i}"><rect x="${CMD_X}" y="46" height="26" width="0">` +
-      `<animate attributeName="width" calcMode="discrete" values="${typingValues(s.cmd).join(";")}" keyTimes="${s.typing}" dur="18s" repeatCount="indefinite"/>` +
+      `<animate attributeName="width" calcMode="discrete" values="${ramps[i].join(";")}" keyTimes="${s.typing}" dur="18s" repeatCount="indefinite"/>` +
       `</rect></clipPath>`
   );
 
   const screens = SCREENS.map((s, i) => {
-    const caretXs = typingValues(s.cmd)
-      .map((w) => r1(CMD_X + w))
-      .join(";");
+    const caretXs = ramps[i].map((w) => r1(CMD_X + w)).join(";");
     return (
       `  <g opacity="${i === 0 ? 1 : 0}">\n` +
       `  <animate attributeName="opacity" values="${s.group.values}" keyTimes="${s.group.keyTimes}" dur="18s" repeatCount="indefinite"/>\n` +
-      `  <text x="40" y="66" class="term" style="fill:var(--inv-ok)">${esc("$")}</text>\n` +
-      `  <g clip-path="url(#cli-tw${i})"><text x="${CMD_X}" y="66" class="term" ${pin(s.cmd)}>${esc(s.cmd)}</text></g>\n` +
-      `  <rect y="54" width="7" height="16" style="fill:var(--inv-muted)" opacity="0">\n` +
+      `  <text x="40" y="66" class="term-lg" style="fill:var(--inv-ok)">${esc("$")}</text>\n` +
+      `  <g clip-path="url(#cli-tw${i})"><text x="${CMD_X}" y="66" class="term-lg" ${pin(s.cmd)}>${esc(s.cmd)}</text></g>\n` +
+      `  <rect y="52" width="9" height="20" style="fill:var(--inv-muted)" opacity="0">\n` +
       `    <animate attributeName="x" calcMode="discrete" values="${caretXs}" keyTimes="${s.typing}" dur="18s" repeatCount="indefinite"/>\n` +
       `    <animate attributeName="opacity" values="0;0;1;0.2;1;0.2;1;0;0" keyTimes="${s.caret}" dur="18s" repeatCount="indefinite"/>\n` +
       `  </rect>\n` +
@@ -274,8 +283,8 @@ export async function renderCliTerminal() {
 
   // Ticker: one period = the text plus one " · " separator; the copy repeats at that offset.
   const tickerLen = C.ticker.join("").length;
-  const period = r1((tickerLen + 3) * CHAR_W);
-  const tickerPin = `textLength="${tickerLen * CHAR_W}" lengthAdjust="spacing"`;
+  const period = r1((tickerLen + 3) * TICKER_CHAR_W);
+  const tickerPin = pin(C.ticker.join(""), TICKER_CHAR_W);
   const tickerText = TICKER_SEGS.map((s) =>
     s.hl ? `<tspan style="fill:var(--accent)">${esc(s.t)}</tspan>` : esc(s.t)
   ).join("");
@@ -307,7 +316,7 @@ export async function renderCliTerminal() {
     // Frame 0: the completed providers screen, fading out as the typing starts.
     `  <g>\n` +
     `  <animate attributeName="opacity" values="1;0;0" keyTimes="0;0.006;1" dur="18s" repeatCount="indefinite"/>\n` +
-    `  <text x="${CMD_X}" y="66" class="term" ${pin(SCREENS[0].cmd)}>${esc(SCREENS[0].cmd)}</text>\n` +
+    `  <text x="${CMD_X}" y="66" class="term-lg" ${pin(SCREENS[0].cmd)}>${esc(SCREENS[0].cmd)}</text>\n` +
     screenLines(SCREENS[0], false) +
     `\n  </g>\n` +
     screens.join("\n") +
