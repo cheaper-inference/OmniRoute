@@ -30,93 +30,93 @@ Zahtjev klijenta
 
 ---
 
-## Načini kompresije
+## Režimi kompresije
 
 ### Isključeno
 
-Kompresija se ne primjenjuje. Sve poruke prolaze bez izmjena.
+Kompresija nije primijenjena. Sve poruke prolaze neizmijenjene.
 
-### Lagani način (~15% uštede, kašnjenje <1ms)
+### Lite režim (~15% uštede, <1ms latencije)
 
-Najsigurniji način — bez semantičkih promjena, samo čišćenje formatiranja:
+Najsigurniji režim — nula semantičkih promjena, samo čišćenje formatiranja:
 
 | Tehnika                  | Opis                                                    |
 | ------------------------ | ------------------------------------------------------- |
-| `collapseWhitespace`     | Spaja uzastopne prazne redove i uklanja završne razmake |
-| `dedupSystemPrompt`      | Uklanja duplicirane sistemske poruke                    |
-| `compressToolResults`    | Komprimira opširne izlaze alata/funkcija                |
-| `removeRedundantContent` | Uklanja ponovljene upute                                |
-| `replaceImageUrls`       | Skraćuje URI-je slikovnih podataka u formatu base64     |
+| `collapseWhitespace`     | Spaja uzastopne prazne redove i razmake na kraju redova |
+| `dedupSystemPrompt`      | Uklanja duplirane sistemske poruke                      |
+| `compressToolResults`    | Komprimuje opširne izlaze alata/funkcija                |
+| `removeRedundantContent` | Uklanja ponovljene instrukcije                          |
+| `replaceImageUrls`       | Skraćuje base64 data URI-je slika                       |
 
-**Najbolje za:** Stalnu upotrebu i radne procese u kojima je sigurnost kritična.
+**Najbolje za:** Stalnu upotrebu, sigurnosno kritične radne tokove.
 
-### Standardni način (~30% uštede)
+### Standardni režim (~30% uštede)
 
-Inspirisan projektom [Caveman](https://github.com/JuliusBrussee/caveman) — uklanja suvišne riječi i opširne formulacije uz očuvanje značenja:
+Inspirisan projektom [Caveman](https://github.com/JuliusBrussee/caveman) — uklanja popunjavajuće riječi i opširne formulacije uz očuvanje značenja:
 
-- Uklanja suvišne riječi ("please", "I think", "basically", "actually")
-- Sažima opširne izraze ("in order to" → "to", "as a result of" → "because")
-- Uklanja učtivo ublažavanje zahtjeva ("Would you mind...", "If you could possibly...")
-- Više od 30 regex pravila prilagođenih upitima za programiranje
+- Uklanja popunjavajuće riječi ("molim", "mislim", "u suštini", "zapravo")
+- Sažima opširne fraze ("in order to" → "to", "as a result of" → "because")
+- Uklanja uljudno oklijevanje ("Bi li vam smetalo...", "Ako biste eventualno mogli...")
+- 30+ regex pravila podešenih za promptove za kodiranje
 
-**Najbolje za:** Svakodnevne programerske radne procese i timove koji vode računa o troškovima.
+**Najbolje za:** Svakodnevne radne tokove kodiranja, timove koji paze na troškove.
 
-### Agresivni način (~50% uštede)
+### Agresivni režim (~50% uštede)
 
 Pametno upravljanje historijom za duge sesije:
 
-- **Sažimanje starijih poruka** — starije poruke se postepeno sve više komprimiraju
+- **Starenje poruka** — starije poruke se progresivno komprimuju
 - **Kompresija rezultata alata** — dugi izlazi alata se skraćuju ili izostavljaju (prvi/posljednji redovi,
-  filtriranje redova s podudaranjima, sažimanje JSON ključeva)
-- **Zaštita strukturnog integriteta** — osigurava dosljednost parova `tool_use` + `tool_result`
-- **Uvažavanje kontekstnog prozora** — poštuje ograničenja broja tokena za svaki model
+  filtriranje redova po podudaranju, kompakcija JSON ključeva)
+- **Zaštite strukturnog integriteta** — osiguravaju da parovi `tool_use` + `tool_result` ostanu konzistentni
+- **Svijest o kontekstnom prozoru** — poštuje ograničenja tokena po modelu
 
-**Najbolje za:** Duge sesije otklanjanja grešaka i velike baze koda.
+**Najbolje za:** Produžene sesije debagiranja, velike baze koda.
 
-### Ultra način (~75% uštede)
+### Ultra režim (~75% uštede)
 
-Maksimalna kompresija za scenarije u kojima je broj tokena kritičan:
+Maksimalna kompresija za scenarije kritične po broju tokena:
 
-- **Heurističko skraćivanje** — skraćivanje proznog teksta zasnovano na bodovanju tokena
-- **Očuvanje strukture** — ograđeni blokovi koda, umetnuti kod, URL-ovi i identifikatori
-  zamjenjuju se oznakama i ponovo umeću bez izmjena te se nikada ne skraćuju
-- **Opcionalni SLM nivo** — mali lokalni model može precizirati skraćivanje kada je konfigurisan
-- Nezavisan je od Agresivnog načina: ne pokreće sažimanje starijih poruka, kompresiju rezultata alata
-  niti rezervni sažimač (samo neuspjeh SLM nivoa može usmjeriti rezervni prolaz kroz
-  agresivni način)
+- **Heurističko podrezivanje** — podrezivanje tokena u prozi na osnovu bodovanja
+- **Očuvanje strukture** — ograđeni blokovi koda, inline kod, URL-ovi i identifikatori se
+  označavaju privremenim oznakama i ponovo sastavljaju doslovno, nikad se ne podrezuju
+- **Opcioni SLM nivo** — mali lokalni model može profiniti podrezivanje kada je konfigurisan
+- Nezavisan od Agresivnog režima: ne izvršava starenje poruka, kompresiju rezultata alata
+  niti rezervni sumarizator (samo neuspjeh SLM nivoa može usmjeriti rezervni prolaz kroz
+  agresivni režim)
 
-**Najbolje za:** Situacije u kojima često dostižete ograničenja konteksta.
+**Najbolje za:** Kada stalno udarate u ograničenja konteksta.
 
-### RTK način (raspon od 60–90% prema nadređenom pružaocu)
+### RTK režim (60-90% opseg za ulazne podatke)
 
-RTK način je optimiziran za opširne izlaze alata koji se pojavljuju u sesijama programerskih agenata:
+RTK režim je optimizovan za opširne izlaze alata koji se pojavljuju u sesijama agenata za kodiranje:
 
-- Prepoznaje klase naredbi/izlaza kao što su `git status`, `git diff`, `git log`, pokretači testova,
-  TypeScript/Vite/Webpack procesi izgradnje, ESLint/Biome/Prettier, npm provjere/instalacije, Docker zapisnici, infrastrukturni
-  izlazi i generički izlazi ljuske
-- Primjenjuje pakete JSON filtera iz `open-sse/services/compression/engines/rtk/filters/`
-- Uvozi filtere RTK TOML sheme v1 iz projektnih ili globalnih datoteka `filters.toml`, uz validaciju
-  ugrađenih testova i provjeru pouzdanosti projektnih datoteka
-- Isporučuje se s 55 ugrađenih filtera s ugrađenim primjerima za provjeru
+- Detektuje klase komandi/izlaza kao što su `git status`, `git diff`, `git log`, test runneri,
+  TypeScript/Vite/Webpack buildovi, ESLint/Biome/Prettier, npm audit/instalacije, Docker logovi,
+  infrastrukturni izlaz i generički shell izlaz
+- Primjenjuje JSON pakete filtera iz `open-sse/services/compression/engines/rtk/filters/`
+- Uvozi RTK TOML schema v1 filtere iz projektnih ili globalnih `filters.toml` datoteka, sa validacijom
+  inline testova i trust-gatingom za projektne datoteke
+- Isporučuje se sa 56 ugrađenih filtera sa inline uzorcima za verifikaciju
 - Uklanja ANSI kontrolne sekvence, trake napretka, ponovljene redove i neupotrebljiv šum
-- Čuva neuspjehe, greške, upozorenja, izmijenjene datoteke, sažetke i završetak dugog izlaza
-- Podržava projektne filtere s provjerom pouzdanosti, globalne filtere i opcionalni oporavak redigiranog neobrađenog izlaza
+- Čuva neuspjehe, greške, upozorenja, izmijenjene datoteke, sažetke i kraj dugog izlaza
+- Podržava projektne filtere pod trust-gatingom, globalne filtere i opcioni oporavak sirovog izlaza sa redakcijom
 
-**Najbolje za:** Sesije agenata koje sadrže transkripte ljuske, izgradnje, testova, git-a, grep-a i izlaza datoteka.
+**Najbolje za:** Sesije agenata sa transkriptima shella, buildova, testova, gita, grepa i izlaza datoteka.
 
-### Složeni način (78–95% prihvatljivog raspona)
+### Stacked režim (78-95% primjenjivi opseg)
 
-Složeni način pokreće više mehanizama za kompresiju determinističkim redoslijedom. Zadani sistem je:
+Stacked režim pokreće više kompresijskih enginea determinističkim redoslijedom. Zadani pipeline je:
 
 ```txt
 RTK -> Caveman
 ```
 
-Tim se redoslijedom prvo sažimaju izlazi terminala/alata, nakon čega Caveman primjenjuje semantičko sažimanje na
-preostali upit na prirodnom jeziku. Složeni sistemi mogu se konfigurirati globalno ili putem
-kombinacija kompresije dodijeljenih kombinacijama usmjeravanja.
+Taj redoslijed prvo održava izlaz terminala/alata kompaktnim, a zatim primjenjuje Caveman semantičku
+kondenzaciju na preostali prompt na prirodnom jeziku. Stacked pipelineovi se mogu konfigurisati globalno
+ili putem kombinacija kompresije dodijeljenih kombinacijama rutiranja.
 
-**Najbolje za:** Mješoviti kontekst s velikim zapisnicima alata te ljudskim uputama ili sažecima asistenta.
+**Najbolje za:** Miješani kontekst sa velikim logovima alata uz ljudske instrukcije ili sažetke asistenta.
 
 ---
 

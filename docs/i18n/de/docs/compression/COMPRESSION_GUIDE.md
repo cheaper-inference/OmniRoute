@@ -34,89 +34,89 @@ Client-Anfrage
 
 ### Aus
 
-Es wird keine Komprimierung angewendet. Alle Nachrichten werden unverändert weitergeleitet.
+Keine Komprimierung. Alle Nachrichten werden unverändert durchgereicht.
 
 ### Lite-Modus (~15 % Einsparung, <1 ms Latenz)
 
-Der sicherste Modus — keine semantischen Änderungen, nur eine Bereinigung der Formatierung:
+Der sicherste Modus — keine semantische Veränderung, nur Formatierungsbereinigung:
 
 | Technik                  | Beschreibung                                                                |
 | ------------------------ | --------------------------------------------------------------------------- |
-| `collapseWhitespace`     | Aufeinanderfolgende Leerzeilen und nachgestellte Leerzeichen zusammenführen |
-| `dedupSystemPrompt`      | Doppelte Systemnachrichten entfernen                                        |
-| `compressToolResults`    | Ausführliche Tool-/Funktionsausgaben komprimieren                           |
-| `removeRedundantContent` | Wiederholte Anweisungen entfernen                                           |
-| `replaceImageUrls`       | Base64-Bilddaten-URIs kürzen                                                |
+| `collapseWhitespace`     | Fasst aufeinanderfolgende Leerzeilen und Leerzeichen am Zeilenende zusammen |
+| `dedupSystemPrompt`      | Entfernt doppelte Systemnachrichten                                         |
+| `compressToolResults`    | Komprimiert ausführliche Tool-/Funktionsausgaben                            |
+| `removeRedundantContent` | Entfernt wiederholte Anweisungen                                            |
+| `replaceImageUrls`       | Kürzt Base64-Bilddaten-URIs                                                 |
 
-**Am besten geeignet für:** Dauerhafte Nutzung, sicherheitskritische Workflows.
+**Ideal für:** Dauerbetrieb, sicherheitskritische Workflows.
 
-### Standardmodus (~30 % Einsparung)
+### Standard-Modus (~30 % Einsparung)
 
-Inspiriert von [Caveman](https://github.com/JuliusBrussee/caveman) — entfernt Füllwörter und weitschweifige Formulierungen, ohne die Bedeutung zu verändern:
+Inspiriert von [Caveman](https://github.com/JuliusBrussee/caveman) — entfernt Füllwörter und ausführliche Formulierungen, ohne die Bedeutung zu verändern:
 
-- Entfernt Füllwörter („bitte“, „ich denke“, „im Grunde“, „eigentlich“)
-- Verkürzt weitschweifige Formulierungen („um zu“ → „zu“, „als Folge von“ → „wegen“)
-- Entfernt höfliche Abschwächungen („Würde es Ihnen etwas ausmachen ...“, „Wenn Sie vielleicht ...“)
-- Mehr als 30 für Programmier-Prompts optimierte Regex-Regeln
+- Entfernt Füllwörter ("please", "I think", "basically", "actually")
+- Kürzt ausführliche Phrasen ("in order to" → "to", "as a result of" → "because")
+- Entfernt höfliche Abschwächungen ("Would you mind...", "If you could possibly...")
+- Über 30 Regex-Regeln, abgestimmt auf Coding-Prompts
 
-**Am besten geeignet für:** Tägliche Programmier-Workflows, kostenbewusste Teams.
+**Ideal für:** Tägliche Coding-Workflows, kostenbewusste Teams.
 
-### Aggressiver Modus (~50 % Einsparung)
+### Aggressiv-Modus (~50 % Einsparung)
 
 Intelligente Verlaufsverwaltung für lange Sitzungen:
 
-- **Nachrichtenalterung** — ältere Nachrichten werden zunehmend stärker komprimiert
-- **Komprimierung von Tool-Ergebnissen** — lange Tool-Ausgaben werden gekürzt oder ausgelassen (erste/letzte Zeilen,
-  Filterung nach übereinstimmenden Zeilen, Komprimierung von JSON-Schlüsseln)
-- **Schutz der strukturellen Integrität** — stellt sicher, dass Paare aus `tool_use` und `tool_result` konsistent bleiben
-- **Berücksichtigung des Kontextfensters** — beachtet die Tokenlimits der einzelnen Modelle
+- **Message Aging** — ältere Nachrichten werden zunehmend stärker komprimiert
+- **Tool Result Compression** — lange Tool-Ausgaben werden gekürzt oder ausgelassen (erste/letzte Zeilen,
+  Filterung von Trefferzeilen, Verdichtung von JSON-Schlüsseln)
+- **Structural Integrity Guards** — stellt sicher, dass `tool_use`- und `tool_result`-Paare konsistent bleiben
+- **Context Window Awareness** — berücksichtigt modellspezifische Token-Limits
 
-**Am besten geeignet für:** Längere Debugging-Sitzungen, große Codebasen.
+**Ideal für:** Längere Debugging-Sitzungen, große Codebases.
 
 ### Ultra-Modus (~75 % Einsparung)
 
-Maximale Komprimierung für Szenarien mit kritischer Tokenauslastung:
+Maximale Komprimierung für tokenkritische Szenarien:
 
-- **Heuristische Bereinigung** — bewertungsbasierte Entfernung von Tokens aus Fließtext
-- **Strukturerhaltung** — mit Begrenzungszeichen versehene Codeblöcke, Inline-Code, URLs und Bezeichner werden
-  durch Platzhalter geschützt und anschließend wortgetreu wieder eingefügt; sie werden niemals entfernt
-- **Optionale SLM-Stufe** — ein kleines lokales Modell kann die Bereinigung verfeinern, sofern es konfiguriert ist
-- Unabhängig vom aggressiven Modus: Es werden weder Nachrichtenalterung noch Komprimierung von Tool-Ergebnissen
-  oder die Fallback-Zusammenfassung ausgeführt (nur ein Fehler der SLM-Stufe kann einen Fallback-Durchlauf über
-  den aggressiven Modus auslösen)
+- **Heuristic Pruning** — scorebasiertes Token-Pruning von Fließtext
+- **Structure Preservation** — Codeblöcke mit Fence, Inline-Code, URLs und Bezeichner werden
+  durch Tombstones ersetzt und wortgetreu wieder eingefügt, niemals entfernt
+- **Optionales SLM-Tier** — ein kleines lokales Modell kann das Pruning verfeinern, sofern konfiguriert
+- Unabhängig vom Aggressiv-Modus: Es werden weder Message Aging noch Tool-Ergebnis-Komprimierung
+  oder der Fallback-Summarizer ausgeführt (nur ein Fehler des SLM-Tiers kann einen Fallback-Durchlauf
+  über den Aggressiv-Modus auslösen)
 
-**Am besten geeignet für:** Situationen, in denen Sie wiederholt an Kontextgrenzen stoßen.
+**Ideal für:** Wenn Sie wiederholt an Kontextlimits stoßen.
 
-### RTK-Modus (60–90 % im Upstream-Bereich)
+### RTK-Modus (60-90 % im Upstream-Bereich)
 
-Der RTK-Modus ist für ausführliche Tool-Ausgaben optimiert, die in Sitzungen mit Programmier-Agenten auftreten:
+Der RTK-Modus ist für ausführliche Tool-Ausgaben optimiert, die in Coding-Agent-Sitzungen anfallen:
 
 - Erkennt Befehls-/Ausgabeklassen wie `git status`, `git diff`, `git log`, Test-Runner,
-  TypeScript-/Vite-/Webpack-Builds, ESLint/Biome/Prettier, npm-Audits/-Installationen, Docker-Protokolle, Infrastruktur-
-  ausgaben und generische Shell-Ausgaben
+  TypeScript-/Vite-/Webpack-Builds, ESLint/Biome/Prettier, npm-Audits/-Installationen, Docker-Logs,
+  Infrastruktur-Ausgaben und generische Shell-Ausgaben
 - Wendet JSON-Filterpakete aus `open-sse/services/compression/engines/rtk/filters/` an
-- Importiert Filter des RTK-TOML-Schemas v1 aus projektbezogenen oder globalen `filters.toml`-Dateien, einschließlich
-  Inline-Testvalidierung und Vertrauensprüfung für Projektdateien
-- Enthält 55 integrierte Filter mit Inline-Verifizierungsbeispielen
-- Entfernt ANSI-Steuersequenzen, Fortschrittsbalken, wiederholte Zeilen und nicht handlungsrelevante Störinformationen
-- Behält Fehlschläge, Fehler, Warnungen, geänderte Dateien, Zusammenfassungen und das Ende langer Ausgaben bei
-- Unterstützt vertrauensgeprüfte Projektfilter, globale Filter und die optionale Wiederherstellung geschwärzter Rohausgaben
+- Importiert RTK-TOML-Schema-v1-Filter aus projektbezogenen oder globalen `filters.toml`-Dateien,
+  mit Inline-Test-Validierung und Trust-Gating für Projektdateien
+- Wird mit 56 integrierten Filtern samt Inline-Verifizierungsbeispielen ausgeliefert
+- Entfernt ANSI-Steuersequenzen, Fortschrittsbalken, wiederholte Zeilen und nicht relevantes Rauschen
+- Bewahrt Fehlschläge, Fehler, Warnungen, geänderte Dateien, Zusammenfassungen und das Ende langer Ausgaben
+- Unterstützt Trust-Gating-gesteuerte Projektfilter, globale Filter und die optionale Wiederherstellung geschwärzter Rohausgaben
 
-**Am besten geeignet für:** Agentensitzungen mit Shell-, Build-, Test-, Git-, Grep- und Dateiausgabeprotokollen.
+**Ideal für:** Agent-Sitzungen mit Shell-, Build-, Test-, Git-, Grep- und Dateiausgabe-Transkripten.
 
-### Gestapelter Modus (78–95 % im geeigneten Bereich)
+### Stacked-Modus (78-95 % bei geeigneten Inhalten)
 
-Der gestapelte Modus führt mehrere Komprimierungs-Engines in einer deterministischen Reihenfolge aus. Die Standardpipeline lautet:
+Der Stacked-Modus führt mehrere Komprimierungs-Engines in einer deterministischen Reihenfolge aus. Die Standard-Pipeline lautet:
 
 ```txt
 RTK -> Caveman
 ```
 
-Durch diese Reihenfolge werden Terminal-/Tool-Ausgaben zuerst kompakt gehalten; anschließend wendet Caveman eine semantische Verdichtung auf
-den verbleibenden natürlichsprachlichen Prompt an. Gestapelte Pipelines können global oder über
-Komprimierungs-Combos konfiguriert werden, die Routing-Combos zugewiesen sind.
+Diese Reihenfolge hält Terminal-/Tool-Ausgaben zuerst kompakt und wendet anschließend die semantische
+Verdichtung von Caveman auf den verbleibenden natürlichsprachlichen Prompt an. Stacked-Pipelines können
+global oder über Komprimierungs-Combos konfiguriert werden, die Routing-Combos zugewiesen sind.
 
-**Am besten geeignet für:** Gemischte Kontextinhalte mit umfangreichen Tool-Protokollen sowie menschlichen Anweisungen oder Assistentenzusammenfassungen.
+**Ideal für:** Gemischte Kontexte mit großen Tool-Logs plus menschlichen Anweisungen oder Assistenten-Zusammenfassungen.
 
 ---
 

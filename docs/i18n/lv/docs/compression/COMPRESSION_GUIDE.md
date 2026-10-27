@@ -34,89 +34,90 @@ Klienta pieprasījums
 
 ### Izslēgts
 
-Saspiešana netiek lietota. Visi ziņojumi tiek pārsūtīti bez izmaiņām.
+Saspiešana netiek lietota. Visi ziņojumi iziet cauri nemainīti.
 
-### Vienkāršais režīms (~15% ietaupījums, <1ms latentums)
+### Lite režīms (~15% ietaupījums, <1ms aizture)
 
-Visdrošākais režīms — bez semantiskām izmaiņām, tikai formatējuma tīrīšana:
+Drošākais režīms — nekādu semantisko izmaiņu, tikai formatējuma attīrīšana:
 
-| Paņēmiens                | Apraksts                                               |
-| ------------------------ | ------------------------------------------------------ |
-| `collapseWhitespace`     | Apvieno secīgas tukšās rindas un noņem beigu atstarpes |
-| `dedupSystemPrompt`      | Noņem sistēmas ziņojumu dublikātus                     |
-| `compressToolResults`    | Saspiež daudzvārdīgu rīku/funkciju izvadi              |
-| `removeRedundantContent` | Noņem atkārtotas instrukcijas                          |
-| `replaceImageUrls`       | Saīsina base64 attēlu datu URI                         |
+| Paņēmiens                | Apraksts                                         |
+| ------------------------ | ------------------------------------------------ |
+| `collapseWhitespace`     | Apvieno secīgas tukšās rindas un beigu atstarpes |
+| `dedupSystemPrompt`      | Noņem dublētus sistēmas ziņojumus                |
+| `compressToolResults`    | Saspiež garlaicīgas rīku/funkciju izvades        |
+| `removeRedundantContent` | Noņem atkārtotās instrukcijas                    |
+| `replaceImageUrls`       | Saīsina base64 attēlu datu URI                   |
 
-**Vispiemērotākais:** pastāvīgai lietošanai, drošībai kritiskām darbplūsmām.
+**Piemērotākais:** pastāvīgai lietošanai, drošībai kritiskām darba plūsmām.
 
 ### Standarta režīms (~30% ietaupījums)
 
-Iedvesmots no [Caveman](https://github.com/JuliusBrussee/caveman) — noņem liekvārdību un izvērstus formulējumus, vienlaikus saglabājot nozīmi:
+Iedvesmots no [Caveman](https://github.com/JuliusBrussee/caveman) — noņem aizpildītājvārdus un garlaicīgas frāzes, saglabājot nozīmi:
 
-- Noņem liekvārdību ("lūdzu", "manuprāt", "būtībā", "patiesībā")
-- Saīsina izvērstas frāzes ("lai varētu" → "lai", "tā rezultātā, ka" → "jo")
-- Noņem pieklājīgus izvairīgus formulējumus ("Vai jūs varētu...", "Ja jūs, iespējams, varētu...")
-- Vairāk nekā 30 regulāro izteiksmju kārtulu, kas pielāgotas programmēšanas uzvednēm
+- Noņem aizpildītājvārdus ("please", "I think", "basically", "actually")
+- Saīsina garlaicīgas frāzes ("in order to" → "to", "as a result of" → "because")
+- Noņem pieklājīgas piesardzības frāzes ("Would you mind...", "If you could possibly...")
+- Vairāk nekā 30 regex noteikumi, kas noregulēti programmēšanas vaicājumiem
 
-**Vispiemērotākais:** ikdienas programmēšanas darbplūsmām un izmaksu ziņā apzinīgām komandām.
+**Piemērotākais:** ikdienas programmēšanas darba plūsmām, izmaksas apzinīgām komandām.
 
 ### Agresīvais režīms (~50% ietaupījums)
 
-Vieda vēstures pārvaldība ilgām sesijām:
+Vieda vēstures pārvaldība garām sesijām:
 
-- **Ziņojumu novecināšana** — vecāki ziņojumi tiek pakāpeniski saspiesti
-- **Rīku rezultātu saspiešana** — gara rīku izvade tiek saīsināta vai izlaista (pirmās/pēdējās rindas,
-  atbilstošo rindu filtrēšana, JSON atslēgu sablīvēšana)
-- **Strukturālās integritātes aizsargi** — nodrošina, ka `tool_use` + `tool_result` pāri paliek saskaņoti
-- **Konteksta loga ievērošana** — ievēro katra modeļa marķieru ierobežojumus
+- **Ziņojumu novecošana** — vecāki ziņojumi tiek pakāpeniski saspiesti
+- **Rīka rezultātu saspiešana** — garas rīku izvades tiek apgraizītas vai izlaistas (pirmās/pēdējās
+  rindas, atbilstošo rindu filtrēšana, JSON atslēgu blīvēšana)
+- **Strukturālās integritātes aizsargi** — nodrošina, ka `tool_use` + `tool_result` pāri paliek konsekventi
+- **Konteksta loga apzināšanās** — ievēro katra modeļa tokenu ierobežojumus
 
-**Vispiemērotākais:** ilgstošām atkļūdošanas sesijām un lielām kodu bāzēm.
+**Piemērotākais:** ilgstošām atkļūdošanas sesijām, lielām koda bāzēm.
 
 ### Ultra režīms (~75% ietaupījums)
 
-Maksimāla saspiešana scenārijiem, kuros marķieru daudzums ir kritiski svarīgs:
+Maksimāla saspiešana tokeniem kritiskos scenārijos:
 
-- **Heiristiska atsijāšana** — uz vērtējumu balstīta prozas marķieru atsijāšana
-- **Struktūras saglabāšana** — norobežoti koda bloki, iekļauts kods, URL un identifikatori tiek
-  aizstāti ar vietturiem un pēc tam bez izmaiņām ievietoti atpakaļ; tie nekad netiek atsijāti
-- **Neobligāts SLM līmenis** — ja tas ir konfigurēts, mazs lokālais modelis var precizēt atsijāšanu
-- Neatkarīgs no agresīvā režīma: tas neveic ziņojumu novecināšanu, rīku rezultātu saspiešanu
-  vai rezerves apkopošanu (tikai SLM līmeņa kļūme var novirzīt rezerves apstrādi caur
+- **Heiristiskā atzarošana** — uz vērtējuma balstīta prozas tokenu atzarošana
+- **Struktūras saglabāšana** — nožogotie koda bloki, iekļautais kods, URL un identifikatori tiek
+  pagaidu aizsargāti (tombstoned) un pēc tam vārds vārdā atjaunoti, nekad netiek atzaroti
+- **Neobligātais SLM līmenis** — mazs lokāls modelis var precizēt atzarošanu, ja tas ir konfigurēts
+- Neatkarīgs no Agresīvā režīma: tas neizpilda ziņojumu novecošanu, rīka rezultātu saspiešanu
+  vai rezerves kopsavilkuma veidotāju (tikai SLM līmeņa atteice var novirzīt rezerves pieeju caur
   agresīvo režīmu)
 
-**Vispiemērotākais:** ja atkārtoti sasniedzat konteksta ierobežojumus.
+**Piemērotākais:** gadījumiem, kad atkārtoti sasniedzat konteksta ierobežojumus.
 
-### RTK režīms (60–90% augšupstraumes diapazons)
+### RTK režīms (60–90% augšplūsmas diapazons)
 
-RTK režīms ir optimizēts daudzvārdīgai rīku izvadei, kas parādās programmēšanas aģentu sesijās:
+RTK režīms ir optimizēts garlaicīgām rīku izvadēm, kas parādās kodēšanas aģentu sesijās:
 
-- Nosaka tādas komandu/izvades klases kā `git status`, `git diff`, `git log`, testu izpildītāji,
-  TypeScript/Vite/Webpack būvējumi, ESLint/Biome/Prettier, npm audit/installs, Docker žurnāli, infrastruktūras
-  izvade un vispārīga čaulas izvade
-- Lieto JSON filtru pakotnes no `open-sse/services/compression/engines/rtk/filters/`
-- Importē RTK TOML shēmas v1 filtrus no projekta vai globālajiem `filters.toml` failiem, veicot iekļauto testu
-  validāciju un uzticamības pārbaudi projekta failiem
-- Ietver 55 iebūvētus filtrus ar iekļautiem pārbaudes paraugiem
-- Noņem ANSI vadības sekvences, progresa joslas, atkārtotas rindas un nevajadzīgu informāciju, kas neprasa rīcību
-- Saglabā atteices, kļūdas, brīdinājumus, mainītos failus, kopsavilkumus un garas izvades beigu daļu
-- Atbalsta projekta filtrus ar uzticamības pārbaudi, globālos filtrus un neobligātu rediģētās neapstrādātās izvades atgūšanu
+- Atpazīst komandu/izvades klases, piemēram, `git status`, `git diff`, `git log`, testu palaidējus,
+  TypeScript/Vite/Webpack būvēšanas, ESLint/Biome/Prettier, npm audit/instalācijas, Docker žurnālus,
+  infrastruktūras izvadi un vispārīgu čaulas izvadi
+- Lieto JSON filtru pakas no `open-sse/services/compression/engines/rtk/filters/`
+- Importē RTK TOML shēmas v1 filtrus no projekta vai globālajām `filters.toml` datnēm, ar iekļauto
+  testu validāciju un uzticamības kontroli projekta datnēm
+- Ietver 56 iebūvētus filtrus ar iebūvētiem pārbaudes paraugiem
+- Noņem ANSI vadības sekvences, progresa joslas, atkārtotas rindas un neinformatīvu troksni
+- Saglabā atteices, kļūdas, brīdinājumus, izmainītās datnes, kopsavilkumus un garu izvažu beigu daļu
+- Atbalsta ar uzticamības kontroli aizsargātus projekta filtrus, globālos filtrus un neobligātu
+  rediģētās neapstrādātās izvades atkopšanu
 
-**Vispiemērotākais:** aģentu sesijām ar čaulas, būvēšanas, testēšanas, git, grep un failu izvades izrakstiem.
+**Piemērotākais:** aģentu sesijām ar čaulas, būvēšanas, testu, git, grep un datņu izvades protokoliem.
 
-### Slāņotais režīms (78–95% atbilstošā satura diapazons)
+### Kombinētais režīms (78–95% piemērojamais diapazons)
 
-Slāņotais režīms izpilda vairākus saspiešanas dzinējus deterministiskā secībā. Noklusējuma konveijers ir:
+Kombinētais režīms izpilda vairākus saspiešanas dzinējus deterministiskā secībā. Noklusējuma konveijers ir:
 
 ```txt
 RTK -> Caveman
 ```
 
-Šāda secība vispirms sablīvē termināļa/rīku izvadi un pēc tam lieto Caveman semantisko saīsināšanu
-atlikušajai dabiskās valodas uzvednei. Slāņotos konveijerus var konfigurēt globāli vai ar
+Šāda secība vispirms padara termināļa/rīku izvadi kompaktu, pēc tam lieto Caveman semantisko blīvēšanu
+atlikušajam dabiskās valodas vaicājumam. Kombinētos konveijerus var konfigurēt globāli vai ar
 saspiešanas kombinācijām, kas piešķirtas maršrutēšanas kombinācijām.
 
-**Vispiemērotākais:** jauktam kontekstam ar apjomīgiem rīku žurnāliem kopā ar cilvēka instrukcijām vai asistenta kopsavilkumiem.
+**Piemērotākais:** jauktam kontekstam ar lieliem rīku žurnāliem kopā ar cilvēka instrukcijām vai asistenta kopsavilkumiem.
 
 ---
 

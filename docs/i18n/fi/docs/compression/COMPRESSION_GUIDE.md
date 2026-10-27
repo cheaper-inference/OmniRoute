@@ -32,91 +32,91 @@ Asiakaspyyntö
 
 ## Pakkaustilat
 
-### Pois käytöstä
+### Off
 
-Pakkausta ei käytetä. Kaikki viestit välitetään muuttumattomina.
+Ei pakkausta. Kaikki viestit menevät läpi muuttumattomina.
 
-### Kevyt tila (~15 %:n säästö, <1 ms:n viive)
+### Lite-tila (~15 %:n säästö, <1 ms:n viive)
 
-Turvallisin tila — ei semanttisia muutoksia, vain muotoilun siivousta:
+Turvallisin tila — ei lainkaan semanttisia muutoksia, vain muotoilun siistimistä:
 
-| Tekniikka                | Kuvaus                                                              |
-| ------------------------ | ------------------------------------------------------------------- |
-| `collapseWhitespace`     | Yhdistä peräkkäiset tyhjät rivit ja poista rivien lopun välilyönnit |
-| `dedupSystemPrompt`      | Poista päällekkäiset järjestelmäviestit                             |
-| `compressToolResults`    | Pakkaa monisanaiset työkalu-/funktiotulosteet                       |
-| `removeRedundantContent` | Poista toistetut ohjeet                                             |
-| `replaceImageUrls`       | Lyhennä base64-kuvadatan URI-tunnisteita                            |
+| Tekniikka                | Kuvaus                                                |
+| ------------------------ | ----------------------------------------------------- |
+| `collapseWhitespace`     | Yhdistää peräkkäiset tyhjät rivit ja loppuvälilyönnit |
+| `dedupSystemPrompt`      | Poistaa päällekkäiset järjestelmäviestit              |
+| `compressToolResults`    | Pakkaa monisaniset työkalu-/funktiotulosteet          |
+| `removeRedundantContent` | Poistaa toistuvat ohjeet                              |
+| `replaceImageUrls`       | Lyhentää base64-muotoiset kuvien data-URI:t           |
 
-**Soveltuu parhaiten:** Jatkuvaan käyttöön ja turvallisuuskriittisiin työnkulkuihin.
+**Parhaiten sopii:** Jatkuvaan käyttöön, turvallisuuskriittisiin työnkulkuihin.
 
-### Vakiotila (~30 %:n säästö)
+### Standard-tila (~30 %:n säästö)
 
-Inspiraationa [Caveman](https://github.com/JuliusBrussee/caveman) — poistaa täytesanoja ja monisanaisia ilmaisuja merkityksen säilyttäen:
+[Cavemanin](https://github.com/JuliusBrussee/caveman) innoittama — poistaa täytesanat ja monisaniset ilmaukset merkityksen säilyttäen:
 
-- Poistaa täytesanoja ("ole hyvä", "luulen", "periaatteessa", "itse asiassa")
-- Tiivistää monisanaisia ilmauksia ("siinä tarkoituksessa, että" → "jotta", "sen seurauksena, että" → "koska")
-- Poistaa kohteliaan epäröinnin ("Voisitko...", "Jos vain mitenkään voisit...")
-- Yli 30 koodauskehotteille hienosäädettyä säännöllisen lausekkeen sääntöä
+- Poistaa täytesanoja ("please", "I think", "basically", "actually")
+- Tiivistää monisanisia fraaseja ("in order to" → "to", "as a result of" → "because")
+- Poistaa kohteliaat varovaiset muotoilut ("Would you mind...", "If you could possibly...")
+- Yli 30 regex-sääntöä, jotka on viritetty koodauskehotteisiin
 
-**Soveltuu parhaiten:** Päivittäisiin koodaustyönkulkuihin ja kustannustietoisille tiimeille.
+**Parhaiten sopii:** Päivittäisiin koodaustyönkulkuihin, kustannustietoisille tiimeille.
 
-### Aggressiivinen tila (~50 %:n säästö)
+### Aggressive-tila (~50 %:n säästö)
 
-Älykäs historian hallinta pitkiä istuntoja varten:
+Älykäs historianhallinta pitkiin istuntoihin:
 
-- **Viestien ikäännytys** — vanhempia viestejä pakataan asteittain enemmän
-- **Työkalutulosteiden pakkaus** — pitkät työkalutulosteet katkaistaan tai jätetään pois (ensimmäiset/viimeiset rivit,
-  osumarivien suodatus, JSON-avainten tiivistäminen)
-- **Rakenteellisen eheyden suojaukset** — varmistaa, että `tool_use`- ja `tool_result`-parit pysyvät yhdenmukaisina
-- **Konteksti-ikkunan huomiointi** — noudattaa mallikohtaisia tunnisterajoja
+- **Viestien ikääntyminen** — vanhemmat viestit pakataan asteittain
+- **Työkalutulosten pakkaus** — pitkät työkalutulosteet katkaistaan tai karsitaan (ensimmäiset/viimeiset
+  rivit, osumarivien suodatus, JSON-avainten tiivistys)
+- **Rakenteen eheyden suojaukset** — varmistaa, että `tool_use` + `tool_result` -parit pysyvät yhtenäisinä
+- **Konteksti-ikkunan huomioiminen** — kunnioittaa mallikohtaisia token-rajoja
 
-**Soveltuu parhaiten:** Pitkiin virheenkorjausistuntoihin ja suuriin koodikantoihin.
+**Parhaiten sopii:** Pitkiin virheenkorjausistuntoihin, suuriin koodikantoihin.
 
 ### Ultra-tila (~75 %:n säästö)
 
-Maksimaalinen pakkaus tilanteisiin, joissa tunnisteiden määrä on kriittinen:
+Maksimaalinen pakkaus token-kriittisiin tilanteisiin:
 
-- **Heuristinen karsinta** — pisteytykseen perustuva proosan tunnisteiden karsinta
-- **Rakenteen säilyttäminen** — aidatut koodilohkot, upotettu koodi, URL-osoitteet ja tunnisteet
-  korvataan paikkamerkeillä ja liitetään takaisin sanatarkasti, eikä niitä koskaan karsita
+- **Heuristinen karsinta** — pisteytykseen perustuva proosan token-karsinta
+- **Rakenteen säilyttäminen** — aidatut koodilohkot, rivinsisäinen koodi, URL-osoitteet ja tunnisteet
+  merkitään suojatuiksi ja ommellaan takaisin sellaisenaan, niitä ei koskaan karsita
 - **Valinnainen SLM-taso** — pieni paikallinen malli voi hienosäätää karsintaa, kun se on määritetty
-- Riippumaton aggressiivisesta tilasta: se ei suorita viestien ikäännytystä, työkalutulosteiden pakkausta
-  tai varatiivistäjää (vain SLM-tason vika voi ohjata varakäsittelyn
-  aggressiivisen tilan kautta)
+- Riippumaton Aggressive-tilasta: se ei suorita viestien ikääntymistä, työkalutulosten pakkausta
+  tai varayhteenvetoa (vain SLM-tason epäonnistuminen voi reitittää varasuorituksen
+  aggressive-tilan kautta)
 
-**Soveltuu parhaiten:** Kun kontekstirajat ylittyvät toistuvasti.
+**Parhaiten sopii:** Kun törmäät toistuvasti kontekstirajoihin.
 
-### RTK-tila (60–90 %:n ylävirran vaihteluväli)
+### RTK-tila (60–90 %:n säästöalue upstreamissa)
 
-RTK-tila on optimoitu koodausagenttien istunnoissa esiintyville monisanaisille työkalutulosteille:
+RTK-tila on optimoitu monisanisille työkalutulosteille, joita esiintyy koodausagenttien istunnoissa:
 
-- Tunnistaa komento-/tulosteluokkia, kuten `git status`, `git diff`, `git log`, testien suorittajat,
-  TypeScript/Vite/Webpack-koontiversiot, ESLint/Biome/Prettier, npm-tarkastukset/-asennukset, Docker-lokit, infrastruktuurin
-  tulosteet ja yleiset komentotulkin tulosteet
-- Käyttää JSON-suodatinpaketteja hakemistosta `open-sse/services/compression/engines/rtk/filters/`
-- Tuo RTK TOML schema v1 -suodattimia projektin tai yleisistä `filters.toml`-tiedostoista sekä käyttää upotettujen testien
-  validointia ja projektitiedostojen luottamusrajoitusta
-- Sisältää 55 sisäänrakennettua suodatinta ja upotetut vahvistusnäytteet
-- Poistaa ANSI-ohjaussekvenssit, edistymispalkit, toistetut rivit ja muun ei-toiminnallisen kohinan
-- Säilyttää epäonnistumiset, virheet, varoitukset, muuttuneet tiedostot, yhteenvedot ja pitkän tulosteen loppuosan
-- Tukee luottamusrajoitettuja projektisuodattimia, yleisiä suodattimia ja valinnaista peitetyn raakatulosteen palautusta
+- Tunnistaa komento-/tulosteluokkia kuten `git status`, `git diff`, `git log`, testisuorittimet,
+  TypeScript/Vite/Webpack -käännökset, ESLint/Biome/Prettier, npm audit/asennukset, Docker-lokit, infra-
+  tulosteet ja yleiset shell-tulosteet
+- Soveltaa JSON-suodatinpaketteja polusta `open-sse/services/compression/engines/rtk/filters/`
+- Tuo RTK TOML schema v1 -suodattimia projektin tai globaaleista `filters.toml`-tiedostoista, sisältäen
+  sisäisten testien validoinnin ja projektitiedostojen luottamusporttauksen
+- Sisältää 56 sisäänrakennettua suodatinta ja niiden sisäiset vahvistusnäytteet
+- Poistaa ANSI-ohjaussekvenssit, edistymispalkit, toistuvat rivit ja toimettoman kohinan
+- Säilyttää epäonnistumiset, virheet, varoitukset, muuttuneet tiedostot, yhteenvedot ja pitkien tulosteiden loppuosat
+- Tukee luottamusportattuja projektisuodattimia, globaaleja suodattimia ja valinnaista sensuroidun raakatulosteen palautusta
 
-**Soveltuu parhaiten:** Agentti-istuntoihin, joiden transkripteissä on komentotulkin, koonnin, testien, gitin, grepin ja tiedostotulosteiden sisältöä.
+**Parhaiten sopii:** Agentti-istuntoihin, jotka sisältävät shell-, build-, test-, git-, grep- ja tiedostotulosteiden tallenteita.
 
-### Pinottu tila (78–95 % soveltuvasta sisällöstä)
+### Stacked-tila (78–95 %:n säästöalue kelvolliselle sisällölle)
 
-Pinottu tila suorittaa useita pakkausmoottoreita deterministisessä järjestyksessä. Oletusputki on:
+Stacked-tila suorittaa useita pakkausmoottoreita deterministisessä järjestyksessä. Oletusputki on:
 
 ```txt
 RTK -> Caveman
 ```
 
-Tämä järjestys tiivistää ensin pääte-/työkalutulosteen ja käyttää sitten Caveman-moottorin semanttista tiivistystä
-jäljellä olevaan luonnollisen kielen kehotteeseen. Pinotut putket voidaan määrittää yleisesti tai
-reititysyhdistelmiin liitettyjen pakkausyhdistelmien kautta.
+Tämä järjestys pitää terminaali-/työkalutulosteet ensin tiiviinä, minkä jälkeen Cavemanin semanttinen
+tiivistys kohdistetaan jäljelle jäävään luonnollisen kielen kehotteeseen. Stacked-putket voidaan määrittää
+globaalisti tai reitityscomboihin liitettyjen pakkauskombinaatioiden kautta.
 
-**Soveltuu parhaiten:** Sekalaiseen kontekstiin, jossa on suuria työkalulokeja sekä ihmisen antamia ohjeita tai avustajan yhteenvetoja.
+**Parhaiten sopii:** Sekalaiseen kontekstiin, jossa on suuria työkalulokeja sekä ihmisten ohjeita tai assistentin yhteenvetoja.
 
 ---
 
@@ -292,7 +292,7 @@ salasanat, tokenit ja salaisuudet ennen kuin mitään tallennetaan pysyvästi.
 
 ## Pakkaustilastot
 
-Jokaisen pakatun pyynnön tilastot sisällytetään palvelinlokeihin:
+Jokainen pakattu pyyntö sisältää tilastot palvelimen lokeissa:
 
 ```json
 {

@@ -30,93 +30,92 @@ OmniRoute ń ṣe ìlànà ìfúnpọ̀ prompt onímodulu kan tí ń ṣiṣẹ�
 
 ---
 
-## Àwọn Ipò Ìfúnpọ̀
+## Àwọn Ipo Ìdínkù
 
-### Pípa
+### Òfò
 
-Kò sí ìfúnpọ̀ tí a lò. Gbogbo àwọn ìfiránṣẹ́ máa ń kọjá láìyípadà.
+Kò sí ìdínkù tí a fi kún un rárá. Gbogbo àwọn ìfiránṣẹ́ ń lọ kọjá láìyípadà.
 
-### Ipò Fúyẹ́ (~15% fífi pamọ́, ìdádúró <1ms)
+### Ipo Fẹ́ẹ̀rùn (~15% ìfipamọ́, ìdídùró <1ms)
 
-Ipò tó ní ààbò jù lọ — kò sí ìyípadà sí ìtumọ̀ rárá, ìmúṣẹ̀dá ìṣètò nìkan:
+Ipo tó dáa jù lọ — kò sí àyípadà lórí ìtumọ̀ rárá, kìkì ìfíntí ọ̀nà-àkọsílẹ̀ nìkan:
 
-| Ọ̀nà                      | Àpèjúwe                                                         |
-| ------------------------ | --------------------------------------------------------------- |
-| `collapseWhitespace`     | Dapọ̀ àwọn ìlà òfìfo tó tẹ̀lé ara wọn àti àwọn àyè tó wà ní ìparí |
-| `dedupSystemPrompt`      | Yọ àwọn ìfiránṣẹ́ system àdàkọ kúrò                              |
-| `compressToolResults`    | Fún àwọn àbájáde irinṣẹ́/function alálàyé pọ̀                     |
-| `removeRedundantContent` | Yọ àwọn ìtọ́nisọ́nà àtúnṣe kúrò                                   |
-| `replaceImageUrls`       | Kúrú data URI àwòrán base64                                     |
+| Ọ̀nà                      | Àpèjúwe                                                      |
+| ------------------------ | ------------------------------------------------------------ |
+| `collapseWhitespace`     | Dàpọ̀ àwọn ila òfo tó tẹ̀le ara àti àwọn àyíká òfo ẹ̀yìn-ila pọ̀ |
+| `dedupSystemPrompt`      | Yọ àwọn ìfiránṣẹ́ ètò tó ṣe ẹ̀dá-keji kúrò                     |
+| `compressToolResults`    | Dín àwọn abajade irinṣẹ́/iṣẹ́ tó ṣọ̀ọ̀lẹ̀ kù                      |
+| `removeRedundantContent` | Yọ àwọn ìtọ́sọ́nà tó ń tún ara wọ́n sọ kúrò                     |
+| `replaceImageUrls`       | Sọ́ àwọn URI dátà àwòrán base64 kúrú                          |
 
-**Ó dára jù fún:** Ìlò tó máa ń wà ní títàn nígbà gbogbo, àwọn ìṣàn iṣẹ́ tí ààbò ṣe pàtàkì gidigidi.
+**Ó dára jù lọ fún:** Ìlò nígbà gbogbo, àwọn ìṣàn-ìṣe tí ààbò ṣe pàtàkì.
 
-### Ipò Déédéé (~30% fífi pamọ́)
+### Ipo Òṣùwọ̀n (~30% ìfipamọ́)
 
-Ó gba ìmísí láti ọ̀dọ̀ [Caveman](https://github.com/JuliusBrussee/caveman) — ó ń yọ àwọn ọ̀rọ̀ àfikún àti gbólóhùn alálàyé kúrò nígbà tó ń pa ìtumọ̀ mọ́:
+Ó gba ìrísí láti [Caveman](https://github.com/JuliusBrussee/caveman) — ó ń yọ àwọn ọ̀rọ̀ àfikún àti ọ̀rọ̀-ìsọ̀tẹ́lẹ̀ gùn kúrò nígbà tó sì ń tọ́ju ìtumọ̀:
 
-- Ó ń yọ àwọn ọ̀rọ̀ àfikún kúrò ("jọ̀wọ́", "mo rò pé", "ní pàtàkì", "ní ti gidi")
-- Ó ń dín àwọn gbólóhùn alálàyé kù ("láti lè" → "láti", "nítorí àbájáde" → "nítorí")
-- Ó ń yọ àwọn ọ̀rọ̀ ìbẹ̀bẹ̀ oníwà pẹ̀lẹ́ kúrò ("Ṣé o lè...", "Tí o bá lè ṣe é...")
-- Àwọn òfin regex tó ju 30 lọ tí a ṣàtúnṣe fún àwọn prompt ìkọ̀wé kóòdù
+- Ó ń yọ àwọn ọ̀rọ̀ àfikún kúrò ("jọ̀wọ́", "mo rò pé", "ní ìpàtàkì", "ní tòótọ́")
+- Ó ń sọ́ àwọn gbolóhùn tó gùn kúrú ("ní ìlànà láti" → "láti", "nítorí abajade ti" → "nítorí")
+- Ó ń yọ ìbẹ̀rù-ọ̀rọ̀ ọ̀wọ̀n tó ṣe pọ̀pọ̀ kúrò ("Ǹjẹ́ o kò ní ṣe wàhálà tí...", "Tí o bá lè jọ̀wọ́...")
+- Àwọn òfin regex tó pọ̀ ju 30 lọ tí a ṣètò daradara fún àwọn ìbéèrè kóòdì
 
-**Ó dára jù fún:** Àwọn ìṣàn iṣẹ́ ìkọ̀wé kóòdù ojoojúmọ́, àwọn ẹgbẹ́ tó ń ṣọ́ owó ná.
+**Ó dára jù lọ fún:** Àwọn ìṣàn-ìṣe kíkọ kóòdì ojoojúmọ́, àwọn ẹgbẹ́ tó ń ṣọ́ra lórí ìnàwó.
 
-### Ipò Líle (~50% fífi pamọ́)
+### Ipo Líle (~50% ìfipamọ́)
 
-Ìṣàkóso ìtàn ọlọ́gbọ́n fún àwọn session gígùn:
+Ìṣàkóso ìtàn ọlọ́gbọ́n fún àwọn àkókò-iṣẹ́ gùn:
 
-- **Ìsọ̀rọ̀ Ìfiránṣẹ́ di Àtijọ́** — àwọn ìfiránṣẹ́ àtijọ́ máa ń di fífúnpọ̀ díẹ̀díẹ̀
-- **Ìfúnpọ̀ Àbájáde Irinṣẹ́** — a máa gé àwọn àbájáde irinṣẹ́ gígùn kúrú tàbí yọ apá kan sílẹ̀ (àwọn ìlà àkọ́kọ́/ìkẹyìn,
-  àlẹ̀mọ́ ìlà tó bá mu, ìdínkù àwọn key JSON)
-- **Àwọn Olùṣọ́ Ìdúróṣinṣin Ẹ̀yà** — ó ń rí i dájú pé àwọn méjì `tool_use` + `tool_result` wà ní ìbámu
-- **Ìmọ̀ nípa Fèrèsé Àyíká Ọ̀rọ̀** — ó ń bọ̀wọ̀ fún ààlà token model kọ̀ọ̀kan
+- **Ìpaláṣẹ́ Ìfiránṣẹ́** — àwọn ìfiránṣẹ́ tó ti pẹ́ ń jẹ́ dídín kù díẹ̀díẹ̀
+- **Ìdínkù Abajade Irinṣẹ́** — a gé àwọn abajade irinṣẹ́ gùn kúrú tàbí a yọ àpá rẹ̀ kúrò (àwọn ila
+  àkọ́kọ́/ìkẹyìn, ìlẹmọ̀ ila-ìbáramu, ìkójọpọ̀ kọ́kọ́rọ́ JSON)
+- **Àwọn Olùṣọ́ Ìdéédéé Ọ̀nà-ìkó** — ó ń jẹ́ àlàáfíà pé àwọn ẹ̀jì `tool_use` + `tool_result` ń bá ara wọ́n mu
+- **Ìmọ̀nímọ̀ Fèrèsé Àyíká-ìtumọ̀** — ó ń bẹ̀wẹ̀ àwọn ààlà tóòkìì ti kọ̀ọ̀kan àwoṣe
 
-**Ó dára jù fún:** Àwọn session àtúnṣe àṣìṣe gígùn, àwọn codebase ńlá.
+**Ó dára jù lọ fún:** Àwọn àkókò ìwádìí-àṣìṣe tó fà ákókò, àwọn ibùdó-kóòdì ńlá.
 
-### Ipò Gíga Jù (~75% fífi pamọ́)
+### Ipo Gíga Jùlọ (~75% ìfipamọ́)
 
-Ìfúnpọ̀ tó pọ̀ jù fún àwọn ipò tí token ṣe pàtàkì gidigidi:
+Ìdínkù tó ga jù lọ fún àwọn ìṣẹ̀lẹ̀ tí tóòkìì ṣe pàtàkì gan-an:
 
-- **Ìyọkúrò Oníheuristic** — ìyọkúrò token láti inú ọ̀rọ̀ àlàyé tó dá lórí ìwọ̀n
-- **Ìtọ́jú Ẹ̀yà** — àwọn ìdípọ̀ kóòdù olódi, kóòdù inú ìlà, URL àti àwọn identifier ni a
-  máa ń fi àmì ìpamọ́ sí, tí a sì tún so pọ̀ gẹ́gẹ́ bí wọ́n ṣe rí; a kì í yọ wọ́n kúrò
-- **Ìpele SLM àṣàyàn** — model kékeré abẹ́lé kan lè mú ìyọkúrò náà péye sí i nígbà tí a bá ṣètò rẹ̀
-- Ó dá dúró lọ́tọ̀ sí ipò Líle: kò ṣiṣẹ́ ìsọ̀rọ̀ ìfiránṣẹ́ di àtijọ́, ìfúnpọ̀ àbájáde irinṣẹ́
-  tàbí olùkópọ̀ fallback (ìkùnà ìpele SLM nìkan ló lè darí ìṣiṣẹ́ fallback gba
-  aggressive kọjá)
+- **Ìgẹ́kúrò Heuristic** — ìgẹ́kúrò tóòkìì ọ̀rọ̀-kikọ tó dá lórí àmì-ìdíwọ́
+- **Ìtọ́ju Ọ̀nà-ìkó** — a ń dá àwọn àkójọ kóòdì tí a yí fáàlò, kóòdì inú-ila, àwọn URL àti àwọn àmì-ìdámọ̀ sílẹ̀ gẹ́gẹ́ bí àmì-ìpamọ́, a sì ń tún sọ wọ́n pọ̀ bákan náà gẹ́gẹ́ bí wọ́n ṣe rí, a kì í gẹ́ wọ́n kúrò rárá
+- **Ipele SLM àṣàyàn** — àwoṣe kékeré ìbílẹ̀ kan lè ṣe ìtúnṣe sí ìgẹ́kúrò náà tí a bá ṣètò ó
+- Ó dúró fúnra rẹ̀, kò gbẹ̀dẹ̀ke ipo Líle: kò ṣe ìpaláṣẹ́ ìfiránṣẹ́, ìdínkù abajade-irinṣẹ́
+  tàbí ẹ̀rọ-àkótán àdáàbòbò (kìkì àìṣẹ́gun ipele SLM kan ni lè darí ìrìnàjò àdáàbòbò kan
+  kọjá ipo líle)
 
-**Ó dára jù fún:** Nígbà tí o bá ń dé ààlà àyíká ọ̀rọ̀ léraléra.
+**Ó dára jù lọ fún:** Nígbà tí o bá ń kọlu àwọn ààlà àyíká-ìtumọ̀ lẹ́ẹ̀kọ̀sípọ̀.
 
-### Ipò RTK (ìwọ̀n upstream 60-90%)
+### Ipo RTK (ààlà 60-90% lójú ìṣàn-òkè)
 
-A ṣe àtúnṣe ipò RTK fún àwọn àbájáde irinṣẹ́ alálàyé tó máa ń hàn nínú àwọn session aṣojú ìkọ̀wé kóòdù:
+A ṣe ìmúlòdára ipo RTK fún àwọn abajade irinṣẹ́ tó ṣọ̀ọ̀lẹ̀ tí ó ń fara han nínú àwọn àkókò-iṣẹ́ ẹ̀rọ-àǹfààní kóòdì:
 
-- Ó ń ṣàwárí àwọn ẹ̀ka àṣẹ/àbájáde bíi `git status`, `git diff`, `git log`, àwọn olùṣiṣẹ́ ìdánwò,
-  ìkọ́ TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audit/ìfikún npm, àwọn log Docker, àbájáde infra,
-  àti àbájáde shell gbogbogbòò
-- Ó ń lo àwọn àkójọpọ̀ àlẹ̀mọ́ JSON láti `open-sse/services/compression/engines/rtk/filters/`
-- Ó ń ṣàgbéwọlé àwọn àlẹ̀mọ́ RTK TOML schema v1 láti inú àwọn fáìlì `filters.toml` project tàbí àgbáyé, pẹ̀lú ìdánilójú
-  ìdánwò inline àti ìdènà tó dá lórí ìgbẹ́kẹ̀lé fún àwọn fáìlì project
-- Ó ní àwọn àlẹ̀mọ́ inú rẹ̀ 55 pẹ̀lú àwọn àpẹẹrẹ ìjẹ́rìísí inline
-- Ó ń yọ àwọn ìtẹ̀léra ìṣàkóso ANSI, àwọn àmì ìlọsíwájú, àwọn ìlà àtúnṣe, àti ariwo tí kò lè mú ìgbésẹ̀ wá kúrò
-- Ó ń pa àwọn ìkùnà, àṣìṣe, ìkìlọ̀, àwọn fáìlì tí a yí padà, àkópọ̀, àti ìrù àbájáde gígùn mọ́
-- Ó ń ṣètìlẹ́yìn fún àwọn àlẹ̀mọ́ project tó ní ìdènà ìgbẹ́kẹ̀lé, àwọn àlẹ̀mọ́ àgbáyé, àti ìmúpadàbọ̀ àbájáde raw tí a ti fi àṣírí bo gẹ́gẹ́ bí àṣàyàn
+- Ó ń ṣàkíyèsí àwọn ẹ̀yà àṣẹ/abajade bíi `git status`, `git diff`, `git log`, àwọn ẹ̀rọ-ìdánwò,
+  àwọn ìkọ́lù TypeScript/Vite/Webpack, ESLint/Biome/Prettier, ìṣàyẹ̀wò àti ìfíìsí npm, àkọsílẹ̀ Docker, abajade
+  ìpìlẹ̀-ìṣe, àti abajade shell gbogboògùn
+- Ó ń lo àwọn àkójọ àlẹmọ̀ JSON láti `open-sse/services/compression/engines/rtk/filters/`
+- Ó ń gbé àwọn àlẹmọ̀ RTK TOML schema v1 wọlé láti àwọn fáìlì `filters.toml` iṣẹ́-ọ̀nà tàbí gbogboògùn, pẹ̀lú ìfìdájọ́
+  ìdánwò inú-ila àti ìdíwọ́-ìgbẹ́kẹ́lé fún àwọn fáìlì iṣẹ́-ọ̀nà
+- Ó wá pẹ̀lú àwọn àlẹmọ̀ tí a kọ́ sínú 56 àti àwọn àpẹẹrẹ ìfìdájọ́ inú-ila
+- Ó ń yọ àwọn ìtẹ̀lé ìṣàkóso ANSI, àwọn òpó ìlọsíwájú, àwọn ila àtúnwá, àti àríwàríwá tí kò ṣe é ṣe lórí kúrò
+- Ó ń tọ́ju àwọn àìṣẹ́gun, àwọn àṣìṣe, àwọn ìkìlọ̀, àwọn fáìlì tó yípadà, àwọn àkótán, àti ìparí abajade gùn
+- Ó ṣe àtìlẹ́yìn fún àwọn àlẹmọ̀ iṣẹ́-ọ̀nà ìdíwọ́-ìgbẹ́kẹ́lé, àwọn àlẹmọ̀ gbogboògùn, àti ìmúpadàbọ̀ abajade-rárá tí a bo àṣàyàn kan
 
-**Ó dára jù fún:** Àwọn session aṣojú tó ní shell, ìkọ́, ìdánwò, git, grep, àti àwọn transcript àbájáde fáìlì.
+**Ó dára jù lọ fún:** Àwọn àkókò ẹ̀rọ-àǹfààní pẹ̀lú àkọsílẹ̀ ìrìnàjò shell, ìkọ́lù, ìdánwò, git, grep, àti èsì-fáìlì.
 
-### Ipò Títòpọ̀ (ìwọ̀n tó yẹ 78-95%)
+### Ipo Àkópọ̀ (ààlà 78-95% fún ohun tó yẹ)
 
-Ipò Títòpọ̀ ń ṣiṣẹ́ ọ̀pọ̀ engine ìfúnpọ̀ ní ìtòlẹ́sẹẹsẹ tó ṣeé pinnu. Ìlànà àìyípadà ni:
+Ipo Àkópọ̀ ń ṣiṣẹ́ ọ̀pọ̀ ẹ̀rọ ìdínkù ní ìbáṣepọ̀ tó dájú tẹ́lẹ̀. Ìṣàn-ìṣe àtọ́wájọ́ ni èyí:
 
 ```txt
 RTK -> Caveman
 ```
 
-Ìtòlẹ́sẹẹsẹ yẹn kọ́kọ́ mú kí àbájáde terminal/irinṣẹ́ kúrú, lẹ́yìn náà ó lo ìdínkù ìtumọ̀ Caveman sí
-prompt èdè àdánidá tó kù. A lè ṣètò àwọn ìlànà Títòpọ̀ káàkiri àgbáyé tàbí nípasẹ̀
-àwọn combo ìfúnpọ̀ tí a yàn sí àwọn combo afisáàlà.
+Ìbáṣepọ̀ yẹn ń kọ́kọ́ jẹ́ kí èsì ìkànnì/irinṣẹ́ di kékeré, kí ó tó fi ìdínkù ìtumọ̀ Caveman kún ìbéèrè
+èdè-àdáyebáye tó kù. A lè ṣètò àwọn ìṣàn-ìṣe àkópọ̀ ní gbogboògùn tàbí nípasẹ̀ àwọn
+àpapọ̀ ìdínkù tí a pín fún àwọn àpapọ̀ ìtọ́nà-ọ̀nà.
 
-**Ó dára jù fún:** Àyíká ọ̀rọ̀ adalu tó ní àwọn log irinṣẹ́ ńlá, pẹ̀lú àwọn ìtọ́nisọ́nà ènìyàn tàbí àkópọ̀ olùrànlọ́wọ́.
+**Ó dára jù lọ fún:** Àyíká-ìtumọ̀ àràwọ̀tọ̀ pẹ̀lú àwọn àkọsílẹ̀ irinṣẹ́ ńlá àti àwọn ìtọ́sọ́nà ènìyàn tàbí àwọn àkótán olùrànlọ́wọ́.
 
 ---
 

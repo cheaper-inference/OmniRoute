@@ -32,91 +32,91 @@ Zahteva odjemalca
 
 ## Načini stiskanja
 
-### Off
+### Izključeno
 
-Stiskanje se ne uporabi. Vsa sporočila se posredujejo nespremenjena.
+Stiskanje ni uporabljeno. Vsa sporočila se prenesejo nespremenjena.
 
-### Način Lite (~15 % prihranka, zakasnitev <1 ms)
+### Način Lite (~15 % prihrankov, <1 ms zakasnitve)
 
-Najvarnejši način — brez pomenskih sprememb, samo čiščenje oblikovanja:
+Najvarnejši način — brez semantičnih sprememb, le čiščenje oblikovanja:
 
 | Tehnika                  | Opis                                                |
 | ------------------------ | --------------------------------------------------- |
 | `collapseWhitespace`     | Združi zaporedne prazne vrstice in končne presledke |
 | `dedupSystemPrompt`      | Odstrani podvojena sistemska sporočila              |
-| `compressToolResults`    | Stisne obsežne izhode orodij/funkcij                |
-| `removeRedundantContent` | Odstrani ponavljajoča se navodila                   |
+| `compressToolResults`    | Stisne obširne izpise orodij/funkcij                |
+| `removeRedundantContent` | Odstrani ponovljena navodila                        |
 | `replaceImageUrls`       | Skrajša podatkovne URI-je slik base64               |
 
-**Najprimernejše za:** Stalno uporabo in delovne tokove, pri katerih je varnost ključnega pomena.
+**Najboljše za:** neprekinjeno uporabo, varnostno kritične delovne tokove.
 
-### Način Standard (~30 % prihranka)
+### Standardni način (~30 % prihrankov)
 
-Navdih črpa iz projekta [Caveman](https://github.com/JuliusBrussee/caveman) — odstrani mašila in dolgovezne besedne zveze, pri tem pa ohrani pomen:
+Navdihnjen po projektu [Caveman](https://github.com/JuliusBrussee/caveman) — odstranjuje polnilne besede in obširno izražanje ob ohranjanju pomena:
 
-- Odstrani mašila ("prosim", "mislim", "v bistvu", "pravzaprav")
-- Zgosti dolgovezne besedne zveze ("z namenom, da" → "da", "kot posledica" → "zaradi")
-- Odstrani vljudno omahovanje ("Ali bi vas motilo ...", "Če bi morda lahko ...")
-- Več kot 30 pravil regularnih izrazov, prilagojenih pozivom za programiranje
+- Odstrani polnilne besede ("prosim", "mislim", "v bistvu", "pravzaprav")
+- Skrajša obširne fraze ("zato da" → "da", "kot posledica" → "ker")
+- Odstrani vljudnostno previdnostno izražanje ("Bi vas motilo ...", "Če bi morda lahko ...")
+- Več kot 30 pravil regex, prilagojenih pozivom za kodiranje
 
-**Najprimernejše za:** Vsakodnevne delovne tokove programiranja in ekipe, ki pazijo na stroške.
+**Najboljše za:** vsakodnevne delovne tokove kodiranja, ekipe, pozorne na stroške.
 
-### Način Aggressive (~50 % prihranka)
+### Agresivni način (~50 % prihrankov)
 
-Pametno upravljanje zgodovine pri dolgih sejah:
+Pametno upravljanje zgodovine za dolge seje:
 
 - **Staranje sporočil** — starejša sporočila se postopoma vse bolj stiskajo
-- **Stiskanje rezultatov orodij** — dolgi izhodi orodij se skrajšajo ali izpustijo (prve/zadnje vrstice,
-  filtriranje vrstic z ujemanji, zgoščevanje ključev JSON)
-- **Varovala strukturne celovitosti** — zagotavljajo, da pari `tool_use` + `tool_result` ostanejo usklajeni
-- **Upoštevanje kontekstnega okna** — upošteva omejitve žetonov posameznega modela
+- **Stiskanje rezultatov orodij** — dolgi izpisi orodij se skrajšajo ali izpustijo (prve/zadnje
+  vrstice, filtriranje vrstic z zadetki, zbijanje ključev JSON)
+- **Zaščitni mehanizmi strukturne celovitosti** — zagotavljajo, da pari `tool_use` + `tool_result` ostanejo skladni
+- **Zavedanje kontekstnega okna** — upošteva omejitve žetonov posameznega modela
 
-**Najprimernejše za:** Daljše seje odpravljanja napak in velike zbirke izvorne kode.
+**Najboljše za:** daljše seje razhroščevanja, velike zbirke kode.
 
-### Način Ultra (~75 % prihranka)
+### Način Ultra (~75 % prihrankov)
 
-Največje stiskanje za scenarije, pri katerih so žetoni ključnega pomena:
+Največje stiskanje za scenarije, kjer so žetoni kritični:
 
-- **Hevristično obrezovanje** — obrezovanje žetonov v prozi na podlagi točkovanja
-- **Ohranjanje strukture** — ograjeni bloki kode, koda v vrstici, URL-ji in identifikatorji se
-  začasno nadomestijo z označbami in nato dobesedno znova vstavijo; nikoli se ne obrežejo
-- **Izbirna raven SLM** — majhen lokalni model lahko dodatno izboljša obrezovanje, če je konfiguriran
-- Neodvisno od načina Aggressive: ne izvaja staranja sporočil, stiskanja rezultatov orodij
-  ali nadomestnega povzemanja (le napaka na ravni SLM lahko nadomestni prehod usmeri skozi
-  način Aggressive)
+- **Hevristično obrezovanje** — obrezovanje žetonov proze na podlagi ocene
+- **Ohranjanje strukture** — ograjeni bloki kode, vstavljena koda, URL-ji in identifikatorji se
+  nadomestijo z zaščitnimi oznakami in dobesedno ponovno sestavijo; nikoli niso obrezani
+- **Izbirna stopnja SLM** — majhen lokalni model lahko po konfiguraciji obrezovanje izpopolni
+- Neodvisen od agresivnega načina: ne izvaja staranja sporočil, stiskanja rezultatov orodij
+  ali rezervnega povzemanja (le odpoved stopnje SLM lahko rezervni prehod usmeri skozi
+  agresivni način)
 
-**Najprimernejše za:** Primere, ko vedno znova dosegate omejitve konteksta.
+**Najboljše za:** ko večkrat zadete ob omejitve konteksta.
 
-### Način RTK (60–90 % pri ponudniku višje ravni)
+### Način RTK (60–90-odstotni razpon na vhodni ravni)
 
-Način RTK je optimiziran za obsežne izhode orodij, ki se pojavljajo v sejah programerskih agentov:
+Način RTK je optimiziran za obširne izpise orodij, ki se pojavljajo v sejah agentov za kodiranje:
 
-- Zazna razrede ukazov/izhodov, kot so `git status`, `git diff`, `git log`, izvajalniki testov,
-  gradnje TypeScript/Vite/Webpack, ESLint/Biome/Prettier, revizije/namestitve npm, dnevniki Docker, infrastrukturni
-  izhodi in splošni izhodi lupine
-- Uporabi pakete filtrov JSON iz `open-sse/services/compression/engines/rtk/filters/`
-- Uvozi filtre RTK TOML sheme v1 iz projektnih ali globalnih datotek `filters.toml`, s preverjanjem
-  vgrajenih testov in nadzorom zaupanja za projektne datoteke
-- Vključuje 55 vgrajenih filtrov z vgrajenimi vzorci za preverjanje
-- Odstrani nadzorna zaporedja ANSI, vrstice napredka, ponavljajoče se vrstice in neuporaben šum
-- Ohrani neuspehe, napake, opozorila, spremenjene datoteke, povzetke in konec dolgega izhoda
-- Podpira projektne filtre z nadzorom zaupanja, globalne filtre in izbirno obnovitev redigiranega neobdelanega izhoda
+- Zaznava razrede ukazov/izpisov, kot so `git status`, `git diff`, `git log`, izvajalci testov,
+  gradnje TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/namestitve, dnevniki Docker,
+  izpis infrastrukture in splošni izpis lupine
+- Uporablja pakete filtrov JSON iz `open-sse/services/compression/engines/rtk/filters/`
+- Uvaža filtre sheme RTK TOML v1 iz projektnih ali globalnih datotek `filters.toml`, s preverjanjem
+  vdelanih testov in nadzorom zaupanja projektnih datotek
+- Dobavlja se s 56 vgrajenimi filtri z vdelanimi vzorci za preverjanje
+- Odstranjuje krmilna zaporedja ANSI, indikatorje napredka, ponovljene vrstice in šum brez uporabne vrednosti
+- Ohranja neuspehe, napake, opozorila, spremenjene datoteke, povzetke in zaključek dolgih izpisov
+- Podpira projektne filtre z nadzorom zaupanja, globalne filtre in izbirno obnovitev surovega izpisa iz prikrite oblike
 
-**Najprimernejše za:** Seje agentov s prepisi lupine, gradenj, testov, ukazov git in grep ter izhodov datotek.
+**Najboljše za:** seje agentov s prepisi lupine, graditev, testov, git, grep in izpisov datotek.
 
-### Način Stacked (78–95 % primernega obsega)
+### Zloženi način (78–95-odstotni upravičeni razpon)
 
-Način Stacked izvaja več mehanizmov stiskanja v determinističnem vrstnem redu. Privzeti cevovod je:
+Zloženi način izvaja več pogonov stiskanja v determinističnem vrstnem redu. Privzeti cevovod je:
 
 ```txt
 RTK -> Caveman
 ```
 
-Ta vrstni red najprej zgosti izhod terminala/orodij, nato pa uporabi pomensko zgoščevanje Caveman za
-preostali poziv v naravnem jeziku. Cevovode Stacked je mogoče konfigurirati globalno ali prek
-kombinacij stiskanja, dodeljenih kombinacijam usmerjanja.
+Ta vrstni red najprej zagotovi kompaktnost izpisa terminala/orodij, nato pa na preostali
+naravnojezični poziv uporabi semantično zgoščevanje Caveman. Zložene cevovode je mogoče
+konfigurirati globalno ali prek kombinacij stiskanja, dodeljenih kombinacijam usmerjanja.
 
-**Najprimernejše za:** Mešani kontekst z obsežnimi dnevniki orodij ter človeškimi navodili ali povzetki pomočnika.
+**Najboljše za:** mešan kontekst z obsežnimi dnevniki orodij ter človeškimi navodili ali povzetki asistenta.
 
 ---
 

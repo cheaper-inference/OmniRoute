@@ -32,89 +32,82 @@ Mijoz so‘rovi
 
 ## Siqish rejimlari
 
-### Off
+### Oʻchirilgan
 
-Hech qanday siqish qo‘llanmaydi. Barcha xabarlar o‘zgartirilmasdan uzatiladi.
+Siqish qoʻllanmaydi. Barcha xabarlar oʻzgarishsiz oʻtadi.
 
 ### Lite rejimi (~15% tejash, <1ms kechikish)
 
-Eng xavfsiz rejim — semantik o‘zgarishsiz, faqat formatlashni tozalaydi:
+Eng xavfsiz rejim — semantik oʻzgarish nol, faqat formatlash tozalanadi:
 
-| Usul                     | Tavsif                                                                |
-| ------------------------ | --------------------------------------------------------------------- |
-| `collapseWhitespace`     | Ketma-ket bo‘sh satrlar va satr oxiridagi bo‘shliqlarni birlashtiradi |
-| `dedupSystemPrompt`      | Takroriy tizim xabarlarini olib tashlaydi                             |
-| `compressToolResults`    | Batafsil vosita/funksiya chiqishlarini siqadi                         |
-| `removeRedundantContent` | Takrorlangan ko‘rsatmalarni olib tashlaydi                            |
-| `replaceImageUrls`       | Base64 rasm maʼlumotlari URI manzillarini qisqartiradi                |
+| Texnika                  | Tavsif                                                            |
+| ------------------------ | ----------------------------------------------------------------- |
+| `collapseWhitespace`     | Ketma-ket boʻsh qatorlar va ortiqcha boʻsh joylarni birlashtiradi |
+| `dedupSystemPrompt`      | Takroriy tizim xabarlarini olib tashlaydi                         |
+| `compressToolResults`    | Batafsil vosita/funksiya chiqishlarini siqadi                     |
+| `removeRedundantContent` | Takrorlangan koʻrsatmalarni olib tashlaydi                        |
+| `replaceImageUrls`       | Base64 rasm data URI larini qisqartiradi                          |
 
-**Eng mos holat:** Doimo yoqilgan foydalanish, xavfsizlik muhim bo‘lgan ish jarayonlari.
+**Eng yaxshi mos:** Doimiy foydalanish, xavfsizlik jihatidan muhim ish oqimlari.
 
 ### Standard rejimi (~30% tejash)
 
-[Caveman](https://github.com/JuliusBrussee/caveman) loyihasidan ilhomlangan — maʼnoni saqlagan holda ortiqcha so‘zlar va cho‘zib yozilgan iboralarni olib tashlaydi:
+[Caveman](https://github.com/JuliusBrussee/caveman) dan ilhomlangan — ma'noni saqlab qolgan holda toʻldiruvchi soʻzlar va ortiqcha iboralarni olib tashlaydi:
 
-- Ortiqcha so‘zlarni olib tashlaydi ("iltimos", "menimcha", "asosan", "aslida")
-- Cho‘zib yozilgan iboralarni ixchamlaydi ("... qilish maqsadida" → "... uchun", "... natijasida" → "... sababli")
-- Muloyim ehtiyotkor iboralarni olib tashlaydi ("Qarshi emasmisiz...", "Agar imkoningiz bo‘lsa...")
-- Dasturlash promptlari uchun sozlangan 30 dan ortiq regex qoidalari
+- Toʻldiruvchi soʻzlarni olib tashlaydi ("please", "I think", "basically", "actually")
+- Ortiqcha iboralarni ixchamlashtiradi ("in order to" → "to", "as a result of" → "because")
+- Muloyim ikkilanishlarni olib tashlaydi ("Would you mind...", "If you could possibly...")
+- Kod yozish promptlari uchun sozlangan 30+ regex qoidalari
 
-**Eng mos holat:** Kundalik dasturlash ish jarayonlari, xarajatlarni hisobga oladigan jamoalar.
+**Eng yaxshi mos:** Kundalik kod yozish ish oqimlari, xarajatni tejashga intilgan jamoalar.
 
 ### Aggressive rejimi (~50% tejash)
 
-Uzoq seanslar uchun aqlli tarix boshqaruvi:
+Uzoq sessiyalar uchun aqlli tarix boshqaruvi:
 
-- **Xabarlarni eskirtirish** — eski xabarlar bosqichma-bosqich ko‘proq siqiladi
-- **Vosita natijalarini siqish** — uzun vosita chiqishlari qisqartiriladi yoki tushirib qoldiriladi (birinchi/oxirgi satrlar,
-  mos keluvchi satrlarni filtrlash, JSON kalitlarini ixchamlash)
-- **Strukturaviy yaxlitlik himoyasi** — `tool_use` + `tool_result` juftliklarining muvofiqligini taʼminlaydi
-- **Kontekst oynasini hisobga olish** — har bir model uchun token cheklovlariga amal qiladi
+- **Xabarlarning eskirishi** — eski xabarlar bosqichma-bosqich siqiladi
+- **Vosita natijalarini siqish** — uzun vosita chiqishlari qisqartiriladi yoki qisqartirilib koʻrsatiladi (birinchi/oxirgi qatorlar, mos qatorlarni filtrlash, JSON kalitlarini ixchamlashtirish)
+- **Tuzilish yaxlitligi himoyasi** — `tool_use` + `tool_result` juftliklarining izchilligini ta'minlaydi
+- **Kontekst oynasini hisobga olish** — har bir modelning token limitlariga rioya qiladi
 
-**Eng mos holat:** Uzoq davom etadigan nosozliklarni tuzatish seanslari, katta kod bazalari.
+**Eng yaxshi mos:** Uzoq davom etadigan tuzatish (debugging) sessiyalari, katta kod bazalari.
 
 ### Ultra rejimi (~75% tejash)
 
-Tokenlar juda muhim bo‘lgan holatlar uchun maksimal siqish:
+Token jihatidan kritik holatlar uchun maksimal siqish:
 
-- **Evristik qisqartirish** — matn tokenlarini ball asosida qisqartirish
-- **Strukturani saqlash** — chegaralangan kod bloklari, satr ichidagi kod, URL manzillari va identifikatorlar
-  vaqtinchalik belgilar bilan almashtirilib, keyin so‘zma-so‘z qayta tiklanadi va hech qachon qisqartirilmaydi
-- **Ixtiyoriy SLM darajasi** — sozlangan bo‘lsa, kichik lokal model qisqartirishni takomillashtirishi mumkin
-- Aggressive rejimidan mustaqil: u xabarlarni eskirtirish, vosita natijalarini siqish
-  yoki zaxira umumlashtiruvchini ishga tushirmaydi (faqat SLM darajasidagi nosozlik zaxira o‘tishini
-  aggressive orqali yo‘naltirishi mumkin)
+- **Evristik qirqish** — nasr matnining ball asosida token qirqilishi
+- **Tuzilishni saqlash** — kod bloklari, inline kod, URL lar va identifikatorlar belgilanib (tombstone), soʻngra soʻzsiz qayta tiklanadi, hech qachon qirqilmaydi
+- **Ixtiyoriy SLM darajasi** — sozlanganda kichik mahalliy model qirqishni aniqlashtirishi mumkin
+- Aggressive rejimidan mustaqil: u xabarlarning eskirishi, vosita natijalarini siqish yoki zaxira umumlashtiruvchini ishga tushirmaydi (faqat SLM darajasidagi xato zaxira oʻtishni aggressive orqali yoʻnaltirishi mumkin)
 
-**Eng mos holat:** Kontekst cheklovlariga qayta-qayta duch kelganingizda.
+**Eng yaxshi mos:** Kontekst limitlariga takroriy duch kelayotgan holatlar.
 
-### RTK rejimi (yuqori oqimda 60–90% diapazon)
+### RTK rejimi (yuqori oqimda 60-90% diapazon)
 
-RTK rejimi dasturlash agenti seanslarida uchraydigan batafsil vosita chiqishlari uchun optimallashtirilgan:
+RTK rejimi kod yozuvchi agent sessiyalarida uchraydigan batafsil vosita chiqishlari uchun optimallashtirilgan:
 
-- `git status`, `git diff`, `git log`, test ishga tushiruvchilari,
-  TypeScript/Vite/Webpack yig‘ishlari, ESLint/Biome/Prettier, npm audit/o‘rnatishlar, Docker jurnallari, infratuzilma
-  chiqishi va umumiy qobiq chiqishi kabi buyruq/chiqish sinflarini aniqlaydi
-- `open-sse/services/compression/engines/rtk/filters/` ichidagi JSON filtr to‘plamlarini qo‘llaydi
-- Loyiha yoki global `filters.toml` fayllaridan RTK TOML schema v1 filtrlarini import qiladi, bunda ichki test
-  tekshiruvi va loyiha fayllari uchun ishonch nazorati qo‘llanadi
-- Ichki tekshiruv namunalari bilan birga 55 ta o‘rnatilgan filtrni taqdim etadi
-- ANSI boshqaruv ketma-ketliklari, jarayon indikatorlari, takroriy satrlar va foydasiz shovqinni olib tashlaydi
-- Nosozliklar, xatolar, ogohlantirishlar, o‘zgartirilgan fayllar, xulosalar va uzun chiqishning oxirgi qismini saqlaydi
-- Ishonch nazoratidagi loyiha filtrlari, global filtrlar va ixtiyoriy ravishda maxfiy maʼlumotlari yashirilgan xom chiqishni tiklashni qo‘llab-quvvatlaydi
+- `git status`, `git diff`, `git log`, test ishga tushirgichlar, TypeScript/Vite/Webpack buildlari, ESLint/Biome/Prettier, npm audit/installlar, Docker loglari, infra chiqishi va umumiy shell chiqishi kabi buyruq/chiqish sinflarini aniqlaydi
+- `open-sse/services/compression/engines/rtk/filters/` dan JSON filtr paketlarini qoʻllaydi
+- RTK TOML sxema v1 filtrlarini loyiha yoki global `filters.toml` fayllaridan import qiladi, inline-test tekshiruvi va loyiha fayllari uchun ishonch nazorati bilan
+- Inline tekshirish namunalari bilan 56 ta oʻrnatilgan filtr bilan keladi
+- ANSI boshqaruv ketma-ketliklari, progress barlar, takroriy qatorlar va foydasiz shovqinni olib tashlaydi
+- Xatoliklar, ogohlantirishlar, ogohlantirishlar (warnings), oʻzgargan fayllar, xulosalar va uzun chiqishning oxirgi qismini saqlaydi
+- Ishonch nazoratiga ega loyiha filtrlari, global filtrlar va ixtiyoriy yashirilgan xom chiqishni tiklashni qoʻllab-quvvatlaydi
 
-**Eng mos holat:** Qobiq, yig‘ish, test, git, grep va fayl chiqishi transkriptlarini o‘z ichiga olgan agent seanslari.
+**Eng yaxshi mos:** Shell, build, test, git, grep va fayl chiqishi transkriptlari boʻlgan agent sessiyalari.
 
-### Stacked rejimi (mos kontekstda 78–95% diapazon)
+### Stacked rejimi (muvofiqlashtirilgan diapazonda 78-95%)
 
-Stacked rejimi bir nechta siqish mexanizmini deterministik tartibda ishga tushiradi. Standart konveyer:
+Stacked rejimi bir nechta siqish dvigatellarini deterministik tartibda ishga tushiradi. Standart quvur liniyasi:
 
 ```txt
 RTK -> Caveman
 ```
 
-Bu tartib avval terminal/vosita chiqishini ixchamlaydi, so‘ng qolgan tabiiy tildagi promptga Caveman semantik ixchamlashini qo‘llaydi. Stacked konveyerlarini global ravishda yoki marshrutlash kombinatsiyalariga biriktirilgan siqish kombinatsiyalari orqali sozlash mumkin.
+Bu tartib avval terminal/vosita chiqishini ixcham saqlaydi, soʻngra qolgan tabiiy til promptiga Caveman semantik ixchamlashtirishini qoʻllaydi. Stacked quvur liniyalarini global yoki marshrutlashtirish kombinatsiyalariga tayinlangan siqish kombinatsiyalari orqali sozlash mumkin.
 
-**Eng mos holat:** Katta vosita jurnallari hamda inson ko‘rsatmalari yoki yordamchi xulosalarini o‘z ichiga olgan aralash kontekst.
+**Eng yaxshi mos:** Katta vosita loglari va inson koʻrsatmalari yoki assistent xulosalari aralashgan kontekst.
 
 ---
 

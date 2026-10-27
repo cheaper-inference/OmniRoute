@@ -34,89 +34,89 @@ Klientanmodning
 
 ### Fra
 
-Der anvendes ingen komprimering. Alle meddelelser sendes uændret videre.
+Ingen komprimering anvendes. Alle beskeder passerer igennem uændrede.
 
 ### Lite-tilstand (~15 % besparelse, <1 ms latenstid)
 
-Den sikreste tilstand — ingen semantiske ændringer, kun oprydning af formatering:
+Den sikreste tilstand — nul semantisk ændring, kun oprydning i formatering:
 
-| Teknik                   | Beskrivelse                                                     |
-| ------------------------ | --------------------------------------------------------------- |
-| `collapseWhitespace`     | Flet efterfølgende tomme linjer, og fjern afsluttende mellemrum |
-| `dedupSystemPrompt`      | Fjern identiske systemmeddelelser                               |
-| `compressToolResults`    | Komprimer detaljerede værktøjs-/funktionsoutput                 |
-| `removeRedundantContent` | Fjern gentagne instruktioner                                    |
-| `replaceImageUrls`       | Forkort base64-billeddata-URI'er                                |
+| Teknik                   | Beskrivelse                                                 |
+| ------------------------ | ----------------------------------------------------------- |
+| `collapseWhitespace`     | Fletter fortløbende tomme linjer og efterstillede mellemrum |
+| `dedupSystemPrompt`      | Fjerner dublerede systembeskeder                            |
+| `compressToolResults`    | Komprimerer udførlige værktøjs-/funktionsoutput             |
+| `removeRedundantContent` | Fjerner gentagne instruktioner                              |
+| `replaceImageUrls`       | Forkorter base64-billeddata-URI'er                          |
 
-**Bedst til:** Konstant brug og sikkerhedskritiske arbejdsgange.
+**Bedst til:** Altid aktiv brug, sikkerhedskritiske arbejdsgange.
 
-### Standard-tilstand (~30 % besparelse)
+### Standardtilstand (~30 % besparelse)
 
-Inspireret af [Caveman](https://github.com/JuliusBrussee/caveman) — fjerner fyldord og omstændelige formuleringer, samtidig med at betydningen bevares:
+Inspireret af [Caveman](https://github.com/JuliusBrussee/caveman) — fjerner fyldord og udførlige formuleringer, mens betydningen bevares:
 
-- Fjerner fyldord ("venligst", "jeg tror", "grundlæggende", "faktisk")
-- Forkorter omstændelige formuleringer ("med henblik på at" → "for at", "som et resultat af" → "fordi")
-- Fjerner høflige forbehold ("Vil du have noget imod...", "Hvis du muligvis kunne...")
-- Over 30 regex-regler tilpasset kodningsprompter
+- Fjerner fyldord ("vær venlig", "jeg synes", "i bund og grund", "faktisk")
+- Fortætter udførlige fraser ("for at" → "at", "som følge af" → "fordi")
+- Fjerner høflige omsvøb ("Ville du have noget imod...", "Hvis du muligvis kunne...")
+- 30+ regex-regler finjusteret til kodnings-prompter
 
-**Bedst til:** Daglige kodningsarbejdsgange og omkostningsbevidste teams.
+**Bedst til:** Daglige kodningsarbejdsgange, omkostningsbevidste teams.
 
-### Aggressive-tilstand (~50 % besparelse)
+### Aggressiv tilstand (~50 % besparelse)
 
 Intelligent historikstyring til lange sessioner:
 
-- **Aldring af meddelelser** — ældre meddelelser komprimeres gradvist
+- **Beskedældning** — ældre beskeder komprimeres gradvist
 - **Komprimering af værktøjsresultater** — lange værktøjsoutput afkortes eller udelades (første/sidste linjer,
-  filtrering af matchende linjer, komprimering af JSON-nøgler)
-- **Kontrol af strukturel integritet** — sikrer, at `tool_use`- og `tool_result`-par forbliver konsistente
-- **Bevidsthed om kontekstvindue** — respekterer tokengrænserne for hver model
+  matchlinjefiltrering, komprimering af JSON-nøgler)
+- **Værn om strukturel integritet** — sikrer, at `tool_use` + `tool_result`-par forbliver konsistente
+- **Bevidsthed om kontekstvindue** — respekterer token-grænser pr. model
 
-**Bedst til:** Lange fejlfindingssessioner og store kodebaser.
+**Bedst til:** Længerevarende fejlsøgningssessioner, store kodebaser.
 
 ### Ultra-tilstand (~75 % besparelse)
 
-Maksimal komprimering til scenarier, hvor tokens er kritiske:
+Maksimal komprimering til token-kritiske scenarier:
 
-- **Heuristisk beskæring** — pointbaseret beskæring af tokens i prosa
-- **Bevarelse af struktur** — indhegnede kodeblokke, indlejret kode, URL'er og identifikatorer
-  erstattes midlertidigt med markører og sammensættes igen ordret; de beskæres aldrig
-- **Valgfrit SLM-niveau** — en lille lokal model kan finjustere beskæringen, når den er konfigureret
-- Uafhængig af Aggressive-tilstand: Den udfører ikke aldring af meddelelser, komprimering af værktøjsresultater
-  eller reserveopsummering (kun en fejl på SLM-niveauet kan sende et reservegennemløb gennem
-  Aggressive)
+- **Heuristisk beskæring** — scorebaseret token-beskæring af prosa
+- **Strukturbevarelse** — indhegnede kodeblokke, inline-kode, URL'er og identifikatorer
+  markeres med tombstones og sammensættes igen ordret, beskæres aldrig
+- **Valgfrit SLM-niveau** — en lille lokal model kan forfine beskæringen, når den er konfigureret
+- Uafhængig af Aggressiv tilstand: den kører ikke beskedældning, komprimering af værktøjsresultater
+  eller fallback-opsummeringsfunktionen (kun en fejl i SLM-niveauet kan dirigere et fallback-gennemløb
+  gennem aggressiv)
 
-**Bedst til:** Når du gentagne gange rammer kontekstgrænser.
+**Bedst til:** Når du gentagne gange rammer kontekstgrænserne.
 
-### RTK-tilstand (60-90 % upstream-interval)
+### RTK-tilstand (60-90 % opstrømsinterval)
 
-RTK-tilstand er optimeret til detaljerede værktøjsoutput, der optræder i sessioner med kodningsagenter:
+RTK-tilstand er optimeret til udførlige værktøjsoutput, der optræder i sessioner med kodningsagenter:
 
-- Registrerer kommando-/outputklasser såsom `git status`, `git diff`, `git log`, testkørsler,
-  TypeScript/Vite/Webpack-builds, ESLint/Biome/Prettier, npm-revisioner/-installationer, Docker-logfiler, infrastrukturoutput
-  og generisk shell-output
+- Registrerer kommando-/outputklasser såsom `git status`, `git diff`, `git log`, testrunnere,
+  TypeScript/Vite/Webpack-builds, ESLint/Biome/Prettier, npm audit/installationer, Docker-logs,
+  infrastrukturoutput og generisk shell-output
 - Anvender JSON-filterpakker fra `open-sse/services/compression/engines/rtk/filters/`
-- Importerer RTK TOML-skema v1-filtre fra projektets eller globale `filters.toml`-filer med validering
-  via integrerede test og tillidsstyring for projektfiler
-- Leveres med 55 indbyggede filtre med integrerede verificeringseksempler
-- Fjerner ANSI-kontrolsekvenser, statuslinjer, gentagne linjer og ikke-handlingsrelevant støj
-- Bevarer fejl, advarsler, ændrede filer, opsummeringer og slutningen af lange output
-- Understøtter tillidsstyrede projektfiltre, globale filtre og valgfri gendannelse af råoutput med redigerede følsomme oplysninger
+- Importerer RTK TOML-skema v1-filtre fra projekt- eller globale `filters.toml`-filer, med validering
+  via inline-tests og trust-gating for projektfiler
+- Leveres med 56 indbyggede filtre med inline-verifikationseksempler
+- Fjerner ANSI-kontrolsekvenser, statusbjælker, gentagne linjer og støj, der ikke kan omsættes til handling
+- Bevarer mislykkede resultater, fejl, advarsler, ændrede filer, sammenfatninger og slutningen af langt output
+- Understøtter trust-gatede projektfiltre, globale filtre og valgfri gendannelse af maskeret råoutput
 
-**Bedst til:** Agentsessioner med shell-, build-, test-, git-, grep- og filoutputtransskriptioner.
+**Bedst til:** Agentsessioner med transskriptioner fra shell, builds, tests, git, grep og filoutput.
 
-### Stacked-tilstand (78-95 % kvalificeret interval)
+### Stakket tilstand (78-95 % kvalificeret interval)
 
-Stacked-tilstand kører flere komprimeringsmotorer i en deterministisk rækkefølge. Standardpipelinens rækkefølge er:
+Stakket tilstand kører flere komprimeringsmotorer i en deterministisk rækkefølge. Standardpipelinen er:
 
 ```txt
 RTK -> Caveman
 ```
 
-Denne rækkefølge komprimerer først terminal-/værktøjsoutput og anvender derefter Cavemans semantiske kondensering på
-den resterende prompt i naturligt sprog. Stacked-pipelines kan konfigureres globalt eller via
-komprimerings-combos, der er tildelt routing-combos.
+Den rækkefølge holder terminal-/værktøjsoutput kompakt først og anvender derefter Cavemans semantiske
+fortætning på det resterende naturligsprogede prompt. Stakkede pipelines kan konfigureres globalt eller via
+komprimeringskombinationer, der er tildelt routingkombinationer.
 
-**Bedst til:** Blandet kontekst med store værktøjslogfiler samt menneskelige instruktioner eller assistentopsummeringer.
+**Bedst til:** Blandet kontekst med store værktøjslogs samt menneskelige instruktioner eller assistentsammenfatninger.
 
 ---
 

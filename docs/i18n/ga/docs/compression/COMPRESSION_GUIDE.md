@@ -30,93 +30,84 @@ Iarratas ón gCliant
 
 ---
 
-## Móid Chomhbhrúite
+## Módanna Comhbhrúite
 
 ### Múchta
 
-Ní chuirtear aon chomhbhrú i bhfeidhm. Gabhann gach teachtaireacht tríd gan athrú.
+Ní chuirtear aon chomhbhrú i bhfeidhm. Téann gach teachtaireacht tríd gan athrú.
 
-### Mód Éadrom (~15% de choigilteas, aga folaigh <1ms)
+### Mód Éadrom (~15% coigiltis, <1ms moille)
 
-An mód is sábháilte — gan aon athrú séimeantach, glanadh formáidithe amháin:
+An mód is sábháilte — gan aon athrú séimeantach, ach glanadh formáidithe amháin:
 
-| Teicníc                  | Cur Síos                                                |
-| ------------------------ | ------------------------------------------------------- |
-| `collapseWhitespace`     | Cumaisc línte bána comhleanúnacha agus spásanna deiridh |
-| `dedupSystemPrompt`      | Bain teachtaireachtaí córais dúblacha                   |
-| `compressToolResults`    | Comhbhrúigh aschuir fhoclacha uirlise/feidhme           |
-| `removeRedundantContent` | Bain treoracha athráite                                 |
-| `replaceImageUrls`       | Giorraigh URIanna sonraí íomhá base64                   |
+| Teicníc                  | Cur síos                                             |
+| ------------------------ | ---------------------------------------------------- |
+| `collapseWhitespace`     | Cumaisc línte bána as a chéile agus spásanna deiridh |
+| `dedupSystemPrompt`      | Bain teachtaireachtaí córais dúblacha                |
+| `compressToolResults`    | Comhbhrúigh aschuir fhada uirlisí/feidhmeanna        |
+| `removeRedundantContent` | Bain treoracha atá arís agus arís eile               |
+| `replaceImageUrls`       | Giorraigh URIanna sonraí íomhá base64                |
 
-**Is fearr le haghaidh:** Úsáid leanúnach, sreafaí oibre atá criticiúil ó thaobh sábháilteachta de.
+**Oiriúnach do:** Úsáid bhuan, sreabhaí oibre atá criticiúil ó thaobh sábháilteachta de.
 
-### Mód Caighdeánach (~30% de choigilteas)
+### Mód Caighdeánach (~30% coigiltis)
 
-Bunaithe ar [Caveman](https://github.com/JuliusBrussee/caveman) — baintear focail líonta agus friotal foclach agus an bhrí á caomhnú:
+Spreagtha ag [Caveman](https://github.com/JuliusBrussee/caveman) — baineann sé focail líontacháin agus frásaíocht rófhada fad is a choimeádtar an bhrí:
 
-- Baintear focail líonta ("le do thoil", "sílim", "go bunúsach", "i ndáiríre")
-- Dlúthaítear frásaí foclacha ("chun críche" → "chun", "mar thoradh ar" → "toisc")
-- Baintear maolú béasach ("Ar mhiste leat...", "Dá bhféadfá, b'fhéidir...")
-- Breis agus 30 riail slonn ionadaíochta tiúnáilte le haghaidh leideanna códaithe
+- Baineann sé focail líontacháin ("please", "I think", "basically", "actually")
+- Dlúthaíonn sé frásaí rófhada ("in order to" → "to", "as a result of" → "because")
+- Baineann sé maolú beasach ("Would you mind...", "If you could possibly...")
+- 30+ riail regex tiúnaithe do phromptanna códaithe
 
-**Is fearr le haghaidh:** Sreafaí oibre códaithe laethúla, foirne atá feasach ar chostais.
+**Oiriúnach do:** Sreabhaí oibre códaithe laethúla, foirne atá feasach ar chostas.
 
-### Mód Ionsaitheach (~50% de choigilteas)
+### Mód Ionsaitheach (~50% coigiltis)
 
-Bainistiú cliste staire le haghaidh seisiúin fhada:
+Bainistíocht chliste staire do sheisiúin fhada:
 
 - **Aosú Teachtaireachtaí** — déantar teachtaireachtaí níos sine a chomhbhrú de réir a chéile
-- **Comhbhrú Torthaí Uirlise** — gearrtar nó fágtar ar lár aschuir fhada uirlise (na chéad línte/na línte deiridh,
-  scagadh línte meaitseála, dlúthú eochracha JSON)
-- **Cosaintí Sláine Struchtúraí** — cinntítear go bhfanann péirí `tool_use` + `tool_result` comhsheasmhach
-- **Feasacht ar Fhuinneog an Chomhthéacs** — urramaítear teorainneacha comharthaí gach samhla
+- **Comhbhrú Torthaí Uirlisí** — déantar aschuir fhada uirlisí a theascadh nó a fhágáil ar lár (línte tosaigh/deiridh, scagadh líne-mheaitseála, dlúthú eochracha JSON)
+- **Gardaí Sláine Struchtúrtha** — cinntíonn sé go bhfanann péirí `tool_use` + `tool_result` comhsheasmhach
+- **Feasacht ar an bhFuinneog Comhthéacs** — urramaíonn sé teorainneacha token in aghaidh an mhúnla
 
-**Is fearr le haghaidh:** Seisiúin fhada dífhabhtaithe, bunachair mhóra cód.
+**Oiriúnach do:** Seisiúin fhada dífhabhtaithe, bunachair chóid mhóra.
 
-### Mód Fíorard (~75% de choigilteas)
+### Mód Ultra (~75% coigiltis)
 
-Comhbhrú uasta le haghaidh cásanna ina bhfuil comharthaí ríthábhachtach:
+Comhbhrú uasta do chásanna ina bhfuil token criticiúil:
 
-- **Bearradh Heorastúil** — bearradh prós comhartha ar chomhartha bunaithe ar scór
-- **Caomhnú Struchtúir** — cuirtear bloic chód fhálaithe, cód inlíne, URLanna agus aitheantóirí
-  i leataobh agus fuaitear ar ais iad focal ar fhocal; ní bhearrtar riamh iad
-- **Sraith roghnach SLM** — is féidir le samhail bheag áitiúil an bearradh a bheachtú nuair a chumraítear í
-- Neamhspleách ar an mód Ionsaitheach: ní ritheann sé aosú teachtaireachtaí, comhbhrú torthaí uirlise
-  ná an t-achoimreoir cúltaca (ní féidir ach le teip sa tsraith SLM pas cúltaca a sheoladh tríd an
-  mód ionsaitheach)
+- **Béarradh Heuristeach** — béarradh token próis bunaithe ar scór
+- **Caomhnú Struchtúir** — déantar bloic chóid fhálaithe, cód inlíne, URLanna agus aitheantóirí a thuamaisiú agus a athfhuáil go litriúil; ní dhéantar iad a bhéarradh riamh
+- **Sraith SLM roghnach** — is féidir le múnla beag áitiúil an béarradh a fheabhsú nuair a chumraítear é
+- Neamhspleách ar an mód Ionsaitheach: ní ritheann sé aosú teachtaireachtaí, comhbhrú torthaí uirlisí ná an t-achoimritheoir cúltaca (ní féidir ach teip ar an sraith SLM pas cúltaca a threorú tríd an mód ionsaitheach)
 
-**Is fearr le haghaidh:** Nuair a bhíonn teorainneacha comhthéacs á sárú agat arís agus arís eile.
+**Oiriúnach do:** Nuair a bhaineann tú teorainneacha comhthéacs amach arís agus arís eile.
 
-### Mód RTK (raon réamhtheachtach 60-90%)
+### Mód RTK (60-90% raon srutha suas)
 
-Tá mód RTK optamaithe le haghaidh aschuir fhoclacha uirlise a bhíonn le feiceáil i seisiúin gníomhairí códaithe:
+Tá mód RTK optamaithe le haghaidh aschuir rófhada uirlisí a thagann chun cinn i seisiúin ghníomhaire códaithe:
 
-- Aimsítear aicmí ordaithe/aschuir amhail `git status`, `git diff`, `git log`, riteoirí tástála,
-  tiomsúcháin TypeScript/Vite/Webpack, ESLint/Biome/Prettier, iniúchtaí/suiteálacha npm, logaí Docker, aschur bonneagair
-  agus aschur ginearálta blaoisce
-- Cuirtear pacáistí scagairí JSON ó `open-sse/services/compression/engines/rtk/filters/` i bhfeidhm
-- Iompórtáiltear scagairí RTK TOML schema v1 ó chomhaid tionscadail nó dhomhanda `filters.toml`, le bailíochtú
-  tástálacha inlíne agus geatú iontaoibhe do chomhaid tionscadail
-- Soláthraítear 55 scagaire ionsuite le samplaí fíoraithe inlíne
-- Baintear seichimh rialaithe ANSI, barraí dul chun cinn, línte athráite agus torann nach féidir gníomhú ina leith
-- Caomhnaítear teipeanna, earráidí, rabhaidh, comhaid athraithe, achoimrí agus deireadh aschuir fhada
-- Tacaítear le scagairí tionscadail faoi gheata iontaoibhe, scagairí domhanda agus aisghabháil roghnach aschuir amh faoi cheilt
+- Aimsíonn sé ranganna ordú/aschuir ar nós `git status`, `git diff`, `git log`, ritheoirí tástála, tógálacha TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, logaí Docker, aschur infreastruchtúir, agus aschur ginearálta bhlaosc
+- Cuireann sé pacáistí scagairí JSON i bhfeidhm ó `open-sse/services/compression/engines/rtk/filters/`
+- Iompórtálann sé scagairí scéim TOML v1 RTK ó chomhaid `filters.toml` tionscadail nó domhanda, le bailíochtú tástála inlíne agus geatú muiníne do chomhaid tionscadail
+- Seachadann sé 56 scagaire ionsuite le samplaí fíoraithe inlíne
+- Baineann sé seichimh rialaithe ANSI, barraí dul chun cinn, línte arís, agus torann nach bhfuil ina ghniomh
+- Coimeádann sé teipeanna, earráidí, rabhaidh, comhaid athraithe, achoimrí, agus eireaball an aschuir fhada
+- Tacaíonn sé le scagairí tionscadail faoi gheata muiníne, scagairí dhomhanda, agus aisghabháil roghnach amhaschuir slánaithe
 
-**Is fearr le haghaidh:** Seisiúin ghníomhairí ina bhfuil tras-scríbhinní blaoisce, tiomsúcháin, tástála, git, grep agus aschuir comhad.
+**Oiriúnach do:** Seisiúin ghníomhaire le trascríbhinní blaosce, tógála, tástála, git, grep, agus aschuir chomhad.
 
-### Mód Cruachta (raon incháilithe 78-95%)
+### Mód Cruachta (78-95% raon incháilithe)
 
-Ritheann mód Cruachta innill chomhbhrúite iolracha in ord cinntitheach. Is í an phíblíne réamhshocraithe:
+Ritheann mód cruachta inneall chomhbhrúite iolracha in ord cinnteach. Is é seo a leanas an píblíne réamhshocraithe:
 
 ```txt
 RTK -> Caveman
 ```
 
-Coinníonn an t-ord sin aschur teirminéil/uirlisí dlúth ar dtús, ansin cuireann sé dlúthú séimeantach Caveman i bhfeidhm ar
-an gcuid eile den leid teanga nádúrtha. Is féidir píblínte cruachta a chumrú go domhanda nó trí
-theaglamaí comhbhrúite a shanntar do theaglamaí ródúcháin.
+Coinníonn an t-ord sin aschur teirminéil/uirlisí dlúth ar dtús, ansin cuireann sé dlúthú séimeantach Caveman i bhfeidhm ar an bprompt teanga nádúrtha atá fágtha. Is féidir píblínte cruachta a chumrú go domhanda nó trí theaglama comhbhrúite a shanntar do theaglama ródaithe.
 
-**Is fearr le haghaidh:** Comhthéacs measctha ina bhfuil logaí móra uirlise chomh maith le treoracha daonna nó achoimrí cúntóra.
+**Oiriúnach do:** Comhthéacs measctha le logaí móra uirlisí móide treoracha daonna nó achoimrí cúnta.
 
 ---
 

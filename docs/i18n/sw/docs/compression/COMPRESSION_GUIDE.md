@@ -32,91 +32,95 @@ Ombi la Mteja
 
 ## Hali za Ukandamizaji
 
-### Off
+### Off (Imezimwa)
 
-Hakuna ukandamizaji unaotumika. Ujumbe wote hupitishwa bila kubadilishwa.
+Hakuna ukandamizaji unaotumika. Ujumbe wote hupita bila mabadiliko.
 
-### Hali ya Lite (uokoaji wa ~15%, ucheleweshaji wa <1ms)
+### Lite Mode (~15% akiba, ucheleweshaji <1ms)
 
-Hali salama zaidi — hakuna mabadiliko ya maana, ni usafishaji wa uumbizaji pekee:
+Hali salama kabisa — hakuna mabadiliko ya kisemantiki, ni usafishaji wa umbizo pekee:
 
-| Mbinu                    | Maelezo                                                 |
-| ------------------------ | ------------------------------------------------------- |
-| `collapseWhitespace`     | Unganisha mistari tupu inayofuatana na nafasi za mwisho |
-| `dedupSystemPrompt`      | Ondoa ujumbe wa mfumo unaojirudia                       |
-| `compressToolResults`    | Kandamiza matokeo marefu ya zana/vitendakazi            |
-| `removeRedundantContent` | Ondoa maagizo yanayorudiwa                              |
-| `replaceImageUrls`       | Fupisha URI za data za picha za base64                  |
+| Mbinu                    | Maelezo                                                |
+| ------------------------ | ------------------------------------------------------ |
+| `collapseWhitespace`     | Unganisha mistari tupu mfululizo na nafasi za mwishoni |
+| `dedupSystemPrompt`      | Ondoa ujumbe wa mfumo unaojirudia                      |
+| `compressToolResults`    | Kandamiza matokeo manene ya zana/kazi                  |
+| `removeRedundantContent` | Ondoa maagizo yanayojirudia                            |
+| `replaceImageUrls`       | Fupisha URI za data za picha za base64                 |
 
-**Inafaa zaidi kwa:** Matumizi ya kudumu, mitiririko ya kazi inayozingatia sana usalama.
+**Bora kwa:** Matumizi ya kila mara, mtiririko wa kazi unaohitaji usalama wa hali ya juu.
 
-### Hali ya Standard (uokoaji wa ~30%)
+### Standard Mode (~30% akiba)
 
-Imechochewa na [Caveman](https://github.com/JuliusBrussee/caveman) — huondoa maneno ya ziada na vifungu virefu huku ikihifadhi maana:
+Imechochewa na [Caveman](https://github.com/JuliusBrussee/caveman) — huondoa maneno ya kujaza na misemo mirefu huku ikihifadhi maana:
 
-- Huondoa maneno ya ziada ("tafadhali", "nadhani", "kimsingi", "kwa hakika")
-- Hufupisha vifungu virefu ("ili kuweza" → "ili", "kutokana na ukweli kwamba" → "kwa sababu")
-- Huondoa lugha ya tahadhari yenye adabu ("Je, ungejali...", "Ikiwa ungeweza tafadhali...")
-- Zaidi ya kanuni 30 za regex zilizoboreshwa kwa prompt za uandishi wa msimbo
+- Huondoa maneno ya kujaza ("please", "I think", "basically", "actually")
+- Hufupisha misemo mirefu ("in order to" → "to", "as a result of" → "because")
+- Huondoa maneno ya heshima ya ziada ("Would you mind...", "If you could possibly...")
+- Sheria 30+ za regex zilizoboreshwa kwa maelekezo (prompts) za uandishi wa programu
 
-**Inafaa zaidi kwa:** Mitiririko ya kila siku ya uandishi wa msimbo, timu zinazozingatia gharama.
+**Bora kwa:** Mtiririko wa kazi wa uandishi wa programu wa kila siku, timu zinazojali gharama.
 
-### Hali ya Aggressive (uokoaji wa ~50%)
+### Aggressive Mode (~50% akiba)
 
-Usimamizi mahiri wa historia kwa vipindi virefu:
+Usimamizi mahiri wa historia kwa vikao virefu:
 
-- **Uchakavu wa Ujumbe** — ujumbe wa zamani hukandamizwa hatua kwa hatua
-- **Ukandamizaji wa Matokeo ya Zana** — matokeo marefu ya zana hukatwa au kuachwa (mistari ya kwanza/mwisho,
-  uchujaji wa mistari inayolingana, ufupishaji wa funguo za JSON)
-- **Vilinzi vya Uadilifu wa Muundo** — huhakikisha jozi za `tool_use` + `tool_result` zinabaki thabiti
-- **Uelewa wa Dirisha la Muktadha** — huzingatia vikomo vya tokeni vya kila modeli
+- **Message Aging** — ujumbe wa zamani hukandamizwa hatua kwa hatua kadri unavyozeeka
+- **Tool Result Compression** — matokeo marefu ya zana hukatwa au kupunguzwa (mistari ya
+  kwanza/mwisho, uchujaji wa mistari inayolingana, kufupisha funguo za JSON)
+- **Structural Integrity Guards** — huhakikisha jozi za `tool_use` + `tool_result` zinabaki thabiti
+- **Context Window Awareness** — huheshimu mipaka ya tokeni ya kila modeli
 
-**Inafaa zaidi kwa:** Vipindi virefu vya utatuzi, hazina kubwa za msimbo.
+**Bora kwa:** Vikao virefu vya urekebishaji hitilafu, misingi mikubwa ya msimbo.
 
-### Hali ya Ultra (uokoaji wa ~75%)
+### Ultra Mode (~75% akiba)
 
-Ukandamizaji wa juu zaidi kwa hali ambazo tokeni ni muhimu sana:
+Ukandamizaji wa kiwango cha juu kabisa kwa hali muhimu za tokeni:
 
-- **Upogoaji wa Kiheuristiki** — upogoaji wa tokeni za nathari kulingana na alama
-- **Uhifadhi wa Muundo** — vizuizi vya msimbo vilivyozungushiwa uzio, msimbo wa ndani, URL na vitambulishi
-  huwekewa alama za muda na kuunganishwa upya kama zilivyo, bila kupogolewa kamwe
-- **Kiwango cha hiari cha SLM** — modeli ndogo ya ndani inaweza kuboresha upogoaji inaposanidiwa
-- Hujitegemea kutoka kwa hali ya Aggressive: haiendeshi uchakavu wa ujumbe, ukandamizaji wa matokeo ya zana
-  au kifupishaji cha dharura (ni hitilafu ya kiwango cha SLM pekee inayoweza kuelekeza upitishaji wa dharura kupitia
-  aggressive)
+- **Heuristic Pruning** — kupunguza tokeni za prose kwa msingi wa alama
+- **Structure Preservation** — vitalu vya msimbo vilivyozungukwa, msimbo wa ndani (inline),
+  URL na vitambulishi hutiwa alama na kuunganishwa upya neno kwa neno, havipunguzwi kamwe
+- **Optional SLM tier** — modeli ndogo ya ndani inaweza kuboresha upunguzaji ikisanidiwa
+- Huru kutoka kwa hali ya Aggressive: haiendeshi message aging, ukandamizaji wa matokeo
+  ya zana au muhtasari wa dharura (kushindwa kwa kiwango cha SLM pekee ndiko kunaweza
+  kuelekeza kipitio cha dharura kupitia aggressive)
 
-**Inafaa zaidi kwa:** Unapofikia vikomo vya muktadha mara kwa mara.
+**Bora kwa:** Unapokutana na mipaka ya muktadha mara kwa mara.
 
-### Hali ya RTK (kiwango cha 60-90% kwa mtoa huduma wa juu)
+### RTK Mode (kiwango cha 60-90% upande wa juu)
 
-Hali ya RTK imeboreshwa kwa matokeo marefu ya zana yanayotokea katika vipindi vya mawakala wa uandishi wa msimbo:
+Hali ya RTK imeboreshwa kwa matokeo manene ya zana yanayojitokeza katika vikao vya mawakala wa uandishi wa programu:
 
-- Hutambua aina za amri/matokeo kama vile `git status`, `git diff`, `git log`, viendeshaji vya majaribio,
-  miundo ya TypeScript/Vite/Webpack, ESLint/Biome/Prettier, ukaguzi/usakinishaji wa npm, kumbukumbu za Docker, matokeo ya infra
-  na matokeo ya kawaida ya shell
+- Huchunguza aina za amri/matokeo kama `git status`, `git diff`, `git log`, waendeshaji wa
+  majaribio, ujenzi wa TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs,
+  kumbukumbu za Docker, matokeo ya miundombinu, na matokeo ya kawaida ya shell
 - Hutumia vifurushi vya vichujio vya JSON kutoka `open-sse/services/compression/engines/rtk/filters/`
-- Huleta vichujio vya RTK TOML schema v1 kutoka faili za mradi au za jumla za `filters.toml`, pamoja na uthibitishaji wa
-  majaribio ya ndani na uzuiaji unaotegemea uaminifu kwa faili za mradi
-- Huja na vichujio 55 vilivyojengewa ndani pamoja na sampuli za uthibitishaji za ndani
-- Huondoa mifuatano ya udhibiti ya ANSI, pau za maendeleo, mistari inayojirudia na kelele zisizoweza kufanyiwa kazi
-- Huhifadhi hitilafu, makosa, maonyo, faili zilizobadilishwa, mihtasari na mwisho wa matokeo marefu
-- Husaidia vichujio vya mradi vinavyodhibitiwa kwa uaminifu, vichujio vya jumla na urejeshaji wa hiari wa matokeo ghafi yaliyofichwa
+- Huingiza vichujio vya RTK TOML schema v1 kutoka kwa faili za mradi au za kimataifa
+  `filters.toml`, kwa uthibitishaji wa majaribio ya ndani (inline-test) na udhibiti wa
+  uaminifu kwa faili za mradi
+- Huja na vichujio 56 vilivyojengewa ndani pamoja na sampuli za uthibitishaji wa ndani
+- Huondoa mlolongo wa udhibiti wa ANSI, upau wa maendeleo, mistari inayojirudia, na kelele
+  zisizo na hatua
+- Huhifadhi kushindwa, hitilafu, onyo, faili zilizobadilishwa, muhtasari, na mwisho wa
+  matokeo marefu
+- Huauni vichujio vya mradi vilivyo na udhibiti wa uaminifu, vichujio vya kimataifa, na
+  urejeshaji wa hiari wa matokeo ghafi yaliyofichwa
 
-**Inafaa zaidi kwa:** Vipindi vya mawakala vyenye shell, build, test, git, grep na nakala za matokeo ya faili.
+**Bora kwa:** Vikao vya wakala vyenye nakala za shell, ujenzi, majaribio, git, grep, na matokeo ya faili.
 
-### Hali ya Stacked (kiwango cha 78-95% ya inayostahiki)
+### Stacked Mode (kiwango cha 78-95% kinachostahili)
 
-Hali ya Stacked huendesha injini nyingi za ukandamizaji kwa mpangilio thabiti. Mtiririko chaguo-msingi ni:
+Hali ya Stacked huendesha injini nyingi za ukandamizaji kwa mpangilio uhakika. Mfereji chaguomsingi ni:
 
 ```txt
 RTK -> Caveman
 ```
 
-Mpangilio huo huweka matokeo ya terminal/zana yakiwa mafupi kwanza, kisha hutumia ufupishaji wa kimaana wa Caveman kwa
-prompt iliyosalia ya lugha asilia. Mitiririko ya Stacked inaweza kusanidiwa kwa ujumla au kupitia
-combo za ukandamizaji zilizogawiwa kwa combo za uelekezaji.
+Mpangilio huo hufanya matokeo ya terminali/zana yawe mafupi kwanza, kisha hutumia ufupishaji
+wa kisemantiki wa Caveman kwa maelekezo ya lugha asilia yaliyobaki. Mifereji ya Stacked inaweza
+kusanidiwa kimataifa au kupitia michanganyo ya ukandamizaji iliyokabidhiwa kwa michanganyo ya uelekezaji.
 
-**Inafaa zaidi kwa:** Muktadha mchanganyiko wenye kumbukumbu nyingi za zana pamoja na maagizo ya binadamu au mihtasari ya msaidizi.
+**Bora kwa:** Muktadha mchanganyiko wenye kumbukumbu kubwa za zana pamoja na maagizo ya binadamu au muhtasari wa msaidizi.
 
 ---
 

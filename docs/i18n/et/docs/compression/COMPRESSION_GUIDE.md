@@ -34,89 +34,90 @@ Kliendi päring
 
 ### Väljas
 
-Tihendamist ei rakendata. Kõik sõnumid edastatakse muutmata kujul.
+Tihendust ei rakendata. Kõik sõnumid liiguvad läbi muutumatuna.
 
-### Kerge režiim (~15% säästu, <1ms latentsus)
+### Lite-režiim (~15% kokkuhoid, <1 ms latentsus)
 
-Kõige turvalisem režiim — semantilisi muudatusi pole, korrastatakse ainult vormindust:
+Kõige turvalisem režiim — null semantilist muutust, ainult vorminduse koristamine:
 
-| Tehnika                  | Kirjeldus                                                   |
-| ------------------------ | ----------------------------------------------------------- |
-| `collapseWhitespace`     | Järjestikuste tühjade ridade ja lõputühikute ühendamine     |
-| `dedupSystemPrompt`      | Dubleerivate süsteemisõnumite eemaldamine                   |
-| `compressToolResults`    | Paljusõnaliste tööriista-/funktsiooniväljundite tihendamine |
-| `removeRedundantContent` | Korduvate juhiste eemaldamine                               |
-| `replaceImageUrls`       | Base64-kujutiste andme-URI-de lühendamine                   |
+| Tehnika                  | Kirjeldus                                                       |
+| ------------------------ | --------------------------------------------------------------- |
+| `collapseWhitespace`     | Liidab järjestikused tühjad read ja ridade lõpus olevad tühikud |
+| `dedupSystemPrompt`      | Eemaldab korduvad süsteemisõnumid                               |
+| `compressToolResults`    | Tihendab detailsed tööriista-/funktsiooniväljundid              |
+| `removeRedundantContent` | Kärbib korduvaid juhiseid                                       |
+| `replaceImageUrls`       | Lühendab base64-piltide andme-URI-sid                           |
 
-**Sobib kõige paremini:** pidevaks kasutamiseks ja ohutuskriitilisteks töövoogudeks.
+**Sobib kõige paremini:** alati-sees kasutamine, ohutuskriitilised töövood.
 
-### Standardrežiim (~30% säästu)
+### Standardrežiim (~30% kokkuhoid)
 
-Inspireeritud projektist [Caveman](https://github.com/JuliusBrussee/caveman) — eemaldab täitesõnu ja paljusõnalisi väljendeid, säilitades samal ajal tähenduse:
+Inspireeritud projektist [Caveman](https://github.com/JuliusBrussee/caveman) — eemaldab täitesõnad ja liiga detailsed sõnakasutused, säilitades samas tähenduse:
 
-- Eemaldab täitesõnad („palun“, „ma arvan“, „põhimõtteliselt“, „tegelikult“)
-- Lühendab paljusõnalisi väljendeid („selleks, et“ → „et“, „selle tulemusena“ → „sest“)
-- Eemaldab viisaka pehmendamise („Kas teil oleks võimalik...“, „Kui saaksite ehk...“)
-- Üle 30 regulaaravaldise reegli, mis on kohandatud programmeerimisviipadele
+- Eemaldab täitesõnad („please“, „I think“, „basically“, „actually“)
+- Tihendab detailsed fraasid („in order to“ → „to“, „as a result of“ → „because“)
+- Eemaldab viisaka härdumise („Would you mind...“, „If you could possibly...“)
+- Üle 30 regulaaravaldise reegli, mis on häälestatud kodeerimispromptidele
 
-**Sobib kõige paremini:** igapäevasteks programmeerimistöövoogudeks ja kuluteadlikele meeskondadele.
+**Sobib kõige paremini:** igapäevased kodeerimistöövood, kuluteadlikud meeskonnad.
 
-### Agressiivne režiim (~50% säästu)
+### Agressiivne režiim (~50% kokkuhoid)
 
-Nutikas ajaloo haldamine pikkade seansside jaoks:
+Nutikas ajaloohaldus pikkade seansside jaoks:
 
-- **Sõnumite vanandamine** — vanemaid sõnumeid tihendatakse järjest rohkem
-- **Tööriistatulemuste tihendamine** — pikad tööriistaväljundid kärbitakse või jäetakse välja (esimesed/viimased read,
-  sobivate ridade filtreerimine, JSON-võtmete tihendamine)
-- **Struktuurse tervikluse kaitsed** — tagavad, et `tool_use` + `tool_result` paarid püsivad kooskõlas
-- **Kontekstiakna arvestamine** — järgib iga mudeli tokenipiiranguid
+- **Sõnumite vananemine** — vanemaid sõnumeid tihendatakse järk-järgult
+- **Tööriistatulemuste tihendamine** — pikki tööriistaväljundeid kärbitakse või jäetakse
+  vahele (esimesed/viimased read, vasteridade filtreerimine, JSON-võtmete kompakteerimine)
+- **Struktuurse terviklikkuse kaitse** — tagab, et `tool_use` + `tool_result` paarid püsivad kooskõlas
+- **Kontekstiakna teadlikkus** — arvestab iga mudeli tokenipiiranguid
 
-**Sobib kõige paremini:** pikkadeks silumisseanssideks ja suurte koodibaaside jaoks.
+**Sobib kõige paremini:** pikad silumisseansid, suured koodibaasid.
 
-### Ultra-režiim (~75% säästu)
+### Ultra-režiim (~75% kokkuhoid)
 
-Maksimaalne tihendamine tokenikriitiliste olukordade jaoks:
+Maksimaalne tihendus tokenikriitilistes stsenaariumides:
 
-- **Heuristiline kärpimine** — proosa skooripõhine tokenite kärpimine
-- **Struktuuri säilitamine** — piirdega koodiplokid, reasisesed koodiosad, URL-id ja identifikaatorid
-  asendatakse ajutiste tähistega ning taastatakse sõna-sõnalt; neid ei kärbita kunagi
-- **Valikuline SLM-aste** — seadistamise korral saab väike kohalik mudel kärpimist täiustada
-- Agressiivsest režiimist sõltumatu: see ei kasuta sõnumite vanandamist, tööriistatulemuste tihendamist
-  ega varukokkuvõtjat (ainult SLM-astme tõrge võib suunata varutöötluse läbi
-  agressiivse režiimi)
+- **Heuristiline kärpimine** — skooripõhine proosatokenite kärpimine
+- **Struktuuri säilitamine** — taradega koodiplokid, reasisene kood, URL-id ja
+  identifikaatorid kaitstakse kohatäidetega (tombstoned) ja õmmeldakse sõnasõnalt tagasi, neid ei kärpita kunagi
+- **Valikuline SLM-tase** — väike kohalik mudel saab seadistamisel kärpet täpsustada
+- Sõltumatu agressiivsest režiimist: see ei käivita sõnumite vananemist,
+  tööriistatulemuste tihendamist ega varu-kokkuvõtjat (ainult SLM-taseme tõrge võib
+  suunata varukäigu läbi agressiivse režiimi)
 
-**Sobib kõige paremini:** kui jõuate korduvalt kontekstipiiranguteni.
+**Sobib kõige paremini:** kui lööd korduvalt kontekstipiirangutesse.
 
-### RTK-režiim (60–90% ülesvooluvahemik)
+### RTK-režiim (60–90% vahemik ülesvoolus)
 
-RTK-režiim on optimeeritud programmeerimisagentide seanssides esinevate paljusõnaliste tööriistaväljundite jaoks:
+RTK-režiim on optimeeritud detailsete tööriistaväljundite jaoks, mis esinevad kodeerimisagendi seanssides:
 
-- Tuvastab käsu-/väljundiklassid, nagu `git status`, `git diff`, `git log`, testikäitajad,
-  TypeScripti/Vite'i/Webpacki järgud, ESLint/Biome/Prettier, npm-i auditid/paigaldused, Dockeri logid, taristu
-  väljund ja üldine kestaväljund
+- Tuvastab käsu-/väljundklasse nagu `git status`, `git diff`, `git log`, testide käivitajad,
+  TypeScript/Vite/Webpack ehitused, ESLint/Biome/Prettier, npm audit/installid, Dockeri logid, infra
+  väljund ja üldine shelli väljund
 - Rakendab JSON-filtripakette asukohast `open-sse/services/compression/engines/rtk/filters/`
-- Impordib RTK TOML-i skeemi v1 filtrid projekti või üldistest `filters.toml` failidest koos tekstisiseste testide
-  valideerimise ja projektifailide usalduspõhise piiramisega
-- Sisaldab 55 sisseehitatud filtrit koos tekstisiseste kontrollnäidistega
-- Eemaldab ANSI juhtjärjendid, edenemisribad, korduvad read ja mittevajaliku müra
-- Säilitab nurjumised, vead, hoiatused, muudetud failid, kokkuvõtted ja pika väljundi lõpuosa
-- Toetab usalduspõhiselt piiratud projektifiltreid, üldisi filtreid ja valikulist redigeeritud toorväljundi taastamist
+- Impordib RTK TOML schema v1 filtreid projekti või globaalsetest `filters.toml` failidest,
+  koos reasisesete testide valideerimise ja projektifailide usalduskontrolliga
+- Kaasas 56 sisseehitatud filtrit koos reasisesete kontrollnäidistega
+- Eemaldab ANSI-juhtjärjestused, edenemisribad, korduvad read ja tegevust mitte vajava müra
+- Säilitab ebaõnnestumised, vead, hoiatused, muudetud failid, kokkuvõtted ja pika väljundi lõpu
+- Toetab usalduskontrolliga projektifiltreid, globaalseid filtreid ja valikulist redakteeritud toorväljundi taastamist
 
-**Sobib kõige paremini:** agendiseanssideks, mis sisaldavad kesta-, järgu-, testi-, git-, grep- ja failiväljundite transkripte.
+**Sobib kõige paremini:** agendiseansid shelli-, ehitus-, testi-, git-, grep- ja failiväljundi transkriptsioonidega.
 
-### Virnastatud režiim (78–95% sobivusvahemik)
+### Kihistatud režiim (78–95% kohaldatav vahemik)
 
-Virnastatud režiim käitab mitut tihendusmootorit deterministlikus järjestuses. Vaikekonveier on:
+Kihistatud režiim käivitab mitu tihendusmootorit deterministlikus järjekorras. Vaiketorustik on:
 
 ```txt
 RTK -> Caveman
 ```
 
-See järjestus tihendab esmalt terminali-/tööriistaväljundi ning rakendab seejärel ülejäänud
-loomulikus keeles viibale Cavemani semantilist lühendamist. Virnastatud konveiereid saab seadistada üldiselt või
-marsruutimiskombinatsioonidele määratud tihenduskombinatsioonide kaudu.
+See järjekord hoiab terminali-/tööriistaväljundi kõigepealt kompaktsena ja rakendab seejärel
+Cavemani semantilist kondenseerimist ülejäänud loomulikku keeles promptile. Kihistatud
+torustikke saab seadistada globaalselt või tihenduskombinatsioonide kaudu, mis on määratud
+suunamiskombinatsioonidele.
 
-**Sobib kõige paremini:** segakonteksti jaoks, mis sisaldab suuri tööriistaloge koos inimese juhiste või assistendi kokkuvõtetega.
+**Sobib kõige paremini:** segakontekst, kus on suured tööriistalogid koos inimjuhiste või assistendi kokkuvõtetega.
 
 ---
 
