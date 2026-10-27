@@ -6634,7 +6634,7 @@
       "claude": "Ceangail Claude Code leis an sreabhadh OAuth atá ann cheana.",
       "cline": "Ceangail Cline leis an sreabhadh OAuth atá ann cheana.",
       "cursor": "Ceangail Cursor IDE leis an sreabhadh OAuth atá ann cheana.",
-      "cursor-api": "Ceangail Cursor le heochair API úsáideora (crsr_...) ó cursor.com/dashboard/api; ní theastaíonn seisiún IDE.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Ceangail GitHub Copilot leis an sreabhadh OAuth atá ann cheana.",
       "gitlab-duo": "Feidhmchlár OAuth le scóipeanna ai_features + read_user. Cumraigh GITLAB_DUO_OAUTH_CLIENT_ID agus GITLAB_DUO_OAUTH_CLIENT_SECRET go roghnach ar an gcás OmniRoute seo.",
       "kilocode": "Ceangail Kilo Code leis an sreabhadh OAuth atá ann cheana.",

@@ -394,6 +394,17 @@ export async function executeTargetAttempt(
         // unhealthy, so the sticky pin's lazy headroom recheck would never
         // catch it either — release it here, on the failing response.
         deps.releaseStickyPinOnFailure(deps.sticky.messageHash, effectiveConnectionId);
+        // #919: a quality-rejected 200 leaves the same stale LKGP pin as a
+        // classic failure — clear it so the next request re-resolves.
+        deps.clearStaleLKGP(
+          deps.combo.name,
+          target.executionKey,
+          deps.combo.id,
+          deps.log,
+          "COMBO",
+          undefined,
+          target
+        );
         recordComboRequest(deps.combo.name, modelStr, {
           success: false,
           latencyMs: Date.now() - deps.startTime,

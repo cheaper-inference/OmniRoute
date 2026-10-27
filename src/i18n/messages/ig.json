@@ -6634,7 +6634,7 @@
       "claude": "Jikọọ Claude Code site na usoro OAuth dị ugbu a.",
       "cline": "Jikọọ Cline site na usoro OAuth dị ugbu a.",
       "cursor": "Jikọọ Cursor IDE site na usoro OAuth dị ugbu a.",
-      "cursor-api": "Jikọọ Cursor site na igodo API onye ọrụ (crsr_...) sitere na cursor.com/dashboard/api; achọghị nnọkọ IDE.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Jikọọ GitHub Copilot site na usoro OAuth dị ugbu a.",
       "gitlab-duo": "Ngwa OAuth nwere scopes ai_features + read_user. Hazie GITLAB_DUO_OAUTH_CLIENT_ID na, ma ọ bụrụ na ịchọrọ, GITLAB_DUO_OAUTH_CLIENT_SECRET n’instance OmniRoute a.",
       "kilocode": "Jikọọ Kilo Code site na usoro OAuth dị ugbu a.",

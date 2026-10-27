@@ -6634,7 +6634,7 @@
       "claude": "Haɗa Claude Code ta amfani da tsarin OAuth na yanzu.",
       "cline": "Haɗa Cline ta amfani da tsarin OAuth na yanzu.",
       "cursor": "Haɗa Cursor IDE ta amfani da tsarin OAuth na yanzu.",
-      "cursor-api": "Haɗa Cursor da maɓallin API na mai amfani (crsr_...) daga cursor.com/dashboard/api; ba a buƙatar zaman IDE.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Haɗa GitHub Copilot ta amfani da tsarin OAuth na yanzu.",
       "gitlab-duo": "Manhajar OAuth mai scopes na ai_features + read_user. Saita GITLAB_DUO_OAUTH_CLIENT_ID da kuma, idan ana so, GITLAB_DUO_OAUTH_CLIENT_SECRET a wannan instance na OmniRoute.",
       "kilocode": "Haɗa Kilo Code ta amfani da tsarin OAuth na yanzu.",

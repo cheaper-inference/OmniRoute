@@ -6634,7 +6634,7 @@
       "claude": "Sambungkan Claude Code dengan aliran OAuth sedia ada.",
       "cline": "Sambungkan Cline dengan aliran OAuth sedia ada.",
       "cursor": "Sambungkan Cursor IDE dengan aliran OAuth sedia ada.",
-      "cursor-api": "Sambungkan Cursor dengan kunci API pengguna (crsr_...) daripada cursor.com/dashboard/api; sesi IDE tidak diperlukan.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Sambungkan GitHub Copilot dengan aliran OAuth sedia ada.",
       "gitlab-duo": "Aplikasi OAuth dengan skop ai_features + read_user. Konfigurasikan GITLAB_DUO_OAUTH_CLIENT_ID dan secara pilihan GITLAB_DUO_OAUTH_CLIENT_SECRET pada tika OmniRoute ini.",
       "kilocode": "Sambungkan Kilo Code dengan aliran OAuth sedia ada.",

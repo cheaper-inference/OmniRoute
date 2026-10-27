@@ -6634,7 +6634,7 @@
       "claude": "חבר את Claude Code באמצעות תהליך ה-OAuth הקיים.",
       "cline": "חבר את Cline באמצעות תהליך ה-OAuth הקיים.",
       "cursor": "חבר את Cursor IDE באמצעות תהליך ה-OAuth הקיים.",
-      "cursor-api": "יש לחבר את Cursor באמצעות מפתח API של משתמש (crsr_...) מ-cursor.com/dashboard/api; אין צורך בהפעלת סשן IDE.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "חבר את GitHub Copilot באמצעות תהליך ה-OAuth הקיים.",
       "gitlab-duo": "יישום OAuth עם הרשאות (scopes) של ai_features + read_user. הגדר את GITLAB_DUO_OAUTH_CLIENT_ID ואופציונלית את GITLAB_DUO_OAUTH_CLIENT_SECRET במופע OmniRoute זה.",
       "kilocode": "חבר את Kilo Code באמצעות תהליך ה-OAuth הקיים.",

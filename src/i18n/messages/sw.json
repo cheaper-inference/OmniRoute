@@ -6634,7 +6634,7 @@
       "claude": "Unganisha Claude Code kwa mtiririko uliopo wa OAuth.",
       "cline": "Unganisha Cline kwa mtiririko uliopo wa OAuth.",
       "cursor": "Unganisha Cursor IDE kwa mtiririko uliopo wa OAuth.",
-      "cursor-api": "Unganisha Cursor kwa kutumia API key ya mtumiaji (crsr_...) kutoka cursor.com/dashboard/api; kipindi cha IDE hakihitajiki.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Unganisha GitHub Copilot kwa mtiririko uliopo wa OAuth.",
       "gitlab-duo": "Programu ya OAuth yenye upeo wa ai_features + read_user. Sanidi GITLAB_DUO_OAUTH_CLIENT_ID na kwa hiari GITLAB_DUO_OAUTH_CLIENT_SECRET kwenye instansi hii ya OmniRoute.",
       "kilocode": "Unganisha Kilo Code kwa mtiririko uliopo wa OAuth.",

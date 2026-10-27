@@ -6634,7 +6634,7 @@
       "claude": "Povežite Claude Code z obstoječim tokom OAuth.",
       "cline": "Povežite Cline z obstoječim tokom OAuth.",
       "cursor": "Povežite Cursor IDE z obstoječim tokom OAuth.",
-      "cursor-api": "Povežite Cursor z uporabniškim ključem API (crsr_...) s cursor.com/dashboard/api; seja IDE ni potrebna.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Povežite GitHub Copilot z obstoječim tokom OAuth.",
       "gitlab-duo": "Aplikacija OAuth z obsegoma ai_features + read_user. V tem primerku OmniRoute konfigurirajte GITLAB_DUO_OAUTH_CLIENT_ID in po želji GITLAB_DUO_OAUTH_CLIENT_SECRET.",
       "kilocode": "Povežite Kilo Code z obstoječim tokom OAuth.",

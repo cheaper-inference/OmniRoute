@@ -6634,7 +6634,7 @@
       "claude": "Ligar o Claude Code com o fluxo OAuth existente.",
       "cline": "Ligar o Cline com o fluxo OAuth existente.",
       "cursor": "Ligar o Cursor IDE com o fluxo OAuth existente.",
-      "cursor-api": "Ligue o Cursor com uma chave de API de utilizador (crsr_...) de cursor.com/dashboard/api; não é necessária uma sessão no IDE.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Ligar o GitHub Copilot com o fluxo OAuth existente.",
       "gitlab-duo": "Aplicação OAuth com os âmbitos ai_features + read_user. Configure GITLAB_DUO_OAUTH_CLIENT_ID e, opcionalmente, GITLAB_DUO_OAUTH_CLIENT_SECRET nesta instância do OmniRoute.",
       "kilocode": "Ligar o Kilo Code com o fluxo OAuth existente.",

@@ -6634,7 +6634,7 @@
       "claude": "Conectați Claude Code cu fluxul OAuth existent.",
       "cline": "Conectați Cline cu fluxul OAuth existent.",
       "cursor": "Conectați Cursor IDE cu fluxul OAuth existent.",
-      "cursor-api": "Conectează Cursor folosind o cheie API de utilizator (crsr_...) de la cursor.com/dashboard/api; nu este necesară nicio sesiune IDE.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Conectați GitHub Copilot cu fluxul OAuth existent.",
       "gitlab-duo": "Aplicație OAuth cu permisiunile ai_features + read_user. Configurați GITLAB_DUO_OAUTH_CLIENT_ID și opțional GITLAB_DUO_OAUTH_CLIENT_SECRET pe această instanță OmniRoute.",
       "kilocode": "Conectați Kilo Code cu fluxul OAuth existent.",

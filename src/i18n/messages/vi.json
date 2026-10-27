@@ -6626,7 +6626,7 @@
       "claude": "Kết nối Claude Code bằng luồng OAuth hiện có.",
       "cline": "Kết nối Cline bằng luồng OAuth hiện có.",
       "cursor": "Kết nối Cursor IDE bằng luồng OAuth hiện có.",
-      "cursor-api": "Kết nối Cursor bằng khóa API người dùng (crsr_...) từ cursor.com/dashboard/api; không cần phiên IDE.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Kết nối GitHub Copilot bằng luồng OAuth hiện có.",
       "gitlab-duo": "Ứng dụng OAuth với phạm vi ai_features + read_user. Cấu hình GITLAB_DUO_OAUTH_CLIENT_ID và tùy chọn GITLAB_DUO_OAUTH_CLIENT_SECRET trên instance OmniRoute này.",
       "kilocode": "Kết nối Kilo Code bằng luồng OAuth hiện có.",

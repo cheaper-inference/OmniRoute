@@ -6634,7 +6634,7 @@
       "claude": "Ikonekta ang Claude Code gamit ang umiiral na OAuth flow.",
       "cline": "Ikonekta ang Cline gamit ang umiiral na OAuth flow.",
       "cursor": "Ikonekta ang Cursor IDE gamit ang umiiral na OAuth flow.",
-      "cursor-api": "Ikonekta ang Cursor gamit ang isang user API key (crsr_...) mula sa cursor.com/dashboard/api; hindi kailangan ng IDE session.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Ikonekta ang GitHub Copilot gamit ang umiiral na OAuth flow.",
       "gitlab-duo": "OAuth application na may ai_features + read_user scopes. I-configure ang GITLAB_DUO_OAUTH_CLIENT_ID at opsyonal ang GITLAB_DUO_OAUTH_CLIENT_SECRET sa OmniRoute instance na ito.",
       "kilocode": "Ikonekta ang Kilo Code gamit ang umiiral na OAuth flow.",
