@@ -39,7 +39,7 @@ Objektiv funktionssammenligning med populære open source AI-routere.
 
 ## Hvornår du bør vælge OmniRoute
 
-- Du hoster selv og ønsker **maksimal udbyderdækning** (375 udbydere, 155 gratis katalogposter uden autentificering)
+- Du hoster selv og ønsker **maksimal udbyderdækning** (376 udbydere, 155 gratis katalogposter uden autentificering)
 - Du har brug for en **indbygget MCP-server** (LLM-værktøjer, hukommelse og færdigheder eksponeret som værktøjer)
 - Du har brug for **A2A-protokollen** til agent-til-agent-arbejdsgange
 - Du ønsker **fingeraftryks-stealth** (JA3/JA4) for at undgå at blive opdaget af upstream-CAPTCHA'er

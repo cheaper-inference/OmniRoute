@@ -72,6 +72,16 @@ curl -i \
 
 Kunci tanpa cakupan manage (atau tanpa Bearer) akan menghasilkan `403 LOCAL_ONLY`. Prefiks terkait `/api/cli-tools/runtime/*` sengaja TIDAK dapat diabaikan — lihat [Tingkat Route Guard — Pengecualian cakupan manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Validasi Origin
+
+Setelah autentikasi, setiap permintaan ke `/api/mcp/*` — transport dan rute manajemen seperti `status`, `tools`, `audit`, `restart` — divalidasi header `Origin`-nya, siapa pun pemanggilnya (API key, token CLI, sesi dashboard, atau loopback anonim saat login dinonaktifkan). Ini adalah perlindungan DNS rebinding yang diwajibkan spesifikasi MCP Streamable HTTP.
+
+- **Tanpa header `Origin`** → diizinkan. OmniRoute CLI, SDK, dan klien IDE tidak mengirimkannya.
+- **`Origin` yang diizinkan** → `localhost` / `127.0.0.1` / `[::1]` pada port mana pun, atau origin publik OmniRoute sendiri: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin yang diteruskan reverse proxy tepercaya (`OMNIROUTE_TRUST_PROXY`, hanya jika base URL tidak diatur), atau host IP loopback/LAN yang diakses langsung. Header `Host` saja tidak pernah membuat origin tepercaya.
+- **`Origin` lain apa pun, termasuk `null`** → `403` dengan body error JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Sesi dashboard yang menyertakan token CSRF valid tetap diterima, sama seperti penulisan dashboard lainnya.
+
+Klien MCP berbasis browser yang disajikan di balik reverse proxy memerlukan `OMNIROUTE_PUBLIC_BASE_URL`; tidak ada daftar izin untuk origin lain. Preflight CORS (`OPTIONS`) tidak diperiksa Origin-nya; permintaan berikutnya diperiksa.
+
 ## Konfigurasi IDE
 
 Lihat [Konfigurasi Klien MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) untuk penyiapan Claude Desktop,

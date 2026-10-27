@@ -488,7 +488,7 @@ Se käsittelee seuraavat:
 
 | Tiedosto                       | Tarkoitus                                                |
 | ------------------------------ | -------------------------------------------------------- |
-| `providerRegistry.ts`          | Chat-mallien rekisteri 375 palveluntarjoajan luettelolle |
+| `providerRegistry.ts`          | Chat-mallien rekisteri 376 palveluntarjoajan luettelolle |
 | `providerModels.ts`            | Mallialiasukset, formaattikartoitus                      |
 | `constants.ts`                 | Aikakatkaisut, rajat, tilakoodit                         |
 | `defaultThinkingSignature.ts`  | Clauden oletusarvoinen thinking-allekirjoitus            |

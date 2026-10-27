@@ -156,7 +156,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` daxilində bağlanm
 | Sağlamlıq Hesabatı  | `health-report`      | Hər provayder üzrə circuit breaker, cooldown, lockout vəziyyətini aqreqasiya edir                                                                                         | health, resilience         | "Bütün provayderlərin sağlamlıq statusunu göstər" |
 | İmkanların Siyahısı | `list-capabilities`  | Kontekst inyeksiyası üçün xam SKILL.md URL-ləri ilə birlikdə 45 elementlik tam Agent Skills kataloqunu (23 API + 21 CLI + 1 konfiqurasiya) markdown cədvəli kimi qaytarır | catalog, discovery, skills | "Bütün OmniRoute imkanlarını siyahıya al"         |
 
-> Agent Card canlı 375 provayderli kataloqla uyğun saxlanılmalıdır; provayder sayları və pulsuz/autentifikasiyasız metadata runtime reyestrindən götürülür.
+> Agent Card canlı 376 provayderli kataloqla uyğun saxlanılmalıdır; provayder sayları və pulsuz/autentifikasiyasız metadata runtime reyestrindən götürülür.
 
 ### `list-capabilities` Bacarıq Təfərrüatları
 

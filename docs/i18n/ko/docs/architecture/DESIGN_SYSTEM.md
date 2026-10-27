@@ -101,13 +101,34 @@
 
 ## 2. 규칙
 
-1. 리터럴 대신 토큰을 사용합니다. 의도적으로 유지하는 예외는 항상 다크 테마인 콘솔 터미널, `STATUS_HEX`(`src/shared/constants/statusColors.ts`)를 통한 ReactFlow SVG 스트로크, 그리고 범주형 팔레트인 `STRATEGY_COLORS`(`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`)와 `LAYER_COLORS`(`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`)입니다.
-2. `packages/ui-kit/src`를 직접 수정하지 마세요. `scripts/dev/sync-ui-kit.sh <commit>`으로 동기화합니다. pre-commit 게이트인 `npm run check:ui-kit-snapshot`(`.husky/pre-commit`)은 고정된 업스트림 커밋과 단 하나의 바이트라도 다르면 실패합니다(업스트림 클론인 `UI_KIT_CLONE` 또는 `_references/cheaper-inference-ui-kit`이 없으면 경고와 함께 건너뜁니다). 키트에 필요한 기능이 없다면 어댑터나 화면에서 우회 처리하고 업스트림에 요청하세요.
-3. 키트의 기본 텍스트는 영어입니다(`label = "Loading"`, `loadingLabel = "Loading table"`…). 키트 컴포넌트가 텍스트를 렌더링할 때마다 `useTranslations(...)`에서 번역된 문자열을 전달하세요.
-4. Tailwind 유틸리티가 키트 컴포넌트 클래스보다 우선합니다(키트는 `@layer theme, base, components, utilities`를 선언하고 해당 규칙은 `components`에 있습니다). 간격과 레이아웃에는 유틸리티를 사용하되, 키트 컴포넌트의 색상을 다시 지정하는 데는 사용하지 마세요.
-5. 제목: 페이지 및 섹션 제목에는 `.ci-heading`(Inter, 자간 없음)을 사용하고, `.ci-dashboard-display`(Instrument Serif)는 오류 페이지의 상태 코드처럼 크고 드문드문 배치되는 디스플레이 텍스트에만 사용합니다.
-6. `tests/unit/dashboard-kit-sweep.test.ts`는 키트 도입 상태를 검사합니다. `src/app` 또는 `src/shared/components` 아래에는 Material 리거처 span이 없어야 합니다. 대시보드 트리(`src/app/(dashboard)` 및 `src/shared/components`)에는 원시 `<select>`, `<textarea>`, `<table>`이 없어야 하며, 명시된 예외(`Select` 어댑터의 네이티브 분기, `RequestLoggerDetail`) 외에는 직접 구현한 `role="dialog"`가 없어야 합니다. 이 영역의 모든 원시 `<button>` 또는 `<input>`에는 해당 요소로부터 최대 3줄 위에서 끝나는, 이유와 함께 `kit-exception:`을 포함한 주석이 필요합니다. 팔레트 색조와 `dark:` 변형은 테스트에 명시된 파일에서만 사용할 수 있습니다.
-7. PR 전에 두 테마와 390 px 뷰포트를 모두 확인하세요(스크린샷). `tests/e2e/a11y.spec.ts`는 axe를 실행합니다.
+1. 토큰만 사용하고, 리터럴은 절대 사용하지 않습니다. 의도적으로 유지하는 예외: 항상 다크인 콘솔 터미널과,
+   리터럴 hex가 필요한 호출자를 위해 키트 상태 팔레트를 resolved-hex로 미러링한
+   `STATUS_HEX`(`src/shared/constants/statusColors.ts`)입니다. 범주형 팔레트는 더 이상 예외가 아닙니다:
+   이들은 `src/shared/utils/categoricalPalette.ts`를 통해 키트의 다섯 가지 차트 토큰(`--color-chart-1..5`)을
+   사용하고, 라우팅 전략의 경우
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`를 사용합니다; ReactFlow 엣지와 오케스트레이션
+   캔버스는 테마 인식 `--orch-status-*` 변수를 읽습니다(`src/shared/components/flow/edgeStyles.ts`).
+2. `packages/ui-kit/src`를 수동으로 패치하지 마세요: `scripts/dev/sync-ui-kit.sh <commit>`으로 동기화하세요;
+   pre-commit 게이트인 `npm run check:ui-kit-snapshot`(`.husky/pre-commit`)은 고정된 업스트림 커밋과 다른
+   바이트가 하나라도 있으면 실패합니다(업스트림 클론인 `UI_KIT_CLONE` 또는
+   `_references/cheaper-inference-ui-kit`이 없으면 경고와 함께 건너뜁니다). 키트에 무언가 부족할 때는
+   어댑터나 화면에서 우회 처리하고 업스트림에 요청하세요.
+3. 키트 텍스트 기본값은 영어입니다(`label = "Loading"`, `loadingLabel = "Loading table"`…) — 키트 컴포넌트가 텍스트를
+   렌더링할 때마다 `useTranslations(...)`에서 번역된 문자열을 전달하세요.
+4. Tailwind 유틸리티가 키트 컴포넌트 클래스보다 우선합니다(키트는
+   `@layer theme, base, components, utilities`를 선언하며 규칙은 `components`에 있습니다) — 유틸리티는
+   간격과 레이아웃에 사용하고, 키트 컴포넌트의 색상을 다시 지정하는 데는 사용하지 마세요.
+5. 제목: 페이지 및 섹션 제목에는 `.ci-heading`(Inter, 자간 없음)을 사용하고, `.ci-dashboard-display`
+   (Instrument Serif)는 오류 페이지 상태 코드처럼 크고 여백이 많은 디스플레이 텍스트에만 사용하세요.
+6. `tests/unit/dashboard-kit-sweep.test.ts`가 키트 도입을 보호합니다: `src/app` 또는
+   `src/shared/components` 아래에 Material 합자(ligature) span이 없어야 합니다; 대시보드 트리(`src/app/(dashboard)` 및
+   `src/shared/components`)에서는 나열된 예외(`Select` 어댑터의 네이티브 분기,
+   `RequestLoggerDetail`) 외에 원시 `<select>`, `<textarea>` 또는 `<table>`과 수작업으로 만든
+   `role="dialog"`가 없어야 합니다; 그곳의 모든 원시 `<button>` 또는 `<input>`에는 최대 3줄 위에서 끝나는
+   `kit-exception:`(이유 포함)을 포함한 주석이 필요합니다; 팔레트 색상(hue)과 `dark:` 변형은
+   테스트가 나열하는 파일에서만 사용합니다.
+7. PR 전에 두 테마와 390 px 뷰포트를 확인하세요(스크린샷); `tests/e2e/a11y.spec.ts`가
+   axe를 실행합니다.
 
 ## 3. 화면 추가하기
 

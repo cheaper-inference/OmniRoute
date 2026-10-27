@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ไฟล์                              | วัตถุประสงค์                                                |
 | --------------------------------- | ----------------------------------------------------------- |
-| `providerRegistry.ts`             | รีจิสทรีของโมเดลแชทที่ครอบคลุมแคตตาล็อกผู้ให้บริการ 375 ราย |
+| `providerRegistry.ts`             | รีจิสทรีของโมเดลแชทที่ครอบคลุมแคตตาล็อกผู้ให้บริการ 376 ราย |
 | `providerModels.ts`               | ชื่อแฝงของโมเดล, การแมปรูปแบบ                               |
 | `constants.ts`                    | ค่าการหมดเวลา, ขีดจำกัด, รหัสสถานะ                          |
 | `defaultThinkingSignature.ts`     | ลายเซ็นการคิด (thinking signature) เริ่มต้นของ Claude       |

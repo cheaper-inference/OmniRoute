@@ -488,6 +488,24 @@ function sanitizeWreqError(error: unknown, message: string): SafeWreqError {
   return sanitized;
 }
 
+// Keep body-phase cancellation compatible with wreq-js's request-phase errors.
+function createWreqAbortError(reason: unknown): Error {
+  if (reason instanceof DOMException) {
+    return reason.name === "AbortError"
+      ? reason
+      : new DOMException(reason.message || "The operation was aborted", "AbortError");
+  }
+  if (reason instanceof Error) {
+    const error = new Error(reason.message, { cause: reason });
+    error.name = "AbortError";
+    return error;
+  }
+  return new DOMException(
+    typeof reason === "string" ? reason : "The operation was aborted",
+    "AbortError"
+  );
+}
+
 function toNativeResponse(
   response: WreqResponse,
   onFinalize: () => void,
@@ -498,14 +516,17 @@ function toNativeResponse(
   let bodyFailureReported = false;
   let consumerCancelled = false;
   let consumerCancelReason: unknown;
+  let removeAbortListener = () => {};
+  let cancelBody: (reason: unknown) => Promise<void> = async () => {};
   const finalize = () => {
     if (finalized) return;
     finalized = true;
+    removeAbortListener();
     onFinalize();
   };
   const safeBodyError = (error: unknown): unknown => {
     if (signal?.aborted) {
-      return signal.reason ?? new DOMException("The operation was aborted", "AbortError");
+      return createWreqAbortError(signal.reason);
     }
     if (consumerCancelled) {
       return (
@@ -518,41 +539,74 @@ function toNativeResponse(
     }
     return sanitizeWreqError(error, "wreq-js response body failed");
   };
-  if (response instanceof Response) {
+  if (response instanceof Response && response.body === null) {
     finalize();
     return response;
   }
-
   try {
     const headers = new Headers();
     for (const [name, value] of response.headers) headers.append(name, value);
     let body: ReadableStream<Uint8Array> | null = null;
     if (response.body) {
       const reader = response.body.getReader();
+      let stopped = false;
+      let cancellation: Promise<void> | undefined;
+      cancelBody = (reason) => {
+        cancellation ??= (async () => {
+          try {
+            return reader.cancel(reason);
+          } finally {
+            // Cancel settles pending reads before native cleanup, which may stall.
+            reader.releaseLock();
+          }
+        })();
+        return cancellation;
+      };
       body = new ReadableStream<Uint8Array>({
+        start(controller) {
+          if (!signal) return;
+          const onAbort = () => {
+            if (stopped) return;
+            stopped = true;
+            const error = createWreqAbortError(signal.reason);
+            finalize();
+            controller.error(error);
+            void cancelBody(error).catch(() => {});
+          };
+          // wreq-js stops observing the signal at headers; keep it for the body.
+          removeAbortListener = () => signal.removeEventListener("abort", onAbort);
+          signal.addEventListener("abort", onAbort, { once: true });
+          if (signal.aborted) onAbort();
+        },
         async pull(controller) {
           try {
             const chunk = await reader.read();
+            if (stopped) return;
             if (chunk.done) {
+              stopped = true;
+              reader.releaseLock();
               finalize();
               controller.close();
             } else {
               controller.enqueue(chunk.value);
             }
           } catch (error) {
+            if (stopped) return;
+            stopped = true;
+            reader.releaseLock();
             controller.error(safeBodyError(error));
             finalize();
           }
         },
         async cancel(reason) {
+          stopped = true;
           consumerCancelled = true;
           consumerCancelReason = reason;
+          finalize();
           try {
-            await reader.cancel(reason);
+            await cancelBody(reason);
           } catch (error) {
             throw safeBodyError(error);
-          } finally {
-            finalize();
           }
         },
       });
@@ -576,6 +630,7 @@ function toNativeResponse(
     return adapted;
   } catch (error) {
     finalize();
+    void cancelBody(error).catch(() => {});
     throw error;
   }
 }

@@ -7,10 +7,16 @@ import {
 } from "@omniroute/open-sse/services/syntxModels.ts";
 import { looksLikeJwt, resolveSyntxToken } from "@omniroute/open-sse/services/syntxAuth.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import {
+  toDiscoveryFailure,
+  type DiscoveryFailure,
+} from "@/shared/discovery/degradedCause";
 
 interface DiscoveryWarnings {
   cacheWarning?: string;
   localWarning?: string;
+  /** Why the discovery failed — a code or an HTTP status, never a message. */
+  failure?: DiscoveryFailure;
 }
 
 interface SyntxDiscoveryRouteOptions {
@@ -53,6 +59,7 @@ export async function maybeHandleSyntxModelDiscovery(
     const fallback = options.buildDiscoveryFallbackResponse({
       cacheWarning: "No SYNTX JWT configured — using cached catalog",
       localWarning: "No SYNTX JWT configured — using local catalog",
+      failure: { code: "NO_CREDENTIAL" },
     });
     if (fallback) return fallback;
     return options.buildResponse({
@@ -84,6 +91,7 @@ export async function maybeHandleSyntxModelDiscovery(
     const fallback = options.buildDiscoveryFallbackResponse({
       cacheWarning: "SYNTX model discovery failed — using cached catalog",
       localWarning: "SYNTX model discovery failed — using seed catalog",
+      failure: toDiscoveryFailure(error),
     });
     if (fallback) return fallback;
     return options.buildResponse({

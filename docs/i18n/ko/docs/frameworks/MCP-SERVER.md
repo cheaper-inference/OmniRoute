@@ -72,6 +72,16 @@ curl -i \
 
 `manage` 범위가 없는 키를 사용하거나 Bearer를 제공하지 않으면 `403 LOCAL_ONLY`가 반환됩니다. 인접한 접두사 `/api/cli-tools/runtime/*`는 의도적으로 우회할 수 없습니다. 자세한 내용은 [라우트 가드 계층 — manage 범위 예외](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)를 참조하세요.
 
+### Origin 검증
+
+인증 후 `/api/mcp/*`로 가는 모든 요청(트랜스포트와 `status`, `tools`, `audit`, `restart` 같은 관리 라우트)은 호출자(API 키, CLI 토큰, 대시보드 세션, 로그인 비활성화 시 익명 루프백)와 관계없이 `Origin` 헤더를 검증받습니다. 이는 MCP Streamable HTTP 사양이 요구하는 DNS 리바인딩 방어입니다.
+
+- **`Origin` 헤더 없음** → 허용. OmniRoute CLI, SDK, IDE 클라이언트는 이 헤더를 보내지 않습니다.
+- **허용되는 `Origin`** → 모든 포트의 `localhost` / `127.0.0.1` / `[::1]`, 또는 OmniRoute 자체 공개 origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, 신뢰된 리버스 프록시가 전달한 origin(`OMNIROUTE_TRUST_PROXY`, base URL이 설정되지 않은 경우에만), 또는 루프백/LAN IP 호스트 직접 접속. `Host` 헤더만으로는 어떤 origin도 신뢰되지 않습니다.
+- **그 밖의 모든 `Origin`(`null` 포함)** → `403`, JSON-RPC 오류 본문: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. 유효한 CSRF 토큰을 제시한 대시보드 세션은 다른 대시보드 쓰기와 마찬가지로 계속 허용됩니다.
+
+리버스 프록시 뒤에서 제공되는 브라우저 MCP 클라이언트는 `OMNIROUTE_PUBLIC_BASE_URL`가 필요하며, 다른 origin을 위한 허용 목록은 없습니다. CORS 프리플라이트(`OPTIONS`)는 Origin을 검사하지 않지만, 뒤따르는 실제 요청은 검사합니다.
+
 ## IDE 구성
 
 Claude Desktop, Cursor, Cline 및 호환되는 MCP 클라이언트 설정은 [MCP 클라이언트 구성](../guides/SETUP_GUIDE.md#mcp-client-configuration)을 참조하세요.

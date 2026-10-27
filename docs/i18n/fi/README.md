@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — Ilmainen tekoäly-yhdyskäytävä
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Älä koskaan lopeta koodaamista. Kaikki tekoälytyökalut → 375 palveluntarjoajaa — yli 150 ilmaista — yhden päätepisteen kautta. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity ILMAISIIN Claude-, GPT- ja Gemini-palveluihin automaattisella varajärjestelmään siirtymisellä. Yhdistetty RTK- ja Caveman-pakkaus säästää 15–95 % tokeneista (keskimäärin ~89 %) — et enää koskaan saavuta rajoja. 375 tekoälypalveluntarjoajaa · yli 150 ilmaistasoa · ~1,62 mrd. ilmaista tokenia/kk · 20 reititysstrategiaa · alkuun pääsee 0 dollarilla."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Älä koskaan lopeta koodaamista. Kaikki tekoälytyökalut → 376 palveluntarjoajaa — yli 150 ilmaista — yhden päätepisteen kautta. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity ILMAISIIN Claude-, GPT- ja Gemini-palveluihin automaattisella varajärjestelmään siirtymisellä. Yhdistetty RTK- ja Caveman-pakkaus säästää 15–95 % tokeneista (keskimäärin ~89 %) — et enää koskaan saavuta rajoja. 376 tekoälypalveluntarjoajaa · yli 150 ilmaistasoa · ~1,62 mrd. ilmaista tokenia/kk · 20 reititysstrategiaa · alkuun pääsee 0 dollarilla."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Käytä omia palveluntarjoajatilejäsi.** Tämä on arvioitu yhteismäärä erikseen saatavilla olevista kolmansien osapuolten maksuttomista käyttöoikeustasoista, ei OmniRouten myöntämä token-kiintiö. Rekisteröidy, hanki tarvittavat tunnistetiedot ja yhdistä palveluntarjoajat, joita voit käyttää. Kukin palveluntarjoaja määrittää omat rajoituksensa, saatavuutensa ja ehtonsa.
 >
-> Maksuttomien käyttöoikeustasojen yhdistäminen käsin on työlästä — kymmeniä SDK:ita, kymmeniä nopeusrajoituksia eikä mitään käsitystä siitä, kuinka paljon kapasiteettia sinulla todellisuudessa on. OmniRoute luetteloi **471 maksuttoman käyttöoikeustason kohdetta 34 toistuvan pooliavaimen kautta** ja laskee tokenien otsikkoluvun **17 poolista, joilla on julkaistu positiivinen kuukausibudjetti, sekä viidestä mallikohtaisesta Groq-rajasta** siten, että jaetut poolit poistetaan kaksoislaskennasta. Kiintiöt, jotka avautuvat vasta alueellisen henkilöllisyystarkistuksen jälkeen (tällä hetkellä ModelScope), näytetään erikseen: +~6M alueellisen henkilöllisyyden vahvistamisen takana, eikä niitä koskaan lasketa mukaan otsikkolukuun. Tulos pysyy näkyvissä hallintapaneelissa (`/dashboard/free-tiers`).
+> Maksuttomien käyttöoikeustasojen yhdistäminen käsin on työlästä — kymmeniä SDK:ita, kymmeniä nopeusrajoituksia eikä mitään käsitystä siitä, kuinka paljon kapasiteettia sinulla todellisuudessa on. OmniRoute luetteloi **484 maksuttoman käyttöoikeustason kohdetta 34 toistuvan pooliavaimen kautta** ja laskee tokenien otsikkoluvun **17 poolista, joilla on julkaistu positiivinen kuukausibudjetti, sekä viidestä mallikohtaisesta Groq-rajasta** siten, että jaetut poolit poistetaan kaksoislaskennasta. Kiintiöt, jotka avautuvat vasta alueellisen henkilöllisyystarkistuksen jälkeen (tällä hetkellä ModelScope), näytetään erikseen: +~6M alueellisen henkilöllisyyden vahvistamisen takana, eikä niitä koskaan lasketa mukaan otsikkolukuun. Tulos pysyy näkyvissä hallintapaneelissa (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRouten maksuttoman käyttöoikeustason budjettikortti: tasaisesti ~1.62B maksutonta tokenia kuukaudessa ja rekisteröitymiskrediittien ansiosta ensimmäisen kuukauden aikana jopa ~2.22B, 34 dokumentoidusta toistuvasta pooliavaimesta, jotka kattavat 471 luetteloitua maksuttoman käyttöoikeustason kohdetta yhden päätepisteen takana. Rehellinen, poolien kaksoislaskennan poistava laskenta — kukin jaettu pooli lasketaan kerran, mukaan lukien 17 toistuvaa poolia, joilla on julkaistu positiivinen kuukausittainen token-budjetti, sekä viisi mallikohtaista Groq-rajaa; 12 palveluntarjoajaa on merkitty vältettäviksi ehtoriskiluettelossa, jotta voit päättää itse. Budjettipalkki sisältää Mistral 1B:n, Nara 210M:n, LLM7 150M:n, xKiro 150M:n, Groq 30M:n (viisi mallikohtaista rajaa) ja pienempiä pooleja sekä ensimmäisen kuukauden rekisteröitymiskrediitit. Pysyvästi maksuttomat palveluntarjoajat, joilla ei ole token-rajaa, esitetään erikseen, jotta ne eivät koskaan kasvata otsikkolukua keinotekoisesti. Ajantasainen käytetty ja jäljellä oleva määrä osoitteessa /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRouten maksuttoman käyttöoikeustason budjettikortti: tasaisesti ~1.62B maksutonta tokenia kuukaudessa ja rekisteröitymiskrediittien ansiosta ensimmäisen kuukauden aikana jopa ~2.22B, 34 dokumentoidusta toistuvasta pooliavaimesta, jotka kattavat 484 luetteloitua maksuttoman käyttöoikeustason kohdetta yhden päätepisteen takana. Rehellinen, poolien kaksoislaskennan poistava laskenta — kukin jaettu pooli lasketaan kerran, mukaan lukien 17 toistuvaa poolia, joilla on julkaistu positiivinen kuukausittainen token-budjetti, sekä viisi mallikohtaista Groq-rajaa; 12 palveluntarjoajaa on merkitty vältettäviksi ehtoriskiluettelossa, jotta voit päättää itse. Budjettipalkki sisältää Mistral 1B:n, Nara 210M:n, LLM7 150M:n, xKiro 150M:n, Groq 30M:n (viisi mallikohtaista rajaa) ja pienempiä pooleja sekä ensimmäisen kuukauden rekisteröitymiskrediitit. Pysyvästi maksuttomat palveluntarjoajat, joilla ei ole token-rajaa, esitetään erikseen, jotta ne eivät koskaan kasvata otsikkolukua keinotekoisesti. Ajantasainen käytetty ja jäljellä oleva määrä osoitteessa /dashboard/free-tiers."/>
 
 > Animoitu yhteenveto reaaliaikaisesta `/dashboard/free-tiers`-sivusta. Täydellinen menetelmäkuvaus (poolien kaksoislaskennan poisto, krediittitasot, palveluntarjoajien ehdot): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Ominaisuudet</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Yhdistelmät</a></td>
-    <td align="center"><a href="#-375-ai-providers--153-catalog-marked-free">🌐 Palveluntarjoajat</a></td>
+    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Palveluntarjoajat</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 375 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen toiminnassa niin kauan kuin toinen toimintakuntoinen kohde on käytettävissä. Kuusi peruspilaria: vikasietoinen varareititys 375 palveluntarjoajan välillä · jopa 95 %:n token-säästöt soveltuvissa työkuormissa · aloittaminen maksutta yli 150 ilmaistasolla sekä 51 toistuvasti ilmaisella tai avaimettomalla, pysyvästi ilmaisella palveluntarjoajalla · 37 CLI-/agentti-integraatiota yhden määrityksen kautta · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus osoitteessa /v1 · tuotantokäytön hallintaominaisuudet, kuten katkaisijat, TLS-häivytys, MCP:n 110 työkalua, A2A, muisti, suojaukset, arvioinnit ja yli 56 000 staattista testimääritystä yli 7 800 seuratussa testitiedostossa."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lupaus — yksi päätepiste ja 376 palveluntarjoajaa. Automaattinen varareititys pitää reitityksen toiminnassa niin kauan kuin toinen toimintakuntoinen kohde on käytettävissä. Kuusi peruspilaria: vikasietoinen varareititys 376 palveluntarjoajan välillä · jopa 95 %:n token-säästöt soveltuvissa työkuormissa · aloittaminen maksutta yli 150 ilmaistasolla sekä 52 toistuvasti ilmaisella tai avaimettomalla, pysyvästi ilmaisella palveluntarjoajalla · 37 CLI-/agentti-integraatiota yhden määrityksen kautta · OpenAI-, Claude-, Gemini- ja Responses API -yhteensopivuus osoitteessa /v1 · tuotantokäytön hallintaominaisuudet, kuten katkaisijat, TLS-häivytys, MCP:n 110 työkalua, A2A, muisti, suojaukset, arvioinnit ja yli 56 000 staattista testimääritystä yli 7 800 seuratussa testitiedostossa."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Kaikki **20** strategiaa — yhdistele vapaasti yhdistelmän jokaisessa vaiheess
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mikä erottaa OmniRouten muista — ajankohtaan sidottu ominaisuusvertailu 9routeriin, OpenRouteriin, CLIProxyAPI:in ja LiteLLM:ään 13 ominaisuuden osalta. OmniRoute: 375 palveluntarjoajaa, yli 150 sisäänrakennettua ilmaistasoa, 20 reititysstrategiaa, 12 moottorin token-pakkaus, sisäänrakennettu MCP-palvelin 110 työkalulla, A2A-agenttiprotokolla, pysyvä muisti, suojakaiteet, pilviagentit, TLS-sormenjälkien häivytys, Desktop/Termux/PWA sekä 67 kansainvälistettyä käyttöliittymän kielialuetta. OmniRoute on MIT-lisensoitu ja itse ylläpidettävissä. Kilpailijoiden ominaisuudet ja lukumäärät voivat muuttua; katso linkitetty menetelmäkuvaus."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mikä erottaa OmniRouten muista — ajankohtaan sidottu ominaisuusvertailu 9routeriin, OpenRouteriin, CLIProxyAPI:in ja LiteLLM:ään 13 ominaisuuden osalta. OmniRoute: 376 palveluntarjoajaa, yli 150 sisäänrakennettua ilmaistasoa, 20 reititysstrategiaa, 12 moottorin token-pakkaus, sisäänrakennettu MCP-palvelin 110 työkalulla, A2A-agenttiprotokolla, pysyvä muisti, suojakaiteet, pilviagentit, TLS-sormenjälkien häivytys, Desktop/Termux/PWA sekä 67 kansainvälistettyä käyttöliittymän kielialuetta. OmniRoute on MIT-lisensoitu ja itse ylläpidettävissä. Kilpailijoiden ominaisuudet ja lukumäärät voivat muuttua; katso linkitetty menetelmäkuvaus."/>
 
 <sub>📊 Täydellinen menetelmäkuvaus &amp; ominaisuuskohtaiset tiedot verrattuna 9routeriin, OpenRouteriin, CLIProxyAPI:in &amp; LiteLLM:ään → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -612,7 +612,7 @@ nykyisestä luettelosta on osoitteessa **[radar.omniroute.online/planos](https:/
 - **🖼️ Uudet päätepisteet** — `/v1/ocr` (Mistral OCR) ja `/v1/audio/translations` (Whisper-tyylinen) täydentävät mediatoiminnot. → [API-viite](docs/reference/API_REFERENCE.md)
 - **🎨 Kuvien / videoiden / äänen generointi** — yksi API medialle: xAI Grok Imagine ja Novita AI -video, ComfyUI, Magnific, Adobe Firefly, Segmind sekä puhepalveluntarjoajat, kuten ElevenLabs. → [API-viite](docs/reference/API_REFERENCE.md)
 - **🌍 Käyttöönotto ja operointi** — käänteisen välityspalvelimen `basePath`, selaimen kielen automaattinen tunnistus, avainkohtainen laitteiden seuranta, pääkäyttäjätunnukseton MITM-luottamus ja zh-TW-lokalisointi. → [Ympäristö](docs/reference/ENVIRONMENT.md)
-- **🤝 Lisää palveluntarjoajia ja agentteja** — pilviagentit (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) selain- ja OAuth-kirjautumisella, Ollaman ensiluokkainen kortti, Claude Opus 5 ja Sonnet 5, virallinen Kimi-kumppanuus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… sekä uudistettu **375 palveluntarjoajan luettelo**. → [Palveluntarjoajat](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Lisää palveluntarjoajia ja agentteja** — pilviagentit (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) selain- ja OAuth-kirjautumisella, Ollaman ensiluokkainen kortti, Claude Opus 5 ja Sonnet 5, virallinen Kimi-kumppanuus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… sekä uudistettu **376 palveluntarjoajan luettelo**. → [Palveluntarjoajat](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Reitityksen läpinäkyvyys** — jokaisessa vastauksessa on `X-OmniRoute-Decision`-otsake, joka ilmoittaa vastauksen toimittaneen strategian/palveluntarjoajan/viiveen; uusi `cache-optimized`-yhdistelmästrategia ja Auto-Combon `cacheAffinity`-tekijä reitittävät toistuvat pyynnöt takaisin yhteyteen, jossa välimuistiin tallennettu etuliite sijaitsee, ja vain luku -tyyppinen `/v1/auto-combo/{channel}/candidates`-päätepiste tuo näkyviin `auto/*`-kanavan reaaliaikaisen ehdokasjoukon. → [Automaattinen yhdistelmä](docs/routing/AUTO-COMBO.md)
 - **⚡ Paikallinen suorituskyky ja infra** — paikallinen Redis yhdellä napsautuksella, Cloudflare Workers / Deno Deploy -välityspalvelimen käyttöönottotyökalut, Bifrost ja Mux valvottuina sulautettuina palveluina. → [Sulautetut palvelut](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Myös mukana** — liitännäiskehys + markkinapaikka, Omni/Agent/GitHub-taitokehykset, Obsidian-holvin integraatio (22 MCP-työkalua), OpenAI-yhteensopivat Batch- ja Files-rajapinnat, semanttinen vastausvälimuisti, pelillistäminen tulostauluineen, ACP-agenttien löytäminen (15 sisäänrakennettua agenttia), ajoitettu lokien vienti BigQueryyn, `auto/chaos` rinnakkainen monimallihajautus, Telegram-bottisilta, sovelluksen sisäinen versiohallinta ja LMArena-ELO-sijoitukset ilmaisille tarjoajille. → [Dokumentaatio](docs/README.md)
@@ -696,11 +696,11 @@ komentotulkkisi historiasta. → [CLI-integraatiot](docs/guides/CLI-INTEGRATIONS
 
 <div align="center">
 
-## 🌐 375 tekoälypalveluntarjoajaa — 153 merkitty luettelossa maksuttomiksi
+## 🌐 376 tekoälypalveluntarjoajaa — 153 merkitty luettelossa maksuttomiksi
 
 </div>
 
-> **375 rekisteröityä palveluntarjoajaa** kanonisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, joista **153 sisältää `hasFree: true` -hakumetatiedon**. Keskustelumallirekisteri kattaa **239 palveluntarjoajaa / 3 059 erillistä palveluntarjoaja–malli-paria / 1 475 käsittelemätöntä mallitunnusta**; erillisessä maksuttoman käyttöbudjetin luettelossa on **471 mallikohtaista riviä**, **34 uusiutuvaa resurssipoolia** ja **51 uusiutuvaa tai ilman avainta käytettävää pysyvästi maksutonta palveluntarjoajaa**. Nimittäjät ovat tarkoituksella erilaiset; määritelmät ja resurssipoolien kaksoiskappaleet poistavat laskelmat löytyvät [palveluntarjoajien viitteestä](docs/reference/PROVIDER_REFERENCE.md) ja [maksuttomista käyttökiintiöistä](docs/reference/FREE_TIERS.md).
+> **376 rekisteröityä palveluntarjoajaa** kanonisissa keskustelu-, media-, haku-, paikallis-, pilviagentti- ja järjestelmäkokoelmissa, joista **153 sisältää `hasFree: true` -hakumetatiedon**. Keskustelumallirekisteri kattaa **239 palveluntarjoajaa / 3 059 erillistä palveluntarjoaja–malli-paria / 1 475 käsittelemätöntä mallitunnusta**; erillisessä maksuttoman käyttöbudjetin luettelossa on **471 mallikohtaista riviä**, **34 uusiutuvaa resurssipoolia** ja **52 uusiutuvaa tai ilman avainta käytettävää pysyvästi maksutonta palveluntarjoajaa**. Nimittäjät ovat tarkoituksella erilaiset; määritelmät ja resurssipoolien kaksoiskappaleet poistavat laskelmat löytyvät [palveluntarjoajien viitteestä](docs/reference/PROVIDER_REFERENCE.md) ja [maksuttomista käyttökiintiöistä](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1311,7 +1311,7 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
   <tr><td nowrap><b>Ajoympäristö</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Kieli</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> kansioissa <code>src/</code> ja <code>open-sse/</code> (ei yhtään <code>any</code>-tyyppiä ytimessä versiosta v2.0 alkaen)</td></tr>
   <tr><td nowrap><b>Kehys</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-journalointi) + LowDB (JSON-perintö) — 147 domain-moduulia, 210 migraatiota</td></tr>
+  <tr><td nowrap><b>Tietokanta</b></td><td>better-sqlite3 (SQLite, WAL-journalointi) + LowDB (JSON-perintö) — 147 domain-moduulia, 211 migraatiota</td></tr>
   <tr><td nowrap><b>Muisti</b></td><td>SQLite FTS5 -kokotekstihaku + int8-kvantisoidut vektoriupotukset, tyypitetty vaimeneminen</td></tr>
   <tr><td nowrap><b>Skeemat</b></td><td>Zod 4 — MCP-työkalujen I/O-validointi + API-sopimukset</td></tr>
   <tr><td nowrap><b>Protokollat</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1374,7 +1374,7 @@ Kanoniset mittarit 2026-10-18: **1.976 yksilöllistä videota** · **20.220.289 
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Vikasietoisuusopas</a></b></td><td>Katkaisijat, jäähdytysajat, jono, thundering herd -ilmiön esto ja TLS-väärentäminen</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo-moottori</a></b></td><td>16 tekijän pisteytys, tilapaketit ja itsekorjautuvuus</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Välityspalvelinopas</a></b></td><td>Kolmitasoinen välityspalvelinjärjestelmä, 1proxy-markkinapaikka ja rekisterin CRUD-toiminnot</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Ilmaistasot</a></b></td><td>Koottu hakemisto: 34 dokumentoitua toistuvaa resurssipoolia / 471 luetteloitua ilmaistason merkintää</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Ilmaistasot</a></b></td><td>Koottu hakemisto: 34 dokumentoitua toistuvaa resurssipoolia / 484 luetteloitua ilmaistason merkintää</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Ominaisuusgalleria</a></b></td><td>Visuaalinen hallintapaneelikierros kuvakaappauksineen</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Koodikannan dokumentaatio</a></b></td><td>Aloittelijaystävällinen opastus koodikantaan</td></tr>
 </table>

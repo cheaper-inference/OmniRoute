@@ -16,11 +16,6 @@ import { forgetClaudeThinkingForClientResponse } from "../../services/claudeThin
 import { requestTtftMs, streamEmittedOutput } from "../../utils/streamTiming.ts";
 import { readStreamPartialUsage } from "../../utils/streamPartialUsage.ts";
 import { clearPostOutputFailureStreak } from "../../services/accountFallback/postOutputFailureStreak.ts";
-import {
-  createRoutingEvent,
-  emitRoutingEvent,
-  outcomeFromStatus,
-} from "../../services/routing/index.ts";
 import { FORMATS } from "../../translator/formats.ts";
 import { needsTranslation } from "../../translator/index.ts";
 import { runEmptyTurnRetryLoop } from "./emptyTurnRetryLoop.ts";
@@ -45,7 +40,6 @@ import { maybeConvertJsonBodyToSse } from "./jsonBodyToSse.ts";
 import { runMemoryExtractionGate } from "./memoryExtraction.ts";
 import { mergeResponseToolNameMap } from "./passthroughToolNames.ts";
 import { runPluginOnResponseHook, runPluginOnStreamCompleteHook } from "./pluginOnResponse.ts";
-import { routingFinishReason } from "./routingFinishReason.ts";
 import { wrapReadableStreamWithFinalize } from "./streamFinalize.ts";
 import { buildStreamLedgerDetails, recordStreamingCost } from "./streamingCost.ts";
 import { assembleStreamingPipeline } from "./streamingPipeline.ts";
@@ -53,6 +47,7 @@ import { scheduleStreamingQuotaShareConsumption } from "./streamingQuotaShare.ts
 import { assembleStreamingResponseHeaders } from "./streamingResponseHeaders.ts";
 import { storeStreamingSemanticCacheResponse } from "./streamingSemanticCacheStore.ts";
 import { recordFinalInputCalibration } from "./contextEstimation.ts";
+import { emitStreamingRoutingEvent } from "./streamingRoutingEvent.ts";
 import { recordStreamingUsageStats } from "./streamingUsageStats.ts";
 import { maybeSyncClaudeExtraUsageState } from "./telemetryHelpers.ts";
 import { getExecutorTimeoutMs, resolveConnectionTimeoutMs } from "./upstreamTimeouts.ts";
@@ -64,6 +59,7 @@ import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../../services/streamRecovery.ts";
 import { getProviderCredentials } from "@/sse/services/auth";
 import { resolveCredentialGate } from "@/lib/streamingCredentialTransform";
+import { resolvePiiGate } from "@/lib/streamingPiiTransform";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- deps bag mirrors the barrel closure
 type Loose = any;
@@ -97,10 +93,12 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     executeProviderRequest,
     executor,
     fallbackAttempts,
+    geminiPromptCacheMode,
     getCurrentConnectionId,
     forcedConnectionId,
     isCombo,
     isDroidCLI,
+    isScopedGeminiCacheTarget,
     isResponsesEndpoint,
     log,
     managedLease,
@@ -133,6 +131,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     streamUserAgent,
     targetFormat,
     thinkingMarkerHeader,
+    tokensCompressed,
     toolNameMap,
     traceId,
     translatedBody,
@@ -368,6 +367,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     firstOutputMs,
     itlMs: streamItlMs,
     interrupted: _streamInterrupted,
+    cacheEvidence: streamCacheEvidence,
     partialUsage: streamPartialUsage,
   }) => {
     const ttft = requestTtftMs(streamTimingOriginOffsetMs, firstOutputMs);
@@ -378,7 +378,17 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       if (streamFailureCompletionRecorded) return;
       streamFailureCompletionRecorded = true;
     }
-    const cacheUsageLogMeta = buildCacheUsageLogMeta(streamUsage);
+    const cacheUsageLogMeta = buildCacheUsageLogMeta(
+      streamUsage,
+      isScopedGeminiCacheTarget
+        ? {
+            mode: geminiPromptCacheMode,
+            evidence: streamCacheEvidence,
+            compressionTokens: tokensCompressed || undefined,
+            timing: { ttftMs: ttft, itlMs: streamItlMs },
+          }
+        : undefined
+    );
     const streamConnectionId = getCurrentConnectionId();
 
     if (normalizedStreamStatus === 200) {
@@ -476,50 +486,26 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
 
     // Routing event (feedback foundation) — fire-and-forget, cheap, never blocks
     // the stream. Feeds the quality tracker + optional OTel exporter.
-    void emitRoutingEvent(
-      createRoutingEvent({
-        requestId: traceId || pendingRequestId || "unknown",
-        provider: provider || "unknown",
-        model: model || "unknown",
-        strategy: isCombo ? (comboStrategy ?? "combo") : "direct",
-        latencyMs: Date.now() - startTime,
-        ttftMs: typeof ttft === "number" && Number.isFinite(ttft) && ttft >= 0 ? ttft : null,
-        itlMs:
-          typeof streamItlMs === "number" && Number.isFinite(streamItlMs) && streamItlMs >= 0
-            ? streamItlMs
-            : null,
-        inputTokens:
-          streamUsage && typeof streamUsage === "object"
-            ? (() => {
-                const promptTokens = (streamUsage as Record<string, unknown>).prompt_tokens;
-                return typeof promptTokens === "number" && Number.isFinite(promptTokens)
-                  ? promptTokens
-                  : null;
-              })()
-            : null,
-        outputTokens:
-          streamUsage && typeof streamUsage === "object"
-            ? (() => {
-                const completionTokens = (streamUsage as Record<string, unknown>).completion_tokens;
-                return typeof completionTokens === "number" && Number.isFinite(completionTokens)
-                  ? completionTokens
-                  : null;
-              })()
-            : null,
-        cost: null,
-        retries: 0,
-        fallbackUsed: false, // combo-level fallback tracked by decisionTrace
-        outcome:
-          normalizedStreamStatus === 200
-            ? "success"
-            : streamErrorCode === "stream_interrupted" || streamErrorCode === "aborted"
-              ? "stream_interrupted"
-              : outcomeFromStatus(normalizedStreamStatus),
-        status: normalizedStreamStatus,
-        finishReason: routingFinishReason(streamResponseBody),
-        connectionId: streamConnectionId ?? credentials?.connectionId ?? null,
-      })
-    );
+    // Cost is resolved asynchronously (pricing DB lookup) and the event is emitted only
+    // after it lands, so OTel spans carry gen_ai.usage.cost.
+    emitStreamingRoutingEvent({
+      requestId: traceId || pendingRequestId || "unknown",
+      provider,
+      model,
+      isCombo,
+      comboStrategy,
+      startTime,
+      ttft,
+      streamItlMs,
+      streamUsage,
+      normalizedStreamStatus,
+      streamErrorCode,
+      streamResponseBody,
+      connectionId: streamConnectionId ?? credentials?.connectionId ?? null,
+      apiKeyId: apiKeyInfo?.id ?? null,
+      serviceTier: effectiveServiceTier,
+      calculateCost,
+    });
 
     persistAttemptLogs({
       status: normalizedStreamStatus,
@@ -533,6 +519,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       clientResponse: clientPayload ?? streamResponseBody ?? undefined,
       claudeCacheMeta: claudePromptCacheLogMeta,
       claudeCacheUsageMeta: cacheUsageLogMeta,
+      geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
       cacheSource: "upstream",
       // #13130: persist TTFT so call_logs.ttft_ms lets the dashboard compute
       // generation-time TPS instead of wall-clock TPS.
@@ -766,6 +753,16 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     body: deps.body,
     headers: deps.clientRawRequest?.headers,
   });
+  // Per-request PII opt-out: same names as the non-streaming guardrail.
+  // Only data keys chatCore.ts already passes (apiKeyInfo, body,
+  // clientRawRequest) are read here; the reader defaults to the production
+  // module inside resolvePiiGate, and unit tests inject fakes by calling
+  // that helper directly.
+  const piiGate = await resolvePiiGate({
+    apiKeyInfo: deps.apiKeyInfo,
+    body: deps.body,
+    headers: deps.clientRawRequest?.headers,
+  });
   const finalStream = assembleStreamingPipeline({
     providerResponse,
     transformStream,
@@ -777,6 +774,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     responseHeaders,
     credentialRedactionEnabled: credentialGate.credentialRedactionEnabled,
     credentialDisabledGuardrails: credentialGate.credentialDisabledGuardrails,
+    piiDisabledGuardrails: piiGate.piiDisabledGuardrails,
     // Same adaptive budget the pre-handoff readiness gate above just used —
     // reasoning models that legitimately take a while to say anything keep
     // that same patience for their first REAL content, not just their first

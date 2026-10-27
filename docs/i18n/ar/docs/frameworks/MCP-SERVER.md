@@ -72,6 +72,16 @@ curl -i \
 
 يُرجع المفتاح الذي لا يحمل نطاق manage (أو الطلب الذي لا يتضمن Bearer) الخطأ `403 LOCAL_ONLY`. أما البادئة الشقيقة `/api/cli-tools/runtime/*`، فلا يمكن تجاوز قيودها عمدًا — راجع [مستويات حارس المسارات — استثناء نطاق manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### التحقق من Origin
+
+بعد المصادقة، يُتحقَّق من ترويسة `Origin` في كل طلب إلى `/api/mcp/*` — وسائل النقل ومسارات الإدارة مثل `status`, `tools`, `audit`, `restart` — أيًّا كان المستدعي (مفتاح API، أو رمز CLI، أو جلسة لوحة التحكم، أو loopback مجهول مع تعطيل تسجيل الدخول). هذه هي الحماية من DNS rebinding التي تشترطها مواصفة MCP Streamable HTTP.
+
+- **لا توجد ترويسة `Origin`** ← مسموح. لا يرسلها CLI الخاص بـ OmniRoute ولا الـ SDK ولا عملاء IDE.
+- **`Origin` المسموح** ← `localhost` / `127.0.0.1` / `[::1]` على أي منفذ، أو الـ origin العام لـ OmniRoute نفسه: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`، أو الـ origin الذي يمرّره وكيل عكسي موثوق (`OMNIROUTE_TRUST_PROXY`، فقط عند عدم ضبط base URL)، أو مضيف IP من نوع loopback/LAN يُوصَل إليه مباشرة. ترويسة `Host` وحدها لا تجعل أي origin موثوقًا أبدًا.
+- **أي `Origin` آخر، بما في ذلك `null`** ← `403` مع جسم خطأ JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. تظل جلسة لوحة التحكم التي تقدّم رمز CSRF صالحًا مقبولة، كما في عمليات الكتابة الأخرى من لوحة التحكم.
+
+يحتاج عميل MCP يعمل في المتصفح خلف وكيل عكسي إلى `OMNIROUTE_PUBLIC_BASE_URL`؛ ولا توجد قائمة سماح لأي origins أخرى. لا يُتحقَّق من Origin في طلب CORS التمهيدي (`OPTIONS`)؛ بل في الطلب الذي يليه.
+
 ## إعداد بيئة التطوير المتكاملة
 
 راجع [إعداد عميل MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) لإعداد Claude Desktop وCursor وCline وعملاء MCP المتوافقين.

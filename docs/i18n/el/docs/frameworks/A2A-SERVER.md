@@ -163,7 +163,7 @@ curl -X POST http://localhost:20128/a2a \
 | Health Report      | `health-report`      | Συγκεντρώνει την κατάσταση circuit breaker, cooldown, lockout ανά provider                                                                                 | health, resilience         | "Εμφάνισε την κατάσταση υγείας όλων των providers"       |
 | List Capabilities  | `list-capabilities`  | Επιστρέφει τον πλήρη κατάλογο 45 καταχωρήσεων Agent Skills (23 API + 21 CLI + 1 config) ως πίνακα markdown με ακατέργαστα URL SKILL.md για έγχυση πλαισίου | catalog, discovery, skills | "Κατάγραψε όλες τις δυνατότητες του OmniRoute"           |
 
-> Η Agent Card θα πρέπει να παραμένει ευθυγραμμισμένη με τον ζωντανό κατάλογο 375 providers· οι αριθμοί providers και τα μεταδεδομένα free/no-auth προέρχονται από το μητρώο χρόνου εκτέλεσης.
+> Η Agent Card θα πρέπει να παραμένει ευθυγραμμισμένη με τον ζωντανό κατάλογο 376 providers· οι αριθμοί providers και τα μεταδεδομένα free/no-auth προέρχονται από το μητρώο χρόνου εκτέλεσης.
 
 ### Λεπτομέρειες δεξιότητας `list-capabilities`
 
