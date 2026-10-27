@@ -119,6 +119,8 @@ test("explicit one-connection discovery is read-only and native import makes all
   assert.equal(readBody.models[0].id, "inception/decision-fixture");
   assert.equal(readBody.models[0].apiFormat, "systemone");
   assert.equal(readBody.models[0].modelType, "decision");
+  assert.equal(readBody.models[0].context_length, 32768);
+  assert.deepEqual(readBody.models[0].decision_primitives, ["choice"]);
   assert.equal(readBody.inferenceAccess, "unverified");
   assert.deepEqual(
     (await models.getSyncedAvailableModelsForConnection("openrouter", selected.id)).map(
@@ -144,6 +146,7 @@ test("explicit one-connection discovery is read-only and native import makes all
   assert.deepEqual(native?.inputModalities, ["text", "image"]);
   assert.deepEqual(native?.outputModalities, ["decisions"]);
   assert.deepEqual(native?.decisionPrimitives, ["choice"]);
+  assert.equal(native?.inputTokenLimit, 32768);
   assert.equal(
     requests.length,
     2,

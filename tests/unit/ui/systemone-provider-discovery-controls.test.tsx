@@ -90,6 +90,109 @@ it("import is a separate intentional metadata POST and reload callback", async (
   expect(fetchMock.mock.calls[0][1].method).toBe("POST");
 });
 
+it("keeps context and primitives through discovery, normalized import and saved-model reload", async () => {
+  // The discovery route returns snake_case; the saved connection inventory uses
+  // inputTokenLimit/decisionPrimitives (see native-decision-model-import.test.ts).
+  const discovered = {
+    id: "inception/decision-fixture",
+    modelType: "decision",
+    supportedEndpoints: ["systemone"],
+    context_length: 32768,
+    decision_primitives: ["choice"],
+  };
+  const saved = {
+    id: discovered.id,
+    modelType: "decision",
+    supportedEndpoints: ["systemone"],
+    inputTokenLimit: 32768,
+    decisionPrimitives: ["choice"],
+  };
+  const fetchMock = vi
+    .fn()
+    .mockResolvedValueOnce(Response.json({ models: [discovered] }))
+    .mockResolvedValueOnce(Response.json({ success: true, models: [saved] }));
+  vi.stubGlobal("fetch", fetchMock);
+  const changed = vi.fn();
+  const { rerender } = render(
+    <DecisionModelsSection providerId="openrouter" connectionId="selected" onChanged={changed} />
+  );
+  const expectMetadata = () => {
+    expect(screen.getByText(`context: ${(32768).toLocaleString()}`)).toBeTruthy();
+    expect(screen.getByText("choice")).toBeTruthy();
+  };
+  fireEvent.click(screen.getByRole("button", { name: "Discover decision models" }));
+  await waitFor(expectMetadata);
+  fireEvent.click(screen.getByRole("button", { name: "Import decision models" }));
+  await waitFor(() => expect(changed).toHaveBeenCalledOnce());
+  expectMetadata();
+  rerender(
+    <DecisionModelsSection
+      providerId="openrouter"
+      connectionId="selected"
+      initialModels={[saved]}
+      onChanged={changed}
+    />
+  );
+  fireEvent.click(screen.getByRole("button", { name: "Reload saved models" }));
+  await waitFor(() => expect(changed).toHaveBeenCalledTimes(2));
+  expectMetadata();
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+  cleanup();
+  render(
+    <DecisionModelsSection
+      providerId="openrouter"
+      connectionId="selected"
+      initialModels={[saved]}
+      onChanged={changed}
+    />
+  );
+  expectMetadata();
+  expect(fetchMock).toHaveBeenCalledTimes(2);
+});
+
+it("preserves discovery precedence, saved context windows and genuinely unknown metadata", () => {
+  const fetchMock = vi.fn();
+  vi.stubGlobal("fetch", fetchMock);
+  render(
+    <DecisionModelsSection
+      providerId="openrouter"
+      connectionId="selected"
+      onChanged={vi.fn()}
+      initialModels={[
+        {
+          id: "snake-metadata",
+          modelType: "decision",
+          context_length: 8192,
+          inputTokenLimit: 4096,
+          decision_primitives: ["noul"],
+          decisionPrimitives: ["choice"],
+        },
+        {
+          id: "saved-context-window",
+          supportedEndpoints: ["responses", "systemone"],
+          contextWindow: 16384,
+          inputTokenLimit: 8192,
+          decisionPrimitives: ["score", null, 17],
+        },
+        {
+          id: "unknown-metadata",
+          modelType: "decision",
+          context_length: 0,
+          contextWindow: Infinity,
+          inputTokenLimit: -1,
+        },
+      ]}
+    />
+  );
+  expect(screen.getByText(`context: ${(8192).toLocaleString()}`)).toBeTruthy();
+  expect(screen.getByText(`context: ${(16384).toLocaleString()}`)).toBeTruthy();
+  expect(screen.getByText("context: Unknown")).toBeTruthy();
+  expect(screen.getByText("noul")).toBeTruthy();
+  expect(screen.getByText("score")).toBeTruthy();
+  expect(screen.queryByText("choice")).toBeNull();
+  expect(fetchMock).not.toHaveBeenCalled();
+});
+
 it("a reported 429 stops without retry, account rotation or an account-quota claim", async () => {
   const fetchMock = vi
     .fn()

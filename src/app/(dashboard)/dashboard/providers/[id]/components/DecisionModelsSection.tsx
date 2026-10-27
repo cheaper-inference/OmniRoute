@@ -22,16 +22,24 @@ function modelRows(raw: unknown): Model[] {
   if (!Array.isArray(raw)) return [];
   return raw.flatMap((entry) => {
     if (!entry || typeof entry !== "object" || typeof entry.id !== "string") return [];
+    // Discovery is snake_case; the persisted connection inventory is camelCase.
+    // Keep the context window distinct when present, with the legacy input cap
+    // fallback used by the existing import normalizer for other providers.
+    const contextLength = [entry.context_length, entry.contextWindow, entry.inputTokenLimit].find(
+      (value): value is number =>
+        typeof value === "number" && Number.isSafeInteger(value) && value > 0
+    );
+    const primitives = Array.isArray(entry.decision_primitives)
+      ? entry.decision_primitives
+      : entry.decisionPrimitives;
     return [
       {
         id: entry.id,
         ...(typeof entry.name === "string" ? { name: entry.name } : {}),
-        ...(typeof entry.context_length === "number"
-          ? { context_length: entry.context_length }
-          : {}),
-        ...(Array.isArray(entry.decision_primitives)
+        ...(contextLength !== undefined ? { context_length: contextLength } : {}),
+        ...(Array.isArray(primitives)
           ? {
-              decision_primitives: entry.decision_primitives.filter(
+              decision_primitives: primitives.filter(
                 (value: unknown): value is string => typeof value === "string"
               ),
             }
