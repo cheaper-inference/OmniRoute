@@ -145,7 +145,9 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     method: "POST",
     authType: "apikey",
     authHeader: "bearer",
-    costPerQuery: 0.005,
+    // buildNimbleRequest() always sends search_depth "lite": $1.10 per 1K
+    // (standard is $5.00). https://docs.nimbleway.com/nimble-sdk/admin/pricing
+    costPerQuery: 0.0011,
     freeMonthlyQuota: 0,
     searchTypes: ["web", "news"],
     defaultMaxResults: 5,

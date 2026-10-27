@@ -63,6 +63,7 @@ import { resolveProviderId } from "@/shared/constants/providers";
 import { buildContinuationLogHooks } from "./recoveryTraceLogging.ts";
 import { formatStreamRecoveryRetryWarning } from "./streamErrorResult.ts";
 import { injectSystemPromptPostTranslation } from "../../services/systemPrompt.ts";
+import type { ToolDisclosureConfig } from "../../utils/toolDisclosure.ts";
 
 export type ChatCoreExecutorResult = {
   response: Response;
@@ -137,6 +138,7 @@ export type ExecuteProviderRequestDeps = {
   requestedModel: string;
   resilienceSettings: ResilienceSettings;
   settings: Record<string, unknown> | null | undefined;
+  toolDisclosure?: ToolDisclosureConfig | null;
   skipUpstreamRetry: boolean;
   stream: boolean;
   streamController: { signal: AbortSignal };
@@ -191,6 +193,7 @@ export async function executeProviderRequest(
     traceId,
     translatedBody,
     trustedEffortContext,
+    toolDisclosure,
     upstreamStream,
     userAgent: _userAgent,
   } = deps;
@@ -211,6 +214,7 @@ export async function executeProviderRequest(
       isOpencodeClient,
       rawBody: body,
       clientRawRequest,
+      toolDisclosure,
     });
 
     // Global System Prompt — SINGLE injection point (post-translation) for

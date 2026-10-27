@@ -1,0 +1,1 @@
+- **fix(sse):** the reasoning_content placeholder injector no longer adds a second reasoning carrier to assistant messages that already send the `reasoning` alias or an array-valued carrier, which serde-based upstreams rejected as a duplicate field ([#18273](https://github.com/diegosouzapw/OmniRoute/pull/18273)) — thanks @AppleVibe

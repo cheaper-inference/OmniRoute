@@ -1,0 +1,1 @@
+- **fix(translator):** Claude/Gemini/Antigravity → OpenAI now keep an explicit client `max_tokens` on tool-calling requests instead of raising it to the 32000 tool floor, the same way OpenAI → Claude already does. A client that sends a tiny cap with tools now gets exactly that cap ([#18300](https://github.com/cheaper-inference/OmniRoute/pull/18300)) — thanks @claytontavaresdan

@@ -169,3 +169,96 @@ test("explicit disabled thinking survives every last-message role", () => {
     assert.deepEqual(normalized.thinking, { type: "disabled" }, role);
   }
 });
+
+test("native thinking config survives OpenAI tool-result turns (last role tool)", () => {
+  const body = {
+    messages: [
+      { role: "user", content: "hi" },
+      {
+        role: "assistant",
+        content: null,
+        tool_calls: [{ id: "c1", type: "function", function: { name: "f", arguments: "{}" } }],
+      },
+      { role: "tool", tool_call_id: "c1", content: "result" },
+    ],
+    thinking: { type: "enabled", budget_tokens: 1024 },
+  };
+
+  const normalized = normalizeThinkingConfig(body);
+
+  assert.deepEqual(normalized.thinking, { type: "enabled", budget_tokens: 1024 });
+});
+
+test("native thinking config survives Gemini function-response turns (last role function)", () => {
+  const body = {
+    contents: [
+      { role: "user", parts: [{ text: "hi" }] },
+      { role: "model", parts: [{ functionCall: { name: "f", args: {} } }] },
+      { role: "function", parts: [{ functionResponse: { name: "f", response: {} } }] },
+    ],
+    thinking: { type: "adaptive" },
+  };
+
+  const normalized = normalizeThinkingConfig(body);
+
+  assert.deepEqual(normalized.thinking, { type: "adaptive" });
+});
+
+test("native thinking config survives Claude user tool_result turns", () => {
+  const body = {
+    messages: [
+      { role: "user", content: "hi" },
+      { role: "assistant", content: [{ type: "tool_use", id: "t1", name: "f", input: {} }] },
+      { role: "user", content: [{ type: "tool_result", tool_use_id: "t1", content: "ok" }] },
+    ],
+    thinking: { type: "enabled", budget_tokens: 1024 },
+  };
+
+  const normalized = normalizeThinkingConfig(body);
+
+  assert.deepEqual(normalized.thinking, { type: "enabled", budget_tokens: 1024 });
+});
+
+test("native thinking config survives a trailing system/developer message", () => {
+  for (const role of ["system", "developer"]) {
+    const body = {
+      messages: [
+        { role: "user", content: "hi" },
+        { role, content: "synthetic" },
+      ],
+      thinking: { type: "enabled", budget_tokens: 1024 },
+    };
+
+    const normalized = normalizeThinkingConfig(body);
+
+    assert.deepEqual(normalized.thinking, { type: "enabled", budget_tokens: 1024 }, role);
+  }
+});
+
+test("native thinking config is removed on a Gemini model prefill (last role model)", () => {
+  const body = {
+    contents: [
+      { role: "user", parts: [{ text: "hi" }] },
+      { role: "model", parts: [{ text: "partial" }] },
+    ],
+    thinking: { type: "enabled", budget_tokens: 1024 },
+  };
+
+  const normalized = normalizeThinkingConfig(body);
+
+  assert.equal("thinking" in normalized, false);
+});
+
+test("explicit disabled thinking survives tool and Gemini model last turns", () => {
+  const toolLast = {
+    messages: [{ role: "tool", tool_call_id: "c1", content: "result" }],
+    thinking: { type: "disabled" },
+  };
+  const modelLast = {
+    contents: [{ role: "model", parts: [{ text: "partial" }] }],
+    thinking: { type: "disabled" },
+  };
+
+  assert.deepEqual(normalizeThinkingConfig(toolLast).thinking, { type: "disabled" });
+  assert.deepEqual(normalizeThinkingConfig(modelLast).thinking, { type: "disabled" });
+});

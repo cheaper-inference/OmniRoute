@@ -408,7 +408,13 @@ export function openaiToClaudeResponse(chunk, state) {
   const choice = chunkChoice || state.pendingClaudeFinishChoice;
   if (!choice) return null;
   if (flushingPendingFinish) state.pendingClaudeFinishChoice = null;
-  const delta = choice.delta;
+  // The deferred choice was already processed on the pass that received it: its
+  // text / reasoning / tool-arg fragments were emitted then, and only the
+  // terminal blocks were held back for the real usage. Re-reading the delta
+  // here replays the trailing fragment a second time, so an OpenAI→Claude
+  // client that concatenates input_json_delta into one JSON string receives the
+  // final fragment twice and fails to parse the tool input.
+  const delta = flushingPendingFinish ? undefined : choice.delta;
   // First chunk - ALWAYS send message_start first
   if (!state.messageStartSent) {
     state.messageStartSent = true;
@@ -794,7 +800,14 @@ export function openaiToClaudeResponse(chunk, state) {
     // (requestedThinking === false): for `true` and for legacy `undefined` the
     // reasoning already went out as a thinking block above, and synthesizing a
     // text block too would double-expose it.
-    if (!state.textBlockStarted && state._reasoningAccum && state.requestedThinking === false) {
+    if (
+      !state.textBlockStarted &&
+      state._reasoningAccum &&
+      state.requestedThinking === false &&
+      // reasoning-ONLY replies only: a reply with tool calls is not "empty", and turning
+      // its reasoning into visible text leaks it into the transcript (every agent turn).
+      !(state.toolCalls instanceof Map && state.toolCalls.size > 0)
+    ) {
       state.textBlockIndex = state.nextBlockIndex++;
       state.textBlockStarted = true;
       state.textBlockClosed = false;

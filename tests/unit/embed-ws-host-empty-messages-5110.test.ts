@@ -16,6 +16,9 @@ import { createChatPipelineHarness } from "../integration/_chatPipelineHarness.t
 //           message is required". OmniRoute now rejects it early with a clear
 //           OmniRoute-level 400 before any upstream call.
 
+const harness = await createChatPipelineHarness("chat-empty-messages-5110");
+const { handleChat, buildRequest, resetStorage, seedConnection } = harness;
+
 // ── Issue 1: embed WS bind host honours LIVE_WS_HOST ──────────────────────────
 test("#5110-1: resolveEmbedWsHost prefers EMBED_WS_PROXY_HOST, then LIVE_WS_HOST, then loopback", async () => {
   const { resolveEmbedWsHost } = await import("../../src/lib/services/embedWsProxy.ts");
@@ -48,9 +51,6 @@ test("#5110-1: resolveEmbedWsHost prefers EMBED_WS_PROXY_HOST, then LIVE_WS_HOST
 });
 
 // ── Issue 4: empty messages array rejected early with a clear 400 ─────────────
-const harness = await createChatPipelineHarness("chat-empty-messages-5110");
-const { handleChat, buildRequest, resetStorage, seedConnection } = harness;
-
 test.beforeEach(async () => {
   await resetStorage();
 });
@@ -80,7 +80,11 @@ test("#5110-4: an empty messages array is rejected with a clear 400 before hitti
     })
   );
 
-  assert.equal(response.status, 400, "empty messages must be a 400, not a forwarded upstream error");
+  assert.equal(
+    response.status,
+    400,
+    "empty messages must be a 400, not a forwarded upstream error"
+  );
   const body = (await response.json()) as { error?: { message?: string } };
   assert.match(
     body.error?.message ?? "",

@@ -64,6 +64,7 @@ import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags.ts";
 import { isEmptyStreamSiblingRecoveryEnabled } from "../../services/streamRecovery.ts";
 import { getProviderCredentials } from "@/sse/services/auth";
 import { resolveCredentialGate } from "@/lib/streamingCredentialTransform";
+import { resolvePiiGate } from "@/lib/streamingPiiTransform";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- deps bag mirrors the barrel closure
 type Loose = any;
@@ -766,6 +767,16 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     body: deps.body,
     headers: deps.clientRawRequest?.headers,
   });
+  // Per-request PII opt-out: same names as the non-streaming guardrail.
+  // Only data keys chatCore.ts already passes (apiKeyInfo, body,
+  // clientRawRequest) are read here; the reader defaults to the production
+  // module inside resolvePiiGate, and unit tests inject fakes by calling
+  // that helper directly.
+  const piiGate = await resolvePiiGate({
+    apiKeyInfo: deps.apiKeyInfo,
+    body: deps.body,
+    headers: deps.clientRawRequest?.headers,
+  });
   const finalStream = assembleStreamingPipeline({
     providerResponse,
     transformStream,
@@ -777,6 +788,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     responseHeaders,
     credentialRedactionEnabled: credentialGate.credentialRedactionEnabled,
     credentialDisabledGuardrails: credentialGate.credentialDisabledGuardrails,
+    piiDisabledGuardrails: piiGate.piiDisabledGuardrails,
     // Same adaptive budget the pre-handoff readiness gate above just used —
     // reasoning models that legitimately take a while to say anything keep
     // that same patience for their first REAL content, not just their first

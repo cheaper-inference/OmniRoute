@@ -68,11 +68,11 @@ Bağlantı düzeyindeki kayıtlar (`provider:connectionId`) bunun yerine üstel
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 Regresyon koruması: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Bağlantı Bekleme Süresi (Connection Cooldown)
+## 2. Bağlantı Bekleme Süresi (Cooldown)
 
 **Kapsam:** tek bir sağlayıcı bağlantısı/hesabı/anahtarı.
 
-**Amaç:** aynı sağlayıcı için diğer bağlantılar hizmet vermeye devam ederken hatalı bir anahtarı atlamak.
+**Amaç:** aynı sağlayıcıya ait diğer bağlantılar hizmet vermeye devam ederken bozuk olan tek bir anahtarı atlamak.
 
 **Uygulama:**
 
@@ -83,7 +83,7 @@ Regresyon koruması: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 **Bağlantı başına alanlar:**
 
-- `rateLimitedUntil` — bekleme süresinin biteceği zaman damgası
+- `rateLimitedUntil` — bekleme süresinin dolacağı zaman damgası
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
 - `backoffLevel` — üstel geri çekilme sayacı
@@ -92,98 +92,175 @@ Regresyon koruması: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
 - OAuth tabanı: 5sn
 - API anahtarı tabanı: 3sn
-- API anahtarı 429: yukarı akış `Retry-After`/sıfırlama başlıklarını/ayrıştırılabilir sıfırlama metnini tercih eder
+- API anahtarı 429: yukarı akışın `Retry-After`/sıfırlama başlıklarını/ayrıştırılabilir sıfırlama metnini tercih eder
 - Geri çekilme: `baseCooldownMs * 2 ** failureIndex`
 
-**Sürü baskını (thundering herd) koruması:** eşzamanlı hataların bekleme süresini aşırı uzatmasını veya `backoffLevel`'ı çift artırmasını engeller.
+**Thundering-herd koruması:** eşzamanlı hataların bekleme süresini aşırı uzatmasını veya `backoffLevel` değerini iki kez artırmasını engeller.
 
-**Eşzamanlılık sınırı 429'ları geri çekilme basamaklarını tırmanmaz.** Gövdesi eşzamanlılık sınırı bildiren bir `429` ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`) hesabın sağlıklı ancak meşgul olduğu anlamına gelir.
-`checkFallbackError()` `concurrency_limited` nedenini döndürür: hemen bir sonraki bağlantıya yük devret, bu bağlantıyı sabit bir `CONCURRENCY_LIMIT_COOLDOWN_MS` (1sn) veya yukarı akışın yeniden deneme ipucu kadar beklet, `backoffLevel`'ı değiştirme ve `skipProviderBreaker`'ı ayarla.
-Açık bir kota gövdesi yine de önceliklidir; dolayısıyla bir kota kalıbıyla da eşleşen bir gövde kota kararı olarak kalır.
-Tespit: `src/shared/utils/classify429.ts` içindeki `looksLikeConcurrencyLimit()`; karar: `open-sse/services/accountFallback/concurrencyLimit429.ts`. `classify429()` (kesicinin `FailureKind`'ı) değişmeden kalır ve bu gövdeler için hâlâ `rate_limit` döndürür.
+**Eşzamanlılık sınırı 429'ları geri çekilme basamaklarını tırmanmaz.** Gövdesinde eşzamanlılık
+sınırı bildiren bir `429` ("too many concurrent requests", "concurrency limit", "parallel request
+limit", GLM `并发数过高`), hesabın sağlıklı ancak meşgul olduğu anlamına gelir.
+`checkFallbackError()` `concurrency_limited` nedenini döndürür: hemen bir sonraki bağlantıya
+yük devret, bu bağlantıyı sabit bir `CONCURRENCY_LIMIT_COOLDOWN_MS` (1sn) veya yukarı akışın
+yeniden deneme ipucu kadar beklet, `backoffLevel` değerini değiştirme ve `skipProviderBreaker`
+ayarla. Açık bir kota gövdesi yine de önceliklidir; bu nedenle bir kota kalıbıyla da eşleşen
+gövde, kota kararı olarak kalır. Algılama: `src/shared/utils/classify429.ts` içindeki
+`looksLikeConcurrencyLimit()`; karar: `open-sse/services/accountFallback/concurrencyLimit429.ts`.
+`classify429()` (kesicinin `FailureKind` değeri) değişmemiştir ve bu gövdeler için hâlâ
+`rate_limit` okur.
 
-**Akış içerik duraklamaları hesabı bekletmez.** İçerik duraklaması bekçisi (`open-sse/utils/streamHandler.ts`) zamanında model çıktısı göndermeyen bir akıştan vazgeçtiğinde, `markAccountUnavailable()` hatayı bağlantıya kaydeder ancak bekleme süresi ayarlamaz: duraklama o isteğe aittir ve çoğunlukla henüz çıktı üretmemiş uzun bir akıl yürütme turudur. Operatörler `resilienceSettings.streamStallCooldown.enabled` ile bu davranışı yeniden etkinleştirebilir (varsayılan `false`).
+**Akış içerik duraklamaları hesabı bekletmez.** İçerik duraklaması watchdog'u
+(`open-sse/utils/streamHandler.ts`) zamanında model çıktısı göndermeyen bir akıştan vazgeçtiğinde,
+`markAccountUnavailable()` hatayı bağlantıya kaydeder ancak bekleme süresi ayarlamaz: duraklama
+o isteğe aittir ve çoğunlukla henüz çıktı üretmemiş uzun bir akıl yürütme turudur. Operatörler
+`resilienceSettings.streamStallCooldown.enabled` (varsayılan `false`) ile bu davranışı yeniden
+etkinleştirebilir.
 
-**Akıl yürütme kareleri içerik duraklaması bütçesini yeniden başlatır.** Bir akıl yürütme modeli, görünür ilk token'ından önce dakikalarca düşünebilir: Claude, düşünme metni boş olabilen `thinking_delta` kareleri akıtır ve Responses API arka arkaya akıl yürütme öğeleri akıtır. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) bu kareleri tanır ve bekçi, turu iptal etmek yerine her birinde bütçesini yeniden başlatır. Bunlar hâlâ model çıktısı değildir; bu nedenle yalnızca akıl yürütmeyle biten bir tur yine boş olarak raporlanır ve akıl yürütmeyi bırakıp yalnızca heartbeat gönderen bir tur yine bekçiyi tetikler.
+**`p2c` hesap seçimi için isteğe bağlı gecikme sinyali.** Gönderilen her deneme, ilk bayta kadar
+geçen süresini ve sonucunu bağlantı başına (ve bağlantı + model başına) bellek içi kayan bir
+pencerede kaydeder: 15 dakika içindeki son 20 örnek
+(`open-sse/services/connectionLatencyTracker.ts`, `src/sse/handlers/chatHelpers.ts` içindeki
+`safeLogEvents()` üzerinden kaydedilir). `resilienceSettings.p2cLatency.weight` `0` üzerinde
+olduğunda (aralık 0-20, varsayılan `0` = kapalı), `src/sse/services/auth.ts` içindeki
+`compareP2CConnections()` çiftteki her adaya en fazla `weight` puanı ekler. Bunun yarısı, daha
+hızlı adaya oranla gecikmeden (iki kat yavaş olan tam yarıyı alır), yarısı da kayan hata
+oranından gelir. Bu terim yalnızca her iki adayın da en az 3 örneğe sahip olduğunda uygulanır;
+böylece yeni hesaplar cezalandırılmaz ve üst sınırı, kota engeli ve kota tükenmesi cezalarının
+altında kalır. Kendi devresini eklemez: başarısız olan hesaplar hâlâ bekleme süresi, kilitleme
+ve kesici katmanları tarafından yönetilir. `PATCH /api/resilience`
+`{ "p2cLatency": { "weight": 10 } }` ile ayarlayın.
 
-Kiro'nun boş olmayan imzaya sahip ikili `reasoningContentEvent` kareleri, bu akıl yürütme etkinliğini executor üzerinden boş bir `reasoning_content` deltası olarak korur. İmza iletilmez. Meta veriler, eksik kareler ve boş imzalar içerik bütçesini yeniden başlatmaz; bağımsız aktif akış zaman aşımı ve istemci iptali hâlâ geçerlidir (`open-sse/executors/kiro/reasoning.ts`).
+**Akıl yürütme çerçeveleri içerik duraklaması bütçesini yeniden başlatır.** Bir akıl yürütme
+modeli, ilk görünür token'ından önce dakikalarca düşünebilir: Claude, düşünme metni boş olabilen
+`thinking_delta` çerçeveleri akışı yapar ve Responses API arka arkaya akıl yürütme öğeleri
+akışı yapar. `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) bu çerçeveleri
+tanır ve watchdog, turu iptal etmek yerine her birinde bütçesini yeniden başlatır. Bunlar yine
+de model çıktısı değildir; bu nedenle yalnızca akıl yürütmeyle biten bir tur hâlâ boş olarak
+raporlanır ve akıl yürütmeyi bırakıp yalnızca heartbeat gönderen bir tur yine de watchdog'u
+tetikler.
 
-**Nihai durumlar (bekleme süresi DEĞİLDİR):**
+Kiro'nun boş olmayan imzaya sahip ikili `reasoningContentEvent` çerçeveleri, bu akıl yürütme
+etkinliğini executor boyunca boş bir `reasoning_content` deltası olarak korur. İmza iletilmez.
+Meta veri, eksik çerçeveler ve boş imzalar içerik bütçesini yeniden başlatmaz; bağımsız aktif
+akış zaman aşımı ve istemci iptali yine de geçerlidir (`open-sse/executors/kiro/reasoning.ts`).
 
-- `banned` — yasaklı anahtar kelime / hesap yasağı tespiti tarafından ayarlanır (bkz. [BAN_DETECTION](../security/BAN_DETECTION.md)) ve art arda üç yukarı akış istek reddi tarafından (`request_rejected`, örn. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); tek bir ret yalnızca bağlantıyı bekletir
-- `expired` (sınırlı yeniden denemelerden sonra nihai duruma geçer — üstel geri çekilmeli `EXPIRED_RETRY_MAX = 3` — böylece geçici OAuth hataları, hesap kalıcı olarak devre dışı bırakılmadan önce kendini onarabilir)
+**Nihai durumlar (bekleme süresi DEĞİL):**
+
+- `banned` — yasaklı anahtar kelime / hesap yasağı algılaması tarafından ayarlanır (bkz. [BAN_DETECTION](../security/BAN_DETECTION.md)) ve art arda üç yukarı akış istek reddiyle ayarlanır (`request_rejected`, örn. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); tek bir ret yalnızca bağlantıyı bekletir
+- `expired` (sınırlı yeniden denemeden sonra nihai duruma geçer — üstel geri çekilmeyle `EXPIRED_RETRY_MAX = 3` — böylece geçici OAuth hataları, hesap kalıcı olarak devre dışı bırakılmadan önce kendini iyileştirebilir)
 - `credits_exhausted`
 
-Bunlar, kimlik bilgileri değişene veya bir operatör sıfırlayana kadar kalır. Nihai durumları geçici bekleme süresi durumuyla ezmeyin.
+Bunlar, kimlik bilgileri değişene veya bir operatör sıfırlayana kadar kalıcıdır. Nihai durumları geçici bekleme süresi durumuyla ezmeyin.
 
-**Tembel kurtarma (lazy recovery):** `rateLimitedUntil` geçtiğinde bağlantı yeniden uygun hale gelir. Başarılı kullanımda `clearAccountError()` tüm hata alanlarını temizler.
+**Tembel kurtarma:** `rateLimitedUntil` geçtiğinde bağlantı yeniden uygun hale gelir. Başarılı kullanımda `clearAccountError()` tüm hata alanlarını temizler.
 
-### Claude OAuth kullanım duvarı: düşük öncelikli şerit + oturum sınırı sıfırlama
+### Claude OAuth kullanım duvarı: düşük öncelikli kulvar + oturum sınırı sıfırlama
 
-**Kapsam:** bir Claude aboneliği (OAuth) bağlantısı. Her iki özellik de **bağlantı başına etkinleştirilir** (Bağlantıyı düzenle → Claude bölümü → `providerSpecificData` içinde `lowPriorityMode` / `autoLimitReset`, ikisi de varsayılan olarak kapalı) ve Claude Code'un `/low-priority` ve `/limit-reset` komutlarını yansıtır (protokol sözleşmesi Claude Code 2.1.263'ten alınmıştır).
+**Kapsam:** tek bir Claude aboneliği (OAuth) bağlantısı. Her iki özellik de **bağlantı başına
+isteğe bağlıdır** (Bağlantıyı düzenle → Claude bölümü → `providerSpecificData` içinde
+`lowPriorityMode` / `autoLimitReset`, ikisi de varsayılan olarak kapalı) ve Claude Code'un
+`/low-priority` ve `/limit-reset` komutlarını yansıtır (protokol sözleşmesi Claude Code
+2.1.263'ten yakalanmıştır).
 
 **Uygulama:**
 
 - Durum makinesi + yanıt sınıflandırması: `open-sse/services/claudeLowPriority.ts`
 - Sıfırlama durumu/talep istemcisi: `open-sse/services/claudeLimitReset.ts`
-- Executor kancası (başlık enjeksiyonu + aynı hesapla yeniden deneme): `open-sse/executors/base.ts::execute()`
-- Etkinleştirme kalıcılığı: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+- Yürütücü kancası (başlık enjeksiyonu + aynı hesapla yeniden deneme): `open-sse/executors/base.ts::execute()`
+- İsteğe bağlı kalıcılık: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
 
-**Tetikleyici:** 5 saatlik kullanım duvarı — başlıklarında `anthropic-ratelimit-unified-status: rejected` ve hesap uygun olduğunda `anthropic-ratelimit-unified-slow-offer: treatment` taşıyan bir `429`. Bu ilk duvar 429'undan önce hiçbir şey gönderilmez; birleşik başlıklar olmadan gelen bir yoğun istek 429'u normal bekleme süresi yolundan geçer.
+**Tetikleyici:** 5 saatlik kullanım duvarı — başlıklarında
+`anthropic-ratelimit-unified-status: rejected` ve (hesap uygun olduğunda)
+`anthropic-ratelimit-unified-slow-offer: treatment` taşıyan bir `429`. Bu ilk duvar
+429'undan önce hiçbir şey gönderilmez; birleşik başlıklar içermeyen ani bir 429, normal
+cooldown yolundan geçer.
 
 **Düşük öncelikli şerit** (`lowPriorityMode`):
 
-- Duvar 429'unda yürütücü teklifi kabul eder ve `anthropic-usage-limit: slow` ile **aynı** hesabı hemen yeniden dener; şerit, duyurulan `anthropic-ratelimit-unified-reset` anına kadar (+60 sn hoşgörü payı) aktif kalır ve bu penceredeki her istek başlığı taşır. Yakalanan 429 asla `handleChatCore`'a ulaşmaz; bu nedenle bağlantı soğumaya alınmaz ve rotasyonla uzaklaştırılmaz.
-- Sonraki yanıtlardaki `anthropic-ratelimit-unified-slow-status`: `active` / `not_needed` şeridi korur; `slot_busy` (429) veya bir `529`, sunucunun `anthropic-ratelimit-unified-slow-retry-after` değerini (varsayılan 20 sn, sınır 5–600 sn, ±%30 jitter) bekleyip yeniden dener; bu bekleme `anthropic-ratelimit-unified-slow-max-wait` ile sınırlıdır (varsayılan 20 dk, sınır 1 dk–6 sa) — bunun ötesinde şerit sona erer ve 10 dakikalık bir soğuma yeniden kabulü engeller. Bekleme ayrıca, isteğin kendi yukarı akış başlangıç zaman aşımından (`resolveFetchStartTimeout`, varsayılan 10 dk) kalan süre eksi 5 sn'lik bir pay ile de sınırlanır: bu sınır olmasaydı 20 dakikalık varsayılan maksimum bekleme isteğin ömrünü aşar ve uyku bekleme ortasında iptal edilir; zarif `max_wait` sonu + soğuma yerine bir `TimeoutError` ortaya çıkardı.
-- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5 saatlik pencere devri veya `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (ücretli aşım artık duvarı karşıladığı için herhangi bir durumda şeridi `extra_usage` olarak sonlandırır) şeridi bitirir; yanıt ardından normal soğuma yoluna akar. `budget_exhausted`, duyurulan bütçe sıfırlanmasına kadar (≤ 8 gün) hatırlanır.
-- Duvar denetimi, yürütücünün kendi 400 kaynaklı deneme-içi yeniden denemelerinden (bağlam düzenleme, thinking/effort kısıtlamaları, parametre otomatik öğrenimi) sonra çalışır; bu nedenle yalnızca bu yeniden denemelerden birinde ortaya çıkan bir duvar 429'u, soğuma yoluna ulaşmak yerine yine de yakalanır.
-- Durum, bağlantı başına bellek içindedir (yeniden başlatma, yeniden kabul için bir ek duvar 429'una mal olur).
+- Duvar 429'unda yürütücü teklifi kabul eder ve **aynı** hesabı
+  `anthropic-usage-limit: slow` başlığıyla hemen yeniden dener; şerit, duyurulan
+  `anthropic-ratelimit-unified-reset` zamanına kadar (+60 sn ek pay) etkin kalır ve bu
+  penceredeki her istek bu başlığı taşır. Yakalanan 429 asla `handleChatCore`'a ulaşmaz;
+  bu nedenle bağlantı cooldown'a **alınmaz** ve rotasyonla başka hesaba geçilmez.
+- Sonraki yanıtlardaki `anthropic-ratelimit-unified-slow-status`: `active` / `not_needed`
+  şeridi sürdürür; `slot_busy` (429) veya bir `529`, sunucunun
+  `anthropic-ratelimit-unified-slow-retry-after` değerini (varsayılan 20 sn, 5–600 sn
+  aralığına kısıtlanır, ±%30 jitter) bekler ve yeniden dener; bu,
+  `anthropic-ratelimit-unified-slow-max-wait` ile sınırlıdır (varsayılan 20 dk, 1 dk–6 sa
+  aralığına kısıtlanır) — bu süre aşıldığında şerit sona erer ve 10 dakikalık bir soğuma
+  yeniden kabulü engeller. Bekleme ayrıca, isteğin kendi yukarı akış başlangıç zaman
+  aşımından (`resolveFetchStartTimeout`, varsayılan 10 dk) kalan süre eksi 5 sn'lik bir
+  pay ile de sınırlanır: bu sınır olmasaydı, 20 dakikalık varsayılan maksimum bekleme
+  isteğin ömrünü aşar ve uyku bekleme ortasında iptal edilirdi; bu da zarif bir
+  `max_wait` sonu + soğuma yerine bir `TimeoutError` olarak ortaya çıkardı.
+- `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, 5 saatlik pencerenin
+  yenilenmesi ya da `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true`
+  (ücretli ek kullanım artık duvarı karşıladığı için, durum ne olursa olsun şeridi
+  `extra_usage` olarak bitirir) şeridi sonlandırır; yanıt ardından normal cooldown
+  yoluna akar. `budget_exhausted`, duyurulan bütçe sıfırlanmasına kadar (≤ 8 gün)
+  hatırlanır.
+- Duvar kontrolü, yürütücünün kendi 400 kaynaklı deneme-içi yeniden denemelerinden
+  (bağlam düzenleme, thinking/effort kısıtlamaları, parametre otomatik öğrenimi) sonra
+  çalışır; bu nedenle yalnızca bu yeniden denemelerden birinde ortaya çıkan bir duvar
+  429'u, cooldown yoluna ulaşmak yerine yine de yakalanır.
+- Durum, bağlantı başına bellek içinde tutulur (yeniden başlatma, yeniden kabul için
+  fazladan bir duvar 429'una mal olur).
 
 **Oturum sınırı sıfırlama** (`autoLimitReset`, ikisi de açıkken şeritten önce denenir):
 
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide` bloğu; `arm: "reset"` ve `available: true` olduğunda, `{ "program": "juniper_tide" }` gövdesiyle `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` (organizasyon UUID'si `providerSpecificData.organizationUUID`'den, bootstrap yedeğiyle).
-- `result: reset|not_limited` → istek tam hızda yeniden denenir (slow başlığı olmadan). `already_used` / `not_offered`, `next_available_at` değerini memoize eder (varsayılan bir hafta); herhangi bir hata 15 dakikalık geri çekilmeye yol açar. Sıfırlama haftada bir kezdir ve yine de haftalık sınıra dahil edilir.
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → `juniper_tide`
+  bloğu; `arm: "reset"` ve `available: true` olduğunda,
+  `{ "program": "juniper_tide" }` gövdesiyle
+  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits`
+  (organizasyon UUID'si `providerSpecificData.organizationUUID`'den alınır, yedek olarak
+  bootstrap).
+- `result: reset|not_limited` → istek tam hızda yeniden denenir (slow başlığı olmadan).
+  `already_used` / `not_offered`, `next_available_at` değerini memoize eder (varsayılan
+  bir hafta); herhangi bir hata 15 dakikalık geri çekilme uygular. Sıfırlama haftada bir
+  kez yapılır ve yine de haftalık sınıra dahil edilir.
 
-Regresyon koruyucuları: `tests/unit/claude-low-priority-mode.test.ts`,
+Regresyon korumaları: `tests/unit/claude-low-priority-mode.test.ts`,
 `tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
 
 ### Oturum yakınlığı (#7274)
 
-**Kapsam:** bir istemci oturumunun (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` başlığı) **herhangi bir** sağlayıcı için tek bir bağlantıya sabitlenmesi.
+**Kapsam:** **herhangi bir** sağlayıcı için, tek bir istemci oturumunun (`X-Session-Id` / `x-codex-session-id` / `x-omniroute-session` başlığı) tek bir bağlantıya sabitlenmesi.
 
-**Amaç:** çok turlu bir aracıyı (Claude Code, aider, özel aracılar) istekler boyunca aynı hesapta tutmak; hesaplar arası bağlam kaybını ve hesap başına oturum durumu tutan sağlayıcılarda tekrarlanan soğuk başlangıç 429'larını azaltmak.
+**Amaç:** çok turlu bir aracı (Claude Code, aider, özel aracılar) istekler boyunca aynı hesapta tutmak; böylece hesaplar arası bağlam kaybını ve hesap başına oturum durumu tutan sağlayıcılarda tekrarlanan soğuk başlangıç 429'larını azaltmak.
 
 **Uygulama:**
 
 - TTL çözümlemesi: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Pin seçimi/oluşturma: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Sabitleme seçimi/oluşturma: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
 - Başlık çıkarımı (genel, herhangi bir sağlayıcı): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Kalıcı pin tablosu: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Ayar: `sessionAffinityTtlMs` (ms cinsinden genel TTL, `0` devre dışı bırakır) — `src/lib/db/settings.ts`. `124_generic_session_affinity_ttl.sql` geçişiyle yalnızca Codex'e özgü `codexSessionAffinityTtlMs` adından yeniden adlandırıldı; bu geçiş, önceden yapılandırılmış herhangi bir Codex TTL değerini yeni varsayılan olarak devralır.
+- Kalıcı sabitleme tablosu: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Ayar: `sessionAffinityTtlMs` (ms cinsinden genel TTL, `0` devre dışı bırakır) — `src/lib/db/settings.ts`. `124_generic_session_affinity_ttl.sql` geçişiyle yalnızca Codex'e özgü olan `codexSessionAffinityTtlMs` adından yeniden adlandırıldı; bu geçiş, önceden yapılandırılmış herhangi bir Codex TTL'sini yeni varsayılan olarak devralır.
 
-#7274 öncesinde, `resolveSessionAffinityTtlMs()` `codex` dışındaki her sağlayıcı için kesin olarak `0` döndürüyordu; bu nedenle sabitleme mekanizması ve başlık çıkarımı zaten sağlayıcıdan bağımsız olmasına rağmen TTL ayarının (ve oturum başlıklarının) başka hiçbir yerde etkisi olmuyordu. Düzeltme bu erken dönüşü kaldırdı; TTL artık genel olarak `0`'ın üzerinde ayarlandığında her sağlayıcıya eşit şekilde uygulanır.
+#7274'ten önce, `resolveSessionAffinityTtlMs()` `codex` dışındaki her sağlayıcı için koşulsuz olarak `0` döndürüyordu; bu nedenle sabitleme mekanizması ve başlık çıkarımı zaten sağlayıcıdan bağımsız olmasına rağmen, TTL ayarının (ve oturum başlıklarının) başka hiçbir yerde etkisi olmuyordu. Düzeltme bu erken dönüşü kaldırdı; TTL artık genel olarak `0`'ın üzerine ayarlandığında her sağlayıcıya eşit şekilde uygulanıyor.
 
-Üç oturum yakınlığı başlığı asla yukarı akışa iletilmez — yürütücüler istemci başlıklarını geçirmek yerine kendi yukarı akış başlıklarını sıfırdan oluşturur; dolayısıyla bu yalnızca dahili bir ilişkilendirme kimliği olarak kalır.
+Üç oturum yakınlığı başlığı asla yukarı akışa iletilmez — yürütücüler istemci başlıklarını olduğu gibi aktarmak yerine kendi yukarı akış başlıklarını sıfırdan oluşturur; bu nedenle bu, yalnızca dahili bir ilişkilendirme kimliği olarak kalır.
 
-### Özel yönetilen oturum bağlantı kiralamaları
+### Münhasır yönetilen oturum bağlantısı kiralamaları
 
 **Kapsam:** bir etkin yönetilen HTTP istemcisi/oturumu, uygun bir OmniRoute bağlantısına sahip olur.
 
-**Amaç:** istekler arasında katı bir yönlendirme çitine ihtiyaç duyan istemciler için kalıcı, özel bağlantı sahipliği sağlamak. Bu, yumuşak bir süreklilik tercihi olan oturum yakınlığından farklıdır: özel bir kiralama yaşam döngüsü durumunu SQLite'ta saklar, genel etkin-sahip ve etkin-bağlantı tekilliğini zorunlu kılar ve sağlayıcı gönderiminden önce bayat bir nesli reddeder.
+**Amaç:** istekler arasında katı bir yönlendirme sınırına ihtiyaç duyan istemciler için
+kalıcı, münhasır bağlantı sahipliği sağlamak. Bu, yumuşak bir süreklilik tercihi olan
+oturum yakınlığından farklıdır: münhasır bir kiralama, yaşam döngüsü durumunu SQLite'ta
+saklar, genel etkin sahip ve etkin bağlantı tekilliğini zorlar ve sağlayıcıya
+gönderimden önce eski bir nesli (generation) reddeder.
 
-Özellik, API anahtarı başına isteğe bağlıdır. Yönetilen bir anahtarın `lease:exclusive` kapsamına ve açıkça belirtilmiş, boş olmayan bir `allowedConnections` listesine sahip olması gerekir. Herhangi bir HTTP istemcisi yaşam döngüsü uç noktasını kullanabilir; istemci adı, user-agent, sağlayıcı, OAuth yöntemi veya model gerekmez. Kiralama bir modele değil bir bağlantıya sahiptir; bu nedenle bağlantı normal şekilde uygun kaldığı sürece model değişikliği bağlamayı korur. Normal model, kota, sağlık, soğuma ve izin listesi kuralları yetkili olmaya devam eder ve aynı nesli başka bir boş uygun bağlantıya taşıyabilir.
+Bu özellik, API anahtarı bazında isteğe bağlı olarak etkinleştirilir. Yönetilen bir anahtar, `lease:exclusive` kapsamına ve açıkça tanımlanmış, boş olmayan bir `allowedConnections` listesine sahip olmalıdır. Herhangi bir HTTP istemcisi yaşam döngüsü uç noktasını kullanabilir; istemci adı, user-agent, sağlayıcı, OAuth yöntemi veya model gerekmez. Kiralama bir modele değil, bir bağlantıya sahiptir; bu nedenle bağlantı normal şekilde uygun kaldığı sürece bir model değişikliği bağlamayı korur. Normal model, kota, sağlık, soğuma süresi ve izin listesi kuralları yetkili olmaya devam eder ve aynı nesli başka bir boş uygun bağlantıya aktarabilir.
 
-Yaşam döngüsü, `acquire`, `renew` ve `release` JSON eylemleriyle `POST /api/v1/session-leases` üzerinden işler. Yönetilen çıkarım istekleri, opak `X-OmniRoute-Lease-Owner` değerini ve tam `X-OmniRoute-Lease-Generation` değerini sunar. Sahip değeri, `vlo_` öneki ve ardından gelen 43 base64url karakterinden oluşur; yalnızca SHA-256 özeti saklanır. Her nihai gönderim bariyeri ayrıca kimliği doğrulanmış API anahtarı kimliğini ve etkin bağlantı kimliğini de bağlar. Kira kontrol başlıkları; günlüklerden, saklanan istek anlık görüntülerinden ve yukarı akış yürütücü başlıklarından kaldırılır.
+Yaşam döngüsü, `acquire`, `renew` ve `release` JSON eylemleriyle `POST /api/v1/session-leases` şeklindedir. Yönetilen çıkarım istekleri, opak `X-OmniRoute-Lease-Owner` değerini ve tam `X-OmniRoute-Lease-Generation` değerini sunar. Sahip değeri, `vlo_` ve ardından gelen 43 base64url karakterinden oluşur; yalnızca SHA-256 karması saklanır. Her nihai gönderim sınırı, kimliği doğrulanmış API anahtarı kimliğini ve etkin bağlantı kimliğini de bağlar. Kiralama kontrol başlıkları günlüklerden, saklanan istek anlık görüntülerinden ve upstream yürütücü başlıklarından kaldırılır.
 
-Sıradan yönlendirmede uygun yönetilen adaylar bulunuyor ancak boştaki her aday yabancı bir etkin kira tarafından tutuluyorsa, OmniRoute HTTP `429`, kira kapasitesinin kullanılamadığını belirten bir kod, kapasite bekleme durumu ve ilgili en erken sona erme zamanından türetilen sınırlı bir `Retry-After` değeri döndürür. Sıradan boş uygunluk kira çekişmesi değildir ve mevcut yönlendirme hatası anlambilimini korur.
+Sıradan yönlendirmede uygun yönetilen adaylar varsa ancak her boş aday yabancı bir etkin kiralama tarafından işgal edilmişse, OmniRoute HTTP `429`, kiralama kapasitesi kullanılamıyor kodu, kapasite bekleniyor durumu ve ilgili en erken sona erme zamanından türetilen sınırlı bir `Retry-After` döndürür. Sıradan boş uygunluk, kiralama çekişmesi değildir ve mevcut yönlendirme hatası anlambilimini korur.
 
 İlgili mekanizmalar ayrı kalır:
 
 - OAuth oturum doluluğu, OAuth hesapları için işlem-yerel yumuşak dağıtımdır.
-- Hesap semaforları istek eşzamanlılığı izinleri verir ve bir istek tamamlandığında sona erer.
-- Özel yönetilen oturum kiraları, nesil bariyeri içeren kalıcı yaşam döngüsü sahipliğidir.
-
----
+- Hesap semaforları, istek eşzamanlılığı izinleri verir ve bir istek tamamlandığında sona erer.
+- Özel yönetilen oturum kiralamaları, nesil sınırına sahip dayanıklı yaşam döngüsü sahipliğidir.
 
 ## 3. Model Kilitleme
 

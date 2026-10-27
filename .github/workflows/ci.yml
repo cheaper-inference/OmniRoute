@@ -191,6 +191,7 @@ jobs:
       - run: npm run check:known-symbols
       - run: npm run check:route-guard-membership
       - run: npm run check:test-discovery
+      - run: npm run check:test-tla-order
       - run: npm run check:radar-sentinels
       - run: npm run check:tracked-artifacts
       - name: AI attribution in commit / PR metadata (Hard Rule #16)
