@@ -11,6 +11,7 @@ import EmptyState from "@/shared/components/EmptyState";
 import Icon from "@/shared/components/Icon";
 import { CardSkeleton, Button, Modal } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import Reveal from "@/shared/components/Reveal";
 import { AI_PROVIDERS, NOAUTH_PROVIDERS, OAUTH_PROVIDERS } from "@/shared/constants/providers";
 import {
   isProviderConnectionConnected,
@@ -1060,7 +1061,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
 
       {/* Quick Start (controlled by Appearance setting, default on) */}
       {showQuickStartOnHome && (
-        <section className="flex flex-col gap-3">
+        <Reveal as="section" className="flex flex-col gap-3">
           <SectionHeader
             title={t("quickStart")}
             description={t("quickStartDesc")}
@@ -1139,11 +1140,11 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
               },
             ]}
           />
-        </section>
+        </Reveal>
       )}
 
       {showProviderTopologyOnHome && (
-        <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-3">
+        <Reveal className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-3" delay={0.08}>
           <HomeProviderTopologySection
             providers={topologyProviders}
             lastProvider={lastProvider}
@@ -1151,7 +1152,7 @@ export default function HomePageClient({ machineId }: HomePageClientProps) {
             enabled={showProviderTopologyOnHome}
           />
           <HomeRecentRequests enabled={showProviderTopologyOnHome} />
-        </div>
+        </Reveal>
       )}
 
       {/* Provider Models Modal */}
