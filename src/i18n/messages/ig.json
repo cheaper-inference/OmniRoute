@@ -10008,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Oke Ndị Na-eweta Ọrụ",
     "noProviders": "Enweghị Ndị Na-eweta Ọrụ Ejikọrọ",
+    "quotaAuthRequired": "Achọrọ nkwenye njirimara — banye na ogwe njikwa",
+    "quotaAuthRequiredHint": "Enweghị ike ibunye njikọ ndị na-eweta ọrụ n’ihi na nnọkọ ogwe njikwa ahụ adịghị ma ọ bụ kubiela. Banye wee mee ka ibe ahụ dị ọhụrụ ka ị hụ oke ojiji gị.",
     "connectProvidersForQuota": "Jikọọ na ndị na-eweta ọrụ site na OAuth iji soro oke na ojiji API gị.",
     "accountsCount": "{count, plural, one {# akaụntụ} other {# akaụntụ}}",
     "filteredFromCount": "(e nyochara site na {count})",

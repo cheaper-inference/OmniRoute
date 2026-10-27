@@ -10008,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "ਪ੍ਰਦਾਤਾ ਦੀਆਂ ਸੀਮਾਵਾਂ",
     "noProviders": "ਕੋਈ ਪ੍ਰਦਾਤਾ ਕਨੈਕਟ ਨਹੀਂ ਹੈ",
+    "quotaAuthRequired": "ਪ੍ਰਮਾਣਿਕਤਾ ਲੋੜੀਂਦੀ ਹੈ - ਡੈਸ਼ਬੋਰਡ ਵਿੱਚ ਸਾਈਨ ਇਨ ਕਰੋ",
+    "quotaAuthRequiredHint": "ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ ਮੌਜੂਦ ਨਾ ਹੋਣ ਜਾਂ ਮਿਆਦ ਪੁੱਗ ਜਾਣ ਕਾਰਨ ਪ੍ਰਦਾਤਾ ਕਨੈਕਸ਼ਨ ਲੋਡ ਨਹੀਂ ਕੀਤੇ ਜਾ ਸਕੇ। ਆਪਣੀਆਂ ਕੋਟਾ ਸੀਮਾਵਾਂ ਦੇਖਣ ਲਈ ਸਾਈਨ ਇਨ ਕਰੋ ਅਤੇ ਰਿਫ੍ਰੈਸ਼ ਕਰੋ।",
     "connectProvidersForQuota": "ਆਪਣੀਆਂ API ਕੋਟਾ ਸੀਮਾਵਾਂ ਅਤੇ ਵਰਤੋਂ ਨੂੰ ਟਰੈਕ ਕਰਨ ਲਈ OAuth ਨਾਲ ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ ਕਨੈਕਟ ਕਰੋ।",
     "accountsCount": "{count, plural, one {# ਖਾਤਾ} other {# ਖਾਤੇ}}",
     "filteredFromCount": "({count} ਵਿੱਚੋਂ ਫਿਲਟਰ ਕੀਤੇ)",

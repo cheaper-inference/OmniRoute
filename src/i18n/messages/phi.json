@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Mga Limitasyon ng Provider",
     "noProviders": "Walang Nakakonektang Provider",
+    "quotaAuthRequired": "Kinakailangan ang pagpapatotoo—mag-sign in sa dashboard",
+    "quotaAuthRequiredHint": "Hindi ma-load ang mga koneksyon sa provider dahil nawawala o nag-expire na ang session sa dashboard. Mag-sign in at i-refresh upang makita ang iyong mga limitasyon sa quota.",
     "connectProvidersForQuota": "Kumonekta sa mga provider gamit ang OAuth upang subaybayan ang iyong mga limitasyon sa quota ng API at paggamit.",
     "accountsCount": "{count, plural, one {# account} other {# account}}",
     "filteredFromCount": "(na-filter mula sa {count})",

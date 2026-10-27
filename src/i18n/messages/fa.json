@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "محدودیتهای ارائهدهنده",
     "noProviders": "هیچ ارائهدهندهای متصل نیست",
+    "quotaAuthRequired": "احراز هویت الزامی است - وارد داشبورد شوید",
+    "quotaAuthRequiredHint": "اتصالهای ارائهدهنده بارگیری نشدند، زیرا نشست داشبورد وجود ندارد یا منقضی شده است. وارد شوید و صفحه را تازهسازی کنید تا محدودیتهای سهمیه خود را ببینید.",
     "connectProvidersForQuota": "برای پیگیری محدودیت سهمیه و میزان استفاده از API، از طریق OAuth به ارائهدهندگان متصل شوید.",
     "accountsCount": "{count, plural, one {# حساب} other {# حساب}}",
     "filteredFromCount": "(فیلترشده از مجموع {count})",

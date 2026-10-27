@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limites do Provedor",
     "noProviders": "Nenhum Provedor Conectado",
+    "quotaAuthRequired": "Autenticação necessária — entre no painel",
+    "quotaAuthRequiredHint": "Não foi possível carregar as conexões dos provedores porque a sessão do painel está ausente ou expirou. Entre e atualize a página para ver seus limites de cota.",
     "connectProvidersForQuota": "Conecte provedores com OAuth para acompanhar limites e uso de cota da API.",
     "accountsCount": "{count, plural, one {# conta} other {# contas}}",
     "filteredFromCount": "(filtrado de {count})",

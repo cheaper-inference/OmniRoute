@@ -10008,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Àwọn Ààlà Olùpèsè",
     "noProviders": "Kò sí olùpèsè kankan tí a sopọ̀ mọ́",
+    "quotaAuthRequired": "A nílò ìfàṣẹsí — wọlé sí pánẹ́ẹ̀lì ìṣàkóso",
+    "quotaAuthRequiredHint": "A kò lè ṣàkójọpọ̀ àwọn àsopọ̀ olùpèsè nítorí pé àkókò ìṣiṣẹ́ pánẹ́ẹ̀lì ìṣàkóso kò sí tàbí ó ti parí. Wọlé kí o sì sọ ojú-ìwé náà dọ̀tun láti rí àwọn ààlà ìwọ̀n lílò rẹ.",
     "connectProvidersForQuota": "Sopọ̀ mọ́ àwọn olùpèsè pẹ̀lú OAuth láti tọpinpin àwọn ààlà ìpín API àti lílò rẹ.",
     "accountsCount": "{count, plural, one {# àkọọ́lẹ̀} other {# àkọọ́lẹ̀}}",
     "filteredFromCount": "(ti a ṣe àlẹ̀mọ́ láti inú {count})",

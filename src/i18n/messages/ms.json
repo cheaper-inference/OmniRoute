@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Had Pembekal",
     "noProviders": "Tiada Pembekal Disambungkan",
+    "quotaAuthRequired": "Pengesahan diperlukan - log masuk ke papan pemuka",
+    "quotaAuthRequiredHint": "Sambungan penyedia tidak dapat dimuatkan kerana sesi papan pemuka tiada atau telah tamat tempoh. Log masuk dan muat semula untuk melihat had kuota anda.",
     "connectProvidersForQuota": "Sambung kepada pembekal dengan OAuth untuk menjejak had kuota dan penggunaan API anda.",
     "accountsCount": "{count, plural, one {# akaun} other {# akaun}}",
     "filteredFromCount": "(ditapis daripada {count})",

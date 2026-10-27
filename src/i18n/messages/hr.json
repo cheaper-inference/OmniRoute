@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Ograničenja pružatelja usluga",
     "noProviders": "Nema povezanih pružatelja usluga",
+    "quotaAuthRequired": "Potrebna je autentifikacija – prijavite se na nadzornu ploču",
+    "quotaAuthRequiredHint": "Veze s pružateljima usluga nije bilo moguće učitati jer sesija nadzorne ploče nedostaje ili je istekla. Prijavite se i osvježite stranicu kako biste vidjeli ograničenja svoje kvote.",
     "connectProvidersForQuota": "Povežite se s pružateljima putem OAuth-a kako biste pratili ograničenja kvote i korištenje API-ja.",
     "accountsCount": "{count, plural, one {# račun} other {# računa}}",
     "filteredFromCount": "(filtrirano od ukupno {count})",

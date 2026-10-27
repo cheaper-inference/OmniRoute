@@ -10008,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "የአቅራቢዎች ገደቦች",
     "noProviders": "ምንም አቅራቢዎች አልተገናኙም",
+    "quotaAuthRequired": "ማረጋገጫ ያስፈልጋል - ወደ ዳሽቦርዱ ይግቡ",
+    "quotaAuthRequiredHint": "የዳሽቦርዱ ክፍለ ጊዜ ስለሌለ ወይም ጊዜው ስላለፈበት የአቅራቢ ግንኙነቶችን መጫን አልተቻለም። የኮታ ገደቦችዎን ለማየት ይግቡና ገጹን ያድሱ።",
     "connectProvidersForQuota": "የAPI ኮታ ገደቦችዎን እና አጠቃቀምዎን ለመከታተል OAuthን በመጠቀም ከአቅራቢዎች ጋር ይገናኙ።",
     "accountsCount": "{count, plural, one {# መለያ} other {# መለያዎች}}",
     "filteredFromCount": "(ከ{count} የተጣራ)",

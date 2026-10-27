@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Límites del proveedor",
     "noProviders": "No hay proveedores conectados",
+    "quotaAuthRequired": "Se requiere autenticación: inicia sesión en el panel",
+    "quotaAuthRequiredHint": "No se pudieron cargar las conexiones de proveedores porque la sesión del panel no existe o ha caducado. Inicia sesión y actualiza la página para ver tus límites de cuota.",
     "connectProvidersForQuota": "Conéctese con proveedores con OAuth para realizar un seguimiento de los límites y el uso de su cuota de API.",
     "accountsCount": "{count, plural, one {# cuenta} other {# cuentas}}",
     "filteredFromCount": "(filtrado de {count})",

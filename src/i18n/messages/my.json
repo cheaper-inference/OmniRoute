@@ -10008,6 +10008,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Provider ကန့်သတ်ချက်များ",
     "noProviders": "ချိတ်ဆက်ထားသော Provider မရှိပါ",
+    "quotaAuthRequired": "အထောက်အထားစိစစ်ရန် လိုအပ်သည် - dashboard သို့ အကောင့်ဝင်ပါ",
+    "quotaAuthRequiredHint": "dashboard session မရှိသောကြောင့် သို့မဟုတ် သက်တမ်းကုန်ဆုံးသွားသောကြောင့် provider ချိတ်ဆက်မှုများကို ဖွင့်၍မရပါ။ သင်၏ quota ကန့်သတ်ချက်များကို ကြည့်ရန် အကောင့်ဝင်ပြီး refresh လုပ်ပါ။",
     "connectProvidersForQuota": "သင်၏ API quota ကန့်သတ်ချက်များနှင့် အသုံးပြုမှုကို ခြေရာခံရန် OAuth ဖြင့် provider များသို့ ချိတ်ဆက်ပါ။",
     "accountsCount": "{count, plural, one {# အကောင့်} other {# အကောင့်}}",
     "filteredFromCount": "({count} ခုမှ စစ်ထုတ်ထားသည်)",

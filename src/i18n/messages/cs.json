@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limity Poskytovatele",
     "noProviders": "Nejsou připojeni žádní poskytovatelé",
+    "quotaAuthRequired": "Je vyžadováno ověření – přihlaste se k řídicímu panelu",
+    "quotaAuthRequiredHint": "Připojení poskytovatelů se nepodařilo načíst, protože relace řídicího panelu chybí nebo vypršela. Přihlaste se a obnovte stránku, abyste zobrazili své limity kvót.",
     "connectProvidersForQuota": "Pro sledování limitů a využití API kvót se připojte k poskytovatelům pomocí OAuth.",
     "accountsCount": "{count, plural, one {# účet} other {# účtů}}",
     "filteredFromCount": "(filtrováno z {count})",

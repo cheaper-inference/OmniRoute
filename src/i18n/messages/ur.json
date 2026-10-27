@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "فراہم کنندہ کی حدود",
     "noProviders": "کوئی فراہم کنندہ منسلک نہیں",
+    "quotaAuthRequired": "تصدیق درکار ہے - ڈیش بورڈ میں سائن اِن کریں",
+    "quotaAuthRequiredHint": "فراہم کنندہ کنکشنز لوڈ نہیں کیے جا سکے کیونکہ ڈیش بورڈ سیشن موجود نہیں ہے یا اس کی میعاد ختم ہو چکی ہے۔ اپنے کوٹہ کی حدود دیکھنے کے لیے سائن اِن کریں اور ریفریش کریں۔",
     "connectProvidersForQuota": "اپنے API کوٹے کی حدود اور استعمال کو ٹریک کرنے کے لیے OAuth کے ذریعے فراہم کنندگان سے منسلک ہوں۔",
     "accountsCount": "{count, plural, one {# اکاؤنٹ} other {# اکاؤنٹس}}",
     "filteredFromCount": "({count} میں سے فلٹر شدہ)",

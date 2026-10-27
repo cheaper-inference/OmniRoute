@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limiti del fornitore",
     "noProviders": "Nessun provider connesso",
+    "quotaAuthRequired": "Autenticazione richiesta: accedi alla dashboard",
+    "quotaAuthRequiredHint": "Non è stato possibile caricare le connessioni ai provider perché la sessione della dashboard è assente o scaduta. Accedi e aggiorna la pagina per visualizzare i limiti delle quote.",
     "connectProvidersForQuota": "Connettiti ai provider con OAuth per monitorare i limiti di quota e l'utilizzo dell'API.",
     "accountsCount": "{count, plural, one {# account} other {# account}}",
     "filteredFromCount": "(filtrato da {count})",
