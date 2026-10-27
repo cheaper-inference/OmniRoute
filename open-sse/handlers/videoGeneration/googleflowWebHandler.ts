@@ -2,7 +2,10 @@
  * Video generation handler for Google Flow Web (Veo via Playwright browser session).
  */
 
-import { generateFlowVideo, normalizeVideoAspectRatio } from "../../executors/googleflow-web/flowClient.ts";
+import {
+  generateFlowVideo,
+  normalizeVideoAspectRatio,
+} from "../../executors/googleflow-web/flowClient.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 export interface GoogleFlowWebVideoHandlerArgs {
@@ -18,29 +21,39 @@ export async function handleGoogleFlowWebVideoGeneration({
   body,
   credentials,
   log,
-}: GoogleFlowWebVideoHandlerArgs): Promise<{ success: boolean; status?: number; data?: unknown; error?: string }> {
+}: GoogleFlowWebVideoHandlerArgs): Promise<{
+  success: boolean;
+  status?: number;
+  data?: unknown;
+  error?: string;
+}> {
   try {
     const prompt = String(body.prompt ?? "");
     if (!prompt.trim()) {
       return { success: false, status: 400, error: "Prompt is required for video generation" };
     }
 
-    const rawAspect = typeof body.aspect_ratio === "string"
-      ? body.aspect_ratio
-      : typeof body.aspectRatio === "string"
-        ? body.aspectRatio
-        : typeof body.size === "string"
-          ? body.size
-          : undefined;
+    const rawAspect =
+      typeof body.aspect_ratio === "string"
+        ? body.aspect_ratio
+        : typeof body.aspectRatio === "string"
+          ? body.aspectRatio
+          : typeof body.size === "string"
+            ? body.size
+            : undefined;
 
     const aspectRatio = normalizeVideoAspectRatio(rawAspect);
 
     const creds = {
       apiKey: typeof credentials?.apiKey === "string" ? credentials.apiKey : undefined,
-      accessToken: typeof credentials?.accessToken === "string" ? credentials.accessToken : undefined,
+      accessToken:
+        typeof credentials?.accessToken === "string" ? credentials.accessToken : undefined,
     };
 
-    log?.info?.("VIDEO", `Google Flow video generation starting: model=${model}, aspect=${aspectRatio}`);
+    log?.info?.(
+      "VIDEO",
+      `Google Flow video generation starting: model=${model}, aspect=${aspectRatio}`
+    );
 
     const result = await generateFlowVideo({
       prompt,
@@ -65,11 +78,12 @@ export async function handleGoogleFlowWebVideoGeneration({
     const message = sanitizeErrorMessage(err?.message || "Google Flow video generation failed");
     log?.error?.("VIDEO", `Google Flow video generation error: ${message}`);
 
-    const status = message.includes("quota exhausted") || message.includes("credits remaining")
-      ? 429
-      : message.includes("session is expired") || message.includes("re-authentication")
-        ? 401
-        : 502;
+    const status =
+      message.includes("quota exhausted") || message.includes("credits remaining")
+        ? 429
+        : message.includes("session is expired") || message.includes("re-authentication")
+          ? 401
+          : 502;
 
     return {
       success: false,

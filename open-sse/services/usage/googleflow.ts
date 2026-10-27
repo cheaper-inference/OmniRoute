@@ -21,7 +21,10 @@ export interface GoogleFlowCreditsResult {
 
 const XSSI_PREFIX = ")]}'";
 const ONE_HOUR_MS = 60 * 60 * 1000;
-const flowCreditsCache = new Map<string, { data: { quotas: Record<string, UsageQuota> }; timestamp: number }>();
+const flowCreditsCache = new Map<
+  string,
+  { data: { quotas: Record<string, UsageQuota> }; timestamp: number }
+>();
 
 export function invalidateFlowCreditsCache(cacheKey?: string): void {
   if (cacheKey) {
@@ -121,7 +124,8 @@ export async function fetchFlowCredits(
     throw new Error("Missing Google Flow cookies (__Secure-1PSID)");
   }
 
-  const endpoint = "https://flow.google.com/_/AiSandboxAngularFrontend/data/batchexecute?rpcids=nzlxg";
+  const endpoint =
+    "https://flow.google.com/_/AiSandboxAngularFrontend/data/batchexecute?rpcids=nzlxg";
   const headers: Record<string, string> = {
     "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
     Cookie: cookieHeader,
@@ -131,7 +135,8 @@ export async function fetchFlowCredits(
       "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36",
   };
 
-  const reqData = "f.req=" + encodeURIComponent(JSON.stringify([[["nzlxg", "[]", null, "generic"]]]));
+  const reqData =
+    "f.req=" + encodeURIComponent(JSON.stringify([[["nzlxg", "[]", null, "generic"]]]));
   let response = await fetchImpl(endpoint, {
     method: "POST",
     headers,
@@ -172,12 +177,13 @@ export async function getGoogleFlowUsage(
   providerSpecificData?: Record<string, unknown>,
   fetchImpl: typeof fetch = fetch
 ): Promise<{ quotas: Record<string, UsageQuota> }> {
-  const cacheKey = typeof apiKeyOrCookie === "string" ? apiKeyOrCookie.trim().slice(0, 80) : "default";
+  const cacheKey =
+    typeof apiKeyOrCookie === "string" ? apiKeyOrCookie.trim().slice(0, 80) : "default";
   const now = Date.now();
   const cached = flowCreditsCache.get(cacheKey);
   const force = providerSpecificData?.forceRefresh === true || providerSpecificData?.force === true;
 
-  if (!force && cached && (now - cached.timestamp < ONE_HOUR_MS)) {
+  if (!force && cached && now - cached.timestamp < ONE_HOUR_MS) {
     return cached.data;
   }
 

@@ -324,7 +324,10 @@ export async function validateGoogleFlowWebProvider({ apiKey, providerSpecificDa
   try {
     const raw = String(apiKey || "").trim();
     if (!raw) {
-      return { valid: false, error: "Paste your Google cookies (__Secure-1PSID) from flow.google.com" };
+      return {
+        valid: false,
+        error: "Paste your Google cookies (__Secure-1PSID) from flow.google.com",
+      };
     }
 
     const cookieHeader = normalizeGeminiValidationCookie(raw);
@@ -350,7 +353,8 @@ export async function validateGoogleFlowWebProvider({ apiKey, providerSpecificDa
     if (response.status === 401 || response.status === 403) {
       return {
         valid: false,
-        error: "Invalid or expired Google Flow cookie — sign in to flow.google.com and re-copy cookies",
+        error:
+          "Invalid or expired Google Flow cookie — sign in to flow.google.com and re-copy cookies",
       };
     }
 

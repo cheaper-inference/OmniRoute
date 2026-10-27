@@ -221,10 +221,7 @@ export function isSupportedUsageConnection(connection: ProviderConnectionLike | 
   if (connection.authType === "oauth") {
     return supportsProviderQuota(connection.provider, connection);
   }
-  if (
-    connection.authType === "web-session" ||
-    connection.authType === "cookie"
-  ) {
+  if (connection.authType === "web-session" || connection.authType === "cookie") {
     if (
       connection.provider === "googleflow-web" ||
       connection.provider === "googleflow" ||

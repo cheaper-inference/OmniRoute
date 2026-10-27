@@ -4,7 +4,11 @@
  */
 
 import { acquireFlowBrowser, releaseFlowBrowser, type FlowBrowser } from "./browserLease.ts";
-import { normalizeFlowCookies, fetchFlowCredits, invalidateFlowCreditsCache } from "../../services/usage/googleflow.ts";
+import {
+  normalizeFlowCookies,
+  fetchFlowCredits,
+  invalidateFlowCreditsCache,
+} from "../../services/usage/googleflow.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 export const FLOW_USER_AGENT =
@@ -54,7 +58,10 @@ export const IMAGE_MODEL_MAP: Record<string, string> = {
  */
 export function normalizeVideoModel(input?: string): string {
   if (!input) return "veo_3_1_fast";
-  const cleaned = input.toLowerCase().replace(/^googleflow-web\//, "").replace(/^gflow\//, "");
+  const cleaned = input
+    .toLowerCase()
+    .replace(/^googleflow-web\//, "")
+    .replace(/^gflow\//, "");
   return VIDEO_MODEL_MAP[cleaned] || "veo_3_1_fast";
 }
 
@@ -63,7 +70,10 @@ export function normalizeVideoModel(input?: string): string {
  */
 export function normalizeImageModel(input?: string): string {
   if (!input) return "GEM_PIX_2";
-  const cleaned = input.toLowerCase().replace(/^googleflow-web\//, "").replace(/^gflow\//, "");
+  const cleaned = input
+    .toLowerCase()
+    .replace(/^googleflow-web\//, "")
+    .replace(/^gflow\//, "");
   return IMAGE_MODEL_MAP[cleaned] || "GEM_PIX_2";
 }
 
@@ -133,7 +143,10 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
           secure: true,
         };
       })
-      .filter((c): c is { name: string; value: string; domain: string; path: string; secure: boolean } => c !== null);
+      .filter(
+        (c): c is { name: string; value: string; domain: string; path: string; secure: boolean } =>
+          c !== null
+      );
     await context.addCookies(cookiesToSet);
 
     const page = await context.newPage();
@@ -151,7 +164,9 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
 
     // Ensure we start a fresh project or session
     const newProjBtn = page
-      .locator("button.new-project-button, button:has-text('Новый проект'), button:has-text('New project'), button:has-text('Start Creating')")
+      .locator(
+        "button.new-project-button, button:has-text('Новый проект'), button:has-text('New project'), button:has-text('Start Creating')"
+      )
       .first();
     if (await newProjBtn.isVisible({ timeout: 6_000 }).catch(() => false)) {
       try {
@@ -159,7 +174,9 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         await page.waitForURL(/.*\/project\/.*/, { timeout: 20_000 });
       } catch {}
     } else if (page.url().includes("/project/")) {
-      const newChatBtn = page.locator("button[aria-label='Начать новый сеанс'], button:has-text('edit_square')").first();
+      const newChatBtn = page
+        .locator("button[aria-label='Начать новый сеанс'], button:has-text('edit_square')")
+        .first();
       if (await newChatBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
         await newChatBtn.click().catch(() => {});
         await page.waitForTimeout(1_500);
@@ -206,7 +223,12 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
           }
         }
 
-        if (url.includes("batchexecute") && (url.includes("rpcids=as29s") || url.includes("rpcids=GN0Bre") || url.includes("rpcids=ngNC2"))) {
+        if (
+          url.includes("batchexecute") &&
+          (url.includes("rpcids=as29s") ||
+            url.includes("rpcids=GN0Bre") ||
+            url.includes("rpcids=ngNC2"))
+        ) {
           try {
             const body = await response.text();
             if (body.includes("flow-content.google/video")) {
@@ -243,7 +265,11 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     promptSentAt = Date.now();
     console.log("[FLOW_DEBUG] Clicking send button...");
 
-    const sendBtn = page.locator("button.generate-icon-button, button[aria-label='Начать генерацию'], button:has-text('arrow_forward')").first();
+    const sendBtn = page
+      .locator(
+        "button.generate-icon-button, button[aria-label='Начать генерацию'], button:has-text('arrow_forward')"
+      )
+      .first();
     if (await sendBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
       await sendBtn.click();
     } else {
@@ -268,7 +294,9 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         await page.waitForTimeout(4_000);
         if (Date.now() - promptSentAt < 15_000) continue;
 
-        const approveBtnLater = page.locator(".option-row:has-text('Всегда одобрять'), .option-row:has-text('Одобрить')").first();
+        const approveBtnLater = page
+          .locator(".option-row:has-text('Всегда одобрять'), .option-row:has-text('Одобрить')")
+          .first();
         if (await approveBtnLater.isVisible({ timeout: 500 }).catch(() => false)) {
           await approveBtnLater.click().catch(() => {});
         }
@@ -282,9 +310,13 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
           }
         }
         const videos = await page.$$eval("video", (els: any[]) =>
-          els.map((e: any) => e.src || e.currentSrc).filter((s: string) => s && s.startsWith("http"))
+          els
+            .map((e: any) => e.src || e.currentSrc)
+            .filter((s: string) => s && s.startsWith("http"))
         );
-        const newVideos = videos.filter((v: string) => !existingVideoUrls.has(v) && v.includes("flow-content.google"));
+        const newVideos = videos.filter(
+          (v: string) => !existingVideoUrls.has(v) && v.includes("flow-content.google")
+        );
         if (newVideos.length > 0) {
           return newVideos[0];
         }
@@ -349,7 +381,10 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
           secure: true,
         };
       })
-      .filter((c): c is { name: string; value: string; domain: string; path: string; secure: boolean } => c !== null);
+      .filter(
+        (c): c is { name: string; value: string; domain: string; path: string; secure: boolean } =>
+          c !== null
+      );
     await context.addCookies(cookiesToSet);
 
     const page = await context.newPage();
@@ -393,8 +428,14 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
         if (!url.includes("batchexecute")) return;
         try {
           const body = await response.text();
-          if (url.includes("bOKtO") || body.includes("bOKtO") || body.includes("googleusercontent.com/asb/")) {
-            const match = /(https:\/\/lh3\.googleusercontent\.com\/asb\/[A-Za-z0-9_\-\/]+)/.exec(body);
+          if (
+            url.includes("bOKtO") ||
+            body.includes("bOKtO") ||
+            body.includes("googleusercontent.com/asb/")
+          ) {
+            const match = /(https:\/\/lh3\.googleusercontent\.com\/asb\/[A-Za-z0-9_\-\/]+)/.exec(
+              body
+            );
             if (match && match[1]) {
               clearTimeout(timeout);
               resolve(match[1]);
@@ -410,7 +451,9 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
     await page.keyboard.type(opts.prompt);
     await page.waitForTimeout(1_000);
 
-    const sendBtn = page.locator("button[aria-label='Начать генерацию'], button:has-text('arrow_forward')").first();
+    const sendBtn = page
+      .locator("button[aria-label='Начать генерацию'], button:has-text('arrow_forward')")
+      .first();
     if (await sendBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
       await sendBtn.click();
     } else {
@@ -431,7 +474,9 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
       for (let i = 0; i < 12; i++) {
         await page.waitForTimeout(5_000);
         const imgs = await page.$$eval("img", (els: any[]) =>
-          els.map((e: any) => e.src || e.currentSrc).filter((s: string) => s && s.includes("googleusercontent.com/asb/"))
+          els
+            .map((e: any) => e.src || e.currentSrc)
+            .filter((s: string) => s && s.includes("googleusercontent.com/asb/"))
         );
         if (imgs.length > 0) {
           return imgs[0];
