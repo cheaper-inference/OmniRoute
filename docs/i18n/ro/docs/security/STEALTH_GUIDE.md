@@ -16,61 +16,60 @@ Funcționalitățile de disimulare există pentru ca OmniRoute să poată acțio
 
 ---
 
-## Stratul de amprentare TLS
+## Strat de amprentare TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Sesiunile persistente `wreq-js` sunt create în mod leneș pentru fiecare domeniu de cont și proxy rezolvat. La nivel de proces, `TlsClient` menține în grup cel mult 128 de sesiuni care imită **Chrome 124 pe macOS** pentru serviciile din amonte protejate de Cloudflare. `TlsClient.fetch()` eșuează în mod închis atunci când mediul de execuție nativ nu este disponibil; un apelant poate selecta explicit o soluție de rezervă în afara acestui wrapper.
+Sesiunile persistente `wreq-js` sunt create la cerere pentru fiecare domeniu al contului și proxy rezolvat. Instanța `TlsClient` la nivel de proces păstrează în pool cel mult 128 de sesiuni care simulează **Chrome 124 pe macOS** pentru serviciile upstream aflate în spatele Cloudflare. `TlsClient.fetch()` eșuează în mod sigur atunci când runtime-ul nativ nu este disponibil; un apelant poate selecta explicit o soluție de rezervă în afara acestui wrapper.
 
-- Profil de sesiune: `browser: "chrome_124", os: "macos"`
+- Profilul sesiunii: `browser: "chrome_124", os: "macos"`
 - Rezolvarea proxy-ului (prioritate): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (inclusiv variantele cu litere mici)
 - Timp de expirare: `TLS_CLIENT_TIMEOUT_MS` (moștenit din `FETCH_TIMEOUT_MS`, implicit 600000)
-- Răspunsul `wreq-js` este compatibil cu fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Mecanismul de supraveghere pentru primul octet (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  se finalizează imediat ce sosesc antetele din amonte, astfel încât `TLS_CLIENT_TIMEOUT_MS` singur nu poate limita durata
-  unui corp care nu furnizează niciodată primul octet. `guardTlsFirstByte()` pune în competiție primul `read()` al corpului
-  cu `TLS_FIRST_BYTE_WATCHDOG_MS` (implicit `10000`, valoarea `0` îl dezactivează); un corp valid nu este
-  afectat, în timp ce un corp blocat determină anularea cititorului wreq și permite logicii existente de
-  revenire TLS din `proxyFetch` să continue cu dispecerul direct/proxy (o cerere care nu poate fi reluată în siguranță, de ex.
-  un POST cu corp, va genera în continuare o eroare în loc să fie reîncercată în mod transparent).
+- Response din `wreq-js` este compatibil cu fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Temporizator de siguranță pentru primul octet (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  se finalizează imediat ce sosesc antetele upstream, astfel încât `TLS_CLIENT_TIMEOUT_MS` singur nu poate limita durata unui
+  corp care nu furnizează niciodată primul octet. `guardTlsFirstByte()` pune în competiție primul `read()` al corpului
+  cu `TLS_FIRST_BYTE_WATCHDOG_MS` (implicit `10000`, `0` îl dezactivează); un corp funcțional nu este
+  afectat, în timp ce un corp blocat anulează cititorul wreq și permite logicii existente de
+  rezervă TLS din `proxyFetch` să continue către dispecerul direct/proxy (o solicitare care nu poate fi reluată în siguranță, de exemplu
+  un POST cu un corp, va genera în continuare o eroare în loc să fie reîncercată fără avertisment).
 
-### Transport pentru furnizori bazat pe cookie-uri web — wreq-js 3.2.0
+### Transportul furnizorilor cu cookie-uri web — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` este adaptorul comun pentru cele cinci mecanisme de transport
-specializate, bazate pe cookie-uri web, prezentate mai jos. Fiecare wrapper minimal specific furnizorului selectează un profil de browser/sistem de operare. Adaptorul
-utilizează unicul încărcător al mediului de execuție wreq și grupul de transporturi din `open-sse/utils/tlsClient.ts`, indexate după
-profil + sistem de operare + proxy rezolvat, în timp ce fiecare cerere utilizează `cookieMode: "ephemeral"`. Prin urmare, conturile și
-cererile partajează conexiunile la nivel de transport, dar niciodată o sesiune wreq sau un depozit de cookie-uri.
+`open-sse/services/tlsClientBase.ts` este adaptorul comun pentru cele cinci transporturi specializate
+cu cookie-uri web de mai jos. Fiecare wrapper minimal al furnizorului selectează un profil de browser/sistem de operare. Adaptorul
+folosește încărcătorul unic al runtime-ului wreq și pool-ul de transporturi din `open-sse/utils/tlsClient.ts`, indexat după
+profil + sistem de operare + proxy rezolvat, în timp ce fiecare solicitare folosește `cookieMode: "ephemeral"`. Prin urmare, conturile și
+solicitările partajează conexiunile la nivel de transport, dar niciodată o sesiune wreq sau un depozit de cookie-uri.
 
-| Furnizor   | Profil        | Sistem de operare emulat | Politica EOF a fluxului                |
-| ---------- | ------------- | ------------------------ | -------------------------------------- |
-| Claude     | `chrome_146`  | Linux                    | include `[DONE]`                       |
-| Perplexity | `firefox_148` | macOS                    | include `event: end_of_stream`         |
-| Grok       | `chrome_146`  | Linux                    | exclude `[DONE]`                       |
-| Notion     | `chrome_146`  | Windows                  | include `[DONE]`                       |
-| LMArena    | `chrome_146`  | Windows                  | fără santinelă; închidere la EOF nativ |
+| Furnizor   | Profil        | Sistem de operare emulat | Politica EOF pentru flux                  |
+| ---------- | ------------- | ------------------------ | ----------------------------------------- |
+| Claude     | `chrome_146`  | Linux                    | include `[DONE]`                          |
+| Perplexity | `firefox_151` | macOS                    | include `event: end_of_stream`            |
+| Grok       | `chrome_146`  | Linux                    | exclude `[DONE]`                          |
+| Notion     | `chrome_146`  | Windows                  | include `[DONE]`                          |
+| LMArena    | `chrome_146`  | Windows                  | fără santinelă; închidere la EOF-ul nativ |
 
-- Transmiterea în flux consumă direct obiectul `ReadableStream` al răspunsului nativ; nu este creat
-  niciun fișier temporar sau proces auxiliar.
-- Sunt inspectați până la 256 de octeți inițiali înainte de expunerea unui flux. Furnizorii SSE memorează temporar erorile
-  non-SSE; Grok/LMArena mapează provocările Cloudflare la `403`, iar paginile HTML intermediare la `502`.
-- Timpul de expirare al cererii native rămâne încadrat de un termen-limită absolut strict în JS. O blocare invalidează
-  și închide doar transportul afectat pentru combinația profil/sistem de operare/proxy, înainte ca următoarea cerere să îl recreeze.
-- Prioritatea rezolvării proxy-ului este `proxyUrl` per apel → contextul contului/panoului de control aferent cererii →
+- Redarea în flux consumă direct `ReadableStream` din răspunsul nativ; nu este creat niciun fișier temporar sau proces auxiliar.
+- Sunt inspectați până la 256 de octeți inițiali înainte de expunerea unui flux. Furnizorii SSE stochează în buffer erorile non-SSE;
+  Grok/LMArena mapează provocările Cloudflare la `403`, iar paginile HTML intermediare la `502`.
+- Timpul de expirare al solicitării native rămâne încadrat de un termen-limită JS absolut. O blocare invalidează
+  și închide numai transportul afectat pentru profil/sistem de operare/proxy, înainte ca următoarea solicitare să îl recreeze.
+- Prioritatea rezolvării proxy-ului este, pentru fiecare apel, `proxyUrl` → contextul contului/panoului de control asociat solicitării →
   `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (inclusiv variantele cu litere mici). Erorile de rezolvare eșuează
-  în mod închis, în loc să permită scurgerea unei conexiuni directe. LMArena efectuează în mod deliberat rezolvarea pentru `arena.ai`.
-- `byteResponse` returnează un URL `data:` cu tipul de conținut specificat, fără coruperea UTF-8.
-- Erorile sunt `TlsClientUnavailableError` (pachet/extensie indisponibilă), `TlsClientHangError`
+  în mod sigur, în loc să permită accidental o conexiune directă. LMArena efectuează intenționat rezolvarea pentru `arena.ai`.
+- `byteResponse` returnează un URL `data:` cu tipul de conținut corespunzător, fără coruperea UTF-8.
+- Erorile sunt `TlsClientUnavailableError` (pachetul/modulul addon nu este disponibil), `TlsClientHangError`
   (termen-limită depășit) și `WreqTransportCapacityError` (codul comun de eroare privind capacitatea sesiunilor)
   atunci când toate cele 128 de sloturi limitate pentru profil/sistem de operare/proxy sunt active sau în curs de închidere.
 
-Sesiunea generică `TlsClient` de mai sus rămâne specializată pentru starea persistentă a cookie-urilor
-gestionată de browser. Ambele căi reutilizează un singur încărcător cache-uit al modulului wreq și un hook al ciclului de viață al procesului; grupurile lor rămân
+Sesiunea generică `TlsClient` de mai sus rămâne specializată pentru starea persistentă a cookie-urilor susținută de browser.
+Ambele căi reutilizează un singur încărcător de module wreq stocat în cache și un hook pentru ciclul de viață al procesului; pool-urile lor rămân
 separate deoarece duratele de viață ale cookie-urilor sunt intenționat diferite.
 
-Profilurile sunt acceptate de pachetul fixat, însă acceptarea de către WAF-urile reale se poate modifica independent
-de testele contractuale locale. Validați modificările amprentelor folosind un cont real autorizat în mod explicit,
-înainte de a declara paritatea cu un browser din amonte.
+Profilurile sunt acceptate de pachetul fixat la versiunea specificată, însă acceptarea reală de către WAF se poate modifica independent
+de testele locale de contract. Validați modificările amprentei folosind un cont activ autorizat în mod explicit
+înainte de a declara paritatea cu un browser upstream.
 
 ---
 

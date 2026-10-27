@@ -401,11 +401,24 @@ export function getModelTimeoutMs(aliasOrId: string, modelId: string): number | 
 }
 
 const CLAUDE_MODEL_PATTERN = /(?:^|[\/._-])claude(?:[._-]|$)/;
-const CLAUDE_MAX_EFFORT_UNSUPPORTED_FAMILY_PATTERNS = [
-  /(?:^|[\/._-])haiku(?:[._-]|$)/,
-  // Sonnet 5.5 caps effort at xhigh; max returns a 400.
-  /(?:^|[\/._-])claude-sonnet-5-5(?:[._-]|$)/,
-] as const;
+// Anthropic effort docs (platform.claude.com/docs/en/build-with-claude/effort), `max`
+// row: Fable and Mythos (every version, incl. Mythos Preview), Opus 4.6+, Sonnet 4.6+
+// and Haiku 5.5+. Versions are encoded as major * 100 + minor. Families not listed
+// here stay allowed so a new Claude family is not blocked before the docs list it.
+const CLAUDE_MAX_EFFORT_MIN_VERSION: ReadonlyMap<string, number> = new Map([
+  ["fable", 0],
+  ["mythos", 0],
+  ["opus", 406],
+  ["sonnet", 406],
+  ["haiku", 505],
+]);
+// The docs also list Sonnet 5.5, but it returned a 400 on `max` when it was added
+// (#15035), so it stays capped at xhigh until that is re-verified.
+const CLAUDE_MAX_EFFORT_EXCLUDED_VERSIONS: ReadonlySet<string> = new Set(["sonnet:505"]);
+const CLAUDE_FAMILY_VERSION_PATTERN =
+  /^claude[._-]([a-z]+)(?:[._-](\d{1,2})(?:[._-](\d{1,2}))?)?(?=[._-]|$)/;
+// Pre-4 ids put the version first (claude-3-5-haiku, claude-2.1); none supports effort.
+const CLAUDE_LEGACY_ID_PATTERN = /^claude[._-]\d/;
 const ANTHROPIC_COMPATIBLE_PREFIX = "anthropic-compatible-";
 
 export function supportsClaudeMaxEffort(modelId: string | null | undefined): boolean {
@@ -413,10 +426,14 @@ export function supportsClaudeMaxEffort(modelId: string | null | undefined): boo
   const normalized = modelId.toLowerCase();
   const claudeMatch = normalized.match(CLAUDE_MODEL_PATTERN);
   if (!claudeMatch) return false;
-  const claudeScopedId = normalized.slice(claudeMatch.index ?? 0);
-  return !CLAUDE_MAX_EFFORT_UNSUPPORTED_FAMILY_PATTERNS.some((pattern) =>
-    pattern.test(claudeScopedId)
-  );
+  const claudeScopedId = normalized.slice(claudeMatch.index ?? 0).replace(/^[\/._-]/, "");
+  if (CLAUDE_LEGACY_ID_PATTERN.test(claudeScopedId)) return false;
+  const familyMatch = claudeScopedId.match(CLAUDE_FAMILY_VERSION_PATTERN);
+  const minVersion = familyMatch ? CLAUDE_MAX_EFFORT_MIN_VERSION.get(familyMatch[1]) : undefined;
+  if (minVersion === undefined || familyMatch?.[2] === undefined) return true;
+  const version = Number(familyMatch[2]) * 100 + Number(familyMatch[3] ?? 0);
+  if (CLAUDE_MAX_EFFORT_EXCLUDED_VERSIONS.has(`${familyMatch[1]}:${version}`)) return false;
+  return version >= minVersion;
 }
 
 // Reasoning-effort suffixes the Claude/Claude-Code model picker appends to a base

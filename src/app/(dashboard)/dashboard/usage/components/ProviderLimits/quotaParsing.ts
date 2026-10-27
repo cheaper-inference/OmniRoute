@@ -292,10 +292,21 @@ function parseClaude(data: any) {
     );
   const quotas = quotaEntries({
     quotas: { ...visibleQuotas(data.quotas), ...visibleQuotas(data.modelQuotas) },
-  }).map(([name, quota]) => normalizeQuotaEntry(name, quota, { isPercentageOnly: true }));
+  }).map(([name, quota]) =>
+    normalizeQuotaEntry(name, quota, {
+      isPercentageOnly: true,
+      // usage/claudeQuota.ts puts weekly_scoped into modelQuotas, not account quotas.
+      modelScoped: Object.hasOwn(data.modelQuotas ?? {}, name),
+    })
+  );
 
   if (data?.extraUsage?.is_enabled) {
     quotas.push(buildClaudeExtraUsageQuota(data.extraUsage));
+  }
+
+  const bankedResetCredits = Number(data?.bankedResetCredits);
+  if (Number.isFinite(bankedResetCredits) && bankedResetCredits > 0) {
+    quotas.push(buildBankedResetCreditsQuota(bankedResetCredits));
   }
 
   return quotas;

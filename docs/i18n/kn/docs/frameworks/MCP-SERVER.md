@@ -72,6 +72,16 @@ curl -i \
 
 `manage` ವ್ಯಾಪ್ತಿ ಇಲ್ಲದ ಕೀಲಿ (ಅಥವಾ Bearer ಇಲ್ಲದಿದ್ದರೆ) `403 LOCAL_ONLY` ಅನ್ನು ಹಿಂದಿರುಗಿಸುತ್ತದೆ. ಪಕ್ಕದ ಪೂರ್ವಪ್ರತ್ಯಯ `/api/cli-tools/runtime/*` ಅನ್ನು ಉದ್ದೇಶಪೂರ್ವಕವಾಗಿ ಬೈಪಾಸ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ — [ರೂಟ್ ಗಾರ್ಡ್ ಹಂತಗಳು — `manage` ವ್ಯಾಪ್ತಿಯ ವಿನಾಯಿತಿ](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) ನೋಡಿ.
 
+### Origin ಪರಿಶೀಲನೆ
+
+ದೃಢೀಕರಣದ ನಂತರ `/api/mcp/*` ಗೆ ಬರುವ ಪ್ರತಿಯೊಂದು ವಿನಂತಿಯ — ಟ್ರಾನ್ಸ್‌ಪೋರ್ಟ್‌ಗಳು ಮತ್ತು `status`, `tools`, `audit`, `restart` ನಂತಹ ನಿರ್ವಹಣಾ ಮಾರ್ಗಗಳು — `Origin` ಹೆಡರ್ ಅನ್ನು ಕರೆ ಮಾಡುವವರು ಯಾರೇ ಆಗಿರಲಿ (API ಕೀ, CLI ಟೋಕನ್, ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಸೆಷನ್, ಅಥವಾ ಲಾಗಿನ್ ನಿಷ್ಕ್ರಿಯವಾಗಿರುವಾಗ ಅನಾಮಧೇಯ loopback) ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ. ಇದು MCP Streamable HTTP ವಿವರಣೆ ಬಯಸುವ DNS rebinding ರಕ್ಷಣೆ.
+
+- **`Origin` ಹೆಡರ್ ಇಲ್ಲ** → ಅನುಮತಿಸಲಾಗಿದೆ. OmniRoute CLI, SDK ಮತ್ತು IDE ಕ್ಲೈಂಟ್‌ಗಳು ಇದನ್ನು ಕಳುಹಿಸುವುದಿಲ್ಲ.
+- **ಅನುಮತಿಸಲಾದ `Origin`** → ಯಾವುದೇ ಪೋರ್ಟ್‌ನಲ್ಲಿ `localhost` / `127.0.0.1` / `[::1]`, ಅಥವಾ OmniRoute ನ ಸ್ವಂತ ಸಾರ್ವಜನಿಕ origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, ವಿಶ್ವಸನೀಯ ರಿವರ್ಸ್ ಪ್ರಾಕ್ಸಿ ಫಾರ್ವರ್ಡ್ ಮಾಡಿದ origin (`OMNIROUTE_TRUST_PROXY`, base URL ಹೊಂದಿಸದಿದ್ದಾಗ ಮಾತ್ರ), ಅಥವಾ ನೇರವಾಗಿ ಪ್ರವೇಶಿಸಿದ loopback/LAN IP ಹೋಸ್ಟ್. ಕೇವಲ `Host` ಹೆಡರ್ ಎಂದಿಗೂ ಯಾವುದೇ origin ಅನ್ನು ವಿಶ್ವಸನೀಯವಾಗಿಸುವುದಿಲ್ಲ.
+- **`null` ಸೇರಿದಂತೆ ಬೇರೆ ಯಾವುದೇ `Origin`** → JSON-RPC ದೋಷ ಬಾಡಿಯೊಂದಿಗೆ `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. ಮಾನ್ಯ CSRF ಟೋಕನ್ ತೋರಿಸುವ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಸೆಷನ್ ಅನ್ನು, ಇತರ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಬರಹಗಳಂತೆಯೇ, ಈಗಲೂ ಸ್ವೀಕರಿಸಲಾಗುತ್ತದೆ.
+
+ರಿವರ್ಸ್ ಪ್ರಾಕ್ಸಿಯ ಹಿಂದೆ ಒದಗಿಸಲಾಗುವ ಬ್ರೌಸರ್ MCP ಕ್ಲೈಂಟ್‌ಗೆ `OMNIROUTE_PUBLIC_BASE_URL` ಬೇಕು; ಇತರ origins ಗೆ ಅನುಮತಿ ಪಟ್ಟಿ ಇಲ್ಲ. CORS ಪ್ರೀಫ್ಲೈಟ್ (`OPTIONS`) ಅನ್ನು Origin ಗಾಗಿ ಪರಿಶೀಲಿಸಲಾಗುವುದಿಲ್ಲ; ನಂತರದ ವಿನಂತಿಯನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತದೆ.
+
 ## IDE ಸಂರಚನೆ
 
 Claude Desktop, Cursor, Cline ಮತ್ತು ಹೊಂದಾಣಿಕೆಯಾಗುವ MCP ಕ್ಲೈಂಟ್ಗಳ ಸೆಟಪ್ಗಾಗಿ [MCP ಕ್ಲೈಂಟ್ ಸಂರಚನೆ](../guides/SETUP_GUIDE.md#mcp-client-configuration) ನೋಡಿ.

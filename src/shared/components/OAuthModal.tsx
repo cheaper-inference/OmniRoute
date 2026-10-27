@@ -57,6 +57,7 @@ const DEVICE_CODE_PROVIDERS = new Set([
   "ghe-copilot",
   "grok-cli",
   "muse-code",
+  "workbuddy",
 ]);
 
 const TOKEN_PASTE_PROVIDERS = new Set(["devin-desktop", "devin-cli", "grok-cli", "claude"]);

@@ -1,0 +1,1 @@
+- **fix(sse):** Purge releasable failure entries past held lockouts so the failure map stays within its cap ([#18126](https://github.com/cheaper-inference/OmniRoute/pull/18126)) — thanks @maxmad64bis

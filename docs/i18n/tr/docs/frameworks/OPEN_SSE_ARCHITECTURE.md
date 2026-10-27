@@ -488,7 +488,7 @@ Bu, şunları işler:
 
 | Dosya                         | Amaç                                                          |
 | ----------------------------- | ------------------------------------------------------------- |
-| `providerRegistry.ts`         | 375 sağlayıcılık katalog üzerinde sohbet modeli kayıt defteri |
+| `providerRegistry.ts`         | 376 sağlayıcılık katalog üzerinde sohbet modeli kayıt defteri |
 | `providerModels.ts`           | Model takma adları, format eşlemesi                           |
 | `constants.ts`                | Zaman aşımları, limitler, durum kodları                       |
 | `defaultThinkingSignature.ts` | Varsayılan Claude düşünme imzası                              |

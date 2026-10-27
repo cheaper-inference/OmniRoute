@@ -160,6 +160,41 @@ test("Codex preserves bootstrap selection when no account has a synced catalog",
   );
 });
 
+test("Codex image models bypass the synced chat inventory (it never lists image models)", async () => {
+  // The Codex live catalog (`/backend-api/codex/models`) only returns chat models, so a
+  // synced Codex inventory never contains gpt-image-*. Filtering an image request against it
+  // leaves no eligible account: /v1/images/generations -> "No credentials for image provider".
+  await resetStorage();
+  const { proId } = await seedTwoAccounts();
+  for (const imageModel of ["gpt-image-2", "gpt-image-2.5-flare"]) {
+    const selected = await auth.getProviderCredentials(PROVIDER, null, null, imageModel);
+    assert.equal(
+      selectedConnectionId(selected),
+      proId,
+      `${imageModel} is a registered Codex image model and must not be filtered by the chat inventory`
+    );
+  }
+});
+
+test("Codex image models are not blocked by an empty account inventory; chat models still are", async () => {
+  await resetStorage();
+  const { plusId } = await seedTwoAccounts();
+  await modelsDb.replaceSyncedAvailableModelsForConnection(PROVIDER, plusId, []);
+  assert.equal(
+    selectedConnectionId(
+      await auth.getProviderCredentials(PROVIDER, null, [plusId], "gpt-image-2")
+    ),
+    plusId
+  );
+  assert.equal(
+    selectedConnectionId(
+      await auth.getProviderCredentials(PROVIDER, null, [plusId], "gpt-pro-only-test")
+    ),
+    null,
+    "chat models still honour the account inventory"
+  );
+});
+
 test("Codex forced and API-key restricted selection cannot bypass the account inventory", async () => {
   await resetStorage();
   const { plusId } = await seedTwoAccounts();

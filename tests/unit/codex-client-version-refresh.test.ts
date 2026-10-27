@@ -156,7 +156,8 @@ test("discovery refreshes before authenticated model fetch and accepts remote-on
   });
   assert.equal(requests.length, 2);
   assert.equal(requests[0], REGISTRY_URL);
-  assert.equal(models?.[0].id, "gpt-future-remote-only");
+  assert.equal(models.models[0].id, "gpt-future-remote-only");
+  assert.equal(models.failure, undefined);
 });
 
 test("registry failure still discovers models with fallback version; absent credentials do no work", async () => {
@@ -171,16 +172,15 @@ test("registry failure still discovers models with fallback version; absent cred
       return Response.json({ models: [{ slug: "gpt-known-model" }] });
     },
   });
-  assert.equal(models?.[0].id, "gpt-known-model");
-  assert.equal(
-    await fetchCodexDiscoveryModels({
-      accessToken: null,
-      fetchImpl: async () => {
-        assert.fail("no credentials must not fetch");
-      },
-    }),
-    null
-  );
+  assert.equal(models.models[0].id, "gpt-known-model");
+  const withoutCredentials = await fetchCodexDiscoveryModels({
+    accessToken: null,
+    fetchImpl: async () => {
+      assert.fail("no credentials must not fetch");
+    },
+  });
+  assert.deepEqual(withoutCredentials.models, []);
+  assert.deepEqual(withoutCredentials.failure, { code: "NO_CREDENTIAL" });
 });
 
 test("oversized metadata bodies are cancelled and preserve fallback", async () => {

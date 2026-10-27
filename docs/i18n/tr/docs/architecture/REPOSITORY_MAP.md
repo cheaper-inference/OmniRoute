@@ -7,25 +7,26 @@
 > **Her dizin ve kök dosya için tek satırlık açıklama.**
 > Son güncelleme: 2026-06-28 — OmniRoute v3.8.40
 >
-> Kod tabanında hızlıca gezinmek için bu haritayı kullanın. Ayrıntılı incelemeler için özel dokümanların bağlantılarını takip edin.
+> Kod tabanında hızla gezinmek için bu haritayı kullanın. Ayrıntılı incelemeler için ilgili belgelere yönlendiren bağlantıları izleyin.
 
-## Üst düzey dizin ağacı
+## Üst düzey ağaç
 
 ```
 OmniRoute/
-├── src/                  # Next.js 16 uygulaması (UI + API rotaları + kütüphaneler + etki alanı + sunucu)
+├── src/                  # Next.js 16 uygulaması (kullanıcı arayüzü + API rotaları + kütüphaneler + alan mantığı + sunucu)
 ├── open-sse/             # Akış motoru çalışma alanı (işleyiciler, yürütücüler, çevirici, MCP sunucusu)
+├── packages/            # npm çalışma alanları: ui-kit (pakete dahil edilmiş Keak CI UI Kit) ve browser-pool
 ├── electron/             # Masaüstü sarmalayıcısı (Electron 41 + electron-builder 26.10)
 ├── bin/                  # CLI giriş noktası ve komut işleyicileri
-├── scripts/              # Derleme, kontrol, eşitleme ve tek seferlik betikler
-├── docs/                 # Herkese açık dokümantasyon (şu anda buradasınız)
+├── scripts/              # Derleme, denetim, eşitleme ve tek seferlik betikler
+├── docs/                 # Herkese açık belgeler (şu anda buradasınız)
 ├── tests/                # Tüm test paketleri (birim, entegrasyon, e2e, protokol istemcileri)
-├── public/               # Next.js statik varlıkları, PWA bildirimi, service worker, simgeler
-├── config/               # Statik yapılandırma + kalite kapısı durumu (i18n, payloadRules, quality/)
+├── public/               # Next.js statik varlıkları, PWA manifesti, service worker, simgeler
+├── config/               # Statik yapılandırma + kalite eşiği durumu (i18n, payloadRules, quality/)
 ├── images/               # Pazarlama / README görsel varlıkları
-├── @omniroute/           # Yayımlanabilir yardımcı paketler (opencode-plugin, opencode-provider)
+├── @omniroute/           # Yayımlanabilir tamamlayıcı paketler (opencode-plugin, opencode-provider)
 ├── skills/               # CLI/ajan beceri paketleri (cli-* + omni-* + config-codex-cli)
-├── examples/             # Örnek eklentiler + omniroute-cmd-hello başlangıç şablonu
+├── examples/             # Örnek eklentiler + omniroute-cmd-hello başlangıç projesi
 ├── contrib/              # Topluluk katkıları (podman/)
 ├── .source/              # Fumadocs kaynak yapılandırması (source.config.mjs + server/browser/dynamic)
 ├── .github/              # GitHub Actions iş akışları + sorun şablonları + PR şablonu
@@ -36,8 +37,8 @@ OmniRoute/
 ├── _ideia/               # Planlama notları (gayriresmî; dağıtıma dahil edilmez)
 ├── _mono_repo/           # Geçmiş alt projeler (cloud, site, vscode-extension)
 ├── _references/          # İlgili OSS projelerinden salt okunur referans klonları
-├── _tasks/               # Sürüm başına görev izleme dosyaları (gayriresmî)
-├── .build/ .worktrees/ dist/   # Yerel derleme / git-worktree / derleme çıktısı çalışma alanı (gitignored)
+├── _tasks/               # Sürüm bazında görev takip dosyaları (gayriresmî)
+├── .build/ .worktrees/ dist/   # Yerel derleme / git-worktree / derleme çıktısı geçici alanı (gitignored)
 ├── .issues/              # Yerel sorun önbelleği (gitignored)
 ├── .playwright-mcp/      # Playwright MCP test çıktıları
 ├── coverage/             # c8 kapsam çıktısı (gitignored)
@@ -52,61 +53,61 @@ OmniRoute/
 
 ## Kök dosyalar
 
-| Dosya                                       | Amaç                                                                                                |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Pazarlama açılış sayfası + hızlı başlangıç + özellik matrisi (ayrıca bkz. `llm.txt`)                |
-| **CHANGELOG.md**                            | Sürüm bazında değişiklik günlüğü (`/version-bump-cc` becerisi tarafından otomatik oluşturulur)      |
-| **LICENSE**                                 | MIT lisans metni                                                                                    |
-| **CLAUDE.md**                               | Claude Code ajanları için proje kuralları (kesin kurallar, kurallar bütünü, senaryolar)             |
-| **AGENTS.md**                               | CLAUDE.md ile aynı, ancak Claude dışındaki AI ajanları için (Codex, Cursor vb.)                     |
-| **GEMINI.md**                               | Gemini tabanlı ajanlar için kısa kurallar (CLAUDE.md'nin alt kümesi)                                |
-| **CONTRIBUTING.md**                         | Katkıda bulunanlar için rehber: kurulum, conventional commit'ler, test, PR akışı                    |
-| **SECURITY.md**                             | Güvenlik açığı bildirim politikası, desteklenen sürümler, tehdit modeli                             |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — topluluk davranışına ilişkin beklentiler                                     |
-| **llm.txt**                                 | LLM tarayıcıları için optimize edilmiş düz metin açılış sayfası (AI asistanları için SEO)           |
-| **package.json**                            | npm manifestosu, betikler, bağımlılıklar, motorlar, c8 kapsam eşiği                                 |
-| **package-lock.json**                       | Kilitlenmiş bağımlılık ağacı                                                                        |
-| **tsconfig.json**                           | Kök TypeScript yapılandırması                                                                       |
-| **tsconfig.typecheck-core.json**            | `src/` çekirdeği için tür denetimi yapılandırması                                                   |
-| **tsconfig.typecheck-noimplicit-core.json** | Katı (`noImplicitAny`) tür denetimi                                                                 |
-| **tsconfig.tsbuildinfo**                    | TS artımlı derleme önbelleği (gitignore kapsamında)                                                 |
-| **next.config.mjs**                         | Next.js 16 derleme yapılandırması (bağımsız çıktı)                                                  |
-| **next-env.d.ts**                           | Next.js tarafından otomatik oluşturulan ortam türleri                                               |
-| **eslint.config.mjs**                       | Düz ESLint yapılandırması (proje alanına göre kurallar)                                             |
-| **prettier.config.mjs**                     | Prettier biçimlendirme kuralları                                                                    |
-| **postcss.config.mjs**                      | Tailwind/CSS işlem hattı için PostCSS yapılandırması                                                |
-| **playwright.config.ts**                    | Playwright E2E test yapılandırması                                                                  |
-| **vitest.config.ts**                        | Vitest yapılandırması (varsayılan paket)                                                            |
-| **vitest.mcp.config.ts**                    | MCP sunucusu / autoCombo / önbellek paketleri için Vitest yapılandırması                            |
-| **sonar-project.properties**                | SonarQube/SonarCloud yapılandırması (kod kalitesi)                                                  |
-| **Dockerfile**                              | Çok aşamalı Docker derlemesi (builder → runner-base → runner-cli)                                   |
-| **docker-compose.yml**                      | 4 profilli geliştirme compose'u (base, cli, host, cliproxyapi) + redis yardımcı konteyneri          |
-| **docker-compose.prod.yml**                 | Üretim compose'u (port 20130, redis, adlandırılmış volume'ler)                                      |
-| **.dockerignore**                           | Docker bağlamından hariç tutulan dosyalar                                                           |
-| **fly.toml**                                | Fly.io dağıtım yapılandırması (bölge `sin`, port 20128, /data volume'ü)                             |
-| **.env.example**                            | Ortam dosyası şablonu (ilk kurulumda otomatik olarak `.env` dosyasına kopyalanır)                   |
-| **.gitignore**                              | Git yoksayma kalıpları                                                                              |
-| **.npmignore**                              | npm yayınlama hariç tutma listesi                                                                   |
-| **.npmrc**                                  | npm yapılandırması (kayıt defteri, lockfile politikası)                                             |
-| **.node-version**                           | Node sürüm sabitlemesi (nvm uyumlu araçlar tarafından kullanılır)                                   |
-| **.nvmrc**                                  | nvm için Node sürüm sabitlemesi                                                                     |
-| **eslint.complexity.config.mjs**            | Karmaşıklık mandalı için ESLint yapılandırması (`scripts/check/check-complexity.mjs --config`)      |
-| **eslint.sonarjs.config.mjs**               | SonarJS kuralları için ESLint yapılandırması (bilişsel karmaşıklık / yineleme)                      |
-| **source.config.ts**                        | Fumadocs `defineDocs` kaynak yapılandırması (`.source/` girdisini sağlar)                           |
-| **knip.json**                               | Knip yapılandırması — kullanılmayan dosyalar/dışa aktarımlar/bağımlılıklar (ölü kod eşiğini besler) |
-| **stryker.conf.json**                       | Stryker mutasyon testi yapılandırması                                                               |
-| **.size-limit.json**                        | size-limit paket bütçesi yapılandırması                                                             |
-| **promptfooconfig.yaml**                    | promptfoo değerlendirme yapılandırması                                                              |
-| **.gitleaks.toml**                          | gitleaks gizli bilgi tarama kural kümesi                                                            |
-| **.zizmor.yml**                             | zizmor GitHub Actions güvenlik lint yapılandırması                                                  |
-| **socket.yml**                              | Socket.dev tedarik zinciri yapılandırması                                                           |
-| **news.json**                               | Yerelleştirilmiş v2 duyuru akışı; Radar lansman öğesi devre dışı olarak sunulur                     |
-| **flake.nix** / **flake.lock**              | Nix geliştirme kabuğu tanımı + kilit                                                                |
-| **.env**                                    | Yerel gizli bilgiler (gitignored — `.env.example` dosyasından oluşturulur)                          |
+| Dosya                                       | Amaç                                                                                                 |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **README.md**                               | Pazarlama açılış sayfası + hızlı başlangıç + özellik matrisi (ayrıca bkz. `llm.txt`)                 |
+| **CHANGELOG.md**                            | Sürüm başına değişiklik günlüğü (`/version-bump-cc` becerisi tarafından otomatik oluşturulur)        |
+| **LICENSE**                                 | MIT lisans metni                                                                                     |
+| **CLAUDE.md**                               | Claude Code aracıları için proje kuralları (katı kurallar, kurallar bütünü, senaryolar)              |
+| **AGENTS.md**                               | CLAUDE.md ile aynı, ancak Claude dışındaki yapay zekâ aracıları için (Codex, Cursor vb.)             |
+| **GEMINI.md**                               | Gemini tabanlı aracılar için özlü kurallar (CLAUDE.md'nin alt kümesi)                                |
+| **CONTRIBUTING.md**                         | Katkıda bulunanlar için kılavuz: kurulum, conventional commit'ler, test, PR akışı                    |
+| **SECURITY.md**                             | Güvenlik açığı bildirim politikası, desteklenen sürümler, tehdit modeli                              |
+| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — topluluk davranışına ilişkin beklentiler                                      |
+| **llm.txt**                                 | LLM tarayıcıları için optimize edilmiş düz metin açılış sayfası (yapay zekâ asistanları için SEO)    |
+| **package.json**                            | npm manifestosu, betikler, bağımlılıklar, çalışma ortamları, c8 kapsam eşiği                         |
+| **package-lock.json**                       | Kilitlenmiş bağımlılık ağacı                                                                         |
+| **tsconfig.json**                           | Kök TypeScript yapılandırması                                                                        |
+| **tsconfig.typecheck-core.json**            | `src/` çekirdeği için tür denetimi yapılandırması                                                    |
+| **tsconfig.typecheck-noimplicit-core.json** | Katı (`noImplicitAny`) tür denetimi                                                                  |
+| **tsconfig.tsbuildinfo**                    | TS artımlı derleme önbelleği (git tarafından yok sayılır)                                            |
+| **next.config.mjs**                         | Next.js 16 derleme yapılandırması (bağımsız çıktı)                                                   |
+| **next-env.d.ts**                           | Next.js tarafından otomatik oluşturulan ortam türleri                                                |
+| **eslint.config.mjs**                       | ESLint düz yapılandırması (proje alanına göre kurallar)                                              |
+| **prettier.config.mjs**                     | Prettier biçimlendirme kuralları                                                                     |
+| **postcss.config.mjs**                      | Tailwind/CSS işlem hattı için PostCSS yapılandırması                                                 |
+| **playwright.config.ts**                    | Playwright E2E test yapılandırması                                                                   |
+| **vitest.config.ts**                        | Vitest yapılandırması (varsayılan paket)                                                             |
+| **vitest.mcp.config.ts**                    | MCP sunucusu / autoCombo / önbellek paketleri için Vitest yapılandırması                             |
+| **sonar-project.properties**                | SonarQube/SonarCloud yapılandırması (kod kalitesi)                                                   |
+| **Dockerfile**                              | Çok aşamalı Docker derlemesi (builder → runner-base → runner-cli)                                    |
+| **docker-compose.yml**                      | 4 profilli geliştirme compose yapılandırması (base, cli, host, cliproxyapi) + redis yan hizmeti      |
+| **docker-compose.prod.yml**                 | Üretim compose yapılandırması (20130 numaralı port, redis, adlandırılmış birimler)                   |
+| **.dockerignore**                           | Docker bağlamından hariç tutulan dosyalar                                                            |
+| **fly.toml**                                | Fly.io dağıtım yapılandırması (`sin` bölgesi, 20128 numaralı port, /data birimi)                     |
+| **.env.example**                            | Ortam dosyası şablonu (ilk kurulumda otomatik olarak `.env` dosyasına kopyalanır)                    |
+| **.gitignore**                              | Git yok sayma kalıpları                                                                              |
+| **.npmignore**                              | npm yayımlama hariç tutma listesi                                                                    |
+| **.npmrc**                                  | npm yapılandırması (kayıt deposu, kilit dosyası politikası)                                          |
+| **.node-version**                           | Node sürüm sabitlemesi (nvm uyumlu araçlar tarafından kullanılır)                                    |
+| **.nvmrc**                                  | nvm için Node sürüm sabitlemesi                                                                      |
+| **eslint.complexity.config.mjs**            | Karmaşıklık mandalı için ESLint yapılandırması (`scripts/check/check-complexity.mjs --config`)       |
+| **eslint.sonarjs.config.mjs**               | SonarJS kuralları için ESLint yapılandırması (bilişsel karmaşıklık / yineleme)                       |
+| **source.config.ts**                        | Fumadocs `defineDocs` kaynak yapılandırması (`.source/` girdisini sağlar)                            |
+| **knip.json**                               | Knip yapılandırması — kullanılmayan dosyalar/dışa aktarımlar/bağımlılıklar (ölü kod geçidini besler) |
+| **stryker.conf.json**                       | Stryker mutasyon testi yapılandırması                                                                |
+| **.size-limit.json**                        | size-limit paket bütçesi yapılandırması                                                              |
+| **promptfooconfig.yaml**                    | promptfoo değerlendirme yapılandırması                                                               |
+| **.gitleaks.toml**                          | gitleaks gizli bilgi tarama kural kümesi                                                             |
+| **.zizmor.yml**                             | zizmor GitHub Actions güvenlik lint yapılandırması                                                   |
+| **socket.yml**                              | Socket.dev tedarik zinciri yapılandırması                                                            |
+| **news.json**                               | Yerelleştirilmiş v2 duyuru akışı; Radar lansman öğesi devre dışı olarak sunulur                      |
+| **flake.nix** / **flake.lock**              | Nix geliştirme kabuğu tanımı + kilit dosyası                                                         |
+| **.env**                                    | Yerel gizli bilgiler (git tarafından yok sayılır — `.env.example` dosyasından oluşturulur)           |
 
-> **v3.8.26 sürümünde kök dizinden taşındı (düzenleme):**
+> **v3.8.26 sürümünde kök dizinden taşındı (sadeleştirme):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ve oluşturulan `quality-metrics.json` (gitignored). Bkz. [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ve oluşturulan `quality-metrics.json` (git tarafından yok sayılır). Bkz. [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -115,17 +116,17 @@ OmniRoute/
 ```
 src/
 ├── app/                 # App Router (sayfalar + API rotaları + durum sayfaları + açılış sayfası)
-├── lib/                 # Temel kütüphaneler / alan modülleri (80 alt dizin + üst düzeyde ~70 dosya)
-├── domain/              # Saf alan mantığı (ilke motoru, geri dönüş, maliyet, kilitleme, comboResolver, değerlendirme)
-├── server/              # Yalnızca sunucu modülleri (yetkilendirme işlem hattı, cors, kimlik doğrulama ara yazılımı) — istemciden içe aktarılamaz
+├── lib/                 # Temel kütüphaneler / etki alanı modülleri (80 alt dizin + ~70 üst düzey dosya)
+├── domain/              # Saf etki alanı mantığı (ilke motoru, geri dönüş, maliyet, kilitleme, comboResolver, değerlendirme)
+├── server/              # Yalnızca sunucuya özel modüller (yetkilendirme işlem hattı, cors, kimlik doğrulama ara katmanı) — istemciden içe aktarılamaz
 ├── shared/              # Güvenli olduğu durumlarda sunucu ve istemci arasında paylaşılır (sabitler, türler, doğrulama, sözleşmeler, yardımcı araçlar)
 ├── i18n/                # next-intl yapılandırması + yerel ayar başına mesaj JSON'u (67 yerel ayar)
-├── middleware/          # Next.js ara yazılımı (istek zenginleştirme, yerel ayar algılama)
+├── middleware/          # Next.js ara katmanı (istek zenginleştirme, yerel ayar algılama)
 ├── mitm/                # MITM proxy çekirdeği: sertifika oluşturma/yükleme, işleyiciler, hedefler, inceleyici, maskeler, doğrudan geçiş
-│   ├── handlers/        # MitmHandlerBase'i genişleten 9 IDE ajanı işleyici sınıfı (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
+│   ├── handlers/        # MitmHandlerBase sınıfını genişleten 9 IDE aracısı işleyici sınıfı (antigravity, kiro, copilot, codex, cursor, zed, claudeCode, openCode, trae)
 │   └── inspector/       # Trafik yakalama katmanı: arabellek (bellek içi halka), sseMerger, conversationNormalizer, kindDetector, contextKey, httpProxyServer, systemProxyConfig
-├── models/              # Model bağdaştırıcı bağlantı katmanı (eski uyumluluk katmanı)
-├── scripts/             # Kaynak ağacı içi bakım betikleri (ör. backfillAggregation)
+├── models/              # Model adaptörü bağlantı kodu (eski uyumluluk katmanı)
+├── scripts/             # Kaynak ağacı içindeki bakım betikleri (ör. backfillAggregation)
 ├── sse/                 # Eski SSE işleyicileri/hizmetleri (chat.ts, chatHelpers.ts, services/auth.ts)
 ├── store/               # Eski bellek içi depo (src/lib/db lehine aşamalı olarak kullanımdan kaldırılıyor)
 ├── types/               # Paylaşılan TS tür dosyaları
@@ -138,19 +139,19 @@ src/
 
 | Yol                                                                          | Amaç                                                                                                                                                                                                                                                                                                                   |
 | ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | Herkese açık OpenAI uyumlu API (~25 alt rota: sohbet, tamamlamalar, gömmeler, dosyalar, toplu işlemler, ses, görseller, videolar, müzik, yeniden sıralama, moderasyon, arama, ws, aracılar, hesaplar, sağlayıcılar vb.)                                                                                                |
+| `app/api/v1/`                                                                | Herkese açık OpenAI uyumlu API (~25 alt rota: sohbet, tamamlamalar, gömmeler, dosyalar, toplu işlemler, ses, görseller, videolar, müzik, yeniden sıralama, moderasyonlar, arama, ws, aracılar, hesaplar, sağlayıcılar vb.)                                                                                             |
 | `app/api/v1beta/`                                                            | Gemini tarzı API uç noktaları                                                                                                                                                                                                                                                                                          |
 | `app/api/playground/`                                                        | Playground Studio rotaları: `improve-prompt/` (POST — LLM istem yeniden yazıcısı), `presets/` (GET ile listeleme / POST ile oluşturma), `presets/[id]/` (GET / PUT / DELETE) — bkz. `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                             |
-| `app/api/` (v1 olmayan)                                                      | Yönetim/yönetici rotaları (~60 dizin: sağlayıcılar, kombinasyonlar, ayarlar, mcp, a2a, değerlendirmeler, bellek, beceriler, webhook'lar, uyumluluk, dayanıklılık, izleme, tüneller, cli araçları vb.)                                                                                                                  |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 rota (sunucu denetimi, aracı durumu/DNS/eşlemeleri, atlama, sertifika, üst-CA). LOCAL_ONLY + SPAWN_CAPABLE. Bkz. `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                        |
+| `app/api/` (v1 dışı)                                                         | Yönetim/yönetici rotaları (~60 dizin: sağlayıcılar, kombinasyonlar, ayarlar, mcp, a2a, değerlendirmeler, bellek, beceriler, web kancaları, uyumluluk, dayanıklılık, izleme, tüneller, cli araçları vb.)                                                                                                                |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 rota (sunucu kontrolü, aracı durumu/DNS/eşlemeleri, atlama, sertifika, üst CA). LOCAL_ONLY + SPAWN_CAPABLE. Bkz. `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                        |
 | `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16+ rota (istekler, oturumlar, ana makineler, yakalama modları, dışa aktarma, ws). LOCAL_ONLY + SPAWN_CAPABLE. Bkz. `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                       |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 giriş noktası (`POST /a2a`)                                                                                                                                                                                                                                                                           |
 | `app/.well-known/agent.json/`                                                | A2A Aracı Kartı (keşif)                                                                                                                                                                                                                                                                                                |
-| `app/(dashboard)/dashboard/`                                                 | Pano kullanıcı arayüzü sayfaları (50+ bölüm, ~118 page.tsx dosyası: sağlayıcılar, kombinasyonlar, ayarlar, bellek, beceriler, webhook'lar, değerlendirmeler, denetim, toplu işlemler, önbellek, maliyetler, sistem durumu, sistem, etkinlik vb.)                                                                       |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio kullanıcı arayüzü (3 sekme: Ara/Kazı/Karşılaştır + SearchConceptCard + ProviderCatalog) — bkz. `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                            |
+| `app/(dashboard)/dashboard/`                                                 | Pano kullanıcı arayüzü sayfaları (50+ bölüm, ~118 page.tsx dosyası: sağlayıcılar, kombinasyonlar, ayarlar, bellek, beceriler, web kancaları, değerlendirmeler, denetim, toplu işlemler, önbellek, maliyetler, sistem durumu, sistem, etkinlik vb.)                                                                     |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio kullanıcı arayüzü (3 sekme: Arama/Kazıma/Karşılaştırma + SearchConceptCard + ProviderCatalog) — bkz. `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                      |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plan 21): `page.tsx` (3 sekmeli kabuk), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge pano sayfası — sunucu kartı, 9 aracı kartı, kurulum sihirbazı, model eşleme, atlama listesi. i18n PT-BR + EN. Bkz. `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                       |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector pano sayfası — DevTools bölünmüş görünümü, 7 ayrıntı sekmesi, 4 yakalama modu geçiş düğmesi, oturum kaydedici, bağlam renklendirmesi. i18n PT-BR + EN. Bkz. `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                  |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector pano sayfası — DevTools bölünmüş görünümü, 7 ayrıntı sekmesi, 4 yakalama modu anahtarı, oturum kaydedici, bağlam renklendirmesi. i18n PT-BR + EN. Bkz. `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                       |
 | `app/(dashboard)/dashboard/activity/`                                        | Etkinlik akışı sayfası (Grup B): `page.tsx` (sunucu) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — bkz. `docs/architecture/MONITORING_SECTIONS.md`                                                                                                             |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Kota Paylaşımı sayfası (Grup B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                           |
 | `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Sağlayıcı planı yapılandırma sayfası (Grup B): `page.tsx` + `ProviderPlanConfigClient.tsx` — bağlantı başına kota boyutu geçersiz kılmaları                                                                                                                                                                            |
@@ -164,68 +165,68 @@ src/
 
 ### `src/lib/` — Temel kütüphaneler (~50 modül)
 
-| Modül                                    | Amaç                                                                                                                                                                                                                                                                                                                      |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A protokolü görev yöneticisi, yetenekler (5), akış                                                                                                                                                                                                                                                                      |
-| `acp/`                                   | CLI Aracı Kayıt Defteri (yerel CLI keşfi — bkz. `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                               |
-| `api/`                                   | Paylaşılan API yardımcıları (`requireManagementAuth`, doğrulama)                                                                                                                                                                                                                                                          |
-| `auth/`                                  | Oturum, parola karma işlemi, belirteç doğrulama                                                                                                                                                                                                                                                                           |
-| `batches/`                               | OpenAI Batches API işleyicileri                                                                                                                                                                                                                                                                                           |
-| `catalog/`                               | Sağlayıcı kataloğu için Zod doğrulaması + yetenek çözümleme                                                                                                                                                                                                                                                               |
-| `cloudAgent/`                            | Bulut Aracıları (Codex Cloud, Devin, Jules) — bkz. `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                       |
-| `combos/`                                | Kombinasyon çözümleme + yeniden sıralama yardımcıları                                                                                                                                                                                                                                                                     |
-| `audit/`                                 | Etkinlik akışı yardımcıları: `highLevelActions.ts` (izin verilenler listesi + `isHighLevelAction()`), `activityIcons.ts` (eylem → simge/fiil eşlemesi), `timeline.ts` (groupByDay/relativeTime) — bkz. `docs/architecture/MONITORING_SECTIONS.md`                                                                         |
-| `compliance/`                            | Denetim günlüğü + sağlayıcı denetimi — bkz. `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                 |
-| `compression/`                           | Sıkıştırma motoru bağlantı katmanı (motorlar `open-sse/services/compression/` içinde bulunur)                                                                                                                                                                                                                             |
-| `config/`                                | Çalışma zamanı yapılandırma yardımcıları                                                                                                                                                                                                                                                                                  |
-| `db/`                                    | 120'den fazla etki alanı veritabanı modülü + 168 geçiş (SQLite için her zaman burayı kullanın)                                                                                                                                                                                                                            |
-| `quota/`                                 | Kota Paylaşım Motoru: `dimensions.ts` (türler/Zod), `types.ts` (`QuotaStore` arayüzü), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — bkz. `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Radar ücretsiz model kataloğu istemcisi: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — bkz. `docs/frameworks/RADAR.md`                                                                                                                                     |
-| `display/`                               | Kullanıcı arayüzü biçimlendirme yardımcıları (maliyet, gecikme vb.)                                                                                                                                                                                                                                                       |
-| `embeddings/`                            | Embeddings hizmeti yardımcıları                                                                                                                                                                                                                                                                                           |
-| `env/`                                   | Ortam değişkenlerini ayrıştırma + doğrulama                                                                                                                                                                                                                                                                               |
-| `evals/`                                 | Değerlendirme çerçevesi (paketler, çalıştırıcı, çalışma zamanı) — bkz. `docs/frameworks/EVALS.md`                                                                                                                                                                                                                         |
-| `guardrails/`                            | Kişisel bilgi maskeleyici, istem enjeksiyonu, görüntü köprüsü — bkz. `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                        |
-| `jobs/`                                  | Arka plan görevleri (cron benzeri)                                                                                                                                                                                                                                                                                        |
-| `memory/`                                | Konuşma belleği (SQLite FTS5 + sqlite-vec hibrit RRF + Qdrant katman 2) — bkz. `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                |
-| `memory/embedding/`                      | Çok kaynaklı embedding katmanı: `index.ts` (çözümleyici), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                        |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 sarmalayıcısı — KNN kaba kuvvet + hibrit RRF (FTS5 + vektör, k=60). Gerektiğinde başlatılır; sqlite-vec kullanılamadığında sorunsuz biçimde daha düşük işlevsellikle çalışır. (plan 21)                                                                                                                 |
-| `memory/reindex.ts`                      | `runReindexBatch()` — `needs_reindex=1` olan bellekleri arka planda işler; `POST /api/memory/reindex` ve gereksinim üzerine geçmiş verileri doldurma yolu tarafından çağrılır. (plan 21)                                                                                                                                  |
-| `monitoring/`                            | Sistem durumu kontrolleri, metrik yayımı                                                                                                                                                                                                                                                                                  |
-| `oauth/`                                 | 22 sağlayıcı modülü için OAuth/içe aktarma akışları (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                           |
-| `plugins/`                               | Eklenti kayıt defteri                                                                                                                                                                                                                                                                                                     |
-| `promptCache/`                           | Anthropic tarzı istem önbelleği kesme noktaları                                                                                                                                                                                                                                                                           |
-| `skills/`                                | Yetenekler çerçevesi (yerleşik + pazar yeri + SkillsSH) — bkz. `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                |
-| `playground/`                            | Playground Studio paylaşımlı yardımcıları: `codeExport.ts` (curl/Python/TS oluşturucu), `promptImprover.ts` (meta-prompt oluşturucu), `streamMetrics.ts` (saf TTFT/TPS), `types.ts` (fiyatlandırma tablosu) — bkz. `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                 |
-| `webhookDispatcher.ts`                   | HMAC webhook teslimatı — bkz. `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                               |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tünel yöneticileri — bkz. `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                     |
-| `cloudSync.ts`, `initCloudSync.ts`       | Durumun isteğe bağlı bulut senkronizasyonu                                                                                                                                                                                                                                                                                |
-| `localDb.ts`                             | Veritabanı modülleri için yeniden dışa aktarma varili (mantık içermez — yalnızca yeniden dışa aktarmalar)                                                                                                                                                                                                                 |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | İstek önbelleğe alma + eşgüçlülük                                                                                                                                                                                                                                                                                         |
-| (~30 ek üst düzey dosya)                 | Özelleştirilmiş yardımcılar (logEnv, modelsDevSync, piiSanitizer vb.)                                                                                                                                                                                                                                                     |
+| Modül                                    | Amaç                                                                                                                                                                                                                                                                                                                    |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A protokolü görev yöneticisi, beceriler (5), akış                                                                                                                                                                                                                                                                     |
+| `acp/`                                   | CLI Aracı Kaydı (yerel CLI keşfi — bkz. `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                     |
+| `api/`                                   | Paylaşılan API yardımcıları (`requireManagementAuth`, doğrulama)                                                                                                                                                                                                                                                        |
+| `auth/`                                  | Oturum, parola karma oluşturma, belirteç doğrulama                                                                                                                                                                                                                                                                      |
+| `batches/`                               | OpenAI Batches API işleyicileri                                                                                                                                                                                                                                                                                         |
+| `catalog/`                               | Sağlayıcı kataloğu için Zod doğrulaması + yetenek çözümleme                                                                                                                                                                                                                                                             |
+| `cloudAgent/`                            | Bulut Aracıları (Codex Cloud, Devin, Jules) — bkz. `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                     |
+| `combos/`                                | Kombinasyon çözümleme + yeniden sıralama yardımcıları                                                                                                                                                                                                                                                                   |
+| `audit/`                                 | Etkinlik akışı yardımcıları: `highLevelActions.ts` (izin verilenler listesi + `isHighLevelAction()`), `activityIcons.ts` (eylem → simge/fiil eşlemesi), `timeline.ts` (groupByDay/relativeTime) — bkz. `docs/architecture/MONITORING_SECTIONS.md`                                                                       |
+| `compliance/`                            | Denetim günlüğü + sağlayıcı denetimi — bkz. `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                               |
+| `compression/`                           | Sıkıştırma motoru entegrasyon katmanı (motorlar `open-sse/services/compression/` içinde bulunur)                                                                                                                                                                                                                        |
+| `config/`                                | Çalışma zamanı yapılandırma yardımcıları                                                                                                                                                                                                                                                                                |
+| `db/`                                    | 120'den fazla etki alanı DB modülü + 168 geçiş (SQLite için her zaman burayı kullanın)                                                                                                                                                                                                                                  |
+| `quota/`                                 | Kota Paylaşım Motoru: `dimensions.ts` (türler/Zod), `types.ts` (QuotaStore arayüzü), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — bkz. `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | Radar ücretsiz model kataloğu istemcisi: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — bkz. `docs/frameworks/RADAR.md`                                                                                                                                   |
+| `display/`                               | Kullanıcı arayüzü biçimlendirme yardımcıları (maliyet, gecikme vb.)                                                                                                                                                                                                                                                     |
+| `embeddings/`                            | Embedding hizmeti yardımcıları                                                                                                                                                                                                                                                                                          |
+| `env/`                                   | Ortam değişkeni ayrıştırma + doğrulama                                                                                                                                                                                                                                                                                  |
+| `evals/`                                 | Değerlendirme çatısı (paketler, çalıştırıcı, çalışma zamanı) — bkz. `docs/frameworks/EVALS.md`                                                                                                                                                                                                                          |
+| `guardrails/`                            | PII maskeleyici, prompt enjeksiyonu, görüntü köprüsü — bkz. `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                               |
+| `jobs/`                                  | Arka plan işleri (cron benzeri)                                                                                                                                                                                                                                                                                         |
+| `memory/`                                | Diyaloğa dayalı bellek (SQLite FTS5 + sqlite-vec hibrit RRF + Qdrant katman 2) — bkz. `docs/frameworks/MEMORY.md`                                                                                                                                                                                                       |
+| `memory/embedding/`                      | Çok kaynaklı embedding katmanı: `index.ts` (çözümleyici), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                      |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 sarmalayıcısı — KNN kaba kuvvet + hibrit RRF (FTS5 + vektör, k=60). Tembel başlatılır; sqlite-vec kullanılamadığında sorunsuz biçimde daha düşük işlevsellikle çalışır. (plan 21)                                                                                                                     |
+| `memory/reindex.ts`                      | `runReindexBatch()` — `needs_reindex=1` olan bellekleri arka planda işler; `POST /api/memory/reindex` ve tembel geri doldurma yolu tarafından çağrılır. (plan 21)                                                                                                                                                       |
+| `monitoring/`                            | Sistem durumu denetimleri, metrik yayımı                                                                                                                                                                                                                                                                                |
+| `oauth/`                                 | 22 sağlayıcı modülü için OAuth/içe aktarma akışları (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                         |
+| `plugins/`                               | Eklenti kayıt defteri                                                                                                                                                                                                                                                                                                   |
+| `promptCache/`                           | Anthropic tarzı prompt önbelleği kesme noktaları                                                                                                                                                                                                                                                                        |
+| `skills/`                                | Skills çatısı (yerleşik + pazar yeri + SkillsSH) — bkz. `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                     |
+| `playground/`                            | Playground Studio paylaşılan yardımcıları: `codeExport.ts` (curl/Python/TS oluşturucu), `promptImprover.ts` (meta istem oluşturucu), `streamMetrics.ts` (saf TTFT/TPS), `types.ts` (fiyatlandırma tablosu) — bkz. `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                |
+| `webhookDispatcher.ts`                   | HMAC webhook teslimatı — bkz. `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                             |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tünel yöneticileri — bkz. `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                   |
+| `cloudSync.ts`, `initCloudSync.ts`       | Durumun isteğe bağlı bulut senkronizasyonu                                                                                                                                                                                                                                                                              |
+| `localDb.ts`                             | Veritabanı modülleri için yeniden dışa aktarma toplayıcısı (mantık içermez — yalnızca yeniden dışa aktarımlar)                                                                                                                                                                                                          |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | İstek önbelleğe alma + eş etkisizlik                                                                                                                                                                                                                                                                                    |
+| (üst düzeyde yaklaşık 30 dosya daha)     | Özelleştirilmiş yardımcılar (logEnv, modelsDevSync, piiSanitizer vb.)                                                                                                                                                                                                                                                   |
 
-### `src/lib/db/` — Veritabanı (147 modül + 208 migrasyon)
+### `src/lib/db/` — Veritabanı (147 modül + 208 geçiş)
 
-| Alt dizin                 | Amaç                                                                                                                                                                             |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | WAL günlük kaydı kullanan `getDbInstance()` tekil örneği                                                                                                                         |
-| `db/migrations/`          | Sürümlendirilmiş SQL dosyaları (eşgüçlü, işlemsel). `073_memory_vec.sql`, `memory_vec_meta` + `needs_reindex` sütununu ekler (plan 21).                                          |
-| `db/playgroundPresets.ts` | Playground Studio ön ayarları için CRUD modülü (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)    |
-| `db/memoryVec.ts`         | `memory_vec_meta` için CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` vb. (plan 21)                       |
-| `db/<domain>.ts`          | Her etki alanı için bir modül: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache vb. |
+| Alt dizin                 | Amaç                                                                                                                                                                          |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | WAL günlükleme kullanan `getDbInstance()` tekil örneği                                                                                                                        |
+| `db/migrations/`          | Sürümlendirilmiş SQL dosyaları (eş etkili, işlemsel). `073_memory_vec.sql`, `memory_vec_meta` + `needs_reindex` sütununu ekler (plan 21).                                     |
+| `db/playgroundPresets.ts` | Playground Studio ön ayarları için CRUD modülü (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`) |
+| `db/memoryVec.ts`         | `memory_vec_meta` için CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` vb. (plan 21)                    |
+| `db/<domain>.ts`          | Her alan için bir modül: providers, combos, apiKeys, users, sessions, usage, audit*log, webhooks, skills, memory_entries, cloud_agent_tasks, evals*\*, reasoning_cache vb.    |
 
 ### `src/domain/`
 
-| Modül                  | Amaç                                                             |
-| ---------------------- | ---------------------------------------------------------------- |
-| `policy.ts`            | İlke motoru                                                      |
-| `fallbackPolicy.ts`    | Geri dönüş karar ağacı                                           |
-| `costRules.ts`         | Maliyet hesaplama kuralları                                      |
-| `lockoutPolicy.ts`     | Model/bağlantı kilitleme ilkesi                                  |
-| `tagRouter.ts`         | Etiket tabanlı yönlendirme                                       |
-| `comboResolver.ts`     | Kombinasyon çözümleme (kombinasyon motoru tarafından kullanılır) |
-| `modelAvailability.ts` | Model başına kullanılabilirlik kontrolü                          |
-| `assessment/`          | Model değerlendirmesi (RFC-AUTO-ASSESSMENT'ın 1. Aşaması)        |
+| Modül                  | Amaç                                                      |
+| ---------------------- | --------------------------------------------------------- |
+| `policy.ts`            | İlke motoru                                               |
+| `fallbackPolicy.ts`    | Geri dönüş karar ağacı                                    |
+| `costRules.ts`         | Maliyet hesaplama kuralları                               |
+| `lockoutPolicy.ts`     | Model/bağlantı kilitleme ilkesi                           |
+| `tagRouter.ts`         | Etiket tabanlı yönlendirme                                |
+| `comboResolver.ts`     | Combo çözümleme (combo motoru tarafından kullanılır)      |
+| `modelAvailability.ts` | Model başına kullanılabilirlik denetimi                   |
+| `assessment/`          | Model değerlendirmesi (RFC-AUTO-ASSESSMENT'ın 1. Aşaması) |
 
 ### `src/server/`
 
@@ -237,21 +238,23 @@ src/
 
 ### `src/shared/`
 
-| Modül                            | Amaç                                                                                   |
-| -------------------------------- | -------------------------------------------------------------------------------------- |
-| `constants/providers.ts`         | Zod doğrulamalı **375 sağlayıcı** (tek doğruluk kaynağı)                               |
-| `constants/cliTools.ts`          | Harici CLI aracı kayıt defteri                                                         |
-| `constants/routingStrategies.ts` | Önceliklere sahip **20 yönlendirme stratejisi**                                        |
-| `constants/publicApiRoutes.ts`   | Bearer kimlik doğrulaması (yönetim kimlik doğrulaması yerine) gerektiren rotalar       |
-| `constants/upstreamHeaders.ts`   | Üst akış istekleri için başlık engelleme listesi                                       |
-| `validation/schemas.ts`          | ~80 Zod şeması (API sözleşmeleri için tek doğruluk kaynağı)                            |
-| `validation/helpers.ts`          | Zod doğrulama yardımcıları (`validateBody` vb.)                                        |
-| `types/`                         | Paylaşılan TS türleri                                                                  |
-| `contracts/`                     | Herkese açık API sözleşmeleri (`package.json` içindeki `files:` tarafından kullanılır) |
-| `utils/circuitBreaker.ts`        | Sağlayıcı devre kesicisi (bkz. `docs/architecture/RESILIENCE_GUIDE.md`)                |
-| `utils/apiAuth.ts`               | API anahtarı doğrulaması, kapsam denetimi                                              |
-| `utils/fetchTimeout.ts`          | Üst akış fetch işlemleri için zaman aşımı/iptal sarmalayıcıları                        |
-| `utils/releaseNotes.ts`          | Kapatılan v2/eski duyuru ayrıştırıcısı, yerelleştirme ve kimliğe göre kapatma          |
+| Modül                            | Amaç                                                                                                         |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| `components/`                    | Pano bileşeni API'si: `packages/ui-kit` üzerinde bağdaştırıcılar — bkz. `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: ekranlar tarafından kullanılan simge adları → Lucide bileşenleri (`<Icon>`)                      |
+| `constants/providers.ts`         | Zod doğrulamalı **376 sağlayıcı** (tek doğruluk kaynağı)                                                     |
+| `constants/cliTools.ts`          | Harici CLI aracı kayıt defteri                                                                               |
+| `constants/routingStrategies.ts` | Önceliklere sahip **20 yönlendirme stratejisi**                                                              |
+| `constants/publicApiRoutes.ts`   | Bearer kimlik doğrulaması (yönetim kimlik doğrulaması yerine) gerektiren rotalar                             |
+| `constants/upstreamHeaders.ts`   | Yukarı akış istekleri için üst bilgi engelleme listesi                                                       |
+| `validation/schemas.ts`          | ~80 Zod şeması (API sözleşmeleri için tek doğruluk kaynağı)                                                  |
+| `validation/helpers.ts`          | Zod doğrulama yardımcıları (`validateBody` vb.)                                                              |
+| `types/`                         | Paylaşılan TS türleri                                                                                        |
+| `contracts/`                     | Genel API sözleşmeleri (`package.json` içindeki `files:` tarafından kullanılır)                              |
+| `utils/circuitBreaker.ts`        | Sağlayıcı devre kesicisi (bkz. `docs/architecture/RESILIENCE_GUIDE.md`)                                      |
+| `utils/apiAuth.ts`               | API anahtarı doğrulaması, kapsam denetimi                                                                    |
+| `utils/fetchTimeout.ts`          | Yukarı akış fetch işlemleri için zaman aşımı/iptal sarmalayıcıları                                           |
+| `utils/releaseNotes.ts`          | Kapatılmış v2/eski duyuru ayrıştırıcısı, yerelleştirme ve kimliğe göre kapatma                               |
 
 ---
 
@@ -263,14 +266,14 @@ Ayrı npm çalışma alanı (`@omniroute/open-sse`). İstek işleme ve sağlayı
 open-sse/
 ├── handlers/            # 16 dosya (12 işleyici + 4 yardımcı): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search vb.
 ├── executors/           # 150 yürütücü modülü (BaseExecutor sınıfını genişleten sınıflar + sağlayıcı başına yardımcılar)
-├── translator/          # Biçim dönüştürücüleri (9 istek, 9 yanıt, 9 yardımcı)
+├── translator/          # Biçim dönüştürücüler (9 istek, 9 yanıt, 9 yardımcı)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ hizmet modülü (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM vb.)
 ├── mcp-server/          # MCP sunucusu (110 araç, 3 aktarım, 33 kapsam)
 ├── config/              # Sağlayıcı/model kayıtları, başlık yapılandırması, model takma adları
 ├── utils/               # TLS istemcisi, proxy fetch/dispatcher, ağ yardımcıları
 ├── index.ts             # Çalışma alanı giriş noktası
-├── package.json         # Çalışma alanı bildirimi
+├── package.json         # Çalışma alanı manifesti
 ├── tsconfig.json        # Çalışma alanı TS yapılandırması
 └── types.d.ts           # Çalışma alanı tür bildirimleri
 ```
@@ -294,17 +297,26 @@ open-sse/
 
 ---
 
+## `packages/` — Çalışma Alanları
+
+| Yol                      | Amaç                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `packages/ui-kit/`       | `@omniroute/ui-kit` — kaynak olarak kullanılan (derleme yok) Keak CI UI Kit'in projeye dahil edilmiş anlık görüntüsü (`private`, `UNLICENSED`). `UPSTREAM.md`, üst kaynak commit'ini sabitler ve lisans yetkilendirmesini kaydeder; `PATCHES.md`, yerel yamaları listeler (yok); `src/` yalnızca `scripts/dev/sync-ui-kit.sh` tarafından senkronize edilir ve `npm run check:ui-kit-snapshot` ile korunur. Bkz. `docs/architecture/DESIGN_SYSTEM.md` |
+| `packages/browser-pool/` | `@omniroute/browser-pool` — isteğe bağlı tarayıcı havuzu hizmeti (CloakBrowser ve Playwright destekli sohbet)                                                                                                                                                                                                                                                                                                                                        |
+
+---
+
 ## `electron/` — Masaüstü Sarmalayıcısı
 
-| Dosya            | Amaç                                                                                              |
-| ---------------- | ------------------------------------------------------------------------------------------------- |
-| `main.js`        | Electron ana süreci (BrowserWindow, gömülü Next.js sunucusu, sistem tepsisi, otomatik güncelleme) |
-| `preload.js`     | IPC köprüsü (contextBridge → `window.omniroute`)                                                  |
-| `package.json`   | electron-builder yapılandırması + Electron 41 + electron-builder 26.10 bağımlılıkları             |
-| `assets/`        | Uygulama simgeleri (Windows .ico, macOS .icns, Linux .png)                                        |
-| `dist-electron/` | Derleme çıktısı (git tarafından yok sayılır)                                                      |
-| `types.d.ts`     | İşleyici köprüsü için tür bildirimleri                                                            |
-| `README.md`      | Dahili Electron README'si (ayrıca bkz. `docs/guides/ELECTRON_GUIDE.md`)                           |
+| Dosya            | Amaç                                                                                     |
+| ---------------- | ---------------------------------------------------------------------------------------- |
+| `main.js`        | Electron ana süreci (BrowserWindow, gömülü Next.js sunucusu, tepsi, otomatik güncelleme) |
+| `preload.js`     | IPC köprüsü (contextBridge → `window.omniroute`)                                         |
+| `package.json`   | electron-builder yapılandırması + Electron 41 + electron-builder 26.10 bağımlılıkları    |
+| `assets/`        | Uygulama simgeleri (Windows .ico, macOS .icns, Linux .png)                               |
+| `dist-electron/` | Derleme çıktısı (git tarafından yok sayılır)                                             |
+| `types.d.ts`     | İşleyici köprüsü için tür bildirimleri                                                   |
+| `README.md`      | Dahili Electron README dosyası (ayrıca bkz. `docs/guides/ELECTRON_GUIDE.md`)             |
 
 ---
 
@@ -313,30 +325,30 @@ open-sse/
 | Dosya                                                                                                       | Amaç                                                                                                                            |
 | ----------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
 | `omniroute.mjs`                                                                                             | Ana CLI giriş noktası — `omniroute serve`, `omniroute setup`, `omniroute doctor`, `omniroute providers`, `omniroute combos` vb. |
-| `reset-password.mjs`                                                                                        | Bağımsız parola sıfırlama CLI'si                                                                                                |
+| `reset-password.mjs`                                                                                        | Bağımsız parola sıfırlama CLI'ı                                                                                                 |
 | `cli/commands/setup.mjs`                                                                                    | Etkileşimli + etkileşimsiz kurulum sihirbazı                                                                                    |
 | `cli/commands/doctor.mjs`                                                                                   | Sistem sağlığı tanılamaları (8+ kontrol)                                                                                        |
 | `cli/commands/providers.mjs`                                                                                | Sağlayıcıları listeleme/test etme/doğrulama                                                                                     |
 | `cli/{args,data-dir,encryption,io,provider-catalog,provider-store,provider-test,settings-store,sqlite}.mjs` | CLI yardımcı modülleri                                                                                                          |
-| `cli/tray/tray.ts`                                                                                          | Sistem tepsisi entegrasyonu (platformlar arası: Windows'da NotifyIcon, macOS/Linux'ta systray2)                                 |
+| `cli/tray/tray.ts`                                                                                          | Sistem tepsisi entegrasyonu (platformlar arası: Windows'ta NotifyIcon, macOS/Linux'ta systray2)                                 |
 | `cli/tray/tray.ps1`                                                                                         | PowerShell NotifyIcon arka ucu (Windows, sıfır yeni ikili dosya)                                                                |
 | `cli/tray/autostart.ts`                                                                                     | Platformlar arası otomatik başlatma (LaunchAgent / .desktop / kayıt defteri)                                                    |
-| `cli/runtime/sqliteRuntime.mjs`                                                                             | 5 adımlı SQLite sürücüsü çözümleme zinciri (paketle birlikte → çalışma zamanı → gecikmeli kurulum → node:sqlite → sql.js)       |
+| `cli/runtime/sqliteRuntime.mjs`                                                                             | 5 adımlı SQLite sürücüsü çözümleme zinciri (paketlenmiş → çalışma zamanı → gecikmeli kurulum → node:sqlite → sql.js)            |
 | `cli/runtime/magicBytes.mjs`                                                                                | İkili dosya sihirli bayt doğrulaması (ELF / Mach-O / Mach-O fat / PE)                                                           |
 | `cli/runtime/index.mjs`                                                                                     | `warmUpRuntimes()` — postinstall / ilk başlatma sırasında sürücüleri önceden çözümler                                           |
 | `nodeRuntimeSupport.mjs`                                                                                    | Kurulum sırasında desteklenen Node.js sürümünü doğrular                                                                         |
 
 ---
 
-## `skills/` — Genel Kullanıma Açık Agent Becerileri
+## `skills/` — Herkese Açık Agent Becerileri
 
-| Dosya                        | Amaç                                                                                    |
-| ---------------------------- | --------------------------------------------------------------------------------------- |
-| `skills/omniroute*/SKILL.md` | Harici AI agentları (Claude Desktop, ChatGPT, Cursor, Cline) için 10 beceri manifestosu |
+| Dosya                        | Amaç                                                                                  |
+| ---------------------------- | ------------------------------------------------------------------------------------- |
+| `skills/omniroute*/SKILL.md` | Harici AI agentları (Claude Desktop, ChatGPT, Cursor, Cline) için 10 beceri manifesti |
 
 ---
 
-## `scripts/` — Derleme ve Denetim Betikleri
+## `scripts/` — Derleme ve Kontrol Betikleri
 
 | Betik                               | Amaç                                                                                                |
 | ----------------------------------- | --------------------------------------------------------------------------------------------------- |
@@ -345,110 +357,114 @@ open-sse/
 | `prepublish.ts`                     | `npm pack` öncesi paket hazırlığı                                                                   |
 | `postinstall.mjs`                   | İlk kurulumda `.env.example` dosyasından otomatik olarak `.env` oluşturur                           |
 | `sync-env.mjs`                      | `.env` anahtarlarını `.env.example` ile yeniden eşitler                                             |
-| `check-cycles.mjs`                  | Döngüsel bağımlılıkları tespit eder                                                                 |
+| `check-cycles.mjs`                  | Döngüsel bağımlılıkları algılar                                                                     |
 | `check-route-validation.mjs`        | Tüm API rotalarında Zod doğrulaması bulunduğunu doğrular                                            |
 | `check-t11-any-budget.mjs`          | Dosya başına açık `any` bütçesini uygular                                                           |
-| `check-docs-sync.mjs`               | Dokümantasyon sürümü eşitlemesini doğrular (mevcut pre-commit)                                      |
-| **`check-env-doc-sync.mjs`**        | YENİ: Koddaki ortam değişkenlerini `.env.example` ve `ENVIRONMENT.md` ile çapraz denetler           |
+| `check-docs-sync.mjs`               | Dokümantasyon sürüm eşitlemesini doğrular (mevcut ön işleme kontrolü)                               |
+| **`check-env-doc-sync.mjs`**        | YENİ: Koddaki ortam değişkenlerini `.env.example` ve `ENVIRONMENT.md` ile çapraz kontrol eder       |
 | **`check-docs-counts-sync.mjs`**    | YENİ: Sayıların (yürütücüler, stratejiler, OAuth, A2A becerileri) dokümanlarla eşleşmesini doğrular |
-| **`check-deprecated-versions.mjs`** | YENİ: Dokümanlardaki eski sürümleri/tarihleri işaretler                                             |
-| `check-supported-node-runtime.ts`   | Geçerli Node sürümünün desteklendiğini doğrular                                                     |
-| `check-pr-test-policy.mjs`          | Üretim kodu değişikliklerinde "testler gerekli" kuralını uygular                                    |
+| **`check-deprecated-versions.mjs`** | YENİ: Dokümanlardaki güncelliğini yitirmiş sürümleri/tarihleri işaretler                            |
+| `check-supported-node-runtime.ts`   | Mevcut Node sürümünün desteklendiğini doğrular                                                      |
+| `check-pr-test-policy.mjs`          | Üretim kodu değişikliklerinde "testler gereklidir" kuralını uygular                                 |
 | **`gen-provider-reference.ts`**     | YENİ: Katalogdan otomatik olarak `docs/reference/PROVIDER_REFERENCE.md` oluşturur                   |
-| `i18n/generate-multilang.mjs`       | UI dizelerini ve dokümanları Google Translate aracılığıyla çevirir                                  |
+| `i18n/generate-multilang.mjs`       | Google Translate aracılığıyla kullanıcı arayüzü dizelerini ve dokümanları çevirir                   |
 | `i18n_autotranslate.py`             | LLM tabanlı doküman çeviri işlem hattı                                                              |
 | `validate_translation.py`           | Yerel ayar başına çeviri doğrulaması                                                                |
-| `check_translations.py`             | Kod tarafında i18n anahtar denetimi                                                                 |
+| `check_translations.py`             | Kod tarafında i18n anahtarı kontrolü                                                                |
 | `run-playwright-tests.mjs`          | Playwright E2E çalıştırıcısı                                                                        |
 | `run-protocol-clients-tests.mjs`    | MCP/A2A E2E çalıştırıcısı                                                                           |
 | `run-ecosystem-tests.mjs`           | Ekosistem (sağlayıcı entegrasyonu) testleri                                                         |
 | `test-report-summary.mjs`           | Kapsam özeti markdown'ı oluşturur                                                                   |
-| `smoke-electron-packaged.mjs`       | Paketlenmiş Electron derlemesine duman testi uygular                                                |
+| `smoke-electron-packaged.mjs`       | Paketlenmiş Electron derlemesine temel işlev testi uygular                                          |
 | `native-binary-compat.mjs`          | Yerel bağımlılıkların (`better-sqlite3`) Electron'ın Node sürümüyle eşleştiğini doğrular            |
-| `validate-pack-artifact.ts`         | npm pack çıktısını doğrular                                                                         |
+| `validate-pack-artifact.ts`         | npm paket çıktısını doğrular                                                                        |
 | `responses-ws-proxy.mjs`            | Codex Responses API için WebSocket köprüsü                                                          |
 | `v1-ws-bridge.mjs`                  | `/api/v1/ws` uç noktası için WebSocket köprüsü                                                      |
 | `standalone-server-ws.mjs`          | Bağımsız WS sunucusu çalıştırıcısı                                                                  |
 | `system-info.mjs`                   | Destek amacıyla sistem/çalışma zamanı bilgilerini yazdırır                                          |
-| `healthcheck.mjs`                   | Tek seferlik sistem durumu denetimi (Docker HEALTHCHECK tarafından kullanılır)                      |
+| `healthcheck.mjs`                   | Tek seferlik sistem durumu kontrolü (Docker HEALTHCHECK tarafından kullanılır)                      |
 | `uninstall.mjs`                     | Temiz kaldırma betiği                                                                               |
+| `dev/sync-ui-kit.sh`                | Sabitlenmiş bir commit'teki CI UI Kit `src/` içeriğini `packages/ui-kit/src` konumuna kopyalar      |
+| `check/check-ui-kit-snapshot.mjs`   | Ön işleme geçidi: `packages/ui-kit/src`, sabitlenmiş upstream commit ile eşleşir                    |
+| `dev/gen-icon-map.mjs`              | `npm run gen:icon-map` — kullanımda olup `ICON_MAP` tarafından eşlenmeyen simge adları              |
+| `dev/codemod-material-icons.mjs`    | Değişmez Material Symbols span'lerini `<Icon>` olarak yeniden yazar (geçiş araçları)                |
 
 ---
 
-## `docs/` — Herkese Açık Dokümantasyon (7 kök dosya + 17 alt dizin)
+## `docs/` — Genel Dokümantasyon (7 kök dosya + 17 alt dizin)
 
 ### Üst düzey kılavuzlar
 
-| Belge                       | Amaç                                                                                                            |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Üst düzey mimari, alt sistem haritası, kontrol paneli yüzeyi                                                    |
-| `CODEBASE_DOCUMENTATION.md` | Mühendislik referansı: dizinler, modüller, kurallar                                                             |
-| `FEATURES.md`               | v3.8'de öne çıkan özellikleri içeren özellik matrisi                                                            |
-| `USER_GUIDE.md`             | Son kullanıcı kılavuzu (kurulum, modeller, kombinasyonlar, CLI'lar, ses vb.)                                    |
-| `API_REFERENCE.md`          | Kimlik doğrulama modeliyle birlikte API uç noktası referansı                                                    |
-| `openapi.yaml`              | OpenAPI 3.0 spesifikasyonu (121 yol)                                                                            |
-| `SETUP_GUIDE.md`            | Kurulum yöntemleri (npm, npx, Docker, Electron, Termux, kaynak kod)                                             |
-| `ENVIRONMENT.md`            | Tüm ortam değişkenleri (~800 belgelenmiş, `.env.example` içinde ~3.050 satır)                                   |
-| `TROUBLESHOOTING.md`        | Yaygın hatalar + v3.8.0 ile ilgili bilinen sorunlar                                                             |
-| `RELEASE_CHECKLIST.md`      | Tam sürüm yayımlama akışı (beceriler, husky, conventional commits, dağıtım)                                     |
-| `COVERAGE_PLAN.md`          | Kapsama hedefleri ve mevcut durum                                                                               |
-| `FREE_TIERS.md`             | Özenle seçilmiş ücretsiz katman sağlayıcıları (48+ ücretsiz + 11 OAuth)                                         |
-| `CLI-TOOLS.md`              | Harici CLI entegrasyonları + dahili OmniRoute CLI                                                               |
-| `I18N.md`                   | i18n mimarisi, dil ekleme, 67 yerel ayar                                                                        |
-| `UNINSTALL.md`              | Temiz kaldırma adımları                                                                                         |
-| `PROVIDER_REFERENCE.md`     | 375 sağlayıcıdan oluşan **otomatik oluşturulmuş** katalog (yeniden oluşturma: `npm run gen:provider-reference`) |
+| Belge                       | Amaç                                                                                                      |
+| --------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Üst düzey mimari, alt sistem haritası, pano yüzeyi                                                        |
+| `CODEBASE_DOCUMENTATION.md` | Mühendislik referansı: dizinler, modüller, kurallar                                                       |
+| `FEATURES.md`               | v3.8 öne çıkanlarıyla özellik matrisi                                                                     |
+| `USER_GUIDE.md`             | Son kullanıcı kılavuzu (kurulum, modeller, kombinasyonlar, CLI'lar, ses vb.)                              |
+| `API_REFERENCE.md`          | Kimlik doğrulama modeliyle API uç noktası referansı                                                       |
+| `openapi.yaml`              | OpenAPI 3.0 spesifikasyonu (121 yol)                                                                      |
+| `SETUP_GUIDE.md`            | Kurulum yöntemleri (npm, npx, Docker, Electron, Termux, kaynak)                                           |
+| `ENVIRONMENT.md`            | Tüm ortam değişkenleri (~800 belgelenmiş, ~3.050 satır `.env.example`)                                    |
+| `TROUBLESHOOTING.md`        | Yaygın hatalar + v3.8.0 bilinen sorunları                                                                 |
+| `RELEASE_CHECKLIST.md`      | Tam yayın akışı (skills, husky, conventional commits, deploy)                                             |
+| `COVERAGE_PLAN.md`          | Kapsam hedefleri ve mevcut durum                                                                          |
+| `FREE_TIERS.md`             | Derlenmiş ücretsiz katman sağlayıcıları (48+ ücretsiz + 11 OAuth)                                         |
+| `CLI-TOOLS.md`              | Harici CLI entegrasyonları + Dahili OmniRoute CLI                                                         |
+| `I18N.md`                   | i18n mimarisi, dil ekleme, 67 yerel ayar                                                                  |
+| `UNINSTALL.md`              | Temiz kaldırma adımları                                                                                   |
+| `PROVIDER_REFERENCE.md`     | 376 sağlayıcının **otomatik oluşturulmuş** kataloğu (yeniden oluşturma: `npm run gen:provider-reference`) |
 
-### Alt sistemlere derinlemesine bakış
+### Alt sistem derinlemesine incelemeler
 
 | Belge                                           | Amaç                                                                              |
 | ----------------------------------------------- | --------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                                 | MCP sunucusu: 110 araç, 3 aktarım, 33 kapsam, REST uç noktaları                   |
-| `A2A-SERVER.md`                                 | A2A v0.3: JSON-RPC, 6 beceri, REST yardımcıları, ajan kartı                       |
-| `AGENT_PROTOCOLS_GUIDE.md`                      | Birleşik kılavuz: A2A, ACP ve Cloud Agents karşılaştırması                        |
+| `MCP-SERVER.md`                                 | MCP sunucusu: 110 araç, 3 taşıma, 33 kapsam, REST uç noktaları                    |
+| `A2A-SERVER.md`                                 | A2A v0.3: JSON-RPC, 6 yetenek, REST yardımcıları, ajan kartı                      |
+| `AGENT_PROTOCOLS_GUIDE.md`                      | Birleşik kılavuz: A2A vs ACP vs Cloud Agents                                      |
 | `CLOUD_AGENT.md`                                | Codex Cloud / Devin / Jules orkestrasyonu                                         |
-| `SKILLS.md`                                     | Beceri çatısı (yerleşik + pazar yeri + SkillsSH + korumalı alan)                  |
+| `SKILLS.md`                                     | Skills çerçevesi (yerleşik + marketplace + SkillsSH + sandbox)                    |
 | `RADAR.md`                                      | Radar ücretsiz model kataloğu katmanı (`RADAR_ENABLED`, varsayılan olarak kapalı) |
 | `MEMORY.md`                                     | Bellek sistemi (SQLite FTS5 + Qdrant)                                             |
-| `EVALS.md`                                      | Değerlendirme çatısı (paketler, çalıştırmalar, değerlendirme ölçütleri)           |
-| `GUARDRAILS.md`                                 | PII maskeleyici, istem enjeksiyonu, görüntü köprüsü                               |
-| `COMPLIANCE.md`                                 | Denetim günlüğü, saklama, noLog ile kapsam dışında kalma                          |
+| `EVALS.md`                                      | Değerlendirme çerçevesi (suiteler, çalıştırmalar, rubrikler)                      |
+| `GUARDRAILS.md`                                 | PII maskeleme, prompt injection, vision bridge                                    |
+| `COMPLIANCE.md`                                 | Denetim günlüğü, saklama, noLog devre dışı bırakma                                |
 | `WEBHOOKS.md`                                   | HMAC imzalı webhook teslimatı                                                     |
 | `REASONING_REPLAY.md`                           | `reasoning_content` için hibrit bellek/SQLite önbelleği                           |
-| `AUTHZ_GUIDE.md`                                | Yetkilendirme işlem hattı (`classify` → `policies` → `enforce`)                   |
+| `AUTHZ_GUIDE.md`                                | Yetkilendirme hattı (`classify` → `policies` → `enforce`)                         |
 | `RESILIENCE_GUIDE.md`                           | Devre kesici + bekleme süresi + model kilitleme                                   |
-| `docs/security/STEALTH_GUIDE.md` (yalnızca git) | TLS parmak izi oluşturma (JA3/JA4), Claude Code CCH, MITM sertifikası             |
+| `docs/security/STEALTH_GUIDE.md` (yalnızca git) | TLS parmak izi (JA3/JA4), Claude Code CCH, MITM sertifikası                       |
 | `AUTO-COMBO.md`                                 | Auto Combo motoru (16 faktörlü puanlama, 6 mod paketi, sanal fabrika)             |
 
 ### Sıkıştırma
 
-| Belge                           | Amaç                                            |
-| ------------------------------- | ----------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Sıkıştırma modlarına genel bakış + yol haritası |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK motorları, kayıt sözleşmesi       |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman kural paketi JSON şeması                |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Dil bazında kural paketi envanteri              |
-| `RTK_COMPRESSION.md`            | RTK bildirimsel işlem hattı (49 filtre)         |
+| Belge                           | Amaç                                              |
+| ------------------------------- | ------------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Sıkıştırma modlarına genel bakış + yol haritası   |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK motorları, kayıt defteri sözleşmesi |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman kural paketi JSON şeması                  |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Dil başına kural paketi envanteri                 |
+| `RTK_COMPRESSION.md`            | RTK bildirimsel hattı (56 filtre)                 |
 
 ### Dağıtım
 
-| Belge                        | Amaç                                                                               |
-| ---------------------------- | ---------------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker derlemesi, profiller (base/cli/host/cliproxyapi), Redis yardımcı konteyneri |
-| `VM_DEPLOYMENT_GUIDE.md`     | Genel VM/VPS dağıtımı (Ubuntu/Debian + nginx + systemd)                            |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io dağıtımı (şu anda yalnızca Çince)                                           |
-| `TERMUX_GUIDE.md`            | Termux aracılığıyla ekransız Android kullanımı                                     |
-| `PWA_GUIDE.md`               | İlerlemeli Web Uygulaması kurulumu + service worker                                |
-| `ELECTRON_GUIDE.md`          | Masaüstü uygulamasını derleme + imzalama + dağıtma                                 |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                             |
-| `PROXY_GUIDE.md`             | 4 seviyeli giden proxy + 1proxy pazaryeri                                          |
+| Belge                        | Amaç                                                                   |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker derlemesi, profiller (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Genel VM/VPS dağıtımı (Ubuntu/Debian + nginx + systemd)                |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io dağıtımı (şu anda yalnızca Çince)                               |
+| `TERMUX_GUIDE.md`            | Termux aracılığıyla başsız (headless) Android                          |
+| `PWA_GUIDE.md`               | Progressive Web App kurulumu + service worker                          |
+| `ELECTRON_GUIDE.md`          | Masaüstü uygulaması derleme + imzalama + dağıtma                       |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                 |
+| `PROXY_GUIDE.md`             | 4 seviyeli giden proxy + 1proxy pazaryeri                              |
 
-### Alt dizinler
+### Alt Dizinler
 
-| Alt dizin             | Amaç                                                                                                                                                                                                                        |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Yerelleştirilmiş belge çevirileri (41 yerel ayar)                                                                                                                                                                           |
-| `docs/screenshots/`   | Kılavuzlar için görsel varlıkları                                                                                                                                                                                           |
-| `_tasks/superpowers/` | superpowers kaynaklı planlar/özellikler (`writing-plans`/`brainstorming`) + araştırmalar — yalıtılmış, ayrı sürümlendirilen depo; ana ağaçta git tarafından yok sayılır. Bkz. CLAUDE.md → "Planlama ve Araştırma Eserleri". |
+| Alt Dizin             | Amaç                                                                                                                                                                                                                      |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Yerelleştirilmiş belge çevirileri (41 yerel ayar)                                                                                                                                                                         |
+| `docs/screenshots/`   | Kılavuzlar için görsel dosyaları                                                                                                                                                                                          |
+| `_tasks/superpowers/` | superpowers'tan (`writing-plans`/`brainstorming`) planlar/spesifikasyonlar + araştırma — izole, ayrı olarak sürümlendirilen depo, ana ağaç tarafından gitignore edilir. Bkz. CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 
@@ -460,7 +476,7 @@ open-sse/
 | `tests/integration/`                 | Çok modüllü + DB entegrasyon testleri   | Node yerel test çalıştırıcısı (eşzamanlılık 1) |
 | `tests/e2e/`                         | UI + iş akışı E2E                       | Playwright                                     |
 | `tests/e2e/protocol-clients.test.ts` | MCP + A2A gerçek istemci E2E            | Özel protokol istemcileri                      |
-| `tests/e2e/ecosystem.test.ts`        | Sağlayıcı entegrasyonu (ağ erişimli)    | Node yerel test çalıştırıcısı                  |
+| `tests/e2e/ecosystem.test.ts`        | Sağlayıcı entegrasyonu (ağa erişen)     | Node yerel test çalıştırıcısı                  |
 
 ---
 
@@ -469,25 +485,25 @@ open-sse/
 | Yol                 | Amaç                                                                    |
 | ------------------- | ----------------------------------------------------------------------- |
 | `public/` (kök)     | Favicon'lar, robots.txt, manifest, service worker, pazarlama görselleri |
-| `public/providers/` | Sağlayıcı logosu PNG/SVG (kontrol panelinde kullanılır)                 |
+| `public/providers/` | Sağlayıcı logosu PNG/SVG (dashboard'da kullanılır)                      |
 
 ---
 
 ## `config/` — Statik Yapılandırmalar + Kalite Geçidi Durumu
 
-Dağıtılan yapılandırma şablonları ve commit edilmiş kalite geçidi referans değerleri
-(kök dizini sade tutmak için v3.8.26 sürümünde depo kökünden buraya taşındı).
+Dağıtılan yapılandırma şablonlarının yanı sıra commit edilmiş kalite geçidi temel değerleri
+(kök dizini sade tutmak için v3.8.26 sürümünde repo kökünden buraya taşındı).
 
 | Yol                                           | Amaç                                                                                                      |
 | --------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `config/i18n.json`                            | Yerel ayar listesi + meta veriler (42 yerel ayar sayısının standart kaynağı)                              |
+| `config/i18n.json`                            | Yerel ayar listesi + meta veriler (42 yerel ayar sayısı için kurallı kaynak)                              |
 | `config/i18n-schema.json`                     | `i18n.json` dosyasını doğrulayan JSON şeması                                                              |
-| `config/payloadRules.json`                    | Üst kaynak yükü temizleme kuralları                                                                       |
-| `config/quality/quality-baseline.json`        | Çok metrikli mandal referans değeri (`scripts/quality/check-quality-ratchet.mjs`)                         |
-| `config/quality/complexity-baseline.json`     | Dondurulmuş ESLint karmaşıklık referans değeri (`check-complexity.mjs`)                                   |
-| `config/quality/duplication-baseline.json`    | Dondurulmuş jscpd yineleme referans değeri (`check-duplication.mjs`)                                      |
-| `config/quality/file-size-baseline.json`      | Dondurulmuş dosya başına boyut referans değeri (`check-file-size.mjs`)                                    |
-| `config/quality/test-discovery-baseline.json` | Dondurulmuş sahipsiz test referans değeri (`check-test-discovery.mjs`)                                    |
+| `config/payloadRules.json`                    | Üst akış yükü temizleme kuralları                                                                         |
+| `config/quality/quality-baseline.json`        | Çok metrikli mandal temel değeri (`scripts/quality/check-quality-ratchet.mjs`)                            |
+| `config/quality/complexity-baseline.json`     | Sabitlenmiş ESLint karmaşıklık temel değeri (`check-complexity.mjs`)                                      |
+| `config/quality/duplication-baseline.json`    | Sabitlenmiş jscpd yineleme temel değeri (`check-duplication.mjs`)                                         |
+| `config/quality/file-size-baseline.json`      | Sabitlenmiş dosya başına boyut temel değeri (`check-file-size.mjs`)                                       |
+| `config/quality/test-discovery-baseline.json` | Sabitlenmiş yetim test temel değeri (`check-test-discovery.mjs`)                                          |
 | `config/quality/dependency-allowlist.json`    | Onaylanmış bağımlılıklar izin listesi (`check-deps.mjs`)                                                  |
 | `config/quality/.license-allowlist.json`      | SPDX lisans izin listesi (`check-licenses.mjs`)                                                           |
 | `config/quality/quality-metrics.json`         | Geçici olarak toplanan metrikler (`collect-metrics.mjs` tarafından oluşturulur; **gitignore kapsamında**) |
@@ -507,11 +523,11 @@ Dağıtılan yapılandırma şablonları ve commit edilmiş kalite geçidi refer
 
 ## `.husky/` — Git Hook'ları
 
-| Dosya        | Amaç                                                                                                |
-| ------------ | --------------------------------------------------------------------------------------------------- |
-| `pre-commit` | `lint-staged + check-docs-sync + check:any-budget:t11` çalıştırır                                   |
-| `pre-push`   | Şu anda devre dışı (yorum satırına alınmış). `npm run test:unit` komutunu manuel olarak çalıştırın. |
-| `_/`         | Husky dahili bileşenleri                                                                            |
+| Dosya        | Amaç                                                                                                      |
+| ------------ | --------------------------------------------------------------------------------------------------------- |
+| `pre-commit` | `lint-staged + check-docs-sync + check:any-budget:t11` komutlarını çalıştırır                             |
+| `pre-push`   | Şu anda devre dışıdır (yorum satırına alınmıştır). `npm run test:unit` komutunu manuel olarak çalıştırın. |
+| `_/`         | Husky'nin dahili dosyaları                                                                                |
 
 ---
 
@@ -523,9 +539,9 @@ Dağıtılan yapılandırma şablonları ve commit edilmiş kalite geçidi refer
 | `commands/generate-release-cc.md`                   | `/generate-release-cc` — eksiksiz sürüm yayımlama iş akışı                    |
 | `commands/deploy-vps-{local,akamai,both}-cc.md`     | VPS'ye dağıtım yapar                                                          |
 | `commands/capture-release-evidences-cc.md`          | Yeni özellikleri tarayıcıda WebP olarak kaydeder                              |
-| `commands/review-{prs,discussions}-cc.md`           | GitHub PR'lerini/tartışmalarını değerlendirir                                 |
+| `commands/review-{prs,discussions}-cc.md`           | GitHub PR'larını/tartışmalarını sınıflandırır                                 |
 | `commands/{review-issues,implement-features}-cc.md` | Issue iş akışları                                                             |
-| `settings.local.json`                               | Projeye özgü Claude Code ayarları                                             |
+| `settings.local.json`                               | Proje bazında Claude Code ayarları                                            |
 
 ---
 
@@ -540,20 +556,20 @@ Dağıtılan yapılandırma şablonları ve commit edilmiş kalite geçidi refer
 
 ---
 
-## `_ideia/`, `_mono_repo/`, `_references/`, `_tasks/` — Ağaç Dışı
+## `_ideia/`, `_mono_repo/`, `_references/`, `_tasks/` — Ana Ağacın Dışında
 
 Alt çizgiyle başlayan bu dizinler, dağıtıma dahil edilmeyen içerikleri barındırır:
 
 - **`_ideia/`** — tasarım notları (defer / notfit / viable kategorileri)
 - **`_mono_repo/`** — geçmiş alt projeler (omnirouteCloud, omnirouteSite, vscode-extension)
-- **`_references/`** — geliştirme sırasında çapraz referans için ilgili OSS projelerinin salt okunur klonları (LiteLLM, 9router, ClawRouter, CLIProxyAPI, modelrelay, new-api vb.)
-- **`_tasks/`** — sürüm başına görev takip dosyaları (gayriresmî)
+- **`_references/`** — geliştirme sırasında çapraz referans amacıyla ilgili OSS projelerinin (LiteLLM, 9router, ClawRouter, CLIProxyAPI, modelrelay, new-api vb.) salt okunur klonları
+- **`_tasks/`** — sürüm bazında görev izleme dosyaları (gayriresmî)
 
 `npm pack` çıktısına dahil edilmez. Bkz. `.npmignore`.
 
 ---
 
-## Oluşturulan / Git Tarafından Yok Sayılan
+## Oluşturulan / Git Tarafından Yok Sayılanlar
 
 | Yol                    | Amaç                          |
 | ---------------------- | ----------------------------- |
@@ -562,7 +578,7 @@ Alt çizgiyle başlayan bu dizinler, dağıtıma dahil edilmeyen içerikleri bar
 | `coverage/`            | c8 kapsam raporları           |
 | `logs/`                | Çalışma zamanı günlükleri     |
 | `package/`             | npm pack hazırlama alanı      |
-| `.playwright-mcp/`     | Playwright MCP test çıktıları |
+| `.playwright-mcp/`     | Playwright MCP test yapıtları |
 | `.issues/`             | Yerel sorun önbelleği         |
 | `tsconfig.tsbuildinfo` | TS artımlı derleme önbelleği  |
 
@@ -571,10 +587,10 @@ Alt çizgiyle başlayan bu dizinler, dağıtıma dahil edilmeyen içerikleri bar
 ## Gezinme ipuçları
 
 - **Yeni katkıda bulunan biri misiniz?** `CONTRIBUTING.md` → `CLAUDE.md` → `docs/architecture/ARCHITECTURE.md` → `docs/architecture/CODEBASE_DOCUMENTATION.md` dosyalarını okuyun.
-- **Bir sağlayıcı mı ekliyorsunuz?** `docs/architecture/ARCHITECTURE.md § Yeni Bir Sağlayıcı Ekleme` bölümünü izleyin ve `docs/reference/PROVIDER_REFERENCE.md` ile karşılaştırın.
-- **Bir rota mı ekliyorsunuz?** `docs/architecture/ARCHITECTURE.md § Yeni Bir API Rotası Ekleme` + `src/shared/validation/schemas.ts`.
-- **Bir MCP aracı mı ekliyorsunuz?** `docs/frameworks/MCP-SERVER.md § Araç Ekleme`.
-- **Bir A2A becerisi mi ekliyorsunuz?** `docs/frameworks/A2A-SERVER.md § Yeni Bir Beceri Ekleme`.
+- **Sağlayıcı mı ekliyorsunuz?** `docs/architecture/ARCHITECTURE.md § Adding a New Provider` bölümünü izleyin ve `docs/reference/PROVIDER_REFERENCE.md` ile çapraz kontrol yapın.
+- **Rota mı ekliyorsunuz?** `docs/architecture/ARCHITECTURE.md § Adding a New API Route` + `src/shared/validation/schemas.ts`.
+- **MCP aracı mı ekliyorsunuz?** `docs/frameworks/MCP-SERVER.md § Adding a Tool`.
+- **A2A becerisi mi ekliyorsunuz?** `docs/frameworks/A2A-SERVER.md § Adding a New Skill`.
 - **Yerel olarak mı çalıştırıyorsunuz?** `docs/guides/SETUP_GUIDE.md`.
 - **Dağıtım mı yapıyorsunuz?** `docs/guides/DOCKER_GUIDE.md` / `docs/ops/VM_DEPLOYMENT_GUIDE.md` / `docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md`.
 - **Sürüm mü yayımlıyorsunuz?** `docs/ops/RELEASE_CHECKLIST.md` (ve `/generate-release-cc` Claude Code becerisi).

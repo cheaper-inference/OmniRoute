@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ఫైల్                          | ఉద్దేశ్యం                                       |
 | ----------------------------- | ----------------------------------------------- |
-| `providerRegistry.ts`         | 375-ప్రొవైడర్ కేటలాగ్ మీద చాట్-మోడల్ రిజిస్ట్రీ |
+| `providerRegistry.ts`         | 376-ప్రొవైడర్ కేటలాగ్ మీద చాట్-మోడల్ రిజిస్ట్రీ |
 | `providerModels.ts`           | మోడల్ మారుపేర్లు, ఫార్మాట్ మ్యాపింగ్            |
 | `constants.ts`                | టైమ్అవుట్లు, పరిమితులు, స్థితి కోడ్లు           |
 | `defaultThinkingSignature.ts` | డిఫాల్ట్ Claude థింకింగ్ సంతకం                  |

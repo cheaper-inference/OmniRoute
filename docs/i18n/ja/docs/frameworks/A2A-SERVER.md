@@ -163,7 +163,7 @@ OmniRoute は、`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` に配線さ�
 | ヘルスレポート             | `health-report`      | プロバイダーごとのサーキットブレーカー、クールダウン、ロックアウト状態を集約します                                                                    | health, resilience         | "すべてのプロバイダーのヘルスステータスを表示して"   |
 | ケイパビリティ一覧         | `list-capabilities`  | 45 エントリの Agent Skills カタログ全体（API 23 + CLI 21 + 設定 1）を、コンテキスト注入用の raw SKILL.md URL を含むマークダウンテーブルとして返します | catalog, discovery, skills | "OmniRoute のすべてのケイパビリティを一覧表示して"   |
 
-> Agent Card は、稼働中の 375 プロバイダーのカタログと常に整合させておく必要があります。プロバイダー数や無料/認証不要のメタデータは、ランタイムレジストリから取得されます。
+> Agent Card は、稼働中の 376 プロバイダーのカタログと常に整合させておく必要があります。プロバイダー数や無料/認証不要のメタデータは、ランタイムレジストリから取得されます。
 
 ### `list-capabilities` スキルの詳細
 

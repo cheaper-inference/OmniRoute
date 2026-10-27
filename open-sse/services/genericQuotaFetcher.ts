@@ -19,7 +19,8 @@
 import { toNumberOrNull } from "@/shared/utils/numeric";
 
 import { hasOllamaPurchasedCredits } from "./ollamaPurchasedCredits.ts";
-import { getUsageForProvider, USAGE_FETCHER_PROVIDERS } from "./usage.ts";
+import type { getUsageForProvider } from "./usage.ts";
+import { USAGE_FETCHER_PROVIDERS } from "./usage/fetcherProviders.ts";
 import {
   getQuotaCacheInvalidator,
   getQuotaFetcher,
@@ -325,8 +326,14 @@ export function convertUsageToQuotaInfo(
 
   const normalized = normalizeQuotaWindows(providerScopedWindows, context);
   const { percentUsed, resetAt } = aggregateGroupedQuotaValues(providerScopedWindows);
+  const bootstrap = usageRecord.bootstrap as Record<string, unknown> | null | undefined;
+  const plan = [bootstrap?.organization_rate_limit_tier, usageRecord.plan]
+    .filter((value): value is string => typeof value === "string")
+    .map((value) => value.trim())
+    .find((value) => value.length > 0);
 
   return {
+    ...(plan ? { plan } : {}),
     used: 0,
     total: 0,
     percentUsed,
@@ -451,7 +458,7 @@ export const fetchGenericQuota: QuotaFetcher = async (connectionId, connection) 
 
   let usage: unknown;
   try {
-    const fetchUsage = usageFetcherOverride ?? getUsageForProvider;
+    const fetchUsage = usageFetcherOverride ?? (await import("./usage.ts")).getUsageForProvider;
     usage = await fetchUsage(conn as Parameters<typeof getUsageForProvider>[0], {
       ...(forceRefresh ? { forceRefresh: true } : {}),
     });

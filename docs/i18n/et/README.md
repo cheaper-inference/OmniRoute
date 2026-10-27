@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — tasuta tehisintellekti lüüs
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ära kunagi lõpeta programmeerimist. Kõik tehisintellekti tööriistad → 375 teenusepakkujat — üle 150 tasuta — ühe lõpp-punkti kaudu. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity TASUTA Claude'i / GPT / Gemini juurde automaatse ümberlülitusega. RTK + Cavemani kombineeritud tihendus säästab 15–95% tokeneid (keskmiselt ~89%) — piirangud ei saa kunagi takistuseks. 375 tehisintellekti teenusepakkujat · üle 150 tasuta taseme · ~1,62 miljardit tasuta tokenit kuus · 20 marsruutimisstrateegiat · alustamine maksab $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — ära kunagi lõpeta programmeerimist. Kõik tehisintellekti tööriistad → 376 teenusepakkujat — üle 150 tasuta — ühe lõpp-punkti kaudu. Claude Code, Codex, Cursor, Cline, Copilot ja Antigravity TASUTA Claude'i / GPT / Gemini juurde automaatse ümberlülitusega. RTK + Cavemani kombineeritud tihendus säästab 15–95% tokeneid (keskmiselt ~89%) — piirangud ei saa kunagi takistuseks. 376 tehisintellekti teenusepakkujat · üle 150 tasuta taseme · ~1,62 miljardit tasuta tokenit kuus · 20 marsruutimisstrateegiat · alustamine maksab $0."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Kasutage oma teenusepakkujate kontosid.** See on eraldi kvalifitseeruvate kolmandate osapoolte tasuta pakettide hinnanguline koondmaht, mitte OmniRoute'i pakutav tokenikogus. Registreeruge, hankige vajaduse korral pääsuandmed ja ühendage teenusepakkujad, mida saate kasutada; iga teenusepakkuja määrab ise oma piirangud, saadavuse ja tingimused.
 >
-> Tasuta pakettide käsitsi kombineerimine on vaevarikas — kümned SDK-d, kümned kiiruspiirangud ja puudub ülevaade sellest, kui palju teil tegelikult kasutada on. OmniRoute kataloogib **471 tasuta paketi kirjet 34 korduva ressursikogumi võtme lõikes** ning arvutab tokenite põhinäitaja **17 ressursikogumi põhjal, millel on avaldatud positiivne kuueelarve, ning viie mudelipõhise Groqi piirangu põhjal**, eemaldades ühiste ressursikogumite duplikaadid. Kvoodid, mis avanevad alles pärast piirkondliku isikusamasuse kontrolli (praegu: ModelScope), kuvatakse eraldi — +~6M pärast piirkondliku isikusamasuse kinnitamist — ja neid ei liideta kunagi põhinäitajale. Tulemus jääb nähtavaks töölaual (`/dashboard/free-tiers`).
+> Tasuta pakettide käsitsi kombineerimine on vaevarikas — kümned SDK-d, kümned kiiruspiirangud ja puudub ülevaade sellest, kui palju teil tegelikult kasutada on. OmniRoute kataloogib **484 tasuta paketi kirjet 34 korduva ressursikogumi võtme lõikes** ning arvutab tokenite põhinäitaja **17 ressursikogumi põhjal, millel on avaldatud positiivne kuueelarve, ning viie mudelipõhise Groqi piirangu põhjal**, eemaldades ühiste ressursikogumite duplikaadid. Kvoodid, mis avanevad alles pärast piirkondliku isikusamasuse kontrolli (praegu: ModelScope), kuvatakse eraldi — +~6M pärast piirkondliku isikusamasuse kinnitamist — ja neid ei liideta kunagi põhinäitajale. Tulemus jääb nähtavaks töölaual (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute'i tasuta pakettide eelarvekaart: püsivalt ~1,62 mld tasuta tokenit kuus, registreerumiskrediitidega esimesel kuul kuni ~2,22 mld, 34 dokumenteeritud korduva ressursikogumi võtme kaudu, mis hõlmavad ühe lõpp-punkti taga 471 kataloogitud tasuta paketi kirjet. Aus, ressursikogumite duplikaate eemaldav arvutus — iga ühist ressursikogumit arvestatakse üks kord, sealhulgas 17 korduvat ressursikogumit, millel on avaldatud positiivne tokenite kuueelarve, ning viis mudelipõhist Groqi piirangut; tingimuste riskikataloogis on 12 teenusepakkujat märgitud välditavaks, et saaksite ise otsustada. Eelarveriba sisaldab Mistralit 1 mld, Narat 210 mln, LLM7-t 150 mln, xKirot 150 mln, Groqi 30 mln (viis mudelipõhist piirangut) ja väiksemaid ressursikogumeid ning esimese kuu registreerumiskrediite ja püsivalt tasuta tokenipiiranguta teenusepakkujaid, mis kuvatakse eraldi, et need ei suurendaks kunagi kunstlikult põhinäitajat. Reaalajas kasutatud/järelejäänud maht lehel /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute'i tasuta pakettide eelarvekaart: püsivalt ~1,62 mld tasuta tokenit kuus, registreerumiskrediitidega esimesel kuul kuni ~2,22 mld, 34 dokumenteeritud korduva ressursikogumi võtme kaudu, mis hõlmavad ühe lõpp-punkti taga 484 kataloogitud tasuta paketi kirjet. Aus, ressursikogumite duplikaate eemaldav arvutus — iga ühist ressursikogumit arvestatakse üks kord, sealhulgas 17 korduvat ressursikogumit, millel on avaldatud positiivne tokenite kuueelarve, ning viis mudelipõhist Groqi piirangut; tingimuste riskikataloogis on 12 teenusepakkujat märgitud välditavaks, et saaksite ise otsustada. Eelarveriba sisaldab Mistralit 1 mld, Narat 210 mln, LLM7-t 150 mln, xKirot 150 mln, Groqi 30 mln (viis mudelipõhist piirangut) ja väiksemaid ressursikogumeid ning esimese kuu registreerumiskrediite ja püsivalt tasuta tokenipiiranguta teenusepakkujaid, mis kuvatakse eraldi, et need ei suurendaks kunagi kunstlikult põhinäitajat. Reaalajas kasutatud/järelejäänud maht lehel /dashboard/free-tiers."/>
 
 > Reaalajas töötava `/dashboard/free-tiers` lehe animeeritud kokkuvõte. Täielik metoodika (ressursikogumite duplikaatide eemaldamine, krediiditasemed, teenusepakkujate tingimused): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Funktsioonid</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Kombod</a></td>
-    <td align="center"><a href="#-375-ai-providers--153-catalog-marked-free">🌐 Teenusepakkujad</a></td>
+    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Teenusepakkujad</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — üks lõpp-punkt ja 375 teenusepakkujat. Automaatne ümberlülitumine jätkab suunamist, kuni saadaval on mõni muu terve sihtmärk. Kuus sammast: vastupidav ümberlülitumine 375 teenusepakkuja vahel · kuni 95% tokenite kokkuhoid sobivatel töökoormustel · alustamine 0 $-ga koos 150+ tasuta taseme ja 51 korduva/võtmeta igavesti tasuta teenusepakkujaga · 37 CLI/agendi integratsiooni ühe konfiguratsiooni kaudu · OpenAI, Claude'i, Gemini ja Responses API ühilduvus aadressil /v1 · tootmise juhtelemendid, sealhulgas kaitselülitid, TLS-i varjestus, MCP 110 tööriista, A2A, mälu, kaitsepiired, hindamised ja 56 000+ staatilist testideklaratsiooni enam kui 7 800 jälgitavas testifailis."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Lubadus — üks lõpp-punkt ja 376 teenusepakkujat. Automaatne ümberlülitumine jätkab suunamist, kuni saadaval on mõni muu terve sihtmärk. Kuus sammast: vastupidav ümberlülitumine 376 teenusepakkuja vahel · kuni 95% tokenite kokkuhoid sobivatel töökoormustel · alustamine 0 $-ga koos 150+ tasuta taseme ja 52 korduva/võtmeta igavesti tasuta teenusepakkujaga · 37 CLI/agendi integratsiooni ühe konfiguratsiooni kaudu · OpenAI, Claude'i, Gemini ja Responses API ühilduvus aadressil /v1 · tootmise juhtelemendid, sealhulgas kaitselülitid, TLS-i varjestus, MCP 110 tööriista, A2A, mälu, kaitsepiired, hindamised ja 56 000+ staatilist testideklaratsiooni enam kui 7 800 jälgitavas testifailis."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Kõik **20** strateegiat — kombineeri neid kombo igas etapis:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mis eristab OmniRoute'i teistest — kuupäevastatud funktsioonide hetkeseis võrreldes 9routeri, OpenRouteri, CLIProxyAPI ja LiteLLM-iga 13 võimekuse lõikes. OmniRoute: 375 teenusepakkujat, sisseehitatud 150+ tasuta taset, 20 marsruutimisstrateegiat, 12 mootoriga tokenite tihendamine, sisseehitatud 110 tööriistaga MCP-server, A2A agendiprotokoll, püsimälu, kaitsemeetmed, pilveagendid, TLS-sõrmejälje varjamine, Desktop/Termux/PWA ja 67 lokaliseeritud kasutajaliidese keelt. OmniRoute'il on MIT-litsents ja seda saab ise majutada. Konkurentide võimekused ja arvud võivad muutuda; vaadake lingitud metoodikat."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Mis eristab OmniRoute'i teistest — kuupäevastatud funktsioonide hetkeseis võrreldes 9routeri, OpenRouteri, CLIProxyAPI ja LiteLLM-iga 13 võimekuse lõikes. OmniRoute: 376 teenusepakkujat, sisseehitatud 150+ tasuta taset, 20 marsruutimisstrateegiat, 12 mootoriga tokenite tihendamine, sisseehitatud 110 tööriistaga MCP-server, A2A agendiprotokoll, püsimälu, kaitsemeetmed, pilveagendid, TLS-sõrmejälje varjamine, Desktop/Termux/PWA ja 67 lokaliseeritud kasutajaliidese keelt. OmniRoute'il on MIT-litsents ja seda saab ise majutada. Konkurentide võimekused ja arvud võivad muutuda; vaadake lingitud metoodikat."/>
 
 <sub>📊 Täielik metoodika &amp; funktsioonipõhised üksikasjad võrreldes 9routeri, OpenRouteri, CLIProxyAPI &amp; LiteLLM-iga → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -612,7 +612,7 @@ praeguse kataloogi kohta leiate teavet aadressilt **[radar.omniroute.online/plan
 - **🖼️ Uued lõpp-punktid** — `/v1/ocr` (Mistral OCR) ja `/v1/audio/translations` (Whisperi-stiilis) täiendavad meediapinda. → [API viide](docs/reference/API_REFERENCE.md)
 - **🎨 Pildi / video / heli genereerimine** — üks API meedia jaoks: xAI Grok Imagine ja Novita AI video, ComfyUI, Magnific, Adobe Firefly, Segmind ning kõnepakkujad nagu ElevenLabs. → [API viide](docs/reference/API_REFERENCE.md)
 - **🌍 Kasutuselevõtt ja haldus** — pöördpuhverserveri `basePath`, brauserikeele automaattuvastus, võtmepõhine seadmete jälgimine, root-õigusteta MITM-usaldus, zh-TW lokaliseerimine. → [Keskkond](docs/reference/ENVIRONMENT.md)
-- **🤝 Rohkem pakkujaid ja agente** — pilveagendid (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) brauseri + OAuth-sisselogimisega, Ollama esmaklassiline kaart, Claude Opus 5 ja Sonnet 5, Kimi ametlik partnerlus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ning värskendatud **375 pakkujaga kataloog**. → [Pakkujad](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Rohkem pakkujaid ja agente** — pilveagendid (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) brauseri + OAuth-sisselogimisega, Ollama esmaklassiline kaart, Claude Opus 5 ja Sonnet 5, Kimi ametlik partnerlus (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ning värskendatud **376 pakkujaga kataloog**. → [Pakkujad](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Marsruutimise läbipaistvus** — iga vastus kannab `X-OmniRoute-Decision` päist, mis nimetab seda teenindanud strateegia/pakkuja/latentsuse, uus `cache-optimized` kombostrateegia + Auto-Combo `cacheAffinity` tegur suunavad korduvad päringud tagasi vahemälus eesliidet hoidva ühenduse juurde ning kirjutuskaitstud `/v1/auto-combo/{channel}/candidates` lõpp-punkt paljastab `auto/*` kanali reaalajas kandidaatide kogumi. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Kohalik jõudlus ja taristu** — ühe klõpsuga käivitatav kohalik Redis, Cloudflare Workers / Deno Deploy releejuurutajad, Bifrost ja Mux järelevalvatute sisseehitatud teenustena. → [Sisseehitatud teenused](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 Samuti komplektis** — pluginaraamistik + turg, Omni/Agent/GitHub oskusteraamistikud, Obsidiani vault-integratsioon (22 MCP tööriista), OpenAI-ühilduvad Batch & Files API-d, semantiline vastuste vahemälu, mängustamine edetabelitega, ACP agentide tuvastus (15 sisseehitatud agenti), ajastatud logide eksport BigQuery'sse, `auto/chaos` paralleelne mitme mudeli fan-out, Telegrami boti sild, rakendusesisene versioonihaldur ja LMArena-ELO tasuta pakkujate edetabelid. → [Dokumendid](docs/README.md)
@@ -696,11 +696,11 @@ teie shell'i ajaloost eemal. → [CLI-integratsioonid](docs/guides/CLI-INTEGRATI
 
 <div align="center">
 
-## 🌐 375 tehisintellekti pakkujat — 153 kataloogis tasuta teenusena märgitud
+## 🌐 376 tehisintellekti pakkujat — 153 kataloogis tasuta teenusena märgitud
 
 </div>
 
-> **375 registreeritud pakkujat** kanoonilistes vestluse, meedia, otsingu, kohalike, pilveagentide ja süsteemi kogudes, sealhulgas **153 pakkujat, millel on tuvastusmetaandmed `hasFree: true`**. Vestlusmudelite register hõlmab **239 pakkujat / 3 059 erinevat pakkuja-mudeli paari / 1 475 töötlemata mudeli ID-d**; eraldi tasuta kasutusmahu kataloogis on **471 mudelipõhist kirjet**, **34 korduvat kogumit** ja **51 korduva või võtmeta igavesti tasuta pakkujat**. Need nimetajad on teadlikult erinevad; määratlused ja kogumite duplikaate eemaldavad arvutused leiate jaotistest [Pakkujate teatmik](docs/reference/PROVIDER_REFERENCE.md) ja [Tasuta kasutustasemed](docs/reference/FREE_TIERS.md).
+> **376 registreeritud pakkujat** kanoonilistes vestluse, meedia, otsingu, kohalike, pilveagentide ja süsteemi kogudes, sealhulgas **153 pakkujat, millel on tuvastusmetaandmed `hasFree: true`**. Vestlusmudelite register hõlmab **239 pakkujat / 3 059 erinevat pakkuja-mudeli paari / 1 475 töötlemata mudeli ID-d**; eraldi tasuta kasutusmahu kataloogis on **471 mudelipõhist kirjet**, **34 korduvat kogumit** ja **52 korduva või võtmeta igavesti tasuta pakkujat**. Need nimetajad on teadlikult erinevad; määratlused ja kogumite duplikaate eemaldavad arvutused leiate jaotistest [Pakkujate teatmik](docs/reference/PROVIDER_REFERENCE.md) ja [Tasuta kasutustasemed](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1317,7 +1317,7 @@ Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.
   <tr><td nowrap><b>Käituskeskkond</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Keel</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> kaustades <code>src/</code> ja <code>open-sse/</code> (tuumas pole alates v2.0 ühtegi <code>any</code>-tüüpi)</td></tr>
   <tr><td nowrap><b>Raamistik</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-journalimine) + LowDB (JSON-i pärand) — 147 domeenimoodulit, 209 migratsiooni</td></tr>
+  <tr><td nowrap><b>Andmebaas</b></td><td>better-sqlite3 (SQLite, WAL-journalimine) + LowDB (JSON-i pärand) — 147 domeenimoodulit, 211 migratsiooni</td></tr>
   <tr><td nowrap><b>Mälu</b></td><td>SQLite FTS5 täistekstotsing + int8-kvantiseeritud vektor-embeddingud, tüübitud hääbumine</td></tr>
   <tr><td nowrap><b>Skeemid</b></td><td>Zod 4 — MCP tööriistade I/O valideerimine + API-lepingud</td></tr>
   <tr><td nowrap><b>Protokollid</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1380,7 +1380,7 @@ Kanoonilised mõõdikud seisuga 2026-10-18: **1.976 unikaalset videot** · **20.
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Töökindluse juhend</a></b></td><td>Kaitselülitid, ooteajad, järjekord, päringutormi vältimine, TLS-i võltsimine</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo mootor</a></b></td><td>16 teguriga hindamine, režiimipaketid, isetaastumine</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Puhverserveri juhend</a></b></td><td>Kolmetasandiline puhverserverisüsteem, 1proxy turuplats, registri CRUD-toimingud</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tasuta paketid</a></b></td><td>Koondkataloog: 34 dokumenteeritud korduvkasutatavat ressursside kogumit / 471 kataloogitud tasuta paketi kirjet</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Tasuta paketid</a></b></td><td>Koondkataloog: 34 dokumenteeritud korduvkasutatavat ressursside kogumit / 484 kataloogitud tasuta paketi kirjet</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funktsioonide galerii</a></b></td><td>Visuaalne töölaua tutvustus ekraanipiltidega</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Koodibaasi dokumentatsioon</a></b></td><td>Algajasõbralik koodibaasi ülevaade</td></tr>
 </table>

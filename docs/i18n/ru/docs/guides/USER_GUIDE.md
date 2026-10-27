@@ -609,19 +609,19 @@ post_install() {
 ## 📊 Доступные модели
 
 <details>
-<summary><b>Просмотреть все доступные модели</b></summary>
+<summary><b>Посмотреть все доступные модели</b></summary>
 
-> Приведённый ниже список сформирован на основе `open-sse/config/providerRegistry.ts` для v3.8.0. Облачные каталоги (Gemini, OpenRouter и т. д.) синхронизируются динамически — чтобы просмотреть полный актуальный каталог, откройте **Панель управления → Провайдеры → [провайдер] → Доступные модели** или вызовите `GET /api/models/catalog`.
+> Список ниже составлен на основе `open-sse/config/providerRegistry.ts` для v3.8.0. Облачные каталоги (Gemini, OpenRouter и т. д.) синхронизируются динамически — полный актуальный каталог смотрите в **Панель управления → Провайдеры → [провайдер] → Доступные модели** или вызовите `GET /api/models/catalog`.
 >
-> Если встроенный список провайдера устарел, используйте **Импортировать из /models** на этой странице (или включите **Автосинхронизацию**), чтобы загрузить актуальный каталог из исходного сервиса. Это было проверено в v3.8.50 для LLM7.io (`gemini-3.1-flash-lite`) и UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); во время того же цикла тестирования анонимный доступ к Pollinations по-прежнему был ограничен на стороне исходного сервиса.
+> Если встроенный список провайдера устарел, используйте **Импорт из /models** на этой странице (или включите **Автосинхронизацию**), чтобы получить актуальный каталог из первоисточника. Это было проверено в v3.8.50 для LLM7.io (`gemini-3.1-flash-lite`) и UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); анонимный доступ Pollinations во время того же тестового прогона оставался ограниченным на стороне первоисточника.
 
-**Claude Code (`cc/`)** — OAuth для Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth для Plus/Pro: `cx/gpt-5.5` (+ уровни интенсивности рассуждений: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ уровни effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — БЕСПЛАТНЫЙ OAuth: используйте актуальный каталог, показанный в разделе **Панель управления → Провайдеры → Kiro → Доступные модели**. Доступность зависит от учётной записи и тарифного плана.
+**Kiro (`kr/`)** — БЕСПЛАТНЫЙ OAuth: используйте актуальный каталог, показанный в **Панель управления → Провайдеры → Kiro → Доступные модели**. Доступность зависит от аккаунта и тарифного плана.
 
 **Qoder (`if/`)** — БЕСПЛАТНЫЙ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -629,37 +629,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — фиксированная плата $9/мес. или оплата по мере использования: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/мес фиксированно или по факту использования: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — ключ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API-ключ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — сверхвысокая скорость: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Сверхбыстрый: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — нативные модели Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Нативный Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — размещение в ЕС: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Хостинг в ЕС: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — с расширением за счёт поиска: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — С поисковым дополнением: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — открытый исходный код: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (бесплатно), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — С открытым исходным кодом: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (бесплатно), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — быстрый инференс: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Быстрый инференс: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — масштабирование на уровне пластины: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Масштаб пластины: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — ориентация на RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Ориентирован на RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — корпоративное использование: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Корпоративный: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: синхронизируется в реальном времени с Google отдельно для каждого ключа API — статического списка нет. Подключите ключ в разделе **Панель управления → Провайдеры**, затем используйте **Доступные модели**, чтобы импортировать текущий каталог (например, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Синхронизируется в реальном времени для каждого API-ключа от Google — статического списка нет. Подключите ключ в **Панель управления → Провайдеры**, затем используйте **Доступные модели**, чтобы импортировать текущий каталог (например, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Другие совместимые провайдеры** (избранные): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (через `aws-bedrock`), `azure-ai`, `openrouter` (сквозной каталог), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Каждый из них поддерживает собственный список моделей в `providerRegistry.ts` и может автоматически синхронизироваться, если провайдер предоставляет конечную точку `/models`.
+**Другие совместимые провайдеры** (некоторые): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (через `aws-bedrock`), `azure-ai`, `openrouter` (транзитный каталог), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Каждый ведёт собственный список моделей в `providerRegistry.ts` и может автоматически синхронизироваться, если провайдер предоставляет эндпоинт `/models`.
 
-**Примечание об идентификаторах моделей:** OmniRoute использует нативные идентификаторы провайдеров (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Некоторые идентификаторы содержат версии с точками, поскольку именно такой формат ожидает исходный API. Если модель не указана выше, выполните `omniroute models --search <term>` или обратитесь к `GET /api/models/catalog`, чтобы проверить доступность.
+**Примечание об идентификаторах моделей:** OmniRoute использует нативные идентификаторы провайдеров (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Некоторые идентификаторы содержат версии с точками, потому что именно в таком виде их ожидает API первоисточника. Если модель не указана выше, выполните `omniroute models --search <term>` или обратитесь к `GET /api/models/catalog`, чтобы подтвердить доступность.
 
 </details>
 
