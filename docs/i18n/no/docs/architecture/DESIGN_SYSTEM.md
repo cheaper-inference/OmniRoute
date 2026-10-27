@@ -81,31 +81,36 @@
 
 ## 2. Regler
 
-1. Bruk tokens, aldri literalverdier. Unntak som er beholdt med hensikt: den alltid mørke konsollterminalen, ReactFlow SVG-
-   streker via `STATUS_HEX` (`src/shared/constants/statusColors.ts`) og de kategoriske palettene
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) og
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Aldri endre `packages/ui-kit/src` manuelt: synkroniser med `scripts/dev/sync-ui-kit.sh <commit>`; pre-
-   commit-kontrollen `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) mislykkes for enhver byte som
-   avviker fra den festede oppstrømscommiten (den hoppes over med en advarsel når oppstrømsklonen,
-   `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, mangler). Når kitet mangler noe,
-   omgå det i adapteren eller skjermbildet, og be oppstrømsprosjektet om det.
-3. Standardtekstene i kitet er på engelsk (`label = "Loading"`, `loadingLabel = "Loading table"`…) — send inn oversatte
-   strenger fra `useTranslations(...)` hver gang en kitkomponent gjengir tekst.
-4. Tailwind-verktøyklasser overstyrer kitkomponentenes klasser (kitet deklarerer
-   `@layer theme, base, components, utilities`, og reglene ligger i `components`) — bruk verktøyklasser for
-   avstand og layout, ikke for å endre fargene på kitkomponenter.
-5. Overskrifter: `.ci-heading` (Inter, uten tegnavstand) for side- og seksjonstitler; `.ci-dashboard-display`
-   (Instrument Serif) kun for stor, luftig visningstekst, for eksempel statuskoden på feilsiden.
-6. `tests/unit/dashboard-kit-sweep.test.ts` håndhever bruken av kitet: ingen Material-ligaturspenn under
-   `src/app` eller `src/shared/components`; i dashboard-treet (`src/app/(dashboard)` og
-   `src/shared/components`) skal det ikke finnes rå `<select>`, `<textarea>` eller `<table>`, og ingen egenimplementert
-   `role="dialog"` utenfor de oppførte unntakene (`Select`-adapterens native gren,
-   `RequestLoggerDetail`); hver rå `<button>` eller `<input>` der krever en kommentar som inneholder
-   `kit-exception:` (med begrunnelse) og avsluttes høyst 3 linjer over elementet; palettfargetoner og `dark:`-varianter
-   er kun tillatt i filene testen oppgir.
-7. Kontroller begge temaene og visningsbredden på 390 px før en PR (skjermbilder); `tests/e2e/a11y.spec.ts` kjører
-   axe.
+1. Tokens, aldri literaler. Unntak som er beholdt med vilje: den alltid mørke konsollterminalen og
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), som speiler kitens statuspalett som
+   oppløste hex-verdier for kallere som trenger en konkret hex. De kategoriske palettene er ikke
+   lenger noe unntak: de bygger på kitens fem diagramtokens (`--color-chart-1..5`) gjennom
+   `src/shared/utils/categoricalPalette.ts` og, for rutingsstrategier,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-kanter og
+   orkestreringslerretet leser de tematilpassede `--orch-status-*`-variablene
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Patch aldri `packages/ui-kit/src` for hånd: synkroniser med `scripts/dev/sync-ui-kit.sh <commit>`;
+   pre-commit-sperren `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) feiler på enhver byte
+   som avviker fra den låste upstream-commiten (den hopper over med en advarsel når
+   upstream-klonen, `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, mangler). Når
+   kiten mangler noe, må du arbeide rundt det i adapteren eller skjermen og be upstream om det.
+3. Kitens standardtekster er engelske (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   send oversatte strenger fra `useTranslations(...)` hver gang en kit-komponent rendrer tekst.
+4. Tailwind-utilities vinner over kitens komponentklasser (kiten deklarerer
+   `@layer theme, base, components, utilities`, og reglene dens ligger i `components`) — bruk
+   utilities til avstand og layout, ikke til å endre fargene på kit-komponenter.
+5. Overskrifter: `.ci-heading` (Inter, ingen tracking) for side- og seksjonstitler;
+   `.ci-dashboard-display` (Instrument Serif) kun for stor, sparsom displaytekst som feilsidens
+   statuskode.
+6. `tests/unit/dashboard-kit-sweep.test.ts` vokter kit-adopsjonen: ingen Material-ligatur-span under
+   `src/app` eller `src/shared/components`; i dashbordtreet (`src/app/(dashboard)` og
+   `src/shared/components`) ingen rå `<select>`, `<textarea>` eller `<table>` og ingen håndrullet
+   `role="dialog"` utenfor de listede unntakene (`Select`-adapterens native-gren,
+   `RequestLoggerDetail`); hver rå `<button>` eller `<input>` der trenger en kommentar som
+   inneholder `kit-exception:` (med begrunnelsen) og som slutter maks 3 linjer over den;
+   palettnyanser og `dark:`-varianter kun i filene testen lister opp.
+7. Verifiser begge temaene og 390 px-viewporten før en PR (skjermbilder); `tests/e2e/a11y.spec.ts`
+   kjører axe.
 
 ## 3. Legge til et skjermbilde
 

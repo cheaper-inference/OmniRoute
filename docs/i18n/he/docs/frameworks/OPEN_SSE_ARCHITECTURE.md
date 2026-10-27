@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | קובץ                          | מטרה                                       |
 | ----------------------------- | ------------------------------------------ |
-| `providerRegistry.ts`         | רישום מודלי צ'אט מעל קטלוג של 375 ספקים    |
+| `providerRegistry.ts`         | רישום מודלי צ'אט מעל קטלוג של 376 ספקים    |
 | `providerModels.ts`           | כינויי מודלים, מיפוי פורמטים               |
 | `constants.ts`                | פסקי זמן, מגבלות, קודי סטטוס               |
 | `defaultThinkingSignature.ts` | חתימת החשיבה המוגדרת כברירת מחדל של Claude |

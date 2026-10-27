@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | फाइल                          | उद्देश                                         |
 | ----------------------------- | ---------------------------------------------- |
-| `providerRegistry.ts`         | 375-प्रोव्हायडर कॅटलॉगवरील चॅट-मॉडेल रजिस्ट्री |
+| `providerRegistry.ts`         | 376-प्रोव्हायडर कॅटलॉगवरील चॅट-मॉडेल रजिस्ट्री |
 | `providerModels.ts`           | मॉडेल उपनामे, फॉरमॅट मॅपिंग                    |
 | `constants.ts`                | टाइमआउट, मर्यादा, स्टेटस कोड                   |
 | `defaultThinkingSignature.ts` | डीफॉल्ट Claude थिंकिंग स्वाक्षरी               |

@@ -81,30 +81,34 @@
 
 ## 2. القواعد
 
-1. استخدم الرموز المميزة، لا القيم الحرفية أبدًا. الاستثناءات المتعمدة: طرفية وحدة التحكم ذات السمة الداكنة دائمًا، وحدود SVG الخاصة بـ ReactFlow عبر `STATUS_HEX` (`src/shared/constants/statusColors.ts`)، ولوحات الألوان الفئوية
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) و
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. لا تعدّل `packages/ui-kit/src` يدويًا أبدًا: زامنه باستخدام `scripts/dev/sync-ui-kit.sh <commit>`؛ تفشل
-   بوابة ما قبل الالتزام `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) عند وجود أي بايت
-   يختلف عن الالتزام المثبّت في المنبع (ويتم تخطيها مع تحذير عند غياب نسخة المنبع،
-   `UI_KIT_CLONE` أو `_references/cheaper-inference-ui-kit`). عندما تفتقر الحزمة إلى شيء ما،
-   التفّ حول ذلك في المكيّف أو الشاشة واطلب إضافته من المنبع.
-3. القيم الافتراضية لنصوص الحزمة باللغة الإنجليزية (`label = "Loading"`، و`loadingLabel = "Loading table"`…) — مرّر سلاسل
-   مترجمة من `useTranslations(...)` كلما عرض أحد مكونات الحزمة نصًا.
-4. أدوات Tailwind لها الأولوية على أصناف مكونات الحزمة (تُعلن الحزمة
-   `@layer theme, base, components, utilities` وتوجد قواعدها في `components`) — استخدم الأدوات
-   للتباعد والتخطيط، وليس لإعادة تلوين مكونات الحزمة.
-5. العناوين: استخدم `.ci-heading` (خط Inter، دون تباعد بين الأحرف) لعناوين الصفحات والأقسام؛ واستخدم `.ci-dashboard-display`
-   (خط Instrument Serif) فقط لنصوص العرض الكبيرة والمتباعدة، مثل رمز الحالة في صفحة الخطأ.
-6. يحمي `tests/unit/dashboard-kit-sweep.test.ts` اعتماد الحزمة: لا عناصر span لوصلات Material تحت
-   `src/app` أو `src/shared/components`؛ وفي شجرة لوحة المعلومات (`src/app/(dashboard)` و
-   `src/shared/components`) لا تستخدم `<select>` أو `<textarea>` أو `<table>` خامًا، ولا تنشئ
-   `role="dialog"` يدويًا خارج الاستثناءات المدرجة (الفرع الأصلي لمكيّف `Select`،
-   و`RequestLoggerDetail`)؛ ويحتاج كل `<button>` أو `<input>` خام هناك إلى تعليق يحتوي على
-   `kit-exception:` (مع السبب) وينتهي قبل العنصر بما لا يزيد على 3 أسطر؛ لا يُسمح بدرجات ألوان اللوحات ومتغيرات `dark:`
-   إلا في الملفات التي يدرجها الاختبار.
-7. تحقّق من كلتا السمتين ومن إطار العرض بعرض 390 بكسل قبل إنشاء طلب دمج (مع لقطات شاشة)؛ ويشغّل `tests/e2e/a11y.spec.ts`
-   أداة axe.
+1. رموز (tokens) دائمًا، ولا قيم حرفية أبدًا. الاستثناءات مُبقاة عن قصد: طرفية وحدة التحكم الداكنة دائمًا و
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`)، وهي مرآة القيم hex المحسومة للوحة حالات
+   الحزمة، للمتصلين الذين يحتاجون قيمة hex حرفية. لم تعد اللوحات الفئوية استثناءً بعد الآن:
+   فهي تعتمد على رموز المخططات الخمسة في الحزمة (`--color-chart-1..5`) عبر
+   `src/shared/utils/categoricalPalette.ts`، وبالنسبة لاستراتيجيات التوجيه،
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`؛ وتقرأ حواف ReactFlow ولوحة التنسيق
+   متغيرات `--orch-status-*` الواعية بالسمة (`src/shared/components/flow/edgeStyles.ts`).
+2. لا تُرقّع `packages/ui-kit/src` يدويًا أبدًا: زامِن باستخدام `scripts/dev/sync-ui-kit.sh <commit>`؛
+   بوابة ما قبل الالتزام `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) تفشل عند أي بايت
+   يختلف عن الالتزام المثبَّت في المنبع (تُتخطَّى مع تحذير عندما يكون استنساخ المنبع،
+   `UI_KIT_CLONE` أو `_references/cheaper-inference-ui-kit`، غائبًا). عندما تفتقر الحزمة إلى شيء،
+   تحايَل عليه في المحوِّل أو الشاشة واطلبه من المنبع.
+3. النصوص الافتراضية في الحزمة إنجليزية (`label = "Loading"`، `loadingLabel = "Loading table"`…) — مرِّر
+   سلاسل مترجمة من `useTranslations(...)` كلما عرض مكوّن من الحزمة نصًا.
+4. الأدوات المساعدة في Tailwind تتغلّب على فئات مكونات الحزمة (فالحزمة تُعلن
+   `@layer theme, base, components, utilities` وقواعدها تعيش في `components`) — استخدم الأدوات المساعدة
+   للتباعد والتخطيط، لا لإعادة تلوين مكونات الحزمة.
+5. العناوين: `.ci-heading` (خط Inter، بلا تباعد أحرف) لعناوين الصفحات والأقسام؛ `.ci-dashboard-display`
+   (Instrument Serif) فقط لنصوص العرض الكبيرة القليلة مثل رمز الحالة في صفحة الخطأ.
+6. `tests/unit/dashboard-kit-sweep.test.ts` يحرس اعتماد الحزمة: ممنوع أي span برباط حروف Material تحت
+   `src/app` أو `src/shared/components`؛ وفي شجرة لوحة التحكم (`src/app/(dashboard)` و
+   `src/shared/components`) ممنوع وجود `<select>` أو `<textarea>` أو `<table>` خام، وممنوع أي
+   `role="dialog"` مُنفَّذ يدويًا خارج الاستثناءات المدرجة (الفرع الأصيل لمحوِّل `Select`،
+   `RequestLoggerDetail`)؛ وكل `<button>` أو `<input>` خام هناك يحتاج تعليقًا يتضمن
+   `kit-exception:` (مع ذكر السبب) ينتهي قبله بثلاثة أسطر على الأكثر؛ وتدرجات ألوان اللوحة ومتغيرات `dark:`
+   مقصورة على الملفات التي يعدّدها الاختبار.
+7. تحقّق من كلتا السمتين ومن منفذ العرض بعرض 390 px قبل فتح PR (بلقطات شاشة)؛ `tests/e2e/a11y.spec.ts` يشغّل
+   axe.
 
 ## 3. إضافة شاشة
 

@@ -32,91 +32,91 @@ Richiesta del client
 
 ## Modalità di compressione
 
-### Disattivata
+### Off
 
-Non viene applicata alcuna compressione. Tutti i messaggi vengono inoltrati senza modifiche.
+Nessuna compressione applicata. Tutti i messaggi passano invariati.
 
-### Modalità leggera (~15% di risparmio, latenza <1 ms)
+### Modalità Lite (~15% di risparmio, latenza <1ms)
 
-La modalità più sicura: nessuna modifica semantica, solo pulizia della formattazione:
+La modalità più sicura — zero modifiche semantiche, solo pulizia della formattazione:
 
-| Tecnica                  | Descrizione                                           |
-| ------------------------ | ----------------------------------------------------- |
-| `collapseWhitespace`     | Unisce righe vuote consecutive e spazi finali         |
-| `dedupSystemPrompt`      | Rimuove i messaggi di sistema duplicati               |
-| `compressToolResults`    | Comprime gli output dettagliati di strumenti/funzioni |
-| `removeRedundantContent` | Elimina le istruzioni ripetute                        |
-| `replaceImageUrls`       | Accorcia gli URI di dati delle immagini in base64     |
+| Tecnica                  | Descrizione                                       |
+| ------------------------ | ------------------------------------------------- |
+| `collapseWhitespace`     | Unisce righe vuote consecutive e spazi finali     |
+| `dedupSystemPrompt`      | Rimuove i messaggi di sistema duplicati           |
+| `compressToolResults`    | Comprime gli output verbosi di strumenti/funzioni |
+| `removeRedundantContent` | Elimina le istruzioni ripetute                    |
+| `replaceImageUrls`       | Accorcia i data URI delle immagini base64         |
 
-**Ideale per:** utilizzo continuo e flussi di lavoro critici per la sicurezza.
+**Ideale per:** Uso sempre attivo, flussi di lavoro critici per la sicurezza.
 
-### Modalità standard (~30% di risparmio)
+### Modalità Standard (~30% di risparmio)
 
-Ispirata a [Caveman](https://github.com/JuliusBrussee/caveman): rimuove le parole superflue e le formulazioni prolisse preservandone il significato:
+Ispirata a [Caveman](https://github.com/JuliusBrussee/caveman) — rimuove le parole di riempimento e le formulazioni verbose preservando il significato:
 
-- Rimuove le parole superflue ("per favore", "penso", "fondamentalmente", "in realtà")
-- Condensa le espressioni prolisse ("al fine di" → "per", "come risultato di" → "a causa di")
-- Elimina le formule di cortesia attenuanti ("Ti dispiacerebbe...", "Se potessi...")
+- Rimuove le parole di riempimento ("please", "I think", "basically", "actually")
+- Condensa le frasi verbose ("in order to" → "to", "as a result of" → "because")
+- Elimina le cautele cortesi ("Would you mind...", "If you could possibly...")
 - Oltre 30 regole regex ottimizzate per i prompt di programmazione
 
-**Ideale per:** flussi di lavoro quotidiani di programmazione e team attenti ai costi.
+**Ideale per:** Flussi di lavoro di sviluppo quotidiani, team attenti ai costi.
 
-### Modalità aggressiva (~50% di risparmio)
+### Modalità Aggressive (~50% di risparmio)
 
 Gestione intelligente della cronologia per sessioni lunghe:
 
-- **Invecchiamento dei messaggi** — i messaggi meno recenti vengono progressivamente compressi
-- **Compressione dei risultati degli strumenti** — gli output lunghi degli strumenti vengono troncati od omessi (prime/ultime righe,
+- **Invecchiamento dei messaggi** — i messaggi più vecchi vengono compressi progressivamente
+- **Compressione dei risultati degli strumenti** — gli output lunghi degli strumenti vengono troncati o elisi (prime/ultime righe,
   filtraggio delle righe corrispondenti, compattazione delle chiavi JSON)
-- **Protezioni dell'integrità strutturale** — garantiscono che le coppie `tool_use` + `tool_result` rimangano coerenti
+- **Guardie di integrità strutturale** — garantisce che le coppie `tool_use` + `tool_result` restino coerenti
 - **Consapevolezza della finestra di contesto** — rispetta i limiti di token di ciascun modello
 
-**Ideale per:** sessioni di debug prolungate e codebase di grandi dimensioni.
+**Ideale per:** Sessioni di debug prolungate, codebase di grandi dimensioni.
 
-### Modalità ultra (~75% di risparmio)
+### Modalità Ultra (~75% di risparmio)
 
-Compressione massima per gli scenari in cui i token sono una risorsa critica:
+Compressione massima per scenari critici in termini di token:
 
-- **Sfoltimento euristico** — sfoltimento del testo basato sul punteggio dei token
-- **Conservazione della struttura** — i blocchi di codice delimitati, il codice inline, gli URL e gli identificatori vengono
-  sostituiti da segnaposto e reinseriti testualmente, senza mai essere eliminati
-- **Livello SLM opzionale** — un piccolo modello locale può perfezionare lo sfoltimento quando configurato
-- Indipendente dalla modalità aggressiva: non esegue l'invecchiamento dei messaggi, la compressione dei risultati degli strumenti
-  o il riepilogatore di fallback (solo un errore del livello SLM può instradare un passaggio di fallback attraverso
-  la modalità aggressiva)
+- **Potatura euristica** — potatura dei token della prosa basata su punteggio
+- **Preservazione della struttura** — i blocchi di codice delimitati, il codice inline, gli URL e gli identificatori
+  vengono marcati con tombstone e ricuciti alla lettera, mai potati
+- **Livello SLM opzionale** — un piccolo modello locale può perfezionare la potatura, se configurato
+- Indipendente dalla modalità Aggressive: non esegue l'invecchiamento dei messaggi, la compressione dei risultati degli strumenti
+  né il riassuntore di fallback (solo un fallimento del livello SLM può instradare un passaggio di fallback
+  attraverso aggressive)
 
-**Ideale per:** quando si raggiungono ripetutamente i limiti di contesto.
+**Ideale per:** Quando raggiungi ripetutamente i limiti di contesto.
 
 ### Modalità RTK (intervallo upstream del 60-90%)
 
-La modalità RTK è ottimizzata per gli output dettagliati degli strumenti che compaiono nelle sessioni degli agenti di programmazione:
+La modalità RTK è ottimizzata per gli output verbosi degli strumenti che compaiono nelle sessioni degli agent di codifica:
 
-- Rileva classi di comandi/output come `git status`, `git diff`, `git log`, strumenti di esecuzione dei test,
-  build TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audit/installazioni npm, log Docker, output
-  dell'infrastruttura e output generico della shell
-- Applica i pacchetti di filtri JSON da `open-sse/services/compression/engines/rtk/filters/`
-- Importa i filtri dello schema TOML v1 di RTK dai file `filters.toml` del progetto o globali, con convalida
-  dei test inline e controllo dell'attendibilità per i file di progetto
-- Include 55 filtri integrati con esempi di verifica inline
-- Rimuove sequenze di controllo ANSI, barre di avanzamento, righe ripetute e informazioni non utili
-- Conserva errori, avvisi, file modificati, riepiloghi e la parte finale degli output lunghi
-- Supporta filtri di progetto soggetti a verifica dell'attendibilità, filtri globali e il recupero facoltativo dell'output grezzo con dati sensibili oscurati
+- Rileva classi di comando/output come `git status`, `git diff`, `git log`, test runner,
+  build TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/install, log Docker, output
+  infrastrutturale e output generico della shell
+- Applica pacchetti di filtri JSON da `open-sse/services/compression/engines/rtk/filters/`
+- Importa i filtri dello schema RTK TOML v1 da file `filters.toml` di progetto o globali, con validazione
+  tramite test inline e trust-gating per i file di progetto
+- Include 56 filtri integrati con campioni di verifica inline
+- Rimuove sequenze di controllo ANSI, barre di avanzamento, righe ripetute e rumore non azionabile
+- Preserva fallimenti, errori, avvisi, file modificati, riepiloghi e la coda degli output lunghi
+- Supporta filtri di progetto con trust-gating, filtri globali e recupero opzionale dell'output grezzo con redazione
 
-**Ideale per:** sessioni di agenti con trascrizioni di shell, build, test, git, grep e output di file.
+**Ideale per:** Sessioni di agent con trascrizioni di shell, build, test, git, grep e output di file.
 
-### Modalità combinata (intervallo idoneo del 78-95%)
+### Modalità Stacked (intervallo idoneo del 78-95%)
 
-La modalità combinata esegue più motori di compressione in un ordine deterministico. La pipeline predefinita è:
+La modalità Stacked esegue più motori di compressione in un ordine deterministico. La pipeline predefinita è:
 
 ```txt
 RTK -> Caveman
 ```
 
-Questo ordine compatta prima l'output del terminale/degli strumenti, quindi applica la condensazione semantica di Caveman
-al prompt rimanente in linguaggio naturale. Le pipeline combinate possono essere configurate globalmente o tramite
-combinazioni di compressione assegnate alle combinazioni di instradamento.
+Questo ordine mantiene prima compatto l'output del terminale/degli strumenti, poi applica la condensazione
+semantica di Caveman al prompt in linguaggio naturale rimanente. Le pipeline Stacked possono essere configurate
+globalmente o tramite combinazioni di compressione assegnate alle combinazioni di routing.
 
-**Ideale per:** contesti misti con log degli strumenti di grandi dimensioni insieme a istruzioni umane o riepiloghi dell'assistente.
+**Ideale per:** Contesti misti con ampi log degli strumenti più istruzioni umane o riepiloghi dell'assistente.
 
 ---
 

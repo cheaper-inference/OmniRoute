@@ -185,6 +185,19 @@ Runs on every PR to `main`. Blocks merge on failure.
 | `check:docs-symbols`           | Every `/api/...` reference in `docs/**/*.md` resolves to a real `route.ts` (anti-hallucination)                                                   | Yes                        |
 | `i18n translation drift`       | Untranslated keys in i18n locale files — warn only                                                                                                | **Advisory**               |
 
+The twelve README SVGs under `docs/diagrams/` are generated (`scripts/docs/gen-readme-<name>.mjs`;
+`npm run docs:readme-diagrams` regenerates all of them). Each has a byte-compare unit test
+(`tests/unit/docs/readme-*-svg.test.ts`, job `test-unit`) that fails when the committed file is
+stale, and `check:docs-counts` reads canonical numbers from their `<text>` nodes — which is why the
+numbers are never outlined to paths. The SVG canonical-numbers check reads the files listed in
+`SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`,
+`free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
+`tier-cascade.svg`, plus `public/images/tier-flow-dark.svg` and `tier-flow-light.svg`; the
+free-forever, catalog-entry, recurring-pool and scoring-factors claims also read
+`promise-pillars.svg`, `free-tier-budget.svg` and `strategies-grid.svg`. `free-tier-budget.svg`
+draws its figures from the live catalog loader, so a change to `FREE_MODEL_BUDGETS` or to a
+provider display name reds CI until that file is regenerated.
+
 ### Job: `i18n-ui-coverage`
 
 | Script                            | Validates                                                                                                                                                                             | Blocking     |

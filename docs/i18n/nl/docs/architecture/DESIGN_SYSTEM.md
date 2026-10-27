@@ -81,31 +81,39 @@
 
 ## 2. Regels
 
-1. Tokens, nooit letterlijke waarden. Bewust behouden uitzonderingen: de altijd donkere consoleterminal, ReactFlow SVG-
-   lijnen via `STATUS_HEX` (`src/shared/constants/statusColors.ts`) en de categorische paletten
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) en
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Pas `packages/ui-kit/src` nooit handmatig aan: synchroniseer met `scripts/dev/sync-ui-kit.sh <commit>`; de
-   pre-commitcontrole `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) mislukt bij elke byte die
-   afwijkt van de vastgezette upstream-commit (de controle wordt met een waarschuwing overgeslagen wanneer de upstream-kloon,
-   `UI_KIT_CLONE` of `_references/cheaper-inference-ui-kit`, ontbreekt). Als de kit iets niet bevat,
-   werk je eromheen in de adapter of het scherm en vraag je upstream om toevoeging ervan.
-3. De standaardteksten van de kit zijn Engels (`label = "Loading"`, `loadingLabel = "Loading table"`…) — geef vertaalde
-   tekenreeksen uit `useTranslations(...)` door wanneer een kitcomponent tekst rendert.
-4. Tailwind-utilities hebben voorrang op kitcomponentklassen (de kit declareert
-   `@layer theme, base, components, utilities` en de regels ervan staan in `components`) — gebruik utilities voor
-   witruimte en lay-out, niet om kitcomponenten een andere kleur te geven.
-5. Koppen: `.ci-heading` (Inter, zonder tekenafstand) voor pagina- en sectietitels; `.ci-dashboard-display`
-   (Instrument Serif) alleen voor grote, spaarzaam gebruikte weergavetekst, zoals de statuscode op een foutpagina.
-6. `tests/unit/dashboard-kit-sweep.test.ts` bewaakt het gebruik van de kit: geen Material-ligatuurspan onder
-   `src/app` of `src/shared/components`; in de dashboardstructuur (`src/app/(dashboard)` en
-   `src/shared/components`) geen onbewerkte `<select>`, `<textarea>` of `<table>` en geen zelfgemaakte
-   `role="dialog"` buiten de vermelde uitzonderingen (de native vertakking van de `Select`-adapter,
-   `RequestLoggerDetail`); elke onbewerkte `<button>` of `<input>` daar vereist een commentaarregel met
-   `kit-exception:` (met de reden) die maximaal 3 regels erboven eindigt; palettinten en `dark:`-varianten
-   zijn alleen toegestaan in de bestanden die door de test worden vermeld.
-7. Controleer vóór een PR beide thema's en de viewport van 390 px (met schermafbeeldingen); `tests/e2e/a11y.spec.ts` voert
-   axe uit.
+1. Tokens, nooit literals. Uitzonderingen bewust behouden: de altijd-donkere consoleterminal en
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), de opgeloste-hex-mirror van het
+   statuspalet van de kit voor aanroepers die een letterlijke hexwaarde nodig hebben. De
+   categorische paletten vormen geen uitzondering meer: ze liften mee op de vijf grafiektokens van
+   de kit (`--color-chart-1..5`) via `src/shared/utils/categoricalPalette.ts` en, voor
+   routingstrategieën, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-edges
+   en het orkestratiecanvas lezen de thema-afhankelijke `--orch-status-*`-variabelen
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Patch `packages/ui-kit/src` nooit met de hand: synchroniseer met
+   `scripts/dev/sync-ui-kit.sh <commit>`; de pre-commit-controle `npm run check:ui-kit-snapshot`
+   (`.husky/pre-commit`) faalt op elke byte die afwijkt van de vastgepinde upstream-commit (die met
+   een waarschuwing wordt overgeslagen wanneer de upstream-kloon, `UI_KIT_CLONE` of
+   `_references/cheaper-inference-ui-kit`, afwezig is). Wanneer de kit iets mist, omzeil het dan in
+   de adapter of het scherm en vraag er upstream om.
+3. De standaardteksten van de kit zijn Engels (`label = "Loading"`,
+   `loadingLabel = "Loading table"`…) — geef vertaalde strings uit `useTranslations(...)` door
+   wanneer een kit-component tekst rendert.
+4. Tailwind-utilities winnen het van de klassen van kit-componenten (de kit declareert
+   `@layer theme, base, components, utilities` en de regels ervan staan in `components`) — gebruik
+   utilities voor spatiëring en lay-out, niet om kit-componenten opnieuw in te kleuren.
+5. Koppen: `.ci-heading` (Inter, geen tracking) voor pagina- en sectietitels;
+   `.ci-dashboard-display` (Instrument Serif) alleen voor grote, spaarzaam ingezette displaytekst
+   zoals de statuscode van de foutpagina.
+6. `tests/unit/dashboard-kit-sweep.test.ts` bewaakt de adoptie van de kit: geen span met
+   Material-ligaturen onder `src/app` of `src/shared/components`; in de dashboardboom
+   (`src/app/(dashboard)` en `src/shared/components`) geen kale `<select>`, `<textarea>` of
+   `<table>` en geen handmatig gebouwde `role="dialog"` buiten de opgesomde uitzonderingen (de
+   native tak van de `Select`-adapter, `RequestLoggerDetail`); elke kale `<button>` of `<input>`
+   daar heeft een commentaarregel nodig met daarin `kit-exception:` (met de reden), die uiterlijk 3
+   regels erboven eindigt; palettinten en `dark:`-varianten alleen in de bestanden die de test
+   opsomt.
+7. Verifieer beide thema's en de 390 px-viewport vóór een PR (screenshots);
+   `tests/e2e/a11y.spec.ts` draait axe.
 
 ## 3. Een scherm toevoegen
 

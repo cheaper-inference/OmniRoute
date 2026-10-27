@@ -501,7 +501,7 @@ eile (scéimeanna uirlisí, cuibheoirí gabhála/TTS, láimhseálaithe iompraío
 (cúntóir comhroinnte aitheantais) agus `index.ts` (clárlann).
 
 > Nóta: freastalaíonn `default.ts` ar sholáthraithe nach bhfuil liostaithe anseo agus úsáideann sé an feidhmitheoir cineálach
-> atá comhoiriúnach le OpenAI. Tá catalóg iomlán na soláthraithe (375 soláthraí) le fáil in
+> atá comhoiriúnach le OpenAI. Tá catalóg iomlán na soláthraithe (376 soláthraí) le fáil in
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

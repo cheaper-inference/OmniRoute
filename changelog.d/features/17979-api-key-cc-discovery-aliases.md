@@ -1,0 +1,1 @@
+- **feat(api-keys):** add a per-key control for Claude Code discovery aliases so operators can keep compatibility aliases visible only where needed without widening the key's underlying model authorization ([#17979](https://github.com/diegosouzapw/OmniRoute/pull/17979)) - thanks @seanford

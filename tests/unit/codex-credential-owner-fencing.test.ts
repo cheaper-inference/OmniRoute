@@ -166,11 +166,51 @@ for (const aba of [false, true]) {
       after?.providerSpecificData?.syncedModelsAt,
       before?.providerSpecificData?.syncedModelsAt
     );
-    assert.equal(response.ok, false);
+    assert.equal(response.status, 409);
     const body = JSON.stringify(await response.json());
     assert.ok(!body.includes("at /") && !body.includes("synthetic-access-"));
   });
 }
+
+test("current-owner discovery keeps upstream catalog projection and version diagnostics", async () => {
+  const connection = await seed();
+  const client = await import("../../open-sse/config/codexClient.ts");
+  const originalVersion = process.env.CODEX_CLIENT_VERSION;
+  process.env.CODEX_CLIENT_VERSION = "0.160.1";
+  globalThis.fetch = async (input) =>
+    Response.json({
+      models: [
+        {
+          slug: String(input).includes("chatgpt.com") ? "current-owner-model" : "github-only-model",
+          visibility: "list",
+          supported_in_api: true,
+        },
+      ],
+    });
+  try {
+    const response = await GET(
+      new Request(`http://localhost/api/providers/${connection.id}/models?refresh=true`),
+      { params: { id: connection.id } }
+    );
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.source, "api");
+    assert.deepEqual(
+      body.models.map((model: { id: string }) => model.id),
+      ["current-owner-model"]
+    );
+    assert.deepEqual(body.discovery.clientVersion, { version: "0.160.1", source: "override" });
+    assert.equal(body.degraded, undefined);
+    assert.deepEqual(
+      (await discovery.getCachedDiscoveredModels("codex", connection.id)).map((model) => model.id),
+      ["current-owner-model"]
+    );
+  } finally {
+    if (originalVersion === undefined) delete process.env.CODEX_CLIENT_VERSION;
+    else process.env.CODEX_CLIENT_VERSION = originalVersion;
+    client.resetCodexClientVersionCacheForTests();
+  }
+});
 
 test("a stale unauthorized usage result cannot mark replacement credentials expired", async () => {
   const connection = await seed();

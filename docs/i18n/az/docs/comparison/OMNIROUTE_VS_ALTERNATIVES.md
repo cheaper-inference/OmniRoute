@@ -39,7 +39,7 @@ Populyar açıq mənbəli AI routerləri ilə obyektiv xüsusiyyət müqayisəsi
 
 ## OmniRoute-u nə vaxt seçməli
 
-- Öz serverinizdə yerləşdirirsinizsə və **maksimum provayder əhatəsi** istəyirsinizsə (375 provayder, 155 pulsuz/autentifikasiyasız kataloq yazısı)
+- Öz serverinizdə yerləşdirirsinizsə və **maksimum provayder əhatəsi** istəyirsinizsə (376 provayder, 155 pulsuz/autentifikasiyasız kataloq yazısı)
 - **Daxili MCP serverinə** ehtiyacınız varsa (LLM alətləri, yaddaş, alətlər kimi təqdim olunan bacarıqlar)
 - Agentlər arası iş axınları üçün **A2A protokoluna** ehtiyacınız varsa
 - Yuxarı axın CAPTCHA-ları tərəfindən aşkarlanmamaq üçün **barmaq izi gizliliyi** (JA3/JA4) istəyirsinizsə
