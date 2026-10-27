@@ -157,6 +157,11 @@ test("a degraded provider without a readable reason is still listed", async () =
     listModelsCatalogOutput.parse({
       models: [],
       source: "local_catalog",
+      mode: "models",
+      total: 0,
+      returned: 0,
+      limit: 100,
+      nextCursor: null,
       degradedProviders: [{ provider: "github" }],
     })
   );

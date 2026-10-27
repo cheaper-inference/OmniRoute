@@ -125,14 +125,9 @@ test("the exception check rejects loose words and accepts the marker", () => {
 test("hard-coded palette hues and dark: variants only where the exception is documented", () => {
   const HUE =
     /\b(?:text|bg|border|ring|from|to|via|fill|stroke|outline|divide|accent|decoration|shadow|placeholder|caret)-(?:red|green|blue|amber|yellow|emerald|rose|slate|gray|zinc|neutral|indigo|violet|purple|orange|cyan|sky|teal|lime|pink|fuchsia|stone)-\d/g;
-  // Category legend dots: 13 categories vs 5 chart tokens, shared by three files (lote 2b).
-  const HUE_ALLOWED: Record<string, number> = {
-    "src/app/(dashboard)/dashboard/providers/components/CategoryDot.tsx": 1,
-    "src/app/(dashboard)/dashboard/providers/components/NoAuthProvidersSection.tsx": 1,
-    "src/app/(dashboard)/dashboard/providers/components/ProviderCard.tsx": 11,
-    "src/app/(dashboard)/dashboard/providers/components/ProviderSummaryCard.tsx": 13,
-    "src/app/(dashboard)/dashboard/providers/page.tsx": 17,
-  };
+  // None left: the provider category legend moved to the kit chart tokens (KEA-7886, P8 —
+  // providerCategoryPalette.ts). Categorical colour goes through categoricalPalette.ts.
+  const HUE_ALLOWED: Record<string, number> = {};
   assert.deepEqual(countBy(DASHBOARD, HUE), HUE_ALLOWED);
 
   const DARK_ALLOWED: Record<string, number> = {

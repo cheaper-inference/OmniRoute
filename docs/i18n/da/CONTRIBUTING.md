@@ -170,18 +170,18 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 ## Kørsel af tests
 
 ```bash
-# Alle tests (unit + vitest + ecosystem + e2e)
+# Alle tests (enhed + Vitest + økosystem + E2E)
 npm run test:all
 
-# Enkelt testfil (Node.js' indbyggede testkørsel — de fleste tests bruger denne)
+# Enkelt testfil (Node.js' indbyggede testkører — de fleste tests bruger denne)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
 # Kun de enhedstests, der påvirkes af din ændring (samme TIA-vælger som CI-kontrollen, #8084)
 npm run test:scoped            # ændringer i den seneste commit (eller arbejdstræet)
-npm run test:scoped:staged     # kun klargjorte ændringer — fungerer godt med en pre-commit-kørsel
+npm run test:scoped:staged     # kun stagede ændringer — fungerer godt sammen med en pre-commit-kørsel
 npm run test:scoped:full       # genopbyg først importgrafkortet (efter tilføjelse/flytning af filer)
-# Afslutningskode 1 + "run the full suite" betyder, at en central fil (tsconfig, package.json, …) eller en
-# ikke-kortlagt kildefil er ændret — vælgeren fejler sikkert og springer aldrig over uden at oplyse det.
+# Exit 1 + "kør hele testsuiten" betyder, at en central fil (tsconfig, package.json, …) eller en
+# ikke-kortlagt kildefil er ændret — vælgeren fejler sikkert og springer aldrig noget over uden at oplyse det.
 
 # Vitest (MCP-server, autoCombo, cache)
 npm run test:vitest
@@ -195,59 +195,60 @@ npm run test:protocols:e2e
 # Kompatibilitetstests for økosystemet
 npm run test:ecosystem
 
-# Dækningskrav: 60 % af statements/linjer/funktioner/grene
+# Dækningskrav: 60 % statements/linjer/funktioner/grene
 npm run test:coverage
 npm run coverage:report
 
-# Kontrol af lint + formatering
+# Kontrol af linting + formatering
 npm run lint
 npm run check
 
-# Kontrolleret smoke-test af kombinationer mod faktiske upstream-tjenester (kræver VPS-adgang + rigtige udbyderkreditter)
-# Rammer RIGTIGE udbydere — koster lidt. Kører ALDRIG i CI. Springes problemfrit over uden kontrollen.
-# Kræver: adgang via ssh root@192.168.0.15 (indlæser et skrivebeskyttet DB-snapshot fra VPS'en).
+# Adgangsstyret smoke-test af kombinationer mod ægte upstreams (kræver VPS-adgang + kreditter hos rigtige udbydere)
+# Rammer RIGTIGE udbydere — koster lidt. Kører ALDRIG i CI. Springes problemfrit over uden aktivering.
+# Kræver: adgang med ssh root@192.168.0.15 (indlæser et skrivebeskyttet DB-snapshot fra VPS'en).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Fase 3-smoke-test direkte mod VPS — almindelige Node ESM-scripts, der rammer live-serveren på .15 direkte.
-# Kræver: adgang via ssh root@192.168.0.15 (kombinationer oprettes/nedlægges via SSH sqlite).
-# Rammer RIGTIGE udbydere (lille omkostning). Opretter/sletter kun kombinationer af typen __live_test__*. Kører ALDRIG i CI.
+# Live-smoke-test for fase 3 på VPS — almindelige Node ESM-scripts, der rammer live-.15-serveren direkte.
+# Kræver: adgang med ssh root@192.168.0.15 (kombinationer oprettes/nedtages via SSH sqlite).
+# Rammer RIGTIGE udbydere (lille omkostning). Opretter/sletter kun __live_test__*-kombinationer. Kører ALDRIG i CI.
 # REQUIRE_API_KEY=false på .15, så der kræves ingen API-nøgle, men COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY respekteres, hvis de er angivet.
-npm run test:combo:live:vps              # 7 HTTP-scenarier (prioritet/round-robin/vægtet/omkostning/fusion/auto + tilstand)
-npm run test:combo:live:vps:failover     # tilføjer et reelt failover-scenarie på tværs af udbydere (8 i alt)
+npm run test:combo:live:vps              # 7 HTTP-scenarier (prioritet/round-robin/vægtet/omkostning/fusion/automatisk + tilstand)
+npm run test:combo:live:vps:failover     # tilføjer et ægte failover-scenarie på tværs af udbydere (8 i alt)
 ```
 
 Bemærkninger om dækning:
 
-- `npm run test:coverage` måler kildedækningen for den primære enhedstestsuite, udelukker `tests/**` og inkluderer `open-sse/**`
-- Pull requests skal opretholde dækningskravet på **60 %+** for statements/linjer/funktioner/grene
+- `npm run test:coverage` måler kildedækningen for den primære enhedstestsuite, ekskluderer `tests/**` og inkluderer `open-sse/**`
+- Pull requests skal fastholde dækningskravet på **60 %+** for statements/linjer/funktioner/grene
 - Hvis en PR ændrer produktionskode i `src/`, `open-sse/`, `electron/` eller `bin/`, skal den tilføje eller opdatere automatiserede tests i samme PR
 - `npm run coverage:report` udskriver den detaljerede rapport fil for fil fra den seneste dækningskørsel
-- `npm run test:coverage:legacy` bevarer det ældre målepunkt til historisk sammenligning
-- Se `docs/ops/COVERAGE_PLAN.md` for den faseopdelte køreplan til forbedring af dækningen
+- `npm run test:coverage:legacy` bevarer den ældre måling til historisk sammenligning
+- Se `docs/ops/COVERAGE_PLAN.md` for den faseopdelte plan til forbedring af dækningen
 
 ### Krav til pull requests
 
 Før du åbner en PR, skal du bruge
-[den anbefalede bidragsproces](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) til at køre den fokuserede løkke for
-det, du har ændret. Den fulde enhedstestsuite (4 CI-shards), Vitest, dækningskravet på **60 %+** og
-produktions-buildet er CI's ansvar — lokal kørsel af dem giver ingen oplysninger, som PR-
+[Den anbefalede bidragsproces](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) til at køre det fokuserede forløb for
+det, du har ændret. Den komplette enhedstestsuite (4 CI-shards), Vitest, dækningskravet på **60 %+** og
+produktionsbuildet er CI's ansvar — at køre dem lokalt giver ingen yderligere information, som PR-
 kontrollerne ikke allerede giver dig, og på mindre maskiner kan det overbelaste værten (#8084):
 
 - Kør de testfiler, der dækker din ændring: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Kør `npm run lint`
-- Medtag eller opdater automatiserede tests i samme PR, når produktionskode ændres
-- Medtag de ændrede eller tilføjede testfiler i PR-beskrivelsen, når produktionskode er ændret
-- Kontrollér SonarQube-resultatet på PR'en, når projektets hemmeligheder er konfigureret i CI
+- Medtag eller opdater automatiserede tests i samme PR, hver gang produktionskoden ændres
+- I `node:test`-filer skal alle `await` på øverste niveau (såsom `await import(...)`) placeres før den første `test()` / `describe()`: under `--test-force-exit` kan tests, der registreres efter den, i stilhed risikere aldrig at blive kørt (#18045; håndhæves af `npm run check:test-tla-order`)
+- Medtag de ændrede eller tilføjede testfiler i PR-beskrivelsen, når produktionskoden er ændret
+- Kontrollér SonarQube-resultatet på PR'en, når projektets secrets er konfigureret i CI
 
 Aktuel teststatus: **122 enhedstestfiler**, der dækker:
 
 - Udbyderoversættere og formatkonvertering
 - Hastighedsbegrænsning, circuit breaker og robusthed
-- Semantisk cache, idempotens og statussporing
-- Databaseoperationer og -skema (21 DB-moduler)
+- Semantisk cache, idempotens og sporing af fremskridt
+- Databasehandlinger og -skema (21 DB-moduler)
 - OAuth-flows og godkendelse
 - Validering af API-endpoints (Zod v4)
-- MCP-serverværktøjer og håndhævelse af scopes
+- Værktøjer til MCP-serveren og håndhævelse af scopes
 - Memory- og Skills-systemer
 
 ---

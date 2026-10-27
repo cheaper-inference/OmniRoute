@@ -88,10 +88,29 @@ function getCodexModelItems(payload: unknown): unknown[] {
   if (Array.isArray(record.data)) return record.data;
   if (Array.isArray(payload)) return payload;
 
+  // An error envelope is not a model map. Without this, `{"error":{...}}`
+  // becomes a phantom model with id "error" and the caller counts it as a
+  // successful live catalog. It yields no items, and fetchCodexDiscoveryModels
+  // reports it as a failure (null) because it is not a recognised empty list.
+  if (record.error) return [];
+
   const objectItems = Object.entries(record)
     .filter(([, value]) => value && typeof value === "object" && !Array.isArray(value))
     .map(([key, value]) => ({ id: key, ...asRecord(value) }));
   return objectItems.length > 0 ? objectItems : [];
+}
+
+/**
+ * True only for an answer that is a model list and is empty: `[]`,
+ * `{"models": []}` or `{"data": []}` with no error. Anything else that yields no
+ * models (an error envelope, `{"detail": ...}`, an unknown shape) is a failure.
+ */
+function isEmptyCodexModelList(payload: unknown): boolean {
+  if (Array.isArray(payload)) return payload.length === 0;
+  const record = asRecord(payload);
+  if (record.error) return false;
+  const list = Array.isArray(record.models) ? record.models : record.data;
+  return Array.isArray(list) && list.length === 0;
 }
 
 function getCodexModelMetadata(record: JsonRecord): {
@@ -550,9 +569,17 @@ export async function fetchCodexDiscoveryModels({
 
     if (!response.ok) return { models: [], failure: { status: response.status } };
 
-    const models = normalizeCodexModelsResponse(await response.json());
-    if (models.length === 0) return { models: [], failure: { code: "EMPTY_CATALOG" } };
-    return { models };
+    // A recognised, empty model list is reported as EMPTY_CATALOG: the account
+    // may simply have nothing discoverable right now (measured 2026-10-23 on
+    // both pro accounts, every client version). Every other body that yields no
+    // models, including an unparseable one, carries no code at all, so callers
+    // can still tell "answered with nothing" from "did not answer".
+    const payload: unknown = await response.json();
+    const models = normalizeCodexModelsResponse(payload);
+    if (models.length > 0) return { models };
+    return isEmptyCodexModelList(payload)
+      ? { models: [], failure: { code: "EMPTY_CATALOG" } }
+      : { models: [], failure: {} };
   } catch {
     return { models: [], failure: {} };
   }

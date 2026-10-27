@@ -50,7 +50,7 @@ requests therefore share transport-level connections, but never a wreq session o
 | Provider   | Profile       | Emulated OS | Stream EOF policy                |
 | ---------- | ------------- | ----------- | -------------------------------- |
 | Claude     | `chrome_146`  | Linux       | include `[DONE]`                 |
-| Perplexity | `firefox_148` | macOS       | include `event: end_of_stream`   |
+| Perplexity | `firefox_151` | macOS       | include `event: end_of_stream`   |
 | Grok       | `chrome_146`  | Linux       | exclude `[DONE]`                 |
 | Notion     | `chrome_146`  | Windows     | include `[DONE]`                 |
 | LMArena    | `chrome_146`  | Windows     | no sentinel; close on native EOF |

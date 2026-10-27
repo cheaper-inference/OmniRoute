@@ -108,7 +108,7 @@ Built applications are placed in `dist-electron/`:
 
 ### macOS
 
-1. Download the latest `.dmg` from the [Releases](https://github.com/diegosouzapw/OmniRoute/releases) page.
+1. Download the latest `.dmg` from the [Releases](https://github.com/cheaper-inference/OmniRoute/releases) page.
 2. Open the `.dmg` file.
 3. Drag `OmniRoute.app` to the Applications folder.
 4. Launch from Applications.
@@ -125,18 +125,18 @@ Built applications are placed in `dist-electron/`:
 
 **Installer (Recommended):**
 
-1. Download `OmniRoute.Setup.*.exe` from [Releases](https://github.com/diegosouzapw/OmniRoute/releases).
+1. Download `OmniRoute.Setup.*.exe` from [Releases](https://github.com/cheaper-inference/OmniRoute/releases).
 2. Run the installer.
 3. Launch from Start Menu or Desktop shortcut.
 
 **Portable (No Installation):**
 
-1. Download `OmniRoute.exe` from [Releases](https://github.com/diegosouzapw/OmniRoute/releases).
+1. Download `OmniRoute.exe` from [Releases](https://github.com/cheaper-inference/OmniRoute/releases).
 2. Run directly from any folder.
 
 ### Linux
 
-1. Download the `.AppImage` from [Releases](https://github.com/diegosouzapw/OmniRoute/releases).
+1. Download the `.AppImage` from [Releases](https://github.com/cheaper-inference/OmniRoute/releases).
 2. Make it executable:
    ```bash
    chmod +x OmniRoute-*.AppImage
