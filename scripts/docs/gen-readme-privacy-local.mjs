@@ -150,10 +150,11 @@ export async function renderPrivacyLocal() {
     `  <text x="${LEFT}" y="56" class="kicker">${esc(C.kicker[0])}</text>\n` +
     `  <line x1="248" y1="51" x2="${RIGHT}" y2="51" class="rule" stroke-width="1"/>\n` +
     // Headline: ink throughout; the "no hosted hop" claim sits on a muted inline tag, the
-    // "off by default" guarantee reads in --ok. The tag spans the tspan's measured extent
-    // (x 391–661 with the embedded Inter 600) plus a few px each side, short of the semicolon.
-    `  <rect x="386" y="84" width="277" height="24" rx="6" class="surface-muted"/>\n` +
-    `  <text x="${LEFT}" y="100" class="h3">${esc(H[0])}<tspan>${esc(H[1])}</tspan>${esc(H[2])}<tspan class="ok">${esc(H[3])}</tspan>${esc(H[4])}</text>\n` +
+    // "off by default" guarantee reads in --ok. The tagged tspan is pinned to its measured
+    // extent (x 391–661 with the embedded Inter 600) so the tag's padding (6 px left, 3 px
+    // right — the semicolon follows immediately) holds on every renderer.
+    `  <rect x="385" y="84" width="279" height="24" rx="6" class="surface-muted"/>\n` +
+    `  <text x="${LEFT}" y="100" class="h3">${esc(H[0])}<tspan textLength="270" lengthAdjust="spacing">${esc(H[1])}</tspan>${esc(H[2])}<tspan class="ok">${esc(H[3])}</tspan>${esc(H[4])}</text>\n` +
     `  <line x1="${LEFT}" y1="122" x2="${RIGHT}" y2="122" class="rule" stroke-width="1"/>\n` +
     sweep +
     rows.join("\n") +

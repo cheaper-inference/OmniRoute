@@ -26,6 +26,7 @@
 .mono-sm{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:11px;fill:var(--body)}
 .mono-xs{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:9px;letter-spacing:0.08em;fill:var(--muted)}
 .term{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:13px;fill:var(--inverse-text)}
+.term-lg{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:16px;fill:var(--inverse-text)}
 .ok{fill:var(--ok)} .warn{fill:var(--warn)} .err{fill:var(--err)} .info{fill:var(--info)} .ok-bg{fill:var(--ok-bg)} .warn-bg{fill:var(--warn-bg)} .err-bg{fill:var(--err-bg)} .info-bg{fill:var(--info-bg)} .stroke-ok{stroke:var(--ok)} .stroke-warn{stroke:var(--warn)} .stroke-err{stroke:var(--err)} .stroke-info{stroke:var(--info)} .stroke-accent{stroke:var(--accent)} .stroke-ink{stroke:var(--ink)} .surface-subtle{fill:var(--surface-subtle)} .surface-muted{fill:var(--surface-muted)} .inverse{fill:var(--inverse-bg)} .track{fill:var(--track)} .accent-soft{fill:var(--accent-soft)} .ink{fill:var(--ink)} .body-fill{fill:var(--body)} .muted{fill:var(--muted)}
   </style>
   <defs>
@@ -37,8 +38,8 @@
   <rect x="0" y="0" width="1200" height="650" fill="url(#pvl-grid)"/>
   <text x="40" y="56" class="kicker">PRIVATE &amp; LOCAL-FIRST</text>
   <line x1="248" y1="51" x2="1160" y2="51" class="rule" stroke-width="1"/>
-  <rect x="386" y="84" width="277" height="24" rx="6" class="surface-muted"/>
-  <text x="40" y="100" class="h3">Your keys, your machine, your data. No <tspan>OmniRoute-hosted prompt hop</tspan>; telemetry <tspan class="ok">off by default</tspan>.</text>
+  <rect x="385" y="84" width="279" height="24" rx="6" class="surface-muted"/>
+  <text x="40" y="100" class="h3">Your keys, your machine, your data. No <tspan textLength="270" lengthAdjust="spacing">OmniRoute-hosted prompt hop</tspan>; telemetry <tspan class="ok">off by default</tspan>.</text>
   <line x1="40" y1="122" x2="1160" y2="122" class="rule" stroke-width="1"/>
   <rect x="40" y="140" width="1120" height="44" class="ok-bg" opacity="0">
     <animate attributeName="y" calcMode="discrete" values="140;184;228;272;316;360;404;448;492;536;580" keyTimes="0.0000;0.0909;0.1818;0.2727;0.3636;0.4545;0.5455;0.6364;0.7273;0.8182;0.9091" dur="16s" repeatCount="indefinite"/>

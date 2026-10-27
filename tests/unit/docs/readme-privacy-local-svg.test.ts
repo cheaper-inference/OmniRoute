@@ -22,7 +22,7 @@ test("the committed privacy-local diagram is exactly what the generator produces
   );
 });
 
-test("the ledger embeds the two kit families (ui, uiBold, mono = 3 faces) and nothing external", async () => {
+test("the ledger embeds three kit faces (Inter 400 + 600 as CI Sans, Plex Mono as CI Mono) and nothing external", async () => {
   const svg = await renderPrivacyLocal();
   // Three roles are passed to buildFontFaceCss: ui (row text), uiBold (headline + row
   // titles) and mono (kicker + receipt chips) — the display serif is not drawn here.
