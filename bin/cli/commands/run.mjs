@@ -2,14 +2,12 @@ import {
   runLaunchCommand as runLaunchClaudeCommand,
   buildClaudeEnv,
   resolveClaudeSpawn,
-  quoteClaudeArgs,
   resolveLaunchTarget,
 } from "./launch.mjs";
 import {
   buildCodexEnv,
   buildCodexProviderArgs,
   resolveCodexSpawn,
-  quoteCodexArgs,
   resolveCodexTarget,
   runLaunchCodexCommand as runLaunchCodexCommand,
 } from "./launch-codex.mjs";
@@ -20,7 +18,7 @@ import { spawn, execFileSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, rmSync, writeFileSync } from "node:fs";
 import { resolveActiveContext } from "../contexts.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
-import { quoteShellArgs } from "../utils/winShellArgs.mjs";
+import { quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import {
   listManifestTargets,
   manifestModelArgs,
@@ -134,14 +132,14 @@ async function buildClaudePlan(rawOpts, args = []) {
     model: merged.model || undefined,
     inheritEnv: merged.inheritEnv,
   });
-  const quotedArgs = quoteClaudeArgs(args, process.platform);
+  const spawnArgs = quoteShellArgsForSpawn(args, process.platform, commandSpec.shell);
 
   return {
     target: "claude",
     baseUrl,
     command: commandSpec.command,
     shell: commandSpec.shell,
-    args: quotedArgs,
+    args: spawnArgs,
     model: merged.model || undefined,
     envDiff: envPreview(process.env, env),
     authSource: toAuthSource(rawOpts),
@@ -168,14 +166,14 @@ async function buildCodexPlan(rawOpts, args = []) {
     inheritEnv: merged.inheritEnv,
   });
   const fullArgs = [...providerArgs, ...profileArgs, ...args];
-  const quotedArgs = quoteCodexArgs(fullArgs, process.platform);
+  const spawnArgs = quoteShellArgsForSpawn(fullArgs, process.platform, commandSpec.shell);
 
   return {
     target: "codex",
     baseUrl,
     command: commandSpec.command,
     shell: commandSpec.shell,
-    args: quotedArgs,
+    args: spawnArgs,
     model: merged.model || undefined,
     envDiff: envPreview(process.env, env),
     authSource: toAuthSource(rawOpts),
@@ -334,7 +332,7 @@ async function buildGenericPlan(target, rawOpts, args = []) {
     baseUrl,
     command: commandSpec.command,
     shell: commandSpec.shell,
-    args: quoteShellArgs(fullArgs, process.platform),
+    args: quoteShellArgsForSpawn(fullArgs, process.platform, commandSpec.shell),
     model: model || undefined,
     envDiff: envPreview(process.env, env),
     authSource: toAuthSource(rawOpts),
@@ -400,7 +398,7 @@ async function runGenericTarget(target, rawOpts, args) {
 
   const child = spawn(
     commandSpec.command,
-    quoteShellArgs([...modelArgs, ...args], process.platform),
+    quoteShellArgsForSpawn([...modelArgs, ...args], process.platform, commandSpec.shell),
     {
       env: childEnv,
       stdio: "inherit",

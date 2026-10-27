@@ -18,11 +18,14 @@ export function normalizeBasePath(value?: string | null): string {
  * Deploy basePath as seen by the client bundle.
  * Set via next.config `env.NEXT_PUBLIC_OMNIROUTE_BASE_PATH` from `OMNIROUTE_BASE_PATH`.
  */
-export function getDeployBasePath(
-  env: NodeJS.ProcessEnv = typeof process !== "undefined" ? process.env : ({} as NodeJS.ProcessEnv)
-): string {
+export function getDeployBasePath(env?: Record<string, string | undefined>): string {
+  if (env) {
+    return normalizeBasePath(env.NEXT_PUBLIC_OMNIROUTE_BASE_PATH || env.OMNIROUTE_BASE_PATH || "");
+  }
+  // Direct member access so Next.js can inline the value into client bundles
+  // (a bare `process.env` object is the browser polyfill and carries nothing, #18062).
   return normalizeBasePath(
-    env.NEXT_PUBLIC_OMNIROUTE_BASE_PATH || env.OMNIROUTE_BASE_PATH || ""
+    process.env.NEXT_PUBLIC_OMNIROUTE_BASE_PATH || process.env.OMNIROUTE_BASE_PATH || ""
   );
 }
 
@@ -53,8 +56,7 @@ export function withBasePath(
   // Absolute URL — only rewrite same-origin
   try {
     const baseOrigin =
-      origin ||
-      (typeof window !== "undefined" ? window.location.origin : "http://localhost");
+      origin || (typeof window !== "undefined" ? window.location.origin : "http://localhost");
     const url = new URL(input, baseOrigin);
     const currentOrigin = new URL(baseOrigin).origin;
     if (url.origin !== currentOrigin) return input;

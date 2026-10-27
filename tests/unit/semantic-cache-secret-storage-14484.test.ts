@@ -139,3 +139,33 @@ test("an explicit null clears a stored cache credential", async () => {
   assert.equal(db.getUserDatabaseSettings().cache.semanticCacheEmbeddingApiKey, "");
   assert.equal(db.getUserDatabaseSettings().cache.semanticCacheRedisUrl, "");
 });
+
+test("mixed section updates preserve masked credentials without mutating the caller's patch", () => {
+  db.updateDatabaseSettings({
+    cache: { semanticCacheEmbeddingApiKey: KEY, semanticCacheRedisUrl: REDIS },
+  });
+  const patch = {
+    cache: {
+      semanticCacheEmbeddingApiKey: "********",
+      semanticCacheRedisUrl: "********",
+      semanticCacheTTL: 2400,
+    },
+    retention: { callLogs: 14 },
+  };
+
+  db.updateDatabaseSettings(patch);
+
+  const saved = db.getUserDatabaseSettings();
+  assert.equal(saved.cache.semanticCacheEmbeddingApiKey, KEY);
+  assert.equal(saved.cache.semanticCacheRedisUrl, REDIS);
+  assert.equal(saved.cache.semanticCacheTTL, 2400);
+  assert.equal(saved.retention.callLogs, 14);
+  assert.deepEqual(patch, {
+    cache: {
+      semanticCacheEmbeddingApiKey: "********",
+      semanticCacheRedisUrl: "********",
+      semanticCacheTTL: 2400,
+    },
+    retention: { callLogs: 14 },
+  });
+});

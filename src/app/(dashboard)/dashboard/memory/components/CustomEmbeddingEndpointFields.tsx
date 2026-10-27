@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
 import type { MemorySettingsExtended } from "@/shared/schemas/memory";
 
 type Props = {
@@ -58,47 +60,36 @@ export default function CustomEmbeddingEndpointFields({ settings, onSave, saving
 
   return (
     <div className="mt-4 pt-4 border-t border-border/60 space-y-3">
-      <div>
-        <label className="block text-sm font-medium text-text-main mb-1">
-          {t("embedding.customBaseUrlLabel")}
-        </label>
-        <input
-          value={baseUrl}
-          onChange={(event) => setBaseUrl(event.target.value)}
-          placeholder="http://localhost:8000/v1"
-          disabled={saving}
-          data-testid="embedding-custom-base-url"
-          className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm"
-        />
-      </div>
-      <div>
-        <label className="block text-sm font-medium text-text-main mb-1">
-          {t("embedding.customModelIdLabel")}
-        </label>
-        <input
-          value={modelId}
-          onChange={(event) => setModelId(event.target.value)}
-          placeholder="my-embedding-model"
-          disabled={saving}
-          data-testid="embedding-custom-model-id"
-          className="w-full px-3 py-2 rounded-lg bg-background border border-border text-sm"
-        />
-      </div>
+      <Input
+        label={t("embedding.customBaseUrlLabel")}
+        value={baseUrl}
+        onChange={(event) => setBaseUrl(event.target.value)}
+        placeholder="http://localhost:8000/v1"
+        disabled={saving}
+        data-testid="embedding-custom-base-url"
+      />
+      <Input
+        label={t("embedding.customModelIdLabel")}
+        value={modelId}
+        onChange={(event) => setModelId(event.target.value)}
+        placeholder="my-embedding-model"
+        disabled={saving}
+        data-testid="embedding-custom-model-id"
+      />
       <p className="text-xs text-text-muted">{t("embedding.customEndpointHelp")}</p>
       {error && (
-        <p role="alert" className="text-xs text-red-400">
+        <p role="alert" className="text-xs text-error">
           {error}
         </p>
       )}
-      <button
-        type="button"
+      <Button
+        size="sm"
         onClick={() => void save()}
         disabled={saving}
         data-testid="embedding-custom-save"
-        className="px-3 py-2 rounded-lg bg-violet-500 text-white text-sm disabled:opacity-50"
       >
         {t("embedding.customEndpointSave")}
-      </button>
+      </Button>
     </div>
   );
 }

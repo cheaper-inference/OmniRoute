@@ -43,9 +43,9 @@ const TIER_LABELS: Record<string, string> = {
   tier3: "Free",
 };
 const TIER_COLORS: Record<string, string> = {
-  tier1: "text-amber-500",
-  tier2: "text-green-500",
-  tier3: "text-indigo-400",
+  tier1: "text-warning",
+  tier2: "text-success",
+  tier3: "text-chart-2",
 };
 
 export function TierCoverageWidget() {
@@ -90,7 +90,7 @@ export function TierCoverageWidget() {
   }));
 
   return (
-    <div className="rounded-xl border border-white/[0.06] bg-surface p-5">
+    <div className="rounded-xl border border-border bg-surface p-5">
       <div className="flex items-center justify-between mb-4">
         <div>
           <h3 className="font-semibold text-sm">{t("tierCoverageTitle")}</h3>
@@ -110,12 +110,12 @@ export function TierCoverageWidget() {
             <div className={`text-2xl font-bold ${colorClass}`}>{active}</div>
             <div className="text-xs text-text-muted mt-0.5">{label}</div>
             {configured > 0 && active < configured && (
-              <div className="text-xs text-amber-500 mt-0.5">{configured - active} inactive</div>
+              <div className="text-xs text-warning mt-0.5">{configured - active} inactive</div>
             )}
             {configured === 0 && (
               <Link
                 href="/dashboard/providers/new"
-                className="text-xs text-blue-400 underline mt-0.5 block"
+                className="text-xs text-info underline mt-0.5 block"
               >
                 {t("add")}
               </Link>

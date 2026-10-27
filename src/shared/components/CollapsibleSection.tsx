@@ -1,7 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { cn } from "@/shared/utils/cn";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@omniroute/ui-kit/accordion";
+// F1: swap for the Badge adapter once track C merges
+import { Badge as KitBadge } from "@omniroute/ui-kit/badge";
 
 interface CollapsibleSectionProps {
   title: string;
@@ -12,6 +19,9 @@ interface CollapsibleSectionProps {
   className?: string;
 }
 
+const ITEM = "section";
+
+/** Titled, collapsible section over the kit `Accordion` (KEA-7886); open by default. */
 export default function CollapsibleSection({
   title,
   description,
@@ -20,47 +30,33 @@ export default function CollapsibleSection({
   children,
   className,
 }: CollapsibleSectionProps) {
-  const [open, setOpen] = useState(defaultOpen);
-
+  const [value, setValue] = useState(defaultOpen ? ITEM : "");
+  const open = value === ITEM;
   return (
-    <div className={cn("border border-black/5 dark:border-white/5 rounded-lg", className)}>
-      <button
-        type="button"
-        onClick={() => setOpen((v) => !v)}
-        className={cn(
-          "flex items-center justify-between w-full px-4 py-3 text-left",
-          "hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors",
-          "rounded-t-lg",
-          !open && "rounded-b-lg"
-        )}
-        aria-expanded={open}
-      >
-        <div className="flex items-center gap-3 min-w-0">
-          <span className="text-sm font-semibold text-text-main truncate">{title}</span>
-          {count != null && (
-            <span className="px-2 py-0.5 text-[10px] font-semibold rounded-full bg-black/5 dark:bg-white/10 text-text-muted">
-              {count}
-            </span>
-          )}
-          {description && (
-            <span className="text-xs text-text-muted truncate hidden sm:inline">{description}</span>
-          )}
-        </div>
-        <span
-          className="material-symbols-outlined text-[20px] text-text-muted transition-transform duration-200 shrink-0"
-          style={{ transform: open ? "rotate(0deg)" : "rotate(-90deg)" }}
-        >
-          expand_more
-        </span>
-      </button>
-      <div
-        className={cn(
-          "overflow-hidden transition-[max-height] duration-200 ease-in-out",
-          open ? "max-h-[2000px]" : "max-h-0"
-        )}
-      >
-        <div className="px-4 pb-4 pt-1">{children}</div>
-      </div>
-    </div>
+    <Accordion
+      type="single"
+      collapsible
+      value={value}
+      onValueChange={(next) => setValue(typeof next === "string" ? next : (next[0] ?? ""))}
+      variant="bordered"
+      className={className}
+    >
+      <AccordionItem value={ITEM}>
+        <AccordionTrigger className="[&>span:first-child]:min-w-0">
+          <span className="flex min-w-0 items-center gap-3 text-start">
+            <span className="truncate text-sm font-semibold text-text-main">{title}</span>
+            {count != null && <KitBadge variant="secondary">{count}</KitBadge>}
+            {description && (
+              <span className="hidden truncate text-xs text-text-muted sm:inline">
+                {description}
+              </span>
+            )}
+          </span>
+        </AccordionTrigger>
+        {/* Closed content stays mounted (legacy) but is aria-hidden by the kit: keep it out of
+            the tab order too. */}
+        <AccordionContent inert={!open || undefined}>{children}</AccordionContent>
+      </AccordionItem>
+    </Accordion>
   );
 }

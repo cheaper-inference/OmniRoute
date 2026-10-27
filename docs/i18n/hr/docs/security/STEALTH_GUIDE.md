@@ -16,64 +16,70 @@ Prikrivene značajke postoje kako bi OmniRoute mogao djelovati kao sloj kompatib
 
 ---
 
-## Sloj za utvrđivanje TLS otiska
+## Sloj TLS otiska
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Trajne sesije paketa `wreq-js` stvaraju se lijeno za svaki opseg računa i razriješeni proxy. Skup
-objekata `TlsClient` na razini procesa sadrži najviše 128 sesija koje oponašaju **Chrome 124 na sustavu macOS** za
-nadređene sustave iza Cloudflarea. `TlsClient.fetch()` završava neuspjehom bez zamjenskog ponašanja kada izvorno izvršno okruženje
-nije dostupno; pozivatelj može izričito odabrati zamjensku mogućnost izvan ovog omotača.
+Trajne sesije `wreq-js` stvaraju se lijeno za svaki opseg računa i razriješeni proxy. Procesno
+globalni `TlsClient` objedinjuje najviše 128 sesija koje oponašaju **Chrome 124 na macOS-u** za
+uzvodne poslužitelje iza Cloudflarea. `TlsClient.fetch()` sigurno prekida rad kada izvorno izvršno
+okruženje nije dostupno; pozivatelj može izričito odabrati rezervnu opciju izvan ovog omotača.
 
 - Profil sesije: `browser: "chrome_124", os: "macos"`
-- Razrješavanje proxyja (redoslijed prioriteta): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (također malim slovima)
-- Istek vremena: `TLS_CLIENT_TIMEOUT_MS` (nasljeđuje se iz `FETCH_TIMEOUT_MS`, zadano 600000)
-- Odgovor paketa `wreq-js` kompatibilan je s funkcijom fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Razrješavanje proxyja (po prioritetu): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (također malim slovima)
+- Vremensko ograničenje: `TLS_CLIENT_TIMEOUT_MS` (nasljeđuje se iz `FETCH_TIMEOUT_MS`, zadano 600000)
+- Odgovor biblioteke `wreq-js` kompatibilan je s API-jem fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
 - Nadzornik prvog bajta (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  razrješava se čim stignu zaglavlja nadređenog sustava, pa sam `TLS_CLIENT_TIMEOUT_MS` ne može ograničiti
-  tijelo koje nikada ne isporuči prvi bajt. `guardTlsFirstByte()` stavlja prvo `read()` tijela u utrku
-  s `TLS_FIRST_BYTE_WATCHDOG_MS` (zadano `10000`, `0` ga onemogućuje); na ispravno tijelo to
-  ne utječe, dok zastalo tijelo otkazuje wreq čitač i dopušta da postojeća
-  TLS zamjenska logika funkcije `proxyFetch` prijeđe na izravni/proxy dispečer (zahtjev koji nije sigurno ponovno poslati, npr.
-  POST s tijelom, i dalje izaziva pogrešku umjesto tihog ponovnog pokušaja).
+  dovršava se čim stignu zaglavlja uzvodnog poslužitelja, pa sam `TLS_CLIENT_TIMEOUT_MS` ne može
+  ograničiti tijelo koje nikada ne isporuči prvi bajt. `guardTlsFirstByte()` pokreće utrku između
+  prvog poziva `read()` nad tijelom i `TLS_FIRST_BYTE_WATCHDOG_MS` (zadano `10000`, `0` ga
+  onemogućuje); to ne utječe na ispravno tijelo, dok zastalo tijelo otkazuje čitač wreq i omogućuje
+  postojećoj logici rezervnog TLS mehanizma funkcije `proxyFetch` da prijeđe na izravni/proxy
+  dispečer (zahtjev koji nije sigurno ponovno poslati, npr. POST s tijelom, i dalje uzrokuje
+  pogrešku umjesto tihog ponovnog pokušaja).
 
-### Prijenos pružatelja usluga s web-kolačićima — wreq-js 3.2.0
+### Prijenos pružatelja web-kolačića — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` zajednički je prilagodnik za pet specijaliziranih
-prijenosa s web-kolačićima navedenih u nastavku. Svaki tanki omotač pružatelja odabire profil preglednika/OS-a. Prilagodnik
-koristi jedinstveni učitavač izvršnog okruženja wreq i skup prijenosa u `open-sse/utils/tlsClient.ts`, indeksiran prema
-profilu + OS-u + razriješenom proxyju, dok svaki zahtjev upotrebljava `cookieMode: "ephemeral"`. Računi i
-zahtjevi stoga dijele veze na razini prijenosa, ali nikada wreq sesiju ili spremnik kolačića.
+`open-sse/services/tlsClientBase.ts` zajednički je prilagodnik za pet specijaliziranih prijenosa
+web-kolačića navedenih u nastavku. Svaki tanki omotač pružatelja odabire profil preglednika/OS-a.
+Prilagodnik upotrebljava jedinstveni učitavač izvršnog okruženja wreq i skup prijenosa iz
+`open-sse/utils/tlsClient.ts`, indeksiran prema profilu + OS-u + razriješenom proxyju, dok svaki
+zahtjev upotrebljava `cookieMode: "ephemeral"`. Računi i zahtjevi stoga dijele veze na razini
+prijenosa, ali nikada sesiju wreq ni spremnik kolačića.
 
-| Pružatelj usluge | Profil        | Emulirani OS | Pravilo za EOF toka                    |
-| ---------------- | ------------- | ------------ | -------------------------------------- |
-| Claude           | `chrome_146`  | Linux        | uključi `[DONE]`                       |
-| Perplexity       | `firefox_148` | macOS        | uključi `event: end_of_stream`         |
-| Grok             | `chrome_146`  | Linux        | isključi `[DONE]`                      |
-| Notion           | `chrome_146`  | Windows      | uključi `[DONE]`                       |
-| LMArena          | `chrome_146`  | Windows      | bez oznake; zatvori pri izvornom EOF-u |
+| Pružatelj  | Profil        | Emulirani OS | Pravilo EOF-a toka                        |
+| ---------- | ------------- | ------------ | ----------------------------------------- |
+| Claude     | `chrome_146`  | Linux        | uključuje `[DONE]`                        |
+| Perplexity | `firefox_151` | macOS        | uključuje `event: end_of_stream`          |
+| Grok       | `chrome_146`  | Linux        | isključuje `[DONE]`                       |
+| Notion     | `chrome_146`  | Windows      | uključuje `[DONE]`                        |
+| LMArena    | `chrome_146`  | Windows      | bez oznake; zatvara se pri izvornom EOF-u |
 
-- Strujanje izravno troši izvorni `ReadableStream` odgovora; ne stvara se privremena datoteka ni
+- Strujanje izravno čita izvorni `ReadableStream` odgovora; ne stvaraju se privremena datoteka ni
   pomoćni proces.
-- Prije izlaganja toka pregledava se do 256 početnih bajtova. SSE pružatelji međuspremnički pohranjuju pogreške koje nisu SSE;
-  Grok/LMArena mapiraju Cloudflare izazove na `403`, a HTML međustranice na `502`.
-- Izvorni istek vremena zahtjeva i dalje je obuhvaćen apsolutnim tvrdim JS rokom. Zastoj poništava valjanost
-  i zatvara samo zahvaćeni prijenos profila/OS-a/proxyja prije nego što ga sljedeći zahtjev ponovno stvori.
-- Redoslijed prioriteta za razrješavanje proxyja je `proxyUrl` pojedinačnog poziva → kontekst računa/nadzorne ploče ograničen na zahtjev →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (uključujući inačice malim slovima). Pogreške razrješavanja završavaju
-  neuspjehom bez zamjenskog ponašanja umjesto propuštanja izravne veze. LMArena se namjerno razrješava prema `arena.ai`.
-- `byteResponse` vraća `data:` URL s vrstom sadržaja bez oštećenja UTF-8 kodiranja.
+- Prije izlaganja toka pregledava se do 256 početnih bajtova. Pružatelji SSE-a spremaju pogreške
+  koje nisu SSE u međuspremnik; Grok/LMArena preslikavaju Cloudflareove provjere na `403`, a
+  HTML međustranice na `502`.
+- Izvorno vremensko ograničenje zahtjeva i dalje je obuhvaćeno apsolutnim krajnjim rokom u JS-u.
+  Zastoj poništava i zatvara samo zahvaćeni prijenos profila/OS-a/proxyja prije nego što ga sljedeći
+  zahtjev ponovno stvori.
+- Prioritet razrješavanja proxyja je `proxyUrl` po pozivu → kontekst računa/nadzorne ploče ograničen
+  na zahtjev → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (uključujući inačice malim slovima). Pogreške
+  pri razrješavanju sigurno prekidaju rad umjesto propuštanja izravne veze. LMArena namjerno
+  razrješava prema `arena.ai`.
+- `byteResponse` vraća `data:` URL s odgovarajućom vrstom sadržaja bez oštećenja UTF-8 kodiranja.
 - Pogreške su `TlsClientUnavailableError` (paket/dodatak nije dostupan), `TlsClientHangError`
-  (rok prekoračen) i `WreqTransportCapacityError` (kod pogreške kapaciteta zajedničke sesije)
+  (prekoračen krajnji rok) i `WreqTransportCapacityError` (zajednički kôd pogreške kapaciteta sesija)
   kada je svih 128 ograničenih mjesta za profil/OS/proxy aktivno ili u postupku zatvaranja.
 
-Prethodno navedena generička sesija objekta `TlsClient` ostaje specijalizirana za trajno stanje kolačića podržano preglednikom.
-Oba puta ponovno upotrebljavaju jedan predmemorirani učitavač modula wreq i kuku životnog ciklusa procesa; njihovi skupovi ostaju
-odvojeni jer su njihova trajanja kolačića namjerno različita.
+Prethodno navedena generička sesija `TlsClient` ostaje specijalizirana za trajno stanje kolačića
+koje podržava preglednik. Oba puta ponovno upotrebljavaju jedan predmemorirani učitavač modula wreq
+i kuku životnog ciklusa procesa; njihovi skupovi ostaju odvojeni jer se životni vijekovi njihovih
+kolačića namjerno razlikuju.
 
-Profile podržava prikvačeni paket, ali se stvarno prihvaćanje WAF-a može promijeniti neovisno
-o lokalnim ugovornim testovima. Provjerite promjene otiska pomoću izričito odobrenog aktivnog računa
-prije nego što ustvrdite jednakost s nadređenim preglednikom.
+Prikvačeni paket podržava profile, ali se stvarno prihvaćanje WAF-a može mijenjati neovisno o
+lokalnim testovima ugovora. Prije tvrdnje o istovjetnosti s uzvodnim preglednikom provjerite promjene
+otiska na izričito ovlaštenom stvarnom računu.
 
 ---
 

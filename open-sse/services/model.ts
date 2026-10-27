@@ -267,6 +267,12 @@ function resolveInferredProviderModel(provider: string, modelId: string) {
   return resolveProviderModelAlias(provider, modelId);
 }
 
+function normalizeProviderScopedModelId(provider: string | null, modelId: string | null) {
+  // Compatibility dialects must not rewrite an ID this provider already serves.
+  if (hasKnownProviderModel(provider, modelId)) return modelId;
+  return normalizeCrossProxyModelId(modelId).modelId;
+}
+
 function getInferredProvidersForModel(modelId: string, dynamicProviders: string[] = []) {
   return Array.from(new Set([...(MODEL_TO_PROVIDERS.get(modelId) || []), ...dynamicProviders]));
 }
@@ -569,7 +575,7 @@ function resolveModelAliasTarget(
 
     return {
       provider: resolveProviderAlias(resolved.provider),
-      model: normalizeCrossProxyModelId(resolved.model).modelId || resolved.model,
+      model: normalizeProviderScopedModelId(resolved.provider, resolved.model) || resolved.model,
     };
   }
 
@@ -830,7 +836,7 @@ export async function getModelInfoCore(
   const { extendedContext } = parsed;
 
   if (!parsed.isAlias) {
-    const normalizedModel = normalizeCrossProxyModelId(parsed.model).modelId;
+    const normalizedModel = normalizeProviderScopedModelId(parsed.provider, parsed.model);
     const canonicalModel = resolveProviderModelAlias(parsed.provider, normalizedModel);
     return {
       provider: parsed.provider,

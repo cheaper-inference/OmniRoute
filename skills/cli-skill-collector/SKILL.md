@@ -27,6 +27,11 @@ omniroute autostart
 
 ### `autostart enable`
 
+**Flags:**
+
+- `--tray`
+- `--no-tray`
+
 **Example:**
 
 ```bash
@@ -42,6 +47,11 @@ omniroute autostart disable
 ```
 
 ### `autostart toggle`
+
+**Flags:**
+
+- `--tray`
+- `--no-tray`
 
 **Example:**
 

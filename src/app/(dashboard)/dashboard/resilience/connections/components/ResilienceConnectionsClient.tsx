@@ -3,6 +3,8 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useTranslations } from "next-intl";
 import type { ResilienceConnectionsResponse } from "@/types/resilience";
+import { Alert } from "@omniroute/ui-kit/alert";
+import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
 import ConnectionsTable from "./ConnectionsTable";
 import BreakerTimeline from "./BreakerTimeline";
@@ -11,6 +13,7 @@ const POLL_INTERVAL_MS = 30000;
 
 export default function ResilienceConnectionsClient() {
   const t = useTranslations("resilienceConnections");
+  const tc = useTranslations("common");
   const [data, setData] = useState<ResilienceConnectionsResponse | null>(null);
   const [windowMs, setWindowMs] = useState(3600000);
   const [pollError, setPollError] = useState(false);
@@ -127,25 +130,26 @@ export default function ResilienceConnectionsClient() {
   }, []);
 
   const errorBanner = pollError ? (
-    <div
-      style={{
-        padding: "12px",
-        borderRadius: "8px",
-        background: "rgba(239,68,68,0.1)",
-        color: "var(--color-error)",
-      }}
-    >
-      {stopReason === "local_only"
-        ? t("pollErrorLocalOnly") // LOCAL_ONLY gate rejection - page only accessible from localhost/LAN
-        : stopReason !== "none"
-          ? t("pollErrorStopped")
-          : t("pollErrorTransient")}
-      {stopReason !== "local_only" && (
-        <button type="button" onClick={handleRetry} style={{ marginLeft: "8px" }}>
-          {t("retry")}
-        </button>
-      )}
-    </div>
+    <Alert
+      // Re-keyed on the stop reason: a dismissed banner re-appears when the state changes.
+      key={stopReason}
+      variant="critical"
+      dismissLabel={tc("close")}
+      description={
+        stopReason === "local_only"
+          ? t("pollErrorLocalOnly") // LOCAL_ONLY gate rejection - page only accessible from localhost/LAN
+          : stopReason !== "none"
+            ? t("pollErrorStopped")
+            : t("pollErrorTransient")
+      }
+      actions={
+        stopReason !== "local_only" ? (
+          <Button variant="secondary" size="sm" icon="refresh" onClick={handleRetry}>
+            {t("retry")}
+          </Button>
+        ) : undefined
+      }
+    />
   ) : null;
 
   if (pollError && !data) return errorBanner;
@@ -166,9 +170,7 @@ export default function ResilienceConnectionsClient() {
   return (
     <>
       {errorBanner}
-      <div
-        style={{ display: "flex", gap: "16px", fontSize: "12px", color: "var(--color-text-muted)" }}
-      >
+      <div className="flex flex-wrap gap-4 text-xs text-text-muted">
         <span>
           {t("summary.total", { count: data.meta.totalConnections })}
           {data.meta.countsCapped ? ` (${t("summary.capped")})` : ""}
@@ -177,20 +179,16 @@ export default function ResilienceConnectionsClient() {
         <span>{t("summary.unhealthyBreakers", { count: data.meta.unhealthyBreakerCount })}</span>
       </div>
       {data.meta.degraded.length > 0 && (
-        <div
-          style={{
-            padding: "12px",
-            borderRadius: "8px",
-            background: "rgba(245,158,11,0.1)",
-            color: "var(--color-warning)",
-          }}
-        >
-          {t("degraded.message", {
+        <Alert
+          key={data.meta.degraded.join(",")}
+          variant="warning"
+          dismissLabel={tc("close")}
+          description={t("degraded.message", {
             sources: data.meta.degraded.map((s) => t(`degraded.source.${s}`)).join(", "),
           })}
-        </div>
+        />
       )}
-      <div style={{ fontSize: "11px", color: "var(--color-text-muted)" }}>{t("pollingNote")}</div>
+      <div className="text-[11px] text-text-muted">{t("pollingNote")}</div>
       <ConnectionsTable
         connections={data.connections}
         receivedAt={data.receivedAt ?? 0}

@@ -46,15 +46,15 @@ En büyük **belgelenmiş** katkı sağlayıcılar: `mistral` 1,00B, `nara` 210M
 
 ## 2026-06-17 yenilemesi — 2026-06-05 tarihinden bu yana neler değişti
 
-50 ajanlı bir web araştırması taraması (resmî belgeler + son 7 günün haberleri, karşıt doğrulama uygulanarak) kataloğun tamamını yeniledi. Öne çıkanlar:
+50 ajanlı bir web araştırması taraması (resmî belgeler + son 7 günün haberleri, karşıt yöntemlerle doğrulanmış) tüm kataloğu yeniledi. Öne çıkanlar:
 
-- **Kaldırılanlar / ücretsiz katmanı olmayanlar (2026):** `chutes` (ücretsiz katman 2026-03'te sona erdi), `phind` (şirket 2026-01'de kapandı), `kluster` (2026-06-09'da sonlandırıldı → MITO), `gitlawb` + `gitlawb-gmi` (MiMo ücretsiz erişimi 2026-05-24'te iptal edildi, Nemotron promosyonu 2026-06'da sona erdi — 2026-06-18'de yeniden doğrulandı), `aimlapi` (ücretsiz katman duraklatıldı — 2026-06-18'de yeniden doğrulandı), `yi` (Yi-Light kullanımdan kaldırıldı, kullandıkça öde modeline geçti — 2026-06-18'de yeniden doğrulandı), `featherless-ai` (güncel bir ücretsiz katman yok), `chipotle` (Chipotle'ın "Pepper AI"ı — sağlayıcının iletişim kurduğu tersine mühendislikle çözümlenmiş `amelia.chipotle.com` Amelia sohbet bileşeni artık kök dâhil her rotada 404 döndürüyor; arka uç devre dışı bırakılmış/taşınmış, 2026-09-15'te doğrulandı — katalogdan tamamen kaldırıldı, #13131/#4037). `iflytek` / `sparkdesk` listede kalıyor ancak bir ToS uyarı notu taşıyor (Spark Lite ücretsizdir; ToS, proxy/aktarıcı kullanımını kısıtlar).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01'de kapatıldı ve `2.5 Pro` ücretsiz katmandan ayrıldı (2026-04); ücretsiz katman artık **yalnızca Flash ailesinden** oluşuyor (2.5/3/3.1/3.5 Flash + Gemma). Katalog artık Flash ailesini **havuzluyor** (önceden her varyant ayrı ayrı sayılarak şişiriliyordu: 462M → 60M).
-- **Düzeltilen rakamlar:** `cloudflare-ai` 122M → **30M** (gerçekte günlük 10k Nöron), `doubao` tek seferlik kayıt kredisi olarak yeniden sınıflandırıldı (yinelenen değil), `llm7` 4M → **150M** (belgelenmiş günlük 5M token), `together` "-Free" uç noktaları sonlandırıldı → $25 kayıt kredisi de kaldırıldı (minimum $5 satın alma gerektiriyor, ücretsiz deneme yok), `longcat` Preview sona erdi + Flash modelleri kullanımdan kaldırıldı → yalnızca **LongCat-2.0**, tek seferlik **10M** tokenlık kayıt kredisi olarak yeniden sınıflandırıldı (KYC koşullu, yinelenen değil).
-- **Keşfedilen yeni ücretsiz sağlayıcılar:** ⭐ **Kilo Code** (`kilo-gateway` — dönüşümlü "Auto Free" kümesi: NVIDIA Nemotron 3 ailesi, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — dönüşümlü 6 ücretsiz kodlama modeli), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash kalıcı olarak ücretsiz + 20M kayıt bonusu) ve `arcee-ai` Trinity Large Preview.
-- **Yeni şeffaf katmanlar** (bkz. Metodoloji): _kalıcı olarak ücretsiz ancak sınırsız_ kategorisi (gerçek yinelenen erişim, sayılabilecek token sınırı yok) ve _depozitoyla açılan artış_ (OpenRouter $10 → +24M/ay); manşet rakamını asla şişirmemeleri için her ikisi de **ayrı ayrı** gösteriliyor.
+- **Kaldırılanlar / ücretsiz katmanı olmayanlar (2026):** `chutes` (ücretsiz katman 2026-03'te sona erdi), `phind` (şirket 2026-01'de kapandı), `kluster` (2026-06-09'da kullanımdan kaldırıldı → MITO), `gitlawb` + `gitlawb-gmi` (MiMo ücretsiz erişimi 2026-05-24'te iptal edildi, Nemotron promosyonu 2026-06'da sona erdi — 2026-06-18'de yeniden doğrulandı), `aimlapi` (ücretsiz katman duraklatıldı — 2026-06-18'de yeniden doğrulandı), `yi` (Yi-Light kullanımdan kaldırıldı, kullandıkça öde modeline geçti — 2026-06-18'de yeniden doğrulandı), `featherless-ai` (şu anda ücretsiz katman yok), `chipotle` (Chipotle'ın "Pepper AI" hizmeti — sağlayıcının iletişim kurduğu, tersine mühendislikle incelenmiş `amelia.chipotle.com` Amelia sohbet bileşeni artık kök dizin dâhil her rotada 404 döndürüyor; arka uç kullanımdan kaldırıldı/taşındı, 2026-09-15'te doğrulandı — katalogdan tamamen kaldırıldı, #13131/#4037). `iflytek` / `sparkdesk` listede kalıyor ancak bir kullanım koşulları uyarısı taşıyor (Spark Lite ücretsizdir; kullanım koşulları proxy/aktarıcı kullanımını kısıtlar).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` 2026-06-01'de kapatıldı ve `2.5 Pro` ücretsiz katmandan çıkarıldı (2026-04); ücretsiz katman artık **yalnızca Flash ailesinden** oluşuyor (2.5/3/3.1/3.5 Flash + Gemma). Katalog artık Flash ailesini **tek bir havuzda topluyor** (önceden her varyant ayrı sayılarak şişiriliyordu: 462M → 60M).
+- **Düzeltilen rakamlar:** `cloudflare-ai` 122M → **30M** (gerçekte günlük 10 bin Nöron), `doubao` yinelenen bir hak yerine tek seferlik kayıt kredisi olarak yeniden sınıflandırıldı, `llm7` 4M → **150M** (belgelenmiş günlük 5M token), `together` "-Free" uç noktaları kullanımdan kaldırıldı → $25 kayıt kredisi de kaldırıldı (en az $5 satın alma gerektiriyor, ücretsiz deneme yok), `longcat` Preview sona erdi + Flash modelleri kullanımdan kaldırıldı → yalnızca **LongCat-2.0**; tek seferlik **10M** token kayıt kredisi olarak yeniden sınıflandırıldı (KYC koşullu, yinelenmiyor).
+- **Keşfedilen yeni ücretsiz sağlayıcılar:** ⭐ **Kilo Code** (`kilo-gateway` — dönüşümlü "Auto Free" kümesi: NVIDIA Nemotron 3 ailesi, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — dönüşümlü 10 ücretsiz kodlama modeli, 2026-10-20'de yenilendi), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash kalıcı olarak ücretsiz + 20M kayıt bonusu) ve `arcee-ai` Trinity Large Preview.
+- **Yeni dürüst katmanlar** (bkz. Metodoloji): _kalıcı olarak ücretsiz ancak üst sınırı olmayan_ bir kategori (gerçek yinelenen erişim, sayılabilecek bir token sınırı yok) ve bir _para yatırarak etkinleştirilen artış_ (OpenRouter $10 → ayda +24M); manşetteki rakamı hiçbir zaman şişirmemeleri için her ikisi de **ayrı ayrı** gösteriliyor.
 
-> Daha aşağıdaki ayrıntılı sağlayıcı başına tablo, **2026-06-05 anlık görüntüsüdür**; yukarıdaki değişiklikler onun yerine geçer. Canlı ve kanonik kaynak, model başına katalog olan `open-sse/config/freeModelCatalog.ts` dosyasıdır.
+> Daha aşağıdaki ayrıntılı sağlayıcı bazlı tablo, **2026-06-05 anlık görüntüsüdür**; yukarıdaki değişiklikler onun yerine geçer. Güncel ve esas kaynak, model bazlı `open-sse/config/freeModelCatalog.ts` kataloğudur.
 
 ---
 
@@ -240,73 +240,73 @@ Bu alandaki çoğu "aylık ücretsiz token" rakamı, model başına etiketlerin 
 
 ## Sağlayıcı başına ücretsiz katman (Bytez/Nous 2026-10-15 tarihinde kontrol edildi; satırlar 2026-09-02 tarihinde yeniden denetlendi; diğerleri 2026-06-17)
 
-> Model başına katalogdan (`open-sse/config/freeModelCatalog.ts`) yeniden oluşturuldu ve havuz bazında yinelenenler kaldırıldı. Aylık düzenli token miktarına göre sıralandı. `uncapped*` = kalıcı olarak ücretsizdir ancak yayımlanmış bir token sınırı yoktur (hız/eşzamanlılık sınırlıdır) — gerçek erişimdir, ancak **ana toplama dahil edilmemiştir**. `—` = yalnızca krediyle / anahtarsız / token cinsinden ölçülemez.
+> Model başına katalogdan (`open-sse/config/freeModelCatalog.ts`) yeniden oluşturuldu ve havuz bazında tekilleştirildi. Aylık düzenli token miktarına göre sıralandı. `uncapped*` = kalıcı olarak ücretsizdir ancak yayımlanmış bir token sınırı yoktur (hız/eşzamanlılık sınırlıdır) — gerçek erişimdir, ancak **genel toplama** dahil edilmemiştir. `—` = yalnızca krediyle / anahtarsız / token cinsinden ölçülemez.
 
-| Sağlayıcı        | Ücretsiz tür  | Sabit token/ay | İlk ay kredisi | Kullanım Şartları | Modeller |
-| ---------------- | ------------- | -------------- | -------------- | ----------------- | -------- |
-| `mistral`        | yinelenen     | ~1.00B         | —              | dikkat            | 5        |
-| `nara`           | yinelenen     | ~210M          | —              | dikkat            | 8        |
-| `llm7`           | yinelenen     | ~150M          | —              | dikkat            | 4        |
-| `xkiro`          | yinelenen     | ~150M          | —              | dikkat            | 39       |
-| `longcat`        | tek seferlik  | —              | 10M            | dikkat            | 1        |
-| `cerebras`       | tek seferlik  | —              | $5 kredi       | dikkat            | 2        |
-| `cloudflare-ai`  | yinelenen     | ~30M           | —              | dikkat            | 9        |
-| `groq`           | yinelenen     | ~30M           | —              | dikkat            | 5        |
-| `api-airforce`   | yinelenen     | ~24M           | —              | dikkat            | 7        |
-| `bluesminds`     | yinelenen     | ~7M            | —              | belirsiz          | 22       |
-| `sambanova`      | yinelenen     | ~6M            | —              | dikkat            | 5        |
-| `arcee-ai`       | yinelenen     | ~5M            | —              | dikkat            | 1        |
-| `bazaarlink`     | yinelenen     | ~4M            | —              | dikkat            | 32       |
-| `openrouter`     | yinelenen     | ~1M            | —              | dikkat            | 1        |
-| `cohere`         | yinelenen     | ~800K          | —              | dikkat            | 6        |
-| `huggingchat`    | yinelenen     | ~500K          | —              | dikkat            | 4        |
-| `morph`          | yinelenen     | ~400K          | —              | uygun             | 2        |
-| `huggingface`    | yinelenen     | ~200K          | —              | dikkat            | 6        |
-| `kiro`           | yinelenen     | ~25K           | —              | kaçının           | 12       |
-| `glm-cn`         | sınırsız      | sınırsız\*     | ~20M           | uygun             | 4        |
-| `baidu`          | sınırsız      | sınırsız\*     | —              | dikkat            | 1        |
-| `gemini`         | sınırsız      | sınırsız\*     | —              | dikkat            | 4        |
-| `kilo-gateway`   | sınırsız      | sınırsız\*     | —              | dikkat            | 7        |
-| `ollama-cloud`   | sınırsız      | sınırsız\*     | —              | belirsiz          | 8        |
-| `opencode-zen`   | sınırsız      | sınırsız\*     | —              | dikkat            | 6        |
-| `tencent`        | sınırsız      | sınırsız\*     | —              | dikkat            | 1        |
-| `vertex`         | kayıt kredisi | —              | ~300M          | dikkat            | 10       |
-| `agentrouter`    | kayıt kredisi | —              | ~200M          | dikkat            | 4        |
-| `predibase`      | kayıt kredisi | —              | ~25M           | dikkat            | 1        |
-| `doubao`         | kayıt kredisi | —              | ~15M           | belirsiz          | 1        |
-| `ai21`           | kayıt kredisi | —              | ~10M           | kaçının           | 2        |
-| `deepseek`       | kayıt kredisi | —              | ~5M            | uygun             | 2        |
-| `hyperbolic`     | kayıt kredisi | —              | ~5M            | uygun             | 8        |
-| `nscale`         | kayıt kredisi | —              | ~5M            | dikkat            | 6        |
-| `bytez`          | kredi (yin.)  | —              | bilinmiyor     | belirsiz          | 1        |
-| `deepinfra`      | kayıt kredisi | —              | ~1M            | dikkat            | 22       |
-| `fireworks`      | kayıt kredisi | —              | ~1M            | kaçının           | 10       |
-| `nebius`         | kayıt kredisi | —              | ~1M            | dikkat            | 1        |
-| `qoder`          | kayıt kredisi | —              | ~1M            | dikkat            | 14       |
-| `scaleway`       | kayıt kredisi | —              | ~1M            | uygun             | 6        |
-| `novita`         | kayıt kredisi | —              | ~500K          | dikkat            | 1        |
-| `agy`            | anahtarsız    | —              | —              | kaçının           | 16       |
-| `baichuan`       | anahtarsız    | —              | —              | belirsiz          | 1        |
-| `blackbox`       | anahtarsız    | —              | —              | kaçının           | 6        |
-| `coze`           | anahtarsız    | —              | —              | kaçının           | 1        |
-| `duckduckgo-web` | anahtarsız    | —              | —              | kaçının           | 6        |
-| `freemodel-dev`  | anahtarsız    | —              | —              | bilinmiyor        | 4        |
-| `friendliai`     | anahtarsız    | —              | —              | kaçının           | 2        |
-| `iflytek`        | anahtarsız    | —              | —              | kaçının           | 1        |
-| `inference-net`  | anahtarsız    | —              | —              | dikkat            | 3        |
-| `liquid`         | anahtarsız    | —              | —              | bilinmiyor        | 1        |
-| `monsterapi`     | anahtarsız    | —              | —              | belirsiz          | 1        |
-| `muse-spark-web` | anahtarsız    | —              | —              | kaçının           | 3        |
-| `nlpcloud`       | anahtarsız    | —              | —              | kaçının           | 1        |
-| `nvidia`         | anahtarsız    | —              | —              | dikkat            | 13       |
-| `pollinations`   | anahtarsız    | —              | —              | dikkat            | 31       |
-| `publicai`       | anahtarsız    | —              | —              | dikkat            | 3        |
-| `reka`           | anahtarsız    | —              | —              | dikkat            | 2        |
-| `sensenova`      | anahtarsız    | —              | —              | dikkat            | 1        |
-| `sparkdesk`      | anahtarsız    | —              | —              | dikkat            | 1        |
-| `stepfun`        | anahtarsız    | —              | —              | uygun             | 1        |
-| `t3-web`         | anahtarsız    | —              | —              | kaçının           | 23       |
-| `uncloseai`      | anahtarsız    | —              | —              | dikkat            | 3        |
+| Sağlayıcı        | Ücretsiz türü | Aylık düzenli token | İlk ay kredisi | Kullanım Koşulları | Modeller |
+| ---------------- | ------------- | ------------------- | -------------- | ------------------ | -------- |
+| `mistral`        | yinelenen     | ~1.00B              | —              | dikkat             | 5        |
+| `nara`           | yinelenen     | ~210M               | —              | dikkat             | 8        |
+| `llm7`           | yinelenen     | ~150M               | —              | dikkat             | 4        |
+| `xkiro`          | yinelenen     | ~150M               | —              | dikkat             | 39       |
+| `longcat`        | tek seferlik  | —                   | 10M            | dikkat             | 1        |
+| `cerebras`       | tek seferlik  | —                   | $5 kredi       | dikkat             | 2        |
+| `cloudflare-ai`  | yinelenen     | ~30M                | —              | dikkat             | 9        |
+| `groq`           | yinelenen     | ~30M                | —              | dikkat             | 5        |
+| `api-airforce`   | yinelenen     | ~24M                | —              | dikkat             | 7        |
+| `bluesminds`     | yinelenen     | ~7M                 | —              | belirsiz           | 22       |
+| `sambanova`      | yinelenen     | ~6M                 | —              | dikkat             | 5        |
+| `arcee-ai`       | yinelenen     | ~5M                 | —              | dikkat             | 1        |
+| `bazaarlink`     | yinelenen     | ~4M                 | —              | dikkat             | 32       |
+| `openrouter`     | yinelenen     | ~1M                 | —              | dikkat             | 1        |
+| `cohere`         | yinelenen     | ~800K               | —              | dikkat             | 6        |
+| `huggingchat`    | yinelenen     | ~500K               | —              | dikkat             | 4        |
+| `morph`          | yinelenen     | ~400K               | —              | uygun              | 2        |
+| `huggingface`    | yinelenen     | ~200K               | —              | dikkat             | 6        |
+| `kiro`           | yinelenen     | ~25K                | —              | kaçının            | 12       |
+| `glm-cn`         | sınırsız      | sınırsız\*          | ~20M           | uygun              | 4        |
+| `baidu`          | sınırsız      | sınırsız\*          | —              | dikkat             | 1        |
+| `gemini`         | sınırsız      | sınırsız\*          | —              | dikkat             | 4        |
+| `kilo-gateway`   | sınırsız      | sınırsız\*          | —              | dikkat             | 7        |
+| `ollama-cloud`   | sınırsız      | sınırsız\*          | —              | belirsiz           | 8        |
+| `opencode-zen`   | sınırsız      | sınırsız\*          | —              | dikkat             | 10       |
+| `tencent`        | sınırsız      | sınırsız\*          | —              | dikkat             | 1        |
+| `vertex`         | kayıt kredisi | —                   | ~300M          | dikkat             | 10       |
+| `agentrouter`    | kayıt kredisi | —                   | ~200M          | dikkat             | 4        |
+| `predibase`      | kayıt kredisi | —                   | ~25M           | dikkat             | 1        |
+| `doubao`         | kayıt kredisi | —                   | ~15M           | belirsiz           | 1        |
+| `ai21`           | kayıt kredisi | —                   | ~10M           | kaçının            | 2        |
+| `deepseek`       | kayıt kredisi | —                   | ~5M            | uygun              | 2        |
+| `hyperbolic`     | kayıt kredisi | —                   | ~5M            | uygun              | 8        |
+| `nscale`         | kayıt kredisi | —                   | ~5M            | dikkat             | 6        |
+| `bytez`          | kredi (yin.)  | —                   | bilinmiyor     | belirsiz           | 1        |
+| `deepinfra`      | kayıt kredisi | —                   | ~1M            | dikkat             | 22       |
+| `fireworks`      | kayıt kredisi | —                   | ~1M            | kaçının            | 10       |
+| `nebius`         | kayıt kredisi | —                   | ~1M            | dikkat             | 1        |
+| `qoder`          | kayıt kredisi | —                   | ~1M            | dikkat             | 14       |
+| `scaleway`       | kayıt kredisi | —                   | ~1M            | uygun              | 6        |
+| `novita`         | kayıt kredisi | —                   | ~500K          | dikkat             | 1        |
+| `agy`            | anahtarsız    | —                   | —              | kaçının            | 16       |
+| `baichuan`       | anahtarsız    | —                   | —              | belirsiz           | 1        |
+| `blackbox`       | anahtarsız    | —                   | —              | kaçının            | 6        |
+| `coze`           | anahtarsız    | —                   | —              | kaçının            | 1        |
+| `duckduckgo-web` | anahtarsız    | —                   | —              | kaçının            | 6        |
+| `freemodel-dev`  | anahtarsız    | —                   | —              | bilinmiyor         | 4        |
+| `friendliai`     | anahtarsız    | —                   | —              | kaçının            | 2        |
+| `iflytek`        | anahtarsız    | —                   | —              | kaçının            | 1        |
+| `inference-net`  | anahtarsız    | —                   | —              | dikkat             | 3        |
+| `liquid`         | anahtarsız    | —                   | —              | bilinmiyor         | 1        |
+| `monsterapi`     | anahtarsız    | —                   | —              | belirsiz           | 1        |
+| `muse-spark-web` | anahtarsız    | —                   | —              | kaçının            | 3        |
+| `nlpcloud`       | anahtarsız    | —                   | —              | kaçının            | 1        |
+| `nvidia`         | anahtarsız    | —                   | —              | dikkat             | 13       |
+| `pollinations`   | anahtarsız    | —                   | —              | dikkat             | 31       |
+| `publicai`       | anahtarsız    | —                   | —              | dikkat             | 3        |
+| `reka`           | anahtarsız    | —                   | —              | dikkat             | 2        |
+| `sensenova`      | anahtarsız    | —                   | —              | dikkat             | 1        |
+| `sparkdesk`      | anahtarsız    | —                   | —              | dikkat             | 1        |
+| `stepfun`        | anahtarsız    | —                   | —              | uygun              | 1        |
+| `t3-web`         | anahtarsız    | —                   | —              | kaçının            | 23       |
+| `uncloseai`      | anahtarsız    | —                   | —              | dikkat             | 3        |
 
 ---
 

@@ -14,12 +14,12 @@ after(async () => await cleanupTempDataDir(dataDir));
 test("Responses route wires dual-cadence neutral keepalives", () => {
   assert.match(
     routeSource,
-    /startupFrame:\s*OPENAI_RESPONSES_IN_PROGRESS_FRAME/,
+    /startupFrame:\s*keepaliveFrame/,
     "the immediate frame must not create a synthetic reasoning item"
   );
   assert.match(
     routeSource,
-    /applicationKeepalive:\s*\{[\s\S]*frame:\s*OPENAI_RESPONSES_IN_PROGRESS_FRAME,[\s\S]*intervalMs:\s*SSE_HEARTBEAT_INTERVAL_MS/,
+    /applicationKeepalive:\s*\{[\s\S]*frame:\s*keepaliveFrame,[\s\S]*intervalMs:\s*SSE_HEARTBEAT_INTERVAL_MS/,
     "parser-visible events must use the configured mid-stream heartbeat cadence"
   );
   assert.doesNotMatch(

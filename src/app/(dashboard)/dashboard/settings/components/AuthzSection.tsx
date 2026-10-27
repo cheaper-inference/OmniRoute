@@ -1,8 +1,9 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { Badge, Button, Card, Input, Modal, Toggle } from "@/shared/components";
 import { useTranslations } from "next-intl";
+import { Badge, Button, Card, Input, Modal, Toggle } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 
 type TierName = "LOCAL_ONLY" | "ALWAYS_PROTECTED" | "MANAGEMENT" | "CLIENT_API" | "PUBLIC";
 
@@ -240,32 +241,20 @@ export default function AuthzSection() {
 
   if (loading) {
     return (
-      <Card>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-info/10 text-info">
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              shield_lock
-            </span>
-          </div>
-          <h3 className="text-lg font-semibold">{t("authz.title")}</h3>
-        </div>
-        <p className="text-sm text-text-muted">{t("authz.loading")}</p>
+      <Card title={t("authz.title")} icon="shield_lock">
+        <p className="text-sm text-text-muted" role="status">
+          {t("authz.loading")}
+        </p>
       </Card>
     );
   }
 
   if (loadError || !inventory) {
     return (
-      <Card>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-info/10 text-info">
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              shield_lock
-            </span>
-          </div>
-          <h3 className="text-lg font-semibold">{t("authz.title")}</h3>
-        </div>
-        <p className="text-sm text-red-500">{loadError ?? t("authz.loadError")}</p>
+      <Card title={t("authz.title")} icon="shield_lock">
+        <p className="text-sm text-error" role="alert">
+          {loadError ?? t("authz.loadError")}
+        </p>
       </Card>
     );
   }
@@ -278,11 +267,9 @@ export default function AuthzSection() {
         <div
           data-testid="cors-wildcard-banner"
           role="alert"
-          className="flex items-start gap-3 rounded-lg border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-amber-700 dark:text-amber-300"
+          className="flex items-start gap-3 rounded-lg border border-warning/40 bg-warning-bg px-4 py-3 text-warning"
         >
-          <span className="material-symbols-outlined text-[20px] mt-0.5" aria-hidden="true">
-            warning
-          </span>
+          <Icon name="warning" size={20} className="mt-0.5" />
           <div className="flex flex-col gap-1">
             <p className="font-semibold">{t("authz.cors.wildcard.title")}</p>
             <p className="text-sm">{t("authz.cors.wildcard.desc")}</p>
@@ -291,22 +278,14 @@ export default function AuthzSection() {
       )}
 
       {/* Bypass policy editor */}
-      <Card>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400">
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              tune
-            </span>
-          </div>
-          <h3 className="text-lg font-semibold">{t("authz.bypass.section")}</h3>
-        </div>
-
-        <div className="flex items-center justify-between mb-6">
+      <Card title={t("authz.bypass.section")} icon="tune">
+        <div className="flex items-center justify-between gap-4 mb-6">
           <div>
             <p className="font-medium">{t("authz.bypass.kill_switch.label")}</p>
             <p className="text-sm text-text-muted">{t("authz.bypass.kill_switch.desc")}</p>
           </div>
           <Toggle
+            ariaLabel={t("authz.bypass.kill_switch.label")}
             checked={draftEnabled}
             onChange={() => setDraftEnabled((prev) => !prev)}
             disabled={submitting}
@@ -329,12 +308,12 @@ export default function AuthzSection() {
               return (
                 <li
                   key={prefix}
-                  className="flex items-center justify-between gap-3 rounded-md border border-border/40 bg-black/[0.02] dark:bg-white/[0.02] px-3 py-2"
+                  className="flex items-center justify-between gap-3 rounded-md border border-border bg-bg-subtle px-3 py-2"
                 >
                   <div className="flex flex-col">
                     <code className="text-xs font-mono">{prefix}</code>
                     {locked && (
-                      <span className="text-[10px] text-red-500 mt-1">
+                      <span className="text-[10px] text-error mt-1">
                         {t("authz.bypass.cli_tools_runtime_note")}
                       </span>
                     )}
@@ -358,11 +337,11 @@ export default function AuthzSection() {
               .map((prefix) => (
                 <li
                   key={`locked:${prefix}`}
-                  className="flex items-center justify-between gap-3 rounded-md border border-red-500/30 bg-red-500/[0.04] px-3 py-2 opacity-80"
+                  className="flex items-center justify-between gap-3 rounded-md border border-error/30 bg-error-bg px-3 py-2 opacity-80"
                 >
                   <div className="flex flex-col">
                     <code className="text-xs font-mono">{prefix}</code>
-                    <span className="text-[10px] text-red-500 mt-1">
+                    <span className="text-[10px] text-error mt-1">
                       {t("authz.bypass.cli_tools_runtime_note")}
                     </span>
                   </div>
@@ -373,8 +352,9 @@ export default function AuthzSection() {
               ))}
           </ul>
 
-          <div className="flex gap-2 items-end pt-2">
+          <div className="flex flex-col sm:flex-row gap-2 sm:items-end pt-2">
             <Input
+              className="flex-1"
               type="text"
               label={t("authz.bypass.prefix.add")}
               placeholder={t("authz.bypass.prefix.placeholder")}
@@ -393,14 +373,13 @@ export default function AuthzSection() {
         </div>
 
         {/* Save bar */}
-        <div className="flex items-center justify-between gap-4 pt-4 mt-4 border-t border-border/50">
+        <div className="flex items-center justify-between gap-4 pt-4 mt-4 border-t border-border">
           <div className="text-sm">
-            {dirty && (
-              <span className="text-amber-600 dark:text-amber-400">{t("authz.pending")}</span>
-            )}
+            {dirty && <span className="text-warning">{t("authz.pending")}</span>}
             {status && (
               <span
-                className={`ml-3 ${status.type === "error" ? "text-red-500" : "text-green-500"}`}
+                role={status.type === "error" ? "alert" : "status"}
+                className={`ml-3 ${status.type === "error" ? "text-error" : "text-success"}`}
               >
                 {status.message}
               </span>
@@ -413,25 +392,10 @@ export default function AuthzSection() {
       </Card>
 
       {/* Authorization tier inventory */}
-      <Card>
-        <div className="flex items-center gap-3 mb-4">
-          <div className="p-2 rounded-lg bg-info/10 text-info">
-            <span className="material-symbols-outlined text-[20px]" aria-hidden="true">
-              shield_lock
-            </span>
-          </div>
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold">{t("authz.title")}</h3>
-            <p className="text-sm text-text-muted">{t("authz.description")}</p>
-          </div>
-        </div>
-
+      <Card title={t("authz.title")} subtitle={t("authz.description")} icon="shield_lock">
         <div className="flex flex-col gap-4">
           {inventory.tiers.map((tier) => (
-            <div
-              key={tier.name}
-              className="rounded-lg border border-border/50 bg-black/[0.02] dark:bg-white/[0.02] p-4"
-            >
+            <div key={tier.name} className="rounded-lg border border-border bg-bg-subtle p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-3">
                   <h4 className="font-semibold">{t(`authz.tier.${tier.name}`)}</h4>
@@ -455,9 +419,9 @@ export default function AuthzSection() {
                   return (
                     <li
                       key={`${tier.name}:${prefix}`}
-                      className="flex items-center justify-between gap-3 rounded-md border border-border/40 bg-black/[0.02] dark:bg-white/[0.02] px-3 py-2"
+                      className="flex items-center justify-between gap-3 rounded-md border border-border bg-surface px-3 py-2"
                     >
-                      <code className="text-xs font-mono">{prefix}</code>
+                      <code className="text-xs font-mono break-all">{prefix}</code>
                       <Badge variant={badge.variant} size="sm">
                         {t(`authz.badge.${badge.key}`)}
                       </Badge>
@@ -507,12 +471,13 @@ export default function AuthzSection() {
           <p className="text-sm text-text-muted">{t("authz.password.prompt.desc")}</p>
           <Input
             type="password"
+            aria-label={t("authz.password.prompt.label")}
             placeholder={t("authz.password.placeholder")}
             value={currentPassword}
             onChange={(e) => setCurrentPassword(e.target.value)}
             autoFocus
+            error={status?.type === "error" ? status.message : undefined}
           />
-          {status?.type === "error" && <p className="text-sm text-red-500">{status.message}</p>}
         </div>
       </Modal>
     </>

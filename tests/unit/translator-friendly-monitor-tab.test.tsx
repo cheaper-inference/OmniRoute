@@ -1,8 +1,19 @@
 // @vitest-environment jsdom
+// KEA-7886: icons are Lucide <svg class="oi-icon" data-icon="<material name>"> via <Icon>.
 import React from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi, beforeAll } from "vitest";
+
+// The kit Table (KEA-7886) mounts a persistent horizontal scrollbar that measures the table
+// with ResizeObserver, which jsdom does not implement.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 // ── i18n stub — returns fallback key so we can assert on translateOrFallback ──
 vi.mock("next-intl", () => ({
@@ -169,8 +180,8 @@ describe("MonitorTab", () => {
     const hint = container.querySelector("[data-testid='monitor-origin-hint']");
     expect(hint).toBeTruthy();
     // The hint should contain the info icon
-    const icons = hint?.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons ?? []).map((el) => el.textContent?.trim());
+    const icons = hint?.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons ?? []).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts).toContain("info");
   });
 
@@ -182,8 +193,8 @@ describe("MonitorTab", () => {
     await mountAndFlushInitialFetch(<MonitorTab />, container);
 
     // Stat card icons: translate, check_circle, error, speed, hub, lan
-    const icons = container.querySelectorAll(".material-symbols-outlined");
-    const iconTexts = Array.from(icons).map((el) => el.textContent?.trim());
+    const icons = container.querySelectorAll("svg.oi-icon");
+    const iconTexts = Array.from(icons).map((el) => el.getAttribute("data-icon"));
     expect(iconTexts).toContain("translate");
     expect(iconTexts).toContain("check_circle");
     expect(iconTexts).toContain("error");

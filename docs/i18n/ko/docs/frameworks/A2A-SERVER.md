@@ -47,7 +47,7 @@ JSON-RPC 호출은 JSON-RPC 오류 코드 `-32000`과 함께 HTTP 503을 반환�
 
 ### `message/send` — 동기 실행
 
-스킬에 메시지를 전송하고 전체 응답이 완료될 때까지 기다립니다.
+스킬에 메시지를 전송하고 전체 응답을 기다립니다.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,15 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`에서 `metadata.combo`는 게이트웨이 요청의
+`metadata.model`을 명시적으로 재정의하며, 무시되는 `x-combo` JSON 필드가 아니라 실제 `model`로 전송됩니다.
+게이트웨이의 일반적인 API 키 및 대상별 인증은 계속 적용됩니다. 유효하지 않거나 비어 있는 콤보는 거부됩니다.
+
+결과에는 `requested_combo`(호출자 의도), `dispatched_model`
+(실제 게이트웨이 요청), `response_model`(게이트웨이 응답) 및
+`confirmed_combo`가 표시됩니다. 마지막 필드는 게이트웨이가 콤보를 명시적으로 식별하지 않는 한 `null`입니다.
+A2A 결정 로그는 확인된 콤보에만 실행을 귀속하며, 확인되지 않은 요청은 `requestedCombo`로 유지합니다.
+
 **응답:**
 
 ```json
@@ -76,22 +85,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +101,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — SSE 스트리밍
 
-`message/send`와 동일하지만 실시간 스트리밍을 위해 서버 전송 이벤트(Server-Sent Events)를 반환합니다.
+`message/send`와 동일하지만 실시간 스트리밍을 위해 Server-Sent Events를 반환합니다.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -148,31 +150,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## 사용 가능한 스킬
 
-OmniRoute는 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`에 연결된 6개의 A2A 스킬을 제공합니다. 각 스킬 모듈은 `src/lib/a2a/skills/`에 있습니다.
+OmniRoute는 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`에 연결된 6개의 A2A 스킬을 제공합니다. 각 스킬 모듈은 `src/lib/a2a/skills/`에 위치합니다.
 
-| 스킬          | ID                   | 설명                                                                                                                                         | 태그                 | 예시                                      |
-| :------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- | :------------------- | :---------------------------------------- |
-| 스마트 라우팅 | `smart-routing`      | OmniRoute의 콤보 엔진과 점수 산정을 사용하여 프롬프트를 최적의 제공자/콤보로 라우팅합니다                                                    | 라우팅, 제공자       | "이 프롬프트를 최적의 모델로 라우팅해 줘" |
-| 할당량 관리   | `quota-management`   | 제공자별 할당량 상태를 보고하고, 호출자가 언제 속도를 제한하거나 전환할지 결정하도록 지원합니다                                              | 할당량, 제공자       | "anthropic의 할당량을 확인해 줘"          |
-| 제공자 검색   | `provider-discovery` | 설치된 제공자를 기능, 무료 티어 여부, OAuth 상태와 함께 나열합니다                                                                           | 제공자, 검색         | "어떤 제공자를 사용할 수 있나요?"         |
-| 비용 분석     | `cost-analysis`      | 카탈로그와 최근 사용량을 기반으로 요청/대화 비용을 추정합니다                                                                                | 비용, 사용량         | "이 대화의 비용을 추정해 줘"              |
-| 상태 보고서   | `health-report`      | 제공자별 회로 차단기, 쿨다운, 잠금 상태를 집계합니다                                                                                         | 상태, 복원력         | "모든 제공자의 상태를 보여 줘"            |
-| 기능 목록     | `list-capabilities`  | 전체 45개 항목의 Agent Skills 카탈로그(API 23개 + CLI 21개 + 구성 1개)를 컨텍스트 주입용 원시 SKILL.md URL이 포함된 마크다운 표로 반환합니다 | 카탈로그, 검색, 스킬 | "OmniRoute의 모든 기능을 나열해 줘"       |
+| 스킬          | ID                   | 설명                                                                                                                                                    | 태그                       | 예시                                   |
+| :------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :------------------------- | :------------------------------------- |
+| 스마트 라우팅 | `smart-routing`      | OmniRoute의 콤보 엔진과 스코어링을 사용해 프롬프트를 최적의 제공자/콤보로 라우팅합니다                                                                  | routing, providers         | "Route this prompt via the best model" |
+| 쿼터 관리     | `quota-management`   | 제공자별 쿼터 상태를 보고하고, 호출자가 언제 스로틀링하거나 전환할지 결정할 수 있도록 돕습니다                                                          | quota, providers           | "Check quota for anthropic"            |
+| 제공자 검색   | `provider-discovery` | 설치된 제공자를 기능, 프리 티어 여부, OAuth 상태와 함께 나열합니다                                                                                      | providers, discovery       | "What providers are available?"        |
+| 비용 분석     | `cost-analysis`      | 카탈로그와 최근 사용량을 기반으로 요청/대화의 비용을 추정합니다                                                                                         | cost, usage                | "Estimate cost for this conversation"  |
+| 상태 리포트   | `health-report`      | 제공자별 서킷 브레이커, 쿨다운, 잠금 상태를 집계합니다                                                                                                  | health, resilience         | "Show health status of all providers"  |
+| 기능 목록     | `list-capabilities`  | 전체 45개 항목의 Agent Skills 카탈로그(23개 API + 21개 CLI + 1개 config)를 컨텍스트 주입을 위한 원본 SKILL.md URL이 포함된 마크다운 테이블로 반환합니다 | catalog, discovery, skills | "List all OmniRoute capabilities"      |
 
-> Agent Card는 현재 374개 제공자 카탈로그와 일치하도록 유지해야 합니다. 제공자 수와 무료/무인증 메타데이터는 런타임 레지스트리에서 가져옵니다.
+> Agent Card는 실시간 375개 제공자 카탈로그와 일치하도록 유지되어야 하며, 제공자 수와 무료/인증 불필요 메타데이터는 런타임 레지스트리에서 가져옵니다.
 
-### `list-capabilities` 스킬 상세 정보
+### `list-capabilities` 스킬 상세
 
-`list-capabilities` 스킬은 API 호출을 전송하기 전에 OmniRoute가 제공하는 기능을 파악해야 하는 외부 에이전트에 특히 유용합니다. 이 스킬은 구조화된 마크다운 표 아티팩트를 반환합니다.
+`list-capabilities` 스킬은 API 호출을 보내기 전에 OmniRoute가 제공하는 기능을 파악해야 하는 외부 에이전트에게 특히 유용합니다. 구조화된 마크다운 테이블 아티팩트를 반환합니다:
 
 ```
-| ID | 이름 | 카테고리 | 영역 | 엔드포인트/명령 | 원시 URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | 인증 및 세션 | api | 인증 | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-각 행에는 에이전트가 전체 SKILL.md를 즉시 가져올 수 있도록 `rawUrl` 열이 포함됩니다. `metadata.totalSkills` 필드는 카탈로그 크기(현재 45개)를 반영합니다. 구현: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md)도 참조하세요.
+각 행에는 `rawUrl` 열이 포함되어 있어 에이전트가 전체 SKILL.md를 즉시 가져올 수 있습니다. `metadata.totalSkills` 필드는 카탈로그 크기(현재 45)를 반영합니다. 구현 위치: `src/lib/a2a/skills/listCapabilities.ts`. [AGENT-SKILLS.md](./AGENT-SKILLS.md)도 참조하세요.
 
 ---
 

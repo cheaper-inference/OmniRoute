@@ -1,0 +1,1 @@
+- Translate the 111 dashboard UI keys the UI-kit migration (#17951) left untranslated in 64 locales, re-sync the drifted FEATURE_FLAGS, ENVIRONMENT, REPOSITORY_MAP, DESIGN_SYSTEM, CODEBASE_DOCUMENTATION and ARCHITECTURE mirrors, and classify the VS Code tag connection read that #17360 moved into `src/lib/vscode/tagModels.ts` in the hard-lease inventory.
