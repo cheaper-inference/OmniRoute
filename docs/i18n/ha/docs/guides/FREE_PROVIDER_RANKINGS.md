@@ -120,102 +120,106 @@ Tsarin amsa:
 
 ---
 
-## Yadda Maki Ke Aiki
+## Yadda Sakamakon Yake Aiki
 
-### Tushe: jadawalin shugabannin Arena AI
+### Tushe: Arena AI leaderboard
 
-Injin daidaita Arena ELO (`src/lib/arenaEloSync.ts`) yana ɗauko jadawalin shugabanni guda biyu — `text`
-da `code` — daga API na jadawalin shugabannin Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Kowace shigarwa a jadawalin
-shugabannin tana ɗauke da sunan samfur, mai samarwa, `score` na ELO, tazarar amincewa, da yawan ƙuri'u.
+Injin daidaitawa na Arena ELO (`src/lib/arenaEloSync.ts`) yana kawo leaderboard biyu — `text`
+da `code` — daga API na Arena AI leaderboard
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Idan wannan API ba ta dawo da
+wani allo da za a iya amfani da shi ba, injin yana koma wa `lmarena-ai/leaderboard-dataset` na hukuma a kan
+datasets-server na Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` yana ba da rahoto kan `activeSource`, `lastError` da
+`lastFailedAt`. Kowane shigar da leaderboard
+yana ɗauke da sunan samfur, mai samarwa, ELO `score`, tsakanin amincewa, da adadin kuri'u.
 
-Rukunonin jadawalin shugabanni suna daidaituwa da rukunonin ayyukan OmniRoute:
+Rukunin leaderboard suna daidaita rukunin ayyukan OmniRoute:
 
-| Jadawalin shugabannin Arena | Rukunonin ayyukan OmniRoute                       |
-| --------------------------- | ------------------------------------------------- |
-| `text`                      | `default`, `review`, `documentation`, `debugging` |
-| `code`                      | `coding`                                          |
+| Arena leaderboard | Rukunin ayyukan OmniRoute                         |
+| ----------------- | ------------------------------------------------- |
+| `text`            | `default`, `review`, `documentation`, `debugging` |
+| `code`            | `coding`                                          |
 
-### Daidaita ma'auni (maki na dacewa da aiki)
+### Daidaitawa (maki na dacewar aiki)
 
-Ana daidaita ɗanyen makin ELO bisa kowane jadawalin shugabanni zuwa **ƙimar dacewa da aiki a cikin `[0.4, 0.98]`**:
+Ana daidaita maki na ELO na farko a kowace leaderboard zuwa **darajar dacewar aiki a cikin `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Makin ba ya taɓa kaiwa `0` ko `1`, domin a bar sarari ga sauye-sauyen mai amfani. Wannan shi ne
-filin `score` da kake gani a martanin API da kuma alamar da ake nunawa a dashboard.
+Makin ba ya taɓa isa `0` ko `1` ba, yana barin fili don saitunan mai amfani. Wannan shi ne
+filin `score` da kake gani a cikin amsar API da kuma lakabin da ake nuna shi a dashboard.
 
 ### Amincewa
 
-Kowace shigarwa tana samun matakin amincewa bisa yawan ƙuri'un Arena:
+Kowane shigar yana samun matakin amincewa bisa ga adadin kuri'un Arena:
 
-| Amincewa | Ƙuri'u  |
+| Amincewa | Kuri'u  |
 | -------- | ------- |
 | `high`   | ≥ 5,000 |
 | `medium` | ≥ 1,000 |
 | `low`    | < 1,000 |
 
-### Ajiya da sabuntar bayanai
+### Ajiya da sabuntawa
 
-Ana rubuta shigarwar da aka daidaita zuwa teburin DB na `model_intelligence` tare da
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Shigarwar suna **ƙarewa bayan
-kwanaki 7**, saboda haka mai samarwa da ya daina daidaitawa zai fita daga baya maimakon a ci gaba da
-gabatar da tsofaffin bayanai.
+Ana rubuta shigar da aka daidaita zuwa teburin DB na `model_intelligence` tare da
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Shigarwa **yana ƙarewa bayan
+kwana 7**, don haka mai samarwa da ya daina daidaitawa a ƙarshe yana fice maimakon ya ba da
+bayanai da suka ɓace.
 
-Daidaitawar tana aiki **ta tsohuwa**:
+Daidaitawar tana aiki **ta tashi tuni**:
 
-- Tana gudana sau ɗaya lokacin fara uwar garke, sannan tana ci gaba bisa agogon lokaci-lokaci
-  (`src/lib/arenaEloSync.ts`, an haɗa ta daga `src/instrumentation-node.ts`).
-- Ba ta **tare aiki kuma ba ta taɓa haddasa gazawar tsarin** — idan ɗauko bayanai daga tushen waje ya gaza, OmniRoute zai ci gaba da
-  aiki, kuma jerin matsayi kawai za su nuna ingantattun bayanai na ƙarshe (ko yanayin da babu komai).
+- Tana gudana sau ɗaya lokacin fara uwar garken sannan kuma a kan mai ƙidaya lokaci
+  (`src/lib/arenaEloSync.ts`, an haɗa shi daga `src/instrumentation-node.ts`).
+- **Ba ta toshewa kuma ba ta kasancewa fatal** — idan karɓar daga sama ta gaza, OmniRoute yana ci gaba
+  da aiki kuma matsayin suna nuna kawai bayanan ƙarshe masu inganci (ko yanayin ɗanko).
 
-Sauye-sauyen muhalli guda biyu ne ke sarrafa ta (an rubuta bayaninsu a
+Canji biyu na muhalli suna sarrafa shi (an rubuta su a
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Sauyi                     | Tsoho         | Manufa                                             |
-| ------------------------- | ------------- | -------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Saita zuwa `false` don ƙin shiga daidaitawar waje. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Tazarar daidaitawa, a cikin daƙiƙu.                |
+| Canji                     | Na farko      | Manufa                                               |
+| ------------------------- | ------------- | ---------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Saita zuwa `false` don ficewa daga daidaitawar waje. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Tazarar daidaitawa, cikin dakiku.                    |
 
-### Daidaitawa da hannu / matsayi / gogewa
+### Daidaitawa da hannu / yanayi / sharewa
 
-Ga masu gudanarwa, endpoint na gudanarwa mai buƙatar tantancewa yana ba da ikon sarrafawa da hannu
-(`src/app/api/intelligence/sync/route.ts` — yana buƙatar tantancewar gudanarwa):
+Ga masu aiki, wani endpoint na sarrafawa da ke buƙatar shiga yana bayar da sarrafa hannu
+(`src/app/api/intelligence/sync/route.ts` — yana buƙatar izinin sarrafawa):
 
 ```
-GET    /api/intelligence/sync          # matsayin daidaitawa na yanzu (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # fara daidaitawa da hannu; body: { "dryRun": true } don samfoti ba tare da rubutawa ba
-DELETE /api/intelligence/sync          # goge duk shigarwar bayanan arena_elo da aka daidaita
+GET    /api/intelligence/sync          # yanayin daidaitawa na yanzu (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # fara daidaitawa da hannu; jiki: { "dryRun": true } don gani kafin rubutawa
+DELETE /api/intelligence/sync          # share duk shigar da aka daidaita na arena_elo
 ```
 
-Idan shafin jerin matsayi babu komai, yin `POST /api/intelligence/sync` da hannu (ko kuma kawai
-sake kunna uwar garken) zai sake cika shi.
+Idan shafin matsayi ɗanko ne, `POST /api/intelligence/sync` da hannu (ko kawai
+sake kunna uwar garken) yana sake cika shi.
 
-### Daidaita samfura da jadawalin shugabanni
+### Daidaita samfura da leaderboard
 
-ID na samfurorin rajista da sunayen samfuran Arena ba koyaushe suke daidai gaba ɗaya ba. Jerin matsayi yana amfani da
-daidaitawa mai sassauci (`findMatchingIntelligence` a cikin `src/lib/freeProviderRankings.ts`):
+ID na samfuran rajista da sunayen samfuran Arena ba kullum suke daidaita daidai ba. Matsayin yana amfani da
+daidaitawa mai sassauƙa (`findMatchingIntelligence` a `src/lib/freeProviderRankings.ts`):
 
-1. Daidaituwa kai tsaye da ID na samfur da aka daidaita.
-2. Daidaituwa bayan cire ƙarin sigar da ke ƙarshen suna (misali `kimi-k2.6` → `kimi-k2`).
-3. Daidaituwar farkon suna (sunan samfur a jadawalin shugabanni shi ne farkon ID na rajista).
+1. Daidaita daidai akan ID na samfur da aka daidaita.
+2. Daidaita bayan cire ƙarshen sigar da ke ƙarshe (misali `kimi-k2.6` → `kimi-k2`).
+3. Daidaita ta farko (sunan samfur na leaderboard shine farkon ID na rajista).
 
-A ɓangaren daidaitawa, ana cire sanannun farkon sunayen masu samarwa (`anthropic/`, `openai/`, `google/`, …),
-kuma ƙaramin taswirar laƙabi yana faɗaɗa sanannun sunaye zuwa nau'ikan da OmniRoute ke amfani da su
-a ciki, don haka ana iya samun samfuran da kowane suna.
+A bangaren daidaitawa, ana cire sanannun farkon masu samarwa (`anthropic/`, `openai/`, `google/`, …)
+kuma ƙaramin taswirar laƙabi tana faɗaɗa sunayen hukuma zuwa bambance-bambancen da OmniRoute yake amfani da su
+a ciki, don samfuran su ci gaba da samuwa a ƙarƙashin kowane suna.
 
-### Yadda ake jera mai samarwa
+### Yadda ake tsara mai samarwa
 
-Ga kowane mai samarwa na kyauta, injin yana sanya maki ga kowane samfur a kundinsa, sannan:
+Ga kowace mai samarwa kyauta, injin yana ƙirga maki na kowace samfur a cikin katalokinta, sannan:
 
-- **Mafi Kyawun Samfur** = samfurin mai samarwar da ya fi samun maki.
-- **Matsakaicin Maki** = matsakaicin maki na duk samfuran mai samarwar da aka sanya wa maki.
-- **Samfura** = yawan samfuran mai samarwar da suke da makin Arena.
+- **Top Model** = samfur ɗa mai samarwa mai mafi girman maki.
+- **Avg Score** = matsakaicin maki a duk samfuran wannan mai samarwa da aka ƙirga.
+- **Models** = adadin samfuran mai samarwa da suka sami maki na Arena.
 
-Ana jera masu samarwa bisa **makin mafi kyawun samfur** da farko, sannan bisa matsakaicin maki. Wannan yana ba
-mai samarwar da ke da aƙalla samfurin kyauta mai ƙarfi tagomashi.
+Ana tsara masu samarwa ta **makin samfur mafi girma** da farko, sannan ta matsakaicin maki. Wannan yana ba da lada ga
+mai samarwa da ke fitar da aƙalla samfur ɗaya mai ƙarfi na kyauta.
 
 ---
 

@@ -122,100 +122,109 @@ Ang `eloRaw` ay ang orihinal na Arena ELO value; ang `score` ay ang na-normalize
 
 ## Paano Gumagana ang mga Score
 
-### Pinagmulan: leaderboard ng Arena AI
+### Pinagmulan: Arena AI leaderboard
 
-Kinukuha ng Arena ELO sync engine (`src/lib/arenaEloSync.ts`) ang dalawang leaderboard — `text`
+Ang Arena ELO sync engine (`src/lib/arenaEloSync.ts`) ay kumukuha ng dalawang leaderboard — `text`
 at `code` — mula sa Arena AI leaderboard API
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Ang bawat entry sa leaderboard
-ay naglalaman ng pangalan ng modelo, vendor, ELO `score`, confidence interval, at bilang ng boto.
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Kapag ang API na iyon ay walang
+naibalik na magagamit na board, ang engine ay nagfa-fallback sa opisyal na `lmarena-ai/leaderboard-dataset`
+sa Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); iniulat ng `GET /api/intelligence/sync` ang `activeSource`, `lastError` at
+`lastFailedAt`. Bawat entry sa leaderboard
+ay may dalang pangalan ng modelo, vendor, ELO `score`, confidence interval, at bilang ng boto.
 
-Ang mga kategorya ng leaderboard ay itinutugma sa mga kategorya ng gawain ng OmniRoute:
+Ang mga kategorya ng leaderboard ay naka-map sa mga kategorya ng gawain ng OmniRoute:
 
 | Arena leaderboard | Mga kategorya ng gawain ng OmniRoute              |
 | ----------------- | ------------------------------------------------- |
 | `text`            | `default`, `review`, `documentation`, `debugging` |
 | `code`            | `coding`                                          |
 
-### Normalisasyon (score ng pagiging angkop sa gawain)
+### Normalisasyon (score ng kaangkupan sa gawain)
 
-Ang mga raw na ELO score ay ginagawang normal kada leaderboard bilang isang **task-fit value sa `[0.4, 0.98]`**:
+Ang mga hilaw na ELO score ay na-normalisa bawat leaderboard sa isang **halagang task-fit sa `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Hindi kailanman umaabot sa `0` o `1` ang score, upang mag-iwan ng puwang para sa mga override ng user. Ito ang
-`score` field na makikita mo sa tugon ng API at ang label na ipinapakita sa dashboard.
+Ang score ay hindi kailanman umaabot sa `0` o `1`, na nag-iiwan ng espasyo para sa mga override ng
+user. Ito ang field na `score` na nakikita mo sa tugon ng API at ang label na ipinapakita sa
+dashboard.
 
-### Kumpiyansa
+### Katiyakan (confidence)
 
-Ang bawat entry ay binibigyan ng antas ng kumpiyansa batay sa bilang ng boto sa Arena:
+Bawat entry ay may antas ng katiyakan batay sa bilang ng boto sa Arena:
 
-| Kumpiyansa | Mga boto |
-| ---------- | -------- |
-| `high`     | ≥ 5,000  |
-| `medium`   | ≥ 1,000  |
-| `low`      | < 1,000  |
+| Katiyakan | Mga boto |
+| --------- | -------- |
+| `high`    | ≥ 5,000  |
+| `medium`  | ≥ 1,000  |
+| `low`     | < 1,000  |
 
-### Pag-iimbak at pagiging napapanahon
+### Pag-iimbak at pagiging bago
 
-Isinusulat ang mga na-normalize na entry sa `model_intelligence` DB table na may
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Ang mga entry ay **nag-e-expire pagkalipas ng
-7 araw**, kaya ang provider na tumigil sa pag-sync ay kalaunang inaalis sa halip na maghatid
-ng lipas na data.
+Ang mga na-normalisang entry ay isinusulat sa DB table na `model_intelligence` na may
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Ang mga entry ay **nag-e-expire
+pagkatapos ng 7 araw**, kaya ang provider na huminto sa pag-sync ay kalaunang mawawala sa halip
+na maghatid ng lipas na data.
 
-**Naka-on bilang default** ang pag-sync:
+Ang sync ay tumatakbo **naka-on bilang default**:
 
-- Tumatakbo ito nang isang beses sa pagsisimula ng server at pagkatapos ay sa pana-panahong timer
-  (`src/lib/arenaEloSync.ts`, na nakakonekta mula sa `src/instrumentation-node.ts`).
-- Ito ay **non-blocking at hindi kailanman fatal** — kung mabigo ang pagkuha mula sa upstream, patuloy na
-  tumatakbo ang OmniRoute at ipinapakita lamang ng mga ranking ang huling wastong data (o isang walang-lamang estado).
+- Tumatakbo ito nang isang beses sa startup ng server at pagkatapos ay sa isang pana-panahong timer
+  (`src/lib/arenaEloSync.ts`, nakakabit mula sa `src/instrumentation-node.ts`).
+- Ito ay **non-blocking at hindi kailanman fatal** — kapag nabigo ang pag-fetch sa upstream,
+  patuloy na tumatakbo ang OmniRoute at ang mga ranking ay nagpapakita lamang ng huling
+  wastong data (o ng isang walang-laman na estado).
 
 Dalawang environment variable ang kumokontrol dito (nakadokumento sa
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Variable                  | Default       | Layunin                                                |
-| ------------------------- | ------------- | ------------------------------------------------------ |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Itakda sa `false` upang hindi sumali sa outbound sync. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Agwat ng pag-sync, sa mga segundo.                     |
+| Variable                  | Default       | Layunin                                                   |
+| ------------------------- | ------------- | --------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Itakda sa `false` upang mag-opt out sa papalabas na sync. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Interval ng sync, sa mga segundo.                         |
 
-### Manu-manong pag-sync / status / pag-clear
+### Manu-manong sync / status / pag-clear
 
-Para sa mga operator, nagbibigay ang isang authenticated management endpoint ng manu-manong kontrol
+Para sa mga operator, isang awtentikadong management endpoint ang nagbibigay ng manu-manong kontrol
 (`src/app/api/intelligence/sync/route.ts` — nangangailangan ng management auth):
 
 ```
-GET    /api/intelligence/sync          # kasalukuyang status ng pag-sync (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # mag-trigger ng manu-manong pag-sync; body: { "dryRun": true } upang i-preview nang hindi nagsusulat
-DELETE /api/intelligence/sync          # i-clear ang lahat ng naka-sync na arena_elo intelligence entry
+GET    /api/intelligence/sync          # kasalukuyang status ng sync (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # mag-trigger ng manu-manong sync; body: { "dryRun": true } upang mag-preview nang walang pagsulat
+DELETE /api/intelligence/sync          # burahin ang lahat ng na-sync na arena_elo intelligence entries
 ```
 
-Kung walang laman ang pahina ng mga ranking, muli itong mapupunan ng manu-manong `POST /api/intelligence/sync` (o simpleng
-pag-restart ng server).
+Kung walang laman ang pahina ng rankings, ang manu-manong `POST /api/intelligence/sync` (o simpleng
+pag-restart ng server) ay magpapuno muli dito.
 
 ### Pagtutugma ng mga modelo sa leaderboard
 
-Hindi palaging eksaktong magkatugma ang mga registry model ID at mga pangalan ng modelo sa Arena. Gumagamit ang ranking ng
-flexible matching (`findMatchingIntelligence` sa `src/lib/freeProviderRankings.ts`):
+Ang mga registry model ID at pangalan ng modelo sa Arena ay hindi laging eksaktong tumutugma.
+Gumagamit ang ranking ng flexible na pagtutugma (`findMatchingIntelligence` sa
+`src/lib/freeProviderRankings.ts`):
 
-1. Eksaktong tugma sa na-normalize na model ID.
-2. Pagtutugma matapos alisin ang version suffix sa dulo (hal. `kimi-k2.6` → `kimi-k2`).
-3. Prefix match (ang pangalan ng modelo sa leaderboard ay prefix ng registry ID).
+1. Eksaktong tugma sa na-normalisang model ID.
+2. Tugma pagkatapos alisin ang version suffix sa dulo (hal. `kimi-k2.6` → `kimi-k2`).
+3. Prefix na tugma (ang pangalan ng modelo sa leaderboard ay prefix ng registry ID).
 
-Sa panig ng pag-sync, inaalis ang mga kilalang vendor prefix (`anthropic/`, `openai/`, `google/`, …)
-at pinapalawak ng isang maliit na alias map ang mga canonical name sa mga variant na ginagamit ng OmniRoute
-sa loob, upang manatiling nahahanap ang mga modelo sa ilalim ng anumang pangalan.
+Sa panig ng sync, ang mga kilalang vendor prefix (`anthropic/`, `openai/`, `google/`, …) ay
+inaalis at isang maliit na alias map ang nagpapalawak ng mga canonical na pangalan sa mga variant
+na ginagamit ng OmniRoute nang panloob, kaya ang mga modelo ay nananatiling mahahanap sa ilalim ng
+anumang pangalan.
 
 ### Paano niraranggo ang isang provider
 
-Para sa bawat libreng provider, binibigyan ng engine ng score ang bawat modelo sa catalog nito, pagkatapos:
+Para sa bawat libreng provider, binibigyan ng engine ng score ang bawat modelo sa katalogo nito,
+pagkatapos:
 
-- **Nangungunang Modelo** = ang modelo ng provider na may pinakamataas na score.
-- **Average na Score** = ang mean score ng lahat ng modelo ng provider na nabigyan ng score.
-- **Mga Modelo** = kung ilan sa mga modelo ng provider ang may Arena score.
+- **Top Model** = ang modelo ng provider na may pinakamataas na score.
+- **Avg Score** = ang mean score sa lahat ng may score na modelo ng provider na iyon.
+- **Models** = kung ilan sa mga modelo ng provider ang may Arena score.
 
-Inaayos muna ang mga provider ayon sa **score ng nangungunang modelo**, pagkatapos ay ayon sa average na score. Ginagantimpalaan nito ang
-provider na nag-aalok ng kahit isang mahusay na libreng modelo.
+Ang mga provider ay inaayos ayon sa **score ng top model** muna, pagkatapos ay ayon sa average
+score. Gantimpalaan nito ang provider na naglalabas ng kahit isang malakas na libreng modelo.
 
 ---
 

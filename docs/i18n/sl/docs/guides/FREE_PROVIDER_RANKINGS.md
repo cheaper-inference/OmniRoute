@@ -126,7 +126,11 @@ Oblika odgovora:
 
 Mehanizem za sinhronizacijo Arena ELO (`src/lib/arenaEloSync.ts`) pridobi dve lestvici — `text`
 in `code` — iz API-ja lestvice Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Vsak vnos na lestvici
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Ko ta API ne vrne
+uporabne lestvice, se mehanizem zateče k uradnemu viru `lmarena-ai/leaderboard-dataset` na
+strežniku Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` poroča `activeSource`, `lastError` in
+`lastFailedAt`. Vsak vnos na lestvici
 vsebuje ime modela, ponudnika, ELO `score`, interval zaupanja in število glasov.
 
 Kategorije lestvice se preslikajo v kategorije opravil OmniRoute:
@@ -138,18 +142,18 @@ Kategorije lestvice se preslikajo v kategorije opravil OmniRoute:
 
 ### Normalizacija (ocena primernosti za opravilo)
 
-Neobdelane ocene ELO se za vsako lestvico normalizirajo v **vrednost primernosti za opravilo v območju `[0.4, 0.98]`**:
+Surove ocene ELO se za vsako lestvico normalizirajo v **vrednost primernosti za opravilo v intervalu `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Ocena nikoli ne doseže `0` ali `1`, s čimer ostane prostor za uporabniške preglasitve. To je
+Ocena nikoli ne doseže `0` ali `1`, kar pušča manevrski prostor za uporabniške preglasitve. To je
 polje `score`, ki ga vidite v odzivu API-ja, in oznaka, prikazana na nadzorni plošči.
 
 ### Zaupanje
 
-Vsak vnos dobi raven zaupanja glede na število glasov v Areni:
+Vsak vnos dobi raven zaupanja glede na število glasov na Areni:
 
 | Zaupanje | Glasovi |
 | -------- | ------- |
@@ -157,65 +161,65 @@ Vsak vnos dobi raven zaupanja glede na število glasov v Areni:
 | `medium` | ≥ 1.000 |
 | `low`    | < 1.000 |
 
-### Shranjevanje in svežina
+### Shranjevanje in svežost
 
-Normalizirani vnosi se zapišejo v tabelo podatkovne zbirke `model_intelligence` z
+Normalizirani vnosi se zapišejo v tabelo zbirke podatkov `model_intelligence` z
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Vnosi **potečejo po
-7 dneh**, zato ponudnik, ki se preneha sinhronizirati, sčasoma izgine, namesto da bi
-ponujal zastarele podatke.
+7 dneh**, tako da ponudnik, ki preneha s sinhronizacijo, sčasoma izpade, namesto da bi
+stregel zastarele podatke.
 
-Sinhronizacija se **privzeto izvaja**:
+Sinhronizacija je **privzeto vklopljena**:
 
-- Izvede se enkrat ob zagonu strežnika in nato periodično glede na časovnik
+- Izvede se enkrat ob zagonu strežnika in nato v periodičnih časovnih presledkih
   (`src/lib/arenaEloSync.ts`, povezano iz `src/instrumentation-node.ts`).
-- Je **neblokirajoča in nikoli usodna** — če pridobivanje podatkov iz nadrejenega vira ne uspe, OmniRoute še naprej
-  deluje, lestvice pa preprosto prikazujejo zadnje veljavne podatke (ali prazno stanje).
+- Je **neblokirajoča in nikoli usodna** — če pridobivanje iz oddaljenega vira spodleti, OmniRoute
+  še naprej deluje, razvrstitve pa preprosto prikazujejo zadnje veljavne podatke (ali prazno stanje).
 
-Nadzirata jo dve spremenljivki okolja (dokumentirani v
+Nadzorujeta jo dve okoljski spremenljivki (dokumentirani v
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Spremenljivka             | Privzeto       | Namen                                                        |
-| ------------------------- | -------------- | ------------------------------------------------------------ |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`         | Nastavite na `false`, da onemogočite izhodno sinhronizacijo. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 h) | Interval sinhronizacije v sekundah.                          |
+| Spremenljivka             | Privzeto      | Namen                                                      |
+| ------------------------- | ------------- | ---------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Nastavite na `false`, da izklopite odhodno sinhronizacijo. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Interval sinhronizacije v sekundah.                        |
 
 ### Ročna sinhronizacija / stanje / brisanje
 
-Preverjena upravljavska končna točka operaterjem omogoča ročni nadzor
-(`src/app/api/intelligence/sync/route.ts` — zahteva preverjanje pristnosti za upravljanje):
+Za operaterje je na voljo overjena končna točka za upravljanje, ki omogoča ročni nadzor
+(`src/app/api/intelligence/sync/route.ts` — zahteva overitev za upravljanje):
 
 ```
 GET    /api/intelligence/sync          # trenutno stanje sinhronizacije (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # sproži ročno sinhronizacijo; telo: { "dryRun": true } za predogled brez zapisovanja
-DELETE /api/intelligence/sync          # izbriše vse sinhronizirane vnose podatkov arena_elo
+POST   /api/intelligence/sync          # sproži ročno sinhronizacijo; telo: { "dryRun": true } za predogled brez pisanja
+DELETE /api/intelligence/sync          # izbriše vse sinhronizirane vnose inteligence arena_elo
 ```
 
-Če je stran z lestvicami prazna, jo ročni `POST /api/intelligence/sync` (ali preprost
-ponovni zagon strežnika) znova napolni.
+Če je stran z razvrstitvami prazna, jo ročni `POST /api/intelligence/sync` (ali preprost
+ponovni zagon strežnika) ponovno napolni.
 
 ### Ujemanje modelov z lestvico
 
-ID-ji modelov v registru in imena modelov v Areni se ne ujemajo vedno natančno. Razvrščanje uporablja
+ID-ji modelov v registru in imena modelov na Areni se ne ujemajo vedno natančno. Razvrstitev uporablja
 prilagodljivo ujemanje (`findMatchingIntelligence` v `src/lib/freeProviderRankings.ts`):
 
-1. Natančno ujemanje z normaliziranim ID-jem modela.
-2. Ujemanje po odstranitvi končne pripone različice (npr. `kimi-k2.6` → `kimi-k2`).
-3. Ujemanje predpone (ime modela na lestvici je predpona ID-ja v registru).
+1. Natančno ujemanje normaliziranega ID-ja modela.
+2. Ujemanje po odstranitvi končne priponke različice (npr. `kimi-k2.6` → `kimi-k2`).
+3. Ujemanje predpone (ime modela z lestvice je predpona ID-ja v registru).
 
 Na strani sinhronizacije se znane predpone ponudnikov (`anthropic/`, `openai/`, `google/`, …)
-odstranijo, majhen zemljevid vzdevkov pa razširi kanonična imena v različice, ki jih OmniRoute uporablja
-interno, zato je modele mogoče najti pod katerim koli imenom.
+odstranijo, majhna preslikava vzdevkov pa razširi kanonična imena v različice, ki jih OmniRoute
+uporablja interno, tako da je modele mogoče najti pod katerim koli imenom.
 
-### Kako se ponudnik razvrsti
+### Kako je ponudnik razvrščen
 
-Za vsakega brezplačnega ponudnika mehanizem oceni vsak model v njegovem katalogu, nato pa določi:
+Za vsakega brezplačnega ponudnika mehanizem oceni vsak model v njegovem katalogu, nato:
 
-- **Najboljši model** = model ponudnika z najvišjo oceno.
-- **Povprečna ocena** = povprečna ocena vseh ocenjenih modelov tega ponudnika.
-- **Modeli** = število modelov ponudnika, ki so imeli oceno Arena.
+- **Najboljši model** = najvišje ocenjeni model ponudnika.
+- **Povprečna ocena** = povprečje ocen vseh ocenjenih modelov tega ponudnika.
+- **Modeli** = koliko modelov ponudnika je imelo oceno Arena.
 
-Ponudniki so razvrščeni najprej po **oceni najboljšega modela**, nato pa po povprečni oceni. Tako je
-nagrajen ponudnik, ki ponuja vsaj en zmogljiv brezplačen model.
+Ponudniki so razvrščeni najprej po **oceni najboljšega modela**, nato po povprečni oceni. To
+nagrajuje ponudnika, ki ponuja vsaj en močan brezplačen model.
 
 ---
 

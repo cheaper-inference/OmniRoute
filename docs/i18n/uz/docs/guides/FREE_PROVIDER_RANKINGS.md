@@ -128,106 +128,86 @@ javobdan chiqarib tashlanadi.
 
 ## Ballar qanday ishlaydi
 
-### Manba: Arena AI reyting jadvali
+### Manba: Arena AI leaderboard
 
-Arena ELO sinxronlash mexanizmi (`src/lib/arenaEloSync.ts`) Arena AI reyting jadvali API manzilidan
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) ikkita reyting jadvalini — `text`
-va `code` — oladi. Har bir reyting yozuvi model nomi, taʼminotchi, ELO `score`, ishonch oraligʻi
-va ovozlar sonini oʻz ichiga oladi.
+Arena ELO sinxronlash mexanizmi (`src/lib/arenaEloSync.ts`) Arena AI leaderboard API dan (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) ikkita leaderboard — `text` va `code` — yuklab oladi. Agar ushbu API foydalanishga yarogli board qaytarmasa, mexanizm Hugging Face datasets-server dagi rasmiy `lmarena-ai/leaderboard-dataset` ga murojaat qiladi (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`, `coding` → `code`); `GET /api/intelligence/sync` `activeSource`, `lastError` va `lastFailedAt` haqida hisobot beradi. Har bir leaderboard yozuvida model nomi, vendor, ELO `score`, ishonch oralig'i va ovozlar soni bo'ladi.
 
-Reyting jadvali toifalari OmniRoute vazifa toifalariga quyidagicha mos keladi:
+Leaderboard kategoriyalari OmniRoute vazifa kategoriyalariga mos keladi:
 
-| Arena reyting jadvali | OmniRoute vazifa toifalari                        |
-| --------------------- | ------------------------------------------------- |
-| `text`                | `default`, `review`, `documentation`, `debugging` |
-| `code`                | `coding`                                          |
+| Arena leaderboard | OmniRoute vazifa kategoriyalari                   |
+| ----------------- | ------------------------------------------------- |
+| `text`            | `default`, `review`, `documentation`, `debugging` |
+| `code`            | `coding`                                          |
 
-### Normalizatsiya (vazifaga moslik bali)
+### Normalizatsiya (task-fit bali)
 
-Dastlabki ELO ballari har bir reyting jadvali uchun **`[0.4, 0.98]` oraligʻidagi vazifaga moslik qiymatiga** normalizatsiya qilinadi:
+Xom ELO ballari har bir leaderboard bo'yicha **`[0.4, 0.98]` oralig'idagi task-fit qiymatiga** normalizatsiya qilinadi:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Ball hech qachon `0` yoki `1` ga yetmaydi, bu esa foydalanuvchi tomonidan qayta belgilash uchun
-zaxira qoldiradi. Bu API javobida koʻrinadigan `score` maydoni va boshqaruv panelida
-koʻrsatiladigan belgidir.
+Bal hech qachon `0` yoki `1` ga yetib bormaydi, bu foydalanuvchi o'zgartirishlari (override) uchun zaxira qoldiradi. Bu API javobida ko'rinadigan `score` maydoni va dashboardda ko'rsatiladigan yorliqdir.
 
-### Ishonchlilik
+### Ishonch darajasi
 
-Har bir yozuv Arena ovozlari soniga qarab ishonchlilik darajasini oladi:
+Har bir yozuv Arena ovozlari soniga qarab ishonch darajasini oladi:
 
-| Ishonchlilik | Ovozlar |
-| ------------ | ------- |
-| `high`       | ≥ 5,000 |
-| `medium`     | ≥ 1,000 |
-| `low`        | < 1,000 |
+| Ishonch  | Ovozlar |
+| -------- | ------- |
+| `high`   | ≥ 5,000 |
+| `medium` | ≥ 1,000 |
+| `low`    | < 1,000 |
 
-### Saqlash va maʼlumotlarning dolzarbligi
+### Saqlash va dolzarblik
 
-Normalizatsiya qilingan yozuvlar `source = "arena_elo"` bilan `model_intelligence`
-maʼlumotlar bazasi jadvaliga yoziladi (`src/lib/db/modelIntelligence.ts`). Yozuvlarning amal
-qilish muddati **7 kundan soʻng tugaydi**, shu sababli sinxronlashni toʻxtatgan taʼminotchi
-eskirgan maʼlumotlarni taqdim etish oʻrniga, oxir-oqibat roʻyxatdan chiqib ketadi.
+Normalizatsiya qilingan yozuvlar `source = "arena_elo"` bilan `model_intelligence` DB jadvaliga yoziladi (`src/lib/db/modelIntelligence.ts`). Yozuvlar **7 kundan so'ng muddati tugaydi**, shuning uchun sinxronlashni to'xtatgan provayder eskirgan ma'lumotlarni ko'rsatish o'rniga vaqt o'tishi bilan ro'yxatdan tushib qoladi.
 
-Sinxronlash **standart holatda yoqilgan**:
+Sinxronlash **standart bo'yicha yoqilgan**:
 
-- U server ishga tushganda bir marta, keyin esa davriy taymer boʻyicha ishga tushadi
-  (`src/lib/arenaEloSync.ts`, `src/instrumentation-node.ts` orqali ulangan).
-- U **bloklamaydi va hech qachon jiddiy xatoga sabab boʻlmaydi** — agar yuqori oqimdan maʼlumot
-  olish muvaffaqiyatsiz tugasa, OmniRoute ishlashda davom etadi va reytinglar shunchaki oxirgi
-  muvaffaqiyatli maʼlumotlarni (yoki boʻsh holatni) koʻrsatadi.
+- U server ishga tushirilganda bir marta ishlaydi, so'ng davriy taymer bo'yicha ishlaydi
+  (`src/lib/arenaEloSync.ts`, `src/instrumentation-node.ts` dan ulangan).
+- U **bloklamaydigan va hech qachon halokatli (fatal) emas** — agar upstream dan olish muvaffaqiyatsiz bo'lsa, OmniRoute ishlashda davom etadi va reytinglar shunchaki oxirgi to'g'ri ma'lumotlarni (yoki bo'sh holatni) ko'rsatadi.
 
-Uni ikkita muhit oʻzgaruvchisi boshqaradi
-([`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) faylida hujjatlashtirilgan):
+Buni ikkita muhit o'zgaruvchisi boshqaradi
+([`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) da hujjatlashtirilgan):
 
-| Oʻzgaruvchi               | Standart      | Maqsad                                                  |
-| ------------------------- | ------------- | ------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Tashqi sinxronlashdan voz kechish uchun `false` qiling. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sinxronlash oraligʻi, soniyalarda.                      |
+| O'zgaruvchi               | Standart      | Vazifasi                                                         |
+| ------------------------- | ------------- | ---------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Chiquvchi sinxronlashdan voz kechish uchun `false` ga o'rnating. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sinxronlash oralig'i, soniyalarda.                               |
 
-### Qoʻlda sinxronlash / holat / tozalash
+### Qo'lda sinxronlash / holat / tozalash
 
-Operatorlar uchun autentifikatsiyalangan boshqaruv endpointi qoʻlda boshqarish imkonini beradi
-(`src/app/api/intelligence/sync/route.ts` — boshqaruv autentifikatsiyasini talab qiladi):
+Operatorlar uchun autentifikatsiyadan o'tgan boshqaruv endpointi qo'lda boshqaruvni taqdim etadi (`src/app/api/intelligence/sync/route.ts` — boshqaruv autentifikatsiyasini talab qiladi):
 
 ```
 GET    /api/intelligence/sync          # joriy sinxronlash holati (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # qoʻlda sinxronlashni ishga tushirish; yozmasdan koʻrib chiqish uchun tana: { "dryRun": true }
-DELETE /api/intelligence/sync          # barcha sinxronlangan arena_elo tahliliy maʼlumot yozuvlarini tozalash
+POST   /api/intelligence/sync          # qo'lda sinxronlashni ishga tushirish; yozmasdan oldindan ko'rish uchun body: { "dryRun": true }
+DELETE /api/intelligence/sync          # sinxronlangan barcha arena_elo intelligence yozuvlarini tozalash
 ```
 
-Agar reytinglar sahifasi boʻsh boʻlsa, qoʻlda `POST /api/intelligence/sync` soʻrovini yuborish
-(yoki serverni shunchaki qayta ishga tushirish) uni qayta toʻldiradi.
+Agar reytinglar sahifasi bo'sh bo'lsa, qo'lda `POST /api/intelligence/sync` (yoki shunchaki serverni qayta ishga tushirish) uni qayta to'ldiradi.
 
-### Modellarni reyting jadvaliga moslashtirish
+### Modellarni leaderboard bilan moslashtirish
 
-Reyestrdagi model IDlari va Arenadagi model nomlari har doim ham aynan mos kelavermaydi.
-Reyting moslashuvchan moslashtirishdan foydalanadi (`src/lib/freeProviderRankings.ts`
-faylidagi `findMatchingIntelligence`):
+Reestr model ID lari va Arena model nomlari har doim ham aniq mos kelavermaydi. Reytinglash egiluvchan moslashtirishdan foydalanadi (`src/lib/freeProviderRankings.ts` dagi `findMatchingIntelligence`):
 
-1. Normalizatsiya qilingan model IDsi boʻyicha aniq moslik.
-2. Oxirdagi versiya suffiksi olib tashlangandan keyingi moslik (masalan, `kimi-k2.6` → `kimi-k2`).
-3. Prefiks boʻyicha moslik (reyting jadvalidagi model nomi reyestr IDsi uchun prefiks boʻlsa).
+1. Normalizatsiya qilingan model ID bo'yicha aniq moslik.
+2. Oxirgi versiya qo'shimchasini olib tashlagandan keyingi moslik (masalan, `kimi-k2.6` → `kimi-k2`).
+3. Prefiks mosligi (leaderboard model nomi reestr ID ning prefiksi bo'ladi).
 
-Sinxronlash tomonida maʼlum taʼminotchi prefikslari (`anthropic/`, `openai/`, `google/`, …)
-olib tashlanadi va kichik taxalluslar xaritasi kanonik nomlarni OmniRoute ichkarida
-foydalanadigan variantlarga kengaytiradi, shu sababli modellarni istalgan nom bilan topish
-mumkin boʻlib qoladi.
+Sinxronlash tomonida ma'lum vendor prefikslari (`anthropic/`, `openai/`, `google/`, …) olib tashlanadi va kichik alias xaritasi kanonik nomlarni OmniRoute ichkarida ishlatadigan variantlarga kengaytiradi, shuning uchun modellar har qanday nom ostida topilaveradi.
 
-### Taʼminotchi qanday reytinglanadi
+### Provayder qanday reytinglanadi
 
-Mexanizm har bir bepul taʼminotchi katalogidagi barcha modellarni baholaydi, soʻng:
+Har bir bepul provayder uchun mexanizm uning katalogidagi har bir modelni baholaydi, so'ng:
 
-- **Eng yaxshi model** = taʼminotchining eng yuqori ball olgan modeli.
-- **Oʻrtacha ball** = taʼminotchining ball olgan barcha modellari boʻyicha oʻrtacha ball.
-- **Modellar** = taʼminotchining Arena bali mavjud modellari soni.
+- **Top Model** = provayderning eng yuqori ballga ega modeli.
+- **Avg Score** = provayderning barcha baholangan modellari bo'yicha o'rtacha bali.
+- **Models** = provayderning nechta modeli Arena baliga ega bo'lgani.
 
-Taʼminotchilar avval **eng yaxshi model bali**, soʻngra oʻrtacha ball boʻyicha saralanadi.
-Bu kamida bitta kuchli bepul modelni taqdim etadigan taʼminotchini ragʻbatlantiradi.
-
----
+Provayderlar avval **top-model bali** bo'yicha, keyin o'rtacha bal bo'yicha saralanadi. Bu kamida bitta kuchli bepul model taqdim etadigan provayderni rag'batlantiradi.
 
 ## Undan bepul provayderlarni tanlash uchun foydalanish
 

@@ -122,11 +122,15 @@ Bentuk respons:
 
 ## Cara Kerja Skor
 
-### Sumber: papan peringkat Arena AI
+### Sumber: Papan peringkat Arena AI
 
-Mesin sinkronisasi ELO Arena (`src/lib/arenaEloSync.ts`) mengambil dua papan peringkat — `text`
+Mesin sinkronisasi Arena ELO (`src/lib/arenaEloSync.ts`) mengambil dua papan peringkat — `text`
 dan `code` — dari API papan peringkat Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Setiap entri papan peringkat
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Ketika API tersebut tidak
+mengembalikan papan yang dapat digunakan, mesin beralih (fallback) ke `lmarena-ai/leaderboard-dataset`
+resmi di datasets-server Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` melaporkan `activeSource`, `lastError` dan
+`lastFailedAt`. Setiap entri papan peringkat
 memuat nama model, vendor, `score` ELO, interval kepercayaan, dan jumlah suara.
 
 Kategori papan peringkat dipetakan ke kategori tugas OmniRoute:
@@ -144,62 +148,62 @@ Skor ELO mentah dinormalisasi per papan peringkat menjadi **nilai kesesuaian tug
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Skor tidak pernah mencapai `0` atau `1`, sehingga menyisakan ruang untuk penimpaan oleh pengguna. Ini adalah
-bidang `score` yang Anda lihat dalam respons API dan label yang ditampilkan di dasbor.
+Skor tidak pernah mencapai `0` atau `1`, sehingga menyisakan ruang untuk penimpaan oleh pengguna.
+Inilah kolom `score` yang Anda lihat di respons API dan label yang ditampilkan di dasbor.
 
-### Tingkat kepercayaan
+### Kepercayaan
 
 Setiap entri mendapatkan tingkat kepercayaan berdasarkan jumlah suara Arena:
 
-| Tingkat kepercayaan | Suara   |
-| ------------------- | ------- |
-| `high`              | ≥ 5.000 |
-| `medium`            | ≥ 1.000 |
-| `low`               | < 1.000 |
+| Kepercayaan | Suara   |
+| ----------- | ------- |
+| `high`      | ≥ 5,000 |
+| `medium`    | ≥ 1,000 |
+| `low`       | < 1,000 |
 
 ### Penyimpanan dan kebaruan
 
-Entri yang telah dinormalisasi ditulis ke tabel DB `model_intelligence` dengan
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Entri **kedaluwarsa setelah
-7 hari**, sehingga penyedia yang berhenti melakukan sinkronisasi pada akhirnya akan dikeluarkan alih-alih menyajikan
-data yang sudah usang.
+Entri yang dinormalisasi ditulis ke tabel DB `model_intelligence` dengan
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Entri **kedaluwarsa
+setelah 7 hari**, sehingga penyedia yang berhenti melakukan sinkronisasi pada akhirnya
+tersingkir daripada menyajikan data usang.
 
-Sinkronisasi **aktif secara default**:
+Sinkronisasi berjalan **aktif secara default**:
 
-- Sinkronisasi dijalankan sekali saat server dimulai, lalu secara berkala berdasarkan pengatur waktu
+- Berjalan sekali saat server dinyalakan, lalu secara berkala sesuai timer
   (`src/lib/arenaEloSync.ts`, dihubungkan dari `src/instrumentation-node.ts`).
-- Sinkronisasi ini **tidak memblokir dan tidak pernah menyebabkan kegagalan fatal** — jika pengambilan data dari sumber hulu gagal, OmniRoute tetap
-  berjalan dan peringkat hanya menampilkan data valid terakhir (atau status kosong).
+- Sifatnya **non-blocking dan tidak pernah fatal** — jika pengambilan upstream gagal, OmniRoute
+  tetap berjalan dan peringkat cukup menampilkan data baik terakhir (atau keadaan kosong).
 
-Dua variabel lingkungan mengontrolnya (didokumentasikan dalam
+Dua variabel lingkungan mengendalikannya (didokumentasikan di
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
 | Variabel                  | Default       | Tujuan                                                   |
 | ------------------------- | ------------- | -------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Atur ke `false` untuk menonaktifkan sinkronisasi keluar. |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Atur ke `false` untuk menyisih dari sinkronisasi keluar. |
 | `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Interval sinkronisasi, dalam detik.                      |
 
-### Sinkronisasi manual / status / pembersihan
+### Sinkronisasi manual / status / hapus
 
-Untuk operator, endpoint pengelolaan terautentikasi menyediakan kontrol manual
-(`src/app/api/intelligence/sync/route.ts` — memerlukan autentikasi pengelolaan):
+Untuk operator, endpoint manajemen terautentikasi menyediakan kendali manual
+(`src/app/api/intelligence/sync/route.ts` — memerlukan autentikasi manajemen):
 
 ```
-GET    /api/intelligence/sync          # status sinkronisasi saat ini (diaktifkan, sinkronisasi terakhir, sinkronisasi berikutnya, interval dalam milidetik)
-POST   /api/intelligence/sync          # memicu sinkronisasi manual; isi: { "dryRun": true } untuk melihat pratinjau tanpa menulis
-DELETE /api/intelligence/sync          # menghapus semua entri inteligensi arena_elo yang telah disinkronkan
+GET    /api/intelligence/sync          # status sinkronisasi saat ini (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # picu sinkronisasi manual; body: { "dryRun": true } untuk pratinjau tanpa menulis
+DELETE /api/intelligence/sync          # hapus semua entri intelijen arena_elo yang disinkronkan
 ```
 
-Jika halaman peringkat kosong, `POST /api/intelligence/sync` secara manual (atau cukup
+Jika halaman peringkat kosong, `POST /api/intelligence/sync` manual (atau cukup
 memulai ulang server) akan mengisinya kembali.
 
 ### Mencocokkan model dengan papan peringkat
 
-ID model registri dan nama model Arena tidak selalu sama persis. Pemeringkatan menggunakan
-pencocokan fleksibel (`findMatchingIntelligence` dalam `src/lib/freeProviderRankings.ts`):
+ID model registri dan nama model Arena tidak selalu cocok persis. Peringkat menggunakan
+pencocokan fleksibel (`findMatchingIntelligence` di `src/lib/freeProviderRankings.ts`):
 
-1. Kecocokan persis pada ID model yang telah dinormalisasi.
-2. Kecocokan setelah menghapus sufiks versi di akhir (misalnya `kimi-k2.6` → `kimi-k2`).
+1. Kecocokan persis pada ID model yang dinormalisasi.
+2. Kecocokan setelah menghapus akhiran versi di belakang (mis. `kimi-k2.6` → `kimi-k2`).
 3. Kecocokan prefiks (nama model papan peringkat merupakan prefiks dari ID registri).
 
 Di sisi sinkronisasi, prefiks vendor yang dikenal (`anthropic/`, `openai/`, `google/`, …)
@@ -208,14 +212,15 @@ secara internal, sehingga model tetap dapat ditemukan dengan nama apa pun.
 
 ### Cara penyedia diberi peringkat
 
-Untuk setiap penyedia gratis, mesin menilai setiap model dalam katalognya, kemudian:
+Untuk setiap penyedia gratis, mesin memberi skor pada setiap model dalam katalognya, lalu:
 
 - **Model Teratas** = model penyedia dengan skor tertinggi.
-- **Skor Rata-rata** = skor rata-rata dari semua model penyedia yang dinilai.
+- **Skor Rata-rata** = skor rata-rata di seluruh model penyedia yang memiliki skor.
 - **Model** = jumlah model penyedia yang memiliki skor Arena.
 
-Penyedia diurutkan terlebih dahulu berdasarkan **skor model teratas**, lalu berdasarkan skor rata-rata. Hal ini memberi penghargaan kepada
-penyedia yang menawarkan setidaknya satu model gratis yang unggul.
+Penyedia diurutkan berdasarkan **skor model teratas** terlebih dahulu, lalu berdasarkan skor
+rata-rata. Ini memberi keunggulan pada penyedia yang menyediakan setidaknya satu model gratis
+yang tangguh.
 
 ---
 

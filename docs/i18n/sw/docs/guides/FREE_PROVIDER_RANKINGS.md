@@ -120,102 +120,107 @@ Muundo wa jibu:
 
 ---
 
-## Alama Zinavyofanya Kazi
+## Jinsi Alama Zinavyofanya Kazi
 
-### Chanzo: ubao wa wanaoongoza wa Arena AI
+### Chanzo: Bao la vinara la Arena AI
 
-Injini ya ulandanishi wa Arena ELO (`src/lib/arenaEloSync.ts`) huchota mbao mbili za wanaoongoza — `text`
-na `code` — kutoka kwenye API ya ubao wa wanaoongoza wa Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Kila ingizo la ubao wa wanaoongoza
-lina jina la modeli, mtoa huduma, `score` ya ELO, muda wa kujiamini, na idadi ya kura.
+Injini ya usawazishaji wa Arena ELO (`src/lib/arenaEloSync.ts`) hutafuta mbao mbili za vinara — `text`
+na `code` — kutoka kwa API ya bao la vinara la Arena AI
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). API hiyo ikishindwa kurudisha
+bao linalotumika, injini hutumia badala yake `lmarena-ai/leaderboard-dataset` rasmi kwenye
+datasets-server ya Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` huripoti `activeSource`, `lastError` na
+`lastFailedAt`. Kila ingizo la bao la vinara
+hubeba jina la modeli, mtengenezaji, `score` ya ELO, kipimo cha kujiamini, na idadi ya kura.
 
-Kategoria za ubao wa wanaoongoza huhusishwa na kategoria za kazi za OmniRoute:
+Aina za bao la vinara hulinganishwa na aina za kazi za OmniRoute:
 
-| Ubao wa wanaoongoza wa Arena | Kategoria za kazi za OmniRoute                    |
-| ---------------------------- | ------------------------------------------------- |
-| `text`                       | `default`, `review`, `documentation`, `debugging` |
-| `code`                       | `coding`                                          |
+| Bao la vinara la Arena | Aina za kazi za OmniRoute                         |
+| ---------------------- | ------------------------------------------------- |
+| `text`                 | `default`, `review`, `documentation`, `debugging` |
+| `code`                 | `coding`                                          |
 
-### Usawazishaji (alama ya kufaa kwa kazi)
+### Usanifishaji (alama ya ufaa wa kazi)
 
-Alama ghafi za ELO husawazishwa kwa kila ubao wa wanaoongoza kuwa **thamani ya kufaa kwa kazi katika `[0.4, 0.98]`**:
+Alama ghafi za ELO zinasanifishwa kwa kila bao la vinara kuwa **thamani ya ufaa wa kazi katika `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Alama haifikii kamwe `0` au `1`, hivyo kuacha nafasi kwa mabadiliko ya mtumiaji. Hii ndiyo sehemu ya
-`score` unayoona katika jibu la API na lebo inayoonyeshwa kwenye dashibodi.
+Alama haifiki kamwe `0` wala `1`, na kuacha nafasi kwa ajili ya mabadiliko ya mtumiaji. Huu ndiyo
+uga wa `score` unaoona katika jibu la API na lebo inayoonyeshwa kwenye dashibodi.
 
-### Kiwango cha kujiamini
+### Kujiamini
 
-Kila ingizo hupewa kiwango cha kujiamini kulingana na idadi ya kura za Arena:
+Kila ingizo hupata kiwango cha kujiamini kulingana na idadi ya kura za Arena:
 
-| Kiwango cha kujiamini | Kura    |
-| --------------------- | ------- |
-| `high`                | ≥ 5,000 |
-| `medium`              | ≥ 1,000 |
-| `low`                 | < 1,000 |
+| Kujiamini | Kura    |
+| --------- | ------- |
+| `high`    | ≥ 5,000 |
+| `medium`  | ≥ 1,000 |
+| `low`     | < 1,000 |
 
-### Hifadhi na usasishaji
+### Uhifadhi na uhai wa data
 
-Maingizo yaliyosawazishwa huandikwa kwenye jedwali la DB la `model_intelligence` yakiwa na
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Maingizo **huisha baada ya
-siku 7**, kwa hivyo mtoa huduma anayeacha kulandanisha hatimaye huondolewa badala ya kutoa
-data iliyopitwa na wakati.
+Maingizo yaliyosanifishwa huandikwa kwenye jedwali la hifadhidata la `model_intelligence` lenye
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Maingizo **huisha muda wake baada ya
+siku 7**, hivyo mtoa huduma anayeacha kusawazisha hatimaye huondolewa badala ya kutoa
+data kongwe.
 
-Ulandanishi huendeshwa **kwa chaguo-msingi**:
+Usawazishaji huendeshwa **ukiwashwa kwa chaguo-msingi**:
 
-- Huendeshwa mara moja seva inapoanza na kisha kwa kipima muda cha mara kwa mara
-  (`src/lib/arenaEloSync.ts`, kikiunganishwa kutoka `src/instrumentation-node.ts`).
-- **Hauzuii na hausababishi hitilafu mbaya kamwe** — ikiwa uchotaji kutoka chanzo cha nje utashindwa, OmniRoute huendelea
-  kufanya kazi na upangaji huonyesha tu data nzuri ya mwisho (au hali tupu).
+- Huendeshwa mara moja wakati wa kuanzishwa kwa seva na kisha kwa kipima muda cha mara kwa mara
+  (`src/lib/arenaEloSync.ts`, umeunganishwa kutoka `src/instrumentation-node.ts`).
+- Ni **usiozuia na kamwe hauleti kushindwa kabisa** — ikiwa upatikanaji wa chanzo cha juu
+  utashindwa, OmniRoute huendelea kufanya kazi na viwango huonyesha tu data nzuri ya mwisho
+  (au hali tupu).
 
-Vigeu viwili vya mazingira vinaudhibiti (vimeandikwa katika
+Vigezo viwili vya mazingira huidhibiti (vimeandikwa katika
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Kigeu                     | Chaguo-msingi | Madhumuni                                                  |
-| ------------------------- | ------------- | ---------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Weka kuwa `false` ili kujiondoa kwenye ulandanishi wa nje. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Muda kati ya ulandanishi, kwa sekunde.                     |
+| Kigezo                    | Chaguo-msingi | Madhumuni                                          |
+| ------------------------- | ------------- | -------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Weka `false` kujiondoa kwenye usawazishaji wa nje. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Muda wa usawazishaji, kwa sekunde.                 |
 
-### Ulandanishi wa mkono / hali / kufuta
+### Usawazishaji wa mwongozo / hali / kufuta
 
-Kwa waendeshaji, endpoint ya usimamizi iliyothibitishwa hutoa udhibiti wa mkono
+Kwa waendeshaji, endpoint ya usimamizi iliyothibitishwa hutoa udhibiti wa mwongozo
 (`src/app/api/intelligence/sync/route.ts` — inahitaji uthibitishaji wa usimamizi):
 
 ```
-GET    /api/intelligence/sync          # hali ya sasa ya ulandanishi (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # anzisha ulandanishi wa mkono; mwili: { "dryRun": true } ili kuhakiki bila kuandika
-DELETE /api/intelligence/sync          # futa maingizo yote ya taarifa ya arena_elo yaliyolandanishwa
+GET    /api/intelligence/sync          # hali ya sasa ya usawazishaji (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # anzisha usawazishaji wa mwongozo; mwili: { "dryRun": true } kutazama awali bila kuandika
+DELETE /api/intelligence/sync          # futa maingizo yote ya akili ya modeli ya arena_elo yaliyosawazishwa
 ```
 
-Ikiwa ukurasa wa upangaji ni tupu, `POST /api/intelligence/sync` ya mkono (au
-kuanzisha upya seva tu) huujaza tena.
+Ikiwa ukurasa wa viwango ni tupu, `POST /api/intelligence/sync` ya mwongozo (au tu
+kuanzisha upya seva) huujaza tena.
 
-### Kulinganisha modeli na ubao wa wanaoongoza
+### Kulinganisha modeli na bao la vinara
 
-Vitambulisho vya modeli vya sajili na majina ya modeli za Arena havilingani sawasawa kila wakati. Upangaji hutumia
-ulinganishaji unaonyumbulika (`findMatchingIntelligence` katika `src/lib/freeProviderRankings.ts`):
+ID za modeli za rejista na majina ya modeli ya Arena havilingani kila wakati kikamilifu. Upangaji hutumia
+ulinganishaji wenye unyumbufu (`findMatchingIntelligence` katika `src/lib/freeProviderRankings.ts`):
 
-1. Ulinganifu kamili wa kitambulisho cha modeli kilichosawazishwa.
-2. Ulinganifu baada ya kuondoa kiambishi cha toleo kilicho mwishoni (k.m. `kimi-k2.6` → `kimi-k2`).
-3. Ulinganifu wa kiambishi cha mwanzo (jina la modeli kwenye ubao wa wanaoongoza ni kiambishi cha mwanzo cha kitambulisho cha sajili).
+1. Ulinganifu kamili kwa ID ya modeli iliyosanifishwa.
+2. Ulinganifu baada ya kuondoa kiambishi cha toleo cha mwisho (k.m. `kimi-k2.6` → `kimi-k2`).
+3. Ulinganifu wa kiambishi awali (jina la modeli la bao la vinara ni kiambishi awali cha ID ya rejista).
 
-Kwa upande wa ulandanishi, viambishi vya mwanzo vya watoa huduma vinavyojulikana (`anthropic/`, `openai/`, `google/`, …)
-huondolewa na ramani ndogo ya lakabu hupanua majina rasmi kuwa vibadala ambavyo OmniRoute hutumia
-ndani, ili modeli ziendelee kupatikana kwa jina lolote.
+Upande wa usawazishaji, viambishi awali vya watengenezaji vinavyojulikana (`anthropic/`, `openai/`, `google/`, …)
+huondolewa na ramani ndogo ya majina mbadala hupanua majina sanifu kuwa vibadala ambavyo
+OmniRoute hutumia ndani, ili modeli ziweze kupatikana chini ya jina lolote.
 
 ### Jinsi mtoa huduma anavyopangwa
 
-Kwa kila mtoa huduma wa bila malipo, injini huipa alama kila modeli katika katalogi yake, kisha:
+Kwa kila mtoa huduma wa bure, injini hutoa alama kwa kila modeli katika katalogi yake, kisha:
 
 - **Modeli Bora** = modeli yenye alama ya juu zaidi ya mtoa huduma.
-- **Wastani wa Alama** = wastani wa alama katika modeli zote za mtoa huduma ambazo zimepewa alama.
-- **Modeli** = idadi ya modeli za mtoa huduma zilizokuwa na alama ya Arena.
+- **Alama ya Wastani** = wastani wa alama katika modeli zote za mtoa huduma huyo zilizopewa alama.
+- **Modeli** = ni modeli ngapi za mtoa huduma zilizo na alama ya Arena.
 
-Watoa huduma hupangwa kwa **alama ya modeli bora** kwanza, kisha kwa wastani wa alama. Hili humzawadia
-mtoa huduma anayetoa angalau modeli moja bora ya bila malipo.
+Watoa huduma hupangwa kwa **alama ya modeli bora** kwanza, kisha kwa alama ya wastani. Hii
+humzawadia mtoa huduma anayetoa angalau modeli moja imara ya bure.
 
 ---
 

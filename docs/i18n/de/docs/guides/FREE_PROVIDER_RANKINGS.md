@@ -119,36 +119,44 @@ Antwortstruktur:
 
 ---
 
-## Funktionsweise der Bewertungen
+## So funktionieren die Bewertungen
 
-### Quelle: Arena-AI-Bestenliste
+### Quelle: Arena-AI-Leaderboard
 
-Die Arena-ELO-Synchronisierungs-Engine (`src/lib/arenaEloSync.ts`) ruft zwei Bestenlisten — `text`
-und `code` — von der Arena-AI-Bestenlisten-API
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) ab. Jeder Bestenlisteneintrag
-enthält einen Modellnamen, Anbieter, ELO-`score`, ein Konfidenzintervall und die Anzahl der Stimmen.
+Die Arena-ELO-Sync-Engine (`src/lib/arenaEloSync.ts`) ruft zwei Leaderboards ab — `text`
+und `code` — von der Arena-AI-Leaderboard-API
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Wenn diese API kein
+verwendbares Board zurückgibt, greift die Engine auf das offizielle
+`lmarena-ai/leaderboard-dataset` auf dem Hugging-Face-Datasets-Server zurück
+(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` meldet `activeSource`, `lastError` und
+`lastFailedAt`. Jeder Leaderboard-Eintrag
+enthält einen Modellnamen, einen Anbieter, einen ELO-`score`, ein Konfidenzintervall und
+eine Stimmenanzahl.
 
-Die Bestenlistenkategorien werden den OmniRoute-Aufgabenkategorien wie folgt zugeordnet:
+Die Leaderboard-Kategorien werden auf OmniRoute-Aufgabenkategorien abgebildet:
 
-| Arena-Bestenliste | OmniRoute-Aufgabenkategorien                      |
+| Arena-Leaderboard | OmniRoute-Aufgabenkategorien                      |
 | ----------------- | ------------------------------------------------- |
 | `text`            | `default`, `review`, `documentation`, `debugging` |
 | `code`            | `coding`                                          |
 
-### Normalisierung (Aufgabeneignungswert)
+### Normalisierung (Task-Fit-Wert)
 
-Die ELO-Rohwerte werden pro Bestenliste auf einen **Aufgabeneignungswert in `[0.4, 0.98]`** normalisiert:
+Roh-ELO-Werte werden pro Leaderboard in einen **Task-Fit-Wert im Bereich `[0.4, 0.98]`**
+normalisiert:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Der Wert erreicht nie `0` oder `1`, sodass Spielraum für benutzerdefinierte Überschreibungen bleibt. Dies ist das
-Feld `score`, das in der API-Antwort angezeigt wird, sowie die auf dem Dashboard dargestellte Bezeichnung.
+Der Wert erreicht niemals `0` oder `1`, wodurch Spielraum für benutzerdefinierte
+Überschreibungen bleibt. Dies ist das `score`-Feld, das Sie in der API-Antwort sehen,
+und die Bezeichnung, die auf dem Dashboard angezeigt wird.
 
 ### Konfidenz
 
-Jeder Eintrag erhält basierend auf der Anzahl der Arena-Stimmen eine Konfidenzstufe:
+Jeder Eintrag erhält eine Konfidenzstufe basierend auf der Arena-Stimmenanzahl:
 
 | Konfidenz | Stimmen |
 | --------- | ------- |
@@ -158,63 +166,66 @@ Jeder Eintrag erhält basierend auf der Anzahl der Arena-Stimmen eine Konfidenzs
 
 ### Speicherung und Aktualität
 
-Normalisierte Einträge werden mit `source = "arena_elo"` in die DB-Tabelle `model_intelligence`
-geschrieben (`src/lib/db/modelIntelligence.ts`). Einträge **laufen nach
-7 Tagen ab**, sodass ein Anbieter, der nicht mehr synchronisiert wird, schließlich entfernt wird, anstatt
-veraltete Daten bereitzustellen.
+Normalisierte Einträge werden in die DB-Tabelle `model_intelligence` mit
+`source = "arena_elo"` geschrieben (`src/lib/db/modelIntelligence.ts`). Einträge
+**verfallen nach 7 Tagen**, sodass ein Anbieter, der nicht mehr synchronisiert,
+irgendwann ausfällt, statt veraltete Daten auszuliefern.
 
-Die Synchronisierung ist **standardmäßig aktiviert**:
+Die Synchronisierung läuft **standardmäßig aktiviert**:
 
-- Sie wird einmal beim Serverstart und anschließend in regelmäßigen Abständen ausgeführt
+- Sie läuft einmal beim Serverstart und danach in einem periodischen Timer
   (`src/lib/arenaEloSync.ts`, eingebunden über `src/instrumentation-node.ts`).
-- Sie ist **nicht blockierend und niemals fatal** — wenn der Abruf von der vorgelagerten Quelle fehlschlägt, läuft OmniRoute
-  weiter, und die Ranglisten zeigen einfach die letzten gültigen Daten an (oder einen leeren Zustand).
+- Sie ist **nicht blockierend und niemals fatal** — wenn der Upstream-Abruf fehlschlägt,
+  läuft OmniRoute weiter und die Rankings zeigen einfach die letzten gültigen Daten
+  (oder einen leeren Zustand).
 
-Sie wird durch zwei Umgebungsvariablen gesteuert (dokumentiert in
+Zwei Umgebungsvariablen steuern das Verhalten (dokumentiert in
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Variable                  | Standardwert  | Zweck                                                              |
-| ------------------------- | ------------- | ------------------------------------------------------------------ |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Auf `false` setzen, um die ausgehende Synchronisierung abzulehnen. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Synchronisierungsintervall in Sekunden.                            |
+| Variable                  | Standard      | Zweck                                                  |
+| ------------------------- | ------------- | ------------------------------------------------------ |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Auf `false` setzen, um die ausgehende Sync abzulehnen. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sync-Intervall in Sekunden.                            |
 
-### Manuelle Synchronisierung / Status / Löschen
+### Manuelle Sync / Status / Löschen
 
-Für Betreiber stellt ein authentifizierter Verwaltungsendpunkt eine manuelle Steuerung bereit
-(`src/app/api/intelligence/sync/route.ts` — erfordert Verwaltungsauthentifizierung):
+Für Administratoren bietet ein authentifizierter Management-Endpunkt manuelle Kontrolle
+(`src/app/api/intelligence/sync/route.ts` — erfordert Management-Authentifizierung):
 
 ```
-GET    /api/intelligence/sync          # aktueller Synchronisierungsstatus (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # manuelle Synchronisierung auslösen; Body: { "dryRun": true } für eine Vorschau ohne Schreibvorgang
+GET    /api/intelligence/sync          # aktuellen Sync-Status abrufen (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # manuelle Sync auslösen; Body: { "dryRun": true } für Vorschau ohne Schreiben
 DELETE /api/intelligence/sync          # alle synchronisierten arena_elo-Intelligence-Einträge löschen
 ```
 
-Wenn die Ranglistenseite leer ist, wird sie durch ein manuelles `POST /api/intelligence/sync` (oder einfach
-durch einen Neustart des Servers) wieder befüllt.
+Wenn die Rankings-Seite leer ist, füllt ein manuelles `POST /api/intelligence/sync`
+(oder einfach ein Neustart des Servers) sie wieder auf.
 
-### Abgleich von Modellen mit der Bestenliste
+### Abgleich von Modellen mit dem Leaderboard
 
-Modell-IDs aus der Registry und Arena-Modellnamen stimmen nicht immer exakt überein. Die Rangliste verwendet
-einen flexiblen Abgleich (`findMatchingIntelligence` in `src/lib/freeProviderRankings.ts`):
+Registry-Modell-IDs und Arena-Modellnamen stimmen nicht immer exakt überein. Das Ranking
+verwendet einen flexiblen Abgleich (`findMatchingIntelligence` in
+`src/lib/freeProviderRankings.ts`):
 
 1. Exakte Übereinstimmung mit der normalisierten Modell-ID.
-2. Übereinstimmung nach Entfernen eines abschließenden Versionssuffixes (z. B. `kimi-k2.6` → `kimi-k2`).
-3. Präfixübereinstimmung (ein Modellname aus der Bestenliste ist ein Präfix der Registry-ID).
+2. Übereinstimmung nach dem Entfernen eines abschließenden Versionssuffixes
+   (z. B. `kimi-k2.6` → `kimi-k2`).
+3. Präfix-Übereinstimmung (ein Leaderboard-Modellname ist ein Präfix der Registry-ID).
 
-Auf der Synchronisierungsseite werden bekannte Anbieterpräfixe (`anthropic/`, `openai/`, `google/`, …)
-entfernt, und eine kleine Alias-Zuordnung erweitert kanonische Namen um die Varianten, die OmniRoute
-intern verwendet, sodass Modelle unter jedem Namen auffindbar bleiben.
+Auf der Sync-Seite werden bekannte Anbieterpräfixe (`anthropic/`, `openai/`, `google/`, …)
+entfernt und eine kleine Alias-Map erweitert kanonische Namen in die Varianten, die
+OmniRoute intern verwendet, sodass Modelle unter jedem Namen auffindbar bleiben.
 
-### Einstufung eines Anbieters
+### Wie ein Anbieter gerankt wird
 
-Für jeden kostenlosen Anbieter bewertet die Engine jedes Modell in dessen Katalog und bestimmt anschließend:
+Für jeden kostenlosen Anbieter bewertet die Engine jedes Modell in seinem Katalog, dann:
 
-- **Bestes Modell** = das Modell des Anbieters mit der höchsten Bewertung.
-- **Durchschnittswert** = der Mittelwert über alle bewerteten Modelle dieses Anbieters.
-- **Modelle** = die Anzahl der Modelle des Anbieters, für die eine Arena-Bewertung vorlag.
+- **Top Model** = das am höchsten bewertete Modell des Anbieters.
+- **Avg Score** = der Durchschnittswert über alle bewerteten Modelle des Anbieters.
+- **Models** = wie viele Modelle des Anbieters einen Arena-Score hatten.
 
-Anbieter werden zuerst nach der **Bewertung des besten Modells** und anschließend nach dem Durchschnittswert sortiert. Dadurch wird ein
-Anbieter belohnt, der mindestens ein leistungsstarkes kostenloses Modell anbietet.
+Anbieter werden zuerst nach **Top-Modell-Score** sortiert, dann nach Durchschnittswert.
+Dies belohnt einen Anbieter, der mindestens ein starkes kostenloses Modell anbietet.
 
 ---
 

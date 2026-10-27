@@ -119,103 +119,110 @@ Vastuse struktuur:
 
 ---
 
-## Kuidas skoorid toimivad
+## Kuidas skoorid töötavad
 
 ### Allikas: Arena AI edetabel
 
-Arena ELO sünkroonimismootor (`src/lib/arenaEloSync.ts`) hangib Arena AI edetabeli API-st
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) kaks edetabelit — `text`
-ja `code`. Iga edetabelikirje sisaldab mudeli nime, tarnijat, ELO `score`-i,
-usaldusvahemikku ja häälte arvu.
+Arena ELO sünkroniseerimismootor (`src/lib/arenaEloSync.ts`) tõmbab Arena AI
+edetabeli API-st (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`)
+kaks edetabelit — `text` ja `code`. Kui see API ei tagasta kasutatavat edetabelit,
+kasutab mootor varulahendusena ametlikku `lmarena-ai/leaderboard-dataset`
+andmestikku Hugging Face'i datasets-serveris (`src/lib/arenaEloHfSource.ts`,
+CC-BY-4.0; `overall` → `text`, `coding` → `code`); `GET /api/intelligence/sync`
+teatab väljad `activeSource`, `lastError` ja `lastFailedAt`. Iga edetabeli kirje
+sisaldab mudeli nime, tootjat, ELO `score` väärtust, usaldusintervalli ja häälte arvu.
 
-Edetabeli kategooriad vastendatakse OmniRoute'i ülesandekategooriatega:
+Edetabeli kategooriad vastendatakse OmniRoute'i ülesannete kategooriatele:
 
-| Arena edetabel | OmniRoute'i ülesandekategooriad                   |
+| Arena edetabel | OmniRoute'i ülesannete kategooriad                |
 | -------------- | ------------------------------------------------- |
 | `text`         | `default`, `review`, `documentation`, `debugging` |
 | `code`         | `coding`                                          |
 
-### Normaliseerimine (ülesandega sobivuse skoor)
+### Normaliseerimine (ülesande sobivuse skoor)
 
-ELO toorskoorid normaliseeritakse iga edetabeli kohta **ülesandega sobivuse väärtuseks vahemikus `[0.4, 0.98]`**:
+Toores ELO-skoor normaliseeritakse iga edetabeli kohta **ülesande sobivuse
+väärtuseks vahemikus `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Skoor ei jõua kunagi väärtuseni `0` ega `1`, jättes varu kasutaja määratud väärtustele.
-See on API vastuses kuvatav väli `score` ja töölaual kuvatav silt.
+Skoor ei jõua kunagi väärtusteni `0` ega `1`, jättes varu kasutaja kohandustele.
+See on `score` väli, mida näete API-vastuses, ja juhtpaneelil kuvatav silt.
 
-### Usaldusväärsus
+### Usaldustase
 
-Igale kirjele määratakse Arena häälte arvu põhjal usaldusväärsuse tase:
+Iga kirje saab usaldustaseme Arena häälte arvu põhjal:
 
-| Usaldusväärsus | Hääli   |
-| -------------- | ------- |
-| `high`         | ≥ 5,000 |
-| `medium`       | ≥ 1,000 |
-| `low`          | < 1,000 |
+| Usaldustase | Hääled  |
+| ----------- | ------- |
+| `high`      | ≥ 5 000 |
+| `medium`    | ≥ 1 000 |
+| `low`       | < 1 000 |
 
 ### Salvestamine ja ajakohasus
 
-Normaliseeritud kirjed kirjutatakse andmebaasi tabelisse `model_intelligence`, määrates
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Kirjed **aeguvad 7 päeva
-pärast**, mistõttu sünkroonimise lõpetanud tarnija andmed eemaldatakse lõpuks, selle
-asemel et kuvada aegunud andmeid.
+Normaliseeritud kirjed kirjutatakse andmebaasi tabelisse `model_intelligence`
+väärtusega `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Kirjed
+**aeguvad 7 päeva pärast**, nii et tarnija, kes lõpetab sünkroniseerimise, langeb
+lõpuks välja, selle asemel et pakkuda aegunud andmeid.
 
-Sünkroonimine on **vaikimisi sisse lülitatud**:
+Sünkroniseerimine töötab **vaikimisi sisse lülitatuna**:
 
-- See käivitatakse üks kord serveri käivitamisel ja seejärel perioodilise taimeriga
-  (`src/lib/arenaEloSync.ts`, ühendatud failist `src/instrumentation-node.ts`).
-- See on **mitteblokeeriv ega põhjusta kunagi kriitilist tõrget** — kui andmete
-  hankimine lähteallikast nurjub, jätkab OmniRoute tööd ning pingereas kuvatakse lihtsalt
-  viimased korrektsed andmed (või tühi olek).
+- See käivitub üks kord serveri käivitamisel ja seejärel perioodiliselt taimeri
+  järgi (`src/lib/arenaEloSync.ts`, ühendatud failist `src/instrumentation-node.ts`).
+- See on **mitteblokeeriv ega ole kunagi fataalne** — kui ülesvoolu päring
+  ebaõnnestub, jätkab OmniRoute töötamist ja edetabelid näitavad lihtsalt viimaseid
+  korrektseid andmeid (või tühja olekut).
 
-Seda juhivad kaks keskkonnamuutujat (dokumenteeritud failis
+Kaks keskkonnamuutujat juhivad seda (dokumenteeritud failis
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Muutuja                   | Vaikeväärtus  | Otstarve                                                    |
-| ------------------------- | ------------- | ----------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Väljuva sünkroonimise keelamiseks määra väärtuseks `false`. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sünkroonimisintervall sekundites.                           |
+| Muutuja                   | Vaikimisi     | Eesmärk                                                   |
+| ------------------------- | ------------- | --------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Seadke `false`, et väljuvast sünkroniseerimisest loobuda. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sünkroniseerimise intervall sekundites.                   |
 
-### Käsitsi sünkroonimine / olek / kustutamine
+### Manuaalne sünkroniseerimine / olek / tühjendamine
 
-Operaatoritele pakub autenditud halduslõpp-punkt käsitsi juhtimise võimalust
-(`src/app/api/intelligence/sync/route.ts` — nõuab halduse autentimist):
+Operaatoritele pakub autentitud halduslõpp-punkt manuaalset juhtimist
+(`src/app/api/intelligence/sync/route.ts` — nõuab haldusautentimist):
 
 ```
-GET    /api/intelligence/sync          # sünkroonimise praegune olek (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # käivita käsitsi sünkroonimine; body: { "dryRun": true }, et vaadata eelvaadet ilma kirjutamata
-DELETE /api/intelligence/sync          # kustuta kõik sünkroonitud arena_elo teabekirjed
+GET    /api/intelligence/sync          # praegune sünkroniseerimise olek (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # käivita manuaalne sünkroniseerimine; keha: { "dryRun": true } eelvaateks ilma kirjutamata
+DELETE /api/intelligence/sync          # tühjenda kõik sünkroniseeritud arena_elo intelligentsuse kirjed
 ```
 
-Kui pingerea leht on tühi, täidab käsitsi tehtav `POST /api/intelligence/sync` (või
-lihtsalt serveri taaskäivitamine) selle uuesti.
+Kui edetabelite leht on tühi, täidab selle manuaalne `POST /api/intelligence/sync`
+(või lihtsalt serveri taaskäivitamine).
 
-### Mudelite vastendamine edetabeliga
+### Mudelite sobitamine edetabeliga
 
-Registri mudeli-ID-d ja Arena mudelinimed ei kattu alati täpselt. Pingerida kasutab
-paindlikku vastendamist (`findMatchingIntelligence` failis `src/lib/freeProviderRankings.ts`):
+Registri mudeli ID-d ja Arena mudelite nimed ei kattu alati täpselt. Järjestus
+kasutab paindlikku sobitamist (`findMatchingIntelligence` failis
+`src/lib/freeProviderRankings.ts`):
 
-1. Normaliseeritud mudeli-ID täpne vaste.
-2. Vaste pärast lõpus oleva versioonisufiksi eemaldamist (nt `kimi-k2.6` → `kimi-k2`).
-3. Prefiksi vaste (edetabelis olev mudelinimi on registri-ID prefiks).
+1. Täpne kokkulangevus normaliseeritud mudeli ID-ga.
+2. Langevus pärast lõpus oleva versioonisufiksi eemaldamist (nt `kimi-k2.6` → `kimi-k2`).
+3. Eesliite sobitus (edetabeli mudeli nimi on registri ID eesliide).
 
-Sünkroonimise poolel eemaldatakse tuntud tarnijaprefiksid (`anthropic/`, `openai/`,
-`google/`, …) ning väike pseudonüümikaart laiendab kanoonilised nimed OmniRoute'i
-sisemiselt kasutatavateks variantideks, et mudelid oleksid leitavad mis tahes nime all.
+Sünkroniseerimise poolel eemaldatakse teadaolevad tootjate eesliited
+(`anthropic/`, `openai/`, `google/`, …) ja väike aliaste vastendus laiendab
+kanoonilised nimed variantideks, mida OmniRoute sisemiselt kasutab, nii et mudelid
+jäävad leitavaks iga nime all.
 
-### Kuidas tarnija pingerida määratakse
+### Kuidas tarnijat järjestatakse
 
-Mootor hindab iga tasuta tarnija kataloogis kõiki mudeleid ning seejärel:
+Iga tasuta tarnija puhul hindab mootor kõik tema kataloogi mudelid, seejärel:
 
-- **Parim mudel** = tarnija kõrgeima skooriga mudel.
-- **Keskmine skoor** = kõigi selle tarnija hinnatud mudelite skooride aritmeetiline keskmine.
-- **Mudelid** = tarnija nende mudelite arv, millel oli Arena skoor.
+- **Top Model** = tarnija kõrgeima skooriga mudel.
+- **Avg Score** = keskmine skoor kõigi selle tarnija hinnatud mudelite üle.
+- **Models** = kui mitmel tarnija mudelil oli Arena skoor.
 
-Tarnijad sorditakse esmalt **parima mudeli skoori** ja seejärel keskmise skoori järgi.
-See premeerib tarnijat, kes pakub vähemalt üht tugevat tasuta mudelit.
+Tarnijad sorteeritakse kõigepealt **parima mudeli skoori** järgi, seejärel keskmise
+skoori järgi. See premeerib tarnijat, kes pakub vähemalt ühte tugevat tasuta mudelit.
 
 ---
 

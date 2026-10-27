@@ -125,32 +125,40 @@ dəyəridir (aşağıya baxın). Qiymətləndirilmiş modeli olmayan provayderl�
 
 ---
 
-## Xallar necə işləyir
+## Ballar necə işləyir
 
-### Mənbə: Arena AI liderlər cədvəli
+### Mənbə: Arena AI leaderboard
 
-Arena ELO sinxronizasiya mühərriki (`src/lib/arenaEloSync.ts`) Arena AI liderlər cədvəli API-sindən (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) iki liderlər cədvəlini — `text` və `code` — əldə edir. Hər liderlər cədvəli qeydinə model adı, təchizatçı, ELO `score` göstəricisi, etibar intervalı və səs sayı daxildir.
+Arena ELO sinxronizasiya mühərriki (`src/lib/arenaEloSync.ts`) Arena AI leaderboard API-dən
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) iki leaderboard — `text`
+və `code` — əldə edir. Həmin API istifadəyə yararlı lövhə qaytarmadıqda, mühərrik
+Hugging Face datasets-server-dəki rəsmi `lmarena-ai/leaderboard-dataset`-ə müraciət edir
+(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` `activeSource`, `lastError` və
+`lastFailedAt` dəyərlərini bildirir. Hər leaderboard yazısı
+model adı, təchizatçı, ELO `score`, etibar intervalı və səs sayı daşıyır.
 
-Liderlər cədvəli kateqoriyaları OmniRoute tapşırıq kateqoriyalarına belə uyğunlaşdırılır:
+Leaderboard kateqoriyaları OmniRoute tapşırıq kateqoriyalarına aşağıdakı kimi uyğunlaşır:
 
-| Arena liderlər cədvəli | OmniRoute tapşırıq kateqoriyaları                 |
-| ---------------------- | ------------------------------------------------- |
-| `text`                 | `default`, `review`, `documentation`, `debugging` |
-| `code`                 | `coding`                                          |
+| Arena leaderboard | OmniRoute tapşırıq kateqoriyaları                 |
+| ----------------- | ------------------------------------------------- |
+| `text`            | `default`, `review`, `documentation`, `debugging` |
+| `code`            | `coding`                                          |
 
-### Normallaşdırma (tapşırığa uyğunluq xalı)
+### Normallaşdırma (tapşırığa uyğunluq balı)
 
-Xam ELO xalları hər liderlər cədvəli üzrə **`[0.4, 0.98]` diapazonunda tapşırığa uyğunluq dəyərinə** normallaşdırılır:
+Xam ELO balları hər leaderboard daxilində **`[0.4, 0.98]` aralığında tapşırığa uyğunluq dəyərinə** normallaşdırılır:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Xal heç vaxt `0` və ya `1` olmur və beləliklə, istifadəçi tərəfindən edilən dəyişikliklər üçün ehtiyat saxlanılır. Bu, API cavabında gördüyünüz `score` sahəsi və idarəetmə panelində göstərilən etiketdir.
+Bal heç vaxt `0` və ya `1` dəyərinə çatmır — bu, istifadəçi düzəlişləri üçün ehtiyat saxlayır. Bu,
+API cavabında gördüyünüz `score` sahəsi və paneldə göstərilən etiketdir.
 
 ### Etibarlılıq
 
-Hər qeydə Arena səs sayına əsasən etibarlılıq səviyyəsi verilir:
+Hər yazı Arena səs sayına əsasən etibarlılıq səviyyəsi alır:
 
 | Etibarlılıq | Səslər  |
 | ----------- | ------- |
@@ -158,54 +166,65 @@ Hər qeydə Arena səs sayına əsasən etibarlılıq səviyyəsi verilir:
 | `medium`    | ≥ 1,000 |
 | `low`       | < 1,000 |
 
-### Saxlama və məlumatların aktuallığı
+### Saxlanma və aktuallıq
 
-Normallaşdırılmış qeydlər `source = "arena_elo"` olmaqla `model_intelligence` verilənlər bazası cədvəlinə yazılır (`src/lib/db/modelIntelligence.ts`). Qeydlərin **müddəti 7 gündən sonra bitir**, buna görə də sinxronizasiyanı dayandıran təchizatçı köhnəlmiş məlumat təqdim etmək əvəzinə nəticələrdən çıxarılır.
+Normallaşdırılmış yazılar `model_intelligence` DB cədvəlinə
+`source = "arena_elo"` ilə yazılır (`src/lib/db/modelIntelligence.ts`). Yazıların
+**müddəti 7 gündən sonra bitir**, buna görə də sinxronizasiyanı dayandıran təchizatçı
+köhnə məlumat təqdim etmək əvəzinə, nəticədə sıralamadan düşür.
 
-Sinxronizasiya **standart olaraq aktivdir**:
+Sinxronizasiya **defolt olaraq aktivdir**:
 
-- Server işə salınarkən bir dəfə, sonra isə dövri taymer əsasında işləyir
-  (`src/lib/arenaEloSync.ts`, `src/instrumentation-node.ts` vasitəsilə qoşulur).
-- O, **bloklamır və heç vaxt kritik xətaya səbəb olmur** — yuxarı axındakı məlumatların əldə edilməsi uğursuz olarsa, OmniRoute işləməyə davam edir və sıralamalar sadəcə son uğurlu məlumatları (və ya boş vəziyyəti) göstərir.
+- Serverin başlanğıcında bir dəfə işə düşür, sonra isə dövri taymerlə davam edir
+  (`src/lib/arenaEloSync.ts`, `src/instrumentation-node.ts`-dən qoşulub).
+- O, **bloklamır və heç vaxt kritik xəta yaratmır** — yuxarı mənbədən əldə etmə alınmazsa,
+  OmniRoute işləməyə davam edir və sıralamalar sadəcə son yaxşı məlumatı (və ya boş vəziyyəti) göstərir.
 
-Onu iki mühit dəyişəni idarə edir ([`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) sənədində təsvir edilib):
+Onu iki mühit dəyişəni idarə edir (sənədləşmə:
+[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Dəyişən                   | Standart      | Məqsəd                                                               |
-| ------------------------- | ------------- | -------------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Xaricə yönələn sinxronizasiyanı dayandırmaq üçün `false` təyin edin. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Saniyə ilə sinxronizasiya intervalı.                                 |
+| Dəyişən                   | Defolt        | Məqsəd                                                   |
+| ------------------------- | ------------- | -------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Xarici sinxronizasiyadan imtina üçün `false` təyin edin. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24s) | Sinxronizasiya intervalı, saniyələrlə.                   |
 
 ### Əl ilə sinxronizasiya / status / təmizləmə
 
-Operatorlar üçün autentifikasiya tələb edən idarəetmə son nöqtəsi əl ilə idarəetmə imkanı təqdim edir (`src/app/api/intelligence/sync/route.ts` — idarəetmə autentifikasiyası tələb olunur):
+Operatorlar üçün autentifikasiyalı idarəetmə endpointi əl ilə nəzarət təqdim edir
+(`src/app/api/intelligence/sync/route.ts` — idarəetmə autentifikasiyası tələb olunur):
 
 ```
 GET    /api/intelligence/sync          # cari sinxronizasiya statusu (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # əl ilə sinxronizasiyanı başladır; yazmadan önizləmək üçün sorğu gövdəsi: { "dryRun": true }
-DELETE /api/intelligence/sync          # sinxronlaşdırılmış bütün arena_elo kəşfiyyat qeydlərini təmizləyir
+POST   /api/intelligence/sync          # əl ilə sinxronizasiya başlat; yazmadan önizləmə üçün body: { "dryRun": true }
+DELETE /api/intelligence/sync          # sinxronizasiya edilmiş bütün arena_elo intelligence yazılarını təmizlə
 ```
 
-Sıralamalar səhifəsi boşdursa, əl ilə edilən `POST /api/intelligence/sync` sorğusu (və ya sadəcə serverin yenidən başladılması) onu yenidən doldurur.
+Sıralamalar səhifəsi boşdursa, əl ilə `POST /api/intelligence/sync` (və ya sadəcə
+serverin yenidən başladılması) onu yenidən doldurur.
 
-### Modellərin liderlər cədvəli ilə uyğunlaşdırılması
+### Modellərin leaderboard-a uyğunlaşdırılması
 
-Reyestr model ID-ləri və Arena model adları həmişə tam uyğun gəlmir. Sıralama çevik uyğunlaşdırmadan istifadə edir (`src/lib/freeProviderRankings.ts` faylındakı `findMatchingIntelligence`):
+Reyestr model ID-ləri və Arena model adları həmişə dəqiq üst-üstə düşmür. Sıralama
+çevik uyğunlaşdırmadan istifadə edir (`src/lib/freeProviderRankings.ts` faylındakı `findMatchingIntelligence`):
 
-1. Normallaşdırılmış model ID-si üzrə dəqiq uyğunluq.
-2. Sondakı versiya şəkilçisi çıxarıldıqdan sonra uyğunluq (məsələn, `kimi-k2.6` → `kimi-k2`).
-3. Prefiks uyğunluğu (liderlər cədvəlindəki model adı reyestr ID-sinin prefiksidir).
+1. Normallaşdırılmış model ID üzrə dəqiq uyğunluq.
+2. Sondakı versiya sonluğu silindikdən sonra uyğunluq (məs. `kimi-k2.6` → `kimi-k2`).
+3. Prefiks uyğunluğu (leaderboard model adı reyestr ID-nin prefiksidir).
 
-Sinxronizasiya tərəfində məlum təchizatçı prefiksləri (`anthropic/`, `openai/`, `google/`, …) çıxarılır və kiçik ləqəb xəritəsi kanonik adları OmniRoute-un daxildə istifadə etdiyi variantlara genişləndirir. Beləliklə, modellər istənilən adla tapıla bilir.
+Sinxronizasiya tərəfində məlum təchizatçı prefiksləri (`anthropic/`, `openai/`, `google/`, …)
+silinir və kiçik bir ləqəb xəritəsi kanonik adları OmniRoute-un daxildə istifadə etdiyi
+variantlara genişləndirir, beləliklə modellər istənilən adla tapıla bilən qalır.
 
-### Təchizatçının sıralanması
+### Təchizatçı necə sıralanır
 
-Hər pulsuz təchizatçı üçün mühərrik onun kataloqundakı hər modeli qiymətləndirir, sonra:
+Hər pulsuz təchizatçı üçün mühərrik onun kataloqundakı bütün modelləri qiymətləndirir, sonra:
 
-- **Ən yaxşı model** = təchizatçının ən yüksək xal alan modeli.
-- **Orta xal** = həmin təchizatçının xal verilmiş bütün modellərinin orta xalı.
-- **Modellər** = təchizatçının Arena xalı olan modellərinin sayı.
+- **Top Model** = təchizatçının ən yüksək ballı modeli.
+- **Avg Score** = həmin təchizatçının qiymətləndirilmiş bütün modelləri üzrə orta bal.
+- **Models** = təchizatçının neçə modelinin Arena balı olması.
 
-Təchizatçılar əvvəlcə **ən yaxşı modelin xalına**, sonra isə orta xala görə sıralanır. Bu, ən azı bir güclü pulsuz model təqdim edən təchizatçını mükafatlandırır.
+Təchizatçılar əvvəlcə **ən yaxşı model balına**, sonra isə orta bala görə sıralanır. Bu,
+ən azı bir güclü pulsuz model təqdim edən təchizatçını mükafatlandırır.
 
 ---
 

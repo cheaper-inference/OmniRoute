@@ -124,10 +124,15 @@ Structure de la réponse :
 
 ### Source : classement Arena AI
 
-Le moteur de synchronisation ELO d’Arena (`src/lib/arenaEloSync.ts`) récupère deux classements — `text`
-et `code` — depuis l’API du classement Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Chaque entrée du classement
-comprend un nom de modèle, un fournisseur, un `score` ELO, un intervalle de confiance et un nombre de votes.
+Le moteur de synchronisation Arena ELO (`src/lib/arenaEloSync.ts`) récupère deux
+classements — `text` et `code` — auprès de l'API du classement Arena AI
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Lorsque cette API ne
+renvoie aucun classement exploitable, le moteur se replie sur le jeu de données officiel
+`lmarena-ai/leaderboard-dataset` du serveur de datasets Hugging Face
+(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0 ; `overall` → `text`, `coding` → `code`) ;
+`GET /api/intelligence/sync` indique alors `activeSource`, `lastError` et
+`lastFailedAt`. Chaque entrée du classement comporte un nom de modèle, un fournisseur,
+un `score` ELO, un intervalle de confiance et un nombre de votes.
 
 Les catégories du classement correspondent aux catégories de tâches OmniRoute :
 
@@ -136,18 +141,20 @@ Les catégories du classement correspondent aux catégories de tâches OmniRoute
 | `text`           | `default`, `review`, `documentation`, `debugging` |
 | `code`           | `coding`                                          |
 
-### Normalisation (score d’adéquation à la tâche)
+### Normalisation (score d'adéquation à la tâche)
 
-Les scores ELO bruts sont normalisés par classement en une **valeur d’adéquation à la tâche comprise dans `[0.4, 0.98]`** :
+Les scores ELO bruts sont normalisés par classement en une **valeur d'adéquation à la
+tâche comprise dans `[0.4, 0.98]`** :
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Le score n’atteint jamais `0` ni `1`, ce qui laisse une marge pour les remplacements définis par l’utilisateur. Il s’agit du
-champ `score` visible dans la réponse de l’API et du libellé affiché dans le tableau de bord.
+Le score n'atteint jamais `0` ni `1`, ce qui laisse une marge pour les ajustements de
+l'utilisateur. C'est le champ `score` que vous voyez dans la réponse de l'API et le
+libellé affiché sur le tableau de bord.
 
-### Confiance
+### Niveau de confiance
 
 Chaque entrée reçoit un niveau de confiance basé sur le nombre de votes Arena :
 
@@ -157,65 +164,71 @@ Chaque entrée reçoit un niveau de confiance basé sur le nombre de votes Arena
 | `medium`  | ≥ 1 000 |
 | `low`     | < 1 000 |
 
-### Stockage et fraîcheur
+### Stockage et fraîcheur des données
 
-Les entrées normalisées sont écrites dans la table de base de données `model_intelligence` avec
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Les entrées **expirent après
-7 jours**. Ainsi, un fournisseur qui cesse de se synchroniser finit par disparaître au lieu de fournir
-des données obsolètes.
+Les entrées normalisées sont écrites dans la table de base de données
+`model_intelligence` avec `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`).
+Les entrées **expirent au bout de 7 jours**, de sorte qu'un fournisseur qui cesse de se
+synchroniser finit par disparaître au lieu de servir des données obsolètes.
 
 La synchronisation est **activée par défaut** :
 
-- Elle s’exécute une fois au démarrage du serveur, puis selon une minuterie périodique
-  (`src/lib/arenaEloSync.ts`, configurée depuis `src/instrumentation-node.ts`).
-- Elle est **non bloquante et jamais fatale** : si la récupération en amont échoue, OmniRoute continue
-  de fonctionner et les classements affichent simplement les dernières données valides (ou un état vide).
+- Elle s'exécute une fois au démarrage du serveur, puis selon un minuteur périodique
+  (`src/lib/arenaEloSync.ts`, branché depuis `src/instrumentation-node.ts`).
+- Elle est **non bloquante et jamais fatale** — si la récupération en amont échoue,
+  OmniRoute continue de fonctionner et les classements affichent simplement les
+  dernières données valides (ou un état vide).
 
-Deux variables d’environnement permettent de la contrôler (documentées dans
+Deux variables d'environnement la contrôlent (documentées dans
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)) :
 
-| Variable                  | Valeur par défaut | Fonction                                                               |
-| ------------------------- | ----------------- | ---------------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`            | Définissez-la sur `false` pour désactiver la synchronisation sortante. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 h)    | Intervalle de synchronisation, en secondes.                            |
+| Variable                  | Valeur par défaut | Rôle                                                             |
+| ------------------------- | ----------------- | ---------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`            | Définir sur `false` pour désactiver la synchronisation sortante. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h)     | Intervalle de synchronisation, en secondes.                      |
 
-### Synchronisation manuelle / état / effacement
+### Synchronisation manuelle / statut / effacement
 
-Pour les opérateurs, un point de terminaison de gestion authentifié permet un contrôle manuel
-(`src/app/api/intelligence/sync/route.ts` — nécessite une authentification de gestion) :
+Pour les opérateurs, un point de terminaison de gestion authentifié offre un contrôle
+manuel (`src/app/api/intelligence/sync/route.ts` — nécessite une authentification de
+gestion) :
 
 ```
-GET    /api/intelligence/sync          # état actuel de la synchronisation (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # déclencher une synchronisation manuelle ; corps : { "dryRun": true } pour prévisualiser sans écrire
-DELETE /api/intelligence/sync          # effacer toutes les entrées de renseignements arena_elo synchronisées
+GET    /api/intelligence/sync          # statut actuel de la synchronisation (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # déclenche une synchronisation manuelle ; body: { "dryRun": true } pour prévisualiser sans écrire
+DELETE /api/intelligence/sync          # efface toutes les entrées d'intelligence arena_elo synchronisées
 ```
 
-Si la page des classements est vide, une requête manuelle `POST /api/intelligence/sync` (ou simplement
-un redémarrage du serveur) la remplit à nouveau.
+Si la page des classements est vide, un `POST /api/intelligence/sync` manuel (ou
+simplement un redémarrage du serveur) la repeuple.
 
-### Correspondance des modèles avec le classement
+### Association des modèles au classement
 
-Les identifiants de modèles du registre et les noms de modèles Arena ne correspondent pas toujours exactement. Le classement utilise
-une correspondance flexible (`findMatchingIntelligence` dans `src/lib/freeProviderRankings.ts`) :
+Les identifiants de modèles du registre et les noms de modèles Arena ne correspondent
+pas toujours exactement. Le classement utilise une correspondance souple
+(`findMatchingIntelligence` dans `src/lib/freeProviderRankings.ts`) :
 
-1. Correspondance exacte avec l’identifiant normalisé du modèle.
-2. Correspondance après suppression d’un suffixe de version final (par exemple, `kimi-k2.6` → `kimi-k2`).
-3. Correspondance par préfixe (un nom de modèle du classement est un préfixe de l’identifiant du registre).
+1. Correspondance exacte sur l'identifiant de modèle normalisé.
+2. Correspondance après suppression d'un suffixe de version final (par ex. `kimi-k2.6`
+   → `kimi-k2`).
+3. Correspondance par préfixe (un nom de modèle du classement est un préfixe de
+   l'identifiant du registre).
 
-Côté synchronisation, les préfixes de fournisseurs connus (`anthropic/`, `openai/`, `google/`, …) sont
-supprimés et une petite table d’alias développe les noms canoniques en variantes utilisées par OmniRoute
-en interne, afin que les modèles restent accessibles sous n’importe quel nom.
+Côté synchronisation, les préfixes de fournisseurs connus (`anthropic/`, `openai/`,
+`google/`, …) sont supprimés et une petite table d'alias développe les noms canoniques
+en variantes qu'OmniRoute utilise en interne, afin que les modèles restent trouvables
+sous n'importe quel nom.
 
-### Classement d’un fournisseur
+### Comment un fournisseur est classé
 
-Pour chaque fournisseur gratuit, le moteur évalue tous les modèles de son catalogue, puis :
+Pour chaque fournisseur gratuit, le moteur évalue chaque modèle de son catalogue, puis :
 
-- **Meilleur modèle** = le modèle du fournisseur ayant obtenu le score le plus élevé.
-- **Score moyen** = la moyenne des scores de tous les modèles évalués de ce fournisseur.
-- **Modèles** = le nombre de modèles du fournisseur disposant d’un score Arena.
+- **Meilleur modèle** = le modèle du fournisseur au score le plus élevé.
+- **Score moyen** = le score moyen de l'ensemble des modèles évalués de ce fournisseur.
+- **Modèles** = le nombre de modèles du fournisseur disposant d'un score Arena.
 
-Les fournisseurs sont d’abord triés par **score du meilleur modèle**, puis par score moyen. Cela favorise un
-fournisseur qui propose au moins un modèle gratuit performant.
+Les fournisseurs sont triés d'abord par **score du meilleur modèle**, puis par score
+moyen. Cela récompense un fournisseur qui propose au moins un modèle gratuit performant.
 
 ---
 

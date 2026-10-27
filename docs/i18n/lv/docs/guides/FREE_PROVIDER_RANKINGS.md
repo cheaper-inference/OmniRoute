@@ -121,100 +121,104 @@ Atbildes struktūra:
 
 ## Kā darbojas vērtējumi
 
-### Avots: Arena AI līderu tabula
+### Avots: Arena AI leaderboard
 
-Arena ELO sinhronizācijas dzinis (`src/lib/arenaEloSync.ts`) iegūst divas līderu tabulas — `text`
-un `code` — no Arena AI līderu tabulas API
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Katrā līderu tabulas ierakstā
-ir modeļa nosaukums, piegādātājs, ELO `score`, ticamības intervāls un balsu skaits.
+Arena ELO sinhronizācijas dzinējs (`src/lib/arenaEloSync.ts`) iegūst divas līderu tabulas — `text`
+un `code` — no Arena AI leaderboard API
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Ja šī API neatgriež
+lietojamu tabulu, dzinējs pārslēdzas uz oficiālo `lmarena-ai/leaderboard-dataset`
+Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` ziņo `activeSource`, `lastError` un
+`lastFailedAt`. Katrs līderu tabulas ieraksts
+satur modeļa nosaukumu, piegādātāju, ELO `score`, uzticamības intervālu un balsu skaitu.
 
-Līderu tabulas kategorijas atbilst OmniRoute uzdevumu kategorijām:
+Līderu tabulu kategorijas tiek kartētas uz OmniRoute uzdevumu kategorijām:
 
 | Arena līderu tabula | OmniRoute uzdevumu kategorijas                    |
 | ------------------- | ------------------------------------------------- |
 | `text`              | `default`, `review`, `documentation`, `debugging` |
 | `code`              | `coding`                                          |
 
-### Normalizācija (piemērotības uzdevumam vērtējums)
+### Normalizācija (uzdevuma atbilstības vērtējums)
 
-Neapstrādātie ELO vērtējumi katrā līderu tabulā tiek normalizēti par **piemērotības uzdevumam vērtību diapazonā `[0.4, 0.98]`**:
+Neapstrādātie ELO vērtējumi katrā līderu tabulā tiek normalizēti par **uzdevuma atbilstības vērtību intervālā `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Vērtējums nekad nesasniedz `0` vai `1`, atstājot rezervi lietotāja norādītām vērtībām. Šis ir
-`score` lauks, kas redzams API atbildē, un informācijas paneļa etiķetē parādītā vērtība.
+Vērtējums nekad nesasniedz `0` vai `1`, atstājot rezervi lietotāja pārdefinējumiem. Šis ir
+`score` lauks, ko redzat API atbildē, un etiķete, kas tiek rādīta informācijas panelī.
 
-### Pārliecības līmenis
+### Uzticamība
 
-Katram ierakstam tiek piešķirts pārliecības līmenis, pamatojoties uz Arena balsu skaitu:
+Katrs ieraksts saņem uzticamības līmeni atkarībā no Arena balsu skaita:
 
-| Pārliecības līmenis | Balsis  |
-| ------------------- | ------- |
-| `high`              | ≥ 5,000 |
-| `medium`            | ≥ 1,000 |
-| `low`               | < 1,000 |
+| Uzticamība | Balsis  |
+| ---------- | ------- |
+| `high`     | ≥ 5,000 |
+| `medium`   | ≥ 1,000 |
+| `low`      | < 1,000 |
 
-### Glabāšana un datu aktualitāte
+### Glabāšana un aktualitāte
 
-Normalizētie ieraksti tiek saglabāti datubāzes tabulā `model_intelligence` ar
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Ierakstu derīguma termiņš **beidzas pēc
-7 dienām**, tāpēc piegādātājs, kura sinhronizācija tiek pārtraukta, ar laiku pazūd, nevis turpina
-piedāvāt novecojušus datus.
+Normalizētie ieraksti tiek ierakstīti `model_intelligence` datubāzes tabulā ar
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Ierakstu derīgums **beidzas pēc
+7 dienām**, tāpēc nodrošinātājs, kas pārtrauc sinhronizēties, laika gaitā izkrīt,
+nevis apkalpo novecojušus datus.
 
-Sinhronizācija ir **ieslēgta pēc noklusējuma**:
+Sinhronizācija pēc noklusējuma ir **ieslēgta**:
 
-- Tā tiek izpildīta vienreiz servera palaišanas laikā un pēc tam periodiski pēc taimera
-  (`src/lib/arenaEloSync.ts`, piesaistīta no `src/instrumentation-node.ts`).
-- Tā ir **nebloķējoša un nekad neizraisa fatālu kļūdu** — ja datu iegūšana no ārējā avota neizdodas, OmniRoute turpina
-  darboties, un rangos tiek rādīti pēdējie veiksmīgi iegūtie dati (vai tukšs stāvoklis).
+- Tā darbojas vienreiz servera startēšanas brīdī un pēc tam periodiskā taimerī
+  (`src/lib/arenaEloSync.ts`, pieslēgts no `src/instrumentation-node.ts`).
+- Tā ir **nebloķējoša un nekad nav kritiska** — ja augšupējā datu iegūšana neizdodas, OmniRoute turpina
+  darboties, un rangu tabula vienkārši rāda pēdējos korektos datus (vai tukšu stāvokli).
 
 To kontrolē divi vides mainīgie (dokumentēti
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Mainīgais                 | Noklusējums   | Nolūks                                                         |
-| ------------------------- | ------------- | -------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Iestatiet uz `false`, lai atteiktos no ārējās sinhronizācijas. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sinhronizācijas intervāls sekundēs.                            |
+| Mainīgais                 | Noklusējums   | Mērķis                                                           |
+| ------------------------- | ------------- | ---------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Iestatiet uz `false`, lai atteiktos no izejošās sinhronizācijas. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sinhronizācijas intervāls sekundēs.                              |
 
-### Manuāla sinhronizācija / statuss / notīrīšana
+### Manuāla sinhronizācija / statuss / tīrīšana
 
-Operatoriem autentificēts pārvaldības galapunkts nodrošina manuālu vadību
+Operatoriem autentificēts pārvaldības galapunkts nodrošina manuālu kontroli
 (`src/app/api/intelligence/sync/route.ts` — nepieciešama pārvaldības autentifikācija):
 
 ```
 GET    /api/intelligence/sync          # pašreizējais sinhronizācijas statuss (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # aktivizē manuālu sinhronizāciju; pamatteksts: { "dryRun": true }, lai priekšskatītu bez ierakstīšanas
-DELETE /api/intelligence/sync          # notīra visus sinhronizētos arena_elo analītikas ierakstus
+POST   /api/intelligence/sync          # aktivizē manuālu sinhronizāciju; body: { "dryRun": true } priekšskatījumam bez ierakstīšanas
+DELETE /api/intelligence/sync          # iztīra visus sinhronizētos arena_elo inteliģences ierakstus
 ```
 
 Ja rangu lapa ir tukša, manuāls `POST /api/intelligence/sync` (vai vienkārši
-servera restartēšana) to aizpilda no jauna.
+servera restartēšana) to atkārtoti aizpilda.
 
-### Modeļu atbilstības noteikšana līderu tabulai
+### Modeļu saskaņošana ar līderu tabulu
 
-Reģistra modeļu ID un Arena modeļu nosaukumi ne vienmēr precīzi sakrīt. Rangu noteikšanai tiek izmantota
-elastīga atbilstības noteikšana (`findMatchingIntelligence` failā `src/lib/freeProviderRankings.ts`):
+Reģistra modeļu ID un Arena modeļu nosaukumi ne vienmēr precīzi sakrīt. Rangos tiek
+izmantota elastīga saskaņošana (`findMatchingIntelligence` failā `src/lib/freeProviderRankings.ts`):
 
-1. Precīza atbilstība normalizētajam modeļa ID.
-2. Atbilstība pēc beigu versijas sufiksa noņemšanas (piemēram, `kimi-k2.6` → `kimi-k2`).
-3. Prefiksa atbilstība (līderu tabulas modeļa nosaukums ir reģistra ID prefikss).
+1. Precīza sakritība ar normalizēto modeļa ID.
+2. Sakritība pēc beigu versijas priedēkļa noņemšanas (piem., `kimi-k2.6` → `kimi-k2`).
+3. Prefiksa sakritība (līderu tabulas modeļa nosaukums ir reģistra ID prefikss).
 
-Sinhronizācijas pusē zināmie piegādātāju prefiksi (`anthropic/`, `openai/`, `google/`, …) tiek
-noņemti, un neliela aizstājvārdu karte izvērš kanoniskos nosaukumus par variantiem, kurus OmniRoute izmanto
-iekšēji, lai modeļus varētu atrast ar jebkuru nosaukumu.
+Sinhronizācijas pusē zināmie piegādātāju prefiksi (`anthropic/`, `openai/`, `google/`, …)
+tiek noņemti, un maza aizstājējvārdu karte paplašina kanoniskos nosaukumus variantos, ko
+OmniRoute izmanto iekšēji, tāpēc modeļi paliek atrodami ar jebkuru nosaukumu.
 
-### Kā tiek noteikts piegādātāja rangs
+### Kā nodrošinātājs tiek rangots
 
-Katram bezmaksas piegādātājam dzinis novērtē katru tā kataloga modeli un pēc tam nosaka:
+Katram bezmaksas nodrošinātājam dzinējs novērtē katru modeli tā katalogā, pēc tam:
 
-- **Labākais modelis** = piegādātāja modelis ar visaugstāko vērtējumu.
-- **Vidējais vērtējums** = visu šī piegādātāja novērtēto modeļu vidējais vērtējums.
-- **Modeļi** = to piegādātāja modeļu skaits, kuriem bija pieejams Arena vērtējums.
+- **Labākais modelis** = nodrošinātāja augstāk novērtētais modelis.
+- **Vidējais vērtējums** = vidējā vērtība visiem šī nodrošinātāja novērtētajiem modeļiem.
+- **Modeļi** = cik daudziem nodrošinātāja modeļiem bija Arena vērtējums.
 
-Piegādātāji vispirms tiek kārtoti pēc **labākā modeļa vērtējuma**, bet pēc tam — pēc vidējā vērtējuma. Tādējādi tiek atalgots
-piegādātājs, kas piedāvā vismaz vienu spēcīgu bezmaksas modeli.
+Nodrošinātāji vispirms tiek kārtoti pēc **labākā modeļa vērtējuma**, pēc tam pēc vidējā
+vērtējuma. Tas atalgo nodrošinātāju, kas piedāvā vismaz vienu spēcīgu bezmaksas modeli.
 
 ---
 

@@ -127,102 +127,106 @@ Kształt odpowiedzi:
 
 ---
 
-## Jak działają wyniki
+## Jak działa punktacja
 
 ### Źródło: ranking Arena AI
 
 Silnik synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`) pobiera dwa rankingi — `text`
 oraz `code` — z API rankingu Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Każdy wpis rankingu
-niesie nazwę modelu, vendora, ELO `score`, przedział ufności oraz liczbę głosów.
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Gdy API nie zwraca
+żadnej użytecznej tabeli, silnik korzysta z oficjalnego zestawu `lmarena-ai/leaderboard-dataset`
+na serwerze datasets-server Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` raportuje `activeSource`, `lastError` oraz
+`lastFailedAt`. Każdy wpis rankingu
+zawiera nazwę modelu, dostawcę, wynik ELO `score`, przedział ufności i liczbę głosów.
 
-Kategorie rankingu mapują się na kategorie zadań OmniRoute:
+Kategorie rankingu są mapowane na kategorie zadań OmniRoute:
 
 | Ranking Arena | Kategorie zadań OmniRoute                         |
 | ------------- | ------------------------------------------------- |
 | `text`        | `default`, `review`, `documentation`, `debugging` |
 | `code`        | `coding`                                          |
 
-### Normalizacja (wynik task-fit)
+### Normalizacja (wynik dopasowania do zadania)
 
-Surowe wyniki ELO są normalizowane per ranking do **wartości task-fit w `[0.4, 0.98]`**:
+Surowe wyniki ELO są normalizowane w obrębie każdego rankingu do **wartości dopasowania do zadania z zakresu `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Wynik nigdy nie osiąga `0` ani `1`, zostawiając zapas na nadpisania użytkownika. To jest
-pole `score`, które widzisz w odpowiedzi API oraz etykieta na dashboardzie.
+Wynik nigdy nie osiąga `0` ani `1`, co pozostawia margines na nadpisania przez użytkownika. To jest
+pole `score` widoczne w odpowiedzi API oraz etykieta wyświetlana na pulpicie.
 
-### Confidence (pewność)
+### Ufność
 
-Każdy wpis dostaje poziom confidence na podstawie liczby głosów Arena:
+Każdy wpis otrzymuje poziom ufności na podstawie liczby głosów w Arena:
 
-| Pewność  | Głosy   |
+| Ufność   | Głosy   |
 | -------- | ------- |
-| `high`   | ≥ 5,000 |
-| `medium` | ≥ 1,000 |
-| `low`    | < 1,000 |
+| `high`   | ≥ 5 000 |
+| `medium` | ≥ 1 000 |
+| `low`    | < 1 000 |
 
-### Przechowywanie i świeżość
+### Przechowywanie i aktualność
 
-Znormalizowane wpisy trafiają do tabeli DB `model_intelligence` z
+Znormalizowane wpisy są zapisywane w tabeli bazy danych `model_intelligence` z
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Wpisy **wygasają po
-7 dniach**, więc provider, który przestanie się synchronizować, w końcu wypada zamiast serwować
-przestarzałe dane.
+7 dniach**, więc dostawca, który przestanie się synchronizować, ostatecznie znika z listy,
+zamiast serwować nieaktualne dane.
 
-Synchronizacja jest **domyślnie włączona**:
+Synchronizacja działa **domyślnie włączona**:
 
-- Uruchamia się raz przy starcie serwera, a potem na okresowym timerze
-  (`src/lib/arenaEloSync.ts`, podpięte z `src/server-init.ts`).
-- Jest **nieblokująca i nigdy nie jest fatalna** — jeśli fetch upstreamu się nie uda, OmniRoute dalej
-  działa, a rankingi po prostu pokazują ostatnie dobre dane (albo stan pusty).
+- Uruchamia się raz przy starcie serwera, a następnie cyklicznie
+  (`src/lib/arenaEloSync.ts`, podłączone z `src/instrumentation-node.ts`).
+- Jest **nieblokująca i nigdy nie krytyczna** — jeśli pobranie danych z zewnątrz się nie powiedzie,
+  OmniRoute działa dalej, a rankingi po prostu pokazują ostatnie poprawne dane (albo stan pusty).
 
-Sterują nią dwie zmienne środowiskowe (opisane w
+Kontrolują ją dwie zmienne środowiskowe (opisane w
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Zmienna                   | Domyślnie     | Cel                                                       |
-| ------------------------- | ------------- | --------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Ustaw na `false`, aby wyłączyć wychodzącą synchronizację. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Interwał synchronizacji w sekundach.                      |
+| Zmienna                   | Wartość domyślna | Przeznaczenie                                                |
+| ------------------------- | ---------------- | ------------------------------------------------------------ |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`           | Ustaw `false`, aby zrezygnować z synchronizacji wychodzącej. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h)    | Interwał synchronizacji w sekundach.                         |
 
 ### Ręczna synchronizacja / status / czyszczenie
 
-Dla operatorów uwierzytelniony endpoint managementu udostępnia ręczną kontrolę
-(`src/app/api/intelligence/sync/route.ts` — wymaga management auth):
+Dla operatorów dostępny jest uwierzytelniany endpoint zarządczy umożliwiający ręczną kontrolę
+(`src/app/api/intelligence/sync/route.ts` — wymaga uwierzytelnienia zarządczego):
 
 ```
-GET    /api/intelligence/sync          # current sync status (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # trigger a manual sync; body: { "dryRun": true } to preview without writing
-DELETE /api/intelligence/sync          # clear all synced arena_elo intelligence entries
+GET    /api/intelligence/sync          # bieżący status synchronizacji (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # wyzwól ręczną synchronizację; body: { "dryRun": true }, aby wyświetlić podgląd bez zapisu
+DELETE /api/intelligence/sync          # usuń wszystkie zsynchronizowane wpisy arena_elo
 ```
 
-Jeśli strona rankingów jest pusta, ręczny `POST /api/intelligence/sync` (albo po prostu
-restart serwera) uzupełnia ją ponownie.
+Jeśli strona rankingów jest pusta, ręczne wywołanie `POST /api/intelligence/sync` (lub po prostu
+ponowne uruchomienie serwera) ponownie ją wypełni.
 
 ### Dopasowywanie modeli do rankingu
 
-ID modeli w rejestrze i nazwy modeli Arena nie zawsze pasują dokładnie. Ranking używa
-elastycznego dopasowania (`findMatchingIntelligence` w `src/lib/freeProviderRankings.ts`):
+Identyfikatory modeli w rejestrze i nazwy modeli w Arena nie zawsze są identyczne. Ranking używa
+elastycznego dopasowywania (`findMatchingIntelligence` w `src/lib/freeProviderRankings.ts`):
 
-1. Dokładne dopasowanie znormalizowanego ID modelu.
-2. Dopasowanie po usunięciu końcówki wersji (np. `kimi-k2.6` → `kimi-k2`).
-3. Dopasowanie prefiksu (nazwa modelu z rankingu jest prefiksem ID w rejestrze).
+1. Dokładne dopasowanie znormalizowanego identyfikatora modelu.
+2. Dopasowanie po usunięciu końcowego sufiksu wersji (np. `kimi-k2.6` → `kimi-k2`).
+3. Dopasowanie prefiksowe (nazwa modelu z rankingu jest prefiksem identyfikatora z rejestru).
 
-Po stronie sync znane prefiksy vendorów (`anthropic/`, `openai/`, `google/`, …) są
-usuwane, a mała mapa aliasów rozwija kanoniczne nazwy do wariantów używanych wewnętrznie
-przez OmniRoute, dzięki czemu modele da się znaleźć pod dowolną nazwą.
+Po stronie synchronizacji znane prefiksy dostawców (`anthropic/`, `openai/`, `google/`, …) są
+usuwane, a niewielka mapa aliasów rozwija kanoniczne nazwy do wariantów używanych wewnętrznie
+przez OmniRoute, dzięki czemu modele można znaleźć pod dowolną nazwą.
 
-### Jak rankingowany jest provider
+### Jak oceniany jest dostawca
 
-Dla każdego darmowego providera silnik ocenia każdy model w jego katalogu, a następnie:
+Dla każdego darmowego dostawcy silnik punktuje każdy model w jego katalogu, a następnie:
 
-- **Top Model** = model providera z najwyższym wynikiem.
-- **Avg Score** = średni wynik ze wszystkich ocenionych modeli tego providera.
-- **Models** = ile modeli providera miało wynik Arena.
+- **Top Model** = model dostawcy z najwyższym wynikiem.
+- **Avg Score** = średni wynik wszystkich ocenionych modeli tego dostawcy.
+- **Models** = liczba modeli dostawcy, które miały wynik w Arena.
 
-Providery są sortowane najpierw według **wyniku top-model**, potem według średniego wyniku. To premiuje
-providera, który oferuje przynajmniej jeden silny darmowy model.
+Dostawcy są sortowani najpierw według **wyniku najlepszego modelu**, a następnie według średniego
+wyniku. Nagradza to dostawcę, który oferuje przynajmniej jeden mocny darmowy model.
 
 ---
 

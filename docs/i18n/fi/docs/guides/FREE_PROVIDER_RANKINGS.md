@@ -125,96 +125,103 @@ Vastauksen rakenne:
 
 Arena ELO -synkronointimoottori (`src/lib/arenaEloSync.ts`) hakee kaksi tulostaulukkoa — `text`
 ja `code` — Arena AI -tulostaulukon API:sta
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Jokainen tulostaulukon tietue
-sisältää mallin nimen, toimittajan, ELO-`score`-arvon, luottamusvälin ja äänten määrän.
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Jos kyseinen API ei palauta
+käyttökelpoista taulukkoa, moottori käyttää varavarana virallista `lmarena-ai/leaderboard-dataset`-aineistoa
+Hugging Face datasets -palvelimelta (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` raportoi kentät `activeSource`, `lastError` ja
+`lastFailedAt`. Jokainen tulostaulukon merkintä
+sisältää mallin nimen, toimittajan, ELO-`score`-pisteet, luottamusvälin ja äänimäärän.
 
-Tulostaulukoiden luokat yhdistetään OmniRouten tehtäväluokkiin seuraavasti:
+Tulostaulukoiden kategoriat vastaavat OmniRouten tehtäväkategorioita:
 
-| Arena-tulostaulukko | OmniRouten tehtäväluokat                          |
+| Arena-tulostaulukko | OmniRouten tehtäväkategoriat                      |
 | ------------------- | ------------------------------------------------- |
 | `text`              | `default`, `review`, `documentation`, `debugging` |
 | `code`              | `coding`                                          |
 
-### Normalisointi (tehtävään soveltuvuuden pisteet)
+### Normalisointi (task-fit-pisteet)
 
-Raaka-ELO-pisteet normalisoidaan tulostaulukohtaisesti **tehtävään soveltuvuuden arvoksi välillä `[0.4, 0.98]`**:
+Raakapisteet (ELO) normalisoidaan tulostaulukoittain **task-fit-arvoksi välille `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Pistemäärä ei koskaan saavuta arvoa `0` tai `1`, joten käyttäjän ohituksille jää liikkumavaraa. Tämä on
-API-vastauksessa näkyvä `score`-kenttä sekä hallintapaneelissa näkyvä tunniste.
+Pisteet eivät koskaan saavuta arvoa `0` tai `1`, jotta käyttäjän omat ohitukset jäävät
+vaille tilaa. Tämä on se `score`-kenttä, jonka näet API-vastauksessa ja jonka
+otsakkeena hallintapaneelissa näytetään.
 
-### Luottamustaso
+### Luotettavuus
 
-Jokaiselle tietueelle määritetään luottamustaso Arenan äänimäärän perusteella:
+Jokaiselle merkinnälle annetaan luotettavuustaso Arena-äänimäärän perusteella:
 
-| Luottamustaso | Ääniä   |
-| ------------- | ------- |
-| `high`        | ≥ 5 000 |
-| `medium`      | ≥ 1 000 |
-| `low`         | < 1 000 |
+| Luotettavuus | Ääniä   |
+| ------------ | ------- |
+| `high`       | ≥ 5,000 |
+| `medium`     | ≥ 1,000 |
+| `low`        | < 1,000 |
 
-### Tallennus ja tietojen ajantasaisuus
+### Tallennus ja tuoreus
 
-Normalisoidut tietueet kirjoitetaan tietokannan `model_intelligence`-tauluun arvolla
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Tietueet **vanhenevat
-7 päivän kuluttua**, joten synkronoinnin lopettava palveluntarjoaja poistuu lopulta tiedoista vanhentuneiden
-tietojen näyttämisen sijaan.
+Normalisoidut merkinnät kirjoitetaan `model_intelligence`-tietokantatauluun arvolla
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Merkinnät **vanhenevat
+7 päivän jälkeen**, joten palveluntarjoaja, joka lopettaa synkronoinnin, putoaa lopulta
+pois sen sijaan että se tarjoaisi vanhentunutta dataa.
 
-Synkronointi on **oletusarvoisesti käytössä**:
+Synkronointi on **oletuksena päällä**:
 
-- Se suoritetaan kerran palvelimen käynnistyessä ja sen jälkeen säännöllisin väliajoin
-  (`src/lib/arenaEloSync.ts`, kytkentä tiedostossa `src/instrumentation-node.ts`).
-- Se **ei estä toimintaa eikä koskaan aiheuta vakavaa virhettä** — jos tietojen haku lähteestä epäonnistuu, OmniRoute jatkaa
-  toimintaansa ja sijoituksissa näytetään vain viimeisimmät onnistuneesti haetut tiedot (tai tyhjä tila).
+- Se suoritetaan kerran palvelimen käynnistyessä ja sen jälkeen ajastetusti
+  (`src/lib/arenaEloSync.ts`, kytketty tiedostosta `src/instrumentation-node.ts`).
+- Se on **ei-blokkaava eikä koskaan kohtalokas** — jos lähdejärjestelmän haku epäonnistuu,
+  OmniRoute jatkaa toimintaansa ja ranking-listat näyttävät yksinkertaisesti viimeisimmät
+  toimivat tiedot (tai tyhjän tilan).
 
-Sitä hallitaan kahdella ympäristömuuttujalla (dokumentoitu tiedostossa
+Kaksi ympäristömuuttujaa ohjaa sitä (dokumentoitu tiedostossa
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Muuttuja                  | Oletusarvo     | Tarkoitus                                                                  |
-| ------------------------- | -------------- | -------------------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`         | Aseta arvoksi `false`, jos haluat poistaa lähtevän synkronoinnin käytöstä. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 h) | Synkronointiväli sekunteina.                                               |
+| Muuttuja                  | Oletus        | Tarkoitus                                                 |
+| ------------------------- | ------------- | --------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Aseta arvoon `false` kieltääksesi lähtevän synkronoinnin. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Synkronointiväli sekunteina.                              |
 
 ### Manuaalinen synkronointi / tila / tyhjennys
 
-Operaattoreille todennettu hallintapäätepiste tarjoaa manuaalisen hallinnan
-(`src/app/api/intelligence/sync/route.ts` — edellyttää hallintatodennusta):
+Ylläpitäjille todennettu hallintapäätepiste tarjoaa manuaalisen ohjauksen
+(`src/app/api/intelligence/sync/route.ts` — vaatii hallintatodennuksen):
 
 ```
 GET    /api/intelligence/sync          # synkronoinnin nykyinen tila (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # käynnistä manuaalinen synkronointi; runko: { "dryRun": true } esikatselua varten ilman kirjoittamista
-DELETE /api/intelligence/sync          # tyhjennä kaikki synkronoidut arena_elo-älytietueet
+POST   /api/intelligence/sync          # käynnistä manuaalinen synkronointi; runko: { "dryRun": true } esikatseluun ilman kirjoitusta
+DELETE /api/intelligence/sync          # tyhjennä kaikki synkronoidut arena_elo-tietomerkinnät
 ```
 
-Jos sijoitussivu on tyhjä, manuaalinen `POST /api/intelligence/sync` (tai pelkkä
+Jos ranking-sivu on tyhjä, manuaalinen `POST /api/intelligence/sync` (tai yksinkertaisesti
 palvelimen uudelleenkäynnistys) täyttää sen uudelleen.
 
-### Mallien yhdistäminen tulostaulukkoon
+### Mallien täsmäyttäminen tulostaulukkoon
 
-Rekisterin mallitunnukset ja Arenan mallien nimet eivät aina vastaa täysin toisiaan. Sijoituksissa käytetään
-joustavaa vastaavuushakua (`findMatchingIntelligence` tiedostossa `src/lib/freeProviderRankings.ts`):
+Rekisterin mallitunnukset ja Arenan mallinimet eivät aina täsmää täysin. Ranking käyttää
+joustavaa täsmäytystä (`findMatchingIntelligence` tiedostossa `src/lib/freeProviderRankings.ts`):
 
-1. Normalisoidun mallitunnuksen täsmällinen vastaavuus.
-2. Vastaavuus lopussa olevan versiotunnisteen poistamisen jälkeen (esim. `kimi-k2.6` → `kimi-k2`).
-3. Etuliitteen vastaavuus (tulostaulukon mallin nimi on rekisteritunnuksen etuliite).
+1. Tarkka täsmäys normalisoidulla mallitunnuksella.
+2. Täsmäys lopun versionumeroliitteen poistamisen jälkeen (esim. `kimi-k2.6` → `kimi-k2`).
+3. Etuliitetäsmäys (tulostaulukon mallinimi on rekisteritunnuksen etuliite).
 
-Synkronoinnin yhteydessä tunnetut toimittajien etuliitteet (`anthropic/`, `openai/`, `google/`, …)
-poistetaan ja pieni aliasmääritys laajentaa kanoniset nimet OmniRouten sisäisesti käyttämiin
-muunnelmiin, joten mallit löytyvät kaikilla nimillä.
+Synkronointipuolella tunnetut toimittajien etuliitteet (`anthropic/`, `openai/`, `google/`, …)
+poistetaan ja pieni aliaskartta laajentaa kanoniset nimet niihin muunnelmiin, joita OmniRoute
+käyttää sisäisesti, jotta mallit löytyvät millä nimellä tahansa.
 
 ### Miten palveluntarjoaja sijoitetaan
 
-Moottori pisteyttää kunkin ilmaisen palveluntarjoajan kaikki luettelossa olevat mallit, minkä jälkeen:
+Jokaisen ilmaisen palveluntarjoajan kohdalla moottori pisteyttää jokaisen sen katalogin mallin, minkä jälkeen:
 
-- **Paras malli** = palveluntarjoajan parhaiten pisteytetty malli.
-- **Keskimääräinen pistemäärä** = palveluntarjoajan kaikkien pisteytettyjen mallien pisteiden keskiarvo.
-- **Mallit** = niiden palveluntarjoajan mallien määrä, joilla oli Arena-pistemäärä.
+- **Paras malli** = palveluntarjoajan korkeimmin pisteytetty malli.
+- **Keskiarvo** = kaikkien palveluntarjoajan pisteytettyjen mallien pistekeskiarvo.
+- **Malleja** = kuinka monella palveluntarjoajan malleista oli Arena-pisteet.
 
-Palveluntarjoajat järjestetään ensin **parhaan mallin pistemäärän** ja sitten keskimääräisen pistemäärän mukaan. Tämä palkitsee
-palveluntarjoajan, joka tarjoaa vähintään yhden vahvan ilmaisen mallin.
+Palveluntarjoajat lajitellaan ensisijaisesti **parhaan mallin pisteiden** mukaan ja
+toissijaisesti keskiarvon mukaan. Tämä palkitsee palveluntarjoajan, joka tarjoaa
+vähintään yhden vahvan ilmaisen mallin.
 
 ---
 
