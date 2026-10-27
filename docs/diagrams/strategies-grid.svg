@@ -25,6 +25,7 @@
 .mono-sm{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:11px;fill:var(--body)}
 .mono-xs{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:9px;letter-spacing:0.08em;fill:var(--muted)}
 .term{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:13px;fill:var(--inverse-text)}
+.term-lg{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:16px;fill:var(--inverse-text)}
 .ok{fill:var(--ok)} .warn{fill:var(--warn)} .err{fill:var(--err)} .info{fill:var(--info)} .ok-bg{fill:var(--ok-bg)} .warn-bg{fill:var(--warn-bg)} .err-bg{fill:var(--err-bg)} .info-bg{fill:var(--info-bg)} .stroke-ok{stroke:var(--ok)} .stroke-warn{stroke:var(--warn)} .stroke-err{stroke:var(--err)} .stroke-info{stroke:var(--info)} .stroke-accent{stroke:var(--accent)} .stroke-ink{stroke:var(--ink)} .surface-subtle{fill:var(--surface-subtle)} .surface-muted{fill:var(--surface-muted)} .inverse{fill:var(--inverse-bg)} .track{fill:var(--track)} .accent-soft{fill:var(--accent-soft)} .ink{fill:var(--ink)} .body-fill{fill:var(--body)} .muted{fill:var(--muted)}
   </style>
   <defs>
