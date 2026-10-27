@@ -403,6 +403,61 @@ function repairJson(text: string): string {
 }
 
 /**
+ * Escape double quotes that appear *inside* a JSON string value.
+ *
+ * Playground models routinely emit shell commands and code carrying quoted
+ * paths/globs/patterns without escaping the inner quotes:
+ *
+ *   `<tool name="bash">{"command":"find . -name "*.py" 2>/dev/null"}</tool>`
+ *
+ * Strict `JSON.parse` rejects that, and when the whole call was discarded the
+ * model's markup leaked to the client as plain assistant text — so the agent
+ * never received a tool result and retried the same turn.
+ *
+ * A quote inside a string is treated as a terminator only when the next
+ * non-whitespace character can legally follow one (`:`, `,`, `}`, `]` or end of
+ * input). Anything else is a literal inner quote and is escaped.
+ *
+ * Known limitation: a quoted phrase immediately followed by a comma inside a
+ * value (`"echo "hi", stop"`) stays ambiguous and is left unparsed — the same
+ * outcome as before this repair existed. Only ever applied after strict
+ * `JSON.parse` has already failed, so well-formed payloads are never rewritten.
+ */
+function repairUnescapedInnerQuotes(text: string): string {
+  let out = "";
+  let inString = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === "\\") {
+      out += ch + (text[i + 1] ?? "");
+      i++;
+      continue;
+    }
+    if (ch !== '"') {
+      out += ch;
+      continue;
+    }
+    if (!inString) {
+      inString = true;
+      out += ch;
+      continue;
+    }
+    let j = i + 1;
+    while (j < text.length && /\s/.test(text[j])) j++;
+    const next = text[j];
+    const closes =
+      next === undefined || next === "," || next === ":" || next === "}" || next === "]";
+    if (closes) {
+      inString = false;
+      out += ch;
+    } else {
+      out += '\\"';
+    }
+  }
+  return out;
+}
+
+/**
  * Lenient JSON parser for model output: accepts unquoted keys, single-quoted
  * strings, bare (unquoted) string values, trailing commas and real newlines.
  * Only used when strict `JSON.parse` fails, so it never changes well-formed
@@ -540,6 +595,42 @@ function parseLooseJson(input: string): unknown {
 }
 
 /**
+ * Return the first balanced `{...}` / `[...]` slice of `text`, leaving escapes
+ * intact.
+ *
+ * Unlike `extractEmbeddedJson` (which unescapes before scanning, for payloads
+ * embedded in tag attributes) this never rewrites the text, so an otherwise
+ * valid object followed by junk is recovered verbatim. Models routinely emit a
+ * stray extra closing brace — `{"path":"a","content":"...{str(e)}"}}` — which
+ * makes `JSON.parse` reject a payload that is 99% correct.
+ */
+function extractBalancedJson(text: string): string | null {
+  const start = text.search(/[[{]/);
+  if (start === -1) return null;
+  const open = text[start];
+  const close = open === "{" ? "}" : "]";
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === open) depth++;
+    else if (ch === close) {
+      depth--;
+      if (depth === 0) return text.slice(start, i + 1);
+    }
+  }
+  return null;
+}
+
+/**
  * Normalize tool-call arguments into a valid JSON string.
  * Returns the original text when it already parses (preserving formatting),
  * otherwise the repaired-and-restringified payload, or null when unparseable.
@@ -550,15 +641,32 @@ function normalizeToolArguments(content: string): string | null {
     JSON.parse(trimmed);
     return trimmed;
   } catch {
-    /* try the lenient path */
+    /* fall through to the repair passes */
   }
-  try {
-    const parsed = parseLooseJson(repairJson(trimmed));
-    if (parsed === null || typeof parsed !== "object") return null;
-    return JSON.stringify(parsed);
-  } catch {
-    return null;
+  // Candidates are tried in order of fidelity. The unrepaired payload and the
+  // balanced slice come first: `repairJson` below unescapes `\"`/`\n`, which is
+  // what a payload embedded in markup needs but which destroys an
+  // otherwise-valid object that merely has trailing junk.
+  const balanced = extractBalancedJson(trimmed);
+  const candidates = [
+    trimmed,
+    balanced,
+    repairJson(trimmed),
+    balanced ? repairJson(balanced) : null,
+    repairUnescapedInnerQuotes(trimmed),
+    repairUnescapedInnerQuotes(repairJson(trimmed)),
+    balanced ? repairUnescapedInnerQuotes(repairJson(balanced)) : null,
+  ];
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+    try {
+      const parsed = parseLooseJson(candidate);
+      if (parsed !== null && typeof parsed === "object") return JSON.stringify(parsed);
+    } catch {
+      /* try the next candidate */
+    }
   }
+  return null;
 }
 
 /**
@@ -642,8 +750,11 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
   const isHandled = (start: number, end: number) =>
     handledSpans.some(([s, e]) => start < e && end > s);
 
-  // Pattern 1: <tool name="...">...</tool> or <tool>...</tool>
-  const toolTagRegex = /<\s*tool\b([^>]*)>([\s\S]*?)<\s*\/\s*tool\s*>/gi;
+  // Pattern 1: <tool name="...">...</tool> or <tool>...</tool>. Also accepts
+  // the `<tool_call>` / `<tool-call>` / `<toolcall>` spellings many models are
+  // trained on (e.g. `<tool_call>{"name":"bash","arguments":{...}}</tool_call>`).
+  const toolTagRegex =
+    /<\s*tool(?:[_-]?call)?\b([^>]*)>([\s\S]*?)<\s*\/\s*tool(?:[_-]?call)?\s*>/gi;
   let match: RegExpExecArray | null;
   while ((match = toolTagRegex.exec(text)) !== null) {
     const attrs = match[1];
@@ -671,7 +782,7 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
   // Pattern 1b: recover malformed `<tool ...>` tags where a `>` inside the JSON
   // payload (e.g. `{"command": "ls > out.txt"}`) truncated the attribute scan
   // above. Re-scan the whole tag body for a balanced JSON payload.
-  const looseToolRegex = /<\s*tool\b([\s\S]*?)<\s*\/\s*tool\s*>/gi;
+  const looseToolRegex = /<\s*tool(?:[_-]?call)?\b([\s\S]*?)<\s*\/\s*tool(?:[_-]?call)?\s*>/gi;
   while ((match = looseToolRegex.exec(text)) !== null) {
     const start = match.index;
     const end = start + match[0].length;
@@ -690,6 +801,36 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
       arguments: unwrapped.argsJson,
     });
     handledSpans.push([start, end]);
+  }
+
+  // Pattern 1c: `<tool ...>` with no closing tag. Models hit their output
+  // limit mid-payload, or simply omit `</tool>`; the call used to be dropped
+  // and its markup leaked to the client as text. Deliberately narrow: only an
+  // opening tag whose remainder carries no closing tag at all and whose body
+  // starts with the JSON payload. A `<tool:name>` body belongs to Pattern 2, a
+  // body with any closing tag belongs to Pattern 1, and prose that merely
+  // mentions `<tool>` is left alone.
+  const openOnlyRegex = /<\s*tool(?:[_-]?call)?\b([^>]*)>([\s\S]*)$/gi;
+  while ((match = openOnlyRegex.exec(text)) !== null) {
+    const start = match.index;
+    if (isHandled(start, start + 1)) continue;
+    if (/^\s*:/.test(match[1])) continue;
+    const body = match[2].trim();
+    if (/<\s*\//.test(body) || !/^[[{]/.test(body)) continue;
+    const normalized = normalizeToolArguments(body);
+    if (!normalized) continue;
+    const unwrapped = unwrapToolPayload(normalized);
+    const attrName = match[1].match(/name\s*=\s*["']([^"']+)["']/i);
+    const name =
+      unwrapped.name ??
+      (attrName ? attrName[1] : inferToolName(unwrapped.argsJson, availableTools));
+    if (!name) continue;
+    calls.push({
+      id: `call_${crypto.randomUUID().slice(0, 8)}`,
+      name,
+      arguments: unwrapped.argsJson,
+    });
+    handledSpans.push([start, text.length]);
   }
 
   // Pattern 2: <tool:name>...</tool:name> (alternative form)

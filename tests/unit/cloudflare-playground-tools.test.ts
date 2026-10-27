@@ -129,6 +129,74 @@ test("parseCfToolCalls handles any declared tool name used as the tag", () => {
   assert.equal(calls[0].arguments, '{"command": "ls"}');
 });
 
+// ── Regressions: real model output that used to be dropped ──────────────────
+// Every payload below was captured from a live playground session (OpenCode
+// `ses_e9bc32a3bffeu7t5WwTY8M0ood`). Each one failed to parse before, so the
+// model's markup leaked to the client as plain assistant text and the agent
+// never received a tool result — it just retried the same turn.
+
+test("parseCfToolCalls recovers a command with unescaped inner double quotes", () => {
+  // The model quoted a glob without escaping it — not valid JSON:
+  //   {"command":"find . -name "*.py" 2>/dev/null"}
+  const command = 'ls -la /srv/*.py 2>/dev/null; find /srv -type f -name "*.py" 2>/dev/null';
+  const text = `<tool name="bash">{"command":"${command}"}</tool>`;
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
+  assert.equal(JSON.parse(calls[0].arguments).command, command);
+});
+
+test("parseCfToolCalls recovers a payload closed with a stray extra brace", () => {
+  // Observed tail: `...{str(e)}"}}` — one closing brace too many, so JSON.parse
+  // rejected a payload that was otherwise entirely correct.
+  const text = '<tool name="bash">{"command": "echo hi"}}</tool>';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
+  assert.equal(JSON.parse(calls[0].arguments).command, "echo hi");
+});
+
+test("parseCfToolCalls recovers a file-write payload with escaped newlines and quotes", () => {
+  // Observed: `<tool name="write">` carrying an entire script, `\n` escaped and
+  // inner quotes backslash-escaped, behind a sentence of prose.
+  const text =
+    'Let me write the probe script:\n\n<tool name="write">{"path":"/tmp/probe.sh","content":"#!/bin/bash\\nset -e\\necho \\"done\\"\\n"}</tool>';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "write");
+  const args = JSON.parse(calls[0].arguments);
+  assert.equal(args.path, "/tmp/probe.sh");
+  assert.equal(args.content, '#!/bin/bash\nset -e\necho "done"\n');
+});
+
+test("parseCfToolCalls recovers a <tool> tag left unterminated by truncation", () => {
+  // Observed: `<tool>{"name": "shell", "arguments": {...}}` with no closing
+  // tag — the model ran out of output, or simply forgot it.
+  const text = '<tool>{"name": "bash", "arguments": {"command": "ls"}}';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
+  assert.equal(calls[0].arguments, '{"command":"ls"}');
+});
+
+test("parseCfToolCalls handles the <tool_call> tag spelling", () => {
+  // Many models are trained on `<tool_call>` rather than `<tool>`.
+  const text = '<tool_call>{"name":"bash","arguments":{"command":"ls"}}</tool_call>';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
+  assert.equal(calls[0].arguments, '{"command":"ls"}');
+});
+
+test("parseCfToolCalls does not turn prose that merely mentions <tool> into a call", () => {
+  // The unterminated-tag recovery must not fire on explanatory text.
+  const prose = "Wrap the payload in <tool> tags and put the JSON object right after them.";
+  assert.equal(parseCfToolCalls(prose, TEST_TOOLS).length, 0);
+
+  // A mismatched closing tag still counts as malformed intent, not a call.
+  assert.equal(hasMalformedCfToolIntent('<tool>{"command": "ls"}</other>'), true);
+});
+
 test("parseCfToolCalls handles <read_file>...</read_file> tag", () => {
   const text = '<read_file>{"path": "src/index.ts"}</read_file>';
   const calls = parseCfToolCalls(text, TEST_TOOLS);
