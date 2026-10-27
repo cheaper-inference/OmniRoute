@@ -121,8 +121,7 @@ export async function renderCompressionPipeline() {
     const peak = def ? "1" : "0.9";
     // Names alternate between two baselines under the cells so 11 px labels never collide.
     const nameY = k % 2 === 0 ? 270 : 286;
-    // "Session Dedup" (80 px wide) would start on the container's left stroke — nudge it in.
-    const nameX = x + CELL_W / 2 + (k === 0 ? 12 : 0);
+    const nameX = x + CELL_W / 2;
     return (
       `    <g transform="translate(${x},${CELL_Y})">\n` +
       `      ${base}\n` +
@@ -161,9 +160,11 @@ export async function renderCompressionPipeline() {
     `  <circle cx="222" cy="186" r="5" class="accent">` +
     `<animate attributeName="opacity" values="1;0.4;1" dur="2.2s" repeatCount="indefinite"/></circle>\n` +
     // Pipeline container
-    `  <rect x="285" y="112" width="630" height="254" rx="12" class="surface" stroke-width="1"/>\n` +
+    // Pipeline container: 12 px wider than the previous file on each side (273–927) so the
+    // 80 px "Session Dedup" name, centred under cell 1, clears the left stroke.
+    `  <rect x="273" y="112" width="654" height="254" rx="12" class="surface" stroke-width="1"/>\n` +
     `  <text x="600" y="140" text-anchor="middle" class="kicker">${esc(C.kickers[2])}</text>\n` +
-    `  <path d="M 245,208 L 285,210 L 915,226 L 955,227 L 955,233 L 915,234 L 285,250 L 245,252 Z" fill="url(#cmp-funnel)"/>\n` +
+    `  <path d="M 245,208 L 273,210 L 927,226 L 955,227 L 955,233 L 927,234 L 273,250 L 245,252 Z" fill="url(#cmp-funnel)"/>\n` +
     // 12 engine cells + staggered names
     `  <g text-anchor="middle">\n` +
     cells.join("\n") +
