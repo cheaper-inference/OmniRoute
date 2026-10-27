@@ -93,10 +93,12 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     executeProviderRequest,
     executor,
     fallbackAttempts,
+    geminiPromptCacheMode,
     getCurrentConnectionId,
     forcedConnectionId,
     isCombo,
     isDroidCLI,
+    isScopedGeminiCacheTarget,
     isResponsesEndpoint,
     log,
     managedLease,
@@ -129,6 +131,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     streamUserAgent,
     targetFormat,
     thinkingMarkerHeader,
+    tokensCompressed,
     toolNameMap,
     traceId,
     translatedBody,
@@ -364,6 +367,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
     firstOutputMs,
     itlMs: streamItlMs,
     interrupted: _streamInterrupted,
+    cacheEvidence: streamCacheEvidence,
     partialUsage: streamPartialUsage,
   }) => {
     const ttft = requestTtftMs(streamTimingOriginOffsetMs, firstOutputMs);
@@ -374,7 +378,17 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       if (streamFailureCompletionRecorded) return;
       streamFailureCompletionRecorded = true;
     }
-    const cacheUsageLogMeta = buildCacheUsageLogMeta(streamUsage);
+    const cacheUsageLogMeta = buildCacheUsageLogMeta(
+      streamUsage,
+      isScopedGeminiCacheTarget
+        ? {
+            mode: geminiPromptCacheMode,
+            evidence: streamCacheEvidence,
+            compressionTokens: tokensCompressed || undefined,
+            timing: { ttftMs: ttft, itlMs: streamItlMs },
+          }
+        : undefined
+    );
     const streamConnectionId = getCurrentConnectionId();
 
     if (normalizedStreamStatus === 200) {
@@ -505,6 +519,7 @@ export async function runStreamingTail(deps: StreamingTailDeps) {
       clientResponse: clientPayload ?? streamResponseBody ?? undefined,
       claudeCacheMeta: claudePromptCacheLogMeta,
       claudeCacheUsageMeta: cacheUsageLogMeta,
+      geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
       cacheSource: "upstream",
       // #13130: persist TTFT so call_logs.ttft_ms lets the dashboard compute
       // generation-time TPS instead of wall-clock TPS.

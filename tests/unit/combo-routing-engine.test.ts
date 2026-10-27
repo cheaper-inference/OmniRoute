@@ -591,6 +591,62 @@ test("handleComboChat preserves the weighted primary before prompt-cache affinit
   }
 });
 
+test("prompt-cache affinity falls through when its preferred account becomes runtime-ineligible", async () => {
+  const combo = {
+    name: "affinity-runtime-ineligible",
+    strategy: "round-robin",
+    models: [
+      {
+        kind: "model",
+        providerId: "openai",
+        model: "openai/gpt-4o-mini",
+        connectionId: "affinity-account-a",
+      },
+      {
+        kind: "model",
+        providerId: "openai",
+        model: "openai/gpt-4o-mini",
+        connectionId: "eligible-account-b",
+      },
+    ],
+    config: { maxRetries: 0 },
+  };
+  const resolvedTargets = resolveComboTargets(combo, null);
+  const cacheKey = Array.from({ length: 100 }, (_, index) => `affinity-cache-${index}`).find(
+    (key) =>
+      applyPromptCacheAffinity(resolvedTargets, { prompt_cache_key: key }).targets[0]
+        ?.connectionId === "affinity-account-a"
+  );
+  assert.ok(cacheKey, "fixture must prefer affinity account A");
+
+  const availabilityChecks: string[] = [];
+  const dispatches: string[] = [];
+  const result = await handleComboChat({
+    body: { prompt_cache_key: cacheKey },
+    combo,
+    handleSingleModel: async (
+      _body: unknown,
+      _modelStr: string,
+      target: { connectionId?: string }
+    ) => {
+      dispatches.push(target.connectionId || "none");
+      return okResponse();
+    },
+    isModelAvailable: async (_modelStr: string, target: { connectionId?: string }) => {
+      availabilityChecks.push(target.connectionId || "none");
+      return target.connectionId !== "affinity-account-a";
+    },
+    log: createLog(),
+    settings: { promptCacheAffinityEnabled: true },
+    relayOptions: null,
+    allCombos: null,
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(availabilityChecks[0], "affinity-account-a");
+  assert.deepEqual(dispatches, ["eligible-account-b"]);
+});
+
 test("handleComboChat weighted strategy falls back to uniform random when all weights are zero", async () => {
   const calls: any[] = [];
   _setSecureRandomFloatSource(() => 0.75);
