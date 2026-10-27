@@ -171,13 +171,13 @@ generator's output (job `test-unit`).
 - **Regenerate.** `npm run docs:readme-diagrams` rewrites all twelve in README order and prints one line per
   file with its size. A single generator also runs on its own (`node scripts/docs/gen-readme-<name>.mjs`;
   `free-tier-budget` needs `node --import tsx/esm` because its figures come from the live catalog loader in
-  `open-sse/config/freeModelCatalog.ts` — a change to `FREE_MODEL_BUDGETS` or to a provider display name
-  reds CI until it is regenerated). Commit the generator and the SVG together.
+  `open-sse/config/freeModelCatalog.ts`; the CI consequence of a catalog change is in
+  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit the generator and the SVG together.
 - **Proof.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renders a file the way GitHub serves
   it (an `<img>` tag, camo's `Content-Security-Policy`, `image/svg+xml`), captures a light and a dark frame
   and reports the external font requests the page made (must be 0).
 - **Budget.** Under 200 KB per file (each staleness test asserts it); 500 KB is the hard cap for any README
-  image.
+  image (the SVG studio validator's rule).
 - **Copy unchanged, counts from the gate.** The rebrand changed type and palette, not words: each generator
   carries its diagram's copy in a `*_COPY` constant (or builds it from the live catalog) that is both the
   drawn text and the font-subset input. Canonical figures stay in `<text>` nodes, read by `check:docs-counts`

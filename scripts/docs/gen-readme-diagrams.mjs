@@ -30,7 +30,7 @@ import { renderCompressionPipeline } from "./gen-readme-compression-pipeline.mjs
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
 // README order (top to bottom). `out` is relative to the repository root.
-export const README_DIAGRAMS = [
+const README_DIAGRAMS = [
   { name: "readme-hero", render: renderReadmeHero, out: "docs/diagrams/readme-hero.svg" },
   {
     name: "free-tier-budget",
@@ -79,7 +79,8 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
     try {
       svg = await render();
     } catch (err) {
-      console.error(`${name}: generator failed — ${err instanceof Error ? err.message : err}`);
+      console.error(`${name}: generator failed`);
+      console.error(err);
       process.exit(1);
     }
     writeFileSync(resolve(ROOT, out), svg);

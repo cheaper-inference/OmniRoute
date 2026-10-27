@@ -193,7 +193,7 @@ numbers are never outlined to paths. The SVG canonical-numbers check reads the f
 `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`,
 `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`,
 `tier-cascade.svg`, plus `public/images/tier-flow-dark.svg` and `tier-flow-light.svg`; the
-free-forever, catalog-entry, recurring-pool and strategy-table claims also read
+free-forever, catalog-entry, recurring-pool and scoring-factors claims also read
 `promise-pillars.svg`, `free-tier-budget.svg` and `strategies-grid.svg`. `free-tier-budget.svg`
 draws its figures from the live catalog loader, so a change to `FREE_MODEL_BUDGETS` or to a
 provider display name reds CI until that file is regenerated.
