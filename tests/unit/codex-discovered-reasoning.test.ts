@@ -6,6 +6,8 @@ import test from "node:test";
 
 const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "codex-discovered-reasoning-"));
 process.env.DATA_DIR = dataDir;
+await import("../_helpers/offlineCatalogDiscovery.ts");
+
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 const { createProviderConnection } = await import("../../src/lib/db/providers.ts");
 const { getSyncedAvailableModelsForConnection } = await import("../../src/lib/db/models.ts");

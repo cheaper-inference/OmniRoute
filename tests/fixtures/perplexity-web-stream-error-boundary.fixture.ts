@@ -426,7 +426,9 @@ test("same-packet content and error preserve the prefix across repeated readines
 
 test("a delayed success hook cannot erase same-packet content before terminal failure", async () => {
   const partialAnswer = "prefix must survive delayed success bookkeeping";
-  const model = "pplx-auto-delayed-success-proof";
+  // Use a distinct, registered model so persistence cannot match an earlier
+  // pplx-auto failure. An invented id is rejected before the stream is exercised.
+  const model = "pplx-sonar";
   const requestStartedAt = new Date(Date.now() - 1_000);
   let finalizedFailure: StreamFailure | null = null;
   const result = await executeThroughChatCore(
