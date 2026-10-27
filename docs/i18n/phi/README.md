@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                                         |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Mga Provider                         |            352            |   **358**   |          375          |
-| 🧠 Natatanging chat model ID            |           1320            |  **1374**   |         1475          |
-| 🖼️ Modality Bridge                      | 🆕 vision + audio + video |      ✓      |           ✓           |
-| 📡 Libreng catalog ng Radar             |         🆕 opt-in         |      ✓      |           ✓           |
-| ⚖️ Scheduling na may kamalayan sa quota |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Telemetry ng quota                   |          🆕 live          |      ✓      |           ✓           |
-| 🧰 Headless mode                        |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS rail infra                       |             —             |      —      |  🆕 release channels  |
-| 🔎 API sa paghahanap ng Model           |             —             |      —      | 🆕 `/v1/models/query` |
+|                                     |          v3.8.50          | **v3.8.51** |       `v3.8.53+`       |
+| ----------------------------------- | :-----------------------: | :---------: | :--------------------: |
+| 🌐 Mga Provider                     |            352            |   **358**   |          376           |
+| 🧠 Mga natatanging ID ng chat model |           1320            |  **1374**   |          1475          |
+| 🖼️ Modality Bridge                  | 🆕 vision + audio + video |      ✓      |           ✓            |
+| 📡 Libreng catalog ng Radar         |         🆕 opt-in         |      ✓      |           ✓            |
+| ⚖️ Pag-iiskedyul na batay sa quota  |      🆕 Quota-Share       |      ✓      |           ✓            |
+| 📊 Telemetry ng quota               |          🆕 live          |      ✓      |           ✓            |
+| 🧰 Headless mode                    |             —             |      —      | 🆕 `serve --headless`  |
+| 🛤️ Infra ng LTS rail                |             —             |      —      | 🆕 mga release channel |
+| 🔎 API ng pagtuklas ng modelo       |             —             |      —      | 🆕 `/v1/models/query`  |
 
-**→ [Roadmap](ROADMAP.md) — sakay sa riles patungong `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — sumasakay sa riles patungong `v3.9.0 LTS`**
 
 </div>
 

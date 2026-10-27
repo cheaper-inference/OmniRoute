@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                            |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| -------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Penyedia                |           352           |   **358**   |          375          |
-| 🧠 ID model chat unik      |          1320           |  **1374**   |         1475          |
-| 🖼️ Jembatan Modalitas      | 🆕 visi + audio + video |      ✓      |           ✓           |
-| 📡 Katalog gratis Radar    |        🆕 opt-in        |      ✓      |           ✓           |
-| ⚖️ Penjadwalan sadar kuota |     🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Telemetri kuota         |       🆕 langsung       |      ✓      |           ✓           |
-| 🧰 Mode headless           |            —            |      —      | 🆕 `serve --headless` |
-| 🛤️ Infrastruktur rel LTS   |            —            |      —      |    🆕 kanal rilis     |
-| 🔎 API penemuan model      |            —            |      —      | 🆕 `/v1/models/query` |
+|                            |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| -------------------------- | :-----------------------: | :---------: | :-------------------: |
+| 🌐 Provider                |            352            |   **358**   |          376          |
+| 🧠 ID model chat unik      |           1320            |  **1374**   |         1475          |
+| 🖼️ Jembatan Modalitas      | 🆕 vision + audio + video |      ✓      |           ✓           |
+| 📡 Katalog gratis Radar    |         🆕 opt-in         |      ✓      |           ✓           |
+| ⚖️ Penjadwalan sadar kuota |      🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Telemetri kuota         |        🆕 langsung        |      ✓      |           ✓           |
+| 🧰 Mode headless           |             —             |      —      | 🆕 `serve --headless` |
+| 🛤️ Infra jalur LTS         |             —             |      —      |    🆕 kanal rilis     |
+| 🔎 API penemuan model      |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Peta Jalan](ROADMAP.md) — menyusuri rel menuju `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — menempuh jalur menuju `v3.9.0 LTS`**
 
 </div>
 

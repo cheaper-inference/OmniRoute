@@ -71,17 +71,17 @@
 
 |                                                 |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Watoa huduma                                 |           352            |   **358**   |          375          |
-| 🧠 Vitambulisho vya kipekee vya modeli za gumzo |           1320           |  **1374**   |         1475          |
-| 🖼️ Daraja la Modali                             | 🆕 maono + sauti + video |      ✓      |           ✓           |
-| 📡 Katalogi ya bure ya Radar                    |       🆕 kujiunga        |      ✓      |           ✓           |
-| ⚖️ Upangaji unaozingatia kiwango                |      🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Telemetria ya kiwango                        |     🆕 moja kwa moja     |      ✓      |           ✓           |
+| 🌐 Watoa huduma                                 |           352            |   **358**   |          376          |
+| 🧠 Vitambulisho vya kipekee vya mifano ya gumzo |           1320           |  **1374**   |         1475          |
+| 🖼️ Daraja la Modaliti                           | 🆕 maono + sauti + video |      ✓      |           ✓           |
+| 📡 Katalogi bure ya Radar                       |     🆕 kwa kujiunga      |      ✓      |           ✓           |
+| ⚖️ Uratibu unaojali kwota                       |      🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 Telemetria ya kwota                          |     🆕 moja kwa moja     |      ✓      |           ✓           |
 | 🧰 Hali ya headless                             |            —             |      —      | 🆕 `serve --headless` |
-| 🛤️ Miundombinu ya reli ya LTS                   |            —             |      —      |  🆕 chaneli za toleo  |
-| 🔎 API ya ugunduzi wa modeli                    |            —             |      —      | 🆕 `/v1/models/query` |
+| 🛤️ Miundombinu ya reli ya LTS                   |            —             |      —      |  🆕 njia za matoleo   |
+| 🔎 API ya ugunduzi wa mifano                    |            —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Ramani ya maendeleo](ROADMAP.md) — tukisafiri kwa reli kuelekea `v3.9.0 LTS`**
+**→ [Ramani ya Maendeleo](ROADMAP.md) — tukisafiri kwa reli kuelekea `v3.9.0 LTS`**
 
 </div>
 

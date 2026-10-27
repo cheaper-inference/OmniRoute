@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                                     |          v3.8.50          | **v3.8.51** |        `v3.8.53+`         |
-| ----------------------------------- | :-----------------------: | :---------: | :-----------------------: |
-| 🌐 Proveedores                      |            352            |   **358**   |            375            |
-| 🧠 IDs únicos de modelos de chat    |           1320            |  **1374**   |           1475            |
-| 🖼️ Puente de modalidades            | 🆕 visión + audio + vídeo |      ✓      |             ✓             |
-| 📡 Catálogo gratuito de Radar       | 🆕 participación opcional |      ✓      |             ✓             |
-| ⚖️ Planificación según cuota        |      🆕 Quota-Share       |      ✓      |             ✓             |
-| 📊 Telemetría de cuota              |     🆕 en tiempo real     |      ✓      |             ✓             |
-| 🧰 Modo sin interfaz                |             —             |      —      |   🆕 `serve --headless`   |
-| 🛤️ Infraestructura de la rama LTS   |             —             |      —      | 🆕 canales de publicación |
-| 🔎 API de descubrimiento de modelos |             —             |      —      |   🆕 `/v1/models/query`   |
+|                                      |          v3.8.50          | **v3.8.51** |        `v3.8.53+`         |
+| ------------------------------------ | :-----------------------: | :---------: | :-----------------------: |
+| 🌐 Proveedores                       |            352            |   **358**   |            376            |
+| 🧠 IDs únicos de modelos de chat     |           1320            |  **1374**   |           1475            |
+| 🖼️ Puente de modalidad               | 🆕 visión + audio + video |      ✓      |             ✓             |
+| 📡 Catálogo gratuito de Radar        |         🆕 opt-in         |      ✓      |             ✓             |
+| ⚖️ Programación consciente de cuotas |      🆕 Quota-Share       |      ✓      |             ✓             |
+| 📊 Telemetría de cuotas              |        🆕 en vivo         |      ✓      |             ✓             |
+| 🧰 Modo headless                     |             —             |      —      |   🆕 `serve --headless`   |
+| 🛤️ Infraestructura del rail LTS      |             —             |      —      | 🆕 canales de lanzamiento |
+| 🔎 API de descubrimiento de modelos  |             —             |      —      |   🆕 `/v1/models/query`   |
 
-**→ [Hoja de ruta](ROADMAP.md) — avanzando por la vía hacia `v3.9.0 LTS`**
+**→ [Hoja de ruta](ROADMAP.md) — avanzando por el rail hacia `v3.9.0 LTS`**
 
 </div>
 

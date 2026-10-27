@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Brána sa neustále rozrastá
+## 📈 Gateway neustále rastie
 
 <div align="center">
 
-|                                  |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| -------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Poskytovatelia                |           352           |   **358**   |          375          |
-| 🧠 Jedinečné ID modelov chatu    |          1320           |  **1374**   |         1475          |
-| 🖼️ Most modalít                  | 🆕 obraz + zvuk + video |      ✓      |           ✓           |
-| 📡 Bezplatný katalóg Radaru      |  🆕 voliteľné zapnutie  |      ✓      |           ✓           |
-| ⚖️ Plánovanie zohľadňujúce kvóty |     🆕 Quota-Share      |      ✓      |           ✓           |
-| 📊 Telemetria kvót               |    🆕 v reálnom čase    |      ✓      |           ✓           |
-| 🧰 Bezobslužný režim             |            —            |      —      | 🆕 `serve --headless` |
-| 🛤️ Infraštruktúra vetvy LTS      |            —            |      —      |   🆕 kanály vydaní    |
-| 🔎 API na vyhľadávanie modelov   |            —            |      —      | 🆕 `/v1/models/query` |
+|                                   |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
+| --------------------------------- | :------------------------: | :---------: | :-------------------: |
+| 🌐 Poskytovatelia                 |            352             |   **358**   |          376          |
+| 🧠 Jedinečné ID chatových modelov |            1320            |  **1374**   |         1475          |
+| 🖼️ Modality Bridge                | 🆕 videnie + audio + video |      ✓      |           ✓           |
+| 📡 Bezplatný katalóg Radar        |         🆕 opt-in          |      ✓      |           ✓           |
+| ⚖️ Plánovanie s ohľadom na kvóty  |       🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Telemetria kvót                |         🆕 naživo          |      ✓      |           ✓           |
+| 🧰 Headless režim                 |             —              |      —      | 🆕 `serve --headless` |
+| 🛤️ Infraštruktúra trate LTS       |             —              |      —      |   🆕 kanály vydaní    |
+| 🔎 API na objavovanie modelov     |             —              |      —      | 🆕 `/v1/models/query` |
 
-**→ [Plán vývoja](ROADMAP.md) — po koľajniciach k `v3.9.0 LTS`**
+**→ [Plán vývoja](ROADMAP.md) — mierime po koľajnici k `v3.9.0 LTS`**
 
 </div>
 

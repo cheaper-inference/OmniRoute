@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gerbang Terus Berkembang
+## 📈 Gateway Terus Berkembang
 
 <div align="center">
 
-|                               |            v3.8.50             | **v3.8.51** |      `v3.8.53+`       |
-| ----------------------------- | :----------------------------: | :---------: | :-------------------: |
-| 🌐 Penyedia                   |              352               |   **358**   |          375          |
-| 🧠 ID model sembang unik      |              1320              |  **1374**   |         1475          |
-| 🖼️ Jambatan Modaliti          | 🆕 penglihatan + audio + video |      ✓      |           ✓           |
-| 📡 Katalog percuma Radar      |     🆕 penyertaan sukarela     |      ✓      |           ✓           |
-| ⚖️ Penjadualan sedar kuota    |      🆕 Perkongsian Kuota      |      ✓      |           ✓           |
-| 📊 Telemetri kuota            |         🆕 masa nyata          |      ✓      |           ✓           |
-| 🧰 Mod tanpa antaramuka       |               —                |      —      | 🆕 `serve --headless` |
-| 🛤️ Infrastruktur landasan LTS |               —                |      —      |  🆕 saluran keluaran  |
-| 🔎 API penemuan model         |               —                |      —      | 🆕 `/v1/models/query` |
+|                           |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------- | :---------------------: | :---------: | :-------------------: |
+| 🌐 Penyedia               |           352           |   **358**   |          376          |
+| 🧠 ID model sembang unik  |          1320           |  **1374**   |         1475          |
+| 🖼️ Modality Bridge        | 🆕 visi + audio + video |      ✓      |           ✓           |
+| 📡 Katalog percuma Radar  |    🆕 pilihan sertai    |      ✓      |           ✓           |
+| ⚖️ Penjadualan peka kuota |     🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 Telemetri kuota        |       🆕 langsung       |      ✓      |           ✓           |
+| 🧰 Mod headless           |            —            |      —      | 🆕 `serve --headless` |
+| 🛤️ Infra landasan LTS     |            —            |      —      |  🆕 saluran keluaran  |
+| 🔎 API penemuan model     |            —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Pelan Hala Tuju](ROADMAP.md) — menyusuri landasan menuju `v3.9.0 LTS`**
+**→ [Peta Hala](ROADMAP.md) — menyusuri landasan menuju `v3.9.0 LTS`**
 
 </div>
 

@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gateway nastavlja rasti
+## 📈 Gateway i dalje raste
 
 <div align="center">
 
-|                                         |           v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
-| --------------------------------------- | :-------------------------: | :---------: | :-------------------: |
-| 🌐 Pružatelji                           |             352             |   **358**   |          375          |
-| 🧠 Jedinstveni ID-jevi modela razgovora |            1320             |  **1374**   |         1475          |
-| 🖼️ Most modalnosti                      |   🆕 vid + audio + video    |      ✓      |           ✓           |
-| 📡 Besplatni katalog Radara             | 🆕 dobrovoljno uključivanje |      ✓      |           ✓           |
-| ⚖️ Raspoređivanje prema kvotama         |      🆕 Podjela kvota       |      ✓      |           ✓           |
-| 📊 Telemetrija kvota                    |          🆕 uživo           |      ✓      |           ✓           |
-| 🧰 Način rada bez sučelja               |              —              |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS infrastruktura pruge             |              —              |      —      |   🆕 kanali izdanja   |
-| 🔎 API za otkrivanje modela             |              —              |      —      | 🆕 `/v1/models/query` |
+|                                       |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------------------- | :-------------------: | :---------: | :-------------------: |
+| 🌐 Pružatelji                         |          352          |   **358**   |          376          |
+| 🧠 Jedinstveni ID-ovi chat modela     |         1320          |  **1374**   |         1475          |
+| 🖼️ Most modaliteta                    | 🆕 vid + zvuk + video |      ✓      |           ✓           |
+| 📡 Besplatni katalog Radara           |       🆕 opt-in       |      ✓      |           ✓           |
+| ⚖️ Raspoređivanje s uvažavanjem kvota |  🆕 Dijeljenje kvote  |      ✓      |           ✓           |
+| 📊 Telemetrija kvota                  |       🆕 uživo        |      ✓      |           ✓           |
+| 🧰 Headless način rada                |           —           |      —      | 🆕 `serve --headless` |
+| 🛤️ Infrastruktura LTS tračnice        |           —           |      —      |   🆕 kanali izdanja   |
+| 🔎 API za otkrivanje modela           |           —           |      —      | 🆕 `/v1/models/query` |
 
-**→ [Plan razvoja](ROADMAP.md) — vožnja prugom do `v3.9.0 LTS`**
+**→ [Plan razvoja](ROADMAP.md) — jašući tračnicom prema `v3.9.0 LTS`**
 
 </div>
 

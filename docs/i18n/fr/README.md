@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 La passerelle continue de croître
+## 📈 Le Gateway ne cesse de croître
 
 <div align="center">
 
-|                                    |          v3.8.50          | **v3.8.51** |        `v3.8.53+`        |
-| ---------------------------------- | :-----------------------: | :---------: | :----------------------: |
-| 🌐 Fournisseurs                    |            352            |   **358**   |           375            |
-| 🧠 ID uniques de modèles de chat   |           1320            |  **1374**   |           1475           |
-| 🖼️ Pont de modalités               | 🆕 vision + audio + vidéo |      ✓      |            ✓             |
-| 📡 Catalogue gratuit Radar         |         🆕 opt-in         |      ✓      |            ✓             |
-| ⚖️ Ordonnancement selon les quotas |      🆕 Quota-Share       |      ✓      |            ✓             |
-| 📊 Télémétrie des quotas           |       🆕 en direct        |      ✓      |            ✓             |
-| 🧰 Mode headless                   |             —             |      —      |  🆕 `serve --headless`   |
-| 🛤️ Infra de rail LTS               |             —             |      —      | 🆕 canaux de publication |
-| 🔎 API de découverte des modèles   |             —             |      —      |  🆕 `/v1/models/query`   |
+|                                            |          v3.8.50          | **v3.8.51** |        `v3.8.53+`        |
+| ------------------------------------------ | :-----------------------: | :---------: | :----------------------: |
+| 🌐 Fournisseurs                            |            352            |   **358**   |           376            |
+| 🧠 ID de modèles de chat uniques           |           1320            |  **1374**   |           1475           |
+| 🖼️ Pont de modalités                       | 🆕 vision + audio + vidéo |      ✓      |            ✓             |
+| 📡 Catalogue gratuit Radar                 |         🆕 opt-in         |      ✓      |            ✓             |
+| ⚖️ Ordonnancement tenant compte des quotas |      🆕 Quota-Share       |      ✓      |            ✓             |
+| 📊 Télémétrie des quotas                   |       🆕 en direct        |      ✓      |            ✓             |
+| 🧰 Mode headless                           |             —             |      —      |  🆕 `serve --headless`   |
+| 🛤️ Infra du rail LTS                       |             —             |      —      | 🆕 canaux de publication |
+| 🔎 API de découverte de modèles            |             —             |      —      |  🆕 `/v1/models/query`   |
 
-**→ [Feuille de route](ROADMAP.md) — en route sur le rail vers `v3.9.0 LTS`**
+**→ [Feuille de route](ROADMAP.md) — sur le rail vers `v3.9.0 LTS`**
 
 </div>
 

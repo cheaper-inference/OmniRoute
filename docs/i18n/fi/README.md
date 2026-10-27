@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Yhdyskäytävä kasvaa edelleen
+## 📈 Gateway jatkaa kasvuaan
 
 <div align="center">
 
-|                                        |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| -------------------------------------- | :--------------------: | :---------: | :-------------------: |
-| 🌐 Palveluntarjoajat                   |          352           |   **358**   |          375          |
-| 🧠 Yksilölliset keskustelumallien ID:t |          1320          |  **1374**   |         1475          |
-| 🖼️ Modaliteettisilta                   | 🆕 näkö + ääni + video |      ✓      |           ✓           |
-| 📡 Radarin ilmainen luettelo           |     🆕 valinnainen     |      ✓      |           ✓           |
-| ⚖️ Kiintiötietoinen ajastus            |     🆕 Quota-Share     |      ✓      |           ✓           |
-| 📊 Kiintiötelemetria                   |   🆕 reaaliaikainen    |      ✓      |           ✓           |
-| 🧰 Headless-tila                       |           —            |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS-kiskoinfrastruktuuri            |           —            |      —      |  🆕 julkaisukanavat   |
-| 🔎 Mallien etsintä -API                |           —            |      —      | 🆕 `/v1/models/query` |
+|                                     |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+| ----------------------------------- | :--------------------: | :---------: | :-------------------: |
+| 🌐 Palveluntarjoajat                |          352           |   **358**   |          376          |
+| 🧠 Yksilölliset chat-mallitunnukset |          1320          |  **1374**   |         1475          |
+| 🖼️ Modaliteettisilta                | 🆕 näkö + ääni + video |      ✓      |           ✓           |
+| 📡 Radarin ilmainen katalogi        |     🆕 valinnainen     |      ✓      |           ✓           |
+| ⚖️ Kiintiötietoinen ajoitus         |     🆕 Quota-Share     |      ✓      |           ✓           |
+| 📊 Kiintiön telemetria              |   🆕 reaaliaikainen    |      ✓      |           ✓           |
+| 🧰 Headless-tila                    |           —            |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS-radan infrastruktuuri        |           —            |      —      |  🆕 julkaisukanavat   |
+| 🔎 Mallien haku-API                 |           —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Tiekartta](ROADMAP.md) — kiskoilla kohti `v3.9.0 LTS`:ää**
+**→ [Tiekartta](ROADMAP.md) — raidetta pitkin kohti `v3.9.0 LTS` -julkaisua**
 
 </div>
 

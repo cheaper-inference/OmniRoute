@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                                       |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| ------------------------------------- | :---------------------: | :---------: | :-------------------: |
-| 🌐 Sağlayıcılar                       |           352           |   **358**   |          375          |
-| 🧠 Benzersiz sohbet modeli kimlikleri |          1320           |  **1374**   |         1475          |
-| 🖼️ Modalite Köprüsü                   | 🆕 görsel + ses + video |      ✓      |           ✓           |
-| 📡 Radar ücretsiz katalog             | 🆕 isteğe bağlı katılım |      ✓      |           ✓           |
-| ⚖️ Kota farkındalıklı zamanlama       |    🆕 Kota Paylaşımı    |      ✓      |           ✓           |
-| 📊 Kota telemetrisi                   |        🆕 canlı         |      ✓      |           ✓           |
-| 🧰 Headless mod                       |            —            |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS ray altyapısı                  |            —            |      —      |  🆕 sürüm kanalları   |
-| 🔎 Model keşif API'si                 |            —            |      —      | 🆕 `/v1/models/query` |
+|                                       |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------------------- | :--------------------: | :---------: | :-------------------: |
+| 🌐 Sağlayıcılar                       |          352           |   **358**   |          376          |
+| 🧠 Benzersiz sohbet modeli kimlikleri |          1320          |  **1374**   |         1475          |
+| 🖼️ Modality Bridge                    | 🆕 görme + ses + video |      ✓      |           ✓           |
+| 📡 Radar ücretsiz kataloğu            |    🆕 isteğe bağlı     |      ✓      |           ✓           |
+| ⚖️ Kota duyarlı zamanlama             |     🆕 Quota-Share     |      ✓      |           ✓           |
+| 📊 Kota telemetrisi                   |        🆕 canlı        |      ✓      |           ✓           |
+| 🧰 Headless mod                       |           —            |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS ray altyapısı                  |           —            |      —      |  🆕 yayın kanalları   |
+| 🔎 Model keşif API'si                 |           —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Yol Haritası](ROADMAP.md) — `v3.9.0 LTS` rayında ilerliyor**
+**→ [Yol Haritası](ROADMAP.md) — `v3.9.0 LTS` rayında ilerliyoruz**
 
 </div>
 

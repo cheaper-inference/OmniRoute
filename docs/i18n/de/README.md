@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                               |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
-| ----------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Anbieter                   |            352            |   **358**   |          375          |
-| 🧠 Eindeutige Chat-Modell-IDs |           1320            |  **1374**   |         1475          |
-| 🖼️ Modality Bridge            | 🆕 vision + audio + video |      ✓      |           ✓           |
-| 📡 Radar-Katalog (kostenlos)  |         🆕 Opt-in         |      ✓      |           ✓           |
-| ⚖️ Quota-bewusste Planung     |      🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Quota-Telemetrie           |          🆕 Live          |      ✓      |           ✓           |
-| 🧰 Headless-Modus             |             —             |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS-Rail-Infrastruktur     |             —             |      —      |  🆕 Release-Channels  |
-| 🔎 Modell-Discovery-API       |             —             |      —      | 🆕 `/v1/models/query` |
+|                                   |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| --------------------------------- | :-----------------------: | :---------: | :-------------------: |
+| 🌐 Provider                       |            352            |   **358**   |          376          |
+| 🧠 Eindeutige Chat-Modell-IDs     |           1320            |  **1374**   |         1475          |
+| 🖼️ Modality Bridge                | 🆕 Vision + Audio + Video |      ✓      |           ✓           |
+| 📡 Kostenloser Radar-Katalog      |         🆕 Opt-in         |      ✓      |           ✓           |
+| ⚖️ Kontingentbewusstes Scheduling |      🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Kontingent-Telemetrie          |          🆕 Live          |      ✓      |           ✓           |
+| 🧰 Headless-Modus                 |             —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS-Schienen-Infrastruktur     |             —             |      —      |  🆕 Release-Channels  |
+| 🔎 Modell-Discovery-API           |             —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Roadmap](ROADMAP.md) — auf dem Gleis zu `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — auf Schiene Richtung `v3.9.0 LTS`**
 
 </div>
 

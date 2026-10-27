@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 O Gateway continua crescendo
+## 📈 O Gateway Continua Crescendo
 
 <div align="center">
 
-|                                      |         v3.8.50          | **v3.8.51** |       `v3.8.53+`        |
-| ------------------------------------ | :----------------------: | :---------: | :---------------------: |
-| 🌐 Provedores                        |           352            |   **358**   |           375           |
-| 🧠 IDs exclusivos de modelos de chat |           1320           |  **1374**   |          1475           |
-| 🖼️ Ponte de Modalidade               | 🆕 visão + áudio + vídeo |      ✓      |            ✓            |
-| 📡 Catálogo gratuito Radar           |    🆕 adesão opcional    |      ✓      |            ✓            |
-| ⚖️ Agendamento ciente de cota        |      🆕 Quota-Share      |      ✓      |            ✓            |
-| 📊 Telemetria de cota                |        🆕 ao vivo        |      ✓      |            ✓            |
-| 🧰 Modo headless                     |            —             |      —      |  🆕 `serve --headless`  |
-| 🛤️ Infraestrutura de trilhos LTS     |            —             |      —      | 🆕 canais de lançamento |
-| 🔎 API de descoberta de modelos      |            —             |      —      |  🆕 `/v1/models/query`  |
+|                                  |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| -------------------------------- | :----------------------: | :---------: | :-------------------: |
+| 🌐 Provedores                    |           352            |   **358**   |          376          |
+| 🧠 IDs únicos de modelos de chat |           1320           |  **1374**   |         1475          |
+| 🖼️ Ponte de Modalidades          | 🆕 visão + áudio + vídeo |      ✓      |           ✓           |
+| 📡 Catálogo gratuito do Radar    |        🆕 opt-in         |      ✓      |           ✓           |
+| ⚖️ Agendamento sensível a cotas  |      🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 Telemetria de cota            |        🆕 ao vivo        |      ✓      |           ✓           |
+| 🧰 Modo headless                 |            —             |      —      | 🆕 `serve --headless` |
+| 🛤️ Infraestrutura do trilho LTS  |            —             |      —      | 🆕 canais de release  |
+| 🔎 API de descoberta de modelos  |            —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Roadmap](ROADMAP.md) — seguindo nos trilhos até `v3.9.0 LTS`**
+**→ [Roadmap](ROADMAP.md) — seguindo pelos trilhos rumo ao `v3.9.0 LTS`**
 
 </div>
 

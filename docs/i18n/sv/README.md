@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Gatewayen fortsätter att växa
+## 📈 Gateway:en fortsätter växa
 
 <div align="center">
 
-|                                |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
-| ------------------------------ | :--------------------: | :---------: | :-------------------: |
-| 🌐 Leverantörer                |          352           |   **358**   |          375          |
-| 🧠 Unika chattmodell-ID:n      |          1320          |  **1374**   |         1475          |
-| 🖼️ Modalitetsbrygga            | 🆕 bild + ljud + video |      ✓      |           ✓           |
-| 📡 Radar – gratis katalog      |       🆕 opt-in        |      ✓      |           ✓           |
-| ⚖️ Kvotmedveten schemaläggning |     🆕 Quota-Share     |      ✓      |           ✓           |
-| 📊 Kvottelemetri               |        🆕 live         |      ✓      |           ✓           |
-| 🧰 Headless-läge               |           —            |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS-rälsinfra               |           —            |      —      | 🆕 utgivningskanaler  |
-| 🔎 Modellupptäckts-API         |           —            |      —      | 🆕 `/v1/models/query` |
+|                                |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------------ | :----------------------: | :---------: | :-------------------: |
+| 🌐 Leverantörer                |           352            |   **358**   |          376          |
+| 🧠 Unika chattmodells-ID:n     |           1320           |  **1374**   |         1475          |
+| 🖼️ Modalitetsbrygga            | 🆕 vision + ljud + video |      ✓      |           ✓           |
+| 📡 Radars kostnadsfria katalog |        🆕 tillval        |      ✓      |           ✓           |
+| ⚖️ Kvotmedveten schemaläggning |      🆕 Kvotdelning      |      ✓      |           ✓           |
+| 📊 Kvottelemetri               |       🆕 i realtid       |      ✓      |           ✓           |
+| 🧰 Headless-läge               |            —             |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS-spårinfrastruktur       |            —             |      —      |   🆕 releasekanaler   |
+| 🔎 API för modellupptäckt      |            —             |      —      | 🆕 `/v1/models/query` |
 
-**→ [Färdplan](ROADMAP.md) — på rälsen mot `v3.9.0 LTS`**
+**→ [Färdplan](ROADMAP.md) — rullar på räls mot `v3.9.0 LTS`**
 
 </div>
 

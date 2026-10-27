@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 Ẹnù-Ọ̀nà Ń Tẹ̀síwájú Láti Dàgbàsókè
+## 📈 Ẹnù-Ọ̀nà Ń Dagba Sí i
 
 <div align="center">
 
-|                                        |        v3.8.50         | **v3.8.51** |       `v3.8.53+`       |
-| -------------------------------------- | :--------------------: | :---------: | :--------------------: |
-| 🌐 Àwọn Olùpèsè                        |          352           |   **358**   |          375           |
-| 🧠 Àwọn ID àpẹẹrẹ ìfòrọ̀wàrọ̀sì aládàáni |          1320          |  **1374**   |          1475          |
-| 🖼️ Àfárá Ẹ̀yà-Ìrírí                     | 🆕 ìran + ohùn + fídíò |      ✓      |           ✓            |
-| 📡 Kàtálógù ọ̀fẹ́ Radar                  |  🆕 yíyan-láti-darapọ̀  |      ✓      |           ✓            |
-| ⚖️ Ìṣètò-àkókò tó fiyèsí quota         |     🆕 Quota-Share     |      ✓      |           ✓            |
-| 📊 Ìwíwá-jìnnà quota                   |        🆕 láàyè        |      ✓      |           ✓            |
-| 🧰 Ọ̀nà headless                        |           —            |      —      | 🆕 `serve --headless`  |
-| 🛤️ Ìpílẹ̀ ọ̀nà-irìn LTS                  |           —            |      —      | 🆕 àwọn ikanni ìtúpalẹ̀ |
-| 🔎 API ìṣàwárí àpẹẹrẹ                  |           —            |      —      | 🆕 `/v1/models/query`  |
+|                                  |         v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+| -------------------------------- | :---------------------: | :---------: | :-------------------: |
+| 🌐 Àwọn olùpèsè                  |           352           |   **358**   |          376          |
+| 🧠 Àwọn ID àpẹẹrẹ ìjíròrò ọ̀tọ̀ọ̀tọ̀ |          1320           |  **1374**   |         1475          |
+| 🖼️ Afárá ẹ̀yà-ìbáṣepọ̀             | 🆕 ìrírí + ohùn + fídíò |      ✓      |           ✓           |
+| 📡 Àkójọ ọ̀fẹ́ Radar               |   🆕 yíyàn-láti-kópa    |      ✓      |           ✓           |
+| ⚖️ Ìpín àkókò tó fiyèsí òṣùwọ̀n   |     🆕 Quota-Share      |      ✓      |           ✓           |
+| 📊 Ìwíwọ̀n òṣùwọ̀n latókùn         |       🆕 lẹ́sẹ̀kẹsẹ̀       |      ✓      |           ✓           |
+| 🧰 Ìpo àìlórí                    |            —            |      —      | 🆕 `serve --headless` |
+| 🛤️ Amóòdájú ọ̀nà-relùwẹ́ẹ̀ LTS      |            —            |      —      |  🆕 àwọn ọ̀nà ìtúpalẹ̀  |
+| 🔎 API ìṣàwárí àpẹẹrẹ            |            —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Ìtòsọ́nà](ROADMAP.md) — a ń rìn lórí ọ̀nà-irìn lọ sí `v3.9.0 LTS`**
+**→ [Àfihàn-ọ̀nà](ROADMAP.md) — ìrìnàjò lórí ọ̀nà relùwẹ́ẹ̀ sí `v3.9.0 LTS`**
 
 </div>
 

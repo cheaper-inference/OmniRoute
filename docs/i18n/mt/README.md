@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                                    |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
-| ---------------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 Fornituri                       |            352             |   **358**   |          375          |
-| 🧠 IDs uniċi tal-mudelli ta' chat  |            1320            |  **1374**   |         1475          |
-| 🖼️ Pont tal-Modalitajiet           | 🆕 viżjoni + awdjo + vidjo |      ✓      |           ✓           |
-| 📡 Katalogu ħieles tar-Radar       |         🆕 opt-in          |      ✓      |           ✓           |
-| ⚖️ Skedar konxju tal-kwoti         |       🆕 Quota-Share       |      ✓      |           ✓           |
-| 📊 Telemetrija tal-kwoti           |         🆕 dirett          |      ✓      |           ✓           |
-| 🧰 Modalità headless               |             —              |      —      | 🆕 `serve --headless` |
-| 🛤️ Infrastruttura tal-binarju LTS  |             —              |      —      | 🆕 kanali ta' rilaxx  |
-| 🔎 API għall-iskoperta tal-mudelli |             —              |      —      | 🆕 `/v1/models/query` |
+|                                   |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
+| --------------------------------- | :------------------------: | :---------: | :-------------------: |
+| 🌐 Providituri                    |            352             |   **358**   |          376          |
+| 🧠 IDs uniċi ta' mudelli chat     |            1320            |  **1374**   |         1475          |
+| 🖼️ Pont tal-Modalità              | 🆕 viżjoni + awdjo + video |      ✓      |           ✓           |
+| 📡 Katalgu bla ħlas ta' Radar     |         🆕 opt-in          |      ✓      |           ✓           |
+| ⚖️ Skedar konxju tal-kwota        |       🆕 Quota-Share       |      ✓      |           ✓           |
+| 📊 Telemetrija tal-kwota          |         🆕 dirett          |      ✓      |           ✓           |
+| 🧰 Modalità headless              |             —              |      —      | 🆕 `serve --headless` |
+| 🛤️ Infrastruttura tal-binarja LTS |             —              |      —      | 🆕 kanali ta' rilaxx  |
+| 🔎 API ta' skoperta tal-mudelli   |             —              |      —      | 🆕 `/v1/models/query` |
 
-**→ [Pjan Direzzjonali](ROADMAP.md) — fuq il-binarju lejn `v3.9.0 LTS`**
+**→ [Pjana](ROADMAP.md) — fuq il-binarja lejn `v3.9.0 LTS`**
 
 </div>
 

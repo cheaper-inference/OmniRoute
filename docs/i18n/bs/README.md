@@ -69,19 +69,19 @@
 
 <div align="center">
 
-|                                          |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
-| ---------------------------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 Pružatelji                            |          352          |   **358**   |          375          |
-| 🧠 Jedinstveni ID-ovi modela za razgovor |         1320          |  **1374**   |         1475          |
-| 🖼️ Most modaliteta                       | 🆕 vid + zvuk + video |      ✓      |           ✓           |
-| 📡 Besplatni Radar katalog               |     🆕 po izboru      |      ✓      |           ✓           |
-| ⚖️ Raspoređivanje prema kvoti            |    🆕 Quota-Share     |      ✓      |           ✓           |
-| 📊 Telemetrija kvota                     |       🆕 uživo        |      ✓      |           ✓           |
-| 🧰 Bezglavi način rada                   |           —           |      —      | 🆕 `serve --headless` |
-| 🛤️ Infrastruktura LTS grane              |           —           |      —      |   🆕 kanali izdanja   |
-| 🔎 API za otkrivanje modela              |           —           |      —      | 🆕 `/v1/models/query` |
+|                                    |        v3.8.50         | **v3.8.51** |      `v3.8.53+`       |
+| ---------------------------------- | :--------------------: | :---------: | :-------------------: |
+| 🌐 Provajderi                      |          352           |   **358**   |          376          |
+| 🧠 Jedinstveni ID-ovi chat modela  |          1320          |  **1374**   |         1475          |
+| 🖼️ Modality Bridge                 | 🆕 vid + audio + video |      ✓      |           ✓           |
+| 📡 Radar besplatni katalog         |       🆕 opt-in        |      ✓      |           ✓           |
+| ⚖️ Zakazivanje uz uvažavanje kvote |     🆕 Quota-Share     |      ✓      |           ✓           |
+| 📊 Telemetrija kvote               |        🆕 uživo        |      ✓      |           ✓           |
+| 🧰 Headless način rada             |           —            |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS infrastruktura tračnica     |           —            |      —      |   🆕 kanali izdanja   |
+| 🔎 API za otkrivanje modela        |           —            |      —      | 🆕 `/v1/models/query` |
 
-**→ [Plan razvoja](ROADMAP.md) — prateći granu do `v3.9.0 LTS`**
+**→ [Plan razvoja](ROADMAP.md) — na tračnicama prema `v3.9.0 LTS`**
 
 </div>
 
