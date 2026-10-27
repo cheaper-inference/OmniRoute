@@ -4802,10 +4802,8 @@
     "totalEntries": "Łączna liczba wpisów",
     "type": "Typ",
     "memoryEnabled": "Pamięć włączona",
-    "qdrantTutorialAria": "Samouczek: konfiguracja Qdrant",
     "qdrantTutorialTitle": "Szybki samouczek: pamięć z Qdrant",
     "qdrantTutorialIntro": "Qdrant przechowuje wektory i metadane pamięci, co umożliwia pobieranie relevantnego kontekstu. Nie kompresuje bezpośrednio tokenów; oszczędności są pośrednie, wynikające z unikania kontekstu niezwiązanego z żądaniem.",
-    "qdrantTutorialCloseAria": "Zamknij samouczek",
     "qdrantTutorialStep1": "Zabezpiecz serwer za pomocą protokołu HTTPS i klucza API przed użyciem produkcyjnym.",
     "qdrantTutorialStep2": "Wprowadź host, port, kolekcję oraz model w formacie provider/model z skonfigurowanym poświadczeniem.",
     "qdrantTutorialStep3": "Wymiar kolekcji musi odpowiadać wymiarowi wygenerowanemu przez model. Istniejąca kolekcja o wymiarze 2048 nie przyjmuje osadzeń o wymiarze 1536.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Cześć {name}! Wyślij wiadomość przez bramkę OmniRoute.",
     "greetingFallbackName": "tam",
     "errNoReply": "⚠️ Brak odpowiedzi z bramki.",
-    "inputPlaceholder": "Zadaj dowolne pytanie…",
     "btnSend": "Wyślij"
   }
 }

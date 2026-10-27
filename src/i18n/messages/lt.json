@@ -4802,10 +4802,8 @@
     "totalEntries": "Iš viso įrašų",
     "type": "Tipas",
     "memoryEnabled": "Atmintis įjungta",
-    "qdrantTutorialAria": "Qdrant paruošimo mokymasis",
     "qdrantTutorialTitle": "Greitas mokymasis: atmintis su Qdrant",
     "qdrantTutorialIntro": "Qdrant saugo atminčių vektorių ir metaduomenų, kad būtų galima gauti susijusią kontekstą. Jis netiesiogiai nesumažina žetonų; sutaupymas yra netiesioginis, vengiant konteksto, nesantį susijusio su užklausa.",
-    "qdrantTutorialCloseAria": "Uždaryti mokymąsi",
     "qdrantTutorialStep1": "Prieš naudojimą gamyboje, apsaugokite serverį naudojant HTTPS ir API raktą.",
     "qdrantTutorialStep2": "Įveskite vietą, portą, kolekciją ir modelį „teikėjas/modelis“ formate su sukonfigūruotu įrodymu.",
     "qdrantTutorialStep3": "Kolekcijos matmuo turi atitikti modelio sukurto matmuo. Egzistuojanti 2048 matmenų kolekcija nepriima 1536 matmenų įterpimų.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Labas, {name}! Siųskite žinutę per savo OmniRoute įėjimo punktą.",
     "greetingFallbackName": "ten",
     "errNoReply": "⚠️ Atsakymo iš įėjimo punkto nėra.",
-    "inputPlaceholder": "Klauskite ko norite…",
     "btnSend": "Siųsti"
   }
 }

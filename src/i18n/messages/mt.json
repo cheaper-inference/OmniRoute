@@ -4802,10 +4802,8 @@
     "totalEntries": "Total ta' entrati",
     "type": "Tip",
     "memoryEnabled": "Memorja attivata",
-    "qdrantTutorialAria": "Tutorial tal-istabbiliment ta' Qdrant",
     "qdrantTutorialTitle": "Tutorial malajjeb: memo rja ma' Qdrant",
     "qdrantTutorialIntro": "Qdrant jżomm il-vetturi u l-metadata tal-memori biex ikun possibbli li jinkiseb kontest relatvu. M'għandux effett dirett fuq it-tokeni; is-żjiefr huwa indirett, billi jevita kontest li m'għandu x'jaqsam mad-domanda.",
-    "qdrantTutorialCloseAria": "Agħlaq it-tutorial",
     "qdrantTutorialStep1": "Issir sħiħ is-server b'HTTPS u ħaġa API qabel ma jintuża f'produzzjoni.",
     "qdrantTutorialStep2": "Daħħal l-host, il-port, il-kollezjoni, u mudell b'format provider/model b'kwalifikata konfigurata.",
     "qdrantTutorialStep3": "Id-dimensjoni tal-kollezjoni trid tkun konformi mad-dimensjoni prodotta mill-mudell. Kollezjoni eżistenti b'dimensjoni ta' 2048 ma taqbilx embeddings b'dimensjoni ta' 1536.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Ilu {name}! Ibgħat messaġġ biex tħaddan permezz tal- gateway ta' OmniRoute tiegħek.",
     "greetingFallbackName": "hemm",
     "errNoReply": "⚠️ L-ebda rispost mill-gateway.",
-    "inputPlaceholder": "Istaqsir kollox…",
     "btnSend": "Ibgħat"
   }
 }

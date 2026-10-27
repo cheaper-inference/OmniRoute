@@ -4802,10 +4802,8 @@
     "totalEntries": "စာရင်းသွင်းချက် စုစုပေါင်း",
     "type": "အမျိုးအစား",
     "memoryEnabled": "မှတ်ဉာဏ်ကို ဖွင့်ထားသည်",
-    "qdrantTutorialAria": "Qdrant setup သင်ခန်းစာ",
     "qdrantTutorialTitle": "မြန်ဆန်သောသင်ခန်းစာ: Qdrant ဖြင့် memory",
     "qdrantTutorialIntro": "Qdrant သည် memory တွေ၏ vectors နှင့် metadata များကို သိမ်းဆည်းထားပြီး သက်ဆိုင်ရာ context ကို ရှာဖွေနိုင်စေသည်။ ၎င်းသည် tokens များကို တိုက်ရိုက် နှမ်းမိစေခြင်း မဟုတ်ပါ; ငွေပမာဏ ကျဆုံးမှုကို တိုက်ရိုက် မဟုတ်ဘဲ request နှင့် မသက်ဆိုင်သော context များကို ဖြစ်ပေါ်မှုကို ရှောင်ရှားခြင်းဖြင့် တိုက်ရိုက်မဟုတ်ဘဲ လုပ်ဆောင်ပါသည်။",
-    "qdrantTutorialCloseAria": "သင်ခန်းစာ ချေ့ပါ",
     "qdrantTutorialStep1": "production မှာ အသုံးပြုမလျှင် အဆုံးအခွင်တွင် HTTPS နှင့် API key ဖြင့် server ကို သိမ်းဆည်းထားပါ။",
     "qdrantTutorialStep2": "ဟို့စ် (host)၊ ပို့တ် (port)၊ စုစည်းမှု (collection) နှင့် အထောက်အထား (credential) သတ်မှတ်ပြီးသော provider/model ပုံစံဖြင့် မော်ဒယ်တစ်ခုကို ထည့်ပါ။",
     "qdrantTutorialStep3": "collection ၏ အတိုင်းအတာ (dimension) သည် မော်ဒယ်က ထုတ်ပေးသော အတိုင်းအတာနှင့် ကိုက်ညီရမည်။ ရှိပြီးသား 2048 အတိုင်းအတာ collection သည် 1536 အတိုင်းအတာ embedding များကို လက်မခံပါ။",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 မင်္ဂလာပါ {name}! သင်၏ OmniRoute gateway မှတစ်ဆင့် စကားပြောရန် မက်ဆေ့ချ် ပို့ပါ။",
     "greetingFallbackName": "မိတ်ဆွေ",
     "errNoReply": "⚠️ Gateway မှ အဖြေမရပါ။",
-    "inputPlaceholder": "ဘာမဆို မေးပါ…",
     "btnSend": "ပို့ရန်"
   }
 }

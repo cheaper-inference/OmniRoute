@@ -4802,10 +4802,8 @@
     "totalEntries": "Jami yozuvlar",
     "type": "Tur",
     "memoryEnabled": "Xotira yoqilgan",
-    "qdrantTutorialAria": "Qdrant sozlash boʻyicha tutorial",
     "qdrantTutorialTitle": "Tezkor tutorial: Qdrant yordamida xotira",
     "qdrantTutorialIntro": "Qdrant xotiralarning vektorlari va metadata’larini saqlaydi, shunda tegishli kontekst olish mumkin boʻladi. U to‘g‘ridan-to‘g‘ri tokenlarni siqmaydi; tejamliklik murojaatga tegishli bo‘lmagan kontekstni chiqarib tashlash orqali yopiq holda amalga oshiriladi.",
-    "qdrantTutorialCloseAria": "Tuitionni yopish",
     "qdrantTutorialStep1": "Ishlab chiqarishda foydalanishdan oldin serverni HTTPS va API kaliti bilan xavfsizlashtiring.",
     "qdrantTutorialStep2": "Muxim, port, kolleksiya va sozlangan kreditga ega bo‘lgan provider/model formatidagi modelni kiriting.",
     "qdrantTutorialStep3": "Kolleksiya oʻlchami model hosil qiladigan oʻlcham bilan mos kelishi kerak. Mavjud 2048 o‘lchamli kolleksiya 1536 o‘lchamli embedding’larni qabul qilmaydi.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Salom {name}! OmniRoute shaxsiy vositasi orqali xabar yuboring.",
     "greetingFallbackName": "u yerda",
     "errNoReply": "⚠️ Vositedan javob yoʻq.",
-    "inputPlaceholder": "Istalgan savolni yuboring…",
     "btnSend": "Yuborish"
   }
 }

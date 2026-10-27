@@ -4802,10 +4802,8 @@
     "totalEntries": "Iomlán na n-iontrálacha",
     "type": "Cineál",
     "memoryEnabled": "Cuimhne cumasaithe",
-    "qdrantTutorialAria": "Teagaisc suiteála Qdrant",
     "qdrantTutorialTitle": "Teagaisc luath: cuimhne le Qdrant",
     "qdrantTutorialIntro": "Stóráiltear veicteoraí agus meiteashonraí cuimhne i nQdrant ionas gur féidir coinnisc ábhartha a aisghabháil. Ní ghlomhnaíonn sé toicinn go díreach; is éifeachtí neamh-díreacha iad na sábhálacha, trí sheiceacht neamhábhartha an iarratais a sheachaint.",
-    "qdrantTutorialCloseAria": "Dún teagaisc",
     "qdrantTutorialStep1": "Slán aigh an freastalaí le HTTPS agus eochair API sula gcaithfear le nuálaíocht.",
     "qdrantTutorialStep2": "Iontráil óstún, port, bailiúchán, agus samhail i bhfoirmat áthreoraithe/samhail leis an gcreidiún ciallaithe.",
     "qdrantTutorialStep3": "Caithfeadh méid an bhailiúcháin a bheith ag teacht le meid a thálaíonn an samhail. Ní ghlacfadh bailiúchán meid 2048 atá ann cheana le glomhnaíochtaí meid 1536.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Ha {name}! Seol teacht ar a chéile chun comhrá a dhéanamh tríd do gheata OmniRoute.",
     "greetingFallbackName": "ansin",
     "errNoReply": "⚠️ Níl aon freagra ón ngeata.",
-    "inputPlaceholder": "Iar ar aon rud…",
     "btnSend": "Seol"
   }
 }

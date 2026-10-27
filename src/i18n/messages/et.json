@@ -4802,10 +4802,8 @@
     "totalEntries": "Kirjeid kokku",
     "type": "Tüüp",
     "memoryEnabled": "Mälu lubatud",
-    "qdrantTutorialAria": "Qdrandi seadistamise juhend",
     "qdrantTutorialTitle": "Kiirõpetus: mälu Qdrantiga",
     "qdrantTutorialIntro": "Qdrant salvestab vektorid ja metabandmed meeldetulemuste jaoks, et võimaldada asjakohase konteksti hankimist. See ei komprimeeri siltu otseselt; kokkuhoiud on kaudsed, kuna vältitakse päringuga seotud mitteasjakohase konteksti kasutamist.",
-    "qdrantTutorialCloseAria": "Sulge õppe",
     "qdrantTutorialStep1": "Kaitske serverit HTTPS-i ja API- Võtmega enne tootmisel kasutamist.",
     "qdrantTutorialStep2": "Sisestage host, port, kollektsioon ja mudel formaadis pakkuja/mudel kasutades konfigureeritud krediiti.",
     "qdrantTutorialStep3": "Kogumi dimensioon peab vastama mudeli genereeritavale dimensioonile. Olemasolev 2048-dimensiooniline kogum ei aktsepteeri 1536-dimensioonilisi sissevõtteid.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Tere, {name}! Sada sõnumit OmniRoute värava kaudu vestlema.",
     "greetingFallbackName": "sina",
     "errNoReply": "⚠️ Väravalt ei ole vastust.",
-    "inputPlaceholder": "Küsi mis iganes…",
     "btnSend": "Saada"
   }
 }

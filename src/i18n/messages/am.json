@@ -4802,10 +4802,8 @@
     "totalEntries": "ጠቅላላ ግቤቶች",
     "type": "ዓይነት",
     "memoryEnabled": "ትውስታ ነቅቷል",
-    "qdrantTutorialAria": "የQdrant ሙከራ ተግባር",
     "qdrantTutorialTitle": "ፈጥን ተግባር: ስኒት በQdrant",
     "qdrantTutorialIntro": "Qdrant የማህደረ ትውስታዎችን ቬክተሮች እና ሜታዳታ ያከማቻል፣ በዚህም ተዛማጅ አውድ ሊገኝ ይችላል። ቶከኖችን በቀጥታ አይጨምቅም፤ ቁጠባው ቀጥተኛ ያልሆነ ነው፣ ከጥያቄው ጋር ያልተያያዘ አውድን በማስቀረት ይገኛል።",
-    "qdrantTutorialCloseAria": "ተግባሪውን ዝጋ",
     "qdrantTutorialStep1": "በግልጽ አገልጋዮችን በHTTPS እና በAPI ቁልፍ ደህንነት ያድርጉ።",
     "qdrantTutorialStep2": "ጋባዮችን፣ በር፣ ስምጣ፣ እና የአቅራቢያ/አውታሮች ንድፋገባዮችን ያስገቡ።",
     "qdrantTutorialStep3": "የስብስቡ (collection) ልኬት ሞዴሉ ከሚያመነጨው ልኬት ጋር መመሳሰል አለበት። ያለ 2048-ልኬት ስብስብ 1536-ልኬት embeddings አይቀበልም።",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 ሰላም {name}! በ OmniRoute gateway በኩል ግልግሎት ጥያቄ ላክ።",
     "greetingFallbackName": "እዚህ",
     "errNoReply": "⚠️ ከ gateway መልስ የለም።",
-    "inputPlaceholder": "ማንኛውንም ነገር ጠይቅ።",
     "btnSend": "ላክ"
   }
 }

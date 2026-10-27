@@ -4802,10 +4802,8 @@
     "totalEntries": "Total intrări",
     "type": "Tip",
     "memoryEnabled": "Memorie activată",
-    "qdrantTutorialAria": "Tutorial de configurare Qdrant",
     "qdrantTutorialTitle": "Tutorial rapid: memorie cu Qdrant",
     "qdrantTutorialIntro": "Qdrant stochează vectorii și metadatele memoriilor, astfel încât contextul relevant poate fi recuperat. Nu comprimă tokenii direct; economia este indirectă, evitând contextul nesolicitat de cerere.",
-    "qdrantTutorialCloseAria": "Închideți tutorialul",
     "qdrantTutorialStep1": "Securizați serverul cu HTTPS și o cheie API înainte de utilizarea în producție.",
     "qdrantTutorialStep2": "Introduceți gazda, portul, colecția și un model în format furnizor/model cu o credențială configurată.",
     "qdrantTutorialStep3": "Dimensiunea colecției trebuie să corespundă cu dimensiunea produsă de model. O colecție existentă cu 2048 de dimensiuni nu acceptă încorporări (embeddings) de 1536 de dimensiuni.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Salut {name}! Trimite un mesaj pentru a conversa prin poarta ta OmniRoute.",
     "greetingFallbackName": "acolo",
     "errNoReply": "⚠️ Niciun răspuns din partea poartei.",
-    "inputPlaceholder": "Întreabă orice…",
     "btnSend": "Trimite"
   }
 }

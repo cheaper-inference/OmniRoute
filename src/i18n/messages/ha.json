@@ -4802,10 +4802,8 @@
     "totalEntries": "Jimillar Shigarwar Bayanai",
     "type": "Nau'i",
     "memoryEnabled": "An kunna ƙwaƙwalwa",
-    "qdrantTutorialAria": "Sayar da kayan kudi na Qdrant",
     "qdrantTutorialTitle": "Sayar da kayan kudi da qdrant",
     "qdrantTutorialIntro": "Qdrant yana maye gado da cunkos, tare da bayanai na wani wari ta sarki. Yana da amsa mara mahimmanci, amma ba ya maye gado da cunkos kai tsaye. Amsa ba su ta hakan kuma ba su ciki da zama ba.",
-    "qdrantTutorialCloseAria": "Sanyar kayan kudi",
     "qdrantTutorialStep1": "Sanyar sarrafa da HTTPS da kyakar API kafin amfani da kai tsaye.",
     "qdrantTutorialStep2": "Shigar da hanyar, port, cunkos, da abin da yake da abin da ba ya cikin gaba da abin da ba ya cikin gaba.",
     "qdrantTutorialStep3": "Cunkos da yake da wani wari ba ya zama abin da ba ya cikin gaba. A cunkos da ke da wani wari ba ya cikin gaba da cunkos na wani wari.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Sannu {name}! Aika saƙo don haɗa ta hanyar shafin OmniRoute na ka.",
     "greetingFallbackName": "a nan",
     "errNoReply": "⚠️ Babu amsa daga shafin.",
-    "inputPlaceholder": "Kaya komai…",
     "btnSend": "Aika"
   }
 }

@@ -4802,10 +4802,8 @@
     "totalEntries": "Jumla ya Maingizo",
     "type": "Aina",
     "memoryEnabled": "Kumbukumbu imewezeshwa",
-    "qdrantTutorialAria": "Somo la mwenendo la Qdrant",
     "qdrantTutorialTitle": "Somo la haraka: kumbukumbu na Qdrant",
     "qdrantTutorialIntro": "Qdrant inahifadhi vekta na maelezo ya ziada ya kumbukumbu ili muktadha wa uhusiano uweze kupatikana. Haishushii tokens moja kwa moja; faida ni za ukweli, kwa kuepuka muktadha usiowezekana na ombi.",
-    "qdrantTutorialCloseAria": "Funga somo",
     "qdrantTutorialStep1": "Linda seva na HTTPS na kiungo cha API kabla ya matumizi ya uzalishaji.",
     "qdrantTutorialStep2": "Ingiza mwendeshaji, kiwango, mkusanyiko, na modeli ya mfano wa provider/model wenye neno la kufaa.",
     "qdrantTutorialStep3": "Upana wa mkusanyiko lazima ulingane na upana oundwa na modeli. Mkusanyiko wa upeo 2048 unaendelea haiakili embeddings ya upeo 1536.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Habari {name}! Tuma ujumbe kwa kuongea kupitia lango la OmniRoute lako.",
     "greetingFallbackName": "hapa",
     "errNoReply": "⚠️ Hakuna jibu kutoka kwa lango.",
-    "inputPlaceholder": "Uliza chochote…",
     "btnSend": "Tuma"
   }
 }

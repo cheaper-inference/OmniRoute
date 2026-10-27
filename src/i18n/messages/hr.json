@@ -4802,10 +4802,8 @@
     "totalEntries": "Ukupno unosa",
     "type": "Vrsta",
     "memoryEnabled": "Memorija je omogućena",
-    "qdrantTutorialAria": "Upute za postavljanje Qdranta",
     "qdrantTutorialTitle": "Brze upute: memorija s Qdrantom",
     "qdrantTutorialIntro": "Qdrant pohranjuje vektore i metapodatke memorije kako bi se mogao dobiti relevantni kontekst. Ne komprimira tokenove izravno; ušteda je neizravna, izbjegavanjem konteksta koji nije povezan s zahtjevom.",
-    "qdrantTutorialCloseAria": "Zatvori upute",
     "qdrantTutorialStep1": "Prije uporabe u produkcijskom okruženju osigurajte poslužitelj pomoću HTTPS-a i ključa API-ja.",
     "qdrantTutorialStep2": "Unesite domaćina, port, kolekciju i model u obliku davatelj/model s konfiguriranim vjerodajnicama.",
     "qdrantTutorialStep3": "Dimenzija kolekcije mora biti ista kao dimenzija koju generira model. Postojeća kolekcija dimenzije 2048 ne prihvaća ugrađenja dimenzije 1536.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Zdravo, {name}! Pošaljite poruku za chat putem vaše OmniRoute upravljačke točke.",
     "greetingFallbackName": "tamo",
     "errNoReply": "⚠️ Nema odgovora od upravljačke točke.",
-    "inputPlaceholder": "Pitajte bilo što…",
     "btnSend": "Pošalji"
   }
 }

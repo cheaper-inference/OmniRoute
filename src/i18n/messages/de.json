@@ -4802,10 +4802,8 @@
     "totalEntries": "Einträge insgesamt",
     "type": "Typ",
     "memoryEnabled": "Memory aktiviert",
-    "qdrantTutorialAria": "Qdrant-Einrichtungs-Tutorial",
     "qdrantTutorialTitle": "Kurztutorial: Speicher mit Qdrant",
     "qdrantTutorialIntro": "Qdrant speichert die Vektoren und Metadaten von Speicherelementen, sodass relevanter Kontext abgerufen werden kann. Es komprimiert Tokens nicht direkt; die Einsparungen sind indirekt, indem Kontext vermieden wird, der nicht zum_request passt.",
-    "qdrantTutorialCloseAria": "Tutorial schließen",
     "qdrantTutorialStep1": "Sichern Sie den Server vor dem Produktiveinsatz mit HTTPS und einem API-Schlüssel.",
     "qdrantTutorialStep2": "Geben Sie Host, Port, Collection und ein Modell im provider/model-Format mit einem konfigurierten Credential ein.",
     "qdrantTutorialStep3": "Die Dimensionsanzahl der Collection muss mit der Dimension übereinstimmen, die das Modell erzeugt. Eine bestehende 2048-Dimension-Collection akzeptiert keine 1536-Dimension-Embeddings.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Hallo {name}! Sende eine Nachricht, um über dein OmniRoute-Gateway zu chatten.",
     "greetingFallbackName": "dort",
     "errNoReply": "⚠️ Keine Antwort vom Gateway.",
-    "inputPlaceholder": "Frag etwas…",
     "btnSend": "Senden"
   }
 }

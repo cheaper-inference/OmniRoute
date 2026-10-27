@@ -4802,10 +4802,8 @@
     "totalEntries": "총 항목 수",
     "type": "유형",
     "memoryEnabled": "메모리 활성화됨",
-    "qdrantTutorialAria": "Qdrant 설정 튜토리얼",
     "qdrantTutorialTitle": "빠른 튜토리얼: Qdrant를 통한 메모리 사용법",
     "qdrantTutorialIntro": "Qdrant는 관련 컨텍스트를 검색할 수 있도록 메모리의 벡터와 메타데이터를 저장합니다. 토큰을 직접 압축하지는 않으며, 요청과 무관한 컨텍스트를 제외함으로써 간접적으로 절약 효과를 냅니다.",
-    "qdrantTutorialCloseAria": "튜토리얼 닫기",
     "qdrantTutorialStep1": "본격 사용 전에 HTTPS와 API 키로 서버를 보호하세요.",
     "qdrantTutorialStep2": "호스트, 포트, 컬렉션 및 provider/model 형식의 모델을 입력하고 설정된 자격 증명을 사용하세요.",
     "qdrantTutorialStep3": "컬렉션 차원은 모델이 생성하는 차원과 일치해야 합니다. 기존 2048차원 컬렉션은 1536차원 임베딩을 받을 수 없습니다.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 안녕하세요 {name}님! OmniRoute 게이트웨이를 통해 메시지를 보내서 채팅을 시작하세요.",
     "greetingFallbackName": "사용자",
     "errNoReply": "⚠️ 게이트웨이에서 응답이 없습니다.",
-    "inputPlaceholder": "무엇이든 질문하세요…",
     "btnSend": "전송"
   }
 }

@@ -4802,10 +4802,8 @@
     "totalEntries": "Celkem položek",
     "type": "Typ",
     "memoryEnabled": "Paměť povolena",
-    "qdrantTutorialAria": "Úvodní tutoriál k nastavení Qdrant",
     "qdrantTutorialTitle": "Rychlý tutoriál: paměť s Qdrant",
     "qdrantTutorialIntro": "Qdrant ukládá vektory a metadata paměti, takže lze získat relevantní kontext. Neukládá tokeny přímo; úspora je nepřímá, díky vynechání kontextu nesouvisejícího s požadavkem.",
-    "qdrantTutorialCloseAria": "Zavřít tutoriál",
     "qdrantTutorialStep1": "Než začnete službu používat v produkci, zabezpečte server pomocí protokolu HTTPS a klíče API.",
     "qdrantTutorialStep2": "Zadejte hostitele, port, kolekci a model ve formátu poskytovatel/model s nakonfigurovanými credenciály.",
     "qdrantTutorialStep3": "Dimenze kolekce musí odpovídat dimenzi, kterou generuje model. Existující kolekce s dimenzí 2048 nepřijímá embeddingy s dimenzí 1536.",
@@ -15574,7 +15572,6 @@
     "greeting": "👡 Ahoj {name}! Pošli zprávu pro chatování přes svou bránu OmniRoute.",
     "greetingFallbackName": "tam",
     "errNoReply": "⚠️ Žádná odpověď z brány.",
-    "inputPlaceholder": "Zeptej se na cokoli…",
     "btnSend": "Odeslat"
   }
 }

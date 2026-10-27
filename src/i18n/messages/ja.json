@@ -4802,10 +4802,8 @@
     "totalEntries": "総エントリ数",
     "type": "タイプ",
     "memoryEnabled": "メモリ有効",
-    "qdrantTutorialAria": "Qdrantセットアップチュートリアル",
     "qdrantTutorialTitle": "クイックチュートリアル：Qdrantによるメモリ管理",
     "qdrantTutorialIntro": "Qdrantはメモリベクトルおよびメタデータを保存し、関連するコンテキストの検索を可能にします。トークンの直接圧縮は行わず、リクエストと無関係なコンテキストを回避することで、間接的に節約を実現します。",
-    "qdrantTutorialCloseAria": "チュートリアルの閉じる",
     "qdrantTutorialStep1": "本番環境での使用前に、サーバーをHTTPSとAPIキーで保護してください。",
     "qdrantTutorialStep2": "ホスト、ポート、コレクション、およびモデルを設定済みのクレデンシャル付きのprovider/model形式で入力してください。",
     "qdrantTutorialStep3": "コレクションの次元は、モデルが生成する次元と一致する必要があります。既存の2048次元のコレクションでは、1536次元のエンベディングを受け入れられません。",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 {name}さん、こんにちは！ OmniRoute ゲートウェイを通じてチャットでメッセージをお送りください。",
     "greetingFallbackName": "ユーザー",
     "errNoReply": "⚠️ ゲートウェイからの応答がありません。",
-    "inputPlaceholder": "何でも聞いてみてください…",
     "btnSend": "送信"
   }
 }

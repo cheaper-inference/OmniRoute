@@ -4802,10 +4802,8 @@
     "totalEntries": "Totaal aantal items",
     "type": "Type",
     "memoryEnabled": "Geheugen ingeschakeld",
-    "qdrantTutorialAria": "Tutorial voor Qdrant-instellingen",
     "qdrantTutorialTitle": "Snelle tutorial: geheugen met Qdrant",
     "qdrantTutorialIntro": "Qdrant bewaart de vectoren en metadata van herinneringen, zodat relevante context kan worden opgeroepen. Het comprimeert tokens niet rechtstreeks; de besparing is indirect, door context die niet gerelateerd is aan de aanvraag te negeren.",
-    "qdrantTutorialCloseAria": "Tutorial sluiten",
     "qdrantTutorialStep1": "Beveilig de server met HTTPS en een API-sleutel voordat deze in productie wordt gebruikt.",
     "qdrantTutorialStep2": "Voer host, poort, collectie en een model in provider/model-indeling met een geconfigureerde credentie in.",
     "qdrantTutorialStep3": "De dimensie van de collectie moet overeenkomen met de dimensie die door het model wordt gegenereerd. Een bestaande collectie met 2048 dimensies accepteert geen inbeddingen met 1536 dimensies.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Hallo {name}! Stuur een bericht via je OmniRoute-gateway.",
     "greetingFallbackName": "daar",
     "errNoReply": "⚠️ Geen antwoord van de gateway.",
-    "inputPlaceholder": "Stel een vraag…",
     "btnSend": "Verzenden"
   }
 }

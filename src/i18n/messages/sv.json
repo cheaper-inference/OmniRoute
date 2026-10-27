@@ -4802,10 +4802,8 @@
     "totalEntries": "Totalt antal poster",
     "type": "Typ",
     "memoryEnabled": "Minne aktiverat",
-    "qdrantTutorialAria": "Qdrant-installationsguide",
     "qdrantTutorialTitle": "Snabbguide: minne med Qdrant",
     "qdrantTutorialIntro": "Qdrant lagrar vektorer och metadata för minnen så att relevant kontext kan hämtas. Det komprimerar inte direkt token; besparingarna är indirekta genom att undvika kontext som inte är relaterad till begäran.",
-    "qdrantTutorialCloseAria": "Stäng guiden",
     "qdrantTutorialStep1": "Säkrar servern med HTTPS och en API-nyckel innan produktionsanvändning.",
     "qdrantTutorialStep2": "Ange värd, port, samling och en modell i leverantör/modell-format med konfigurerad inloggningsuppgift.",
     "qdrantTutorialStep3": "Samlingens dimension måste matcha dimensionen som genereras av modellen. En befintlig samling med 2048 dimensioner accepterar inte inbäddningar på 1536 dimensioner.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Hej {name}! Skicka ett meddelande för att chatta via din OmniRoute-gateway.",
     "greetingFallbackName": "där",
     "errNoReply": "⚠️ Inget svar från gateway.",
-    "inputPlaceholder": "Fråga vad som helst…",
     "btnSend": "Skicka"
   }
 }

@@ -4802,10 +4802,8 @@
     "totalEntries": "Merkintöjä yhteensä",
     "type": "Tyyppi",
     "memoryEnabled": "Muisti käytössä",
-    "qdrantTutorialAria": "Qdrantin asennusohje",
     "qdrantTutorialTitle": "Nopea ohje: muisti Qdrantin kanssa",
     "qdrantTutorialIntro": "Qdrant säilyttää muistien vektorit ja metatiedot, jotta suvannut konteksti voidaan hakea. Se ei pienennä tokeneja suoraan; säästö on välillinen välttämällä pyynnölle liittyvämättömää kontekstia.",
-    "qdrantTutorialCloseAria": "Sulje ohje",
     "qdrantTutorialStep1": "Suojaa palvelin HTTPS:llä ja API-avaimella ennen tuotannon käyttöä.",
     "qdrantTutorialStep2": "Syötä isäntä, portti, kokoelma ja malli muotoa tarjoaja/malli käyttämällä asennetulla todennusavaimella.",
     "qdrantTutorialStep3": "Kokoelman dimension täytyy vastata mallin tuottamaa dimensiota. Olemassa oleva 2048-dimension kokoelu ei hyväksy 1536-dimension vektoreita.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Moi {name}! Lähetä viestit keskustelunsa kautta OmniRoute-lähettesivusi kautta.",
     "greetingFallbackName": "siellä",
     "errNoReply": "⚠️ Ei vastausta lähetysverkkoon.",
-    "inputPlaceholder": "Kysy mitä tahansa…",
     "btnSend": "Lähetä"
   }
 }

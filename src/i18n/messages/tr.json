@@ -4802,10 +4802,8 @@
     "totalEntries": "Toplam Kayıt",
     "type": "Tür",
     "memoryEnabled": "Bellek etkinleştirildi",
-    "qdrantTutorialAria": "Qdrant kurulum eğitimi",
     "qdrantTutorialTitle": "Hızlı eğitim: Qdrant ile hafıza",
     "qdrantTutorialIntro": "Qdrant, ilgili bağlamın alınabilmesi için hafızaların vektörlerini ve üst verilerini depolar. Tokenları doğrudan sıkıştırmaz; tasarruf, istekle ilgili olmayan bağlamdan kaçınarak dolaylı olarak sağlanır.",
-    "qdrantTutorialCloseAria": "Eğitimi kapat",
     "qdrantTutorialStep1": "Üretim ortamında kullanmadan önce sunucuyu HTTPS ve bir API anahtarı ile güvence altına alın.",
     "qdrantTutorialStep2": "Host, port, koleksiyon ve yapılandırılmış bir kimlik bilgisiyle provider/model biçiminde bir model girin.",
     "qdrantTutorialStep3": "Koleksiyon boyutu, modelin ürettiği boyutla eşleşmelidir. Mevcut 2048 boyutlu bir koleksiyon, 1536 boyutlu gömütlere kabul etmez.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Merhaba {name}! OmniRoute geçiş noktanız üzerinden sohbet etmek için bir mesaj gönderin.",
     "greetingFallbackName": "orada",
     "errNoReply": "⚠️ Geçiş noktasından yanıt gelmedi.",
-    "inputPlaceholder": "Herhangi bir şey sorun…",
     "btnSend": "Gönder"
   }
 }

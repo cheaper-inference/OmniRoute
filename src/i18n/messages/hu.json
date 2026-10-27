@@ -4802,10 +4802,8 @@
     "totalEntries": "Összes bejegyzés",
     "type": "Típus",
     "memoryEnabled": "Memória engedélyezve",
-    "qdrantTutorialAria": "Qdrant telepítési oktatóanyag",
     "qdrantTutorialTitle": "Gyors oktatóanyag: memória Qdranttal",
     "qdrantTutorialIntro": "A Qdrant tárolja a memóriák vektorait és metaadatait, így releváns kontextus vehető fel. Nem közvetlenül tömöríti a tokeneket; a megtakarítás közvetett, a kéréshez nem kapcsolódó kontextus elkerülésével.",
-    "qdrantTutorialCloseAria": "Oktatóanyag bezárása",
     "qdrantTutorialStep1": "Termékhasználat előtt HTTPS-sel és API-kulccsal biztosítsa a szervert.",
     "qdrantTutorialStep2": "Adja meg a hostot, a portot, a gyűjteményt, és egy modellt a szolgáltató/model formátumban, beállított hitelesítő adatokkal.",
     "qdrantTutorialStep3": "A gyűjtemény dimenziójának meg kell egyeznie a modell által generált dimenzióval. Egy meglévő 2048 dimenziós gyűjtemény nem fogad el 1536 dimenziós beágyazásokat.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Szia {name}! Küldjön egy üzenetet az OmniRoute kapuján keresztül.",
     "greetingFallbackName": "ott",
     "errNoReply": "⚠️ Nincs válasz a kaputól.",
-    "inputPlaceholder": "Kérdezzen bármit…",
     "btnSend": "Küldés"
   }
 }

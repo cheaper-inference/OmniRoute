@@ -4802,10 +4802,8 @@
     "totalEntries": "ធាតុសរុប",
     "type": "ប្រភេទ",
     "memoryEnabled": "មុខងារចងចាំត្រូវបានបើក",
-    "qdrantTutorialAria": "មេរៀនសិក្សា Qdrant",
     "qdrantTutorialTitle": "មេរៀនខ្លី៖ memory ជាមួយ Qdrant",
     "qdrantTutorialIntro": "Qdrant ផ្ទុng vectors និង metadata នៃ memories ដើម្បីអាចយក context ដែលពាក់ព័ន្ធបង។ វាមិន compression tokens ដោយផ្ទាល់ទេ; ការសន្សំសំចាំគឺជាច្បាប់ព្រោះវាជៀសវា context ដែលមិនពាក់ព័ន្ធនឹងសំណើ។",
-    "qdrantTutorialCloseAria": "បិទមេរៀន",
     "qdrantTutorialStep1": "ការពារ server ដោយ HTTPS និង API key មុនពេលប្រើក្នុងការផលិតផល។",
     "qdrantTutorialStep2": "បញ្ចូលម៉ាស៊ីនមេ (host), ច្រក (port), បណ្ដុំ (collection) និងម៉ូដែលក្នុងទម្រង់ provider/model ដែលមានព័ត៌មានសម្គាល់ (credential) បានកំណត់រួច។",
     "qdrantTutorialStep3": "កម្ពស់ជម្រើសរបស់ collection ត្រូវតែត្រូវគ្នានឹងកម្ពស់ជម្រើសដែល model ផលិត។ Collection 2048-dimension ដែលមានរួចមិនប្រកបដោយ embeddings 1536-dimension។",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 លូត {name}! ផ្ញើសារដើម្បីជជែកតាមរយៈ gateway OmniRoute របស់អ្នក។",
     "greetingFallbackName": "ទីនោះ",
     "errNoReply": "⚠️ គ្មានឆ្លើយតបពី gateway ទេ។",
-    "inputPlaceholder": "សួរអ្វីមួយ...",
     "btnSend": "ផ្ញើ"
   }
 }

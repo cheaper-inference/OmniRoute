@@ -4802,10 +4802,8 @@
     "totalEntries": "Total Entri",
     "type": "Jenis",
     "memoryEnabled": "Memori diaktifkan",
-    "qdrantTutorialAria": "Tutorial setup Qdrant",
     "qdrantTutorialTitle": "Tutorial singkat: memori dengan Qdrant",
     "qdrantTutorialIntro": "Qdrant menyimpan vektor dan metadata memori sehingga konteks yang relevan dapat diambil. Qdrant tidak melakukan kompresi token secara langsung; penghematannya tidak langsung, yaitu dengan menghindari konteks yang tidak terkait dengan permintaan.",
-    "qdrantTutorialCloseAria": "Tutup tutorial",
     "qdrantTutorialStep1": "Amankan server dengan HTTPS dan API key sebelum penggunaan produksi.",
     "qdrantTutorialStep2": "Masukkan host, port, collection, dan model dalam format provider/model dengan kredensial yang telah dikonfigurasi.",
     "qdrantTutorialStep3": "Dimensi collection harus sesuai dengan dimensi yang dihasilkan oleh model. Collection berdimensi 2048 yang sudah ada tidak akan menerima embedding berdimensi 1536.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Halo {name}! Kirim pesan untuk mengobrol melalui gerbang OmniRoute Anda.",
     "greetingFallbackName": "di sana",
     "errNoReply": "⚠️ Tidak ada respons dari gerbang.",
-    "inputPlaceholder": "Tanyakan apa saja…",
     "btnSend": "Kirim"
   }
 }

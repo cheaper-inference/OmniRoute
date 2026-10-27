@@ -4802,10 +4802,8 @@
     "totalEntries": "Voci totali",
     "type": "Tipo",
     "memoryEnabled": "Memoria abilitata",
-    "qdrantTutorialAria": "Guida alla configurazione di Qdrant",
     "qdrantTutorialTitle": "Guida rapida: memoria con Qdrant",
     "qdrantTutorialIntro": "Qdrant memorizza i vettori e i metadati delle memorie in modo che il contesto rilevante possa essere recuperato. Non comprime direttamente i token; i risparmi sono indiretti, evitando il contesto non pertinente alla richiesta.",
-    "qdrantTutorialCloseAria": "Chiudi guida",
     "qdrantTutorialStep1": "Proteggi il server con HTTPS e una chiave API prima dell'uso in produzione.",
     "qdrantTutorialStep2": "Inserisci host, porta, collection e un modello in formato provider/modello con una credenziale configurata.",
     "qdrantTutorialStep3": "La dimensione della collection deve corrispondere alla dimensione prodotta dal modello. Una collection esistente di 2048 dimensioni non accetta embedding di 1536 dimensioni.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Ciao {name}! Invia un messaggio per chattare tramite il tuo gateway OmniRoute.",
     "greetingFallbackName": "lì",
     "errNoReply": "⚠️ Nessuna risposta dal gateway.",
-    "inputPlaceholder": "Chiedi qualsiasi cosa…",
     "btnSend": "Invia"
   }
 }

@@ -4802,10 +4802,8 @@
     "totalEntries": "Jumlah Entri",
     "type": "Jenis",
     "memoryEnabled": "Memori didayakan",
-    "qdrantTutorialAria": "Pendidikan ringkas tetapan Qdrant",
     "qdrantTutorialTitle": "Pendidikan ringkas: ingatan dengan Qdrant",
     "qdrantTutorialIntro": "Qdrant menyimpan vektor dan metadata ingatan supaya konteks yang berkaitan boleh diperoleh. Ia tidak mampatkan token secara langsung; jimatannya adalah tidak langsung, dengan mengelakkan konteks yang tidak berkaitan dengan permintaan.",
-    "qdrantTutorialCloseAria": "Tutup pendidikan",
     "qdrantTutorialStep1": "Lindungi pelayan dengan HTTPS dan kunci API sebelum digunakan dalam produksi.",
     "qdrantTutorialStep2": "Masukkan hos, port, koleksi, dan model dalam format penyedia/model dengan kelayakan yang dikonfigurasi.",
     "qdrantTutorialStep3": "Dimensi koleksi mesti sepadan dengan dimensi yang dihasilkan oleh model. Koleksi 2048 dimensi yang sedia ada tidak menerima penanam 1536 dimensi.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Hai {name}! Hantarkan mesej untuk berbual melalui gerbang OmniRoute anda.",
     "greetingFallbackName": "di sana",
     "errNoReply": "⚠️ Tiada respons daripada gerbang.",
-    "inputPlaceholder": "Tanya apa saja…",
     "btnSend": "Hantar"
   }
 }

@@ -4802,10 +4802,8 @@
     "totalEntries": "Tổng số mục",
     "type": "Loại",
     "memoryEnabled": "Đã bật bộ nhớ",
-    "qdrantTutorialAria": "Hướng dẫn cài đặt Qdrant",
     "qdrantTutorialTitle": "Hướng dẫn nhanh: bộ nhớ với Qdrant",
     "qdrantTutorialIntro": "Qdrant lưu trữ các vectơ và dữ liệu mô tả (metadata) của bộ nhớ để có thể truy xuất ngữ cảnh liên quan. Nó không nén trực tiếp token; tiết kiệm là gián tiếp, bằng cách tránh ngữ cảnh không liên quan đến yêu cầu.",
-    "qdrantTutorialCloseAria": "Đóng hướng dẫn",
     "qdrantTutorialStep1": "Bảo mật máy chủ bằng HTTPS và một khóa API trước khi sử dụng trong môi trường sản xuất.",
     "qdrantTutorialStep2": "Nhập host, cổng, collection, và một model theo định dạng provider/model với thông tin xác thực đã được cấu hình.",
     "qdrantTutorialStep3": "Chiều kích của collection phải khớp với chiều kích do model tạo ra. Một collection hiện có 2048 chiều sẽ không chấp nhận các embedding 1536 chiều.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Xin chào {name}! Gửi tin nhắn để trò chuyện qua cổng OmniRoute của bạn.",
     "greetingFallbackName": "ở đó",
     "errNoReply": "⚠️ Không có phản hồi từ cổng.",
-    "inputPlaceholder": "Hỏi bất cứ điều gì…",
     "btnSend": "Gửi"
   }
 }

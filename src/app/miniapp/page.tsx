@@ -65,7 +65,12 @@ export default function TelegramMiniApp() {
     } else {
       setError(tm("errTelegramOnly"));
     }
-  }, [tm]);
+    // Runs once on mount to initialise the Telegram SDK and post the greeting.
+    // The effect and its setMessages updater use tm from the mount-time
+    // closure, which is the translator this one-shot greeting needs. Listing tm
+    // would re-run the effect and repeat the greeting if its identity changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });

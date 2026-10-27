@@ -4802,10 +4802,8 @@
     "totalEntries": "Skupno število vnosov",
     "type": "Vrsta",
     "memoryEnabled": "Spomin omogočen",
-    "qdrantTutorialAria": "Uvodna vadba za nastavitev Qdrant",
     "qdrantTutorialTitle": "Hitro vstopno vadbo: spomin z Qdrant",
     "qdrantTutorialIntro": "Qdrant shranjuje vektore in metapodatke spominov, da se omogoči pridobitev relevantnega konteksta. Tokenov ne stisne neposredno; prihranke doseže posredno, tako da izogiba kontekstu, ki ni povezan z zahtevko.",
-    "qdrantTutorialCloseAria": "Zapri vadbo",
     "qdrantTutorialStep1": "Strežnik varujte s protokolom HTTPS in API ključem pred uporabo v produkcijskem okolju.",
     "qdrantTutorialStep2": "Vnesite gostitelja, vrata, zbirko in model v obliki ponudnik/model z opredeljeno verodostojnostjo.",
     "qdrantTutorialStep3": "Dimenzija zbirke se mora ujemati s dimenzijo, ki jo proizvede model. Obstoječa zbirka s 2048 dimenzijami ne sprejme vgradenj s 1536 dimenzijami.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Pozdravljeni, {name}! Pošljite sporočilo za klepet prek vašega OmniRoute gatewaysa.",
     "greetingFallbackName": "tja",
     "errNoReply": "⚠️ Ni odgovora od gatewaysa.",
-    "inputPlaceholder": "Vprašajte kaj…",
     "btnSend": "Pošlji"
   }
 }

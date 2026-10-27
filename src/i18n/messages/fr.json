@@ -4802,10 +4802,8 @@
     "totalEntries": "Nombre total d’entrées",
     "type": "Type",
     "memoryEnabled": "Mémoire activée",
-    "qdrantTutorialAria": "Tutoriel de configuration de Qdrant",
     "qdrantTutorialTitle": "Tutoriel rapide : mémoire avec Qdrant",
     "qdrantTutorialIntro": "Qdrant stocke les vecteurs et les métadonnées des mémoires afin que le contexte pertinent puisse être récupéré. Il ne compresse pas les jetons directement ; les économies sont indirectes, en évitant le contexte non lié à la requête.",
-    "qdrantTutorialCloseAria": "Fermer le tutoriel",
     "qdrantTutorialStep1": "Sécuriser le serveur avec HTTPS et une clé API avant une utilisation en production.",
     "qdrantTutorialStep2": "Saisir l'hôte, le port, la collection et un modèle au format fournisseur/modèle avec des identifiants configurés.",
     "qdrantTutorialStep3": "La dimension de la collection doit correspondre à la dimension produite par le modèle. Une collection existante de 2048 dimensions n'accepte pas des plongements de 1536 dimensions.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Bonjour {name} ! Envoyez un message pour discuter via votre passerelle OmniRoute.",
     "greetingFallbackName": "là",
     "errNoReply": "⚠️ Pas de réponse de la passerelle.",
-    "inputPlaceholder": "Demandez n'importe quoi…",
     "btnSend": "Envoyer"
   }
 }

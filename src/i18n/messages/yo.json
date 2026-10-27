@@ -4802,10 +4802,8 @@
     "totalEntries": "Àpapọ̀ Àwọn Àkọsílẹ̀",
     "type": "Irú",
     "memoryEnabled": "Ìrántí ṣiṣẹ́",
-    "qdrantTutorialAria": "ẹkọ lẹsẹkẹsẹ fun pilẹsẹ Qdrant",
     "qdrantTutorialTitle": "ẹkọ lẹsẹkẹsẹ: iroyin pẹlu Qdrant",
     "qdrantTutorialIntro": "Qdrant gbin vectors ati metadata ti iroyin ni eyiti a le gba alaye kan ti o ba mu. Kò ma ṣe itọju tokens taara; awọn aṣayan wọpọ jẹ aṣayan, nipa didiwọn ifihan ti kii ṣe iṣeduro pẹlu iṣeduro.",
-    "qdrantTutorialCloseAria": "Ṣi ẹkọ",
     "qdrantTutorialStep1": "Ṣe ilọsiwaju server pẹlu HTTPS ati aṣẹ API ṣaaju lilo ni ọna iṣẹ.",
     "qdrantTutorialStep2": "Kọ host, port, collection, ati model ni ilana provider/model pẹlu aṣẹ ti a ṣe aṣa.",
     "qdrantTutorialStep3": "Dimeeters collection gbọdọ jọna pẹlu dimeeters ti o model le da. Collection 2048-dimeeters ti o wa ni bayi kò n gba 1536-dimeeters embeddings.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Ìbéni {name}! Fún ìtọ́kà sí àwòṣe tàkò nípasẹ̀ ọwọ́ OmniRoute rẹ.",
     "greetingFallbackName": "yìí",
     "errNoReply": "⚠️ Kò sí ìdáhùn láti ọwọ́ gateway.",
-    "inputPlaceholder": "Beèrè èyíkéyìí…",
     "btnSend": "Fún"
   }
 }

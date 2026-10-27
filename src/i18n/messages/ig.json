@@ -4802,10 +4802,8 @@
     "totalEntries": "Ngụkọta Ndenye",
     "type": "Ụdị",
     "memoryEnabled": "Agbanyere ncheta",
-    "qdrantTutorialAria": "Akaụnụ usoro Qdrant",
     "qdrantTutorialTitle": "Akaụnụ gụnyere: ihe ncheta na Qdrant",
     "qdrantTutorialIntro": "Qdrant na-enwe vectors na metadata nke ihe ncheta ka e wee nweta mbụ chikwara ozi. Ọ anaghị akpa tokens kpụmkwem; ọ bara ọnụ na otu ọrụ abụghị ihe dị mkpa maka aghụghọchaa.",
-    "qdrantTutorialCloseAria": "Mụọ akaụnụ",
     "qdrantTutorialStep1": "Jide n'aka na ụdị HTTPS na ihe nchopụta API ọzọ maara n'oge a na-eji maka ọrụ ọhụrụ.",
     "qdrantTutorialStep2": "Tinye host, port, collection, na otu ụdị n'ụdị provider/model na ihe nchopụta ọzọ.",
     "qdrantTutorialStep3": "Ogo collection ga-abụrịrị otu ụdị ụdị ahụ emepụtara. Collection nwere ogo 2048 enweghị ike ịnwere embeddings nwere ogo 1536.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Nnee {name}! Zipu ozi iji kwaa okwu site n'ọdụ ụzọ OmniRoute gị.",
     "greetingFallbackName": "ebe a",
     "errNoReply": "⚠️ Enweghị azị site n'ọdụ ụzọ.",
-    "inputPlaceholder": "Jụọ ihe ọbụla…",
     "btnSend": "Zipu"
   }
 }

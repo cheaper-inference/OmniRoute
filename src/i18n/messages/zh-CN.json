@@ -4802,10 +4802,8 @@
     "totalEntries": "总条目数",
     "type": "类型",
     "memoryEnabled": "内存已启用",
-    "qdrantTutorialAria": "Qdrant 配置教程",
     "qdrantTutorialTitle": "快速教程：用 Qdrant 做记忆",
     "qdrantTutorialIntro": "Qdrant 存储记忆的向量与元数据，用于检索相关上下文。它并不直接压缩 Token；节省是间接的——避免带入与当前请求无关的上下文。",
-    "qdrantTutorialCloseAria": "关闭教程",
     "qdrantTutorialStep1": "在生产使用前，为服务器配置 HTTPS 与 API Key。",
     "qdrantTutorialStep2": "填写主机、端口、集合，以及一个 provider/model 格式且已配置凭据的模型。",
     "qdrantTutorialStep3": "集合维度必须与模型产出的维度一致。已有的 2048 维集合无法接收 1536 维的向量。",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 你好，{name}！发一条消息即可通过你的 OmniRoute 网关开始对话。",
     "greetingFallbackName": "朋友",
     "errNoReply": "⚠️ 网关没有回复。",
-    "inputPlaceholder": "随便问点什么…",
     "btnSend": "发送"
   }
 }

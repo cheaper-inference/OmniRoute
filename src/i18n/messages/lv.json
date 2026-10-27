@@ -4802,10 +4802,8 @@
     "totalEntries": "Kopējais ierakstu skaits",
     "type": "Tips",
     "memoryEnabled": "Atmiņa iespējota",
-    "qdrantTutorialAria": "Qdrant iestatījumu pamācība",
     "qdrantTutorialTitle": "Ātrā pamācība: atmiņa ar Qdrant",
     "qdrantTutorialIntro": "Qdrant saglabā atmiņu vektorus un metadatus, lai varētu izvilkt saistītu kontekstu. Tas nav tieši kompresē tokenus; taupījumi ir netieši, izvairoties no ar pieprasījumu nesaskaņota konteksta.",
-    "qdrantTutorialCloseAria": "Aizvērt pamācību",
     "qdrantTutorialStep1": "Pirms lietošanas produkcijā serveri jāapdrošina ar HTTPS un API atslēgu.",
     "qdrantTutorialStep2": "Ievadiet saimnieku, portu, kolekciju un modeli veidā izdevējs/modelis ar konfigurētiem kredītārpakļaudā.",
     "qdrantTutorialStep3": "Kolekcijas dimensijai jāatbilst dimensijai, ko ģenerē modelis. Eksistējoša 2048 dimensiju kolekcija nepieņem 1536 dimensiju iegultus vektorus.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Sveiks, {name}! Sūtiet ziņu čatam caur savu OmniRoute vārtu maršrutu.",
     "greetingFallbackName": "tur",
     "errNoReply": "⚠️ Nav atbildes no vārta.",
-    "inputPlaceholder": "Uzzi visu…",
     "btnSend": "Nosūtīt"
   }
 }

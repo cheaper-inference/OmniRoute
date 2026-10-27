@@ -4802,10 +4802,8 @@
     "totalEntries": "סך כל הרשומות",
     "type": "סוג",
     "memoryEnabled": "זיכרון מופעל",
-    "qdrantTutorialAria": "מדריך מתקן ל־Qdrant",
     "qdrantTutorialTitle": "מדריך מהיר: זיכרון עם Qdrant",
     "qdrantTutorialIntro": "Qdrant מאחסן וקטורים ומטא־דאטה של זכרונות כך שניתן לשלוף הקשר רלוונטי. הוא אינו כופף טוקנס ישירות; החיסכון הוא עקיף, על ידי הימנעות מהקשר שאינו רלוונטי לבקשה.",
-    "qdrantTutorialCloseAria": "סגירת המדריך",
     "qdrantTutorialStep1": "בטח את השרת עם HTTPS ומפתח API לפני שימוש הייצור.",
     "qdrantTutorialStep2": "הזן מייבא, פורט, קולקציה ודגשה בפורמט provider/model עם אישור מוגדר.",
     "qdrantTutorialStep3": "ממד הקולקציה חייב להתאים לממד המופק מהדגש. קולקציה קיימת עם 2048־ממד אינה מקבלת הצמדות עם 1536־ממד.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 הי {name}! שלח הודעה כדי לשוחב דרך השער שלך ב-OmniRoute.",
     "greetingFallbackName": "שם",
     "errNoReply": "⚠️ אין תגובה מהשער.",
-    "inputPlaceholder": "שאל כל דבר...",
     "btnSend": "שלח"
   }
 }

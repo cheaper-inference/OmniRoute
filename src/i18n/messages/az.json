@@ -4802,10 +4802,8 @@
     "totalEntries": "Ümumi qeydlər",
     "type": "Növ",
     "memoryEnabled": "Yaddaş aktivdir",
-    "qdrantTutorialAria": "Qdrant quraşdırma təlimatı",
     "qdrantTutorialTitle": "Qısa təlimat: Qdrant ilə yaddaş",
     "qdrantTutorialIntro": "Qdrant yaddaşların vektorlarını və metadatağını saxlayır, buna görə də uyğun kontekst əldə edilə bilər. O, Token-ları birbaşa sıxışdırmır; təsərrüf dolayısı yoldan, istəkdən əlaqəsiz kontekstdən qaçınaraq baş verir.",
-    "qdrantTutorialCloseAria": "Təlimatı bağla",
     "qdrantTutorialStep1": "İstehsalatdan əvvəl serveri HTTPS və API açarı ilə təmin edin.",
     "qdrantTutorialStep2": "Host, port, kolleksiya və təchiz olunmuş etibarlıyyətlə provider/model formatında model daxil edin.",
     "qdrantTutorialStep3": "Kolleksiyanın ölçüsü modelin yaratdığı ölçü ilə uyğun olmalıdır. mövcud 2048-ölçülü kolleksiya 1536-ölçülü embeedinqləri qəbul etmir.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Səlam {name}! OmniRoute qəpazəniz vasitəsilə çata mesaj göndərin.",
     "greetingFallbackName": "orada",
     "errNoReply": "⚠️ Qəpazədən cavab gəlmir.",
-    "inputPlaceholder": "İstənilən sualı verin…",
     "btnSend": "Göndər"
   }
 }

@@ -4802,10 +4802,8 @@
     "totalEntries": "Kabuuang Bilang ng mga Entry",
     "type": "Uri",
     "memoryEnabled": "Naka-enable ang memory",
-    "qdrantTutorialAria": "Tutorial sa setup ng Qdrant",
     "qdrantTutorialTitle": "Mabilisang tutorial: memory gamit ang Qdrant",
     "qdrantTutorialIntro": "Iiimbak ng Qdrant ang mga vector at metadata ng mga memory upang makuha ang kaugnay na context. Hindi nito direkta na naipapabuti ang token savings; ang pagtipid ay indirect lamang, sa pamamagitan ng pag-iwas sa context na hindi kaugnay sa request.",
-    "qdrantTutorialCloseAria": "Isara ang tutorial",
     "qdrantTutorialStep1": "Protektahan ang server gamit ang HTTPS at API key bago itong gagamitin sa production.",
     "qdrantTutorialStep2": "Ilagay ang host, port, collection, at isang modelo sa format ng provider/modelo na may naka-configure na credential.",
     "qdrantTutorialStep3": "Ang dimension ng collection ay dapat lumapit sa dimension na ipinagbigay ng model. Ang umiiral na 2048-dimension na collection ay hindi tatanggap ng 1536-dimension embeddings.",
@@ -15574,7 +15572,6 @@
     "greeting": "👋 Kumusta si {name}! Magpadala ng mensaheng chat sa pamamagitan ng iyong OmniRoute gateway.",
     "greetingFallbackName": "doon",
     "errNoReply": "⚠️ Walang sagot mula sa gateway.",
-    "inputPlaceholder": "Magtanong ng anumang bagay…",
     "btnSend": "Ipadala"
   }
 }
