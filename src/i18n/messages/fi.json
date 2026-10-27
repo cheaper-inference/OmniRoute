@@ -6634,7 +6634,7 @@
       "claude": "Yhdistä Claude Code olemassa olevalla OAuth-työnkululla.",
       "cline": "Yhdistä Cline olemassa olevalla OAuth-työnkululla.",
       "cursor": "Yhdistä Cursor IDE olemassa olevalla OAuth-työnkululla.",
-      "cursor-api": "Yhdistä Cursor käyttäjän API-avaimella (crsr_...) osoitteesta cursor.com/dashboard/api; IDE-istuntoa ei tarvita.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Yhdistä GitHub Copilot olemassa olevalla OAuth-työnkululla.",
       "gitlab-duo": "OAuth-sovellus ai_features + read_user -käyttöoikeuksilla. Määritä GITLAB_DUO_OAUTH_CLIENT_ID ja valinnaisesti GITLAB_DUO_OAUTH_CLIENT_SECRET tälle OmniRoute-instanssille.",
       "kilocode": "Yhdistä Kilo Code olemassa olevalla OAuth-työnkululla.",

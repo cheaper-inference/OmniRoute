@@ -6634,7 +6634,7 @@
       "claude": "Pripojte Claude Code pomocou existujúceho toku OAuth.",
       "cline": "Pripojte Cline pomocou existujúceho toku OAuth.",
       "cursor": "Pripojte Cursor IDE pomocou existujúceho toku OAuth.",
-      "cursor-api": "Pripojte Cursor pomocou používateľského kľúča API (crsr_...) z cursor.com/dashboard/api; relácia IDE nie je potrebná.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Pripojte GitHub Copilot pomocou existujúceho toku OAuth.",
       "gitlab-duo": "Aplikácia OAuth s rozsahmi (scopes) ai_features + read_user. Nakonfigurujte GITLAB_DUO_OAUTH_CLIENT_ID a voliteľne GITLAB_DUO_OAUTH_CLIENT_SECRET na tejto inštancii OmniRoute.",
       "kilocode": "Pripojte Kilo Code pomocou existujúceho toku OAuth.",

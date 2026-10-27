@@ -72,6 +72,16 @@ curl -i \
 
 En nyckel utan `manage` (eller utan Bearer) returnerar `403 LOCAL_ONLY`. Syskonprefixet `/api/cli-tools/runtime/*` går avsiktligen INTE att kringgå — se [Nivåer för routningsskydd — undantag för manage-behörighet](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Origin-validering
+
+Efter autentisering får varje begäran till `/api/mcp/*` — transporterna och hanteringsrutterna som `status`, `tools`, `audit`, `restart` — sin `Origin`-header validerad, oavsett anropare (API-nyckel, CLI-token, dashboard-session eller anonym loopback med inloggning avstängd). Detta är det skydd mot DNS rebinding som MCP Streamable HTTP-specifikationen kräver.
+
+- **Ingen `Origin`-header** → tillåts. OmniRoute CLI, SDK:n och IDE-klienter skickar ingen.
+- **Tillåten `Origin`** → `localhost` / `127.0.0.1` / `[::1]` på valfri port, eller OmniRoutes egen publika origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, den vidarebefordrade origin från en betrodd omvänd proxy (`OMNIROUTE_TRUST_PROXY`, bara när ingen base URL är satt) eller en direkt nådd loopback-/LAN-IP-värd. `Host`-headern ensam gör aldrig en origin betrodd.
+- **Varje annan `Origin`, inklusive `null`** → `403` med en JSON-RPC-felbody: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. En dashboard-session som visar ett giltigt CSRF-token accepteras fortfarande, som vid andra dashboard-skrivningar.
+
+En webbläsarbaserad MCP-klient bakom en omvänd proxy behöver `OMNIROUTE_PUBLIC_BASE_URL`; det finns ingen tillåtelselista för andra origins. CORS-preflight (`OPTIONS`) kontrolleras inte för Origin; begäran som följer gör det.
+
 ## IDE-konfiguration
 
 Se [MCP-klientkonfiguration](../guides/SETUP_GUIDE.md#mcp-client-configuration) för konfiguration av Claude Desktop,

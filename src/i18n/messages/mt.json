@@ -6634,7 +6634,7 @@
       "claude": "Qabbad Claude Code bil-fluss OAuth eżistenti.",
       "cline": "Qabbad Cline bil-fluss OAuth eżistenti.",
       "cursor": "Qabbad Cursor IDE bil-fluss OAuth eżistenti.",
-      "cursor-api": "Qabbad Cursor b'ċavetta API tal-utent (crsr_...) minn cursor.com/dashboard/api; ma hija meħtieġa ebda sessjoni tal-IDE.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "Qabbad GitHub Copilot bil-fluss OAuth eżistenti.",
       "gitlab-duo": "Applikazzjoni OAuth bl-ambiti ai_features + read_user. Ikkonfigura GITLAB_DUO_OAUTH_CLIENT_ID u, jekk mixtieq, GITLAB_DUO_OAUTH_CLIENT_SECRET fuq din l-istanza ta' OmniRoute.",
       "kilocode": "Qabbad Kilo Code bil-fluss OAuth eżistenti.",

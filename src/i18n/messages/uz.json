@@ -6634,7 +6634,7 @@
       "claude": "Claude Codeʼni mavjud OAuth jarayoni orqali ulang.",
       "cline": "Clineʼni mavjud OAuth jarayoni orqali ulang.",
       "cursor": "Cursor IDEʼni mavjud OAuth jarayoni orqali ulang.",
-      "cursor-api": "Cursorʼni cursor.com/dashboard/api saytidan olingan foydalanuvchi API kaliti (crsr_...) bilan ulang; IDE seansi talab qilinmaydi.",
+      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
       "github": "GitHub Copilotʼni mavjud OAuth jarayoni orqali ulang.",
       "gitlab-duo": "ai_features + read_user vakolat doiralariga ega OAuth ilovasi. Ushbu OmniRoute nusxasida GITLAB_DUO_OAUTH_CLIENT_ID va ixtiyoriy ravishda GITLAB_DUO_OAUTH_CLIENT_SECRETʼni sozlang.",
       "kilocode": "Kilo Codeʼni mavjud OAuth jarayoni orqali ulang.",
