@@ -121,82 +121,163 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
   let context: any = null;
 
   try {
+    const customUa =
+      (opts.credentials as any)?.providerSpecificData?.customUserAgent ||
+      (opts.credentials as any)?.customUserAgent;
+    const resolvedUserAgent =
+      typeof customUa === "string" && customUa.trim() ? customUa.trim() : FLOW_USER_AGENT;
+
     context = await browser.newContext({
-      userAgent: FLOW_USER_AGENT,
+      userAgent: resolvedUserAgent,
       viewport: { width: 1280, height: 800 },
     });
 
-    // Populate cookies into context
-    const cookiesToSet = cookieHeader
-      .split(";")
-      .map((pair) => {
+    let cookiesToSet: Array<{
+      name: string;
+      value: string;
+      domain: string;
+      path: string;
+      secure: boolean;
+      httpOnly?: boolean;
+      sameSite?: "Strict" | "Lax" | "None";
+    }> = [];
+
+    const rawTrimmed = (token || "").trim();
+    if (rawTrimmed.startsWith("[") && rawTrimmed.endsWith("]")) {
+      try {
+        const rawList = JSON.parse(rawTrimmed);
+        if (Array.isArray(rawList)) {
+          cookiesToSet = rawList
+            .filter((item: any) => item && item.name && typeof item.value === "string")
+            .map((item: any) => {
+              const name = String(item.name).trim();
+              let domain =
+                item.domain ||
+                (name.includes("OSID") || name.startsWith("__Host-")
+                  ? "flow.google.com"
+                  : ".google.com");
+              if (name.includes("OSID") || name.startsWith("__Host-")) {
+                domain = "flow.google.com";
+              }
+              const sameSiteVal = String(item.sameSite || "").toLowerCase();
+              const sameSite: "Strict" | "Lax" | "None" =
+                sameSiteVal === "no_restriction" || sameSiteVal === "none"
+                  ? "None"
+                  : sameSiteVal === "strict"
+                    ? "Strict"
+                    : "Lax";
+
+              return {
+                name,
+                value: String(item.value).trim(),
+                domain,
+                path: item.path || "/",
+                secure: item.secure !== false,
+                httpOnly: Boolean(item.httpOnly),
+                sameSite,
+              };
+            });
+        }
+      } catch (e) {
+        console.error("[FLOW_DEBUG] Failed to parse JSON cookies:", e);
+      }
+    }
+
+    if (cookiesToSet.length === 0) {
+      for (const pair of cookieHeader.split(";")) {
         const [name, ...valParts] = pair.trim().split("=");
-        if (!name || valParts.length === 0) return null;
+        if (!name || valParts.length === 0) continue;
         const cleanName = name.trim();
         const cleanVal = valParts.join("=").trim();
-        if (!cleanName || !cleanVal) return null;
-        return {
-          name: cleanName,
-          value: cleanVal,
-          domain: cleanName.includes("OSID") ? "flow.google.com" : ".google.com",
-          path: "/",
-          secure: true,
-        };
-      })
-      .filter(
-        (c): c is { name: string; value: string; domain: string; path: string; secure: boolean } =>
-          c !== null
-      );
+        if (!cleanName || !cleanVal) continue;
+
+        if (cleanName.includes("OSID") || cleanName.startsWith("__Host-")) {
+          cookiesToSet.push({
+            name: cleanName,
+            value: cleanVal,
+            domain: "flow.google.com",
+            path: "/",
+            secure: true,
+          });
+        } else {
+          cookiesToSet.push({
+            name: cleanName,
+            value: cleanVal,
+            domain: ".google.com",
+            path: "/",
+            secure: true,
+          });
+        }
+      }
+    }
     await context.addCookies(cookiesToSet);
 
     const page = await context.newPage();
 
-    await page.goto("https://flow.google.com/", {
-      waitUntil: "domcontentloaded",
-      timeout: 30_000,
-    });
-    await page.waitForTimeout(3_000);
-
-    // 1. Force navigation directly to creating a brand new project, or click New Project button
+    // Directly navigate to project creation or studio workspace
     await page.goto("https://flow.google.com/", {
       waitUntil: "domcontentloaded",
       timeout: 30_000,
     });
     await page.waitForTimeout(2_000);
-    console.log("[FLOW_DEBUG] Navigated to:", page.url());
-    if (page.url().includes("accounts.google.com")) {
-      throw new Error("Google Flow session is expired or requires re-authentication");
-    }
+    console.log("[FLOW_DEBUG] Initial explore URL:", page.url());
 
-    // Always create a FRESH new project:
-    // If we land inside an existing project URL (e.g. redirected to /project/xxx), navigate back home first
-    if (page.url().includes("/project/")) {
-      const backHomeBtn = page
+    // If redirected to /about, click the main entry button ("Get started", "Create with Google Flow", etc.)
+    if (page.url().includes("/about")) {
+      console.log("[FLOW_DEBUG] Landed on /about, clicking CTA entry button...");
+      const ctaBtn = page
         .locator(
-          "a[href='/'], a[aria-label='Home'], a[aria-label='Главная'], button.back-button, button:has-text('arrow_back')"
+          "a:has-text('Create with Google Flow'), a:has-text('Начать'), a:has-text('Попробовать'), a:has-text('Sign in'), a:has-text('Войти'), a[href*='flow.google.com'], button:has-text('Create')"
         )
         .first();
-      if (await backHomeBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
-        await backHomeBtn.click().catch(() => {});
-        await page.waitForTimeout(2_000);
+      if (await ctaBtn.isVisible({ timeout: 4_000 }).catch(() => false)) {
+        await ctaBtn.click().catch(() => {});
+        await page.waitForTimeout(3_000);
       } else {
         await page.goto("https://flow.google.com/", { waitUntil: "domcontentloaded" });
         await page.waitForTimeout(2_000);
       }
     }
+    console.log("[FLOW_DEBUG] Navigated to:", page.url());
+    if (page.url().includes("accounts.google.com") || page.url().includes("/about")) {
+      throw new Error(
+        "Google Flow session is expired or requires re-authentication (redirected to " +
+          page.url() +
+          ")"
+      );
+    }
 
-    // Now click New Project on the main dashboard
+    // Always start by going to the main dashboard so we are guaranteed not to be in an old project
+    await page.goto("https://flow.google.com/", {
+      waitUntil: "domcontentloaded",
+      timeout: 30_000,
+    });
+    await page.waitForTimeout(2_000);
+
+    // If we were redirected into an existing project, click Home or force load /
+    if (page.url().includes("/project/")) {
+      const homeBtn = page
+        .locator("a[aria-label*='Home' i], button[aria-label*='Home' i], a[href='/']")
+        .first();
+      if (await homeBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+        await homeBtn.click();
+        await page.waitForTimeout(2_000);
+      }
+    }
+
+    // Now click New Project on the main dashboard to create a brand new isolated project
     let newProjectCreated = false;
     const newProjBtn = page
-      .locator(
-        "button.new-project-button, button:has-text('Новый проект'), button:has-text('New project'), button:has-text('Start Creating'), a[href*='/project/new'], [role='button']:has-text('Новый проект'), [role='button']:has-text('New project')"
-      )
+      .locator("button:has-text('New project'), button:has-text('Новый проект')")
       .first();
 
     if (await newProjBtn.isVisible({ timeout: 6_000 }).catch(() => false)) {
       try {
+        const startUrl = page.url();
         await newProjBtn.click();
-        await page.waitForURL(/\/project\/[a-zA-Z0-9_-]+/, { timeout: 15_000 });
+        await page.waitForURL((url) => url.href.includes("/project/") && url.href !== startUrl, {
+          timeout: 15_000,
+        });
         newProjectCreated = true;
         console.log("[FLOW_DEBUG] Created fresh project via button:", page.url());
       } catch (err) {
@@ -210,7 +291,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
 
     const extractAssetId = (str: string) => {
       const match =
-        /(?:video\/|[a-f0-9-]{36})([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i.exec(
+        /(?:video\/|[a-f0-9-]{36}|image\/)([a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12})/i.exec(
           str
         );
       return match ? match[1].toLowerCase() : null;
@@ -246,8 +327,8 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
 
     const videoPromise = new Promise<string>((resolve, reject) => {
       const timeout = setTimeout(() => {
-        reject(new Error("Timed out waiting for Veo video generation to complete (180s limit)"));
-      }, 180_000);
+        reject(new Error("Timed out waiting for Veo video generation to complete (300s limit)"));
+      }, 300_000);
 
       page.on("response", async (response: any) => {
         const url = response.url();
@@ -263,27 +344,30 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
           return;
         }
 
+        // Direct CDN video request
         if (url.includes("flow-content.google/video") && url.includes("Signature=")) {
           const aid = extractAssetId(url);
           if (!existingVideoUrls.has(url) && (!aid || !existingAssetIds.has(aid))) {
-            console.log("[FLOW_DEBUG] RESOLVED videoPromise with direct URL:", url);
+            console.log("[FLOW_DEBUG] RESOLVED video response with direct CDN URL:", url);
             clearTimeout(timeout);
             resolve(url);
             return;
           }
         }
 
+        // Catch any batchexecute, labs-flow, or direct video/stream response from Google Flow
         if (
-          url.includes("batchexecute") &&
-          (url.includes("rpcids=as29s") ||
-            url.includes("rpcids=GN0Bre") ||
-            url.includes("rpcids=ngNC2"))
+          url.includes("flow-content.google/video") ||
+          url.includes("batchexecute") ||
+          url.includes("labs-flow") ||
+          url.includes("flow.google.com")
         ) {
           try {
             const body = await response.text();
             if (body.includes("flow-content.google/video")) {
-              const match = /(https:\/\/flow-content\.google\/video\/[^"\s\\]+)/.exec(body);
-              if (match && match[1]) {
+              const matches = body.matchAll(/(https:\/\/flow-content\.google\/video\/[^"\s\\]+)/g);
+              for (const match of matches) {
+                if (!match || !match[1]) continue;
                 const cleanUrl = match[1]
                   .replace(/\\\\u003d|\\u003d/g, "=")
                   .replace(/\\\\u0026|\\u0026/g, "&");
@@ -293,7 +377,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
                   (!aid || !existingAssetIds.has(aid)) &&
                   cleanUrl.includes("Signature=")
                 ) {
-                  console.log("[FLOW_DEBUG] RESOLVED batchexecute with clean URL:", cleanUrl);
+                  console.log("[FLOW_DEBUG] RESOLVED video response with clean URL:", cleanUrl);
                   clearTimeout(timeout);
                   resolve(cleanUrl);
                   return;
@@ -305,10 +389,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
       });
     });
 
-    const videoPrompt =
-      opts.prompt.toLowerCase().includes("video") || opts.prompt.toLowerCase().includes("видео")
-        ? opts.prompt
-        : `Create a video: ${opts.prompt}`;
+    const videoPrompt = `Create a video: ${opts.prompt}`;
 
     console.log("[FLOW_DEBUG] Typing prompt:", videoPrompt.slice(0, 50));
     const editor = page.locator(".ProseMirror").first();
@@ -325,7 +406,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
 
     const sendBtn = page
       .locator(
-        "button.generate-icon-button, button[aria-label='Начать генерацию'], button:has-text('arrow_forward')"
+        "button.generate-icon-button, button[aria-label='Начать генерацию'], button[aria-label*='generat' i], button[aria-label*='send' i], button:has-text('arrow_forward')"
       )
       .first();
     if (await sendBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
@@ -335,34 +416,34 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     }
     console.log("[FLOW_DEBUG] Send triggered!");
 
-    // Check for approval card ("Всегда одобрять" / "Одобрить")
-    const approveBtn = page
-      .locator(
-        ".option-row:has-text('Всегда одобрять'), .option-row:has-text('Одобрить'), .option-label:has-text('Всегда одобрять'), .option-label:has-text('Одобрить'), button:has-text('Всегда одобрять'), button:has-text('Одобрить')"
-      )
-      .first();
-    try {
-      await approveBtn.waitFor({ state: "visible", timeout: 8_000 });
-      await approveBtn.click();
-      console.log("[FLOW_DEBUG] Clicked approval button!");
-    } catch {}
+    // Helper to click approve button if prompt creates a confirmation dialog
+    const clickApproveIfPresent = async (timeoutMs: number) => {
+      const btn = page
+        .locator(
+          ".option-row:has-text('Approve'), .option-row:has-text('Одобрить'), button:has-text('Approve'), button:has-text('Одобрить'), [role='button']:has-text('Approve'), [role='button']:has-text('Одобрить')"
+        )
+        .first();
+      if (await btn.isVisible({ timeout: timeoutMs }).catch(() => false)) {
+        await btn.click().catch(() => {});
+        console.log("[FLOW_DEBUG] Clicked approve option row!");
+        return true;
+      }
+      return false;
+    };
+
+    await clickApproveIfPresent(12_000);
 
     const pollPromise = (async () => {
-      for (let i = 0; i < 40; i++) {
-        await page.waitForTimeout(4_000);
-        if (Date.now() - promptSentAt < 15_000) continue;
+      for (let i = 0; i < 90; i++) {
+        await page.waitForTimeout(3_000);
+        await clickApproveIfPresent(500);
 
-        const approveBtnLater = page
-          .locator(".option-row:has-text('Всегда одобрять'), .option-row:has-text('Одобрить')")
-          .first();
-        if (await approveBtnLater.isVisible({ timeout: 500 }).catch(() => false)) {
-          await approveBtnLater.click().catch(() => {});
-        }
+        if (Date.now() - promptSentAt < 15_000) continue;
 
         // Check if there is an active generation progress card or container
         const progressEl = page
           .locator(
-            ".video-container, .generation-card, [class*='generation-progress'], [class*='rendering']"
+            ".video-container, .media-option, .generation-card, [class*='generation-progress'], [class*='rendering'], [class*='media-card']"
           )
           .first();
         if (await progressEl.isVisible({ timeout: 500 }).catch(() => false)) {
@@ -370,6 +451,38 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
           if (text.includes("%") && !text.includes("100%")) {
             console.log("[FLOW_DEBUG] Generation in progress:", text.replace(/\n/g, " "));
             continue;
+          }
+          // Click the container to open editor or trigger CDN stream
+          console.log("[FLOW_DEBUG] Clicking media container...");
+          await progressEl.click().catch(() => {});
+          await page.waitForTimeout(1_000);
+        }
+
+        // Check for video tag directly created anywhere in DOM
+        const videoSrc = await page.evaluate(() => {
+          const v = document.querySelector("video");
+          return v ? v.src || v.currentSrc : null;
+        });
+        if (videoSrc && videoSrc.includes("flow-content.google/video")) {
+          const aid = extractAssetId(videoSrc);
+          if (!existingVideoUrls.has(videoSrc) && (!aid || !existingAssetIds.has(aid))) {
+            console.log("[FLOW_DEBUG] RESOLVED video directly from <video> element:", videoSrc);
+            return videoSrc;
+          }
+        }
+
+        // Also check any download buttons or media action menus
+        const downloadBtn = page
+          .locator("button[aria-label*='Download'], button[aria-label*='Скачать'], a[download]")
+          .first();
+        if (await downloadBtn.isVisible({ timeout: 300 }).catch(() => false)) {
+          const href = await downloadBtn.getAttribute("href").catch(() => null);
+          if (href && href.includes("flow-content.google/video")) {
+            const aid = extractAssetId(href);
+            if (!existingVideoUrls.has(href) && (!aid || !existingAssetIds.has(aid))) {
+              console.log("[FLOW_DEBUG] RESOLVED video via download button href:", href);
+              return href;
+            }
           }
         }
         const videos = await page.$$eval("video", (els: any[]) =>
@@ -389,7 +502,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
           return newVideos[0];
         }
       }
-      throw new Error("Timeout polling video element");
+      return await videoPromise;
     })();
 
     videoUrl = await Promise.race([videoPromise, pollPromise]);
@@ -428,31 +541,95 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
   let context: any = null;
 
   try {
+    const customUa =
+      (opts.credentials as any)?.providerSpecificData?.customUserAgent ||
+      (opts.credentials as any)?.customUserAgent;
+    const resolvedUserAgent =
+      typeof customUa === "string" && customUa.trim() ? customUa.trim() : FLOW_USER_AGENT;
+
     context = await browser.newContext({
-      userAgent: FLOW_USER_AGENT,
+      userAgent: resolvedUserAgent,
       viewport: { width: 1280, height: 800 },
     });
 
-    const cookiesToSet = cookieHeader
-      .split(";")
-      .map((pair) => {
+    let cookiesToSet: Array<{
+      name: string;
+      value: string;
+      domain: string;
+      path: string;
+      secure: boolean;
+      httpOnly?: boolean;
+      sameSite?: "Strict" | "Lax" | "None";
+    }> = [];
+
+    const rawTrimmed = (token || "").trim();
+    if (rawTrimmed.startsWith("[") && rawTrimmed.endsWith("]")) {
+      try {
+        const rawList = JSON.parse(rawTrimmed);
+        if (Array.isArray(rawList)) {
+          cookiesToSet = rawList
+            .filter((item: any) => item && item.name && typeof item.value === "string")
+            .map((item: any) => {
+              const name = String(item.name).trim();
+              let domain =
+                item.domain ||
+                (name.includes("OSID") || name.startsWith("__Host-")
+                  ? "flow.google.com"
+                  : ".google.com");
+              if (name.includes("OSID") || name.startsWith("__Host-")) {
+                domain = "flow.google.com";
+              }
+              const sameSiteVal = String(item.sameSite || "").toLowerCase();
+              const sameSite: "Strict" | "Lax" | "None" =
+                sameSiteVal === "no_restriction" || sameSiteVal === "none"
+                  ? "None"
+                  : sameSiteVal === "strict"
+                    ? "Strict"
+                    : "Lax";
+
+              return {
+                name,
+                value: String(item.value).trim(),
+                domain,
+                path: item.path || "/",
+                secure: item.secure !== false,
+                httpOnly: Boolean(item.httpOnly),
+                sameSite,
+              };
+            });
+        }
+      } catch (e) {
+        console.error("[FLOW_DEBUG] Failed to parse JSON cookies:", e);
+      }
+    }
+
+    if (cookiesToSet.length === 0) {
+      for (const pair of cookieHeader.split(";")) {
         const [name, ...valParts] = pair.trim().split("=");
-        if (!name || valParts.length === 0) return null;
+        if (!name || valParts.length === 0) continue;
         const cleanName = name.trim();
         const cleanVal = valParts.join("=").trim();
-        if (!cleanName || !cleanVal) return null;
-        return {
-          name: cleanName,
-          value: cleanVal,
-          domain: cleanName.includes("OSID") ? "flow.google.com" : ".google.com",
-          path: "/",
-          secure: true,
-        };
-      })
-      .filter(
-        (c): c is { name: string; value: string; domain: string; path: string; secure: boolean } =>
-          c !== null
-      );
+        if (!cleanName || !cleanVal) continue;
+
+        if (cleanName.includes("OSID") || cleanName.startsWith("__Host-")) {
+          cookiesToSet.push({
+            name: cleanName,
+            value: cleanVal,
+            domain: "flow.google.com",
+            path: "/",
+            secure: true,
+          });
+        } else {
+          cookiesToSet.push({
+            name: cleanName,
+            value: cleanVal,
+            domain: ".google.com",
+            path: "/",
+            secure: true,
+          });
+        }
+      }
+    }
     await context.addCookies(cookiesToSet);
 
     const page = await context.newPage();
@@ -461,10 +638,29 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
       waitUntil: "domcontentloaded",
       timeout: 30_000,
     });
-    await page.waitForTimeout(3_000);
+    await page.waitForTimeout(2_000);
 
-    if (page.url().includes("accounts.google.com")) {
-      throw new Error("Google Flow session is expired or requires re-authentication");
+    if (page.url().includes("/about")) {
+      const ctaBtn = page
+        .locator(
+          "a:has-text('Create with Google Flow'), a:has-text('Начать'), a:has-text('Попробовать'), a:has-text('Sign in'), a:has-text('Войти'), a[href*='flow.google.com'], button:has-text('Create')"
+        )
+        .first();
+      if (await ctaBtn.isVisible({ timeout: 4_000 }).catch(() => false)) {
+        await ctaBtn.click().catch(() => {});
+        await page.waitForTimeout(3_000);
+      } else {
+        await page.goto("https://flow.google.com/", { waitUntil: "domcontentloaded" });
+        await page.waitForTimeout(2_000);
+      }
+    }
+
+    if (page.url().includes("accounts.google.com") || page.url().includes("/about")) {
+      throw new Error(
+        "Google Flow session is expired or requires re-authentication (redirected to " +
+          page.url() +
+          ")"
+      );
     }
 
     if (!page.url().includes("/project/")) {
@@ -530,11 +726,11 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
 
     const approveBtn = page
       .locator(
-        ".option-row:has-text('Всегда одобрять'), .option-row:has-text('Одобрить'), .option-label:has-text('Всегда одобрять'), .option-label:has-text('Одобрить'), button:has-text('Всегда одобрять'), button:has-text('Одобрить')"
+        ".option-row[aria-label*='Approve' i], .option-row[aria-label*='Одобр' i], .option-row:has-text('Approve'), .option-row:has-text('Always approve'), .option-row:has-text('Всегда одобрять'), .option-row:has-text('Одобрить'), button:has-text('Approve'), button:has-text('Always approve'), button:has-text('Всегда одобрять'), button:has-text('Одобрить')"
       )
       .first();
     try {
-      await approveBtn.waitFor({ state: "visible", timeout: 10_000 });
+      await approveBtn.waitFor({ state: "visible", timeout: 15_000 });
       await approveBtn.click();
     } catch {}
 

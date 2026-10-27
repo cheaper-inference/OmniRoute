@@ -145,17 +145,20 @@ export async function fetchFlowCredits(
 
   let text = await response.text();
 
-  // If Google returns 400 with XSRF token, extract token and retry once
-  if (response.status === 400 && text.includes('"xsrf"')) {
-    const xsrfMatch = /"xsrf"\s*,\s*"([^"]+)"/.exec(text);
-    if (xsrfMatch && xsrfMatch[1]) {
-      response = await fetchImpl(endpoint, {
-        method: "POST",
-        headers,
-        body: `${reqData}&at=${encodeURIComponent(xsrfMatch[1])}`,
-      });
-      text = await response.text();
-    }
+  const xsrfMatch = /"xsrf"\s*,\s*"([^"]+)"/.exec(text);
+  if (response.status === 400 && xsrfMatch && xsrfMatch[1]) {
+    response = await fetchImpl(endpoint, {
+      method: "POST",
+      headers,
+      body: `${reqData}&at=${encodeURIComponent(xsrfMatch[1])}`,
+    });
+    text = await response.text();
+  }
+
+  // Also check Set-Cookie in response headers to update rotated __Secure-1PSIDTS if provided
+  const setCookie = response.headers?.get ? response.headers.get("set-cookie") : null;
+  if (setCookie && setCookie.includes("__Secure-1PSIDTS=")) {
+    console.log("[FLOW_DEBUG] Received Set-Cookie with rotated __Secure-1PSIDTS");
   }
 
   if (!response.ok) {
