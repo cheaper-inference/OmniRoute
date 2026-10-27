@@ -14,18 +14,23 @@
  * `minIntervalMs = 0` disables throttling entirely (byte-identical to before).
  */
 
+import { performance } from "node:perf_hooks";
+
 const DEFAULT_MIN_INTERVAL_MS = 250;
 const MAX_MIN_INTERVAL_MS = 60_000;
 const DEFAULT_JITTER_MS = 120;
 const MAX_JITTER_MS = 60_000;
+/** A real timer can wake at most one loop tick before its monotonic deadline. */
+const TIMER_EARLY_WAKE_TOLERANCE_MS = 1;
 
 export interface ThrottleClock {
+  /** Monotonic milliseconds used to measure spacing inside this process. */
   now: () => number;
   sleep: (ms: number) => Promise<void>;
 }
 
 const realClock: ThrottleClock = {
-  now: () => Date.now(),
+  now: () => performance.now(),
   sleep: (ms: number) => new Promise((resolve) => setTimeout(resolve, ms)),
 };
 
@@ -76,7 +81,17 @@ export class MinIntervalThrottle {
           ? now
           : Math.max(now, this.lastStart + this.minIntervalMs + this.nextJitter());
       const wait = startAt - now;
-      if (wait > 0) await this.clock.sleep(wait);
+      if (wait > 0) await this.clock.sleep(Math.max(1, Math.ceil(wait)));
+      // Timers fire on whole milliseconds of loop time, so a real setTimeout can
+      // wake up to one tick before the monotonic deadline. Recheck only that
+      // sub-tick shortfall; every iteration awaits a positive sleep, so this never
+      // spins. A larger shortfall means an injected clock stepped backward, and
+      // the scheduled window below already keeps the spacing.
+      let shortfall = startAt - this.clock.now();
+      while (shortfall > 0 && shortfall <= TIMER_EARLY_WAKE_TOLERANCE_MS) {
+        await this.clock.sleep(Math.max(1, Math.ceil(shortfall)));
+        shortfall = startAt - this.clock.now();
+      }
       // Spacing is measured between real starts. A timer that wakes late (a
       // loaded CI box, a paused process) would otherwise shorten the next gap,
       // because the next caller computes its wait from the scheduled instant
