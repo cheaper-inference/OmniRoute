@@ -321,7 +321,8 @@
     "check:free-catalog-evidence": "node scripts/check/check-free-catalog-evidence.mjs",
     "check:ui-kit-snapshot": "node scripts/check/check-ui-kit-snapshot.mjs",
     "gen:icon-map": "node scripts/dev/gen-icon-map.mjs",
-    "docs:readme-hero": "node scripts/docs/gen-readme-hero.mjs"
+    "docs:readme-hero": "node scripts/docs/gen-readme-hero.mjs",
+    "docs:readme-diagrams": "node --import tsx/esm scripts/docs/gen-readme-diagrams.mjs"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "1.4.0",
