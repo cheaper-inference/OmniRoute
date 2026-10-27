@@ -218,7 +218,7 @@ test("CfStreamParser maps the real 3021 rate-limit frame to HTTP 429", () => {
   assert.equal(parser.done, false);
 });
 
-test("toCfMessages drops system/tool, flattens parts, keeps user/assistant", () => {
+test("toCfMessages drops system, replays tool as tool_result, flattens parts, keeps user/assistant", () => {
   const out = toCfMessages([
     { role: "system", content: "You are a helpful assistant." },
     { role: "user", content: "hi" },
@@ -233,12 +233,15 @@ test("toCfMessages drops system/tool, flattens parts, keeps user/assistant", () 
     { role: "tool", content: "tool result" },
     { role: "user", content: "" },
   ]);
-  assert.equal(out.length, 3);
+  assert.equal(out.length, 4);
   assert.deepEqual(out[0].parts, [{ type: "text", text: "hi" }]);
   assert.equal(out[1].parts[0].text, "hello");
   assert.equal(out[2].parts[0].text, "a\nb");
+  assert.ok(out[3].parts[0].text.includes("<tool_result>"));
+  assert.ok(out[3].parts[0].text.includes("tool result"));
   assert.equal(out[0].role, "user");
   assert.equal(out[1].role, "assistant");
+  assert.equal(out[3].role, "user"); // tool messages become user messages
 });
 
 test("#16460 missing Playwright package or Chromium binary is a 503 host error", () => {
@@ -527,7 +530,7 @@ test("executor streams OpenAI SSE chunks from captured frames", async () => {
     .split("\n")
     .filter((line) => line.startsWith("data: ") && line !== "data: [DONE]")
     .map((line) => JSON.parse(line.slice(6)));
-  assert.ok(chunks.length >= 5, `expected several chunks, got ${chunks.length}`);
+  assert.ok(chunks.length >= 4, `expected several chunks, got ${chunks.length}`);
 
   const first = chunks[0];
   assert.equal(first.choices[0].delta.role, "assistant");
