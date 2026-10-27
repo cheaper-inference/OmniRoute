@@ -50,8 +50,12 @@ import {
   parseCfToolCalls,
   buildCfToolConversationPrompt,
   stripCfToolMarkup,
+  finalizeCfToolCalls,
+  hasMalformedCfToolIntent,
+  cfToolNonce,
   cfMessageText,
   truncateCfMessage,
+  type CfParsedToolCall,
   type CfToolDef,
 } from "../translator/cloudflarePlaygroundTools.ts";
 
@@ -71,6 +75,18 @@ const NAV_TIMEOUT_MS = 45_000;
 const CHAT_TIMEOUT_MS = 120_000;
 const BLOCKED_MESSAGE =
   "Cloudflare Playground blocked the headless browser (fingerprint check). Set CLOUDFLARE_PLAYGROUND_CHROME_PATH to a full desktop Chrome binary and retry.";
+
+/**
+ * Re-ask sent to a fresh room when a reply carried tool intent the parser could
+ * not read. It restates the contract's three hard requirements (one block per
+ * call, tool name as the tag, nonce included verbatim) because the models that
+ * invent their own envelope are the same ones that skim the contract.
+ */
+const CF_TOOL_REPAIR_NOTE =
+  "Your previous response contained a tool call that the client could not read, so it was rejected. " +
+  "Retry the requested next action from scratch, following the tool contract exactly: " +
+  "one block per call, the tool name as the tag, the arguments as a single JSON object, " +
+  "and the _nonce binding copied verbatim.";
 
 // ── Frame parsing & translation (pure — unit-tested against live captures) ──
 
@@ -555,249 +571,283 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
     // retries the same oversized payload.
     const originalMessages =
       (bodyObj.messages as Array<{ role?: string; content?: unknown }>) || [];
-    const preparedMessages = buildCfToolConversationPrompt(
-      originalMessages,
-      tools as Array<{
-        type: string;
-        function: { name: string; description?: string; parameters: Record<string, unknown> };
-      }>
-    );
+    const availableTools: CfToolDef[] = tools.map((t) => ({
+      name: t.function.name,
+      description: t.function.description,
+      parameters: t.function.parameters,
+    }));
+    const toolNames = availableTools.map((t) => t.name);
+    const nonce = hasTools ? cfToolNonce(tools) : "";
 
-    const transport = this.transportFactory(chatId);
-    const started = await transport.start({
-      model,
-      messages: toCfMessages(preparedMessages),
-      temperature,
-      signal,
-    });
-    if (started.ok !== true) {
+    type CfAttemptResult =
+      | Extract<CfTransportStartResult, { ok: false }>
+      | { ok: true; parser: CfStreamParser; timedOut: boolean };
+
+    /**
+     * One playground request, drained to completion.
+     *
+     * Owns the transport for the whole attempt and always opens a fresh room:
+     * the playground keeps a per-room 10-user-message history, so resuming one
+     * would inherit a foreign history — which is also what makes the repair
+     * retry below safe to run.
+     */
+    const runAttempt = async (
+      messages: Array<{ role?: string; content?: unknown }>,
+      idSuffix: string
+    ): Promise<CfAttemptResult> => {
+      const transport = this.transportFactory(chatId + idSuffix);
+      const started = await transport.start({
+        model,
+        messages: toCfMessages(
+          buildCfToolConversationPrompt(
+            messages,
+            tools as Array<{
+              type: string;
+              function: {
+                name: string;
+                description?: string;
+                parameters: Record<string, unknown>;
+              };
+            }>
+          )
+        ),
+        temperature,
+        signal,
+      });
+      if (started.ok !== true) return started;
+
+      const timedOut = { current: false };
+      const timer = setTimeout(() => {
+        timedOut.current = true;
+        void transport.close();
+      }, this.chatTimeoutMs);
+
+      const parser = new CfStreamParser(chatId + idSuffix);
+      try {
+        for await (const raw of transport.frames()) {
+          if (signal?.aborted) break;
+          parser.push(raw);
+          if (parser.error || parser.done) break;
+          if (timedOut.current) break;
+        }
+      } finally {
+        clearTimeout(timer);
+        await transport.close().catch(() => {});
+      }
+      return { ok: true, parser, timedOut: timedOut.current };
+    };
+
+    /**
+     * Turn one raw reply into tool calls, held to the nonce + argument-schema
+     * contract. `null` means the reply expressed tool intent but did not hold up,
+     * so the caller retries once rather than shipping a turn that silently lost
+     * the call.
+     */
+    const parseAttempt = (text: string): CfParsedToolCall[] | null => {
+      if (!hasTools) return [];
+      const parsed = parseCfToolCalls(text, availableTools);
+      if (parsed.length === 0) {
+        return hasMalformedCfToolIntent(text, toolNames) ? null : [];
+      }
+      return finalizeCfToolCalls(parsed, tools, nonce);
+    };
+
+    const attemptMessages = (repairNote?: string) =>
+      repairNote ? [...originalMessages, { role: "user", content: repairNote }] : originalMessages;
+
+    const attempt = await runAttempt(attemptMessages(), "");
+    if (attempt.ok !== true) {
       return makeErrorResult(
-        started.status,
-        started.message,
+        attempt.status,
+        attempt.message,
         body,
         PLAYGROUND_URL,
-        started.fallbackHint ? { "X-Omni-Fallback-Hint": started.fallbackHint } : undefined
+        attempt.fallbackHint ? { "X-Omni-Fallback-Hint": attempt.fallbackHint } : undefined
       );
     }
 
-    const timedOut = { current: false };
-    const timer = setTimeout(() => {
-      timedOut.current = true;
-      void transport.close();
-    }, this.chatTimeoutMs);
+    let parser = attempt.parser;
+    let timedOut = attempt.timedOut;
+    let toolCalls = parseAttempt(parser.text);
 
-    try {
-      if (!wantStream) {
-        const parser = new CfStreamParser(chatId);
-        for await (const raw of transport.frames()) {
-          parser.push(raw);
-          if (parser.error || parser.done) break;
-        }
-        if (parser.error) {
-          return makeErrorResult(parser.error.status, parser.error.message, body, PLAYGROUND_URL);
-        }
-        if (timedOut.current && !parser.text) {
-          return makeErrorResult(504, "Cloudflare Playground timed out", body, PLAYGROUND_URL);
-        }
+    // A reply that carried tool intent but no readable call gets exactly one
+    // retry in a fresh room, with an explicit repair instruction. Before this an
+    // unrecognised markup shape silently became a text answer with the call
+    // buried inside it, and the client treated the turn as finished.
+    if (toolCalls === null) {
+      const repair = await runAttempt(attemptMessages(CF_TOOL_REPAIR_NOTE), "-repair");
+      if (repair.ok === true) {
+        parser = repair.parser;
+        timedOut = repair.timedOut;
+        // A second failure is answered as plain text: the model's own words are
+        // still more useful to the client than a 502, and a loop is worse.
+        toolCalls = parseAttempt(parser.text) ?? [];
+      } else {
+        toolCalls = [];
+      }
+    }
 
-        // Parse tool calls from the response text
-        const text = parser.text;
-        const availableTools: CfToolDef[] = tools.map((t) => ({
-          name: t.function.name,
-          description: t.function.description,
-          parameters: t.function.parameters,
-        }));
-        const toolCalls = hasTools ? parseCfToolCalls(text, availableTools) : [];
-
-        let finishReason = parser.finishReason ?? "stop";
-        let content: string | null = text;
-        if (toolCalls.length > 0) {
-          finishReason = "tool_calls";
-          // Strip tool markup from content
-          content = stripCfToolMarkup(
-            text,
-            availableTools.map((t) => t.name)
-          );
-          if (!content) content = null;
-        }
-
-        const messagePayload: Record<string, unknown> = { role: "assistant", content };
-        if (parser.reasoningText) {
-          messagePayload.reasoning_content = parser.reasoningText;
-        }
-        if (toolCalls.length > 0) {
-          messagePayload.tool_calls = toolCalls.map((tc) => ({
-            id: tc.id,
-            type: "function",
-            function: { name: tc.name, arguments: tc.arguments },
-          }));
-        }
-
-        return {
-          response: new Response(
-            JSON.stringify({
-              id: chatId,
-              object: "chat.completion",
-              created,
-              model: rawModel,
-              choices: [
-                {
-                  index: 0,
-                  message: messagePayload,
-                  finish_reason: finishReason,
-                },
-              ],
-              usage: {
-                prompt_tokens: 0,
-                completion_tokens: Math.ceil((text.length + parser.reasoningText.length) / 4),
-                total_tokens: 0,
-              },
-            }),
-            { headers: { "Content-Type": "application/json" } }
-          ),
-          url: PLAYGROUND_URL,
-          headers: {},
-          transformedBody: body,
-        };
+    if (!wantStream) {
+      if (parser.error) {
+        return makeErrorResult(parser.error.status, parser.error.message, body, PLAYGROUND_URL);
+      }
+      if (timedOut && !parser.text) {
+        return makeErrorResult(504, "Cloudflare Playground timed out", body, PLAYGROUND_URL);
       }
 
-      // Streaming: buffer the full response first, then parse tool calls and emit clean chunks
-      const encoder = new TextEncoder();
-      let parser: CfStreamParser | null = null;
-      let bufferError: { status: number; message: string } | null = null;
-      let bufferReasoning = "";
-
-      // First pass: collect all frames
-      for await (const raw of transport.frames()) {
-        if (signal?.aborted) break;
-        if (!parser) parser = new CfStreamParser(chatId);
-        parser.push(raw);
-        if (parser.error) {
-          bufferError = parser.error;
-          break;
-        }
-        if (parser.done) {
-          break;
-        }
-        if (timedOut.current) break;
-      }
-
-      // If we have a parser, get the accumulated text
-      const fullText = parser?.text ?? "";
-      const fullReasoning = parser?.reasoningText ?? "";
-      bufferReasoning = fullReasoning;
-
-      // Parse tool calls from buffered text
-      const availableTools: CfToolDef[] = tools.map((t) => ({
-        name: t.function.name,
-        description: t.function.description,
-        parameters: t.function.parameters,
-      }));
-      const toolCalls = hasTools ? parseCfToolCalls(fullText, availableTools) : [];
-
-      let finishReason = parser?.finishReason ?? "stop";
-      let content: string | null = fullText;
+      const text = parser.text;
+      let finishReason = parser.finishReason ?? "stop";
+      let content: string | null = text;
       if (toolCalls.length > 0) {
         finishReason = "tool_calls";
+        // Strip tool markup from content
         content = stripCfToolMarkup(
-          fullText,
+          text,
           availableTools.map((t) => t.name)
         );
         if (!content) content = null;
       }
 
-      // Build the response stream
-      const responseStream = new ReadableStream<Uint8Array>({
-        async start(controller) {
-          const enqueue = (payload: {
-            delta?: Record<string, unknown>;
-            finish_reason?: string | null;
-            error?: unknown;
-          }) => {
-            controller.enqueue(encoder.encode(sseChunk(chatId, created, rawModel, payload)));
-          };
-
-          try {
-            // Emit role
-            enqueue({ delta: { role: "assistant" }, finish_reason: null });
-
-            // Emit reasoning if present
-            if (bufferReasoning) {
-              enqueue({ delta: { reasoning_content: bufferReasoning }, finish_reason: null });
-            }
-
-            // Emit content (without tool markup)
-            if (content) {
-              enqueue({ delta: { content }, finish_reason: null });
-            }
-
-            // Emit tool_calls if present
-            if (toolCalls.length > 0) {
-              enqueue({
-                delta: {
-                  tool_calls: toolCalls.map((tc) => ({
-                    id: tc.id,
-                    type: "function",
-                    function: { name: tc.name, arguments: tc.arguments },
-                  })),
-                },
-                finish_reason: null,
-              });
-            }
-
-            // Handle errors
-            if (bufferError) {
-              enqueue({
-                error: {
-                  message: bufferError.message,
-                  type: "upstream_error",
-                  code: `HTTP_${bufferError.status}`,
-                },
-              });
-            } else if (timedOut.current) {
-              enqueue({
-                error: {
-                  message: "Cloudflare Playground timed out",
-                  type: "timeout_error",
-                  code: "HTTP_504",
-                },
-              });
-            }
-
-            // Final chunk with finish_reason
-            enqueue({ delta: {}, finish_reason: finishReason });
-          } catch (error) {
-            if (!signal?.aborted) controller.error(error);
-          } finally {
-            clearTimeout(timer);
-            await transport.close().catch(() => {});
-            controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-            controller.close();
-          }
-        },
-        cancel() {
-          clearTimeout(timer);
-          void transport.close().catch(() => {});
-        },
-      });
+      const messagePayload: Record<string, unknown> = { role: "assistant", content };
+      if (parser.reasoningText) {
+        messagePayload.reasoning_content = parser.reasoningText;
+      }
+      if (toolCalls.length > 0) {
+        messagePayload.tool_calls = toolCalls.map((tc) => ({
+          id: tc.id,
+          type: "function",
+          function: { name: tc.name, arguments: tc.arguments },
+        }));
+      }
 
       return {
-        response: new Response(responseStream, {
-          headers: {
-            "Content-Type": "text/event-stream",
-            "Cache-Control": "no-cache",
-            Connection: "keep-alive",
-          },
-        }),
+        response: new Response(
+          JSON.stringify({
+            id: chatId,
+            object: "chat.completion",
+            created,
+            model: rawModel,
+            choices: [
+              {
+                index: 0,
+                message: messagePayload,
+                finish_reason: finishReason,
+              },
+            ],
+            usage: {
+              prompt_tokens: 0,
+              completion_tokens: Math.ceil((text.length + parser.reasoningText.length) / 4),
+              total_tokens: 0,
+            },
+          }),
+          { headers: { "Content-Type": "application/json" } }
+        ),
         url: PLAYGROUND_URL,
         headers: {},
         transformedBody: body,
       };
-    } finally {
-      if (!wantStream) {
-        clearTimeout(timer);
-        await transport.close().catch(() => {});
-      }
     }
+
+    // Streaming: buffer the full response first, then parse tool calls and emit clean chunks
+    const encoder = new TextEncoder();
+    const bufferError = parser.error ?? null;
+    const bufferReasoning = parser.reasoningText;
+
+    const fullText = parser.text;
+    let finishReason = parser.finishReason ?? "stop";
+    let content: string | null = fullText;
+    if (toolCalls.length > 0) {
+      finishReason = "tool_calls";
+      content = stripCfToolMarkup(fullText, toolNames);
+      if (!content) content = null;
+    }
+
+    // Build the response stream
+    const responseStream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        const enqueue = (payload: {
+          delta?: Record<string, unknown>;
+          finish_reason?: string | null;
+          error?: unknown;
+        }) => {
+          controller.enqueue(encoder.encode(sseChunk(chatId, created, rawModel, payload)));
+        };
+
+        try {
+          // Emit role
+          enqueue({ delta: { role: "assistant" }, finish_reason: null });
+
+          // Emit reasoning if present
+          if (bufferReasoning) {
+            enqueue({ delta: { reasoning_content: bufferReasoning }, finish_reason: null });
+          }
+
+          // Emit content (without tool markup)
+          if (content) {
+            enqueue({ delta: { content }, finish_reason: null });
+          }
+
+          // Emit tool_calls if present
+          if (toolCalls.length > 0) {
+            enqueue({
+              delta: {
+                tool_calls: toolCalls.map((tc) => ({
+                  id: tc.id,
+                  type: "function",
+                  function: { name: tc.name, arguments: tc.arguments },
+                })),
+              },
+              finish_reason: null,
+            });
+          }
+
+          // Handle errors
+          if (bufferError) {
+            enqueue({
+              error: {
+                message: bufferError.message,
+                type: "upstream_error",
+                code: `HTTP_${bufferError.status}`,
+              },
+            });
+          } else if (timedOut) {
+            enqueue({
+              error: {
+                message: "Cloudflare Playground timed out",
+                type: "timeout_error",
+                code: "HTTP_504",
+              },
+            });
+          }
+
+          // Final chunk with finish_reason
+          enqueue({ delta: {}, finish_reason: finishReason });
+        } catch (error) {
+          if (!signal?.aborted) controller.error(error);
+        } finally {
+          // The attempt helper already closed its transport; the whole reply was
+          // buffered above, so there is nothing left to drain here.
+          controller.enqueue(encoder.encode("data: [DONE]\n\n"));
+          controller.close();
+        }
+      },
+      cancel() {
+        // Nothing to release: the attempt's transport was closed before this
+        // stream was handed to the client.
+      },
+    });
+
+    return {
+      response: new Response(responseStream, {
+        headers: {
+          "Content-Type": "text/event-stream",
+          "Cache-Control": "no-cache",
+          Connection: "keep-alive",
+        },
+      }),
+      url: PLAYGROUND_URL,
+      headers: {},
+      transformedBody: body,
+    };
   }
 }

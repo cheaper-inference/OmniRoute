@@ -20,6 +20,7 @@ import {
   CF_COMPACT_HEADER,
   CF_MAX_MESSAGE_CHARS,
   cfMessageText,
+  cfToolNonce,
 } from "../../open-sse/translator/cloudflarePlaygroundTools.ts";
 
 const identityFrame = JSON.stringify({
@@ -507,4 +508,208 @@ test("the compacted block renders a turn exactly like the verbatim tail does", (
     const blockItem = cfMessageText(message);
     assert.equal(blockItem, tailText, `rendering drifted for role ${message.role}`);
   }
+});
+
+// ── Repair retry: a tool-intent reply the parser cannot read ──────────────────
+
+const READ_TOOLS = [
+  {
+    type: "function" as const,
+    function: {
+      name: "read",
+      description: "Read a file",
+      parameters: {
+        type: "object",
+        properties: { path: { type: "string" } },
+        required: ["path"],
+      },
+    },
+  },
+];
+
+/** Transport that yields a different reply per attempt, recording each room id. */
+function makeSequencedExecutor(replies: Array<(chatId: string) => string[]>) {
+  const rooms: string[] = [];
+  const executor = new CloudflarePlaygroundExecutor((chatId) => {
+    rooms.push(chatId);
+    const build = replies[Math.min(rooms.length - 1, replies.length - 1)];
+    return new FakeTransport(build(chatId));
+  });
+  return { executor, rooms };
+}
+
+const readArgs = (body: Record<string, unknown>, stream = false) =>
+  executeArgs(
+    {
+      model: "test-model",
+      messages: [{ role: "user", content: "read a.py" }],
+      tools: READ_TOOLS,
+      ...body,
+    },
+    stream
+  );
+
+test("executor retries once in a fresh room when a tool-intent reply is unreadable", async () => {
+  // `<read><path>a.py` is a declared-tool block that never closes: the parser
+  // cannot read it, and before the retry existed the turn came back as plain
+  // text with the call buried inside it.
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, "<read><path>a.py"),
+    (chatId) => buildSuccessFrames(chatId, '<read>{"path": "a.py"}</read>'),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { content: string | null; tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.length, 1);
+  assert.equal(parsed.choices[0].message.content, null);
+  assert.equal(rooms.length, 2, "expected exactly one repair retry");
+  assert.notEqual(rooms[0], rooms[1], "the retry must open a fresh room");
+});
+
+test("executor gives up after one repair retry instead of looping", async () => {
+  const broken = "<read><path>a.py";
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, broken),
+    (chatId) => buildSuccessFrames(chatId, broken),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { content: string | null; tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+
+  // The model's own words still reach the client; a 502 or a loop would be worse.
+  assert.equal(parsed.choices[0].finish_reason, "stop");
+  assert.equal(parsed.choices[0].message.content, broken);
+  assert.ok(!parsed.choices[0].message.tool_calls);
+  assert.equal(rooms.length, 2);
+});
+
+test("executor retries when a bound call's arguments violate the declared schema", async () => {
+  const { executor, rooms } = makeSequencedExecutor([
+    // `path` is missing, so the client could never run this call.
+    (chatId) => buildSuccessFrames(chatId, '<read>{"pattern": "*.py"}</read>'),
+    (chatId) => buildSuccessFrames(chatId, '<read>{"path": "a.py"}</read>'),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { tool_calls?: Array<{ function: { arguments: string } }> };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.[0].function.arguments, '{"path": "a.py"}');
+  assert.equal(rooms.length, 2);
+});
+
+test("executor never executes a call bound to another request's nonce", async () => {
+  // The replay case: stale envelopes from an earlier turn carry a nonce this
+  // request never issued. Executing one would re-run a tool the user already
+  // answered.
+  const stale = '<read>{"path": "a.py", "_nonce": "stale-nonce"}</read>';
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, stale),
+    (chatId) => buildSuccessFrames(chatId, stale),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { content: string | null; tool_calls?: unknown[] };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "stop");
+  assert.ok(!parsed.choices[0].message.tool_calls);
+  assert.equal(rooms.length, 2);
+});
+
+test("executor strips the nonce from a correctly bound call", async () => {
+  const nonce = cfToolNonce(READ_TOOLS);
+  const { executor } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, `<read>{"path": "a.py", "_nonce": "${nonce}"}</read>`),
+  ]);
+
+  const parsed = JSON.parse(await (await executor.execute(readArgs({}))).response.text()) as {
+    choices: Array<{
+      message: { tool_calls?: Array<{ function: { arguments: string } }> };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.[0].function.arguments, '{"path":"a.py"}');
+});
+
+test("executor retry applies to streaming clients too", async () => {
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, "<read><path>a.py"),
+    (chatId) => buildSuccessFrames(chatId, '<read>{"path": "a.py"}</read>'),
+  ]);
+
+  const raw = await (await executor.execute(readArgs({}, true))).response.text();
+  const chunks = parseSseChunks(raw);
+  const toolCallsChunk = chunks.find((c) => c.choices?.[0]?.delta?.tool_calls);
+
+  assert.ok(toolCallsChunk, "expected a tool_calls chunk after the repair retry");
+  assert.equal(toolCallsChunk.choices[0].delta.tool_calls[0].function.name, "read");
+  assert.equal(chunks[chunks.length - 1].choices[0].finish_reason, "tool_calls");
+  assert.equal(rooms.length, 2);
+});
+
+test("executor repairs a <shell> tag when the client declared the tool as bash", async () => {
+  // The live alias mismatch: OpenCode declares `bash`, the playground models
+  // write `<shell>`. It used to reach the client as a call for a tool that does
+  // not exist; now the unbound name fails the contract and the retry recovers it.
+  const { executor, rooms } = makeSequencedExecutor([
+    (chatId) => buildSuccessFrames(chatId, '<shell>{"command": "ls"}</shell>'),
+    (chatId) => buildSuccessFrames(chatId, '<bash>{"command": "ls"}</bash>'),
+  ]);
+
+  const parsed = JSON.parse(
+    await (
+      await executor.execute(
+        executeArgs(
+          {
+            model: "test-model",
+            messages: [{ role: "user", content: "list files" }],
+            tools: [
+              {
+                type: "function",
+                function: {
+                  name: "bash",
+                  description: "Run a command",
+                  parameters: {
+                    type: "object",
+                    properties: { command: { type: "string" } },
+                    required: ["command"],
+                  },
+                },
+              },
+            ],
+          },
+          false
+        )
+      )
+    ).response.text()
+  ) as {
+    choices: Array<{
+      message: { tool_calls?: Array<{ function: { name: string } }> };
+      finish_reason: string;
+    }>;
+  };
+
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.[0].function.name, "bash");
+  assert.equal(rooms.length, 2);
 });

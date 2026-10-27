@@ -20,9 +20,29 @@
  * Payloads are normalized leniently (unquoted keys/values, single quotes,
  * trailing commas, double-escaped newlines) so a small model's sloppy JSON
  * still becomes a valid tool call.
+ *
+ * Three defences sit on top of the parser, matching the shared emulated
+ * tool-calling core the other web providers use:
+ *   - the contract asks for a per-request `_nonce` binding, and a call carrying
+ *     a different one is treated as text (a replayed or injected envelope);
+ *   - accepted arguments are validated against the tool's declared JSON schema;
+ *   - a reply that expresses tool intent but fails either test is retried once in
+ *     a fresh room instead of being returned as an answer with the call buried
+ *     in it (`finalizeCfToolCalls`, `hasMalformedCfToolIntent`).
  */
 import type { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import type { ChatCompletionTool } from "openai/resources/chat/completions";
+
+// Nonce binding, name resolution and schema validation come from the shared
+// emulated-tool-calling core the other web providers use, so cfp cannot drift
+// from them. Only the contract wording and the dialect parser are cfp-specific.
+import {
+  getRequestedToolNames,
+  getToolNonce,
+  parseLooseJsonObject,
+  resolveRequestedToolName,
+} from "./webTools.ts";
+import { validateToolArguments } from "./toolArgValidation.ts";
 
 /**
  * OpenAI tool definition (subset we care about).
@@ -309,10 +329,20 @@ function renderCompactSchema(schema: unknown): string {
 export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
   if (!tools || tools.length === 0) return "";
 
+  const nonce = getToolNonce(tools);
   const exampleName = tools[0].function.name;
   const lines = [
     "# Tools",
-    `To call a tool, reply with <${exampleName}>{"arg": value}</${exampleName}> where ${exampleName} is replaced by the tool name and the body is a JSON object of arguments. Arguments must be valid JSON. Emit no other text when calling a tool.`,
+    "To call a tool, reply with exactly this block and nothing else:",
+    `<${exampleName}>{"arg": value, "_nonce": "${nonce}"}</${exampleName}>`,
+    `${exampleName} is replaced by the tool name and the body is a JSON object of arguments.`,
+    "Rules:",
+    `- Use exactly <${exampleName}>...</${exampleName}> with the tool name as the tag.`,
+    '- Do NOT use <tool>, <tool_call>, <tool:name>, XML argument tags, name="..." attributes or code fences.',
+    `- Include "_nonce": "${nonce}" exactly as shown. A different binding is rejected.`,
+    "- Argument names must match the tool's declared parameters.",
+    "- Emit one block per call; several blocks may follow each other.",
+    "- If no tool is needed, answer normally with no tool block.",
     "",
     "Tools:",
   ];
@@ -325,6 +355,79 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
   }
 
   return lines.join("\n");
+}
+
+/**
+ * The per-request nonce this provider binds tool calls with.
+ *
+ * Same source as the contract (`getToolNonce` is keyed on the tools array, which
+ * flows unchanged from serialization to parsing), so the executor can verify a
+ * reply against the exact value the model was given.
+ */
+export function cfToolNonce(tools: unknown): string {
+  return getToolNonce(tools);
+}
+
+/** The single canonical wrapper tag the contract asks for. */
+const CF_GENERIC_TOOL_TAGS = new Set(["tool", "tool_call", "toolcall", "tool-call"]);
+
+/**
+ * Hold a parsed turn to the nonce + argument-schema contract before it is handed
+ * back to the client.
+ *
+ * Returns the accepted calls, or `null` when the turn expressed tool intent but
+ * failed the contract — the caller then treats it like any other malformed
+ * envelope and retries once. Three rules, matching the shared core:
+ *
+ * - A call whose arguments carry `_nonce` must carry *this* request's value. A
+ *   wrong one is a copy-attack or a hallucinated envelope replayed from an
+ *   earlier turn; executing it would re-run a tool the user already answered.
+ *   A missing `_nonce` is tolerated so shapes with no JSON body (XML argument
+ *   tags) keep working.
+ * - The name must be a declared tool. Names the parser accepted through an alias
+ *   (a bare `<shell>` when the caller named the tool `bash`) are resolved with
+ *   the shared fuzzy matcher before giving up.
+ * - The arguments must satisfy the tool's declared JSON schema.
+ *
+ * `_nonce` is stripped from the accepted arguments so the client never sees it.
+ */
+export function finalizeCfToolCalls(
+  calls: CfParsedToolCall[],
+  tools: unknown,
+  nonce: string
+): CfParsedToolCall[] | null {
+  if (!calls || calls.length === 0) return null;
+
+  const requested = getRequestedToolNames(tools);
+  const declared = new Set(requested.map((tool) => tool.original));
+  const accepted: CfParsedToolCall[] = [];
+
+  for (const call of calls) {
+    const args = parseLooseJsonObject(call.arguments);
+    if (!args) return null;
+
+    let bound = false;
+    if (args._nonce !== undefined) {
+      if (args._nonce !== nonce) return null;
+      delete args._nonce;
+      bound = true;
+    }
+
+    const name = declared.has(call.name)
+      ? call.name
+      : requested.length > 0
+        ? resolveRequestedToolName(call.name, requested)
+        : null;
+    if (!name) return null;
+
+    if (!validateToolArguments(tools, name, args)) return null;
+
+    // Only re-serialize when the binding was stripped; otherwise the model's
+    // argument bytes reach the client untouched.
+    accepted.push(bound ? { ...call, name, arguments: JSON.stringify(args) } : { ...call, name });
+  }
+
+  return accepted;
 }
 
 /** Split text into chunks no longer than `maxChars`, preferring line breaks. */
@@ -348,23 +451,47 @@ function chunkPrompt(text: string, maxChars: number): string[] {
   return chunks;
 }
 
+/** Escape a tool name so it can be embedded in a RegExp. */
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 /**
  * Check if the text contains what looks like a tool call attempt but is
  * malformed (e.g., unclosed tags, invalid JSON). This helps us decide whether
  * to treat the response as a tool call or regular text.
+ *
+ * `toolNames` are the tools the client declared. They matter: the models write
+ * `<read><path>a.py</path></read>` as often as they write `<tool ...>`, and a
+ * *broken* one of those is exactly as much tool intent as a broken `<tool>`
+ * one. Without them the five-call XML turn that motivated this check looked
+ * like plain prose and was answered with no calls at all.
+ *
+ * A bare mention of a tag (`Wrap the payload in <tool> tags`) is not intent;
+ * the tag has to open a block — be followed by a JSON/XML body, or have a
+ * matching closing tag.
  */
-export function hasMalformedCfToolIntent(text: string): boolean {
+export function hasMalformedCfToolIntent(text: string, toolNames: string[] = []): boolean {
   if (!text) return false;
-  // Look for tool-like tags that don't parse cleanly
-  const toolTagRegex = /<\s*tool\b[^>]*>|<\s*\/\s*tool\s*>/i;
-  const shellTagRegex = /<\s*shell\b[^>]*>|<\s*\/\s*shell\s*>/i;
-  const hasToolTag = toolTagRegex.test(text);
-  const hasShellTag = shellTagRegex.test(text);
-  if (!hasToolTag && !hasShellTag) return false;
-  // If it has tags but parseCfToolCalls returns empty, it's malformed
-  // Use a dummy tool list so name inference works for <tool> without name
-  const parsed = parseCfToolCalls(text, [{ name: "dummy", parameters: {} }]);
-  return parsed.length === 0;
+
+  const candidates = [...CF_GENERIC_TOOL_TAGS, "shell", ...toolNames];
+  const opensABlock = candidates.some((name) => {
+    const tag = `<\\s*${escapeRegex(name)}\\b[^>]*>`;
+    return (
+      new RegExp(`${tag}\\s*[{\\[<]`, "i").test(text) ||
+      new RegExp(`${tag}[\\s\\S]*?<\\s*\\/\\s*${escapeRegex(name)}\\s*>`, "i").test(text)
+    );
+  });
+  if (!opensABlock) return false;
+
+  // If it has tags but parseCfToolCalls returns empty, it's malformed. The probe
+  // list mirrors the real tool set so name inference and the declared-name
+  // patterns behave exactly as they do in the executor.
+  const probe: CfToolDef[] = [
+    { name: "dummy", parameters: {} },
+    ...toolNames.map((name) => ({ name, parameters: {} })),
+  ];
+  return parseCfToolCalls(text, probe).length === 0;
 }
 
 /**
@@ -679,11 +806,19 @@ function unwrapToolPayload(content: string): { name: string | null; argsJson: st
     if (parsed && typeof parsed === "object" && !Array.isArray(parsed)) {
       const obj = parsed as Record<string, unknown>;
       if (typeof obj.name === "string" && obj.arguments !== undefined) {
-        return {
-          name: obj.name,
-          argsJson:
-            typeof obj.arguments === "string" ? obj.arguments : JSON.stringify(obj.arguments),
-        };
+        let argsJson =
+          typeof obj.arguments === "string" ? obj.arguments : JSON.stringify(obj.arguments);
+        // An envelope-shaped call is self-contained (`{"name", "arguments"}`), so a
+        // replayed one is indistinguishable from a fresh one. Carry its `_nonce`
+        // into the arguments, where the binding check can see it — otherwise it
+        // would pass as an unbound call and be executed again.
+        if (obj._nonce !== undefined) {
+          const inner = parseLooseJsonObject(argsJson);
+          if (inner && inner._nonce === undefined) {
+            argsJson = JSON.stringify({ ...inner, _nonce: obj._nonce });
+          }
+        }
+        return { name: obj.name, argsJson };
       }
     }
   } catch {

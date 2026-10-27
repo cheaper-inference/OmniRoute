@@ -18,6 +18,8 @@ import {
   trimCfConversation,
   compactCfConversation,
   stripCfToolMarkup,
+  finalizeCfToolCalls,
+  cfToolNonce,
   CF_MAX_MESSAGE_CHARS,
   CF_MAX_CONVERSATION_MESSAGES,
   CF_COMPACT_HEADER,
@@ -71,13 +73,42 @@ test("serializeCfToolPrompt generates a compact contract block", () => {
   assert.ok(prompt.includes("# Tools"));
   assert.ok(prompt.includes("bash"));
   assert.ok(prompt.includes("read_file"));
-  // Concrete example uses the first tool name as the tag
-  assert.ok(prompt.includes('<bash>{"arg": value}</bash>'));
+  // Concrete example uses the first tool name as the tag, and binds the call to
+  // this request's nonce
+  assert.match(prompt, /<bash>\{"arg": value, "_nonce": "[a-z0-9]+"\}<\/bash>/);
   assert.ok(prompt.includes("command: string"));
   assert.ok(prompt.includes("path: string"));
   // Compact one-line signatures instead of pretty-printed JSON
   assert.ok(!prompt.includes('"type": "object"'));
   assert.ok(prompt.length < 1200, `contract should stay small, got ${prompt.length}`);
+});
+
+test("serializeCfToolPrompt forbids the markup shapes the models invent", () => {
+  const prompt = serializeCfToolPrompt(TEST_TOOLS_OPENAI);
+  // Each of these was observed live and had to be recovered by the parser; the
+  // contract names them so the model does not reach for them in the first place.
+  for (const forbidden of ["<tool>", "<tool_call>", "<tool:name>", "XML argument tags"]) {
+    assert.ok(prompt.includes(forbidden), `contract should forbid ${forbidden}`);
+  }
+  // Requirement is stated twice: once in the example, once as a rule.
+  const nonce = prompt.match(/"_nonce": "([a-z0-9]+)"/)?.[1];
+  assert.ok(nonce, "contract should carry a nonce");
+  assert.ok(
+    prompt.includes(
+      `Include "_nonce": "${nonce}" exactly as shown. A different binding is rejected.`
+    )
+  );
+});
+
+test("serializeCfToolPrompt is stable for one tool set", () => {
+  // The executor re-serializes the contract for its repair retry; a nonce that
+  // changed between the two would reject the model's retry as unbound.
+  assert.equal(serializeCfToolPrompt(TEST_TOOLS_OPENAI), serializeCfToolPrompt(TEST_TOOLS_OPENAI));
+});
+
+test("cfToolNonce returns the nonce the contract asked for", () => {
+  const prompt = serializeCfToolPrompt(TEST_TOOLS_OPENAI);
+  assert.ok(prompt.includes(cfToolNonce(TEST_TOOLS_OPENAI)));
 });
 
 // ── parseCfToolCalls ──────────────────────────────────────────────────────────
@@ -911,4 +942,98 @@ test("stripCfToolMarkup handles multiple tags", () => {
   const text = '<tool name="a">1</tool> middle <tool:b>2</tool:b> end';
   const stripped = stripCfToolMarkup(text);
   assert.equal(stripped, "middle  end"); // trimStart removes leading space
+});
+
+// ── finalizeCfToolCalls: nonce binding + argument schema ──────────────────────
+
+test("finalizeCfToolCalls accepts a call with a missing _nonce", () => {
+  // Shapes with no JSON body (XML argument tags) cannot carry one.
+  const calls = [{ id: "call_1", name: "bash", arguments: '{"command": "ls"}' }];
+  assert.deepEqual(finalizeCfToolCalls(calls, TEST_TOOLS_OPENAI, "abc123"), calls);
+});
+
+test("finalizeCfToolCalls keeps the model's argument bytes when nothing changes", () => {
+  // A repair pass that re-serialized every payload would silently rewrite the
+  // spacing the model chose, so byte-for-byte fidelity is asserted here.
+  const calls = [{ id: "call_1", name: "bash", arguments: '{ "command" : "ls -la" }' }];
+  const out = finalizeCfToolCalls(calls, TEST_TOOLS_OPENAI, "abc123");
+  assert.equal(out?.[0].arguments, '{ "command" : "ls -la" }');
+});
+
+test("finalizeCfToolCalls strips a matching _nonce", () => {
+  const calls = [
+    { id: "call_1", name: "bash", arguments: '{"command": "ls", "_nonce": "abc123"}' },
+  ];
+  const out = finalizeCfToolCalls(calls, TEST_TOOLS_OPENAI, "abc123");
+  assert.equal(out?.length, 1);
+  assert.equal(out?.[0].arguments, '{"command":"ls"}');
+});
+
+test("finalizeCfToolCalls rejects a call bound to another request's nonce", () => {
+  // This is the replay case: a call echoed from an earlier turn (or injected by
+  // something other than the model) carries a nonce the client never granted.
+  const calls = [
+    { id: "call_1", name: "bash", arguments: '{"command": "rm -rf /", "_nonce": "stale"}' },
+  ];
+  assert.equal(finalizeCfToolCalls(calls, TEST_TOOLS_OPENAI, "abc123"), null);
+});
+
+test("finalizeCfToolCalls rejects arguments that violate the declared schema", () => {
+  const calls = [{ id: "call_1", name: "bash", arguments: '{"cmd": "ls"}' }];
+  assert.equal(finalizeCfToolCalls(calls, TEST_TOOLS_OPENAI, "abc123"), null);
+});
+
+test("finalizeCfToolCalls rejects an undeclared tool name", () => {
+  const calls = [{ id: "call_1", name: "nope", arguments: '{"command": "ls"}' }];
+  assert.equal(finalizeCfToolCalls(calls, TEST_TOOLS_OPENAI, "abc123"), null);
+});
+
+test("finalizeCfToolCalls resolves an alias onto the declared tool", () => {
+  // Models emit `read` for a tool declared as `read_file`; the shared matcher
+  // maps it rather than throwing the call away.
+  const calls = [{ id: "call_1", name: "read", arguments: '{"path": "a.py"}' }];
+  const out = finalizeCfToolCalls(calls, TEST_TOOLS_OPENAI, "abc123");
+  assert.equal(out?.[0].name, "read_file");
+  assert.equal(out?.[0].arguments, '{"path": "a.py"}');
+});
+
+test("finalizeCfToolCalls binds an envelope-shaped call's nonce", () => {
+  // `{"name","arguments"}` is self-contained, so a replayed one looks exactly
+  // like a fresh one. Its `_nonce` has to survive unwrapping to be checked.
+  const calls = parseCfToolCalls(
+    '<tool>{"name": "bash", "arguments": {"command": "ls"}, "_nonce": "stale"}</tool>',
+    TEST_TOOLS
+  );
+  assert.equal(calls.length, 1);
+  assert.equal(finalizeCfToolCalls(calls, TEST_TOOLS_OPENAI, "abc123"), null);
+});
+
+test("finalizeCfToolCalls returns null for an empty turn", () => {
+  assert.equal(finalizeCfToolCalls([], TEST_TOOLS_OPENAI, "abc123"), null);
+});
+
+test("finalizeCfToolCalls rejects rather than executing an unparseable payload", () => {
+  const calls = [{ id: "call_1", name: "bash", arguments: "not json" }];
+  assert.equal(finalizeCfToolCalls(calls, TEST_TOOLS_OPENAI, "abc123"), null);
+});
+
+// ── hasMalformedCfToolIntent: declared-tool tags ──────────────────────────────
+
+test("hasMalformedCfToolIntent sees an unclosed declared-tool block", () => {
+  // The five-call XML turn was lost because this returned false for tags other
+  // than <tool>/<shell>, so the repair retry never fired.
+  assert.equal(hasMalformedCfToolIntent("<read><path>a.py", ["read"]), true);
+  assert.equal(hasMalformedCfToolIntent("<read><path>a.py</readd>", ["read"]), true);
+});
+
+test("hasMalformedCfToolIntent ignores a well-formed declared-tool block", () => {
+  assert.equal(hasMalformedCfToolIntent("<read><path>a.py</path></read>", ["read"]), false);
+  assert.equal(hasMalformedCfToolIntent('<read>{"path": "a.py"}</read>', ["read"]), false);
+});
+
+test("hasMalformedCfToolIntent ignores a bare mention of a tool tag", () => {
+  // Prose that names the tag must not trigger a repair retry — that would
+  // replace a perfectly good answer with a second one.
+  assert.equal(hasMalformedCfToolIntent("Wrap the payload in <read> tags.", ["read"]), false);
+  assert.equal(hasMalformedCfToolIntent("Wrap the payload in <tool> tags.", ["read"]), false);
 });
