@@ -740,6 +740,81 @@ function extractEmbeddedJson(raw: string): string | null {
   return null;
 }
 
+/**
+ * Decode the XML entities models emit when they escape markup inside a value.
+ * `&amp;` is decoded last so a literal `&amp;lt;` does not become `<`.
+ */
+function decodeXmlEntities(value: string): string {
+  return value
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#0*39;|&apos;/g, "'")
+    .replace(/&amp;/g, "&");
+}
+
+/**
+ * Read `<param>value</param>` pairs out of a tool tag body.
+ *
+ * Playground models sometimes emit XML-style arguments instead of the JSON the
+ * contract asks for:
+ *
+ *   <read><path>a.py</path></read>
+ *   <shell><command>ps aux | grep x</command></shell>
+ *
+ * Returns null when the body carries no such pair, so prose and JSON bodies are
+ * left to the other patterns.
+ */
+function extractXmlParams(body: string): Array<[string, string]> | null {
+  const paramRegex = /<\s*([a-zA-Z_][\w.-]*)\s*>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
+  const params: Array<[string, string]> = [];
+  let match: RegExpExecArray | null;
+  while ((match = paramRegex.exec(body)) !== null) {
+    params.push([match[1], decodeXmlEntities(match[2].trim())]);
+  }
+  return params.length > 0 ? params : null;
+}
+
+/**
+ * Map `<param>` names onto the tool's declared argument names and coerce
+ * scalars using the declared JSON-schema type.
+ *
+ * When a tool declares exactly one property and the body carries exactly one
+ * pair, the declared name wins regardless of the tag the model used — models
+ * write `<read><file_path>…</file_path></read>` for a tool whose argument is
+ * `path`. Only number/integer/boolean are coerced; everything else stays a
+ * string, which is what every observed playground tool expects.
+ */
+function xmlParamsToArguments(
+  params: Array<[string, string]>,
+  def: CfToolDef | undefined
+): Record<string, unknown> {
+  const props =
+    def && def.parameters && typeof def.parameters === "object"
+      ? ((def.parameters as Record<string, unknown>).properties as
+          Record<string, Record<string, unknown>> | undefined)
+      : undefined;
+  const declared = props ? Object.keys(props) : [];
+  const single = declared.length === 1 && params.length === 1 ? declared[0] : null;
+  const args: Record<string, unknown> = {};
+  for (const [rawKey, rawValue] of params) {
+    const key = single ?? rawKey;
+    const type = props?.[key]?.type;
+    if (type === "number") {
+      const num = Number(rawValue);
+      args[key] = Number.isFinite(num) ? num : rawValue;
+    } else if (type === "integer") {
+      const num = Number.parseInt(rawValue, 10);
+      args[key] = Number.isFinite(num) ? num : rawValue;
+    } else if (type === "boolean") {
+      args[key] = /^(true|1|yes)$/i.test(rawValue);
+    } else {
+      args[key] = rawValue;
+    }
+  }
+  return args;
+}
+
 export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfParsedToolCall[] {
   if (!text) return [];
 
@@ -762,7 +837,23 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
       match[2].trim() || extractPayloadFromAttrs(attrs) || extractEmbeddedJson(attrs) || "";
     // Only accept tool calls whose arguments normalize to valid JSON
     const normalized = normalizeToolArguments(content);
-    if (!normalized) continue;
+    if (!normalized) {
+      // `<tool name="read"><path>a.py</path></tool>` — XML-style arguments
+      // inside an explicit `<tool>` wrapper. Pattern 3b cannot see this one
+      // because the tag is `tool`, not the tool's name.
+      const xmlName = attrs.match(/name\s*=\s*["']([^"']+)["']/i);
+      const xmlParams = extractXmlParams(content);
+      if (xmlName && xmlParams) {
+        const def = availableTools.find((t) => t.name === xmlName[1]);
+        calls.push({
+          id: `call_${crypto.randomUUID().slice(0, 8)}`,
+          name: xmlName[1],
+          arguments: JSON.stringify(xmlParamsToArguments(xmlParams, def)),
+        });
+        handledSpans.push([match.index, match.index + match[0].length]);
+      }
+      continue;
+    }
     // Handle format: <tool>{"name": "shell", "arguments": {...}}</tool>
     const unwrapped = unwrapToolPayload(normalized);
     const nameMatch = attrs.match(/name\s*=\s*["']([^"']+)["']/i);
@@ -867,6 +958,30 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
       id: `call_${crypto.randomUUID().slice(0, 8)}`,
       name: unwrapped.name ?? tagName,
       arguments: unwrapped.argsJson,
+    });
+  }
+
+  // Pattern 3b: <toolname><param>value</param></toolname> — XML-style arguments
+  // instead of a JSON body, so Pattern 3 above (which needs JSON) drops them.
+  // Observed live: a single turn carrying five calls at once —
+  //   <read><path>a.py</path></read>
+  //   <shell><command>ps aux | grep x</command></shell>
+  // Every declared tool name is accepted, in document order, so a turn that
+  // batches several reads keeps its ordering.
+  const xmlToolRegex = /<\s*([a-zA-Z_][\w.-]*)\b([^>]*)>([\s\S]*?)<\s*\/\s*\1\s*>/gi;
+  while ((match = xmlToolRegex.exec(text)) !== null) {
+    const tagName = match[1];
+    if (!knownTagNames.has(tagName)) continue;
+    const body = match[3].trim();
+    // A JSON body belongs to Pattern 3; do not also read it as XML params.
+    if (!body || /^[[{]/.test(body)) continue;
+    const params = extractXmlParams(body);
+    if (!params) continue;
+    const def = availableTools.find((t) => t.name === tagName);
+    calls.push({
+      id: `call_${crypto.randomUUID().slice(0, 8)}`,
+      name: tagName,
+      arguments: JSON.stringify(xmlParamsToArguments(params, def)),
     });
   }
 

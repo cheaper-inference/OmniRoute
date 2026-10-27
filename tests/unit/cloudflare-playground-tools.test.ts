@@ -239,6 +239,121 @@ test("parseCfToolCalls handles the <tool_call> tag spelling", () => {
   assert.equal(calls[0].arguments, '{"command":"ls"}');
 });
 
+// ── XML-style arguments: <tool><param>value</param></tool> ──────────────────
+// Observed live (`ses_e9bc32a3bffeu7t5WwTY8M0ood`, seq 9032, `finish: stop`):
+// instead of the JSON the contract asks for, the model emitted XML argument
+// tags. Every call in the turn was dropped and the markup leaked as text.
+// These use their own fixture because the behaviour depends on the tool's
+// declared parameter names.
+
+const XML_TOOLS: CfToolDef[] = [
+  {
+    name: "read",
+    description: "Read a file",
+    parameters: {
+      type: "object",
+      properties: { path: { type: "string" } },
+      required: ["path"],
+    },
+  },
+  {
+    name: "shell",
+    description: "Execute a shell command",
+    parameters: {
+      type: "object",
+      properties: { command: { type: "string" } },
+      required: ["command"],
+    },
+  },
+  {
+    name: "write",
+    description: "Write a file",
+    parameters: {
+      type: "object",
+      properties: { path: { type: "string" }, content: { type: "string" } },
+      required: ["path", "content"],
+    },
+  },
+];
+
+test("parseCfToolCalls parses XML-style <read><path>…</path></read>", () => {
+  const text = "<read><path>kw-ai/orchestrator/query_processor.py</path></read>";
+  const calls = parseCfToolCalls(text, XML_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "read");
+  assert.equal(calls[0].arguments, '{"path":"kw-ai/orchestrator/query_processor.py"}');
+});
+
+test("parseCfToolCalls keeps all five XML calls of one turn, in order", () => {
+  const text = [
+    "I'll continue from where we left off.",
+    "",
+    "<read><path>kw-ai/orchestrator/query_processor.py</path></read>",
+    '<shell><command>ps aux | grep -E "(comfyui|python.*main.py)" | grep -v grep</command></shell>',
+    "<read><path>kw-ai/orchestrator/arbiter.py</path></read>",
+    "<read><path>kw-ai/orchestrator/memory_manager.py</path></read>",
+    "<read><path>kw-ai/orchestrator/__init__.py</path></read>",
+  ].join("\n");
+
+  const calls = parseCfToolCalls(text, XML_TOOLS);
+  assert.deepEqual(
+    calls.map((c) => [c.name, JSON.parse(c.arguments)]),
+    [
+      ["read", { path: "kw-ai/orchestrator/query_processor.py" }],
+      ["shell", { command: 'ps aux | grep -E "(comfyui|python.*main.py)" | grep -v grep' }],
+      ["read", { path: "kw-ai/orchestrator/arbiter.py" }],
+      ["read", { path: "kw-ai/orchestrator/memory_manager.py" }],
+      ["read", { path: "kw-ai/orchestrator/__init__.py" }],
+    ]
+  );
+
+  // The prose survives; the markup does not.
+  const visible = stripCfToolMarkup(
+    text,
+    calls.map((c) => c.name)
+  );
+  assert.equal(visible.trim(), "I'll continue from where we left off.");
+});
+
+test("parseCfToolCalls maps a single XML param onto the declared argument name", () => {
+  // Models write <file_path> for a tool whose declared argument is `path`.
+  const text = "<read><file_path>/etc/hostname</file_path></read>";
+  const calls = parseCfToolCalls(text, XML_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "read");
+  assert.equal(calls[0].arguments, '{"path":"/etc/hostname"}');
+});
+
+test("parseCfToolCalls keeps XML params separate when the tool takes several", () => {
+  const text = "<write><path>/tmp/a.txt</path><content>line1\nline2</content></write>";
+  const calls = parseCfToolCalls(text, XML_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.deepEqual(JSON.parse(calls[0].arguments), {
+    path: "/tmp/a.txt",
+    content: "line1\nline2",
+  });
+});
+
+test("parseCfToolCalls decodes XML entities in XML-style arguments", () => {
+  const text = "<read><path>a&amp;b&lt;c&gt;.txt</path></read>";
+  const calls = parseCfToolCalls(text, XML_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(JSON.parse(calls[0].arguments).path, "a&b<c>.txt");
+});
+
+test("parseCfToolCalls ignores XML-style markup that is not a declared tool", () => {
+  const text = "Use <div><span>this</span></div> to wrap the output.";
+  assert.deepEqual(parseCfToolCalls(text, XML_TOOLS), []);
+});
+
+test("parseCfToolCalls parses XML-style arguments inside an explicit <tool> wrapper", () => {
+  const text = '<tool name="read"><path>/etc/hosts</path></tool>';
+  const calls = parseCfToolCalls(text, XML_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "read");
+  assert.equal(calls[0].arguments, '{"path":"/etc/hosts"}');
+});
+
 test("parseCfToolCalls does not turn prose that merely mentions <tool> into a call", () => {
   // The unterminated-tag recovery must not fire on explanatory text.
   const prose = "Wrap the payload in <tool> tags and put the JSON object right after them.";
