@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "સ્ટ્રીમ રૂપાંતરિત કરવામાં નિષ્ફળ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ટોકન્સ (આ ચક્ર)",
+    "cursorModelUsageBilledHint": "Cursor દ્વારા બિલ કરાયેલ",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "ઇનપુટ",
+    "cursorModelUsageOutput": "આઉટપુટ",
+    "cursorModelUsageCacheRead": "કૅશ રીડ",
+    "cursorModelUsageCacheWrite": "કૅશ લેખન",
+    "cursorModelUsageCost": "ખર્ચ",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

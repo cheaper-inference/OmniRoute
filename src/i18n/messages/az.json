@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Axını çevirmək mümkün olmadı"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokenləri (bu dövr)",
+    "cursorModelUsageBilledHint": "Cursor tərəfindən hesablanıb",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Giriş",
+    "cursorModelUsageOutput": "Çıxış",
+    "cursorModelUsageCacheRead": "Keş oxunması",
+    "cursorModelUsageCacheWrite": "Keşə yazma",
+    "cursorModelUsageCost": "Xərc",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

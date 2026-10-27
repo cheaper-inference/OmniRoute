@@ -5,6 +5,8 @@
  * Fall back to the cookie-based cursor.com dashboard endpoint for IDE-imported
  * WorkOS sessions. OpenCodex-compatible chain:
  *   GetCurrentPeriodUsage → /api/usage/summary → /auth/usage → cookie dashboard.
+ * When GetCurrentPeriodUsage succeeds, GetAggregatedUsageEvents adds per-model token
+ * counts and Cursor's billed cost (fail-open: any failure leaves the quotas unchanged).
  */
 
 import { toRecord, toNumber, clampPercentage } from "./scalars.ts";
@@ -17,6 +19,8 @@ const CURSOR_API2 = "https://api2.cursor.sh";
 const CURSOR_PERIOD_USAGE_URL = `${CURSOR_API2}/aiserver.v1.DashboardService/GetCurrentPeriodUsage`;
 const CURSOR_USAGE_SUMMARY_URL = `${CURSOR_API2}/api/usage/summary`;
 const CURSOR_AUTH_USAGE_URL = `${CURSOR_API2}/auth/usage`;
+const CURSOR_AGGREGATED_USAGE_URL = `${CURSOR_API2}/aiserver.v1.DashboardService/GetAggregatedUsageEvents`;
+const MAX_MODEL_USAGE_ROWS = 50;
 
 /** Legacy IDE/session cookie path (last resort). */
 const CURSOR_COOKIE_USAGE_CONFIG = {
@@ -29,9 +33,24 @@ const CURSOR_COOKIE_USAGE_CONFIG = {
 
 const REAUTH_HINT = "Use Cursor Login (PKCE) or re-import the connection from Cursor IDE.";
 
+/**
+ * One row of Cursor's per-model usage for the current billing cycle.
+ * `costUsd` is the amount Cursor billed (`totalCents / 100`), not an OmniRoute estimate —
+ * it is display-only and never feeds OmniRoute cost accounting.
+ */
+export type CursorModelUsageRow = {
+  model: string;
+  inputTokens: number;
+  outputTokens: number;
+  cacheReadTokens: number;
+  cacheWriteTokens: number;
+  costUsd: number;
+};
+
 export type CursorUsageResult = {
   plan?: string;
   quotas?: Record<string, UsageQuota>;
+  modelUsage?: CursorModelUsageRow[];
   message?: string;
 };
 
@@ -154,6 +173,46 @@ function tryPeriodUsage(data: Record<string, unknown>): CursorUsageResult | null
   const quotas = buildPlanUsageQuotas(planUsage, data.billingCycleEnd ?? planUsage.billingCycleEnd);
   if (!quotas) return null;
   return { plan: "Cursor Pro", quotas };
+}
+
+/** Cursor sends token counts as decimal strings (`"4861279"`); clamp to a non-negative int. */
+function parseTokenCount(value: unknown): number {
+  return Math.max(0, Math.floor(toNumber(value, 0)));
+}
+
+/**
+ * Map GetAggregatedUsageEvents `aggregations[]` into per-model rows, most expensive first.
+ * Rows without a `modelIntent` (or that are not objects) are skipped; output is capped.
+ */
+export function mapAggregatedUsageEvents(data: unknown): CursorModelUsageRow[] {
+  const aggregations = toRecord(data).aggregations;
+  if (!Array.isArray(aggregations)) return [];
+  const rows: CursorModelUsageRow[] = [];
+  for (const entry of aggregations) {
+    const row = toRecord(entry);
+    const model = typeof row.modelIntent === "string" ? row.modelIntent.trim() : "";
+    if (!model) continue;
+    const cents = Math.max(0, toNumber(row.totalCents, 0));
+    rows.push({
+      model,
+      inputTokens: parseTokenCount(row.inputTokens),
+      outputTokens: parseTokenCount(row.outputTokens),
+      cacheReadTokens: parseTokenCount(row.cacheReadTokens),
+      cacheWriteTokens: parseTokenCount(row.cacheWriteTokens),
+      costUsd: Math.round(cents * 100) / 10_000, // cents → USD, 4 decimals
+    });
+  }
+  rows.sort((a, b) => b.costUsd - a.costUsd || a.model.localeCompare(b.model));
+  return rows.slice(0, MAX_MODEL_USAGE_ROWS);
+}
+
+/** Fail-open: any HTTP/parse/network failure yields no rows, never an error. */
+async function fetchModelUsage(
+  connectInit: RequestInit,
+  connectionId?: string
+): Promise<CursorModelUsageRow[]> {
+  const aggregated = await fetchJson(CURSOR_AGGREGATED_USAGE_URL, connectInit, connectionId);
+  return aggregated.ok ? mapAggregatedUsageEvents(aggregated.data) : [];
 }
 
 function tryUsageSummary(data: Record<string, unknown>): CursorUsageResult | null {
@@ -332,22 +391,22 @@ export async function getCursorUsage(
 
   const auth = bearerHeaders(accessToken);
 
-  const period = await fetchJson(
-    CURSOR_PERIOD_USAGE_URL,
-    {
-      method: "POST",
-      headers: {
-        ...auth,
-        "Content-Type": "application/json",
-        "Connect-Protocol-Version": "1",
-      },
-      body: "{}",
+  const connectInit: RequestInit = {
+    method: "POST",
+    headers: {
+      ...auth,
+      "Content-Type": "application/json",
+      "Connect-Protocol-Version": "1",
     },
-    connectionId
-  );
+    body: "{}",
+  };
+  const period = await fetchJson(CURSOR_PERIOD_USAGE_URL, connectInit, connectionId);
   if (period.ok) {
     const mapped = tryPeriodUsage(period.data);
-    if (mapped) return mapped;
+    if (mapped) {
+      const modelUsage = await fetchModelUsage(connectInit, connectionId);
+      return modelUsage.length > 0 ? { ...mapped, modelUsage } : mapped;
+    }
   }
 
   const summary = await fetchJson(

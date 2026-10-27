@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Theip ar chlaochlú an tsrutha"
   },
   "usage": {
+    "cursorModelUsageTitle": "Comharthaí API (an timthriall seo)",
+    "cursorModelUsageBilledHint": "Billeáilte ag Cursor",
+    "cursorModelUsageModel": "Samhail",
+    "cursorModelUsageInput": "Ionchur",
+    "cursorModelUsageOutput": "Aschur",
+    "cursorModelUsageCacheRead": "Léamh taisce",
+    "cursorModelUsageCacheWrite": "Taisce a Scríobh",
+    "cursorModelUsageCost": "Costas",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

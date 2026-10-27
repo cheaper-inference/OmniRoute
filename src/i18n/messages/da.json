@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Kunne ikke transformere stream"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokens (denne cyklus)",
+    "cursorModelUsageBilledHint": "Faktureret af Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Input",
+    "cursorModelUsageOutput": "Output",
+    "cursorModelUsageCacheRead": "Cache-læsning",
+    "cursorModelUsageCacheWrite": "Cache skriv",
+    "cursorModelUsageCost": "Pris",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

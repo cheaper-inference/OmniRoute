@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Virran muuntaminen epäonnistui"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokenit (tämä jakso)",
+    "cursorModelUsageBilledHint": "Cursorin laskuttama",
+    "cursorModelUsageModel": "Malli",
+    "cursorModelUsageInput": "Syöte",
+    "cursorModelUsageOutput": "Tuloste",
+    "cursorModelUsageCacheRead": "Välimuistin luku",
+    "cursorModelUsageCacheWrite": "Välimuistin kirjoitus",
+    "cursorModelUsageCost": "Hinta",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

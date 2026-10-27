@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "แปลงสตรีมล้มเหลว"
   },
   "usage": {
+    "cursorModelUsageTitle": "โทเค็น API (รอบนี้)",
+    "cursorModelUsageBilledHint": "เรียกเก็บโดย Cursor",
+    "cursorModelUsageModel": "รุ่น",
+    "cursorModelUsageInput": "อินพุต",
+    "cursorModelUsageOutput": "ผลลัพธ์",
+    "cursorModelUsageCacheRead": "การอ่านแคช",
+    "cursorModelUsageCacheWrite": "แคชเขียน",
+    "cursorModelUsageCost": "ค่าใช้จ่าย",
     "codexPaidCreditsLabel": "เครดิต Codex แบบชำระเงิน",
     "codexPaidCreditsAvailable": "พร้อมใช้งาน (ไม่รายงานยอดคงเหลือ)",
     "codexPaidCreditsUnavailable": "ไม่พร้อมใช้งานหรือถึงขีดจำกัดการใช้จ่ายแล้ว",

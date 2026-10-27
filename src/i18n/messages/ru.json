@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Не удалось преобразовать поток"
   },
   "usage": {
+    "cursorModelUsageTitle": "Токены API (текущий цикл)",
+    "cursorModelUsageBilledHint": "Списано Cursor",
+    "cursorModelUsageModel": "Модель",
+    "cursorModelUsageInput": "Ввод",
+    "cursorModelUsageOutput": "Вывод",
+    "cursorModelUsageCacheRead": "Чтение кэша",
+    "cursorModelUsageCacheWrite": "Запись в кэш",
+    "cursorModelUsageCost": "Стоимость",
     "codexPaidCreditsLabel": "Платные кредиты Codex",
     "codexPaidCreditsAvailable": "Доступно (баланс не сообщается)",
     "codexPaidCreditsUnavailable": "Недоступно или достигнут лимит расходов",

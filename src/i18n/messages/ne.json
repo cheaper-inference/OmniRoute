@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "स्ट्रिम रूपान्तरण गर्न असफल भयो"
   },
   "usage": {
+    "cursorModelUsageTitle": "API टोकनहरू (यो चक्र)",
+    "cursorModelUsageBilledHint": "Cursor द्वारा बिल गरिएको",
+    "cursorModelUsageModel": "मोडेल",
+    "cursorModelUsageInput": "इनपुट",
+    "cursorModelUsageOutput": "आउटपुट",
+    "cursorModelUsageCacheRead": "क्यास रिड",
+    "cursorModelUsageCacheWrite": "क्यास लेखन",
+    "cursorModelUsageCost": "लागत",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

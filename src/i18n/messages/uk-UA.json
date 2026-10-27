@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Не вдалося перетворити потік"
   },
   "usage": {
+    "cursorModelUsageTitle": "Токени API (цей цикл)",
+    "cursorModelUsageBilledHint": "Нараховано Cursor",
+    "cursorModelUsageModel": "Модель",
+    "cursorModelUsageInput": "Вхідні дані",
+    "cursorModelUsageOutput": "Вивід",
+    "cursorModelUsageCacheRead": "Читання з кешу",
+    "cursorModelUsageCacheWrite": "Запис кешу",
+    "cursorModelUsageCost": "Вартість",
     "codexPaidCreditsLabel": "Платні кредити Codex",
     "codexPaidCreditsAvailable": "Доступно (баланс не повідомляється)",
     "codexPaidCreditsUnavailable": "Недоступно або досягнуто ліміт витрат",

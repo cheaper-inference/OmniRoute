@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "轉換串流失敗"
   },
   "usage": {
+    "cursorModelUsageTitle": "API 權杖（本週期）",
+    "cursorModelUsageBilledHint": "由 Cursor 計費",
+    "cursorModelUsageModel": "模型",
+    "cursorModelUsageInput": "輸入",
+    "cursorModelUsageOutput": "輸出",
+    "cursorModelUsageCacheRead": "快取讀取",
+    "cursorModelUsageCacheWrite": "快取寫入",
+    "cursorModelUsageCost": "成本",
     "codexPaidCreditsLabel": "Codex 付費額度",
     "codexPaidCreditsAvailable": "可用（未回報餘額）",
     "codexPaidCreditsUnavailable": "無法使用或已達支出上限",

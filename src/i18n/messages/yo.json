@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Yíyí ṣiṣàn padà kùnà"
   },
   "usage": {
+    "cursorModelUsageTitle": "Àwọn tọ́kẹ́ẹ̀nì API (àyíká yìí)",
+    "cursorModelUsageBilledHint": "Cursor ló gba owó",
+    "cursorModelUsageModel": "Àwòṣe",
+    "cursorModelUsageInput": "Àbáwọlé",
+    "cursorModelUsageOutput": "Àbájáde",
+    "cursorModelUsageCacheRead": "Kíkà cache",
+    "cursorModelUsageCacheWrite": "Kíkọ sí Cache",
+    "cursorModelUsageCost": "Iye owó",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

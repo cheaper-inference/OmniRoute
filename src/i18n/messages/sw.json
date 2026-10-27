@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Imeshindwa kubadilisha mtiririko"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokeni za API (mzunguko huu)",
+    "cursorModelUsageBilledHint": "Imetozwa na Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Ingizo",
+    "cursorModelUsageOutput": "Matokeo",
+    "cursorModelUsageCacheRead": "Usomaji wa kache",
+    "cursorModelUsageCacheWrite": "Uandishi kwenye Akiba",
+    "cursorModelUsageCost": "Gharama",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

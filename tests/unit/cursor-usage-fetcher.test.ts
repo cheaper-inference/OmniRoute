@@ -8,6 +8,8 @@ const CURSOR_PERIOD_URL =
 const CURSOR_SUMMARY_URL = "https://api2.cursor.sh/api/usage/summary";
 const CURSOR_AUTH_USAGE_URL = "https://api2.cursor.sh/auth/usage";
 const CURSOR_COOKIE_USAGE_URL = "https://cursor.com/api/dashboard/get-current-period-usage";
+const CURSOR_AGGREGATED_URL =
+  "https://api2.cursor.sh/aiserver.v1.DashboardService/GetAggregatedUsageEvents";
 
 function makeJwt(payload: Record<string, unknown>): string {
   const b64url = (input: string) =>
@@ -117,8 +119,11 @@ test("cursor usage: Bearer period-usage happy path returns three windows", async
       providerSpecificData: {},
     });
     assertThreeWindows(usage);
-    assert.equal(mock.calls.length, 1);
+    // Period usage + the fail-open per-model aggregate call (500 here → no table).
+    assert.equal(mock.calls.length, 2);
     assert.equal(mock.calls[0].url, CURSOR_PERIOD_URL);
+    assert.equal(mock.calls[1].url, CURSOR_AGGREGATED_URL);
+    assert.equal(usage.modelUsage, undefined);
     const headers = mock.calls[0].init.headers as Record<string, string>;
     assert.equal(headers.Authorization, `Bearer ${accessToken}`);
     assert.equal(headers["Connect-Protocol-Version"], "1");
@@ -289,7 +294,8 @@ test("cursor usage: Bearer-only token without userId still works via period API"
       providerSpecificData: {},
     });
     assertThreeWindows(usage);
-    assert.equal(mock.calls.length, 1);
+    assert.equal(mock.calls.length, 2);
+    assert.equal(mock.calls[1].url, CURSOR_AGGREGATED_URL);
   } finally {
     mock.restore();
   }
@@ -368,6 +374,225 @@ test("cursor usage: empty planUsage on period falls through to cookie empty mess
     });
     assert.equal(usage.plan, "Cursor");
     assert.match(usage.message ?? "", /No active plan usage/i);
+  } finally {
+    mock.restore();
+  }
+});
+
+const AGGREGATED_RESPONSE = {
+  aggregations: [
+    {
+      modelIntent: "claude-4.6-sonnet-medium-thinking",
+      inputTokens: "1000",
+      outputTokens: "500",
+      cacheReadTokens: "2000",
+      cacheWriteTokens: "100",
+      totalCents: 50.5,
+      tier: 1,
+    },
+    {
+      modelIntent: "  composer-2.5  ",
+      inputTokens: "4861279",
+      outputTokens: "726233",
+      cacheReadTokens: "87013884",
+      cacheWriteTokens: "0",
+      totalCents: 2167.68593,
+      tier: 2,
+    },
+    { inputTokens: "10", totalCents: 99999 },
+    { modelIntent: "   ", totalCents: 1 },
+    null,
+    "garbage",
+  ],
+};
+
+test("cursor usage: mapAggregatedUsageEvents parses token strings and billed cents", async () => {
+  const { mapAggregatedUsageEvents } = await import("../../open-sse/services/usage/cursor.ts");
+  const rows = mapAggregatedUsageEvents(AGGREGATED_RESPONSE);
+  assert.deepEqual(rows, [
+    {
+      model: "composer-2.5",
+      inputTokens: 4861279,
+      outputTokens: 726233,
+      cacheReadTokens: 87013884,
+      cacheWriteTokens: 0,
+      costUsd: 21.6769,
+    },
+    {
+      model: "claude-4.6-sonnet-medium-thinking",
+      inputTokens: 1000,
+      outputTokens: 500,
+      cacheReadTokens: 2000,
+      cacheWriteTokens: 100,
+      costUsd: 0.505,
+    },
+  ]);
+});
+
+test("cursor usage: mapAggregatedUsageEvents tolerates malformed payloads", async () => {
+  const { mapAggregatedUsageEvents } = await import("../../open-sse/services/usage/cursor.ts");
+  assert.deepEqual(mapAggregatedUsageEvents({}), []);
+  assert.deepEqual(mapAggregatedUsageEvents(null), []);
+  assert.deepEqual(mapAggregatedUsageEvents({ aggregations: "nope" }), []);
+  const [row] = mapAggregatedUsageEvents({
+    aggregations: [
+      {
+        modelIntent: "gpt-5",
+        inputTokens: "-5",
+        outputTokens: "abc",
+        cacheReadTokens: 12.9,
+        totalCents: "not-a-number",
+      },
+    ],
+  });
+  assert.deepEqual(row, {
+    model: "gpt-5",
+    inputTokens: 0,
+    outputTokens: 0,
+    cacheReadTokens: 12,
+    cacheWriteTokens: 0,
+    costUsd: 0,
+  });
+});
+
+test("cursor usage: mapAggregatedUsageEvents caps the number of rows", async () => {
+  const { mapAggregatedUsageEvents } = await import("../../open-sse/services/usage/cursor.ts");
+  const aggregations = Array.from({ length: 80 }, (_, i) => ({
+    modelIntent: `model-${String(i).padStart(2, "0")}`,
+    totalCents: i,
+  }));
+  const rows = mapAggregatedUsageEvents({ aggregations });
+  assert.equal(rows.length, 50);
+  assert.equal(rows[0].model, "model-79");
+});
+
+test("cursor usage: period OK + aggregated OK returns quotas and per-model usage", async () => {
+  const accessToken = makeJwt({ sub: "user_01AGG" });
+  const mock = installFetchMock(async (url) => {
+    if (url === CURSOR_PERIOD_URL) {
+      return new Response(JSON.stringify(SAMPLE_RESPONSE), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    if (url === CURSOR_AGGREGATED_URL) {
+      return new Response(JSON.stringify(AGGREGATED_RESPONSE), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response("unexpected", { status: 500 });
+  });
+
+  try {
+    const usage = await usageService.getUsageForProvider({
+      provider: "cursor",
+      accessToken,
+      providerSpecificData: {},
+    });
+    assertThreeWindows(usage);
+    assert.equal(usage.message, undefined);
+    assert.deepEqual(
+      usage.modelUsage?.map((row: { model: string; costUsd: number }) => [row.model, row.costUsd]),
+      [
+        ["composer-2.5", 21.6769],
+        ["claude-4.6-sonnet-medium-thinking", 0.505],
+      ]
+    );
+    assert.deepEqual(
+      mock.calls.map((c) => c.url),
+      [CURSOR_PERIOD_URL, CURSOR_AGGREGATED_URL]
+    );
+    const aggregateCall = mock.calls[1];
+    const headers = aggregateCall.init.headers as Record<string, string>;
+    assert.equal(aggregateCall.init.method, "POST");
+    assert.equal(aggregateCall.init.body, "{}");
+    assert.equal(headers.Authorization, `Bearer ${accessToken}`);
+    assert.equal(headers["Connect-Protocol-Version"], "1");
+    assert.equal(headers["Content-Type"], "application/json");
+  } finally {
+    mock.restore();
+  }
+});
+
+for (const [label, aggregateResponder] of [
+  ["HTTP 500", () => new Response(JSON.stringify({ error: "unavailable" }), { status: 500 })],
+  [
+    "network error",
+    () => {
+      throw new TypeError("fetch failed");
+    },
+  ],
+  ["non-JSON body", () => new Response("<html>oops</html>", { status: 200 })],
+  [
+    "empty aggregations",
+    () =>
+      new Response(JSON.stringify({ aggregations: [] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      }),
+  ],
+] as const) {
+  test(`cursor usage: aggregated ${label} is fail-open (quotas unchanged, no table)`, async () => {
+    const accessToken = makeJwt({ sub: "user_01FAILOPEN" });
+    const mock = installFetchMock(async (url) => {
+      if (url === CURSOR_PERIOD_URL) {
+        return new Response(JSON.stringify(SAMPLE_RESPONSE), {
+          status: 200,
+          headers: { "content-type": "application/json" },
+        });
+      }
+      if (url === CURSOR_AGGREGATED_URL) return aggregateResponder();
+      return new Response("unexpected", { status: 500 });
+    });
+
+    try {
+      const usage = await usageService.getUsageForProvider({
+        provider: "cursor",
+        accessToken,
+        providerSpecificData: {},
+      });
+      assertThreeWindows(usage);
+      assert.equal(usage.message, undefined);
+      assert.equal(usage.modelUsage, undefined);
+      assert.ok(!("modelUsage" in usage));
+      assert.deepEqual(
+        mock.calls.map((c) => c.url),
+        [CURSOR_PERIOD_URL, CURSOR_AGGREGATED_URL]
+      );
+    } finally {
+      mock.restore();
+    }
+  });
+}
+
+test("cursor usage: aggregated usage is not requested on the fallback paths", async () => {
+  const accessToken = makeJwt({ sub: "user_01NOAGG" });
+  const summaryBody = {
+    billingCycleEnd: "1779264371000",
+    individualUsage: {
+      plan: { used: 1529, limit: 2000, totalPercentUsed: 10.193333333333333 },
+    },
+  };
+  const mock = installFetchMock(async (url) => {
+    if (url === CURSOR_PERIOD_URL) return new Response("nope", { status: 401 });
+    if (url === CURSOR_SUMMARY_URL) {
+      return new Response(JSON.stringify(summaryBody), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    return new Response("unexpected", { status: 500 });
+  });
+
+  try {
+    const usage = await usageService.getUsageForProvider({
+      provider: "cursor",
+      accessToken,
+    });
+    assert.ok(usage.quotas?.Total);
+    assert.equal(usage.modelUsage, undefined);
+    assert.ok(!mock.calls.some((c) => c.url === CURSOR_AGGREGATED_URL));
   } finally {
     mock.restore();
   }

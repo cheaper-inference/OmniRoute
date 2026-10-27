@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Nabigong i-transform ang stream"
   },
   "usage": {
+    "cursorModelUsageTitle": "Mga token ng API (siklong ito)",
+    "cursorModelUsageBilledHint": "Siningil ng Cursor",
+    "cursorModelUsageModel": "Modelo",
+    "cursorModelUsageInput": "Input",
+    "cursorModelUsageOutput": "Output",
+    "cursorModelUsageCacheRead": "Pagbasa ng cache",
+    "cursorModelUsageCacheWrite": "Pagsulat sa Cache",
+    "cursorModelUsageCost": "Gastos",
     "codexPaidCreditsLabel": "Mga bayad na kredito sa Codex",
     "codexPaidCreditsAvailable": "Magagamit (hindi iniulat ang balanse)",
     "codexPaidCreditsUnavailable": "Hindi magagamit o naabot na ang limitasyon sa paggastos",

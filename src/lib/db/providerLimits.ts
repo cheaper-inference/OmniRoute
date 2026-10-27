@@ -34,6 +34,8 @@ export interface ProviderLimitsCacheEntry {
   paidCredits?: CodexPaidCredits;
   billing?: ProviderBillingStatus;
   quotaGroups?: Array<Record<string, unknown>>;
+  /** Cursor only: per-model tokens + Cursor-billed cost for the current cycle (display-only). */
+  modelUsage?: Array<Record<string, unknown>>;
 }
 
 const PROVIDER_LIMITS_CACHE_NAMESPACE = "providerLimitsCache";
@@ -81,6 +83,9 @@ function normalizeCacheEntry(value: unknown): ProviderLimitsCacheEntry | null {
     ...(billing ? { billing } : {}),
     ...(Array.isArray(record.quotaGroups)
       ? { quotaGroups: record.quotaGroups as Array<Record<string, unknown>> }
+      : {}),
+    ...(Array.isArray(record.modelUsage)
+      ? { modelUsage: record.modelUsage as Array<Record<string, unknown>> }
       : {}),
   };
 }

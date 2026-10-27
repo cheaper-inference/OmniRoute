@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "It-trasformazzjoni tal-fluss falliet"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokens tal-API (dan iċ-ċiklu)",
+    "cursorModelUsageBilledHint": "Iffatturat minn Cursor",
+    "cursorModelUsageModel": "Mudell",
+    "cursorModelUsageInput": "Dħul",
+    "cursorModelUsageOutput": "Riżultat",
+    "cursorModelUsageCacheRead": "Qari mill-cache",
+    "cursorModelUsageCacheWrite": "Kitba fil-Cache",
+    "cursorModelUsageCost": "Spiża",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

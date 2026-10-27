@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Không thể chuyển đổi luồng"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (chu kỳ này)",
+    "cursorModelUsageBilledHint": "Do Cursor tính phí",
+    "cursorModelUsageModel": "Mô hình",
+    "cursorModelUsageInput": "Đầu vào",
+    "cursorModelUsageOutput": "Đầu ra",
+    "cursorModelUsageCacheRead": "Đọc cache",
+    "cursorModelUsageCacheWrite": "Ghi cache",
+    "cursorModelUsageCost": "Chi phí",
     "title": "Mức sử dụng",
     "grokExtraUsageCredits": "Tín dụng sử dụng bổ sung",
     "grokAutoTopUp": "Tự động nạp thêm",

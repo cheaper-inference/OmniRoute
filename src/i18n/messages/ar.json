@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "فشل تحويل التدفق"
   },
   "usage": {
+    "cursorModelUsageTitle": "الرموز المميزة لـ API (هذه الدورة)",
+    "cursorModelUsageBilledHint": "مفوتر بواسطة Cursor",
+    "cursorModelUsageModel": "نموذج",
+    "cursorModelUsageInput": "الإدخال",
+    "cursorModelUsageOutput": "الإخراج",
+    "cursorModelUsageCacheRead": "قراءة ذاكرة التخزين المؤقت",
+    "cursorModelUsageCacheWrite": "كتابة ذاكرة التخزين المؤقت",
+    "cursorModelUsageCost": "التكلفة",
     "codexPaidCreditsLabel": "أرصدة Codex المدفوعة",
     "codexPaidCreditsAvailable": "متاح (الرصيد غير مُبلَّغ عنه)",
     "codexPaidCreditsUnavailable": "غير متاح أو تم بلوغ حد الإنفاق",

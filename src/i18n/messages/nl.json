@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Transformeren van stream mislukt"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokens (deze cyclus)",
+    "cursorModelUsageBilledHint": "Gefactureerd door Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Invoer",
+    "cursorModelUsageOutput": "Uitvoer",
+    "cursorModelUsageCacheRead": "Cache-lezen",
+    "cursorModelUsageCacheWrite": "Cache schrijven",
+    "cursorModelUsageCost": "Kosten",
     "codexPaidCreditsLabel": "Betaalde Codex-credits",
     "codexPaidCreditsAvailable": "Beschikbaar (saldo niet gemeld)",
     "codexPaidCreditsUnavailable": "Niet beschikbaar of bestedingslimiet bereikt",

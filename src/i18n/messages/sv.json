@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Misslyckades med att transformera strömmen"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokens (denna cykel)",
+    "cursorModelUsageBilledHint": "Fakturerat av Cursor",
+    "cursorModelUsageModel": "Modell",
+    "cursorModelUsageInput": "Indata",
+    "cursorModelUsageOutput": "Utdata",
+    "cursorModelUsageCacheRead": "Cacheläsning",
+    "cursorModelUsageCacheWrite": "Cache Skriv",
+    "cursorModelUsageCost": "Kostnad",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

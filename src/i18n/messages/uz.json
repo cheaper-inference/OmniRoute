@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Oqimni o‘zgartirib bo‘lmadi"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokenlari (ushbu davr)",
+    "cursorModelUsageBilledHint": "Cursor tomonidan hisoblangan",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Kiritish",
+    "cursorModelUsageOutput": "Chiqish",
+    "cursorModelUsageCacheRead": "Keshdan oʻqish",
+    "cursorModelUsageCacheWrite": "Keshga yozish",
+    "cursorModelUsageCost": "Narx",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

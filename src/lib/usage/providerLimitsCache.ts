@@ -43,6 +43,9 @@ export function toProviderLimitsCacheEntry(
     quotaGroups: Array.isArray(usage.quotaGroups)
       ? (usage.quotaGroups as Array<Record<string, unknown>>)
       : undefined,
+    ...(Array.isArray(usage.modelUsage)
+      ? { modelUsage: usage.modelUsage as Array<Record<string, unknown>> }
+      : {}),
   };
 }
 

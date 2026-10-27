@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "转换流失败"
   },
   "usage": {
+    "cursorModelUsageTitle": "API 令牌（本周期）",
+    "cursorModelUsageBilledHint": "Cursor 计费",
+    "cursorModelUsageModel": "模型",
+    "cursorModelUsageInput": "输入",
+    "cursorModelUsageOutput": "输出",
+    "cursorModelUsageCacheRead": "缓存读取",
+    "cursorModelUsageCacheWrite": "缓存写入",
+    "cursorModelUsageCost": "成本",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

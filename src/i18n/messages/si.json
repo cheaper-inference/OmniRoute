@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "ප්රවාහය පරිණාමනය කිරීමට අසමත් විය"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ටෝකන (මෙම චක්‍රය)",
+    "cursorModelUsageBilledHint": "Cursor විසින් බිල් කළ",
+    "cursorModelUsageModel": "මාදිලිය",
+    "cursorModelUsageInput": "ආදානය",
+    "cursorModelUsageOutput": "ප්රතිදානය",
+    "cursorModelUsageCacheRead": "කෑෂ් කියවීම",
+    "cursorModelUsageCacheWrite": "කෑෂයට ලිවීම",
+    "cursorModelUsageCost": "පිරිවැය",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

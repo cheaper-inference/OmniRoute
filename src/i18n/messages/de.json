@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Stream konnte nicht transformiert werden"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-Token (dieser Zyklus)",
+    "cursorModelUsageBilledHint": "Von Cursor abgerechnet",
+    "cursorModelUsageModel": "Modell",
+    "cursorModelUsageInput": "Eingabe",
+    "cursorModelUsageOutput": "Ausgabe",
+    "cursorModelUsageCacheRead": "Cache-Lesevorgang",
+    "cursorModelUsageCacheWrite": "Cache-Schreiben",
+    "cursorModelUsageCost": "Kosten",
     "codexPaidCreditsLabel": "Kostenpflichtige Codex-Credits",
     "codexPaidCreditsAvailable": "Verfügbar (Guthaben nicht gemeldet)",
     "codexPaidCreditsUnavailable": "Nicht verfügbar oder Ausgabenlimit erreicht",

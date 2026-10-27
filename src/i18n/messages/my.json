@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "ဒေတာစီးကြောင်းကို ပြောင်းလဲ၍ မရပါ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API တိုကင်များ (ဤစက်ဝန်း)",
+    "cursorModelUsageBilledHint": "Cursor မှ ငွေတောင်းခံထားသည်",
+    "cursorModelUsageModel": "မော်ဒယ်",
+    "cursorModelUsageInput": "ထည့်သွင်းချက်",
+    "cursorModelUsageOutput": "အထွက်ရလဒ်",
+    "cursorModelUsageCacheRead": "Cache ဖတ်ရှုမှု",
+    "cursorModelUsageCacheWrite": "ကက်ရှ်သို့ ရေးသားခြင်း",
+    "cursorModelUsageCost": "ကုန်ကျစရိတ်",
     "codexPaidCreditsLabel": "အခပေး Codex ခရက်ဒစ်များ",
     "codexPaidCreditsAvailable": "ရရှိနိုင်သည် (လက်ကျန်ပမာဏကို မဖော်ပြထားပါ)",
     "codexPaidCreditsUnavailable": "မရရှိနိုင်ပါ သို့မဟုတ် သုံးစွဲမှုကန့်သတ်ချက်သို့ ရောက်ရှိနေသည်",

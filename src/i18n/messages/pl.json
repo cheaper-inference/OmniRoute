@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Nie udało się przekształcić strumienia"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokeny API (ten cykl)",
+    "cursorModelUsageBilledHint": "Rozliczane przez Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Wejście",
+    "cursorModelUsageOutput": "Wyjście",
+    "cursorModelUsageCacheRead": "Odczyt z cache",
+    "cursorModelUsageCacheWrite": "Zapis w pamięci podręcznej",
+    "cursorModelUsageCost": "Koszt",
     "codexPaidCreditsLabel": "Płatne kredyty Codex",
     "codexPaidCreditsAvailable": "Dostępne (saldo nie jest raportowane)",
     "codexPaidCreditsUnavailable": "Niedostępne lub osiągnięto limit wydatków",

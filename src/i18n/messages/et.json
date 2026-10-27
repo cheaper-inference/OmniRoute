@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Voo teisendamine nurjus"
   },
   "usage": {
+    "cursorModelUsageTitle": "API-tokenid (see tsükkel)",
+    "cursorModelUsageBilledHint": "Arveldab Cursor",
+    "cursorModelUsageModel": "Mudel",
+    "cursorModelUsageInput": "Sisend",
+    "cursorModelUsageOutput": "Väljund",
+    "cursorModelUsageCacheRead": "Vahemälust lugemine",
+    "cursorModelUsageCacheWrite": "Vahemällu kirjutamine",
+    "cursorModelUsageCost": "Maksumus",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

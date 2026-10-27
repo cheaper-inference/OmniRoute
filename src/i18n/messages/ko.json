@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "스트림 변환 실패"
   },
   "usage": {
+    "cursorModelUsageTitle": "API 토큰(이번 주기)",
+    "cursorModelUsageBilledHint": "Cursor 청구 금액",
+    "cursorModelUsageModel": "모델",
+    "cursorModelUsageInput": "입력",
+    "cursorModelUsageOutput": "출력",
+    "cursorModelUsageCacheRead": "캐시 읽기",
+    "cursorModelUsageCacheWrite": "캐시 쓰기",
+    "cursorModelUsageCost": "비용",
     "codexPaidCreditsLabel": "Codex 유료 크레딧",
     "codexPaidCreditsAvailable": "사용 가능(잔액 미보고)",
     "codexPaidCreditsUnavailable": "사용 불가 또는 지출 한도 도달",

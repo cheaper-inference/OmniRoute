@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Неуспешно преобразуване на потока"
   },
   "usage": {
+    "cursorModelUsageTitle": "API токени (този цикъл)",
+    "cursorModelUsageBilledHint": "Таксувано от Cursor",
+    "cursorModelUsageModel": "Модел",
+    "cursorModelUsageInput": "Входни данни",
+    "cursorModelUsageOutput": "Резултат",
+    "cursorModelUsageCacheRead": "Четене от кеша",
+    "cursorModelUsageCacheWrite": "Кеш запис",
+    "cursorModelUsageCost": "Цена",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

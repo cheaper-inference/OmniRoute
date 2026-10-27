@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Neizdevās pārveidot straumi"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokeni (šis cikls)",
+    "cursorModelUsageBilledHint": "Rēķinu izrāda Cursor",
+    "cursorModelUsageModel": "Modelis",
+    "cursorModelUsageInput": "Ievade",
+    "cursorModelUsageOutput": "Izvade",
+    "cursorModelUsageCacheRead": "Kešatmiņas nolasīšana",
+    "cursorModelUsageCacheWrite": "Kešatmiņas rakstīšana",
+    "cursorModelUsageCost": "Izmaksas",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

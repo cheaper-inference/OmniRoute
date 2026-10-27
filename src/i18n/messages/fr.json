@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Échec de la transformation du flux"
   },
   "usage": {
+    "cursorModelUsageTitle": "Jetons API (ce cycle)",
+    "cursorModelUsageBilledHint": "Facturé par Cursor",
+    "cursorModelUsageModel": "Modèle",
+    "cursorModelUsageInput": "Entrée",
+    "cursorModelUsageOutput": "Sortie",
+    "cursorModelUsageCacheRead": "Lecture cache",
+    "cursorModelUsageCacheWrite": "Écriture du cache",
+    "cursorModelUsageCost": "Coût",
     "codexPaidCreditsLabel": "Crédits payants Codex",
     "codexPaidCreditsAvailable": "Disponibles (solde non communiqué)",
     "codexPaidCreditsUnavailable": "Indisponibles ou limite de dépenses atteinte",

@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "ዥረቱን መለወጥ አልተሳካም"
   },
   "usage": {
+    "cursorModelUsageTitle": "የAPI ቶከኖች (በዚህ ዑደት)",
+    "cursorModelUsageBilledHint": "በCursor የተከፈለ",
+    "cursorModelUsageModel": "ሞዴል",
+    "cursorModelUsageInput": "ግቤት",
+    "cursorModelUsageOutput": "ውጤት",
+    "cursorModelUsageCacheRead": "የመሸጎጫ ንባብ",
+    "cursorModelUsageCacheWrite": "ወደ መሸጎጫ መጻፍ",
+    "cursorModelUsageCost": "ወጪ",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

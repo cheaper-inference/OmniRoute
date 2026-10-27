@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Gagal mengubah strim"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (kitaran ini)",
+    "cursorModelUsageBilledHint": "Dibilkan oleh Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Input",
+    "cursorModelUsageOutput": "Output",
+    "cursorModelUsageCacheRead": "Bacaan cache",
+    "cursorModelUsageCacheWrite": "Tulis Cache",
+    "cursorModelUsageCost": "Kos",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

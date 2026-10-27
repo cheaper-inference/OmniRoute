@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Pretvorba toka ni uspela"
   },
   "usage": {
+    "cursorModelUsageTitle": "Žetoni API (ta cikel)",
+    "cursorModelUsageBilledHint": "Zaračunal Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Vnos",
+    "cursorModelUsageOutput": "Izhod",
+    "cursorModelUsageCacheRead": "Branje iz predpomnilnika",
+    "cursorModelUsageCacheWrite": "Zapis v predpomnilnik",
+    "cursorModelUsageCost": "Strošek",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

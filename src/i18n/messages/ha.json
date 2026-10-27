@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "An kasa canza rafi"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokunan API (wannan zagaye)",
+    "cursorModelUsageBilledHint": "Cursor ne ya caje",
+    "cursorModelUsageModel": "Samfuri",
+    "cursorModelUsageInput": "Shigarwa",
+    "cursorModelUsageOutput": "Sakamako",
+    "cursorModelUsageCacheRead": "Karatu daga cache",
+    "cursorModelUsageCacheWrite": "Rubutawa a Ma'ajiyar Wucin Gadi",
+    "cursorModelUsageCost": "Kuɗi",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Трансформација стрима није успела"
   },
   "usage": {
+    "cursorModelUsageTitle": "API токени (овај циклус)",
+    "cursorModelUsageBilledHint": "Наплаћује Cursor",
+    "cursorModelUsageModel": "Модел",
+    "cursorModelUsageInput": "Улаз",
+    "cursorModelUsageOutput": "Излаз",
+    "cursorModelUsageCacheRead": "Читање из кеша",
+    "cursorModelUsageCacheWrite": "Упис у кеш",
+    "cursorModelUsageCost": "Cena",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

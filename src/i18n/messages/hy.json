@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Չհաջողվեց փոխակերպել հոսքը"
   },
   "usage": {
+    "cursorModelUsageTitle": "API թոքեններ (այս ցիկլ)",
+    "cursorModelUsageBilledHint": "Հաշվարկված է Cursor-ի կողմից",
+    "cursorModelUsageModel": "Մոդել",
+    "cursorModelUsageInput": "Մուտք",
+    "cursorModelUsageOutput": "Ելք",
+    "cursorModelUsageCacheRead": "Քեշից ընթերցում",
+    "cursorModelUsageCacheWrite": "Քեշի գրառում",
+    "cursorModelUsageCost": "Արժեք",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "ਸਟ੍ਰੀਮ ਨੂੰ ਰੂਪਾਂਤਰਿਤ ਕਰਨ ਵਿੱਚ ਅਸਫਲ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ਟੋਕਨ (ਇਹ ਚੱਕਰ)",
+    "cursorModelUsageBilledHint": "Cursor ਵੱਲੋਂ ਬਿੱਲ ਕੀਤਾ",
+    "cursorModelUsageModel": "ਮਾਡਲ",
+    "cursorModelUsageInput": "ਇਨਪੁੱਟ",
+    "cursorModelUsageOutput": "ਆਉਟਪੁੱਟ",
+    "cursorModelUsageCacheRead": "ਕੈਸ਼ ਰੀਡ",
+    "cursorModelUsageCacheWrite": "ਕੈਸ਼ ਲਿਖਾਈ",
+    "cursorModelUsageCost": "ਲਾਗਤ",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Eșec la transformarea fluxului"
   },
   "usage": {
+    "cursorModelUsageTitle": "Tokenuri API (acest ciclu)",
+    "cursorModelUsageBilledHint": "Facturat de Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Intrare",
+    "cursorModelUsageOutput": "Ieșire",
+    "cursorModelUsageCacheRead": "Citire din cache",
+    "cursorModelUsageCacheWrite": "Scriere în cache",
+    "cursorModelUsageCost": "Cost",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

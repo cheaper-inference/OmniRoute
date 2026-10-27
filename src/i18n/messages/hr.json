@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Pretvorba toka nije uspjela"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokeni (ovaj ciklus)",
+    "cursorModelUsageBilledHint": "Naplaćuje Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Ulaz",
+    "cursorModelUsageOutput": "Izlaz",
+    "cursorModelUsageCacheRead": "Čitanje iz predmemorije",
+    "cursorModelUsageCacheWrite": "Pisanje u predmemoriju",
+    "cursorModelUsageCost": "Trošak",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

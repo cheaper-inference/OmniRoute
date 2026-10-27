@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "המרת הזרם נכשלה"
   },
   "usage": {
+    "cursorModelUsageTitle": "אסימוני API (המחזור הנוכחי)",
+    "cursorModelUsageBilledHint": "מחויב על ידי Cursor",
+    "cursorModelUsageModel": "דגם",
+    "cursorModelUsageInput": "קלט",
+    "cursorModelUsageOutput": "פלט",
+    "cursorModelUsageCacheRead": "קריאה מהמטמון",
+    "cursorModelUsageCacheWrite": "כתוב מטמון",
+    "cursorModelUsageCost": "עלות",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

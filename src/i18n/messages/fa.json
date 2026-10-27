@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "تبدیل استریم ناموفق بود"
   },
   "usage": {
+    "cursorModelUsageTitle": "توکن‌های API (این دوره)",
+    "cursorModelUsageBilledHint": "صورتحساب توسط Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "ورودی",
+    "cursorModelUsageOutput": "خروجی",
+    "cursorModelUsageCacheRead": "خواندن از کش",
+    "cursorModelUsageCacheWrite": "نوشتن در حافظه نهان",
+    "cursorModelUsageCost": "هزینه",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

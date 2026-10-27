@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Gagal mentransformasi stream"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (siklus ini)",
+    "cursorModelUsageBilledHint": "Ditagih oleh Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Masukan",
+    "cursorModelUsageOutput": "Keluaran",
+    "cursorModelUsageCacheRead": "Pembacaan cache",
+    "cursorModelUsageCacheWrite": "Tulis Cache",
+    "cursorModelUsageCost": "Biaya",
     "codexPaidCreditsLabel": "Kredit Codex berbayar",
     "codexPaidCreditsAvailable": "Tersedia (saldo tidak dilaporkan)",
     "codexPaidCreditsUnavailable": "Tidak tersedia atau batas pengeluaran tercapai",

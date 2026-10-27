@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "اسٹریم کو تبدیل کرنے میں ناکامی"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ٹوکنز (یہ سائیکل)",
+    "cursorModelUsageBilledHint": "Cursor کی جانب سے بل شدہ",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "ان پٹ",
+    "cursorModelUsageOutput": "آؤٹ پٹ",
+    "cursorModelUsageCacheRead": "کیش ریڈ",
+    "cursorModelUsageCacheWrite": "کیش رائٹ",
+    "cursorModelUsageCost": "لاگت",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

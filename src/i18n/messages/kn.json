@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "ಸ್ಟ್ರೀಮ್ ಅನ್ನು ಪರಿವರ್ತಿಸಲು ವಿಫಲವಾಗಿದೆ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ಟೋಕನ್‌ಗಳು (ಈ ಚಕ್ರ)",
+    "cursorModelUsageBilledHint": "Cursor ಬಿಲ್ ಮಾಡಿದೆ",
+    "cursorModelUsageModel": "ಮಾಡೆಲ್",
+    "cursorModelUsageInput": "ಇನ್ಪುಟ್",
+    "cursorModelUsageOutput": "ಔಟ್ಪುಟ್",
+    "cursorModelUsageCacheRead": "ಕ್ಯಾಶ್ ಓದುವಿಕೆ",
+    "cursorModelUsageCacheWrite": "ಕ್ಯಾಶ್ ಬರವಣಿಗೆ",
+    "cursorModelUsageCost": "ವೆಚ್ಚ",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

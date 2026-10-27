@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "ნაკადის გარდაქმნა ვერ მოხერხდა"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ტოკენები (ეს ციკლი)",
+    "cursorModelUsageBilledHint": "ანგარიში Cursor-ისგან",
+    "cursorModelUsageModel": "მოდელი",
+    "cursorModelUsageInput": "შეყვანა",
+    "cursorModelUsageOutput": "გამომავალი მონაცემები",
+    "cursorModelUsageCacheRead": "ქეშიდან წაკითხვა",
+    "cursorModelUsageCacheWrite": "ქეშში ჩაწერა",
+    "cursorModelUsageCost": "ღირებულება",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

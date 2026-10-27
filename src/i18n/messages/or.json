@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "ଷ୍ଟ୍ରିମ୍ ରୂପାନ୍ତର କରିବାରେ ବିଫଳ"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ଟୋକେନ୍‌ଗୁଡ଼ିକ (ଏହି ଚକ୍ର)",
+    "cursorModelUsageBilledHint": "Cursor ଦ୍ୱାରା ବିଲ୍ କରାଯାଇଛି",
+    "cursorModelUsageModel": "ମଡେଲ୍",
+    "cursorModelUsageInput": "ଇନ୍ପୁଟ୍",
+    "cursorModelUsageOutput": "ଆଉଟପୁଟ୍",
+    "cursorModelUsageCacheRead": "କ୍ୟାଶ୍ ପଠନ",
+    "cursorModelUsageCacheWrite": "କ୍ୟାଶ୍ ଲେଖନ",
+    "cursorModelUsageCost": "ଖର୍ଚ୍ଚ",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

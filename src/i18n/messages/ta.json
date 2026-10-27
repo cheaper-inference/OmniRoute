@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "ஸ்ட்ரீமை மாற்ற முடியவில்லை"
   },
   "usage": {
+    "cursorModelUsageTitle": "API டோக்கன்கள் (இந்தச் சுழற்சி)",
+    "cursorModelUsageBilledHint": "Cursor வசூலித்தது",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "உள்ளீடு",
+    "cursorModelUsageOutput": "வெளியீடு",
+    "cursorModelUsageCacheRead": "கேச் வாசிப்பு",
+    "cursorModelUsageCacheWrite": "தற்காலிகச் சேமிப்பக எழுதுதல்",
+    "cursorModelUsageCost": "செலவு",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

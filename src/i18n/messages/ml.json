@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "സ്ട്രീം പരിവർത്തനം ചെയ്യുന്നതിൽ പരാജയപ്പെട്ടു"
   },
   "usage": {
+    "cursorModelUsageTitle": "API ടോക്കണുകൾ (ഈ സൈക്കിൾ)",
+    "cursorModelUsageBilledHint": "Cursor ബിൽ ചെയ്തത്",
+    "cursorModelUsageModel": "മോഡൽ",
+    "cursorModelUsageInput": "ഇൻപുട്ട്",
+    "cursorModelUsageOutput": "ഔട്ട്പുട്ട്",
+    "cursorModelUsageCacheRead": "കാഷ് റീഡ്",
+    "cursorModelUsageCacheWrite": "കാഷിലേക്ക് എഴുതൽ",
+    "cursorModelUsageCost": "ചെലവ്",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

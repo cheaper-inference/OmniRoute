@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "స్ట్రీమ్‌ను మార్చడం విఫలమైంది"
   },
   "usage": {
+    "cursorModelUsageTitle": "API టోకెన్లు (ఈ చక్రం)",
+    "cursorModelUsageBilledHint": "Cursor బిల్ చేసింది",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "ఇన్పుట్",
+    "cursorModelUsageOutput": "అవుట్పుట్",
+    "cursorModelUsageCacheRead": "కాష్ రీడ్",
+    "cursorModelUsageCacheWrite": "క్యాష్ రైట్",
+    "cursorModelUsageCost": "ఖర్చు",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

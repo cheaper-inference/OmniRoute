@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Transformace streamu se nezdařila"
   },
   "usage": {
+    "cursorModelUsageTitle": "API tokeny (tento cyklus)",
+    "cursorModelUsageBilledHint": "Účtováno službou Cursor",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Vstup",
+    "cursorModelUsageOutput": "Výstup",
+    "cursorModelUsageCacheRead": "Čtení z mezipaměti",
+    "cursorModelUsageCacheWrite": "Zápis do mezipaměti",
+    "cursorModelUsageCost": "Náklady",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

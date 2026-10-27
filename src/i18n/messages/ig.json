@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Enweghị ike ịgbanwe iyi ahụ"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (usoro a)",
+    "cursorModelUsageBilledHint": "Cursor gbara ụgwọ",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "Ntinye",
+    "cursorModelUsageOutput": "Nsonaazụ",
+    "cursorModelUsageCacheRead": "Ọgụgụ cache",
+    "cursorModelUsageCacheWrite": "Ide na Cache",
+    "cursorModelUsageCost": "Ọnụ ahịa",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "স্ট্রিম রূপান্তর করতে ব্যর্থ হয়েছে"
   },
   "usage": {
+    "cursorModelUsageTitle": "API টোকেন (এই চক্র)",
+    "cursorModelUsageBilledHint": "Cursor দ্বারা বিল করা",
+    "cursorModelUsageModel": "Model",
+    "cursorModelUsageInput": "ইনপুট",
+    "cursorModelUsageOutput": "আউটপুট",
+    "cursorModelUsageCacheRead": "ক্যাশ রিড",
+    "cursorModelUsageCacheWrite": "ক্যাশ লেখা",
+    "cursorModelUsageCost": "খরচ",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

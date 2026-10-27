@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "Αποτυχία μετασχηματισμού της ροής"
   },
   "usage": {
+    "cursorModelUsageTitle": "Token API (αυτός ο κύκλος)",
+    "cursorModelUsageBilledHint": "Χρέωση από το Cursor",
+    "cursorModelUsageModel": "Μοντέλο",
+    "cursorModelUsageInput": "Είσοδος",
+    "cursorModelUsageOutput": "Έξοδος",
+    "cursorModelUsageCacheRead": "Ανάγνωση κρυφής μνήμης",
+    "cursorModelUsageCacheWrite": "Εγγραφή στην κρυφή μνήμη",
+    "cursorModelUsageCost": "Κόστος",
     "codexPaidCreditsLabel": "Paid Codex credits",
     "codexPaidCreditsAvailable": "Available (balance not reported)",
     "codexPaidCreditsUnavailable": "Unavailable or spending limit reached",

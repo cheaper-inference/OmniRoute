@@ -9835,6 +9835,14 @@
     "streamTransformFailed": "ストリームの変換に失敗しました"
   },
   "usage": {
+    "cursorModelUsageTitle": "APIトークン（今期）",
+    "cursorModelUsageBilledHint": "Cursor による請求額",
+    "cursorModelUsageModel": "モデル",
+    "cursorModelUsageInput": "入力",
+    "cursorModelUsageOutput": "出力",
+    "cursorModelUsageCacheRead": "キャッシュ読み取り",
+    "cursorModelUsageCacheWrite": "キャッシュ書き込み",
+    "cursorModelUsageCost": "コスト",
     "codexPaidCreditsLabel": "Codex の有料クレジット",
     "codexPaidCreditsAvailable": "利用可能（残高は未報告）",
     "codexPaidCreditsUnavailable": "利用不可、または支出上限に達しました",
