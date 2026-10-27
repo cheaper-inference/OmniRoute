@@ -584,16 +584,11 @@ function ProviderModelsSectionState({
 }
 
 export default function ProviderModelsSection(props: ProviderModelsSectionProps) {
-  const connection = props.selectedConnection;
-  const connectionId =
-    connection?.isActive !== false && typeof connection?.id === "string"
-      ? connection.id
-      : undefined;
   return (
     <>
       <DecisionModelsSection
         providerId={props.providerId}
-        connectionId={connectionId}
+        connections={props.connections}
         initialModels={props.syncedAvailableModels}
         onChanged={props.fetchProviderModelMeta}
       />

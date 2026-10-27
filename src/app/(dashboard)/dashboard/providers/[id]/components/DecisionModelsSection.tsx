@@ -1,14 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
-import { Button } from "@/shared/components";
+import { Button, Select } from "@/shared/components";
 import { isSystemOneProvider } from "@omniroute/open-sse/config/systemOneRegistry";
 import { providerText } from "../providerPageHelpers";
 
 type Props = {
   providerId: string;
   connectionId?: string;
+  connections?: unknown[];
   initialModels?: unknown[];
   onChanged: () => void | Promise<void>;
 };
@@ -49,7 +50,12 @@ function modelRows(raw: unknown): Model[] {
   });
 }
 
-function DecisionModelsState({ connectionId, initialModels = [], onChanged }: Props) {
+function DecisionModelsState({
+  connectionId,
+  initialModels = [],
+  onChanged,
+  connectionControl,
+}: Props & { connectionControl?: ReactNode }) {
   const t = useTranslations("providers");
   const catalogText = useTranslations("modelCatalog");
   const [discovered, setDiscovered] = useState<Model[] | null>(null);
@@ -169,6 +175,7 @@ function DecisionModelsState({ connectionId, initialModels = [], onChanged }: Pr
           "Discovery reads model metadata only. It does not verify account access or run inference."
         )}
       </p>
+      {connectionControl}
       <div className="flex flex-wrap gap-2">
         <Button
           size="sm"
@@ -262,9 +269,67 @@ function DecisionModelsState({ connectionId, initialModels = [], onChanged }: Pr
   );
 }
 
+function activeDecisionConnections(
+  raw: unknown,
+  providerId: string
+): Array<{ id: string; name: string }> {
+  if (!Array.isArray(raw)) return [];
+  return raw.flatMap((entry) => {
+    if (
+      !entry ||
+      typeof entry !== "object" ||
+      typeof entry.id !== "string" ||
+      !entry.id.trim() ||
+      entry.isActive !== true ||
+      entry.provider !== providerId
+    )
+      return [];
+    return [
+      {
+        id: entry.id,
+        name: typeof entry.name === "string" && entry.name.trim() ? entry.name : entry.id,
+      },
+    ];
+  });
+}
+
 export default function DecisionModelsSection(props: Props) {
+  const [choice, setChoice] = useState("");
+  const t = useTranslations("providers");
+  const common = useTranslations("common");
   if (!isSystemOneProvider(props.providerId)) return null;
+  const connections = activeDecisionConnections(props.connections, props.providerId);
+  const selected =
+    connections.find((row) => row.id === choice) ??
+    (connections.length === 1 ? connections[0] : undefined);
+  const connectionId = props.connections === undefined ? props.connectionId : selected?.id;
+  const connectionControl =
+    props.connections !== undefined ? (
+      <div className="mb-3">
+        <Select
+          label={providerText(
+            t,
+            "decisionSelectConnection",
+            "Select an active connection to discover decision models"
+          )}
+          value={connectionId ?? ""}
+          onChange={(event) => setChoice(event.target.value)}
+        >
+          <option value="">{common("selectOption")}</option>
+          {connections.map((row) => (
+            <option key={row.id} value={row.id}>
+              {row.name}
+            </option>
+          ))}
+        </Select>
+      </div>
+    ) : undefined;
   return (
-    <DecisionModelsState key={`${props.providerId}\0${props.connectionId ?? ""}`} {...props} />
+    <DecisionModelsState
+      key={`${props.providerId}\0${connectionId ?? ""}`}
+      {...props}
+      connectionId={connectionId}
+      connectionControl={connectionControl}
+    />
   );
 }
