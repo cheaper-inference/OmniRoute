@@ -277,11 +277,27 @@ function hasRemainingBuffers(store: ChoiceBufferStore): boolean {
   return false;
 }
 
+function pickClaudeFlushBuffer(
+  store: ChoiceBufferStore,
+  blockIndex: number
+): Record<FieldCategory, string> {
+  const own = store.get(`${blockIndex}_0`);
+  if (Object.values(own).some((v) => v.length > 0)) return own;
+  for (const [, candidate] of store.takeAll()) {
+    if (Object.values(candidate).some((v) => v.length > 0)) return candidate;
+  }
+  return own;
+}
+
 function flushClaudeFormat(
   store: ChoiceBufferStore,
   lastJson: Record<string, unknown>
 ): Record<string, unknown> | null {
-  const buffers = store.get("0_0");
+  const blockIndex = typeof lastJson.index === "number" ? lastJson.index : 0;
+  // Claude content blocks buffer under `<blockIndex>_0`; a thinking block at index 0 followed
+  // by a text block at index 1 must not strand the text in a buffer that is never flushed
+  // (#18006). Prefer the block the last frame belongs to, then any non-empty block buffer.
+  const buffers = pickClaudeFlushBuffer(store, blockIndex);
   const delta: Record<string, unknown> = { type: "text_delta" };
   let hasDelta = false;
   if (buffers.content) {
@@ -307,7 +323,7 @@ function flushClaudeFormat(
   if (!hasDelta) return null;
   return {
     type: "content_block_delta",
-    index: typeof lastJson.index === "number" ? lastJson.index : 0,
+    index: blockIndex,
     delta,
   };
 }
