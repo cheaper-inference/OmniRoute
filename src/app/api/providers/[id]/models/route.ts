@@ -2454,7 +2454,19 @@ export async function GET(
     const status = getSafeOutboundFetchErrorStatus(error);
     if (status) {
       const message = error instanceof Error ? error.message : "Failed to fetch models";
-      return NextResponse.json({ error: message }, { status });
+      // Timeout messages embed the request URL, which can carry a `?key=` credential.
+      return NextResponse.json({ error: sanitizeErrorMessage(message) }, { status });
+    }
+    // #4843 — dead host / DNS / TLS failure with no cached or local catalog to
+    // degrade to is an upstream outage, not an OmniRoute bug: answer 502.
+    if (error instanceof SafeOutboundFetchError && error.code === "NETWORK_ERROR") {
+      return NextResponse.json(
+        {
+          error: `Failed to fetch models: ${sanitizeErrorMessage(error.message) || "upstream unreachable"}`,
+          code: "UPSTREAM_UNREACHABLE",
+        },
+        { status: 502 }
+      );
     }
     console.log("Error fetching provider models:", error);
     return NextResponse.json({ error: "Failed to fetch models" }, { status: 500 });
