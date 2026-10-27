@@ -1,0 +1,1 @@
+- **fix(dashboard):** the combo model picker lists the live models of Zed Hosted and other live-only catalog providers ([#18315](https://github.com/cheaper-inference/OmniRoute/pull/18315)) — thanks @haidarmy

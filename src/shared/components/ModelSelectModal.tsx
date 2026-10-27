@@ -23,6 +23,11 @@ import {
   hasWorkingTestResults,
   listVisibleProviderIds,
 } from "./modelSelectModalHelpers";
+import {
+  buildLiveModelEntries,
+  hasUsableLiveModels,
+  shouldFetchLiveModels,
+} from "./modelSelectLiveProviders";
 import { getModelsByProviderId, PROVIDER_ID_TO_ALIAS } from "@/shared/constants/models";
 import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableModels";
 import {
@@ -247,7 +252,8 @@ export default function ModelSelectModal({
   };
 
   // When the modal opens, dynamically load models for every connected custom
-  // (openai-/anthropic-compatible) provider in parallel.
+  // (openai-/anthropic-compatible) provider and every live-only catalog provider
+  // (empty static catalog + modelsUrl, e.g. zed-hosted) in parallel.
   useEffect(() => {
     if (!isOpen) return;
 
@@ -255,9 +261,7 @@ export default function ModelSelectModal({
 
     const loadCustomProviderModels = async () => {
       const customProviderIds = activeProviders
-        .filter(
-          (p) => isOpenAICompatibleProvider(p.provider) || isAnthropicCompatibleProvider(p.provider)
-        )
+        .filter((p) => shouldFetchLiveModels(p.provider))
         .map((p) => p.provider);
 
       if (customProviderIds.length === 0) return;
@@ -266,7 +270,7 @@ export default function ModelSelectModal({
       await Promise.all(
         customProviderIds.map(async (providerId) => {
           const models = await fetchProviderModels(providerId);
-          if (models && models.length > 1) {
+          if (hasUsableLiveModels(providerId, models)) {
             fetched[providerId] = models;
           }
         })
@@ -414,25 +418,12 @@ export default function ModelSelectModal({
         // already filtered hidden rows via `excludeHidden=true`, but re-check the
         // unified map here so a hidden model is dropped even on the local-catalog
         // fallback path where the query param is not passed through.
-        const fetchedEntries = (fetchedModels[providerId] || [])
-          .map((m) => {
-            const id = m.id || m.slug || m.model || m.name;
-            return {
-              id,
-              name: m.name || m.displayName || id,
-              value: `${nodePrefix}/${id}`,
-              isFetched: true,
-              source: "auto",
-            };
-          })
-          .filter(
-            (fm) =>
-              fm.id &&
-              !nodeModels.some((nm) => nm.id === fm.id) &&
-              !fallbackEntries.some((fbm) => fbm.id === fm.id) &&
-              !customEntries.some((cm) => cm.id === fm.id)
-          )
-          .filter((fm) => !isHiddenForProvider(fm.id));
+        const fetchedEntries = buildLiveModelEntries({
+          liveModels: fetchedModels[providerId] || [],
+          prefix: nodePrefix,
+          existingIds: [...nodeModels, ...fallbackEntries, ...customEntries].map((m) => m.id),
+          isHidden: isHiddenForProvider,
+        });
 
         const allModels = [...nodeModels, ...fallbackEntries, ...customEntries, ...fetchedEntries];
 
@@ -470,7 +461,16 @@ export default function ModelSelectModal({
             source: normalizeModelCatalogSource(cm.source) === "imported" ? "imported" : "custom",
           }));
 
-        const allModels = [...systemEntries, ...customEntries];
+        // Live catalog (zed-hosted and other live-only providers); system and
+        // custom rows win over a live duplicate.
+        const fetchedEntries = buildLiveModelEntries({
+          liveModels: fetchedModels[providerId] || [],
+          prefix: alias,
+          existingIds: [...systemEntries, ...customEntries].map((m) => m.id),
+          isHidden: isHiddenForProvider,
+        });
+
+        const allModels = [...systemEntries, ...customEntries, ...fetchedEntries];
 
         if (allModels.length > 0) {
           groups[providerId] = {
