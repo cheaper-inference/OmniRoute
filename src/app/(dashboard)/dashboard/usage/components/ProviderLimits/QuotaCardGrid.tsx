@@ -4,7 +4,13 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { PROVIDER_ORDER } from "./constants";
 import QuotaCard from "./QuotaCard";
-import { worstStatus, type CardStatus, compareProviderGroups } from "./utils";
+import {
+  worstStatus,
+  type CardStatus,
+  compareProviderGroups,
+  type QuotaVisibilityScope,
+} from "./utils";
+import Icon from "@/shared/components/Icon";
 import { compareTr } from "@/shared/utils/turkishText";
 
 interface Props {
@@ -25,8 +31,8 @@ interface Props {
   loadingResetCreditsId?: string | null;
   /** Per-operator quota row visibility (upstream 9router#2371 port). */
   quotaVisibility?: Record<string, { hidden?: string[] }>;
-  onHideQuota?: (provider: string, quota: any) => void;
-  onShowQuota?: (provider: string, quota: any) => void;
+  onHideQuota?: (scope: QuotaVisibilityScope, quota: any) => void;
+  onShowQuota?: (scope: QuotaVisibilityScope, quota: any) => void;
   compact?: boolean;
 }
 
@@ -171,10 +177,8 @@ function ProviderQuotaSection({
       onToggle={(event) => setOpen((event.target as HTMLDetailsElement).open)}
       className="rounded-lg border border-border bg-surface overflow-hidden"
     >
-      <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-white/[0.03] [&::-webkit-details-marker]:hidden">
-        <span className="material-symbols-outlined text-[16px] text-text-muted">
-          {open ? "expand_less" : "expand_more"}
-        </span>
+      <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
+        <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-text-main leading-5 truncate">
             {providerLabel}
@@ -205,8 +209,16 @@ function ProviderQuotaSection({
               redeemingResetCredit={redeemingResetCreditId === conn.id}
               loadingResetCredits={loadingResetCreditsId === conn.id}
               quotaVisibility={quotaVisibility}
-              onHideQuota={onHideQuota ? (q) => onHideQuota(conn.provider, q) : undefined}
-              onShowQuota={onShowQuota ? (q) => onShowQuota(conn.provider, q) : undefined}
+              onHideQuota={
+                onHideQuota
+                  ? (q) => onHideQuota({ connectionId: conn.id, provider: conn.provider }, q)
+                  : undefined
+              }
+              onShowQuota={
+                onShowQuota
+                  ? (q) => onShowQuota({ connectionId: conn.id, provider: conn.provider }, q)
+                  : undefined
+              }
             />
           ))}
         </div>
@@ -256,8 +268,16 @@ export default function QuotaCardGrid({
       redeemingResetCredit={redeemingResetCreditId === conn.id}
       loadingResetCredits={loadingResetCreditsId === conn.id}
       quotaVisibility={quotaVisibility}
-      onHideQuota={onHideQuota ? (q) => onHideQuota(conn.provider, q) : undefined}
-      onShowQuota={onShowQuota ? (q) => onShowQuota(conn.provider, q) : undefined}
+      onHideQuota={
+        onHideQuota
+          ? (q) => onHideQuota({ connectionId: conn.id, provider: conn.provider }, q)
+          : undefined
+      }
+      onShowQuota={
+        onShowQuota
+          ? (q) => onShowQuota({ connectionId: conn.id, provider: conn.provider }, q)
+          : undefined
+      }
     />
   );
 

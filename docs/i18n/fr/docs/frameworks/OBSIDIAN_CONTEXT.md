@@ -1,6 +1,6 @@
 # Obsidian Context Source (Français)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇹 [am](../../../am/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇿 [az](../../../az/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇰 [da](../../../da/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇪 [de](../../../de/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇷 [el](../../../el/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇸 [es](../../../es/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇪 [et](../../../et/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇱 [he](../../../he/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇩 [id](../../../id/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇹 [it](../../../it/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇭 [km](../../../km/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇲 [my](../../../my/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇴 [no](../../../no/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [or](../../../or/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇰 [si](../../../si/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [te](../../../te/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇭 [th](../../../th/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OBSIDIAN_CONTEXT.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇹 [am](../../../am/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇿 [az](../../../az/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇰 [da](../../../da/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇪 [de](../../../de/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇷 [el](../../../el/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇸 [es](../../../es/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇪 [et](../../../et/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇱 [he](../../../he/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇩 [id](../../../id/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇹 [it](../../../it/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇭 [km](../../../km/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇲 [my](../../../my/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇴 [no](../../../no/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [or](../../../or/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇰 [si](../../../si/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [te](../../../te/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇭 [th](../../../th/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OBSIDIAN_CONTEXT.md)
 
 ---
 
@@ -36,35 +36,33 @@ Le client (`src/lib/obsidian/api.ts`) encapsule la Local REST API avec :
 
 ## Configuration
 
-Il n’existe **aucune variable d’environnement** pour le jeton Obsidian ou l’URL de
-base — tous deux sont stockés dans la table SQLite `key_value` (espace de noms
-`obsidian`) via `src/lib/db/obsidian.ts`. Le jeton est **chiffré au repos**
-(AES-256-GCM, avec solution de repli rétrocompatible en texte brut). Effectuez la
-configuration depuis l’onglet **Sources de contexte** du tableau de bord Endpoint
-(`ObsidianSourceCard`), ou via l’API REST des paramètres.
+Il n’existe **aucune variable d’environnement** pour le jeton Obsidian ou l’URL de base — les deux sont
+stockés dans la table SQLite `key_value` (espace de noms `obsidian`) via
+`src/lib/db/obsidian.ts`. Le jeton est **chiffré au repos** (AES-256-GCM, avec
+un mécanisme de repli rétrocompatible en texte clair). Effectuez la configuration depuis l’onglet **Sources de contexte** du
+tableau de bord Endpoint (`ObsidianSourceCard`), ou via l’API REST des paramètres.
 
 > [!IMPORTANT]
-> L’extension **Obsidian Local REST API** doit être installée et en cours d’exécution.
-> Son interface REST écoute sur **HTTP `127.0.0.1:27123`** (l’URL de base par défaut).
-> Le port `27124` est un point de terminaison MCP/HTTPS _distinct_ et est explicitement
-> refusé par la route des paramètres. Pour vous connecter depuis un autre appareil,
-> utilisez `http://<tailscale-ip>:27123`.
+> Le plugin **Obsidian Local REST API** doit être installé et en cours d’exécution. Son interface REST
+> écoute sur **HTTP `127.0.0.1:27123`** (l’URL de base par défaut). Le port `27124`
+> est un point de terminaison MCP/HTTPS _distinct_ et est explicitement rejeté par la route des paramètres.
+> Si vous vous connectez depuis un autre appareil, utilisez `http://<tailscale-ip>:27123`.
 
-### Clés de configuration (table SQLite `key_value`, espace de noms `obsidian`)
+### Clés de configuration (SQLite `key_value`, espace de noms `obsidian`)
 
-| Clé               | Fonction                                                             | Chiffrée |
-| ----------------- | -------------------------------------------------------------------- | -------- |
-| `api_key`         | Jeton Bearer de la Local REST API                                    | oui      |
-| `base_url`        | URL de base REST (par défaut `http://127.0.0.1:27123`)               | non      |
-| `vault_path`      | Chemin absolu vers le répertoire du coffre (pour la synchronisation) | non      |
-| `webdav_username` | Nom d’utilisateur WebDAV généré (synchronisation du coffre)          | non      |
-| `webdav_password` | Mot de passe WebDAV généré (synchronisation du coffre)               | oui      |
-| `webdav_enabled`  | Indique si la synchronisation du coffre via WebDAV est activée       | non      |
+| Clé               | Rôle                                                                 | Chiffré |
+| ----------------- | -------------------------------------------------------------------- | ------- |
+| `api_key`         | Jeton bearer de l’API REST locale                                    | oui     |
+| `base_url`        | URL de base REST (par défaut `http://127.0.0.1:27123`)               | non     |
+| `vault_path`      | Chemin absolu vers le répertoire du coffre (pour la synchronisation) | non     |
+| `webdav_username` | Nom d’utilisateur WebDAV généré (synchronisation du coffre)          | non     |
+| `webdav_password` | Mot de passe WebDAV généré (synchronisation du coffre)               | oui     |
+| `webdav_enabled`  | Indique si la synchronisation WebDAV du coffre est activée           | non     |
 
 ### Configuration via REST
 
 ```bash
-# Enregistrer et valider le jeton de la Local REST API (POST effectue la validation au moyen d’une vérification d’état)
+# Enregistrer et valider le jeton de l’API REST locale (POST effectue la validation via une vérification d’état)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
@@ -76,16 +74,14 @@ curl http://localhost:20128/api/settings/obsidian
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Toutes les méthodes nécessitent une authentification auprès du tableau de bord. `POST`
-refuse toute URL utilisant le port `27124` et valide le jeton en appelant le point de
-terminaison d’état de la Local REST API avant de le conserver.
+Toutes les méthodes nécessitent une authentification au tableau de bord. `POST` rejette toute URL utilisant le port `27124`
+et valide le jeton en appelant le point de terminaison d’état de l’API REST locale avant de le conserver.
 
-### Synchronisation du coffre via WebDAV
+### Synchronisation WebDAV du coffre
 
-`src/app/api/settings/obsidian/webdav/route.ts` gère une synchronisation facultative
-du coffre reposant sur WebDAV (pilotée par `src/lib/obsidianSync.ts`). Son activation
-dirige OmniRoute vers un répertoire de coffre local et génère une paire aléatoire de
-nom d’utilisateur et de mot de passe WebDAV :
+`src/app/api/settings/obsidian/webdav/route.ts` gère une synchronisation facultative du
+coffre basée sur WebDAV (pilotée par `src/lib/obsidianSync.ts`). Son activation fait pointer OmniRoute vers un
+répertoire de coffre local et génère une paire aléatoire de nom d’utilisateur et de mot de passe WebDAV :
 
 ```bash
 # Activer la synchronisation WebDAV pour un répertoire de coffre (génère un nom d’utilisateur et un mot de passe)
@@ -100,14 +96,21 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
-### Source de contexte par clé API (facultatif)
+### Source de contexte par clé d’API (facultatif)
 
-La configuration Obsidian peut être définie **par clé API** au moyen de la table
-`api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Lorsqu’un appel MCP
-contient l’identifiant d’une clé API authentifiée, `getObsidianConfigForApiKey()`
-privilégie le jeton, l’URL de base et le chemin du coffre propres à cette clé
-(`source: "api_key"`) et, à défaut, utilise la configuration globale
-(`source: "global"`).
+La configuration Obsidian peut être définie **par clé d’API** via la table `api_key_context_sources`
+(`src/lib/db/apiKeyContextSources.ts`). Lorsqu’un appel MCP contient un identifiant de clé d’API
+authentifié, `getObsidianConfigForApiKey()` utilise en priorité le jeton, l’URL de base et le chemin du coffre propres à cette clé
+(`source: "api_key"`) et, à défaut, utilise la configuration globale (`source: "global"`).
+
+Les outils MCP autres que ceux de synchronisation nécessitent une identité d’appelant résolue avant de lire cette configuration.
+Un appelant sans identité reçoit `Obsidian API token not configured`, et aucune requête
+n’est envoyée au coffre. L’identité des appelants HTTP est résolue à partir des identifiants de leur requête ; celle des appelants stdio
+peut être résolue via `OMNIROUTE_API_KEY` ou `ROUTER_API_KEY`. Un appelant HTTP non résolu
+ne peut pas hériter de l’identité d’environnement du serveur. Les identifiants d’espace réservé seuls n’autorisent pas
+l’accès ; un identifiant d’environnement valide qui se résout en `env-key` reste pris en charge.
+Les clés authentifiées sans configuration Obsidian propre à la clé conservent le mécanisme de repli vers la configuration globale.
+Les quatre outils `obsidian_sync_*` conservent leur comportement distinct relatif au jeton de synchronisation.
 
 ## Outils MCP (22)
 

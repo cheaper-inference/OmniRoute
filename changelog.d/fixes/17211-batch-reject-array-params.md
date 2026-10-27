@@ -1,0 +1,1 @@
+- **fix(batch):** Reject array-valued Anthropic `params` during JSONL validation and exclude invalid lines from the preview ([#17211](https://github.com/diegosouzapw/OmniRoute/pull/17211)) — thanks @pacocartones

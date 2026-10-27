@@ -1,6 +1,6 @@
 # Obsidian Context Source (Suomi)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇹 [am](../../../am/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇿 [az](../../../az/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇰 [da](../../../da/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇪 [de](../../../de/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇷 [el](../../../el/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇸 [es](../../../es/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇪 [et](../../../et/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇱 [he](../../../he/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇩 [id](../../../id/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇹 [it](../../../it/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇭 [km](../../../km/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇲 [my](../../../my/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇴 [no](../../../no/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [or](../../../or/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇰 [si](../../../si/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [te](../../../te/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇭 [th](../../../th/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OBSIDIAN_CONTEXT.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇹 [am](../../../am/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇿 [az](../../../az/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇰 [da](../../../da/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇪 [de](../../../de/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇷 [el](../../../el/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇸 [es](../../../es/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇪 [et](../../../et/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇱 [he](../../../he/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇩 [id](../../../id/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇹 [it](../../../it/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇭 [km](../../../km/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇲 [my](../../../my/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇴 [no](../../../no/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [or](../../../or/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇰 [si](../../../si/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [te](../../../te/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇭 [th](../../../th/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OBSIDIAN_CONTEXT.md)
 
 ---
 
@@ -32,53 +32,54 @@ Asiakas (`src/lib/obsidian/api.ts`) paketoi Local REST API -rajapinnan seuraavil
 
 ## Määritys
 
-Obsidian-tunnukselle tai perus-URL:lle **ei ole ympäristömuuttujaa** — molemmat
+Obsidian-tunnukselle tai perus-URL-osoitteelle **ei ole ympäristömuuttujaa** — molemmat
 tallennetaan SQLiten `key_value`-tauluun (nimiavaruus `obsidian`) tiedoston
-`src/lib/db/obsidian.ts` kautta. Tunnus **salataan levossa** (AES-256-GCM,
-taaksepäin yhteensopivalla selväkielisen tekstin varavaihtoehdolla). Määritä asetukset
-Endpoint-hallintapaneelin **Kontekstilähteet**-välilehdeltä (`ObsidianSourceCard`) tai
-asetusten REST-rajapinnan kautta.
+`src/lib/db/obsidian.ts` kautta. Tunnus on **salattu levossa** (AES-256-GCM sekä
+taaksepäin yhteensopiva varavaihtoehto salaamattomalle tekstille). Määritä asetukset
+Endpoint-hallintapaneelin **Context Sources** -välilehdeltä (`ObsidianSourceCard`) tai
+asetusten REST API:n kautta.
 
 > [!IMPORTANT]
 > **Obsidian Local REST API** -lisäosan on oltava asennettuna ja käynnissä. Sen REST-
-> rajapinta kuuntelee osoitteessa **HTTP `127.0.0.1:27123`** (oletusarvoinen perus-URL). Portti `27124`
-> on _erillinen_ MCP/HTTPS-päätepiste, jonka asetusreitti nimenomaisesti hylkää.
-> Jos yhteys muodostetaan toisesta laitteesta, käytä osoitetta `http://<tailscale-ip>:27123`.
+> rajapinta kuuntelee osoitteessa **HTTP `127.0.0.1:27123`** (oletusarvoinen perus-URL).
+> Portti `27124` on _erillinen_ MCP/HTTPS-päätepiste, ja asetusreitti hylkää sen
+> nimenomaisesti. Jos muodostat yhteyden toisesta laitteesta, käytä osoitetta
+> `http://<tailscale-ip>:27123`.
 
 ### Määritysavaimet (SQLiten `key_value`, nimiavaruus `obsidian`)
 
-| Avain             | Tarkoitus                                         | Salattu |
-| ----------------- | ------------------------------------------------- | ------- |
-| `api_key`         | Local REST API -rajapinnan bearer-tunnus          | kyllä   |
-| `base_url`        | REST-perus-URL (oletus `http://127.0.0.1:27123`)  | ei      |
-| `vault_path`      | Holvikansion absoluuttinen polku (synkronointiin) | ei      |
-| `webdav_username` | Luotu WebDAV-käyttäjänimi (holvisynkronointi)     | ei      |
-| `webdav_password` | Luotu WebDAV-salasana (holvisynkronointi)         | kyllä   |
-| `webdav_enabled`  | Onko WebDAV-holvisynkronointi käytössä            | ei      |
+| Avain             | Tarkoitus                                               | Salattu |
+| ----------------- | ------------------------------------------------------- | ------- |
+| `api_key`         | Local REST API -rajapinnan bearer-tunnus                | kyllä   |
+| `base_url`        | REST-perus-URL (oletus `http://127.0.0.1:27123`)        | ei      |
+| `vault_path`      | Holvikansion absoluuttinen polku (synkronointia varten) | ei      |
+| `webdav_username` | Luotu WebDAV-käyttäjänimi (holvin synkronointi)         | ei      |
+| `webdav_password` | Luotu WebDAV-salasana (holvin synkronointi)             | kyllä   |
+| `webdav_enabled`  | Onko holvin WebDAV-synkronointi käytössä                | ei      |
 
 ### Määritys REST-rajapinnan kautta
 
 ```bash
-# Tallenna ja vahvista Local REST API -tunnus (POST vahvistaa sen tilantarkistuksella)
+# Tallenna ja vahvista Local REST API -tunnus (POST vahvistaa tilantarkistuksella)
 curl -X POST http://localhost:20128/api/settings/obsidian \
   -H "Content-Type: application/json" \
   -d '{"token":"<obsidian-rest-api-key>","baseUrl":"http://127.0.0.1:27123"}'
 
-# Tarkista yhteyden tila (palauttaa connected-, hasToken-, baseUrl- ja vaultPath-kentät)
+# Tarkista yhteyden tila (palauttaa connected-, hasToken-, baseUrl- ja vaultPath-arvot)
 curl http://localhost:20128/api/settings/obsidian
 
 # Katkaise yhteys (poistaa tallennetun tunnuksen)
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Kaikki menetelmät edellyttävät hallintapaneelin todennusta. `POST` hylkää kaikki porttia `27124`
-käyttävät URL-osoitteet ja vahvistaa tunnuksen kutsumalla Local REST API -rajapinnan
-tilapäätepistettä ennen tallennusta.
+Kaikki metodit edellyttävät hallintapaneelin todennusta. `POST` hylkää kaikki porttia
+`27124` käyttävät URL-osoitteet ja vahvistaa tunnuksen kutsumalla Local REST API:n
+tilapäätepistettä ennen tallentamista.
 
-### WebDAV-holvisynkronointi
+### Holvin WebDAV-synkronointi
 
-`src/app/api/settings/obsidian/webdav/route.ts` hallitsee valinnaista WebDAV-pohjaista
-holvisynkronointia (jonka toteuttaa `src/lib/obsidianSync.ts`). Sen käyttöönotto ohjaa
+`src/app/api/settings/obsidian/webdav/route.ts` hallinnoi valinnaista WebDAV-taustaista
+holvin synkronointia (jota ohjaa `src/lib/obsidianSync.ts`). Sen käyttöönotto osoittaa
 OmniRouten paikalliseen holvikansioon ja luo satunnaisen WebDAV-käyttäjänimi- ja
 salasanaparin:
 
@@ -88,10 +89,10 @@ curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
 
-# Hae WebDAV-synkronoinnin tila (tunnistetiedot palautetaan vain sen ollessa käytössä)
+# Hae WebDAV-synkronoinnin tila (tunnistetiedot palautetaan vain, kun synkronointi on käytössä)
 curl http://localhost:20128/api/settings/obsidian/webdav
 
-# Poista WebDAV-synkronointi käytöstä (poistaa tunnistetiedot ja hallitun .stignore-tiedoston)
+# Poista WebDAV-synkronointi käytöstä (poistaa tunnistetiedot ja hallinnoidun .stignore-tiedoston)
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
@@ -99,9 +100,20 @@ curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 
 Obsidian-määritys voidaan rajata **API-avainkohtaisesti** `api_key_context_sources`-taulun
 kautta (`src/lib/db/apiKeyContextSources.ts`). Kun MCP-kutsu sisältää todennetun API-
-avaimen tunnisteen, `getObsidianConfigForApiKey()` käyttää ensisijaisesti kyseisen avaimen
-omaa tunnusta, perus-URL:ää ja holvipolkua (`source: "api_key"`) ja käyttää muussa tapauksessa
-yleistä määritystä (`source: "global"`).
+avaimen tunnuksen, `getObsidianConfigForApiKey()` käyttää ensisijaisesti kyseisen avaimen
+omaa tunnusta, perus-URL-osoitetta ja holvipolkua (`source: "api_key"`) ja muussa
+tapauksessa yleistä määritystä (`source: "global"`).
+
+Muut kuin synkronointiin tarkoitetut MCP-työkalut edellyttävät kutsujan selvitettyä
+identiteettiä ennen tämän määrityksen lukemista. Kutsuja, jolla ei ole identiteettiä, saa
+vastauksen `Obsidian API token not configured`, eikä holvipyyntöä lähetetä. HTTP-kutsujat
+selvitetään niiden pyyntötunnistetietojen kautta; stdio-kutsujat voidaan selvittää
+muuttujan `OMNIROUTE_API_KEY` tai `ROUTER_API_KEY` kautta. Selvittämätön HTTP-kutsuja ei
+voi periä palvelimen ympäristöidentiteettiä. Pelkät paikkamerkkitunnukset eivät oikeuta
+käyttöön; kelvollista ympäristötunnistetietoa, joka selvitetään tunnukseksi `env-key`,
+tuetaan edelleen. Todennetut avaimet, joilla ei ole avainkohtaista Obsidian-määritystä,
+käyttävät edelleen yleistä varamääritystä. Neljä `obsidian_sync_*`-työkalua säilyttävät
+erillisen synkronointitunnustoimintansa.
 
 ## MCP-työkalut (22)
 

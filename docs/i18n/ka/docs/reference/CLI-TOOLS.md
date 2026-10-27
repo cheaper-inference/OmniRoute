@@ -1,20 +1,20 @@
 # CLI Tools — OmniRoute (ქართული)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../reference/CLI-TOOLS.md) · 🇪🇹 [am](../../../am/docs/reference/CLI-TOOLS.md) · 🇸🇦 [ar](../../../ar/docs/reference/CLI-TOOLS.md) · 🇦🇿 [az](../../../az/docs/reference/CLI-TOOLS.md) · 🇧🇬 [bg](../../../bg/docs/reference/CLI-TOOLS.md) · 🇧🇩 [bn](../../../bn/docs/reference/CLI-TOOLS.md) · 🇨🇿 [cs](../../../cs/docs/reference/CLI-TOOLS.md) · 🇩🇰 [da](../../../da/docs/reference/CLI-TOOLS.md) · 🇩🇪 [de](../../../de/docs/reference/CLI-TOOLS.md) · 🇬🇷 [el](../../../el/docs/reference/CLI-TOOLS.md) · 🇪🇸 [es](../../../es/docs/reference/CLI-TOOLS.md) · 🇪🇪 [et](../../../et/docs/reference/CLI-TOOLS.md) · 🇮🇷 [fa](../../../fa/docs/reference/CLI-TOOLS.md) · 🇫🇮 [fi](../../../fi/docs/reference/CLI-TOOLS.md) · 🇫🇷 [fr](../../../fr/docs/reference/CLI-TOOLS.md) · 🇮🇪 [ga](../../../ga/docs/reference/CLI-TOOLS.md) · 🇮🇳 [gu](../../../gu/docs/reference/CLI-TOOLS.md) · 🇳🇬 [ha](../../../ha/docs/reference/CLI-TOOLS.md) · 🇮🇱 [he](../../../he/docs/reference/CLI-TOOLS.md) · 🇮🇳 [hi](../../../hi/docs/reference/CLI-TOOLS.md) · 🇭🇷 [hr](../../../hr/docs/reference/CLI-TOOLS.md) · 🇭🇺 [hu](../../../hu/docs/reference/CLI-TOOLS.md) · 🇦🇲 [hy](../../../hy/docs/reference/CLI-TOOLS.md) · 🇮🇩 [id](../../../id/docs/reference/CLI-TOOLS.md) · 🇳🇬 [ig](../../../ig/docs/reference/CLI-TOOLS.md) · 🇮🇹 [it](../../../it/docs/reference/CLI-TOOLS.md) · 🇯🇵 [ja](../../../ja/docs/reference/CLI-TOOLS.md) · 🇰🇭 [km](../../../km/docs/reference/CLI-TOOLS.md) · 🇮🇳 [kn](../../../kn/docs/reference/CLI-TOOLS.md) · 🇰🇷 [ko](../../../ko/docs/reference/CLI-TOOLS.md) · 🇱🇹 [lt](../../../lt/docs/reference/CLI-TOOLS.md) · 🇱🇻 [lv](../../../lv/docs/reference/CLI-TOOLS.md) · 🇮🇳 [ml](../../../ml/docs/reference/CLI-TOOLS.md) · 🇮🇳 [mr](../../../mr/docs/reference/CLI-TOOLS.md) · 🇲🇾 [ms](../../../ms/docs/reference/CLI-TOOLS.md) · 🇲🇹 [mt](../../../mt/docs/reference/CLI-TOOLS.md) · 🇲🇲 [my](../../../my/docs/reference/CLI-TOOLS.md) · 🇳🇵 [ne](../../../ne/docs/reference/CLI-TOOLS.md) · 🇳🇱 [nl](../../../nl/docs/reference/CLI-TOOLS.md) · 🇳🇴 [no](../../../no/docs/reference/CLI-TOOLS.md) · 🇮🇳 [or](../../../or/docs/reference/CLI-TOOLS.md) · 🇮🇳 [pa](../../../pa/docs/reference/CLI-TOOLS.md) · 🇵🇭 [phi](../../../phi/docs/reference/CLI-TOOLS.md) · 🇵🇱 [pl](../../../pl/docs/reference/CLI-TOOLS.md) · 🇵🇹 [pt](../../../pt/docs/reference/CLI-TOOLS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/CLI-TOOLS.md) · 🇷🇴 [ro](../../../ro/docs/reference/CLI-TOOLS.md) · 🇷🇺 [ru](../../../ru/docs/reference/CLI-TOOLS.md) · 🇱🇰 [si](../../../si/docs/reference/CLI-TOOLS.md) · 🇸🇰 [sk](../../../sk/docs/reference/CLI-TOOLS.md) · 🇸🇮 [sl](../../../sl/docs/reference/CLI-TOOLS.md) · 🇷🇸 [sr](../../../sr/docs/reference/CLI-TOOLS.md) · 🇸🇪 [sv](../../../sv/docs/reference/CLI-TOOLS.md) · 🇰🇪 [sw](../../../sw/docs/reference/CLI-TOOLS.md) · 🇮🇳 [ta](../../../ta/docs/reference/CLI-TOOLS.md) · 🇮🇳 [te](../../../te/docs/reference/CLI-TOOLS.md) · 🇹🇭 [th](../../../th/docs/reference/CLI-TOOLS.md) · 🇹🇷 [tr](../../../tr/docs/reference/CLI-TOOLS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/CLI-TOOLS.md) · 🇵🇰 [ur](../../../ur/docs/reference/CLI-TOOLS.md) · 🇺🇿 [uz](../../../uz/docs/reference/CLI-TOOLS.md) · 🇻🇳 [vi](../../../vi/docs/reference/CLI-TOOLS.md) · 🇳🇬 [yo](../../../yo/docs/reference/CLI-TOOLS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/CLI-TOOLS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/CLI-TOOLS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../reference/CLI-TOOLS.md) · 🇪🇹 [am](../../../am/docs/reference/CLI-TOOLS.md) · 🇸🇦 [ar](../../../ar/docs/reference/CLI-TOOLS.md) · 🇦🇿 [az](../../../az/docs/reference/CLI-TOOLS.md) · 🇧🇬 [bg](../../../bg/docs/reference/CLI-TOOLS.md) · 🇧🇩 [bn](../../../bn/docs/reference/CLI-TOOLS.md) · 🇧🇦 [bs](../../../bs/docs/reference/CLI-TOOLS.md) · 🇨🇿 [cs](../../../cs/docs/reference/CLI-TOOLS.md) · 🇩🇰 [da](../../../da/docs/reference/CLI-TOOLS.md) · 🇩🇪 [de](../../../de/docs/reference/CLI-TOOLS.md) · 🇬🇷 [el](../../../el/docs/reference/CLI-TOOLS.md) · 🇪🇸 [es](../../../es/docs/reference/CLI-TOOLS.md) · 🇪🇪 [et](../../../et/docs/reference/CLI-TOOLS.md) · 🇮🇷 [fa](../../../fa/docs/reference/CLI-TOOLS.md) · 🇫🇮 [fi](../../../fi/docs/reference/CLI-TOOLS.md) · 🇫🇷 [fr](../../../fr/docs/reference/CLI-TOOLS.md) · 🇮🇪 [ga](../../../ga/docs/reference/CLI-TOOLS.md) · 🇮🇳 [gu](../../../gu/docs/reference/CLI-TOOLS.md) · 🇳🇬 [ha](../../../ha/docs/reference/CLI-TOOLS.md) · 🇮🇱 [he](../../../he/docs/reference/CLI-TOOLS.md) · 🇮🇳 [hi](../../../hi/docs/reference/CLI-TOOLS.md) · 🇭🇷 [hr](../../../hr/docs/reference/CLI-TOOLS.md) · 🇭🇺 [hu](../../../hu/docs/reference/CLI-TOOLS.md) · 🇦🇲 [hy](../../../hy/docs/reference/CLI-TOOLS.md) · 🇮🇩 [id](../../../id/docs/reference/CLI-TOOLS.md) · 🇳🇬 [ig](../../../ig/docs/reference/CLI-TOOLS.md) · 🇮🇹 [it](../../../it/docs/reference/CLI-TOOLS.md) · 🇯🇵 [ja](../../../ja/docs/reference/CLI-TOOLS.md) · 🇰🇭 [km](../../../km/docs/reference/CLI-TOOLS.md) · 🇮🇳 [kn](../../../kn/docs/reference/CLI-TOOLS.md) · 🇰🇷 [ko](../../../ko/docs/reference/CLI-TOOLS.md) · 🇱🇹 [lt](../../../lt/docs/reference/CLI-TOOLS.md) · 🇱🇻 [lv](../../../lv/docs/reference/CLI-TOOLS.md) · 🇮🇳 [ml](../../../ml/docs/reference/CLI-TOOLS.md) · 🇮🇳 [mr](../../../mr/docs/reference/CLI-TOOLS.md) · 🇲🇾 [ms](../../../ms/docs/reference/CLI-TOOLS.md) · 🇲🇹 [mt](../../../mt/docs/reference/CLI-TOOLS.md) · 🇲🇲 [my](../../../my/docs/reference/CLI-TOOLS.md) · 🇳🇵 [ne](../../../ne/docs/reference/CLI-TOOLS.md) · 🇳🇱 [nl](../../../nl/docs/reference/CLI-TOOLS.md) · 🇳🇴 [no](../../../no/docs/reference/CLI-TOOLS.md) · 🇮🇳 [or](../../../or/docs/reference/CLI-TOOLS.md) · 🇮🇳 [pa](../../../pa/docs/reference/CLI-TOOLS.md) · 🇵🇭 [phi](../../../phi/docs/reference/CLI-TOOLS.md) · 🇵🇱 [pl](../../../pl/docs/reference/CLI-TOOLS.md) · 🇵🇹 [pt](../../../pt/docs/reference/CLI-TOOLS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/CLI-TOOLS.md) · 🇷🇴 [ro](../../../ro/docs/reference/CLI-TOOLS.md) · 🇷🇺 [ru](../../../ru/docs/reference/CLI-TOOLS.md) · 🇱🇰 [si](../../../si/docs/reference/CLI-TOOLS.md) · 🇸🇰 [sk](../../../sk/docs/reference/CLI-TOOLS.md) · 🇸🇮 [sl](../../../sl/docs/reference/CLI-TOOLS.md) · 🇷🇸 [sr](../../../sr/docs/reference/CLI-TOOLS.md) · 🇸🇪 [sv](../../../sv/docs/reference/CLI-TOOLS.md) · 🇰🇪 [sw](../../../sw/docs/reference/CLI-TOOLS.md) · 🇮🇳 [ta](../../../ta/docs/reference/CLI-TOOLS.md) · 🇮🇳 [te](../../../te/docs/reference/CLI-TOOLS.md) · 🇹🇭 [th](../../../th/docs/reference/CLI-TOOLS.md) · 🇹🇷 [tr](../../../tr/docs/reference/CLI-TOOLS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/CLI-TOOLS.md) · 🇵🇰 [ur](../../../ur/docs/reference/CLI-TOOLS.md) · 🇺🇿 [uz](../../../uz/docs/reference/CLI-TOOLS.md) · 🇻🇳 [vi](../../../vi/docs/reference/CLI-TOOLS.md) · 🇳🇬 [yo](../../../yo/docs/reference/CLI-TOOLS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/CLI-TOOLS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/CLI-TOOLS.md)
 
 ---
 
 ბოლო განახლება: 2026-08-23
 
-OmniRoute ინტეგრირდება სამი კატეგორიის CLI ხელსაწყოებთან, რომლებიც განაწილებულია დაფის სამ სპეციალურ გვერდზე:
+OmniRoute ინტეგრირებულია CLI ხელსაწყოების სამ კატეგორიასთან, რომლებიც დაფის სამ ცალკეულ გვერდზეა განაწილებული:
 
-| გვერდი           | მარშრუტი                | კონცეფცია                                                                                          | რაოდენობა      |
-| ---------------- | ----------------------- | -------------------------------------------------------------------------------------------------- | -------------- |
-| **CLI კოდები**   | `/dashboard/cli-code`   | კოდირების ხელსაწყოები, რომლებსაც OmniRoute-ზე მიუთითებთ (კლიენტი → CLI → OmniRoute → პროვაიდერი)   | 26             |
-| **CLI აგენტები** | `/dashboard/cli-agents` | ავტონომიური აგენტები, რომლებსაც OmniRoute-ზე მიუთითებთ (იგივე ნაკადი, უფრო ფართო მოქმედების სფერო) | 10             |
-| **ACP აგენტები** | `/dashboard/acp-agents` | CLI-ები, რომლებსაც OmniRoute უშვებს backend-ის სახით stdio/ACP-ის მეშვეობით (შებრუნებული ნაკადი)   | იხილეთ რეესტრი |
+| გვერდი         | მარშრუტი                | კონცეფცია                                                                                        | რაოდენობა      |
+| -------------- | ----------------------- | ------------------------------------------------------------------------------------------------ | -------------- |
+| **CLI Code's** | `/dashboard/cli-code`   | კოდირების ხელსაწყოები, რომლებსაც OmniRoute-ზე მიუთითებთ (კლიენტი → CLI → OmniRoute → პროვაიდერი) | 26             |
+| **CLI Agents** | `/dashboard/cli-agents` | ავტონომიური აგენტები, რომლებსაც OmniRoute-ზე მიუთითებთ (იგივე ნაკადი, უფრო ფართო არეალი)         | 10             |
+| **ACP Agents** | `/dashboard/acp-agents` | CLI-ები, რომლებსაც OmniRoute stdio/ACP-ის საშუალებით ბექენდად უშვებს (შებრუნებული ნაკადი)        | იხილეთ რეესტრი |
 
-მოძველებული მარშრუტები 308-ის მეშვეობით გადამისამართდება: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+მოძველებული მარშრუტები 308-ის საშუალებით გადამისამართდება: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
@@ -31,80 +31,76 @@ Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose /
     Anthropic / OpenAI / Gemini / DeepSeek / Groq / Mistral / ...
 
 ACP Agents (შებრუნებული გაშვების ნაკადი):
-    კლიენტის მოთხოვნა → OmniRoute → უშვებს CLI-ს stdio/ACP-ის მეშვეობით → პასუხი
+    კლიენტის მოთხოვნა → OmniRoute → უშვებს CLI-ს stdio/ACP-ის საშუალებით → პასუხი
 ```
 
 **უპირატესობები:**
 
-- ერთი API გასაღები ყველა ინსტრუმენტის სამართავად
-- ხარჯების თვალყურის დევნება ყველა CLI-სთვის დაფაზე
-- მოდელების გადართვა თითოეული ინსტრუმენტის ხელახლა კონფიგურირების გარეშე
+- ერთი API გასაღები ყველა ხელსაწყოს სამართავად
+- ხარჯების აღრიცხვა ყველა CLI-სთვის დაფაზე
+- მოდელებს შორის გადართვა თითოეული ხელსაწყოს ხელახლა კონფიგურირების გარეშე
 - მუშაობს როგორც ლოკალურად, ისე დისტანციურ სერვერებზე (VPS, Docker, Akamai, Cloudflare Tunnel)
 
 ---
 
 ## ავტომატური კონფიგურაცია `setup-*`-ით
 
-არ არის საჭირო თითოეული ინსტრუმენტის კონფიგურაციის ხელით დაწერა. OmniRoute-ს მოჰყვება
-`setup-*` ბრძანება თითოეული მხარდაჭერილი CLI-სთვის, რომელიც გაშვებული
-OmniRoute-იდან (ლოკალურიდან ან დისტანციურიდან) მოდელების **მოქმედ** კატალოგს კითხულობს
-და თქვენს კომპიუტერზე თავად ინსტრუმენტის კონფიგურაციას წერს:
+არ არის საჭირო თითოეული ხელსაწყოს კონფიგურაციის ხელით დაწერა. OmniRoute-ს თითოეული მხარდაჭერილი CLI-სთვის მოჰყვება `setup-*`
+ბრძანება, რომელიც გაშვებული
+OmniRoute-იდან (ლოკალურიდან ან დისტანციურიდან) კითხულობს მოდელების **აქტიურ** კატალოგს და თქვენს კომპიუტერზე ხელსაწყოს საკუთარ კონფიგურაციას წერს:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-თითოეული მათგანი იღებს `--remote <url> --api-key <key>` პარამეტრებს (ლოკალური
-ინსტრუმენტის დისტანციურ OmniRoute-თან კონფიგურაციისთვის), `--dry-run`-ს (ჩაწერის
-გარეშე წინასწარ სანახავად) და `--port`-ს. მოდელების ავტომატური აღმოჩენის გარეშე
-მომუშავე ინსტრუმენტები (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) იღებენ
-`--model <id>`-ს (და `--yes`-ს არაინტერაქტიული გაშვებებისთვის). `setup-5dive`
-ერთადერთი რეცეპტია, რომელიც `$HOME`-ის ქვეშ არ წერს: ის 5dive-ის აგენტების ფლოტს
-აკონფიგურირებს ფლოტის ჰოსტზე root-ის კუთვნილი ავტორიზაციის პროფილის ჩაწერით,
-ამიტომ `sudo`-ს მეშვეობით ხელახლა ეშვება და საკუთარი დისტანციური რეჟიმი არ აქვს.
-CLI-ის სწორი გარემოს ცვლადებით გასაშვებად, ყოველგვარი კონფიგურაციის ჩაწერის
-გარეშე, გამოიყენეთ უნივერსალური `omniroute run <target>` გამშვები (claude,
-codex, aider, goose, opencode, qwen, gemini — სამიზნეები და ფსევდონიმები
-`bin/cli/cli-manifest.mjs`-დან მოდის); თითოეული ინსტრუმენტისთვის განკუთვნილი
-მოძველებული გამშვებები `omniroute launch` (Claude Code) და
-`omniroute launch-codex` (Codex) კვლავ ხელმისაწვდომია. Gemini CLI მხოლოდ
-გაშვებისთვისაა განკუთვნილი: ის `omniroute run`-ის სამიზნეა, თუმცა
-`setup-*`/`configure` რეცეპტი არ აქვს.
+თითოეული მათგანი იღებს `--remote <url> --api-key <key>` პარამეტრებს (ლოკალური ხელსაწყოს დისტანციურ OmniRoute-თან კონფიგურაციისთვის), `--dry-run`-ს (ჩაწერის გარეშე წინასწარი ნახვისთვის) და `--port`-ს. მოდელების ავტომატური აღმოჩენის არმქონე ხელსაწყოები (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) იღებენ
+`--model <id>`-ს (და `--yes`-ს არაინტერაქტიული გაშვებებისთვის). `setup-5dive` ერთადერთი რეცეპტია, რომელიც
+`$HOME`-ის ქვეშ არ წერს: ის 5dive-ის აგენტების ფლოტს აკონფიგურირებს
+ფლოტის ჰოსტზე root-ის მფლობელობაში არსებული ავთენტიფიკაციის პროფილის ჩაწერით, ამიტომ ხელახლა ეშვება `sudo`-ს მეშვეობით
+და საკუთარი დისტანციური რეჟიმი არ აქვს. CLI-ის სწორი გარემოს ცვლადებით გასაშვებად ისე, რომ
+კონფიგურაცია საერთოდ არ ჩაიწეროს, გამოიყენეთ უნივერსალური გამშვები
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen,
+gemini — სამიზნოების და ფსევდონიმების წყაროა `bin/cli/cli-manifest.mjs`); ძველი
+ცალკეული ხელსაწყოების გამშვებები `omniroute launch` (Claude Code) და `omniroute launch-codex`
+(Codex) კვლავ ხელმისაწვდომია. Gemini CLI მხოლოდ გაშვებას უჭერს მხარს: ის `omniroute run`-ის
+სამიზნეა, თუმცა `setup-*`/`configure` რეცეპტი არ აქვს.
 
 > **სრული ცნობარი:** მთავარი ცხრილი — რას წერს თითოეული ბრძანება, ყველა პარამეტრი,
-> ლოკალური და დისტანციური რეჟიმები და რომელ ინსტრუმენტებს სჭირდება `/v1` სუფიქსი —
-> ხელმისაწვდომია **[CLI ინტეგრაციებში](../guides/CLI-INTEGRATIONS.md)**.
+> ლოკალური და დისტანციური რეჟიმები და რომელ ხელსაწყოებს სჭირდებათ `/v1` სუფიქსი — მოცემულია
+> **[CLI ინტეგრაციებში](../guides/CLI-INTEGRATIONS.md)**.
 
 ### მათი კონტეინერის შიგნით გაშვება
 
-OmniRoute-ის კონტეინერის შიგნით შესრულებული `setup-*` ბრძანება კონტეინერის
-საკუთარ home დირექტორიაში წერს, რომელსაც ჰოსტის არცერთი CLI არ კითხულობს და
-რომელიც კონტეინერთან ერთად ქრება. OmniRoute ამას ამოიცნობს და ჩაწერის ნაცვლად
-ინსტრუქციებთან ერთად `2` კოდით ასრულებს მუშაობას. არსებობს ორი მხარდაჭერილი
-გზა — დააინსტალირეთ CLI ჰოსტზე და გამოიყენეთ `omniroute connect` კონტეინერთან
-დასაკავშირებლად, ან bind-mount-ით მიამაგრეთ კონფიგურაციის დირექტორიები და
-დააყენეთ `CLI_CONFIG_HOME` (`host` პროფილი compose-ში). ყოველი `setup-*` ბრძანება,
-ასევე `omniroute configure` და `omniroute config set`, იღებს
-`--allow-container-write` პარამეტრს, თუ სინამდვილეში კონტეინერის საკუთარი CLI-ების
-კონფიგურირება გსურთ; სერვერისთვის იმავეს აკეთებს
-`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`. იხილეთ
-[Docker-ის სახელმძღვანელო → ჰოსტის CLI ინსტრუმენტების კონფიგურაცია](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+OmniRoute-ის კონტეინერის შიგნით შესრულებული `setup-*` ბრძანება წერს
+კონტეინერის საკუთარ საშინაო დირექტორიაში, რომელსაც ჰოსტის არცერთი CLI არ კითხულობს და რომელიც
+კონტეინერთან ერთად ქრება. OmniRoute ამას ამოიცნობს და ჩაწერის ნაცვლად ინსტრუქციებითურთ
+კოდით `2` ასრულებს მუშაობას. შემდგომი მოქმედების ორი მხარდაჭერილი გზა არსებობს — დააინსტალირეთ CLI ჰოსტზე და
+კონტეინერს `omniroute connect`-ით დაუკავშირდით, ან bind-mount-ით მიამაგრეთ კონფიგურაციის დირექტორიები და დააყენეთ
+`CLI_CONFIG_HOME` (`host` compose-პროფილი). ყოველი `setup-*` ბრძანება, ასევე
+`omniroute configure` და `omniroute config set`, იღებს
+`--allow-container-write`-ს, როდესაც რეალურად კონტეინერის საკუთარი CLI-ების
+კონფიგურაცია გსურთ; სერვერისთვის იმავეს აკეთებს `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true`.
+იხილეთ
+[Docker-ის სახელმძღვანელო → ჰოსტის CLI ხელსაწყოების კონფიგურაცია](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-დაფის **გამოყენების endpoint** (`POST /api/cli-tools/apply`) იმავე დამცავ
-მექანიზმს აღასრულებს: კონტეინერში, თუ ჩაწერის სამიზნე ჰოსტიდან bind-mount-ით
-არ არის მიმაგრებული, პასუხად ბრუნდება **`422`** `containerEphemeralTarget: true`-ით,
-უსაფრთხო შეცდომის ტექსტით და — იმ ინსტრუმენტებისთვის, რომლებსაც ჰოსტის რეცეპტი
-აქვთ (claude, codex, opencode, cline, kilo, continue) — ჰოსტზე გასაშვები
-`hostSetupCommand`-ით (მაგ., `omniroute setup-opencode`); არაფერი ჩაიწერება.
-`dryRun: true` კონტეინერის რეჟიმშიც აგრძელებს მუშაობას და დისკზე შეხების გარეშე
-აბრუნებს გენერირებულ შიგთავსს + სამიზნე გზას, ამიტომ შეგიძლიათ წინასწარ ნახოთ
-დაფიდან და გამოიყენოთ ჰოსტზე. ეს ქცევა განზრახია და რეგრესიებისგან დაცულია
-`tests/unit/api/cli-tools/apply-container-guard.test.ts`-ით — არასოდეს „გამოასწოროთ“
-422 დამცავი მექანიზმის წაშლით.
+დაფის **გამოყენების ენდპოინტი** (`POST /api/cli-tools/apply`) იმავე
+დაცვას უზრუნველყოფს: კონტეინერში, როდესაც ჩაწერის სამიზნე ჰოსტიდან bind-mount-ით არ არის
+მიმაგრებული, პასუხია **`422`** `containerEphemeralTarget: true`-ით, უსაფრთხო შეცდომის
+ტექსტით და — ჰოსტის რეცეპტის მქონე ხელსაწყოებისთვის (claude, codex, opencode, cline,
+kilo, continue) — `hostSetupCommand`-ით (მაგ., `omniroute setup-opencode`), რომელიც
+ამის ნაცვლად ჰოსტზე უნდა გაუშვათ; არაფერი იწერება. `dryRun: true` კონტეინერის
+რეჟიმშიც მუშაობას აგრძელებს და დისკზე შეხების გარეშე აბრუნებს გასუფთავებულ წინასწარ ნახვას + სამიზნე გზას. წინასწარი ნახვის
+შიგთავსი არ არის ავტორიზაციის მონაცემების შემცველი კონფიგურაცია, რომლის კოპირება ან იმპორტიც შეიძლება. გამოიყენეთ
+საწყისი ხელსაწყოს/საბაზო URL-ის/API გასაღების/მოდელის მონაცემებით ჰოსტზე, ან გამოიყენეთ მითითებული
+ჰოსტზე გასაშვები დაყენების ბრძანება. წინასწარი ნახვის სათაურისა და მოთხოვნის კონტრაქტისთვის იხილეთ [CLI-ის კონფიგურაციის უსაფრთხოება](../security/CLI-CONFIGURATION.md).
+ეს ქცევა
+განზრახია და რეგრესიისგან დაცულია
+`tests/unit/api/cli-tools/apply-container-guard.test.ts`-ით — არასოდეს „გამოასწოროთ“ 422
+დაცვის წაშლით.
 
 ---
 
@@ -112,82 +108,76 @@ OmniRoute-ის კონტეინერის შიგნით შეს�
 
 ერთიანი კატალოგი განთავსებულია `src/shared/constants/cliTools.ts`-ში, როგორც `CLI_TOOLS: Record<string, CliCatalogEntry>`.
 
-თითოეული ჩანაწერი შეიცავს შემდეგ ველებს (განსაზღვრულია `src/shared/schemas/cliCatalog.ts`-ში):
+თითოეულ ჩანაწერს აქვს შემდეგი ველები (განსაზღვრულია `src/shared/schemas/cliCatalog.ts`-ში):
 
-| ველი                                            | ტიპი                                                         | აღწერა                                                                                    |
-| ----------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
-| `category`                                      | `"code" \| "agent"`                                          | რომელ გვერდზე გამოჩნდება ინსტრუმენტი                                                      |
-| `vendor`                                        | `string`                                                     | ინსტრუმენტის წარმომავლობა ("Anthropic", "OSS (P. Gauthier)")                              |
-| `acpSpawnable`                                  | `boolean`                                                    | შესაძლებელია ACP Agent-ის სახით გამოყენებაც (ნაჩვენებია ნიშანი)                           |
-| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | მორგებული საბოლოო წერტილის მხარდაჭერის დონე. `"none"` = MITM-ის სამომავლო სამუშაოების სია |
-| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | კონფიგურაციის მექანიზმი                                                                   |
-| `id`, `name`, `color`, `description`, `docsUrl` | სტანდარტული                                                  | ძირითადი საჩვენებელი ველები                                                               |
+| ველი                                            | ტიპი                                                         | აღწერა                                                                  |
+| ----------------------------------------------- | ------------------------------------------------------------ | ----------------------------------------------------------------------- |
+| `category`                                      | `"code" \| "agent"`                                          | რომელ გვერდზე გამოჩნდება ხელსაწყო                                       |
+| `vendor`                                        | `string`                                                     | ხელსაწყოს წარმომავლობა ("Anthropic", "OSS (P. Gauthier)")               |
+| `acpSpawnable`                                  | `boolean`                                                    | შესაძლებელია ასევე ACP Agent-ის სახით გამოყენება (ნაჩვენებია ნიშანი)    |
+| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | მორგებული საბოლოო წერტილის მხარდაჭერის დონე. `"none"` = MITM-ის ბექლოგი |
+| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | კონფიგურაციის მექანიზმი                                                 |
+| `id`, `name`, `color`, `description`, `docsUrl` | სტანდარტული                                                  | ჩვენების ძირითადი ველები                                                |
 
-ჩანაწერები, რომლებშიც მითითებულია `baseUrlSupport: "none"`, მართვის პანელის გვერდებზე **არ ჩანს** — ისინი რეგისტრირებულია MITM-ის სამომავლო სამუშაოების სიაში მე-11 გეგმისთვის (იხილეთ `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
+ჩანაწერები, რომლებშიც მითითებულია `baseUrlSupport: "none"`, დაფის გვერდებზე **არ გამოჩნდება** — ისინი რეგისტრირებულია MITM-ის ბექლოგში მე-11 გეგმისთვის (იხილეთ `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
 
-### შესაძლებლობების დონეები (კატალოგიზებული × აღმოჩენადი × კონფიგურირებადი × გაშვებადი)
+### შესაძლებლობების დონეები (კატალოგში შეტანილი × აღმოჩენადი × კონფიგურირებადი × გაშვებადი)
 
-კატალოგიზებული ყველა ინსტრუმენტი არ არის აღმოჩენადი, კონფიგურირებადი ან გაშვებადი. თითოეულ დონეს აქვს ერთი
-დეკლარირების წყარო, ხოლო აცდენის ტესტი მათ შესაბამისობას ინარჩუნებს:
+კატალოგში შეტანილი ყველა ხელსაწყო არ არის აღმოჩენადი, კონფიგურირებადი ან გაშვებადი. თითოეულ დონეს აქვს ერთი განმსაზღვრელი წყარო, ხოლო აცდენის ტესტი მათ შესაბამისობას უზრუნველყოფს:
 
-| დონე                | მნიშვნელობა                                                                                     | სად არის დეკლარირებული                                                         |
-| ------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ |
-| **კატალოგიზებული**  | წარმოდგენილია მართვის პანელის კატალოგში (სახელი, მომწოდებელი, დოკუმენტაცია, კონფიგურაციის ტიპი) | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                               |
-| **აღმოჩენადი**      | ბინარული ფაილის/კონფიგურაციის აღმოჩენა, მდგომარეობის შემოწმებები, კონფიგურაციის ბილიკები        | `src/shared/services/cliRuntime.ts` (`CLI_TOOLS`-ის გაშვების გარემოს კატალოგი) |
-| **კონფიგურირებადი** | მხარდაჭერილია `omniroute configure <cli>`-ის მიერ (არსებობს გამართვის რეცეპტი)                  | `bin/cli/cli-manifest.mjs` (`configure: true`)                                 |
-| **გაშვებადი**       | მხარდაჭერილია `omniroute run <target>`-ის მიერ (განსაზღვრულია გარემოს/არგუმენტების ჩასმა)       | `bin/cli/cli-manifest.mjs` (`run: true`)                                       |
+| დონე                   | მნიშვნელობა                                                                               | განსაზღვრულია                                                               |
+| ---------------------- | ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| **კატალოგში შეტანილი** | გამოჩნდება დაფის კატალოგში (სახელი, მომწოდებელი, დოკუმენტაცია, კონფიგურაციის ტიპი)        | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                            |
+| **აღმოჩენადი**         | ბინარული ფაილის/კონფიგურაციის აღმოჩენა, მდგომარეობის შემოწმებები, კონფიგურაციის გზები     | `src/shared/services/cliRuntime.ts` (`CLI_TOOLS` გაშვების გარემოს კატალოგი) |
+| **კონფიგურირებადი**    | მხარდაჭერილია `omniroute configure <cli>`-ის მიერ (არსებობს დაყენების რეცეპტი)            | `bin/cli/cli-manifest.mjs` (`configure: true`)                              |
+| **გაშვებადი**          | მხარდაჭერილია `omniroute run <target>`-ის მიერ (განსაზღვრულია გარემოს/არგუმენტების ჩასმა) | `bin/cli/cli-manifest.mjs` (`run: true`)                                    |
 
-`bin/cli/cli-manifest.mjs` არის კანონიკური შესრულებადი მანიფესტი CLI ბრძანებების
-ინტერფეისებისთვის: `run`, `configure` და გარსის ავტომატური შევსების გენერატორები მისგან იღებენ
-სამიზნეების სიებს, ფსევდონიმების ამოხსნას (მაგალითად, `kilocode`/`kilo-code`/`kilo_cli` → `kilo`)
-და `--model` ალმის დაკავშირების წესებს. აცდენისგან დამცავი ტესტი
-`tests/unit/cli/cli-manifest-drift.test.ts` ამოწმებს, რომ მანიფესტი, გაშვების გარემოს
-კატალოგი, UI-ის კატალოგი და თითოეული მომხმარებელი ინტერფეისი სინქრონიზებული დარჩეს — თუ სამიზნე
-ერთ ინტერფეისს დაემატება სხვების გარეშე, შეუმჩნეველი აცდენის ნაცვლად ტესტების ნაკრები ჩავარდება.
+`bin/cli/cli-manifest.mjs` არის CLI ბრძანებების ინტერფეისების კანონიკური შესრულებადი მანიფესტი: `run`, `configure` და shell-ის ავტომატური შევსების გენერატორები მისგან იღებენ სამიზნეების სიებს, ფსევდონიმების ამოხსნას (მაგალითად, `kilocode`/`kilo-code`/`kilo_cli` → `kilo`) და `--model` ალმის დაკავშირებას. აცდენისგან დამცავი ტესტი `tests/unit/cli/cli-manifest-drift.test.ts` ამოწმებს, რომ მანიფესტი, გაშვების გარემოს კატალოგი, UI-ის კატალოგი და ყველა მომხმარებელი ინტერფეისი სინქრონიზებული დარჩეს — ერთ ინტერფეისში სხვების გარეშე დამატებული სამიზნე ტესტების ნაკრების ჩავარდნას იწვევს, ნაცვლად შეუმჩნეველი აცდენისა.
 
 ---
 
-## 1. CLI Code-ის კატალოგი (26 ხელსაწყო)
+## 1. CLI Code-ის კატალოგი (27 ინსტრუმენტი)
 
-ყველა ხელსაწყო, რომელიც `/dashboard/cli-code`-ში გამოჩნდება. `baseUrlSupport: none`-ის მქონე ხელსაწყოები მორგებული საბაზისო URL-ის ნაცვლად MITM-ის ან სახელმძღვანელოს მეშვეობით არის დაკავშირებული:
+ყველა ინსტრუმენტი, რომელიც `/dashboard/cli-code`-ში ჩანს. ინსტრუმენტები, რომელთა `baseUrlSupport: none`-ია, მორგებული საბაზისო URL-ის ნაცვლად MITM-ის ან სახელმძღვანელოს მეშვეობით არის დაკავშირებული:
 
-| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic           | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                | none           | custom         | false        |
-| cline        | Cline                   | OSS (ex-Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org            | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)           | full           | guide          | false        |
-| continue     | Continue                | continue.dev        | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)   | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ         | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)      | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)        | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (ex-SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI          | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS           | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere           | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)   | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
-| cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
-| antigravity  | Antigravity             | Google              | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| id           | სახელი                  | მომწოდებელი             | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ----------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic               | full           | env            | true         |
+| codex        | OpenAI Codex CLI        | OpenAI                  | full           | custom         | true         |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                    | none           | custom         | false        |
+| cline        | Cline                   | OSS (ყოფილი Claude Dev) | full           | custom         | true         |
+| kilo         | Kilo Code               | Kilo-Org                | full           | custom         | false        |
+| roo          | Roo Code                | Roo (OSS)               | full           | guide          | false        |
+| continue     | Continue                | continue.dev            | full           | guide          | false        |
+| aider        | Aider                   | OSS (P. Gauthier)       | full           | guide          | true         |
+| forge        | ForgeCode               | Antinomy HQ             | full           | custom         | true         |
+| jcode        | jcode                   | 1jehuang (OSS)          | full           | custom         | false        |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)       | full           | custom         | false        |
+| codewhale    | CodeWhale               | Hmbown (OSS)            | full           | custom         | false        |
+| opencode     | OpenCode                | Anomaly (ყოფილი SST)    | full           | guide          | true         |
+| droid        | Factory Droid           | Factory AI              | partial        | guide          | false        |
+| copilot      | GitHub Copilot CLI      | GitHub/MS               | full           | custom         | false        |
+| cursor-cli   | Cursor CLI              | Anysphere               | partial        | guide          | true         |
+| smelt        | Smelt                   | leonardcser (OSS)       | full           | custom         | false        |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)        | full           | custom         | false        |
+| grok-build   | Grok Build              | xAI                     | full           | custom         | false        |
+| crush        | Crush                   | OSS (Charm)             | full           | custom         | false        |
+| qwen         | Qwen Code               | Alibaba                 | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries          | full           | guide          | false        |
+| cursor       | Cursor                  | Anysphere               | none           | guide          | false        |
+| antigravity  | Antigravity             | Google                  | none           | mitm           | false        |
+| hermes       | Hermes                  | Nous Research           | none           | guide          | false        |
+| kiro         | Kiro AI                 | Amazon                  | none           | mitm           | false        |
+| custom       | მორგებული CLI           | —                       | full           | custom-builder | false        |
 
-`baseUrlSupport: "partial"`-ის მქონე ხელსაწყოების საინფორმაციო ბარათზე ნაჩვენებია სამკერდე ნიშანი „⚠ ნაწილობრივი საბაზისო URL“.
+ინსტრუმენტებისთვის, რომელთა `baseUrlSupport: "partial"`-ია, დაფის ბარათზე ნაჩვენებია სამკერდე ნიშანი „⚠ ნაწილობრივი Base URL“.
 ---
 
 ## 2. CLI აგენტების კატალოგი (10 ხელსაწყო)
 
-ავტონომიური აგენტები, რომლებიც ნაჩვენებია `/dashboard/cli-agents`-ში:
+ავტონომიური აგენტები, რომლებიც გამოჩნდება `/dashboard/cli-agents`-ში:
 
-| id           | name             | vendor                   | baseUrlSupport | acpSpawnable |
+| id           | სახელი           | მომწოდებელი              | baseUrlSupport | acpSpawnable |
 | ------------ | ---------------- | ------------------------ | -------------- | ------------ |
 | hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
 | openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
@@ -204,20 +194,20 @@ OmniRoute-ის კონტეინერის შიგნით შეს�
 
 ## 3. ACP აგენტები (/dashboard/acp-agents)
 
-ამ გვერდზე (სახელი შეიცვალა `/dashboard/agents`-იდან) ნაჩვენებია CLI-ები, რომელთა **გაშვებაც** OmniRoute-ს შეუძლია, როგორც ბექენდის შესრულების ძრავებისა, stdio/ACP პროტოკოლის მეშვეობით. კატალოგი ცალკე იმართება `src/lib/acp/registry.ts`-ში და **არ** არის `CLI_TOOLS`-ის იდენტური.
+ეს გვერდი (რომელსაც სახელი შეეცვალა `/dashboard/agents`-იდან) აჩვენებს CLI-ებს, რომელთა **გაშვებაც** OmniRoute-ს შეუძლია backend-ის შესრულების ძრავების სახით, stdio/ACP პროტოკოლის მეშვეობით. კატალოგი ცალკე იმართება `src/lib/acp/registry.ts`-ში და **არ** არის იგივე, რაც `CLI_TOOLS`.
 
 ---
 
-## 4. MITM-ის დაგროვილი ამოცანები (მართვის პანელში არ ჩანს)
+## 4. MITM-ის სამუშაოთა სია (dashboard-ზე არ ჩანს)
 
-შემდეგ CLI-ებს მორგებული საბაზო URL-ის მშობლიური მხარდაჭერა არ აქვთ და CLI Code-ის ან CLI Agents-ის გვერდებზე **არ არის ჩამოთვლილი**. ისინი მე-11 გეგმაში MITM-ჩაჭრის კანდიდატები არიან:
+ქვემოთ ჩამოთვლილ CLI-ებს არ აქვთ მორგებული საბაზისო URL-ის ნატიური მხარდაჭერა და ისინი CLI Code-ის ან CLI Agents-ის გვერდებზე **არ არის ჩამოთვლილი**. ისინი მე-11 გეგმაში MITM გადაჭერის კანდიდატები არიან:
 
-| CLI                 | მიზეზი                                                                 |
-| ------------------- | ---------------------------------------------------------------------- |
-| windsurf            | BYOK შეზღუდულია Claude-ის შერჩეული მოდელებით + კორპორაციული URL/ტოკენი |
-| amp                 | დახურული ეკოსისტემა (Sourcegraph)                                      |
-| amazon-q / kiro-cli | AWS SSO ავტორიზაცია, მორგებული URL არ არის                             |
-| cowork              | Anthropic Desktop, კონფიგურირებადი საბოლოო წერტილი არ არის             |
+| CLI                 | მიზეზი                                                             |
+| ------------------- | ------------------------------------------------------------------ |
+| windsurf            | BYOK შეზღუდულია შერჩეული Claude მოდელებით + კორპორაციული URL/token |
+| amp                 | დახურული ეკოსისტემა (Sourcegraph)                                  |
+| amazon-q / kiro-cli | AWS SSO ავტორიზაცია, მორგებული URL-ის გარეშე                       |
+| cowork              | Anthropic Desktop, კონფიგურირებადი endpoint-ის გარეშე              |
 
 სრული ჯვარედინი მითითებისთვის იხილეთ `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`.
 
@@ -225,16 +215,16 @@ OmniRoute-ის კონტეინერის შიგნით შეს�
 
 ## 5. პაკეტური აღმოჩენის API
 
-ყველა ხელსაწყოს აღმოჩენა აგრეგირებულია ერთი საბოლოო წერტილის მეშვეობით:
+ყველა ინსტრუმენტის აღმოჩენის შედეგი ერთ endpoint-შია აგრეგირებული:
 
 **`GET /api/cli-tools/all-statuses`**
 
-- ავტორიზაცია: `requireCliToolsAuth(request)` (იგივე, რაც სხვა `/api/cli-tools/` მარშრუტებისთვის)
+- ავტორიზაცია: `requireCliToolsAuth(request)` (ისევე, როგორც სხვა `/api/cli-tools/` მარშრუტებისთვის)
 - აბრუნებს: `Record<toolId, ToolBatchStatus>` (ტიპი: `src/shared/types/cliBatchStatus.ts`)
-- სტრატეგია: `Promise.all` ყველა ხელსაწყოსთვის, თითოეულ ხელსაწყოზე 5s მოლოდინის ლიმიტით
-- კეში: მეხსიერებაში განთავსებული LRU, ინდექსირებული კონფიგურაციის ფაილის `mtime`-ის მიხედვით. კეში უქმდება, როდესაც mtime იცვლება. ნულდება სერვერის გადატვირთვისას.
+- სტრატეგია: `Promise.all` ყველა ინსტრუმენტისთვის, თითოეულ ინსტრუმენტზე 5-წამიანი timeout
+- ქეში: მეხსიერებაში განთავსებული LRU, რომელიც ინდექსირებულია კონფიგურაციის ფაილის `mtime`-ით. `mtime`-ის ცვლილებისას ქეში უქმდება. სერვერის გადატვირთვისას ნულდება.
 
-თითოეული ხელსაწყოს პასუხის სტრუქტურა:
+თითოეული ინსტრუმენტის პასუხის სტრუქტურა:
 
 ```ts
 interface ToolBatchStatus {
@@ -251,7 +241,7 @@ interface ToolBatchStatus {
     endpoint?: string | null;
     lastConfiguredAt?: string | null;
   };
-  error?: string; // გასუფთავებული, სტეკის ტრეისების გარეშე
+  error?: string; // გასუფთავებული, stack trace-ების გარეშე
 }
 ```
 
@@ -264,11 +254,11 @@ interface ToolBatchStatus {
 | მარშრუტი                                    | ხელსაწყო                                                                        |
 | ------------------------------------------- | ------------------------------------------------------------------------------- |
 | `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                         |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url ალამი)                                                        |
+| `POST /api/cli-tools/jcode-settings`        | jcode (`--base-url` ალამი)                                                      |
 | `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, მოძველებული)                                     |
 | `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ძირითადი + მოძველებული `~/.deepseek` სინქრონიზაცია) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                           |
-| `POST /api/cli-tools/pi-settings`           | Pi პროგრამირების აგენტი                                                         |
+| `POST /api/cli-tools/pi-settings`           | Pi კოდირების აგენტი                                                             |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                           |
 | `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + გამოყოფილი `.env` გასაღები)                |
 
@@ -276,35 +266,35 @@ interface ToolBatchStatus {
 
 ---
 
-## 7. დაფის გვერდების არქიტექტურა
+## 7. საინფორმაციო დაფის გვერდების არქიტექტურა
 
-### CLI Code-ის (`/dashboard/cli-code`)
+### CLI კოდები (`/dashboard/cli-code`)
 
-- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — სერვერის კომპონენტი
-- `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — კლიენტის ბადე
+- `src/app/(dashboard)/dashboard/cli-code/page.tsx` — სერვერული კომპონენტი
+- `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — კლიენტური ბადე
 - `src/app/(dashboard)/dashboard/cli-code/[id]/page.tsx` — ხელსაწყოს დეტალების გვერდი
 - `src/app/(dashboard)/dashboard/cli-code/components/` — ხელსაწყოს 12 სპეციალიზებული ბარათი + `ToolDetailClient.tsx`
 
 ### CLI აგენტები (`/dashboard/cli-agents`)
 
-- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — სერვერის კომპონენტი
-- `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — კლიენტის ბადე
+- `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — სერვერული კომპონენტი
+- `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — კლიენტური ბადე
 - `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — ხელახლა იყენებს `ToolDetailClient`-ს
 
 ### ACP აგენტები (`/dashboard/acp-agents`)
 
-- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — სერვერის კომპონენტი (გადატანილია `agents/`-იდან)
+- `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — სერვერული კომპონენტი (გადატანილია `agents/`-დან)
 
 ### საზიარო UI კომპონენტები (`src/shared/components/cli/`)
 
-| ფაილი                   | დანიშნულება                                                             |
-| ----------------------- | ----------------------------------------------------------------------- |
-| `CliToolCard.tsx`       | მდგომარეობის ჭკვიანი ბარათი (აღმოჩენა + კონფიგურაცია + საბოლოო წერტილი) |
-| `CliConceptCard.tsx`    | თითოეული გვერდისთვის კონცეფციის განმარტების ბარათი                      |
-| `CliComparisonCard.tsx` | CLI ტიპების სამსვეტიანი შედარება                                        |
-| `BaseUrlSelect.tsx`     | საბოლოო წერტილის ჩამოსაშლელი სია (ლოკალური/ღრუბლოვანი/მორგებული)        |
-| `ApiKeySelect.tsx`      | API გასაღების ამრჩევი                                                   |
-| `ManualConfigModal.tsx` | კოპირებადი კონფიგურაციის ფრაგმენტის მოდალური ფანჯარა                    |
+| ფაილი                   | დანიშნულება                                                         |
+| ----------------------- | ------------------------------------------------------------------- |
+| `CliToolCard.tsx`       | სტატუსის ჭკვიანი ბარათი (აღმოჩენა + კონფიგურაცია + საბოლოო წერტილი) |
+| `CliConceptCard.tsx`    | თითოეული გვერდისთვის კონცეფციის განმარტების ბარათი                  |
+| `CliComparisonCard.tsx` | სამსვეტიანი შედარება CLI ტიპებს შორის                               |
+| `BaseUrlSelect.tsx`     | საბოლოო წერტილის ჩამოსაშლელი სია (ლოკალური/ღრუბლოვანი/მორგებული)    |
+| `ApiKeySelect.tsx`      | API გასაღების ამომრჩევი                                             |
+| `ManualConfigModal.tsx` | კოპირებადი კონფიგურაციის ფრაგმენტის მოდალური ფანჯარა                |
 
 ### საზიარო ჰუკი (`src/shared/hooks/cli/`)
 
@@ -316,16 +306,16 @@ interface ToolBatchStatus {
 
 ## 8. i18n
 
-მე-14 გეგმის F9-ში დაემატა ახალი სახელთა სივრცეები:
+გეგმა 14 F9-ში დამატებულია ახალი სახელთა სივრცეები:
 
-| სახელთა სივრცე | დანიშნულება                                                                                         |
-| -------------- | --------------------------------------------------------------------------------------------------- |
-| `cliCommon`    | საერთო სტრიქონები (ბარათების წარწერები, კონცეფციის/შედარების ტექსტები, დეტალების გვერდის წარწერები) |
-| `cliCode`      | CLI Code-ის გვერდის სტრიქონები                                                                      |
-| `cliAgents`    | CLI Agents-ის გვერდის სტრიქონები                                                                    |
-| `acpAgents`    | ACP Agents-ის გვერდის სტრიქონები                                                                    |
+| სახელთა სივრცე | დანიშნულება                                                                                        |
+| -------------- | -------------------------------------------------------------------------------------------------- |
+| `cliCommon`    | საერთო სტრიქონები (ბარათების ნიშნულები, კონცეფციის/შედარების ტექსტები, დეტალური გვერდის ნიშნულები) |
+| `cliCode`      | CLI Code-ის გვერდის სტრიქონები                                                                     |
+| `cliAgents`    | CLI Agents-ის გვერდის სტრიქონები                                                                   |
+| `acpAgents`    | ACP Agents-ის გვერდის სტრიქონები                                                                   |
 
-მოწოდებულია სრული PT-BR და EN თარგმანები. დანარჩენი 39 ლოკალი ავტომატურად იყენებს EN-ს, `src/i18n/request.ts`-ში სახელთა სივრცის დონეზე გაერთიანების მეშვეობით.
+მოწოდებულია სრული PT-BR და EN თარგმანები. დანარჩენი 39 ლოკალი ავტომატურად იყენებს EN-ს `src/i18n/request.ts`-ში სახელთა სივრცის დონეზე გაერთიანების მეშვეობით.
 
 ---
 
@@ -334,16 +324,16 @@ interface ToolBatchStatus {
 ### ნაბიჯი 1 — მიიღეთ OmniRoute API გასაღები
 
 1. გახსენით `/dashboard/api-manager` → **API გასაღების შექმნა**
-2. მიანიჭეთ სახელი (მაგ., `cli-tools`) და აირჩიეთ ყველა ნებართვა
+2. დაარქვით სახელი (მაგ., `cli-tools`) და აირჩიეთ ყველა ნებართვა
 3. დააკოპირეთ გასაღები — ის ქვემოთ ჩამოთვლილი ყველა CLI-სთვის დაგჭირდებათ
 
 > თქვენი გასაღები ასე გამოიყურება: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### ნაბიჯი 2 — დააინსტალირეთ CLI ინსტრუმენტები
+### ნაბიჯი 2 — დააინსტალირეთ CLI ხელსაწყოები
 
-npm-ზე დაფუძნებული ყველა ინსტრუმენტი საჭიროებს Node.js 22.22.2+ ან 24.x ვერსიას:
+npm-ზე დაფუძნებული ყველა ხელსაწყო საჭიროებს Node.js 22.22.2+-ს ან 24.x-ს:
 
 ```bash
 # Claude Code (Anthropic)
@@ -384,9 +374,9 @@ cargo install smelt  # Rust-ზე დაფუძნებული
 
 ### ნაბიჯი 3 — დააკონფიგურირეთ მართვის პანელის მეშვეობით
 
-1. გადადით `http://localhost:20128/dashboard/cli-code` მისამართზე
-2. ბადეში იპოვეთ თქვენი ინსტრუმენტი
-3. ინსტრუმენტის დეტალების გვერდის გასახსნელად დააწკაპუნეთ ბარათზე
+1. გადადით `http://localhost:20128/dashboard/cli-code`-ზე
+2. ბადეში იპოვეთ თქვენი ხელსაწყო
+3. ხელსაწყოს დეტალური გვერდის გასახსნელად დააწკაპუნეთ ბარათზე
 4. აირჩიეთ თქვენი API გასაღები და საბაზისო URL
 5. დააწკაპუნეთ **კონფიგურაციის გამოყენებაზე** ან დააკოპირეთ ხელით კონფიგურაციის ფრაგმენტი
 
@@ -400,17 +390,17 @@ export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI კითხულობს GOOGLE_GEMINI_BASE_URL-ს ROOT დონეზე (მისი SDK თავად ამატებს /v1beta/...-ს)
+# Gemini CLI კითხულობს GOOGLE_GEMINI_BASE_URL-ს ძირეული მისამართიდან (მისი SDK თავად ამატებს /v1beta/...-ს)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **დისტანციური სერვერისთვის** `localhost:20128` ჩაანაცვლეთ სერვერის IP მისამართით ან დომენით,
+> **დისტანციური სერვერისთვის** `localhost:20128` შეცვალეთ სერვერის IP-ით ან დომენით,
 > მაგ., `http://<your-server-ip>:20128`.
 
 ---
 
-### ნაბიჯი 4 — დააკონფიგურირეთ თითოეული ინსტრუმენტი
+### ნაბიჯი 4 — დააკონფიგურირეთ თითოეული ხელსაწყო
 
 #### Claude Code
 
@@ -426,7 +416,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Claude Code-ისთვის გამოიყენეთ ერთიანი Anthropic კარიბჭის ძირეული მისამართი. აქ `/v1` არ დაამატოთ.
+Claude Code-ისთვის გამოიყენეთ ერთიანი Anthropic-ის კარიბჭის ძირეული მისამართი. აქ `/v1` არ დაამატოთ.
 
 **ტესტი:** `claude "say hello"`
 
@@ -434,8 +424,8 @@ Claude Code-ისთვის გამოიყენეთ ერთიან
 
 #### OpenAI Codex
 
-თანამედროვე Codex (v0.137+) მხოლოდ `~/.codex/config.toml`-ს კითხულობს — ძველი
-`config.yaml` მემკვიდრეობით npm CLI-ს ეკუთვნის და გაფრთხილების გარეშე იგნორირდება. API
+თანამედროვე Codex (v0.137+) კითხულობს მხოლოდ `~/.codex/config.toml`-ს — ძველი
+`config.yaml` განკუთვნილია მოძველებული npm CLI-სთვის და უხმოდ იგნორირდება. API
 გასაღები რჩება `OMNIROUTE_API_KEY` გარემოს ცვლადში (`env_key`) და არასდროს
 ფაილის შიგნით:
 
@@ -485,7 +475,7 @@ EOF
 
 **ტესტი:** `opencode`
 
-> სააზროვნო ვარიანტების გასაგზავნად გამოიყენეთ `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`.
+> აზროვნების ვარიანტების გასაგზავნად გამოიყენეთ `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`.
 
 ---
 
@@ -506,7 +496,7 @@ EOF
 **VS Code რეჟიმი:**
 Cline გაფართოების პარამეტრები → API პროვაიდერი: `OpenAI Compatible` → საბაზისო URL: `http://localhost:20128/v1`
 
-ან გამოიყენეთ OmniRoute-ის მართვის პანელი → **CLI ინსტრუმენტები → Cline → კონფიგურაციის გამოყენება**.
+ან გამოიყენეთ OmniRoute-ის მართვის პანელი → **CLI ხელსაწყოები → Cline → კონფიგურაციის გამოყენება**.
 
 ---
 
@@ -527,13 +517,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-ან გამოიყენეთ OmniRoute-ის მართვის პანელი → **CLI ინსტრუმენტები → KiloCode → კონფიგურაციის გამოყენება**.
+ან გამოიყენეთ OmniRoute-ის მართვის პანელი → **CLI ხელსაწყოები → KiloCode → კონფიგურაციის გამოყენება**.
 
 ---
 
 #### Continue (VS Code გაფართოება)
 
-დაარედაქტირეთ `~/.continue/config.yaml`:
+ჩაასწორეთ `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -545,20 +535,20 @@ models:
     default: true
 ```
 
-რედაქტირების შემდეგ გადატვირთეთ VS Code.
+ჩასწორების შემდეგ გადატვირთეთ VS Code.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-გამოიყენეთ ეს მაშინ, როდესაც VS Code Insiders კონფიგურირებულია მორგებული საბოლოო წერტილის მოდელებისთვის და გსურთ, რომ OmniRoute-მა მორგებული სათაურის ველის გარეშე იმუშაოს.
+გამოიყენეთ ეს, როდესაც VS Code Insiders მორგებული საბოლოო წერტილის მოდელებისთვისაა კონფიგურირებული და გსურთ, OmniRoute-მა მორგებული სათაურის ველის გარეშე იმუშაოს.
 
 **რეკომენდებული მდებარეობა:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**OmniRoute-ის ტოკენიზებული ფსევდონიმის გამოყენების მაგალითი:**
+**ტოკენიზებული OmniRoute ფსევდონიმის გამოყენების მაგალითი:**
 
 ```json
 [
@@ -585,8 +575,8 @@ models:
 - ჩაანაცვლეთ `sk-your-omniroute-key` OmniRoute-ში შექმნილი API გასაღებით.
 - `url` ველი უნდა მიუთითებდეს `/api/v1/vscode/{token}/chat/completions`-ზე.
 - `modelsUrl` ველი უნდა მიუთითებდეს `/api/v1/vscode/{token}/models`-ზე.
-- როდესაც კლიენტს მორგებული სათაურების მხარდაჭერა აქვს, უპირატესობა მიანიჭეთ სტანდარტულ `/v1` + Bearer სათაურის სქემას.
-- URL-ში ჩაშენებული ტოკენები თავსებადობის სარეზერვო ვარიანტია და შესაძლოა რედაქტორის ჟურნალებში ან პროქსის ისტორიაში გამოჩნდეს.
+- თუ კლიენტს მორგებული სათაურების მხარდაჭერა აქვს, უპირატესობა მიანიჭეთ ჩვეულებრივ `/v1` + Bearer სათაურის მეთოდს.
+- URL-ში ჩაშენებული ტოკენები თავსებადობისთვის განკუთვნილი სარეზერვო ვარიანტია და შესაძლოა რედაქტორის ჟურნალებში ან პროქსის ისტორიაში გამოჩნდეს.
 
 ---
 
@@ -596,28 +586,28 @@ models:
 # შედით თქვენს AWS/Kiro ანგარიშში:
 kiro-cli login
 
-# CLI საკუთარ ავთენტიფიკაციას იყენებს — თავად Kiro CLI-სთვის OmniRoute ბექენდად საჭირო არ არის.
+# CLI საკუთარ ავთენტიფიკაციას იყენებს — თავად Kiro CLI-ისთვის OmniRoute ბექენდის სახით საჭირო არ არის.
 # სხვა ხელსაწყოებისთვის გამოიყენეთ kiro-cli OmniRoute-თან ერთად.
 kiro-cli status
 ```
 
-**Kiro IDE** დესკტოპ-აპისთვის გამოიყენეთ OmniRoute-ის მიერ ხელმისაწვდომი MITM საბოლოო წერტილი
-`/dashboard/cli-tools → Kiro`-ის ქვეშ.
+**Kiro IDE** დესკტოპ აპისთვის გამოიყენეთ OmniRoute-ის მიერ ხელმისაწვდომი MITM ენდპოინტი,
+რომელიც მდებარეობს `/dashboard/cli-tools → Kiro`-ში.
 
 ---
 
 ## 10. შიდა OmniRoute CLI
 
-`omniroute` შესრულებადი ფაილი უზრუნველყოფს ბრძანებებს სერვერის სასიცოცხლო ციკლის, გამართვის, დიაგნოსტიკისა და პროვაიდერების მართვისთვის. შესვლის წერტილი: `bin/omniroute.mjs`.
+`omniroute` ორობითი ფაილი უზრუნველყოფს ბრძანებებს სერვერის სასიცოცხლო ციკლის, საწყისი გამართვის, დიაგნოსტიკისა და პროვაიდერების მართვისთვის. შესვლის წერტილი: `bin/omniroute.mjs`.
 
 ```bash
 omniroute                              # სერვერის გაშვება (ნაგულისხმევი პორტი 20128)
 omniroute setup                        # ინტერაქტიული გამართვის ოსტატი
-omniroute doctor                       # კონფიგურაციის, DB-ის, პორტებისა და გაშვების გარემოს შემოწმება
-omniroute providers list               # კონფიგურირებული პროვაიდერების კავშირები
+omniroute doctor                       # კონფიგურაციის, DB-ის, პორტებისა და შესრულების გარემოს შემოწმება
+omniroute providers list               # კონფიგურირებული პროვაიდერის კავშირები
 omniroute providers test-all           # ყველა აქტიური კავშირის შემოწმება
-omniroute reset-password               # ადმინისტრატორის პაროლის ჩამოყრა
-omniroute logs                         # მოთხოვნების ჟურნალის ნაკადურად ჩვენება
+omniroute reset-password               # ადმინისტრატორის პაროლის განულება
+omniroute logs                         # მოთხოვნების ჟურნალის ნაკადურ რეჟიმში ჩვენება
 omniroute health                       # ჯანმრთელობის დეტალური სტატუსი (ამომრთველები, კეში, მეხსიერება)
 omniroute --version                    # ვერსიის გამოტანა
 omniroute --help                       # ყველა ბრძანების ჩვენება
@@ -632,43 +622,43 @@ omniroute setup --password '<value>'   # ადმინისტრატორ
 omniroute setup --add-provider \
   --provider openai \
   --api-key '<value>' \
-  --test-provider                      # პროვაიდერის დამატება და შემოწმება ერთი მოქმედებით
+  --test-provider                      # პროვაიდერის ერთი მოქმედებით დამატება და შემოწმება
 ```
 
 არაინტერაქტიული გამართვისთვის ამოცნობილი გარემოს ცვლადები:
 
-| ცვლადი              | დანიშნულება                                                                           |
-| ------------------- | ------------------------------------------------------------------------------------- |
-| `OMNIROUTE_API_KEY` | პროვაიდერის API-გასაღები (Commander-ის `.env()`-ის მეშვეობით მიბმულია `--api-key`-ზე) |
-| `DATA_DIR`          | OmniRoute-ის მონაცემთა დირექტორიის ჩანაცვლება                                         |
+| ცვლადი              | დანიშნულება                                                                                  |
+| ------------------- | -------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_API_KEY` | პროვაიდერის API გასაღები (დაკავშირებულია `--api-key`-თან Commander-ის `.env()`-ის მეშვეობით) |
+| `DATA_DIR`          | OmniRoute-ის მონაცემთა დირექტორიის ჩანაცვლება                                                |
 
-ყველა სხვა არაინტერაქტიული შესატანი მნიშვნელობა გადაიცემა ალმების და არა გარემოს ცვლადების სახით:
+ყველა სხვა არაინტერაქტიული შესატანი პარამეტრი გადაიცემა ალმების სახით და არა გარემოს ცვლადებად:
 `--password`, `--provider`, `--provider-name`, `--provider-base-url`, `--default-model`
 (იხილეთ `omniroute setup`-ის პარამეტრები ზემოთ).
 
 ### დიაგნოსტიკა
 
 ```bash
-omniroute doctor                       # კონფიგურაციის, DB-ის, პორტების, გაშვების გარემოს, მეხსიერებისა და ხელმისაწვდომობის შემოწმება
-omniroute doctor --json                # მანქანურად წაკითხვადი JSON
-omniroute doctor --no-liveness         # HTTP-ჯანმრთელობის შემოწმების გამოტოვება
-omniroute doctor --host 0.0.0.0        # ხელმისაწვდომობის შემოწმების ჰოსტის ჩანაცვლება
+omniroute doctor                       # კონფიგურაციის, DB-ის, პორტების, შესრულების გარემოს, მეხსიერებისა და სიცოცხლისუნარიანობის შემოწმება
+omniroute doctor --json                # მანქანის მიერ წაკითხვადი JSON
+omniroute doctor --no-liveness         # HTTP ჯანმრთელობის შემოწმების გამოტოვება
+omniroute doctor --host 0.0.0.0        # სიცოცხლისუნარიანობის ჰოსტის ჩანაცვლება
 omniroute doctor --liveness-url <url>  # ჯანმრთელობის საბოლოო წერტილის სრული URL-ის ჩანაცვლება
 ```
 
 doctor ასრულებს შემდეგ შემოწმებებს: `Config`, `Database`, `Storage/encryption`,
 `Port availability`, `Node runtime`, `Native binary` (better-sqlite3),
-`Memory` და `Server liveness`. თუ რომელიმე შემოწმების შედეგია `fail`, პროცესი ნულზე განსხვავებული კოდით სრულდება.
+`Memory` და `Server liveness`. თუ რომელიმე შემოწმების შედეგია `fail`, ის ასრულებს მუშაობას ნულისგან განსხვავებული კოდით.
 
 ### პროვაიდერების მართვა
 
 ```bash
 omniroute providers available                       # OmniRoute-ის პროვაიდერების კატალოგი
-omniroute providers available --search openai       # კატალოგის გაფილტვრა იდენტიფიკატორის/სახელის/ფსევდონიმის/კატეგორიის მიხედვით
+omniroute providers available --search openai       # კატალოგის გაფილტვრა id/სახელის/ფსევდონიმის/კატეგორიის მიხედვით
 omniroute providers available --category api-key    # კატეგორიის მიხედვით გაფილტვრა (api-key, oauth, free, ...)
-omniroute providers available --json                # მანქანურად წაკითხვადი JSON
+omniroute providers available --json                # მანქანის მიერ წაკითხვადი JSON
 
-omniroute providers list                            # კონფიგურირებული პროვაიდერების კავშირები
+omniroute providers list                            # კონფიგურირებული პროვაიდერის კავშირები
 omniroute providers list --json
 
 omniroute providers test <id|name>                  # ერთი კონფიგურირებული კავშირის შემოწმება
@@ -676,53 +666,65 @@ omniroute providers test-all                        # ყველა აქტ�
 omniroute providers validate                        # მხოლოდ ლოკალური სტრუქტურული ვალიდაცია
 omniroute providers add <provider> --credential-env PROVIDER_KEY
 omniroute providers import ./providers.json --dry-run --json
-omniroute providers auth <provider>                 # არსებული OAuth-ნაკადი
+omniroute providers auth <provider>                 # არსებული OAuth ნაკადი
 omniroute providers edit <id|name> --default-model <model>
 omniroute providers remove <id|name> --yes
 ```
 
-`providers add/import/auth/edit/remove` უპირველესად API-ზეა დაფუძნებული და, შესაბამისად, აქტიურ
-ლოკალურ ან დისტანციურ კონტექსტთან მუშაობს. ავტორიზაციის მონაცემების შესატანად გამოიყენეთ
-`--credential-stdin` ან `--credential-env`; `--dry-run --json` მხოლოდ
-დაფარულ ინფორმაციას მათი არსებობის/სტრუქტურის შესახებ აჩვენებს. `providers available` კითხულობს OmniRoute-ის კატალოგს;
-`providers list/test/test-all/validate` ინარჩუნებს ლოკალურ SQLite-ზე დაფუძნებულ ქცევას და
+`providers add/import/auth/edit/remove` პირველ რიგში API-ზეა დაფუძნებული და, შესაბამისად, მუშაობს
+აქტიური ლოკალური ან დისტანციური კონტექსტის მიმართ. ავტორიზაციის მონაცემების შესაყვანად გამოიყენეთ
+`--credential-stdin` ან `--credential-env`; `--dry-run --json` აჩვენებს მხოლოდ
+შენიღბულ ინფორმაციას მონაცემების არსებობისა და ფორმის შესახებ. `providers available` კითხულობს OmniRoute-ის კატალოგს;
+`providers list/test/test-all/validate` ინარჩუნებს ლოკალურ SQLite ქცევას და
 არ მოითხოვს სერვერის გაშვებულ მდგომარეობაში ყოფნას.
 
-### აღდგენა და ჩამოყრა
+OpenAI-სთან ან Anthropic-თან თავსებადი მორგებული კვანძისთვის ავტორიზაციის მონაცემები მიაბით
+`omniroute nodes add`-ის მიერ დაბრუნებულ კვანძის ID-ს, `omniroute keys add "$NODE_ID" --stdin`-ის გამოყენებით.
+ამისთვის საჭიროა გაშვებული სერვერი და მართვის ავტორიზაცია აქტიური კონტექსტისთვის.
+CLI იყენებს `POST /api/providers`-ს, რომელიც ამოწმებს კვანძს და მისი საბოლოო წერტილის
+პარამეტრებს კავშირში აკოპირებს. კვანძის არარსებობა, ავტორიზაციის შეცდომა ან მიუწვდომელი
+სერვერი აბრუნებს შეცდომას ლოკალური სარეზერვო ავტორიზაციის მონაცემის შექმნის გარეშე.
+
+`nodes add --base-url` ადგენს კვანძის საბოლოო წერტილს; ის განსხვავდება
+`OMNIROUTE_BASE_URL`-ში მითითებული სერვერის მისამართისგან. OpenAPI ფაილებისთვის გამოიყენეთ
+`omniroute openapi dump --format json --out ./openapi.json`; გლობალური `--output`
+ირჩევს CLI-ის ჩვენების ფორმატს და არა დანიშნულების ფაილის სახელს.
+
+### აღდგენა და განულება
 
 ```bash
-omniroute reset-password                # ადმინისტრატორის პაროლის ჩამოყრა (ასევე: omniroute-reset-password)
-omniroute reset-encrypted-columns       # გაფრთხილებისა და საცდელი გაშვების ჩვენება დაშიფრული ავტორიზაციის მონაცემების ჩამოყრისთვის
-omniroute reset-encrypted-columns --force  # SQLite-ში დაშიფრული ავტორიზაციის მონაცემების რეალურად განულება
+omniroute reset-password                # ადმინისტრატორის პაროლის განულება (ასევე: omniroute-reset-password)
+omniroute reset-encrypted-columns       # დაშიფრული ავტორიზაციის მონაცემების განულებისთვის გაფრთხილებისა და საცდელი გაშვების ჩვენება
+omniroute reset-encrypted-columns --force  # SQLite-ში დაშიფრული ავტორიზაციის მონაცემების რეალურად null-ით ჩანაცვლება
 ```
 
-### ავტორიზაციის მონაცემების ექსპორტი (⚠ მოეპყარით სიფრთხილით)
+### ავტორიზაციის მონაცემების ექსპორტი (⚠ გამოიჩინეთ სიფრთხილე)
 
 ```bash
-omniroute auth export                                 # გაფრთხილებისა და დადასტურების ეტაპის ჩვენება — DB-ზე წვდომის გარეშე
-omniroute auth export --force                          # ყველა კავშირის გაშიფრული ავტორიზაციის მონაცემების JSON-ის სახით stdout-ში ექსპორტი
+omniroute auth export                                 # გაფრთხილებისა და დადასტურების მოთხოვნის ჩვენება — DB-ზე წვდომის გარეშე
+omniroute auth export --force                          # ყველა კავშირის გაშიფრული ავტორიზაციის მონაცემების stdout-ში JSON-ის სახით ექსპორტი
 omniroute auth export --force --id <id>                 # მხოლოდ შესაბამისი კავშირის ექსპორტი
-omniroute auth export --force --format env               # OMNIROUTE_<PROVIDER>_<FIELD>=<value> ფორმატის სტრიქონების გამოტანა
+omniroute auth export --force --format env               # OMNIROUTE_<PROVIDER>_<FIELD>=<value> სტრიქონების გამოტანა
 omniroute auth export --force --out creds.json           # ფაილში ჩაწერა (იქმნება 0600 ნებართვებით)
 ```
 
-`auth export` მუშაობს **მხოლოდ ლოკალურად** (SQLite-იდან პირდაპირი წაკითხვა, HTTP-მარშრუტის გარეშე) და განზრახ ბეჭდავს/წერს
-`apiKey`/`accessToken`/`refreshToken`/`idToken` მნიშვნელობებს **ღია ტექსტის** სახით — ეს ფუნქციაა და არა
-შეცდომა. `--force`-ის გარეშე მონაცემთა ბაზიდან არაფერი იკითხება და არაფერი იშიფრება. ნებისმიერ ღია ტექსტის გამოტანამდე
-stderr-ში ყოველთვის იბეჭდება გამაფრთხილებელი ბანერი. აუცილებელია `STORAGE_ENCRYPTION_KEY`-ის
-დაყენება. ველი, რომლის გაშიფვრაც ვერ ხერხდება (მოძველებული გასაღები, დაზიანებული შიფროტექსტი), მთელი ექსპორტის შეწყვეტის ან ძირითადი შეცდომის გამჟღავნების ნაცვლად აღინიშნება, როგორც
+`auth export` არის **მხოლოდ ლოკალური** (SQLite-ის პირდაპირი წაკითხვა, HTTP მარშრუტის გარეშე) და მიზანმიმართულად ბეჭდავს/წერს
+**ღია ტექსტის სახით** `apiKey`/`accessToken`/`refreshToken`/`idToken` მნიშვნელობებს — ეს ფუნქციაა და არა
+შეცდომა. `--force`-ის გარეშე მონაცემთა ბაზიდან არაფერი იკითხება და არც არაფერი იშიფრება. stderr-ში
+გამაფრთხილებელი ბანერი ყოველთვის იბეჭდება ნებისმიერი ღია ტექსტის გამოტანამდე. აუცილებელია
+`STORAGE_ENCRYPTION_KEY`-ის დაყენება. ველი, რომლის გაშიფვრაც ვერ ხერხდება (მოძველებული გასაღები, დაზიანებული შიფროტექსტი), მთელი ექსპორტის შეწყვეტის ან ძირითადი შეცდომის გამჟღავნების ნაცვლად წარმოდგენილია როგორც
 `<field>DecryptFailed: true`.
 
-### სხვა ქვეკომანდები
+### სხვა ქვებრძანებები
 
-თუ სხვაგვარად არ არის მითითებული, ისინი მოითხოვენ გაშვებულ OmniRoute სერვერს:
+თუ სხვაგვარად არ არის მითითებული, ეს ბრძანებები მოითხოვს გაშვებულ OmniRoute სერვერს:
 
 ```bash
 omniroute status                       # შესრულების გარემოს სრული სტატუსი
-omniroute logs                         # მოთხოვნების ჟურნალის ნაკადური ჩვენება (--json, --search, --follow)
-omniroute config show                  # მიმდინარე კონფიგურაციის ჩვენება
+omniroute logs                         # მოთხოვნების ჟურნალების ნაკადური ჩვენება (--json, --search, --follow)
+omniroute config list                  # კონფიგურირებული CLI ხელსაწყოების ჩვენება
 
-omniroute provider list                # ხელმისაწვდომი პროვაიდერების სია (providers list-ის ალიასი)
+omniroute provider list                # ხელმისაწვდომი პროვაიდერების სია (providers list-ის ფსევდონიმი)
 omniroute provider add                 # OmniRoute-ის პროვაიდერად რეგისტრაცია ხელსაწყოში
 omniroute keys add | list | remove     # API გასაღებების მართვა
 omniroute models [provider]            # მოდელების სია (--json, --search)
@@ -731,47 +733,47 @@ omniroute combo list | switch | create | delete
 omniroute backup                       # კონფიგურაციისა და DB-ის სარეზერვო ასლის შექმნა
 omniroute restore                      # წინა სარეზერვო ასლიდან აღდგენა
 
-omniroute health                       # მდგომარეობის დეტალური ინფორმაცია (ამომრთველები, კეში, მეხსიერება)
+omniroute health                       # ჯანმრთელობის დეტალური სტატუსი (ამომრთველები, კეში, მეხსიერება)
 omniroute quota                        # პროვაიდერის კვოტის გამოყენება
 omniroute cache                        # კეშის სტატუსი
 omniroute cache clear                  # სემანტიკური და ხელმოწერის კეშების გასუფთავება
 
-omniroute mcp status | restart         # MCP სერვერის სტატუსი / გადატვირთვა
+omniroute mcp status | restart         # MCP სერვერის სტატუსი / ხელახლა გაშვება
 omniroute a2a status | card            # A2A სერვერის სტატუსი / აგენტის ბარათი
 
 omniroute tunnel list | create | stop  # გვირაბების მართვა (cloudflare/tailscale/ngrok)
-omniroute env show | get <k> | set <k> <v>  # გარემოს ცვლადების შემოწმება / დაყენება (დროებით)
+omniroute env show | get <k> | set <k> <v>  # გარემოს ცვლადების შემოწმება / დაყენება (დროებითი)
 
-omniroute test                         # პროვაიდერთან კავშირის სწრაფი ტესტი
+omniroute test                         # პროვაიდერთან კავშირის საბაზისო ტესტი
 omniroute update                       # განახლებების შემოწმება
 omniroute completion                   # გარსის ავტომატური შევსების გენერირება
 ```
 
 ### საერთო ალმები
 
-| ალამი               | აღწერა                                                               |
-| ------------------- | -------------------------------------------------------------------- |
-| `--no-open`         | გაშვებისას ბრაუზერი ავტომატურად არ გაიხსნას                          |
-| `--port <n>`        | API პორტის ჩანაცვლება (ნაგულისხმევად 20128)                          |
-| `--mcp`             | MCP სერვერის სახით გაშვება stdio-ს მეშვეობით (IDE-ებისთვის)          |
-| `--non-interactive` | CI რეჟიმი (მოთხოვნების გარეშე; კითხულობს გარემოდან/ალმებიდან)        |
-| `--json`            | მანქანის მიერ წაკითხვადი JSON გამომავალი (doctor, providers და ა.შ.) |
-| `--help`, `-h`      | კონკრეტული ბრძანების დახმარების ჩვენება                              |
-| `--version`, `-v`   | დაყენებული ვერსიის გამოტანა                                          |
+| ალამი               | აღწერა                                                            |
+| ------------------- | ----------------------------------------------------------------- |
+| `--no-open`         | გაშვებისას ბრაუზერი ავტომატურად არ გაიხსნას                       |
+| `--port <n>`        | API პორტის შეცვლა (ნაგულისხმევია 20128)                           |
+| `--mcp`             | MCP სერვერად გაშვება stdio-ს მეშვეობით (IDE-ებისთვის)             |
+| `--non-interactive` | CI რეჟიმი (მოთხოვნების გარეშე; კითხულობს env/ალმებიდან)           |
+| `--json`            | მანქანისთვის წაკითხვადი JSON გამოტანა (doctor, providers და სხვ.) |
+| `--help`, `-h`      | კონკრეტული ბრძანების დახმარების ჩვენება                           |
+| `--version`, `-v`   | დაყენებული ვერსიის დაბეჭდვა                                       |
 
 ---
 
-## ხელმისაწვდომი API ენდპოინტები
+## ხელმისაწვდომი API ბოლო წერტილები
 
-| ენდპოინტი                  | აღწერა                              | გამოყენების დანიშნულება                          |
+| ბოლო წერტილი               | აღწერა                              | გამოყენება                                       |
 | -------------------------- | ----------------------------------- | ------------------------------------------------ |
 | `/v1/chat/completions`     | სტანდარტული ჩატი (ყველა პროვაიდერი) | ყველა თანამედროვე ხელსაწყო                       |
 | `/v1/responses`            | Responses API (OpenAI-ის ფორმატი)   | Codex, აგენტური სამუშაო პროცესები                |
-| `/v1/completions`          | ტექსტის შევსების მოძველებული API    | ძველი ხელსაწყოები, რომლებიც იყენებენ `prompt:`-ს |
-| `/v1/embeddings`           | ტექსტის ემბედინგები                 | RAG, ძიება                                       |
+| `/v1/completions`          | მოძველებული ტექსტური შევსებები      | ძველი ხელსაწყოები, რომლებიც იყენებენ `prompt:`-ს |
+| `/v1/embeddings`           | ტექსტური ვექტორული წარმოდგენები     | RAG, ძიება                                       |
 | `/v1/images/generations`   | სურათების გენერაცია                 | GPT-Image, Flux და სხვ.                          |
-| `/v1/audio/speech`         | ტექსტის მეტყველებად გარდაქმნა       | ElevenLabs, OpenAI TTS                           |
-| `/v1/audio/transcriptions` | მეტყველების ტექსტად გარდაქმნა       | Deepgram, AssemblyAI                             |
+| `/v1/audio/speech`         | ტექსტიდან მეტყველების სინთეზი       | ElevenLabs, OpenAI TTS                           |
+| `/v1/audio/transcriptions` | მეტყველებიდან ტექსტად გარდაქმნა     | Deepgram, AssemblyAI                             |
 
 ჩასასმელად გამზადებული მაგალითები ტოკენიზებული OmniRoute URL-ით:
 
@@ -792,10 +794,42 @@ Ollama-ს ჩატი: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3
 
 | შეცდომა                                         | მიზეზი                                    | გამოსწორება                                                   |
 | ----------------------------------------------- | ----------------------------------------- | ------------------------------------------------------------- |
-| `Connection refused`                            | OmniRoute გაშვებული არ არის               | `omniroute serve`                                             |
+| `Connection refused`                            | OmniRoute არ არის გაშვებული               | `omniroute serve`                                             |
 | `401 Unauthorized`                              | არასწორი API გასაღები                     | შეამოწმეთ `/dashboard/api-manager`-ში                         |
-| `No combo configured`                           | მარშრუტიზაციის აქტიური კომბინაცია არ არის | დააყენეთ `/dashboard/combos`-ში                               |
-| CLI აჩვენებს „not installed“                    | ბინარული ფაილი PATH-ში არ არის            | შეამოწმეთ `which <command>`                                   |
-| ინსტალაციის შემდეგ დაფა აჩვენებს „not detected“ | ქეში მოძველებულია                         | დაფაზე დააწკაპუნეთ „⟳ Refresh detection“                      |
+| `No combo configured`                           | აქტიური მარშრუტიზაციის კომბინაცია არ არის | გამართეთ `/dashboard/combos`-ში                               |
+| CLI აჩვენებს „not installed“                    | ორობითი ფაილი PATH-ში არ არის             | შეამოწმეთ `which <command>`                                   |
+| ინსტალაციის შემდეგ დაფა აჩვენებს „not detected“ | ქეში მოძველებულია                         | დაფაზე დააწკაპუნეთ „⟳ Refresh detection“-ზე                   |
 | ძველი ბმული `/dashboard/cli-tools`              | v3.8.6-მდელი სანიშნე                      | ავტომატურად გადამისამართდება `/dashboard/cli-code`-ზე (308)   |
 | ძველი ბმული `/dashboard/agents`                 | v3.8.6-მდელი სანიშნე                      | ავტომატურად გადამისამართდება `/dashboard/acp-agents`-ზე (308) |
+
+## inference-key-ის პოლიტიკის მართვა OmniRoute CLI-ით
+
+გამოიყენეთ ავთენტიფიცირებული მართვის კონტექსტი (იხილეთ [დისტანციური რეჟიმი](../guides/REMOTE-MODE.md)),
+რათა არსებული inference key მისი ID-ით შეამოწმოთ ან განაახლოთ:
+
+```bash
+omniroute --output json keys policy show KEY_ID
+omniroute keys policy set KEY_ID --unrestricted
+omniroute --output json keys policy show KEY_ID
+```
+
+`--unrestricted` არის `--model-access-mode all`-ის ფსევდონიმი. განახლება ასუფთავებს
+მოდელების ნებადართულ სიას. ის ინარჩუნებს მოქმედების სფეროებს, კავშირის წესებს, დაბლოკილ მოდელებს, სიხშირის ლიმიტებსა
+და ღირებულების ლიმიტებს, ამიტომ ამ სხვა კონტროლის მექანიზმებს კვლავ შეუძლიათ მოთხოვნის უარყოფა. აშკარად მითითებული
+`--allowed-models ""` ასევე ირჩევს `all`-ს; შეუთავსეთ ის
+`--model-access-mode restricted`-ს, რათა შეინარჩუნოთ შეზღუდული გასაღები ნებადართული მოდელების გარეშე.
+მძიმით გამოყოფილი არაცარიელი სია ირჩევს `restricted`-ს, თუ სხვა რამ აშკარად არ არის მითითებული.
+ურთიერთგამომრიცხავი `all` და არაცარიელი ნებადართული სია მოთხოვნის გაგზავნამდე უარყოფილი იქნება.
+
+`--rate-limit 30` ადგენს მოთხოვნების რაოდენობას წუთში და ინარჩუნებს სხვა დროის
+შუალედების წესებს. `--max-cost 5` ააქტიურებს დღიურ USD ლიმიტს ყოველკვირეული ლიმიტის შეცვლის გარეშე;
+`--max-cost 0` შლის დღიურ ლიმიტს და ინარჩუნებს გამოყენების ლიმიტის არსებულ გადამრთველსა
+და ყოველკვირეულ ლიმიტს. გამოტოვებული პოლიტიკის ველები უცვლელი რჩება. სიხშირის ცვლილებები ჯერ
+მიმდინარე პოლიტიკას კითხულობს; მოერიდეთ ერთი და იმავე გასაღების სიხშირის ლიმიტების მასივის ერთდროულ რედაქტირებას.
+
+პოლიტიკის ბრძანებები იყენებს ავთენტიფიცირებულ `GET`/`PATCH /api/keys/{id}`-ს და ითვალისწინებს აქტიურ
+კონტექსტსა და გლობალურ `--api-key` პარამეტრს. JSON-ის გამომავალი შეიცავს მხოლოდ პოლიტიკის ველებს,
+შენახული გასაღების ან მისი შენიღბული წარმოდგენის გარეშე. მხოლოდ ინფერენციისთვის განკუთვნილ ავტორიზაციის მონაცემებს
+არ შეუძლია მართვის ცვლილებების ავტორიზება. 401/403 მოითხოვს მართვის
+ავტორიზაციის მონაცემებისა და კონტექსტის შემოწმებას; ეს არ მიუთითებს ადგილობრივი CLI-ტოკენის ან salt-ის გაუმართაობაზე.
+ცალკე ადგილობრივი ავთენტიფიკაციის კონტრაქტისთვის იხილეთ [CLI ტოკენი](../security/CLI_TOKEN.md).

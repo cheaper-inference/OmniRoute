@@ -14,7 +14,7 @@ import { createErrorResponse, createErrorResponseFromUnknown } from "@/lib/api/e
 import { extractRelayAuth, getProxyById } from "@/lib/db/proxies";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
-import { buildRelayTestResult } from "./relayTestResult";
+import { buildRelayTestResult, RELAY_TEST_TIMEOUT_MS } from "./relayTestResult";
 import { recordRelayProbe } from "@/lib/db/relayProbeStats";
 
 const BASE_SUPPORTED_PROXY_TYPES = new Set(["http", "https"]);
@@ -105,14 +105,14 @@ export async function POST(request: Request) {
       const relayUrl = `https://${relayHost}`;
       const start = Date.now();
       const controller2 = new AbortController();
-      const timeout2 = setTimeout(() => controller2.abort(), 10000);
+      const timeout2 = setTimeout(() => controller2.abort(), RELAY_TEST_TIMEOUT_MS);
       try {
         // Send request to the relay URL with relay headers; relay forwards to ipify
         const res = await undiciRequest(`${relayUrl}/`, {
           method: "GET",
           signal: controller2.signal,
-          headersTimeout: 10000,
-          bodyTimeout: 10000,
+          headersTimeout: RELAY_TEST_TIMEOUT_MS,
+          bodyTimeout: RELAY_TEST_TIMEOUT_MS,
           headers: {
             "x-relay-target": "https://api64.ipify.org",
             "x-relay-path": "/?format=json",
@@ -149,7 +149,7 @@ export async function POST(request: Request) {
       } catch (relayErr) {
         const message =
           relayErr instanceof Error && relayErr.name === "AbortError"
-            ? "Connection timeout (10s)"
+            ? `Connection timeout (${RELAY_TEST_TIMEOUT_MS / 1000}s)`
             : getErrorMessage(relayErr, "Relay test failed");
         console.warn(`[ProxyTest] relay ${relayHost} request failed: ${message}`);
         return Response.json({

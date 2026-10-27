@@ -128,6 +128,8 @@ omniroute keys show <id>
 - `--rate-limit <n>`
 - `--max-cost <n>`
 - `--allowed-models <list>`
+- `--model-access-mode <mode>`
+- `--unrestricted`
 
 **Example:**
 
@@ -189,6 +191,7 @@ omniroute oauth providers
 
 **Flags:**
 
+- `--provider <id>`
 - `--no-browser`
 - `--import-from-system`
 - `--social <s>`
@@ -216,6 +219,7 @@ omniroute oauth status
 
 **Flags:**
 
+- `--provider <id>`
 - `--connection-id <id>`
 - `--yes`
 

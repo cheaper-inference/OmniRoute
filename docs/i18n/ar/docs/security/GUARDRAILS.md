@@ -1,26 +1,33 @@
 # Guardrails (العربية)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/GUARDRAILS.md) · 🇪🇹 [am](../../../am/docs/security/GUARDRAILS.md) · 🇦🇿 [az](../../../az/docs/security/GUARDRAILS.md) · 🇧🇬 [bg](../../../bg/docs/security/GUARDRAILS.md) · 🇧🇩 [bn](../../../bn/docs/security/GUARDRAILS.md) · 🇨🇿 [cs](../../../cs/docs/security/GUARDRAILS.md) · 🇩🇰 [da](../../../da/docs/security/GUARDRAILS.md) · 🇩🇪 [de](../../../de/docs/security/GUARDRAILS.md) · 🇬🇷 [el](../../../el/docs/security/GUARDRAILS.md) · 🇪🇸 [es](../../../es/docs/security/GUARDRAILS.md) · 🇪🇪 [et](../../../et/docs/security/GUARDRAILS.md) · 🇮🇷 [fa](../../../fa/docs/security/GUARDRAILS.md) · 🇫🇮 [fi](../../../fi/docs/security/GUARDRAILS.md) · 🇫🇷 [fr](../../../fr/docs/security/GUARDRAILS.md) · 🇮🇪 [ga](../../../ga/docs/security/GUARDRAILS.md) · 🇮🇳 [gu](../../../gu/docs/security/GUARDRAILS.md) · 🇳🇬 [ha](../../../ha/docs/security/GUARDRAILS.md) · 🇮🇱 [he](../../../he/docs/security/GUARDRAILS.md) · 🇮🇳 [hi](../../../hi/docs/security/GUARDRAILS.md) · 🇭🇷 [hr](../../../hr/docs/security/GUARDRAILS.md) · 🇭🇺 [hu](../../../hu/docs/security/GUARDRAILS.md) · 🇦🇲 [hy](../../../hy/docs/security/GUARDRAILS.md) · 🇮🇩 [id](../../../id/docs/security/GUARDRAILS.md) · 🇳🇬 [ig](../../../ig/docs/security/GUARDRAILS.md) · 🇮🇹 [it](../../../it/docs/security/GUARDRAILS.md) · 🇯🇵 [ja](../../../ja/docs/security/GUARDRAILS.md) · 🇬🇪 [ka](../../../ka/docs/security/GUARDRAILS.md) · 🇰🇭 [km](../../../km/docs/security/GUARDRAILS.md) · 🇮🇳 [kn](../../../kn/docs/security/GUARDRAILS.md) · 🇰🇷 [ko](../../../ko/docs/security/GUARDRAILS.md) · 🇱🇹 [lt](../../../lt/docs/security/GUARDRAILS.md) · 🇱🇻 [lv](../../../lv/docs/security/GUARDRAILS.md) · 🇮🇳 [ml](../../../ml/docs/security/GUARDRAILS.md) · 🇮🇳 [mr](../../../mr/docs/security/GUARDRAILS.md) · 🇲🇾 [ms](../../../ms/docs/security/GUARDRAILS.md) · 🇲🇹 [mt](../../../mt/docs/security/GUARDRAILS.md) · 🇲🇲 [my](../../../my/docs/security/GUARDRAILS.md) · 🇳🇵 [ne](../../../ne/docs/security/GUARDRAILS.md) · 🇳🇱 [nl](../../../nl/docs/security/GUARDRAILS.md) · 🇳🇴 [no](../../../no/docs/security/GUARDRAILS.md) · 🇮🇳 [or](../../../or/docs/security/GUARDRAILS.md) · 🇮🇳 [pa](../../../pa/docs/security/GUARDRAILS.md) · 🇵🇭 [phi](../../../phi/docs/security/GUARDRAILS.md) · 🇵🇱 [pl](../../../pl/docs/security/GUARDRAILS.md) · 🇵🇹 [pt](../../../pt/docs/security/GUARDRAILS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/GUARDRAILS.md) · 🇷🇴 [ro](../../../ro/docs/security/GUARDRAILS.md) · 🇷🇺 [ru](../../../ru/docs/security/GUARDRAILS.md) · 🇱🇰 [si](../../../si/docs/security/GUARDRAILS.md) · 🇸🇰 [sk](../../../sk/docs/security/GUARDRAILS.md) · 🇸🇮 [sl](../../../sl/docs/security/GUARDRAILS.md) · 🇷🇸 [sr](../../../sr/docs/security/GUARDRAILS.md) · 🇸🇪 [sv](../../../sv/docs/security/GUARDRAILS.md) · 🇰🇪 [sw](../../../sw/docs/security/GUARDRAILS.md) · 🇮🇳 [ta](../../../ta/docs/security/GUARDRAILS.md) · 🇮🇳 [te](../../../te/docs/security/GUARDRAILS.md) · 🇹🇭 [th](../../../th/docs/security/GUARDRAILS.md) · 🇹🇷 [tr](../../../tr/docs/security/GUARDRAILS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/GUARDRAILS.md) · 🇵🇰 [ur](../../../ur/docs/security/GUARDRAILS.md) · 🇺🇿 [uz](../../../uz/docs/security/GUARDRAILS.md) · 🇻🇳 [vi](../../../vi/docs/security/GUARDRAILS.md) · 🇳🇬 [yo](../../../yo/docs/security/GUARDRAILS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/GUARDRAILS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/GUARDRAILS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/GUARDRAILS.md) · 🇪🇹 [am](../../../am/docs/security/GUARDRAILS.md) · 🇦🇿 [az](../../../az/docs/security/GUARDRAILS.md) · 🇧🇬 [bg](../../../bg/docs/security/GUARDRAILS.md) · 🇧🇩 [bn](../../../bn/docs/security/GUARDRAILS.md) · 🇧🇦 [bs](../../../bs/docs/security/GUARDRAILS.md) · 🇨🇿 [cs](../../../cs/docs/security/GUARDRAILS.md) · 🇩🇰 [da](../../../da/docs/security/GUARDRAILS.md) · 🇩🇪 [de](../../../de/docs/security/GUARDRAILS.md) · 🇬🇷 [el](../../../el/docs/security/GUARDRAILS.md) · 🇪🇸 [es](../../../es/docs/security/GUARDRAILS.md) · 🇪🇪 [et](../../../et/docs/security/GUARDRAILS.md) · 🇮🇷 [fa](../../../fa/docs/security/GUARDRAILS.md) · 🇫🇮 [fi](../../../fi/docs/security/GUARDRAILS.md) · 🇫🇷 [fr](../../../fr/docs/security/GUARDRAILS.md) · 🇮🇪 [ga](../../../ga/docs/security/GUARDRAILS.md) · 🇮🇳 [gu](../../../gu/docs/security/GUARDRAILS.md) · 🇳🇬 [ha](../../../ha/docs/security/GUARDRAILS.md) · 🇮🇱 [he](../../../he/docs/security/GUARDRAILS.md) · 🇮🇳 [hi](../../../hi/docs/security/GUARDRAILS.md) · 🇭🇷 [hr](../../../hr/docs/security/GUARDRAILS.md) · 🇭🇺 [hu](../../../hu/docs/security/GUARDRAILS.md) · 🇦🇲 [hy](../../../hy/docs/security/GUARDRAILS.md) · 🇮🇩 [id](../../../id/docs/security/GUARDRAILS.md) · 🇳🇬 [ig](../../../ig/docs/security/GUARDRAILS.md) · 🇮🇹 [it](../../../it/docs/security/GUARDRAILS.md) · 🇯🇵 [ja](../../../ja/docs/security/GUARDRAILS.md) · 🇬🇪 [ka](../../../ka/docs/security/GUARDRAILS.md) · 🇰🇭 [km](../../../km/docs/security/GUARDRAILS.md) · 🇮🇳 [kn](../../../kn/docs/security/GUARDRAILS.md) · 🇰🇷 [ko](../../../ko/docs/security/GUARDRAILS.md) · 🇱🇹 [lt](../../../lt/docs/security/GUARDRAILS.md) · 🇱🇻 [lv](../../../lv/docs/security/GUARDRAILS.md) · 🇮🇳 [ml](../../../ml/docs/security/GUARDRAILS.md) · 🇮🇳 [mr](../../../mr/docs/security/GUARDRAILS.md) · 🇲🇾 [ms](../../../ms/docs/security/GUARDRAILS.md) · 🇲🇹 [mt](../../../mt/docs/security/GUARDRAILS.md) · 🇲🇲 [my](../../../my/docs/security/GUARDRAILS.md) · 🇳🇵 [ne](../../../ne/docs/security/GUARDRAILS.md) · 🇳🇱 [nl](../../../nl/docs/security/GUARDRAILS.md) · 🇳🇴 [no](../../../no/docs/security/GUARDRAILS.md) · 🇮🇳 [or](../../../or/docs/security/GUARDRAILS.md) · 🇮🇳 [pa](../../../pa/docs/security/GUARDRAILS.md) · 🇵🇭 [phi](../../../phi/docs/security/GUARDRAILS.md) · 🇵🇱 [pl](../../../pl/docs/security/GUARDRAILS.md) · 🇵🇹 [pt](../../../pt/docs/security/GUARDRAILS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/GUARDRAILS.md) · 🇷🇴 [ro](../../../ro/docs/security/GUARDRAILS.md) · 🇷🇺 [ru](../../../ru/docs/security/GUARDRAILS.md) · 🇱🇰 [si](../../../si/docs/security/GUARDRAILS.md) · 🇸🇰 [sk](../../../sk/docs/security/GUARDRAILS.md) · 🇸🇮 [sl](../../../sl/docs/security/GUARDRAILS.md) · 🇷🇸 [sr](../../../sr/docs/security/GUARDRAILS.md) · 🇸🇪 [sv](../../../sv/docs/security/GUARDRAILS.md) · 🇰🇪 [sw](../../../sw/docs/security/GUARDRAILS.md) · 🇮🇳 [ta](../../../ta/docs/security/GUARDRAILS.md) · 🇮🇳 [te](../../../te/docs/security/GUARDRAILS.md) · 🇹🇭 [th](../../../th/docs/security/GUARDRAILS.md) · 🇹🇷 [tr](../../../tr/docs/security/GUARDRAILS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/GUARDRAILS.md) · 🇵🇰 [ur](../../../ur/docs/security/GUARDRAILS.md) · 🇺🇿 [uz](../../../uz/docs/security/GUARDRAILS.md) · 🇻🇳 [vi](../../../vi/docs/security/GUARDRAILS.md) · 🇳🇬 [yo](../../../yo/docs/security/GUARDRAILS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/GUARDRAILS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/GUARDRAILS.md)
 
 ---
 
 > **مصدر الحقيقة:** `src/lib/guardrails/`
-> **آخر تحديث:** 2026-08-29 — v3.8.51 (يُصرّح المستدعي بمصدر نص التفريغ في Video Bridge،
-> ولم يتحقق منه الخادم بعد — تم التوضيح وفقًا لـ #11661)
+> **آخر تحديث:** 2026-10-17 — v3.8.52 (أُضيف [التغطية والحدود](#coverage-and-limits):
+> المسارات ومسارات الاستجابة التي تصل إليها الخطافات، وترويسات التعطيل المدمجة (#16412)،
+> ووضع حظر الحقن كحدّ إلزامي (#16413)، وما يرى الاستجابة قبل مرحلة ما بعد الاستدعاء)
 
-تفرض آليات الحماية قيود السلامة والسياسات وتحويلات المحتوى عند الحد الفاصل
-بين OmniRoute والموفّرين الخارجيين. يمكن لكل آلية حماية فحص حمولات الطلب
-(ورفضها أو تحويلها أو إضافة تعليقات توضيحية إليها اختياريًا) (`preCall`) واستجابات
-الموفّرين الخارجيين (`postCall`).
+تفرض حواجز الحماية تحويلات السلامة والسياسات والمحتوى عند الحدود
+بين OmniRoute والمزودين الأصليين. يستطيع كل حاجز حماية فحص
+(ورفض أو تحويل أو توصيف، اختياريًا) حمولات الطلبات (`preCall`)
+واستجابات المزودين الأصليين (`postCall`).
 
-يعتمد النظام مبدأ **السماح عند الفشل**: إذا طرحت آلية حماية استثناءً أثناء التنفيذ، يسجّل السجل
-الخطأ ويتابع تنفيذ آلية الحماية التالية بدلًا من إفشال
-الطلب. الحظر قرار صريح (`block: true`)، وليس نتيجة عَرَضية أبدًا.
+يعمل النظام وفق مبدأ **الفشل المفتوح** (fail-open): إذا رمى حاجز حماية استثناءً
+أثناء التنفيذ، يسجّل السجل الخطأ ويتابع مع حاجز الحماية التالي بدلاً من
+إفشال الطلب. الحظر قرار صريح (`block: true`)، وليس صدفة أبدًا.
+الاستثناء الوحيد هو الطلب المُجهَض: عندما تُجهَض `signal` الخاصة بالمستدعي،
+فإن حاجز الحماية الرامي يرفض تشغيل الخطاف بدلاً من تخطّيه.
 
-## آليات الحماية المضمّنة
+الخطافات **لا** تعمل على كل مسار ولا على كل استجابة. اقرأ
+[التغطية والحدود](#coverage-and-limits) قبل الاعتماد على حاجز حماية
+كضابط أمني.
 
-يحمّل السجل تلقائيًا ست آليات حماية وفق ترتيب الأولوية عند الاستيراد
-(راجع `registry.ts` ← `registerDefaultGuardrails()`):
+## حواجز الحماية المدمجة
+
+يحمّل السجل تلقائيًا ستة حواجز حماية بترتيب الأولوية عند الاستيراد
+(انظر `registry.ts` → `registerDefaultGuardrails()`):
 
 | الأولوية | الاسم               | المرحلة (المراحل) | الملف                 |
 | -------- | ------------------- | ----------------- | --------------------- |
@@ -31,513 +38,424 @@
 | `20`     | `prompt-injection`  | `preCall`         | `promptInjection.ts`  |
 | `95`     | `credential-masker` | `pre` + `post`    | `credentialMasker.ts` |
 
-تُنفَّذ أرقام الأولوية الأقل **أولًا**.
+تعمل أرقام الأولوية الأدنى **أولاً**.
 
-### جسر الرؤية (`visionBridge.ts`) — جسر الأنماط PR-1
+### جسر الرؤية (`visionBridge.ts`) — جسر الوسائط PR-1
 
-يعترض الطلبات المحتوية على صور والموجّهة إلى **نماذج لا تدعم الرؤية**، ثم إما
-يعيد توجيه الطلب بالكامل إلى نموذج يدعم الرؤية، أو يستبدل أجزاء الصور
-بأوصاف نصية ينتجها نموذج رؤية قابل للتهيئة قبل
-استدعاء الموفّر الخارجي. يتيح ذلك للموفّرين المعتمدين على النص فقط التعامل بشفافية مع
-الحمولات متعددة الأنماط.
+يتمتع النموذج الأساسي GLM 5.3 و`glm-5.3-{low,high,max}` ببيانات وصفية
+صريحة `supportsVision:false` في السجل/المواصفات. أما متغيرات GLM 5.3 Flash
+فتظل نماذج رؤية أصلية. يدخل مسار `/v1/messages` في Claude Code سلسلة
+حواجز الحماية المشتركة لما قبل الاستدعاء في `handleChat` **قبل** الترجمة من
+Claude إلى OpenAI؛ يجب وصف صور نتائج أداة `Read` المتداخلة أو معالجتها
+قبل أن ترفعها تلك الترجمة إلى محتوى `image_url` في OpenAI (#17069).
 
-التدفق:
+يعترض الطلبات المحتوية على صور والموجهة إلى **نماذج لا تدعم الرؤية**،
+فإما يعيد توجيه الطلب بأكمله إلى نموذج قادر على الرؤية، أو يستبدل
+أجزاء الصور بأوصاف نصية ينتجها نموذج رؤية قابل للتكوين قبل
+الاستدعاء إلى المزود. يتيح هذا للمزودين المقتصرين على النصوص التعامل
+بشفافية مع الحمولات متعددة الوسائط.
 
-1. التخطي إذا كان النموذج المستهدف يدعم الرؤية بالفعل (ما لم يظهر في
-   قائمة الجسر الإجباري `isVisionBridgeForcedModel`).
-2. استخراج أجزاء الصور عبر `extractImageParts(messages)`
-   (`visionBridgeHelpers.ts`)، التي تفوّض إلى **كاشف الوسائط الموحّد**
-   `detectMediaParts()` في `open-sse/utils/mediaParts.ts` — وهو
-   مصدر الحقيقة الوحيد المشترك مع مرشح توافق التركيبات.
-   يقتصر الاستخراج وفق قائمة سماح على أجزاء المستوى الأعلى ذات الأشكال التي يمكن للدالة
-   `replaceImageParts` إعادة إدراجها (عقد الاستخراج↔الاستبدال):‏ OpenAI
-   `image_url`، ومصدر Anthropic بصيغة base64‏ `source.type:"base64"`، وعنوان URL
-   من Anthropic‏ `source.type:"url"`، وResponses API‏ `input_image`. أما التطابقات المتداخلة
-   والأشكال الدلالية فقط فهي مواد لمرشح التركيبات ولا تُستخرج أبدًا.
-   يتم التخطي إذا لم يُعثر على أي منها.
-3. تحديد إعدادات وقت التشغيل عبر `resolveVisionBridgeRuntimeSettings()`
-   (`src/shared/constants/modalityBridgeDefaults.ts`): تكون الأولوية لمفاتيح الإعدادات الجديدة `modalityBridge*`؛
-   وتظل مفاتيح `visionBridge*` القديمة **خيارًا احتياطيًا لدورة واحدة**
-   (نافذة التراجع). يتم التخطي قبل اجتياز أي وسائط عندما يكون
-   الجسر معطّلًا.
-4. يحدد منتقي الوضع (`modalityBridgeVisionMode`، راجع الجدول أدناه)
-   إعادة التوجيه أو الوصف. تعيد إعادة التوجيه `modifiedPayload` مع تبديل `model`
-   فقط، بالإضافة إلى البيانات الوصفية `{ rerouted, fromModel, toModel, imagesKept }`.
-5. مسار الوصف: يحدّ عدد الصور عند `maxImages`، وينشئ مطالبة مدركة للمهمة،
-   ويراجع ذاكرة التخزين المؤقت للوصف، ويستدعي نموذج الرؤية **بالتوازي**
-   (`Promise.allSettled`)، ويدرج أجزاء نصية بالصيغة `[Image N]: <description>`
-   مكان الصور. يؤدي فشل الوصف إلى إرجاع `null` مع **الاحتفاظ** بجزء الصورة الأصلي
-   (#4012) — باستثناء مسار وصف التركيبات عندما تفشل جميع
-   عمليات الوصف، إذ يتلقى موفّر خارجي مؤكّد عدم دعمه للرؤية نصًا بديلًا
-   `(غير متاح — لا يوجد موفّر يدعم الرؤية متصل)` بدلًا منه (#8430).
-6. إرجاع `modifiedPayload` مع البيانات الوصفية (`imagesProcessed`، و`descriptions`،
-   و`processingTimeMs`، و`visionModel`).
+سير العمل:
 
-#### منتقي الوضع (`modalityBridgeVisionMode`)
+1. تخطَّ إذا كان النموذج الهدف يدعم الرؤية بالفعل (ما لم يظهر في
+   قائمة الجسر القسري `isVisionBridgeForcedModel`).
+2. استخرج أجزاء الصور عبر `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`)، الذي يفوّض المهمة إلى **كاشف الوسائط
+   الموحّد** `detectMediaParts()` في `open-sse/utils/mediaParts.ts` —
+   وهو المصدر الوحيد للحقيقة المشترك مع مرشح توافق المجموعات.
+   الاستخراج مقيّد بقائمة سماح تقتصر على الأشكال التي يستطيع
+   `replaceImageParts` إعادة دمجها (عقد الاستخراج↔الاستبدال):
+   `image_url` في OpenAI، و`source.type:"base64"` في Anthropic base64،
+   و`source.type:"url"` في Anthropic URL، و`input_image` في Responses API.
+   تُستخرج أيضًا الصور المطابقة المتداخلة داخل `tool_result.content`
+   في Claude Code ومخرجات أدوات Responses وتُستبدل في مساراتها
+   الأصلية؛ أما الأشكال ذات المؤشرات فقط فهي مادة لمرشح المجموعات
+   ولا تُستخرج.
+   تخطَّ إذا لم يُعثر على أي صورة.
+3. حلّل إعدادات وقت التشغيل عبر `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): مفاتيح الإعدادات
+   الجديدة `modalityBridge*` لها الأولوية؛ بينما تبقى المفاتيح القديمة
+   `visionBridge*` بمثابة **احتياط لدورة واحدة** (نافذة تراجع). تخطَّ
+   قبل أي مسح للوسائط عندما يكون الجسر معطلاً.
+4. محدد الوضع (`modalityBridgeVisionMode`، انظر الجدول أدناه) يقرر
+   بين إعادة التوجيه والوصف. تُعيد إعادة التوجيه `modifiedPayload` مع
+   استبدال `model` فقط، بالإضافة إلى بيانات وصفية
+   `{ rerouted, fromModel, toModel, imagesKept }`.
+5. مسار الوصف: حدِّد عدد الصور بسقف `maxImages`، وأنشئ الموجّه الواعي
+   بالمهمة، واستشر ذاكرة التخزين المؤقت للوصف، واستدعِ نموذج الرؤية
+   **بالتوازي** (`Promise.allSettled`)، ثم احقن أجزاء نصية
+   `[Image N]: <description>` مكانها. الوصف الفاشل يُنتج `null`: تُحفظ
+   الصورة الخام للأهداف غير المعروفة/القادرة على الرؤية (#4012)، لكن
+   **الهدف المباشر المؤكد أنه نصي فقط** أو المجموعة عديمة الرؤية يحصل
+   على عنصر نصي صريح `(unavailable — no vision-capable provider connected)`
+   لكل صورة غير موصوفة، بما في ذلك حالات الفشل الجزئي والصور التي
+   تتجاوز سقف استدعاءات الوصف (#17069). يبقى الاحتياط الحالي لوصف
+   المجموعة عند فشل الجميع ساريًا (#8430).
+6. أعِد `modifiedPayload` + بيانات وصفية (`imagesProcessed`،
+   `descriptions`، `processingTimeMs`، `visionModel`).
 
-| الوضع      | الافتراضي | السلوك                                                                                                                                                                                                                                                        |
-| ---------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔         | الاستدلال القديم دون تغيير (#6640/#7204): تعيد النماذج غير المركّبة/نماذج `auto/` التوجيه إلى أفضل نموذج رؤية، ما لم يكن النموذج الأصلي يمتلك بيانات اعتماد قابلة للاستخدام (فتصف عندئذٍ)؛ أما الأهداف المركّبة فتصف دائمًا.                                  |
-| `describe` |           | الوصف دائمًا — يتم تخطي كتلة إعادة التوجيه بالكامل؛ ويجيب دائمًا النموذج الذي اختاره المستخدم.                                                                                                                                                                |
-| `reroute`  |           | فرض إعادة التوجيه: يتم تجاوز الحارس الذي يُبقي النموذج ذا بيانات الاعتماد. ويظل حارس بيانات اعتماد **هدف** إعادة التوجيه ساريًا — فعند عدم وجود هدف رؤية قابل للاستخدام، ينتقل الطلب إلى الوصف كي لا تصل الصور الخام مطلقًا إلى واجهة خلفية نصية فقط (#8430). |
+#### محدد الوضع (`modalityBridgeVisionMode`)
 
-تُجري الأوضاع المفروضة اختصارًا **قبل** تشغيل استدلال الوضع التلقائي؛ ويكون سلوك `auto`
-مطابقًا على مستوى البايتات لسلوك آلية الحماية السابق لـ PR-1.
+| الوضع      | الافتراضي | السلوك                                                                                                                                                                                                                                                              |
+| ---------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `auto`     | ✔         | أسلوب استدلالي قديم، دون تغيير (#6640/#7204): النماذج غير المركّبة/`auto/` تُعاد توجيهها إلى أفضل نموذج رؤية ما لم يكن النموذج الأصلي يمتلك بالفعل بيانات اعتماد قابلة للاستخدام (عندها يتم الوصف)؛ الأهداف المركّبة تُوصَف دائمًا.                                 |
+| `describe` |           | الوصف دائمًا — تُتخطَّى كتلة إعادة التوجيه بالكامل؛ النموذج الذي اختاره المستخدم هو من يجيب دائمًا.                                                                                                                                                                 |
+| `reroute`  |           | فرض إعادة التوجيه: يتم تجاوز حارس الاحتفاظ بالنموذج صاحب بيانات الاعتماد. ولا يزال حارس بيانات اعتماد **هدف** إعادة التوجيه ساريًا — فعندما لا يوجد هدف رؤية قابل للاستخدام، يحظر الجسر الطلب برسالة خطأ واضحة بدلًا من الوصف أو إرسال الصور الخام إلى هدف نصي فقط. |
 
-#### مطالبة الوصف المدركة للمهمة (`modalityBridgeVisionTaskAware`)
+تتجاوز الأوضاع القسرية المسار مبكرًا **قبل** تشغيل الأسلوب الاستدلالي التلقائي؛ وسلوك `auto`
+مطابق تمامًا بايتًا بايت لما كان عليه حاجز الحماية قبل PR-1.
 
-القيمة الافتراضية **true**. تُلحق `composeVisionPrompt()` (`visionBridgeHelpers.ts`)
-نص **آخر رسالة للمستخدم** (مقتطعًا إلى 500 حرف) بمطالبة
-الوصف الأساسية، ما يوجّه الوصف نحو ما طلبه المستخدم فعليًا
-(نمط codex-vision-proxy)، ويطلب من نموذج الرؤية نسخ النص
-الظاهر. عند إيقاف العلامة — أو عدم وجود نص للمستخدم — تُستخدم المطالبة الأساسية دون تغيير.
+#### نطاق مفتاح API (`visionBridgeKeyScope.ts`)
 
-يطلب استدعاء OpenAI المتوافق الخاص بحلقة الوصف الذاتية (`callVisionModelSingle()`
+عندما يقيّد مفتاح API الخاص بالمتصل `allowedConnections`، أو مجمّعات الحصص
+(`allowedQuotas`) أو النماذج (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`)، فإن الجسر
+يختار فقط نماذج إعادة التوجيه والوصف التي يُسمح للمفتاح باستخدامها، وعلى الاتصالات
+التي يُسمح للمفتاح باستخدامها. ثم يمرّ استدعاء الوصف دائمًا عبر الحلقة الذاتية (self-loop)
+لـ OmniRoute مع ترويسة `x-omniroute-self-loop-key-id`، بحيث يفرض طلب الدردشة
+المستقبِل سياسة الاتصال والنموذج الخاصة بذلك المفتاح مرة أخرى. وتحترم
+`enforceApiKeyPolicy()` تلك الترويسة فقط مع رمز bearer الخاص بالحلقة الذاتية،
+لذا لا يمكنها إلا تضييق الوصول، ويُرفض أي معرّف لا يمكن حلّه.
+
+إذا لم يُسمح بأي نموذج رؤية للمفتاح، فإن **الهدف المؤكَّد بأنه نصي فقط**
+يرفض طلب الصورة محليًا برسالة HTTP 400 واضحة بدلًا من
+إعادة توجيه بايتات الصورة إلى وجهة عليا (upstream) غير قادرة (#17069). أما بالنسبة للأهداف
+ذات قدرة الرؤية غير المعروفة أو الأصلية، فيحتفظ مسار الوصف بسلوك
+الفشل المفتوح (fail-open) السابق (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+الطلبات بدون مفتاح، والمفاتيح بدون هذه القيود، تتصرف تمامًا كما في
+السابق.
+
+#### موجّه الوصف المدرِك للمهمة (`modalityBridgeVisionTaskAware`)
+
+الافتراضي **true**. تُلحق `composeVisionPrompt()` (`visionBridgeHelpers.ts`)
+نص **آخر رسالة من المستخدم** (مقتطعًا إلى 500 حرف) بموجّه الوصف
+الأساسي، موجّهةً الوصف نحو ما سأل عنه المستخدم فعلًا
+(نمط codex-vision-proxy) وطالبةً من نموذج الرؤية نسخ النص
+المرئي. وعند إيقاف العلامة — أو عدم وجود نص من المستخدم — يُستخدم
+الموجّه الأساسي دون تغيير.
+
+يطلب طلب الحلقة الذاتية المتوافق مع OpenAI الخاص بالوصف (`callVisionModelSingle()`
 في `visionBridgeHelpers.ts`) دائمًا `image_url.detail: "high"` —
-دون شروط، لكل مستدعٍ/موفّر، ومن دون ربطه بأي إشارة من العميل.
-يؤدي أخذ العينات منخفضة التفاصيل إلى تدهور دقة OCR في مهمة نسخ النص
-التي تطلبها هذه المطالبة تحديدًا، ولذلك يطلب استدعاء الوصف نفسه دائمًا تفاصيل
-عالية، بصرف النظر عن مستوى التفاصيل الذي استخدمه الطلب الوارد الأصلي. يؤثر هذا
-فقط في جسم طلب الوصف الداخلي؛ ولا يغيّر كيفية تمرير
-OmniRoute لقيمة `image_url.detail` الخاصة بالمستدعي في الطلب الأساسي —
-إذ تُطبّق تلك القيمة الافتراضية بصورة منفصلة، وفقط لعملاء OpenCode المكتشفين، في
-`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). أما فرع
-تنسيق Anthropic السلكي من حلقة الوصف الذاتية فلا يحتوي على حقل `detail`
-ولا يتأثر بأي من القيمتين الافتراضيتين.
+دون قيد أو شرط، لكل متصل/مزوّد، ولا يُقيَّد بأي إشارة من العميل.
+إن أخذ العينات بتفاصيل منخفضة يُضعف دقة OCR بالضبط في مهمة نسخ النص
+التي يطلبها هذا الموجّه، لذا فإن استدعاء الوصف نفسه يطلب دائمًا تفاصيل
+عالية بغض النظر عن مستوى التفاصيل الذي استخدمه الطلب الوارد الأصلي. هذا
+يؤثر فقط في جسم طلب الوصف الداخلي؛ ولا يغيّر كيفية
+إعادة توجيه OmniRoute لـ `image_url.detail` الخاص بالمتصل على الطلب الأساسي —
+إذ يُطبَّق ذلك الافتراضي بشكل منفصل، وفقط لعملاء OpenCode المُكتشَفين، في
+`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`).
+أما فرع تنسيق التواصل (wire-format) الخاص بـ Anthropic في الحلقة الذاتية
+للوصف فلا يحتوي على حقل `detail` ولا يتأثر بأي من الافتراضيين.
 
-#### الحد الأقصى لمخرجات الوصف (`modalityBridgeVisionMaxChars`)
+#### حد مخرجات الوصف (`modalityBridgeVisionMaxChars`)
 
-| المفتاح                        | القيمة الافتراضية | النطاق           |
-| ------------------------------ | ----------------- | ---------------- |
-| `modalityBridgeVisionMaxChars` | `0`               | `0` أو 100–50000 |
+| المفتاح                        | الافتراضي | النطاق           |
+| ------------------------------ | --------- | ---------------- |
+| `modalityBridgeVisionMaxChars` | `0`       | `0` أو 100–50000 |
 
-تعني القيمة `0` (الافتراضية) **عدم وجود حد أقصى** — إذ يُمرَّر الوصف الذي تعيده
+تعني `0` (الافتراضي) **بلا حد أقصى** — يتم تمرير الوصف الذي تُرجعه
 `callVisionModel()` دون تعديل، مع الحفاظ على السلوك
-الحالي. تؤدي أي قيمة ضمن النطاق 100–50000 إلى اقتطاع الوصف وإضافة اللاحقة
-`…` قبل إدراجه مجددًا بصيغة `[Image N]: <description>`
+الحالي. أي قيمة في النطاق 100–50000 تقتطع الوصف بلاحقة
+`…` قبل أن يُعاد تركيبه كـ `[Image N]: <description>`
 (`VisionBridgeGuardrail.preCall()` في `src/lib/guardrails/visionBridge.ts`).
-ارفع هذه القيمة لمهام OCR كثيفة التفاصيل التي يحتاج فيها النموذج اللاحق إلى
-النص المنسوخ كاملًا؛ واخفضها لتقييد استخدام الرموز مع نماذج الرؤية كثيرة الإسهاب.
-يوجد حقل لوحة المعلومات في لوحة Advanced ضمن علامة تبويب Vision
-(`modality-bridge-max-chars` في `ModalityBridgeVisionTab.tsx`)، ويضبط أي
-قيمة بين 1 و99 إلى الحد الأدنى 100، مع ترك القيمة الصريحة `0`
-دون تغيير — فالقيمة `0` قيمة Zod صالحة بحد ذاتها
+ارفع هذه القيمة لمهام OCR كثيفة التفاصيل حيث يحتاج النموذج اللاحق (downstream) إلى
+النص الكامل المنسوخ؛ واخفضها لتقييد استهلاك الرموز (tokens) في نماذج الرؤية المطوِّلة.
+يوجد حقل لوحة التحكم في لوحة Advanced بعلامة تبويب Vision
+(`modality-bridge-max-chars` في `ModalityBridgeVisionTab.tsx`) ويثبّت أي
+قيمة بين 1 و99 إلى الحد الأدنى 100 مع ترك `0` الصريحة
+دون مساس — فـ `0` قيمة Zod صالحة بحد ذاتها
 (`z.union([z.literal(0), z.number().int().min(100).max(50000)])`)، وليست مجرد
-القيمة الافتراضية «غير المعيّنة».
+الافتراضي "غير المضبوط" (unset).
 
-#### ذاكرة الوصف المؤقتة (`modalityBridge/bridgeCache.ts`)
+#### ذاكرة التخزين المؤقت للوصف (`modalityBridge/bridgeCache.ts`)
 
-ذاكرة مؤقتة داخل الذاكرة من نوع LRU + TTL لمخرجات الوصف، مشتركة على مستوى العملية بأكملها.
+ذاكرة تخزين مؤقت LRU + TTL في الذاكرة لمخرجات الوصف، مشتركة على مستوى العملية بأكملها.
 المفتاح = `sha256(imageRef + composedPrompt + configuredBridgeModel)` مع
-تأطير مسبوق بالطول (من دون تصادمات عند حدود الحقول). مكوّن النموذج هو
-نموذج الجسر **المُهيأ**، وليس النموذج الذي قدّم الإجابة فعليًا —
-فقد تستخدم `callVisionModel` نموذجًا احتياطيًا داخليًا، وسيؤدي إنشاء مفتاح لكل محاولة
-إلى تجزئة ذاكرة التخزين المؤقت. لا تُخزَّن عمليات الوصف الفاشلة مؤقتًا مطلقًا. الإعدادات:
+تأطير بادئة الطول (بلا تصادمات على حدود الحقول). مكوّن النموذج هو
+نموذج الجسر **المُهيأ**، وليس النموذج الذي أجاب فعليًا —
+فقد يتراجع `callVisionModel` داخليًا، واستخدام مفتاح لكل محاولة من شأنه أن
+يفتّت ذاكرة التخزين المؤقت. لا تُخزَّن عمليات الوصف الفاشلة أبدًا. الإعدادات:
 
-| المفتاح                         | القيمة الافتراضية | النطاق  |
-| ------------------------------- | ----------------- | ------- |
-| `modalityBridgeCacheEnabled`    | `true`            | —       |
-| `modalityBridgeCacheTtlMinutes` | `60`              | 1–1440  |
-| `modalityBridgeCacheMaxEntries` | `200`             | 10–5000 |
+| المفتاح                         | الافتراضي | النطاق  |
+| ------------------------------- | --------- | ------- |
+| `modalityBridgeCacheEnabled`    | `true`    | —       |
+| `modalityBridgeCacheTtlMinutes` | `60`      | 1–1440  |
+| `modalityBridgeCacheMaxEntries` | `200`     | 10–5000 |
 
-#### تسوية الصور البعيدة (الوصف الذاتي/الجلب بصيغة base64)
+#### تطبيع الصور عن بُعد (جلب describe/base64 عبر الحلقة الذاتية)
 
-عندما يجلب الجسر صورة **بعيدة** بنفسه — سواءً لاستدعاء الوصف الذاتي الخاص
-بـ Anthropic أو للتحويل إلى base64 بتنسيق claude السلكي
-(`ensureBase64ImagesForClaudeWire`)، وكلاهما عبر
-`fetchRemoteImageAsDataUri()` في `visionBridgeHelpers.ts` — يُمرَّر معرّف URI
-للبيانات الناتج عبر `normalizeDataUri()`
-(`open-sse/utils/imageNormalize.ts`) قبل تضمينه في طلب نموذج
-الرؤية. تُصغّر الصور كبيرة الحجم بحيث تصبح **الحافة الطويلة 2048px**
-(بما يتطابق مع حد تغيير الحجم الذي تطبّقه OpenAI/Anthropic مسبقًا من جانب الخادم)، مما يقلل
-حجم وحدات البايت المرفوعة وزمن الاستجابة من دون تغيير ما يراه نموذج الرؤية. تستخدم عملية تغيير الحجم
-`sharp`، الذي يُحمَّل عبر استيراد ديناميكي: وعلى أي منصة يتعذر فيها تحميل
-ملفه الثنائي الأصلي، فإن `normalizeDataUri()` **لا يرمي استثناءً مطلقًا** — بل يعود
-إلى تمرير وحدات البايت الأصلية كما هي، بحيث يظل مسار الوصف/التحويل إلى base64
-عاملًا دائمًا. كذلك تُمرَّر وحدات البايت التي لا تمثل صورة (أي عملية جلب لم تُرجع
-صورة قابلة لفك الترميز) دون تغيير. تقتصر هذه التسوية
-على الصور التي يجلبها الجسر لاستدعائه الذاتي — ولا تُطبَّق مطلقًا
-على حمولة المستدعي الخام التي تُمرَّر كما هي، بما يتوافق مع
-مبدأ عدم التعديل إلا بعد الاشتراك الصريح (القاعدة الصارمة رقم 20).
+عندما يجلب الجسر صورة **بعيدة** بنفسه — استدعاء describe الذاتي من Anthropic وتحويل base64 بتنسيق claude-wire (`ensureBase64ImagesForClaudeWire`)، وكلاهما عبر `fetchRemoteImageAsDataUri()` في `visionBridgeHelpers.ts` — تُمرَّر data URI الناتجة عبر `normalizeDataUri()` (`open-sse/utils/imageNormalize.ts`) قبل تضمينها في طلب نموذج الرؤية. تُخفَّض أبعاد الصور فائقة الحجم إلى **حافة أطول بطول 2048px** (بما يطابق حد تغيير الحجم الذي تطبقه OpenAI/Anthropic بالفعل على جانب الخادم)، مما يقلل بايتات الرفع وزمن الاستجابة دون تغيير ما يراه نموذج الرؤية. يستخدم تغيير الحجم مكتبة `sharp` المحمَّلة عبر استيراد ديناميكي: فعلى منصة يفشل فيها تحميل ثنائيها الأصلي، `normalizeDataUri()` **لا يرمي أي استثناء إطلاقًا** — بل يعود إلى تمرير البايتات الأصلية كما هي، بحيث يظل مسار describe/تحويل base64 يعمل دائمًا. تُمرَّر أيضًا البايتات غير الصورية (جلب لم يُرجع صورة قابلة للفك) دون أي مساس. هذا التطبيع مقصور على الصور التي يجلبها الجسر لاستدعائه الذاتي — ولا يُطبَّق أبدًا على الحمولة الخام الممرَّرة من المتصل، بما يتوافق مع مبدأ التعديل بالاشتراك الصريح فقط (القاعدة الصارمة رقم 20).
 
 #### مخطط الإعدادات + الترحيل
 
-تخضع مفاتيح `modalityBridge*` الجديدة للتحقق باستخدام Zod في `updateSettingsSchema`
-(`src/shared/validation/settingsSchemas.ts`): وهي `modalityBridgeVisionEnabled`،
-`modalityBridgeVisionMode`، و`modalityBridgeVisionModel`،
-و`modalityBridgeVisionTaskAware`، و`modalityBridgeVisionPrompt`،
-و`modalityBridgeVisionTimeout`، و`modalityBridgeVisionMaxImages`،
-و`modalityBridgeVisionMaxChars`، وثلاثية `modalityBridgeCache*`، ومجموعة
-`modalityBridgeAudio*` التي يستخدمها Audio Bridge. ينسخ الترحيل
-`141_modality_bridge_settings.sql` قيم `visionBridge*`
-القديمة الحالية إلى المفاتيح الجديدة المطابقة (بشكل متكرر آمن، ومن دون الكتابة فوق
-أي قيمة `modalityBridge*` عيّنها المشغّل)؛ وتظل المفاتيح القديمة مقبولة بوصفها
-خيارًا احتياطيًا للقراءة خلال دورة إصدار واحدة.
+مفاتيح `modalityBridge*` الجديدة مُتحقَّق منها عبر Zod في `updateSettingsSchema` (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`، و`modalityBridgeVisionMode`، و`modalityBridgeVisionModel`، و`modalityBridgeVisionTaskAware`، و`modalityBridgeVisionPrompt`، و`modalityBridgeVisionTimeout`، و`modalityBridgeVisionMaxImages`، و`modalityBridgeVisionMaxChars`، وثلاثية `modalityBridgeCache*`، ومجموعة `modalityBridgeAudio*` التي يستخدمها Audio Bridge. وينسخ الترحيل `141_modality_bridge_settings.sql` قيم `visionBridge*` القديمة الموجودة إلى المفاتيح الجديدة المطابقة (بشكل idempotent، ولا يستبدل أبدًا قيمة `modalityBridge*` حدَّدها المشغّل)؛ وتظل المفاتيح القديمة مقبولة كمرجع قراءة احتياطي لدورة إصدار واحدة.
 
 #### ترويسة الشفافية + الإحصاءات
 
-تحمل الاستجابات المحوّلة بواسطة الوصف الترويسة
-`x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
-(التي تنشئها `buildModalityBridgeHeader()` في `modalityBridge/bridgeStats.ts`،
-وتضيفها `withModalityBridgeHeader()` في `src/sse/handlers/chatHelpers.ts`).
-لا تحصل الطلبات المعاد توجيهها على **أي** ترويسة — إذ لم تتغير الحمولة، كما أن تبديل النموذج
-ظاهر بالفعل في حقل `model` داخل جسم الاستجابة.
+تحمل الاستجابات المحوَّلة عبر describe الترويسة `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>` (تبنيها `buildModalityBridgeHeader()` في `modalityBridge/bridgeStats.ts`، وتختمها `withModalityBridgeHeader()` في `src/sse/handlers/chatHelpers.ts`). الطلبات المعاد توجيهها لا تحصل على **أي** ترويسة — فالحمولة لم تُمسّ، وتبديل النموذج ظاهر أصلًا في حقل `model` ضمن جسم الاستجابة.
 
-يعيد `GET /api/modality-bridge/stats` (مع مصادقة الإدارة، وفي المستوى نفسه مثل
-`GET /api/settings`) العدادات الموجودة في الذاكرة لكل نمط:
-`{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
-latencySamples, averageLatencyMs, lastUsedAt }` لكل من `vision` و`audio`
-و`video`. تستخدم `averageLatencyMs` قيمة `latencySamples`، وليس جميع المحاولات،
-مقامًا لها؛ فالعملية التي لا يتوفر لها توقيت لا تنشئ عينة زائفة مدتها صفر ميلي ثانية.
-تظل `bridged` الاسم البديل المتوافق مع الإصدارات السابقة للتحويلات
-الناجحة؛ ولا تؤدي المحاولات الفاشلة إلى زيادتها.
-تُصفّر العدادات عند إعادة تشغيل العملية حسب التصميم
-(بيانات قياس عن بُعد، وليست بيانات محاسبية).
+يعيد `GET /api/modality-bridge/stats` (مصادقة إدارية، بنفس فئة `GET /api/settings`) العدادات المخزنة في الذاكرة لكل modality على الشكل `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs, latencySamples, averageLatencyMs, lastUsedAt }` لكل من `vision` و`audio` و`video`. يعتمد `averageLatencyMs` في مقامه على `latencySamples`، لا على مجمل المحاولات؛ فالعملية التي لا يُقاس زمنها لا تختلق عينة بصفر ميلي ثانية. ويبقى `bridged` الاسم المستعار المتوافق مع الإصدارات السابقة للتحويلات الناجحة؛ والمحاولات الفاشلة لا تزيده. تُصفَّر العدادات عند إعادة تشغيل العملية بحسب التصميم (قياس عن بُعد، لا محاسبة).
 
-#### إعداد لوحة المعلومات
+#### تهيئة لوحة التحكم
 
-صفحة لوحة المعلومات المخصصة هي
-`/dashboard/settings/modality-bridge`. وتحافظ تبويبات `Vision` و`Audio`
-و`Video`، التي يمكن الوصول إليها عبر عنوان URL، على معاملات الاستعلام عند تبديل قيمة `tab`.
-يتيح تبويب Vision التفعيل، والوضع، واختيار النموذج (بما في ذلك الخيار الافتراضي
-التلقائي)، وصياغة المطالبات المدركة للمهمة، والحدود المتقدمة للمهلة/الصور/طول الوصف/ذاكرة
-التخزين المؤقت، وعدادات وقت التشغيل، وطلبًا تجريبيًا محميًا. كما أن تبويب Audio فعّال أيضًا: فهو يتيح
-التفعيل، ومنتقي نماذج مخصصًا لـ STT مع خيار Auto، وحدود المهلة/المدة القصوى للمقطع، وعدادات
-الصوت، واختبارًا تجريبيًا لـ `input_audio`. أما تبويب Video فهو وظيفي: إذ يعرض
-حالة وقت تشغيل FFmpeg/ffprobe — وهي إحدى أربع حالات صريحة في واجهة المستخدم (`unknown` أثناء
-تنفيذ الفحص أو عند تعذر إكماله، و`restricted` على مضيف لوحة معلومات غير تابع لعنوان loopback
-حيث يجري تخطي الفحص من جانب العميل، و`unavailable` بعد إجراء الفحص
-والتأكد من عدم توفره، أو `available` مع إصدارات FFmpeg/ffprobe) — ويحفظ
-حدود التفعيل/النموذج/الإطارات/الفيديو/المهلة، ويرشّح منتقي النماذج ليقتصر على
-النماذج الداعمة للرؤية، ويتيح عدادات الفيديو.
+صفحة لوحة التحكم المخصصة هي `/dashboard/settings/modality-bridge`. تحافظ تبويباتها `Vision` و`Audio` و`Video` القابلة للعنونة عبر URL على معلمات الاستعلام أثناء تبديل قيمة `tab`. يعرض تبويب Vision خيارات التمكين، والوضع، واختيار النموذج (بما فيه الافتراضي التلقائي)، والتلقين الواعي بالمهمة، وحدودًا متقدمة للمهلة/عدد الصور/طول الوصف/التخزين المؤقت، وعدادات وقت التشغيل، وطلب عيّنة محروس. تبويب Audio فعّال أيضًا: يعرض التمكين، ومنتقي نماذج مخصصًا لـ STT فقط مع خيار Auto، وحدود المهلة/الحد الأقصى لطول المقطع، وعدادات الصوت، واختبار عيّنة `input_audio`. تبويب Video وظيفي: يُبلغ عن حالة تشغيل FFmpeg/ffprobe — إحدى أربع حالات واجهة مستخدم صريحة (`unknown` بينما يكون الفحص قيد التنفيذ أو تعذّر اكتماله، و`restricted` على مضيف لوحة تحكم غير loopback حيث يُتخطَّى الفحص من جانب العميل، و`unavailable` بعد فحصه والتأكد من غيابه، أو `available` مع إصدارَي FFmpeg/ffprobe) — ويحفظ حدود التمكين/النموذج/الإطارات/الفيديو/المهلة، ويصفّي منتقي النماذج ليقتصر على النماذج القادرة على الرؤية، ويعرض عدادات الفيديو.
 
-أصبحت بطاقة Vision Bridge السابقة ضمن إعدادات AI رابط توافق يؤدي إلى
-الصفحة الجديدة؛ ولم تعد تحتوي على نسخة ثانية من النموذج. كما تربط Media Providers
-سيري عمل Image-to-Text وSpeech-to-Text بتبويبات Modality
-Bridge المقابلة من دون إزالة ساحة تجربة Speech-to-Text الحالية.
+أصبحت بطاقة Vision Bridge السابقة ضمن إعدادات الذكاء الاصطناعي رابط توافق إلى الصفحة الجديدة؛ ولم تعد تملك نسخة ثانية من النموذج. وتربط Media Providers أيضًا سيرَي عمل Image-to-Text وSpeech-to-Text بتبويبَي Modality Bridge المقابلَين دون إزالة ساحة تجربة Speech-to-Text الحالية.
 
-**تجاوز قبول الحلقة الذاتية:** عندما يُوجَّه استدعاء الوصف عبر
-الحلقة الذاتية `/v1` الخاصة بـ OmniRoute (نموذج موفر غير قياسي)، يرسل الطلب الفرعي
-`x-omniroute-admission-bypass: internal` وتتم مصادقته باستخدام بيانات اعتماد
-الحلقة الذاتية المحلولة — القيمة المحلية البديلة `sk_omniroute` في الوضع المحلي، أو
-مفتاح البيئة `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` الذي يضبطه المشغّل (#1350)، بحيث
-تظل عمليات النشر التي تستخدم `REQUIRE_API_KEY=true` قادرة على تنفيذ استدعاء الوصف. ولا
-يُعتد بالتجاوز إلا مع بيانات الاعتماد المطابقة تمامًا، ولذلك لا يمكن للعملاء الخارجيين استخدام
-الترويسة لتخطي القبول.
+**تجاوز القبول في الحلقة الذاتية:** عندما يمرّ استدعاء describe عبر حلقة OmniRoute الذاتية `/v1` (نموذج موفّر غير قياسي)، يرسل الطلب الفرعي `x-omniroute-admission-bypass: internal` ويُصادَق عليه ببيانات اعتماد الحلقة الذاتية المحلولة — القيمة الحارسة المحلية `sk_omniroute` في الوضع المحلي، أو مفتاح البيئة `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` الذي يضبطه المشغّل (#1350) — بحيث تظل عمليات النشر ذات `REQUIRE_API_KEY=true` قادرة على تشغيل استدعاء describe. لا يُحترَم التجاوز إلا مع تلك البيانات الاعتمادية بعينها، فلا يستطيع العملاء الخارجيون استخدام الترويسة لتخطي القبول.
 
-توجد القيم الافتراضية القديمة في `src/shared/constants/visionBridgeDefaults.ts`؛ أما
-القيم الافتراضية الجديدة للوضع/الإدراك بالمهمة/ذاكرة التخزين المؤقت ومحلّل الإعدادات فتوجد في
-`src/shared/constants/modalityBridgeDefaults.ts`. ويتيح حاجز الحماية خيار مُنشئ
-`deps` حتى تتمكن الاختبارات من حقن تنفيذات وهمية لـ `getSettings` و
-`callVisionModel`.
+توجد القيم الافتراضية القديمة في `src/shared/constants/visionBridgeDefaults.ts`؛ بينما توجد القيم الافتراضية الجديدة للوضع/الوعي بالمهمة/التخزين المؤقت ومحلل الإعدادات في `src/shared/constants/modalityBridgeDefaults.ts`. ويكشف الحاجز الواقي خيار المُنشئ `deps` بحيث تستطيع الاختبارات حقن تطبيقات وهمية لـ `getSettings` و`callVisionModel`.
 
-### جسر الصوت (`audioBridge.ts`) — Modality Bridge PR-3
+### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-يعترض طلبات المحادثة التي تحتوي على صوت قبل وصولها إلى هدف ليس
-معروفًا بقبول إدخال الصوت. ولا يعيد توجيه طلب المحادثة أبدًا: إذ تُنسخ الأجزاء
-الصوتية إلى نص عبر نقطة النهاية الحالية متعددة الأجزاء والمتوافقة مع OpenAI، ويواصل
-نموذج المحادثة المختار العمل باستخدام النصوص المنسوخة.
+يعترض طلبات المحادثة التي تحمل صوتًا قبل أن تصل إلى هدف غير معروف بقبوله إدخالًا صوتيًا. ولا يعيد توجيه طلب المحادثة أبدًا: تُفرَّغ الأجزاء الصوتية نصيًا عبر نقطة النهاية multipart المتوافقة مع OpenAI الموجودة، ويواصل نموذج المحادثة المختار العمل بالنصوص المفرَّغة.
 
 التدفق:
 
-1. حلّ `supportsAudio` عبر `getResolvedModelCapabilities()`. تكون الأولوية
-   للبيانات الوصفية الصريحة في سجل الموفر، ثم للبيانات الوصفية الثابتة للنموذج، ثم
-   لـ `modalities_input` المتزامنة. تكون قائمة الإدخال المعلنة التي لا تتضمن `audio`
-   مساوية لـ `false`؛ وإذا لم يتبق أي دليل على الإمكانية فتكون القيمة `null`. تعمل
-   القيمتان `false` و`null` على تنشيط الجسر المحافظ، بينما تتجاوزه القيمة `true`.
-2. حلّ إعدادات `modalityBridgeAudio*` واستخراج أجزاء الصوت ذات المستوى الأعلى
-   والقابلة للاستبدال من كل رسالة عبر كاشف `detectMediaParts()` المشترك.
-   أشكال النقل المدعومة هي `input_audio` و`audio_url` في OpenAI،
-   و`source.media_type: "audio/*"`. يُكتشف الصوت المتداخل لأغراض التوجيه، لكنه لا
-   يُزال بواسطة مسار الاستبدال. ويُحد العمل بواسطة `modalityBridgeAudioMaxClips`؛
-   بينما تظل الأجزاء اللاحقة دون تغيير.
-3. الالتزام بقيمة `provider/model` مضبوطة، أو السماح لـ `selectAudioBridgeModel()`
-   بالمرور على `AUDIO_TRANSCRIPTION_PROVIDERS` وفق ترتيب الكتالوج الثابت واختيار أول
-   نموذج يمتلك بيانات اعتماد صالحة لموفر نشط.
-4. تحوّل `callAudioTranscription()` الصوت المشفر بصيغة base64/data-URI إلى `file`
-   متعدد الأجزاء، أو تنزّل `audio_url` بعيدًا عبر حاجز الاتصالات الصادرة العامة فقط
-   مع تثبيت DNS وحد أقصى يبلغ 25 MB. ثم ترسل الملف والنموذج المختار باستخدام POST
-   إلى الحلقة الذاتية المحلية `/v1/audio/transcriptions`، مع المصادقة بواسطة
-   `resolveSelfLoopBearer()`. ينفذ مسار النسخ الحالي البحث المعتاد عن بيانات
-   الاعتماد، والتعامل مع التهدئة/حدود المعدل، والإرسال إلى الموفر.
-5. تستبدل الاستدعاءات الناجحة أجزاءها بـ `[Audio N]: <transcript>`. وتُنفّذ
-   الاستدعاءات باستخدام `Promise.allSettled`: يحافظ فشل منفرد على جزء الصوت الأصلي
-   المقابل (#4012 contract). إذا فشلت كل الاستدعاءات وثبت أن الهدف
-   `supportsAudio === false`، تصبح الأجزاء
-   `[Audio N]: (غير متاح — لا يوجد موفر STT متصل)` (#8430 contract). أما بالنسبة
-   إلى هدف غير معروف (`null`)، فتظل النتيجة دون تغيير عند فشل جميع الاستدعاءات.
-   ويتلقى الهدف الذي ثبت أنه نصي فقط ولا يمتلك بيانات اعتماد STT صالحة القيمة
-   البديلة الصريحة نفسها من دون إصدار استدعاء شبكي.
+1. تُحدَّد قيمة `supportsAudio` عبر `getResolvedModelCapabilities()`. تتغلّب
+   البيانات الوصفية الصريحة في سجلّ المزوّدين أولًا، ثم البيانات الوصفية الثابتة
+   للنموذج، ثم `modalities_input` المُزامَنة. قائمة إدخال مُعلَنة لا تتضمّن
+   `audio` تُعطي `false`؛ وغياب أي دليل على القدرة يُبقي القيمة `null`. كلٌّ من
+   `false` و`null` يُفعّل الجسر المتحفّظ، بينما يتجاوزه `true`.
+2. تُحلَّل إعدادات `modalityBridgeAudio*` وتُستخرج الأجزاء الصوتية العليا
+   القابلة للاستئصال من كل رسالة عبر كاشف `detectMediaParts()` المشترك.
+   أشكال التمثيل أثناء النقل المدعومة هي `input_audio` من OpenAI، و`audio_url`،
+   و`source.media_type: "audio/*"`. يُكتشَف الصوت المتداخل لأغراض التوجيه لكنه
+   لا يُزال عبر مسار الاستئصال. يُحدَّد العمل بسقف
+   `modalityBridgeAudioMaxClips`؛ وتبقى الأجزاء اللاحقة دون مساس.
+3. يُحترَم `provider/model` المُهيأ إن وُجد، وإلا يتولّى `selectAudioBridgeModel()`
+   المرور على `AUDIO_TRANSCRIPTION_PROVIDERS` بترتيب الفهرس الثابت واختيار أول
+   نموذج يمتلك بيانات اعتماد مزوّد نشطة وقابلة للاستخدام.
+4. تحوّل `callAudioTranscription()` الصوت بصيغة base64/data-URI إلى `file`
+   متعدد الأجزاء (multipart)، أو تنزّل `audio_url` بعيدًا عبر حارس النزوح الصادر
+   المقتصر على العناوين العامة مع تثبيت DNS وحدّ أقصى قدره 25 MB. ثم ترسل
+   الملف والنموذج المحدَّد عبر POST إلى الحلقة الذاتية المحلية
+   `/v1/audio/transcriptions`، مع المصادقة بواسطة `resolveSelfLoopBearer()`.
+   ينفّذ مسار التفريغ الصوتي القائم البحث الاعتيادي عن بيانات الاعتماد، ومعالجة
+   فترة التهدئة/حدّ المعدل، والتوزيع على المزوّدين.
+5. تستبدل الاستدعاءات الناجحة أجزاءها بـ `[Audio N]: <transcript>`. تُنفَّذ
+   الاستدعاءات باستخدام `Promise.allSettled`: الفشل الفردي يحفظ جزء الصوت
+   الأصلي المعني (عقد #4012). إذا فشلت كل الاستدعاءات وكان الهدف مُثبَتًا على
+   أنه `supportsAudio === false`، تصبح الأجزاء
+   `[Audio N]: (unavailable — no STT provider connected)` (عقد #8430). أما
+   الهدف المجهول (`null`)، فتبقى نتيجة الفشل الكامل دون مساس. والهدف المُثبَت
+   أنه نصي فقط دون بيانات اعتماد STT قابلة للاستخدام يتلقّى العنصر النائب
+   الصريح نفسه دون إصدار أي استدعاء شبكي.
 
-تستخدم النصوص المنسوخة بنجاح ذاكرة التخزين المؤقت LRU/TTL العامة للعملية في Modality Bridge.
-يجمع المفتاح بين مرجع الصوت، وتسمية العملية الثابتة `audio-transcription`،
-ونموذج STT المختار؛ ولا تُخزّن حالات الفشل مؤقتًا أبدًا. تحدّث محاولات الصوت
-العدادات المشتركة `bridged` و`cacheHits` و`failures` و`lastUsedAt`.
-وتحمل الاستجابات المحوّلة
-`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`؛ أما الطلبات
-التي لم تُغيّر فلا تتلقى مقطعًا خاصًا بـ Audio Bridge.
+تستخدم النصوص المفرَّغة الناجحة ذاكرة التخزين المؤقت LRU/TTL الخاصة بجسر
+الوسائط على مستوى العملية بأكملها. يجمع المفتاح مرجع الصوت، ووسم العملية
+الثابت `audio-transcription`، ونموذج STT المحدَّد؛ ولا تُخزَّن الإخفاقات
+مؤقتًا أبدًا. تحدّث محاولات الصوت العدّادات المشتركة `bridged` و`cacheHits`
+و`failures` و`lastUsedAt`. تحمل الاستجابات المُحوَّلة الترويسة
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`؛ أما
+الطلبات التي لم تُمسّ فلا تتلقّى مقطع جسر الصوت.
 
-تستند إعدادات وقت التشغيل إلى قاعدة البيانات ويجري التحقق منها بواسطة Zod:
+إعدادات وقت التشغيل مدعومة بقاعدة البيانات ومُتحقَّق منها عبر Zod:
 
-| المفتاح                       | القيمة الافتراضية | النطاق            |
-| ----------------------------- | ----------------- | ----------------- |
-| `modalityBridgeAudioEnabled`  | `true`            | —                 |
-| `modalityBridgeAudioModel`    | `""`              | Auto أو معرّف STT |
-| `modalityBridgeAudioTimeout`  | `60000`           | 1000–300000       |
-| `modalityBridgeAudioMaxClips` | `3`               | 1–10              |
+| المفتاح                       | الافتراضي | النطاق              |
+| ----------------------------- | --------- | ------------------- |
+| `modalityBridgeAudioEnabled`  | `true`    | —                   |
+| `modalityBridgeAudioModel`    | `""`      | تلقائي أو معرّف STT |
+| `modalityBridgeAudioTimeout`  | `60000`   | 1000–300000         |
+| `modalityBridgeAudioMaxClips` | `3`       | 1–10                |
 
-تظل ذاكرة التخزين المؤقت المشتركة خاضعة لتحكم `modalityBridgeCacheEnabled`
+تبقى ذاكرة التخزين المؤقت المشتركة خاضعة لتحكّم `modalityBridgeCacheEnabled`
 و`modalityBridgeCacheTtlMinutes` و`modalityBridgeCacheMaxEntries`.
 
-### جسر الفيديو (`videoBridge.ts`، `videoBridgePipeline.ts`)
+### جسر الفيديو (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-يعترض أجزاء الفيديو ذات المستوى الأعلى في `messages` الخاصة بـ Chat Completions و`input` الخاصة بـ Responses API قبل استدعاء وجهة لا يُعرف أنها تدعم الفيديو دعمًا أصليًا. تشمل الأشكال المدعومة `input_video` و`video_url` و`video_source` وعناوين HTTPS URL ومعرّفات URI للبيانات من النوع `data:video/*;base64,...`. لا تُعامل أسماء الملفات المجردة الواردة في النص على أنها فيديو.
+يعترض أجزاء الفيديو العليا في `messages` الخاصة بـ Chat Completions و`input`
+الخاصة بـ Responses API قبل استدعاء هدفٍ لا يُعرف عنه دعم أصيل للفيديو.
+الأشكال المدعومة هي `input_video` و`video_url` و`video_source` وروابط HTTPS
+ومعرّفات البيانات `data:video/*;base64,...`. لا تُعامَل أسماء الملفات
+المجرّدة في النص على أنها فيديو.
 
-يتولى `VideoBridgeGuardrail.preCall` (`videoBridge.ts`) اجتياز الطلب، والتحقق من الإمكانية/السياسة، والتجميع لكل طلب، وحمولة الاستجابة. أما العمل الخاص بكل فيديو — جلب البيانات، وذاكرة التخزين المؤقت للنتيجة الكاملة، ووصف تسلسل الإطارات (الذي يدمج أي نص منسوخ للصوت يصرّح به المستدعي)، والمقاييس/الإلغاء/التنظيف لكل محاولة — فهو مخفي خلف `processVideoPart` في `videoBridgePipeline.ts`، والذي يُستدعى مرة واحدة لكل جزء فيديو داخل حلقة `preCall`. تحدد تلك الوحدة أيضًا حدود المنافذ الصريحة `VideoMediaBrokerPort` (لجلب البايتات واستخراج الإطارات المأخوذة كعينات)، و`VideoAudioTranscriptionPort` (لدمج نص صوتي منسوخ يصرّح به المستدعي مع التسميات التوضيحية للإطارات المأخوذة كعينات)، و`VideoDrilldownPort` (حد استمرارية بيانات التعمق في الإطارات؛ ولم يُوصَل بعد بـ`processVideoPart` — إذ إن مسار `/api/modality-bridge/video/drilldown` المنفصل وحده هو الذي يكتب إدخالات التعمق حاليًا).
+يملك `VideoBridgeGuardrail.preCall` (`videoBridge.ts`) اجتياز الطلب، وفحص
+القدرة/السياسة، والتجميع لكل طلب، وحمولة الاستجابة. أما العمل لكل فيديو —
+الاستحواذ، وذاكرة التخزين المؤقت للنتيجة الكاملة، ووصف تسلسل الإطارات (الذي
+يدمج أي نصّ صوتي مفرَّغ يصرّح به المتّصل)، ومقاييس كل محاولة والإجهاض
+والتنظيف — فيُخفى خلف `processVideoPart` في `videoBridgePipeline.ts`، ويُستدعى
+مرة واحدة لكل جزء فيديو داخل حلقة `preCall`. تعرّف تلك الوحدة أيضًا حدود
+المنافذ الصريحة `VideoMediaBrokerPort` (استحواذ البايتات واستخراج الإطارات
+المأخوذة كعينات)، و`VideoAudioTranscriptionPort` (دمج النص الصوتي المفرَّغ
+المُصرَّح به من المتّصل مع التعليقات المأخوذة كعينات)، و`VideoDrilldownPort`
+(حدّ استمرارية التعمّق في الإطارات؛ لم يُوصَل بعد في `processVideoPart` — فقط
+المسار المنفصل `/api/modality-bridge/video/drilldown` هو ما يكتب إدخالات
+التعمّق اليوم).
 
-لا يستورد مسار الطلب العام `/v1` أي عملية فرعية ولا يستدعيها مطلقًا. تُنزَّل مقاطع الفيديو البعيدة ضمن حد يبلغ 50 MiB؛ وتخضع مقاطع الفيديو المضمّنة بترميز base64 لسقف محافظ لكل فيديو قدره 36 MiB بعد فك الترميز، بحيث يمكن أن يظل غلاف النموذج/الرسائل/التأطير ضمن حد قبول طلبات JSON العامة البالغ 50 MiB. يُتحقق من الطول المضمّن وتقديرات الحجم بعد فك الترميز قبل تخصيص الذاكرة. يُشترط HTTPS في عنوان URL البعيد الأولي وفي كل إعادة توجيه، باستخدام الحارس الحالي للاتصالات الصادرة العامة فقط مع تثبيت DNS. بعد ذلك تعبر البايتات حد الوسيط الداخلي المحدد تمامًا `POST /api/modality-bridge/video/extract`. هذا المسار موسوم بكل من `LOCAL_ONLY` و`SPAWN_CAPABLE`، ولا يقبل إلا طلبًا موثّقًا لكل عملية وواردًا عبر واجهة loopback موثوقة، ولا يقبل مطلقًا عنوان URL أو مسار نظام ملفات أو ملفًا تنفيذيًا أو قائمة وسائط. يفرض كل من مسار حجم جسم API وقارئ الجسم التزايدي في المعالج، بصورة مستقلة، سقفًا قدره 50 MiB لمدخلات الوسيط. تنفّذ قائمة الانتظار المحدودة الخاصة به عملية استخراج واحدة في كل مرة، وتسمح بأربع مهام معلّقة، وتضع حدًا أقصى قدره 100 MiB للمدخلات المعلّقة.
+مسار الطلب العام `/v1` لا يستورد أو يستدعي عملية فرعية أبدًا. تُنزَّل مقاطع
+الفيديو البعيدة ضمن حدّ أقصى قدره 50 MiB؛ أما مقاطع الفيديو المضمّنة بصيغة
+base64 فلها سقف متحفّظ قدره 36 MiB بعد فكّ الترميز لكل فيديو، كي يبقى غلاف
+النموذج/الرسائل/التأطير ضمن حدّ قبول طلبات JSON العامة البالغ 50 MiB. يُتحقَّق
+من الطول المضمّن وتقديرات الحجم بعد فكّ الترميز قبل التخصيص. يُشترَط HTTPS في
+رابط البعيد الأولي وفي كل إعادة توجيه، باستخدام حارس النزوح الصادر المقتصر
+على العناوين العامة القائم مع تثبيت DNS. تعبر البايتات بعد ذلك حدّ الوسيط
+الداخلي الدقيق `POST /api/modality-bridge/video/extract`. ذلك المسار `LOCAL_ONLY`
+و`SPAWN_CAPABLE` معًا، ولا يقبل إلا طلبًا موثَّقًا لكل عملية عبر استرجاع محلي
+موثوق (loopback)، ولا يقبل أبدًا رابطًا أو مسار نظام ملفات أو ملفًا تنفيذيًا
+أو قائمة وسيطات. يفرض كلٌّ من خط أنابيب حجم جسم الطلب في واجهة API وقارئ الجسم
+التزايدي في المعالج، بشكل مستقل، سقف إدخال للوسيط قدره 50 MiB. ويشغّل طابوره
+محدود السعة عملية استخراج واحدة في كل مرة، ويسمح بأربع مهام معلَّقة، ويحدّ
+الإدخال المعلَّق عند 100 MiB.
 
-داخل الوسيط، يقرأ `ffprobe` ملفًا محليًا خاصًا؛ وتستبعد قائمة السماح الثابتة للتنسيقات تنسيقات قوائم التشغيل والبيانات الوصفية. بالنسبة إلى حاويات عائلة MOV المسموح بها، تظل مراجع بيانات MOV الخارجية معطّلة افتراضيًا، ولا يفعّلها الأمر الثابت. يستخدم كل من `ffprobe` و`ffmpeg` قائمة سماح بروتوكولات مقتصرة على `file`، وسلسلة تنفيذ واحدة، ومصفوفات وسائط ثابتة، ومن دون shell، مع تحليل مواقع الملفات التنفيذية من `PATH`. لا تُعد تدفقات صور الأغلفة المرفقة مرشحات قابلة للتشغيل. يجب أن تستوفي جميع التدفقات القابلة للتشغيل الحدود، ويُفضّل تدفق افتراضي صريح قبل الرجوع الحتمي إلى التدفق ذي الفهرس الأدنى. تقتصر مقاطع الفيديو على 600 ثانية، و8,192 بكسل لكل بُعد، و33,554,432 بكسلًا للمصدر. يأخذ FFmpeg عينات من 1–16 إطار JPEG عند النقاط الوسطى، ويصغّر الحافة الطويلة إلى 1,024 بكسل كحد أقصى من دون تكبير المدخلات الأصغر، ولا يتلقى عنوان URL مطلقًا. تكون سياسة أخذ العينات `uniform` افتراضيًا. تنفّذ السياستان الاختياريتان `scene_aware` و`segment_aware` التجريبية تمريرة FFmpeg ثابتة إضافية واحدة على التدفق المحلي الذي تم التحقق منه مسبقًا، وتختاران طوابع زمنية محدودة للمشاهد من `showinfo`، وتعودان بصورة حتمية إلى النقاط الوسطى المنتظمة نفسها عند فشل الكاشف، أو انتهاء المهلة، أو وجود مخرجات مشوّهة، أو خلو مجموعة المرشحين. يخصص وضع `segment_aware` عينات النقاط الوسطى بالتناسب مع فواصل المشاهد التي تم التحقق منها؛ وترد أدناه تفاصيل أدلة وضع `segment_aware` وسلوك الرجوع الاحتياطي. يُطبَّق السقف الصارم البالغ 16 إطارًا بعد الاختيار في كل سياسة. عندما لا يتجاوز احتياج طلب `scene_aware` إطارًا واحدًا، فإنه يستخدم النقطة الوسطى المنتظمة للفيديو الكامل النشط أو نافذة التركيز، ويُبلغ عن `policyEffective: uniform`: إذ لا يستطيع إطار مشهد واحد محدد الحفاظ على كلا الطرفين الزمنيين. يمكن للمستدعي اختياريًا توفير نافذة تركيز محدودة (`start`/`end` بالثواني)؛ وتُقيَّد الحدود بمدة الوسائط، وتُرفض النوافذ المعكوسة أو غير المحدودة، وتُنفَّذ جميع سياسات أخذ العينات داخل الفاصل المطبّع فقط. تُضمَّن النافذة الناتجة في البيانات الوصفية لأخذ العينات وفي بادئة الوصف غير الموثوق بها، بحيث تستطيع النماذج اللاحقة تمييز مقتطف مركّز عن المخطط الزمني الكامل.
+داخل الوسيط (broker)، يقرأ `ffprobe` ملفًا محليًا خاصًا؛ وتستبعد القائمة البيضاء الثابتة للصيغ صيغ قوائم التشغيل والبيانات الوصفية (manifest). بالنسبة لحاويات عائلة MOV المسموح بها، تظل مراجع بيانات MOV الخارجية معطّلة افتراضيًا، ولا يفعّلها الأمر الثابت. يستخدم كلٌّ من `ffprobe` و`ffmpeg` قائمة بروتوكولات بيضاء تقتصر على `file` فقط، وخيطًا (thread) واحدًا، ومصفوفات وسائط ثابتة، دون صدفة (shell)، مع ملفات تنفيذية تُحلّ من `PATH`. لا تُعدّ تدفقات الصور المرفقة (الأغلفة) مرشحةً للتشغيل. يجب أن تستوفي جميع التدفقات القابلة للتشغيل الحدود، ويُفضَّل تدفق افتراضي صريح قبل الرجوع الحتمي إلى التدفق ذي الفهرس الأدنى. تُحدّ مقاطع الفيديو بمدة 600 ثانية، و8,192 بكسل لكل بُعد، و33,554,432 بكسل مصدري. يأخذ FFmpeg عينات من 1–16 إطارًا وسيطًا بصيغة JPEG، ويصغّر الحافة الطويلة إلى 1,024 بكسل كحد أقصى دون تكبير المدخلات الأصغر، ولا يستقبل أي عنوان URL إطلاقًا. يكون أخذ العينات `uniform` افتراضيًا. تجري السياستان الاختياريتان `scene_aware` و`segment_aware` التجريبية تمريرة FFmpeg ثابتة إضافية واحدة فوق التدفق المحلي الذي تم التحقق منه مسبقًا، وتختار طوابع زمنية محدودة لمشاهد `showinfo`، وترجع حتميًا إلى نقاط المنتصف المنتظمة نفسها عند فشل الكاشف، أو انتهاء المهلة، أو مخرجات مشوهة، أو مجموعة مرشحين فارغة. يوزّع وضع إدراك المقاطع عينات نقاط المنتصف بشكل متناسب مع فواصل المشاهد التي تم التحقق منها؛ وتُفصَّل أدلة إدراك المقاطع وسلوك الرجوع أدناه. يُطبَّق الحد الأقصى الثابت البالغ 16 إطارًا بعد الاختيار في كل سياسة. عندما يمتلك طلب مُدرِك للمشاهد ميزانية إطار واحد فقط، فإنه يستخدم نقطة المنتصف المنتظمة لنافذة الفيديو الكامل أو نافذة التركيز النشطة ويبلّغ عن `policyEffective: uniform`: فإطار مشهد واحد مختار لا يمكنه الحفاظ على الطرفين الزمنيين معًا. يجوز للمُستدعي اختياريًا توفير نافذة تركيز محدودة (ثواني `start`/`end`)؛ تُقيَّد الحدود بمدة الوسائط، وتُرفَض النوافذ المعكوسة أو غير المحدودة، وتُنفَّذ جميع سياسات أخذ العينات داخل الفاصل المُطبَّع فقط. تُضمَّن النافذة الناتجة في البيانات الوصفية لأخذ العينات وفي بادئة الوصف غير الموثوق حتى تتمكن النماذج اللاحقة من تمييز مقتطف مُركَّز عن الخط الزمني الكامل.
 
-تركيز التسميات التوضيحية الدلالي إعداد منفصل وصريح. يحافظ وضع التحليل الافتراضي `full` على موجّه الإطارات الحالي، ولا يمرر نص الطلب مطلقًا إلى نموذج التسميات التوضيحية. في وضع `focused`، لا يقرأ الجسر سوى أحدث `text`/`input_text` غير فارغ كتبه المستخدم من حاوية Chat أو Responses نفسها، ويطبّعه إلى NFC، ويضغط محارف التحكم والمسافات البيضاء، ويقصره على 500 نقطة ترميز Unicode. تؤدي النتيجة الفارغة إلى الرجوع إلى موجّه `full` نفسه تمامًا. تُسلسل التلميحة القابلة للاستخدام بصيغة JSON داخل كتلة مخصصة لسياق مستخدم غير موثوق به، ولا يجوز لها سوى إعطاء الأولوية للتفاصيل القابلة للملاحظة؛ ولا يمكنها تجاوز التحذير المنفصل من اتباع التعليمات المرئية أو المسموعة في الوسائط. لا يستنتج التركيز النصي `start`/`end` مطلقًا ولا يغيّر آلية أخذ العينات الزمنية.
+تركيز التسمية التوضيحية الدلالي إعداد منفصل وصريح. يحافظ وضع التحليل الافتراضي `full` على موجّه الإطار الحالي ولا يمرّر نص الطلب إطلاقًا إلى نموذج التسمية التوضيحية. في وضع `focused`، يقرأ الجسر أحدث `text`/`input_text` غير فارغ من تأليف المستخدم ضمن حاوية Chat أو Responses نفسها، ويُطبّعه وفق NFC، ويطوّي أحرف التحكم والمسافات البيضاء، ويحدّه بـ500 نقطة شيفرة Unicode. تؤدي النتيجة الفارغة إلى الرجوع إلى موجّه `full` الحرفي. تُسلسَل التلميحة الصالحة كـJSON في كتلة سياق-مستخدم-غير-موثوق مخصصة، ولا يجوز لها سوى إعطاء أولوية للتفاصيل القابلة للملاحظة؛ ولا يمكنها تجاوز التحذير المنفصل ضد اتباع التعليمات المرئية أو المسموعة في الوسائط. لا يستنتج التركيز النصي إطلاقًا `start`/`end` ولا يغيّر مُأخِذ العينات الزمني.
 
-#### أدلة المقاطع البنيوية لـ FU-07
+#### أدلة المقاطع البنيوية FU-07
 
-يستخدم `segment_aware` تمريرة تحليل مسبق محدودة واحدة على تدفق الفيديو المحلي الذي تم التحقق منه مسبقًا. تقوم سلسلة المرشحات الثابتة أولًا بالتصغير إلى عرض لا يتجاوز 320 بكسل، وتكتشف تغييرات المشاهد والفواصل المتجمدة، ثم تأخذ عينة بمعدل إطار واحد في الثانية لقياس الضبابية، ومتوسط النصوع، والمعلومات المكانية/الزمنية. تقتصر التمريرة على 600 عينة بنيوية، وسلسلة FFmpeg/مرشح واحدة، وبروتوكول `file` نفسه وقوائم السماح نفسها للحاويات، وحد لمخرجات العملية قدره 1 MiB، ومدة لا تتجاوز 30 ثانية ضمن حد الإلغاء/المهلة المشتركة للوسيط. ولا تقبل مطلقًا أمرًا أو مرشحًا أو مسارًا أو عنوان URL من الطلب.
+يستخدم `segment_aware` تمريرة تحليل مسبق محدودة واحدة فوق تدفق الفيديو المحلي الذي تم التحقق منه مسبقًا. تصغّر سلسلة المرشحات الثابتة أولًا إلى عرض 320 بكسل كحد أقصى، وتكشف تغيّرات المشاهد والفواصل المتجمدة، ثم تأخذ عينات بمعدل إطار واحد في الثانية لقياس الضبابية، ومتوسط الإضاءة (luma)، والمعلومات المكانية/الزمنية. تُحدّ التمريرة بـ600 عينة بنيوية، وخيط FFmpeg/مرشح واحد، وقائمتي البروتوكولات والحاويات البيضاوين نفسيهما اللتين تقتصران على `file`، وحدّ لمخرجات العملية قدره 1 MiB، و30 ثانية كحد أقصى ضمن حدّ الإجهاض/المهلة المشترك للوسيط. ولا تقبل إطلاقًا أمرًا أو مرشحًا أو مسارًا أو عنوان URL من الطلب.
 
-القيم البنيوية هي أدلة أخذ عينات حتمية، وليست فهمًا دلاليًا للفيديو. فهي لا تستنتج الموضوعات أو الإجراءات أو التسميات التوضيحية أو الكلام أو نية المستخدم. تشكّل حدود المشاهد والتجمّد مقاطع؛ ولا تؤثر تغطية التجمّد والضبابية والتعرّض والتفاصيل المكانية والتغيّر الزمني إلا في كيفية توزيع الميزانية الحالية البالغة 1–16 إطارًا. يُحدّد حد أقصى قدره إطار واحد للمقطع المتجمّد بالكامل، بينما تتنافس المقاطع غير المتجمّدة على الميزانية المتبقية. عندما يفوق عدد الحدود عدد الإطارات، يُحتفَظ بتغطية موحّدة للمخطط الزمني كي لا تتمكن القطوع المبكرة السريعة من إخفاء مقطع نهائي طويل. تُدمج حدود المشاهد الواقعة ضمن دقة التحليل البالغة ثانية واحدة من حدّ تجمّد.
+القيم البنيوية أدلة أخذ عينات حتمية، وليست فهمًا دلاليًا للفيديو. فهي لا تستنتج الموضوعات أو الأفعال أو التسميات التوضيحية أو الكلام أو نية المستخدم. تشكّل حدود المشاهد والتجميد مقاطع؛ ولا يؤثر غطاء التجميد والضبابية والتعريض والتفاصيل المكانية والتغيّر الزمني إلا في كيفية توزيع ميزانية الإطارات الحالية البالغة 1–16 إطارًا. يُحدّ المقطع المتجمد بالكامل بإطار واحد، بينما تتنافس المقاطع غير المتجمدة على الميزانية المتبقية. عندما تفوق الحدودُ عددَ الإطارات، يُحتفَظ بتغطية منتظمة للخط الزمني حتى لا تخفي القطعات المبكرة السريعة مقطعًا لاحقًا طويلًا. تُدمَج حدود المشاهد الواقعة ضمن دقة التحليل البالغة ثانية واحدة من حدّ التجميد.
 
-يؤدي غياب عوامل التصفية، أو الأدلة المشوّهة/الفارغة، أو خطأ في أداة الكشف، أو انتهاء مهلة التحليل المسبق المحدودة إلى الرجوع الآمن إلى سياسة نقاط المنتصف الموحّدة نفسها تمامًا. أما إلغاء المستدعي أو الموعد النهائي للوسيط فلا يؤدي إلى هذا الرجوع الآمن: بل ينهي العملية الفرعية الجارية، ويمنع استخراج الإطارات لاحقًا، وتُزال شجرة الملفات المؤقتة الخاصة في `finally`.
+تؤدي المرشحات المفقودة، أو الأدلة المشوهة/الفارغة، أو خطأ الكاشف، أو انتهاء مهلة التحليل المسبق المحدود إلى الفشل المفتوح نحو سياسة نقاط المنتصف المنتظمة الحرفية. أمّا إجهاض المُستدعي أو مهلة الوسيط فلا يفشلان بشكل مفتوح: بل يُنهيان العملية الفرعية الجارية، ويمنعان استخراج الإطارات لاحقًا، وتُزال شجرة الملفات المؤقتة الخاصة في `finally`.
 
-ينشئ `scripts/perf/video-bridge-fu07-eval.ts` تجهيزات FFmpeg حقيقية وحتمية لقياس وفورات استدعاءات إنشاء التسميات التوضيحية بعد إزالة التكرار، وتوزيع الميزانية للحركة الكثيفة، وأدلة الضبابية/التعرّض/SI-TI، والقطوع السريعة ذات النهاية الطويلة، والنتائج الإيجابية الزائفة للتلاشي التدريجي. ويسجّل زمن التحليل المسبق الفعلي، ويسجّل أيضًا، حيثما يتوفر `/usr/bin/time`، وقت وحدة المعالجة المركزية للعملية الفرعية وذروة RSS. لا تمثل فحوص الجودة الخاصة به سوى مراجع بنيوية. تظل جودة نموذج التسميات التوضيحية الحقيقي عند `HOLD` لأن أداة الاختبار هذه لا تملك نقطة نهاية مصرّحًا بها أو مُحكِّمًا ثابتًا. كما تظل الوفورات المالية عند `HOLD` ما لم يوفّر `--caption-cost-per-call-usd` تقديرًا صريحًا موجبًا للتكلفة لكل استدعاء؛ ولا يختلق البرنامج النصي أيًا من النتيجتين.
+يولّد `scripts/perf/video-bridge-fu07-eval.ts` تجهيزات FFmpeg حقيقية حتمية لقياس وفورات استدعاءات التسمية التوضيحية بعد إزالة التكرار، وتوزيع الميزانية للحركة الكثيفة، وأدلة الضبابية/التعريض/SI-TI، والقطعات السريعة مع ذيل طويل، والإيجابيات الكاذبة للتلاشي التدريجي. ويسجّل زمن التحليل المسبق الفعلي، وحيثما يتوفر `/usr/bin/time`، يسجّل زمن وحدة المعالجة المركزية للعملية الفرعية وذروة RSS. فحوصات الجودة الخاصة به هي أوراكل بنيوية فقط. تظل جودة نموذج التسمية التوضيحية الحقيقية في حالة `HOLD` لأن هذا المُسخّر (harness) لا يملك نقطة نهاية مُصرَّحًا بها ولا حَكَمًا مجمّدًا. كما تظل الوفورات المالية في حالة `HOLD` ما لم يوفّر `--caption-cost-per-call-usd` تقديرًا موجبًا صريحًا لكل استدعاء؛ ولا يختلق السكربت إطلاقًا أيًّا من هاتين النتيجتين.
 
-يقتصر حجم كل إطار على 4 MiB، ويقتصر إجمالي الإطارات الخام على 23 MiB، وتقتصر استجابة الوسيط المتسلسلة على 32 MiB. يُزال دليل مؤقت خاص في `finally`. لا يضمّن OmniRoute أداة FFmpeg ولا يقبل مسارًا مخصصًا للملف التنفيذي. قبل إنشاء التسميات التوضيحية، يطبّق الجسر تمريرة محافظة لإزالة التكرار المرئي: يُختزل كل ملف JPEG إلى مخزن مؤقت بتدرّج رمادي بحجم 16×16، ولا يُقارن إلا بآخر إطار محتفَظ به. عندما تكون ميزانية التسميات التوضيحية المطلوبة أكبر من إطار واحد، يوفّر الاستخراج مجموعة مرشحين محدودة تصل إلى ضعف تلك الميزانية، ولا تتجاوز 16 إطارًا مطلقًا. لا يُطبّق الحد الأقصى المطلوب إلا بعد إزالة التكرار، مع الحفاظ على أول مرشح محدد وآخره أثناء التقليص النهائي عندما تكون الميزانية إطارين على الأقل. تستخدم سياسة
-`grayscale-16x16-mean-cells-v2` ذات الإصدار المحدد القيمة الأكبر بين متوسط فرق النصوع ونسبة خلايا الصورة المصغّرة التي يبلغ فرقها المُطبّع 0.05 على الأقل. عتبة التكرار هي الثابت 0.04، وقد اختيرت لقابلية التنبؤ بدلًا من إتاحتها كإعداد وقت تشغيل. تحافظ إشارة التباين العالي الثانوية هذه على الحركة الصغيرة وتغيّرات النص المرئي التي قد تخفيها مقارنة تعتمد على المتوسط فقط. تؤدي أخطاء المقارن أو وحدة فك الترميز إلى الرجوع الآمن مع الاحتفاظ بالتغطية. تفصل بيانات الخرج الوصفية بين المرشحين المستخرَجين، والإطارات المستخدمة بنجاح، والتكرارات المرئية المستبعَدة.
+يُحدَّد كل إطار بـ 4 MiB، وجميع الإطارات الخام مجتمعة بـ 23 MiB، واستجابة الوسيط المتسلسلة بـ 32 MiB. يُزال دليل مؤقت خاص في `finally`. لا يُرفِق OmniRoute أداة FFmpeg ولا يقبل مسارًا مخصصًا لملف تنفيذي. قبل التعليق على الإطارات، يطبّق الجسر مرحلة إزالة تكرار بصري متحفظة: يُختزَل كل JPEG إلى مخزن مؤقت بتدرج رمادي بأبعاد 16×16 ويُقارَن فقط مع آخر إطار محتفظ به. عند طلب ميزانية تعليقات تتجاوز إطارًا واحدًا، يوفّر الاستخراج مجموعة مرشحين محدودة تصل إلى ضعف تلك الميزانية ولا تتجاوز 16 إطارًا أبدًا. يُطبَّق الحد الأقصى المطلوب فقط بعد إزالة التكرار، مع الحفاظ على أول المرشحين المحددين وآخرهم أثناء التخفيف النهائي عندما تكون الميزانية إطارين على الأقل. تستخدم سياسة `grayscale-16x16-mean-cells-v2` ذات الإصدار القيمة الأكبر من بين فرق متوسط الإضاءة ونسبة خلايا الصور المصغرة التي يبلغ فرقها المُطبَّع 0.05 على الأقل. عتبة التكرار هي الثابت 0.04، اختير لأجل قابلية التنبؤ بدلًا من إتاحته كإعداد وقت تشغيل. تحافظ هذه الإشارة الثانوية عالية التباين على الحركات الصغيرة وتغيّرات النص المرئي التي قد تخفيها المقارنة المعتمدة على المتوسط وحده. تفشل أخطاء المقارِن أو وحدة فك الترميز بشكل مفتوح وتحتفظ بالتغطية. تفصل البيانات الوصفية للمخرجات بين المرشحين المستخرَجين والإطارات المستخدمة بنجاح والتكرارات البصرية المُسقَطة.
 
-قد يطلب جزء فيديو معلَّم صراحةً لوحة صور مصغّرة ذات طوابع زمنية. ينشئ الجسر شبكة JPEG لا تتجاوز 4 أعمدة و16 إطارًا. تحرق كل خلية بعرض 512 بكسل الطابع الزمني لمصدرها في شريط سفلي عالي التباين، بينما تبقى الطوابع الزمنية نفسها في البيانات الوصفية النصية للربط والتدقيق في المراحل اللاحقة. يظل ملف JPEG الكامل محدودًا بحجم 32 MiB. إذا تعذّر على `sharp` فك ترميز الشبكة أو تركيبها، يرجع الجسر إلى إطارات JPEG الفردية؛ ويظل إلغاء العميل مُمرَّرًا عبر عملية إنشاء اللوحة.
+يمكن لجزء فيديو موسوم صراحةً أن يطلب ورقة اتصال مُختومة زمنيًا. يبني الجسر شبكة JPEG بأربعة أعمدة كحد أقصى و16 إطارًا. تحرق كل خلية بقياس 512 بكسل طابعها الزمني المصدري في شريط سفلي عالي التباين، بينما تبقى الطوابع الزمنية ذاتها في بيانات وصفية نصية للربط والتدقيق اللاحقين. يبقى ملف JPEG الكامل محدودًا بـ 32 MiB. إذا تعذّر على `sharp` فك ترميز الشبكة أو تركيبها، يتراجع الجسر إلى إطارات JPEG الفردية؛ أما إجهاض العميل فيستمر في الانتشار عبر عملية الورقة.
 
-تُفصل أدلة الترقية عمدًا عن الاختبار المصغّر للتركيب الاصطناعي. يعرّف `scripts/perf/video-bridge-contact-sheet-eval.ts` أداة اختبار A/B ذات مخطط محدد الإصدار لنماذج الرؤية الحقيقية المتوافقة مع OpenAI. وهي تقيس الرموز التي يُبلغ عنها المزوّد، وزمن الاستجابة الفعلي من البداية إلى النهاية (بما في ذلك تركيب اللوحة)، وعدد استدعاءات النموذج، والاحتفاظ بالحقائق المحددة في ملف البيان. لا تُكتب استجابات النموذج الخام في التقرير؛ بل يُحتفَظ فقط بملخّصات SHA-256 ومعرّفات الحقائق المطابَقة. لا تجري أداة الاختبار أي استدعاء شبكي أو استدعاء مدفوع لنموذج ما لم يُمرَّر `--execute-real` وتُضبط `--model` و`OMNIROUTE_BASE_URL` و`OMNIROUTE_API_KEY`. ومن دون هذا التشغيل الحقيقي الصريح، تظل النتيجة القابلة للقراءة آليًا عند `HOLD`؛ ولا تُعد قياسات الحمولة الاصطناعية/عدد الاستدعاءات وحدها دليلًا للترقية.
+تُفصَل أدلة الترقية عمدًا عن قياس الأداء المصغّر للتركيب الاصطناعي. يعرّف `scripts/perf/video-bridge-contact-sheet-eval.ts` منصة اختبار A/B ذات مخطط مُصدَر لنماذج رؤية حقيقية متوافقة مع OpenAI. يقيس الرموز المُبلَّغ عنها من المزوّد، وزمن الاستجابة الكامل من الطرف إلى الطرف (بما في ذلك تركيب الورقة)، وعدد استدعاءات النموذج، والاحتفاظ بالحقائق المعرَّفة في البيان. لا تُكتَب استجابات النموذج الخام في التقرير؛ تُحتفَظ فقط بملخصات SHA-256 ومعرّفات الحقائق المتطابقة. لا تجري المنصة أي استدعاء شبكي أو لنموذج مدفوع ما لم يُمرَّر `--execute-real` ويُهيَّأ كل من `--model` و`OMNIROUTE_BASE_URL` و`OMNIROUTE_API_KEY`. من دون ذلك التشغيل الحقيقي الصريح، يبقى حكمها الآلي القراءة `HOLD`؛ فقياسات الحمولة الاصطناعية وعدد الاستدعاءات وحدها ليست دليل ترقية.
 
-يمكن للمستدعين إرفاق مصفوفة `transcript.cues` اختيارية بجزء فيديو مدعوم عندما يمتلكون بالفعل نصًا متزامنًا. يجب أن يحمل كل تلميح `text` وفاصلًا زمنيًا محدودًا من `start`/`end` يقع ضمن المدة المستقصاة، وقيمة `source` مدرجة في القائمة المسموح بها (`client` أو `embedded` أو `audio-bridge`)؛ وتكون القيمة الافتراضية لـ`confidence` هي `1`، ويجب أن تظل بين `0` و`1`. تُدمج التلميحات المتطابقة تمامًا. لا يبدأ OmniRoute مطلقًا عملية نسخ صوتي اعتمادًا على هذه البيانات الوصفية: تُنسخ التلميحات المتحقَّق منها إلى النتيجة الموصوفة مع المصدر والثقة والفاصل الزمني، وتُعرض كملاحظات غير موثوقة إلى جانب التسميات التوضيحية للإطارات. يُرفض النص غير الصالح أو الواقع خارج النطاق أو المفتقر إلى مصدر بدلًا من خلطه في تدفق التسميات التوضيحية. يظل حقل `source` حاليًا مُعلَنًا من المستدعي، ولا يتحقق منه الخادم: يفرض OmniRoute أن تكون القيمة واحدة من السلاسل الثلاث المسموح بها، لكنه لا يؤكد بعدُ تشفيريًا أن التصنيف `embedded` أو `audio-bridge` جاء فعلًا من عملية استخراج يملكها الخادم. تعامل مع `source` كتلميح غير موثوق إلى أن يتوفر ذلك التحقق؛ ولا تبنِ عليه قرارات التفويض.
+يجوز للمُستدعين إرفاق مصفوفة `transcript.cues` اختيارية بجزء فيديو مدعوم عندما يمتلكون نصًا محاذيًا مسبقًا. يجب أن يحمل كل مقطع `text` وفاصلًا زمنيًا `start`/`end` منتهيًا ضمن المدة المستكشَفة ومصدرًا مدرَجًا في القائمة البيضاء `source` (`client` أو `embedded` أو `audio-bridge`)؛ ويُعيَّن `confidence` افتراضيًا إلى `1` ويجب أن يبقى بين `0` و`1`. تُدمَج المقاطع المكررة تمامًا. لا يبدأ OmniRoute النسخ أبدًا من هذه البيانات الوصفية: تُنسَخ المقاطع المُتحقَّق منها إلى النتيجة الموصوفة مع المصدر والثقة والفاصل الزمني، وتُعرَض كملاحظات غير موثوقة بجانب تعليقات الإطارات. يُرفَض النص غير الصالح أو الخارج عن النطاق أو الخالي من المصدر بدلًا من خلطه في تدفق التعليقات. تُطبِّع قناتا النص في جسم الطلب المصدر المُقدَّم إلى `client`، بما في ذلك تسميات `embedded` أو `audio-bridge` المُعلَنة ذاتيًا. وحدها محوّلة مملوكة للخادم يمكنها تعيين تلك التسميات الموثوقة عبر وسيط `trustedSource` المتاح في الشيفرة فقط؛ ولا يمكن لحقل JSON في الطلب الوصول إلى ذلك الوسيط. يبقى نص النص المفرَّغ محتوى غير موثوق مشتقًا من الوسائط، بغض النظر عن مصدره، ويجب ألا يحدد التخويل أبدًا.
 
-قد يوفّر المستدعي المتقدم مسار `audioTranscript` مصرّحًا به مسبقًا
-للفيديو نفسه. يشغّل موضع دمج الوسائط الملاحظات المرئية والصوتية ضمن
-مهلة نهائية واحدة وإشارة إلغاء واحدة، ويرتّبها على خط زمني مشترك، ويدمج
-النسخ المتطابقة تمامًا، ويُبلغ عن نتيجة جزئية عندما ينجح جانب واحد فقط.
-يؤدي `audioTranscript` غير الصالح إلى التراجع إلى تلك النتيجة الجزئية — إذ يُحتفظ
-بالوصف المرئي ويسجّل الفرع الصوتي رمز فشل منقّحًا — بدلًا من
-إفشال الفيديو بالكامل. يُحتفظ بتوفّر كل فرع، وعلامة النتيجة الجزئية،
-ورموز الفشل المنقّحة في النتيجة الموصوفة، وفي بيانات الحواجز الوصفية
-(`audioFusionRuns`/`audioFusionPartials`/
-`audioFusionFailureCodes`)، وفي بيانات ذاكرة التخزين المؤقت للنتائج، وفي عدّادات
-الدمج الخاصة بالجسر. لا يستدعي مسار Video Bridge الافتراضي تحويل الكلام إلى نص
-ولا ينزّل نسخة وسائط ثانية؛ ومن دون ذلك المسار الصريح، يظل
-خاصًا بالفيديو فقط.
+يمكن للمُستدعي المتقدم توفير مسار `audioTranscript` للفيديو نفسه؛ ويُعامَل كنص مقدَّم من العميل، لا كدليل على نسخ أجراه الخادم. تشغّل واجهة الدمج الملاحظات البصرية والصوتية تحت مهلة واحدة وإشارة إجهاض واحدة، وترتّبها على خط زمني مشترك، وتدمج التكرارات التامة، وتُبلِغ عن نتيجة جزئية عند نجاح أحد الجانبين فقط. يتدهور `audioTranscript` غير الصالح إلى تلك النتيجة الجزئية — يُحتفَظ بالوصف البصري ويسجّل الفرع الصوتي رمز فشل مُنقَّح — بدلًا من إفشال الفيديو بأكمله. تُحفَظ إتاحة كل فرع وعلامة الجزئية ورموز الفشل المُنقَّحة في النتيجة الموصوفة، وفي بيانات وصفية للضوابط (`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`)، وفي بيانات ذاكرة التخزين المؤقت للنتائج، وفي عدّادات دمج الجسر. لا يستدعي مسار Video Bridge الافتراضي تحويل الكلام إلى نص ولا ينزّل نسخة وسائط ثانية؛ فمن دون ذلك المسار الصريح، يبقى مقتصرًا على الفيديو فقط.
 
-**الاحتفاظ بالنص المنسوخ (#12150 P1).** ينطبق هذا تلقائيًا كلما عرض
-Video Bridge (وهو نفسه ميزة اشتراك اختياري) تلميح نص منسوخ — فلا توجد علامة
-احتفاظ منفصلة. عندما يعرض طلب أي تلميح نص منسوخ (سواء كان `transcript`
-مصرّحًا به من المستدعي أو `audioTranscript` مدمجًا)، يضع الحاجز عليه علامة
-`videoBridgeObserved` وينشئ نسخة ظل منقّحة من وصف الفيديو —
-وهي عرض مطابق يُستبدل فيه النص الحر لكل تلميح بـ
-`[redacted-video-transcript]`، وتُنشأ عبر استبدال حقل التلميح المنظّم
-قبل تجميع السلسلة النصية (وليس عبر تحليل النص المسطّح مطلقًا، بحيث لا يمكن لأي محتوى
-تلميح — سواء كان عدائيًا أو عاديًا، بما في ذلك المتون التي تحتوي على `]` مثل
-`[inaudible]`/`[music]` — أن يبقى). يستبدل متن الطلب المحفوظ في سجل الاستدعاء
-كل جزء نصي مشتق من الفيديو بنسخة الظل المنقّحة تلك، مع المطابقة بحسب تساوي
-المحتوى؛ ويُعاد قراءة مرساة `fullText` من حمولة الحاجز المكتملة السابقة للاستدعاء،
-لذلك تظل المطابقة ناجحة بعد أن تعيد حواجز السلسلة اللاحقة (أدوات إخفاء معلومات
-التعريف الشخصية وبيانات الاعتماد، بالأولويتين 10/95) كتابة نص الوصف في موضعه،
-وبعد أن تعيد عمليات حقن موجّه النظام/التسليم/الذاكرة تشكيل مصفوفة الرسائل. يظل
-المتن المرسل إلى النموذج في المنبع دون تغيير. كذلك لا يملأ الطلب المرصود
-أي Memory دائمة (إذ يُتخطى الاستخراج المشتق من كل من الطلب والاستجابة)،
-وبذلك لا يمكن لرد النموذج نفسه أن يكرر نص النسخ داخل Memory.
+**الاحتفاظ بنص التفريغ (#12150 P1).** يسري هذا تلقائيًا كلما عرض جسر الفيديو (الذي هو اختياري بحد ذاته) إشارة تفريغ — فلا توجد راية احتفاظ منفصلة. عندما يعرض طلبٌ ما أي إشارة تفريغ (سواء كانت `transcript` معلنة من المتصل أو `audioTranscript` مدموجة)، يضع حاجز الحماية علامة `videoBridgeObserved` عليه وينتج ظلًا منقّحًا لوصف الفيديو — عرضًا مطابقًا يُستبدل فيه النص الحر لجسم كل إشارة بـ `[redacted-video-transcript]`، ويُبنى عبر استبدال حقل الإشارة المنظَّم قبل تجميع السلسلة النصية (ولا يتم أبدًا عبر تحليل النص المُسطَّح، بحيث لا يمكن لأي محتوى من الإشارات — عدائيًا كان أو عاديًا، بما في ذلك الأجسام التي تحتوي على `]` مثل `[inaudible]`/`[music]` — أن يبقى). يستبدل جسم الطلب المحفوظ في سجل المكالمات كل جزء نصي مشتق من الفيديو بذلك الظل المنقّح، مع المطابقة عبر تساوي المحتوى؛ وتُعاد قراءة مرساة `fullText` من حمولة حاجز الحماية النهائية قبل الاستدعاء، بحيث تنجح المطابقة حتى بعد أن تعيد حواجز الحماية اللاحقة في السلسلة (أدوات إخفاء PII وبيانات الاعتماد، بالأولويتين 10/95) كتابة نص الوصف في مكانه، وبعد أن يعيد حقن موجه النظام/التسليم/الذاكرة تشكيل مصفوفة الرسائل. أما الجسم المُرسل إلى النموذج في المنبع فيبقى دون تغيير. كما أن الطلب المرصود لا يملأ أي ذاكرة (Memory) دائمة (إذ يُتخطّى الاستخراج المشتق من الطلب ومن الاستجابة معًا)، بحيث لا يمكن لرد النموذج نفسه أن يعكس نص التفريغ إلى الذاكرة.
 
-أسطح الاحتفاظ التي لا تزال مفتوحة، والمتتبعة ضمن متابعة لاحقة (**P2**، #12430): لقطة
-طلب العميل الخام السابقة للحاجز في مُنتَج السجل التفصيلي؛ واستمرارية
-`previous_response_id` التي تفشل بصورة مغلقة؛ وعمليات الإرسال الداخلية للموجّهات
-المشتقة التي تضمّن النص المنسوخ داخل موجّه نصي مُنشأ (مراحل خط الأنابيب،
-وتسليم السياق)؛ ومتن الاستجابة/نسخة ذاكرة التخزين المؤقت الدلالية
-من رد النموذج الذي يقتبس النص المنسوخ. هذه أسطح خام/من فئة الاستجابة أو
-اختيارية تقع خارج نطاق متن الطلب المحفوظ + Memory الخاص بـ P1.
+**حقول الفيديو الخام (#12430).** عندما يكون الجسر ممكّنًا ودعم الفيديو الأصلي غير معروف أو غير موجود، فإن حقول `transcript`/`audioTranscript` المعرّفة تفعّل أيضًا `videoBridgeObserved`، حتى بعد فشل الوصف أو بلوغ حد `maxVideos`. تُحتسب القيم `null` والسلاسل النصية الفارغة؛ أما الحقول الغائبة والبيانات الوصفية غير المتعلقة بالفيديو فلا تُحتسب. تعمل النسخ المحتفظ بها على تنقيح هذه الحقول أو حذف الطلب، ويتم تجاوز ذاكرات التخزين المؤقت/الذاكرة.
 
-دورة حياة `/api/modality-bridge/video/drilldown` الداخلية هي ركيزة منفصلة
-لذاكرة التخزين المؤقت، محمية بمصادقة الاسترجاع الداخلي/الرمز المميز. تتطلب كل عملية أيضًا
-معرّف جهة رئيسية مبهمًا وأساسيًا. قبل تمكين مستدعٍ في بيئة الإنتاج، يجب عليه
-اشتقاق ذلك المعرّف من المستأجر المصادق عليه، ويجب ألا يمرر مطلقًا قيمة
-اختارها العميل. تربط مفاتيح ذاكرة التخزين المؤقت تلك الجهة الرئيسية بمعرّفات الجلسة
-ومراجع الفيديو الأساسية، ولا تخزّن سوى مفاتيحها المشتقة من SHA-256، وتحصر كلًا من
-القراءات والحذف ضمن الجهة الرئيسية نفسها. تخزّن ذاكرة التخزين المؤقت ما لا يزيد عن 16
-إطار JPEG مشتقًا لكل إدخال، وتنهي صلاحيتها بعد عشر دقائق، وتدعم قراءات
-`start`/`end` المحدودة أو الحذف الصريح للجلسة.
+في مسارات الرجوع تلك، تصبح إشارات المتصل الصالحة أجزاء `text`/`input_text` مدعومة بدلاً من حقول موفّر غير قياسية. ويظل كلا المسارين المقدمين في الطلب مشاهدات `client` غير موثوقة، مع تحذير صريح بأن الفيديو لم يُوصَف وأن الطوابع الزمنية لم يتم التحقق منها مقابل الوسائط. تنطبق الميزانيات الحالية البالغة 256 إشارة/64 كيبيبايت في المجموع ولكل إشارة على المسارين معًا؛ ويجب أن تتوافق الطوابع الزمنية مع سقف الوسيط البالغ 600 ثانية ومع أي نافذة تركيز مقدمة. تُتجاهَل المسارات غير الصالحة ولا تُمرَّر كنص عشوائي؛ وقد يظل المسار الشقيق الصالح مستخدمًا ما لم يتم تجاوز ميزانيتهما المشتركة. والحقول ذات القيمة `null`/الفارغة لا تضيف أي نص. ولا يضيف هذا الرجوع أي جلب للوسائط أو تفريغ صوتي. تُزال حقول امتداد التفريغ من حامل الفيديو البديل ومن كائنات `video_url`/`source` الخاصة به. تظل قائمة السماح السلكية لـ OpenAI صارمة؛ وتبقى حاملات الفيديو ذات الدعم الأصلي غير المعروف متاحة، وتحتفظ الأهداف النصية المعروفة فقط بعلامات آمنة. تحمي ظلال التنقيح المنظمة نص التفريغ المُلحَق، بينما يبقى الطلب الأصلي المملوك للمتصل دون تغيير. وتحتفظ الأهداف المدعومة أصليًا والجسور المعطلة بسلوك التجاوز الحالي الخاص بها.
 
-تُحد كل جهة رئيسية بـ 16 إدخالًا و64 MiB من بيانات JPEG الأساسية. وهذه
-الحدود مستقلة عن السقف العام البالغ 64 إدخالًا/256 MiB: فضغط حصة
-الجهة الرئيسية لا يُخرج إلا إدخالات تلك الجهة الأقل استخدامًا مؤخرًا قبل النظر في
-الإخراج العام وفق LRU. وتُزال الإدخالات منتهية الصلاحية من محاسبة كل من الجهة الرئيسية
-والمحاسبة العامة عند نشاط ذاكرة التخزين المؤقت، بينما لا يؤدي الإلغاء أو فشل التحقق
-إلى تثبيت استبدال جزئي.
+تستخدم النسخ المحتفظ بها الإضافية إشارة الطلب المرصود نفسها. فلقطة طلب العميل الخام قبل حاجز الحماية، والطلب المعلق في الذاكرة، وسجل الطلبات المرفوضة مبكرًا، تحل جميعها محل حقول التفريغ في أجزاء الفيديو بنيويًا؛ بينما تُنقَّح الموجهات النصية المركبة بواسطة مراحل خط المعالجة وتسليم السياق عند نقطة تخزين جسم الطلب المحفوظ. تجعل علامة `video_content_removed` المحفوظة متابعة `previous_response_id` تفشل بشكل مغلق بدلاً من إعادة بناء نص تم تجاهله عمدًا. وإذا فقد طلب مرصود ظل التنقيح الخاص بكل جزء قبل التسجيل، أو حتى إذا فشل أحد ظلال الفيديو المتعددة في المطابقة بعد تعديلات لاحقة على الطلب، فإن جسم الطلب المحتفظ به يُحذف بالكامل بدلاً من الاحتفاظ بتفريغ منقّح جزئيًا.
 
-ترفض ذاكرة التخزين المؤقت Base64 غير الأساسي، والحشو الزائد، والوسائط غير المنسقة بصيغة JPEG،
-وملفات JPEG المشوهة أو المبتورة، وملفات JPEG التي تنتج تحذيرًا أثناء فك ترميز
-`sharp` محدود للصورة الكاملة. وتعيد ترميز كل صورة مقبولة بصيغة JPEG أساسية، وتستمد
-العرض والارتفاع من البايتات المفككة بدلًا من الوثوق بحقول المستدعي، وتتخلص من أي
-بايتات متعددة الصيغ لاحقة بدلًا من الاحتفاظ بها. ولا تُحتسب ضمن كلتا الحصتين إلا
-ذاكرة التخزين المؤقت المضغوطة الأساسية والمحدودة. يشمل حد نقل JSON الحمل الإضافي
-لـ Base64 بالنسبة إلى سقف الإدخال المفكوك البالغ 32 MiB. ويسجّل كل
-اشتقاق مخزّن تنسيق JPEG ودقته بعد التحقق، وسياسة أخذ العينات،
-وإصدار الاشتقاق، ووقت الإنشاء، وتجزئة المحتوى المحسوبة على الخادم، ومرجع الأصل
-المجزّأ، إلى جانب تجزئة محتوى الأصل الخاصة بالمستدعي الموثوق. ويُتحقق من الإلغاء
-بين مراحل فك الترميز/التجزئة غير المتزامنة قبل التثبيت الذري في ذاكرة التخزين المؤقت.
+بالنسبة لطلب مرصود، قد يقتبس رد النموذج أي جزء من التفريغ دون حدود إشارة منظمة. لذلك يُستبدل `responseBody` المحفوظ في سجل المكالمات بعلامة حذف؛ ولا يُحتفظ بأثر خط المعالجة التفصيلي (الذي قد يتضمن أجسام المنبع/العميل وأجزاء التدفق). تتجاوز ذاكرات التخزين المؤقت الدلالية وذاكرات عدم التكرار وإعادة تشغيل الاستدلال عمليتَي القراءة والكتابة لذلك الطلب. ويبقى طلب الموفّر والاستجابة المرئية للعميل دون تغيير. تُستنزَف بايتات keepalive المبكرة من المخزن المؤقت المؤقت عند حذف الأثر التفصيلي. يبلغ تحذير Kiro الخاص بـ EventStream المعطوب عن عدد بايتات الحمولة فقط، ولا يبلغ أبدًا عن محتوياتها أو عن خطأ محلل JSON الخام. ولا يدّعي هذا أنه تم تدقيق كل تشخيص موفّر/إضافة غير مرتبط؛ فعملية المسح الأوسع لنقاط التخزين المحتفظ بها مُتتبَّعة في #11658.
 
-لا تربط هذه الدفعة حتى الآن أي منتج في بيئة الإنتاج بالمسار، ولا
-توفّر اختيار متغيرات متعددة الدقة. ولذلك لا يفرض مسار طلب
-Video Bridge الشفاف أي عمل إضافي، بينما يظل اشتقاق الجهة الرئيسية المرتبط بالمستأجر
-ودورة حياة FU-08 الكاملة متعددة الدقة أعمال متابعة صريحة بدلًا من
-توثيقها كسلوك مكتمل.
+إن دورة حياة `/api/modality-bridge/video/drilldown` الداخلية هي بنية تخزين مؤقت منفصلة، مصادَق عليها عبر الاسترجاع المحلي/الرمز المميز. وتتطلب كل عملية أيضًا معرف أساس مبهمًا ومعياريًا. وقبل تمكين متصل إنتاجي، يجب أن يشتق ذلك المعرف من المستأجر المصادَق عليه وألا يمرّر أبدًا قيمة مختارة من العميل. تربط مفاتيح التخزين المؤقت ذلك الأساس بمعرفات جلسة ومرجع فيديو معيارية، وتخزن فقط المفاتيح المشتقة من SHA-256، وتحصر كلاً من القراءة والحذف في الأساس نفسه. تخزن ذاكرة التخزين المؤقت 16 إطار JPEG مشتقًا كحد أقصى لكل إدخال، وتنتهي صلاحيتها بعد عشر دقائق، وتدعم القراءات المحدودة بـ `start`/`end` أو الحذف الصريح للجلسة.
 
-تُضاف تسميات توضيحية إلى الإطارات بالتتابع باستخدام نموذج Video المُهيّأ. يتوارث تجاوز
-Video الفارغ إعداد Vision؛ وإذا كان كلاهما فارغًا، يختار الموجّه التلقائي لـ Vision
-النموذج الفعلي الداعم للرؤية. تستبدل التسميات التوضيحية الناجحة الجزء الأصلي ببادئة ثابتة
-`[Video description:` تشير أيضًا إلى أن النص ملاحظة غير موثوقة مشتقة من وسائط، وتطلب من
-النماذج اللاحقة عدم اتباع التعليمات الموجودة في الوسائط. تتضمن مفاتيح ذاكرة التخزين المؤقت
-لتسميات الإطارات بايتات JPEG، والموجّه، والطابع الزمني، والنموذج الفعلي؛ ولا تُخزّن مؤقتًا
-إلا التسميات التوضيحية الناجحة. تحتفظ إدخالات ذاكرة التخزين المؤقت بالنموذج المُنتِج الفعلي
-الناجح، بما في ذلك نموذج احتياطي؛ وتُبلغ الجسور بالقيمة `mixed` عندما تكون الإطارات المختلفة
-قد أُنتجت بواسطة نماذج مختلفة. تعيد إصابة ذاكرة التخزين المؤقت استخدام هوية ذلك المُنتِج
-بدلًا من إعادة تصنيفها بوصفها خطة التوجيه المطلوبة. تُفهرس ذاكرة التخزين المؤقت لنتيجة
-الفيديو بالكامل وفق كل مُدخل يغيّر الناتج — الموجّه، والنموذج الفعلي، وسياسة أخذ العينات،
-وعدد الإطارات، ووضع التحليل الدلالي، وبصمة SHA-256 لتلميح التركيز المُطبّع، ونافذة التركيز،
-و`transcript`، و`audioTranscript`، وعلامة ورقة جهات الاتصال — ولذلك فإن تغيير أي من هذه
-الأبعاد يؤدي إلى فقدان ذاكرة التخزين المؤقت، وليس إلى إعادة استخدام بيانات قديمة. كما أن
-إصدار سياسة إزالة التكرار المرئي، وعتبتها، والعدد المحدود من الإطارات المرشحة مُحددة صراحةً
-في مفتاح ذاكرة التخزين المؤقت للنتائج وبياناتها الوصفية؛ ولذلك لا يمكن لتغيير السياسة إعادة
-استخدام وصف قديم للفيديو بالكامل. تحتفظ البيانات الوصفية للإصدار v4 من ذاكرة التخزين
-المؤقت للنتائج بالوضع والبصمة، ولا تحتفظ أبدًا بمهمة المستخدم الخام. تُبلغ البيانات الوصفية
-للحاجز الوقائي عن وضعي التحليل المطلوب والفعلي؛ ويُبلّغ عن وضع `focused` مطلوب من دون
-نص مستخدم صالح بوصفه `full` فعليًا.
+يقتصر كل أساس على 16 إدخالاً و64 ميبيبايت من بيانات JPEG المعيارية. وهذه الحدود مستقلة عن السقف العام البالغ 64 إدخالاً/256 ميبيبايت: فضغط حصة الأساس يطرد فقط الإدخالات الأقل استخدامًا مؤخرًا الخاصة بذلك الأساس قبل النظر في الطرد العام وفق LRU. وتُكنَّس الإدخالات منتهية الصلاحية من محاسبة الأساس والمحاسبة العامة معًا عند نشاط ذاكرة التخزين المؤقت، بينما لا يؤدي الإلغاء وفشل التحقق إلى تثبيت استبدال جزئي.
 
-يستخرج الحاجز الوقائي كل جزء فيديو مدعوم، لكنه لا يصف أكثر من
-`modalityBridgeVideoMaxVideos`. بالنسبة إلى هدف ثبت أن
-`supportsVideo === false` لديه، تتحول مقاطع الفيديو الفاشلة والمتجاوزة للحد إلى علامات
-نصية آمنة صريحة، بحيث لا يبقى أي فيديو خام. عندما تكون الإمكانية مجهولة، تظل تلك الأجزاء
-دون تغيير. تتجاوز الأهداف التي لديها `supportsVideo === true` الجسر.
-تنتشر إشارة إلغاء طلب العميل عبر التنزيل، وطابور الوسيط، والعمليات الفرعية، واستدعاءات
-التسمية التوضيحية؛ وتوقف عمليات الإلغاء التنفيذ بين مقاطع الفيديو، ولا تفشل أبدًا بشكل يسمح
-بمرور الوسائط الخام.
+ترفض ذاكرة التخزين المؤقت Base64 غير القياسي، والحشو الزائد، والوسائط غير JPEG، وملفات JPEG التالفة أو المقتطعة، وملفات JPEG التي تُنتج تحذيرًا أثناء فك ترميز `sharp` المحدود للصورة الكاملة. تُعيد ترميز كل صورة مقبولة كـ JPEG قياسي، وتشتق العرض والارتفاع من البايتات المفكوكة الترميز بدلاً من الوثوق بحقول المستدعي، وتتجاهل أي بايتات هجينة (polyglot) زائدة في النهاية بدلاً من الاحتفاظ بها. يُحتسَب المخزن المؤقت المضغوط القياسي المحدود فقط ضمن كلتا الحصتين. يتضمن حد JSON على مستوى النقل (wire) عبء Base64 لسقف الإدخال المفكوك الترميز البالغ 32 MiB. يسجل كل اشتقاق مخزَّن تنسيق/دقة JPEG الذي تم التحقق منه، وسياسة أخذ العينات، وإصدار الاشتقاق، ووقت الإنشاء، وتجزئة المحتوى المحسوبة من الخادم، ومرجع الأصل المُجزَّأ بالإضافة إلى تجزئة محتوى الأصل الخاصة بالمستدعي الموثوق. يتم التحقق من الإلغاء بين مراحل فك الترميز/التجزئة غير المتزامنة قبل التثبيت الذري لذاكرة التخزين المؤقت.
 
-تُخزّن إعدادات وقت التشغيل في قاعدة البيانات ويجري التحقق منها باستخدام Zod:
+لا تربط هذه الدفعة بعد منتجًا إنتاجيًا بالمسار ولا توفر اختيار متغيرات متعددة الدقات. وبالتالي لا يتحمل مسار طلب Video Bridge الشفاف أي عمل إضافي، بينما يظل اشتقاق الكيان الأساسي المرتبط بالمستأجر ودورة الحياة الكاملة متعددة الدقات FU-08 عملاً متابِعًا صريحًا بدلاً من توثيقهما كسلوك مكتمل.
 
-| المفتاح                             | القيمة الافتراضية | النطاق / السلوك                                                                                   |
-| ----------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------- |
-| `modalityBridgeVideoEnabled`        | `false`           | وقت تشغيل اختياري، ويستلزم الاشتراك صراحةً                                                        |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`          | يحافظ `full` على التسميات العامة؛ ويستخدم `focused` سياقًا محدودًا وغير موثوق من أحدث نص للمستخدم |
-| `modalityBridgeVideoModel`          | `""`              | يتوارث نموذج Vision Bridge                                                                        |
-| `modalityBridgeVideoFrameCount`     | `8`               | 1–16                                                                                              |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"`       | `uniform` أو `scene_aware` أو `segment_aware` التناسبي؛ وعند فشل الكاشف يجري الرجوع إلى `uniform` |
-| `modalityBridgeVideoMaxVideos`      | `1`               | 1–4                                                                                               |
-| `modalityBridgeVideoTimeout`        | `120000`          | 1000–120000 مللي ثانية                                                                            |
+يتم وضع تسميات توضيحية للإطارات بشكل تسلسلي باستخدام نموذج الفيديو المُكوَّن. يرث تجاوز الفيديو الفارغ إعداد Vision؛ وإذا كان كلاهما فارغًا، يختار الموجّه التلقائي لـ Vision النموذج الفعلي القادر على الرؤية. تحل التسميات التوضيحية الناجحة محل الجزء الأصلي ببادئة ثابتة `[Video description:` تُميّز النص أيضًا كملاحظة غير موثوقة مشتقة من الوسائط وتخبر النماذج اللاحقة بعدم اتباع التعليمات الموجودة في الوسائط. تتضمن مفاتيح ذاكرة التخزين المؤقت لتسميات الإطارات بايتات JPEG والموجه والطابع الزمني والنموذج الفعلي؛ ويتم تخزين التسميات التوضيحية الناجحة فقط مؤقتًا. تحتفظ إدخالات ذاكرة التخزين المؤقت بنموذج المنتج الناجح الفعلي، بما في ذلك نموذج احتياطي؛ ويُبلغ الجسر عن `mixed` عندما تُنتَج إطارات مختلفة بواسطة نماذج مختلفة. تُعيد إصابة ذاكرة التخزين المؤقت استخدام هوية المنتج تلك بدلاً من إعادة تسميتها كخطة التوجيه المطلوبة. يتم مفتحة ذاكرة التخزين المؤقت لنتائج الفيديو الكامل على كل إدخال يغيّر المخرجات — الموجه، والنموذج الفعلي، وسياسة أخذ العينات، وعدد الإطارات، ووضع التحليل الدلالي، وبصمة SHA-256 لتلميح التركيز المُطبَّع، ونافذة التركيز، و`transcript`، و`audioTranscript`، وعلامة ورقة الاتصال — بحيث يؤدي تغيير أي من هذه الأبعاد إلى إخفاق في ذاكرة التخزين المؤقت، وليس أبدًا إلى إعادة استخدام قديمة. كما أن إصدار سياسة إزالة التكرار البصري والعتبة وعدد الإطارات المرشحة المحدود صريحة في مفتاح ذاكرة التخزين المؤقت للنتائج والبيانات الوصفية؛ وبالتالي لا يمكن لتغيير السياسة إعادة استخدام وصف قديم للفيديو الكامل. تحتفظ البيانات الوصفية v4 لذاكرة التخزين المؤقت للنتائج بالوضع والبصمة، ولا تحتفظ أبدًا بمهمة المستخدم الخام. تُبلغ البيانات الوصفية لحاجز الحماية عن وضعي التحليل المطلوب والفعلي معًا؛ ويُبلَّغ عن وضع `focused` المطلوب بدون نص مستخدم قابل للاستخدام على أنه `full` فعليًا.
 
-تُقيّد قيم مهلة Video القديمة المحفوظة، التي تتجاوز 120 ثانية، بموعد الوسيط النهائي؛
-وتُرفض عمليات كتابة الإعدادات الجديدة التي تتجاوز ذلك الحد.
-يتطلب `GET /api/modality-bridge/video/runtime` محلية موثوقة ومختومة عبر loopback
-قبل المصادقة أو فحص وقت التشغيل، ثم يتطلب مصادقة الإدارة.
-ولا يُرجع سوى `available`، وإصدارات FFmpeg/ffprobe المنقّحة، وسببًا ثابتًا عندما يكون
-وقت التشغيل غير متاح. نقطة نهاية الاستخراج الداخلية ليست واجهة API عامة للرفع: يُرجع
-تشبّع الطابور `503` بالإضافة إلى `Retry-After`، ويُرجع انقطاع اتصال المستدعي `499`،
-ويُرجع الموعد النهائي الثابت للوسيط `504`. تضيف الاستجابات المحوّلة
-`video->text;model=<visionModel>;parts=<videos>` إلى ترويسة
-`x-omniroute-modality-bridge` المركزية من دون إزالة مقاطع Vision أو Audio.
+يستخرج حاجز الحماية كل جزء فيديو مدعوم لكنه لا يصف أكثر من `modalityBridgeVideoMaxVideos`. بالنسبة لهدف ثبت أنه يحتوي على `supportsVideo === false`، تصبح مقاطع الفيديو الفاشلة والمتجاوزة للحد علامات نصية آمنة صريحة بحيث لا يبقى أي فيديو خام. عندما تكون القدرة غير معروفة، تحتفظ تلك الأجزاء بحامل الفيديو الخاص بها؛ ويتبع أي نص احتياطي تحويل النص المحدود أعلاه. تتجاوز الأهداف ذات `supportsVideo === true` الجسر. تنتشر إشارة إجهاض طلب العميل عبر التنزيل وقائمة انتظار الوسيط والعمليات الفرعية واستدعاءات التسمية التوضيحية؛ وتتوقف عمليات الإجهاض بين مقاطع الفيديو ولا تفشل أبدًا على نحو يكشف الوسائط الخام.
+
+إعدادات وقت التشغيل مدعومة بقاعدة البيانات ويتم التحقق من صحتها بواسطة Zod:
+
+| المفتاح                             | الافتراضي   | النطاق / السلوك                                                                                  |
+| ----------------------------------- | ----------- | ------------------------------------------------------------------------------------------------ |
+| `modalityBridgeVideoEnabled`        | `false`     | اختياري في وقت التشغيل، بالاشتراك (opt-in)                                                       |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | يحافظ `full` على التسميات التوضيحية العامة؛ يستخدم `focused` سياق أحدث مستخدم محدودًا وغير موثوق |
+| `modalityBridgeVideoModel`          | `""`        | يرث نموذج Vision Bridge                                                                          |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                             |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform` أو `scene_aware` أو `segment_aware` النسبي؛ يؤدي فشل الكاشف إلى الرجوع إلى `uniform`   |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                              |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 م.ث                                                                                  |
+
+تُثبَّت قيم مهلة الفيديو القديمة المستمرة التي تتجاوز 120 ثانية عند الموعد النهائي للوسيط؛ وتُرفَض كتابات الإعدادات الجديدة التي تتجاوز هذا الحد. يتطلب `GET /api/modality-bridge/video/runtime` محلية loopback مختومة وموثوقة قبل المصادقة أو فحص وقت التشغيل، ثم يتطلب مصادقة الإدارة. يعيد فقط `available` وإصدارات FFmpeg/ffprobe المُعقَّمة وسببًا ثابتًا عندما يكون وقت التشغيل غير متاح. نقطة النهاية الداخلية للاستخراج ليست واجهة برمجة تطبيقات عامة للتحميل: يعيد تشبع قائمة الانتظار `503` مع `Retry-After`، ويعيد قطع اتصال المستدعي `499`، ويعيد الموعد النهائي الثابت للوسيط `504`. تضيف الاستجابات المحوّلة `video->text;model=<visionModel>;parts=<videos>` إلى الترويسة المركزية `x-omniroute-modality-bridge` دون إزالة مقاطع Vision أو Audio.
 
 ### أداة إخفاء معلومات التعريف الشخصية (`piiMasker.ts`)
 
-تعمل في **كلتا** المرحلتين.
+تعمل على **كلتا** المرحلتين.
 
-- **`preCall`** تنسخ الحمولة، وتعبر `system` و`messages` و`input` و
-  `prompt` (بما في ذلك العناصر النصية البسيطة)، وتطبّق `processPII()` (من
-  `@/shared/utils/inputSanitizer`) على حقول `content`/`text` النصية. عندما تكون
-  `PII_REDACTION_ENABLED=true`، تُنقّح معلومات التعريف الشخصية المكتشفة في الحمولة
-  الصادرة. وهذا مستقل عن `INPUT_SANITIZER_MODE` (الذي يتحكم فقط في سياسة
-  حقن الموجّهات). عندما يكون التنقيح معطلًا، يسجل الاستدعاء أعداد الاكتشافات
-  من دون إعادة كتابة المحتوى.
-- **`postCall`** تنشئ نسخة عميقة من الاستجابة، وتشغّل `sanitizePIIResponse()` بالإضافة
-  إلى أداة الإخفاء الخاصة ببنية Responses API‏ (`maskResponsesOutput` — التي تغطي
-  `output_text` و`output[].content[].text`). إذا حدث أي تنقيح، تحل
-  الاستجابة المعدّلة محل الأصلية.
+- **`preCall`** يستنسخ الحمولة (payload)، ويجتاز `system` و`messages` و`input` و
+  `prompt` (بما في ذلك العناصر النصية البسيطة)، ويطبّق `processPII()` (من
+  `@/shared/utils/inputSanitizer`) على حقول `content`/`text` النصية. عندما
+  يكون `PII_REDACTION_ENABLED=true`، تُحجب المعلومات الشخصية (PII) المكتشفة في
+  الحمولة الصادرة. هذا مستقل عن `INPUT_SANITIZER_MODE` (الذي يتحكم فقط في
+  سياسة حقن الأوامر prompt-injection). عندما يكون الحجب معطلاً، يسجّل الاستدعاء
+  أعداد الاكتشافات دون إعادة كتابة المحتوى.
+- **`postCall`** يستنسخ الاستجابة استنساخاً عميقاً، ويشغّل `sanitizePIIResponse()`
+  بالإضافة إلى أداة الإخفاء الخاصة ببنية Responses-API (`maskResponsesOutput` —
+  تغطي `output_text` و`output[].content[].text`). إذا حدث أي حجب، تستبدل
+  الاستجابة المعدَّلة الاستجابة الأصلية.
 
-لا يحظر الحاجز الوقائي أبدًا؛ بل يضيف تعليقات توضيحية فقط (`meta.detections`،
+لا يحظر هذا الحارس (guardrail) أبداً؛ فهو فقط يضيف تعليقات توضيحية (`meta.detections`،
 `meta.redacted`) أو يعيد الكتابة.
 
-### حقن الموجّهات (`promptInjection.ts`)
+#### التحديد حسب النوع، والأنماط المخصصة، وعدّادات الاكتشاف
 
-يكتشف البنى العدائية في المحتوى المقدم من المستخدم، ويفرض السياسة
-المُهيّأة. يتحدد السلوك بواسطة متغيرات البيئة وخيارات المُنشئ:
+**لوحة التحكم ← الإعدادات ← الأمان ← إخفاء PII** تختار _ما_ الذي يُخفى. وهي
+لا تفعّل الإخفاء: فذلك ما يزال منوطاً بـ `PII_REDACTION_ENABLED` (للطلبات) و
+`PII_RESPONSE_SANITIZATION` (للاستجابة + SSE)، وكلاهما معطّل افتراضياً.
 
-| الإعداد  | متغير البيئة                                                                                                | القيمة الافتراضية | التأثير                                                                                                                                                                                                 |
-| -------- | ----------------------------------------------------------------------------------------------------------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| التفعيل  | `INPUT_SANITIZER_ENABLED`                                                                                   | `true`            | عندما تكون القيمة `false`، يتوقف حاجز الحماية مبكرًا.                                                                                                                                                   |
-| الوضع    | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                             | `warn`            | سياسة الحقن: `block` أو `warn` أو `log`. (تُقبل `redact` للتوافق مع الإصدارات السابقة، لكنها **لا** تزيل نص الحقن؛ تتحكم `PII_REDACTION_ENABLED` في إعادة كتابة معلومات تحديد الهوية الشخصية في الطلب.) |
-| حد الحظر | خيار `blockThreshold` / ‏`INPUT_SANITIZER_BLOCK_THRESHOLD` (الاسم البديل `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`            | الحد الأدنى لمستوى الخطورة المطلوب للحظر. تكون الخطورة المتوسطة مخصصة للمراقبة فقط وفق الإعداد الافتراضي.                                                                                               |
+- **التحديد حسب النوع** — المعرفات المدمجة مدرجة في
+  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). عدم التعيين يعني كل
+  الأنواع (السلوك الذي كان سائداً قبل وجود هذا الإعداد). نمط `ssn_us` في محرك
+  الطلبات يقابل `ssn`. القوالب (Minimal، وStandard، وFinancial،
+  وBrazilian، وUSA، وFull) تملأ فقط مربعات الاختيار في واجهة المستخدم.
+- **الأنماط المخصصة** — ما يصل إلى 20 نمطاً من نوع regex أو wildcard
+  (`*` = ما يصل إلى 64 حرفاً غير المسافات البيضاء، `?` = حرف واحد). تتحول
+  المطابقات إلى `[CUSTOM_REDACTED]`. يمر كل نمط عبر `compilePiiCustomPattern()`
+  (`src/shared/utils/piiCustomPatterns.ts`): 500 حرف كحد أقصى، والأعلام (flags)
+  محصورة في `g i m s u`، ويجب أن يُصرَّف بنجاح، ويجب أن يجتاز فحص `safe-regex`
+  (التراجع الكارثي catastrophic backtracking)، ويجب ألا يطابق سلسلة فارغة أو
+  عنصراً نائباً للحجب. النمط الذي يفشل يُرفض عند الحفظ وعند الاختبار، والصف
+  المخزَّن الذي يفشل يُتخطَّى في وقت التشغيل بدلاً من تصريفه. لا تعمل الأنماط
+  المخصصة إلا أثناء تفعيل الإخفاء.
+- **عدّادات الاكتشاف** — أعداد لكل نوع (وليست القيم المطابَقة أبداً)، محفوظة في
+  الذاكرة وتُصفَّر عند إعادة التشغيل (`src/lib/pii/piiDetectionStats.ts`). لا
+  تزداد إلا أثناء تفعيل الإخفاء.
 
-**أولوية الوضع** (`getMode`): ‏`options.mode` الخاص بالمتصل →
-**تجاوز علامة الميزة في قاعدة البيانات** لـ `INJECTION_GUARD_MODE` (لوحة المعلومات → الإعدادات →
-علامات الميزات) → متغير البيئة `INJECTION_GUARD_MODE` → متغير البيئة `INPUT_SANITIZER_MODE` →
-`warn`. لذلك، تكون لتجاوز لوحة المعلومات الأولوية على متغيرات البيئة، مما يتيح لواجهة
-علامات الميزات التحكم مباشرةً في حاجز الحماية قيد التشغيل (من دون إعادة تشغيل). تتم قراءة قاعدة البيانات بأسلوب آمن عند الفشل:
-إذا حدث خطأ، يعود حاجز الحماية إلى السلوك المستند إلى متغيرات البيئة، وعند عدم تعيين أي
-تجاوز، يكون السلوك مطابقًا تمامًا لآلية الحل المعتمدة على متغيرات البيئة فقط.
+تُخزَّن الإعدادات في جدول `key_value` (بنطاق الأسماء `pii_settings`،
+`src/lib/db/piiSettings.ts`) وتُقرأ عبر ذاكرة مؤقتة مدتها ثانية واحدة. واجهة API:
+
+| الطريقة | المسار                   | الغرض                                                               |
+| ------- | ------------------------ | ------------------------------------------------------------------- |
+| `GET`   | `/api/settings/pii`      | حالة الأعلام، و`enabledTypes`، و`customPatterns`، وعدّادات الاكتشاف |
+| `PUT`   | `/api/settings/pii`      | استبدال `enabledTypes` (القيمة `null` = الكل) و/أو `customPatterns` |
+| `POST`  | `/api/settings/pii/test` | تجربة نمط واحد على عينة بحجم 8 كيلوبايت كحد أقصى؛ لا يُخزَّن أي شيء |
+
+تتطلب الطرق الثلاث جميعها مصادقة إدارية وتتحقق من جسم الطلب باستخدام Zod
+(`src/shared/validation/schemas/piiSettings.ts`).
+
+### حقن الأوامر Prompt Injection (`promptInjection.ts`)
+
+يكتشف البنى الخبيثة في المحتوى الذي يقدمه المستخدم ويفرض السياسة المُهيأة.
+يُدار السلوك عبر متغيرات البيئة وخيارات المُنشئ (constructor):
+
+| الإعداد    | متغير البيئة                                                                                                   | الافتراضي | التأثير                                                                                                                                                                       |
+| ---------- | -------------------------------------------------------------------------------------------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| التفعيل    | `INPUT_SANITIZER_ENABLED`                                                                                      | `true`    | عندما يكون `false`، يتجاوز الحارس المعالجة مباشرة.                                                                                                                            |
+| الوضع      | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                                | `warn`    | سياسة الحقن: `block` أو `warn` أو `log`. (يُقبل `redact` للتوافق مع الإصدارات السابقة لكنه **لا** يزيل نص الحقن؛ إعادة كتابة PII في الطلب يتحكم بها `PII_REDACTION_ENABLED`.) |
+| عتبة الحظر | الخيار `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (الاسم المستعار `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`    | الحد الأدنى من الخطورة المطلوب للحظر. الخطورة المتوسطة للمراقبة فقط عند الإعداد الافتراضي.                                                                                    |
+
+**أولوية الوضع** (`getMode`): خيار `options.mode` من المتصل ←
+**تجاوز علم الميزة من قاعدة البيانات** لـ `INJECTION_GUARD_MODE` (لوحة التحكم ←
+الإعدادات ← Feature Flags) ← متغير البيئة `INJECTION_GUARD_MODE` ←
+متغير البيئة `INPUT_SANITIZER_MODE` ← `warn`. لذلك فإن تجاوز لوحة التحكم يغلب
+على متغيرات البيئة، بحيث تتحكم واجهة Feature Flags في الحارس العامل مباشرة
+(دون إعادة تشغيل). القراءة من قاعدة البيانات آمنة ضد الأعطال: إذا حدث خطأ،
+يرجع الحارس إلى السلوك القائم على متغيرات البيئة، وعندما لا يُعيَّن أي تجاوز
+يكون السلوك مطابقاً لحل متغيرات البيئة وحدها.
 
 مصادر الاكتشاف:
 
-1. ‏`sanitizeRequest()` من `@/shared/utils/inputSanitizer` (مجموعة أدوات الاكتشاف المشتركة
-   المستخدمة في مواضع أخرى من مسار المعالجة).
-2. ‏`DEFAULT_GUARD_PATTERNS` المضمّنة (حاليًا `system_override_inline` و
-   `markdown_system_block`، وكلاهما بمستوى خطورة `high`).
-3. ‏`customPatterns` اختيارية تُمرَّر عبر خيارات المُنشئ (سلاسل نصية أو تعبيرات نمطية
-   أو سجلات `{ name, pattern, severity }`).
+1. `sanitizeRequest()` من `@/shared/utils/inputSanitizer` (مجموعة الكواشف
+   المشتركة المستخدمة في أماكن أخرى من خط المعالجة).
+2. `DEFAULT_GUARD_PATTERNS` المدمجة (حالياً `system_override_inline` و
+   `markdown_system_block`، وكلاهما بخطورة `high`).
+3. `customPatterns` الاختيارية المُمرَّرة عبر خيارات المُنشئ (سلاسل نصية، أو
+   تعبيرات نمطية regex، أو سجلات بالشكل `{ name, pattern, severity }`).
 
-عندما يكون `mode === "block"` **و** يستوفي اكتشاف واحد على الأقل حد
-الخطورة، تُرجع `preCall` القيمة `{ block: true, message: "Request rejected:
-suspicious content detected" }`. في الوضعين `warn`/`log`، يسجل حاجز الحماية الحدث، لكنه
-يسمح بالاستدعاء. كما تُصدَّر الدالة المساعدة المشتركة `evaluatePromptInjection()`
-للمتصلين الذين يحتاجون إلى تقييم المطالبات من دون المرور عبر السجل.
+عندما يكون `mode === "block"` **و** استوفى كشفٌ واحد على الأقل عتبة الخطورة، يُعيد `preCall` القيمة `{ block: true, message: "Request rejected: suspicious content detected" }`. في وضعَي `warn`/`log` يقوم الحاجز بالتسجيل لكنه يسمح بالاستدعاء. كما يتم تصدير المساعد المشترك `evaluatePromptInjection()` للمتصلين الذين يحتاجون إلى تقييم المطالبات دون المرور عبر السجل.
 
-**حد الفحص (v3.8.20):** لا تفحص أداة الاكتشاف سوى **أول 16 KB** من
-نص المطالبة المدمج — ‏`MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 بايت) في
-`src/shared/utils/inputSanitizer.ts`. تستدعي كل من `detectInjection()` و
-`evaluatePromptInjection()` الدالة `slice(0, MAX_INJECTION_SCAN_BYTES)` قبل تشغيل
-حلقة الأنماط. تظهر توجيهات الحقن بالقرب من بداية الإدخال، ولذلك يحد هذا
-من استهلاك وحدة المعالجة المركزية/جامع القمامة بواسطة التعبيرات النمطية عند التعامل مع حمولات بحجم مئات الكيلوبايت من دون إضعاف الاكتشاف (راجع
-#3932، و#4041).
+**حد الفحص (v3.8.20):** لا يفحص الكاشف سوى **أول 16 كيلوبايت** من نص المطالبة المدمج — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 بايت) في `src/shared/utils/inputSanitizer.ts`. ينفّذ كلٌّ من `detectInjection()` و`evaluatePromptInjection()` العملية `slice(0, MAX_INJECTION_SCAN_BYTES)` قبل تشغيل حلقة الأنماط. توجد توجيهات الحقن بالقرب من بداية المدخل، لذا فإن هذا يضع حدًّا أقصى لاستهلاك التعابير النمطية للمعالج وجامع المهملات (CPU/GC) على الحمولات التي يبلغ حجمها مئات الكيلوبايتات دون إضعاف الكشف (انظر #3932، #4041).
 
-### أداة إخفاء بيانات الاعتماد (`credentialMasker.ts`)
+### مقنِّع بيانات الاعتماد (`credentialMasker.ts`)
 
-تعمل في **كلتا** المرحلتين، وتأتي أخيرًا في السلسلة الافتراضية (الأولوية `95`). تحجب
-أنماط مفاتيح API / الرموز السرية المعروفة من الحمولة الصادرة (محتوى الرسالة
-ووسيطات استدعاء الأدوات ونتائج الأدوات) **ومن** استجابة المزوّد، بحيث لا تتسرب
-بيانات الاعتماد الملصقة في مطالبة (أو التي تعيدها نتيجة أداة) إلى
-المزوّد الخارجي أو إلى العميل.
+يعمل على **كلتا** المرحلتين، ويأتي أخيرًا في السلسلة الافتراضية (الأولوية `95`). يحجب أنماط مفاتيح API / الرموز السرية المعروفة من الحمولة الصادرة (محتوى الرسالة، وسيطات استدعاء الأدوات، نتائج الأدوات) **و**من استجابة المزوِّد، بحيث لا تُسرَّب بيانات اعتماد لُصِقت في مطالبة (أو أعادتها نتيجة أداة) إلى المزوِّد الأعلى أو رجوعًا إلى العميل.
 
-- **لا تعمل إلا بالاشتراك الصريح**، وفق النهج نفسه المتبع في حجب معلومات تحديد الهوية الشخصية (بالقرب من القاعدة الصارمة رقم 20):
-  تكون معطّلة ما لم تكن `settings.credentialRedactionEnabled === true` **أو**
-  `CREDENTIAL_REDACTION_ENABLED=true`. عند تعطيلها، لا ينفذ حاجز الحماية أي إجراء —
-  فلا يحظر ولا يعيد الكتابة مطلقًا.
-- تجتاز `redactCredentials()` شجرة الحمولة/الاستجابة بالكامل (`walkValue()`،
-  مع حماية من تلويث النموذج الأولي وأمان من الحلقات عبر `WeakSet`) وتستبدل التطابقات
-  بعنصر نائب `[REDACTED:<type>]`، مع استنساخ الفروع التي تغيرت فعليًا فقط.
-- تشمل `CREDENTIAL_PATTERNS` مفاتيح مزوّدي نماذج اللغة الكبيرة (OpenAI وOpenAI-proj
-  وAnthropic وGoogle وHugging Face وReplicate)، ورموز VCS/SaaS (GitHub وSlack
-  وLinear وNotion وnpm وPostman وDiscord)، ومفاتيح الدفع (Stripe وSquare)، ومفاتيح الخدمات
-  السحابية (مفتاح وصول AWS وTwilio وSendGrid وMailgun)، والمفاتيح الخاصة / JWTs،
-  وسلاسل الاتصال التي تتضمن بيانات اعتماد (`mongodb://user:pass@...`، إلخ)،
-  ونمطًا عامًا لقيم ترويسات `Authorization`/`x-api-key`/`api-key`/`apikey`.
-  تُحجب المفاتيح التي تأخذ شكل ترويسات (`authorization` و`x-api-key` و`api-key`
-  و`apikey`) بنيويًا (القيمة فقط، مع الحفاظ على بادئة النظام مثل
-  `Bearer `/`Basic `) بدلًا من استخدام التعبير النمطي النصي العام.
-- لا يحظر حاجز الحماية مطلقًا؛ بل يعيد الكتابة فقط (`modifiedPayload` /
-  `modifiedResponse`) ويضيف بيانات وصفية (`meta.credentialsRedacted` و`meta.count`).
+- **اختياري فقط (Opt-in)**، بنفس اصطلاح حجب معلومات التعريف الشخصية PII (المجاور للقاعدة الصارمة رقم 20): يكون معطَّلًا ما لم يكن `settings.credentialRedactionEnabled === true` **أو** `CREDENTIAL_REDACTION_ENABLED=true`. وعند إيقافه، يكون الحاجز بلا تأثير — فلا يحظر أبدًا ولا يعيد الكتابة أبدًا.
+- يجوب `redactCredentials()` شجرة الحمولة/الاستجابة الكاملة (عبر `walkValue()`، آمن ضد تلوث النموذج الأولي، وآمن ضد الدورات عبر `WeakSet`) ويستبدل التطابقات بعنصر نائب `[REDACTED:<type>]`، مع استنساخ الفروع التي تغيّرت فعليًّا فقط.
+- تغطي `CREDENTIAL_PATTERNS` مفاتيح مزوِّدي نماذج اللغة الكبيرة (OpenAI، OpenAI-proj، Anthropic، Google، Hugging Face، Replicate)، ورموز VCS/SaaS (GitHub، Slack، Linear، Notion، npm، Postman، Discord)، ومفاتيح الدفع (Stripe، Square)، والمفاتيح السحابية (مفتاح وصول AWS، Twilio، SendGrid، Mailgun)، والمفاتيح الخاصة / رموز JWT، وسلاسل الاتصال الحاملة لبيانات الاعتماد (`mongodb://user:pass@...`، وغيرها)، ونمطًا عامًّا لقيم الترويسات `Authorization`/`x-api-key`/`api-key`/`apikey`. تُحجَب المفاتيح ذات الشكل الترويسي (`authorization`، `x-api-key`، `api-key`، `apikey`) بنيويًّا (القيمة فقط، مع الحفاظ على بادئة المخطط مثل `Bearer `/`Basic `) بدلًا من استخدام التعبير النمطي النصي العام.
+- لا يحظر الحاجز أبدًا؛ بل يعيد الكتابة فقط (`modifiedPayload` / `modifiedResponse`) ويضيف التعليقات التوضيحية (`meta.credentialsRedacted`، `meta.count`).
 
-حاجز منع الانحدار: `tests/unit/credential-masker-guardrail.test.ts`.
+حارس التراجع: `tests/unit/credential-masker-guardrail.test.ts`.
 
 ## العقد الأساسي (`base.ts`)
 
@@ -555,11 +473,11 @@ class BaseGuardrail {
 }
 
 interface GuardrailResult<TValue = unknown> {
-  block?: boolean; // تؤدي القيمة true إلى إيقاف السلسلة فورًا
+  block?: boolean; // القيمة true تُوقف السلسلة فورًا
   message?: string; // تُعرض عند الحظر
   meta?: Record<string, unknown> | null;
-  modifiedPayload?: TValue; // تُرجعها preCall لإعادة كتابة الطلب
-  modifiedResponse?: TValue; // تُرجعها postCall لإعادة كتابة الاستجابة
+  modifiedPayload?: TValue; // يعيدها preCall لإعادة كتابة الطلب
+  modifiedResponse?: TValue; // يعيدها postCall لإعادة كتابة الاستجابة
 }
 
 interface GuardrailContext {
@@ -578,109 +496,187 @@ interface GuardrailContext {
 }
 ```
 
-يشير حاجز الحماية إلى «عدم وجود تغيير» بإرجاع `void` أو `{}` أو
-`{ block: false }`. يؤدي إرجاع `modifiedPayload`/`modifiedResponse` إلى استبدال
-القيمة المتدفقة عبر السلسلة لحواجز الحماية اللاحقة.
-يحمل `signal?: AbortSignal` دورة حياة المستدعي إلى حواجز الحماية. ويُعد إلغاء الطلب استثناءً مقصودًا يسمح بالمتابعة عند الفشل: إذ تتوقف جسور الوسائط عن العمل وتُجري التنظيف من دون استعادة الوسائط الخام إلى هدف معروف بعدم دعمه لها.
+يُشير الحارس (guardrail) إلى "لا تغيير" بإرجاع `void` أو `{}` أو
+`{ block: false }`. أما إرجاع `modifiedPayload`/`modifiedResponse` فيستبدل
+القيمة المتدفقة عبر السلسلة للحرّاس اللاحقين.
+يحمل `signal?: AbortSignal` دورة حياة المُستدعي إلى داخل الحرّاس. يُعد إجهاض الطلب
+الاستثناء المقصود لمبدأ الفشل المفتوح (fail-open): تتوقف جسور الوسائط عن العمل
+وتُنظّف دون استعادة الوسائط الخام إلى هدف معروف أنه لا يدعمها.
 
 ## السجل (`registry.ts`)
 
 يكشف الكائن المفرد `guardrailRegistry` ما يلي:
 
-- `register(guardrail)` — يضيف حاجز حماية (أو يستبدله حسب الاسم الموحّد)، ثم
-  يعيد الفرز تصاعديًا حسب `priority`.
-- `clear()` / `list()` — دوال مساعدة إدارية.
-- `runPreCallHooks(payload, context)` — يكرّر المرور على حواجز الحماية النشطة، ويمرّر
+- `register(guardrail)` — يضيف حارسًا (أو يستبدله بالاسم المُطبَّع) و
+  يعيد الترتيب تصاعديًا حسب `priority`.
+- `clear()` / `list()` — أدوات مساعدة إدارية.
+- `runPreCallHooks(payload, context)` — يتنقل عبر الحرّاس النشطين، ويمرّر
   الحمولة عبر `modifiedPayload`، ويتوقف عند أول `block: true`.
-- `runPostCallHooks(response, context)` — التدفق نفسه من جهة الاستجابة.
-- `resetGuardrailsForTests({ registerDefaults })` — يمسح الحالة ويعيد، اختياريًا،
-  تسجيل الإعدادات الافتراضية لضمان عزل نظيف للاختبارات.
+- `runPostCallHooks(response, context)` — نفس التدفق على جانب الاستجابة.
+- `resetGuardrailsForTests({ registerDefaults })` — يمسح الحالة ويعيد
+  تسجيل الإعدادات الافتراضية اختياريًا لعزل اختباري نظيف.
 
-يُرجع كلا المشغّلين `{ blocked, payload|response, results, guardrail?, message? }`
-حيث تكون `results` مصفوفة من سجلات `GuardrailExecutionResult` التي تتضمن
-حقول `blocked` و`skipped` و`modified` و`error` و`meta` الخاصة بكل حاجز حماية،
+يعيد كلا المُشغِّلين `{ blocked, payload|response, results, guardrail?, message? }`
+حيث `results` عبارة عن مصفوفة من سجلات `GuardrailExecutionResult` تتضمن
+حقول `blocked` و`skipped` و`modified` و`error` و`meta` لكل حارس،
 وهي مفيدة للتتبّع.
 
-### تعطيل حواجز الحماية لكل طلب
+### تعطيل الحرّاس لكل طلب
 
-تجمع `resolveDisabledGuardrails({ apiKeyInfo, body, headers })` قائمة
-منزوعة التكرار بأسماء حواجز الحماية التي ينبغي تخطيها للطلب الحالي.
-المصادر (كلها اختيارية، وتُدمج جميعها):
+يجمع `resolveDisabledGuardrails({ apiKeyInfo, body, headers })` قائمة
+مُزالة التكرار من أسماء الحرّاس التي ينبغي تخطّيها للطلب
+الحالي. توجد خمس قنوات، تُقرأ بهذا الترتيب وتُدمج في قائمة واحدة
+(الظهور الأول هو الذي يفوز عند إزالة التكرار):
 
-- `apiKeyInfo.disabledGuardrails`
-- `disabledGuardrails` في جسم الطلب (في المستوى الأعلى)
-- `metadata.disabledGuardrails` في جسم الطلب
-- الترويسة `x-omniroute-disabled-guardrails` (أو الترويسة القديمة
-  `x-disabled-guardrails`)
+1. `apiKeyInfo.disabledGuardrails`
+2. حقل `disabledGuardrails` في جسم الطلب (المستوى الأعلى)
+3. حقل `metadata.disabledGuardrails` في جسم الطلب (فقط عندما يكون `metadata` كائنًا)
+4. الترويسة `x-omniroute-disabled-guardrails`
+5. الترويسة القديمة `x-disabled-guardrails`
 
-يمكن أن تكون القيم مصفوفات من السلاسل النصية أو سلسلة نصية مفصولة بفواصل؛ وتُوحّد
-الأسماء إلى أحرف صغيرة بصيغة kebab-case (`pii_masker` → `pii-masker`). وتُمرر النتيجة
-عبر `context.disabledGuardrails` إلى السجل، الذي يتخطى
-حواجز الحماية المطابقة (`skipped: true` في `results`).
+تُدمج القنوات الخمس جميعها، بما فيها الترويستان: فإرسال كلٍّ من
+`x-omniroute-disabled-guardrails` و`x-disabled-guardrails` يتخطّى اتحاد
+قائمتيهما، ولم يعد إرسال الترويسة الحديثة فارغة يُخفي الترويسة القديمة
+([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)، أُصلح في
+[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805)).
+
+قد تكون القيم مصفوفات من السلاسل النصية أو سلسلة نصية مفصولة بفواصل؛ وتُقتطع
+الأسماء وتُطبَّع إلى صيغة kebab-case الصغيرة (`pii_masker` → `pii-masker`)،
+وتُسقط الإدخالات الفارغة. تُمرَّر النتيجة عبر `context.disabledGuardrails`
+إلى السجل، الذي يتخطّى الحرّاس المطابقين (`skipped: true` في `results`).
+
+لا تؤثر قائمة التعطيل إلا في **السجل**. فوضع `block` الخاص بحقن الأوامر
+حدٌّ إلزامي: فالوسيط injection-guard
+(`src/middleware/promptInjectionGuard.ts`) يستدعي `evaluatePromptInjection()`
+دون أي قائمة تعطيل يتحكم بها المُستدعي (وقد أُزيل استدعاء
+`resolveDisabledGuardrails({ body })` الميت الذي كان يُجريه في
+[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934))، لذا يظل الطلب
+الذي يعطّل `prompt-injection` مرفوضًا في وضع `block`. هذا مقصود
+بالتصميم. إذ تتحكم جهة الاستدعاء في قنوات التعطيل (جسم الطلب،
+metadata، الترويسات)، ولا يجوز للمُستدعي إيقاف عنصر
+تحكم أمني ضبطه المشغّل
+([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). أما اتحاد
+الترويسات من [#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)
+فيغيّر فقط أيّ حرّاس السجل يُتخطّون؛ ولا يسمح للعميل بتجاوز
+الوسيط. تُتتبَّع سياسات الحرّاس الإلزامية لكل مفتاح ولكل مجموعة في
+RFC الإصدار v4 رقم [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417).
+راجع [التغطية والحدود](#coverage-and-limits).
 
 ## ترتيب التنفيذ
 
-لكل طلب يمر عبر `src/sse/handlers/chat.ts` و
-`open-sse/handlers/chatCore.ts`:
+لكل طلب يتدفق عبر `src/sse/handlers/chat.ts` و
+`open-sse/handlers/chatCore.ts` (مسارات عائلة الدردشة المدرجة تحت
+[التغطية والحدود](#coverage-and-limits)):
 
-1. تنشئ `resolveDisabledGuardrails(...)` قائمة التجاوز استنادًا إلى مفتاح API ومحتوى الطلب
+1. يبني `resolveDisabledGuardrails(...)` قائمة التخطي من مفتاح API والجسم
    والترويسات.
-2. تشغّل `guardrailRegistry.runPreCallHooks(body, ctx)` حواجز الحماية بترتيب
-   تصاعدي حسب الأولوية:
-   - تُسجَّل حواجز الحماية المعطّلة بالحالة `skipped`.
-   - يمكن للدالة `preCall` الخاصة بكل حاجز حماية إعادة كتابة الحمولة عبر `modifiedPayload`.
-   - تؤدي أول قيمة `block: true` إلى إيقاف السلسلة مبكرًا، ويُرجع المعالج
-     استجابة رفض من حاجز الحماية.
-3. تتدفق الحمولة (التي ربما أُعيدت كتابتها) إلى التوجيه المركّب والإرسال
-   إلى الخدمة المنبع.
-4. بعد تجميع الاستجابة، تشغّل `guardrailRegistry.runPostCallHooks(...)`
-   السلسلة نفسها على الاستجابة. تؤدي `block: true` هنا إلى إسقاط استجابة
-   الخدمة المنبع.
+2. يشغّل `guardrailRegistry.runPreCallHooks(body, ctx)` حواجز الحماية بترتيب
+   الأولوية التصاعدي:
+   - تُسجَّل حواجز الحماية المعطَّلة كـ`skipped`.
+   - قد يعيد `preCall` الخاص بكل حاجز حماية كتابة الحمولة عبر `modifiedPayload`.
+   - أول `block: true` يقصّر السلسلة ويعيد المعالج استجابة رفض من حاجز
+     الحماية.
+3. تتدفق الحمولة (التي ربما أُعيدت كتابتها) إلى توجيه الكومبو والإرسال إلى
+   المنبع.
+4. **غير المتدفق فقط:** بعد تجميع الاستجابة،
+   يشغّل `guardrailRegistry.runPostCallHooks(...)` السلسلة نفسها على
+   الاستجابة. `block: true` هنا يُسقط استجابة المنبع ويعيد HTTP 400. أما
+   الاستجابات المتدفقة فتتخطى هذه الخطوة بالكامل.
 
-تُسجَّل حواجز الحماية التي تطرح أخطاء بالقيمة `error: <message>`، ويُدوَّن تحذير بشأنها عبر
-`logger.warn`، لكن السلسلة تستمر — إذ يعتمد التصميم مبدأ السماح عند الفشل.
+حواجز الحماية التي تطرح استثناءً تُسجَّل مع `error: <message>` وتُدوَّن عبر
+`logger.warn`، لكن السلسلة تستمر — فشل مفتوح (fail-open) بحسب التصميم.
+
+## التغطية والحدود
+
+سجل حواجز الحماية موصول بخط أنابيب الدردشة فقط. هذه الحدود مثبَّتة بواسطة
+`tests/unit/guardrail-pipeline-wiring-characterization.test.ts` و
+`tests/unit/guardrail-pipeline-characterization.test.ts`؛ حدِّث تلك الاختبارات
+عمدًا عندما يتغير السلوك.
+
+### أين تعمل الخطافات
+
+| الخطاف / عنصر التحكم                | يعمل على                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `runPreCallHooks`                   | الطلبات التي يعالجها `handleChat` (`src/sse/handlers/chat.ts`): `/v1/chat/completions`، `/v1/completions`، `/v1/messages`، `/v1/responses` (و`/v1/responses/*`)، `/v1/relay/chat/completions`، `/v1/providers/{provider}/chat/completions`، `/v1/api/chat`، `/v1/antigravity`، `/v1beta/models/*`، ووكيل دردشة Telegram. وأيضًا نقطة نهاية اختبار لوحة التحكم `/api/guardrails/test`. الحظر قبل الاستدعاء يعيد HTTP 400. |
+| `runPostCallHooks`                  | استجابات الدردشة **غير المتدفقة** فقط (`open-sse/handlers/chatCore/nonStreamingResponse.ts`). الاستجابات المتدفقة لا تصل إليه أبدًا.                                                                                                                                                                                                                                                                                     |
+| PII في التدفق                       | `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`)، يُوصَل في `streamingPipeline.ts` عندما تكون `PII_RESPONSE_SANITIZATION` مفعَّلة. إنه ليس حاجز حماية، لذا قنوات التعطيل لا تؤثر فيه.                                                                                                                                                                                                                        |
+| برمجية حارس الحقن الوسيطة (القديمة) | كل مسار `/v1` يحمل موجّهًا، بما في ذلك عائلة الدردشة (راجع [تغطية المسارات](#injection-guard-route-coverage--red-team-phase-8--block-d)). حقن الموجّهات فقط.                                                                                                                                                                                                                                                             |
+
+### ما هو غير مشمول
+
+- **مسارات الوسائط والتضمينات والبيانات** (`/v1/images/*`، `/v1/embeddings`،
+  `/v1/audio/*`، `/v1/videos/generations`، `/v1/music/generations`،
+  `/v1/rerank`، `/v1/search`، `/v1/moderations`) لا تصل إلى السجل أبدًا. لا
+  يعمل هناك إخفاء PII أو إخفاء بيانات الاعتماد أو جسر الوسائط. فحصها الوحيد
+  هو برمجية حارس الحقن الوسيطة القديمة.
+- **الاستجابات المتدفقة** لا تحصل على حواجز حماية بعد الاستدعاء: لا `pii-masker`
+  ولا `credential-masker` بعد الاستدعاء، ولا حظر بعد الاستدعاء. فقط تحويل PII
+  المتدفق ينطبق (عندما تكون `PII_RESPONSE_SANITIZATION` مفعَّلة). بيانات
+  الاعتماد التي تُعاد في استجابة متدفقة لا تُحجَب.
+- **قنوات التعطيل مقابل البرمجية الوسيطة (بحسب التصميم):** تقيّم البرمجية
+  الوسيطة حقن الموجّهات باستدعائها الخاص لـ`evaluatePromptInjection()`، دون
+  تمرير أي قائمة تعطيل يتحكم بها المتصل. وضع `block` هو حدّ إلزامي لا يمكن
+  لتعطيلات المتصل تجاوزه، بما في ذلك على مسارات عائلة الدردشة
+  ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). تعطيل
+  `prompt-injection` يتخطى فقط حاجز حماية السجل.
+
+### ما الذي يرى الاستجابة قبل ما بعد الاستدعاء
+
+في المسار غير المتدفق، الترتيب هو: استخراج الذاكرة → تنفيذ الأدوات المدمجة
+→ حواجز حماية ما بعد الاستدعاء → الخروج بحظر ما بعد الاستدعاء → تخزين ذاكرة
+التخزين المؤقت الدلالية.
+
+- يرى كلٌّ من **استخراج الذاكرة** و**تنفيذ الأدوات** الاستجابة قبل أن تتمكن ضوابط ما بعد الاستدعاء من إعادة كتابتها أو حظرها. ومنذ
+  [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401)، يُمرِّر استخراج
+  الذاكرة النص المستخرج عبر `sanitizePII` عندما تكون
+  `PII_RESPONSE_SANITIZATION` مفعَّلة (في وضعَي البث وغير البث)، لكن
+  الاستجابة التي تحظرها ضوابط ما بعد الاستدعاء لاحقاً تكون قد عُرضت بالفعل على
+  الذاكرة والأدوات.
+- تخزِّن **ذاكرة التخزين المؤقت الدلالية** الاستجابة بعد معالجة ما بعد الاستدعاء،
+  لذا فهي تخزِّن الاستجابة المُعاد كتابتها، ولا تُخزَّن الاستجابة المحظورة
+  أبداً. تُفهرَس إدخالات ذاكرة التخزين المؤقت وفق مفتاح API.
 
 ## الإعدادات
 
-متغيرات البيئة التي تقرؤها حواجز الحماية المضمّنة:
+متغيرات البيئة التي تقرأها حواجز الحماية المدمجة:
 
-| المتغير                               | يستخدمه                       | التأثير                                                                                      |
-| ------------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`            | اضبطه على `false` لتعطيل الاكتشاف بالكامل.                                                   |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`            | سياسة الحقن: `warn` أو `block` أو `log`. القيمة القديمة `redact` لا تعيد كتابة نص الحقن.     |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`            | وضع حاجز الحقن؛ وهو أيضًا علامة ميزة في قاعدة البيانات **تتجاوز** متغيرات البيئة (DB > ENV). |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`            | الحد الأدنى للخطورة التي يرفضها `MODE=block`:‏ `high` (الافتراضي) أو `medium` أو `low`.      |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`            | اسم بديل قديم لـ `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                          |
-| `PII_REDACTION_ENABLED`               | `pii-masker`                  | عندما تكون القيمة `true`، تُحجب معلومات التعريف الشخصية في الطلب (بشكل مستقل عن وضع الحقن).  |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (في اتجاه المصب) | يتحكم في سلوك الحجب على جانب الاستجابة.                                                      |
+| المتغيّر                              | يُستخدم بواسطة            | التأثير                                                                                      |
+| ------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`        | اضبطها على `false` لتعطيل الكشف بالكامل.                                                     |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`        | سياسة الحقن: `warn` أو `block` أو `log`. القيمة القديمة `redact` لا تعيد كتابة نص الحقن.     |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`        | وضع حارس الحقن؛ يعمل أيضًا كعلم ميزة في قاعدة البيانات **يتجاوز** متغيرات البيئة (DB > ENV). |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`        | الحد الأدنى من الخطورة الذي يرفضه `MODE=block`: `high` (الافتراضي) أو `medium` أو `low`.     |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`        | اسم مستعار قديم لـ `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                        |
+| `PII_REDACTION_ENABLED`               | `pii-masker`              | عندما تكون `true`، يتم حجب معلومات تحديد الهوية الشخصية في الطلب (بشكل مستقل عن وضع الحقن).  |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream) | يتحكم في سلوك أداة الحجب على جانب الاستجابة.                                                 |
 
-تقرأ حواجز حماية جسر الوسائط إعدادات وقت التشغيل من مخزن الإعدادات
-المدعوم بقاعدة البيانات (`getSettings()`)، وليس من متغيرات البيئة. المفاتيح الأساسية للرؤية هي
-`modalityBridgeVisionEnabled` و`modalityBridgeVisionMode`
+تقرأ حواجز حماية Modality Bridge إعدادات وقت التشغيل من مخزن الإعدادات المدعوم
+بقاعدة البيانات (`getSettings()`)، وليس من متغيرات البيئة. المفاتيح الأساسية
+للرؤية (Vision) هي `modalityBridgeVisionEnabled` و`modalityBridgeVisionMode`
 و`modalityBridgeVisionModel` و`modalityBridgeVisionTaskAware`
 و`modalityBridgeVisionPrompt` و`modalityBridgeVisionTimeout`
 و`modalityBridgeVisionMaxImages` و`modalityBridgeVisionMaxChars`
-و`modalityBridgeCacheEnabled` و`modalityBridgeCacheTtlMinutes` و
-`modalityBridgeCacheMaxEntries`. لا تُقبل مفاتيح
-`visionBridge*` القديمة إلا كآلية احتياطية موثّقة للقراءة خلال دورة واحدة؛
-وتستخدم عمليات الكتابة من لوحة المعلومات المفاتيح الأساسية. توجد القيم الافتراضية وآلية
-التحليل الاحتياطية في `src/shared/constants/modalityBridgeDefaults.ts`، مع الاحتفاظ
-بالثوابت القديمة في `src/shared/constants/visionBridgeDefaults.ts`.
+و`modalityBridgeCacheEnabled` و`modalityBridgeCacheTtlMinutes`
+و`modalityBridgeCacheMaxEntries`. أما مفاتيح `visionBridge*` القديمة فتُقبل
+فقط كآلية رجوع موثقة للقراءة لدورة واحدة؛ بينما تستخدم عمليات الكتابة من لوحة
+التحكم المفاتيح الأساسية. توجد القيم الافتراضية ومحلل الرجوع في
+`src/shared/constants/modalityBridgeDefaults.ts`، مع الاحتفاظ بالثوابت القديمة
+في `src/shared/constants/visionBridgeDefaults.ts`.
 
 يستخدم الصوت `modalityBridgeAudioEnabled` و`modalityBridgeAudioModel`
-و`modalityBridgeAudioTimeout` و`modalityBridgeAudioMaxClips`، بالإضافة إلى إعدادات
-`modalityBridgeCache*` المشتركة. لا توجد آلية احتياطية للمفاتيح القديمة في الصوت لأن هذه
-المفاتيح طُرحت مع مخطط جسر الوسائط.
+و`modalityBridgeAudioTimeout` و`modalityBridgeAudioMaxClips`، بالإضافة إلى
+إعدادات `modalityBridgeCache*` المشتركة. لا يملك الصوت آلية رجوع للمفاتيح
+القديمة لأن هذه المفاتيح قُدّمت مع مخطط Modality Bridge.
 
 يستخدم الفيديو `modalityBridgeVideoEnabled` و`modalityBridgeVideoAnalysisMode`
 و`modalityBridgeVideoModel`
 و`modalityBridgeVideoFrameCount` و`modalityBridgeVideoSamplingPolicy`
-و`modalityBridgeVideoMaxVideos` و
-`modalityBridgeVideoTimeout`، بالإضافة إلى إعدادات `modalityBridgeCache*` المشتركة.
-وهو معطّل افتراضيًا لأن FFmpeg/ffprobe تبعيات تشغيلية اختيارية،
-ولأن إضافة تعليقات وصفية إلى الإطارات تزيد زمن الاستجابة وتكلفة النموذج.
+و`modalityBridgeVideoMaxVideos` و`modalityBridgeVideoTimeout`، بالإضافة إلى
+إعدادات `modalityBridgeCache*` المشتركة. وهو معطّل افتراضيًا لأن FFmpeg/ffprobe
+تبعيات تشغيلية اختيارية، ولأن إضافة تعليقات على الإطارات يزيد زمن الاستجابة
+وتكلفة النموذج.
 
-## حواجز حماية مخصصة
+## حواجز الحماية المخصصة
 
 ```typescript
 import { BaseGuardrail, guardrailRegistry } from "@/lib/guardrails";
@@ -703,11 +699,11 @@ guardrailRegistry.register(new BudgetGuardrail());
 
 الخطوات:
 
-1. أنشئ `src/lib/guardrails/myGuardrail.ts` بحيث يمتد من `BaseGuardrail`.
-2. نفّذ `preCall` و/أو `postCall`.
-3. إمّا أن تسجّله وقت الاستيراد (بإضافته من `registerDefaultGuardrails`) أو
-   تستدعي `guardrailRegistry.register(...)` في وقت التشغيل — يستبدل السجل
-   أي حاجز حماية سابق يحمل الاسم الموحّد نفسه.
+1. أنشئ `src/lib/guardrails/myGuardrail.ts` موسِّعًا `BaseGuardrail`.
+2. نفِّذ `preCall` و/أو `postCall`.
+3. إما أن تُسجِّل عند وقت الاستيراد (بالدفع من `registerDefaultGuardrails`) أو
+   استدعِ `guardrailRegistry.register(...)` في وقت التشغيل — يستبدل السجل
+   أي حاجز حماية سابق يحمل الاسم المُطبَّع نفسه.
 4. أضف اختبارات ضمن `tests/unit/` (أمثلة موجودة:
    `tests/unit/guardrails-registry.test.ts`،
    `tests/unit/prompt-injection-guard.test.ts`،
@@ -716,56 +712,57 @@ guardrailRegistry.register(new BudgetGuardrail());
 ## الاختبار
 
 استخدم `resetGuardrailsForTests()` بين الاختبارات للبدء من حالة معروفة.
-مرّر `{ registerDefaults: false }` للبدء بسجل فارغ وتسجيل حواجز الحماية
-قيد الاختبار فقط. يقبل جسر الرؤية حقن الاعتماديات
-(`deps.getSettings` و`deps.callVisionModel`)؛ ويكشف جسر الصوت نقاط الفصل
-المكافئة للإعدادات والإمكانات واختيار نموذج STT والتحقق من بيانات الاعتماد
-والنسخ الصوتي. ولذلك يمكن للاختبارات فحص كلا التدفقين دون الوصول إلى قاعدة
-بيانات أو شبكة.
+مرِّر `{ registerDefaults: false }` للبدء بسجل فارغ وتسجيل
+حواجز الحماية قيد الاختبار فقط. يقبل Vision Bridge حقن التبعيات
+(`deps.getSettings`، `deps.callVisionModel`)؛ ويكشف Audio Bridge
+الفواصل المكافئة للإعدادات والقدرات واختيار نموذج STT وفحوصات
+بيانات الاعتماد والتفريغ الصوتي. وبذلك يمكن للاختبارات تمرين كلا
+التدفقين دون الوصول إلى قاعدة بيانات أو شبكة.
 
 ## انظر أيضًا
 
 - `src/lib/guardrails/` — التنفيذ
-- `src/shared/utils/inputSanitizer.ts` — أداة الكشف المشتركة التي تدعم
-  كشف حقن الموجّهات وإخفاء معلومات التعريف الشخصية
-- `src/shared/constants/visionBridgeDefaults.ts` — الإعدادات الافتراضية لجسر الرؤية
-  وقائمة نماذج الجسر الإلزامية
-- `src/shared/constants/modalityBridgeDefaults.ts` — إعدادات وقت التشغيل الافتراضية المشتركة لجسري الرؤية/الصوت
-- `docs/architecture/RESILIENCE_GUIDE.md` — طبقة مستقلة (قاطع الدائرة، وفترات التهدئة)
+- `src/shared/utils/inputSanitizer.ts` — كاشف مشترك يشغِّل كشف
+  حقن الأوامر وإخفاء معلومات التعريف الشخصية (PII)
+- `src/shared/constants/visionBridgeDefaults.ts` — الإعدادات الافتراضية لـ Vision Bridge وقائمة
+  نماذج الجسر الإجباري
+- `src/shared/constants/modalityBridgeDefaults.ts` — الإعدادات الافتراضية المشتركة لوقت تشغيل Vision/Audio
+- `docs/architecture/RESILIENCE_GUIDE.md` — طبقة متعامدة (قاطع الدائرة، فترات التهدئة)
 - `docs/reference/ENVIRONMENT.md` — المرجع الكامل لمتغيرات البيئة
 
-## تغطية مسارات حاجز الحقن واختبارات الفريق الأحمر (المرحلة 8 · الكتلة D)
+## تغطية مسارات حاجز الحقن والفريق الأحمر (المرحلة 8 · الكتلة D)
 
 يغطي حاجز الحقن (`createInjectionGuard` / `withInjectionGuard`) جميع المسارات
-التي تقبل موجّهات المستخدم. وهو يلتزم بـ`INJECTION_GUARD_MODE` (القيمة الافتراضية `warn` = التسجيل فقط؛
-`block` = إرجاع HTTP 400 مع `SECURITY_001`).
+التي تقبل أوامر المستخدم. وهو يحترم `INJECTION_GUARD_MODE` (الافتراضي `warn` = تسجيل فقط؛
+`block` = يعيد HTTP 400 `SECURITY_001`).
 
 | النوع         | المسارات                                                                                                                                             | الوضع الافتراضي |
 | ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| النص (الحالي) | `/v1/chat/completions`، `/v1/completions`، `/v1/relay/chat/completions`                                                                              | warn            |
-| توليدي        | `/v1/messages`، `/v1/responses`، `/v1/images/generations`، `/v1/images/edits`، `/v1/videos/generations`، `/v1/music/generations`، `/v1/audio/speech` | warn            |
-| البيانات      | `/v1/embeddings`، `/v1/rerank`، `/v1/search`، `/v1/moderations`                                                                                      | warn            |
+| نصية (موجودة) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | warn            |
+| توليدية       | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | warn            |
+| بيانات        | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | warn            |
 
 يغطي استخراج النص (`extractMessageContents`) الحقول `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`.
 
-**اختبارات الفريق الأحمر (ليليًا، `nightly-llm-security.yml`):** يتحقق promptfoo من أن كل مسار يحظر
-مجموعة OWASP-LLM عند استخدام `INJECTION_GUARD_MODE=block`؛ ويشغّل garak عمليات الفحص (ويتخطاها عند غياب السر).
-أُدرج `moderations` حرصًا على الاتساق — ويمكن للمشغّلين في وضع الحظر استثناؤه عبر
-`resolveDisabledGuardrails`.
+**الفريق الأحمر (ليليًا، `nightly-llm-security.yml`):** يتحقق promptfoo من أن كل مسار يحجب
+مجموعة OWASP-LLM في `INJECTION_GUARD_MODE=block`؛ بينما يشغِّل garak مسبارات (يتخطاها دون توفر السر).
+تم تضمين `moderations` حرصًا على الاتساق. وضع الحجب حدٌّ إلزامي: فدالة `evaluatePromptInjection()`
+تتجاهل قائمة التعطيل الخاصة بكل طلب التي يمررها لها البرنامج الوسيط، لذا فإن `disabledGuardrails`
+**لا** يعفي أي مسار منها ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)).
 
-يحتوي سير العمل الليلي (`.github/workflows/nightly-llm-security.yml`، بجدولة cron + تشغيل
-يدوي) على مهمتين:
+سير العمل الليلي (`.github/workflows/nightly-llm-security.yml`، cron + التشغيل
+اليدوي) يتضمن مهمتين:
 
-- **`promptfoo-guard` (إلزامية)** — تشغّل `promptfoo eval -c promptfooconfig.yaml`
-  مع `INJECTION_GUARD_MODE=block`. تتحقق كل حالة هجومية (مثل "تجاهل جميع
-  التعليمات السابقة…"، ومحاولات كسر الحماية بأسلوب DAN) من أن الاستجابة تتضمن
-  `error.code === "SECURITY_001"`، أي أن الحاجز رفض الطلب بالفعل.
-- **`garak` (استشارية)** — تشغّل garak مع `--probes promptinject,dan,leakreplay`
-  مقابل نسخة OmniRoute محلية (`http://localhost:20128/v1`). وهي مشروطة بوجود
-  سر المزوّد (`PROMPTFOO_PROVIDER_KEY`)؛ وتتخطى التنفيذ بسلاسة عند غيابه، وتُلحق
-  بـ`|| true`، لذا تُصدر تقريرًا دون التسبب في فشل CI.
+- **`promptfoo-guard` (مانعة)** — تشغِّل `promptfoo eval -c promptfooconfig.yaml`
+  مع `INJECTION_GUARD_MODE=block`. تؤكد كل حالة عدائية (مثل "تجاهل جميع
+  التعليمات السابقة…"، ومحاولات كسر الحماية بأسلوب DAN) أن الاستجابة تحمل
+  `error.code === "SECURITY_001"`، أي أن الحاجز رفض الطلب فعليًا.
+- **`garak` (استشارية)** — تشغِّل garak `--probes promptinject,dan,leakreplay`
+  ضد نسخة OmniRoute محلية (`http://localhost:20128/v1`). وهي مشروطة بسر
+  المزوّد (`PROMPTFOO_PROVIDER_KEY`)؛ تتخطى بسلاسة عند غيابه وهي مُلحَقة بـ
+  `|| true`، لذا تُبلِغ عن النتائج دون إفشال CI.
 
 تمتد تغطية أداة الحاجز المساعدة (`createInjectionGuard` / `withInjectionGuard`)
-إلى كل مسار `/v1` يحتوي على موجّه؛ ويُستخرج نص الموجّه من
+لتشمل كل مسار `/v1` حامل للأوامر؛ ويُستخرج نص الأمر من
 `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` بواسطة
 `extractMessageContents()` في `src/shared/utils/inputSanitizer.ts`.

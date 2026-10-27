@@ -1,150 +1,154 @@
 # CLI Tools — OmniRoute (Latviešu)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../reference/CLI-TOOLS.md) · 🇪🇹 [am](../../../am/docs/reference/CLI-TOOLS.md) · 🇸🇦 [ar](../../../ar/docs/reference/CLI-TOOLS.md) · 🇦🇿 [az](../../../az/docs/reference/CLI-TOOLS.md) · 🇧🇬 [bg](../../../bg/docs/reference/CLI-TOOLS.md) · 🇧🇩 [bn](../../../bn/docs/reference/CLI-TOOLS.md) · 🇨🇿 [cs](../../../cs/docs/reference/CLI-TOOLS.md) · 🇩🇰 [da](../../../da/docs/reference/CLI-TOOLS.md) · 🇩🇪 [de](../../../de/docs/reference/CLI-TOOLS.md) · 🇬🇷 [el](../../../el/docs/reference/CLI-TOOLS.md) · 🇪🇸 [es](../../../es/docs/reference/CLI-TOOLS.md) · 🇪🇪 [et](../../../et/docs/reference/CLI-TOOLS.md) · 🇮🇷 [fa](../../../fa/docs/reference/CLI-TOOLS.md) · 🇫🇮 [fi](../../../fi/docs/reference/CLI-TOOLS.md) · 🇫🇷 [fr](../../../fr/docs/reference/CLI-TOOLS.md) · 🇮🇪 [ga](../../../ga/docs/reference/CLI-TOOLS.md) · 🇮🇳 [gu](../../../gu/docs/reference/CLI-TOOLS.md) · 🇳🇬 [ha](../../../ha/docs/reference/CLI-TOOLS.md) · 🇮🇱 [he](../../../he/docs/reference/CLI-TOOLS.md) · 🇮🇳 [hi](../../../hi/docs/reference/CLI-TOOLS.md) · 🇭🇷 [hr](../../../hr/docs/reference/CLI-TOOLS.md) · 🇭🇺 [hu](../../../hu/docs/reference/CLI-TOOLS.md) · 🇦🇲 [hy](../../../hy/docs/reference/CLI-TOOLS.md) · 🇮🇩 [id](../../../id/docs/reference/CLI-TOOLS.md) · 🇳🇬 [ig](../../../ig/docs/reference/CLI-TOOLS.md) · 🇮🇹 [it](../../../it/docs/reference/CLI-TOOLS.md) · 🇯🇵 [ja](../../../ja/docs/reference/CLI-TOOLS.md) · 🇬🇪 [ka](../../../ka/docs/reference/CLI-TOOLS.md) · 🇰🇭 [km](../../../km/docs/reference/CLI-TOOLS.md) · 🇮🇳 [kn](../../../kn/docs/reference/CLI-TOOLS.md) · 🇰🇷 [ko](../../../ko/docs/reference/CLI-TOOLS.md) · 🇱🇹 [lt](../../../lt/docs/reference/CLI-TOOLS.md) · 🇮🇳 [ml](../../../ml/docs/reference/CLI-TOOLS.md) · 🇮🇳 [mr](../../../mr/docs/reference/CLI-TOOLS.md) · 🇲🇾 [ms](../../../ms/docs/reference/CLI-TOOLS.md) · 🇲🇹 [mt](../../../mt/docs/reference/CLI-TOOLS.md) · 🇲🇲 [my](../../../my/docs/reference/CLI-TOOLS.md) · 🇳🇵 [ne](../../../ne/docs/reference/CLI-TOOLS.md) · 🇳🇱 [nl](../../../nl/docs/reference/CLI-TOOLS.md) · 🇳🇴 [no](../../../no/docs/reference/CLI-TOOLS.md) · 🇮🇳 [or](../../../or/docs/reference/CLI-TOOLS.md) · 🇮🇳 [pa](../../../pa/docs/reference/CLI-TOOLS.md) · 🇵🇭 [phi](../../../phi/docs/reference/CLI-TOOLS.md) · 🇵🇱 [pl](../../../pl/docs/reference/CLI-TOOLS.md) · 🇵🇹 [pt](../../../pt/docs/reference/CLI-TOOLS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/CLI-TOOLS.md) · 🇷🇴 [ro](../../../ro/docs/reference/CLI-TOOLS.md) · 🇷🇺 [ru](../../../ru/docs/reference/CLI-TOOLS.md) · 🇱🇰 [si](../../../si/docs/reference/CLI-TOOLS.md) · 🇸🇰 [sk](../../../sk/docs/reference/CLI-TOOLS.md) · 🇸🇮 [sl](../../../sl/docs/reference/CLI-TOOLS.md) · 🇷🇸 [sr](../../../sr/docs/reference/CLI-TOOLS.md) · 🇸🇪 [sv](../../../sv/docs/reference/CLI-TOOLS.md) · 🇰🇪 [sw](../../../sw/docs/reference/CLI-TOOLS.md) · 🇮🇳 [ta](../../../ta/docs/reference/CLI-TOOLS.md) · 🇮🇳 [te](../../../te/docs/reference/CLI-TOOLS.md) · 🇹🇭 [th](../../../th/docs/reference/CLI-TOOLS.md) · 🇹🇷 [tr](../../../tr/docs/reference/CLI-TOOLS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/CLI-TOOLS.md) · 🇵🇰 [ur](../../../ur/docs/reference/CLI-TOOLS.md) · 🇺🇿 [uz](../../../uz/docs/reference/CLI-TOOLS.md) · 🇻🇳 [vi](../../../vi/docs/reference/CLI-TOOLS.md) · 🇳🇬 [yo](../../../yo/docs/reference/CLI-TOOLS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/CLI-TOOLS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/CLI-TOOLS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../reference/CLI-TOOLS.md) · 🇪🇹 [am](../../../am/docs/reference/CLI-TOOLS.md) · 🇸🇦 [ar](../../../ar/docs/reference/CLI-TOOLS.md) · 🇦🇿 [az](../../../az/docs/reference/CLI-TOOLS.md) · 🇧🇬 [bg](../../../bg/docs/reference/CLI-TOOLS.md) · 🇧🇩 [bn](../../../bn/docs/reference/CLI-TOOLS.md) · 🇧🇦 [bs](../../../bs/docs/reference/CLI-TOOLS.md) · 🇨🇿 [cs](../../../cs/docs/reference/CLI-TOOLS.md) · 🇩🇰 [da](../../../da/docs/reference/CLI-TOOLS.md) · 🇩🇪 [de](../../../de/docs/reference/CLI-TOOLS.md) · 🇬🇷 [el](../../../el/docs/reference/CLI-TOOLS.md) · 🇪🇸 [es](../../../es/docs/reference/CLI-TOOLS.md) · 🇪🇪 [et](../../../et/docs/reference/CLI-TOOLS.md) · 🇮🇷 [fa](../../../fa/docs/reference/CLI-TOOLS.md) · 🇫🇮 [fi](../../../fi/docs/reference/CLI-TOOLS.md) · 🇫🇷 [fr](../../../fr/docs/reference/CLI-TOOLS.md) · 🇮🇪 [ga](../../../ga/docs/reference/CLI-TOOLS.md) · 🇮🇳 [gu](../../../gu/docs/reference/CLI-TOOLS.md) · 🇳🇬 [ha](../../../ha/docs/reference/CLI-TOOLS.md) · 🇮🇱 [he](../../../he/docs/reference/CLI-TOOLS.md) · 🇮🇳 [hi](../../../hi/docs/reference/CLI-TOOLS.md) · 🇭🇷 [hr](../../../hr/docs/reference/CLI-TOOLS.md) · 🇭🇺 [hu](../../../hu/docs/reference/CLI-TOOLS.md) · 🇦🇲 [hy](../../../hy/docs/reference/CLI-TOOLS.md) · 🇮🇩 [id](../../../id/docs/reference/CLI-TOOLS.md) · 🇳🇬 [ig](../../../ig/docs/reference/CLI-TOOLS.md) · 🇮🇹 [it](../../../it/docs/reference/CLI-TOOLS.md) · 🇯🇵 [ja](../../../ja/docs/reference/CLI-TOOLS.md) · 🇬🇪 [ka](../../../ka/docs/reference/CLI-TOOLS.md) · 🇰🇭 [km](../../../km/docs/reference/CLI-TOOLS.md) · 🇮🇳 [kn](../../../kn/docs/reference/CLI-TOOLS.md) · 🇰🇷 [ko](../../../ko/docs/reference/CLI-TOOLS.md) · 🇱🇹 [lt](../../../lt/docs/reference/CLI-TOOLS.md) · 🇮🇳 [ml](../../../ml/docs/reference/CLI-TOOLS.md) · 🇮🇳 [mr](../../../mr/docs/reference/CLI-TOOLS.md) · 🇲🇾 [ms](../../../ms/docs/reference/CLI-TOOLS.md) · 🇲🇹 [mt](../../../mt/docs/reference/CLI-TOOLS.md) · 🇲🇲 [my](../../../my/docs/reference/CLI-TOOLS.md) · 🇳🇵 [ne](../../../ne/docs/reference/CLI-TOOLS.md) · 🇳🇱 [nl](../../../nl/docs/reference/CLI-TOOLS.md) · 🇳🇴 [no](../../../no/docs/reference/CLI-TOOLS.md) · 🇮🇳 [or](../../../or/docs/reference/CLI-TOOLS.md) · 🇮🇳 [pa](../../../pa/docs/reference/CLI-TOOLS.md) · 🇵🇭 [phi](../../../phi/docs/reference/CLI-TOOLS.md) · 🇵🇱 [pl](../../../pl/docs/reference/CLI-TOOLS.md) · 🇵🇹 [pt](../../../pt/docs/reference/CLI-TOOLS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/reference/CLI-TOOLS.md) · 🇷🇴 [ro](../../../ro/docs/reference/CLI-TOOLS.md) · 🇷🇺 [ru](../../../ru/docs/reference/CLI-TOOLS.md) · 🇱🇰 [si](../../../si/docs/reference/CLI-TOOLS.md) · 🇸🇰 [sk](../../../sk/docs/reference/CLI-TOOLS.md) · 🇸🇮 [sl](../../../sl/docs/reference/CLI-TOOLS.md) · 🇷🇸 [sr](../../../sr/docs/reference/CLI-TOOLS.md) · 🇸🇪 [sv](../../../sv/docs/reference/CLI-TOOLS.md) · 🇰🇪 [sw](../../../sw/docs/reference/CLI-TOOLS.md) · 🇮🇳 [ta](../../../ta/docs/reference/CLI-TOOLS.md) · 🇮🇳 [te](../../../te/docs/reference/CLI-TOOLS.md) · 🇹🇭 [th](../../../th/docs/reference/CLI-TOOLS.md) · 🇹🇷 [tr](../../../tr/docs/reference/CLI-TOOLS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/reference/CLI-TOOLS.md) · 🇵🇰 [ur](../../../ur/docs/reference/CLI-TOOLS.md) · 🇺🇿 [uz](../../../uz/docs/reference/CLI-TOOLS.md) · 🇻🇳 [vi](../../../vi/docs/reference/CLI-TOOLS.md) · 🇳🇬 [yo](../../../yo/docs/reference/CLI-TOOLS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/reference/CLI-TOOLS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/reference/CLI-TOOLS.md)
 
 ---
 
 Pēdējoreiz atjaunināts: 2026-08-23
 
-OmniRoute integrējas ar trim CLI rīku kategorijām, kas izvietotas trīs atsevišķās informācijas paneļa lapās:
+OmniRoute integrējas ar trīs kategoriju CLI rīkiem, kas sadalīti trīs īpašās informācijas paneļa lapās:
 
-| Lapa           | Maršruts                | Koncepcija                                                                              | Skaits           |
-| -------------- | ----------------------- | --------------------------------------------------------------------------------------- | ---------------- |
-| **CLI kodi**   | `/dashboard/cli-code`   | Kodēšanas rīki, kurus novirzāt uz OmniRoute (Klients → CLI → OmniRoute → Sniedzējs)     | 26               |
-| **CLI aģenti** | `/dashboard/cli-agents` | Autonomi aģenti, kurus novirzāt uz OmniRoute (tā pati plūsma, plašāks tvērums)          | 10               |
-| **ACP aģenti** | `/dashboard/acp-agents` | CLI, kurus OmniRoute palaiž kā aizmugursistēmu, izmantojot stdio/ACP (apgrieztā plūsma) | skatiet reģistru |
+| Lapa           | Maršruts                | Koncepcija                                                                                      | Skaits           |
+| -------------- | ----------------------- | ----------------------------------------------------------------------------------------------- | ---------------- |
+| **CLI kodi**   | `/dashboard/cli-code`   | Kodēšanas rīki, kurus novirzāt uz OmniRoute (Klients → CLI → OmniRoute → Pakalpojuma sniedzējs) | 26               |
+| **CLI aģenti** | `/dashboard/cli-agents` | Autonomi aģenti, kurus novirzāt uz OmniRoute (tā pati plūsma, plašāks tvērums)                  | 10               |
+| **ACP aģenti** | `/dashboard/acp-agents` | CLI, kurus OmniRoute palaiž kā aizmugursistēmas, izmantojot stdio/ACP (apgrieztā plūsma)        | skatiet reģistru |
 
-Mantotie maršruti veic 308 novirzīšanu: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
+Novecojušie maršruti veic 308 novirzīšanu: `/dashboard/cli-tools` → `/dashboard/cli-code`, `/dashboard/agents` → `/dashboard/acp-agents`.
 
 ---
 
 ## Kā tas darbojas
 
 ```
-CLI Code's / CLI Agents (patēriņa plūsma):
+CLI kodi / CLI aģenti (patēriņa plūsma):
 Claude / Codex / OpenCode / Cline / KiloCode / Continue / Hermes Agent / Goose / ...
            │
-           ▼  (visi norāda uz OmniRoute)
-    http://JŪSU_SERVERIS:20128/v1
+           ▼  (visi tiek novirzīti uz OmniRoute)
+    http://YOUR_SERVER:20128/v1
            │
-           ▼  (OmniRoute maršrutē uz atbilstošo pakalpojumu sniedzēju)
+           ▼  (OmniRoute novirza uz atbilstošo pakalpojuma sniedzēju)
     Anthropic / OpenAI / Gemini / DeepSeek / Groq / Mistral / ...
 
-ACP Agents (apgrieztā izveidošanas plūsma):
-    Klienta pieprasījums → OmniRoute → izveido CLI caur stdio/ACP → atbilde
+ACP aģenti (apgrieztā palaišanas plūsma):
+    Klienta pieprasījums → OmniRoute → palaiž CLI, izmantojot stdio/ACP → atbilde
 ```
 
-**Ieguvumi:**
+**Priekšrocības:**
 
 - Viena API atslēga visu rīku pārvaldībai
-- Izdevumu izsekošana visos CLI informācijas panelī
-- Modeļu maiņa bez katra rīka atkārtotas konfigurēšanas
-- Strādā lokāli un attālos serveros (VPS, Docker, Akamai, Cloudflare Tunnel)
+- Izmaksu uzskaite visiem CLI informācijas panelī
+- Modeļu pārslēgšana bez katra rīka atkārtotas konfigurēšanas
+- Darbojas lokāli un attālos serveros (VPS, Docker, Akamai, Cloudflare Tunnel)
 
 ---
 
-## Automātiskā konfigurēšana ar `setup-*`
+## Automātiska konfigurēšana ar `setup-*`
 
-Jums nav jāraksta katra rīka konfigurācija ar roku. OmniRoute piegādā `setup-*`
-komandu katrai atbalstītai CLI, kas nolasa **dzīvo** modeļu katalogu no darbojošās
-OmniRoute (vietējās vai attālās) un raksta rīka paša konfigurāciju jūsu datorā:
+Katra rīka konfigurācija nav jāraksta manuāli. OmniRoute katrai atbalstītajai CLI nodrošina `setup-*`
+komandu, kas nolasa **aktuālo** modeļu katalogu no darbojošās
+OmniRoute instances (lokālas vai attālas) un ieraksta attiecīgā rīka konfigurāciju jūsu datorā:
 
 ```bash
 omniroute setup-codex        omniroute setup-claude       omniroute setup-opencode
 omniroute setup-cline        omniroute setup-kilo         omniroute setup-continue
 omniroute setup-cursor       omniroute setup-roo          omniroute setup-crush
 omniroute setup-goose        omniroute setup-qwen         omniroute setup-aider
-omniroute setup-5dive
+omniroute setup-5dive        omniroute setup-zed
 ```
 
-Katra pieņem `--remote <url> --api-key <key>` (konfigurēt vietēju rīku pret
-attālu OmniRoute), `--dry-run` (priekšskatījums bez rakstīšanas) un `--port`. Rīki
-bez modeļa automātiskās noteikšanas (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) pieņem
-`--model <id>` (un `--yes` neinteraktīviem braucieniem). `setup-5dive` ir vienīgais
-recepšu risinājums, kas neraksta zem `$HOME`: tas konfigurē 5dive aģenta floti, rakstot
-root-owned autentifikācijas profilu flozes saimniekdatorā, tāpēc tas atkārtoti izpilda caur `sudo`
-un tam pašam nav attālā režīma. Lai palaiž CLI ar
-pareizo injicēto vidi un vispār bez rakstītas konfigurācijas, izmantojiet vispārējo
-`omniroute run <mērķis>` startētāju (claude, codex, aider, goose, opencode, qwen,
-gemini — mērķi un aliāši nāk no `bin/cli/cli-manifest.mjs`); vecie
-par instrumentiem startētāji `omniroute launch` (Claude Code) un `omniroute launch-codex`
-(Codex) paliek pieejami. Gemini CLI ir tikai palaižams: tas ir `omniroute run`
-mērķis, bet tam nav `setup-*`/`configure` receptes.
+Katra komanda pieņem `--remote <url> --api-key <key>` (lokāla rīka konfigurēšanai darbam ar
+attālu OmniRoute), `--dry-run` (priekšskatīšanai bez ierakstīšanas) un `--port`. Rīkiem
+bez automātiskas modeļu atklāšanas (Cline, Kilo, Roo, Goose, Aider, Qwen, 5dive) ir nepieciešams
+`--model <id>` (un `--yes` neinteraktīvai izpildei). `setup-5dive` ir vienīgā
+recepte, kas neveic ierakstīšanu zem `$HOME`: tā konfigurē 5dive aģentu kopu,
+kopas resursdatorā ierakstot `root` lietotājam piederošu autentifikācijas profilu, tāpēc tā atkārtoti izpilda sevi ar `sudo`
+un tai nav sava attālā režīma. Lai palaistu CLI ar
+ievadītiem pareizajiem vides mainīgajiem, vispār neierakstot konfigurāciju, izmantojiet vispārīgo
+`omniroute run <target>` palaidēju (claude, codex, aider, goose, opencode, qwen,
+gemini — mērķi un aizstājvārdi tiek iegūti no `bin/cli/cli-manifest.mjs`); joprojām ir pieejami arī mantotie
+atsevišķo rīku palaidēji `omniroute launch` (Claude Code) un `omniroute launch-codex`
+(Codex). Gemini CLI ir paredzēta tikai palaišanai: tā ir `omniroute run`
+mērķis, taču tai nav `setup-*`/`configure` receptes.
 
-> **Pilna atsauce:** galvenā tabula — ko raksta katra komanda, katra karodziņa,
-> vietējais pret attālo, un kuri rīki vēlas `/v1` pēcdēli — atrodas
+> **Pilna atsauce:** galvenā tabula — ko katra komanda ieraksta, visi karodziņi,
+> lokālais un attālais režīms, kā arī tas, kuriem rīkiem nepieciešams `/v1` sufikss — ir pieejama sadaļā
 > **[CLI integrācijas](../guides/CLI-INTEGRATIONS.md)**.
 
-### Šo komandu palaišana konteinerī
+### Šo komandu izpilde konteinerā
 
-`setup-*` komanda, kas izpildīta OmniRoute konteinerī, raksta konteinera
-paša mājas direktorijā, kuru neviens saimniekdatora CLI nelasa un kas pazūd līdz ar
-konteineri. OmniRoute to atklāj un iziet ar kodu `2` ar instrukcijām, nevis
-rakstot. Divas atbalstītas iespējas — instalēt CLI saimniekdatorā un
-`omniroute connect` uz konteineri, vai bin-montēt konfigurācijas direktorijus un iestatīt
-`CLI_CONFIG_HOME` (compose `host` profils). Katra `setup-*` komanda, plus
+Konteinerā OmniRoute izpildīta `setup-*` komanda veic ierakstīšanu paša
+konteinera mājas direktorijā, kuru neviena resursdatora CLI nelasa un kura pazūd kopā ar
+konteineru. OmniRoute to nosaka un tā vietā, lai veiktu ierakstīšanu, beidz darbu ar kodu `2` un parāda norādījumus.
+Ir divi atbalstīti risinājumi — instalēt CLI resursdatorā un
+izmantot `omniroute connect`, lai izveidotu savienojumu ar konteineru, vai piesaistīt konfigurācijas direktorijus un iestatīt
+`CLI_CONFIG_HOME` (compose profils `host`). Katra `setup-*` komanda, kā arī
 `omniroute configure` un `omniroute config set`, pieņem
-`--allow-container-write`, kad faktiski bija domāts konfigurēt konteinera paša CLI; `OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` nodrošina to pašu serverim. Skat.
-[Docker rokasgrāmata → Host CLI rīku konfigurēšana](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
+`--allow-container-write`, ja patiesībā vēlaties konfigurēt paša konteinera CLI;
+`OMNIROUTE_ALLOW_CONTAINER_CONFIG_WRITE=true` nodrošina to pašu serverim. Skatiet
+[Docker rokasgrāmatu → Resursdatora CLI rīku konfigurēšana](../guides/DOCKER_GUIDE.md#configuring-host-cli-tools-when-omniroute-runs-in-docker).
 
-Informācijas paneļa **pielietojuma galapunkts** (`POST /api/cli-tools/apply`) ievieš
-tādu pašu sargu: konteinerī, rakstīšana, kuras mērķis nav bin-montēts no
-saimniekdatora, atbild ar **`422`** ar `containerEphemeralTarget: true`, drošo
-kļūdas tekstun — rīkiem ar saimniekdatora recepti (claude, codex, opencode, cline,
-kilo, continue) — ar `hostSetupCommand` (piem., `omniroute setup-opencode`), ko palaist
-saimniekdatorā tā vietā; nekas netiek rakstīts. `dryRun: true` turpina strādāt konteinera
-režīmā un atgriež ģenerēto saturu + mērķa ceļu, nesaskaroties ar disku, tāpēc
-jūs varat priekšskatīt no informācijas paneļa un pielietot saimniekdatorā. Šāda uzvedība ir
-apsvērta un regresijas aizsargāta ar
-`tests/unit/api/cli-tools/apply-container-guard.test.ts` — nekad "neizlabojiet" 422
-noņemot sargu.
-
----
-
-## Avota patiesība
-
-Vienotais katalogs atrodas `src/shared/constants/cliTools.ts` kā `CLI_TOOLS: Record<string, CliCatalogEntry>`.
-
-Katrai ierakstam ir šie lauki (definēti `src/shared/schemas/cliCatalog.ts`):
-
-| Lauks                                           | Tips                                                         | Apraksts                                                         |
-| ----------------------------------------------- | ------------------------------------------------------------ | ---------------------------------------------------------------- |
-| `category`                                      | `"code" \| "agent"`                                          | Kurā lapā rīks parādās                                           |
-| `vendor`                                        | `string`                                                     | Rīka izcelsme ("Anthropic", "OSS (P. Gauthier)")                 |
-| `acpSpawnable`                                  | `boolean`                                                    | Arī izmantojams kā ACP aģents (tiek parādīta emblēma)            |
-| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | pielāgoto galapunktu atbalsta līmenis. `"none"` = MITM rezervēts |
-| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | Konfigurēšanas mehānisms                                         |
-| `id`, `name`, `color`, `description`, `docsUrl` | standarta                                                    | Galvenie displeja lauki                                          |
-
-Ieraksti ar `baseUrlSupport: "none"` **netiek rādīti** informācijas paneļa lapās — tie tiek reģistrēti MITM rezervētos plānā 11 (sk. `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
-
-### Spēju līmeņi (katalogizēts × nosakāms × konfigurējams × palaižams)
-
-Ne visi katalogizētie rīki ir nosakāmi, konfigurējami vai palaižami. Katram līmenim ir viens
-deklarēšanas avots, un novirzes tests tos uztur saskaņotus:
-
-| Līmenis           | Nozīme                                                                                     | Deklarēts                                                              |
-| ----------------- | ------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- |
-| **Katalogizēts**  | Parādās informācijas paneļa katalogā (nosaukums, ražotājs, dokumenti, konfigurācijas tips) | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                       |
-| **Nosakāms**      | Binārā faila/konfigurācijas noteikšana, veselības pārbaudes, konfigurācijas ceļi           | `src/shared/services/cliRuntime.ts` (`CLI_TOOLS` izpildlaika katalogs) |
-| **Konfigurējams** | Atbalstīts ar `omniroute configure <cli>` (iestatīšanas recepte pastāv)                    | `bin/cli/cli-manifest.mjs` (`configure: true`)                         |
-| **Palaižams**     | Atbalstīts ar `omniroute run <target>` (iekļauti env/args injekcijas definīcijas)          | `bin/cli/cli-manifest.mjs` (`run: true`)                               |
-
-`bin/cli/cli-manifest.mjs` ir kanoniskais izpildāmā faila manifests CLI komandu
-virsmām: `run`, `configure` un čaulas pabeigšanas ģeneratori visi iegūst savus
-mērķu sarakstus, aliāsu risinājumus (piemēram, `kilocode`/`kilo-code`/`kilo_cli` → `kilo`)
-un `--model` karoga savienojumu no tā. Novirzes sargājs
-`tests/unit/cli/cli-manifest-drift.test.ts` apgalvo, ka manifests, izpildlaika
-katalogs, saskarnes katalogs un katrs patērētāja virsma paliek sinhronizēti — mērķis, kas pievienots
-vienai virsmai bez pārējām, neveiksmīgi iziet testu komplektu, nevis klusēm novirzās.
+Informācijas paneļa **lietošanas galapunkts** (`POST /api/cli-tools/apply`) piemēro
+to pašu aizsardzību: konteinerā ierakstīšanas pieprasījums, kura mērķis nav no
+resursdatora piesaistīts sējums, atbild ar **`422`**, `containerEphemeralTarget: true`, drošu kļūdas
+tekstu un — rīkiem, kuriem ir resursdatora recepte (claude, codex, opencode, cline,
+kilo, continue), — `hostSetupCommand` (piem., `omniroute setup-opencode`), kas tā vietā jāizpilda
+resursdatorā; nekas netiek ierakstīts. `dryRun: true` turpina darboties konteinera
+režīmā un, nepiekļūstot diskam, atgriež rediģētu priekšskatījumu un mērķa ceļu. Priekšskatījuma
+saturs nav akreditācijas datus ietveroša konfigurācija, ko var kopēt vai importēt. Lietojiet
+sākotnējos rīka/bāzes URL/API atslēgas/modeļa ievades datus resursdatorā vai izmantojiet norādīto
+resursdatora iestatīšanas komandu. Informāciju par priekšskatījuma galveni un pieprasījuma līgumu skatiet sadaļā [CLI konfigurācijas drošība](../security/CLI-CONFIGURATION.md).
+Šāda darbība ir
+apzināta, un pret regresijām to aizsargā
+`tests/unit/api/cli-tools/apply-container-guard.test.ts` — nekad „nelabojiet” kļūdu 422,
+noņemot šo aizsardzību.
 
 ---
 
-## 1. CLI koda katalogs (26 rīki)
+## Patiesais avots
 
-Visi rīki, kas atrodas direktorijā `/dashboard/cli-code`. Tie, kuriem ir `baseUrlSupport: none`, tiek savienoti, izmantojot MITM vai manuālu rokasgrāmatu, nevis pielāgotu bāzes URL:
+Vienotais katalogs atrodas failā `src/shared/constants/cliTools.ts` kā `CLI_TOOLS: Record<string, CliCatalogEntry>`.
 
-| id           | nosaukums               | piegādātājs         | baseUrlSupport | configType     | acpSpawnable |
+Katram ierakstam ir šādi lauki (definēti failā `src/shared/schemas/cliCatalog.ts`):
+
+| Lauks                                           | Tips                                                         | Apraksts                                                                          |
+| ----------------------------------------------- | ------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| `category`                                      | `"code" \| "agent"`                                          | Lapa, kurā rīks tiek attēlots                                                     |
+| `vendor`                                        | `string`                                                     | Rīka izcelsme ("Anthropic", "OSS (P. Gauthier)")                                  |
+| `acpSpawnable`                                  | `boolean`                                                    | Var izmantot arī kā ACP aģentu (tiek rādīta emblēma)                              |
+| `baseUrlSupport`                                | `"full" \| "partial" \| "none"`                              | Pielāgota galapunkta atbalsta līmenis. `"none"` = MITM neizpildīto darbu saraksts |
+| `configType`                                    | `"env" \| "custom" \| "guide" \| "custom-builder" \| "mitm"` | Konfigurācijas mehānisms                                                          |
+| `id`, `name`, `color`, `description`, `docsUrl` | standarta                                                    | Galvenie attēlošanas lauki                                                        |
+
+Ieraksti ar `baseUrlSupport: "none"` informācijas paneļa lapās **netiek rādīti** — tie ir reģistrēti 11. plāna MITM neizpildīto darbu sarakstā (skatiet `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`).
+
+### Iespēju līmeņi (katalogizēts × nosakāms × konfigurējams × palaižams)
+
+Ne katrs katalogizētais rīks ir nosakāms, konfigurējams vai palaižams. Katram līmenim ir viens
+deklarācijas avots, un noviržu tests nodrošina to savstarpēju atbilstību:
+
+| Līmenis           | Nozīme                                                                                            | Deklarēts                                                              |
+| ----------------- | ------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| **Katalogizēts**  | Parādās informācijas paneļa katalogā (nosaukums, piegādātājs, dokumentācija, konfigurācijas tips) | `src/shared/constants/cliTools.ts` (`CLI_TOOLS`)                       |
+| **Nosakāms**      | Binārā faila/konfigurācijas noteikšana, darbspējas pārbaudes, konfigurācijas ceļi                 | `src/shared/services/cliRuntime.ts` (`CLI_TOOLS` izpildlaika katalogs) |
+| **Konfigurējams** | Atbalsta `omniroute configure <cli>` (pastāv iestatīšanas recepte)                                | `bin/cli/cli-manifest.mjs` (`configure: true`)                         |
+| **Palaižams**     | Atbalsta `omniroute run <target>` (definēta vides/argumentu ievietošana)                          | `bin/cli/cli-manifest.mjs` (`run: true`)                               |
+
+`bin/cli/cli-manifest.mjs` ir kanoniskais izpildāmais manifests CLI komandu
+saskarnēm: `run`, `configure` un čaulas automātiskās pabeigšanas ģeneratori no tā iegūst
+mērķu sarakstus, aizstājvārdu atrisināšanu (piemēram, `kilocode`/`kilo-code`/`kilo_cli` → `kilo`)
+un karoga `--model` piesaisti. Noviržu aizsargs
+`tests/unit/cli/cli-manifest-drift.test.ts` pārbauda, ka manifests, izpildlaika
+katalogs, lietotāja saskarnes katalogs un visas patērētāju saskarnes ir sinhronizētas — ja mērķis tiek pievienots
+vienai saskarnei, bet ne pārējām, testu komplekts neizdodas, nevis ļauj neatbilstībai palikt nepamanītai.
+
+---
+
+## 1. CLI Code katalogs (27 rīki)
+
+Visi rīki, kas redzami sadaļā `/dashboard/cli-code`. Rīki ar `baseUrlSupport: none` tiek savienoti, izmantojot MITM vai manuālu pamācību, nevis pielāgotu bāzes URL:
+
+| id           | name                    | vendor              | baseUrlSupport | configType     | acpSpawnable |
 | ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
 | claude       | Claude Code             | Anthropic           | full           | env            | true         |
 | codex        | OpenAI Codex CLI        | OpenAI              | full           | custom         | true         |
@@ -167,66 +171,68 @@ Visi rīki, kas atrodas direktorijā `/dashboard/cli-code`. Tie, kuriem ir `base
 | grok-build   | Grok Build              | xAI                 | full           | custom         | false        |
 | crush        | Crush                   | OSS (Charm)         | full           | custom         | false        |
 | qwen         | Qwen Code               | Alibaba             | full           | guide          | true         |
+| zed          | Zed                     | Zed Industries      | full           | guide          | false        |
 | cursor       | Cursor                  | Anysphere           | none           | guide          | false        |
 | antigravity  | Antigravity             | Google              | none           | mitm           | false        |
 | hermes       | Hermes                  | Nous Research       | none           | guide          | false        |
 | kiro         | Kiro AI                 | Amazon              | none           | mitm           | false        |
-| custom       | Custom CLI              | —                   | full           | custom-builder | false        |
+| custom       | Pielāgots CLI           | —                   | full           | custom-builder | false        |
 
-Rīkiem ar `baseUrlSupport: "partial"` informācijas kartītē tiek parādīta virsraksts "⚠ Base URL parcial".
+Rīkiem ar `baseUrlSupport: "partial"` informācijas paneļa kartītē tiek rādīta emblēma „⚠ Daļējs bāzes URL atbalsts”.
+---
 
 ## 2. CLI aģentu katalogs (10 rīki)
 
-Autonomie aģenti, kas atrodas `/dashboard/cli-agents`:
+Autonomie aģenti, kas tiek rādīti sadaļā `/dashboard/cli-agents`:
 
-| id           | nosaukums        | ražotājs                 | baseUrlSupport | acpSpawnable |
+| id           | nosaukums        | piegādātājs              | baseUrlSupport | acpSpawnable |
 | ------------ | ---------------- | ------------------------ | -------------- | ------------ |
-| hermes-agent | Hermes Agent     | Nous Research            | pilns          | false        |
-| openclaw     | OpenClaw         | OSS (P. Steinberger)     | pilns          | true         |
-| goose        | Goose            | Block / Linux Foundation | pilns          | true         |
-| interpreter  | Open Interpreter | OSS                      | pilns          | true         |
-| warp         | Warp AI          | Warp Inc.                | daļējs         | true         |
-| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | pilns          | false        |
-| omp          | Oh My Pi         | OSS                      | pilns          | true         |
-| letta        | Letta CLI        | Letta                    | pilns          | false        |
-| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | pilns          | false        |
-| 5dive        | 5dive            | OSS (5dive-ai)           | pilns          | false        |
+| hermes-agent | Hermes Agent     | Nous Research            | full           | false        |
+| openclaw     | OpenClaw         | OSS (P. Steinberger)     | full           | true         |
+| goose        | Goose            | Block / Linux Foundation | full           | true         |
+| interpreter  | Open Interpreter | OSS                      | full           | true         |
+| warp         | Warp AI          | Warp Inc.                | partial        | true         |
+| agent-deck   | Agent Deck       | asheshgoplani (OSS)      | full           | false        |
+| omp          | Oh My Pi         | OSS                      | full           | true         |
+| letta        | Letta CLI        | Letta                    | full           | false        |
+| prime-agent  | Prime Agent      | Prime Intellect (OSS)    | full           | false        |
+| 5dive        | 5dive            | OSS (5dive-ai)           | full           | false        |
 
 ---
 
 ## 3. ACP aģenti (/dashboard/acp-agents)
 
-Šī lapa (pārdēvēta no `/dashboard/agents`) parāda CLI, kurus OmniRoute var **izsaukt** kā aizmugures izpildes dzinējus, izmantojot stdio/ACP protokolu. Katalogs tiek uzturēts atsevišķi `src/lib/acp/registry.ts` un **nav** tas pats, kas `CLI_TOOLS`.
+Šajā lapā (pārdēvēta no `/dashboard/agents`) tiek rādīti CLI, kurus OmniRoute var **palaist** kā aizmugursistēmas izpildes dzinējus, izmantojot stdio/ACP protokolu. Katalogs tiek uzturēts atsevišķi failā `src/lib/acp/registry.ts`, un tas **nav** tas pats, kas `CLI_TOOLS`.
 
 ---
 
-## 4. MITM paveicamais saraksts (netiek rādīts informācijas panelī)
+## 4. MITM neizpildīto darbu saraksts (informācijas panelī netiek rādīts)
 
-Šie CLI neatbalsta pielāgotu bāzes URL natively un **nav iekļauti** CLI Code vai CLI Agents lapās. Tie ir kandidāti MITM interceptēšanai plānā 11:
+Tālāk norādītie CLI sākotnēji neatbalsta pielāgotu pamata URL un **nav uzskaitīti** CLI Code vai CLI Agents lapās. Tie ir MITM pārtveršanas kandidāti 11. plānā:
 
-| CLI                 | Iemesls                                                                |
-| ------------------- | ---------------------------------------------------------------------- |
-| windsurf            | BYOK ierobežots ar atlasītiem Claude modeļiem + korporatīvs URL/tokens |
-| amp                 | Slēgta ekosistēma (Sourcegraph)                                        |
-| amazon-q / kiro-cli | AWS SSO autentifikācija, nav pielāgojama URL                           |
-| cowork              | Anthropic Desktop, nav konfigurējams gala punkts                       |
+| CLI                 | Iemesls                                                                    |
+| ------------------- | -------------------------------------------------------------------------- |
+| windsurf            | BYOK ir ierobežots līdz noteiktiem Claude modeļiem un uzņēmuma URL/tokenam |
+| amp                 | Slēgta ekosistēma (Sourcegraph)                                            |
+| amazon-q / kiro-cli | AWS SSO autentifikācija, nav pielāgota URL                                 |
+| cowork              | Anthropic Desktop, nav konfigurējama galapunkta                            |
 
-Sk. `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md` pilnīgai atsaucei.
+Pilnu savstarpējo atsauču sarakstu skatiet failā `_tasks/features-v3.8.6/refactorpages/_orchestration/_plan11-mitm-backlog.md`.
 
 ---
 
-## 5. Partiju noteikšanas API
+## 5. Pakešveida noteikšanas API
 
-Visu rīku noteikšana tiek apkopota caur vienu gala punktu:
+Visa rīku noteikšana tiek apkopota, izmantojot vienu galapunktu:
 
 **`GET /api/cli-tools/all-statuses`**
 
-- Autentifikācija: `requireCliToolsAuth(request)` (tāpat kā citiem `/api/cli-tools/` maršrutiem)
+- Autentifikācija: `requireCliToolsAuth(request)` (tāda pati kā citiem `/api/cli-tools/` maršrutiem)
 - Atgriež: `Record<toolId, ToolBatchStatus>` (tips: `src/shared/types/cliBatchStatus.ts`)
-- Stratēģija: `Promise.all` pār visiem rīkiem, 5s taimauts katram rīkam
-- Kešatmiņa: atmiņā esoša LRU, indeksēta pēc konfigurācijas faila `mtime`. Kešatmiņa tiek atspēkota, kad mainās mtime. Atiestatāta servera restartēšanas laikā.
+- Stratēģija: `Promise.all` visiem rīkiem, 5 s taimauts katram rīkam
+- Kešatmiņa: atmiņā glabāta LRU kešatmiņa, kas indeksēta pēc konfigurācijas faila `mtime`. Kešatmiņa tiek padarīta nederīga, kad mainās mtime. Tā tiek atiestatīta pēc servera restartēšanas.
 
-Atbildes forma katram rīkam:
+Atbildes struktūra katram rīkam:
 
 ```ts
 interface ToolBatchStatus {
@@ -243,95 +249,99 @@ interface ToolBatchStatus {
     endpoint?: string | null;
     lastConfiguredAt?: string | null;
   };
-  error?: string; // sanitized, no stack traces
+  error?: string; // attīrīts, bez steka trasējumiem
 }
 ```
 
-## 6. Iestatījumu apstrādātāji jauniem rīkiem
+---
 
-Jauniem rīkiem ar `configType: "custom"` ir paredzētas specifiskas iestatījumu API maršruti:
+## 6. Iestatījumu apstrādātāji jaunajiem rīkiem
+
+Jaunajiem rīkiem ar `configType: "custom"` ir īpaši iestatījumu API maršruti:
 
 | Maršruts                                    | Rīks                                                                          |
 | ------------------------------------------- | ----------------------------------------------------------------------------- |
 | `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                       |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url karogs)                                                     |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, mantojuma)                                     |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primārā + mantojuma `~/.deepseek` sinhronizācija) |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url karodziņš)                                                  |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, mantotais)                                     |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primārais + mantotā `~/.deepseek` sinhronizācija) |
 | `POST /api/cli-tools/smelt-settings`        | Smelt                                                                         |
-| `POST /api/cli-tools/pi-settings`           | Pi kodēšanas aģents                                                           |
+| `POST /api/cli-tools/pi-settings`           | Pi programmēšanas aģents                                                      |
 | `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                         |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + specifiskā `.env` atslēga)               |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + īpaša `.env` atslēga)                    |
 
-Visi maršruti izmanto `sanitizeErrorMessage()` kļūdu atbildēm (Stingrā Noteikuma #12).
+Visi maršruti kļūdu atbildēm izmanto `sanitizeErrorMessage()` (stingrais noteikums Nr. 12).
 
 ---
 
 ## 7. Informācijas paneļa lapu arhitektūra
 
-### CLI Code's (`/dashboard/cli-code`)
+### CLI kodi (`/dashboard/cli-code`)
 
 - `src/app/(dashboard)/dashboard/cli-code/page.tsx` — servera komponents
 - `src/app/(dashboard)/dashboard/cli-code/CliCodePageClient.tsx` — klienta režģis
-- `src/app/(dashboard)/dashboard/cli-code/[id]/page.tsx` — rīka detaļu lapa
-- `src/app/(dashboard)/dashboard/cli-code/components/` — 12 specializētas rīku kartes + `ToolDetailClient.tsx`
+- `src/app/(dashboard)/dashboard/cli-code/[id]/page.tsx` — rīka detalizētās informācijas lapa
+- `src/app/(dashboard)/dashboard/cli-code/components/` — 12 specializētas rīku kartītes + `ToolDetailClient.tsx`
 
-### CLI Aģenti (`/dashboard/cli-agents`)
+### CLI aģenti (`/dashboard/cli-agents`)
 
 - `src/app/(dashboard)/dashboard/cli-agents/page.tsx` — servera komponents
 - `src/app/(dashboard)/dashboard/cli-agents/CliAgentsPageClient.tsx` — klienta režģis
-- `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — atkārto `ToolDetailClient`
+- `src/app/(dashboard)/dashboard/cli-agents/[id]/page.tsx` — atkārtoti izmanto `ToolDetailClient`
 
-### ACP Aģenti (`/dashboard/acp-agents`)
+### ACP aģenti (`/dashboard/acp-agents`)
 
 - `src/app/(dashboard)/dashboard/acp-agents/page.tsx` — servera komponents (pārvietots no `agents/`)
 
-### Kopīgie UI Komponenti (`src/shared/components/cli/`)
+### Koplietojamie lietotāja saskarnes komponenti (`src/shared/components/cli/`)
 
-| Fails                   | Mērķis                                                        |
-| ----------------------- | ------------------------------------------------------------- |
-| `CliToolCard.tsx`       | Viedā statusa karte (noteikšana + konfigurācija + galapunkts) |
-| `CliConceptCard.tsx`    | Lapas koncepta izskaidrošanas karte                           |
-| `CliComparisonCard.tsx` | Trīs kolonnu salīdzinājums starp CLI tipiem                   |
-| `BaseUrlSelect.tsx`     | Galapunkta nolaižamais saraksts (Lokāls/Mākoņs/Pielāgots)     |
-| `ApiKeySelect.tsx`      | API atslēgas izvēlētājs                                       |
-| `ManualConfigModal.tsx` | Kopējama konfigurācijas fragmenta modālais logs               |
+| Fails                   | Nolūks                                                          |
+| ----------------------- | --------------------------------------------------------------- |
+| `CliToolCard.tsx`       | Viedā statusa kartīte (noteikšana + konfigurācija + galapunkts) |
+| `CliConceptCard.tsx`    | Katras lapas koncepcijas skaidrojuma kartīte                    |
+| `CliComparisonCard.tsx` | Trīs kolonnu salīdzinājums starp CLI tipiem                     |
+| `BaseUrlSelect.tsx`     | Galapunkta nolaižamā izvēlne (lokāls/mākonis/pielāgots)         |
+| `ApiKeySelect.tsx`      | API atslēgas atlasītājs                                         |
+| `ManualConfigModal.tsx` | Kopējama konfigurācijas fragmenta modālais logs                 |
 
-### Kopīgais Āķis (`src/shared/hooks/cli/`)
+### Koplietojamais āķis (`src/shared/hooks/cli/`)
 
-| Fails                     | Mērķis                                                                       |
-| ------------------------- | ---------------------------------------------------------------------------- |
-| `useToolBatchStatuses.ts` | Iegūst `/api/cli-tools/all-statuses`, pārvalda ielādes/atjaunošanas stāvokli |
-
-## 8. i18n
-
-Jauni vārdtelpas pievienotas plānā 14 F9:
-
-| Vārdtelpa   | Mērķis                                                                                        |
-| ----------- | --------------------------------------------------------------------------------------------- |
-| `cliCommon` | Kopīgiem virsrakstiem (karšu nosaukumi, konceptu/salīdzinājumu teksti, detaļu lapu nosaukumi) |
-| `cliCode`   | CLI Code lapas virsraksti                                                                     |
-| `cliAgents` | CLI Agents lapas virsraksti                                                                   |
-| `acpAgents` | ACP Agents lapas virsraksti                                                                   |
-
-Pilnas PT-BR un EN tulkojumi ir nodrošināti. 39 citas valodas automātiski pāriet uz EN, izmantojot vārdtelpu līmeņa apvienošanu failā `src/i18n/request.ts`.
+| Fails                     | Nolūks                                                                                    |
+| ------------------------- | ----------------------------------------------------------------------------------------- |
+| `useToolBatchStatuses.ts` | Iegūst datus no `/api/cli-tools/all-statuses`, pārvalda ielādes/atsvaidzināšanas stāvokli |
 
 ---
 
-## 9. Ātrā sākšana
+## 8. i18n
 
-### 1. solis — Iegūstiet OmniRoute API atslēgu
+14. plānā F9 pievienotas jaunas nosaukumvietas:
+
+| Nosaukumvieta | Mērķis                                                                                              |
+| ------------- | --------------------------------------------------------------------------------------------------- |
+| `cliCommon`   | Koplietojamas virknes (kartīšu etiķetes, koncepciju/salīdzinājumu teksti, detalizēto lapu etiķetes) |
+| `cliCode`     | CLI Code lapas virknes                                                                              |
+| `cliAgents`   | CLI Agents lapas virknes                                                                            |
+| `acpAgents`   | ACP Agents lapas virknes                                                                            |
+
+Ir nodrošināti pilni PT-BR un EN tulkojumi. 39 citām lokalizācijām automātiski tiek izmantots EN, pateicoties nosaukumvietu līmeņa sapludināšanai failā `src/i18n/request.ts`.
+
+---
+
+## 9. Ātrā darba sākšana
+
+### 1. darbība — iegūstiet OmniRoute API atslēgu
 
 1. Atveriet `/dashboard/api-manager` → **Izveidot API atslēgu**
-2. Piešķirt tai nosaukumu (piem., `cli-tools`) un atlasiet visas atļaujas
-3. Nokopējiet atslēgu — tā būs nepieciešama katram zemāk esošajam CLI
+2. Piešķiriet tai nosaukumu (piemēram, `cli-tools`) un atlasiet visas atļaujas
+3. Nokopējiet atslēgu — tā būs nepieciešama katram tālāk norādītajam CLI
 
 > Jūsu atslēga izskatās šādi: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### 2. solis — Instalējiet CLI rīkus
+### 2. darbība — instalējiet CLI rīkus
 
-Visi npm bāzētie rīki prasa Node.js 22.22.2+ vai 24.x:
+Visiem uz npm balstītajiem rīkiem ir nepieciešams Node.js 22.22.2+ vai 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -352,53 +362,53 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (palaižams ar `omniroute run gemini` → /v1beta virsma)
+# Google Gemini CLI (palaižams ar `omniroute run gemini` → /v1beta saskarne)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Uz Rust balstīts
+cargo install smelt  # Balstīts uz Rust
 
-# Pi coding agent
-# skat. https://github.com/zechnerj/pi-coding-agent instalācijai
+# Pi programmēšanas aģents
+# instalēšanas norādījumus skatiet vietnē https://github.com/zechnerj/pi-coding-agent
 
 # jcode
-# skat. https://github.com/1jehuang/jcode instalācijai
+# instalēšanas norādījumus skatiet vietnē https://github.com/1jehuang/jcode
 ```
 
 ---
 
-### 3. solis — Konfigurējiet caur vadības paneli
+### 3. darbība — konfigurējiet informācijas panelī
 
-1. Dodieties uz `http://localhost:20128/dashboard/cli-code`
-2. Atrodiet savu rīku režģī
-3. Noklikšķiniet uz kartes, lai atvērtu rīka detaļu lapu
+1. Atveriet `http://localhost:20128/dashboard/cli-code`
+2. Režģī atrodiet savu rīku
+3. Noklikšķiniet uz kartītes, lai atvērtu rīka detalizēto lapu
 4. Atlasiet savu API atslēgu un bāzes URL
-5. Noklikšķiniet uz **Lietot konfigurāciju** vai nokopējiet manuālo konfigurācijas fragmentu
+5. Noklikšķiniet uz **Lietot konfigurāciju** vai nokopējiet manuālās konfigurācijas fragmentu
 
 ---
 
-### 4. solis — Iestatiet globālos vides mainīgos
+### 4. darbība — iestatiet globālos vides mainīgos
 
 ```bash
-# OmniRoute universālais gala punkts
+# OmniRoute universālais galapunkts
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI nolasa GOOGLE_GEMINI_BASE_URL saknes līmenī (tā SDK pats pievieno /v1beta/...)
+# Gemini CLI nolasa GOOGLE_GEMINI_BASE_URL SAKNES līmenī (tā SDK pats pievieno /v1beta/...)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **Attālinātam serverim** aizstājiet `localhost:20128` ar servera IP adresi vai domēnvārdu,
-> piem., `http://<your-server-ip>:20128`.
+> **Attālam serverim** aizstājiet `localhost:20128` ar servera IP adresi vai domēnu,
+> piemēram, `http://<your-server-ip>:20128`.
 
 ---
 
-### 4. solis — Konfigurējiet katru rīku
+### 4. darbība — konfigurējiet katru rīku
 
 #### Claude Code
 
@@ -414,17 +424,17 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Izmantojiet vienoto Anthropic vārtu sakni Claude Code. Šeit nepievienojiet `/v1`.
+Claude Code vajadzībām izmantojiet vienotās Anthropic vārtejas saknes adresi. Šeit nepievienojiet `/v1`.
 
-**Testēt:** `claude "say hello"`
+**Pārbaude:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
 Mūsdienu Codex (v0.137+) nolasa tikai `~/.codex/config.toml` — vecais
-`config.yaml` pieder vecajam npm CLI un klusām tiek ignorēts. API
-atslēga paliek vides mainīgajā `OMNIROUTE_API_KEY` (`env_key`), nekad
+`config.yaml` pieder mantotajam npm CLI un tiek bez brīdinājuma ignorēts. API
+atslēga paliek vides mainīgajā `OMNIROUTE_API_KEY` (`env_key`), nevis
 failā:
 
 ```bash
@@ -442,7 +452,7 @@ export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 
 Pilna atsauce (profili, `wire_api`, konteksta logi): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**Testēt:** `codex "what is 2+2?"`
+**Pārbaude:** `codex "what is 2+2?"`
 
 ---
 
@@ -471,7 +481,7 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**Testēt:** `opencode`
+**Pārbaude:** `opencode`
 
 > Izmantojiet `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`,
 > lai nosūtītu domāšanas variantus.
@@ -493,9 +503,9 @@ EOF
 ```
 
 **VS Code režīms:**
-Cline paplašinājuma iestatījumi → API sniedzējs: `OpenAI Compatible` → Bāzes URL: `http://localhost:20128/v1`
+Cline paplašinājuma iestatījumi → API nodrošinātājs: `OpenAI Compatible` → Bāzes URL: `http://localhost:20128/v1`
 
-Vai izmantojiet OmniRoute vadības paneli → **CLI rīki → Cline → Lietot konfigurāciju**.
+Vai izmantojiet OmniRoute informācijas paneli → **CLI rīki → Cline → Lietot konfigurāciju**.
 
 ---
 
@@ -516,7 +526,7 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Vai izmantojiet OmniRoute vadības paneli → **CLI rīki → KiloCode → Lietot konfigurāciju**.
+Vai izmantojiet OmniRoute informācijas paneli → **CLI rīki → KiloCode → Lietot konfigurāciju**.
 
 ---
 
@@ -540,7 +550,7 @@ Pēc rediģēšanas restartējiet VS Code.
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Izmantojiet šo, kad VS Code Insiders ir konfigurēts pielāgoto gala punktu modeļiem un vēlaties, lai OmniRoute darbotos bez pielāgota galvenes lauka.
+Izmantojiet šo iespēju, ja VS Code Insiders ir konfigurēts pielāgotu galapunktu modeļiem un vēlaties, lai OmniRoute darbotos bez pielāgota galvenes lauka.
 
 **Ieteicamā atrašanās vieta:**
 
@@ -572,10 +582,10 @@ Izmantojiet šo, kad VS Code Insiders ir konfigurēts pielāgoto gala punktu mod
 **Piezīmes:**
 
 - Aizstājiet `sk-your-omniroute-key` ar OmniRoute izveidotu API atslēgu.
-- Laukam `url` jānorāda `/api/v1/vscode/{token}/chat/completions`.
-- Laukam `modelsUrl` jānorāda `/api/v1/vscode/{token}/models`.
-- Dodiet priekšroku parastajai `/v1` + Bearer galvenes plūsmai, kad klients atbalsta pielāgotas galvenes.
-- URL iegultie tokeni ir saderības rezerves variants un var parādīties redaktora žurnālos vai starpniekservera vēsturē.
+- Laukam `url` jānorāda uz `/api/v1/vscode/{token}/chat/completions`.
+- Laukam `modelsUrl` jānorāda uz `/api/v1/vscode/{token}/models`.
+- Ja klients atbalsta pielāgotas galvenes, dodiet priekšroku parastajai `/v1` plūsmai ar Bearer galveni.
+- URL iegultie tokeni ir saderības rezerves risinājums, un tie var parādīties redaktora žurnālos vai starpniekservera vēsturē.
 
 ---
 
@@ -585,187 +595,201 @@ Izmantojiet šo, kad VS Code Insiders ir konfigurēts pielāgoto gala punktu mod
 # Piesakieties savā AWS/Kiro kontā:
 kiro-cli login
 
-# CLI izmanto savu autentifikāciju — OmniRoute nav nepieciešams kā backend pašam Kiro CLI.
+# CLI izmanto savu autentifikāciju — OmniRoute nav nepieciešams kā aizmugursistēma pašam Kiro CLI.
 # Izmantojiet kiro-cli kopā ar OmniRoute citiem rīkiem.
 kiro-cli status
 ```
 
-**Kiro IDE** darbvirsmas lietotnei izmantojiet MITM gala punktu, ko nodrošina OmniRoute
-vadības sadaļā `/dashboard/cli-tools → Kiro`.
+**Kiro IDE** darbvirsmas lietotnei izmantojiet OmniRoute nodrošināto MITM galapunktu,
+kas atrodas sadaļā `/dashboard/cli-tools → Kiro`.
+
+---
 
 ## 10. Iekšējais OmniRoute CLI
 
-Binance `omniroute` binārais faila nodrošina komandas servera dzīves ciklam, iestatīšanai, diagnostikai un pakalpojumu sniedzēju pārvaldībai. Ieejas punkts: `bin/omniroute.mjs`.
+`omniroute` binārais fails nodrošina komandas servera dzīves cikla pārvaldībai, iestatīšanai, diagnostikai un pakalpojumu sniedzēju pārvaldībai. Ieejas punkts: `bin/omniroute.mjs`.
 
 ```bash
-omniroute                              # Start server (default port 20128)
-omniroute setup                        # Interactive setup wizard
-omniroute doctor                       # Check config, DB, ports, runtime
-omniroute providers list               # Configured provider connections
-omniroute providers test-all           # Test every active connection
-omniroute reset-password               # Reset the admin password
-omniroute logs                         # Stream request logs
-omniroute health                       # Detailed health (breakers, cache, memory)
-omniroute --version                    # Print version
-omniroute --help                       # Show all commands
+omniroute                              # Palaist serveri (noklusējuma ports 20128)
+omniroute setup                        # Interaktīvs iestatīšanas vednis
+omniroute doctor                       # Pārbaudīt konfigurāciju, DB, portus un izpildlaika vidi
+omniroute providers list               # Konfigurētie pakalpojumu sniedzēju savienojumi
+omniroute providers test-all           # Pārbaudīt katru aktīvo savienojumu
+omniroute reset-password               # Atiestatīt administratora paroli
+omniroute logs                         # Straumēt pieprasījumu žurnālus
+omniroute health                       # Detalizēts darbspējas statuss (slēdži, kešatmiņa, atmiņa)
+omniroute --version                    # Izvadīt versiju
+omniroute --help                       # Parādīt visas komandas
 ```
 
 ### Iestatīšana un inicializācija
 
 ```bash
-omniroute setup                        # Interactive setup wizard
-omniroute setup --non-interactive      # CI/automation mode (reads env vars + flags)
-omniroute setup --password '<value>'   # Set admin password directly
+omniroute setup                        # Interaktīvs iestatīšanas vednis
+omniroute setup --non-interactive      # CI/automatizācijas režīms (nolasa vides mainīgos un karogus)
+omniroute setup --password '<value>'   # Tieši iestatīt administratora paroli
 omniroute setup --add-provider \
   --provider openai \
   --api-key '<value>' \
-  --test-provider                      # Add and test a provider in one shot
+  --test-provider                      # Pievienot un pārbaudīt pakalpojumu sniedzēju vienā darbībā
 ```
 
-Neinteraktīvai iestatīšanai atpazīstamās vides mainīgās:
+Atpazītie vides mainīgie neinteraktīvai iestatīšanai:
 
-| Mainīgais           | Mērķis                                                                              |
-| ------------------- | ----------------------------------------------------------------------------------- |
-| `OMNIROUTE_API_KEY` | Pakalpojuma sniedzēja API atslēga (saistīta ar `--api-key` caur Commander `.env()`) |
-| `DATA_DIR`          | Pārrakstīt OmniRoute datu direktoriju                                               |
+| Mainīgais           | Nolūks                                                                                     |
+| ------------------- | ------------------------------------------------------------------------------------------ |
+| `OMNIROUTE_API_KEY` | Pakalpojumu sniedzēja API atslēga (piesaistīta `--api-key`, izmantojot Commander `.env()`) |
+| `DATA_DIR`          | Aizstāt OmniRoute datu direktoriju                                                         |
 
-Visas citas neinteraktīvās ievades tiek padotas kā karogi, nevis vides mainīgās:
+Visas pārējās neinteraktīvās ievades tiek nodotas kā karogi, nevis vides mainīgie:
 `--password`, `--provider`, `--provider-name`, `--provider-base-url`, `--default-model`
-(sk. `omniroute setup` opcijas iepriekš).
+(skatiet iepriekš norādītās `omniroute setup` opcijas).
 
 ### Diagnostika
 
 ```bash
-omniroute doctor                       # Check config, DB, ports, runtime, memory, liveness
-omniroute doctor --json                # Machine-readable JSON
-omniroute doctor --no-liveness         # Skip the HTTP health probe
-omniroute doctor --host 0.0.0.0        # Override liveness host
-omniroute doctor --liveness-url <url>  # Full health endpoint URL override
+omniroute doctor                       # Pārbaudīt konfigurāciju, DB, portus, izpildlaika vidi, atmiņu un darbspēju
+omniroute doctor --json                # Mašīnlasāms JSON
+omniroute doctor --no-liveness         # Izlaist HTTP darbspējas pārbaudi
+omniroute doctor --host 0.0.0.0        # Aizstāt darbspējas pārbaudes resursdatoru
+omniroute doctor --liveness-url <url>  # Aizstāt pilno darbspējas galapunkta URL
 ```
 
-`doctor` veic šādas pārbaudes: `Config`, `Database`, `Storage/encryption`,
+Komanda doctor veic šādas pārbaudes: `Config`, `Database`, `Storage/encryption`,
 `Port availability`, `Node runtime`, `Native binary` (better-sqlite3),
-`Memory` un `Server liveness`. Tas iziet ar nenulles kodu, ja jebkura pārbaude ir `fail`.
+`Memory` un `Server liveness`. Tā beidz darbu ar kodu, kas nav nulle, ja kādas pārbaudes rezultāts ir `fail`.
 
 ### Pakalpojumu sniedzēju pārvaldība
 
 ```bash
-omniroute providers available                       # OmniRoute provider catalog
-omniroute providers available --search openai       # Filter catalog by id/name/alias/category
-omniroute providers available --category api-key    # Filter by category (api-key, oauth, free, ...)
-omniroute providers available --json                # Machine-readable JSON
+omniroute providers available                       # OmniRoute pakalpojumu sniedzēju katalogs
+omniroute providers available --search openai       # Filtrēt katalogu pēc ID/nosaukuma/aizstājvārda/kategorijas
+omniroute providers available --category api-key    # Filtrēt pēc kategorijas (api-key, oauth, free, ...)
+omniroute providers available --json                # Mašīnlasāms JSON
 
-omniroute providers list                            # Configured provider connections
+omniroute providers list                            # Konfigurētie pakalpojumu sniedzēju savienojumi
 omniroute providers list --json
 
-omniroute providers test <id|name>                  # Test one configured connection
-omniroute providers test-all                        # Test every active connection
-omniroute providers validate                        # Local-only structural validation
+omniroute providers test <id|name>                  # Pārbaudīt vienu konfigurētu savienojumu
+omniroute providers test-all                        # Pārbaudīt katru aktīvo savienojumu
+omniroute providers validate                        # Tikai lokāla strukturālā validācija
 omniroute providers add <provider> --credential-env PROVIDER_KEY
 omniroute providers import ./providers.json --dry-run --json
-omniroute providers auth <provider>                 # Existing OAuth flow
+omniroute providers auth <provider>                 # Esošā OAuth plūsma
 omniroute providers edit <id|name> --default-model <model>
 omniroute providers remove <id|name> --yes
 ```
 
-`providers add/import/auth/edit/remove` ir API-primāri un tāpēc darbojas pret
-aktīvo lokālo vai attālo kontekstu. Pieteikšanās datu ievadei jāizmanto
+`providers add/import/auth/edit/remove` primāri izmanto API un tādēļ darbojas ar
+aktīvo lokālo vai attālo kontekstu. Akreditācijas datu ievadei jāizmanto
 `--credential-stdin` vai `--credential-env`; `--dry-run --json` ziņo tikai par
 rediģētu esamību/formu. `providers available` nolasa OmniRoute katalogu;
-`providers list/test/test-all/validate` saglabā savu lokālo SQLite uzvedību un
-neprasa servera darbību.
+`providers list/test/test-all/validate` saglabā savu lokālo SQLite darbību, un
+tiem nav nepieciešams, lai serveris darbotos.
 
-### Atgūšana un atiestatīšana
+Pielāgotam ar OpenAI vai Anthropic saderīgam mezglam piesaistiet akreditācijas datus
+mezgla ID, ko atgriež `omniroute nodes add`, izmantojot `omniroute keys add "$NODE_ID" --stdin`.
+Tam nepieciešams darbojošs serveris un pārvaldības autentifikācija aktīvajam kontekstam.
+CLI izmanto `POST /api/providers`, kas validē mezglu un kopē tā galapunkta
+iestatījumus savienojumā. Ja mezgls nav atrasts, autorizācija neizdodas vai serveris
+nav pieejams, tiek atgriezta kļūda, neveidojot lokālu rezerves akreditācijas ierakstu.
+
+`nodes add --base-url` iestata mezgla galapunktu; tas atšķiras no servera adreses,
+kas norādīta `OMNIROUTE_BASE_URL`. OpenAPI failiem izmantojiet
+`omniroute openapi dump --format json --out ./openapi.json`; globālā opcija `--output`
+atlasa CLI attēlošanas formatējumu, nevis mērķa faila nosaukumu.
+
+### Atkopšana un atiestatīšana
 
 ```bash
-omniroute reset-password                # Reset the admin password (also: omniroute-reset-password)
-omniroute reset-encrypted-columns       # Show warning + dry-run for encrypted credential reset
-omniroute reset-encrypted-columns --force  # Actually null out encrypted credentials in SQLite
+omniroute reset-password                # Atiestatīt administratora paroli (arī: omniroute-reset-password)
+omniroute reset-encrypted-columns       # Parādīt brīdinājumu un izmēģinājuma režīmu šifrēto akreditācijas datu atiestatīšanai
+omniroute reset-encrypted-columns --force  # Faktiski aizstāt šifrētos akreditācijas datus SQLite ar null
 ```
 
-### Pieteikšanās datu eksportēšana (⚠ apieties piesardzīgi)
+### Akreditācijas datu eksportēšana (⚠ rīkojieties piesardzīgi)
 
 ```bash
-omniroute auth export                                 # Show warning + confirmation gate — no DB access
-omniroute auth export --force                          # Export ALL connections' DECRYPTED credentials to stdout as JSON
-omniroute auth export --force --id <id>                 # Export only the matching connection
-omniroute auth export --force --format env               # Emit OMNIROUTE_<PROVIDER>_<FIELD>=<value> lines
-omniroute auth export --force --out creds.json           # Write to a file (created with 0600 permissions)
+omniroute auth export                                 # Parādīt brīdinājumu un pieprasīt apstiprinājumu — bez piekļuves DB
+omniroute auth export --force                          # Eksportēt VISU savienojumu ATŠIFRĒTOS akreditācijas datus uz stdout JSON formātā
+omniroute auth export --force --id <id>                 # Eksportēt tikai atbilstošo savienojumu
+omniroute auth export --force --format env               # Izvadīt OMNIROUTE_<PROVIDER>_<FIELD>=<value> rindas
+omniroute auth export --force --out creds.json           # Ierakstīt failā (izveidots ar 0600 atļaujām)
 ```
 
-`auth export` ir **tikai lokāls** (tieša SQLite nolasīšana, nevis HTTP maršruts) un apzināti drukā/raksta
-**plain text** `apiKey`/`accessToken`/`refreshToken`/`idToken` vērtības — tas ir funkcionalitāte, nevis
-kļūda. Nekas netiek nolasīts no datubāzes, un nekas netiek atšifrēts bez `--force`. Stderr
-brīdinājums vienmēr tiek izdrukāts pirms jebkura plain text izvadīšanas. Nepieciešams, lai būtu iestatīts `STORAGE_ENCRYPTION_KEY`.
-Lauks, kuram neizdodas atšifrēt (novecojusi atslēga, bojāts šifrots), tiek ziņots kā
-`<field>DecryptFailed: true` tā vietā, lai pārtrauktu visu eksportu vai izplatītu pamata kļūdu.
+`auth export` darbojas **tikai lokāli** (tieša SQLite lasīšana, bez HTTP maršruta) un apzināti izvada/raksta
+**vienkārša teksta** `apiKey`/`accessToken`/`refreshToken`/`idToken` vērtības — tā ir funkcionalitāte, nevis
+kļūda. Bez `--force` nekas netiek lasīts no datubāzes un nekas netiek atšifrēts. Pirms jebkāda vienkārša teksta izvades
+vienmēr tiek parādīts brīdinājuma baneris stderr plūsmā. Nepieciešams, lai būtu iestatīts `STORAGE_ENCRYPTION_KEY`.
+Lauks, kuru neizdodas atšifrēt (novecojusi atslēga, bojāts šifrētais teksts), tiek norādīts kā
+`<field>DecryptFailed: true`, nevis tiek pārtraukts viss eksports vai atklāta pamatā esošā kļūda.
 
 ### Citas apakškomandas
 
-Pieņem, ka darbojas OmniRoute serveris, ja vien nav norādīts citādi:
+Ja vien nav norādīts citādi, tās pieņem, ka darbojas OmniRoute serveris:
 
 ```bash
-omniroute status                       # Comprehensive runtime status
-omniroute logs                         # Stream request logs (--json, --search, --follow)
-omniroute config show                  # Display current configuration
+omniroute status                       # Visaptverošs izpildlaika statuss
+omniroute logs                         # Pieprasījumu žurnālu straumēšana (--json, --search, --follow)
+omniroute config list                  # Konfigurēto CLI rīku parādīšana
 
-omniroute provider list                # List available providers (alias of providers list)
-omniroute provider add                 # Register OmniRoute as a provider on a tool
-omniroute keys add | list | remove     # Manage API keys
-omniroute models [provider]            # List models (--json, --search)
+omniroute provider list                # Pieejamo pakalpojumu sniedzēju saraksts (providers list aizstājvārds)
+omniroute provider add                 # OmniRoute reģistrēšana rīkā kā pakalpojumu sniedzēju
+omniroute keys add | list | remove     # API atslēgu pārvaldība
+omniroute models [provider]            # Modeļu saraksts (--json, --search)
 omniroute combo list | switch | create | delete
 
-omniroute backup                       # Snapshot config + DB
-omniroute restore                      # Restore from a previous snapshot
+omniroute backup                       # Konfigurācijas un DB momentuzņēmuma izveide
+omniroute restore                      # Atjaunošana no iepriekšēja momentuzņēmuma
 
-omniroute health                       # Detailed health (breakers, cache, memory)
-omniroute quota                        # Provider quota usage
-omniroute cache                        # Cache status
-omniroute cache clear                  # Clear semantic + signature caches
+omniroute health                       # Detalizēts darbspējas stāvoklis (slēdži, kešatmiņa, atmiņa)
+omniroute quota                        # Pakalpojumu sniedzēja kvotas lietojums
+omniroute cache                        # Kešatmiņas statuss
+omniroute cache clear                  # Semantiskās un parakstu kešatmiņas notīrīšana
 
-omniroute mcp status | restart         # MCP server status / restart
-omniroute a2a status | card            # A2A server status / agent card
+omniroute mcp status | restart         # MCP servera statuss / restartēšana
+omniroute a2a status | card            # A2A servera statuss / aģenta kartīte
 
-omniroute tunnel list | create | stop  # Manage tunnels (cloudflare/tailscale/ngrok)
-omniroute env show | get <k> | set <k> <v>  # Inspect / set env vars (temporary)
+omniroute tunnel list | create | stop  # Tuneļu pārvaldība (cloudflare/tailscale/ngrok)
+omniroute env show | get <k> | set <k> <v>  # Vides mainīgo apskate / iestatīšana (īslaicīgi)
 
-omniroute test                         # Provider connectivity smoke test
-omniroute update                       # Check for updates
-omniroute completion                   # Generate shell completion
+omniroute test                         # Pakalpojumu sniedzēja savienojamības ātrā pārbaude
+omniroute update                       # Atjauninājumu pārbaude
+omniroute completion                   # Čaulas automātiskās pabeigšanas ģenerēšana
 ```
 
-### Bieži izmantotie karogi
+### Biežāk lietotie karodziņi
 
-| Karogs              | Apraksts                                             |
-| ------------------- | ---------------------------------------------------- |
-| `--no-open`         | Nesākt automātiski pārlūkprogrammu startēšanas laikā |
-| `--port <n>`        | Pārrakstīt API portu (noklusējums 20128)             |
-| `--mcp`             | Palaist kā MCP serveri caur stdio (IDE lietošanai)   |
-| `--non-interactive` | CI režīms (nav uzvedņu; nolasās no vidiem/karogiem)  |
-| `--json`            | Datorlasāms JSON izvads (doctor, providers, utt.)    |
-| `--help`, `-h`      | Rāda komandai specifisku palīdzību                   |
-| `--version`, `-v`   | Drukā instalēto versiju                              |
+| Karodziņš           | Apraksts                                                   |
+| ------------------- | ---------------------------------------------------------- |
+| `--no-open`         | Startēšanas laikā automātiski neatvērt pārlūkprogrammu     |
+| `--port <n>`        | Pārrakstīt API portu (noklusējums: 20128)                  |
+| `--mcp`             | Darbināt kā MCP serveri, izmantojot stdio (IDE vajadzībām) |
+| `--non-interactive` | CI režīms (bez uzvednēm; nolasa no vides/karodziņiem)      |
+| `--json`            | Mašīnlasāma JSON izvade (doctor, providers utt.)           |
+| `--help`, `-h`      | Parādīt konkrētās komandas palīdzību                       |
+| `--version`, `-v`   | Izvadīt instalēto versiju                                  |
 
 ---
 
 ## Pieejamie API galapunkti
 
-| Galapunkts                 | Apraksts                             | Izmanto                   |
-| -------------------------- | ------------------------------------ | ------------------------- |
-| `/v1/chat/completions`     | Standarta tērzēšana (visi sniedzēji) | Visi modernie rīki        |
-| `/v1/responses`            | Atbildes API (OpenAI formāts)        | Codex, aģentu darbplūsmas |
-| `/v1/completions`          | Novecojuši teksta pabeigšana         | Vecāki rīki ar `prompt:`  |
-| `/v1/embeddings`           | Teksta iegultnes                     | RAG, meklēšana            |
-| `/v1/images/generations`   | Attēlu ģenerēšana                    | GPT-Image, Flux u.c.      |
-| `/v1/audio/speech`         | Teksts-skaņa                         | ElevenLabs, OpenAI TTS    |
-| `/v1/audio/transcriptions` | Skaņa-teksts                         | Deepgram, AssemblyAI      |
+| Galapunkts                 | Apraksts                                 | Lietojums                          |
+| -------------------------- | ---------------------------------------- | ---------------------------------- |
+| `/v1/chat/completions`     | Standarta tērzēšana (visi nodrošinātāji) | Visi mūsdienīgie rīki              |
+| `/v1/responses`            | Responses API (OpenAI formāts)           | Codex, aģentu darbplūsmas          |
+| `/v1/completions`          | Mantotā teksta pabeigšana                | Vecāki rīki, kas izmanto `prompt:` |
+| `/v1/embeddings`           | Teksta iegulumi                          | RAG, meklēšana                     |
+| `/v1/images/generations`   | Attēlu ģenerēšana                        | GPT-Image, Flux utt.               |
+| `/v1/audio/speech`         | Teksta pārvēršana runā                   | ElevenLabs, OpenAI TTS             |
+| `/v1/audio/transcriptions` | Runas pārvēršana tekstā                  | Deepgram, AssemblyAI               |
 
-Gatavi ielīmēt piemēri ar tokenizētu OmniRoute URL:
+Ielīmēšanai gatavi piemēri ar tokenizētu OmniRoute URL:
 
 ```txt
-Token piemērs: sk-a3ab3c080beaee3a-69f4a4-070d71af
+Tokena piemērs: sk-a3ab3c080beaee3a-69f4a4-070d71af
 
-Standarta OpenAI bāze: http://localhost:20128/v1
+Standarta OpenAI bāzes URL: http://localhost:20128/v1
 VS Code modeļi: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/models
 VS Code tērzēšana: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/chat/completions
 VS Code atbildes: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69f4a4-070d71af/responses
@@ -777,12 +801,44 @@ Ollama tērzēšana: http://localhost:20128/api/v1/vscode/sk-a3ab3c080beaee3a-69
 
 ## Problēmu novēršana
 
-| Kļūda                                          | Cēlonis                                | Labojums                                               |
-| ---------------------------------------------- | -------------------------------------- | ------------------------------------------------------ |
-| `Connection refused`                           | OmniRoute nav palaists                 | `omniroute serve`                                      |
-| `401 Unauthorized`                             | Nepareizs API atslēga                  | Pārbaudīt `/dashboard/api-manager`                     |
-| `No combo configured`                          | Nav aktīvas maršrutēšanas kombinācijas | Iestatīt `/dashboard/combos`                           |
-| CLI rāda "not installed"                       | Binārfails nav PATH                    | Pārbaudīt `which <command>`                            |
-| Dashboard pēc instalēšanas rāda "not detected" | Novecojušais kešatmiņa                 | Noklikšķināt "⟳ Refresh detection" dashboard           |
-| Veca saite `/dashboard/cli-tools`              | Līdz v3.8.š grāmatzīme                 | Automātiski novirzīts uz `/dashboard/cli-code` (308)   |
-| Veca saite `/dashboard/agents`                 | Līdz v3.8.š grāmatzīme                 | Automātiski novirzīts uz `/dashboard/acp-agents` (308) |
+| Kļūda                                                       | Cēlonis                                | Risinājums                                                       |
+| ----------------------------------------------------------- | -------------------------------------- | ---------------------------------------------------------------- |
+| `Connection refused`                                        | OmniRoute nedarbojas                   | `omniroute serve`                                                |
+| `401 Unauthorized`                                          | Nepareiza API atslēga                  | Pārbaudiet sadaļā `/dashboard/api-manager`                       |
+| `No combo configured`                                       | Nav aktīvas maršrutēšanas kombinācijas | Iestatiet sadaļā `/dashboard/combos`                             |
+| CLI rāda „nav instalēts”                                    | Binārais fails nav PATH                | Pārbaudiet ar `which <command>`                                  |
+| Pēc instalēšanas informācijas panelī redzams „nav noteikts” | Kešatmiņa ir novecojusi                | Informācijas panelī noklikšķiniet uz „⟳ Atsvaidzināt noteikšanu” |
+| Vecā saite `/dashboard/cli-tools`                           | Grāmatzīme no versijas pirms v3.8.6    | Automātiski novirzīta uz `/dashboard/cli-code` (308)             |
+| Vecā saite `/dashboard/agents`                              | Grāmatzīme no versijas pirms v3.8.6    | Automātiski novirzīta uz `/dashboard/acp-agents` (308)           |
+
+## Secinājumu atslēgas politikas pārvaldība ar OmniRoute CLI
+
+Izmantojiet autentificētu pārvaldības kontekstu (skatiet [Attālais režīms](../guides/REMOTE-MODE.md)),
+lai pārbaudītu vai atjauninātu esošu secinājumu atslēgu pēc tās ID:
+
+```bash
+omniroute --output json keys policy show KEY_ID
+omniroute keys policy set KEY_ID --unrestricted
+omniroute --output json keys policy show KEY_ID
+```
+
+`--unrestricted` ir `--model-access-mode all` aizstājvārds. Atjaunināšana notīra
+atļauto modeļu sarakstu. Tā saglabā tvērumus, savienojumu noteikumus, bloķētos modeļus, ātruma ierobežojumus
+un izmaksu ierobežojumus, tāpēc šie pārējie kontroles mehānismi joprojām var noraidīt pieprasījumu. Arī nepārprotams
+`--allowed-models ""` atlasa `all`; kombinējiet to ar
+`--model-access-mode restricted`, lai saglabātu ierobežotu atslēgu bez atļautiem modeļiem.
+Netukšs, ar komatiem atdalīts saraksts atlasa `restricted`, ja vien nav nepārprotami norādīts citādi.
+Pretrunīga `all` un netukša atļauto modeļu saraksta kombinācija tiek noraidīta pirms pieprasījuma nosūtīšanas.
+
+`--rate-limit 30` iestata pieprasījumu skaitu minūtē un saglabā noteikumus citiem laika
+logiem. `--max-cost 5` iespējo dienas ierobežojumu USD, nemainot nedēļas ierobežojumu;
+`--max-cost 0` noņem dienas ierobežojumu un saglabā esošo lietojuma ierobežojuma slēdzi
+un nedēļas ierobežojumu. Izlaistie politikas lauki paliek nemainīti. Ātruma izmaiņu gadījumā vispirms tiek nolasīta
+pašreizējā politika; neveiciet vienlaicīgas izmaiņas vienas un tās pašas atslēgas ātruma ierobežojumu masīvā.
+
+Politikas komandas izmanto autentificētus `GET`/`PATCH /api/keys/{id}` pieprasījumus un ievēro aktīvo
+kontekstu un globālo `--api-key` opciju. JSON izvade satur tikai politikas laukus,
+bez saglabātās atslēgas vai tās maskētā attēlojuma. Akreditācijas dati, kas paredzēti tikai secinājumu veikšanai,
+nevar autorizēt pārvaldības izmaiņas. 401/403 kļūdas gadījumā jāpārbauda pārvaldības
+akreditācijas dati un konteksts; tā neliecina par lokālā CLI tokena vai sāls kļūmi.
+Atsevišķo lokālās autentifikācijas līgumu skatiet sadaļā [CLI tokens](../security/CLI_TOKEN.md).

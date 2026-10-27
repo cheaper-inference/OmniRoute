@@ -1,6 +1,6 @@
 # OmniRoute A2A Server Documentation (Malti)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
 
 ---
 
@@ -45,9 +45,9 @@ L-A2A huwa kkontrollat mill-bidla **Endpoints → A2A** u huwa diżattivat b'mod
 
 ## Metodi JSON-RPC 2.0
 
-### `message/send` — Eżekuzzjoni Sinniċka
+### `message/send` — Eżekuzzjoni Sinkronika
 
-Jibgħat messaġġ lill-għarfien u jistenna r-risposta kompluta.
+Jibgħat messaġġ lil ħila u jistenna r-risposta sħiħa.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Għal `smart-routing`, `metadata.combo` huwa sostituzzjoni espliċita ta'
+`metadata.model` għat-talba tal-gateway; jintbagħat bħala l-`model` reali,
+mhux bħala qasam JSON `x-combo` injorat. L-awtorizzazzjoni normali tal-gateway
+permezz taċ-ċavetta tal-API u għal kull mira xorta tibqa' tapplika. Combo invalidu jew vojt jiġi miċħud.
+
+Ir-riżultat jesponi `requested_combo` (l-intenzjoni ta' min jagħmel it-talba), `dispatched_model`
+(it-talba effettiva lill-gateway), `response_model` (ir-risposta tal-gateway) u
+`confirmed_combo`. L-aħħar qasam ikun `null` sakemm il-gateway ma jidentifikax
+combo b'mod espliċitu. Ir-reġistri tad-deċiżjonijiet A2A jattribwixxu l-eżekuzzjoni biss lil
+combo kkonfermat, filwaqt li jżommu talba mhux ikkonfermata bħala `requestedCombo`.
+
 **Risposta:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE Streaming
+### `message/stream` — Streaming permezz ta' SSE
 
-Identika għal `message/send` imma jirritorna Eventi SSE għal streaming f'ħin reali.
+L-istess bħal `message/send`, iżda jirritorna Server-Sent Events għal streaming f'ħin reali.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Eventi SSE:**
+**Avvenimenti SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Staqsi l-Status tal-Kompitu
+### `tasks/get` — Ikkonsulta l-Istatus tal-Kompitu
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Kanċella Kompitu
+### `tasks/cancel` — Ikkanċella Kompitu
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -146,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Kompetenzi Disponibbli
+## Ħiliet Disponibbli
 
-OmniRoute joffri 6 ħiliet A2A marbuta f'`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kull modulu tal-ħila jgħix f'`src/lib/a2a/skills/`.
+OmniRoute jesponi 6 ħiliet A2A konnessi f'`src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Kull modulu ta' ħila jinsab f'`src/lib/a2a/skills/`.
 
-| Ħila                   | ID                   | Deskrizzjoni                                                                                                                                                          | Tags                                                              | Eżempji                                          |
-| :--------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------------------------- | :----------------------------------------------- |
-| Smart Routing          | `smart-routing`      | Jirrotta prompt permezz tal-fornitur/kombottif ottimali bl-għodda ta' kombo + punteġġ ta' OmniRoute                                                                   | routing, providers                                                | "Rotta dan il-prompt permezz tal-mudell l-aħjar" |
-| Ġestjoni tal-Quota     | `quota-management`   | Jirrapporta l-kundizzjoni tal-quota għal kull fornitur, jgħin lis-sejjers jiddeċiedu meta jwaqqfu/jibdlu                                                              | quota, providers                                                  | "Check quota għal anthropic"                     |
-| Skoperta tal-Fornituri | `provider-discovery` | Jilista l-fornituri installati bil-kapaċitajiet, bandier tal-free-tier, stat tal-OAuth                                                                                | providers, discovery                                              | "X'fornituri huma disponibbli?"                  |
-| Analisi tal-Kost       | `cost-analysis`      | Jistima l-ispejjeż ta' talba/lejla mogħdija meta jinqara l-katalogu + l-użu reċenti                                                                                   | cost, usage                                                       | "Estima l-ispejjeż għal din il-lejla"            |
-| Rapport tas-Saħħa      | `health-report`      | Jagħmel aggregates tat-circuit breaker, cooldown, stat tal-lockout għal kull fornitur                                                                                 | health, resilience "Uri l-istat tas-saħħa ta' kollha l-fornituri" |
-| Lista ta' Kapaċitajiet | `list-capabilities`  | Jirritorna l-katalogu sħiħ ta' 45 entry tal-Ħiliet tal-Aġent (23 API + 21 CLI + 1 config) b'taħlita tal-ma hudx raw URLs tal-fajl SKILL.md għal injettar tal-kontekst | catalog, discovery, skills                                        | "Lista ta' kollha l-kapaċitajiet ta' OmniRoute"  |
+| Ħila               | ID                   | Deskrizzjoni                                                                                                                                                            | Tikketti                   | Eżempji                                        |
+| :----------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------- |
+| Smart Routing      | `smart-routing`      | Irotta prompt permezz tal-provider/combo ottimali billi juża l-magna tal-combo ta' OmniRoute flimkien mal-iskorjar                                                      | routing, providers         | "Irotta dan il-prompt l-aħjar mudell"          |
+| Quota Management   | `quota-management`   | Jirrapporta l-istat tal-kwota għal kull provider, jgħin lill-sejħa jiddeċiedu meta jnaqqsu r-rata jew jibdlu                                                            | quota, providers           | "Iċċekkja l-kwota għal anthropic"              |
+| Provider Discovery | `provider-discovery` | Jelenka l-providers installati bil-kapaċitajiet, il-bandieri tal-free-tier, u l-istatus tal-OAuth                                                                       | providers, discovery       | "Liema providers huma disponibbli?"            |
+| Cost Analysis      | `cost-analysis`      | Jistima l-ispiża ta' talba/konversazzjoni abbażi tal-katalgu u l-użu reċenti                                                                                            | cost, usage                | "Istima l-ispiża ta' din il-konversazzjoni"    |
+| Health Report      | `health-report`      | Jaggrèga l-istat ta' circuit breaker, cooldown, u lockout għal kull provider                                                                                            | health, resilience         | "Uri l-istatus tas-saħħa tal-providers kollha" |
+| List Capabilities  | `list-capabilities`  | Jirritorna l-katalgu sħiħ ta' 45-il dħul tal-Agent Skills (23 API + 21 CLI + 1 config) bħala tabella markdown bil-URLs grezzi tas-SKILL.md għall-injezzjoni tal-kuntest | catalog, discovery, skills | "Elenka l-kapaċitajiet kollha ta' OmniRoute"   |
 
-> Il-Karta tal-Aġent għandha tinżamm allinjata mal-katalogu ħaj ta' 352-fornitur; il-kontijiet tal-fornituri u l-metadati ta' free/no-auth jiġu minn registru runtime.
+> L-Agent Card għandu jinżamm allinjat mal-katalgu ħaj ta' 376 provider; il-għadd tal-providers u l-metadata ta' b'xejn/bla avtentikazzjoni jittieħdu mir-reġistru tal-runtime.
 
-### Dettalji tal-Ħila `list-capabilities`
+### Dettall tal-Ħila `list-capabilities`
 
-Il-ħila `list-capabilities` hija utli b'mod partikolari għal aġenti esterni li jridu jiskopru dak li OmniRoute juri qabel ma jibagħtu sejħiet API. Jirritorna artifatt tat-taħlita markdown stukturata:
+Il-ħila `list-capabilities` hija partikolarment utli għal aġenti esterni li jeħtieġilhom jiskopru x'jesponi OmniRoute qabel ma jibagħtu sejħiet API. Tirritorna artefatt b'tabella markdown strutturata:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -172,7 +176,7 @@ Il-ħila `list-capabilities` hija utli b'mod partikolari għal aġenti esterni l
 ...
 ```
 
-Kull linja jinkludi il-kolonna `rawUrl` sabiex l-aġenti jistgħu jieħdu malajr il-fajl SKILL.md sħiħ. Il-qasam `metadata.totalSkills` jirrifletti d-daqs tal-katalogu (45 illum). Implimentazzjoni: `src/lib/a2a/skills/listCapabilitiesara`. Ara wkoll [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Kull ringiela tinkludi l-kolonna `rawUrl` sabiex l-aġenti jkunu jistgħu minnufih jġibu s-SKILL.md sħiħ. Il-qasam `metadata.totalSkills` jirrifletti d-daqs tal-katalgu (45 illum). Implementazzjoni: `src/lib/a2a/skills/listCapabilities.ts`. Ara wkoll [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

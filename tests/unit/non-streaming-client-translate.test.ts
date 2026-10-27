@@ -76,7 +76,7 @@ test("translate from claude to openai format", () => {
   assert.equal((msg as { content: string }).content, "Hi there");
 });
 
-test("claude source strips markdown code fence", () => {
+test("JSON-mode request strips the markdown code fence from a Claude response", () => {
   const input = baseInput({
     responseBody: {
       id: "msg-123",
@@ -91,15 +91,20 @@ test("claude source strips markdown code fence", () => {
     },
     responsePayloadFormat: "claude",
     clientResponseFormat: "openai",
-    sourceFormat: "claude",
+    sourceFormat: "openai",
     provider: "anthropic",
     model: "claude-sonnet-4-20250514",
+    // The fence is only stripped when the client asked for JSON output; the
+    // upstream (Claude) body no longer carries response_format, the client body does.
+    clientRequestBody: {
+      messages: [{ role: "user", content: "hi" }],
+      response_format: { type: "json_object" },
+    },
   });
   const result = translateNonStreamingClientResponse(input);
   const content = result.response.choices?.[0]?.message?.content;
   assert.ok(typeof content === "string");
-  // After stripping, the content should not have the markdown fence wrapper
-  assert.ok(!content.startsWith("```json"), "markdown fence should be stripped");
+  assert.equal(content, '{"key": "value"}');
 });
 
 test("normalizeOpenAIToolFinishReasons: tool_calls present → finish_reason tool_calls", () => {
@@ -171,6 +176,40 @@ test("reasoning replay: no-tool history comes from historyMessages, not requestB
     "let me think...",
     "must cache against translatedBody.messages, not finalBody.input"
   );
+});
+
+test("transcript-observed non-streaming replies bypass reasoning cache without changing the client reply", () => {
+  clearReasoningCacheAll();
+  const sentinel = "PRIVATE_NONSTREAM_REASONING_TRANSCRIPT_SENTINEL";
+  const observed = { videoTranscriptSensitive: true };
+  const input = baseInput({
+    provider: "deepseek",
+    model: "deepseek-v4-pro",
+    responseBody: {
+      choices: [
+        {
+          index: 0,
+          message: {
+            role: "assistant",
+            content: "visible client reply",
+            reasoning_content: sentinel,
+            tool_calls: [
+              {
+                id: "call_video_nonstream",
+                type: "function",
+                function: { name: "f", arguments: "{}" },
+              },
+            ],
+          },
+          finish_reason: "tool_calls",
+        },
+      ],
+    },
+    ...observed,
+  });
+  const result = translateNonStreamingClientResponse(input);
+  assert.equal(result.response.choices[0].message.reasoning_content, sentinel);
+  assert.equal(lookupReasoning("call_video_nonstream"), null);
 });
 
 test("phase=final applies client usage buffer", () => {

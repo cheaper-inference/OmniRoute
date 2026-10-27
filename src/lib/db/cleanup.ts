@@ -27,6 +27,10 @@ import {
 } from "./cleanup/usagePurge";
 import { ensureCompressionRunTelemetryTable } from "./compressionRunTelemetry";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import {
+  pruneDbBackupsOutsideMigrationWindow,
+  resolveReusedPreMigrationSha,
+} from "./cleanup/backupPrune";
 
 interface CleanupResult {
   deleted: number;
@@ -169,6 +173,39 @@ export async function cleanupCompressionAnalytics(): Promise<CleanupResult> {
     );
   } catch (err: unknown) {
     console.error("[Cleanup] Error cleaning compression_analytics:", err);
+    result.errors++;
+  }
+
+  return result;
+}
+
+/**
+ * Clean up old compression_engine_breakdown based on retention settings (#14268).
+ * Uses retention.compressionAnalytics (same retention window as compression_analytics).
+ */
+export async function cleanupCompressionEngineBreakdown(): Promise<CleanupResult> {
+  const db = getDbInstance();
+  const retention = getRetentionSettings();
+
+  const retentionDays = retention.compressionAnalytics;
+  const cutoffDate = new Date();
+  cutoffDate.setDate(cutoffDate.getDate() - retentionDays);
+  const cutoffISO = cutoffDate.toISOString();
+
+  const result: CleanupResult = { deleted: 0, errors: 0 };
+
+  try {
+    if (!tableExists("compression_engine_breakdown")) return result;
+
+    const stmt = db.prepare("DELETE FROM compression_engine_breakdown WHERE timestamp < ?");
+    const runResult = stmt.run(cutoffISO);
+    result.deleted = runResult.changes;
+
+    console.log(
+      `[Cleanup] Deleted ${result.deleted} compression_engine_breakdown older than ${retentionDays} days`
+    );
+  } catch (err: unknown) {
+    console.error("[Cleanup] Error cleaning compression_engine_breakdown:", err);
     result.errors++;
   }
 
@@ -550,10 +587,10 @@ export async function cleanupExpiredFiles(): Promise<CleanupResult> {
  * separate compliance cleanup path and does not override this window.
  * Deleting an old node only affects reconnect anchors: a conversation resumed
  * after the window mints a new id, which is already the documented
- * anchor-miss behavior of resolveConversationId. `last_seen_at` has no index
- * (migration 156), so each DELETE is a table scan. Bounded batches yield
- * between writes so an existing large table cannot park the event loop for
- * the whole cleanup pass.
+ * anchor-miss behavior of resolveConversationId. `last_seen_at` is indexed
+ * (migration 186, #13973 — migration 156 originally missed it). Bounded
+ * batches yield between writes so an existing large table cannot park the
+ * event loop for the whole cleanup pass.
  */
 export async function cleanupConversationTurnNodes(): Promise<CleanupResult> {
   const retention = getRetentionSettings();
@@ -654,6 +691,7 @@ export async function runAutoCleanup(): Promise<{
     callLogs: await cleanupCallLogs(),
     usageHistory: await cleanupUsageHistory(),
     compressionAnalytics: await cleanupCompressionAnalytics(),
+    compressionEngineBreakdown: await cleanupCompressionEngineBreakdown(),
     mcpAudit: await cleanupMcpAudit(),
     configAudit: await cleanupConfigAudit(),
     a2aEvents: await cleanupA2aEvents(),
@@ -789,9 +827,15 @@ export interface ResetUsageHistoryResult extends CleanupResult {
   deletedProxyLogs: number;
   deletedRelayLogs: number;
   deletedCompressionAnalytics: number;
+  deletedCompressionEngineBreakdown: number;
   deletedCompressionRunTelemetry: number;
   deletedRoutingDecisions: number;
   deletedQuotaConsumption: number;
+  /**
+   * Always 0. `token_ledger` is the transfer record behind token balances and
+   * idempotency keys, not usage analytics, so a usage reset never deletes it.
+   * The field stays so the response shape of the purge API does not change.
+   */
   deletedTokenLedger: number;
   deletedConversationTurnNodes: number;
   deletedAgenticConversations: number;
@@ -852,6 +896,12 @@ const RESET_TARGETS: Array<
     resultKey: "deletedCompressionAnalytics",
   },
   {
+    table: "compression_engine_breakdown",
+    column: "timestamp",
+    cutoff: "iso",
+    resultKey: "deletedCompressionEngineBreakdown",
+  },
+  {
     table: "compression_run_telemetry",
     column: "timestamp",
     cutoff: "epochMs",
@@ -869,7 +919,6 @@ const RESET_TARGETS: Array<
     cutoff: "epochMs",
     resultKey: "deletedQuotaConsumption",
   },
-  { table: "token_ledger", column: "created_at", cutoff: "iso", resultKey: "deletedTokenLedger" },
   {
     table: "conversation_turn_nodes",
     column: "last_seen_at",
@@ -904,6 +953,7 @@ export async function resetUsageHistory(period: string): Promise<ResetUsageHisto
     deletedProxyLogs: 0,
     deletedRelayLogs: 0,
     deletedCompressionAnalytics: 0,
+    deletedCompressionEngineBreakdown: 0,
     deletedCompressionRunTelemetry: 0,
     deletedRoutingDecisions: 0,
     deletedQuotaConsumption: 0,
@@ -996,6 +1046,9 @@ export {
   type ReclaimFreedPagesResult,
   type ReclaimStopReason,
 };
+// Backup-directory pruning for the scheduled pass lives in ./cleanup/backupPrune
+// (same file-size reason) — re-exported so tests drive the pass's own symbols.
+export { pruneDbBackupsOutsideMigrationWindow, resolveReusedPreMigrationSha };
 
 // ──────────────── Background Cleanup Scheduler ────────────────
 
@@ -1013,6 +1066,8 @@ export async function runScheduledCleanupPass(phase: "startup" | "periodic"): Pr
   if (result.totalDeleted > 0) {
     console.log(`[Cleanup] ${label} cleanup freed ${result.totalDeleted} rows.`);
   }
+
+  pruneDbBackupsOutsideMigrationWindow();
 
   // Always run: it also drains pages left over from a previous capped pass or
   // from deletes made outside this scheduler. Costs a few PRAGMA reads when idle.

@@ -1,6 +1,6 @@
 # Search Tools Studio (Română)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/SEARCH_TOOLS_STUDIO.md) · 🇪🇹 [am](../../../am/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇦🇿 [az](../../../az/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇩🇰 [da](../../../da/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇩🇪 [de](../../../de/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇬🇷 [el](../../../el/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇪🇸 [es](../../../es/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇪🇪 [et](../../../et/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇱 [he](../../../he/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇩 [id](../../../id/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇹 [it](../../../it/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇭 [km](../../../km/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇲 [my](../../../my/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇴 [no](../../../no/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [or](../../../or/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇰 [si](../../../si/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [te](../../../te/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇭 [th](../../../th/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/SEARCH_TOOLS_STUDIO.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/SEARCH_TOOLS_STUDIO.md) · 🇪🇹 [am](../../../am/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇦🇿 [az](../../../az/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇩🇰 [da](../../../da/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇩🇪 [de](../../../de/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇬🇷 [el](../../../el/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇪🇸 [es](../../../es/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇪🇪 [et](../../../et/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇱 [he](../../../he/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇩 [id](../../../id/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇹 [it](../../../it/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇭 [km](../../../km/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇲 [my](../../../my/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇴 [no](../../../no/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [or](../../../or/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇰 [si](../../../si/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [te](../../../te/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇭 [th](../../../th/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/SEARCH_TOOLS_STUDIO.md)
 
 ---
 
@@ -39,12 +39,12 @@ Studio cu trei file, care unifică funcțiile de căutare web, extragere de con�
 
 ### Fila Căutare
 
-Dezvoltă componentele existente `SearchForm` + `ResultsPanel` + `RerankPanel` într-o filă:
+Transformă componentele existente `SearchForm` + `ResultsPanel` + `RerankPanel` într-o filă:
 
 - Interogare → rezultate (titlu, URL, fragment, scor de relevanță).
 - Metadatele furnizorului în panoul Configurare (cost, cotă, stare).
-- Secțiunea de rerank: selectarea unui model de rerank, reordonarea rezultatelor, afișarea `positionDelta`.
-- Stare goală cu îndemn la acțiune atunci când nu este configurat niciun furnizor de căutare.
+- Secțiune de rerangare: selectarea unui model de rerangare, reordonarea rezultatelor, afișarea `positionDelta`.
+- Stare goală cu CTA atunci când nu este configurat niciun furnizor de căutare.
 - Istoricul căutărilor prin `SearchHistory.tsx`.
 - Apelează `POST /v1/search` (endpoint existent, fără modificări).
 
@@ -53,10 +53,10 @@ Dezvoltă componentele existente `SearchForm` + `ResultsPanel` + `RerankPanel` �
 Filă nouă pentru extragerea conținutului dintr-un URL prin `POST /v1/web/fetch` (creat în planul 05):
 
 - Intrare: URL + comutator pentru pagina completă + selector de format (markdown / text / HTML).
-- Trimitere → preluare → randare `ScrapeResult.tsx`.
-- `ScrapeResult` randează previzualizarea markdown + comutatorul pentru conținutul brut.
-- Limită: dacă corpul răspunsului depășește **256 KB**, interfața afișează `(trunchiat, vizualizați conținutul brut)` și deschide conținutul brut într-o fereastră modală Monaco (D21).
-- Panou de metadate: furnizor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latență, cost, dimensiunea răspunsului, numărul de linkuri.
+- Trimitere → preluare → afișare în `ScrapeResult.tsx`.
+- `ScrapeResult` afișează previzualizarea markdown + un comutator pentru conținutul brut.
+- Limită: dacă corpul răspunsului depășește **256 KB**, interfața afișează `(trunchiat, vizualizează conținutul brut)` și deschide conținutul brut într-o fereastră modală Monaco (D21).
+- Panou de metadate: furnizor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latență, cost, dimensiunea răspunsului, numărul de linkuri.
 - Utilizează hook-ul `useScrapeFetch.ts`.
 
 ### Fila Comparare
@@ -64,8 +64,8 @@ Filă nouă pentru extragerea conținutului dintr-un URL prin `POST /v1/web/fetc
 Rulează aceeași interogare/același URL prin maximum **4 furnizori în paralel** (D22):
 
 - Coloane alăturate pentru fiecare furnizor.
-- Metrici: latență, cost, numărul de rezultate, dimensiunea răspunsului.
-- Calcularea suprapunerii URL-urilor pentru căutare (numărul de URL-uri comune față de rezultatul inițial).
+- Metrici: latență, cost, număr de rezultate, dimensiunea răspunsului.
+- Calcularea suprapunerii URL-urilor pentru căutare (numărul de URL-uri comune raportat la rezultatul inițial).
 - Apelează `POST /v1/search` (căutare) sau `POST /v1/web/fetch` (extragere) pentru fiecare furnizor.
 
 ---
@@ -99,15 +99,15 @@ Rulează aceeași interogare/același URL prin maximum **4 furnizori în paralel
 
 ---
 
-## Catalogul furnizorilor
+## Catalog de furnizori
 
 `ProviderCatalog.tsx` expune lista completă de furnizori din `GET /api/search/providers`
 (extinsă în F4 pentru a include furnizorii de preluare):
 
-| `kind` | `"search"` (20 de furnizori) sau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 de furnizori) sau `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Starea este **determinată în momentul solicitării**, verificând dacă există acreditări și dacă
-toate cheile se află momentan în perioada de așteptare.
+Starea este **determinată în momentul solicitării**, verificând dacă există credențiale și dacă
+toate cheile se află în prezent în perioada de așteptare.
 
 ---
 
@@ -119,17 +119,17 @@ Substituentul pentru cheia API este întotdeauna `$OMNIROUTE_API_KEY` (D11, part
 
 ---
 
-## Modificări în backend
+## Modificări backend
 
-Pentru această funcționalitate a fost necesară o singură modificare în backend:
+A fost necesară o singură modificare de backend pentru această funcționalitate:
 
-### `GET /api/search/providers` extins
+### Extinderea `GET /api/search/providers`
 
 `src/app/api/search/providers/route.ts` a fost extins pentru a:
 
-- Include toți cei 6 furnizori de preluare (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) în listă.
-- Adăuga `kind: "search" | "fetch"` fiecărui element.
-- Adăuga `status: "configured" | "missing" | "rate_limited"`, determinat din starea actuală a acreditărilor.
+- Include fiecare furnizor de preluare (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) în listă.
+- Adăuga `kind: "search" | "fetch"` la fiecare element.
+- Adăuga `status: "configured" | "missing" | "rate_limited"`, derivat din starea curentă a acreditărilor.
 - Menține compatibilitatea cu versiunile anterioare — câmpurile existente (`id`, `name` etc.) rămân neschimbate.
 
 ---

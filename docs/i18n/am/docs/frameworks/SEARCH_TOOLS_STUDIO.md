@@ -1,6 +1,6 @@
 # Search Tools Studio (አማርኛ)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇦🇿 [az](../../../az/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇩🇰 [da](../../../da/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇩🇪 [de](../../../de/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇬🇷 [el](../../../el/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇪🇸 [es](../../../es/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇪🇪 [et](../../../et/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇱 [he](../../../he/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇩 [id](../../../id/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇹 [it](../../../it/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇭 [km](../../../km/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇲 [my](../../../my/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇴 [no](../../../no/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [or](../../../or/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇰 [si](../../../si/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [te](../../../te/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇭 [th](../../../th/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/SEARCH_TOOLS_STUDIO.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇦🇿 [az](../../../az/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇩🇰 [da](../../../da/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇩🇪 [de](../../../de/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇬🇷 [el](../../../el/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇪🇸 [es](../../../es/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇪🇪 [et](../../../et/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇱 [he](../../../he/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇩 [id](../../../id/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇹 [it](../../../it/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇭 [km](../../../km/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇲🇲 [my](../../../my/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇴 [no](../../../no/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [or](../../../or/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇱🇰 [si](../../../si/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇮🇳 [te](../../../te/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇭 [th](../../../th/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/SEARCH_TOOLS_STUDIO.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/SEARCH_TOOLS_STUDIO.md)
 
 ---
 
@@ -40,32 +40,32 @@ Search Tools Studio፣ `/dashboard/search-tools`ን ከመሠረታዊ የፍለ
 
 ነባሩን `SearchForm` + `ResultsPanel` + `RerankPanel` ወደ አንድ ትር ያሳድጋል፦
 
-- ጥያቄ → ውጤቶች (ርዕስ፣ URL፣ ቅንጭብ፣ የተዛማጅነት ነጥብ)።
-- በውቅር ክፍሉ ውስጥ የአቅራቢ ሜታዳታ (ወጪ፣ ኮታ፣ ሁኔታ)።
-- የዳግም ደረጃ ክፍል፦ የዳግም ደረጃ ሞዴል ይምረጡ፣ ውጤቶችን እንደገና ያስቀምጡ፣ `positionDelta`ን ያሳዩ።
-- ምንም የፍለጋ አቅራቢዎች ባልተዋቀሩበት ጊዜ CTA ያለው ባዶ ሁኔታ።
+- መጠይቅ → ውጤቶች (ርዕስ፣ URL፣ አጭር መግለጫ፣ የተዛማጅነት ነጥብ)።
+- በConfig ፓነል ውስጥ የአቅራቢ ሜታዳታ (ወጪ፣ ኮታ፣ ሁኔታ)።
+- የዳግም ደረጃ አሰጣጥ ክፍል፦ የዳግም ደረጃ አሰጣጥ ሞዴል ይምረጡ፣ ውጤቶችን እንደገና ደርድሩ፣ `positionDelta`ን ያሳዩ።
+- ምንም የፍለጋ አቅራቢዎች ካልተዋቀሩ፣ CTA ያለው ባዶ ሁኔታ።
 - የፍለጋ ታሪክ በ`SearchHistory.tsx` በኩል።
-- `POST /v1/search`ን ይጠራል (ነባር endpoint፣ ምንም ለውጥ የለም)።
+- `POST /v1/search`ን ይጠራል (ነባር መገልገያ ነጥብ፣ ምንም ለውጥ የለም)።
 
-### ይዘት የማውጣት ትር
+### የመረጃ መሰብሰቢያ ትር
 
-በ`POST /v1/web/fetch` በኩል ከURL ይዘት ለማውጣት የሚያገለግል አዲስ ትር (በዕቅድ 05 የተፈጠረ)፦
+በ`POST /v1/web/fetch` (በዕቅድ 05 የተፈጠረ) አማካኝነት ከURL ይዘት ለማውጣት የሚያገለግል አዲስ ትር፦
 
-- ግቤት፦ URL + የሙሉ-ገጽ መቀያየሪያ + የቅርጸት መራጭ (markdown / text / HTML)።
-- ማስገባት → ማምጣት → `ScrapeResult.tsx`ን ማቅረብ።
-- `ScrapeResult` የmarkdown ቅድመ-እይታን + የጥሬ ውሂብ መቀያየሪያን ያቀርባል።
-- ገደብ፦ የምላሹ ይዘት ከ**256 KB** በላይ ከሆነ፣ UI `(ተቆርጧል፣ ጥሬውን ይመልከቱ)` ያሳያል እና ጥሬ ውሂቡን በMonaco modal ውስጥ ይከፍታል (D21)።
-- የሜታዳታ ፓነል፦ አቅራቢ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search)፣ የምላሽ ጊዜ፣ ወጪ፣ የምላሽ መጠን፣ የአገናኞች ብዛት።
+- ግቤት፦ URL + የሙሉ ገጽ ማብሪያ/ማጥፊያ + የቅርጸት መምረጫ (markdown / ጽሑፍ / HTML)።
+- ያስገቡ → ያምጡ → `ScrapeResult.tsx`ን ያቅርቡ።
+- `ScrapeResult` የmarkdown ቅድመ ዕይታን + የጥሬ ይዘት ማብሪያ/ማጥፊያን ያቀርባል።
+- ገደብ፦ የምላሹ ይዘት > **256 KB** ከሆነ፣ UI `(ተቆርጧል፣ ጥሬውን ይመልከቱ)` ያሳያል እና ጥሬ ይዘቱን በMonaco ሞዳል (D21) ውስጥ ይከፍታል።
+- የሜታዳታ ፓነል፦ አቅራቢ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search)፣ መዘግየት፣ ወጪ፣ የምላሽ መጠን፣ የአገናኞች ብዛት።
 - `useScrapeFetch.ts` hookን ይጠቀማል።
 
-### የንጽጽር ትር
+### የማነጻጸሪያ ትር
 
-ተመሳሳዩን ጥያቄ/URL በአንድ ጊዜ እስከ **4 አቅራቢዎች** ድረስ ያስኬዳል (D22)፦
+ተመሳሳዩን መጠይቅ/URL እስከ **4 በሚደርሱ አቅራቢዎች ላይ በትይዩ** ያስኬዳል (D22)፦
 
-- ለእያንዳንዱ አቅራቢ በጎን ለጎን የተቀመጡ ዓምዶች።
-- መለኪያዎች፦ የምላሽ ጊዜ፣ ወጪ፣ የውጤቶች ብዛት፣ የምላሽ መጠን።
-- ለፍለጋ የURL መደራረብ ስሌት (ከመጀመሪያው ውጤት ጋር የሚጋሩ የURL ብዛት)።
-- ለእያንዳንዱ አቅራቢ `POST /v1/search`ን (ፍለጋ) ወይም `POST /v1/web/fetch`ን (ይዘት ማውጣት) ይጠራል።
+- ለእያንዳንዱ አቅራቢ ጎን ለጎን የቀረቡ ዓምዶች።
+- መለኪያዎች፦ መዘግየት፣ ወጪ፣ የውጤት ብዛት፣ የምላሽ መጠን።
+- ለፍለጋ የURL መደራረብ ስሌት (ከመጀመሪያው ውጤት ጋር የሚጋሩ የURLዎች ብዛት)።
+- ለእያንዳንዱ አቅራቢ `POST /v1/search`ን (ፍለጋ) ወይም `POST /v1/web/fetch`ን (መረጃ መሰብሰብ) ይጠራል።
 
 ---
 
@@ -100,13 +100,12 @@ Search Tools Studio፣ `/dashboard/search-tools`ን ከመሠረታዊ የፍለ
 
 ## የአቅራቢዎች ካታሎግ
 
-`ProviderCatalog.tsx` ሙሉውን የአቅራቢዎች ዝርዝር ከ`GET /api/search/providers`
-ያቀርባል (fetch አቅራቢዎችን ለማካተት በF4 የተስፋፋ)፦
+`ProviderCatalog.tsx` ሙሉውን የአቅራቢዎች ዝርዝር ከ`GET /api/search/providers` ያቀርባል
+(fetch አቅራቢዎችን ለማካተት በF4 የተስፋፋ):
 
-| `kind` | `"search"` (20 አቅራቢዎች) ወይም `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 አቅራቢዎች) ወይም `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-ሁኔታው ማረጋገጫ መረጃዎች መኖራቸውን እና ሁሉም
-ቁልፎች በአሁኑ ጊዜ በ cooldown ውስጥ መሆናቸውን በመፈተሽ **ጥያቄው በሚቀርብበት ጊዜ ይወሰናል**።
+ሁኔታው ማረጋገጫዎች መኖራቸውን እና ሁሉም ቁልፎች በአሁኑ ጊዜ በ cooldown ውስጥ መሆናቸውን በመፈተሽ **ጥያቄው በሚቀርብበት ጊዜ ይወሰናል**።
 
 ---
 
@@ -118,18 +117,18 @@ Search Tools Studio፣ `/dashboard/search-tools`ን ከመሠረታዊ የፍለ
 
 ---
 
-## የBackend ለውጦች
+## የባክኤንድ ለውጦች
 
-ለዚህ ባህሪ አንድ የBackend ለውጥ ብቻ አስፈልጎ ነበር፦
+ለዚህ ባህሪ ያስፈለገው አንድ የባክኤንድ ለውጥ ብቻ ነበር፦
 
 ### የተስፋፋ `GET /api/search/providers`
 
-`src/app/api/search/providers/route.ts` እንዲከተለው ተስፋፍቷል፦
+`src/app/api/search/providers/route.ts` የሚከተሉትን እንዲያካትት ተስፋፍቷል፦
 
-- ሁሉንም 6 fetch አቅራቢዎች (`firecrawl`፣ `jina-reader`፣ `tavily-search`፣ `tinyfish`፣ `nimble-search`፣ `anysearch-search`) በarray ውስጥ ማካተት።
-- በእያንዳንዱ item ላይ `kind: "search" | "fetch"` መጨመር።
-- ከቀጥታ የማረጋገጫ መረጃ ሁኔታ የሚወሰን `status: "configured" | "missing" | "rate_limited"` መጨመር።
-- ከነባር ስሪቶች ጋር ተኳሃኝነትን መጠበቅ — ነባር fields (`id`፣ `name`፣ ወዘተ) ሳይለወጡ ይቆያሉ።
+- እያንዳንዱን የማምጫ አቅራቢ (`firecrawl`፣ `jina-reader`፣ `tavily-search`፣ `tinyfish`፣ `nimble-search`፣ `anysearch-search`፣ `parallel-search`) በድርድሩ ውስጥ ማካተት።
+- ወደ እያንዳንዱ ንጥል `kind: "search" | "fetch"` ማከል።
+- ከቀጥታ የማረጋገጫ መረጃ ሁኔታ የተወሰደ `status: "configured" | "missing" | "rate_limited"` ማከል።
+- ከቀደሙ ስሪቶች ጋር ተኳኋኝነትን መጠበቅ — ነባር መስኮች (`id`፣ `name`፣ ወዘተ) ሳይቀየሩ ቀርተዋል።
 
 ---
 

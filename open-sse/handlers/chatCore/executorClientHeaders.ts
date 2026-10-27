@@ -5,18 +5,27 @@
  * Pure helper extracted from chatCore: normalizes a Headers instance or a plain header object into a
  * lowercased-tolerant Record<string,string>, and backfills the client User-Agent (both casings) when
  * one is supplied and not already present. Returns null when nothing was collected. Side-effect-free;
- * behaviour is byte-identical to the previous module-level function.
+ * OpenCode additionally retains explicit conversation identity before body translation.
  */
+import { preserveOpencodeSessionIdentity } from "../../utils/opencodeSessionIdentity.ts";
+
+// Pre-compiled set for O(1) lease control header checks (hot path)
+const LEASE_CONTROL_HEADERS = new Set([
+  "x-omniroute-lease-owner",
+  "x-omniroute-lease-generation",
+  "x-deadline-token",
+]);
+
+function isLeaseControlHeader(key: string): boolean {
+  return LEASE_CONTROL_HEADERS.has(key.toLowerCase());
+}
 
 export function buildExecutorClientHeaders(
   headers: Headers | Record<string, unknown> | null | undefined,
-  userAgent?: string | null
+  userAgent?: string | null,
+  request?: { provider?: string; body?: unknown }
 ) {
   const normalized: Record<string, string> = {};
-  const isLeaseControlHeader = (key: string) => {
-    const lowerKey = key.toLowerCase();
-    return lowerKey === "x-omniroute-lease-owner" || lowerKey === "x-omniroute-lease-generation";
-  };
 
   if (headers instanceof Headers) {
     headers.forEach((value, key) => {
@@ -38,5 +47,6 @@ export function buildExecutorClientHeaders(
     normalized["User-Agent"] = normalizedUserAgent;
   }
 
+  preserveOpencodeSessionIdentity(normalized, request);
   return Object.keys(normalized).length > 0 ? normalized : null;
 }

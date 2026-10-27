@@ -1,6 +1,6 @@
 # Route Guard Tiers (አማርኛ)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/ROUTE_GUARD_TIERS.md) · 🇸🇦 [ar](../../../ar/docs/security/ROUTE_GUARD_TIERS.md) · 🇦🇿 [az](../../../az/docs/security/ROUTE_GUARD_TIERS.md) · 🇧🇬 [bg](../../../bg/docs/security/ROUTE_GUARD_TIERS.md) · 🇧🇩 [bn](../../../bn/docs/security/ROUTE_GUARD_TIERS.md) · 🇨🇿 [cs](../../../cs/docs/security/ROUTE_GUARD_TIERS.md) · 🇩🇰 [da](../../../da/docs/security/ROUTE_GUARD_TIERS.md) · 🇩🇪 [de](../../../de/docs/security/ROUTE_GUARD_TIERS.md) · 🇬🇷 [el](../../../el/docs/security/ROUTE_GUARD_TIERS.md) · 🇪🇸 [es](../../../es/docs/security/ROUTE_GUARD_TIERS.md) · 🇪🇪 [et](../../../et/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇷 [fa](../../../fa/docs/security/ROUTE_GUARD_TIERS.md) · 🇫🇮 [fi](../../../fi/docs/security/ROUTE_GUARD_TIERS.md) · 🇫🇷 [fr](../../../fr/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇪 [ga](../../../ga/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [gu](../../../gu/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇬 [ha](../../../ha/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇱 [he](../../../he/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [hi](../../../hi/docs/security/ROUTE_GUARD_TIERS.md) · 🇭🇷 [hr](../../../hr/docs/security/ROUTE_GUARD_TIERS.md) · 🇭🇺 [hu](../../../hu/docs/security/ROUTE_GUARD_TIERS.md) · 🇦🇲 [hy](../../../hy/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇩 [id](../../../id/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇬 [ig](../../../ig/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇹 [it](../../../it/docs/security/ROUTE_GUARD_TIERS.md) · 🇯🇵 [ja](../../../ja/docs/security/ROUTE_GUARD_TIERS.md) · 🇬🇪 [ka](../../../ka/docs/security/ROUTE_GUARD_TIERS.md) · 🇰🇭 [km](../../../km/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [kn](../../../kn/docs/security/ROUTE_GUARD_TIERS.md) · 🇰🇷 [ko](../../../ko/docs/security/ROUTE_GUARD_TIERS.md) · 🇱🇹 [lt](../../../lt/docs/security/ROUTE_GUARD_TIERS.md) · 🇱🇻 [lv](../../../lv/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [ml](../../../ml/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [mr](../../../mr/docs/security/ROUTE_GUARD_TIERS.md) · 🇲🇾 [ms](../../../ms/docs/security/ROUTE_GUARD_TIERS.md) · 🇲🇹 [mt](../../../mt/docs/security/ROUTE_GUARD_TIERS.md) · 🇲🇲 [my](../../../my/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇵 [ne](../../../ne/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇱 [nl](../../../nl/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇴 [no](../../../no/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [or](../../../or/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [pa](../../../pa/docs/security/ROUTE_GUARD_TIERS.md) · 🇵🇭 [phi](../../../phi/docs/security/ROUTE_GUARD_TIERS.md) · 🇵🇱 [pl](../../../pl/docs/security/ROUTE_GUARD_TIERS.md) · 🇵🇹 [pt](../../../pt/docs/security/ROUTE_GUARD_TIERS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/ROUTE_GUARD_TIERS.md) · 🇷🇴 [ro](../../../ro/docs/security/ROUTE_GUARD_TIERS.md) · 🇷🇺 [ru](../../../ru/docs/security/ROUTE_GUARD_TIERS.md) · 🇱🇰 [si](../../../si/docs/security/ROUTE_GUARD_TIERS.md) · 🇸🇰 [sk](../../../sk/docs/security/ROUTE_GUARD_TIERS.md) · 🇸🇮 [sl](../../../sl/docs/security/ROUTE_GUARD_TIERS.md) · 🇷🇸 [sr](../../../sr/docs/security/ROUTE_GUARD_TIERS.md) · 🇸🇪 [sv](../../../sv/docs/security/ROUTE_GUARD_TIERS.md) · 🇰🇪 [sw](../../../sw/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [ta](../../../ta/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [te](../../../te/docs/security/ROUTE_GUARD_TIERS.md) · 🇹🇭 [th](../../../th/docs/security/ROUTE_GUARD_TIERS.md) · 🇹🇷 [tr](../../../tr/docs/security/ROUTE_GUARD_TIERS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/ROUTE_GUARD_TIERS.md) · 🇵🇰 [ur](../../../ur/docs/security/ROUTE_GUARD_TIERS.md) · 🇺🇿 [uz](../../../uz/docs/security/ROUTE_GUARD_TIERS.md) · 🇻🇳 [vi](../../../vi/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇬 [yo](../../../yo/docs/security/ROUTE_GUARD_TIERS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/ROUTE_GUARD_TIERS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/ROUTE_GUARD_TIERS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/ROUTE_GUARD_TIERS.md) · 🇸🇦 [ar](../../../ar/docs/security/ROUTE_GUARD_TIERS.md) · 🇦🇿 [az](../../../az/docs/security/ROUTE_GUARD_TIERS.md) · 🇧🇬 [bg](../../../bg/docs/security/ROUTE_GUARD_TIERS.md) · 🇧🇩 [bn](../../../bn/docs/security/ROUTE_GUARD_TIERS.md) · 🇧🇦 [bs](../../../bs/docs/security/ROUTE_GUARD_TIERS.md) · 🇨🇿 [cs](../../../cs/docs/security/ROUTE_GUARD_TIERS.md) · 🇩🇰 [da](../../../da/docs/security/ROUTE_GUARD_TIERS.md) · 🇩🇪 [de](../../../de/docs/security/ROUTE_GUARD_TIERS.md) · 🇬🇷 [el](../../../el/docs/security/ROUTE_GUARD_TIERS.md) · 🇪🇸 [es](../../../es/docs/security/ROUTE_GUARD_TIERS.md) · 🇪🇪 [et](../../../et/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇷 [fa](../../../fa/docs/security/ROUTE_GUARD_TIERS.md) · 🇫🇮 [fi](../../../fi/docs/security/ROUTE_GUARD_TIERS.md) · 🇫🇷 [fr](../../../fr/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇪 [ga](../../../ga/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [gu](../../../gu/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇬 [ha](../../../ha/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇱 [he](../../../he/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [hi](../../../hi/docs/security/ROUTE_GUARD_TIERS.md) · 🇭🇷 [hr](../../../hr/docs/security/ROUTE_GUARD_TIERS.md) · 🇭🇺 [hu](../../../hu/docs/security/ROUTE_GUARD_TIERS.md) · 🇦🇲 [hy](../../../hy/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇩 [id](../../../id/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇬 [ig](../../../ig/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇹 [it](../../../it/docs/security/ROUTE_GUARD_TIERS.md) · 🇯🇵 [ja](../../../ja/docs/security/ROUTE_GUARD_TIERS.md) · 🇬🇪 [ka](../../../ka/docs/security/ROUTE_GUARD_TIERS.md) · 🇰🇭 [km](../../../km/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [kn](../../../kn/docs/security/ROUTE_GUARD_TIERS.md) · 🇰🇷 [ko](../../../ko/docs/security/ROUTE_GUARD_TIERS.md) · 🇱🇹 [lt](../../../lt/docs/security/ROUTE_GUARD_TIERS.md) · 🇱🇻 [lv](../../../lv/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [ml](../../../ml/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [mr](../../../mr/docs/security/ROUTE_GUARD_TIERS.md) · 🇲🇾 [ms](../../../ms/docs/security/ROUTE_GUARD_TIERS.md) · 🇲🇹 [mt](../../../mt/docs/security/ROUTE_GUARD_TIERS.md) · 🇲🇲 [my](../../../my/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇵 [ne](../../../ne/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇱 [nl](../../../nl/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇴 [no](../../../no/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [or](../../../or/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [pa](../../../pa/docs/security/ROUTE_GUARD_TIERS.md) · 🇵🇭 [phi](../../../phi/docs/security/ROUTE_GUARD_TIERS.md) · 🇵🇱 [pl](../../../pl/docs/security/ROUTE_GUARD_TIERS.md) · 🇵🇹 [pt](../../../pt/docs/security/ROUTE_GUARD_TIERS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/ROUTE_GUARD_TIERS.md) · 🇷🇴 [ro](../../../ro/docs/security/ROUTE_GUARD_TIERS.md) · 🇷🇺 [ru](../../../ru/docs/security/ROUTE_GUARD_TIERS.md) · 🇱🇰 [si](../../../si/docs/security/ROUTE_GUARD_TIERS.md) · 🇸🇰 [sk](../../../sk/docs/security/ROUTE_GUARD_TIERS.md) · 🇸🇮 [sl](../../../sl/docs/security/ROUTE_GUARD_TIERS.md) · 🇷🇸 [sr](../../../sr/docs/security/ROUTE_GUARD_TIERS.md) · 🇸🇪 [sv](../../../sv/docs/security/ROUTE_GUARD_TIERS.md) · 🇰🇪 [sw](../../../sw/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [ta](../../../ta/docs/security/ROUTE_GUARD_TIERS.md) · 🇮🇳 [te](../../../te/docs/security/ROUTE_GUARD_TIERS.md) · 🇹🇭 [th](../../../th/docs/security/ROUTE_GUARD_TIERS.md) · 🇹🇷 [tr](../../../tr/docs/security/ROUTE_GUARD_TIERS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/ROUTE_GUARD_TIERS.md) · 🇵🇰 [ur](../../../ur/docs/security/ROUTE_GUARD_TIERS.md) · 🇺🇿 [uz](../../../uz/docs/security/ROUTE_GUARD_TIERS.md) · 🇻🇳 [vi](../../../vi/docs/security/ROUTE_GUARD_TIERS.md) · 🇳🇬 [yo](../../../yo/docs/security/ROUTE_GUARD_TIERS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/ROUTE_GUARD_TIERS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/ROUTE_GUARD_TIERS.md)
 
 ---
 
@@ -12,130 +12,254 @@
 
 ### ደረጃ 1 — LOCAL_ONLY
 
-**የሚያስፈጽመው፦** `isLocalOnlyPath(path)` → የloopback አስተናጋጅ ማረጋገጫ
-**ማለፊያ፦** በነባሪነት የለም። ጥያቄው `manage` ወሰን ያለው ትክክለኛ API ቁልፍ ሲይዝ፣ በ`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ውስጥ ላሉ ዱካዎች የተወሰነ ልዩ ፈቃድ አለ (ይመልከቱ [የManage ወሰን ልዩ ፈቃድ](#manage-scope-carve-out))።
+**የሚያስፈጽመው፦** `isLocalOnlyPath(path)` → የloopback host ማረጋገጫ
+**ማለፊያ፦** በነባሪ ምንም የለም። ጥያቄው `manage` scope ያለው ትክክለኛ
+API key ሲይዝ፣ በ`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` ውስጥ ላሉ ዱካዎች
+የተገደበ ልዩ ፍቃድ አለ (ይመልከቱ [የManage-scope ልዩ ፍቃድ](#manage-scope-carve-out))።
 
-እነዚህ መስመሮች ንዑስ ሂደቶችን ያስጀምራሉ ወይም የአሂድ ጊዜ ኮድን ያስፈጽማሉ። ለloopback ያልሆነ ትራፊክ ማጋለጥ፣ ትክክለኛ JWT ያገኘ አጥቂ (ለምሳሌ፣ በCloudflared/Ngrok ቱነል በኩል) ሂደት እንዲጀመር ሊያስችለው ይችላል — ይህም የታወቀ የCVE ምድብ ነው ([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj))።
+እነዚህ routes child processes ያስነሳሉ ወይም runtime code ያስፈጽማሉ።
+ለnon-loopback traffic እንዲጋለጡ ማድረግ፣ ትክክለኛ JWT ያገኘ አጥቂን (ለምሳሌ፣
+በCloudflared/Ngrok tunnel በኩል) process spawning እንዲያስነሳ ያስችለዋል — ይህም
+የታወቀ CVE class ነው
+([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj))።
 
-**GHSA-fhh6-4qxv-rpqj ምንድን ነው (የጥቃቱ ምድብ)፦** የአስተዳደር/ወኪል አገልጋይ ንዑስ ሂደትን የሚያስጀምር መጨረሻ ነጥብ ያጋልጣል (`npm install`፣ `node`፣ አሳሽ፣ ፕሮክሲ፣ `git`፣ `tar`፣ …)። ያ መጨረሻ ነጥብ ከአስተናጋጁ ውጭ ሊደረስበት የሚችል ከሆነ — ኦፕሬተሩ OmniRouteን ከnginx/Cloudflare/Tailscale ቱነል ጀርባ ስላስቀመጠው እና JWT ስለወጣ፣ ወይም ማረጋገጫው በስህተት ስለተዋቀረ — አጥቂው “API መጥራትን” ወደ “በአስተናጋጁ ላይ ትዕዛዝ ማስኬድ” (የርቀት ኮድ ማስፈጸም) ይለውጠዋል። OmniRoute ይህንን የሚከላከለው ንዑስ ሂደት ማስጀመር በሚችል እያንዳንዱ መስመር ላይ **ከማንኛውም የማረጋገጫ ፍተሻ በፊት፣ ያለምንም ሁኔታ የloopback አስተናጋጅ ፍተሻን በማስፈጸም** ነው፤ በቱነል የወጣ ቶከን እንኳን የንዑስ ሂደት ማስጀመሪያውን ሊደርስበት አይችልም።
+**GHSA-fhh6-4qxv-rpqj ምንድን ነው (የጥቃቱ class)፦** አንድ management/agent server
+subprocess (`npm install`፣ `node`፣ browser፣
+proxy፣ `git`፣ `tar`፣ …) የሚያስነሳ endpoint ያጋልጣል። ያ endpoint ከhost ውጭ ሊደረስበት የሚችል ከሆነ — ምክንያቱም
+operator OmniRouteን ከnginx/Cloudflare/Tailscale tunnel ጀርባ አድርጎታል እና JWT
+leak ሆኗል፣ ወይም auth በተሳሳተ ሁኔታ ተዋቅሯል — አጥቂው "API መጥራት"ን ወደ "በhost ላይ
+command ማስኬድ" (remote code execution) ይቀይረዋል። OmniRoute ይህን የሚከለክለው spawn ማድረግ በሚችል እያንዳንዱ
+route ላይ **ምንም ሁኔታ ሳይኖርበት፣ ከማንኛውም auth ማረጋገጫ በፊት የloopback host ማረጋገጫን በማስፈጸም** ነው፦
+በtunnel ላይ leak የሆነ token እንኳን spawn የሚያስነሳበትን መድረስ አይችልም።
 
-**ሙሉው የLOCAL_ONLY ስብስብ።** ባለሥልጣን ምንጩ በ`src/server/authz/routeGuard.ts` ውስጥ ያሉት `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS` ናቸው፤ ከታች ያለው ሰንጠረዥ የአሁኑን ሁኔታ ያንጸባርቃል። የ`check-route-guard-membership` መቆጣጠሪያ በንዑስ ሂደት ማስጀመር በሚችሉ ቅድመ-ቅጥያዎች ስር ያለውን እያንዳንዱን `route.ts` ይዘረዝራል፣ እና ከእነሱ አንዱም local-only ተብሎ ካልተመደበ CI እንዲወድቅ ያደርጋል።
+**ሙሉው LOCAL_ONLY ስብስብ።** ሥልጣን ያለው ምንጭ
+በ`src/server/authz/routeGuard.ts` ውስጥ ያሉት `LOCAL_ONLY_API_PREFIXES` /
+`LOCAL_ONLY_API_PATTERNS` ናቸው፤ ከታች ያለው ሰንጠረዥ የአሁኑን ሁኔታ ያንጸባርቃል።
+`check-route-guard-membership` gate በspawn ማድረግ በሚችሉ prefixes ስር ያለውን እያንዳንዱን `route.ts`
+ይዘረዝራል፣ እና ከእነዚህ ውስጥ አንዱም local-only ተብሎ ካልተመደበ CIን እንዲወድቅ ያደርጋል።
 
-| ቅድመ ቅጥያ / ስርዓተ ጥለት                                                                                       | ለምን ለአካባቢያዊ አጠቃቀም ብቻ እንደሆነ                                                               |
-| -------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP አገልጋይ — stdio ድልድዮችን + SSE ማስተናገጃዎችን ያስነሳል                                           |
-| `/api/cli-tools/runtime/`                                                                                | CLI መሣሪያ የማስኬጃ አካባቢ — ማንኛውንም የተሰኪ ኮድ ያስፈጽማል                                              |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | በአስተናጋጁ ላይ ያሉ የመሣሪያ ፋይሎችን/ውቅሮችን ሊነኩ የሚችሉ የየመሣሪያው ቅንብር ጸሐፊዎች                              |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | ከላይ ካሉት ስድስት ተመሳሳይ መሣሪያዎች ጋር ተመሳሳይ የ`getCliRuntimeStatus()` ማስነሳት (GHSA-35fw-cv32-2373)  |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | የCLI ዝርዝር መመርመሪያዎች — ለእያንዳንዱ መሣሪያ `command -v` / `--version` ያስነሳሉ (GHSA-35fw-cv32-2373) |
-| `/api/cli-tools/antigravity-mitm`                                                                        | የAntigravity MITM ተኪ መቆጣጠሪያ (የስርዓቱን ተኪ ያስነሳል/ያመለክታል)                                     |
-| `/api/modality-bridge/video/`                                                                            | በጥብቅ የሚታመን የloopback Video Bridge የማስኬጃ አካባቢ መመርመሪያ እና ውስጣዊ የማውጫ ድልድይ                    |
-| `/api/services/`                                                                                         | የተካተቱ አገልግሎቶች (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + ማስነሳት       |
-| `/dashboard/providers/services/`                                                                         | ወደ የተካተቱ አገልግሎቶች UIዎች የሚያመራ ተገላቢጦሽ ተኪ                                                    |
-| `/api/tunnels/cloudflared`                                                                               | የcloudflared ፋይልን ይጭናል/ያስነሳል                                                             |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | tailscaledን በአስተናጋጁ ላይ ይጭናል/ይቆጣጠራል                                                       |
-| `/api/copilot/`                                                                                          | ማረጋገጫ የሌለው LLM ነጂ — በነባሪነት ለCLI ብቻ                                                       |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM አገልጋይን ያስነሳል + DNS ለውጦችን ያደርጋል                                        |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy አድማጭ + የስርዓት ተኪ                                           |
-| `/api/settings/mitm`                                                                                     | MITM መጥለፍን ያነቃል (በስርዓት ደረጃ ያለ የተኪ ሁኔታ)                                                   |
-| `/api/issue-agent/`                                                                                      | የችግኝ ወኪል — በማከማቻው ላይ አካባቢያዊ መሣሪያዎችን ያስነሳል                                                |
-| `/api/plugins/`, `/api/plugins`                                                                          | ተሰኪዎች — በ`worker_threads` + `child_process` በኩል ይጫናሉ/ይፈጸማሉ                               |
-| `/api/middleware/`                                                                                       | የተጠቃሚ middleware — የከዋኙን ኮድ በሂደቱ ውስጥ ይጭናል/ያስፈጽማል                                         |
-| `/api/system/version`                                                                                    | ራስ-ሰር ማዘመን (POST ብቻ፤ GET/HEAD/OPTIONS ነፃ ናቸው) — `git checkout` + `npm install` ያስነሳል     |
-| `/api/db-backups/exportAll`                                                                              | ለወጪ መዝገቡ `tar`ን ያስነሳል                                                                    |
-| `/api/local/`                                                                                            | በአንድ ጠቅታ የሚጀምሩ አካባቢያዊ ማስነሻዎች (በአሁኑ ጊዜ Redis) — podman/dockerን ያስነሳሉ                      |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | የHeadroom ተኪ የሕይወት ዑደት — python CLIን ያስነሳል / ለPID ምልክት ይልካል                              |
-| `/api/jobs`, `/api/jobs/`                                                                                | የሥራ ማስኬጃ መቆጣጠሪያ — በአስተናጋጁ በኩል የታቀዱ ሥራዎችን ያስፈጽማል                                          |
-| `/api/oauth/cursor/auto-import`                                                                          | ማረጋገጫዎችን ከማስመጣቱ በፊት `execFile("which", ["cursor"])`ን ያስኬዳል                               |
-| `/api/oauth/kiro/auto-import`                                                                            | ከአስተናጋጁ የKiro CLI ማረጋገጫ ፋይሎችን ያነባል                                                       |
-| `/api/skills/collect/`                                                                                   | የክህሎት ስብስብ — አካባቢያዊ መሣሪያዎችን ይለያል/ይጭናል                                                    |
-| `/api/skills/install`, `/api/skills/executions`                                                          | የክህሎት ማስተናገጃ ምዝገባ + ማስፈጸም — ወደ የsandbox መያዣ ማስነሳት ይደርሳሉ (GHSA-jx89)                      |
-| `/api/discovery/`                                                                                        | የአካባቢያዊ አውታረ መረብ/አቅራቢ ግኝት መመርመሪያዎች                                                       |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | ለመስተጋብራዊ መግቢያዎች ሙሉ UI ያለው አሳሽ + VNC ክፍለ ጊዜ ያስነሳል                                         |
-| `/api/acp/agents`                                                                                        | ACP — አካባቢያዊ የCLI ወኪል ፋይሎችን ያገኛል እና ያስነሳል                                                |
-| `/api/resilience/connections`, `/dashboard/resilience/connections`                                       | አካባቢያዊ የCLI ሁኔታን ሊነኩ የሚችሉ የግንኙነት ጥገና ድርጊቶች                                               |
-| `/api/providers/cursor/agent-availability`                                                               | የdashboard ጭነት-አስታዋሽ ፍተሻ — `cursor-agent status --format json`ን ያስነሳል                    |
-| `/api/providers/{id}/login` (regex)                                                                      | በድር cookie ለመግባት ሙሉ UI ያለው Playwright Chromiumን ያስነሳል                                    |
-| `/api/providers/volcengine-plan/connect` (regex)                                                         | በእጅ የሚከናወን ሙሉ UI ያለው ፍሰት + በክፍለ ጊዜ ላይ የተመሠረተ የስልክ/SMS ራስ-ሰር መግቢያ (Playwrightን ያስነሳል)     |
-| `/api/providers/{id}/refresh-cursor` (regex)                                                             | በእጅ የሚደረግ የCursor ክፍለ ጊዜ እድሳት — `cursor-agent`ን ያነሳሳል                                    |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | የአካባቢያዊውን Codex CLI ጭነት ይመረምራል (ፋይሉን ያስነሳል)                                              |
+| ቅድመ ቅጥያ / ንድፍ                                                                                            | ለምን ለአካባቢያዊ አጠቃቀም ብቻ እንደሆነ                                                                            |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP አገልጋይ — stdio bridges + SSE handlers ያስነሳል                                                        |
+| `/api/cli-tools/runtime/`                                                                                | የCLI መሣሪያ runtime — ማንኛውንም የplugin ኮድ ያስፈጽማል                                                          |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | በእያንዳንዱ መሣሪያ ደረጃ በhost ላይ ያሉ የመሣሪያ binaries/config ሊነኩ የሚችሉ የቅንብሮች ጸሐፊዎች                              |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | ከላይ ካሉት ስድስት ተመሳሳይ መሣሪያዎች ጋር ተመሳሳይ የ`getCliRuntimeStatus()` ማስነሳት (GHSA-35fw-cv32-2373)               |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | የCLI ዝርዝር መመርመሪያዎች — ለእያንዳንዱ መሣሪያ `command -v` / `--version` ያስነሳሉ (GHSA-35fw-cv32-2373)              |
+| `/api/cli-tools/antigravity-mitm`                                                                        | የAntigravity MITM proxy መቆጣጠሪያ (የsystem proxyን ያስነሳል/ያመላክታል)                                          |
+| `/api/modality-bridge/video/`                                                                            | ጥብቅ trusted-loopback Video Bridge runtime መመርመሪያ እና ውስጣዊ extraction bridge                            |
+| `/api/services/`                                                                                         | የተካተቱ አገልግሎቶች (9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + ማስነሳት                    |
+| `/dashboard/providers/services/`                                                                         | ወደ የተካተቱ አገልግሎቶች UIs የሚደረግ reverse proxy                                                              |
+| `/api/tunnels/cloudflared`                                                                               | cloudflared binaryን ይጭናል/ያስነሳል                                                                        |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | በhost ላይ tailscaledን ይጭናል/ይቆጣጠራል                                                                      |
+| `/api/copilot/`                                                                                          | ማረጋገጫ የማይጠይቅ የLLM driver — በነባሪ ለCLI ብቻ                                                               |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM አገልጋይ ያስነሳል + የDNS ለውጦችን ያደርጋል                                                     |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy listener + system proxy                                                |
+| `/api/settings/mitm`                                                                                     | MITM interceptionን ያነቃል (የsystem-ደረጃ proxy ሁኔታ)                                                       |
+| `/api/issue-agent/`                                                                                      | የIssue agent — በrepo ላይ አካባቢያዊ toolingን ያስነሳል                                                         |
+| `/api/plugins/`, `/api/plugins`                                                                          | Plugins — በ`worker_threads` + `child_process` ይጫናሉ/ይፈጸማሉ                                              |
+| `/api/middleware/`                                                                                       | የተጠቃሚ middleware — የoperator ኮድን በprocess ውስጥ ይጭናል/ያስፈጽማል                                             |
+| `/api/system/version`                                                                                    | ራስ-ሰር ማዘመን (POST ብቻ፤ GET/HEAD/OPTIONS ነጻ ናቸው) — `git checkout` + `npm install` ያስነሳል                  |
+| `/api/db-backups/exportAll`                                                                              | ለexport archive `tar`ን ያስነሳል                                                                          |
+| `/api/local/`                                                                                            | በ1-ጠቅታ የአካባቢ ማስጀመሪያዎች (በአሁኑ ጊዜ Redis) — podman/dockerን ያስነሳል                                          |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | የHeadroom proxy lifecycle — python CLIን ያስነሳል / ለPID ምልክት ይልካል                                        |
+| `/api/jobs`, `/api/jobs/`                                                                                | የJob runner መቆጣጠሪያ — በhost ላይ የታቀደ ሥራን ያስፈጽማል                                                         |
+| `/api/oauth/cursor/auto-import`                                                                          | ማረጋገጫዎችን ከማስመጣቱ በፊት `execFile("which", ["cursor"])`                                                   |
+| `/api/oauth/kiro/auto-import`                                                                            | ከhost ላይ የKiro CLI ማረጋገጫ ፋይሎችን ያነባል                                                                   |
+| `/api/skills/collect/`                                                                                   | የSkill ስብስብ — አካባቢያዊ toolingን ይለያል/ይጭናል                                                               |
+| `/api/skills/install`, `/api/skills/executions`                                                          | የክህሎት አስተናጋጅ ምዝገባ + አፈጻጸም — የsandbox container ማስነሳትን ይደርሳል (GHSA-jx89)                               |
+| `/api/discovery/`                                                                                        | የአካባቢያዊ አውታረ መረብ/አቅራቢ ፍለጋ መርማሪያዎች                                                                     |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | ለበይነተገናኝ መግቢያዎች በመስኮት የሚታይ አሳሽ + VNC ክፍለ-ጊዜ ያስነሳል                                                     |
+| `/api/acp/agents`                                                                                        | ACP — የአካባቢያዊ CLI agent binary ፋይሎችን ያገኛል እና ያስነሳል                                                    |
+| `/api/resilience/connections`                                                                            | የእያንዳንዱ መለያ የመቋቋም አቅም JSON (የማቀዝቀዣ ጊዜ፣ breaker፣ መቆለፍ)። የdashboard HTML ለአካባቢያዊ ተደራሽነት ብቻ የተገደበ አይደለም። |
+| `/api/providers/cursor/agent-availability`                                                               | የdashboard የመጫኛ ማስታወሻ ማረጋገጫ — `cursor-agent status --format json` ያስነሳል                               |
+| `/api/providers/{id}/login` (regex)                                                                      | በድር-cookie ለመግባት በመስኮት የሚታይ Playwright Chromium ያስጀምራል                                                |
+| `/api/providers/volcengine-plan/connect` (regex)                                                         | በእጅ የሚከናወን በመስኮት የሚታይ ሂደት + በክፍለ-ጊዜ ላይ የተመሠረተ የስልክ/SMS ራስ-ሰር መግቢያ (Playwrightን ያስነሳል)                 |
+| `/api/providers/{id}/refresh-cursor` (regex)                                                             | የCursor ክፍለ-ጊዜን በእጅ ማደስ — `cursor-agent`ን እንዲሠራ ያነሳሳል                                                 |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (regex)                                                   | የአካባቢያዊውን Codex CLI ጭነት ይመረምራል (binary ፋይሉን ያስነሳል)                                                    |
 
 **ጥሰት ሲኖር የሚሰጥ ምላሽ፦** `403 LOCAL_ONLY`
 
-#### የmanage-scope ልዩ ማለፊያ
+#### የmanage scope ልዩ ፈቃድ
 
-የLOCAL_ONLY ዱካዎች ንዑስ ስብስብ ከloopback ውጭም ሊደረስበት የሚችለው ጥያቄው `Authorization: Bearer <api-key>` የያዘ እና የቁልፉ metadata የ`manage` scope (ወይም `admin`) ያካተተ ከሆነ ብቻ ነው። ይህ ልዩ ማለፊያ ለእያንዳንዱ ዱካ በ`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` በግልጽ ይቆጣጠራል፤ ስለዚህ ለማንኛውም አዲስ LOCAL_ONLY ዱካ ነባሪው ጥብቅ-loopback ሆኖ ይቀጥላል። ማንነት ያልተረጋገጠላቸው ጥያቄዎች እና manage ያልሆኑ ቁልፎችን የያዙ ጥያቄዎች አሁንም በ`403 LOCAL_ONLY` ውድቅ ይደረጋሉ።
+የLOCAL_ONLY paths ንዑስ ስብስብ፣ ጥያቄው metadata ውስጥ `manage` scope
+(ወይም `admin`) ያለውን `Authorization: Bearer <api-key>` ከያዘ ብቻ፣
+ከloopback ውጭ ሊደረስበት ይችላል። ልዩ ፈቃዱ በእያንዳንዱ path ላይ
+በ`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` በኩል በግልጽ የሚቆጣጠር
+ስለሆነ፣ ለማንኛውም አዲስ LOCAL_ONLY path ነባሪው ጥብቅ-loopback ሆኖ
+ይቆያል። ማንነት ያልተረጋገጠባቸው ጥያቄዎች እና manage ያልሆኑ
+keys ያሏቸው ጥያቄዎች አሁንም በ`403 LOCAL_ONLY` ውድቅ ይደረጋሉ።
 
-በአሁኑ ጊዜ ልዩ ማለፊያ ሊደረግለት የሚችለው prefix `/api/mcp/` ብቻ ነው። `/api/cli-tools/runtime/` እና `/api/services/` የዘፈቀደ subprocess-ዎችን (`npm install`፣ `node`) ማስነሳት ስለሚችሉ ሆን ተብለው አልተካተቱም፤ ይህም የLOCAL_ONLY tier እንዲከላከለው የተፈጠረበት ትክክለኛው የCVE ምድብ ነው።
+በአሁኑ ጊዜ ልዩ ፈቃድ ሊሰጠው የሚችለው prefix `/api/mcp/` ብቻ ነው።
+`/api/cli-tools/runtime/` እና `/api/services/` የዘፈቀደ subprocesses
+(`npm install`፣ `node`) ማስነሳት ስለሚችሉ ሆን ተብለው አልተካተቱም፤
+ይህም LOCAL_ONLY ደረጃ እንዲከላከለው የተፈጠረበት ትክክለኛው የCVE
+ምድብ ነው።
 
-**#7895 — የ`mcp:connect` ውስን scope፦** የ`/api/mcp/` ልዩ ማለፊያ ውስን የ`mcp:connect` scope የያዘ Bearer ቁልፍንም ይቀበላል (`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`)፤ ይህም በ`src/server/authz/policies/management.ts` ውስጥ ባለው `hasMcpConnectOrManageScope()` ይፈተሻል። ይህ ለ`/api/mcp/` ብቻ የተወሰነ ነው — `mcp:connect` በሌላ ማንኛውም management route ላይ (ወደፊት ቢጨመርም ሌላ ማንኛውንም LOCAL_ONLY bypass prefix ጨምሮ) ምንም ፈቃድ አይሰጥም፤ እንዲሁም ሆን ተብሎ ከ`MANAGEMENT_API_KEY_SCOPES` ውጭ ተደርጓል። `manage`/`admin` የያዘ ቁልፍ እንደበፊቱ ልዩ ማለፊያውን ያልፋል፤ `mcp:connect` ሰፊ የmanagement መዳረሻ ማስፈለግ ለሌለባቸው የርቀት MCP-ብቻ ጠሪዎች ዝቅተኛ-መብት ያለው አማራጭ ነው።
+**#7895 — `mcp:connect` የተገደበ scope፦** የ`/api/mcp/` ልዩ ፈቃድ፣
+ጠባቡን `mcp:connect` scope
+(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`) የያዘ
+Bearer keyም ይቀበላል፤ ይህም በ
+`src/server/authz/policies/management.ts` ውስጥ ባለው
+`hasMcpConnectOrManageScope()` ይረጋገጣል። ይህ ለ`/api/mcp/` ብቻ
+የተገደበ ነው — `mcp:connect` በሌላ ማንኛውም management route ላይ
+ምንም ፈቃድ አይሰጥም (ወደፊት ከተጨመረ ማንኛውንም ሌላ LOCAL_ONLY
+bypass prefix ጨምሮ)፣ እና ሆን ተብሎ ከ`MANAGEMENT_API_KEY_SCOPES`
+ተገልሏል። `manage`/`admin` የያዘ key እንደበፊቱ ልዩ ፈቃዱን
+ያልፋል፤ `mcp:connect` ሰፊ የmanagement ተደራሽነት ሊያስፈልጋቸው
+ለማይገቡ የርቀት MCP-ብቻ ጠሪዎች ዝቅተኛ መብት ያለው አማራጭ ነው።
 
-| ጥያቄ                                              | ዱካ                         | ውጤት             |
-| ------------------------------------------------ | -------------------------- | --------------- |
-| Non-loopback፣ Bearer የለም                         | `/api/mcp/*`               | 403 LOCAL_ONLY  |
-| Non-loopback፣ የ`manage` scope ያለው Bearer         | `/api/mcp/*`               | ፍቀድ             |
-| Non-loopback፣ የ`mcp:connect` scope ያለው Bearer    | `/api/mcp/*`               | ፍቀድ             |
-| Non-loopback፣ `manage`/`mcp:connect` የሌለው Bearer | `/api/mcp/*`               | 403 LOCAL_ONLY  |
-| Non-loopback፣ የ`mcp:connect` scope ያለው Bearer    | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY  |
-| Non-loopback፣ የ`manage` scope ያለው Bearer         | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY  |
-| Loopback፣ ማንኛውም Bearer/ያለ Bearer                 | ማንኛውም LOCAL_ONLY           | ፍቀድ (gate ያልፋል) |
+| ጥያቄ                                              | Path                       | ውጤት               |
+| ------------------------------------------------ | -------------------------- | ----------------- |
+| ከloopback ውጭ፣ Bearer የሌለው                        | `/api/mcp/*`               | 403 LOCAL_ONLY    |
+| ከloopback ውጭ፣ `manage` scope ያለው Bearer          | `/api/mcp/*`               | ይፈቀዳል             |
+| ከloopback ውጭ፣ `mcp:connect` scope ያለው Bearer     | `/api/mcp/*`               | ይፈቀዳል             |
+| ከloopback ውጭ፣ `manage`/`mcp:connect` የሌለው Bearer | `/api/mcp/*`               | 403 LOCAL_ONLY    |
+| ከloopback ውጭ፣ `mcp:connect` scope ያለው Bearer     | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY    |
+| ከloopback ውጭ፣ `manage` scope ያለው Bearer          | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY    |
+| Loopback፣ ማንኛውም/Bearer የሌለው                      | ማንኛውም LOCAL_ONLY           | ይፈቀዳል (gate ያልፋል) |
 
-#### ለኦፕሬተሮች መመሪያ እና auditing
+#### የኦፕሬተር መመሪያ እና ኦዲት
 
-OmniRouteን ከreverse proxy ወይም tunnel (nginx፣ Caddy፣ Cloudflare Tunnel፣ Tailscale፣ Ngrok) ጀርባ ካስኬዱ፣ የloopback ማረጋገጫው አሁንም ከላይ ያሉትን spawn ማድረግ የሚችሉ routes ይጠብቃል — የclient address-ው non-loopback የሆነ ጥያቄ **auth ከመካሄዱ በፊት** በ`403 LOCAL_ONLY` ውድቅ ይደረጋል፤ ስለዚህ የወጣ JWT ወደ spawn ሊደርስ አይችልም። ሁለት የኦፕሬተር ኃላፊነቶች ይቀራሉ፦
+OmniRouteን ከreverse proxy ወይም tunnel (nginx፣ Caddy፣ Cloudflare
+Tunnel፣ Tailscale፣ Ngrok) በስተጀርባ ብታስኬዱት፣ የloopback ማረጋገጫው
+አሁንም ከላይ ያሉትን ማስነሳት የሚችሉ routes ይጠብቃል — የclient
+address ከloopback ውጭ የሆነ ጥያቄ **ማንነት ማረጋገጫው ከመከናወኑ
+በፊት** በ`403 LOCAL_ONLY` ውድቅ ይደረጋል፤ ስለዚህ የወጣ JWT
+ማስነሳትን ሊደርስበት አይችልም። ሁለት የኦፕሬተር ኃላፊነቶች
+አሁንም ይቀራሉ፦
 
-- **የclient IPን loopback አስመስሎ በማቅረብ 403ን “አታስተካክሉ”።** `X-Forwarded-For: 127.0.0.1` ማዋቀር፣ ወይም source address-ውን ወደ loopback የሚቀይር proxy መጠቀም፣ ይህ tier የዘጋውን ትክክለኛ የRCE ምድብ እንደገና ይከፍታል። dashboard/APIውን በproxyው በኩል ያቅርቡ — spawn ማድረግ የሚችሉትን routes ፈጽሞ አታቅርቡ።
-- **የmanage-scope bypassን ዝቅተኛው መጠን ላይ ያቆዩ።** bypass ሊደረግለት የሚችለው `/api/mcp/` ብቻ ሲሆን፣ ይህም `manage`-scoped API key ሲኖር ብቻ ነው። `SPAWN_CAPABLE_PREFIXES` በፍጹም ወደ bypass ዝርዝሩ ሊጨመሩ አይችሉም — zod schemaው ውድቅ ያደርጋቸዋል፣ `isLocalOnlyBypassableByManageScope` ደግሞ runtime ላይ ይከለክላቸዋል (defence-in-depth)፤ dashboardው “cannot be made bypassable” ሲል የሚያመለክተው ይህንን ነው። በ`/api/providers/` ስር ያሉ dynamic-segment እና static-path spawn ማድረግ የሚችሉ routes (ለምሳሌ `/login`፣ `/refresh-cursor`) የሚሸፈኑት በ`src/shared/constants/spawnCapablePrefixes.ts` ውስጥ ባለው regex-መሠረት ያደረገው `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` companion ነው፤ በጠፍጣፋው `SPAWN_CAPABLE_PREFIXES` array አይደለም — ጠፍጣፋው array እነሱን ለመያዝ ሙሉውን `/api/providers/` prefix መሸፈን ይኖርበታል፣ ይህም የርቀት dashboards ለprovider CRUD በሕጋዊ መንገድ የሚጠቀሙበትን route tree ከመጠን በላይ ያሰፋዋል።
+- **የደንበኛውን IP እንደ loopback በማስመሰል 403ን "አያስተካክሉ"።**
+  `X-Forwarded-For: 127.0.0.1`ን ማዋቀር፣ ወይም የምንጭ አድራሻውን ወደ
+  loopback እንደገና የሚጽፍ proxy መጠቀም፣ ይህ ደረጃ የሚዘጋውን ተመሳሳይ የRCE ምድብ
+  እንደገና ይከፍታል። dashboard/APIን በproxyው በኩል ያቅርቡ —
+  spawn ማድረግ የሚችሉ መንገዶችን ፈጽሞ አያቅርቡ።
+- **የmanage-scope bypassን እጅግ ውስን ያድርጉት።** bypass ሊደረግ የሚችለው `/api/mcp/` ብቻ ሲሆን፣
+  ይህም `manage`-scoped API key ሲኖር ብቻ ነው። `SPAWN_CAPABLE_PREFIXES` ፈጽሞ ወደ
+  bypass ዝርዝሩ ሊጨመሩ አይችሉም — zod schemaው ይከለክላቸዋል፣ እንዲሁም
+  `isLocalOnlyBypassableByManageScope` በruntime ይከለክላቸዋል (defence-in-depth)፤
+  dashboardው "bypass ሊደረጉ አይችሉም" ሲል የሚያመለክተውም ይህንኑ ነው። ይኸው
+  deny-list spawn የማያደርጉ ነገር ግን ከሩቅ ፈጽሞ ተደራሽ መሆን የሌለባቸውን
+  ጥቂት LOCAL_ONLY መንገዶችም ይዟል — `/api/oauth/kiro/auto-import` (በhost ላይ ያሉ
+  የKiro ማረጋገጫ ፋይሎችን ያነባል)፣ `/api/discovery/` እና `/api/issue-agent/`። የruntime
+  snapshot loaderም እንደዚህ ያሉ ግቤቶችን ከተከማቸ settings row ያስወግዳል፣ እንዲሁም
+  የቆየው JSON import (`/api/settings/import-json`) የbypass keysን ፈጽሞ አይጽፍም።
+  እያንዳንዱ `LOCAL_ONLY_API_PREFIXES` ግቤት በdeny-list ውስጥ መሆን ወይም
+  bypass ለማድረግ ብቁ መሆኑ መገምገም አለበት (`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`)። በ`/api/providers/` ስር ያሉ Dynamic-segment
+  እና static-path spawn ማድረግ የሚችሉ መንገዶች (ለምሳሌ `/login`፣
+  `/refresh-cursor`) በregex ላይ በተመሠረቱት `SPAWN_CAPABLE_PATTERNS` /
+  `SPAWN_CAPABLE_PATTERN_ANCESTORS` ተጓዳኝ ውስጥ
+  `src/shared/constants/spawnCapablePrefixes.ts` ይሸፈናሉ፤ በጠፍጣፋው
+  `SPAWN_CAPABLE_PREFIXES` array አይደለም — ጠፍጣፋው array እነሱን ለመያዝ
+  ሙሉውን `/api/providers/` prefix መሸፈን ይኖርበታል፣ ይህም remote dashboards
+  ለprovider CRUD በሕጋዊነት የሚጠቀሙበትን route tree ከመጠን በላይ ያሰፋዋል።
 
-**መዳረሻን auditing ማድረግ** — ከhost ውጭ የሆነ ምንም ነገር ወደእነዚህ routes እንደማይደርስ ለማረጋገጥ፦
+**መዳረሻን ኦዲት ማድረግ** — ከhost ውጭ ምንም ነገር እነዚህን መንገዶች እየደረሰባቸው አለመሆኑን ለማረጋገጥ፦
 
-- በ`/dashboard/settings/security` ላይ ያለውን **Authorization Inventory** ይክፈቱ፦ የቀጥታ LOCAL_ONLY prefix ዝርዝርን፣ bypass ሊደረግላቸው የሚችሉትን prefixes፣ እና በcompile-time የተወሰነውን spawn-capable (“cannot be made bypassable”) ስብስብ ያሳያል።
-- የreverse-proxy / access logsዎችዎን ከnon-loopback client address ጋር ተያይዘው ለሚታዩ ከላይ ያሉት prefixes በGrep ይፈልጉ። ከ`403 LOCAL_ONLY` ይልቅ `200` የመለሰ ማንኛውም እንደዚህ ያለ hit proxyው እውነተኛውን client IP እየደበቀ ነው ማለት ነው — proxyውን ያስተካክሉ።
-- በOmniRoute logs ውስጥ ከእነዚህ ዱካዎች ለአንዱ የሚታይ `403 LOCAL_ONLY`፣ guardው እንደታሰበው እየሠራ መሆኑን ያሳያል፤ ሊደበቅ የሚገባው ስህተት አይደለም።
+- **Authorization Inventory**ን በ`/dashboard/settings/security` ላይ ይክፈቱ፦ የቀጥታውን LOCAL_ONLY prefix ዝርዝር፣
+  የትኞቹ prefixes bypass ሊደረጉ እንደሚችሉ፣ እና በcompile-time የሚወሰነውን
+  spawn ማድረግ የሚችል ("bypass ሊደረግ የማይችል") ስብስብ ያሳያል።
+- reverse-proxy / access logsዎን ከloopback ያልሆነ የደንበኛ አድራሻ ጋር ለተጣመሩት
+  ከላይ ላሉት prefixes grep ያድርጉ። `403 LOCAL_ONLY` ፈንታ `200`ን የመለሰ
+  ማንኛውም እንዲህ ያለ hit proxyው እውነተኛውን የደንበኛ IP እየደበቀ ነው ማለት ነው —
+  proxyውን ያስተካክሉ።
+- ከእነዚህ paths ለአንዱ በOmniRoute logs ውስጥ ያለ `403 LOCAL_ONLY`፣ guardው
+  እንደታሰበው እየሠራ መሆኑን ያሳያል፤ ሊታፈን የሚገባ ስህተት አይደለም።
 
-### Tier 2 — ALWAYS_PROTECTED
+#### ከሩቅ ተደራሽ የሆኑ፣ call-site probe gate ያላቸው መንገዶች
 
-**የሚተገበረው በ፦** `isAlwaysProtectedPath(path)` → የ`requireLogin=false` bypassን ዝለል  
-**Bypass፦** `requireLogin=false` ሲሆን ምንም የለም፤ JWT ሁልጊዜ ያስፈልጋል
+አንዳንድ መንገዶች ከremote dashboard ተደራሽ ሆነው መቆየት አለባቸው፣ ነገር ግን
+ለአካባቢያዊ callers በhost ላይ የሚሠራ probe (`which <binary>`፣ `<binary> --version`፣
+`tailscale status --json`) ያከናውናሉ። ለ`GET` LOCAL_ONLY አይደሉም፤ በምትኩ handlerው
+የታመነውን peer verdict በ`getRequestPeerLocality()` (`src/shared/utils/apiAuth.ts`) ያነባል
+እና probeውን የሚያስኬደው ለ`loopback` / `lan` callers ብቻ ነው። `remote` caller ከspawn
+የማያደርጉ ምንጮች (የተከማቸ state፣ settings፣ fs checks) የተገነባ፣
+`probed: false` ተብሎ ምልክት የተደረገበት ተመሳሳይ response shape ያገኛል።
 
-እነዚህ routes አጥፊ ወይም ወደነበረበት ሊመለሱ የማይችሉ ናቸው። “no-password” install ውስጥ እንዲፈቀዱ ማድረግ ማለት፣ በተመሳሳይ LAN ላይ ያለ ማንኛውም ሰው databaseውን ማጥፋት ወይም server processውን ማቋረጥ ይችላል ማለት ነው።
+| መንገድ                                                             | ለremote callers የሚዘለለው probe                                       |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------ |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI runtime probe (`allowLocalRuntimeProbe`) እና CLI-fallback spawn |
+| `GET /api/headroom/status`                                       | `which headroom` እና የpython `--version` probes                     |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`፣ `tailscale status/funnel --json`፣ `which brew`  |
+| `GET /api/tunnels/cloudflared` (ከLOCAL_ONLY ነፃ የሆነ GET)          | `which cloudflared` PATH lookup                                    |
 
-| ዱካ                                        | ምክንያት                                                      |
-| ----------------------------------------- | ---------------------------------------------------------- |
-| `/api/shutdown`                           | የserver processውን ያቋርጣል                                    |
-| `/api/settings/database`                  | Database export፣ import እና wipe                            |
-| `/api/db-backups`                         | የሙሉ database backup archive መዳረሻ                           |
-| `/api/settings/export-json`               | ሙሉውን settings blob (ምስጢሮችን ጨምሮ) export ያደርጋል               |
-| `/api/settings/import-json`               | ሙሉውን settings blob ይተካል                                    |
-| `/api/providers/health-autopilot/actions` | የautopilot remediation actionsን ያስፈጽማል                     |
-| `/api/settings/obsidian`                  | ለማንኛውም vault root እንደገና ጥቅም ላይ ሊውሉ የሚችሉ WebDAV creds ያመነጫል |
+hostውን probe የሚያደርግ አዲስ read route ተመሳሳይ patternን ይከተላል፣ ወይም
+በቀጥታ LOCAL_ONLY ተብሎ ይመደባል።
+
+### ደረጃ 2 — ALWAYS_PROTECTED
+
+**በሚከተለው የሚተገበር፦** `isAlwaysProtectedPath(path)` → የ`requireLogin=false` bypassን ዝለል
+**Bypass፦** `requireLogin=false` ሲሆን ምንም፤ JWT ሁልጊዜ ያስፈልጋል
+
+እነዚህ መንገዶች አጥፊ ወይም የማይቀለበሱ ናቸው። "no-password" install ውስጥ
+እነሱን መፍቀድ፣ በተመሳሳይ LAN ላይ ያለ ማንኛውም ሰው databaseውን ሊያጠፋ
+ወይም server processውን ሊያቋርጥ ይችላል ማለት ነው።
+
+| መንገድ                                      | ምክንያት                                                       |
+| ----------------------------------------- | ----------------------------------------------------------- |
+| `/api/shutdown`                           | server processውን ያቋርጣል                                      |
+| `/api/settings/database`                  | database export፣ import እና wipe                             |
+| `/api/db-backups`                         | ሙሉ የdatabase backup archive መዳረሻ                            |
+| `/api/settings/export-json`               | ሙሉውን settings blob (secretsን ጨምሮ) export ያደርጋል              |
+| `/api/settings/import-json`               | ሙሉውን settings blob ይተካል                                     |
+| `/api/providers/health-autopilot/actions` | የautopilot remediation actionsን ያስፈጽማል                      |
+| `/api/settings/obsidian`                  | ለማንኛውም vault root እንደገና ጥቅም ላይ ሊውሉ የሚችሉ WebDAV credsን ይፈጥራል |
+| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                |
 
 **ጥሰት ሲኖር የሚሰጥ ምላሽ፦** `401 Authentication required`
 
-`/api/settings/obsidian` የእሱን `/webdav` ልጅ ይሸፍናል፦ `POST` የWebDAV ፋይል አገልግሎትን —
-ከዚህ pipeline ውጭ በብጁ Node layer ከNext.js በፊት የሚቀርበውን — ጥሪ አድራጊው ወደመረጠው root
-ያመላክታል እና አዲስ የተፈጠሩ Basic ማረጋገጫዎችን መልሶ ያሳያል፤ `DELETE` ደግሞ ያድሳቸዋል፣ እና የወላጁ `POST`
-የObsidian REST API tokenን ያከማቻል። GHSA-62vw የ`GET` password መጋለጥን ብቻ ደብቆ ነበር፤ መስጠቱ ግን
-አሁንም በfail-open tier ላይ ነበር (GHSA-7pq4-8pvv-rx7r)። `enableObsidianVaultSync()` በተጨማሪም
-ከdata directory ጋር ተመሳሳይ የሆነ፣ በውስጡ የሚገኝ፣ ወይም እሱን የያዘ vault አይቀበልም።
+`/api/settings/obsidian` የ`/webdav` childን ይሸፍናል፦ `POST`፣ ከNext.js በፊት
+በcustom Node layer የሚቀርበውን እና ከዚህ pipeline ውጭ የሆነውን WebDAV file service —
+caller ወደመረጠው root ይጠቁማል እና አዲስ የተፈጠሩ Basic credentialsን መልሶ
+ያሳያል፣ `DELETE` እነሱን ያድሳል፣ እንዲሁም parent `POST` የObsidian REST API tokenን
+ያከማቻል። GHSA-62vw የ`GET` password revealን ብቻ ደብቋል፤ issuanceው አሁንም
+በfail-open tier ላይ ነበር (GHSA-7pq4-8pvv-rx7r)። `enableObsidianVaultSync()` በተጨማሪ
+data directoryው የሆነ፣ በውስጡ የሚገኝ፣ ወይም የያዘ vaultን አይቀበልም።
 
-### የአዲስ ጭነት bootstrap ለloopback ብቻ ነው — በእውነተኛው peer እንጂ በ`Host` አይደለም
+#### የማረጋገጫ መረጃ exports ለoperator ብቻ ናቸው
 
-ምንም የmanagement password ሳይዋቀር (እና `INITIAL_PASSWORD` ሳይኖር)፣ በ
-`src/shared/utils/apiAuth.ts` ውስጥ ያለው `isAuthRequired()` ማንነትን ያልገለጸ bootstrapን **ለloopback peers ብቻ**
-ክፍት አድርጎ ያቆያል። Loopback በሚከተሉት የታመኑ peer signals መሠረት በቅደም ተከተል ይወሰናል፦ token የታተመበት እውነተኛ TCP peer
-(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`፣ policyው የሚያየው)፣ የpipelineው የራሱ
-`AUTHZ_HEADER_PEER_LOCALITY` verdict (route handlers የሚያዩት፣
-`OMNIROUTE_PEER_STAMP_TOKEN` እስከተዋቀረ ድረስ ብቻ የሚታመን)፣ ወይም ለቀጥታ ጥሪ አድራጊዎች እውነተኛ socket peer። `Host` /
-`nextUrl.hostname` ፈጽሞ አይመረመሩም፣ እና የመጀመሪያው password መጻፍ
-(`POST /api/settings/require-login`) ለእያንዳንዱ network peer ክፍት ከመሆን ይልቅ በተመሳሳይ
-ገደብ ስር ነው (GHSA-7pq4-8pvv-rx7r)። `managementPolicy` የራሱን `peerContext` verdict
-በግልጽ ወደታች ያስተላልፋል፣ ስለዚህ የORIGINAL (ከመወገዱ በፊት) request headers ውሳኔውን ፈጽሞ አይወስኑም።
+ከላይ ያለው ደረጃ የሚወስነው _የሆነ_ ማረጋገጫ መረጃ ያስፈልግ እንደሆነ ብቻ ነው። የተቀመጡ
+የማረጋገጫ መረጃዎችን የሚያወርዱ መስመሮች በተቆጣጣሪው ውስጥ ሁለተኛ ፍተሻ ይጨምራሉ፦ `GET /api/settings/export-json` (ዲክሪፕት የተደረጉ
+የአቅራቢ ግንኙነቶች እና ጥሬ API ቁልፎች)፣ `GET /api/db-backups/export` (የSQLite ፋይል) እና
+`GET /api/db-backups/exportAll` (ሙሉው ማኅደር) `requireOperatorCredential()`ን ይጠራሉ
+(`src/lib/api/operatorCredential.ts`)። ይህ የዳሽቦርድ ክፍለ-ጊዜን፣ የአካባቢ CLI ርዕሰ-ጉዳይን ወይም
+መግባት የተሰናከለበትን ኢንስታንስ ይቀበላል፤ እንዲሁም ማንኛውም ወሰን ላላቸው API ቁልፎች (`manage`ን
+እና `admin`ን ጨምሮ) እና ለ`oma_` የመዳረሻ ቶከኖች `403` ይመልሳል። የማመሳሰያ ቶከን መስጠት (`POST /api/sync/tokens`)
+ተመሳሳዩን አጋዥ ከታመነው የloopback ውስጣዊ-አገልግሎት ቶከን ጋር ይጠቀማል።
 
-### Tier 3 — MANAGEMENT (ነባሪ)
+#### Credential exports and restores are operator-only
 
-ሁሉም ሌሎች management routes። `requireLogin=false` እንዲሆን
-ካልተዋቀረ በስተቀር Auth ያስፈልጋል። CLI tokens እነዚህን routes ማረጋገጥ ይችላሉ (loopback + ትክክለኛ HMAC)።
+The tier above only decides whether _some_ credential is required. The routes that download
+stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
+provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
+`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
+(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
+an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
+and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
+`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
+(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
+replace the live database or the whole settings/connections/API-key set, so a machine credential
+cannot trigger them either. Listing, creating, retention and cleanup of backups
+(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
+issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
+internal-service token.
+
+### የአዲስ-ጭነት bootstrap ለloopback ብቻ ነው — በእውነተኛ አቻ እንጂ በ`Host` አይደለም
+
+ምንም የአስተዳደር የይለፍ ቃል ካልተዋቀረ (እና `INITIAL_PASSWORD` ከሌለ)፣ በ
+`src/shared/utils/apiAuth.ts` ውስጥ ያለው `isAuthRequired()` ስም-አልባውን bootstrap **ለloopback አቻዎች ብቻ** ክፍት ያደርገዋል።
+Loopback የሚወሰነው ከታመኑ የአቻ ምልክቶች ሲሆን፣ ቅደም ተከተላቸውም፦ በቶከን ማህተም የተደረገበት እውነተኛ TCP አቻ
+(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`፣ ፖሊሲው የሚያየው)፣ የፓይፕላይኑ የራሱ
+`AUTHZ_HEADER_PEER_LOCALITY` ውሳኔ (የመስመር ተቆጣጣሪዎች የሚያዩት፣ `OMNIROUTE_PEER_STAMP_TOKEN`
+እስከተዋቀረ ድረስ ብቻ የሚታመን)፣ ወይም ለቀጥታ ጠሪዎች እውነተኛ የሶኬት አቻ ነው። `Host` /
+`nextUrl.hostname` ፈጽሞ አይመረመሩም፤ እንዲሁም የመጀመሪያው-የይለፍ ቃል መጻፍ
+(`POST /api/settings/require-login`) ለሁሉም የአውታረ መረብ አቻዎች ክፍት ከመሆን ይልቅ በተመሳሳዩ
+ገደብ ሥር ነው (GHSA-7pq4-8pvv-rx7r)። `managementPolicy` የራሱን `peerContext` ውሳኔ
+በግልጽ ወደ ታች ያስተላልፋል፤ ስለዚህ የORIGINAL (ከማስወገድ በፊት) ጥያቄ ራስጌዎች በፍጹም አይወስኑትም።
+
+### ደረጃ 3 — MANAGEMENT (ነባሪ)
+
+ሁሉም ሌሎች የአስተዳደር መስመሮች። `requireLogin=false` ካልተዋቀረ በስተቀር
+ማረጋገጫ ያስፈልጋል። የCLI ቶከኖች እነዚህን መስመሮች ማረጋገጥ ይችላሉ (loopback + ትክክለኛ HMAC)።
 
 ## የግምገማ ቅደም ተከተል
 

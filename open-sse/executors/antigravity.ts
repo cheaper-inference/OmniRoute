@@ -1,4 +1,5 @@
 import crypto, { randomUUID } from "crypto";
+import { isAntigravityPreResponseTimeout } from "../services/antigravityTimeout.ts";
 import {
   BaseExecutor,
   mergeUpstreamExtraHeaders,
@@ -13,10 +14,7 @@ import {
   getAntigravityOAuthUserAgent,
 } from "../services/antigravityHeaders.ts";
 import { classify429, decide429, type Decision } from "../services/antigravity429Engine.ts";
-import {
-  parseRetryFromErrorText,
-  type RetryHintProvenance,
-} from "../services/accountFallback.ts";
+import { parseRetryFromErrorText, type RetryHintProvenance } from "../services/accountFallback.ts";
 import { parseDetailedRetryHintFromJsonBody } from "../services/retryAfterJson.ts";
 import {
   shouldRetryWithCredits,
@@ -27,11 +25,9 @@ import {
 import { persistCreditBalance, getAllPersistedCreditBalances } from "@/lib/db/creditBalance";
 import { setConnectionRateLimitUntil } from "@/lib/db/providers";
 import { markAntigravityModelQuotaExhausted } from "../services/antigravityFamilyCooldown.ts";
-import { getMitmAlias } from "@/lib/db/models";
-import {
-  MAX_ANTIGRAVITY_OUTPUT_TOKENS,
-  resolveAntigravityOutputCap,
-} from "./antigravityOutputCap.ts";
+import { cleanModelName } from "./antigravity/modelResolution.ts";
+export { cleanModelName } from "./antigravity/modelResolution.ts";
+import { resolveAntigravityOutputCap } from "./antigravityOutputCap.ts";
 export { MAX_ANTIGRAVITY_OUTPUT_TOKENS } from "./antigravityOutputCap.ts";
 import {
   ensureAntigravityProjectAssigned,
@@ -39,15 +35,14 @@ import {
 } from "../services/antigravityProjectBootstrap.ts";
 import { persistDiscoveredAntigravityProjectId } from "../services/antigravityProjectPersist.ts";
 import { markAntigravityMissingCloudCodeProject } from "../services/antigravityProjectPersistence.ts";
-import {
-  resolveAntigravityModelId,
-  getAntigravityModelFallbacks,
-} from "../config/antigravityModelAliases.ts";
+import { getAntigravityModelFallbacks } from "../config/antigravityModelAliases.ts";
 import {
   shouldStripCloudCodeThinking,
   stripCloudCodeThinkingConfig,
 } from "../services/cloudCodeThinking.ts";
 import { buildGeminiTools } from "../translator/helpers/geminiToolsSanitizer.ts";
+import { sanitizeGeminiPartFunctionResponse } from "../translator/request/openai-to-gemini/helpers.ts";
+import { logger } from "../utils/logger.ts";
 import {
   type AntigravityCollectedStream,
   processAntigravitySSEText,
@@ -84,6 +79,10 @@ import {
   getAntigravityEnvelopeUserAgent,
   getAntigravitySessionId,
 } from "../services/antigravityIdentity.ts";
+import {
+  isGeminiTrailingModelTurnRejectingModel,
+  stripTrailingGeminiModelTurns,
+} from "../translator/helpers/geminiTrailingModelTurn.ts";
 
 const MAX_RETRY_AFTER_MS = 60_000;
 const LONG_RETRY_THRESHOLD_MS = 60_000;
@@ -262,50 +261,6 @@ export function markConnectionQuotaExhausted(
  * tests (the markdown / candidate-parts extraction branches). @internal
  */
 
-/**
- * Strip provider prefixes (e.g. "antigravity/model" → "model").
- * Ensures the model name sent to the upstream API never contains a routing prefix.
- *
- * `modelIdOverride` (#3786): when the per-request Pro-family fallback chain forces a
- * specific upstream id, pass it here. It is an ALREADY-RESOLVED upstream id, so it bypasses
- * the MITM/static alias resolution and is used verbatim (after prefix stripping).
- */
-async function cleanModelName(model: string, modelIdOverride?: string): Promise<string> {
-  if (modelIdOverride) {
-    return modelIdOverride.includes("/") ? modelIdOverride.split("/").pop()! : modelIdOverride;
-  }
-  if (!model) return model;
-  const stripped = model.includes("/") ? model.split("/").pop()! : model;
-  let clean = stripped;
-
-  // 1. Check dynamic MITM aliases first (authoritative after first sync).
-  //    Built during model sync — contains ONLY currently-available models.
-  //    Obsolete/removed models are automatically excluded.
-  try {
-    const mitmAliases = await getMitmAlias("antigravity");
-    if (mitmAliases && typeof mitmAliases === "object") {
-      const aliases = mitmAliases as Record<string, unknown>;
-      const raw = aliases[stripped];
-      // Only honor string aliases; corrupted/non-string DB values fall through
-      // to the static alias resolution below (never return undefined here).
-      if (typeof raw === "string" && raw) {
-        // Strip the "antigravity/" prefix if present; use the raw model ID otherwise.
-        const PREFIX = "antigravity/";
-        clean = raw.startsWith(PREFIX) ? raw.slice(PREFIX.length) : raw;
-      }
-    }
-  } catch {
-    // DB not available (build phase, transient error) — fall through to static aliases
-  }
-
-  // 2. Fall back to static aliases if MITM didn't resolve
-  if (clean === stripped) {
-    clean = resolveAntigravityModelId(clean);
-  }
-
-  return clean;
-}
-
 function applyAntigravityGenerationDefaults(
   request: Record<string, unknown>,
   modelId?: string | null
@@ -331,7 +286,8 @@ function applyAntigravityGenerationDefaults(
   if (
     Number.isFinite(thinkingBudget) &&
     thinkingBudget > 0 &&
-    (!Number.isFinite(maxOutputTokens) || maxOutputTokens <= thinkingBudget)
+    Number.isFinite(maxOutputTokens) &&
+    maxOutputTokens <= thinkingBudget
   ) {
     generationConfig.maxOutputTokens = Math.floor(thinkingBudget) + 1;
   }
@@ -374,12 +330,38 @@ const COMPETITIVE_AGENT_PROMPT_PATTERNS: RegExp[] = [
 ];
 
 /**
- * Strip competing-agent identity sentences from systemInstruction.parts.
+ * Oh My Pi (OMP) coding-harness markers reported to draw a false 429
+ * RESOURCE_EXHAUSTED from Antigravity on large agent prompts even with quota
+ * left. These are compatibility rewrites, not proof of intentional upstream
+ * blocking: they only neutralize known harness tags/branding, and only inside
+ * systemInstruction text. Order matters ("Oh My Pi coding harness" before
+ * "Oh My Pi").
+ */
+const HARNESS_MARKER_REWRITES: Array<{ from: RegExp; to: string }> = [
+  { from: /<(\/?)system[-_]conventions>/gi, to: "<$1conventions>" },
+  { from: /<(\/?)system[-_]directive>/gi, to: "<$1instructions>" },
+  { from: /<(\/?)critical>/gi, to: "<$1important>" },
+  { from: /Oh My Pi coding harness/gi, to: "AI coding assistant" },
+  { from: /Oh My Pi/gi, to: "coding assistant" },
+  { from: /omp Live/gi, to: "coding assistant live" },
+];
+
+/** Harness telemetry keys stripped from the envelope and from `labels`. */
+const ANTIGRAVITY_HARNESS_TELEMETRY_KEYS = ["used_claude", "used_claude_conservative"] as const;
+
+const promptNormalizeLog = logger("AG_PROMPT_NORMALIZE");
+
+/**
+ * Normalize systemInstruction.parts text before Antigravity dispatch: strip
+ * competing-agent identity sentences (#10420) and rewrite OMP harness markers.
+ * Only string `text` parts are touched; every other part and field is kept.
  * Returns the original reference when nothing matched (no allocation).
  */
-export function stripCompetitiveAgentPrompts(systemInstruction: unknown): unknown {
+export function normalizeAntigravitySystemInstruction(systemInstruction: unknown): unknown {
   const record = asRecord(systemInstruction);
-  const parts = Array.isArray(record?.parts) ? (record.parts as Array<Record<string, unknown>>) : [];
+  const parts = Array.isArray(record?.parts)
+    ? (record.parts as Array<Record<string, unknown>>)
+    : [];
   if (parts.length === 0) return systemInstruction;
 
   let changed = false;
@@ -387,16 +369,71 @@ export function stripCompetitiveAgentPrompts(systemInstruction: unknown): unknow
     if (typeof part.text !== "string" || part.text.length === 0) return part;
     let text = part.text;
     for (const pattern of COMPETITIVE_AGENT_PROMPT_PATTERNS) {
-      const stripped = text.replace(pattern, "").replace(/\n{3,}/g, "\n\n").trimStart();
+      const stripped = text
+        .replace(pattern, "")
+        .replace(/\n{3,}/g, "\n\n")
+        .trimStart();
       if (stripped !== text) {
         changed = true;
         text = stripped;
       }
     }
+    let rewrites = 0;
+    for (const { from, to } of HARNESS_MARKER_REWRITES) {
+      const rewritten = text.replace(from, to);
+      if (rewritten !== text) {
+        rewrites++;
+        text = rewritten;
+      }
+    }
+    if (rewrites > 0) {
+      changed = true;
+      promptNormalizeLog.debug("Rewrote harness markers in systemInstruction", { rewrites });
+    }
     return text === part.text ? part : { ...part, text };
   });
 
   return changed ? { ...record, parts: newParts } : systemInstruction;
+}
+
+/** Legacy name (#10420) kept for existing importers. */
+export const stripCompetitiveAgentPrompts = normalizeAntigravitySystemInstruction;
+
+/**
+ * Drop OMP harness telemetry keys (`used_claude`, `used_claude_conservative`)
+ * from a record and from its `labels` map. Every other key and label is kept.
+ * Returns the original reference when nothing was removed.
+ */
+function stripAntigravityHarnessTelemetry<T>(value: T): T {
+  const record = asRecord(value);
+  if (!record) return value;
+
+  let changed = false;
+  const cleaned: Record<string, unknown> = { ...record };
+  for (const key of ANTIGRAVITY_HARNESS_TELEMETRY_KEYS) {
+    if (Object.prototype.hasOwnProperty.call(cleaned, key)) {
+      delete cleaned[key];
+      changed = true;
+    }
+  }
+
+  const labels = asRecord(cleaned.labels);
+  if (labels) {
+    const cleanedLabels: Record<string, unknown> = { ...labels };
+    let labelsChanged = false;
+    for (const key of ANTIGRAVITY_HARNESS_TELEMETRY_KEYS) {
+      if (Object.prototype.hasOwnProperty.call(cleanedLabels, key)) {
+        delete cleanedLabels[key];
+        labelsChanged = true;
+      }
+    }
+    if (labelsChanged) {
+      cleaned.labels = cleanedLabels;
+      changed = true;
+    }
+  }
+
+  return changed ? (cleaned as T) : value;
 }
 
 function getAntigravitySafetySettings(safetySettings: unknown): unknown[] | undefined {
@@ -406,6 +443,20 @@ function getAntigravitySafetySettings(safetySettings: unknown): unknown[] | unde
     const category = asRecord(setting)?.category;
     return typeof category !== "string" || !ANTIGRAVITY_UNSUPPORTED_SAFETY_CATEGORIES.has(category);
   });
+}
+
+/**
+ * Gemini branch (no field whitelist): apply the same systemInstruction
+ * normalization the Claude branch gets, leaving every other field untouched.
+ */
+function normalizeAntigravityGeminiSystemInstruction<T extends Record<string, unknown>>(
+  request: T
+): T {
+  if (!asRecord(request.systemInstruction)) return request;
+  const systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+  return systemInstruction === request.systemInstruction
+    ? request
+    : { ...request, systemInstruction };
 }
 
 function sanitizeAntigravityGeminiRequest(
@@ -421,7 +472,7 @@ function sanitizeAntigravityGeminiRequest(
     // #10420: strip competing-agent identity sentences (e.g. "You are a
     // Claude agent, built on Anthropic's Claude Agent SDK.") that Antigravity
     // flags and answers with 429 RESOURCE_EXHAUSTED.
-    clean.systemInstruction = stripCompetitiveAgentPrompts(request.systemInstruction);
+    clean.systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
   }
 
   clean.generationConfig = asRecord(request.generationConfig)
@@ -477,12 +528,7 @@ function stripTrailingAntigravityAssistantTurn(
     return request;
   }
 
-  while (
-    contents.length > 1 &&
-    (contents[contents.length - 1] as AntigravityContent)?.role === "model"
-  ) {
-    contents.pop();
-  }
+  stripTrailingGeminiModelTurns(contents);
 
   return request;
 }
@@ -494,17 +540,14 @@ function stripTrailingAntigravityAssistantTurn(
  * of the rejection evidence for #10104.
  */
 function isAntigravityGeminiChatModel(upstreamModel: string): boolean {
-  const normalizedModel = upstreamModel.toLowerCase();
-  if (/(?:^|-)image(?:-|$)/.test(normalizedModel)) {
-    return false;
-  }
-  return /^gemini-(?:3(?:\.\d+)?(?:-[a-z0-9-]+)?|pro-agent)$/.test(normalizedModel);
+  return isGeminiTrailingModelTurnRejectingModel(upstreamModel);
 }
 
 // Test-only export so the unit suite can exercise the strip logic directly.
 export const __test_stripTrailingAntigravityAssistantTurn = stripTrailingAntigravityAssistantTurn;
 
 type AntigravityCreditsRetryState = { attempted: boolean };
+type AntigravityPhysicalSendCounter = { value: number };
 
 /** Base per-url-index attempt context, before the request has been sent. */
 type AntigravityAttemptContext = {
@@ -524,6 +567,8 @@ type AntigravityAttemptContext = {
   urlIndex: number;
   retryAttemptsByUrl: Record<number, number>;
   fallbackCount: number;
+  physicalSendCounter: AntigravityPhysicalSendCounter;
+  correlationId: string | null;
 };
 
 /** Context threaded through the 429/503 handling helpers — adds the sent response. */
@@ -559,8 +604,7 @@ export class AntigravityExecutor extends BaseExecutor {
       (status === HTTP_STATUS.RATE_LIMITED ||
         status === HTTP_STATUS.NOT_FOUND ||
         status === HTTP_STATUS.BAD_GATEWAY ||
-        status === HTTP_STATUS.SERVICE_UNAVAILABLE ||
-        status === HTTP_STATUS.GATEWAY_TIMEOUT) &&
+        status === HTTP_STATUS.SERVICE_UNAVAILABLE) &&
       urlIndex + 1 < this.getFallbackCount()
     );
   }
@@ -601,6 +645,10 @@ export class AntigravityExecutor extends BaseExecutor {
     const normalizeProjectId = (value: unknown): string | null => {
       if (typeof value !== "string") return null;
       const trimmedValue = value.trim();
+      // A row poisoned with the manual-project sentinel must behave as "no project"
+      // so it takes the typed 422 GCP_PROJECT_REQUIRED path (and gets flagged
+      // missing_project_id) instead of sending `projects/__REQUIRES_GCP_PROJECT__`.
+      if (trimmedValue === ANTIGRAVITY_REQUIRES_MANUAL_PROJECT) return null;
       return trimmedValue ? trimmedValue : null;
     };
     const bodyRecord = asRecord(body) ?? {};
@@ -715,7 +763,12 @@ export class AntigravityExecutor extends BaseExecutor {
       return resp as unknown as never;
     }
 
-    const upstreamModel = await cleanModelName(model, modelIdOverride);
+    const upstreamModel = await cleanModelName(
+      model,
+      modelIdOverride,
+      this.provider,
+      credentials?.connectionId
+    );
     const isClaude = upstreamModel.toLowerCase().includes("claude");
     // #10104: newer Gemini endpoints reject a request ending on a `model` turn with
     // HTTP 400 "Requests ending with a model turn are not supported" — the same
@@ -747,19 +800,21 @@ export class AntigravityExecutor extends BaseExecutor {
         const hasFunctionCall = c.parts?.some((p) => p.functionCall) || false;
 
         const parts =
-          c.parts?.filter((p) => {
-            if (typeof p.text === "string" && p.text === "") return false;
-            if (p.functionCall && !p.functionCall.name) return false;
+          c.parts
+            ?.filter((p) => {
+              if (typeof p.text === "string" && p.text === "") return false;
+              if (p.functionCall && !p.functionCall.name) return false;
 
-            // Only strip if it's NOT our bypass sentinel.
-            // Antigravity models (like Gemini) need this sentinel to bypass 400 errors.
-            return (
-              !p.thought &&
-              (hasFunctionCall ||
-                !p.thoughtSignature ||
-                p.thoughtSignature === "skip_thought_signature_validator")
-            );
-          }) || [];
+              // Only strip if it's NOT our bypass sentinel.
+              // Antigravity models (like Gemini) need this sentinel to bypass 400 errors.
+              return (
+                !p.thought &&
+                (hasFunctionCall ||
+                  !p.thoughtSignature ||
+                  p.thoughtSignature === "skip_thought_signature_validator")
+              );
+            })
+            .map(sanitizeGeminiPartFunctionResponse) || [];
         return { ...c, role, parts };
       }) || [];
 
@@ -796,7 +851,9 @@ export class AntigravityExecutor extends BaseExecutor {
           sanitizeAntigravityGeminiRequest(rawTransformedRequest)
         )
       : isGemini
-        ? stripTrailingAntigravityAssistantTurn(rawTransformedRequest)
+        ? stripTrailingAntigravityAssistantTurn(
+            normalizeAntigravityGeminiSystemInstruction(rawTransformedRequest)
+          )
         : rawTransformedRequest;
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
@@ -824,6 +881,7 @@ export class AntigravityExecutor extends BaseExecutor {
       enable_thinking: _enableThinking,
       thinking_budget: _thinkingBudget,
       enabledCreditTypes: _enabledCreditTypes,
+      stream: _streamField,
       ...passthroughFields
     } = normalizedBody;
 
@@ -835,8 +893,11 @@ export class AntigravityExecutor extends BaseExecutor {
       model: upstreamModel,
       userAgent: getAntigravityEnvelopeUserAgent(credentials),
       requestType,
-      ...passthroughFields,
+      ...stripAntigravityHarnessTelemetry(passthroughFields),
     };
+    // Harness telemetry is dropped from the inner request too (the Claude branch's
+    // whitelist already omits it; the Gemini/other branches pass the request through).
+    envelope.request = stripAntigravityHarnessTelemetry(envelope.request);
 
     return envelope;
   }
@@ -893,6 +954,7 @@ export class AntigravityExecutor extends BaseExecutor {
       // a proactive discovery here prevents 422 errors on the next request when the
       // per-token memoization cache is invalidated by the new access token.
       let projectId = credentials.projectId?.trim() || "";
+      if (projectId === ANTIGRAVITY_REQUIRES_MANUAL_PROJECT) projectId = "";
       if (!projectId && newAccessToken) {
         try {
           const discovered = await ensureAntigravityProjectAssigned(
@@ -901,7 +963,7 @@ export class AntigravityExecutor extends BaseExecutor {
             getAntigravityClientProfile(credentials),
             AbortSignal.timeout(8_000)
           );
-          if (discovered) {
+          if (discovered && discovered !== ANTIGRAVITY_REQUIRES_MANUAL_PROJECT) {
             projectId = discovered;
             await persistDiscoveredAntigravityProjectId(
               credentials.connectionId,
@@ -1166,16 +1228,22 @@ export class AntigravityExecutor extends BaseExecutor {
    * exactly the same single call as before (zero extra upstream requests).
    */
   async execute(input: ExecuteInput) {
+    const physicalSendCounter: AntigravityPhysicalSendCounter = { value: 0 };
     await resolveAntigravityClientVersion(getAntigravityClientProfile(input.credentials));
 
     // Look up the chain by the NORMALLY-resolved upstream id (honours MITM/static aliases).
     // If a MITM alias remapped the id away from a known Pro tier, no chain applies → fast path.
-    const resolvedUpstreamId = await cleanModelName(input.model);
+    const resolvedUpstreamId = await cleanModelName(
+      input.model,
+      undefined,
+      this.provider,
+      input.credentials.connectionId
+    );
     const chain = getAntigravityModelFallbacks(resolvedUpstreamId);
 
     if (chain.length <= 1) {
       // No fallback chain (flash, claude, plain pro, unknown) → single attempt, unchanged.
-      return this.executeOnce(input);
+      return this.executeOnce(input, undefined, physicalSendCounter);
     }
 
     let firstResult: Awaited<ReturnType<AntigravityExecutor["executeOnce"]>> | null = null;
@@ -1183,8 +1251,9 @@ export class AntigravityExecutor extends BaseExecutor {
       const candidate = chain[i];
       let result: Awaited<ReturnType<AntigravityExecutor["executeOnce"]>>;
       try {
-        result = await this.executeOnce(input, candidate);
+        result = await this.executeOnce(input, candidate, physicalSendCounter);
       } catch (error) {
+        if (isAntigravityPreResponseTimeout(error)) throw error;
         const outcome = handleAntigravityFallbackChainError(
           input,
           error,
@@ -1225,7 +1294,7 @@ export class AntigravityExecutor extends BaseExecutor {
     }
 
     // Unreachable (loop always returns), but keeps the type checker happy.
-    return firstResult ?? this.executeOnce(input);
+    return firstResult ?? this.executeOnce(input, undefined, physicalSendCounter);
   }
 
   /**
@@ -1236,8 +1305,18 @@ export class AntigravityExecutor extends BaseExecutor {
    * status of the first response so `execute()` can decide whether to fall through. @internal
    */
   private async executeOnce(
-    { model, body, stream, credentials, signal, log, upstreamExtraHeaders }: ExecuteInput,
-    modelIdOverride?: string
+    {
+      model,
+      body,
+      stream,
+      credentials,
+      signal,
+      log,
+      upstreamExtraHeaders,
+      correlationId = null,
+    }: ExecuteInput,
+    modelIdOverride?: string,
+    physicalSendCounter: AntigravityPhysicalSendCounter = { value: 0 }
   ) {
     await resolveAntigravityClientVersion(getAntigravityClientProfile(credentials));
     const fallbackCount = this.getFallbackCount();
@@ -1304,6 +1383,8 @@ export class AntigravityExecutor extends BaseExecutor {
           urlIndex,
           retryAttemptsByUrl,
           fallbackCount,
+          physicalSendCounter,
+          correlationId,
         });
 
         if (outcome.action === "return") return outcome.result;
@@ -1314,12 +1395,28 @@ export class AntigravityExecutor extends BaseExecutor {
         if (signal?.aborted || isAbortError(error)) {
           throw signal?.reason ?? error;
         }
+        // This deadline has already consumed its full header budget. Never
+        // spend it again on another host within the SAME provider account.
+        if (isAntigravityPreResponseTimeout(error)) throw error;
         lastError = error;
-        l.error(
+        // A fetch failure on a URL that still has a fallback is a retry, not a
+        // failed request: the loop continues and the client gets the next
+        // URL's answer. Logging it at error floods the error stream with
+        // requests that succeeded. Only the last URL, which is rethrown below,
+        // is a real failure. Node hides the socket reason (ECONNRESET and
+        // friends) on error.cause, so surface that code instead of the bare
+        // "fetch failed".
+        const cause =
+          error instanceof Error && error.cause instanceof Error
+            ? (error.cause as NodeJS.ErrnoException).code || error.cause.message
+            : "";
+        const detail = `${error instanceof Error ? error.message : String(error)}${cause ? ` (cause: ${cause})` : ""}`;
+        const hasFallback = urlIndex + 1 < this.getFallbackCount();
+        l[hasFallback ? "warn" : "error"](
           "TELEMETRY",
-          `[Antigravity] Network/Fetch Error - URL: ${url}, Model: ${model}, Error: ${error instanceof Error ? error.message : String(error)}`
+          `[Antigravity] Network/Fetch Error - URL: ${url}, Model: ${model}, Error: ${detail}`
         );
-        if (urlIndex + 1 < fallbackCount) {
+        if (hasFallback) {
           l.debug("RETRY", `Error on ${url}, trying fallback ${urlIndex + 1}`);
           continue;
         }
@@ -1352,7 +1449,8 @@ export class AntigravityExecutor extends BaseExecutor {
       accountId,
       urlIndex,
       retryAttemptsByUrl,
-      fallbackCount,
+      physicalSendCounter,
+      correlationId,
     } = ctx;
 
     const { response, finalHeaders } = await sendAntigravityRequest(
@@ -1365,7 +1463,9 @@ export class AntigravityExecutor extends BaseExecutor {
       stream,
       signal,
       log,
-      retryAttemptsByUrl[urlIndex]
+      retryAttemptsByUrl[urlIndex],
+      physicalSendCounter,
+      correlationId
     );
 
     let retryMs: number | null = null;
@@ -1616,7 +1716,9 @@ export class AntigravityExecutor extends BaseExecutor {
           signal,
           log,
           accountId,
-          updateAntigravityRemainingCredits
+          updateAntigravityRemainingCredits,
+          ctx.physicalSendCounter,
+          ctx.correlationId
         );
         if (creditsResult) return { kind: "return", result: creditsResult };
         if (retryMs) markConnectionQuotaExhausted(accountId, retryMs, ctx.model);

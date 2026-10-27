@@ -2,7 +2,23 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Card, Button, Input, Badge, EmptyState, Spinner, ConfirmModal } from "@/shared/components";
+import { Alert } from "@omniroute/ui-kit/alert";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
+import Badge from "@/shared/components/Badge";
+import Button from "@/shared/components/Button";
+import Card from "@/shared/components/Card";
+import EmptyState from "@/shared/components/EmptyState";
+import Input from "@/shared/components/Input";
+import { Spinner } from "@/shared/components/Loading";
+import { ConfirmModal } from "@/shared/components/Modal";
 
 interface DiscoveryResult {
   id: number;
@@ -171,7 +187,8 @@ function useDiscovery() {
   const t = useTranslations("discovery");
   const { results, loading, feedback, setFeedback, load } = useDiscoveryResults(t);
   const actions = useDiscoveryActions(t, load, setFeedback);
-  return { t, results, loading, feedback, ...actions };
+  const tc = useTranslations("common");
+  return { t, tc, results, loading, feedback, setFeedback, ...actions };
 }
 
 function DiscoveryScanForm({
@@ -191,11 +208,9 @@ function DiscoveryScanForm({
     <Card className="p-4">
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <div className="flex-1">
-          <label className="mb-1 block text-sm font-medium" htmlFor="discovery-scan-target">
-            {t("scanLabel")}
-          </label>
           <Input
             id="discovery-scan-target"
+            label={t("scanLabel")}
             value={value}
             placeholder={t("scanPlaceholder")}
             onChange={(e) => onChange(e.target.value)}
@@ -208,12 +223,12 @@ function DiscoveryScanForm({
           {scanning ? t("scanning") : t("scan")}
         </Button>
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">{t("localOnlyNote")}</p>
+      <p className="mt-2 text-xs text-text-muted">{t("localOnlyNote")}</p>
     </Card>
   );
 }
 
-function DiscoveryResultCard({
+function DiscoveryResultRow({
   t,
   row,
   busy,
@@ -227,41 +242,41 @@ function DiscoveryResultCard({
   onDelete: () => void;
 }) {
   return (
-    <Card className="p-4">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="space-y-1">
-          <div className="flex items-center gap-2">
-            <span className="font-medium">{row.providerId}</span>
-            <Badge variant={STATUS_VARIANT[row.status] ?? "default"}>{row.status}</Badge>
-            <Badge variant={RISK_VARIANT[row.riskLevel] ?? "default"}>
-              {t("risk")}: {row.riskLevel}
-            </Badge>
+    <TableRow>
+      <TableCell className="font-medium text-text-main">{row.providerId}</TableCell>
+      <TableCell>
+        <Badge variant={STATUS_VARIANT[row.status] ?? "default"}>{row.status}</Badge>
+      </TableCell>
+      <TableCell>
+        <Badge variant={RISK_VARIANT[row.riskLevel] ?? "default"}>
+          {t("risk")}: {row.riskLevel}
+        </Badge>
+      </TableCell>
+      <TableCell className="text-xs text-text-muted">
+        {t("method")}: {row.method} · {t("auth")}: {row.authType} · {t("feasibility")}:{" "}
+        {row.feasibility}/5
+      </TableCell>
+      <TableCell className="max-w-[24rem] text-xs text-text-muted">
+        {row.endpoint && <div className="break-all">{row.endpoint}</div>}
+        {row.models && row.models.length > 0 && (
+          <div>
+            {t("models")}: {row.models.join(", ")}
           </div>
-          <div className="text-xs text-muted-foreground">
-            {t("method")}: {row.method} · {t("auth")}: {row.authType} · {t("feasibility")}:{" "}
-            {row.feasibility}/5
-          </div>
-          {row.endpoint && (
-            <div className="text-xs text-muted-foreground break-all">{row.endpoint}</div>
-          )}
-          {row.models && row.models.length > 0 && (
-            <div className="text-xs text-muted-foreground">
-              {t("models")}: {row.models.join(", ")}
-            </div>
-          )}
-        </div>
-        <div className="flex gap-2">
+        )}
+      </TableCell>
+      <TableCell>
+        <div className="flex justify-end gap-2">
           {row.status !== "verified" && (
-            <Button variant="secondary" onClick={onVerify} disabled={busy}>
+            <Button variant="secondary" size="sm" onClick={onVerify} disabled={busy}>
               {t("verify")}
             </Button>
           )}
-          <Button variant="danger" onClick={onDelete} disabled={busy}>
+          <Button variant="danger" size="sm" onClick={onDelete} disabled={busy}>
             {t("delete")}
           </Button>
         </div>
-      </div>
-    </Card>
+      </TableCell>
+    </TableRow>
   );
 }
 
@@ -270,10 +285,7 @@ export function DiscoveryPageClient() {
 
   return (
     <div className="space-y-6">
-      <header className="space-y-1">
-        <h1 className="text-2xl font-semibold">{d.t("title")}</h1>
-        <p className="text-sm text-muted-foreground">{d.t("subtitle")}</p>
-      </header>
+      <PageHeader compact title={d.t("title")} description={d.t("subtitle")} />
 
       <DiscoveryScanForm
         t={d.t}
@@ -284,16 +296,13 @@ export function DiscoveryPageClient() {
       />
 
       {d.feedback && (
-        <div
+        <Alert
           role="status"
-          className={
-            d.feedback.type === "error"
-              ? "rounded-md border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-700"
-              : "rounded-md border border-green-300 bg-green-50 px-3 py-2 text-sm text-green-700"
-          }
-        >
-          {d.feedback.message}
-        </div>
+          variant={d.feedback.type === "error" ? "critical" : "success"}
+          description={d.feedback.message}
+          dismissLabel={d.tc("dismissNotification")}
+          onDismiss={() => d.setFeedback(null)}
+        />
       )}
 
       {d.loading ? (
@@ -303,19 +312,30 @@ export function DiscoveryPageClient() {
       ) : d.results.length === 0 ? (
         <EmptyState title={d.t("emptyTitle")} description={d.t("emptyDescription")} />
       ) : (
-        <ul className="space-y-3">
-          {d.results.map((row) => (
-            <li key={row.id}>
-              <DiscoveryResultCard
+        <Table className="text-sm" scrollbarLabel={d.t("title")}>
+          <TableHeader>
+            <TableRow>
+              <TableHead>{d.t("provider")}</TableHead>
+              <TableHead>{d.t("status")}</TableHead>
+              <TableHead>{d.t("risk")}</TableHead>
+              <TableHead>{d.t("method")}</TableHead>
+              <TableHead>{d.t("endpoint")}</TableHead>
+              <TableHead className="text-right">{d.t("actions")}</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {d.results.map((row) => (
+              <DiscoveryResultRow
+                key={row.id}
                 t={d.t}
                 row={row}
                 busy={d.busyId === row.id}
                 onVerify={() => void d.verify(row)}
                 onDelete={() => d.setDeleteTarget(row)}
               />
-            </li>
-          ))}
-        </ul>
+            ))}
+          </TableBody>
+        </Table>
       )}
 
       <ConfirmModal

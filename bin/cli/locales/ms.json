@@ -123,7 +123,9 @@
       "maxCostOpt": "Kos maksimum sehari (USD)",
       "allowedModelsOpt": "Senarai model yang dibenarkan, dipisahkan dengan koma",
       "nothingToSet": "Tiada medan dasar diberikan. Gunakan --rate-limit, --max-cost, atau --allowed-models.",
-      "updated": "Dasar telah dikemas kini."
+      "updated": "Dasar telah dikemas kini.",
+      "modelAccessModeOpt": "Mod akses model (all | restricted)",
+      "unrestrictedOpt": "Benarkan semua model (--model-access-mode all)"
     },
     "expiration": {
       "title": "Tamat Tempoh Kunci",
@@ -254,6 +256,7 @@
     "log": "Tunjukkan log pelayan sebaris",
     "no_recovery": "Lumpuhkan mula semula automatik apabila ranap (mod penyahpepijatan)",
     "max_restarts": "Bilangan maksimum mula semula akibat ranap dalam tempoh 30s sebelum berhenti mencuba (lalai: 2)",
+    "headless": "Jalankan enjin proksi sahaja: papan pemuka dilumpuhkan (404), subsistem pilihan dilangkau (menetapkan OMNIROUTE_HEADLESS=1)",
     "tray": "Mulakan dalam dulang sistem (desktop sahaja, ikut serta)",
     "no_tray": "Lumpuhkan ikon dulang sistem",
     "ready_timeout": "Tamat masa prob kesediaan dalam ms (juga OMNIROUTE_READY_TIMEOUT_MS, lalai 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Segerakkan konfigurasi antara tika OmniRoute",
     "push": {
-      "description": "Tolak konfigurasi ke awan atau tika jauh",
-      "target": "Sasaran (cloud atau context:name)",
-      "bundle": "Bahagian pakej untuk disegerakkan",
-      "dryRun": "Pratonton tanpa menggunakan perubahan"
+      "description": "Tolak konfigurasi ke awan atau tika jauh"
     },
     "pull": {
-      "description": "Tarik konfigurasi daripada awan atau jauh",
-      "source": "Sumber (awan atau context:name)",
-      "merge": "Gabungkan dengan konfigurasi sedia ada",
-      "replace": "Gantikan konfigurasi sedia ada",
-      "dryRun": "Pratonton tanpa menggunakan perubahan"
-    },
-    "diff": {
-      "source": "Konteks sumber",
-      "target": "Konteks sasaran"
+      "description": "Tarik konfigurasi daripada awan atau jauh"
     },
     "bundle": {
       "description": "Eksport konfigurasi sebagai fail pakej",
-      "include": "Bahagian untuk disertakan (dipisahkan dengan koma)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Import fail pakej",
       "dryRun": "Sahkan tanpa menggunakan perubahan"
-    },
-    "initialize": {
-      "fromCloud": "Mulakan daripada sandaran awan"
     },
     "tokens": {
       "description": "Urus token penyegerakan",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Langkau pengesahan"
       }
-    },
-    "resolve": {
-      "description": "Selesaikan konflik penyegerakan secara interaktif"
     }
   },
   "config": {

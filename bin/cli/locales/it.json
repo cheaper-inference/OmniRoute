@@ -123,7 +123,9 @@
       "maxCostOpt": "Costo massimo giornaliero (USD)",
       "allowedModelsOpt": "Elenco separato da virgole dei modelli consentiti",
       "nothingToSet": "Nessun campo dei criteri specificato. Usa --rate-limit, --max-cost o --allowed-models.",
-      "updated": "Criteri aggiornati."
+      "updated": "Criteri aggiornati.",
+      "modelAccessModeOpt": "Modalità di accesso ai modelli (all | restricted)",
+      "unrestrictedOpt": "Consenti tutti i modelli (--model-access-mode all)"
     },
     "expiration": {
       "title": "Scadenza della chiave",
@@ -254,6 +256,7 @@
     "log": "Mostra i log del server in linea",
     "no_recovery": "Disabilita il riavvio automatico in caso di arresto anomalo (modalità di debug)",
     "max_restarts": "Numero massimo di riavvii in seguito ad arresti anomali entro 30 s prima di rinunciare (predefinito: 2)",
+    "headless": "Esegui solo il motore proxy: dashboard disattivata (404), sottosistemi opzionali saltati (imposta OMNIROUTE_HEADLESS=1)",
     "tray": "Avvia nell'area di notifica di sistema (solo desktop, attivazione facoltativa)",
     "no_tray": "Disabilita l'icona nell'area di notifica di sistema",
     "ready_timeout": "Timeout della verifica di disponibilità in ms (anche OMNIROUTE_READY_TIMEOUT_MS, valore predefinito 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Sincronizza la configurazione tra le istanze di OmniRoute",
     "push": {
-      "description": "Invia la configurazione al cloud o a un'istanza remota",
-      "target": "Destinazione (cloud o context:name)",
-      "bundle": "Parti del bundle da sincronizzare",
-      "dryRun": "Visualizza l'anteprima senza applicare"
+      "description": "Invia la configurazione al cloud o a un'istanza remota"
     },
     "pull": {
-      "description": "Recupera la configurazione dal cloud o da un'istanza remota",
-      "source": "Origine (cloud o context:name)",
-      "merge": "Unisci alla configurazione esistente",
-      "replace": "Sostituisci la configurazione esistente",
-      "dryRun": "Visualizza l'anteprima senza applicare"
-    },
-    "diff": {
-      "source": "Contesto di origine",
-      "target": "Contesto di destinazione"
+      "description": "Recupera la configurazione dal cloud o da un'istanza remota"
     },
     "bundle": {
       "description": "Esporta la configurazione come file bundle",
-      "include": "Parti da includere (separate da virgole)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Importa un file bundle",
       "dryRun": "Convalida senza applicare"
-    },
-    "initialize": {
-      "fromCloud": "Inizializza da un backup cloud"
     },
     "tokens": {
       "description": "Gestisci i token di sincronizzazione",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Salta la conferma"
       }
-    },
-    "resolve": {
-      "description": "Risolvi i conflitti di sincronizzazione in modo interattivo"
     }
   },
   "config": {

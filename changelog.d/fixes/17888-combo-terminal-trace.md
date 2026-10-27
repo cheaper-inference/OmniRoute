@@ -1,0 +1,1 @@
+- **fix(combo):** Keep retrying combos nonterminal and record the actual final response status in traces ([#17888](https://github.com/cheaper-inference/OmniRoute/pull/17888)) — thanks @AiCaptain357

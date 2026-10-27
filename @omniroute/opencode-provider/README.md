@@ -4,7 +4,7 @@
 >
 > This package writes a **static** `provider.omniroute` block to `opencode.json` from a hardcoded default model list, so it **drifts behind your live OmniRoute catalog** — adding a model in OmniRoute won't show up in OpenCode until you re-run the generator, and OpenCode Desktop/Web only surfaces a subset of the static models.
 >
-> **`@omniroute/opencode-plugin`** solves this by fetching `GET /v1/models` from your OmniRoute instance at OpenCode startup, so the model list is always live (see [#3419](https://github.com/diegosouzapw/OmniRoute/issues/3419)). It is now the recommended path.
+> **`@omniroute/opencode-plugin`** solves this by fetching `GET /v1/models` from your OmniRoute instance at OpenCode startup, so the model list is always live (see [#3419](https://github.com/cheaper-inference/OmniRoute/issues/3419)). It is now the recommended path.
 >
 > **One-line migration** — replace the static `provider.omniroute` block in `opencode.json` with a single plugin entry:
 >
@@ -12,13 +12,13 @@
 > // opencode.json
 > {
 >   "$schema": "https://opencode.ai/config.json",
->   "plugin": ["@omniroute/opencode-plugin"]
+>   "plugin": ["@omniroute/opencode-plugin"],
 > }
 > ```
 >
 > This package is **not removed** and still works for static/offline config generation, but it is no longer actively recommended and won't track new models automatically.
 
-Helper for connecting [OpenCode](https://opencode.ai) to a running [OmniRoute](https://github.com/diegosouzapw/OmniRoute) AI gateway.
+Helper for connecting [OpenCode](https://opencode.ai) to a running [OmniRoute](https://github.com/cheaper-inference/OmniRoute) AI gateway.
 
 The package emits a **schema-valid entry** for `opencode.json` (`https://opencode.ai/config.json`) that delegates the actual runtime to [`@ai-sdk/openai-compatible`](https://www.npmjs.com/package/@ai-sdk/openai-compatible). It does not ship any new HTTP client — OmniRoute already exposes an OpenAI-compatible surface, and OpenCode already speaks it through the AI SDK.
 
@@ -100,7 +100,7 @@ Returns the value to place under `provider.omniroute` inside `opencode.json`.
 | `baseURL`     | `string`                | Yes      | OmniRoute base URL. Accepts `http://host:port` **or** `http://host:port/v1`. Trailing slashes are tolerated. |
 | `apiKey`      | `string`                | Yes      | OmniRoute API key. Use `sk_omniroute` for local installs that have `REQUIRE_API_KEY=false`.                  |
 | `displayName` | `string`                | No       | Custom name shown in the OpenCode UI. Default: `"OmniRoute"`.                                                |
-| `models`      | `string[]`              | No       | Override the surfaced model catalog. Default: 4 curated models — see `OMNIROUTE_DEFAULT_OPENCODE_MODELS`.    |
+| `models`      | `string[]`              | No       | Override the surfaced model catalog. Default: 8 curated models — see `OMNIROUTE_DEFAULT_OPENCODE_MODELS`.    |
 | `modelLabels` | `Record<string,string>` | No       | Human-readable labels keyed by model id.                                                                     |
 
 Throws on empty/invalid input — `baseURL` must be a real URL, `apiKey` must be a non-empty string.
@@ -143,11 +143,11 @@ Duplicates and empty strings are dropped automatically, and order is preserved.
 
 - **Requests 404 with `/v1/v1/...`** — you're on an old version (≤1.0.0). Update to `≥0.1.0` of this re-released package. The new build normalises `baseURL` automatically.
 - **`401 Invalid API key`** — your OmniRoute instance has `REQUIRE_API_KEY=true` but the key you supplied doesn't exist there. Create one via the dashboard or set `REQUIRE_API_KEY=false` and use `sk_omniroute`.
-- **OpenCode complains the provider has no models** — supply an explicit `models` list; the default 4 may be hidden by your provider visibility settings.
+- **OpenCode complains the provider has no models** — supply an explicit `models` list; the default 8 may be hidden by your provider visibility settings.
 
 ## Related
 
-- [OmniRoute](https://github.com/diegosouzapw/OmniRoute) — the AI gateway this plugin targets.
+- [OmniRoute](https://github.com/cheaper-inference/OmniRoute) — the AI gateway this plugin targets.
 - [OpenCode](https://opencode.ai) — the agentic CLI consumer.
 - [`@ai-sdk/openai-compatible`](https://www.npmjs.com/package/@ai-sdk/openai-compatible) — the runtime delegate that actually speaks HTTP.
 

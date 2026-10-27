@@ -1,15 +1,15 @@
 # Authorization Guide (العربية)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
 
 ---
 
 > **مصدر الحقيقة:** `src/server/authz/`، `src/shared/constants/publicApiRoutes.ts`، `src/lib/api/requireManagementAuth.ts`، `src/shared/utils/apiAuth.ts`
-> **آخر تحديث:** 2026-06-28 — v3.8.40
+> **آخر تحديث:** 2026-09-22 — تشير مساحات أسماء النطاقات إلى MCP-SERVER.md
 
-يحتوي OmniRoute على مسار معالجة للتفويض يراعي المسارات ويتحكم في كل طلب API. ويكون التصنيف **حتميًا** و**مغلقًا افتراضيًا عند الفشل** — فكل ما يتعذر تصنيفه ينتهي به المطاف ضمن `MANAGEMENT` ويتطلب جلسة أو رمزًا مميزًا بمستوى الإدارة. تشرح هذه الصفحة النموذج للمهندسين الذين يصونون المسارات أو يصممون نقاط نهاية جديدة.
+لدى OmniRoute مسار معالجة تخويل مُدرك للمسارات، يتحكم في كل طلب API. ويُعد التصنيف **حتميًا** و**مغلقًا عند الفشل** — فأي شيء يتعذر تصنيفه ينتهي به المطاف ضمن `MANAGEMENT` ويتطلب جلسة أو رمزًا مميزًا بمستوى الإدارة. تشرح هذه الصفحة النموذج للمهندسين الذين يتولون صيانة المسارات أو تصميم نقاط نهاية جديدة.
 
-![مسار معالجة AuthZ (3 فئات للمسارات + تقييم السياسة)](../diagrams/exported/authz-pipeline.svg)
+![مسار معالجة AuthZ (3 فئات للمسارات + تقييم السياسات)](../diagrams/exported/authz-pipeline.svg)
 
 > المصدر: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -17,69 +17,119 @@
 
 ### 1. مفتاح API ‏(Bearer)
 
-يُستخدم لواجهات API الخاصة بالعملاء والمتوافقة مع OpenAI/Anthropic/Gemini، وكذلك لبعض مسارات الإدارة عندما يكون للمفتاح نطاق `manage`.
+يُستخدم لواجهات API الخاصة بالعملاء المتوافقة مع OpenAI/Anthropic/Gemini، ولبعض مسارات الإدارة عندما يتضمن المفتاح نطاق `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-يتم التحقق منه بواسطة `isValidApiKey()` / `extractApiKey()` في `src/sse/services/auth.ts`، وتُعاد تصديرهما عبر `src/shared/utils/apiAuth.ts`. يقبل المدقق أيضًا متغيري البيئة `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` بوصفهما مفتاحي تمرير دائمين (المشكلة #1350).
+يتم التحقق منه بواسطة `isValidApiKey()` / `extractApiKey()` في `src/sse/services/auth.ts`، وتُعاد تصديرهما عبر `src/shared/utils/apiAuth.ts`. تقبل أداة التحقق أيضًا متغيرَي البيئة `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` كمفتاحَي تمرير دائمين (المشكلة #1350).
 
 ### 2. جلسة لوحة المعلومات (ملف تعريف الارتباط auth_token)
 
-تُستخدم لصفحات لوحة المعلومات وعمليات الإدارة.
+لصفحات لوحة المعلومات وعمليات الإدارة.
 
 ```
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-لا يُعد ملف تعريف الارتباط جلسةً إلا عندما يتم التحقق من JWT **ويحمل** `authenticated: true`
+لا يُعد ملف تعريف الارتباط جلسة إلا عندما يجتاز JWT التحقق **ويحمل** `authenticated: true`
 (`src/shared/utils/dashboardSessionToken.ts` ← `verifyDashboardSessionToken`). يمر كل
-مستهلك لملف تعريف الارتباط (حارس المسار، وتحديث مسار معالجة التفويض، ومصافحة WebSocket، والخادم
+مستهلك لملف تعريف الارتباط (حارس مسارات لوحة المعلومات (`isDashboardSessionAuthenticated()`)، وتحديث مسار التفويض، ومصافحة WebSocket، والخادم
 المباشر، و`/api/settings/require-login`، و`/api/auth/status`) عبر تلك الدالة المساعدة.
-توجد رموز JWT أخرى موقعة باستخدام `JWT_SECRET` — إذ يُصدر تمرير Cursor CLI
-رموزًا تحمل `iss "omniroute" / aud "cursor-cli"` لحاملي المفاتيح — ولا تُعد جلسات مطلقًا
+توجد رموز JWT أخرى موقعة باستخدام `JWT_SECRET` — إذ ينشئ التمرير عبر Cursor CLI
+رموزًا تتضمن `iss "omniroute" / aud "cursor-cli"` لحاملي المفاتيح — ولا تُعد جلسات مطلقًا
 (#13298).
 
 يتم التحقق منها بواسطة `isDashboardSessionAuthenticated()` في `src/shared/utils/apiAuth.ts`. يُحدّث مسار المعالجة JWT تلقائيًا عندما يتبقى أقل من 7 أيام من مدة صلاحيته البالغة 30 يومًا.
 
-تقبل بعض مسارات الإدارة **أيًا من** الوضعين: ملف تعريف ارتباط أو `Bearer <key>` عندما يكون لمفتاح API نطاق `manage` (أو `admin`). وهذا ما يتيح سير عمل «القابل للتهيئة عبر استدعاءات API» المضاف في v3.8.
+يمكن أن تنتهي الجلسة أيضًا قبل اكتمال أيامها الثلاثين، لأن كل جهة مُصدرة تمر عبر `mintDashboardSessionToken` (وقت إصدار `iat` ومعرّف `jti`)، ولأن أداة التحقق تفحص إعدادين: `sessionsValidAfter`، الذي يُضبط عند تغيير كلمة المرور بحيث يتوقف التحقق من كل جلسة صدرت قبله (ويحصل المتصفح الذي غيّر كلمة المرور على ملف تعريف ارتباط جديد)، و`revokedDashboardSessions`، الذي يضيف إليه `POST /api/auth/logout` قيمة `jti` الخاصة بالجلسة التي سُجل الخروج منها. لا تحمل الجلسات الصادرة عن إصدار أقدم أيًا من الادعاءين، وتظل صالحة حتى أول تغيير لكلمة المرور. إذا تعذرت قراءة الإعدادات، فلا تُعد الجلسة موثوقة.
 
-#### بوابة تسجيل دخول OIDC اختيارية (#6973)
+تقبل بعض مسارات الإدارة **أيًا من** الوضعين: ملف تعريف الارتباط أو `Bearer <key>` عندما يتضمن مفتاح API نطاق `manage` (أو `admin`). وهذا ما يتيح سير العمل «القابل للتهيئة عبر استدعاءات API» الذي أُضيف في v3.8.
 
-يدعم تسجيل دخول مسؤول لوحة المعلومات أيضًا تدفق OIDC ‏(OpenID Connect) **اختياري التفعيل**
-إلى جانب تسجيل الدخول الافتراضي بكلمة المرور — ولا تتم إزالة تسجيل الدخول بكلمة المرور مطلقًا، بل
+#### بوابة تسجيل دخول OIDC الاختيارية (#6973)
+
+يدعم تسجيل دخول مسؤول لوحة المعلومات أيضًا تدفق OIDC ‏(OpenID Connect) **اختياريًا**
+إلى جانب تسجيل الدخول الافتراضي باستخدام كلمة المرور — ولا يُزال تسجيل الدخول باستخدام كلمة المرور مطلقًا، بل
 يُستكمل فقط:
 
-- يكون معطلًا ما لم تكن `settings.oidcEnabled === true` **و**تكون جميع القيم `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` مهيأة (الإعدادات ← المصادقة).
-  وإلا، فيُرجع `GET /api/auth/oidc/login` الحالة `400`.
-- يكتشف `GET /api/auth/oidc/login` قيمة `authorization_endpoint` من
-  `/.well-known/openid-configuration` الخاص بجهة الإصدار (مع الرجوع احتياطيًا إلى
-  `<issuer>/authorize`)، وينشئ URI لإعادة التوجيه من الطلب الوارد
-  (مع مراعاة `x-forwarded-proto`)، ثم يعيد التوجيه إلى موفر الهوية IdP مع قيمة `state`
-  عشوائية مخزنة في ملف تعريف ارتباط `oidc_state` ذي السمة `httpOnly`.
+- يكون معطّلًا ما لم تكن `settings.oidcEnabled === true` **وتكون** جميع القيم `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` مهيّأة (الإعدادات ← المصادقة).
+  وإلا، فسيُرجع `GET /api/auth/oidc/login` الاستجابة `400`.
+- يكتشف `GET /api/auth/oidc/login` نقطة النهاية `authorization_endpoint` من
+  `/.well-known/openid-configuration` الخاصة بجهة الإصدار (مع الرجوع احتياطيًا إلى
+  `<issuer>/authorize`)، وينشئ عنوان URI لإعادة التوجيه من الطلب الوارد
+  (مع مراعاة `x-forwarded-proto`)، ثم يعيد التوجيه إلى موفّر الهوية IdP باستخدام قيمة `state`
+  عشوائية مخزّنة في ملف تعريف ارتباط `oidc_state` من النوع `httpOnly`.
 - يتحقق `GET /api/auth/oidc/callback` من `state`، ويستبدل رمز التفويض،
   ويتحقق من توقيع رمز ID عبر JWKS الخاص بجهة الإصدار
-  (`createRemoteJWKSet` من `jose`، مع التخزين المؤقت لكل URI خاص بـJWKS)، مع إجراء عمليات تحقق
-  من `issuer`/`audience`. تطابق قائمة السماح الاختيارية `oidcAllowedSubjects` مطالبة
-  `sub` في الرمز أو مطالبة `email` — ولا تُقبل مطالبة البريد الإلكتروني إلا عندما تكون
-  `email_verified === true`، ولذلك لا يمكن لبريد إلكتروني غير متحقق منه لدى موفر الهوية IdP تجاوز
-  البوابة مطلقًا.
-- عند النجاح، يُصدر التدفق رمز JWT ‏`auth_token` **نفسه تمامًا** بصلاحية 30 يومًا، وهو الرمز الذي
-  يصدره تسجيل الدخول بكلمة المرور (`src/app/api/auth/login/route.ts`)، ولذلك يبقى باقي
-  مسار معالجة جلسة لوحة المعلومات (التحديث التلقائي، وسمات ملفات تعريف الارتباط) دون تغيير —
-  إذ لا يستبدل OIDC سوى كيفية إصدار ملف تعريف الارتباط، وليس الصلاحيات التي يمنحها.
+  (باستخدام `createRemoteJWKSet` من `jose`، مع التخزين المؤقت لكل عنوان URI خاص بـ JWKS) مع
+  فحوصات `issuer`/`audience`. يتطلب السماح بالدخول إلى لوحة المعلومات قائمة
+  `oidcAllowedSubjects` غير فارغة، أو سياسة `oidcAdmissionClaim`، أو كليهما.
+  تطابق قائمة الهويات `sub` أو `email` فقط عندما تكون `email_verified === true`.
+  تأخذ سياسة المطالبة الاختيارية مسار مطالبة ضمن رمز ID مفصولًا بنقاط (مثل
+  `realm_access.roles`) ومصفوفة من القيم المقبولة؛ ويجب أن تكون المطالبة الناتجة
+  مصفوفة من السلاسل النصية تحتوي على قيمة مقبولة واحدة على الأقل. إذا كانت كلتا
+  السياستين مهيّأتين، فيجب اجتياز كلتيهما. تؤدي المطالبات المفقودة أو المشوّهة
+  إلى الرفض الآمن، ومن دون أي من السياستين ترفض معاودة الاتصال تسجيل الدخول
+  (`not_configured`). وتستمر عمليات التهيئة الحالية المعتمدة على الهوية فقط دون تغيير.
+- يعيّن Keycloak عادةً أدوار النطاق إلى رموز الوصول، وليس بالضرورة إلى رموز ID.
+  لاشتراط دور النطاق `admin`، هيّئ مخطط بروتوكول لهذا العميل يتضمن
+  `realm_access.roles` في **رمز ID** الخاص به، ثم عيّن
+  `oidcAdmissionClaim` إلى `{ "path": "realm_access.roles", "values": ["admin"] }`.
+  تحقّق من المطالبة الفعلية في رمز ID لهذا العميل قبل تمكين السماح بالدخول
+  استنادًا إلى الدور فقط؛ فالتطبيق لا يقرأ أدوار رمز الوصول. يمكن لرفض الرمز
+  من جانب موفّر الهوية IdP أن يكمّل هذا الفحص من جانب التطبيق، لكنه لا يحل محله.
+- عند النجاح، يُصدر **رمز JWT نفسه تمامًا** لمدة 30 يومًا في `auth_token` الذي
+  يصدره تسجيل الدخول بكلمة المرور (`src/app/api/auth/login/route.ts`)، ولذلك تظل بقية
+  آلية جلسة لوحة المعلومات (التحديث التلقائي، وسمات ملفات تعريف الارتباط) دون تغيير —
+  إذ لا يستبدل OIDC سوى طريقة إصدار ملف تعريف الارتباط، وليس ما يمنحه. لا تؤدي
+  التغييرات في أدوار/مجموعات موفّر الهوية IdP إلى إبطال جلسات OmniRoute الحالية؛
+  إذ يظل تسجيل الخروج أو تدوير كلمة المرور أو انتهاء صلاحية الجلسة هو ما يحكم مدتها.
+- يندرج كل إعداد يبدأ بـ `oidc*` (`oidcEnabled`، و`oidcDisablePasswordLogin`،
+  و`oidcIssuer`، و`oidcClientId`، و`oidcClientSecret`، و`oidcAllowedSubjects`،
+  و`oidcAdmissionClaim`، و`oidcRedirectPath`، و`oidcScopes`) ضمن `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): يستجيب `PATCH /api/settings`
+  بـ `400 PASSWORD_REQUIRED` ما لم يتضمن جسم الطلب كلمة مرور الإدارة بوصفها
+  `currentPassword` (وبـ `401 PASSWORD_MISMATCH` عندما تكون خاطئة).
+  يرفض `oidcDisablePasswordLogin` _تسجيل الدخول_ بكلمة المرور (`POST /api/auth/login`)
+  لكنه يحتفظ بتجزئة كلمة المرور المخزّنة، كما تظل إعادة المصادقة تتحقق من
+  `currentPassword` بمقارنتها بها.
+- يندرج `corsOrigins` و`bruteForceProtection` ضمن `SECURITY_IMPACTING_SETTINGS_KEYS`
+  أيضًا: يؤدي تخفيف أي منهما إلى إضعاف وسائل الحماية الخاصة بتسجيل الدخول، ولذلك
+  يتطلبان إعادة المصادقة نفسها باستخدام `currentPassword` (تطلبها علامة تبويب الأمان)،
+  كما يؤدي استيراد JSON إلى إسقاطهما.
+- كل مفتاح لسياسة الأمان — أي إدخالات `SECURITY_IMPACTING_SETTINGS_KEYS`،
+  وكل مفتاح يبدأ بـ `oidc*`، وحالة جلسة لوحة المعلومات — **مقصور على المشغّل** في
+  `PATCH /api/settings`: يُرفض مفتاح API ذو نطاق `manage` أو رمز وصول يبدأ بـ `oma_`
+  باستخدام `403` حتى عند إرساله `currentPassword` الصحيحة، ويُسجّل الرفض في سجل
+  التدقيق بوصفه `settings.update_failed` مع `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` في `src/lib/api/operatorCredential.ts`).
+  تظل الإعدادات العادية (السمة وتفضيلات العرض) قابلة للكتابة باستخدام مفتاح `manage`
+  أو رمز وصول `admin`. تتطلب أيضًا كل عملية تعديل على `/api/settings` نفسها (وعلى
+  `/api/settings/require-login`) نطاق رمز الوصول `admin`
+  (`ADMIN_MUTATION_EXACT_PATHS` في `src/server/authz/accessScopes.ts`، مع مطابقة
+  المسار بدقة)؛ ويظل `GET` ضمن النطاق `read`، بينما تحتفظ المسارات الفرعية الأخرى
+  لـ `/api/settings/*` (الوكلاء، والقيم الافتراضية للمجموعات، والأسماء المستعارة
+  للنماذج، والضغط، وعمليات الحذف…) بنطاق `write` المستنتج من الطريقة.
+- يتجاوز `POST /api/settings/import-json` إعادة المصادقة تلك، ولذلك يسقط كل مفتاح في
+  `IMPORT_STRIPPED_SETTINGS_KEYS` (الملف نفسه) قبل الكتابة: كلمة المرور و
+  `currentPassword`، وكل إدخال في `SECURITY_IMPACTING_SETTINGS_KEYS`، وحالة
+  جلسة لوحة المعلومات (`sessionsValidAfter`، و`revokedDashboardSessions`).
+  لذلك لا يمكن لاستيراد نسخة احتياطية أقدم إحياء جلسة سبق أن أنهاها تغيير كلمة
+  المرور أو تسجيل الخروج.
 
 ## فئات المسارات
 
-يعرّف `src/server/authz/types.ts` ثلاث فئات؛ وأي مسار لا يمكن تصنيفه بشكل حتمي يعود افتراضيًا إلى `MANAGEMENT`.
+يعرّف `src/server/authz/types.ts` ثلاث فئات، وأي مسار لا يمكن تصنيفه بشكل حتمي يرجع إلى `MANAGEMENT`.
 
-| الفئة        | الوصف                                                                                                                                                                       | المصادقة المطلوبة                                             |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
-| `PUBLIC`     | مسارات آمنة صراحةً — تسجيل الدخول، وتسجيل الخروج، والحالة، والتهيئة، والتحقق من السلامة، والتمهيد للإعداد الأولي.                                                           | لا شيء                                                        |
-| `CLIENT_API` | نقاط نهاية تقديم النماذج — `/api/v1/*`، و`/api/v1beta/*`، بالإضافة إلى الأسماء البديلة `/v1/*`، و`/v1beta/*`، و`/chat/completions`، و`/responses`، و`/models`، و`/codex/*`. | مفتاح Bearer عند تمكين علامة الميزة الفعلية `REQUIRE_API_KEY` |
-| `MANAGEMENT` | صفحات لوحة المعلومات، والإعدادات، ومزوّدو الخدمة، والمفاتيح، ونقاط نهاية الإدارة والتشخيص.                                                                                  | جلسة لوحة المعلومات أو Bearer بنطاق `manage`                  |
+| Class        | Description                                                                                                                                                     | Auth required                                                 |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `PUBLIC`     | مسارات آمنة صراحةً: تسجيل الدخول، وتسجيل الخروج، والحالة، والتهيئة، والصحة، وتمهيد الإعداد الأولي.                                                              | لا شيء                                                        |
+| `CLIENT_API` | نقاط خدمة النماذج: `/api/v1/*` و`/api/v1beta/*`، بالإضافة إلى الأسماء المستعارة `/v1/*` و`/v1beta/*` و`/chat/completions` و`/responses` و`/models` و`/codex/*`. | مفتاح Bearer عندما تكون ميزة `REQUIRE_API_KEY` الفعلية مفعّلة |
+| `MANAGEMENT` | صفحات لوحة التحكم، والإعدادات، والمزوّدون، والمفاتيح، ونقاط الإدارة والتشخيص.                                                                                   | جلسة لوحة التحكم **أو** Bearer بنطاق `manage`                 |
+
+تحتاج بعض إجراءات `MANAGEMENT` إلى **المشغّل فقط**: فمفتاح `manage` لا يكفي. فتصدير بيانات الاعتماد المخزّنة (`GET /api/settings/export-json` و`GET /api/db-backups/export` و`GET /api/db-backups/exportAll`)، واستعادة نسخة احتياطية فوق البيانات الحية (`POST /api/db-backups/import` بما فيه `dryRun=true`، و`POST /api/db-backups` للاستعادة بالمعرّف، و`POST /api/settings/import-json`)، وإتلاف نقاط الاستعادة (تنظيف `DELETE /api/db-backups`، و`PATCH /api/db-backups` لأن الاحتفاظ الذي يحفظه يقود التقليم التلقائي بعد كل نسخة احتياطية) كلها تتطلب جلسة لوحة التحكم، أو هوية CLI المحلية، أو تعطيل تسجيل الدخول. ويتطلب إصدار رمز مزامنة (`POST /api/sync/tokens`) وسكّ رمز وصول CLI بنطاق `admin` (`POST /api/cli/tokens`) جلسة لوحة التحكم أو هوية CLI المحلية في كل أوضاع تسجيل الدخول. ومفاتيح API بأي نطاق ورموز الوصول `oma_` ليست بيانات اعتماد للمشغّل: فتتلقى الخطأ `403` كلما اشترط المسار ذلك. ويقع الفحص في `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). وتغيير إعدادات تسجيل الدخول مقصور على المشغّل أيضًا: إذ لا يقبل `POST /api/settings/require-login` (لضبط كلمة مرور الإدارة أو تبديل `requireLogin`) إلا هذه البيانات بعد وجود كلمة مرور، أما نافذة التمهيد الأولي عند أول تشغيل (قبل وجود كلمة مرور) فتبقى كما هي، ويجب أن ترسل جلسة لوحة التحكم `currentPassword` لاستبدال كلمة المرور (فيعيد `403` عند غيابها أو خطئها، ويُدقَّق بوصفه `settings.update_failed`). وتحتفظ CLI المحلية، والنسخة التي عُطّل فيها تسجيل الدخول، بمسار الاسترداد، ويجوز لها ضبط كلمة مرور دون هذا الشرط، لأن كليهما مرتبط بالمضيف الذي يملك مجلد البيانات.
 
 ## خط المعالجة
 
@@ -202,36 +252,44 @@ export async function POST(request: Request) {
 
 ## النطاقات
 
-تحمل مفاتيح API مصفوفة `scopes` (تُخزَّن بصيغة JSON في `api_keys.scopes`، راجع `src/lib/db/apiKeys.ts`).
+ثلاثة مساحات أسماء. يقرأ كل مدقّق السلاسل النصية الخاصة به فقط. للمقارنة جنبًا إلى جنب، بما في ذلك سبب فشل `manage` في `scopeMatches` بالنسبة إلى `read:compression` وسبب عدم تمكّن رمز وصول ذي نطاق `read` من تنفيذ `PATCH /api/keys/{id}`، راجع
+[مساحات أسماء النطاقات الثلاث](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+
+تحمل مفاتيح API مصفوفة `scopes` (مخزّنة بصيغة JSON في `api_keys.scopes`، راجع `src/lib/db/apiKeys.ts`).
 
 ### نطاق الإدارة
 
-- `manage` / `admin` — يمنح المفتاح صلاحية الوصول إلى نقاط نهاية API الإدارية عند إرساله كرمز Bearer.
+- `manage` / `admin` — `hasManageScope`. وصول حامل الرمز إلى مسارات واجهة API الإدارية.
+- إن `mcp:connect` و`self:usage` و`self:account-quota` و
+  `policy:bypass-provider-quota` هي نطاقات تراكمية تعتمد على التطابق التام. وهي تقع
+  خارج `MANAGEMENT_API_KEY_SCOPES`. لا يتيح `mcp:connect` سوى
+  استثناء الوصول غير المحلي إلى `/api/mcp/`.
 
-### نطاقات MCP (`src/shared/constants/mcpScopes.ts`)
+### نطاقات أدوات MCP
 
-تتطلب كل أداة MCP نطاقات محددة عبر `MCP_TOOL_SCOPES`. القائمة الكاملة (`MCP_SCOPE_LIST`):
+دليل النطاقات وقواعد المطابقة (سلسلة نصية متطابقة، أو نطاق ممنوح ينتهي بـ `*`):
+[نطاقات أدوات MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
+تمثّل `MCP_SCOPE_LIST` في `src/shared/constants/mcpScopes.ts` المجموعة الفرعية الأصلية
+ذات الأنواع المحددة، وليست الدليل الكامل. يجري الإنفاذ في
+`open-sse/mcp-server/scopeEnforcement.ts` بعد أن تحلّ `resolveCallerScopeContext()`
+النطاقات من معلومات مصادقة MCP أو بيانات الطلب الوصفية أو `OMNIROUTE_MCP_SCOPES`.
+ويظل معطّلًا ما لم تكن `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 
-```
-read:health, read:combos, write:combos, read:quota, read:usage,
-read:models, execute:completions, execute:search, write:budget,
-write:resilience, pricing:write, read:cache, write:cache,
-read:compression, write:compression, read:proxies
-```
+### نطاقات رموز الوصول
 
-يفرض التحقق من النطاقات في `open-sse/mcp-server/server.ts` قائمة نطاقات كل أداة من خلال تمريرها إلى
-`evaluateToolScopes()` بعد أن تحلّ `resolveCallerScopeContext()` النطاقات من معلومات مصادقة MCP،
-أو بيانات الطلب الوصفية، أو `OMNIROUTE_MCP_SCOPES`.
+`read` / `write` / `admin` على رموز `oma_live_…`، مرتبة بواسطة `scopeSatisfies`
+(`src/lib/accessTokens/scopes.ts`). ينطبق هذا الترتيب على بيانات اعتماد رمز الوصول
+فقط. راجع [مصادقة الإدارة](../guides/MANAGEMENT-AUTH.md).
 
-## مفتاح تبديل اشتراط المصادقة
+## تبديل اشتراط المصادقة
 
-تحدد `isAuthRequired()` في `src/shared/utils/apiAuth.ts` ما إذا كان سيتم فرض **أي** مصادقة على الطلب:
+تحدّد `isAuthRequired()` في `src/shared/utils/apiAuth.ts` ما إذا كانت **أي** مصادقة مطلوبة لطلب ما:
 
-- `settings.requireLogin === false` → تكون المصادقة معطلة عالميًا.
-- عدم تكوين كلمة مرور **و** عدم وجود متغير البيئة `INITIAL_PASSWORD` → يسمح وضع التهيئة بمعالج الإعداد الأولي وطلبات الاسترجاع المحلي، لكن طلبات الشبكة المكشوفة تظل بحاجة إلى بيانات اعتماد.
-- أي خطأ في قاعدة البيانات → يؤدي إلى الإغلاق الآمن (الأمان افتراضيًا).
+- `settings.requireLogin === false` ← تُعطّل المصادقة على مستوى النظام، باستثناء فئة الحماية الدائمة (انظر [مستويات حارس المسارات](../security/ROUTE_GUARD_TIERS.md)) والاستدعاءات التي تُسلّم بيانات اعتماد يقبلها النظام، والتي تتطلب بيانات الاعتماد نفسها كما لو كان تسجيل الدخول مفعّلًا: إصدار رموز المزامنة، وسكّ رموز وصول CLI بأي نطاق، وإنشاء مفتاح API بنطاق `manage`/`admin`، ومنح هذا النطاق لمفتاح، أو إعادة توليد مفتاح من هذا النوع أو كشفه (`requireCredentialForManagementScopedKey()` في `src/lib/api/requireManagementAuth.ts`). أما مفاتيح الاستدلال فقط فتبقى مفتوحة.
+- لا توجد كلمة مرور مُعدّة **ولا** متغير البيئة `INITIAL_PASSWORD` ← يسمح وضع التمهيد بمعالج الإعداد وبالطلبات المحلية (loopback)، لكن الطلبات الشبكية المكشوفة ما زالت تحتاج إلى بيانات اعتماد.
+- أي خطأ في قاعدة البيانات ← يفشل النظام مغلقًا (آمن افتراضيًا).
 
-يستخدم فرض مفتاح API الخاص بالعميل الدالة `isRequireApiKeyEnabled()` في `src/shared/utils/featureFlags.ts`، وليس قراءة مباشرة من `process.env.REQUIRE_API_KEY`. وهذا مهم للمثيلات المنشورة: يؤدي تبديل `REQUIRE_API_KEY` في Dashboard → Feature Flags إلى تخزين تجاوز في قاعدة البيانات، ويؤثر فورًا في `/v1/*` و`/v1beta/*` و`/models` و`/responses` و`/chat/completions` و`/codex/*` وغيرها من عمليات التحقق من مصادقة API العميل التي تشترك في هذه الدالة المساعدة. إذا تعذرت قراءة مخزن علامات الميزات، تفشل مصادقة API العميل بإغلاق آمن وتتطلب مفتاحًا.
+يستخدم فرض مفتاح API للعميل `isRequireApiKeyEnabled()` في `src/shared/utils/featureFlags.ts`، لا قراءة مباشرة لـ `process.env.REQUIRE_API_KEY`. وهذا مهم للنسخ المنشورة: فتبديل `REQUIRE_API_KEY` في لوحة التحكم ← أعلام الميزات يخزّن تجاوزًا في قاعدة البيانات ويؤثر فورًا في `/v1/*` و`/v1beta/*` و`/models` و`/responses` و`/chat/completions` و`/codex/*`، وفي فحوص مصادقة واجهة برمجة العميل الأخرى التي تشارك هذه الدالة المساعدة. وإذا تعذّرت قراءة مخزن أعلام الميزات فإن مصادقة واجهة العميل تفشل مغلقة وتشترط مفتاحًا.
 
 ## تغيير غير متوافق — v3.8.0
 
@@ -270,6 +328,6 @@ x-omniroute-auth-scopes:    قائمة مفصولة بفواصل
 ## انظر أيضًا
 
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — علامة المصادقة لكل نقطة نهاية
-- [COMPLIANCE.md](../security/COMPLIANCE.md) — سجل تدقيق لأحداث المصادقة
-- [MCP-SERVER.md](../frameworks/MCP-SERVER.md) — تفاصيل فرض نطاقات MCP
+- [COMPLIANCE.md](../security/COMPLIANCE.md) — سجل التدقيق لأحداث المصادقة
+- [MCP-SERVER.md](../frameworks/MCP-SERVER.md#three-scope-namespaces) — نطاقات الأذونات الثلاثة ودليل نطاقات أدوات MCP
 - المصدر: `src/server/authz/`، `src/lib/api/requireManagementAuth.ts`

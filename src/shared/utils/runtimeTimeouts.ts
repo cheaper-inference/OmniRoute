@@ -38,6 +38,7 @@ export const DEFAULT_API_BRIDGE_SERVER_SOCKET_TIMEOUT_MS = 0;
 // idle-pool window, mirroring the API bridge server's pattern.
 export const DEFAULT_MAIN_SERVER_KEEPALIVE_TIMEOUT_MS = 65_000;
 export const DEFAULT_MAIN_SERVER_HEADERS_TIMEOUT_MS = 66_000;
+export const DEFAULT_MAIN_SERVER_TCP_KEEPALIVE_MS = 30_000;
 // A client that closes its connection right after reading a fully-completed
 // SSE stream can race OmniRoute's own completion bookkeeping (#9653): the
 // bytes already reached the client, but the disconnect handler can fire
@@ -59,6 +60,10 @@ export const DEFAULT_TLS_FIRST_BYTE_WATCHDOG_MS = 10_000;
 // thinking. Executors that can rotate accounts use it to move on instead of waiting for the
 // readiness timeout. Set to 0 to disable.
 export const DEFAULT_RESPONSES_FIRST_BYTE_TIMEOUT_MS = 15_000;
+// Suggested operator value when enabling the Responses headers-wait bound below.
+// Not an active default: the getters read 0 (off) unless the operator sets the env var.
+export const SUGGESTED_OPENCODE_RESPONSES_HEADERS_WAIT_MS = 30_000;
+export const DEFAULT_OPENCODE_RESPONSES_HEADERS_WAIT_MAX_ROTATIONS = 2;
 
 function hasEnvValue(env: EnvSource, name: string): boolean {
   const raw = env[name];
@@ -94,6 +99,7 @@ export type ApiBridgeTimeoutConfig = {
 export type MainServerTimeoutConfig = {
   keepAliveTimeoutMs: number;
   headersTimeoutMs: number;
+  tcpKeepAliveInitialDelayMs: number;
 };
 
 function readTimeoutMs(
@@ -269,6 +275,31 @@ export function getResponsesFirstByteTimeoutMs(
   );
 }
 
+// Bound on waiting for upstream response headers on streamed Responses calls
+// before moving to the next account. Off by default: the read default is 0
+// (unchanged behavior) — SUGGESTED_… is only the documented starting value.
+export function getOpencodeResponsesHeadersWaitMs(
+  env: EnvSource = process.env,
+  logger?: TimeoutLogger
+): number {
+  return readTimeoutMs(env, "OPENCODE_RESPONSES_HEADERS_WAIT_MS", 0, {
+    allowZero: true,
+    logger,
+  });
+}
+
+export function getOpencodeResponsesHeadersWaitMaxRotations(
+  env: EnvSource = process.env,
+  logger?: TimeoutLogger
+): number {
+  return readTimeoutMs(
+    env,
+    "OPENCODE_RESPONSES_HEADERS_WAIT_MAX_ROTATIONS",
+    DEFAULT_OPENCODE_RESPONSES_HEADERS_WAIT_MAX_ROTATIONS,
+    { allowZero: true, logger }
+  );
+}
+
 export function getApiBridgeTimeoutConfig(
   env: EnvSource = process.env,
   logger?: TimeoutLogger
@@ -368,6 +399,16 @@ export function getMainServerTimeoutConfig(
     }
   );
 
+  const tcpKeepAliveInitialDelayMs = readTimeoutMs(
+    env,
+    "MAIN_SERVER_TCP_KEEPALIVE_MS",
+    DEFAULT_MAIN_SERVER_TCP_KEEPALIVE_MS,
+    {
+      allowZero: true,
+      logger,
+    }
+  );
+
   return {
     keepAliveTimeoutMs,
     // Node requires headersTimeout > keepAliveTimeout to avoid its internal
@@ -376,5 +417,6 @@ export function getMainServerTimeoutConfig(
       headersTimeoutMs > 0 && keepAliveTimeoutMs > 0
         ? Math.max(headersTimeoutMs, keepAliveTimeoutMs + 1_000)
         : headersTimeoutMs,
+    tcpKeepAliveInitialDelayMs,
   };
 }

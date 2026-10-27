@@ -1,5 +1,5 @@
 import { buildErrorBody } from "./error.ts";
-import type { StreamFailurePayload } from "./streamErrorFormat.ts";
+import type { StreamFailurePayload, StreamFailureSnapshot } from "./streamErrorFormat.ts";
 import type { StreamTiming } from "./streamTiming.ts";
 
 type CompletePayload = {
@@ -18,6 +18,7 @@ type CompletePayload = {
 type AborterContext = {
   onFailure?: ((payload: StreamFailurePayload) => boolean | void | Promise<void>) | null;
   onComplete?: ((payload: CompletePayload) => void) | null;
+  attachFailureSnapshot?: () => StreamFailureSnapshot | undefined;
   getUsage: () => unknown;
   timing: StreamTiming;
   buildProviderPayload: () => unknown;
@@ -33,10 +34,15 @@ export function createStreamFailureAborter(context: AborterContext) {
     controller: TransformStreamDefaultController<Uint8Array>,
     failure: StreamFailurePayload,
     publicMessage: string,
-    options: { notifyComplete?: boolean } = {}
+    options: { notifyComplete?: boolean; preserveQueuedChunks?: boolean } = {}
   ): void => {
     let handled = false;
     context.timing.markInterrupted();
+    try {
+      failure.streamSnapshot ??= context.attachFailureSnapshot?.();
+    } catch (error) {
+      console.debug("[STREAM] attach failure snapshot error:", error);
+    }
     if (context.onFailure) {
       try {
         handled = context.onFailure(failure) === true;
@@ -71,6 +77,11 @@ export function createStreamFailureAborter(context: AborterContext) {
     }
     context.clearIdleTimer();
     if (!handled) context.clearPendingRequest();
-    controller.error(context.markPendingRequestCleared(new Error(safeMessage)));
+    // At EOF the caller has already queued an explicit failure terminal. Let
+    // flush close normally: controller.error() would discard those queued
+    // deltas and the failure event before a slow reader can consume them.
+    if (!options.preserveQueuedChunks) {
+      controller.error(context.markPendingRequestCleared(new Error(safeMessage)));
+    }
   };
 }

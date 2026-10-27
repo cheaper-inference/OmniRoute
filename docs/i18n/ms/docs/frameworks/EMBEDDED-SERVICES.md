@@ -1,14 +1,14 @@
 # Embedded Services (Bahasa Melayu)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/EMBEDDED-SERVICES.md) · 🇪🇹 [am](../../../am/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇿 [az](../../../az/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇰 [da](../../../da/docs/frameworks/EMBEDDED-SERVICES.md) · 🇩🇪 [de](../../../de/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇷 [el](../../../el/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇸 [es](../../../es/docs/frameworks/EMBEDDED-SERVICES.md) · 🇪🇪 [et](../../../et/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇱 [he](../../../he/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/EMBEDDED-SERVICES.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇩 [id](../../../id/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇹 [it](../../../it/docs/frameworks/EMBEDDED-SERVICES.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/EMBEDDED-SERVICES.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇭 [km](../../../km/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇲🇲 [my](../../../my/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇴 [no](../../../no/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [or](../../../or/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/EMBEDDED-SERVICES.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/EMBEDDED-SERVICES.md) · 🇱🇰 [si](../../../si/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/EMBEDDED-SERVICES.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/EMBEDDED-SERVICES.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/EMBEDDED-SERVICES.md) · 🇮🇳 [te](../../../te/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇭 [th](../../../th/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/EMBEDDED-SERVICES.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/EMBEDDED-SERVICES.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/EMBEDDED-SERVICES.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/EMBEDDED-SERVICES.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/EMBEDDED-SERVICES.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/EMBEDDED-SERVICES.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/EMBEDDED-SERVICES.md)
 
 ---
 
 > **Versi:** v3.8.44
-> **Kemas kini terakhir:** 2026-07-03
-> **Khalayak:** Jurutera yang menambah, menyelenggara atau menyahpepijat perkhidmatan terbenam (9Router, CLIProxyAPI, Mux, Bifrost).
+> **Kemas kini terakhir:** 2026-09-16
+> **Sasaran pembaca:** Jurutera yang menambah, menyelenggara atau menyahpepijat perkhidmatan terbenam (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua).
 
-Perkhidmatan terbenam ialah alat sesampai proses yang dipasang secara setempat, diselia dan
+Perkhidmatan terbenam ialah alat proses sampingan yang dipasang secara setempat, yang dipasang, diselia dan
 didedahkan oleh OmniRoute sebagai sasaran penghalaan kelas pertama. Tidak seperti penyedia luaran (yang dicapai melalui internet
 menggunakan kunci API), perkhidmatan terbenam berjalan pada mesin yang sama dengan OmniRoute dan berkomunikasi melalui gelung balik.
 
@@ -27,37 +27,39 @@ menggunakan kunci API), perkhidmatan terbenam berjalan pada mesin yang sama deng
 
 ---
 
-## 1. Gambaran keseluruhan
+## 1. Gambaran Keseluruhan
 
-### Mengapakah perkhidmatan terbenam diperlukan?
+### Mengapa perkhidmatan terbenam?
 
-Lima perkhidmatan disertakan secara terbenam:
+Tujuh perkhidmatan disertakan:
 
-| Perkhidmatan    | Pakej npm                             | Port lalai | Tujuan                                                                                                                                                                                                     |
-| --------------- | ------------------------------------- | :--------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                             |   20130    | Penghala AI yang boleh digunakan oleh OmniRoute sebagai subpenyedia. Model didedahkan sebagai `9router/{sub}/{model}`                                                                                      |
-| **CLIProxyAPI** | Binari keluaran GitHub (`cliproxy`)   |    8317    | Penyesuai proksi setempat untuk aliran pengesahan CLI Anthropic. Menyediakan penghalaan sandaran apabila token OAuth tamat tempoh                                                                          |
-| **Mux**         | `mux` (`mux server` tanpa antaramuka) |    8322    | Daemon orkestrasi ejen setempat (coder/mux). Diuruskan dari segi kitar hayat sahaja — bukan sasaran penghalaan (tiada pemproksian LLM).                                                                    |
-| **Bifrost**     | `@maximhq/bifrost`                    |    8080    | Bahagian belakang geganti get laluan AI Go. Apabila berjalan, dipilih secara automatik oleh laluan geganti (`/v1/relay/`)                                                                                  |
-| **Dario**       | `@askalf/dario`                       |    3456    | Proksi langganan Claude — alternatif/sandaran kepada CLIProxyAPI untuk trafik berformat Claude Code; kunci yang disuntik menjadi `DARIO_ADMIN_TOKEN` yang mengawal satah kawalan OAuth `/admin/*` miliknya |
+| Perkhidmatan    | Pakej npm                           | Port lalai | Tujuan                                                                                                                                                                                                                                                                                                                                                                |
+| --------------- | ----------------------------------- | :--------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9Router**     | `9router`                           |   20130    | Penghala AI yang boleh digunakan oleh OmniRoute sebagai subpenyedia. Model didedahkan sebagai `9router/{sub}/{model}`                                                                                                                                                                                                                                                 |
+| **CLIProxyAPI** | Binari keluaran GitHub (`cliproxy`) |    8317    | Penyesuai proksi setempat untuk aliran pengesahan CLI Anthropic. Menyediakan penghalaan sandaran apabila token OAuth tamat tempoh                                                                                                                                                                                                                                     |
+| **Mux**         | `mux` (`mux server` tanpa paparan)  |    8322    | Daemon pengorkestraan ejen setempat (coder/mux). Diurus kitar hayat sahaja — bukan sasaran penghalaan (tiada pemproksian LLM).                                                                                                                                                                                                                                        |
+| **Bifrost**     | `@maximhq/bifrost`                  |    8080    | Bahagian belakang geganti get laluan AI Go. Apabila berjalan, dipilih secara automatik oleh laluan geganti (`/v1/relay/`)                                                                                                                                                                                                                                             |
+| **Dario**       | `@askalf/dario`                     |    3456    | Proksi langganan Claude — alternatif/pengambilalihan untuk CLIProxyAPI bagi trafik berbentuk Claude-Code; kunci yang disuntik menjadi `DARIO_ADMIN_TOKEN` yang mengehadkan satah kawalan OAuth `/admin/*`                                                                                                                                                             |
+| **open-wa**     | `@open-wa/wa-automate`              |    8323    | Automasi WhatsApp Web (Chromium tanpa paparan melalui Puppeteer). Diurus kitar hayat sahaja — bukan sasaran penghalaan.                                                                                                                                                                                                                                               |
+| **LLMLingua**   | `@atjsh/llmlingua-2`                |   20135    | Sidecar pemampatan gesaan — model ONNX LLMLingua-2 sebenar (port JS/TS bagi algoritma Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` menghantar `/compress` kepadanya melalui HTTP, dengan beralih kepada bahagian belakang jalur pekerja dalam proses apabila sidecar tidak berfungsi. Diurus kitar hayat sahaja — bukan sasaran penghalaan. |
 
-Kelima-limanya mengikuti model penyeliaan yang sama:
+Kesemua tujuh perkhidmatan mengikuti model penyeliaan yang sama:
 
 - OmniRoute memasangnya di bawah `DATA_DIR/services/{name}/` (diasingkan daripada `package.json` milik OmniRoute)
-- OmniRoute memulakan dan memantau perkhidmatan tersebut sebagai proses anak
+- OmniRoute memulakan dan memantaunya sebagai proses anak
 - OmniRoute menyuntik kunci API sementara ke dalam persekitaran proses anak dan menggilirnya tanpa masa henti (jika berkenaan)
-- Semua laluan pengurusan (`/api/services/*`) ialah **LOCAL_ONLY** — hanya boleh dicapai melalui gelung balik (peraturan tegas #17)
+- Semua laluan pengurusan (`/api/services/*`) adalah **LOCAL_ONLY** — hanya boleh dicapai daripada antara muka gelung balik (peraturan tetap #17)
 
 ### Keputusan utama (daripada pelan reka bentuk)
 
-| Keputusan                                  | Nilai                                                                                  |
-| ------------------------------------------ | -------------------------------------------------------------------------------------- |
-| Akses papan pemuka kepada UI natif 9Router | Proksi songsang di `/dashboard/providers/services/9router/embed/*`                     |
-| Mekanisme pemasangan                       | `npm install {package}` melalui `execFile` (tanpa interpolasi shell)                   |
-| Mod penggunaan                             | Penyedia didaftarkan sebagai `9router/{sub}/{model}` dalam enjin penghalaan            |
-| Pengurusan kunci API                       | OmniRoute menjana, menyulitkan semasa disimpan (AES-256-GCM) dan menyuntik melalui env |
-| Lokasi papan pemuka                        | `/dashboard/providers/services` (tiga tab)                                             |
-| Mula automatik                             | Togol bagi setiap perkhidmatan, MATI secara lalai                                      |
+| Keputusan                                 | Nilai                                                                                            |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| Akses papan pemuka kepada UI asli 9Router | Proksi songsang di `/dashboard/providers/services/9router/embed/*`                               |
+| Mekanisme pemasangan                      | `npm install {package}` melalui `execFile` (tiada interpolasi shell)                             |
+| Mod penggunaan                            | Penyedia didaftarkan sebagai `9router/{sub}/{model}` dalam enjin penghalaan                      |
+| Pengurusan kunci API                      | OmniRoute menjana, menyulitkan ketika disimpan (AES-256-GCM), dan menyuntik melalui persekitaran |
+| Lokasi papan pemuka                       | `/dashboard/providers/services` (tiga tab)                                                       |
+| Mula automatik                            | Togol bagi setiap perkhidmatan, lalai MATI                                                       |
 
 ---
 
@@ -67,11 +69,10 @@ Kelima-limanya mengikuti model penyeliaan yang sama:
 ┌────────────────────────────────────────────────────────────────────┐
 │  Lapisan 1 — UI                                                    │
 │  /dashboard/providers/services  (tab: CLIProxyAPI | 9Router | Mux) │
-│  Log langsung (SSE), Mula/Henti/Mula Semula/Kemas Kini, Tetapan,   │
-│  Pasang                                                            │
+│  Log langsung (SSE), Mula/Henti/Mula Semula/Kemas Kini, Tetapan, Pasang│
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Kerangka + penghalaan tab melalui ?tab=│
+│    ├── page.tsx               Cangkerang + penghalaan tab melalui ?tab=│
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -98,21 +99,21 @@ Kelima-limanya mengikuti model penyeliaan yang sama:
 │  Lapisan 3 — ServiceSupervisor (src/lib/services/)                 │
 │                                                                    │
 │  ServiceSupervisor.ts   Penyelia generik (child_process.spawn)     │
-│    ├── pasang:     execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── mula:       spawn(node, [entrypoint], {env, cwd})           │
-│    ├── kunci API:  crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── port:       20130 untuk 9Router (boleh dikonfigurasi)       │
-│    ├── log:        penimbal gelang stdio 5 MB → peristiwa SSE      │
-│    ├── kesihatan:  HTTP GET /health setiap 2–5 s, pemulihan malas  │
-│    └── kitar hayat: SIGTERM 15 s → SIGKILL                         │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
+│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
+│    ├── port:       20130 untuk 9Router (boleh dikonfigurasikan)    │
+│    ├── logs:       penimbal gelang stdio 5 MB → peristiwa SSE      │
+│    ├── health:     HTTP GET /health setiap 2–5 s, pemulihan malas  │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Memulakan semua SERVICES[] ketika proses bermula│
+│  bootstrap.ts       Memulakan semua SERVICES[] semasa proses bermula│
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
 │  modelSync.ts       GET /v1/models berkala → jadual service_models │
 │  ringBuffer.ts      Penimbal log bulat (5 MB bagi setiap perkhidmatan)│
-│  healthCheck.ts     Prob kesihatan HTTP secara tinjauan berkala    │
-│  installers/        ninerouter.ts, cliproxy.ts, mux.ts             │
+│  healthCheck.ts     Prob kesihatan HTTP secara tinjauan            │
+│  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
 │                      (penyesuai pemasang)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP serasi OpenAI (gelung balik)
@@ -120,12 +121,9 @@ Kelima-limanya mengikuti model penyeliaan yang sama:
 │  Lapisan 4 — Penyedia / Penghalaan                                 │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Mencari semula port dan kunci API bagi setiap permintaan        │
-│    (tanpa cache).                                                  │
-│    Menggugurkan awalan "9router/" daripada ID model sebelum        │
-│    memproksikannya.                                                │
-│    Mengembalikan 503 service_not_running jika penyelia tidak       │
-│    dalam keadaan "running".                                        │
+│    Mencari semula port dan kunci API bagi setiap permintaan (tanpa cache).│
+│    Membuang awalan "9router/" daripada id model sebelum pemproksian.│
+│    Mengembalikan 503 service_not_running jika penyelia tidak dalam "running".│
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
 │    Entri untuk "9router": isEmbeddedService: true                  │
@@ -134,30 +132,32 @@ Kelima-limanya mengikuti model penyeliaan yang sama:
 │    Model disimpan sebagai "9router/{sub}/{model}" (berawalan).     │
 │    Disegerakkan setiap 5 min oleh modelSync.ts.                    │
 │                                                                    │
-│  Mux diuruskan kitar hayatnya SAHAJA (Lapisan 1-3) — ia ialah      │
-│  daemon orkestrasi ejen, bukan proksi LLM, maka ia tidak mempunyai │
-│  entri pelaksana/penyedia Lapisan 4 dan tidak pernah menjadi       │
+│  Mux diurus kitar hayat SAHAJA (Lapisan 1-3) — ia ialah daemon     │
+│  orkestrasi ejen, bukannya proksi LLM, maka ia tidak mempunyai     │
+│  pelaksana/entri penyedia Lapisan 4 dan tidak pernah menjadi       │
 │  sasaran penghalaan.                                               │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Fail sumber utama
 
-| Fail                                        | Peranan                                                     |
-| ------------------------------------------- | ----------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Kelas teras: kitar hayat, kunci, kesihatan, penimbal gelang |
-| `src/lib/services/bootstrap.ts`             | Pendaftaran peringkat proses dan mula automatik             |
-| `src/lib/services/registry.ts`              | Peta tunggal `tool → supervisor`                            |
-| `src/lib/services/apiKey.ts`                | Penjanaan kunci, penyulitan AES-256-GCM semasa disimpan     |
-| `src/lib/services/modelSync.ts`             | Penyegerakan model berkala (5 min) + atas permintaan        |
-| `src/lib/services/ringBuffer.ts`            | Penimbal log bulat 5 MB dengan langganan SSE                |
-| `src/lib/services/healthCheck.ts`           | Pemeriksaan kesihatan HTTP (selang boleh dikonfigurasikan)  |
-| `src/lib/services/installers/ninerouter.ts` | Pemasangan/kemas kini/nyahpasang npm untuk 9Router          |
-| `src/lib/services/installers/cliproxy.ts`   | Pemasangan/kemas kini/nyahpasang npm untuk CLIProxyAPI      |
-| `src/lib/services/installers/mux.ts`        | Pemasangan/kemas kini/nyahpasang npm untuk Mux              |
-| `src/app/api/services/9router/_lib.ts`      | Pembantu `getOrInitSupervisor()`                            |
-| `src/app/api/services/[name]/logs/route.ts` | Titik akhir log SSE dikongsi                                |
-| `open-sse/executors/ninerouter.ts`          | Pelaksana penyedia (Lapisan 4)                              |
+| Fail                                        | Peranan                                                       |
+| ------------------------------------------- | ------------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | Kelas teras: kitaran hayat, kunci, kesihatan, penimbal gelang |
+| `src/lib/services/bootstrap.ts`             | Pendaftaran peringkat proses dan mula automatik               |
+| `src/lib/services/registry.ts`              | Peta tunggal `tool → supervisor`                              |
+| `src/lib/services/apiKey.ts`                | Penjanaan kunci, penyulitan AES-256-GCM semasa disimpan       |
+| `src/lib/services/modelSync.ts`             | Penyegerakan model berkala (5 min) + atas permintaan          |
+| `src/lib/services/ringBuffer.ts`            | Penimbal log bulat 5 MB dengan langganan SSE                  |
+| `src/lib/services/healthCheck.ts`           | Prob kesihatan HTTP (selang boleh dikonfigurasikan)           |
+| `src/lib/services/installers/ninerouter.ts` | Pemasangan/kemas kini/nyahpasang npm untuk 9Router            |
+| `src/lib/services/installers/cliproxy.ts`   | Pemasangan/kemas kini/nyahpasang npm untuk CLIProxyAPI        |
+| `src/lib/services/installers/mux.ts`        | Pemasangan/kemas kini/nyahpasang npm untuk Mux                |
+| `src/lib/services/installers/openwa.ts`     | Pemasangan/kemas kini/nyahpasang npm untuk open-wa            |
+| `src/lib/services/installers/llmlingua.ts`  | Pemasangan/kemas kini/nyahpasang npm untuk LLMLingua          |
+| `src/app/api/services/9router/_lib.ts`      | Pembantu `getOrInitSupervisor()`                              |
+| `src/app/api/services/[name]/logs/route.ts` | Titik akhir log SSE yang dikongsi                             |
+| `open-sse/executors/ninerouter.ts`          | Pelaksana penyedia (Lapisan 4)                                |
 
 ---
 
@@ -231,7 +231,7 @@ Pasang 9Router daripada npm. Mencipta `DATA_DIR/services/9router/` dengan
 
 | Medan     | Jenis    | Lalai      | Penerangan                               |
 | --------- | -------- | ---------- | ---------------------------------------- |
-| `version` | `string` | `"latest"` | tag versi npm atau semver untuk dipasang |
+| `version` | `string` | `"latest"` | Tag versi npm atau semver untuk dipasang |
 
 **Respons:**
 
@@ -239,11 +239,11 @@ Pasang 9Router daripada npm. Mencipta `DATA_DIR/services/9router/` dengan
 | ------ | ---------------------------------------------------------------------- |
 | `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                 |
 | `400`  | Badan permintaan tidak sah (kegagalan pengesahan Zod)                  |
-| `409`  | Sedang dipasang (kunci dipegang)                                       |
-| `500`  | Pemasangan npm gagal — lihat `message` untuk ralat yang mudah difahami |
+| `409`  | Pemasangan sedang dijalankan (kunci sedang dipegang)                   |
+| `500`  | Pemasangan npm gagal — lihat `message` untuk mesej yang mesra pengguna |
 
 **Nota:** Menggunakan `execFile('npm', [...])` — tanpa shell, tanpa interpolasi (peraturan tegas #13).
-Ralat EACCES dipaparkan sebagai mesej yang mudah difahami.
+Ralat EACCES dipaparkan sebagai mesej yang mesra pengguna.
 
 ---
 
@@ -280,17 +280,17 @@ Mulakan 9Router. Mendaftarkan penyelia jika belum didaftarkan, kemudian memanggi
 
 #### `POST /api/services/9router/stop`
 
-Hentikan 9Router dengan tertib. Menghantar SIGTERM, menunggu 15 s, kemudian SIGKILL jika masih hidup.
+Hentikan 9Router secara tertib. Menghantar SIGTERM, menunggu 15 s, kemudian SIGKILL jika masih hidup.
 Idempoten apabila sudah dihentikan.
 
 **Badan permintaan:** tiada
 
 **Respons:**
 
-| Status | Penerangan                         |
-| ------ | ---------------------------------- |
-| `200`  | `ServiceStatus` (state: "stopped") |
-| `503`  | Penghentian gagal tanpa dijangka   |
+| Status | Penerangan                              |
+| ------ | --------------------------------------- |
+| `200`  | `ServiceStatus` (state: "stopped")      |
+| `503`  | Penghentian gagal secara tidak dijangka |
 
 ---
 
@@ -307,7 +307,7 @@ Bersamaan dengan `stop()` kemudian `start()` di bawah kunci operasi.
 #### `POST /api/services/9router/update`
 
 Mengemas kini 9Router kepada versi npm yang lebih baharu. Jika perkhidmatan sedang berjalan, ia dihentikan
-terlebih dahulu, pemasangan npm dijalankan (memasang versi yang lebih baharu di lokasi yang sama), kemudian
+terlebih dahulu, pemasangan npm dijalankan (memasang versi lebih baharu di lokasi yang sama), kemudian
 perkhidmatan dimulakan semula.
 
 **Badan permintaan** (semuanya pilihan):
@@ -328,9 +328,9 @@ perkhidmatan dimulakan semula.
 
 #### `POST /api/services/9router/rotate-key`
 
-Menjana kunci API baharu untuk 9Router, menyulitkannya semasa disimpan dan memulakan semula perkhidmatan
-(jika sedang berjalan) supaya perkhidmatan menggunakan kunci baharu daripada persekitarannya. Kunci lama
-dibatalkan serta-merta.
+Menjana kunci API baharu untuk 9Router, menyulitkannya ketika disimpan, dan memulakan semula perkhidmatan
+(jika sedang berjalan) supaya ia mengambil kunci baharu daripada persekitarannya. Kunci lama
+dinyahsahkan serta-merta.
 
 **Badan permintaan:** tiada
 
@@ -342,7 +342,7 @@ dibatalkan serta-merta.
 | `500`  | Putaran gagal                              |
 
 **Keselamatan:** Kunci baharu tidak pernah dikembalikan dalam respons (tiada kebocoran kelayakan).
-Kunci tersebut disimpan dalam bentuk tersulit (AES-256-GCM) dalam jadual `version_manager`.
+Ia disimpan dalam bentuk tersulit (AES-256-GCM) dalam jadual `version_manager`.
 
 ---
 
@@ -381,8 +381,8 @@ Mengembalikan gabungan status langsung + DB termasuk metadata versi dan pratonto
 
 #### `POST /api/services/9router/auto-start`
 
-Menogol bendera mula automatik. Apabila `enabled: true`, perkhidmatan dimulakan secara automatik
-pada kali seterusnya OmniRoute dibut (jika perkhidmatan telah dipasang).
+Togol bendera mula automatik. Apabila `enabled: true`, perkhidmatan bermula secara automatik
+pada kali berikutnya OmniRoute dibut (jika perkhidmatan dipasang).
 
 **Badan permintaan:**
 
@@ -405,18 +405,18 @@ Strim SSE bagi log langsung daripada penimbal gelang stdout/stderr 9Router.
 
 **Parameter pertanyaan:**
 
-| Param    | Jenis     | Lalai | Penerangan                                                                                          |
-| -------- | --------- | ----- | --------------------------------------------------------------------------------------------------- |
-| `tail`   | `integer` | 200   | Bilangan baris sejarah yang dihantar terlebih dahulu (maks. 1000)                                   |
-| `filter` | `string`  | tiada | Penapis subrentetan tanpa mengira huruf besar/kecil (tanpa ungkapan nalar — selamat daripada ReDoS) |
+| Parameter | Jenis     | Lalai | Penerangan                                                                                  |
+| --------- | --------- | ----- | ------------------------------------------------------------------------------------------- |
+| `tail`    | `integer` | 200   | Bilangan baris sejarah untuk dihantar terlebih dahulu (maksimum 1000)                       |
+| `filter`  | `string`  | tiada | Penapis subrentetan tidak sensitif huruf besar/kecil (tanpa regex — selamat daripada ReDoS) |
 
 **Peristiwa SSE:**
 
-| Peristiwa   | Data        | Penerangan                 |
-| ----------- | ----------- | -------------------------- |
-| `snapshot`  | `LogLine[]` | Penghujung sejarah awal    |
-| `log`       | `LogLine`   | Baris log langsung         |
-| `heartbeat` | `{}`        | Kekal aktif setiap 15 saat |
+| Peristiwa   | Data        | Penerangan              |
+| ----------- | ----------- | ----------------------- |
+| `snapshot`  | `LogLine[]` | Ekor sejarah awal       |
+| `log`       | `LogLine`   | Baris log langsung      |
+| `heartbeat` | `{}`        | Kekal aktif setiap 15 s |
 
 **Skema LogLine:**
 
@@ -441,9 +441,9 @@ Strim SSE bagi log langsung daripada penimbal gelang stdout/stderr 9Router.
 ### 4.2 Titik akhir CLIProxyAPI (10 laluan)
 
 CLIProxyAPI mempunyai bentuk titik akhir yang sama seperti 9Router tanpa `rotate-key`, serta
-`accounts`, `provider-expose` dan `auto-restart-adopted`. Kini ia menerima
-kunci API satah data khusus yang disuntik semasa proses dimulakan (`needsApiKey: true` dalam
-`bootstrap.ts`, digunakan untuk penyegerakan model); `status` merangkumi lebih sedikit medan.
+`accounts`, `provider-expose` dan `auto-restart-adopted`. Ia kini menerima
+kunci API satah data khusus yang disuntik semasa pelancaran (`needsApiKey: true` dalam
+`bootstrap.ts`, digunakan untuk penyegerakan model); `status` mengandungi lebih sedikit medan.
 
 | Kaedah | Laluan                              | Penerangan                                  |
 | ------ | ----------------------------------- | ------------------------------------------- |
@@ -451,21 +451,21 @@ kunci API satah data khusus yang disuntik semasa proses dimulakan (`needsApiKey:
 | `POST` | `/api/services/cliproxy/start`      | Mulakan CLIProxyAPI                         |
 | `POST` | `/api/services/cliproxy/stop`       | Hentikan CLIProxyAPI                        |
 | `POST` | `/api/services/cliproxy/restart`    | Mulakan semula CLIProxyAPI                  |
-| `POST` | `/api/services/cliproxy/update`     | Kemas kini kepada versi yang lebih baharu   |
-| `GET`  | `/api/services/cliproxy/status`     | Status langsung + DB (tanpa `apiKeyMasked`) |
+| `POST` | `/api/services/cliproxy/update`     | Kemas kini kepada versi lebih baharu        |
+| `GET`  | `/api/services/cliproxy/status`     | Status langsung + DB (tiada `apiKeyMasked`) |
 | `POST` | `/api/services/cliproxy/auto-start` | Togol mula automatik                        |
 
-Titik akhir kongsi `GET /api/services/{name}/logs` (lihat §4.1) berfungsi untuk keempat-empat
-perkhidmatan menggunakan segmen dinamik `[name]`.
+Titik akhir dikongsi `GET /api/services/{name}/logs` (lihat §4.1) berfungsi untuk kesemua
+empat perkhidmatan menggunakan segmen dinamik `[name]`.
 
 ---
 
 ### 4.3 Titik akhir Mux (8 laluan)
 
 Mux mempunyai bentuk titik akhir yang sama seperti CLIProxyAPI — tiada laluan `rotate-key` pada permukaan
-API (token pembawa dijana dengan cara yang sama seperti milik 9Router melalui
+API (token pembawa dijana dengan cara yang sama seperti 9Router melalui
 `getOrCreateApiKey("mux")` dan disuntik melalui pemboleh ubah persekitaran `MUX_SERVER_AUTH_TOKEN`, tetapi
-belum ada titik akhir putaran khusus). Mux hanya diuruskan dari segi kitar hayat: tidak seperti
+belum ada titik akhir penggiliran khusus). Mux hanya diuruskan dari segi kitaran hayat: tidak seperti
 9Router, ia tidak mempunyai pelaksana Lapisan 4 dan tidak pernah didaftarkan sebagai penyedia penghalaan.
 
 | Kaedah | Laluan                         | Penerangan                               |
@@ -482,36 +482,106 @@ belum ada titik akhir putaran khusus). Mux hanya diuruskan dari segi kitar hayat
 
 ### 4.4 Titik akhir Bifrost (8 laluan)
 
-Bifrost ialah bahagian belakang geganti gerbang AI Go (`@maximhq/bifrost`). Ia menggunakan
-bentuk titik akhir yang sama seperti CLIProxyAPI (tiada `rotate-key` — Bifrost mengurus kunci
-penyedinya sendiri dalam `config.json` di bawah `-app-dir`).
+Bifrost ialah bahagian belakang geganti get laluan AI Go (`@maximhq/bifrost`). Ia menggunakan
+bentuk titik akhir yang sama seperti CLIProxyAPI (tiada `rotate-key` — Bifrost menguruskan kunci
+penyedialanya sendiri dalam `config.json` di bawah `-app-dir`).
 
-| Kaedah | Laluan                             | Penerangan                                                          |
-| ------ | ---------------------------------- | ------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | Pasang Bifrost daripada npm (`@maximhq/bifrost`)                    |
-| `POST` | `/api/services/bifrost/start`      | Mulakan Bifrost pada port 8080 (lalai)                              |
-| `POST` | `/api/services/bifrost/stop`       | Hentikan Bifrost                                                    |
-| `POST` | `/api/services/bifrost/restart`    | Mulakan semula Bifrost                                              |
-| `POST` | `/api/services/bifrost/update`     | Kemas kini kepada versi yang lebih baharu                           |
-| `GET`  | `/api/services/bifrost/status`     | Status langsung + DB                                                |
-| `POST` | `/api/services/bifrost/auto-start` | Togol mula automatik                                                |
-| `GET`  | `/api/services/bifrost/logs`       | Hujung log SSE (melalui laluan dinamik `[name]/logs` yang dikongsi) |
+| Kaedah | Laluan                             | Penerangan                                                   |
+| ------ | ---------------------------------- | ------------------------------------------------------------ |
+| `POST` | `/api/services/bifrost/install`    | Pasang Bifrost daripada npm (`@maximhq/bifrost`)             |
+| `POST` | `/api/services/bifrost/start`      | Mulakan Bifrost pada port 8080 (lalai)                       |
+| `POST` | `/api/services/bifrost/stop`       | Hentikan Bifrost                                             |
+| `POST` | `/api/services/bifrost/restart`    | Mulakan semula Bifrost                                       |
+| `POST` | `/api/services/bifrost/update`     | Kemas kini kepada versi lebih baharu                         |
+| `GET`  | `/api/services/bifrost/status`     | Status langsung + DB                                         |
+| `POST` | `/api/services/bifrost/auto-start` | Togol mula automatik                                         |
+| `GET`  | `/api/services/bifrost/logs`       | Ekor log SSE (melalui laluan dinamik dikongsi `[name]/logs`) |
 
 **Pendawaian penghalaan:** Apabila `BIFROST_BASE_URL` tidak ditetapkan dan tika Bifrost
 yang diselia sedang berjalan, `getBifrostRoutingConfig()` (dalam `routingBackend.ts`) secara automatik
-menggunakan `http://127.0.0.1:{port}` sebagai URL asas geganti. Pemboleh ubah persekitaran
-`BIFROST_BASE_URL` yang ditetapkan secara eksplisit sentiasa diutamakan.
+menggunakan `http://127.0.0.1:{port}` sebagai URL asas geganti. Pemboleh ubah persekitaran `BIFROST_BASE_URL`
+yang ditetapkan secara eksplisit sentiasa diutamakan.
 
 ---
 
 ### 4.5 Titik akhir Dario (12 laluan)
 
-Mempunyai bentuk kitaran hayat yang sama seperti perkhidmatan lain (`install`, `start`, `stop`, `restart`,
+Bentuk kitaran hayat yang sama seperti perkhidmatan lain (`install`, `start`, `stop`, `restart`,
 `update`, `status`, `auto-start`, `auto-restart-adopted`) serta satah kawalan OAuth
 berpagar token di bawah `admin/`: `admin/accounts`, `admin/import-from-omniroute`,
 `admin/login-start`, `admin/login-complete` (semuanya dilindungi oleh `DARIO_ADMIN_TOKEN`).
 
-### 4.6 Proksi songsang (benaman papan pemuka 9Router)
+### 4.6 Titik akhir open-wa (7 laluan)
+
+open-wa (`@open-wa/wa-automate`) mengendalikan tika Chromium tanpa antaramuka (melalui
+Puppeteer) untuk mengautomasikan WhatsApp Web. Ia menggunakan bentuk titik akhir yang sama seperti Mux (belum
+ada laluan `rotate-key`). Ia hanya diuruskan dari segi kitaran hayat — bukan sasaran penghalaan,
+tiada entri pelaksana/penyedia Lapisan 4.
+
+| Kaedah | Laluan                            | Penerangan                                                   |
+| ------ | --------------------------------- | ------------------------------------------------------------ |
+| `POST` | `/api/services/openwa/install`    | Pasang open-wa daripada npm (`@open-wa/wa-automate`)         |
+| `POST` | `/api/services/openwa/start`      | Mulakan open-wa pada port 8323 (lalai)                       |
+| `POST` | `/api/services/openwa/stop`       | Hentikan open-wa                                             |
+| `POST` | `/api/services/openwa/restart`    | Mulakan semula open-wa                                       |
+| `POST` | `/api/services/openwa/update`     | Kemas kini kepada versi yang lebih baharu                    |
+| `GET`  | `/api/services/openwa/status`     | Status langsung + DB                                         |
+| `POST` | `/api/services/openwa/auto-start` | Togol mula automatik                                         |
+| `GET`  | `/api/services/openwa/logs`       | Ekor log SSE (melalui laluan dinamik `[name]/logs` dikongsi) |
+
+**Kunci API:** disuntik sebagai `WA_KEY` — penggantian env generik open-wa yang
+diawali `WA_*` memetakannya kepada pilihan CLI `--key`/`-k`
+(`dist/cli/setup.js::envArgs()`, disahkan terhadap pakej 4.76.0 yang telah
+dipasang). Diawali `ow_` apabila dijana oleh `generateServiceApiKey()`. open-wa
+membaca semula kunci daripada pengepala HTTP `key`/`api_key` (bukan
+`Authorization: Bearer`); `/api-docs*` dikecualikan secara eksplisit daripada
+semakan tersebut (`setupAuthenticationLayer` dalam `dist/cli/server.js`), maka
+prob kesihatan tidak memerlukan pengepala pengesahan.
+
+**Penggandingan:** open-wa tidak rasmi dan tidak mempunyai kaitan dengan
+WhatsApp — nombor yang disambungkan menghadapi risiko disekat akibat pengesanan
+automasi WhatsApp sendiri. Pada permulaan pertama, kod QR penggandingan dicetak
+ke stdout dan dipaparkan melalui panel Log/aliran SSE sedia ada — masih belum
+ada titik akhir imej QR khusus dalam penyepaduan ini.
+
+---
+
+### 4.7 Titik akhir LLMLingua (8 laluan)
+
+LLMLingua ialah sidecar pemampatan gesaan yang membalut
+`@atjsh/llmlingua-2` (model pengelasan token ONNX sebenar, dimuat turun
+daripada Hugging Face pada panggilan `/compress` pertama). Ia menggunakan
+bentuk titik akhir yang sama seperti Bifrost (tiada kunci API —
+`needsApiKey: false`, ia tidak pernah mengendalikan kelayakan).
+
+| Kaedah | Laluan                                         | Penerangan                                                                          |
+| ------ | ---------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | Pasang `@atjsh/llmlingua-2` + rakan setara melalui npm, tulis skrip pelayan sidecar |
+| `POST` | `/api/services/llmlingua/start`                | Mulakan sidecar pada port 20135 (lalai)                                             |
+| `POST` | `/api/services/llmlingua/stop`                 | Hentikan sidecar                                                                    |
+| `POST` | `/api/services/llmlingua/restart`              | Mulakan semula sidecar                                                              |
+| `POST` | `/api/services/llmlingua/update`               | Kemas kini kepada versi pakej yang lebih baharu                                     |
+| `GET`  | `/api/services/llmlingua/status`               | Status langsung + DB                                                                |
+| `POST` | `/api/services/llmlingua/auto-start`           | Togol mula automatik                                                                |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Togol mula semula automatik bagi tika guna pakai (sedia ada)                        |
+| `GET`  | `/api/services/llmlingua/logs`                 | Ekor log SSE (melalui laluan dinamik `[name]/logs` dikongsi)                        |
+
+**Kontrak sidecar:** skrip pelayan mendedahkan `GET /health` (serta-merta —
+tidak menunggu model) dan `POST /compress` (`{ text, rate }` →
+`{ text, compressed, ratio }`). Model dimuatkan secara malas pada panggilan
+`/compress` pertama.
+
+**Pendawaian pemampatan:** `httpSidecarBackend` dalam
+`open-sse/services/compression/engines/llmlingua/index.ts` memanggil
+`LLMLINGUA_BASE_URL` (lalai `http://127.0.0.1:20135`) dan hanya menerima
+respons sidecar apabila respons itu benar-benar lebih pendek daripada input;
+sebarang kegagalan (tidak berjalan, tamat masa, respons tanpa perubahan)
+akan kembali menggunakan bahagian belakang bebenang pekerja dalam proses
+(`./worker.ts`).
+
+---
+
+### 4.8 Proksi songsang (benaman papan pemuka 9Router)
 
 Papan pemuka membenamkan UI web 9Router di dalam iframe melalui proksi songsang
 dalaman di:
@@ -528,12 +598,13 @@ Proksi ini:
 - Membuang `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` daripada respons
 - Menulis semula respons HTML untuk menyuntik `<base href>` dan menormalkan laluan mutlak (`/foo` → `/dashboard/.../embed/foo`)
 
-Peningkatan WebSocket untuk papan pemuka terbenam dikendalikan oleh pelayan pendamping pada
-port khusus (lihat `src/lib/services/embedWsProxy.ts`).
+Naik taraf WebSocket untuk papan pemuka terbenam dikendalikan oleh pelayan
+pendamping pada port khusus (lihat `src/lib/services/embedWsProxy.ts`).
 
-**Keselamatan:** Laluan proksi benaman diklasifikasikan di bawah `LOCAL_ONLY_API_PREFIXES`
-dan hanya boleh dicapai daripada gelung balik. Penyerang yang memperoleh JWT melalui
-terowong Cloudflare/Ngrok tidak boleh menggunakan proksi untuk memasuki perkhidmatan terbenam.
+**Keselamatan:** Laluan proksi benaman dikelaskan di bawah
+`LOCAL_ONLY_API_PREFIXES` dan hanya boleh dicapai daripada gelung balik.
+Penyerang yang memperoleh JWT melalui terowong Cloudflare/Ngrok tidak boleh
+menggunakan proksi untuk mengakses perkhidmatan terbenam.
 
 ---
 

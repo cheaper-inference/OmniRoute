@@ -52,6 +52,27 @@ export function getStickyRoundRobinStartIndex(
   return { startIndex: counter % targets.length, counter };
 }
 
+/**
+ * Index into a round-robin target list for the `offset`-th attempt (#17289).
+ *
+ * `confirmedCount` is the length of the confirmed-vision prefix of an image
+ * request's targets (0 = no tiering, plain rotation). With tiering, the rotation
+ * runs WITHIN the confirmed prefix first and only then within the unknown-vision
+ * tail, so an unknown (possibly text-only) target is a last resort instead of
+ * taking its share of normal rotation.
+ */
+export function rotateWithinVisionTiers(
+  offset: number,
+  startIndex: number,
+  total: number,
+  confirmedCount: number
+): number {
+  if (confirmedCount <= 0 || confirmedCount >= total) return (startIndex + offset) % total;
+  if (offset < confirmedCount) return (startIndex + offset) % confirmedCount;
+  const unknownStart = startIndex >= confirmedCount ? startIndex - confirmedCount : 0;
+  return confirmedCount + ((unknownStart + offset - confirmedCount) % (total - confirmedCount));
+}
+
 export function recordStickyRoundRobinSuccess(
   comboName: string,
   target: ResolvedComboUnit,

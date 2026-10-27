@@ -8,7 +8,7 @@
  * - passthrough: leave client fields unchanged (required for Codex visible thinking)
  * - auto: STRIP all thinking/reasoning fields before upstream (not “auto-show thinking”)
  * - custom: force a fixed token budget on every request
- * - adaptive: scale budget from a base effort by request complexity
+ * - adaptive: preserve explicit effort; otherwise scale budget by request complexity
  *
  * Independent of compression, prompt cache, combo routing, and API-key token limits.
  * Does **not** decrypt OpenAI/Codex `encrypted_content` reasoning blobs.
@@ -61,6 +61,61 @@ export const THINKING_LEVEL_MAP: Record<string, number> = {
   max: 131072, // T11: max = full Claude budget (sub2api: xhigh)
   xhigh: 131072, // T11: explicit xhigh alias
 };
+
+export type Gemini38ThinkingLevel = "low" | "medium" | "high";
+
+/** Gemini 3.8 Flash, Gemini 4 Argon, and future thinking-level models (e.g. vertex/gemini-4-argon). */
+export function isGemini38Model(model: string): boolean {
+  return /(?:^|[\/])gemini-(?:3\.8|4)(?:$|[-.])/i.test(model);
+}
+
+export function gemini38ThinkingLevelFromBudget(
+  model: string,
+  budget: number
+): Gemini38ThinkingLevel {
+  const resolved = getResolvedModelCapabilities(model);
+  const cap = resolved.thinkingBudgetCap ?? 24576;
+  const medium = resolved.defaultThinkingBudget || 8192;
+  if (budget <= 0) {
+    throw new RangeError(
+      "gemini38ThinkingLevelFromBudget: budget must be > 0; use gemini38ThinkingConfig for the off-switch"
+    );
+  }
+  if (budget >= cap) return "high";
+  if (budget <= 1024) return "low";
+  if (budget <= medium) return "medium";
+  return "high";
+}
+
+function clientAskedForThoughts(body: Record<string, unknown>): boolean {
+  return body.includeThoughts === true || body.include_thoughts === true;
+}
+
+/**
+ * Gemini 3.8 honors thinkingLevel, not a 3.7 numeric thinkingBudget.
+ * Omit includeThoughts unless the client asked - thoughts share maxOutputTokens.
+ */
+export function gemini38ThinkingConfig(
+  model: string,
+  budget: number,
+  body: Record<string, unknown>
+):
+  | { thinkingLevel: Gemini38ThinkingLevel; includeThoughts?: boolean }
+  | { thinkingBudget: number; includeThoughts: boolean } {
+  if (budget <= 0) {
+    return { thinkingBudget: 0, includeThoughts: false };
+  }
+  const thinkingConfig: {
+    thinkingLevel: Gemini38ThinkingLevel;
+    includeThoughts?: boolean;
+  } = {
+    thinkingLevel: gemini38ThinkingLevelFromBudget(model, budget),
+  };
+  if (clientAskedForThoughts(body)) {
+    thinkingConfig.includeThoughts = true;
+  }
+  return thinkingConfig;
+}
 
 // Default config (passthrough = backward compatible)
 export const DEFAULT_THINKING_CONFIG = {
@@ -252,7 +307,7 @@ export function applyThinkingBudget(
       return setCustomBudget(processed, cfg.customBudget ?? DEFAULT_THINKING_CONFIG.customBudget);
 
     case ThinkingMode.ADAPTIVE:
-      return applyAdaptiveBudget(processed, cfg);
+      return hasExplicitReasoningEffort(body) ? processed : applyAdaptiveBudget(processed, cfg);
 
     default:
       return processed;
@@ -340,9 +395,29 @@ function setCustomBudget(body: unknown, budget: number) {
   return result;
 }
 
-/**
- * ADAPTIVE mode: scale budget based on request complexity
- */
+// Inspect original carriers before normalizeThinkingLevel converts discrete levels
+// into numeric budgets. Provider capability validation remains at the executor.
+function hasExplicitReasoningEffort(body: unknown): boolean {
+  const record = toRecord(body);
+  const generationConfig = toRecord(record.generationConfig);
+  const nativeEffort = toRecord(record.output_config).effort;
+  // Match the normalizer's precedence: a shadowed alias is not the chosen level.
+  const levels = [
+    record.thinkingLevel || record.thinking_level,
+    toRecord(generationConfig.thinkingConfig).thinkingLevel ||
+      toRecord(generationConfig.thinking_config).thinkingLevel,
+  ];
+  return (
+    typeof record.reasoning_effort === "string" ||
+    typeof toRecord(record.reasoning).effort === "string" ||
+    (typeof nativeEffort === "string" && nativeEffort.length > 0) ||
+    levels.some(
+      (level) => typeof level === "string" && Object.hasOwn(THINKING_LEVEL_MAP, level.toLowerCase())
+    )
+  );
+}
+
+/** ADAPTIVE mode without explicit effort: scale budget by request complexity. */
 function applyAdaptiveBudget(body: unknown, cfg: Partial<ThinkingBudgetConfig>) {
   const bodyRecord = toRecord(body);
   const messages = Array.isArray(bodyRecord.messages)
@@ -379,12 +454,31 @@ function applyAdaptiveBudget(body: unknown, cfg: Partial<ThinkingBudgetConfig>) 
     EFFORT_BUDGETS[typeof cfg.effortLevel === "string" ? cfg.effortLevel : "medium"] ||
     getDefaultThinkingBudget(getStringField(bodyRecord, "model")) ||
     EFFORT_BUDGETS.medium;
-  const budget = capThinkingBudget(
-    getStringField(bodyRecord, "model"),
-    Math.ceil(baseBudget * multiplier)
-  );
+  const scaledBudget = Math.ceil(baseBudget * multiplier);
+  const budget = capThinkingBudget(getStringField(bodyRecord, "model"), scaledBudget);
 
-  return setCustomBudget(body, budget);
+  // The effort→budget table collapses high, xhigh and max onto the same number,
+  // and setCustomBudget then reads any budget at that ceiling back as xhigh.
+  // Keep the configured effort when the multiplier did not raise the budget.
+  // Compare the pre-cap value: a model
+  // cap that pulls a genuinely scaled budget back under the ceiling is not the
+  // same as "the request was not complex". Only pin efforts below the ceiling:
+  // "max"/"xhigh" already read back as "xhigh", and writing "max" verbatim as
+  // reasoning_effort would be rejected by OpenAI/Codex.
+  const result = setCustomBudget(body, budget);
+  const selected = typeof cfg.effortLevel === "string" ? cfg.effortLevel : "";
+  const selectedBudget = EFFORT_BUDGETS[selected];
+  if (
+    selected &&
+    selected !== "max" &&
+    selected !== "xhigh" &&
+    selectedBudget !== undefined &&
+    scaledBudget <= selectedBudget &&
+    result.reasoning_effort !== undefined
+  ) {
+    result.reasoning_effort = selected;
+  }
+  return result;
 }
 
 /**

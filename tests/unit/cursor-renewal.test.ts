@@ -680,6 +680,48 @@ describe("createKeyedMutex", () => {
     assert.deepEqual(events, ["first-start", "first-end", "second-start"]);
   });
 
+  it("keeps a queued successor locked when an earlier call cleans up", async () => {
+    const mutex = createKeyedMutex<string>();
+    const firstGate = deferred();
+    const secondGate = deferred();
+    const secondStarted = deferred();
+    const events: string[] = [];
+    const first = mutex.run("k", async () => {
+      events.push("first");
+      await firstGate.promise;
+      return "first-result";
+    });
+    const second = mutex.run("k", async () => {
+      events.push("second-start");
+      secondStarted.resolve();
+      await secondGate.promise;
+      events.push("second-end");
+      return "second-result";
+    });
+    let third: Promise<string> | undefined;
+    try {
+      firstGate.resolve();
+      await secondStarted.promise;
+      third = mutex.run("k", async () => {
+        events.push("third");
+        return "third-result";
+      });
+      // An incorrectly unlocked third callback would run in this microtask turn.
+      await Promise.resolve();
+      assert.deepEqual(events, ["first", "second-start"]);
+    } finally {
+      firstGate.resolve();
+      secondGate.resolve();
+      await Promise.allSettled([first, second, third]);
+    }
+    assert.deepEqual(await Promise.all([first, second, third]), [
+      "first-result",
+      "second-result",
+      "third-result",
+    ]);
+    assert.deepEqual(events, ["first", "second-start", "second-end", "third"]);
+  });
+
   it("runs calls for different keys concurrently (no cross-key serialization)", async () => {
     const mutex = createKeyedMutex<string>();
     const events: string[] = [];

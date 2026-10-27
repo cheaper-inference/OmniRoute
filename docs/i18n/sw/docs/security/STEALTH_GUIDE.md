@@ -1,6 +1,6 @@
 # Stealth Guide (Kiswahili)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/STEALTH_GUIDE.md) · 🇪🇹 [am](../../../am/docs/security/STEALTH_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/security/STEALTH_GUIDE.md) · 🇦🇿 [az](../../../az/docs/security/STEALTH_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/security/STEALTH_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/security/STEALTH_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/security/STEALTH_GUIDE.md) · 🇩🇰 [da](../../../da/docs/security/STEALTH_GUIDE.md) · 🇩🇪 [de](../../../de/docs/security/STEALTH_GUIDE.md) · 🇬🇷 [el](../../../el/docs/security/STEALTH_GUIDE.md) · 🇪🇸 [es](../../../es/docs/security/STEALTH_GUIDE.md) · 🇪🇪 [et](../../../et/docs/security/STEALTH_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/security/STEALTH_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/security/STEALTH_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/security/STEALTH_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/security/STEALTH_GUIDE.md) · 🇮🇱 [he](../../../he/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/security/STEALTH_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/security/STEALTH_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/security/STEALTH_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/security/STEALTH_GUIDE.md) · 🇮🇩 [id](../../../id/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/security/STEALTH_GUIDE.md) · 🇮🇹 [it](../../../it/docs/security/STEALTH_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/security/STEALTH_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/security/STEALTH_GUIDE.md) · 🇰🇭 [km](../../../km/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/security/STEALTH_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/security/STEALTH_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/security/STEALTH_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/security/STEALTH_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/security/STEALTH_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/security/STEALTH_GUIDE.md) · 🇲🇲 [my](../../../my/docs/security/STEALTH_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/security/STEALTH_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/security/STEALTH_GUIDE.md) · 🇳🇴 [no](../../../no/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [or](../../../or/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/security/STEALTH_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/security/STEALTH_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/security/STEALTH_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/security/STEALTH_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/STEALTH_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/security/STEALTH_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/security/STEALTH_GUIDE.md) · 🇱🇰 [si](../../../si/docs/security/STEALTH_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/security/STEALTH_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/security/STEALTH_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/security/STEALTH_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [te](../../../te/docs/security/STEALTH_GUIDE.md) · 🇹🇭 [th](../../../th/docs/security/STEALTH_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/security/STEALTH_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/STEALTH_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/security/STEALTH_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/security/STEALTH_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/security/STEALTH_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/STEALTH_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/STEALTH_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/STEALTH_GUIDE.md) · 🇪🇹 [am](../../../am/docs/security/STEALTH_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/security/STEALTH_GUIDE.md) · 🇦🇿 [az](../../../az/docs/security/STEALTH_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/security/STEALTH_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/security/STEALTH_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/security/STEALTH_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/security/STEALTH_GUIDE.md) · 🇩🇰 [da](../../../da/docs/security/STEALTH_GUIDE.md) · 🇩🇪 [de](../../../de/docs/security/STEALTH_GUIDE.md) · 🇬🇷 [el](../../../el/docs/security/STEALTH_GUIDE.md) · 🇪🇸 [es](../../../es/docs/security/STEALTH_GUIDE.md) · 🇪🇪 [et](../../../et/docs/security/STEALTH_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/security/STEALTH_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/security/STEALTH_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/security/STEALTH_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/security/STEALTH_GUIDE.md) · 🇮🇱 [he](../../../he/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/security/STEALTH_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/security/STEALTH_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/security/STEALTH_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/security/STEALTH_GUIDE.md) · 🇮🇩 [id](../../../id/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/security/STEALTH_GUIDE.md) · 🇮🇹 [it](../../../it/docs/security/STEALTH_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/security/STEALTH_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/security/STEALTH_GUIDE.md) · 🇰🇭 [km](../../../km/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/security/STEALTH_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/security/STEALTH_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/security/STEALTH_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/security/STEALTH_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/security/STEALTH_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/security/STEALTH_GUIDE.md) · 🇲🇲 [my](../../../my/docs/security/STEALTH_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/security/STEALTH_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/security/STEALTH_GUIDE.md) · 🇳🇴 [no](../../../no/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [or](../../../or/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/security/STEALTH_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/security/STEALTH_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/security/STEALTH_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/security/STEALTH_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/STEALTH_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/security/STEALTH_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/security/STEALTH_GUIDE.md) · 🇱🇰 [si](../../../si/docs/security/STEALTH_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/security/STEALTH_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/security/STEALTH_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/security/STEALTH_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [te](../../../te/docs/security/STEALTH_GUIDE.md) · 🇹🇭 [th](../../../th/docs/security/STEALTH_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/security/STEALTH_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/STEALTH_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/security/STEALTH_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/security/STEALTH_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/security/STEALTH_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/STEALTH_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/STEALTH_GUIDE.md)
 
 ---
 
@@ -16,40 +16,61 @@ Vipengele vya ufichaji vipo ili OmniRoute iweze kufanya kazi kama safu ya uoanif
 
 ---
 
-## Safu ya Alama za Utambulisho za TLS
+## Safu ya Utambuzi wa Alama za TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Vipindi endelevu vya `wreq-js` huundwa kwa uvivu kwa kila upeo wa akaunti na proksi iliyotatuliwa. `TlsClient` ya mchakato mzima huhifadhi vipindi visivyozidi 128 vinavyoiga **Chrome 124 kwenye macOS** kwa huduma asili zilizo nyuma ya Cloudflare. `TlsClient.fetch()` hushindwa kwa kufungwa wakati mazingira asilia ya utekelezaji hayapatikani; mpigaji anaweza kuchagua kwa uwazi njia mbadala nje ya kifungashio hiki.
+Vipindi endelevu vya `wreq-js` huundwa kwa njia ya uvivu kwa kila wigo wa akaunti na proksi iliyotatuliwa. `TlsClient` ya mchakato mzima huhifadhi kwenye bwawa vipindi visivyozidi 128 vinavyoiga **Chrome 124 kwenye macOS** kwa huduma za juu zilizo nyuma ya Cloudflare. `TlsClient.fetch()` hushindwa kwa hali iliyofungwa wakati mazingira asilia ya utekelezaji hayapatikani; mpigaji anaweza kuchagua waziwazi mbinu mbadala nje ya kifungashio hiki.
 
 - Wasifu wa kipindi: `browser: "chrome_124", os: "macos"`
 - Utatuzi wa proksi (kipaumbele): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (pia herufi ndogo)
-- Muda wa kusubiri: `TLS_CLIENT_TIMEOUT_MS` (hurithi kutoka `FETCH_TIMEOUT_MS`, chaguo-msingi 600000)
+- Muda wa kuisha: `TLS_CLIENT_TIMEOUT_MS` (hurithi kutoka `FETCH_TIMEOUT_MS`, chaguo-msingi 600000)
 - Response ya `wreq-js` inaoana na fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Kichunguzi cha baiti ya kwanza (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()` hutatuliwa mara tu vichwa vya huduma asili vinapowasili, kwa hivyo `TLS_CLIENT_TIMEOUT_MS` pekee haiwezi kuweka kikomo kwa mwili ambao hautoi kamwe baiti ya kwanza. `guardTlsFirstByte()` hushindanisha `read()` ya kwanza ya mwili dhidi ya `TLS_FIRST_BYTE_WATCHDOG_MS` (chaguo-msingi `10000`, `0` huizima); mwili wenye afya hauathiriwi, ilhali mwili uliokwama hughairi kisomaji cha wreq na kuruhusu mantiki iliyopo ya urejeaji wa TLS ya `proxyFetch` kuendelea hadi kwa kisambazaji cha moja kwa moja/proksi (ombi lisilo salama kuchezwa tena, k.m. POST yenye mwili, bado hutupa hitilafu badala ya kujaribiwa tena kimyakimya).
+- Kifuatiliaji cha baiti ya kwanza (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  hukamilika mara tu vichwa vya huduma ya juu vinapowasili, kwa hivyo `TLS_CLIENT_TIMEOUT_MS` pekee haiwezi kuweka kikomo kwa
+  mwili ambao hautoi kamwe baiti ya kwanza. `guardTlsFirstByte()` hushindanisha `read()` ya kwanza ya mwili
+  dhidi ya `TLS_FIRST_BYTE_WATCHDOG_MS` (chaguo-msingi `10000`, `0` huizima); mwili wenye hali nzuri
+  hauathiriwi, huku mwili uliokwama ukighairi kisomaji cha wreq na kuruhusu mantiki iliyopo ya
+  mbinu mbadala ya TLS ya `proxyFetch` iendelee hadi kwa kisambazaji cha moja kwa moja/proksi (ombi lisilo salama kurudiwa, kwa mfano
+  POST yenye mwili, bado hutupa hitilafu badala ya kujaribiwa tena kimyakimya).
 
-### Usafirishaji wa mtoa huduma kwa kutumia vidakuzi vya wavuti — wreq-js 3.2.0
+### Usafirishaji wa mtoa huduma wa vidakuzi vya wavuti — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` ni adapta ya pamoja kwa usafirishaji maalumu mitano wa vidakuzi vya wavuti ulio hapa chini. Kila kifungashio chepesi cha mtoa huduma huchagua wasifu wa kivinjari/mfumo wa uendeshaji. Adapta hutumia kipakiaji kimoja cha mazingira ya utekelezaji ya wreq na hifadhi ya usafirishaji katika `open-sse/utils/tlsClient.ts`, iliyowekewa funguo kulingana na wasifu + mfumo wa uendeshaji + proksi iliyotatuliwa, huku kila ombi likitumia `cookieMode: "ephemeral"`. Kwa hivyo akaunti na maombi hushiriki miunganisho ya kiwango cha usafirishaji, lakini kamwe hazishiriki kipindi cha wreq au hifadhi ya vidakuzi.
+`open-sse/services/tlsClientBase.ts` ni adapta inayoshirikiwa na njia tano maalumu za
+usafirishaji wa vidakuzi vya wavuti zilizo hapa chini. Kila kifungashio chepesi cha mtoa huduma huchagua wasifu wa kivinjari/OS. Adapta
+hutumia kipakiaji kimoja cha mazingira ya utekelezaji ya wreq na bwawa la usafirishaji katika `open-sse/utils/tlsClient.ts`, lenye ufunguo wa
+wasifu + OS + proksi iliyotatuliwa, huku kila ombi likitumia `cookieMode: "ephemeral"`. Kwa hivyo, akaunti na
+maombi hushiriki miunganisho ya kiwango cha usafirishaji, lakini kamwe hazishiriki kipindi cha wreq wala hifadhi ya vidakuzi.
 
-| Mtoa huduma | Wasifu        | Mfumo wa uendeshaji unaoigwa | Sera ya EOF ya mtiririko                  |
-| ----------- | ------------- | ---------------------------- | ----------------------------------------- |
-| Claude      | `chrome_146`  | Linux                        | jumuisha `[DONE]`                         |
-| Perplexity  | `firefox_148` | macOS                        | jumuisha `event: end_of_stream`           |
-| Grok        | `chrome_146`  | Linux                        | ondoa `[DONE]`                            |
-| Notion      | `chrome_146`  | Windows                      | jumuisha `[DONE]`                         |
-| LMArena     | `chrome_146`  | Windows                      | hakuna kiashiria; funga kwenye EOF asilia |
+| Mtoa huduma | Wasifu        | OS inayoigwa | Sera ya EOF ya mtiririko               |
+| ----------- | ------------- | ------------ | -------------------------------------- |
+| Claude      | `chrome_146`  | Linux        | jumuisha `[DONE]`                      |
+| Perplexity  | `firefox_151` | macOS        | jumuisha `event: end_of_stream`        |
+| Grok        | `chrome_146`  | Linux        | ondoa `[DONE]`                         |
+| Notion      | `chrome_146`  | Windows      | jumuisha `[DONE]`                      |
+| LMArena     | `chrome_146`  | Windows      | hakuna kiashiria; funga kwa EOF asilia |
 
-- Utiririshaji hutumia `ReadableStream` asilia ya jibu moja kwa moja; hakuna faili ya muda au mchakato saidizi unaoundwa.
-- Hadi baiti 256 za mwanzo hukaguliwa kabla ya kufichua mtiririko. Watoa huduma wa SSE huhifadhi kwenye bafa hitilafu zisizo za SSE; Grok/LMArena huweka changamoto za Cloudflare kuwa `403` na kurasa za kati za HTML kuwa `502`.
-- Muda asilia wa kusubiri ombi hubaki umefungwa na kikomo kamili cha mwisho cha JS. Kukwama hubatilisha na kufunga tu usafirishaji ulioathirika wa wasifu/mfumo wa uendeshaji/proksi kabla ya ombi linalofuata kuuunda upya.
-- Kipaumbele cha utatuzi wa proksi ni `proxyUrl` ya kila mwito → muktadha wa akaunti/dashibodi wa upeo wa ombi → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (ikiwemo lahaja za herufi ndogo). Hitilafu za utatuzi hushindwa kwa kufungwa badala ya kuvuja muunganisho wa moja kwa moja. LMArena hutatua kwa makusudi dhidi ya `arena.ai`.
-- `byteResponse` hurejesha URL ya `data:` yenye aina ya maudhui bila uharibifu wa UTF-8.
-- Hitilafu ni `TlsClientUnavailableError` (kifurushi/kiongezi hakipatikani), `TlsClientHangError` (kikomo cha muda kimepitwa), na `WreqTransportCapacityError` (msimbo wa hitilafu ya uwezo wa kipindi cha pamoja) wakati nafasi zote 128 zenye kikomo za wasifu/mfumo wa uendeshaji/proksi zinafanya kazi au zinafungwa.
+- Utiririshaji hutumia `ReadableStream` asilia ya jibu moja kwa moja; hakuna faili ya muda wala mchakato saidizi
+  unaoundwa.
+- Hadi baiti 256 za mwanzo hukaguliwa kabla ya kufichua mtiririko. Watoa huduma wa SSE huhifadhi kwenye bafa
+  hitilafu zisizo za SSE; Grok/LMArena huoanisha changamoto za Cloudflare na `403`, na kurasa za kati za HTML na `502`.
+- Muda asilia wa kuisha kwa ombi huendelea kufungwa na kikomo kamili cha mwisho cha JS. Kukwama hubatilisha
+  na kufunga tu usafirishaji ulioathiriwa wa wasifu/OS/proksi kabla ya ombi linalofuata kuuunda upya.
+- Kipaumbele cha utatuzi wa proksi ni `proxyUrl` ya kila mwito → muktadha wa akaunti/dashibodi wa ombi →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (ikiwemo aina za herufi ndogo). Hitilafu za utatuzi hushindwa
+  kwa hali iliyofungwa badala ya kuvuja muunganisho wa moja kwa moja. LMArena kwa makusudi hufanya utatuzi dhidi ya `arena.ai`.
+- `byteResponse` hurudisha URL ya `data:` yenye aina ya maudhui bila uharibifu wa UTF-8.
+- Hitilafu ni `TlsClientUnavailableError` (kifurushi/kiongezi hakipatikani), `TlsClientHangError`
+  (kikomo cha muda kimepitwa), na `WreqTransportCapacityError` (msimbo wa hitilafu ya uwezo wa kipindi unaoshirikiwa)
+  wakati nafasi zote 128 zenye kikomo za wasifu/OS/proksi zinatumika au zinafungwa.
 
-Kipindi cha jumla cha `TlsClient` kilicho hapo juu hubaki maalumu kwa hali endelevu ya vidakuzi inayotegemea kivinjari. Njia zote mbili hutumia tena kipakiaji kimoja cha moduli ya wreq kilichohifadhiwa na kihusishi cha mzunguko wa maisha ya mchakato; hifadhi zake hubaki tofauti kwa sababu muda wa kuishi wa vidakuzi vyake umetofautishwa kimakusudi.
+Kipindi cha jumla cha `TlsClient` kilicho hapo juu kinaendelea kuwa maalumu kwa hali endelevu ya vidakuzi
+inayoungwa mkono na kivinjari. Njia zote mbili hutumia tena kipakiaji kimoja cha moduli ya wreq kilichohifadhiwa na kiunganishi cha mzunguko wa maisha ya mchakato; mabwawa yake yanaendelea
+kuwa tofauti kwa sababu muda wa maisha wa vidakuzi vyake umetofautishwa kimakusudi.
 
-Wasifu huu unaungwa mkono na kifurushi kilichofungwa kwenye toleo mahususi, lakini kukubalika halisi na WAF kunaweza kubadilika bila kutegemea majaribio ya ndani ya mkataba. Thibitisha mabadiliko ya alama za utambulisho dhidi ya akaunti hai iliyoidhinishwa kwa uwazi kabla ya kudai usawa na kivinjari cha huduma asili.
+Wasifu unaungwa mkono na kifurushi kilichofungwa kwa toleo mahususi, lakini ukubalifu halisi wa WAF unaweza kubadilika bila kutegemea
+majaribio ya ndani ya mkataba. Thibitisha mabadiliko ya alama dhidi ya akaunti halisi iliyoidhinishwa waziwazi
+kabla ya kudai usawa na kivinjari cha huduma ya juu.
 
 ---
 
@@ -98,7 +119,7 @@ Hutumika kwa: vizuizi vya `system`, `messages[].content` zote, na `tools[].descr
 
 Kwa relay za Anthropic za wahusika wengine zinazokubali tu trafiki ya "Claude Code halisi":
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` kwa chaguomsingi
@@ -216,12 +237,12 @@ Zaidi ya hayo, `updateNssDatabases()` husakinisha kwenye hifadhidata za NSS za k
 
 Vituo vyote vya ufikiaji vya MITM vinahitaji uthibitishaji wa usimamizi (`requireCliToolsAuth`). Nenosiri la sudo huhifadhiwa kwenye akiba ndani ya upeo wa moduli (kamwe si `globalThis`) na huondolewa wakati wa `stopMitm()`.
 
-## Ubatilishaji wa User-Agent — vigezo vya mazingira (`.env.example` sehemu ya 12)
+## Ubatilishaji wa User-Agent — vibadala vya mazingira (`.env.example` sehemu ya 12)
 
-| Kigezo                   | Chaguo-msingi                                                   |
+| Kibadala                 | Chaguo-msingi                                                   |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.149.0 (Windows 10.0.26200; x64)`                   |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
+| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
 | `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |

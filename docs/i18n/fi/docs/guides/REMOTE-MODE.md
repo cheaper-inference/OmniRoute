@@ -1,6 +1,6 @@
 # Remote Mode (Suomi)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -251,172 +251,147 @@ yhteys näkyy aktiivisena.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ tulostaa salaisuuden KERRAN — kopioi se nyt
-omniroute tokens list                 # peitetty: tunniste, nimi, käyttöalue, etuliite, tila, vanheneminen
-omniroute tokens revoke <id|prefix>   # mitätöi välittömästi
-omniroute tokens scopes               # selitä kolme käyttöaluetta
+#   ↳ tulostaa salaisuuden KERRAN — kopioi se heti
+omniroute tokens list                 # peitetty: tunnus, nimi, scope, etuliite, tila, vanhentuminen
+omniroute tokens revoke <id|prefix>   # peruuta välittömästi
+omniroute tokens scopes               # selittää kolme scope-laajuutta
 ```
 
-`tokens`-komennot edellyttävät **admin**-tunnistetietoa. Voit hallita tunnuksia
-myös hallintapaneelin kohdassa **Asetukset → Käyttöoikeustunnukset** (luo, mitätöi,
-kopioi kerran).
+`tokens`-komennot vaativat **admin**-tason tunnistetiedot. Voit hallita tunnuksia myös dashboardissa kohdassa **Asetukset → Käyttötunnukset** (luo, peruuta, kopioi kerran).
+
+Tunnusta ei voi koskaan myöntää enemmillä oikeuksilla kuin sen luojalla on. `admin`-tunnuksen voi luoda vain operaattori: dashboard-istunto, paikallinen CLI palvelimella itsessään tai `omniroute connect` salasanalla. Koneen tunnistetiedot (`admin`-käyttötunnus tai API-avain, jolla on `manage`/`admin`-laajuus) voivat myöntää vain `write`- ja `read`-tunnuksia. Jos ne pyytävät `--scope admin`, vastaus on `403`. Kirjautumisen poistaminen käytöstä ei avaa tunnusten myöntämistä: millä tahansa laajuudella oleva käyttötunnus on tunnistetieto, jonka aina todennetut reitit hyväksyvät, joten anonyymi kutsu saa `401`-virheen kaikilla laajuuksilla.
 
 ---
 
-## Ohjelmointi-CLI:n määrittäminen etäluettelosta
+## Koodauksen CLI-työkalun määrittäminen etäluettelosta
 
-`omniroute configure` lukee **aktiivisen palvelimen** ajantasaisen malliluettelon
-ja kirjoittaa määritykset **omalle** koneellesi.
+`omniroute configure` lukee **aktiivisen palvelimen** reaaliaikaisen mallikatalogin ja kirjoittaa asetustiedoston **sinun** koneellesi.
 
 ```bash
 omniroute configure codex
 #   Palveluntarjoajat: glm, kmc, ollamacloud, opencode-go, …
 #   Palveluntarjoaja: glm
-#   Mallin tunniste: glm/glm-5.2
-#   ✔ Kirjoitettiin ~/.codex/glm52.config.toml
-#   Käytä näin:  codex --profile glm52
+#   Mallin tunnus: glm/glm-5.2
+#   ✔ Kirjoitettu ~/.codex/glm52.config.toml
+#   Käyttö:  codex --profile glm52
 
-# ei-vuorovaikutteinen
+# ei-interaktiivinen
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# pidä usein käytetty malli vuorovaikutteisen valitsimen alussa
+# pidä usein käytetty malli interaktiivisen valitsimen yläosassa
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Valitsin säilyttää paikallisessa `model-preferences.json`-tiedostossa vain mallien
-tunnisteet (ei koskaan URL-osoitteita tai tunnistetietoja), kontekstin ja
-CLI-kohteen mukaan rajattuina. Suosikit näytetään ennen viimeksi valittuja;
-poista valittu malli kyseisen kontekstin/kohteen luettelosta käyttämällä
-`--unfavorite`-valitsinta.
+Valitsin säilyttää paikallisessa tiedostossa `model-preferences.json` vain mallitunnukset (ei koskaan URL-osoitteita tai tunnistetietoja), rajattuina kontekstin ja CLI-kohteen mukaan. Suosikit näytetään ennen viimeisimpiä valintoja. Käytä `--unfavorite`-lippua poistaaksesi valitun mallin kyseisen kontekstin ja kohteen luettelosta.
 
-Kirjoitettu profiili viittaa päättelyavaimeen ympäristömuuttujan
-(`OMNIROUTE_API_KEY`) kautta — salaisuutta ei koskaan kirjoiteta levylle.
-Codexin kertaluonteisen perusmäärityksen (`[model_providers.omniroute]`-lohkon)
-ohjeet ovat tiedostossa
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Kirjoitettu profiili viittaa päättelyavaimeen ympäristömuuttujan `OMNIROUTE_API_KEY` kautta. Salaisuutta ei kirjoiteta levylle koskaan. Kertaluonteisesta Codex-perusasetuksesta (`[model_providers.omniroute]`-lohko) on lisätietoja tiedostossa [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### CLI:n käynnistäminen etäpalvelua vasten (määrityksiä kirjoittamatta)
+### CLI:n käynnistäminen etäpalvelimelle (asetuksia ei kirjoiteta)
 
-Myös `omniroute run <target>` noudattaa aktiivista kontekstia: etäpalvelun
-perus-URL-osoite ja kontekstin tunnistetieto lisätään vain käynnistettyyn
-prosessiin.
+`omniroute run <target>` huomioi myös aktiivisen kontekstin: etäpalvelimen perus-URL ja kontekstin tunnistetiedot injektoidaan vain käynnistettyyn prosessiin.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → etäpalvelu
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → etä
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Esikatsele tarkalleen, mitä käynnistettäisiin (vain ympäristömuuttujien AVAINTEN NIMET, ei koskaan arvoja):
+# Esikatsele tarkalleen, mitä käynnistettäisiin (vain ympäristömuuttujien nimet, ei arvoja):
 omniroute run codex --dry-run --json
 ```
 
-Kohteet: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(ainoa lähde: `bin/cli/cli-manifest.mjs`). Qwen ja Gemini suoritetaan
-väliaikaisessa eristetyssä kotihakemistossa, joka poistetaan suorittamisen
-päätyttyä, joten käynnistys ei koskaan koske henkilökohtaisen työkalusi
-määrityksiin — eikä vuoda niihin.
+Kohteet: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (ainoa lähde: `bin/cli/cli-manifest.mjs`). Qwen ja Gemini käynnistyvät väliaikaisessa eristetyssä kotihakemistossa, joka poistetaan lopetettaessa, joten käynnistys ei koskaan koske henkilökohtaisiin työkalujen asetuksiisi eikä vuoda niihin.
 
-### CLI-kohtaiset määrityskomennot
+### Asennuskomennot CLI-työkaluittain
 
-Jokaisella tuetulla CLI:llä on etäpalvelut huomioiva määrityskomento (kaikki
-noudattavat aktiivista kontekstia tai valitsimia `--remote <url> --api-key <key>`):
+Jokaisella tuetulla CLI-työkalulla on etätietoinen asennuskomento (kaikki noudattavat aktiivista kontekstia tai `--remote <url> --api-key <key>`):
 
-| CLI         | Komento                    | Mitä se kirjoittaa                                                                                                                                                                                                        |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml`-profiilit (mallikohtaisesti)                                                                                                                                                                |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (mallikohtaisesti)                                                                                                                                                              |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — OpenAI-yhteensopiva `omniroute`-palveluntarjoaja kaikilla luettelon malleilla (suorita `opencode -m omniroute/<model>`)                                                              |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI-tila) + tulostaa liitettävät VS Code -laajennuksen asetukset (OpenAI-yhteensopiva, perus-URL **ilman** `/v1`-osaa)                                                        |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Coden `kilocode.*`-asetukset — OpenAI-yhteensopiva, perus-URL **sisältää** `/v1`-osan                                                                                          |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **sisältää** `/v1`-osan, avain `${{ secrets.OMNIROUTE_API_KEY }}`-salaisuuden kautta                                             |
-| Cursor      | `omniroute setup-cursor`   | tulostaa sovelluksessa tehtävät vaiheet (Settings → Models → Override OpenAI Base URL **sisältäen** `/v1`-osan + avain + malli). Cursorin määritys on läpinäkymätön SQLite — vain keskustelupaneeli                       |
-| Roo Code    | `omniroute setup-roo`      | kirjoittaa Roon tuotavan JSON-tiedoston (`~/.omniroute/roo-settings.json`) + asettaa `roo-cline.autoImportSettingsPath`-arvon + tulostaa käyttöliittymän vaiheet (OpenAI-yhteensopiva, perus-URL **sisältää** `/v1`-osan) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat`-palveluntarjoaja, `base_url` **sisältää** `/v1`-osan, avain `$OMNIROUTE_API_KEY`-ympäristömuuttujan kautta                                                                 |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **ilman** `/v1`-osaa + `GOOSE_MODEL`) + ympäristömuuttujaohje                                                                                      |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **ilman** `/v1`-osaa + `model: openai/<id>`) + ympäristömuuttujaohje (`aider --message --yes`)                                                                                     |
-| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4:n `modelProviders.openai`-merkintä + `OMNIROUTE_API_KEY` tiedostossa `~/.qwen/.env`                                                                                                            |
+| CLI         | Komento                    | Mitä se kirjoittaa                                                                                                                                                                                                     |
+| ----------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml`-profiilit (mallikohtaisesti)                                                                                                                                                             |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (mallikohtaisesti)                                                                                                                                                           |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`: palveluntarjoaja `omniroute` openai-yhteensopivalla rajapinnalla ja kaikki katalogin mallit (suorita `opencode -m omniroute/<model>`)                                              |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI-tila) + tulostaa VS Code -laajennuksen asetukset liitettäväksi (OpenAI-yhteensopiva, Base URL **ilman** `/v1`)                                                         |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + VS Code `kilocode.*`-asetukset: OpenAI-yhteensopiva, Base URL **kanssa** `/v1`                                                                                                 |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI): `provider: openai`, `apiBase` **kanssa** `/v1`, avain `${{ secrets.OMNIROUTE_API_KEY }}`-kautta                                                              |
+| Cursor      | `omniroute setup-cursor`   | tulostaa vaiheet sovellukseen (Settings → Models → Override OpenAI Base URL **kanssa** `/v1` + avain + malli). Cursorin asetukset ovat läpinäkymätön SQLite-tietokanta, joten se koskee vain chat-paneelia             |
+| Roo Code    | `omniroute setup-roo`      | kirjoittaa Roo-tuontitiedoston JSON-muodossa (`~/.omniroute/roo-settings.json`) + asettaa `roo-cline.autoImportSettingsPath`-arvon + tulostaa käyttöliittymän vaiheet (OpenAI-yhteensopiva, Base URL **kanssa** `/v1`) |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`: palveluntarjoaja `openai-compat`, `base_url` **kanssa** `/v1`, avain `$OMNIROUTE_API_KEY`-kautta                                                                                         |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`: `language_models.openai_compatible.omniroute`, `api_url` **kanssa** `/v1`, Zed lukee avaimen `$OMNIROUTE_API_KEY`-muuttujasta (ei koskaan kirjoiteta)                                   |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **ilman** `/v1` + `GOOSE_MODEL`) + env-resepti                                                                                                  |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **ilman** `/v1` + `model: openai/<id>`) + env-resepti (`aider --message --yes`)                                                                                                 |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json`, V4-merkintä `modelProviders.openai` + `OMNIROUTE_API_KEY` tiedostossa `~/.qwen/.env`                                                                                                          |
 
 ```bash
-# OpenCode (OpenAI-yhteensopiva palveluntarjoaja, kaikki luettelon mallit, etä-VPS)
+# OpenCode (openai-yhteensopiva palveluntarjoaja, kaikki katalogin mallit, etä-VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # säilytä vain vastaavat mallit
-opencode -m omniroute/glm/glm-5.2 "..."          # vie ensin OMNIROUTE_API_KEY ympäristöön
+omniroute setup-opencode --only glm,kimi        # pidä vain vastaavat mallit
+opencode -m omniroute/glm/glm-5.2 "..."          # vie ensin OMNIROUTE_API_KEY
 ```
 
-> OpenCodella on myös monipuolisempi **liitännäisintegraatio**: `omniroute setup opencode`
-> (tukee nyt etäyhteyksiä `--remote`-valitsimella), joka asentaa `@omniroute/opencode-plugin`-paketin.
-> `setup-opencode` on kevyt OpenAI-yhteensopiva vaihtoehto. API-avaimeen
-> viitataan muodossa `{env:OMNIROUTE_API_KEY}` — sitä ei koskaan kirjoiteta levylle.
+> OpenCodella on myös rikkaampi **plugin**-integraatio: `omniroute setup opencode`
+> (nyt etätietoinen `--remote`-lipun kautta) asentaa paketin `@omniroute/opencode-plugin`.
+> `setup-opencode` on kevyempi openai-yhteensopiva vaihtoehto. API-avainta viitataan
+> `{env:OMNIROUTE_API_KEY}`-muodossa, eikä sitä kirjoiteta koskaan levylle.
 >
-> Käytä OpenCode v2:ssa sen sijaan `@omniroute/opencode-plugin-v2`-pakettia: sama luettelo,
-> eri lataussopimus. Se lukee avaimen OpenCoden omasta tunnistetietosäilöstä,
-> kun integraatio on yhdistetty, joten etäyhdyskäytävä ei tarvitse lainkaan avainta
-> `opencode.json`-tiedostossa.
+> OpenCode v2:ssa käytä sen sijaan pakettia `@omniroute/opencode-plugin-v2`: sama katalogi,
+> mutta eri latauskontrakti. Se lukee avaimen OpenCoden omasta tunnistetietovarastosta,
+> kun integraatio on yhdistetty, joten etägateway ei tarvitse avainta `opencode.json`-tiedostossa lainkaan.
 
 ---
 
 ## Kontekstien hallinta (palvelimien välillä vaihtaminen)
 
-**Konteksti** on tallennettu palvelin (baseUrl + tunnistetieto + käyttöalue). `omniroute connect`
-luo kontekstin ja aktivoi sen; sen jälkeen jokainen komento kohdistuu siihen. Hallitse
-konteksteja ja vaihda niiden välillä komennolla `omniroute contexts`:
+**Konteksti** on tallennettu palvelin (baseUrl + tunnistetieto + laajuus). `omniroute connect` luo sellaisen ja tekee siitä aktiivisen; siitä eteenpäin jokainen komento kohdistuu siihen. Hallitse ja vaihda niiden välillä komennolla `omniroute contexts`:
 
 ```bash
-omniroute contexts list            # kaikki kontekstit; aktiivinen on merkitty symbolilla ●
-omniroute contexts current         # aktiivinen palvelin, todennuksen tila ja käyttöalue
+omniroute contexts list            # kaikki kontekstit; aktiivinen on merkitty ●
+omniroute contexts current         # aktiivinen palvelin, todennustila, laajuus
 ```
 
 ```text
-  | Nimi    | Perus-URL                 | Todennus | Käyttöalue | Kuvaus
-● | vps     | http://100.67.86.91:20128 | token    | admin      | Etä-OmniRoute (…)
-  | default | http://localhost:20128    | ✗        |            |
+  | Name    | Base URL                  | Auth  | Scope | Description
+● | vps     | http://100.67.86.91:20128 | token | admin | Remote OmniRoute (…)
+  | default | http://localhost:20128    | ✗     |       |
 ```
 
-**Vaihda palvelinta** — kaikki seuraavat komennot käyttävät aktiivista kontekstia:
+**Vaihda palvelimia** – jokainen seuraava komento noudattaa aktiivista kontekstia:
 
 ```bash
-omniroute contexts use vps         # → kaikki komennot kohdistuvat nyt VPS-etäpalvelimeen
-omniroute tokens list              #   (suoritetaan VPS-palvelinta vasten)
+omniroute contexts use vps         # → kaikki komennot kohdistuvat nyt etä-VPS:ään
+omniroute tokens list              #   (ajetaan VPS:ää vasten)
 
-omniroute contexts use default     # → takaisin localhost-palvelimeen
-omniroute tokens list              #   (suoritetaan paikallista palvelinta vasten)
+omniroute contexts use default     # → takaisin localhostiin
+omniroute tokens list              #   (ajetaan paikallista palvelinta vasten)
 ```
 
-**Lisää konteksti manuaalisesti** (`connect`-komennon sijaan), tarkastele sitä tai nimeä se uudelleen:
+**Lisää konteksti manuaalisesti** (`connect`-komennon sijaan), tarkastele tai nimeä uudelleen:
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
-  --access-token oma_live_xxxx --scope write --description "välipalvelin"
-omniroute contexts show staging    # yhden kontekstin täydelliset tiedot
+  --access-token oma_live_xxxx --scope write --description "staging box"
+omniroute contexts show staging    # yhden kontekstin kaikki tiedot
 omniroute contexts rename staging stg
 ```
 
-**Poista konteksti** — pyytää vahvistusta; ohita se antamalla `--yes`
-(vaaditaan komentosarjoissa / ei-vuorovaikutteisissa komentotulkeissa, jotka muuten kieltäytyvät turvallisesti):
+**Poista konteksti** – pyytää vahvistusta; ohita se `--yes`-lipulla (tarvitaan skripteissä / ei-interaktiivisissa kuorissa, jotka muuten kieltäytyvät turvallisesti):
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> `default`-kontekstia (localhost) ei voi poistaa. Aktiivisen kontekstin poistaminen vaihtaa
-> takaisin `default`-kontekstiin. Vinkki: kontekstin poistaminen poistaa vain **paikallisesti** tallennetun tunnistetiedon —
-> peruuta token palvelimella komennolla `omniroute tokens revoke <id>`, jotta
-> käyttöoikeus todella poistuu.
+> `default`-kontekstia (localhost) ei voi poistaa. Aktiivisen kontekstin poistaminen palauttaa oletukseksi `default`-kontekstin. Vinkki: kontekstin poistaminen poistaa vain **paikallisesti** tallennetun tunnistetiedon – kumoa tunnus palvelimelta komennolla `omniroute tokens revoke <id>` poistaaksesi pääsyn kokonaan.
 
-**Vie / tuo** konteksteja (esimerkiksi niiden siirtämiseksi koneiden välillä). Uusissa konteksteissa säilytetään
-vain viittaus avainnippuun; tunnistetietoja ei kopioida vientiin, kun käyttöjärjestelmän
-avainnippu on käytettävissä:
+**Vie / tuo** konteksteja (esim. siirtääksesi niitä koneiden välillä). Vienti jättää tunnistetiedot oletuksena pois, mukaan lukien tiedostovarmistuksen tallentamat tunnistetiedot. Käytä `--include-secrets`-lippua eksplisiittisesti, kun tarvitaan siirrettävä tunnistetietoja sisältävä varmuuskopio:
 
 ```bash
-omniroute contexts export --out contexts.json     # oletus: stdout
-omniroute contexts import contexts.json            # korvaa; säilytä nykyiset valitsimella --merge
-omniroute contexts migrate --yes                  # siirrä vanhat selväkieliset tokenit avainnippuun
+omniroute contexts export --out contexts.json     # sensuroitu; oletuskohde: stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # ylikirjoita; --merge säilyttää olemassa olevat
+omniroute contexts migrate --yes                  # siirrä vanhat selväkieliset tunnukset avainnippuun
 ```
 
-Ilman käyttökelpoista käyttöjärjestelmän avainnippua toimivissa headless-järjestelmissä CLI käyttää varajärjestelynä
-`config.json`-tiedostoa tilassa `0600` ja näyttää kertaluonteisen varoituksen. Käsittele tämän
-varajärjestelyn vientejä (ja kaikkia ennen siirtoa luotuja vanhoja määrityksiä) salassa pidettävänä aineistona.
+`--include-secrets` ratkaisee avainnippuviittaukset ennen vientiä ja epäonnistuu, jos jotakin viitattua tunnistetietoa ei voida lukea. `--no-secrets` on aina etusijalla. Vientitiedostot kirjoitetaan atomisesti tilassa `0600`. Käsittele eksplisiittistä salaisuuksia sisältävää vientiä salaisena materiaalina. Päätteettömissä järjestelmissä, joissa ei ole käyttökelpoista käyttöjärjestelmän avainnippua, CLI palautuu `config.json`-tiedostoon tilassa `0600` ja tulostaa kertaluonteisen varoituksen; oletusvienti pysyy sensuroituna tässä tilassa.
 
 ---
 

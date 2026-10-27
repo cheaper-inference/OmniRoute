@@ -1,8 +1,10 @@
 import assert from "node:assert/strict";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { createRequire } from "node:module";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import afterPack from "../../scripts/build/afterpack-copy-node-modules.mjs";
 import { pruneElectronRuntimeDocs } from "../../scripts/build/electronRuntimeDocs.mjs";
 
 const ROOT = join(import.meta.dirname, "..", "..");
@@ -141,4 +143,47 @@ test("electron bundle preparation applies the runtime docs manifest to its stagi
     /pruneElectronRuntimeDocs\(ELECTRON_STANDALONE_DIR\)/,
     "Electron staging must prune authoring docs before electron-builder copies the bundle"
   );
+});
+
+test("afterPack keeps playwright-core resolvable from the packaged Next server", async () => {
+  const tmp = mkdtempSync(join(tmpdir(), "omniroute-electron-playwright-"));
+  const projectDir = join(tmp, "project", "electron");
+  const stagingPackage = join(
+    projectDir,
+    "..",
+    ".build",
+    "electron-standalone",
+    "node_modules",
+    "playwright-core"
+  );
+  const appOutDir = join(tmp, "dist");
+  const packagedPackage = join(appOutDir, "resources", "app", "node_modules", "playwright-core");
+  const runtimeChunk = join(
+    appOutDir,
+    "resources",
+    "app",
+    ".build",
+    "next",
+    "server",
+    "chunks",
+    "runtime.cjs"
+  );
+
+  try {
+    mkdirSync(stagingPackage, { recursive: true });
+    writeFileSync(
+      join(stagingPackage, "package.json"),
+      JSON.stringify({ name: "playwright-core", main: "index.cjs" })
+    );
+    writeFileSync(join(stagingPackage, "index.cjs"), "module.exports = true;\n");
+
+    await afterPack({ packager: { projectDir }, appOutDir });
+
+    assert.equal(
+      createRequire(runtimeChunk).resolve("playwright-core"),
+      join(packagedPackage, "index.cjs")
+    );
+  } finally {
+    rmSync(tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
 });

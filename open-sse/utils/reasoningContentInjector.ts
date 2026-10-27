@@ -20,7 +20,7 @@ type JsonRecord = Record<string, unknown>;
 /**
  * Model-id predicates for thinking-mode families that need the echo.
  * Matched case-insensitively against the resolved model id (post upstream
- * routing, e.g. `oc/deepseek-v4-flash-free` for the OpenCode meta-provider).
+ * routing, e.g. `opencode-zen/deepseek-v4-flash-free` for OpenCode Zen).
  */
 const THINKING_MODEL_PATTERNS: RegExp[] = [
   /deepseek/i,
@@ -73,10 +73,21 @@ export function shouldInjectReasoningContentPlaceholder(
   );
 }
 
-function hasNonEmptyReasoningContent(message: JsonRecord): boolean {
+function isNonEmptyReasoningCarrier(value: unknown): boolean {
+  if (typeof value === "string") return value.trim().length > 0;
+  return Array.isArray(value) && value.length > 0;
+}
+
+/**
+ * Serde-based upstreams (DeepSeek, Kimi, GLM) alias `reasoning` to
+ * `reasoning_content`, so a message that already carries either field must not
+ * get a second one — the body would be rejected with
+ * `400 duplicate field \`reasoning_content\``.
+ */
+function hasAnyReasoningCarrier(message: JsonRecord): boolean {
   return (
-    typeof message.reasoning_content === "string" &&
-    (message.reasoning_content as string).trim().length > 0
+    isNonEmptyReasoningCarrier(message.reasoning_content) ||
+    isNonEmptyReasoningCarrier(message.reasoning)
   );
 }
 
@@ -91,8 +102,10 @@ function isAssistantMessage(value: unknown): value is JsonRecord {
 
 /**
  * Inject a placeholder `reasoning_content` on every assistant message in
- * `body.messages` that lacks one. Returns the original object if no mutation
- * was needed, or a shallow-copied body with a new messages array otherwise.
+ * `body.messages` that carries no reasoning (neither `reasoning_content` nor
+ * the `reasoning` alias, as a non-empty string or array). Returns the original
+ * object if no mutation was needed, or a shallow-copied body with a new
+ * messages array otherwise.
  *
  * No-op when the body shape is unexpected (defensive).
  */
@@ -104,7 +117,7 @@ export function injectReasoningContentForThinkingModel(body: unknown): unknown {
   let modified = false;
   const messages = record.messages.map((message) => {
     if (!isAssistantMessage(message)) return message;
-    if (hasNonEmptyReasoningContent(message)) return message;
+    if (hasAnyReasoningCarrier(message)) return message;
     modified = true;
     return { ...message, reasoning_content: PLACEHOLDER };
   });

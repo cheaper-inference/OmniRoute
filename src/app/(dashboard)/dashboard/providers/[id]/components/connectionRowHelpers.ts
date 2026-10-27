@@ -73,3 +73,85 @@ export function sortConnectionsByAvailability<T extends AvailabilitySortableConn
     return 0;
   });
 }
+
+/** One `PUT /api/providers/:id` priority write. */
+export interface PriorityUpdate {
+  id: string;
+  priority: number;
+}
+
+interface PrioritizedConnection {
+  id?: string;
+  priority?: number;
+}
+
+/**
+ * Writes that persist `next` (an already re-ordered list) as 1-based integer
+ * priorities — the only shape `updateProviderConnectionSchema` accepts
+ * (`priority` is an integer >= 1). Rows already at their final position are
+ * skipped; once every write lands, the provider's priorities are exactly 1..N
+ * in `next` order, so the server's `updated_at` tiebreak never decides it.
+ */
+export function buildPriorityUpdates(next: PrioritizedConnection[]): PriorityUpdate[] {
+  const updates: PriorityUpdate[] = [];
+  next.forEach((row, i) => {
+    const priority = i + 1;
+    if (!row.id || row.priority === priority) return;
+    updates.push({ id: row.id, priority });
+  });
+  return updates;
+}
+
+const isValidPriority = (value: unknown): value is number =>
+  typeof value === "number" && Number.isInteger(value) && value >= 1;
+
+/**
+ * Writes for the ▲/▼ swap of `conn1` with its neighbour `conn2`. Distinct
+ * stored priorities are swapped as values (operator-chosen gaps such as
+ * 10/20/30 survive). A tie (or an invalid stored value) has no value to swap,
+ * so the whole list — in the order the panel renders it — is rewritten as
+ * 1-based positions with the two rows exchanged.
+ */
+export function buildSwapPriorityUpdates(
+  connections: PrioritizedConnection[],
+  conn1: PrioritizedConnection,
+  conn2: PrioritizedConnection
+): PriorityUpdate[] {
+  const p1 = conn1.priority;
+  const p2 = conn2.priority;
+  if (conn1.id && conn2.id && isValidPriority(p1) && isValidPriority(p2) && p1 !== p2) {
+    return [
+      { id: conn1.id, priority: p2 },
+      { id: conn2.id, priority: p1 },
+    ];
+  }
+  const next = [...connections].sort((a, b) => (a.priority || 0) - (b.priority || 0));
+  const i1 = next.findIndex((row) => row.id === conn1.id);
+  const i2 = next.findIndex((row) => row.id === conn2.id);
+  if (i1 < 0 || i2 < 0) return [];
+  [next[i1], next[i2]] = [next[i2], next[i1]];
+  return buildPriorityUpdates(next);
+}
+
+type PriorityFetch = (
+  url: string,
+  init: { method: string; headers: Record<string, string>; body: string }
+) => Promise<{ ok: boolean; status: number }>;
+
+/**
+ * Send priority writes one at a time and stop at the first rejected one, so a
+ * failure is surfaced to the caller instead of being silently dropped.
+ */
+export async function persistPriorityUpdates(
+  updates: PriorityUpdate[],
+  fetchImpl: PriorityFetch = fetch
+): Promise<void> {
+  for (const update of updates) {
+    const res = await fetchImpl(`/api/providers/${update.id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ priority: update.priority }),
+    });
+    if (!res.ok) throw new Error(`Priority update failed with status ${res.status}`);
+  }
+}

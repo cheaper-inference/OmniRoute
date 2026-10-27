@@ -40,16 +40,35 @@ const PROVIDERS_WITHOUT_SYSTEM_ROLE = new Set([
  * Operators can still force preservation per-model via the dashboard
  * "Compatibility → preserveOpenAIDeveloperRole = true" toggle.
  */
-const PROVIDERS_PRESERVING_DEVELOPER_ROLE = new Set(["openai", "azure-openai", "azure", "github"]);
+const PROVIDERS_PRESERVING_DEVELOPER_ROLE = new Set(["openai", "azure-openai", "azure"]);
+
+// Custom OpenAI-compatible nodes point at arbitrary gateways (MiniMax, DeepSeek, …)
+// that commonly reject `developer` (#2281); they must opt in via the compat toggle.
+const CUSTOM_OPENAI_COMPATIBLE_PREFIX = "openai-compatible-";
 
 function defaultPreserveDeveloperForProvider(provider: string): boolean {
   const id = provider.trim().toLowerCase();
   if (!id) return false;
   if (PROVIDERS_PRESERVING_DEVELOPER_ROLE.has(id)) return true;
-  // Treat any provider id containing "openai" as OpenAI-compatible enough
+  if (id.startsWith(CUSTOM_OPENAI_COMPATIBLE_PREFIX)) return false;
+  // Treat any other provider id containing "openai" as OpenAI-compatible enough
   // to preserve developer role by default (e.g. "azure-openai-gov").
   if (id.includes("openai")) return true;
   return false;
+}
+
+/**
+ * Single source of truth for "does an OpenAI-format target keep the `developer` role?".
+ * An explicit per-model compat value wins; otherwise the provider default applies.
+ * Shared by {@link normalizeDeveloperRole} and the final `filterToOpenAIFormat` pass so
+ * the two can never disagree.
+ */
+export function resolvePreserveDeveloperRole(
+  preserveDeveloperRole: boolean | undefined,
+  provider: string | null | undefined
+): boolean {
+  if (preserveDeveloperRole !== undefined) return preserveDeveloperRole;
+  return defaultPreserveDeveloperForProvider(provider ?? "");
 }
 
 /**
@@ -163,11 +182,7 @@ export function normalizeDeveloperRole(
   if (!Array.isArray(messages)) return messages;
 
   if (targetFormat === "openai") {
-    const effectivePreserve =
-      preserveDeveloperRole !== undefined
-        ? preserveDeveloperRole
-        : defaultPreserveDeveloperForProvider(provider ?? "");
-    if (effectivePreserve) return messages;
+    if (resolvePreserveDeveloperRole(preserveDeveloperRole, provider)) return messages;
   }
 
   return messages.map((msg: NormalizedMessage) => {

@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
 
 const { buildCurl, escSq } =
   await import("../../src/app/(dashboard)/dashboard/providers/utils/buildCurl.ts");
@@ -73,3 +74,35 @@ test("escSq — escapes single quotes correctly for POSIX shell", () => {
   assert.strictEqual(escSq("a'b'c"), "a'\\''b'\\''c");
   assert.strictEqual(escSq("no quotes here"), "no quotes here");
 });
+const headerSets: Record<string, string>[] = [{}, { "X-Test": "it's a header" }];
+for (const headers of headerSets) {
+  test(
+    `buildCurl keeps the URL in the same POSIX shell command (${Object.keys(headers).length} headers)`,
+    {
+      skip: process.platform === "win32" ? "POSIX shell command" : false,
+    },
+    () => {
+      const endpoint = "https://example.invalid/it's-a-test?x=$HOME&y=two";
+      const body = { input: "It's a test with $HOME and `literal` text" };
+      const command = buildCurl({ endpoint, headers, body });
+      // The shell function records arguments without invoking cURL or making a request.
+      const result = spawnSync("sh", [], {
+        input: 'curl() { printf "%s\\0" "$@"; };' + "\n" + command,
+        encoding: "utf8",
+        timeout: 5000,
+      });
+      assert.equal(result.error, undefined);
+      assert.equal(result.status, 0, result.stderr);
+      const args = result.stdout.split("\0").slice(0, -1);
+      assert.deepEqual(args, [
+        "-s",
+        "-X",
+        "POST",
+        ...Object.entries(headers).flatMap(([name, value]) => ["-H", `${name}: ${value}`]),
+        "-d",
+        JSON.stringify(body),
+        endpoint,
+      ]);
+    }
+  );
+}

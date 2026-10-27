@@ -1,6 +1,6 @@
 # Memory System (Polski)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MEMORY.md) · 🇪🇹 [am](../../../am/docs/frameworks/MEMORY.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MEMORY.md) · 🇦🇿 [az](../../../az/docs/frameworks/MEMORY.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MEMORY.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MEMORY.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MEMORY.md) · 🇩🇰 [da](../../../da/docs/frameworks/MEMORY.md) · 🇩🇪 [de](../../../de/docs/frameworks/MEMORY.md) · 🇬🇷 [el](../../../el/docs/frameworks/MEMORY.md) · 🇪🇸 [es](../../../es/docs/frameworks/MEMORY.md) · 🇪🇪 [et](../../../et/docs/frameworks/MEMORY.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MEMORY.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MEMORY.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MEMORY.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MEMORY.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MEMORY.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MEMORY.md) · 🇮🇱 [he](../../../he/docs/frameworks/MEMORY.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MEMORY.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MEMORY.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MEMORY.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MEMORY.md) · 🇮🇩 [id](../../../id/docs/frameworks/MEMORY.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MEMORY.md) · 🇮🇹 [it](../../../it/docs/frameworks/MEMORY.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MEMORY.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MEMORY.md) · 🇰🇭 [km](../../../km/docs/frameworks/MEMORY.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MEMORY.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MEMORY.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MEMORY.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MEMORY.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MEMORY.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MEMORY.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MEMORY.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MEMORY.md) · 🇲🇲 [my](../../../my/docs/frameworks/MEMORY.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MEMORY.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MEMORY.md) · 🇳🇴 [no](../../../no/docs/frameworks/MEMORY.md) · 🇮🇳 [or](../../../or/docs/frameworks/MEMORY.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MEMORY.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MEMORY.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MEMORY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MEMORY.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MEMORY.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MEMORY.md) · 🇱🇰 [si](../../../si/docs/frameworks/MEMORY.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MEMORY.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MEMORY.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MEMORY.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MEMORY.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MEMORY.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MEMORY.md) · 🇮🇳 [te](../../../te/docs/frameworks/MEMORY.md) · 🇹🇭 [th](../../../th/docs/frameworks/MEMORY.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MEMORY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MEMORY.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MEMORY.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MEMORY.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MEMORY.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MEMORY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MEMORY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MEMORY.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MEMORY.md) · 🇪🇹 [am](../../../am/docs/frameworks/MEMORY.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MEMORY.md) · 🇦🇿 [az](../../../az/docs/frameworks/MEMORY.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MEMORY.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MEMORY.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/MEMORY.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MEMORY.md) · 🇩🇰 [da](../../../da/docs/frameworks/MEMORY.md) · 🇩🇪 [de](../../../de/docs/frameworks/MEMORY.md) · 🇬🇷 [el](../../../el/docs/frameworks/MEMORY.md) · 🇪🇸 [es](../../../es/docs/frameworks/MEMORY.md) · 🇪🇪 [et](../../../et/docs/frameworks/MEMORY.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MEMORY.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MEMORY.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MEMORY.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MEMORY.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MEMORY.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MEMORY.md) · 🇮🇱 [he](../../../he/docs/frameworks/MEMORY.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MEMORY.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MEMORY.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MEMORY.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MEMORY.md) · 🇮🇩 [id](../../../id/docs/frameworks/MEMORY.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MEMORY.md) · 🇮🇹 [it](../../../it/docs/frameworks/MEMORY.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MEMORY.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MEMORY.md) · 🇰🇭 [km](../../../km/docs/frameworks/MEMORY.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MEMORY.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MEMORY.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MEMORY.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MEMORY.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MEMORY.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MEMORY.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MEMORY.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MEMORY.md) · 🇲🇲 [my](../../../my/docs/frameworks/MEMORY.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MEMORY.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MEMORY.md) · 🇳🇴 [no](../../../no/docs/frameworks/MEMORY.md) · 🇮🇳 [or](../../../or/docs/frameworks/MEMORY.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MEMORY.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MEMORY.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MEMORY.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MEMORY.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MEMORY.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MEMORY.md) · 🇱🇰 [si](../../../si/docs/frameworks/MEMORY.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MEMORY.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MEMORY.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MEMORY.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MEMORY.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MEMORY.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MEMORY.md) · 🇮🇳 [te](../../../te/docs/frameworks/MEMORY.md) · 🇹🇭 [th](../../../th/docs/frameworks/MEMORY.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MEMORY.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MEMORY.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MEMORY.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MEMORY.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MEMORY.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MEMORY.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MEMORY.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MEMORY.md)
 
 ---
 
@@ -175,32 +175,32 @@ Tabela `memory_vec_meta` (migracja `083_memory_vec.sql`) przechowuje:
 Dziewięć pól osadzania i wektorów jest dostępnych w `MemorySettingsExtended` w
 `src/shared/schemas/memory.ts` i utrwalanych za pośrednictwem `src/lib/db/settings.ts`:
 
-| Pole                     | Typ                                                | Wartość domyślna | Opis                                                                        |
+| Pole                     | Typ                                                | Domyślna wartość | Opis                                                                        |
 | ------------------------ | -------------------------------------------------- | ---------------- | --------------------------------------------------------------------------- |
-| `embeddingSource`        | `"remote" \| "static" \| "transformers" \| "auto"` | `"auto"`         | Określa używane źródło osadzania                                            |
+| `embeddingSource`        | `"remote" \| "static" \| "transformers" \| "auto"` | `"auto"`         | Określa źródło osadzania                                                    |
 | `embeddingProviderModel` | `string \| null`                                   | `null`           | Dostawca/model w formacie `provider/model`                                  |
 | `customBaseUrl`          | `string \| null`                                   | `null`           | Bazowy URL punktu końcowego zgodnego z OpenAI, używanego tylko przez pamięć |
 | `customModelId`          | `string \| null`                                   | `null`           | Identyfikator modelu wysyłany do niestandardowego punktu końcowego          |
-| `transformersEnabled`    | `boolean`                                          | `false`          | Opcjonalne włączenie Transformers.js (MiniLM, ~400MB)                       |
-| `staticEnabled`          | `boolean`                                          | `false`          | Opcjonalne włączenie lokalnego, statycznego modelu potion-base-8M           |
-| `rerankEnabled`          | `boolean`                                          | `false`          | Włącza etap ponownego szeregowania (dodaje +200-500ms/żądanie)              |
+| `transformersEnabled`    | `boolean`                                          | `false`          | Opcjonalne włączenie Transformers.js (MiniLM, ~400 MB)                      |
+| `staticEnabled`          | `boolean`                                          | `false`          | Opcjonalne włączenie lokalnego statycznego modelu potion-base-8M            |
+| `rerankEnabled`          | `boolean`                                          | `false`          | Włącza etap ponownego szeregowania (dodaje +200–500 ms/żądanie)             |
 | `rerankProviderModel`    | `string \| null`                                   | `null`           | Dostawca/model ponownego szeregowania w formacie `provider/model`           |
-| `vectorStore`            | `"sqlite-vec" \| "qdrant" \| "auto"`               | `"auto"`         | Określa używany backend wektorowy                                           |
 
-Są one udostępniane za pośrednictwem `GET /PUT /api/settings/memory` (schemat `MemorySettingsExtendedSchema`).
+`rerankProviderModel` jest rozpoznawany przez `POST /v1/rerank` (wywoływane przez interfejs loopback), dlatego akceptuje wszystko, co obsługuje ta trasa: wyselekcjonowany chmurowy model ponownego szeregowania (`cohere/rerank-v3.5`, `jina-ai/jina-reranker-v3.5`, …) albo węzeł dostawcy zgodny z OpenAI w postaci `<node-prefix>/<model>` (np. `skilled-mini/bge-reranker-v2-m3` dla instancji TEI/Infinity). Węzły loopback oraz nazwy hostów wymienione w `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS` (np. nazwa usługi Docker/Compose) są zawsze dozwolone; węzeł na innym hoście (LAN, Tailscale) wymaga dodatkowo flagi funkcji `RERANK_REMOTE_PROVIDER_NODES` i musi przejść kontrolę zasad wychodzących adresów URL dostawcy — zobacz [Flagi funkcji](../reference/FEATURE_FLAGS.md). Selektor w panelu wyświetla wyselekcjonowanych dostawców oraz węzły lokalne; dowolny prawidłowy ciąg `provider/model` można ustawić bezpośrednio za pomocą `PUT /api/settings/memory`.
+| `vectorStore` | `"sqlite-vec" \| "qdrant" \| "auto"` | `"auto"` | Określa używany backend wektorowy |
 
-Dla źródła `remote` pamięć akceptuje również opcjonalne ustawienia `customBaseUrl` i
-`customModelId`. Razem wybierają one zgodny z OpenAI punkt końcowy `/embeddings`
+Ustawienia te są udostępniane przez `GET /PUT /api/settings/memory` (schemat `MemorySettingsExtendedSchema`).
+
+Dla źródła `remote` moduł Memory akceptuje również opcjonalne ustawienia `customBaseUrl` i
+`customModelId`. Razem wskazują punkt końcowy `/embeddings` zgodny z OpenAI
 oraz model bez zmiany globalnego rejestru osadzania. Punkt końcowy jest
-normalizowany przed użyciem i sprawdzany zgodnie z zasadami dostawcy dotyczącymi
-wychodzących adresów URL: wymagany jest protokół HTTP(S), osadzone dane
-uwierzytelniające i ciągi zapytania są odrzucane, a adresy metadanych chmurowych
-pozostają zablokowane. Puste wartości zachowują dostawcę wybranego w rejestrze. Błędy
-zwracane do panelu są oczyszczane, a dane uwierzytelniające punktu końcowego nigdy
-nie są rejestrowane w logach.
+normalizowany przed użyciem i sprawdzany zgodnie z zasadami wychodzących adresów URL dostawcy: wymagany
+jest protokół HTTP(S), osadzone dane uwierzytelniające i ciągi zapytania są odrzucane, a adresy
+metadanych chmurowych pozostają zablokowane. Puste wartości zachowują wybranego dostawcę z rejestru. Błędy
+zwracane do panelu są oczyszczane, a dane uwierzytelniające punktu końcowego nigdy nie są rejestrowane.
 
-> **TODO (D20):** Zakres `global` (współdzielenie pamięci między wszystkimi kluczami API) nie jest
-> zaimplementowany w tym wydaniu. Wymaga zmian schematu i globalnej ścieżki
+> **TODO (D20):** Zakres `global` (współdzielenie wspomnień między wszystkimi kluczami API) nie jest
+> zaimplementowany w tym wydaniu. Wymaga zmian schematu oraz globalnej ścieżki
 > pobierania. Należy śledzić to oddzielnie.
 
 ## Warstwy przechowywania
@@ -919,7 +919,7 @@ Aby pozostawić tę funkcję wyłączoną, zachowaj domyślną wartość `autoSu
 > **Źródło prawdy:** `src/lib/memory/backend.ts`, `src/lib/memory/genericBackend.ts`, `src/lib/memory/manager.ts`
 > **Testy:** `src/lib/memory/__tests__/generic-backend.test.ts`
 
-Wzorzec dostawcy MemoryBackend wprowadza **wymienną warstwę abstrakcji backendu** nad istniejącym silnikiem pamięci. Zamiast być powiązanym z jedną implementacją pamięci masowej, system pamięci obsługuje teraz wiele backendów (SQLite, Obsidian, Notion, niestandardowe backendy HTTP) z konfigurowalnym routingiem podstawowym i rezerwowym.
+Wzorzec dostawcy MemoryBackend wprowadza **wymienną warstwę abstrakcji backendu** nad istniejącym silnikiem pamięci. Zamiast zależeć od jednej implementacji magazynu, system pamięci obsługuje teraz wiele backendów (SQLite, Obsidian, Notion, niestandardowe backendy HTTP) z konfigurowalnym routingiem podstawowym i awaryjnym.
 
 ### Architektura
 
@@ -934,7 +934,7 @@ Wzorzec dostawcy MemoryBackend wprowadza **wymienną warstwę abstrakcji backend
 │       Orkiestrator singletonowy (manager.ts)              │
 │                                                          │
 │  Podstawowy ──► Backend A  (np. SQLite)                  │
-│  Rezerwowy  ──► Backend B  (np. Obsidian)                │
+│  Awaryjny   ──► Backend B  (np. Obsidian)                │
 │                 Backend C  (np. Notion przez GenericBackend)│
 └──────────────────────┬───────────────────────────────────┘
                        │
@@ -968,7 +968,7 @@ interface MemoryBackend {
   // Stan
   health(): Promise<HealthCheckResult>;
 
-  // Cykl życia (opcjonalnie)
+  // Cykl życia (opcjonalny)
   initialize?(): Promise<void>;
   shutdown?(): Promise<void>;
 }
@@ -979,40 +979,40 @@ interface MemoryBackend {
 Orkiestrator singletonowy, który:
 
 - **Rejestruje** backendy za pomocą `register(backend)` — wywoływane podczas uruchamiania z `index.ts`
-- **Konfiguruje** backend podstawowy i rezerwowe za pomocą `configure(primary, fallbacks)`
-- **Kieruje** operacje CRUD/wyszukiwania do backendu podstawowego, korzystając z łańcucha backendów rezerwowych w przypadku awarii
-- **Sprawdza stan** wszystkich backendów w regularnych odstępach czasu
+- **Konfiguruje** backend podstawowy i awaryjne za pomocą `configure(primary, fallbacks)`
+- **Kieruje** operacje CRUD i wyszukiwanie do backendu podstawowego, z łańcuchem awaryjnym w przypadku błędu
+- **Sprawdza stan** wszystkich backendów okresowo
 
-**Zachowanie mechanizmu rezerwowego:**
+**Zachowanie mechanizmu awaryjnego:**
 
-| Operacja | Backend podstawowy             | Backendy rezerwowe                         |
-| -------- | ------------------------------ | ------------------------------------------ |
-| `create` | ✅ Tylko backend podstawowy    | ❌                                         |
-| `get`    | ✅ Najpierw backend podstawowy | ✅ Rezerwowy, jeśli wynik to null          |
-| `update` | ✅ Tylko backend podstawowy    | ✅ Synchronizacja bez oczekiwania na wynik |
-| `delete` | ✅ Tylko backend podstawowy    | ✅ Synchronizacja bez oczekiwania na wynik |
-| `list`   | ✅ Tylko backend podstawowy    | ❌                                         |
-| `search` | ✅ Najpierw backend podstawowy | ✅ Rezerwowy w przypadku błędu             |
+| Operacja | Backend podstawowy             | Backendy awaryjne                 |
+| -------- | ------------------------------ | --------------------------------- |
+| `create` | ✅ Tylko podstawowy            | ❌                                |
+| `get`    | ✅ Najpierw próba podstawowego | ✅ Awaryjny, jeśli wynik to null  |
+| `update` | ✅ Tylko podstawowy            | ✅ Synchronizacja bez oczekiwania |
+| `delete` | ✅ Tylko podstawowy            | ✅ Synchronizacja bez oczekiwania |
+| `list`   | ✅ Tylko podstawowy            | ❌                                |
+| `search` | ✅ Najpierw podstawowy         | ✅ Awaryjny w przypadku błędu     |
 
 #### GenericMemoryBackend (`genericBackend.ts`)
 
-Ogólny konektor HTTP, który dostosowuje dowolne REST API do interfejsu MemoryBackend. Przydatny w przypadku:
+Ogólny konektor HTTP, który dostosowuje dowolne REST API do interfejsu MemoryBackend. Przydatny dla:
 
 - **Notion** — połączenie przez Notion API
 - **Obsidian** — połączenie przez Obsidian Local REST API
-- **Niestandardowych backendów** — dowolnej usługi udostępniającej RESTful API pamięci
+- **Niestandardowych backendów** — dowolnych usług udostępniających RESTful API pamięci
 
 **Konfiguracja:**
 
 ```typescript
 interface GenericBackendConfig {
-  baseUrl: string;           // Bazowy adres URL interfejsu API backendu
+  baseUrl: string;           // Bazowy adres URL API backendu
   apiKey?: string;           // Token Bearer do uwierzytelniania
   headers?: Record<string, string>;  // Niestandardowe nagłówki HTTP
   timeout?: number;          // Limit czasu żądania (domyślnie: 30000ms)
   backendType?: string;      // Do rejestrowania zdarzeń
 
-  // Nadpisania endpointów (wartości domyślne używają konwencji REST)
+  // Nadpisania endpointów (wartości domyślne korzystają z konwencji REST)
   endpoints?: {
     search?: string;   // domyślnie: "/memories/search"
     create?: string;   // domyślnie: "/memories"
@@ -1046,7 +1046,7 @@ createKnownBackend("notion"); // → GenericMemoryBackend wskazujący na api.not
 
 ##### SQLiteBackend (`sqliteBackend.ts`)
 
-Domyślny backend główny. Opakowuje istniejący magazyn pamięci oparty na SQLite, używając `src/lib/memory/store.ts`. Jest automatycznie rejestrowany podczas uruchamiania.
+Domyślny backend podstawowy. Opakowuje istniejący magazyn pamięci oparty na SQLite, używając `src/lib/memory/store.ts`. Jest automatycznie rejestrowany podczas uruchamiania.
 
 ```typescript
 import { sqliteBackend } from "./sqliteBackend";
@@ -1055,16 +1055,75 @@ memoryManager.register(sqliteBackend);
 
 ##### ObsidianBackend (`obsidianBackend.ts`)
 
-Opakowuje istniejącą integrację z Obsidianem (`src/lib/memory/obsidianBackend.ts`). Łączy się z magazynem Obsidian za pośrednictwem lokalnego interfejsu REST API Obsidiana.
+Opakowuje istniejącą integrację z Obsidian (`src/lib/memory/obsidianBackend.ts`). Łączy się ze skarbcem Obsidian za pośrednictwem Obsidian Local REST API.
+
+##### ClaudeMemBackend (`claudeMemBackend.ts`)
+
+Adapter dla lokalnego workera [claude-mem](https://github.com/thedotmack/claude-mem) — wtyczki pamięci
+dla Claude Code / Codex / Cursor, która rejestruje sesje programistyczne jako „obserwacje”.
+Po jego zarejestrowaniu trasy REST `/api/memory` oraz wyszukiwanie pamięci A2A mogą odczytywać dane
+z tego samego magazynu, który wypełniają hooki claude-mem, i zapisywać je w nim.
+
+Worker nasłuchuje wyłącznie na interfejsie loopback, który zabezpieczenie SSRF klasy `GenericMemoryBackend`
+celowo odrzuca. Ten adapter nie osłabia tego zabezpieczenia: host jest na stałe ustawiony na `127.0.0.1`,
+a schemat konfiguracji (`ClaudeMemBackendConfigSchema`, `.strict()`) akceptuje wyłącznie:
+
+| Klucz       | Typ    | Domyślnie | Uwagi                                                                                                                 |
+| ----------- | ------ | --------- | --------------------------------------------------------------------------------------------------------------------- |
+| `port`      | number | —         | Wymagane, 1024–65535. Port procesu roboczego claude-mem z jego pliku ustawień (domyślnie `37700 + uid % 100`).        |
+| `project`   | string | —         | Projekt claude-mem do użycia. Brak wartości → każdy klucz API OmniRoute jest mapowany na osobny projekt (`apiKeyId`). |
+| `timeoutMs` | number | `5000`    | Limit czasu dla każdego żądania, 100–30000.                                                                           |
+
+Włącz go za pomocą `PUT /api/settings/memory` i uruchom ponownie OmniRoute (backendy są rejestrowane
+jednorazowo w `initMemoryBackends()`):
+
+```json
+{
+  "backendConfigs": { "claude-mem": { "port": 37701, "project": "OmniRoute" } },
+  "fallbackBackends": ["claude-mem"]
+}
+```
+
+Zamiast tego użyj `"primaryBackend": "claude-mem"`, aby ustawić go jako magazyn dla interfejsu REST API. Nieprawidłowa
+konfiguracja jest rejestrowana w dzienniku (`claude-mem.backend.invalid_config`) i pomijana, dzięki czemu SQLite pozostaje backendem głównym.
+
+Mapowanie i ograniczenia:
+
+- Identyfikatory mają postać `claude-mem:<observationId>`; operacje `get`/`delete` ignorują identyfikatory innych backendów bez
+  wykonywania wywołania sieciowego.
+- `create` → `POST /api/memory/save`; pola OmniRoute (`apiKeyId`, `sessionId`, `type`,
+  `key`, `metadata`) są przesyłane w `metadata.omniroute` claude-mem i odtwarzane podczas odczytu.
+- `search` → `GET /api/search?format=json&type=observations`, z wynikiem przyciętym do `maxTokens`
+  (liczba znaków / 4). `list` → stronicowany endpoint obserwacji procesu roboczego (`total` jest dolnym ograniczeniem — proces roboczy
+  zwraca `hasMore`, a nie liczbę).
+- Obserwacje przechwycone przez hooki są mapowane następująco: `discovery` → `factual`, `decision` → `procedural` oraz
+  `bugfix`/`feature`/`refactor`/`change` → `episodic`.
+- **Brak aktualizacji** (`update()` zwraca `false`; obserwacje są niezmienne) i **brak TTL**
+  (`expiresAt` jest ignorowane). claude-mem deduplikuje identyczne zapisy zamiast wykonywać upsert według `key`.
+- Wstrzykiwanie do promptu (`retrieval.ts`) i narzędzia MCP `omniroute_memory_*` nadal odczytują dane bezpośrednio z SQLite
+  — nie korzystają z `memoryManager`, więc ten backend nie dostarcza im danych.
+
+**Kierowanie własnych wywołań LLM claude-mem przez OmniRoute.** claude-mem kompresuje obserwacje
+za pomocą LLM (domyślnie: Claude Agent SDK). Jego dostawcę `openai-compatible` można zamiast tego skierować do
+OmniRoute, uzyskując obsługę awaryjnych kombinacji i śledzenie kosztów. W pliku `~/.claude-mem/settings.json`:
+
+```json
+{
+  "CLAUDE_MEM_PROVIDER": "openai-compatible",
+  "CLAUDE_MEM_OPENAI_COMPAT_BASE_URL": "http://localhost:20128/v1",
+  "CLAUDE_MEM_OPENAI_COMPAT_API_KEY": "<OmniRoute API key>",
+  "CLAUDE_MEM_OPENAI_COMPAT_MODEL": "<OmniRoute model or combo>"
+}
+```
 
 ### Ustawienia
 
-Ustawienia backendu pamięci są przechowywane w tabeli ustawień aplikacji i zarządzane za pośrednictwem `src/lib/memory/settings.ts`:
+Ustawienia backendu pamięci są przechowywane w tabeli ustawień aplikacji i zarządzane za pomocą `src/lib/memory/settings.ts`:
 
 | Ustawienie             | Klucz środowiska/konfiguracji | Domyślnie  | Opis                                                 |
 | ---------------------- | ----------------------------- | ---------- | ---------------------------------------------------- |
-| Backend główny         | `memoryPrimaryBackend`        | `"sqlite"` | Identyfikator głównego backendu                      |
-| Backendy rezerwowe     | `memoryFallbackBackends`      | `[]`       | Uporządkowane identyfikatory backendów rezerwowych   |
+| Backend główny         | `memoryPrimaryBackend`        | `"sqlite"` | Identyfikator backendu głównego                      |
+| Backendy awaryjne      | `memoryFallbackBackends`      | `[]`       | Uporządkowane identyfikatory awaryjnych backendów    |
 | Konfiguracje backendów | `memoryBackendConfigs`        | `{}`       | Nadpisania konfiguracji dla poszczególnych backendów |
 
 Ustawienia są normalizowane za pomocą `normalizeMemorySettings()` i buforowane w `getMemorySettings()`.
@@ -1072,12 +1131,13 @@ Ustawienia są normalizowane za pomocą `normalizeMemorySettings()` i buforowane
 ### Przebieg inicjalizacji
 
 ```
-Uruchomienie aplikacji
-  → importy index.ts (efekt uboczny): rejestrują SQLiteBackend
-  → initMemoryBackends() wywoływane z cyklu życia aplikacji:
+Uruchamianie aplikacji
+  → importy index.ts (efekt uboczny): rejestracja SQLiteBackend
+  → initMemoryBackends() wywołane z cyklu życia aplikacji:
       1. Wczytanie ustawień (getMemorySettings)
-      2. Skonfigurowanie backendu głównego i rezerwowych
-      3. Zainicjalizowanie wszystkich backendów (kontrola stanu)
+      1b. Rejestracja opcjonalnych backendów obecnych w backendConfigs (claude-mem)
+      2. Konfiguracja backendu głównego i awaryjnych
+      3. Inicjalizacja wszystkich backendów (kontrola kondycji)
       4. Gotowość do obsługi żądań
 ```
 
@@ -1087,7 +1147,7 @@ Uruchomienie aplikacji
 2. **Wyeksportuj** z `src/lib/memory/index.ts`
 3. **Zarejestruj** za pomocą `memoryManager.register(yourBackend)` podczas uruchamiania
 4. **Skonfiguruj** za pomocą ustawień: ustaw `memoryPrimaryBackend` na identyfikator swojego backendu
-5. **Przetestuj**, używając `src/lib/memory/__tests__/generic-backend.test.ts` jako punktu odniesienia
+5. **Przetestuj**, używając `src/lib/memory/__tests__/generic-backend.test.ts` jako przykładu
 
 #### Przykład: backend Brain
 
@@ -1118,16 +1178,16 @@ npx vitest run src/lib/memory/__tests__/generic-backend.test.ts --reporter=verbo
 Oczekiwany wynik: **35 testów, wszystkie zakończone powodzeniem**, obejmujących:
 
 - Konstruktor (2)
-- Kontrolę stanu (4) — powodzenie, błąd 500, błąd sieci, opóźnienie
-- Inicjalizację (2) — powodzenie, niepowodzenie
+- Kontrola kondycji (4) — powodzenie, błąd 500, błąd sieci, opóźnienie
+- Inicjalizacja (2) — powodzenie, niepowodzenie
 - Tworzenie (2) — domyślny endpoint, niestandardowy endpoint
-- Pobieranie (4) — powodzenie, 404 → null, zgłoszenie wyjątku dla kodu innego niż 404, niestandardowe parametry ścieżki
-- Aktualizację (2) — powodzenie, 404 → false
+- Pobieranie (4) — powodzenie, 404 → null, wyjątek dla kodu innego niż 404, niestandardowe parametry ścieżki
+- Aktualizacja (2) — powodzenie, 404 → false
 - Usuwanie (2) — powodzenie, 404 → false
 - Wyświetlanie listy (2) — parametry zapytania, niestandardowe nazwy parametrów
 - Wyszukiwanie (3) — parametry zapytania, niestandardowy endpoint, serializacja opcji
 - Nagłówki uwierzytelniania (2) — token Bearer, niestandardowe nagłówki
-- Fabrykę (1)
+- Fabryka (1)
 
 #### Sprawdzanie typów
 

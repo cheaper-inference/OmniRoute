@@ -1,7 +1,7 @@
 ---
 title: "🐳 Docker Guide — OmniRoute"
-version: 3.8.40
-lastUpdated: 2026-06-28
+version: 3.8.51
+lastUpdated: 2026-10-16
 ---
 
 # 🐳 Docker Guide — OmniRoute
@@ -22,7 +22,9 @@ lastUpdated: 2026-06-28
 - [Docker Compose with Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
 - [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
 - [Image Tags](#image-tags)
+- [Dashboard updates in Docker](#dashboard-updates-in-docker)
 - [Availability: default SQLite is single-replica](#availability-default-sqlite-is-single-replica)
+- [Gemini regional errors inside Docker](#gemini-regional-errors-inside-docker)
 - [Important Notes](#important-notes)
 
 ---
@@ -73,20 +75,24 @@ docker compose --profile cli up -d
 # Host profile (Linux-first; mounts host CLI binaries read-only)
 docker compose --profile host up -d
 
+# Web profile (Chromium/Playwright for web-session providers)
+docker compose --profile web up -d
+
 # Combine CLI + CLIProxyAPI sidecar
 docker compose --profile cli --profile cliproxyapi up -d
 ```
 
 ## Available Profiles
 
-OmniRoute ships four Compose profiles. Pick the one that matches your environment.
+OmniRoute ships Compose profiles for the main deployment shapes. Pick the one that matches your environment.
 
-| Profile          | Service          | When to use                                                                                                                       | Command                                      |
-| ---------------- | ---------------- | --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `base` (default) | `omniroute-base` | Headless server / minimal runtime, no provider CLIs bundled                                                                       | `docker compose --profile base up -d`        |
-| `cli`            | `omniroute-cli`  | Agentic workflows that call `omniroute providers/setup/doctor` and bundled CLIs (Codex, Claude Code, Droid, OpenClaw)             | `docker compose --profile cli up -d`         |
-| `host`           | `omniroute-host` | Linux hosts that want `network_mode`-like access to host CLIs by mounting `~/.local/bin`, `~/.codex`, `~/.claude`, etc. read-only | `docker compose --profile host up -d`        |
-| `cliproxyapi`    | `cliproxyapi`    | Run the [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) sidecar on port `8317` for upstream CLI proxying              | `docker compose --profile cliproxyapi up -d` |
+| Profile          | Service          | When to use                                                                                                                        | Command                                      |
+| ---------------- | ---------------- | ---------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `base` (default) | `omniroute-base` | Headless server / minimal runtime, no provider CLIs bundled                                                                        | `docker compose --profile base up -d`        |
+| `cli`            | `omniroute-cli`  | Agentic workflows that call `omniroute providers/setup/doctor` and bundled CLIs (Codex, Claude Code, Droid, OpenClaw)              | `docker compose --profile cli up -d`         |
+| `host`           | `omniroute-host` | Linux hosts that want `network_mode`-like access to host CLIs by mounting `~/.local/bin`, `~/.codex`, `~/.claude`, etc. read-only  | `docker compose --profile host up -d`        |
+| `cliproxyapi`    | `cliproxyapi`    | Run the [CLIProxyAPI](https://github.com/router-for-me/CLIProxyAPI) sidecar on port `8317` for upstream CLI proxying               | `docker compose --profile cliproxyapi up -d` |
+| `web`            | `omniroute-web`  | Web-session providers that need a browser: `gemini-web`, `claude-web`, `claude-turnstile` (builds `runner-web`, Chromium included) | `docker compose --profile web up -d`         |
 
 > Multiple profiles can be combined: `docker compose --profile cli --profile cliproxyapi up -d`.
 
@@ -235,19 +241,21 @@ The prod stack runs in parallel with the dev compose (different container names,
 
 ## Dockerfile Stages
 
-The repository ships a multi-stage Dockerfile (`Dockerfile`). Three stages are exposed; pick the right `target` for your use case.
+The repository ships a multi-stage Dockerfile (`Dockerfile`). Four stages are exposed; pick the right `target` for your use case.
 
-| Stage         | Base image            | Purpose                                                                                                                                                            |
-| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `builder`     | `node:26-trixie-slim` | Installs deps (`npm ci --legacy-peer-deps`) and runs `npm run build` (Turbopack by default — see Build-time resources below)                                       |
-| `runner-base` | `node:26-trixie-slim` | Production runtime with the Next.js standalone output. **No provider CLIs bundled.**                                                                               |
-| `runner-cli`  | `runner-base`         | Adds `git`, `docker.io`, `docker-compose` and global CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Pick this for agentic workflows.** |
+| Stage         | Base image            | Purpose                                                                                                                                                                                                                                                                     |
+| ------------- | --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Installs deps (`npm ci --legacy-peer-deps`) and runs `npm run build` (Turbopack by default — see Build-time resources below)                                                                                                                                                |
+| `runner-base` | `node:26-trixie-slim` | Production runtime with the Next.js standalone output. **No provider CLIs bundled.**                                                                                                                                                                                        |
+| `runner-cli`  | `runner-base`         | Adds `git`, `docker.io`, `docker-compose` and global CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Pick this for agentic workflows.**                                                                                                          |
+| `runner-web`  | `runner-base`         | Adds Playwright + a Chromium browser (`--with-deps`) for web-session providers: `gemini-web`, `claude-web`, `claude-turnstile`. **Pick this when you use those providers** — the plain image fails at request time without it (see the `-web` note under Release Channels). |
 
 Build a specific target manually:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
 docker build --target runner-cli  -t omniroute:cli  .
+docker build --target runner-web  -t omniroute:web  .
 ```
 
 ### Build-time resources
@@ -257,7 +265,7 @@ Three build args control what the `builder` stage costs. They are build-time onl
 
 | Build arg                   | Default | Effect                                                                              |
 | --------------------------- | ------- | ----------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `1`     | `0` builds with webpack instead. Lower peak memory, slower.                         |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`     | `0` builds with webpack: lower peak memory, slower. `1` opts into Turbopack.        |
 | `OMNIROUTE_BUILD_MEMORY_MB` | `6144`  | V8 heap ceiling (`--max-old-space-size`) for the spawned `next build`.              |
 | `OMNIROUTE_BUILD_WORKERS`   | `2`     | Feeds `CIRCLE_NODE_TOTAL`; Next derives `workers = N - 1` for page-data collection. |
 
@@ -279,11 +287,17 @@ Turbopack compiles in native Rust memory that lives **outside** the V8 heap, so
 `OMNIROUTE_BUILD_MEMORY_MB` does not bound it. On a host with a memory ceiling the
 build is then SIGKILLed by the OOM killer with no error text at all — it simply
 stops mid-`Creating an optimized production build`, which reads like a hang rather
-than an out-of-memory. If the build host is constrained, switch bundlers:
+than an out-of-memory. That is why the `Dockerfile` defaults to webpack
+(`OMNIROUTE_USE_TURBOPACK=0`), unlike `npm run dev` / `npm run build`, where
+Turbopack is the code default: a bare `docker build .` with no build args (what
+Railway and other one-click hosts run) must not die silently on a memory-capped
+builder. The published images already pass `OMNIROUTE_USE_TURBOPACK=0`
+explicitly in `docker-publish.yml`. On a builder with plenty of RAM, opt into
+Turbopack for a faster build:
 
 ```bash
 docker build --target runner-base \
-  --build-arg OMNIROUTE_USE_TURBOPACK=0 \
+  --build-arg OMNIROUTE_USE_TURBOPACK=1 \
   -t omniroute:base .
 ```
 
@@ -335,22 +349,22 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 
 Beyond the defaults documented in [ENVIRONMENT.md](../reference/ENVIRONMENT.md), the following variables matter most when running under Docker:
 
-| Variable                      | Purpose                                                                                                                                                                    | Default                  |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `OMNIROUTE_WS_BRIDGE_SECRET`  | Shared secret for the WebSocket bridge. **Required in production** — set to a strong random string.                                                                        | unset (must be provided) |
-| `REDIS_URL`                   | Connection string for the rate limiter / cache backend                                                                                                                     | `redis://redis:6379`     |
-| `REDIS_PORT`                  | Host-side port for the bundled Redis container                                                                                                                             | `6379`                   |
-| `REDIS_BIND_HOST`             | Host interface the bundled Redis port is published on (loopback unless you add AUTH)                                                                                       | `127.0.0.1`              |
-| `AUTO_UPDATE_HOST_REPO_DIR`   | Host path mounted into `cli` profile at `/workspace/omniroute` for self-update workflows                                                                                   | `.` (current directory)  |
-| `OMNIROUTE_MEMORY_MB`         | Runtime Node heap ceiling for the Docker standalone server; overrides the image default above. Coding agents: `8192`+ (see [runtime RAM](#runtime-ram-for-coding-agents)). | `1024`                   |
-| `DASHBOARD_PORT` / `API_PORT` | Override exposed ports for dashboard (20128) and API (20129)                                                                                                               | `20128` / `20129`        |
+| Variable                      | Purpose                                                                                                                                                                                                                                              | Default                  |
+| ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `OMNIROUTE_WS_BRIDGE_SECRET`  | Shared secret for the WebSocket bridge. **Required in production** — set to a strong random string.                                                                                                                                                  | unset (must be provided) |
+| `REDIS_URL`                   | Connection string for the rate limiter / cache backend                                                                                                                                                                                               | `redis://redis:6379`     |
+| `REDIS_PORT`                  | Host-side port for the bundled Redis container                                                                                                                                                                                                       | `6379`                   |
+| `REDIS_BIND_HOST`             | Host interface the bundled Redis port is published on (loopback unless you add AUTH)                                                                                                                                                                 | `127.0.0.1`              |
+| `AUTO_UPDATE_HOST_REPO_DIR`   | Host path mounted into `cli` profile at `/workspace/omniroute` for self-update workflows                                                                                                                                                             | `.` (current directory)  |
+| `OMNIROUTE_MEMORY_MB`         | Runtime Node heap ceiling for the Docker standalone server; overrides the image default above. Coding agents: `8192`+ (see [runtime RAM](#runtime-ram-for-coding-agents)).                                                                           | `1024`                   |
+| `DASHBOARD_PORT` / `API_PORT` | Override exposed ports for dashboard (20128) and API (20129)                                                                                                                                                                                         | `20128` / `20129`        |
 | `APP_BIND_HOST`               | Host interface docker-compose publishes the dashboard/API/live-WS ports on. With `REQUIRE_API_KEY=false` (the default), `0.0.0.0` exposes the anonymous `/v1` proxy to the LAN — only widen with `REQUIRE_API_KEY=true` or a reverse proxy in front. | `127.0.0.1`              |
-| `CLIPROXY_BIND_HOST`          | Host interface docker-compose publishes the `cliproxyapi` sidecar on — its data volume holds provider credentials.                                                        | `127.0.0.1`              |
-| `OMNIROUTE_PLUGINS_DIR`       | Directory the runtime plugin scanner reads and installs into. Set it when plugins are bind-mounted: the default follows `HOME`, which an image need not export.            | `~/.omniroute/plugins`   |
-| `OMNIROUTE_BASE_PATH`         | URL subpath when the app is published behind a reverse proxy (e.g. `/omniroute`)                                                                                           | _(empty = root)_         |
-| `NEXT_PUBLIC_BASE_URL`        | Public browser origin including the subpath (e.g. `https://host/omniroute`)                                                                                                | unset                    |
-| `PROD_DASHBOARD_PORT`         | Host-side dashboard port for `docker-compose.prod.yml`                                                                                                                     | `20130`                  |
-| `CLIPROXYAPI_PORT`            | Host-side port for the `cliproxyapi` sidecar                                                                                                                               | `8317`                   |
+| `CLIPROXY_BIND_HOST`          | Host interface docker-compose publishes the `cliproxyapi` sidecar on — its data volume holds provider credentials.                                                                                                                                   | `127.0.0.1`              |
+| `OMNIROUTE_PLUGINS_DIR`       | Directory the runtime plugin scanner reads and installs into. Set it when plugins are bind-mounted: the default follows `HOME`, which an image need not export.                                                                                      | `~/.omniroute/plugins`   |
+| `OMNIROUTE_BASE_PATH`         | URL subpath when the app is published behind a reverse proxy (e.g. `/omniroute`)                                                                                                                                                                     | _(empty = root)_         |
+| `NEXT_PUBLIC_BASE_URL`        | Public browser origin including the subpath (e.g. `https://host/omniroute`)                                                                                                                                                                          | unset                    |
+| `PROD_DASHBOARD_PORT`         | Host-side dashboard port for `docker-compose.prod.yml`                                                                                                                                                                                               | `20130`                  |
+| `CLIPROXYAPI_PORT`            | Host-side port for the `cliproxyapi` sidecar                                                                                                                                                                                                         | `8317`                   |
 
 ## Reverse Proxy on a Subpath (Traefik / nginx)
 
@@ -500,6 +514,19 @@ OmniRoute publishes separate Docker channels for stable releases, active release
 | `:next` / `:next-web`           | Current default `release/v*` branch | Mutable pre-release pointer | Testing fixes that have landed on the active release branch but are not yet in a stable release                       |
 | `:main` / `:main-web`           | `main` branch                       | Mutable development pointer | Development and integration testing only                                                                              |
 
+#### Web-session providers: the `-web` images
+
+Every channel above doubles as a `-web` tag (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), built from the `runner-web` stage — the same image plus Playwright and a Chromium browser. The plain image ships **without** Chromium; `gemini-web`, `claude-web` and `claude-turnstile` need it.
+
+The failure is deferred, not startup-time: those providers list their models and show as connected in the dashboard, and only the first request fails with
+
+```
+[500]: Failed to load external module playwright: Error: Cannot find module
+'/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
+```
+
+If you use those providers, pull the `-web` tag of the channel you are already on — nothing else changes. On an npm/CLI install (no Docker image), the equivalent missing piece is the browser binary: run `npx playwright install chromium` on the host.
+
 #### Using the pre-release channel
 
 The `next` channel is rebuilt on every push to the current default `release/v*` branch and is published for both AMD64 and ARM64. Older maintenance branches cannot overwrite it. The channel provides a pullable image for fixes that have merged into the active release branch before the next stable tag is cut.
@@ -548,6 +575,77 @@ A release-branch build can never move `latest`; only an eligible stable semantic
 | Follow published stables and accept a recreate on each release | `:latest`                          |
 | Test unreleased `release/v*` commits                           | `:next` (not production)           |
 | Test `main`                                                    | `:main` (not production)           |
+
+## Dashboard updates in Docker
+
+A published-image container cannot replace itself. When OmniRoute detects it runs inside a
+container (no `.git` checkout, not an npm install), the home dashboard's update banner shows the
+host command to run instead of the npm/git instructions, with a copy button:
+
+```bash
+docker compose pull omniroute && docker compose up -d --force-recreate omniroute
+```
+
+The service name comes from `AUTO_UPDATE_SERVICE` (default `omniroute`, the service in
+`docker-compose.selfhost.yml`). `pull` only moves a floating tag (`latest`, `next`); with a pinned
+`:X.Y.Z` tag, edit the tag first.
+
+### One-click updates with a host trigger file
+
+To keep **Update Now** working without mounting `/var/run/docker.sock` (which gives the container
+root on the host — see the `cli` profile warning above), set `DOCKER_UPDATE_TRIGGER_FILE` on the
+OmniRoute service and run a watcher on the host:
+
+```yaml
+services:
+  omniroute:
+    environment:
+      DOCKER_UPDATE_TRIGGER_FILE: /app/data/update/docker-update.request
+    volumes:
+      - ./data:/app/data
+```
+
+The path must be inside `DATA_DIR` (relative values resolve against it); anything else is
+rejected. **Update Now** then writes `{ "requestedAt": "...", "targetVersion": "X.Y.Z" }` to that
+file, answers `202`, and the dashboard polls `/api/system/version` until the new version is live
+and reloads. OmniRoute never runs a shell or Docker command in this mode. Like every update
+action, the request is accepted only from loopback/LAN clients.
+
+A bind-mounted data directory gives the host a stable path to watch. Sample `systemd` units
+(adjust `/srv/omniroute` to the directory holding your compose file and `data/`):
+
+```ini
+# /etc/systemd/system/omniroute-update.path
+[Unit]
+Description=Watch for OmniRoute dashboard update requests
+
+[Path]
+PathExists=/srv/omniroute/data/update/docker-update.request
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```ini
+# /etc/systemd/system/omniroute-update.service
+[Unit]
+Description=Pull and recreate the OmniRoute container
+
+[Service]
+Type=oneshot
+WorkingDirectory=/srv/omniroute
+ExecStartPre=/usr/bin/rm -f /srv/omniroute/data/update/docker-update.request
+ExecStart=/bin/sh -c 'docker compose pull omniroute || (sleep 15 && docker compose pull omniroute)'
+ExecStart=/usr/bin/docker compose up -d --force-recreate omniroute
+```
+
+```bash
+sudo systemctl daemon-reload
+sudo systemctl enable --now omniroute-update.path
+```
+
+The service removes the request before pulling so a failed run does not loop. Without
+`DOCKER_UPDATE_TRIGGER_FILE` the dashboard keeps the manual command flow.
 
 ## Availability: default SQLite is single-replica
 
@@ -648,6 +746,85 @@ volumes:
 ```
 
 In-process density (compression off the HTTP isolate) is [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). One logical cluster on shared durable state is [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+
+## Gemini regional errors inside Docker
+
+Google AI Studio / Gemini API can return HTTP 400 with FAILED_PRECONDITION and
+`User location is not supported for the API use.` A successful request on the host
+does not prove that the container uses the same outbound route. DNS ordering,
+IPv4/IPv6 connectivity, VPN routing and configured proxies can differ. Check
+[Google's supported regions](https://ai.google.dev/gemini-api/docs/available-regions)
+as well as the actual connection route; this error alone does not identify a bad API key.
+
+### Prefer a connection-specific proxy
+
+Use OmniRoute's [per-connection proxy configuration](../ops/PROXY_GUIDE.md#4-level-proxy-system)
+for the affected Gemini connection, then repeat **Test Connection** and a small request
+with the same model. This keeps the routing change scoped to that connection. Verify
+that the proxy is reachable from the container, and that the connection really selects
+it. Changing the route does not guarantee upstream regional eligibility.
+
+### Compare host and container networking
+
+Keep the key, model and request identical when comparing authenticated results; never
+paste credentials, proxy passwords or complete authorization headers into an issue.
+First inspect which address families the OS resolver offers, using the same command
+on the host and inside the container:
+
+```bash
+node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
+docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
+```
+
+Replace `omniroute` with the service you run (for example, `omniroute-web`). These
+commands print address families without credentials or IP addresses. A returned `6`
+only shows an IPv6 DNS result: it does **not** prove a usable IPv6 route or API access.
+Where `curl` is installed, compare `curl -4 -I https://generativelanguage.googleapis.com`
+with `curl -6 -I https://generativelanguage.googleapis.com` in both environments.
+An HTTP response proves connectivity for that probe, even if it is an unauthenticated
+error; only the authenticated model request tests Gemini eligibility.
+
+### Host-level alternative: working IPv6 and resolver policy
+
+The reporter of [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) restored
+access in their environment by enabling container IPv6 and changing glibc address
+selection. Treat this as an environment-specific alternative. Confirm working host
+IPv6, container egress/routing and firewall rules before adjusting resolver preferences.
+A private ULA address by itself does not establish public IPv6 connectivity.
+
+For services already attached to Compose's default network, this fragment enables
+IPv6 on that network; retain the rest of your service, ports, volumes and configuration:
+
+```yaml
+networks:
+  default:
+    enable_ipv6: true
+```
+
+For a named network, enable it on the network the service actually joins. Docker can
+allocate a ULA subnet; select an explicit, non-overlapping subnet only when your network
+requires it. See [Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/)
+and [Compose network options](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+
+On a **glibc-based image**, `/etc/gai.conf` can change address selection. The current
+repository Dockerfile uses Debian; custom musl-based images do not share this mechanism.
+The reported adjustment changes the ULA label from `label fc00::/7 6` to
+`label fc00::/7 1`. Start from the image's complete policy table and preserve its other
+entries: adding a `label` or `precedence` entry replaces that default table, so a file
+containing only the changed line is insufficient. The
+[glibc configuration reference](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
+documents those semantics. Bind-mount the reviewed file read-only at `/etc/gai.conf`
+and recreate the service to apply it.
+
+This changes OS address selection for **all outbound traffic in that container**.
+It does not force every application to choose IPv6: Node's DNS order and connection
+selection also matter. In particular, `--dns-result-order=ipv4first` prefers IPv4 and
+is not a remedy for an IPv4-only failure. See [Node DNS ordering](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+
+Re-test Gemini and your other providers after any host-level change. To roll back,
+remove the custom `gai.conf` mount, restore the previous network configuration and
+recreate the affected service/network during a maintenance window. Recreating a network
+can interrupt other containers attached to it; do not delete the persistent data volume.
 
 ## Important Notes
 

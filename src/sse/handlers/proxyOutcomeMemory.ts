@@ -1,4 +1,7 @@
-import { isEgressBucketedLockScope } from "@omniroute/open-sse/config/providerErrorRules.ts";
+import {
+  isEgressBucketedLockScope,
+  rotatesEgressOnQuotaRefusal,
+} from "@omniroute/open-sse/config/providerErrorRules.ts";
 import {
   hasProxyRefusals,
   noteProxyRecovered,
@@ -7,7 +10,7 @@ import {
   proxyEgressKey,
 } from "@omniroute/open-sse/utils/proxyRefusalMemory.ts";
 import { isProxySkipRecentlyFailedEnabled } from "@/shared/utils/featureFlags";
-
+import { maybeSwitchOnSetAside } from "@/lib/proxySubscription/selectorTrigger";
 /**
  * Feed the outcome the provider actually returned through a proxy (captured around the
  * patched fetch and carried on proxyInfo.upstreamStatus) back to proxy selection. Opt-in:
@@ -18,6 +21,12 @@ import { isProxySkipRecentlyFailedEnabled } from "@/shared/utils/featureFlags";
  * outcome (local refusal, network error), an edge relay (the outcome is the relay's, and
  * its key is null) or a direct request writes nothing. Never reads result.status: several
  * failures are generated locally.
+ *
+ * The 429 write serves the IP-bucketed family by default and every provider when the
+ * operator widens the scope (OMNIROUTE_EGRESS_QUOTA_ROTATION_PROVIDERS=all — the free and
+ * keyless providers answer 429 per IP, having no key to bucket by). The scope stays narrow
+ * on the paths that widen blast radius instead of narrowing it: the clear-on-success arm
+ * and the sibling-connection lockout are unchanged.
  *
  * Synchronous on purpose: the caller runs it as soon as the upstream status is known, so
  * a request picking from the pool right after already sees the member set aside. The flag
@@ -30,9 +39,17 @@ export function noteProxyOutcome(
   const status = proxyInfo?.upstreamStatus;
   if (typeof status !== "number") return;
   const inRefusalScope = isEgressBucketedLockScope(provider);
-  if (status === 429 && inRefusalScope) {
+  if (status === 429 && rotatesEgressOnQuotaRefusal(provider)) {
     const key = proxyEgressKey(proxyInfo?.proxy);
-    if (key !== null && isProxySkipRecentlyFailedEnabled()) noteProxyRefusal(key, "ip_quota_429");
+    if (key === null || !isProxySkipRecentlyFailedEnabled()) return;
+    const period = noteProxyRefusal(key, "ip_quota_429");
+    if (period === null) return;
+    // Steer the local core selector off the set-aside member. Fire-and-
+    // forget, off the request path, never blocking, never throwing: the callee
+    // owns a defensive catch, this one guards the sync caller.
+    void maybeSwitchOnSetAside(key).catch((e) => {
+      console.warn(`[SelectorControl] trigger failed: ${e instanceof Error ? e.message : e}`);
+    });
     return;
   }
   if (status < 200 || status >= 300 || !hasProxyRefusals()) return;
@@ -40,3 +57,8 @@ export function noteProxyOutcome(
   if (inRefusalScope) noteProxyServed(key);
   else noteProxyRecovered(key, "proxy_unreachable");
 }
+
+// The transport cross-evidence decision lives next to its store in open-sse (the
+// proxy dispatcher calls it without reaching into src/sse); re-exported here so
+// the outcome feedback for proxies stays discoverable from one place.
+export { noteTransportOutcome } from "@omniroute/open-sse/utils/proxyTransportOutcome.ts";

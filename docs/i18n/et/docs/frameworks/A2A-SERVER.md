@@ -1,6 +1,6 @@
 # OmniRoute A2A Server Documentation (Eesti)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
 
 ---
 
@@ -43,11 +43,11 @@ aadressile `POST /a2a` annavad HTTP 503 koos JSON-RPC veakoodiga `-32000`.
 
 ---
 
-## JSON-RPC 2.0 Meetodid
+## JSON-RPC 2.0 meetodid
 
-### `message/send` — Sünkroonne Täitmine
+### `message/send` — sünkroonne täitmine
 
-Saadab sõnumi oskusele ja ootab täielikku vastust.
+Saadab oskusele sõnumi ja ootab täielikku vastust.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+`smart-routing`-u puhul alistab `metadata.combo` lüüsipäringus sõnaselgelt
+`metadata.model`-i; see saadetakse tegeliku `model`-ina, mitte eiratava
+`x-combo` JSON-väljana. Lüüsis kehtivad endiselt tavapärased API-võtme ja
+sihtkohapõhised autoriseerimisreeglid. Sobimatu või tühi kombinatsioon lükatakse tagasi.
+
+Tulemus sisaldab välju `requested_combo` (kutsuja kavatsus), `dispatched_model`
+(tegelik lüüsipäring), `response_model` (lüüsi vastus) ja
+`confirmed_combo`. Viimane väli on `null`, välja arvatud juhul, kui lüüs
+tuvastab kombinatsiooni sõnaselgelt. A2A otsustuslogid omistavad täitmise ainult
+kinnitatud kombinatsioonile, säilitades kinnitamata päringu väljana `requestedCombo`.
+
 **Vastus:**
 
 ```json
@@ -76,30 +87,23 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
 ```
 
-### `message/stream` — SSE Voog
+### `message/stream` — SSE voogedastus
 
-Sarnane `message/send`-iga, aga tagastab Server-Sent Events reaalajas voogu jaoks.
+Sama mis `message/send`, kuid tagastab reaalajas voogedastuseks Server-Sent Events sündmused.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**SSE Sündmused:**
+**SSE sündmused:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Küsi Ülesande Olekut
+### `tasks/get` — ülesande oleku pärimine
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Tühista Ülesanne
+### `tasks/cancel` — ülesande tühistamine
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,22 +152,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Saadaolevad oskused
 
-OmniRoute paljastab 6 A2A oskust, mis on ühendatud `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Iga oskuste moodul asub `src/lib/a2a/skills/`.
+OmniRoute pakub 6 A2A-oskust, mis on seotud kohas `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Iga oskuse moodul asub kataloogis `src/lib/a2a/skills/`.
 
-| Oskus                     | ID                   | Kirjeldus                                                                                                                                            | Sildid                         | Näited                                              |
-| :------------------------ | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :-------------------------------------------------- |
-| Nutikas marsruutimine     | `smart-routing`      | Marsruutib prompti optimaalse teenusepakkuja/kombinatsiooni kaudu, kasutades OmniRoute'i kombinatsioonimootorit + skoorimist                         | marsruutimine, teenusepakkujad | "Marsruuta see prompt parima mudeli kaudu"          |
-| Kvoodihaldus              | `quota-management`   | Annab teada teenusepakkujate kohta kvoodi olekust, aitab vastajatel otsustada, millal kiirust piirata/vahetada                                       | kvoot, teenusepakkujad         | "Kontrolli AnthroPici kvooti"                       |
-| Teenusepakkuja avastamine | `provider-discovery` | Loetleb installitud teenusepakkujad koos võimalustega, tasuta tsoonide lippudega, OAuthi olekuga                                                     | teenusepakkujad, avastamine    | "Millised teenusepakkujad on saadaval?"             |
-| Kuluanalüüs               | `cost-analysis`      | Hindab päringu/vestluse kulu, võttes arvesse kataloogi ja hiljutist kasutust                                                                         | kulu, kasutus                  | "Hinda selle vestluse kulu"                         |
-| Tervisaruanne             | `health-report`      | Koondab iga teenusepakkuja vooluringi katkestaja, jahtumisaja, lukustamise oleku                                                                     | tervis, vastupidavus           | "Näita kõigi teenusepakkujate tervislikkuse olekut" |
-| Võimaluste loendamine     | `list-capabilities`  | Tagastab täieliku 45-kande kataloogi (23 API-d + 21 CLI-d + 1 konfiguratsiooni) markdown-tabelina koos SKILL.md toor-URL-idega konteksti süstimiseks | kataloog, avastamine, oskused  | "Loetle kõik OmniRoute'i võimalused"                |
+| Oskus              | ID                   | Kirjeldus                                                                                                                                                  | Sildid                     | Näited                                     |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :----------------------------------------- |
+| Smart Routing      | `smart-routing`      | Marsruudib prompti optimaalse pakkuya/kombo kaudu, kasutades OmniRoute'i kombo-mootorit ja skoorimist                                                      | routing, providers         | "Marsruudi see prompt parima mudeli kaudu" |
+| Quota Management   | `quota-management`   | Annab ülevaate pakkujapõhisest kvoodiseisundist ja aitab kutsujal otsustada, millal piirata või vahetada                                                   | quota, providers           | "Kontrolli anthropic'i kvooti"             |
+| Provider Discovery | `provider-discovery` | Loetleb installitud pakkujad koos võimekuste, tasuta taseme lippude ja OAuth-i olekuga                                                                     | providers, discovery       | "Millised pakkujad on saadaval?"           |
+| Cost Analysis      | `cost-analysis`      | Hindab päringu/vestluse maksumust kataloogi ja hiljutise kasutuse põhjal                                                                                   | cost, usage                | "Hinda selle vestluse maksumust"           |
+| Health Report      | `health-report`      | Koondab pakkujapõhiselt circuit-breakeri, cooldowni ja lockouti oleku                                                                                      | health, resilience         | "Näita kõigi pakkujate terviseolekut"      |
+| List Capabilities  | `list-capabilities`  | Tagastab täieliku 45-kirjelise Agent Skillsi kataloogi (23 API + 21 CLI + 1 config) markdown-tabelina koos toorete SKILL.md URL-idega konteksti lisamiseks | catalog, discovery, skills | "Loetle kõik OmniRoute'i võimekused"       |
 
-> Agent Card peaks olema kooskõlas reaalse 352-teenusepakkuja kataloogiga; teenusepakkujate arv ja tasuta/autentimisvaba metaandmed pärinevad tööaegsest registrile.
+> Agent Card tuleks hoida kooskõlas reaalajas 376 pakkujaga kataloogiga; pakkujate arv ning tasuta/autentimisvabad metaandmed pärinevad käitusaja registrist.
 
 ### `list-capabilities` oskuse üksikasjad
 
-Oskus `list-capabilities` on eriti kasulik välistele agentidele, kes peavad enne API-käskude saatmist avastama, mida OmniRoute pakub. See tagastab struktureeritud markdown-tabeli objekti:
+Oskus `list-capabilities` on eriti kasulik välistele agentidele, kes peavad enne API-kõnede tegemist selgitama, mida OmniRoute pakub. See tagastab struktureeritud markdown-tabeli artefaktina:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -172,7 +176,9 @@ Oskus `list-capabilities` on eriti kasulik välistele agentidele, kes peavad enn
 ...
 ```
 
-Iga rida sisaldab `rawUrl` veergu, et agendid saaksid koheldata täieliku SKILL.md. Väli `metadata.totalSkills` peegeldab kataloogi suurust (tänapäeval 45). Rakendus: `src/lib/a2a/skills/listCapabilities.ts`. Vaata ka [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Iga rida sisaldab veergu `rawUrl`, et agendid saaksid kohe hankida kogu SKILL.md sisu. Väli `metadata.totalSkills` peegeldab kataloogi suurust (täna 45). Implementatsioon: `src/lib/a2a/skills/listCapabilities.ts`. Vaata ka [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+
+---
 
 ## REST API (abiseadmed)
 
@@ -260,7 +266,7 @@ esitatud → töös → valmis
 
 ---
 
-## Integratsiooni näited
+## Integratsiooninäited
 
 ### Python (requests)
 

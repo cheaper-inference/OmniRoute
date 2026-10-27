@@ -123,3 +123,145 @@ describe("defaultOmniRouteEnrichmentFetcher", () => {
     assert.equal(map.size, 0);
   });
 });
+
+describe("free-tier canonical fan-out", () => {
+  const modelsBody = {
+    cf: {
+      id: "cloudflare-ai",
+      alias: "cf",
+      name: "Cloudflare",
+      models: [{ id: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", name: "Llama 3.3 70B" }],
+    },
+  };
+
+  function fetchFor(perModel: unknown[]): typeof fetch {
+    return (async (url: unknown) => {
+      const href = String(url);
+      const body = href.endsWith("/api/pricing/models")
+        ? modelsBody
+        : href.endsWith("/api/pricing")
+          ? {}
+          : { perModel };
+      return { ok: true, status: 200, statusText: "OK", json: async () => body };
+    }) as unknown as typeof fetch;
+  }
+
+  it("stamps the canonical freeType and budgets on every namespaced key of the provider", async () => {
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = fetchFor([
+      {
+        provider: "cloudflare-ai",
+        modelId: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+        freeType: "recurring-monthly",
+        monthlyTokens: 1_000_000,
+        creditTokens: 0,
+      },
+    ]);
+    try {
+      const map = await defaultOmniRouteEnrichmentFetcher("https://gw.example.com", "k", 1000);
+      const namespaced = map.get("cf/@cf/meta/llama-3.3-70b-instruct-fp8-fast");
+      assert.equal(namespaced?.freeType, "recurring-monthly");
+      assert.equal(namespaced?.monthlyTokens, 1_000_000);
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+  });
+
+  it("stamps the alias-served key built from the canonical provider entry", async () => {
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = fetchFor([
+      {
+        provider: "cloudflare-ai",
+        modelId: "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+        freeType: "recurring-monthly",
+        monthlyTokens: 1_000_000,
+      },
+    ]);
+    try {
+      const map = await defaultOmniRouteEnrichmentFetcher("https://gw.example.com", "k", 1000);
+      assert.equal(
+        map.get("cf/@cf/meta/llama-3.3-70b-instruct-fp8-fast")?.freeType,
+        "recurring-monthly"
+      );
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+  });
+
+  it("leaves the homonym of another provider unstamped", async () => {
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = (async (url: unknown) => {
+      const href = String(url);
+      const body = href.endsWith("/api/pricing/models")
+        ? {
+            cf: {
+              id: "cloudflare-ai",
+              alias: "cf",
+              name: "Cloudflare",
+              models: [{ id: "shared-model", name: "Shared" }],
+            },
+            xx: {
+              id: "other-provider",
+              alias: "xx",
+              name: "Other",
+              models: [{ id: "shared-model", name: "Shared" }],
+            },
+          }
+        : href.endsWith("/api/pricing")
+          ? {}
+          : {
+              perModel: [
+                { provider: "cloudflare-ai", modelId: "shared-model", freeType: "keyless" },
+              ],
+            };
+      return { ok: true, status: 200, statusText: "OK", json: async () => body };
+    }) as unknown as typeof fetch;
+    try {
+      const map = await defaultOmniRouteEnrichmentFetcher("https://gw.example.com", "k", 1000);
+      assert.equal(map.get("cf/shared-model")?.freeType, "keyless");
+      assert.equal(map.get("xx/shared-model")?.freeType, undefined);
+      assert.equal(map.get("shared-model")?.providerCanonical, "cloudflare-ai");
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+  });
+
+  it("stamps once when alias equals canonical", async () => {
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = (async (url: unknown) => {
+      const href = String(url);
+      const body = href.endsWith("/api/pricing/models")
+        ? {
+            kiro: {
+              id: "kiro",
+              alias: "kiro",
+              name: "Kiro",
+              models: [{ id: "m1", name: "Model One" }],
+            },
+          }
+        : href.endsWith("/api/pricing")
+          ? {}
+          : { perModel: [{ provider: "kiro", modelId: "m1", freeType: "keyless" }] };
+      return { ok: true, status: 200, statusText: "OK", json: async () => body };
+    }) as unknown as typeof fetch;
+    try {
+      const map = await defaultOmniRouteEnrichmentFetcher("https://gw.example.com", "k", 1000);
+      assert.equal(map.get("kiro/m1")?.freeType, "keyless");
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+  });
+
+  it("ignores a free-tier line without provider", async () => {
+    const origFetch = globalThis.fetch;
+    globalThis.fetch = fetchFor([
+      { provider: "", modelId: "@cf/meta/llama-3.3-70b-instruct-fp8-fast", freeType: "keyless" },
+    ]);
+    try {
+      const map = await defaultOmniRouteEnrichmentFetcher("https://gw.example.com", "k", 1000);
+      assert.equal(map.get("cf/@cf/meta/llama-3.3-70b-instruct-fp8-fast")?.freeType, undefined);
+    } finally {
+      globalThis.fetch = origFetch;
+    }
+  });
+});

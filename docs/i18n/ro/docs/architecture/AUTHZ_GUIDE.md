@@ -1,15 +1,15 @@
 # Authorization Guide (Română)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇭 [km](../../../km/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
 
 ---
 
-> **Sursa adevărului:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **Ultima actualizare:** 2026-06-28 — v3.8.40
+> **Sursă de adevăr:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
+> **Ultima actualizare:** 2026-09-22 — spațiile de nume ale scopurilor indică spre MCP-SERVER.md
 
-OmniRoute are un flux de autorizare care ține cont de rute și controlează fiecare solicitare API. Clasificarea este **deterministă** și **se închide în mod securizat în caz de eroare** — orice element care nu poate fi clasificat ajunge în categoria `MANAGEMENT` și necesită o sesiune sau un token cu privilegii de administrare. Această pagină explică modelul pentru inginerii care întrețin rutele sau proiectează endpointuri noi.
+OmniRoute are un pipeline de autorizare conștient de rute, care filtrează fiecare cerere API. Clasificarea este **determinată** și **fail-closed** — orice nu poate fi clasificat ajunge ca `MANAGEMENT` și necesită o sesiune sau un token de nivel management. Această pagină explică modelul pentru inginerii care întrețin rute sau proiectează noi endpoint-uri.
 
-![Fluxul AuthZ (3 clase de rute + evaluarea politicilor)](../diagrams/exported/authz-pipeline.svg)
+![Pipeline AuthZ (3 clase de rute + evaluare politici)](../diagrams/exported/authz-pipeline.svg)
 
 > Sursă: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
@@ -17,67 +17,135 @@ OmniRoute are un flux de autorizare care ține cont de rute și controlează fie
 
 ### 1. Cheie API (Bearer)
 
-Utilizată pentru API-urile client compatibile cu OpenAI/Anthropic/Gemini și pentru câteva rute de administrare atunci când cheia are domeniul de autorizare `manage`.
+Utilizat pentru API-urile client compatibile cu OpenAI/Anthropic/Gemini și pentru câteva rute de administrare atunci când cheia are domeniul de acces `manage`.
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-Este validată de `isValidApiKey()` / `extractApiKey()` în `src/sse/services/auth.ts` și reexportată prin `src/shared/utils/apiAuth.ts`. Validatorul acceptă și variabilele de mediu `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` drept chei persistente de tip passthrough (problema #1350).
+Validarea este efectuată de `isValidApiKey()` / `extractApiKey()` în `src/sse/services/auth.ts`, acestea fiind reexportate prin `src/shared/utils/apiAuth.ts`. Validatorul acceptă, de asemenea, variabilele de mediu `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` drept chei persistente de transfer direct (problema #1350).
 
-### 2. Sesiune de dashboard (cookie auth_token)
+### 2. Sesiune pentru panoul de control (cookie auth_token)
 
-Pentru paginile dashboardului și operațiunile de administrare.
+Pentru paginile panoului de control și operațiunile administrative.
 
 ```
-Cookie: auth_token=<JWT semnat cu JWT_SECRET>
+Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-Un cookie reprezintă o sesiune numai atunci când JWT-ul este verificat **și** conține `authenticated: true`
+Un cookie reprezintă o sesiune numai atunci când JWT-ul este verificat cu succes **și** conține `authenticated: true`
 (`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`). Fiecare
-consumator al cookie-ului (protecția rutelor, reîmprospătarea fluxului authz, negocierea WebSocket, serverul
-live, `/api/settings/require-login`, `/api/auth/status`) trece prin acel utilitar.
-Există și alte JWT-uri semnate cu `JWT_SECRET` — mecanismul passthrough al Cursor CLI emite
+consumator al cookie-ului (mecanismul de protecție a rutelor panoului de control (`isDashboardSessionAuthenticated()`), reîmprospătarea fluxului de autorizare, negocierea inițială WebSocket, serverul
+live, `/api/settings/require-login`, `/api/auth/status`) utilizează această funcție auxiliară.
+Există și alte JWT-uri semnate cu `JWT_SECRET` — mecanismul de transfer direct pentru Cursor CLI emite
 tokenuri `iss "omniroute" / aud "cursor-cli"` pentru deținătorii de chei — iar acestea nu reprezintă niciodată sesiuni
 (#13298).
 
-Este verificată de `isDashboardSessionAuthenticated()` în `src/shared/utils/apiAuth.ts`. Fluxul reîmprospătează automat JWT-ul atunci când au rămas mai puțin de 7 zile din durata sa de viață de 30 de zile.
+Verificarea este efectuată de `isDashboardSessionAuthenticated()` în `src/shared/utils/apiAuth.ts`. Fluxul reîmprospătează automat JWT-ul atunci când au mai rămas mai puțin de 7 zile din durata sa de viață de 30 de zile.
 
-Unele rute de administrare acceptă **oricare** dintre cele două moduri: cookie SAU `Bearer <key>` atunci când cheia API are domeniul de autorizare `manage` (sau `admin`). Acest lucru permite fluxul de lucru „configurabil prin apeluri API” adăugat în v3.8.
+O sesiune se poate încheia și înainte de expirarea celor 30 de zile, deoarece fiecare emitent utilizează `mintDashboardSessionToken` (un moment al emiterii `iat` și un identificator `jti`), iar verificatorul controlează două setări: `sessionsValidAfter`, setată în urma schimbării parolei, astfel încât toate sesiunile emise anterior să nu mai poată fi verificate (browserul în care a fost schimbată parola primește un cookie nou), și `revokedDashboardSessions`, la care `POST /api/auth/logout` adaugă valoarea `jti` a sesiunii deconectate. Sesiunile emise de o versiune mai veche nu conțin niciuna dintre aceste revendicări și rămân valide până la prima schimbare a parolei. Dacă setările nu pot fi citite, sesiunea nu este considerată de încredere.
 
-#### Control opțional al autentificării OIDC (#6973)
+Unele rute de administrare acceptă **oricare** dintre cele două moduri: cookie SAU `Bearer <key>` atunci când cheia API are domeniul de acces `manage` (sau `admin`). Acest lucru permite fluxul de lucru „configurabil prin apeluri API”, adăugat în v3.8.
 
-Autentificarea de administrator în dashboard acceptă și un flux OIDC (OpenID Connect) **opțional**, alături de autentificarea implicită prin parolă — autentificarea prin parolă nu este eliminată niciodată, ci doar completată:
+#### Poartă opțională de autentificare OIDC (#6973)
 
-- Este dezactivat dacă `settings.oidcEnabled === true` **și** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` nu sunt toate configurate (Settings → Auth).
-  În caz contrar, `GET /api/auth/oidc/login` returnează `400`.
-- `GET /api/auth/oidc/login` identifică `authorization_endpoint` din
-  configurația `/.well-known/openid-configuration` a emitentului (cu revenire la
-  `<issuer>/authorize`), construiește URI-ul de redirecționare din solicitarea primită
-  (ținând cont de `x-forwarded-proto`) și redirecționează către IdP cu o valoare `state`
-  aleatorie, stocată într-un cookie `oidc_state` cu atributul `httpOnly`.
+Autentificarea administratorului în panoul de control acceptă și un flux OIDC (OpenID Connect) **opțional**
+alături de autentificarea implicită prin parolă — autentificarea prin parolă nu este eliminată niciodată, ci doar
+completată:
+
+- Dezactivat dacă `settings.oidcEnabled === true` **nu este îndeplinită** sau dacă
+  `oidcIssuer` / `oidcClientId` / `oidcClientSecret` nu sunt toate configurate
+  (Setări → Autentificare). În caz contrar, `GET /api/auth/oidc/login` returnează
+  `400`.
+- `GET /api/auth/oidc/login` descoperă `authorization_endpoint` din
+  `/.well-known/openid-configuration` al emitentului (cu revenire la
+  `<issuer>/authorize`), construiește URI-ul de redirecționare din cererea
+  primită (ținând cont de `x-forwarded-proto`) și redirecționează către IdP cu
+  un `state` aleatoriu stocat într-un cookie `oidc_state` cu atributul
+  `httpOnly`.
 - `GET /api/auth/oidc/callback` validează `state`, schimbă codul de autorizare
   și verifică semnătura tokenului ID prin JWKS-ul emitentului
-  (`createRemoteJWKSet` din `jose`, memorat în cache pentru fiecare URI JWKS), cu verificări pentru `issuer`/`audience`.
-  O listă opțională de permisiuni `oidcAllowedSubjects` compară revendicarea
-  `sub` a tokenului sau revendicarea `email` — revendicarea de e-mail este luată în considerare numai când
-  `email_verified === true`, astfel încât o adresă de e-mail neverificată la IdP nu poate trece niciodată
-  de control.
-- În caz de succes, emite **exact același** JWT `auth_token` cu valabilitate de 30 de zile pe care îl emite autentificarea
-  prin parolă (`src/app/api/auth/login/route.ts`), astfel încât restul fluxului
-  sesiunii dashboardului (reîmprospătarea automată, atributele cookie-ului) rămâne neschimbat —
-  OIDC înlocuiește doar modul în care este emis cookie-ul, nu și permisiunile pe care acesta le acordă.
+  (`createRemoteJWKSet` din `jose`, memorat în cache pentru fiecare URI JWKS),
+  cu verificări pentru `issuer`/`audience`. Admiterea în panoul de control
+  necesită o listă `oidcAllowedSubjects` nevidă, o politică
+  `oidcAdmissionClaim` sau ambele. Lista de subiecți corespunde cu `sub` sau
+  `email` numai atunci când `email_verified === true`. Politica opțională
+  privind revendicările primește o cale către o revendicare din tokenul ID,
+  separată prin puncte (de exemplu, `realm_access.roles`), și un tablou de
+  valori acceptate; revendicarea rezolvată trebuie să fie un tablou de șiruri
+  care conține cel puțin o valoare acceptată. Dacă sunt configurate ambele
+  politici, ambele trebuie să fie îndeplinite. Revendicările lipsă sau
+  incorect formatate determină respingerea, iar în absența ambelor politici,
+  callback-ul refuză autentificarea (`not_configured`). Configurațiile
+  existente bazate exclusiv pe subiect continuă să funcționeze neschimbate.
+- În mod normal, Keycloak mapează rolurile realm-ului în tokenurile de acces,
+  nu neapărat în tokenurile ID. Pentru a impune rolul de realm `admin`,
+  configurați pentru acest client un mapper de protocol care include
+  `realm_access.roles` în **tokenul ID**, apoi setați `oidcAdmissionClaim` la
+  `{ "path": "realm_access.roles", "values": ["admin"] }`. Verificați
+  revendicarea efectivă din tokenul ID pentru acest client înainte de a activa
+  admiterea bazată exclusiv pe roluri; aplicația nu citește rolurile din
+  tokenul de acces. Refuzul tokenului la nivelul IdP poate completa această
+  verificare la nivelul aplicației, dar nu o înlocuiește.
+- La reușită, emite **exact același** JWT `auth_token` valabil 30 de zile pe
+  care îl emite autentificarea cu parolă
+  (`src/app/api/auth/login/route.ts`), astfel încât restul fluxului de sesiune
+  al panoului de control (reîmprospătare automată, atributele cookie-urilor)
+  rămâne neschimbat — OIDC înlocuiește doar modul în care este emis cookie-ul,
+  nu și permisiunile acordate de acesta. Modificările rolurilor/grupurilor din
+  IdP nu invalidează sesiunile OmniRoute existente; deconectarea, schimbarea
+  parolei sau expirarea sesiunii continuă să le determine durata de viață.
+- Fiecare setare `oidc*` (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) se află în
+  `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`): `PATCH /api/settings`
+  răspunde cu `400 PASSWORD_REQUIRED` dacă corpul cererii nu conține parola
+  de administrare ca `currentPassword` (`401 PASSWORD_MISMATCH` atunci când
+  aceasta este greșită). `oidcDisablePasswordLogin` refuză _autentificarea_ cu
+  parolă (`POST /api/auth/login`), dar păstrează hash-ul parolei stocate, iar
+  reautentificarea continuă să verifice `currentPassword` față de acesta.
+- `corsOrigins` și `bruteForceProtection` se află, de asemenea, în
+  `SECURITY_IMPACTING_SETTINGS_KEYS`: relaxarea oricăreia dintre ele slăbește
+  mecanismele de protecție a autentificării, astfel încât necesită aceeași
+  reautentificare cu `currentPassword` (fila Securitate îl solicită), iar
+  importul JSON le elimină.
+- Fiecare cheie a politicii de securitate — intrările din
+  `SECURITY_IMPACTING_SETTINGS_KEYS`, fiecare cheie `oidc*` și starea sesiunii
+  panoului de control — este accesibilă **numai operatorului** pentru
+  `PATCH /api/settings`: o cheie API cu domeniul `manage` sau un token de acces
+  `oma_` este refuzat cu `403` chiar dacă trimite valoarea corectă pentru
+  `currentPassword`, iar refuzul este înregistrat în jurnalul de audit ca
+  `settings.update_failed` cu `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` din `src/lib/api/operatorCredential.ts`).
+  Setările obișnuite (tema, preferințele de afișare) rămân modificabile cu o
+  cheie `manage` sau cu un token de acces `admin`. Fiecare modificare a
+  `/api/settings` propriu-zis (și a `/api/settings/require-login`) necesită, de
+  asemenea, domeniul `admin` al tokenului de acces
+  (`ADMIN_MUTATION_EXACT_PATHS` din `src/server/authz/accessScopes.ts`,
+  potrivire exactă a căii); `GET` rămâne `read`, iar celelalte subrute
+  `/api/settings/*` (proxy-uri, valori implicite pentru combinații, aliasuri
+  de modele, compresie, ștergeri…) păstrează domeniul `write` dedus din
+  metodă.
+- `POST /api/settings/import-json` omite această reautentificare, astfel încât
+  elimină fiecare cheie din `IMPORT_STRIPPED_SETTINGS_KEYS` (același fișier)
+  înainte de scriere: parola și `currentPassword`, fiecare intrare din
+  `SECURITY_IMPACTING_SETTINGS_KEYS` și starea sesiunii panoului de control
+  (`sessionsValidAfter`, `revokedDashboardSessions`). Prin urmare, importarea
+  unei copii de rezervă mai vechi nu poate reactiva o sesiune pe care o
+  schimbare a parolei sau o deconectare a încheiat-o deja.
 
 ## Clase de rute
 
-`src/server/authz/types.ts` definește trei clase; orice rută care nu poate fi clasificată în mod determinist revine implicit la `MANAGEMENT`.
+`src/server/authz/types.ts` definește trei clase; orice rută care nu poate fi clasificată determinist revine la `MANAGEMENT`.
 
-| Clasă        | Descriere                                                                                                                                                             | Autentificare necesară                                                                  |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
-| `PUBLIC`     | Rute explicit sigure — autentificare, deconectare, stare, inițializare, verificarea stării de funcționare, inițializarea integrării.                                  | Niciuna                                                                                 |
-| `CLIENT_API` | Endpointuri pentru servirea modelelor — `/api/v1/*`, `/api/v1beta/*`, plus aliasurile `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Cheie Bearer când indicatorul de funcționalitate efectiv `REQUIRE_API_KEY` este activat |
-| `MANAGEMENT` | Pagini ale panoului de control, setări, furnizori, chei, endpointuri de administrare și diagnosticare.                                                                | Sesiune a panoului de control SAU Bearer cu domeniul `manage`                           |
+| Clasă        | Descriere                                                                                                                                                         | Autentificare necesară                                                              |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `PUBLIC`     | Rute explicit sigure — autentificare, deconectare, stare, inițializare, health, bootstrap-ul onboarding-ului.                                                     | Niciuna                                                                             |
+| `CLIENT_API` | Endpoint-uri de servire a modelelor — `/api/v1/*`, `/api/v1beta/*` și alias-urile `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Cheie Bearer când flag-ul de funcționalitate efectiv `REQUIRE_API_KEY` este activat |
+| `MANAGEMENT` | Paginile panoului, setări, furnizori, chei, endpoint-uri de administrare și diagnostic.                                                                           | Sesiune de panou SAU Bearer cu domeniul `manage`                                    |
+
+Câteva acțiuni `MANAGEMENT` sunt **doar pentru operator**: o cheie `manage` nu este suficientă. Exportul credențialelor stocate (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), restaurarea unei copii de rezervă peste datele live (`POST /api/db-backups/import`, inclusiv `dryRun=true`, `POST /api/db-backups` restaurare după id, `POST /api/settings/import-json`) și distrugerea punctelor de restaurare (curățarea prin `DELETE /api/db-backups` și de asemenea `PATCH /api/db-backups`, deoarece retenția pe care o persistă determină curățarea automată după fiecare copie de rezervă) necesită o sesiune de panou, subiectul CLI local sau autentificarea dezactivată. Emiterea unui token de sincronizare (`POST /api/sync/tokens`) și crearea unui token de acces CLI cu domeniul `admin` (`POST /api/cli/tokens`) necesită o sesiune de panou sau subiectul CLI local în orice mod de autentificare. Cheile API de orice domeniu și tokenurile de acces `oma_` nu sunt credențiale de operator: primesc `403` ori de câte ori se cere una. Verificarea se află în `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Modificarea setărilor de autentificare este și ea rezervată operatorului: `POST /api/settings/require-login` (setarea parolei de administrare / comutarea `requireLogin`) acceptă doar aceste credențiale odată ce există o parolă — fereastra de bootstrap de la prima rulare (fără parolă) rămâne neschimbată — iar o sesiune de panou trebuie să trimită `currentPassword` pentru a înlocui parola (`403` dacă lipsește sau este greșită, auditat ca `settings.update_failed`). CLI-ul local și o instanță cu autentificarea dezactivată păstrează calea de recuperare și pot seta o parolă fără ea, deoarece ambele sunt legate de gazda care deține directorul de date.
 
 ## Flux de procesare
 
@@ -198,38 +266,48 @@ export async function POST(request: Request) {
 
 Alegeți setul în funcție de formă, nu de comoditate. O rută individuală trebuie adăugată în `PUBLIC_API_ROUTES_EXACT` (sau în `PUBLIC_READONLY_CORS_API_ROUTES` dacă acceptă doar GET); numai un subarbore autentic trebuie adăugat în `PUBLIC_API_ROUTE_PREFIXES`, iar acesta **trebuie să se termine cu `/`**. Adăugarea unei rute individuale în lista de prefixe face publică și fiecare cale adiacentă care are aceleași caractere inițiale — inclusiv rutele înrudite cu segmente dinamice adăugate ulterior (GHSA-74g9-q8f6-793h). Actualizați testele unitare din `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` și `tests/unit/authz/classify.test.ts`.
 
-## Domenii de acces
+## Domenii de aplicare (Scopes)
 
-Cheile API conțin un array `scopes` (stocat ca JSON în `api_keys.scopes`, consultați `src/lib/db/apiKeys.ts`).
+Trei spații de nume. Fiecare verificator citește doar propriile șiruri de caractere. Comparația alăturată,
+inclusiv de ce `manage` eșuează `scopeMatches` pentru `read:compression` și de ce un
+token de acces `read` nu poate `PATCH /api/keys/{id}`, se găsește la
+[Trei spații de nume pentru domenii de aplicare](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-### Domeniul de acces pentru administrare
+Cheile API conțin un array `scopes` (stocat ca JSON în `api_keys.scopes`, vezi `src/lib/db/apiKeys.ts`).
 
-- `manage` / `admin` — acordă cheii acces la endpointurile API-ului de administrare atunci când este trimisă ca Bearer.
+### Domeniul de aplicare pentru management
 
-### Domenii de acces MCP (`src/shared/constants/mcpScopes.ts`)
+- `manage` / `admin` — `hasManageScope`. Acces de tip Bearer la rutele API de management.
+- `mcp:connect`, `self:usage`, `self:account-quota` și
+  `policy:bypass-provider-quota` sunt domenii de aplicare aditive cu potrivire exactă. Ele se află
+  în afara `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` deschide doar
+  secțiunea non-loopback `/api/mcp/`.
 
-Fiecare instrument MCP necesită anumite domenii de acces prin `MCP_TOOL_SCOPES`. Lista completă (`MCP_SCOPE_LIST`):
+### Domenii de aplicare pentru instrumentele MCP
 
-```
-read:health, read:combos, write:combos, read:quota, read:usage,
-read:models, execute:completions, execute:search, write:budget,
-write:resilience, pricing:write, read:cache, write:cache,
-read:compression, write:compression, read:proxies
-```
+Catalog și reguli de potrivire (șir identic, sau un domeniu de aplicare acordat care se termină cu `*`):
+[Domenii de aplicare pentru instrumentele MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
+`MCP_SCOPE_LIST` în `src/shared/constants/mcpScopes.ts` este subsetul tipizat original,
+nu acel catalog complet. Aplicarea se realizează în
+`open-sse/mcp-server/scopeEnforcement.ts` după ce `resolveCallerScopeContext()`
+rezolvă domeniile de aplicare din informațiile de autentificare MCP, metadatele cererii sau `OMNIROUTE_MCP_SCOPES`.
+Rămâne dezactivată, cu excepția cazului în care `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 
-Aplicarea domeniilor de acces în `open-sse/mcp-server/server.ts` transmite lista de domenii de acces a fiecărui instrument către
-`evaluateToolScopes()`, după ce `resolveCallerScopeContext()` determină domeniile de acces din informațiile de autentificare MCP,
-metadatele cererii sau `OMNIROUTE_MCP_SCOPES`.
+### Domenii de aplicare pentru token-uri de acces
 
-## Comutatorul pentru autentificare obligatorie
+`read` / `write` / `admin` pe token-uri `oma_live_…`, clasificate prin `scopeSatisfies`
+(`src/lib/accessTokens/scopes.ts`). Acest rang se aplică doar credențialului token-ului de acces.
+Vezi [Autentificarea Managementului](../guides/MANAGEMENT-AUTH.md).
 
-`isAuthRequired()` din `src/shared/utils/apiAuth.ts` stabilește dacă este impusă **vreo** formă de autentificare pentru o cerere:
+## Comutatorul de autentificare obligatorie
 
-- `settings.requireLogin === false` → autentificarea este dezactivată global.
-- Nu este configurată nicio parolă **și** nu există nicio variabilă de mediu `INITIAL_PASSWORD` → modul de inițializare permite expertul de configurare inițială și cererile loopback, însă cererile de rețea expuse necesită în continuare acreditări.
-- Orice eroare a bazei de date → accesul este refuzat (securizat în mod implicit).
+`isAuthRequired()` din `src/shared/utils/apiAuth.ts` decide dacă se impune **orice** autentificare pentru o cerere:
 
-Impunerea cheii API pentru client utilizează `isRequireApiKeyEnabled()` din `src/shared/utils/featureFlags.ts`, nu o citire directă a `process.env.REQUIRE_API_KEY`. Acest aspect este important pentru instanțele implementate: comutarea opțiunii `REQUIRE_API_KEY` în Dashboard → Feature Flags stochează o suprascriere în baza de date și afectează imediat `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` și alte verificări de autentificare ale API-ului pentru clienți care utilizează această funcție auxiliară. Dacă stocarea indicatorilor de funcționalitate nu poate fi citită, autentificarea API-ului pentru clienți refuză accesul și necesită o cheie.
+- `settings.requireLogin === false` → autentificarea este dezactivată global, cu excepția nivelului protejat permanent (vezi [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) și a apelurilor care emit o credențială pe care o acceptă, acestea necesitând aceeași credențială ca atunci când autentificarea este activă: emiterea tokenurilor de sincronizare, crearea tokenurilor de acces CLI de orice domeniu și crearea unei chei API cu domeniul `manage`/`admin`, acordarea acestui domeniu unei chei, regenerarea sau dezvăluirea unei astfel de chei (`requireCredentialForManagementScopedKey()` din `src/lib/api/requireManagementAuth.ts`). Cheile destinate doar inferenței rămân deschise.
+- Nicio parolă configurată **și** nicio variabilă de mediu `INITIAL_PASSWORD` → modul de bootstrap permite expertul de configurare și cererile de pe loopback, dar cererile din rețea externă încă necesită credențiale.
+- Orice eroare de bază de date → eșec închis (secure-by-default).
+
+Aplicarea cheii API a clientului folosește `isRequireApiKeyEnabled()` din `src/shared/utils/featureFlags.ts`, nu o citire directă a `process.env.REQUIRE_API_KEY`. Acest lucru contează pentru instanțele implementate: comutarea `REQUIRE_API_KEY` în Dashboard → Feature Flags stochează o suprascriere în baza de date și afectează imediat `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` și celelalte verificări de autentificare a API-ului clientului care partajează acest helper. Dacă depozitul de feature flag-uri nu poate fi citit, autentificarea API-ului clientului eșuează închis și cere o cheie.
 
 ## Modificare incompatibilă — v3.8.0
 
@@ -265,9 +343,9 @@ x-omniroute-auth-scopes:    listă separată prin virgule
 
 Utilizați `assertAuth(req, expectedClass)` în interiorul handlerelor — aceasta generează `AuthzAssertionError` cu codul `AUTHZ_NOT_INITIALIZED` dacă middleware-ul a fost ocolit (util pentru detectarea regresiilor de configurare în teste).
 
-## Consultați și
+## Vezi și
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — marcajul de autentificare pentru fiecare endpoint
-- [COMPLIANCE.md](../security/COMPLIANCE.md) — jurnalul de audit pentru evenimentele de autentificare
-- [MCP-SERVER.md](../frameworks/MCP-SERVER.md) — detalii despre aplicarea scope-urilor MCP
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — marcator de autentificare per punct final
+- [COMPLIANCE.md](../security/COMPLIANCE.md) — jurnal de audit pentru evenimente de autentificare
+- [MCP-SERVER.md](../frameworks/MCP-SERVER.md#three-scope-namespaces) — trei spații de nume de scop și catalogul de scopuri de instrumente MCP
 - Sursă: `src/server/authz/`, `src/lib/api/requireManagementAuth.ts`

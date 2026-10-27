@@ -1,10 +1,12 @@
 #!/usr/bin/env node
 
 import { existsSync } from "node:fs";
+import { totalmem } from "node:os";
 import {
   resolveRuntimePorts,
   withRuntimePortEnv,
   resolveMaxOldSpaceMb,
+  calibrateHeapFallbackMb,
   warnConflictingHeapLimits,
   buildStandaloneNodeOptions,
   spawnWithForwardedSignals,
@@ -19,7 +21,10 @@ const childEnv = withRuntimePortEnv(env, runtimePorts);
 // When it is set, we append --max-old-space-size last (V8 last-flag wins).
 // When it is unset and NODE_OPTIONS already pins the heap, keep NODE_OPTIONS
 // (#5238). Warn when both are set and the numbers disagree.
-const maxOldSpaceMb = resolveMaxOldSpaceMb(childEnv.OMNIROUTE_MEMORY_MB);
+const maxOldSpaceMb = resolveMaxOldSpaceMb(
+  childEnv.OMNIROUTE_MEMORY_MB,
+  calibrateHeapFallbackMb(totalmem())
+);
 warnConflictingHeapLimits(childEnv, maxOldSpaceMb);
 childEnv.NODE_OPTIONS = buildStandaloneNodeOptions(childEnv, maxOldSpaceMb);
 
@@ -30,7 +35,7 @@ childEnv.NODE_OPTIONS = buildStandaloneNodeOptions(childEnv, maxOldSpaceMb);
 // rather than trusting the spoofable Host header.
 const entry = existsSync("server-ws.mjs") ? "server-ws.mjs" : "server.js";
 
-spawnWithForwardedSignals("node", [entry], {
+spawnWithForwardedSignals(process.execPath, [entry], {
   stdio: "inherit",
   env: childEnv,
 });

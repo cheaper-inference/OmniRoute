@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Card, Button, Input } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
 import { isHttpUrl } from "@/shared/validation/schemas/misc";
 
 const HEADROOM_URL_MAX = 500;
@@ -167,44 +168,34 @@ export default function HeadroomProxyCard() {
   const busy = saving || acting;
 
   return (
-    <Card padding="md">
-      <div className="flex items-center gap-3 mb-4">
-        <div className="size-8 rounded-lg flex items-center justify-center bg-indigo-500/10">
-          <span className="material-symbols-outlined text-indigo-500 text-xl">compress</span>
-        </div>
-        <div>
-          <h3 className="font-medium text-sm">{t("headroomProxyTitle")}</h3>
-          <p className="text-xs text-text-muted">{t("headroomProxyDesc")}</p>
-        </div>
-      </div>
-
+    <Card
+      padding="md"
+      icon="compress"
+      title={t("headroomProxyTitle")}
+      subtitle={t("headroomProxyDesc")}
+    >
       {msg && (
         <div
+          role={msg.ok ? "status" : "alert"}
           className={`flex items-center gap-1.5 mb-3 px-2 py-1.5 rounded text-xs ${
-            msg.ok
-              ? "bg-green-500/10 text-green-600 dark:text-green-400"
-              : "bg-red-500/10 text-red-600 dark:text-red-400"
+            msg.ok ? "bg-success-bg text-success" : "bg-error-bg text-error"
           }`}
         >
-          <span className="material-symbols-outlined text-[12px]">
-            {msg.ok ? "check_circle" : "error"}
-          </span>
+          <Icon name={msg.ok ? "check_circle" : "error"} size={12} />
           {msg.text}
         </div>
       )}
 
       <div className="space-y-3">
-        <div>
-          <label className="text-xs text-text-muted mb-1.5 block">{t("headroomProxyUrl")}</label>
-          <Input
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            placeholder="http://localhost:8787"
-            className="w-full"
-            disabled={busy}
-          />
-          <p className="text-xs text-text-muted mt-1">{t("headroomProxyUrlHint")}</p>
-        </div>
+        <Input
+          label={t("headroomProxyUrl")}
+          hint={t("headroomProxyUrlHint")}
+          value={url}
+          onChange={(e) => setUrl(e.target.value)}
+          placeholder="http://localhost:8787"
+          className="w-full"
+          disabled={busy}
+        />
         <div className="flex flex-wrap items-center gap-2">
           <Button type="button" onClick={() => void save()} disabled={busy}>
             {t("headroomProxySave")}

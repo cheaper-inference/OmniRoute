@@ -1,6 +1,6 @@
 # Remote Mode (Kiswahili)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇷 [hr](../../../hr/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -246,171 +246,147 @@ amilifu.
 
 ---
 
-## Kudhibiti tokeni
+## Kusimamia tokens
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ huchapisha siri MARA MOJA — inakili sasa
-omniroute tokens list                 # imefichwa: id, jina, scope, prefix, hali, muda wa kuisha
+#   ↳ inaonyesha siri MARA MOJA; ikili sasa
+omniroute tokens list                 # imefichwa: id, name, scope, prefix, status, expiry
 omniroute tokens revoke <id|prefix>   # batilisha mara moja
-omniroute tokens scopes               # eleza scope tatu
+omniroute tokens scopes               # eleza wigo tatu
 ```
 
-Amri za `tokens` zinahitaji kitambulisho cha **admin**. Unaweza pia kudhibiti tokeni kwenye
-dashibodi chini ya **Mipangilio → Tokeni za Ufikiaji** (unda, batilisha, nakili mara moja).
+Amri za `tokens` zinahitaji kitambulisho cha **admin**. Unaweza pia kusimamia tokens kwenye dashboard chini ya **Settings → Access Tokens** (unda, batilisha, nakili-mara-moja).
+
+Token haiwezi kamwe kutengenezwa ikiwa na haki zaidi kuliko muumbaji wake anazo. Token ya `admin` inaweza kuundwa tu na operator: kipindi cha dashboard, CLI ya ndani kwenye server yenyewe, au `omniroute connect` pamoja na nenosiri. Credentials za mashine (access token ya `admin`, au ufunguo wa API wenye wigo wa `manage`/`admin`) zinaweza kutengeneza tokens za `write` na `read` pekee. Zikiomba `--scope admin`, zinarudisha `403`. Kuzima kuingia hakufungui utengenezaji: access token ya wigo wowote ni credential ambayo njia zinazohitaji uthibitishaji kila wakati zinaikubali, kwa hiyo wito usiojulikana unapata `401` katika wigo wowote.
 
 ---
 
-## Kusanidi CLI ya uandishi wa msimbo kutoka katalogi ya mbali
+## Kusanidi CLI ya usimbaji kutoka katalogi ya mbali
 
-`omniroute configure` husoma katalogi ya moja kwa moja ya modeli ya **seva amilifu** na kuandika
-usanidi kwenye mashine **yako**.
+`omniroute configure` inasoma katalogi hai ya modeli ya **server inayotumika** na kuandika config kwenye mashine **yako**.
 
 ```bash
 omniroute configure codex
 #   Watoa huduma: glm, kmc, ollamacloud, opencode-go, …
-#   Mtoa huduma: glm
+#   Provider: glm
 #   Model id: glm/glm-5.2
 #   ✔ Imeandika ~/.codex/glm52.config.toml
 #   Itumie:  codex --profile glm52
 
-# isiyoingiliana
+# bila mwingiliano
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# weka modeli inayotumiwa mara kwa mara juu ya kichaguzi shirikishi
+# weka modeli inayotumika mara kwa mara juu kabisa ya kichaguzi cha mwingiliano
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Kichaguzi huhifadhi vitambulisho vya modeli pekee (kamwe si URLs au vitambulisho vya ufikiaji) kwenye faili ya ndani ya
-`model-preferences.json`, vikiwa na upeo kulingana na muktadha na lengo la CLI. Vipendwa
-huonyeshwa kabla ya chaguo za hivi karibuni; tumia `--unfavorite` ili kuondoa modeli iliyochaguliwa
-kwenye orodha hiyo ya muktadha/lengo.
+Kichaguzi kinahifadhi model IDs pekee (kamwe si URLs wala credentials) kwenye faili ya ndani `model-preferences.json`, kikigawanywa kwa muktadha na lengo la CLI. Vipendwa vinaonyeshwa kabla ya chaguo za hivi karibuni; tumia `--unfavorite` kuondoa modeli iliyochaguliwa kutoka orodha ya muktadha/lengo hilo.
 
-Wasifu ulioandikwa hurejelea ufunguo wa inference kupitia env var
-(`OMNIROUTE_API_KEY`) — siri haiandikwi kamwe kwenye diski. Kwa usanidi wa msingi wa Codex wa mara moja
-(kizuizi cha `[model_providers.omniroute]`), angalia
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Profile iliyoandikwa inarejelea ufunguo wa inference kupitia env var (`OMNIROUTE_API_KEY`). Siri haiandikwi kwenye diski kamwe. Kwa usanidi wa msingi wa Codex wa mara moja (kizuizi cha `[model_providers.omniroute]`), tazama [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Kuanzisha CLI dhidi ya seva ya mbali (hakuna usanidi unaoandikwa)
+### Kuzindua CLI dhidi ya mbali (bila kuandika config)
 
-`omniroute run <target>` pia huheshimu muktadha amilifu: URL ya msingi ya mbali
-na kitambulisho cha ufikiaji cha muktadha huingizwa kwenye mchakato ulioanzishwa pekee.
+`omniroute run <target>` pia inaheshimu muktadha unaotumika: base URL ya mbali na credential ya muktadha huingizwa kwenye mchakato uliozinduliwa pekee.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → seva ya mbali
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → remote
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Hakiki kwa usahihi kile ambacho kingeanzishwa (MAJINA YA KEY za env pekee, kamwe si thamani):
+# Onyesha kwa usahihi kile kitakachozinduliwa (majina ya env KEY pekee, si thamani):
 omniroute run codex --dry-run --json
 ```
 
-Malengo: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(chanzo kimoja: `bin/cli/cli-manifest.mjs`). Qwen na Gemini huendeshwa kwa kutumia
-home ya muda iliyotengwa ambayo huondolewa wakati wa kuondoka, kwa hivyo uzinduzi haugusi kamwe —
-wala kuvuja hadi kwenye — usanidi wako binafsi wa zana.
+Malengo: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (chanzo kimoja: `bin/cli/cli-manifest.mjs`). Qwen na Gemini zinaendeshwa kwenye nyumba ya muda iliyotengwa inayofutwa wakati wa kutoka, kwa hiyo uzinduzi hauguswi kamwe, wala haumwagi kwenye, usanidi wako binafsi wa zana.
 
 ### Amri za usanidi kwa kila CLI
 
-Kila CLI inayotumika ina amri ya usanidi inayotambua seva ya mbali (zote huheshimu
-muktadha amilifu, au `--remote <url> --api-key <key>`):
+Kila CLI inayoungwa mkono ina amri ya usanidi inayofahamu mbali (zote zinaheshimu muktadha unaotumika, au `--remote <url> --api-key <key>`):
 
 | CLI         | Amri                       | Inachoandika                                                                                                                                                                                        |
 | ----------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | wasifu wa `~/.codex/<name>.config.toml` (kwa kila modeli)                                                                                                                                           |
+| Codex       | `omniroute setup-codex`    | profaili za `~/.codex/<name>.config.toml` (kwa kila modeli)                                                                                                                                         |
 | Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (kwa kila modeli)                                                                                                                                         |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — mtoa huduma `omniroute` anayeoana na OpenAI akiwa na kila modeli ya katalogi (endesha `opencode -m omniroute/<model>`)                                         |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (hali ya CLI) + huchapisha mipangilio ya kiendelezi cha VS Code ya kubandika (inayoana na OpenAI, Base URL **bila** `/v1`)                               |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + mipangilio ya VS Code ya `kilocode.*` — inayoana na OpenAI, Base URL **ikiwa na** `/v1`                                                                     |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **ikiwa na** `/v1`, ufunguo kupitia `${{ secrets.OMNIROUTE_API_KEY }}`                                     |
-| Cursor      | `omniroute setup-cursor`   | huchapisha hatua za ndani ya programu (Settings → Models → Override OpenAI Base URL **ikiwa na** `/v1` + ufunguo + modeli). Usanidi wa Cursor ni SQLite isiyo wazi — paneli ya gumzo pekee          |
-| Roo Code    | `omniroute setup-roo`      | huandika JSON ya kuleta mipangilio ya Roo (`~/.omniroute/roo-settings.json`) + huweka `roo-cline.autoImportSettingsPath` + huchapisha hatua za UI (inayoana na OpenAI, Base URL **ikiwa na** `/v1`) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — mtoa huduma wa `openai-compat`, `base_url` **ikiwa na** `/v1`, ufunguo kupitia `$OMNIROUTE_API_KEY`                                                                  |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **bila** `/v1` + `GOOSE_MODEL`) + maelekezo ya env                                                                           |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **bila** `/v1` + `model: openai/<id>`) + maelekezo ya env (`aider --message --yes`)                                                                          |
-| Qwen Code   | `omniroute setup-qwen`     | ingizo la V4 `modelProviders.openai` katika `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` katika `~/.qwen/.env`                                                                                     |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`: mtoa huduma `omniroute` anayeoana na openai pamoja na kila modeli ya katalogi (endesha `opencode -m omniroute/<model>`)                                         |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (hali ya CLI) + inachapisha mipangilio ya kiendelezi cha VS Code ya kubandika (inayooana na OpenAI, Base URL **bila** `/v1`)                             |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + mipangilio ya VS Code `kilocode.*`: inayooana na OpenAI, Base URL **pamoja na** `/v1`                                                                       |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI): `provider: openai`, `apiBase` **pamoja na** `/v1`, ufunguo kupitia `${{ secrets.OMNIROUTE_API_KEY }}`                                     |
+| Cursor      | `omniroute setup-cursor`   | inachapisha hatua za ndani ya programu (Settings → Models → Override OpenAI Base URL **pamoja na** `/v1` + ufunguo + modeli). Config ya Cursor ni SQLite isiyoeleweka, kwa hiyo ni chat panel pekee |
+| Roo Code    | `omniroute setup-roo`      | inaandika JSON ya kuingiza ya Roo (`~/.omniroute/roo-settings.json`) + inaweka `roo-cline.autoImportSettingsPath` + inachapisha hatua za UI (inayooana na OpenAI, Base URL **pamoja na** `/v1`)     |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`: mtoa huduma `openai-compat`, `base_url` **pamoja na** `/v1`, ufunguo kupitia `$OMNIROUTE_API_KEY`                                                                     |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`: `language_models.openai_compatible.omniroute`, `api_url` **pamoja na** `/v1`, Zed inasoma ufunguo kutoka `$OMNIROUTE_API_KEY` (haujawahi kuandikwa)                  |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **bila** `/v1` + `GOOSE_MODEL`) + env recipe                                                                                 |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **bila** `/v1` + `model: openai/<id>`) + env recipe (`aider --message --yes`)                                                                                |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` ingizo la V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` katika `~/.qwen/.env`                                                                                            |
 
 ```bash
-# OpenCode (mtoa huduma anayeoana na OpenAI, modeli zote za katalogi, VPS ya mbali)
+# OpenCode (mtoa huduma anayeoana na openai, modeli zote za katalogi, VPS ya mbali)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 omniroute setup-opencode --only glm,kimi        # weka modeli zinazolingana pekee
-opencode -m omniroute/glm/glm-5.2 "..."          # kwanza hamisha OMNIROUTE_API_KEY
+opencode -m omniroute/glm/glm-5.2 "..."          # hamisha OMNIROUTE_API_KEY kwanza
 ```
 
-> OpenCode pia ina muunganisho wa **plugin** wenye uwezo zaidi: `omniroute setup opencode`
-> (sasa unatambua mazingira ya mbali kupitia `--remote`) husakinisha `@omniroute/opencode-plugin`.
-> `setup-opencode` ni chaguo jepesi linalooana na OpenAI. Ufunguo wa API
-> hurejelewa kupitia `{env:OMNIROUTE_API_KEY}` — hauandikwi kamwe kwenye diski.
+> OpenCode pia ina integration tajiri zaidi ya **plugin**: `omniroute setup opencode` (sasa inazingatia mbali kupitia `--remote`) husakinisha `@omniroute/opencode-plugin`.
+> `setup-opencode` ni mbadala mwepesi unaooana na OpenAI. Ufunguo wa API unarejelewa kupitia `{env:OMNIROUTE_API_KEY}`, haujawahi kuandikwa kwenye diski.
 >
-> Kwenye OpenCode v2, tumia `@omniroute/opencode-plugin-v2` badala yake: katalogi ileile,
-> mkataba tofauti wa kipakiaji. Husoma ufunguo kutoka kwenye hifadhi ya vitambulisho
-> ya OpenCode yenyewe wakati muunganisho umeunganishwa, kwa hivyo lango la mbali halihitaji ufunguo wowote katika
-> `opencode.json`.
+> Kwenye OpenCode v2, tumia `@omniroute/opencode-plugin-v2` badala yake: orodha ile ile ya modeli, mkataba tofauti wa loader. Inasoma ufunguo kutoka kwenye hifadhi ya credentials ya OpenCode yenyewe pale integration inapounganishwa, kwa hiyo gateway ya mbali haihitaji ufunguo wowote ndani ya `opencode.json`.
 
 ---
 
-## Kudhibiti miktadha (kubadilisha kati ya seva)
+## Kudhibiti contexts (badilisha kati ya seva)
 
-**Muktadha** ni seva iliyohifadhiwa (baseUrl + kitambulisho + upeo). `omniroute connect`
-huunda mmoja na kuufanya uwe amilifu; kuanzia hapo kila amri hulenga muktadha huo. Dhibiti na
-ubadilishe kati yake kwa kutumia `omniroute contexts`:
+**Context** ni seva iliyohifadhiwa (baseUrl + credential + scope). `omniroute connect` huunda moja na kuifanya iwe hai; kuanzia hapo kila amri huilenga. Dhibiti na ubadilishe kati yao kwa kutumia `omniroute contexts`:
 
 ```bash
-omniroute contexts list            # miktadha yote; ulio amilifu umewekwa alama ●
-omniroute contexts current         # seva amilifu, hali ya uthibitishaji, upeo
+omniroute contexts list            # all contexts; the active one is marked ●
+omniroute contexts current         # the active server, auth status, scope
 ```
 
 ```text
-  | Jina    | URL ya Msingi              | Uthibitishaji | Upeo  | Maelezo
-● | vps     | http://100.67.86.91:20128 | token         | admin | OmniRoute ya Mbali (…)
-  | default | http://localhost:20128    | ✗             |       |
+  | Name    | Base URL                  | Auth  | Scope | Description
+● | vps     | http://100.67.86.91:20128 | token | admin | Remote OmniRoute (…)
+  | default | http://localhost:20128    | ✗     |       |
 ```
 
-**Badilisha seva** — kila amri inayofuata hutumia muktadha amilifu:
+**Badilisha seva** — kila amri inayofuata inafuata context hai:
 
 ```bash
-omniroute contexts use vps         # → sasa amri zote zinalenga VPS ya mbali
-omniroute tokens list              #   (hutekelezwa dhidi ya VPS)
+omniroute contexts use vps         # → all commands now hit the remote VPS
+omniroute tokens list              #   (runs against the VPS)
 
-omniroute contexts use default     # → kurudi localhost
-omniroute tokens list              #   (hutekelezwa dhidi ya seva ya ndani)
+omniroute contexts use default     # → back to localhost
+omniroute tokens list              #   (runs against the local server)
 ```
 
-**Ongeza muktadha mwenyewe** (badala ya `connect`), ukague, au ubadilishe jina:
+**Ongeza context mwenyewe** (badala ya `connect`), kagua, au badilisha jina:
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
   --access-token oma_live_xxxx --scope write --description "staging box"
-omniroute contexts show staging    # maelezo kamili ya muktadha mmoja
+omniroute contexts show staging    # full details for one context
 omniroute contexts rename staging stg
 ```
 
-**Ondoa muktadha** — huomba uthibitisho; tumia `--yes` ili kuuruka
-(inahitajika kwa hati / shell zisizoingiliana, ambazo vinginevyo hukataa kwa usalama):
+**Ondoa context** — huomba uthibitisho; pitisha `--yes` kuiruka (inahitajika kwa scripts / shells zisizoingiliana, ambazo vinginevyo hukataa salama):
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> `default` (localhost) haiwezi kuondolewa. Kuondoa muktadha amilifu hurudisha matumizi
-> kwenye `default`. Kidokezo: kuondoa muktadha hufuta tu kitambulisho kilichohifadhiwa **ndani** —
-> batilisha tokeni kwenye seva kwa kutumia `omniroute tokens revoke <id>` ili kusitisha
-> ufikiaji kikamilifu.
+> `default` (localhost) haiwezi kuondolewa. Kuondoa context hai hurudi kwenye `default`. Kidokezo: kuondoa context huondoa tu credential iliyohifadhiwa **ndani** — batilisha token kwenye seva kwa kutumia `omniroute tokens revoke <id>` ili kukata kabisa ufikiaji.
 
-**Hamisha nje / ingiza** miktadha (kwa mfano, kuihamisha kati ya mashine). Miktadha mipya huhifadhi
-rejeleo la keychain pekee; vitambulisho havinakiliwi kwenye faili ya kuhamisha nje wakati
-keychain ya OS inapatikana:
+**Hamisha / ingiza contexts** (k.m. kuzihamisha kati ya mashine). Uhamishaji huacha credentials kwa chaguo-msingi, ikiwemo credentials zilizohifadhiwa na file fallback. Tumia `--include-secrets` waziwazi wakati nakala rudufu inayoweza kubebeka yenye credentials inahitajika:
 
 ```bash
-omniroute contexts export --out contexts.json     # chaguo-msingi: stdout
-omniroute contexts import contexts.json            # andika juu yake; --merge ili kuhifadhi iliyopo
-omniroute contexts migrate --yes                  # hamisha tokeni za zamani za maandishi wazi kwenda keychain
+omniroute contexts export --out contexts.json     # redacted; default destination: stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # overwrite; --merge to keep existing
+omniroute contexts migrate --yes                  # move legacy plaintext tokens to keychain
 ```
 
-Kwenye mifumo isiyo na kiolesura bila keychain ya OS inayoweza kutumika, CLI hurudi kutumia
-`config.json` yenye modi `0600` na kuchapisha onyo la mara moja. Chukulia faili zilizohamishwa nje
-kutoka kwenye mbinu hiyo mbadala (na usanidi wowote wa zamani kabla ya uhamishaji) kama nyenzo za siri.
+`--include-secrets` hutatua marejeleo ya keychain kabla ya kuhamisha na hushindwa ikiwa credential yoyote iliyorejelewa haiwezi kusomwa. `--no-secrets` daima hupewa kipaumbele. Faili za kuhamisha huandikwa kwa atomiki na mode `0600`. Chukulia uhamishaji waziwazi wenye siri kama nyenzo ya siri. Kwenye mifumo isiyo na kichwa bila keychain ya OS inayoweza kutumika, CLI hurudi kwenye `config.json` na mode `0600` na huchapisha onyo la mara moja; uhamishaji wa chaguo-msingi hubaki umefichwa katika hali hii.
 
 ---
 

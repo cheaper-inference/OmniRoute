@@ -21,6 +21,7 @@
  */
 import { writeFileSync, readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
+import { pathToFileURL } from "node:url";
 
 import { parseArgs } from "./lib/args.mjs";
 import { defaultDeps } from "./lib/github.mjs";
@@ -289,7 +290,7 @@ async function main(argv, env, deps = defaultDeps) {
   process.exit(0);
 }
 
-const invokedDirectly = import.meta.url === `file://${process.argv[1]}`;
+const invokedDirectly = import.meta.url === pathToFileURL(process.argv[1] || "").href;
 if (invokedDirectly) {
   main(process.argv.slice(2), process.env).catch((e) => {
     process.stderr.write(`Fatal: ${e.stack || e.message}\n`);
