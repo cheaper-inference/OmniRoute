@@ -35,6 +35,14 @@ import { HTTP_STATUS, STREAM_RECOVERY } from "../../config/constants.ts";
 import { parseRetryAfterMs } from "../../services/apiKeyRotator.ts";
 import { createRecoverableStream, makeContinuationBody } from "../../services/streamRecovery.ts";
 import { persistCodexChildQuotaResponse } from "../../services/codexAccount/index.ts";
+import {
+  captureCodexConnectionFence,
+  runWithCodexConnectionFence,
+  bindCodexResponseFence,
+  inheritCodexResponseFence,
+  isCodexConnectionFenceCurrent,
+  StaleCodexOperationError,
+} from "@/lib/db/codexConnectionFences";
 import { invalidateQuotaCacheOnStatus } from "../../services/genericQuotaFetcher.ts";
 import {
   isRateLimitEnabled,
@@ -250,6 +258,10 @@ export async function executeProviderRequest(
           const execCreds = getExecutionCredentials();
           const executionConnectionId = getExecutionConnectionId(execCreds);
           const attemptConnectionId = executionConnectionId || connectionId;
+          const ownerFence =
+            provider === "codex"
+              ? captureCodexConnectionFence(execCreds ?? {}, String(attemptConnectionId || ""))
+              : null;
           const accountSemaphoreMaxConcurrency = resolveAccountSemaphoreMaxConcurrency(
             execCreds,
             typeof attemptConnectionId === "string" && isRateLimitEnabled(attemptConnectionId)
@@ -332,6 +344,8 @@ export async function executeProviderRequest(
                   stage: "rate_limit_slot_acquired",
                 });
                 assertManagedLeaseFence(attemptConnectionId);
+                if (ownerFence && !isCodexConnectionFenceCurrent(ownerFence))
+                  throw new StaleCodexOperationError();
                 return executeWithUpstreamStartTimeout({
                   executor,
                   provider,
@@ -352,7 +366,12 @@ export async function executeProviderRequest(
                         upstreamExtraHeaders: buildUpstreamHeadersForExecute(modelToCall),
                         clientHeaders: getExecutorClientHeaders(),
                         clientResponseFormat,
-                        onCredentialsRefreshed,
+                        onCredentialsRefreshed: onCredentialsRefreshed
+                          ? (next) =>
+                              runWithCodexConnectionFence(ownerFence, () =>
+                                onCredentialsRefreshed(next)
+                              )
+                          : undefined,
                         skipUpstreamRetry,
                         contextEditing: { enabled: contextEditingEnabled },
                         correlationId,
@@ -369,7 +388,11 @@ export async function executeProviderRequest(
               }
             );
             const res = normalizeExecutorResult(rawExecutorResult);
-            res.response = markEmptyTurnExecution(res.response, res.url, execCreds);
+            bindCodexResponseFence(res.response, ownerFence);
+            res.response = inheritCodexResponseFence(
+              res.response,
+              markEmptyTurnExecution(res.response, res.url, execCreds)
+            );
             trace("post_executor", { status: res?.response?.status });
 
             // When a payload override rewrote body.model (custom-model alias →
@@ -391,12 +414,17 @@ export async function executeProviderRequest(
               !(await shouldIsolateProbeFailures())
             ) {
               try {
-                const persistedQuota = await persistCodexChildQuotaResponse({
-                  connectionId: String(attemptConnectionId),
-                  model: modelToCall || model || requestedModel || "",
-                  headers: normalizeHeaders(res.response.headers),
-                  status: res.response.status,
-                });
+                const persistedQuota = await runWithCodexConnectionFence(
+                  ownerFence,
+                  () =>
+                    persistCodexChildQuotaResponse({
+                      connectionId: String(attemptConnectionId),
+                      model: modelToCall || model || requestedModel || "",
+                      headers: normalizeHeaders(res.response.headers),
+                      status: res.response.status,
+                    }),
+                  res.response.status >= 200 && res.response.status < 300
+                );
                 if (persistedQuota) {
                   execCreds.providerSpecificData = persistedQuota.providerSpecificData;
                   if (persistedQuota.exhaustionLog) {
@@ -408,7 +436,11 @@ export async function executeProviderRequest(
                 log?.debug?.("CODEX", `Failed to persist codex quota state: ${errMessage}`);
               }
             }
-            if (attemptConnectionId && res.response.status === 429) {
+            if (
+              attemptConnectionId &&
+              res.response.status === 429 &&
+              (!ownerFence || isCodexConnectionFenceCurrent(ownerFence))
+            ) {
               // Dropped generic quota cache after 429 — bespoke fetchers drop their
               // own cache through the registry; the generic wrapper is the fallback.
               invalidateQuotaCacheOnStatus({
@@ -700,9 +732,12 @@ export async function executeProviderRequest(
 
       return {
         ...rawResult,
-        response: inheritEmptyTurnPolicy(
+        response: inheritCodexResponseFence(
           rawResult.response,
-          new Response(payload, { status, statusText, headers: responseHeaders })
+          inheritEmptyTurnPolicy(
+            rawResult.response,
+            new Response(payload, { status, statusText, headers: responseHeaders })
+          )
         ),
         _dedupSnapshot: {
           status,

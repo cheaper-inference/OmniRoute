@@ -3,6 +3,12 @@
  */
 
 import { v4 as uuidv4 } from "uuid";
+import {
+  mayWriteCodexConnection,
+  isCodexConnectionFenceCurrent,
+  readCodexConnectionFence,
+  type CodexConnectionFence,
+} from "./codexConnectionFences";
 
 import { isCommonChatGptWebRetiredProviderId } from "@/shared/constants/chatgptWebRetirement";
 import { getDbInstance, rowToCamel, cleanNulls } from "./core";
@@ -967,6 +973,9 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
 export type ProviderConnectionUpdateOpts = UpdateOpts & {
   /** #16190: this isActive:false write is the permanent-ban auto-disable (never retested). */
   permanentBan?: boolean;
+  expectedCodexFence?: CodexConnectionFence;
+  /** Internal token rotation: the exact version committed by this write, never a later reread. */
+  onCodexFenceCommitted?: (fence: CodexConnectionFence) => void;
 };
 
 export async function updateProviderConnection(
@@ -975,77 +984,116 @@ export async function updateProviderConnection(
   opts?: ProviderConnectionUpdateOpts
 ) {
   const db = getDbInstance() as unknown as DbLike;
-  const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
-  if (!existing) return null;
-
   // The incoming value only. A connection that already holds the password has
   // to stay editable, or an operator cannot repair the one this guard exists
   // to prevent -- and re-checking the merged value would spend a bcrypt round
   // on every unrelated field edit.
   await assertApiKeyIsNotManagementPassword(data.apiKey);
+  // Version checks, read/merge and write share one lock. A newer failure may
+  // arrive during validation; it must survive even when a valid token rotates.
+  const applied = db.transaction(() => {
+    const existing = db.prepare("SELECT * FROM provider_connections WHERE id = ?").get(id);
+    if (!existing) return null;
 
-  const existingCamel = toRecord(rowToCamel(existing));
-  const merged: JsonRecord = {
-    ...existingCamel,
-    ...data,
-    updatedAt: new Date().toISOString(),
-  };
-  merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
-    data,
-    normalizeConnectionProviderSpecificData(
-      toStringOrNull(merged.provider),
-      merged.providerSpecificData,
-      merged,
-      existingCamel.providerSpecificData
-    )
-  );
-  // #16190: with CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, an automated switch-off is
-  // marked so the health sweep can retest it; a permanent-ban switch-off is always marked
-  // so that sweep never retests it, whenever the flag is turned on.
-  if (typeof data.isActive === "boolean") {
-    merged.providerSpecificData = applyAutomaticDisableMarker(
-      merged.providerSpecificData,
-      existingCamel.isActive,
-      data.isActive,
-      undefined,
-      {
-        stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
-        permanentBan: opts?.permanentBan === true,
-      }
+    const existingCamel = toRecord(rowToCamel(existing));
+    const merged: JsonRecord = {
+      ...existingCamel,
+      ...data,
+      updatedAt: new Date().toISOString(),
+    };
+    merged.providerSpecificData = applyCodexChildCooldownClearOnUpdate(
+      data,
+      normalizeConnectionProviderSpecificData(
+        toStringOrNull(merged.provider),
+        merged.providerSpecificData,
+        merged,
+        existingCamel.providerSpecificData
+      )
     );
-  }
-  // Mirror the sanitization the create path applies — keep the returned
-  // object in lockstep with what we persist.
-  if ("quotaWindowThresholds" in merged) {
-    const result = sanitizeQuotaWindowThresholds(merged.quotaWindowThresholds);
-    if (result.rejected.length > 0) {
-      throw new Error(
-        `Refusing to persist quotaWindowThresholds with rejected keys: ${result.rejected.join(", ")}`
+    // #16190: with CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED on, an automated switch-off is
+    // marked so the health sweep can retest it; a permanent-ban switch-off is always marked
+    // so that sweep never retests it, whenever the flag is turned on.
+    if (typeof data.isActive === "boolean") {
+      merged.providerSpecificData = applyAutomaticDisableMarker(
+        merged.providerSpecificData,
+        existingCamel.isActive,
+        data.isActive,
+        undefined,
+        {
+          stampAutomatic: data.isActive === false && isRetestAutoDisabledEnabled(),
+          permanentBan: opts?.permanentBan === true,
+        }
       );
     }
-    // For updates we always carry the key forward (even as null) so the read
-    // path surfaces the cleared state to callers that merged it.
-    merged.quotaWindowThresholds = result.sanitized;
-  }
-  if ("rateLimitOverrides" in merged) {
-    const result = sanitizeRateLimitOverrides(merged.rateLimitOverrides);
-    if (result.rejected.length > 0) {
-      throw new Error(
-        `Refusing to persist rateLimitOverrides with rejected keys: ${result.rejected.join(", ")}`
-      );
+    // Mirror the sanitization the create path applies — keep the returned
+    // object in lockstep with what we persist.
+    if ("quotaWindowThresholds" in merged) {
+      const result = sanitizeQuotaWindowThresholds(merged.quotaWindowThresholds);
+      if (result.rejected.length > 0) {
+        throw new Error(
+          `Refusing to persist quotaWindowThresholds with rejected keys: ${result.rejected.join(", ")}`
+        );
+      }
+      // For updates we always carry the key forward (even as null) so the read
+      // path surfaces the cleared state to callers that merged it.
+      merged.quotaWindowThresholds = result.sanitized;
     }
-    merged.rateLimitOverrides = result.sanitized;
-  }
-  const existingRecord = toRecord(existing);
+    if ("rateLimitOverrides" in merged) {
+      const result = sanitizeRateLimitOverrides(merged.rateLimitOverrides);
+      if (result.rejected.length > 0) {
+        throw new Error(
+          `Refusing to persist rateLimitOverrides with rejected keys: ${result.rejected.join(", ")}`
+        );
+      }
+      merged.rateLimitOverrides = result.sanitized;
+    }
+    const existingRecord = toRecord(existing);
 
-  db.transaction(() => {
+    if (opts?.expectedCodexFence) {
+      // Token rotation must survive a newer failure, but never an owner/token replacement.
+      if (!isCodexConnectionFenceCurrent(opts.expectedCodexFence)) return null;
+      if (!isCodexConnectionFenceCurrent(opts.expectedCodexFence, true)) {
+        for (const key of [
+          "testStatus",
+          "isActive",
+          "lastError",
+          "lastErrorAt",
+          "lastErrorType",
+          "lastErrorSource",
+          "errorCode",
+          "rateLimitedUntil",
+          "backoffLevel",
+        ]) {
+          merged[key] = existingCamel[key] ?? null;
+        }
+        const latestData = toRecord(existingCamel.providerSpecificData);
+        const nextData = { ...toRecord(merged.providerSpecificData) };
+        for (const key of [
+          "codexScopeRateLimitedUntil",
+          "codexScopeRateLimitSource",
+          "codexQuotaState",
+          "codexQuotaStateByScope",
+          "codexExhaustedWindow",
+          "codexExhaustedWindowByScope",
+        ]) {
+          if (Object.hasOwn(latestData, key)) nextData[key] = latestData[key];
+          else delete nextData[key];
+        }
+        merged.providerSpecificData = nextData;
+      }
+    } else if (!mayWriteCodexConnection(id)) return null;
     reconcileCodexUsageHistory(db, {
       connectionId: id,
       existing: existingRecord,
       merged,
     });
     _updateConnectionRow(db, id, encryptConnectionFields({ ...merged }));
+    const committedFence = opts?.onCodexFenceCommitted ? readCodexConnectionFence(id) : null;
+    return { existing, merged, committedFence };
   })();
+  if (!applied) return null;
+  const { existing, merged, committedFence } = applied;
+  if (committedFence) opts?.onCodexFenceCommitted?.(committedFence);
   backupDbFile("pre-write");
   invalidateConnectionUpdate(id, data, opts);
   bumpProxyConfigGeneration();
@@ -1061,6 +1109,10 @@ export async function updateProviderConnection(
     reorderConnections(db, providerId);
     return getProviderConnectionById(id);
   }
+
+  // Owner-change triggers strip the previous owner's scoped evidence atomically.
+  // Return the committed metadata, not the pre-trigger merged snapshot.
+  if (merged.provider === "codex") return getProviderConnectionById(id);
 
   // The write path keeps existing ciphertext in merged.providerSpecificData
   // to avoid re-encrypting unchanged values. Return a decrypted copy instead:
@@ -1133,7 +1185,7 @@ export async function touchConnectionLastUsed(
  * silently pinned routing to that point-in-time snapshot with no staleness
  * check. Lightweight targeted UPDATE, mirrors touchConnectionLastUsed.
  */
-export async function touchConnectionSyncedModelsAt(id: string): Promise<void> {
+export function touchConnectionSyncedModelsAt(id: string): void {
   if (!id) return;
   const db = getDbInstance() as unknown as DbLike;
   const now = new Date().toISOString();

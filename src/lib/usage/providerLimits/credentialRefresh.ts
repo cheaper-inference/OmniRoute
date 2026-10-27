@@ -1,4 +1,8 @@
 import { updateProviderConnection } from "@/lib/db/providers";
+import {
+  captureCodexConnectionFence,
+  StaleCodexOperationError,
+} from "@/lib/db/codexConnectionFences";
 import type { BaseExecutor } from "@omniroute/open-sse/executors/base";
 import {
   isUnrecoverableRefreshError,
@@ -108,6 +112,10 @@ export async function refreshAndUpdateCredentialsWithResolver(
   if (!shouldAttemptRotatingRefresh(connection.provider, opts.allowRotatingRefresh)) {
     return { connection, refreshed: false };
   }
+  const fence =
+    connection.provider === "codex"
+      ? captureCodexConnectionFence(connection as unknown as JsonRecord, connection.id)
+      : null;
   const executor = await resolveExecutor(connection.provider);
   const credentials = {
     connectionId: connection.id,
@@ -143,7 +151,12 @@ export async function refreshAndUpdateCredentialsWithResolver(
 
   const updateData = buildCredentialUpdateData(connection, refreshResult);
 
-  await updateProviderConnection(connection.id, updateData);
+  const persisted = await updateProviderConnection(
+    connection.id,
+    updateData,
+    fence ? { expectedCodexFence: fence } : undefined
+  );
+  if (fence && !persisted) throw new StaleCodexOperationError();
 
   return {
     connection: {

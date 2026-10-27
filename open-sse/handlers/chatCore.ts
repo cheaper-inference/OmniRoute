@@ -301,6 +301,15 @@ import { generateRequestId } from "@/shared/utils/requestId";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
+import {
+  captureCodexConnectionFence,
+  runWithCodexConnectionFence,
+  bindCodexResponseFence,
+  getCodexOperationFence,
+  isCodexConnectionFenceCurrent,
+  StaleCodexOperationError,
+  type CodexConnectionFence,
+} from "@/lib/db/codexConnectionFences";
 import { handleToolCallExecution } from "@/lib/skills/interception";
 import { buildClaudeCodeBridgeBody } from "./chatCore/claudeCodeBridgeBody.ts";
 import { setGeminiThoughtSignatureMode } from "../services/geminiThoughtSignatureStore.ts";
@@ -338,9 +347,23 @@ type VideoBridgeLogParam = { observed: boolean; redaction: VideoBridgeLogRedacti
 // extractSystemRoleMessages extracted to chatCore/claudeSystemRole.ts (#3501); re-exported above so
 // existing importers (e.g. tests/unit/system-role-extraction.test.ts) keep resolving it from here.
 export async function handleChatCore(args: Parameters<typeof handleChatCoreInner>[0]) {
-  // one implicit resilience store per attempt (combo legs each run
-  // handleChatCore, so each leg gets its own isolated store).
-  return withResilienceActionsContext([args], (forwarded) => handleChatCoreInner(forwarded));
+  // One immutable owner snapshot for this invocation, including delayed stream callbacks.
+  let fence: CodexConnectionFence | null = null;
+  try {
+    if (args.modelInfo?.provider === "codex")
+      fence = captureCodexConnectionFence(args.credentials ?? {}, args.connectionId);
+  } catch (error) {
+    if (error instanceof StaleCodexOperationError)
+      return createErrorResult(409, error.message, null, error.code);
+    throw error;
+  }
+  return runWithCodexConnectionFence(fence, async () => {
+    const result = await withResilienceActionsContext([args], (forwarded) =>
+      handleChatCoreInner(forwarded)
+    );
+    if (result?.response) bindCodexResponseFence(result.response, fence);
+    return result;
+  });
 }
 
 async function handleChatCoreInner({
@@ -2604,10 +2627,11 @@ async function handleChatCoreInner({
     }
 
     const targetCredentials = (currentCreds || credentials || {}) as Record<string, unknown>;
+    const refreshFence = provider === "codex" ? (getCodexOperationFence(String(targetCredentials.connectionId || connectionId || "")) ?? captureCodexConnectionFence(targetCredentials)) : null;
     const attemptedRefreshToken =
       typeof targetCredentials?.refreshToken === "string" ? targetCredentials.refreshToken : null;
     credentialRefreshPersistRan = false;
-    const persistFn = onCredentialsRefreshed
+    const persistFn = onCredentialsRefreshed && provider !== "codex"
       ? async (refreshResult: Record<string, unknown>) => {
           credentialRefreshPersistRan = true;
           Object.assign(targetCredentials, refreshResult);
@@ -2646,6 +2670,14 @@ async function handleChatCoreInner({
     )) as null | Record<string, unknown>;
 
     if (newCredentials?.accessToken || newCredentials?.copilotToken) {
+      if (refreshFence) {
+        const persisted = await updateProviderConnection(refreshFence.connectionId, newCredentials, { expectedCodexFence: refreshFence });
+        if (!persisted) return null;
+        credentialRefreshPersistRan = true;
+        Object.assign(targetCredentials, newCredentials);
+        Object.assign(credentials, newCredentials);
+        return newCredentials;
+      }
       log?.info?.("TOKEN", `${provider?.toUpperCase()} | refreshed`);
       if (!credentialRefreshPersistRan) {
         Object.assign(targetCredentials, newCredentials);
@@ -2713,6 +2745,8 @@ async function handleChatCoreInner({
     }
     const persistentMessage = projectRetainedProviderFailureMessage(message, videoBridgeObserved);
     const errorConnectionId = getCurrentConnectionId() || connectionId;
+    const failureFence = errorConnectionId ? getCodexOperationFence(errorConnectionId) : null;
+    if (failureFence && !isCodexConnectionFenceCurrent(failureFence)) return;
     if (errorConnectionId && errorType) {
       try {
         if (

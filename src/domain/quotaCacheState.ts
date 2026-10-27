@@ -40,6 +40,7 @@ export interface QuotaCacheEntry {
   exhausted: boolean;
   nextResetAt: string | null;
   windowDurationMs?: number | null; // T08: optional rolling window duration
+  codexOwnerEpoch?: string; // opaque durable identity, never credential material
 }
 
 // #14359 — a park is trusted at most EXHAUSTED_MAX_PARK_MS past its observation; a far weekly-window reset must not block for days.

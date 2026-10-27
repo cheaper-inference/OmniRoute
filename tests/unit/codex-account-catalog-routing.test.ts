@@ -11,6 +11,7 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
 const auth = await import("../../src/sse/services/auth.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 
 const PROVIDER = "codex";
 
@@ -213,6 +214,8 @@ test("Codex forced and API-key restricted selection cannot bypass the account in
 
 test("the public catalog keeps the union of active Codex account inventories", async () => {
   await resetStorage();
+  // This inventory contract needs no unrelated live quota/AI Horde discovery.
+  await settingsDb.updateSettings({ hideAutoCombos: true, blockedProviders: ["aihorde"] });
   await seedTwoAccounts();
   const catalog = await import("../../src/app/api/v1/models/catalog.ts");
   catalog.__resetCatalogBuilderRunsForTest();

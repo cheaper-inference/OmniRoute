@@ -1,5 +1,12 @@
 import { syncCodexQuotaObservation } from "@/lib/db/providers/codexAccountRecovery";
 import {
+  captureCodexConnectionFence,
+  runWithCodexConnectionFence,
+  assertCodexOperationCurrent,
+  isCodexConnectionFenceCurrent,
+  type CodexConnectionFence,
+} from "@/lib/db/codexConnectionFences";
+import {
   getProviderConnectionById,
   getProviderConnections,
   updateProviderConnection,
@@ -922,6 +929,7 @@ async function fetchLiveProviderLimitsWithOptions(
 ): Promise<{
   connection: ProviderConnectionLike;
   usage: JsonRecord;
+  codexFence?: CodexConnectionFence | null;
 }> {
   let connection = (await getProviderConnectionById(
     connectionId
@@ -962,6 +970,10 @@ async function fetchLiveProviderLimitsWithOptions(
     return { connection, usage };
   }
 
+  let codexFence =
+    connection.provider === "codex"
+      ? captureCodexConnectionFence(connection as unknown as JsonRecord, connectionId)
+      : null;
   const proxyInfo = await resolveProxyForConnection(connectionId);
 
   const fetchUsageWithContext = async (proxyConfig: unknown) =>
@@ -974,6 +986,9 @@ async function fetchLiveProviderLimitsWithOptions(
       });
       conn = result.connection;
       wasRefreshed = result.refreshed;
+      if (codexFence && wasRefreshed) {
+        codexFence = captureCodexConnectionFence(conn as unknown as JsonRecord, connectionId);
+      }
 
       if (wasRefreshed) {
         await syncToCloudIfEnabled();
@@ -997,6 +1012,8 @@ async function fetchLiveProviderLimitsWithOptions(
         });
         if (forced.refreshed) {
           conn = forced.connection;
+          if (codexFence)
+            codexFence = captureCodexConnectionFence(conn as unknown as JsonRecord, connectionId);
           await syncToCloudIfEnabled();
           usageData = sanitizeUsageQuotasForProvider(
             conn.provider,
@@ -1073,37 +1090,45 @@ async function fetchLiveProviderLimitsWithOptions(
     result = await fetchUsageWithContext(null);
   }
 
-  if (connection.provider === "codex") {
-    const data = await syncCodexQuotaObservation(
-      connection.id,
-      result.usage,
-      connection.providerSpecificData
-    );
-    if (data) connection = { ...connection, providerSpecificData: data };
-  }
-  if (isRecord(result.usage.quotas)) {
-    setQuotaCache(
-      connectionId,
-      connection.provider,
-      result.usage.quotas,
-      isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {}
-    );
-  }
-  connection = await syncExpiredStatusIfNeeded(connection, result.usage);
-  connection = await syncClaudeExtraUsageStateIfNeeded(connection, result.usage);
-  connection = await syncClaudeBootstrapIfNeeded(connection, result.usage);
-  connection = await syncAntigravitySubscriptionIfNeeded(connection, result.usage);
-  connection = await maybeClearRecoveredQuotaState(connection, result.usage);
+  return runWithCodexConnectionFence(
+    codexFence,
+    async () => {
+      assertCodexOperationCurrent(connectionId);
+      if (connection.provider === "codex") {
+        const data = await syncCodexQuotaObservation(
+          connection.id,
+          result.usage,
+          connection.providerSpecificData
+        );
+        if (data) connection = { ...connection, providerSpecificData: data };
+      }
+      if (isRecord(result.usage.quotas)) {
+        setQuotaCache(
+          connectionId,
+          connection.provider,
+          result.usage.quotas,
+          isRecord(result.usage.modelQuotas) ? result.usage.modelQuotas : {}
+        );
+      }
+      connection = await syncExpiredStatusIfNeeded(connection, result.usage);
+      connection = await syncClaudeExtraUsageStateIfNeeded(connection, result.usage);
+      connection = await syncClaudeBootstrapIfNeeded(connection, result.usage);
+      connection = await syncAntigravitySubscriptionIfNeeded(connection, result.usage);
+      connection = await maybeClearRecoveredQuotaState(connection, result.usage);
 
-  return {
-    connection,
-    // Claude's banked reset-credit count is invisible to the regular usage poll; attach the
-    // count the user-opened list (or the opt-in auto-reset) last seeded, or omit it (unknown).
-    usage:
-      connection.provider === "claude"
-        ? withClaudeResetCreditCount(connection.id, result.usage)
-        : result.usage,
-  };
+      return {
+        connection,
+        // Claude's banked reset-credit count is invisible to the regular usage poll; attach the
+        // count the user-opened list (or the opt-in auto-reset) last seeded, or omit it (unknown).
+        usage:
+          connection.provider === "claude"
+            ? withClaudeResetCreditCount(connection.id, result.usage)
+            : result.usage,
+        codexFence,
+      };
+    },
+    true
+  );
 }
 
 export async function fetchAndPersistProviderLimits(
@@ -1115,53 +1140,62 @@ export async function fetchAndPersistProviderLimits(
   usage: JsonRecord;
   cache: ProviderLimitsCacheEntry;
 }> {
-  const { connection, usage } = await fetchLiveProviderLimitsWithOptions(connectionId, {
+  const { connection, usage, codexFence } = await fetchLiveProviderLimitsWithOptions(connectionId, {
     forceRefresh: source === "manual",
     allowRotatingRefresh: opts.allowRotatingRefresh,
     includeResetCredits: opts.includeResetCredits,
   });
-  const newCache = toProviderLimitsCacheEntry(usage, source);
-  const previous = getProviderLimitsCache(connectionId);
-  const cache = mergeProviderLimitsCacheEntry(connection.provider, newCache, previous);
+  return runWithCodexConnectionFence(
+    codexFence ?? null,
+    () => {
+      assertCodexOperationCurrent(connectionId);
+      const newCache = toProviderLimitsCacheEntry(usage, source);
+      const previous = getProviderLimitsCache(connectionId);
+      const cache = mergeProviderLimitsCacheEntry(connection.provider, newCache, previous);
 
-  // Don't persist error-only entries (429 etc.) — would wipe prior good cache.
-  // Serve the prior entry instead; only successful fetches update the cache.
-  if (cache === previous && newCache.message) {
-    // Claude's banked count lives in the list-seeded memo (already on `usage` when known),
-    // so a cached count — e.g. from before a redeem — must not come back through here.
-    const isClaude = connection.provider === "claude";
-    const bankedResetCredits = isClaude ? newCache.bankedResetCredits : previous.bankedResetCredits;
-    let served = previous;
-    if (isClaude && previous.bankedResetCredits !== bankedResetCredits) {
-      const { bankedResetCredits: _cached, ...rest } = previous;
-      served = setProviderLimitsCache(
-        connectionId,
-        bankedResetCredits === undefined ? rest : { ...rest, bankedResetCredits }
-      );
-    }
-    const staleUsage: JsonRecord = {
-      ...usage,
-      quotas: previous.quotas,
-      modelQuotas: previous.modelQuotas,
-      plan: previous.plan ?? usage.plan ?? null,
-      bankedResetCredits,
-      paidCredits: previous.paidCredits,
-      billing: previous.billing,
-      message: null,
-      _stale: true,
-      _staleSince: previous.fetchedAt,
-      _staleReason: newCache.message,
-    };
-    if (bankedResetCredits === undefined) delete staleUsage.bankedResetCredits;
-    return { connection, usage: staleUsage, cache: served };
-  }
+      // Don't persist error-only entries (429 etc.) — would wipe prior good cache.
+      // Serve the prior entry instead; only successful fetches update the cache.
+      if (cache === previous && newCache.message) {
+        // Claude's banked count lives in the list-seeded memo (already on `usage` when known),
+        // so a cached count — e.g. from before a redeem — must not come back through here.
+        const isClaude = connection.provider === "claude";
+        const bankedResetCredits = isClaude
+          ? newCache.bankedResetCredits
+          : previous.bankedResetCredits;
+        let served = previous;
+        if (isClaude && previous.bankedResetCredits !== bankedResetCredits) {
+          const { bankedResetCredits: _cached, ...rest } = previous;
+          served = setProviderLimitsCache(
+            connectionId,
+            bankedResetCredits === undefined ? rest : { ...rest, bankedResetCredits }
+          );
+        }
+        const staleUsage: JsonRecord = {
+          ...usage,
+          quotas: previous.quotas,
+          modelQuotas: previous.modelQuotas,
+          plan: previous.plan ?? usage.plan ?? null,
+          bankedResetCredits,
+          paidCredits: previous.paidCredits,
+          billing: previous.billing,
+          message: null,
+          _stale: true,
+          _staleSince: previous.fetchedAt,
+          _staleReason: newCache.message,
+        };
+        if (bankedResetCredits === undefined) delete staleUsage.bankedResetCredits;
+        return { connection, usage: staleUsage, cache: served };
+      }
 
-  const mergedUsage: JsonRecord = {
-    ...usage,
-    ...(cache.billing ? { billing: cache.billing } : {}),
-  };
-  setProviderLimitsCache(connectionId, cache);
-  return { connection, usage: mergedUsage, cache };
+      const mergedUsage: JsonRecord = {
+        ...usage,
+        ...(cache.billing ? { billing: cache.billing } : {}),
+      };
+      setProviderLimitsCache(connectionId, cache);
+      return { connection, usage: mergedUsage, cache };
+    },
+    true
+  );
 }
 
 export async function syncAllProviderLimits(
@@ -1181,22 +1215,28 @@ export async function syncAllProviderLimits(
     isActive: true,
   })) as unknown as ProviderConnectionLike[];
   const connections = connectionRows.filter(isSupportedUsageConnection);
-  const cacheEntries: Array<{ connectionId: string; entry: ProviderLimitsCacheEntry }> = [];
+  type FetchedCache = {
+    connectionId: string;
+    cache: ProviderLimitsCacheEntry;
+    codexFence?: CodexConnectionFence | null;
+  };
+  const cacheEntries: Array<{
+    connectionId: string;
+    entry: ProviderLimitsCacheEntry;
+    codexFence?: CodexConnectionFence | null;
+  }> = [];
   const caches: Record<string, ProviderLimitsCacheEntry> = {};
   const errors: Record<string, string> = {};
 
-  const recordResult = (
-    connectionId: string,
-    result: PromiseSettledResult<{ connectionId: string; cache: ProviderLimitsCacheEntry }>
-  ) => {
+  const recordResult = (connectionId: string, result: PromiseSettledResult<FetchedCache>) => {
     if (result.status === "fulfilled") {
-      const { cache } = result.value;
+      const { cache, codexFence } = result.value;
       const previous = getProviderLimitsCache(connectionId);
       if (cache === previous) {
         caches[connectionId] = cache;
         return;
       }
-      cacheEntries.push({ connectionId, entry: cache });
+      cacheEntries.push({ connectionId, entry: cache, codexFence });
       caches[connectionId] = cache;
       return;
     }
@@ -1210,12 +1250,12 @@ export async function syncAllProviderLimits(
     const forceRefresh =
       source === "manual" ||
       shouldRefreshProviderLimitsCache(connection, existingCache || undefined);
-    const { usage } = await fetchLiveProviderLimitsWithOptions(connection.id, {
+    const { usage, codexFence } = await fetchLiveProviderLimitsWithOptions(connection.id, {
       forceRefresh,
     });
     const nextCache = toProviderLimitsCacheEntry(usage, source);
     const cache = mergeProviderLimitsCacheEntry(connection.provider, nextCache, existingCache);
-    return { connectionId: connection.id, cache };
+    return { connectionId: connection.id, cache, codexFence };
   };
 
   // OAuth connections are processed STRICTLY SEQUENTIALLY (chunk size 1) with a
@@ -1229,7 +1269,7 @@ export async function syncAllProviderLimits(
 
   const recordChunk = (
     chunk: ProviderConnectionLike[],
-    results: PromiseSettledResult<{ connectionId: string; cache: ProviderLimitsCacheEntry }>[]
+    results: PromiseSettledResult<FetchedCache>[]
   ) => {
     results.forEach((result, index) => {
       const connectionId = chunk[index]?.id;
@@ -1240,8 +1280,16 @@ export async function syncAllProviderLimits(
   await syncInChunksWithSpacing(otherConnections, concurrency, spacingMs, fetchOne, recordChunk);
   await syncInChunksWithSpacing(oauthConnections, 1, spacingMs, fetchOne, recordChunk);
 
-  if (cacheEntries.length > 0) {
-    setProviderLimitsCacheBatch(cacheEntries);
+  // A later account can keep this batch open after an earlier response finished.
+  // Recheck before advertising/persisting any deferred result, not just after fetch.
+  const currentEntries = cacheEntries.filter(({ connectionId, codexFence }) => {
+    if (!codexFence || isCodexConnectionFenceCurrent(codexFence)) return true;
+    delete caches[connectionId];
+    errors[connectionId] = "Codex connection changed while the quota batch was running";
+    return false;
+  });
+  if (currentEntries.length > 0) {
+    setProviderLimitsCacheBatch(currentEntries);
   }
 
   if (source === "scheduled") {
@@ -1250,8 +1298,8 @@ export async function syncAllProviderLimits(
 
   return {
     total: connections.length,
-    succeeded: cacheEntries.length,
-    failed: connections.length - cacheEntries.length,
+    succeeded: currentEntries.length,
+    failed: connections.length - currentEntries.length,
     caches,
     errors,
   };

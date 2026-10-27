@@ -1,6 +1,14 @@
 // Re-export from open-sse with local logger
 import * as log from "../utils/logger";
 import { updateProviderConnection } from "@/lib/db/providers";
+import {
+  captureCodexConnectionFence,
+  runWithCodexConnectionFence,
+  getCodexOperationFence,
+  isCodexConnectionFenceCurrent,
+  StaleCodexOperationError,
+  type CodexConnectionFence,
+} from "@/lib/db/codexConnectionFences";
 import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { resolveProxyForProvider, hasBlockingProxyAssignment } from "@/lib/db/proxies";
@@ -165,8 +173,16 @@ export const formatProviderCredentials = (provider: string, credentials: any) =>
 
 export const getAllAccessTokens = (userInfo: any) => _getAllAccessTokens(userInfo, log);
 
+// A shared refresh result can be reused only with the exact durable version its
+// successful write committed. Weak keys do not extend the token object's lifetime.
+const committedCodexRefreshes = new WeakMap<object, CodexConnectionFence>();
+
 // Local-specific: Update credentials in localDb
-export async function updateProviderCredentials(connectionId: string, newCredentials: any) {
+export async function updateProviderCredentials(
+  connectionId: string,
+  newCredentials: any,
+  onCodexFenceCommitted?: (fence: CodexConnectionFence) => void
+) {
   try {
     const updates: Record<string, any> = {};
 
@@ -227,11 +243,25 @@ export async function updateProviderCredentials(connectionId: string, newCredent
     // catalog-relevant state, so those updates keep the default invalidation.
     const catalogRelevant =
       updates.isActive !== undefined || updates.providerSpecificData !== undefined;
-    const result = await updateProviderConnection(
-      connectionId,
-      updates,
-      catalogRelevant ? undefined : { skipModelCatalog: true }
-    );
+    const fence = getCodexOperationFence(connectionId);
+    if (fence && !isCodexConnectionFenceCurrent(fence, true)) {
+      // A valid rotation cannot be thrown away because a newer hard stop arrived.
+      // Persist only the tokens; do not clear/re-enable the newer health state.
+      for (const key of [
+        "testStatus",
+        "isActive",
+        "lastError",
+        "lastErrorAt",
+        "lastErrorType",
+        "lastErrorSource",
+        "errorCode",
+      ])
+        delete updates[key];
+    }
+    const result = await updateProviderConnection(connectionId, updates, {
+      ...(catalogRelevant ? {} : { skipModelCatalog: true }),
+      ...(fence ? { expectedCodexFence: fence, onCodexFenceCommitted } : {}),
+    });
     log.info("TOKEN_REFRESH", "Credentials updated in localDb", {
       connectionId,
       success: !!result,
@@ -248,6 +278,23 @@ export async function updateProviderCredentials(connectionId: string, newCredent
 
 // Local-specific: Check and refresh token proactively
 export async function checkAndRefreshToken(provider: string, credentials: any) {
+  const fence = provider === "codex" ? captureCodexConnectionFence(credentials) : null;
+  return runWithCodexConnectionFence(fence, () => checkAndRefreshTokenInner(provider, credentials));
+}
+async function checkAndRefreshTokenInner(provider: string, credentials: any) {
+  let resultFence = getCodexOperationFence(String(credentials.connectionId || ""));
+  const adoptCommittedRefresh = (result: object): boolean => {
+    const committed = committedCodexRefreshes.get(result);
+    if (!resultFence || !committed) return false;
+    if (
+      committed.connectionId !== resultFence.connectionId ||
+      committed.ownerEpoch !== resultFence.ownerEpoch ||
+      !isCodexConnectionFenceCurrent(committed)
+    )
+      throw new StaleCodexOperationError();
+    resultFence = committed;
+    return true;
+  };
   let updatedCredentials = { ...credentials };
 
   // Check regular token expiry. Use the provider-specific lead time so rotating-
@@ -277,13 +324,20 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
       // The separate withConnectionRefreshMutex wrapper is no longer needed here.
       const persistCallback = connectionId
         ? async (result: any) => {
-            await updateProviderCredentials(connectionId, result);
+            if (adoptCommittedRefresh(result)) return;
+            const applied = await updateProviderCredentials(connectionId, result, (nextFence) => {
+              resultFence = nextFence;
+              committedCodexRefreshes.set(result, nextFence);
+            });
+            if (!applied && getCodexOperationFence(connectionId))
+              throw new StaleCodexOperationError();
           }
         : undefined;
 
       const newCredentials = await getAccessToken(provider, updatedCredentials, persistCallback);
 
       if (newCredentials && newCredentials.accessToken) {
+        adoptCommittedRefresh(newCredentials);
         // For the no-connectionId path (no mutex, no onPersist), persist here as before.
         if (!connectionId) {
           await updateProviderCredentials(updatedCredentials.connectionId, newCredentials);
@@ -346,6 +400,12 @@ export async function checkAndRefreshToken(provider: string, credentials: any) {
     }
   }
 
+  if (resultFence) {
+    if (!isCodexConnectionFenceCurrent(resultFence)) throw new StaleCodexOperationError();
+    // A mutex/rotation-cache hit can bypass this caller's persistence callback.
+    // Never hand a different generation's minted token to a current-owner waiter.
+    captureCodexConnectionFence(updatedCredentials);
+  }
   return updatedCredentials;
 }
 

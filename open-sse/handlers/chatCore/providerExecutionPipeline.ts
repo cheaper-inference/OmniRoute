@@ -20,6 +20,11 @@ import {
 import { COOLDOWN_MS } from "../../config/errorConfig.ts";
 import { normalizeHeaders } from "../../utils/headers.ts";
 import { shouldSkipCredentialRefresh } from "./skipCredentialRefresh.ts";
+import {
+  bindCodexResponseCallbacks,
+  runWithCodexResponseFence,
+  isCodexResponseCurrent,
+} from "@/lib/db/codexConnectionFences";
 
 export interface ChatCoreExecutorResult {
   response: Response;
@@ -339,7 +344,7 @@ function maxAttemptsFor(provider: string): number {
 export async function runProviderExecutionPipeline(
   input: ProviderExecutionPipelineInput
 ): Promise<ProviderExecutionOutcome> {
-  const { policy, target, connection, wire, state, sendProviderAttempt } = input;
+  const { policy, target, connection, wire, state: baseState, sendProviderAttempt } = input;
   const maxAttempts = maxAttemptsFor(target.provider);
   const allowedConnections = connection.allowedConnections ?? null;
   const excludedIds: string[] = [];
@@ -387,6 +392,15 @@ export async function runProviderExecutionPipeline(
 
     const attempt = await sendProviderAttempt(wire.currentModel, attempts === 0);
     lastAttempt = attempt;
+    const state = bindCodexResponseCallbacks(attempt.response, baseState);
+    if (!isCodexResponseCurrent(attempt.response)) {
+      return toOutcome(
+        attempt,
+        wire.currentModel,
+        currentConnectionId(connection),
+        target.provider
+      );
+    }
 
     const after = assertLease(policy, connection, wire.currentModel);
     if (after) return after;
@@ -489,7 +503,9 @@ export async function runProviderExecutionPipeline(
       typeof connection.refreshCredentials === "function" &&
       !(await shouldSkipCredentialRefresh(target.provider, attempt.response))
     ) {
-      const refreshed = await connection.refreshCredentials(connection.getCredentials());
+      const refreshed = await runWithCodexResponseFence(attempt.response, () =>
+        connection.refreshCredentials!(connection.getCredentials())
+      );
       if (refreshed && (refreshed.accessToken || refreshed.copilotToken)) {
         connection.replaceCredentials({ ...connection.getCredentials(), ...refreshed });
         await connection.onCredentialsRefreshed(refreshed);
