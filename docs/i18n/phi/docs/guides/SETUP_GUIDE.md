@@ -140,7 +140,7 @@ omniroute providers validate
 
 ### 1) Ikonekta ang mga Provider at Gumawa ng API Key
 
-1. Buksan ang Dashboard → `Providers` at magkonekta ng kahit isang provider (OAuth o API key).
+1. Buksan ang Dashboard → `Providers` at ikonekta ang kahit isang provider (OAuth o API key).
 2. Buksan ang Dashboard → `Endpoints` at gumawa ng API key.
 3. (Opsyonal) Buksan ang Dashboard → `Combos` at itakda ang iyong fallback chain.
 
@@ -165,8 +165,7 @@ Gumagana sa Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, at mga SD
 
 #### Awtomatikong i-configure gamit ang `setup-*`
 
-Sa halip na manu-manong i-paste ang base URL at key, hayaang isulat ng OmniRoute ang sariling
-config ng bawat tool mula sa live model catalog. Isang command bawat tool:
+Sa halip na manu-manong i-paste ang base URL at key, hayaan ang OmniRoute na isulat ang sariling config ng bawat tool mula sa aktuwal na model catalog. Isang command para sa bawat tool:
 
 ```bash
 omniroute setup-codex        # Mga profile sa ~/.codex/<name>.config.toml
@@ -176,22 +175,17 @@ omniroute setup-cline        # Mga setting ng Cline CLI + VS Code extension
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # Ipinapakita ang mga hakbang sa loob ng app ng Cursor
-omniroute setup-roo          # Import ng Roo Code + autoImport pointer
+omniroute setup-roo          # Roo Code import + autoImport pointer
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Tinatanggap ng bawat isa ang `--remote <url> --api-key <key>` upang mag-configure ng lokal na tool para sa isang
-**remote** na OmniRoute, pati na rin ang `--dry-run` para sa preview. Upang maglunsad ng CLI na may tamang
-env na naka-inject nang walang anumang isinusulat na config, gamitin ang generic launcher na
-`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-patuloy na magagamit ang mga legacy na per-tool launcher na `omniroute launch` (Claude Code) at
-`omniroute launch-codex` (Codex).
+Tumatanggap ang bawat isa ng `--remote <url> --api-key <key>` upang mag-configure ng lokal na tool para sa isang **remote** na OmniRoute, pati na rin ng `--dry-run` para makita muna ang preview. Upang maglunsad ng CLI na may tamang naka-inject na env at walang anumang isinusulat na config, gamitin ang generic launcher na `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); available pa rin ang mga legacy na per-tool launcher na `omniroute launch` (Claude Code) at `omniroute launch-codex` (Codex).
 
-Para sa kumpletong talahanayan (kung ano ang isinusulat ng bawat command, lahat ng flag, lokal kumpara sa remote, mga convention ng base-URL
-na `/v1`), tingnan ang **[Mga Integrasyon ng CLI](./CLI-INTEGRATIONS.md)**.
+Para sa kumpletong talahanayan (kung ano ang isinusulat ng bawat command, lahat ng flag, local kumpara sa remote, at mga convention ng base URL na `/v1`), tingnan ang **[Mga Integrasyon ng CLI](./CLI-INTEGRATIONS.md)**.
 
 Para sa detalyadong configuration ng bawat tool (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, at iba pa), tingnan ang nakalaang **[Gabay sa mga CLI Tool](../reference/CLI-TOOLS.md)**.
 
@@ -322,9 +316,9 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Template para sa Void Linux (xbps-src)
+## Template ng Void Linux (xbps-src)
 
-Para sa mga gumagamit ng Void Linux, maaari kang bumuo ng native package gamit ang `xbps-src`. I-save ang block na ito bilang `srcpkgs/omniroute/template`:
+Para sa mga gumagamit ng Void Linux, maaari kang bumuo ng native na package gamit ang `xbps-src`. I-save ang block na ito bilang `srcpkgs/omniroute/template`:
 
 ```bash
 # Template file para sa 'omniroute'

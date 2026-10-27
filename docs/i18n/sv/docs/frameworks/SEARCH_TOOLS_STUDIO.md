@@ -36,35 +36,35 @@ Studio med tre flikar som förenar webbsökning, webbskrapning och jämförelse 
 
 ## Flikar
 
-### Sökfliken
+### Sökflik
 
 Vidareutvecklar befintliga `SearchForm` + `ResultsPanel` + `RerankPanel` till en flik:
 
 - Fråga → resultat (titel, URL, utdrag, relevanspoäng).
 - Leverantörsmetadata i konfigurationspanelen (kostnad, kvot, status).
-- Omrankningsavsnitt: välj en omrankningsmodell, ordna om resultaten och visa `positionDelta`.
-- Tomt tillstånd med uppmaning när inga sökleverantörer har konfigurerats.
+- Omrankningssektion: välj en omrankningsmodell, ordna om resultaten, visa `positionDelta`.
+- Tomt läge med uppmaning till åtgärd när inga sökleverantörer är konfigurerade.
 - Sökhistorik via `SearchHistory.tsx`.
 - Anropar `POST /v1/search` (befintlig slutpunkt, inga ändringar).
 
-### Skrapningsfliken
+### Skrapningsflik
 
 Ny flik för att extrahera innehåll från en URL via `POST /v1/web/fetch` (skapad i plan 05):
 
-- Indata: URL + växlingsknapp för hela sidan + formatväljare (markdown/text/HTML).
+- Inmatning: URL + växling för hela sidan + formatväljare (markdown/text/HTML).
 - Skicka → hämta → rendera `ScrapeResult.tsx`.
-- `ScrapeResult` renderar en förhandsgranskning av markdown samt en växlingsknapp för rådata.
-- Gräns: om svarstexten är större än **256 kB** visar gränssnittet `(avkortad, visa rådata)` och öppnar rådata i en Monaco-modal (D21).
-- Metadatapanel: leverantör (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latens, kostnad, svarsstorlek, antal länkar.
+- `ScrapeResult` renderar en förhandsvisning av markdown + växling till rådata.
+- Gräns: om svarskroppen är större än **256 kB** visar gränssnittet `(truncated, view raw)` och öppnar rådata i en Monaco-modal (D21).
+- Metadatapanel: leverantör (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latens, kostnad, svarsstorlek, antal länkar.
 - Använder hooken `useScrapeFetch.ts`.
 
-### Jämförelsefliken
+### Jämförelseflik
 
 Kör samma fråga/URL parallellt hos upp till **4 leverantörer** (D22):
 
 - Kolumner sida vid sida för varje leverantör.
 - Mätvärden: latens, kostnad, antal resultat, svarsstorlek.
-- Beräkning av URL-överlappning för sökning (antalet delade URL:er jämfört med det ursprungliga resultatet).
+- Beräkning av URL-överlappning för sökning (antalet gemensamma URL:er jämfört med det ursprungliga resultatet).
 - Anropar `POST /v1/search` (sökning) eller `POST /v1/web/fetch` (skrapning) för varje leverantör.
 
 ---
@@ -100,13 +100,13 @@ Kör samma fråga/URL parallellt hos upp till **4 leverantörer** (D22):
 
 ## Leverantörskatalog
 
-`ProviderCatalog.tsx` visar den fullständiga leverantörslistan från `GET /api/search/providers`
+`ProviderCatalog.tsx` visar hela leverantörslistan från `GET /api/search/providers`
 (utökad i F4 för att inkludera hämtningsleverantörer):
 
-| `kind` | `"search"` (20 leverantörer) eller `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 leverantörer) eller `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Statusen **härleds vid tidpunkten för begäran** genom att kontrollera om autentiseringsuppgifter finns och om
-alla nycklar för närvarande befinner sig i en vänteperiod.
+Statusen **fastställs vid tidpunkten för begäran** genom att kontrollera om autentiseringsuppgifter finns och om
+alla nycklar för närvarande har en nedkylningsperiod.
 
 ---
 
@@ -118,18 +118,18 @@ Platshållaren för API-nyckeln är alltid `$OMNIROUTE_API_KEY` (D11, delas med 
 
 ---
 
-## Ändringar i backend
+## Backendändringar
 
-Endast en ändring i backend krävdes för den här funktionen:
+Endast en backendändring behövdes för den här funktionen:
 
 ### Utökad `GET /api/search/providers`
 
 `src/app/api/search/providers/route.ts` utökades för att:
 
-- Inkludera samtliga 6 hämtningsleverantörer (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) i arrayen.
+- Inkludera alla hämtningsleverantörer (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) i arrayen.
 - Lägga till `kind: "search" | "fetch"` för varje objekt.
-- Lägga till `status: "configured" | "missing" | "rate_limited"`, härledd från aktuella autentiseringsuppgifter.
-- Bibehålla bakåtkompatibilitet — befintliga fält (`id`, `name` osv.) är oförändrade.
+- Lägga till `status: "configured" | "missing" | "rate_limited"` härledd från aktuell autentiseringsuppgiftsstatus.
+- Bibehålla bakåtkompatibilitet – befintliga fält (`id`, `name` osv.) är oförändrade.
 
 ---
 

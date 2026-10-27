@@ -9,6 +9,11 @@
 
 import { getProviderAlias } from "@/shared/constants/providers";
 import { isLoopbackNodeHost } from "@/shared/network/loopbackNodeHost";
+import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
+import {
+  toRegistrySpeechModels as toSyntxSpeechModels,
+  toRegistryTranscriptionModels as toSyntxTranscriptionModels,
+} from "../services/syntxMediaCatalog.ts";
 
 interface AudioModel {
   id: string;
@@ -25,12 +30,18 @@ export interface AudioProvider {
    * id already is the credential key.
    */
   credentialProviderId?: string;
+  alias?: string;
   baseUrl: string;
   authType: string;
   authHeader: string;
   format?: string;
   supportedFormats?: string[];
   async?: boolean;
+  /**
+   * Voice sent by the OpenAI-compatible speech path when the request omits `voice`.
+   * Absent means the OpenAI stock default ("alloy").
+   */
+  defaultVoice?: string;
   models: AudioModel[];
 }
 
@@ -139,7 +150,8 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
     id: "assemblyai",
     baseUrl: "https://api.assemblyai.com/v2/transcript",
     authType: "apikey",
-    authHeader: "bearer",
+    // AssemblyAI expects `Authorization: <API_KEY>` with no "Bearer" scheme.
+    authHeader: "authorization",
     async: true,
     format: "assemblyai",
     models: [
@@ -261,6 +273,22 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
       { id: "gpt-4o-transcription", name: "GPT-4o Transcription" },
     ],
   },
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    models: [{ id: "whisper", name: "Whisper" }],
+  },
+  syntx: {
+    id: "syntx",
+    alias: "stx",
+    baseUrl: "https://api.syntx.ai/api/v1/audio/transcriptions",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "syntx-audio",
+    models: toSyntxTranscriptionModels(),
+  },
 };
 
 /**
@@ -366,7 +394,12 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     authType: "apikey",
     authHeader: "bearer",
     format: "soniox-tts",
-    models: [{ id: "tts-rt-v1", name: "Soniox TTS RT v1" }],
+    // tts-rt-v1 is deprecated upstream (2026-08-31) and now served by tts-rt-v2;
+    // kept so existing clients that pin v1 still resolve.
+    models: [
+      { id: "tts-rt-v2", name: "Soniox TTS RT v2" },
+      { id: "tts-rt-v1", name: "Soniox TTS RT v1" },
+    ],
   },
 
   elevenlabs: {
@@ -419,6 +452,20 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     authHeader: "none",
     format: "openai",
     models: [{ id: "qwen3-tts", name: "Qwen3 TTS" }],
+  },
+
+  // Qwen Cloud Token Plan — DashScope SpeechSynthesizer (JSON → inline base64 or an
+  // expiring audio URL). The host follows the connection's region (Singapore/Beijing).
+  "qwen-cloud-token-plan": {
+    id: "qwen-cloud-token-plan",
+    alias: "qct",
+    baseUrl:
+      "https://token-plan.ap-southeast-1.maas.aliyuncs.com/api/v1/services/audio/tts/SpeechSynthesizer",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "dashscope-tts",
+    supportedFormats: ["mp3"],
+    models: [{ id: "qwen-audio-3.0-tts-plus", name: "Qwen Audio 3.0 TTS Plus" }],
   },
 
   // ── Cloud TTS Providers (#248) ────────────────────────────────────────────
@@ -589,6 +636,17 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     ],
   },
 
+  // Kokoro has no OpenAI stock voices, so a request without `voice` must not fall
+  // back to "alloy" — defaultVoice supplies a Kokoro voice id instead.
+  nan: {
+    id: "nan",
+    baseUrl: "https://api.nan.builders/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    defaultVoice: "af_heart",
+    models: [{ id: "kokoro", name: "Kokoro" }],
+  },
+
   // UC (uncensored.com) voice synthesis over its dedicated TTS WebSocket. Auth is
   // a Clerk session JWT minted per-connect from the durable connection cred; the
   // `format: "uc-tts"` branch in audioSpeech.ts drives the socket. The baseUrl is
@@ -601,6 +659,15 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     authHeader: "none",
     format: "uc-tts",
     models: [{ id: "jade", name: "UC Voice (Jade)" }],
+  },
+  syntx: {
+    id: "syntx",
+    alias: "stx",
+    baseUrl: "https://api.syntx.ai/api/v1/audio/speech",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "syntx-audio",
+    models: toSyntxSpeechModels(),
   },
 };
 
@@ -645,16 +712,18 @@ export { isLoopbackNodeHost };
  * Build a dynamic AudioProvider from a provider_node DB entry.
  *
  * Loopback nodes keep `authType: "none"` — a local Ollama/LM Studio has no key and
- * must not be blocked on a missing credential. A remote node is the opposite: it is
- * only reachable when the operator opted in, and it must present the credential
- * stored on its connection, so it is built as an api-key provider keyed by the node
- * id (`credentialProviderId`) rather than by the caller-facing prefix.
+ * must not be blocked on a missing credential. Every other node — a remote node the
+ * operator opted into, or a hostname listed in `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`
+ * (#14635) — must present the credential stored on its connection, so it is built as an
+ * api-key provider keyed by the node id (`credentialProviderId`) rather than by the
+ * caller-facing prefix.
  */
 export function buildDynamicAudioProvider(node: ProviderNodeRow, audioPath: string): AudioProvider {
   if (!node.prefix || !node.baseUrl) {
     throw new Error(`Invalid provider_node: missing prefix or baseUrl`);
   }
   const baseUrl = node.baseUrl.replace(/\/+$/, "");
+  // Auth follows the built-in loopback class only (see above).
   const isLocal = isLoopbackNodeHost(node.baseUrl);
   return {
     id: node.prefix,
@@ -671,7 +740,7 @@ function parseAudioModel(
   registry: Record<string, AudioProvider>,
   dynamicProviders?: AudioProvider[]
 ): { provider: string | null; model: string | null } {
-  if (!modelStr) return { provider: null, model: null };
+  if (!modelStr || hasUnsafeModelIdSyntax(modelStr)) return { provider: null, model: null };
 
   // Phase 1: prefix match in hardcoded registry
   for (const [providerId] of Object.entries(registry)) {

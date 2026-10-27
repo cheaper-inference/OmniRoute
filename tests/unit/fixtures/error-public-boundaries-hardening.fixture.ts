@@ -269,6 +269,7 @@ test("public identifier vocabulary preserves current internal machine-readable c
     "orphan_tool_result",
     "bedrock_stream_error",
     "invalid_kiro_tool_call",
+    "kiro_tool_call_repair_retry_failed",
     "devin_cli_error",
     "upstream_websocket_error",
     "upstream_websocket_connect_failed",
@@ -398,10 +399,15 @@ test("stream request finalization never warns with a raw error object", () => {
 
 test("chatCore provider-failure writes use the projected persistent message", () => {
   const source = fs.readFileSync(path.join(REPO_ROOT, "open-sse/handlers/chatCore.ts"), "utf8");
-  const failureStart = source.indexOf("providerFailure: if (!providerResponse.ok)");
-  const failureEnd = source.indexOf("// Non-streaming response", failureStart);
-  assert.ok(failureStart >= 0 && failureEnd > failureStart, "providerFailure block must exist");
-  const failureBlock = source.slice(failureStart, failureEnd);
+  // The providerFailure block moved into the streaming leaf with the handleChatCore split; the
+  // classification helper (applyProviderFailureClassification) stayed in the barrel.
+  const streamingLeaf = fs.readFileSync(
+    path.join(REPO_ROOT, "open-sse/handlers/chatCore/streamingResponse.ts"),
+    "utf8"
+  );
+  const failureStart = streamingLeaf.indexOf("providerFailure: if (!providerResponse.ok)");
+  assert.ok(failureStart >= 0, "providerFailure block must exist in streamingResponse.ts");
+  const failureBlock = streamingLeaf.slice(failureStart);
   const classifierStart = source.indexOf("const applyProviderFailureClassification = async");
   const classifierEnd = source.indexOf("\n  };\n", classifierStart);
   assert.ok(
@@ -412,9 +418,20 @@ test("chatCore provider-failure writes use the projected persistent message", ()
 
   assert.doesNotMatch(failureBlock, /lastError:\s*message\b/);
   assert.match(failureBlock, /await applyProviderFailureClassification\(/);
+  // #14527 moved the projection into chatCore/providerFailureRetention.ts (it adds a
+  // video-transcript omission in front of the same sanitizer). Hold chatCore to calling the
+  // projection, and the projection to sanitizing — the invariant, wherever it lives.
   assert.match(
     classifierBlock,
-    /const persistentMessage = sanitizeErrorMessage\(message\) \|\| "Provider request failed"/
+    /const persistentMessage = projectRetainedProviderFailureMessage\(message, /
+  );
+  const retentionSource = fs.readFileSync(
+    path.join(REPO_ROOT, "open-sse/handlers/chatCore/providerFailureRetention.ts"),
+    "utf8"
+  );
+  assert.match(
+    retentionSource,
+    /return sanitizeErrorMessage\(message\) \|\| "Provider request failed";/
   );
   assert.doesNotMatch(classifierBlock, /lastError:\s*message\b/);
   // #12864 extracted the REQUEST_REJECTED branches (2 of the former 11) into

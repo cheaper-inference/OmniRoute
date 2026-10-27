@@ -120,15 +120,15 @@ Přístup přes: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ## 📖 Nastavení poskytovatelů
 
-Chcete-li hromadně přidat připojení pomocí API klíčů ze souboru CSV nebo JSON, použijte **Řídicí panel → Poskytovatelé → Importovat ze souboru**. Sloupce jsou poziční (`provider,name,apiKey,baseUrl,priority`); `provider` již musí existovat jako spravovaný poskytovatel nebo kompatibilní uzel. Viz [Import poskytovatelů ze souboru CSV nebo JSON](../providers/CSV-IMPORT.md).
+Chcete-li hromadně přidat připojení pomocí API klíčů ze souboru CSV nebo JSON, použijte **Ovládací panel → Poskytovatelé → Importovat ze souboru**. Sloupce jsou poziční (`provider,name,apiKey,baseUrl,priority`); `provider` již musí existovat jako spravovaný poskytovatel nebo kompatibilní uzel. Viz [Import poskytovatelů ze souboru CSV nebo JSON](../providers/CSV-IMPORT.md).
 
 ### 🔐 Poskytovatelé s předplatným
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Řídicí panel → Poskytovatelé → Připojit Claude Code
-→ Přihlášení přes OAuth → Automatické obnovení tokenu
+Ovládací panel → Poskytovatelé → Připojit Claude Code
+→ Přihlášení přes OAuth → Automatické obnovování tokenu
 → Sledování 5hodinové a týdenní kvóty
 
 Modely:
@@ -139,14 +139,16 @@ Modely:
 
 **Tip pro profesionály:** Pro složité úlohy používejte Opus, pro rychlost Sonnet. OmniRoute sleduje kvótu pro každý model!
 
-Trasy kompatibilní s Claude a Claude Code zachovávají úroveň úsilí při přemýšlení `max` pro modely Opus a Sonnet. Modely Haiku úroveň úsilí `max` nepřijímají, takže OmniRoute před odesláním požadavku nadřazenému poskytovateli sníží tuto úroveň na vysoký rozpočet pro přemýšlení.
+Nemáte na hostiteli OmniRoute prohlížeč? Spusťte `claude setup-token` kdekoli, kde jste přihlášeni ke Claude Code, a vložte roční token na kartu **Token nastavení**. Viz [Claude Code s tokenem nastavení](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+
+Trasy kompatibilní s Claude a Claude Code zachovávají pro modely Opus a Sonnet úroveň intenzity přemýšlení `max`. Modely Haiku úroveň intenzity `max` nepřijímají, takže OmniRoute před odesláním požadavku nadřazenému poskytovateli sníží tuto úroveň na vysoký rozpočet pro přemýšlení.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Řídicí panel → Poskytovatelé → Připojit Codex
+Ovládací panel → Poskytovatelé → Připojit Codex
 → Přihlášení přes OAuth (port 1455)
-→ Obnovení po 5 hodinách a týdnu
+→ Obnovení po 5 hodinách a každý týden
 
 Modely:
   cx/gpt-5.5
@@ -158,7 +160,7 @@ Modely:
 #### GitHub Copilot
 
 ```bash
-Řídicí panel → Poskytovatelé → Připojit GitHub
+Ovládací panel → Poskytovatelé → Připojit GitHub
 → OAuth přes GitHub
 → Měsíční obnovení (1. den v měsíci)
 
@@ -172,45 +174,44 @@ Modely:
 
 ### 💰 Levní poskytovatelé
 
-#### GLM-4.7 (denní obnovení, $0.6/1M)
+#### GLM-4.7 (Denní obnovení, $0.6/1M)
 
 1. Zaregistrujte se: [Zhipu AI](https://open.bigmodel.cn)
-2. Získejte API klíč z tarifu Coding Plan
-3. Řídicí panel → Přidat API klíč: Poskytovatel: `glm`, API klíč: `your-key`
+2. Získejte API klíč z plánu Coding Plan
+3. Ovládací panel → Přidat API klíč: Poskytovatel: `glm`, API klíč: `your-key`
 
-**Použití:** `glm/glm-4.7` — **Tip pro profesionály:** Coding Plan nabízí 3× větší kvótu za 1/7 ceny! Obnovuje se denně v 10:00.
+**Použití:** `glm/glm-4.7` — **Tip pro profesionály:** Coding Plan nabízí 3× vyšší kvótu za 1/7 ceny! Obnovuje se denně v 10:00.
 
-#### MiniMax M2.1 (obnovení po 5 h, $0.20/1M)
+#### MiniMax M2.1 (Obnovení po 5 h, $0.20/1M)
 
 1. Zaregistrujte se: [MiniMax](https://www.minimax.io)
-2. Získejte API klíč → Řídicí panel → Přidat API klíč
+2. Získejte API klíč → Ovládací panel → Přidat API klíč
 
 **Použití:** `minimax/MiniMax-M2.1` — **Tip pro profesionály:** Nejlevnější možnost pro dlouhý kontext (1M tokenů)!
 
-#### Kimi K2 (paušálně $9/měsíc)
+#### Kimi K2 (Paušálně $9/měsíc)
 
 1. Předplaťte si službu: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Získejte API klíč → Řídicí panel → Přidat API klíč
+2. Získejte API klíč → Ovládací panel → Přidat API klíč
 
 **Použití:** `kimi/kimi-k2.5` — **Tip pro profesionály:** Pevná cena $9/měsíc za 10M tokenů = efektivní cena $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Zaregistrujte se: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Vytvořte API klíč Qianfan → Řídicí panel → Přidat API klíč: Poskytovatel: `qianfan`
+2. Vytvořte API klíč Qianfan → Ovládací panel → Přidat API klíč: Poskytovatel: `qianfan`
 
 **Použití:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` nebo jiné ID modelu Qianfan kompatibilního s OpenAI.
 
 ### 🆓 BEZPLATNÍ poskytovatelé
 
-Bezplatní poskytovatelé bez ověřování mají na své stránce přepínač vedle položky **Ověření není vyžadováno**.
-Jeho vypnutím daného poskytovatele deaktivujete, odeberete jej z nakonfigurovaného/kompaktního zobrazení Poskytovatelů a
-odeberete jeho modely z `/v1/models`.
+Bezplatní poskytovatelé bez ověřování mají na své stránce přepínač vedle možnosti **Ověření není vyžadováno**.
+Jeho vypnutím daného poskytovatele deaktivujete, odeberete jej z nakonfigurovaného a kompaktního zobrazení Poskytovatelů a jeho modely odeberete z `/v1/models`.
 
 #### Qoder (9 BEZPLATNÝCH modelů)
 
 ```bash
-Řídicí panel → Připojit Qoder → Přihlášení přes OAuth → Přístup podléhá aktuálním limitům poskytovatele
+Ovládací panel → Připojit Qoder → Přihlášení přes OAuth → Přístup podléhá aktuálním omezením poskytovatele
 
 Modely: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -218,7 +219,7 @@ Modely: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/
 #### Kiro (Claude ZDARMA)
 
 ```bash
-Řídicí panel → Připojit Kiro → AWS Builder ID nebo Google/GitHub → ~50 kreditů/měsíc
+Ovládací panel → Připojit Kiro → AWS Builder ID nebo Google/GitHub → ~50 kreditů/měsíc
 
 Modely: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -680,19 +681,56 @@ curl -X POST http://localhost:20128/api/provider-models \
 # Odebrání: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Nebo použijte řídicí panel: **Poskytovatelé → [Poskytovatel] → Vlastní modely**.
+Nebo použijte ovládací panel: **Poskytovatelé → [Poskytovatel] → Vlastní modely**.
 
 Poznámky:
 
-- Poskytovatelé kompatibilní s OpenRouter a OpenAI/Anthropic se spravují pouze v části **Dostupné modely**. Ruční přidání, import i automatická synchronizace se ukládají do stejného seznamu dostupných modelů, takže pro tyto poskytovatele neexistuje samostatná část Vlastní modely.
+- Poskytovatelé kompatibilní s OpenRouter a OpenAI/Anthropic se spravují pouze v části **Dostupné modely**. Ruční přidání, import i automatická synchronizace ukládají modely do stejného seznamu dostupných modelů, takže pro tyto poskytovatele neexistuje samostatná část Vlastní modely.
 - Část **Vlastní modely** je určena poskytovatelům, kteří nenabízejí spravované importy dostupných modelů.
+
+### Vlastní poskytovatelé kompatibilní s OpenAI
+
+Libovolnou bránu podporující API OpenAI (samostatně hostovaný proxy server, vLLM nebo agregátor třetí strany)
+lze přidat jako samostatný uzel poskytovatele:
+
+1. **Poskytovatelé → Přidat poskytovatele kompatibilního s OpenAI**.
+2. **Název**: zobrazovaný název uzlu.
+3. **Prefix**: název pro směrování. Klienti volají modely ve formátu `<prefix>/<model>`, takže uzel s
+   prefixem `mygw` obsluhuje `mygw/gpt-4o-mini`. Povinné; neplatí žádná omezení znaků.
+4. **Typ API**: rodina koncových bodů, které brána obsluhuje (Chat Completions, Responses,
+   Embeddings, zvuk, obrázky).
+5. **Základní URL**: kořen API až po `/v1` včetně (například
+   `https://gateway.example.com/v1`), nikoli úplná cesta `/chat/completions`. Brány s
+   nestandardními cestami je nastavují v části **Pokročilá nastavení** (cesta chatu, cesta modelů).
+6. Pole **Klíč API (pro kontrolu)** slouží pouze k otestování připojení. Po vytvoření uzlu
+   jej otevřete a pomocí možnosti **Přidat připojení** uložte klíč, který budou požadavky používat.
+
+Uzel obdrží interní ID ve formátu `openai-compatible-<apiType>-<uuid>`; nikdy jej
+nemusíte zadávat, veřejným názvem je prefix.
+
+#### Vyhrazené prefixy
+
+Prefix nesmí být ID ani alias integrovaného poskytovatele (například `openai`, `cf`) ani
+ID vyřazeného poskytovatele. Překladač modelů kontroluje ID a aliasy integrovaných poskytovatelů před
+vlastními uzly, takže uzel používající některý z těchto prefixů by nikdy nepřijímal provoz:
+`<prefix>/model` by byl místo toho směrován k integrovanému poskytovateli, nebo by byl odmítnut, pokud byl daný poskytovatel
+vyřazen. Vytvoření nebo úprava uzlu s takovým prefixem bude odmítnuta s chybou:
+
+```text
+prefix: "<prefix>" je vyhrazený prefix poskytovatele — zvolte jiný prefix (vyhrazená ID/aliasy nelze použít pro vlastní uzly, protože požadavky jako <prefix>/model jsou směrovány k integrovanému poskytovateli nebo jsou po jeho vyřazení odmítnuty)
+```
+
+Zvolte jedinečný prefix (`mygw`, `acme-proxy`). Pokud požadavky na vlastní uzel selhávají s
+chybou uvádějící integrovaného poskytovatele nebo jeho přihlašovací údaje, zkontrolujte, zda není prefix uzlu
+vyhrazený: uzly uložené před zavedením tohoto pravidla zůstávají uložené, ale jejich prefix směruje požadavky
+k integrovanému poskytovateli. Upravte uzel a přidělte mu nový prefix.
 
 ### Řetězení partnerských instancí OmniRoute
 
 Další bránu OmniRoute lze přidat jako **vlastního poskytovatele kompatibilního s OpenAI**. Použijte
-základní URL `/v1` partnerské instance a vyhrazený API klíč s minimálními oprávněními, který tato instance vydala.
+základní URL partnerské instance s `/v1` a vyhrazený klíč API s minimálními oprávněními vydaný touto partnerskou instancí.
 
-U obousměrných nebo víceuzlových řetězců povolte na každé bráně volitelnou ochranu proti smyčkám:
+Pro obousměrné nebo víceúrovňové řetězce povolte na každé bráně volitelnou ochranu proti smyčkám:
 
 ```bash
 # gateway-a
@@ -708,12 +746,12 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Hlavičku `X-OmniRoute-Peer-Trace` obdrží pouze požadavky odeslané na partnerskou URL výslovně uvedenou v seznamu povolených.
-Brána odmítne opakované ID instance nebo vyčerpaný limit počtu přeskoků pomocí HTTP
-`508 Loop Detected`; běžní poskytovatelé upstream služeb neobdrží žádná metadata o partnerských instancích.
+Pouze požadavky odeslané na URL partnerské instance výslovně uvedené v seznamu povolených adres obdrží
+hlavičku `X-OmniRoute-Peer-Trace`. Brána odmítne opakované ID instance nebo vyčerpaný limit
+počtu přeskoků pomocí HTTP `508 Loop Detected`; běžní upstream poskytovatelé neobdrží žádná metadata partnerské instance.
 
-Řetězení partnerských instancí nenahrazuje replikaci databáze ani převzetí služeb při selhání hostitele. Každá brána udržuje nezávislý
-stav SQLite, mezipaměti, čítače limitů a relace. Pro dostupnost v režimu aktivní/pasivní nebo aktivní/aktivní použijte reverzní proxy
+Řetězení partnerských instancí není replikací databáze ani převzetím služeb hostitele při selhání. Každá brána udržuje nezávislý
+stav SQLite, mezipaměti, čítače limitů a relace. Pro dostupnost active/passive nebo active/active použijte reverzní proxy
 s kontrolou stavu nebo převzetí služeb na straně klienta a nikdy nepřipojujte jednu databázi SQLite
 k více spuštěným instancím OmniRoute.
 
@@ -727,7 +765,7 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Pokud prefix poskytovatele chybí, přidá se automaticky. Neshodující se modely vrátí `400`.
+Pokud prefix poskytovatele chybí, bude přidán automaticky. Neshodující se modely vrátí `400`.
 
 ### Konfigurace síťového proxy serveru
 
@@ -736,7 +774,7 @@ Pokud prefix poskytovatele chybí, přidá se automaticky. Neshodující se mode
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Proxy server pro konkrétního poskytovatele
+# Proxy server pro jednotlivé poskytovatele
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
@@ -758,85 +796,85 @@ Vrací modely seskupené podle poskytovatele s typy (`chat`, `embedding`, `image
 ### Cloudová synchronizace
 
 - Synchronizace poskytovatelů, kombinací a nastavení mezi zařízeními
-- Automatická synchronizace na pozadí s časovým limitem a rychlým ukončením při selhání
+- Automatická synchronizace na pozadí s časovým limitem a rychlým ukončením při chybě
 - V produkčním prostředí upřednostněte serverové `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`
 
 ### Rychlý tunel Cloudflare
 
-- Dostupný v části **Řídicí panel → Koncové body** pro Docker a další lokálně hostovaná nasazení
-- Vytvoří dočasnou URL `https://*.trycloudflare.com`, která přesměrovává na váš aktuální koncový bod `/v1` kompatibilní s OpenAI
+- K dispozici v **Dashboard → Endpoints** pro Docker a další nasazení s vlastním hostingem
+- Vytvoří dočasnou URL adresu `https://*.trycloudflare.com`, která přesměrovává na váš aktuální koncový bod `/v1` kompatibilní s OpenAI
 - Při prvním povolení se `cloudflared` nainstaluje pouze v případě potřeby; při pozdějších restartech se znovu použije stejný spravovaný binární soubor
-- Rychlé tunely se po restartu OmniRoute nebo kontejneru automaticky neobnoví; v případě potřeby je znovu povolte z řídicího panelu
-- URL tunelů jsou dočasné a změní se při každém zastavení a spuštění tunelu
-- Spravované rychlé tunely ve výchozím nastavení používají přenos HTTP/2, aby se v kontejnerech s omezenými prostředky zabránilo zahlcení varováními o vyrovnávací paměti UDP protokolu QUIC
-- Pokud chcete změnit spravovanou volbu přenosu, nastavte `CLOUDFLARED_PROTOCOL=quic` nebo `auto`
-- Pokud chcete místo spravovaného stahování použít předinstalovaný binární soubor `cloudflared`, nastavte `CLOUDFLARED_BIN`
-- Panely Cloudflare Quick Tunnel, Tailscale Funnel a ngrok Tunnel lze zobrazit nebo skrýt v části **Nastavení → Vzhled**. Skrytí panelu nezastaví spuštěný tunel.
+- Quick Tunnels se po restartu OmniRoute nebo kontejneru automaticky neobnoví; v případě potřeby je znovu povolte z řídicího panelu
+- URL adresy tunelů jsou dočasné a změní se při každém zastavení/spuštění tunelu
+- Spravované Quick Tunnels používají ve výchozím nastavení přenos přes HTTP/2, aby se v kontejnerech s omezenými prostředky zabránilo zahlcení varováními o vyrovnávací paměti QUIC UDP
+- Pokud chcete přepsat volbu spravovaného přenosu, nastavte `CLOUDFLARED_PROTOCOL=quic` nebo `auto`
+- Pokud místo spravovaného stahování upřednostňujete použití předinstalovaného binárního souboru `cloudflared`, nastavte `CLOUDFLARED_BIN`
+- Panely Cloudflare Quick Tunnel, Tailscale Funnel a ngrok Tunnel lze zobrazit nebo skrýt v části **Settings → Appearance**. Skrytí panelu nezastaví spuštěný tunel.
 
-### Inteligentní funkce brány LLM (fáze 9)
+### Inteligentní funkce LLM Gateway (fáze 9)
 
-- **Sémantická mezipaměť** — Automaticky ukládá do mezipaměti odpovědi bez streamování s temperature=0 (lze obejít pomocí `X-OmniRoute-No-Cache: true`)
-- **Idempotence požadavků** — Deduplikuje požadavky během 5 s pomocí hlavičky `Idempotency-Key` nebo `X-Request-Id`
+- **Sémantická mezipaměť** — Automaticky ukládá do mezipaměti odpovědi bez streamování s hodnotou temperature=0 (lze obejít pomocí `X-OmniRoute-No-Cache: true`)
+- **Idempotence požadavků** — Deduplikuje požadavky během 5 sekund prostřednictvím hlavičky `Idempotency-Key` nebo `X-Request-Id`
 - **Sledování průběhu** — Volitelné události SSE `event: progress` prostřednictvím hlavičky `X-OmniRoute-Progress: true`
 
 ---
 
-### Testovací prostředí překladače
+### Překladatelské hřiště
 
-Přístupné prostřednictvím **Řídicí panel → Překladač**. Laděte a vizualizujte, jak OmniRoute překládá požadavky API mezi poskytovateli.
+Přístup přes **Dashboard → Translator**. Ladění a vizualizace způsobu, jakým OmniRoute překládá požadavky API mezi poskytovateli.
 
-| Režim                   | Účel                                                                                            |
-| ----------------------- | ----------------------------------------------------------------------------------------------- |
-| **Testovací prostředí** | Vyberte zdrojový a cílový formát, vložte požadavek a okamžitě zobrazte přeložený výstup         |
-| **Tester chatu**        | Odesílejte živé chatové zprávy přes proxy server a kontrolujte celý cyklus požadavku a odpovědi |
-| **Testovací sada**      | Spouštějte dávkové testy napříč několika kombinacemi formátů a ověřujte správnost překladu      |
-| **Živý monitor**        | Sledujte překlady v reálném čase při průchodu požadavků přes proxy server                       |
+| Režim              | Účel                                                                                     |
+| ------------------ | ---------------------------------------------------------------------------------------- |
+| **Hřiště**         | Vyberte zdrojový/cílový formát, vložte požadavek a okamžitě zobrazte přeložený výstup    |
+| **Tester chatu**   | Odesílejte živé chatové zprávy přes proxy a kontrolujte celý cyklus požadavku a odpovědi |
+| **Testovací sada** | Spouštějte dávkové testy napříč více kombinacemi formátů a ověřujte správnost překladu   |
+| **Živé sledování** | Sledujte překlady v reálném čase během průchodu požadavků přes proxy                     |
 
 **Případy použití:**
 
 - Ladění důvodu, proč konkrétní kombinace klienta a poskytovatele selhává
-- Ověření, že se značky přemýšlení, volání nástrojů a systémové prompty překládají správně
+- Ověření, že se značky myšlenkového procesu, volání nástrojů a systémové pokyny překládají správně
 - Porovnání rozdílů mezi formáty OpenAI, Claude, Gemini a Responses API
 
 ---
 
 ### Strategie směrování
 
-Nakonfigurujte prostřednictvím **Dashboard → Settings → Routing**. Řídicí panel zpřístupňuje šest nejpoužívanějších strategií; kombinace a automatický router interně podporují širší sadu.
+Konfigurace přes **Dashboard → Settings → Routing**. Řídicí panel nabízí šest nejpoužívanějších strategií; kombinace a automatický směrovač interně podporují širší sadu.
 
-**Strategie dostupné v řídicím panelu (směrování na úrovni účtu):**
+**Strategie zobrazené v řídicím panelu (směrování na úrovni účtu):**
 
-| Strategie                      | Popis                                                                                                      |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| **Fill First**                 | Používá účty v pořadí podle priority — primární účet zpracovává všechny požadavky, dokud není nedostupný   |
-| **Round Robin**                | Cyklicky prochází všechny účty s konfigurovatelným limitem přilnavosti (výchozí: 3 volání na účet)         |
-| **P2C (Power of Two Choices)** | Vybere 2 náhodné účty a směruje na ten v lepším stavu — vyvažuje zátěž s ohledem na stav                   |
-| **Random**                     | Pro každý požadavek náhodně vybere účet pomocí Fisherova–Yatesova míchání                                  |
-| **Least Used**                 | Směruje na účet s nejstarším časovým razítkem `lastUsedAt`, čímž rovnoměrně rozděluje provoz               |
-| **Cost Optimized**             | Směruje na účet s nejnižší hodnotou priority a optimalizuje tak využití poskytovatelů s nejnižšími náklady |
+| Strategie                        | Popis                                                                                                    |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| **Postupné naplnění**            | Používá účty v pořadí podle priority — primární účet zpracovává všechny požadavky, dokud není nedostupný |
+| **Cyklické střídání**            | Střídá všechny účty s konfigurovatelným limitem přidružení (výchozí: 3 volání na účet)                   |
+| **P2C (výběr ze dvou možností)** | Vybere 2 náhodné účty a směruje na zdravější z nich — vyvažuje zátěž s ohledem na stav                   |
+| **Náhodně**                      | Náhodně vybírá účet pro každý požadavek pomocí Fisherova–Yatesova promíchání                             |
+| **Nejméně používaný**            | Směruje na účet s nejstarším časovým razítkem `lastUsedAt`, čímž rovnoměrně rozděluje provoz             |
+| **Optimalizace nákladů**         | Směruje na účet s nejnižší hodnotou priority a optimalizuje tak výběr poskytovatelů s nejnižšími náklady |
 
-**Pokročilé kombinované a automatické strategie** (konfigurovatelné pro jednotlivé kombinace nebo prostřednictvím prefixů `auto/*` — viz [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+**Pokročilé strategie kombinací a automatického směrování** (konfigurovatelné pro jednotlivé kombinace nebo pomocí předpon `auto/*` — viz [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
 
-- `priority` — striktní pořadí, nikdy nepoužívá round-robin
-- `weighted` — proporcionální rozdělení provozu podle vah jednotlivých modelů
-- `fill-first` — využívá první model až do dosažení limitů
+- `priority` — striktní pořadí, nikdy nepoužívá cyklické střídání
+- `weighted` — poměrné rozdělení provozu podle vah jednotlivých modelů
+- `fill-first` — využívá první model, dokud nejsou dosaženy limity
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
+- `p2c` (výběr ze dvou možností)
 - `least-used` a `cost-optimized`
-- `auto` — směrování podle skóre napříč všemi kandidáty
-- `lkgp` (Last Known Good Provider) — připne se k poslednímu úspěšnému poskytovateli a poté použije záložní pravidla
-- `context-optimized` — vybere model s největším volným kontextovým oknem
-- `context-relay` — řetězí modely s dlouhým kontextem pro navazující interakce
+- `auto` — výběr ze všech kandidátů na základě skóre
+- `lkgp` (poslední známý funkční poskytovatel) — používá posledního úspěšného poskytovatele a poté přechází na záložní pravidla
+- `context-optimized` — vybírá model s největším volným kontextovým oknem
+- `context-relay` — řetězí modely s dlouhým kontextem pro navazující tahy
 
-#### Externí hlavička pro přilnavou relaci
+#### Externí hlavička pro přidružení relace
 
-Pro externí afinitu relace (například pro agenty Claude Code/Codex za reverzními proxy) odešlete:
+Pro externí afinitu relace (například agenti Claude Code/Codex za reverzními proxy) odešlete:
 
 ```http
-X-Session-Id: váš-klíč-relace
+X-Session-Id: your-session-key
 ```
 
-OmniRoute také přijímá `x_session_id` a vrací platný klíč relace v `X-OmniRoute-Session-Id`.
+OmniRoute přijímá také `x_session_id` a vrací efektivní klíč relace v `X-OmniRoute-Session-Id`.
 
 Pokud používáte Nginx a odesíláte hlavičky s podtržítky, povolte:
 
@@ -855,9 +893,9 @@ Vzor: gpt-*               →  Cíl: gh/gpt-5.3-codex
 
 Zástupné znaky podporují `*` (libovolné znaky) a `?` (jeden znak).
 
-#### Řetězce záložních variant
+#### Řetězce záložních možností
 
-Definujte globální řetězce záložních variant, které se použijí pro všechny požadavky:
+Definujte globální řetězce záložních možností, které se použijí pro všechny požadavky:
 
 ```
 Řetězec: production-fallback
@@ -868,58 +906,117 @@ Definujte globální řetězce záložních variant, které se použijí pro vš
 
 ---
 
+### Běžné kombinace poskytovatelů a vzory směrování
+
+Zde jsou příklady vzorů pro kombinování více poskytovatelů a směrování mezi nimi v OmniRoute:
+
+#### 1. Kombinace pro programovacího agenta: Pokročilé uvažování se záložní variantou optimalizovanou na cenu/rychlost
+
+Ideální pro programovací agenty (OpenCode, Claude Code, Cursor, Cline). Požadavky zpočátku směruje na špičkové modely pro uvažování a při vyčerpání kvóty nebo výskytu chyb přechází na rychlé programovací modely.
+
+- **Řídicí panel**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
+- **Modely**:
+  1. `claude/claude-sonnet-4-6` (Primární programovací agent)
+  2. `openai/gpt-4o` (Sekundární záložní varianta s vysokou kapacitou)
+  3. `deepseek/deepseek-v4-flash` (Vysoce efektivní a cenově výhodná záložní varianta)
+
+```bash
+# Příklad prostřednictvím API
+curl -X POST http://localhost:20128/api/combos \
+  -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "agent-coding",
+    "strategy": "priority",
+    "models": [
+      { "model": "claude/claude-sonnet-4-6" },
+      { "model": "openai/gpt-4o" },
+      { "model": "deepseek/deepseek-v4-flash" }
+    ]
+  }'
+```
+
+#### 2. Kombinace s automatickým převzetím při selhání v bezplatném tarifu
+
+Řetězí více poskytovatelů s bezplatnými tarify nebo bez nutnosti klíče, aby maximalizovala dostupnost bez nákladů na API.
+
+- **Strategie**: `Least Used` nebo `Round Robin` (rozděluje zátěž mezi kvóty)
+- **Modely**:
+  1. `groq/llama-3.3-70b-versatile`
+  2. `gemini/gemini-2.5-flash`
+  3. `cerebras/gpt-oss-120b`
+
+```bash
+# Příklad prostřednictvím CLI
+omniroute combo create free-stack \
+  --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
+  --strategy round-robin
+```
+
+#### 3. Multimodální pipeline pro obraz a text
+
+Kombinuje specializované modely pro zpracování obrazu s vysokorychlostním generováním textu pro pracovní postupy zahrnující porozumění obrazu a generování kódu.
+
+- **Vzor**: Kombinace `Priority`, která uvádí nejprve modely podporující obraz a jako poslední model s vysokou propustností pro text a kód.
+- **Modely**:
+  1. `gemini/gemini-2.5-pro` (Pokročilé porozumění obrazu a multimodálním vstupům)
+  2. `openai/gpt-4o` (Vyvážené zpracování obrazu a používání nástrojů)
+  3. `deepseek/deepseek-v4-flash` (Generování textu a kódu)
+
+---
+
 ### Odolnost a jističe
 
-Nakonfigurujte prostřednictvím **Dashboard → Settings → Resilience**.
+Konfigurujte prostřednictvím **Dashboard → Settings → Resilience**.
 
 OmniRoute implementuje odolnost na úrovni poskytovatelů pomocí pěti komponent:
 
-1. **Fronta požadavků a řízení tempa** — Řízení toku požadavků na úrovni systému:
-   - **Požadavky za minutu (RPM)** — Maximální počet požadavků za minutu na účet
-   - **Minimální čas mezi požadavky** — Minimální interval mezi požadavky v milisekundách
-   - **Maximální počet souběžných požadavků** — Maximální počet současných požadavků na účet
+1. **Fronta požadavků a řízení tempa** — Řízení toku požadavků na systémové úrovni:
+   - **Požadavky za minutu (RPM)** — Maximální počet požadavků za minutu na jeden účet
+   - **Minimální čas mezi požadavky** — Minimální prodleva mezi požadavky v milisekundách
+   - **Maximální počet souběžných požadavků** — Maximální počet současných požadavků na jeden účet
 
-2. **Doba zklidnění připojení** — Konfigurace podle typu ověřování pro jedno připojení po opakovatelných selháních:
-   - **Základní doba zklidnění** — Výchozí interval zklidnění při opakovatelných selháních upstreamu
-   - **Používat doporučení upstreamu k opakování** — Respektuje autoritativní hlavičku `Retry-After` nebo doporučení k obnovení, jsou-li poskytnuta
-   - **Maximální počet kroků prodlevy** — Maximální úroveň exponenciální prodlevy při opakovaných selháních
+2. **Doba zklidnění připojení** — Konfigurace podle typu ověřování pro jednotlivé připojení po opakovatelných selháních:
+   - **Základní doba zklidnění** — Výchozí interval zklidnění pro opakovatelná selhání nadřazené služby
+   - **Používat doporučení nadřazené služby pro opakování** — Pokud jsou k dispozici autoritativní údaje `Retry-After` nebo informace o resetování, budou respektovány
+   - **Maximální počet kroků prodlevy** — Maximální úroveň exponenciálního prodlužování prodlevy při opakovaných selháních
 
 3. **Jistič poskytovatele** — Sleduje komplexní selhání poskytovatele, při dosažení nakonfigurované prahové hodnoty varování označí poskytovatele jako degradovaného a při dosažení nakonfigurované prahové hodnoty selhání jistič otevře:
    - **Prahová hodnota degradace** — Počet po sobě jdoucích selhání poskytovatele před přechodem do stavu `DEGRADED`
    - **Prahová hodnota selhání** — Počet po sobě jdoucích selhání poskytovatele před přechodem do stavu `OPEN`
-   - **Časový limit resetování** — Časový interval, po kterém je poskytovatel znovu otestován
-   - **CLOSED** (V pořádku) — Požadavky proudí normálně
-   - **DEGRADED** — Požadavky nadále proudí, zatímco se sleduje zvýšený počet selhání
+   - **Časový limit resetování** — Doba, po jejímž uplynutí bude poskytovatel znovu otestován
+   - **CLOSED** (V pořádku) — Požadavky jsou zpracovávány normálně
+   - **DEGRADED** — Požadavky jsou nadále zpracovávány a zároveň se sleduje zvýšený počet selhání
    - **OPEN** — Poskytovatel je po opakovaných selháních dočasně zablokován
-   - **HALF_OPEN** — Testuje se, zda se poskytovatel zotavil
+   - **HALF_OPEN** — Probíhá ověřování, zda se poskytovatel zotavil
 
-   Omezení rychlosti `429` vázaná na připojení zůstávají v režimu **Doba zklidnění připojení** a nezapočítávají se do jističe poskytovatele.
+   Omezení rychlosti `429` vztahující se ke konkrétnímu připojení zůstávají v režimu **Doba zklidnění připojení** a nezapočítávají se do jističe poskytovatele.
 
-   Běhový stav jističe poskytovatele se zobrazuje pouze na stránce **Dashboard → Health**.
+   Provozní stav jističe poskytovatele se zobrazuje pouze na stránce **Dashboard → Health**.
 
-4. **Čekání na skončení doby zklidnění** — Pokud jsou všechna kandidátní připojení již v režimu zklidnění, může OmniRoute počkat na nejbližší ukončení doby zklidnění a automaticky zopakovat stejný požadavek klienta.
+4. **Čekání na dobu zklidnění** — Pokud jsou všechna kandidátní připojení právě v režimu zklidnění, OmniRoute může počkat na skončení nejbližší doby zklidnění a automaticky zopakovat stejný požadavek klienta.
 
-5. **Automatická detekce omezení rychlosti** — Pokud upstream poskytovatelé vrátí explicitní intervaly čekání, mají tato doporučení při povoleném nastavení přednost před místní dobou zklidnění připojení.
+5. **Automatická detekce omezení rychlosti** — Když nadřazení poskytovatelé vrátí explicitní intervaly čekání, tyto údaje při povoleném nastavení přepíší místní dobu zklidnění připojení.
 
-**Profesionální tip:** Pomocí stránky **Health** můžete po výpadku zkontrolovat a resetovat aktivní jističe poskytovatelů. Stránka Resilience pouze mění konfiguraci.
+**Profesionální tip:** Pomocí stránky **Health** můžete po výpadku zkontrolovat a resetovat aktivní jističe poskytovatelů. Stránka Resilience slouží pouze ke změně konfigurace.
 
 ---
 
 ### Export/import databáze
 
-Zálohy databáze spravujte v **Dashboard → Settings → System & Storage**.
+Spravujte zálohy databáze v části **Dashboard → Settings → System & Storage**.
 
-| Akce                         | Popis                                                                                                                                                          |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Exportovat databázi**      | Stáhne aktuální databázi SQLite jako soubor `.sqlite`                                                                                                          |
-| **Exportovat vše (.tar.gz)** | Stáhne kompletní záložní archiv obsahující databázi, nastavení, kombinace, připojení poskytovatelů (bez přihlašovacích údajů) a metadata klíčů API             |
-| **Importovat databázi**      | Nahraje soubor `.sqlite`, který nahradí aktuální databázi. Pokud není nastaveno `DISABLE_SQLITE_AUTO_BACKUP=true`, automaticky se vytvoří záloha před importem |
+| Akce                         | Popis                                                                                                                                                           |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Exportovat databázi**      | Stáhne aktuální databázi SQLite jako soubor `.sqlite`                                                                                                           |
+| **Exportovat vše (.tar.gz)** | Stáhne úplný archiv zálohy obsahující databázi, nastavení, kombinace, připojení poskytovatelů (bez přihlašovacích údajů) a metadata klíčů API                   |
+| **Importovat databázi**      | Nahraje soubor `.sqlite`, kterým nahradí aktuální databázi. Pokud není nastaveno `DISABLE_SQLITE_AUTO_BACKUP=true`, automaticky se vytvoří záloha před importem |
 
 ```bash
 # API: Export databáze
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: Export všeho (kompletní archiv)
+# API: Export všeho (úplný archiv)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
 # API: Import databáze
@@ -927,7 +1024,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Ověření importu:** U importovaného souboru se kontroluje integrita (kontrola pomocí pragma SQLite), přítomnost požadovaných tabulek (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) a velikost (max. 100 MB).
+**Ověření importu:** U importovaného souboru se ověřuje integrita (kontrola pomocí příkazu pragma SQLite), přítomnost požadovaných tabulek (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) a velikost (max. 100 MB).
 
 **Případy použití:**
 
@@ -941,31 +1038,31 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Stránka nastavení je pro snadnou navigaci uspořádána do **7 karet**:
 
-| Karta           | Obsah                                                                                                                                                                                                           |
-| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Obecné**      | Nástroje systémového úložiště, výchozí chování, viditelnost tunelů koncových bodů                                                                                                                               |
-| **Vzhled**      | Ovládání motivu (světlý/tmavý/systémový), viditelnost postranního panelu, přepínače panelů pro karty tunelů Cloudflare/Tailscale/ngrok                                                                          |
-| **AI**          | Rozpočet na přemýšlení (předání beze změn / automatické odstranění / vlastní / adaptivní — viz [THINKING_BUDGET.md](./THINKING_BUDGET.md)), globální systémová výzva, statistiky mezipaměti výzev               |
-| **Zabezpečení** | Nastavení přihlášení a hesla, řízení přístupu podle IP, ověřování API pro `/models`, blokování poskytovatelů, ochrana proti vkládání škodlivých instrukcí do výzev                                              |
-| **Směrování**   | Globální strategie směrování (postupné zaplnění / kruhové střídání / P2C / náhodně / nejméně používané / optimalizace nákladů), aliasy modelů se zástupnými znaky, záložní řetězce, výchozí nastavení kombinací |
-| **Odolnost**    | Fronta požadavků, čekací doba připojení, konfigurace jističe poskytovatele a chování při čekání na skončení čekací doby                                                                                         |
-| **Pokročilé**   | Globální konfigurace proxy (HTTP/SOCKS5), přepsání nastavení proxy pro jednotlivé poskytovatele                                                                                                                 |
+| Karta           | Obsah                                                                                                                                                                                                    |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Obecné**      | Nástroje systémového úložiště, výchozí chování, viditelnost tunelů Endpoint                                                                                                                              |
+| **Vzhled**      | Ovládání motivu (světlý/tmavý/systémový), viditelnost postranního panelu, přepínače panelů pro karty tunelů Cloudflare/Tailscale/ngrok                                                                   |
+| **AI**          | Rozpočet na přemýšlení (předání beze změny / automatické odstranění / vlastní / adaptivní — viz [THINKING_BUDGET.md](./THINKING_BUDGET.md)), globální systémový prompt, statistiky mezipaměti promptů    |
+| **Zabezpečení** | Nastavení přihlášení/hesla, řízení přístupu podle IP, ověřování API pro `/models`, blokování poskytovatelů, ochrana před útoky typu prompt injection                                                     |
+| **Směrování**   | Globální strategie směrování (postupné naplnění / Round Robin / P2C / náhodně / nejméně používané / optimalizace nákladů), zástupné aliasy modelů, řetězce záložních řešení, výchozí nastavení kombinací |
+| **Odolnost**    | Fronta požadavků, čekací doba připojení, konfigurace jističe poskytovatele a chování při čekání na skončení čekací doby                                                                                  |
+| **Pokročilé**   | Globální konfigurace proxy (HTTP/SOCKS5), přepsání nastavení proxy pro jednotlivé poskytovatele                                                                                                          |
 
-Karta Obecné již neduplikuje poznámky pouze pro čtení týkající se protokolování a mezipaměti. Nastavení uchovávání a
+Karta Obecné již neduplikuje informační poznámky o protokolování a mezipaměti. Nastavení uchovávání a
 optimalizace databáze se ukládají prostřednictvím `/api/settings/database`; ruční vymazání mezipaměti používá
-`DELETE /api/cache`. Limity počtu řádků v tabulkách protokolů požadavků a proxy jsou řízeny proměnnými
+`DELETE /api/cache`. Limity počtu řádků protokolů požadavků a proxy jsou řízeny proměnnými
 `CALL_LOGS_TABLE_MAX_ROWS` a `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
 ### Správa nákladů a rozpočtů
 
-Přístup přes **Ovládací panel → Náklady**.
+Přístup přes **Řídicí panel → Náklady**.
 
 | Karta        | Účel                                                                                                                |
 | ------------ | ------------------------------------------------------------------------------------------------------------------- |
 | **Rozpočet** | Nastavení limitů výdajů pro jednotlivé klíče API s denními/týdenními/měsíčními rozpočty a sledováním v reálném čase |
-| **Ceny**     | Zobrazení a úprava položek cen modelů — náklady na 1 000 vstupních/výstupních tokenů pro jednotlivé poskytovatele   |
+| **Ceny**     | Zobrazení a úprava cenových položek modelů — cena za 1 000 vstupních/výstupních tokenů podle poskytovatele          |
 
 ```bash
 # API: Nastavení rozpočtu
@@ -977,7 +1074,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Sledování nákladů:** Každý požadavek zaznamenává využití tokenů a vypočítává náklady pomocí tabulky cen. Rozpisy podle poskytovatele, modelu a klíče API zobrazíte v části **Ovládací panel → Využití**.
+**Sledování nákladů:** Každý požadavek zaznamenává využití tokenů a vypočítává náklady pomocí cenové tabulky. Rozpisy podle poskytovatele, modelu a klíče API zobrazíte v části **Řídicí panel → Využití**.
 
 ---
 
@@ -1000,7 +1097,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 `deepgram/nova-3` je nativní trasa Deepgram a vyžaduje klíč API služby Deepgram.
 Pokud je nakonfigurován pouze OpenRouter, použijte `openrouter/deepgram/nova-3`.
 
-Poskytovatelé funkce **převodu řeči na text (přepisu)**:
+Poskytovatelé **převodu řeči na text (přepisu)**:
 
 - `openai/` (kompatibilní s Whisper)
 - `groq/` (Groq Whisper Turbo)
@@ -1010,7 +1107,7 @@ Poskytovatelé funkce **převodu řeči na text (přepisu)**:
 - `huggingface/` (varianty Whisper)
 - `qwen/`
 
-Poskytovatelé funkce **převodu textu na řeč (`POST /v1/audio/speech`)**:
+Poskytovatelé **převodu textu na řeč (`POST /v1/audio/speech`)**:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1033,50 +1130,50 @@ Podporované zvukové formáty pro přepis: `mp3`, `wav`, `m4a`, `flac`, `ogg`, 
 
 ### Strategie vyvažování kombinací
 
-Vyvažování jednotlivých kombinací nakonfigurujete v části **Ovládací panel → Kombinace → Vytvořit/Upravit → Strategie**.
+Vyvažování jednotlivých kombinací nakonfigurujte v části **Řídicí panel → Kombinace → Vytvořit/Upravit → Strategie**.
 
-| Strategie                 | Popis                                                                               |
-| ------------------------- | ----------------------------------------------------------------------------------- |
-| **Round-Robin**           | Postupně cyklicky střídá modely                                                     |
-| **Prioritní**             | Vždy nejprve zkouší první model; k záložnímu přejde pouze při chybě                 |
-| **Náhodná**               | Pro každý požadavek vybere náhodný model z kombinace                                |
-| **Vážená**                | Směruje proporcionálně podle vah přiřazených jednotlivým modelům                    |
-| **Nejméně používaná**     | Směruje na model s nejmenším počtem nedávných požadavků (využívá metriky kombinace) |
-| **Optimalizovaná cenově** | Směruje na nejlevnější dostupný model (využívá tabulku cen)                         |
+| Strategie                | Popis                                                                               |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| **Round-Robin**          | Postupně střídá modely                                                              |
+| **Priorita**             | Vždy nejprve zkusí první model; na záložní přejde pouze při chybě                   |
+| **Náhodně**              | Pro každý požadavek vybere z kombinace náhodný model                                |
+| **Váženě**               | Směruje poměrně podle vah přiřazených jednotlivým modelům                           |
+| **Nejméně používané**    | Směruje na model s nejmenším počtem nedávných požadavků (používá metriky kombinace) |
+| **Optimalizace nákladů** | Směruje na nejlevnější dostupný model (používá cenovou tabulku)                     |
 
-Globální výchozí nastavení kombinací lze nastavit v části **Dashboard → Settings → Routing → Combo Defaults**.
-Časové limity cílů kombinace ve výchozím nastavení přebírají aktuální časový limit požadavku. Nastavení **Target timeout
-(seconds)** ve výchozím nastavení kombinací nebo u jednotlivé kombinace použijte pouze v případě, že má kratší limit pro jednotlivé cíle
-aktivovat rychlejší přechod na záložní cíl.
+Globální výchozí nastavení kombinací lze nastavit v části **Řídicí panel → Nastavení → Směrování → Výchozí nastavení kombinací**.
+Časové limity cílů kombinace ve výchozím nastavení dědí aktuální časový limit požadavku. Možnost **Časový limit cíle
+(sekundy)** ve výchozím nastavení kombinací nebo u jednotlivé kombinace použijte pouze tehdy, pokud má kratší limit pro daný cíl
+spustit rychlejší přechod na záložní řešení.
 
-Optimalizace kombinací pro nulovou latenci jsou volitelné. Ponechte možnost **Zero-latency optimizations** vypnutou, aby
-tyto funkce pro snížení latence nesoutěžily se záložními cíli, nepřeskakovaly cíle na základě historie TTFT
-ani nekomprimovaly záložní požadavky; jejím zapnutím umožníte nakonfigurované souběžné záložní požadavky, prediktivní
-přeskakování podle TTFT a proaktivní kompresi záložních požadavků, které vyměňují věrnost směrování/požadavků za nižší
-latenci na konci distribuce.
+Optimalizace kombinací pro nulovou latenci jsou volitelné. Ponechte možnost **Optimalizace pro nulovou latenci** vypnutou,
+aby tyto funkce latence nesoutěžily se záložními cíli, nepřeskakovaly cíle na základě historie TTFT
+ani nekomprimovaly záložní požadavky; její zapnutí umožní nakonfigurované souběžné záložní požadavky, prediktivní přeskakování podle TTFT
+a proaktivní kompresi záložních požadavků výměnou za nižší přesnost směrování/požadavků ve prospěch nižší
+koncové latence.
 
-Možnost **Reasoning token buffer** vypněte, pokud poskytovatelé na upstreamu vyžadují striktní
-limity `max_tokens` / `maxOutputTokens`. Je-li tato možnost zapnutá, směrování kombinací přidává prostor pro modely
-s uvažováním pouze u modelů se známým limitem výstupu a ponechá klientský limit tokenů beze změny, pokud by
+Vypněte **vyrovnávací paměť tokenů pro uvažování**, pokud nadřazení poskytovatelé vyžadují striktní
+limity `max_tokens` / `maxOutputTokens`. Je-li tato možnost povolena, kombinované směrování přidává rezervu pro modely uvažování
+pouze u modelů se známým limitem výstupu a ponechává klientský limit tokenů beze změny, pokud by
 bezpečná hodnota s rezervou tento limit překročila. Pokud je klientský limit již vyšší než známý limit,
-OmniRoute jej před odesláním požadavku na upstream sníží na tento limit.
+OmniRoute jej před odesláním požadavku nadřazenému poskytovateli sníží na tento limit.
 
 ---
 
 ### Přehled stavu
 
-Přístup přes **Dashboard → Health**. Přehled stavu systému v reálném čase se 6 kartami:
+Přístup přes **Řídicí panel → Stav**. Přehled stavu systému v reálném čase se 6 kartami:
 
-| Karta                  | Co zobrazuje                                                               |
-| ---------------------- | -------------------------------------------------------------------------- |
-| **Stav systému**       | Doba provozu, verze, využití paměti, datový adresář                        |
-| **Stav poskytovatelů** | Globální běhový stav jističe poskytovatelů                                 |
-| **Limity rychlosti**   | Aktivní intervaly čekání připojení pro jednotlivé účty se zbývajícím časem |
-| **Aktivní blokace**    | Aktivní blokace omezené na konkrétní model a dočasná vyloučení             |
-| **Mezipaměť podpisů**  | Statistiky mezipaměti deduplikace (aktivní klíče, míra zásahů)             |
-| **Telemetrie latence** | Agregace latence p50/p95/p99 pro jednotlivé poskytovatele                  |
+| Karta                  | Co zobrazuje                                                          |
+| ---------------------- | --------------------------------------------------------------------- |
+| **Stav systému**       | Doba provozu, verze, využití paměti, datový adresář                   |
+| **Stav poskytovatelů** | Globální běhový stav jističe poskytovatelů                            |
+| **Limity požadavků**   | Aktivní čekací doby připojení pro jednotlivé účty se zbývajícím časem |
+| **Aktivní blokace**    | Aktivní blokace vázané na model a dočasná vyloučení                   |
+| **Mezipaměť signatur** | Statistiky deduplikační mezipaměti (aktivní klíče, míra zásahů)       |
+| **Telemetrie latence** | Agregace latence p50/p95/p99 pro jednotlivé poskytovatele             |
 
-**Tip pro profesionály:** Stránka Health se automaticky obnovuje každých 10 sekund. Pomocí karty jističe zjistíte, u kterých poskytovatelů dochází k problémům.
+**Tip pro profesionály:** Stránka Stav se automaticky obnovuje každých 10 sekund. Pomocí karty jističe zjistíte, kteří poskytovatelé mají potíže.
 
 ---
 

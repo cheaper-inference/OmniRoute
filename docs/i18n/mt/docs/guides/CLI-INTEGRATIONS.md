@@ -4,11 +4,33 @@
 
 ---
 
-OmniRoute jinkludi familja ta' kmandi `setup-*` li jikkonfiguraw CLI tal-kodifikazzjoni (Codex, Claude Code, OpenCode, Cline, …) biex tuża OmniRoute bħala l-backend tagħha — hekk l-għodda titkellem ma' endpoint **wieħed** u OmniRoute jidderieġi lejn il-fornitur it-tajjeb b'auto-fallback. Kull kmand jaqra l-katalogu tal-mudelli **ħaj** minn OmniRoute li qed jaħdem (lokali jew remot) u jikteb il-fajl tal-konfigurazzjoni tal-għodda stess fuq il-magna **tiegħek**. Iċ-ċavetta tal-API hija referenzjata minn varjabbli tal-ambjent kull fejn l-għodda tappoġġjaha. Kmandi li jippersistu fajl tal-ambjent lokali għall-għodda huma nnotati hawn taħt.
+Għall-manifest tal-eżegwibbli kondiviż, l-ambjenti subordinati ristretti u
+l-konfigurazzjoni persistenti ta’ Gemini, ara [Il-kuntratti tat-tnedija tas-CLI](./CLI-LAUNCH-CONTRACTS.md).
 
-Hemm ukoll launcher ġeneriku — `omniroute run <target>` — li jniedi `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` jew `gemini` bl-ambjent it-tajjeb injettat, mingħajr ma jikteb l-ebda konfigurazzjoni. Il-miri u l-alias tagħhom jiġu mill-manifest kanoniku `bin/cli/cli-manifest.mjs` (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`), u `omniroute completion` joffri l-istess kliem mira derivati mill-manifest. Il-launchers legati għal kull għodda — `omniroute launch` (Claude Code) u `omniroute launch-codex` (Codex) — jibqgħu disponibbli.
+OmniRoute jinkludi familja ta’ kmandi `setup-*` li jikkonfiguraw CLI
+għall-ipprogrammar (Codex, Claude Code, OpenCode, Cline, …) biex juża lil OmniRoute
+bħala l-backend tiegħu — sabiex l-għodda tikkomunika ma’ endpoint **wieħed** u
+OmniRoute jidderieġiha lejn il-fornitur it-tajjeb bi bdil awtomatiku f’każ ta’
+ħsara. Kull kmand jaqra l-katalgu **attiv** tal-mudelli minn OmniRoute li jkun
+qed jaħdem (lokalment jew mill-bogħod) u jikteb il-fajl tal-konfigurazzjoni
+tal-għodda fuq il-magna **tiegħek**. Iċ-ċavetta tal-API tiġi referenzjata permezz
+ta’ varjabbli tal-ambjent kull fejn l-għodda tappoġġjah. Il-kmandi li jippersistu
+fajl tal-ambjent lokali għall-għodda huma indikati hawn taħt.
 
-L-onboarding tal-fornitur huwa disponibbli mill-istess kuntest lokali/remot. Il-kmandi API-first hawn taħt iżommu l-awtentikazzjoni tal-ġestjoni separata mill-kredenzjali tal-fornitur u qatt ma jistampaw kredenzjali f'output strutturat:
+Hemm ukoll lanċjatur ġeneriku — `omniroute run <target>` — li jniedi
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` jew `gemini`
+bl-ambjent it-tajjeb injettat, mingħajr ma jikteb ebda konfigurazzjoni. Il-miri
+u l-aliases tagħhom jiġu mill-manifest kanoniku `bin/cli/cli-manifest.mjs`
+(`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
+`open-code`, `qwen-code`, `gemini-cli`), u `omniroute completion` joffri
+l-istess kliem tal-miri derivat mill-manifest. Il-lanċjaturi preċedenti għal kull
+għodda — `omniroute launch` (Claude Code) u `omniroute launch-codex` (Codex) —
+għadhom disponibbli.
+
+L-inkorporazzjoni tal-fornituri hija disponibbli mill-istess kuntest lokali jew
+remot. Il-kmandi li ġejjin, imfassla primarjament għall-API, iżommu
+l-awtentikazzjoni tal-ġestjoni separata mill-kredenzjali tal-fornitur u qatt ma
+jistampaw kredenzjali f’output strutturat:
 
 ```bash
 omniroute providers add glm --credential-env GLM_API_KEY --name work
@@ -18,108 +40,120 @@ omniroute providers edit <connection-id> --default-model glm/glm-5.2
 omniroute providers remove <connection-id> --yes
 ```
 
-Għall-iskripts, ippreferi `--credential-stdin` jew `--credential-env`; `--credential` jinżamm għal użu lokali kkontrollat. `providers remove` jeħtieġ `--yes` fuq terminal mhux interattiv, u l-ħames kmandi kollha jirrispettaw il-kuntest attiv jew l-għażliet globali `--base-url`/`--api-key`.
+Għall-iskripts, ippreferi `--credential-stdin` jew `--credential-env`;
+`--credential` jinżamm għal użu lokali kkontrollat. `providers remove` jeħtieġ
+`--yes` fuq terminal mhux interattiv, u l-ħames kmandi kollha jirrispettaw
+il-kuntest attiv jew l-għażliet globali `--base-url`/`--api-key`.
 
-Is-seletturi tal-fornituri jirrifjutaw prefissi tal-ID ambigwi, ismijiet jew ismijiet tal-fornituri; uża ID ta' konnessjoni sħiħa meta jaqblu diversi konnessjonijiet. Il-kmandi tal-ħolqien u l-editjar jaqraw il-konnessjoni ssejvjata lura, u t-tneħħija tivverifika li ma tistax tinqara aktar. Importazzjoni taqbeż par fornitur/isem eżistenti. Entrati importati ma jistgħux jissuperaw l-endpoint tal-ġestjoni, il-kuntest jew il-kredenzjali tal-ġestjoni fornuti lill-CLI.
+Is-seletturi tal-fornituri jirrifjutaw prefissi tal-ID, ismijiet jew ismijiet
+tal-fornituri li jkunu ambigwi; uża ID sħiħ tal-konnessjoni meta jkun hemm diversi
+konnessjonijiet li jaqblu. Il-kmandi għall-ħolqien u l-editjar jerġgħu jaqraw
+il-konnessjoni ssejvjata, u t-tneħħija tivverifika li din ma tkunx għadha
+tista’ tinqara. Importazzjoni taqbeż par eżistenti ta’ fornitur/isem.
+L-entrati importati ma jistgħux jissostitwixxu l-endpoint tal-ġestjoni,
+il-kuntest jew il-kredenzjali tal-ġestjoni mogħtija lis-CLI.
 
-Għall-konfigurazzjoni bażika ta' darba, miktuba bl-idejn, tal-aktar żewġ integrazzjonijiet sinjuri, ara l-approfondimenti għal kull għodda:
+Għall-konfigurazzjoni bażika ta’ darba, miktuba bl-idejn, taż-żewġ
+integrazzjonijiet bl-aktar funzjonalità, ara l-gwidi dettaljati għal kull għodda:
 
-- [Konfigurazzjoni ta' Claude Code](./CLAUDE-CODE-CONFIGURATION.md)
-- [Konfigurazzjoni ta' Codex CLI](./CODEX-CLI-CONFIGURATION.md)
-- [Modalità Remota](./REMOTE-MODE.md) — issuq OmniRoute remot (VPS / Tailnet) mil-laptop tiegħek
-- [VS Code Copilot Chat](./VSCODE-COPILOT.md) — l-estensjoni OmniCopilot; tista' wkoll tmexxi dawn il-kmandi `setup-*` għalik minn ġewwa l-editur
+- [Konfigurazzjoni ta’ Claude Code](./CLAUDE-CODE-CONFIGURATION.md)
+- [Konfigurazzjoni ta’ Codex CLI](./CODEX-CLI-CONFIGURATION.md)
+- [Modalità Remota](./REMOTE-MODE.md) — ikkontrolla OmniRoute remot (VPS / Tailnet) mil-laptop tiegħek
+- [VS Code Copilot Chat](./VSCODE-COPILOT.md) — l-estensjoni OmniCopilot; tista’ wkoll tħaddem dawn
+  il-kmandi `setup-*` għalik minn ġewwa l-editur
 
 ---
 
 ## Tabella ewlenija
 
-Kull kmand jirrispetta l-**kuntest attiv** (issettjat b’`omniroute connect`, ara
+Kull kmand jirrispetta l-**kuntest attiv** (issettjat permezz ta’ `omniroute connect`, ara
 [Modalità Remota](./REMOTE-MODE.md)) jew il-parametri espliċiti `--remote <url> --api-key <key>`.
-“Lokali kontra remot” hawn taħt tfisser: mingħajr parametri, jimmira lejn `http://localhost:20128`;
-b’`--remote` (jew kuntest remot attiv), jikseb il-katalgu minn dak
+“Lokali kontra remot” hawn taħt ifisser: mingħajr parametri, jimmira lejn `http://localhost:20128`;
+b’`--remote` (jew b’kuntest remot attiv), jikseb il-katalgu minn dak
 is-server u jikteb il-konfigurazzjoni lokalment.
 
-| Kmand                      | Għodda                                | X'jikteb                                                                                                                                                                                              | Parametri ewlenin                                                                                                                          | Lokali jew remot |
-| -------------------------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- |
-| `omniroute setup-codex`    | OpenAI Codex CLI                      | `~/.codex/<name>.config.toml` — profil wieħed għal kull mudell tat-test kompatibbli (`codex --profile <name>`)                                                                                        | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | It-tnejn         |
-| `omniroute setup-claude`   | Claude Code                           | `~/.claude/profiles/<name>/settings.json` — profil wieħed għal kull mudell imqabbel (`CLAUDE_CONFIG_DIR`)                                                                                             | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | It-tnejn         |
-| `omniroute setup-opencode` | OpenCode (kompatibbli ma' OpenAI)     | `~/.config/opencode/opencode.json` — fornitur `omniroute` b'kull mudell fil-katalgu (`opencode -m omniroute/<model>`)                                                                                 | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | It-tnejn         |
-| `omniroute setup-cline`    | Cline                                 | `~/.cline/data/{globalState,secrets}.json` (modalità CLI) + jistampa s-settings tal-estensjoni ta' VS Code                                                                                            | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | It-tnejn         |
-| `omniroute setup-kilo`     | Kilo Code                             | `~/.local/share/kilo/auth.json` (CLI) + jgħaqqad `kilocode.*` ma' `settings.json` ta' VS Code jekk ikun preżenti                                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | It-tnejn         |
-| `omniroute setup-continue` | Continue / `cn` CLI                   | `~/.continue/config.yaml` — mudelli `provider: openai`, biċ-ċavetta permezz ta' `${{ secrets.OMNIROUTE_API_KEY }}`                                                                                    | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | It-tnejn         |
-| `omniroute setup-cursor`   | Cursor                                | Xejn — jistampa l-passi li għandhom isiru fl-app (il-konfigurazzjoni ta' Cursor hija SQLite opaka)                                                                                                    | `--remote` `--api-key` `--only` `--port`                                                                                                   | It-tnejn         |
-| `omniroute setup-roo`      | Roo Code                              | `~/.omniroute/roo-settings.json` (dokument għall-importazzjoni) + jistabbilixxi `roo-cline.autoImportSettingsPath` jekk jeżisti `settings.json` ta' VS Code                                           | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | It-tnejn         |
-| `omniroute setup-crush`    | Crush                                 | `~/.config/crush/crush.json` — fornitur `openai-compat`, biċ-ċavetta permezz ta' `$OMNIROUTE_API_KEY`                                                                                                 | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | It-tnejn         |
-| `omniroute setup-goose`    | Goose                                 | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + jistampa riċetta għall-varjabbli tal-ambjent                                                                           | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | It-tnejn         |
-| `omniroute setup-aider`    | Aider                                 | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + jistampa riċetta għall-varjabbli tal-ambjent                                                                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | It-tnejn         |
-| `omniroute setup-qwen`     | Qwen Code                             | `~/.qwen/settings.json` — array V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` f'`~/.qwen/.env`                                                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | It-tnejn         |
-| `omniroute setup-5dive`    | 5dive (flotta ta' aġenti)             | Xejn taħt `$HOME` — jikteb **profil tal-awtentikazzjoni** ta' 5dive (`/var/lib/5dive/auth-profiles/<name>/`) permezz ta' `5dive agent auth set`; għall-utent root biss, jaħdem fuq il-host tal-flotta | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | It-tnejn         |
-| `omniroute run <target>`   | Tnedija waqt l-eżekuzzjoni (ġenerika) | Xejn — iniedi `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` bl-ambjent u l-argumenti t-tajba; Qwen u Gemini jużaw home temporanju u iżolat                                              | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | It-tnejn         |
-| `omniroute launch`         | Claude Code                           | Xejn — iniedi `claude` b'`ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` injettati                                                                                                                        | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | It-tnejn         |
-| `omniroute launch-codex`   | OpenAI Codex CLI                      | Xejn — iniedi `codex` bil-fornitur `omniroute` injettat permezz tal-parametri `-c`                                                                                                                    | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | It-tnejn         |
+| Kmand                      | Għodda                                | X'jikteb                                                                                                                                                                                                 | Flags ewlenin                                                                                                                              | Lokali jew remot |
+| -------------------------- | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- |
+| `omniroute setup-codex`    | OpenAI Codex CLI                      | `~/.codex/<name>.config.toml` — profil wieħed għal kull mudell tat-test kompatibbli (`codex --profile <name>`)                                                                                           | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | It-tnejn         |
+| `omniroute setup-claude`   | Claude Code                           | `~/.claude/profiles/<name>/settings.json` — profil wieħed għal kull mudell li jaqbel (`CLAUDE_CONFIG_DIR`)                                                                                               | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | It-tnejn         |
+| `omniroute setup-opencode` | OpenCode (kompatibbli ma' OpenAI)     | `~/.config/opencode/opencode.json` — fornitur `omniroute` b'kull mudell fil-katalgu (`opencode -m omniroute/<model>`)                                                                                    | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | It-tnejn         |
+| `omniroute setup-cline`    | Cline                                 | `~/.cline/data/{globalState,secrets}.json` (modalità CLI) + jistampa s-settings tal-estensjoni ta' VS Code                                                                                               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | It-tnejn         |
+| `omniroute setup-kilo`     | Kilo Code                             | `~/.local/share/kilo/auth.json` (CLI) + jinkorpora `kilocode.*` f'`settings.json` ta' VS Code jekk ikun preżenti                                                                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | It-tnejn         |
+| `omniroute setup-continue` | Continue / `cn` CLI                   | `~/.continue/config.yaml` — mudelli `provider: openai`, biċ-ċavetta permezz ta' `${{ secrets.OMNIROUTE_API_KEY }}`                                                                                       | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | It-tnejn         |
+| `omniroute setup-cursor`   | Cursor                                | Xejn — jistampa l-passi li għandhom isiru fl-app (il-konfigurazzjoni ta' Cursor hija SQLite opaka)                                                                                                       | `--remote` `--api-key` `--only` `--port`                                                                                                   | It-tnejn         |
+| `omniroute setup-roo`      | Roo Code                              | `~/.omniroute/roo-settings.json` (dokument għall-importazzjoni) + jistabbilixxi `roo-cline.autoImportSettingsPath` jekk jeżisti `settings.json` ta' VS Code                                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | It-tnejn         |
+| `omniroute setup-crush`    | Crush                                 | `~/.config/crush/crush.json` — fornitur `openai-compat`, biċ-ċavetta permezz ta' `$OMNIROUTE_API_KEY`                                                                                                    | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | It-tnejn         |
+| `omniroute setup-zed`      | Zed                                   | `~/.config/zed/settings.json` — fornitur `openai_compatible.omniroute` (≤ 25 mudell li jappoġġjaw l-għodod), biċ-ċavetta permezz ta' `$OMNIROUTE_API_KEY`                                                | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | It-tnejn         |
+| `omniroute setup-goose`    | Goose                                 | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + jistampa r-riċetta għall-varjabbli tal-ambjent                                                                            | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | It-tnejn         |
+| `omniroute setup-aider`    | Aider                                 | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + jistampa r-riċetta għall-varjabbli tal-ambjent                                                                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | It-tnejn         |
+| `omniroute setup-qwen`     | Qwen Code                             | `~/.qwen/settings.json` — matriċi V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` f'`~/.qwen/.env`                                                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | It-tnejn         |
+| `omniroute setup-5dive`    | 5dive (flotta ta’ aġenti)             | Xejn taħt `$HOME` — jikteb **profil ta’ awtentikazzjoni** ta’ 5dive (`/var/lib/5dive/auth-profiles/<name>/`) permezz ta’ `5dive agent auth set`; għall-utent root biss, jitħaddem fuq il-host tal-flotta | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | It-tnejn         |
+| `omniroute run <target>`   | Tnedija waqt l-eżekuzzjoni (ġenerika) | Xejn — iniedi `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` bl-env u l-argumenti t-tajbin; Qwen u Gemini jużaw home temporanju u iżolat                                                    | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | It-tnejn         |
+| `omniroute launch`         | Claude Code                           | Xejn — iniedi `claude` b’`ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` injettati                                                                                                                           | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | It-tnejn         |
+| `omniroute launch-codex`   | OpenAI Codex CLI                      | Xejn — iniedi `codex` bil-fornitur `omniroute` injettat permezz tal-flags `-c`                                                                                                                           | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | It-tnejn         |
 
 Noti dwar il-flags (ivverifikati fis-sors tal-kmand):
 
-- `--remote <url>` — iġib il-katalgu minn OmniRoute remot (jieħu post `--port`
+- `--remote <url>` — iġib il-katalgu minn OmniRoute remot (jieħu preċedenza fuq `--port`
   u l-kuntest attiv). `--api-key <key>` jipprovdi l-kredenzjali għal dak
-  is-server (b’mod awtomatiku juża l-varjabbli tal-ambjent `OMNIROUTE_API_KEY`, jew it-token tal-kuntest attiv).
+  is-server (b’mod awtomatiku juża l-varjabbli env `OMNIROUTE_API_KEY`, jew it-token tal-kuntest attiv).
 - `--only <patterns>` — sottostrings separati b’virgoli; iżomm biss l-IDs tal-mudelli li jaqblu
   (eż. `--only glm,kimi`). Disponibbli fuq `setup-codex`, `setup-claude`,
-  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`.
-- `--dry-run` — jistampa eżattament dak li kien jinkiteb mingħajr ma jmiss
-  is-sistema tal-fajls. Disponibbli fuq kull kmand `setup-*` **ħlief** `setup-cursor`
+  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed`.
+- `--dry-run` — jistampa eżattament dak li kien jinkiteb mingħajr ma jmiss is-
+  sistema tal-fajls. Disponibbli fuq kull kmand `setup-*` **ħlief** `setup-cursor`
   (li qatt ma jikteb fajl).
 - `--model <id>` — meħtieġ (jew jintgħażel b’mod interattiv) għall-għodod li m’għandhomx
-  skoperta awtomatika tal-mudell: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Dawk l-għodod
+  skoperta awtomatika tal-mudelli: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Dawn l-għodod
   jaċċettaw ukoll `--yes` għal eżekuzzjonijiet mhux interattivi (li mbagħad jeħtieġu `--model`).
-  `setup-opencode` juża `--model` biex jistabbilixxi l-mudell predefinit tal-ogħla livell.
-- `--model <id>` fuq `omniroute run` isegwi l-konnessjonijiet għal kull mira tal-manifest
+  `setup-opencode` jieħu `--model` biex jistabbilixxi l-mudell predefinit tal-ogħla livell.
+- `--model <id>` fuq `omniroute run` isegwi l-konnessjonijiet għal kull target fil-manifest
   (`bin/cli/cli-manifest.mjs`): **aider** jirċievi `--model openai/<id>` u
   **opencode** `--model omniroute/<id>` (il-prefiss jiżdied biss meta l-id
-  ma jkunx diġà fih); **qwen** u **gemini** jirċievu l-id eżatt kif inhu;
+  ma jkunx diġà fih); **qwen** u **gemini** jirċievu l-id kelma b’kelma;
   **claude** jirċevih permezz ta’ `ANTHROPIC_MODEL`, **goose** permezz ta’ `GOOSE_MODEL`, u
-  **codex** permezz tal-argumenti `-c model_providers.omniroute.*`. **Qwen huwa l-unika mira ta’
-  eżekuzzjoni li teħtieġ b’mod strett `--model`** — `omniroute run qwen` mingħajru joħroġ
-  bil-kodiċi `2` u bi żball espliċitu.
-- `--port <port>` — il-port lokali ta’ OmniRoute (b’mod awtomatiku `20128`, jiġi injorat meta jkun issettjat `--remote`).
-  Preżenti fuq il-kmandi `setup-*` kollha u ż-żewġ lanċjaturi.
-- Kodiċijiet tal-ħruġ ta’ `omniroute run`: il-kodiċi tal-ħruġ proprju tas-CLI wild jiġi propagat
-  eżatt kif inhu; `2` = argumenti invalidi (mira mhux appoġġjata, `--model` meħtieġ
-  nieqes, protezzjoni tal-kontejner); `127` = il-binarju tal-mira mhuwiex f’`PATH`;
-  `130`/`143`/`129` meta t-tnedija tintemm permezz ta’ `SIGINT`/`SIGTERM`/`SIGHUP`;
-  `1` = falliment ieħor waqt it-tnedija fl-eżekuzzjoni.
-- Iż-żewġ lanċjaturi (`launch`, `launch-codex`) jaċċettaw `--profile <name>` biex jagħżlu
+  **codex** permezz tal-argumenti `-c model_providers.omniroute.*`. **Qwen huwa l-uniku target ta’ run
+  li jirrikjedi b’mod strett `--model`** — `omniroute run qwen` mingħajru joħroġ
+  b’`2` u żball espliċitu.
+- `--port <port>` — il-port lokali ta’ OmniRoute (predefinit `20128`, jiġi injorat meta jkun issettjat
+  `--remote`). Preżenti fuq il-kmandi `setup-*` kollha u ż-żewġ launchers.
+- Kodiċijiet tal-ħruġ ta’ `omniroute run`: il-kodiċi tal-ħruġ proprju tas-CLI child jiġi propagat
+  kelma b’kelma; `2` = argumenti invalidi (target mhux appoġġjat, `--model` meħtieġ
+  iżda nieqes, protezzjoni tal-container); `127` = il-binarju tat-target mhuwiex f’`PATH`;
+  `130`/`143`/`129` meta t-tnedija tintemm minn `SIGINT`/`SIGTERM`/`SIGHUP`;
+  `1` = falliment ieħor tat-tnedija waqt l-eżekuzzjoni.
+- Iż-żewġ launchers (`launch`, `launch-codex`) jaċċettaw `--profile <name>` biex jagħżlu
   profil miktub minn `setup-claude` / `setup-codex`, flimkien ma’ argumenti mgħoddija direttament
   lill-binarju sottostanti `claude` / `codex`.
 
-Is-selettur interattiv huwa kondiviż ukoll mir-riċetti tal-konfigurazzjoni:
+Il-picker interattiv huwa wkoll kondiviż mir-riċetti tas-setup:
 
 ```bash
-# Agħżel mill-katalgu attiv lokali jew remot tal-mudelli u kkonfigura l-mira.
+# Agħżel mill-katalgu attiv lokali jew remot tal-mudelli u kkonfigura t-target.
 omniroute configure claude
 omniroute configure opencode --provider glm
 omniroute configure qwen --model qwen/qwen3.8-max-preview --yes
 ```
 
-Bħalissa, `configure` jiddelega lir-riċetti ttestjati għal `codex`, `claude`,
+`configure` bħalissa jiddelega lir-riċetti ttestjati għal `codex`, `claude`,
 `opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo`, u `5dive`.
 L-entrati tal-katalgu li huma biss għall-IDE,
-MITM, u dawk li huma biss gwidi jibqgħu flussi espliċiti `setup-*`/manwali u
-ma jiġux ippreżentati bħala miri li jistgħu jitnedew.
+MITM, u dawk li jipprovdu gwida biss jibqgħu flussi espliċiti `setup-*`/manwali u
+ma jiġux ippreżentati bħala targets li jistgħu jitnedew.
 
-> `setup-opencode` hija l-integrazzjoni **ħafifa kompatibbli ma’ openai** ta’ OpenCode.
-> Hemm ukoll integrazzjoni aktar rikka permezz ta’ plugin — `omniroute setup opencode` — li
+> `setup-opencode` hija l-integrazzjoni **ħafifa u kompatibbli ma’ openai** ta’ OpenCode.
+> Hemm ukoll integrazzjoni b’plugin aktar rikka — `omniroute setup opencode` — li
 > tinstalla `@omniroute/opencode-plugin`. Dawn huma kmandi differenti; it-tabella
 > ta’ hawn fuq tiddokumenta `setup-opencode`.
 >
-> Il-plugin jiġi f’żewġ pakketti, wieħed għal kull verżjoni ewlenija ta’ OpenCode, minħabba li ż-żewġ
+> Il-plugin jiġi f’żewġ pakketti, wieħed għal kull verżjoni ewlenija ta’ OpenCode, għax iż-żewġ
 > loaders jistennew entrypoints differenti:
 > `@omniroute/opencode-plugin` għal OpenCode v1 u
 > `@omniroute/opencode-plugin-v2` għal OpenCode v2. Il-pakkett v2 huwa ġdid
-> (`0.1.0`) u jsegwi kuntratt tal-host li għadu qed jinbidel, għalhekk jaqra
-> l-istruttura li OpenCode idaħħal fl-abbozz tal-katalgu minflok ma jassumi waħda. Installah
+> (`0.1.0`) u jsegwi kuntratt tal-host li għadu qed jinbidel, għalhekk jaqra l-
+> forma li OpenCode jdaħħal fl-abbozz tal-katalgu minflok ma jassumi waħda. Installah
 > billi żżid entrata `plugins` ma’ `opencode.json`; `omniroute setup opencode`
-> xorta jinstalla l-pakkett v1. L-għażliet u l-ordni tat-tiftix tal-kredenzjali jinsabu
+> xorta jinstalla l-pakkett v1. L-għażliet u l-ordni tat-tfittxija tal-kredenzjali jinsabu
 > fir-README tal-pakkett.
 
 ---
@@ -235,21 +269,24 @@ Il-profil imur lejn kombinazzjoni **OmniRoute** minflok mudell wieħed biss li j
 
 ---
 
-## Konvenzjonijiet tal-URL bażiċi (liema għodod jitolbu `/v1`)
+## Konvenzjonijiet tal-Base URL (liema għodod jeħtieġu `/v1`)
 
-OmniRoute jippreżenta s-superfiċċja ta' OpenAI f'`/v1`, is-superfiċċja ta' Anthropic fir-rads, u superfiċċja nativa ta' Gemini f'`/v1beta`. Kull integrazzjoni hija mqabbda mal-forma li l-għodda tagħha tistenna (verifikata fil-kodiċi tal-kmand):
+OmniRoute jesponi l-interfaċċa ta’ OpenAI f’`/v1`, l-interfaċċa ta’ Anthropic fl-għerq,
+u interfaċċa nattiva ta’ Gemini f’`/v1beta`. Kull integrazzjoni hija kkonfigurata skont il-format li
+tistenna l-għodda tagħha (ivverifikat fis-sors tal-kmand):
 
-| Integrazzjoni                                                              | URL bażi miktub | `/v1`?                                   |
+| Integrazzjoni                                                              | Base URL miktub | `/v1`?                                   |
 | -------------------------------------------------------------------------- | --------------- | ---------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | rads            | Le — Cline iżid `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | rads            | Le — Goose iżid il-mixja                 |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | rads            | Le — LiteLLM iżid `/v1/chat/completions` |
-| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | b'`/v1`         | Iva                                      |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | rads            | Le — Claude Code iżid `/v1/messages`     |
-| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | b'`/v1`         | Iva                                      |
-| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | b'`/v1`         | Iva                                      |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | rads            | Le — is-SDK iżid `/v1beta/models/…`      |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` fil-profil tal-awtentikazzjoni)        | rads            | Le — Claude Code iżid `/v1messages`      |
+| `setup-cline` (`openAiBaseUrl`)                                            | għerq           | Le — Cline iżid `/v1/chat/completions`   |
+| `setup-goose` (`OPENAI_HOST`)                                              | għerq           | Le — Goose iżid il-path                  |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | għerq           | Le — LiteLLM iżid `/v1/chat/completions` |
+| `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | b’`/v1`         | Iva                                      |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | b’`/v1`         | Iva                                      |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | għerq           | Le — Claude Code iżid `/v1/messages`     |
+| `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | b’`/v1`         | Iva                                      |
+| `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | b’`/v1`         | Iva                                      |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | għerq           | Le — l-SDK iżid `/v1beta/models/…`       |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` fil-profil tal-awtentikazzjoni)        | għerq           | Le — Claude Code iżid `/v1/messages`     |
 
 ---
 

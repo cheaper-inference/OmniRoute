@@ -17,9 +17,15 @@ import { sanitizeErrorMessage } from "../utils/errorSanitization.ts";
 import { formatSSE } from "../utils/streamHelpers.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { PARKED_STREAM_HEADER, PARKED_STREAM_VALUE } from "../utils/streamReadiness.ts";
-import { isProxyAvoided, proxyEgressKey, proxySetAsideSeq } from "../utils/proxyRefusalMemory.ts";
+import {
+  isProxyAvoided,
+  proxyEgressKey,
+  proxySetAsideSeq,
+  proxySetAsideStatus,
+} from "../utils/proxyRefusalMemory.ts";
 import { maskAccountId, type RotatableAccount } from "./accountRotation.ts";
 import { runWithProxyContext } from "../utils/proxyFetch.ts";
+import { noteResilienceAction } from "@/lib/usage/resilienceActionsContext.ts";
 import type { ExecuteInput, ExecutorExecuteResult } from "./base.ts";
 
 /** Consecutive transient 429s before a request parks. */
@@ -141,18 +147,59 @@ export function parkWaitMs(ttlLeftMs: number | null): number {
 }
 
 /**
+ * Park wait while every egress sits aside for quota: the nearest real
+ * set-aside end, or null when no park is due on this path. A key that is
+ * null, unknown, or free means dispatch can still try it, so the received
+ * counter stays the trigger. A key set aside for anything but quota (slow,
+ * transport, unreachable, geo) vetoes too: the wake-up only serves fresh
+ * members, so waiting for a quota end would idle for nothing. The wait never
+ * exceeds the existing park window.
+ */
+export function setAsideParkWaitMs(
+  keys: Array<string | null>,
+  nowMs: number = Date.now()
+): number | null {
+  let nearest: number | null = null;
+  for (const key of keys) {
+    if (key === null) return null;
+    const status = proxySetAsideStatus(key, nowMs);
+    if (!status.setAside || !status.quotaOnly || status.endsAt === null) return null;
+    if (nearest === null || status.endsAt < nearest) nearest = status.endsAt;
+  }
+  if (nearest === null) return null;
+  const wait = nearest - nowMs;
+  if (wait <= 0 || wait > PARK_WAIT_MS) return null;
+  return wait;
+}
+
+/**
+ * Opt-in (default off, #14851): when every cooldown-ready account is set aside,
+ * serve them anyway instead of returning an empty replay leg.
+ */
+export function isReplayServeSetAsideEnabled(env: NodeJS.ProcessEnv = process.env): boolean {
+  const raw = env.OPENCODE_PARK_REPLAY_SERVE_SETASIDE;
+  return raw != null && /^(1|true|yes|on)$/i.test(raw.trim());
+}
+
+/**
  * Replay candidates: cooldown-ready accounts (bans included) that are not set
- * aside, least-recently-penalized first, capped at PARK_PROBE_MAX.
+ * aside, least-recently-penalized first, capped at PARK_PROBE_MAX. When all
+ * ready accounts are set aside the leg is empty unless `serveSetAside` (opt-in
+ * flag, #14851) is on.
  */
 export function replayCandidates<T extends RotatableAccount>(
   accounts: T[],
-  nowMs = Date.now()
+  nowMs = Date.now(),
+  keyOfMember: (account: T) => string | null = (a) => proxyEgressKey(a.proxy),
+  serveSetAside: boolean = isReplayServeSetAsideEnabled()
 ): T[] {
-  return accounts
-    .filter((a) => a.cooldownUntil <= nowMs && !isProxyAvoided(proxyEgressKey(a.proxy)))
+  const ready = accounts.filter((a) => a.cooldownUntil <= nowMs);
+  const fresh = ready.filter((a) => !isProxyAvoided(keyOfMember(a)));
+  // Serve set-aside accounts anyway only when opted in (#14851).
+  return (fresh.length > 0 || !serveSetAside ? fresh : ready)
     .sort((x, y) => {
-      const sx = proxySetAsideSeq(proxyEgressKey(x.proxy)) ?? -1;
-      const sy = proxySetAsideSeq(proxyEgressKey(y.proxy)) ?? -1;
+      const sx = proxySetAsideSeq(keyOfMember(x)) ?? -1;
+      const sy = proxySetAsideSeq(keyOfMember(y)) ?? -1;
       return sx - sy;
     })
     .slice(0, PARK_PROBE_MAX);
@@ -207,6 +254,7 @@ export interface ParkDriver<TAccount extends RotatableAccount = RotatableAccount
   execute: (input: ExecuteInput) => Promise<ExecutorExecuteResult & { response: Response }>;
   markSuccess: (account: TAccount) => void;
   sleep: (ms: number, signal?: AbortSignal | null) => Promise<boolean>;
+  replayKeyOfMember?: (account: TAccount) => string | null;
 }
 
 /**
@@ -247,10 +295,22 @@ export async function runParkAndReplay<TAccount extends RotatableAccount>(
         }
         const probe = await replayOneLeg(driver, input, driver.accounts, log, cid);
         const finalBody = probe?.result.response ?? fallback.response;
+        // stream note: note only AFTER the recopy outcome is known. A stored 429
+        // fallback recopied into the 200 SSE envelope is still a stored
+        // error replay — flag alone decides at read time.
+        let recopied = true;
         try {
           await copyFinalBodyAsValidFrames(controller, encoder, finalBody);
         } catch {
-          /* unreadable body — close with the pings already sent */
+          // Unreadable body — the client got pings only, not the replay.
+          recopied = false;
+        }
+        if (probe == null && fallback.response.status === 429) {
+          noteResilienceAction({ stored429: true, replayed: false });
+        } else if (probe != null && recopied) {
+          noteResilienceAction({ replayed: true });
+        } else if (probe != null) {
+          noteResilienceAction({ replayed: false });
         }
         try {
           controller.close();
@@ -298,7 +358,7 @@ export async function replayOneLeg<TAccount extends RotatableAccount>(
     account: TAccount;
     result: ExecutorExecuteResult & { response: Response };
   } | null = null;
-  for (const account of replayCandidates(accounts)) {
+  for (const account of replayCandidates(accounts, Date.now(), driver.replayKeyOfMember)) {
     const masked = maskAccountId(account.fingerprint);
     const proxy = (account as { proxy?: { host?: string; port?: unknown } | null }).proxy;
     log?.info?.(

@@ -20,6 +20,7 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET ?? "combos-duplicate-tes
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
+const combosDb = await import("../../src/lib/db/combos.ts");
 
 // Route loaded AFTER env is set
 const duplicateRoute = await import("../../src/app/api/combos/duplicate/route.ts");
@@ -123,7 +124,7 @@ test("POST /api/combos/duplicate returns 400 when name is empty string", async (
 
 // ── Success response shape (when models match) ───────────────────────────────
 
-test("POST /api/combos/duplicate returns valid combo with correct naming and weights on success", async () => {
+test("POST /api/combos/duplicate returns valid combo with correct naming and weights on success", async (t) => {
   await settingsDb.updateSettings({ requireLogin: false });
 
   const req = makePostRequest("http://localhost/api/combos/duplicate", {
@@ -157,6 +158,17 @@ test("POST /api/combos/duplicate returns valid combo with correct naming and wei
       0
     );
     assert.equal(totalWeight, 100, `model weights must sum to exactly 100, got ${totalWeight}`);
+
+    t.diagnostic(
+      `Snapshot returned 201 with ${body.models.length} candidates and total ${totalWeight}`
+    );
+    const stored = await combosDb.getComboById(body.id);
+    assert.ok(stored, "snapshot must be persisted");
+    assert.deepEqual(
+      stored.models,
+      body.models,
+      "persisted snapshot must preserve fractional weights"
+    );
 
     // Every model has a positive weight
     for (const m of body.models) {

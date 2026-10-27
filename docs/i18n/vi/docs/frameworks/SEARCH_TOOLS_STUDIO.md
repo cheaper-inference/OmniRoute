@@ -41,21 +41,21 @@ Studio gồm ba tab, hợp nhất tìm kiếm web, thu thập dữ liệu web v�
 Phát triển `SearchForm` + `ResultsPanel` + `RerankPanel` hiện có thành một tab:
 
 - Truy vấn → kết quả (tiêu đề, URL, đoạn trích, điểm liên quan).
-- Siêu dữ liệu nhà cung cấp trong ngăn Cấu hình (chi phí, hạn ngạch, trạng thái).
-- Phần xếp hạng lại: chọn mô hình xếp hạng lại, sắp xếp lại kết quả, hiển thị `positionDelta`.
-- Trạng thái trống kèm lời kêu gọi hành động khi chưa cấu hình nhà cung cấp tìm kiếm nào.
-- Lịch sử tìm kiếm qua `SearchHistory.tsx`.
-- Gọi `POST /v1/search` (điểm cuối hiện có, không thay đổi).
+- Siêu dữ liệu của nhà cung cấp trong ngăn Cấu hình (chi phí, hạn mức, trạng thái).
+- Phần xếp hạng lại: chọn một mô hình xếp hạng lại, sắp xếp lại kết quả, hiển thị `positionDelta`.
+- Trạng thái trống kèm CTA khi chưa cấu hình nhà cung cấp tìm kiếm nào.
+- Lịch sử tìm kiếm thông qua `SearchHistory.tsx`.
+- Gọi `POST /v1/search` (endpoint hiện có, không thay đổi).
 
-### Tab Thu thập
+### Tab Thu thập nội dung
 
-Tab mới để trích xuất nội dung từ một URL qua `POST /v1/web/fetch` (được tạo trong kế hoạch 05):
+Tab mới để trích xuất nội dung từ một URL thông qua `POST /v1/web/fetch` (được tạo trong kế hoạch 05):
 
 - Đầu vào: URL + nút bật/tắt toàn trang + bộ chọn định dạng (markdown / văn bản / HTML).
-- Gửi → tải về → hiển thị `ScrapeResult.tsx`.
-- `ScrapeResult` hiển thị bản xem trước markdown + nút chuyển đổi sang dữ liệu thô.
-- Giới hạn: nếu nội dung phản hồi > **256 KB**, giao diện hiển thị `(đã cắt bớt, xem dữ liệu thô)` và mở dữ liệu thô trong hộp thoại Monaco (D21).
-- Bảng siêu dữ liệu: nhà cung cấp (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), độ trễ, chi phí, kích thước phản hồi, số lượng liên kết.
+- Gửi → tìm nạp → hiển thị `ScrapeResult.tsx`.
+- `ScrapeResult` hiển thị bản xem trước markdown + nút bật/tắt nội dung thô.
+- Giới hạn: nếu nội dung phản hồi > **256 KB**, giao diện người dùng hiển thị `(đã cắt bớt, xem nội dung thô)` và mở nội dung thô trong một hộp thoại Monaco (D21).
+- Bảng siêu dữ liệu: nhà cung cấp (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), độ trễ, chi phí, kích thước phản hồi, số lượng liên kết.
 - Sử dụng hook `useScrapeFetch.ts`.
 
 ### Tab So sánh
@@ -64,8 +64,8 @@ Chạy cùng một truy vấn/URL song song trên tối đa **4 nhà cung cấp*
 
 - Các cột đặt cạnh nhau cho từng nhà cung cấp.
 - Chỉ số: độ trễ, chi phí, số lượng kết quả, kích thước phản hồi.
-- Tính toán mức độ trùng lặp URL cho tìm kiếm (số URL được chia sẻ so với kết quả ban đầu).
-- Gọi `POST /v1/search` (tìm kiếm) hoặc `POST /v1/web/fetch` (thu thập) cho từng nhà cung cấp.
+- Tính toán mức độ trùng lặp URL cho tìm kiếm (số URL chung so với kết quả ban đầu).
+- Gọi `POST /v1/search` (tìm kiếm) hoặc `POST /v1/web/fetch` (thu thập nội dung) cho từng nhà cung cấp.
 
 ---
 
@@ -101,11 +101,11 @@ Chạy cùng một truy vấn/URL song song trên tối đa **4 nhà cung cấp*
 ## Danh mục nhà cung cấp
 
 `ProviderCatalog.tsx` hiển thị danh sách đầy đủ các nhà cung cấp từ `GET /api/search/providers`
-(được mở rộng trong F4 để bao gồm các nhà cung cấp fetch):
+(được mở rộng trong F4 để bao gồm các nhà cung cấp truy xuất):
 
-| `kind` | `"search"` (20 nhà cung cấp) hoặc `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 nhà cung cấp) hoặc `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Trạng thái được **xác định tại thời điểm gửi yêu cầu** bằng cách kiểm tra xem thông tin xác thực có tồn tại hay không và liệu
+Trạng thái được **xác định tại thời điểm yêu cầu** bằng cách kiểm tra xem thông tin xác thực có tồn tại hay không và liệu
 tất cả các khóa hiện có đang trong thời gian chờ hay không.
 
 ---
@@ -118,17 +118,17 @@ Phần giữ chỗ cho khóa API luôn là `$OMNIROUTE_API_KEY` (D11, dùng chun
 
 ---
 
-## Các thay đổi ở backend
+## Thay đổi Backend
 
-Chỉ cần một thay đổi ở backend cho tính năng này:
+Chỉ cần một thay đổi backend cho tính năng này:
 
 ### Mở rộng `GET /api/search/providers`
 
 `src/app/api/search/providers/route.ts` đã được mở rộng để:
 
-- Bao gồm tất cả 6 nhà cung cấp fetch (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) trong mảng.
-- Thêm `kind: "search" | "fetch"` vào từng mục.
-- Thêm `status: "configured" | "missing" | "rate_limited"` được xác định từ trạng thái thông tin xác thực trực tiếp.
+- Bao gồm mọi nhà cung cấp fetch (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) trong mảng.
+- Thêm `kind: "search" | "fetch"` vào mỗi mục.
+- Thêm `status: "configured" | "missing" | "rate_limited"` được xác định từ trạng thái thông tin xác thực theo thời gian thực.
 - Duy trì khả năng tương thích ngược — các trường hiện có (`id`, `name`, v.v.) không thay đổi.
 
 ---

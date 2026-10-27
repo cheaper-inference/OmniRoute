@@ -136,23 +136,23 @@ omniroute providers validate
 
 ---
 
-## CLI ಪರಿಕರ ಸಂರಚನೆ
+## CLI ಸಾಧನದ ಸಂರಚನೆ
 
-### 1) ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸಿ ಮತ್ತು API ಕೀಲಿಯನ್ನು ರಚಿಸಿ
+### 1) ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸಿ ಮತ್ತು API ಕೀ ರಚಿಸಿ
 
-1. ಡ್ಯಾಶ್ಬೋರ್ಡ್ → `Providers` ತೆರೆಯಿರಿ ಮತ್ತು ಕನಿಷ್ಠ ಒಬ್ಬ ಪೂರೈಕೆದಾರರನ್ನು (OAuth ಅಥವಾ API ಕೀಲಿ) ಸಂಪರ್ಕಿಸಿ.
-2. ಡ್ಯಾಶ್ಬೋರ್ಡ್ → `Endpoints` ತೆರೆಯಿರಿ ಮತ್ತು API ಕೀಲಿಯನ್ನು ರಚಿಸಿ.
-3. (ಐಚ್ಛಿಕ) ಡ್ಯಾಶ್ಬೋರ್ಡ್ → `Combos` ತೆರೆಯಿರಿ ಮತ್ತು ನಿಮ್ಮ ಪರ್ಯಾಯ ಸರಪಳಿಯನ್ನು ಹೊಂದಿಸಿ.
+1. Dashboard → `Providers` ತೆರೆಯಿರಿ ಮತ್ತು ಕನಿಷ್ಠ ಒಬ್ಬ ಪೂರೈಕೆದಾರರನ್ನು ಸಂಪರ್ಕಿಸಿ (OAuth ಅಥವಾ API ಕೀ).
+2. Dashboard → `Endpoints` ತೆರೆಯಿರಿ ಮತ್ತು API ಕೀ ರಚಿಸಿ.
+3. (ಐಚ್ಛಿಕ) Dashboard → `Combos` ತೆರೆಯಿರಿ ಮತ್ತು ನಿಮ್ಮ ಫಾಲ್ಬ್ಯಾಕ್ ಸರಪಳಿಯನ್ನು ಹೊಂದಿಸಿ.
 
-### 2) ನಿಮ್ಮ ಕೋಡಿಂಗ್ ಪರಿಕರವನ್ನು ಸಂರಚಿಸಿ
+### 2) ನಿಮ್ಮ ಕೋಡಿಂಗ್ ಸಾಧನವನ್ನು ನಿರ್ದೇಶಿಸಿ
 
 ```txt
 ಮೂಲ URL: http://localhost:20128/v1
-API ಕೀಲಿ:  [Endpoint ಪುಟದಿಂದ ನಕಲಿಸಿ]
-ಮಾದರಿ:    if/qwen3.8-max-preview (ಅಥವಾ ಯಾವುದೇ ಪೂರೈಕೆದಾರ/ಮಾದರಿ ಪೂರ್ವಪ್ರತ್ಯಯ)
+API ಕೀ:  [Endpoint ಪುಟದಿಂದ ನಕಲಿಸಿ]
+ಮಾದರಿ:   if/qwen3.8-max-preview (ಅಥವಾ ಯಾವುದೇ ಪೂರೈಕೆದಾರ/ಮಾದರಿ ಪೂರ್ವಪ್ರತ್ಯಯ)
 ```
 
-ನಿಮ್ಮ ಎಡಿಟರ್ಗೆ `Authorization: Bearer ...` ಕಳುಹಿಸಲು ಸಾಧ್ಯವಾಗದಿದ್ದರೆ, ಬದಲಿಗೆ ಟೋಕನೀಕರಿಸಿದ ಹೊಂದಾಣಿಕೆ ಮೂಲವನ್ನು ಬಳಸಿ:
+ನಿಮ್ಮ ಎಡಿಟರ್ಗೆ `Authorization: Bearer ...` ಕಳುಹಿಸಲು ಸಾಧ್ಯವಾಗದಿದ್ದರೆ, ಬದಲಿಗೆ ಟೋಕನ್ಯುಕ್ತ ಹೊಂದಾಣಿಕೆಯ ಮೂಲವನ್ನು ಬಳಸಿ:
 
 ```txt
 ಮೂಲ URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
@@ -163,36 +163,37 @@ Ollama ಟ್ಯಾಗ್ಗಳ URL: http://localhost:20128/api/v1/vscode/YOUR_K
 
 Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode ಮತ್ತು OpenAI-ಹೊಂದಾಣಿಕೆಯ SDKಗಳೊಂದಿಗೆ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತದೆ.
 
-#### `setup-*` ಬಳಸಿ ಸ್ವಯಂ-ಸಂರಚಿಸಿ
+#### `setup-*` ಮೂಲಕ ಸ್ವಯಂ-ಸಂರಚಿಸಿ
 
-ಮೂಲ URL ಮತ್ತು ಕೀಲಿಯನ್ನು ಕೈಯಾರೆ ಅಂಟಿಸುವ ಬದಲು, ಲೈವ್ ಮಾದರಿ ಕ್ಯಾಟಲಾಗ್ನಿಂದ ಪ್ರತಿ ಪರಿಕರದ
-ಸ್ವಂತ ಸಂರಚನೆಯನ್ನು OmniRoute ಬರೆಯಲು ಬಿಡಿ. ಪ್ರತಿ ಪರಿಕರಕ್ಕೆ ಒಂದು ಕಮಾಂಡ್:
+ಮೂಲ URL ಮತ್ತು ಕೀಲಿಯನ್ನು ಕೈಯಾರೆ ಅಂಟಿಸುವ ಬದಲು, ನೇರ ಮಾದರಿ ಕ್ಯಾಟಲಾಗ್ನಿಂದ ಪ್ರತಿಯೊಂದು ಸಾಧನದ
+ಸ್ವಂತ ಸಂರಚನೆಯನ್ನು OmniRoute ಬರೆಯಲು ಬಿಡಿ. ಪ್ರತಿ ಸಾಧನಕ್ಕೆ ಒಂದು ಕಮಾಂಡ್:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml ಪ್ರೊಫೈಲ್ಗಳು
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (openai-ಹೊಂದಾಣಿಕೆ)
-omniroute setup-cline        # Cline CLI + VS Code ವಿಸ್ತರಣೆಯ ಸೆಟ್ಟಿಂಗ್ಗಳು
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI-ಹೊಂದಾಣಿಕೆ)
+omniroute setup-cline        # Cline CLI + VS Code ಎಕ್ಸ್ಟೆನ್ಶನ್ ಸೆಟ್ಟಿಂಗ್ಗಳು
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # Cursorನ ಆ್ಯಪ್ನೊಳಗಿನ ಹಂತಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ
+omniroute setup-cursor       # Cursorನ ಅಪ್ಲಿಕೇಶನ್ನೊಳಗಿನ ಹಂತಗಳನ್ನು ಮುದ್ರಿಸುತ್ತದೆ
 omniroute setup-roo          # Roo Code ಆಮದು + autoImport ಪಾಯಿಂಟರ್
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-ಸ್ಥಳೀಯ ಪರಿಕರವನ್ನು **ದೂರಸ್ಥ** OmniRouteಗೆ ಸಂರಚಿಸಲು ಪ್ರತಿಯೊಂದೂ `--remote <url> --api-key <key>` ಅನ್ನು ಮತ್ತು ಪೂರ್ವವೀಕ್ಷಣೆಗಾಗಿ `--dry-run` ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಸರಿಯಾದ
-env ಅನ್ನು ಸೇರಿಸಿ, ಯಾವುದೇ ಸಂರಚನೆಯನ್ನು ಬರೆಯದೆಯೇ CLI ಅನ್ನು ಪ್ರಾರಂಭಿಸಲು ಸಾಮಾನ್ಯ ಲಾಂಚರ್
+ಸ್ಥಳೀಯ ಸಾಧನವನ್ನು **ದೂರಸ್ಥ** OmniRoute ವಿರುದ್ಧ ಸಂರಚಿಸಲು ಪ್ರತಿಯೊಂದು ಕಮಾಂಡ್ `--remote <url> --api-key <key>` ಅನ್ನು ಹಾಗೂ ಮುನ್ನೋಟಕ್ಕಾಗಿ `--dry-run` ಅನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ. ಸರಿಯಾದ
+ಪರಿಸರವನ್ನು ಇಂಜೆಕ್ಟ್ ಮಾಡಿ, ಯಾವುದೇ ಸಂರಚನೆಯನ್ನು ಬರೆಯದೆಯೇ CLI ಅನ್ನು ಪ್ರಾರಂಭಿಸಲು ಸಾಮಾನ್ಯ ಲಾಂಚರ್
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) ಬಳಸಿ;
-ಹಳೆಯ ಪ್ರತಿ-ಪರಿಕರ ಲಾಂಚರ್ಗಳಾದ `omniroute launch` (Claude Code) ಮತ್ತು
+ಹಳೆಯ ಪ್ರತಿ-ಸಾಧನ ಲಾಂಚರ್ಗಳಾದ `omniroute launch` (Claude Code) ಮತ್ತು
 `omniroute launch-codex` (Codex) ಇನ್ನೂ ಲಭ್ಯವಿವೆ.
 
-ಸಂಪೂರ್ಣ ಕೋಷ್ಟಕಕ್ಕಾಗಿ (ಪ್ರತಿ ಕಮಾಂಡ್ ಏನನ್ನು ಬರೆಯುತ್ತದೆ, ಪ್ರತಿಯೊಂದು ಫ್ಲ್ಯಾಗ್, ಸ್ಥಳೀಯ ಮತ್ತು ದೂರಸ್ಥ, ಮೂಲ-URL
+ಸಂಪೂರ್ಣ ಕೋಷ್ಟಕಕ್ಕಾಗಿ (ಪ್ರತಿಯೊಂದು ಕಮಾಂಡ್ ಏನನ್ನು ಬರೆಯುತ್ತದೆ, ಎಲ್ಲಾ ಫ್ಲ್ಯಾಗ್ಗಳು, ಸ್ಥಳೀಯ ಮತ್ತು ದೂರಸ್ಥ ನಡುವಿನ ವ್ಯತ್ಯಾಸ, ಮೂಲ-URL
 `/v1` ಸಂಪ್ರದಾಯಗಳು), **[CLI ಏಕೀಕರಣಗಳು](./CLI-INTEGRATIONS.md)** ನೋಡಿ.
 
-ಪ್ರತಿ ಪರಿಕರದ ವಿವರವಾದ ಸಂರಚನೆಗಾಗಿ (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ಮತ್ತು ಇನ್ನಷ್ಟು), ಮೀಸಲಾದ **[CLI ಪರಿಕರಗಳ ಮಾರ್ಗದರ್ಶಿ](../reference/CLI-TOOLS.md)** ನೋಡಿ.
+ಪ್ರತಿ ಸಾಧನದ ವಿವರವಾದ ಸಂರಚನೆಗಾಗಿ (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot ಮತ್ತು ಇನ್ನಷ್ಟು), ಮೀಸಲಾದ **[CLI ಸಾಧನಗಳ ಮಾರ್ಗದರ್ಶಿ](../reference/CLI-TOOLS.md)** ನೋಡಿ.
 
 ---
 
@@ -321,23 +322,23 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (xbps-src) ಟೆಂಪ್ಲೇಟ್
+## Void Linux (`xbps-src`) ಟೆಂಪ್ಲೇಟ್
 
 Void Linux ಬಳಕೆದಾರರು `xbps-src` ಬಳಸಿ ಸ್ಥಳೀಯ ಪ್ಯಾಕೇಜ್ ಅನ್ನು ನಿರ್ಮಿಸಬಹುದು. ಈ ಬ್ಲಾಕ್ ಅನ್ನು `srcpkgs/omniroute/template` ಆಗಿ ಉಳಿಸಿ:
 
 ```bash
-# 'omniroute' ಗಾಗಿನ ಟೆಂಪ್ಲೇಟ್ ಫೈಲ್
+# 'omniroute' ಗಾಗಿ ಟೆಂಪ್ಲೇಟ್ ಫೈಲ್
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+short_desc="ಬಹು LLM ಪೂರೈಕೆದಾರಗಳಿಗಾಗಿ ಸ್ಮಾರ್ಟ್ ರೂಟಿಂಗ್ ಹೊಂದಿರುವ ಸಾರ್ವತ್ರಿಕ AI ಗೇಟ್ವೇ"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# ಪ್ರತಿ ಬಿಡುಗಡೆಯ checksum ಅನ್ನು ಈ ಕೆಳಗಿನಂತೆ ಮರುರಚಿಸಿ:
+# ಪ್ರತಿ ಬಿಡುಗಡೆಯ checksum ಅನ್ನು ಈ ಕೆಳಗಿನದರೊಂದಿಗೆ ಮರುರಚಿಸಿ:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

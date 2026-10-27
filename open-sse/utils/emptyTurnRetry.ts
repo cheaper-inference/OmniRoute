@@ -3,10 +3,16 @@ import { FORMATS } from "../translator/formats.ts";
 import { STREAM_READINESS_MAX_TIMEOUT_MS } from "../config/constants.ts";
 import { hasValidUsage } from "./usageTracking.ts";
 import { hasUsefulStreamContent } from "./streamReadiness.ts";
-import { parseSSELine, hasValuableContent } from "./streamHelpers.ts";
+import {
+  parseSSEDataPayload,
+  parseSSELine,
+  hasValuableContent,
+  stripAnsiCodes,
+} from "./streamHelpers.ts";
 import { isEmptyTurnCore } from "./streamEmptyChoices.ts";
 import { sanitizeStreamingChunk } from "../handlers/responseSanitizer.ts";
 import { getAnyReasoningValue, getReadableReasoningValue } from "./reasoningFields.ts";
+import { SYSTEM_ECHO_THRESHOLD } from "./directivePreambleStripper.ts";
 
 /** Max upstream bytes buffered for flush-empty-retry classification (flag-gated). */
 export const FLUSH_EMPTY_RETRY_MAX_BYTES = 256_000;
@@ -27,6 +33,46 @@ export type EmptyTurnSummary = {
 };
 
 /**
+ * Draft / system-echo blocks a model can emit instead of an answer:
+ * `<summary>…</summary>`, `<analysis>…</analysis>`, `<system-reminder>…</system-reminder>`.
+ *
+ * OmniRoute already treats exactly these constructs as system echoes that must
+ * not reach the client (see `directivePreambleStripper.ts`), so a turn whose
+ * ENTIRE content is such markup carries no answer — the downstream consumer
+ * strips the tags and is left with an empty turn (#17461).
+ *
+ * A block carrying >= `SYSTEM_ECHO_THRESHOLD` chars of content is NOT a draft
+ * skeleton: `directivePreambleStripper` preserves it as the model's real response
+ * (e.g. a Claude Code compaction reply `<analysis>…</analysis><summary>…</summary>`),
+ * so it counts as usable here too and is never retried as an empty turn.
+ *
+ * Bounded, non-overlapping repetition: one pass over the text, no nested
+ * quantifiers, so it cannot backtrack on untrusted content.
+ */
+const DRAFT_BLOCK_PATTERN = /<(summary|analysis|system-reminder)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi;
+
+/**
+ * True when the text carries something a client can use as an answer.
+ *
+ * Draft/system-echo markup alone does not count: the turn is then "empty" for
+ * the flush-empty-retry classifier, so the recovery path can retry it on
+ * another connection instead of shipping a degenerate turn. Whitespace-only
+ * text does not count either (it used to, via `length > 0`).
+ */
+export function hasUsableContentText(contentText: string | null | undefined): boolean {
+  const text = typeof contentText === "string" ? contentText : "";
+  if (!text.trim()) return false;
+  let hasSubstantialBlock = false;
+  // `String.prototype.replace` with a global regex always starts at index 0 and
+  // leaves `lastIndex` reset, so no manual state handling is needed.
+  const stripped = text.replace(DRAFT_BLOCK_PATTERN, (_match, _tag, inner: string) => {
+    if (inner.length >= SYSTEM_ECHO_THRESHOLD) hasSubstantialBlock = true;
+    return "";
+  });
+  return hasSubstantialBlock || stripped.trim().length > 0;
+}
+
+/**
  * Unified "turn with no usable content" classifier (one mechanism, two arms:
  * reasoning-only turn with stop + empty text + non-empty reasoning, and
  * zero-valuable-chunk turn via shared `isEmptyTurnCore`). Legit empty stops
@@ -35,7 +81,12 @@ export type EmptyTurnSummary = {
 export function isUselessEmptyTurn(summary: EmptyTurnSummary): boolean {
   if (LEGIT_EMPTY_TURN_FINISH.has(summary.finishReason)) return false;
   if (summary.toolCallsPresent) return false;
-  if (summary.contentText.length > 0) return false;
+  if (hasUsableContentText(summary.contentText)) return false;
+  // Draft-only turn (#17461): the chunks carried content, but only
+  // `<summary>`/`<analysis>`/`<system-reminder>` markup, so nothing usable
+  // reached the client. The forwarded-chunk / usage arms below would call
+  // this a normal turn — it is not.
+  if (summary.contentText.trim().length > 0) return true;
   // Reasoning-only arm: non-empty reasoning with no content. The stop gate
   // applies to chat turns (finish=stop disambiguates from mid-stream deltas);
   // Responses translators never set a probe finish reason, so Responses
@@ -79,11 +130,34 @@ async function drainBoundedChunks(
   reader: ReadableStreamDefaultReader<Uint8Array>,
   maxBytes: number,
   idleMs: number,
-  deadlineMs = 0
-): Promise<{ chunks: Uint8Array[]; total: number; over: boolean; idle: boolean }> {
+  deadlineMs = 0,
+  opts?: { targetFormat?: string; sourceFormat?: string }
+): Promise<{
+  chunks: Uint8Array[];
+  total: number;
+  over: boolean;
+  idle: boolean;
+  earlyPass: boolean;
+}> {
   const chunks: Uint8Array[] = [];
   let total = 0;
   let pending: Promise<ReadableStreamReadResult<Uint8Array>> | null = null;
+  // Persistent probe: ProbeAccum + consumed-char offset live
+  // here, not in a pure per-push function, so the translator state advances
+  // exactly like the end-of-turn replay. `consumed` counts chars of whole
+  // lines already fed (no re-split of consumed prefix).
+  let probe: ProbeAccum | null = null;
+  let consumed = 0;
+  const targetFormat = opts?.targetFormat ?? "";
+  const sourceFormat = opts?.sourceFormat ?? "";
+  // Probe cadence: probe every push while cheap; when the buffer is already
+  // large without content, check every 16th push (worst case bounded ~2x
+  // the end summary on content-free turns — measured 2.15x all-push at
+  // 156 KB). Content turns stop at the first fragment, so
+  // cadence only affects content-free turns (which never early-pass).
+  const FIRST_USEFUL_CHUNK_CADENCE = 16;
+  const FIRST_USEFUL_CHUNK_BULK_BYTES = 64_000;
+  let pushes = 0;
   for (;;) {
     // A single in-flight read spans idle expiries: an expired budget never
     // orphans the read that still owns the next chunk.
@@ -96,17 +170,50 @@ async function drainBoundedChunks(
       // stay "open"): biasing toward continuing is the safe direction.
       if (deadlineMs > 0 && Date.now() < deadlineMs && hasOpenReasoning(decodeSoFar(chunks, total)))
         continue;
-      return { chunks, total, over: false, idle: true };
+      return { chunks, total, over: false, idle: true, earlyPass: false };
     }
     const { done, value } = read;
     pending = null;
     if (done) break;
     if (!value) continue;
     total += value.byteLength;
-    if (total > maxBytes) return { chunks, total, over: true, idle: false };
+    if (total > maxBytes) return { chunks, total, over: true, idle: false, earlyPass: false };
     chunks.push(value);
+    pushes += 1;
+    try {
+      if (!probe) {
+        const state = createProbeState(sourceFormat);
+        if (!state) continue;
+        probe = { state, forwardedValuableChunk: false, finishReason: "", toolCallsPresent: false };
+      }
+      // Skip the probe on bulk content-free stretches (every push is
+      // checked while the buffer is small or right after the cadence tick).
+      // `done` is handled by the normal loop exit below, not here.
+      const bulk = total >= FIRST_USEFUL_CHUNK_BULK_BYTES;
+      if (bulk && pushes % FIRST_USEFUL_CHUNK_CADENCE !== 0) continue;
+      const text = decodeSoFar(chunks, total);
+      // Whole lines only: the trailing partial segment stays out of the
+      // probe until its newline arrives. Slice from `consumed`.
+      const end = text.endsWith("\n") ? text.length : text.lastIndexOf("\n") + 1;
+      if (end > consumed) {
+        const todo = text.slice(consumed, end).split("\n");
+        for (const line of todo) replayParseLineQuiet(line, targetFormat, sourceFormat, probe);
+        consumed = end;
+      }
+      if (isUsefulSummary(buildProbeSummary(probe))) {
+        // Stop WITHOUT awaiting cancel: the clone is dropped and its reader
+        // released in `finally`; awaiting cancel here can hang when the
+        // producer only serves pull() on demand (the pending pull never
+        // resolves). Same fire-and-forget motif as the idle branch below.
+        void reader.cancel().catch(() => undefined);
+        return { chunks, total, over: false, idle: false, earlyPass: true };
+      }
+    } catch {
+      // Doubt → keep draining: the predicate never produces a retry,
+      // and must never throw the bounded read into the `error` branch.
+    }
   }
-  return { chunks, total, over: false, idle: false };
+  return { chunks, total, over: false, idle: false, earlyPass: false };
 }
 
 /** Best-effort decode of chunks drained so far, for the open-reasoning check. */
@@ -162,6 +269,9 @@ export function hasOpenReasoning(text: string): boolean {
 
 export type BoundedReadOutcome =
   | { kind: "text"; text: string }
+  // Early useful fragment: the bounded read stopped at the first
+  // content/tool fragment and cancelled the clone; the original is piped.
+  | { kind: "early-pass" }
   // Over the byte cap, no body, or undecodable: not classifiable, pass it through.
   | { kind: "skipped" }
   // The body threw while being read (e.g. the upstream dropped the connection
@@ -188,7 +298,7 @@ export async function readBoundedResponseOutcome(
   response: Response,
   maxBytes: number,
   idleMs = 0,
-  opts?: { maxTotalMs?: number }
+  opts?: { maxTotalMs?: number; targetFormat?: string; sourceFormat?: string }
 ): Promise<BoundedReadOutcome> {
   const clone = response.clone();
   if (!clone.body) return { kind: "skipped" };
@@ -201,23 +311,28 @@ export async function readBoundedResponseOutcome(
   const maxTotalMs = opts?.maxTotalMs ?? STREAM_READINESS_MAX_TIMEOUT_MS;
   const deadlineMs = maxTotalMs > 0 ? Date.now() + maxTotalMs : 0;
   try {
-    const { chunks, total, over, idle } = await drainBoundedChunks(
+    const { chunks, total, over, idle, earlyPass } = await drainBoundedChunks(
       reader,
       maxBytes,
       idleMs,
-      deadlineMs
+      deadlineMs,
+      { targetFormat: opts?.targetFormat, sourceFormat: opts?.sourceFormat }
     );
+    if (earlyPass) {
+      // Checked FIRST, before idle/over: the clone was already
+      // cancel-requested at the stop point (fire-and-forget); releaseLock
+      // in `finally` below. No await here (see stop point).
+      return { kind: "early-pass" };
+    }
     if (idle) {
       // Never awaited: this branch exists because the stream stopped answering.
       void reader.cancel().catch(() => undefined);
       return { kind: "idle", text: concatChunks(chunks, total) ?? "" };
     }
     if (over) {
-      try {
-        await reader.cancel();
-      } catch {
-        // best-effort
-      }
+      // A clone branch cancel only settles once the original is read or cancelled: never await
+      // it — the original is piped to the client below.
+      void reader.cancel().catch(() => undefined);
       return { kind: "skipped" };
     }
     const text = concatChunks(chunks, total);
@@ -238,6 +353,38 @@ export async function readBoundedResponseOutcome(
 export type BufferedTurnVerdict =
   { kind: "retry"; reason: string } | { kind: "pass"; why: string; idlePass?: true };
 
+/** Max chars of the free-text verdict reason kept in the one-line verdict log. */
+export const BUFFERED_VERDICT_LOG_REASON_MAX = 180;
+
+export type BufferedVerdictLogLevel = "info" | "warn";
+
+/**
+ * Presentation-only verdict log line (no I/O, no mutation): one bounded line
+ * per verdict with correlation identifiers. `warn` only for an anomalous
+ * pass on a stalled turn (`idlePass`); everything else is `info`. Never
+ * receives turn content — only the short verdict reason, truncated.
+ */
+export function formatBufferedVerdictLog(
+  verdict: BufferedTurnVerdict,
+  correlationId: string | null,
+  traceId: string
+): { level: BufferedVerdictLogLevel; line: string } {
+  const idle = verdict.kind === "pass" && verdict.idlePass === true;
+  const reason = verdict.kind === "pass" ? verdict.why : verdict.reason;
+  // Collapse newlines first so the line guarantee is structural, not hostage
+  // to future reason literals: the verdict log is always exactly one line.
+  const flattened = reason.replace(/\s*\n\s*/g, " ");
+  const clipped =
+    flattened.length > BUFFERED_VERDICT_LOG_REASON_MAX
+      ? `${flattened.slice(0, BUFFERED_VERDICT_LOG_REASON_MAX)}…`
+      : flattened;
+  const cid = correlationId && correlationId.length > 0 ? correlationId : "none";
+  return {
+    level: idle ? "warn" : "info",
+    line: `verdict=${verdict.kind} idle=${idle ? "yes" : "no"} correlationId=${cid} trace=${traceId} ${clipped}`,
+  };
+}
+
 /**
  * Decide from a bounded read whether the buffered turn deserves a retry: an
  * empty turn, or a stream that dropped before anything reached the client
@@ -251,6 +398,11 @@ export function judgeBufferedTurn(
 ): BufferedTurnVerdict {
   if (read.kind === "skipped") {
     return { kind: "pass", why: "not classified (over the buffer cap or unreadable)" };
+  }
+  // Early useful fragment: a pass without the idle marker (the turn
+  // never stalled — it was stopped because content was already there).
+  if (read.kind === "early-pass") {
+    return { kind: "pass", why: "turn already carries usable content" };
   }
   if (read.kind === "idle") {
     if (clientAborted) {
@@ -285,6 +437,80 @@ export async function readBoundedResponseText(
 ): Promise<string | null> {
   const outcome = await readBoundedResponseOutcome(response, maxBytes, idleMs);
   return outcome.kind === "text" ? outcome.text : null;
+}
+
+/** The `getProviderCredentials` positional signature, as far as the retry uses it. */
+type RetryCredentialSelector = (
+  provider: string,
+  excludeConnectionId: string | null,
+  allowedConnections: string[] | null,
+  requestedModel: string | null
+) => Promise<unknown>;
+
+/** The routing constraints of the original selection that the retry has to keep. */
+export type RetryRouting = {
+  leased: boolean;
+  forcedConnectionId: string | null;
+  apiKey: { allowedConnections?: unknown; allowedQuotas?: unknown } | null;
+};
+
+function nonEmptyIds(value: unknown): string[] | null {
+  if (!Array.isArray(value)) return null;
+  const ids = value.filter((id): id is string => typeof id === "string" && id.trim().length > 0);
+  return ids.length > 0 ? ids : null;
+}
+
+/**
+ * Credentials for the next empty-turn retry, or null when no connection can take
+ * it. A managed lease, a pinned connection (`x-omniroute-connection` or a combo
+ * step pin) and a quota-scoped key (whose pool is not known here) replay the
+ * connection that served the turn: the lease fence refuses any other connection,
+ * and the others are routing constraints the retry must not escape. Otherwise
+ * the connection that just returned the empty turn is excluded first, inside the
+ * key's connection allowlist; when nothing else is eligible the normal selection
+ * runs again, so a single slot still replays itself.
+ */
+export async function pickEmptyTurnRetryCredentials(
+  select: RetryCredentialSelector,
+  input: RetryRouting & {
+    provider: string;
+    model: string | null;
+    current: Record<string, unknown>;
+  }
+): Promise<Record<string, unknown> | null> {
+  if (input.leased || input.forcedConnectionId || nonEmptyIds(input.apiKey?.allowedQuotas)) {
+    return input.current;
+  }
+  const allowed = nonEmptyIds(input.apiKey?.allowedConnections);
+  const pick = async (excludeConnectionId: string | null) => {
+    const creds = asRecord(
+      await select(input.provider, excludeConnectionId, allowed, input.model).catch(() => null)
+    );
+    return creds?.connectionId ? creds : null;
+  };
+  const currentId =
+    typeof input.current.connectionId === "string" ? input.current.connectionId : null;
+  return (await pick(currentId)) ?? (currentId ? pick(null) : null);
+}
+
+/**
+ * Point `target` at `next` in place and return the undo. The retry has to run on
+ * the new credentials, but every fallback keeps the original response, and
+ * `target` must keep describing the connection that served it.
+ */
+export function swapCredentialsInPlace(
+  target: Record<string, unknown>,
+  next: Record<string, unknown>
+): () => void {
+  if (next === target) return () => undefined;
+  const previous = { ...target };
+  Object.assign(target, next);
+  return () => {
+    for (const key of Object.keys(target)) {
+      if (!Object.hasOwn(previous, key)) delete target[key];
+    }
+    Object.assign(target, previous);
+  };
 }
 
 type ProbeAccum = {
@@ -460,6 +686,73 @@ function buildProbeSummary(probe: ProbeAccum): EmptyTurnSummary {
       probe.toolCallsPresent ||
       (probe.state.toolCalls instanceof Map && probe.state.toolCalls.size > 0),
   };
+}
+
+/**
+ * Pure early-stop predicate: true when an incremental
+ * summary already carries usable content or a tool call. Reasoning-only
+ * never stops (judged by the idle branch + `isUselessEmptyTurn`).
+ * Pure read of the summary — never throws on a well-formed summary.
+ *
+ * #17461: draft-only content (`<summary>`/`<analysis>` markup) is not usable
+ * content, so it must not end the read early and hide the turn from the
+ * judge.
+ */
+export function isUsefulSummary(summary: EmptyTurnSummary | null): boolean {
+  if (!summary) return false;
+  return hasUsableContentText(summary.contentText) || summary.toolCallsPresent;
+}
+
+/**
+ * Quiet SSE line parse for the incremental probe: same shape as
+ * `parseSSELine` (`trimStart` + ANSI strip + `data:` guard, so
+ * terminal-redraw-prefixed frames resolve identically) but with
+ * `logWarning: false`, so truncated mid-chunk lines never spam the console
+ * on the hot per-push path.
+ */
+function parseSSELineQuiet(line: string): Record<string, unknown> | null {
+  if (!line) return null;
+  const trimmed = line.trimStart();
+  const clean = stripAnsiCodes(trimmed);
+  if (!clean.startsWith("data:")) return null;
+  return parseSSEDataPayload(clean.slice(5), { logWarning: false }) as Record<
+    string,
+    unknown
+  > | null;
+}
+
+/**
+ * Incremental twin of `replayParseLine` for the persistent probe: replays
+ * one already-whole line. Truncated lines never reach it (kept out of the
+ * probe until their newline arrives), so no WARN and no double translate.
+ */
+function replayParseLineQuiet(
+  line: string,
+  targetFormat: string,
+  sourceFormat: string,
+  probe: ProbeAccum
+): void {
+  const trimmed = line.trim();
+  if (!trimmed) return;
+  const parsedLine = parseSSELineQuiet(trimmed);
+  if (!parsedLine || (parsedLine as Record<string, unknown>).done) return;
+  const parsed = parsedLine as Record<string, unknown>;
+  accumulateRawChunk(parsed, probe);
+  let translated: unknown;
+  try {
+    translated = translateResponse(
+      targetFormat,
+      sourceFormat,
+      parsed as Record<string, unknown>,
+      probe.state
+    );
+  } catch {
+    return;
+  }
+  if (!Array.isArray(translated)) return;
+  for (const item of translated) {
+    classifyTranslatedItem(item, translated, sourceFormat, probe);
+  }
 }
 
 /**

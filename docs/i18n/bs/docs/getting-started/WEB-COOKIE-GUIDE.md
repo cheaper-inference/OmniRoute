@@ -4,23 +4,21 @@
 
 ---
 
-# Web Cookie provajderi
+Web Cookie pružaoci usluga omogućavaju OmniRouteu da koristi AI uslugu putem vaše postojeće sesije preglednika umjesto API ključa. Korisni su kada već imate pristup usluzi putem njene web-stranice i želite da OmniRoute koristi istu autentificiranu sesiju.
 
-Web Cookie provajderi omogućavaju OmniRoute-u da koristi AI servis putem vaše postojeće sesije pretraživača umjesto API ključa. Oni su korisni kada već imate pristup servisu putem njegove web stranice i želite da OmniRoute koristi istu autentifikovanu sesiju.
-
-Za razliku od provajdera sa API ključem, Web Cookie provajderi se autentifikuju koristeći akreditive koje vaš pretraživač šalje web stranici.
+Za razliku od pružalaca usluga koji koriste API ključeve, Web Cookie pružaoci usluga autentificiraju se pomoću podataka za autentifikaciju koje vaš preglednik šalje web-stranici.
 
 ---
 
 # Prije nego što počnete
 
-> **Važno:** Uvijek kopirajte akreditive iz **aktivnog mrežnog zahtjeva (live network request)**, a **ne** iz skladišta kolačića vašeg pretraživača.
+> **Važno:** Uvijek kopirajte podatke za autentifikaciju iz **aktivnog mrežnog zahtjeva**, a **ne** iz spremišta kolačića vašeg preglednika.
 
-Mnogi problemi sa autentifikacijom su uzrokovani kopiranjem kolačića sa pogrešnog mjesta.
+Mnogi problemi s autentifikacijom nastaju zbog kopiranja kolačića s pogrešnog mjesta.
 
-## NE kopirajte iz skladišta kolačića (Cookie Storage)
+## NEMOJTE kopirati iz spremišta kolačića
 
-Većina pretraživača izlaže sačuvane kolačiće kroz:
+Većina preglednika prikazuje pohranjene kolačiće putem:
 
 ```
 DevTools
@@ -28,15 +26,15 @@ DevTools
 → Cookies
 ```
 
-Iako ovi kolačići izgledaju ispravno, oni mogu biti:
+Iako ovi kolačići izgledaju ispravno, mogu biti:
 
 - zastarjeli
 - nepotpuni
-- nedostajući kolačići koji se šalju samo pri autentifikovanim zahtjevima
+- bez kolačića koji se šalju samo uz autentificirane zahtjeve
 
-Korištenje ovih vrijednosti može uzrokovati neuspjeh autentifikacije čak i ako izgledaju validno.
+Korištenje ovih vrijednosti može uzrokovati neuspješnu autentifikaciju čak i ako izgledaju valjano.
 
-## Kopirajte iz aktivnog zahtjeva (Live Request)
+## Kopirajte iz aktivnog zahtjeva
 
 Umjesto toga, koristite kolačiće iz uspješnog zahtjeva:
 
@@ -44,96 +42,146 @@ Umjesto toga, koristite kolačiće iz uspješnog zahtjeva:
 DevTools
 → Network
 → Osvježite stranicu
-→ Otvorite zahtjev za chat ili razgovor
+→ Otvorite zahtjev za razgovor ili konverzaciju
 → Request Headers
 → Cookie
 ```
 
-`Cookie` zaglavlje zahtjeva sadrži tačne informacije o autentifikaciji koje je vaš pretraživač uspješno koristio.
+Zaglavlje zahtjeva `Cookie` sadrži tačne podatke za autentifikaciju koje je vaš preglednik uspješno koristio.
 
-Za većinu Web Cookie provajdera, ovo je vrijednost koju treba zalijepiti u OmniRoute.
+Za većinu Web Cookie pružalaca usluga, ovo je vrijednost koju treba zalijepiti u OmniRoute.
 
 ---
 
-# Opšte podešavanje
+# Opće postavljanje
 
-Proces podešavanja je isti za većinu Web Cookie provajdera.
+Postupak postavljanja isti je za većinu Web Cookie pružalaca usluga.
 
-1. Prijavite se na web stranicu provajdera.
-2. Otvorite Developer Tools pretraživača.
+1. Prijavite se na web-stranicu pružaoca usluga.
+2. Otvorite razvojne alate preglednika.
 3. Otvorite karticu **Network**.
 4. Osvježite stranicu.
-5. Otvorite autentifikovani zahtjev za chat ili razgovor.
-6. Kopirajte potrebne akreditive za autentifikaciju.
+5. Otvorite autentificirani zahtjev za razgovor ili konverzaciju.
+6. Kopirajte potrebne podatke za autentifikaciju.
 7. Otvorite OmniRoute.
 8. Idite na **Providers → Add Provider**.
-9. Odaberite svog Web Cookie provajdera.
-10. Zalijepite akreditive.
+9. Odaberite svog Web Cookie pružaoca usluga.
+10. Zalijepite podatke za autentifikaciju.
 11. Kliknite na **Test Connection**.
-12. Sačuvajte provajdera.
+12. Sačuvajte pružaoca usluga.
 
-Tačni potrebni akreditivi zavise od provajdera.
-
----
-
-# Formati akreditiva provajdera
-
-Različite web stranice skladište autentifikaciju na različite načine. Neke zahtijevaju samo kolačiće, dok druge mogu zahtijevati dodatna zaglavlja ili tokene.
-
-| Provajder                       | Format akreditiva              | Vodič za provajdera              |
-| ------------------------------- | ------------------------------ | -------------------------------- |
-| Claude Web                      | Puno zaglavlje zahtjeva Cookie | `docs/providers/CLAUDE_WEB.md`   |
-| ChatGPT Web (Codex)             | Puno zaglavlje Cookie          | `docs/providers/CHATGPT_WEB.md`  |
-| Gemini Web                      | _(provjerite)_                 |                                  |
-| Copilot Web                     | _(provjerite)_                 | `docs/providers/COPILOT-M365.md` |
-| Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath  | `docs/providers/COPILOT-M365.md` |
-| Grok Web                        | _(provjerite)_                 |                                  |
-| ...                             | ...                            | ...                              |
-
-> Ažurirajte ovu tabelu kako se dodaju novi Web Cookie provajderi ili kako postojeći provajderi mijenjaju svoje zahtjeve za autentifikaciju.
+Tačni potrebni podaci za autentifikaciju zavise od pružaoca usluga.
 
 ---
 
-# Šta Web Cookie provajderi mogu, a šta ne mogu
+# Formati podataka za autentifikaciju pružalaca usluga
 
-Web Cookie provajderi ponovo koriste interfejs za chat web stranice. Oni **ne** pružaju iste mogućnosti kao zvanični API-ji.
+Različite web-stranice pohranjuju podatke za autentifikaciju na različite načine. Neke zahtijevaju samo kolačiće, dok druge mogu zahtijevati dodatna zaglavlja ili tokene.
+
+| Pružalac usluga                 | Format podataka za autentifikaciju | Vodič za pružaoca usluga         |
+| ------------------------------- | ---------------------------------- | -------------------------------- |
+| Claude Web                      | Puno zaglavlje Cookie zahtjeva     | `docs/providers/CLAUDE_WEB.md`   |
+| ChatGPT Web (Codex)             | Puno Cookie zaglavlje              | `docs/providers/CHATGPT_WEB.md`  |
+| Gemini Web                      | _(provjeriti)_                     |                                  |
+| Copilot Web                     | _(provjeriti)_                     | `docs/providers/COPILOT-M365.md` |
+| Microsoft 365 Copilot (BizChat) | WS access_token + chathubPath      | `docs/providers/COPILOT-M365.md` |
+| Grok Web                        | _(provjeriti)_                     |                                  |
+| ...                             | ...                                | ...                              |
+
+> Ažurirajte ovu tabelu kada se dodaju novi Web Cookie pružaoci usluga ili kada postojeći pružaoci promijene svoje zahtjeve za autentifikaciju.
+
+## NoTrack (notrack-web)
+
+NoTrack ([notrack.ai](https://notrack.ai)) je besplatna platforma za razgovor namijenjena korisnicima, bez potrebe za registracijom — sesija se anonimno kreira pri prvoj posjeti i održava putem tri kolačića: `uid`, `si_usr_id` i `si_ses_id`. OmniRoute prosljeđuje isti krajnji endpoint `/api/dispatch` putem jednog ID-a modela (`notrack-c`, pseudonim `ntw`).
+
+### Koraci za povezivanje
+
+1. Otvorite [notrack.ai](https://notrack.ai) u pregledniku i dopustite postavljanje kolačića anonimne sesije.
+2. Otvorite **Alati za razvojne programere → Mreža**, osvježite stranicu i kliknite na bilo koji `/api` zahtjev.
+3. U odjeljku **Zaglavlja zahtjeva** kopirajte punu vrijednost zaglavlja `Cookie`.
+4. U OmniRouteu idite na **Pružaoci → Dodaj pružaoca → NoTrack Web (besplatno)**.
+5. Zalijepite niz kolačića u polje `apiKey` i kliknite **Sačuvaj**.
+
+OmniRoute iz zalijepljenog niza izdvaja `uid`, `si_usr_id` i `si_ses_id` te ponovo izrađuje čisto zaglavlje `Cookie` koje sadrži samo te parove — uz `nt_session` (token `ntk_…` postavljen za prijavljene račune), kada je prisutan. Ako bilo koja od te tri vrijednosti nedostaje, sirovi zalijepljeni niz prosljeđuje se bez izmjena kako bi operateri mogli eksperimentisati s alternativnim oblicima.
+
+### ID-ovi modela
+
+| ID modela   | Naziv za prikaz | Napomene                                                    |
+| ----------- | --------------- | ----------------------------------------------------------- |
+| `notrack-c` | NoTrack C       | Zadano — uzvodni model usmjeravanja `C`.                    |
+| `C`         | NoTrack C       | Pseudonim za `notrack-c` (sirovi uzvodni kod usmjeravanja). |
+| `notrack`   | NoTrack C       | Pseudonim za `notrack-c`.                                   |
+| `ntw`       | NoTrack C       | Kratki pseudonim za `notrack-c`.                            |
+
+Sva četiri ID-a modela mapiraju se na isti uzvodni model usmjeravanja (`C`).
+
+### Opcije zahtjeva
+
+Izvršitelj prihvata sljedeća neobavezna polja u tijelu zahtjeva:
+
+| Polje tijela          | Zadano  | Namjena                                                                       |
+| --------------------- | ------- | ----------------------------------------------------------------------------- |
+| `notrack_mode`        | `usual` | Način usmjeravanja (proizvoljan niz; uzvodni servis prihvata `usual`, …)      |
+| `notrack_max_turns`   | `6`     | Broj internih koraka koje uzvodni servis može izvršiti prije odgovaranja.     |
+| `notrack_chat_id`     | `null`  | Nastavlja postojeći uzvodni razgovor (izostavite za novi razgovor).           |
+| `notrack_attachments` | `[]`    | Prolazni niz deskriptora uzvodnih priloga.                                    |
+| `notrack_regenerate`  | `false` | Postavite na `true` da zatražite ponovo generisan odgovor za prethodni korak. |
+
+### Mogućnosti
+
+- **Strujani i nestrujani** dovršeci razgovora.
+- **Pozivanje alata** — postavite `tools: [...]` u zahtjevu; izvršitelj ih serijalizuje u ugovor omotnice za pozivanje alata i odgovore modela ponovo raščlanjuje u OpenAI `tool_calls`.
+- **`response_format`** — podržani su `json_object` i `json_schema`. Izvršitelj izdvaja prvi JSON objekt iz odgovora modela i pretvara ga u niz prije vraćanja.
+- **Naznaka rezonovanja** — izvršitelj emituje `reasoning` deltu kada uzvodni servis pošalje događaj `thinking`.
+
+### Ograničenja
+
+- Uzvodni servis primjenjuje kvote anonimnog korištenja — kada se one prekorače, izvršitelj prikazuje status 429 s razumljivom porukom.
+- Svi ID-ovi modela razrješavaju se na isti uzvodni model usmjeravanja; ne postoji prebacivanje za pojedinačne modele.
+- Izvršitelj ne poziva uzvodni endpoint `/api/chats`, pa se historija razgovora / sesije ne upravljaju automatski. Koristite `notrack_chat_id` za nastavak postojećeg uzvodnog razgovora.
+
+---
+
+# Šta pružaoci web-kolačića mogu, a šta ne mogu raditi
+
+Pružaoci web-kolačića ponovo koriste interfejs za razgovor web-stranice. Oni **ne** pružaju iste mogućnosti kao službeni API-ji.
 
 ## Podržano
 
-- Autentifikacija koristeći vašu postojeću sesiju pretraživača
-- Pristup modelima dostupnim putem vašeg naloga
-- Strimovanje odgovora chata
-- Nije potreban API ključ
+- Autentifikacija pomoću postojeće sesije preglednika
+- Pristup modelima dostupnim putem vašeg računa
+- Strimovanje odgovora četa
+- API ključ nije potreban
 
 ## Nije podržano
 
-- Pozivanje funkcija (Function calling)
-- Pozivanje alata (Tool calling)
+- Pozivanje funkcija
+- Pozivanje alata
 - Automatsko uređivanje datoteka
-- Agentski IDE radni procesi
-- Funkcije samo za API
+- Agentski tokovi rada u IDE-u
+- Funkcije dostupne isključivo putem API-ja
 
-Ovo je očekivano ponašanje i **nije** greška (bug).
+Ovo je očekivano ponašanje i **nije** greška.
 
-Ako vam je potrebno izvršavanje alata, automatsko uređivanje datoteka ili drugi agentski radni procesi, koristite **API-key provajdera** umjesto Web Cookie provajdera.
+Ako vam je potrebno izvršavanje alata, automatsko uređivanje datoteka ili drugi agentski tokovi rada, koristite pružaoca s **API ključem** umjesto pružaoca Web Cookie.
 
 ---
 
 # Napomena o validaciji
 
-Uspješan **Test Connection** ili validacija kolačića samo potvrđuje da priloženi akreditivi izgledaju kao da su u očekivanom formatu.
+Uspješan **Test Connection** ili validacija kolačića samo potvrđuje da su dostavljeni pristupni podaci naizgled u očekivanom formatu.
 
-Sve dok se problem #7857 ne riješi, uspješna validacija **ne garantuje** da će se provajder uspješno autentifikovati.
+Dok se ne riješi problem #7857, uspješna validacija **ne garantuje** da će se pružalac uspješno autentificirati.
 
-Ako autentifikacija i dalje ne uspijeva, provjerite da li ste kopirali akreditive iz aktivnog mrežnog zahtjeva, a ne iz skladišta kolačića pretraživača.
+Ako autentifikacija i dalje ne uspijeva, provjerite jeste li pristupne podatke kopirali iz aktivnog mrežnog zahtjeva, a ne iz pohrane kolačića preglednika.
 
 ---
 
 # Rješavanje problema
 
-## Neuspješna autentifikacija
+## Autentifikacija ne uspijeva
 
-Provjerite da li su akreditivi kopirani iz:
+Provjerite jesu li pristupni podaci kopirani iz:
 
 ```
 Network
@@ -150,44 +198,61 @@ Application
 
 ---
 
-## Kolačić radi u pretraživaču, ali ne u OmniRoute-u
+## Kolačić radi u pregledniku, ali ne i u OmniRouteu
 
-Neki provajderi uključuju kolačiće koji se šalju samo tokom autentifikovanih zahtjeva.
+Neki pružaoci uključuju kolačiće koji se šalju samo tokom autentificiranih zahtjeva.
 
-Ponovo kopirajte akreditive iz svježeg mrežnog zahtjeva nakon uspješnog otvaranja razgovora.
+Ponovo kopirajte pristupne podatke iz novog mrežnog zahtjeva nakon što uspješno otvorite razgovor.
 
 ---
 
 ## Sesija je istekla
 
-Web Cookie provajderi koriste vašu postojeću sesiju pretraživača.
+Pružaoci Web Cookie koriste vašu postojeću sesiju preglednika.
 
-Ako vaša sesija pretraživača istekne ili se odjavite, morate kopirati novi set akreditiva.
-
----
-
-## Test Connection prolazi, ali zahtjevi ne uspijevaju
-
-Sve dok se problem #7857 ne riješi, prolazak validacije ne garantuje da će zahtjev za autentifikaciju uspjeti.
-
-Ponovo kopirajte svoje akreditive iz svježeg autentifikovanog zahtjeva prije daljeg rješavanja problema.
+Ako vaša sesija preglednika istekne ili se odjavite, morate kopirati novi skup pristupnih podataka. Da biste automatizirali obnavljanje kolačića za podržane web-pružaoce, pogledajte prateći alat [Browser Session Sync Extension](../guides/SESSION-SYNC-EXTENSION.md).
 
 ---
 
-# Primjer provajdera
+## Test veze prolazi, ali zahtjevi ne uspijevaju
 
-Za kompletan vodič specifičan za provajdera, pogledajte:
+Dok se ne riješi problem #7857, prolazak validacije ne garantuje da će zahtjev za autentifikaciju uspjeti.
+
+Ponovo kopirajte pristupne podatke iz novog autentificiranog zahtjeva prije nego što nastavite s rješavanjem problema.
+
+---
+
+## ChatGPT Web ne uspijeva uz poruku "Unsupported ChatGPT integrity dependency"
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Pristupni podatak je ispravan — ta greška dolazi iz mosta, a ne iz sesije. chatgpt.com dodjeljuje svoje
+ID-ove modula pri svakom uvođenju, a most je ranije fiksirao ID pomoćnog modula Sentinel koji instancira, pa je
+ponovna izgradnja stranice chatgpt.com koja je preimenovala pomoćni modul prekinula svaki upit, dok je kolačić ostao važeći. Ponovna autorizacija
+veze to ne može popraviti.
+
+Izdanja koja razrješavaju modul putem vlastitog izvršnog okruženja stranice ne fiksiraju nijedan ID i kod njih se ovo ne događa. Ako vidite ovu
+grešku, nadogradite OmniRoute i ponovo pokrenite provjeru veze.
+
+---
+
+# Primjer pružaoca
+
+Za kompletan vodič specifičan za pružaoca pogledajte:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
-Claude Web vodič demonstrira kompletan proces podešavanja za Web Cookie provajdera i služi kao referentna implementacija.
+Vodič za Claude Web prikazuje kompletan postupak postavljanja pružaoca Web Cookie i služi kao referentna implementacija.
 
 ---
 
 # Najbolje prakse
 
-- Kopirajte akreditive iz svježeg autentifikovanog zahtjeva.
+- Kopirajte pristupne podatke iz novog autentificiranog zahtjeva.
 - Izbjegavajte ponovnu upotrebu starih kolačića.
-- Održavajte svoju sesiju pretraživača aktivnom dok koristite Web Cookie provajdere.
-- Tretirajte kopirane kolačiće kao osjetljive akreditive.
-- Koristite API-key provajdere kada vam je potrebno pozivanje funkcija ili agentski radni procesi.
+- Održavajte sesiju preglednika aktivnom dok koristite pružaoce Web Cookie.
+- S kopiranim kolačićima postupajte kao s osjetljivim pristupnim podacima.
+- Koristite pružaoce s API ključem kada vam je potrebno pozivanje funkcija ili agentski tokovi rada.

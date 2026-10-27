@@ -4,11 +4,30 @@
 
 ---
 
-OmniRoute menyediakan satu siri arahan `setup-*` yang mengkonfigurasi CLI pengekodan (Codex, Claude Code, OpenCode, Cline, …) untuk menggunakan OmniRoute sebagai bahagian belakangnya — supaya alat tersebut berkomunikasi dengan **satu** titik akhir dan OmniRoute menghala ke penyedia yang betul dengan sandaran automatik. Setiap arahan membaca katalog model **langsung** daripada OmniRoute yang sedang berjalan (tempatan atau jauh) dan menulis fail konfigurasi alat itu sendiri pada mesin **anda**. Kunci API dirujuk oleh pemboleh ubah persekitaran di mana sahaja alat itu menyokongnya. Arahan yang mengekalkan fail persekitaran tempatan alat dicatat di bawah.
+Untuk manifes boleh laku yang dikongsi, persekitaran anak yang terhad dan persediaan
+Gemini yang berterusan, lihat [kontrak pelancaran CLI](./CLI-LAUNCH-CONTRACTS.md).
 
-Terdapat juga pelancar generik — `omniroute run <target>` — yang melancarkan `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` atau `gemini` dengan env yang betul disuntik, tanpa menulis sebarang konfigurasi sama sekali. Sasaran dan aliasnya berasal dari manifes kanonik `bin/cli/cli-manifest.mjs` (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`, `open-code`, `qwen-code`, `gemini-cli`), dan `omniroute completion` menawarkan perkataan sasaran yang sama yang diperoleh daripada manifes. Pelancar warisan setiap alat — `omniroute launch` (Claude Code) dan `omniroute launch-codex` (Codex) — kekal tersedia.
+OmniRoute menyediakan rangkaian perintah `setup-*` yang mengkonfigurasi CLI
+pengekodan (Codex, Claude Code, OpenCode, Cline, …) untuk menggunakan OmniRoute sebagai bahagian belakangnya — supaya
+alat tersebut berkomunikasi dengan **satu** titik akhir dan OmniRoute menghalakan permintaan kepada penyedia yang betul dengan
+sandaran automatik. Setiap perintah membaca katalog model **langsung** daripada OmniRoute yang sedang berjalan
+(setempat atau jauh) dan menulis fail konfigurasi alat itu sendiri pada mesin **anda**.
+Kunci API dirujuk melalui pemboleh ubah persekitaran apabila alat tersebut
+menyokongnya. Perintah yang menyimpan fail persekitaran setempat alat secara berterusan dinyatakan di bawah.
 
-Penyertaan penyedia tersedia dari konteks tempatan/jauh yang sama. Arahan API-first di bawah memastikan pengesahan pengurusan berasingan daripada kelayakan penyedia dan tidak pernah mencetak kelayakan dalam output berstruktur:
+Terdapat juga pelancar generik — `omniroute run <target>` — yang menjalankan
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` atau `gemini` dengan
+persekitaran yang betul disuntik, tanpa menulis sebarang konfigurasi. Sasaran dan
+aliasnya berasal daripada manifes kanonik `bin/cli/cli-manifest.mjs`
+(`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
+`open-code`, `qwen-code`, `gemini-cli`), dan `omniroute completion` menawarkan
+perkataan sasaran yang sama, yang diterbitkan daripada manifes. Pelancar lama bagi setiap alat —
+`omniroute launch` (Claude Code) dan `omniroute launch-codex` (Codex) — kekal
+tersedia.
+
+Penyediaan awal penyedia tersedia daripada konteks setempat/jauh yang sama. Perintah
+yang mengutamakan API di bawah memastikan pengesahan pengurusan berasingan daripada kelayakan
+penyedia dan tidak sekali-kali mencetak kelayakan dalam output berstruktur:
 
 ```bash
 omniroute providers add glm --credential-env GLM_API_KEY --name work
@@ -18,16 +37,25 @@ omniroute providers edit <connection-id> --default-model glm/glm-5.2
 omniroute providers remove <connection-id> --yes
 ```
 
-Untuk skrip, utamakan `--credential-stdin` atau `--credential-env`; `--credential` dikekalkan untuk kegunaan tempatan yang terkawal. `providers remove` memerlukan `--yes` pada terminal bukan interaktif, dan kelima-lima arahan mematuhi konteks aktif atau pilihan global `--base-url`/`--api-key`.
+Untuk skrip, utamakan `--credential-stdin` atau `--credential-env`; `--credential`
+dikekalkan untuk kegunaan setempat yang terkawal. `providers remove` memerlukan `--yes` pada
+terminal bukan interaktif, dan kelima-lima perintah mematuhi konteks aktif atau
+pilihan global `--base-url`/`--api-key`.
 
-Pemilih penyedia menolak awalan ID, nama atau nama penyedia yang samar-samar; gunakan ID sambungan penuh apabila beberapa sambungan sepadan. Arahan cipta dan edit membaca semula sambungan yang disimpan, dan penyingkiran mengesahkan bahawa ia tidak lagi boleh dibaca. Import melangkau pasangan penyedia/nama yang sedia ada. Entri yang diimport tidak boleh mengatasi titik akhir pengurusan, konteks atau kelayakan pengurusan yang dibekalkan kepada CLI.
+Pemilih penyedia menolak awalan ID, nama atau nama penyedia yang tidak jelas; gunakan
+ID sambungan penuh apabila beberapa sambungan sepadan. Perintah penciptaan dan penyuntingan membaca
+semula sambungan yang disimpan, manakala pengalihan keluar mengesahkan bahawa sambungan tersebut tidak lagi boleh dibaca.
+Import akan melangkau pasangan penyedia/nama yang sedia ada. Entri yang diimport tidak boleh mengatasi
+titik akhir pengurusan, konteks atau kelayakan pengurusan yang dibekalkan kepada CLI.
 
-Untuk persediaan asas sekali sahaja yang ditulis tangan bagi dua integrasi terkaya, lihat penyelaman mendalam setiap alat:
+Untuk persediaan asas manual sekali sahaja bagi dua integrasi yang paling lengkap, lihat
+huraian mendalam bagi setiap alat:
 
 - [Konfigurasi Claude Code](./CLAUDE-CODE-CONFIGURATION.md)
 - [Konfigurasi Codex CLI](./CODEX-CLI-CONFIGURATION.md)
-- [Mod Jauh](./REMOTE-MODE.md) — mengendalikan OmniRoute jauh (VPS / Tailnet) dari komputer riba anda
-- [VS Code Copilot Chat](./VSCODE-COPILOT.md) — sambungan OmniCopilot; ia juga boleh menjalankan arahan `setup-*` ini untuk anda dari dalam editor
+- [Mod Jauh](./REMOTE-MODE.md) — kendalikan OmniRoute jauh (VPS / Tailnet) daripada komputer riba anda
+- [VS Code Copilot Chat](./VSCODE-COPILOT.md) — sambungan OmniCopilot; ia juga boleh menjalankan
+  perintah `setup-*` ini untuk anda dari dalam editor
 
 ---
 
@@ -36,61 +64,62 @@ Untuk persediaan asas sekali sahaja yang ditulis tangan bagi dua integrasi terka
 Setiap perintah mematuhi **konteks aktif** (ditetapkan dengan `omniroute connect`, lihat
 [Mod Jauh](./REMOTE-MODE.md)) atau bendera `--remote <url> --api-key <key>` yang dinyatakan secara eksplisit.
 "Setempat berbanding jauh" di bawah bermaksud: tanpa bendera, ia menyasarkan `http://localhost:20128`;
-dengan `--remote` (atau konteks jauh yang aktif), ia mengambil katalog daripada
+dengan `--remote` (atau konteks jauh yang aktif), ia mendapatkan katalog daripada
 pelayan tersebut dan menulis konfigurasi secara setempat.
 
-| Perintah                   | Alat                         | Perkara yang ditulisnya                                                                                                                                                                     | Bendera utama                                                                                                                              | Setempat lwn jauh |
-| -------------------------- | ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
-| `omniroute setup-codex`    | OpenAI Codex CLI             | `~/.codex/<name>.config.toml` — satu profil bagi setiap model teks yang serasi (`codex --profile <name>`)                                                                                   | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Kedua-duanya      |
-| `omniroute setup-claude`   | Claude Code                  | `~/.claude/profiles/<name>/settings.json` — satu profil bagi setiap model yang sepadan (`CLAUDE_CONFIG_DIR`)                                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Kedua-duanya      |
-| `omniroute setup-opencode` | OpenCode (serasi openai)     | `~/.config/opencode/opencode.json` — penyedia `omniroute` dengan setiap model dalam katalog (`opencode -m omniroute/<model>`)                                                               | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Kedua-duanya      |
-| `omniroute setup-cline`    | Cline                        | `~/.cline/data/{globalState,secrets}.json` (mod CLI) + mencetak tetapan sambungan VS Code                                                                                                   | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Kedua-duanya      |
-| `omniroute setup-kilo`     | Kilo Code                    | `~/.local/share/kilo/auth.json` (CLI) + menggabungkan `kilocode.*` ke dalam `settings.json` VS Code jika wujud                                                                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Kedua-duanya      |
-| `omniroute setup-continue` | Continue / `cn` CLI          | `~/.continue/config.yaml` — model `provider: openai`, kunci melalui `${{ secrets.OMNIROUTE_API_KEY }}`                                                                                      | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Kedua-duanya      |
-| `omniroute setup-cursor`   | Cursor                       | Tiada — mencetak langkah dalam aplikasi (konfigurasi Cursor ialah SQLite legap)                                                                                                             | `--remote` `--api-key` `--only` `--port`                                                                                                   | Kedua-duanya      |
-| `omniroute setup-roo`      | Roo Code                     | `~/.omniroute/roo-settings.json` (dokumen import) + menetapkan `roo-cline.autoImportSettingsPath` jika `settings.json` VS Code wujud                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Kedua-duanya      |
-| `omniroute setup-crush`    | Crush                        | `~/.config/crush/crush.json` — penyedia `openai-compat`, kunci melalui `$OMNIROUTE_API_KEY`                                                                                                 | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Kedua-duanya      |
-| `omniroute setup-goose`    | Goose                        | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + mencetak resipi persekitaran                                                                                 | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Kedua-duanya      |
-| `omniroute setup-aider`    | Aider                        | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + mencetak resipi persekitaran                                                                                               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Kedua-duanya      |
-| `omniroute setup-qwen`     | Qwen Code                    | `~/.qwen/settings.json` — tatasusunan V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` dalam `~/.qwen/.env`                                                                                 | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Kedua-duanya      |
-| `omniroute setup-5dive`    | 5dive (kumpulan ejen)        | Tiada di bawah `$HOME` — menulis **profil pengesahan** 5dive (`/var/lib/5dive/auth-profiles/<name>/`) melalui `5dive agent auth set`; khusus root, dijalankan pada hos kumpulan             | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Kedua-duanya      |
-| `omniroute run <target>`   | Pelancaran masa jalan (umum) | Tiada — melancarkan `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` dengan persekitaran dan argumen yang betul; Qwen dan Gemini menggunakan direktori utama terpencil sementara | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Kedua-duanya      |
-| `omniroute launch`         | Claude Code                  | Tiada — melancarkan `claude` dengan `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` disuntik                                                                                                    | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Kedua-duanya      |
-| `omniroute launch-codex`   | OpenAI Codex CLI             | Tiada — melancarkan `codex` dengan penyedia `omniroute` disuntik melalui bendera `-c`                                                                                                       | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Kedua-duanya      |
+| Perintah                   | Alat                            | Perkara yang ditulis                                                                                                                                                                              | Flag utama                                                                                                                                 | Tempatan lwn jauh |
+| -------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
+| `omniroute setup-codex`    | OpenAI Codex CLI                | `~/.codex/<name>.config.toml` — satu profil bagi setiap model teks yang serasi (`codex --profile <name>`)                                                                                         | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Kedua-duanya      |
+| `omniroute setup-claude`   | Claude Code                     | `~/.claude/profiles/<name>/settings.json` — satu profil bagi setiap model yang sepadan (`CLAUDE_CONFIG_DIR`)                                                                                      | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Kedua-duanya      |
+| `omniroute setup-opencode` | OpenCode (serasi openai)        | `~/.config/opencode/opencode.json` — penyedia `omniroute` dengan setiap model katalog (`opencode -m omniroute/<model>`)                                                                           | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Kedua-duanya      |
+| `omniroute setup-cline`    | Cline                           | `~/.cline/data/{globalState,secrets}.json` (mod CLI) + mencetak tetapan sambungan VS Code                                                                                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Kedua-duanya      |
+| `omniroute setup-kilo`     | Kilo Code                       | `~/.local/share/kilo/auth.json` (CLI) + menggabungkan `kilocode.*` ke dalam `settings.json` VS Code jika ada                                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Kedua-duanya      |
+| `omniroute setup-continue` | Continue / `cn` CLI             | `~/.continue/config.yaml` — model `provider: openai`, kunci melalui `${{ secrets.OMNIROUTE_API_KEY }}`                                                                                            | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Kedua-duanya      |
+| `omniroute setup-cursor`   | Cursor                          | Tiada — mencetak langkah dalam aplikasi (konfigurasi Cursor ialah SQLite legap)                                                                                                                   | `--remote` `--api-key` `--only` `--port`                                                                                                   | Kedua-duanya      |
+| `omniroute setup-roo`      | Roo Code                        | `~/.omniroute/roo-settings.json` (dokumen import) + menetapkan `roo-cline.autoImportSettingsPath` jika `settings.json` VS Code wujud                                                              | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Kedua-duanya      |
+| `omniroute setup-crush`    | Crush                           | `~/.config/crush/crush.json` — penyedia `openai-compat`, kunci melalui `$OMNIROUTE_API_KEY`                                                                                                       | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Kedua-duanya      |
+| `omniroute setup-zed`      | Zed                             | `~/.config/zed/settings.json` — penyedia `openai_compatible.omniroute` (≤ 25 model berkeupayaan menggunakan alat), kunci melalui `$OMNIROUTE_API_KEY`                                             | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | Kedua-duanya      |
+| `omniroute setup-goose`    | Goose                           | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + mencetak resipi persekitaran                                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Kedua-duanya      |
+| `omniroute setup-aider`    | Aider                           | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + mencetak resipi persekitaran                                                                                                     | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Kedua-duanya      |
+| `omniroute setup-qwen`     | Qwen Code                       | `~/.qwen/settings.json` — tatasusunan V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` dalam `~/.qwen/.env`                                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Kedua-duanya      |
+| `omniroute setup-5dive`    | 5dive (kelompok ejen)           | Tiada apa-apa di bawah `$HOME` — menulis **profil pengesahan** 5dive (`/var/lib/5dive/auth-profiles/<name>/`) melalui `5dive agent auth set`; untuk root sahaja, dijalankan pada hos kelompok     | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Kedua-duanya      |
+| `omniroute run <target>`   | Pelancaran masa jalan (generik) | Tiada apa-apa — memulakan `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` dengan persekitaran dan argumen yang betul; Qwen dan Gemini menggunakan direktori utama terpencil sementara | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Kedua-duanya      |
+| `omniroute launch`         | Claude Code                     | Tiada apa-apa — memulakan `claude` dengan `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN` disuntik                                                                                                    | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Kedua-duanya      |
+| `omniroute launch-codex`   | OpenAI Codex CLI                | Tiada apa-apa — memulakan `codex` dengan penyedia `omniroute` disuntik melalui bendera `-c`                                                                                                       | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Kedua-duanya      |
 
 Nota tentang bendera (disahkan dalam sumber perintah):
 
-- `--remote <url>` — dapatkan katalog daripada OmniRoute jauh (mengatasi `--port`
-  dan konteks aktif). `--api-key <key>` membekalkan bukti kelayakan untuk
-  pelayan tersebut (lalai kepada pemboleh ubah persekitaran `OMNIROUTE_API_KEY`, atau token konteks aktif).
-- `--only <patterns>` — subrentetan dipisahkan koma; kekalkan hanya ID model yang sepadan
+- `--remote <url>` — mendapatkan katalog daripada OmniRoute jauh (mengatasi `--port`
+  dan konteks aktif). `--api-key <key>` membekalkan kelayakan untuk pelayan
+  tersebut (lalai kepada pemboleh ubah persekitaran `OMNIROUTE_API_KEY`, atau token konteks aktif).
+- `--only <patterns>` — subrentetan dipisahkan koma; hanya kekalkan ID model yang sepadan
   (cth. `--only glm,kimi`). Tersedia pada `setup-codex`, `setup-claude`,
-  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`.
-- `--dry-run` — cetak dengan tepat perkara yang akan ditulis tanpa menyentuh
+  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed`.
+- `--dry-run` — mencetak dengan tepat perkara yang akan ditulis tanpa menyentuh
   sistem fail. Tersedia pada setiap perintah `setup-*` **kecuali** `setup-cursor`
   (yang tidak pernah menulis fail).
 - `--model <id>` — diperlukan (atau dipilih secara interaktif) untuk alat yang tidak mempunyai
-  penemuan automatik model: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Alat tersebut
-  turut menerima `--yes` untuk pelaksanaan bukan interaktif (yang kemudiannya memerlukan `--model`).
-  `setup-opencode` menerima `--model` untuk menetapkan model peringkat teratas lalai.
-- `--model <id>` pada `omniroute run` mengikuti pendawaian setiap sasaran dalam manifes
+  penemuan model automatik: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Alat-alat tersebut
+  juga menerima `--yes` untuk pelaksanaan tanpa interaksi (yang kemudiannya memerlukan `--model`).
+  `setup-opencode` menerima `--model` untuk menetapkan model peringkat atas lalai.
+- `--model <id>` pada `omniroute run` mengikuti pendawaian khusus sasaran dalam manifes
   (`bin/cli/cli-manifest.mjs`): **aider** menerima `--model openai/<id>` dan
-  **opencode** `--model omniroute/<id>` (awalan ditambahkan hanya apabila ID
-  belum memilikinya); **qwen** dan **gemini** menerima ID tersebut secara verbatim;
+  **opencode** menerima `--model omniroute/<id>` (awalan hanya ditambahkan apabila ID
+  belum mengandunginya); **qwen** dan **gemini** menerima ID tersebut seadanya;
   **claude** menerimanya melalui `ANTHROPIC_MODEL`, **goose** melalui `GOOSE_MODEL`, dan
-  **codex** melalui argumen `-c model_providers.omniroute.*`. **Qwen ialah satu-satunya sasaran pelaksanaan
-  yang mewajibkan `--model`** — `omniroute run qwen` tanpanya akan keluar
+  **codex** melalui argumen `-c model_providers.omniroute.*`. **Qwen ialah satu-satunya sasaran
+  pelaksanaan yang mewajibkan `--model`** — `omniroute run qwen` tanpanya akan keluar
   dengan kod `2` berserta ralat yang jelas.
 - `--port <port>` — port OmniRoute setempat (lalai `20128`, diabaikan apabila `--remote`
-  ditetapkan). Terdapat pada semua `setup-*` dan kedua-dua pelancar.
-- Kod keluar `omniroute run`: kod keluar CLI anak itu sendiri disebarkan
-  secara verbatim; `2` = argumen tidak sah (sasaran tidak disokong, `--model` wajib
-  tiada, pengawal kontena); `127` = binari sasaran tiada dalam `PATH`;
+  ditetapkan). Tersedia pada semua `setup-*` dan kedua-dua pelancar.
+- Kod keluar `omniroute run`: kod keluar CLI anak disebarkan
+  tanpa perubahan; `2` = argumen tidak sah (sasaran tidak disokong, `--model` wajib
+  tiada, pengawal bekas); `127` = perduaan sasaran tiada dalam `PATH`;
   `130`/`143`/`129` apabila pelancaran ditamatkan oleh `SIGINT`/`SIGTERM`/`SIGHUP`;
   `1` = kegagalan pelancaran masa jalan yang lain.
 - Kedua-dua pelancar (`launch`, `launch-codex`) menerima `--profile <name>` untuk memilih
   profil yang ditulis oleh `setup-claude` / `setup-codex`, serta argumen laluan terus untuk
-  binari asas `claude` / `codex`.
+  perduaan asas `claude` / `codex`.
 
 Pemilih interaktif turut dikongsi oleh resipi persediaan:
 
@@ -101,11 +130,11 @@ omniroute configure opencode --provider glm
 omniroute configure qwen --model qwen/qwen3.8-max-preview --yes
 ```
 
-`configure` kini mewakilkan kepada resipi yang telah diuji untuk `codex`, `claude`,
+`configure` pada masa ini mewakilkan kepada resipi yang telah diuji untuk `codex`, `claude`,
 `opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo`, dan `5dive`.
 Entri katalog khusus IDE,
-MITM dan panduan sahaja kekal sebagai aliran `setup-*`/manual yang eksplisit dan
-tidak dipersembahkan sebagai sasaran yang boleh dilancarkan.
+MITM, dan panduan sahaja kekal sebagai aliran `setup-*`/manual yang eksplisit dan
+tidak dipaparkan sebagai sasaran yang boleh dilancarkan.
 
 > `setup-opencode` ialah integrasi OpenCode **ringan yang serasi dengan openai**.
 > Terdapat juga integrasi pemalam yang lebih kaya — `omniroute setup opencode` — yang
@@ -117,9 +146,9 @@ tidak dipersembahkan sebagai sasaran yang boleh dilancarkan.
 > `@omniroute/opencode-plugin` untuk OpenCode v1 dan
 > `@omniroute/opencode-plugin-v2` untuk OpenCode v2. Pakej v2 adalah baharu
 > (`0.1.0`) dan mengikuti kontrak hos yang masih berubah, maka ia membaca
-> bentuk yang disediakan oleh OpenCode dalam draf katalog dan bukannya mengandaikan satu bentuk tertentu. Pasangnya
+> bentuk yang disemai oleh OpenCode ke dalam draf katalog dan bukannya mengandaikan bentuk tertentu. Pasangnya
 > dengan menambahkan entri `plugins` pada `opencode.json`; `omniroute setup opencode`
-> masih memasang pakej v1. Pilihan dan tertib carian bukti kelayakan terdapat dalam
+> masih memasang pakej v1. Pilihan dan tertib carian kelayakan tersedia dalam
 > README pakej.
 
 ---
@@ -225,9 +254,9 @@ Menghalakan profil kepada **kombo** OmniRoute dan bukannya satu model tunggal me
 
 ## Konvensyen URL asas (alat yang memerlukan `/v1`)
 
-OmniRoute mendedahkan antara muka OpenAI pada `/v1`, antara muka Anthropic pada akar,
-dan antara muka Gemini natif pada `/v1beta`. Setiap integrasi dikonfigurasikan mengikut format yang
-dijangkakan oleh alatnya (disahkan dalam sumber perintah):
+OmniRoute menyediakan antara muka OpenAI pada `/v1`, antara muka Anthropic pada akar,
+dan antara muka asli Gemini pada `/v1beta`. Setiap integrasi dikonfigurasikan mengikut format yang
+dijangkakan oleh alat tersebut (disahkan dalam sumber perintah):
 
 | Integrasi                                                                  | URL asas yang ditulis | `/v1`?                                             |
 | -------------------------------------------------------------------------- | --------------------- | -------------------------------------------------- |
@@ -235,6 +264,7 @@ dijangkakan oleh alatnya (disahkan dalam sumber perintah):
 | `setup-goose` (`OPENAI_HOST`)                                              | akar                  | Tidak — Goose menambahkan laluan                   |
 | `setup-aider` (`OPENAI_API_BASE`)                                          | akar                  | Tidak — LiteLLM menambahkan `/v1/chat/completions` |
 | `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | dengan `/v1`          | Ya                                                 |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | dengan `/v1`          | Ya                                                 |
 | `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | akar                  | Tidak — Claude Code menambahkan `/v1/messages`     |
 | `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | dengan `/v1`          | Ya                                                 |
 | `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | dengan `/v1`          | Ya                                                 |

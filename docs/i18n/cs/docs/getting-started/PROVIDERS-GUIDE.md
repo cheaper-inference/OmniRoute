@@ -10,46 +10,45 @@
 
 ## Co je poskytovatel?
 
-Představte si poskytovatele jako **mobilního operátora**. Stejně jako k telefonování potřebujete mobilního operátora, k používání modelů AI potřebujete poskytovatele AI. OmniRoute je jako telefon, který funguje se **všemi operátory** — můžete mezi nimi automaticky přepínat.
+Představte si poskytovatele jako **mobilního operátora**. Stejně jako k telefonování potřebujete mobilního operátora, potřebujete k používání modelů umělé inteligence poskytovatele AI. OmniRoute je jako telefon, který funguje se **všemi operátory** — můžete mezi nimi automaticky přepínat.
 
 ### Typy poskytovatelů
 
-| Typ                      | Co to je                         | Příklady                          | Cena                  |
-| ------------------------ | -------------------------------- | --------------------------------- | --------------------- |
-| **Zdarma**               | Není vyžadována žádná platba     | Kiro, OpenCode Free, Pollinations | $0                    |
-| **Klíč API**             | Potřebujete klíč API             | OpenAI, Anthropic, Google         | Platba podle využití  |
-| **OAuth**                | Přihlášení pomocí vašeho účtu    | Claude Code, GitHub Copilot       | Předplatné            |
-| **Webový soubor cookie** | Používá relaci vašeho prohlížeče | ChatGPT Web (Codex), Gemini Web   | $0 (používá váš účet) |
+| Typ            | Co to je                         | Příklady                        | Cena                  |
+| -------------- | -------------------------------- | ------------------------------- | --------------------- |
+| **Zdarma**     | Není vyžadována žádná platba     | Kiro, Pollinations              | $0                    |
+| **Klíč API**   | Potřebujete klíč API             | OpenAI, Anthropic, Google       | Platba podle využití  |
+| **OAuth**      | Přihlášení pomocí vašeho účtu    | Claude Code, GitHub Copilot     | Předplatné            |
+| **Web cookie** | Používá relaci vašeho prohlížeče | ChatGPT Web (Codex), Gemini Web | $0 (používá váš účet) |
 
-### Poskytovatelé využívající webové soubory cookie
+### Poskytovatelé využívající webové cookies
 
-Obecné pokyny k nastavení, omezení, řešení potíží a informace k ověřování u jednotlivých poskytovatelů najdete v souboru **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**.
+Obecné pokyny k nastavení, omezení, řešení problémů a pokyny k ověřování specifické pro jednotlivé poskytovatele najdete v dokumentu **[WEB-COOKIE-GUIDE.md](./WEB-COOKIE-GUIDE.md)**.
 ---
 
-## Rychlý začátek: Připojení prvního poskytovatele
+## Rychlý start: Připojte svého prvního poskytovatele
 
 ### Volitelné nastavení bezplatných poskytovatelů při prvním spuštění
 
 Průvodce prvním spuštěním nabízí samostatnou kartu **Nastavit bezplatné poskytovatele**. Aktuální
-seznam vhodných poskytovatelů odvodí z registru poskytovatelů OmniRoute, kteří nevyžadují ověření, a poté vám umožní jednotlivé
-poskytovatele před potvrzením zkontrolovat a zrušit jejich výběr. OmniRoute zobrazí upozornění poskytovatele a odkaz na jeho web,
-abyste si mohli nejprve prostudovat podmínky třetí strany, zásady ochrany osobních údajů, dostupnost a limity požadavků.
+seznam dostupných poskytovatelů odvozuje z registru poskytovatelů OmniRoute, kteří nevyžadují ověření, a poté vám umožní každého
+poskytovatele před potvrzením zkontrolovat a případně zrušit jeho výběr. OmniRoute zobrazí upozornění poskytovatele a odkaz na jeho web,
+abyste si nejprve mohli projít podmínky třetí strany, ochranu soukromí, dostupnost a limity požadavků.
 
-Tato akce je volitelná: dokončením průvodce se připojení k bezplatným poskytovatelům nikdy nevytvoří bez vašeho vědomí.
-Vytvoří pouze dosud chybějící poskytovatele, ponechá stávající přizpůsobená připojení
-beze změny a samostatně uvede vytvořené, již nakonfigurované a neúspěšné poskytovatele. Po částečném úspěchu můžete
+Tato akce je volitelná: dokončení průvodce nikdy skrytě nevytvoří připojení k bezplatným poskytovatelům.
+Vytvoří pouze poskytovatele, kteří dosud chybějí, existující přizpůsobená připojení
+ponechá beze změny a jednotlivě oznámí vytvořené, již nakonfigurované a neúspěšné poskytovatele. Po částečném úspěchu můžete
 bezpečně zopakovat pouze neúspěšné pokusy.
 
-### Možnost A: Bezplatný poskytovatel (bez platební karty)
+### Možnost A: Bezplatný poskytovatel (bez kreditní karty)
 
-1. Otevřete ovládací panel na adrese `http://localhost:20128`
+1. Otevřete řídicí panel na adrese `http://localhost:20128`
 2. Přejděte na **Poskytovatelé** → **Přidat poskytovatele**
 3. Vyberte jednoho z těchto bezplatných poskytovatelů:
    - **Kiro AI** — Bezplatné modely Claude (bez nutnosti ověření)
-   - **OpenCode Free** — Bezplatné modely GPT (bez nutnosti ověření)
    - **Pollinations** — Bezplatné modely GPT-5, Claude a Gemini (bez nutnosti klíče)
-   - **LongCat** — 10M tokenů zdarma (jednorázové přidělení, vyžaduje účet a KYC)
-   - **Cloudflare AI** — Více než 50 modelů, 10K neuronů denně
+   - **LongCat** — 10 milionů tokenů zdarma (jednorázový příděl, vyžaduje účet + KYC)
+   - **Cloudflare AI** — Více než 50 modelů, 10 tisíc neuronů denně
    - **MLX Gemma 26B** — Lokální model pro Apple Silicon (~38.5 tok/s, ~15.9GB RAM)
    - **MLX Qwen 3.8 27B** — Lokální model pro Apple Silicon (~9.1 tok/s, ~13.1GB RAM)
 4. Klikněte na **Připojit**
@@ -57,39 +56,39 @@ bezpečně zopakovat pouze neúspěšné pokusy.
 
 ### Možnost B: Poskytovatel s klíčem API (placený)
 
-1. Získejte klíč API na webu poskytovatele:
+1. Získejte klíč API z webu poskytovatele:
    - **OpenAI**: https://platform.openai.com/api-keys
    - **Anthropic**: https://console.anthropic.com/
    - **Google**: https://aistudio.google.com/apikey
    - **DeepSeek**: https://platform.deepseek.com/
    - **Groq**: https://console.groq.com/
-2. Otevřete ovládací panel na adrese `http://localhost:20128`
+2. Otevřete řídicí panel na adrese `http://localhost:20128`
 3. Přejděte na **Poskytovatelé** → **Přidat poskytovatele**
 4. Vyberte svého poskytovatele
 5. Vložte svůj klíč API
 6. Klikněte na **Připojit**
-7. Hotovo! Nyní máte přístup k modelům tohoto poskytovatele.
+7. Hotovo! Nyní máte přístup k modelům daného poskytovatele.
 
 ### Možnost C: Poskytovatel OAuth (předplatné)
 
-1. Otevřete ovládací panel na adrese `http://localhost:20128`
+1. Otevřete řídicí panel na adrese `http://localhost:20128`
 2. Přejděte na **Poskytovatelé** → **Přidat poskytovatele**
-3. Vyberte svého poskytovatele (například Claude Code nebo GitHub Copilot)
+3. Vyberte svého poskytovatele (např. Claude Code, GitHub Copilot)
 4. Klikněte na **Připojit pomocí OAuth**
 5. Přihlaste se pomocí svého účtu
-6. Hotovo! Nyní máte přístup k modelům zahrnutým ve svém předplatném.
+6. Hotovo! Nyní máte přístup k modelům zahrnutým ve vašem předplatném.
 
 ### Možnost D: Lokální modely MLX (Apple Silicon)
 
-Na počítačích Mac s Apple Silicon a sjednocenou pamětí podporuje OmniRoute připojení k lokálním modelům MLX spuštěným pomocí `mlx-lm.server` jako k běžným lokálním poskytovatelům kompatibilním s OpenAI.
+Pro počítače Mac s Apple Silicon a sjednocenou pamětí podporuje OmniRoute připojení k lokálním modelům MLX spuštěným prostřednictvím `mlx-lm.server` jako k běžným lokálním poskytovatelům kompatibilním s OpenAI.
 
 #### Předpoklady
 
-- **Mac s Apple Silicon** (M1/M2/M3/M4), doporučuje se alespoň 24GB sjednocené paměti
+- **Mac s Apple Silicon** (M1/M2/M3/M4), doporučeno alespoň 24GB sjednocené paměti
 - Správce balíčků **uv**: `curl -LsSf https://astral.sh/uv/install.sh | sh`
 - **mlx-lm**: `uv pip install mlx-lm`
 
-#### Rychlý začátek
+#### Rychlý start
 
 1. **Nainstalujte závislosti**:
 
@@ -111,14 +110,14 @@ Na počítačích Mac s Apple Silicon a sjednocenou pamětí podporuje OmniRoute
    uv run mlx_lm.server --model maglun/Qwen3.8-27B-MLX-Mixed-3.80bpw --port 11436 --host 127.0.0.1
    ```
 
-3. **Připojte se v ovládacím panelu OmniRoute**:
+3. **Připojte se v řídicím panelu OmniRoute**:
    - Přejděte na **Poskytovatelé** → **Přidat poskytovatele**
    - Vyberte **MLX Gemma 26B** nebo **MLX Qwen 3.8 27B**
-   - Klikněte na **Připojit** (klíč API není potřeba)
+   - Klikněte na **Připojit** (není potřeba klíč API)
 
 4. **Použití s OpenCode**:
    ```bash
-   # Nakonfigurujte OpenCode tak, aby používal OmniRoute
+   # Nakonfigurujte OpenCode pro použití OmniRoute
    opencode config set api.base_url http://localhost:20128/v1
    opencode config set api.key <your-omniroute-api-key>
 
@@ -129,18 +128,18 @@ Na počítačích Mac s Apple Silicon a sjednocenou pamětí podporuje OmniRoute
 
 #### Správa paměti
 
-**Důležité**: S 24GB sjednocené paměti lze současně spustit pouze **jeden velký model MLX**.
+**Důležité**: S 24GB sjednocené paměti může být současně spuštěn pouze **jeden velký model MLX**.
 
-- Gemma 26B: maximální využití paměti ~15.9GB
-- Qwen 3.8 27B: maximální využití paměti ~13.1GB
+- Gemma 26B: špičková spotřeba paměti ~15.9GB
+- Qwen 3.8 27B: špičková spotřeba paměti ~13.1GB
 
 Toto musíte spravovat ručně:
 
 - Spouštějte vždy pouze jeden server MLX, nebo
 - Spusťte oba na samostatných počítačích, nebo
-- Před spuštěním druhého jeden zastavte
+- Před spuštěním jednoho zastavte druhý
 
-OmniRoute procesy serveru MLX automaticky nespravuje — pouze směruje požadavky na vámi nakonfigurované koncové body kompatibilní s OpenAI.
+OmniRoute automaticky nespravuje procesy serverů MLX — pouze směruje požadavky na vámi nakonfigurované koncové body kompatibilní s OpenAI.
 
 #### Podpora volání nástrojů
 
@@ -159,32 +158,30 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 #### Řešení problémů
 
-| Problém                 | Řešení                                                                                                    |
-| ----------------------- | --------------------------------------------------------------------------------------------------------- |
-| Server se nespustí      | Zkontrolujte `uv run mlx_lm.server --help` a ověřte ID modelů                                             |
-| Nedostatek paměti       | Zajistěte, aby běžel pouze jeden model; zavřete ostatní aplikace; zkontrolujte Monitor aktivity           |
-| Připojení odmítnuto     | Ověřte, že server běží na správném portu (11435/11436)                                                    |
-| Pomalé odpovědi         | Při prvním požadavku se model načte do paměti (~30–60 s); následující požadavky jsou rychlé               |
-| Volání nástrojů selhává | Ujistěte se, že model podporuje nástroje; zkontrolujte protokoly OmniRoute, zda neobsahují chyby překladu |
+| Problém                  | Řešení                                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| Server se nespustí       | Zkontrolujte `uv run mlx_lm.server --help` a ověřte ID modelů                                   |
+| Nedostatek paměti        | Zajistěte, aby běžel pouze jeden model; zavřete ostatní aplikace; zkontrolujte Monitor aktivity |
+| Připojení bylo odmítnuto | Ověřte, že server běží na správném portu (11435/11436)                                          |
+| Pomalé odpovědi          | První požadavek načte model do paměti (~30–60 s); následné požadavky jsou rychlé                |
+| Volání nástrojů selhává  | Ověřte, že model podporuje nástroje; zkontrolujte v protokolech OmniRoute chyby překladu        |
 
 ---
 
 ## Nejlepší bezplatní poskytovatelé
 
-Tito poskytovatelé nabízejí **bezplatný přístup** bez platební karty:
+Tito poskytovatelé nabízejí **bezplatný přístup** bez nutnosti zadávat platební kartu:
 
 | Poskytovatel      | Bezplatná kvóta         | Modely                                   | Jak se připojit       |
 | ----------------- | ----------------------- | ---------------------------------------- | --------------------- |
 | **Kiro AI**       | 50 kreditů/měsíc        | Claude Sonnet 4.5, Haiku 4.5, Opus 4.6   | Bez ověření           |
-| **OpenCode Free** | Neomezeně               | GPT-4o, Claude, Gemini                   | Bez ověření           |
-| **Pollinations**  | Klíč není potřeba       | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Bez ověření           |
-| **LongCat**       | Jednorázově 10M         | LongCat-2.0                              | Klíč API + KYC        |
+| **Pollinations**  | Bez nutnosti klíče      | GPT-5, Claude, Gemini, DeepSeek, Llama 4 | Bez ověření           |
+| **LongCat**       | Jednorázově 10M         | LongCat-2.0                              | API klíč + KYC        |
 | **Cloudflare AI** | 10K neuronů/den         | Více než 50 modelů                       | Bez ověření           |
-| **NVIDIA NIM**    | ~40 RPM                 | 129 modelů                               | Je vyžadován klíč API |
-| **Cerebras**      | Kredit $5 za registraci | GLM 4.7, GPT-OSS 120B                    | Klíč API + karta      |
-| **Qoder**         | Neomezeně               | Kimi-K2, DeepSeek-R1, Qwen3-coder        | Bez ověření           |
+| **NVIDIA NIM**    | ~40 RPM                 | 129 modelů                               | Je vyžadován API klíč |
+| **Cerebras**      | Kredit $5 za registraci | GLM 4.7, GPT-OSS 120B                    | API klíč + karta      |
 
-**Tip**: Připojte více bezplatných poskytovatelů a získejte **neomezenou AI zdarma** s automatickým přepnutím při selhání!
+**Tip**: Připojte více bezplatných poskytovatelů a získejte **neomezenou AI zdarma** s automatickým přepnutím při výpadku!
 
 ---
 
@@ -241,70 +238,110 @@ Váš poskytovatel je nyní připojen. Můžete jej používat s `model: "auto"`
 
 OmniRoute funguje nejlépe s **více poskytovateli**. Získáte tak:
 
-- **Automatické přepnutí při selhání** — Pokud jeden poskytovatel selže, OmniRoute vyzkouší dalšího
-- **Optimalizaci nákladů** — OmniRoute vybere pro každý požadavek nejlevnějšího poskytovatele
-- **Optimalizaci rychlosti** — OmniRoute vybere pro každý požadavek nejrychlejšího poskytovatele
-- **Optimalizaci kvality** — OmniRoute vybere pro každou úlohu nejlepšího poskytovatele
+- **Automatické záložní řešení** — Pokud jeden poskytovatel selže, OmniRoute vyzkouší dalšího
+- **Optimalizaci nákladů** — OmniRoute pro každý požadavek vybere nejlevnějšího poskytovatele
+- **Optimalizaci rychlosti** — OmniRoute pro každý požadavek vybere nejrychlejšího poskytovatele
+- **Optimalizaci kvality** — OmniRoute pro každou úlohu vybere nejlepšího poskytovatele
 
 ### Doporučené nastavení
 
-Pro nejlepší fungování připojte alespoň **3 poskytovatele**:
+Pro nejlepší používání připojte alespoň **3 poskytovatele**:
 
-1. **Jeden bezplatný poskytovatel** (Kiro, OpenCode Free nebo Pollinations) — Vždy k dispozici
+1. **Jeden bezplatný poskytovatel** (Kiro nebo Pollinations) — Vždy dostupný
 2. **Jeden rychlý poskytovatel** (Groq, Cerebras) — Pro rychlé odpovědi
 3. **Jeden kvalitní poskytovatel** (OpenAI, Anthropic, Google) — Pro složité úlohy
 
-Poté použijte `model: "auto"` a OmniRoute automaticky vybere pro každý požadavek nejlepšího poskytovatele.
+Poté použijte `model: "auto"` a OmniRoute automaticky vybere nejlepšího poskytovatele pro každý požadavek.
 
 ---
 
-## Nastavení pro konkrétní poskytovatele
+## Nastavení specifická pro poskytovatele
 
 ### OpenAI
 
-1. Získejte API klíč: https://platform.openai.com/api-keys
+1. Získejte klíč API: https://platform.openai.com/api-keys
 2. V OmniRoute: Poskytovatelé → Přidat poskytovatele → OpenAI
-3. Vložte API klíč → Připojit
+3. Vložte klíč API → Připojit
 
 ### Anthropic
 
-1. Získejte API klíč: https://console.anthropic.com/
+1. Získejte klíč API: https://console.anthropic.com/
 2. V OmniRoute: Poskytovatelé → Přidat poskytovatele → Anthropic
-3. Vložte API klíč → Připojit
+3. Vložte klíč API → Připojit
 
 ### Google (Gemini)
 
-1. Získejte API klíč: https://aistudio.google.com/apikey
+1. Získejte klíč API: https://aistudio.google.com/apikey
 2. V OmniRoute: Poskytovatelé → Přidat poskytovatele → Gemini
-3. Vložte API klíč → Připojit
+3. Vložte klíč API → Připojit
 
 ### DeepSeek
 
-1. Získejte API klíč: https://platform.deepseek.com/
+1. Získejte klíč API: https://platform.deepseek.com/
 2. V OmniRoute: Poskytovatelé → Přidat poskytovatele → DeepSeek
-3. Vložte API klíč → Připojit
+3. Vložte klíč API → Připojit
+
+### Qoder: zvolte způsob přenosu přihlašovacích údajů
+
+Qoder vyžaduje přihlašovací údaje. Jeho dva způsoby přenosu mají odlišné možnosti; samotný název modelu
+neurčuje, co konkrétní připojení dokáže.
+
+| Přihlašovací údaj                           | Způsob přenosu OmniRoute                        | Volání nástrojů volajícím                                     | Streamování                                                             |
+| ------------------------------------------- | ----------------------------------------------- | ------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| PAT začínající na `pt-`                     | Místní proces `qodercli` na hostiteli OmniRoute | Nepodporováno                                                 | S vyrovnávací pamětí: SSE se odešle až poté, co CLI vrátí celou odpověď |
+| Přístupový token jiný než PAT nebo klíč API | HTTP endpoint DashScope kompatibilní s OpenAI   | Předává se beze změny v závislosti na nadřazeném modelu/klíči | Nadřazená cesta HTTP/SSE                                                |
+
+Pro PAT nainstalujte Qoder CLI na stejného hostitele nebo do stejného kontejneru jako OmniRoute. Spustitelný soubor
+musí být dostupný jako `qodercli`, případně nastavte `CLI_QODER_BIN` na cestu k jeho spustitelnému souboru. CLI
+nainstalované pouze na hostiteli Dockeru není automaticky dostupné v kontejneru. Chybějící
+binární soubory způsobí explicitní chybu, která vás odkáže na instalaci nebo nastavení cesty.
+
+Cesta chatu PAT má časový limit procesu 45 sekund. Konverzaci sloučí do jednoho
+promptu a spustí CLI v nestreamovacím režimu výpisu. Požadavek `stream: true` změní
+formát odpovědi na SSE; neposkytuje však průběžné doručování tokenů z nadřazené služby.
+Ověření pomocí CLI a výpis modelů používají samostatný časový limit 20 sekund. Jedná se o aktuální výchozí hodnoty
+v kódu, nikoli o konfigurovatelná nastavení ovládacího panelu.
+
+Připojení PAT používejte pro běžný chat. Požadavky agentů obsahující `tools` nebo starší `functions`
+vylučují účty PAT při výběru přihlašovacích údajů, včetně připnutých kombinovaných cílů. Smíšený
+fond Qoder může nadále vybrat svůj HTTP účet. Přímá volání exekutoru PAT také selžou
+explicitně před spuštěním CLI, místo aby definice nástrojů bez upozornění zahodila. Toto
+omezení se týká nástrojů poskytnutých volajícím API, nikoli interních nástrojů, které může používat samotné
+Qoder CLI. Klíč HTTP nezaručuje, že každý model podporuje nástroje; nadále platí běžné
+kontroly schopností modelu.
+
+OAuth v prohlížeči je k dispozici pouze tehdy, když správce nakonfiguruje všech pět nastavení:
+`QODER_OAUTH_AUTHORIZE_URL`, `QODER_OAUTH_TOKEN_URL`, `QODER_OAUTH_USERINFO_URL`,
+`QODER_OAUTH_CLIENT_ID` a `QODER_OAUTH_CLIENT_SECRET`. Jejich výchozí hodnoty jsou prázdné; v
+nenakonfigurované instalaci je třeba použít podporovaný import přihlašovacích údajů namísto předpokladu,
+že je přihlašování přes prohlížeč připraveno.
+
+Odkazy na implementaci: [exekutor Qoder](../../open-sse/executors/qoder.ts),
+[běhové prostředí CLI](../../open-sse/services/qoderCli.ts) a
+[konfigurace OAuth](../../src/lib/oauth/constants/oauth.ts). Průběžné streamování PAT
+a konfigurovatelný časový limit jsou samostatná vylepšení; toto chování je nezaručuje.
 
 ### Groq
 
-1. Získejte API klíč: https://console.groq.com/
+1. Získejte klíč API: https://console.groq.com/
 2. V OmniRoute: Poskytovatelé → Přidat poskytovatele → Groq
-3. Vložte API klíč → Připojit
+3. Vložte klíč API → Připojit
 
 ---
 
-## Časté otázky
+## Časté dotazy
 
 ### „Musím za používání OmniRoute platit?“
 
-**Ne!** OmniRoute je zdarma a má otevřený zdrojový kód. Bez jakýchkoli poplatků můžete používat bezplatné poskytovatele (Kiro, OpenCode Free, Pollinations). Platíte pouze v případě, že se rozhodnete používat placené poskytovatele.
+**Ne!** OmniRoute je bezplatný open-source nástroj. Bezplatné poskytovatele (Kiro, Pollinations) můžete používat, aniž byste cokoli platili. Platíte pouze v případě, že se rozhodnete používat placené poskytovatele.
 
 ### „Se kterým poskytovatelem bych měl začít?“
 
-Začněte s **Kiro AI** — je zdarma, nevyžaduje API klíč a poskytuje vám přístup k modelům Claude. Poté podle potřeby přidejte další poskytovatele.
+Začněte s **Kiro AI** — je zdarma, nevyžaduje žádný API klíč a poskytuje přístup k modelům Claude. Poté můžete podle potřeby přidat další poskytovatele.
 
 ### „Mohu používat více poskytovatelů současně?“
 
-**Ano!** To je hlavní smysl OmniRoute. Připojte více poskytovatelů a použijte `model: "auto"`, aby OmniRoute pro každý požadavek vybral toho nejlepšího.
+**Ano!** To je hlavní smysl OmniRoute. Připojte více poskytovatelů a použijte `model: "auto"`, aby OmniRoute mohl pro každý požadavek vybrat toho nejlepšího.
 
 ### „Co když dojde k výpadku poskytovatele?“
 
@@ -316,7 +353,7 @@ Přejděte na Poskytovatelé → klikněte na poskytovatele → klikněte na **O
 
 ### „Mohu použít své stávající API klíče?“
 
-**Ano!** Pokud již máte API klíče pro OpenAI, Anthropic, Google atd., můžete je v OmniRoute použít. Při připojování poskytovatele je stačí vložit.
+**Ano!** Pokud již máte API klíče pro OpenAI, Anthropic, Google atd., můžete je v OmniRoute použít. Stačí je vložit při připojování poskytovatele.
 
 ---
 

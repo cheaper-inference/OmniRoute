@@ -72,6 +72,16 @@ curl -i \
 
 غیر `manage` کلید (یا Bearer کے بغیر) `403 LOCAL_ONLY` واپس کرتی ہے۔ متوازی پریفکس `/api/cli-tools/runtime/*` کو دانستہ طور پر بائی پاس نہیں کیا جا سکتا — دیکھیے [روٹ گارڈ کے درجات — manage اسکوپ کے لیے استثنا](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)۔
 
+### Origin کی توثیق
+
+تصدیق کے بعد `/api/mcp/*` کی ہر درخواست — ٹرانسپورٹس اور `status`, `tools`, `audit`, `restart` جیسے انتظامی راستوں — کے `Origin` ہیڈر کی توثیق کی جاتی ہے، چاہے کال کرنے والا کوئی بھی ہو (API کلید، CLI ٹوکن، ڈیش بورڈ سیشن، یا لاگ اِن بند ہونے پر گمنام loopback)۔ یہ وہ DNS rebinding تحفظ ہے جو MCP Streamable HTTP تفصیل لازم کرتی ہے۔
+
+- **کوئی `Origin` ہیڈر نہیں** ← اجازت ہے۔ OmniRoute CLI، SDK اور IDE کلائنٹس اسے نہیں بھیجتے۔
+- **اجازت یافتہ `Origin`** ← کسی بھی پورٹ پر `localhost` / `127.0.0.1` / `[::1]`، یا خود OmniRoute کا عوامی origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`، کسی قابلِ اعتماد ریورس پراکسی کا فارورڈ کردہ origin (`OMNIROUTE_TRUST_PROXY`، صرف جب base URL مقرر نہ ہو)، یا براہِ راست رسائی والا loopback/LAN IP ہوسٹ۔ صرف `Host` ہیڈر کبھی کسی origin کو قابلِ اعتماد نہیں بناتا۔
+- **`null` سمیت کوئی بھی دوسرا `Origin`** ← JSON-RPC خرابی باڈی کے ساتھ `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`۔ درست CSRF ٹوکن پیش کرنے والا ڈیش بورڈ سیشن، دیگر ڈیش بورڈ تحریروں کی طرح، اب بھی قبول کیا جاتا ہے۔
+
+ریورس پراکسی کے پیچھے پیش کیے جانے والے براؤزر MCP کلائنٹ کو `OMNIROUTE_PUBLIC_BASE_URL` درکار ہے؛ دوسرے origins کے لیے کوئی اجازت فہرست نہیں۔ CORS پیشگی درخواست (`OPTIONS`) کی Origin جانچ نہیں ہوتی؛ اس کے بعد آنے والی درخواست کی ہوتی ہے۔
+
 ## IDE کنفیگریشن
 
 Claude Desktop، Cursor، Cline، اور ہم آہنگ MCP کلائنٹس کے سیٹ اپ کے لیے [MCP کلائنٹ کنفیگریشن](../guides/SETUP_GUIDE.md#mcp-client-configuration) دیکھیں۔
@@ -287,75 +297,117 @@ SSE اور اسٹریم ایبل HTTP، دونوں ٹرانسپورٹس اس و�
 
 ---
 
-## تصدیق اور اسکوپس
+## توثیق اور اسکوپس
 
-MCP ٹول کالر سے اسکوپ سٹرنگز پڑھتا ہے۔ یہ چیک تین آزاد نام اسپیسز میں سے ایک ہے۔ ایک چیکر سے پاس ہونا دوسروں سے پاس ہونا نہیں ہے۔ قواعد [تین اسکوپ نام اسپیسز](#تین-اسکوپ-نام-اسپیسز) ہیں۔ ٹول کیٹلاگ [MCP ٹول اسکوپس](#mcp-tool-scopes) ہے۔
+MCP ٹول کالز کال کرنے والے سے اسکوپ اسٹرنگز پڑھتی ہیں۔ یہ جانچ تین آزاد
+نیم اسپیسز میں سے ایک ہے۔ ایک چیکر سے کامیابی کا مطلب دیگر سے کامیابی نہیں ہے۔
+قواعد [تین اسکوپ نیم اسپیسز](#three-scope-namespaces) میں ہیں۔
+ٹول کیٹلاگ [MCP ٹول اسکوپس](#mcp-tool-scopes) میں ہے۔
 
-### تین اسکوپ نام اسپیسز
+### تین اسکوپ نیم اسپیسز
 
-ایک API کلید پر `manage`، ایک MCP ٹول پر `read:compression`، اور ایک `oma_live_…` ایکسیس ٹوکن پر `read` تین مختلف گرانٹس ہیں۔ کالرز جو ایک `read` ایکسیس ٹوکن کو ایک میوٹیٹنگ مینجمنٹ روٹ پر بھیجتے ہیں انہیں HTTP 403 `Access token scope 'read' is insufficient; 'write' required.` ملتا ہے۔ یہ رینک `scopeSatisfies` ہے۔ یہ MCP ٹیبل سے مشورہ نہیں کرتا، اور MCP میچر اس سے مشورہ نہیں کرتا۔
+API کلید پر `manage`، MCP ٹول پر `read:compression`، اور
+`oma_live_…` ایکسیس ٹوکن پر `read` تین مختلف اجازتیں ہیں۔ وہ کالرز جو تبدیلی
+کرنے والے مینجمنٹ روٹ کو `read` ایکسیس ٹوکن بھیجتے ہیں، انہیں HTTP 403
+`Access token scope 'read' is insufficient; 'write' required.`
+ملتا ہے۔ یہ رینک `scopeSatisfies` ہے۔ یہ MCP ٹیبل سے رجوع نہیں کرتا، اور MCP
+میچر بھی اس سے رجوع نہیں کرتا۔
 
-| نام اسپیس        | کریڈینشل                                                           | چیکر                   | ایک پاس اجازت دیتا ہے                                      |
-| :--------------- | :----------------------------------------------------------------- | :--------------------- | :--------------------------------------------------------- |
-| API-کلید مینجمنٹ | `api_keys.scopes`                                                  | `hasManageScope`       | اس بیئرر کلید کے لیے مینجمنٹ REST                          |
-| API-کلید اضافی   | وہی ارے، ایک عین سٹرنگ                                             | نیچے نامزد کردہ مددگار | صرف وہ ایک صلاحیت                                          |
-| MCP ٹول اسکوپس   | وہی ارے، بصورت دیگر MCP `_meta`، بصورت دیگر `OMNIROUTE_MCP_SCOPES` | `scopeMatches`         | وہ ٹول، ایک بار جب نفاذ آن ہو                              |
-| ایکسیس ٹوکن      | `oma_live_…`                                                       | `scopeSatisfies`       | مینجمنٹ روٹ جس کا طریقہ اور پاتھ اس رینک کا تقاضا کرتے ہیں |
+| نیم اسپیس        | کریڈینشل                                                             | چیکر                | کامیابی سے کیا اجازت ملتی ہے                               |
+| :--------------- | :------------------------------------------------------------------- | :------------------ | :--------------------------------------------------------- |
+| API کلید مینجمنٹ | `api_keys.scopes`                                                    | `hasManageScope`    | اس Bearer کلید کے لیے مینجمنٹ REST                         |
+| API کلید اضافی   | وہی ارے، ایک بعینہٖ اسٹرنگ                                           | ذیل میں نامزد ہیلپر | صرف وہی ایک صلاحیت                                         |
+| MCP ٹول اسکوپس   | وہی ارے، بصورتِ دیگر MCP `_meta`، بصورتِ دیگر `OMNIROUTE_MCP_SCOPES` | `scopeMatches`      | نفاذ فعال ہونے کے بعد، وہ ٹول                              |
+| ایکسیس ٹوکن      | `oma_live_…`                                                         | `scopeSatisfies`    | وہ مینجمنٹ روٹ جس کے میتھڈ اور پاتھ کو اس رینک کی ضرورت ہو |
 
-ہر کریڈینشل کی منٹنگ [مینجمنٹ تصدیق](../guides/MANAGEMENT-AUTH.md) میں شامل ہے۔
+ہر کریڈینشل کو جاری کرنے کا طریقہ
+[مینجمنٹ توثیق](../guides/MANAGEMENT-AUTH.md) میں بیان کیا گیا ہے۔
 
-#### API-کلید اسکوپس
+#### API کلید کے اسکوپس
 
-ایک `api_keys.scopes` ارے دو کاموں کو فیڈ کرتا ہے۔ وہ مختلف فنکشنز استعمال کرتے ہیں۔
+ایک `api_keys.scopes` ارے دو کام انجام دیتا ہے۔ ان میں مختلف فنکشنز استعمال ہوتے ہیں۔
 
-**مینجمنٹ REST۔** `manage` اور `admin` `MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) کے ممبران ہیں۔ `hasManageScope` وہ ہے جو اس کلید کے لیے مینجمنٹ روٹس کو اجازت دیتا ہے۔ `admin` ان روٹس پر مینجمنٹ کے قابل ہے۔ یہاں لفظ `admin` ایکسیس ٹوکن رینک نہیں ہے اور یہ MCP ٹول اسکوپس میں توسیع نہیں کرتا۔
+**مینجمنٹ REST۔** `manage` اور `admin`
+`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) کے اراکین ہیں۔
+`hasManageScope` اس کلید کے لیے مینجمنٹ روٹس کو مجاز قرار دیتا ہے۔ ان روٹس پر `admin`
+مینجمنٹ کی صلاحیت رکھتا ہے۔ یہاں لفظ `admin`
+ایکسیس ٹوکن کا رینک نہیں ہے اور یہ MCP ٹول اسکوپس میں توسیع نہیں پاتا۔
 
-**اضافی سٹرنگز۔** ہر ایک ایک عین رکنیت کا ٹیسٹ ہے، اور ہر ایک `MANAGEMENT_API_KEY_SCOPES` سے باہر رہتا ہے۔
+**اضافی اسٹرنگز۔** ہر ایک بعینہٖ رکنیت کی جانچ ہے، اور ہر ایک
+`MANAGEMENT_API_KEY_SCOPES` سے باہر رہتا ہے۔
 
-| اسکوپ                          | ایک پاس اجازت دیتا ہے                                                                                                                                                  |
-| :----------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `mcp:connect`                  | نان-لوپ بیک `/api/mcp/` LOCAL_ONLY کارو-آؤٹ صرف (`hasMcpConnectOrManageScope`)۔ `manage` یا `admin` والی کلید اب بھی اس کارو-آؤٹ کو پاس کرتی ہے۔                       |
-| `self:usage`                   | اس کلید کے لیے `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)۔ `POST /api/keys` تخلیق پر یہ اسکوپ شامل کرتا ہے (`normalizeSelfServiceScopesForCreate`)۔ |
-| `self:account-quota`           | اس اسٹیٹس پے لوڈ کے اندر اپ اسٹریم اکاؤنٹ کوٹے (`src/lib/usage/apiKeySelfService.ts`)۔ اسٹیٹس روٹ اب بھی `self:usage` کا تقاضا کرتا ہے۔                                |
-| `policy:bypass-provider-quota` | اس کلید کی انفرنس کالز فراہم کنندہ-کوٹا پالیسی کو چھوڑ دیتی ہیں (`hasProviderQuotaBypassScope` in `src/sse/handlers/chat.ts`)۔                                         |
+| اسکوپ                          | کامیابی سے کیا اجازت ملتی ہے                                                                                                                                            |
+| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | صرف نان-لوپ بیک `/api/mcp/` LOCAL_ONLY استثنا (`hasMcpConnectOrManageScope`)۔ `manage` یا `admin` والی کلید بھی اس استثنا سے کامیاب ہو جاتی ہے۔                         |
+| `self:usage`                   | اس کلید کے لیے `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)۔ `POST /api/keys` بناتے وقت یہ اسکوپ شامل کرتا ہے (`normalizeSelfServiceScopesForCreate`)۔ |
+| `self:account-quota`           | اس اسٹیٹس پے لوڈ کے اندر اَپ اسٹریم اکاؤنٹ کوٹے (`src/lib/usage/apiKeySelfService.ts`)۔ اسٹیٹس روٹ کو پھر بھی `self:usage` درکار ہے۔                                    |
+| `policy:bypass-provider-quota` | اس کلید کی انفرنس کالز پرووائیڈر کوٹا پالیسی کو نظر انداز کرتی ہیں (`src/sse/handlers/chat.ts` میں `hasProviderQuotaBypassScope`)۔                                      |
 
 #### میچنگ
 
-کیٹلاگ [MCP ٹول اسکوپس](#mcp-tool-scopes) کے تحت ٹیبل ہے۔ `src/shared/constants/mcpScopes.ts` میں `MCP_SCOPE_LIST` کو اس کیٹلاگ کے طور پر نہ سمجھیں: یہ اصل ٹائپ شدہ سب سیٹ ہے۔ بعد کے ٹولز اس کے علاوہ مزید اسکوپس کا اعلان کرتے ہیں (`read:notion`، `read:skills`، `read:local-corpus`، اور باقی ٹیبل)۔
+کیٹلاگ [MCP ٹول اسکوپس](#mcp-tool-scopes) کے تحت موجود ٹیبل ہے۔
+`src/shared/constants/mcpScopes.ts` میں `MCP_SCOPE_LIST` کو وہ کیٹلاگ نہ سمجھیں:
+یہ اصل ٹائپ شدہ ذیلی مجموعہ ہے۔ بعد کے ٹولز اس کے ساتھ مزید اسکوپس کا اعلان کرتے ہیں
+(`read:notion`، `read:skills`، `read:local-corpus`، اور ٹیبل میں شامل باقی اسکوپس)۔
 
-`open-sse/mcp-server/scopeEnforcement.ts` میں `evaluateToolScopes` ایک کال کی اجازت دیتا ہے جب ہر مطلوبہ اسکوپ کسی گرانٹ شدہ اسکوپ سے میل کھاتا ہے:
+`open-sse/mcp-server/scopeEnforcement.ts` میں `evaluateToolScopes` کسی کال کو
+اس وقت اجازت دیتا ہے جب ہر مطلوبہ اسکوپ کسی تفویض کردہ اسکوپ سے میچ کرے:
 
-- `*` ہر مطلوبہ اسکوپ سے میل کھاتا ہے۔
-- ایک گرانٹ شدہ اسکوپ جو `*` پر ختم ہوتا ہے ایک مطلوبہ اسکوپ سے میل کھاتا ہے جو ستارے سے پہلے والے پریفکس سے شروع ہوتا ہے۔ `read:*` `read:compression` سے میل کھاتا ہے۔
-- ہر دوسرا گرانٹ شدہ اسکوپ صرف ایک جیسی مطلوبہ سٹرنگ سے میل کھاتا ہے۔
+- `*` ہر مطلوبہ اسکوپ سے میچ کرتا ہے۔
+- `*` پر ختم ہونے والا تفویض کردہ اسکوپ ایسے مطلوبہ اسکوپ سے میچ کرتا ہے جو
+  ستارے سے پہلے موجود سابقے سے شروع ہو۔ `read:*`، `read:compression` سے میچ کرتا ہے۔
+- ہر دوسرا تفویض کردہ اسکوپ صرف بعینہٖ یکساں مطلوبہ اسٹرنگ سے میچ کرتا ہے۔
 
-ایک کلید جس کے اسکوپس `["manage"]` ہیں وہ `read:compression` کے لیے `scopeMatches` میں ناکام ہو جاتی ہے۔ وہی کال `admin`، `mcp:connect`، `read`، اور `write` کے لیے ناکام ہو جاتی ہے جب وہ واحد گرانٹ شدہ سٹرنگز ہوں۔ MCP ٹول اسکوپس کے درمیان ٹریلنگ `*` سے آگے کوئی درجہ بندی نہیں ہے۔
+جس کلید کے اسکوپس `["manage"]` ہوں، وہ `read:compression` کے لیے `scopeMatches`
+میں ناکام ہو جاتی ہے۔ یہی کال `admin`، `mcp:connect`، `read`، اور `write` کے لیے بھی
+ناکام ہوتی ہے جب صرف یہی اسٹرنگز تفویض شدہ ہوں۔ آخری `*` کے علاوہ MCP ٹول
+اسکوپس میں کوئی درجہ بندی نہیں ہے۔
 
-نفاذ بند ہے جب تک کہ `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (ڈیفالٹ `false`) نہ ہو۔ جب یہ بند ہوتا ہے، `evaluateToolScopes` کال کی اجازت دیتا ہے اور کیٹلاگ کو چھوڑ دیتا ہے۔ جب یہ آن ہوتا ہے، HTTP بیئرر کلید کے `api_keys.scopes` کو `authInfo` کے طور پر استعمال کرتا ہے (دیکھیں [فی-کلید HTTP اسکوپ بائنڈنگ](#per-key-http-scope-binding-7895))۔ جب کوئی کلید اسکوپس حل نہیں ہوتے، تو گرانٹ شدہ سیٹ MCP `_meta`، پھر `OMNIROUTE_MCP_SCOPES` میں گر جاتا ہے۔
+نفاذ اس وقت تک بند رہتا ہے جب تک `OMNIROUTE_MCP_ENFORCE_SCOPES=true` نہ ہو (ڈیفالٹ
+`false`)۔ جب یہ بند ہو تو `evaluateToolScopes` کال کی اجازت دیتا اور
+کیٹلاگ کو چھوڑ دیتا ہے۔ جب یہ فعال ہو تو HTTP، Bearer کلید کے `api_keys.scopes` کو
+`authInfo` کے طور پر استعمال کرتا ہے (دیکھیں [فی کلید HTTP اسکوپ بائنڈنگ](#per-key-http-scope-binding-7895))۔
+جب کوئی کلیدی اسکوپ حل نہ ہو، تو تفویض کردہ مجموعہ پہلے MCP `_meta`، پھر
+`OMNIROUTE_MCP_SCOPES` پر منتقل ہو جاتا ہے۔
 
-#### ایکسیس-ٹوکن اسکوپس
+#### ایکسیس ٹوکن اسکوپس
 
-`oma_live_…` ٹوکنز (`src/lib/accessTokens/scopes.ts`) `read`، `write`، یا `admin` لے جاتے ہیں۔ `scopeSatisfies` ایک رینک ہے: `admin` `write` اور `read` کو کور کرتا ہے، اور `write` `read` کو کور کرتا ہے۔ نامعلوم اسکوپس کچھ بھی کور نہیں کرتے۔
+`oma_live_…` ٹوکنز (`src/lib/accessTokens/scopes.ts`) میں `read`، `write`،
+یا `admin` ہوتا ہے۔ `scopeSatisfies` ایک رینک ہے: `admin`، `write` اور `read` دونوں
+کا احاطہ کرتا ہے، اور `write`، `read` کا احاطہ کرتا ہے۔ نامعلوم اسکوپس کسی چیز
+کا احاطہ نہیں کرتے۔
 
-`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) اس رینک کا موازنہ `inferRequiredScope` (`src/server/authz/accessScopes.ts`) سے کرتا ہے:
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) اس رینک کا
+`inferRequiredScope` (`src/server/authz/accessScopes.ts`) سے موازنہ کرتا ہے:
 
-- `GET`، `HEAD`، اور `OPTIONS` کو `read` کی ضرورت ہوتی ہے۔
-- ہر دوسرے طریقہ کو `write` کی ضرورت ہوتی ہے۔
-- `ADMIN_SCOPE_PREFIXES` میں پاتھ ہر طریقہ کے لیے `admin` کا تقاضا کرتے ہیں۔ `/api/mcp` اس فہرست میں ہے، لہذا ایک `write` ایکسیس ٹوکن اب بھی MCP HTTP سطح کو کال نہیں کر سکتا۔
-- `ADMIN_MUTATION_PREFIXES` میں پاتھ صرف میوٹیشنز کے لیے `admin` کا تقاضا کرتے ہیں۔
+- `GET`، `HEAD`، اور `OPTIONS` کو `read` درکار ہے۔
+- ہر دوسرے میتھڈ کو `write` درکار ہے۔
+- `ADMIN_SCOPE_PREFIXES` میں موجود پاتھز کو ہر میتھڈ کے لیے `admin` درکار ہے۔ `/api/mcp`
+  اس فہرست میں ہے، اس لیے `write` ایکسیس ٹوکن پھر بھی MCP HTTP
+  سطح کو کال نہیں کر سکتا۔
+- `ADMIN_MUTATION_PREFIXES` میں موجود پاتھز کو صرف تبدیلیوں کے لیے `admin` درکار ہے۔
+- `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`،
+  `/api/settings/require-login`) میں موجود پاتھز کو صرف تبدیلیوں کے لیے، اور صرف
+  اسی بعینہٖ پاتھ پر `admin` درکار ہے — دیگر `/api/settings/*` ذیلی روٹس پر `write`
+  برقرار رہتا ہے۔
 
-`PATCH /api/keys/{id}` ایک میوٹیشن ہے اور ان ایڈمن فہرستوں میں شامل نہیں ہے، لہذا ایک `read` ٹوکن کو 403 ملتا ہے
+`PATCH /api/keys/{id}` ایک تبدیلی ہے اور ان ایڈمن فہرستوں میں شامل نہیں ہے، اس لیے
+ایک `read` ٹوکن کو 403 موصول ہوتا ہے:
 `Access token scope 'read' is insufficient; 'write' required.`
-ایک `write` یا `admin` ایکسیس ٹوکن اس روٹ کو پورا کرتا ہے۔ ایک ڈیش بورڈ JWT، لوپ بیک CLI مشین-آئی ڈی ٹوکن، اور `manage` یا `admin` کے ساتھ ایک API کی دوسری شاخیں اختیار کرتے ہیں اور اس رینک سے محدود نہیں ہوتے۔
+ایک `write` یا `admin` رسائی ٹوکن اس روٹ کی ضرورت پوری کرتا ہے۔ ڈیش بورڈ JWT،
+لوپ بیک CLI machine-id ٹوکن، اور `manage` یا `admin` والی API کلید
+دوسری شاخوں سے گزرتے ہیں اور اس درجہ بندی سے محدود نہیں ہوتے۔
 
-ایک ایکسیس ٹوکن جو `/api/mcp` کے لیے `scopeSatisfies` کو پاس کرتا ہے، اس نے صرف انتظامی گیٹ کو کلیئر کیا ہے۔ ٹول کالز اب بھی API-key سکوپس کے خلاف `scopeMatches` چلاتے ہیں۔ ایکسیس ٹوکن کا رینک `scopeMatches` کے لیے ان پٹ نہیں ہے۔
+ایک رسائی ٹوکن جو `/api/mcp` کے لیے `scopeSatisfies` سے کامیابی سے گزر جاتا ہے، اس نے
+صرف انتظامی گیٹ عبور کیا ہے۔ ٹول کالز پھر بھی API کلید کے
+اسکوپس کے مقابلے میں `scopeMatches` چلاتی ہیں۔ رسائی ٹوکن کا درجہ `scopeMatches` کے لیے ان پٹ نہیں ہے۔
 
-### MCP ٹول سکوپس
+### MCP ٹول کے اسکوپس
 
-سکوپ کا نفاذ `open-sse/mcp-server/scopeEnforcement.ts` میں مرکزی حیثیت رکھتا ہے۔
-ہر ٹول کو مخصوص سکوپس درکار ہوتے ہیں:
+اسکوپ کا نفاذ `open-sse/mcp-server/scopeEnforcement.ts` میں مرکزی طور پر کیا جاتا ہے۔
+ہر ٹول کے لیے مخصوص اسکوپس درکار ہوتے ہیں:
 
-| دائرہ کار             | ٹولز                                                                                                                                                                            |
+| دائرۂ کار             | ٹولز                                                                                                                                                                            |
 | :-------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `read:health`         | `get_health`, `get_provider_metrics`, `simulate_route`, `explain_route`, `best_combo_for_task`, `db_health_check`                                                               |
 | `read:combos`         | `list_combos`, `get_combo_metrics`, `simulate_route`, `best_combo_for_task`, `test_combo`                                                                                       |
@@ -387,37 +439,70 @@ MCP ٹول کالر سے اسکوپ سٹرنگز پڑھتا ہے۔ یہ چیک �
 | `write:gamification`  | `gamification_invite`, `gamification_transfer`                                                                                                                                  |
 | `read:plugins`        | `plugin_list`, `plugin_executions`                                                                                                                                              |
 | `write:plugins`       | `plugin_scan`, `plugin_install`, `plugin_uninstall`, `plugin_activate`, `plugin_deactivate`, `plugin_configure`                                                                 |
-| `read:obsidian`       | 13 پڑھنے کے ٹولز — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
-| `write:obsidian`      | 9 لکھنے کے ٹولز — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
+| `read:obsidian`       | 13 مطالعاتی ٹولز — `obsidian_list_vault`, `obsidian_read_note`, `obsidian_search_simple`, `obsidian_search_structured`, `obsidian_get_periodic_note`, `obsidian_sync_status`, … |
+| `write:obsidian`      | 9 تحریری ٹولز — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                  |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                               |
 
-وائلڈ کارڈ اسکوپس تعاون یافتہ ہیں: `read:*` تمام ریڈ اسکوپس کی اجازت دیتا ہے، `*` مکمل رسائی کی اجازت دیتا ہے۔
+وائلڈ کارڈ اسکوپس معاونت یافتہ ہیں: `read:*` تمام مطالعاتی اسکوپس دیتا ہے، جبکہ `*` مکمل رسائی دیتا ہے۔
 
-### `mcp:connect` — تنگ روٹ کی صلاحیت (#7895)
+### `mcp:connect` — محدود روٹ کی صلاحیت (#7895)
 
-نان-لوپ بیک سے HTTP/SSE MCP ٹرانسپورٹ (`/api/mcp/*`) تک پہنچنے کے لیے `/api/mcp/` LOCAL_ONLY کارو-آؤٹ (دیکھیں `docs/security/ROUTE_GUARD_TIERS.md`) کی ضرورت ہوتی ہے۔ تاریخی طور پر، وہ کارو-آؤٹ صرف ایک مکمل `manage`/`admin`-اسکوپ API کلید کو قبول کرتا تھا — جو ایک ایسے کالر کے لیے بہت وسیع تھا جسے صرف MCP سے بات کرنے کی ضرورت ہے۔ `src/shared/constants/managementScopes.ts` اب `MCP_CONNECT_SCOPE = "mcp:connect"` ایکسپورٹ کرتا ہے: ایک اضافی، تنگ اسکوپ (`SELF_USAGE_SCOPE` جیسا ہی سابقہ) جو `src/server/authz/policies/management.ts` میں صرف `/api/mcp/` بائی پاس کی اجازت دیتا ہے — یہ کسی اور مینجمنٹ-روٹ تک رسائی نہیں دیتا اور اسے جان بوجھ کر `MANAGEMENT_API_KEY_SCOPES` سے باہر رکھا گیا ہے۔ ایک کلید جس میں `manage`/`admin` ہے وہ اب بھی کارو-آؤٹ کو بغیر کسی تبدیلی کے پاس کرتی ہے؛ `mcp:connect` ریموٹ MCP-صرف کالرز کے لیے ایک کم مراعات یافتہ متبادل ہے، جسے `hasMcpConnectOrManageScope()` کے ذریعے چیک کیا جاتا ہے۔
+غیر لوپ بیک سے HTTP/SSE MCP ٹرانسپورٹ (`/api/mcp/*`) تک پہنچنے کے لیے
+`/api/mcp/` LOCAL_ONLY استثنا درکار ہے (`docs/security/ROUTE_GUARD_TIERS.md` دیکھیں)۔ تاریخی طور پر
+یہ استثنا صرف مکمل `manage`/`admin` اسکوپ والی API کلید قبول کرتا تھا — جو ایسے
+کالر کے لیے ضرورت سے کہیں زیادہ وسیع تھا جسے صرف MCP سے رابطہ کرنا ہو۔ `src/shared/constants/managementScopes.ts` اب
+`MCP_CONNECT_SCOPE = "mcp:connect"` ایک اضافی، محدود اسکوپ کے طور پر ایکسپورٹ کرتا ہے (`SELF_USAGE_SCOPE` جیسی ہی نظیر)،
+جو `src/server/authz/policies/management.ts` میں صرف `/api/mcp/` بائی پاس کی اجازت دیتا ہے — یہ
+کسی دوسرے مینجمنٹ روٹ تک رسائی نہیں دیتا اور اسے جان بوجھ کر `MANAGEMENT_API_KEY_SCOPES` سے باہر
+رکھا گیا ہے۔ `manage`/`admin` رکھنے والی کلید بدستور بغیر تبدیلی کے اس استثنا سے گزر جاتی ہے؛
+`mcp:connect` صرف ریموٹ MCP کالرز کے لیے کم مراعات والا متبادل ہے، جس کی جانچ
+`hasMcpConnectOrManageScope()` کے ذریعے کی جاتی ہے۔
 
-### فی-کلید HTTP اسکوپ بائنڈنگ (#7895)
+### فی کلید HTTP اسکوپ بائنڈنگ (#7895)
 
-HTTP/SSE پر، `open-sse/mcp-server/httpTransport.ts` اب کالر کے حقیقی `api_keys.scopes` کو `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) کے ذریعے حل کرتا ہے اور اسے MCP SDK کے `transport.handleRequest(req, { authInfo })` کو پاس کرتا ہے، تاکہ ہر ٹول کال تک پہنچنے والے `extra.authInfo.scopes` بیئرر کلید کے اپنے اسکوپس کی عکاسی کریں۔ `scopeEnforcement.ts` کا `resolveCallerScopeContext()` پہلے ہی `_meta` اور `OMNIROUTE_MCP_SCOPES` env فال بیک پر `authInfo` کو ترجیح دیتا تھا — یہ صرف اس پہلے، اعلیٰ ترین ترجیحی ماخذ کو آباد کرتا ہے، جسے پہلے HTTP پر فیڈ نہیں کیا گیا تھا۔ جب کوئی API کلید حل نہیں ہوتی (کوئی ہیڈر نہیں، غلط کلید)، `authInfo` `undefined` رہتا ہے اور ریزولوشن موجودہ `meta`/env چین پر بغیر کسی تبدیلی کے گر جاتا ہے۔ یہ `OMNIROUTE_MCP_ENFORCE_SCOPES` کے ڈیفالٹ کو تبدیل نہیں کرتا — نفاذ کو اب بھی واضح طور پر فعال کرنا ہوگا؛ یہ تبدیلی صرف اس صورت میں فی-کلید پاتھ کو ترجیح دیتی ہے جب یہ فعال ہو۔ stdio کی کوئی فی-کالر شناخت نہیں ہے (دیکھیں `mcpCallerIdentity.ts`) اور یہ غیر متاثر رہتا ہے — یہ `_meta`/env فال بیک چین پر رہتا ہے۔
+HTTP/SSE پر، `open-sse/mcp-server/httpTransport.ts` اب کالر کے حقیقی
+`api_keys.scopes` کو `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) کے ذریعے
+حل کرتا ہے اور اسے MCP SDK کے `transport.handleRequest(req, { authInfo })` کو پاس کرتا ہے، تاکہ
+ہر ٹول کال تک پہنچنے والا `extra.authInfo.scopes` Bearer کلید کے اپنے اسکوپس کی عکاسی کرے۔
+`scopeEnforcement.ts` کا `resolveCallerScopeContext()` پہلے ہی `_meta` اور
+`OMNIROUTE_MCP_SCOPES` env فال بیک کے مقابلے میں `authInfo` کو ترجیح دیتا تھا — یہ تبدیلی صرف اس پہلے،
+سب سے زیادہ ترجیحی ماخذ کو پُر کرتی ہے، جو پہلے HTTP پر فراہم نہیں کیا جاتا تھا۔ جب کوئی API کلید حل نہ ہو
+(ہیڈر نہ ہو یا کلید نامعتبر ہو)، تو `authInfo` بدستور `undefined` رہتا ہے اور حل کا عمل بغیر تبدیلی کے
+موجودہ `meta`/env سلسلے پر منتقل ہو جاتا ہے۔ stdio میں فی کالر شناخت موجود نہیں ہے
+(`mcpCallerIdentity.ts` دیکھیں) اور یہ اس تبدیلی سے متاثر نہیں ہوتا — یہ `_meta`/env فال بیک سلسلے پر ہی رہتا ہے۔
+
+**محدود اسکوپ والے HTTP/SSE کالرز کے لیے نفاذ، `OMNIROUTE_MCP_ENFORCE_SCOPES` سے قطع نظر، لازماً فعال کیا جاتا ہے۔**
+`OMNIROUTE_MCP_ENFORCE_SCOPES` کا بطور ڈیفالٹ `false` ہونا صرف مقامی/stdio واحد آپریٹر بہاؤ کے لیے
+محفوظ ہے، جہاں اسکوپ لاگو کرنے کے لیے فی کالر شناخت موجود نہیں ہوتی۔
+`open-sse/mcp-server/server.ts::withScopeEnforcement()` ہر ٹول کے اسکوپ کا
+نفاذ غیر مشروط طور پر فعال کر دیتا ہے (`scopeEnforcement.ts` میں `shouldForceScopeEnforcement()`)
+جب بھی `resolveCallerScopeContext()` نے
+`source === "authInfo"` حل کیا ہو (یعنی ایک حقیقی فی کلید HTTP Authorization ہیڈر، صرف HTTP/SSE) اور اس
+کلید کے پاس مکمل `manage`/`admin` اسکوپ نہ ہو۔ یہ اس خلا کو بند کرتا ہے جس میں صرف
+محدود `mcp:connect` بائی پاس اسکوپ رکھنے والی کلید — جسے اوپر صرف
+`/api/mcp/` LOCAL_ONLY استثنا کی اجازت دینے والا قرار دیا گیا ہے — بصورتِ دیگر آپریٹر کے
+ریموٹ/غیر لوپ بیک MCP رسائی فعال کرتے ہی ہر MCP ٹول استعمال کر سکتی تھی، صرف اس لیے کہ
+`OMNIROUTE_MCP_ENFORCE_SCOPES` بطور ڈیفالٹ `false` فراہم کیا جاتا ہے۔ HTTP پر مکمل
+`manage`/`admin` کلید، اور ہر stdio/مقامی کالر، موجودہ
+`OMNIROUTE_MCP_ENFORCE_SCOPES` سے مشروط رویے کو بغیر تبدیلی کے برقرار رکھتے ہیں۔
 
 ---
 
 ## ماحولیاتی متغیرات
 
-| متغیر                                   | ڈیفالٹ                                  | مقصد                                                                                                                                       |
-| :-------------------------------------- | :-------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                | وہ بنیادی URL جسے MCP سرور OmniRoute کی داخلی APIs کو کال کرتے وقت استعمال کرتا ہے                                                         |
-| `OMNIROUTE_API_KEY`                     | (خالی)                                  | داخلی API کالز کو `Authorization: Bearer` کے طور پر فارورڈ کی جانے والی API کلید                                                           |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (صرف `"true"` اسے فعال کرتا ہے) | فعال ہونے پر، غیر موجود scopes ٹول کالز کو مسترد کرتے ہیں اور آڈٹ لاگ میں `scope_denied:<reason>` درج کرتے ہیں                             |
-| `OMNIROUTE_MCP_SCOPES`                  | (خالی)                                  | scopes کی کوما سے جدا کردہ اجازت فہرست جنہیں ڈیفالٹ طور پر "دستیاب" تصور کیا جاتا ہے (جب کالر اپنے scopes فراہم نہ کرے تو استعمال ہوتی ہے) |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (غیر متعین = فعال)                      | `0/false/off/no` پر سیٹ ہونے کی صورت میں، رجسٹریشن کے وقت MCP تفصیل کی کمپریشن کو غیر فعال کرتا ہے                                         |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (غیر متعین = فعال)                      | مذکورہ بالا اسی ٹوگل کا متبادل عرف                                                                                                         |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                 | داخلی انتظامی ریڈز (صحت، لچک، کمبینیشنز، کوٹا، استعمال) کے لیے اسقاط کا وقت                                                                |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                 | کسی فراہم کنندہ کا انتظار کرنے والے ہاپس (`route_request`، `web_search`، `web_fetch`) کے لیے اسقاط کا وقت                                  |
-| `MCP_TOOL_DENY`                         | (غیر متعین = کوئی فلٹر نہیں)            | `tools/list` سے خارج کرنے کے لیے ٹول ناموں کی کوما سے جدا کردہ فہرست (ٹول کارڈینیلیٹی میں کمی — ذیل میں دیکھیں)                            |
-| `MCP_TOOL_ALLOW`                        | (غیر متعین = کوئی فلٹر نہیں)            | صرف برقرار رکھنے کے لیے ٹول ناموں کی کوما سے جدا کردہ فہرست (اجازت فہرست موڈ — ذیل میں دیکھیں)                                             |
-| `DATA_DIR`                              | `~/.omniroute`                          | ہارٹ بیٹ فائل `${DATA_DIR}/runtime/mcp-heartbeat.json` میں لکھی جاتی ہے                                                                    |
+| متغیر                                   | طے شدہ قدر                              | مقصد                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| :-------------------------------------- | :-------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                | وہ بنیادی URL جسے MCP سرور OmniRoute کی اندرونی APIs کو کال کرتے وقت استعمال کرتا ہے                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `OMNIROUTE_API_KEY`                     | (خالی)                                  | اندرونی API کالز کے لیے `Authorization: Bearer` کے طور پر فارورڈ کی جانے والی API کلید                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (صرف `"true"` اسے فعال کرتا ہے) | فعال ہونے پر، مفقود scopes ٹول کالز کو مسترد کرتے ہیں اور آڈٹ لاگ میں `scope_denied:<reason>` درج کرتے ہیں۔ اس فلیگ سے قطع نظر، ہر ایسے HTTP/SSE کالر کے لیے نفاذ لازماً فعال کیا جاتا ہے جس کی شناخت فی کلید Authorization ہیڈر (`source === "authInfo"`) سے ہوئی ہو اور جس کے پاس مکمل `manage`/`admin` scope نہ ہو — مثلاً ایسی کلید جس کے پاس صرف محدود `mcp:connect` بائی پاس scope ہو — لہٰذا یہ طے شدہ ترتیب صرف مقامی/stdio واحد آپریٹر فلو کے لیے محفوظ ہے، ریموٹ نان لوپ بیک رسائی کے لیے کبھی نہیں |
+| `OMNIROUTE_MCP_SCOPES`                  | (خالی)                                  | بطور ڈیفالٹ "دستیاب" تصور کیے جانے والے scopes کی کوما سے جدا کردہ اجازت فہرست (اس وقت استعمال ہوتی ہے جب کالر اپنے scopes فراہم نہ کرے)                                                                                                                                                                                                                                                                                                                                                                      |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (غیر متعین = فعال)                      | `0/false/off/no` پر سیٹ کیے جانے کی صورت میں، رجسٹریشن کے وقت MCP وضاحتوں کی کمپریشن غیر فعال کر دیتا ہے                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (غیر متعین = فعال)                      | اوپر دیے گئے اسی ٹوگل کے لیے متبادل عرف                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                 | اندرونی انتظامی ریڈز (صحت، لچک پذیری، مجموعے، کوٹا، استعمال) کے لیے منسوخی کی مہلت                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                 | ان مراحل کے لیے منسوخی کی مہلت جو کسی فراہم کنندہ (`route_request`، `web_search`، `web_fetch`) کا انتظار کرتے ہیں                                                                                                                                                                                                                                                                                                                                                                                             |
+| `MCP_TOOL_DENY`                         | (غیر متعین = کوئی فلٹر نہیں)            | `tools/list` سے حذف کیے جانے والے ٹول ناموں کی کوما سے جدا کردہ فہرست (ٹولز کی تعداد میں کمی — ذیل میں دیکھیں)                                                                                                                                                                                                                                                                                                                                                                                                |
+| `MCP_TOOL_ALLOW`                        | (غیر سیٹ شدہ = کوئی فلٹر نہیں)          | صرف برقرار رکھنے کے لیے ٹول نام، کاما سے علیحدہ کردہ (اجازت فہرست موڈ — ذیل میں دیکھیں)                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `DATA_DIR`                              | `~/.omniroute`                          | ہارٹ بیٹ فائل `${DATA_DIR}/runtime/mcp-heartbeat.json` میں لکھی جاتی ہے                                                                                                                                                                                                                                                                                                                                                                                                                                       |
 
 ---
 

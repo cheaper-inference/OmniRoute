@@ -16,82 +16,152 @@ malengo zaidi yanaweza kuongezwa.
 ## 1. Jinsi inavyofanya kazi
 
 ```
-call_logs (SQLite)
-  → callLogExportSource.getCallLogsForExport(cursor, batchSize)
-    → LogExportRecord[]  (seti ya sehemu za kichupo cha Logs)
-      → destination client.send(batch)
-        → advanceLogExportCursor(id, lastRowId, count)
+seva (simbua + thibitisha usanidi, sawazisha kishale)
+  → anzisha IPC → mchakato wa OS wa exportChild uliotengwa
+    → storage.sqlite ya kusoma pekee → hoja/ulinganishaji wa pamoja wa kumbukumbu za simu
+      → upakiaji wa vipengee usiolandanishwa → prepare()/send() ya lengwa
+        → IPC ya kundi → seva huhifadhi kishale → IPC ya uthibitisho
+          → kundi linalofuata; IPC ya kukamilika → seva hurekodi mafanikio
 ```
 
-- **Ratiba** — kazi moja ya cron ya `JobRegistry`, `log_export`, ambayo chaguo-msingi ni `0 * * * *` (kila saa,
+- **Ratiba** — kazi moja ya cron ya `JobRegistry`, `log_export`, yenye chaguo-msingi la `0 * * * *` (kila saa,
   UTC). Imesajiliwa katika `src/lib/initCloudSync.ts`; inaweza kubadilishwa kwa `OMNIROUTE_LOG_EXPORT_CRON`.
-  Kila utekelezaji ulioratibiwa huchakata kila lengwa **lililowezeshwa**, moja baada ya jingine.
-- **Kielekezi** — `call_logs.rowid` fiche ya SQLite, inayohifadhiwa kwa kila lengwa katika
-  `log_export_destinations.cursor_row_id`. `timestamp` haitumiki kimakusudi kama kielekezi: wapigaji
-  wanaweza kutoa thamani yao wenyewe, kwa hivyo ombi la polepole linaweza kuandikwa baada ya ombi la haraka lililoanza
-  baadaye, na kielekezi cha muhuri wa muda kingeliruka ombi hilo.
-- **Uchakataji kwa mafungu** — safu `batch_size` kwa kila ombi (chaguo-msingi ni 500), safu `max_rows_per_run` kwa kila utekelezaji
-  (chaguo-msingi ni 10000), ili mlundikano mkubwa uchakatwe katika utekelezaji kadhaa badala ya kuzuia utekelezaji mmoja.
-- **Uwasilishaji** — kielekezi husogezwa mbele tu baada ya `send()` kukamilika. Fungu lililoshindwa huacha
-  kielekezi kilipokuwa, kwa hivyo safu zilezile hujaribiwa tena katika utekelezaji unaofuata. Dhamana ni
-  uwasilishaji angalau mara moja pamoja na uondoaji wa nakala katika upande wa lengwa, wala si uwasilishaji halisi wa mara moja tu: BigQuery hutambulisha kila
-  safu kwa kitambulisho cha kumbukumbu ya simu, ambacho huheshimu kadiri iwezekanavyo ndani ya kipindi chake cha kuondoa nakala.
-- **Kizuizi cha mwingiliano** — utekelezaji wa cron na `POST .../run` vinaweza kuanzishwa kwa wakati mmoja. Lengwa
-  ambalo tayari linachakatwa hurukwa badala ya kuchakatwa mara mbili (`skipped: true` katika matokeo ya utekelezaji),
-  kwa hivyo utekelezaji wa wakati mmoja hauwezi kutuma tena fungu au kurudisha kielekezi nyuma.
-- **Urejeshaji baada ya ufutaji** — ikiwa `cursor_row_id` itakuwa juu ya `MAX(rowid)` (jedwali lote
-  lilifutwa na rowid zikaanza upya), kiendeshaji hurudisha kielekezi hadi 0 badala ya kuacha kutambua rekodi mpya kabisa.
+  Kila utekelezaji hushughulikia kila lengwa **lililowezeshwa**, moja baada ya jingine.
+- **Kishale** — `call_logs.rowid` fiche ya SQLite, inayohifadhiwa kwa kila lengwa katika
+  `log_export_destinations.cursor_row_id`. `timestamp` haikutumika kimakusudi kama kishale: wapigaji
+  wanaweza kutoa thamani yao wenyewe, kwa hivyo ombi la polepole linaweza kuandikwa baada ya ombi la kasi zaidi lililoanza
+  baadaye, na kishale cha muhuri wa muda kingeliruka ombi hilo.
+- **Ugawaji katika makundi** — safu `batch_size` kwa kila ombi (chaguo-msingi 500), safu `max_rows_per_run` kwa kila utekelezaji
+  (chaguo-msingi 10000) ili mlundikano mkubwa ushughulikiwe katika utekelezaji kadhaa badala ya kuzuia utekelezaji mmoja.
+- **Uwasilishaji** — kishale husogea mbele tu baada ya `send()` kukamilika. Kundi lililoshindwa huacha
+  kishale mahali kilipokuwa, kwa hivyo safu zilezile hujaribiwa tena katika utekelezaji unaofuata. Dhamana ni
+  uwasilishaji wa angalau mara moja pamoja na uondoaji wa nakala upande wa lengwa, si uwasilishaji halisi wa mara moja tu: BigQuery hutambulisha kila
+  safu kwa kitambulisho cha kumbukumbu ya simu, ambacho huheshimu kwa kadiri iwezekanavyo ndani ya kipindi chake cha uondoaji wa nakala.
+- **Kizuizi cha mwingiliano** — utekelezaji wa cron na `POST .../run` vinaweza kuanzishwa kwa pamoja. Lengwa
+  ambalo tayari linashughulikiwa hurukwa badala ya kushughulikiwa mara mbili (`skipped: true` katika matokeo ya utekelezaji),
+  kwa hivyo utekelezaji sambamba hauwezi kutuma tena kundi au kuandika kishale kurudi nyuma.
+- **Urejeshaji baada ya ufutaji** — ikiwa `cursor_row_id` itaishia juu ya `MAX(rowid)` (jedwali lote
+  lilifutwa na rowid zikaanza upya), kiendeshi hurudisha kishale hadi 0 badala ya kubaki bila kuona data kabisa.
 
-### Data zinazotumwa (vidokezo na majibu yaliyokamilishwa)
+### Kiendeshi kilichotengwa na vikomo
 
-Kwa chaguo-msingi, uhamishaji hubeba tu sehemu za muhtasari zinazoonyeshwa na orodha ya Logs. Kuwasha
-**Hamisha vidokezo na majibu** (`includeBodies`) husafirisha pia kile kinachoonyeshwa na kidirisha cha **maelezo**
-cha Logs kwa kila simu:
+Kila utekelezaji wa lengwa kwenye Node huanzisha mchakato tofauti wa muda mfupi wa OS (`child_process`
+wenye IPC, si `worker_threads`). Usomaji wa body, uchanganuzi/ugeuzaji wa JSON ya payload kuwa mfuatano, `prepare()`
+ya lengwa na I/O ya mtandao ya lengwa yote huendeshwa humo, si kwenye kitanzi cha matukio cha seva.
+Usanidi na ujumbe mdogo wa maendeleo pekee ndio huvuka IPC; rekodi zilizosafirishwa hazirudi kamwe
+kwenye seva. Kazi ya cron na njia ya Endesha sasa hudumisha matokeo yale yale ya umma na kizuizi cha mwingiliano.
 
-| Sehemu                           | Inachohifadhi                                                        |
-| -------------------------------- | -------------------------------------------------------------------- |
-| `request_body` / `response_body` | Data za simu jinsi dashibodi inavyozionyesha                         |
-| `pipeline_route_decision`        | Lengwa na modeli ambazo kipanga njia kilichagua                      |
-| `pipeline_client_request`        | Ombi ghafi kama lilivyotumwa na kiteja                               |
-| `pipeline_openai_request`        | Baada ya kutafsiriwa kuwa muundo wa ndani wa OpenAI                  |
-| `pipeline_provider_request`      | Kama lilivyotumwa kwa mtoa huduma, katika lahaja ya mtoa huduma      |
-| `pipeline_provider_response`     | Jibu ghafi la mtoa huduma                                            |
-| `pipeline_client_response`       | Kilichorejeshwa kwa mpigaji                                          |
-| `pipeline_error`                 | Maelezo ya hitilafu ya mtiririko wa uchakataji kwa simu iliyoshindwa |
-| `bodies_truncated`               | True ikiwa sehemu yoyote hapo juu ilifikia `maxBodyBytes`            |
+Mchakato mtoto hufungua `DATA_DIR/storage.sqlite` iliyotambuliwa na seva kwa hali ya kusoma pekee kwa kutumia `node:sqlite`,
+ikiwa na `busy_timeout=5000` na `query_only=ON`. Hauleti singleton yoyote ya DB na haufanyi
+uhamishaji, nakala rudufu au masasisho ya SQLite. Uwekaji kumbukumbu wa vipengee vilivyokosekana/vilivyoharibika (ikiwemo
+UPDATE ya kipengee kilichoharibika) hubaki katika njia ya maelezo ya dashibodi pekee. Njia zote mbili hutumia kitatuzi safi
+cha maelezo; usafirishaji hutumia usomaji wa mfumo wa faili usiolandanishwa na mpangilio uleule wa utatuzi wa kipengee → ya zamani
+ya ndani ya mstari → diski ya zamani → hakuna. Utekelezaji hunasa rowid ya juu zaidi ya uingizaji
+mchakato mtoto unapofungua kisomaji chake; miingizo ya baadaye husubiri utekelezaji unaofuata. Huu ni mpaka wa
+uingizaji, si muamala wa SQLite wa muda mrefu: waandishi na vituo hakikishi vya WAL hubaki huru wakati wa
+kusubiri mtandao. Masasisho/ufutaji wa safu zilizopo haufungwi na mpaka huu.
 
-Haya ni maudhui ya kidokezo, kwa hivyo kipengele hiki **kimezimwa kwa chaguo-msingi** na kimakusudi huchaguliwa kwa kila lengwa.
-Kinachosafirishwa ndicho kinachoonyeshwa na dashibodi, kwa sababu vyote husoma kupitia `getCallLogById`: data zinazotumwa huwa
-tayari zimesafishwa dhidi ya PII na siri zimefichwa zinapoandikwa, na simu inayopigwa kwa
-ufunguo wa API wa `noLog` haihifadhi data zozote zinazotumwa, kwa hivyo hakuna cha kuhamisha.
+Baada ya kila kundi kukubaliwa, mchakato mtoto husubiri uthibitisho. Kwanza seva huhifadhi
+kishale kwa `advanceLogExportCursor`, kisha hutuma `ack`; hakuna kundi linalofuata linaloanza kabla ya hapo.
+Kushindwa kwa utumaji, kuvurugika au kuisha kwa muda hurekodi kutofaulu bila kusogeza mbele kundi hilo. Makundi
+yaliyothibitishwa awali hubaki yamehifadhiwa; kwa kiwango cha juu, kundi moja ambalo halijathibitishwa linaweza kutumwa tena.
+Mafanikio hurekodiwa tu baada ya `done` na mchakato mtoto kutoka bila hitilafu. Hitilafu husimamisha mchakato mtoto
+kwa SIGTERM, ikipandishwa hadi SIGKILL baada ya ms 500, na kiendeshi husubiri mchakato kufungwa.
 
-Data zinazotumwa husomwa kwa kila safu kutoka kwenye faili ya artefakti, kwa hivyo ujazaji wa data huendeshwa tu kwa malengo
-yaliyouomba. Safu ambayo artefakti yake haipo au imeharibika huhamisha muhtasari wake ikiwa na
-data batili za null badala ya kusababisha fungu lishindwe na kukwaza kielekezi.
+| Kigezo cha mazingira                          | Chaguo-msingi | Kusudi                                                        |
+| --------------------------------------------- | ------------- | ------------------------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000        | Kikomo cha muda halisi kwa kila lengwa                        |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024          | Kikomo cha nafasi ya zamani ya V8 ya mchakato mtoto katika MB |
 
-`maxBodyBytes` (chaguo-msingi ni 262144) huweka kikomo kwa kila sehemu. Data ndefu zaidi **hukatwa badala ya
-kuondolewa** — kidokezo kilichokatwa bado hujibu "nini kiliulizwa" — na safu huwekewa alama ya
-`bodies_truncated`. Tofauti zinazotiririshwa kipande kwa kipande hazihamishwi; jibu lililounganishwa
-tayari liko katika `pipeline_provider_response` na `pipeline_client_response`.
+Thamani batili/zisizo chanya/zisizo nambari kamili hutumia chaguo-msingi. Mpangilio wa heap si kikomo cha jumla cha
+RSS; makundi makubwa sana bado yanaweza kumaliza kumbukumbu ya mchakato mtoto na kusababisha utekelezaji kushindwa kwa usalama.
+Chaguo-msingi la MB 1024 huacha nafasi ya ziada kwa kundi chaguo-msingi la safu 500 za vipengee vya KiB 512 huku
+body zikiwa zimewezeshwa, ikijumuisha ugeuzaji wa JSON kuwa mfuatano kwa vipande vya baiti wa BigQuery. Haufanyi
+kundi la body lenye safu 10000 kuwa salama. Kuisha kwa heap ya V8 hurekodi hitilafu inayoweza kushughulikiwa: punguza ukubwa wa
+kundi au ongeza `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; kishale hubaki kwenye kundi la mwisho
+lililothibitishwa. Body za kihistoria za ndani ya mstari/diski hazijumuishwi kwenye kikomo cha kisasa cha vipengee.
+Waendeshaji lazima wapangie RSS kando, hasa ndani ya kontena zenye kikomo cha kumbukumbu.
+
+Mchakato mtoto hurithi tu `DATA_DIR` iliyotambuliwa, `NODE_ENV`, `TZ` iliyobainishwa (utatuzi wa muda wa ndani wa
+jina la faili la zamani), `ELECTRON_RUN_AS_NODE` inapokuwepo, na ingizo zifuatazo za mawasiliano ya nje:
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (na maumbo yake ya herufi ndogo),
+`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
+Kisambazaji cha jumla cha Undici hutumia kwa pamoja utatuzi safi wa proksi wa mazingira wa seva na kanuni za
+kupita moja kwa moja kwa seva pangishi za ndani, ikijumuisha `NO_PROXY`; hakileti `proxyFetch.ts` au alama zake za DB/vipengele.
+Vitambulisho vya proksi hufichwa katika matokeo yaliyosambazwa na hitilafu zilizorekodiwa. Vitambulisho vya lengwa
+husafiri tu katika ujumbe mmoja wa kuanza wa IPC, kamwe si argv wala mazingira; usambazaji wa matokeo/hitilafu
+huwekewa kiambishi awali na kusafishwa. `ExperimentalWarning` pekee ndiyo huzimwa katika hoja za utekelezaji za mchakato mtoto ili kuepuka
+kurudia onyo la SQLite la Node kila cron inapotekelezwa; aina nyingine za maonyo hubaki zikionekana.
+
+Moduli lengwa lazima ziweze kuletwa bila vitegemezi vya Next.js/vya upande wa seva pekee. Utekelezaji uliopo wa
+BigQuery tayari unatimiza masharti hayo. Akiba za tokeni za ufikiaji hudumu kwa kipindi cha utekelezaji wa mchakato
+mtoto pekee, si kati ya utekelezaji tofauti. Node ndiyo mazingira ya utekelezaji yanayotumika (`package.json` engines), lakini sehemu ya
+usakinishaji wa Bun katika README na `Dockerfile.bun` pia zinatangaza njia ya uoanifu wa uzalishaji inayotumia
+`bun:sqlite` (`src/lib/db/core.ts` / adapta). Kwa hivyo, chini ya Bun, exports hudumisha njia ya awali
+ya ndani ya mchakato na kutoa onyo la mara moja: utengaji wa heap/muda wa kuisha wa mchakato mtoto haupatikani. Tumia
+Node kwa utengaji wa event-loop na OOM; Bun haichukuliwi kuwa ya mazingira ya uundaji pekee hapa.
+
+Wakati `includeBodies` imewezeshwa, pendelea ratiba ya kila dakika kadhaa kama vile
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` badala ya kukusanya mrundikano wa payload wa kila saa.
+Vikomo vya batch na safu bado hudhibiti kila utekelezaji. Gharama ya kuanzisha mchakato hulipwa kwa kila eneo lengwa katika kila utekelezaji;
+hii hubadilishana gharama ndogo ya kuanzisha kwa utengaji wa event-loop ya seva, si kupunguza jumla ya matumizi ya CPU.
+
+### Payload (maagizo na majibu)
+
+Kwa chaguo-msingi, export hubeba sehemu za muhtasari pekee ambazo **orodha** ya Logs huonyesha. Kuwasha
+**Hamisha maagizo na majibu** (`includeBodies`) pia hutuma kile ambacho kidirisha cha **maelezo**
+cha Logs huonyesha kwa kila mwito:
+
+| Sehemu                           | Inachohifadhi                                                     |
+| -------------------------------- | ----------------------------------------------------------------- |
+| `request_body` / `response_body` | Payload za mwito jinsi dashibodi inavyoziwasilisha                |
+| `pipeline_route_decision`        | Lengo na modeli ambazo kipanga-njia kilichagua                    |
+| `pipeline_client_request`        | Ombi ghafi jinsi mteja alivyolituma                               |
+| `pipeline_openai_request`        | Baada ya kutafsiriwa kuwa muundo wa ndani wa OpenAI               |
+| `pipeline_provider_request`      | Jinsi lilivyotumwa kwa mtoa huduma wa nje, katika lahaja yake     |
+| `pipeline_provider_response`     | Jibu ghafi kutoka kwa mtoa huduma wa nje                          |
+| `pipeline_client_response`       | Kilichorejeshwa kwa mwitaji                                       |
+| `pipeline_error`                 | Maelezo ya hitilafu ya kiwango cha pipeline kwa mwito ulioshindwa |
+| `bodies_truncated`               | True wakati sehemu yoyote hapo juu ilifikia `maxBodyBytes`        |
+
+Haya ni maudhui ya maagizo, kwa hivyo **yamezimwa kwa chaguo-msingi** na kwa makusudi ni chaguo la kila eneo lengwa.
+Kinachotumwa ndicho dashibodi inachoonyesha, kwa sababu export na `getCallLogById` hushiriki utatuzi wa
+maelezo: payload huwa
+tayari zimesafishwa PII na taarifa za siri zimefichwa zinapoandikwa, na mwito unaofanywa kwa kutumia
+ufunguo wa API wa `noLog` hauhifadhi payload yoyote, kwa hivyo hakuna kitu cha kuhamisha.
+
+Payload husomwa kwa kila safu kutoka kwenye artifact ya mfumo wa faili, kwa hivyo hydration huendeshwa tu kwa maeneo lengwa
+yaliyoomba itumike. Artifact inayokosekana au iliyoharibika huhamisha muhtasari wake ikiwa na payload za null badala
+ya kufanya batch ishindwe na kuzuia cursor kusonga mbele.
+
+`maxBodyBytes` (chaguo-msingi 262144) huweka kikomo kwa kila sehemu. Payload ndefu zaidi **hukatwa badala ya
+kuondolewa** — agizo lililokatwa bado hujibu "nini kiliulizwa" — na safu huwekewa alama ya
+`bodies_truncated`. Delta zilizotiririshwa kipande kwa kipande hazihamishwi; jibu lililounganishwa tayari limo
+katika `pipeline_provider_response` na `pipeline_client_response`.
 
 ---
 
 ## 2. Faili
 
-| Sehemu                            | Mahali                                       |
-| --------------------------------- | -------------------------------------------- |
-| Mkataba wa lengwa                 | `src/lib/logExport/types.ts`                 |
-| Sajili                            | `src/lib/logExport/registry.ts`              |
-| Ushughulikiaji wa siri            | `src/lib/logExport/secrets.ts`               |
-| Kiendeshaji (kitanzi cha kishale) | `src/lib/logExport/runner.ts`                |
-| Uwasilishaji wa API               | `src/lib/logExport/presenter.ts`             |
-| Lengwa la BigQuery                | `src/lib/logExport/destinations/bigquery.ts` |
-| Uthibitishaji wa Google SA        | `src/lib/logExport/googleServiceAccount.ts`  |
-| Chanzo cha kumbukumbu za miito    | `src/lib/usage/callLogExportSource.ts`       |
-| Hifadhi endelevu                  | `src/lib/db/logExportDestinations.ts`        |
-| Kazi ya Cron                      | `src/lib/jobs/logExportJob.ts`               |
-| Tabaka la REST                    | `src/app/api/log-export/`                    |
-| Ukurasa wa dashibodi              | `src/app/(dashboard)/dashboard/log-export/`  |
+| Sehemu                         | Mahali                                       |
+| ------------------------------ | -------------------------------------------- |
+| Mkataba wa lengwa              | `src/lib/logExport/types.ts`                 |
+| Sajili                         | `src/lib/logExport/registry.ts`              |
+| Ushughulikiaji wa siri         | `src/lib/logExport/secrets.ts`               |
+| Kiendeshaji (IPC mzazi)        | `src/lib/logExport/runner.ts`                |
+| Mzunguko wa maisha ya mchakato | `src/lib/logExport/childRunner.ts`           |
+| Kiingilio cha mchakato mtoto   | `src/lib/logExport/exportChild.ts`           |
+| Kifunguaji cha kusoma pekee    | `src/lib/db/logExportReadOnly.ts`            |
+| Hoja/ulinganishaji wa pamoja   | `src/lib/usage/callLogExportQueries.ts`      |
+| Kitatuzi cha maelezo           | `src/lib/usage/callLogDetailResolver.ts`     |
+| Uwasilishaji wa API            | `src/lib/logExport/presenter.ts`             |
+| Lengwa la BigQuery             | `src/lib/logExport/destinations/bigquery.ts` |
+| Uthibitishaji wa Google SA     | `src/lib/logExport/googleServiceAccount.ts`  |
+| Chanzo cha kumbukumbu za simu  | `src/lib/usage/callLogExportSource.ts`       |
+| Uhifadhi                       | `src/lib/db/logExportDestinations.ts`        |
+| Kazi ya cron                   | `src/lib/jobs/logExportJob.ts`               |
+| Safu ya REST                   | `src/app/api/log-export/`                    |
+| Ukurasa wa dashibodi           | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Skima: `src/lib/db/migrations/170_log_export_destinations.sql`.
 

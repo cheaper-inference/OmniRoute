@@ -16,68 +16,62 @@ Il-karatteristiċi ta’ diskrezzjoni jeżistu sabiex OmniRoute jkun jista’ ja
 
 ---
 
-## Saff tal-Fingerprinting TLS
+## Saff tal-Identifikazzjoni TLS
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Sessjonijiet persistenti ta’ `wreq-js` jinħolqu b’mod għażżien għal kull ambitu ta’ kont u proxy riżolt. Il-pool `TlsClient` mifrux mal-proċess kollu jżomm mhux aktar minn 128 sessjoni li jimitaw **Chrome 124 fuq macOS** għal servizzi upstream wara Cloudflare. `TlsClient.fetch()` jagħlaq b’falliment meta r-runtime nattiv ma jkunx disponibbli; min isejjaħ jista’ jagħżel b’mod espliċitu fallback barra dan il-wrapper.
+Sessjonijiet persistenti ta’ `wreq-js` jinħolqu b’mod għażżien għal kull ambitu ta’ kont u proxy riżolt. Il-`TlsClient` mifrux mal-proċess kollu jiġbor f’pool mhux aktar minn 128 sessjoni li jimitaw **Chrome 124 fuq macOS** għal upstreams wara Cloudflare. `TlsClient.fetch()` ifalli b’mod magħluq meta r-runtime nattiv ma jkunx disponibbli; min isejjaħ jista’ jagħżel b’mod espliċitu fallback barra minn dan il-wrapper.
 
 - Profil tas-sessjoni: `browser: "chrome_124", os: "macos"`
 - Riżoluzzjoni tal-proxy (prijorità): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (ukoll b’ittri żgħar)
 - Timeout: `TLS_CLIENT_TIMEOUT_MS` (jiret minn `FETCH_TIMEOUT_MS`, valur predefinit 600000)
-- Ir-Response ta’ `wreq-js` huwa kompatibbli ma’ fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Ir-Response ta’ `wreq-js` hija kompatibbli ma’ fetch (`headers`, `text()`, `json()`, `clone()`, `body`).
 - Watchdog tal-ewwel byte (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  jiġi riżolt malli jaslu l-headers mill-upstream, għalhekk `TLS_CLIENT_TIMEOUT_MS` waħdu ma jistax
-  jillimita body li qatt ma jipproduċi l-ewwel byte. `guardTlsFirstByte()` jikkompeti l-ewwel `read()`
-  tal-body ma’ `TLS_FIRST_BYTE_WATCHDOG_MS` (valur predefinit `10000`, `0` jiddiżattivah); body
-  f’saħħtu ma jiġix affettwat, filwaqt li body wieqaf jikkanċella l-reader ta’ wreq u jippermetti
-  lil-loġika eżistenti ta’ fallback TLS ta’ `proxyFetch` tkompli lejn id-dispatcher dirett/tal-proxy
-  (talba li ma tistax terġa’ tintbagħat b’mod sikur, eż. POST b’body, xorta tiġġenera żball minflok
-  ma terġa’ tintbagħat fis-skiet).
+  jirrisolvi malli jaslu l-headers tal-upstream, għalhekk `TLS_CLIENT_TIMEOUT_MS` waħdu ma jistax jillimita
+  body li qatt ma jipproduċi l-ewwel byte. `guardTlsFirstByte()` iqabbel f’tellieqa l-ewwel `read()`
+  tal-body ma’ `TLS_FIRST_BYTE_WATCHDOG_MS` (valur predefinit `10000`, `0` jiddiżattivah); body normali
+  ma jiġix affettwat, filwaqt li body imwaħħal jikkanċella l-reader ta’ wreq u jippermetti lil-loġika
+  eżistenti ta’ fallback TLS ta’ `proxyFetch` tgħaddi għad-dispatcher dirett/tal-proxy (talba li ma tistax
+  terġa’ tintbagħat b’mod sikur, eż. POST b’body, xorta tarmi żball minflok ma terġa’ tiġi ppruvata fis-skiet).
 
-### Trasport tal-fornitur b’web-cookie — wreq-js 3.2.0
+### Trasport tal-fornitur tal-web cookies — wreq-js 3.2.0
 
 `open-sse/services/tlsClientBase.ts` huwa l-adapter kondiviż għall-ħames trasporti speċjalizzati
-b’web-cookie ta’ hawn taħt. Kull wrapper irqiq tal-fornitur jagħżel profil tal-browser/OS. L-adapter
-juża l-loader uniku tar-runtime ta’ wreq u l-pool tat-trasport f’`open-sse/utils/tlsClient.ts`, keyed
-skont il-profil + OS + proxy riżolt, filwaqt li kull talba tuża `cookieMode: "ephemeral"`. Għalhekk,
-il-kontijiet u t-talbiet jaqsmu konnessjonijiet fil-livell tat-trasport, iżda qatt ma jaqsmu sessjoni
-wreq jew cookie jar.
+tal-web cookies hawn taħt. Kull wrapper irqiq ta’ fornitur jagħżel profil ta’ browser/OS. L-adapter
+juża l-loader uniku tar-runtime ta’ wreq u l-pool tat-trasport f’`open-sse/utils/tlsClient.ts`, b’ċavetta
+magħmula mill-profil + OS + proxy riżolt, filwaqt li kull talba tuża `cookieMode: "ephemeral"`. Għalhekk,
+il-kontijiet u t-talbiet jikkondividu konnessjonijiet fil-livell tat-trasport, iżda qatt sessjoni ta’ wreq
+jew kontenitur tal-cookies.
 
-| Fornitur   | Profil        | OS emulat | Politika tal-EOF tal-istream         |
-| ---------- | ------------- | --------- | ------------------------------------ |
-| Claude     | `chrome_146`  | Linux     | inkludi `[DONE]`                     |
-| Perplexity | `firefox_148` | macOS     | inkludi `event: end_of_stream`       |
-| Grok       | `chrome_146`  | Linux     | eskludi `[DONE]`                     |
-| Notion     | `chrome_146`  | Windows   | inkludi `[DONE]`                     |
-| LMArena    | `chrome_146`  | Windows   | ebda sentinel; agħlaq mal-EOF nattiv |
+| Fornitur   | Profil        | OS Emulat | Politika tal-EOF tal-Istream             |
+| ---------- | ------------- | --------- | ---------------------------------------- |
+| Claude     | `chrome_146`  | Linux     | inkludi `[DONE]`                         |
+| Perplexity | `firefox_151` | macOS     | inkludi `event: end_of_stream`           |
+| Grok       | `chrome_146`  | Linux     | eskludi `[DONE]`                         |
+| Notion     | `chrome_146`  | Windows   | inkludi `[DONE]`                         |
+| LMArena    | `chrome_146`  | Windows   | l-ebda sentinella; agħlaq mal-EOF nattiv |
 
-- L-istreaming jikkonsma direttament ir-`ReadableStream` tar-response nattiv; ma jinħoloq ebda fajl
-  temporanju jew sidecar.
+- L-istreaming jikkonsma r-`ReadableStream` tar-response nattiv direttament; ma jinħoloq l-ebda fajl temporanju jew sidecar.
 - Sa 256 byte inizjali jiġu spezzjonati qabel ma jiġi espost stream. Il-fornituri SSE jibbufferjaw
-  żbalji mhux SSE; Grok/LMArena jimmappjaw l-isfidi ta’ Cloudflare għal `403` u l-interstitials HTML
-  għal `502`.
-- It-timeout nattiv tat-talba jibqa’ mgeżwer b’limitu ta’ żmien assolut u strett ta’ JS. Hang
-  jinvalida u jagħlaq biss it-trasport affettwat tal-profil/OS/proxy qabel ma t-talba li jmiss
-  terġa’ toħloqu.
-- Il-prijorità tar-riżoluzzjoni tal-proxy hija `proxyUrl` għal kull sejħa → kuntest tal-kont/dashboard
-  limitat għat-talba → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (inklużi l-varjanti b’ittri żgħar).
-  Żbalji fir-riżoluzzjoni jagħlqu b’falliment minflok ma jikxfu konnessjoni diretta. LMArena
-  deliberatament jirriżolvi ma’ `arena.ai`.
-- `byteResponse` jirritorna URL `data:` b’tip ta’ kontenut mingħajr korruzzjoni UTF-8.
-- L-iżbalji huma `TlsClientUnavailableError` (pakkett/addon mhux disponibbli), `TlsClientHangError`
-  (inqabeż il-limitu ta’ żmien), u `WreqTransportCapacityError` (il-kodiċi kondiviż tal-iżball
-  tal-kapaċità tas-sessjonijiet) meta l-128 slot limitati kollha tal-profil/OS/proxy jkunu attivi
-  jew qed jingħalqu.
+  żbalji mhux SSE; Grok/LMArena jimmappjaw l-isfidi ta’ Cloudflare għal `403` u l-paġni HTML intermedjarji għal `502`.
+- It-timeout nattiv tat-talba jibqa’ mgeżwer b’limitu ta’ żmien assolut u riġidu f’JS. Waqfien
+  jinvalida u jagħlaq biss it-trasport affettwat tal-profil/OS/proxy qabel ma t-talba li jmiss terġa’ toħolqu.
+- Il-prijorità tar-riżoluzzjoni tal-proxy hija `proxyUrl` għal kull sejħa → kuntest tal-kont/pannell limitat għat-talba →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (inklużi l-varjanti b’ittri żgħar). Żbalji fir-riżoluzzjoni
+  jfallu b’mod magħluq minflok ma jħallu konnessjoni diretta tnixxi. LMArena apposta jirrisolvi ma’ `arena.ai`.
+- `byteResponse` jirritorna URL `data:` ikklassifikat skont it-tip tal-kontenut mingħajr korruzzjoni UTF-8.
+- L-iżbalji huma `TlsClientUnavailableError` (package/addon mhux disponibbli), `TlsClientHangError`
+  (inqabeż il-limitu taż-żmien), u `WreqTransportCapacityError` (il-kodiċi kondiviż tal-iżball tal-kapaċità tas-sessjonijiet)
+  meta l-128 slot limitati kollha tal-profil/OS/proxy jkunu attivi jew qed jingħalqu.
 
-Is-sessjoni ġenerika `TlsClient` ta’ hawn fuq tibqa’ speċjalizzata għal stat persistenti tal-cookies
-appoġġjat mill-browser. Iż-żewġ mogħdijiet jerġgħu jużaw loader wieħed cached tal-modulu wreq u hook
-taċ-ċiklu tal-ħajja tal-proċess; il-pools tagħhom jibqgħu separati minħabba li t-tul tal-ħajja
-tal-cookies tagħhom huwa intenzjonalment differenti.
+Is-sessjoni ġenerika ta’ `TlsClient` hawn fuq tibqa’ speċjalizzata għal stat persistenti tal-cookies
+ibbażat fuq browser. Iż-żewġ mogħdijiet jerġgħu jużaw loader wieħed tal-modulu wreq fil-cache u hook
+taċ-ċiklu tal-ħajja tal-proċess; il-pools tagħhom jibqgħu separati minħabba li t-tul tal-ħajja tal-cookies
+tagħhom huwa intenzjonalment differenti.
 
-Il-profili huma appoġġjati mill-pakkett ippinjat, iżda l-aċċettazzjoni reali mill-WAF tista’ tinbidel
+Il-profili huma appoġġjati mill-package ippinjat, iżda l-aċċettazzjoni reali mill-WAF tista’ tinbidel
 indipendentement mit-testijiet lokali tal-kuntratt. Ivvalida l-bidliet fil-fingerprint ma’ kont live
-awtorizzat b’mod espliċitu qabel ma tiddikjara parità ma’ browser upstream.
+awtorizzat b’mod espliċitu qabel ma tiddikjara parità ma’ browser tal-upstream.
 
 ---
 
@@ -126,7 +120,7 @@ Applikat għal: blokok `system`, il-`messages[].content` kollha, u `tools[].desc
 
 Għal relays Anthropic ta’ partijiet terzi li jaċċettaw biss traffiku ta’ “Claude Code reali”:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` b’mod predefinit
@@ -248,7 +242,7 @@ L-endpoints MITM kollha jeħtieġu awtentikazzjoni tal-ġestjoni (`requireCliToo
 
 | Varjabbli                | Valur predefinit                                                |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

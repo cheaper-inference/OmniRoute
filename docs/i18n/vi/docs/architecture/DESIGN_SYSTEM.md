@@ -4,228 +4,165 @@
 
 ---
 
-> **Trạng thái:** tài liệu tham chiếu — quá trình chuẩn hóa được mô tả tại đây đã được **triển khai** (các giai đoạn 1–6: hình nền lưới, các primitive, tập trung hóa màu trạng thái, token mono, di chuyển DataTable sang token, focus-ring → accent, các primitive Checkbox/Textarea, `cn()` → tailwind-merge, lưới trên mọi màn hình độc lập, lớp vỏ nội dung 4K linh hoạt, các bề mặt bảng dữ liệu không trong suốt). Tài liệu này là mô tả chuẩn về các design token, thành phần và quy ước của dashboard; cách phân chia theo giai đoạn bên dưới được giữ lại để giải thích cơ sở lý luận cho từng quyết định.
-> **Phạm vi:** dashboard OmniRoute (`src/`) và trang web tiếp thị (`_mono_repo/omnirouteSite/`) dùng chung **một bản sắc hình ảnh** — cùng hình nền lưới giấy kẻ ô (32px), cùng các token màu và các thành phần được chuẩn hóa.
->
-> Ghi chú thực tế dành cho người bảo trì:
->
-> - Một số giá trị hex được mã hóa cứng còn lại là **có chủ đích** (terminal console luôn ở chế độ tối, các nét SVG của ReactFlow) và **KHÔNG** được chuyển hàng loạt sang token.
-> - Lưới “lớn hơn” trên một phiên bản đang chạy là do bản dựng cũ, không phải do mã nguồn — kích thước lưới là 32px, giống hệt trang web.
-> - Các giá trị `--table-*` của giao diện tối giống từng byte với rgba được mã hóa cứng trước khi di chuyển; giao diện sáng đã được sửa (trước đó bị lỗi luôn hiển thị tối do các giá trị dự phòng `var()` không bao giờ được dùng).
+> **Trạng thái:** dashboard được xây dựng trên **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), được vendored
+> dưới dạng workspace `packages/ui-kit` (`@omniroute/ui-kit`; snapshot upstream được ghim trong
+> `packages/ui-kit/UPSTREAM.md` và được bảo vệ bằng `npm run check:ui-kit-snapshot`). Light là
+> giao diện chuẩn; tùy chọn mặc định là `system`. Màu nhấn là xanh chanh Keak (`--ci-color-accent`). Inter
+> (letter-spacing 0, `--ci-letter-spacing-ui`) là họ phông chữ giao diện, Instrument Serif chỉ dành cho văn bản hiển thị lớn, thưa
+> (`.ci-dashboard-display`), IBM Plex Mono dành cho mã — tất cả đều được tự lưu trữ thông qua các import
+> `@fontsource/*` ở đầu `src/app/globals.css`. Mọi biểu tượng đều là glyph Lucide.
 
----
+## 1. Vị trí của các thành phần
 
-## 1. Mục đích
+- **Bộ kit.** `packages/ui-kit/src` là bản sao giống từng byte của `src/` thượng nguồn tại commit được ghim trong
+  `packages/ui-kit/UPSTREAM.md` (tệp này cũng ghi lại sự cho phép về giấy phép); `PATCHES.md` liệt kê các
+  bản vá cục bộ (không có). Nó được sử dụng trực tiếp dưới dạng mã nguồn, không qua bước build: `next.config.mjs` biên dịch chuyển đổi nó, còn
+  `tsconfig.json` ánh xạ `@omniroute/ui-kit` → `packages/ui-kit/src` và `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts` và `vitest.mcp.config.ts` cũng có cùng alias). Hãy import một
+  thành phần của kit qua subpath của nó (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), tuyệt đối không
+  qua barrel `@omniroute/ui-kit`: barrel sẽ kéo mọi thành phần (bao gồm cả bộ chọn ngày)
+  vào từng tệp import. Stylesheet của kit được đưa vào qua `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **Token.** `packages/ui-kit/src/ci-tokens.css` khai báo các token `--ci-*`; `src/app/globals.css`
+  nối chúng với các tên OmniRoute cũ (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), để các chỗ đọc `var(--color-*)` hiện có và các tiện ích Tailwind
+  tiếp tục hoạt động. Mã mới sử dụng các tiện ích Tailwind (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) hoặc các class của kit — tuyệt đối không dùng giá trị hex
+  (`tests/unit/design-kit-bridge.test.ts` thực thi quy tắc cầu nối này). `text-primary` phân giải thành
+  `--color-primary-ink` thông qua `--text-color-primary` (lime-800 ở chế độ sáng, màu nhấn lime ở chế độ tối), nhờ đó
+  văn bản chính vẫn dễ đọc trong khi `bg-primary`/`border-primary` giữ bề mặt màu lime. Các chuỗi dữ liệu biểu đồ sử dụng
+  `--color-chart-1` … `--color-chart-5`.
+- **Giao diện.** `<html className="ci-theme">` (`src/app/layout.tsx`) đưa tài liệu vào giao diện của kit.
+  Tùy chọn là `light`, `dark` hoặc `system` (`THEME_CONFIG.defaultTheme = "system"` trong
+  `src/shared/constants/appConfig.ts`; `system` tuân theo `prefers-color-scheme`). `applyTheme()` trong
+  `src/store/themeStore.ts` (được phản chiếu bởi script bootstrap nội tuyến trong `src/app/layout.tsx`, chạy
+  trước khi hydration) đặt `data-theme="dark"|"light"` và đồng thời bật/tắt class `.dark` trên `<html>`.
+  Tập token tối của kit được xác định theo `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  các ghi đè chế độ tối riêng của OmniRoute (khối `.dark` trong `globals.css`) và các tiện ích `dark:` cũ của Tailwind
+  được xác định theo class `.dark`. Không có các preset màu nhấn: màu nhấn luôn đến từ
+  kit, và preset được lưu lại từ một bản build cũ sẽ bị loại bỏ khi store tải.
+- **Thành phần (adapter).** `src/shared/components/index.tsx` duy trì API thành phần của OmniRoute (giữ nguyên
+  tên, default export và prop), còn các primitive phía sau là những adapter bọc quanh kit: biểu mẫu
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), lớp phủ và phản hồi
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  cấu trúc (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) và bảng
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Một adapter import thành phần của kit
+  qua subpath rồi ánh xạ các prop cũ sang thành phần đó — ví dụ `Button variant="primary"` là nút
+  `default` của kit (`--ci-button-primary-*`: bề mặt đảo màu ở chế độ sáng, màu nhấn cùng màu chữ
+  `--ci-color-accent-foreground` của nó ở chế độ tối), `danger` là `destructive`, còn `warning` là `outline` cộng với
+  phần mở rộng `.ci-button--warning`. Các quy tắc `.ci-button--warning` và `.ci-badge[data-tone]` ở cuối
+  `globals.css` (`@layer components`) là các phần mở rộng của OmniRoute nằm trên các class của kit.
+  `tests/unit/ui/adapters/*.test.tsx` cố định hành vi của từng adapter.
+- **Khung ứng dụng.** `src/app/(dashboard)/layout.tsx` render `DashboardLayout`, thành phần này render
+  `src/shared/components/layouts/DashboardShell.tsx`: các thành phần `SidebarProvider` / `Sidebar` /
+  `SidebarInset` của kit (`packages/ui-kit/src/sidebar.tsx`), cùng logic điều hướng của OmniRoute trong
+  `src/shared/components/Sidebar.tsx`. Liên kết "bỏ qua để đến nội dung" trỏ tới `#main-content` là phần tử
+  đầu tiên có thể nhận focus. `src/shared/components/Header.tsx` chứa `SidebarTrigger` của kit (nút chuyển đổi
+  thanh bên duy nhất của khung), `ProductSwitcher` của Keak và nút mở bảng lệnh; nó chỉ hiển thị tiêu đề tuyến
+  khi không có `PageHeader` của kit (`.ci-page-header`) được mount bên trong `#main-content`, nhờ đó một trang
+  có `PageHeader` riêng chỉ có một `h1`. `src/shared/components/CommandPalette.tsx` là một `Dialog` của kit.
+- **Biểu tượng.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) phân giải tên (bộ từ vựng
+  Material Symbols mà các màn hình sử dụng) thông qua `ICON_MAP` (`src/shared/constants/iconMap.ts`) thành một
+  glyph Lucide. Font và package Material Symbols đã bị loại bỏ: tên không có trong bảng ánh xạ sẽ render một
+  glyph giữ chỗ trung tính (`data-icon-missing="true"`) và ghi cảnh báo vào console bên ngoài môi trường production.
+  `npm run gen:icon-map` in ra các tên đang được sử dụng nhưng còn thiếu trong bảng ánh xạ
+  (`tests/unit/icon-map-coverage.test.ts` thất bại với bất kỳ tên nào không có biểu tượng Lucide;
+  `tests/unit/icon-map-object-values.test.ts` bao phủ các tên được lưu trong những đối tượng tra cứu);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` chuyển đổi các span
+  `<span className="material-symbols-outlined">` dạng literal thành `<Icon>`.
+- **Thương hiệu.** `src/shared/components/OmniRouteLogo.tsx` bọc kit: default export `OmniRouteLogo`
+  render `ProductIcon product="omniroute" variant="glyph"` (SVG nội tuyến, an toàn với `basePath`) và
+  `OmniRouteLockup` render `ProductLockup product="omniroute"` (tên hỗ trợ tiếp cận "Keak OmniRoute") hoặc, đối với
+  các nhà vận hành nhãn trắng, `name`/`logoSrc` riêng của họ. Các đích đến của bộ chuyển đổi sản phẩm nằm trong
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Các màn hình độc lập
+  — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` và `src/shared/components/ErrorPageScaffold.tsx`
+  — hiển thị lockup; `tests/unit/brand-pages-static.test.ts` bảo vệ yêu cầu này.
 
-Trang web tiếp thị (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) và dashboard sản phẩm phải trông như **một sản phẩm thống nhất**. Trang web đã lấy bảng màu từ dashboard — tệp `css/tokens.css` thậm chí còn ghi _“Bảng màu phản chiếu dashboard OmniRoute (src/app/globals.css)”_. Vì vậy, hai bên đã đồng nhất khoảng 80% ở cấp độ màu sắc. Những gì dashboard còn thiếu:
+## 2. Quy tắc
 
-1. **Hình nền lưới giấy kẻ ô** mà trang web sử dụng trên mọi trang.
-2. Một số **design token dùng chung** mà trang web có nhưng dashboard còn thiếu (thang đo bán kính, gradient thương hiệu, `surface-2`, phông chữ mono).
-3. **Tính nhất quán ở cấp độ thành phần** — một số thành phần của dashboard bỏ qua các token giao diện bằng cách sử dụng giá trị hex/rgba được mã hóa cứng.
+1. Dùng token, tuyệt đối không dùng literal. Các ngoại lệ được giữ lại có chủ đích: terminal console
+   luôn ở chế độ tối và `STATUS_HEX` (`src/shared/constants/statusColors.ts`), bản sao hex đã được
+   resolve của bảng màu trạng thái của kit dành cho các caller cần một mã hex literal. Các bảng màu
+   phân loại (categorical) không còn là ngoại lệ nữa: chúng đi qua năm token biểu đồ của kit
+   (`--color-chart-1..5`) thông qua `src/shared/utils/categoricalPalette.ts` và, đối với các chiến
+   lược routing, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; các edge của ReactFlow
+   và canvas điều phối (orchestration) đọc các biến `--orch-status-*` nhận biết theme
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Không bao giờ vá `packages/ui-kit/src` thủ công: hãy đồng bộ bằng
+   `scripts/dev/sync-ui-kit.sh <commit>`; cổng kiểm tra pre-commit `npm run check:ui-kit-snapshot`
+   (`.husky/pre-commit`) sẽ thất bại nếu có bất kỳ byte nào khác với commit upstream đã ghim (nó sẽ
+   bỏ qua kèm cảnh báo khi không có bản clone upstream, `UI_KIT_CLONE` hoặc
+   `_references/cheaper-inference-ui-kit`). Khi kit thiếu thứ gì đó, hãy xử lý vòng trong adapter
+   hoặc màn hình và yêu cầu upstream bổ sung.
+3. Văn bản mặc định của kit là tiếng Anh (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   hãy truyền chuỗi đã dịch từ `useTranslations(...)` bất cứ khi nào một component của kit hiển thị
+   văn bản.
+4. Các utility của Tailwind thắng các class component của kit (kit khai báo
+   `@layer theme, base, components, utilities` và các quy tắc của nó nằm trong `components`) — dùng
+   utility cho khoảng cách và bố cục, không dùng để đổi màu các component của kit.
+5. Tiêu đề: `.ci-heading` (Inter, không tracking) cho tiêu đề trang và tiêu đề phần;
+   `.ci-dashboard-display` (Instrument Serif) chỉ dành cho văn bản display cỡ lớn, thưa thớt chẳng
+   hạn như mã trạng thái của trang lỗi.
+6. `tests/unit/dashboard-kit-sweep.test.ts` canh giữ việc áp dụng kit: không có span ligature
+   Material nào dưới `src/app` hoặc `src/shared/components`; trong cây dashboard
+   (`src/app/(dashboard)` và `src/shared/components`) không dùng `<select>`, `<textarea>` hoặc
+   `<table>` thô và không tự chế `role="dialog"` ngoài các ngoại lệ được liệt kê (nhánh native của
+   adapter `Select`, `RequestLoggerDetail`); mọi `<button>` hoặc `<input>` thô ở đó đều cần một
+   comment chứa `kit-exception:` (kèm lý do) kết thúc tối đa 3 dòng phía trên nó; các hue của bảng
+   màu và biến thể `dark:` chỉ được xuất hiện trong các file mà test liệt kê.
+7. Kiểm tra cả hai theme và viewport 390 px trước khi tạo PR (chụp màn hình);
+   `tests/e2e/a11y.spec.ts` chạy axe.
 
-Tài liệu này trình bày phần phân tích và kế hoạch.
+## 3. Thêm màn hình
 
----
+1. Mở trang bằng `PageHeader` của kit (`@omniroute/ui-kit/page-header`, dùng `compact` bên trong
+   dashboard) — gồm tiêu đề, mô tả và `actions`. Sau đó, header của shell sẽ bỏ tiêu đề riêng của nó.
+2. Tạo các điều khiển từ `@/shared/components` (các adapter) và dùng thành phần kit theo subpath khi không có
+   adapter (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   `Slider`…).
+3. Biểu tượng: `<Icon name="…" />`. Tên mới được thêm vào `ICON_MAP` cùng thành phần Lucide phù hợp
+   về mặt ngữ nghĩa; `npm run gen:icon-map` liệt kê các tên vẫn còn thiếu.
+4. Màu sắc: dùng các utility ngữ nghĩa (`text-success`, `bg-warning-bg`, `border-border`…) và
+   `var(--color-chart-N)` cho các chuỗi dữ liệu biểu đồ; không dùng giá trị hex và không dùng các biến thể `dark:` chỉ lặp lại một màu.
+5. Văn bản: mọi chuỗi, bao gồm cả các nhãn được truyền vào thành phần kit, đều lấy từ `useTranslations`. Các
+   khóa mới được thêm vào `src/i18n/messages/en.json`, `pt-BR.json` và `vi.json` (bài kiểm thử tính tương đồng tiếng Việt ghim
+   mọi khóa tiếng Anh); các locale khác được điền bởi quy trình đồng bộ i18n.
+6. Chạy các kiểm tra bảo vệ trước khi tạo PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (kiểm tra duy nhất phát hiện import bị trùng lặp trong `iconMap.ts`),
+   `npm run check:ui-icu`, và các bài kiểm thử riêng của màn hình.
 
-## 2. Nguyên tắc
+## 4. Thêm hoặc thay đổi một adapter
 
-- **Nguồn chân lý duy nhất = `src/app/globals.css`.** Trang web phản chiếu dashboard, không bao giờ theo chiều ngược lại. Các token mới phải được thêm vào `globals.css` trước.
-- **Dùng token, không dùng giá trị literal.** Các thành phần sử dụng token ngữ nghĩa (`bg-surface`, `text-primary`, `border-border`), tuyệt đối không dùng trực tiếp `#hex`.
-- **Tinh tế, không phô trương.** Lưới là một hình nền mờ nằm phía sau nội dung — nó không bao giờ được làm giảm độ tương phản của văn bản hoặc gây xung đột với giao diện người dùng.
-- **Nhận biết giao diện.** Mọi thứ đều hoạt động trong cả `.dark` (diện mạo đặc trưng của sản phẩm) và giao diện sáng.
-- **Triển khai có chọn lọc.** Phát hành lưới + token trước (rủi ro thấp, mức độ hiển thị cao), sau đó dọn dẹp các thành phần theo từng đợt.
+1. Giữ nguyên API công khai của `src/shared/components/index.tsx`: cùng tên export, default export và
+   các props được chấp nhận. Ánh xạ các props cũ sang kit bên trong adapter (xem `Button.tsx`: `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT`).
+2. Import kit bằng subpath (`@omniroute/ui-kit/<component>`).
+3. Các giải pháp tạm thời cho những phần còn thiếu của kit phải nằm trong adapter (hoặc trong `globals.css` `@layer components` khi bản sửa lỗi liên quan đến
+   kiểu dáng), tuyệt đối không nằm trong `packages/ui-kit/src`.
+4. Thêm hoặc cập nhật `tests/unit/ui/adapters/<name>.test.tsx`. Với adapter có nhiều nơi gọi, hãy so sánh
+   markup được render trước và sau thay đổi — các thay đổi về padding hoặc wrapper sẽ ảnh hưởng đến mọi màn hình.
 
----
+## 5. Cập nhật kit
 
-## 3. Trạng thái hiện tại — những gì đã đồng nhất và những gì chưa
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` sao chép `src/` từ upstream tại commit đó vào
+`packages/ui-kit/src` và áp dụng phép biến đổi duy nhất được phép (loại bỏ hậu tố `.js` khỏi
+các import tương đối). Sau đó: xem xét `git diff packages/ui-kit`, kiểm tra trực quan providers, settings, combos,
+usage và endpoint trong cả hai theme, chạy `npm run check:ui-kit-snapshot` và `npm run test:vitest:ui`, rồi
+mở PR kèm changelog từ upstream.
 
-### 3.1 Màu sắc — đã thống nhất ✅
+## 6. Chỉ mục tham khảo
 
-Mọi màu thương hiệu và bề mặt đều đã khớp với trang web **về giá trị** (chỉ khác tên — dashboard thêm tiền tố `--color-`). Đã xác minh trong `src/app/globals.css:30-128`:
-
-| Khái niệm                     | Token trang web (`tokens.css`)              | Token dashboard (`globals.css`) | Mức độ khớp     |
-| ----------------------------- | ------------------------------------------- | ------------------------------- | --------------- |
-| màu chính                     | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅              |
-| màu chính khi di chuột        | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅              |
-| màu nhấn                      | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅              |
-| màu nhấn 2                    | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (đã đổi tên) |
-| màu nhấn 3                    | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (đã đổi tên) |
-| thành công / cảnh báo / lỗi   | `#22c55e / #f59e0b / #ef4444`               | giống hệt                       | ✅              |
-| đèn tín hiệu                  | `#ff5f56 / #ffbd2e / #27c93f`               | giống hệt                       | ✅              |
-| nền tối / bề mặt / đường viền | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | giống hệt                       | ✅              |
-| nền sáng / bề mặt / văn bản   | `#f9f9fb / #fff / #1a1a2e`                  | giống hệt                       | ✅              |
-
-**Kết luận:** không cần thực hiện việc di chuyển màu sắc. Bản sắc đã được dùng chung; chúng ta đang _hoàn thiện_ nó, không phải xây dựng lại.
-
-### 3.2 Khoảng trống — những gì dashboard còn thiếu
-
-| Khoảng cách biệt        | Trang web có                                                                 | Dashboard                                                               | Hành động                             |
-| ----------------------- | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------- | ------------------------------------- |
-| **Hình nền dạng lưới**  | Giấy kẻ ô `body::before`, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ đã thêm (Giai đoạn 1)**                                            | **Phần A**                            |
-| **Thang bo góc**        | `--radius 14px`, `--radius-sm 9px`                                           | đã thêm `--radius 14px`; `-sm` + chuyển hướng thành phần đang chờ xử lý | **Phần B / Giai đoạn 2**              |
-| **Dải màu thương hiệu** | `--grad-brand 135deg primary→accent-3`                                       | **✅ đã thêm token (Giai đoạn 1)**; được sử dụng trong Giai đoạn 2      | **Phần B**                            |
-| **Bề mặt lồng nhau**    | `--surface-2 #1c2230`                                                        | **✅ đã thêm (Giai đoạn 1)**                                            | **Phần B**                            |
-| **Phông chữ đơn cách**  | `--font-mono` (ngăn xếp ui-monospace)                                        | đang chờ xử lý (Giai đoạn 4, cùng với các thành phần sử dụng)           | **Phần B**                            |
-| **`text-muted` (tối)**  | `#8b8b9e`                                                                    | `#a1a1aa` (zinc-400)                                                    | điều chỉnh cho nhất quán — **Phần B** |
-
-### 3.3 Cơ chế chủ đề (để không làm hỏng bất kỳ thứ gì)
-
-- **Tailwind v4, ưu tiên CSS** (không có `tailwind.config.*`). Các token được định nghĩa trong `:root`/`.dark` và được cung cấp cho các tiện ích thông qua `@theme inline` (`globals.css:130-179`).
-- **Chế độ tối thông qua lớp `.dark`** trên `<html>` (`@custom-variant dark` tại `globals.css:22`), được chuyển đổi bằng store Zustand tùy chỉnh (`src/store/themeStore.ts`), chủ đề mặc định = `system` (`src/shared/constants/appConfig.ts:11`). Thay vào đó, trang web sử dụng `html[data-theme="light"]` — **các cơ chế này khác nhau nhưng không bao giờ giao nhau** (nguồn riêng biệt), vì vậy không có xung đột. Chúng ta giữ nguyên cơ chế `.dark` của dashboard.
-- **Có hỗ trợ ghi đè màu chính khi chạy** (`themeStore.ts:85-97`, các thiết lập sẵn trong `COLOR_THEMES`) — người dùng có thể thay đổi `--color-primary`. Mọi token mới (dải màu, v.v.) tham chiếu đến `--color-primary` đều tự động kế thừa các giá trị ghi đè đó. ✅
-- **Tên bán kính dành riêng của Tailwind v4:** `--radius-sm/md/lg/...` làm cơ sở cho các tiện ích `rounded-*`. Việc định nghĩa lại chúng sẽ thay đổi ngược trở lại mọi `rounded-*` hiện có (ví dụ: `rounded-sm` được sử dụng trong 12 tệp). Vì vậy, giá trị bán kính nhỏ và việc chuyển hướng thành phần được chủ động hoãn đến Giai đoạn 2, nơi các thành phần sử dụng sẽ được thay đổi đồng thời.
-
----
-
-## 4. Phần A — Nền lưới giấy kẻ ô (yêu cầu chính) — ĐÃ TRIỂN KHAI (Giai đoạn 1)
-
-### 4.1 Đây là gì
-
-Công thức chính xác từ trang web (`_mono_repo/omnirouteSite/css/base.css`): một **pseudo-element cố định, phủ toàn bộ viewport**, vẽ hai gradient đường kẻ 1px, nằm ở `z-index:-1` phía sau toàn bộ nội dung.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**Tại sao cách này vẫn hoạt động dù `body` có `background-color` không trong suốt:** một `::before` với `z-index:-1` được vẽ _phía trên_ nền riêng của phần tử nhưng _phía dưới_ nội dung trong luồng của phần tử đó. Vì vậy, `--color-bg` là lớp nền cơ sở, lưới được xếp chồng lên trên và ứng dụng được hiển thị phía trên lưới.
-
-### 4.2 Tiền lệ đã có trong codebase
-
-`src/app/landing/page.tsx:16-26` **đã triển khai chính lưới này theo từng trang** — nhưng với các đường kẻ **màu đỏ** (`#E54D5E`, độ mờ `0.06`) ở kích thước **50px**, cùng các quầng sáng động. Vì vậy, mẫu này đã được kiểm chứng trong sản phẩm; thay đổi này nâng nó thành một hình nền **toàn cục, nhận biết theme**.
-
-### 4.3 Các token đã thêm (trong `globals.css`)
-
-```css
-:root {
-  /* sáng — độ mờ của lưới được tăng từ mức 0.045 của trang web để hình nền
-     thực sự hiển thị trên dashboard dày đặc (các card/chrome che phủ phần lớn viewport) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* tối — được tăng từ 0.035 vì cùng lý do */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 Trở ngại duy nhất — đã được loại bỏ
-
-Lưới mang tính toàn cục theo thiết kế (nó bao phủ panel, `auth`/`login`, các trang lỗi — mọi route — cùng một lúc). Chỉ có đúng **một** phần tử che khuất nó bên trong panel:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — wrapper ngoài cùng vẽ một lớp `bg-bg` không trong suốt. Mọi thứ bên dưới nó đều đã trong suốt (`<main>`, scroll container, phần tử bên trong `max-w-7xl`), vì vậy **việc xóa `bg-bg`** cho phép lưới của body hiển thị xuyên qua vùng nội dung (`--color-bg` của body vẫn là lớp nền cơ sở).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 Tương tác với chrome (sidebar / header)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) và `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) vẫn **không trong suốt** → lưới chỉ hiển thị trong **vùng nội dung**, với chrome đặc bao quanh. Đây là thiết lập mặc định nhẹ nhàng, phù hợp với cách trang web tách chrome khỏi canvas (quyết định D3 = đặc).
-
-### 4.6 Các trang đăng nhập / xác thực / lỗi
-
-Các trang này được hiển thị trực tiếp bên dưới `<body>` (không có chrome của panel), vì vậy lưới toàn cục sẽ tự động xuất hiện phía sau chúng. **Giai đoạn 5 — HOÀN TẤT:** các wrapper toàn màn hình độc lập thực tế không trong suốt (`min-h-screen … bg-bg`, trong đó `bg-bg` là cùng một lớp màu đặc như `<body>`), khiến lưới bị che khuất trên mọi màn hình không thuộc dashboard — không chỉ riêng trang đăng nhập. Tất cả chúng hiện đã trong suốt để hình nền dùng chung có thể hiển thị xuyên qua: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` và `ErrorPageScaffold` (bao gồm `400`/`401`). Điều này hoàn tất **D4** (được mở rộng từ chỉ trang đăng nhập sang mọi màn hình độc lập). Được bảo vệ bởi `tests/unit/design-grid-background.test.ts`.
-
-### 4.7 Trang đích
-
-`landing/page.tsx` giữ nguyên nền động phong phú hơn (các quầng sáng + vignette) — phần giới thiệu marketing riêng của nó (quyết định D5 = giữ nguyên).
-
----
-
-## 5. Phần B — Hợp nhất token
-
-Giai đoạn 1 bổ sung các token định danh không gây tác động và không xung đột (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`). Giai đoạn 2 kết nối thang bán kính bo góc vào Tailwind và chuyển các component sang sử dụng các token này; Giai đoạn 4 bổ sung `--font-mono` cùng các thành phần sử dụng nó.
-
-| Token                      | Lý do                                                                    | Giai đoạn                              |
-| -------------------------- | ------------------------------------------------------------------------ | -------------------------------------- |
-| `--radius` / `--radius-sm` | Một thang bán kính bo góc (14/9) thay cho các giá trị 6/8/12 tùy ý       | 1 (giá trị) / 2 (kết nối + chuyển đổi) |
-| `--grad-brand`             | Gradient thương hiệu cho các CTA chính (đỏ→tím), đồng nhất với trang web | 1 (token) / 2 (Button)                 |
-| `--surface-2`              | Panel lồng nhau / tiêu đề bảng / hàng thụt vào                           | 1                                      |
-| `--font-mono`              | Khối mã, terminal, ID, endpoint                                          | 4                                      |
-| Đồng bộ `--text-muted`     | Chọn một giá trị giữa trang web↔panel (khuyến nghị `#a1a1aa`)            | 2                                      |
-
-**D2 (text-muted):** trang web dùng `#8b8b9e`, còn dashboard dùng `#a1a1aa`. Khuyến nghị giữ **`#a1a1aa` của dashboard** và cập nhật _trang web_ cho đồng nhất. Đây là thay đổi về giao diện.
-
----
-
-## 6. Phần C — Chuẩn hóa component (Giai đoạn 2–4)
-
-Các component tùy chỉnh (không dùng shadcn/Radix), Tailwind v4, các token ngữ nghĩa **phần lớn** đã được áp dụng (195 tệp import barrel dùng chung). Công việc còn lại là loại bỏ các trường hợp **bỏ qua** hệ thống này. Thư mục chính: `src/shared/components/`.
-
-| #   | Hạng mục                                    | Tệp                                                                                                                     | Vấn đề → Mục tiêu                                                                                                                                 | Giai đoạn |
-| --- | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| C1  | **Căn chỉnh bán kính bo góc**               | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                               | trộn lẫn 6/8/12px → `--radius`/`--radius-sm` (14/9)                                                                                               | 2         |
-| C2  | **Gradient của Button + biến thể `accent`** | `Button.tsx:5-12`                                                                                                       | nút chính hiện dùng đỏ→đỏ đơn sắc; căn chỉnh theo `--grad-brand`; bổ sung biến thể `accent` còn thiếu. ~195 nơi import — mức độ hiển thị cao nhất | 2         |
-| C3  | **Bảng**                                    | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                     | 100% giá trị rgba viết cứng nội tuyến + các biến không tồn tại; chuyển sang token, loại bỏ các kiểu không đồng nhất                               | 3         |
-| C4  | **Tập trung hóa màu trạng thái**            | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 5 helper | Hơn 6 bản sao của cùng mã hex → một module duy nhất dựa trên `--color-success/warning/error`                                                      | 3         |
-| C5  | **Viền Card**                               | `Card.tsx:39`                                                                                                           | `border-white/5` → màu thương hiệu `/8`                                                                                                           | 2         |
-| C6  | **Đồng bộ focus ring** ✅ ĐÃ XONG           | `globals.css` `--focus-ring` (accent) so với `ring-primary/30` của các form control                                     | thống nhất dùng **accent (tím)** để khớp với ring toàn cục + phân biệt với ring lỗi màu đỏ; trạng thái lỗi vẫn dùng màu đỏ                        | 4         |
-| C7  | **Thêm `Checkbox` + `Textarea`**            | `<input>`/`<textarea>` thô với `accentColor:#6366f1` nội tuyến                                                          | các primitive được điều khiển bằng token                                                                                                          | 4         |
-| C8  | **Rà soát mã hex viết cứng**                | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, các chấm trong Modal, ~14 tệp biểu đồ                            | giá trị literal → token                                                                                                                           | 4         |
-| C9  | **`cn()` → clsx + tailwind-merge**          | `src/shared/utils/cn.ts`                                                                                                | các class xung đột bị xếp chồng; cần thiết cho các override của C1                                                                                | 2         |
-
-**Đã đúng nhận diện thương hiệu (được điều khiển bằng token, chỉ cần cập nhật bán kính bo góc):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. Kế hoạch triển khai
-
-- **Giai đoạn 1 — Lưới + token nhận diện (PR NÀY).** Lưới trong `globals.css` + các token `--surface-2`/`--grad-brand`/`--radius`; hình nền `body::before`; loại bỏ phần chặn `bg-bg`; kiểm thử bảo vệ tĩnh. Rủi ro thấp, có thể hoàn tác trong một commit.
-- **Giai đoạn 2 — Các primitive (C1, C2, C5) — ĐÃ HOÀN THÀNH trong PR này.** Đã thêm các utility bán kính ngữ nghĩa `rounded-card` (14px) / `rounded-control` (9px) thông qua `@theme` (tên tùy chỉnh, nên các utility mặc định `rounded-sm/md/lg/xl` vẫn không bị ảnh hưởng — tránh tác động hàng loạt tới 400 file); Card/Modal → 14px, Button/Input/Select → 9px; Button chính → `--grad-brand` (đỏ→tím) + variant `accent` mới; viền Card → token `border-border` (0.08). **Đã hoãn:** `cn()`→tailwind-merge (C9) cần dependency mới; việc rà soát `rounded-lg` dùng tùy tiện (326 file) được giữ nguyên vì các primitive đã bao phủ phần lớn bề mặt.
-- **Giai đoạn 3 — Màu trạng thái + bảng (C3, C4) — ĐÃ HOÀN THÀNH trong PR này.** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` là nguồn duy nhất; `flow/edgeStyles.ts` + `TokenHealthBadge` đã được chuyển sang dùng nguồn này, trung thực/cùng mã hex). ✅ Token **`--font-mono`**. ✅ **C3 (DataTable)** — đã thay thế mọi rgba nội tuyến + các fallback không còn hoạt động `var(--bg-table-header)` / `var(--text-secondary)` bằng bộ token `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`), trong đó **các giá trị dark hoàn toàn giống các rgba được hardcode trước đây** (dark giống hệt từng byte), còn các giá trị light khắc phục theme sáng trước đây luôn hiển thị như dark. Viền header → `--color-border`, văn bản phụ → `--color-text-muted`. **Cần kiểm tra trực quan trước khi merge.** (Chưa đụng tới: `logTableStyles.ts` và các rule Ant `.ant-table` cũ — tách riêng, mức ưu tiên thấp hơn.)
-- **Giai đoạn 4 — Dọn dẹp (C6, C7, C9 đã hoàn thành; C8 đang chờ).** ✅ **C9** `cn()` → `twMerge(clsx(...))` (đã thêm clsx + tailwind-merge làm dependency) — `className` của caller giờ đây thay thế chính xác class xung đột của primitive thay vì xếp chồng. ✅ **C7** các primitive `Checkbox` + `Textarea` mới (dựa trên token, được export từ barrel; chỉ bổ sung — có thể áp dụng dần cho 32 checkbox thô / 41 textarea thô). ✅ **C6** điều chỉnh focus-ring — các control biểu mẫu (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) giờ sử dụng ring **accent (tím)** khi focus để khớp với `--focus-ring` toàn cục và tránh xung đột với ring lỗi màu đỏ; trạng thái lỗi màu đỏ không thay đổi. ⏳ **Việc rà soát hex ở C8 KHÔNG phải là tìm/thay thế mù quáng** — các trường hợp vi phạm đã được xác nhận là _có chủ đích_ và phải giữ nguyên: `ConsoleLogViewer.tsx:240` (terminal luôn ở chế độ dark), popover của `TokenHealthBadge`, các stroke SVG của ReactFlow. Chỉ chuyển đổi những mã hex thực sự cần nhận biết theme.
-
-Mỗi giai đoạn: `npm run lint` + `npm run typecheck:core` + kiểm tra trực quan.
-
----
-
-## 8. Các quyết định còn bỏ ngỏ (khuyến nghị)
-
-- **D1 — Button chính:** giữ đỏ→đỏ hay chuyển sang **đỏ→tím `--grad-brand`**? Khuyến nghị: **đỏ→tím** (Giai đoạn 2).
-- **D2 — Màu đường lưới:** **trung tính** (phong cách của site) — đã chọn — thay vì màu đỏ thương hiệu. Kích thước **32px** (giảm khoảng 30% so với 46px ban đầu theo phản hồi của chủ sở hữu — các ô 46px trông quá lớn trên bố cục dashboard).
-- **D3 — Độ sống động của chrome:** sidebar/header **đặc** — đã chọn.
-- **D4 — Lưới auth/login:** ✅ **ĐÃ HOÀN THÀNH (Giai đoạn 5)** — đã loại bỏ `bg-bg` đục khỏi mọi wrapper toàn màn hình độc lập (không chỉ login), nên lưới hiển thị trên tất cả màn hình. Xem §4.6.
-- **D5 — Trang đích:** giữ nguyên splash động. Đã chọn.
-- **D6 — Bán kính 14/9 trên toàn sản phẩm:** Khuyến nghị: có (Giai đoạn 2).
-- **D7 — Giai đoạn 1 được phát hành trước:** Đã chọn.
-- **D8 — Chiều rộng bố cục (Giai đoạn 5):** shell nội dung dashboard trước đây bị giới hạn ở `max-w-7xl` (1280px), khiến nội dung nằm giữa với khoảng trống rộng ở hai bên trên màn hình lớn. ✅ **ĐÃ HOÀN THÀNH** — đã nâng lên `max-w-[3840px]` linh hoạt (4K thực): nội dung giờ bám theo viewport tới khoảng 4K và chỉ căn giữa khi vượt quá mức đó (`DashboardLayout.tsx`). Các trang được thiết kế hẹp có chủ đích vẫn giữ nguyên chiều rộng hẹp (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — Bảng dữ liệu đục (Giai đoạn 6):** do vùng nội dung dashboard giờ đã trong suốt (để hình nền lưới hiển thị xuyên qua, Giai đoạn 5), các bảng dữ liệu có container _không_ phải là bề mặt đục khiến lưới lọt qua các hàng chẵn trong suốt / zebra có alpha thấp. ✅ **ĐÃ HOÀN THÀNH** — mọi bảng không có card giờ đều vẽ `bg-surface` (hoặc, đối với primitive `<DataTable>`, dùng `background: var(--color-surface)` trên scroll container). Đã sửa: `DataTable` (primitive), `ProxyLogger`/`RequestLoggerV2` (sắc độ `bg-black/5 dark:bg-black/20` của `<Card>` đã ghi đè `bg-surface` của Card thông qua tailwind-merge → trong suốt khoảng 95%), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, cùng hai "bảng" CSS-grid trong các view cache (`bg-surface/35` → `bg-surface`). Các bảng vốn đã nằm trong `<Card>`/Modal được xác minh là đục và chủ đích không thay đổi (thêm bg-surface ở đó sẽ là thao tác dư thừa, không tạo ra tác dụng). Bản thân lưới **không cần thay đổi** — `body::before` của dashboard giống hệt từng byte so với site (`--grid-size: 32px`); mọi trường hợp thấy "lưới lớn hơn" trên một instance đang chạy đều là bản build cũ trước `#4143`, không phải do code. Được bảo vệ bằng `tests/unit/design-grid-background.test.ts` (khối Giai đoạn 6).
-
----
-
-## 9. Ngoài phạm vi / rủi ro
-
-- **Không thay đổi bảng màu** — màu sắc đã khớp; chúng ta chỉ bổ sung các token còn thiếu. Không có rủi ro làm thay đổi màu sắc của sản phẩm.
-- **Không thay đổi theme engine** — giữ nguyên `.dark` + Zustand store.
-- **Thay đổi bán kính bo góc (Giai đoạn 2) có phạm vi rộng** — ảnh hưởng đến mọi card/button/input; kiểm tra trực quan các màn hình có nhiều thành phần (bảng, modal) trước khi merge.
-- **Các bảng (C3)** chứa nhiều kiểu dáng được hardcode nhất và có phạm vi hồi quy lớn nhất — tách chúng thành PR riêng.
-
----
-
-## 10. Chỉ mục tham chiếu
-
-| Khu vực                                 | Đường dẫn                                                                                                            |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| Token của dashboard                     | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| Theme store                             | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| Khung panel (grid được bỏ chặn tại đây) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                                  | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| Tiền lệ về grid                         | `src/app/landing/page.tsx:16-26`                                                                                     |
-| Các primitive                           | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| Nguồn màu trạng thái                    | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| Tiện ích `cn`                           | `src/shared/utils/cn.ts`                                                                                             |
-| Kiểm thử bảo vệ Giai đoạn 1             | `tests/unit/design-grid-background.test.ts`                                                                          |
-| Tham chiếu trang web                    | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — cầu nối token, các ghi đè `.dark`, các phần mở rộng OmniRoute trong `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — commit upstream được ghim và giấy phép ủy quyền; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` và các adapter bên cạnh; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

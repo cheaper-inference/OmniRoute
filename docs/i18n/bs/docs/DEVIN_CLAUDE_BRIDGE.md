@@ -4,48 +4,96 @@
 
 ---
 
-`devin-cli-agentic` omogućava stvarnom Claude Code runtime-u da koristi OmniRoute-ov lokalni Anthropic Messages endpoint dok zvanični Devin CLI isporučuje odgovore modela preko ACP stdio. On ne modifikuje postojeće Anthropic, Claude OAuth, Claude Web ili `devin-cli` provajdere.
+`devin-cli-agentic` omogućava stvarnom Claude Code izvršnom okruženju da koristi OmniRouteovu lokalnu Anthropic
+Messages krajnju tačku, dok službeni Devin CLI pruža odgovore modela putem ACP stdio. On
+ne mijenja postojeće pružaoce Anthropic, Claude OAuth, Claude Web ili `devin-cli`.
 
-> **Trenutni status: fiksiran (pinned) Claude Code `2.1.258`; offline i live validacija posljednji put zabilježena na `2.1.220`.** Fiksiranje na `2.1.220` je završilo tri izolovana scenarija kroz Devin CLI `3000.2.17` i model `swe-1-7-lightning`; to posljednje live pokretanje je dokazalo `Read`, `Edit` i `Bash` poteze u vlasništvu klijenta, uspješne `npm test` rezultate, otkrivanje komandi projekta i vještina, rutiranje samo preko Devin-a, i nula Claude izlaznog saobraćaja (egress). Fiksiranje je zatim podignuto na `2.1.258` (CLI generacija koju imitira OmniRoute-ov Claude identitet, i prva linija koja nativno isporučuje Fable 5.1 nivo). Na novom fiksiranju, instalacioni sloj i `claude --version` su verifikovani na fiksiranoj baznoj slici, a bridge unit suite, `compose config` i statički dokaz izolacije prolaze — ali offline mock scenario i live suite od tri scenarija još nisu ponovo pokrenuti. Ponovo ih pokrenite (pogledajte "Updating pinned tools") prije oslanjanja na bridge sa ovim fiksiranjem.
+Za pozive alata kojima upravlja klijent, usmjeravajte putem `devin-cli-agentic` (alias `dva`),
+pružaoca s podrškom za alate koji koristi Claude format. Naslijeđeni `devin-cli` (`dv`) ACP izvršilac
+podržava samo tekst: pokreće Devinov sažimač bez alata i ne može vraćati pozive alata. Njegovi
+metapodaci modela označeni su u skladu s tim, tako da će ga kombinovano usmjeravanje koje zahtijeva
+alate izbjegavati.
+
+> **Trenutni status: Claude Code je fiksiran na `2.1.258`; vanmrežna i aktivna validacija posljednji put su zabilježene
+> na `2.1.220`.** Fiksirana verzija `2.1.220` završila je tri izolovana scenarija putem Devin CLI-ja
+> `3000.2.17` i modela `swe-1-7-lightning`; to završno aktivno pokretanje potvrdilo je poteze `Read`,
+> `Edit` i `Bash` kojima upravlja klijent, uspješne rezultate komande `npm test`, otkrivanje projektnih
+> komandi i vještina, usmjeravanje isključivo putem Devina i odsustvo izlaznog prometa prema Claudeu. Fiksirana verzija je zatim podignuta na `2.1.258`
+> (generaciju CLI-ja koju oponaša OmniRouteov Claude identitet i prvu liniju koja izvorno isporučuje
+> nivo Fable 5.1). Na novoj fiksiranoj verziji verifikovani su instalacijski sloj i `claude --version`
+> na fiksiranoj osnovnoj slici, a skup jediničnih testova mosta, `compose config` i
+> statički dokaz izolacije prolaze — ali vanmrežni simulirani scenarij i aktivni skup od tri scenarija
+> još nisu ponovo pokrenuti. Ponovo ih pokrenite (pogledajte "Ažuriranje fiksiranih alata") prije nego što se
+> oslonite na most s ovom fiksiranom verzijom.
 
 ## Arhitektura
 
 ```text
-Claude Code 2.1.258 (izolovani non-root Linux kontejner)
+Claude Code 2.1.258 (izolovani Linux kontejner bez root ovlasti)
   -> http://omniroute:20128/v1/messages
-  -> devin-cli-agentic (Claude-format, no-auth provajder)
-  -> devin acp --agent-type summarizer (zvanični ACP stdio, bez Devin alata)
-  -> Devin nalog u namjenskom devin-auth volumenu
+  -> devin-cli-agentic (Claude format, pružalac bez autentifikacije)
+  -> devin acp --agent-type summarizer (službeni ACP stdio, bez Devinovih alata)
+  -> Devin račun u namjenskom devin-auth volumenu
 ```
 
-Zvanični CLI-jev podrazumijevani ACP agent može izvršavati sopstvene alate, tako da ga ovaj bridge ne koristi. On pokreće fiksirani `summarizer` ACP agent, čiji zvanični CLI režim nema alate, i uokviruje serijalizovani Anthropic zahtjev kao trag izvršenja (execution trace). Kada je potrebna još jedna akcija u vlasništvu Claude-a, odgovor mora sadržavati tačno jednu klijentsku kovertu alata (client tool envelope). Bilo koji ACP `tool_call` ili `tool_call_update` se odbija prije nego što se odgovor može prijaviti kao uspješan.
+Zadani ACP agent službenog CLI-ja može izvršavati vlastite alate, pa ga ovaj most ne koristi.
+Pokreće fiksni `summarizer` ACP agent, čiji službeni CLI način rada nema alate, i
+uokviruje serijalizovani Anthropic zahtjev kao trag izvršavanja. Kada je potrebna još jedna radnja
+kojom upravlja Claude, odgovor mora sadržavati tačno jednu klijentsku omotnicu alata. Svaki ACP
+`tool_call` ili `tool_call_update` odbacuje se prije nego što se odgovor može prijaviti kao
+uspješan.
 
-Serijalizator u `open-sse/executors/devin-agentic/serializer.ts` čuva `system`, `text`, `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `tool_choice` i alate koje isporučuje Claude Code. Slike i nepoznati blokovi eksplicitno ne uspijevaju. Veliki rezultati alata koriste vidljivi marker skraćivanja.
+Serijalizator u `open-sse/executors/devin-agentic/serializer.ts` zadržava `system`,
+`text`, `tool_use`, `tool_result`, `thinking`, `redacted_thinking`, `tool_choice` i
+alate koje dostavlja Claude Code. Slike i nepoznati blokovi izričito uzrokuju neuspjeh. Veliki rezultati
+alata koriste vidljivu oznaku skraćivanja.
 
-Parser prihvata jednu samostalnu `<tool>{...}</tool>` kovertu po potezu modela. On provjerava ime u odnosu na listu alata zahtjeva, validira argumente u odnosu na JSON šemu tog alata, odbija mješovite narative/akcije i dozvoljava jednu ograničenu popravku. Claude Code zatim lokalno izvršava rezultujući Anthropic `tool_use` i šalje `tool_result` nazad kroz OmniRoute.
+Parser prihvata jednu samostalnu `<tool>{...}</tool>` omotnicu po potezu modela. Provjerava
+naziv prema listi alata iz zahtjeva, validira argumente prema JSON Schema tog alata,
+odbacuje miješani narativ i radnje te dozvoljava jednu ograničenu popravku. Claude Code zatim
+lokalno izvršava rezultirajući Anthropic `tool_use` i šalje `tool_result` nazad putem
+OmniRoutea.
+
+## Automatsko usmjeravanje
+
+Pružalac ispunjava uslove za OmniRouteove skupove kandidata `auto/*` kada nije blokiran.
+Ispunjavanje uslova kandidata ne garantuje odabir: strategija usmjeravanja kombinacije (na primjer,
+posljednji poznati ispravan izbor) može dati prednost drugom pružaocu. Koristite `dva/<model>` ili kombinaciju
+s Devinom kao prvim izborom kada zahtijevate da svaki zahtjev prolazi kroz Devin.
 
 ## Izolacija i model prijetnji
 
-Host-ova Claude instalacija, nalog i konfiguracija su izvan opsega i tretiraju se kao zabranjeni. Compose servisi:
+Claude instalacija, račun i konfiguracija na hostu izvan su opsega i tretiraju se kao
+zabranjeni. Compose servisi:
 
-- rade kao UID/GID `10001:10001`, sa root fajl sistemom samo za čitanje, odbačenim mogućnostima (dropped capabilities) i `no-new-privileges`;
-- koriste privatni `/home/bridge`, namjenski Claude konfiguracioni volumen, izolovane OmniRoute podatke i poseban `devin-auth` volumen;
-- montiraju samo jednokratne `.sandbox` radne prostore/dokaze;
-- ne montiraju host home, Keychain, SSH, cloud akreditive ili Docker socket;
-- konstruišu eksplicitna okruženja i uklanjaju Anthropic API/OAuth/rutirajuće varijable;
-- usmjeravaju Claude Code inferenciju samo na `http://omniroute:20128` sa ključem samo za lokalnu upotrebu.
+- pokreću se kao UID/GID `10001:10001`, s korijenskim datotečnim sistemom samo za čitanje, uklonjenim mogućnostima i
+  opcijom `no-new-privileges`;
+- koriste privatni `/home/bridge`, namjenski volumen za Claude konfiguraciju, izolirane OmniRoute podatke
+  i zaseban `devin-auth` volumen;
+- montiraju samo privremene `.sandbox` radne prostore/dokaze;
+- ne montiraju početni direktorij hosta, Keychain, SSH, vjerodajnice za oblak niti Docker socket;
+- konstruiraju eksplicitna okruženja i uklanjaju Anthropic API/OAuth varijable i varijable usmjeravanja;
+- usmjeravaju Claude Code zaključivanje isključivo na `http://omniroute:20128` pomoću ključa namijenjenog samo za lokalnu upotrebu.
 
-Offline profil koristi internu mrežu. U live profilu, OmniRoute dostiže zvanične Devin krajnje tačke samo kroz `network-guard`; nepovezane destinacije su odbijene. Claude Code ima poseban deny-all egress guard i može dosegnuti samo lokalni OmniRoute servis kroz `NO_PROXY`. Guard revizorski fajlovi su montirani samo od strane njihovog guard procesa. Skripte verifikuju vlasništvo nad fajlom, režim, broj linkova i svaku odluku prije izvoza dokaza bez tokena.
+Vanmrežni profil koristi internu mrežu. U aktivnom profilu OmniRoute pristupa
+službenim Devin krajnjim tačkama isključivo putem `network-guard`; nepovezana odredišta su odbijena.
+Claude Code ima zasebnu zaštitu odlaznog prometa koja sve odbija i može pristupiti samo lokalnom OmniRoute
+servisu putem `NO_PROXY`. Datoteke revizije zaštite montira isključivo njihov proces zaštite.
+Skripte provjeravaju vlasništvo nad datotekama, način rada, broj veza i svaku odluku prije izvoza
+dokaza bez tokena.
 
-Pokrenite dokaz izolacije nezavisno:
+Nezavisno pokrenite dokaz izolacije:
 
 ```bash
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-On validira topologiju, imenovane montirane volumene, non-root/read-only postavke, eksplicitno lokalno rutiranje, odsustvo osjetljivih varijabli okruženja, odsustvo Docker socket-a, blokiran pristup `api.anthropic.com` i `claude.ai`, izbor provajdera samo za Devin i eksplicitni neuspjeh kada ACP backend nije dostupan.
+On provjerava topologiju, imenovana montiranja, postavke za nekorijenskog korisnika i samo za čitanje, eksplicitno lokalno usmjeravanje,
+odsustvo osjetljivih varijabli okruženja, odsustvo Docker socketa, blokirani pristup domenama
+`api.anthropic.com` i `claude.ai`, izbor pružaoca isključivo za Devin i eksplicitni neuspjeh kada
+ACP pozadinski sistem nije dostupan.
 
-## Prvo podešavanje i normalna upotreba
+## Početno postavljanje i uobičajena upotreba
 
 Izgradite fiksiranu sliku:
 
@@ -53,25 +101,30 @@ Izgradite fiksiranu sliku:
 ./scripts/devin-bridge/build
 ```
 
-Autentifikujte samo izolovani Devin volumen:
+Autentificirajte samo izolirani Devin volumen:
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/login-devin
 ```
 
-Komanda za prijavu koristi zvanični tok ručnog tokena namijenjen za udaljena/kontejnerska okruženja. Vrijednost se unosi direktno u CLI prompt; ne prosljeđuje se kao argument procesa, ne zapisuje se u Git i ne kopira se sa hosta.
+Naredba za prijavu koristi službeni tok s ručnim tokenom namijenjen udaljenim/kontejnerskim
+okruženjima. Vrijednost se unosi direktno u CLI upit; ne prosljeđuje se kao
+argument procesa, ne zapisuje se u Git niti se kopira s hosta.
 
-Pokrenite izolovani Claude Code runtime:
+Pokrenite izolirano Claude Code izvršno okruženje:
 
 ```bash
 ./scripts/devin-bridge/launch
 ```
 
-`launch` ponovo provjerava izolaciju, Devin autentifikaciju i otkrivanje modela prije pokretanja kontejnerizovanog Claude Code-a. Nikada ne pokreće Claude izvršnu datoteku hosta. Alias-i modela se mogu podesiti u `.env.devin-bridge`; svaka konfigurisana vrijednost mora zadržati prefiks `devin-cli-agentic/`.
+`launch` ponovo provjerava izolaciju, Devin autentifikaciju i otkrivanje modela prije pokretanja
+kontejneriziranog Claude Codea. Nikada ne pokreće Claude izvršnu datoteku hosta. Aliasi modela mogu se
+postaviti u `.env.devin-bridge`; svaka konfigurirana vrijednost mora zadržati
+prefiks `devin-cli-agentic/`.
 
-## Komande za validaciju
+## Naredbe za validaciju
 
-Reproduktivna offline putanja ne zahtijeva Devin nalog i nema runtime pristup Internetu:
+Ponovljivi vanmrežni postupak ne zahtijeva Devin račun i nema pristup internetu tokom izvršavanja:
 
 ```bash
 ./scripts/devin-bridge/test-unit
@@ -80,48 +133,56 @@ Reproduktivna offline putanja ne zahtijeva Devin nalog i nema runtime pristup In
 ./scripts/devin-bridge/verify-anthropic-isolation
 ```
 
-Autentifikovana opt-in live putanja je:
+Aktivni postupak uz autentifikaciju i izričito uključivanje je:
 
 ```bash
 ENABLE_LIVE_DEVIN_TESTS=1 ./scripts/devin-bridge/test-live-devin
 ```
 
-Live runner čeka između scenarija kako bi izbjegao otvaranje ACP sesija u nizu i validira strukturirane Claude stream događaje umjesto da vjeruje tekstualnim tvrdnjama. Njegova tri scenarija dokazuju:
+Aktivni pokretač čeka između scenarija kako bi izbjegao naglo otvaranje više ACP sesija i
+validira strukturirane događaje Claude toka umjesto da vjeruje tekstualnim tvrdnjama. Njegova tri
+scenarija dokazuju:
 
-1. direktno čitanje projekta i analizu defekata;
-2. stvarni `Edit`, `Bash` `npm test` u vlasništvu klijenta i rezultat terminala;
-3. `/bridge-check` plus `bridge-proof` otkrivanje, čitanje projekta, još jedan uspješan `npm test` u vlasništvu klijenta i završetak bez posla na čekanju.
+1. direktno čitanje projekta i analizu nedostataka;
+2. stvarni `Edit`, `Bash` `npm test` u vlasništvu klijenta i završni rezultat;
+3. otkrivanje `/bridge-check` i `bridge-proof`, čitanje projekta, još jedno uspješno
+   klijentsko pokretanje `npm test` i završetak bez posla na čekanju.
 
-Završna kapija također provjerava Devin mrežnu reviziju i zahtijeva da Claude egress revizija ostane prazna.
+Završna provjera također provjerava reviziju Devin mreže i zahtijeva da revizija Claude odlaznog prometa
+ostane prazna.
 
 ## Ažuriranje fiksiranih alata
 
-Slika fiksira Node, Claude Code i Devin CLI u `docker/devin-bridge/Dockerfile`. Za ažuriranje:
+Slika fiksira Node, Claude Code i Devin CLI u
+`docker/devin-bridge/Dockerfile`. Za ažuriranje:
 
 1. promijenite eksplicitne verzije;
-2. zamijenite oba Devin arhivska kontrolna zbira specifična za arhitekturu vrijednostima za zvanični artefakt;
-3. ponovo izgradite i pokrenite svaku offline komandu za validaciju;
+2. zamijenite obje kontrolne sume Devin arhive specifične za arhitekturu vrijednostima za službeni
+   artefakt;
+3. ponovo izgradite i pokrenite svaku naredbu za vanmrežnu validaciju;
 4. potvrdite verzije unutar slike;
-5. ponovo pokrenite autentifikovani live paket od tri scenarija.
+5. ponovo pokrenite autentificirani testni skup uživo s tri scenarija.
 
-Nemojte instalirati nijedan CLI globalno na hostu niti zamijeniti verifikaciju kontrolnog zbira neprovjerenim preuzimanjem.
+Nemojte globalno instalirati nijedan CLI na host niti zamijeniti provjeru kontrolne sume
+neprovjerenim preuzimanjem.
 
-## Dijagnoza i čišćenje
+## Dijagnostika i čišćenje
 
 - `docker compose -f docker/devin-bridge/compose.yml --profile offline logs omniroute`
-  prikazuje lokalno rutiranje i sanirane greške izvršioca.
-- `.sandbox/evidence/mock-acp.jsonl` bilježi determinističke mock ACP radnje.
-- `.sandbox/evidence/claude-stream.jsonl` bilježi stvarno offline pokretanje Claude Code-a.
-- `.sandbox/evidence/live-*.jsonl` bilježi tri validirana live streama.
-- `.sandbox/evidence/egress.jsonl` i `.sandbox/evidence/claude-egress.jsonl` su validirane kopije guard revizija bez tokena.
+  prikazuje lokalno usmjeravanje i sanitizirane greške izvršitelja.
+- `.sandbox/evidence/mock-acp.jsonl` bilježi determinističke lažne ACP radnje.
+- `.sandbox/evidence/claude-stream.jsonl` bilježi stvarno vanmrežno izvršavanje Claude Codea.
+- `.sandbox/evidence/live-*.jsonl` bilježi tri validirana toka uživo.
+- `.sandbox/evidence/egress.jsonl` i `.sandbox/evidence/claude-egress.jsonl` su validirane
+  kopije revizija zaštite bez tokena.
 
-Zaustavite kontejnere i mreže u vlasništvu uz očuvanje volumena za prijavu/konfiguraciju:
+Zaustavite pripadajuće kontejnere i mreže uz očuvanje volumena za prijavu/konfiguraciju:
 
 ```bash
 ./scripts/devin-bridge/clean
 ```
 
-Uklonite kompletno okruženje u vlasništvu bridge-a, uključujući imenovane volumene:
+Uklonite kompletno okruženje u vlasništvu mosta, uključujući imenovane volumene:
 
 ```bash
 ./scripts/devin-bridge/clean --all
@@ -129,9 +190,14 @@ Uklonite kompletno okruženje u vlasništvu bridge-a, uključujući imenovane vo
 
 ## Ograničenja
 
-- Most se oslanja na fiksnu `summarizer` ulogu bez alata jer Devin CLI `3000.2.17` ne izlaže neutralnog ACP agenta bez alata. Adapter kompenzuje međurezultate u obliku sažetka, ali ograničena popravka i dalje može eksplicitno ne uspjeti.
-- Aktivni ACP pozivi mogu vratiti prolazne `502`/`504` odgovore. Testni okvir razdvaja scenarije; uporan neuspjeh ostaje u stanju fail-closed i nikada ne bira drugog provajdera.
-- ACP kontekst se rekonstruiše iz svakog Anthropic zahtjeva; ne postoji afinitet procesa/sesije.
+- Most se oslanja na fiksnu `summarizer` ulogu bez alata jer Devin CLI `3000.2.17`
+  ne pruža neutralnog ACP agenta bez alata. Adapter kompenzira međurezultate
+  u obliku sažetka, ali jedan ograničeni pokušaj popravke i dalje može eksplicitno ne uspjeti.
+- ACP pozivi uživo mogu vratiti privremene odgovore `502`/`504`. Testno okruženje pravi razmak između scenarija;
+  trajni neuspjeh ostaje zatvoren radi sigurnosti i nikada ne odabire drugog pružatelja usluga.
+- ACP kontekst se rekonstruira iz svakog Anthropic zahtjeva; ne postoji afinitet prema procesu/sesiji.
 - Podržan je jedan poziv alata po odgovoru modela; paralelni pozivi se odbijaju.
-- Slike eksplicitno nisu podržane. Vision, thinking output, kontrole napora i kontekstualni prozor od 1M nisu oglašeni.
-- SSE koristi validne Anthropic događaje životnog ciklusa, ali se emituje nakon što je ograničeni ACP potez prikupljen; ACP dijelovi se ne prosljeđuju inkrementalno.
+- Slike izričito nisu podržane. Vizija, izlaz razmišljanja, kontrole nivoa truda i kontekstni prozor od 1M
+  nisu oglašeni.
+- SSE koristi važeće Anthropic događaje životnog ciklusa, ali se emituje nakon što se prikupi
+  ograničeni ACP ciklus; ACP fragmenti se ne prosljeđuju inkrementalno.

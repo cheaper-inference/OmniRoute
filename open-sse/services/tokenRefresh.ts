@@ -15,9 +15,11 @@ import { PROVIDERS } from "../config/constants.ts";
 import { getCodexAuthIdentityHeaders } from "../config/codexClient.ts";
 import { runWithProxyContext } from "../utils/proxyFetch.ts";
 import { serializeRefresh } from "./refreshSerializer.ts";
+import { parseTokenExpiryMs } from "@/lib/tokenHealthCheckExpiry";
 import {
   extractOAuthErrorCode,
   isUnrecoverableRefreshError,
+  NO_REFRESH_NEEDED,
   type RefreshLogger,
 } from "./tokenRefresh/shared.ts";
 import {
@@ -40,6 +42,8 @@ import {
   refreshWithRetry,
 } from "./tokenRefresh/circuitBreaker.ts";
 import { refreshCodebuddyCnToken } from "./tokenRefresh/providers/codebuddyCn.ts";
+import { refreshCodebuddyIntlToken } from "./tokenRefresh/providers/codebuddyIntl.ts";
+import { refreshWorkbuddyToken } from "./tokenRefresh/providers/workbuddy.ts";
 import { refreshClineToken } from "./tokenRefresh/providers/cline.ts";
 import { refreshKimiCodingToken } from "./tokenRefresh/providers/kimiCoding.ts";
 import { refreshMuseCodeToken } from "./tokenRefresh/providers/museCode.ts";
@@ -77,6 +81,7 @@ export {
   refreshCopilotToken,
   extractOAuthErrorCode,
   isUnrecoverableRefreshError,
+  NO_REFRESH_NEEDED,
   isProviderBlocked,
   getCircuitBreakerStatus,
   refreshWithRetry,
@@ -191,6 +196,20 @@ const refreshPromiseCache = new Map();
 // Key: connectionId → Value: { promise, waiters }
 // Primary dedup when credentials.connectionId is present; refreshPromiseCache is fallback.
 const connectionRefreshMutex = new Map();
+
+// #14970: upper bound on a shared refresh entry's lifetime. Provider refresh
+// fetches do not all carry an AbortSignal, so one hung upstream (e.g. a
+// blackholed proxy during an outage window) would otherwise keep the entry —
+// and every waiter joining it — stuck until process restart. 90s ≈ 3× the
+// 30s per-attempt budget used by refreshWithRetry, generous for a slow but
+// healthy refresh and short enough to unwedge a wedged connection.
+const REFRESH_MUTEX_MAX_MS_DEFAULT = 90_000;
+let refreshMutexMaxMs = REFRESH_MUTEX_MAX_MS_DEFAULT;
+
+/** Test seam: shrink the #14970 bound so unit tests do not wait 90s. */
+export function setRefreshMutexMaxMsForTest(ms: number | null) {
+  refreshMutexMaxMs = typeof ms === "number" ? ms : REFRESH_MUTEX_MAX_MS_DEFAULT;
+}
 
 // Token Rotation Map (codex-multi-auth pattern) lives in
 // ./tokenRefresh/rotationMap.ts — see that leaf for the in-memory rotation
@@ -457,6 +476,12 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     case "codebuddy-cn":
       return await refreshCodebuddyCnToken(credentials.refreshToken, log, proxyConfig);
 
+    case "codebuddy-intl":
+      return await refreshCodebuddyIntlToken(credentials.refreshToken, log, proxyConfig);
+
+    case "workbuddy":
+      return await refreshWorkbuddyToken(credentials.refreshToken, log, proxyConfig);
+
     default:
       // Fallback to generic OAuth refresh for unknown providers
       return refreshAccessToken(provider, credentials.refreshToken, credentials, log, proxyConfig);
@@ -488,6 +513,8 @@ export function supportsTokenRefresh(provider) {
     // testStatus="expired" / errorCode="no_refresh_token".
     "gitlab-duo",
     "codebuddy-cn",
+    "codebuddy-intl",
+    "workbuddy",
     "cursor",
   ]);
   if (explicitlySupported.has(provider)) return true;
@@ -553,7 +580,12 @@ export async function getAccessToken(
     }
 
     const entry = { promise: null, waiters: 0 };
-    entry.promise = (async () => {
+    // The underlying work runs un-raced so a late-settling refresh can still
+    // reach onPersist (the CAS guard keeps a late write safe). The SHARED
+    // promise is what gets bounded: if it never settles, the race resolves
+    // null (refresh failure), the entry is evicted, and the next caller starts
+    // a fresh refresh instead of rejoining the wedge.
+    const work = (async () => {
       const result = await _getAccessTokenWithStalenessCheck(
         provider,
         credentials,
@@ -580,7 +612,22 @@ export async function getAccessToken(
         }
       }
       return result;
-    })().finally(() => {
+    })();
+    let mutexTimer: ReturnType<typeof setTimeout> | null = null;
+    entry.promise = Promise.race([
+      work,
+      new Promise((resolve) => {
+        mutexTimer = setTimeout(() => {
+          log?.error?.(
+            "TOKEN_REFRESH",
+            `Refresh for ${provider}/${connectionId} exceeded ${refreshMutexMaxMs}ms inside the per-connection mutex — evicting wedged entry (upstream fetch may still be hanging)`
+          );
+          resolve(null);
+        }, refreshMutexMaxMs);
+        (mutexTimer as { unref?: () => void })?.unref?.();
+      }),
+    ]).finally(() => {
+      if (mutexTimer) clearTimeout(mutexTimer);
       connectionRefreshMutex.delete(connectionId);
     });
     connectionRefreshMutex.set(connectionId, entry);
@@ -600,12 +647,7 @@ export async function getAccessToken(
   // the legacy `connectionId`-less path would silently swallow the callback,
   // leaving DB rows out of sync with rotated tokens (Codex/OpenAI). We still
   // resolve the promise to all waiters with the refreshed credentials.
-  const refreshPromise = _getAccessTokenWithStalenessCheck(
-    provider,
-    credentials,
-    log,
-    proxyConfig
-  )
+  const refreshPromise = _getAccessTokenWithStalenessCheck(provider, credentials, log, proxyConfig)
     .then(async (result) => {
       if (result?.accessToken && effectiveOnPersist) {
         // #4038: same compare-and-swap guard as Layer 1 — skip the persist if a concurrent
@@ -647,8 +689,10 @@ export async function getAccessToken(
  * consumed token and burns the family (Claude/Anthropic, Auth0 Codex).
  */
 async function _getAccessTokenWithStalenessCheck(provider, credentials, log, proxyConfig) {
-  return serializeRefresh(provider, () =>
-    _refreshWithFreshCredentials(provider, credentials, log, proxyConfig)
+  return serializeRefresh(
+    provider,
+    () => _refreshWithFreshCredentials(provider, credentials, log, proxyConfig),
+    log
   );
 }
 
@@ -668,7 +712,7 @@ async function _refreshWithFreshCredentials(provider, credentials, log, proxyCon
       const dbConnection = await getProviderConnectionById(credentials.connectionId);
       if (dbConnection && dbConnection.refreshToken) {
         const now = Date.now();
-        const dbExpiresAt = dbConnection.expiresAt ? new Date(dbConnection.expiresAt).getTime() : 0;
+        const dbExpiresAt = parseTokenExpiryMs(dbConnection.expiresAt);
 
         if (dbConnection.refreshToken !== credentials.refreshToken) {
           log?.info?.(

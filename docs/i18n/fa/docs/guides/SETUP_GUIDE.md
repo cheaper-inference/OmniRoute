@@ -144,28 +144,29 @@ omniroute providers validate
 2. داشبورد → `Endpoints` را باز کنید و یک کلید API بسازید.
 3. (اختیاری) داشبورد → `Combos` را باز کنید و زنجیره جایگزین خود را تنظیم کنید.
 
-### 2) هدایت ابزار کدنویسی
+### 2) هدایت ابزار کدنویسی شما
 
 ```txt
-Base URL: http://localhost:20128/v1
-API Key:  [copy from Endpoint page]
-Model:    if/qwen3.8-max-preview (or any provider/model prefix)
+نشانی پایه: http://localhost:20128/v1
+کلید API:  [از صفحه Endpoint کپی کنید]
+مدل:    if/qwen3.8-max-preview (یا هر پیشوند ارائهدهنده/مدل دیگر)
 ```
 
-اگر ویرایشگر شما نمیتواند `Authorization: Bearer ...` را ارسال کند، بهجای آن از آدرس پایه سازگاری توکندار استفاده کنید:
+اگر ویرایشگر شما نمیتواند `Authorization: Bearer ...` را ارسال کند، بهجای آن از نشانی پایه سازگاریِ توکندار استفاده کنید:
 
 ```txt
-Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+نشانی پایه: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+نشانی مدلها: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+نشانی چت: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+نشانی برچسبهای Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
 با Claude Code، Codex CLI، Cursor، Cline، OpenClaw، OpenCode و SDKهای سازگار با OpenAI کار میکند.
 
 #### پیکربندی خودکار با `setup-*`
 
-بهجای وارد کردن دستی آدرس پایه و کلید، اجازه دهید OmniRoute پیکربندی اختصاصی هر ابزار را از کاتالوگ زنده مدلها بنویسد. برای هر ابزار یک فرمان:
+بهجای وارد کردن دستی نشانی پایه و کلید، اجازه دهید OmniRoute پیکربندی اختصاصی هر ابزار را
+از کاتالوگ زنده مدلها بنویسد. برای هر ابزار یک فرمان:
 
 ```bash
 omniroute setup-codex        # پروفایلهای ~/.codex/<name>.config.toml
@@ -174,19 +175,26 @@ omniroute setup-opencode     # ~/.config/opencode/opencode.json (سازگار ب
 omniroute setup-cline        # تنظیمات Cline CLI و افزونه VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # مراحل داخل برنامه Cursor را نمایش میدهد
-omniroute setup-roo          # وارد کردن Roo Code و اشارهگر autoImport
+omniroute setup-cursor       # مراحل درونبرنامهای Cursor را نمایش میدهد
+omniroute setup-roo          # درونریزی Roo Code و اشارهگر autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-هرکدام گزینههای `--remote <url> --api-key <key>` را برای پیکربندی یک ابزار محلی جهت استفاده از یک OmniRoute **راهدور** میپذیرند؛ همچنین میتوانید برای پیشنمایش از `--dry-run` استفاده کنید. برای اجرای یک CLI با تزریق env مناسب، بدون نوشتن هیچگونه پیکربندی، از اجراکننده عمومی `omniroute run <target>` استفاده کنید (claude، codex، aider، goose، opencode، qwen، gemini)؛ اجراکنندههای قدیمی مختص هر ابزار، یعنی `omniroute launch` (Claude Code) و `omniroute launch-codex` (Codex)، همچنان در دسترس هستند.
+هرکدام برای پیکربندی یک ابزار محلی جهت استفاده از یک OmniRoute
+**راهدور**، گزینههای `--remote <url> --api-key <key>` و برای پیشنمایش گزینه `--dry-run` را میپذیرند. برای اجرای یک CLI با
+متغیرهای محیطی مناسب، بدون نوشتن هیچگونه پیکربندی، از اجراکننده عمومی
+`omniroute run <target>` (claude، codex، aider، goose، opencode، qwen، gemini) استفاده کنید؛
+اجراکنندههای قدیمی مختص هر ابزار، یعنی `omniroute launch` (Claude Code) و
+`omniroute launch-codex` (Codex)، همچنان در دسترس هستند.
 
-برای مشاهده جدول کامل (مواردی که هر فرمان مینویسد، همه گزینهها، حالت محلی در برابر راهدور و قراردادهای `/v1` برای آدرس پایه)، به **[یکپارچهسازیهای CLI](./CLI-INTEGRATIONS.md)** مراجعه کنید.
+برای مشاهده جدول کامل (اینکه هر فرمان چه چیزی مینویسد، همه گزینهها، حالت محلی در برابر راهدور و قراردادهای نشانی پایه
+`/v1`)، به **[یکپارچهسازیهای CLI](./CLI-INTEGRATIONS.md)** مراجعه کنید.
 
-برای پیکربندی جزئی و اختصاصی هر ابزار (Claude Code، Codex CLI، Cursor، Cline، OpenClaw، Kilo Code، Copilot و موارد بیشتر)، به **[راهنمای ابزارهای CLI](../reference/CLI-TOOLS.md)** مراجعه کنید.
+برای پیکربندی تفصیلی هر ابزار (Claude Code، Codex CLI، Cursor، Cline، OpenClaw، Kilo Code، Copilot و موارد دیگر)، به **[راهنمای ابزارهای CLI](../reference/CLI-TOOLS.md)** اختصاصی مراجعه کنید.
 
 ---
 
@@ -315,9 +323,9 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## قالب Void Linux ‏(xbps-src)
+## قالب Void Linux ‏(`xbps-src`)
 
-کاربران Void Linux میتوانند با استفاده از `xbps-src` یک بستهٔ بومی بسازند. این بلوک را با نام `srcpkgs/omniroute/template` ذخیره کنید:
+کاربران Void Linux میتوانند با استفاده از `xbps-src` یک بستهٔ بومی بسازند. این بلوک را با مسیر `srcpkgs/omniroute/template` ذخیره کنید:
 
 ```bash
 # فایل قالب برای 'omniroute'

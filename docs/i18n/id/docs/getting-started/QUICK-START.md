@@ -4,7 +4,7 @@
 
 ---
 
-> **TL;DR**: Instal → Hubungkan penyedia gratis → Arahkan IDE Anda ke OmniRoute. Selesai.
+> **TL;DR**: Instal → Hubungkan penyedia yang memenuhi syarat → Arahkan IDE Anda ke OmniRoute. Selesai.
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute berjalan di `http://localhost:20128`. Dasbor akan terbuka secara otoma
 
 ---
 
-## Langkah 3: Hubungkan Penyedia Gratis
+## Langkah 3: Hubungkan Penyedia yang Memenuhi Syarat
 
-Anda dapat menggunakan OmniRoute **tanpa membayar apa pun** dengan menghubungkan penyedia gratis.
+Pilih penyedia yang ketentuan dan kuotanya sesuai dengan kebutuhan Anda. Di **Dashboard → Providers**, hubungkan akun atau kunci API Anda sendiri, lalu uji koneksinya. Akses gratis dan ketersediaan tanpa kunci tidak dijamin.
 
-### Opsi A: Kiro (Claude Gratis — Tanpa Kartu Kredit)
-
-1. Buka dasbor di `http://localhost:20128`
-2. Buka **Penyedia** → **Tambahkan Penyedia**
-3. Pilih **Kiro AI**
-4. Klik **Hubungkan** (tidak memerlukan kunci API!)
-5. Selesai! Sekarang Anda memiliki akses gratis ke model-model Claude.
-
-### Opsi B: OpenCode Free (Tanpa Autentikasi)
-
-1. Buka dasbor di `http://localhost:20128`
-2. Buka **Penyedia** → **Tambahkan Penyedia**
-3. Pilih **OpenCode Free**
-4. Klik **Hubungkan** (tidak memerlukan kunci API!)
-5. Selesai! Sekarang Anda memiliki akses gratis ke beberapa model.
-
-### Opsi C: Pollinations (Tidak Memerlukan Kunci)
-
-1. Buka dasbor di `http://localhost:20128`
-2. Buka **Penyedia** → **Tambahkan Penyedia**
-3. Pilih **Pollinations**
-4. Klik **Hubungkan** (tidak memerlukan kunci API!)
-5. Selesai! Sekarang Anda memiliki akses gratis ke GPT-5, Claude, Gemini, dan lainnya.
+`auto` secara default mengecualikan penyedia yang ditandai `tos: avoid`, termasuk Kiro. Menghubungkan akun tidak mengubah kebijakan tersebut. Pilihan untuk ikut serta di **Dashboard → Combos** berlaku untuk semua kombinasi otomatis. Tinjau [Panduan Tingkat Gratis](./FREE-TIERS-GUIDE.md) sebelum memilih penyedia.
 
 ---
 
@@ -154,7 +132,7 @@ Anda dapat melihat detail permintaan dengan mengeklik [Pemantauan/Log](http://lo
 
 - **[Panduan Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Biarkan OmniRoute memilih AI terbaik untuk Anda
 - **[Panduan Penyedia](./PROVIDERS-GUIDE.md)** — Hubungkan lebih banyak penyedia (gratis dan berbayar)
-- **[Panduan Tingkat Gratis](./FREE-TIERS-GUIDE.md)** — Dapatkan AI gratis tanpa kartu kredit
+- **[Panduan Tingkat Gratis](./FREE-TIERS-GUIDE.md)** — Tinjau ketentuan penyedia dan batas tingkat gratis
 - **[Pemecahan Masalah](../guides/TROUBLESHOOTING.md)** — Atasi masalah umum
 
 ---
@@ -163,21 +141,21 @@ Anda dapat melihat detail permintaan dengan mengeklik [Pemantauan/Log](http://lo
 
 ### "Apakah saya memerlukan kunci API?"
 
-**Tidak!** Anda dapat menggunakan penyedia gratis (Kiro, OpenCode Free, Pollinations) tanpa kunci API apa pun. Cukup hubungkan penyedia tersebut di dasbor.
+Kunci API OmniRoute mengautentikasi alat Anda. Kredensial upstream bergantung pada penyedia: beberapa penyedia memerlukan kunci API atau login akun. Akses gratis tidak dijamin.
 
 ### "Apa itu `auto`?"
 
-`auto` memberi tahu OmniRoute untuk secara otomatis memilih penyedia terbaik bagi setiap permintaan. OmniRoute mempertimbangkan kecepatan, biaya, kualitas, dan ketersediaan. Lihat [Panduan Auto-Combo](./AUTO-COMBO-GUIDE.md) untuk detailnya.
+`auto` memberi tahu OmniRoute agar secara otomatis memilih penyedia terbaik untuk setiap permintaan. Pilihan ini mempertimbangkan kecepatan, biaya, kualitas, dan ketersediaan. Lihat [Panduan Auto-Combo](./AUTO-COMBO-GUIDE.md) untuk detailnya.
 
 ### "Berapa biayanya?"
 
-OmniRoute sendiri **gratis dan bersumber terbuka**. Anda hanya membayar penyedia yang Anda gunakan. Banyak penyedia menawarkan tingkat gratis—lihat [Panduan Tingkat Gratis](./FREE-TIERS-GUIDE.md).
+OmniRoute sendiri **gratis dan bersumber terbuka**. Anda hanya membayar penyedia yang Anda gunakan. Banyak penyedia memiliki paket gratis — lihat [Panduan Paket Gratis](./FREE-TIERS-GUIDE.md).
 
-### "Bisakah saya menggunakannya dengan Claude Code / Cursor / Copilot?"
+### "Dapatkah saya menggunakannya dengan Claude Code / Cursor / Copilot?"
 
-**Ya!** OmniRoute dapat digunakan dengan alat apa pun yang mendukung format OpenAI. Cukup atur URL dasar ke `http://localhost:20128/v1`. Lihat [Panduan Alat CLI](../reference/CLI-TOOLS.md) untuk petunjuk penyiapan spesifik.
+**Ya!** OmniRoute berfungsi dengan alat apa pun yang mendukung format OpenAI. Cukup atur URL dasar ke `http://localhost:20128/v1`. Lihat [Panduan Alat CLI](../reference/CLI-TOOLS.md) untuk petunjuk penyiapan khusus.
 
-### "Bagaimana jika suatu penyedia mengalami gangguan?"
+### "Bagaimana jika suatu penyedia tidak berfungsi?"
 
 OmniRoute secara otomatis melewati penyedia yang gagal dan mencoba penyedia berikutnya. Anda tidak perlu melakukan apa pun. Lihat [Panduan Auto-Combo](./AUTO-COMBO-GUIDE.md) untuk detailnya.
 

@@ -48,15 +48,11 @@ sinusuri ang kalagayan ng server, at ine-exec ang `claude`.
 
 ---
 
-## Mga discovery alias — ipakita ang mga modelong hindi Claude sa `/model` picker
+## Mga discovery alias — paglalantad ng mga non-Claude na modelo sa `/model` picker
 
-Ang gateway model discovery ng Claude Code ay naglilista lamang ng mga id na nagsisimula sa `claude`
-o `anthropic`, kaya kapag `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, karaniwang ipinapakita ng native
-na `/model` picker ang **mga Claude/Anthropic model lamang** ng OmniRoute — ang
-`kimi/kimi-k2.6` o `glm/glm-5.2` ay hindi kailanman lilitaw, kahit maayos naman itong nairuruta.
+Ang gateway model discovery ng Claude Code ay naglilista lamang ng mga id na nagsisimula sa `claude` o `anthropic`, kaya kapag `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`, ang native na `/model` picker ay karaniwang nagpapakita **lamang** ng mga Claude/Anthropic na modelo ng OmniRoute — ang `kimi/kimi-k2.6` o `glm/glm-5.2` ay hindi kailanman lumilitaw, kahit na maayos naman itong naire-route.
 
-Maaaring i-mirror ng OmniRoute ang anumang naka-enable na modelo (at combo) sa ilalim ng isang `claude/…` id upang
-makapasa ito sa filter na iyon at lumitaw sa picker:
+Maaaring i-mirror ng OmniRoute ang anumang naka-enable na modelo (at combo) sa ilalim ng isang `claude/…` na id upang makapasa ito sa filter na iyon at lumitaw sa picker:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -64,73 +60,78 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kapag pumili ka ng isa sa mga ito sa Claude Code, inaalis ng OmniRoute ang `claude/` wrapper
-upang maibalik ang tunay na id bago mag-route — ang tunay na `claude/<real-claude-model>` id
-(ang aktuwal na Claude OAuth provider) ay palaging hindi ginagalaw.
+Kapag pinili mo ang isa sa mga ito sa Claude Code, inaalis ng OmniRoute ang `claude/` na wrapper pabalik sa totoong id bago ang routing — ang tunay na `claude/<real-claude-model>` na id (ang aktuwal na Claude OAuth provider) ay laging hindi binabago.
 
-**Naka-off ito bilang default** at kinokontrol ng tatlong antas na gate (ang pinakaspesipiko ang
-mananaig), kaya hindi kailanman dinodoble ng karaniwang OmniRoute ang catalog nito para sa mga client na hindi gumagamit ng
-Claude Code:
+Bilang default, tanging mga base id ang nire-mirror. Kapag naka-on ang opt-in na feature flag na `CATALOG_MIRROR_REFINEMENTS_ENABLED`, ang mga reasoning-effort variant na nakalista na sa catalog (hal. `codex/gpt-6-sol-high`) ay nire-mirror tulad ng anumang ibang id, kaya maaaring pumili ang Claude Code ng explicit na effort level, at ang mga built-in na `auto/*` na id na hindi kayang i-materialize ng request path ay hindi nire-mirror. Kung nakalista man ang mga effort variant ay pinamamahalaan pa rin ng `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — hindi kailanman nagdaragdag ang mirror ng variant na wala sa base catalog.
 
-| Antas    | Saan                                                                                          |
-| -------- | --------------------------------------------------------------------------------------------- |
-| Modelo   | Pahina ng detalye ng provider → toggle na "Expose in Claude Code" para sa bawat modelo        |
-| Provider | Pahina ng detalye ng provider → toggle sa antas ng provider (saklaw ang lahat ng modelo nito) |
-| Global   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (naka-off bilang default)            |
+**Naka-off ito bilang default** at kontrolado ng three-level na gate (ang pinaka-specific ang nananalo), kaya ang simpleng OmniRoute ay hindi kailanman dinodoble ang sariling catalog nito para sa mga client na hindi gumagamit ng Claude Code:
 
-Pinipilit ng `EXPOSE_CC_DISCOVERY_ALIASES` environment variable na i-on ang global na antas
-at inuuna ito kaysa sa override ng dashboard (nagpapakita ang screen ng Feature Flags
-ng paalalang "active via environment variable" kapag ganito). Mula roon, higit pang nililinaw ng mga toggle
-para sa bawat provider at bawat modelo ang saklaw — hal. kapag naka-off ang global + naka-on ang Kimi provider, mga
-modelo lamang ng Kimi ang inilalantad.
+| Antas    | Saan                                                                              |
+| -------- | --------------------------------------------------------------------------------- |
+| Modelo   | Provider detail page → per-model na "Expose in Claude Code" na toggle             |
+| Provider | Provider detail page → provider-level na toggle (saklaw ang lahat ng modelo nito) |
+| Global   | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (default na naka-off)    |
 
-> ⚠️ **Hindi pagtutugma ng window sa mga modelong hindi Claude.** Ipinagpapalagay ng Claude Code ang 200K context
-> window para sa anumang id na hindi nito nakikilala (hindi nito mababasa ang tunay na window mula sa
-> `/v1/models`). Para sa modelong may mas malaking window (hal. ang 256K ng Kimi K2), itakda ang
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sa halagang mas mababa sa tunay na window ng modelo upang
-> hindi mangyari nang masyadong maaga ang awtomatikong compaction. Ginagawa na ito para sa bawat modelo ng mga profile na binuo sa itaas.
+Ang environment variable na `EXPOSE_CC_DISCOVERY_ALIASES` ay pinipilit na i-on ang global na antas at may precedence sa dashboard override (ang Feature Flags na screen ay nagpapakita ng "active via environment variable" na tala kapag ganoon). Ang mga per-provider at per-model na toggle ay nagre-refine mula doon — hal. global off + Kimi provider on ay naglalantad lamang ng mga modelo ng Kimi.
+
+> ⚠️ **Window mismatch sa mga non-Claude na modelo.** Ipinapalagay ng Claude Code ang 200K context window para sa anumang id na hindi nito nakikilala (hindi nito mababasa ang totoong window mula sa `/v1/models`). Para sa modelong may mas malaking window (hal. 256K ng Kimi K2), itakda ang `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sa halagang mas mababa sa totoong window ng modelo upang hindi maagang mag-trigger ang auto-compaction. Ang mga nabuo na profile sa itaas ay ginagawa na ito para sa bawat modelo.
 
 ---
 
 ## Block ng onboarding sa dashboard
 
 Ipinapakita ng card ng Claude tool (**Dashboard → CLI Code**) ang eksaktong fragment ng `settings.json`
-para sa instance na ito, katabi ng button ng impormasyon para sa discovery alias, kasama ang isang button para kumopya:
+para sa instance na ito, katabi ng button ng impormasyon tungkol sa discovery alias, kasama ang isang button para kumopya:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<iyong OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<iyong OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-Ang base URL ay ang ni-resolve ng card (kabilang ang custom override na inilagay mo), at naka-normalize na
-— walang `/v1` suffix at walang trailing slash. **Hindi kailanman ipinapakita ang key**: placeholder ang
-kasama sa block, kaya hindi ito maaaring malantad sa screenshot o na-paste na snippet. Palitan ito ng iyong key.
+Ang base URL ang siyang ni-resolve ng card (kabilang ang custom override na inilagay mo) at
+na-normalize na — walang `/v1` suffix at walang trailing slash. **Hindi kailanman ipinapakita ang key**:
+placeholder ang kasama sa block, kaya hindi ito maaaring mailantad ng screenshot o na-paste na snippet.
+I-paste ang iyong key kapalit nito.
 
-Idagdag ang `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sa ilalim ng parehong `env` block para sa anumang model na ang tunay
-na context window ay hindi 200K — ipinapalagay ng Claude Code na 200K ang bawat id na hindi nito nakikilala, kaya
-kung hindi ay magti-trigger ang auto-compaction sa maling punto (tingnan ang babala sa nakaraang seksyon).
-Tinatanggap din ng snippet builder ang value na iyon, kaya maaari itong direktang ilabas ng caller na nakakaalam
-sa laki ng window ng target na model.
+Idagdag ang `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sa parehong `env` block para sa anumang model na ang
+aktuwal na context window ay hindi 200K — ipinapalagay ng Claude Code na 200K ang bawat id na hindi nito
+nakikilala, kaya kung hindi ito idaragdag, gagana ang auto-compaction sa maling punto (tingnan ang babala
+sa nakaraang seksyon). Tinatanggap din ng snippet builder ang value na iyon, kaya maaari itong direktang
+ilabas ng caller na nakakaalam sa window ng target na model.
 
 Source: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (purong
-builder na may mga unit test) na nire-render ng `ClaudeGatewayOnboardingBlock`.
+builder, may unit tests) na nire-render ng `ClaudeGatewayOnboardingBlock`.
+
+### Mag-pin ng isang account (opsyonal)
+
+Upang ipadala ang bawat request ng Claude Code sa isang partikular na provider account, idagdag ang
+`x-omniroute-connection` header sa pamamagitan ng `ANTHROPIC_CUSTOM_HEADERS` sa parehong `env` block:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Kopyahin ang id mula sa `xxxxxxxx…` chip sa connection row ng provider page. Nalalapat lamang ang pin
+sa mga single-model id (`provider/model`), hindi sa mga combo. Tingnan ang
+[Pag-pin ng account sa bawat request](../reference/API_REFERENCE.md#account-pinning-per-request) para sa
+eksaktong fallback behavior.
 
 ---
 
-## Mga profile (`CLAUDE_CONFIG_DIR`)
+## Mga Profile (`CLAUDE_CONFIG_DIR`)
 
 Ang Claude Code ay **walang native na mga profile file** (hindi tulad ng `~/.codex/<name>.config.toml` ng Codex).
-Ang idiomatic na mekanismo ay `CLAUDE_CONFIG_DIR` — isang hiwalay na config directory para sa bawat
-profile, na may sarili nitong `settings.json`, credentials, history, at cache.
+Ang karaniwang mekanismo ay `CLAUDE_CONFIG_DIR` — isang hiwalay na direktoryo ng config para sa bawat
+profile, na may sarili nitong `settings.json`, mga kredensyal, history, at cache.
 
-Kinukuha ng `omniroute setup-claude` ang live na `/v1/models` catalog at nagsusulat ng isang
+Kinukuha ng `omniroute setup-claude` ang kasalukuyang catalog na `/v1/models` at nagsusulat ng isang
 profile para sa bawat model sa `~/.claude/profiles/<name>/settings.json`, gamit muli ang
-**mga pangalan ding ginagamit ng `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
+**mga kaparehong pangalan gaya ng `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
 // ~/.claude/profiles/glm52/settings.json
@@ -152,11 +153,11 @@ profile para sa bawat model sa `~/.claude/profiles/<name>/settings.json`, gamit 
 > aktibong context), o ikaw mismo ang mag-export ng `ANTHROPIC_AUTH_TOKEN` at patakbuhin ang
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
-**Auto-sync pagkatapos ng model discovery (opt-in).** Maaaring awtomatikong buuin muli ng OmniRoute ang parehong
-mga `~/.claude/profiles/<name>/settings.json` file tuwing binabago ng pag-sync ng provider model
-ang live na catalog — kaya nagkakaroon ng mga profile ang mga bago o pinalitang-pangalan na model nang hindi muling pinapatakbo ang
+**Awtomatikong pag-sync pagkatapos ng model discovery (opt-in).** Maaaring awtomatikong muling buuin ng OmniRoute ang parehong
+mga file na `~/.claude/profiles/<name>/settings.json` tuwing binabago ng pag-sync ng provider model
+ang kasalukuyang catalog — kaya nagkakaroon ng mga profile ang mga bago o pinalitang-pangalan na model nang hindi muling pinapatakbo ang
 command. **Naka-off ito bilang default**: i-toggle ito mula sa **CLI Code dashboard** ("CLI profile
-auto-sync" → Claude Code), o itakda ang `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (sinusunod din nito ang
+auto-sync" → Claude Code), o itakda ang `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (iginagalang din nito ang
 `CLI_ALLOW_CONFIG_WRITES`, na naka-on bilang default). Kapag naka-enable, mga profile file lamang ang isinusulat nito; hindi nito kailanman
 binabago ang iyong aktibo/default na Claude config, auth, o ang `~/.claude/settings.json`.
 
@@ -166,11 +167,15 @@ binabago ang iyong aktibo/default na Claude config, auth, o ang `~/.claude/setti
 # Lokal na OmniRoute
 omniroute setup-claude
 
-# Remote na VPS (isinusulat ang VPS URL sa bawat profile)
+# Remote VPS (isinasama ang VPS URL sa bawat profile)
 omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 
 # Ilang provider lamang
 omniroute setup-claude --only glm,kimi
+
+# Magsulat din ng mga profile para sa mga local-CLI provider (zcode, auggie, devin-cli-agentic,
+# codex-app-server) na hindi natukoy sa host na ito (nilalaktawan bilang default para sa lokal na target)
+omniroute setup-claude --include-local
 
 # I-preview nang hindi nagsusulat
 omniroute setup-claude --dry-run

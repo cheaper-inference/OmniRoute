@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { generateGlobalErrorMessages } from "../i18n/generate-global-error-messages.mjs";
 import {
   assembleStandalone,
   syncStandaloneNativeAssets as _syncNativeAssets,
@@ -193,6 +194,19 @@ export function resolveNextBuildEnv(baseEnv = process.env, platform = process.pl
     env.USERPROFILE = buildHomeDir;
     env.APPDATA = path.join(buildHomeDir, "AppData", "Roaming");
     env.LOCALAPPDATA = path.join(buildHomeDir, "AppData", "Local");
+    // Next 16.3.8+'s SWC loader validates the DACL of the native-binding cache
+    // root and refuses one under os.tmpdir(): the sandbox inherits BUILTIN\Users
+    // replacement rights from the temp ancestor, and the build dies with
+    // "Failed to load native binding / swc.win32-x64-msvc.node" (observed
+    // 2026-10-14 on local Windows builds; upstream CI is Linux-only, unreported).
+    // Pin the cache to the real per-user LOCALAPPDATA — outside the sandbox,
+    // tight DACL. The loader's own error names SWC_NATIVE_BINDING_CACHE.
+    env.SWC_NATIVE_BINDING_CACHE =
+      baseEnv.SWC_NATIVE_BINDING_CACHE ||
+      path.join(
+        baseEnv.LOCALAPPDATA || path.join(os.homedir(), "AppData", "Local"),
+        "swc-native-cache-omniroute"
+      );
   }
 
   // Raise the Node heap for the spawned `next build`. The webpack production pass
@@ -288,6 +302,7 @@ export async function main() {
   };
 
   try {
+    generateGlobalErrorMessages(projectRoot);
     for (const entry of transientBuildPaths) {
       if (!(await exists(entry.sourcePath))) continue;
       await movePath(entry.sourcePath, entry.backupPath);

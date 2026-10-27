@@ -46,11 +46,17 @@ export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
+      // Optional native embeddings are outside the UI unit-test runtime.
+      "@huggingface/transformers": path.resolve(
+        __dirname,
+        "./tests/_setup/transformersUnavailable.ts"
+      ),
       "@": path.resolve(__dirname, "./src"),
       // Mirrors tsconfig paths. Without it, a UI test importing from open-sse
       // resolves to undefined instead of failing loudly — which silently made
       // every provider look credentialed in the free-tier card tests.
       "@omniroute/open-sse": path.resolve(__dirname, "./open-sse"),
+      "@omniroute/ui-kit": path.resolve(__dirname, "./packages/ui-kit/src"),
     },
   },
 });

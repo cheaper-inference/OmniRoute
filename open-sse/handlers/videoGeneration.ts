@@ -14,13 +14,19 @@ import { handleGoogleFlowVideoGeneration } from "./videoGeneration/googleFlowHan
 import { handleDeepinfraVideoGeneration } from "./videoGeneration/deepinfraHandler.ts";
 import { handleLeonardoVideoGeneration } from "./videoGeneration/leonardoHandler.ts";
 import { handleDashscopeVideoGeneration } from "./videoGeneration/dashscopeHandler.ts";
+import { handleMinimaxVideoGeneration } from "./videoGeneration/minimaxHandler.ts";
 import { handleNovitaVideoGeneration } from "./videoGeneration/novitaHandler.ts";
 import { handleXaiVideoGeneration } from "./videoGeneration/xaiGrokImagineHandler.ts";
 import { handleSegmindVideoGeneration } from "./videoGeneration/providers/segmind.ts";
 import { handleUcVideoGeneration } from "./videoGeneration/providers/ucVideo.ts";
 import { handleAdobeFireflyVideoGeneration } from "./videoGeneration/adobeFireflyHandler.ts";
+import { handleSyntxVideoGeneration } from "./videoGeneration/syntxHandler.ts";
 import { handleOpenAIVideoGeneration } from "./videoGeneration/openai.ts";
-import { getVideoJobPreset, handleVideoJobGeneration } from "./videoGeneration/job.ts";
+import {
+  getVideoJobPreset,
+  handleVideoJobGeneration,
+  type VideoJobCallRecord,
+} from "./videoGeneration/job.ts";
 import {
   extractRunwayFailureMessage,
   normalizeRunwayVideoResult,
@@ -43,7 +49,7 @@ import {
   extractComfyOutputFiles,
   resolveComfyUiBaseUrl,
 } from "../utils/comfyuiClient.ts";
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog, saveRequestUsage } from "@/lib/usageDb";
 import { getAllCustomModels } from "@/lib/db/models";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import {
@@ -61,7 +67,8 @@ import { handleFalVideoGeneration } from "./mediaGeneration/fal.ts";
 export function resolveVideoBaseUrl(
   credentials:
     { baseUrl?: unknown; providerSpecificData?: { baseUrl?: unknown } | null } | null | undefined,
-  fallback: string
+  fallback: string,
+  failClosed = false
 ): string {
   const psd = credentials?.providerSpecificData;
   const psdBaseUrl =
@@ -74,7 +81,7 @@ export function resolveVideoBaseUrl(
       : null;
   const nodeBaseUrl = psdBaseUrl || topLevelBaseUrl;
 
-  if (!nodeBaseUrl) return fallback;
+  if (!nodeBaseUrl) return failClosed ? "" : fallback;
 
   // Trim trailing slashes
   let normalized = nodeBaseUrl;
@@ -133,13 +140,56 @@ function resolveVideoJobPollingOverrides(body: Record<string, unknown>): {
 }
 
 /**
- * Handle video generation request
+ * Record a finished job-preset generation in both usage surfaces.
+ *
+ * The job pipeline previously wrote neither, so a job-preset provider was invisible in
+ * the request log and in the usage view while the synchronous video handlers appeared
+ * in both. `path`/`duration` are the names the call-log writer reads, and `endpoint` is
+ * what the usage row reports. Injected into `handleVideoJobGeneration` so the job
+ * module keeps no dependency on the usage DB.
  */
+export async function recordVideoJobCall({
+  provider,
+  model,
+  result,
+  durationMs,
+}: VideoJobCallRecord): Promise<void> {
+  const status = result.success ? 200 : (result.status ?? 502);
+  const error = result.success ? undefined : result.error;
+  await Promise.allSettled([
+    saveCallLog({
+      method: "POST",
+      path: "/v1/videos/generations",
+      status,
+      model: `${provider}/${model}`,
+      provider,
+      duration: durationMs,
+      ...(error ? { error } : {}),
+    }),
+    saveRequestUsage({
+      provider,
+      model,
+      endpoint: "video",
+      status: String(status),
+      success: result.success,
+      latencyMs: durationMs,
+      ...(error ? { errorCode: error.slice(0, 200) } : {}),
+    }),
+  ]);
+}
 
 /**
  * Handle video generation request
  */
-export async function handleVideoGeneration({ body, credentials, log, resolvedProvider = null }) {
+export async function handleVideoGeneration({
+  body,
+  credentials,
+  log,
+  resolvedProvider = null,
+  // #16372 — route-injected media sink (owner + public origin) for auth-gated job results.
+  mediaSink = undefined,
+  signal = null,
+}) {
   let { provider, model } = parseVideoModel(body.model);
   if (resolvedProvider) {
     provider = resolvedProvider;
@@ -186,6 +236,9 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
         body,
         credentials,
         log,
+        mediaSink,
+        provider,
+        recordCall: recordVideoJobCall,
         ...resolveVideoJobPollingOverrides(body),
       });
     }
@@ -193,14 +246,19 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
       log.info("VIDEO", `Custom model ${provider}/${model} — using OpenAI-compatible handler`);
     const syntheticConfig = {
       id: provider,
-      baseUrl: resolveVideoBaseUrl(
-        credentials,
-        "http://generative.language.googleapis.com/v1beta/openai/videos/generations"
-      ),
+      baseUrl: resolveVideoBaseUrl(credentials, "", true),
       authType: "apikey",
       authHeader: "bearer",
       format: "openai-video",
     };
+    if (!syntheticConfig.baseUrl) {
+      return {
+        success: false,
+        status: 501,
+        error: `Video generation is not configured for custom provider: ${provider}`,
+      };
+    }
+
     return handleOpenAIVideoGeneration({
       model,
       body,
@@ -220,6 +278,9 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
       body,
       credentials,
       log,
+      mediaSink,
+      provider,
+      recordCall: recordVideoJobCall,
       ...resolveVideoJobPollingOverrides(body),
     });
   }
@@ -305,6 +366,17 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
     });
   }
 
+  if (providerConfig.format === "minimax-video") {
+    return handleMinimaxVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+    });
+  }
+
   if (providerConfig.format === "segmind") {
     return handleSegmindVideoGeneration({
       model,
@@ -335,6 +407,17 @@ export async function handleVideoGeneration({ body, credentials, log, resolvedPr
       body,
       credentials,
       log,
+    });
+  }
+  if (providerConfig.format === "syntx-video") {
+    return handleSyntxVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
     });
   }
   if (resolvedProvider) {

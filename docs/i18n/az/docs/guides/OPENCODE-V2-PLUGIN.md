@@ -76,24 +76,32 @@ qalmır.
 
 ## Seçimlər
 
-| Açar                             | Standart dəyər                                     | Qeydlər                                                                                                             |
-| -------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                      | Provayder identifikatoru, inteqrasiya identifikatoru və modellərin göründüyü prefiks                                |
-| `baseURL`                        | tələb olunur                                       | Şlüzün kök ünvanı, yalnız `http(s)`; lazım olan yerlərdə `/v1` suffiksi əlavə edilir                                |
-| `apiKey`                         | qoşulmuş giriş məlumatı, sonra `OMNIROUTE_API_KEY` | `/v1/*` üçün çat açarı                                                                                              |
-| `managementReadToken`            | `apiKey` istifadə olunur                           | `/api/*` üçün açar — adətən eyni açar **deyil**                                                                     |
-| `displayName`                    | `"OmniRoute"`                                      | Seçicidəki provayder adı                                                                                            |
-| `timeoutMs`                      | `10000`                                            | Hər son nöqtə üzrə sorğu vaxt limiti (avtomatik kombinasiyalar 5 san. istifadə edir)                                |
-| `modelCacheTtlMs`                | `300000`                                           | Kataloq keşinin TTL müddəti; disk ani görüntüsü soyuq başlanğıcları sürətləndirir                                   |
-| `timeouts`                       | `timeoutMs` istifadə olunur                        | Son nöqtələr üzrə millisaniyə ilə limitlər: `models`, `combos`, `autoCombos`, `enrichment`                          |
-| `enrichment`                     | `true`                                             | Adları, qiymətləri və pulsuz səviyyə limitlərini əldə edir                                                          |
-| `providerTag`                    | `true`                                             | Görünən adın əvvəlinə sorğunun yönləndirildiyi yuxarı axın provayderini əlavə edir                                  |
-| `usableOnly`                     | `false`                                            | Yalnız şlüzün təmin edilmiş kimi bildirdiyi provayderləri saxlayır                                                  |
-| `visibleModels` / `hiddenModels` | `[]`                                               | Dəqiq uyğunluq və ya suffiks üzrə icazə siyahıları; qadağa üstünlük təşkil edir                                     |
-| `geminiSanitization`             | `true`                                             | Gemini-nin alət sxemlərində rədd etdiyi JSON-Schema açar sözlərini silir (`$ref` alətləri dəyişdirilmədən ötürülür) |
-| `apiFormat.allowAnthropic`       | `false`                                            | İcazə siyahısındakı identifikatorları Anthropic API bloku vasitəsilə yönləndirir                                    |
-| `apiFormat.anthropicModels`      | `[]`                                               | Anthropic-ə yönləndirilən tam model identifikatorları                                                               |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                   | Jurnalın təfərrüat səviyyəsi                                                                                        |
+| Açar                             | Defolt                                             | Qeydlər                                                                                                                                        |
+| -------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                      | Provayder ID-si, inteqrasiya ID-si və modellərin göstərildiyi prefiks                                                                          |
+| `baseURL`                        | tələb olunur                                       | Şlüzün kök ünvanı, yalnız `http(s)`; `/v1` suffiksi tələb olunan yerlərdə əlavə edilir                                                         |
+| `apiKey`                         | qoşulmuş giriş məlumatı, sonra `OMNIROUTE_API_KEY` | `/v1/*` üçün söhbət açarı                                                                                                                      |
+| `managementReadToken`            | `apiKey` dəyərinə geri qayıdır                     | `/api/*` üçün açar — adətən eyni açar **deyil**                                                                                                |
+| `displayName`                    | `"OmniRoute"`                                      | Seçicidəki provayder adı                                                                                                                       |
+| `timeoutMs`                      | `10000`                                            | Hər son nöqtə üçün sorğu vaxt limiti (avtomatik kombinasiyalar 5 saniyə istifadə edir)                                                         |
+| `modelCacheTtlMs`                | `300000`                                           | Kataloq keşinin TTL-i; disk ani görüntüsü soyuq başlanğıcları sürətləndirir                                                                    |
+| `timeouts`                       | `timeoutMs` dəyərinə geri qayıdır                  | Son nöqtələr üzrə millisaniyə ilə limitlər: `models`, `combos`, `autoCombos`, `enrichment`                                                     |
+| `enrichment`                     | `true`                                             | Adları, qiymətləri və pulsuz səviyyə limitlərini əldə et                                                                                       |
+| `providerTag`                    | `true`                                             | Göstərilən adın əvvəlinə sorğunun yönləndirildiyi yuxarı axın provayderini əlavə et                                                            |
+| `usableOnly`                     | `false`                                            | Yalnız şlüzün təmin edilmiş kimi bildirdiyi provayderləri saxla                                                                                |
+| `combosSource`                   | `"api"`                                            | `"models"` `/api/combos` sorğusunu ötürür və `/v1/models` kombinasiya sətirlərini yayımlayır; üzv səviyyəli filtrlər `"api"` dəyərini saxlayır |
+| `showcasePerOwner`               | `10`                                               | Defolt görünüşdə hər provayder üçün saxlanılan qeydlər                                                                                         |
+| `freshPerOwner`                  | `10`                                               | Defolt görünüşdə hər provayder üçün saxlanılan yeni qeydlər                                                                                    |
+| `freshWindowDays`                | `90`                                               | Yeni qeydlər qolu üçün günlərlə yenilik müddəti                                                                                                |
+| `usageMemory`                    | `true`                                             | 30 günlük istifadə analitikası tərəfindən adlandırılan statik şəkildə çıxarılmış qeydləri bərpa et (idarəetmə tokeni tələb olunur)             |
+| `visibleModels` / `hiddenModels` | `[]`                                               | Dəqiq və ya suffiks üzrə icazə siyahıları; qadağa üstün gəlir; `*` tam kataloqu yayımlayır (digər filtrlər yenə də tətbiq olunur)              |
+| `geminiSanitization`             | `true`                                             | Gemini-nin alət sxemlərindən qəbul etmədiyi JSON-Schema açar sözlərini sil (`$ref` alətləri dəyişdirilmədən ötürülür)                          |
+| `apiFormat.allowAnthropic`       | `false`                                            | İcazə siyahısındakı ID-ləri Anthropic API bloku vasitəsilə yönləndir                                                                           |
+| `apiFormat.anthropicModels`      | `[]`                                               | Anthropic-ə yönləndirilən tam model ID-ləri                                                                                                    |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                   | Jurnal qeydiyyatının təfərrüat səviyyəsi                                                                                                       |
+
+İstifadə yaddaşı defolt olaraq aktivdir. İdarəetmə tokeni olmadan o, qeyri-aktiv qalır
+(başlanğıc bildirişi jurnala yazılır) və heç nə bərpa edilmir.
 
 ## Kataloq necə aktual saxlanılır
 
@@ -110,11 +118,16 @@ Bunu söndürmək üçün `"geminiSanitization": false` təyin edin.
 
 ## Problemlərin aradan qaldırılması
 
-| Əlamət                                                       | Səbəb                                                                                                                   |
-| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| Seçim aləti heç bir OmniRoute modeli göstərmir               | Heç bir açar müəyyən edilməyib (başlanğıc xəbərdarlığını yoxlayın) və ya şlüz əlçatmazdır                               |
-| Xam model identifikatorları, kombinasiya və qiymətlər yoxdur | İdarəetmə son nöqtələri tokeni rədd edib — `managementReadToken` təyin edin                                             |
-| Sessiya `opencode-<id>/…` ünvanına bərkidilib                | v1 plagini `opencode-<id>` dərc edirdi; v2 isə çılpaq `<id>` dərc edir, buna görə modeli `<id>/…` altında yenidən seçin |
+| Əlamət                                                              | Səbəb                                                                                                                        |
+| ------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Seçicidə heç bir OmniRoute modeli görünmür                          | Heç bir açar müəyyən edilməyib (başlanğıc xəbərdarlığını yoxlayın) və ya şlüz əlçatan deyil                                  |
+| Xam model identifikatorları var, kombinasiyalar və qiymətlər yoxdur | İdarəetmə endpoint-ləri tokeni rədd edib — `managementReadToken` təyin edin                                                  |
+| `freeOnly` kataloqu qısa və ya boşdur                               | İdarəetmə tokeni yoxdur və ya token rədd edilib — host jurnalındakı yeniləmə xülasəsi sətrini (`unmatched-free` sayı) oxuyun |
+| Sessiya `opencode-<id>/…` üzərinə bərkidilib                        | v1 plagini `opencode-<id>` dərc edirdi; v2 isə yalnız `<id>` dərc edir, buna görə modeli `<id>/…` altında yenidən seçin      |
+
+Mühit dəyişənləri opencode server prosesinə çatmalıdır: host xidmət kimi
+işlədikdə, `opencode models` əmrini icra edən shell ilə serverin
+mühiti fərqli olur, buna görə açarı serverin onu oxuduğu yerdə export edin.
 
 ## Həmçinin baxın
 

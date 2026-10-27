@@ -31,6 +31,7 @@ import { spawnSync as _spawnSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildReadmeMigrationChecks } from "./lib/readmeMigrationCount.mjs";
 
 let _spawnSyncImpl = _spawnSync;
 export function __setSpawnSyncForTest(fn) {
@@ -383,16 +384,128 @@ export function readPackageVersion() {
   }
 }
 
+/**
+ * The BLOCKING coverage floors from config/quality/quality-baseline.json.
+ *
+ * Read from the baseline rather than hardcoded so G-08's validator and the gate
+ * that actually blocks can never drift apart: a rebaseline moves both at once.
+ *
+ * @returns {{statements:number,lines:number,functions:number,branches:number}}
+ */
+export function readCoverageRatchetFloors() {
+  const fallback = { statements: 60, lines: 60, functions: 60, branches: 60 };
+  try {
+    const baseline = JSON.parse(
+      fs.readFileSync(path.join(ROOT, "config/quality/quality-baseline.json"), "utf8")
+    );
+    const metrics = baseline?.metrics ?? {};
+    const pick = (key) => metrics[key]?.value;
+    return {
+      statements: pick("coverage.statements") ?? fallback.statements,
+      lines: pick("coverage.lines") ?? fallback.lines,
+      functions: pick("coverage.functions") ?? fallback.functions,
+      branches: pick("coverage.branches") ?? fallback.branches,
+    };
+  } catch {
+    return fallback;
+  }
+}
+
+function isTableRowAt(content, index) {
+  const lineStart = content.lastIndexOf("\n", index - 1) + 1;
+  return content.slice(lineStart, index).trimStart().startsWith("|");
+}
+
 export function makeVersionClaimValidator(expected) {
+  // G-06 (#15159): the original list matched only TWO literal phrasings, so the
+  // gate saw at most one claim per file and four stale strings shipped through
+  // it — README.md "reported by OmniRoute 3.8.51", the compatibility table's
+  // "**v3.8.50**", "Recent highlights from v3.8.20 → v3.8.50", and llm.txt's
+  // "## Key Features (v3.8.50)".
+  //
+  // The load-bearing lesson: fixing those four STRINGS is not enough. Any new
+  // phrasing nobody anticipated slips through again.
+  //
+  // The subtlety that makes widening safe: a version NUMBER alone is not a
+  // defect. `v3.8.49` in a compatibility table, `v3.9.0 LTS` in a roadmap, and
+  // the `v3.8.20` end of a "from X → Y" range are all CORRECT. Only a claim
+  // that asserts which version is CURRENT is checkable. So each pattern below
+  // is anchored to a context that marks the version as the current one, and
+  // captures exactly the asserting version:
+  //
+  //   1. the product name immediately before it   "OmniRoute 3.8.51"
+  //   2. an explicit "Current version:" label
+  //   3. a bold range — emphasis picks out the target, so capture the SECOND
+  //      endpoint ("**v3.8.20 → v3.8.50**" asserts the right one is current)
+  //   4. a single bold version — emphasis marks the notable/current one
+  //      (outside markdown table rows; see isTableRowAt below)
+  //   5. a version inside a heading's parentheses ("## Key Features (v3.8.50)")
+  //   6. an inline range's target ("from v3.8.20 → v3.8.50")
+  //   7. a backticked floor ("`v3.8.51+`") — a floor below current understates
+  //      what users on that version actually get
+  //
+  // A naive `/\d+\.\d+\.\d+/` would redden on Node (22.22.2), TypeScript and
+  // every dependency version; that was the failure mode avoided here.
+  const SEMVER = String.raw`\d+\.\d+\.\d+`;
+  // Written as ordinary escaped strings, NOT String.raw templates: a template
+  // literal ending in `\*\*` immediately before the closing backtick makes the
+  // `**` ambiguous to the reader and easy to corrupt (it once produced `s***`
+  // and a "Nothing to repeat" SyntaxError at import time).
+  const BOLD = "\\*\\*";
+  const B = "(?:\\u2192|->|\\u2014|\\u2013)";
   const PATTERNS = [
-    /OmniRoute v(\d+\.\d+\.\d+)/g,
-    /Current version:\*{0,2}\s*\*{0,2}(\d+\.\d+\.\d+)/g,
+    // 1. product-named
+    new RegExp(`OmniRoute\\s+v?(${SEMVER})`, "g"),
+    // 2. explicit label
+    new RegExp(`[Cc]urrent\\s+version:?\\s*\\**\\s*v?(${SEMVER})`, "g"),
+    // 3. bold range — capture the TARGET (last endpoint)
+    new RegExp(`${BOLD}\\s*v?${SEMVER}\\s*${B}\\s*v?(${SEMVER})\\s*${BOLD}`, "g"),
+    // 4. single bold version
+    new RegExp(`${BOLD}\\s*v?(${SEMVER})\\s*${BOLD}`, "g"),
+    // 5. heading with a parenthesised/backticked version
+    new RegExp(`^#{1,6}[^\\n]*?[\\(\\\`]\\s*v?(${SEMVER})`, "gm"),
+    // 6. inline range target
+    new RegExp(`v${SEMVER}\\s*${B}\\s*v?(${SEMVER})`, "g"),
+    // 7. backticked floor, e.g. `v3.8.51+`
+    new RegExp("\\`\\s*v?(" + SEMVER + ")\\s*\\+\\s*\\`", "g"),
   ];
+
+  // Ranges are matched by patterns 3 and 6, but their LEFT endpoint also looks
+  // like a plain bold/inline version. Record the ranges first and ignore any
+  // other pattern's match that falls inside one, so "**v3.8.20 → v3.8.52**"
+  // yields a single claim (3.8.52) instead of also claiming 3.8.20.
+  const RANGE_RE = new RegExp(`v?${SEMVER}\\s*${B}\\s*v?${SEMVER}`, "g");
+
   return (content) => {
     if (!expected) return { ok: false, detail: "package.json version could not be read" };
+
+    const rangeSpans = [];
+    for (const m of content.matchAll(RANGE_RE)) {
+      rangeSpans.push([m.index ?? 0, (m.index ?? 0) + m[0].length]);
+    }
+    const insideRange = (index) => rangeSpans.some(([s, e]) => index >= s && index < e);
+
     const claims = [];
-    for (const pattern of PATTERNS)
-      for (const m of content.matchAll(pattern)) claims.push({ value: m[1], text: m[0].trim() });
+    for (const pattern of PATTERNS) {
+      for (const m of content.matchAll(pattern)) {
+        const index = m.index ?? 0;
+        const value = m[1];
+        // Patterns 3 and 6 capture a range's TARGET, which legitimately sits
+        // inside the range span. Every other match inside a range is that
+        // range's left endpoint being double-counted — skip it.
+        const isRangeTarget = pattern === PATTERNS[2] || pattern === PATTERNS[5];
+        if (insideRange(index) && !isRangeTarget) continue;
+        // A bold version inside a markdown TABLE row is a column marker, not a
+        // current-version claim: the README compatibility table bolds the last
+        // SHIPPED release (`| v3.8.50 | **v3.8.51** | \`v3.8.52+\` |`) while
+        // package.json already carries the in-development version. In such a
+        // row the current version is asserted by the backticked floor
+        // (pattern 7), which is still checked.
+        if (pattern === PATTERNS[3] && isTableRowAt(content, index)) continue;
+        claims.push({ value, text: m[0].trim(), index });
+      }
+    }
+
     if (!claims.length) return { ok: true, detail: "no version claim in this file" };
     const stale = claims.filter((c) => c.value !== expected);
     if (!stale.length)
@@ -406,6 +519,72 @@ export function makeVersionClaimValidator(expected) {
         `stale version: ${[...new Set(stale.map((c) => `"${c.text}"`))].join(", ")} — ` +
         `package.json is ${expected}`,
     };
+  };
+}
+
+/**
+ * G-08 (#15159): validate a documented coverage floor against the BLOCKING
+ * ratchet, not against `npm run test:coverage`.
+ *
+ * AGENTS.md advertised `60/60/60/60` (statements/lines/functions/branches).
+ * That number is accurate in isolation — it is what test:coverage hardcodes —
+ * but the blocking gate enforces 67.33 / 67.33 / 72.02 / 65.08 from
+ * config/quality/quality-baseline.json. So an agent reading AGENTS.md alone
+ * would run the floor below the real one and be surprised by a red quality-gate
+ * on correct work. AGENTS.md is also an agent-instruction surface: a wrong floor
+ * there misleads every future session, not just a human reading docs.
+ *
+ * Deliberately narrow: it only fires on an explicit four-number coverage-floor
+ * claim, so ordinary prose about coverage is untouched.
+ *
+ * @param {{statements:number,lines:number,functions:number,branches:number}} floors
+ * @returns {(content: string) => {ok: boolean, detail: string}}
+ */
+export function makeCoverageFloorClaimValidator(floors) {
+  // "60/60/60/60", "67.33 / 67.33 / 72.02 / 65.08", "60 / 60 / 60 / 60".
+  const PATTERN =
+    /(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)\s*\/\s*(\d+(?:\.\d+)?)/g;
+
+  return (content) => {
+    const claims = [];
+    for (const m of content.matchAll(PATTERN)) {
+      claims.push({
+        values: [m[1], m[2], m[3], m[4]].map(Number),
+        text: m[0],
+        index: m.index ?? 0,
+      });
+    }
+    if (!claims.length) return { ok: true, detail: "no coverage-floor claim in this file" };
+
+    const required = [floors.statements, floors.lines, floors.functions, floors.branches];
+    const problems = [];
+    for (const claim of claims) {
+      // Only compare against the requirement it can actually fail: a floor claim
+      // sits BELOW the blocking floor, so any component below its requirement is
+      // a real understatement. Being above is harmless (stricter than required).
+      const shortfalls = required
+        .map((required_, i) => ({ required: required_, claimed: claim.values[i] }))
+        .filter((c) => c.claimed < c.required);
+      if (shortfalls.length) {
+        // Show the surrounding line so the report names the offending text.
+        const lineStart = content.lastIndexOf("\n", claim.index) + 1;
+        const lineEnd = content.indexOf("\n", claim.index);
+        const line = content.slice(lineStart, lineEnd === -1 ? undefined : lineEnd).trim();
+        problems.push(
+          `${claim.text} understates the blocking coverage floor ` +
+            `(${shortfalls
+              .map((c) => `claims ${c.claimed}, gate requires ${c.required}`)
+              .join("; ")}) — ${line}`
+        );
+      }
+    }
+
+    if (!problems.length)
+      return {
+        ok: true,
+        detail: `${claims.length} coverage-floor claim(s) meet or exceed the blocking ratchet`,
+      };
+    return { ok: false, detail: problems.join(" | ") };
   };
 }
 
@@ -541,14 +720,51 @@ const SVG_DIAGRAM_FILES = [
   "public/images/tier-flow-light.svg",
 ];
 
+function makeProviderCountValidator(expected, requireClaim = false) {
+  return makeNumberClaimValidator(expected, {
+    what: "aggregate provider count",
+    // Subsets and approximate counts (100+) have their own denominators.
+    pattern:
+      /\b(\d{3,4})\*{0,2}(?:\s+(?:(?:AI|LLM|registered|unique)\s+)?providers\b|-provider\b)/gi,
+    skipBefore: /chat model registry covers\s+\*{0,2}$/i,
+    skipAfter: /^\s+in\s+(?:>\s*)?OmniRoute v\d+\.\d+\.\d+/i,
+    requireClaim,
+  });
+}
+
 export function buildChecks() {
   return [
+    ...buildReadmeMigrationChecks(ROOT, countMigrations()),
     {
       label: "Provider count",
       actual: readProviderTotal(),
       docKey: "providers",
       strict: true,
       files: ["README.md", "AGENTS.md", "llm.txt"],
+      validate: makeProviderCountValidator(readProviderTotal(), true),
+    },
+    {
+      label: "Provider count (secondary docs and skills)",
+      actual: readProviderTotal(),
+      docKey: "providers",
+      strict: true,
+      files: [
+        "docs/architecture/ARCHITECTURE.md",
+        "docs/architecture/CODEBASE_DOCUMENTATION.md",
+        "docs/architecture/REPOSITORY_MAP.md",
+        "docs/frameworks/A2A-SERVER.md",
+        "docs/frameworks/ACP.md",
+        "docs/frameworks/AGENTBRIDGE.md",
+        "docs/frameworks/OPEN_SSE_ARCHITECTURE.md",
+        "docs/getting-started/FREE-TIERS-GUIDE.md",
+        "docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md",
+        "docs/guides/FREE_PROVIDER_RANKINGS.md",
+        "src/shared/constants/agentSkills.ts",
+        "skills/README.md",
+        "skills/omni-auth/SKILL.md",
+        "skills/omni-providers/SKILL.md",
+      ],
+      validate: makeProviderCountValidator(readProviderTotal()),
     },
     {
       label: "Provider count (package.json description)",
@@ -579,6 +795,18 @@ export function buildChecks() {
       strict: true,
       files: ["README.md", "llm.txt"],
       validate: makeVersionClaimValidator(readPackageVersion()),
+    },
+    {
+      // G-08 (#15159): AGENTS.md advertised `60/60/60/60`, which is what
+      // test:coverage hardcodes but NOT what the BLOCKING ratchet enforces. Read
+      // the real floors from quality-baseline.json rather than hardcoding them
+      // here, so a future rebaseline cannot leave the docs silently wrong.
+      label: "Coverage floor (docs vs blocking ratchet)",
+      actual: Object.values(readCoverageRatchetFloors()).join(" / "),
+      docKey: "coverage floor",
+      strict: true,
+      files: ["AGENTS.md", "README.md"],
+      validate: makeCoverageFloorClaimValidator(readCoverageRatchetFloors()),
     },
     {
       label: "i18n locales count",

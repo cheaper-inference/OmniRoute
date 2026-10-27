@@ -2,7 +2,31 @@
  * Extract usage from non-streaming response body
  * Handles different provider response formats
  */
-import { carryEstimatedUsageMarker } from "../utils/usageTracking.ts";
+import { carryEstimatedUsageMarker, pickReportedCostUsd } from "../utils/usageTracking.ts";
+
+/**
+ * True for an Anthropic Messages response body (`type: "message"`), whatever provider
+ * id served it: kimi-coding, deepseek, xiaomi-mimo and every other Claude-format or
+ * Anthropic-endpoint provider return this shape. Its `usage.input_tokens` EXCLUDES
+ * prompt-cache reads and writes, unlike the Responses API, whose `input_tokens`
+ * already includes the cache (`input_tokens_details.cached_tokens`). A usage object
+ * carrying those cached-token details is therefore never re-totalled.
+ */
+function isAnthropicMessageUsage(
+  responseBody: Record<string, unknown>,
+  usage: Record<string, unknown>
+): boolean {
+  return (
+    responseBody.type === "message" &&
+    usage.input_tokens_details === undefined &&
+    usage.prompt_tokens_details === undefined
+  );
+}
+
+/** A provider-reported, non-negative finite amount (credits or exact cost ticks). */
+function isReportedAmount(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
 
 export function extractUsageFromResponse(responseBody, provider) {
   if (!responseBody || typeof responseBody !== "object") return null;
@@ -27,6 +51,7 @@ export function extractUsageFromResponse(responseBody, provider) {
       responseBody.usage.prompt_tokens_details?.cache_write_tokens ??
       responseBody.usage.input_tokens_details?.cache_write_tokens ??
       responseBody.usage.cache_write_tokens;
+    const reportedCostUsd = pickReportedCostUsd(responseBody.usage);
     const openAiUsage = {
       prompt_tokens: responseBody.usage.prompt_tokens || 0,
       completion_tokens: responseBody.usage.completion_tokens || 0,
@@ -63,17 +88,25 @@ export function extractUsageFromResponse(responseBody, provider) {
       responseBody.usage.cost_in_usd_ticks >= 0
         ? { cost_in_usd_ticks: responseBody.usage.cost_in_usd_ticks }
         : {}),
+      // Credit metering reported by a credit-metered provider (see
+      // src/lib/usage/creditMeteredProviders.ts). Only set when it is a real
+      // measurement, so non-credit OpenAI-shaped usage stays unchanged.
+      ...(isReportedAmount(responseBody.usage.provider_credits)
+        ? { provider_credits: responseBody.usage.provider_credits }
+        : {}),
+      // OpenRouter's provider-billed USD cost (`usage.cost`); only set when reported.
+      ...(reportedCostUsd !== undefined ? { cost_usd: reportedCostUsd } : {}),
     };
     return carryEstimatedUsageMarker(responseBody.usage, openAiUsage);
   }
 
-  // Claude format
+  // Claude format: known Anthropic provider ids, or any Anthropic Messages body.
   if (
-    isClaudeProvider &&
     responseBody.usage &&
     typeof responseBody.usage === "object" &&
     (responseBody.usage.input_tokens !== undefined ||
-      responseBody.usage.output_tokens !== undefined)
+      responseBody.usage.output_tokens !== undefined) &&
+    (isClaudeProvider || isAnthropicMessageUsage(responseBody, responseBody.usage))
   ) {
     const inputTokens = responseBody.usage.input_tokens || 0;
     const cacheRead = responseBody.usage.cache_read_input_tokens || 0;
@@ -81,15 +114,29 @@ export function extractUsageFromResponse(responseBody, provider) {
 
     // Total prompt tokens = input + cache_read + cache_creation (per Claude API docs)
     const promptTokens = inputTokens + cacheRead + cacheCreation;
+    // Anthropic reports thinking under output_tokens_details.thinking_tokens; some
+    // Claude-format providers use the OpenAI-style reasoning_tokens names instead.
+    const reasoningTokens =
+      responseBody.usage.output_tokens_details?.thinking_tokens ??
+      responseBody.usage.output_tokens_details?.reasoning_tokens ??
+      responseBody.usage.reasoning_tokens;
+    // Native Claude ids always carry both cache counters. Other Claude-format
+    // providers may have no prompt cache at all (devin-cli-agentic reports only
+    // input/output), so emit a counter only when it was reported: the dashboard then
+    // shows N/A instead of 0, as the OpenAI branch above does for cache writes.
+    const reportedCache = (value: unknown) =>
+      isClaudeProvider || (value !== undefined && value !== null);
 
     return {
       prompt_tokens: promptTokens,
       completion_tokens: responseBody.usage.output_tokens || 0,
-      cache_read_input_tokens: cacheRead,
-      cache_creation_input_tokens: cacheCreation,
-      ...(typeof responseBody.usage.output_tokens_details?.thinking_tokens === "number"
-        ? { reasoning_tokens: responseBody.usage.output_tokens_details.thinking_tokens }
+      ...(reportedCache(responseBody.usage.cache_read_input_tokens)
+        ? { cache_read_input_tokens: cacheRead }
         : {}),
+      ...(reportedCache(responseBody.usage.cache_creation_input_tokens)
+        ? { cache_creation_input_tokens: cacheCreation }
+        : {}),
+      ...(typeof reasoningTokens === "number" ? { reasoning_tokens: reasoningTokens } : {}),
     };
   }
 
@@ -101,6 +148,12 @@ export function extractUsageFromResponse(responseBody, provider) {
     (responsesUsage.input_tokens !== undefined || responsesUsage.output_tokens !== undefined)
   ) {
     return {
+      ...(isReportedAmount(responsesUsage.provider_credits)
+        ? { provider_credits: responsesUsage.provider_credits }
+        : {}),
+      ...(isReportedAmount(responsesUsage.cost_in_usd_ticks)
+        ? { cost_in_usd_ticks: responsesUsage.cost_in_usd_ticks }
+        : {}),
       prompt_tokens: responsesUsage.input_tokens || 0,
       completion_tokens: responsesUsage.output_tokens || 0,
       cache_read_input_tokens: responsesUsage.cache_read_input_tokens,
@@ -108,7 +161,11 @@ export function extractUsageFromResponse(responseBody, provider) {
         responsesUsage.input_tokens_details?.cached_tokens ??
         responsesUsage.prompt_tokens_details?.cached_tokens ??
         responsesUsage.cache_read_input_tokens,
-      cache_creation_input_tokens: responsesUsage.cache_creation_input_tokens,
+      cache_creation_input_tokens:
+        responsesUsage.cache_creation_input_tokens ??
+        responsesUsage.input_tokens_details?.cache_creation_tokens ??
+        responsesUsage.prompt_tokens_details?.cache_creation_tokens ??
+        responsesUsage.cache_write_tokens,
       reasoning_tokens:
         responsesUsage.output_tokens_details?.reasoning_tokens ??
         responsesUsage.completion_tokens_details?.reasoning_tokens ??

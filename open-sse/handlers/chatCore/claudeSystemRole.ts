@@ -16,7 +16,11 @@ export type HoistedCacheBoundary = "moved" | "kept" | "dropped";
 
 // Re-exported from its canonical home in claudeCodeConstraints.ts so existing
 // importers of this module keep working.
-export { relocateDirectiveOnlyMessages } from "../../services/claudeCodeConstraints.ts";
+import { relocateDirectiveOnlyMessages } from "../../services/claudeCodeConstraints.ts";
+import { resolveClaudeMidConversationSystemPolicy } from "../../services/claudeMidConversationSystem.ts";
+import { FORMATS } from "../../translator/formats.ts";
+
+export { relocateDirectiveOnlyMessages };
 
 /** Effective cache TTL of a `cache_control` value; Anthropic defaults to 5m when `ttl` is absent. */
 function effectiveTtl(marker: unknown): string {
@@ -166,4 +170,102 @@ export function extractSystemRoleMessages(payload: Record<string, unknown>): voi
     }
   }
   payload.messages = messages.filter((m) => !isSystemRole(m.role));
+}
+
+/**
+ * Hoists the leading run of text-bearing system-role messages (everything
+ * before the first real user/assistant turn) into the top-level `system`
+ * parameter. Anthropic treats `messages[0]` as the initial system prompt
+ * position and rejects any non-directive system-role message there ("use the
+ * top-level 'system' parameter for the initial system prompt"), which is
+ * exactly where the Output Styles injection lands on the mid-conversation
+ * system passthrough (provider `claude` + 1M-context models). Only the leading
+ * run is hoisted so genuine mid-conversation system turns keep their position
+ * and cache prefix; empty (directive-only) messages in the run are left in
+ * place for relocateDirectiveOnlyMessages to handle.
+ */
+export function hoistLeadingTextSystemMessages(payload: Record<string, unknown>): void {
+  if (!Array.isArray(payload.messages) || payload.messages.length === 0) return;
+  const messages = payload.messages as Array<Record<string, unknown>>;
+  const isSystemRole = (role: unknown): boolean =>
+    typeof role === "string" &&
+    (role.toLowerCase() === "system" || role.toLowerCase() === "developer");
+
+  const blocks: Array<Record<string, unknown>> = [];
+  const kept: Array<Record<string, unknown>> = [];
+  let i = 0;
+  for (; i < messages.length; i++) {
+    const m = messages[i];
+    if (m == null || typeof m !== "object" || !isSystemRole(m.role)) break;
+    if (typeof m.content === "string") {
+      if (m.content.length > 0) blocks.push({ type: "text", text: m.content });
+      continue;
+    }
+    if (Array.isArray(m.content) && m.content.length > 0) {
+      let hoisted = false;
+      for (const block of m.content as Array<Record<string, unknown>>) {
+        if (block?.type === "text" && typeof block.text === "string" && block.text.length > 0) {
+          blocks.push({ type: "text", text: block.text });
+          hoisted = true;
+        }
+      }
+      if (!hoisted) kept.push(m);
+      continue;
+    }
+    kept.push(m);
+  }
+  if (blocks.length === 0) return;
+
+  const existing = payload.system;
+  if (typeof existing === "string" && existing.length > 0) {
+    payload.system = [{ type: "text", text: existing }, ...blocks];
+  } else if (Array.isArray(existing)) {
+    payload.system = [...(existing as Array<Record<string, unknown>>), ...blocks];
+  } else {
+    payload.system = blocks;
+  }
+  payload.messages = [...kept, ...messages.slice(i)];
+}
+
+/** Routing context of a native Claude upstream call (the target format is always Claude). */
+export type SystemRoleRoute = {
+  provider?: string | null;
+  sourceFormat?: string | null;
+  /** The client's own `anthropic-beta` header (the beta must be negotiated by the client). */
+  clientAnthropicBeta?: string | null;
+  /** Injected ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM reader; absent/throwing = off. */
+  isMidConversationSystemEnabled?: (() => boolean) | null;
+};
+
+/**
+ * Picks how system/developer turns leave messages[] before a native Claude upstream call.
+ * Upstreams that accept mid-conversation system turns (resolveClaudeMidConversationSystemPolicy:
+ * opt-in flag + client-negotiated beta) only get the leading run hoisted
+ * (and directive-only messages moved off messages[0]), so later turns keep their position
+ * and the cache prefix stays stable. Accepting `system` turns says nothing about OpenAI
+ * `developer` turns, so a body carrying one keeps the full hoist.
+ */
+export function liftSystemRoleMessages(
+  payload: Record<string, unknown>,
+  route?: SystemRoleRoute
+): void {
+  const preserveMidConversationSystem = resolveClaudeMidConversationSystemPolicy({
+    provider: route?.provider,
+    sourceFormat: route?.sourceFormat,
+    targetFormat: FORMATS.CLAUDE,
+    clientAnthropicBeta: route?.clientAnthropicBeta,
+    isPassthroughEnabled: route?.isMidConversationSystemEnabled,
+  });
+  const messages = Array.isArray(payload.messages)
+    ? (payload.messages as Array<{ role?: unknown }>)
+    : [];
+  const hasDeveloperTurn = messages.some(
+    (m) => typeof m?.role === "string" && m.role.toLowerCase() === "developer"
+  );
+  if (preserveMidConversationSystem && !hasDeveloperTurn) {
+    hoistLeadingTextSystemMessages(payload);
+    relocateDirectiveOnlyMessages(payload);
+    return;
+  }
+  extractSystemRoleMessages(payload);
 }

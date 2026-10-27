@@ -16,82 +16,173 @@ pipeline huwa reġistru, għalhekk jistgħu jiżdiedu aktar destinazzjonijiet.
 ## 1. Kif jaħdem
 
 ```
-call_logs (SQLite)
-  → callLogExportSource.getCallLogsForExport(cursor, batchSize)
-    → LogExportRecord[]  (is-sett ta’ fields tat-tab Logs)
-      → il-klijent tad-destinazzjoni.send(batch)
-        → advanceLogExportCursor(id, lastRowId, count)
+server (jiddeċifra + jivvalida l-konfigurazzjoni, jirrikonċilja l-cursor)
+  → jibda l-IPC → proċess OS exportChild iżolat
+    → storage.sqlite għall-qari biss → query/immappjar kondiviż tar-reġistru tas-sejħiet
+      → idratazzjoni asinkronika tal-artefatti → prepare()/send() tad-destinazzjoni
+        → IPC tal-lott → is-server jippersisti l-cursor → IPC ta' konferma
+          → il-lott li jmiss; IPC ta' tlestija → is-server jirreġistra s-suċċess
 ```
 
-- **Skeda** — job cron wieħed ta’ `JobRegistry`, `log_export`, bil-valur predefinit `0 * * * *` (kull siegħa,
-  UTC). Irreġistrat f’`src/lib/initCloudSync.ts`; jista’ jinbidel b’`OMNIROUTE_LOG_EXPORT_CRON`.
-  Kull tick ibattal kull destinazzjoni **attivata**, waħda wara l-oħra.
-- **Cursor** — il-`call_logs.rowid` impliċitu ta’ SQLite, ippersistit għal kull destinazzjoni f’
-  `log_export_destinations.cursor_row_id`. `timestamp` deliberatament mhuwiex il-cursor: min jagħmel is-sejħa
-  jista’ jipprovdi l-valur tiegħu stess, għalhekk talba bil-mod tista’ tinkiteb wara waħda aktar mgħaġġla li bdiet
-  aktar tard, u cursor ibbażat fuq timestamp jaqbiżha.
-- **Tqassim f’lottijiet** — `batch_size` ringieli għal kull talba (valur predefinit 500), `max_rows_per_run` ringieli għal kull eżekuzzjoni
-  (valur predefinit 10000) sabiex ammont kbir ta’ xogħol pendenti jitbattal fuq diversi ticks minflok jimblokka eżekuzzjoni waħda.
-- **Konsenja** — il-cursor javvanza biss wara li `send()` jiġi riżolt. Lott li jfalli jħalli l-
-  cursor fejn kien, sabiex l-istess ringieli jerġgħu jiġu ppruvati fl-eżekuzzjoni li jmiss. Il-garanzija hija
-  ta’ mill-inqas darba flimkien mat-tneħħija tad-duplikati min-naħa tad-destinazzjoni, mhux eżattament darba tassew: BigQuery jidentifika kull
-  ringiela bl-id tar-reġistru tas-sejħa, li jirrispetta fuq bażi tal-aħjar sforz possibbli fi ħdan it-tieqa tiegħu stess għat-tneħħija tad-duplikati.
-- **Protezzjoni kontra sovrappożizzjoni** — it-tick cron u `POST .../run` jistgħu jiġu attivati flimkien. Destinazzjoni
-  li tkun diġà qed titbattal tinqabeż minflok titbattal darbtejn (`skipped: true` fir-riżultat tal-eżekuzzjoni),
-  sabiex eżekuzzjoni konkorrenti ma tkunx tista’ terġa’ tibgħat lott jew tikteb il-cursor lura.
-- **Irkupru wara t-tindif** — jekk `cursor_row_id` jispiċċa ’l fuq minn `MAX(rowid)` (it-tabella kollha tkun
-  tnaddfet u r-rowids reġgħu bdew mill-bidu), ir-runner jirritorna għal 0 minflok jibqa’ permanentement ma jistax jara rekords ġodda.
+- **Skeda** — job cron wieħed ta' `JobRegistry`, `log_export`, li awtomatikament ikun
+  `0 * * * *` (kull siegħa, UTC). Irreġistrat f'`src/lib/initCloudSync.ts`; jista' jinbidel
+  b'`OMNIROUTE_LOG_EXPORT_CRON`. Kull eżekuzzjoni tbattal kull destinazzjoni **attivata**,
+  waħda wara l-oħra.
+- **Cursor** — il-`call_logs.rowid` impliċitu ta' SQLite, ippersistit għal kull destinazzjoni
+  f'`log_export_destinations.cursor_row_id`. `timestamp` deliberatament mhuwiex il-cursor:
+  min jagħmel is-sejħa jista' jipprovdi l-valur tiegħu stess, għalhekk talba bil-mod tista'
+  tinkiteb wara waħda aktar mgħaġġla li bdiet aktar tard, u cursor ibbażat fuq timestamp
+  jaqbiżha.
+- **Tqassim f'lottijiet** — `batch_size` ringieli għal kull talba (default 500),
+  `max_rows_per_run` ringieli għal kull eżekuzzjoni (default 10000), sabiex xogħol pendenti
+  kbir jitbattal fuq diversi eżekuzzjonijiet minflok jimblokka waħda.
+- **Kunsinna** — il-cursor javvanza biss wara li `send()` jiġi riżolt. Lott li jfalli jħalli
+  l-cursor fejn kien, għalhekk l-istess ringieli jerġgħu jiġu ppruvati fl-eżekuzzjoni li jmiss.
+  Il-garanzija hija kunsinna mill-inqas darba flimkien ma' eliminazzjoni tad-duplikati min-naħa
+  tad-destinazzjoni, mhux eżattament darba waħda: BigQuery jidentifika kull ringiela permezz
+  tal-id tar-reġistru tas-sejħiet, li jirrispetta fuq bażi tal-aħjar sforz matul it-tieqa
+  interna tiegħu għat-tneħħija tad-duplikati.
+- **Protezzjoni kontra sovrapożizzjoni** — l-eżekuzzjoni cron u `POST .../run` jistgħu
+  jattivaw ruħhom flimkien. Destinazzjoni li diġà qiegħda titbattal tinqabeż minflok titbattal
+  darbtejn (`skipped: true` fir-riżultat tal-eżekuzzjoni), sabiex eżekuzzjoni konkorrenti ma
+  tkunx tista' terġa' tibgħat lott jew tikteb il-cursor lura.
+- **Irkupru wara tindif** — jekk `cursor_row_id` jispiċċa ogħla minn `MAX(rowid)` (it-tabella
+  kollha tkun tnaddfet u r-rowids reġgħu bdew mill-bidu), ir-runner jerġa' lura għal 0 minflok
+  jibqa' għami b'mod permanenti.
 
-### Payloads (prompts u completions)
+### Runner iżolat u limiti
 
-B’mod predefinit, l-esportazzjoni ġġorr biss il-fields tas-sommarju li turi l-**lista** ta’ Logs. Meta tiġi attivata
-**Esporta prompts u responses** (`includeBodies`) jintbagħat ukoll dak li juri l-pane tad-**dettalji**
-ta’ Logs għal kull sejħa:
+Kull eżekuzzjoni ta' destinazzjoni fuq Node tibda proċess child separat u b'ħajja qasira
+tas-sistema operattiva (`child_process` bl-IPC, mhux `worker_threads`). Il-qari tal-body,
+il-parsing/is-serializzazzjoni tal-JSON tal-payload, `prepare()` tad-destinazzjoni u l-I/O
+tan-network tad-destinazzjoni kollha jitħaddmu hemmhekk, mhux fuq l-event loop tas-server.
+Il-konfigurazzjoni u messaġġi żgħar tal-progress biss jgħaddu mill-IPC; ir-rekords esportati
+qatt ma jirritornaw lis-server. Il-job cron u r-rotta Run now iżommu l-istess riżultat pubbliku
+u protezzjoni kontra s-sovrapożizzjoni.
 
-| Field                            | X’fih                                                             |
+Il-proċess child jiftaħ il-`DATA_DIR/storage.sqlite` riżolt tas-server għall-qari biss bl-użu
+ta' `node:sqlite`, b'`busy_timeout=5000` u `query_only=ON`. Ma jimporta l-ebda singleton
+tad-DB u ma jwettaq l-ebda migrazzjoni, backup jew aġġornament ta' SQLite. Iż-żamma tar-rekords
+ta' artefatti neqsin/bil-ħsara (inkluż l-UPDATE tal-artefatt bil-ħsara) tibqa' biss fil-mogħdija
+tad-dettalji tad-dashboard. Iż-żewġ mogħdijiet jużaw l-istess risolvitur pur tad-dettalji;
+l-esportazzjoni tuża qari asinkroniku mis-sistema tal-fajls u l-istess ordni ta' riżoluzzjoni:
+artefatt → inline legacy → disk legacy → xejn. Eżekuzzjoni tieħu snapshot tal-ogħla rowid
+ta' inserzjoni meta l-proċess child jiftaħ ir-reader tiegħu; inserzjonijiet ta' wara jistennew
+sal-eżekuzzjoni li jmiss. Dan huwa limitu ta' inserzjoni, mhux tranżazzjoni SQLite fit-tul:
+il-writers u ċ-checkpoints ta' WAL jibqgħu ħielsa waqt l-istennija tan-network.
+L-aġġornamenti/it-tħassir ta' ringieli eżistenti ma jiġux iffriżati minn dan il-limitu.
+
+Wara kull lott aċċettat, il-proċess child jistenna konferma. Is-server l-ewwel jippersisti
+l-cursor b'`advanceLogExportCursor`, imbagħad jibgħat `ack`; l-ebda lott sussegwenti ma jibda
+qabel dan. Falliment fit-trażmissjoni, crash jew timeout jirreġistra falliment mingħajr ma
+javvanza dak il-lott. Lottijiet ikkonfermati qabel jibqgħu kkommettuti; l-iktar lott wieħed
+mhux ikkonfermat jista' jerġa' jintbagħat. Is-suċċess jiġi rreġistrat biss wara `done` u ħruġ
+nadif tal-proċess child. Il-fallimenti jitterminaw il-proċess child b'SIGTERM, u jeskalaw għal
+SIGKILL wara 500 ms, filwaqt li r-runner jistenna li jingħalaq il-proċess.
+
+| Varjabbli tal-ambjent                         | Default | Għan                                         |
+| --------------------------------------------- | ------- | -------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000  | Limitu ta' ħin reali għal kull destinazzjoni |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024    | Limitu tal-old-space V8 tal-child f'MB       |
+
+Valuri invalidi/mhux pożittivi/mhux sħaħ jużaw il-valuri default. Is-setting tal-heap mhuwiex
+limitu RSS totali; lottijiet kbar ħafna xorta jistgħu jeżawrixxu l-memorja tal-proċess child
+u jġiegħlu l-eżekuzzjoni tfalli b'mod sikur. Il-valur default ta' 1024 MB iħalli spazju żejjed
+għal-lott default ta' 500 ringiela b'artefatti ta' 512 KiB meta l-bodies ikunu attivati,
+inkluża s-serializzazzjoni JSON ta' BigQuery maqsuma f'biċċiet ta' bytes. Dan ma jagħmilx
+lott ta' 10000 ringiela bil-bodies sikur. L-eżawriment tal-heap ta' V8 jirreġistra falliment
+li fuqu tista' tittieħed azzjoni: naqqas id-daqs tal-lott jew żid
+`OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; il-cursor jibqa' fl-aħħar lott ikkonfermat.
+Il-bodies storiċi inline/fuq id-disk mhumiex koperti mil-limitu modern tal-artefatti.
+L-operaturi għandhom jallokaw l-RSS separatament, speċjalment ġewwa containers b'memorja
+limitata.
+
+Il-proċess child jiret biss il-`DATA_DIR` riżolt, `NODE_ENV`, `TZ` espliċitu (għar-riżoluzzjoni
+legacy tal-ħin lokali fl-ismijiet tal-fajls), `ELECTRON_RUN_AS_NODE` meta jkun preżenti, u
+l-inputs outbound li ġejjin: `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (u l-forom
+tagħhom b'ittri żgħar), `OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`,
+`SSL_CERT_FILE`, `SSL_CERT_DIR`. Dispatcher globali ta' Undici juża l-istess riżoluzzjoni pura
+tal-proxy tal-ambjent tas-server u r-regoli biex jiġu evitati proxies għal hosts lokali,
+inkluż `NO_PROXY`; ma jimportax `proxyFetch.ts` jew il-flags tiegħu tad-DB/karatteristiċi.
+Il-kredenzjali tal-proxy jitneħħew mill-output mibgħut u mill-iżbalji rreġistrati.
+Il-kredenzjali tad-destinazzjoni jgħaddu biss f'messaġġ IPC wieħed tal-bidu, qatt f'argv jew
+fl-ambjent; it-twassil tal-output/iżbalji jingħata prefiss u jiġi ssanitizzat.
+`ExperimentalWarning` biss jiġi diżattivat fl-argumenti exec tal-proċess child sabiex ma
+tirrepetix it-twissija SQLite ta' Node ma' kull eżekuzzjoni cron; tipi oħra ta' twissijiet
+jibqgħu viżibbli.
+
+Il-moduli tad-destinazzjoni jridu jkunu importabbli mingħajr dipendenzi ta’ Next.js jew dipendenzi
+għas-server biss. L-implimentazzjoni eżistenti ta’ BigQuery diġà tissodisfa dak il-kuntratt. Il-caches
+tat-tokens tal-aċċess idumu biss tul l-eżekuzzjoni tal-proċess sekondarju, mhux bejn eżekuzzjoni u oħra.
+Node huwa r-runtime appoġġjat (`package.json` engines), iżda t-taqsima tal-installazzjoni ta’ Bun
+fir-README u `Dockerfile.bun` jirreklamaw ukoll rotta ta’ kompatibbiltà għall-produzzjoni li tuża
+`bun:sqlite` (`src/lib/db/core.ts` / adapters). Għalhekk, taħt Bun, l-esportazzjonijiet iżommu r-rotta
+preċedenti fl-istess proċess u joħorġu twissija ta’ darba: l-iżolament tal-heap/tal-timeout tal-proċess
+sekondarju mhuwiex disponibbli. Uża Node għall-iżolament tal-event loop u tal-OOM; hawnhekk Bun
+mhuwiex meqjus bħala għall-iżvilupp biss.
+
+Meta `includeBodies` ikun attivat, ippreferi frekwenza ta’ kull ftit minuti bħal
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` minflok takkumula xogħol b’lura ta’ payloads għal siegħa
+sħiħa. Il-limiti tal-batches u tar-ringieli xorta jillimitaw kull eżekuzzjoni. L-ispiża tal-istartjar
+tal-proċess titħallas għal kull destinazzjoni f’kull eżekuzzjoni; dan jissagrifika spiża żgħira
+tal-istartjar għall-iżolament mill-event loop tas-server, mhux għal tnaqqis fl-użu totali tas-CPU.
+
+### Payloads (promptijiet u komplezzjonijiet)
+
+B’mod awtomatiku, l-esportazzjoni tinkludi biss l-oqsma tas-sommarju li turi l-**lista**
+tal-Logs. Meta tattiva **Esporta l-promptijiet u t-tweġibiet** (`includeBodies`), jintbagħat ukoll
+dak li juri l-ħġieġa tad-**dettalji** tal-Logs għal kull sejħa:
+
+| Qasam                            | X’fih                                                             |
 | -------------------------------- | ----------------------------------------------------------------- |
-| `request_body` / `response_body` | Il-payloads tas-sejħa kif jirrendihom id-dashboard                |
-| `pipeline_route_decision`        | Liema target u model għażel ir-router                             |
+| `request_body` / `response_body` | Il-payloads tas-sejħa kif jurihom id-dashboard                    |
+| `pipeline_route_decision`        | Liema mira u mudell għażel ir-router                              |
 | `pipeline_client_request`        | It-talba mhux ipproċessata eżatt kif bagħatha l-klijent           |
 | `pipeline_openai_request`        | Wara t-traduzzjoni għall-forma interna ta’ OpenAI                 |
-| `pipeline_provider_request`      | Kif intbagħtet fil-fatt upstream, fid-djalett tal-provider        |
-| `pipeline_provider_response`     | Ir-response upstream mhux ipproċessata                            |
+| `pipeline_provider_request`      | Kif intbagħtet effettivament upstream, fid-djalett tal-fornitur   |
+| `pipeline_provider_response`     | It-tweġiba mhux ipproċessata minn upstream                        |
 | `pipeline_client_response`       | Dak li ngħata lura lil min għamel is-sejħa                        |
-| `pipeline_error`                 | Dettalji dwar żball fil-livell tal-pipeline għal sejħa li falliet |
-| `bodies_truncated`               | Veru meta xi field hawn fuq laħaq `maxBodyBytes`                  |
+| `pipeline_error`                 | Dettalji tal-iżball fil-livell tal-pipeline għal sejħa li falliet |
+| `bodies_truncated`               | Veru meta xi qasam hawn fuq laħaq `maxBodyBytes`                  |
 
-Dan huwa kontenut tal-prompt, għalhekk huwa **diżattivat b’mod predefinit** u deliberatament huwa għażla għal kull destinazzjoni.
-Dak li jintbagħat huwa dak li juri d-dashboard, għax it-tnejn jaqraw permezz ta’ `getCallLogById`: il-payloads ikunu
-diġà ġew sanitizzati minn PII u s-sigrieti jkunu ġew moħbija meta jinkitbu, u sejħa magħmula b’
-API key `noLog` ma taħżen ebda payload, għalhekk ma jkun hemm xejn x’jiġi esportat.
+Dan huwa kontenut tal-prompt, għalhekk huwa **diżattivat b’mod awtomatiku** u intenzjonalment
+huwa għażla għal kull destinazzjoni. Dak li jintbagħat huwa dak li juri d-dashboard, għax
+l-esportazzjoni u `getCallLogById` jużaw l-istess riżoluzzjoni tad-dettalji: il-payloads ikunu
+diġà tneħħitilhom il-PII u ġew mgħottija fihom is-sigrieti meta jinkitbu, u sejħa magħmula b’ċavetta
+tal-API `noLog` ma taħżen l-ebda payload, għalhekk ma jkun hemm xejn x’jiġi esportat.
 
-Il-payloads jinqraw għal kull ringiela mill-artefatt tas-filesystem, għalhekk l-idratazzjoni ssir biss għad-destinazzjonijiet
-li talbuha. Ringiela li l-artefatt tagħha jkun nieqes jew korrott tesporta s-sommarju tagħha b’payloads null
-minflok ma tfalli l-lott u tħalli l-cursor imwaħħal.
+Il-payloads jinqraw ringiela b’ringiela mill-artifatt tas-sistema tal-fajls, għalhekk l-idratazzjoni
+ssir biss għad-destinazzjonijiet li talbuha. Artifatt nieqes jew korrott jesporta s-sommarju tiegħu
+b’payloads nulli minflok ifalli l-batch u jħalli l-cursor imwaħħal.
 
-`maxBodyBytes` (valur predefinit 262144) jillimita kull field. Payloads itwal jiġu **maqtugħa minflok
-jitħallew barra** — prompt maqtugħ xorta jwieġeb “x’intalab” — u r-ringiela tiġi mmarkata b’
-`bodies_truncated`. Deltas streamed biċċa biċċa ma jiġux esportati; ir-response immuntata
-tkun diġà f’`pipeline_provider_response` u `pipeline_client_response`.
+`maxBodyBytes` (il-valur awtomatiku huwa 262144) jillimita kull qasam. Payloads itwal jiġu
+**maqtugħa minflok eliminati** — prompt maqtugħ xorta jwieġeb “x’intalab” — u r-ringiela tiġi
+mmarkata b’`bodies_truncated`. Id-deltas imxandra biċċa biċċa ma jiġux esportati; it-tweġiba
+assemblata diġà tinsab f’`pipeline_provider_response` u `pipeline_client_response`.
 
 ---
 
 ## 2. Fajls
 
-| Biċċa                         | Post                                         |
-| ----------------------------- | -------------------------------------------- |
-| Kuntratt tad-destinazzjoni    | `src/lib/logExport/types.ts`                 |
-| Reġistru                      | `src/lib/logExport/registry.ts`              |
-| Ġestjoni tas-sigrieti         | `src/lib/logExport/secrets.ts`               |
-| Eżekutur (ċiklu tal-cursor)   | `src/lib/logExport/runner.ts`                |
-| Projezzjoni tal-API           | `src/lib/logExport/presenter.ts`             |
-| Destinazzjoni BigQuery        | `src/lib/logExport/destinations/bigquery.ts` |
-| Awtentikazzjoni Google SA     | `src/lib/logExport/googleServiceAccount.ts`  |
-| Sors tar-reġistru tas-sejħiet | `src/lib/usage/callLogExportSource.ts`       |
-| Persistenza                   | `src/lib/db/logExportDestinations.ts`        |
-| Kompitu cron                  | `src/lib/jobs/logExportJob.ts`               |
-| Saff REST                     | `src/app/api/log-export/`                    |
-| Paġna tad-dashboard           | `src/app/(dashboard)/dashboard/log-export/`  |
+| Komponent                      | Post                                         |
+| ------------------------------ | -------------------------------------------- |
+| Kuntratt tad-destinazzjoni     | `src/lib/logExport/types.ts`                 |
+| Reġistru                       | `src/lib/logExport/registry.ts`              |
+| Ġestjoni tas-sigrieti          | `src/lib/logExport/secrets.ts`               |
+| Eżekutur (IPC ġenitur)         | `src/lib/logExport/runner.ts`                |
+| Ċiklu tal-ħajja tal-proċess    | `src/lib/logExport/childRunner.ts`           |
+| Punt tad-dħul tal-proċess wild | `src/lib/logExport/exportChild.ts`           |
+| Opener għall-qari biss         | `src/lib/db/logExportReadOnly.ts`            |
+| Mistoqsija/immappjar kondiviżi | `src/lib/usage/callLogExportQueries.ts`      |
+| Riżolvitur tad-dettalji        | `src/lib/usage/callLogDetailResolver.ts`     |
+| Projezzjoni tal-API            | `src/lib/logExport/presenter.ts`             |
+| Destinazzjoni BigQuery         | `src/lib/logExport/destinations/bigquery.ts` |
+| Awtentikazzjoni Google SA      | `src/lib/logExport/googleServiceAccount.ts`  |
+| Sors tar-reġistru tas-sejħiet  | `src/lib/usage/callLogExportSource.ts`       |
+| Persistenza                    | `src/lib/db/logExportDestinations.ts`        |
+| Kompitu cron                   | `src/lib/jobs/logExportJob.ts`               |
+| Saff REST                      | `src/app/api/log-export/`                    |
+| Paġna tad-dashboard            | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Skema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 

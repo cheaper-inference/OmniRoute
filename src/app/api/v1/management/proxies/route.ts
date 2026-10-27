@@ -1,4 +1,5 @@
 import { listProxies } from "@/lib/db/proxies";
+import { parseIntegerQueryParam } from "@/lib/api/queryIntegerParam";
 import {
   handleProxyCreate,
   handleProxyDelete,
@@ -8,10 +9,15 @@ import {
 import { createErrorResponseFromUnknown } from "@/lib/api/errorResponse";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 
-function toPagination(searchParams: URLSearchParams) {
-  const limit = Math.max(1, Math.min(200, Number(searchParams.get("limit") || 50)));
-  const offset = Math.max(0, Number(searchParams.get("offset") || 0));
-  return { limit, offset };
+function toPagination(searchParams: URLSearchParams): { limit: number; offset: number } | Response {
+  const parsedLimit = parseIntegerQueryParam(searchParams, "limit", 50);
+  if (parsedLimit.ok === false) return parsedLimit.response;
+  const parsedOffset = parseIntegerQueryParam(searchParams, "offset", 0);
+  if (parsedOffset.ok === false) return parsedOffset.response;
+  return {
+    limit: Math.max(1, Math.min(200, parsedLimit.value)),
+    offset: Math.max(0, parsedOffset.value),
+  };
 }
 
 export async function GET(request: Request) {
@@ -23,7 +29,9 @@ export async function GET(request: Request) {
     const lookupResponse = await resolveProxyLookupResponse(searchParams, "where_used");
     if (lookupResponse) return lookupResponse;
 
-    const { limit, offset } = toPagination(searchParams);
+    const pagination = toPagination(searchParams);
+    if (pagination instanceof Response) return pagination;
+    const { limit, offset } = pagination;
     const result = await listProxies({ includeSecrets: false, limit, offset });
     return Response.json({
       items: result.items,

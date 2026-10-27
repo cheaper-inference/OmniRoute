@@ -123,7 +123,9 @@
       "maxCostOpt": "በቀን ከፍተኛው ወጪ (USD)",
       "allowedModelsOpt": "በነጠላ ሰረዝ የተለዩ የተፈቀዱ ሞዴሎች ዝርዝር",
       "nothingToSet": "ምንም የፖሊሲ መስኮች አልቀረቡም። --rate-limit፣ --max-cost ወይም --allowed-models ይጠቀሙ።",
-      "updated": "ፖሊሲው ዘምኗል።"
+      "updated": "ፖሊሲው ዘምኗል።",
+      "modelAccessModeOpt": "የሞዴል መዳረሻ ሁነታ (all | restricted)",
+      "unrestrictedOpt": "ሁሉንም ሞዴሎች ፍቀድ (--model-access-mode all)"
     },
     "expiration": {
       "title": "የቁልፍ ጊዜ ማብቂያ",
@@ -254,6 +256,7 @@
     "log": "የአገልጋይ ምዝግቦችን inline ያሳዩ",
     "no_recovery": "በብልሽት ጊዜ በራስ-ሰር ዳግም መጀመርን ያሰናክሉ (debugging mode)",
     "max_restarts": "ከመተው በፊት በ30s ውስጥ የሚፈቀደው ከፍተኛ የብልሽት ዳግም መጀመር ብዛት (ነባሪ፦ 2)",
+    "headless": "የፕሮክሲ ሞተሩን ብቻ አሂድ፦ ዳሽቦርዱ ተሰናክሏል (404)፣ አማራጭ ንዑስ ሥርዓቶች ይዘለላሉ (OMNIROUTE_HEADLESS=1 ያዘጋጃል)",
     "tray": "በስርዓት ትሪ ውስጥ አስጀምር (ለዴስክቶፕ ብቻ፣ በፈቃድ)",
     "no_tray": "የስርዓት ትሪ አዶን አሰናክል",
     "ready_timeout": "የዝግጁነት ምርመራ ጊዜ ማብቂያ በሚሊሰከንድ (እንዲሁም OMNIROUTE_READY_TIMEOUT_MS፣ ነባሪ 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "በOmniRoute ኢንስታንሶች መካከል ውቅርን አመሳስል",
     "push": {
-      "description": "ውቅሩን ወደ ደመና ወይም የርቀት ኢንስታንስ ግፋ",
-      "target": "መድረሻ (cloud ወይም context:name)",
-      "bundle": "የሚመሳሰሉ የጥቅል ክፍሎች",
-      "dryRun": "ሳይተገበር ቅድመ ዕይታ አሳይ"
+      "description": "ውቅሩን ወደ ደመና ወይም የርቀት ኢንስታንስ ግፋ"
     },
     "pull": {
-      "description": "ውቅሩን ከደመና ወይም ከርቀት ኢንስታንስ ጎትት",
-      "source": "ምንጭ (cloud ወይም context:name)",
-      "merge": "ከነባሩ ውቅር ጋር አዋህድ",
-      "replace": "ነባሩን ውቅር ተካ",
-      "dryRun": "ሳይተገበር ቅድመ ዕይታ አሳይ"
-    },
-    "diff": {
-      "source": "የምንጭ አውድ",
-      "target": "የመድረሻ አውድ"
+      "description": "ውቅሩን ከደመና ወይም ከርቀት ኢንስታንስ ጎትት"
     },
     "bundle": {
       "description": "ውቅሩን እንደ ጥቅል ፋይል ላክ",
-      "include": "የሚካተቱ ክፍሎች (በኮማ የተለዩ)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "የጥቅል ፋይል አስመጣ",
       "dryRun": "ሳይተገበር አረጋግጥ"
-    },
-    "initialize": {
-      "fromCloud": "ከደመና ምትኬ አስጀምር"
     },
     "tokens": {
       "description": "የማመሳሰያ ቶከኖችን አስተዳድር",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "ማረጋገጫን ዝለል"
       }
-    },
-    "resolve": {
-      "description": "የማመሳሰያ ግጭቶችን በይነተገናኝ ሁኔታ ፍታ"
     }
   },
   "config": {

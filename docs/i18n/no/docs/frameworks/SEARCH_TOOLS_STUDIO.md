@@ -42,21 +42,21 @@ Videreutvikler eksisterende `SearchForm` + `ResultsPanel` + `RerankPanel` til en
 
 - Spørring → resultater (tittel, URL, utdrag, relevanspoeng).
 - Leverandørmetadata i konfigurasjonspanelet (kostnad, kvote, status).
-- Rerankingsdel: Velg en rerankingsmodell, endre rekkefølgen på resultatene og vis `positionDelta`.
-- Tom tilstand med handlingsoppfordring når ingen søkeleverandører er konfigurert.
+- Omrangeringsdel: velg en omrangeringsmodell, endre rekkefølgen på resultatene, vis `positionDelta`.
+- Tomtilstand med handlingsknapp når ingen søkeleverandører er konfigurert.
 - Søkehistorikk via `SearchHistory.tsx`.
 - Kaller `POST /v1/search` (eksisterende endepunkt, ingen endringer).
 
 ### Skrapefane
 
-Ny fane for uthenting av innhold fra en URL via `POST /v1/web/fetch` (opprettet i plan 05):
+Ny fane for å hente ut innhold fra en URL via `POST /v1/web/fetch` (opprettet i plan 05):
 
 - Inndata: URL + bryter for hele siden + formatvelger (markdown / tekst / HTML).
 - Send inn → hent → gjengi `ScrapeResult.tsx`.
-- `ScrapeResult` gjengir en markdown-forhåndsvisning + bryter for rådata.
-- Grense: Hvis responsinnholdet er større enn **256 KB**, viser brukergrensesnittet `(avkortet, vis rådata)` og åpner rådataene i en Monaco-dialogboks (D21).
-- Metadatapanel: leverandør (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), ventetid, kostnad, responsstørrelse, antall lenker.
-- Bruker hooken `useScrapeFetch.ts`.
+- `ScrapeResult` gjengir markdown-forhåndsvisning + bryter for rådata.
+- Grense: Hvis responsinnholdet er større enn **256 KB**, viser brukergrensesnittet `(avkortet, vis rådata)` og åpner rådataene i en Monaco-modal (D21).
+- Metadatapanel: leverandør (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), ventetid, kostnad, responsstørrelse, antall lenker.
+- Bruker `useScrapeFetch.ts`-hooken.
 
 ### Sammenligningsfane
 
@@ -65,7 +65,7 @@ Kjører samme spørring/URL parallelt hos opptil **4 leverandører** (D22):
 - Kolonner side om side for hver leverandør.
 - Måleverdier: ventetid, kostnad, antall resultater, responsstørrelse.
 - Beregning av URL-overlapp for søk (antall delte URL-er sammenlignet med det opprinnelige resultatet).
-- Kaller `POST /v1/search` (søk) eller `POST /v1/web/fetch` (skraping) for hver leverandør.
+- Kaller `POST /v1/search` (søk) eller `POST /v1/web/fetch` (skraping) per leverandør.
 
 ---
 
@@ -103,10 +103,10 @@ Kjører samme spørring/URL parallelt hos opptil **4 leverandører** (D22):
 `ProviderCatalog.tsx` viser hele leverandørlisten fra `GET /api/search/providers`
 (utvidet i F4 til å inkludere henteleverandører):
 
-| `kind` | `"search"` (20 leverandører) eller `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 leverandører) eller `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-Statusen **utledes på forespørselstidspunktet** ved å kontrollere om påloggingsinformasjon finnes, og om
-alle nøkler for øyeblikket er i nedkjølingsperioden.
+Statusen **utledes ved forespørselstidspunktet** ved å kontrollere om legitimasjon finnes, og om
+alle nøklene for øyeblikket er i nedkjølingsperioden.
 
 ---
 
@@ -118,7 +118,7 @@ Plassholderen for API-nøkkelen er alltid `$OMNIROUTE_API_KEY` (D11, delt med Pl
 
 ---
 
-## Endringer i backend
+## Backend-endringer
 
 Bare én backend-endring var nødvendig for denne funksjonen:
 
@@ -126,10 +126,10 @@ Bare én backend-endring var nødvendig for denne funksjonen:
 
 `src/app/api/search/providers/route.ts` ble utvidet for å:
 
-- Inkludere alle de 6 henteleverandørene (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) i matrisen.
+- Inkludere alle henteleverandører (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) i matrisen.
 - Legge til `kind: "search" | "fetch"` for hvert element.
-- Legge til `status: "configured" | "missing" | "rate_limited"` utledet fra gjeldende tilstand for påloggingsinformasjon.
-- Opprettholde bakoverkompatibilitet — eksisterende felter (`id`, `name` osv.) er uendret.
+- Legge til `status: "configured" | "missing" | "rate_limited"` utledet fra gjeldende tilstand for påloggingsinformasjonen.
+- Opprettholde bakoverkompatibilitet – eksisterende felt (`id`, `name` osv.) er uendret.
 
 ---
 

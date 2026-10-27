@@ -12,6 +12,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 const virtualFactory = await import("../../open-sse/services/autoCombo/virtualFactory.ts");
 const candidateHandler = await import("../../open-sse/handlers/autoComboCandidates.ts");
 
@@ -59,6 +60,12 @@ async function seedConnections(firstExcludedModels?: string[]) {
 
 test.beforeEach(async () => {
   await resetStorage();
+  // contract changed by #15979 (on top of #15839): `excludeTosAvoid` defaults to on and
+  // uncataloged models inherit the provider's curated `tos: "avoid"` verdict, so every antigravity
+  // model (now `antigravity: "avoid"`) is ToS-filtered out of auto/*. Opt out so this file keeps
+  // guarding the per-model candidate pool shape; the ToS default is covered by
+  // issue-15059-tos-avoid-auto-default.
+  await settingsDb.updateSettings({ excludeTosAvoid: false });
 });
 
 test.after(async () => {
@@ -87,9 +94,9 @@ test("credentialed providers expose one logical candidate per visible registry m
   );
   for (const model of [
     "antigravity/claude-sonnet-4-6",
-    "antigravity/gemini-3.7-flash-low",
-    "antigravity/gemini-3.7-flash-medium",
-    "antigravity/gemini-3.7-flash-high",
+    "antigravity/gemini-3.8-flash-low",
+    "antigravity/gemini-3.8-flash-medium",
+    "antigravity/gemini-3.8-flash-high",
   ]) {
     assert.ok(modelStrings.includes(model), `${model} should be eligible for auto routing`);
   }
@@ -121,15 +128,15 @@ test("candidate transparency expands a logical model into per-account rows", asy
 });
 
 test("connection model exclusions narrow only that model's account allowlist", async () => {
-  const { first, second } = await seedConnections(["gemini-3.7-*"]);
+  const { first, second } = await seedConnections(["gemini-3.8-*"]);
 
   const combo = await virtualFactory.createVirtualAutoCombo(undefined);
   const candidates = antigravityCandidates(combo);
   const geminiCandidates = candidates.filter((candidate) =>
-    candidate.model.startsWith("antigravity/gemini-3.7-")
+    candidate.model.startsWith("antigravity/gemini-3.8-")
   );
 
-  assert.ok(geminiCandidates.length >= 3, "Gemini 3.7 candidates should remain available");
+  assert.ok(geminiCandidates.length >= 3, "Gemini 3.8 candidates should remain available");
   for (const candidate of geminiCandidates) {
     assert.deepEqual(candidate.allowedConnectionIds, [second.id]);
   }
@@ -150,9 +157,9 @@ test("hiding the first registry model does not drop the credentialed provider", 
 
   assert.equal(modelStrings.includes("antigravity/claude-sonnet-4-6"), false);
   for (const model of [
-    "antigravity/gemini-3.7-flash-low",
-    "antigravity/gemini-3.7-flash-medium",
-    "antigravity/gemini-3.7-flash-high",
+    "antigravity/gemini-3.8-flash-low",
+    "antigravity/gemini-3.8-flash-medium",
+    "antigravity/gemini-3.8-flash-high",
   ]) {
     assert.ok(modelStrings.includes(model), `${model} should remain after Sonnet is hidden`);
   }

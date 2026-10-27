@@ -2,6 +2,8 @@
 // Extracted verbatim from codex.ts. Self-contained (console.debug only).
 
 import { stripUnsupportedRegexPatterns } from "../../translator/helpers/schemaCoercion.ts";
+import { coerceSchemaValueShapes } from "../../translator/helpers/schemaValueShapes.ts";
+import { readToolStrict, restoreToolStrict } from "../../translator/helpers/toolStrict.ts";
 
 // Responses-API hosted tool types that OpenAI/Codex executes server-side.
 // These arrive shaped as `{ type, ...params }` with no `function` object and no `name` —
@@ -31,9 +33,7 @@ export function isCodexFreePlan(providerSpecificData: unknown): boolean {
     chatgptPlanType?: unknown;
   };
   const plan =
-    typeof data.workspacePlanType === "string"
-      ? data.workspacePlanType
-      : data.chatgptPlanType;
+    typeof data.workspacePlanType === "string" ? data.workspacePlanType : data.chatgptPlanType;
   return typeof plan === "string" && plan.trim().toLowerCase() === "free";
 }
 
@@ -151,10 +151,14 @@ export function normalizeCodexTools(
     dropImageGeneration?: boolean;
     preserveCustomTools?: boolean;
     defaultFunctionStrict?: boolean;
+    preserveWebSearchPreviewVersion?: boolean;
   }
 ): void {
   if (!Array.isArray(body.tools)) return;
 
+  const hostedToolTypes = new Set(CODEX_HOSTED_TOOL_TYPES);
+  if (options?.preserveWebSearchPreviewVersion)
+    hostedToolTypes.add("web_search_preview_2025_03_11");
   const validToolNames = new Set<string>();
   body.tools = body.tools.filter((toolValue) => {
     if (!toolValue || typeof toolValue !== "object" || Array.isArray(toolValue)) {
@@ -173,6 +177,9 @@ export function normalizeCodexTools(
             const subTool = st as Record<string, unknown>;
             const name = typeof subTool.name === "string" ? subTool.name.trim().slice(0, 128) : "";
             if (name) validToolNames.add(name);
+            if (isPlainObject(subTool.parameters)) {
+              subTool.parameters = coerceSchemaValueShapes(subTool.parameters);
+            }
           }
         }
       }
@@ -197,7 +204,7 @@ export function normalizeCodexTools(
       if (!toolType || hasFunctionObject || hasName) {
         return false;
       }
-      if (CODEX_HOSTED_TOOL_TYPES.has(toolType)) {
+      if (hostedToolTypes.has(toolType)) {
         // #2980: drop the CLI-injected image_generation tool for free-plan
         // accounts, which can't run it server-side (upstream 400 otherwise).
         if (toolType === "image_generation" && options?.dropImageGeneration === true) {
@@ -247,20 +254,23 @@ export function normalizeCodexTools(
             !Array.isArray(functionObject.parameters)
           ? functionObject.parameters
           : { type: "object", properties: {} };
+    // Keep the client-declared strict (boolean or LangChain's `null` opt-out): an omitted
+    // strict means strict-normalized on Responses, so only fall back when undeclared.
+    const declaredStrict = readToolStrict(tool);
     const strict =
-      typeof tool.strict === "boolean"
-        ? tool.strict
-        : typeof functionObject?.strict === "boolean"
-          ? functionObject.strict
-          : typeof options?.defaultFunctionStrict === "boolean"
-            ? options.defaultFunctionStrict
-            : undefined;
+      declaredStrict !== undefined
+        ? declaredStrict
+        : typeof options?.defaultFunctionStrict === "boolean"
+          ? options.defaultFunctionStrict
+          : undefined;
 
     // Codex/OpenAI Responses API rejects `pattern` fields using regex lookaround
     // (e.g. `^(?=.*@).+$`) with a 400 "regex lookaround is not supported" error.
     // Strip those before the schema reaches upstream (9router#1556).
+    // Bare type names / tuple `items` fail the Responses validator for every
+    // account ("'object' is not of type 'object', 'boolean'"), so coerce first.
     const sanitizedParameters = stripRedundantOneOfConstEnum(
-      stripUnsupportedRegexPatterns(parameters)
+      stripUnsupportedRegexPatterns(coerceSchemaValueShapes(parameters))
     );
 
     // Rewrite in-place to Responses format
@@ -271,7 +281,7 @@ export function normalizeCodexTools(
     tool.name = name.slice(0, 128);
     if (description) tool.description = description;
     tool.parameters = sanitizedParameters;
-    if (strict !== undefined) tool.strict = strict;
+    restoreToolStrict(tool, strict);
 
     validToolNames.add(name);
     return true;

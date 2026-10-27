@@ -1,0 +1,1 @@
+- **refactor(sse):** the JSON container length calculation in `jsonSize` is split into array, object and fallback-serialization helpers, with identical exactness against `JSON.stringify(...).length` and lower cognitive complexity ([#17380](https://github.com/diegosouzapw/OmniRoute/pull/17380) - thanks @JxnLexn)

@@ -1,11 +1,13 @@
 export const MODEL_SUPPORTED_ENDPOINT_VALUES = [
   "chat",
+  "responses",
   "embeddings",
   "rerank",
   "images",
   "videos",
   "audio-speech",
   "audio-transcriptions",
+  "music",
   "images-generations",
   // Persisted legacy values remain valid input and normalize on write/edit.
   "video",
@@ -34,13 +36,24 @@ export function normalizeModelSupportedEndpoints(endpoints: readonly string[]): 
 }
 
 export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
-  type?: "embedding" | "rerank" | "image" | "video" | "audio";
+  type?: "embedding" | "rerank" | "image" | "video" | "audio" | "music";
   subtype?: "speech" | "transcription";
 } {
-  if (endpoints.includes("embeddings")) return { type: "embedding" };
-  if (endpoints.includes("rerank")) return { type: "rerank" };
-  if (endpoints.includes("images")) return { type: "image" };
-  if (endpoints.includes("videos") || endpoints.includes("video")) return { type: "video" };
+  // "chat" and "responses" are text-conversation endpoints; they carry no
+  // modality type. Return before the media checks so a multimodal chat model
+  // is not classified as image, audio, embedding, or rerank.
+  if (endpoints.includes("chat") || endpoints.includes("responses")) return {};
+  const primary = (
+    [
+      ["embeddings", "embedding"],
+      ["rerank", "rerank"],
+      ["images", "image"],
+      ["videos", "video"],
+      ["video", "video"],
+      ["music", "music"],
+    ] as const
+  ).find(([endpoint]) => endpoints.includes(endpoint));
+  if (primary) return { type: primary[1] };
 
   const supportsSpeech = endpoints.includes("audio-speech");
   const supportsTranscription =
@@ -80,4 +93,19 @@ export function defaultEndpointsForProviderNodeApiType(
     default:
       return ["chat"];
   }
+}
+
+/**
+ * Endpoint-tag provenances trusted enough to gate dispatch or catalog listing
+ * (#16929): provider-declared, inferred from a specialty model id, or set by the
+ * operator. Missing (legacy) and "defaulted" tags are informational only.
+ */
+const TRUSTED_ENDPOINT_CAPABILITY_SOURCES: ReadonlySet<string> = new Set([
+  "declared",
+  "operator",
+  "inferred",
+]);
+
+export function isTrustedEndpointCapabilitySource(source: unknown): boolean {
+  return typeof source === "string" && TRUSTED_ENDPOINT_CAPABILITY_SOURCES.has(source);
 }

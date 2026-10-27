@@ -138,7 +138,7 @@ test("providerSets.isNamedOpenAIStyleProvider matches Set membership", () => {
 // ── providerModelsConfig leaf ────────────────────────────────────────────────
 
 test("providerModelsConfig.PROVIDER_MODELS_CONFIG keeps core provider entries", () => {
-  assert.equal(PROVIDER_MODELS_CONFIG.claude.url, "https://api.anthropic.com/v1/models");
+  assert.equal(PROVIDER_MODELS_CONFIG.claude.url, "https://api.anthropic.com/v1/models?limit=1000");
   assert.equal(PROVIDER_MODELS_CONFIG["qwen-web"], undefined);
   assert.ok(PROVIDER_MODELS_CONFIG["qwen-cloud"]);
 });
@@ -147,12 +147,61 @@ test("providerModelsConfig keeps the aimlapi live catalog entry", () => {
   assert.equal(PROVIDER_MODELS_CONFIG.aimlapi.url, "https://api.aimlapi.com/models");
 });
 
-test("providerModelsConfig aimlapi.parseResponse keeps only chat-completion models when present", () => {
+// RED before the fix: the live endpoint answers with the OpenAI-style envelope
+// `{ object: "list", data: [...] }`, so `Array.isArray(data)` was false and the
+// parser returned [] for every real response — the whole provider degraded to its
+// static seed. The old test only ever fed it a bare array, which is why a green
+// suite coexisted with a provider that discovered nothing.
+test("providerModelsConfig aimlapi.parseResponse unwraps the { object, data } catalog envelope", () => {
+  const parsed = PROVIDER_MODELS_CONFIG.aimlapi.parseResponse({
+    object: "list",
+    data: [
+      { id: "openai/gpt-5", type: "openai/chat-completions", info: { name: "GPT-5" } },
+      { id: "flux/flux-pro", type: "openai/image-generations", info: { name: "FLUX Pro" } },
+    ],
+  });
+  assert.deepEqual(parsed, [{ id: "openai/gpt-5", name: "GPT-5" }]);
+});
+
+// RED before the fix: `chat-completion` matched 0 of the 936 live catalog rows —
+// the vocabulary is `openai/chat-completions`. Both spellings stay accepted so a
+// rename in either direction degrades to "some models missing" rather than "the
+// provider has no models".
+test("providerModelsConfig aimlapi.parseResponse accepts both chat type spellings", () => {
+  const parsed = PROVIDER_MODELS_CONFIG.aimlapi.parseResponse({
+    object: "list",
+    data: [
+      { id: "current", type: "openai/chat-completions", info: { name: "Current" } },
+      { id: "legacy", type: "chat-completion", info: { name: "Legacy" } },
+    ],
+  });
+  assert.deepEqual(parsed, [
+    { id: "current", name: "Current" },
+    { id: "legacy", name: "Legacy" },
+  ]);
+});
+
+test("providerModelsConfig aimlapi.parseResponse still accepts a bare array", () => {
   const parsed = PROVIDER_MODELS_CONFIG.aimlapi.parseResponse([
     { id: "chat-1", type: "chat-completion", info: { name: "Chat 1" } },
     { id: "img-1", type: "image" },
   ]);
   assert.deepEqual(parsed, [{ id: "chat-1", name: "Chat 1" }]);
+});
+
+// The old parser fell through to `all` when the chat filter matched nothing, which
+// would have published 583 video/image/TTS/batch ids into a chat model picker and
+// masked the broken type filter. An unrecognised catalog must yield nothing.
+test("providerModelsConfig aimlapi.parseResponse never falls back to non-chat rows", () => {
+  const parsed = PROVIDER_MODELS_CONFIG.aimlapi.parseResponse({
+    object: "list",
+    data: [
+      { id: "veo/veo-3", type: "internal/video-generations/submit" },
+      { id: "eleven/tts", type: "internal/text-to-speech" },
+      { id: "anthropic/claude-opus-5", type: "anthropic/messages" },
+    ],
+  });
+  assert.deepEqual(parsed, []);
 });
 
 test("providerModelsConfig grok-cli.parseResponse preserves exact supported reasoning efforts", () => {
@@ -178,10 +227,10 @@ test("providerModelsConfig grok-cli.parseResponse preserves exact supported reas
     ],
   });
 
-  assert.deepEqual(parsed[0].supportedThinkingEfforts, ["high", "low", "medium"]);
+  assert.deepEqual(parsed[0].supportedThinkingEfforts, ["high", "low", "medium", "xhigh"]);
   assert.deepEqual(parsed[1].supportedThinkingEfforts, ["low", "medium", "high"]);
   assert.equal(parsed[2].supportsThinking, true);
-  assert.equal(parsed[2].supportedThinkingEfforts, undefined);
+  assert.deepEqual(parsed[2].supportedThinkingEfforts, ["xhigh"]);
 });
 
 test("providerModelsConfig openrouter.parseResponse keeps the full catalog (LLMs not filtered out)", () => {
@@ -268,6 +317,7 @@ test("codex.normalizeCodexModelsResponse parses the Codex live catalog shape", (
   assert.deepEqual(
     parsed.map((m) => ({ id: m.id, name: m.name })),
     [
+      { id: "codex-auto-review", name: "Codex Auto Review" },
       { id: "gpt-5.4", name: "GPT-5.4" },
       { id: "gpt-5.5", name: "GPT-5.5" },
     ]
@@ -306,6 +356,59 @@ test("codex safe discovery classifies public metadata before activating it", () 
       { source: "live", mode: "safe", implementedClientVersion: "0.153.4" }
     ),
     { status: "retired", reason: "denylisted" }
+  );
+});
+
+test("codex retired ids stay out of the discovery catalog", () => {
+  for (const id of ["gpt-5.3-codex-spark"]) {
+    assert.equal(isCodexDiscoveryModelExcluded({ id }), true);
+    assert.equal(isSharedCodexDiscoveryModelExcluded({ id }), true);
+    assert.deepEqual(
+      classifyCodexDiscoveryModel(
+        { id, visibility: "list", supportedInApi: true },
+        { source: "live", mode: "all", implementedClientVersion: "0.157.1" }
+      ),
+      { status: "retired", reason: "denylisted" }
+    );
+  }
+
+  const catalog = buildCodexDiscoveryCatalog(
+    [
+      {
+        id: "gpt-5.3-codex-spark",
+        name: "GPT 5.3 Codex Spark",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+      {
+        id: "codex-auto-review",
+        name: "Codex Auto Review",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+      {
+        id: "gpt-6-sol",
+        name: "GPT-6-Sol",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+    ],
+    []
+  );
+  assert.deepEqual(
+    catalog.map((model) => model.id),
+    ["codex-auto-review", "gpt-6-sol"]
+  );
+});
+
+test("the codex registry no longer advertises the retired spark id", async () => {
+  const { codexProvider } = await import("../../open-sse/config/providers/registry/codex/index.ts");
+  assert.equal(
+    codexProvider.models?.some((model) => model.id === "gpt-5.3-codex-spark"),
+    false
   );
 });
 
@@ -440,7 +543,7 @@ test("codex.normalizeCodexGithubCatalogResponse parses current client catalog me
 
   assert.deepEqual(
     parsed.map((model) => model.id),
-    ["gpt-5.6-sol", "future-model"]
+    ["gpt-5.6-sol", "future-model", "codex-auto-review"]
   );
   assert.equal(parsed[0]?.description, "Latest frontier agentic coding model.");
   assert.equal(parsed[0]?.inputTokenLimit, 372000);
@@ -537,6 +640,36 @@ test("codex.enrichCodexModelsFromGithubCatalog keeps live entitlement list autho
   assert.equal(enriched[0]?.supportsVision, true);
 });
 
+test("codex.enrichCodexModelsFromGithubCatalog uses the GitHub catalog when there is no live list", () => {
+  const catalog = enrichCodexModelsFromGithubCatalog(
+    [],
+    [
+      {
+        id: "gpt-5.6-luna",
+        name: "GitHub Luna",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+      },
+      {
+        id: "gpt-5.6-terra",
+        name: "GitHub Terra",
+        owned_by: "codex",
+        apiFormat: "responses",
+        supportedEndpoints: ["responses"],
+        inputTokenLimit: 272000,
+      },
+    ]
+  );
+
+  assert.deepEqual(
+    catalog.map((model) => model.id),
+    ["gpt-5.6-luna", "gpt-5.6-terra"]
+  );
+  assert.equal(catalog[0]?.name, "GitHub Luna");
+  assert.equal(catalog[1]?.inputTokenLimit, 272000);
+});
+
 test("codex.mergeCodexLiveModelsWithLocalCatalog merges capacity limits conservatively (smaller wins)", () => {
   const merged = mergeCodexLiveModelsWithLocalCatalog(
     [
@@ -578,7 +711,7 @@ test("codex.mergeCodexLiveModelsWithLocalCatalog merges capacity limits conserva
   const ids = merged.map((model) => model.id);
   assert.ok(ids.includes("future-codex-model"));
   assert.ok(ids.includes("gpt-5.6-sol"));
-  assert.ok(ids.includes("gpt-5.6-sol-low"));
+  assert.ok(!ids.includes("gpt-5.6-sol-low"));
   const sol = merged.find((model) => model.id === "gpt-5.6-sol");
   assert.equal(sol?.name, "Live Sol");
   // Live (272000) is SMALLER than the pinned contract (372000) here — the
@@ -646,7 +779,7 @@ test("codex.buildCodexDiscoveryCatalog merges then filters in one step", () => {
   const ids = catalog.map((model) => model.id);
   assert.ok(ids.includes("brand-new-codex"));
   assert.ok(ids.includes("gpt-5.6-sol"));
-  assert.ok(ids.includes("gpt-5.6-sol-max"));
+  assert.ok(!ids.includes("gpt-5.6-sol-max"));
   assert.equal(
     ids.some((id) => String(id).startsWith("gpt-5.4")),
     false
@@ -675,7 +808,10 @@ test("codex.normalizeCodexModelsResponse drops entries without an id", () => {
   );
 });
 
-test("codex.fetchCodexDiscoveryModels returns null for missing token, auth failure, empty, or network error", async () => {
+// Contract change: a recognised empty list (`{data: []}`, `{models: []}`, `[]`) is
+// a successful answer, returned as []. Every other body that yields no models is
+// a failure, returned as null, so callers keep warning about it.
+test("codex.fetchCodexDiscoveryModels separates an empty catalog from a failed fetch", async () => {
   assert.equal(
     await fetchCodexDiscoveryModels({
       accessToken: null,
@@ -692,12 +828,42 @@ test("codex.fetchCodexDiscoveryModels returns null for missing token, auth failu
     null
   );
 
+  for (const emptyList of [{ data: [] }, { models: [] }, []]) {
+    assert.deepEqual(
+      await fetchCodexDiscoveryModels({
+        accessToken: "tok",
+        fetchImpl: async () => Response.json(emptyList),
+      }),
+      [],
+      `${JSON.stringify(emptyList)} is an empty catalog`
+    );
+  }
+
+  for (const notAList of [
+    { error: { message: "quota exhausted", type: "insufficient_quota" } },
+    { error: "bad", models: [] },
+    { detail: "Unauthorized" },
+    { status: "ok" },
+    {},
+    null,
+  ]) {
+    assert.equal(
+      await fetchCodexDiscoveryModels({
+        accessToken: "tok",
+        fetchImpl: async () => Response.json(notAList),
+      }),
+      null,
+      `${JSON.stringify(notAList)} is a failure, not an empty catalog`
+    );
+  }
+
   assert.equal(
     await fetchCodexDiscoveryModels({
       accessToken: "tok",
-      fetchImpl: async () => Response.json({ data: [] }),
+      fetchImpl: async () => new Response("<html>bad gateway</html>", { status: 200 }),
     }),
-    null
+    null,
+    "an unparseable 200 body is a failure"
   );
 
   assert.equal(

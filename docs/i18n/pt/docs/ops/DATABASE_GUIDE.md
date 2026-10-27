@@ -509,9 +509,9 @@ Se devolver qualquer resultado que não seja `ok`, **pare imediatamente de utili
 
 ---
 
-## Recuperação após Desastre
+## Recuperação após desastre
 
-### Cenário 1: Ficheiro WAL Perdido
+### Cenário 1: Ficheiro WAL perdido
 
 O ficheiro `-wal` está em falta, mas o ficheiro `-shm` e a BD principal estão intactos:
 
@@ -528,26 +528,29 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Cenário 2: Ficheiro da BD Principal Corrompido
+### Cenário 2: Ficheiro da BD principal corrompido
 
 Restaure a partir da cópia de segurança:
 
 ```bash
-omniroute sync pull --merge   # ou: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Cenário 3: Chave de Encriptação Perdida
+`omniroute sync pull [outPath]` apenas transfere um arquivo `.tar.gz` completo a partir de um servidor em execução
+(`GET /api/db-backups/exportAll`, é necessária uma credencial de operador); não restaura nada.
 
-**Não é possível recuperar** sem a chave. Os campos encriptados ficam ilegíveis. Volte a adicionar manualmente todos os fornecedores com novas credenciais.
+### Cenário 3: Chave de encriptação perdida
 
-> **Mitigação**: Faça sempre uma cópia de segurança separada da chave de encriptação, de preferência num gestor de palavras-passe ou KMS.
+**Não é possível recuperar** sem a chave. Os campos encriptados estão ilegíveis. Volte a adicionar manualmente todos os fornecedores com novas credenciais.
 
-### Cenário 4: Disco Cheio
+> **Mitigação**: Crie sempre uma cópia de segurança da chave de encriptação em separado, idealmente num gestor de palavras-passe ou KMS.
+
+### Cenário 4: Disco cheio
 
 O SQLite devolverá erros `SQLITE_FULL`. Liberte espaço em disco e, em seguida:
 
 ```bash
-# Cria um ponto de controlo do WAL para libertar espaço
+# Efetuar o checkpoint do WAL para libertar espaço
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

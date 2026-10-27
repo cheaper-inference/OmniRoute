@@ -29,6 +29,35 @@ export function applyMuseSparkMinOutputTokens(model: string, body: Record<string
   body.max_tokens = MUSE_SPARK_MIN_OUTPUT_TOKENS;
 }
 
+/**
+ * Responses path (`/v1/responses`, e.g. Muse Spark Contributor on Zen): the budget is
+ * `max_output_tokens`. muse-spark-*-contributor-free spends ~1-2k tokens on hidden
+ * reasoning and answers `status:"incomplete"` with `output: []` below ~8k (upstream
+ * measurement: 1000 → empty, 2000 → ~60%, ≥8000 reliable); requests above 1M are
+ * rejected 400. OpenCode Zen also 400s any `max_output_tokens` below 16.
+ */
+export const MUSE_SPARK_RESPONSES_MIN_OUTPUT_TOKENS = 8000;
+export const MUSE_SPARK_MAX_OUTPUT_TOKENS = 1_000_000;
+export const OPENCODE_MIN_OUTPUT_TOKENS = 16;
+
+/** Every opencode output-budget floor/ceiling. Never synthesizes a missing budget. */
+export function applyOpencodeOutputBudgetFloors(
+  model: string,
+  body: Record<string, unknown>
+): void {
+  applyMuseSparkMinOutputTokens(model, body);
+  const current = body.max_output_tokens;
+  if (typeof current !== "number" || !Number.isFinite(current)) return;
+  if (model.startsWith("muse-spark")) {
+    body.max_output_tokens = Math.min(
+      Math.max(current, MUSE_SPARK_RESPONSES_MIN_OUTPUT_TOKENS),
+      MUSE_SPARK_MAX_OUTPUT_TOKENS
+    );
+  } else if (current < OPENCODE_MIN_OUTPUT_TOKENS) {
+    body.max_output_tokens = OPENCODE_MIN_OUTPUT_TOKENS;
+  }
+}
+
 /** The completion count to trust: the tracked one when the caller has it, else the payload's usage. */
 function reportedCompletionTokens(
   payload: Record<string, unknown>,
@@ -104,12 +133,23 @@ export function createMuseSparkStreamFinishNormalizer(
   };
 }
 
+export const RESPONSES_TERMINAL_EVENT_TYPES = new Set([
+  "response.completed",
+  "response.done",
+  "response.cancelled",
+  "response.canceled",
+  "response.failed",
+  "response.incomplete",
+]);
+
 export function isResponsesTerminalLine(line: string): boolean {
   const trimmed = line.trim();
   if (!trimmed.startsWith("data:")) return false;
+  const rawData = trimmed.slice(5).trim();
+  if (!rawData || rawData === "[DONE]") return false;
   try {
-    const payload = JSON.parse(trimmed.slice(5).trim()) as Record<string, unknown>;
-    return payload.type === "response.completed";
+    const payload = JSON.parse(rawData) as Record<string, unknown>;
+    return typeof payload.type === "string" && RESPONSES_TERMINAL_EVENT_TYPES.has(payload.type);
   } catch {
     return false;
   }

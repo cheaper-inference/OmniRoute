@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Badge, Button, Card } from "@/shared/components";
@@ -69,26 +71,18 @@ export default function ResultNarrated({
     <Card className="flex flex-col gap-4 p-4">
       {/* Header */}
       <div className="flex items-center gap-2">
-        <span className="material-symbols-outlined text-[20px] text-primary" aria-hidden="true">
-          translate
-        </span>
+        <Icon name="translate" size={20} className="text-primary" />
         <h3 className="text-sm font-semibold text-text-main">
           {tr("simpleResultPanelTitle", "Translation + Response")}
         </h3>
       </div>
 
       {/* Status area — aria-live for screen-reader announcements (D20) */}
-      <div
-        aria-live="polite"
-        aria-atomic="true"
-        className="flex flex-1 flex-col gap-3"
-      >
+      <div aria-live="polite" aria-atomic="true" className="flex flex-1 flex-col gap-3">
         {/* idle */}
         {result.status === "idle" && (
           <div className="flex flex-col items-center justify-center gap-2 py-8 text-center">
-            <span className="material-symbols-outlined text-[40px] text-text-muted/40" aria-hidden="true">
-              info
-            </span>
+            <Icon name="info" size={40} className="text-text-muted/40" />
             <p className="text-sm text-text-muted">
               {tr("simpleStartWithExamplePlaceholder", "Select a ready-made example")}
             </p>
@@ -98,9 +92,7 @@ export default function ResultNarrated({
         {/* translating or sending */}
         {isSpinning && (
           <div className="flex items-center gap-3 py-6">
-            <span className="material-symbols-outlined animate-spin text-[24px] text-primary" aria-hidden="true">
-              progress_activity
-            </span>
+            <Icon name="progress_activity" size={24} className="animate-spin text-primary" />
             <span className="text-sm text-text-muted">
               {result.status === "translating"
                 ? tr("narratedTranslating", "Translating to {target}...", {
@@ -135,7 +127,7 @@ export default function ResultNarrated({
 
             {/* Response preview */}
             {result.responsePreview && (
-              <div className="rounded-md border border-black/10 bg-black/5 p-3 dark:border-white/10 dark:bg-white/5">
+              <div className="rounded-md border border-border bg-bg-subtle p-3">
                 <pre className="overflow-x-auto whitespace-pre-wrap break-words font-mono text-xs text-text-main">
                   {result.responsePreview.slice(0, 500)}
                 </pre>
@@ -172,9 +164,7 @@ export default function ResultNarrated({
         {result.status === "error" && (
           <div className="flex flex-col gap-2">
             <Badge variant="error">
-              <span className="material-symbols-outlined text-[14px]" aria-hidden="true">
-                error
-              </span>
+              <Icon name="error" size={14} />
               Error
             </Badge>
             <p className="text-sm text-text-main">

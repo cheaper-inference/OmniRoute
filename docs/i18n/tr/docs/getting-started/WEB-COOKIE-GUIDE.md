@@ -4,9 +4,9 @@
 
 ---
 
-Web Cookie sağlayıcıları, OmniRoute'un bir API anahtarı yerine mevcut tarayıcı oturumunuz üzerinden bir yapay zekâ hizmetini kullanmasına olanak tanır. Bir hizmete web sitesi üzerinden zaten erişiminiz olduğunda ve OmniRoute'un aynı kimliği doğrulanmış oturumu kullanmasını istediğinizde kullanışlıdırlar.
+Web Cookie sağlayıcıları, OmniRoute'un bir API anahtarı yerine mevcut tarayıcı oturumunuz üzerinden bir yapay zekâ hizmetini kullanmasına olanak tanır. Bir hizmete web sitesi üzerinden zaten erişiminiz varsa ve OmniRoute'un aynı kimliği doğrulanmış oturumu kullanmasını istiyorsanız kullanışlıdırlar.
 
-API anahtarı sağlayıcılarından farklı olarak Web Cookie sağlayıcıları, tarayıcınızın web sitesine gönderdiği kimlik bilgilerini kullanarak kimlik doğrulaması yapar.
+API anahtarı sağlayıcılarının aksine Web Cookie sağlayıcıları, tarayıcınızın web sitesine gönderdiği kimlik bilgilerini kullanarak kimlik doğrulaması yapar.
 
 ---
 
@@ -18,21 +18,21 @@ Birçok kimlik doğrulama sorunu, çerezlerin yanlış yerden kopyalanmasından 
 
 ## Çerez Depolama Alanından Kopyalamayın
 
-Çoğu tarayıcı, depolanan çerezleri şu bölümde gösterir:
+Çoğu tarayıcı, depolanan çerezleri şu yol üzerinden gösterir:
 
 ```
 DevTools
-→ Application (veya Storage)
-→ Cookies
+→ Uygulama (veya Depolama)
+→ Çerezler
 ```
 
-Bu çerezler doğru görünse de şunlardan biri söz konusu olabilir:
+Bu çerezler doğru görünse de şunları içerebilir:
 
-- güncelliğini yitirmiş olabilirler
-- eksik olabilirler
-- yalnızca kimliği doğrulanmış isteklerde gönderilen çerezleri içermeyebilirler
+- güncelliğini yitirmiş olabilir
+- eksik olabilir
+- yalnızca kimliği doğrulanmış isteklerde gönderilen çerezleri içermeyebilir
 
-Bu değerlerin kullanılması, geçerli görünseler bile kimlik doğrulama hatalarına yol açabilir.
+Bu değerleri kullanmak, geçerli görünseler bile kimlik doğrulama hatalarına neden olabilir.
 
 ## Canlı Bir İstekten Kopyalayın
 
@@ -40,14 +40,14 @@ Bunun yerine, başarılı bir istekteki çerezleri kullanın:
 
 ```
 DevTools
-→ Network
+→ Ağ
 → Sayfayı yenileyin
-→ Bir sohbet veya konuşma isteğini açın
-→ Request Headers
+→ Bir sohbet veya konuşma isteği açın
+→ İstek Başlıkları
 → Cookie
 ```
 
-`Cookie` istek başlığı, tarayıcınızın başarıyla kullandığı kimlik doğrulama bilgilerinin tam hâlini içerir.
+`Cookie` istek başlığı, tarayıcınızın başarıyla kullandığı kimlik doğrulama bilgilerini tam olarak içerir.
 
 Çoğu Web Cookie sağlayıcısı için OmniRoute'a yapıştırılması gereken değer budur.
 
@@ -59,24 +59,24 @@ Kurulum süreci çoğu Web Cookie sağlayıcısı için aynıdır.
 
 1. Sağlayıcının web sitesinde oturum açın.
 2. Tarayıcının Geliştirici Araçları'nı açın.
-3. **Network** sekmesini açın.
+3. **Ağ** sekmesini açın.
 4. Sayfayı yenileyin.
-5. Kimliği doğrulanmış bir sohbet veya konuşma isteğini açın.
+5. Kimliği doğrulanmış bir sohbet veya konuşma isteği açın.
 6. Gerekli kimlik doğrulama bilgilerini kopyalayın.
 7. OmniRoute'u açın.
-8. **Providers → Add Provider** bölümüne gidin.
+8. **Sağlayıcılar → Sağlayıcı Ekle** bölümüne gidin.
 9. Web Cookie sağlayıcınızı seçin.
 10. Kimlik bilgilerini yapıştırın.
-11. **Test Connection** seçeneğine tıklayın.
+11. **Bağlantıyı Test Et** seçeneğine tıklayın.
 12. Sağlayıcıyı kaydedin.
 
-Gerekli kimlik bilgilerinin tam olarak hangileri olduğu sağlayıcıya bağlıdır.
+Gerekli kimlik bilgilerinin tam olarak neler olduğu sağlayıcıya bağlıdır.
 
 ---
 
 # Sağlayıcı Kimlik Bilgisi Biçimleri
 
-Farklı web siteleri kimlik doğrulama bilgilerini farklı şekillerde saklar. Bazıları yalnızca çerez gerektirirken diğerleri ek başlıklar veya belirteçler gerektirebilir.
+Farklı web siteleri kimlik doğrulama bilgilerini farklı şekillerde depolar. Bazıları yalnızca çerezleri gerektirirken diğerleri ek başlıklar veya belirteçler gerektirebilir.
 
 | Sağlayıcı                       | Kimlik Bilgisi Biçimi         | Sağlayıcı Kılavuzu               |
 | ------------------------------- | ----------------------------- | -------------------------------- |
@@ -90,11 +90,61 @@ Farklı web siteleri kimlik doğrulama bilgilerini farklı şekillerde saklar. B
 
 > Yeni Web Cookie sağlayıcıları eklendikçe veya mevcut sağlayıcıların kimlik doğrulama gereksinimleri değiştikçe bu tabloyu güncelleyin.
 
+## NoTrack (notrack-web)
+
+NoTrack ([notrack.ai](https://notrack.ai)), kayıt gerektirmeyen ücretsiz bir son kullanıcı sohbet platformudur — oturum ilk ziyarette anonim olarak oluşturulur ve üç çerez aracılığıyla korunur: `uid`, `si_usr_id` ve `si_ses_id`. OmniRoute, aynı `/api/dispatch` uç noktasına tek bir model kimliği (`notrack-c`, diğer adıyla `ntw`) üzerinden vekillik eder.
+
+### Bağlantı adımları
+
+1. Tarayıcınızda [notrack.ai](https://notrack.ai) adresini açın ve anonim oturum çerezinin ayarlanmasını bekleyin.
+2. **DevTools → Network** bölümünü açın, sayfayı yenileyin ve herhangi bir `/api` isteğine tıklayın.
+3. **Request Headers** bölümündeki `Cookie` üst bilgisinin tam değerini kopyalayın.
+4. OmniRoute'ta **Providers → Add Provider → NoTrack Web (Free)** bölümüne gidin.
+5. Çerez dizesini `apiKey` alanına yapıştırın ve **Save** seçeneğine tıklayın.
+
+OmniRoute, yapıştırılan dizeden `uid`, `si_usr_id` ve `si_ses_id` değerlerini çıkarır ve yalnızca bu çiftleri içeren temiz bir `Cookie` üst bilgisi oluşturur — mevcut olduğunda buna `nt_session` (oturum açmış hesaplar için ayarlanan `ntk_…` belirteci) da eklenir. Bu üç değerden herhangi biri eksikse operatörlerin alternatif biçimleri deneyebilmesi için yapıştırılan ham dize değiştirilmeden iletilir.
+
+### Model kimlikleri
+
+| Model kimliği | Görünen ad | Notlar                                                     |
+| ------------- | ---------- | ---------------------------------------------------------- |
+| `notrack-c`   | NoTrack C  | Varsayılan — yukarı akış gönderim modeli `C`.              |
+| `C`           | NoTrack C  | `notrack-c` için diğer ad (ham yukarı akış gönderim kodu). |
+| `notrack`     | NoTrack C  | `notrack-c` için diğer ad.                                 |
+| `ntw`         | NoTrack C  | `notrack-c` için kısa diğer ad.                            |
+
+Dört model kimliğinin tümü aynı yukarı akış gönderim modeliyle (`C`) eşleşir.
+
+### İstek seçenekleri
+
+Yürütücü, istek gövdesindeki şu isteğe bağlı alanları kabul eder:
+
+| Gövde alanı           | Varsayılan | Amaç                                                                                  |
+| --------------------- | ---------- | ------------------------------------------------------------------------------------- |
+| `notrack_mode`        | `usual`    | Gönderim modu (serbest biçimli dize; yukarı akış `usual`, … kabul eder)               |
+| `notrack_max_turns`   | `6`        | Yukarı akışın yanıt vermeden önce gerçekleştirebileceği dahili tur sayısı.            |
+| `notrack_chat_id`     | `null`     | Mevcut bir yukarı akış sohbetini sürdürür (yeni bir sohbet için belirtmeyin).         |
+| `notrack_attachments` | `[]`       | Yukarı akış ek tanımlayıcılarının doğrudan aktarılan dizisi.                          |
+| `notrack_regenerate`  | `false`    | Önceki tur için yeniden oluşturulmuş bir yanıt istemek üzere `true` olarak ayarlayın. |
+
+### Yetenekler
+
+- **Akışlı ve akışsız** sohbet tamamlamaları.
+- **Araç çağırma** — istekte `tools: [...]` ayarlayın; yürütücü bunları bir araç çağrısı zarfı sözleşmesine göre serileştirir ve modelin yanıtlarını yeniden OpenAI `tool_calls` biçimine ayrıştırır.
+- **`response_format`** — `json_object` ve `json_schema` desteklenir. Yürütücü, modelin yanıtındaki ilk JSON nesnesini çıkarır ve döndürmeden önce dizeye dönüştürür.
+- **Akıl yürütme ipucu** — yukarı akış bir `thinking` olayı gönderdiğinde yürütücü bir `reasoning` deltası yayınlar.
+
+### Sınırlamalar
+
+- Yukarı akış anonim kullanım kotaları uygular — kota aşıldığında yürütücü, kullanıcı dostu bir mesajla birlikte 429 hatası döndürür.
+- Tüm model kimlikleri aynı yukarı akış gönderim modeline çözümlenir; model başına geçiş seçeneği yoktur.
+- Yürütücü, yukarı akışın `/api/chats` uç noktasını çağırmaz; bu nedenle sohbet geçmişi / oturumlar otomatik olarak yönetilmez. Mevcut bir yukarı akış sohbetini sürdürmek için `notrack_chat_id` kullanın.
+
 ---
 
-# Web Cookie Sağlayıcılarının Yapabildikleri ve Yapamadıkları
+# Web Çerezi Sağlayıcılarının Yapabilecekleri ve Yapamayacakları
 
-Web Cookie sağlayıcıları, bir web sitesinin sohbet arayüzünü yeniden kullanır. Resmî API'lerle aynı yetenekleri **sunmazlar**.
+Web Çerezi sağlayıcıları, bir web sitesinin sohbet arayüzünü yeniden kullanır. Bunlar, resmî API'lerle aynı yetenekleri **sunmaz**.
 
 ## Desteklenenler
 
@@ -108,22 +158,22 @@ Web Cookie sağlayıcıları, bir web sitesinin sohbet arayüzünü yeniden kull
 - Fonksiyon çağırma
 - Araç çağırma
 - Otomatik dosya düzenleme
-- Otonom IDE iş akışları
+- Aracı tabanlı IDE iş akışları
 - Yalnızca API üzerinden kullanılabilen özellikler
 
-Bu, beklenen bir davranıştır ve **bir hata değildir**.
+Bu beklenen bir davranıştır ve **bir hata değildir**.
 
-Araç yürütme, otomatik dosya düzenleme veya diğer aracı iş akışlarına ihtiyacınız varsa Web Cookie sağlayıcısı yerine bir **API anahtarı sağlayıcısı** kullanın.
+Araç çalıştırma, otomatik dosya düzenleme veya diğer aracı iş akışlarına ihtiyacınız varsa Web Cookie sağlayıcısı yerine bir **API anahtarı sağlayıcısı** kullanın.
 
 ---
 
 # Doğrulamayla İlgili Uyarı
 
-Başarılı bir **Test Connection** veya çerez doğrulaması, yalnızca sağlanan kimlik bilgilerinin beklenen biçimde göründüğünü doğrular.
+Başarılı bir **Bağlantıyı Test Etme** veya çerez doğrulaması, yalnızca sağlanan kimlik bilgilerinin beklenen biçimde göründüğünü doğrular.
 
 Issue #7857 çözülene kadar başarılı bir doğrulama, sağlayıcının kimlik doğrulamasını başarıyla gerçekleştireceğini **garanti etmez**.
 
-Kimlik doğrulama yine de başarısız olursa kimlik bilgilerini tarayıcı çerez depolama alanı yerine canlı bir ağ isteğinden kopyaladığınızı doğrulayın.
+Kimlik doğrulama yine de başarısız olursa kimlik bilgilerini tarayıcının çerez depolama alanından değil, etkin bir ağ isteğinden kopyaladığınızı doğrulayın.
 
 ---
 
@@ -131,7 +181,7 @@ Kimlik doğrulama yine de başarısız olursa kimlik bilgilerini tarayıcı çer
 
 ## Kimlik Doğrulama Başarısız Oluyor
 
-Kimlik bilgilerinin şu bölümden kopyalandığını doğrulayın:
+Kimlik bilgilerinin şuradan kopyalandığını doğrulayın:
 
 ```
 Network
@@ -139,7 +189,7 @@ Network
 → Cookie
 ```
 
-ve şu bölümden kopyalanmadığından emin olun:
+ve şuradan **kopyalanmadığını** doğrulayın:
 
 ```
 Application
@@ -148,9 +198,9 @@ Application
 
 ---
 
-## Çerez Tarayıcıda Çalışıyor ancak OmniRoute'ta Çalışmıyor
+## Çerez Tarayıcıda Çalışıyor Ancak OmniRoute'ta Çalışmıyor
 
-Bazı sağlayıcılar, yalnızca kimliği doğrulanmış istekler sırasında gönderilen çerezler içerir.
+Bazı sağlayıcılar yalnızca kimliği doğrulanmış istekler sırasında gönderilen çerezler içerir.
 
 Bir konuşmayı başarıyla açtıktan sonra kimlik bilgilerini yeni bir ağ isteğinden tekrar kopyalayın.
 
@@ -160,25 +210,38 @@ Bir konuşmayı başarıyla açtıktan sonra kimlik bilgilerini yeni bir ağ ist
 
 Web Cookie sağlayıcıları mevcut tarayıcı oturumunuzu kullanır.
 
-Tarayıcı oturumunuzun süresi dolarsa veya oturumu kapatırsanız yeni bir kimlik bilgisi kümesi kopyalamanız gerekir.
+Tarayıcı oturumunuzun süresi dolarsa veya oturumu kapatırsanız yeni bir kimlik bilgisi kümesi kopyalamanız gerekir. Desteklenen web sağlayıcıları için çerez yenilemeyi otomatikleştirmek üzere eşlik eden [Tarayıcı Oturumu Eşitleme Uzantısı](../guides/SESSION-SYNC-EXTENSION.md) aracına bakın.
 
 ---
 
-## Test Connection Başarılı ancak İstekler Başarısız Oluyor
+## Bağlantı Testi Başarılı Ancak İstekler Başarısız Oluyor
 
-Issue #7857 çözülene kadar doğrulamanın başarılı olması, kimlik doğrulama isteğinin başarıyla sonuçlanacağını garanti etmez.
+Issue #7857 çözülene kadar doğrulamayı geçmek, kimlik doğrulama isteğinin başarılı olacağını garanti etmez.
 
 Sorunu daha ayrıntılı incelemeden önce kimlik bilgilerinizi yeni ve kimliği doğrulanmış bir istekten tekrar kopyalayın.
 
 ---
 
+## ChatGPT Web, "Unsupported ChatGPT integrity dependency" Hatasıyla Başarısız Oluyor
+
+```
+[502] ChatGPT Web first-party bridge module failed to load:
+pageerror: Unsupported ChatGPT integrity dependency: DD
+```
+
+Kimlik bilgileri geçerlidir — bu hata oturumdan değil, köprüden kaynaklanır. chatgpt.com, modül kimliklerini her dağıtım için ayrı olarak atar ve köprü daha önce örneklediği Sentinel yardımcısının kimliğini sabitliyordu. Bu nedenle yardımcıyı yeniden adlandıran bir chatgpt.com derlemesi, çerez geçerli kalmasına rağmen her etkileşimi bozuyordu. Bağlantıyı yeniden yetkilendirmek bu sorunu çözemez.
+
+Modülü sayfanın kendi çalışma zamanı aracılığıyla çözümleyen derlemeler herhangi bir kimliği sabitlemez ve bu sorunla karşılaşmaz. Hatayı görürseniz OmniRoute'u yükseltin ve bağlantı denetimini yeniden çalıştırın.
+
+---
+
 # Sağlayıcı Örneği
 
-Sağlayıcıya özel eksiksiz bir açıklamalı kılavuz için şuna bakın:
+Sağlayıcıya özel eksiksiz bir adım adım kılavuz için şuna bakın:
 
 - **Claude Web** — `docs/providers/CLAUDE_WEB.md`
 
-Claude Web kılavuzu, bir Web Cookie sağlayıcısı için eksiksiz kurulum sürecini gösterir ve referans uygulama görevi görür.
+Claude Web kılavuzu, bir Web Cookie sağlayıcısının eksiksiz kurulum sürecini gösterir ve referans uygulama işlevi görür.
 
 ---
 
@@ -188,4 +251,4 @@ Claude Web kılavuzu, bir Web Cookie sağlayıcısı için eksiksiz kurulum sür
 - Eski çerezleri yeniden kullanmaktan kaçının.
 - Web Cookie sağlayıcılarını kullanırken tarayıcı oturumunuzu etkin tutun.
 - Kopyalanan çerezleri hassas kimlik bilgileri olarak değerlendirin.
-- Fonksiyon çağırmaya veya aracı iş akışlarına ihtiyaç duyduğunuzda API anahtarı sağlayıcılarını kullanın.
+- Fonksiyon çağırma veya aracı iş akışlarına ihtiyaç duyduğunuzda API anahtarı sağlayıcılarını kullanın.

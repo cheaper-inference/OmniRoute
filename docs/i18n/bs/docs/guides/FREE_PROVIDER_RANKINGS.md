@@ -10,19 +10,31 @@
 
 ---
 
-## Šta je to
+## Šta je ovo
 
-OmniRoute registruje 329 provajdera, uključujući 155 unosa u katalogu označenih kao **besplatno/bez-autentifikacije** (bez-autentifikacije, besplatni nivo OAuth, ili besplatni nivo API ključa — pogledajte [Vodič za besplatne nivoe](../getting-started/FREE-TIERS-GUIDE.md) i kompletan [Direktorijum besplatnih nivoa](../reference/FREE_TIERS.md)). Kvaka je u tome: besplatni provajderi se drastično razlikuju po kvalitetu modela. Provajder bez autentifikacije koji nudi vrhunski model je mnogo korisniji od onog koji nudi mali, zastarjeli model.
+OmniRoute registruje 375 provajdera, uključujući 155 unosa u katalogu označenih kao **free/no-auth**
+(no-auth, free-tier OAuth ili free-tier API ključ — pogledajte
+[Vodič kroz besplatne pakete](../getting-started/FREE-TIERS-GUIDE.md) i potpuni
+[direktorij besplatnih paketa](../reference/FREE_TIERS.md)). Tu je kvaka: besplatni provajderi
+se drastično razlikuju po kvalitetu modela. No-auth provajder koji nudi vrhunski (frontier) model
+daleko je korisniji od onog koji nudi mali, zastarjeli model.
 
-**Rangiranje besplatnih provajdera** odgovara na pitanje "**koji besplatni provajder mi daje najbolji model?**" spajanjem kataloga svakog besplatnog provajdera sa **crowd-sourced rezultatima kvaliteta** sa **Arena AI rang liste** (ELO zasnovan na ljudskim preferencijama, ista ideja iza LMArena chatbot arene). Provajderi se zatim rangiraju prema snazi njihovog **najboljeg besplatnog modela**.
+**Rangiranje besplatnih provajdera** odgovara na pitanje "**koji besplatni provajder mi daje najbolji model?**"
+spajanjem kataloga svakog besplatnog provajdera sa **ocjenama kvaliteta prikupljenim od zajednice** sa
+**Arena AI ljestvice** (ELO ljestvica ljudskih preferencija, ista ideja koja stoji iza LMArena
+chatbot arene). Provajderi se zatim rangiraju prema snazi svog **najboljeg besplatnog modela**.
 
 Rangiranje se izračunava iz tri stvarna izvora:
 
-1. Liste besplatnih provajdera — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` unosi označeni sa `hasFree` (`src/shared/constants/providers.ts`).
-2. Katalog modela svakog provajdera iz registra provajdera (`open-sse/config/providerRegistry.ts`).
-3. Rezultati prilagođenosti zadatku izvedeni iz ELO-a, pohranjeni u `model_intelligence` DB tabeli od strane Arena ELO sync engine-a (`src/lib/arenaEloSync.ts`).
+1. Liste besplatnih provajdera — `NOAUTH_PROVIDERS`, plus `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` unosi označeni sa `hasFree`
+   (`src/shared/constants/providers.ts`).
+2. Katalog modela svakog provajdera iz registra provajdera
+   (`open-sse/config/providerRegistry.ts`).
+3. Ocjene podobnosti za zadatke izvedene iz ELO-a, pohranjene u `model_intelligence` DB tabelu
+   od strane Arena ELO mehanizma za sinhronizaciju (`src/lib/arenaEloSync.ts`).
 
-Logika spajanja se nalazi u `src/lib/freeProviderRankings.ts`.
+Logika spajanja nalazi se u `src/lib/freeProviderRankings.ts`.
 
 ---
 

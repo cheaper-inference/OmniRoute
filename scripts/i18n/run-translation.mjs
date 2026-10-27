@@ -32,6 +32,9 @@
  *   OMNIROUTE_TRANSLATION_API_URL     e.g. https://cloud.omniroute.dev/v1
  *   OMNIROUTE_TRANSLATION_API_KEY     bearer token (kept out of logs)
  *   OMNIROUTE_TRANSLATION_MODEL       e.g. cx/gpt-5.6-sol
+ *   OMNIROUTE_TRANSLATION_FALLBACK_MODELS  optional, comma-separated chain tried in order when
+ *                                     the model above fails (quota/auth/5xx/timeout), e.g.
+ *                                     cmd/deepseek/deepseek-v4.1-flash
  *   OMNIROUTE_TRANSLATION_TIMEOUT_MS  optional, default 60000
  *   OMNIROUTE_TRANSLATION_CONCURRENCY optional, default 4
  */
@@ -44,6 +47,7 @@ import process from "node:process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
+import { isFallbackWorthy, resolveModelChain } from "./lib/translate-backend.mjs";
 import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/translation-state.mjs";
 
 // ----- .env loader --------------------------------------------------------
@@ -80,7 +84,9 @@ import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/transl
 // warning) in environments where node_modules has not been installed. The
 // formatter is applied to every translated file before its hash is recorded,
 // so a subsequent lint-staged Prettier pass cannot mutate the file content
-// out from under `.i18n-state.json`.
+// out from under `.i18n-state.json`. That only holds with the options the
+// `prettier --write` CLI resolves for the same path (prettier.config.mjs +
+// .editorconfig); Prettier's defaults wrap at 80 columns instead of 100.
 let prettierMod = null;
 async function getPrettier() {
   if (prettierMod !== null) return prettierMod;
@@ -92,11 +98,12 @@ async function getPrettier() {
   return prettierMod;
 }
 
-async function formatMarkdown(content, fileName) {
+export async function formatMarkdown(content, fileName) {
   const p = await getPrettier();
   if (!p) return content;
   try {
-    return await p.format(content, { parser: "markdown", filepath: fileName });
+    const config = (await p.resolveConfig(fileName, { editorconfig: true })) ?? {};
+    return await p.format(content, { ...config, parser: "markdown", filepath: fileName });
   } catch (err) {
     logWarn(`prettier could not format ${fileName}: ${err.message}`);
     return content;
@@ -223,21 +230,37 @@ async function loadConfig() {
   return cfg;
 }
 
+// An unreadable state is an error, never "start fresh": a runner that read the file while
+// another one was rewriting it saw "" or a JSON prefix, started from { sources: {} } and wrote
+// back only its own entries — the state went from 153 sources to 1 (2026-09-24).
+export function parseStateText(raw) {
+  let parsed;
+  try {
+    parsed = JSON.parse(raw);
+  } catch (err) {
+    throw new Error(`translation state is not valid JSON (${err.message})`);
+  }
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed) || !parsed.sources) {
+    throw new Error("translation state has no `sources` object");
+  }
+  return parsed;
+}
+
 async function loadState() {
   if (!existsSync(STATE_PATH)) return { sources: {} };
-  try {
-    const raw = await fs.readFile(STATE_PATH, "utf8");
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === "object" && parsed.sources ? parsed : { sources: {} };
-  } catch (err) {
-    logWarn(`could not parse ${path.relative(ROOT, STATE_PATH)} — starting fresh (${err.message})`);
-    return { sources: {} };
-  }
+  return parseStateText(await fs.readFile(STATE_PATH, "utf8"));
+}
+
+// Write to a temp file and rename it over the state, so a concurrent reader (or a runner
+// killed mid-write) never sees a truncated file.
+export async function writeStateAtomic(filePath, state) {
+  const tmp = `${filePath}.${process.pid}.tmp`;
+  await fs.writeFile(tmp, JSON.stringify(state, null, 2) + "\n", "utf8");
+  await fs.rename(tmp, filePath);
 }
 
 async function saveState(state) {
-  const json = JSON.stringify(state, null, 2) + "\n";
-  await fs.writeFile(STATE_PATH, json, "utf8");
+  await writeStateAtomic(STATE_PATH, state);
 }
 
 async function collectDocsSources() {
@@ -318,11 +341,37 @@ function backendConfig() {
   const apiUrl = requireEnv("OMNIROUTE_TRANSLATION_API_URL").replace(/\/$/, "");
   const apiKey = requireEnv("OMNIROUTE_TRANSLATION_API_KEY");
   const model = requireEnv("OMNIROUTE_TRANSLATION_MODEL");
+  const { fallbackModels } = resolveModelChain();
   const timeoutMs = Number(process.env.OMNIROUTE_TRANSLATION_TIMEOUT_MS || 60000);
-  return { apiUrl, apiKey, model, timeoutMs };
+  return { apiUrl, apiKey, model, fallbackModels, timeoutMs };
 }
 
-async function callChat(messages, { apiUrl, apiKey, model, timeoutMs }, retry = 0) {
+// Model chain (2026-10-20): the configured model first, then each entry of
+// OMNIROUTE_TRANSLATION_FALLBACK_MODELS whenever the previous one failed for a reason the next
+// model could fix (quota 429, 402/401, 5xx, timeout, network — not a malformed request). A wave
+// used to stop dead on the single route's weekly quota; the per-chunk validator below still
+// rejects answers that drop lines or leak reasoning, whichever model produced them.
+export async function callChat(messages, backend, retry = 0) {
+  const chain = [backend.model, ...(backend.fallbackModels ?? [])].filter(Boolean);
+  let lastErr;
+  for (let i = 0; i < chain.length; i++) {
+    try {
+      const content = await callChatOnce(messages, { ...backend, model: chain[i] }, retry);
+      if (i > 0) console.warn(`[i18n-fallback] success index=${i}`);
+      return content;
+    } catch (err) {
+      lastErr = err;
+      if (i < chain.length - 1 && isFallbackWorthy(err)) {
+        console.warn(`[i18n-fallback] attempt index=${i + 1}`);
+        continue;
+      }
+      throw err;
+    }
+  }
+  throw lastErr ?? new Error("no translation model configured");
+}
+
+async function callChatOnce(messages, { apiUrl, apiKey, model, timeoutMs }, retry = 0) {
   const ctrl = new AbortController();
   const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   try {
@@ -347,7 +396,7 @@ async function callChat(messages, { apiUrl, apiKey, model, timeoutMs }, retry = 
         const wait = 1500 + retry * 1500;
         logWarn(`upstream ${res.status} — retrying after ${wait}ms`);
         await new Promise((r) => setTimeout(r, wait));
-        return callChat(messages, { apiUrl, apiKey, model, timeoutMs }, retry + 1);
+        return callChatOnce(messages, { apiUrl, apiKey, model, timeoutMs }, retry + 1);
       }
       throw new Error(`upstream ${res.status}: ${text.slice(0, 200)}`);
     }
@@ -361,7 +410,7 @@ async function callChat(messages, { apiUrl, apiKey, model, timeoutMs }, retry = 
     if (err?.name === "AbortError") {
       if (retry < 1) {
         logWarn(`timeout after ${timeoutMs}ms — retrying`);
-        return callChat(messages, { apiUrl, apiKey, model, timeoutMs }, retry + 1);
+        return callChatOnce(messages, { apiUrl, apiKey, model, timeoutMs }, retry + 1);
       }
       throw new Error(`timeout after ${timeoutMs}ms`);
     }
@@ -372,7 +421,7 @@ async function callChat(messages, { apiUrl, apiKey, model, timeoutMs }, retry = 
     ) {
       logWarn(`network error: ${err.message} — retrying`);
       await new Promise((r) => setTimeout(r, 1500));
-      return callChat(messages, { apiUrl, apiKey, model, timeoutMs }, retry + 1);
+      return callChatOnce(messages, { apiUrl, apiKey, model, timeoutMs }, retry + 1);
     }
     throw err;
   } finally {
@@ -387,9 +436,149 @@ const SYSTEM_PROMPT = (englishName, native) =>
     `Preserve all markdown syntax EXACTLY: headings, lists, code blocks (\`\`\`), inline code (\`...\`), links, images, tables, blockquotes, HTML tags.`,
     `Do NOT translate: source code, URLs, file paths, command names (npm/git/curl/node/etc), environment variable names (UPPER_SNAKE_CASE),`,
     `version numbers, package names, shell flags, function/class identifiers, JSON keys.`,
+    `Never change the text between backticks (inline code), even when it reads like prose: it is a literal the reader searches for (an error message, a label, a value).`,
     `Translate ALL prose, including comments inside code blocks IF they are clearly prose comments (lines starting with # or //).`,
     `Return ONLY the translated markdown — no preamble, no explanation, no surrounding fences.`,
   ].join(" ");
+
+// ----- Output guard ---------------------------------------------------------
+// The hash-based drift check cannot tell a good mirror from a broken one, and
+// fallback models broke mirrors in two ways that shipped (refresh-5/6,
+// 2026-09-23): reasoning models leaked their `<think>` block and English
+// meta-prose ("I'll keep the table header…") into the translation, and long
+// tables came back with rows missing. Each chunk is therefore cleaned and
+// checked against its source before it is accepted; a chunk that still fails is
+// retried, and a doc whose chunk never validates fails instead of being written.
+
+const THINK_BLOCK = /<think>[\s\S]*?<\/think>\s*/g;
+const LEADING_THINK_BLOCKS = /^\s*(?:<think>[\s\S]*?<\/think>\s*)+/;
+const WRAPPING_FENCE = /^```(?:markdown|md)?[ \t]*\n([\s\S]*?)\n```[ \t]*$/;
+const META_PROSE = [
+  /\bI'll /g,
+  /\bI will /g,
+  /\bI need to /g,
+  /\bLet me /g,
+  /\bMy plan\b/g,
+  /\bOkay, /g,
+  /\bThe user /g,
+];
+const countMatches = (re, text) => (text.match(re) || []).length;
+const countLines = (re, text) => text.split("\n").filter((l) => re.test(l)).length;
+
+// Protect only exact, source-owned code examples. Counts matter: seeing one
+// example in the source must not authorize extra copies or arbitrary reasoning.
+const THINK_LITERAL = /<think>[\s\S]*?<\/think>|<\/?think>/g;
+const BACKTICK_CODE =
+  /^ {0,3}(?<fence>`{3,})(?!`)[^`\n]*\n[\s\S]*?^ {0,3}\k<fence>`*[ \t]*(?=\n|$)/;
+const TILDE_CODE = /^ {0,3}(?<tilde>~{3,})(?!~)[^\n]*\n[\s\S]*?^ {0,3}\k<tilde>~*[ \t]*(?=\n|$)/;
+const INLINE_CODE =
+  /(?<![\\`])(?:\\\\)*(?<span>`+)(?!`)(?:(?!\r?\n[ \t]*\r?\n)[\s\S])*?(?<!`)\k<span>(?!`)/;
+const CODE_LITERAL = new RegExp(
+  [BACKTICK_CODE.source, TILDE_CODE.source, INLINE_CODE.source].join("|"),
+  "gm"
+);
+const mapThinkCode = (text, visit) =>
+  text.replace(CODE_LITERAL, (code) => code.replace(THINK_LITERAL, visit));
+
+function protectThinkCode(source, output) {
+  const remaining = new Map();
+  mapThinkCode(source, (literal) => {
+    remaining.set(literal, (remaining.get(literal) || 0) + 1);
+    return literal;
+  });
+  let prefix = "\0omniroute-think-literal:";
+  while (source.includes(prefix) || output.includes(prefix)) prefix += ":";
+  const replacements = new Map();
+  const problems = [];
+  const text = mapThinkCode(output, (literal) => {
+    const available = remaining.get(literal) || 0;
+    if (available === 0) {
+      problems.push("unexpected <think> code literal");
+      return literal;
+    }
+    remaining.set(literal, available - 1);
+    const token = `${prefix}${replacements.size}\0`;
+    replacements.set(token, literal);
+    return token;
+  });
+  if ([...remaining.values()].some((count) => count > 0)) {
+    problems.push("missing source <think> code literal");
+  }
+  return {
+    text,
+    problems,
+    restore(value) {
+      for (const [token, literal] of replacements) value = value.replaceAll(token, () => literal);
+      return value;
+    },
+  };
+}
+
+function unwrapTranslationFence(source, text) {
+  const unwrapped = !/^\s*```/.test(source) && text.match(WRAPPING_FENCE);
+  return unwrapped ? unwrapped[1].trim() : text;
+}
+
+export function validateTranslatedChunk(source, output) {
+  const candidate = unwrapTranslationFence(source, output.replace(LEADING_THINK_BLOCKS, "").trim());
+  const protectedOutput = protectThinkCode(source, candidate);
+  let text = protectedOutput.text.replace(THINK_BLOCK, "").trim();
+  text = unwrapTranslationFence(source, text);
+  text = protectedOutput.restore(text);
+  // Recheck after stripping/unwrapping: an outer leaked block can consume a
+  // protected example, and a wrapping fence must not turn a bare tag into code.
+  const checked = protectThinkCode(source, text);
+  const problems = [...new Set([...protectedOutput.problems, ...checked.problems])];
+  if (/<\/?think>/.test(checked.text)) problems.push("leaked <think> tag");
+  const fences = [countLines(/^\s*```/, source), countLines(/^\s*```/, text)];
+  if (fences[0] !== fences[1]) problems.push(`code fences ${fences[1]}/${fences[0]}`);
+  const rows = [countLines(/^\s*\|/, source), countLines(/^\s*\|/, text)];
+  if (rows[0] !== rows[1]) problems.push(`table rows ${rows[1]}/${rows[0]}`);
+  const meta = META_PROSE.filter((re) => countMatches(re, text) > countMatches(re, source));
+  if (meta.length) problems.push(`meta-prose ${meta.map((re) => re.source).join(", ")}`);
+  const lost = lostInlineCode(source, text);
+  if (lost.length) {
+    const shown = lost.slice(0, 3).map((span) => `\`${span}\``);
+    problems.push(
+      `inline code changed: ${shown.join(", ")}${lost.length > 3 ? ` (+${lost.length - 3})` : ""}`
+    );
+  }
+  return { text, problems };
+}
+
+// Inline code spans outside fenced blocks, counted by content. Soft-wrapped lines of a paragraph
+// are joined first, because a CommonMark code span may cross a line break.
+function inlineCodeSpans(markdown) {
+  const prose = [];
+  let inFence = false;
+  for (const line of markdown.split("\n")) {
+    if (FENCE_LINE.test(line)) {
+      inFence = !inFence;
+      prose.push("");
+    } else prose.push(inFence ? "" : line);
+  }
+  const joined = prose.join("\n").replace(/([^\n])\n(?=[^\n])/g, "$1 ");
+  const spans = new Map();
+  for (const match of joined.matchAll(/(?<!`)`([^`\n]+)`(?!`)/g)) {
+    const span = match[1].replace(/\s+/g, " ").trim();
+    if (span) spans.set(span, (spans.get(span) ?? 0) + 1);
+  }
+  return spans;
+}
+
+// Inline code is a literal: an error message, a flag, a marker the reader greps for. Every span of
+// the source must survive the translation at least as often — a translated span, or a dropped
+// backtick that re-pairs the rest of the line, shows up as a lost span. Spans the translator
+// adds (backticks around a product name) are not a loss.
+export function lostInlineCode(source, translated) {
+  const before = inlineCodeSpans(source);
+  const after = inlineCodeSpans(translated);
+  return [...before]
+    .filter(([span, count]) => (after.get(span) ?? 0) < count)
+    .map(([span]) => span);
+}
+
+const CHUNK_ATTEMPTS = 3;
 
 // Splits a markdown body into chunks of <= maxChars. Top-level `## ` headings
 // are the preferred cut; a section that is still longer than maxChars is then
@@ -735,11 +924,23 @@ async function translateBody(body, localeEntry, backend) {
       { role: "system", content: system },
       { role: "user", content: chunks[i] },
     ];
-    const out = await callChat(messages, backend);
-    translated.push(out.trim());
+    let checked;
+    for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
+      checked = validateTranslatedChunk(chunks[i], await callChat(messages, backend));
+      if (checked.problems.length === 0) break;
+      logWarn(
+        `  chunk ${i + 1}/${chunks.length} rejected (attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
+      );
+    }
+    if (checked.problems.length > 0) {
+      throw new Error(
+        `chunk ${i + 1}/${chunks.length} failed validation: ${checked.problems.join("; ")}`
+      );
+    }
+    translated.push(checked.text);
     if (chunks.length > 1) {
       logInfo(
-        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${out.length} chars)`
+        `  chunk ${i + 1}/${chunks.length} translated (${chunks[i].length} → ${checked.text.length} chars)`
       );
     }
   }
@@ -1028,7 +1229,13 @@ async function main() {
   // `--locale=<code>` runs execute in parallel during a batch, so re-read the file and merge
   // only this run's entries instead of overwriting the whole state (last writer used to win
   // and the other runners' work vanished from the state — 2026-09-16).
-  await saveState(mergeStateUpdates(await loadState(), touched, state));
+  let fresh = null;
+  try {
+    fresh = await loadState();
+  } catch (err) {
+    logWarn(`${err.message} at save time — merging into this run's snapshot instead`);
+  }
+  await saveState(mergeStateUpdates(fresh, touched, state));
 
   const elapsedSec = ((Date.now() - startMs) / 1000).toFixed(1);
   logInfo(
