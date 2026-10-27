@@ -4,6 +4,8 @@ import { readFileSync } from "node:fs";
 import {
   renderReadmeFreeTierBudget,
   buildFreeTierBudgetCopy,
+  fmtTokens,
+  fmtWords,
 } from "../../../scripts/docs/gen-readme-free-tier-budget.mjs";
 import { buildChecks } from "../../../scripts/check/check-docs-counts-sync.mjs";
 
@@ -61,4 +63,17 @@ test("light and dark palettes are both declared and no literal color escapes the
   assert.match(svg, /prefers-color-scheme: dark\)\{:root\{[^}]*--bg:#040d10/);
   const body = svg.slice(svg.indexOf("</style>"));
   assert.doesNotMatch(body, /#[0-9a-fA-F]{3,8}(?![\w-])/);
+});
+
+test("fmtTokens keeps one decimal below 10M and rolls a value up to the next unit", () => {
+  assert.equal(fmtTokens(7_200_000), "7.2M");
+  assert.equal(fmtTokens(6_000_000), "6M");
+  assert.equal(fmtTokens(30_000_000), "30M");
+  assert.equal(fmtTokens(999_999), "1M");
+  assert.equal(fmtTokens(999_600_000), "1.00B");
+  assert.equal(fmtTokens(1_000_000_000), "1.00B");
+  assert.equal(fmtTokens(25_000), "25K");
+  assert.equal(fmtWords(1_000_000_000), "1 billion");
+  assert.equal(fmtWords(1_623_225_000), "1.62 billion");
+  assert.equal(fmtWords(999_999), "1 million");
 });

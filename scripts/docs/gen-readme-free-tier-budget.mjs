@@ -37,27 +37,45 @@ const NUMBER_WORDS = [
 ];
 
 // Figures as the card draws them: billions with two decimals, millions with one decimal below
-// 10M (7.2M, 4.8M — the card's own fmt() would round them to 7M/5M), thousands rounded.
+// 10M (7.2M, 4.8M — the card's own fmt() would round them to 7M/5M), thousands rounded. A value
+// that rounds up to the next unit rolls over (999,999 → 1M, 999.6M → 1.00B), never "1000K".
+function scaleTokens(n) {
+  if (n < 1e6) {
+    const k = Math.round(n / 1e3);
+    if (k < 1000) return { k };
+    n = k * 1e3;
+  }
+  if (n < 1e9) {
+    const m = n >= 1e7 ? Math.round(n / 1e6) : Math.round(n / 1e5) / 10;
+    if (m < 1000) return { m };
+    n = m * 1e6;
+  }
+  return { b: (n / 1e9).toFixed(2) };
+}
 export function fmtTokens(n) {
-  if (n >= 1e9) return (n / 1e9).toFixed(2) + "B";
-  if (n >= 1e7) return Math.round(n / 1e6) + "M";
-  if (n >= 1e6) return String(Math.round(n / 1e5) / 10) + "M";
-  return Math.round(n / 1e3) + "K";
+  const s = scaleTokens(n);
+  return s.b != null ? `${s.b}B` : s.m != null ? `${s.m}M` : `${s.k}K`;
 }
 
-// The same figure spelled out for the accessible title ("1.62 billion", "210 million").
-function fmtWords(n) {
-  if (n >= 1e9) return (n / 1e9).toFixed(2) + " billion";
-  if (n >= 1e7) return Math.round(n / 1e6) + " million";
-  if (n >= 1e6) return Math.round(n / 1e5) / 10 + " million";
-  return Math.round(n / 1e3) + " thousand";
+// The same figure spelled out for the accessible title ("1.62 billion", "1 billion", "210 million").
+export function fmtWords(n) {
+  const s = scaleTokens(n);
+  if (s.b != null) return `${s.b.replace(/\.?0+$/, "")} billion`;
+  return s.m != null ? `${s.m} million` : `${s.k} thousand`;
 }
 
-const providerName = (id) =>
-  (AI_PROVIDERS[id]?.name || id)
-    .replace(/\s*\(.*$/, "")
-    .replace(/ —.*$/, "")
-    .slice(0, 24);
+// Live display name, parentheticals stripped as the card does. The pool grid column fits 24
+// glyphs; a longer name fails loudly here (and in the stale test) instead of being cut silently.
+const MAX_NAME = 24;
+const providerName = (id) => {
+  const name = (AI_PROVIDERS[id]?.name || id).replace(/\s*\(.*$/, "").replace(/ —.*$/, "");
+  if (name.length > MAX_NAME) {
+    throw new Error(
+      `free-tier-budget: provider name "${name}" (${id}) exceeds the ${MAX_NAME} glyphs the pool grid fits — shorten it or widen the layout`
+    );
+  }
+  return name;
+};
 
 // Chip row layout: IBM Plex Mono 500 at 11px is ~6.6 px per glyph; chips that do not fit before
 // `maxX` (keeping room for one "…" chip) are folded into the ellipsis chip.
