@@ -213,6 +213,14 @@ export const KILOCODE_CONFIG = {
   pollUrlBase: "https://api.kilo.ai/api/device-auth/codes",
 };
 
+// MegaBrain OAuth Configuration (Kilo's device auth flow: MegaBrain's gateway is built on
+// Kilo's, so the endpoints and responses are the same as KILOCODE_CONFIG's).
+export const MEGABRAIN_CONFIG = {
+  apiBaseUrl: "https://api.getmegabrain.com",
+  initiateUrl: "https://api.getmegabrain.com/api/device-auth/codes",
+  pollUrlBase: "https://api.getmegabrain.com/api/device-auth/codes",
+};
+
 // Cline OAuth Configuration (Local Callback Flow via app.cline.bot)
 export const CLINE_CONFIG = {
   appBaseUrl: "https://app.cline.bot",
@@ -532,6 +540,7 @@ export const PROVIDERS = {
   AMAZON_Q: "amazon-q",
   CURSOR: "cursor",
   KILOCODE: "kilocode",
+  MEGABRAIN: "megabrain",
   CLINE: "cline",
   CLINEPASS: "clinepass",
   DEVIN_DESKTOP: "devin-desktop",

@@ -354,6 +354,27 @@ export function isGrokContentRefusal(errorText: string): boolean {
   return /\bi can['’]t help with that request\b/i.test(String(errorText || ""));
 }
 
+/**
+ * MegaBrain refuses a model the account cannot pay for with one of two 403s:
+ * `plan_tier_required` (Claude, GPT and Gemini below Pro without Extra Usage: "…turn on
+ * Extra Usage in Billing, or move to Pro…") and `extra_usage_off` (a Free account whose
+ * Extra Usage is off: "Extra Usage is off, so your balance does not pay for models…").
+ * Both refuse the model, not the account: the same token keeps serving the free and
+ * included models. The generic 403 → FORBIDDEN would ban the only MegaBrain connection
+ * on the account's first Claude request. The executor flattens the body to its message,
+ * so the message wording is matched as well as the error types.
+ */
+export function isMegabrainProvider(provider?: string | null): boolean {
+  const id = String(provider || "").toLowerCase();
+  return id === "megabrain" || id === "mb";
+}
+
+export function isMegabrainPlanTierRefusal(errorText: string): boolean {
+  return /\bplan_tier_required\b|\bextra_usage_off\b|\bextra usage\b|\bcome with pro and above\b/i.test(
+    String(errorText || "")
+  );
+}
+
 function responseBodyToString(responseBody: unknown): string {
   if (typeof responseBody === "string") return responseBody;
   if (responseBody !== null && typeof responseBody === "object") {
@@ -529,6 +550,11 @@ export function classifyProviderError(
     // Must be checked BEFORE the generic 403 → FORBIDDEN fall-through, which bans
     // the connection permanently.
     return PROVIDER_ERROR_TYPES.REQUEST_REJECTED;
+  }
+  if (statusCode === 403 && isMegabrainProvider(provider) && isMegabrainPlanTierRefusal(bodyStr)) {
+    // A model above the account's plan — see isMegabrainPlanTierRefusal. MODEL_NOT_FOUND
+    // locks only that model on this connection; must precede the generic 403 → FORBIDDEN.
+    return PROVIDER_ERROR_TYPES.MODEL_NOT_FOUND;
   }
   if (statusCode === 403) {
     // Cloud Code / Antigravity (Gemini Code Assist) 403s are almost always a

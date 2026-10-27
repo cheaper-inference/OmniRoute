@@ -359,4 +359,12 @@ export const OAUTH_TEST_CONFIG: Record<string, OAuthTestConfigEntry> = {
     refreshable: true,
     acceptStatuses: [402],
   },
+  // MegaBrain: the plan's usage limits are a free authenticated read that accepts both the
+  // device-code token and an mb-v1 API key (its public /models route needs no auth).
+  megabrain: {
+    url: "https://api.getmegabrain.com/api/profile/limits",
+    method: "GET",
+    authHeader: "Authorization",
+    authPrefix: "Bearer ",
+  },
 };

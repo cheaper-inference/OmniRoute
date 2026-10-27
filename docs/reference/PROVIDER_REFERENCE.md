@@ -1,16 +1,16 @@
 ---
 title: "Provider Reference"
 version: 3.8.53
-lastUpdated: 2026-10-20
+lastUpdated: 2026-10-27
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-10-20
+> **Last generated:** 2026-10-27
 
-Total providers: **375**. See category breakdown below.
+Total providers: **377**. See category breakdown below.
 
 ## Categories
 
@@ -48,7 +48,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `veoaifree-web` | `veo-free` | Veo AI Free | No-auth, video | [link](https://veoaifree.com) | No auth required. Rate limited to 6 requests/hour per IP. | — |
 | `zcode` | `zc` | ZCode (GLM Coding Plan) | No-auth | [link](https://zcode.z.ai) | No API key stored by OmniRoute. The local ZCode app-server uses the existing builtin:zai-coding-plan login. | — |
 
-## OAuth Providers (27)
+## OAuth Providers (28)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -71,6 +71,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `kilocode` | `kc` | Kilo Code | OAuth | — | Sign in with your Kilo Code account (device-code OAuth), or paste a direct API key from app.kilo.ai → Settings → API Keys. Multiple API keys are supported and rotated automatically — add each as a separate connection. Without any connection, free anonymous models are available via the anonymousFallback. |
 | `kimi-coding` | `kmc` | Kimi Code CLI | OAuth | [link](https://www.kimi.ai/code?aff=omniroute) | Sign in with the same Kimi account used by Kimi Code CLI. OmniRoute uses the CLI OAuth flow and Kimi Coding Plan endpoints. |
 | `kiro` | `kr` | Kiro AI | OAuth | — | Free tier: 50 credits/month (~25K–100K tokens). ⚠️ Kiro ToS prohibits third-party proxy/harness use. |
+| `megabrain` | `mb` | MegaBrain | OAuth | [link](https://getmegabrain.com) | Sign in with your MegaBrain account (device code), or paste an mb-v1-… MegaBrain API key (add each key as a separate connection to rotate them). A paid plan covers the included models (Auto, GLM, Kimi, MiniMax, Grok, DeepSeek, Qwen) within its session and weekly limits; Claude, GPT and Gemini are paid from the account's credits, from Pro up or with Extra Usage turned on. Address models as mb/<model> or megabrain/<model>. |
 | `muse-code` | `mc` | Muse Code (Meta) | OAuth | [link](https://ai.developer.meta.com/docs/muse-code/auth) | Sign in with the Muse Code device flow (same as `muse login` / CLIProxyAPI `-meta-login`) to use a Muse subscription, or paste a META_API_KEY. Device login keeps the durable dca token and mints the inference key; a 401 remints that key. Wire format is OpenAI Responses (POST /responses). |
 | `openference` | `of` | Openference | OAuth | [link](https://openference.com) | Sign in with your Openference account to route requests through api.openference.com. Includes free-tier access to Qwen3.8 27b and Llama 3.2 3B — see openference.com/pricing for current plan terms. |
 | `qoder` | `if` | Qoder | OAuth | — | PAT (pt-): requires local qodercli; plain chat only, no caller tools, buffered streaming and a 45-second chat limit. HTTP keys use DashScope; browser OAuth requires administrator configuration. |
@@ -122,7 +123,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `zai-web` | `zw` | Z.ai Web | Web cookie | [link](https://chat.z.ai) | Copy the "token" value from chat.z.ai → DevTools → Application → Local Storage. Do not copy cookies; OmniRoute handles the per-request CAPTCHA through its browser transport. | — |
 | `zenmux-free` | `zmf` | ZenMux Free (Web) | Web cookie | [link](https://zenmux.ai) | Login at zenmux.ai, then export all cookies using EditThisCookie or Cookie-Editor and paste the full Cookie header string here. Refresh every ~30 days. | — |
 
-## API Key Providers (paid / paid-with-free-credits) (252)
+## API Key Providers (paid / paid-with-free-credits) (253)
 
 | ID | Alias | Name | Tags | Website | Notes |
 |----|-------|------|------|---------|-------|
@@ -133,6 +134,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `ai21` | `ai21` | AI21 Labs | API key | [link](https://www.ai21.com) | $10 trial credits on signup (valid 3 months), no credit card required |
 | `aimlapi` | `aiml` | AI/ML API | API key, aggregator | [link](https://aimlapi.com) | Free tier paused (2026) — AI/ML API is now pay-as-you-go only (min $20 top-up); no recurring free credits. |
 | `ainative` | `ainative` | AINative Studio | API key | [link](https://ainative.studio) | Create a free API key at ainative.studio (no card), then paste it here as a Bearer token. |
+| `ainetcafe` | `ainetcafe` | ainetcafe | API key | [link](https://ainetcafe.com/k3/) | Sign-up credit toward available models; amount and eligibility are set by ainetcafe, not OmniRoute. |
 | `aion` | `aion` | Aion Labs | API key | [link](https://www.aionlabs.ai) | Create a free API key at aionlabs.ai (no card), then paste it here as a Bearer token. |
 | `alibaba` | `ali` | Alibaba Cloud Model Studio | API key | [link](https://bailian.console.alibabacloud.com/) | — |
 | `alibaba-cn` | `ali-cn` | Alibaba (China) | API key | [link](https://dashscope.console.aliyun.com/) | — |

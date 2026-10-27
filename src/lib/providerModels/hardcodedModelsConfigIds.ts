@@ -33,6 +33,7 @@ export const HARDCODED_MODELS_CONFIG_IDS: ReadonlySet<string> = new Set([
   "kimi",
   "kimi-coding",
   "kimi-coding-apikey",
+  "megabrain",
   "mistral",
   "nebius",
   "nvidia",

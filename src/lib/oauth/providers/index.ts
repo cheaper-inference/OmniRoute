@@ -23,6 +23,7 @@ import { kiro } from "./kiro";
 import { cursor } from "./cursor";
 import { trae } from "./trae";
 import { kilocode } from "./kilocode";
+import { megabrain } from "./megabrain";
 import { cline } from "./cline";
 import { devinDesktop } from "./devin-desktop";
 import { grokCli } from "./grok-cli";
@@ -50,6 +51,7 @@ export const PROVIDERS = {
   cursor,
   trae,
   kilocode,
+  megabrain,
   cline,
   // clinepass reuses the Cline WorkOS OAuth flow 1:1 (same api.cline.bot host, same token
   // type) — it is a separate catalog entry advertising the cline-pass/* (ClinePass
