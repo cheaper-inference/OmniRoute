@@ -12780,8 +12780,8 @@
     "avgTotal": "平均总计",
     "requestTelemetry": "请求遥测",
     "requestTelemetryDescription": "7 阶段流水线明细（最近 5 分钟）",
-    "title": "提供商统计信息",
-    "description": "按提供商和模型统计的流量、延迟和成功率",
+    "title": "提供者统计信息",
+    "description": "按提供者和模型统计的流量、延迟和成功率",
     "combo": "组合",
     "toggleModels": "显示 {provider} 的模型"
   },
@@ -13441,7 +13441,7 @@
     "auth": "认证",
     "feasibility": "可行性",
     "models": "模型",
-    "provider": "提供商",
+    "provider": "提供者",
     "status": "状态",
     "endpoint": "端点",
     "actions": "操作"

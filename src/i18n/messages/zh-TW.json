@@ -12780,8 +12780,8 @@
     "avgTotal": "平均總計",
     "requestTelemetry": "請求遙測",
     "requestTelemetryDescription": "7 階段管線細項（過去 5 分鐘）",
-    "title": "供應商統計資料",
-    "description": "各供應商與各模型的流量、延遲及成功率",
+    "title": "提供者統計資料",
+    "description": "各提供者與各模型的流量、延遲及成功率",
     "combo": "組合",
     "toggleModels": "顯示 {provider} 的模型"
   },
