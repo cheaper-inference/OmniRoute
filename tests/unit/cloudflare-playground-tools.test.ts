@@ -179,6 +179,57 @@ test("parseCfToolCalls recovers a <tool> tag left unterminated by truncation", (
   assert.equal(calls[0].arguments, '{"command":"ls"}');
 });
 
+test("parseCfToolCalls preserves brackets, asterisks and quotes in the payload byte-for-byte", () => {
+  // Regression guard for the repair passes. A model writing Python emits
+  // `Optional[str]`, `Dict[str, Any]`, `**kwargs`, `servers["text"]` and
+  // `[{}])[0]` — exactly the characters a lossy "repair" would eat. The real
+  // capture (`jolly-nebula/8941`, a 9,723-char `kw-ai/orchestrator/
+  // query_processor.py`) round-trips unchanged, so assert equality against the
+  // expected string rather than a substring: any dropped `[`, `]` or `*`
+  // silently writes a corrupted file to disk, which is worse than dropping the
+  // call, and a substring check would not catch it.
+  const content = [
+    "from typing import Dict, Any, Optional, List",
+    "",
+    "@dataclass",
+    "class Query:",
+    "    image_prompt: Optional[str] = None",
+    "    image_seed: Optional[int] = None",
+    "",
+    "    def to_dict(self) -> Dict[str, Any]:",
+    "        return {}",
+    "",
+    "class QueryProcessor:",
+    "    def __init__(self, arbiter):",
+    "        self.arbiter = arbiter",
+    "",
+    "    def route_text_only(self, query, **kwargs) -> Dict[str, Any]:",
+    '        text_server = self.arbiter.servers["text"]',
+    '        text = result.get("choices", [{}])[0].get("text", "")',
+    "        return text",
+    "",
+  ].join("\n");
+
+  // Trailing `}` reproduces the observed stray brace, forcing the repair path
+  // rather than plain `JSON.parse`.
+  const text = `<tool name="write">{"path":"kw/query_processor.py","content":${JSON.stringify(
+    content
+  )}}}</tool>`;
+
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "write");
+  const args = JSON.parse(calls[0].arguments);
+  assert.equal(args.path, "kw/query_processor.py");
+  assert.equal(args.content, content);
+  // Belt and braces: the characters that were reported as visibly mangled.
+  assert.ok(args.content.includes("Optional[str]"));
+  assert.ok(args.content.includes("Dict[str, Any]"));
+  assert.ok(args.content.includes("**kwargs"));
+  assert.ok(args.content.includes('servers["text"]'));
+  assert.ok(args.content.includes("[{}])[0]"));
+});
+
 test("parseCfToolCalls handles the <tool_call> tag spelling", () => {
   // Many models are trained on `<tool_call>` rather than `<tool>`.
   const text = '<tool_call>{"name":"bash","arguments":{"command":"ls"}}</tool_call>';
