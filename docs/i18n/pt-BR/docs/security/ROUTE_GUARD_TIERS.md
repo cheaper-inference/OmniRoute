@@ -173,7 +173,7 @@ verificações do sistema de arquivos), sinalizado com `probed: false`.
 | `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | Sondagem do runtime da CLI (`allowLocalRuntimeProbe`) e inicialização do fallback da CLI |
 | `GET /api/headroom/status`                                       | `which headroom` e as sondagens `--version` do python                                    |
 | `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`                        |
-| `GET /api/tunnels/cloudflared` (GET isento de LOCAL_ONLY)        | Consulta de `cloudflared` no PATH com `which`                                            |
+| `GET /api/tunnels/cloudflared` (GET isento de LOCAL_ONLY)        | Consulta de `cloudflared` no PATH com `which cloudflared`                                |
 
 Uma nova rota de leitura que faça sondagens no host deve seguir o mesmo padrão ou ser
 classificada diretamente como LOCAL_ONLY.

@@ -211,7 +211,7 @@ ukončiť proces servera.
 | `/api/log-export`                         | Odosiela záznamy volaní do nakonfigurovaného cieľa                                  |
 | `/api/restart`                            | Reštartuje proces servera                                                           |
 
-**Odpoveď pri porušení:** `401 Vyžaduje sa overenie totožnosti`
+**Odpoveď pri porušení:** `401 Authentication required`
 
 `/api/settings/obsidian` pokrýva aj svoju podradenú cestu `/webdav`: `POST` nasmeruje súborovú službu WebDAV —
 obsluhovanú vlastnou vrstvou Node pred Next.js, mimo tohto spracovateľského reťazca — na koreň zvolený volajúcim
