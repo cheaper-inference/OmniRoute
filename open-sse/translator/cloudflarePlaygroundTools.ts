@@ -81,9 +81,10 @@ function renderCompactSchema(schema: unknown): string {
 export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
   if (!tools || tools.length === 0) return "";
 
+  const exampleName = tools[0].function.name;
   const lines = [
     "# Tools",
-    'To call a tool, reply with <tool name="NAME">{"arg": value}</tool>. Arguments must be valid JSON. Emit no other text when calling a tool.',
+    `To call a tool, reply with <${exampleName}>{"arg": value}</${exampleName}> where ${exampleName} is replaced by the tool name and the body is a JSON object of arguments. Arguments must be valid JSON. Emit no other text when calling a tool.`,
     "",
     "Tools:",
   ];
@@ -156,15 +157,21 @@ export function hasMalformedCfToolIntent(text: string): boolean {
 /**
  * Repair the most common JSON mistakes models make in tool payloads:
  * double-escaped whitespace (`{\n"command": "ls"}` where `\n` is two literal
- * characters). Single quotes / unquoted keys / bare values are handled by the
- * lenient parser below.
+ * characters) and backslash-escaped quotes (`{\"path\": \".\"}` — models escape
+ * quotes when embedding JSON inside an XML-ish tag). Single quotes / unquoted
+ * keys / bare values are handled by the lenient parser below.
+ *
+ * Only called after strict `JSON.parse` fails, so valid escapes in well-formed
+ * payloads are never rewritten.
  */
 function repairJson(text: string): string {
   return text
     .replace(/\\r\\n/g, "\n")
     .replace(/\\n/g, "\n")
     .replace(/\\r/g, "\n")
-    .replace(/\\t/g, "\t");
+    .replace(/\\t/g, "\t")
+    .replace(/\\"/g, '"')
+    .replace(/\\'/g, "'");
 }
 
 /**
@@ -357,22 +364,63 @@ function unwrapToolPayload(content: string): { name: string | null; argsJson: st
 function extractPayloadFromAttrs(attrs: string): string | null {
   const attrMatch = attrs.match(/=\s*(["'])([\s\S]*)\1\s*$/);
   if (!attrMatch) return null;
-  let payload = attrMatch[2].replace(/\\"/g, '"').replace(/\\'/g, "'").trim();
+  const payload = attrMatch[2].replace(/\\"/g, '"').replace(/\\'/g, "'").trim();
   if (!payload || !/^[[{]/.test(payload)) return null;
   return payload;
+}
+
+/**
+ * Extract the first balanced JSON object/array embedded anywhere in a string.
+ * Handles malformed tags like `<tool name="read"{"path": "."}></tool>` where
+ * the model forgot the closing quote and `>` before the payload, and payloads
+ * that themselves contain `>` (e.g. `{"command": "ls > out.txt"}`).
+ */
+function extractEmbeddedJson(raw: string): string | null {
+  // Payloads embedded in markup often have escaped quotes; unescape first so
+  // the brace/quote scan below is not thrown off.
+  const text = raw.replace(/\\"/g, '"').replace(/\\'/g, "'");
+  const start = text.search(/[[{]/);
+  if (start === -1) return null;
+  const open = text[start];
+  const close = open === "{" ? "}" : "]";
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for (let i = start; i < text.length; i++) {
+    const ch = text[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === "\\") escaped = true;
+      else if (ch === '"') inString = false;
+      continue;
+    }
+    if (ch === '"') inString = true;
+    else if (ch === open) depth++;
+    else if (ch === close) {
+      depth--;
+      if (depth === 0) return text.slice(start, i + 1);
+    }
+  }
+  return null;
 }
 
 export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfParsedToolCall[] {
   if (!text) return [];
 
   const calls: CfParsedToolCall[] = [];
+  // Spans already turned into a tool call, so the loose fallback below does not
+  // emit duplicates. Each entry is [start, end) into `text`.
+  const handledSpans: Array<[number, number]> = [];
+  const isHandled = (start: number, end: number) =>
+    handledSpans.some(([s, e]) => start < e && end > s);
 
   // Pattern 1: <tool name="...">...</tool> or <tool>...</tool>
   const toolTagRegex = /<\s*tool\b([^>]*)>([\s\S]*?)<\s*\/\s*tool\s*>/gi;
   let match: RegExpExecArray | null;
   while ((match = toolTagRegex.exec(text)) !== null) {
     const attrs = match[1];
-    const content = match[2].trim() || extractPayloadFromAttrs(attrs) || "";
+    const content =
+      match[2].trim() || extractPayloadFromAttrs(attrs) || extractEmbeddedJson(attrs) || "";
     // Only accept tool calls whose arguments normalize to valid JSON
     const normalized = normalizeToolArguments(content);
     if (!normalized) continue;
@@ -388,7 +436,32 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
         name,
         arguments: unwrapped.argsJson,
       });
+      handledSpans.push([match.index, match.index + match[0].length]);
     }
+  }
+
+  // Pattern 1b: recover malformed `<tool ...>` tags where a `>` inside the JSON
+  // payload (e.g. `{"command": "ls > out.txt"}`) truncated the attribute scan
+  // above. Re-scan the whole tag body for a balanced JSON payload.
+  const looseToolRegex = /<\s*tool\b([\s\S]*?)<\s*\/\s*tool\s*>/gi;
+  while ((match = looseToolRegex.exec(text)) !== null) {
+    const start = match.index;
+    const end = start + match[0].length;
+    if (isHandled(start, end)) continue;
+    const inner = match[1];
+    const nameMatch = inner.match(/name\s*=\s*["']?([A-Za-z_][\w.-]*)/i);
+    if (!nameMatch) continue;
+    const embedded = extractEmbeddedJson(inner);
+    if (!embedded) continue;
+    const normalized = normalizeToolArguments(embedded);
+    if (!normalized) continue;
+    const unwrapped = unwrapToolPayload(normalized);
+    calls.push({
+      id: `call_${crypto.randomUUID().slice(0, 8)}`,
+      name: unwrapped.name ?? nameMatch[1],
+      arguments: unwrapped.argsJson,
+    });
+    handledSpans.push([start, end]);
   }
 
   // Pattern 2: <tool:name>...</tool:name> (alternative form)
@@ -416,7 +489,8 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
   while ((match = anyToolTagRegex.exec(text)) !== null) {
     const tagName = match[1];
     if (!knownTagNames.has(tagName)) continue;
-    const content = match[3].trim() || extractPayloadFromAttrs(match[2]) || "";
+    const content =
+      match[3].trim() || extractPayloadFromAttrs(match[2]) || extractEmbeddedJson(match[2]) || "";
     const normalized = normalizeToolArguments(content);
     if (!normalized) continue;
     const unwrapped = unwrapToolPayload(normalized);

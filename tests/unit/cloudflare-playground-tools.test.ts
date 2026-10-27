@@ -67,7 +67,8 @@ test("serializeCfToolPrompt generates a compact contract block", () => {
   assert.ok(prompt.includes("# Tools"));
   assert.ok(prompt.includes("bash"));
   assert.ok(prompt.includes("read_file"));
-  assert.ok(prompt.includes('name="NAME"'));
+  // Concrete example uses the first tool name as the tag
+  assert.ok(prompt.includes('<bash>{"arg": value}</bash>'));
   assert.ok(prompt.includes("command: string"));
   assert.ok(prompt.includes("path: string"));
   // Compact one-line signatures instead of pretty-printed JSON
@@ -237,6 +238,45 @@ test("parseCfToolCalls reads attribute payload with escaped quotes and numbers",
     offset: 0,
     limit: 5,
   });
+});
+
+test('parseCfToolCalls handles glommed <tool name="X"{json}> without closing quote', () => {
+  const text = '<tool name="read"{"path": "."}></tool>';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "read");
+  assert.deepEqual(JSON.parse(calls[0].arguments), { path: "." });
+});
+
+test("parseCfToolCalls handles glommed tool-name tag <bash{json}>", () => {
+  const text = '<bash{"command": "ls -la"}></bash>';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
+  assert.deepEqual(JSON.parse(calls[0].arguments), { command: "ls -la" });
+});
+
+test("parseCfToolCalls unescapes backslash-escaped quotes in glommed attrs", () => {
+  const text = '<tool name="read"{\\"path\\": \\".\\"}></tool>';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "read");
+  assert.deepEqual(JSON.parse(calls[0].arguments), { path: "." });
+});
+
+test("parseCfToolCalls recovers a glommed tag whose JSON contains '>'", () => {
+  const text = '<tool name="bash"{"command": "ls > out.txt"}></tool>';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0].name, "bash");
+  assert.deepEqual(JSON.parse(calls[0].arguments), { command: "ls > out.txt" });
+});
+
+test("parseCfToolCalls does not duplicate a well-formed tag with '>' in the JSON", () => {
+  const text = '<tool name="bash">{"command": "ls > out.txt"}</tool>';
+  const calls = parseCfToolCalls(text, TEST_TOOLS);
+  assert.equal(calls.length, 1);
+  assert.deepEqual(JSON.parse(calls[0].arguments), { command: "ls > out.txt" });
 });
 
 test("parseCfToolCalls handles multiple tool calls in one response", () => {
