@@ -1,0 +1,1 @@
+- **fix(nvidia):** Replace the retired `nvidia/nemotron-3-super-120b-a12b` (404 since 2026-10-20) with its replacement `nvidia/nemotron-3.5-super-vl-120b-a12b` in the NVIDIA catalog and Antigravity bridge auto groups ([#17928](https://github.com/diegosouzapw/OmniRoute/pull/17928)) — thanks @DeadY2J

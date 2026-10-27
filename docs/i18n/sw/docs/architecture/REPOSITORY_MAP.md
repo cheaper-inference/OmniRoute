@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | API ya vijenzi vya dashibodi: adapta juu ya `packages/ui-kit` — tazama `docs/architecture/DESIGN_SYSTEM.md`  |
 | `constants/iconMap.ts`           | `ICON_MAP`: majina ya ikoni yanayotumiwa na skrini → vijenzi vya Lucide (`<Icon>`)                           |
-| `constants/providers.ts`         | **Watoa huduma 375** wenye uthibitishaji wa Zod (chanzo kimoja cha ukweli)                                   |
+| `constants/providers.ts`         | **Watoa huduma 376** wenye uthibitishaji wa Zod (chanzo kimoja cha ukweli)                                   |
 | `constants/cliTools.ts`          | Sajili ya zana za nje za CLI                                                                                 |
 | `constants/routingStrategies.ts` | **Mikakati 20 ya uelekezaji** yenye vipaumbele                                                               |
 | `constants/publicApiRoutes.ts`   | Njia zinazohitaji uthibitishaji wa Bearer (dhidi ya uthibitishaji wa usimamizi)                              |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Miunganisho ya CLI za nje + CLI ya ndani ya OmniRoute                                                       |
 | `I18N.md`                   | Usanifu wa i18n, kuongeza lugha, lugha 67                                                                   |
 | `UNINSTALL.md`              | Hatua za uondoaji safi                                                                                      |
-| `PROVIDER_REFERENCE.md`     | Katalogi ya watoa huduma 375 **inayozalishwa kiotomatiki** (zalisha upya: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Katalogi ya watoa huduma 376 **inayozalishwa kiotomatiki** (zalisha upya: `npm run gen:provider-reference`) |
 
 ### Uchambuzi wa kina wa mifumo midogo
 

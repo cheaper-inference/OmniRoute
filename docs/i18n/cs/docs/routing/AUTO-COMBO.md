@@ -457,54 +457,54 @@ To znamená, že **přidání nového poskytovatele s povoleným `auto/*` automa
 
 ## API
 
-**Neexistuje žádný vyhrazený endpoint `POST /api/combos/auto`** — Auto-Combo se používá dvěma způsoby:
+**Neexistuje žádný vyhrazený koncový bod `POST /api/combos/auto`** — Auto-Combo se používá dvěma způsoby:
 
-1. **Bez konfigurace (doporučeno):** Odešlete libovolný požadavek na dokončení chatu s `model: "auto"` nebo `model: "auto/<variant>"`. Virtuální továrna sestaví combo pro každý požadavek — bez perzistence a bez nutnosti volání API.
+1. **Bez konfigurace (doporučeno):** Odešlete libovolný požadavek na dokončení chatu s `model: "auto"` nebo `model: "auto/<variant>"`. Virtuální továrna vytvoří kombinaci pro každý požadavek — není potřeba žádná perzistence ani volání API.
 
-2. **Perzistentní combo se `strategy: "auto"`:** Vytvořte běžné combo pomocí `POST /api/combos` a nastavte `strategy: "auto"` společně s `config.auto.weights` / `config.auto.candidatePool`. Použije se stejný bodovací mechanismus; combo se uloží do `combos` a lze ho opakovaně používat podle ID.
+2. **Trvalá kombinace se `strategy: "auto"`:** Vytvořte běžnou kombinaci prostřednictvím `POST /api/combos` a nastavte `strategy: "auto"` spolu s `config.auto.weights` / `config.auto.candidatePool`. Použije se stejný vyhodnocovací modul; kombinace se uloží do `combos` a lze ji opakovaně používat podle ID.
 
-Pro zjišťování možností vypíše `GET /api/combos/auto` každou variantu s jejím vyhodnoceným fondem kandidátů a také `context_length` / `max_output_tokens` — jde o MAXIMUM napříč kontextovými okny fondu kandidátů. Klienti (např. plugin opencode) musí inzerovat tyto hodnoty namísto `0`: nulový kontext zcela vypne automatickou kompaktaci opencode, takže relace rostou, dokud čištění historie na bráně nezničí kontext. Inzerovat MAXIMUM je bezpečné, protože předběžný filtr kontextu Auto-Combo směruje nadměrně velké požadavky ke kandidátům s velkým kontextovým oknem.
+Pro zjišťování dostupných možností vypíše `GET /api/combos/auto` všechny varianty s jejich vyhodnoceným fondem kandidátů a také `context_length` / `max_output_tokens` — hodnoty MAX napříč kontextovými okny fondu kandidátů. Klienti (např. plugin opencode) musí uvádět tyto hodnoty namísto `0`: nulový kontext zcela vypne automatickou kompakci opencode, takže relace rostou, dokud vymazání historie na bráně nezničí kontext. Hodnotu MAX lze bezpečně uvádět, protože předběžný filtr kontextu automatické kombinace směruje nadměrně velké požadavky ke kandidátům s velkým kontextovým oknem.
 
 ```bash
-# Použití bez konfigurace (bez vytváření comba)
+# Použití bez konfigurace (bez vytváření kombinace)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# Perzistentní automatické combo prostřednictvím běžného endpointu pro comba
+# Trvalá automatická kombinace prostřednictvím běžného koncového bodu pro kombinace
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### Strategie automatického routeru
+### Strategie automatického směrovače
 
-Perzistentní comba se `strategy: "auto"` mohou nastavit `config.routerStrategy` (nebo starší
-`config.auto.routerStrategy`) na jednu z následujících hodnot:
+Trvalé kombinace se `strategy: "auto"` mohou nastavit `config.routerStrategy` (nebo starší
+`config.auto.routerStrategy`) na jednu z následujících možností:
 
-- `rules` — výchozí vážené bodování
+- `rules` — výchozí vážené vyhodnocování
 - `score` — vybere nejvyšší nakonfigurované vážené skóre. Při přesné shodě se zachová nakonfigurované
-  pořadí kandidátů; existující `explorationRate` provádí výběr z celého seřazeného fondu.
-- `cost` / `eco` — nejlevnější poskytovatel v dobrém stavu
+  pořadí kandidátů; stávající `explorationRate` vybírá vzorky z celého seřazeného fondu.
+- `cost` / `eco` — nejlevnější dostupný poskytovatel
 - `latency` / `fast` — nejnižší latence p95 s penalizací za nespolehlivost
-- `sla-aware` / `sla` — upřednostní kandidáty, kteří splňují SLO pro latenci p95, míru chyb a volitelně
+- `sla-aware` / `sla` — upřednostní kandidáty, kteří splňují SLO pro latenci p95, chybovost a volitelně
   náklady
-- `lkgp` — nejprve naposledy známý funkční poskytovatel
-- `nadir` — zeptá se rozhodovacího API služby [Nadir](https://getnadir.com), který model z fondu
-  požadavek potřebuje; vyžaduje výslovné zapnutí a při selhání přejde na `rules`
+- `lkgp` — nejprve poslední známý funkční poskytovatel
+- `nadir` — dotáže se rozhodovacího API služby [Nadir](https://getnadir.com), který model ve fondu
+  daný prompt potřebuje; vyžaduje výslovné zapnutí, při selhání přejde na `rules`
 
-### Podrobnosti o strategiích routeru
+### Strategie směrovače podrobně
 
-Mechanismus Auto-Combo poskytuje 7 vyměnitelných implementací **RouterStrategy**,
+Modul automatických kombinací nabízí 7 zaměnitelných implementací **RouterStrategy**,
 mezi kterými můžete přepínat pomocí `config.routerStrategy` (nebo staršího `config.auto.routerStrategy`).
 Každá strategie vybere jednoho poskytovatele z fondu kandidátů na základě `RoutingContext`
-(typ úlohy, indikace nástrojů/vize, odhad počtu tokenů, volitelná zásada SLA a volitelně
-naposledy známý funkční poskytovatel).
+(typ úlohy, indikace nástrojů/vizuálních vstupů, odhad počtu tokenů, volitelná zásada SLA a volitelně
+poslední známý funkční poskytovatel).
 
-#### 1. `rules` (výchozí) — vážené bodování podle 16 faktorů
+#### 1. `rules` (výchozí) — 16faktorové vážené vyhodnocování
 
-Obaluje stávající bodovací mechanismus. Odfiltruje kandidáty s jističem ve stavu `OPEN`
+Zapouzdřuje stávající vyhodnocovací modul. Odfiltruje kandidáty s jističem ve stavu `OPEN`
 a poté spustí `scorePool()` s aktuálním typem úlohy a `getTaskFitness()`,
 přičemž vybere poskytovatele s nejvyšším skóre.
 
@@ -526,13 +526,13 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kdy použít**: Výchozí volba. Použijte, pokud chcete vyvážený kompromis mezi všemi signály.
+**Kdy použít**: Výchozí možnost. Použijte, pokud chcete vyvážený kompromis mezi všemi signály.
 
 **Alias**: `rules` (bez aliasu)
 
 ---
 
-#### 2. `cost` / `eco` — nejlevnější poskytovatel v dobrém stavu
+#### 2. `cost` / `eco` — nejlevnější dostupný poskytovatel
 
 Seřadí fond kandidátů podle `costPer1MTokens` (vzestupně) a vybere nejlevnějšího.
 Nejprve odfiltruje kandidáty ve stavu `OPEN`.
@@ -558,8 +558,8 @@ class CostStrategyImpl implements RouterStrategy {
 
 #### 3. `latency` / `fast` — nejnižší latence p95 s penalizací za nespolehlivost
 
-Řadí podle `p95LatencyMs + (errorRate * 1000)`. Penalizace podle míry chyb zajišťuje,
-že nespolehliví poskytovatelé budou v pořadí níže, i když je jejich nominální latence nízká.
+Řadí podle `p95LatencyMs + (errorRate * 1000)`. Penalizace za chybovost zajišťuje,
+že nespolehliví poskytovatelé budou hodnoceni hůře, i když je jejich nominální latence nízká.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -583,7 +583,7 @@ interaktivní asistenti pro programování.
 
 ---
 
-#### 4. `sla-aware` / `sla` — soulad se SLO pro latenci/chyby/náklady
+#### 4. `sla-aware` / `sla` — splnění SLO pro latenci/chybovost/náklady
 
 Ohodnotí každého kandidáta podle toho, jak dobře splňuje nakonfigurovanou zásadu SLO:
 
@@ -595,8 +595,8 @@ Ohodnotí každého kandidáta podle toho, jak dobře splňuje nakonfigurovanou 
 | Skóre nákladů    | 10%  | `threshold / max(value, ε)` nebo inverzně normalizované |
 | Skóre stability  | 5%   | inverzně normalizovaná směrodatná odchylka latence      |
 
-Když je nastaveno `hardConstraints: true`, kandidáti jsou řazeni primárně podle **skóre porušení**
-(o kolik překračují některé SLO) a následně podle složeného skóre. Jinak se používá pouze
+Když je nastaveno `hardConstraints: true`, kandidáti se řadí primárně podle **skóre porušení**
+(o kolik překračují některý z cílů SLO) a poté podle složeného skóre. Jinak se používá pouze
 složené skóre.
 
 ```ts
@@ -606,7 +606,7 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... vyhodnotí každého kandidáta podle zásad: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... ohodnotí každého kandidáta podle zásad: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
@@ -626,7 +626,7 @@ class SLAStrategyImpl implements RouterStrategy {
 }
 ```
 
-**Kdy použít**: Produkční zátěže s přísnými limity pro latenci, chybovost nebo náklady.
+**Kdy použít**: Produkční úlohy s přísnými limity latence, chybovosti nebo nákladů.
 
 **Aliasy**: `sla-aware`, `sla`
 
@@ -634,9 +634,9 @@ class SLAStrategyImpl implements RouterStrategy {
 
 #### 5. `lkgp` — nejprve poslední známý funkční poskytovatel
 
-Nejprve zkusí **posledního známého funkčního poskytovatele** (pokud je nastaven) a poté přejde
-na strategii `rules`. Je to užitečné pro zachování návaznosti relace — následné požadavky
-v konverzaci zpracovává stejný poskytovatel.
+Nejprve vyzkouší **posledního známého funkčního poskytovatele** (pokud je nastaven) a poté
+přejde na strategii `rules`. To je užitečné pro zachování stejného poskytovatele v rámci relace —
+následné požadavky v konverzaci zpracovává stejný poskytovatel.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -657,27 +657,27 @@ class LKGPStrategyImpl implements RouterStrategy {
       }
     }
 
-    // Přechod na strategii rules
+    // Návrat ke strategii rules
     return getStrategy("rules").select(pool, context);
   }
 }
 ```
 
-**Kdy použít**: Vícekolové konverzace, u kterých chcete, aby následné požadavky zpracovával
-stejný poskytovatel (např. kvůli ukládání do mezipaměti, kontinuitě kontextu nebo konzistentním cenám).
+**Kdy použít**: Vícekolové konverzace, u kterých chcete, aby následné požadavky
+zpracovával stejný poskytovatel (např. kvůli ukládání do mezipaměti, kontinuitě kontextu nebo konzistenci cen).
 
 **Alias**: `lkgp` (bez aliasu)
 
 ---
 
-#### 6. `nadir` — výběr modelu podle promptu prostřednictvím Nadiru
+#### 6. `nadir` — výběr modelu zohledňující prompt prostřednictvím Nadiru
 
-Každá výše uvedená strategie řadí kandidáty podle vlastních telemetrických údajů; žádná z nich
-nečte požadavek. `nadir` odešle poslední vstup uživatele spolu s ID modelů ve fondu
-rozhodovacímu API služby [Nadir](https://getnadir.com) (`POST /v1/bucket`) a směruje požadavek
-na model, který Nadir z této nabídky vybere (`simple` → nejlevnější vyhovující model, `complex` →
-špičkový model). Připojení obsluhující tento model je stále vybíráno strategií `rules`, takže
-o výběru účtu nadále rozhodují kvóty, stav a náklady.
+Každá z výše uvedených strategií řadí kandidáty podle vlastních telemetrických dat; žádná z nich
+nečte požadavek. `nadir` odešle poslední vstup uživatele spolu s ID modelů z fondu
+rozhodovacímu API služby [Nadir](https://getnadir.com) (`POST /v1/bucket`) a směruje požadavek do modelu,
+který Nadir z této nabídky vybere (`simple` → nejlevnější vyhovující model, `complex` → špičkový
+model). Připojení obsluhující tento model stále vybírá strategie `rules`, takže o výběru účtu
+nadále rozhodují kvóty, stav a náklady.
 
 ```json
 {
@@ -694,24 +694,25 @@ o výběru účtu nadále rozhodují kvóty, stav a náklady.
 ```
 
 `OMNIROUTE_NADIR_API_KEY` a `OMNIROUTE_NADIR_BASE_URL` slouží jako záložní proměnné prostředí pro
-tyto dva řetězce. `baseUrl` je potřeba pouze pro Nadir hostovaný ve vlastní infrastruktuře (koncové
-`/v1` je tolerováno). Volání bez klíče jsou směrována do anonymní úrovně Nadiru, která má omezení
-počtu požadavků podle IP adresy.
+tyto dva řetězce. `baseUrl` je potřeba pouze pro vlastní hostovanou instanci Nadiru (koncové `/v1` je tolerováno).
+Volání bez klíče používají anonymní úroveň Nadiru, která má omezenou frekvenci požadavků pro jednotlivé IP adresy. S klíčem
+([vytvořit klíč](https://app.getnadir.com/dashboard/api-keys)) se každé rozhodnutí
+zaznamená na váš řídicí panel Nadiru. Kompletní postup nastavení a ověření:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
-Co opouští systém: text poslední zprávy uživatele (prvních 16 tisíc znaků), ID kandidátních
-modelů a značka kanálu `source: "omniroute"`. Neodesílá se žádný systémový prompt, historie,
-nástroje ani hlavičky.
+Co se odesílá mimo systém: text poslední zprávy uživatele (prvních 16 tisíc znaků), ID kandidátních
+modelů a značka kanálu `source: "omniroute"`. Neodesílá se systémový prompt, historie, nástroje ani
+hlavičky.
 
-Chování při selhání je typu fail-open: časový limit (výchozí hodnota 2000 ms), stav mimo rozsah
-2xx, nedostupný hostitel, chybná odpověď nebo výběr mimo fond vedou k rozhodnutí strategie `rules`
-a důvod je opatřen předponou `NadirStrategy: fallback (…)`. Po neúspěšném volání strategie
-na 30 s vynechá komunikaci se sítí, takže výpadek způsobí jeden časový limit za 30 s namísto
-jednoho pro každý požadavek. Události směrování uvádějí `strategy: "nadir"` pouze tehdy, když
-výběr skutečně provedl Nadir.
+Chování při selhání je typu fail-open: vypršení časového limitu (výchozí hodnota je 2000 ms), odpověď mimo rozsah 2xx, nedostupný
+hostitel, chybná odpověď nebo výběr mimo fond vedou k rozhodnutí strategie `rules`
+a důvod dostane předponu `NadirStrategy: fallback (…)`. Po neúspěšném volání strategie
+na 30 s přeskočí síťové volání, takže výpadek způsobí jedno vypršení časového limitu za 30 s namísto
+jednoho pro každý požadavek. Události směrování uvádějí `strategy: "nadir"` pouze tehdy, když výběr
+skutečně provedl Nadir.
 
-**Kdy použít**: Provoz s různou obtížností požadavků ve fondu zahrnujícím různé úrovně modelů
-(malý, střední a špičkový model), pokud chcete snížit náklady způsobené používáním vždy jen
-špičkového modelu.
+**Kdy použít**: Provoz s různou obtížností požadavků ve fondu zahrnujícím několik úrovní modelů (malý, střední
+a špičkový model), kde chcete snížit náklady vznikající neustálým používáním špičkového modelu.
 
 **Alias**: `nadir` (bez aliasu)
 
@@ -732,7 +733,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // Zde vložte vlastní logiku směrování
+    // Sem patří vaše logika směrování
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -765,11 +766,11 @@ Poté ji použijte:
 | Případ použití       | Strategie   | Důvod                                            |
 | -------------------- | ----------- | ------------------------------------------------ |
 | Vyvážená zátěž       | `rules`     | Výchozí — zohledňuje všechny faktory             |
-| Minimalizace nákladů | `cost`      | Vždy vybírá nejlevnější možnost                  |
-| Minimalizace latence | `latency`   | Vybírá nejrychlejšího spolehlivého poskytovatele |
-| Přísná SLO           | `sla-aware` | Filtruje podle limitů p95/chybovosti/nákladů     |
-| Vícekolový chat      | `lkgp`      | Zachování návaznosti relace                      |
-| Různá obtížnost      | `nadir`     | Vybírá úroveň modelu podle promptu               |
+| Minimalizace nákladů | `cost`      | Vždy vybere nejlevnější možnost                  |
+| Minimalizace latence | `latency`   | Vybere nejrychlejšího spolehlivého poskytovatele |
+| Přísné cíle SLO      | `sla-aware` | Filtruje podle prahů p95/chybovosti/nákladů      |
+| Vícekolový chat      | `lkgp`      | Zachování poskytovatele v rámci relace           |
+| Různá obtížnost      | `nadir`     | Vybere úroveň modelu pro každý prompt            |
 
 Pole pro strategii zohledňující SLA:
 

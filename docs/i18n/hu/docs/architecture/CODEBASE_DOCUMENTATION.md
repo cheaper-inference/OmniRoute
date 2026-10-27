@@ -499,7 +499,7 @@ segédmodulok (eszközsémák, fetch-/TTS-adapterek, sajátosságokat kezelő mo
 (megosztott identitás-segédmodul) és az `index.ts` (nyilvántartás).
 
 > Megjegyzés: az itt fel nem sorolt szolgáltatókat a `default.ts` szolgálja ki az általános,
-> OpenAI-kompatibilis végrehajtó használatával. A teljes szolgáltatói katalógus (375 szolgáltató) a
+> OpenAI-kompatibilis végrehajtó használatával. A teljes szolgáltatói katalógus (376 szolgáltató) a
 > `src/shared/constants/providers.ts` fájlban található.
 
 ### 4.3 `open-sse/translator/`

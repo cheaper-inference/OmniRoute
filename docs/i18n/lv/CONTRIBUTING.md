@@ -172,87 +172,88 @@ Tvērumi (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`
 
 ---
 
-## Testu palaišana
+## Testu izpilde
 
 ```bash
-# Visi testi (unit + vitest + ecosystem + e2e)
+# Visi testi (vienībtesti + vitest + ekosistēma + e2e)
 npm run test:all
 
-# Viens testa fails (Node.js native test runner — lielākā daļa testu izmanto šo)
+# Atsevišķs testa fails (Node.js iebūvētais testu izpildītājs — to izmanto lielākā daļa testu)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Tikai izmaiņu ietekmētie unit testi (tas pats TIA selektors, ko izmanto CI vārteja, #8084)
-npm run test:scoped            # izmaiņas pēdējā commit (vai darba kokā)
-npm run test:scoped:staged     # tikai staged izmaiņas — labi piemērots pre-commit palaišanai
-npm run test:scoped:full       # vispirms atkārtoti izveidot import-graph karti (pēc failu pievienošanas/pārvietošanas)
-# Exit 1 + "run the full suite" nozīmē, ka mainīts hub fails (tsconfig, package.json, …) vai
-# nekartēts avots — selektors neuzņemas risku, tas nekad klusi neizlaiž testus.
+# Tikai jūsu izmaiņu ietekmētie vienībtesti (tas pats TIA atlasītājs kā CI pārbaudē, #8084)
+npm run test:scoped            # izmaiņas pēdējā komitā (vai darba kokā)
+npm run test:scoped:staged     # tikai sagatavotās izmaiņas — labi sader ar izpildi pirms komita
+npm run test:scoped:full       # vispirms no jauna izveido importēšanas grafa karti (pēc failu pievienošanas/pārvietošanas)
+# Izejas kods 1 + "izpildiet pilno komplektu" nozīmē, ka ir mainīts centrmezgla fails (tsconfig, package.json, …) vai
+# nekartēts avota fails — atlasītājs droši pārtrauc darbu un nekad klusām neizlaiž testus.
 
-# Vitest (MCP server, autoCombo, cache)
+# Vitest (MCP serveris, autoCombo, kešatmiņa)
 npm run test:vitest
 
 # E2E testi (nepieciešams Playwright)
 npm run test:e2e
 
-# Protokola klientu E2E (MCP transports, A2A)
+# Protokolu klientu E2E (MCP transporti, A2A)
 npm run test:protocols:e2e
 
-# Ecosystem saderības testi
+# Ekosistēmas saderības testi
 npm run test:ecosystem
 
-# Pārklājuma vārteja: 60% statements/lines/functions/branches
+# Pārklājuma slieksnis: 60% priekšrakstu/rindu/funkciju/zaru
 npm run test:coverage
 npm run coverage:report
 
-# Lint + format pārbaude
+# Lintēšanas un formatējuma pārbaude
 npm run lint
 npm run check
 
-# Kontrolēta reālo upstream kombināciju smoke pārbaude (nepieciešama VPS piekļuve + reāla provideru kredītu bilance)
-# Izmanto REAL providerus — izmaksas ir nelielas. NEKAD netiek palaists CI. Bez vārtejas tiek korekti izlaists.
-# Nepieciešama: ssh root@192.168.0.15 piekļuve (no VPS tiek iegūts tikai lasāms DB momentuzņēmums).
+# Ar slēdzi iespējota reālās augšupstraumes combo ātrā pārbaude (nepieciešama VPS piekļuve un reālu pakalpojumu sniedzēju kredīti)
+# Izmanto REĀLUS pakalpojumu sniedzējus — rada nelielas izmaksas. NEKAD netiek izpildīta CI. Ja slēdzis nav iestatīts, tiek korekti izlaista.
+# Nepieciešama: ssh root@192.168.0.15 piekļuve (no VPS tiek ielādēts tikai lasāms DB momentuzņēmums).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# 3. fāzes VPS live smoke pārbaude — vienkārši Node ESM skripti, kas tieši piekļūst live .15 serverim.
-# Nepieciešama: ssh root@192.168.0.15 piekļuve (kombinācijas tiek izveidotas/noņemtas, izmantojot SSH sqlite).
-# Izmanto REAL providerus (nelielas izmaksas). Izveido/dzēš tikai __live_test__* kombinācijas. NEKAD netiek palaists CI.
-# REQUIRE_API_KEY=false uz .15, tāpēc API atslēga nav nepieciešama, bet, ja iestatīti, tiek ņemti vērā COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY.
-npm run test:combo:live:vps              # 7 HTTP scenāriji (priority/round-robin/weighted/cost/fusion/auto + health)
-npm run test:combo:live:vps:failover     # pievieno reālu starp-provideru failover scenāriju (kopā 8)
+# 3. posma VPS tiešā ātrā pārbaude — vienkārši Node ESM skripti, kas tieši izmanto aktīvo .15 serveri.
+# Nepieciešama: ssh root@192.168.0.15 piekļuve (combo tiek izveidoti/noņemti, izmantojot SSH sqlite).
+# Izmanto REĀLUS pakalpojumu sniedzējus (nelielas izmaksas). Izveido/dzēš tikai __live_test__* combo. NEKAD netiek izpildīta CI.
+# .15 serverī ir REQUIRE_API_KEY=false, tāpēc API atslēga nav nepieciešama, taču, ja iestatīti COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY, tie tiek ievēroti.
+npm run test:combo:live:vps              # 7 HTTP scenāriji (prioritāte/cikliska atlase/svēršana/izmaksas/apvienošana/automātiska atlase + darbspēja)
+npm run test:combo:live:vps:failover     # pievieno reālu kļūmjpārlēces scenāriju starp pakalpojumu sniedzējiem (kopā 8)
 ```
 
-Pārklājuma piezīmes:
+Piezīmes par pārklājumu:
 
-- `npm run test:coverage` mēra avota pārklājumu galvenajai unit testu kopai, izslēdz `tests/**` un ietver `open-sse/**`
-- Pull Request ir jāsaglabā pārklājuma vārteja vismaz **60%+** apmērā statements/lines/functions/branches
-- Ja PR maina produkcijas kodu mapēs `src/`, `open-sse/`, `electron/` vai `bin/`, tajā pašā PR ir jāpievieno vai jāatjaunina automatizētie testi
-- `npm run coverage:report` izvada detalizētu pārskatu par katru failu no jaunākās pārklājuma palaišanas
+- `npm run test:coverage` mēra avota pārklājumu galvenajam vienībtestu komplektam, izslēdz `tests/**` un iekļauj `open-sse/**`
+- Izmaiņu pieprasījumos ir jāsaglabā vismaz **60%** priekšrakstu/rindu/funkciju/zaru pārklājuma slieksnis
+- Ja PR maina produkcijas kodu mapē `src/`, `open-sse/`, `electron/` vai `bin/`, tajā pašā PR ir jāpievieno vai jāatjaunina automatizētie testi
+- `npm run coverage:report` izdrukā jaunākās pārklājuma izpildes detalizētu pārskatu par katru failu
 - `npm run test:coverage:legacy` saglabā vecāko metriku vēsturiskai salīdzināšanai
-- Skatiet `docs/ops/COVERAGE_PLAN.md`, lai iepazītos ar pakāpenisku pārklājuma uzlabošanas ceļvedi
+- Pakāpeniskā pārklājuma uzlabošanas ceļvedi skatiet failā `docs/ops/COVERAGE_PLAN.md`
 
-### Pull Request prasības
+### Izmaiņu pieprasījuma prasības
 
 Pirms PR atvēršanas izmantojiet
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), lai palaistu mērķēto ciklu
-atbilstoši veiktajām izmaiņām. Pilnā unit testu kopa (4 CI shards), Vitest, **60%+**
-pārklājuma vārteja un produkcijas build ir CI atbildība — to palaišana lokāli nedod nekādu papildu
-informāciju, ko PR pārbaudes jau nesniegs, turklāt mazākās ierīcēs tas var pārslogot hostu (#8084):
+[ieteicamo ieguldījumu procesu](docs/ops/CONTRIBUTION_GOLDEN_PATH.md), lai izpildītu mērķēto ciklu
+jūsu veiktajām izmaiņām. Par pilno vienībtestu komplektu (4 CI daļas), Vitest, **60%+** pārklājuma slieksni un
+produkcijas būvējumu atbild CI — to lokāla izpilde nesniedz nekādu papildu informāciju, ko PR
+pārbaudes jau nesniegtu, un mazāk jaudīgās iekārtās tā var pārslogot sistēmu (#8084):
 
-- Palaidiet testa failus, kas aptver jūsu izmaiņas: `node --import tsx/esm --test tests/unit/<file>.test.ts`
-- Palaidiet `npm run lint`
+- Izpildiet testa failus, kas pārbauda jūsu izmaiņas: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Izpildiet `npm run lint`
 - Ikreiz, kad mainās produkcijas kods, tajā pašā PR iekļaujiet vai atjauniniet automatizētos testus
-- Ja mainījies produkcijas kods, PR aprakstā iekļaujiet mainītos vai pievienotos testa failus
-- Ja CI ir konfigurēti projekta noslēpumi, pārbaudiet SonarQube rezultātu PR
+- `node:test` failos katru augstākā līmeņa `await` (piemēram, `await import(...)`) novietojiet pirms pirmā `test()` / `describe()`: izmantojot `--test-force-exit`, pēc tā reģistrētie testi var klusām vispār netikt izpildīti (#18045; to nodrošina `npm run check:test-tla-order`)
+- Ja ir mainīts produkcijas kods, PR aprakstā norādiet mainītos vai pievienotos testa failus
+- Ja projektam CI vidē ir konfigurēti noslēpumi, pārbaudiet PR SonarQube rezultātu
 
-Pašreizējais testu statuss: **122 unit testu faili**, kas aptver:
+Pašreizējais testu statuss: **122 vienībtestu faili**, kas aptver:
 
-- Provideru translatorus un formātu konvertēšanu
-- Ātruma ierobežošanu, circuit breaker un noturību
-- Semantisko kešatmiņu, idempotenci, progresa izsekošanu
-- Datu bāzes darbības un shēmu (21 DB modulis)
+- Pakalpojumu sniedzēju tulkotājus un formātu pārveidošanu
+- Ātruma ierobežošanu, ķēdes pārtraucēju un noturību
+- Semantisko kešatmiņu, idempotenci un progresa izsekošanu
+- Datubāzes operācijas un shēmu (21 DB modulis)
 - OAuth plūsmas un autentifikāciju
 - API galapunktu validāciju (Zod v4)
-- MCP servera rīkus un tvērumu izpildes kontroli
+- MCP servera rīkus un tvēruma ierobežojumu piemērošanu
 - Memory un Skills sistēmas
 
 ---

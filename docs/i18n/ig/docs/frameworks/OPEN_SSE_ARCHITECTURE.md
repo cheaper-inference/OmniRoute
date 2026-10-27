@@ -488,7 +488,7 @@ Nke a na-ahụ maka:
 
 | Faịlụ                            | Ebumnuche                                         |
 | -------------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`            | Ndekọ aha ụdị-chat dabere na katalog provider 375 |
+| `providerRegistry.ts`            | Ndekọ aha ụdị-chat dabere na katalog provider 376 |
 | `providerModels.ts`              | Aha ndị ọzọ nke ụdị, ịmapụ usoro                  |
 | `constants.ts`                   | Oge agwụ, oke, koodu ọnọdụ                        |
 | `defaultThinkingSignature.ts`    | Mbinye aka echiche Claude ndabara                 |

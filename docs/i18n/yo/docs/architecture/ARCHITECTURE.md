@@ -15,7 +15,7 @@ OmniRoute jẹ́ ẹnu-ọ̀nà ìdarí AI abẹ́lẹ̀ àti pátákó ìṣàk
 
 Àwọn agbára pàtàkì:
 
-- Ojú API tó bá OpenAI mu fún CLI/irinṣẹ́ (àwọn olupèsè 375, àwọn mójúùlù olùmúṣẹ 156)
+- Ojú API tó bá OpenAI mu fún CLI/irinṣẹ́ (àwọn olupèsè 376, àwọn mójúùlù olùmúṣẹ 156)
 - Ìtumọ̀ ìbéèrè/ìdáhùn láàárín àwọn fọ́ọ̀mù olupèsè
 - Ìyípadà àṣàyàn àkójọpọ̀ model (ọ̀wọ̀ọ̀wọ́ ọ̀pọ̀ model)
 - Àwọn ìgbésẹ̀ àkójọpọ̀ tí a ṣètò (`provider + model + connection`) pẹ̀lú ìṣètò ní àkókò ìṣiṣẹ́ nípasẹ̀ `compositeTiers`

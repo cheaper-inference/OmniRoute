@@ -8,7 +8,7 @@
  * imports getCodexUsage (dispatcher). Behavior-preserving move.
  */
 
-import { buildCodexUsageQuotas } from "../codexUsageQuotas.ts";
+import { buildCodexUsageQuotas, findCodexSparkRateLimit } from "../codexUsageQuotas.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { getCodexBackendIdentityHeaders } from "../../config/codexClient.ts";
 import { getFieldValue } from "./scalars.ts";
@@ -87,8 +87,14 @@ export async function getCodexUsage(
 
     const { rateLimit, quotas, bankedResetCredits, rateLimitReachedType, paidCredits } =
       buildCodexUsageQuotas(data);
+    const sparkLimitReached = getFieldValue(
+      findCodexSparkRateLimit(data).rateLimit,
+      "limit_reached",
+      "limitReached"
+    );
 
     return {
+      ...(typeof sparkLimitReached === "boolean" ? { sparkLimitReached } : {}),
       plan: String(getFieldValue(data, "plan_type", "planType") || "unknown"),
       limitReached: Boolean(getFieldValue(rateLimit, "limit_reached", "limitReached")),
       quotas,

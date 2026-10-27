@@ -498,7 +498,7 @@ helpers (tool schemas၊ fetch/TTS adapters၊ ထူးခြားချက်
 (မျှဝေသုံး identity helper) နှင့် `index.ts` (registry) တို့လည်း ပါဝင်သည်။
 
 > မှတ်ချက်- ဤနေရာတွင် စာရင်းမပြုထားသော providers များကို ယေဘုယျ
-> OpenAI-compatible executor အသုံးပြုသည့် `default.ts` က ဆောင်ရွက်ပေးသည်။ Provider catalog အပြည့်အစုံ (providers 375 ခု) သည်
+> OpenAI-compatible executor အသုံးပြုသည့် `default.ts` က ဆောင်ရွက်ပေးသည်။ Provider catalog အပြည့်အစုံ (providers 376 ခု) သည်
 > `src/shared/constants/providers.ts` တွင် ရှိသည်။
 
 ### 4.3 `open-sse/translator/`

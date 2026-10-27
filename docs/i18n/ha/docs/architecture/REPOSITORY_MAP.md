@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | API na sassan dashboard: masu daidaitawa a kan `packages/ui-kit` — duba `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: sunayen gumaka da allunan ke amfani da su → sassan Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **masu samarwa 375** tare da tabbatarwar Zod (tushen gaskiya)                                                |
+| `constants/providers.ts`         | **masu samarwa 376** tare da tabbatarwar Zod (tushen gaskiya)                                                |
 | `constants/cliTools.ts`          | Kundin rajistar kayan aikin CLI na waje                                                                      |
 | `constants/routingStrategies.ts` | **dabarun zaɓin hanya 20** tare da matakan fifiko                                                            |
 | `constants/publicApiRoutes.ts`   | Hanyoyin da ke buƙatar tantancewar Bearer (maimakon ta gudanarwa)                                            |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Haɗaɗɗun CLI na waje + CLI na OmniRoute na ciki                                                           |
 | `I18N.md`                   | Tsarin gine-ginen i18n, ƙara harshe, locales 67                                                           |
 | `UNINSTALL.md`              | Matakan cire girkawa gaba ɗaya                                                                            |
-| `PROVIDER_REFERENCE.md`     | Kundin masu samarwa 375 da aka **ƙirƙira ta atomatik** (sake ƙirƙirawa: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Kundin masu samarwa 376 da aka **ƙirƙira ta atomatik** (sake ƙirƙirawa: `npm run gen:provider-reference`) |
 
 ### Cikakken bayani kan ƙananan tsare-tsare
 

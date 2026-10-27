@@ -24,7 +24,7 @@ function supportedProfiles() {
 const TRANSPORT_PROFILES = {
   "open-sse/utils/tlsClient.ts": ["chrome_124", "macos"],
   "open-sse/services/claudeTlsClient.ts": ["chrome_146", "linux"],
-  "open-sse/services/perplexityTlsClient.ts": ["firefox_148", "macos"],
+  "open-sse/services/perplexityTlsClient.ts": ["firefox_151", "macos"],
   "open-sse/services/grokTlsClient.ts": ["chrome_146", "linux"],
   "open-sse/services/notionTlsClient.ts": ["chrome_146", "windows"],
   "open-sse/services/lmarenaTlsClient.ts": ["chrome_146", "windows"],
