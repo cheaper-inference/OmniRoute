@@ -31,13 +31,14 @@ test("the cascade embeds the kit faces it uses (display, uiBold, mono) and nothi
   for (const fam of ["CI Serif", "CI Sans", "CI Mono"]) {
     assert.ok(svg.includes(`font-family:"${fam}"`), fam);
   }
-  // The drawn endpoint label "http://localhost:20128/v1" is copy, not a fetch — it is the one
-  // scheme-prefixed string allowed besides the SVG namespace.
-  assert.doesNotMatch(
-    svg,
-    /https?:\/\/(?!www\.w3\.org\/2000\/svg|localhost:20128\/v1)|@import|<script|<foreignObject/
-  );
-  assert.doesNotMatch(svg, /(href|src)="https?:\/\//);
+  // Reference-based "nothing external" check (review ruling R10): every place the renderer could
+  // fetch from — element references, CSS url(), @import — must not carry an http(s) scheme, and
+  // no script / foreignObject. Drawn text such as "http://localhost:20128/v1" is copy, not a
+  // fetch, so it is not matched by any of these.
+  assert.doesNotMatch(svg, /(href|src|xlink:href)=["']https?:/);
+  assert.doesNotMatch(svg, /url\(\s*["']?https?:/);
+  assert.doesNotMatch(svg, /@import|<script|<foreignObject/);
+  assert.ok(svg.includes("http://localhost:20128/v1"), "the endpoint label is still drawn");
   assert.match(svg, /^<svg viewBox="0 0 1200 650" [^>]*role="img"/);
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
 });
