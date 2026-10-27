@@ -177,3 +177,22 @@ test("without the advisory the context check still counts the full max_tokens", 
     "tier-strict/uncatalogued",
   ]);
 });
+
+test("a max_tokens below the target's own output limit is not raised to that limit", async () => {
+  saveModelsDevCapabilities({
+    "tier-small-request": {
+      primary: capabilityEntry(200_000, 64_000),
+      big: capabilityEntry(1_000_000, 64_000),
+    },
+  });
+  // 600k chars is about 150k input tokens: 150k + 8k fits a 200k window,
+  // 150k + 64k does not.
+  const body = {
+    messages: [{ role: "user", content: "word ".repeat(120_000) }],
+    max_tokens: 8_000,
+  };
+  assert.deepEqual(await orderFor("tier-small-request", ["primary", "big"], body), [
+    "tier-small-request/primary",
+    "tier-small-request/big",
+  ]);
+});
