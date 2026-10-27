@@ -69,7 +69,7 @@ export const LOCAL_PROVIDERS = {
     textIcon: "OC",
     website: "https://opencode.ai/docs/server/",
     authHint:
-      "No API key required. Uses the opencode CLI's own headless server (`opencode serve`), which holds the opencode credential and talks to the opencode upstream. Set the server URL in the provider settings; OmniRoute starts the server on demand when it is a loopback URL and nothing is listening, using the binary from OPENCODE_SERVER_BIN or the usual install locations.",
+      "No API key required. Uses the opencode CLI's own headless server (`opencode serve`), which holds the opencode credential and talks to the opencode upstream. Set the server URL in the provider settings and start the server from Providers > Services > OpenCode (loopback URLs only, binary from OPENCODE_SERVER_BIN or the usual install locations) or run `opencode serve` yourself; requests never start it.",
     localDefault: "http://127.0.0.1:4096",
     passthroughModels: false,
   },

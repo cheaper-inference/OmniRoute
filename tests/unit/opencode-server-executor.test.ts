@@ -222,7 +222,6 @@ async function startFakeServer(): Promise<{
 test("opencode-server: maps a chat request onto an opencode session turn", async () => {
   const fake = await startFakeServer();
   process.env.OPENCODE_SERVER_URL = fake.url;
-  process.env.OPENCODE_SERVER_AUTOSTART = "0";
   const { OpencodeServerExecutor } = await import("../../open-sse/executors/opencodeServer.ts");
   const { clearOpencodeServerSettingsCache } =
     await import("../../open-sse/executors/opencodeServer.ts");
@@ -271,7 +270,6 @@ test("opencode-server: maps a chat request onto an opencode session turn", async
 test("opencode-server: unknown model fails loudly instead of hitting the upstream", async () => {
   const fake = await startFakeServer();
   process.env.OPENCODE_SERVER_URL = fake.url;
-  process.env.OPENCODE_SERVER_AUTOSTART = "0";
   const { OpencodeServerExecutor, clearOpencodeServerSettingsCache } =
     await import("../../open-sse/executors/opencodeServer.ts");
   clearOpencodeServerSettingsCache();
@@ -296,7 +294,6 @@ test("opencode-server: streaming forwards deltas and terminates with [DONE]", as
   const fake = await startFakeServer();
   fake.setAssistantText("streamed-text");
   process.env.OPENCODE_SERVER_URL = fake.url;
-  process.env.OPENCODE_SERVER_AUTOSTART = "0";
   const { OpencodeServerExecutor, clearOpencodeServerSettingsCache } =
     await import("../../open-sse/executors/opencodeServer.ts");
   clearOpencodeServerSettingsCache();
@@ -326,7 +323,6 @@ test("opencode-server: tool envelope becomes OpenAI tool_calls", async () => {
   const fake = await startFakeServer();
   fake.setAssistantText('{"tool_calls":[{"name":"get_weather","arguments":{"city":"Lisboa"}}]}');
   process.env.OPENCODE_SERVER_URL = fake.url;
-  process.env.OPENCODE_SERVER_AUTOSTART = "0";
   const { OpencodeServerExecutor, clearOpencodeServerSettingsCache } =
     await import("../../open-sse/executors/opencodeServer.ts");
   clearOpencodeServerSettingsCache();
@@ -376,7 +372,6 @@ test("opencode-server: tool envelope becomes OpenAI tool_calls", async () => {
 test("opencode-server: Responses input produces a Responses payload", async () => {
   const fake = await startFakeServer();
   process.env.OPENCODE_SERVER_URL = fake.url;
-  process.env.OPENCODE_SERVER_AUTOSTART = "0";
   const { OpencodeServerExecutor, clearOpencodeServerSettingsCache } =
     await import("../../open-sse/executors/opencodeServer.ts");
   clearOpencodeServerSettingsCache();
@@ -406,7 +401,6 @@ test("opencode-server: upstream error text is never echoed to the client (non-st
   const fake = await startFakeServer();
   fake.failWith("session", 500, LEAKY_UPSTREAM_BODY);
   process.env.OPENCODE_SERVER_URL = fake.url;
-  process.env.OPENCODE_SERVER_AUTOSTART = "0";
   executorModule.clearOpencodeServerSettingsCache();
 
   try {
@@ -433,7 +427,6 @@ test("opencode-server: streaming errors use the sanitized error envelope", async
   const fake = await startFakeServer();
   fake.failWith("prompt_async", 500, LEAKY_UPSTREAM_BODY);
   process.env.OPENCODE_SERVER_URL = fake.url;
-  process.env.OPENCODE_SERVER_AUTOSTART = "0";
   executorModule.clearOpencodeServerSettingsCache();
 
   try {
@@ -457,7 +450,6 @@ test("opencode-server: streaming errors use the sanitized error envelope", async
 test("opencode-server: only https and data URLs are forwarded as file parts", async () => {
   const fake = await startFakeServer();
   process.env.OPENCODE_SERVER_URL = fake.url;
-  process.env.OPENCODE_SERVER_AUTOSTART = "0";
   executorModule.clearOpencodeServerSettingsCache();
 
   try {
@@ -524,23 +516,72 @@ test("opencode-server: the CLI binary is not a settings key", async () => {
   }
 });
 
-test("opencode-server: autostart refuses a non-loopback URL instead of spawning", async () => {
-  process.env.OPENCODE_SERVER_URL = "http://192.0.2.1:4096";
-  process.env.OPENCODE_SERVER_AUTOSTART = "1";
-  process.env.OPENCODE_SERVER_BIN = "/definitely/not/executed";
+// A loopback port with nothing listening (bound, then released).
+async function deadLoopbackUrl(): Promise<string> {
+  const probe = http.createServer();
+  await new Promise<void>((resolve) => probe.listen(0, "127.0.0.1", resolve));
+  const { port } = probe.address() as AddressInfo;
+  await new Promise<void>((resolve) => probe.close(() => resolve()));
+  return `http://127.0.0.1:${port}`;
+}
+
+test("opencode-server: a request never spawns the server; a dead server is a clean 503", async () => {
+  // OPENCODE_SERVER_BIN points at a script that leaves a marker when executed. The
+  // old executor autostarted `opencode serve` from the request path (Hard Rules
+  // #15/#17); now only the local-only /api/services/opencode-server/start does.
+  const marker = path.join(TEST_DATA_DIR, "spawned.marker");
+  const fakeBin = path.join(TEST_DATA_DIR, "fake-opencode.sh");
+  fs.writeFileSync(fakeBin, `#!/bin/sh\necho spawned > "${marker}"\nsleep 5\n`, { mode: 0o755 });
+  process.env.OPENCODE_SERVER_URL = await deadLoopbackUrl();
+  process.env.OPENCODE_SERVER_BIN = fakeBin;
   executorModule.clearOpencodeServerSettingsCache();
   try {
-    await assert.rejects(executorModule.ensureOpencodeServer(), /loopback/);
+    const executor = new executorModule.OpencodeServerExecutor();
+    const result = await executor.execute({
+      model: "opencode-server/test-model",
+      body: { messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials: {},
+    });
+    assert.equal(result.response.status, 503);
+    const payload = (await result.response.json()) as Json;
+    const message = String(dig(payload, "error", "message"));
+    assert.match(message, /opencode server not running/);
+    assert.match(message, /opencode serve/);
+    assert.doesNotMatch(JSON.stringify(payload), /\bat \S+:\d+:\d+|node:internal|Error:/);
+    await new Promise((resolve) => setTimeout(resolve, 300));
+    assert.equal(fs.existsSync(marker), false, "the executor must not spawn anything");
   } finally {
     delete process.env.OPENCODE_SERVER_BIN;
-    process.env.OPENCODE_SERVER_AUTOSTART = "0";
+  }
+});
+
+test("opencode-server: the executor's import graph carries no process API", () => {
+  // Static half of the guarantee above, mirroring check:route-guard-membership:
+  // none of the executor's own modules may load child_process / worker_threads,
+  // and the launcher (which does) is not imported by the executor.
+  const root = path.resolve(import.meta.dirname, "../..");
+  const executorSource = fs.readFileSync(
+    path.join(root, "open-sse/executors/opencodeServer.ts"),
+    "utf8"
+  );
+  assert.doesNotMatch(executorSource, /(?:from\s*|import\s*\(\s*)["'][^"']*opencodeServerLauncher/);
+  for (const rel of [
+    "open-sse/executors/opencodeServer.ts",
+    "open-sse/services/opencodeServerEndpoint.ts",
+    "open-sse/services/opencodeServerEventBus.ts",
+    "open-sse/services/opencodeServerSafety.ts",
+    "open-sse/services/opencodeServerSettings.ts",
+    "open-sse/services/opencodeServerWire.ts",
+  ]) {
+    const source = fs.readFileSync(path.join(root, rel), "utf8");
+    assert.doesNotMatch(source, /["'](?:node:)?(?:child_process|worker_threads)["']/, rel);
   }
 });
 
 test("opencode-server: closing the event bus stops its reconnect loop", async () => {
   const fake = await startFakeServer();
   process.env.OPENCODE_SERVER_URL = fake.url;
-  process.env.OPENCODE_SERVER_AUTOSTART = "0";
   executorModule.clearOpencodeServerSettingsCache();
 
   const executor = new executorModule.OpencodeServerExecutor();

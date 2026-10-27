@@ -1,7 +1,3 @@
-import { spawn } from "node:child_process";
-import { closeSync, existsSync, mkdirSync, openSync } from "node:fs";
-import { join } from "node:path";
-
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { buildErrorBody } from "../utils/error.ts";
@@ -10,7 +6,11 @@ import {
   type OpencodeMessageInfo,
   type OpencodePart,
 } from "../services/opencodeServerEventBus.ts";
-import { buildServerEnv, isLoopbackHost } from "../services/opencodeServerSafety.ts";
+import {
+  probeOpencodeServerHealth,
+  resolveOpencodeServerUrl,
+  type OpencodeServerHealth,
+} from "../services/opencodeServerEndpoint.ts";
 import {
   clearOpencodeServerSettingsCache,
   readOpencodeServerSettings,
@@ -26,10 +26,8 @@ import {
   createStreamFrames,
   detectWireFormat,
   finalStreamFrames,
-  firstExistingPath,
   newId,
   normalizeTools,
-  opencodeBinaryCandidates,
   parseCatalog,
   parseToolEnvelope,
   toolInstruction,
@@ -68,40 +66,29 @@ import {
 //     ~6.8k tokens of opencode agent prompt; with them the overhead drops to ~18.
 //   - `POST /session/:id/prompt_async` (204) plus `GET /event` gives real token
 //     streaming via `message.part.delta` events, terminated by `session.idle`.
+//
+// The executor never starts the server. Spawning a process from the request path
+// would make every inference route a process-spawn surface (Hard Rules #15/#17,
+// check:route-guard-membership), so `opencode serve` is started by the operator:
+// from the dashboard (Providers -> Services -> OpenCode, backed by the local-only
+// /api/services/opencode-server/* routes and services/opencodeServerLauncher.ts)
+// or by running `opencode serve` themselves. A request that finds no server gets
+// a clear 503 instead.
 
-const DEFAULT_BASE_URL = "http://127.0.0.1:4096";
 const DEFAULT_TIMEOUT_MS = 180_000;
 const CATALOG_TTL_MS = 60_000;
-const DEFAULT_AUTOSTART_TIMEOUT_MS = 45_000;
 
 // Settings come from the dashboard (Providers → local → opencode server) and
 // win over the defaults; the cache lives in services/opencodeServerSettings.ts so
 // the settings route can invalidate it without importing an executor.
 export { clearOpencodeServerSettingsCache };
 
-// Refreshed on every ensureOpencodeServer() (i.e. before each request) so the
+// Refreshed on every requireOpencodeServer() (i.e. before each request) so the
 // synchronous helpers below can read it without becoming async themselves.
 let resolvedSettings: OpencodeServerSettings = {};
 
 function serverBaseUrl(): string {
-  const configured =
-    String(process.env.OPENCODE_SERVER_URL || "").trim() ||
-    String(resolvedSettings.url || "").trim();
-  return (configured || DEFAULT_BASE_URL).replace(/\/+$/, "");
-}
-
-// The CLI binary is usually on PATH, but on managed/bundled installs it may not
-// be (npm shim vs. the real exe inside the package). Resolution order mirrors
-// executors/auggie.ts: explicit ENV override, then known install locations, then
-// PATH. It is never read from the settings DB / dashboard (see
-// services/opencodeServerSettings.ts).
-function resolveBinary(): string | null {
-  const explicit = String(
-    process.env.OPENCODE_SERVER_BIN || process.env.CLI_OPENCODE_BIN || ""
-  ).trim();
-  if (explicit) return explicit;
-  const { candidates, fallback } = opencodeBinaryCandidates(process.platform, process.env);
-  return firstExistingPath(candidates, existsSync) ?? fallback;
+  return resolveOpencodeServerUrl(resolvedSettings);
 }
 
 function requestTimeoutMs(): number {
@@ -109,131 +96,39 @@ function requestTimeoutMs(): number {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_TIMEOUT_MS;
 }
 
-function autostartTimeoutMs(): number {
-  const parsed = Number(process.env.OPENCODE_SERVER_START_TIMEOUT_MS);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_AUTOSTART_TIMEOUT_MS;
-}
-
-function autostartEnabled(): boolean {
-  return !/^(0|false|no|off)$/i.test(String(process.env.OPENCODE_SERVER_AUTOSTART ?? "1"));
-}
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-async function probeHealth(
-  timeoutMs = 1500
-): Promise<{ healthy: boolean; version?: string } | null> {
-  try {
-    const response = await fetch(`${serverBaseUrl()}/global/health`, {
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-    if (!response.ok) return null;
-    return (await response.json()) as { healthy: boolean; version?: string };
-  } catch {
-    return null;
-  }
-}
-
-// Owns the lazy autostart of `opencode serve`. Concurrent requests share the same
-// promise so a burst never spawns more than one server.
-const autostartState: {
-  pending: Promise<{ healthy: boolean; version?: string }> | null;
-  pid: number | null;
-} = {
-  pending: null,
-  pid: null,
-};
-
-function openServerLogs(): { stdoutFd: number | null; stderrFd: number | null } {
-  const logDir =
-    process.env.OMNIROUTE_LOG_DIR ||
-    join(process.env.HOME || process.env.USERPROFILE || "", ".omniroute", "logs");
-  try {
-    mkdirSync(logDir, { recursive: true });
-  } catch {
-    /* logging is best effort */
-  }
-  let stdoutFd: number | null = null;
-  let stderrFd: number | null = null;
-  try {
-    stdoutFd = openSync(join(logDir, "opencode-serve.log"), "a");
-    stderrFd = openSync(join(logDir, "opencode-serve.err.log"), "a");
-  } catch {
-    /* fall back to inherited stdio */
-  }
-  return { stdoutFd, stderrFd };
-}
-
-async function spawnServer(): Promise<{ healthy: boolean; version?: string }> {
-  // Autostart only ever applies to a server on this machine; a remote URL means
-  // someone else owns that process.
-  if (!isLoopbackHost(new URL(serverBaseUrl()).hostname)) {
-    throw new Error(
-      `[opencode-server] no server reachable on ${serverBaseUrl()} and autostart only applies to a loopback URL`
+/** No opencode server answers on the configured URL; surfaced to the client as a 503. */
+export class OpencodeServerUnavailableError extends Error {
+  readonly status = 503;
+  constructor(url: string) {
+    super(
+      `opencode server not running on ${url}: start it from the dashboard (Providers > Services > OpenCode) or run \`opencode serve\``
     );
+    this.name = "OpencodeServerUnavailableError";
   }
-  const binary = resolveBinary();
-  if (!binary) {
-    throw new Error(
-      "[opencode-server] server unreachable and no opencode binary found (set OPENCODE_SERVER_BIN in the OmniRoute environment)"
-    );
-  }
-  const { stdoutFd, stderrFd } = openServerLogs();
-
-  const url = new URL(serverBaseUrl());
-  const child = spawn(
-    binary,
-    [
-      "serve",
-      "--port",
-      url.port || "4096",
-      "--hostname",
-      url.hostname.replace(/^\[|\]$/g, "") || "127.0.0.1",
-    ],
-    {
-      cwd: process.env.OPENCODE_SERVER_CWD || process.cwd(),
-      detached: true,
-      windowsHide: true,
-      stdio: ["ignore", stdoutFd, stderrFd],
-      env: buildServerEnv(),
-    }
-  );
-  child.on("error", () => {});
-  child.unref();
-  autostartState.pid = child.pid ?? null;
-  if (stdoutFd !== null) closeSync(stdoutFd);
-  if (stderrFd !== null) closeSync(stderrFd);
-
-  const deadline = Date.now() + autostartTimeoutMs();
-  let delay = 150;
-  while (Date.now() < deadline) {
-    await sleep(delay);
-    delay = Math.min(1000, Math.round(delay * 1.4));
-    const health = await probeHealth(1200);
-    if (health) return health;
-  }
-  throw new Error(
-    `[opencode-server] could not start opencode serve on ${serverBaseUrl()} (pid ${autostartState.pid ?? "?"})`
-  );
 }
 
-export async function ensureOpencodeServer(): Promise<{ healthy: boolean; version?: string }> {
+/** Health of the configured server, or OpencodeServerUnavailableError. Never spawns. */
+export async function requireOpencodeServer(): Promise<OpencodeServerHealth> {
   resolvedSettings = await readOpencodeServerSettings();
-  const health = await probeHealth();
-  if (health) return health;
-  if (!autostartEnabled()) {
-    throw new Error(
-      `[opencode-server] no server on ${serverBaseUrl()} and OPENCODE_SERVER_AUTOSTART is disabled`
-    );
-  }
-  if (!autostartState.pending) {
-    autostartState.pending = spawnServer().finally(() => {
-      autostartState.pending = null;
+  const health = await probeOpencodeServerHealth(serverBaseUrl());
+  if (!health) throw new OpencodeServerUnavailableError(serverBaseUrl());
+  return health;
+}
+
+// Probed on every request (a local GET), so a server that went away gives the
+// same clean 503 whether or not the model catalog is still cached. Same envelope
+// every other route uses (Hard Rule 12): sanitized message, no stack.
+async function unavailableResponse(): Promise<Response | null> {
+  try {
+    await requireOpencodeServer();
+    return null;
+  } catch (error) {
+    if (!(error instanceof OpencodeServerUnavailableError)) throw error;
+    return new Response(JSON.stringify(buildErrorBody(error.status, error.message)), {
+      status: error.status,
+      headers: { "Content-Type": "application/json; charset=utf-8" },
     });
   }
-  return autostartState.pending;
 }
 
 type ServerJsonOptions = {
@@ -284,7 +179,6 @@ function catalogIsFresh(): boolean {
 
 async function loadCatalog(force = false): Promise<typeof catalog> {
   if (!force && catalogIsFresh()) return catalog;
-  await ensureOpencodeServer();
   const { byModel, defaultProvider } = parseCatalog(
     await serverJson<CatalogPayload>("/config/providers")
   );
@@ -485,6 +379,8 @@ export class OpencodeServerExecutor extends BaseExecutor {
     const wantsStream = input.stream === true || body.stream === true;
     const wireFormat = detectWireFormat(body, input.clientHeaders);
 
+    const unavailable = await unavailableResponse();
+    if (unavailable) return { response: unavailable };
     await loadCatalog();
     const target = resolveModel(input.model);
     if (target.synthetic) {
