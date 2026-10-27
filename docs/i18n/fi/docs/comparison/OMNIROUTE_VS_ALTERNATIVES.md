@@ -37,13 +37,13 @@ Objektiivinen ominaisuusvertailu suosittuihin avoimen lähdekoodin tekoälyreiti
 | **Tunnelointituki (Cloudflared, Tailscale, Ngrok)**               |                      ✅                       |          ❌           |        n/a        |      n/a       |
 | **Lisenssi**                                                      |                      MIT                      |          MIT          |    omisteinen     |   omisteinen   |
 
-## Milloin OmniRoute kannattaa valita
+## Milloin valita OmniRoute
 
-- Ylläpidät palvelua itse ja haluat **mahdollisimman laajan palveluntarjoajatuen** (376 palveluntarjoajaa, 155 ilmaista tai ilman tunnistautumista toimivaa luettelomerkintää)
-- Tarvitset **sisäänrakennetun MCP-palvelimen** (LLM-työkalut, muisti ja taidot käytettävissä työkaluina)
+- Isännöit palvelua itse ja haluat **mahdollisimman laajan palveluntarjoajakattavuuden** (376 palveluntarjoajaa, 155 ilmaista tai todennusta vaativatonta luettelomerkintää)
+- Tarvitset **sisäänrakennetun MCP-palvelimen** (LLM-työkalut, muisti ja taidot tarjottuna työkaluina)
 - Tarvitset **A2A-protokollan** agenttien välisiin työnkulkuihin
-- Haluat **sormenjälkien häivytyksen** (JA3/JA4), jotta upstream-palvelujen CAPTCHA-tunnistus voidaan välttää
-- Tarvitset **yritystason ominaisuuksia** (suojaukset, arvioinnit ja kirjausketju) ilman SaaS-laskua
+- Haluat **sormenjäljen häivytyksen** (JA3/JA4) välttääksesi tunnistumisen ylävirran CAPTCHA-suojauksissa
+- Tarvitset **yritysominaisuuksia** (suojakaiteet, evaluaatiot, auditointijälki) ilman SaaS-laskua
 
 ## Milloin LiteLLM kannattaa valita
 

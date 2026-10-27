@@ -17,77 +17,77 @@ _Ostatnia aktualizacja: 2026-06-28_
 
 ## Podsumowanie wykonawcze
 
-OmniRoute to lokalna brama routingu AI i panel administracyjny zbudowane na Next.js.
-Udostępnia pojedynczy punkt końcowy zgodny z OpenAI (`/v1/*`) i kieruje ruch do wielu dostawców nadrzędnych, zapewniając translację, mechanizmy awaryjne, odświeżanie tokenów i śledzenie użycia.
+OmniRoute to lokalna brama routingu AI oraz panel kontrolny zbudowane w oparciu o Next.js.
+Udostępnia pojedynczy punkt końcowy zgodny z OpenAI (`/v1/*`) i kieruje ruch do wielu dostawców nadrzędnych, obsługując translację, mechanizmy awaryjne, odświeżanie tokenów oraz śledzenie użycia.
 
 Najważniejsze możliwości:
 
-- Powierzchnia API zgodna z OpenAI dla CLI/narzędzi (376 dostawców, 156 modułów wykonawczych)
-- Translacja żądań/odpowiedzi między formatami dostawców
-- Mechanizm awaryjny kombinacji modeli (sekwencja wielu modeli)
-- Ustrukturyzowane kroki kombinacji (`provider + model + connection`) z kolejnością wykonywania określaną w czasie działania przez `compositeTiers`
+- Warstwa API zgodna z OpenAI dla narzędzi CLI i innych narzędzi (376 dostawców, 156 modułów wykonawczych)
+- Translacja żądań i odpowiedzi między formatami dostawców
+- Mechanizm awaryjny dla kombinacji modeli (sekwencja wielu modeli)
+- Ustrukturyzowane kroki kombinacji (`provider + model + connection`) z ustalaniem kolejności w czasie wykonywania przez `compositeTiers`
 - Mechanizm awaryjny na poziomie konta (wiele kont na dostawcę)
-- Wstępne sprawdzanie limitów oraz uwzględniający limity wybór konta metodą P2C w głównej ścieżce czatu
-- Zarządzanie połączeniami z dostawcami przez OAuth i klucze API (27 modułów dostawców OAuth)
+- Wstępna kontrola limitów oraz uwzględniający limity wybór konta P2C w głównej ścieżce czatu
+- Zarządzanie połączeniami z dostawcami za pomocą OAuth i kluczy API (27 modułów dostawców OAuth)
 - Generowanie osadzeń przez `/v1/embeddings` (18 dostawców)
 - Generowanie obrazów przez `/v1/images/generations` (ponad 10 dostawców, ponad 20 modeli)
-- Transkrypcja audio przez `/v1/audio/transcriptions` (18 dostawców)
-- Zamiana tekstu na mowę przez `/v1/audio/speech` (24 wbudowanych dostawców)
+- Transkrypcja dźwięku przez `/v1/audio/transcriptions` (18 dostawców)
+- Synteza mowy z tekstu przez `/v1/audio/speech` (24 wbudowanych dostawców)
 - Generowanie wideo przez `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Generowanie muzyki przez `/v1/music/generations` (ComfyUI)
 - Wyszukiwanie w internecie przez `/v1/search` (20 dostawców)
 - Moderacja przez `/v1/moderations`
-- Ponowne szeregowanie przez `/v1/rerank`
-- Analizowanie znaczników myślenia (`<think>...</think>`) dla modeli rozumujących
-- Sanityzacja odpowiedzi zapewniająca ścisłą zgodność z zestawem SDK OpenAI
+- Ponowne klasyfikowanie przez `/v1/rerank`
+- Parsowanie znaczników rozumowania (`<think>...</think>`) dla modeli rozumujących
+- Oczyszczanie odpowiedzi w celu zapewnienia ścisłej zgodności z zestawem SDK OpenAI
 - Normalizacja ról (developer→system, system→user) w celu zapewnienia zgodności między dostawcami
-- Konwersja ustrukturyzowanych wyników (json_schema → Gemini responseSchema)
+- Konwersja ustrukturyzowanych danych wyjściowych (json_schema → Gemini responseSchema)
 - Lokalne przechowywanie dostawców, kluczy, aliasów, kombinacji, ustawień i cenników (122 moduły bazy danych)
-- Śledzenie użycia/kosztów i rejestrowanie żądań
-- Opcjonalna synchronizacja z chmurą do synchronizacji między urządzeniami i synchronizacji stanu
-- Lista dozwolonych/zablokowanych adresów IP do kontroli dostępu do API
-- Zarządzanie budżetem myślenia (przekazywanie bez zmian/automatyczny/niestandardowy/adaptacyjny)
+- Śledzenie użycia i kosztów oraz rejestrowanie żądań
+- Opcjonalna synchronizacja w chmurze umożliwiająca synchronizację między urządzeniami i synchronizację stanu
+- Lista dozwolonych i blokowanych adresów IP do kontroli dostępu do API
+- Zarządzanie budżetem rozumowania (przekazywanie bez zmian/automatyczne/niestandardowe/adaptacyjne)
 - Globalne wstrzykiwanie promptu systemowego
-- Śledzenie sesji i tworzenie odcisków cyfrowych
-- Rozszerzone ograniczanie częstotliwości żądań dla poszczególnych kont przy użyciu profili specyficznych dla dostawcy
-- Wzorzec wyłącznika obwodu zwiększający odporność na awarie dostawców
-- Ochrona przed lawiną równoczesnych żądań z użyciem blokowania mutex
+- Śledzenie sesji i generowanie odcisków cyfrowych
+- Rozszerzone ograniczanie częstotliwości żądań dla poszczególnych kont z profilami właściwymi dla dostawców
+- Wzorzec wyłącznika automatycznego zwiększający odporność dostawców
+- Ochrona przed lawiną równoczesnych żądań z użyciem blokad mutex
 - Pamięć podręczna deduplikacji żądań oparta na sygnaturach
 - Warstwa domenowa: reguły kosztów, zasady mechanizmu awaryjnego, zasady blokowania
-- Context Relay: podsumowania przekazywania sesji zapewniające ciągłość podczas rotacji kont
-- Trwałe przechowywanie stanu domeny (pamięć podręczna SQLite z zapisem bezpośrednim dla mechanizmów awaryjnych, budżetów, blokad i wyłączników obwodu)
-- Silnik zasad do scentralizowanej oceny żądań (blokada → budżet → mechanizm awaryjny)
+- Context Relay: podsumowania przekazania sesji zapewniające ciągłość podczas rotacji kont
+- Trwałe przechowywanie stanu domeny (pamięć podręczna SQLite z bezpośrednim zapisem dla mechanizmów awaryjnych, budżetów, blokad i wyłączników automatycznych)
+- Aparat zasad do scentralizowanej oceny żądań (blokada → budżet → mechanizm awaryjny)
 - Telemetria żądań z agregacją opóźnień p50/p95/p99
 - Telemetria celów kombinacji i historyczny stan celów kombinacji za pośrednictwem `combo_execution_key` / `combo_step_id`
 - Identyfikator korelacji (X-Request-Id) do kompleksowego śledzenia
-- Rejestrowanie audytowe zgodności z możliwością wyłączenia dla poszczególnych kluczy API
-- Framework ewaluacyjny do zapewniania jakości LLM
-- Panel stanu z informacjami w czasie rzeczywistym o stanie wyłączników obwodu dostawców
+- Rejestrowanie audytów zgodności z możliwością wyłączenia dla poszczególnych kluczy API
+- Platforma ewaluacyjna do zapewniania jakości LLM
+- Panel stanu z informacjami w czasie rzeczywistym o stanie wyłączników automatycznych dostawców
 - Serwer MCP (110 narzędzi) z 3 transportami (stdio/SSE/Streamable HTTP)
 - Serwer A2A (JSON-RPC 2.0 + SSE) z umiejętnościami i cyklem życia zadań
-- System pamięci (ekstrakcja, wstrzykiwanie, pobieranie, podsumowywanie)
+- System pamięci (ekstrakcja, wstrzykiwanie, wyszukiwanie, podsumowywanie)
 - System umiejętności (rejestr, moduł wykonawczy, piaskownica, wbudowane umiejętności)
 - Serwer proxy MITM z zarządzaniem certyfikatami i obsługą DNS
 - Oprogramowanie pośredniczące chroniące przed wstrzykiwaniem promptów
 - Potok kompresji promptów z Caveman, RTK, potokami warstwowymi, kombinacjami kompresji, pakietami językowymi i analityką
 - Rejestr ACP (Agent Communication Protocol)
 - Modułowi dostawcy OAuth (22 oddzielne moduły w `src/lib/oauth/providers/`)
-- Skrypty dezinstalacji/pełnej dezinstalacji
-- Akcja naprawy środowiska OAuth
+- Skrypty odinstalowywania i pełnego odinstalowywania
+- Operacja naprawy środowiska OAuth
 - Most WebSocket dla klientów WS zgodnych z OpenAI (`/v1/ws`)
-- Zarządzanie tokenami synchronizacji (wydawanie/unieważnianie, pobieranie pakietu konfiguracji wersjonowanego za pomocą ETag)
-- GLM Thinking (`glmt`) jako wbudowany profil dostawcy pierwszej klasy
-- Hybrydowe zliczanie tokenów (wywołanie `/messages/count_tokens` po stronie dostawcy z awaryjnym szacowaniem)
+- Zarządzanie tokenami synchronizacji (wydawanie/unieważnianie, pobieranie pakietu konfiguracyjnego wersjonowanego za pomocą ETag)
+- GLM Thinking (`glmt`) jako pełnoprawne ustawienie wstępne dostawcy
+- Hybrydowe zliczanie tokenów (`/messages/count_tokens` po stronie dostawcy z awaryjnym szacowaniem)
 - Automatyczne inicjowanie aliasów modeli (ponad 30 normalizacji dialektów między serwerami proxy podczas uruchamiania)
-- Bezpieczne wychodzące żądania fetch z ochroną SSRF, blokowaniem prywatnych adresów URL i konfigurowalnymi ponowieniami
-- Ponowienia żądań czatu uwzględniające okres wyciszenia, z konfigurowalnymi ustawieniami `requestRetry` i `maxRetryIntervalSec`
-- Walidacja środowiska uruchomieniowego za pomocą Zod podczas uruchamiania
-- Audyt zgodności v2 z paginacją, zdarzeniami CRUD dostawców i rejestrowaniem walidacji zablokowanych przez SSRF
+- Bezpieczne wychodzące żądania pobierania z ochroną SSRF, blokowaniem prywatnych adresów URL i konfigurowalnym ponawianiem prób
+- Ponawianie żądań czatu z uwzględnieniem okresu odczekania oraz konfigurowalnymi `requestRetry` i `maxRetryIntervalSec`
+- Walidacja środowiska wykonawczego za pomocą Zod podczas uruchamiania
+- Audyt zgodności v2 z paginacją, zdarzeniami CRUD dostawców oraz rejestrowaniem walidacji zablokowanych przez SSRF
 
-Podstawowy model działania:
+Podstawowy model wykonawczy:
 
 - Trasy aplikacji Next.js w `src/app/api/*` implementują zarówno interfejsy API panelu, jak i interfejsy API zgodności
-- Wspólny rdzeń SSE/routingu w `src/sse/*` + `open-sse/*` obsługuje wykonywanie operacji dostawców, translację, przesyłanie strumieniowe, mechanizmy awaryjne i użycie
+- Wspólny rdzeń SSE i routingu w `src/sse/*` + `open-sse/*` obsługuje wykonywanie operacji dostawców, translację, przesyłanie strumieniowe, mechanizmy awaryjne oraz użycie
 
 ## Diagramy referencyjne
 

@@ -6,32 +6,32 @@
 
 <div align="center">
 
-<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute முகப்புப்பலகை" width="820"/>
+<img src="./docs/screenshots/MainOmniRoute.png" alt="OmniRoute கட்டுப்பாட்டுப் பலகம்" width="820"/>
 
 <br/>
 <br/>
 
 # 🚀 OmniRoute — இலவச AI நுழைவாயில்
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — குறியீடு எழுதுவதை ஒருபோதும் நிறுத்தாதீர்கள். ஒவ்வொரு AI கருவியும் → 376 வழங்குநர்கள் — 150+ இலவசம் — ஒரே முனைப்புள்ளி வழியாக. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ஆகியவற்றைத் தானியங்கி மாற்று வழியுடன் இலவச Claude / GPT / Gemini உடன் இணைக்கவும். RTK + Caveman அடுக்குச் சுருக்கம் 15–95% டோக்கன்களைச் சேமிக்கிறது (சராசரியாக ~89%) — வரம்புகளை ஒருபோதும் எட்டாதீர்கள். 376 AI வழங்குநர்கள் · 150+ இலவச அடுக்குகள் · மாதத்திற்கு ~1.62B இலவச டோக்கன்கள் · 20 வழித்தட உத்திகள் · தொடங்குவதற்கு $0."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — குறியீடு எழுதுவதை ஒருபோதும் நிறுத்தாதீர்கள். ஒவ்வொரு AI கருவியும் → 376 வழங்குநர்கள் — 150+ இலவசம் — ஒரே முனைப்புள்ளி வழியாக. Claude Code, Codex, Cursor, Cline, Copilot & Antigravity ஆகியவற்றைத் தானியங்கி மாற்றுவழியுடன் இலவச Claude / GPT / Gemini உடன் இணைக்கிறது. RTK + Caveman அடுக்குச் சுருக்கம் 15–95% டோக்கன்களைச் சேமிக்கிறது (சராசரியாக ~89%) — வரம்புகளை ஒருபோதும் எட்டாதீர்கள். 376 AI வழங்குநர்கள் · 150+ இலவச அடுக்குகள் · மாதத்திற்கு ~1.62B இலவச டோக்கன்கள் · 20 வழிப்படுத்தல் உத்திகள் · தொடங்குவதற்கு $0."/>
 
 </div>
 
 <div align="center">
 
-## 💰 மூன்றாம் தரப்பு இலவச அடுக்குகள் முழுவதும் ~1.62B டோக்கன்கள் / மாதம்
+## 💰 மூன்றாம் தரப்பு இலவசத் திட்டங்களில் மாதத்திற்கு ~1.62B டோக்கன்கள்
 
 </div>
 
-> **உங்கள் சொந்த வழங்குநர் கணக்குகளைப் பயன்படுத்துங்கள்.** இது தனித்தனியாகத் தகுதிபெறும் மூன்றாம் தரப்பு இலவச அடுக்குகளின் மதிப்பிடப்பட்ட மொத்தமாகும்; OmniRoute வழங்கும் டோக்கன் ஒதுக்கீடு அல்ல. பதிவுசெய்து, தேவைப்படும் இடங்களில் நற்சான்றுகளைப் பெற்று, நீங்கள் பயன்படுத்தக்கூடிய வழங்குநர்களை இணைக்கவும்; ஒவ்வொரு வழங்குநரும் அதன் வரம்புகள், கிடைக்கும் தன்மை மற்றும் விதிமுறைகளைக் கட்டுப்படுத்துகிறது.
+> **உங்கள் சொந்த வழங்குநர் கணக்குகளைப் பயன்படுத்துங்கள்.** இது தனித்தனியாகத் தகுதிபெறும் மூன்றாம் தரப்பு இலவசத் திட்டங்களின் மதிப்பிடப்பட்ட மொத்தமாகும்; OmniRoute வழங்கும் டோக்கன் ஒதுக்கீடு அல்ல. பதிவுசெய்து, தேவைப்படும் இடங்களில் அணுகல் சான்றுகளைப் பெற்று, நீங்கள் பயன்படுத்தக்கூடிய வழங்குநர்களை இணைக்கவும்; ஒவ்வொரு வழங்குநரும் அதன் வரம்புகள், கிடைக்கும் தன்மை மற்றும் விதிமுறைகளைக் கட்டுப்படுத்துகிறது.
 >
-> இலவச அடுக்குகளை கைமுறையாக ஒன்றிணைப்பது கடினமானது — டஜன் கணக்கான SDK-கள், டஜன் கணக்கான வீத வரம்புகள், மேலும் உண்மையில் உங்களிடம் எவ்வளவு உள்ளது என்பதே தெரியாது. OmniRoute, **தொடர்ச்சியாகப் புதுப்பிக்கப்படும் 34 தொகுப்புக் குறியீடுகளில் 484 இலவச-அடுக்கு உள்ளீடுகளை** பட்டியலிட்டு, **வெளியிடப்பட்ட நேர்மறையான மாதாந்திர பட்ஜெட்டைக் கொண்ட 17 தொகுப்புகள் மற்றும் மாதிரி ஒன்றுக்கு ஐந்து Groq உச்சவரம்புகள்** ஆகியவற்றிலிருந்து டோக்கன் மொத்தத்தைக் கணக்கிடுகிறது; பகிரப்பட்ட தொகுப்பின் அடிப்படையில் நகல்கள் நீக்கப்படுகின்றன. பிராந்திய அடையாளச் சரிபார்ப்புக்குப் பிறகு மட்டுமே திறக்கப்படும் ஒதுக்கீடுகள் (தற்போது: ModelScope) தனியாகக் காட்டப்படுகின்றன; பிராந்திய அடையாளச் சரிபார்ப்புக்குப் பின்னால் +~6M உள்ளது, மேலும் அது முதன்மை மொத்தத்தில் ஒருபோதும் சேர்க்கப்படாது. இதன் முடிவு முகப்புப் பலகையில் (`/dashboard/free-tiers`) தொடர்ந்து காணக்கூடியதாக இருக்கும்.
+> இலவசத் திட்டங்களை கைமுறையாக ஒருங்கிணைப்பது கடினம் — டஜன் கணக்கான SDK-கள், டஜன் கணக்கான விகித வரம்புகள், மேலும் உண்மையில் உங்களிடம் எவ்வளவு உள்ளது என்பதே தெரியாது. OmniRoute, **மீண்டும் மீண்டும் கிடைக்கும் 34 பகிரப்பட்ட தொகுப்பு விசைகளில் 484 இலவசத் திட்டப் பதிவுகளை** பட்டியலிடுகிறது; மேலும் **வெளியிடப்பட்ட நேர்மறை மாதாந்திர பட்ஜெட்டைக் கொண்ட 17 தொகுப்புகள் மற்றும் ஒவ்வொரு மாடலுக்குமான ஐந்து Groq உச்சவரம்புகளிலிருந்து** டோக்கன் தலைப்பு எண்ணிக்கையைக் கணக்கிடுகிறது. பகிரப்பட்ட தொகுப்பின் அடிப்படையில் நகல்கள் நீக்கப்படுகின்றன. பிராந்திய அடையாளச் சரிபார்ப்புக்குப் பிறகே திறக்கப்படும் ஒதுக்கீடுகள் (தற்போது: ModelScope) தனியாகக் காட்டப்படுகின்றன; பிராந்திய அடையாளச் சரிபார்ப்புக்குப் பின்னால் +~6M உள்ளது, மேலும் அது தலைப்பு எண்ணிக்கையில் ஒருபோதும் சேர்க்கப்படாது. முடிவு டாஷ்போர்டில் (`/dashboard/free-tiers`) தொடர்ந்து காணப்படும்.
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute இலவச-அடுக்கு பட்ஜெட் அட்டை: நிலையாக மாதத்திற்கு ~1.62B இலவச டோக்கன்கள்; பதிவுக் கிரெடிட்களுடன் முதல் மாதத்தில் ~2.22B வரை, ஒரே முனைப்புள்ளிக்குப் பின்னால் பட்டியலிடப்பட்ட 484 இலவச-அடுக்கு உள்ளீடுகளை உள்ளடக்கிய ஆவணப்படுத்தப்பட்ட 34 தொடர்ச்சியான தொகுப்புக் குறியீடுகளிலிருந்து. நேர்மையான, தொகுப்பு-நகல்நீக்கப்பட்ட கணக்கு — வெளியிடப்பட்ட நேர்மறையான மாதாந்திர டோக்கன் பட்ஜெட்டைக் கொண்ட 17 தொடர்ச்சியான தொகுப்புகள் மற்றும் மாதிரி ஒன்றுக்கு ஐந்து Groq உச்சவரம்புகள் உட்பட, பகிரப்பட்ட ஒவ்வொரு தொகுப்பும் ஒருமுறை மட்டுமே கணக்கிடப்படுகிறது; விதிமுறை-அபாயப் பட்டியலில் 12 வழங்குநர்கள் தவிர்க்க வேண்டியவை எனக் குறிக்கப்பட்டுள்ளதால், நீங்கள் முடிவெடுக்கலாம். பட்ஜெட் பட்டையில் Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (மாதிரி ஒன்றுக்கு ஐந்து உச்சவரம்புகள்) மற்றும் சிறிய தொகுப்புகள் அடங்குகின்றன; மேலும் முதல் மாதப் பதிவுக் கிரெடிட்களும் நிரந்தரமாக இலவசமான, டோக்கன் உச்சவரம்பில்லாத வழங்குநர்களும் தனித்தனியாகக் காட்டப்படுவதால், அவை முதன்மை மொத்தத்தை ஒருபோதும் செயற்கையாக உயர்த்தாது. நேரடி பயன்பாடு/மீதம் பற்றிய விவரங்கள் /dashboard/free-tiers இல்."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute இலவசத் திட்ட பட்ஜெட் அட்டை: மாதத்திற்கு நிலையாக ~1.62B இலவச டோக்கன்கள்; பதிவுசெய்தல் கிரெடிட்களுடன் முதல் மாதத்தில் அதிகபட்சம் ~2.22B வரை; ஒரே முனைப்புள்ளிக்குப் பின்னால் பட்டியலிடப்பட்ட 484 இலவசத் திட்டப் பதிவுகளை உள்ளடக்கிய, ஆவணப்படுத்தப்பட்ட மீண்டும் மீண்டும் கிடைக்கும் 34 பகிரப்பட்ட தொகுப்பு விசைகளிலிருந்து. நேர்மையான, தொகுப்பு அடிப்படையில் நகல் நீக்கப்பட்ட கணக்கீடு — வெளியிடப்பட்ட நேர்மறை மாதாந்திர டோக்கன் பட்ஜெட்டைக் கொண்ட 17 மீளும் தொகுப்புகள் மற்றும் ஒவ்வொரு மாடலுக்குமான ஐந்து Groq உச்சவரம்புகள் உட்பட, ஒவ்வொரு பகிரப்பட்ட தொகுப்பும் ஒருமுறை மட்டுமே கணக்கிடப்படுகிறது; நீங்கள் தீர்மானிக்கும்படி விதிமுறை-அபாயப் பட்டியலில் 12 வழங்குநர்கள் தவிர்க்க வேண்டியவை எனக் குறிக்கப்பட்டுள்ளனர். பட்ஜெட் பட்டையில் Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (ஒவ்வொரு மாடலுக்குமான ஐந்து உச்சவரம்புகள்) மற்றும் சிறிய தொகுப்புகள் அடங்கும்; மேலும் முதல் மாத பதிவுசெய்தல் கிரெடிட்களும், டோக்கன் உச்சவரம்பில்லாத நிரந்தர இலவச வழங்குநர்களும் தனித்தனியாகக் காட்டப்படுவதால் அவை தலைப்பு எண்ணிக்கையை ஒருபோதும் செயற்கையாக உயர்த்தாது. /dashboard/free-tiers இல் நேரடி பயன்பாடு/மீதம்."/>
 
-> நேரடி `/dashboard/free-tiers` பக்கத்தின் அசைவூட்டப்பட்ட சுருக்கம். முழுமையான வழிமுறை (தொகுப்பு நகல்நீக்கம், கிரெடிட் அடுக்குகள், வழங்குநர் விதிமுறைகள்): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> நேரடி `/dashboard/free-tiers` பக்கத்தின் அசைவூட்டப்பட்ட சுருக்கம். முழுமையான செயல்முறை விளக்கம் (தொகுப்பு நகல் நீக்கம், கிரெடிட் நிலைகள், வழங்குநர் விதிமுறைகள்): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>இந்த எண்ணிக்கைகள் இரண்டு வாரங்களுக்கு ஒருமுறை நேரடிப் பட்டியலுடன் மீண்டும் தணிக்கை செய்யப்படுகின்றன, மேலும் அவை **இரு திசைகளிலும் மாறும்** — ஒரு வழங்குநர் இலவச அடுக்கை நிறுத்தினால் எண்ணிக்கை குறையும்; புதிய ஒன்று சேர்ந்தால் அது அதிகரிக்கும். பட்டியல் உண்மையில் கணக்கிடுவதையே நாங்கள் வெளியிடுகிறோம்; உயர்த்தி முழுமைப்படுத்தப்பட்ட சிறந்த சாத்தியமான மதிப்பை ஒருபோதும் வெளியிடுவதில்லை.</sub>
+> <sub>இந்த எண்ணிக்கைகள் நேரடிப் பட்டியலுடன் ஒப்பிட்டு இரண்டு வாரங்களுக்கு ஒருமுறை மீண்டும் தணிக்கை செய்யப்படுகின்றன; அவை **இரு திசைகளிலும் மாறும்** — ஒரு வழங்குநர் இலவசத் திட்டத்தை நிறுத்தினால் எண்ணிக்கை குறையும்; புதியது ஒன்று சேர்ந்தால் அது உயரும். பட்டியல் உண்மையில் கணக்கிடுவதையே நாங்கள் வெளியிடுகிறோம்; மேல்நோக்கிச் சுற்றப்பட்ட சிறந்த சாத்தியமான எண்ணிக்கையை ஒருபோதும் வெளியிடுவதில்லை.</sub>
 
 <br/>
 
@@ -39,7 +39,7 @@
 
 <h3>
 
-⭐ OMNIROUTE உங்கள் பணத்தைச் சேமிக்கவும் வேலையை எளிதாக்கவும் உதவியிருந்தால், களஞ்சியத்திற்கு நட்சத்திரமிடுங்கள்.
+⭐ OMNIROUTE உங்கள் பணத்தைச் சேமிக்கவும், உங்கள் வேலையை எளிதாக்கவும் உதவியிருந்தால் களஞ்சியத்திற்கு நட்சத்திரம் அளியுங்கள்.
 
 </h3>
 
@@ -50,10 +50,10 @@
 
 ### 💬 சமூகத்தில் இணையுங்கள்
 
-**👋 பராமரிப்பாளரைப் பின்தொடருங்கள் — புதிய வழங்குநர்கள், வெளியீடுகள் மற்றும் குறிப்புகளை முதலில் பெறுங்கள்:**
+**👋 பராமரிப்பாளரைப் பின்தொடருங்கள் — புதிய வழங்குநர்கள், வெளியீடுகள் மற்றும் உதவிக்குறிப்புகளை முதலில் பெறுங்கள்:**
 
-[![LinkedIn-இல் Diego-வைப் பின்தொடருங்கள்](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![GitHub-இல் @diegosouzapw-ஐப் பின்தொடருங்கள்](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![LinkedIn இல் Diego-வைப் பின்தொடருங்கள்](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![GitHub இல் @diegosouzapw-ஐப் பின்தொடருங்கள்](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
@@ -61,27 +61,27 @@
 [![WhatsApp பிரேசில்](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![இணையதளம்](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**கேள்விகள், வழங்குநர் குறிப்புகள், செயல்திட்டம் மற்றும் ஆதரவு → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 உலகளாவியது](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 பிரேசில்](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [வலைவாசல்](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**கேள்விகள், வழங்குநர் உதவிக்குறிப்புகள், திட்டப்பாதை மற்றும் ஆதரவு → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 உலகளாவியது](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 பிரேசில்](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [தளம்](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
-## 📈 நுழைவாயில் தொடர்ந்து வளர்கிறது
+## 📈 கேட்வே தொடர்ந்து வளர்கிறது
 
 <div align="center">
 
-|                                     |         v3.8.50          | **v3.8.51** |        `v3.8.53+`        |
-| ----------------------------------- | :----------------------: | :---------: | :----------------------: |
-| 🌐 வழங்குநர்கள்                     |           352            |   **358**   |           376            |
-| 🧠 தனித்துவமான அரட்டை மாதிரி ID-கள் |           1320           |  **1374**   |           1475           |
-| 🖼️ ஊடக வகைப் பாலம்                  | 🆕 பார்வை + ஒலி + காணொளி |      ✓      |            ✓             |
-| 📡 Radar இலவசப் பட்டியல்            |   🆕 விருப்பத் தேர்வு    |      ✓      |            ✓             |
-| ⚖️ ஒதுக்கீடு சார்ந்த திட்டமிடல்     | 🆕 ஒதுக்கீட்டுப் பகிர்வு |      ✓      |            ✓             |
-| 📊 ஒதுக்கீட்டுத் தொலைஅளவியல்        |         🆕 நேரலை         |      ✓      |            ✓             |
-| 🧰 திரையற்ற பயன்முறை                |            —             |      —      |  🆕 `serve --headless`   |
-| 🛤️ LTS தடக் கட்டமைப்பு              |            —             |      —      | 🆕 வெளியீட்டுச் சேனல்கள் |
-| 🔎 மாதிரிக் கண்டறிதல் API           |            —             |      —      |  🆕 `/v1/models/query`   |
+|                                    |         v3.8.50          | **v3.8.51** |       `v3.8.53+`       |
+| ---------------------------------- | :----------------------: | :---------: | :--------------------: |
+| 🌐 வழங்குநர்கள்                    |           352            |   **358**   |          375           |
+| 🧠 தனித்துவமான அரட்டை மாதிரி IDகள் |           1320           |  **1374**   |          1475          |
+| 🖼️ மாடாலிட்டி பாலம்                | 🆕 பார்வை + ஒலி + காணொளி |      ✓      |           ✓            |
+| 📡 ரேடார் இலவச பட்டியல்            |    🆕 விருப்பத்தேர்வு    |      ✓      |           ✓            |
+| ⚖️ ஒதுக்கீடு உணர்ந்த திட்டமிடல்    |  🆕 ஒதுக்கீட்டுப் பங்கு  |      ✓      |           ✓            |
+| 📊 ஒதுக்கீடு அளவியல்               |         🆕 நேரலை         |      ✓      |           ✓            |
+| 🧰 ஹெட்லெஸ் பயன்முறை               |            —             |      —      | 🆕 `serve --headless`  |
+| 🛤️ LTS தண்டவாள உள்கட்டமைப்பு       |            —             |      —      | 🆕 வெளியீட்டு சேனல்கள் |
+| 🔎 மாதிரி கண்டறிதல் API            |            —             |      —      | 🆕 `/v1/models/query`  |
 
-**→ [செயல்திட்டம்](ROADMAP.md) — `v3.9.0 LTS` நோக்கிய தடப் பயணம்**
+**→ [சாலை வரைபடம்](ROADMAP.md) — `v3.9.0 LTS` நோக்கி தண்டவாளத்தில் பயணம்**
 
 </div>
 
@@ -90,7 +90,7 @@
 ## 🧩 கிடைக்கிறது
 
 [![npm பதிப்பு](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM மாதாந்திரப் பதிவிறக்கங்கள்](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
+![NPM மாதாந்திர பதிவிறக்கங்கள்](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![உரிமம்: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
 ![Docker பதிவிறக்கங்கள்](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
@@ -104,10 +104,10 @@
     <td align="center"><a href="#first-run">🆓 ஒரு வழங்குநரை இணைக்கவும்</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💡 அறிந்துகொள்ளுங்கள்</b></td>
+    <td align="right"><b>💡 கற்றுக்கொள்ளுங்கள்</b></td>
     <td align="center"><a href="#-the-promise">💥 வாக்குறுதி</a></td>
     <td align="center"><a href="#-why-omniroute">🤔 ஏன் OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 தனித்துவப்படுத்துவது என்ன</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 தனித்துவமாக்குவது எது</a></td>
   </tr>
   <tr>
     <td align="right"><b>⚙️ அம்சங்கள்</b></td>
@@ -119,7 +119,7 @@
     <td align="right"></td>
     <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ சுருக்கம்</a></td>
     <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ இயங்கும் இடங்கள்</a></td>
-    <td align="center"><a href="#-private--local-first">🔒 தனியுரிமை</a></td>
+    <td align="center"><a href="#-private--local-first">🔒 தனிப்பட்டது</a></td>
   </tr>
   <tr>
     <td align="right"><b>👀 பாருங்கள்</b></td>
@@ -147,72 +147,72 @@
   <b>🌐 67 மொழிகளில்</b>
   <br/><br/>
   <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="ஆங்கிலம் (en)" title="ஆங்கிலம் (en)"></a>
-  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
-  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="Português (pt)" title="Português (pt)"></a>
-  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="Español (es)" title="Español (es)"></a>
-  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="Français (fr)" title="Français (fr)"></a>
-  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="Italiano (it)" title="Italiano (it)"></a>
-  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="Deutsch (de)" title="Deutsch (de)"></a>
-  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="Nederlands (nl)" title="Nederlands (nl)"></a>
-  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="Русский (ru)" title="Русский (ru)"></a>
-  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="Українська (uk-UA)" title="Українська (uk-UA)"></a>
-  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="Polski (pl)" title="Polski (pl)"></a>
-  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="Čeština (cs)" title="Čeština (cs)"></a>
-  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="Slovenčina (sk)" title="Slovenčina (sk)"></a>
-  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="Română (ro)" title="Română (ro)"></a>
-  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="Magyar (hu)" title="Magyar (hu)"></a>
-  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="Български (bg)" title="Български (bg)"></a>
-  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="Dansk (da)" title="Dansk (da)"></a>
-  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="Suomi (fi)" title="Suomi (fi)"></a>
-  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="Norsk (no)" title="Norsk (no)"></a>
-  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="Svenska (sv)" title="Svenska (sv)"></a>
-  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="中文 — 简体 (zh-CN)" title="中文 — 简体 (zh-CN)"></a>
-  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="中文 — 繁體 (zh-TW)" title="中文 — 繁體 (zh-TW)"></a>
-  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="日本語 (ja)" title="日本語 (ja)"></a>
-  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="한국어 (ko)" title="한국어 (ko)"></a>
-  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="ไทย (th)" title="ไทย (th)"></a>
-  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="Tiếng Việt (vi)" title="Tiếng Việt (vi)"></a>
-  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="Bahasa Indonesia (id)" title="Bahasa Indonesia (id)"></a>
-  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="Bahasa Melayu (ms)" title="Bahasa Melayu (ms)"></a>
-  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="Filipino (phi)" title="Filipino (phi)"></a>
-  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="हिन्दी (hi)" title="हिन्दी (hi)"></a>
-  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ગુજરાતી (gu)" title="ગુજરાતી (gu)"></a>
-  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="मराठी (mr)" title="मराठी (mr)"></a>
+  <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="போர்த்துகீசியம் — பிரேசில் (pt-BR)" title="போர்த்துகீசியம் — பிரேசில் (pt-BR)"></a>
+  <a href="docs/i18n/pt/README.md"><img src="docs/assets/flags/pt.svg" width="30" alt="போர்த்துகீசியம் (pt)" title="போர்த்துகீசியம் (pt)"></a>
+  <a href="docs/i18n/es/README.md"><img src="docs/assets/flags/es.svg" width="30" alt="ஸ்பானியம் (es)" title="ஸ்பானியம் (es)"></a>
+  <a href="docs/i18n/fr/README.md"><img src="docs/assets/flags/fr.svg" width="30" alt="பிரெஞ்சு (fr)" title="பிரெஞ்சு (fr)"></a>
+  <a href="docs/i18n/it/README.md"><img src="docs/assets/flags/it.svg" width="30" alt="இத்தாலியம் (it)" title="இத்தாலியம் (it)"></a>
+  <a href="docs/i18n/de/README.md"><img src="docs/assets/flags/de.svg" width="30" alt="ஜெர்மன் (de)" title="ஜெர்மன் (de)"></a>
+  <a href="docs/i18n/nl/README.md"><img src="docs/assets/flags/nl.svg" width="30" alt="டச்சு (nl)" title="டச்சு (nl)"></a>
+  <a href="docs/i18n/ru/README.md"><img src="docs/assets/flags/ru.svg" width="30" alt="ரஷ்யம் (ru)" title="ரஷ்யம் (ru)"></a>
+  <a href="docs/i18n/uk-UA/README.md"><img src="docs/assets/flags/ua.svg" width="30" alt="உக்ரைனியம் (uk-UA)" title="உக்ரைனியம் (uk-UA)"></a>
+  <a href="docs/i18n/pl/README.md"><img src="docs/assets/flags/pl.svg" width="30" alt="போலிஷ் (pl)" title="போலிஷ் (pl)"></a>
+  <a href="docs/i18n/cs/README.md"><img src="docs/assets/flags/cz.svg" width="30" alt="செக் (cs)" title="செக் (cs)"></a>
+  <a href="docs/i18n/sk/README.md"><img src="docs/assets/flags/sk.svg" width="30" alt="ஸ்லோவாக் (sk)" title="ஸ்லோவாக் (sk)"></a>
+  <a href="docs/i18n/ro/README.md"><img src="docs/assets/flags/ro.svg" width="30" alt="ருமேனியம் (ro)" title="ருமேனியம் (ro)"></a>
+  <a href="docs/i18n/hu/README.md"><img src="docs/assets/flags/hu.svg" width="30" alt="ஹங்கேரியம் (hu)" title="ஹங்கேரியம் (hu)"></a>
+  <a href="docs/i18n/bg/README.md"><img src="docs/assets/flags/bg.svg" width="30" alt="பல்கேரியம் (bg)" title="பல்கேரியம் (bg)"></a>
+  <a href="docs/i18n/da/README.md"><img src="docs/assets/flags/dk.svg" width="30" alt="டேனிஷ் (da)" title="டேனிஷ் (da)"></a>
+  <a href="docs/i18n/fi/README.md"><img src="docs/assets/flags/fi.svg" width="30" alt="பின்னிஷ் (fi)" title="பின்னிஷ் (fi)"></a>
+  <a href="docs/i18n/no/README.md"><img src="docs/assets/flags/no.svg" width="30" alt="நார்வேஜியம் (no)" title="நார்வேஜியம் (no)"></a>
+  <a href="docs/i18n/sv/README.md"><img src="docs/assets/flags/se.svg" width="30" alt="ஸ்வீடிஷ் (sv)" title="ஸ்வீடிஷ் (sv)"></a>
+  <a href="docs/i18n/zh-CN/README.md"><img src="docs/assets/flags/cn.svg" width="30" alt="சீனம் — எளிமைப்படுத்தப்பட்டது (zh-CN)" title="சீனம் — எளிமைப்படுத்தப்பட்டது (zh-CN)"></a>
+  <a href="docs/i18n/zh-TW/README.md"><img src="docs/assets/flags/tw.svg" width="30" alt="சீனம் — பாரம்பரியம் (zh-TW)" title="சீனம் — பாரம்பரியம் (zh-TW)"></a>
+  <a href="docs/i18n/ja/README.md"><img src="docs/assets/flags/jp.svg" width="30" alt="ஜப்பானியம் (ja)" title="ஜப்பானியம் (ja)"></a>
+  <a href="docs/i18n/ko/README.md"><img src="docs/assets/flags/kr.svg" width="30" alt="கொரியம் (ko)" title="கொரியம் (ko)"></a>
+  <a href="docs/i18n/th/README.md"><img src="docs/assets/flags/th.svg" width="30" alt="தாய் (th)" title="தாய் (th)"></a>
+  <a href="docs/i18n/vi/README.md"><img src="docs/assets/flags/vn.svg" width="30" alt="வியட்நாமியம் (vi)" title="வியட்நாமியம் (vi)"></a>
+  <a href="docs/i18n/id/README.md"><img src="docs/assets/flags/id.svg" width="30" alt="இந்தோனேசியம் (id)" title="இந்தோனேசியம் (id)"></a>
+  <a href="docs/i18n/ms/README.md"><img src="docs/assets/flags/my.svg" width="30" alt="மலாய் (ms)" title="மலாய் (ms)"></a>
+  <a href="docs/i18n/phi/README.md"><img src="docs/assets/flags/ph.svg" width="30" alt="பிலிப்பினோ (phi)" title="பிலிப்பினோ (phi)"></a>
+  <a href="docs/i18n/hi/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="இந்தி (hi)" title="இந்தி (hi)"></a>
+  <a href="docs/i18n/gu/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="குஜராத்தி (gu)" title="குஜராத்தி (gu)"></a>
+  <a href="docs/i18n/mr/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="மராத்தி (mr)" title="மராத்தி (mr)"></a>
   <a href="docs/i18n/ta/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தமிழ் (ta)" title="தமிழ் (ta)"></a>
-  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="తెలుగు (te)" title="తెలుగు (te)"></a>
-  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="বাংলা (bn)" title="বাংলা (bn)"></a>
-  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="اردو (ur)" title="اردو (ur)"></a>
-  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="فارسی (fa)" title="فارسی (fa)"></a>
-  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="العربية (ar)" title="العربية (ar)"></a>
-  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="עברית (he)" title="עברית (he)"></a>
-  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="Türkçe (tr)" title="Türkçe (tr)"></a>
-  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="Azərbaycan (az)" title="Azərbaycan (az)"></a>
-  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="Kiswahili (sw)" title="Kiswahili (sw)"></a>
-  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="Ελληνικά (el)" title="Ελληνικά (el)"></a>
-  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="Hrvatski (hr)" title="Hrvatski (hr)"></a>
-  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="Српски (sr)" title="Српски (sr)"></a>
-  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="Lietuvių (lt)" title="Lietuvių (lt)"></a>
-  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="Eesti (et)" title="Eesti (et)"></a>
-  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="Latviešu (lv)" title="Latviešu (lv)"></a>
-  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="Slovenščina (sl)" title="Slovenščina (sl)"></a>
-  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="Malti (mt)" title="Malti (mt)"></a>
-  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="Gaeilge (ga)" title="Gaeilge (ga)"></a>
-  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ಕನ್ನಡ (kn)" title="ಕನ್ನಡ (kn)"></a>
-  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="മലയാളം (ml)" title="മലയാളം (ml)"></a>
-  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ଓଡ଼ିଆ (or)" title="ଓଡ଼ିଆ (or)"></a>
-  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ਪੰਜਾਬੀ (pa)" title="ਪੰਜਾਬੀ (pa)"></a>
-  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="नेपाली (ne)" title="नेपाली (ne)"></a>
-  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="සිංහල (si)" title="සිංහල (si)"></a>
-  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="မြန်မာ (my)" title="မြန်မာ (my)"></a>
-  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="ខ្មែរ (km)" title="ខ្មែរ (km)"></a>
-  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Hausa (ha)" title="Hausa (ha)"></a>
-  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Yorùbá (yo)" title="Yorùbá (yo)"></a>
-  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="Igbo (ig)" title="Igbo (ig)"></a>
-  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="አማርኛ (am)" title="አማርኛ (am)"></a>
-  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="Oʻzbekcha (uz)" title="Oʻzbekcha (uz)"></a>
-  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ქართული (ka)" title="ქართული (ka)"></a>
-  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="Հայերեն (hy)" title="Հայերեն (hy)"></a>
-  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="Bosanski (bs)" title="Bosanski (bs)"></a>
+  <a href="docs/i18n/te/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="தெலுங்கு (te)" title="தெலுங்கு (te)"></a>
+  <a href="docs/i18n/bn/README.md"><img src="docs/assets/flags/bd.svg" width="30" alt="வங்காளம் (bn)" title="வங்காளம் (bn)"></a>
+  <a href="docs/i18n/ur/README.md"><img src="docs/assets/flags/pk.svg" width="30" alt="உருது (ur)" title="உருது (ur)"></a>
+  <a href="docs/i18n/fa/README.md"><img src="docs/assets/flags/ir.svg" width="30" alt="பாரசீகம் (fa)" title="பாரசீகம் (fa)"></a>
+  <a href="docs/i18n/ar/README.md"><img src="docs/assets/flags/sa.svg" width="30" alt="அரபு (ar)" title="அரபு (ar)"></a>
+  <a href="docs/i18n/he/README.md"><img src="docs/assets/flags/il.svg" width="30" alt="எபிரேயம் (he)" title="எபிரேயம் (he)"></a>
+  <a href="docs/i18n/tr/README.md"><img src="docs/assets/flags/tr.svg" width="30" alt="துருக்கியம் (tr)" title="துருக்கியம் (tr)"></a>
+  <a href="docs/i18n/az/README.md"><img src="docs/assets/flags/az.svg" width="30" alt="அசர்பைஜானியம் (az)" title="அசர்பைஜானியம் (az)"></a>
+  <a href="docs/i18n/sw/README.md"><img src="docs/assets/flags/tz.svg" width="30" alt="சுவாஹிலி (sw)" title="சுவாஹிலி (sw)"></a>
+  <a href="docs/i18n/el/README.md"><img src="docs/assets/flags/gr.svg" width="30" alt="கிரேக்கம் (el)" title="கிரேக்கம் (el)"></a>
+  <a href="docs/i18n/hr/README.md"><img src="docs/assets/flags/hr.svg" width="30" alt="குரோஷியம் (hr)" title="குரோஷியம் (hr)"></a>
+  <a href="docs/i18n/sr/README.md"><img src="docs/assets/flags/rs.svg" width="30" alt="செர்பியம் (sr)" title="செர்பியம் (sr)"></a>
+  <a href="docs/i18n/lt/README.md"><img src="docs/assets/flags/lt.svg" width="30" alt="லிதுவேனியம் (lt)" title="லிதுவேனியம் (lt)"></a>
+  <a href="docs/i18n/et/README.md"><img src="docs/assets/flags/ee.svg" width="30" alt="எஸ்டோனியம் (et)" title="எஸ்டோனியம் (et)"></a>
+  <a href="docs/i18n/lv/README.md"><img src="docs/assets/flags/lv.svg" width="30" alt="லாட்வியம் (lv)" title="லாட்வியம் (lv)"></a>
+  <a href="docs/i18n/sl/README.md"><img src="docs/assets/flags/si.svg" width="30" alt="ஸ்லோவேனியம் (sl)" title="ஸ்லோவேனியம் (sl)"></a>
+  <a href="docs/i18n/mt/README.md"><img src="docs/assets/flags/mt.svg" width="30" alt="மால்ட்டியம் (mt)" title="மால்ட்டியம் (mt)"></a>
+  <a href="docs/i18n/ga/README.md"><img src="docs/assets/flags/ie.svg" width="30" alt="ஐரிஷ் (ga)" title="ஐரிஷ் (ga)"></a>
+  <a href="docs/i18n/kn/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="கன்னடம் (kn)" title="கன்னடம் (kn)"></a>
+  <a href="docs/i18n/ml/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="மலையாளம் (ml)" title="மலையாளம் (ml)"></a>
+  <a href="docs/i18n/or/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="ஒடியா (or)" title="ஒடியா (or)"></a>
+  <a href="docs/i18n/pa/README.md"><img src="docs/assets/flags/in.svg" width="30" alt="பஞ்சாபி (pa)" title="பஞ்சாபி (pa)"></a>
+  <a href="docs/i18n/ne/README.md"><img src="docs/assets/flags/np.svg" width="30" alt="நேபாளி (ne)" title="நேபாளி (ne)"></a>
+  <a href="docs/i18n/si/README.md"><img src="docs/assets/flags/lk.svg" width="30" alt="சிங்களம் (si)" title="சிங்களம் (si)"></a>
+  <a href="docs/i18n/my/README.md"><img src="docs/assets/flags/mm.svg" width="30" alt="பர்மியம் (my)" title="பர்மியம் (my)"></a>
+  <a href="docs/i18n/km/README.md"><img src="docs/assets/flags/kh.svg" width="30" alt="கெமர் (km)" title="கெமர் (km)"></a>
+  <a href="docs/i18n/ha/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="ஹவுசா (ha)" title="ஹவுசா (ha)"></a>
+  <a href="docs/i18n/yo/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="யோருபா (yo)" title="யோருபா (yo)"></a>
+  <a href="docs/i18n/ig/README.md"><img src="docs/assets/flags/ng.svg" width="30" alt="இக்போ (ig)" title="இக்போ (ig)"></a>
+  <a href="docs/i18n/am/README.md"><img src="docs/assets/flags/et.svg" width="30" alt="அம்ஹாரிக் (am)" title="அம்ஹாரிக் (am)"></a>
+  <a href="docs/i18n/uz/README.md"><img src="docs/assets/flags/uz.svg" width="30" alt="உஸ்பெக் (uz)" title="உஸ்பெக் (uz)"></a>
+  <a href="docs/i18n/ka/README.md"><img src="docs/assets/flags/ge.svg" width="30" alt="ஜார்ஜியம் (ka)" title="ஜார்ஜியம் (ka)"></a>
+  <a href="docs/i18n/hy/README.md"><img src="docs/assets/flags/am.svg" width="30" alt="ஆர்மீனியம் (hy)" title="ஆர்மீனியம் (hy)"></a>
+  <a href="docs/i18n/bs/README.md"><img src="docs/assets/flags/ba.svg" width="30" alt="போஸ்னியம் (bs)" title="போஸ்னியம் (bs)"></a>
 </div>
 
 <br/>
@@ -226,7 +226,7 @@
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="மூன்று படிகள்: OmniRoute-ஐ நிறுவித் தொடங்கவும், உங்கள் சொந்தக் கணக்கு அல்லது API விசையுடன் தகுதியுள்ள ஒரு வழங்குநரை இணைக்கவும், பின்னர் OmniRoute API விசை மற்றும் auto மாதிரியைப் பயன்படுத்தி உங்கள் கருவியை localhost:20128/v1-க்குச் சுட்டிக்காட்டவும். வழிமாற்றம், கிடைக்கக்கூடிய தகுதியுள்ள இணைப்புகள் மற்றும் வழங்குநரின் வரம்புகளைப் பொறுத்தது."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="மூன்று படிகள்: OmniRoute-ஐ நிறுவித் தொடங்கவும், உங்கள் சொந்தக் கணக்கு அல்லது API விசையுடன் தகுதியான வழங்குநரை இணைக்கவும், பின்னர் OmniRoute API விசையையும் auto மாதிரியையும் பயன்படுத்தி உங்கள் கருவியை localhost:20128/v1-க்கு சுட்டிக்காட்டவும். கிடைக்கக்கூடிய தகுதியான இணைப்புகள் மற்றும் வழங்குநரின் வரம்புகளைப் பொறுத்தே வழிமாற்றம் அமையும்."/>
 
 ```bash
 # ஒரு வழங்குநரை இணைத்த பிறகு, Dashboard → Endpoints என்பதிலிருந்து உங்கள் OmniRoute விசையை நகலெடுக்கவும்:
@@ -236,9 +236,9 @@ curl http://localhost:20128/v1/chat/completions \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto`-க்கு ஒரு தகுதியுள்ள வழித்தடம் தேவை. புதிதாக நிறுவப்பட்ட அமைப்பில் தகுதியுள்ள விசையற்ற இலக்குகள் இல்லாமல் இருக்கலாம்; மேலும், விசையற்ற வழங்குநர் மூன்றாம் தரப்பு கிளையன்ட்களை நிராகரிக்கக்கூடும். Kiro உட்பட `tos: avoid` எனக் குறிக்கப்பட்ட வழங்குநர்கள், இயல்பாகவே தானியங்கு வழிமாற்றத்திலிருந்து விலக்கப்படுகின்றனர்; ஒரு கணக்கை இணைப்பது அந்த அமைப்பை மீறாது. வழங்குநரைத் தேர்ந்தெடுப்பதற்கு முன் [இலவச அடுக்குகள் வழிகாட்டியை](docs/getting-started/FREE-TIERS-GUIDE.md) பார்க்கவும்.</sub>
+<sub>`auto`-க்கு ஒரு தகுதியான வழித்தடம் தேவை. புதிதாக நிறுவப்பட்ட அமைப்பில் தகுதியான விசையில்லா இலக்குகள் எதுவும் இல்லாமல் இருக்கலாம்; மேலும், விசையில்லா வழங்குநர் மூன்றாம் தரப்பு கிளையன்ட்களை நிராகரிக்கக்கூடும். Kiro உட்பட `tos: avoid` எனக் குறிக்கப்பட்ட வழங்குநர்கள் இயல்பாகவே தானியங்கு வழிமாற்றத்திலிருந்து விலக்கப்படுகின்றனர்; ஒரு கணக்கை இணைப்பது அந்த அமைப்பை மீறாது. வழங்குநரைத் தேர்ந்தெடுப்பதற்கு முன் [இலவச அடுக்குகள் வழிகாட்டி](docs/getting-started/FREE-TIERS-GUIDE.md)-ஐப் பார்க்கவும்.</sub>
 
-<sub>📦 **Python, Node.js, PHP மற்றும் cURL** ஆகியவற்றுக்கான நகலெடுத்து ஒட்டக்கூடிய விரைவுத்தொடக்க ஸ்கிரிப்ட்கள் → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 **Python, Node.js, PHP மற்றும் cURL**-க்கான நகலெடுத்து ஒட்டக்கூடிய விரைவுத் தொடக்க ஸ்கிரிப்ட்கள் → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="வாக்குறுதி — ஒரே முனைப்புள்ளியும் 376 வழங்குநர்களும். மற்றொரு ஆரோக்கியமான இலக்கு கிடைக்கும் வரை, தானியங்கு மாற்றுவழி வழிமாற்றத்தைத் தொடரச் செய்கிறது. ஆறு தூண்கள்: 376 வழங்குநர்களிடையே மீள்திறனுள்ள மாற்றுவழி · தகுதியுள்ள பணிச்சுமைகளில் 95% வரை டோக்கன் சேமிப்பு · 150+ இலவச அடுக்குகள் மற்றும் தொடர்ந்து கிடைக்கும்/விசையற்ற 52 நிரந்தர இலவச வழங்குநர்களுடன் $0 செலவில் தொடங்கலாம் · ஒரே கட்டமைப்பின் மூலம் 37 CLI/முகவர் ஒருங்கிணைப்புகள் · /v1-இல் OpenAI, Claude, Gemini மற்றும் Responses API இணக்கத்தன்மை · சர்க்யூட் பிரேக்கர்கள், TLS மறைமுகத்தன்மை, MCP-இன் 110 கருவிகள், A2A, நினைவகம், பாதுகாப்புத் தடுப்புகள், மதிப்பீடுகள் மற்றும் கண்காணிக்கப்படும் 7,800+ சோதனைக் கோப்புகளில் 56,000+ நிலையான சோதனை அறிவிப்புகள் உள்ளிட்ட தயாரிப்புச் சூழல் கட்டுப்பாடுகள்."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="வாக்குறுதி — ஒரே முனைப்புள்ளியும் 376 வழங்குநர்களும். மற்றொரு ஆரோக்கியமான இலக்கு கிடைக்கும் வரை, தானியங்கு மாற்றுவழி வழிமாற்றத்தைத் தொடரச் செய்கிறது. ஆறு தூண்கள்: 376 வழங்குநர்களிடையே மீள்திறன்மிக்க மாற்றுவழி · தகுதியான பணிச்சுமைகளில் 95% வரையிலான டோக்கன் சேமிப்பு · 150+ இலவச அடுக்குகள் மற்றும் மீண்டும் மீண்டும் கிடைக்கும்/விசையில்லா 52 நிரந்தர இலவச வழங்குநர்களுடன் $0-இல் தொடக்கம் · ஒரே கட்டமைப்பின் மூலம் 37 CLI/முகவர் ஒருங்கிணைப்புகள் · /v1-இல் OpenAI, Claude, Gemini மற்றும் Responses API இணக்கத்தன்மை · circuit breakers, TLS stealth, MCP 110 கருவிகள், A2A, நினைவகம், பாதுகாப்புத் தடுப்புகள், மதிப்பீடுகள் மற்றும் கண்காணிக்கப்படும் 7,800+ சோதனைக் கோப்புகளில் 56,000+ நிலையான சோதனை அறிவிப்புகள் உள்ளிட்ட உற்பத்திச் சூழல் கட்டுப்பாடுகள்."/>
 
 <br/>
 <br/>
@@ -259,11 +259,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="ஏன் OmniRoute — 10 டாஷ்போர்டுகள், செயலிழந்த API விசைகள் மற்றும் எதிர்பாராத கட்டணங்களை மாறிமாறிக் கையாளுவதை நிறுத்துங்கள். அன்றாடப் பத்து சிக்கல்களும் அவற்றுக்கான தீர்வுகளும்: பயன்படுத்தப்படாமல் காலாவதியாகும் ஒதுக்கீடு → சந்தாக்களை முழுமையாகப் பயன்படுத்துதல்; குறியீடு எழுதும்போது ஏற்படும் விகித வரம்புகள் → 4-அடுக்கு தானியங்கு மாற்றுவழி (சந்தா → API → மலிவானது → இலவசம்); டோக்கன்களை வீணாக்கும் கருவி வெளியீடுகள் → RTK + Caveman சுருக்கம் (15–95%); விலையுயர்ந்த API-கள் → செலவுக்கு உகந்த வழிமாற்றம்; ஒவ்வொரு கருவிக்கும் தனித்தனி அமைப்பு → ஒரே முனைப்புள்ளி, ஒரே டாஷ்போர்டு; AI தடுக்கப்படுதல் → 3-நிலை ப்ராக்ஸி + TLS மறைமுகத்தன்மை; செயலிழந்த விசைகள் → 3-அடுக்கு மீள்திறன் (சர்க்யூட் பிரேக்கர்கள், விசை குளிர்விப்பு, மாதிரி பூட்டுதல்); ஒரே சந்தாவைப் பகிரும் குழு → நியாயமான பகிர்வு ஒதுக்கீடுகளுடன் கூடிய விசைத் தொகுப்புகள்; வேறொருவரின் கிளவுட் வழியாகச் செல்லும் ப்ராம்ப்ட்கள் → AES-256-GCM மூலம் குறியாக்கப்பட்ட விசைகளுடன் உள்ளூர்-முதன்மை அணுகுமுறை; செலவினத் தெளிவின்மை → நேரடி பகுப்பாய்வு (பயன்பாடு, ஒதுக்கீடு, சேமிப்பு, p95 தாமதம்)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="ஏன் OmniRoute — 10 டாஷ்போர்டுகள், செயலிழந்த API விசைகள் மற்றும் எதிர்பாராத கட்டணங்களைச் சமாளிப்பதை நிறுத்துங்கள். அன்றாடப் பத்து சிக்கல்களும் அவற்றுக்கான தீர்வுகளும்: பயன்படுத்தப்படாமலேயே காலாவதியாகும் ஒதுக்கீடு → சந்தாக்களை அதிகபட்சமாகப் பயன்படுத்துதல்; குறியீடு எழுதும் இடையில் வீத வரம்புகள் → 4-அடுக்கு தானியங்கு மாற்றுவழி (சந்தா → API → மலிவு → இலவசம்); கருவி வெளியீடுகள் டோக்கன்களை வீணாக்குதல் → RTK + Caveman சுருக்கம் (15–95%); விலையுயர்ந்த API-கள் → செலவுக்கேற்ற வழிமாற்றம்; ஒவ்வொரு கருவிக்கும் தனித்தனி அமைப்பு → ஒரே முனைப்புள்ளி, ஒரே டாஷ்போர்டு; AI தடுக்கப்படுதல் → 3-நிலை ப்ராக்ஸி + TLS stealth; செயலிழந்த விசைகள் → 3-அடுக்கு மீள்திறன் (circuit breakers, விசை ஓய்வுக்காலம், மாதிரிப் பூட்டுதல்); குழுவினர் ஒரே சந்தாவைப் பகிர்தல் → நியாயமான பகிர்வு ஒதுக்கீடுகளுடன் விசைத் தொகுப்புகள்; வேறொருவரின் கிளவுட் வழியாகச் செல்லும் தூண்டல்கள் → AES-256-GCM மறையாக்கப்பட்ட விசைகளுடன் உள்ளூர்-முதன்மை; செலவுத் தெளிவின்மை → நேரடி பகுப்பாய்வு (பயன்பாடு, ஒதுக்கீடு, சேமிப்பு, p95 தாமதம்)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute கோரிக்கை ஓட்டம்: உங்கள் IDE அல்லது CLI (Claude Code, Cursor, Cline…) ஒரே உள்ளூர் முனைப்புள்ளியை (http://localhost:20128/v1) அழைக்கிறது; OmniRoute Smart Router (RTK + Caveman சுருக்கம், 20 வழிமாற்ற உத்திகள், சர்க்யூட் பிரேக்கர்கள், TLS மறைமுகத்தன்மை, MCP, A2A, பாதுகாப்புத் தடுப்புகள்) தகுதியுள்ள ஆரோக்கியமான இலக்கு இருக்கும் வரை 4 வழங்குநர் அடுக்குகளிடையே மாற்றுவழியைப் பயன்படுத்த முடியும் — அடுக்கு 1 சந்தா, அடுக்கு 2 API விசை, அடுக்கு 3 மலிவானது மற்றும் அடுக்கு 4 இலவசம்."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute கோரிக்கை ஓட்டம்: உங்கள் IDE அல்லது CLI (Claude Code, Cursor, Cline…) ஒரு உள்ளூர் முனைப்புள்ளியை (http://localhost:20128/v1) அழைக்கிறது; தகுதியான, ஆரோக்கியமான இலக்கு கிடைக்கும் வரை OmniRoute Smart Router (RTK + Caveman சுருக்கம், 20 வழிமாற்ற உத்திகள், circuit breakers, TLS stealth, MCP, A2A, பாதுகாப்புத் தடுப்புகள்) 4 வழங்குநர் அடுக்குகளுக்கிடையே மாற்றுவழியைப் பயன்படுத்த முடியும் — அடுக்கு 1 சந்தா, அடுக்கு 2 API விசை, அடுக்கு 3 மலிவு மற்றும் அடுக்கு 4 இலவசம்."/>
 
 </div>
 
@@ -504,13 +504,13 @@ combo எதையும் உருவாக்கத் தேவையில
 
 <div align="center">
 
-## 🏆 OmniRoute-ஐ தனித்துவப்படுத்துவது எது
+## 🏆 OmniRoute-ஐ தனித்துவப்படுத்துவது என்ன
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-ஐத் தனித்துவப்படுத்துவது எது — 13 திறன்களில் 9router, OpenRouter, CLIProxyAPI மற்றும் LiteLLM ஆகியவற்றுடன் ஒப்பிடப்பட்ட, தேதியிடப்பட்ட அம்சங்களின் நிலைப்படம். OmniRoute: 376 வழங்குநர்கள், உள்ளமைந்த 150+ இலவச அடுக்குகள், 20 வழிப்படுத்தல் உத்திகள், 12-எஞ்சின் டோக்கன் சுருக்கம், 110 கருவிகளைக் கொண்ட உள்ளமைந்த MCP சேவையகம், A2A முகவர் நெறிமுறை, நிலையான நினைவகம், பாதுகாப்புக் கட்டுப்பாடுகள், கிளவுட் முகவர்கள், TLS கைரேகை மறைவு, Desktop/Termux/PWA மற்றும் 67 i18n பயனர் இடைமுக மொழிப்பிரதேசங்கள். OmniRoute MIT உரிமம் பெற்றது மற்றும் சுயமாக ஹோஸ்ட் செய்யக்கூடியது. போட்டியாளர்களின் திறன்களும் எண்ணிக்கைகளும் மாறக்கூடும்; இணைக்கப்பட்டுள்ள வழிமுறையைப் பார்க்கவும்."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute-ஐத் தனித்துவப்படுத்துவது என்ன — 13 திறன்களில் 9router, OpenRouter, CLIProxyAPI மற்றும் LiteLLM ஆகியவற்றுடன் ஒப்பிடும், குறிப்பிட்ட தேதிக்குரிய அம்சங்களின் நிலைப்பதிவு. OmniRoute: 376 வழங்குநர்கள், உள்ளமைக்கப்பட்ட 150+ இலவச அடுக்குகள், 20 வழிப்படுத்தல் உத்திகள், 12-எஞ்சின் டோக்கன் சுருக்கம், 110 கருவிகளுடன் உள்ளமைக்கப்பட்ட MCP சேவையகம், A2A முகவர் நெறிமுறை, நிலையான நினைவகம், பாதுகாப்புக் கட்டுப்பாடுகள், கிளவுட் முகவர்கள், TLS கைரேகை மறைவு, Desktop/Termux/PWA மற்றும் 67 i18n பயனர் இடைமுக மொழிப்பகுதிகள். OmniRoute ஆனது MIT உரிமம் பெற்றது மற்றும் சுயமாக ஹோஸ்ட் செய்யக்கூடியது. போட்டியாளர்களின் திறன்களும் எண்ணிக்கைகளும் மாறக்கூடும்; இணைக்கப்பட்ட வழிமுறையைப் பார்க்கவும்."/>
 
-<sub>📊 முழுமையான வழிமுறை &amp; 9router, OpenRouter, CLIProxyAPI &amp; LiteLLM ஆகியவற்றுடனான ஒவ்வொரு அம்சத்தின் விரிவான ஒப்பீடு → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 முழுமையான வழிமுறை &amp; 9router, OpenRouter, CLIProxyAPI மற்றும் LiteLLM ஆகியவற்றுடனான ஒவ்வொரு அம்சத்திற்குமான விரிவான ஒப்பீடு → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
@@ -586,35 +586,35 @@ Radar-ஐப் பயன்படுத்தத் தனியாகச் �
 
 </div>
 
-> **v3.8.20 → v3.8.53** பதிப்புகளின் சமீபத்திய சிறப்பம்சங்கள். முழுமையான வரலாறு [`CHANGELOG.md`](CHANGELOG.md) கோப்பில் உள்ளது.
+> **v3.8.20 → v3.8.53** பதிப்புகளின் அண்மைய சிறப்பம்சங்கள். முழு வரலாறு [`CHANGELOG.md`](CHANGELOG.md)-இல் உள்ளது.
 
-- **⚖️ `quota-weighted` வழித்தடத் தேர்வு** — 20-வது கூட்டு உத்தி ஒதுக்கீடு தீர்ந்த கணக்குகளைத் தவிர்த்து, மீதமுள்ளவற்றிலிருந்து மீதமுள்ள ஒதுக்கீடு ÷ செயலிலுள்ள சுமை என்ற விகிதத்தில் தேர்ந்தெடுக்கிறது; ஏற்கனவே உள்ள உரையாடல்களை அதே இடத்தில் நிலைநிறுத்துகிறது. → [தானியங்கு கூட்டு](docs/routing/AUTO-COMBO.md)
+- **⚖️ `quota-weighted` வழித்தடத் தேர்வு** — 20-வது சேர்க்கை உத்தி, ஒதுக்கீடு தீர்ந்த கணக்குகளைத் தவிர்த்துவிட்டு, மீதமுள்ளவற்றிலிருந்து எஞ்சிய ஒதுக்கீடு ÷ செயல்பாட்டிலுள்ள சுமை என்ற விகிதத்தில் தேர்ந்தெடுக்கிறது; ஏற்கனவே உள்ள உரையாடல்கள் அதே இடத்தில் நிலைநிறுத்தப்படுகின்றன. → [தானியங்குச் சேர்க்கை](docs/routing/AUTO-COMBO.md)
 - **🧰 திரையற்ற பயன்முறை** — `omniroute serve --headless` (அல்லது `OMNIROUTE_HEADLESS=1`) டாஷ்போர்டையும், டாஷ்போர்டுக்கு மட்டும் உரிய துணை அமைப்புகளையும் முடக்கி, `/v1/*` ப்ராக்ஸி இயந்திரத்தை மட்டும் இயக்குகிறது. → [திரையற்ற பயன்முறை](docs/guides/HEADLESS.md)
-- **🔎 மாதிரி கண்டறிதல்** — `/v1/models` திறன், சூழல், வகை மற்றும் உரையின் அடிப்படையில் வடிகட்டுகிறது; மேலும் `POST /v1/models/query`, ஒவ்வொரு விசைக்கும் அதே தெரிவுநிலையுடன், சுருக்கமானதும் நிர்ணயிக்கப்பட்டதுமான தேர்வுப் பட்டியலை வழங்குகிறது. → [API குறிப்பு](docs/reference/API_REFERENCE.md)
-- **🔑 ஒவ்வொரு விசைக்குமான வழித்தடக் கட்டுப்பாடு** — `forcedModel` மூலம் ஓர் API விசையை ஒரு மாதிரி அல்லது கூட்டுடன் நிலைநிறுத்தி, ஒரு விசையின் மாதிரிகளையும் கூட்டுகளையும் அணுவியல் முறையில் சேர்க்கலாம் அல்லது அகற்றலாம் (`/api/keys/{id}/access`). → [API குறிப்பு](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ மேலும் நுணுக்கமான PII கட்டுப்பாடுகள்** — ஒவ்வொரு வகைக்குமான தேர்வு, சரிபார்க்கப்பட்ட 20 தனிப்பயன் மறைப்பு வடிவங்கள் வரை மற்றும் ஒவ்வொரு வகைக்குமான கண்டறிதல் எண்ணிகள்; மறைத்தல் மட்டும் விருப்பத் தேர்வாகவே உள்ளது. → [பாதுகாப்புத் தடுப்புகள்](docs/security/GUARDRAILS.md)
-- **🌍 67 மொழிகள்** — டாஷ்போர்டு, ஆவணப் பிரதிகள் மற்றும் CLI ஆகிய அனைத்திலும், `npm run i18n:add-locale` ஒரே கட்டளையில் ஒரு மொழியை எல்லா இடங்களிலும் சேர்க்கிறது. → [i18n வழிகாட்டி](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — உங்கள் முகவர் அணிக்கான உள்வரும் A2A பணிப்பகிர்வு, முகவர் அட்டையில் Conductor திறன்கள் மற்றும் Faro அழுத்திப்-பேசும் குரல் அரட்டையுடன் கூடிய டாஷ்போர்டு பலகம். → [A2A சேவையகம்](docs/frameworks/A2A-SERVER.md)
-- **🛂 தகவமைப்பு அனுமதியும் அதிகச்சுமைப் பாதுகாப்பும்** — அதிக எடையுள்ள அரட்டை கோரிக்கைகள் 503 பதிலைப் பெறுவதற்குப் பதிலாக வரிசைப்படுத்தப்படுகின்றன; ஒவ்வொரு இணைப்புக்கும் அணுவியல் RPM சுழலும் குத்தகைகள் பயன்படுத்தப்படுகின்றன. → [மீட்சித்திறன் வழிகாட்டி](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ தரநிலையான `/v1/models` வரிசைப்படுத்தல்** — ஒவ்வொரு வழங்குநருக்கும் வழங்குநர் வாரியாகக் குழுவாக்கப்பட்ட ஒரே தொடர்ச்சியான தொகுதி (கூட்டுகள் முதலில் நிலைநிறுத்தப்படும்), எல்லா பட்டியல் மூலங்களிலும் நிலையானதாக இருக்கும். → [API குறிப்பு](docs/reference/API_REFERENCE.md)
-- **🗜️ சுருக்க வலுப்படுத்தல்** — இயல்பாக இயக்கப்பட்டுள்ள விரிவாக்கத் தடுப்பு, DE / FR / JA + சீனம் (wényán) ஆகியவற்றுக்கான Caveman தொகுப்புகள், Gradle & .NET-க்கான RTK வடிகட்டிகள். → [சுருக்கம்](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 நேர்மையான நிலையான-கட்டணச் செலவு** — சந்தா / நிரலாக்கத் திட்ட வழங்குநர்கள் செலவுப் பகுப்பாய்வில் **$0** எனக் காட்டப்படுகின்றனர்; பட்ஜெட், ஒதுக்கீடு மற்றும் வழித்தடத் தேர்வு தொடர்ந்து மதிப்பிடுகின்றன. → [API குறிப்பு](docs/reference/API_REFERENCE.md)
-- **⚖️ ஒதுக்கீட்டுப் பகிர்வு வழித்தடத் தேர்வு** — பகிரப்பட்ட கணக்கின் ஒதுக்கீட்டைத் தொகுக்கப்பட்ட விசைகளிடையே நியாயமாகப் பிரித்து, செயலற்ற பங்குகள் பிறருக்குக் கடனாக வழங்கப்படுவதால் வேலைத் திறனைப் பாதுகாக்கிறது. → [மீட்சித்திறன் வழிகாட்டி](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 ஒரே கட்டளையில் CLI/முகவர் அமைப்பு** — பதிவுசெய்யப்பட்ட 15 `setup-*` கட்டளைகள்; `omniroute run` 7 CLI-களை (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI) தொடங்குகிறது; `omniroute configure` ஊடாடும் வழங்குநர்+மாதிரி தேர்வி மற்றும் ஒவ்வொரு சூழலுக்குமான விருப்பங்களுடன் 11 இலக்குகளை ஆதரிக்கிறது. → [CLI ஒருங்கிணைப்புகள்](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ தொலைநிலைப் பயன்முறை** — வரம்பிடப்பட்ட டோக்கன்கள் (`connect` / `contexts` / `tokens`) மற்றும் VPS நிறுவல்களுக்கான `antigravity` OAuth உதவியாளரைக் கொண்டு தொலைநிலை OmniRoute-ஐ இயக்குங்கள். → [தொலைநிலைப் பயன்முறை](docs/guides/REMOTE-MODE.md)
-- **🧭 மேலும் நுண்ணறிவான தானியங்கு வழித்தடத் தேர்வு** — `auto/<category>:<tier>` கூட்டுகள், **Fusion** (மாதிரிக் குழு + நடுவர்), பணியை உணரும் வழித்தடத் தேர்வு, ஒவ்வொரு கோரிக்கைக்குமான மாதிரி / பயன்முறை / USD-பட்ஜெட் மேலெழுதல்கள். → [தானியங்கு கூட்டு](docs/routing/AUTO-COMBO.md)
-- **🗜️ செருகக்கூடிய சுருக்கம்** — இணைத்துப் பயன்படுத்தக்கூடிய 12 இயந்திரங்கள் + Compression Studios: LLMLingua-2, இரு-அடுக்கு Ultra, omniglyph, ஒவ்வொரு படிக்குமான துல்லிய வாயில், GCF v3.2, இழுத்து மறுவரிசைப்படுத்தும் திருத்தி. → [சுருக்கம்](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ வெளிப்படையான MITM மறைகுறிநீக்கம் (TPROXY)** — ஒவ்வொரு SNI-க்குமான CA + நம்பிக்கைச் சேமிப்பக நிறுவியுடன், ப்ராக்ஸி சூழல் மாறிகளைப் புறக்கணிக்கும் CLI-களைப் பிடிக்கிறது. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 எல்லா இடங்களிலும் செலவுத் தொலைஅளவியல்** — ஒவ்வொரு முனைப்புள்ளியிலும் `X-OmniRoute-*` செலவு/பயன்பாட்டுத் தலைப்புகள், தற்காலிகச் சேமிப்பு-HIT சேமிப்புத் தலைப்பு மற்றும் ஒவ்வொரு விசைக்குமான USD செலவு ஒதுக்கீடுகள். → [API குறிப்பு](docs/reference/API_REFERENCE.md)
-- **🧠 உங்கள் கட்டுப்பாட்டிலுள்ள நினைவகம்** — இயல்பாக முடக்கப்பட்டுள்ளது; விருப்பத் தேர்வான int8 திசையன் அளவீடாக்கம் + வகைப்படுத்தப்பட்ட சிதைவு மற்றும் ஒவ்வொரு கோரிக்கைக்குமான `x-omniroute-no-memory`. → [நினைவகம்](docs/frameworks/MEMORY.md)
-- **🛡️ பாதுகாப்பு** — ஒவ்வொரு LLM வழித்தடத்திலும் ப்ராம்ப்ட்-உட்செலுத்தல் தடுப்பு (ரெட்-டீம் சோதனைத் தொகுப்பு), இரு திசைகளிலும் கசிந்த API விசைகள்/ரகசியங்களை மறைக்கும் விருப்பத் தேர்வான நற்சான்று-மறைப்பு பாதுகாப்புத் தடுப்பு, இலவச DuckDuckGo இறுதி-வழி இணையத் தேடல் மற்றும் டாஷ்போர்டுக்கான விருப்பமான OIDC உள்நுழைவு வாயில் (கடவுச்சொல் உள்நுழைவு எப்போதும் கிடைக்கும்). → [பாதுகாப்புத் தடுப்புகள்](docs/security/GUARDRAILS.md)
-- **🖼️ புதிய முனைப்புள்ளிகள்** — `/v1/ocr` (Mistral OCR) மற்றும் `/v1/audio/translations` (Whisper பாணி) ஆகியவை ஊடக வசதிகளை முழுமையாக்குகின்றன. → [API குறிப்பு](docs/reference/API_REFERENCE.md)
-- **🎨 படம் / காணொளி / ஒலி உருவாக்கம்** — ஊடகத்திற்கான ஒரே API: xAI Grok Imagine & Novita AI காணொளி, ComfyUI, Magnific, Adobe Firefly, Segmind மற்றும் ElevenLabs போன்ற பேச்சு வழங்குநர்கள். → [API குறிப்பு](docs/reference/API_REFERENCE.md)
-- **🌍 நிறுவல் & செயல்பாடுகள்** — ரிவர்ஸ்-ப்ராக்ஸி `basePath`, உலாவி மொழித் தானியங்கு கண்டறிதல், ஒவ்வொரு விசைக்குமான சாதனக் கண்காணிப்பு, ரூட் இல்லாத MITM நம்பிக்கை, zh-TW உள்ளூர்மயமாக்கல். → [சூழல்](docs/reference/ENVIRONMENT.md)
-- **🤝 மேலும் பல வழங்குநர்களும் முகவர்களும்** — கிளவுட் முகவர்கள் (Codex Cloud, Cursor, Devin, Jules), உலாவி + OAuth உள்நுழைவுடன் Grok Build (xAI), முதன்மைத் தர Ollama அட்டை, Claude Opus 5 & Sonnet 5, Kimi அதிகாரப்பூர்வக் கூட்டாண்மை (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… மற்றும் புதுப்பிக்கப்பட்ட **376-வழங்குநர் பட்டியல்**. → [வழங்குநர்கள்](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 வழித்தடத் தேர்வின் வெளிப்படைத்தன்மை** — ஒவ்வொரு பதிலும் அதற்குச் சேவையளித்த உத்தி/வழங்குநர்/தாமதத்தைக் குறிப்பிடும் `X-OmniRoute-Decision` தலைப்பைக் கொண்டுள்ளது; புதிய `cache-optimized` கூட்டு உத்தி + Auto-Combo `cacheAffinity` காரணி, மீண்டும் வரும் கோரிக்கைகளைத் தற்காலிகச் சேமிப்பிலுள்ள முன்னொட்டைக் கொண்ட இணைப்பிற்குத் திருப்பி அனுப்புகின்றன; மேலும் வாசிப்பிற்கு மட்டும் உரிய `/v1/auto-combo/{channel}/candidates` முனைப்புள்ளி, ஓர் `auto/*` சேனலின் தற்போதைய வேட்பாளர் தொகுப்பை வெளிப்படுத்துகிறது. → [தானியங்கு கூட்டு](docs/routing/AUTO-COMBO.md)
-- **⚡ உள்ளூர் செயல்திறன் & உள்கட்டமைப்பு** — ஒரே கிளிக்கில் உள்ளூர் Redis, Cloudflare Workers / Deno Deploy ரிலே வரிசைப்படுத்திகள், மேற்பார்வையிடப்பட்ட உட்பொதிக்கப்பட்ட சேவைகளாக Bifrost & Mux. → [உட்பொதிக்கப்பட்ட சேவைகள்](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 கூடுதலாக உள்ளவை** — செருகுநிரல் கட்டமைப்பு + சந்தை, Omni/Agent/GitHub திறன் கட்டமைப்புகள், Obsidian வால்ட் ஒருங்கிணைப்பு (22 MCP கருவிகள்), OpenAI-இணக்கமான Batch & Files API-கள், சொற்பொருள் சார்ந்த பதில் தற்காலிகச் சேமிப்பு, முன்னிலைப் பட்டியல்களுடன் விளையாட்டுமயமாக்கல், ACP முகவர் கண்டறிதல் (15 உள்ளமைக்கப்பட்ட முகவர்கள்), BigQuery-க்கு திட்டமிடப்பட்ட பதிவேடு ஏற்றுமதி, `auto/chaos` இணையான பல-மாதிரி விரிவாக்கம், Telegram பாட் இணைப்புப் பாலம், பயன்பாட்டினுள் பதிப்பு மேலாளர் மற்றும் LMArena-ELO இலவச-வழங்குநர் தரவரிசைகள். → [ஆவணங்கள்](docs/README.md)
+- **🔎 மாதிரி கண்டறிதல்** — `/v1/models` திறன், சூழல், வகை மற்றும் உரையின் அடிப்படையில் வடிகட்டுகிறது; மேலும் `POST /v1/models/query`, ஒவ்வொரு சாவிக்கும் அதே தெரிவுத்தன்மையுடன், குறுகியதும் தீர்மானகரமானதுமான தேர்வுப் பட்டியலை வழங்குகிறது. → [API குறிப்பேடு](docs/reference/API_REFERENCE.md)
+- **🔑 ஒவ்வொரு சாவிக்குமான வழித்தடக் கட்டுப்பாடு** — `forcedModel` மூலம் ஓர் API சாவியை ஒரு மாதிரி அல்லது சேர்க்கையுடன் நிலைநிறுத்தலாம்; மேலும் ஒரு சாவிக்குரிய மாதிரிகளையும் சேர்க்கைகளையும் அணுவகையில் சேர்க்கவோ அகற்றவோ முடியும் (`/api/keys/{id}/access`). → [API குறிப்பேடு](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ மேலும் நுணுக்கமான PII கட்டுப்பாடுகள்** — ஒவ்வொரு வகைக்குமான தேர்வு, சரிபார்க்கப்பட்ட தனிப்பயன் மறைப்பு வடிவங்கள் அதிகபட்சம் 20 மற்றும் ஒவ்வொரு வகைக்குமான கண்டறிதல் எண்ணிகள்; மறைத்தல் என்பது விருப்பத்தேர்வாகவே தொடர்கிறது. → [பாதுகாப்புத் தடுப்புகள்](docs/security/GUARDRAILS.md)
+- **🌍 67 மொழிகள்** — டாஷ்போர்டு, ஆவணப் பிரதிகள் மற்றும் CLI ஆகிய அனைத்திலும், `npm run i18n:add-locale` ஒரே கட்டளையில் எல்லா இடங்களிலும் ஒரு மொழியைச் சேர்க்கிறது. → [i18n வழிகாட்டி](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — உங்கள் முகவர் அணிக்கு உள்வரும் A2A ஒப்படைப்பு, Agent Card-இல் Conductor திறன்கள் மற்றும் Faro அழுத்திப்-பேசும் குரல் அரட்டையைக் கொண்ட டாஷ்போர்டு பலகம். → [A2A சேவையகம்](docs/frameworks/A2A-SERVER.md)
+- **🛂 தகவமைப்பு அனுமதி மற்றும் அதிகச்சுமைப் பாதுகாப்பு** — அதிக வளம் தேவைப்படும் அரட்டை கோரிக்கைகள் 503 பிழை வழங்குவதற்குப் பதிலாக வரிசைப்படுத்தப்படுகின்றன; ஒவ்வொரு இணைப்புக்கும் அணுவக RPM சுழலும் குத்தகைகள் வழங்கப்படுகின்றன. → [மீட்சித்திறன் வழிகாட்டி](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ நியமமான `/v1/models` வரிசைப்படுத்தல்** — ஒவ்வொரு வழங்குநருக்கும் வழங்குநரின்படி தொகுக்கப்பட்ட ஒரே தொடர்ச்சியான தொகுதி (சேர்க்கைகள் முதலில் நிலைநிறுத்தப்படும்), அனைத்து பட்டியல் மூலங்களிலும் நிலையாக இருக்கும். → [API குறிப்பேடு](docs/reference/API_REFERENCE.md)
+- **🗜️ சுருக்கப் பாதுகாப்பை வலுப்படுத்துதல்** — இயல்பாக இயக்கப்பட்ட விரிவாக்கத் தடுப்பு, DE / FR / JA + சீனம் (wényán) ஆகியவற்றுக்கான Caveman தொகுப்புகள், Gradle மற்றும் .NET-க்கான RTK வடிப்பான்கள். → [சுருக்கம்](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 நேர்மையான நிலையான கட்டணச் செலவு** — சந்தா / நிரலாக்கத் திட்ட வழங்குநர்களின் செலவுப் பகுப்பாய்வில் **$0** காட்டப்படும்; பட்ஜெட், ஒதுக்கீடு மற்றும் வழித்தடத் தேர்வு தொடர்ந்து மதிப்பிடப்படும். → [API குறிப்பேடு](docs/reference/API_REFERENCE.md)
+- **⚖️ ஒதுக்கீட்டுப் பகிர்வு வழித்தடத் தேர்வு** — பகிரப்பட்ட கணக்கின் ஒதுக்கீட்டைத் தொகுக்கப்பட்ட சாவிகளுக்கிடையே நியாயமாகப் பிரிக்கிறது; பயன்படுத்தப்படாத பகுதிகள் பிறவற்றுக்குக் கடனாக வழங்கப்படுவதால் வேலைத் திறன் முழுமையாகப் பயன்படுத்தப்படுகிறது. → [மீட்சித்திறன் வழிகாட்டி](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 ஒரே கட்டளையில் CLI/முகவர் அமைப்பு** — பதிவுசெய்யப்பட்ட 15 `setup-*` கட்டளைகள்; `omniroute run` 7 CLI-களைத் தொடங்குகிறது (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` ஊடாடும் வழங்குநர்+மாதிரி தேர்வி மற்றும் ஒவ்வொரு சூழலுக்குமான விருப்பங்களுடன் 11 இலக்குகளை ஆதரிக்கிறது. → [CLI ஒருங்கிணைப்புகள்](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ தொலைநிலைப் பயன்முறை** — வரம்பிடப்பட்ட டோக்கன்கள் (`connect` / `contexts` / `tokens`) மற்றும் VPS நிறுவல்களுக்கான `antigravity` OAuth உதவியைக் கொண்டு தொலைநிலை OmniRoute-ஐ இயக்குங்கள். → [தொலைநிலைப் பயன்முறை](docs/guides/REMOTE-MODE.md)
+- **🧭 மேலும் நுண்ணறிவுள்ள தானியங்கு வழித்தடத் தேர்வு** — `auto/<category>:<tier>` சேர்க்கைகள், **Fusion** (மாதிரிக் குழு + நடுவர்), பணியை உணரும் வழித்தடத் தேர்வு, ஒவ்வொரு கோரிக்கைக்குமான மாதிரி / பயன்முறை / USD-பட்ஜெட் மேலெழுதல்கள். → [தானியங்குச் சேர்க்கை](docs/routing/AUTO-COMBO.md)
+- **🗜️ செருகக்கூடிய சுருக்கம்** — ஒன்றிணைக்கக்கூடிய 12 இயந்திரங்கள் + Compression Studios: LLMLingua-2, இரு-அடுக்கு Ultra, omniglyph, ஒவ்வொரு படிக்குமான துல்லிய வாயில், GCF v3.2, இழுத்து-மறுவரிசைப்படுத்தும் திருத்தி. → [சுருக்கம்](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ வெளிப்படையான MITM மறைவிலக்கம் (TPROXY)** — ப்ராக்ஸி சூழல் மாறிகளைப் புறக்கணிக்கும் CLI-களை, ஒவ்வொரு SNI-க்குமான CA மற்றும் நம்பகச் சேமிப்பக நிறுவி மூலம் கைப்பற்றுங்கள். → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 எல்லா இடங்களிலும் செலவுத் தொலைஅளவீடு** — ஒவ்வொரு முனைப்புள்ளியிலும் `X-OmniRoute-*` செலவு/பயன்பாட்டுத் தலைப்புகள், தற்காலிக சேமிப்பு-HIT சேமிப்புத் தலைப்பு மற்றும் ஒவ்வொரு சாவிக்குமான USD செலவு ஒதுக்கீடுகள். → [API குறிப்பேடு](docs/reference/API_REFERENCE.md)
+- **🧠 உங்கள் கட்டுப்பாட்டிலுள்ள நினைவகம்** — இயல்பாக முடக்கப்பட்டுள்ளது; விருப்பத்தேர்வாக int8 திசையன் அளவாக்கம் + வகைப்படுத்தப்பட்ட சிதைவு மற்றும் ஒவ்வொரு கோரிக்கைக்குமான `x-omniroute-no-memory`. → [நினைவகம்](docs/frameworks/MEMORY.md)
+- **🛡️ பாதுகாப்பு** — ஒவ்வொரு LLM வழித்தடத்திலும் தூண்டல்-உட்செலுத்தல் தடுப்பு (red-team சோதனைத் தொகுப்பு), இரு திசைகளிலும் கசிந்த API சாவிகள்/ரகசியங்களை மறைக்கும் விருப்பத்தேர்வு நற்சான்று-மறைப்பு பாதுகாப்புத் தடுப்பு, இலவச DuckDuckGo இறுதி-வாய்ப்பு இணையத் தேடல் மற்றும் டாஷ்போர்டுக்கான விருப்பத்தேர்வு OIDC உள்நுழைவு வாயில் (கடவுச்சொல் உள்நுழைவு எப்போதும் கிடைக்கும்). → [பாதுகாப்புத் தடுப்புகள்](docs/security/GUARDRAILS.md)
+- **🖼️ புதிய முனைப்புள்ளிகள்** — `/v1/ocr` (Mistral OCR) மற்றும் `/v1/audio/translations` (Whisper-பாணி) ஆகியவை ஊடகத் திறன்களை முழுமைப்படுத்துகின்றன. → [API குறிப்பேடு](docs/reference/API_REFERENCE.md)
+- **🎨 படம் / காணொளி / ஒலி உருவாக்கம்** — ஊடகத்திற்கான ஒரே API: xAI Grok Imagine மற்றும் Novita AI காணொளி, ComfyUI, Magnific, Adobe Firefly, Segmind மற்றும் ElevenLabs போன்ற பேச்சு வழங்குநர்கள். → [API குறிப்பேடு](docs/reference/API_REFERENCE.md)
+- **🌍 பணியமர்த்தல் மற்றும் செயல்பாடுகள்** — எதிர்-ப்ராக்ஸி `basePath`, உலாவி மொழியைத் தானாகக் கண்டறிதல், ஒவ்வொரு சாவிக்குமான சாதனக் கண்காணிப்பு, root இல்லாத MITM நம்பிக்கை, zh-TW உள்ளூர்மயமாக்கல். → [சூழல்](docs/reference/ENVIRONMENT.md)
+- **🤝 மேலும் பல வழங்குநர்களும் முகவர்களும்** — கிளவுட் முகவர்கள் (Codex Cloud, Cursor, Devin, Jules), உலாவி + OAuth உள்நுழைவுடன் Grok Build (xAI), முதன்மை ஆதரவுடைய Ollama அட்டை, Claude Opus 5 மற்றும் Sonnet 5, Kimi அதிகாரப்பூர்வக் கூட்டாண்மை (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… மற்றும் புதுப்பிக்கப்பட்ட **376-வழங்குநர் பட்டியல்**. → [வழங்குநர்கள்](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 வழித்தடத் தேர்வின் வெளிப்படைத்தன்மை** — ஒவ்வொரு பதிலும் அதை வழங்கிய உத்தி/வழங்குநர்/தாமதத்தைக் குறிப்பிடும் `X-OmniRoute-Decision` தலைப்பைக் கொண்டுள்ளது; புதிய `cache-optimized` சேர்க்கை உத்தியும் Auto-Combo `cacheAffinity` காரணியும், மீண்டும் வரும் கோரிக்கைகளைத் தற்காலிக சேமிப்பிலுள்ள முன்னொட்டைக் கொண்ட இணைப்புக்கே திருப்புகின்றன; மேலும் வாசிப்புக்கு மட்டும் உரிய `/v1/auto-combo/{channel}/candidates` முனைப்புள்ளி, ஓர் `auto/*` சேனலின் நிகழ்நேர வேட்பாளர் தொகுப்பை வெளிப்படுத்துகிறது. → [தானியங்குச் சேர்க்கை](docs/routing/AUTO-COMBO.md)
+- **⚡ உள்ளூர் செயல்திறன் & உள்கட்டமைப்பு** — ஒரு-கிளிக் உள்ளூர் Redis, Cloudflare Workers / Deno Deploy ரிலே வரிசைப்படுத்திகள், Bifrost & Mux ஆகியவை மேற்பார்வையிடப்பட்ட உள்ளமைக்கப்பட்ட சேவைகளாக. → [Embedded Services](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 பெட்டியில் மேலும்** — செருகுநிரல் கட்டமைப்பு + சந்தை, Omni/Agent/GitHub திறன் கட்டமைப்புகள், Obsidian vault ஒருங்கிணைப்பு (22 MCP கருவிகள்), OpenAI-இணக்கமான Batch & Files APIகள், சொற்பொருள் பதில் தற்காலிக சேமிப்பு, தரவரிசைப் பட்டிகளுடன் கேமிஃபிகேஷன், ACP முகவர் கண்டறிதல் (15 உள்ளமைக்கப்பட்ட முகவர்கள்), BigQuery-க்கு திட்டமிடப்பட்ட பதிவு ஏற்றுமதி, `auto/chaos` இணையான பல-மாதிரி விசிறிப் பரவல், ஒரு Telegram bot பாலம், பயன்பாட்டினுள் பதிப்பு மேலாளர் மற்றும் LMArena-ELO இலவச-வழங்குநர் தரவரிசைகள். → [Docs](docs/README.md)
 
 <br/>
 
@@ -695,15 +695,15 @@ omniroute configure codex          # மேலும்: claude opencode qwen ai
 
 <div align="center">
 
-## 🌐 376 AI வழங்குநர்கள் — பட்டியலில் குறிக்கப்பட்ட 153 இலவச வழங்குநர்கள்
+## 🌐 376 AI வழங்குநர்கள் — பட்டியலில் இலவசம் எனக் குறிக்கப்பட்டவை 153
 
 </div>
 
-> அதிகாரப்பூர்வ அரட்டை, ஊடகம், தேடல், உள்ளூர், கிளவுட்-ஏஜென்ட் மற்றும் சிஸ்டம் தொகுப்புகளில் **376 பதிவுசெய்யப்பட்ட வழங்குநர்கள்** உள்ளனர்; இவர்களில் **153 வழங்குநர்கள் `hasFree: true` கண்டறிதல் மெட்டாடேட்டாவைக் கொண்டுள்ளனர்**. அரட்டை மாடல் பதிவகம் **239 வழங்குநர்கள் / 3,059 தனித்துவமான வழங்குநர்-மாடல் இணைகள் / 1,475 மூல மாடல் ID-கள்** ஆகியவற்றை உள்ளடக்குகிறது; தனியான இலவச பட்ஜெட் பட்டியலில் **மாடலுக்கு ஒன்று வீதம் 471 வரிசைகள்**, **34 தொடர் வளத் தொகுப்புகள்** மற்றும் **52 தொடர்/விசையில்லா நிரந்தர இலவச வழங்குநர்கள்** உள்ளனர். வடிவமைப்பின்படி இவற்றின் வகுத்தெண்கள் வேறுபடுகின்றன; வரையறைகளும் வளத் தொகுப்பு நகல் நீக்கப்பட்ட கணக்கீடுகளும் [வழங்குநர் குறிப்பில்](docs/reference/PROVIDER_REFERENCE.md) மற்றும் [இலவச அடுக்குகளில்](docs/reference/FREE_TIERS.md) உள்ளன.
+> **376 பதிவுசெய்யப்பட்ட வழங்குநர்கள்** அதிகாரப்பூர்வமான அரட்டை, ஊடகம், தேடல், உள்ளூர், cloud-agent மற்றும் system தொகுப்புகளில் உள்ளனர்; இவர்களில் **153 வழங்குநர்கள் `hasFree: true` கண்டறிதல் metadata-ஐக் கொண்டுள்ளனர்**. அரட்டை மாதிரிப் பதிவகம் **239 வழங்குநர்கள் / 3,059 தனித்துவமான வழங்குநர்-மாதிரி இணைகள் / 1,475 மூல மாதிரி ID-கள்** ஆகியவற்றை உள்ளடக்குகிறது; தனியான இலவசப் பயன்பாட்டு வரவுப் பட்டியலில் **ஒவ்வொரு மாதிரிக்குமான 471 வரிசைகள்**, **34 மீள்நிரப்பப்படும் தொகுப்புகள்** மற்றும் **52 மீள்நிரப்பப்படும்/API key தேவையில்லாத, எப்போதும் இலவசமான வழங்குநர்கள்** உள்ளனர். இவை வடிவமைப்பின்படியே வெவ்வேறு கணக்கீட்டு அடிப்படைகளைக் கொண்டவை; அவற்றின் வரையறைகளும், தொகுப்பு நகல்நீக்கம் செய்யப்பட்ட கணக்கீடுகளும் [வழங்குநர் மேற்கோள்](docs/reference/PROVIDER_REFERENCE.md) மற்றும் [இலவச அடுக்குகள்](docs/reference/FREE_TIERS.md) ஆகியவற்றில் உள்ளன.
 
 <div align="center">
 
-### 🏢 ஒவ்வொரு முக்கிய ஆய்வகமும் — ஒரே இறுதிப்புள்ளி வழியாக
+### 🏢 ஒவ்வொரு முக்கிய ஆய்வகமும் — ஒரே endpoint வழியாக
 
 <table>
   <tr>
@@ -732,32 +732,32 @@ omniroute configure codex          # மேலும்: claude opencode qwen ai
   </tr>
 </table>
 
-<sub>…மேலும் 350+ — ஒவ்வொரு ஐகானும் டாஷ்போர்டின் வழங்குநர் பட்டியலிலிருந்து நேரடியாகப் பெறப்படுகிறது. 📖 [வழங்குநர் குறிப்பு](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…மேலும் 350+ — ஒவ்வொரு icon-உம் dashboard-இன் வழங்குநர் பட்டியலிலிருந்து நேரடியாகப் பெறப்படுகிறது. 📖 [வழங்குநர் மேற்கோள்](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 என்றென்றும் இலவசம் — $0, கார்டு தேவையில்லை
+### 🆓 எப்போதும் இலவசம் — $0, card தேவையில்லை
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>டோக்கன் வரம்பு இல்லை</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>தானியங்கு வழிப்படுத்தி, Tencent Hy3<br/>என்றென்றும் இலவசம்</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>டோக்கன் உச்சவரம்பு இல்லை</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>தானியங்கு வழித்தேர்வி, Tencent Hy3<br/>என்றென்றும் இலவசம்</sub></td>
     <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>என்றென்றும் இலவசம்</sub></td>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>இலவச அடுக்கு</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>இலவச நிலை</sub></td>
     <td align="center" width="150"><img src="./public/providers/zhipu.svg" width="42" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>GLM-4.7 / 4.5-Flash<br/>என்றென்றும் இலவசம்</sub></td>
     <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>என்றென்றும் இலவசம்</sub></td>
   </tr>
   <tr>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max, Kimi-K2<br/>வரம்பற்ற இலவசப் பயன்பாடு</sub></td>
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>விசை தேவையில்லை</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ மாதிரிகள்<br/>ஒரு நாளைக்கு 10K நியூரான்கள்</sub></td>
-    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>இலவசமாக ~40 RPM</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>ஒருமுறை மட்டும் $5 கிரெடிட்; அட்டை தேவை</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ மாதிரிகள்<br/>நாளொன்றுக்கு 10K நியூரான்கள்</sub></td>
+    <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM இலவசம்</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>ஒருமுறை $5 கிரெடிட்; அட்டை தேவை</sub></td>
     <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free மாதிரிகள்<br/>+$10 → அதிக RPM</sub></td>
   </tr>
 </table>
 
-📖 முழுமையான இயந்திரம் வாசிக்கக்கூடிய பட்டியல் → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
+📖 இயந்திரம் வாசிக்கக்கூடிய முழுப் பட்டியல் → [`docs/reference/PROVIDER_REFERENCE.md`](docs/reference/PROVIDER_REFERENCE.md)
 
 <br/>
 </div>
@@ -1304,27 +1304,27 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
 <br/>
 <div align="center">
 
-## 🛠️ தொழில்நுட்பத் தொகுப்பு
+## 🛠️ தொழில்நுட்ப அடுக்கு
 
 </div>
 
 <table>
   <tr><th align="left">அடுக்கு</th><th align="left">தொழில்நுட்பம்</th></tr>
   <tr><td nowrap><b>இயக்கச் சூழல்</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>மொழி</b></td><td>TypeScript 6.0 — <code>src/</code> மற்றும் <code>open-sse/</code> முழுவதும் <b>100% TypeScript</b> (v2.0 முதல் மையப் பகுதியில் <code>any</code> எதுவுமில்லை)</td></tr>
+  <tr><td nowrap><b>மொழி</b></td><td>TypeScript 6.0 — <code>src/</code> மற்றும் <code>open-sse/</code> முழுவதும் <b>100% TypeScript</b> (v2.0 முதல் மையத்தில் <code>any</code> எதுவுமில்லை)</td></tr>
   <tr><td nowrap><b>கட்டமைப்பு</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL பதிவேடு) + LowDB (JSON மரபமைப்பு) — 147 களத் தொகுதிகள், 210 இடம்பெயர்வுகள்</td></tr>
-  <tr><td nowrap><b>நினைவகம்</b></td><td>SQLite FTS5 முழு-உரை + int8-அளவீடாக்கப்பட்ட திசையன் உட்பொதிவுகள், வகையிடப்பட்ட சிதைவு</td></tr>
-  <tr><td nowrap><b>திட்டவரைகள்</b></td><td>Zod 4 — MCP கருவி உள்ளீடு/வெளியீடு சரிபார்ப்பு + API ஒப்பந்தங்கள்</td></tr>
+  <tr><td nowrap><b>தரவுத்தளம்</b></td><td>better-sqlite3 (SQLite, WAL பதிவேட்டுமுறை) + LowDB (JSON மரபு) — 147 களத் தொகுதிகள், 211 இடம்பெயர்வுகள்</td></tr>
+  <tr><td nowrap><b>நினைவகம்</b></td><td>SQLite FTS5 முழு-உரை + int8-அளவாக்கப்பட்ட வெக்டர் உட்பதிவுகள், வகைப்படுத்தப்பட்ட சிதைவு</td></tr>
+  <tr><td nowrap><b>திட்டவடிவங்கள்</b></td><td>Zod 4 — MCP கருவி உள்ளீடு/வெளியீட்டுச் சரிபார்ப்பு + API ஒப்பந்தங்கள்</td></tr>
   <tr><td nowrap><b>நெறிமுறைகள்</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
-  <tr><td nowrap><b>தொடரோட்டம்</b></td><td>Server-Sent Events (SSE) + WebSocket இணைப்புப் பாலம் (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>சுருக்கம்</b></td><td>12-பொறி செயலாக்கத் தொடர் — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>அங்கீகாரம் &amp; பாதுகாப்பு</b></td><td>OAuth 2.0 (PKCE) + JWT + API விசைகள் + MCP வரம்பிட்ட அங்கீகாரம் · சேமிப்பில் AES-256-GCM மறையாக்கம் · DOMPurify</td></tr>
+  <tr><td nowrap><b>தொடரோட்டம்</b></td><td>சேவையகம் அனுப்பும் நிகழ்வுகள் (SSE) + WebSocket இணைப்புப் பாலம் (<code>/v1/ws</code>)</td></tr>
+  <tr><td nowrap><b>சுருக்கம்</b></td><td>12-எஞ்சின் செயலாக்கத் தொடர் — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>அங்கீகாரம் &amp; பாதுகாப்பு</b></td><td>OAuth 2.0 (PKCE) + JWT + API விசைகள் + MCP வரம்பிடப்பட்ட அங்கீகாரம் · சேமிப்புநிலையில் AES-256-GCM · DOMPurify</td></tr>
   <tr><td nowrap><b>மறைநிலை</b></td><td>wreq-js — JA3 / JA4 TLS கைரேகை ஆள்மாறாட்டம், 3-நிலை ப்ராக்ஸி</td></tr>
-  <tr><td nowrap><b>மீட்சித்திறன்</b></td><td>சுற்று முறிப்பான், அதிவேக பின்னடைவு, ஒரே நேரத் திரள் கோரிக்கைத் தடுப்பு, தானியங்கு-சேர்க்கை சுய-சீரமைப்பு</td></tr>
+  <tr><td nowrap><b>மீள்திறன்</b></td><td>சுற்றுத் துண்டிப்பான், அதிவேகப் பின்னடைவு, ஒரேநேரத் திரள்கோரிக்கைத் தடுப்பு, தானியங்கிச் சேர்க்கை சுய-சீரமைப்பு</td></tr>
   <tr><td nowrap><b>பதிவிடுதல்</b></td><td>pino — கோரிக்கைச் சூழலுடன் கட்டமைக்கப்பட்ட JSON பதிவுகள்</td></tr>
   <tr><td nowrap><b>சோதனை</b></td><td>Node.js சோதனை இயக்கி + Vitest — கண்காணிக்கப்படும் 7,800+ சோதனைக் கோப்புகளில் <b>56,000+ நிலையான சோதனை அறிவிப்புகள்</b> (அலகு, ஒருங்கிணைப்பு, E2E, பாதுகாப்பு, சூழலமைப்பு)</td></tr>
-  <tr><td nowrap><b>தளங்கள்</b></td><td>மேசைக்கணினி (Electron) · Android (Termux) · PWA (எந்த உலாவியிலும்)</td></tr>
+  <tr><td nowrap><b>தளங்கள்</b></td><td>கணினி (Electron) · Android (Termux) · PWA (எந்த உலாவியும்)</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — வெளியீட்டின்போது தானியங்கு npm வெளியீடு + Docker Hub</td></tr>
   <tr><td nowrap><b>இணைப்புகள்</b></td><td><a href="https://omniroute.online">இணையதளம்</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
@@ -1342,24 +1342,24 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
 <table>
   <tr><th align="left">ஆவணம்</th><th align="left">விளக்கம்</th></tr>
   <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">பயனர் வழிகாட்டி</a></b></td><td>வழங்குநர்கள், சேர்க்கைகள், CLI ஒருங்கிணைப்பு, வரிசைப்படுத்தல்</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">அமைப்பு வழிகாட்டி</a></b></td><td>முழுமையான நிறுவல் முறைகள், CLI கருவி உள்ளமைவுகள், நெறிமுறை அமைப்பு, காலக்கெடு சீரமைப்பு</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">அமைப்பு வழிகாட்டி</a></b></td><td>முழுமையான நிறுவல் முறைகள், CLI கருவி உள்ளமைவுகள், நெறிமுறை அமைப்பு, நேரமுடிவு சீரமைப்பு</td></tr>
   <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI கருவிகள் வழிகாட்டி</a></b></td><td>Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo, Copilot ஆகியவற்றுக்கான தனித்தனி கருவி அமைப்பு</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">தொலைநிலைப் பயன்முறை</a></b></td><td>வரம்புக்குட்பட்ட அணுகல் டோக்கன்கள் வழியாக உங்கள் மடிக்கணினி CLI-இலிருந்து தொலைநிலை OmniRoute-ஐ (VPS) இயக்குதல்</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code உள்ளமைவு</a></b></td><td><code>launch</code> + மாதிரி வாரியான சுயவிவரங்களுடன் Claude Code-ஐ OmniRoute-க்கு (உள்ளூர்/தொலைநிலை) இணைத்தல்</td></tr>
-  <tr><td nowrap><b><a href="README.md#-quick-start">விரைவுத் தொடக்கம்</a></b></td><td>3-படி நிறுவல் → இணைப்பு → உள்ளமைப்பு</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">தொலைநிலைப் பயன்முறை</a></b></td><td>வரையறுக்கப்பட்ட அணுகல் டோக்கன்கள் வழியாக உங்கள் மடிக்கணினியின் CLI-இலிருந்து தொலைநிலை OmniRoute-ஐ (VPS) இயக்குங்கள்</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code உள்ளமைவு</a></b></td><td><code>launch</code> மற்றும் ஒவ்வொரு மாதிரிக்குமான சுயவிவரங்களுடன் Claude Code-ஐ OmniRoute-க்கு (உள்ளூர்/தொலைநிலை) இணைத்தல்</td></tr>
+  <tr><td nowrap><b><a href="README.md#-quick-start">விரைவான தொடக்கம்</a></b></td><td>3 படிகள்: நிறுவுதல் → இணைத்தல் → உள்ளமைத்தல்</td></tr>
 </table>
 
 ### 🔧 செயல்பாடுகள் & வரிசைப்படுத்தல்
 
 <table>
   <tr><th align="left">ஆவணம்</th><th align="left">விளக்கம்</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker வழிகாட்டி</a></b></td><td>Docker இயக்கம், Compose சுயவிவரங்கள், Caddy HTTPS, சுரங்கங்கள், படிமக் குறிச்சொற்கள்</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker வழிகாட்டி</a></b></td><td>Docker இயக்கம், Compose சுயவிவரங்கள், Caddy HTTPS, சுரங்கப்பாதைகள், படிமக் குறிச்சொற்கள்</td></tr>
   <tr><td nowrap><b><a href="contrib/podman/README.md">Podman வழிகாட்டி</a></b></td><td>Quadlet systemd ஒருங்கிணைப்பு, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">VM வரிசைப்படுத்தல்</a></b></td><td>முழுமையான வழிகாட்டி: VM + nginx + Cloudflare அமைப்பு</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io வரிசைப்படுத்தல்</a></b></td><td>நிலையான சேமிப்பகத்துடன் Fly.io-க்குப் வரிசைப்படுத்துதல்</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Fly.io வரிசைப்படுத்தல்</a></b></td><td>நிரந்தரச் சேமிப்பகத்துடன் Fly.io-க்கு வரிசைப்படுத்துதல்</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux வழிகாட்டி</a></b></td><td>Termux வழியாக Android-இல் OmniRoute-ஐ இயக்குதல்</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA வழிகாட்டி</a></b></td><td>முன்னேற்றமிக்க வலைச் செயலி நிறுவல், இடைச்சேமிப்பு, கட்டமைப்பு</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">நிறுவல் நீக்க வழிகாட்டி</a></b></td><td>அனைத்து நிறுவல் முறைகளுக்குமான முழுமையான அகற்றல்</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA வழிகாட்டி</a></b></td><td>Progressive Web App நிறுவல், தற்காலிகச் சேமிப்பு, கட்டமைப்பு</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">நிறுவல் நீக்க வழிகாட்டி</a></b></td><td>அனைத்து நிறுவல் முறைகளுக்குமான முழுமையான நீக்கம்</td></tr>
   <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">சூழல் உள்ளமைவு</a></b></td><td>முழுமையான <code>.env</code> மாறிகள் மற்றும் குறிப்புகள்</td></tr>
 </table>
 
@@ -1367,18 +1367,18 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
 
 <table>
   <tr><th align="left">ஆவணம்</th><th align="left">விளக்கம்</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">கட்டமைப்பு</a></b></td><td>கணினிக் கட்டமைப்பு, தரவுப் பாய்வு மற்றும் உள்செயல்பாடுகள்</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">சுருக்க வழிகாட்டி</a></b></td><td>7-விருப்பச் செயலாக்கத் தொடர்: முடக்கம் / எளிய / நிலையான / தீவிரமான / உச்சமான / RTK / அடுக்கப்பட்ட</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK சுருக்கம்</a></b></td><td>கட்டளை வெளியீட்டுச் சுருக்கம், வடிப்பான்கள், நம்பிக்கை, சரிபார்ப்பு, மூல வெளியீட்டு மீட்பு</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">சுருக்கப் பொறிகள்</a></b></td><td>Caveman, RTK, அடுக்கப்பட்ட செயலாக்கத் தொடர்கள், முகப்புப்பலகை/API/MCP இடைமுகங்கள்</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">சுருக்க விதிகள் வடிவமைப்பு</a></b></td><td>Caveman மற்றும் RTK வடிப்பான்களுக்கான JSON விதித் தொகுப்புத் திட்டவடிவங்கள்</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">சுருக்க மொழித் தொகுப்புகள்</a></b></td><td>மொழி கண்டறிதல் மற்றும் Caveman விதித் தொகுப்பு உருவாக்கம்</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">மீட்சித்திறன் வழிகாட்டி</a></b></td><td>சுற்றுத் துண்டிப்பான்கள், குளிர்விப்பு இடைவெளிகள், வரிசை, ஒரே நேரக் கோரிக்கைப் பெருக்கத் தடுப்பு, TLS ஆள்மாறாட்டம்</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">தானியங்கி சேர்க்கைப் பொறி</a></b></td><td>16-காரணி மதிப்பீடு, பயன்முறைத் தொகுப்புகள், தானியங்கி மீட்பு</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">கட்டமைப்பு</a></b></td><td>கணினிக் கட்டமைப்பு, தரவோட்டம் மற்றும் உள் செயல்பாடுகள்</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">சுருக்க வழிகாட்டி</a></b></td><td>7-விருப்பச் செயலாக்கத் தொடர்: முடக்கம் / இலகு / நிலையான / தீவிரமான / அதிதீவிரமான / RTK / அடுக்கப்பட்டது</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK சுருக்கம்</a></b></td><td>கட்டளை வெளியீட்டுச் சுருக்கம், வடிப்பான்கள், நம்பிக்கை, சரிபார்ப்பு, மூல வெளியீட்டு மீட்டெடுப்பு</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">சுருக்க இயந்திரங்கள்</a></b></td><td>Caveman, RTK, அடுக்கப்பட்ட செயலாக்கத் தொடர்கள், dashboard/API/MCP இடைமுகங்கள்</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">சுருக்க விதிகள் வடிவமைப்பு</a></b></td><td>Caveman மற்றும் RTK வடிப்பான்களுக்கான JSON விதித்தொகுப்பு திட்டவடிவங்கள்</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">சுருக்க மொழித் தொகுப்புகள்</a></b></td><td>மொழி கண்டறிதல் மற்றும் Caveman விதித்தொகுப்பு உருவாக்கம்</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">மீட்சித்திறன் வழிகாட்டி</a></b></td><td>சுற்றுத்தடுப்பான்கள், குளிர்விப்பு இடைவெளிகள், வரிசை, ஒரே நேரக் கோரிக்கைப் பெருக்கத் தடுப்பு, TLS ஆள்மாறாட்டம்</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo இயந்திரம்</a></b></td><td>16-காரணி மதிப்பீடு, பயன்முறைத் தொகுப்புகள், தானியக்கச் சீரமைப்பு</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Proxy வழிகாட்டி</a></b></td><td>3-நிலை proxy அமைப்பு, 1proxy சந்தை, பதிவேட்டு CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">இலவச அடுக்குகள்</a></b></td><td>ஒருங்கிணைந்த அடைவு: ஆவணப்படுத்தப்பட்ட 34 தொடர்ச்சியான வளத் தொகுப்புகள் / பட்டியலிடப்பட்ட 484 இலவச-அடுக்கு உள்ளீடுகள்</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">அம்சக் காட்சியகம்</a></b></td><td>திரைப்பிடிப்புகளுடன் கூடிய காட்சி முகப்புப்பலகைச் சுற்றுலா</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">குறியீட்டுத் தள ஆவணங்கள்</a></b></td><td>தொடக்கநிலையாளருக்கு ஏற்ற குறியீட்டுத் தளச் செயல்விளக்கம்</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">இலவச அடுக்குகள்</a></b></td><td>ஒருங்கிணைக்கப்பட்ட அடைவு: ஆவணப்படுத்தப்பட்ட 34 தொடர் வளத்தொகுப்புகள் / பட்டியலிடப்பட்ட 484 இலவச-அடுக்கு உள்ளீடுகள்</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">அம்சங்கள் காட்சியகம்</a></b></td><td>திரைப்பிடிப்புகளுடன் கூடிய காட்சி dashboard சுற்றுப்பயணம்</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">குறியீட்டுத்தள ஆவணங்கள்</a></b></td><td>தொடக்கநிலையாளர்களுக்கு ஏற்ற குறியீட்டுத்தள விளக்கச் சுற்றுப்பயணம்</td></tr>
 </table>
 
 ### 🤖 நெறிமுறைகள் & API-கள்
@@ -1389,7 +1389,7 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
   <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI விவரக்குறிப்பு</a></b></td><td>OpenAPI 3.0 விவரக்குறிப்பு</td></tr>
   <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP சேவையகம்</a></b></td><td>110 MCP கருவிகள், IDE உள்ளமைவுகள், Python/TS/Go கிளையன்ட்கள்</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP சேவையக வழிகாட்டி</a></b></td><td>MCP நிறுவல், போக்குவரத்து முறைகள் மற்றும் கருவிக் குறிப்பு</td></tr>
-  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A சேவையகம்</a></b></td><td>JSON-RPC 2.0 நெறிமுறை, திறன்கள், தொடர் தரவோட்டம், பணித் தள மேலாண்மை</td></tr>
+  <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A சேவையகம்</a></b></td><td>JSON-RPC 2.0 நெறிமுறை, திறன்கள், தொடர் தரவோட்டம், பணி மேலாண்மை</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A சேவையக வழிகாட்டி</a></b></td><td>A2A முகவர் அட்டை, பணிகள், திறன்கள் மற்றும் தொடர் தரவோட்டம்</td></tr>
 </table>
 
@@ -1398,21 +1398,21 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
 <table>
   <tr><th align="left">ஆவணம்</th><th align="left">விளக்கம்</th></tr>
   <tr><td nowrap><b><a href="CONTRIBUTING.md">பங்களித்தல்</a></b></td><td>மேம்பாட்டு அமைப்பும் வழிகாட்டுதல்களும்</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">கிளையாக்கம் & வெளியீட்டு மாதிரி</a></b></td><td>PR-கள் இலக்காகக் கொள்ளும் இடம் (<code>release/*</code>), <code>main</code> மற்றும் குறிச்சொற்களின் பொருள்</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">மாற்றப் பதிவு</a></b></td><td>ஒவ்வொரு பதிப்பிற்குமான முழுமையான வெளியீட்டு வரலாறு</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">கிளையிடல் மற்றும் வெளியீட்டு மாதிரி</a></b></td><td>PR-கள் எதைக் குறிவைக்கின்றன (<code>release/*</code>), <code>main</code> மற்றும் குறிச்சொற்களின் பொருள் என்ன</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">மாற்றப் பதிவு</a></b></td><td>ஒவ்வொரு பதிப்புக்குமான முழுமையான வெளியீட்டு வரலாறு</td></tr>
   <tr><td nowrap><b><a href="SECURITY.md">பாதுகாப்புக் கொள்கை</a></b></td><td>பாதிப்புகளைப் புகாரளித்தலும் பாதுகாப்பு நடைமுறைகளும்</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n வழிகாட்டி</a></b></td><td>67 மொழிகளுக்கான ஆதரவு, மொழிபெயர்ப்புப் பணிப்பாய்வு, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">வெளியீட்டுச் சரிபார்ப்புப் பட்டியல்</a></b></td><td>வெளியீட்டுக்கு முந்தைய சரிபார்ப்புப் படிகள்</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">கவரேஜ் திட்டம்</a></b></td><td>கண்காணிக்கப்படும் 7,800+ சோதனைக் கோப்புகளில் உள்ள 56,000+ நிலையான சோதனை அறிவிப்புகளுக்கான சோதனைக் கவரேஜ் உத்தி</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">சோதனை உள்ளடக்கத் திட்டம்</a></b></td><td>கண்காணிக்கப்படும் 7,800+ சோதனைக் கோப்புகளில் உள்ள 56,000+ நிலையான சோதனை அறிவிப்புகளுக்கான சோதனை உள்ளடக்க உத்தி</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ சிறந்த பங்களிப்பாளர்கள்
+# ⭐ முன்னணிப் பங்களிப்பாளர்கள்
 
-> ஆர்வமிக்க திறந்த மூலச் சமூகத்தால் OmniRoute வடிவமைக்கப்படுகிறது. திட்டத்தின் தரம், நிலைத்தன்மை மற்றும் சென்றடையும் பரப்பு ஆகியவற்றில் நேரடித் தாக்கத்தை ஏற்படுத்தும் சிறப்பான பங்களிப்புகளை இவர்கள் செய்துள்ளனர். **நன்றி.**
+> ஆர்வமிக்க திறந்த மூலச் சமூகத்தால் OmniRoute வடிவமைக்கப்படுகிறது. திட்டத்தின் தரம், நிலைத்தன்மை மற்றும் சென்றடையும் பரப்பு ஆகியவற்றில் நேரடித் தாக்கத்தை ஏற்படுத்தும் சிறப்பான பங்களிப்புகளை இந்த நபர்கள் செய்துள்ளனர். **நன்றி.**
 
 ### ஒன்றிணைக்கப்பட்ட pull request-களின் அடிப்படையில் வெளிப்புறப் பங்களிப்பாளர்கள்
 
@@ -1440,7 +1440,7 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
   <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>நேரடி <code>release/v3.8.52</code> முனை <code>656f01cb43</code>-ஐக் கொண்டு 2026-10-18 15:09:09 UTC அன்று கணக்கெடுப்பு மேற்கொள்ளப்பட்டது. பக்கமிடப்பட்ட GitHub GraphQL கணக்கெடுப்பில் ஒன்றிணைக்கப்பட்ட 9,191 PR-கள் உள்ளன: களஞ்சிய உரிமையாளரால் 3,834, Dependabot-ஆல் 229, பிற bot-கள்/app-களால் 6, மேலும் <b>835 தனித்துவமான பங்களிப்பாளர்களிடமிருந்து 5,122 வெளிப்புற PR-கள்</b>. “மாற்றப்பட்ட வரிகள்” என்பது GitHub சேர்த்தல்கள் + நீக்குதல்கள் ஆகும்; இதில் உருவாக்கப்பட்ட கோப்புகள், lockfile-கள், பட்டியல்கள், மொழிபெயர்ப்புகள் மற்றும் ஆவணங்கள் அடங்கும்; இது மாற்றச் சுழற்சியின் அளவே அன்றி, எழுதப்பட்ட LOC அல்ல. 49 PR-களில் GitHub வேறுபாடுகள் 500,000 வரிகளுக்கு மேல் பதிவாகியுள்ளன (எடுத்துக்காட்டாக #13399, ஒற்றை provider சேர்ப்பு, மாற்றப்பட்ட 2,347 கோப்புகளைப் பட்டியலிடுகிறது); இதனால் மேலே உள்ள பல மொத்தங்கள் அதிகரித்துக் காணப்படுகின்றன. சமநிலைகள் ஒன்றாகத் தரவரிசைப்படுத்தப்பட்டுள்ளன.</sub>
+<sub>நேரடி <code>release/v3.8.52</code> முனை <code>656f01cb43</code>-ஐக் கொண்டு 2026-10-18 15:09:09 UTC அன்று கணக்கெடுப்பு மேற்கொள்ளப்பட்டது. பக்கங்களாகப் பிரிக்கப்பட்ட GitHub GraphQL கணக்கெடுப்பில் ஒன்றிணைக்கப்பட்ட 9,191 PR-கள் உள்ளன: களஞ்சிய உரிமையாளரால் 3,834, Dependabot-ஆல் 229, பிற bot/app-களால் 6 மற்றும் <b>835 தனித்துவமான பங்களிப்பாளர்களிடமிருந்து 5,122 வெளிப்புற PR-கள்</b>. “மாற்றப்பட்ட வரிகள்” என்பது GitHub சேர்த்தல்கள் + நீக்குதல்கள் ஆகும்; இதில் உருவாக்கப்பட்ட கோப்புகள், lockfile-கள், பட்டியல்கள், மொழிபெயர்ப்புகள் மற்றும் ஆவணங்கள் அடங்கும்; இது மாற்றங்களின் அளவே தவிர, எழுதப்பட்ட LOC அல்ல. 49 PR-கள் 500,000 வரிகளுக்கு அதிகமான GitHub diff-களைப் பதிவுசெய்கின்றன (எடுத்துக்காட்டாக #13399, ஒற்றை provider சேர்ப்பு, மாற்றப்பட்ட 2,347 கோப்புகளைப் பட்டியலிடுகிறது); இது மேலே உள்ள பல மொத்த எண்ணிக்கைகளை உயர்த்துகிறது. சமநிலைகள் ஒன்றாகத் தரவரிசைப்படுத்தப்படுகின்றன.</sub>
 
 ### GitHub-ஆல் குறிப்பிடப்பட்ட commit-கள்
 
@@ -1451,42 +1451,42 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
         <img src="https://github.com/maxmad64bis.png" width="40" style="border-radius:50%" alt="Dizzle"/><br/>
         <b>Dizzle</b>
       </a><br/>
-      <sub>🥇 GitHub-க்குக் காரணமிடப்பட்ட 367 commit-கள்</sub>
+      <sub>🥇 GitHub-இல் குறிப்பிடப்பட்ட 367 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/HouMinXi">
         <img src="https://github.com/HouMinXi.png" width="40" style="border-radius:50%" alt="Bob.Hou"/><br/>
         <b>Bob.Hou</b>
       </a><br/>
-      <sub>🥈 GitHub-க்குக் காரணமிடப்பட்ட 269 commit-கள்</sub>
+      <sub>🥈 GitHub-இல் குறிப்பிடப்பட்ட 269 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/oyi77">
         <img src="https://github.com/oyi77.png" width="40" style="border-radius:50%" alt="Paijo"/><br/>
         <b>Paijo</b>
       </a><br/>
-      <sub>🥉 GitHub-க்குக் காரணமிடப்பட்ட 229 commit-கள்</sub>
+      <sub>🥉 GitHub-இல் குறிப்பிடப்பட்ட 229 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/backryun">
         <img src="https://github.com/backryun.png" width="40" style="border-radius:50%" alt="backryun"/><br/>
         <b>backryun</b>
       </a><br/>
-      <sub>🏅 GitHub-க்குக் காரணமிடப்பட்ட 202 commit-கள்</sub>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 202 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/pacocartones">
         <img src="https://github.com/pacocartones.png" width="40" style="border-radius:50%" alt="Paco Cartones"/><br/>
         <b>Paco Cartones</b>
       </a><br/>
-      <sub>🏅 GitHub-க்குக் காரணமிடப்பட்ட 174 commit-கள்</sub>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 174 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/RaviTharuma">
         <img src="https://github.com/RaviTharuma.png" width="40" style="border-radius:50%" alt="Ravi Tharuma"/><br/>
         <b>Ravi Tharuma</b>
       </a><br/>
-      <sub>🏅 GitHub-க்குக் காரணமிடப்பட்ட 126 commit-கள்</sub>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 126 கமிட்கள்</sub>
     </td>
   </tr>
   <tr>
@@ -1495,42 +1495,42 @@ Dashboard இல்லாத headless runtime-க்கு Docker `base` profile
         <img src="https://github.com/hartmark.png" width="40" style="border-radius:50%" alt="Markus Hartung"/><br/>
         <b>Markus Hartung</b>
       </a><br/>
-      <sub>🏅 GitHub-க்குக் காரணமிடப்பட்ட 114 commit-கள்</sub>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 114 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/rdself">
         <img src="https://github.com/rdself.png" width="40" style="border-radius:50%" alt="Randi"/><br/>
         <b>Randi</b>
       </a><br/>
-      <sub>🏅 GitHub-க்குக் காரணமிடப்பட்ட 108 commit-கள்</sub>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 108 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/JxnLexn">
         <img src="https://github.com/JxnLexn.png" width="40" style="border-radius:50%" alt="Jan Leon"/><br/>
         <b>Jan Leon</b>
       </a><br/>
-      <sub>🏅 GitHub-க்குக் காரணமிடப்பட்ட 87 commit-கள்</sub>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 87 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/christopher-s">
         <img src="https://github.com/christopher-s.png" width="40" style="border-radius:50%" alt="Chris"/><br/>
         <b>Chris</b>
       </a><br/>
-      <sub>🏅 GitHub-க்குக் காரணமிடப்பட்ட 70 commit-கள்</sub>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 70 கமிட்கள்</sub>
     </td>
     <td align="center" width="160">
       <a href="https://github.com/KooshaPari">
         <img src="https://github.com/KooshaPari.png" width="40" style="border-radius:50%" alt="Koosha Paridehpour"/><br/>
         <b>Koosha Paridehpour</b>
       </a><br/>
-      <sub>🏅 GitHub-க்குக் காரணமிடப்பட்ட 68 commit-கள்</sub>
+      <sub>🏅 GitHub-இல் குறிப்பிடப்பட்ட 68 கமிட்கள்</sub>
     </td>
   </tr>
 </table>
 
-<sub>2026-10-18 14:44:45 UTC அன்று மீண்டும் சரிபார்க்கப்பட்டது: இயல்புநிலை <code>release/v3.8.52</code> கிளைக்காகக் களஞ்சியத்தின் Contributors API அறிக்கையிட்ட GitHub-க்குக் காரணமிடப்பட்ட commit-கள். API 849 அடையாளங்களை (429 பயனர்கள், 2 bot-கள், 418 பெயரிலிகள்) வழங்கியது; இந்த அட்டவணை பராமரிப்பாளர், bot-கள் மற்றும் பெயரிலி அடையாளங்களை விலக்கி, சமநிலைகளைத் தக்கவைக்கிறது. இது மேலே உள்ள ஒன்றிணைக்கப்பட்ட PR தரவரிசை மற்றும் கீழே உள்ள Git மெட்டாடேட்டா கணக்கெடுப்பு ஆகிய இரண்டிலிருந்தும் வேறுபட்டது.</sub>
+<sub>2026-10-18 14:44:45 UTC அன்று மீண்டும் சரிபார்க்கப்பட்டது: இயல்புநிலைக் கிளையான <code>release/v3.8.52</code> கிளைக்காகக் களஞ்சியத்தின் Contributors API தெரிவித்த GitHub-இல் குறிப்பிடப்பட்ட கமிட்கள். API 849 அடையாளங்களைத் திருப்பியளித்தது (429 பயனர்கள், 2 போட்கள், 418 பெயரிலிகள்); இந்த அட்டவணை பராமரிப்பாளர், போட்கள் மற்றும் பெயரிலி அடையாளங்களைத் தவிர்த்து, சமநிலையான போட்டி நிலைகளைத் தக்கவைக்கிறது. இது மேலே உள்ள ஒன்றிணைக்கப்பட்ட-PR தரவரிசை மற்றும் கீழே உள்ள Git-மெட்டாடேட்டா கணக்கெடுப்பு ஆகிய இரண்டிலிருந்தும் வேறுபட்டது.</sub>
 
-> 🙏 இந்தப் பங்களிப்பாளர்களின் அம்சங்கள், பிழைத் திருத்தங்கள் மற்றும் உள்கட்டமைப்பு மேம்பாடுகள் OmniRoute-ஐ நம்பகமானதாகவும் அம்சங்கள் நிறைந்ததாகவும் ஆக்குவதன் **முக்கியப் பகுதியாகும்**. ஒவ்வொரு pull request-உம், ஒவ்வொரு சோதனை நிகழ்வும், ஒவ்வொரு i18n மொழிபெயர்ப்புக் கோப்பும் முக்கியமானது. திறந்த மூல மென்பொருள் இவர்களைப் போன்றவர்களால் உருவாக்கப்படுகிறது.
+> 🙏 இந்தப் பங்களிப்பாளர்களின் அம்சங்கள், பிழைத் திருத்தங்கள் மற்றும் உள்கட்டமைப்பு மேம்பாடுகள் OmniRoute-ஐ நம்பகமானதாகவும் அம்சங்கள் நிறைந்ததாகவும் ஆக்குவதில் ஒரு **முக்கிய அங்கமாகும்**. ஒவ்வொரு pull request-உம், ஒவ்வொரு சோதனை நிகழ்வும், ஒவ்வொரு i18n மொழிபெயர்ப்புக் கோப்பும் முக்கியமானவை. திறந்த மூல மென்பொருள் இவர்களைப் போன்றவர்களால் உருவாக்கப்படுகிறது.
 
 </div>
 

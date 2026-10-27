@@ -1,5 +1,6 @@
 // Pure shared primitives for the OpenAI Responses <-> Chat Completions request
 // translators. Extracted verbatim from openai-responses.ts (no host imports).
+import { getProviderModels, supportsClaudeMaxEffort } from "../../../config/providerModels.ts";
 
 export type JsonRecord = Record<string, unknown>;
 export const RESPONSES_STORE_MARKER = "_omnirouteResponsesStore";
@@ -73,6 +74,21 @@ function supportsNativeMaxReasoningEffort(model: unknown, targetFormat?: unknown
   );
 }
 
+// Claude targets accept a literal `max` effort on the models that support it
+// (Anthropic effort docs). The Anthropic registry entry is authoritative when it
+// declares the model's effort tiers (e.g. Sonnet 5.5 stops at xhigh); otherwise
+// fall back to the same family check the openai -> claude translator applies.
+function supportsClaudeTargetMaxEffort(model: unknown): boolean {
+  const modelId = toString(model).trim().toLowerCase();
+  const bareModelId = modelId.slice(modelId.lastIndexOf("/") + 1);
+  if (!bareModelId) return false;
+  const declaredEfforts = getProviderModels("claude").find(
+    (entry) => entry.id === bareModelId || entry.aliases?.includes(bareModelId)
+  )?.supportedThinkingEfforts;
+  if (Array.isArray(declaredEfforts)) return declaredEfforts.includes("max");
+  return supportsClaudeMaxEffort(bareModelId);
+}
+
 export function normalizeResponsesReasoningEffort(
   value: unknown,
   model?: unknown,
@@ -80,6 +96,7 @@ export function normalizeResponsesReasoningEffort(
 ): string {
   const effort = toString(value).toLowerCase();
   if (effort !== "max") return effort;
+  if (targetFormat === "claude" && supportsClaudeTargetMaxEffort(model)) return "max";
   return supportsNativeMaxReasoningEffort(model, targetFormat) ? "max" : "xhigh";
 }
 

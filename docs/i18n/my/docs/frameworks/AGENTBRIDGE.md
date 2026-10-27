@@ -14,36 +14,36 @@ AgentBridge သည် IDE AI agent များထံမှ HTTPS traffic ကိ
 
 ## §1 ခြုံငုံသုံးသပ်ချက်
 
-### AgentBridge ဆိုသည်မှာ အဘယ်နည်း?
+### AgentBridge ဆိုတာ ဘာလဲ?
 
-IDE agent တစ်ခု (ဥပမာ GitHub Copilot၊ Cursor၊ Claude Code) က API ခေါ်ဆိုမှုတစ်ခု ပြုလုပ်သည့်အခါ upstream AI provider (OpenAI၊ Anthropic စသည်) ထံ တိုက်ရိုက်ချိတ်ဆက်ပါသည်။ AgentBridge သည် agent configuration ကို မည်သည့်ပြောင်းလဲမှုမျှ ပြုလုပ်ရန်မလိုဘဲ ထိုချိတ်ဆက်မှုကို TLS အဆင့်တွင် ပွင့်လင်းမြင်သာစွာ ကြားဖြတ်ဖမ်းယူပြီး request ကို OmniRoute မှတစ်ဆင့် ပြန်လည်ရေးသားပေးပါသည်။
+IDE agent တစ်ခု (ဥပမာ — GitHub Copilot, Cursor, Claude Code) သည် API call တစ်ခု ပြုလုပ်သောအခါ၊ ၎င်းသည် upstream AI provider (OpenAI, Anthropic စသည်တို့) သို့ တိုက်ရိုက်ချိတ်ဆက်ပါသည်။ AgentBridge သည် ထိုချိတ်ဆက်မှုကို TLS အဆင့်တွင် — agent configuration ပြောင်းလဲမှု အနည်းငယ်မျှ မလိုအပ်ဘဲ — သတိမထားမိစွာ (transparently) ကြားဖြတ်ဖမ်းယူပြီး request ကို OmniRoute မှတစ်ဆင့် ပြင်ဆင်ရေးသားပေးပါသည်။
 
-ဤနည်းဖြင့် အောက်ပါတို့ကို လုပ်ဆောင်နိုင်ပါသည်-
+ဆိုလိုသည်မှာ သင် အောက်ပါတို့ကို လုပ်ဆောင်နိုင်ပါသည် —
 
-- **မည်သည့် agent ကိုမဆို မည်သည့် provider ထံမဆို ပြန်လည်လမ်းကြောင်းသတ်မှတ်နိုင်ခြင်း**: Copilot က OpenAI နှင့် ဆက်သွယ်နေပါသလား? ၎င်းကို Anthropic Claude၊ Gemini သို့မဟုတ် OmniRoute ၏ provider 376 ခုအနက် မည်သည့် provider ထံမဆို ပြန်လည်ညွှန်းပို့နိုင်ပါသည်။
-- **Model mapping များ အသုံးချနိုင်ခြင်း**: handler အဆင့်တွင် `gemini-3-flash` → `claude-sonnet-4.7` ဟု ပွင့်လင်းမြင်သာစွာ mapping ပြုလုပ်နိုင်ပါသည်။
-- **Agent traffic အားလုံးကို စောင့်ကြည့်နိုင်ခြင်း**: ကြားဖြတ်ဖမ်းယူထားသည့် request တိုင်းကို [Traffic Inspector](./TRAFFIC_INSPECTOR.md) သို့ ထုတ်လွှင့်ပေးပါသည်။
-- **OmniRoute ၏ ကြံ့ကြံ့ခံနိုင်စွမ်းဆိုင်ရာ လုပ်ဆောင်ချက်များကို အသုံးချနိုင်ခြင်း**: combo routing၊ circuit breaker များ၊ fallback များနှင့် ကုန်ကျစရိတ်ခြေရာခံခြင်းတို့သည် IDE agent traffic အတွက်လည်း အလုပ်လုပ်ပါသည်။
+- **မည်သည့် agent ကိုမဆို မည်သည့် provider သို့မဆို ပြန်ညွှန်းနိုင်သည်**: Copilot က OpenAI နဲ့ ဆက်သွယ်နေတာလား? ၎င်းကို Anthropic Claude, Gemini သို့မဟုတ် OmniRoute ၏ provider 376 ခုအနက်မှ မည်သည့်တစ်ခုကိုမဆို ပြန်လည်ညွှန်းလိုက်ပါ။
+- **Model mappings များကို အသုံးချနိုင်သည်**: `gemini-3-flash` → `claude-sonnet-4.7` ကို handler အဆင့်တွင် သတိမထားမိစွာ ပြောင်းလဲပေးပါသည်။
+- **agent traffic အားလုံးကို စောင့်ကြည့်နိုင်သည်**: ကြားဖြတ်ဖမ်းယူထားသော request တိုင်းကို [Traffic Inspector](./TRAFFIC_INSPECTOR.md) သို့ ထုတ်ဝေပေးပါသည်။
+- **OmniRoute ၏ resilience ကို အသုံးချနိုင်သည်**: combo routing, circuit breakers, fallbacks နှင့် cost tracking တို့သည် IDE agent traffic အတွက်လည်း အလုပ်လုပ်ပါသည်။
 
-### ဈေးကွက်ရှိ အခြားထုတ်ကုန်များနှင့် နှိုင်းယှဉ်ထားသည့် အနေအထား
+### ဈေးကွက်နှင့် နှိုင်းယှဉ်သော ရပ်တည်ချက်
 
-| လုပ်ဆောင်ချက်     | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ----------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity       |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot    |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)        |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex      |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE        |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries    |    —    |    ✓     |        —        |             ✓             |
-| Claude Code       |    —    |    —     |        ✓        |             ✓             |
-| Open Code         |    —    |    —     |        ✓        |             ✓             |
-| Trae              |    —    |    —     |        —        |    🔍 စုံစမ်းစစ်ဆေးဆဲ     |
-| Dashboard UI      |    ✓    |    ✗     |        ✗        |             ✓             |
-| Traffic Inspector |    ✗    |    ✗     |        ✓        |             ✓             |
-| OmniRoute routing |    ✗    |    ✗     |        ✗        |             ✓             |
-| Model mapping UI  |    ✗    |    ✗     |        ✗        |             ✓             |
-| Bypass စာရင်း     |    ✗    |    ✗     |        ✓        |             ✓             |
-| Upstream CA cert  |    ✗    |    ✗     |        ✓        |             ✓             |
+| အင်္ဂါရပ်           | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| ------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity         |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot      |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)          |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex        |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE          |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries      |    —    |    ✓     |        —        |             ✓             |
+| Claude Code         |    —    |    —     |        ✓        |             ✓             |
+| Open Code           |    —    |    —     |        ✓        |             ✓             |
+| Trae                |    —    |    —     |        —        |   🔍 စူးစမ်းစစ်ဆေးနေဆဲ    |
+| ဒက်ရှ်ဘုတ် UI       |    ✓    |    ✗     |        ✗        |             ✓             |
+| Traffic Inspector   |    ✗    |    ✗     |        ✓        |             ✓             |
+| OmniRoute routing   |    ✗    |    ✗     |        ✗        |             ✓             |
+| Model mapping UI    |    ✗    |    ✗     |        ✗        |             ✓             |
+| Bypass စာရင်း       |    ✗    |    ✗     |        ✓        |             ✓             |
+| Upstream CA လက်မှတ် |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

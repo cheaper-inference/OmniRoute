@@ -8,79 +8,79 @@
 
 _Ìgbà ìkẹyìn tí a ṣe àfikún: 2026-06-28_
 
-## Àkótán Alákóso
+## Àkótán Gbogbogbò
 
-OmniRoute jẹ́ ẹnu-ọ̀nà ìdarí AI abẹ́lẹ̀ àti pánẹ́ẹ̀lì ìṣàkóso tí a kọ́ lórí Next.js.
-Ó pèsè ojú-ọ̀nà kan ṣoṣo tó bá OpenAI mu (`/v1/*`), ó sì ń darí ìṣàn iṣẹ́ kọjá ọ̀pọ̀ olùpèsè òkè pẹ̀lú ìtumọ̀, ìpadà sí àṣàyàn mìíràn, ìsọdọ̀tun token, àti títọpa lílò.
+OmniRoute jẹ́ ẹnu-ọ̀nà ìdarí AI abẹ́lẹ̀ àti pátákó ìṣàkóso tí a kọ́ lórí Next.js.
+Ó pèsè ojú-ọ̀nà kan ṣoṣo tó bá OpenAI mu (`/v1/*`), ó sì ń darí ìrìn-àjò kọjá ọ̀pọ̀ àwọn olupèsè òkè pẹ̀lú ìtumọ̀, ìyípadà sí àṣàyàn ìrànwọ́, ìsọdọ̀tun token, àti ìtọ́pinpin lílò.
 
 Àwọn agbára pàtàkì:
 
-- Ojú API tó bá OpenAI mu fún CLI/irinṣẹ́ (olùpèsè 376, módù executor 156)
-- Ìtumọ̀ ìbéèrè/ìdáhùn láàárín àwọn ìṣètò olùpèsè
-- Ìpadà sí àṣàyàn mìíràn fún àkójọpọ̀ model (ìtẹ̀lé ọ̀pọ̀ model)
-- Àwọn ìgbésẹ̀ àkójọpọ̀ tí a ṣètò (`provider + model + connection`) pẹ̀lú ìtòlẹ́sẹẹsẹ ní àsìkò iṣẹ́ nípasẹ̀ `compositeTiers`
-- Ìpadà sí àṣàyàn mìíràn ní ìpele àkọọ́lẹ̀ (ọ̀pọ̀ àkọọ́lẹ̀ fún olùpèsè kọ̀ọ̀kan)
-- Àyẹ̀wò quota ṣáájú àti yíyan àkọọ́lẹ̀ P2C tó mọ quota nínú ọ̀nà ìtàkurọ̀sọ pàtàkì
-- Ìṣàkóso ìsopọ̀ olùpèsè OAuth + API-key (módù olùpèsè OAuth 27)
-- Ṣíṣẹ̀dá embedding nípasẹ̀ `/v1/embeddings` (olùpèsè 18)
-- Ṣíṣẹ̀dá àwòrán nípasẹ̀ `/v1/images/generations` (olùpèsè 10+, model 20+)
-- Ìkọ̀wé ohùn sí ọ̀rọ̀ nípasẹ̀ `/v1/audio/transcriptions` (olùpèsè 18)
-- Ìyípadà ọ̀rọ̀ sí ohùn nípasẹ̀ `/v1/audio/speech` (olùpèsè inú ètò 24)
+- Ojú API tó bá OpenAI mu fún CLI/irinṣẹ́ (àwọn olupèsè 376, àwọn mójúùlù olùmúṣẹ 156)
+- Ìtumọ̀ ìbéèrè/ìdáhùn láàárín àwọn fọ́ọ̀mù olupèsè
+- Ìyípadà àṣàyàn àkójọpọ̀ model (ọ̀wọ̀ọ̀wọ́ ọ̀pọ̀ model)
+- Àwọn ìgbésẹ̀ àkójọpọ̀ tí a ṣètò (`provider + model + connection`) pẹ̀lú ìṣètò ní àkókò ìṣiṣẹ́ nípasẹ̀ `compositeTiers`
+- Ìyípadà àṣàyàn ní ìpele àkọọ́lẹ̀ (ọ̀pọ̀ àkọọ́lẹ̀ fún olupèsè kọ̀ọ̀kan)
+- Àyẹ̀wò quota ṣáájú àti yíyan àkọọ́lẹ̀ P2C tó mọ quota nínú ipa ọ̀nà ìbánisọ̀rọ̀ àkọ́kọ́
+- Ìṣàkóso ìsopọ̀ olupèsè OAuth + API-key (àwọn mójúùlù olupèsè OAuth 27)
+- Ṣíṣẹ̀dá embedding nípasẹ̀ `/v1/embeddings` (àwọn olupèsè 18)
+- Ṣíṣẹ̀dá àwòrán nípasẹ̀ `/v1/images/generations` (àwọn olupèsè 10+, àwọn model 20+)
+- Ìkọ̀wé-ohùn sí ọ̀rọ̀ nípasẹ̀ `/v1/audio/transcriptions` (àwọn olupèsè 18)
+- Ọ̀rọ̀-sí-ohùn nípasẹ̀ `/v1/audio/speech` (àwọn olupèsè inú ètò 24)
 - Ṣíṣẹ̀dá fídíò nípasẹ̀ `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Ṣíṣẹ̀dá orin nípasẹ̀ `/v1/music/generations` (ComfyUI)
-- Ìṣàwárí wẹ́ẹ̀bù nípasẹ̀ `/v1/search` (olùpèsè 20)
-- Ìṣàyẹ̀wò àkóónú nípasẹ̀ `/v1/moderations`
+- Ìṣàwárí wẹ́ẹ̀bù nípasẹ̀ `/v1/search` (àwọn olupèsè 20)
+- Ìwọ̀ntúnwọ̀nsì nípasẹ̀ `/v1/moderations`
 - Àtúntò ipò nípasẹ̀ `/v1/rerank`
-- Ìtúpalẹ̀ àmì ìrònú (`<think>...</think>`) fún àwọn model ìrònú
-- Ìwẹ̀nùmọ́ ìdáhùn fún ìbámu pípé pẹ̀lú OpenAI SDK
-- Ìṣọ̀kan role (developer→system, system→user) fún ìbámu láàárín àwọn olùpèsè
+- Ìtúpalẹ̀ àmì Think (`<think>...</think>`) fún àwọn model ìrònú
+- Ìwẹ̀nùmọ́ ìdáhùn fún ìbámu tó muna pẹ̀lú OpenAI SDK
+- Ṣíṣe àwọn ipa di ìwọ̀n kan náà (developer→system, system→user) fún ìbámu láàárín àwọn olupèsè
 - Ìyípadà àbájáde tí a ṣètò (json_schema → Gemini responseSchema)
-- Ìtọ́jú dátà abẹ́lẹ̀ fún àwọn olùpèsè, kọ́kọ́rọ́, alias, àkójọpọ̀, ètò, àti ìdíyelé (módù DB 122)
-- Títọpa lílò/ìnáwó àti fífi ìbéèrè pamọ́ sínú àkọsílẹ̀
+- Ìfipamọ́ abẹ́lẹ̀ fún àwọn olupèsè, kọ́kọ́rọ́, alias, àkójọpọ̀, ètò, àti iye owó (àwọn mójúùlù DB 122)
+- Ìtọ́pinpin lílò/ìnáwó àti ìforúkọsílẹ̀ ìbéèrè
 - Ìmúdọ́gba cloud àṣàyàn fún ìmúdọ́gba ọ̀pọ̀ ẹ̀rọ/ipò
-- Àtòjọ ìyọ̀ǹda/dídènà IP fún ìṣàkóso iwọlé API
-- Ìṣàkóso iye ìrònú (passthrough/àìfọwọ́yí/àdáni/adaptive)
-- Fífi system prompt àgbáyé sínú ìbéèrè
-- Títọpa session àti ṣíṣẹ̀dá àmì ìdánimọ̀
-- Ìdíwọ̀n oṣùwọ̀n lílò tó lágbára fún àkọọ́lẹ̀ kọ̀ọ̀kan pẹ̀lú àwọn profaili pàtó sí olùpèsè
-- Àpẹẹrẹ circuit breaker fún ìfaradà olùpèsè
-- Ààbò lòdì sí ìṣàn ìbéèrè ọ̀pọ̀lọpọ̀ lẹ́ẹ̀kan náà pẹ̀lú títì mutex
-- Cache ìyọkúrò ìbéèrè àdáwòkọ tó dá lórí signature
-- Ìpele domain: àwọn òfin ìnáwó, ìlànà ìpadà sí àṣàyàn mìíràn, ìlànà lockout
-- Context Relay: àwọn àkótán ìfàṣẹsí session fún ìtẹ̀síwájú nígbà yíyí àkọọ́lẹ̀
-- Ìtọ́jú ipò domain (cache ìkọ̀wé-taara SQLite fún ìpadà sí àṣàyàn mìíràn, àwọn iye ààlà, lockout, àti circuit breaker)
-- Ẹ́ńjìnnì ìlànà fún ṣíṣe àyẹ̀wò ìbéèrè ní àárín gbùngbùn (lockout → budget → fallback)
+- Àkójọ IP tí a fàyè gbà/àkójọ tí a dí fún ìṣàkóso ààyè sí API
+- Ìṣàkóso ààlà ìrònú (fífi kọjá/àdáṣe/àṣà/adaptive)
+- Ìfi prompt system àgbáyé sínú
+- Ìtọ́pinpin session àti fífi àmì ìdánimọ̀ sí i
+- Ìdínwọ́ oṣùwọ̀n tó ti ní ìlọsíwájú fún àkọọ́lẹ̀ kọ̀ọ̀kan pẹ̀lú àwọn profaili pàtó sí olupèsè
+- Àpẹẹrẹ circuit breaker fún ìfaradà àwọn olupèsè
+- Ààbò lòdì sí anti-thundering herd pẹ̀lú mutex locking
+- Cache ìmúkúrò àwọn ìbéèrè àdáwòkọ tó dá lórí signature
+- Ìpele domain: àwọn òfin ìnáwó, ìlànà ìyípadà àṣàyàn, ìlànà lockout
+- Context Relay: àwọn àkótán fífi session lé omiì lọ fún ìtẹ̀síwájú nígbà yíyí àkọọ́lẹ̀
+- Ìfipamọ́ ipò domain (cache SQLite write-through fún àwọn ìyípadà àṣàyàn, ààlà, lockout, àti circuit breaker)
+- Ẹ̀rọ ìlànà fún àyẹ̀wò ìbéèrè láti ibi àárín (lockout → ààlà → ìyípadà àṣàyàn)
 - Telemetry ìbéèrè pẹ̀lú àkójọpọ̀ àkókò ìdádúró p50/p95/p99
-- Telemetry ibi-afẹ́ àkójọpọ̀ àti ìlera ibi-afẹ́ àkójọpọ̀ látẹ̀yìnwá nípasẹ̀ `combo_execution_key` / `combo_step_id`
-- ID ìbáṣepọ̀ (X-Request-Id) fún títọpa láti ìbẹ̀rẹ̀ dé òpin
-- Àkọsílẹ̀ àyẹ̀wò ìbámu pẹ̀lú àṣàyàn láti yọ ara ẹni kúrò fún API key kọ̀ọ̀kan
-- Ètò eval fún ìmúdájú dídára LLM
-- Pánẹ́ẹ̀lì ìlera pẹ̀lú ipò circuit breaker olùpèsè ní àkókò gidi
-- MCP Server (irinṣẹ́ 110) pẹ̀lú ọ̀nà ìgbékalẹ̀ 3 (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) pẹ̀lú àwọn ọgbọ́n àti ìgbésí-ayé iṣẹ́
-- Ètò ìrántí (yíyọ, fífi sínú, ìgbàpadà, ṣíṣe àkótán)
-- Ètò ọgbọ́n (ìforúkọsílẹ̀, executor, sandbox, àwọn ọgbọ́n inú ètò)
-- Aṣojú MITM pẹ̀lú ìṣàkóso certificate àti ìmúlò DNS
-- Middleware ààbò lòdì sí fífi ìtọ́ni búburú sínú prompt
-- Pipeline ìfúnpọ̀ prompt pẹ̀lú Caveman, RTK, àwọn pipeline tí a tò lé ara wọn, àwọn àkójọpọ̀ ìfúnpọ̀, àkójọpọ̀ èdè, àti ìtúpalẹ̀
-- Ìforúkọsílẹ̀ ACP (Agent Communication Protocol)
-- Àwọn olùpèsè OAuth onímódù (módù ọ̀tọ̀ọ̀tọ̀ 22 lábẹ́ `src/lib/oauth/providers/`)
-- Àwọn script yíyọ kúrò/yíyọ kúrò pátápátá
-- Ìṣe àtúnṣe àyíká OAuth
+- Telemetry ibi-àfojúsùn àkójọpọ̀ àti ìlera ibi-àfojúsùn àkójọpọ̀ látijọ́ nípasẹ̀ `combo_execution_key` / `combo_step_id`
+- ID ìbáṣepọ̀ (X-Request-Id) fún ìtọ́pinpin láti ìbẹ̀rẹ̀ dé òpin
+- Ìforúkọsílẹ̀ àyẹ̀wò ìbámu pẹ̀lú àṣàyàn láti jáde fún API key kọ̀ọ̀kan
+- Ètò eval fún ìdánilójú dídára LLM
+- Pátákó ìlera pẹ̀lú ipò circuit breaker olupèsè ní àkókò gidi
+- MCP Server (irinṣẹ́ 110) pẹ̀lú ọ̀nà ìgbéga mẹ́ta (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) pẹ̀lú àwọn ọgbọ́n àti ìyípo ayé iṣẹ́
+- Ètò memory (yíyọ, fífi sínú, ìgbàpadà, ṣíṣe àkótán)
+- Ètò skills (registry, executor, sandbox, àwọn ọgbọ́n inú ètò)
+- Aṣojú MITM pẹ̀lú ìṣàkóso certificate àti ìtọ́jú DNS
+- Middleware ààbò lòdì sí prompt injection
+- Pipeline ìfúnpọ̀ prompt pẹ̀lú Caveman, RTK, àwọn pipeline tí a tò jọ, àwọn àkójọpọ̀ ìfúnpọ̀, àwọn àkójọpọ̀ èdè, àti ìtúpalẹ̀
+- Registry ACP (Agent Communication Protocol)
+- Àwọn olupèsè OAuth alámójúùlù (mójúùlù ọ̀tọ̀ọ̀tọ̀ 22 lábẹ́ `src/lib/oauth/providers/`)
+- Àwọn script uninstall/full-uninstall
+- Ìgbésẹ̀ àtúnṣe àyíká OAuth
 - Afárá WebSocket fún àwọn client WS tó bá OpenAI mu (`/v1/ws`)
-- Ìṣàkóso token ìmúdọ́gba (fífún/yíyọ, gbígba bundle ìṣètò tó ní ẹ̀yà ETag)
-- GLM Thinking (`glmt`) gẹ́gẹ́ bí ìṣètò olùpèsè àkọ́kọ́
-- Kíkà token alápapọ̀ (ní ẹ̀gbẹ́ olùpèsè `/messages/count_tokens` pẹ̀lú ìṣírò àfẹ̀yìntì)
-- Fífún àwọn alias model ní ìbẹ̀rẹ̀ láìfọwọ́yí (ìṣọ̀kan dialect proxy-láàárín 30+ ní ìbẹ̀rẹ̀)
-- Ìgbàwẹlé ààbò síta pẹ̀lú ààbò SSRF, dídènà URL aládàáni, àti àtúnṣe ìgbìyànjú tó ṣeé ṣètò
-- Àwọn àtúngbìyànjú ìtàkurọ̀sọ tó mọ cooldown pẹ̀lú `requestRetry` àti `maxRetryIntervalSec` tó ṣeé ṣètò
-- Ìfọwọ́sí àyíká àsìkò iṣẹ́ pẹ̀lú Zod ní ìbẹ̀rẹ̀
-- Àyẹ̀wò ìbámu v2 pẹ̀lú pínpín ojú-ewé, àwọn ìṣẹ̀lẹ̀ CRUD olùpèsè, àti àkọsílẹ̀ ìfọwọ́sí tí SSRF dènà
+- Ìṣàkóso token ìmúdọ́gba (ìfúnni/fífagilé, gbígbà bundle ètò tó ní version ETag)
+- Ètò olupèsè GLM Thinking (`glmt`) gẹ́gẹ́ bí àṣàyàn ìpele-àkọ́kọ́
+- Kíkà token alápọpọ̀ (ní ẹ̀gbẹ́ olupèsè `/messages/count_tokens` pẹ̀lú àṣàyàn ìṣírò ìfojú dípò rẹ̀)
+- Ìfúnrúgbìn alias model láìfọwọ́ṣe (àwọn ìṣedéédé dialect aṣojú kọjá 30+ ní ìbẹ̀rẹ̀)
+- Fetch jáde tó ní ààbò pẹ̀lú ààbò SSRF, dídí URL àdáni, àti àtúndánwò tí a lè ṣètò
+- Àwọn àtúndánwò ìbánisọ̀rọ̀ tó mọ cooldown pẹ̀lú `requestRetry` àti `maxRetryIntervalSec` tí a lè ṣètò
+- Ìfọwọ́sí àyíká runtime pẹ̀lú Zod ní ìbẹ̀rẹ̀
+- Àyẹ̀wò ìbámu v2 pẹ̀lú pagination, àwọn ìṣẹ̀lẹ̀ CRUD olupèsè, àti ìforúkọsílẹ̀ ìfọwọ́sí tí SSRF dí
 
-Àpẹẹrẹ àsìkò iṣẹ́ pàtàkì:
+Àpẹẹrẹ runtime àkọ́kọ́:
 
-- Àwọn route app Next.js lábẹ́ `src/app/api/*` ń ṣe àwọn API pánẹ́ẹ̀lì ìṣàkóso àti àwọn API ìbámu
-- Kókó SSE/ìdarí tí a jọ ń lò nínú `src/sse/*` + `open-sse/*` ń ṣàkóso ìṣiṣẹ́ olùpèsè, ìtumọ̀, streaming, ìpadà sí àṣàyàn mìíràn, àti lílò
+- Àwọn ipa ọ̀nà app Next.js lábẹ́ `src/app/api/*` ń ṣe àwọn API pátákó ìṣàkóso àti àwọn API ìbámu
+- Kókó SSE/ìdarí tí a pín ní `src/sse/*` + `open-sse/*` ń bójú tó ìmúṣẹ olupèsè, ìtumọ̀, streaming, ìyípadà àṣàyàn, àti lílò
 
 ## Àwọn Àwòrán Ìtọ́kasí
 

@@ -10,76 +10,76 @@ _Nuashonraithe an uair dheireanach: 2026-06-28_
 
 ## Achoimre Feidhmiúcháin
 
-Is geata ródaithe AI áitiúil agus deais é OmniRoute atá tógtha ar Next.js.
-Soláthraíonn sé críochphointe aonair atá comhoiriúnach le OpenAI (`/v1/*`) agus ródálann sé trácht thar roinnt soláthraithe réamhtheachtacha, le haistriúchán, cúltaca, athnuachan comharthaí agus rianú úsáide.
+Is geata ródaithe AI áitiúil agus painéal é OmniRoute atá tógtha ar Next.js.
+Soláthraíonn sé críochphointe aonair atá comhoiriúnach le OpenAI (`/v1/*`) agus ródaíonn sé trácht thar iliomad soláthraithe réamhtheachtacha le haistriúchán, cúltaca, athnuachan comharthaí agus rianú úsáide.
 
 Príomhchumais:
 
-- Dromchla API atá comhoiriúnach le OpenAI le haghaidh CLI/uirlisí (376 soláthraí, 156 modúl riteora)
-- Aistriúchán iarratais/freagartha idir formáidí soláthraithe
-- Cúltaca teaglama samhlacha (seicheamh ilsamhla)
+- Dromchla API atá comhoiriúnach le OpenAI le haghaidh CLI/uirlisí (376 soláthraí, 156 modúl rite)
+- Aistriú iarrataí/freagraí idir formáidí soláthraithe
+- Cúltaca teaglama samhlacha (seicheamh il-samhail)
 - Céimeanna struchtúrtha teaglama (`provider + model + connection`) le hordú ag am rite de réir `compositeTiers`
 - Cúltaca ar leibhéal cuntais (ilchuntais in aghaidh an tsoláthraí)
-- Réamhsheiceáil cuóta agus roghnú cuntais P2C atá feasach ar chuóta sa phríomhchonair chomhrá
-- Bainistíocht nasc soláthraithe trí OAuth + eochair API (27 modúl soláthraí OAuth)
+- Réamheiceáil cuóta agus roghnú cuntais P2C atá feasach ar chuóta sa phríomhchonair comhrá
+- Bainistíocht nasc soláthraithe trí OAuth + eochracha API (27 modúl soláthraí OAuth)
 - Giniúint leabuithe trí `/v1/embeddings` (18 soláthraí)
 - Giniúint íomhánna trí `/v1/images/generations` (10+ soláthraí, 20+ samhail)
 - Tras-scríobh fuaime trí `/v1/audio/transcriptions` (18 soláthraí)
 - Téacs-go-hurlabhra trí `/v1/audio/speech` (24 soláthraí ionsuite)
-- Giniúint físeáin trí `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Giniúint físe trí `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Giniúint ceoil trí `/v1/music/generations` (ComfyUI)
 - Cuardach gréasáin trí `/v1/search` (20 soláthraí)
-- Modhnóireacht trí `/v1/moderations`
+- Modhnóireachtaí trí `/v1/moderations`
 - Athrangú trí `/v1/rerank`
-- Parsáil clibe smaointeoireachta (`<think>...</think>`) le haghaidh samhlacha réasúnaíochta
-- Sláintíocht freagartha ar mhaithe le comhoiriúnacht dhocht le OpenAI SDK
-- Normalú ról (developer→system, system→user) ar mhaithe le comhoiriúnacht tras-soláthraí
+- Parsáil clibeanna smaointeoireachta (`<think>...</think>`) le haghaidh samhlacha réasúnaíochta
+- Sláintiú freagraí ar mhaithe le dian-chomhoiriúnacht le OpenAI SDK
+- Normalú ról (developer→system, system→user) ar mhaithe le comhoiriúnacht idir soláthraithe
 - Tiontú aschuir struchtúrtha (json_schema → Gemini responseSchema)
-- Marthanacht áitiúil le haghaidh soláthraithe, eochracha, ailiasanna, teaglamaí, socruithe agus praghsála (122 modúl DB)
-- Rianú úsáide/costais agus logáil iarratas
-- Sioncronú roghnach néil le haghaidh sioncronú ilghléasanna/staid
-- Liosta ceadaithe/coiscthe IP le haghaidh rialú rochtana API
-- Bainistíocht buiséid smaointeoireachta (pasáil tríd/uathoibríoch/saincheaptha/oiriúnaitheach)
+- Stóráil mharthanach áitiúil do sholáthraithe, eochracha, ailiasanna, teaglamaí, socruithe agus praghsáil (122 modúl DB)
+- Rianú úsáide/costais agus logáil iarrataí
+- Sioncronú néil roghnach le haghaidh sioncronú ilghléasanna/stáit
+- Liosta ceada/liosta coiscthe IP le haghaidh rialú rochtana API
+- Bainistíocht buiséid smaointeoireachta (pas-tríd/uathoibríoch/saincheaptha/oiriúnaitheach)
 - Instealladh leid chórais dhomhanda
-- Rianú seisiún agus méarlorgú
+- Rianú seisiún agus méarlorgaireacht
 - Teorannú ráta feabhsaithe in aghaidh an chuntais le próifílí a bhaineann go sonrach le soláthraithe
-- Patrún scoradáin chiorcaid ar mhaithe le hathléimneacht soláthraithe
-- Cosaint in aghaidh tréad-thruaim thoirní le glasáil mutex
-- Taisce dídhúblála iarratas bunaithe ar shíniú
-- Sraith fearainn: rialacha costais, beartas cúltaca, beartas frithdhúntha
-- Athsheachadadh Comhthéacs: achoimrí aistrithe seisiúin chun leanúnachas a choinneáil agus cuntais á rothlú
-- Marthanacht staid fearainn (taisce scríobh-tríd SQLite le haghaidh cúltacaí, buiséad, frithdhúnadh agus scoradán ciorcaid)
-- Inneall beartais le haghaidh meastóireacht láraithe ar iarratais (frithdhúnadh → buiséad → cúltaca)
-- Teiliméadracht iarratas le comhiomlánú aga folaigh p50/p95/p99
+- Patrún scoradáin chiorcaid le haghaidh athléimneacht soláthraithe
+- Cosaint i gcoinne borradh comhuaineach iarrataí le glasáil mutex
+- Taisce dí-dhúblála iarrataí bunaithe ar shíniú
+- Sraith fearainn: rialacha costais, beartas cúltaca, beartas frithdhúnadh
+- Sealaíocht Chomhthéacs: achoimrí aistrithe seisiúin chun leanúnachas a choinneáil le linn rothlú cuntas
+- Stóráil mharthanach staid fearainn (taisce SQLite le scríobh tríd le haghaidh cúltacaí, buiséad, frithdhúnadh agus scoradán ciorcaid)
+- Inneall beartais le haghaidh meastóireacht láraithe iarrataí (frithdhúnadh → buiséad → cúltaca)
+- Teiliméadracht iarrataí le comhiomlánú aga folaigh p50/p95/p99
 - Teiliméadracht sprice teaglama agus sláinte stairiúil spriocanna teaglama trí `combo_execution_key` / `combo_step_id`
-- Aitheantas comhghaolaithe (X-Request-Id) le haghaidh rianú ó cheann ceann
-- Logáil iniúchta comhlíontachta le rogha diúltaithe in aghaidh na heochrach API
-- Creat measúnaithe le haghaidh dearbhú cáilíochta LLM
-- Deais sláinte le stádas fíor-ama scoradáin chiorcaid soláthraithe
+- Aitheantas comhghaolmhaireachta (X-Request-Id) le haghaidh rianú ó cheann ceann
+- Logáil iniúchta comhlíontachta le rogha díliostála in aghaidh na heochrach API
+- Creat meastóireachta le haghaidh dearbhú cáilíochta LLM
+- Painéal sláinte le stádas fíor-ama scoradán ciorcaid soláthraithe
 - Freastalaí MCP (110 uirlis) le 3 mhodh iompair (stdio/SSE/Streamable HTTP)
 - Freastalaí A2A (JSON-RPC 2.0 + SSE) le scileanna agus saolré tascanna
 - Córas cuimhne (eastóscadh, instealladh, aisghabháil, achoimriú)
 - Córas scileanna (clárlann, riteoir, bosca gainimh, scileanna ionsuite)
-- Seachfhreastalaí MITM le bainistíocht deimhnithe agus láimhseáil DNS
-- Meánearra cosanta ar instealladh leide
+- Seachfhreastalaí MITM le bainistíocht teastas agus láimhseáil DNS
+- Meánearra cosanta ar instealladh leid
 - Píblíne comhbhrúite leid le Caveman, RTK, píblínte cruachta, teaglamaí comhbhrúite, pacáistí teanga agus anailísíocht
 - Clárlann ACP (Agent Communication Protocol)
 - Soláthraithe modúlacha OAuth (22 modúl aonair faoi `src/lib/oauth/providers/`)
 - Scripteanna díshuiteála/díshuiteála iomláine
 - Gníomh deisithe timpeallachta OAuth
 - Droichead WebSocket le haghaidh cliaint WS atá comhoiriúnach le OpenAI (`/v1/ws`)
-- Bainistíocht comharthaí sioncronaithe (eisiúint/cúlghairm, íoslódáil cuachta cumraíochta le leaganacha ETag)
-- Réamhshocrú soláthraí den chéad scoth le haghaidh GLM Thinking (`glmt`)
-- Comhaireamh hibrideach comharthaí (`/messages/count_tokens` ar thaobh an tsoláthraí, le meastachán mar chúltaca)
-- Uathshíolú ailiasanna samhlacha (30+ normalú canúintí tras-seachfhreastalaí ag am tosaithe)
-- Aisghabháil shábháilte amach le cosaint SSRF, bac ar URLanna príobháideacha agus atriail inchumraithe
-- Atrialacha comhrá atá feasach ar thréimhse fuaraithe, le `requestRetry` agus `maxRetryIntervalSec` inchumraithe
-- Bailíochtú timpeallachta ag am rite le Zod ag am tosaithe
-- Iniúchadh comhlíontachta v2 le huimhrigh, teagmhais CRUD soláthraithe agus logáil bailíochtaithe arna bhlocáil ag SSRF
+- Bainistíocht comharthaí sioncronaithe (eisiúint/cúlghairm, íoslódáil beart cumraíochta le leaganacha ETag)
+- Smaointeoireacht GLM (`glmt`) mar réamhshocrú soláthraí den chéad scoth
+- Comhaireamh hibrideach comharthaí (`/messages/count_tokens` ar thaobh an tsoláthraí le meastachán mar chúltaca)
+- Réamhshíolú uathoibríoch ailiasanna samhlacha (30+ normalú traschanúintí seachfhreastalaí ag am tosaithe)
+- Gabháil amach sábháilte le cosaint SSRF, bac ar URLanna príobháideacha agus atriail inchumraithe
+- Atrialacha comhrá atá feasach ar thréimhse mharbhánta le `requestRetry` agus `maxRetryIntervalSec` inchumraithe
+- Bailíochtú timpeallachta rite le Zod ag am tosaithe
+- Iniúchadh comhlíontachta v2 le huimhriú leathanach, teagmhais CRUD soláthraithe agus logáil bailíochtaithe nuair a chuireann SSRF bac ar iarratas
 
-Príomhshamhail ag am rite:
+Príomhshamhail rite:
 
-- Cuireann bealaí aipe Next.js faoi `src/app/api/*` APIanna deaise agus APIanna comhoiriúnachta araon i bhfeidhm
+- Cuireann bealaí feidhmchláir Next.js faoi `src/app/api/*` APIanna painéil agus APIanna comhoiriúnachta araon i bhfeidhm
 - Láimhseálann croílár comhroinnte SSE/ródaithe in `src/sse/*` + `open-sse/*` rith soláthraithe, aistriúchán, sruthú, cúltaca agus úsáid
 
 ## Léaráidí Tagartha

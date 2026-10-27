@@ -8,79 +8,79 @@
 
 _Naposledy aktualizováno: 2026-06-28_
 
-## Shrnutí pro vedení
+## Souhrn
 
 OmniRoute je lokální směrovací brána a řídicí panel pro AI postavený na Next.js.
-Poskytuje jednotný koncový bod kompatibilní s OpenAI (`/v1/*`) a směruje provoz mezi více poskytovateli upstream služeb s podporou převodu formátů, záložních variant, obnovování tokenů a sledování využití.
+Poskytuje jednotný koncový bod kompatibilní s OpenAI (`/v1/*`) a směruje provoz mezi více nadřazenými poskytovateli s podporou převodu formátů, záložního přepínání, obnovování tokenů a sledování využití.
 
 Hlavní funkce:
 
-- Rozhraní API kompatibilní s OpenAI pro CLI/nástroje (376 poskytovatelů, 156 exekučních modulů)
-- Převod požadavků a odpovědí mezi formáty poskytovatelů
-- Záložní kombinace modelů (sekvence více modelů)
-- Strukturované kroky kombinací (`provider + model + connection`) s řazením za běhu podle `compositeTiers`
+- Rozhraní API kompatibilní s OpenAI pro CLI/nástroje (376 poskytovatelů, 156 prováděcích modulů)
+- Převod požadavků a odpovědí mezi formáty jednotlivých poskytovatelů
+- Záložní přepínání mezi kombinacemi modelů (sekvence více modelů)
+- Strukturované kroky kombinací (`provider + model + connection`) s pořadím za běhu podle `compositeTiers`
 - Záložní přepínání na úrovni účtů (více účtů pro každého poskytovatele)
-- Předběžná kontrola kvót a výběr účtu P2C zohledňující kvóty v hlavní cestě chatu
-- Správa připojení k poskytovatelům pomocí OAuth a API klíčů (27 modulů poskytovatelů OAuth)
+- Předběžná kontrola kvót a výběr účtu pomocí P2C se zohledněním kvót v hlavní cestě chatu
+- Správa připojení k poskytovatelům prostřednictvím OAuth a klíčů API (27 modulů poskytovatelů OAuth)
 - Generování embeddingů prostřednictvím `/v1/embeddings` (18 poskytovatelů)
-- Generování obrázků prostřednictvím `/v1/images/generations` (více než 10 poskytovatelů, více než 20 modelů)
+- Generování obrázků prostřednictvím `/v1/images/generations` (10+ poskytovatelů, 20+ modelů)
 - Přepis zvuku prostřednictvím `/v1/audio/transcriptions` (18 poskytovatelů)
-- Převod textu na řeč prostřednictvím `/v1/audio/speech` (24 vestavěných poskytovatelů)
+- Převod textu na řeč prostřednictvím `/v1/audio/speech` (24 integrovaných poskytovatelů)
 - Generování videa prostřednictvím `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Generování hudby prostřednictvím `/v1/music/generations` (ComfyUI)
 - Vyhledávání na webu prostřednictvím `/v1/search` (20 poskytovatelů)
 - Moderování prostřednictvím `/v1/moderations`
-- Přeřazování výsledků prostřednictvím `/v1/rerank`
-- Zpracování značek přemýšlení (`<think>...</think>`) pro modely s uvažováním
-- Sanitizace odpovědí pro striktní kompatibilitu s OpenAI SDK
-- Normalizace rolí (developer→system, system→user) pro kompatibilitu napříč poskytovateli
+- Změna pořadí výsledků prostřednictvím `/v1/rerank`
+- Zpracování značek uvažování (`<think>...</think>`) pro modely s podporou uvažování
+- Sanitizace odpovědí pro striktní kompatibilitu se sadou OpenAI SDK
+- Normalizace rolí (developer→system, system→user) pro kompatibilitu mezi poskytovateli
 - Převod strukturovaného výstupu (json_schema → Gemini responseSchema)
-- Lokální perzistence poskytovatelů, klíčů, aliasů, kombinací, nastavení a cen (122 databázových modulů)
+- Lokální ukládání poskytovatelů, klíčů, aliasů, kombinací, nastavení a cen (122 databázových modulů)
 - Sledování využití a nákladů a protokolování požadavků
-- Volitelná cloudová synchronizace pro synchronizaci mezi více zařízeními a synchronizaci stavu
+- Volitelná cloudová synchronizace pro synchronizaci stavu mezi více zařízeními
 - Seznam povolených a blokovaných IP adres pro řízení přístupu k API
-- Správa rozpočtu na přemýšlení (předání beze změny/automatický/vlastní/adaptivní)
-- Globální vkládání systémových promptů
+- Správa rozpočtu pro uvažování (passthrough/auto/custom/adaptive)
+- Globální vkládání systémového promptu
 - Sledování relací a vytváření otisků
-- Rozšířené omezení četnosti požadavků pro jednotlivé účty s profily specifickými pro poskytovatele
-- Vzor jističe pro odolnost poskytovatelů
-- Ochrana proti nárazovému souběhu požadavků pomocí zamykání mutexem
-- Mezipaměť pro deduplikaci požadavků založenou na signaturách
-- Doménová vrstva: pravidla nákladů, zásady záložního přepínání, zásady uzamčení
-- Context Relay: souhrny předání relace pro zachování kontinuity při rotaci účtů
-- Perzistence doménového stavu (průběžně zapisovaná mezipaměť SQLite pro záložní varianty, rozpočty, uzamčení a jističe)
-- Modul zásad pro centralizované vyhodnocování požadavků (uzamčení → rozpočet → záložní varianta)
+- Rozšířené omezování četnosti požadavků pro jednotlivé účty s profily specifickými pro poskytovatele
+- Vzor circuit breaker pro odolnost vůči výpadkům poskytovatelů
+- Ochrana před efektem thundering herd pomocí zamykání mutexem
+- Mezipaměť pro deduplikaci požadavků založená na signaturách
+- Doménová vrstva: pravidla nákladů, zásady záložního přepínání a zásady uzamčení
+- Context Relay: souhrny předávání relací pro zachování kontinuity při střídání účtů
+- Perzistence doménového stavu (mezipaměť SQLite s průběžným zápisem pro záložní přepínání, rozpočty, uzamčení a circuit breakery)
+- Modul zásad pro centralizované vyhodnocování požadavků (uzamčení → rozpočet → záložní přepnutí)
 - Telemetrie požadavků s agregací latence p50/p95/p99
-- Telemetrie cílů kombinací a historie jejich stavu prostřednictvím `combo_execution_key` / `combo_step_id`
-- ID korelace (X-Request-Id) pro trasování od začátku do konce
-- Protokolování auditu souladu s možností odhlášení pro jednotlivé API klíče
+- Telemetrie cílů kombinací a historický stav cílů kombinací prostřednictvím `combo_execution_key` / `combo_step_id`
+- Korelační ID (X-Request-Id) pro trasování od začátku do konce
+- Protokolování auditů souladu s možností vypnutí pro jednotlivé klíče API
 - Evaluační framework pro zajištění kvality LLM
-- Řídicí panel stavu s informacemi o stavu jističů poskytovatelů v reálném čase
-- Server MCP (110 nástrojů) se 3 transporty (stdio/SSE/Streamable HTTP)
+- Řídicí panel stavu s údaji o circuit breakerech poskytovatelů v reálném čase
+- Server MCP (110 nástrojů) se 3 přenosovými mechanismy (stdio/SSE/Streamable HTTP)
 - Server A2A (JSON-RPC 2.0 + SSE) s dovednostmi a životním cyklem úloh
-- Paměťový systém (extrakce, vkládání, načítání, sumarizace)
-- Systém dovedností (registr, exekutor, sandbox, vestavěné dovednosti)
-- Proxy MITM se správou certifikátů a zpracováním DNS
-- Middleware na ochranu proti injektáži promptů
-- Pipeline pro kompresi promptů s Caveman, RTK, skládanými pipeline, kompresními kombinacemi, jazykovými balíčky a analytikou
+- Paměťový systém (extrakce, vkládání, vyhledávání, sumarizace)
+- Systém dovedností (registr, vykonavatel, sandbox, integrované dovednosti)
+- MITM proxy se správou certifikátů a obsluhou DNS
+- Middleware pro ochranu před vkládáním škodlivých promptů
+- Pipeline pro kompresi promptů s Caveman, RTK, vrstvenými pipeline, kombinacemi komprese, jazykovými balíčky a analytikou
 - Registr ACP (Agent Communication Protocol)
 - Modulární poskytovatelé OAuth (22 samostatných modulů v `src/lib/oauth/providers/`)
 - Skripty pro odinstalaci a úplnou odinstalaci
 - Akce pro opravu prostředí OAuth
-- Most WebSocket pro klienty WS kompatibilní s OpenAI (`/v1/ws`)
-- Správa synchronizačních tokenů (vydávání/odvolávání, stahování konfiguračního balíčku verzovaného pomocí ETag)
-- GLM Thinking (`glmt`) jako plnohodnotná předvolba poskytovatele
-- Hybridní počítání tokenů (`/messages/count_tokens` na straně poskytovatele se záložním odhadem)
-- Automatické počáteční vytvoření aliasů modelů (více než 30 normalizací dialektů napříč proxy při spuštění)
+- WebSocketový most pro WS klienty kompatibilní s OpenAI (`/v1/ws`)
+- Správa synchronizačních tokenů (vydávání/odvolávání, stahování konfiguračního balíčku s verzováním pomocí ETag)
+- Předvolba poskytovatele GLM Thinking (`glmt`) jako plnohodnotná součást systému
+- Hybridní počítání tokenů (na straně poskytovatele prostřednictvím `/messages/count_tokens` se záložním odhadem)
+- Automatické počáteční vytvoření aliasů modelů (30+ normalizací dialektů mezi proxy při spuštění)
 - Bezpečné odchozí načítání s ochranou proti SSRF, blokováním privátních URL a konfigurovatelným opakováním
-- Opakování požadavků chatu zohledňující dobu zklidnění s konfigurovatelnými parametry `requestRetry` a `maxRetryIntervalSec`
+- Opakování požadavků chatu se zohledněním doby cooldownu a konfigurovatelnými hodnotami `requestRetry` a `maxRetryIntervalSec`
 - Ověřování běhového prostředí pomocí Zod při spuštění
-- Audit souladu v2 se stránkováním, událostmi CRUD poskytovatelů a protokolováním validací zablokovaných ochranou proti SSRF
+- Audit souladu v2 se stránkováním, událostmi CRUD poskytovatelů a protokolováním ověření blokovaných kvůli SSRF
 
-Primární běhový model:
+Primární model běhu aplikace:
 
-- Trasy aplikace Next.js v `src/app/api/*` implementují jak API řídicího panelu, tak API pro kompatibilitu
-- Sdílené jádro SSE a směrování v `src/sse/*` + `open-sse/*` zajišťuje provádění požadavků u poskytovatelů, převod formátů, streamování, záložní přepínání a sledování využití
+- Trasy aplikace Next.js v `src/app/api/*` implementují jak API řídicího panelu, tak kompatibilní API
+- Sdílené jádro SSE a směrování v `src/sse/*` + `open-sse/*` zajišťuje spouštění poskytovatelů, převod formátů, streamování, záložní přepínání a sledování využití
 
 ## Referenční diagramy
 

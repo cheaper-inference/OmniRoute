@@ -37,13 +37,13 @@ Objektyvus funkcijų palyginimas su populiariausiais atvirojo kodo AI maršrutiz
 | **Tunelių palaikymas (Cloudflared, Tailscale, Ngrok)**               |                        ✅                        |        ❌        |        n/a        |     n/a      |
 | **Licencija**                                                        |                       MIT                        |       MIT        |    nuosavybinė    | nuosavybinė  |
 
-## Kada rinktis „OmniRoute“
+## Kada rinktis OmniRoute
 
-- Sprendimą talpinate patys ir norite **maksimalaus paslaugų teikėjų pasirinkimo** (376 paslaugų teikėjai, 155 nemokami katalogo įrašai, kuriems nereikia autentifikavimo)
-- Jums reikia **integruoto MCP serverio** (LLM įrankiai, atmintis ir įgūdžiai pateikiami kaip įrankiai)
-- Jums reikia **A2A protokolo** agentų tarpusavio darbo eigoms
-- Norite **skaitmeninio atspaudo maskavimo** (JA3/JA4), kad išvengtumėte aptikimo pirminių paslaugų teikėjų CAPTCHA sistemose
-- Jums reikia **įmonėms skirtų funkcijų** (apsauginių ribojimų, vertinimų ir audito žurnalo) be SaaS sąskaitos
+- Savarankiškai talpinate ir norite **maksimalios tiekėjų aprėpties** (376 tiekėjai, 155 nemokami / be autentifikacijos katalogo įrašai)
+- Jums reikia **integruoto MCP serverio** (LLM įrankiai, atmintis, įgūdžiai, pateikiami kaip įrankiai)
+- Jums reikia **A2A protokolo** darbo eigoms tarp agentų
+- Norite **pirštų atspaudų maskavimo** (JA3/JA4), kad išvengtumėte aptikimo per upstream CAPTCHA
+- Jums reikia **įmonių lygio funkcijų** (apsauginių mechanizmų, vertinimų, audito pėdsako) be SaaS sąskaitos
 
 ## Kada rinktis LiteLLM
 

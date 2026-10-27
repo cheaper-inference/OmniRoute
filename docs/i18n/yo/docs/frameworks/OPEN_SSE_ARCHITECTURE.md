@@ -484,17 +484,17 @@ createResponsesApiTransformStream(): TransformStream
 
 ## Ìṣètò
 
-`open-sse/config/` ni ipele ìṣètò wà:
+`open-sse/config/` ni ìpele ìṣètò wà sí:
 
-| Fáìlì                           | Ìdí                                                |
-| ------------------------------- | -------------------------------------------------- |
-| `providerRegistry.ts`           | Ìforúkọsílẹ̀ àwòṣe ìtàkurọ̀sọ lórí àkójọ olùpèsè 376 |
-| `providerModels.ts`             | Àwọn orúkọ ìnagijẹ àwòṣe, ìbámu fọ́ọ̀mù              |
-| `constants.ts`                  | Àkókò ìdádúró, àwọn òpin, àwọn kóòdù ipò           |
-| `defaultThinkingSignature.ts`   | Àmì ìrònú Claude àìyípadà                          |
-| `modelStrip.ts` (nínú services) | Yíyọ àwọn ààyè kúrò fún olùpèsè kọ̀ọ̀kan             |
+| Fáìlì                           | Ète                                               |
+| ------------------------------- | ------------------------------------------------- |
+| `providerRegistry.ts`           | Àtòjọ àwoṣe ìbáròrọ̀ lórí àtòkàtà àwọn olupèsè 376 |
+| `providerModels.ts`             | Àwọn orúkọ mìíràn àwoṣe, ìbáṣepọ̀ ọ̀nà àkọsílẹ̀      |
+| `constants.ts`                  | Àwọn ìparí àkókò, àwọn òpin, àwọn kóòdù ipò       |
+| `defaultThinkingSignature.ts`   | Ìbuwọlu ìrònúwò Claude àyọkàyọ                    |
+| `modelStrip.ts` (nínú services) | Yíyọ àwọn aaye kúrò fún olupèsè kọ̀ọ̀kan            |
 
-### Àgbékalẹ̀ Ìforúkọsílẹ̀ Olùpèsè
+### Àpéjúwe Àtòjọ Olupèsè
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Ìfọwọ́sí Zod nígbà tí módùùlù bá ń kó wọlé ń rí i dájú pé gbogbo àwọn ìṣètò olùpèsè wúlò.
+Ìmúdájú Zod nígbà tí móòdùlì ń wọlé ń rí i dájú pé gbogbo àwọn ìṣètò olupèsè wọ́pọ̀.
 
 ---
 

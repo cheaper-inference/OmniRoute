@@ -39,11 +39,11 @@ Objektiver Funktionsvergleich mit beliebten Open-Source-KI-Routern.
 
 ## Wann Sie OmniRoute wählen sollten
 
-- Sie betreiben die Lösung selbst und wünschen **maximale Anbieterabdeckung** (376 Anbieter, 155 kostenlose Katalogeinträge ohne Authentifizierung)
-- Sie benötigen einen **integrierten MCP-Server** (LLM-Tools, Speicher und Skills werden als Tools bereitgestellt)
+- Sie hosten selbst und wünschen **maximale Anbieterabdeckung** (376 Anbieter, 155 kostenlose Katalogeinträge ohne Authentifizierung)
+- Sie benötigen einen **integrierten MCP-Server** (LLM-Tools, Speicher und Skills, die als Tools bereitgestellt werden)
 - Sie benötigen das **A2A-Protokoll** für Agent-zu-Agent-Workflows
-- Sie wünschen **Fingerprint-Verschleierung** (JA3/JA4), um die Erkennung durch vorgelagerte CAPTCHAs zu vermeiden
-- Sie benötigen **Enterprise-Funktionen** (Schutzmechanismen, Evaluierungen, Audit-Trail) ohne SaaS-Rechnung
+- Sie wünschen **Fingerprint-Verschleierung** (JA3/JA4), um eine Erkennung durch vorgelagerte CAPTCHAs zu vermeiden
+- Sie benötigen **Enterprise-Funktionen** (Guardrails, Evals, Audit-Trail) ohne SaaS-Rechnung
 
 ## Wann Sie LiteLLM wählen sollten
 

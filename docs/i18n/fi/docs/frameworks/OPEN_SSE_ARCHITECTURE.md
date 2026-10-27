@@ -486,13 +486,13 @@ Se käsittelee seuraavat:
 
 `open-sse/config/` sisältää konfiguraatiokerroksen:
 
-| Tiedosto                      | Tarkoitus                                                     |
-| ----------------------------- | ------------------------------------------------------------- |
-| `providerRegistry.ts`         | Keskustelumallien rekisteri 376 palveluntarjoajan luettelolle |
-| `providerModels.ts`           | Mallien aliakset ja muotomuunnokset                           |
-| `constants.ts`                | Aikakatkaisut, rajoitukset ja tilakoodit                      |
-| `defaultThinkingSignature.ts` | Clauden oletusarvoinen ajatteluallekirjoitus                  |
-| `modelStrip.ts` (palveluissa) | Palveluntarjoajakohtainen kenttien poistaminen                |
+| Tiedosto                       | Tarkoitus                                                |
+| ------------------------------ | -------------------------------------------------------- |
+| `providerRegistry.ts`          | Chat-mallien rekisteri 376 palveluntarjoajan luettelolle |
+| `providerModels.ts`            | Mallialiasukset, formaattikartoitus                      |
+| `constants.ts`                 | Aikakatkaisut, rajat, tilakoodit                         |
+| `defaultThinkingSignature.ts`  | Clauden oletusarvoinen thinking-allekirjoitus            |
+| `modelStrip.ts` (servicesissä) | Kenttien poisto palveluntarjoajakohtaisesti              |
 
 ### Palveluntarjoajarekisterin skeema
 
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Moduulin latauksen yhteydessä suoritettava Zod-validointi varmistaa, että kaikki palveluntarjoajien konfiguraatiot ovat kelvollisia.
+Zod-validointi moduulin latauksen yhteydessä varmistaa, että kaikki palveluntarjoajien konfiguraatiot ovat kelvollisia.
 
 ---
 

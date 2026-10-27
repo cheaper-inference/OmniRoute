@@ -491,15 +491,15 @@ Obsługuje:
 
 ## Konfiguracja
 
-`open-sse/config/` zawiera warstwę konfiguracji:
+Katalog `open-sse/config/` zawiera warstwę konfiguracji:
 
-| Plik                          | Przeznaczenie                                           |
-| ----------------------------- | ------------------------------------------------------- |
-| `providerRegistry.ts`         | Rejestr modeli czatu obejmujący katalog 376 dostawców   |
-| `providerModels.ts`           | Aliasy modeli, mapowanie formatów                       |
-| `constants.ts`                | Limity czasu, ograniczenia, kody stanu                  |
-| `defaultThinkingSignature.ts` | Domyślna sygnatura myślenia Claude                      |
-| `modelStrip.ts` (w usługach)  | Usuwanie pól specyficznych dla poszczególnych dostawców |
+| Plik                          | Przeznaczenie                                         |
+| ----------------------------- | ----------------------------------------------------- |
+| `providerRegistry.ts`         | Rejestr modeli czatu oparty na katalogu 376 dostawców |
+| `providerModels.ts`           | Aliasy modeli, mapowanie formatów                     |
+| `constants.ts`                | Limity czasu, limity, kody statusu                    |
+| `defaultThinkingSignature.ts` | Domyślna sygnatura myślenia Claude                    |
+| `modelStrip.ts` (w services)  | Usuwanie pól dla poszczególnych dostawców             |
 
 ### Schemat rejestru dostawców
 
@@ -516,7 +516,7 @@ interface ProviderConfig {
 }
 ```
 
-Walidacja Zod podczas ładowania modułu zapewnia poprawność wszystkich konfiguracji dostawców.
+Walidacja Zod przy ładowaniu modułu zapewnia poprawność wszystkich konfiguracji dostawców.
 
 ---
 

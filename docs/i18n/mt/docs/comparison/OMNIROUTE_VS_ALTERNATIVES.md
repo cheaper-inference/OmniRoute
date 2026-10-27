@@ -37,13 +37,13 @@ Paragun oġġettiv tal-karatteristiċi ma' routers tal-AI open-source popolari.
 | **Appoġġ għal tunnels (Cloudflared, Tailscale, Ngrok)** |                        ✅                         |          ❌          |        n/a        |     n/a      |
 | **Liċenzja**                                            |                        MIT                        |         MIT          |   proprjetarju    | proprjetarju |
 
-## Meta għandek tagħżel OmniRoute
+## Meta tagħżel OmniRoute
 
-- Tospitah int stess u trid **kopertura massima tal-fornituri** (376 fornitur, 155 entrata fil-katalgu b'xejn/mingħajr awtentikazzjoni)
-- Teħtieġ **server MCP integrat** (għodod LLM, memorja u ħiliet esposti bħala għodod)
-- Teħtieġ il-**protokoll A2A** għal flussi tax-xogħol bejn aġent u ieħor
-- Trid **ħabi tal-marki tas-swaba'** (JA3/JA4) biex tevita li tinqabad minn CAPTCHAs upstream
-- Teħtieġ **karatteristiċi għall-intrapriżi** (mekkaniżmi ta' protezzjoni, evalwazzjonijiet u rekord tal-awditjar) mingħajr kont ta' SaaS
+- Jekk tagħmel self-hosting u trid **kopertura massima tal-providers** (376 provider, 155 entrata tal-katalgu b'xejn/bla awtentikazzjoni)
+- Għandek bżonn **MCP server inkorporat** (għodod LLM, memorja, ħiliet esposti bħala għodod)
+- Għandek bżonn il-**protokoll A2A** għal workflows bejn aġent u l-ieħor
+- Trid **stealth tal-fingerprint** (JA3/JA4) biex tevita d-detezzjoni minn CAPTCHAs upstream
+- Għandek bżonn **karatteristiċi enterprise** (guardrails, evals, audit trail) mingħajr kont SaaS
 
 ## Meta għandek tagħżel LiteLLM
 

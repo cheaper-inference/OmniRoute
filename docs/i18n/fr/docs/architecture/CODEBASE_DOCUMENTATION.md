@@ -446,18 +446,18 @@ Divisé en sous-répertoires spécialisés :
 
 ## 4. `open-sse/` — Espace de travail du moteur de streaming
 
-Espace de travail npm distinct publié sous le nom `@omniroute/open-sse`. Il gère le traitement
+Espace de travail npm distinct publié sous le nom `@omniroute/open-sse`. Il regroupe le traitement
 des requêtes, les exécuteurs, les traducteurs, les services, le transformateur et le serveur MCP.
 
 ```
 open-sse/
-├── index.ts                Exports publics
+├── index.ts                Exportations publiques
 ├── package.json            Manifeste de l’espace de travail
 ├── tsconfig.json
 ├── types.d.ts
 ├── config/                 Registres de fournisseurs, profils d’en-têtes, identité, …
 ├── handlers/               Gestionnaires de requêtes (chat, embeddings, audio, image, …)
-├── executors/              156 modules d’exécution de fournisseurs (classes d’exécution + assistants propres à chaque fournisseur)
+├── executors/              156 modules d’exécution de fournisseurs (classes d’exécution + assistants par fournisseur)
 ├── translator/             Conversion de formats (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformateur de flux Responses API ↔ Chat Completions
 ├── services/               Plus de 80 modules de service (combinaisons, repli, quotas, identité, …)
@@ -467,14 +467,14 @@ open-sse/
 
 ### 4.1 `open-sse/handlers/`
 
-| Gestionnaire            | Objectif                                                                                                           |
+| Gestionnaire            | Rôle                                                                                                               |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `chatCore.ts`           | Pipeline principal de chat (cache, limitation du débit, routage des combinaisons, répartition vers les exécuteurs) |
-| `responsesHandler.ts`   | Point d’entrée de l’API OpenAI Responses                                                                           |
+| `chatCore.ts`           | Pipeline principal de chat (cache, limitation de débit, routage des combinaisons, répartition vers les exécuteurs) |
+| `responsesHandler.ts`   | Point d’entrée de l’API Responses d’OpenAI                                                                         |
 | `embeddings.ts`         | Embeddings                                                                                                         |
 | `imageGeneration.ts`    | Génération d’images                                                                                                |
 | `audioSpeech.ts`        | Synthèse vocale                                                                                                    |
-| `audioTranscription.ts` | Transcription de la parole                                                                                         |
+| `audioTranscription.ts` | Transcription vocale                                                                                               |
 | `videoGeneration.ts`    | Génération de vidéos                                                                                               |
 | `musicGeneration.ts`    | Génération de musique                                                                                              |
 | `rerank.ts`             | Reclassement                                                                                                       |
@@ -483,14 +483,14 @@ open-sse/
 | `sseParser.ts`          | Analyseur d’événements SSE                                                                                         |
 | `usageExtractor.ts`     | Extraction du nombre de jetons depuis les flux en amont                                                            |
 | `responseSanitizer.ts`  | Suppression des éléments parasites propres aux fournisseurs                                                        |
-| `responseTranslator.ts` | Couche de liaison entre la réponse du fournisseur et la couche de traduction                                       |
+| `responseTranslator.ts` | Liaison entre la réponse du fournisseur et la couche de traduction                                                 |
 
 ### 4.2 `open-sse/executors/`
 
-156 modules d’exécution de premier niveau (`*.ts` à l’exclusion de `base.ts`, `index.ts` et des tests — nombre
+156 modules d’exécution de premier niveau (`*.ts` moins `base.ts`, `index.ts` et les tests — nombre
 mesuré par `npm run check:docs-counts`). Chaque classe d’exécution étend `BaseExecutor` (`base.ts`),
 directement ou par l’intermédiaire de `DefaultExecutor` ou d’un autre exécuteur ; les modules restants sont des
-assistants propres à chaque fournisseur (schémas d’outils, adaptateurs de récupération/TTS, gestionnaires de particularités). Les exécuteurs comprennent :
+assistants propres aux fournisseurs (schémas d’outils, adaptateurs fetch/TTS, gestionnaires de particularités). Les exécuteurs comprennent :
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
@@ -498,13 +498,13 @@ assistants propres à chaque fournisseur (schémas d’outils, adaptateurs de r�
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, ainsi que `claudeIdentity.ts`
 (assistant d’identité partagé) et `index.ts` (registre).
 
-> Remarque : les fournisseurs qui ne figurent pas dans cette liste sont pris en charge par `default.ts` au moyen de l’exécuteur
-> générique compatible avec OpenAI. Le catalogue complet des fournisseurs (376 fournisseurs) se trouve dans
+> Remarque : les fournisseurs qui ne figurent pas dans cette liste sont pris en charge par `default.ts` au moyen de l’exécuteur générique
+> compatible avec OpenAI. Le catalogue complet des fournisseurs (376 fournisseurs) se trouve dans
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Traduction en étoile (OpenAI constitue le hub).
+Traduction en étoile (OpenAI constitue le cœur).
 
 - **9 traducteurs de requêtes** (`translator/request/`) :
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -518,41 +518,41 @@ Traduction en étoile (OpenAI constitue le hub).
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, ainsi que
   les tests des assistants.
-- **Assistants d’image** (`translator/image/sizeMapper.ts`).
-- Au premier niveau : `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- **Assistants pour les images** (`translator/image/sizeMapper.ts`).
+- Au niveau supérieur : `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — Convertisseur Responses API ↔ Chat Completions basé sur `TransformStream`
-  (utilisé par la route générique `responses/`).
+- `responsesTransformer.ts` — Convertisseur Responses API ↔ Chat
+  Completions basé sur `TransformStream` (utilisé par la route générique `responses/`).
 
 ### 4.5 `open-sse/services/`
 
-Principaux éléments (liste complète dans `open-sse/services/`) :
+Principaux éléments (liste complète sous `open-sse/services/`) :
 
-| Préoccupation           | Fichiers                                                                                                                                                                                                                                                 |
-| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Routage Combo           | `combo.ts` (20 stratégies), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
-| Moteur Auto Combo       | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Résilience              | `accountFallback.ts` (délai de récupération + verrouillage), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                       |
-| Quotas                  | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Mise en cache           | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Intelligence de routage | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Gestion des modèles     | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Compression             | `compression/` — câblage complet du moteur de compression                                                                                                                                                                                                |
-| Jetons + session        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Niveau / manifeste      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / réseau             | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Lots                    | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| Utilisation             | `usage.ts`                                                                                                                                                                                                                                               |
+| Préoccupation       | Fichiers                                                                                                                                                                                                                                                 |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Routage combiné     | `combo.ts` (20 stratégies), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                    |
+| Moteur Auto Combo   | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Résilience          | `accountFallback.ts` (délai de récupération + verrouillage), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                       |
+| Quotas              | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| Mise en cache       | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Routage intelligent | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Gestion des modèles | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Compression         | `compression/` — câblage complet du moteur de compression                                                                                                                                                                                                |
+| Jetons + sessions   | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Niveau / manifeste  | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / réseau         | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| Lots                | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Utilisation         | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 outils uniques** câblés dans `server.ts` (45 outils canoniques dans `schemas/tools.ts` +
+- **110 outils uniques** câblés dans `server.ts` (45 canoniques dans `schemas/tools.ts` +
   les modules de mémoire, de compétences, de compétences GitHub, de pool, de ludification, de plug-ins, de Notion, d’Obsidian,
   de corpus local et de compression — union comptabilisée par `countUniqueMcpTools`).
 - **3 transports** : stdio, HTTP Streamable, SSE.
-- **33 portées** appliquées à l’exécution — liste de base dans `src/shared/constants/mcpScopes.ts`, l’ensemble complet étant l’union des portées déclarées par chaque module d’outils.
+- **33 portées** appliquées lors de l’exécution — liste de base dans `src/shared/constants/mcpScopes.ts`, l’ensemble complet correspond à l’union des portées déclarées par chaque module d’outil.
 - Table d’audit : `mcp_tool_audit` (alimentée par `audit.ts`).
 - Fichiers : `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
@@ -562,7 +562,7 @@ Principaux éléments (liste complète dans `open-sse/services/`) :
 
 ### 4.7 `open-sse/config/`
 
-Registres de fournisseurs (`providerRegistry.ts`, `providerModels.ts`,
+Registres des fournisseurs (`providerRegistry.ts`, `providerModels.ts`,
 `providerHeaderProfiles.ts`), registres de modèles par format (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),

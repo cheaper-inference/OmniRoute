@@ -39,11 +39,11 @@ Objektívne porovnanie funkcií oproti populárnym open-source AI smerovačom.
 
 ## Kedy si vybrať OmniRoute
 
-- Prevádzkujete riešenie vo vlastnej infraštruktúre a chcete **maximálne pokrytie poskytovateľov** (376 poskytovateľov, 155 bezplatných položiek katalógu bez potreby autentifikácie)
-- Potrebujete **vstavaný server MCP** (nástroje LLM, pamäť a zručnosti sprístupnené ako nástroje)
-- Potrebujete **protokol A2A** pre pracovné postupy medzi agentmi
-- Chcete **maskovanie odtlačku** (JA3/JA4), aby ste sa vyhli detekcii mechanizmami CAPTCHA u nadradených poskytovateľov
-- Potrebujete **podnikové funkcie** (ochranné mechanizmy, evaluácie, auditný záznam) bez poplatkov za SaaS
+- Používate self-hosting a chcete **maximálne pokrytie poskytovateľov** (376 poskytovateľov, 155 bezplatných položiek katalógu bez autentifikácie)
+- Potrebujete **vstavaný MCP server** (nástroje LLM, pamäť a zručnosti vystavené ako nástroje)
+- Potrebujete **protokol A2A** pre workflow medzi agentmi (agent-to-agent)
+- Chcete **fingerprint stealth** (JA3/JA4), aby ste sa vyhli detekcii zo strany upstream CAPTCHA
+- Potrebujete **enterprise funkcie** (guardrails, evals, audit trail) bez faktúry za SaaS
 
 ## Kedy si vybrať LiteLLM
 

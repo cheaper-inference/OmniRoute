@@ -72,6 +72,16 @@ curl -i \
 
 Klucz bez zakresu `manage` (lub brak uwierzytelnienia Bearer) powoduje zwrócenie `403 LOCAL_ONLY`. Powiązanego prefiksu `/api/cli-tools/runtime/*` celowo nie można obejść — zobacz [Warstwy ochrony tras — wyjątek dla zakresu manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Walidacja Origin
+
+Po uwierzytelnieniu każde żądanie do `/api/mcp/*` — transportów i tras zarządzania, takich jak `status`, `tools`, `audit`, `restart` — ma walidowany nagłówek `Origin`, niezależnie od wywołującego (klucz API, token CLI, sesja dashboardu lub anonimowy loopback przy wyłączonym logowaniu). To ochrona przed DNS rebinding wymagana przez specyfikację MCP Streamable HTTP.
+
+- **Brak nagłówka `Origin`** → dozwolone. CLI OmniRoute, SDK i klienci IDE go nie wysyłają.
+- **Dozwolony `Origin`** → `localhost` / `127.0.0.1` / `[::1]` na dowolnym porcie lub publiczny origin samego OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin przekazany przez zaufany reverse proxy (`OMNIROUTE_TRUST_PROXY`, tylko gdy nie ustawiono base URL) albo bezpośrednio używany host IP loopback/LAN. Sam nagłówek `Host` nigdy nie czyni originu zaufanym.
+- **Każdy inny `Origin`, w tym `null`** → `403` z treścią błędu JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Sesja dashboardu z prawidłowym tokenem CSRF nadal jest akceptowana, tak jak przy innych zapisach dashboardu.
+
+Przeglądarkowy klient MCP serwowany za reverse proxy wymaga `OMNIROUTE_PUBLIC_BASE_URL`; nie ma listy dozwolonych innych originów. Zapytanie wstępne CORS (`OPTIONS`) nie jest sprawdzane pod kątem Origin; następujące po nim żądanie — tak.
+
 ## Konfiguracja IDE
 
 Zobacz [Konfiguracja klienta MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration), aby skonfigurować Claude Desktop,

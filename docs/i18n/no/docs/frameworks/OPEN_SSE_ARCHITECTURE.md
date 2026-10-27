@@ -486,15 +486,15 @@ Dette håndterer:
 
 `open-sse/config/` inneholder konfigurasjonslaget:
 
-| Fil                           | Formål                                             |
-| ----------------------------- | -------------------------------------------------- |
-| `providerRegistry.ts`         | Chatmodellregister for katalogen med 376 tilbydere |
-| `providerModels.ts`           | Modellaliaser, formattilordning                    |
-| `constants.ts`                | Tidsavbrudd, grenser, statuskoder                  |
-| `defaultThinkingSignature.ts` | Standard tenkesignatur for Claude                  |
-| `modelStrip.ts` (i tjenester) | Fjerning av felt per tilbyder                      |
+| Fil                           | Formål                                                  |
+| ----------------------------- | ------------------------------------------------------- |
+| `providerRegistry.ts`         | Register over chat-modeller for 376-leverandørkatalogen |
+| `providerModels.ts`           | Modellaliaser, formatmapping                            |
+| `constants.ts`                | Tidsavbrudd, grenser, statuskoder                       |
+| `defaultThinkingSignature.ts` | Standard Claude-tankesignatur                           |
+| `modelStrip.ts` (i services)  | Fjerning av felt per leverandør                         |
 
-### Skjema for tilbyderregister
+### Skjema for leverandørregister
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Zod-validering ved modulinnlasting sikrer at alle tilbyderkonfigurasjoner er gyldige.
+Zod-validering ved modullasting sikrer at alle leverandørkonfigurasjoner er gyldige.
 
 ---
 

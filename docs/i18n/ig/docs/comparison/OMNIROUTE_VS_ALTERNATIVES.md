@@ -39,11 +39,11 @@ Ntụnyere atụmatụ ziri ezi megide AI routers open-source ama ama.
 
 ## Mgbe ị ga-ahọrọ OmniRoute
 
-- Ị na-akwado ya n'onwe gị ma chọọ **nkwado kachasị ukwuu maka ndị na-eweta ọrụ** (ndị na-eweta ọrụ 376, ndenye katalọgụ efu/na-achọghị nyocha njirimara 155)
-- Ị chọrọ **sava MCP arụnyere n'ime ya** (ngwaọrụ LLM, ebe nchekwa, na nka e gosipụtara dị ka ngwaọrụ)
-- Ị chọrọ **protokọlụ A2A** maka usoro ọrụ sitere n'aka otu ajan gaa n'aka ajan ọzọ
-- Ị chọrọ **izochi akara mkpịsịaka** (JA3/JA4) iji zere ka CAPTCHA ndị dị n'elu chọpụta gị
-- Ị chọrọ **njirimara maka ụlọ ọrụ** (usoro nchedo, nnwale, ndekọ nyocha) na-enweghị ụgwọ SaaS
+- Ị na-ebunye onwe gị (self-host) ma chọọ **ịkpuchite ndị na-enye ọrụ kacha ukwuu** (ndị na-enye ọrụ 376, ihe 155 ndị e debere n'efu/na-enweghị njirimara)
+- Ị chọrọ **MCP server arụnyere n'ime** (ngwá ọrụ LLM, ebe nchekwa, na nkà a gosipụtara dị ka ngwá ọrụ)
+- Ị chọrọ **A2A protocol** maka usoro ọrụ agent-na-agent
+- Ị chọrọ **izobe mkpịsị aka** (JA3/JA4) iji zere ịchọpụta site na CAPTCHAs nke elu
+- Ị chọrọ **atụmatụ nnukwu ụlọ ọrụ** (nchebe, nyocha, ndekọ nyocha) na-enweghị ụgwọ SaaS
 
 ## Mgbe ị ga-ahọrọ LiteLLM
 

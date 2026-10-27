@@ -484,17 +484,17 @@ Ez a következőket kezeli:
 
 ## Konfiguráció
 
-Az `open-sse/config/` tartalmazza a konfigurációs réteget:
+Az `open-sse/config/` könyvtár tartalmazza a konfigurációs réteget:
 
-| Fájl                                  | Rendeltetés                                              |
-| ------------------------------------- | -------------------------------------------------------- |
-| `providerRegistry.ts`                 | Chatmodell-nyilvántartás a 376 szolgáltatós katalógushoz |
-| `providerModels.ts`                   | Modellálnevek, formátumleképezés                         |
-| `constants.ts`                        | Időtúllépések, korlátok, állapotkódok                    |
-| `defaultThinkingSignature.ts`         | Alapértelmezett Claude-gondolkodási aláírás              |
-| `modelStrip.ts` (a services mappában) | Szolgáltatónkénti mezőeltávolítás                        |
+| Fájl                            | Funkció                                                               |
+| ------------------------------- | --------------------------------------------------------------------- |
+| `providerRegistry.ts`           | Chatmodelleket nyilvántartó regiszter a 376 szolgáltatós katalógushoz |
+| `providerModels.ts`             | Modellaliaszok, formátumleképezés                                     |
+| `constants.ts`                  | Időtúllépések, korlátok, státuszkódok                                 |
+| `defaultThinkingSignature.ts`   | Alapértelmezett Claude thinking-aláírás                               |
+| `modelStrip.ts` (a servicesben) | Szolgáltatónkénti mezőeltávolítás                                     |
 
-### A szolgáltatói nyilvántartás sémája
+### A Provider Registry sémája
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-A modul betöltésekor végrehajtott Zod-validáció biztosítja, hogy minden szolgáltatói konfiguráció érvényes legyen.
+A Zod-validáció a modul betöltésekor biztosítja, hogy minden szolgáltatókonfiguráció érvényes legyen.
 
 ---
 

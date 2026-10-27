@@ -39,11 +39,11 @@ Objektivna usporedba značajki s popularnim open-source AI usmjerivačima.
 
 ## Kada odabrati OmniRoute
 
-- Sami hostate i želite **maksimalnu pokrivenost pružateljima usluga** (376 pružatelja usluga, 155 besplatnih stavki kataloga bez autentifikacije)
-- Trebate **ugrađeni MCP poslužitelj** (LLM alati, memorija i vještine dostupni kao alati)
+- Samostalno hostate i želite **maksimalnu pokrivenost pružatelja** (376 pružatelja, 155 besplatnih zapisa/zapisa bez autentikacije u katalogu)
+- Trebate **ugrađeni MCP poslužitelj** (LLM alati, memorija, vještine izložene kao alati)
 - Trebate **A2A protokol** za tijekove rada između agenata
-- Želite **prikrivanje digitalnog otiska** (JA3/JA4) kako biste izbjegli otkrivanje putem CAPTCHA sustava uzvodnih pružatelja usluga
-- Trebate **značajke za poslovne sustave** (zaštitne mehanizme, evaluacije i revizijski trag) bez troška SaaS pretplate
+- Želite **nevidljivost otiska prsta** (JA3/JA4) kako biste izbjegli otkrivanje od strane upstream CAPTCHA-a
+- Trebate **enterprise značajke** (zaštitna ograničenja, evaluacije, revizijski trag) bez računa za SaaS
 
 ## Kada odabrati LiteLLM
 

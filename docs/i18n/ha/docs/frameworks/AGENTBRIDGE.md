@@ -14,36 +14,36 @@ AgentBridge shi ne wakilin MITM (Man-in-the-Middle) na OmniRoute wanda ke katse 
 
 ## §1 Bayani
 
-### Mene ne AgentBridge?
+### Menene AgentBridge?
 
-Lokacin da wakilin IDE (misali, GitHub Copilot, Cursor, Claude Code) ya yi kiran API, yana haɗuwa kai tsaye da mai samar da AI na sama (OpenAI, Anthropic, da sauransu). AgentBridge yana tsoma baki cikin wannan haɗin a bayyane a matakin TLS — ba tare da buƙatar wani canji ga tsarin saitin wakilin ba — sannan ya sake rubuta buƙatar ta hanyar OmniRoute.
+Lokacin da wakilin IDE (misali, GitHub Copilot, Cursor, Claude Code) ya yi kiran API, yana haɗawa kai tsaye zuwa mai samar da AI na sama (OpenAI, Anthropic, da sauransu). AgentBridge yana katse wannan haɗin kai a bayyane a matakin TLS — ba tare da buƙatar kowane canji na saitin wakili ba — kuma yana sake rubuta buƙatar ta hanyar OmniRoute.
 
-Wannan yana nufin za ka iya:
+Wannan yana nufin kuna iya:
 
-- **Sake tura kowane wakili zuwa kowane mai samarwa**: Copilot yana sadarwa da OpenAI? Sake tura shi zuwa Anthropic Claude, Gemini, ko ɗaya daga cikin masu samarwa 376 na OmniRoute.
-- **Aiwatar da taswirar samfura**: `gemini-3-flash` → `claude-sonnet-4.7` a bayyane a matakin handler.
-- **Lura da duk zirga-zirgar wakili**: ana wallafa kowace buƙatar da aka tsoma wa baki zuwa [Mai Binciken Zirga-zirga](./TRAFFIC_INSPECTOR.md).
-- **Aiwatar da juriyar OmniRoute**: haɗaɗɗen turawa, masu katse da'ira, hanyoyin madadin, da bin diddigin kuɗi suna aiki ga zirga-zirgar wakilan IDE ma.
+- **Sake tura kowane wakili zuwa kowane mai samarwa**: Copilot yana magana da OpenAI? Sake tura shi zuwa Anthropic Claude, Gemini, ko ɗaya daga cikin masu samarwa 376 na OmniRoute.
+- **Aiwatar da daidaiton samfura**: `gemini-3-flash` → `claude-sonnet-4.7` a bayyane a matakin mai sarrafawa.
+- **Lura da duk zirga-zirgar wakili**: kowace buƙata da aka katse ana buga ta zuwa [Mai Binciken Zirga-zirga](./TRAFFIC_INSPECTOR.md).
+- **Aiwatar da juriya na OmniRoute**: combo routing, circuit breakers, fallbacks, da bin diddigin kuɗi suna aiki ga zirga-zirgar wakilin IDE kuma.
 
 ### Matsayi idan aka kwatanta da kasuwa
 
-| Fasali                    | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity               |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot            |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex              |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries            |    —    |    ✓     |        —        |             ✓             |
-| Claude Code               |    —    |    —     |        ✓        |             ✓             |
-| Open Code                 |    —    |    —     |        ✓        |             ✓             |
-| Trae                      |    —    |    —     |        —        |      🔍 Ana bincike       |
-| Manhajar Dashboard        |    ✓    |    ✗     |        ✗        |             ✓             |
-| Mai Binciken Zirga-zirga  |    ✗    |    ✗     |        ✓        |             ✓             |
-| Turawar OmniRoute         |    ✗    |    ✗     |        ✗        |             ✓             |
-| Manhajar taswirar samfura |    ✗    |    ✗     |        ✗        |             ✓             |
-| Jerin ketarewa            |    ✗    |    ✗     |        ✓        |             ✓             |
-| Takardar CA ta sama       |    ✗    |    ✗     |        ✓        |             ✓             |
+| Fasali                      | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| --------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity                 |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot              |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)                  |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex                |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE                  |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries              |    —    |    ✓     |        —        |             ✓             |
+| Claude Code                 |    —    |    —     |        ✓        |             ✓             |
+| Open Code                   |    —    |    —     |        ✓        |             ✓             |
+| Trae                        |    —    |    —     |        —        |      🔍 Ana bincike       |
+| UI na Dashboard             |    ✓    |    ✗     |        ✗        |             ✓             |
+| Mai Binciken Zirga-zirga    |    ✗    |    ✗     |        ✓        |             ✓             |
+| Tsarin hanya na OmniRoute   |    ✗    |    ✗     |        ✗        |             ✓             |
+| UI na daidaita samfura      |    ✗    |    ✗     |        ✗        |             ✓             |
+| Jerin bypass                |    ✗    |    ✗     |        ✓        |             ✓             |
+| Takardar shaidar CA ta sama |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 

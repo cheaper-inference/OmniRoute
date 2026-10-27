@@ -37,13 +37,13 @@
 | **Tunnel ပံ့ပိုးမှု (Cloudflared, Tailscale, Ngrok)**    |                       ✅                       |        ❌        |         n/a          |         n/a          |
 | **လိုင်စင်**                                             |                      MIT                       |       MIT        | ပိုင်ဆိုင်မှုသီးသန့် | ပိုင်ဆိုင်မှုသီးသန့် |
 
-## OmniRoute ကို ရွေးချယ်သင့်သည့်အချိန်
+## OmniRoute ကို ဘယ်အခါ ရွေးချယ်သင့်သနည်း
 
-- ကိုယ်တိုင် host လုပ်ပြီး **provider လွှမ်းခြုံမှု အမြင့်ဆုံး**ကို လိုချင်သည့်အခါ (provider 376 ခု၊ အခမဲ့/အထောက်အထားစိစစ်ရန်မလိုသော catalog entry 155 ခု)
-- **built-in MCP server** တစ်ခု လိုအပ်သည့်အခါ (LLM tool များ၊ memory နှင့် skill များကို tool များအဖြစ် အသုံးပြုနိုင်ခြင်း)
+- သင် self-host လုပ်ထားပြီး **provider coverage အပြည့်အစုံ** လိုချင်သည့်အခါ (provider 376 ခု၊ free/no-auth catalog entry 155 ခု)
+- သင်အား **built-in MCP server** တစ်ခု လိုအပ်သည့်အခါ (LLM tool များ၊ memory၊ tool များအဖြစ် expose လုပ်ထားသော skill များ)
 - agent-to-agent workflow များအတွက် **A2A protocol** လိုအပ်သည့်အခါ
-- upstream CAPTCHA များ၏ စစ်ဆေးတွေ့ရှိမှုကို ရှောင်ရှားရန် **fingerprint stealth** (JA3/JA4) ကို လိုချင်သည့်အခါ
-- SaaS အတွက် ငွေတောင်းခံလွှာမရှိဘဲ **enterprise feature များ** (guardrail များ၊ eval များ၊ audit trail) ကို လိုအပ်သည့်အခါ
+- upstream CAPTCHA များ၏ ဖော်ထုတ်မှုကို ရှောင်လွှဲရန် **fingerprint stealth** (JA3/JA4) လိုချင်သည့်အခါ
+- SaaS ကုန်ကျစရိတ် မရှိဘဲ **enterprise feature များ** (guardrail များ၊ eval များ၊ audit trail) လိုအပ်သည့်အခါ
 
 ## LiteLLM ကို ရွေးချယ်သင့်သည့်အချိန်
 

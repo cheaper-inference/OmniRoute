@@ -79,30 +79,35 @@
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` ଏବଂ `src/shared/components/ErrorPageScaffold.tsx`
   —ଲକ୍ଅପ୍କୁ ଦେଖାନ୍ତି; `tests/unit/brand-pages-static.test.ts` ଏହାକୁ ସୁରକ୍ଷିତ ରଖେ।
 
-## 2. ନିୟମାବଳୀ
+## 2. ନିୟମ
 
-1. ଲିଟେରାଲ୍ ନୁହେଁ, ଟୋକେନ୍ ବ୍ୟବହାର କରନ୍ତୁ। ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବେ ରଖାଯାଇଥିବା ବ୍ୟତିକ୍ରମଗୁଡ଼ିକ: ସର୍ବଦା-ଡାର୍କ କନ୍ସୋଲ୍ ଟର୍ମିନାଲ୍, `STATUS_HEX` (`src/shared/constants/statusColors.ts`) ମାଧ୍ୟମରେ ReactFlow SVG
-   ଷ୍ଟ୍ରୋକ୍, ଏବଂ ଶ୍ରେଣୀଭିତ୍ତିକ ପ୍ୟାଲେଟ୍ଗୁଡ଼ିକ
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) ଓ
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`)।
-2. `packages/ui-kit/src`କୁ କେବେବି ହାତରେ ପ୍ୟାଚ୍ କରନ୍ତୁ ନାହିଁ: `scripts/dev/sync-ui-kit.sh <commit>` ସହିତ ସିଙ୍କ୍ କରନ୍ତୁ; ପିନ୍ କରାଯାଇଥିବା ଅପ୍ଷ୍ଟ୍ରିମ୍ କମିଟ୍ଠାରୁ କୌଣସି ବାଇଟ୍ ଭିନ୍ନ ହେଲେ
-   ପ୍ରି-କମିଟ୍ ଗେଟ୍ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ବିଫଳ ହୁଏ (ଅପ୍ଷ୍ଟ୍ରିମ୍ କ୍ଲୋନ୍,
-   `UI_KIT_CLONE` କିମ୍ବା `_references/cheaper-inference-ui-kit`, ଉପଲବ୍ଧ ନଥିଲେ ଏହା ଏକ ସତର୍କବାର୍ତ୍ତା ସହିତ ଏଡ଼ାଇଯାଏ)। କିଟ୍ରେ କିଛି ନଥିଲେ,
-   ଆଡାପ୍ଟର୍ କିମ୍ବା ସ୍କ୍ରିନ୍ରେ ତାହାର ବିକଳ୍ପ ବ୍ୟବସ୍ଥା କରନ୍ତୁ ଏବଂ ଅପ୍ଷ୍ଟ୍ରିମ୍କୁ ତାହା ପାଇଁ ଅନୁରୋଧ କରନ୍ତୁ।
-3. କିଟ୍ର ଡିଫଲ୍ଟ ପାଠ୍ୟ ଇଂରାଜୀରେ ଅଛି (`label = "Loading"`, `loadingLabel = "Loading table"`…) — କୌଣସି କିଟ୍ କମ୍ପୋନେଣ୍ଟ ପାଠ୍ୟ ରେଣ୍ଡର୍ କଲେ
-   `useTranslations(...)`ରୁ ଅନୁବାଦିତ ଷ୍ଟ୍ରିଙ୍ଗ୍ ପାସ୍ କରନ୍ତୁ।
-4. Tailwind ୟୁଟିଲିଟିଗୁଡ଼ିକ କିଟ୍ କମ୍ପୋନେଣ୍ଟ କ୍ଲାସ୍ଗୁଡ଼ିକଠାରୁ ପ୍ରାଧାନ୍ୟ ପାଏ (କିଟ୍
-   `@layer theme, base, components, utilities` ଘୋଷଣା କରେ ଏବଂ ଏହାର ନିୟମଗୁଡ଼ିକ `components`ରେ ରହେ) — କିଟ୍ କମ୍ପୋନେଣ୍ଟଗୁଡ଼ିକର ରଙ୍ଗ ପରିବର୍ତ୍ତନ ପାଇଁ ନୁହେଁ,
-   ସ୍ପେସିଂ ଏବଂ ଲେଆଉଟ୍ ପାଇଁ ୟୁଟିଲିଟି ବ୍ୟବହାର କରନ୍ତୁ।
-5. ଶୀର୍ଷକ: ପୃଷ୍ଠା ଓ ବିଭାଗ ଶୀର୍ଷକ ପାଇଁ `.ci-heading` (Inter, କୌଣସି ଟ୍ରାକିଂ ନାହିଁ); ତ୍ରୁଟି ପୃଷ୍ଠାର ସ୍ଥିତି କୋଡ୍ ପରି ବଡ଼ ଏବଂ ବିରଳ ଡିସ୍ପ୍ଲେ ପାଠ୍ୟ ପାଇଁ ମାତ୍ର `.ci-dashboard-display`
-   (Instrument Serif)।
-6. `tests/unit/dashboard-kit-sweep.test.ts` କିଟ୍ ଗ୍ରହଣକୁ ସୁରକ୍ଷିତ ରଖେ: `src/app` କିମ୍ବା `src/shared/components` ଅଧୀନରେ
-   କୌଣସି Material ଲିଗେଚର୍ ସ୍ପାନ୍ ନାହିଁ; ଡ୍ୟାସ୍ବୋର୍ଡ ଟ୍ରି (`src/app/(dashboard)` ଏବଂ
-   `src/shared/components`) ଭିତରେ କୌଣସି କଞ୍ଚା `<select>`, `<textarea>` କିମ୍ବା `<table>` ନାହିଁ ଏବଂ ତାଲିକାଭୁକ୍ତ ବ୍ୟତିକ୍ରମଗୁଡ଼ିକ (`Select` ଆଡାପ୍ଟର୍ର ନେଟିଭ୍ ବ୍ରାଞ୍ଚ୍,
-   `RequestLoggerDetail`) ବ୍ୟତୀତ ହାତରେ ତିଆରି `role="dialog"` ନାହିଁ; ସେଠାରେ ଥିବା ପ୍ରତ୍ୟେକ କଞ୍ଚା `<button>` କିମ୍ବା `<input>` ପାଇଁ ତାହାଠାରୁ ସର୍ବାଧିକ 3 ଧାଡ଼ି ଉପରେ ସମାପ୍ତ ହେଉଥିବା,
-   କାରଣ ସହିତ `kit-exception:` ଥିବା ଏକ ମନ୍ତବ୍ୟ ଆବଶ୍ୟକ; ପ୍ୟାଲେଟ୍ ହ୍ୟୁ ଏବଂ `dark:` ଭାରିଆଣ୍ଟଗୁଡ଼ିକ
-   କେବଳ ଟେଷ୍ଟ୍ରେ ତାଲିକାଭୁକ୍ତ ଫାଇଲ୍ଗୁଡ଼ିକରେ ଅନୁମୋଦିତ।
-7. PR ପୂର୍ବରୁ ଉଭୟ ଥିମ୍ ଏବଂ 390 px ଭ୍ୟୁପୋର୍ଟ ଯାଞ୍ଚ କରନ୍ତୁ (ସ୍କ୍ରିନ୍ସଟ୍ ସହିତ); `tests/e2e/a11y.spec.ts` axe ଚଲାଏ।
+1. ଟୋକନ୍, କେବେ ଲିଟେରାଲ୍ ନୁହେଁ। ଉଦ୍ଦେଶ୍ୟପୂର୍ଣ୍ଣଭାବରେ ରଖାଯାଇଥିବା ବ୍ୟତିକ୍ରମଗୁଡ଼ିକ: ସର୍ବଦା-ଡାର୍କ କନସୋଲ୍ ଟର୍ମିନାଲ୍ ଏବଂ
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ଯାହା ଲିଟେରାଲ୍ hex ଦରକାର କରୁଥିବା କଲର୍ମାନଙ୍କ ପାଇଁ କିଟ୍ ଷ୍ଟାଟସ୍
+   ପ୍ୟାଲେଟ୍ର resolved-hex ପ୍ରତିରୂପ। ବର୍ଗୀକୃତ ପ୍ୟାଲେଟ୍ଗୁଡ଼ିକ ଆଉ ବ୍ୟତିକ୍ରମ ନୁହଁନ୍ତି:
+   ସେଗୁଡ଼ିକ `src/shared/utils/categoricalPalette.ts` ମାଧ୍ୟମରେ କିଟ୍ର ପାଞ୍ଚଟି ଚାର୍ଟ ଟୋକନ୍ (`--color-chart-1..5`) ଉପରେ
+   ଏବଂ ରାଉଟିଂ ଷ୍ଟ୍ରାଟେଜି ପାଇଁ
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` ମାଧ୍ୟମରେ ନିର୍ଭର କରନ୍ତି; ReactFlow ଏଜ୍ଗୁଡ଼ିକ ଏବଂ ଅର୍କେଷ୍ଟ୍ରେସନ୍
+   କାନଭାସ୍ ଥିମ୍-ସଚେତନ `--orch-status-*` ଭେରିଏବଲ୍ଗୁଡ଼ିକୁ ପଢ଼ନ୍ତି (`src/shared/components/flow/edgeStyles.ts`)।
+2. `packages/ui-kit/src`କୁ କେବେ ହାତରେ ପ୍ୟାଚ୍ କରନ୍ତୁ ନାହିଁ: `scripts/dev/sync-ui-kit.sh <commit>` ସହିତ ସିଙ୍କ୍ କରନ୍ତୁ;
+   ପ୍ରି-କମିଟ୍ ଗେଟ୍ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ପିନ୍ ହୋଇଥିବା ଅପଷ୍ଟ୍ରିମ୍ କମିଟ୍ଠାରୁ ଭିନ୍ନ ଥିବା
+   ଯେକୌଣସି ବାଇଟ୍ ଉପରେ ବିଫଳ ହୁଏ (ଅପଷ୍ଟ୍ରିମ୍ କ୍ଲୋନ୍, `UI_KIT_CLONE` କିମ୍ବା `_references/cheaper-inference-ui-kit`,
+   ଅନୁପସ୍ଥିତ ଥିଲେ ଏହା ଚେତାବନୀ ସହିତ ଛାଡ଼ିଦିଏ)। କିଟ୍ରେ କିଛି ଅଭାବ ଥିଲେ,
+   ଆଡାପ୍ଟର୍ କିମ୍ବା ସ୍କ୍ରିନରେ ଏହାର ବିକଳ୍ପ ବ୍ୟବସ୍ଥା କରନ୍ତୁ ଏବଂ ଅପଷ୍ଟ୍ରିମକୁ ଏହା ପାଇଁ ଅନୁରୋଧ କରନ୍ତୁ।
+3. କିଟ୍ ଟେକ୍ସ୍ଟ ଡିଫଲ୍ଟଗୁଡ଼ିକ ଇଂରାଜୀ ଅଟେ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ଯେତେବେଳେ କିଟ୍ କମ୍ପୋନେଣ୍ଟ୍ ଟେକ୍ସ୍ଟ ରେଣ୍ଡର୍ କରେ, `useTranslations(...)`ରୁ ଅନୁବାଦିତ
+   ଷ୍ଟ୍ରିଂ ପାସ୍ କରନ୍ତୁ।
+4. Tailwind ୟୁଟିଲିଟିଗୁଡ଼ିକ କିଟ୍ କମ୍ପୋନେଣ୍ଟ୍ କ୍ଲାସ୍ଗୁଡ଼ିକ ଉପରେ ବିଜୟୀ ହୁଏ (କିଟ୍
+   `@layer theme, base, components, utilities` ଘୋଷଣା କରେ ଏବଂ ଏହାର ନିୟମଗୁଡ଼ିକ `components`ରେ ରହେ) — ସ୍ପେସିଂ ଏବଂ ଲେଆଉଟ୍ ପାଇଁ ୟୁଟିଲିଟି ବ୍ୟବହାର କରନ୍ତୁ, କିଟ୍ କମ୍ପୋନେଣ୍ଟ୍ଗୁଡ଼ିକର ରଙ୍ଗ ବଦଳାଇବା ପାଇଁ ନୁହେଁ।
+5. ଶୀର୍ଷକଗୁଡ଼ିକ: ପେଜ୍ ଏବଂ ବିଭାଗ ଶୀର୍ଷକ ପାଇଁ `.ci-heading` (Inter, ଟ୍ରାକିଂ ନାହିଁ); `.ci-dashboard-display`
+   (Instrument Serif) କେବଳ ଏରର୍-ପେଜ୍ ଷ୍ଟାଟସ୍ କୋଡ୍ ପରି ବଡ଼, ବିରଳ ଡିସପ୍ଲେ ଟେକ୍ସ୍ଟ ପାଇଁ।
+6. `tests/unit/dashboard-kit-sweep.test.ts` କିଟ୍ ଅବଲମ୍ବନକୁ ସୁରକ୍ଷା ଦିଏ: `src/app` କିମ୍ବା
+   `src/shared/components` ଅଧୀନରେ କୌଣସି Material ligature span ନାହିଁ; ଡ୍ୟାସବୋର୍ଡ ଟ୍ରିରେ (`src/app/(dashboard)` ଏବଂ
+   `src/shared/components`) କୌଣସି କଞ୍ଚା `<select>`, `<textarea>` କିମ୍ବା `<table>` ନାହିଁ ଏବଂ ତାଲିକାଭୁକ୍ତ ବ୍ୟତିକ୍ରମଗୁଡ଼ିକ
+   (`Select` ଆଡାପ୍ଟରର ନେଟିଭ୍ ଶାଖା,
+   `RequestLoggerDetail`) ବାହାରେ କୌଣସି ହାତରେ ତିଆରି `role="dialog"` ନାହିଁ; ସେଠାରେ ଥିବା ପ୍ରତ୍ୟେକ କଞ୍ଚା `<button>` କିମ୍ବା
+   `<input>` ପାଇଁ `kit-exception:` (କାରଣ ସହିତ) ଧାରଣ କରିଥିବା ଏକ ମନ୍ତବ୍ୟ ଆବଶ୍ୟକ ଯାହା ଏହାର ଅତିଅଧିକ ୩ ଧାଡ଼ି ଉପରେ ଶେଷ ହୁଏ; ପ୍ୟାଲେଟ୍ ହ୍ୟୁଗୁଡ଼ିକ ଏବଂ `dark:` ଭେରିଆଣ୍ଟଗୁଡ଼ିକ
+   କେବଳ ଟେଷ୍ଟ ତାଲିକାଭୁକ୍ତ କରିଥିବା ଫାଇଲ୍ଗୁଡ଼ିକରେ।
+7. PR ପୂର୍ବରୁ ଉଭୟ ଥିମ୍ ଏବଂ 390 px ଭ୍ୟୁପୋର୍ଟ୍ ଯାଞ୍ଚ କରନ୍ତୁ (ସ୍କ୍ରିନସଟ୍); `tests/e2e/a11y.spec.ts`
+   axe ଚଲାଏ।
 
 ## 3. ଏକ ସ୍କ୍ରିନ୍ ଯୋଡ଼ିବା
 

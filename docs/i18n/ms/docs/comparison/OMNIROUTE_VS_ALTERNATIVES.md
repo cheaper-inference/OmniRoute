@@ -37,13 +37,13 @@ Perbandingan ciri objektif berbanding penghala AI sumber terbuka popular.
 | **Sokongan terowong (Cloudflared, Tailscale, Ngrok)** |                      ✅                       |          ❌          |        n/a        |     n/a     |
 | **Lesen**                                             |                      MIT                      |         MIT          |    proprietari    | proprietari |
 
-## Bila perlu memilih OmniRoute
+## Bila untuk memilih OmniRoute
 
-- Anda mengehos sendiri dan mahukan **liputan penyedia maksimum** (376 penyedia, 155 entri katalog percuma/tanpa pengesahan)
-- Anda memerlukan **pelayan MCP terbina dalam** (alat LLM, memori dan kemahiran yang didedahkan sebagai alat)
-- Anda memerlukan **protokol A2A** untuk aliran kerja antara ejen
-- Anda mahukan **penyamaran cap jari** (JA3/JA4) untuk mengelakkan pengesanan oleh CAPTCHA huluan
-- Anda memerlukan **ciri perusahaan** (pagar keselamatan, penilaian, jejak audit) tanpa bil SaaS
+- Anda mengehos sendiri dan mahu **liputan penyedia maksimum** (376 penyedia, 155 entri katalog percuma/tanpa pengesahan)
+- Anda memerlukan **pelayan MCP terbina dalam** (alat LLM, memori, kemahiran didedahkan sebagai alat)
+- Anda memerlukan **protokol A2A** untuk aliran kerja ejen-kepada-ejen
+- Anda mahu **stealth cap jari** (JA3/JA4) untuk mengelakkan pengesanan oleh CAPTCHA huluan
+- Anda memerlukan **ciri perusahaan** (guardrails, evals, jejak audit) tanpa bil SaaS
 
 ## Bila perlu memilih LiteLLM
 

@@ -128,7 +128,11 @@ Response shape:
 
 The Arena ELO sync engine (`src/lib/arenaEloSync.ts`) fetches two leaderboards — `text`
 and `code` — from the Arena AI leaderboard API
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Each leaderboard entry
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). When that API returns no
+usable board, the engine falls back to the official `lmarena-ai/leaderboard-dataset` on the
+Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` reports `activeSource`, `lastError` and
+`lastFailedAt`. Each leaderboard entry
 carries a model name, vendor, ELO `score`, confidence interval, and vote count.
 
 Leaderboard categories map to OmniRoute task categories:

@@ -447,7 +447,7 @@ Dibagi menjadi subdirektori terfokus:
 
 ## 4. `open-sse/` — Workspace mesin streaming
 
-Workspace npm terpisah yang dipublikasikan sebagai `@omniroute/open-sse`. Mengelola pemrosesan
+Workspace npm terpisah yang dipublikasikan sebagai `@omniroute/open-sse`. Menangani pemrosesan
 permintaan, eksekutor, penerjemah, layanan, transformer, dan server MCP.
 
 ```
@@ -474,15 +474,15 @@ open-sse/
 | `responsesHandler.ts`   | Titik masuk OpenAI Responses API                                                  |
 | `embeddings.ts`         | Embedding                                                                         |
 | `imageGeneration.ts`    | Pembuatan gambar                                                                  |
-| `audioSpeech.ts`        | Teks ke ucapan                                                                    |
-| `audioTranscription.ts` | Ucapan ke teks                                                                    |
+| `audioSpeech.ts`        | Teks-ke-ucapan                                                                    |
+| `audioTranscription.ts` | Ucapan-ke-teks                                                                    |
 | `videoGeneration.ts`    | Pembuatan video                                                                   |
 | `musicGeneration.ts`    | Pembuatan musik                                                                   |
 | `rerank.ts`             | Pemeringkatan ulang                                                               |
 | `moderations.ts`        | Moderasi                                                                          |
 | `search.ts`             | Pencarian web                                                                     |
 | `sseParser.ts`          | Parser peristiwa SSE                                                              |
-| `usageExtractor.ts`     | Mengambil jumlah token dari stream upstream                                       |
+| `usageExtractor.ts`     | Mengekstrak jumlah token dari stream upstream                                     |
 | `responseSanitizer.ts`  | Menghapus derau khusus penyedia                                                   |
 | `responseTranslator.ts` | Penghubung antara respons penyedia dan lapisan penerjemah                         |
 
@@ -490,8 +490,8 @@ open-sse/
 
 156 modul eksekutor tingkat atas (`*.ts` dikurangi `base.ts`, `index.ts`, dan pengujian — jumlah yang
 diukur oleh `npm run check:docs-counts`). Setiap kelas eksekutor memperluas `BaseExecutor` (`base.ts`),
-baik secara langsung maupun melalui `DefaultExecutor` atau eksekutor lain; modul yang tersisa merupakan
-helper per penyedia (skema alat, adaptor pengambilan/TTS, handler kekhasan). Eksekutor meliputi:
+secara langsung atau melalui `DefaultExecutor` maupun eksekutor lain; modul sisanya merupakan helper
+per penyedia (skema alat, adaptor fetch/TTS, handler kekhususan). Eksekutor mencakup:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
@@ -500,7 +500,7 @@ helper per penyedia (skema alat, adaptor pengambilan/TTS, handler kekhasan). Eks
 (helper identitas bersama) dan `index.ts` (registri).
 
 > Catatan: penyedia yang tidak tercantum di sini dilayani oleh `default.ts` menggunakan eksekutor
-> generik yang kompatibel dengan OpenAI. Katalog penyedia lengkap (376 penyedia) berada di
+> generik yang kompatibel dengan OpenAI. Katalog lengkap penyedia (376 penyedia) berada di
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
@@ -525,22 +525,22 @@ Penerjemahan hub-and-spoke (OpenAI adalah hub-nya).
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — Konverter Responses API ↔ Chat Completions berbasis
-  `TransformStream` (digunakan oleh catch-all rute `responses/`).
+  `TransformStream` (digunakan oleh penampung semua rute `responses/`).
 
 ### 4.5 `open-sse/services/`
 
-Sorotan (daftar lengkap di bawah `open-sse/services/`):
+Sorotan (daftar lengkap tersedia di `open-sse/services/`):
 
 | Aspek               | File                                                                                                                                                                                                                                                     |
 | ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Perutean combo      | `combo.ts` (20 strategi), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
+| Perutean Combo      | `combo.ts` (20 strategi), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                      |
 | Mesin Auto Combo    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Ketahanan           | `accountFallback.ts` (cooldown + lockout), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
+| Ketahanan           | `accountFallback.ts` (masa tunggu + penguncian), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                   |
 | Kuota               | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
 | Caching             | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Kecerdasan perutean | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Penanganan model    | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Kompresi            | `compression/` — pengkabelan mesin kompresi lengkap                                                                                                                                                                                                      |
+| Kompresi            | `compression/` — pengkabelan lengkap mesin kompresi                                                                                                                                                                                                      |
 | Token + sesi        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Tingkat / manifes   | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / jaringan       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -549,16 +549,16 @@ Sorotan (daftar lengkap di bawah `open-sse/services/`):
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **110 alat unik** yang dikonfigurasi di `server.ts` (45 alat kanonis di `schemas/tools.ts` +
+- **110 alat unik** yang dikabelkan dalam `server.ts` (45 alat kanonis dalam `schemas/tools.ts` +
   modul memori, keterampilan, keterampilan GitHub, pool, gamifikasi, plugin, Notion, Obsidian,
   korpus lokal, dan kompresi — gabungannya dihitung oleh `countUniqueMcpTools`).
 - **3 transportasi**: stdio, HTTP Streamable, SSE.
-- **33 cakupan** diberlakukan saat runtime — daftar dasar berada di `src/shared/constants/mcpScopes.ts`, sedangkan set lengkapnya merupakan gabungan cakupan yang dideklarasikan oleh setiap modul alat.
+- **33 cakupan** diberlakukan saat runtime — daftar dasar terdapat dalam `src/shared/constants/mcpScopes.ts`, rangkaian lengkapnya merupakan gabungan cakupan yang dideklarasikan oleh setiap modul alat.
 - Tabel audit: `mcp_tool_audit` (diisi oleh `audit.ts`).
 - File: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  serta pengujian di bawah `__tests__/`.
+  serta pengujian dalam `__tests__/`.
 - Lihat [MCP-SERVER.md](../frameworks/MCP-SERVER.md) untuk katalog alat lengkap.
 
 ### 4.7 `open-sse/config/`
@@ -570,8 +570,8 @@ Registri penyedia (`providerRegistry.ts`, `providerModels.ts`,
 pembantu identitas (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-pembantu kredensial (`credentialLoader.ts`, `codexClient.ts`), dan adaptor cloud
-(`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+pembantu kredensial (`credentialLoader.ts`, `codexClient.ts`), dan adaptor
+cloud (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 

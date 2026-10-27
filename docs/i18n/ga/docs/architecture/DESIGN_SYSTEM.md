@@ -81,30 +81,37 @@
 
 ## 2. Rialacha
 
-1. Tóicíní, ní luachanna liteartha riamh. Eisceachtaí a coinníodh d’aon ghnó: teirminéal an chonsóil atá dorcha i gcónaí, stríoca SVG ReactFlow
-   trí `STATUS_HEX` (`src/shared/constants/statusColors.ts`), agus na pailéid chatagóireacha
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) agus
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Ná paisteáil `packages/ui-kit/src` de láimh riamh: sioncronaigh le `scripts/dev/sync-ui-kit.sh <commit>`; teipeann
-   ar an ngeata réamh-churtha `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) má tá aon bheart
-   éagsúil ón gcur réamhtheachtach pionnáilte (scipeálann sé le rabhadh nuair nach bhfuil an clón réamhtheachtach,
-   `UI_KIT_CLONE` nó `_references/cheaper-inference-ui-kit`, ar fáil). Nuair atá rud éigin in easnamh ón trealamh,
-   téigh timpeall air sa chuibheoir nó sa scáileán agus iarr é ón bhfoireann réamhtheachtach.
-3. Is i mBéarla atá réamhshocruithe téacs an trealaimh (`label = "Loading"`, `loadingLabel = "Loading table"`…) — cuir teaghráin aistrithe
-   ó `useTranslations(...)` ar fáil aon uair a rindreálann comhpháirt trealaimh téacs.
-4. Bíonn tosaíocht ag fóntais Tailwind ar aicmí comhpháirteanna an trealaimh (fógraíonn an trealamh
-   `@layer theme, base, components, utilities` agus tá a rialacha in `components`) — úsáid fóntais don
-   spásáil agus don leagan amach, ní chun dath comhpháirteanna an trealaimh a athrú.
-5. Ceannteidil: `.ci-heading` (Inter, gan spásáil litreacha) do theidil leathanaigh agus rannáin; `.ci-dashboard-display`
-   (Instrument Serif) do théacs taispeána mór neamhphlódaithe amháin, amhail cód stádais an leathanaigh earráide.
-6. Cosnaíonn `tests/unit/dashboard-kit-sweep.test.ts` glacadh an trealaimh: gan aon span ligature Material faoi
-   `src/app` ná `src/shared/components`; i gcrann na deaise (`src/app/(dashboard)` agus
-   `src/shared/components`) gan aon `<select>`, `<textarea>` ná `<table>` amh agus gan aon
-   `role="dialog"` lámhdhéanta lasmuigh de na heisceachtaí liostaithe (brainse dúchasach an chuibheora `Select`,
-   `RequestLoggerDetail`); teastaíonn nóta ina bhfuil `kit-exception:` (agus an chúis leis) ó gach `<button>` nó `<input>`
-   amh ansin, agus caithfidh sé críochnú 3 líne ar a mhéad os a chionn; ní cheadaítear imreacha pailéid ná athraithigh
-   `dark:` ach amháin sna comhaid atá liostaithe sa tástáil.
-7. Deimhnigh an dá théama agus an t-amharcphort 390 px roimh PR (gabhálacha scáileáin); ritheann
+1. Tocnaí, riamh litreacha. Eisceachtaí a coinníodh d'aon ghnó: an teirminéal consóile atá dorcha i
+   gcónaí agus `STATUS_HEX` (`src/shared/constants/statusColors.ts`), an scáthán réitithe-hex de
+   phailéad stádais an kit do ghlaoiteoirí a dteastaíonn hex liteartha uathu. Ní eisceacht iad na
+   pailéid chatagóireacha a thuilleadh: tá siad bunaithe ar chúig thocan cairte an kit
+   (`--color-chart-1..5`) trí `src/shared/utils/categoricalPalette.ts` agus, do straitéisí ródaithe,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; léann imealla ReactFlow agus canbhas an
+   eagrúcháin na hathróga `--orch-status-*` atá aireach don téama
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Ná paistigh `packages/ui-kit/src` de láimh riamh: sioncrónaigh le
+   `scripts/dev/sync-ui-kit.sh <commit>`; theipeann an geata réamh-commit
+   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ar aon bheart a bhíonn difriúil ón gcommit
+   upstream pionnáilte (léimeann sé thairis le rabhadh nuair nach bhfuil an chlón upstream,
+   `UI_KIT_CLONE` nó `_references/cheaper-inference-ui-kit`, i láthair). Nuair nach bhfuil rud éigin
+   sa kit, déan bealach thart air san oiriúntóir nó sa scáileán agus iarr ar upstream é.
+3. Is Béarla iad réamhshocruithe téacs an kit (`label = "Loading"`,
+   `loadingLabel = "Loading table"`…) — tabhair teaghráin aistrithe ó `useTranslations(...)` aon uair
+   a rindreálann comhpháirt kit téacs.
+4. Tá tosaíocht ag fóntais Tailwind thar chlasa chomhpháirte an kit (fógraíonn an kit
+   `@layer theme, base, components, utilities` agus tá a rialacha lonnaithe i `components`) — bain
+   úsáid as fóntais le haghaidh spásála agus leagan amach, ní chun comhpháirte an kit a athdhathú.
+5. Ceannteidil: `.ci-heading` (Inter, gan rianú) do theidil leathanach agus rannóg;
+   `.ci-dashboard-display` (Instrument Serif) amháin do théacs taispeána mór, tearc amhail cód
+   stádais an leathanaigh earráide.
+6. Cosnaíonn `tests/unit/dashboard-kit-sweep.test.ts` glacadh an kit: gan aon span ligatúrach
+   Material faoi `src/app` nó `src/shared/components`; i gcrann an deais (`src/app/(dashboard)` agus
+   `src/shared/components`) gan aon `<select>`, `<textarea>` nó `<table>` amh agus gan aon
+   `role="dialog"` lámdhéanta lasmuigh de na heisceachtaí liostaithe (an brainse dúchais de chuid
+   oiriúntóra `Select`, `RequestLoggerDetail`); teastaíonn trácht ina bhfuil `kit-exception:` (leis
+   an gcúis) ó gach `<button>` nó `<input>` amh ann, trácht a chríochnaíonn 3 líne ar a mhéid os a
+   chionn; dathanna pailéid agus athraithe `dark:` sna comhaid a liostaíonn an tástáil amháin.
+7. Fíoraigh an dá théama agus radharcport 390 px roimh PR (scáileáin); ritheann
    `tests/e2e/a11y.spec.ts` axe.
 
 ## 3. Scáileán a chur leis

@@ -37,13 +37,13 @@ Comparație obiectivă a funcționalităților față de routere AI open-source 
 | **Suport pentru tuneluri (Cloudflared, Tailscale, Ngrok)** |                       ✅                        |         ❌          |        n/a        |    n/a     |
 | **Licență**                                                |                       MIT                       |         MIT         |    proprietar     | proprietar |
 
-## Când să alegeți OmniRoute
+## Când să alegi OmniRoute
 
-- Găzduiți soluția pe propria infrastructură și doriți **acoperire maximă a furnizorilor** (376 de furnizori, 155 de intrări gratuite/fără autentificare în catalog)
-- Aveți nevoie de un **server MCP încorporat** (instrumente LLM, memorie și abilități expuse ca instrumente)
-- Aveți nevoie de **protocolul A2A** pentru fluxuri de lucru între agenți
-- Doriți **disimularea amprentei digitale** (JA3/JA4) pentru a evita detectarea de către sistemele CAPTCHA din amonte
-- Aveți nevoie de **funcționalități pentru companii** (măsuri de protecție, evaluări, jurnal de audit) fără costurile unui serviciu SaaS
+- Te auto-găzduiești și vrei **acoperire maximă a furnizorilor** (376 de furnizori, 155 de intrări gratuite/fără autentificare în catalog)
+- Ai nevoie de un **server MCP integrat** (instrumente LLM, memorie, abilități expuse ca instrumente)
+- Ai nevoie de **protocolul A2A** pentru fluxuri de lucru agent-la-agent
+- Vrei **furtivitate a amprentelor** (JA3/JA4) pentru a evita detectarea de către CAPTCHA-urile din amonte
+- Ai nevoie de **funcționalități enterprise** (mecanisme de protecție, evaluări, jurnal de audit) fără o factură SaaS
 
 ## Când să alegeți LiteLLM
 

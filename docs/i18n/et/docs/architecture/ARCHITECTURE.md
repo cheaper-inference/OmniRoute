@@ -13,76 +13,76 @@ _Viimati uuendatud: 2026-06-28_
 ## Kokkuvõte
 
 OmniRoute on Next.js-il põhinev kohalik tehisintellekti marsruutimislüüs ja juhtpaneel.
-See pakub ühtset OpenAI-ga ühilduvat lõpp-punkti (`/v1/*`) ning marsruudib liiklust mitme ülesvoolu teenusepakkuja vahel, toetades teisendamist, varuvalikuid, lubade värskendamist ja kasutuse jälgimist.
+See pakub ühtset OpenAI-ga ühilduvat lõpp-punkti (`/v1/*`) ning marsruudib liikluse mitme ülesvoolu teenusepakkuja vahel, toetades teisendamist, tõrkesiiret, lubade värskendamist ja kasutuse jälgimist.
 
 Põhivõimekused:
 
-- OpenAI-ga ühilduv API-liides CLI-dele/tööriistadele (376 teenusepakkujat, 156 käivitusmoodulit)
-- Päringute ja vastuste teisendamine eri teenusepakkujate vormingute vahel
-- Mudelikombinatsioonide varuvalikud (mitme mudeli järjestus)
+- OpenAI-ga ühilduv API-liides CLI-dele ja tööriistadele (376 teenusepakkujat, 156 käivitusmoodulit)
+- Päringute ja vastuste teisendamine teenusepakkujate vormingute vahel
+- Mudelikombinatsioonide tõrkesiire (mitme mudeli järjestus)
 - Struktureeritud kombinatsioonisammud (`provider + model + connection`) käitusaegse järjestamisega `compositeTiers` alusel
-- Kontotaseme varuvalikud (mitu kontot teenusepakkuja kohta)
-- Kvoodi eelkontroll ja kvooditeadlik P2C-konto valimine põhivestlusteel
-- OAuthi ja API-võtmega teenusepakkujaühenduste haldus (27 OAuthi teenusepakkuja moodulit)
-- Manuste genereerimine lõpp-punkti `/v1/embeddings` kaudu (18 teenusepakkujat)
-- Piltide genereerimine lõpp-punkti `/v1/images/generations` kaudu (üle 10 teenusepakkuja, üle 20 mudeli)
-- Heli transkribeerimine lõpp-punkti `/v1/audio/transcriptions` kaudu (18 teenusepakkujat)
-- Tekst-kõneks teisendus lõpp-punkti `/v1/audio/speech` kaudu (24 sisseehitatud teenusepakkujat)
-- Video genereerimine lõpp-punkti `/v1/videos/generations` kaudu (ComfyUI + SD WebUI)
-- Muusika genereerimine lõpp-punkti `/v1/music/generations` kaudu (ComfyUI)
-- Veebiotsing lõpp-punkti `/v1/search` kaudu (20 teenusepakkujat)
-- Sisu modereerimine lõpp-punkti `/v1/moderations` kaudu
-- Ümberjärjestamine lõpp-punkti `/v1/rerank` kaudu
-- Mõtlemismärgendite sõelumine (`<think>...</think>`) arutluskäigu mudelite jaoks
-- Vastuste puhastamine rangeks ühilduvuseks OpenAI SDK-ga
-- Rollide normaliseerimine (developer→system, system→user) teenusepakkujatevahelise ühilduvuse tagamiseks
+- Kontotaseme tõrkesiire (mitu kontot teenusepakkuja kohta)
+- Kvoodi eelkontroll ja kvooditeadlik P2C-konto valimine peamises vestlusteekonnas
+- OAuthi ja API-võtme põhine teenusepakkuja ühenduste haldus (27 OAuthi teenusepakkuja moodulit)
+- Manuste genereerimine `/v1/embeddings` kaudu (18 teenusepakkujat)
+- Piltide genereerimine `/v1/images/generations` kaudu (üle 10 teenusepakkuja, üle 20 mudeli)
+- Heli transkribeerimine `/v1/audio/transcriptions` kaudu (18 teenusepakkujat)
+- Tekst-kõneks teisendus `/v1/audio/speech` kaudu (24 sisseehitatud teenusepakkujat)
+- Videote genereerimine `/v1/videos/generations` kaudu (ComfyUI + SD WebUI)
+- Muusika genereerimine `/v1/music/generations` kaudu (ComfyUI)
+- Veebiotsing `/v1/search` kaudu (20 teenusepakkujat)
+- Modereerimine `/v1/moderations` kaudu
+- Ümberjärjestamine `/v1/rerank` kaudu
+- Mõtlemismärgendite sõelumine (`<think>...</think>`) arutlusmudelite jaoks
+- Vastuste puhastamine range OpenAI SDK ühilduvuse tagamiseks
+- Rollide normaliseerimine (developer→system, system→user) teenusepakkujateülese ühilduvuse tagamiseks
 - Struktureeritud väljundi teisendamine (json_schema → Gemini responseSchema)
-- Teenusepakkujate, võtmete, aliaste, kombinatsioonide, sätete ja hinnastuse kohalik püsisalvestus (122 andmebaasimoodulit)
-- Kasutuse ja kulu jälgimine ning päringute logimine
+- Teenusepakkujate, võtmete, aliaste, kombinatsioonide, seadete ja hinnastuse kohalik püsitalletus (122 andmebaasimoodulit)
+- Kasutuse ja kulude jälgimine ning päringute logimine
 - Valikuline pilvesünkroonimine mitme seadme ja oleku sünkroonimiseks
-- IP-aadresside lubamis- ja blokeerimisloend API juurdepääsu juhtimiseks
-- Mõtlemiseelarve haldus (muutmata edastamine/automaatne/kohandatud/adaptiivne)
-- Globaalse süsteemiviiba lisamine
+- IP-lubamis- ja blokeerimisloend API juurdepääsu juhtimiseks
+- Arutluseelarve haldus (passthrough/auto/custom/adaptive)
+- Globaalse süsteemiviiba sisestamine
 - Seansside jälgimine ja sõrmejäljestamine
-- Täiustatud kontopõhine kiiruse piiramine teenusepakkujapõhiste profiilidega
+- Kontopõhine täiustatud päringusageduse piiramine teenusepakkujapõhiste profiilidega
 - Kaitselüliti muster teenusepakkujate töökindluse tagamiseks
-- Kaitse päringutulva eest mutex-lukustusega
-- Allkirjapõhine päringute duplikaatide eemaldamise vahemälu
-- Domeenikiht: kulureeglid, varuvalikupoliitika, lukustuspoliitika
-- Kontekstiedastus: seansi üleandmise kokkuvõtted järjepidevuse säilitamiseks kontode roteerimisel
-- Domeenioleku püsisalvestus (SQLite'i läbikirjutatav vahemälu varuvalikute, eelarvete, lukustuste ja kaitselülitite jaoks)
-- Poliitikamootor päringute tsentraliseeritud hindamiseks (lukustus → eelarve → varuvalik)
-- Päringute telemeetria p50/p95/p99 latentsuse koondamisega
-- Kombinatsiooni sihtmärkide telemeetria ja ajalooline kombinatsiooni sihtmärkide seisund väljade `combo_execution_key` / `combo_step_id` kaudu
+- Päringulaviini vastane kaitse mutex-lukustusega
+- Allkirjapõhine päringute deduplitseerimise vahemälu
+- Domeenikiht: kulureeglid, tõrkesiirdepoliitika, lukustuspoliitika
+- Context Relay: seansi üleandmise kokkuvõtted järjepidevuse säilitamiseks kontode vahetamisel
+- Domeeni oleku püsitalletus (SQLite'i kohese kirjutamisega vahemälu tõrkesiirete, eelarvete, lukustuste ja kaitselülitite jaoks)
+- Poliitikamootor päringute tsentraliseeritud hindamiseks (lukustus → eelarve → tõrkesiire)
+- Päringute telemeetria koos p50/p95/p99 latentsuse koondamisega
+- Kombinatsiooni sihtmärkide telemeetria ja nende ajalooline seisund `combo_execution_key` / `combo_step_id` kaudu
 - Korrelatsiooni-ID (X-Request-Id) läbivaks jälgimiseks
-- Nõuetele vastavuse auditilogi koos API-võtmepõhise loobumisvõimalusega
-- Hindamisraamistik LLM-i kvaliteedi tagamiseks
+- Vastavusauditi logimine koos API-võtmepõhise loobumisvõimalusega
+- Hindamisraamistik LLM-ide kvaliteedi tagamiseks
 - Seisundi juhtpaneel teenusepakkujate kaitselülitite reaalajas olekuga
-- MCP-server (110 tööriista) kolme transpordiga (stdio/SSE/voogedastatav HTTP)
+- MCP-server (110 tööriista) kolme transpordiga (stdio/SSE/Streamable HTTP)
 - A2A-server (JSON-RPC 2.0 + SSE) oskuste ja ülesannete elutsükliga
 - Mälusüsteem (eraldamine, sisestamine, otsimine, kokkuvõtete loomine)
 - Oskuste süsteem (register, käivitaja, liivakast, sisseehitatud oskused)
-- MITM-puhverserver sertifikaatide halduse ja DNS-i käsitlemisega
+- MITM-puhverserver sertifikaatide halduse ja DNS-i käsitlusega
 - Viibasüstide vastane vahevarakiht
 - Viipade tihendamise konveier Cavemani, RTK, virnastatud konveierite, tihenduskombinatsioonide, keelepakettide ja analüütikaga
 - ACP (Agent Communication Protocol) register
-- Modulaarsed OAuthi teenusepakkujad (22 eraldi moodulit kataloogis `src/lib/oauth/providers/`)
+- Modulaarsed OAuthi teenusepakkujad (22 eraldiseisvat moodulit kataloogis `src/lib/oauth/providers/`)
 - Desinstallimise ja täieliku desinstallimise skriptid
-- OAuthi keskkonna parandamise toiming
+- OAuthi keskkonna parandustoiming
 - WebSocketi sild OpenAI-ga ühilduvatele WS-klientidele (`/v1/ws`)
-- Sünkroonimislubade haldus (väljastamine/tühistamine, ETag-versioonitud konfiguratsioonipaketi allalaadimine)
-- GLM Thinking (`glmt`) esmatasandi teenusepakkuja eelseadistus
-- Hübriidne lubade loendamine (teenusepakkujapoolne `/messages/count_tokens` koos varuhinnanguga)
-- Mudelialiase automaatne algtäitmine (üle 30 puhverserveriülest dialektinormaliseeringut käivitamisel)
-- Turvaline väljaminev andmehange SSRF-kaitse, privaatsete URL-ide blokeerimise ja seadistatavate korduskatsetega
-- Jahtumisperioodi arvestavad vestluse korduskatsed seadistatavate väärtustega `requestRetry` ja `maxRetryIntervalSec`
+- Sünkroonimisloadade haldus (väljastamine/tühistamine, ETag-versioonitud konfiguratsioonipaketi allalaadimine)
+- GLM Thinkingu (`glmt`) esmaklassiline teenusepakkuja eelseadistus
+- Hübriidne lubade loendamine (teenusepakkujapoolne `/messages/count_tokens` koos varumeetodina kasutatava hinnanguga)
+- Mudelialiaste automaatne algväärtustamine (üle 30 puhverserveriteülese dialektinormaliseeringu käivitamisel)
+- Turvaline väljaminev päringumehhanism SSRF-kaitse, privaatsete URL-ide blokeerimise ja seadistatavate korduskatsetega
+- Ooteajateadlikud vestluse korduskatsed seadistatavate `requestRetry` ja `maxRetryIntervalSec` väärtustega
 - Käituskeskkonna valideerimine Zodiga käivitamisel
-- Nõuetele vastavuse audit v2 koos lehekülgjaotuse, teenusepakkujate CRUD-sündmuste ja SSRF-i tõttu blokeeritud valideerimise logimisega
+- Vastavusaudit v2 koos lehekülgjaotuse, teenusepakkujate CRUD-sündmuste ja SSRF-i blokeeritud valideerimise logimisega
 
 Peamine käitusmudel:
 
 - Next.js-i rakenduse marsruudid kataloogis `src/app/api/*` rakendavad nii juhtpaneeli API-sid kui ka ühilduvus-API-sid
-- Ühine SSE- ja marsruutimistuumik kataloogides `src/sse/*` + `open-sse/*` haldab teenusepakkujate käivitamist, teisendamist, voogedastust, varuvalikuid ja kasutust
+- Ühine SSE- ja marsruutimistuumik kataloogides `src/sse/*` + `open-sse/*` haldab teenusepakkuja käivitamist, teisendamist, voogedastust, tõrkesiiret ja kasutust
 
 ## Viitediagrammid
 

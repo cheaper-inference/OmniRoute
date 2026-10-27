@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Nka Dịnụ
+## Ọrụ Ndị Dị Ugbu A
 
-OmniRoute na-ewepụta nka A2A 6 e jikọtara na `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Modul nka ọ bụla dị na `src/lib/a2a/skills/`.
+OmniRoute na-ekpughe ọrụ A2A 6 ndị e jikọrọ na `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Modul ọrụ ọ bụla bi na `src/lib/a2a/skills/`.
 
-| Nka                       | ID                   | Nkọwa                                                                                                                                                   | Mkpado                         | Ọmụmaatụ                                   |
-| :------------------------ | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------ | :----------------------------- | :----------------------------------------- |
-| Nhọrọ Ụzọ Amamihe         | `smart-routing`      | Na-eji injin ngwakọta + ntule OmniRoute eduzi ntụziaka site n'aka onye na-eweta ọrụ/ngwakọta kacha mma                                                  | ntụgharị ụzọ, ndị na-eweta ọrụ | "Jiri model kacha mma duzie ntụziaka a"    |
-| Njikwa Oke Ojiji          | `quota-management`   | Na-akọ ọnọdụ oke ojiji nke onye na-eweta ọrụ ọ bụla, ma na-enyere ndị na-akpọ ọrụ aka ikpebi mgbe ha ga-ebelata ọsọ/gbanwee                             | oke ojiji, ndị na-eweta ọrụ    | "Lelee oke ojiji maka anthropic"           |
-| Nchọpụta Ndị Na-eweta Ọrụ | `provider-discovery` | Na-edepụta ndị na-eweta ọrụ arụnyere, tinyere ikike ha, akara ọkwa n'efu, na ọnọdụ OAuth                                                                | ndị na-eweta ọrụ, nchọpụta     | "Olee ndị na-eweta ọrụ dịnụ?"              |
-| Ntụle Ọnụ Ahịa            | `cost-analysis`      | Na-eme atụmatụ ọnụ ahịa arịrịọ/mkparịta ụka dabere na katalọgụ + ojiji na-adịbeghị anya                                                                 | ọnụ ahịa, ojiji                | "Mee atụmatụ ọnụ ahịa mkparịta ụka a"      |
-| Akụkọ Ahụike              | `health-report`      | Na-achịkọta ọnọdụ circuit breaker, cooldown, na lockout maka onye na-eweta ọrụ ọ bụla                                                                   | ahụike, nguzogide nsogbu       | "Gosi ọnọdụ ahụike ndị na-eweta ọrụ niile" |
-| Depụta Ikike              | `list-capabilities`  | Na-eweghachi katalọgụ Agent Skills zuru ezu nwere ndenye 45 (API 23 + CLI 21 + config 1) dịka tebụl markdown nwere URL SKILL.md raw maka itinye context | katalọgụ, nchọpụta, nka        | "Depụta ikike OmniRoute niile"             |
+| Ọrụ                | ID                   | Nkọwa                                                                                                                                                             | Mkpado                     | Ọmụmaatụ                                 |
+| :----------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------- |
+| Smart Routing      | `smart-routing`      | Na-ebufe prompt site na provider/combo kacha mma site na iji combo engine nke OmniRoute + scoring                                                                 | routing, providers         | "Bufee prompt a site na model kacha mma" |
+| Quota Management   | `quota-management`   | Na-akọ ọnọdụ quota nke provider ọ bụla, na-enyere ndị na-akpọ aka ịkpebi mgbe ha ga-achịkwa ọsọ/gbanwee                                                           | quota, providers           | "Lelee quota maka anthropic"             |
+| Provider Discovery | `provider-discovery` | Na-edepụta providers arụnyere na ikike ha, flags free-tier, ọnọdụ OAuth                                                                                           | providers, discovery       | "Kedu providers ndị dị?"                 |
+| Cost Analysis      | `cost-analysis`      | Na-atụle ọnụ ego nke request/mkparịta ụka site na catalog + ojiji nke na-adịbeghị anya                                                                            | cost, usage                | "Tụlee ọnụ ego maka mkparịta ụka a"      |
+| Health Report      | `health-report`      | Na-akọkọta ọnọdụ circuit breaker, cooldown, na lockout nke provider ọ bụla                                                                                        | health, resilience         | "Gosi ọnọdụ ahụ ike nke providers niile" |
+| List Capabilities  | `list-capabilities`  | Na-alọghachi catalog Agent Skills zuru ezu nke ihe ndenye 45 (23 API + 21 CLI + 1 config) dị ka tebulu markdown nwere URL SKILL.md gburugburu maka ịtinye context | catalog, discovery, skills | "Depụta ikike OmniRoute niile"           |
 
-> E kwesịrị idobe Kaadị Agent ka ọ kwekọọ na katalọgụ ndị na-eweta ọrụ 376 dị ugbu a; a na-enweta ọnụ ọgụgụ ndị na-eweta ọrụ na metadata gbasara nke bụ n'efu/na-achọghị nyocha njirimara site na ndekọ runtime.
+> A ga-edebe Agent Card ka ọ kwekọrọ na catalog ndị provider 376 dị ugbu a; a na-enweta ọnụ ọgụgụ provider na metadata free/no-auth site na registry oge ọrụ.
 
-### Nkọwa Nka `list-capabilities`
+### Nkọwa Zuru Ezu nke Ọrụ `list-capabilities`
 
-Nka `list-capabilities` bara uru karịsịa nye agent ndị dị na mpụga chọrọ ịchọpụta ihe OmniRoute na-ewepụta tupu ha ezipụ oku API. Ọ na-eweghachi artifact tebụl markdown ahaziri nke ọma:
+Ọrụ `list-capabilities` bara nnukwu uru maka ndị agent mpụga chọrọ ịchọpụta ihe OmniRoute na-ekpughe tupu ha iziga API calls. Ọ na-alọghachi artifact tebulu markdown haziri ahazi:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ Nka `list-capabilities` bara uru karịsịa nye agent ndị dị na mpụga ch�
 ...
 ```
 
-Ahịrị ọ bụla nwere kọlụm `rawUrl` ka agent nwee ike iweta SKILL.md zuru ezu ozugbo. Field `metadata.totalSkills` na-egosipụta nha katalọgụ ahụ (45 ugbu a). Mmejuputa: `src/lib/a2a/skills/listCapabilities.ts`. Hụkwa [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Ahịrị ọ bụla gụnyere kọlụm `rawUrl` ka ndị agent wee nwee ike ibudata SKILL.md zuru ezu ozugbo. Ubi `metadata.totalSkills` na-egosipụta nha catalog (45 taa). Nhọpụta: `src/lib/a2a/skills/listCapabilities.ts`. Lee kwa [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

@@ -37,13 +37,13 @@ Ulinganisho wa vipengele bila upendeleo dhidi ya maruta maarufu ya AI ya chanzo 
 | **Usaidizi wa handaki (Cloudflared, Tailscale, Ngrok)** |                       ✅                       |           ❌            |        n/a         |        n/a        |
 | **Leseni**                                              |                      MIT                       |           MIT           | ya umiliki maalum  | ya umiliki maalum |
 
-## Wakati wa kuchagua OmniRoute
+## Lini kuchagua OmniRoute
 
-- Unajipangishia mwenyewe na unataka **ufikiaji mpana zaidi wa watoa huduma** (watoa huduma 376, vipengee 155 vya katalogi visivyolipishwa/visivyohitaji uthibitishaji)
-- Unahitaji **seva ya MCP iliyojengewa ndani** (zana za LLM, kumbukumbu na ujuzi vinavyotolewa kama zana)
-- Unahitaji **itifaki ya A2A** kwa mitiririko ya kazi kati ya mawakala
-- Unataka **ufichaji wa alama ya utambulisho** (JA3/JA4) ili kuepuka kutambuliwa na CAPTCHA za huduma za juu ya mtiririko
-- Unahitaji **vipengele vya kiwango cha biashara** (vizuizi vya usalama, tathmini, historia ya ukaguzi) bila bili ya SaaS
+- Unapoji-host mwenyewe na unataka **ufikiaji wa juu kabisa wa watoa huduma** (watoa huduma 376, viingizo 155 vya katalogi vya bure/bila uthibitishaji)
+- Unahitaji **seva ya MCP iliyojengwa ndani** (zana za LLM, kumbukumbu, na ujuzi vinavyotolewa kama zana)
+- Unahitaji **itifaki ya A2A** kwa mtiririko wa kazi kati ya mawakala
+- Unataka **usiri wa alama za vidole** (JA3/JA4) ili kuepuka kugunduliwa na CAPTCHA za ngazi ya juu
+- Unahitaji **vipengele vya kiwango cha biashara** (uardalini, tathmini, njia ya ukaguzi) bila bili ya SaaS
 
 ## Wakati wa kuchagua LiteLLM
 

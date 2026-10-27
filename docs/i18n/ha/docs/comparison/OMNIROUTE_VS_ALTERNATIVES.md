@@ -37,13 +37,13 @@ Kwatancen fasaloli cikin adalci da shahararrun mashiga AI na buɗaɗɗen tushe.
 | **Goyon bayan tunnel (Cloudflared, Tailscale, Ngrok)** |                     ✅                      |     ❌      |        n/a        |     n/a     |
 | **Lasisi**                                             |                     MIT                     |     MIT     |      mallaka      |   mallaka   |
 
-## Lokacin zaɓar OmniRoute
+## Yaushe ake zaɓar OmniRoute
 
-- Kana gudanar da shi a uwar garkenka kuma kana son **mafi faɗin tallafin masu samar da sabis** (masu samar da sabis 376, shigarwar kundin bayanai 155 na kyauta/maras buƙatar tantancewa)
-- Kana buƙatar **ginannen MCP server** (kayan aikin LLM, ma’adanar ƙwaƙwalwa, ƙwarewa da aka samar a matsayin kayan aiki)
-- Kana buƙatar **A2A protocol** don tsarin ayyukan wakili-zuwa-wakili
-- Kana son **ɓoye sawun yatsa** (JA3/JA4) don kauce wa ganowa ta hanyar CAPTCHA na sabis na sama
-- Kana buƙatar **fasalolin kamfanoni** (matakan kariya, kimantawa, tarihin binciken ayyuka) ba tare da kuɗin SaaS ba
+- Kuna yin masaukin baki da kanku (self-host) kuma kuna son **rufe masu samar da sabis mafi yawa** (masu samarwa 376, da abubuwan catalog 155 waɗanda ke kyauta/ba sa buƙatar tantancewa)
+- Kuna buƙatar **uwar garken MCP da aka gina a ciki** (kayan aikin LLM, ƙwaƙwalwar ajiya, da ƙwarewa waɗanda aka fallasa a matsayin kayan aiki)
+- Kuna buƙatar **yarjejeniyar A2A** don hanyoyin aiki tsakanin wakili da wakili
+- Kuna son **ɓoyar alamar hannu (fingerprint stealth)** (JA3/JA4) don guje wa gano daga CAPTCHAs na upstream
+- Kuna buƙatar **fasali na matakin manyan kamfanoni** (matakan tsaro, kimantawa, tarihin dubawa) ba tare da kuɗin SaaS ba
 
 ## Lokacin zaɓar LiteLLM
 

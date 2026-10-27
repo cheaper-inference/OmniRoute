@@ -484,15 +484,15 @@ Time se obrađuju:
 
 ## Konfiguracija
 
-`open-sse/config/` sadrži konfiguracijski sloj:
+`open-sse/config/` sadrži sloj konfiguracije:
 
-| Datoteka                      | Namjena                                                |
-| ----------------------------- | ------------------------------------------------------ |
-| `providerRegistry.ts`         | Registar modela za razgovor iz kataloga 376 pružatelja |
-| `providerModels.ts`           | Aliasi modela, mapiranje formata                       |
-| `constants.ts`                | Vremenska ograničenja, limiti, statusni kodovi         |
-| `defaultThinkingSignature.ts` | Zadani Claudeov potpis razmišljanja                    |
-| `modelStrip.ts` (u servisima) | Uklanjanje polja specifično za svakog pružatelja       |
+| Datoteka                      | Svrha                                                |
+| ----------------------------- | ---------------------------------------------------- |
+| `providerRegistry.ts`         | Registar chat modela nad katalogom od 376 pružatelja |
+| `providerModels.ts`           | Aliasi modela, mapiranje formata                     |
+| `constants.ts`                | Vremenska ograničenja, limiti, statusni kodovi       |
+| `defaultThinkingSignature.ts` | Zadani Claude potpis razmišljanja                    |
+| `modelStrip.ts` (u services)  | Uklanjanje polja po pružatelju                       |
 
 ### Shema registra pružatelja
 
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Zod provjera valjanosti pri učitavanju modula osigurava valjanost svih konfiguracija pružatelja.
+Zod validacija pri učitavanju modula osigurava da sve konfiguracije pružatelja budu valjane.
 
 ---
 

@@ -446,7 +446,7 @@ server/
 
 ## 4. `open-sse/` — ಸ್ಟ್ರೀಮಿಂಗ್ ಎಂಜಿನ್ ಕಾರ್ಯಸ್ಥಳ
 
-`@omniroute/open-sse` ಆಗಿ ಪ್ರಕಟಿಸಲಾದ ಪ್ರತ್ಯೇಕ npm ಕಾರ್ಯಸ್ಥಳ. ವಿನಂತಿ
+`@omniroute/open-sse` ಆಗಿ ಪ್ರಕಟಿಸಲಾದ ಪ್ರತ್ಯೇಕ npm ಕಾರ್ಯಸ್ಥಳ. ಇದು ವಿನಂತಿ
 ಸಂಸ್ಕರಣೆ, ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳು, ಅನುವಾದಕಗಳು, ಸೇವೆಗಳು, ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್ ಮತ್ತು MCP ಸರ್ವರ್ ಅನ್ನು ನಿರ್ವಹಿಸುತ್ತದೆ.
 
 ```
@@ -455,9 +455,9 @@ open-sse/
 ├── package.json            ಕಾರ್ಯಸ್ಥಳ ಮ್ಯಾನಿಫೆಸ್ಟ್
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 ಪೂರೈಕೆದಾರ ರಿಜಿಸ್ಟ್ರಿಗಳು, ಹೆಡರ್ ಪ್ರೊಫೈಲ್ಗಳು, ಗುರುತು, …
+├── config/                 ಪ್ರೊವೈಡರ್ ರಿಜಿಸ್ಟ್ರಿಗಳು, ಹೆಡರ್ ಪ್ರೊಫೈಲ್ಗಳು, ಗುರುತು, …
 ├── handlers/               ವಿನಂತಿ ಹ್ಯಾಂಡ್ಲರ್ಗಳು (ಚಾಟ್, ಎಂಬೆಡಿಂಗ್ಗಳು, ಆಡಿಯೊ, ಚಿತ್ರ, …)
-├── executors/              156 ಪೂರೈಕೆದಾರ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (ಎಕ್ಸಿಕ್ಯೂಟರ್ ಕ್ಲಾಸ್ಗಳು + ಪ್ರತಿ ಪೂರೈಕೆದಾರಕ್ಕೆ ಸಹಾಯಕಗಳು)
+├── executors/              156 ಪ್ರೊವೈಡರ್ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (ಎಕ್ಸಿಕ್ಯೂಟರ್ ಕ್ಲಾಸ್ಗಳು + ಪ್ರತಿ-ಪ್ರೊವೈಡರ್ ಸಹಾಯಕಗಳು)
 ├── translator/             ಸ್ವರೂಪ ಪರಿವರ್ತನೆ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions ಸ್ಟ್ರೀಮ್ ಟ್ರಾನ್ಸ್ಫಾರ್ಮರ್
 ├── services/               80+ ಸೇವಾ ಮಾಡ್ಯೂಲ್ಗಳು (ಕಾಂಬೊಗಳು, ಫಾಲ್ಬ್ಯಾಕ್, ಕೋಟಾಗಳು, ಗುರುತು, …)
@@ -472,25 +472,25 @@ open-sse/
 | `chatCore.ts`           | ಮುಖ್ಯ ಚಾಟ್ ಪೈಪ್ಲೈನ್ (ಕ್ಯಾಶ್, ದರ ಮಿತಿ, ಕಾಂಬೊ ರೂಟಿಂಗ್, ಎಕ್ಸಿಕ್ಯೂಟರ್ ಡಿಸ್ಪ್ಯಾಚ್) |
 | `responsesHandler.ts`   | OpenAI Responses API ಪ್ರವೇಶ ಬಿಂದು                                             |
 | `embeddings.ts`         | ಎಂಬೆಡಿಂಗ್ಗಳು                                                                  |
-| `imageGeneration.ts`    | ಚಿತ್ರ ರಚನೆ                                                                    |
-| `audioSpeech.ts`        | ಪಠ್ಯದಿಂದ ಧ್ವನಿಗೆ                                                              |
-| `audioTranscription.ts` | ಧ್ವನಿಯಿಂದ ಪಠ್ಯಕ್ಕೆ                                                            |
-| `videoGeneration.ts`    | ವೀಡಿಯೊ ರಚನೆ                                                                   |
-| `musicGeneration.ts`    | ಸಂಗೀತ ರಚನೆ                                                                    |
+| `imageGeneration.ts`    | ಚಿತ್ರ ಉತ್ಪಾದನೆ                                                                |
+| `audioSpeech.ts`        | ಪಠ್ಯದಿಂದ-ಧ್ವನಿಗೆ                                                              |
+| `audioTranscription.ts` | ಧ್ವನಿಯಿಂದ-ಪಠ್ಯಕ್ಕೆ                                                            |
+| `videoGeneration.ts`    | ವೀಡಿಯೊ ಉತ್ಪಾದನೆ                                                               |
+| `musicGeneration.ts`    | ಸಂಗೀತ ಉತ್ಪಾದನೆ                                                                |
 | `rerank.ts`             | ಮರುಶ್ರೇಯಾಂಕ                                                                   |
 | `moderations.ts`        | ಮಾಡರೇಷನ್                                                                      |
 | `search.ts`             | ವೆಬ್ ಹುಡುಕಾಟ                                                                  |
 | `sseParser.ts`          | SSE ಈವೆಂಟ್ ಪಾರ್ಸರ್                                                            |
-| `usageExtractor.ts`     | ಅಪ್ಸ್ಟ್ರೀಮ್ ಸ್ಟ್ರೀಮ್ಗಳಿಂದ ಟೋಕನ್ ಎಣಿಕೆಗಳನ್ನು ಹೊರತೆಗೆಯುತ್ತದೆ                    |
-| `responseSanitizer.ts`  | ಪೂರೈಕೆದಾರ-ನಿರ್ದಿಷ್ಟ ಅನಗತ್ಯ ಅಂಶಗಳನ್ನು ತೆಗೆದುಹಾಕುತ್ತದೆ                          |
-| `responseTranslator.ts` | ಪೂರೈಕೆದಾರ ಪ್ರತಿಕ್ರಿಯೆ ಮತ್ತು ಅನುವಾದಕ ಪದರದ ನಡುವಿನ ಸಂಪರ್ಕ                        |
+| `usageExtractor.ts`     | ಅಪ್ಸ್ಟ್ರೀಮ್ ಸ್ಟ್ರೀಮ್ಗಳಿಂದ ಟೋಕನ್ ಎಣಿಕೆಗಳನ್ನು ಹೊರತೆಗೆಯುವುದು                     |
+| `responseSanitizer.ts`  | ಪ್ರೊವೈಡರ್-ನಿರ್ದಿಷ್ಟ ಅನಗತ್ಯ ಮಾಹಿತಿಯನ್ನು ತೆಗೆದುಹಾಕುವುದು                         |
+| `responseTranslator.ts` | ಪ್ರೊವೈಡರ್ ಪ್ರತಿಕ್ರಿಯೆ ಮತ್ತು ಅನುವಾದಕ ಲೇಯರ್ ನಡುವಿನ ಸಂಯೋಜಕ                       |
 
 ### 4.2 `open-sse/executors/`
 
-156 ಉನ್ನತ-ಮಟ್ಟದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts` ನಿಂದ `base.ts`, `index.ts` ಮತ್ತು ಪರೀಕ್ಷೆಗಳನ್ನು ಹೊರತುಪಡಿಸಿ — ಈ ಎಣಿಕೆಯನ್ನು
+156 ಉನ್ನತ-ಹಂತದ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮಾಡ್ಯೂಲ್ಗಳು (`*.ts` ಇಂದ `base.ts`, `index.ts` ಮತ್ತು ಪರೀಕ್ಷೆಗಳನ್ನು ಹೊರತುಪಡಿಸಿ — ಈ ಸಂಖ್ಯೆಯನ್ನು
 `npm run check:docs-counts` ಅಳೆಯುತ್ತದೆ). ಪ್ರತಿಯೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಕ್ಲಾಸ್ `BaseExecutor` (`base.ts`) ಅನ್ನು,
-ನೇರವಾಗಿ ಅಥವಾ `DefaultExecutor` ಅಥವಾ ಮತ್ತೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮೂಲಕ ವಿಸ್ತರಿಸುತ್ತದೆ; ಉಳಿದ ಮಾಡ್ಯೂಲ್ಗಳು ಪ್ರತಿ ಪೂರೈಕೆದಾರಕ್ಕೆ
-ಸಹಾಯಕಗಳಾಗಿವೆ (ಟೂಲ್ ಸ್ಕೀಮಾಗಳು, ಫೆಚ್/TTS ಅಡಾಪ್ಟರ್ಗಳು, ವಿಶಿಷ್ಟ ವರ್ತನೆಗಳ ಹ್ಯಾಂಡ್ಲರ್ಗಳು). ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳಲ್ಲಿ ಇವು ಸೇರಿವೆ:
+ನೇರವಾಗಿ ಅಥವಾ `DefaultExecutor` ಅಥವಾ ಇನ್ನೊಂದು ಎಕ್ಸಿಕ್ಯೂಟರ್ ಮೂಲಕ ವಿಸ್ತರಿಸುತ್ತದೆ; ಉಳಿದ ಮಾಡ್ಯೂಲ್ಗಳು ಪ್ರತಿ-ಪ್ರೊವೈಡರ್
+ಸಹಾಯಕಗಳಾಗಿವೆ (ಟೂಲ್ ಸ್ಕೀಮಾಗಳು, ಫೆಚ್/TTS ಅಡಾಪ್ಟರ್ಗಳು, ವಿಶಿಷ್ಟ ವರ್ತನೆ ಹ್ಯಾಂಡ್ಲರ್ಗಳು). ಎಕ್ಸಿಕ್ಯೂಟರ್ಗಳಲ್ಲಿ ಇವು ಸೇರಿವೆ:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
@@ -498,13 +498,13 @@ open-sse/
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, ಜೊತೆಗೆ `claudeIdentity.ts`
 (ಹಂಚಿಕೆಯ ಗುರುತು ಸಹಾಯಕ) ಮತ್ತು `index.ts` (ರಿಜಿಸ್ಟ್ರಿ).
 
-> ಗಮನಿಸಿ: ಇಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡದ ಪೂರೈಕೆದಾರಗಳಿಗೆ ಸಾಮಾನ್ಯ
-> OpenAI-ಹೊಂದಾಣಿಕೆಯ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಬಳಸುವ `default.ts` ಸೇವೆ ಒದಗಿಸುತ್ತದೆ. ಸಂಪೂರ್ಣ ಪೂರೈಕೆದಾರ ಕ್ಯಾಟಲಾಗ್ (376 ಪೂರೈಕೆದಾರರು)
+> ಗಮನಿಸಿ: ಇಲ್ಲಿ ಪಟ್ಟಿ ಮಾಡದ ಪ್ರೊವೈಡರ್ಗಳನ್ನು ಸಾರ್ವತ್ರಿಕ
+> OpenAI-ಹೊಂದಾಣಿಕೆಯ ಎಕ್ಸಿಕ್ಯೂಟರ್ ಬಳಸುವ `default.ts` ಒದಗಿಸುತ್ತದೆ. ಸಂಪೂರ್ಣ ಪ್ರೊವೈಡರ್ ಕ್ಯಾಟಲಾಗ್ (376 ಪ್ರೊವೈಡರ್ಗಳು)
 > `src/shared/constants/providers.ts` ನಲ್ಲಿ ಇದೆ.
 
 ### 4.3 `open-sse/translator/`
 
-ಹಬ್-ಮತ್ತು-ಸ್ಪೋಕ್ ಅನುವಾದ (OpenAI ಹಬ್ ಆಗಿದೆ).
+ಹಬ್-ಅಂಡ್-ಸ್ಪೋಕ್ ಅನುವಾದ (OpenAI ಹಬ್ ಆಗಿದೆ).
 
 - **9 ವಿನಂತಿ ಅನುವಾದಕಗಳು** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -519,7 +519,7 @@ open-sse/
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, ಜೊತೆಗೆ
   ಸಹಾಯಕ ಪರೀಕ್ಷೆಗಳು.
 - **ಚಿತ್ರ ಸಹಾಯಕಗಳು** (`translator/image/sizeMapper.ts`).
-- ಉನ್ನತ-ಮಟ್ಟದಲ್ಲಿ: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- ಉನ್ನತ-ಹಂತ: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
@@ -528,7 +528,7 @@ open-sse/
 
 ### 4.5 `open-sse/services/`
 
-ಪ್ರಮುಖಾಂಶಗಳು (ಸಂಪೂರ್ಣ ಪಟ್ಟಿ `open-sse/services/` ಅಡಿಯಲ್ಲಿ):
+ಮುಖ್ಯಾಂಶಗಳು (`open-sse/services/` ಅಡಿಯಲ್ಲಿ ಸಂಪೂರ್ಣ ಪಟ್ಟಿ):
 
 | ಕಾಳಜಿ                | ಫೈಲ್ಗಳು                                                                                                                                                                                                                                                  |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -539,7 +539,7 @@ open-sse/
 | ಕ್ಯಾಶಿಂಗ್            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | ರೂಟಿಂಗ್ ಬುದ್ಧಿಮತ್ತೆ  | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | ಮಾದರಿ ನಿರ್ವಹಣೆ       | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| ಸಂಕುಚನ               | `compression/` — ಸಂಪೂರ್ಣ ಸಂಕುಚನ ಎಂಜಿನ್ ವೈರಿಂಗ್                                                                                                                                                                                                           |
+| ಸಂಕುಚನ               | `compression/` — ಸಂಪೂರ್ಣ ಸಂಕುಚನ ಎಂಜಿನ್ನ ವೈರಿಂಗ್                                                                                                                                                                                                          |
 | ಟೋಕನ್ + ಸೆಷನ್        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | ಟಿಯರ್ / ಮ್ಯಾನಿಫೆಸ್ಟ್ | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / ನೆಟ್ವರ್ಕ್       | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
@@ -548,12 +548,12 @@ open-sse/
 
 ### 4.6 `open-sse/mcp-server/`
 
-- `server.ts` ನಲ್ಲಿ ವೈರ್ ಮಾಡಲಾದ **110 ಅನನ್ಯ ಪರಿಕರಗಳು** (`schemas/tools.ts` ನಲ್ಲಿ 45 ಕ್ಯಾನಾನಿಕಲ್ +
+- `server.ts`ನಲ್ಲಿ **110 ಅನನ್ಯ ಪರಿಕರಗಳನ್ನು** ಜೋಡಿಸಲಾಗಿದೆ (`schemas/tools.ts`ನಲ್ಲಿ 45 ಪ್ರಮಾಣಿತ ಪರಿಕರಗಳು +
   ಮೆಮೊರಿ, ಕೌಶಲ್ಯಗಳು, GitHub-ಕೌಶಲ್ಯಗಳು, ಪೂಲ್, ಗೇಮಿಫಿಕೇಶನ್, ಪ್ಲಗಿನ್, Notion, Obsidian,
-  ಸ್ಥಳೀಯ-ಕಾರ್ಪಸ್ ಮತ್ತು ಸಂಕುಚನ ಮಾಡ್ಯೂಲ್ಗಳು — ಯೂನಿಯನ್ ಅನ್ನು `countUniqueMcpTools` ಮೂಲಕ ಎಣಿಸಲಾಗಿದೆ).
-- **3 ಸಾರಿಗೆ ವಿಧಾನಗಳು**: stdio, HTTP Streamable, SSE.
-- ರನ್ಟೈಮ್ನಲ್ಲಿ **33 ಸ್ಕೋಪ್ಗಳನ್ನು** ಜಾರಿಗೊಳಿಸಲಾಗಿದೆ — ಮೂಲ ಪಟ್ಟಿ `src/shared/constants/mcpScopes.ts` ನಲ್ಲಿದೆ; ಸಂಪೂರ್ಣ ಸೆಟ್ ಪ್ರತಿ ಪರಿಕರ ಮಾಡ್ಯೂಲ್ ಘೋಷಿಸಿದ ಸ್ಕೋಪ್ಗಳ ಯೂನಿಯನ್ ಆಗಿದೆ.
-- ಆಡಿಟ್ ಟೇಬಲ್: `mcp_tool_audit` (`audit.ts` ಮೂಲಕ ಭರ್ತಿ ಮಾಡಲಾಗುತ್ತದೆ).
+  ಸ್ಥಳೀಯ-ಕಾರ್ಪಸ್ ಮತ್ತು ಸಂಕುಚನ ಮಾಡ್ಯೂಲ್ಗಳು — ಒಕ್ಕೂಟವನ್ನು `countUniqueMcpTools` ಮೂಲಕ ಎಣಿಸಲಾಗಿದೆ).
+- **3 ಸಾರಿಗೆಗಳು**: stdio, HTTP Streamable, SSE.
+- ರನ್ಟೈಮ್ನಲ್ಲಿ **33 ಸ್ಕೋಪ್ಗಳನ್ನು** ಜಾರಿಗೊಳಿಸಲಾಗಿದೆ — ಮೂಲ ಪಟ್ಟಿ `src/shared/constants/mcpScopes.ts`ನಲ್ಲಿದೆ; ಸಂಪೂರ್ಣ ಸೆಟ್ ಪ್ರತಿ ಪರಿಕರ ಮಾಡ್ಯೂಲ್ ಘೋಷಿಸಿರುವ ಸ್ಕೋಪ್ಗಳ ಒಕ್ಕೂಟವಾಗಿದೆ.
+- ಆಡಿಟ್ ಕೋಷ್ಟಕ: `mcp_tool_audit` (`audit.ts` ಮೂಲಕ ಭರ್ತಿ ಮಾಡಲಾಗಿದೆ).
 - ಫೈಲ್ಗಳು: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
@@ -562,14 +562,14 @@ open-sse/
 
 ### 4.7 `open-sse/config/`
 
-ಪ್ರೊವೈಡರ್ ರಿಜಿಸ್ಟ್ರಿಗಳು (`providerRegistry.ts`, `providerModels.ts`,
-`providerHeaderProfiles.ts`), ಪ್ರತಿ-ಫಾರ್ಮ್ಯಾಟ್ ಮಾದರಿ ರಿಜಿಸ್ಟ್ರಿಗಳು (`audioRegistry.ts`,
+ಪೂರೈಕೆದಾರರ ರಿಜಿಸ್ಟ್ರಿಗಳು (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), ಪ್ರತಿ-ಸ್ವರೂಪದ ಮಾದರಿ ರಿಜಿಸ್ಟ್ರಿಗಳು (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-ಗುರುತು ಸಹಾಯಕಗಳು (`codexIdentity.ts`, `codexInstructions.ts`,
+ಗುರುತಿನ ಸಹಾಯಕಗಳು (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-ಕ್ರೆಡೆನ್ಶಿಯಲ್ ಸಹಾಯಕಗಳು (`credentialLoader.ts`, `codexClient.ts`), ಮತ್ತು ಕ್ಲೌಡ್
+ರುಜುವಾತು ಸಹಾಯಕಗಳು (`credentialLoader.ts`, `codexClient.ts`) ಮತ್ತು ಕ್ಲೌಡ್
 ಅಡಾಪ್ಟರ್ಗಳು (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).

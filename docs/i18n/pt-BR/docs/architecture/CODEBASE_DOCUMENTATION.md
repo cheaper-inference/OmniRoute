@@ -461,7 +461,7 @@ open-sse/
 ├── translator/             Conversão de formatos (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Transformador de stream da Responses API ↔ Chat Completions
 ├── services/               Mais de 80 módulos de serviço (combinações, fallback, cotas, identidade, …)
-├── utils/                  Auxiliares de streaming, cliente TLS, AWS SigV4, busca por proxy, …
+├── utils/                  Auxiliares de streaming, cliente TLS, AWS SigV4, busca via proxy, …
 └── mcp-server/             Servidor MCP (3 transportes, 33 escopos, 110 ferramentas)
 ```
 
@@ -473,11 +473,11 @@ open-sse/
 | `responsesHandler.ts`   | Ponto de entrada da OpenAI Responses API                                                              |
 | `embeddings.ts`         | Embeddings                                                                                            |
 | `imageGeneration.ts`    | Geração de imagens                                                                                    |
-| `audioSpeech.ts`        | Conversão de texto em fala                                                                            |
-| `audioTranscription.ts` | Conversão de fala em texto                                                                            |
+| `audioSpeech.ts`        | Texto para fala                                                                                       |
+| `audioTranscription.ts` | Fala para texto                                                                                       |
 | `videoGeneration.ts`    | Geração de vídeos                                                                                     |
-| `musicGeneration.ts`    | Geração de músicas                                                                                    |
-| `rerank.ts`             | Reordenação                                                                                           |
+| `musicGeneration.ts`    | Geração de música                                                                                     |
+| `rerank.ts`             | Reclassificação                                                                                       |
 | `moderations.ts`        | Moderação                                                                                             |
 | `search.ts`             | Pesquisa na web                                                                                       |
 | `sseParser.ts`          | Analisador de eventos SSE                                                                             |
@@ -488,9 +488,9 @@ open-sse/
 ### 4.2 `open-sse/executors/`
 
 156 módulos executores de nível superior (`*.ts` menos `base.ts`, `index.ts` e testes — a contagem
-é medida por `npm run check:docs-counts`). Cada classe de executor estende `BaseExecutor` (`base.ts`),
+é medida por `npm run check:docs-counts`). Toda classe de executor estende `BaseExecutor` (`base.ts`),
 diretamente ou por meio de `DefaultExecutor` ou de outro executor; os módulos restantes são auxiliares
-por provedor (esquemas de ferramentas, adaptadores de busca/TTS, manipuladores de particularidades). Os executores incluem:
+específicos de cada provedor (esquemas de ferramentas, adaptadores de busca/TTS e manipuladores de peculiaridades). Os executores incluem:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
@@ -499,12 +499,12 @@ por provedor (esquemas de ferramentas, adaptadores de busca/TTS, manipuladores d
 (auxiliar de identidade compartilhado) e `index.ts` (registro).
 
 > Observação: os provedores não listados aqui são atendidos por `default.ts` usando o executor
-> genérico compatível com OpenAI. O catálogo completo de provedores (376 provedores) está em
+> genérico compatível com a OpenAI. O catálogo completo de provedores (376 provedores) fica em
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Tradução hub-and-spoke (OpenAI é o hub).
+Tradução no modelo hub-and-spoke (a OpenAI é o hub).
 
 - **9 tradutores de requisições** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -516,15 +516,15 @@ Tradução hub-and-spoke (OpenAI é o hub).
   `openai-to-claude`.
 - **9 auxiliares** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, além de
-  testes dos auxiliares.
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, além
+  de testes dos auxiliares.
 - **Auxiliares de imagem** (`translator/image/sizeMapper.ts`).
 - Nível superior: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — Conversor baseado em `TransformStream` entre a Responses API e Chat
-  Completions (usado pela rota curinga `responses/`).
+- `responsesTransformer.ts` — Conversor da Responses API ↔ Chat Completions baseado em
+  `TransformStream` (usado pelo catch-all da rota `responses/`).
 
 ### 4.5 `open-sse/services/`
 
@@ -549,10 +549,10 @@ Destaques (lista completa em `open-sse/services/`):
 ### 4.6 `open-sse/mcp-server/`
 
 - **110 ferramentas exclusivas** integradas em `server.ts` (45 canônicas em `schemas/tools.ts` +
-  módulos de memória, habilidades, habilidades do GitHub, pool, gamificação, plugin, Notion, Obsidian,
+  módulos de memória, habilidades, habilidades do GitHub, pool, gamificação, plugins, Notion, Obsidian,
   corpus local e compressão — união contabilizada por `countUniqueMcpTools`).
 - **3 transportes**: stdio, HTTP Streamable, SSE.
-- **33 escopos** aplicados em tempo de execução — lista base em `src/shared/constants/mcpScopes.ts`; o conjunto completo é a união dos escopos declarados por cada módulo de ferramenta.
+- **33 escopos** aplicados em tempo de execução — lista-base em `src/shared/constants/mcpScopes.ts`; o conjunto completo é a união dos escopos declarados por cada módulo de ferramenta.
 - Tabela de auditoria: `mcp_tool_audit` (preenchida por `audit.ts`).
 - Arquivos: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,

@@ -484,17 +484,17 @@ Wannan yana sarrafa:
 
 ## Kanfigareshan
 
-`open-sse/config/` yana ɗauke da ɓangaren kanfigareshan:
+`open-sse/config/` tana riƙe da matakin kanfigareshan:
 
-| Fayil                         | Manufa                                              |
-| ----------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`         | Rijistar samfurin-taɗi bisa kundin masu samarwa 376 |
-| `providerModels.ts`           | Laƙaban samfura, daidaita tsari                     |
-| `constants.ts`                | Lokutan ƙarewa, iyakoki, lambobin matsayi           |
-| `defaultThinkingSignature.ts` | Tsohuwar sa hannun tunani ta Claude                 |
-| `modelStrip.ts` (a services)  | Cire filaye bisa ga kowane mai samarwa              |
+| Fayil                              | Manufa                                                  |
+| ---------------------------------- | ------------------------------------------------------- |
+| `providerRegistry.ts`              | Rajistar samfuran chat bisa katalog na masu samarwa 376 |
+| `providerModels.ts`                | Laƙabin samfurai, taswirar tsari                        |
+| `constants.ts`                     | Lokutan ƙarewa, iyakoki, lambobin matsayi               |
+| `defaultThinkingSignature.ts`      | Sa hannun tunani na Claude na tsoho                     |
+| `modelStrip.ts` (a cikin services) | Cire filayen kowane mai samarwa                         |
 
-### Tsarin Rijistar Mai Samarwa
+### Tsarin Rajistar Masu Samarwa
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Tabbatarwar Zod yayin loda module tana tabbatar da cewa duk kanfigareshan masu samarwa suna da inganci.
+Tabbatarwar Zod a lokacin lodin module tana tabbatar da cewa dukkan saitunan masu samarwa suna da inganci.
 
 ---
 

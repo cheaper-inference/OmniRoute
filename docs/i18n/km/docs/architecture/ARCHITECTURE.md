@@ -10,17 +10,17 @@ _បានធ្វើបច្ចុប្បន្នភាពចុងក្�
 
 ## សេចក្តីសង្ខេបសម្រាប់ថ្នាក់ដឹកនាំ
 
-OmniRoute គឺជា gateway កំណត់ផ្លូវ AI មូលដ្ឋាន និង dashboard ដែលបានបង្កើតឡើងលើ Next.js។
-វាផ្តល់នូវ endpoint តែមួយដែលឆបគ្នាជាមួយ OpenAI (`/v1/*`) និងកំណត់ផ្លូវ traffic ឆ្លងកាត់ upstream providers ជាច្រើន ដោយមានការបកប្រែ fallback ការធ្វើឱ្យ token ស្រស់ឡើងវិញ និងការតាមដានការប្រើប្រាស់។
+OmniRoute គឺជា gateway សម្រាប់បញ្ជូនផ្លូវ AI មូលដ្ឋាន និង dashboard ដែលត្រូវបានបង្កើតឡើងលើ Next.js។
+វាផ្តល់ endpoint តែមួយដែលឆបគ្នាជាមួយ OpenAI (`/v1/*`) និងបញ្ជូនចរាចរណ៍ឆ្លងកាត់ upstream providers ជាច្រើន ដោយមានការបម្លែងទ្រង់ទ្រាយ ការបម្រុងទុក ការធ្វើឱ្យ token ស្រស់ឡើងវិញ និងការតាមដានការប្រើប្រាស់។
 
 សមត្ថភាពស្នូល៖
 
 - ផ្ទៃ API ដែលឆបគ្នាជាមួយ OpenAI សម្រាប់ CLI/tools (376 providers, 156 executor modules)
-- ការបកប្រែ request/response រវាងទម្រង់របស់ provider
-- Model combo fallback (លំដាប់ multi-model)
-- ជំហាន combo ដែលមានរចនាសម្ព័ន្ធ (`provider + model + connection`) ជាមួយការតម្រៀប runtime តាម `compositeTiers`
-- Fallback កម្រិត account (multi-account ក្នុង provider នីមួយៗ)
-- ការត្រួតពិនិត្យ quota ជាមុន និងការជ្រើសរើស account តាម P2C ដែលគិតគូរពី quota នៅក្នុង chat path ចម្បង
+- ការបម្លែង request/response រវាងទ្រង់ទ្រាយរបស់ provider ផ្សេងៗ
+- ការបម្រុងទុកដោយប្រើ model combo (លំដាប់ multi-model)
+- ជំហាន combo ដែលមានរចនាសម្ព័ន្ធ (`provider + model + connection`) ជាមួយការរៀបលំដាប់ពេលដំណើរការដោយ `compositeTiers`
+- ការបម្រុងទុកនៅកម្រិត account (account ច្រើនសម្រាប់ provider នីមួយៗ)
+- ការត្រួតពិនិត្យ quota ជាមុន និងការជ្រើសរើស account តាម P2C ដែលគិតគូរពី quota នៅក្នុងផ្លូវ chat ចម្បង
 - ការគ្រប់គ្រងការតភ្ជាប់ provider តាម OAuth + API key (27 OAuth provider modules)
 - ការបង្កើត embedding តាមរយៈ `/v1/embeddings` (18 providers)
 - ការបង្កើតរូបភាពតាមរយៈ `/v1/images/generations` (10+ providers, 20+ models)
@@ -28,59 +28,59 @@ OmniRoute គឺជា gateway កំណត់ផ្លូវ AI មូលដ្
 - ការបម្លែងអត្ថបទទៅជាសំឡេងតាមរយៈ `/v1/audio/speech` (24 built-in providers)
 - ការបង្កើតវីដេអូតាមរយៈ `/v1/videos/generations` (ComfyUI + SD WebUI)
 - ការបង្កើតតន្ត្រីតាមរយៈ `/v1/music/generations` (ComfyUI)
-- ការស្វែងរកតាម Web តាមរយៈ `/v1/search` (20 providers)
-- ការត្រួតពិនិត្យមាតិកាតាមរយៈ `/v1/moderations`
+- ការស្វែងរកលើបណ្ដាញតាមរយៈ `/v1/search` (20 providers)
+- ការត្រួតពិនិត្យខ្លឹមសារតាមរយៈ `/v1/moderations`
 - ការរៀបចំណាត់ថ្នាក់ឡើងវិញតាមរយៈ `/v1/rerank`
 - ការញែក think tag (`<think>...</think>`) សម្រាប់ reasoning models
-- ការសម្អាត response សម្រាប់ភាពឆបគ្នាយ៉ាងតឹងរ៉ឹងជាមួយ OpenAI SDK
-- ការធ្វើ normalization លើ role (developer→system, system→user) សម្រាប់ភាពឆបគ្នាឆ្លងកាត់ provider
+- ការសម្អាត response ដើម្បីឱ្យឆបគ្នាយ៉ាងតឹងរ៉ឹងជាមួយ OpenAI SDK
+- ការធ្វើឱ្យ role មានស្តង់ដារ (developer→system, system→user) ដើម្បីឱ្យឆបគ្នារវាង providers
 - ការបម្លែង structured output (json_schema → Gemini responseSchema)
-- ការរក្សាទុកមូលដ្ឋានសម្រាប់ providers, keys, aliases, combos, settings, pricing (122 DB modules)
-- ការតាមដានការប្រើប្រាស់/ថ្លៃចំណាយ និងការកត់ត្រា request
-- Cloud sync ជាជម្រើសសម្រាប់ការធ្វើសមកាលកម្ម multi-device/state
-- បញ្ជី IP ដែលអនុញ្ញាត/រារាំង សម្រាប់ការគ្រប់គ្រងសិទ្ធិចូលប្រើ API
+- ការរក្សាទុកទិន្នន័យក្នុងមូលដ្ឋានសម្រាប់ providers, keys, aliases, combos, settings និង pricing (122 DB modules)
+- ការតាមដានការប្រើប្រាស់/ការចំណាយ និងការកត់ត្រា request
+- ជម្រើស cloud sync សម្រាប់ធ្វើសមកាលកម្មឧបករណ៍ច្រើន/ស្ថានភាព
+- បញ្ជី IP ដែលអនុញ្ញាត/ទប់ស្កាត់ សម្រាប់ការគ្រប់គ្រងសិទ្ធិចូលប្រើ API
 - ការគ្រប់គ្រង thinking budget (passthrough/auto/custom/adaptive)
 - ការបញ្ចូល global system prompt
-- ការតាមដាន session និង fingerprinting
-- ការកំណត់អត្រាប្រើប្រាស់កម្រិតខ្ពស់តាម account នីមួយៗ ជាមួយ profile ជាក់លាក់របស់ provider
+- ការតាមដាន session និងការកំណត់ fingerprint
+- ការកំណត់កម្រិតអត្រាដែលប្រសើរឡើងតាម account នីមួយៗ ជាមួយ profile ជាក់លាក់តាម provider
 - លំនាំ circuit breaker សម្រាប់ភាពធន់របស់ provider
-- ការការពារ anti-thundering herd ជាមួយ mutex locking
-- Cache សម្រាប់ការលុប request ស្ទួនដោយផ្អែកលើ signature
-- Domain layer៖ cost rules, fallback policy, lockout policy
-- Context Relay៖ សេចក្តីសង្ខេបសម្រាប់ផ្ទេរ session ដើម្បីរក្សាភាពបន្តនៅពេលប្តូរ account
-- ការរក្សាទុក domain state (SQLite write-through cache សម្រាប់ fallbacks, budgets, lockouts, circuit breakers)
-- Policy engine សម្រាប់ការវាយតម្លៃ request ជាកណ្តាល (lockout → budget → fallback)
-- Telemetry របស់ request ជាមួយការបូកសរុប latency p50/p95/p99
-- Telemetry របស់ combo target និងសុខភាព combo target តាមប្រវត្តិ តាមរយៈ `combo_execution_key` / `combo_step_id`
+- ការការពារបាតុភូត anti-thundering herd ដោយប្រើ mutex locking
+- cache សម្រាប់លុប request ស្ទួនដោយផ្អែកលើ signature
+- ស្រទាប់ domain៖ ច្បាប់ចំណាយ គោលការណ៍ fallback និងគោលការណ៍ lockout
+- Context Relay៖ សេចក្តីសង្ខេបសម្រាប់ផ្ទេរ session ដើម្បីរក្សាភាពបន្តនៅពេលប្ដូរ account
+- ការរក្សាទុកស្ថានភាព domain (SQLite write-through cache សម្រាប់ fallbacks, budgets, lockouts និង circuit breakers)
+- policy engine សម្រាប់វាយតម្លៃ request ជាកណ្តាល (lockout → budget → fallback)
+- telemetry របស់ request ជាមួយការប្រមូលផ្តុំ latency p50/p95/p99
+- telemetry របស់ combo target និងសុខភាព combo target ជាប្រវត្តិសាស្ត្រ តាមរយៈ `combo_execution_key` / `combo_step_id`
 - Correlation ID (X-Request-Id) សម្រាប់ការតាមដានពីដើមដល់ចប់
-- ការកត់ត្រាសវនកម្មសម្រាប់អនុលោមភាព ជាមួយជម្រើសមិនចូលរួមតាម API key នីមួយៗ
-- Eval framework សម្រាប់ការធានាគុណភាព LLM
-- Health dashboard ជាមួយស្ថានភាព circuit breaker របស់ provider ក្នុងពេលជាក់ស្តែង
+- ការកត់ត្រាសវនកម្មអនុលោមភាព ជាមួយជម្រើសដកខ្លួនតាម API key នីមួយៗ
+- eval framework សម្រាប់ការធានាគុណភាព LLM
+- health dashboard ជាមួយស្ថានភាព circuit breaker របស់ provider តាមពេលវេលាជាក់ស្តែង
 - MCP Server (110 tools) ជាមួយ 3 transports (stdio/SSE/Streamable HTTP)
 - A2A Server (JSON-RPC 2.0 + SSE) ជាមួយ skills និងវដ្តជីវិត task
-- ប្រព័ន្ធ memory (extraction, injection, retrieval, summarization)
-- ប្រព័ន្ធ skills (registry, executor, sandbox, built-in skills)
+- ប្រព័ន្ធ memory (ការស្រង់ ការបញ្ចូល ការទាញយក និងការសង្ខេប)
+- ប្រព័ន្ធ skills (registry, executor, sandbox និង built-in skills)
 - MITM proxy ជាមួយការគ្រប់គ្រង certificate និងការដោះស្រាយ DNS
-- Middleware ការពារ prompt injection
-- Pipeline បង្រួម prompt ជាមួយ Caveman, RTK, stacked pipelines, compression combos, language packs និង analytics
-- Registry របស់ ACP (Agent Communication Protocol)
-- Modular OAuth providers (22 individual modules ក្រោម `src/lib/oauth/providers/`)
-- Scripts សម្រាប់ uninstall/full-uninstall
-- Action សម្រាប់ជួសជុល OAuth environment
-- WebSocket bridge សម្រាប់ WS clients ដែលឆបគ្នាជាមួយ OpenAI (`/v1/ws`)
-- ការគ្រប់គ្រង sync token (issue/revoke, ការទាញយក config bundle ដែលមានកំណែតាម ETag)
-- GLM Thinking (`glmt`) ជា provider preset ថ្នាក់ទីមួយ
-- ការរាប់ token បែប hybrid (provider-side `/messages/count_tokens` ជាមួយ estimation fallback)
-- ការបង្កើត model alias ដោយស្វ័យប្រវត្តិជាមុន (30+ cross-proxy dialect normalizations នៅពេលចាប់ផ្តើម)
-- Outbound fetch ដែលមានសុវត្ថិភាព ជាមួយ SSRF guard ការរារាំង private URL និង retry ដែលអាចកំណត់បាន
-- Chat retries ដែលគិតគូរពី cooldown ជាមួយ `requestRetry` និង `maxRetryIntervalSec` ដែលអាចកំណត់បាន
-- ការផ្ទៀងផ្ទាត់ runtime environment ជាមួយ Zod នៅពេលចាប់ផ្តើម
-- Compliance audit v2 ជាមួយ pagination, provider CRUD events និងការកត់ត្រា validation ដែលត្រូវបានរារាំងដោយ SSRF
+- middleware ការពារ prompt injection
+- pipeline បង្ហាប់ prompt ជាមួយ Caveman, RTK, stacked pipelines, compression combos, language packs និង analytics
+- registry របស់ ACP (Agent Communication Protocol)
+- OAuth providers បែប modular (22 individual modules ក្រោម `src/lib/oauth/providers/`)
+- scripts សម្រាប់ uninstall/full-uninstall
+- សកម្មភាពជួសជុល OAuth environment
+- WebSocket bridge សម្រាប់ OpenAI-compatible WS clients (`/v1/ws`)
+- ការគ្រប់គ្រង sync token (ការចេញ/ដកហូត និងការទាញយក config bundle ដែលមាន version តាម ETag)
+- GLM Thinking (`glmt`) ជា provider preset កម្រិត first-class
+- ការរាប់ token បែប hybrid (តាម provider-side `/messages/count_tokens` ជាមួយ estimation fallback)
+- ការបង្កើត model alias ដោយស្វ័យប្រវត្តិជាមុន (30+ cross-proxy dialect normalizations នៅពេលចាប់ផ្ដើម)
+- outbound fetch ប្រកបដោយសុវត្ថិភាព ជាមួយ SSRF guard, ការទប់ស្កាត់ private URL និង retry ដែលអាចកំណត់រចនាសម្ព័ន្ធបាន
+- chat retries ដែលគិតគូរពី cooldown ជាមួយ `requestRetry` និង `maxRetryIntervalSec` ដែលអាចកំណត់រចនាសម្ព័ន្ធបាន
+- ការផ្ទៀងផ្ទាត់ runtime environment ជាមួយ Zod នៅពេលចាប់ផ្ដើម
+- ការធ្វើសវនកម្មអនុលោមភាព v2 ជាមួយ pagination, provider CRUD events និងការកត់ត្រាការផ្ទៀងផ្ទាត់ដែល SSRF បានទប់ស្កាត់
 
-គំរូ runtime ចម្បង៖
+ម៉ូដែលដំណើរការចម្បង៖
 
 - Next.js app routes ក្រោម `src/app/api/*` អនុវត្តទាំង dashboard APIs និង compatibility APIs
-- ស្នូល SSE/routing រួមនៅក្នុង `src/sse/*` + `open-sse/*` គ្រប់គ្រងការប្រតិបត្តិ provider ការបកប្រែ streaming fallback និងការប្រើប្រាស់
+- ស្នូល SSE/routing រួមក្នុង `src/sse/*` + `open-sse/*` គ្រប់គ្រងការប្រតិបត្តិ provider ការបម្លែងទ្រង់ទ្រាយ streaming fallback និងការប្រើប្រាស់
 
 ## ដ្យាក្រាមយោង
 

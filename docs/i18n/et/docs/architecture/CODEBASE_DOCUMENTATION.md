@@ -446,7 +446,7 @@ Jaotatud sihipärasteks alamkataloogideks:
 
 ## 4. `open-sse/` — voogedastusmootori tööruum
 
-Eraldi npm-i tööruum, mis on avaldatud paketina `@omniroute/open-sse`. Haldab päringute
+Eraldi npm-i tööruum, mis avaldatakse paketina `@omniroute/open-sse`. Hõlmab päringute
 töötlemist, täitureid, tõlkureid, teenuseid, teisendajat ja MCP-serverit.
 
 ```
@@ -455,10 +455,10 @@ open-sse/
 ├── package.json            Tööruumi manifest
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Pakkujate registrid, päiseprofiilid, identiteet, …
-├── handlers/               Päringutöötlejad (vestlus, manused, heli, pilt, …)
-├── executors/              156 pakkuja täiturimoodulit (täituriklassid + pakkujapõhised abifunktsioonid)
-├── translator/             Vormingu teisendamine (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── config/                 Teenusepakkujate registrid, päiseprofiilid, identiteet, …
+├── handlers/               Päringutöötlejad (vestlus, vektorkujud, heli, pildid, …)
+├── executors/              156 teenusepakkuja täiturimoodulit (täituriklassid + teenusepakkujapõhised abifunktsioonid)
+├── translator/             Vormingute teisendamine (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            Responses API ↔ Chat Completions voo teisendaja
 ├── services/               Üle 80 teenusemooduli (kombinatsioonid, varuvariandid, kvoodid, identiteet, …)
 ├── utils/                  Voogedastuse abifunktsioonid, TLS-klient, AWS SigV4, puhverserveri kaudu pärimine, …
@@ -467,44 +467,44 @@ open-sse/
 
 ### 4.1 `open-sse/handlers/`
 
-| Töötleja                | Otstarve                                                                                                   |
-| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `chatCore.ts`           | Peamine vestluskonveier (vahemälu, kiiruse piiramine, kombinatsioonide marsruutimine, täituri käivitamine) |
-| `responsesHandler.ts`   | OpenAI Responses API sisenemispunkt                                                                        |
-| `embeddings.ts`         | Manused                                                                                                    |
-| `imageGeneration.ts`    | Piltide genereerimine                                                                                      |
-| `audioSpeech.ts`        | Tekst kõneks                                                                                               |
-| `audioTranscription.ts` | Kõne tekstiks                                                                                              |
-| `videoGeneration.ts`    | Videote genereerimine                                                                                      |
-| `musicGeneration.ts`    | Muusika genereerimine                                                                                      |
-| `rerank.ts`             | Ümberjärjestamine                                                                                          |
-| `moderations.ts`        | Modereerimine                                                                                              |
-| `search.ts`             | Veebiotsing                                                                                                |
-| `sseParser.ts`          | SSE-sündmuste parser                                                                                       |
-| `usageExtractor.ts`     | Tõmbab ülesvooluvoogudest välja sõnede arvud                                                               |
-| `responseSanitizer.ts`  | Eemaldab pakkujapõhise müra                                                                                |
-| `responseTranslator.ts` | Ühenduskiht pakkuja vastuse ja tõlkekihi vahel                                                             |
+| Töötleja                | Otstarve                                                                                                      |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `chatCore.ts`           | Peamine vestlustöötlusvoog (vahemälu, kiiruse piiramine, kombinatsioonide marsruutimine, täituri käivitamine) |
+| `responsesHandler.ts`   | OpenAI Responses API sisendpunkt                                                                              |
+| `embeddings.ts`         | Vektorkujud                                                                                                   |
+| `imageGeneration.ts`    | Piltide genereerimine                                                                                         |
+| `audioSpeech.ts`        | Tekstist kõne genereerimine                                                                                   |
+| `audioTranscription.ts` | Kõnest teksti genereerimine                                                                                   |
+| `videoGeneration.ts`    | Video genereerimine                                                                                           |
+| `musicGeneration.ts`    | Muusika genereerimine                                                                                         |
+| `rerank.ts`             | Ümberjärjestamine                                                                                             |
+| `moderations.ts`        | Modereerimine                                                                                                 |
+| `search.ts`             | Veebiotsing                                                                                                   |
+| `sseParser.ts`          | SSE-sündmuste parser                                                                                          |
+| `usageExtractor.ts`     | Tokenite arvu eraldamine ülesvooluvoogudest                                                                   |
+| `responseSanitizer.ts`  | Teenusepakkujapõhise müra eemaldamine                                                                         |
+| `responseTranslator.ts` | Ühenduslüli teenusepakkuja vastuse ja tõlkekihi vahel                                                         |
 
 ### 4.2 `open-sse/executors/`
 
-156 tipptaseme täiturimoodulit (`*.ts`, millest on välja arvatud `base.ts`, `index.ts` ja testid — seda arvu
+156 tipptaseme täiturimoodulit (`*.ts`, välja arvatud `base.ts`, `index.ts` ja testid — seda arvu
 mõõdab `npm run check:docs-counts`). Iga täituriklass laiendab klassi `BaseExecutor` (`base.ts`)
-kas otse või klassi `DefaultExecutor` või mõne muu täituri kaudu; ülejäänud moodulid on pakkujapõhised
-abimoodulid (tööriistaskeemid, päringu-/TTS-adapterid, eripärade töötlejad). Täiturite hulka kuuluvad:
+kas otse või klassi `DefaultExecutor` või mõne muu täituri kaudu; ülejäänud moodulid on teenusepakkujapõhised
+abifunktsioonid (tööriistaskeemid, päringu-/TTS-adapterid, eripärade töötlejad). Täiturite hulka kuuluvad:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`, samuti `claudeIdentity.ts`
-(jagatud identiteedi abimoodul) ja `index.ts` (register).
+`pollinations`, `qoder`, `vertex`, `devin-desktop`, lisaks `claudeIdentity.ts`
+(jagatud identiteedi abifunktsioon) ja `index.ts` (register).
 
-> Märkus: siin loetlemata pakkujaid teenindab `default.ts`, kasutades üldist
-> OpenAI-ga ühilduvat täiturit. Täielik pakkujate kataloog (376 pakkujat) asub failis
+> Märkus: siin loetlemata teenusepakkujaid teenindab `default.ts`, kasutades üldist
+> OpenAI-ga ühilduvat täiturit. Teenusepakkujate täielik kataloog (376 teenusepakkujat) asub failis
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Keskme ja harude põhimõttel tõlkimine (OpenAI on keskpunkt).
+Keskse sõlme ja kodaratega tõlkemudel (OpenAI on keskne sõlm).
 
 - **9 päringutõlkurit** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -514,51 +514,51 @@ Keskme ja harude põhimõttel tõlkimine (OpenAI on keskpunkt).
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
   `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
   `openai-to-claude`.
-- **9 abimoodulit** (`translator/helpers/`):
+- **9 abifunktsiooni** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, samuti
-  abimoodulite testid.
-- **Pildiabimoodulid** (`translator/image/sizeMapper.ts`).
-- Tipptasemel: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, lisaks
+  abifunktsioonide testid.
+- **Pildiabifunktsioonid** (`translator/image/sizeMapper.ts`).
+- Tipptase: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream`-il põhinev Responses API ↔ Chat
-  Completionsi teisendaja (kasutusel marsruudi `responses/` universaaltöötlejas).
+- `responsesTransformer.ts` — klassil `TransformStream` põhinev Responses API ↔ Chat
+  Completions teisendaja (kasutusel marsruudi `responses/` üldpüüduris).
 
 ### 4.5 `open-sse/services/`
 
-Olulisemad osad (täielik loend asub kataloogis `open-sse/services/`):
+Olulisemad moodulid (täielik loend asub kataloogis `open-sse/services/`):
 
-| Valdkond               | Failid                                                                                                                                                                                                                                                   |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kombomarsruutimine     | `combo.ts` (20 strateegiat), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                   |
-| Auto Combo mootor      | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Tõrkekindlus           | `accountFallback.ts` (jahutusaeg + lukustus), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                      |
-| Kvoodid                | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| Vahemällu salvestamine | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| Nutikas marsruutimine  | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| Mudelite käsitlemine   | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| Tihendamine            | `compression/` — tihendusmootori täielik ühendus                                                                                                                                                                                                         |
-| Luba + seanss          | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| Tase / manifest        | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / võrk              | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| Pakktöötlus            | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| Kasutus                | `usage.ts`                                                                                                                                                                                                                                               |
+| Valdkond                         | Failid                                                                                                                                                                                                                                                   |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Kombineeritud marsruutimine      | `combo.ts` (20 strateegiat), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                   |
+| Automaatse kombineerimise mootor | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| Tõrkekindlus                     | `accountFallback.ts` (ooteaeg + lukustus), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                         |
+| Kvoodid                          | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| Vahemällu salvestamine           | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| Marsruutimisintellekt            | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| Mudelite käsitlemine             | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| Tihendamine                      | `compression/` — tihendusmootori täielik ühendus                                                                                                                                                                                                         |
+| Luba + seanss                    | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Tase / manifest                  | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / võrk                        | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| Pakktöötlus                      | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| Kasutus                          | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
 - **110 unikaalset tööriista**, mis on ühendatud failis `server.ts` (45 kanoonilist failis `schemas/tools.ts` +
-  mälu-, oskuste, GitHubi oskuste, kogumi-, mängustamise, pistikprogrammi-, Notioni, Obsidiani,
+  mälu-, oskuste, GitHubi oskuste, kogumi-, mängustamise-, pistikprogrammi-, Notioni, Obsidiani,
   kohaliku korpuse ja tihendusmoodulid — ühend loendatakse funktsiooniga `countUniqueMcpTools`).
 - **3 transporti**: stdio, HTTP Streamable, SSE.
-- **33 mõjuala**, mida jõustatakse käitusajal — põhiloend asub failis `src/shared/constants/mcpScopes.ts`, täielik kogum on iga tööriistamooduli deklareeritud mõjualade ühend.
-- Audititabel: `mcp_tool_audit` (selle täidab `audit.ts`).
+- **33 ulatust**, mida jõustatakse käitusajal — põhiloend asub failis `src/shared/constants/mcpScopes.ts`, täielik kogum on iga tööriistamooduli deklareeritud ulatuste ühend.
+- Auditeerimistabel: `mcp_tool_audit` (täidetakse faili `audit.ts` kaudu).
 - Failid: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
   ning testid kataloogis `__tests__/`.
-- Täielikku tööriistakataloogi vaadake dokumendist [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
+- Täielikku tööriistakataloogi vaadake failist [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### 4.7 `open-sse/config/`
 
@@ -569,7 +569,7 @@ Pakkujate registrid (`providerRegistry.ts`, `providerModels.ts`,
 identiteedi abifunktsioonid (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-mandaadi abifunktsioonid (`credentialLoader.ts`, `codexClient.ts`) ja pilve-
+identimisteabe abifunktsioonid (`credentialLoader.ts`, `codexClient.ts`) ja pilve-
 adapterid (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).

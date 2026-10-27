@@ -484,17 +484,17 @@ Bu, aşağıdakıları emal edir:
 
 ## Konfiqurasiya
 
-`open-sse/config/` konfiqurasiya qatını ehtiva edir:
+`open-sse/config/` konfiqurasiya qatını saxlayır:
 
-| Fayl                          | Təyinatı                                                 |
-| ----------------------------- | -------------------------------------------------------- |
-| `providerRegistry.ts`         | 376 provayderdən ibarət kataloq üzrə çat modeli reyestri |
-| `providerModels.ts`           | Model aliasları, format uyğunlaşdırılması                |
-| `constants.ts`                | Taymautlar, limitlər, status kodları                     |
-| `defaultThinkingSignature.ts` | Standart Claude düşünmə imzası                           |
-| `modelStrip.ts` (xidmətlərdə) | Hər provayder üzrə sahələrin çıxarılması                 |
+| Fayl                          | Məqsəd                                              |
+| ----------------------------- | --------------------------------------------------- |
+| `providerRegistry.ts`         | 376 provayder kataloqu üzərində chat-model reyestri |
+| `providerModels.ts`           | Model ləqəbləri, format uyğunlaşdırması             |
+| `constants.ts`                | Zaman aşımları, limitlər, status kodları            |
+| `defaultThinkingSignature.ts` | Defolt Claude düşünmə imzası                        |
+| `modelStrip.ts` (services-də) | Hər provayder üçün sahə təmizləməsi                 |
 
-### Provayder Reyestrinin Sxemi
+### Provayder Reyestri Sxemi
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Modulun yüklənməsi zamanı Zod validasiyası bütün provayder konfiqurasiyalarının etibarlı olmasını təmin edir.
+Modul yüklənməsi zamanı Zod validasiyası bütün provayder konfiqurasiyalarının etibarlı olmasını təmin edir.
 
 ---
 

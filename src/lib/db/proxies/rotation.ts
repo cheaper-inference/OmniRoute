@@ -23,7 +23,7 @@ import {
 } from "@/shared/utils/featureFlags";
 import { getCachedProxyHealth } from "@/lib/proxyHealth";
 import { getRecentEgressIpForProxy, getRecentEgressIpsForProxy } from "../proxyLogs";
-import { normalizeEgressAddress } from "@/shared/network/egressAddress";
+import { egressKeyForAddresses, normalizeEgressAddress } from "@/shared/network/egressAddress";
 import { readOperatorEgressForMember } from "../proxyOperatorEgress";
 import type { JsonRecord, ProxyScope, ProxyRotationStrategy } from "./types";
 import { PROXY_ROTATION_STRATEGIES, DEFAULT_PROXY_ROTATION_STRATEGY } from "./types";
@@ -170,10 +170,11 @@ function eligibleMemberIndexes(
   return isProxySkipRecentlyFailedEnabled() ? eligible : null;
 }
 
-// Observed egress addresses seeded only from members the refusal memory already
-// sets aside; matches buildHotEgressPredicate's seed discipline. Only scopes in
-// the egress-bucketed lock set expand: a refusal for one bucketed scope never
-// sets aside members picked for another scope.
+// Observed egress keys (an exact address, or the range an exit rotates inside) seeded
+// only from members the refusal memory already sets aside; matches
+// buildHotEgressPredicate's seed discipline. Only scopes in the egress-bucketed lock
+// set expand: a refusal for one bucketed scope never sets aside members picked for
+// another scope.
 function addressScopeFor(
   provider: string | null | undefined,
   candidates: unknown[],
@@ -188,7 +189,7 @@ function addressScopeFor(
   const hot = new Set<string>();
   for (const row of candidates) {
     if (!isProxyAvoided(proxyEgressKey(row), nowMs)) continue;
-    for (const address of readEgressAddressSetForMember(row, nowMs).addresses) hot.add(address);
+    for (const key of readEgressKeysForMember(row, nowMs).keys) hot.add(key);
   }
   if (hot.size === 0) return none;
   const byKey = new Map<string, unknown>();
@@ -198,8 +199,8 @@ function addressScopeFor(
   }
   return {
     isShared: (row: unknown) => {
-      for (const address of readEgressAddressSetForMember(row, nowMs).addresses) {
-        if (hot.has(address)) return true;
+      for (const key of readEgressKeysForMember(row, nowMs).keys) {
+        if (hot.has(key)) return true;
       }
       return false;
     },
@@ -208,8 +209,8 @@ function addressScopeFor(
       if (key === null) return false;
       const row = byKey.get(key);
       if (row === undefined) return false;
-      for (const address of readEgressAddressSetForMember(row, nowMs).addresses) {
-        if (hot.has(address)) return true;
+      for (const key of readEgressKeysForMember(row, nowMs).keys) {
+        if (hot.has(key)) return true;
       }
       return false;
     },
@@ -321,15 +322,18 @@ export function normalizeEgressAddressForRanking(ip: unknown): string | null {
 const HOT_EGRESS_CACHE_TTL_MS = 30_000;
 const HOT_EGRESS_CACHE_MAX_ENTRIES = 200;
 
-const hotEgressCache = new Map<string, { at: number; value: string | null }>();
+const hotEgressCache = new Map<string, { at: number; value: MemberEgressObservation }>();
 
-function readHotEgressCache(key: string, nowMs: number): { hit: boolean; value: string | null } {
+function readHotEgressCache(
+  key: string,
+  nowMs: number
+): { hit: boolean; value: MemberEgressObservation | null } {
   const hit = hotEgressCache.get(key);
   if (!hit || nowMs - hit.at >= HOT_EGRESS_CACHE_TTL_MS) return { hit: false, value: null };
   return { hit: true, value: hit.value };
 }
 
-function writeHotEgressCache(key: string, value: string | null, nowMs: number): void {
+function writeHotEgressCache(key: string, value: MemberEgressObservation, nowMs: number): void {
   if (!hotEgressCache.has(key) && hotEgressCache.size >= HOT_EGRESS_CACHE_MAX_ENTRIES) {
     const oldest = hotEgressCache.keys().next().value;
     if (oldest !== undefined) hotEgressCache.delete(oldest);
@@ -359,71 +363,109 @@ function hotEgressCacheKey(row: unknown): string | null {
 }
 
 // Observation window for the shared-egress ranking signal: an entry that
-// showed two or more distinct egress addresses within the window is opaque
-// (a gateway or core switching behind one port) and reads as unknown.
+// showed several distinct egress addresses within the window is read under
+// the key those addresses share (one address, or the range they stay inside).
 const EGRESS_RANKING_WINDOW_MS = 30 * 60_000;
 
-// Last normalized egress address observed through a pool entry point, or null.
-// Best-effort by design: a cold probe cache yields no observation and the caller
-// keeps today's order. An entry that showed two or more distinct egress
-// addresses within the window is opaque (a gateway or core switching behind
-// one port): treated as unknown, never ranked.
-function readNormalizedEgressForMember(row: unknown, nowMs: number): string | null {
+// Read ceiling for the ranking signal: the journal reader returns at most this
+// many distinct addresses per member and the sample is not ordered, so a
+// window holding more addresses than that cannot be shown to stay inside one
+// range.
+const EGRESS_RANKING_ADDRESS_LIMIT = 10;
+
+/**
+ * What the journal showed for one pool member inside the ranking window.
+ * Read-only: the observation is shared by reference through the cache, so the
+ * whole observation is frozen — a consumer must never mutate it.
+ */
+type MemberEgressObservation = {
+  /** Distinct normalized addresses observed in the window (frozen). */
+  readonly addresses: readonly string[];
+  /** The key the member is ranked under: exact address, range key, or null. */
+  readonly key: string | null;
+};
+
+const EMPTY_EGRESS_OBSERVATION: MemberEgressObservation = Object.freeze({
+  addresses: Object.freeze([]),
+  key: null,
+});
+
+/**
+ * What the journal showed for one pool member inside the ranking window: the
+ * distinct normalized addresses it was seen on, and the key it is ranked
+ * under. Best-effort by design: a cold probe cache yields no observation and
+ * the caller keeps today's order.
+ */
+function readMemberEgressObservation(row: unknown, nowMs: number): MemberEgressObservation {
   const record = row as Record<string, unknown>;
   const host = typeof record.host === "string" ? record.host : "";
   const port = Number(record.port);
-  if (!host || !Number.isInteger(port) || port < 1 || port > 65535) return null;
+  if (!host || !Number.isInteger(port) || port < 1 || port > 65535) {
+    return EMPTY_EGRESS_OBSERVATION;
+  }
   const key = hotEgressCacheKey(row);
-  if (key === null) return null;
+  if (key === null) return EMPTY_EGRESS_OBSERVATION;
   const cached = readHotEgressCache(key, nowMs);
-  if (cached.hit) return cached.value;
-  let value: string | null = null;
+  if (cached.hit && cached.value !== null) return cached.value;
+  let observation: MemberEgressObservation = EMPTY_EGRESS_OBSERVATION;
   try {
     const sinceIso = new Date(nowMs - EGRESS_RANKING_WINDOW_MS).toISOString();
-    const observed = getRecentEgressIpsForProxy(host, port, sinceIso, 3);
+    const observed = getRecentEgressIpsForProxy(host, port, sinceIso, EGRESS_RANKING_ADDRESS_LIMIT);
     const distinct = new Set<string>();
     for (const ip of observed) {
       const normalized = normalizeEgressAddressForRanking(ip);
       if (normalized !== null) distinct.add(normalized);
     }
-    // One value: that value. Zero or two-or-more: null — an entry that
-    // showed two or more distinct egress addresses within the window is
-    // opaque (a gateway or core switching behind one port): treated as
-    // unknown, never ranked.
-    value = distinct.size === 1 ? [...distinct][0] : null;
+    observation = Object.freeze({
+      // Frozen: the cache shares the observation by reference, a consumer that
+      // mutated the array would corrupt it for every other reader.
+      addresses: Object.freeze([...distinct]),
+      // The query is cut at the read ceiling (DISTINCT … LIMIT, no ORDER BY):
+      // when it returned as many rows as the ceiling, the window may hold
+      // more addresses than we read, so the member cannot be shown to stay
+      // inside one range — it reads unknown. The count is the number of rows
+      // the query returned, not the number of normalized keys: one IPv6 /64
+      // key stands for several rows.
+      key: egressKeyForAddresses(distinct, {
+        truncated: observed.length >= EGRESS_RANKING_ADDRESS_LIMIT,
+      }),
+    });
   } catch {
-    value = null;
+    observation = EMPTY_EGRESS_OBSERVATION;
   }
-  writeHotEgressCache(key, value, nowMs);
-  return value;
+  writeHotEgressCache(key, observation, nowMs);
+  return observation;
 }
 
-/** Merged egress observation for one pool member: the journal set plus the operator set. */
-export type EgressAddressSet = {
-  addresses: Set<string>;
+/** Egress keys of one pool member: the exact addresses observed plus, for an
+ *  exit rotating inside one range, that range's key. `freshest` is the most
+ *  recent observation across both sources. */
+export type EgressKeySet = {
+  keys: Set<string>;
   freshest: { address: string; at: string } | null;
 };
 
 /**
- * Every observed egress address for a pool entry point. Flag off: the journal
+ * Every observed egress key for a pool entry point. Flag off: the journal
  * single address or empty, with zero operator DB read — byte-identical to the
  * base behavior. Flag on: the union of the fresh operator rows (direct read,
- * never cached) and the journal single address, but only when the journal is
- * non-opaque (distinct == 1); an opaque journal (gateway switching behind one
- * port) never contributes. `freshest` is the most recent observation across
- * both sources — a 20 h operator row loses to a 2 min probe, and wins when
- * the probe is the older one.
+ * never cached) and the journal key, which is the single observed address or,
+ * when the journal window stays inside one range, that range's key; a journal
+ * window crossing two ranges never contributes. `freshest` is the most recent
+ * observation across both sources — a 20 h operator row loses to a 2 min
+ * probe, and wins when the probe is the older one.
  */
-export function readEgressAddressSetForMember(
-  row: unknown,
-  nowMs: number = Date.now()
-): EgressAddressSet {
-  const normalized = readNormalizedEgressForMember(row, nowMs);
+export function readEgressKeysForMember(row: unknown, nowMs: number = Date.now()): EgressKeySet {
+  const observation = readMemberEgressObservation(row, nowMs);
+  // The journal's freshest observation stays an exact address: it is what the
+  // observation screen shows. A member rotating inside one range has no
+  // single address, so it has no journal freshest (as before).
+  const single = observation.addresses.length === 1 ? observation.addresses[0] : null;
   const journalFreshest =
-    normalized !== null ? { address: normalized, at: journalFreshestAt(row, nowMs) } : null;
+    single !== null ? { address: single, at: journalFreshestAt(row, nowMs) } : null;
   if (!isOperatorEgressEnabled()) {
     return {
-      addresses: normalized !== null ? new Set([normalized]) : new Set(),
+      keys: observation.key !== null ? new Set([observation.key]) : new Set(),
       freshest: journalFreshest,
     };
   }
@@ -431,8 +473,8 @@ export function readEgressAddressSetForMember(
   const host = typeof record.host === "string" ? record.host : "";
   const port = Number(record.port);
   const operator = readOperatorEgressForMemberSafe(host, port, nowMs);
-  const addresses = new Set<string>(operator.addresses);
-  if (normalized !== null) addresses.add(normalized);
+  const keys = new Set<string>(operator.addresses);
+  if (observation.key !== null) keys.add(observation.key);
   let freshest = operator.freshest;
   if (
     journalFreshest !== null &&
@@ -440,7 +482,7 @@ export function readEgressAddressSetForMember(
   ) {
     freshest = journalFreshest;
   }
-  return { addresses, freshest };
+  return { keys, freshest };
 }
 
 function journalFreshestAt(row: unknown, nowMs: number): string {
@@ -494,15 +536,15 @@ export function buildHotEgressPredicate(
   const hot = new Set<string>();
   for (const row of candidates) {
     if (!isAvoided(proxyEgressKey(row))) continue;
-    // Avoided members seed from the journal single address AND the fresh
-    // operator rows: either source can name the refused address. The journal
-    // contributes only when non-opaque (distinct == 1).
-    for (const address of readEgressAddressSetForMember(row, nowMs).addresses) hot.add(address);
+    // Avoided members seed from the journal AND the fresh operator rows:
+    // either source can name the refused key. The journal contributes when
+    // its window stays inside one range (one address, or one range key).
+    for (const key of readEgressKeysForMember(row, nowMs).keys) hot.add(key);
   }
   if (hot.size === 0) return none;
   return (candidate: unknown) => {
-    for (const address of readEgressAddressSetForMember(candidate, nowMs).addresses) {
-      if (hot.has(address)) return true;
+    for (const key of readEgressKeysForMember(candidate, nowMs).keys) {
+      if (hot.has(key)) return true;
     }
     return false;
   };

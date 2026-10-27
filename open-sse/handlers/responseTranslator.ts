@@ -150,6 +150,11 @@ function findBestMessageText(output: unknown[]): {
   return { text: "", selectedMessageIndex: -1, messageItems: [] };
 }
 
+/** Connection+family scoped namespace so stored Gemini signatures match the request-side lookup (#17912). */
+export interface TranslateNonStreamingOptions {
+  signatureNamespace?: string | null;
+}
+
 /**
  * Translate non-streaming response to OpenAI format
  * Handles different provider response formats (Gemini, Claude, etc.)
@@ -164,7 +169,8 @@ export function translateNonStreamingResponse(
   toolNameMap?: Map<string, string> | null,
   toolSchemas?: Map<string, JsonRecord> | null,
   requestedThinking?: boolean,
-  clientTools?: unknown
+  clientTools?: unknown,
+  options?: TranslateNonStreamingOptions
 ): JsonRecord;
 export function translateNonStreamingResponse(
   responseBody: unknown,
@@ -173,7 +179,8 @@ export function translateNonStreamingResponse(
   toolNameMap?: Map<string, string> | null,
   toolSchemas?: Map<string, JsonRecord> | null,
   requestedThinking?: boolean,
-  clientTools?: unknown
+  clientTools?: unknown,
+  options?: TranslateNonStreamingOptions
 ): unknown;
 export function translateNonStreamingResponse(
   responseBody: unknown,
@@ -182,7 +189,8 @@ export function translateNonStreamingResponse(
   toolNameMap?: Map<string, string> | null,
   toolSchemas?: Map<string, JsonRecord> | null,
   requestedThinking?: boolean,
-  clientTools?: unknown
+  clientTools?: unknown,
+  options?: TranslateNonStreamingOptions
 ): unknown {
   // If already in source format, return as-is
   if (targetFormat === sourceFormat) {
@@ -500,7 +508,10 @@ export function translateNonStreamingResponse(
                     // captured from an earlier thinking-only part.
                     const sig = partThoughtSig || pendingThoughtSignature;
                     if (sig) {
-                      const sigKey = buildGeminiThoughtSignatureKey(null, toolCallId);
+                      const sigKey = buildGeminiThoughtSignatureKey(
+                        options?.signatureNamespace ?? null,
+                        toolCallId
+                      );
                       storeGeminiThoughtSignature(sigKey, sig);
                     }
 

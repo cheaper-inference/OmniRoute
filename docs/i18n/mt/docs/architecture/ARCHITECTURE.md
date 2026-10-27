@@ -11,76 +11,76 @@ _Aġġornat l-aħħar: 2026-06-28_
 ## Sommarju Eżekuttiv
 
 OmniRoute huwa gateway lokali għar-routing tal-AI u dashboard mibni fuq Next.js.
-Jipprovdi endpoint wieħed kompatibbli ma’ OpenAI (`/v1/*`) u jidderieġi t-traffiku bejn diversi fornituri upstream bi traduzzjoni, fallback, tiġdid tat-tokens, u traċċar tal-użu.
+Jipprovdi endpoint wieħed kompatibbli ma’ OpenAI (`/v1/*`) u jidderieġi t-traffiku bejn diversi fornituri upstream bi traduzzjoni, fallback, tiġdid tat-tokens u traċċar tal-użu.
 
 Kapaċitajiet ewlenin:
 
-- Wiċċ API kompatibbli ma’ OpenAI għal CLI/għodod (376 fornitur, 156 modulu ta’ eżekuzzjoni)
+- Superfiċje API kompatibbli ma’ OpenAI għal CLI/għodod (376 fornitur, 156 modulu ta’ eżekuzzjoni)
 - Traduzzjoni tat-talbiet/tweġibiet bejn il-formati tal-fornituri
-- Fallback ta’ kombinazzjoni ta’ mudelli (sekwenza ta’ diversi mudelli)
-- Passi strutturati tal-kombinazzjoni (`provider + model + connection`) b’ordni waqt l-eżekuzzjoni skont `compositeTiers`
+- Fallback ta’ kombinazzjonijiet ta’ mudelli (sekwenza ta’ diversi mudelli)
+- Passi strutturati ta’ kombinazzjoni (`provider + model + connection`) b’ordni waqt it-tħaddim skont `compositeTiers`
 - Fallback fil-livell tal-kont (diversi kontijiet għal kull fornitur)
-- Verifika preliminari tal-kwota u għażla tal-kont P2C konxja mill-kwota fil-fluss ewlieni taċ-chat
-- Ġestjoni tal-konnessjonijiet mal-fornituri permezz ta’ OAuth + API key (27 modulu ta’ fornituri OAuth)
+- Verifika preliminari tal-kwota u għażla P2C tal-kont konxja mill-kwota fil-fluss prinċipali taċ-chat
+- Ġestjoni tal-konnessjonijiet tal-fornituri permezz ta’ OAuth + API key (27 modulu ta’ fornituri OAuth)
 - Ġenerazzjoni ta’ embeddings permezz ta’ `/v1/embeddings` (18-il fornitur)
-- Ġenerazzjoni ta’ immaġnijiet permezz ta’ `/v1/images/generations` (10+ fornituri, 20+ mudell)
+- Ġenerazzjoni ta’ immaġnijiet permezz ta’ `/v1/images/generations` (10+ fornituri, 20+ mudelli)
 - Traskrizzjoni tal-awdjo permezz ta’ `/v1/audio/transcriptions` (18-il fornitur)
-- Konverżjoni minn test għal diskors permezz ta’ `/v1/audio/speech` (24 fornitur integrat)
+- Konverżjoni tat-test għal diskors permezz ta’ `/v1/audio/speech` (24 fornitur integrat)
 - Ġenerazzjoni ta’ vidjows permezz ta’ `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Ġenerazzjoni ta’ mużika permezz ta’ `/v1/music/generations` (ComfyUI)
 - Tiftix fuq il-web permezz ta’ `/v1/search` (20 fornitur)
-- Moderazzjonijiet permezz ta’ `/v1/moderations`
+- Moderazzjoni permezz ta’ `/v1/moderations`
 - Klassifikazzjoni mill-ġdid permezz ta’ `/v1/rerank`
-- Parsing tat-tikketti tal-ħsieb (`<think>...</think>`) għal mudelli ta’ raġunament
-- Sanitizzazzjoni tat-tweġibiet għal kompatibbiltà stretta mal-SDK ta’ OpenAI
-- Normalizzazzjoni tar-rwoli (developer→system, system→user) għal kompatibbiltà bejn il-fornituri
+- Analiżi tat-tags Think (`<think>...</think>`) għal mudelli ta’ raġunament
+- Sanitizzazzjoni tat-tweġibiet għal kompatibbiltà stretta mal-OpenAI SDK
+- Normalizzazzjoni tar-rwoli (developer→system, system→user) għall-kompatibbiltà bejn il-fornituri
 - Konverżjoni tal-output strutturat (json_schema → Gemini responseSchema)
-- Persistenza lokali għall-fornituri, ċwievet, psewdonimi, kombinazzjonijiet, settings, u prezzijiet (122 modulu tad-DB)
+- Persistenza lokali għall-fornituri, ċwievet, aliases, kombinazzjonijiet, settings u prezzijiet (122 modulu DB)
 - Traċċar tal-użu/tal-ispejjeż u reġistrazzjoni tat-talbiet
 - Sinkronizzazzjoni fakultattiva mal-cloud għal sinkronizzazzjoni bejn diversi apparati/tal-istat
 - Lista ta’ IPs permessi/imblukkati għall-kontroll tal-aċċess għall-API
-- Ġestjoni tal-baġit tal-ħsieb (passthrough/awtomatiku/personalizzat/adattiv)
+- Ġestjoni tal-baġit tar-raġunament (passthrough/awtomatiku/personalizzat/adattiv)
 - Injezzjoni globali tal-prompt tas-sistema
-- Traċċar tas-sessjonijiet u teħid tal-marki tas-swaba’
+- Traċċar tas-sessjonijiet u ħolqien ta’ marki tas-swaba’
 - Limitazzjoni mtejba tar-rata għal kull kont bi profili speċifiċi għall-fornitur
 - Mudell ta’ circuit breaker għar-reżiljenza tal-fornituri
-- Protezzjoni kontra thundering herd b’mutex locking
-- Cache għad-deduplikazzjoni tat-talbiet ibbażat fuq il-firma
+- Protezzjoni kontra thundering herd permezz ta’ mutex locking
+- Cache għad-deduplikazzjoni tat-talbiet ibbażata fuq firem
 - Saff tad-domain: regoli tal-ispejjeż, politika tal-fallback, politika tal-lockout
 - Context Relay: sommarji tat-trasferiment tas-sessjoni għall-kontinwità waqt ir-rotazzjoni tal-kontijiet
-- Persistenza tal-istat tad-domain (cache write-through ta’ SQLite għall-fallbacks, baġits, lockouts, u circuit breakers)
-- Magna tal-politiki għall-evalwazzjoni ċentralizzata tat-talbiet (lockout → budget → fallback)
+- Persistenza tal-istat tad-domain (cache write-through ta’ SQLite għal fallbacks, baġits, lockouts u circuit breakers)
+- Magna tal-politiki għall-evalwazzjoni ċentralizzata tat-talbiet (lockout → baġit → fallback)
 - Telemetrija tat-talbiet b’aggregazzjoni tal-latenza p50/p95/p99
 - Telemetrija tal-miri tal-kombinazzjoni u saħħa storika tal-miri tal-kombinazzjoni permezz ta’ `combo_execution_key` / `combo_step_id`
-- ID ta’ korrelazzjoni (X-Request-Id) għat-traċċar minn tarf sa tarf
-- Reġistrazzjoni tal-awditjar tal-konformità b’għażla ta’ opt-out għal kull API key
+- ID ta’ korrelazzjoni (X-Request-Id) għal traċċar minn tarf sa tarf
+- Reġistrazzjoni tal-awditjar tal-konformità b’għażla li tiġi diżattivata għal kull API key
 - Qafas ta’ evalwazzjoni għall-assigurazzjoni tal-kwalità tal-LLM
-- Dashboard tas-saħħa bi status f’ħin reali taċ-circuit breaker tal-fornituri
-- MCP Server (110 għodod) bi 3 mezzi ta’ trasport (stdio/SSE/Streamable HTTP)
-- A2A Server (JSON-RPC 2.0 + SSE) b’ħiliet u ċiklu tal-ħajja tal-kompiti
+- Dashboard tas-saħħa bl-istatus f’ħin reali tas-circuit breakers tal-fornituri
+- Server MCP (110 għodod) bi 3 mezzi ta’ trasport (stdio/SSE/Streamable HTTP)
+- Server A2A (JSON-RPC 2.0 + SSE) b’ħiliet u ċiklu tal-ħajja tal-kompiti
 - Sistema tal-memorja (estrazzjoni, injezzjoni, irkupru, sommarizzazzjoni)
 - Sistema tal-ħiliet (reġistru, eżekutur, sandbox, ħiliet integrati)
 - Proxy MITM b’ġestjoni taċ-ċertifikati u mmaniġġjar tad-DNS
-- Middleware ta’ protezzjoni kontra l-injezzjoni tal-prompt
-- Pipeline għall-kompressjoni tal-prompt b’Caveman, RTK, pipelines f’munzell, kombinazzjonijiet ta’ kompressjoni, pakketti lingwistiċi, u analitika
+- Middleware ta’ protezzjoni kontra l-injezzjoni tal-prompts
+- Pipeline għall-kompressjoni tal-prompts b’Caveman, RTK, pipelines f’munzelli, kombinazzjonijiet ta’ kompressjoni, pakketti lingwistiċi u analitika
 - Reġistru ACP (Agent Communication Protocol)
 - Fornituri OAuth modulari (22 modulu individwali taħt `src/lib/oauth/providers/`)
 - Skripts ta’ diżinstallazzjoni/diżinstallazzjoni sħiħa
-- Azzjoni ta’ tiswija tal-ambjent OAuth
+- Azzjoni għat-tiswija tal-ambjent OAuth
 - Bridge WebSocket għal klijenti WS kompatibbli ma’ OpenAI (`/v1/ws`)
-- Ġestjoni tat-tokens tas-sinkronizzazzjoni (ħruġ/revoka, tniżżil tal-pakkett tal-konfigurazzjoni b’verżjonijiet ETag)
-- Preset ta’ fornitur tal-ewwel klassi GLM Thinking (`glmt`)
-- Għadd ibridu tat-tokens (`/messages/count_tokens` min-naħa tal-fornitur bi fallback għall-istima)
-- Seed awtomatiku tal-psewdonimi tal-mudelli (30+ normalizzazzjoni bejn djaletti differenti ta’ proxy waqt l-istartjar)
-- Fetch outbound sikur bi protezzjoni SSRF, imblukkar ta’ URLs privati, u retry konfigurabbli
-- Retries taċ-chat konxji mill-cooldown b’`requestRetry` u `maxRetryIntervalSec` konfigurabbli
-- Validazzjoni tal-ambjent tar-runtime b’Zod waqt l-istartjar
-- Awditjar tal-konformità v2 b’paġinazzjoni, avvenimenti CRUD tal-fornituri, u reġistrazzjoni tal-validazzjoni mblukkata mill-SSRF
+- Ġestjoni tat-tokens tas-sinkronizzazzjoni (ħruġ/revoka, tniżżil ta’ bundle ta’ konfigurazzjoni b’verżjonijiet ETag)
+- Preset tal-fornitur tal-ogħla livell għal GLM Thinking (`glmt`)
+- Għadd ibridu tat-tokens (`/messages/count_tokens` min-naħa tal-fornitur b’fallback għall-istima)
+- Seeding awtomatiku tal-aliases tal-mudelli (30+ normalizzazzjoni ta’ djaletti bejn proxies waqt l-istartjar)
+- Fetch outbound sikur bi protezzjoni SSRF, imblukkar ta’ URLs privati u tentattivi mill-ġdid konfigurabbli
+- Tentattivi mill-ġdid taċ-chat konxji mill-cooldown b’`requestRetry` u `maxRetryIntervalSec` konfigurabbli
+- Validazzjoni tal-ambjent tat-tħaddim b’Zod waqt l-istartjar
+- Awditjar tal-konformità v2 b’paġinazzjoni, avvenimenti CRUD tal-fornituri u reġistrazzjoni ta’ validazzjoni mblukkata minn SSRF
 
-Mudell primarju tar-runtime:
+Mudell ewlieni tat-tħaddim:
 
 - Ir-rotot tal-app Next.js taħt `src/app/api/*` jimplimentaw kemm l-APIs tad-dashboard kif ukoll l-APIs tal-kompatibbiltà
-- Qalba kondiviża ta’ SSE/routing f’`src/sse/*` + `open-sse/*` timmaniġġja l-eżekuzzjoni tal-fornituri, it-traduzzjoni, l-istreaming, il-fallback, u l-użu
+- Qalba kondiviża ta’ SSE/routing f’`src/sse/*` + `open-sse/*` timmaniġġja l-eżekuzzjoni tal-fornituri, it-traduzzjoni, l-istreaming, il-fallback u l-użu
 
 ## Diqaġni tal-Referenza
 

@@ -10,18 +10,18 @@ _Terakhir diperbarui: 2026-06-28_
 
 ## Ringkasan Eksekutif
 
-OmniRoute adalah gateway perutean AI lokal dan dasbor yang dibangun dengan Next.js.
+OmniRoute adalah gateway perutean AI lokal dan dasbor yang dibangun menggunakan Next.js.
 OmniRoute menyediakan satu endpoint yang kompatibel dengan OpenAI (`/v1/*`) dan merutekan lalu lintas ke beberapa penyedia upstream dengan penerjemahan, fallback, penyegaran token, dan pelacakan penggunaan.
 
 Kemampuan utama:
 
 - Antarmuka API yang kompatibel dengan OpenAI untuk CLI/alat (376 penyedia, 156 modul eksekutor)
-- Penerjemahan permintaan/respons di berbagai format penyedia
+- Penerjemahan permintaan/respons di antara berbagai format penyedia
 - Fallback kombinasi model (urutan multi-model)
 - Langkah kombinasi terstruktur (`provider + model + connection`) dengan pengurutan runtime berdasarkan `compositeTiers`
 - Fallback tingkat akun (multi-akun per penyedia)
-- Pemeriksaan awal kuota dan pemilihan akun P2C yang mempertimbangkan kuota dalam alur chat utama
-- Pengelolaan koneksi penyedia berbasis OAuth + kunci API (27 modul penyedia OAuth)
+- Prapemeriksaan kuota dan pemilihan akun P2C yang mempertimbangkan kuota dalam alur chat utama
+- Pengelolaan koneksi penyedia OAuth + kunci API (27 modul penyedia OAuth)
 - Pembuatan embedding melalui `/v1/embeddings` (18 penyedia)
 - Pembuatan gambar melalui `/v1/images/generations` (10+ penyedia, 20+ model)
 - Transkripsi audio melalui `/v1/audio/transcriptions` (18 penyedia)
@@ -31,33 +31,33 @@ Kemampuan utama:
 - Pencarian web melalui `/v1/search` (20 penyedia)
 - Moderasi melalui `/v1/moderations`
 - Pemeringkatan ulang melalui `/v1/rerank`
-- Penguraian tag berpikir (`<think>...</think>`) untuk model penalaran
-- Sanitasi respons untuk kompatibilitas ketat dengan SDK OpenAI
+- Penguraian tag Think (`<think>...</think>`) untuk model penalaran
+- Sanitasi respons untuk kompatibilitas ketat dengan OpenAI SDK
 - Normalisasi peran (developer→system, system→user) untuk kompatibilitas lintas penyedia
 - Konversi keluaran terstruktur (json_schema → Gemini responseSchema)
 - Persistensi lokal untuk penyedia, kunci, alias, kombinasi, pengaturan, dan harga (122 modul DB)
 - Pelacakan penggunaan/biaya dan pencatatan permintaan
 - Sinkronisasi cloud opsional untuk sinkronisasi multi-perangkat/status
-- Daftar izin/blokir IP untuk kontrol akses API
-- Pengelolaan anggaran pemikiran (passthrough/otomatis/kustom/adaptif)
+- Daftar izin/daftar blokir IP untuk kontrol akses API
+- Pengelolaan anggaran thinking (passthrough/auto/custom/adaptive)
 - Injeksi prompt sistem global
-- Pelacakan sesi dan pembuatan sidik jari
-- Pembatasan laju tingkat akun yang ditingkatkan dengan profil khusus penyedia
-- Pola pemutus sirkuit untuk ketahanan penyedia
+- Pelacakan sesi dan fingerprinting
+- Pembatasan laju yang disempurnakan per akun dengan profil khusus penyedia
+- Pola circuit breaker untuk ketahanan penyedia
 - Perlindungan anti-thundering herd dengan penguncian mutex
 - Cache deduplikasi permintaan berbasis tanda tangan
-- Lapisan domain: aturan biaya, kebijakan fallback, kebijakan penguncian
-- Context Relay: ringkasan serah terima sesi untuk kesinambungan rotasi akun
-- Persistensi status domain (cache write-through SQLite untuk fallback, anggaran, penguncian, dan pemutus sirkuit)
-- Mesin kebijakan untuk evaluasi permintaan terpusat (penguncian → anggaran → fallback)
+- Lapisan domain: aturan biaya, kebijakan fallback, kebijakan lockout
+- Context Relay: ringkasan serah terima sesi untuk menjaga kontinuitas saat rotasi akun
+- Persistensi status domain (cache write-through SQLite untuk fallback, anggaran, lockout, dan circuit breaker)
+- Mesin kebijakan untuk evaluasi permintaan terpusat (lockout → anggaran → fallback)
 - Telemetri permintaan dengan agregasi latensi p50/p95/p99
 - Telemetri target kombinasi dan riwayat kesehatan target kombinasi melalui `combo_execution_key` / `combo_step_id`
 - ID korelasi (X-Request-Id) untuk penelusuran menyeluruh
-- Pencatatan audit kepatuhan dengan opsi penolakan per kunci API
+- Pencatatan audit kepatuhan dengan pilihan menonaktifkan per kunci API
 - Kerangka kerja evaluasi untuk jaminan kualitas LLM
-- Dasbor kesehatan dengan status pemutus sirkuit penyedia secara real-time
-- Server MCP (110 alat) dengan 3 transportasi (stdio/SSE/Streamable HTTP)
-- Server A2A (JSON-RPC 2.0 + SSE) dengan keterampilan dan siklus hidup tugas
+- Dasbor kesehatan dengan status circuit breaker penyedia secara real-time
+- MCP Server (110 alat) dengan 3 transportasi (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) dengan keterampilan dan siklus hidup tugas
 - Sistem memori (ekstraksi, injeksi, pengambilan, peringkasan)
 - Sistem keterampilan (registri, eksekutor, sandbox, keterampilan bawaan)
 - Proksi MITM dengan pengelolaan sertifikat dan penanganan DNS
@@ -67,13 +67,13 @@ Kemampuan utama:
 - Penyedia OAuth modular (22 modul individual di bawah `src/lib/oauth/providers/`)
 - Skrip penghapusan instalasi/penghapusan instalasi penuh
 - Tindakan perbaikan lingkungan OAuth
-- Jembatan WebSocket untuk klien WS yang kompatibel dengan OpenAI (`/v1/ws`)
+- Bridge WebSocket untuk klien WS yang kompatibel dengan OpenAI (`/v1/ws`)
 - Pengelolaan token sinkronisasi (penerbitan/pencabutan, pengunduhan bundel konfigurasi berversi ETag)
-- Preset penyedia kelas utama GLM Thinking (`glmt`)
-- Penghitungan token hibrida (`/messages/count_tokens` di sisi penyedia dengan fallback estimasi)
+- GLM Thinking (`glmt`) sebagai preset penyedia kelas utama
+- Penghitungan token hibrida (`/messages/count_tokens` dari sisi penyedia dengan fallback estimasi)
 - Penyemaian otomatis alias model (30+ normalisasi dialek lintas proksi saat startup)
-- Pengambilan keluar yang aman dengan perlindungan SSRF, pemblokiran URL privat, dan percobaan ulang yang dapat dikonfigurasi
-- Percobaan ulang chat yang mempertimbangkan periode jeda dengan `requestRetry` dan `maxRetryIntervalSec` yang dapat dikonfigurasi
+- Pengambilan outbound yang aman dengan perlindungan SSRF, pemblokiran URL privat, dan percobaan ulang yang dapat dikonfigurasi
+- Percobaan ulang chat yang mempertimbangkan cooldown dengan `requestRetry` dan `maxRetryIntervalSec` yang dapat dikonfigurasi
 - Validasi lingkungan runtime dengan Zod saat startup
 - Audit kepatuhan v2 dengan paginasi, peristiwa CRUD penyedia, dan pencatatan validasi yang diblokir SSRF
 
