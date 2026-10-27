@@ -1,0 +1,23 @@
+{
+  "$schema": "https://anthropic.com/claude-code/plugin.schema.json",
+  "name": "cinematic-ui",
+  "version": "1.0.0",
+  "description": "Director-and-film research workflow for web design: pick a real director and film, research its visual language, translate it into decisions, storyboard and compiled spec, then build HTML/CSS/JS.",
+  "author": {
+    "name": "akseolabs-seo",
+    "url": "https://github.com/akseolabs-seo"
+  },
+  "homepage": "https://github.com/akseolabs-seo/cinematic-ui",
+  "repository": "https://github.com/akseolabs-seo/cinematic-ui",
+  "license": "MIT",
+  "keywords": [
+    "cinematic",
+    "web-design",
+    "film-director",
+    "storyboard",
+    "layout",
+    "motion",
+    "design-system"
+  ],
+  "skills": ["./"]
+}
