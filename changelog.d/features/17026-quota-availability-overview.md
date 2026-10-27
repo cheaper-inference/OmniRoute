@@ -1,0 +1,1 @@
+- **feat(dashboard):** Add an account-availability quota overview with per-pool capsule rows, cooldown recovery, account details, and browser-persisted provider reordering across layouts. ([#17026](https://github.com/diegosouzapw/OmniRoute/pull/17026) — thanks @xiaoyaner0201)
