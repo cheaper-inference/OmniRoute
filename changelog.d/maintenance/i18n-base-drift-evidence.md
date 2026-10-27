@@ -1,0 +1,1 @@
+- Preserve inherited i18n failures only when their recorded/current hashes and failure reasons match the base, so new edits to already-drifted paths fail PR checks.

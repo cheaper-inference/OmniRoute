@@ -120,7 +120,7 @@ Atsakymo struktūra:
 
 ---
 
-## Kaip veikia balai
+## Kaip veikia įverčiai
 
 ### Šaltinis: Arena AI lyderių lentelė
 

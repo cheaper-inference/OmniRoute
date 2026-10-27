@@ -90,27 +90,12 @@
    `src/shared/utils/categoricalPalette.ts` และสำหรับกลยุทธ์การกำหนดเส้นทาง ใช้
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; เอจของ ReactFlow และแคนวาส
    orchestration จะอ่านตัวแปร `--orch-status-*` ที่รองรับธีม (`src/shared/components/flow/edgeStyles.ts`)
-2. ห้ามแพตช์ `packages/ui-kit/src` ด้วยมือเด็ดขาด: ให้ซิงก์ด้วย `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) จะล้มเหลวหากมีไบต์ใด
-   แตกต่างจากคอมมิต upstream ที่ปักหมุดไว้ (จะข้ามไปพร้อมคำเตือนเมื่อไม่มีการโคลน upstream ซึ่งก็คือ
-   `UI_KIT_CLONE` หรือ `_references/cheaper-inference-ui-kit`) เมื่อ kit ขาดสิ่งใด ให้หาวิธีจัดการ
-   ใน adapter หรือในหน้าจอ แล้วร้องขอสิ่งนั้นจาก upstream
-3. ข้อความเริ่มต้นของ kit เป็นภาษาอังกฤษ (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   ให้ส่งสตริงที่แปลแล้วจาก `useTranslations(...)` ทุกครั้งที่คอมโพเนนต์ของ kit เรนเดอร์ข้อความ
-4. ยูทิลิตีของ Tailwind มีความสำคัญเหนือคลาสของคอมโพเนนต์ kit (kit ประกาศ
-   `@layer theme, base, components, utilities` และกฎของมันอยู่ใน `components`) — ใช้ยูทิลิตี
-   สำหรับระยะห่างและเลย์เอาต์ ไม่ใช่เพื่อเปลี่ยนสีของคอมโพเนนต์ kit
-5. หัวข้อ: ใช้ `.ci-heading` (Inter ไม่มี tracking) สำหรับชื่อหน้าและชื่อส่วน; ใช้ `.ci-dashboard-display`
-   (Instrument Serif) เฉพาะกับข้อความแสดงผลขนาดใหญ่ที่ปรากฏเบาบาง เช่น รหัสสถานะบนหน้าแสดงข้อผิดพลาด
-6. `tests/unit/dashboard-kit-sweep.test.ts` คอยเฝ้าระวังการนำ kit มาใช้: ห้ามมี span แบบ Material ligature
-   ภายใต้ `src/app` หรือ `src/shared/components`; ในทรี dashboard (`src/app/(dashboard)` และ
-   `src/shared/components`) ห้ามมี `<select>`, `<textarea>` หรือ `<table>` แบบดิบ และห้ามสร้าง
-   `role="dialog"` เองนอกเหนือจากข้อยกเว้นที่ระบุไว้ (สาขา native ของ adapter `Select`,
-   `RequestLoggerDetail`); `<button>` หรือ `<input>` ดิบทุกตัวในบริเวณนั้นต้องมีคอมเมนต์ที่มีข้อความ
-   `kit-exception:` (พร้อมเหตุผล) ซึ่งต้องจบอยู่ภายในไม่เกิน 3 บรรทัดเหนือตัวมัน; โทนสีของพาเลตต์และ
-   variant `dark:` ใช้ได้เฉพาะในไฟล์ที่เทสต์ระบุไว้เท่านั้น
-7. ตรวจสอบทั้งสองธีมและ viewport ขนาด 390 px ก่อนสร้าง PR (ถ่ายภาพหน้าจอ); `tests/e2e/a11y.spec.ts`
-   จะรัน axe
+2. ห้ามแก้ไข `packages/ui-kit/src` ด้วยตนเอง: ให้ซิงค์ด้วย `scripts/dev/sync-ui-kit.sh <commit>`; จุดตรวจสอบก่อนคอมมิต `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) จะล้มเหลวหากมีไบต์ใดแตกต่างจากคอมมิตต้นทางที่ปักหมุดไว้ (ระบบจะข้ามพร้อมคำเตือนเมื่อไม่มีโคลนต้นทาง `UI_KIT_CLONE` หรือ `_references/cheaper-inference-ui-kit`) เมื่อชุด UI ไม่มีสิ่งที่ต้องการ ให้แก้ปัญหาเฉพาะหน้าในอะแดปเตอร์หรือหน้าจอ และส่งคำขอไปยังต้นทาง
+3. ข้อความเริ่มต้นของชุด UI เป็นภาษาอังกฤษ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ให้ส่งสตริงที่แปลแล้วจาก `useTranslations(...)` ทุกครั้งที่คอมโพเนนต์ของชุด UI แสดงข้อความ
+4. ยูทิลิตี Tailwind มีลำดับความสำคัญเหนือคลาสของคอมโพเนนต์ในชุด UI (ชุด UI ประกาศ `@layer theme, base, components, utilities` และกฎของชุดอยู่ใน `components`) — ใช้ยูทิลิตีสำหรับระยะห่างและเลย์เอาต์ ไม่ใช่เพื่อเปลี่ยนสีคอมโพเนนต์ของชุด UI
+5. หัวเรื่อง: ใช้ `.ci-heading` (Inter, ไม่มีระยะห่างตัวอักษร) สำหรับชื่อหน้าและชื่อส่วน; ใช้ `.ci-dashboard-display` (Instrument Serif) เฉพาะข้อความแสดงผลขนาดใหญ่ที่มีองค์ประกอบไม่หนาแน่น เช่น รหัสสถานะในหน้าข้อผิดพลาด
+6. `tests/unit/dashboard-kit-sweep.test.ts` ทำหน้าที่กำกับการนำชุด UI มาใช้: ห้ามมี span ลิเกเจอร์ของ Material ภายใต้ `src/app` หรือ `src/shared/components`; ในโครงสร้างแดชบอร์ด (`src/app/(dashboard)` และ `src/shared/components`) ห้ามใช้ `<select>`, `<textarea>` หรือ `<table>` แบบดิบ และห้ามสร้าง `role="dialog"` เองนอกเหนือจากข้อยกเว้นที่ระบุไว้ (สาขาเนทีฟของอะแดปเตอร์ `Select`, `RequestLoggerDetail`); `<button>` หรือ `<input>` แบบดิบทุกรายการในบริเวณดังกล่าวต้องมีความคิดเห็นที่มี `kit-exception:` (พร้อมเหตุผล) โดยสิ้นสุดไม่เกิน 3 บรรทัดเหนือองค์ประกอบนั้น; อนุญาตให้ใช้เฉดสีของพาเลตและตัวแปร `dark:` ได้เฉพาะในไฟล์ที่การทดสอบระบุไว้เท่านั้น
+7. ตรวจสอบทั้งสองธีมและวิวพอร์ตขนาด 390 px ก่อนสร้าง PR (พร้อมภาพหน้าจอ); `tests/e2e/a11y.spec.ts` เรียกใช้ axe
 
 ## 3. การเพิ่มหน้าจอ
 
@@ -150,7 +135,23 @@ relative import) จากนั้นให้ตรวจสอบ `git diff p
 usage และ endpoint สำหรับทั้งสองธีม, เรียกใช้ `npm run check:ui-kit-snapshot` และ `npm run test:vitest:ui` และ
 เปิด PR พร้อม changelog จากต้นทาง
 
-## 6. ดัชนีอ้างอิง
+## 6. แผนภาพ README
+
+แผนภาพสิบสองภาพที่ฝังใน `README.md` ระดับราก (`docs/diagrams/*.svg`) นำชุด UI มาใช้กับภาพนิ่ง โดยสร้างจากโปรแกรม ไม่ได้วาดด้วยมือ: มีไฟล์ตัวสร้าง 13 ไฟล์ใน `scripts/docs/gen-readme-*.mjs` (สิบสองแผนภาพและตัวควบคุม `gen-readme-diagrams.mjs`) และการทดสอบความล้าสมัย 12 รายการใน `tests/unit/docs/readme-*-svg.test.ts` หนึ่งรายการต่อแผนภาพ แต่ละการทดสอบเปรียบเทียบไฟล์ที่ commit แล้วกับผลลัพธ์ของตัวสร้างแบบไบต์ต่อไบต์ (งาน `test-unit`).
+
+- **โทเค็น.** `scripts/docs/readme-diagram-theme.mjs` คัดลอกชุดสีจาก `packages/ui-kit/src/ci-tokens.css` (ยืนยันความตรงกันกับไฟล์นั้นด้วย `tests/unit/docs/readme-diagram-theme.test.ts`) และกำหนดบทบาทข้อความด้วยฟอนต์ของชุด UI: Instrument Serif สำหรับข้อความแสดงผลเด่น, Inter สำหรับข้อความ UI และ IBM Plex Mono สำหรับตัวเลขกับโค้ด เป็นแพ็กเกจ `@fontsource` เดียวกับที่ `src/app/globals.css` โหลดให้แดชบอร์ด ค่าสีอ่อนอยู่บน `:root` และค่าสีเข้มอยู่ภายใต้ `prefers-color-scheme: dark` ภายในไฟล์ ทำให้แต่ละภาพตามรูปแบบสีของผู้อ่านบน GitHub.
+
+- **ฟอนต์.** `scripts/docs/readme-fonts.mjs` ลดไฟล์ woff2 เหล่านั้นให้เหลือเฉพาะไกลฟ์ที่แต่ละแผนภาพวาด แล้วฝังผ่าน `@font-face` เป็น URI แบบ `data:`. วิธีนี้เก็บฟอนต์ของชุด UI ไว้ภายใน SVG การทดสอบภาพ README ภายในเครื่องตรวจสอบว่าการเรนเดอร์ไม่ส่งคำขอฟอนต์ภายนอก. ชุดย่อยมีเฉพาะอักษรละติน โดยไกลฟ์สัญลักษณ์ที่ใช้ฟอนต์ระบบเป็นทางเลือกสำรองได้รับอนุญาตทีละรายการใน `SYMBOL_FALLBACKS` ส่วนไกลฟ์อื่นที่ไม่ครอบคลุมจะทำให้เกิดข้อผิดพลาด.
+
+- **สร้างใหม่.** `npm run docs:readme-diagrams` เขียนทั้งสิบสองแผนภาพใหม่ตามลำดับ README และพิมพ์หนึ่งบรรทัดต่อไฟล์พร้อมขนาด ตัวสร้างแต่ละตัวยังทำงานเดี่ยวได้ (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ต้องใช้ `node --import tsx/esm` เพราะตัวเลขมาจากตัวโหลดแค็ตตาล็อกปัจจุบันใน `open-sse/config/freeModelCatalog.ts`; ผลของการเปลี่ยนแค็ตตาล็อกต่อ CI อยู่ที่ `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`) ให้ commit ตัวสร้างและ SVG พร้อมกัน.
+
+- **หลักฐาน.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` เรนเดอร์ไฟล์ในการทดสอบภายในเครื่อง (แท็ก `<img>`, `Content-Security-Policy` แบบจำกัดและการตอบกลับ `image/svg+xml`) จับภาพโหมดสว่างและมืด แล้วรายงานคำขอฟอนต์ภายนอกที่หน้าเว็บส่งออกมา ซึ่งต้องเป็น 0.
+
+- **ขนาดที่กำหนด.** ต่ำกว่า 200 KB ต่อไฟล์ โดยทุกการทดสอบความล้าสมัยตรวจยืนยัน; 500 KB เป็นเพดานสูงสุดตายตัวสำหรับภาพ README ใด ๆ (กฎของตัวตรวจสอบ SVG studio).
+
+- **ข้อความร่วมกัน ตัวเลขจาก gate.** ตัวสร้างแต่ละตัวเก็บข้อความของแผนภาพในค่าคงที่ `*_COPY` หรือสร้างจากแค็ตตาล็อกปัจจุบัน ข้อความเดียวกันนี้ถูกวาดและใช้เป็นอินพุตของชุดย่อยฟอนต์ ตัวเลขมาตรฐานอยู่ในโหนด `<text>` ซึ่ง `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) อ่าน การทดสอบความล้าสมัยของแผนภาพที่ gate อ่านยังเรียกตัวตรวจสอบของ gate กับไฟล์ที่สร้างขึ้นด้วย ตัวเลขที่ต่างจากโค้ดจะทำให้การทดสอบล้มเหลว ให้แก้แหล่งข้อมูลที่ gate อ่าน ห้ามแก้ตัวเลขในตัวสร้าง.
+
+## 7. ดัชนีอ้างอิง
 
 - `src/app/globals.css` — ตัวเชื่อม token, การ override ของ `.dark`, ส่วนขยาย OmniRoute ใน `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — commit ต้นทางที่ตรึงไว้และการอนุญาตด้านสิทธิ์ใช้งาน; `packages/ui-kit/PATCHES.md`

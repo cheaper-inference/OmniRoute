@@ -93,28 +93,27 @@
    `src/shared/utils/categoricalPalette.ts`, o maršrutizavimo strategijoms – per
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow briaunos ir orkestravimo
    drobė skaito temai jautrius `--orch-status-*` kintamuosius (`src/shared/components/flow/edgeStyles.ts`).
-2. Niekada ranka netaisykite `packages/ui-kit/src`: sinchronizuokite su `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit patikra `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) nepavyksta, jei bent
-   vienas baitas skiriasi nuo užfiksuoto (pinned) upstream commit (ji praleidžiama su įspėjimu,
-   kai upstream klono – `UI_KIT_CLONE` arba `_references/cheaper-inference-ui-kit` – nėra). Kai
-   rinkinyje ko nors trūksta, apeikite tai adapteryje arba ekrane ir paprašykite to upstream.
-3. Rinkinio teksto numatytosios reikšmės yra anglų kalba (`label = "Loading"`, `loadingLabel = "Loading table"`…) –
-   perduokite išverstas eilutes iš `useTranslations(...)` kaskart, kai rinkinio komponentas atvaizduoja tekstą.
-4. Tailwind utilities turi pirmenybę prieš rinkinio komponentų klases (rinkinys deklaruoja
-   `@layer theme, base, components, utilities`, o jo taisyklės gyvena `components` sluoksnyje) –
-   naudokite utilities tarpams ir išdėstymui, o ne rinkinio komponentų perdažymui.
-5. Antraštės: `.ci-heading` (Inter, be tarpženklio atstumo) puslapių ir skyrių pavadinimams;
-   `.ci-dashboard-display` (Instrument Serif) tik dideliam, retam display tekstui, pvz., klaidos
-   puslapio būsenos kodui.
-6. `tests/unit/dashboard-kit-sweep.test.ts` prižiūri rinkinio diegimą: jokio Material ligatūros span
-   po `src/app` ar `src/shared/components`; dashboard medyje (`src/app/(dashboard)` ir
-   `src/shared/components`) jokių grynų `<select>`, `<textarea>` ar `<table>` ir jokių rankiškai
-   kurtų `role="dialog"` už išvardytų išimčių ribų (`Select` adapterio natiivioji šaka,
-   `RequestLoggerDetail`); kiekvienas grynas `<button>` ar `<input>` ten turi turėti komentarą su
-   `kit-exception:` (su priežastimi), kuris baigiasi ne daugiau kaip 3 eilutėmis aukščiau jo;
-   paletės atspalviai ir `dark:` variantai – tik failuose, kuriuos išvardija testas.
-7. Prieš PR patikrinkite abi temas ir 390 px peržiūros sritį (ekrano kopijos);
-   `tests/e2e/a11y.spec.ts` paleidžia axe.
+2. Niekada nekeiskite `packages/ui-kit/src` rankiniu būdu: sinchronizuokite naudodami `scripts/dev/sync-ui-kit.sh <commit>`;
+   prieš patvirtinimą vykdoma patikra `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) nepavyksta, jei bent vienas baitas
+   skiriasi nuo prisegto pirminio patvirtinimo (patikra praleidžiama pateikiant įspėjimą, kai nėra pirminio klono
+   `UI_KIT_CLONE` arba `_references/cheaper-inference-ui-kit`). Kai rinkinyje ko nors trūksta,
+   pritaikykite alternatyvų sprendimą adapteryje arba ekrane ir paprašykite, kad tai būtų pridėta pirminiame projekte.
+3. Numatytasis rinkinio tekstas yra anglų kalba (`label = "Loading"`, `loadingLabel = "Loading table"`…) — perduokite iš
+   `useTranslations(...)` gautas išverstas eilutes, kai rinkinio komponentas atvaizduoja tekstą.
+4. Tailwind pagalbinės klasės turi pirmenybę prieš rinkinio komponentų klases (rinkinyje deklaruojama
+   `@layer theme, base, components, utilities`, o jo taisyklės yra sluoksnyje `components`) — pagalbines klases naudokite
+   tarpams ir išdėstymui, o ne rinkinio komponentų spalvoms keisti.
+5. Antraštės: `.ci-heading` (Inter, be tarpų tarp raidžių) puslapių ir skyrių pavadinimams; `.ci-dashboard-display`
+   (Instrument Serif) naudokite tik dideliam, retai rodomam tekstui, pavyzdžiui, klaidos puslapio būsenos kodui.
+6. `tests/unit/dashboard-kit-sweep.test.ts` užtikrina rinkinio naudojimą: jokių Material ligatūrų `span` elementų
+   po `src/app` ar `src/shared/components`; ataskaitų srities medyje (`src/app/(dashboard)` ir
+   `src/shared/components`) negali būti tiesioginių `<select>`, `<textarea>` ar `<table>` elementų ir rankiniu būdu sukurtų
+   `role="dialog"` už išvardytų išimčių ribų (`Select` adapterio savosios šakos ir
+   `RequestLoggerDetail`); kiekvienam tiesioginiam `<button>` ar `<input>` elementui ten būtinas komentaras, kuriame yra
+   `kit-exception:` (su priežastimi), pasibaigiantis ne daugiau kaip 3 eilutėmis aukščiau; paletės atspalviai ir `dark:` variantai
+   leidžiami tik testo išvardytuose failuose.
+7. Prieš PR patikrinkite abi temas ir 390 px peržiūros sritį (naudodami ekrano kopijas); `tests/e2e/a11y.spec.ts` vykdo
+   axe.
 
 ## 3. Ekrano pridėjimas
 
@@ -152,7 +151,23 @@ santykinių importų). Tada: peržiūrėkite `git diff packages/ui-kit`, vizuali
 naudojimo ir galinio taško ekranus abiejose temose, paleiskite `npm run check:ui-kit-snapshot` ir `npm run test:vitest:ui` bei
 atidarykite PR, pridėdami pirminio šaltinio pakeitimų žurnalą.
 
-## 6. Nuorodų rodyklė
+## 6. README diagramos
+
+Dvylika diagramų, įterptų į šakninį `README.md` (`docs/diagrams/*.svg`), pritaiko rinkinį statiniams vaizdams. Jos generuojamos, o ne piešiamos ranka: `scripts/docs/gen-readme-*.mjs` yra 13 generatorių failų (dvylika diagramų ir valdiklis `gen-readme-diagrams.mjs`), o `tests/unit/docs/readme-*-svg.test.ts` yra 12 pasenimo testų, po vieną diagramai. Kiekvienas testas baitas po baito lygina į commit įtrauktą failą su jo generatoriaus išvestimi (užduotis `test-unit`).
+
+- **Žetonai.** `scripts/docs/readme-diagram-theme.mjs` kopijuoja paletę iš `packages/ui-kit/src/ci-tokens.css` (atitiktį šiam failui užtikrina `tests/unit/docs/readme-diagram-theme.test.ts`) ir apibrėžia teksto vaidmenis rinkinio šriftais: Instrument Serif išskirtiniam tekstui, Inter sąsajos tekstui, IBM Plex Mono skaičiams ir kodui. Tai tie patys `@fontsource` paketai, kuriuos `src/app/globals.css` įkelia valdymo skydeliui. Šviesios reikšmės yra failo `:root` dalyje, tamsios – po `prefers-color-scheme: dark` sąlyga, todėl kiekvienas vaizdas atitinka GitHub skaitytojo spalvų schemą.
+
+- **Šriftai.** `scripts/docs/readme-fonts.mjs` apriboja šiuos woff2 failus kiekvienoje diagramoje piešiamais glifais ir įterpia juos per `@font-face` kaip `data:` URI. Taip rinkinio šriftai lieka SVG viduje. Vietinis README vaizdų bandymas tikrina, kad atvaizduojant nebūtų išorinių šriftų užklausų. Poaibiai apima tik lotyniškus ženklus; simbolių glifai, naudojantys sistemos šriftus kaip atsarginį variantą, leidžiami po vieną sąraše `SYMBOL_FALLBACKS`. Bet kuris kitas neapimtas glifas sukelia klaidą.
+
+- **Pakartotinis generavimas.** `npm run docs:readme-diagrams` perrašo visas dvylika diagramų README tvarka ir išveda po eilutę su kiekvieno failo dydžiu. Generatorius gali veikti ir atskirai (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` reikia `node --import tsx/esm`, nes skaičiai gaunami iš dabartinio katalogo įkėliklio `open-sse/config/freeModelCatalog.ts`; katalogo pakeitimo poveikis CI aprašytas `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Generatorių ir SVG įtraukite į tą patį commit.
+
+- **Įrodymas.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` atvaizduoja failą vietiniame bandyme (`<img>` žyma, ribojanti `Content-Security-Policy` ir `image/svg+xml` atsakymas), užfiksuoja šviesų bei tamsų vaizdą ir nurodo puslapio išorines šriftų užklausas; jų turi būti 0.
+
+- **Dydžio biudžetas.** Mažiau nei 200 KB failui, tai tikrina kiekvienas pasenimo testas; 500 KB yra absoliuti bet kurio README vaizdo riba (SVG studio tikrintuvo taisyklė).
+
+- **Bendras tekstas, skaičiai iš gate.** Kiekvienas generatorius saugo diagramos tekstą `*_COPY` konstantoje arba sudaro jį iš dabartinio katalogo. Tas pats tekstas piešiamas ir naudojamas šriftų poaibiui sudaryti. Kanoniniai skaičiai lieka `<text>` mazguose, kuriuos skaito `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Gate skaitomų diagramų pasenimo testai taip pat paleidžia jo tikrintuvus sugeneruotam failui. Nuo kodo nukrypęs skaičius sukelia testo nesėkmę: taisykite gate skaitomą šaltinį, o ne skaičių generatoriuje.
+
+## 7. Nuorodų rodyklė
 
 - `src/app/globals.css` — tokenų tiltas, `.dark` perrašymai, OmniRoute `@layer components` plėtiniai
 - `packages/ui-kit/UPSTREAM.md` — užfiksuotas pirminio šaltinio pakeitimas ir licencijos leidimas; `packages/ui-kit/PATCHES.md`

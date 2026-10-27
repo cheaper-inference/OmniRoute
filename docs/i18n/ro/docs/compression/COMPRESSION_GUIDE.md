@@ -179,7 +179,7 @@ Cu Stacked:          10K-2.5K tokeni trimiși    (interval eligibil RTK+Caveman 
 
 ### Tablou de bord
 
-Navigați la `Tablou de bord → Context și cache`:
+Navigați la `Dashboard → Context & Cache`:
 
 - **Caveman** — selectarea modului, pachete lingvistice, previzualizare și valori implicite globale
 - **RTK** — previzualizarea filtrului de comenzi, setările de siguranță RTK și catalogul de filtre
@@ -188,7 +188,7 @@ Navigați la `Tablou de bord → Context și cache`:
 
 ### Suprascriere pentru fiecare combinație
 
-În `Tablou de bord → Context și cache → Combinații de compresie`, atribuiți o combinație de compresie unei combinații de rutare:
+În `Dashboard → Context & Cache → Compression Combos`, atribuiți o combinație de compresie unei combinații de rutare:
 
 ```txt
 Combinație: "free-tier-fallback"
@@ -201,7 +201,7 @@ Combinație: "free-tier-fallback"
 
 Aceasta vă permite să utilizați compresia stivuită pentru furnizorii gratuiți/de programare, păstrând în același timp modul lite pentru abonamentele cu plată.
 
-Această atribuire „Suprascriere pentru fiecare combinație” este un control diferit de suprascrierea **modului de compresie al combinației de rutare** (Implicit/Dezactivat/Lite/Standard/Agresiv/Ultra/Răspunsuri Codex — schema câmpului acceptă, de asemenea, `rtk`, `stacked` și `omniglyph`) — această suprascriere nu selectează un flux denumit de combinație de compresie; doar setează câmpul `compressionMode` consultat de `resolveCompressionPlan`. Acesta poate fi setat fie pe cardul combinației (`Tablou de bord → Combinații`), fie, începând cu #6760, pentru fiecare combinație de rutare din lista „Atribuire rutării” de la `Tablou de bord → Context și cache → Combinații de compresie`, chiar lângă caseta de selectare pentru atribuirea fluxului documentată mai sus. Ambele interfețe persistă datele prin același endpoint `PUT /api/combos/{id}`.
+Această atribuire „Suprascriere pentru fiecare combinație” este un control diferit de suprascrierea **modului de compresie al combinației de rutare** (Implicit/Dezactivat/Lite/Standard/Agresiv/Ultra/Răspunsuri Codex — schema câmpului acceptă, de asemenea, `rtk`, `stacked` și `omniglyph`) — această suprascriere nu selectează un flux denumit de combinație de compresie; doar setează câmpul `compressionMode` consultat de `resolveCompressionPlan`. Acesta poate fi setat fie pe cardul combinației (`Dashboard → Combos`), fie, începând cu #6760, pentru fiecare combinație de rutare din lista „Atribuire rutării” de la `Dashboard → Context & Cache → Compression Combos`, chiar lângă caseta de selectare pentru atribuirea fluxului documentată mai sus. Ambele interfețe persistă datele prin același endpoint `PUT /api/combos/{id}`.
 
 ### Suprascriere pentru fiecare solicitare
 

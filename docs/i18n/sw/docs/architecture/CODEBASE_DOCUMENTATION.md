@@ -781,7 +781,7 @@ Angalia [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) na sehemu maalumu katika
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Weka scope husika katika `src/shared/constants/mcpScopes.ts`.
 3. Sajili zana katika `open-sse/mcp-server/server.ts`.
-4. Ongeza majaribio chini ya `open-sse/mcp-server/__tests__/`.
+4. Ongeza majaribio chini ya `tests/unit/`.
 5. Sasisha [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Ongeza ujuzi mpya wa A2A
@@ -799,7 +799,7 @@ Tazama [A2A-SERVER.md § Kuongeza Ujuzi Mpya](../frameworks/A2A-SERVER.md). Ujuz
 - **Utoaji majina**: faili `camelCase` au `kebab-case`, vijenzi `PascalCase`,
   konstanti `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` kila mahali;
-  `no-explicit-any` = `warn` katika `open-sse/` na `tests/`, error kwingineko.
+  `no-explicit-any` = `error` katika `open-sse/**/*.ts` na `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (msimamo wa mifumo ya zamani). Pendelea aina zilizobainishwa wazi kuliko
   uainishaji wa kiotomatiki katika mipaka ya moduli.
 - **Hifadhidata**: kamwe usiandike SQL ghafi katika njia au handler — kila mara pitia
@@ -828,8 +828,7 @@ Tazama [A2A-SERVER.md § Kuongeza Ujuzi Mpya](../frameworks/A2A-SERVER.md). Ujuz
   `a2a`, `memory`, `skills`.
 - **Branch**: viambishi awali `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Kamwe usifanye commit moja kwa moja kwenye `main`.
-- **Husky**: pre-commit huendesha `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push huendesha `check:any-budget:t11` + `check:tracked-artifacts` (vizuizi vya haraka; haijumuishi `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

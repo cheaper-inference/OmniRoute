@@ -164,8 +164,8 @@ generator's output (job `test-unit`).
   values behind `prefers-color-scheme: dark`, inside the file, so each image follows the viewer's scheme on
   GitHub.
 - **Fonts.** `scripts/docs/readme-fonts.mjs` subsets those woff2 files to the glyphs each diagram draws and
-  embeds them as `@font-face` `data:` URIs — the only way kit typography reaches a README image, since
-  GitHub Markdown carries no CSS and the camo proxy blocks every external fetch. The subsets are latin-only;
+  embeds them as `@font-face` `data:` URIs — keeping the kit fonts inside the SVG.
+  The local README image probe checks that rendering makes no external font requests. The subsets are latin-only;
   the symbol glyphs that fall back to the system stack are allowed one by one in `SYMBOL_FALLBACKS`, and any
   other uncovered glyph throws.
 - **Regenerate.** `npm run docs:readme-diagrams` rewrites all twelve in README order and prints one line per
@@ -173,12 +173,12 @@ generator's output (job `test-unit`).
   `free-tier-budget` needs `node --import tsx/esm` because its figures come from the live catalog loader in
   `open-sse/config/freeModelCatalog.ts`; the CI consequence of a catalog change is in
   `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit the generator and the SVG together.
-- **Proof.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renders a file the way GitHub serves
-  it (an `<img>` tag, camo's `Content-Security-Policy`, `image/svg+xml`), captures a light and a dark frame
-  and reports the external font requests the page made (must be 0).
+- **Proof.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renders a file using an `<img>` tag,
+  a restrictive `Content-Security-Policy` and an `image/svg+xml` response in the local probe. It captures
+  a light and a dark frame and reports the external font requests the page made (must be 0).
 - **Budget.** Under 200 KB per file (each staleness test asserts it); 500 KB is the hard cap for any README
   image (the SVG studio validator's rule).
-- **Copy unchanged, counts from the gate.** The rebrand changed type and palette, not words: each generator
+- **Shared copy, counts from the gate.** Each generator
   carries its diagram's copy in a `*_COPY` constant (or builds it from the live catalog) that is both the
   drawn text and the font-subset input. Canonical figures stay in `<text>` nodes, read by `check:docs-counts`
   (`scripts/check/check-docs-counts-sync.mjs`); the staleness tests of the diagrams that gate reads also run

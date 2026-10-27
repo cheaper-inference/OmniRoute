@@ -540,17 +540,17 @@ Trae 是一款相对较新的 AI 编程助手。在实现处理器之前：
 1. 在 VS Code / JetBrains 市场中或作为独立应用识别其二进制文件/扩展
 2. 使用 mitmproxy 捕获流量，以发现 API 主机和端点结构
 3. 确定身份验证机制
-4. 根据 TOS 和 API 的可发现性评估是否继续
+4. 根据服务条款和 API 的可发现性评估是否继续
 
-在调研完成之前，仪表板中的 Trae 卡片会显示“调研中”徽章和“报告可行性”链接。位于 `src/mitm/handlers/trae.ts` 的处理器存根会抛出结构化的“尚未实现”错误。
+在调研完成之前，仪表板中的 Trae 卡片会显示“调研中”徽章和“报告可行性”链接。位于 `src/mitm/handlers/trae.ts` 的处理器存根会抛出结构化的 `Not yet implemented` 错误。
 
 ### 待办代理（需要 MITM — 不支持自定义基础 URL）
 
-以下工具的当前版本不支持自定义基础 URL，因此 MITM 是唯一的拦截途径。可行性评估尚未完成：
+以下工具的当前版本不支持自定义基础 URL，因此 MITM 是唯一的拦截方式。可行性评估尚待完成：
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — 与 Kiro IDE 不同)
 - **Cowork** (Anthropic 桌面版)
 
-注意：GitHub Copilot CLI ≥v1.0.19 支持 `COPILOT_PROVIDER_BASE_URL` — 对该工具请使用直接配置，而不是 MITM。
+注意：GitHub Copilot CLI ≥v1.0.19 支持 `COPILOT_PROVIDER_BASE_URL` — 对于该工具，请使用直接配置而非 MITM。

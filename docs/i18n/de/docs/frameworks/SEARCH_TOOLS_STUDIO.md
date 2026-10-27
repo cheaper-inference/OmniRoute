@@ -54,7 +54,7 @@ Neuer Tab zum Extrahieren von Inhalten aus einer URL über `POST /v1/web/fetch` 
 - Eingabe: URL + Umschalter für vollständige Seite + Formatauswahl (Markdown / Text / HTML).
 - Absenden → abrufen → `ScrapeResult.tsx` rendern.
 - `ScrapeResult` rendert eine Markdown-Vorschau + Umschalter für Rohdaten.
-- Begrenzung: Wenn der Antworttext größer als **256 KB** ist, zeigt die Benutzeroberfläche `(gekürzt, Rohdaten anzeigen)` an und öffnet die Rohdaten in einem Monaco-Modal (D21).
+- Begrenzung: Wenn der Antworttext größer als **256 KB** ist, zeigt die Benutzeroberfläche `View full raw content` an und öffnet die Rohdaten in einem Modal (D21).
 - Metadatenbereich: Anbieter (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), Latenz, Kosten, Antwortgröße, Anzahl der Links.
 - Verwendet den Hook `useScrapeFetch.ts`.
 

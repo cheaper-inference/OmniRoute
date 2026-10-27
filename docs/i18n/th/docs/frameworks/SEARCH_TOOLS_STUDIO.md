@@ -54,7 +54,7 @@ Search Tools Studio เปลี่ยน `/dashboard/search-tools` จากพ
 - อินพุต: URL + ตัวเลือกเปิด/ปิดแบบเต็มหน้า + ตัวเลือกรูปแบบ (markdown / ข้อความ / HTML)
 - ส่งคำขอ → ดึงข้อมูล → แสดงผล `ScrapeResult.tsx`
 - `ScrapeResult` แสดงตัวอย่าง markdown + ตัวเลือกเปิด/ปิดข้อมูลดิบ
-- ขีดจำกัด: หากเนื้อหาการตอบกลับมีขนาดมากกว่า **256 KB** UI จะแสดง `(ถูกตัดทอน, ดูข้อมูลดิบ)` และเปิดข้อมูลดิบในโมดัล Monaco (D21)
+- ขีดจำกัด: หากเนื้อหาการตอบกลับมีขนาดมากกว่า **256 KB** UI จะแสดง `View full raw content` และเปิดข้อมูลดิบในโมดัล (D21)
 - แผงข้อมูลเมตา: ผู้ให้บริการ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), เวลาแฝง, ค่าใช้จ่าย, ขนาดการตอบกลับ, จำนวนลิงก์
 - ใช้ฮุก `useScrapeFetch.ts`
 

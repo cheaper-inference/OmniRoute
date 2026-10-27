@@ -155,7 +155,7 @@ taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 | `medium`   | ≥ 1,000  |
 | `low`      | < 1,000  |
 
-### സംഭരണവും പുതുമയും
+### സംഭരണവും ഡാറ്റയുടെ പുതുമയും
 
 നോർമലൈസ് ചെയ്ത എൻട്രികൾ `source = "arena_elo"` എന്നതോടെ `model_intelligence` DB
 ടേബിളിൽ എഴുതപ്പെടുന്നു (`src/lib/db/modelIntelligence.ts`). എൻട്രികൾ **7 ദിവസത്തിന് ശേഷം

@@ -122,7 +122,7 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ## スコアの仕組み
 
-### ソース: Arena AI リーダーボード
+### ソース: Arena AI leaderboard
 
 Arena ELO 同期エンジン（`src/lib/arenaEloSync.ts`）は、Arena AI リーダーボード API
 （`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`）から 2 つの

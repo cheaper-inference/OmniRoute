@@ -4,8 +4,6 @@
 
 ---
 
-# Webhooks
-
 > **Izvor istine:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
 > **Posljednje ažurirano:** 2026-06-28 — v3.8.40
 

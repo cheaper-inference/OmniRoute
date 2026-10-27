@@ -30,7 +30,7 @@ OmniRoute는 376개의 프로바이더를 등록하며, 그중 155개의 카탈�
 
 이 랭킹은 세 가지 실제 소스로부터 계산됩니다:
 
-1. 무료 프로바이더 목록 — `NOAUTH_PROVIDERS`와 `hasFree`로 플래그된
+1. 무료 제공자 목록 — `NOAUTH_PROVIDERS`와 `hasFree` 플래그가 지정된
    `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` 항목
    (`src/shared/constants/providers.ts`).
 2. 프로바이더 레지스트리의 각 프로바이더 모델 카탈로그
@@ -38,7 +38,7 @@ OmniRoute는 376개의 프로바이더를 등록하며, 그중 155개의 카탈�
 3. Arena ELO 동기화 엔진(`src/lib/arenaEloSync.ts`)이 `model_intelligence` DB 테이블에
    저장하는 ELO 기반 작업 적합도(task-fit) 점수.
 
-조인 로직은 `src/lib/freeProviderRankings.ts`에 있습니다.
+결합 로직은 `src/lib/freeProviderRankings.ts`에 있습니다.
 
 ---
 

@@ -121,7 +121,7 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ---
 
-## របៀបដែលពិន្ទុដំណើរការ
+## របៀបដំណើរការរបស់ពិន្ទុ
 
 ### ប្រភព៖ Arena AI leaderboard
 

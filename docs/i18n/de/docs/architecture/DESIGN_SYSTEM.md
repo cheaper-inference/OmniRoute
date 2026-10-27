@@ -89,29 +89,27 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-Kanten und die
    Orchestrierungs-Canvas lesen die theme-sensitiven `--orch-status-*`-Variablen
    (`src/shared/components/flow/edgeStyles.ts`).
-2. `packages/ui-kit/src` niemals von Hand patchen: mit `scripts/dev/sync-ui-kit.sh <commit>`
-   synchronisieren; das Pre-Commit-Gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`)
-   schlägt bei jedem Byte fehl, das vom angepinnten Upstream-Commit abweicht (es wird mit einer
-   Warnung übersprungen, wenn der Upstream-Klon, `UI_KIT_CLONE` oder
-   `_references/cheaper-inference-ui-kit`, fehlt). Wenn dem Kit etwas fehlt, im Adapter oder im
-   Screen darum herumarbeiten und es upstream anfordern.
-3. Die Text-Defaults des Kits sind Englisch (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   übersetzte Strings aus `useTranslations(...)` übergeben, wann immer eine Kit-Komponente Text rendert.
-4. Tailwind-Utilities gewinnen gegenüber Kit-Komponentenklassen (das Kit deklariert
-   `@layer theme, base, components, utilities` und seine Regeln leben in `components`) — Utilities
-   für Abstände und Layout verwenden, nicht, um Kit-Komponenten umzufärben.
-5. Überschriften: `.ci-heading` (Inter, kein Tracking) für Seiten- und Abschnittstitel;
-   `.ci-dashboard-display` (Instrument Serif) nur für großen, spärlichen Display-Text wie den
-   Statuscode der Fehlerseite.
-6. `tests/unit/dashboard-kit-sweep.test.ts` überwacht die Kit-Übernahme: kein Material-Ligatur-Span
-   unter `src/app` oder `src/shared/components`; im Dashboard-Baum (`src/app/(dashboard)` und
-   `src/shared/components`) keine rohen `<select>`, `<textarea>` oder `<table>` und kein
-   handgeschriebenes `role="dialog"` außerhalb der gelisteten Ausnahmen (der native Zweig des
-   `Select`-Adapters, `RequestLoggerDetail`); jedes rohe `<button>` oder `<input>` dort braucht
-   einen Kommentar, der `kit-exception:` enthält (mit der Begründung) und höchstens 3 Zeilen darüber
-   endet; Paletten-Farbtöne und `dark:`-Varianten nur in den Dateien, die der Test auflistet.
-7. Vor einem PR beide Themes und den 390-px-Viewport prüfen (Screenshots); `tests/e2e/a11y.spec.ts`
-   führt axe aus.
+2. `packages/ui-kit/src` niemals manuell ändern: Synchronisierung mit `scripts/dev/sync-ui-kit.sh <commit>`; die
+   Pre-Commit-Prüfung `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) schlägt bei jedem Byte fehl, das
+   vom angehefteten Upstream-Commit abweicht (sie wird mit einer Warnung übersprungen, wenn der Upstream-Klon,
+   `UI_KIT_CLONE` oder `_references/cheaper-inference-ui-kit`, nicht vorhanden ist). Wenn im Kit etwas fehlt,
+   dies im Adapter oder in der Ansicht umgehen und upstream danach fragen.
+3. Die Standardtexte des Kits sind auf Englisch (`label = "Loading"`, `loadingLabel = "Loading table"`…) — übersetzte
+   Zeichenfolgen aus `useTranslations(...)` übergeben, sobald eine Kit-Komponente Text darstellt.
+4. Tailwind-Dienstprogramme haben Vorrang vor den Komponentenklassen des Kits (das Kit deklariert
+   `@layer theme, base, components, utilities`, und seine Regeln befinden sich in `components`) — Dienstprogramme für
+   Abstände und Layout verwenden, nicht zum Umfärben von Kit-Komponenten.
+5. Überschriften: `.ci-heading` (Inter, ohne Zeichenabstand) für Seiten- und Abschnittstitel; `.ci-dashboard-display`
+   (Instrument Serif) nur für große, sparsam eingesetzte Anzeigetexte wie den Statuscode auf der Fehlerseite.
+6. `tests/unit/dashboard-kit-sweep.test.ts` stellt die Kit-Nutzung sicher: keine Material-Ligatur-Spans unter
+   `src/app` oder `src/shared/components`; im Dashboard-Baum (`src/app/(dashboard)` und
+   `src/shared/components`) keine unverarbeiteten `<select>`-, `<textarea>`- oder `<table>`-Elemente und keine selbst
+   erstellten `role="dialog"` außerhalb der aufgeführten Ausnahmen (der native Zweig des `Select`-Adapters,
+   `RequestLoggerDetail`); jedes unverarbeitete `<button>`- oder `<input>`-Element dort benötigt einen Kommentar mit
+   `kit-exception:` (einschließlich Begründung), der höchstens 3 Zeilen darüber endet; Palettenfarbtöne und `dark:`-Varianten
+   sind nur in den von diesem Test aufgeführten Dateien zulässig.
+7. Vor einem PR beide Themes und den Viewport mit 390 px überprüfen (Screenshots); `tests/e2e/a11y.spec.ts` führt
+   axe aus.
 
 ## 3. Einen Bildschirm hinzufügen
 
@@ -154,7 +152,23 @@ relativen Imports entfernt). Anschließend: Prüfe `git diff packages/ui-kit`, f
 Nutzung und Endpunkt in beiden Themes durch, führe `npm run check:ui-kit-snapshot` und `npm run test:vitest:ui` aus und
 öffne den PR mit dem vorgelagerten Changelog.
 
-## 6. Referenzindex
+## 6. README-Diagramme
+
+Die zwölf Diagramme im `README.md` des Stammverzeichnisses (`docs/diagrams/*.svg`) wenden das Kit auf statische Bilder an. Sie werden erzeugt, nicht von Hand gezeichnet: 13 Generatordateien unter `scripts/docs/gen-readme-*.mjs` (zwölf Diagramme plus der Treiber `gen-readme-diagrams.mjs`) und 12 Aktualitätstests unter `tests/unit/docs/readme-*-svg.test.ts`, einer je Diagramm. Jeder Test vergleicht die eingecheckte Datei byteweise mit der Ausgabe ihres Generators (Job `test-unit`).
+
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopiert die Palette aus `packages/ui-kit/src/ci-tokens.css` (durch `tests/unit/docs/readme-diagram-theme.test.ts` gegen diese Datei abgesichert) und definiert die Textrollen mit den Schriften des Kits: Instrument Serif für Display-Text, Inter für UI-Text und IBM Plex Mono für Zahlen und Code. Es sind dieselben `@fontsource`-Pakete, die `src/app/globals.css` für das Dashboard lädt. Helle Werte stehen in `:root`, dunkle unter `prefers-color-scheme: dark` innerhalb der Datei; dadurch folgt jedes Bild dem Farbschema des Betrachters auf GitHub.
+
+- **Schriften.** `scripts/docs/readme-fonts.mjs` reduziert diese woff2-Dateien auf die im jeweiligen Diagramm gezeichneten Glyphen und bettet sie als `@font-face` mit `data:`-URIs ein. So bleiben die Schriften des Kits im SVG. Der lokale README-Bildtest prüft, dass beim Rendern keine externen Schriftanfragen entstehen. Die Teilmengen enthalten nur lateinische Zeichen; Symbolglyphen, die auf die Systemschriften zurückfallen, werden einzeln in `SYMBOL_FALLBACKS` zugelassen. Jede andere nicht abgedeckte Glyphe löst einen Fehler aus.
+
+- **Neu erzeugen.** `npm run docs:readme-diagrams` schreibt alle zwölf Diagramme in README-Reihenfolge neu und gibt je Datei eine Zeile mit ihrer Größe aus. Jeder Generator läuft auch einzeln (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` benötigt `node --import tsx/esm`, weil seine Zahlen aus dem aktuellen Kataloglader in `open-sse/config/freeModelCatalog.ts` stammen; die CI-Auswirkung einer Katalogänderung steht unter `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Generator und SVG gemeinsam committen.
+
+- **Nachweis.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` rendert eine Datei im lokalen Test (ein `<img>`-Tag, eine restriktive `Content-Security-Policy` und eine `image/svg+xml`-Antwort), nimmt je ein helles und dunkles Bild auf und meldet die externen Schriftanfragen der Seite; deren Zahl muss 0 sein.
+
+- **Budget.** Unter 200 KB je Datei, von jedem Aktualitätstest geprüft; 500 KB ist die absolute Obergrenze für jedes README-Bild (Regel des SVG studio-Validators).
+
+- **Gemeinsamer Text, Zahlen vom Gate.** Jeder Generator hält den Diagrammtext in einer `*_COPY`-Konstante oder erstellt ihn aus dem aktuellen Katalog. Derselbe Text wird gezeichnet und als Eingabe für die Schriftteilmenge verwendet. Kanonische Zahlen bleiben in `<text>`-Knoten, die `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) liest. Die Aktualitätstests der vom Gate gelesenen Diagramme führen dessen Validatoren auch auf der erzeugten Datei aus. Weicht eine Zahl vom Code ab, schlägt der Test fehl: die vom Gate gelesene Quelle korrigieren, niemals die Zahl im Generator.
+
+## 7. Referenzindex
 
 - `src/app/globals.css` — Token-Bridge, `.dark`-Überschreibungen, OmniRoute-Erweiterungen unter `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — festgelegter vorgelagerter Commit und Lizenzautorisierung; `packages/ui-kit/PATCHES.md`

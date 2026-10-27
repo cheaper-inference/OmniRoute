@@ -54,7 +54,7 @@ Nova kartica za izdvajanje sadržaja iz URL-a putem `POST /v1/web/fetch` (izrađ
 - Unos: URL + prekidač za cijelu stranicu + odabir formata (markdown / tekst / HTML).
 - Slanje → dohvaćanje → prikaz u `ScrapeResult.tsx`.
 - `ScrapeResult` prikazuje pretpregled markdowna + prekidač za neobrađeni prikaz.
-- Ograničenje: ako je tijelo odgovora veće od **256 KB**, korisničko sučelje prikazuje `(skraćeno, prikaži neobrađeno)` i otvara neobrađeni sadržaj u Monaco modalnom prozoru (D21).
+- Ograničenje: ako je tijelo odgovora veće od **256 KB**, korisničko sučelje prikazuje `View full raw content` i otvara neobrađeni sadržaj u modalnom prozoru (D21).
 - Ploča s metapodacima: pružatelj (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latencija, trošak, veličina odgovora, broj poveznica.
 - Upotrebljava hook `useScrapeFetch.ts`.
 

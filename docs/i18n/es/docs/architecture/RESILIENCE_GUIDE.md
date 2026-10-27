@@ -400,7 +400,7 @@ Cada conexión de proveedor puede declarar un `max_concurrent`
 Déjalo vacío para no aplicar límite. Este es el único parámetro que impulsa la capa de
 serialización descrita a continuación — ajústalo a la concurrencia real de la cuenta (p. ej., GLM ~1, MiniMax ~2).
 
-Límites de concurrencia por modelo (`modelConcurrency`)
+### Límites de concurrencia por modelo (`modelConcurrency`)
 
 Una conexión puede además declarar límites de concurrencia exactos por modelo
 dentro de su mapa `rateLimitOverrides`:

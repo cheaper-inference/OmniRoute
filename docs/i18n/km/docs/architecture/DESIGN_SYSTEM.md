@@ -87,26 +87,26 @@
    `src/shared/utils/categoricalPalette.ts` ហើយសម្រាប់ routing strategies គឺ
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges និង orchestration
    canvas អានអថេរ `--orch-status-*` ដែលអាចប្តូរតាម theme បាន (`src/shared/components/flow/edgeStyles.ts`)។
-2. កុំកែ `packages/ui-kit/src` ដោយដៃ៖ ធ្វើសមកាលកម្មជាមួយ `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) បរាជ័យនៅពេលណាដែលមាន byte ណាមួយ
-   ខុសពី pinned upstream commit (វារំលងជាមួយការព្រមាននៅពេល upstream clone
-   គឺ `UI_KIT_CLONE` ឬ `_references/cheaper-inference-ui-kit` មិនមាន)។ នៅពេល kit ខ្វះអ្វីមួយ
-   សូមដោះស្រាយជុំវិញវាក្នុង adapter ឬ screen ហើយស្នើសុំទៅ upstream។
-3. តម្លៃអក្សរលំនាំដើមរបស់ kit គឺជាភាសាអង់គ្លេស (`label = "Loading"`, `loadingLabel = "Loading table"`…) — បញ្ជូន
-   ខ្សែអក្សរដែលបានបកប្រែពី `useTranslations(...)` រាល់ពេលដែល component របស់ kit បង្ហាញអក្សរ។
-4. Tailwind utilities ឈ្នះជាង class របស់ kit component (kit ប្រកាស
-   `@layer theme, base, components, utilities` ហើយ rules របស់វាស្ថិតក្នុង `components`) — ប្រើ utilities សម្រាប់
-   spacing និង layout កុំប្រើវាដើម្បីប្តូរពណ៌ kit components ឡើយ។
-5. ចំណងជើង៖ `.ci-heading` (Inter គ្មាន tracking) សម្រាប់ចំណងជើងទំព័រ និងផ្នែក; `.ci-dashboard-display`
-   (Instrument Serif) សម្រាប់តែអក្សរបង្ហាញធំៗ និងមានចំនួនតិច ដូចជាលេខកូដស្ថានភាពនៃទំព័រ error។
-6. `tests/unit/dashboard-kit-sweep.test.ts` ការពារការអនុវត្ត kit៖ មិនអនុញ្ញាត Material ligature span នៅក្រោម
+2. កុំកែ `packages/ui-kit/src` ដោយដៃ៖ ធ្វើសមកាលកម្មជាមួយ `scripts/dev/sync-ui-kit.sh <commit>`; ច្រកត្រួតពិនិត្យ
+   មុន commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) នឹងបរាជ័យ ប្រសិនបើមាន byte ណាមួយ
+   ខុសពី upstream commit ដែលបាន pin (វារំលងដោយមានការព្រមាន នៅពេលគ្មាន upstream clone,
+   `UI_KIT_CLONE` ឬ `_references/cheaper-inference-ui-kit`)។ នៅពេល kit ខ្វះអ្វីមួយ
+   ចូរដោះស្រាយបណ្ដោះអាសន្ននៅក្នុង adapter ឬ screen ហើយស្នើសុំវាពី upstream។
+3. តម្លៃលំនាំដើមនៃអត្ថបទរបស់ kit គឺជាភាសាអង់គ្លេស (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ផ្ដល់ string
+   ដែលបានបកប្រែពី `useTranslations(...)` រាល់ពេល component របស់ kit render អត្ថបទ។
+4. utility របស់ Tailwind មានអាទិភាពលើ class របស់ component ក្នុង kit (kit ប្រកាស
+   `@layer theme, base, components, utilities` ហើយ rule របស់វាស្ថិតនៅក្នុង `components`) — ប្រើ utility សម្រាប់
+   spacing និង layout មិនមែនសម្រាប់ប្ដូរពណ៌ component របស់ kit ទេ។
+5. Heading៖ `.ci-heading` (Inter, គ្មាន tracking) សម្រាប់ចំណងជើងទំព័រ និងផ្នែក; `.ci-dashboard-display`
+   (Instrument Serif) សម្រាប់តែអត្ថបទបង្ហាញធំៗ និងមិនសូវញឹកញាប់ ដូចជា status code នៅលើទំព័រកំហុស។
+6. `tests/unit/dashboard-kit-sweep.test.ts` ការពារការប្រើប្រាស់ kit៖ មិនអនុញ្ញាតឱ្យមាន span ជា Material ligature នៅក្រោម
    `src/app` ឬ `src/shared/components`; នៅក្នុង dashboard tree (`src/app/(dashboard)` និង
-   `src/shared/components`) មិនអនុញ្ញាត `<select>`, `<textarea>` ឬ `<table>` ឆៅ និងមិនអនុញ្ញាត
-   `role="dialog"` ដែលសរសេរដោយដៃនៅក្រៅករណីលើកលែងដែលបានរាយ (native branch របស់ `Select` adapter,
-   `RequestLoggerDetail`); រាល់ `<button>` ឬ `<input>` ឆៅនៅទីនោះត្រូវការ comment ដែលមាន
-   `kit-exception:` (ជាមួយមូលហេតុ) ដែលបញ្ចប់យ៉ាងច្រើន 3 ជួរខាងលើវា; palette hues និង `dark:` variants
-   អនុញ្ញាតតែក្នុងឯកសារដែល test បានរាយ។
-7. ផ្ទៀងផ្ទាត់ theme ទាំងពីរ និង viewport 390 px មុនពេលបង្កើត PR (រូបថតអេក្រង់); `tests/e2e/a11y.spec.ts` ដំណើរការ
+   `src/shared/components`) មិនអនុញ្ញាតឱ្យមាន `<select>`, `<textarea>` ឬ `<table>` ដើម និងមិនអនុញ្ញាតឱ្យបង្កើត
+   `role="dialog"` ដោយដៃនៅក្រៅករណីលើកលែងដែលបានរាយបញ្ជី (native branch របស់ adapter `Select`,
+   `RequestLoggerDetail`); រាល់ `<button>` ឬ `<input>` ដើមនៅទីនោះ ត្រូវមាន comment ដែលផ្ទុក
+   `kit-exception:` (ជាមួយហេតុផល) និងបញ្ចប់មិនលើសពី 3 បន្ទាត់នៅខាងលើវា; hue របស់ palette និង variant `dark:`
+   អនុញ្ញាតតែក្នុង file ដែល test បានរាយបញ្ជីប៉ុណ្ណោះ។
+7. ផ្ទៀងផ្ទាត់ theme ទាំងពីរ និង viewport ទំហំ 390 px មុនបង្កើត PR (ជាមួយ screenshot); `tests/e2e/a11y.spec.ts` ដំណើរការ
    axe។
 
 ## 3. ការបន្ថែម screen
@@ -147,7 +147,23 @@ relative imports)។ បន្ទាប់មក៖ ពិនិត្យ `git d
 usage និង endpoint ក្នុង theme ទាំងពីរ, ដំណើរការ `npm run check:ui-kit-snapshot` និង `npm run test:vitest:ui` ហើយ
 បើក PR ដោយភ្ជាប់ជាមួយ upstream changelog។
 
-## 6. លិបិក្រមយោង
+## 6. ដ្យាក្រាម README
+
+ដ្យាក្រាមទាំងដប់ពីរដែលបញ្ចូលក្នុង `README.md` នៅថតឫស (`docs/diagrams/*.svg`) អនុវត្ត kit លើរូបភាពឋិតិវន្ត។ វាត្រូវបានបង្កើតដោយកម្មវិធី មិនមែនគូរដោយដៃទេ: មានឯកសារបង្កើត 13 នៅ `scripts/docs/gen-readme-*.mjs` (ដ្យាក្រាមដប់ពីរ និងកម្មវិធីបញ្ជា `gen-readme-diagrams.mjs`) និងតេស្តភាពហួសសម័យ 12 នៅ `tests/unit/docs/readme-*-svg.test.ts` មួយសម្រាប់ដ្យាក្រាមនីមួយៗ។ តេស្តនីមួយៗប្រៀបធៀបឯកសារដែលបាន commit ជាមួយលទ្ធផលកម្មវិធីបង្កើតរបស់វា បៃត៍ម្តងមួយ (ការងារ `test-unit`)។
+
+- **Token។** `scripts/docs/readme-diagram-theme.mjs` ចម្លងក្ដារពណ៌ពី `packages/ui-kit/src/ci-tokens.css` (ភាពត្រូវគ្នាជាមួយឯកសារនោះត្រូវបានធានាដោយ `tests/unit/docs/readme-diagram-theme.test.ts`) ហើយកំណត់តួនាទីអត្ថបទដោយពុម្ពអក្សររបស់ kit: Instrument Serif សម្រាប់អត្ថបទបង្ហាញលេចធ្លោ, Inter សម្រាប់ផ្ទៃប្រើប្រាស់ និង IBM Plex Mono សម្រាប់លេខនិងកូដ។ ទាំងនេះជាកញ្ចប់ `@fontsource` ដូចគ្នាដែល `src/app/globals.css` ផ្ទុកសម្រាប់ផ្ទាំងគ្រប់គ្រង។ តម្លៃភ្លឺស្ថិតនៅ `:root` ហើយតម្លៃងងឹតនៅក្រោមលក្ខខណ្ឌ `prefers-color-scheme: dark` ក្នុងឯកសារ ដូច្នេះរូបភាពនីមួយៗតាមគ្រោងពណ៌របស់អ្នកអាននៅ GitHub។
+
+- **ពុម្ពអក្សរ។** `scripts/docs/readme-fonts.mjs` បង្រួមឯកសារ woff2 ទាំងនោះឱ្យនៅតែ glyph ដែលដ្យាក្រាមនីមួយៗគូរ ហើយបង្កប់វាតាម `@font-face` ជា URI `data:`។ ដូច្នេះពុម្ពអក្សររបស់ kit នៅក្នុង SVG។ ការសាកល្បងរូបភាព README ក្នុងម៉ាស៊ីនពិនិត្យថាការបង្ហាញមិនធ្វើសំណើពុម្ពអក្សរទៅខាងក្រៅ។ សំណុំរងមានតែតួអក្សរឡាតាំង; glyph និមិត្តសញ្ញាដែលប្រើពុម្ពអក្សរប្រព័ន្ធជាជម្រើសជំនួស ត្រូវបានអនុញ្ញាតម្តងមួយនៅ `SYMBOL_FALLBACKS`។ glyph ផ្សេងទៀតដែលមិនបានគ្របដណ្តប់បង្កឱ្យមានកំហុស។
+
+- **បង្កើតឡើងវិញ។** `npm run docs:readme-diagrams` សរសេរដ្យាក្រាមទាំងដប់ពីរឡើងវិញតាមលំដាប់ README ហើយបោះពុម្ពមួយបន្ទាត់សម្រាប់ឯកសារនីមួយៗជាមួយទំហំរបស់វា។ កម្មវិធីបង្កើតអាចដំណើរការដាច់ដោយឡែកបាន (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ត្រូវការ `node --import tsx/esm` ព្រោះលេខរបស់វាមកពីកម្មវិធីផ្ទុកកាតាឡុកបច្ចុប្បន្នក្នុង `open-sse/config/freeModelCatalog.ts`; ផលប៉ះពាល់នៃការផ្លាស់ប្តូរកាតាឡុកលើ CI មាននៅ `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`)។ ធ្វើ commit កម្មវិធីបង្កើត និង SVG ជាមួយគ្នា។
+
+- **ភស្តុតាង។** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` បង្ហាញឯកសារក្នុងការសាកល្បងនៅក្នុងម៉ាស៊ីន (ស្លាក `<img>`, `Content-Security-Policy` ដែលមានការរឹតត្បិត និងការឆ្លើយតប `image/svg+xml`) ថតស៊ុមភ្លឺនិងងងឹត ហើយរាយការណ៍សំណើពុម្ពអក្សរខាងក្រៅរបស់ទំព័រ; ចំនួនត្រូវតែជា 0។
+
+- **កម្រិតទំហំ។** តិចជាង 200 KB ក្នុងមួយឯកសារ ដែលតេស្តភាពហួសសម័យនីមួយៗផ្ទៀងផ្ទាត់; 500 KB ជាកម្រិតអតិបរមាដាច់ខាតសម្រាប់រូបភាព README ណាមួយ (ច្បាប់របស់ឧបករណ៍ផ្ទៀងផ្ទាត់ SVG studio)។
+
+- **អត្ថបទប្រើរួម លេខពី gate។** កម្មវិធីបង្កើតនីមួយៗរក្សាអត្ថបទដ្យាក្រាមនៅក្នុងថេរ `*_COPY` ឬបង្កើតវាពីកាតាឡុកបច្ចុប្បន្ន។ អត្ថបទដដែលត្រូវបានគូរ និងប្រើជាទិន្នន័យបញ្ចូលសម្រាប់សំណុំរងពុម្ពអក្សរ។ លេខស្តង់ដារនៅក្នុង node `<text>` ដែល `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) អាន។ តេស្តភាពហួសសម័យរបស់ដ្យាក្រាមដែល gate អាន ក៏ដំណើរការឧបករណ៍ផ្ទៀងផ្ទាត់របស់វាលើឯកសារដែលបានបង្កើតផងដែរ។ លេខដែលខុសពីកូដធ្វើឱ្យតេស្តបរាជ័យ: កែប្រភពដែល gate អាន កុំកែលេខក្នុងកម្មវិធីបង្កើតឡើយ។
+
+## 7. លិបិក្រមយោង
 
 - `src/app/globals.css` — token bridge, ការកំណត់ជាន់លើ `.dark`, ផ្នែកបន្ថែម OmniRoute `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — upstream commit ដែលបានកំណត់ជាប់ និងការអនុញ្ញាតអាជ្ញាបណ្ណ; `packages/ui-kit/PATCHES.md`

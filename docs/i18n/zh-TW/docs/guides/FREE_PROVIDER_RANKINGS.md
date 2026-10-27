@@ -148,7 +148,7 @@ taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 
 正規化後的項目會以 `source = "arena_elo"` 寫入 `model_intelligence` 資料庫資料表（`src/lib/db/modelIntelligence.ts`）。項目會在 **7 天後過期**，因此停止同步的提供者最終會從名單中移除，而不是繼續提供過時的資料。
 
-同步功能**預設為啟用**：
+同步功能**預設啟用**：
 
 - 它會在伺服器啟動時執行一次，之後以週期性計時器定期執行（`src/lib/arenaEloSync.ts`，由 `src/instrumentation-node.ts` 接入）。
 - 它是**非阻塞且絕不會造成致命錯誤**的——如果上游擷取失敗，OmniRoute 會繼續運行，排名只會顯示最後一次成功的資料（或空白狀態）。
@@ -184,7 +184,7 @@ DELETE /api/intelligence/sync          # 清除所有已同步的 arena_elo 情�
 
 ### 提供者的排名方式
 
-對於每個免費提供者，引擎會為其目錄中的每個模型評分，然後：
+針對每個免費提供者，引擎會為其目錄中的每個模型評分，然後：
 
 - **最佳模型（Top Model）**＝該提供者得分最高的模型。
 - **平均分數（Avg Score）**＝該提供者所有已評分模型的平均分數。

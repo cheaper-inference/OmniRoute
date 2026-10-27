@@ -484,17 +484,17 @@ Ez a következőket kezeli:
 
 ## Konfiguráció
 
-Az `open-sse/config/` könyvtár tartalmazza a konfigurációs réteget:
+Az `open-sse/config/` tartalmazza a konfigurációs réteget:
 
-| Fájl                            | Funkció                                                               |
-| ------------------------------- | --------------------------------------------------------------------- |
-| `providerRegistry.ts`           | Chatmodelleket nyilvántartó regiszter a 376 szolgáltatós katalógushoz |
-| `providerModels.ts`             | Modellaliaszok, formátumleképezés                                     |
-| `constants.ts`                  | Időtúllépések, korlátok, státuszkódok                                 |
-| `defaultThinkingSignature.ts`   | Alapértelmezett Claude thinking-aláírás                               |
-| `modelStrip.ts` (a servicesben) | Szolgáltatónkénti mezőeltávolítás                                     |
+| Fájl                                     | Rendeltetés                                                          |
+| ---------------------------------------- | -------------------------------------------------------------------- |
+| `providerRegistry.ts`                    | Csevegésimodell-regiszter a 376 szolgáltatót tartalmazó katalógushoz |
+| `providerModels.ts`                      | Modellaliasok, formátumleképezés                                     |
+| `constants.ts`                           | Időtúllépések, korlátok, állapotkódok                                |
+| `defaultThinkingSignature.ts`            | Alapértelmezett Claude-gondolkodási aláírás                          |
+| `modelStrip.ts` (a services könyvtárban) | Szolgáltatónkénti mezőeltávolítás                                    |
 
-### A Provider Registry sémája
+### A szolgáltatói regiszter sémája
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-A Zod-validáció a modul betöltésekor biztosítja, hogy minden szolgáltatókonfiguráció érvényes legyen.
+A modul betöltésekor végzett Zod-validáció biztosítja, hogy minden szolgáltatói konfiguráció érvényes legyen.
 
 ---
 

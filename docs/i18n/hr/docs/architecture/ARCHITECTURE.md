@@ -4,8 +4,6 @@
 
 ---
 
-# OmniRoute arhitektura
-
 🌐 **Languages:** 🇺🇸 [English](../../../../architecture/ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/architecture/ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/architecture/ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/architecture/ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/architecture/ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/architecture/ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/architecture/ARCHITECTURE.md) · 🇪🇪 [et](../../../et/docs/architecture/ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/ARCHITECTURE.md) · 🇮🇱 [he](../../../he/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/ARCHITECTURE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/architecture/ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/ARCHITECTURE.md) · 🇰🇭 [km](../../../km/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/architecture/ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/ARCHITECTURE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/architecture/ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/architecture/ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/architecture/ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/ARCHITECTURE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/ARCHITECTURE.md)
 
 _Posljednje ažurirano: 2026-06-28_
@@ -1027,24 +1025,24 @@ Ciljni formati uključuju:
 
 - OpenAI chat/Responses
 - Claude
-- Gemini/Antigravity omotnicu (envelope)
+- Gemini/Antigravity omotnicu
 - Kiro
 - Cursor
 
-Prijevodi koriste **OpenAI kao središnji (hub) format** — svi se pretvaraju posredstvom OpenAI formata:
+Prijevodi koriste **OpenAI kao središnji format** — sve pretvorbe prolaze kroz OpenAI kao međukorak:
 
 ```
-Izvorni format → OpenAI (hub) → Ciljni format
+Izvorni format → OpenAI (središnji format) → Ciljni format
 ```
 
-Prijevodi se dinamički odabiru na temelju oblika izvornog payloada i ciljnog formata pružatelja usluge.
+Prijevodi se odabiru dinamički na temelju strukture izvornog korisnog sadržaja i ciljnog formata pružatelja usluge.
 
-Dodatni sloj obrade u pipelineu prijevoda:
+Dodatni slojevi obrade u procesu prijevoda:
 
-- **Sanitizacija odgovora** — Uklanja nestandardna polja iz odgovora u OpenAI formatu (i streaming i non-streaming) radi osiguravanja stroge usklađenosti sa SDK-om
-- **Normalizacija ulogâ** — Pretvara `developer` → `system` za ciljeve koji nisu OpenAI; spaja `system` → `user` za modele koji odbijaju ulogu system (GLM, ERNIE)
-- **Ekstrakcija think tagova** — Parsira blokove `` iz sadržaja u polje `reasoning_content`
-- **Strukturirani izlaz** — Pretvara OpenAI `response_format.json_schema` u Geminijev `responseMimeType` + `responseSchema`
+- **Pročišćavanje odgovora** — Uklanja nestandardna polja iz odgovora u OpenAI formatu (i protočnih i neprotočnih) kako bi se osigurala stroga usklađenost sa SDK-om
+- **Normalizacija uloga** — Pretvara `developer` → `system` za ciljeve koji nisu OpenAI; spaja `system` → `user` za modele koji odbacuju ulogu sustava (GLM, ERNIE)
+- **Izdvajanje oznaka razmišljanja** — Raščlanjuje blokove `<think>...</think>` iz sadržaja u polje `reasoning_content`
+- **Strukturirani izlaz** — Pretvara OpenAI `response_format.json_schema` u Gemini `responseMimeType` + `responseSchema`
 
 ## Podržani API krajnje točke (endpoints)
 
@@ -1110,11 +1108,11 @@ kompatibilnosti sa starijim verzijama. Trenutni ugovor za vrijeme izvođenja kor
 - SQLite migracije sheme i kuke za automatsko nadograđivanje pri pokretanju
 - put kompatibilnosti za migraciju sa starijeg JSON formata na SQLite
 
-## 6) SSRF / zaštita izlaznih URL-ova
+## 6) SSRF / zaštita odlaznih URL-ova
 
-- `src/shared/network/outboundUrlGuard.ts` blokira sve privatne/loopback/link-local ciljne URL-ove prije nego što dođu do izvršitelja pružatelja usluge
-- Rute za otkrivanje i validaciju modela pružatelja usluge koriste `src/shared/network/safeOutboundFetch.ts` koji primjenjuje zaštitu prije svakog izlaznog zahtjeva
-- Greške zaštite prikazuju se kao `URL_GUARD_BLOCKED` s HTTP 422 statusom i bilježe se u revizijski trag usklađenosti putem `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) primjenjuje `src/shared/network/outboundUrlGuard.ts` na zahtjeve za razgovor poslane putem `BaseExecutor.execute()`. U načinu rada samo za javne adrese (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` uz isključenu oznaku za privatne adrese) blokira privatna i povratna (loopback) računala te raspon 169.254.0.0/16; u svakom drugom načinu rada blokira računala s metapodacima oblaka. Provjerava naziv računala ili doslovno zapisanu IP adresu prije bilo kakvog DNS pretraživanja. Ugrađeni lokalni pružatelji preskaču ovu provjeru.
+- Rute za otkrivanje i provjeru valjanosti modela pružatelja koriste `src/shared/network/safeOutboundFetch.ts`, koji primjenjuje zaštitu prije svakog odlaznog zahtjeva
+- Pogreške zaštite prikazuju se kao `URL_GUARD_BLOCKED` uz HTTP 503 (`getSafeOutboundFetchErrorStatus`; ruta za otkrivanje modela vraća 400), a stvarne SSRF blokade tijekom provjere valjanosti bilježe se u revizijski trag kao događaji `provider.validation.ssrf_blocked`
 
 ## Vidljivost i operativni signali
 
@@ -1165,7 +1163,7 @@ Varijable okruženja koje se aktivno koriste u kodu:
 4. Ponašanje u oblaku ovisi o ispravnom `NEXT_PUBLIC_BASE_URL` i dostupnosti krajnje točke oblaka.
 5. Direktorij `open-sse/` objavljen je kao **npm workspace paket** `@omniroute/open-sse`. Izvorni kod ga uvozi putem `@omniroute/open-sse/...` (razrješava ga Next.js `transpilePackages`). Putanje datoteka u ovom dokumentu i dalje koriste naziv direktorija `open-sse/` za konzistentnost.
 6. Grafikoni na nadzornoj ploči koriste **Recharts** (temeljen na SVG-u) za pristupačne, interaktivne vizualizacije analitike (grafikoni upotrebe modela, tablice raspodjele po pružateljima usluga sa stopama uspješnosti).
-7. E2E testovi koriste **Playwright** (`tests/e2e/`), pokreću se putem `npm run test:e2e`. Jedinični testovi koriste **Node.js test runner** (`tests/unit/`), pokreću se putem `npm run test:unit`. Izvorni kod u `src/` je **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ostaje u JavaScriptu (`.js`).
+7. E2E testovi koriste **Playwright** (`tests/e2e/`), pokreću se putem `npm run test:e2e`. Jedinični testovi koriste **Node.js test runner** (`tests/unit/`), pokreću se putem `npm run test:unit`. Izvorni kod u `src/` je **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` ostaje u TypeScriptu (`.ts`).
 8. Stranica postavki organizirana je u 7 kartica: General, Appearance, AI, Security, Routing, Resilience, Advanced. Stranica Resilience konfigurira samo red čekanja zahtjeva, hlađenje veze (connection cooldown), prekidač pružatelja (provider breaker) i ponašanje čekanja na hlađenje; stanje prekidača u stvarnom vremenu prikazuje se na stranici Health.
 9. Strategija **Context Relay** (`context-relay`) podijeljena je na dva sloja: `combo.ts` odlučuje treba li se generirati predaja (handoff), `chat.ts` ubacuje predaju nakon razrješenja računa. Podaci o predaji čuvaju se u SQLite tablici `context_handoffs`. Ova podjela je namjerna jer samo `chat.ts` zna je li se stvarni račun promijenio.
 10. **Provedba proxyja** je sada opsežna: `tokenHealthCheck.ts` razrješava proxy po vezi, `/api/providers/validate` koristi `runWithProxyContext`, a `proxyFetch.ts` koristi `undici.fetch()` za održavanje kompatibilnosti dispatchera na Node 22.

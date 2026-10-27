@@ -89,28 +89,12 @@
    του `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`· τα edges του ReactFlow και ο καμβάς
    ενορχήστρωσης διαβάζουν τις theme-aware μεταβλητές `--orch-status-*`
    (`src/shared/components/flow/edgeStyles.ts`).
-2. Ποτέ μην επιδιορθώνετε το `packages/ui-kit/src` χειροκίνητα: συγχρονίστε με
-   `scripts/dev/sync-ui-kit.sh <commit>`· η πύλη pre-commit `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) αποτυγχάνει σε οποιοδήποτε byte διαφέρει από το pinned upstream commit
-   (παραλείπεται με προειδοποίηση όταν το upstream clone, `UI_KIT_CLONE` ή
-   `_references/cheaper-inference-ui-kit`, απουσιάζει). Όταν στο kit λείπει κάτι, βρείτε λύση
-   στον adapter ή στην οθόνη και ζητήστε το από το upstream.
-3. Τα προεπιλεγμένα κείμενα του kit είναι στα Αγγλικά (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   περνάτε μεταφρασμένα strings από το `useTranslations(...)` κάθε φορά που ένα component του kit αποδίδει κείμενο.
-4. Τα Tailwind utilities υπερισχύουν των κλάσεων των components του kit (το kit δηλώνει
-   `@layer theme, base, components, utilities` και οι κανόνες του ζουν στο `components`) — χρησιμοποιήστε
-   utilities για spacing και layout, όχι για να ξαναχρωματίσετε components του kit.
-5. Επικεφαλίδες: `.ci-heading` (Inter, χωρίς tracking) για τίτλους σελίδων και ενοτήτων· `.ci-dashboard-display`
-   (Instrument Serif) μόνο για μεγάλο, αραιό display κείμενο όπως ο κωδικός κατάστασης της σελίδας σφάλματος.
-6. Το `tests/unit/dashboard-kit-sweep.test.ts` προστατεύει την υιοθέτηση του kit: κανένα Material ligature span
-   κάτω από `src/app` ή `src/shared/components`· στο δέντρο του dashboard (`src/app/(dashboard)` και
-   `src/shared/components`) κανένα γυμνό `<select>`, `<textarea>` ή `<table>` και κανένα χειροποίητο
-   `role="dialog"` εκτός των αναγραφόμενων εξαιρέσεων (ο native κλάδος του adapter `Select`,
-   το `RequestLoggerDetail`)· κάθε γυμνό `<button>` ή `<input>` εκεί χρειάζεται σχόλιο που περιέχει
-   `kit-exception:` (με την αιτιολογία) και τελειώνει το πολύ 3 γραμμές πιο πάνω· αποχρώσεις παλέτας και
-   παραλλαγές `dark:` μόνο στα αρχεία που παραθέτει το test.
-7. Επαληθεύστε και τα δύο θέματα και το viewport των 390 px πριν από ένα PR (screenshots)· το
-   `tests/e2e/a11y.spec.ts` τρέχει axe.
+2. Μην τροποποιείτε ποτέ το `packages/ui-kit/src` χειροκίνητα: συγχρονίστε το με `scripts/dev/sync-ui-kit.sh <commit>`· ο έλεγχος pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) αποτυγχάνει αν οποιοδήποτε byte διαφέρει από το καρφιτσωμένο upstream commit (παραλείπεται με προειδοποίηση όταν απουσιάζει ο upstream κλώνος, το `UI_KIT_CLONE` ή το `_references/cheaper-inference-ui-kit`). Όταν κάτι λείπει από το kit, εφαρμόστε μια παράκαμψη στον adapter ή στην οθόνη και ζητήστε το από το upstream.
+3. Οι προεπιλεγμένες τιμές κειμένου του kit είναι στα Αγγλικά (`label = "Loading"`, `loadingLabel = "Loading table"`…) — περάστε μεταφρασμένες συμβολοσειρές από το `useTranslations(...)` κάθε φορά που ένα component του kit αποδίδει κείμενο.
+4. Τα utilities του Tailwind υπερισχύουν των κλάσεων των components του kit (το kit δηλώνει `@layer theme, base, components, utilities` και οι κανόνες του βρίσκονται στο `components`) — χρησιμοποιήστε utilities για τα διάκενα και τη διάταξη, όχι για να αλλάξετε τα χρώματα των components του kit.
+5. Επικεφαλίδες: `.ci-heading` (Inter, χωρίς tracking) για τίτλους σελίδων και ενοτήτων· `.ci-dashboard-display` (Instrument Serif) μόνο για μεγάλο, αραιό κείμενο προβολής, όπως ο κωδικός κατάστασης της σελίδας σφάλματος.
+6. Το `tests/unit/dashboard-kit-sweep.test.ts` διασφαλίζει την υιοθέτηση του kit: κανένα span με λιγατούρα Material κάτω από το `src/app` ή το `src/shared/components`· στο δέντρο του dashboard (`src/app/(dashboard)` και `src/shared/components`) δεν επιτρέπονται ακατέργαστα `<select>`, `<textarea>` ή `<table>`, ούτε χειροποίητο `role="dialog"` εκτός των καταγεγραμμένων εξαιρέσεων (ο εγγενής κλάδος του adapter `Select`, το `RequestLoggerDetail`)· κάθε ακατέργαστο `<button>` ή `<input>` εκεί χρειάζεται ένα σχόλιο που περιέχει `kit-exception:` (με την αιτιολόγηση) και τελειώνει το πολύ 3 γραμμές πριν από αυτό· οι αποχρώσεις της παλέτας και οι παραλλαγές `dark:` επιτρέπονται μόνο στα αρχεία που παραθέτει το test.
+7. Επαληθεύστε και τα δύο θέματα και το viewport των 390 px πριν από ένα PR (στιγμιότυπα οθόνης)· το `tests/e2e/a11y.spec.ts` εκτελεί το axe.
 
 ## 3. Προσθήκη οθόνης
 
@@ -149,7 +133,23 @@
 στη χρήση και στο endpoint και στα δύο θέματα, εκτελέστε τα `npm run check:ui-kit-snapshot` και `npm run test:vitest:ui` και
 ανοίξτε το PR με το upstream αρχείο καταγραφής αλλαγών.
 
-## 6. Ευρετήριο αναφοράς
+## 6. Διαγράμματα README
+
+Τα δώδεκα διαγράμματα που ενσωματώνει το ριζικό `README.md` (`docs/diagrams/*.svg`) εφαρμόζουν το kit σε στατικές εικόνες. Παράγονται, δεν σχεδιάζονται στο χέρι: 13 αρχεία γεννητριών στο `scripts/docs/gen-readme-*.mjs` (δώδεκα διαγράμματα και ο οδηγός `gen-readme-diagrams.mjs`) και 12 δοκιμές επικαιρότητας στο `tests/unit/docs/readme-*-svg.test.ts`, μία ανά διάγραμμα. Κάθε δοκιμή συγκρίνει ανά byte το αρχείο του commit με την έξοδο της γεννήτριάς του (εργασία `test-unit`).
+
+- **Tokens.** Το `scripts/docs/readme-diagram-theme.mjs` αντιγράφει την παλέτα από το `packages/ui-kit/src/ci-tokens.css` (η συμφωνία με αυτό το αρχείο ελέγχεται από το `tests/unit/docs/readme-diagram-theme.test.ts`) και ορίζει ρόλους κειμένου με τις γραμματοσειρές του kit: Instrument Serif για κείμενο προβολής, Inter για τη διεπαφή και IBM Plex Mono για αριθμούς και κώδικα. Είναι τα ίδια πακέτα `@fontsource` που φορτώνει το `src/app/globals.css` για τον πίνακα ελέγχου. Οι φωτεινές τιμές βρίσκονται στο `:root` και οι σκοτεινές υπό τη συνθήκη `prefers-color-scheme: dark` μέσα στο αρχείο, ώστε κάθε εικόνα να ακολουθεί το χρωματικό σχήμα του αναγνώστη στο GitHub.
+
+- **Γραμματοσειρές.** Το `scripts/docs/readme-fonts.mjs` περιορίζει αυτά τα αρχεία woff2 στα γλυφά που σχεδιάζει κάθε διάγραμμα και τα ενσωματώνει μέσω `@font-face` ως URI `data:`. Έτσι οι γραμματοσειρές του kit παραμένουν μέσα στο SVG. Η τοπική δοκιμή εικόνων README ελέγχει ότι η απόδοση δεν πραγματοποιεί εξωτερικά αιτήματα γραμματοσειρών. Τα υποσύνολα είναι μόνο λατινικά· τα γλυφά συμβόλων που χρησιμοποιούν εναλλακτικά γραμματοσειρές συστήματος επιτρέπονται ένα προς ένα στο `SYMBOL_FALLBACKS`. Κάθε άλλο ακάλυπτο γλυφό προκαλεί σφάλμα.
+
+- **Αναδημιουργία.** Το `npm run docs:readme-diagrams` ξαναγράφει και τα δώδεκα διαγράμματα με τη σειρά του README και εμφανίζει μία γραμμή ανά αρχείο με το μέγεθός του. Κάθε γεννήτρια εκτελείται και μόνη της (`node scripts/docs/gen-readme-<name>.mjs`· το `free-tier-budget` χρειάζεται `node --import tsx/esm` επειδή οι αριθμοί προέρχονται από τον φορτωτή του τρέχοντος καταλόγου στο `open-sse/config/freeModelCatalog.ts`· η επίπτωση αλλαγής καταλόγου στο CI περιγράφεται στο `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Κάντε commit τη γεννήτρια και το SVG μαζί.
+
+- **Τεκμήριο.** Το `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` αποδίδει ένα αρχείο στην τοπική δοκιμή (ετικέτα `<img>`, περιοριστική `Content-Security-Policy` και απόκριση `image/svg+xml`), καταγράφει ένα φωτεινό και ένα σκοτεινό καρέ και αναφέρει τα εξωτερικά αιτήματα γραμματοσειρών της σελίδας· πρέπει να είναι 0.
+
+- **Όριο μεγέθους.** Κάτω από 200 KB ανά αρχείο, όπως ελέγχει κάθε δοκιμή επικαιρότητας· τα 500 KB είναι το απόλυτο όριο για οποιαδήποτε εικόνα README (κανόνας του επικυρωτή SVG studio).
+
+- **Κοινό κείμενο, αριθμοί από το gate.** Κάθε γεννήτρια κρατά το κείμενο του διαγράμματος σε σταθερά `*_COPY` ή το συνθέτει από τον τρέχοντα κατάλογο. Το ίδιο κείμενο σχεδιάζεται και χρησιμοποιείται ως είσοδος για το υποσύνολο γραμματοσειράς. Οι κανονικοί αριθμοί μένουν σε κόμβους `<text>`, που διαβάζει το `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Οι δοκιμές επικαιρότητας των διαγραμμάτων που διαβάζει το gate εκτελούν και τους επικυρωτές του στο παραγόμενο αρχείο. Αριθμός που αποκλίνει από τον κώδικα αποτυγχάνει στη δοκιμή: διορθώστε την πηγή που διαβάζει το gate, ποτέ τον αριθμό στη γεννήτρια.
+
+## 7. Ευρετήριο αναφοράς
 
 - `src/app/globals.css` — γέφυρα token, παρακάμψεις `.dark`, επεκτάσεις OmniRoute `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — καρφιτσωμένο upstream commit και εξουσιοδότηση άδειας χρήσης· `packages/ui-kit/PATCHES.md`

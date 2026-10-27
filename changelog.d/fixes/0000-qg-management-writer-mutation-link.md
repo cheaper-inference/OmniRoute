@@ -1,0 +1,1 @@
+- Include the management-writer authentication regressions in the mutation-test suite for the route guard.

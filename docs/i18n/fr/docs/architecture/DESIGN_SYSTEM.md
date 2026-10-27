@@ -89,31 +89,12 @@
    de routage, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` ; les arêtes ReactFlow et le
    canevas d'orchestration lisent les variables `--orch-status-*` sensibles au thème
    (`src/shared/components/flow/edgeStyles.ts`).
-2. Ne jamais patcher `packages/ui-kit/src` à la main : synchroniser avec
-   `scripts/dev/sync-ui-kit.sh <commit>` ; le garde-fou pre-commit `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) échoue sur tout octet qui diffère du commit amont épinglé (il saute la
-   vérification avec un avertissement lorsque le clone amont, `UI_KIT_CLONE` ou
-   `_references/cheaper-inference-ui-kit`, est absent). Quand quelque chose manque dans le kit,
-   contournez le problème dans l'adaptateur ou l'écran et faites-en la demande en amont.
-3. Les textes par défaut du kit sont en anglais (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   transmettez des chaînes traduites depuis `useTranslations(...)` chaque fois qu'un composant du kit
-   affiche du texte.
-4. Les utilitaires Tailwind l'emportent sur les classes des composants du kit (le kit déclare
-   `@layer theme, base, components, utilities` et ses règles vivent dans `components`) — utilisez les
-   utilitaires pour l'espacement et la mise en page, pas pour recolorer les composants du kit.
-5. Titres : `.ci-heading` (Inter, sans interlettrage) pour les titres de page et de section ;
-   `.ci-dashboard-display` (Instrument Serif) uniquement pour les grands textes d'affichage espacés,
-   comme le code de statut de la page d'erreur.
-6. `tests/unit/dashboard-kit-sweep.test.ts` protège l'adoption du kit : aucun span de ligature
-   Material sous `src/app` ou `src/shared/components` ; dans l'arborescence du dashboard
-   (`src/app/(dashboard)` et `src/shared/components`), aucun `<select>`, `<textarea>` ou `<table>`
-   brut et aucun `role="dialog"` bricolé à la main en dehors des exceptions répertoriées (la branche
-   native de l'adaptateur `Select`, `RequestLoggerDetail`) ; chaque `<button>` ou `<input>` brut à cet
-   endroit nécessite un commentaire contenant `kit-exception:` (avec la raison) se terminant au plus
-   3 lignes au-dessus ; les teintes de palette et les variantes `dark:` uniquement dans les fichiers
-   que le test répertorie.
-7. Vérifiez les deux thèmes et la fenêtre de 390 px avant une PR (captures d'écran) ;
-   `tests/e2e/a11y.spec.ts` exécute axe.
+2. Ne modifiez jamais `packages/ui-kit/src` manuellement : synchronisez-le avec `scripts/dev/sync-ui-kit.sh <commit>` ; le contrôle de pré-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) échoue dès qu'un octet diffère du commit amont épinglé (il est ignoré avec un avertissement lorsque le clone amont, `UI_KIT_CLONE` ou `_references/cheaper-inference-ui-kit`, est absent). Lorsqu'un élément manque dans le kit, contournez le problème dans l'adaptateur ou l'écran et demandez son ajout en amont.
+3. Les textes par défaut du kit sont en anglais (`label = "Loading"`, `loadingLabel = "Loading table"`…) — transmettez des chaînes traduites depuis `useTranslations(...)` chaque fois qu'un composant du kit affiche du texte.
+4. Les utilitaires Tailwind prévalent sur les classes des composants du kit (le kit déclare `@layer theme, base, components, utilities` et ses règles se trouvent dans `components`) — utilisez les utilitaires pour l'espacement et la mise en page, et non pour modifier les couleurs des composants du kit.
+5. Titres : `.ci-heading` (Inter, sans espacement des lettres) pour les titres de page et de section ; `.ci-dashboard-display` (Instrument Serif) uniquement pour les grands textes d'affichage peu denses, tels que le code d'état de la page d'erreur.
+6. `tests/unit/dashboard-kit-sweep.test.ts` contrôle l'adoption du kit : aucun span de ligature Material sous `src/app` ou `src/shared/components` ; dans l'arborescence du tableau de bord (`src/app/(dashboard)` et `src/shared/components`), aucun élément brut `<select>`, `<textarea>` ou `<table>`, ni aucun `role="dialog"` créé manuellement en dehors des exceptions répertoriées (la branche native de l'adaptateur `Select`, `RequestLoggerDetail`) ; chaque élément brut `<button>` ou `<input>` doit y être précédé d'un commentaire contenant `kit-exception:` (avec la raison), se terminant au maximum 3 lignes au-dessus ; les teintes de palette et les variantes `dark:` ne sont autorisées que dans les fichiers répertoriés par le test.
+7. Vérifiez les deux thèmes et la fenêtre d'affichage de 390 px avant une PR (captures d'écran) ; `tests/e2e/a11y.spec.ts` exécute axe.
 
 ## 3. Ajouter un écran
 
@@ -153,7 +134,23 @@ imports relatifs). Ensuite : examinez `git diff packages/ui-kit`, effectuez une 
 de l’utilisation et du point de terminaison dans les deux thèmes, exécutez `npm run check:ui-kit-snapshot` et `npm run test:vitest:ui`, puis
 ouvrez la PR en y joignant le journal des modifications en amont.
 
-## 6. Index de référence
+## 6. Diagrammes du README
+
+Les douze diagrammes intégrés au `README.md` racine (`docs/diagrams/*.svg`) appliquent le kit à une image statique. Ils sont générés, et non dessinés à la main : 13 fichiers générateurs dans `scripts/docs/gen-readme-*.mjs` (douze diagrammes et le pilote `gen-readme-diagrams.mjs`), avec 12 tests d'obsolescence dans `tests/unit/docs/readme-*-svg.test.ts`, un par diagramme. Chaque test compare octet par octet le fichier commité à la sortie de son générateur (job `test-unit`).
+
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` copie la palette de `packages/ui-kit/src/ci-tokens.css` (sa conformité à ce fichier est verrouillée par `tests/unit/docs/readme-diagram-theme.test.ts`) et définit les rôles du texte avec les polices du kit : Instrument Serif pour les titres de présentation, Inter pour l'interface et IBM Plex Mono pour les chiffres et le code. Ce sont les mêmes paquets `@fontsource` que `src/app/globals.css` charge pour le tableau de bord. Les valeurs claires sont sur `:root`, les sombres sous `prefers-color-scheme: dark`, dans le fichier ; chaque image suit ainsi le thème du lecteur sur GitHub.
+
+- **Polices.** `scripts/docs/readme-fonts.mjs` réduit ces fichiers woff2 aux glyphes dessinés par chaque diagramme et les intègre via `@font-face` sous forme d'URI `data:`. Les polices du kit restent ainsi dans le SVG. Le test local des images du README vérifie que le rendu ne produit aucune requête de police externe. Les sous-ensembles sont uniquement latins ; les glyphes de symboles utilisant les polices système sont autorisés individuellement dans `SYMBOL_FALLBACKS`. Tout autre glyphe non couvert déclenche une erreur.
+
+- **Régénération.** `npm run docs:readme-diagrams` réécrit les douze diagrammes dans l'ordre du README et affiche une ligne par fichier avec sa taille. Un générateur peut aussi fonctionner seul (`node scripts/docs/gen-readme-<name>.mjs` ; `free-tier-budget` nécessite `node --import tsx/esm` car ses chiffres proviennent du chargeur du catalogue courant dans `open-sse/config/freeModelCatalog.ts` ; l'effet d'une modification du catalogue sur la CI figure dans `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commitez ensemble le générateur et le SVG.
+
+- **Preuve.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` rend un fichier dans le test local (balise `<img>`, `Content-Security-Policy` restrictive et réponse `image/svg+xml`), capture une vue claire et une vue sombre et signale les requêtes de polices externes effectuées par la page ; leur nombre doit être 0.
+
+- **Budget.** Moins de 200 KB par fichier, vérifié par chaque test d'obsolescence ; 500 KB est la limite absolue de toute image du README (règle du validateur SVG studio).
+
+- **Texte partagé, chiffres issus du gate.** Chaque générateur conserve le texte de son diagramme dans une constante `*_COPY` ou le construit depuis le catalogue courant. Ce texte est à la fois affiché et utilisé pour le sous-ensemble de polices. Les chiffres canoniques restent dans des nœuds `<text>`, lus par `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Les tests d'obsolescence des diagrammes lus par le gate exécutent aussi ses validateurs sur le fichier généré ; un chiffre divergent du code fait donc échouer le test. Corrigez la source lue par le gate, jamais le nombre dans le générateur.
+
+## 7. Index de référence
 
 - `src/app/globals.css` — passerelle de jetons, substitutions `.dark`, extensions OmniRoute `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — commit amont épinglé et autorisation de licence ; `packages/ui-kit/PATCHES.md`

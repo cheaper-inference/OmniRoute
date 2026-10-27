@@ -24,6 +24,8 @@ export interface ProxyResolver {
 interface ConnectionProxyFetchDeps {
   resolveProxyForConnection?: ProxyResolver["resolveProxyForConnection"];
   fetchFn?: typeof globalThis.fetch;
+  /** Optional async gate run immediately before the fetch is dispatched. */
+  beforeFetch?: () => Promise<void>;
 }
 
 async function defaultResolveProxyForConnection(
@@ -98,11 +100,20 @@ export async function fetchWithConnectionProxy(
     );
     return null;
   }
-  const task = () => fetchFn(url, init);
+  let requestActive = true;
+  const task = async (): Promise<Response | null> => {
+    // Keep the active check adjacent to fetchFn: runWithProxyContext may report
+    // an unreachable proxy while this gate is pending, and that settled failure
+    // must invalidate the task before it can dispatch later.
+    if (deps.beforeFetch) await deps.beforeFetch();
+    if (!requestActive) return null;
+    return fetchFn(url, init);
+  };
   if (!proxy) return task();
   try {
     return await runWithProxyContext(proxy, task);
   } catch (error) {
+    requestActive = false;
     console.warn(
       `[ConnectionProxyFetch] Proxied quota fetch failed for ${connectionId}: ${sanitizeErrorMessage(
         error instanceof Error ? error.message : String(error)

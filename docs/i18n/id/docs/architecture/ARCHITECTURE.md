@@ -1102,11 +1102,11 @@ kompatibilitas lama. Kontrak runtime saat ini menggunakan:
 - migrasi skema SQLite dan hook peningkatan otomatis saat startup
 - jalur kompatibilitas migrasi JSON lama → SQLite
 
-## 6) Pelindung SSRF / URL Keluar
+## 6) SSRF / Perlindungan URL Keluar
 
-- `src/shared/network/outboundUrlGuard.ts` memblokir semua URL target privat/loopback/link-local sebelum mencapai eksekutor penyedia
-- Rute penemuan dan validasi model penyedia menggunakan `src/shared/network/safeOutboundFetch.ts` yang menerapkan pelindung sebelum setiap permintaan keluar
-- Kesalahan pelindung ditampilkan sebagai `URL_GUARD_BLOCKED` dengan HTTP 422 dan dicatat ke jejak audit kepatuhan melalui `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) menerapkan `src/shared/network/outboundUrlGuard.ts` pada permintaan chat yang dikirim melalui `BaseExecutor.execute()`. Dalam mode khusus publik (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` dengan flag privat dinonaktifkan), mekanisme ini memblokir host privat dan loopback serta 169.254.0.0/16; dalam setiap mode lainnya, mekanisme ini memblokir host metadata cloud. Pemeriksaan dilakukan terhadap hostname atau literal IP sebagaimana ditulis, sebelum pencarian DNS apa pun. Penyedia lokal bawaan tidak menjalani pemeriksaan ini.
+- Rute penemuan dan validasi model penyedia menggunakan `src/shared/network/safeOutboundFetch.ts`, yang menerapkan perlindungan sebelum setiap permintaan keluar
+- Kesalahan perlindungan muncul sebagai `URL_GUARD_BLOCKED` dengan HTTP 503 (`getSafeOutboundFetchErrorStatus`; rute penemuan model mengembalikan 400), dan pemblokiran SSRF yang sebenarnya selama validasi dicatat ke dalam jejak audit sebagai peristiwa `provider.validation.ssrf_blocked`
 
 ## Observabilitas dan Sinyal Operasional
 
@@ -1157,7 +1157,7 @@ Variabel lingkungan yang secara aktif digunakan oleh kode:
 4. Perilaku cloud bergantung pada `NEXT_PUBLIC_BASE_URL` yang benar dan keterjangkauan endpoint cloud.
 5. Direktori `open-sse/` dipublikasikan sebagai **paket workspace npm** `@omniroute/open-sse`. Kode sumber mengimpornya melalui `@omniroute/open-sse/...` (diresolusi oleh `transpilePackages` Next.js). Jalur berkas dalam dokumen ini tetap menggunakan nama direktori `open-sse/` demi konsistensi.
 6. Bagan di dasbor menggunakan **Recharts** (berbasis SVG) untuk visualisasi analitik yang mudah diakses dan interaktif (bagan batang penggunaan model, tabel perincian penyedia dengan tingkat keberhasilan).
-7. Pengujian E2E menggunakan **Playwright** (`tests/e2e/`), dijalankan melalui `npm run test:e2e`. Pengujian unit menggunakan **runner pengujian Node.js** (`tests/unit/`), dijalankan melalui `npm run test:unit`. Kode sumber dalam `src/` menggunakan **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` tetap menggunakan JavaScript (`.js`).
+7. Pengujian E2E menggunakan **Playwright** (`tests/e2e/`), dijalankan melalui `npm run test:e2e`. Pengujian unit menggunakan **runner pengujian Node.js** (`tests/unit/`), dijalankan melalui `npm run test:unit`. Kode sumber dalam `src/` menggunakan **TypeScript** (`.ts`/`.tsx`); workspace `open-sse/` tetap menggunakan TypeScript (`.ts`).
 8. Halaman pengaturan diatur ke dalam 7 tab: Umum, Tampilan, AI, Keamanan, Perutean, Ketahanan, Lanjutan. Halaman Ketahanan hanya mengonfigurasi antrean permintaan, masa jeda koneksi, pemutus penyedia, dan perilaku menunggu masa jeda; status runtime pemutus secara langsung ditampilkan pada halaman Kesehatan.
 9. Strategi **Context Relay** (`context-relay`) dibagi menjadi dua lapisan: `combo.ts` memutuskan apakah serah terima harus dibuat, sedangkan `chat.ts` menyisipkan serah terima setelah resolusi akun. Data serah terima disimpan dalam tabel SQLite `context_handoffs`. Pemisahan ini disengaja karena hanya `chat.ts` yang mengetahui apakah akun yang sebenarnya berubah.
 10. **Penerapan proksi** kini bersifat menyeluruh: `tokenHealthCheck.ts` menentukan proksi per koneksi, `/api/providers/validate` menggunakan `runWithProxyContext`, dan `proxyFetch.ts` menggunakan `undici.fetch()` untuk mempertahankan kompatibilitas dispatcher pada Node 22.

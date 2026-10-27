@@ -160,7 +160,7 @@ Setiap entri mendapatkan tingkat keyakinan berdasarkan jumlah suara Arena:
 | `medium`  | ≥ 1,000 |
 | `low`     | < 1,000 |
 
-### Penyimpanan dan kebaruan
+### Penyimpanan dan keterkinian
 
 Entri yang dinormalisasi ditulis ke tabel DB `model_intelligence` dengan
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Entri **kedaluwarsa setelah
@@ -207,7 +207,7 @@ pencocokan fleksibel (`findMatchingIntelligence` di `src/lib/freeProviderRanking
 
 Di sisi sinkronisasi, awalan vendor yang dikenal (`anthropic/`, `openai/`, `google/`, …)
 dihapus dan peta alias kecil memperluas nama kanonis menjadi varian yang digunakan OmniRoute
-secara internal, sehingga model tetap dapat ditemukan dengan nama apa pun.
+secara internal, sehingga model tetap dapat ditemukan menggunakan nama apa pun.
 
 ### Cara provider diperingkat
 

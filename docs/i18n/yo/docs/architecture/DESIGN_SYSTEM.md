@@ -81,13 +81,13 @@
 
 ## 2. Àwọn Òfin
 
-1. Àwọn token, kì í ṣe àwọn literal. Àwọn ìyàtọ̀ tí a fi pamọ́ lẹ́rọ̀ọ́mọ̀ọ́: ìtẹ́mílí console tí ó jẹ́ dúdú ní gbogbo ìgbà àti `STATUS_HEX` (`src/shared/constants/statusColors.ts`), dídígba hex tí a yanjú ti páálẹ̀ status kit fún àwọn olùpè tí ó nílò hex gangan. Àwọn páálẹ̀ ẹ̀yà-ìpín kò ṣe jẹ́ ìyàtọ̀ mọ́: wọ́n ń gùn lórí àwọn token chart márùn-ún ti kit (`--color-chart-1..5`) nípasẹ̀ `src/shared/utils/categoricalPalette.ts` àti, fún àwọn ìlànà ìdarí-ọnà, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; àwọn edge ReactFlow àti canvas ìṣọ̀kan-ìṣẹ́ ń ka àwọn variable `--orch-status-*` tí ó mọ èròjà (theme) (`src/shared/components/flow/edgeStyles.ts`).
-2. Má ṣe àtúnṣe `packages/ui-kit/src` lọ́wọ́ fúnra rẹ: ṣe ìṣọ̀kan rẹ̀ pẹ̀lú `scripts/dev/sync-ui-kit.sh <commit>`; ìlẹ̀kùn pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) máa ń kùnà lórí byte kankan tó yàtọ̀ sí commit upstream tí a kán mọ́lẹ̀ (ó máa ń fo láìṣe pẹ̀lú ìkìlọ̀ nígbà tí clone upstream, `UI_KIT_CLONE` tàbí `_references/cheaper-inference-ui-kit`, kò sí). Nígbà tí kit bá kò ní ohun kan, rìn kúlẹ̀ rẹ̀ nínú adapter tàbí ibojú náà, kí o sì béèrè fún un lọ́wọ́ upstream.
-3. Àwọn àtọ́kànwá ọ̀rọ̀ kit jẹ́ Gẹ̀ẹ́sì (`label = "Loading"`, `loadingLabel = "Loading table"`…) — fi àwọn okùn ọ̀rọ̀ tí a túmọ̀ kọláàjà láti `useTranslations(...)` ní gbogbo ìgbà tí ohun èlò kit bá ń ṣàfihàn ọ̀rọ̀.
-4. Àwọn utiliti Tailwind máa ń borí àwọn class ohun èlò kit (kit náà kéde `@layer theme, base, components, utilities` àti pé àwọn òfin rẹ̀ gbé nínú `components`) — lo àwọn utiliti fún ààyò àti ìṣètò-ẹ̀rọjà, kì í ṣe láti tún àwò àwọn ohun èlò kit ṣe.
-5. Àwọn àkópọ̀: `.ci-heading` (Inter, láìsí tracking) fún àkópọ̀ ojú-ìwé àti abala; `.ci-dashboard-display` (Instrument Serif) nìkan fún ọ̀rọ̀ àfihàn ńlá, díẹ̀-díẹ̀ bí kóòdù status ojú-ìwé àṣìṣe.
-6. `tests/unit/dashboard-kit-sweep.test.ts` ń dáàbò bo ìmúlò kit: kò sí span ligature Material lábẹ́ `src/app` tàbí `src/shared/components`; nínú igi dashboard (`src/app/(dashboard)` àti `src/shared/components`) kò sí `<select>`, `<textarea>` tàbí `<table>` rárá àti kò sí `role="dialog"` àfọwọ́ṣe lóde àwọn ìyàtọ̀ tí a ṣàkàtò (ẹ̀ka abínibí ti adapter `Select`, `RequestLoggerDetail`); gbogbo `<button>` tàbí `<input>` rárá níbẹ̀ nílò àlàyé tó ní `kit-exception:` nínú (pẹ̀lú ìdí rẹ̀) tó parí kí o tó lé ìlà mẹ́ta sí oke rẹ̀; àwọn hue páálẹ̀ àti àwọn variant `dark:` nìkan nínú àwọn fáìlì tí ìdánwò náà ṣàkàtò.
-7. Ṣàyẹ̀wò àwọn èròjà (theme) méjèèjì àti viewport 390 px ṣáájú PR kan (àwòrán ibojú); `tests/e2e/a11y.spec.ts` ń ṣiṣẹ́ axe.
+1. Àwọn token, kì í ṣe àwọn literal. Àwọn ìyàtọ̀ tí a fi pamọ́ lẹ́rọ̀ọ́mọ̀ọ́: ìtẹ́mílí console tí ó jẹ́ dúdú ní gbogbo ìgbà àti `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ẹ̀dà hex tí a ti yanjú ti páálẹ̀ status kit fún àwọn olùpè tí ó nílò hex gangan. Àwọn páálẹ̀ ẹ̀yà-ìpín kò ṣe jẹ́ ìyàtọ̀ mọ́: wọ́n ń gùn lórí àwọn token chart márùn-ún ti kit (`--color-chart-1..5`) nípasẹ̀ `src/shared/utils/categoricalPalette.ts` àti, fún àwọn ìlànà ìdarí-ọnà, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; àwọn edge ReactFlow àti canvas ìṣọ̀kan-ìṣẹ́ ń ka àwọn variable `--orch-status-*` tí ó mọ èròjà (theme) (`src/shared/components/flow/edgeStyles.ts`).
+2. Má ṣe ṣàtúnṣe `packages/ui-kit/src` pẹ̀lú ọwọ́ láéláé: mú un bá a mu pẹ̀lú `scripts/dev/sync-ui-kit.sh <commit>`; ẹnu-ọ̀nà pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) yóò kùnà lórí byte èyíkéyìí tó yàtọ̀ sí upstream commit tí a ti so mọ́lẹ̀ (ó máa fò ó kọjá pẹ̀lú ìkìlọ̀ nígbà tí upstream clone, `UI_KIT_CLONE` tàbí `_references/cheaper-inference-ui-kit`, kò bá sí). Nígbà tí ohun kan kò bá sí nínú kit, ṣe ọ̀nà àbáyọ ní adapter tàbí screen, kí o sì béèrè rẹ̀ lọ́wọ́ upstream.
+3. Àwọn àiyípadà àkọ́kọ́ fún ọ̀rọ̀ inú kit jẹ́ Gẹ̀ẹ́sì (`label = "Loading"`, `loadingLabel = "Loading table"`…) — fi àwọn ọ̀rọ̀ tí a túmọ̀ láti inú `useTranslations(...)` ránṣẹ́ ní gbogbo ìgbà tí component kit bá ń render ọ̀rọ̀.
+4. Àwọn utility Tailwind máa ń borí àwọn class component kit (kit náà ń kéde `@layer theme, base, components, utilities`, àwọn òfin rẹ̀ sì wà nínú `components`) — lo àwọn utility fún spacing àti layout, kì í ṣe láti tún àwọ̀ àwọn component kit ṣe.
+5. Àwọn àkọlé: `.ci-heading` (Inter, láìsí tracking) fún àwọn àkọlé ojú-ewé àti abala; `.ci-dashboard-display` (Instrument Serif) fún ọ̀rọ̀ display ńlá tí kò pọ̀ nìkan, bíi status code ojú-ewé àṣìṣe.
+6. `tests/unit/dashboard-kit-sweep.test.ts` ń ṣọ́ ìlò kit: kò gbọ́dọ̀ sí span ligature Material lábẹ́ `src/app` tàbí `src/shared/components`; nínú igi dashboard (`src/app/(dashboard)` àti `src/shared/components`), kò gbọ́dọ̀ sí `<select>`, `<textarea>` tàbí `<table>` raw, bẹ́ẹ̀ ni kò gbọ́dọ̀ sí `role="dialog"` tí a fi ọwọ́ kọ lẹ́yìn àwọn ìyàsọ́tọ̀ tí a tò sílẹ̀ (ẹ̀ka native ti adapter `Select`, `RequestLoggerDetail`); gbogbo `<button>` tàbí `<input>` raw níbẹ̀ gbọ́dọ̀ ní àlàyé tó ní `kit-exception:` (pẹ̀lú ìdí náà), tí yóò sì parí ní ìlà mẹ́ta tàbí kéré sí i lókè rẹ̀; àwọn hue palette àti àwọn variant `dark:` gbọ́dọ̀ wà nínú àwọn fáìlì tí test náà tò sílẹ̀ nìkan.
+7. Ṣàyẹ̀wò theme méjèèjì àti viewport 390 px ṣáájú PR (pẹ̀lú àwọn screenshot); `tests/e2e/a11y.spec.ts` ń ṣiṣẹ́ axe.
 
 ## 3. Ṣíṣàfikún ojú-ìwòran
 
@@ -127,7 +127,23 @@
 usage àti endpoint nínú theme méjèèjì, ṣiṣẹ́ `npm run check:ui-kit-snapshot` àti `npm run test:vitest:ui`, kí o sì
 ṣí PR náà pẹ̀lú changelog upstream.
 
-## 6. Atọ́ka ìtọ́kasí
+## 6. Àwọn àwòrán README
+
+Àwọn àwòrán méjìlá tí a fi sínú `README.md` ní gbòǹgbò (`docs/diagrams/*.svg`) ń lo kit fún àwòrán aláìrìn. A ń dá wọn sílẹ̀, a kì í fi ọwọ́ yà wọn: fáìlì amújáde 13 ní `scripts/docs/gen-readme-*.mjs` (àwòrán méjìlá àti olùdarí `gen-readme-diagrams.mjs`) àti ìdánwò 12 fún ohun tó ti di àtijọ́ ní `tests/unit/docs/readme-*-svg.test.ts`, ọ̀kan fún àwòrán kọ̀ọ̀kan. Ìdánwò kọ̀ọ̀kan ń fi fáìlì inú commit wé àbájáde amújáde rẹ̀ byte kọ̀ọ̀kan (iṣẹ́ `test-unit`).
+
+- **Token.** `scripts/docs/readme-diagram-theme.mjs` ń da àkójọpọ̀ àwọ̀ láti `packages/ui-kit/src/ci-tokens.css` (ìdánwò `tests/unit/docs/readme-diagram-theme.test.ts` ń mú kí ó bá fáìlì yẹn mu) ó sì ń ṣàlàyé ipa ọ̀rọ̀ pẹ̀lú font kit: Instrument Serif fún ọ̀rọ̀ àfihàn, Inter fún ọ̀rọ̀ ojú ìbánisọ̀rọ̀, IBM Plex Mono fún nọ́mbà àti kóòdù. Àwọn ni package `@fontsource` kan náà tí `src/app/globals.css` ń kó wọlé fún dashboard. Iye ìmọ́lẹ̀ wà lórí `:root`, ti òkùnkùn wà lábẹ́ `prefers-color-scheme: dark` nínú fáìlì, kí àwòrán kọ̀ọ̀kan lè tẹ̀lé ètò àwọ̀ olùkà lórí GitHub.
+
+- **Font.** `scripts/docs/readme-fonts.mjs` ń dín àwọn fáìlì woff2 yẹn kù sí glyph tí àwòrán kọ̀ọ̀kan ń yà, ó sì ń fi wọ́n sínú `@font-face` gẹ́gẹ́ bí URI `data:`. Èyí ń pa font kit mọ́ nínú SVG. Ìdánwò àwòrán README lórí ẹ̀rọ ń ṣàyẹ̀wò pé fífi àwòrán hàn kò ṣe ìbéèrè font láti òde. Àwọn àkójọpọ̀ kékeré náà ní lẹ́tà Latin nìkan; glyph àmì tó ń lo font ètò kọ̀ǹpútà gẹ́gẹ́ bí àfidípò ni a ń gba láyè lọ́kọ̀ọ̀kan nínú `SYMBOL_FALLBACKS`. Glyph míràn tí kò sí nínú àkójọpọ̀ ń fa àṣìṣe.
+
+- **Ṣíṣe àtúnjáde.** `npm run docs:readme-diagrams` ń tún gbogbo àwòrán méjìlá kọ ní ìtòlẹ́sẹẹsẹ README, ó sì ń tẹ ìlà kan fún fáìlì kọ̀ọ̀kan pẹ̀lú ìwọ̀n rẹ̀. Amújáde tún lè ṣiṣẹ́ lọ́tọ̀ (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` nílò `node --import tsx/esm` nítorí nọ́mbà rẹ̀ wá láti olùkó katalọ́ọ̀gù ìsinsìnyí ní `open-sse/config/freeModelCatalog.ts`; ipa ìyípadà katalọ́ọ̀gù lórí CI wà ní `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Fi amújáde àti SVG sínú commit kan náà.
+
+- **Ẹ̀rí.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ń fi fáìlì hàn nínú ìdánwò lórí ẹ̀rọ (tag `<img>`, `Content-Security-Policy` tó fi ààlà sílẹ̀ àti èsì `image/svg+xml`), ó ń ya àwòrán ìmọ́lẹ̀ àti òkùnkùn, ó sì ń ròyìn ìbéèrè font láti òde tí ojú ìwé ṣe; iye wọn gbọ́dọ̀ jẹ́ 0.
+
+- **Ìwọ̀n.** Kéré ju 200 KB fún fáìlì kọ̀ọ̀kan, gẹ́gẹ́ bí ìdánwò àtijọ́ kọ̀ọ̀kan ṣe ń jẹ́rìí; 500 KB ni òpin líle fún àwòrán README èyíkéyìí (òfin olùṣàyẹ̀wò SVG studio).
+
+- **Ọ̀rọ̀ tí a jọ lò, nọ́mbà láti gate.** Amújáde kọ̀ọ̀kan ń pa ọ̀rọ̀ àwòrán rẹ̀ mọ́ sínú constant `*_COPY` tàbí ó ń kọ ọ́ láti katalọ́ọ̀gù ìsinsìnyí. Ọ̀rọ̀ kan náà ni a ń yà, tí a sì ń lò gẹ́gẹ́ bí ìwọlé fún àkójọpọ̀ font kékeré. Nọ́mbà àṣẹ ń dúró nínú node `<text>` tí `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) ń kà. Ìdánwò àtijọ́ fún àwòrán tí gate ń kà tún ń ṣiṣẹ́ pẹ̀lú àwọn olùṣàyẹ̀wò rẹ̀ lórí fáìlì tí a dá sílẹ̀. Nọ́mbà tó yàtọ̀ sí kóòdù ń jẹ́ kí ìdánwò kùnà: tún orísun tí gate ń kà ṣe, má ṣe tún nọ́mbà inú amújáde ṣe.
+
+## 7. Atọ́ka ìtọ́kasí
 
 - `src/app/globals.css` — afárá token, àwọn override `.dark`, àwọn extension OmniRoute `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — commit upstream tí a pin mọ́ àti àṣẹ license; `packages/ui-kit/PATCHES.md`

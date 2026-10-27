@@ -4,7 +4,7 @@
 
 ---
 
-# AGENTS.md
+@AGENTS.md
 
 **Sva pravila projekta nalaze se u [`AGENTS.md`](AGENTS.md)** — jedini izvor istine za svakog AI
 asistenta (arhitektura, konvencije, testiranje, kvalitativni uvjeti, git tijek rada, 23 Tvrda pravila,
@@ -43,12 +43,12 @@ dolaze s zadanim postavkama koje pokazuju na `docs/…` — te zadane postavke s
 Kada vještina supermoći najavi putanju poput "spremljeno u `docs/superpowers/plans/…`",
 prepišite je u ekvivalent `_tasks/…` prije pisanja:
 
-| Artefakt (vještina)                      | Zadano (NE koristiti)     | Umjesto toga spremi ovdje                                      |
-| ---------------------------------------- | ------------------------- | -------------------------------------------------------------- |
-| Planovi (`writing-plans`)                | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`             |
-| Specifikacije / dizajn (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`        |
-| Istraživanje (`deep-research`, ad-hoc)   | `docs/research/`          | `_tasks/research/…`                                            |
-| Predaje (`/handoff`)                     | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<verzija>_sess-<id>/` |
+| Artefakt (vještina)                      | Zadano (NE koristiti)     | Umjesto toga spremi ovdje                                     |
+| ---------------------------------------- | ------------------------- | ------------------------------------------------------------- |
+| Planovi (`writing-plans`)                | `docs/superpowers/plans/` | `_tasks/superpowers/plans/YYYY-MM-DD-<feature>.md`            |
+| Specifikacije / dizajn (`brainstorming`) | `docs/superpowers/specs/` | `_tasks/superpowers/specs/YYYY-MM-DD-<topic>-design.md`       |
+| Istraživanje (`deep-research`, ad-hoc)   | `docs/research/`          | `_tasks/research/…`                                           |
+| Predaje (`/handoff`)                     | —                         | `_tasks/hands-off/<YYYY-MM-DD>_<branch>_v<versão>_sess-<id>/` |
 
 Pohranite te artefakte unutar repozitorija `_tasks/` (`git -C _tasks …`), nikada u glavnom repozitoriju.
 

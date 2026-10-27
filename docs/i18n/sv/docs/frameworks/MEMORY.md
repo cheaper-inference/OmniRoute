@@ -337,11 +337,11 @@ Extraheringen är **regex-baserad**, inte LLM-baserad – den körs i processen 
 `setImmediate()` så att den aldrig blockerar svarsströmmen:
 
 - **Preferensmönster** → `MemoryType.FACTUAL`
-  (t.ex. `Jag föredrar …`, `Jag tycker verkligen om …`, `min favorit är …`, `Jag hatar …`)
+  (t.ex. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Beslutsmönster** → `MemoryType.EPISODIC`
-  (t.ex. `Jag kommer att använda …`, `Jag valde …`, `Jag bestämde mig för …`, `Jag kommer att börja använda …`)
+  (t.ex. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Beteendemönster** → `MemoryType.FACTUAL`
-  (t.ex. `Jag brukar …`, `Jag gör alltid …`, `Jag tenderar att …`)
+  (t.ex. `I usually …`, `I always …`, `I tend to …`)
 
 Varje träff rensas (`trim`, komprimering av blanksteg, begränsning till 500 tecken),
 dedupliceras inom batchen via en stabil `factKey(category, content)` och
@@ -752,7 +752,8 @@ När en användare säger:
 
 För att förhindra okontrollerad extraktion gäller följande gränser:
 
-| Minsta innehållslängd | 3 tecken |
+| Minsta innehållslängd  | 3 tecken   |
+| ---------------------- | ---------- |
 | Största innehållslängd | 500 tecken |
 
 ### När extraktion bör inaktiveras

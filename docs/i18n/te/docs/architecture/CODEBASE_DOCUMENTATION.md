@@ -782,7 +782,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`ను విస్తరించండి).
 2. `src/shared/constants/mcpScopes.ts`లో తగిన scope(లు)ను కేటాయించండి.
 3. `open-sse/mcp-server/server.ts`లో toolను నమోదు చేయండి.
-4. `open-sse/mcp-server/__tests__/` కింద పరీక్షలను జోడించండి.
+4. `tests/unit/` కింద పరీక్షలను జోడించండి.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md)ను నవీకరించండి.
 
 ### కొత్త A2A skillను జోడించడం
@@ -800,7 +800,7 @@ bin/
 - **Naming**: files `camelCase` లేదా `kebab-case`, components `PascalCase`,
   constants `UPPER_SNAKE`.
 - **ESLint**: ప్రతిచోటా `no-eval`, `no-implied-eval`, `no-new-func` = `error`;
-  `open-sse/` మరియు `tests/`లో `no-explicit-any` = `warn`, మిగతా చోట్ల error.
+  `open-sse/**/*.ts` మరియు `tests/**/*.ts`లో `no-explicit-any` = `error`.
 - **TypeScript**: `strict: false` (legacy విధానం). Cross-module boundaries కోసం
   inference కంటే explicit typesకు ప్రాధాన్యం ఇవ్వండి.
 - **Database**: routes లేదా handlersలో raw SQLను ఎప్పుడూ రాయవద్దు — ఎల్లప్పుడూ
@@ -830,8 +830,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. `main`కు ఎప్పుడూ నేరుగా commit చేయవద్దు.
-- **Husky**: pre-commitలో `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` అమలవుతాయి; pre-pushలో `check:any-budget:t11` + `check:tracked-artifacts` అమలవుతాయి (వేగవంతమైన gates; `test:unit`ను మినహాయిస్తాయి).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

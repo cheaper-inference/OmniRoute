@@ -85,6 +85,67 @@ test("#6009 a single fetch is never delayed", async () => {
   assert.equal(clock.now(), 1000);
 });
 
+test("#15172 wall-clock jumps cannot bypass the default throttle interval", async () => {
+  const originalDateNow = Date.now;
+  const throttle = new MinIntervalThrottle({ minIntervalMs: 20, jitterMs: 0 });
+
+  try {
+    const firstAcquireStart = performance.now();
+    await throttle.acquire();
+    Date.now = () => originalDateNow() + 60_000;
+    await throttle.acquire();
+    const secondRelease = performance.now();
+    assert.ok(
+      secondRelease - firstAcquireStart >= 20,
+      "wall-clock jumps must not shorten the monotonic release interval"
+    );
+  } finally {
+    Date.now = originalDateNow;
+  }
+});
+
+test("#15172 an early timer wake is rechecked before the throttle releases", async () => {
+  let now = 0.1;
+  let sleepCalls = 0;
+  const requestedDelays: number[] = [];
+  const clock: ThrottleClock = {
+    now: () => now,
+    sleep: async (ms: number) => {
+      requestedDelays.push(ms);
+      // Model timer implementations that quantize fractional delays and may
+      // wake one tick before the requested monotonic deadline.
+      now += Math.max(0, Math.floor(ms) - (sleepCalls++ === 0 ? 1 : 0));
+    },
+  };
+  const throttle = new MinIntervalThrottle({ minIntervalMs: 250, jitterMs: 0, clock });
+
+  await throttle.acquire();
+  const first = clock.now();
+  now += 0.3;
+  await throttle.acquire();
+
+  assert.ok(clock.now() - first >= 250, "an early timer wake must not shorten the interval");
+  assert.deepEqual(requestedDelays, [250, 1]);
+});
+
+test("#15172 a late timer cannot release already-queued acquisitions as a burst", async () => {
+  const clock = new FakeClock();
+  let sleepCalls = 0;
+  clock.sleep = async (ms: number) => {
+    clock.slept.push(ms);
+    clock.t += ms + (sleepCalls++ === 0 ? 600 : 0);
+  };
+  const throttle = new MinIntervalThrottle({ minIntervalMs: 250, jitterMs: 0, clock });
+
+  await Promise.all(Array.from({ length: 4 }, () => throttle.acquire()));
+
+  assert.deepEqual(
+    clock.slept,
+    [250, 250, 250],
+    "every queued acquisition must retain a complete interval after a late wake-up"
+  );
+});
+
 test("#6009 jitter adds a bounded extra spacing on top of the min gap", async () => {
   const clock = new FakeClock();
   // Deterministic rand → always 0.5, so jitter = floor(0.5 * 100) = 50.

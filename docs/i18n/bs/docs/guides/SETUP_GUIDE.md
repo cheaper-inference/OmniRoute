@@ -31,6 +31,8 @@ omniroute
 
 Kontrolna tabla se otvara na `http://localhost:20128`, a osnovni API URL je `http://localhost:20128/v1`.
 
+> **Korisnici npm-a:** Ako npm upozori da su instalacijske skripte blokirane (npr. `omniroute`, `better-sqlite3`), pogledajte [Rješavanje problema — blokirane npm instalacijske skripte](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+
 ### pnpm
 
 ```bash

@@ -53,7 +53,7 @@ Search Tools Studio는 `/dashboard/search-tools`를 기본 검색 플레이그�
 - 입력: URL + 전체 페이지 토글 + 형식 선택기(markdown / text / HTML).
 - 제출 → 가져오기 → `ScrapeResult.tsx` 렌더링.
 - `ScrapeResult`는 마크다운 미리보기 + 원본 토글을 렌더링합니다.
-- 제한: 응답 본문이 **256 KB**를 초과하면 UI에 `(잘림, 원본 보기)`가 표시되고 Monaco 모달에서 원본이 열립니다(D21).
+- 제한: 응답 본문이 **256 KB**를 초과하면 UI에 `View full raw content`가 표시되고 모달에서 원본이 열립니다(D21).
 - 메타데이터 패널: 제공자(firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), 지연 시간, 비용, 응답 크기, 링크 수.
 - `useScrapeFetch.ts` 훅을 사용합니다.
 

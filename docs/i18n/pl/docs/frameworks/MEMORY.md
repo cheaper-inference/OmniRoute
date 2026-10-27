@@ -475,7 +475,7 @@ pierwszymi trzema zdaniami oryginału. `tokensSaved` to różnica wartości
 
 Ta procedura jest **dostępna, ale nie jest wywoływana automatycznie** w bieżącym
 potoku czatu — jeśli potrzebujesz ciągłej kompresji, wywołuj ją z zadania cron,
-akcji administratora lub kodu integrującego `MemoryConfig.autoSummarize.`
+akcji administratora lub kodu integrującego `MemoryConfig.autoSummarize`.
 Utrata danych jest nieodwracalna: oryginalny tekst zostaje nadpisany.
 
 ## REST API
@@ -581,7 +581,7 @@ Szczegóły dotyczące transportu i zakresu znajdują się w pliku [MCP-SERVER.m
   dostawcy/modelu).
 
 Ustawienia pamięci i Qdrant są również dostępne w sekcji
-`/dashboard/settings → Pamięć i umiejętności` (`MemorySkillsTab.tsx`) jako
+`/dashboard/settings → Pamięć i umiejętności` (`/dashboard/settings → Memory & Skills`) (`MemorySkillsTab.tsx`) jako
 starszy/globalny interfejs ustawień.
 
 ## Buforowanie
@@ -768,7 +768,8 @@ Gdy użytkownik mówi:
 
 Aby zapobiec niekontrolowanemu wyodrębnianiu, obowiązują następujące limity:
 
-| Minimalna długość treści | 3 znaki |
+| Minimalna długość treści  | 3 znaki    |
+| ------------------------- | ---------- |
 | Maksymalna długość treści | 500 znaków |
 
 ### Kiedy wyłączyć wyodrębnianie

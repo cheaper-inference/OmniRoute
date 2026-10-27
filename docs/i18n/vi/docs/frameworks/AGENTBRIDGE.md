@@ -545,24 +545,24 @@ Các schema OpenAPI đầy đủ: `docs/openapi.yaml` → thẻ `AgentBridge`.
 
 ## §8 Lộ trình
 
-### Khảo sát Trae
+### Điều tra Trae
 
-Trae là một trợ lý lập trình AI tương đối mới. Trước khi triển khai một handler:
+Trae là một trợ lý lập trình AI tương đối mới. Trước khi triển khai handler:
 
 1. Xác định tệp nhị phân/tiện ích mở rộng trên các marketplace của VS Code / JetBrains hoặc dưới dạng ứng dụng độc lập
-2. Ghi lại lưu lượng truy cập bằng mitmproxy để xác định các máy chủ API và cấu trúc endpoint
+2. Ghi lại lưu lượng truy cập bằng mitmproxy để khám phá các máy chủ API và cấu trúc endpoint
 3. Xác định cơ chế xác thực
-4. Đánh giá nên tiếp tục hay dừng lại dựa trên TOS và khả năng khám phá API
+4. Đánh giá nên/không nên triển khai dựa trên TOS và khả năng khám phá API
 
-Cho đến khi quá trình khảo sát hoàn tất, thẻ Trae trên dashboard sẽ hiển thị huy hiệu "Đang khảo sát" cùng liên kết "Báo cáo tính khả thi". Stub của handler tại `src/mitm/handlers/trae.ts` sẽ đưa ra lỗi có cấu trúc `Chưa được triển khai`.
+Cho đến khi quá trình điều tra hoàn tất, thẻ Trae trong bảng điều khiển sẽ hiển thị huy hiệu "Đang điều tra" cùng liên kết "Báo cáo tính khả thi". Stub handler tại `src/mitm/handlers/trae.ts` sẽ đưa ra lỗi có cấu trúc `Not yet implemented`.
 
-### Các agent tồn đọng (bắt buộc dùng MITM — không hỗ trợ base URL tùy chỉnh)
+### Các agent tồn đọng (yêu cầu MITM — không hỗ trợ URL cơ sở tùy chỉnh)
 
-Các công cụ sau không hỗ trợ base URL tùy chỉnh trong phiên bản hiện tại, khiến MITM trở thành phương thức chặn bắt duy nhất. Việc đánh giá tính khả thi vẫn đang chờ xử lý:
+Các công cụ sau không hỗ trợ URL cơ sở tùy chỉnh trong phiên bản hiện tại, khiến MITM trở thành phương thức chặn bắt duy nhất. Việc đánh giá tính khả thi đang chờ xử lý:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — tách biệt với Kiro IDE)
-- **Cowork** (ứng dụng desktop của Anthropic)
+- **Cowork** (ứng dụng máy tính để bàn của Anthropic)
 
 Lưu ý: GitHub Copilot CLI ≥v1.0.19 hỗ trợ `COPILOT_PROVIDER_BASE_URL` — hãy sử dụng cấu hình trực tiếp thay vì MITM cho công cụ đó.

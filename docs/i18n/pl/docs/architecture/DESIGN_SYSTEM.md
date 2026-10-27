@@ -89,30 +89,12 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; krawędzie ReactFlow i kanwa
    orkiestracji odczytują reagujące na motyw zmienne `--orch-status-*`
    (`src/shared/components/flow/edgeStyles.ts`).
-2. Nigdy nie łataj `packages/ui-kit/src` ręcznie: synchronizuj za pomocą
-   `scripts/dev/sync-ui-kit.sh <commit>`; bramka pre-commit `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) kończy się niepowodzeniem przy każdym bajcie, który różni się od
-   przypiętego commita upstream (pomija sprawdzanie z ostrzeżeniem, gdy klon upstream —
-   `UI_KIT_CLONE` lub `_references/cheaper-inference-ui-kit` — nie istnieje). Gdy kitowi czegoś
-   brakuje, obejdź to w adapterze lub na ekranie i poproś o to upstream.
-3. Domyślne teksty kitu są angielskie (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   przekazuj przetłumaczone ciągi znaków z `useTranslations(...)` za każdym razem, gdy komponent
-   kitu renderuje tekst.
-4. Klasy narzędziowe Tailwind wygrywają z klasami komponentów kitu (kit deklaruje
-   `@layer theme, base, components, utilities`, a jego reguły mieszkają w warstwie `components`) —
-   używaj klas narzędziowych do odstępów i układu, nie do przekolorywowywania komponentów kitu.
-5. Nagłówki: `.ci-heading` (Inter, bez trackingu) dla tytułów stron i sekcji;
-   `.ci-dashboard-display` (Instrument Serif) tylko dla dużych, oszczędnie stosowanych tekstów
-   display, takich jak kod statusu na stronie błędu.
-6. `tests/unit/dashboard-kit-sweep.test.ts` strzeże adopcji kitu: żadnych spanów z ligaturą
-   Material w `src/app` ani `src/shared/components`; w drzewie dashboardu (`src/app/(dashboard)` i
-   `src/shared/components`) żadnych surowych `<select>`, `<textarea>` czy `<table>` oraz żadnych
-   ręcznie budowanych `role="dialog"` poza wymienionymi wyjątkami (natywna gałąź adaptera `Select`,
-   `RequestLoggerDetail`); każdy surowy `<button>` lub `<input>` wymaga komentarza zawierającego
-   `kit-exception:` (z uzasadnieniem), kończącego się najwyżej 3 linie powyżej; odcienie palety i
-   warianty `dark:` tylko w plikach wymienionych przez test.
-7. Przed PR zweryfikuj oba motywy oraz viewport 390 px (zrzuty ekranu); `tests/e2e/a11y.spec.ts`
-   uruchamia axe.
+2. Nigdy nie modyfikuj ręcznie `packages/ui-kit/src`: synchronizuj za pomocą `scripts/dev/sync-ui-kit.sh <commit>`; kontrola pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) kończy się niepowodzeniem w przypadku każdego bajtu różniącego się od przypiętego commitu upstream (jest pomijana z ostrzeżeniem, gdy brakuje klonu upstream, `UI_KIT_CLONE` lub `_references/cheaper-inference-ui-kit`). Gdy w zestawie czegoś brakuje, zastosuj obejście w adapterze lub na ekranie i poproś upstream o dodanie tej funkcji.
+3. Domyślne teksty zestawu są po angielsku (`label = "Loading"`, `loadingLabel = "Loading table"`…) — przekazuj przetłumaczone ciągi z `useTranslations(...)` za każdym razem, gdy komponent zestawu renderuje tekst.
+4. Narzędzia Tailwind mają pierwszeństwo przed klasami komponentów zestawu (zestaw deklaruje `@layer theme, base, components, utilities`, a jego reguły znajdują się w `components`) — używaj narzędzi do odstępów i układu, a nie do zmiany kolorów komponentów zestawu.
+5. Nagłówki: `.ci-heading` (Inter, bez dodatkowego odstępu między literami) dla tytułów stron i sekcji; `.ci-dashboard-display` (Instrument Serif) tylko dla dużego, oszczędnego tekstu ekspozycyjnego, takiego jak kod statusu na stronie błędu.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kontroluje stosowanie zestawu: brak spanów z ligaturami Material w `src/app` lub `src/shared/components`; w drzewie panelu (`src/app/(dashboard)` i `src/shared/components`) nie mogą występować surowe elementy `<select>`, `<textarea>` ani `<table>`, ani ręcznie tworzone `role="dialog"` poza wymienionymi wyjątkami (natywna gałąź adaptera `Select`, `RequestLoggerDetail`); każdy surowy element `<button>` lub `<input>` musi mieć komentarz zawierający `kit-exception:` (wraz z powodem), kończący się nie więcej niż 3 wiersze nad nim; odcienie palety i warianty `dark:` są dozwolone tylko w plikach wymienionych przez test.
+7. Przed utworzeniem PR zweryfikuj oba motywy oraz widok o szerokości 390 px (zrzuty ekranu); `tests/e2e/a11y.spec.ts` uruchamia axe.
 
 ## 3. Dodawanie ekranu
 
@@ -152,7 +134,23 @@ importów względnych). Następnie: przejrzyj `git diff packages/ui-kit`, wykona
 użycia i punktu końcowego w obu motywach, uruchom `npm run check:ui-kit-snapshot` oraz `npm run test:vitest:ui`, a następnie
 otwórz PR z dziennikiem zmian projektu nadrzędnego.
 
-## 6. Indeks referencyjny
+## 6. Diagramy README
+
+Dwanaście diagramów osadzonych w głównym `README.md` (`docs/diagrams/*.svg`) stosuje zestaw do statycznych obrazów. Są generowane, a nie rysowane ręcznie: 13 plików generatorów w `scripts/docs/gen-readme-*.mjs` (dwanaście diagramów i sterownik `gen-readme-diagrams.mjs`) oraz 12 testów aktualności w `tests/unit/docs/readme-*-svg.test.ts`, po jednym na diagram. Każdy porównuje bajt po bajcie plik zapisany w commicie z wynikiem generatora (zadanie `test-unit`).
+
+- **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` kopiuje paletę z `packages/ui-kit/src/ci-tokens.css` (zgodność z tym plikiem zabezpiecza `tests/unit/docs/readme-diagram-theme.test.ts`) i definiuje role tekstu czcionkami zestawu: Instrument Serif dla tekstu ekspozycyjnego, Inter dla interfejsu oraz IBM Plex Mono dla liczb i kodu. To te same pakiety `@fontsource`, które `src/app/globals.css` ładuje dla panelu. Jasne wartości są w `:root`, a ciemne pod warunkiem `prefers-color-scheme: dark` wewnątrz pliku, więc każdy obraz podąża za schematem czytelnika na GitHubie.
+
+- **Czcionki.** `scripts/docs/readme-fonts.mjs` ogranicza te pliki woff2 do glifów rysowanych przez dany diagram i osadza je przez `@font-face` jako URI `data:`. Dzięki temu czcionki zestawu pozostają wewnątrz SVG. Lokalna próba obrazu README sprawdza, czy renderowanie nie wysyła zewnętrznych żądań czcionek. Podzbiory zawierają wyłącznie znaki łacińskie; glify symboli korzystające awaryjnie z czcionek systemowych są dopuszczane pojedynczo w `SYMBOL_FALLBACKS`. Każdy inny nieobsługiwany glif powoduje błąd.
+
+- **Ponowne generowanie.** `npm run docs:readme-diagrams` przepisuje wszystkie dwanaście diagramów w kolejności README i wypisuje wiersz z rozmiarem każdego pliku. Generator działa też samodzielnie (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` wymaga `node --import tsx/esm`, ponieważ liczby pochodzą z modułu wczytującego bieżący katalog w `open-sse/config/freeModelCatalog.ts`; wpływ zmiany katalogu na CI opisuje `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Zapisuj generator i SVG w jednym commicie.
+
+- **Dowód.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderuje plik w lokalnej próbie (znacznik `<img>`, restrykcyjna `Content-Security-Policy` i odpowiedź `image/svg+xml`), zapisuje jasny i ciemny kadr oraz raportuje zewnętrzne żądania czcionek strony; musi ich być 0.
+
+- **Budżet.** Poniżej 200 KB na plik, co sprawdza każdy test aktualności; 500 KB to nieprzekraczalny limit każdego obrazu README (reguła walidatora SVG studio).
+
+- **Wspólny tekst, liczby z gate.** Każdy generator przechowuje tekst diagramu w stałej `*_COPY` lub tworzy go z bieżącego katalogu. Ten sam tekst jest rysowany i stanowi wejście do tworzenia podzbioru czcionek. Kanoniczne liczby pozostają w węzłach `<text>`, odczytywanych przez `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Testy aktualności diagramów odczytywanych przez gate uruchamiają również jego walidatory na wygenerowanym pliku. Liczba niezgodna z kodem powoduje niepowodzenie testu: popraw źródło czytane przez gate, nigdy liczbę w generatorze.
+
+## 7. Indeks referencyjny
 
 - `src/app/globals.css` — pomost tokenów, nadpisania `.dark`, rozszerzenia OmniRoute w `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — przypięty commit projektu nadrzędnego i autoryzacja licencji; `packages/ui-kit/PATCHES.md`

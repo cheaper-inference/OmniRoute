@@ -484,17 +484,17 @@ createResponsesApiTransformStream(): TransformStream
 
 ## תצורה
 
-`open-sse/config/` מכיל את שכבת התצורה:
+`open-sse/config/` מכילה את שכבת התצורה:
 
 | קובץ                          | מטרה                                       |
 | ----------------------------- | ------------------------------------------ |
-| `providerRegistry.ts`         | רישום מודלי צ'אט מעל קטלוג של 376 ספקים    |
-| `providerModels.ts`           | כינויי מודלים, מיפוי פורמטים               |
-| `constants.ts`                | פסקי זמן, מגבלות, קודי סטטוס               |
+| `providerRegistry.ts`         | מרשם מודלי צ'אט עבור קטלוג הכולל 376 ספקים |
+| `providerModels.ts`           | כינויים למודלים, מיפוי פורמטים             |
+| `constants.ts`                | פרקי זמן קצובים, מגבלות, קודי מצב          |
 | `defaultThinkingSignature.ts` | חתימת החשיבה המוגדרת כברירת מחדל של Claude |
-| `modelStrip.ts` (ב-services)  | הסרת שדות לפי ספק                          |
+| `modelStrip.ts` (בשירותים)    | הסרת שדות לפי ספק                          |
 
-### סכימת רישום הספקים
+### סכמת מרשם הספקים
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-אימות Zod בזמן טעינת המודול מבטיח שכל תצורות הספקים תקינות.
+אימות Zod בעת טעינת המודול מבטיח שכל תצורות הספקים תקינות.
 
 ---
 

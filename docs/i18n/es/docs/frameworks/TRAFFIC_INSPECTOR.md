@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mecanismo:** Utiliza las API del sistema operativo para redirigir todo el tráfico HTTP/HTTPS a través del listener HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` y los ajustes de host/puerto HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Alcance:** Todas las aplicaciones del equipo que respeten la configuración de proxy del sistema
   **Nota:** `source` = `"system-proxy"`
 
 **Mecanismos de seguridad:**
 
-- Temporizador de desactivación automática (30 min de forma predeterminada, configurable mediante `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- El estado anterior del proxy del sistema se guarda en la base de datos y se restaura al revertir
-- El panel muestra el aviso "Revirtiendo el proxy del sistema" si el usuario sale mientras está activo
-- La interfaz de usuario muestra la insignia `⚠ Avanzado` y una casilla de confirmación explícita
+- Aplicar el proxy programa un temporizador de reversión de mejor esfuerzo, local al proceso (30 min por defecto, configurable mediante `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). No sobrevive a la finalización del proceso del servidor.
+- El estado anterior del proxy se guarda en la memoria del proceso; este almacén de estado de captura no lo persiste en una base de datos. La reversión restaura los ajustes guardados de macOS/GNOME; en Windows restablece el proxy WinHTTP en lugar de restaurar la configuración anterior.
+- Mientras se informa que el proxy está aplicado, al salir de la página (unload) el navegador envía una solicitud de reversión con keepalive, de mejor esfuerzo, y solicita una confirmación nativa cuyo texto controla el navegador. Desmontar el inspector durante la navegación SPA también intenta la reversión, sin ese aviso del navegador.
+- La barra de captura muestra el control `System-wide` traducido con un icono de advertencia. Pulsarlo actualmente solo cambia el estado local de la interfaz; no muestra una casilla de confirmación ni aplica o revierte el proxy del sistema.
 
 ### Modo 5 — Descifrado transparente TPROXY (Linux, root, opcional)
 
@@ -113,13 +113,13 @@ Este es un subsistema considerable que cuenta con su propia guía específica pa
 
 ### Comparación de modos de captura
 
-| Modo                    | Configuración                                   |            ¿Sudo?             | Alcance                                | Notas                                                                                                                                             |
-| ----------------------- | ----------------------------------------------- | :---------------------------: | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge          | Automática                                      |  Una vez (certificado+hosts)  | 9 agentes de IDE                       | Activado de forma predeterminada                                                                                                                  |
-| 2. Hosts personalizados | Entrada por host                                |      Sí (archivo hosts)       | Cualquier aplicación que use ese host  | Persistido en la base de datos                                                                                                                    |
-| 3. HTTP_PROXY           | `export HTTPS_PROXY=...`                        |              No               | Aplicaciones que respeten el entorno   | Puerto 8080; HTTPS se canaliza mediante CONNECT (solo metadatos, nunca se descifra)                                                               |
-| 4. Todo el sistema      | Activar/desactivar + confirmar                  |              Sí               | Todas las aplicaciones del equipo      | Se desactiva automáticamente en 30 min                                                                                                            |
-| 5. Descifrado TPROXY    | Activar/desactivar (Linux + complemento nativo) | Sí (root + instalación de CA) | Cualquier host en el puerto de destino | Descifra hosts arbitrarios; desactivado de forma predeterminada — consulta `docs/security/MITM-TPROXY-DECRYPT.md` (git; no se compila en `/docs`) |
+| Modo                    | Configuración                                                  |            ¿Sudo?             | Alcance                                | Notas                                                                                                                                             |
+| ----------------------- | -------------------------------------------------------------- | :---------------------------: | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge          | Automática                                                     |  Una vez (certificado+hosts)  | 9 agentes de IDE                       | Activado de forma predeterminada                                                                                                                  |
+| 2. Hosts personalizados | Entrada por host                                               |      Sí (archivo hosts)       | Cualquier aplicación que use ese host  | Persistido en la base de datos                                                                                                                    |
+| 3. HTTP_PROXY           | `export HTTPS_PROXY=...`                                       |              No               | Aplicaciones que respeten el entorno   | Puerto 8080; HTTPS se canaliza mediante CONNECT (solo metadatos, nunca se descifra)                                                               |
+| 4. Todo el sistema      | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |              Sí               | Todas las aplicaciones del equipo      | Temporizador de reversión de mejor esfuerzo (30 min por defecto)                                                                                  |
+| 5. Descifrado TPROXY    | Activar/desactivar (Linux + complemento nativo)                | Sí (root + instalación de CA) | Cualquier host en el puerto de destino | Descifra hosts arbitrarios; desactivado de forma predeterminada — consulta `docs/security/MITM-TPROXY-DECRYPT.md` (git; no se compila en `/docs`) |
 
 ---
 
@@ -315,7 +315,7 @@ se añadirá posteriormente).
 ### 5.1 Grabar una sesión
 
 1. Haz clic en **"● Grabar sesión"** en la barra de herramientas → introduce un nombre (opcional)
-2. El seguimiento en tiempo real continúa con normalidad; un indicador rojo pulsante muestra `◉ GRAB · <nombre> · 00:42 · 23 solicitudes`
+2. El seguimiento en tiempo real continúa con normalidad; la barra de grabación muestra un punto rojo pulsante, el tiempo transcurrido, el nombre de la sesión cuando está disponible y un control Detener traducido.
 3. Haz clic en **"⏹ Detener"** → la instantánea de la sesión se guarda en `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Ver una sesión grabada
@@ -323,7 +323,7 @@ se añadirá posteriormente).
 El menú desplegable **Sesiones** de la barra de herramientas muestra las sesiones guardadas. Al seleccionar una:
 
 - Se carga la instantánea de la sesión (estado congelado)
-- Un banner muestra: `Viendo la sesión grabada "<nombre>" — [Volver al modo en directo]`
+- Un banner muestra una etiqueta traducida de sesión grabada y el nombre de la sesión (o una alternativa traducida para una sesión sin título), junto a un botón Volver al directo traducido.
 - La pestaña Estadísticas pasa a estar disponible con agregaciones de Recharts
 
 ### 5.3 Formatos de exportación
@@ -347,7 +347,7 @@ Traffic Inspector muestra **todo el tráfico HTTPS interceptado**, incluidos los
 | -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                               | Todas las rutas y el endpoint WebSocket solo son accesibles mediante loopback (se aplica en `routeGuard.ts` antes de la autenticación)                                                                                    |
 | **Enmascaramiento de secretos**              | El analizador lineal `maskSecret()` censura las credenciales Bearer de RFC 6750, las claves con prefijo de proveedor y los tokens opacos largos antes de `TrafficBuffer.push()`                                           |
-| **Límite de tamaño del cuerpo**              | Los cuerpos > `INSPECTOR_MAX_BODY_KB` (valor predeterminado: 1024 KB) se truncan con el aviso `"(truncado por motivos de rendimiento)"`                                                                                   |
+| **Límite de tamaño del cuerpo**              | Los cuerpos > `INSPECTOR_MAX_BODY_KB` (valor predeterminado: 1024 KB) se truncan con el aviso `"(truncated for performance)"`                                                                                             |
 | **Saneamiento de encabezados**               | Los nombres se convierten a minúsculas; se eliminan los encabezados de encuadre/salto a salto y de autenticación del proxy; las cookies se censuran por completo; los valores de credenciales se delegan a `maskSecret()` |
 | **CSP**                                      | Política de Seguridad de Contenido estricta en las páginas de Traffic Inspector para evitar XSS mediante cuerpos de respuesta inyectados                                                                                  |
 | **Sin persistencia de forma predeterminada** | `TrafficBuffer` se almacena en memoria y se pierde al reiniciar el servidor. Las sesiones solo se conservan cuando se graban explícitamente                                                                               |
@@ -415,7 +415,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-El panel también ofrecerá la opción "Revertir proxy del sistema" la próxima vez que se cargue si detecta que el estado de la base de datos indica que el proxy estaba activo.
+El estado guardado del proxy solo reside en el proceso del servidor. Tras un fallo o reinicio, el almacén actual de estado de captura no puede restaurar esa instantánea desde una base de datos; use los comandos de recuperación de la plataforma indicados arriba cuando necesite una recuperación manual.
 
 ### Búfer lleno
 

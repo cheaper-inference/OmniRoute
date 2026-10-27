@@ -54,7 +54,7 @@ Nov zavihek za pridobivanje vsebine iz URL-ja prek `POST /v1/web/fetch` (ustvarj
 - Vnos: URL + stikalo za celotno stran + izbirnik oblike (markdown / besedilo / HTML).
 - Pošlji → pridobi → upodobi `ScrapeResult.tsx`.
 - `ScrapeResult` upodobi predogled markdowna + stikalo za neobdelano vsebino.
-- Omejitev: če je telo odziva večje od **256 KB**, uporabniški vmesnik prikaže `(skrajšano, prikaži neobdelano)` in odpre neobdelano vsebino v modalnem oknu Monaco (D21).
+- Omejitev: če je telo odziva večje od **256 KB**, uporabniški vmesnik prikaže `View full raw content` in odpre neobdelano vsebino v modalnem oknu (D21).
 - Podokno z metapodatki: ponudnik (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), zakasnitev, stroški, velikost odziva, število povezav.
 - Uporablja kavelj `useScrapeFetch.ts`.
 

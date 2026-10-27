@@ -88,32 +88,27 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` vasitəsilə yararlanırlar; ReactFlow
    tilləri və orkestrasiya kanvası mövzuya həssas `--orch-status-*` dəyişənlərini oxuyur
    (`src/shared/components/flow/edgeStyles.ts`).
-2. `packages/ui-kit/src` qovluğunu heç vaxt əllə düzəltməyin:
-   `scripts/dev/sync-ui-kit.sh <commit>` ilə sinxronlaşdırın; commit-öncəsi qapı
-   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) sabitlənmiş upstream commitindən
-   fərqlənən istənilən baytda uğursuz olur (upstream klonu — `UI_KIT_CLONE` və ya
-   `_references/cheaper-inference-ui-kit` — mövcud olmadıqda xəbərdarlıqla ötür). Kitdə nəsə
-   çatışmadıqda, onu adapterdə və ya ekranda müvəqqəti yolla həll edin və upstream-dən xahiş edin.
-3. Kit mətninin standart dəyərləri ingiliscədir (`label = "Loading"`, `loadingLabel = "Loading
-table"`…) — kit komponenti mətn göstərəndə həmişə `useTranslations(...)` vasitəsilə tərcümə
-   olunmuş sətirləri ötürün.
-4. Tailwind utilitləri kit komponent siniflərindən üstündür (kit
-   `@layer theme, base, components, utilities` elan edir və onun qaydaları `components` qatında
-   yerləşir) — utilitləri aralıqlar və düzülüş üçün istifadə edin, kit komponentlərini yenidən
-   rəngləmək üçün yox.
-5. Başlıqlar: səhifə və bölmə başlıqları üçün `.ci-heading` (Inter, hərf aralığı olmadan);
-   `.ci-dashboard-display` (Instrument Serif) yalnız xəta səhifəsinin status kodu kimi böyük,
-   seyrək displey mətni üçün.
-6. `tests/unit/dashboard-kit-sweep.test.ts` kitin mənimsənilməsini qoruyur: `src/app` və ya
-   `src/shared/components` altında Material liqaturalı span olmamalıdır; dashboard ağacında
-   (`src/app/(dashboard)` və `src/shared/components`) xam `<select>`, `<textarea>` və ya `<table>`
-   olmamalıdır və sadalanan istisnalardan kənarda əllə yazılmış `role="dialog"` olmamalıdır
-   (`Select` adapterinin native budağı, `RequestLoggerDetail`); oradakı hər bir xam `<button>` və
-   ya `<input>` üçün ondan ən çox 3 sətir yuxarıda bitən və (səbəbi göstərən) `kit-exception:`
-   ehtiva edən şərh lazımdır; palitra rəng çalarları və `dark:` variantları yalnız testin
-   sadaladığı fayllarda.
-7. PR-dən əvvəl hər iki mövzunu və 390 px görüntü sahəsini yoxlayın (ekran görüntüləri);
-   `tests/e2e/a11y.spec.ts` axe alətini işə salır.
+2. `packages/ui-kit/src` daxilində heç vaxt əl ilə dəyişiklik etməyin: `scripts/dev/sync-ui-kit.sh <commit>` ilə sinxronlaşdırın;
+   pre-commit yoxlaması `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) sabitlənmiş yuxarı axın commitindən
+   bir bayt belə fərqləndikdə uğursuz olur (yuxarı axın klonu,
+   `UI_KIT_CLONE` və ya `_references/cheaper-inference-ui-kit` mövcud olmadıqda xəbərdarlıq göstərərək yoxlamanı ötürür). Kitdə nəsə çatışmadıqda,
+   adapterdə və ya ekranda müvəqqəti həll tətbiq edin və bunun yuxarı axında əlavə edilməsini istəyin.
+3. Kit mətnlərinin standart dəyərləri ingiliscədir (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit komponenti mətn göstərdikdə
+   `useTranslations(...)` vasitəsilə tərcümə edilmiş sətirləri ötürün.
+4. Tailwind utilitləri kit komponentinin siniflərini üstələyir (kit
+   `@layer theme, base, components, utilities` elan edir və onun qaydaları `components` qatında yerləşir) — kit komponentlərinin
+   rəngini dəyişmək üçün deyil, aralıqlar və tərtibat üçün utilitlərdən istifadə edin.
+5. Başlıqlar: səhifə və bölmə başlıqları üçün `.ci-heading` (Inter, hərf aralığı olmadan); `.ci-dashboard-display`
+   (Instrument Serif) yalnız xəta səhifəsinin status kodu kimi böyük və seyrək təqdimat mətnləri üçün istifadə edilməlidir.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kitin tətbiqinə nəzarət edir: `src/app` və ya `src/shared/components` altında
+   Material liqaturalı span olmamalıdır; idarəetmə paneli ağacında (`src/app/(dashboard)` və
+   `src/shared/components`) xam `<select>`, `<textarea>` və ya `<table>`, həmçinin sadalanmış istisnalar xaricində
+   əl ilə hazırlanmış `role="dialog"` olmamalıdır (istisnalar: `Select` adapterinin yerli budağı,
+   `RequestLoggerDetail`); oradakı hər xam `<button>` və ya `<input>` üçün ondan ən çox 3 sətir yuxarıda bitən və səbəblə birlikdə
+   `kit-exception:` ehtiva edən şərh olmalıdır; palitra çalarlarına və `dark:` variantlarına
+   yalnız testdə sadalanan fayllarda icazə verilir.
+7. PR-dan əvvəl hər iki temanı və 390 px görünüş sahəsini yoxlayın (ekran görüntüləri); `tests/e2e/a11y.spec.ts`
+   axe yoxlamasını işə salır.
 
 ## 3. Ekran əlavə etmək
 
@@ -153,7 +148,23 @@ table"`…) — kit komponenti mətn göstərəndə həmişə `useTranslations(.
 parametrlər, kombinasiyalar, istifadə və son nöqtə üçün vizual yoxlama aparın, `npm run check:ui-kit-snapshot` və
 `npm run test:vitest:ui` əmrlərini işə salın və PR-ı yuxarı axının dəyişiklik jurnalı ilə birlikdə açın.
 
-## 6. İstinad indeksi
+## 6. README diaqramları
+
+Kökdəki `README.md` faylına daxil edilən on iki diaqram (`docs/diagrams/*.svg`) dəsti statik şəkillərə tətbiq edir. Onlar əl ilə çəkilmir, yaradılır: `scripts/docs/gen-readme-*.mjs` daxilində 13 generator faylı (on iki diaqram və `gen-readme-diagrams.mjs` idarəedicisi), `tests/unit/docs/readme-*-svg.test.ts` daxilində isə hər diaqrama bir olmaqla 12 aktuallıq testi var. Hər test commit edilmiş faylı generatorun çıxışı ilə bayt-bayt müqayisə edir (`test-unit` işi).
+
+- **Tokenlər.** `scripts/docs/readme-diagram-theme.mjs` palitranı `packages/ui-kit/src/ci-tokens.css` faylından köçürür (bu faylla uyğunluğu `tests/unit/docs/readme-diagram-theme.test.ts` təmin edir) və dəstin şriftləri ilə mətn rollarını müəyyənləşdirir: vurğulu mətn üçün Instrument Serif, interfeys üçün Inter, rəqəmlər və kod üçün IBM Plex Mono. Bunlar `src/app/globals.css` faylının idarəetmə paneli üçün yüklədiyi eyni `@fontsource` paketləridir. Açıq dəyərlər faylda `:root` daxilində, tünd dəyərlər `prefers-color-scheme: dark` şərti altında yerləşir; hər şəkil GitHub oxucusunun rəng sxeminə uyğunlaşır.
+
+- **Şriftlər.** `scripts/docs/readme-fonts.mjs` həmin woff2 fayllarını hər diaqramın çəkdiyi qliflərlə məhdudlaşdırır və onları `@font-face` vasitəsilə `data:` URI-ləri kimi yerləşdirir. Beləliklə, dəstin şriftləri SVG daxilində qalır. Yerli README şəkil sınağı təsvir zamanı xarici şrift sorğularının olmadığını yoxlayır. Alt çoxluqlar yalnız latın simvollarını əhatə edir; sistem şriftlərinə keçən simvol qliflərinə `SYMBOL_FALLBACKS` daxilində ayrı-ayrılıqda icazə verilir. Əhatə olunmayan hər başqa qlif xəta yaradır.
+
+- **Yenidən yaratma.** `npm run docs:readme-diagrams` bütün on iki diaqramı README ardıcıllığı ilə yenidən yazır və hər fayl üçün ölçüsü ilə bir sətir çıxarır. Generator ayrıca da işləyir (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` üçün `node --import tsx/esm` lazımdır, çünki rəqəmlər `open-sse/config/freeModelCatalog.ts` daxilindəki cari kataloq yükləyicisindən gəlir; kataloq dəyişikliyinin CI nəticəsi `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` bölməsindədir). Generatoru və SVG-ni birlikdə commit edin.
+
+- **Sübut.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` faylı yerli sınaqda təsvir edir (`<img>` teqi, məhdudlaşdırıcı `Content-Security-Policy` və `image/svg+xml` cavabı), açıq və tünd bir kadr çəkir və səhifənin xarici şrift sorğularını bildirir; onların sayı 0 olmalıdır.
+
+- **Büdcə.** Hər fayl 200 KB-dan kiçik olmalıdır; bunu hər aktuallıq testi yoxlayır. İstənilən README şəkli üçün mütləq hədd 500 KB-dır (SVG studio validatorunun qaydası).
+
+- **Ortaq mətn, saylar gate-dən.** Hər generator diaqram mətnini `*_COPY` sabitində saxlayır və ya cari kataloqdan qurur. Eyni mətn həm çəkilir, həm də şrift alt çoxluğuna giriş olur. Kanonik rəqəmlər `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) tərəfindən oxunan `<text>` düyünlərində qalır. Gate-in oxuduğu diaqramların aktuallıq testləri yaradılmış faylda onun validatorlarını da işlədir. Koddan fərqlənən rəqəm testi uğursuz edir: generatorun rəqəmini deyil, gate-in oxuduğu mənbəni düzəldin.
+
+## 7. İstinad indeksi
 
 - `src/app/globals.css` — token körpüsü, `.dark` əvəzləmələri, OmniRoute `@layer components` genişləndirmələri
 - `packages/ui-kit/UPSTREAM.md` — sabitlənmiş yuxarı axın commit-i və lisenziya icazəsi; `packages/ui-kit/PATCHES.md`

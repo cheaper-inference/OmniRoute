@@ -535,26 +535,26 @@ Täielikud OpenAPI skeemid: `docs/openapi.yaml` → silt `AgentBridge`.
 
 ---
 
-## §8 Teekaart
+## §8 Tegevuskava
 
 ### Trae uurimine
 
-Trae on suhteliselt uus tehisintellektil põhinev programmeerimisassistent. Enne töötleja rakendamist:
+Trae on suhteliselt uus tehisintellektil põhinev programmeerimisassistent. Enne töötleja juurutamist:
 
-1. Tuvastage binaarfail/laiendus VS Code'i / JetBrainsi poodides või eraldiseisva rakendusena
+1. Tuvastage binaarfail/laiendus VS Code'i / JetBrainsi turuplatsidel või eraldiseisva rakendusena
 2. Jäädvustage liiklus mitmproxy abil, et tuvastada API hostid ja lõpp-punktide struktuur
 3. Tehke kindlaks autentimismehhanism
-4. Hinnake kasutustingimuste ja API tuvastatavuse põhjal, kas jätkata või mitte
+4. Hinnake kasutustingimuste ja API leitavuse põhjal, kas jätkata või loobuda
 
-Kuni uurimine on lõpule viidud, kuvatakse Trae kaardil juhtpaneelil märk „Uurimisel“ koos lingiga „Teata teostatavusest“. Töötleja toes failis `src/mitm/handlers/trae.ts` väljastab struktureeritud vea `Pole veel rakendatud`.
+Kuni uurimine on lõpetatud, kuvatakse juhtpaneeli Trae kaardil märk „Uurimisel“ koos lingiga „Teata elujõulisusest“. Töötleja mall asukohas `src/mitm/handlers/trae.ts` väljastab struktureeritud vea `Not yet implemented`.
 
-### Ootel olevad agendid (MITM on nõutav — kohandatud baas-URL-i tugi puudub)
+### Ootel agendid (MITM on nõutav — kohandatud baas-URL-i tugi puudub)
 
-Järgmised tööriistad ei toeta oma praegustes versioonides kohandatud baas-URL-e, mistõttu on MITM ainus liikluse pealtkuulamise võimalus. Teostatavuse hindamine on ootel:
+Järgmised tööriistad ei toeta oma praegustes versioonides kohandatud baas-URL-e, mistõttu on MITM ainus liikluse pealtkuulamise viis. Elujõulisuse hindamine on pooleli:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — Kiro IDE-st eraldiseisev)
 - **Cowork** (Anthropicu töölauarakendus)
 
-Märkus. GitHub Copilot CLI ≥v1.0.19 toetab muutujat `COPILOT_PROVIDER_BASE_URL` — selle tööriista puhul kasutage MITM-i asemel otsekonfiguratsiooni.
+Märkus. GitHub Copilot CLI ≥v1.0.19 toetab muutujat `COPILOT_PROVIDER_BASE_URL` — kasutage selle tööriista puhul MITM-i asemel otsekonfiguratsiooni.

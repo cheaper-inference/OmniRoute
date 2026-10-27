@@ -1,0 +1,1 @@
+- **ci:** keep pull-request metadata edits separate from candidate validation, preserve base-retarget checks, and reserve admission check names for eligible candidates.

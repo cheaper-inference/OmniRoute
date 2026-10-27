@@ -54,7 +54,7 @@ Nueva pestaña para extraer contenido de una URL mediante `POST /v1/web/fetch` (
 - Entrada: URL + selector de página completa + selector de formato (markdown / texto / HTML).
 - Enviar → obtener → renderizar `ScrapeResult.tsx`.
 - `ScrapeResult` renderiza una vista previa en markdown + selector de contenido sin procesar.
-- Límite: si el cuerpo de la respuesta supera los **256 KB**, la interfaz muestra `(truncado, ver contenido sin procesar)` y abre el contenido sin procesar en un modal de Monaco (D21).
+- Límite: si el cuerpo de la respuesta supera los **256 KB**, la interfaz muestra `View full raw content` y abre el contenido sin procesar en un modal (D21).
 - Panel de metadatos: proveedor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latencia, coste, tamaño de la respuesta, número de enlaces.
 - Usa el hook `useScrapeFetch.ts`.
 

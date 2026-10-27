@@ -782,7 +782,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`-ஐ நீட்டிக்கவும்).
 2. `src/shared/constants/mcpScopes.ts`-இல் பொருத்தமான scope(களை) ஒதுக்கவும்.
 3. `open-sse/mcp-server/server.ts`-இல் tool-ஐப் பதிவுசெய்யவும்.
-4. `open-sse/mcp-server/__tests__/`-இன் கீழ் சோதனைகளைச் சேர்க்கவும்.
+4. `tests/unit/`-இன் கீழ் சோதனைகளைச் சேர்க்கவும்.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md)-ஐப் புதுப்பிக்கவும்.
 
 ### புதிய A2A skill-ஐச் சேர்த்தல்
@@ -800,7 +800,7 @@ bin/
 - **பெயரிடல்**: கோப்புகள் `camelCase` அல்லது `kebab-case`, components `PascalCase`,
   constants `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = எல்லா இடங்களிலும் `error`;
-  `no-explicit-any` = `open-sse/` மற்றும் `tests/`-இல் `warn`, மற்ற இடங்களில் error.
+  `no-explicit-any` = `open-sse/**/*.ts` மற்றும் `tests/**/*.ts`-இல் `error`.
 - **TypeScript**: `strict: false` (மரபுவழி நிலைப்பாடு). Modules இடையிலான எல்லைகளில்
   inference-ஐவிட வெளிப்படையான types-ஐ முன்னுரிமைப்படுத்தவும்.
 - **Database**: routes அல்லது handlers-இல் ஒருபோதும் raw SQL எழுத வேண்டாம் — எப்போதும்
@@ -829,8 +829,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. `main`-க்கு ஒருபோதும் நேரடியாக commit செய்ய வேண்டாம்.
-- **Husky**: pre-commit, `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` ஆகியவற்றை இயக்கும்; pre-push, `check:any-budget:t11` + `check:tracked-artifacts` ஆகியவற்றை இயக்கும் (வேகமான gates; `test:unit` விலக்கப்பட்டுள்ளது).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

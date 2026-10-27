@@ -89,30 +89,12 @@
    lược routing, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; các edge của ReactFlow
    và canvas điều phối (orchestration) đọc các biến `--orch-status-*` nhận biết theme
    (`src/shared/components/flow/edgeStyles.ts`).
-2. Không bao giờ vá `packages/ui-kit/src` thủ công: hãy đồng bộ bằng
-   `scripts/dev/sync-ui-kit.sh <commit>`; cổng kiểm tra pre-commit `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) sẽ thất bại nếu có bất kỳ byte nào khác với commit upstream đã ghim (nó sẽ
-   bỏ qua kèm cảnh báo khi không có bản clone upstream, `UI_KIT_CLONE` hoặc
-   `_references/cheaper-inference-ui-kit`). Khi kit thiếu thứ gì đó, hãy xử lý vòng trong adapter
-   hoặc màn hình và yêu cầu upstream bổ sung.
-3. Văn bản mặc định của kit là tiếng Anh (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   hãy truyền chuỗi đã dịch từ `useTranslations(...)` bất cứ khi nào một component của kit hiển thị
-   văn bản.
-4. Các utility của Tailwind thắng các class component của kit (kit khai báo
-   `@layer theme, base, components, utilities` và các quy tắc của nó nằm trong `components`) — dùng
-   utility cho khoảng cách và bố cục, không dùng để đổi màu các component của kit.
-5. Tiêu đề: `.ci-heading` (Inter, không tracking) cho tiêu đề trang và tiêu đề phần;
-   `.ci-dashboard-display` (Instrument Serif) chỉ dành cho văn bản display cỡ lớn, thưa thớt chẳng
-   hạn như mã trạng thái của trang lỗi.
-6. `tests/unit/dashboard-kit-sweep.test.ts` canh giữ việc áp dụng kit: không có span ligature
-   Material nào dưới `src/app` hoặc `src/shared/components`; trong cây dashboard
-   (`src/app/(dashboard)` và `src/shared/components`) không dùng `<select>`, `<textarea>` hoặc
-   `<table>` thô và không tự chế `role="dialog"` ngoài các ngoại lệ được liệt kê (nhánh native của
-   adapter `Select`, `RequestLoggerDetail`); mọi `<button>` hoặc `<input>` thô ở đó đều cần một
-   comment chứa `kit-exception:` (kèm lý do) kết thúc tối đa 3 dòng phía trên nó; các hue của bảng
-   màu và biến thể `dark:` chỉ được xuất hiện trong các file mà test liệt kê.
-7. Kiểm tra cả hai theme và viewport 390 px trước khi tạo PR (chụp màn hình);
-   `tests/e2e/a11y.spec.ts` chạy axe.
+2. Không bao giờ sửa thủ công `packages/ui-kit/src`: hãy đồng bộ bằng `scripts/dev/sync-ui-kit.sh <commit>`; bước kiểm tra pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) sẽ thất bại nếu có bất kỳ byte nào khác với commit upstream đã ghim (bước này sẽ được bỏ qua kèm cảnh báo khi không có bản clone upstream, `UI_KIT_CLONE` hoặc `_references/cheaper-inference-ui-kit`). Khi kit thiếu nội dung nào đó, hãy xử lý tạm trong adapter hoặc màn hình và yêu cầu upstream bổ sung.
+3. Văn bản mặc định của kit là tiếng Anh (`label = "Loading"`, `loadingLabel = "Loading table"`…) — hãy truyền các chuỗi đã dịch từ `useTranslations(...)` bất cứ khi nào một thành phần kit hiển thị văn bản.
+4. Các utility của Tailwind được ưu tiên hơn các lớp thành phần của kit (kit khai báo `@layer theme, base, components, utilities` và các quy tắc của nó nằm trong `components`) — hãy dùng utility cho khoảng cách và bố cục, không dùng chúng để đổi màu các thành phần kit.
+5. Tiêu đề: `.ci-heading` (Inter, không giãn cách ký tự) dành cho tiêu đề trang và phần; `.ci-dashboard-display` (Instrument Serif) chỉ dành cho văn bản hiển thị lớn, thưa, chẳng hạn như mã trạng thái trên trang lỗi.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kiểm soát việc áp dụng kit: không có span ligature Material trong `src/app` hoặc `src/shared/components`; trong cây dashboard (`src/app/(dashboard)` và `src/shared/components`), không có `<select>`, `<textarea>` hoặc `<table>` thô và không có `role="dialog"` tự triển khai ngoài các ngoại lệ đã liệt kê (nhánh native của adapter `Select`, `RequestLoggerDetail`); mỗi `<button>` hoặc `<input>` thô tại đó đều cần một chú thích chứa `kit-exception:` (kèm lý do), kết thúc cách phần tử đó không quá 3 dòng phía trên; các sắc độ của bảng màu và biến thể `dark:` chỉ được phép xuất hiện trong các tệp mà bài kiểm thử liệt kê.
+7. Xác minh cả hai giao diện và viewport 390 px trước khi tạo PR (kèm ảnh chụp màn hình); `tests/e2e/a11y.spec.ts` chạy axe.
 
 ## 3. Thêm màn hình
 
@@ -152,7 +134,23 @@ các import tương đối). Sau đó: xem xét `git diff packages/ui-kit`, ki�
 usage và endpoint trong cả hai theme, chạy `npm run check:ui-kit-snapshot` và `npm run test:vitest:ui`, rồi
 mở PR kèm changelog từ upstream.
 
-## 6. Chỉ mục tham khảo
+## 6. Sơ đồ README
+
+Mười hai sơ đồ được nhúng trong `README.md` ở thư mục gốc (`docs/diagrams/*.svg`) áp dụng bộ giao diện vào ảnh tĩnh. Chúng được sinh tự động, không vẽ tay: 13 tệp trình sinh tại `scripts/docs/gen-readme-*.mjs` (mười hai sơ đồ và trình điều khiển `gen-readme-diagrams.mjs`), cùng 12 kiểm thử độ cập nhật tại `tests/unit/docs/readme-*-svg.test.ts`, mỗi sơ đồ một kiểm thử. Mỗi kiểm thử so sánh từng byte của tệp đã commit với đầu ra trình sinh tương ứng (job `test-unit`).
+
+- **Token.** `scripts/docs/readme-diagram-theme.mjs` sao chép bảng màu từ `packages/ui-kit/src/ci-tokens.css` (được `tests/unit/docs/readme-diagram-theme.test.ts` ràng buộc khớp với tệp đó) và định nghĩa vai trò văn bản bằng phông của bộ giao diện: Instrument Serif cho chữ trình bày nổi bật, Inter cho giao diện, IBM Plex Mono cho số liệu và mã. Đây cũng là các gói `@fontsource` mà `src/app/globals.css` tải cho bảng điều khiển. Giá trị sáng nằm ở `:root`, giá trị tối dưới điều kiện `prefers-color-scheme: dark` ngay trong tệp, nên mỗi ảnh theo chế độ màu của người đọc trên GitHub.
+
+- **Phông chữ.** `scripts/docs/readme-fonts.mjs` thu gọn các tệp woff2 đó xuống những glyph mà mỗi sơ đồ vẽ và nhúng chúng qua `@font-face` dưới dạng URI `data:`. Nhờ vậy, phông của bộ giao diện nằm ngay trong SVG. Phép thử ảnh README cục bộ kiểm tra rằng quá trình kết xuất không gửi yêu cầu phông ra bên ngoài. Các tập con chỉ gồm ký tự Latin; glyph ký hiệu dùng phông hệ thống làm dự phòng được cho phép từng mục trong `SYMBOL_FALLBACKS`. Bất kỳ glyph nào khác không được bao phủ đều gây lỗi.
+
+- **Sinh lại.** `npm run docs:readme-diagrams` ghi lại cả mười hai sơ đồ theo thứ tự README và in một dòng cho mỗi tệp kèm kích thước. Mỗi trình sinh cũng chạy riêng được (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` cần `node --import tsx/esm` vì số liệu lấy từ bộ nạp danh mục hiện hành tại `open-sse/config/freeModelCatalog.ts`; tác động của thay đổi danh mục lên CI nằm ở `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit trình sinh và SVG cùng nhau.
+
+- **Bằng chứng.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` kết xuất tệp trong phép thử cục bộ (thẻ `<img>`, một `Content-Security-Policy` hạn chế và phản hồi `image/svg+xml`), chụp một khung sáng và một khung tối, rồi báo các yêu cầu phông bên ngoài của trang; số lượng phải là 0.
+
+- **Giới hạn.** Dưới 200 KB mỗi tệp, được từng kiểm thử độ cập nhật xác nhận; 500 KB là trần cứng cho mọi ảnh README (quy tắc của bộ kiểm tra SVG studio).
+
+- **Nội dung chữ dùng chung, số liệu từ gate.** Mỗi trình sinh giữ nội dung sơ đồ trong hằng `*_COPY` hoặc dựng từ danh mục hiện hành. Nội dung này vừa được vẽ, vừa là đầu vào để tạo tập con phông. Số liệu chuẩn nằm trong các nút `<text>` được `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) đọc. Kiểm thử độ cập nhật của những sơ đồ mà gate đọc cũng chạy các bộ kiểm tra của gate trên tệp được sinh. Số liệu lệch khỏi mã làm kiểm thử thất bại: sửa nguồn mà gate đọc, tuyệt đối không sửa số trong trình sinh.
+
+## 7. Chỉ mục tham khảo
 
 - `src/app/globals.css` — cầu nối token, các ghi đè `.dark`, các phần mở rộng OmniRoute trong `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — commit upstream được ghim và giấy phép ủy quyền; `packages/ui-kit/PATCHES.md`

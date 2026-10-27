@@ -197,6 +197,7 @@ test("usage leaves route every proxied fetch through the connection proxy helper
 
 test("the helper reports a missing identifier instead of fetching directly", async () => {
   let calls = 0;
+  let gateCalls = 0;
   const fetchFn = (async (): Promise<Response> => {
     calls += 1;
     return balanceResponse();
@@ -208,8 +209,79 @@ test("the helper reports a missing identifier instead of fetching directly", asy
     {
       resolveProxyForConnection: async () => ({ proxy: ASSIGNED_PROXY }),
       fetchFn,
+      beforeFetch: async () => {
+        gateCalls += 1;
+      },
     }
   );
   assert.equal(response, null);
   assert.equal(calls, 0);
+  assert.equal(gateCalls, 0);
+});
+
+test("the helper runs beforeFetch immediately before a no-proxy fetch", async () => {
+  const order: string[] = [];
+  const response = await fetchWithConnectionProxy(
+    "direct-gated",
+    "https://console.example/api/balance",
+    undefined,
+    {
+      resolveProxyForConnection: async () => ({ proxy: null }),
+      beforeFetch: async () => {
+        order.push("gate");
+      },
+      fetchFn: (async () => {
+        order.push("fetch");
+        return balanceResponse();
+      }) as typeof globalThis.fetch,
+    }
+  );
+
+  assert.equal(response?.status, 200);
+  assert.deepEqual(order, ["gate", "fetch"]);
+});
+
+test("the helper preserves callers without beforeFetch", async () => {
+  let calls = 0;
+  const response = await fetchWithConnectionProxy(
+    "direct-ungated",
+    "https://console.example/api/balance",
+    undefined,
+    {
+      resolveProxyForConnection: async () => ({ proxy: null }),
+      fetchFn: (async () => {
+        calls += 1;
+        return balanceResponse();
+      }) as typeof globalThis.fetch,
+    }
+  );
+
+  assert.equal(response?.status, 200);
+  assert.equal(calls, 1);
+});
+
+test("proxy resolution failure consumes neither the gate nor the fetch", async () => {
+  let gateCalls = 0;
+  let fetchCalls = 0;
+  const response = await fetchWithConnectionProxy(
+    "resolution-failure",
+    "https://console.example/api/balance",
+    undefined,
+    {
+      resolveProxyForConnection: async () => {
+        throw new Error("synthetic proxy resolution failure");
+      },
+      beforeFetch: async () => {
+        gateCalls += 1;
+      },
+      fetchFn: (async () => {
+        fetchCalls += 1;
+        return balanceResponse();
+      }) as typeof globalThis.fetch,
+    }
+  );
+
+  assert.equal(response, null);
+  assert.equal(gateCalls, 0);
+  assert.equal(fetchCalls, 0);
 });

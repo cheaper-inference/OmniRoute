@@ -212,7 +212,7 @@ OmniRoute go hinmheánach, ionas go bhfanann samhlacha le fáil faoi aon ainm.
 
 ### Conas a rangáiltear soláthraí
 
-I gcás gach soláthraí saor in aisce, scórálann an t-inneall gach samhail ina chatalóg, ansin:
+I gcás gach soláthraí saor in aisce, scórálann an t-inneall gach samhail ina chatalóg, agus ansin:
 
 - **Príomhshamhail** = an tsamhail is airde scór ag an soláthraí.
 - **Meánscór** = an meánscór thar gach samhail scóráilte de chuid an tsoláthraí sin.

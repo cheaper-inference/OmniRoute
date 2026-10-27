@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Meccanismo:** utilizza le API del sistema operativo per reindirizzare tutto il traffico HTTP/HTTPS attraverso il listener HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` e le impostazioni host/porta HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Copertura:** ogni applicazione sulla macchina che rispetti le impostazioni proxy di sistema
   **Nota:** `source` = `"system-proxy"`
 
 **Meccanismi di sicurezza:**
 
-- Timer di disattivazione automatica (valore predefinito: 30 min, configurabile tramite `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Lo stato precedente del proxy di sistema viene salvato nel DB e ripristinato al ripristino
-- La dashboard mostra la richiesta "Ripristino del proxy di sistema" se l'utente abbandona la pagina mentre è attivo
-- L'interfaccia utente mostra il badge `⚠ Avanzato` e una casella di controllo per la conferma esplicita
+- L’applicazione del proxy pianifica un timer di ripristino senza garanzia, locale al processo (30 min per impostazione predefinita, configurabile con `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Il timer non sopravvive alla terminazione del processo server.
+- Lo stato precedente del proxy resta nella memoria del processo; questo archivio dello stato di cattura non lo salva in un database. Il ripristino recupera le impostazioni macOS/GNOME salvate; su Windows reimposta il proxy WinHTTP invece di ripristinare la configurazione precedente.
+- Finché il proxy risulta applicato, quando si lascia la pagina (unload) il browser invia una richiesta di ripristino keepalive senza garanzia e richiede una conferma nativa il cui testo è controllato dal browser. Anche lo smontaggio dell’ispettore durante la navigazione SPA tenta il ripristino, senza tale avviso del browser.
+- La barra di cattura mostra il controllo `System-wide` localizzato con un’icona di avviso. Attualmente un clic modifica solo lo stato locale dell’interfaccia; non mostra una casella di conferma né applica o ripristina il proxy di sistema.
 
 ### Modalità 5 — Decifratura trasparente TPROXY (Linux, root, attivazione facoltativa)
 
@@ -113,13 +113,13 @@ Si tratta di un sottosistema significativo con una propria guida operativa dedic
 
 ### Confronto tra le modalità di acquisizione
 
-| Modalità                 | Configurazione                                    |            Sudo?             | Ambito                                     | Note                                                                                                                                                     |
-| ------------------------ | ------------------------------------------------- | :--------------------------: | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge           | Automatica                                        |    Una volta (cert+hosts)    | 9 agenti IDE                               | Attivo per impostazione predefinita                                                                                                                      |
-| 2. Host personalizzati   | Inserimento per host                              |       Sì (file hosts)        | Qualsiasi app che usa tale host            | Salvato nel DB                                                                                                                                           |
-| 3. HTTP_PROXY            | `export HTTPS_PROXY=...`                          |              No              | App che rispettano le variabili d'ambiente | Porta 8080; HTTPS viene incanalato tramite CONNECT (solo metadati, mai decrittografato)                                                                  |
-| 4. A livello di sistema  | Attivazione/disattivazione + conferma             |              Sì              | Tutte le app sul computer                  | Disattivazione automatica dopo 30 min                                                                                                                    |
-| 5. Decrittografia TPROXY | Attivazione/disattivazione (Linux + addon nativo) | Sì (root + installazione CA) | Qualsiasi host sulla porta di destinazione | Decrittografa host arbitrari; disattivata per impostazione predefinita — consulta `docs/security/MITM-TPROXY-DECRYPT.md` (git; non compilato in `/docs`) |
+| Modalità                 | Configurazione                                                 |            Sudo?             | Ambito                                     | Note                                                                                                                                                     |
+| ------------------------ | -------------------------------------------------------------- | :--------------------------: | ------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge           | Automatica                                                     |    Una volta (cert+hosts)    | 9 agenti IDE                               | Attivo per impostazione predefinita                                                                                                                      |
+| 2. Host personalizzati   | Inserimento per host                                           |       Sì (file hosts)        | Qualsiasi app che usa tale host            | Salvato nel DB                                                                                                                                           |
+| 3. HTTP_PROXY            | `export HTTPS_PROXY=...`                                       |              No              | App che rispettano le variabili d'ambiente | Porta 8080; HTTPS viene incanalato tramite CONNECT (solo metadati, mai decrittografato)                                                                  |
+| 4. A livello di sistema  | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |              Sì              | Tutte le app sul computer                  | Timer di ripristino senza garanzia (30 min predefiniti)                                                                                                  |
+| 5. Decrittografia TPROXY | Attivazione/disattivazione (Linux + addon nativo)              | Sì (root + installazione CA) | Qualsiasi host sulla porta di destinazione | Decrittografa host arbitrari; disattivata per impostazione predefinita — consulta `docs/security/MITM-TPROXY-DECRYPT.md` (git; non compilato in `/docs`) |
 
 ---
 
@@ -314,7 +314,7 @@ verrà aggiunto successivamente).
 ### 5.1 Registrazione di una sessione
 
 1. Fai clic su **"● Registra sessione"** nella barra degli strumenti → inserisci un nome (facoltativo)
-2. Il flusso in tempo reale continua normalmente; un indicatore rosso lampeggiante mostra `◉ REC · <nome> · 00:42 · 23 richieste`
+2. Il monitoraggio in tempo reale continua normalmente; la barra di registrazione mostra un punto rosso pulsante, il tempo trascorso, il nome della sessione quando disponibile e un controllo Interrompi localizzato.
 3. Fai clic su **"⏹ Interrompi"** → l'istantanea della sessione viene salvata in `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Visualizzazione di una sessione registrata
@@ -322,7 +322,7 @@ verrà aggiunto successivamente).
 Il menu a discesa **Sessioni** nella barra degli strumenti elenca le sessioni salvate. Selezionandone una:
 
 - Carica l'istantanea della sessione (stato congelato)
-- Un banner mostra: `Visualizzazione della sessione registrata "<nome>" — [Torna alla visualizzazione in tempo reale]`
+- Un banner mostra un’etichetta localizzata della sessione registrata e il nome della sessione (o un testo localizzato di ripiego per una sessione senza titolo), accanto a un pulsante Torna al live localizzato.
 - La scheda Statistiche diventa disponibile con le aggregazioni di Recharts
 
 ### 5.3 Formati di esportazione
@@ -346,7 +346,7 @@ Traffic Inspector mostra **tutto il traffico HTTPS intercettato**, incluse le in
 | ---------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                                       | Tutte le route e l'endpoint WebSocket sono accessibili esclusivamente tramite loopback (controllo applicato in `routeGuard.ts` prima dell'autenticazione)                                                                        |
 | **Mascheramento dei segreti**                        | Lo scanner lineare `maskSecret()` oscura le credenziali Bearer RFC 6750, le chiavi con prefisso del provider e i token opachi lunghi prima di `TrafficBuffer.push()`                                                             |
-| **Limite delle dimensioni del corpo**                | I corpi > `INSPECTOR_MAX_BODY_KB` (valore predefinito: 1024 KB) vengono troncati con l'avviso `"(troncato per motivi di prestazioni)"`                                                                                           |
+| **Limite delle dimensioni del corpo**                | I corpi > `INSPECTOR_MAX_BODY_KB` (valore predefinito: 1024 KB) vengono troncati con l'avviso `"(truncated for performance)"`                                                                                                    |
 | **Sanificazione delle intestazioni**                 | I nomi vengono convertiti in minuscolo; le intestazioni di framing/hop-by-hop e di autenticazione proxy vengono eliminate; i cookie vengono completamente oscurati; i valori delle credenziali vengono delegati a `maskSecret()` |
 | **CSP**                                              | Una Content Security Policy rigorosa nelle pagine di Traffic Inspector impedisce attacchi XSS tramite corpi delle risposte iniettati                                                                                             |
 | **Nessuna persistenza per impostazione predefinita** | `TrafficBuffer` è conservato in memoria e viene perso al riavvio del server. Le sessioni vengono salvate in modo persistente solo quando vengono registrate esplicitamente                                                       |
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Al successivo caricamento, la dashboard offrirà anche l'opzione "Ripristina proxy di sistema" se rileva che lo stato del DB indica che il proxy era attivo.
+Lo stato salvato del proxy risiede solo nel processo server. Dopo un arresto anomalo o un riavvio, l’attuale archivio dello stato di cattura non può ripristinare tale istantanea da un database; usare i comandi di recupero della piattaforma riportati sopra quando occorre un recupero manuale.
 
 ### Buffer pieno
 

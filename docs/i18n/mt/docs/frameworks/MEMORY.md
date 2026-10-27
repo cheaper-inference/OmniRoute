@@ -346,11 +346,11 @@ L-estrazzjoni hija **bbażata fuq regex**, mhux fuq LLM — titħaddem fil-proċ
 `setImmediate()` sabiex qatt ma timblokka l-fluss tar-rispons:
 
 - **Mudelli ta' preferenza** → `MemoryType.FACTUAL`
-  (eż. `Nippreferi …`, `Jogħġobni ħafna …`, `il-favorit tiegħi huwa …`, `Nobgħod …`)
+  (eż. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Mudelli ta' deċiżjoni** → `MemoryType.EPISODIC`
-  (eż. `Se nuża …`, `Għażilt …`, `Iddeċidejt fuq …`, `Se nadotta …`)
+  (eż. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Mudelli ta' drawwiet** → `MemoryType.FACTUAL`
-  (eż. `Normalment jien …`, `Jien dejjem …`, `Għandi t-tendenza li …`)
+  (eż. `I usually …`, `I always …`, `I tend to …`)
 
 Kull tqabbil jiġi ssanitizzat (`trim`, tnaqqis tal-ispazji bojod, limitat għal 500 karattru),
 deduplikat fil-lott permezz ta' `factKey(category, content)` stabbli, u
@@ -723,11 +723,11 @@ Il-modulu `extraction.ts` (`src/lib/memory/extraction.ts`) juża **tqabbil ta’
 
 ### Kategoriji tal-Mudelli Predefiniti
 
-| Kategorija          | Eżempju ta’ mudell                                      | X’jaqbad                            |
-| ------------------- | ------------------------------------------------------- | ----------------------------------- |
-| PREFERENCE_PATTERNS | `"Nippreferi <X>"`, `"Jogħġobni <X>"`, `"Nobgħod <X>"`  | Preferenzi tal-utent                |
-| DECISION_PATTERNS   | `"Se nuża <X>"`, `"Iddeċidejt li <X>"`, `"Għażilt <X>"` | Deċiżjonijiet tal-utent (episodiċi) |
-| PATTERN_PATTERNS    | `"Normalment <X>"`, `"Dejjem <X>"`, `"Qatt ma <X>"`     | Mudelli persistenti ta’ mġiba       |
+| Kategorija          | Eżempju ta’ mudell                                          | X’jaqbad                            |
+| ------------------- | ----------------------------------------------------------- | ----------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Preferenzi tal-utent                |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Deċiżjonijiet tal-utent (episodiċi) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Mudelli persistenti ta’ mġiba       |
 
 ### Eżempji ta’ Mudelli (Issimplifikati)
 
@@ -763,7 +763,8 @@ Meta utent jgħid:
 
 Biex tiġi evitata estrazzjoni bla kontroll, japplikaw il-limiti li ġejjin:
 
-| Tul minimu tal-kontenut | 3 karattri |
+| Tul minimu tal-kontenut  | 3 karattri   |
+| ------------------------ | ------------ |
 | Tul massimu tal-kontenut | 500 karattru |
 
 ### Meta Għandek Tiddiżattiva l-Estrazzjoni

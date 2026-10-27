@@ -132,7 +132,7 @@ datasets-server ਉੱਤੇ ਅਧਿਕਾਰਕ `lmarena-ai/leaderboard-datas
 | `text`         | `default`, `review`, `documentation`, `debugging` |
 | `code`         | `coding`                                          |
 
-### ਨਾਰਮਲਾਈਜ਼ੇਸ਼ਨ (ਟਾਸਕ-ਫਿੱਟ ਸਕੋਰ)
+### ਸਧਾਰਣੀਕਰਨ (ਟਾਸਕ-ਅਨੁਕੂਲਤਾ ਸਕੋਰ)
 
 ਰੌ ELO ਸਕੋਰ ਹਰ ਲੀਡਰਬੋਰਡ ਦੇ ਅੰਦਰ **`[0.4, 0.98]` ਵਿੱਚ ਇੱਕ ਟਾਸਕ-ਫਿੱਟ ਮੁੱਲ** ਵਿੱਚ ਨਾਰਮਲਾਈਜ਼ ਕੀਤੇ ਜਾਂਦੇ ਹਨ:
 

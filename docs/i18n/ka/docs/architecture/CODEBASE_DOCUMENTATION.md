@@ -784,7 +784,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`).
 2. მიანიჭეთ შესაბამისი მოქმედების არე(ები) `src/shared/constants/mcpScopes.ts`-ში.
 3. დაარეგისტრირეთ ინსტრუმენტი `open-sse/mcp-server/server.ts`-ში.
-4. დაამატეთ ტესტები `open-sse/mcp-server/__tests__/`-ში.
+4. დაამატეთ ტესტები `tests/unit/`-ში.
 5. განაახლეთ [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### ახალი A2A უნარის დამატება
@@ -802,7 +802,7 @@ bin/
 - **დასახელება**: ფაილები — `camelCase` ან `kebab-case`, კომპონენტები — `PascalCase`,
   მუდმივები — `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` ყველგან;
-  `no-explicit-any` = `warn` `open-sse/`-სა და `tests/`-ში, ხოლო სხვაგან — შეცდომა.
+  `no-explicit-any` = `error` `open-sse/**/*.ts`-სა და `tests/**/*.ts`-ში.
 - **TypeScript**: `strict: false` (მემკვიდრეობითი მიდგომა). მოდულთაშორის საზღვრებზე
   ტიპების გამოტანას მიანიჭეთ უპირატესობა აშკარა ტიპებს.
 - **მონაცემთა ბაზა**: არასოდეს დაწეროთ დაუმუშავებელი SQL მარშრუტებსა ან დამმუშავებლებში — ყოველთვის გამოიყენეთ
@@ -831,8 +831,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **ტოტები**: პრეფიქსები `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. არასოდეს შეიტანოთ კომიტი პირდაპირ `main`-ში.
-- **Husky**: pre-commit უშვებს `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push უშვებს `check:any-budget:t11` + `check:tracked-artifacts` (სწრაფი შემოწმებები; არ მოიცავს `test:unit`-ს).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

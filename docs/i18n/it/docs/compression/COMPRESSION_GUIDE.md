@@ -188,7 +188,7 @@ Con Stacked:        10K-2.5K token inviati     (intervallo idoneo RTK+Caveman de
 
 ### Dashboard
 
-Vai a `Dashboard → Contesto e cache`:
+Vai a `Dashboard → Context & Cache`:
 
 - **Caveman** — selezione della modalità, pacchetti lingua, anteprima e impostazioni predefinite globali
 - **RTK** — anteprima dei filtri dei comandi, impostazioni di sicurezza RTK e catalogo dei filtri
@@ -197,7 +197,7 @@ Vai a `Dashboard → Contesto e cache`:
 
 ### Sostituzione per combinazione
 
-In `Dashboard → Contesto e cache → Combinazioni di compressione`, assegna una combinazione di compressione a una combinazione di instradamento:
+In `Dashboard → Context & Cache → Compression Combos`, assegna una combinazione di compressione a una combinazione di instradamento:
 
 ```txt
 Combinazione: "free-tier-fallback"
@@ -210,7 +210,7 @@ Combinazione: "free-tier-fallback"
 
 Ciò consente di utilizzare la compressione concatenata con i provider gratuiti/per la programmazione, mantenendo al contempo la modalità lite per gli abbonamenti a pagamento.
 
-Questa assegnazione di "Sostituzione per combinazione" è un controllo diverso dalla sostituzione della **modalità di compressione della combinazione di instradamento** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — lo schema del campo accetta anche `rtk`, `stacked` e `omniglyph`) — tale sostituzione non seleziona una pipeline di combinazione di compressione denominata; imposta semplicemente il campo `compressionMode` consultato da `resolveCompressionPlan`. Può essere configurata nella scheda della combinazione (`Dashboard → Combinazioni`) oppure, a partire dalla versione #6760, per ogni combinazione di instradamento nell'elenco "Assegna all'instradamento" in `Dashboard → Contesto e cache → Combinazioni di compressione`, proprio accanto alla casella di controllo per l'assegnazione della pipeline documentata sopra. Entrambe le interfacce salvano le modifiche tramite lo stesso endpoint `PUT /api/combos/{id}`.
+Questa assegnazione di "Sostituzione per combinazione" è un controllo diverso dalla sostituzione della **modalità di compressione della combinazione di instradamento** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — lo schema del campo accetta anche `rtk`, `stacked` e `omniglyph`) — tale sostituzione non seleziona una pipeline di combinazione di compressione denominata; imposta semplicemente il campo `compressionMode` consultato da `resolveCompressionPlan`. Può essere configurata nella scheda della combinazione (`Dashboard → Combos`) oppure, a partire dalla versione #6760, per ogni combinazione di instradamento nell'elenco "Assegna all'instradamento" in `Dashboard → Context & Cache → Compression Combos`, proprio accanto alla casella di controllo per l'assegnazione della pipeline documentata sopra. Entrambe le interfacce salvano le modifiche tramite lo stesso endpoint `PUT /api/combos/{id}`.
 
 ### Sostituzione per richiesta
 

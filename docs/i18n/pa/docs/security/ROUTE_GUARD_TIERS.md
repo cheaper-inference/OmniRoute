@@ -180,6 +180,12 @@ spawn ਨਾ ਕਰਨ ਵਾਲੇ ਸਰੋਤਾਂ (ਸੰਭਾਲੀ ਸ�
 | `/api/providers/health-autopilot/actions` | ਆਟੋਪਾਇਲਟ ਸੁਧਾਰਾਤਮਕ ਕਾਰਵਾਈਆਂ ਚਲਾਉਂਦਾ ਹੈ                           |
 | `/api/settings/obsidian`                  | ਕਿਸੇ ਵੀ vault ਰੂਟ ਲਈ ਮੁੜ ਵਰਤੋਂਯੋਗ WebDAV ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਬਣਾਉਂਦਾ ਹੈ |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                     |
+| `/api/cli-tools/apply`                    | ਹੋਸਟ ਉੱਤੇ ਓਪਰੇਟਰ ਦੀ CLI ਸੰਰਚਨਾ ਮੁੜ ਲਿਖਦਾ ਹੈ                      |
+| `/api/cli-tools/guide-settings`           | ਗਾਈਡ-ਆਧਾਰਿਤ CLI ਸੰਰਚਨਾ ਫਾਈਲਾਂ ਲਿਖਦਾ ਹੈ                           |
+| `/api/cli-tools/hermes-agent-settings`    | Hermes ਏਜੰਟ ਦੀ ਸੰਰਚਨਾ ਲਿਖਦਾ ਹੈ                                   |
+| `/api/cli-tools/backups`                  | CLI ਸੰਰਚਨਾ ਦੇ ਬੈਕਅੱਪ ਬਹਾਲ ਅਤੇ ਮਿਟਾਉਂਦਾ ਹੈ                        |
+| `/api/log-export`                         | ਸੰਰਚਿਤ ਮੰਜ਼ਿਲ ਵੱਲ ਕਾਲ ਲੌਗ ਭੇਜਦਾ ਹੈ                               |
+| `/api/restart`                            | ਸਰਵਰ ਪ੍ਰਕਿਰਿਆ ਮੁੜ ਚਾਲੂ ਕਰਦਾ ਹੈ                                   |
 
 **ਉਲੰਘਣਾ ਉੱਤੇ ਜਵਾਬ:** `401 Authentication required`
 
@@ -190,7 +196,7 @@ Obsidian REST API ਟੋਕਨ ਸੰਭਾਲਦਾ ਹੈ। GHSA-62vw ਨੇ 
 ਹਾਲੇ ਵੀ fail-open ਟੀਅਰ ਉੱਤੇ ਸੀ (GHSA-7pq4-8pvv-rx7r)। `enableObsidianVaultSync()` ਇਸ ਤੋਂ ਇਲਾਵਾ
 ਅਜਿਹੇ vault ਤੋਂ ਇਨਕਾਰ ਕਰਦਾ ਹੈ ਜੋ ਖੁਦ ਡਾਟਾ ਡਾਇਰੈਕਟਰੀ ਹੋਵੇ, ਉਸਦੇ ਅੰਦਰ ਹੋਵੇ, ਜਾਂ ਉਸਨੂੰ ਸ਼ਾਮਲ ਕਰਦਾ ਹੋਵੇ।
 
-#### ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਐਕਸਪੋਰਟ ਸਿਰਫ਼ ਓਪਰੇਟਰ ਲਈ ਹਨ
+#### ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਨਿਰਯਾਤ ਅਤੇ ਬਹਾਲੀ ਸਿਰਫ਼ ਓਪਰੇਟਰ ਲਈ ਹਨ
 
 ਉੱਪਰਲਾ ਟੀਅਰ ਸਿਰਫ਼ ਇਹ ਨਿਰਧਾਰਤ ਕਰਦਾ ਹੈ ਕਿ ਕੀ _ਕੋਈ_ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਲੋੜੀਂਦਾ ਹੈ। ਸਟੋਰ ਕੀਤੇ
 ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਡਾਊਨਲੋਡ ਕਰਨ ਵਾਲੇ ਰੂਟ ਹੈਂਡਲਰ ਵਿੱਚ ਦੂਜੀ ਜਾਂਚ ਜੋੜਦੇ ਹਨ: `GET /api/settings/export-json` (ਡੀਕ੍ਰਿਪਟ ਕੀਤੇ
@@ -201,22 +207,9 @@ Obsidian REST API ਟੋਕਨ ਸੰਭਾਲਦਾ ਹੈ। GHSA-62vw ਨੇ 
 ਅਤੇ `admin` ਵੀ ਸ਼ਾਮਲ ਹਨ) ਅਤੇ `oma_` ਐਕਸੈੱਸ ਟੋਕਨਾਂ ਨੂੰ `403` ਜਵਾਬ ਦਿੰਦਾ ਹੈ। ਸਿੰਕ ਟੋਕਨ ਜਾਰੀ ਕਰਨਾ (`POST /api/sync/tokens`)
 ਇਸੇ ਹੈਲਪਰ ਦੇ ਨਾਲ ਭਰੋਸੇਯੋਗ ਲੂਪਬੈਕ ਅੰਦਰੂਨੀ-ਸੇਵਾ ਟੋਕਨ ਦੀ ਵਰਤੋਂ ਕਰਦਾ ਹੈ।
 
-#### Credential exports and restores are operator-only
+ਸੰਬੰਧਿਤ ਵਿਨਾਸ਼ਕਾਰੀ ਕਾਰਵਾਈਆਂ ਲਈ ਵੀ ਉਹੀ ਹੱਦ ਹੈ: `POST /api/db-backups/import` (ਅੱਪਲੋਡ ਕੀਤੀ `.sqlite` ਫਾਈਲ, `dryRun=true` ਸਮੇਤ), `POST /api/db-backups` (ਸੰਭਾਲਿਆ ਬੈਕਅੱਪ ਉਸ ਦੇ id ਨਾਲ ਬਹਾਲ ਕਰਨਾ) ਅਤੇ `POST /api/settings/import-json` (ਪੁਰਾਣੇ JSON ਫਾਰਮੈਟ ਦੀ ਬਹਾਲੀ) ਚੱਲ ਰਹੇ ਡਾਟਾਬੇਸ ਜਾਂ ਸੈਟਿੰਗਾਂ, ਕਨੈਕਸ਼ਨਾਂ ਅਤੇ API ਕੁੰਜੀਆਂ ਦੇ ਪੂਰੇ ਸਮੂਹ ਨੂੰ ਬਦਲ ਦਿੰਦੀਆਂ ਹਨ। ਇਸ ਲਈ ਮਸ਼ੀਨ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਇਹ ਕਾਰਵਾਈਆਂ ਵੀ ਸ਼ੁਰੂ ਨਹੀਂ ਕਰ ਸਕਦਾ।
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+ਬਹਾਲੀ ਬਿੰਦੂ ਮਿਟਾਉਣ ਲਈ ਵੀ ਉਹੀ ਹੱਦ ਹੈ: `DELETE /api/db-backups` (ਸਫ਼ਾਈ — ਸਭ ਤੋਂ ਨਵੇਂ N ਰੱਖਣੇ ਜਾਂ D ਦਿਨਾਂ ਤੋਂ ਪੁਰਾਣੇ ਮਿਟਾਉਣੇ) ਅਤੇ `PATCH /api/db-backups` (ਸੰਭਾਲ ਦੀਆਂ ਸੈਟਿੰਗਾਂ)। ਸੰਭਾਲੇ ਨਿਯਮ ਹੀ `cleanupDbBackups()` ਹਰ ਆਪਣੇ-ਆਪ ਬਣੇ ਬੈਕਅੱਪ ਤੋਂ ਬਾਅਦ ਲਾਗੂ ਕਰਦਾ ਹੈ (`src/lib/db/backup.ts`); ਇਸ ਲਈ `keepLatest: 1` ਸੰਭਾਲ ਸਕਣ ਵਾਲਾ ਮਸ਼ੀਨ ਕ੍ਰੈਡੈਂਸ਼ੀਅਲ ਅਗਲੇ ਸਨੈਪਸ਼ਾਟ ਵਿੱਚ ਪਿਛਲੇ ਬਹਾਲੀ ਬਿੰਦੂ ਮਿਟਾ ਸਕਦਾ ਸੀ। ਬੈਕਅੱਪਾਂ ਦੀ ਸੂਚੀ ਵੇਖਣ ਅਤੇ ਬਣਾਉਣ (`GET`/`PUT /api/db-backups`) ਲਈ ਆਮ ਪ੍ਰਬੰਧਨ ਪ੍ਰਮਾਣੀਕਰਨ ਕਾਇਮ ਰਹਿੰਦਾ ਹੈ।
 
 ### ਨਵੀਂ ਇੰਸਟਾਲੇਸ਼ਨ ਦਾ ਬੂਟਸਟਰੈਪ ਸਿਰਫ਼ ਲੂਪਬੈਕ ਲਈ ਹੈ — ਅਸਲ ਪੀਅਰ ਦੇ ਆਧਾਰ 'ਤੇ, `Host` ਦੇ ਨਹੀਂ
 

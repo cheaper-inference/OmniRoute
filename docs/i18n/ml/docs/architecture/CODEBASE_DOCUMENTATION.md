@@ -781,7 +781,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` വിപുലീകരിക്കുക).
 2. `src/shared/constants/mcpScopes.ts`-ൽ അനുയോജ്യമായ സ്കോപ്പ്(കൾ) നൽകുക.
 3. `open-sse/mcp-server/server.ts`-ൽ ടൂൾ രജിസ്റ്റർ ചെയ്യുക.
-4. `open-sse/mcp-server/__tests__/`-ന് കീഴിൽ ടെസ്റ്റുകൾ ചേർക്കുക.
+4. `tests/unit/`-ന് കീഴിൽ ടെസ്റ്റുകൾ ചേർക്കുക.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) പുതുക്കുക.
 
 ### ഒരു പുതിയ A2A സ്കിൽ ചേർക്കുക
@@ -799,7 +799,7 @@ bin/
 - **നാമകരണം**: ഫയലുകൾ `camelCase` അല്ലെങ്കിൽ `kebab-case`, ഘടകങ്ങൾ `PascalCase`,
   കോൺസ്റ്റന്റുകൾ `UPPER_SNAKE`.
 - **ESLint**: എല്ലായിടത്തും `no-eval`, `no-implied-eval`, `no-new-func` = `error`;
-  `open-sse/`-ലും `tests/`-ലും `no-explicit-any` = `warn`, മറ്റിടങ്ങളിൽ `error`.
+  `open-sse/**/*.ts`-ലും `tests/**/*.ts`-ലും `no-explicit-any` = `error`.
 - **TypeScript**: `strict: false` (ലെഗസി നിലപാട്). മൊഡ്യൂളുകൾക്കിടയിലെ അതിരുകളിൽ
   ഇൻഫറൻസിനേക്കാൾ വ്യക്തമായ ടൈപ്പുകൾക്ക് മുൻഗണന നൽകുക.
 - **ഡാറ്റാബേസ്**: റൂട്ടുകളിലോ ഹാൻഡ്ലറുകളിലോ ഒരിക്കലും റോ SQL എഴുതരുത് — എല്ലായ്പ്പോഴും
@@ -828,8 +828,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **ബ്രാഞ്ചുകൾ**: പ്രിഫിക്സുകൾ `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. ഒരിക്കലും നേരിട്ട് `main`-ലേക്ക് കമ്മിറ്റ് ചെയ്യരുത്.
-- **Husky**: pre-commit `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` പ്രവർത്തിപ്പിക്കുന്നു; pre-push `check:any-budget:t11` + `check:tracked-artifacts` പ്രവർത്തിപ്പിക്കുന്നു (വേഗത്തിലുള്ള ഗേറ്റുകൾ; `test:unit` ഒഴിവാക്കുന്നു).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

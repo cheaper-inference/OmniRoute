@@ -128,7 +128,7 @@ GET /api/free-provider-rankings?category=coding&limit=20
 | `text`             | `default`, `review`, `documentation`, `debugging` |
 | `code`             | `coding`                                          |
 
-### التطبيع (درجة ملاءمة المهمة)
+### التطبيع (درجة الملاءمة للمهمة)
 
 تُطبَّع درجات ELO الخام لكل لوحة متصدرين إلى **قيمة ملاءمة مهمة ضمن `[0.4, 0.98]`**:
 

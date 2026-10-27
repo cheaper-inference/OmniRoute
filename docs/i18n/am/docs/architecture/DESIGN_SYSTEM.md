@@ -79,15 +79,30 @@
   `src/app/offline/page.tsx`፣ `src/app/not-found.tsx` እና `src/shared/components/ErrorPageScaffold.tsx`
   — lockupውን ያሳያሉ፤ `tests/unit/brand-pages-static.test.ts` ይህን ይጠብቃል።
 
-## 2. ህጎች
+## 2. ደንቦች
 
-1. ቶክኖች፣ ፈጽሞ literals አይደሉም። በዓላማ የተቀሩ ልወጣዎች፦ ሁልጊዜ ጨለማ የሆነው ኮንሶል ተርሚናል እና `STATUS_HEX` (`src/shared/constants/statusColors.ts`)፣ ይህም ቀጥተኛ hex ለሚያስፈልጋቸው ጠሪዎች የኪቱ የሁኔታ ፓሌት የተፈታ-hex አንፀባራቂ ነው። የምድብ ፓሌቶች ከእንግዲህ ልወጣ አይደሉም፦ በ `src/shared/utils/categoricalPalette.ts` በኩል በኪቱ አምስት የቻርት ቶክኖች (`--color-chart-1..5`) ላይ ይመሠርታሉ፣ እና ለራውቲንግ ስትራቴጂዎች ደግሞ በ `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` በኩል፤ የReactFlow ጠርዞች እና የኦርኬስትሬሽን ካንቫስ ገጽታን የሚገነዘቡትን `--orch-status-*` ተለዋዋጮች ያነባሉ (`src/shared/components/flow/edgeStyles.ts`)።
-2. `packages/ui-kit/src`ን በእጅ ፓች አያድርጉ፦ በ `scripts/dev/sync-ui-kit.sh <commit>` ያመሳስሉ፤ የpre-commit መከላከያ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ከተሰነጠጠው የupstream ኮሚት ከሚለይ ማንኛውም ባይት ላይ ይወድቃል (የupstream ክሎኑ፣ `UI_KIT_CLONE` ወይም `_references/cheaper-inference-ui-kit`፣ ሲጎድል በማስጠንቀቂያ ይዘለላል)። ኪቱ የሆነ ነገር ሲያጎድል፣ በአዳፕተሩ ወይም በስክሪኑ ውስጥ መዝለሊያ መፍትሔ ይፈጥሩ እና ከupstream ይጠይቁ።
-3. የኪት ጽሑፍ ነባሪ እሴቶች እንግሊዝኛ ናቸው (`label = "Loading"`, `loadingLabel = "Loading table"`…) — የኪት ኮምፖነንት ጽሑፍ በሚያሳይበት ጊዜ ሁሉ ከ `useTranslations(...)` የተተረጎሙ ሕብረቁምፊዎችን ያስተላልፉ።
-4. የTailwind utilities የኪት ኮምፖነንት ክላሶችን ያሸንፋሉ (ኪቱ `@layer theme, base, components, utilities`ን ያወጃል እና ህጎቹ በ `components` ውስጥ ይኖራሉ) — utilitiesን ለክፍተት እና ለአቀማመጥ ይጠቀሙ፣ የኪት ኮምፖነንቶችን ቀለም እንደገና ለመቀየር ሳይሆን።
-5. ርዕሶች፦ `.ci-heading` (Inter፣ ያለ tracking) ለገጽ እና ክፍል ርዕሶች፤ `.ci-dashboard-display` (Instrument Serif) ለትላልቅ፣ ዝርዝር የሆነ የማሳያ ጽሑፍ ብቻ፣ እንደ የስህተት ገጽ ሁኔታ ኮድ ያሉ።
-6. `tests/unit/dashboard-kit-sweep.test.ts` የኪቱን ተቀባይነት ይጠብቃል፦ በ `src/app` ወይም `src/shared/components` ሥር የMaterial ligature span የለም፤ በዳሽቦርድ ዛፉ (`src/app/(dashboard)` እና `src/shared/components`) ውስጥ ጥሬ `<select>`፣ `<textarea>` ወይም `<table>` የለም፣ እና ከተዘረዘሩት ልወጣዎች ውጭ በእጅ የተሰራ `role="dialog"` የለም (የ `Select` አዳፕተሩ native ቅርንጫፍ፣ `RequestLoggerDetail`)፤ እያንዳንዱ በዚያ የሚገኝ ጥሬ `<button>` ወይም `<input>` `kit-exception:` የሚያካትት (ምክንያቱን ጨምሮ) እና ከእሱ በላይ ቢበዛ በ3 መስመሮች የሚያበቃ አስተያየት ያስፈልገዋል፤ የፓሌት ቀለሞች (hues) እና `dark:` ቫሪያንቶች በሙከራው በተዘረዘሩት ፋይሎች ውስጥ ብቻ ናቸው።
-7. ከPR በፊት ሁለቱንም ገጽታዎች እና የ390 px ቪውፖርት ያረጋግጡ (ስክሪንሾቶች)፤ `tests/e2e/a11y.spec.ts` axeን ያካሂዳል።
+1. ቶክኖች፣ ፈጽሞ literals አይደሉም። በዓላማ የተቀሩ ልዩ ሁኔታዎች፦ ሁልጊዜ ጨለማ የሆነው ኮንሶል ተርሚናል እና `STATUS_HEX` (`src/shared/constants/statusColors.ts`)፣ ይህም ቀጥተኛ hex ለሚያስፈልጋቸው ጠሪዎች የኪቱ የሁኔታ ፓሌት የተፈታ-hex አንፀባራቂ ነው። የምድብ ፓሌቶች ከእንግዲህ ልዩ ሁኔታ አይደሉም፦ በ `src/shared/utils/categoricalPalette.ts` በኩል በኪቱ አምስት የቻርት ቶክኖች (`--color-chart-1..5`) ላይ ይመሠርታሉ፣ እና ለራውቲንግ ስትራቴጂዎች ደግሞ በ `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` በኩል፤ የReactFlow ጠርዞች እና የኦርኬስትሬሽን ካንቫስ ገጽታን የሚገነዘቡትን `--orch-status-*` ተለዋዋጮች ያነባሉ (`src/shared/components/flow/edgeStyles.ts`)።
+2. `packages/ui-kit/src`ን በእጅ ፈጽሞ አያስተካክሉ፦ በ`scripts/dev/sync-ui-kit.sh <commit>` ያመሳስሉት፤
+   የpre-commit መቆጣጠሪያው `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ከተወሰነው upstream commit
+   በአንድ byte እንኳ ልዩነት ሲኖር አይሳካም (upstream clone፣
+   `UI_KIT_CLONE` ወይም `_references/cheaper-inference-ui-kit`፣ ከሌለ ከማስጠንቀቂያ ጋር ይዘለዋል)። kit የሆነ ነገር ከሌለው፣
+   በadapter ወይም በscreen ውስጥ አማራጭ መፍትሔ ይጠቀሙ እና upstreamን እንዲያክለው ይጠይቁ።
+3. የKit ነባሪ ጽሑፎች በእንግሊዝኛ ናቸው (`label = "Loading"`, `loadingLabel = "Loading table"`…) — አንድ kit component ጽሑፍ በሚያሳይበት ጊዜ ሁሉ
+   ከ`useTranslations(...)` የተገኙ የተተረጎሙ stringsን ያስተላልፉ።
+4. የTailwind utilities ከkit component classes ይቀድማሉ (kit
+   `@layer theme, base, components, utilities` ያውጃል እና rulesዎቹ በ`components` ውስጥ ይገኛሉ) — utilitiesን ለ
+   spacing እና layout ይጠቀሙ፣ የkit componentsን ቀለም እንደገና ለመቀየር አይጠቀሙባቸው።
+5. ርዕሶች፦ `.ci-heading` (Inter፣ tracking የሌለው) ለpage እና section titles፤ `.ci-dashboard-display`
+   (Instrument Serif) እንደ error-page status code ላሉ ትልቅና ክፍት ቦታ ላላቸው display textዎች ብቻ።
+6. `tests/unit/dashboard-kit-sweep.test.ts` የkit adoptionን ይጠብቃል፦ በ
+   `src/app` ወይም `src/shared/components` ስር Material ligature span አይኖርም፤ በdashboard tree (`src/app/(dashboard)` እና
+   `src/shared/components`) ውስጥ ጥሬ `<select>`፣ `<textarea>` ወይም `<table>` እንዲሁም በዝርዝሩ ከተጠቀሱት ልዩ ሁኔታዎች ውጭ በእጅ የተሠራ
+   `role="dialog"` አይኖርም (የ`Select` adapter native branch፣
+   `RequestLoggerDetail`)፤ በዚያ ያለ እያንዳንዱ ጥሬ `<button>` ወይም `<input>` ቢበዛ ከ3 መስመሮች በላይ ርቆ የማያበቃ
+   `kit-exception:`ን (ከምክንያቱ ጋር) የያዘ comment ያስፈልገዋል፤ palette hues እና `dark:` variants
+   testው በዘረዘራቸው files ውስጥ ብቻ መኖር አለባቸው።
+7. ከPR በፊት ሁለቱንም themes እና የ390 px viewportን ያረጋግጡ (screenshots)፤ `tests/e2e/a11y.spec.ts`
+   axeን ያስኬዳል።
 
 ## 3. Screen ማከል
 
@@ -125,7 +140,23 @@ imports ያስወግዳል)። ከዚያ፦ `git diff packages/ui-kit`ን ይገ
 usage እና endpointን በእይታ ይፈትሹ፣ `npm run check:ui-kit-snapshot`ን እና `npm run test:vitest:ui`ን ያስኪዱ፣ እና
 PRን ከupstream changelog ጋር ይክፈቱ።
 
-## 6. የማጣቀሻ ማውጫ
+## 6. የREADME ዲያግራሞች
+
+በሥር ማውጫው `README.md` ውስጥ የተካተቱት አሥራ ሁለት ዲያግራሞች (`docs/diagrams/*.svg`) ኪቱን በማይንቀሳቀሱ ምስሎች ላይ ይተገብራሉ። በፕሮግራም ይፈጠራሉ እንጂ በእጅ አይሳሉም፦ በ`scripts/docs/gen-readme-*.mjs` ውስጥ 13 የማመንጫ ፋይሎች (አሥራ ሁለት ዲያግራሞችና መቆጣጠሪያው `gen-readme-diagrams.mjs`)፣ በ`tests/unit/docs/readme-*-svg.test.ts` ውስጥ ደግሞ ለእያንዳንዱ ዲያግራም አንድ በድምሩ 12 የእርጅና ፈተናዎች አሉ። እያንዳንዱ ፈተና በcommit የተቀመጠውን ፋይል ከማመንጫው ውጤት ጋር ባይት በባይት ያነጻጽራል (ሥራው `test-unit`)።
+
+- **ቶከኖች።** `scripts/docs/readme-diagram-theme.mjs` የቀለም ስብስቡን ከ`packages/ui-kit/src/ci-tokens.css` ይቀዳል (ከዚያ ፋይል ጋር መጣጣሙን `tests/unit/docs/readme-diagram-theme.test.ts` ያረጋግጣል)፣ የጽሑፍ ሚናዎችንም በኪቱ ቅርጸ ፊደሎች ይወስናል፦ Instrument Serif ለጎልቶ የሚታይ ጽሑፍ፣ Inter ለበይነገጽ ጽሑፍ፣ IBM Plex Mono ለቁጥሮችና ኮድ። እነዚህ `src/app/globals.css` ለዳሽቦርዱ የሚጭናቸው ተመሳሳይ የ`@fontsource` ፓኬጆች ናቸው። ብርሃን እሴቶች በ`:root`፣ ጨለማ እሴቶች ደግሞ በ`prefers-color-scheme: dark` ሁኔታ ሥር በፋይሉ ውስጥ አሉ፤ ስለዚህ እያንዳንዱ ምስል በGitHub የአንባቢውን የቀለም ስርዓት ይከተላል።
+
+- **ቅርጸ ፊደሎች።** `scripts/docs/readme-fonts.mjs` እነዚያን የwoff2 ፋይሎች እያንዳንዱ ዲያግራም ወደሚስላቸው ግሊፎች ብቻ ያሳንሳል፣ በ`@font-face` በኩልም እንደ `data:` URI ያካትታቸዋል። ይህ የኪቱን ቅርጸ ፊደሎች በSVG ውስጥ ያቆያል። የREADME ምስል አካባቢያዊ ሙከራ ምስሉ ሲታይ ውጫዊ የቅርጸ ፊደል ጥያቄዎች እንዳይደረጉ ይፈትሻል። ንዑስ ስብስቦቹ የላቲን ምልክቶችን ብቻ ይይዛሉ፤ ወደ ስርዓቱ ቅርጸ ፊደሎች የሚመለሱ የምልክት ግሊፎች በ`SYMBOL_FALLBACKS` አንድ በአንድ ይፈቀዳሉ። ሌላ ያልተካተተ ግሊፍ ሁሉ ስህተት ያስነሳል።
+
+- **እንደገና ማመንጨት።** `npm run docs:readme-diagrams` አሥራ ሁለቱን ዲያግራሞች በREADME ቅደም ተከተል እንደገና ይጽፋል፣ ለእያንዳንዱ ፋይልም መጠኑን የያዘ አንድ መስመር ያትማል። እያንዳንዱ ማመንጫ ብቻውንም ይሠራል (`node scripts/docs/gen-readme-<name>.mjs`፤ `free-tier-budget` ቁጥሮቹ ከ`open-sse/config/freeModelCatalog.ts` የአሁኑ ካታሎግ ጫኚ ስለሚመጡ `node --import tsx/esm` ያስፈልገዋል፤ የካታሎግ ለውጥ በCI ላይ የሚያመጣው ውጤት በ`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` አለ)። ማመንጫውንና SVGን በአንድ commit ያስቀምጡ።
+
+- **ማስረጃ።** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ፋይልን በአካባቢያዊ ሙከራ ያሳያል (`<img>` መለያ፣ ገዳቢ `Content-Security-Policy` እና የ`image/svg+xml` ምላሽ)፣ ብርሃንና ጨለማ ምስል ይቀርጻል፣ ገጹ ያደረጋቸውንም ውጫዊ የቅርጸ ፊደል ጥያቄዎች ይዘግባል፤ ቁጥራቸው 0 መሆን አለበት።
+
+- **የመጠን ገደብ።** እያንዳንዱ ፋይል ከ200 KB በታች፣ ይህንም እያንዳንዱ የእርጅና ፈተና ያረጋግጣል፤ 500 KB ለማንኛውም README ምስል ጥብቅ ከፍተኛ ገደብ ነው (የSVG studio አረጋጋጭ ደንብ)።
+
+- **የጋራ ጽሑፍ፣ ቁጥሮች ከgate።** እያንዳንዱ ማመንጫ የዲያግራሙን ጽሑፍ በ`*_COPY` ቋሚ እሴት ያስቀምጣል ወይም ከአሁኑ ካታሎግ ይገነባዋል። ይህ ጽሑፍ የሚሳለውም የቅርጸ ፊደል ንዑስ ስብስብ ግቤትም ነው። መደበኛ ቁጥሮች `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) በሚያነባቸው የ`<text>` ኖዶች ውስጥ ይቆያሉ። gate የሚያነባቸው ዲያግራሞች የእርጅና ፈተናዎች አረጋጋጮቹንም በተመነጨው ፋይል ላይ ያስኬዳሉ። ከኮዱ የሚያፈነግጥ ቁጥር ፈተናውን ያሳጣል፦ gate የሚያነበውን ምንጭ ያስተካክሉ፣ በማመንጫው ያለውን ቁጥር ፈጽሞ አይለውጡ።
+
+## 7. የማጣቀሻ ማውጫ
 
 - `src/app/globals.css` — የtoken ድልድይ፣ `.dark` overrides፣ OmniRoute `@layer components` ቅጥያዎች
 - `packages/ui-kit/UPSTREAM.md` — የተወሰነ upstream commit እና የፈቃድ ማረጋገጫ፤ `packages/ui-kit/PATCHES.md`

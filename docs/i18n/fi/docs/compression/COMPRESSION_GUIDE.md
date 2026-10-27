@@ -188,7 +188,7 @@ Stacked-tilassa:       Lähetetään 10K-2.5K tokenia     (RTK+Caveman-yhdistelm
 
 ### Hallintapaneeli
 
-Siirry kohtaan `Hallintapaneeli → Konteksti ja välimuisti`:
+Siirry kohtaan `Dashboard → Context & Cache`:
 
 - **Caveman** — tilan valinta, kielipaketit, esikatselu ja yleiset oletusasetukset
 - **RTK** — komentosuodattimen esikatselu, RTK:n turvallisuusasetukset ja suodatinluettelo
@@ -197,7 +197,7 @@ Siirry kohtaan `Hallintapaneeli → Konteksti ja välimuisti`:
 
 ### Yhdistelmäkohtainen ohitus
 
-Liitä kohdassa `Hallintapaneeli → Konteksti ja välimuisti → Pakkausyhdistelmät` pakkausyhdistelmä
+Liitä kohdassa `Dashboard → Context & Cache → Compression Combos` pakkausyhdistelmä
 reititysyhdistelmään:
 
 ```txt
@@ -216,8 +216,8 @@ Tämä yhdistelmäkohtainen ohitusmääritys on eri ohjaus kuin **reititysyhdist
 ohitus (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — kentän skeema hyväksyy myös
 arvot `rtk`, `stacked` ja `omniglyph`) — kyseinen ohitus ei valitse nimettyä pakkausyhdistelmäputkea,
 vaan ainoastaan asettaa `resolveCompressionPlan`-toiminnon käyttämän `compressionMode`-kentän.
-Sen voi asettaa joko yhdistelmäkortissa (`Hallintapaneeli → Yhdistelmät`) tai versiosta
-#6760 lähtien reititysyhdistelmäkohtaisesti `Hallintapaneeli → Konteksti ja välimuisti → Pakkausyhdistelmät`
+Sen voi asettaa joko yhdistelmäkortissa (`Dashboard → Combos`) tai versiosta
+#6760 lähtien reititysyhdistelmäkohtaisesti `Dashboard → Context & Cache → Compression Combos`
 -näkymän ”Liitä reititykseen” -luettelossa aivan edellä kuvatun putken liittämisen valintaruudun vieressä.
 Molempien näkymien muutokset tallennetaan saman `PUT /api/combos/{id}`-päätepisteen kautta.
 

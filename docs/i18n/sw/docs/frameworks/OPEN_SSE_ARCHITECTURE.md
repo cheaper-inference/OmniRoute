@@ -484,17 +484,17 @@ Hiki hushughulikia:
 
 ## Usanidi
 
-`open-sse/config/` inashikilia safu ya usanidi:
+`open-sse/config/` huhifadhi safu ya usanidi:
 
-| Faili                             | Kusudi                                                        |
-| --------------------------------- | ------------------------------------------------------------- |
-| `providerRegistry.ts`             | Rejesta ya modeli za soga juu ya katalogi ya watoa huduma 376 |
-| `providerModels.ts`               | Majina mbadala ya modeli, uwekaji ramani wa miundo            |
-| `constants.ts`                    | Muda wa kuisha, mipaka, misimbo ya hali                       |
-| `defaultThinkingSignature.ts`     | Saini chaguomsingi ya kufikiria ya Claude                     |
-| `modelStrip.ts` (katika services) | Kuondoa sehemu kwa kila mtoa huduma                           |
+| Faili                           | Madhumuni                                                     |
+| ------------------------------- | ------------------------------------------------------------- |
+| `providerRegistry.ts`           | Sajili ya modeli za gumzo katika katalogi ya watoa huduma 376 |
+| `providerModels.ts`             | Majina mbadala ya modeli, ulinganishaji wa miundo             |
+| `constants.ts`                  | Vipindi vya kuisha, vikomo, misimbo ya hali                   |
+| `defaultThinkingSignature.ts`   | Sahihi chaguomsingi ya kufikiri ya Claude                     |
+| `modelStrip.ts` (katika huduma) | Uondoaji wa sehemu kwa kila mtoa huduma                       |
 
-### Skima ya Rejesta ya Watoa Huduma
+### Skema ya Sajili ya Watoa Huduma
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Uthibitishaji wa Zod wakati wa kupakia moduli huhakikisha kuwa usanidi wote wa watoa huduma ni sahihi.
+Uthibitishaji wa Zod wakati wa kupakia moduli huhakikisha kuwa usanidi wote wa watoa huduma ni halali.
 
 ---
 

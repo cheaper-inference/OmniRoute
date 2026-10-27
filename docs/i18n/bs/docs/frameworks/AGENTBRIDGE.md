@@ -4,8 +4,6 @@
 
 ---
 
-# AgentBridge
-
 AgentBridge je OmniRoute-ov MITM (Man-in-the-Middle) proxy koji presreće HTTPS saobraćaj od IDE AI agenata i preusmjerava ga kroz OmniRoute-ov jedinstveni mehanizam za rutiranje. Podržava **10 IDE agenata** — Antigravity, Kiro, GitHub Copilot, GHE Copilot, OpenAI Codex, Cursor, Zed, Claude Code, Open Code i Trae (u fazi istraživanja) — čineći OmniRoute MITM proxyjem sa najširom pokrivenošću za AI asistente za kodiranje na tržištu.
 
 **Lokacija kontrolne ploče (Dashboard):** `/dashboard/tools/agent-bridge`

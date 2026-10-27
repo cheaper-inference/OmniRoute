@@ -547,22 +547,22 @@ Scéimeanna iomlána OpenAPI: `docs/openapi.yaml` → clib `AgentBridge`.
 
 ### Imscrúdú ar Trae
 
-Is cúntóir códaithe AI measartha nua é Trae. Sula gcuirtear láimhseálaí i bhfeidhm:
+Is cúntóir códaithe AI réasúnta nua é Trae. Sula gcuirtear láimhseálaí i bhfeidhm:
 
-1. Sainaithin an clár dénártha/an eisínteacht i margaí VS Code / JetBrains nó mar aip neamhspleách
-2. Gabh an trácht le mitmproxy chun óstaigh API agus cruthanna críochphointí a aimsiú
+1. Sainaithin an comhad dénártha/an eisínteacht i margaí VS Code / JetBrains nó mar aip neamhspleách
+2. Gabh an trácht le mitmproxy chun óstaigh API agus struchtúir na gcríochphointí a aimsiú
 3. Aimsigh an mheicníocht fíordheimhnithe
-4. Déan cinneadh dul ar aghaidh/gan dul ar aghaidh bunaithe ar na TOS agus ar in-aimsitheacht an API
+4. Déan measúnú dul ar aghaidh/gan dul ar aghaidh bunaithe ar na Téarmaí Seirbhíse agus ar inaimsitheacht an API
 
-Go dtí go mbeidh an t-imscrúdú críochnaithe, taispeánfaidh cárta Trae sa deais suaitheantas "Á Imscrúdú" mar aon le nasc "Tuairiscigh inmharthanacht". Caitheann creatlach an láimhseálaí ag `src/mitm/handlers/trae.ts` earráid struchtúrtha `Níl sé curtha i bhfeidhm fós`.
+Go dtí go mbeidh an t-imscrúdú críochnaithe, taispeánann cárta Trae sa phainéal suaitheantas "Faoi imscrúdú" le nasc "Tuairiscigh inmharthanacht". Caitheann an chreatlach láimhseálaí ag `src/mitm/handlers/trae.ts` earráid struchtúrtha `Not yet implemented`.
 
-### Gníomhairí sa riaráiste (MITM riachtanach — gan aon tacaíocht do bhun-URL saincheaptha)
+### Gníomhairí sa riaráiste (MITM riachtanach — gan tacaíocht do URL bonn saincheaptha)
 
-Ní thacaíonn na huirlisí seo a leanas le bun-URLanna saincheaptha ina leaganacha reatha, rud a fhágann gurb é MITM an t-aon bhealach idircheaptha. Tá measúnú inmharthanachta fós ar feitheamh:
+Ní thacaíonn na huirlisí seo a leanas le URLanna bonn saincheaptha ina leaganacha reatha, rud a fhágann gurb é MITM an t-aon chonair idircheaptha. Tá measúnú inmharthanachta ar feitheamh:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — ar leithligh ó Kiro IDE)
-- **Cowork** (aip deisce Anthropic)
+- **Cowork** (deasc Anthropic)
 
-Nóta: Tacaíonn GitHub Copilot CLI ≥v1.0.19 le `COPILOT_PROVIDER_BASE_URL` — bain úsáid as cumraíocht dhíreach in ionad MITM don uirlis sin.
+Nóta: Tacaíonn GitHub Copilot CLI ≥v1.0.19 le `COPILOT_PROVIDER_BASE_URL` — úsáid cumraíocht dhíreach in ionad MITM don uirlis sin.

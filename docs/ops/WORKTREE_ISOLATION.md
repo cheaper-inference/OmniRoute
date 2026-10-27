@@ -1,7 +1,7 @@
 ---
 title: "Worktree Isolation Protocol"
-version: 3.8.52
-lastUpdated: 2026-10-18
+version: 3.8.53
+lastUpdated: 2026-10-27
 ---
 
 # Worktree Isolation Protocol
@@ -52,7 +52,33 @@ own dedicated branch, and you MUST confirm the base branch with the operator bef
 
    `scripts/dev/new-worktree.sh <branch> [base]` does all of the above (canonical path,
    hard-linked `node_modules`, `.husky/_`) and then **verifies** the hook is actually
-   executable, so prefer it over running the steps by hand.
+   executable, so prefer it over running the steps by hand. On the Linux devbox it also
+   reserves disk capacity in the shared Git common dir **before** fetch, resizes that lease
+   to the fetched tree's logical size plus 512 MiB, and rechecks it before both
+   `git worktree add` and `cp -al`. The admission floor is 8 GiB. A denial before checkout
+   creates no branch/worktree; a later denial leaves the already-created, hook-enabled
+   worktree in place without `node_modules` and exits non-zero. The guard never deletes a
+   worktree or runs `git gc`/`prune`/`reset` to make room.
+
+   The guard is intentionally Linux-only (`/proc` boot ID + PID start ticks and util-linux
+   `flock`). macOS/Windows or a Linux host without `flock` fail before mutation rather than
+   silently creating an unbudgeted worktree. Inspect the shared ledger without changing it:
+
+   ```bash
+   COMMON_DIR=$(git rev-parse --path-format=absolute --git-common-dir)
+   node scripts/dev/resource-budget.mjs status --common-dir "$COMMON_DIR" --json
+   ```
+
+   Live, stale, and unknown are identity verdicts, not cleanup instructions. Every lease
+   continues to count. `status` never creates/repairs files or auto-purges. Reclaim an
+   abandoned lease only when the same command reports a stale owner. A transferred run lease
+   must also report a proven-empty process group; unknown or non-quiescent groups are
+   fail-closed:
+
+   ```bash
+   node scripts/dev/resource-budget.mjs reclaim-stale \
+     --common-dir "$COMMON_DIR" --lease-id <stale-id> --json
+   ```
 
    **Never `ln -s` node_modules.** Turbopack rejects a symlink that resolves outside the
    project root, so `npm run dev` dies with a FATAL panic (`Symlink [project]/node_modules
@@ -77,6 +103,54 @@ is invalid, it points out of the filesystem root`) while typecheck, lint and the
 5. **Never touch another session's worktree, branch, or uncommitted changes.** If `git worktree
 list` shows worktrees you didn't create, leave them alone. End every session with the main
    checkout back on the branch it started on (the active `release/vX.Y.Z`, never `main`).
+
+## Running a disk-heavy local command
+
+Use the same ledger for a measured heavy command. Both numbers are mandatory; free space by
+itself is not evidence that the command's peak fits. `--reserve-bytes` is the measured/planned
+peak allocation and `--monitor-floor-bytes` is capacity that must remain available:
+
+```bash
+COMMON_DIR=$(git rev-parse --path-format=absolute --git-common-dir)
+node scripts/dev/resource-budget.mjs run \
+  --common-dir "$COMMON_DIR" \
+  --reserve-bytes <measured-peak-bytes> \
+  --monitor-floor-bytes <survival-floor-bytes> \
+  --purpose <short-non-secret-label> \
+  --grace-ms <supervisor-cleanup-budget-ms> \
+  -- <supervisor> <arguments...>
+```
+
+Heavy runs take a shared `omniroute-new-worktree.lock`, so budget-admitted heavy runs may
+coexist while old/new worktree helpers (exclusive lock) wait visibly. Ledger mutation uses a
+different short-held mutex; the only order is compatibility lock → ledger lock. The wrapper
+returns the workload's normal exit code. Capacity/monitor failure returns 75; corrupt or
+unprovable state returns 78. On SIGTERM it gives the owned process group the configured grace,
+confirms its members are gone, releases the lease in `finally`, and only then releases the
+compatibility lock.
+
+The final stderr line is a JSON receipt prefixed with `[resource-budget] receipt`. It records
+the lease, reservation/floor, initial and final available capacity, sampled minimum,
+sample count, workload/guard exit, quiescence and classification. The field is deliberately
+named `minimumObservedAvailableBytes`: polling does not prove a continuous minimum.
+The guard's capacity-hold classification is incomplete evidence and requires a new
+capacity/quiescence check before a retry. Reservations coordinate cooperating tools; they are
+not kernel quotas.
+
+The process guarantee is deliberately limited to the sentinel's Linux process group. A
+supervisor that launches children with `start_new_session` moves them outside that group. Use
+a grace long enough for that supervisor's own subreaper/finally cleanup (including restoring
+temporary dotenv state); the resource guard must not be credited with terminating those
+escaped sessions. If the supervisor cannot prove that cleanup, classify the result
+`UNKNOWN / HOLD` and keep/recover the lease conservatively. A controller crash similarly
+leaves a stale lease counted after the sentinel finishes bounded cleanup; there is no TTL or
+automatic stale deletion.
+
+For a supervisor that intentionally creates new sessions, use the authenticated
+`reserve` → `check` → `release` interface instead of claiming `run` owns those processes.
+That supervisor must hold the shared compatibility lock, monitor and receipt its own minimum,
+prove every escaped child quiescent, and release in `finally`. Its receipt is the capacity
+evidence; the resource guard must not invent a minimum for an unmonitored path.
 
 ## Base-green check (PRs must not be born red)
 

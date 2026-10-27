@@ -156,15 +156,15 @@ taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 Bal heç vaxt `0` və ya `1` dəyərinə çatmır, bu da istifadəçi dəyişiklikləri üçün ehtiyat saxlayır. Bu,
 API cavabında gördüyünüz `score` sahəsi və paneldə göstərilən etiketdir.
 
-### Etibarlılıq
+### Etimad
 
 Hər bir yazı Arena səs sayına əsasən etibarlılıq səviyyəsi alır:
 
-| Etibarlılıq | Səslər  |
-| ----------- | ------- |
-| `high`      | ≥ 5,000 |
-| `medium`    | ≥ 1,000 |
-| `low`       | < 1,000 |
+| Etimad   | Səslər  |
+| -------- | ------- |
+| `high`   | ≥ 5,000 |
+| `medium` | ≥ 1,000 |
+| `low`    | < 1,000 |
 
 ### Saxlanma və aktuallıq
 
@@ -189,7 +189,7 @@ Sinxronizasiya **standart olaraq aktivdir**:
 | `ARENA_ELO_SYNC_ENABLED`  | `true`        | Xarici sinxronizasiyadan imtina etmək üçün `false` təyin edin. |
 | `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sinxronizasiya intervalı, saniyələrlə.                         |
 
-### Əl ilə sinxronizasiya / status / təmizləmə
+### Əl ilə sinxronizasiya / vəziyyət / təmizləmə
 
 Operatorlar üçün autentifikasiya olunmuş idarəetmə endpointi əl ilə nəzarəti təmin edir
 (`src/app/api/intelligence/sync/route.ts` — idarəetmə autentifikasiyası tələb olunur):

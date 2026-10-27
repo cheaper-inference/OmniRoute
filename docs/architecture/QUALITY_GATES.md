@@ -40,6 +40,43 @@ The receipts cover their own workflow, not publication, deployment, or the inter
 of an existing advisory scanner. Activating both check names in branch rules is a
 separate administrative change; adding these jobs does not itself protect a branch.
 
+### Retained evidence in the acceptance reducer
+
+`scripts/quality/validate-release-acceptance.mjs` reduces a supplied plan and its
+manifests; it does not establish that the plan covers the complete release pipeline.
+Its reports explicitly set `releaseAcceptance: false`, even when that plan is
+`VERIFIED`. The `release-acceptance.yml` workflow still uses shadow fixtures, not
+real build, package, boot or promotion receipts.
+
+The CLI requires `--evidence-root` to verify retained evidence. Files are resolved
+as `<evidence-root>/<artifact_id>/<member>` and hashed as SHA-256. A PASS record
+without evidence, a missing or changed file, an unsafe path or a symlink prevents
+verification. Missing files are not equivalent to empty successful logs. Existing
+SHA/run/attempt checks remain independent: matching bytes cannot rescue a stale
+receipt. File integrity is not proof of execution authenticity or artifact promotion.
+
+### UI execution capacity
+
+CI runs the full UI inventory as four `test-vitest` matrix shards, each with at most
+two workers per shard and the existing 15-minute job deadline. The first shard also runs the
+MCP/autoCombo Vitest suite. The required job result covers every matrix leg; failure
+or cancellation of one shard cannot establish candidate admission.
+
+The nightly observer retains a separate exact-candidate receipt for each UI shard,
+including the MCP execution in the first receipt. All four receipts, logs and matching
+execution identities are required. Local `npm run test:vitest:ui` still selects the
+complete suite; one `--shard` run is only partial evidence.
+
+### Unit coverage collection
+
+The twelve unit shards collect V8 coverage during their existing test execution. A successful
+shard runs `scripts/ci/compact-v8-coverage.mjs` to compress the original files without generating
+an intermediate Istanbul report. The final Coverage job verifies all twelve manifests against
+the candidate SHA, runtime, source root and data hashes, then runs c8's reporters and existing
+coverage thresholds. Inputs retain c8's global filename order; per-shard pre-merging is unsafe
+for mixed function/block coverage. Missing, malformed or incompatible shards fail admission.
+Failed test shards retain raw diagnostic coverage separately; it cannot enter the final merge.
+
 ### Static scan inventory
 
 The versioned npm-alias inventory and static-scan membership live in
@@ -59,8 +96,14 @@ These profiles cover the static scan only. They do not certify product tests,
 coverage, packaging, external checks or a candidate's full release acceptance.
 Workflow admission uses the linked `config/quality/admission-policy.json` and
 `scripts/quality/admission-verdict.mjs`. Release-observer profiles remain separate;
-inspect their applicable checks and receipts independently. The prose
-inventory below is a reference, not proof that a gate actually ran.
+inspect their applicable checks and receipts independently. The full observer's static
+commands are declared in `config/quality/release-green-static-profile.json`, including
+`audit:deps`, mutation-test selection and translation checks. The loader validates npm
+commands against package.json and modeled CI/Quality declarations; it rejects drift
+instead of executing shell tokens as arguments. Required scanner SKIP/INCOMPLETE output
+cannot establish PASS. The profile records its external exclusions and does not replace
+hosted coverage, test matrices, package or deployment evidence. The prose inventory below
+is a reference, not proof that a gate actually ran.
 
 Scripts live under `scripts/check/` (policy gates) and `scripts/quality/` (ratchet engine).
 The CI source of truth is `.github/workflows/ci.yml`.
@@ -112,7 +155,7 @@ Runs on every PR to `main`. Blocks merge on failure.
 | `check:model-lifecycle`           | The three hand-maintained routing tables stay consistent with the checked-in lifecycle snapshot (#11503): `FITNESS_TABLE` (`taskFitness.ts`) scores no retired id that `REGISTRY` can route; every `BUILT_IN_ALIASES` target is present in `REGISTRY` and absent from the retired-id snapshot; every retired id still in `REGISTRY` is forwarded or listed in `allowedRetiredInCatalog`; and no `DEFAULT_DEGRADATION_MAP` source or target appears retired in that snapshot. This does not prove that a model is currently served by a live upstream. Offline — compares against `config/quality/model-lifecycle.json`, refreshed by hand with `npm run quality:refresh-model-lifecycle` (network; not wired into CI). `allowedRetiredInCatalog` is a burn-down ratchet: add an entry only with a tracking issue. | Yes                                      |
 | `check:fetch-targets`             | Every `fetch("/api/...")` in client-side `src/` resolves to a real `route.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Yes                                      |
 | `check:deps`                      | All `npm install`-able deps across every `package.json` in the repo are in `dependency-allowlist.json`; new unpinned or slopsquatted packages flagged                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Yes                                      |
-| `audit:deps`                      | `npm audit` (root + electron) — no high/critical advisories (overlaps osv `check:vuln-ratchet`; see Rationalization Backlog)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Yes                                      |
+| `audit:deps`                      | npm audit of all five independent lockfiles (root, Electron, OpenCode plugins v1/v2 and provider). Critical advisories block; high advisories remain visible warnings. Missing/failed audits are INCOMPLETE and block; per-scope lock hashes and reports are retained.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Yes                                      |
 | `check:lockfile`                  | `package-lock.json` integrity — https registry, integrity hashes, no host overrides                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Yes                                      |
 | `check:licenses`                  | SPDX license allowlist for production dependencies                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Yes                                      |
 | `check:tracked-artifacts`         | No build artifacts / committed `node_modules` symlinks (also runs in husky pre-commit; pre-push is intentionally light — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Yes                                      |
@@ -152,38 +195,45 @@ Runs after `test-coverage`. Blocks merge on failure.
 
 ### Job: `quality-extended`
 
-Entire job is advisory (`continue-on-error: true`). The npm-based ratchets run for
-real; the external scanners install via `gh release download` and self-skip (exit 0)
-when a binary is still absent.
+The job blocks applicable candidates. Bundle size, secret findings, vulnerability
+findings, workflow findings and OpenAPI changes are checked with required ratchets.
+Circular-dependency diagnostics remain advisory. Scanner installation is required:
+`scripts/ci/install-quality-scanners.sh` provisions pinned versions and propagates
+installation failures. Missing tools, invalid reports or missing baselines leave
+the required scanner gate INCOMPLETE.
 
 | Script                   | Validates                                                                                                                                                                                       | Blocking                                          |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | `check:circular-deps`    | No circular dependencies (dpdm)                                                                                                                                                                 | **Advisory**                                      |
-| `check:bundle-size`      | Bundle size does not exceed the cap                                                                                                                                                             | **Advisory**                                      |
-| `check:secrets`          | Secret scanning (gitleaks) — skips if binary absent                                                                                                                                             | **Advisory**                                      |
-| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) do not regress — skips if binary absent                                                                                                                | **Advisory**                                      |
+| `check:bundle-size`      | Bundle size does not exceed the cap; an unavailable measurement fails                                                                                                                           | **Blocking with --ratchet**                       |
+| `check:secrets`          | Gitleaks findings do not regress; required scans reject missing tools/source/baseline, failed scans and invalid reports                                                                         | **Blocking with --ratchet**                       |
+| `check:vuln-ratchet`     | Dependency vulnerabilities do not regress; required scans reject missing tools, invalid reports or missing baselines                                                                            | **Blocking with --ratchet**                       |
 | `check:workflows`        | Workflow lint (actionlint + zizmor); missing/broken scanners, invalid reports or missing ratchet baseline fail as INCOMPLETE. Valid findings follow the selected strict/advisory/ratchet policy | Execution required; zizmor ratchet blocking in CI |
-| `check:openapi-breaking` | Breaking changes to the public API contract (`openapi.yaml`) vs the base branch (oasdiff) — emits `openapiBreaking=N`; skips if oasdiff absent or base spec unresolvable                        | **Advisory**                                      |
+| `check:openapi-breaking` | Public API contract against pinned event commits (PR merge-base, push before, merge-group base; scheduled/manual checkout first parent); required measurement fails closed                      | **Blocking with --ratchet**                       |
 
 ### Job: `docs-sync-strict`
 
-Runs on every PR to `main`. Blocks merge on failure.
+For pull requests to `main` or `release/**`, this job runs only for non-draft (or trusted
+queue) candidates classified as documentation or code changes. It also runs on non-PR CI
+events; this workflow's push trigger covers `main` only, not `release/**`. A step that exits
+non-zero blocks the job; report-only findings and documented exemptions below do not.
 
-| Script                         | Validates                                                                                                                                         | Blocking                   |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `check:docs-all`               | Meta-gate that runs the 6 sub-gates below sequentially                                                                                            | Yes                        |
-| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI / llm.txt version consistency                                                                                                 | Yes                        |
-| ↳ `check:docs-counts`          | Counts in prose (provider count, migration count, etc.) are within the ratchet window of the real counts                                          | Yes                        |
-| ↳ `check:env-doc-sync`         | Every env var in `.env.example` is documented in a docs table, and vice versa                                                                     | Yes                        |
-| ↳ `check:deprecated-versions`  | No deprecated version strings in docs                                                                                                             | Yes                        |
-| ↳ `check:doc-links`            | Internal markdown links in docs resolve to real files (`[text]`/`(path)` form)                                                                    | Yes                        |
-| ↳ `check:fabricated-docs`      | Routes, env vars, CLI commands, hook names, and file paths cited in docs exist in the codebase. Hard gate via `--strict`; soft-fail without flag. | Yes (via `--strict` in CI) |
-| `check:cli-i18n`               | CLI command strings are present in all i18n locale files                                                                                          | Yes                        |
-| `check:openapi-coverage`       | OpenAPI spec covers at least a ratcheted floor of real routes                                                                                     | Yes                        |
-| `check:openapi-security-tiers` | Security tier annotations in `openapi.yaml` are consistent with `routeGuard.ts` classifications                                                   | **Advisory**               |
-| `check:openapi-routes`         | Every path in `openapi.yaml` resolves to a real `route.ts` (anti-hallucination)                                                                   | Yes                        |
-| `check:docs-symbols`           | Every `/api/...` reference in `docs/**/*.md` resolves to a real `route.ts` (anti-hallucination)                                                   | Yes                        |
-| `i18n translation drift`       | Untranslated keys in i18n locale files — warn only                                                                                                | **Advisory**               |
+| Script                         | Validates                                                                                                                                                                                                                                                                         | Blocking                                                      |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------- |
+| `check:docs-all`               | Meta-gate that runs the 7 sub-gates below sequentially                                                                                                                                                                                                                            | Yes                                                           |
+| ↳ `check:docs-sync`            | Package/OpenAPI/CHANGELOG version consistency, exact `llm.txt` mirrors, translated CHANGELOG section/size invariants, and absence of superseded duplicate docs                                                                                                                    | Yes                                                           |
+| ↳ `check:docs-frontmatter`     | Compiled documentation pages carry valid frontmatter titles                                                                                                                                                                                                                       | Yes                                                           |
+| ↳ `check:docs-counts`          | High-confidence count invariants are strict; heuristic file-count checks only warn unless the script receives `--strict` (the CI meta-gate does not pass it)                                                                                                                      | Strict tier blocking; soft tier advisory                      |
+| ↳ `check:env-doc-sync`         | Source env reads, `.env.example`, and `docs/reference/ENVIRONMENT.md` agree after the explicit ignore, doc-only, and env-only allowlists                                                                                                                                          | Yes, outside the documented allowlists                        |
+| ↳ `check:deprecated-versions`  | Reports potential stale versions outside safe historical contexts and stale update dates, excluding ignored docs                                                                                                                                                                  | Advisory in current CI wiring (`--strict` is not passed)      |
+| ↳ `check:doc-links`            | Internal markdown links in docs resolve to real files (`[text]`/`(path)` form)                                                                                                                                                                                                    | Yes                                                           |
+| ↳ `check:fabricated-docs`      | Routes, env vars, CLI commands, hook names, and file paths cited in docs exist in the codebase. Hard gate via `--strict`; soft-fail without flag.                                                                                                                                 | Yes (via `--strict` in CI)                                    |
+| `check:cli-i18n`               | Used CLI `t()` keys exist in `en`; `pt-BR` retains every top-level section; `zh-CN` and `zh-TW` contain every key from `en`                                                                                                                                                       | Yes                                                           |
+| `check:openapi-coverage`       | OpenAPI spec covers at least a ratcheted floor of real routes                                                                                                                                                                                                                     | Yes                                                           |
+| `check:openapi-security-tiers` | Declared `x-loopback-only`/`x-always-protected` annotations must be backed by `routeGuard.ts`; parser and forward mismatches block. The reverse check for missing `x-loopback-only` under local-only prefixes warns, and pattern-only routes are excluded from that reverse pass. | Parser/forward checks blocking; reverse check advisory        |
+| `check:openapi-routes`         | Each `/api...` path in `openapi.yaml` resolves parameter-insensitively to a real route after the justified `KNOWN_STALE_SPEC` allowlist; stale allowlist entries also fail                                                                                                        | Yes                                                           |
+| `check:docs-symbols`           | Internal `/api/...` URL references in canonical non-mirror docs resolve to a real route or route family; proxy/upstream/placeholder/file references and justified `KNOWN_STALE_DOC_REFS` entries are excluded, and stale allowlist entries fail                                   | Yes                                                           |
+| `i18n translation drift`       | Core translated-doc source/target hashes match `.i18n-state.json`. PRs fail only on newly introduced source, missing-target, or target-hash drift; non-PR checks are strict. Inherited PR drift and stale-target source hashes are warnings.                                      | New PR/non-PR strict drift blocking; inherited/stale advisory |
 
 The twelve README SVGs under `docs/diagrams/` are generated (`scripts/docs/gen-readme-<name>.mjs`;
 `npm run docs:readme-diagrams` regenerates all of them). Each has a byte-compare unit test
@@ -592,7 +642,7 @@ Each candidate was validated against the live gate state on 2026-06-17 (trust-bu
 several "obvious" merges turned out to hide debt and are **not** clean drop-ins.
 
 - **`check:docs-sync` runs twice** — standalone in the `lint` job and again inside `check:docs-all` (`docs-sync-strict`) and the husky pre-commit hook. ✅ **DONE** — standalone `lint` invocation removed.
-- **CVE scanning** — ❌ **NOT a clean merge.** `audit:deps` hard-fails on any high/critical CVE; `check:vuln-ratchet` (osv) only fails on a _regression_ vs baseline (currently 1 MODERATE). Different semantics — dropping `audit:deps` would lose the absolute high/critical gate. Keep both.
+- **CVE scanning** — ❌ **NOT a clean merge.** `audit:deps` blocks critical advisories and incomplete audits across all five lockfiles, while reporting high advisories as warnings under the current policy; `check:vuln-ratchet` (osv) only fails on a _regression_ vs the checked-in baseline and rejects missing measurements when required. Different semantics — dropping `audit:deps` would lose the absolute critical gate and the independent package audit receipts. Keep both.
 - **Cycle detection** — ✅ **DONE** (#15159 G-01/G-02). The old text here called `check:cycles` "the green, curated" gate and justified keeping it blocking because `check:circular-deps` (dpdm) reported 91 cycles. That green was a **false green**: `check:cycles` scanned 5 subdirectories (450 files), matched only static `import|export … from`, and dropped every `@/` and `@omniroute/open-sse/` specifier, so it could not see the dynamic-import + alias cycles that dominated the repo. Fixed: the gate now walks `src` + `open-sse` (5023 files), collects specifiers from the TypeScript AST (so `import("…")` counts and type-position `typeof import("…")` does not), and resolves tsconfig `paths`. It finds **14** cycles, not 0. Because 14 pre-existing cycles cannot be fixed in a gate PR, `check:cycles` is now a **ratchet** (`--ratchet`, ceiling `metrics.cycles.value = 14` in `quality-baseline.json`, `direction: down`) — it blocks any _regression_ and the count can only fall. CI runs `npm run check:cycles:ratchet`. Burn-down rides with **A-01**. `check:circular-deps` (dpdm) stays advisory as the broader second opinion.
 - **Complexity** — ✅ **DONE** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): one ESLint walk, counts by ruleId so cyclomatic+max-lines and cognitive baselines stay independent; individual `check:complexity` / `check:cognitive-complexity` remain for local `--update`.
 - **`/api` anti-hallucination** — ✅ **DONE** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): one FS inventory of `src/app/api`, openapi-routes + docs-symbols still report independently; individuals remain for local runs.
@@ -604,7 +654,7 @@ several "obvious" merges turned out to hide debt and are **not** clean drop-ins.
 - `check:openapi-security-tiers` (advisory) — ❌ **NOT cleanly flippable.** It exits 0 but warns that several `traffic-inspector` routes under `LOCAL_ONLY_API_PREFIXES` lack the `x-loopback-only: true` annotation. Enforcing it requires adding those annotations to `openapi.yaml` first.
 - `typecheck:noimplicit:core` (advisory) — largely subsumed by the blocking `check:type-coverage` ratchet. Flip to a ratchet or drop the redundant second `tsc` pass.
 - `test:vitest:ui` (now **blocking**) — pre-existing failures are explicitly excluded in `vitest.config.ts` with `// #8618` tracking comments; new failures fail the job.
-- `check:secrets` (gitleaks, blocking ratchet frozen at 3 documented false-positives) — allowlist the 3 to reach 0, or demote to advisory. Overlaps GitHub native secret-scanning + `check:public-creds`.
+- `check:secrets` (gitleaks, blocking ratchet) — the current ceiling is `metrics.secretFindings` in `quality-baseline.json`. Any exception needs a justified `.gitleaks.toml` entry; unavailable measurement is INCOMPLETE. The scan complements GitHub native secret scanning and `check:public-creds`.
 - `check:pr-evidence` (blocking, greps PR-body prose) — high false-positive risk; weakens Hard Rule #18 enforcement if dropped, so this is a genuine policy call.
 - `semgrep` (advisory standalone) — overlaps CodeQL for the OWASP families; wire its baseline to a ratchet or drop.
 

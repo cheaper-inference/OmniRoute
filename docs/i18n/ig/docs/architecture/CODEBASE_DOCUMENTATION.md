@@ -782,7 +782,7 @@ Lee [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) na ngalaba pụrụ iche dị n
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Kenye scope kwesịrị ekwesị n'ime `src/shared/constants/mcpScopes.ts`.
 3. Debanye ngwa ahụ na `open-sse/mcp-server/server.ts`.
-4. Tinye ule n'okpuru `open-sse/mcp-server/__tests__/`.
+4. Tinye ule n'okpuru `tests/unit/`.
 5. Melite [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Tinye nka A2A ọhụrụ
@@ -800,7 +800,7 @@ Lee [A2A-SERVER.md § Ịtinye Nka Ọhụrụ](../frameworks/A2A-SERVER.md). Nk
 - **Ịkpọ aha**: faịlụ `camelCase` ma ọ bụ `kebab-case`, components `PascalCase`,
   constants `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` n'ebe niile;
-  `no-explicit-any` = `warn` na `open-sse/` na `tests/`, ma bụrụ error n'ebe ndị ọzọ.
+  `no-explicit-any` = `error` na `open-sse/**/*.ts` na `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (ọnọdụ e ketara n'usoro ochie). Họrọ ụdị akọwapụtara nke ọma karịa
   inference maka oke dị n'etiti modul.
 - **Database**: edela raw SQL ozugbo n'ime routes ma ọ bụ handlers — gafee
@@ -830,8 +830,7 @@ Lee [A2A-SERVER.md § Ịtinye Nka Ọhụrụ](../frameworks/A2A-SERVER.md). Nk
   `a2a`, `memory`, `skills`.
 - **Branches**: prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Etinyela commit ozugbo na `main`.
-- **Husky**: pre-commit na-agba `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push na-agba `check:any-budget:t11` + `check:tracked-artifacts` (nnyocha ngwa ngwa; ọ naghị agụnye `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mehhanism:** Kasutab operatsioonisüsteemi API-sid, et suunata kogu HTTP-/HTTPS-liiklus läbi HTTP_PROXY kuulaja:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` ning HTTP/HTTPS hosti/pordi sätted
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Ulatus:** Kõik masina rakendused, mis arvestavad süsteemi puhverserveri sätteid
   **Märkus:** `source` = `"system-proxy"`
 
 **Turvamehhanismid:**
 
-- Automaatse väljalülitamise taimer (vaikimisi 30 minutit, seadistatav muutuja `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES` kaudu)
-- Süsteemi puhverserveri eelmine olek salvestatakse andmebaasi ja taastatakse muudatuse tagasivõtmisel
-- Kui kasutaja liigub aktiivse funktsiooni ajal lehelt ära, kuvab töölaud viiba „Süsteemi puhverserveri ennistamine”
-- Kasutajaliides kuvab sildi `⚠ Edasijõudnutele` ja selgesõnalise kinnituse märkeruudu
+- Puhverserveri rakendamine ajastab protsessisisese tagasivõtmistaimeri, mille edu pole tagatud (vaikimisi 30 min, seadistatav väärtusega `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Taimer ei säili serveriprotsessi lõppemisel.
+- Puhverserveri eelmist olekut hoitakse protsessi mälus; see hõiveoleku hoidla ei salvesta seda püsivalt andmebaasi. Tagasivõtmine taastab salvestatud macOS/GNOME sätted; Windowsis lähtestab see WinHTTP puhverserveri eelmise konfiguratsiooni taastamise asemel.
+- Kuni puhverserverist teatatakse kui rakendatust, saadab lehe mahalaadimine keepalive-tagasivõtmistaotluse ilma edu garantiita ja taotleb brauseri enda kinnitust, mille teksti määrab brauser. Inspektori eemaldamine SPA-navigeerimisel proovib samuti tagasi võtta, ilma selle brauseri küsimuseta.
+- Hõive tööriistaribal kuvatakse lokaliseeritud `System-wide` juhtelement koos hoiatusikooniga. Klõps muudab praegu ainult kohalikku kasutajaliidese olekut; see ei kuva kinnituskasti ega rakenda või võta tagasi süsteemi puhverserverit.
 
 ### Režiim 5 — TPROXY läbipaistev dekrüptimine (Linux, root, valikuline)
 
@@ -113,13 +113,13 @@ See on mahukas alamsüsteem, millel on oma eraldiseisev operaatorijuhend — tä
 
 ### Hõiverežiimide võrdlus
 
-| Režiim                 | Seadistamine                         |           Sudo?           | Ulatus                                   | Märkused                                                                                                                                 |
-| ---------------------- | ------------------------------------ | :-----------------------: | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge         | Automaatne                           |   Üks kord (sert+hosts)   | 9 IDE agenti                             | Vaikimisi sisse lülitatud                                                                                                                |
-| 2. Kohandatud hostid   | Sisestus hosti kaupa                 |     Jah (hosts-fail)      | Kõik seda hosti kasutavad rakendused     | Salvestatakse andmebaasi                                                                                                                 |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`             |            Ei             | Keskkonnamuutujaid arvestavad rakendused | Port 8080; HTTPS tunneldatakse CONNECT-iga (ainult metaandmed, ei dekrüptita kunagi)                                                     |
-| 4. Süsteemiülene       | Lüliti + kinnitus                    |            Jah            | Kõik masina rakendused                   | Keelatakse automaatselt 30 minuti pärast                                                                                                 |
-| 5. TPROXY dekrüptimine | Lüliti (Linux + natiivne lisamoodul) | Jah (root + CA paigaldus) | Kõik sihtporti kasutavad hostid          | Dekrüptib suvalisi hoste; vaikimisi välja lülitatud — vt `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei kompileerita kataloogi `/docs`) |
+| Režiim                 | Seadistamine                                                   |           Sudo?           | Ulatus                                   | Märkused                                                                                                                                 |
+| ---------------------- | -------------------------------------------------------------- | :-----------------------: | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge         | Automaatne                                                     |   Üks kord (sert+hosts)   | 9 IDE agenti                             | Vaikimisi sisse lülitatud                                                                                                                |
+| 2. Kohandatud hostid   | Sisestus hosti kaupa                                           |     Jah (hosts-fail)      | Kõik seda hosti kasutavad rakendused     | Salvestatakse andmebaasi                                                                                                                 |
+| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`                                       |            Ei             | Keskkonnamuutujaid arvestavad rakendused | Port 8080; HTTPS tunneldatakse CONNECT-iga (ainult metaandmed, ei dekrüptita kunagi)                                                     |
+| 4. Süsteemiülene       | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |            Jah            | Kõik masina rakendused                   | Tagasivõtmistaimer ilma edu garantiita (vaikimisi 30 min)                                                                                |
+| 5. TPROXY dekrüptimine | Lüliti (Linux + natiivne lisamoodul)                           | Jah (root + CA paigaldus) | Kõik sihtporti kasutavad hostid          | Dekrüptib suvalisi hoste; vaikimisi välja lülitatud — vt `docs/security/MITM-TPROXY-DECRYPT.md` (git; ei kompileerita kataloogi `/docs`) |
 
 ---
 
@@ -315,7 +315,7 @@ tugi lisatakse edaspidi).
 ### 5.1 Seansi salvestamine
 
 1. Klõpsake tööriistaribal nuppu **„● Salvesta seanss”** → sisestage nimi (valikuline)
-2. Reaalajas voo jälgimine jätkub tavapäraselt; punane pulseeriv indikaator näitab `◉ SALV · <nimi> · 00:42 · 23 päringut`
+2. Reaalajas voo jälgimine jätkub tavapäraselt; salvestusriba näitab pulseerivat punast täppi, möödunud aega, seansi nime, kui see on saadaval, ja lokaliseeritud peatamisnuppu.
 3. Klõpsake nuppu **„⏹ Peata”** → seansi hetktõmmis salvestatakse tabelitesse `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Salvestatud seansi vaatamine
@@ -323,7 +323,7 @@ tugi lisatakse edaspidi).
 Tööriistariba rippmenüüs **Seansid** kuvatakse salvestatud seansid. Seansi valimisel:
 
 - Laaditakse seansi hetktõmmis (külmutatud olek)
-- Kuvatakse riba: `Salvestatud seansi "<nimi>" vaatamine — [Tagasi reaalajavaatesse]`
+- Bänner näitab salvestatud seansi lokaliseeritud silti ja seansi nime (või lokaliseeritud asendusteksti pealkirjata seansile) koos lokaliseeritud nupuga reaalajavaatesse naasmiseks.
 - Vahekaart Statistika muutub kättesaadavaks koos Rechartsi koondandmetega
 
 ### 5.3 Ekspordivormingud
@@ -347,7 +347,7 @@ Traffic Inspector kuvab **kogu pealtkuulatud HTTPS-liikluse**, sealhulgas autori
 | -------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**             | Kõik marsruudid ja WebSocketi lõpp-punkt on ligipääsetavad ainult loopback-liidese kaudu (jõustatakse failis `routeGuard.ts` enne autentimist)                                                              |
 | **Saladuste maskimine**    | Lineaarne `maskSecret()`-skanner peidab RFC 6750 Bearer-mandaadid, teenusepakkuja prefiksiga võtmed ja pikad läbipaistmatud sõned enne `TrafficBuffer.push()` kutset                                        |
-| **Keha suuruse piirang**   | Kehad, mis on suuremad kui `INSPECTOR_MAX_BODY_KB` (vaikimisi 1024 KB), kärbitakse teatega `"(jõudluse huvides kärbitud)"`                                                                                  |
+| **Keha suuruse piirang**   | Kehad, mis on suuremad kui `INSPECTOR_MAX_BODY_KB` (vaikimisi 1024 KB), kärbitakse teatega `"(truncated for performance)"`                                                                                  |
 | **Päiste puhastamine**     | Nimed teisendatakse väiketähtedeks; kaadristamise, hop-by-hop- ja puhverserveri autentimise päised eemaldatakse; küpsised peidetakse täielikult; mandaadiväärtused edastatakse funktsioonile `maskSecret()` |
 | **CSP**                    | Traffic Inspectori lehtedel kasutatakse ranget sisu turbepoliitikat, et vältida sisestatud vastusekehade kaudu toimuvat XSS-i                                                                               |
 | **Vaikimisi ei säilitata** | `TrafficBuffer` asub mälus ja selle sisu kaob serveri taaskäivitamisel. Seansid säilitatakse ainult siis, kui need sõnaselgelt salvestatakse                                                                |
@@ -415,7 +415,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Kui juhtpaneel tuvastab järgmisel laadimisel, et andmebaasi oleku järgi oli proksi aktiivne, pakub see ka valikut „Ennista süsteemiproksi“.
+Puhverserveri salvestatud olek on ainult serveriprotsessis. Pärast krahhi või taaskäivitust ei saa praegune hõiveoleku hoidla seda hetktõmmist andmebaasist taastada; käsitsi taastamise vajadusel kasutage ülaltoodud platvormi taastamiskäske.
 
 ### Puhver on täis
 

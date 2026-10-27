@@ -54,7 +54,7 @@ Nova aba para extrair conteúdo de uma URL por meio de `POST /v1/web/fetch` (cri
 - Entrada: URL + opção de página completa + seletor de formato (markdown / texto / HTML).
 - Enviar → buscar → renderizar `ScrapeResult.tsx`.
 - `ScrapeResult` renderiza a prévia em markdown + opção de conteúdo bruto.
-- Limite: se o corpo da resposta for maior que **256 KB**, a interface exibirá `(truncado, visualizar conteúdo bruto)` e abrirá o conteúdo bruto em um modal do Monaco (D21).
+- Limite: se o corpo da resposta for maior que **256 KB**, a interface exibirá `View full raw content` e abrirá o conteúdo bruto em um modal (D21).
 - Painel de metadados: provedor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latência, custo, tamanho da resposta, quantidade de links.
 - Usa o hook `useScrapeFetch.ts`.
 

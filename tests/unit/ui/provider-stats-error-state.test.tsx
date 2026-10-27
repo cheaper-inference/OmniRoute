@@ -4,9 +4,18 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 // Key-returning translator: the assertions below read stable i18n keys, not English copy.
-vi.mock("next-intl", () => ({
-  useTranslations: (namespace: string) => (key: string) => `${namespace}.${key}`,
-}));
+vi.mock("next-intl", () => {
+  const translators = new Map<string, (key: string) => string>();
+  return {
+    useTranslations: (namespace: string) => {
+      if (!translators.has(namespace)) {
+        translators.set(namespace, (key: string) => `${namespace}.${key}`);
+      }
+      // Match next-intl's stable identity: changing t retriggers the page's fetch effect.
+      return translators.get(namespace)!;
+    },
+  };
+});
 
 const PAGE = "../../../src/app/(dashboard)/dashboard/provider-stats/page";
 const originalFetch = globalThis.fetch;

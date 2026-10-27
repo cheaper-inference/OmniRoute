@@ -486,15 +486,15 @@ Ini mengendalikan:
 
 `open-sse/config/` mengandungi lapisan konfigurasi:
 
-| Fail                          | Tujuan                                           |
-| ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Daftar model chat merentasi katalog 376 penyedia |
-| `providerModels.ts`           | Alias model, pemetaan format                     |
-| `constants.ts`                | Had masa, had, kod status                        |
-| `defaultThinkingSignature.ts` | Tandatangan pemikiran Claude lalai               |
-| `modelStrip.ts` (in services) | Pelucutan medan mengikut penyedia                |
+| Fail                                 | Tujuan                                             |
+| ------------------------------------ | -------------------------------------------------- |
+| `providerRegistry.ts`                | Daftar model sembang merentas katalog 376 penyedia |
+| `providerModels.ts`                  | Alias model, pemetaan format                       |
+| `constants.ts`                       | Tamat masa, had, kod status                        |
+| `defaultThinkingSignature.ts`        | Tandatangan pemikiran Claude lalai                 |
+| `modelStrip.ts` (dalam perkhidmatan) | Penyingkiran medan mengikut penyedia               |
 
-### Skema Provider Registry
+### Skema Daftar Penyedia
 
 ```ts
 interface ProviderConfig {

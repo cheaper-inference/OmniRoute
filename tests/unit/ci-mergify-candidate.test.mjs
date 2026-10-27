@@ -11,6 +11,9 @@ const policy = JSON.parse(
 );
 const ready = {
   "github.event_name": "pull_request",
+  "github.event.action": "ready_for_review",
+  "github.event.changes.base": null,
+  "needs.changes.result": "success",
   "github.event.pull_request.draft": false,
   "github.head_ref": "fix/example",
   "github.event.pull_request.user.id": 1,
@@ -167,5 +170,5 @@ test("ready PRs still run and queue identity never overrides path classification
   ])
     assert.equal(condition(workflow.jobs[id].if, docsOnly), false, id);
   assert.equal(condition(workflow.jobs["docs-sync-strict"].if, docsOnly), true);
-  assert.equal(workflow.jobs["admission-verdict"].if, "${{ always() }}");
+  assert.equal(condition(workflow.jobs["admission-verdict"].if, jobValues(ready)), true);
 });

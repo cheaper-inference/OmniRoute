@@ -145,22 +145,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## ជំនាញដែលមាន
 
-OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលត្រូវបានភ្ជាប់នៅក្នុង `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`។ ម៉ូឌុលជំនាញនីមួយៗស្ថិតនៅក្នុង `src/lib/a2a/skills/`។
+OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលបានតភ្ជាប់នៅក្នុង `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`។ ម៉ូឌុលជំនាញនីមួយៗស្ថិតនៅក្នុង `src/lib/a2a/skills/`។
 
-| ជំនាញ              | ID                   | ការពិពណ៌នា                                                                                                                                    | ស្លាក                      | ឧទាហរណ៍                                   |
-| :----------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :---------------------------------------- |
-| Smart Routing      | `smart-routing`      | ផ្តល់ផ្លូវ prompt តាម provider/combo ដែលល្អបំផុត ដោយប្រើ combo engine របស់ OmniRoute រួមជាមួយការវាយពិន្ទុ                                     | routing, providers         | "ផ្តល់ផ្លូវ prompt នេះតាមម៉ូដែលល្អបំផុត"  |
-| Quota Management   | `quota-management`   | រាយការណ៍ស្ថានភាព quota តាម provider នីមួយៗ និងជួយអ្នកហៅសម្រេចចិត្តពេលណាត្រូវ throttle/ប្តូរ                                                   | quota, providers           | "ពិនិត្យ quota សម្រាប់ anthropic"         |
-| Provider Discovery | `provider-discovery` | រាយបញ្ជី provider ដែលបានដំឡើង ជាមួយសមត្ថភាព ទង់ free-tier និងស្ថានភាព OAuth                                                                   | providers, discovery       | "តើមាន provider អ្វីខ្លះដែលអាចប្រើបាន?"   |
-| Cost Analysis      | `cost-analysis`      | ប៉ាន់ស្មានថ្លៃដើមនៃសំណើ/ការសន្ទនា ដោយផ្អែកលើកាតាឡុក និងការប្រើប្រាស់ថ្មីៗ                                                                     | cost, usage                | "ប៉ាន់ស្មានថ្លៃដើមសម្រាប់ការសន្ទនានេះ"    |
-| Health Report      | `health-report`      | បូកបញ្ចូលស្ថានភាព circuit breaker, cooldown និង lockout តាម provider នីមួយៗ                                                                   | health, resilience         | "បង្ហាញស្ថានភាពសុខភាពនៃ provider ទាំងអស់" |
-| List Capabilities  | `list-capabilities`  | ត្រឡប់កាតាឡុក Agent Skills ពេញលេញចំនួន 45 ធាតុ (23 API + 21 CLI + 1 config) ជាតារាង markdown ដែលមាន URL ឆៅរបស់ SKILL.md សម្រាប់ការបញ្ចូលបរិបទ | catalog, discovery, skills | "រាយបញ្ជីសមត្ថភាពទាំងអស់របស់ OmniRoute"   |
+| ជំនាញ                | ID                   | សេចក្ដីពិពណ៌នា                                                                                                                                 | ស្លាក                      | ឧទាហរណ៍                                      |
+| :------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------- |
+| ការកំណត់ផ្លូវឆ្លាតវៃ | `smart-routing`      | បញ្ជូន prompt តាមរយៈ provider/combo ដ៏សមស្របបំផុត ដោយប្រើ combo engine + scoring របស់ OmniRoute                                                | ការកំណត់ផ្លូវ, providers   | "បញ្ជូន prompt នេះតាមរយៈម៉ូដែលល្អបំផុត"      |
+| ការគ្រប់គ្រងកូតា     | `quota-management`   | រាយការណ៍ស្ថានភាពកូតាតាម provider និងជួយអ្នកហៅសម្រេចចិត្តថាពេលណាត្រូវកម្រិតល្បឿន/ប្ដូរ                                                          | កូតា, providers            | "ពិនិត្យកូតាសម្រាប់ anthropic"               |
+| ការស្វែងរក Provider  | `provider-discovery` | រាយបញ្ជី providers ដែលបានដំឡើង ព្រមទាំងសមត្ថភាព សញ្ញាសម្គាល់កម្រិតឥតគិតថ្លៃ និងស្ថានភាព OAuth                                                  | providers, ការស្វែងរក      | "តើមាន providers អ្វីខ្លះ?"                  |
+| ការវិភាគតម្លៃ        | `cost-analysis`      | ប៉ាន់ប្រមាណតម្លៃនៃសំណើ/ការសន្ទនា ដោយផ្អែកលើកាតាឡុក + ការប្រើប្រាស់ថ្មីៗ                                                                        | តម្លៃ, ការប្រើប្រាស់       | "ប៉ាន់ប្រមាណតម្លៃសម្រាប់ការសន្ទនានេះ"        |
+| របាយការណ៍សុខភាព      | `health-report`      | ប្រមូលផ្ដុំស្ថានភាព circuit breaker, cooldown និង lockout តាម provider                                                                         | សុខភាព, ភាពធន់             | "បង្ហាញស្ថានភាពសុខភាពរបស់ providers ទាំងអស់" |
+| រាយបញ្ជីសមត្ថភាព     | `list-capabilities`  | ត្រឡប់កាតាឡុក Agent Skills ពេញលេញដែលមាន 45 ធាតុ (23 API + 21 CLI + 1 config) ជាតារាង markdown ជាមួយ URL ដើមរបស់ SKILL.md សម្រាប់ការបញ្ចូលបរិបទ | កាតាឡុក, ការស្វែងរក, ជំនាញ | "រាយបញ្ជីសមត្ថភាព OmniRoute ទាំងអស់"         |
 
-> Agent Card គួរតែត្រូវបានរក្សាឱ្យស្របគ្នាជាមួយកាតាឡុក provider ចំនួន 376 ដែលកំពុងដំណើរការ។ ចំនួន provider និង metadata អំពី free/no-auth ត្រូវបានយកមកពី runtime registry។
+> Agent Card គួរតែត្រូវបានរក្សាឱ្យស្របគ្នាជាមួយកាតាឡុកសកម្មដែលមាន 376 providers; ចំនួន provider និង metadata អំពីការឥតគិតថ្លៃ/មិនត្រូវការការផ្ទៀងផ្ទាត់ ត្រូវបានយកមកពី runtime registry។
 
 ### ព័ត៌មានលម្អិតអំពីជំនាញ `list-capabilities`
 
-ជំនាញ `list-capabilities` មានប្រយោជន៍ជាពិសេសសម្រាប់ agent ខាងក្រៅដែលត្រូវការស្វែងរកអ្វីដែល OmniRoute ផ្តល់ជូន មុនពេលផ្ញើការហៅ API។ វាត្រឡប់ artifact ជាតារាង markdown ដែលមានរចនាសម្ព័ន្ធ៖
+ជំនាញ `list-capabilities` មានប្រយោជន៍ជាពិសេសសម្រាប់ agents ខាងក្រៅដែលត្រូវការស្វែងយល់ថា OmniRoute ផ្ដល់អ្វីខ្លះ មុនពេលផ្ញើ API calls។ វាត្រឡប់ artifact ជាតារាង markdown ដែលមានរចនាសម្ព័ន្ធ៖
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -169,7 +169,7 @@ OmniRoute ផ្តល់ជំនាញ A2A ចំនួន 6 ដែលត្�
 ...
 ```
 
-ជួរដេកនីមួយៗរួមមានជួរឈរ `rawUrl` ដើម្បីឱ្យ agent អាចទាញយក SKILL.md ពេញលេញបានភ្លាមៗ។ វាល `metadata.totalSkills` ឆ្លុះបញ្ចាំងទំហំកាតាឡុក (45 នាពេលបច្ចុប្បន្ន)។ ការអនុវត្ត៖ `src/lib/a2a/skills/listCapabilities.ts`។ សូមមើលផងដែរ [AGENT-SKILLS.md](./AGENT-SKILLS.md)។
+ជួរនីមួយៗរួមបញ្ចូលជួរឈរ `rawUrl` ដើម្បីឱ្យ agents អាចទាញយក SKILL.md ពេញលេញភ្លាមៗ។ វាល `metadata.totalSkills` ឆ្លុះបញ្ចាំងទំហំកាតាឡុក (បច្ចុប្បន្នមាន 45)។ ការអនុវត្ត៖ `src/lib/a2a/skills/listCapabilities.ts`។ សូមមើលផងដែរ [AGENT-SKILLS.md](./AGENT-SKILLS.md)។
 
 ---
 

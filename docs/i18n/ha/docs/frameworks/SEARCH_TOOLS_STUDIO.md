@@ -54,7 +54,7 @@ Sabon shafi don ciro abun ciki daga URL ta hanyar `POST /v1/web/fetch` (wanda ak
 - Shigarwa: URL + maɓallin kunna/kashe cikakken shafi + mai zaɓin tsari (markdown / rubutu / HTML).
 - Aika → ɗauko → nuna `ScrapeResult.tsx`.
 - `ScrapeResult` yana nuna samfotin markdown + maɓallin nuna ɗanyen abun ciki.
-- Iyaka: idan jikin amsa ya wuce **256 KB**, UI yana nuna `(an yanke, duba ɗanyen abun ciki)` kuma yana buɗe ɗanyen abun cikin a modal na Monaco (D21).
+- Iyaka: idan jikin amsa ya wuce **256 KB**, UI yana nuna `View full raw content` kuma yana buɗe ɗanyen abun cikin a modal (D21).
 - Sashen metadata: mai samarwa (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), jinkiri, farashi, girman amsa, adadin hanyoyin haɗi.
 - Yana amfani da hook na `useScrapeFetch.ts`.
 

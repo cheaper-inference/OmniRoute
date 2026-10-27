@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mehanizem:** Uporablja API-je operacijskega sistema za preusmeritev celotnega prometa HTTP/HTTPS skozi poslušalnik HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` in nastavitve gostitelja/vrat HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Doseg:** Vsaka aplikacija v računalniku, ki upošteva sistemske nastavitve posredniškega strežnika
   **Opomba:** `source` = `"system-proxy"`
 
 **Varnostni mehanizmi:**
 
-- Časovnik za samodejni izklop (privzeto 30 min, nastavljivo prek `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Prejšnje stanje sistemskega posredniškega strežnika se shrani v podatkovno zbirko in obnovi ob razveljavitvi
-- Nadzorna plošča prikaže poziv »Razveljavljanje sistemskega posredniškega strežnika«, če uporabnik zapusti stran, ko je ta aktiven
-- Uporabniški vmesnik prikaže značko `⚠ Napredno` in potrditveno polje za izrecno potrditev
+- Uveljavitev posredniškega strežnika nastavi procesno lokalen časovnik za povrnitev po najboljših močeh (privzeto 30 min, nastavljivo z `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Časovnik ne preživi konca strežniškega procesa.
+- Prejšnje stanje posredniškega strežnika ostane v pomnilniku procesa; ta shramba stanja zajema ga ne hrani trajno v podatkovni zbirki. Povrnitev obnovi shranjene nastavitve macOS/GNOME; v sistemu Windows ponastavi posredniški strežnik WinHTTP namesto obnove prejšnje konfiguracije.
+- Dokler je posredniški strežnik označen kot uveljavljen, zapustitev strani (unload) pošlje zahtevo keepalive za povrnitev po najboljših močeh in zahteva izvorno potrditev, katere besedilo določi brskalnik. Odstranitev inšpektorja med navigacijo SPA prav tako poskusi povrnitev, brez tega pogovornega okna brskalnika.
+- Orodna vrstica zajema prikazuje lokaliziran kontrolnik `System-wide` z opozorilno ikono. Klik trenutno spremeni le lokalno stanje vmesnika; ne prikaže potrditvenega polja in ne uveljavi ali povrne sistemskega posredniškega strežnika.
 
 ### Način 5 — Transparentno dešifriranje TPROXY (Linux, korenski uporabnik, zahteva izrecen vklop)
 
@@ -113,13 +113,13 @@ To je obsežen podsistem z lastnim namenskim vodnikom za upravljavce — za celo
 
 ### Primerjava načinov zajema
 
-| Način                  | Nastavitev                        |                   Sudo?                   | Doseg                                                | Opombe                                                                                                                            |
-| ---------------------- | --------------------------------- | :---------------------------------------: | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge         | Samodejno                         |          Enkrat (potrdilo+hosts)          | 9 agentov IDE                                        | Privzeto omogočeno                                                                                                                |
-| 2. Gostitelji po meri  | Vnos za posameznega gostitelja    |            Da (datoteka hosts)            | Katera koli aplikacija, ki uporablja tega gostitelja | Shranjeno v podatkovni zbirki                                                                                                     |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`          |                    Ne                     | Aplikacije, ki upoštevajo okoljske spremenljivke     | Vrata 8080; HTTPS uporablja tunel CONNECT (samo metapodatki, nikoli dešifrirano)                                                  |
-| 4. Sistemsko           | Preklop + potrditev               |                    Da                     | Vse aplikacije v računalniku                         | Samodejno onemogočeno po 30 minutah                                                                                               |
-| 5. Dešifriranje TPROXY | Preklop (Linux + izvorni dodatek) | Da (root + namestitev overitelja potrdil) | Kateri koli gostitelj na ciljnih vratih              | Dešifrira poljubne gostitelje; privzeto izklopljeno — glejte `docs/security/MITM-TPROXY-DECRYPT.md` (git; ni vključeno v `/docs`) |
+| Način                  | Nastavitev                                                     |                   Sudo?                   | Doseg                                                | Opombe                                                                                                                            |
+| ---------------------- | -------------------------------------------------------------- | :---------------------------------------: | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge         | Samodejno                                                      |          Enkrat (potrdilo+hosts)          | 9 agentov IDE                                        | Privzeto omogočeno                                                                                                                |
+| 2. Gostitelji po meri  | Vnos za posameznega gostitelja                                 |            Da (datoteka hosts)            | Katera koli aplikacija, ki uporablja tega gostitelja | Shranjeno v podatkovni zbirki                                                                                                     |
+| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`                                       |                    Ne                     | Aplikacije, ki upoštevajo okoljske spremenljivke     | Vrata 8080; HTTPS uporablja tunel CONNECT (samo metapodatki, nikoli dešifrirano)                                                  |
+| 4. Sistemsko           | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |                    Da                     | Vse aplikacije v računalniku                         | Časovnik za povrnitev po najboljših močeh (privzeto 30 min)                                                                       |
+| 5. Dešifriranje TPROXY | Preklop (Linux + izvorni dodatek)                              | Da (root + namestitev overitelja potrdil) | Kateri koli gostitelj na ciljnih vratih              | Dešifrira poljubne gostitelje; privzeto izklopljeno — glejte `docs/security/MITM-TPROXY-DECRYPT.md` (git; ni vključeno v `/docs`) |
 
 ---
 
@@ -314,7 +314,7 @@ je predvidena v nadaljnjem razvoju).
 ### 5.1 Snemanje seje
 
 1. V orodni vrstici kliknite **"● Snemaj sejo"** → vnesite ime (izbirno)
-2. Sprotni prikaz se nadaljuje kot običajno; rdeč utripajoči indikator prikazuje `◉ SNEM · <ime> · 00:42 · 23 zahtev`
+2. Sprotni prikaz se nadaljuje kot običajno; vrstica snemanja kaže utripajočo rdečo piko, pretečeni čas, ime seje, kadar je na voljo, in lokaliziran kontrolnik za ustavitev.
 3. Kliknite **"⏹ Ustavi"** → posnetek seje se shrani v `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Ogled posnete seje
@@ -322,7 +322,7 @@ je predvidena v nadaljnjem razvoju).
 Spustni meni **Seje** v orodni vrstici prikazuje shranjene seje. Ko izberete eno:
 
 - Naloži se posnetek seje (zamrznjeno stanje)
-- Prikaže se pasica: `Ogled posnete seje "<ime>" — [Nazaj na prikaz v živo]`
+- Pasica kaže lokalizirano oznako posnete seje in ime seje (ali lokalizirano nadomestno besedilo za sejo brez naslova) poleg lokaliziranega gumba za vrnitev v sprotni prikaz.
 - Zavihek Statistika postane na voljo z agregati Recharts
 
 ### 5.3 Oblike izvoza
@@ -346,7 +346,7 @@ Traffic Inspector prikazuje **ves prestreženi promet HTTPS**, vključno z avtor
 | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                | Vse poti in končna točka WebSocket so dostopne samo prek povratne zanke (uveljavljeno v `routeGuard.ts` pred preverjanjem pristnosti)                                                                                              |
 | **Prikrivanje skrivnosti**    | Linearni pregledovalnik `maskSecret()` zakrije poverilnice Bearer po RFC 6750, ključe s predponami ponudnikov in dolge neprosojne žetone pred `TrafficBuffer.push()`                                                               |
-| **Omejitev velikosti telesa** | Telesa, večja od `INSPECTOR_MAX_BODY_KB` (privzeto 1024 KB), so skrajšana z obvestilom `"(skrajšano zaradi zmogljivosti)"`                                                                                                         |
+| **Omejitev velikosti telesa** | Telesa, večja od `INSPECTOR_MAX_BODY_KB` (privzeto 1024 KB), so skrajšana z obvestilom `"(truncated for performance)"`                                                                                                             |
 | **Sanitizacija glav**         | Imena so pretvorjena v male črke; glave za okvirjanje, glave hop-by-hop in glave za preverjanje pristnosti posredniškega strežnika so odstranjene; piškotki so v celoti zakriti; vrednosti poverilnic se obdelajo z `maskSecret()` |
 | **CSP**                       | Stroga politika varnosti vsebine na straneh Traffic Inspector preprečuje XSS prek vstavljenih teles odgovorov                                                                                                                      |
 | **Privzeto brez trajnosti**   | `TrafficBuffer` je shranjen v pomnilniku in se ob ponovnem zagonu strežnika izgubi. Seje se trajno shranijo samo, ko je snemanje izrecno omogočeno                                                                                 |
@@ -414,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Nadzorna plošča bo ob naslednjem nalaganju ponudila tudi možnost »Povrni sistemski posredniški strežnik«, če zazna, da stanje v podatkovni zbirki kaže, da je bil posredniški strežnik aktiven.
+Shranjeno stanje posredniškega strežnika obstaja samo v strežniškem procesu. Po sesutju ali ponovnem zagonu trenutna shramba stanja zajema tega posnetka ne more obnoviti iz podatkovne zbirke; kadar je potrebna ročna obnovitev, uporabite zgornje ukaze za obnovitev za svojo platformo.
 
 ### Poln medpomnilnik
 

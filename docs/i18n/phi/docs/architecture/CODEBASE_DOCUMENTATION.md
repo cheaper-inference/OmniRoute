@@ -783,7 +783,7 @@ Tingnan ang [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) at ang nakalaang seksyo
    ang `open-sse/mcp-server/schemas/tools.ts`).
 2. Italaga ang naaangkop na (mga) scope sa `src/shared/constants/mcpScopes.ts`.
 3. Irehistro ang tool sa `open-sse/mcp-server/server.ts`.
-4. Magdagdag ng mga test sa ilalim ng `open-sse/mcp-server/__tests__/`.
+4. Magdagdag ng mga test sa ilalim ng `tests/unit/`.
 5. I-update ang [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Magdagdag ng bagong A2A skill
@@ -801,7 +801,7 @@ Tingnan ang [A2A-SERVER.md § Pagdaragdag ng Bagong Skill](../frameworks/A2A-SER
 - **Pagpapangalan**: mga file na `camelCase` o `kebab-case`, mga component na `PascalCase`,
   mga constant na `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` sa lahat ng lugar;
-  `no-explicit-any` = `warn` sa `open-sse/` at `tests/`, error sa ibang lugar.
+  `no-explicit-any` = `error` sa `open-sse/**/*.ts` at `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (legacy na postura). Mas piliin ang mga tahasang type kaysa
   inference para sa mga hangganan sa pagitan ng mga module.
 - **Database**: huwag kailanman magsulat ng raw SQL sa mga route o handler — palaging dumaan sa
@@ -831,8 +831,7 @@ Tingnan ang [A2A-SERVER.md § Pagdaragdag ng Bagong Skill](../frameworks/A2A-SER
   `a2a`, `memory`, `skills`.
 - **Mga branch**: mga prefix na `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Huwag kailanman direktang mag-commit sa `main`.
-- **Husky**: pinapatakbo ng pre-commit ang `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pinapatakbo ng pre-push ang `check:any-budget:t11` + `check:tracked-artifacts` (mabilis na mga gate; hindi kasama ang `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

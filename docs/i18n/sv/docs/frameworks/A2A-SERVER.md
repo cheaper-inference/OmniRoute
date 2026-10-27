@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Tillgängliga skills
+## Tillgängliga färdigheter
 
-OmniRoute exponerar 6 A2A-skills som är kopplade i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Varje skill-modul finns i `src/lib/a2a/skills/`.
+OmniRoute exponerar 6 A2A-färdigheter som är kopplade i `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Varje färdighetsmodul finns i `src/lib/a2a/skills/`.
 
-| Skill              | ID                   | Beskrivning                                                                                                                                           | Taggar                     | Exempel                                            |
-| :----------------- | :------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------------- |
-| Smart Routing      | `smart-routing`      | Dirigerar en prompt via den optimala providern/kombon med hjälp av OmniRoutes kombo-motor + poängsättning                                             | routing, providers         | "Dirigera den här prompten via den bästa modellen" |
-| Quota Management   | `quota-management`   | Rapporterar kvotstatus per provider och hjälper anropare att avgöra när de ska begränsa/byta                                                          | quota, providers           | "Kontrollera kvoten för anthropic"                 |
-| Provider Discovery | `provider-discovery` | Listar installerade providers med funktioner, free-tier-flaggor och OAuth-status                                                                      | providers, discovery       | "Vilka providers är tillgängliga?"                 |
-| Cost Analysis      | `cost-analysis`      | Uppskattar kostnaden för en förfrågan/konversation utifrån katalogen + senaste användning                                                             | cost, usage                | "Uppskatta kostnaden för den här konversationen"   |
-| Health Report      | `health-report`      | Aggregerar tillstånd för circuit breaker, cooldown och lockout per provider                                                                           | health, resilience         | "Visa hälsostatus för alla providers"              |
-| List Capabilities  | `list-capabilities`  | Returnerar hela Agent Skills-katalogen med 45 poster (23 API + 21 CLI + 1 config) som en markdown-tabell med råa SKILL.md-URL:er för kontextinjektion | catalog, discovery, skills | "Lista alla OmniRoute-funktioner"                  |
+| Färdighet          | ID                   | Beskrivning                                                                                                                                                  | Taggar                        | Exempel                                        |
+| :----------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :--------------------------------------------- |
+| Smart dirigering   | `smart-routing`      | Dirigerar en prompt genom den optimala leverantören/kombinationen med hjälp av OmniRoutes kombinationsmotor och poängsättning                                | dirigering, leverantörer      | "Dirigera denna prompt via den bästa modellen" |
+| Kvothantering      | `quota-management`   | Rapporterar kvotstatus per leverantör och hjälper anropare att avgöra när de bör begränsa eller byta                                                         | kvot, leverantörer            | "Kontrollera kvoten för anthropic"             |
+| Leverantörssökning | `provider-discovery` | Listar installerade leverantörer med funktioner, kostnadsfria nivåer och OAuth-status                                                                        | leverantörer, sökning         | "Vilka leverantörer är tillgängliga?"          |
+| Kostnadsanalys     | `cost-analysis`      | Uppskattar kostnaden för en begäran/konversation utifrån katalogen och den senaste användningen                                                              | kostnad, användning           | "Uppskatta kostnaden för denna konversation"   |
+| Hälsorapport       | `health-report`      | Sammanställer status för kretsbrytare, nedkylningsperiod och spärrning per leverantör                                                                        | hälsa, motståndskraft         | "Visa hälsostatus för alla leverantörer"       |
+| Lista funktioner   | `list-capabilities`  | Returnerar hela Agent Skills-katalogen med 45 poster (23 API + 21 CLI + 1 konfiguration) som en markdown-tabell med råa SKILL.md-URL:er för kontextinjektion | katalog, sökning, färdigheter | "Lista alla OmniRoute-funktioner"              |
 
-> Agentkortet bör hållas synkroniserat med den aktuella katalogen med 376 providers; providerantal och free/no-auth-metadata hämtas från runtime-registret.
+> Agentkortet bör hållas synkroniserat med den aktuella katalogen med 376 leverantörer. Antalet leverantörer samt metadata om kostnadsfria alternativ och alternativ utan autentisering hämtas från körningsregistret.
 
-### Detaljer om `list-capabilities`-skill
+### Information om färdigheten `list-capabilities`
 
-`list-capabilities`-skill:en är särskilt användbar för externa agenter som behöver upptäcka vad OmniRoute exponerar innan de skickar API-anrop. Den returnerar ett artefakt i form av en strukturerad markdown-tabell:
+Färdigheten `list-capabilities` är särskilt användbar för externa agenter som behöver identifiera vad OmniRoute exponerar innan de skickar API-anrop. Den returnerar en strukturerad markdown-tabellartefakt:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ OmniRoute exponerar 6 A2A-skills som är kopplade i `src/lib/a2a/taskExecution.t
 ...
 ```
 
-Varje rad innehåller kolumnen `rawUrl` så att agenter direkt kan hämta hela SKILL.md. Fältet `metadata.totalSkills` speglar katalogens storlek (45 idag). Implementering: `src/lib/a2a/skills/listCapabilities.ts`. Se även [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Varje rad innehåller kolumnen `rawUrl` så att agenter omedelbart kan hämta hela SKILL.md-filen. Fältet `metadata.totalSkills` motsvarar katalogens storlek (45 i dag). Implementering: `src/lib/a2a/skills/listCapabilities.ts`. Se även [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

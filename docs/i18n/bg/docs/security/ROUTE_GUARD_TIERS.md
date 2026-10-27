@@ -195,6 +195,12 @@ Tunnel, Tailscale, Ngrok), loopback проверката продължава д
 | `/api/providers/health-autopilot/actions` | Изпълнява коригиращи действия на autopilot                                                    |
 | `/api/settings/obsidian`                  | Издава многократно използваеми WebDAV идентификационни данни за произволен корен на хранилище |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                                  |
+| `/api/cli-tools/apply`                    | Презаписва CLI конфигурацията на оператора на хоста                                           |
+| `/api/cli-tools/guide-settings`           | Записва CLI конфигурационни файлове, управлявани от ръководства                               |
+| `/api/cli-tools/hermes-agent-settings`    | Записва конфигурацията на агента Hermes                                                       |
+| `/api/cli-tools/backups`                  | Възстановява и изтрива архиви на CLI конфигурацията                                           |
+| `/api/log-export`                         | Изпраща дневници на повикванията към конфигурирана дестинация                                 |
+| `/api/restart`                            | Рестартира сървърния процес                                                                   |
 
 **Отговор при нарушение:** `401 Authentication required`
 
@@ -205,7 +211,7 @@ REST API токена на Obsidian. GHSA-62vw маскираше само ра�
 все още беше на нивото, допускащо достъп при отказ (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` допълнително
 отказва хранилище, което е директорията с данни, намира се в нея или я съдържа.
 
-#### Експортирането на идентификационни данни е само за оператори
+#### Експортирането на идентификационни данни и възстановяването са само за оператори
 
 Горното ниво определя само дали се изисква _някакъв_ идентификационен компонент. Маршрутите, които изтеглят
 съхранени идентификационни данни, добавят втора проверка в обработчика: `GET /api/settings/export-json` (декриптирани
@@ -216,22 +222,9 @@ REST API токена на Obsidian. GHSA-62vw маскираше само ра�
 и `admin`), както и за токени за достъп с префикс `oma_`. Издаването на токени за синхронизация (`POST /api/sync/tokens`) използва
 същата помощна функция, плюс доверения токен на вътрешната услуга през loopback.
 
-#### Credential exports and restores are operator-only
+Същото ограничение важи за съответните разрушителни действия: `POST /api/db-backups/import` (качен файл `.sqlite`, включително с `dryRun=true`), `POST /api/db-backups` (възстановяване на запазен архив по неговия id) и `POST /api/settings/import-json` (възстановяване от стария JSON формат) заменят действащата база данни или целия набор от настройки, връзки и API ключове. Следователно машинни идентификационни данни не могат да задействат и тях.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Същото ограничение важи за унищожаването на точки за възстановяване: `DELETE /api/db-backups` (почистване — запазване на последните N или изтриване на тези, по-стари от D дни) и `PATCH /api/db-backups` (настройки за съхранение). Запазените правила са точно тези, които `cleanupDbBackups()` прилага след всеки автоматичен архив (`src/lib/db/backup.ts`); машинни идентификационни данни, които могат да запишат `keepLatest: 1`, биха премахнали предишните точки при следващата снимка. Изброяването и създаването на архиви (`GET`/`PUT /api/db-backups`) запазват обичайното удостоверяване за управление.
 
 ### Първоначалното конфигуриране на нова инсталация е достъпно само през loopback — според реалния отдалечен възел, а не `Host`
 

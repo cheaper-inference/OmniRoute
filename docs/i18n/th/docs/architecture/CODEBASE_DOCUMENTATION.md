@@ -781,7 +781,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`)
 2. กำหนด scope ที่เหมาะสมใน `src/shared/constants/mcpScopes.ts`
 3. ลงทะเบียนเครื่องมือใน `open-sse/mcp-server/server.ts`
-4. เพิ่มการทดสอบภายใต้ `open-sse/mcp-server/__tests__/`
+4. เพิ่มการทดสอบภายใต้ `tests/unit/`
 5. อัปเดต [MCP-SERVER.md](../frameworks/MCP-SERVER.md)
 
 ### เพิ่มทักษะ A2A ใหม่
@@ -799,7 +799,7 @@ bin/
 - **การตั้งชื่อ**: ไฟล์ใช้ `camelCase` หรือ `kebab-case`, component ใช้ `PascalCase`,
   ค่าคงที่ใช้ `UPPER_SNAKE`
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` ทุกแห่ง;
-  `no-explicit-any` = `warn` ใน `open-sse/` และ `tests/` และเป็น error ในที่อื่น
+  `no-explicit-any` = `error` ใน `open-sse/**/*.ts` และ `tests/**/*.ts`
 - **TypeScript**: `strict: false` (แนวทางที่สืบทอดจากระบบเดิม) ควรใช้ type ที่ระบุอย่างชัดเจนแทน
   inference สำหรับขอบเขตระหว่างโมดูล
 - **ฐานข้อมูล**: ห้ามเขียน SQL ดิบใน route หรือ handler — ให้ดำเนินการผ่านโมดูล
@@ -828,8 +828,7 @@ bin/
   `a2a`, `memory`, `skills`
 - **Branch**: ใช้ prefix `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/` ห้าม commit โดยตรงไปยัง `main`
-- **Husky**: pre-commit เรียกใช้ `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push เรียกใช้ `check:any-budget:t11` + `check:tracked-artifacts` (ขั้นตรวจสอบแบบรวดเร็ว โดยไม่รวม `test:unit`)
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

@@ -784,7 +784,7 @@ Xem [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) và phần chuyên biệt trong
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Gán phạm vi phù hợp trong `src/shared/constants/mcpScopes.ts`.
 3. Đăng ký công cụ trong `open-sse/mcp-server/server.ts`.
-4. Thêm kiểm thử trong `open-sse/mcp-server/__tests__/`.
+4. Thêm kiểm thử trong `tests/unit/`.
 5. Cập nhật [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Thêm kỹ năng A2A mới
@@ -802,7 +802,7 @@ Xem [A2A-SERVER.md § Thêm kỹ năng mới](../frameworks/A2A-SERVER.md). Các
 - **Đặt tên**: tệp dùng `camelCase` hoặc `kebab-case`, component dùng `PascalCase`,
   hằng số dùng `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` ở mọi nơi;
-  `no-explicit-any` = `warn` trong `open-sse/` và `tests/`, là lỗi ở nơi khác.
+  `no-explicit-any` = `error` trong `open-sse/**/*.ts` và `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (tư thế tương thích mã cũ). Ưu tiên kiểu tường minh hơn
   suy luận kiểu tại các ranh giới giữa mô-đun.
 - **Cơ sở dữ liệu**: không bao giờ viết SQL thô trong route hoặc handler — luôn truy cập thông qua
@@ -832,8 +832,7 @@ Xem [A2A-SERVER.md § Thêm kỹ năng mới](../frameworks/A2A-SERVER.md). Các
   `a2a`, `memory`, `skills`.
 - **Nhánh**: các tiền tố `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Không bao giờ commit trực tiếp vào `main`.
-- **Husky**: pre-commit chạy `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push chạy `check:any-budget:t11` + `check:tracked-artifacts` (các cổng kiểm tra nhanh; loại trừ `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

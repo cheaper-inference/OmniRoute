@@ -79,7 +79,7 @@
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` এবং `src/shared/components/ErrorPageScaffold.tsx`
   —লকআপটি দেখায়; `tests/unit/brand-pages-static.test.ts` এটি সুরক্ষিত রাখে।
 
-## 2. নিয়ম
+## 2. নিয়মাবলি
 
 1. টোকেন, কখনোই লিটারাল নয়। ইচ্ছাকৃতভাবে রাখা ব্যতিক্রম: সর্বদা-ডার্ক কনসোল টার্মিনাল এবং
    `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — কিট স্ট্যাটাস প্যালেটের রিজলভড-হেক্স
@@ -89,28 +89,26 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` এর মাধ্যমে; ReactFlow এজ এবং
    অর্কেস্ট্রেশন ক্যানভাস থিম-সচেতন `--orch-status-*` ভেরিয়েবলগুলো পড়ে
    (`src/shared/components/flow/edgeStyles.ts`)।
-2. কখনো হাতে `packages/ui-kit/src` প্যাচ করবেন না: `scripts/dev/sync-ui-kit.sh <commit>` দিয়ে সিঙ্ক
-   করুন; প্রি-কমিট গেট `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) পিন করা আপস্ট্রিম
-   কমিট থেকে ভিন্ন যেকোনো বাইটে ব্যর্থ হয় (আপস্ট্রিম ক্লোন, `UI_KIT_CLONE` বা
-   `_references/cheaper-inference-ui-kit`, অনুপস্থিত থাকলে এটি সতর্কতাসহ এড়িয়ে যায়)। কিটে কিছু
-   না থাকলে, অ্যাডাপ্টার বা স্ক্রিনে সেটি ঘুরপথে সমাধান করুন এবং আপস্ট্রিমকে সেটির জন্য অনুরোধ করুন।
-3. কিটের টেক্সট ডিফল্ট ইংরেজি (`label = "Loading"`, `loadingLabel = "Loading table"`…) — কিট
-   কম্পোনেন্ট যখনই টেক্সট রেন্ডার করে, `useTranslations(...)` থেকে অনুদিত স্ট্রিং পাস করুন।
-4. Tailwind ইউটিলিটিগুলো কিট কম্পোনেন্ট ক্লাসের চেয়ে জেতে (কিট
-   `@layer theme, base, components, utilities` ঘোষণা করে এবং এর নিয়মগুলো থাকে `components`-এ) —
-   স্পেসিং ও লেআউটের জন্য ইউটিলিটি ব্যবহার করুন, কিট কম্পোনেন্ট পুনরায় রঙ করার জন্য নয়।
-5. হেডিং: পেজ ও সেকশন শিরোনামের জন্য `.ci-heading` (Inter, ট্র্যাকিং ছাড়া);
-   `.ci-dashboard-display` (Instrument Serif) শুধুমাত্র বড়, বিরল ডিসপ্লে টেক্সটের জন্য, যেমন
-   এরর-পেজের স্ট্যাটাস কোড।
-6. `tests/unit/dashboard-kit-sweep.test.ts` কিট অ্যাডপশন পাহারা দেয়: `src/app` বা
-   `src/shared/components`-এর নিচে কোনো Material লিগেচার স্প্যান নেই; ড্যাশবোর্ড ট্রিতে
-   (`src/app/(dashboard)` এবং `src/shared/components`) কোনো কাঁচা `<select>`, `<textarea>` বা
-   `<table>` নেই এবং তালিকাভুক্ত ব্যতিক্রমগুলোর (`Select` অ্যাডাপ্টারের নেটিভ ব্র্যান্চ,
-   `RequestLoggerDetail`) বাইরে কোনো হাতে-বানানো `role="dialog"` নেই; সেখানে প্রতিটি কাঁচা
-   `<button>` বা `<input>`-এর জন্য `kit-exception:` ধারণকারী একটি কমেন্ট (কারণসহ) প্রয়োজন, যা তার
-   সর্বাধিক ৩ লাইন উপরে শেষ হয়; প্যালেট হিউ এবং `dark:` ভ্যারিয়েন্ট শুধুমাত্র টেস্টে তালিকাভুক্ত
-   ফাইলগুলোতে।
-7. PR-এর আগে উভয় থিম এবং 390 px ভিউপোর্ট যাচাই করুন (স্ক্রিনশট); `tests/e2e/a11y.spec.ts`
+2. কখনোই হাতে `packages/ui-kit/src` প্যাচ করবেন না: `scripts/dev/sync-ui-kit.sh <commit>` দিয়ে সিঙ্ক করুন;
+   প্রি-কমিট গেট `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) পিন করা আপস্ট্রিম কমিটের চেয়ে
+   কোনো একটি বাইটও আলাদা হলে ব্যর্থ হয় (আপস্ট্রিম ক্লোন,
+   `UI_KIT_CLONE` বা `_references/cheaper-inference-ui-kit`, অনুপস্থিত থাকলে এটি একটি সতর্কতা দিয়ে এড়িয়ে যায়)। কিটে কোনো কিছু না থাকলে,
+   অ্যাডাপ্টার বা স্ক্রিনে বিকল্প ব্যবস্থা করুন এবং সেটির জন্য আপস্ট্রিমে অনুরোধ জানান।
+3. কিটের টেক্সট ডিফল্টগুলো ইংরেজিতে (`label = "Loading"`, `loadingLabel = "Loading table"`…) — কোনো কিট কম্পোনেন্ট টেক্সট রেন্ডার করলে
+   `useTranslations(...)` থেকে অনূদিত স্ট্রিং পাঠান।
+4. Tailwind ইউটিলিটিগুলো কিট কম্পোনেন্টের ক্লাসের ওপর অগ্রাধিকার পায় (কিটটি
+   `@layer theme, base, components, utilities` ঘোষণা করে এবং এর নিয়মগুলো `components`-এ থাকে) — স্পেসিং ও
+   লেআউটের জন্য ইউটিলিটি ব্যবহার করুন, কিট কম্পোনেন্টের রং পরিবর্তনের জন্য নয়।
+5. শিরোনাম: পেজ ও সেকশন শিরোনামের জন্য `.ci-heading` (Inter, কোনো ট্র্যাকিং নয়); `.ci-dashboard-display`
+   (Instrument Serif) শুধু বড়, বিরল ডিসপ্লে টেক্সটের জন্য, যেমন এরর-পেজের স্ট্যাটাস কোড।
+6. `tests/unit/dashboard-kit-sweep.test.ts` কিট গ্রহণের নিয়মগুলো নিশ্চিত করে: `src/app` বা
+   `src/shared/components`-এর অধীনে কোনো Material লিগেচার span নয়; ড্যাশবোর্ড ট্রিতে (`src/app/(dashboard)` এবং
+   `src/shared/components`) কোনো সরাসরি `<select>`, `<textarea>` বা `<table>` নয় এবং তালিকাভুক্ত
+   ব্যতিক্রমগুলোর (`Select` অ্যাডাপ্টারের নেটিভ শাখা,
+   `RequestLoggerDetail`) বাইরে হাতে তৈরি কোনো `role="dialog"` নয়; সেখানে থাকা প্রতিটি সরাসরি `<button>` বা `<input>`-এর সর্বোচ্চ
+   3 লাইন আগে কারণসহ `kit-exception:`-সম্বলিত একটি মন্তব্য থাকতে হবে; প্যালেট হিউ এবং `dark:` ভ্যারিয়েন্ট
+   শুধু টেস্টে তালিকাভুক্ত ফাইলগুলোতেই ব্যবহার করা যাবে।
+7. PR-এর আগে উভয় থিম এবং 390 px ভিউপোর্ট যাচাই করুন (স্ক্রিনশটসহ); `tests/e2e/a11y.spec.ts`
    axe চালায়।
 
 ## 3. একটি স্ক্রিন যোগ করা
@@ -151,7 +149,23 @@
 usage এবং endpoint দৃশ্যত যাচাই করুন, `npm run check:ui-kit-snapshot` ও `npm run test:vitest:ui` চালান এবং
 upstream changelog-সহ PR খুলুন।
 
-## 6. রেফারেন্স সূচি
+## 6. README-এর চিত্র
+
+মূল `README.md`-তে যুক্ত বারোটি চিত্র (`docs/diagrams/*.svg`) স্থির ছবিতে কিটটি প্রয়োগ করে। এগুলো জেনারেট করা হয়, হাতে আঁকা হয় না: `scripts/docs/gen-readme-*.mjs`-তে 13টি জেনারেটর ফাইল (বারোটি চিত্র ও নিয়ন্ত্রক `gen-readme-diagrams.mjs`), এবং `tests/unit/docs/readme-*-svg.test.ts`-তে 12টি পুরোনো হয়ে যাওয়া যাচাইয়ের টেস্ট আছে, প্রতিটি চিত্রের জন্য একটি। প্রতিটি টেস্ট commit করা ফাইলকে তার জেনারেটরের আউটপুটের সঙ্গে বাইট ধরে তুলনা করে (জব `test-unit`)।
+
+- **টোকেন।** `scripts/docs/readme-diagram-theme.mjs` প্যালেটটি `packages/ui-kit/src/ci-tokens.css` থেকে কপি করে (সেই ফাইলের সঙ্গে মিল `tests/unit/docs/readme-diagram-theme.test.ts` নিশ্চিত করে) এবং কিটের ফন্ট দিয়ে লেখার ভূমিকা নির্ধারণ করে: প্রদর্শনমূলক লেখায় Instrument Serif, ইন্টারফেসে Inter, সংখ্যা ও কোডে IBM Plex Mono। এগুলো সেই একই `@fontsource` প্যাকেজ, যা `src/app/globals.css` ড্যাশবোর্ডের জন্য লোড করে। ফাইলের মধ্যে হালকা মান `:root`-এ এবং গাঢ় মান `prefers-color-scheme: dark` শর্তের অধীনে থাকে, তাই প্রতিটি ছবি GitHub পাঠকের রঙের ধরন অনুসরণ করে।
+
+- **ফন্ট।** `scripts/docs/readme-fonts.mjs` ওই woff2 ফাইলগুলোকে প্রতিটি চিত্রে আঁকা গ্লিফের উপসেটে সীমিত করে এবং `@font-face` দিয়ে `data:` URI হিসেবে যুক্ত করে। এতে কিটের ফন্টগুলো SVG-এর ভেতরেই থাকে। README ছবির স্থানীয় পরীক্ষা যাচাই করে যে রেন্ডারিং কোনো বাইরের ফন্টের অনুরোধ করে না। উপসেটগুলোতে শুধু লাতিন অক্ষর থাকে; সিস্টেম ফন্টে ফিরে যাওয়া প্রতীকের গ্লিফগুলো `SYMBOL_FALLBACKS`-এ একে একে অনুমোদিত হয়। অন্য কোনো অসমর্থিত গ্লিফ ত্রুটি ঘটায়।
+
+- **আবার তৈরি।** `npm run docs:readme-diagrams` সব বারোটি চিত্র README-এর ক্রমে আবার লেখে এবং প্রতিটি ফাইলের আকারসহ একটি লাইন ছাপে। একটি জেনারেটর আলাদাভাবেও চলে (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget`-এর জন্য `node --import tsx/esm` দরকার, কারণ তার সংখ্যাগুলো `open-sse/config/freeModelCatalog.ts`-এর বর্তমান ক্যাটালগ লোডার থেকে আসে; ক্যাটালগ বদলের CI প্রভাব `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`-এ আছে)। জেনারেটর ও SVG একসঙ্গে commit করুন।
+
+- **প্রমাণ।** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` স্থানীয় পরীক্ষায় ফাইল রেন্ডার করে (`<img>` ট্যাগ, সীমাবদ্ধ `Content-Security-Policy` এবং `image/svg+xml` প্রতিক্রিয়া), একটি হালকা ও একটি গাঢ় ফ্রেম ধারণ করে এবং পৃষ্ঠার বাইরের ফন্টের অনুরোধ জানায়; সেগুলোর সংখ্যা অবশ্যই 0 হতে হবে।
+
+- **আকারসীমা।** প্রতিটি ফাইল 200 KB-এর নিচে, যা প্রতিটি পুরোনো হওয়ার টেস্ট যাচাই করে; যেকোনো README ছবির কঠোর সর্বোচ্চ সীমা 500 KB (SVG studio ভ্যালিডেটরের নিয়ম)।
+
+- **ভাগ করা লেখা, সংখ্যা gate থেকে।** প্রতিটি জেনারেটর চিত্রের লেখা `*_COPY` ধ্রুবকে রাখে অথবা বর্তমান ক্যাটালগ থেকে তৈরি করে। সেই লেখাই আঁকা হয় এবং ফন্টের উপসেটের ইনপুট হিসেবেও ব্যবহৃত হয়। প্রামাণ্য সংখ্যাগুলো `<text>` নোডে থাকে, যা `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) পড়ে। gate যে চিত্রগুলো পড়ে, সেগুলোর পুরোনো হওয়ার টেস্ট জেনারেট করা ফাইলে তার ভ্যালিডেটরও চালায়। কোডের সঙ্গে অমিল সংখ্যা টেস্ট ব্যর্থ করে: gate যে উৎস পড়ে সেটি সংশোধন করুন, জেনারেটরের সংখ্যাটি কখনো নয়।
+
+## 7. রেফারেন্স সূচি
 
 - `src/app/globals.css` — token bridge, `.dark` override, OmniRoute `@layer components` extension
 - `packages/ui-kit/UPSTREAM.md` — pin করা upstream commit এবং license authorization; `packages/ui-kit/PATCHES.md`

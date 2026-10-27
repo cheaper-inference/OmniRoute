@@ -190,7 +190,7 @@ Kontrolują ją dwie zmienne środowiskowe (udokumentowane w
 | `ARENA_ELO_SYNC_ENABLED`  | `true`        | Ustaw na `false`, aby zrezygnować z synchronizacji wychodzącej. |
 | `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Interwał synchronizacji, w sekundach.                           |
 
-### Ręczna synchronizacja / status / czyszczenie
+### Ręczna synchronizacja / stan / czyszczenie
 
 Dla operatorów uwierzytelniony punkt końcowy zarządzania udostępnia ręczną kontrolę
 (`src/app/api/intelligence/sync/route.ts` — wymaga uwierzytelnienia zarządzania):

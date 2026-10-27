@@ -127,7 +127,7 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ### మూలం: Arena AI లీడర్బోర్డ్
 
-Arena ELO సింక్ ఇంజిన్ (`src/lib/arenaEloSync.ts`) Arena AI లీడర్బోర్డ్ API
+Arena ELO సింక్ ఇంజిన్ (`src/lib/arenaEloSync.ts`), Arena AI లీడర్బోర్డ్ API
 (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) నుండి రెండు లీడర్బోర్డ్లను — `text`
 మరియు `code` — పొందుతుంది. ఆ API ఉపయోగించదగిన బోర్డును తిరిగి ఇవ్వనప్పుడు, ఇంజిన్ Hugging Face
 datasets-serverలోని అధికారిక `lmarena-ai/leaderboard-dataset`కు ఫాల్బ్యాక్ అవుతుంది

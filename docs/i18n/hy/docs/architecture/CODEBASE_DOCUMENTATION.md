@@ -782,7 +782,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`-ը)։
 2. Նշանակեք համապատասխան շրջանակը կամ շրջանակները `src/shared/constants/mcpScopes.ts`-ում։
 3. Գրանցեք գործիքը `open-sse/mcp-server/server.ts`-ում։
-4. Ավելացրեք թեստեր `open-sse/mcp-server/__tests__/`-ում։
+4. Ավելացրեք թեստեր `tests/unit/`-ում։
 5. Թարմացրեք [MCP-SERVER.md](../frameworks/MCP-SERVER.md)-ը։
 
 ### Ավելացնել նոր A2A հմտություն
@@ -800,7 +800,7 @@ bin/
 - **Անվանումներ**: ֆայլերը՝ `camelCase` կամ `kebab-case`, բաղադրիչները՝ `PascalCase`,
   հաստատունները՝ `UPPER_SNAKE`։
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` ամենուրեք,
-  `no-explicit-any` = `warn`՝ `open-sse/`-ում և `tests/`-ում, իսկ այլուր՝ error։
+  `no-explicit-any` = `error`՝ `open-sse/**/*.ts`-ում և `tests/**/*.ts`-ում։
 - **TypeScript**: `strict: false` (ժառանգված մոտեցում)։ Մոդուլների սահմանների համար
   տիպերի ենթադրությունից գերադասեք բացահայտ տիպերը։
 - **Տվյալների բազա**: երբեք մի գրեք անմշակ SQL երթուղիներում կամ մշակողներում՝ միշտ աշխատեք
@@ -830,8 +830,7 @@ bin/
   `a2a`, `memory`, `skills`։
 - **Ճյուղեր**: նախածանցներ՝ `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`։ Երբեք commit մի կատարեք անմիջապես `main`-ում։
-- **Husky**: pre-commit-ը գործարկում է `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`, իսկ pre-push-ը՝ `check:any-budget:t11` + `check:tracked-artifacts` (արագ ստուգումներ՝ առանց `test:unit`-ի)։
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

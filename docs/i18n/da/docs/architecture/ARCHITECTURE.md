@@ -1101,11 +1101,11 @@ Den ældre filbaserede forespørgselslogger (`open-sse/utils/requestLogger.ts`) 
 - SQLite-skemamigreringer og hooks til automatisk opgradering ved opstart
 - kompatibilitetssti til migrering fra ældre JSON-format til SQLite
 
-## 6) SSRF-/beskyttelse af udgående URL'er
+## 6) SSRF-/udgående URL-beskyttelse
 
-- `src/shared/network/outboundUrlGuard.ts` blokerer alle private, loopback- og link-local-mål-URL'er, før de når udbydernes eksekveringskomponenter
-- Ruter til registrering og validering af udbydermodeller anvender `src/shared/network/safeOutboundFetch.ts`, som aktiverer beskyttelsen før hver udgående forespørgsel
-- Beskyttelsesfejl vises som `URL_GUARD_BLOCKED` med HTTP 422 og logges i revisionssporet for overholdelse via `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) anvender `src/shared/network/outboundUrlGuard.ts` på chatanmodninger, der sendes via `BaseExecutor.execute()`. I tilstanden kun offentlig (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` med det private flag slået fra) blokerer den private værter, loopback-værter og 169.254.0.0/16; i alle andre tilstande blokerer den cloud-metadata-værter. Den kontrollerer værtsnavnet eller den bogstavelige IP-adresse, som den er skrevet, før et eventuelt DNS-opslag. Indbyggede lokale udbydere springer kontrollen over.
+- Ruter til registrering og validering af udbydermodeller bruger `src/shared/network/safeOutboundFetch.ts`, som anvender beskyttelsen før hver udgående anmodning
+- Beskyttelsesfejl vises som `URL_GUARD_BLOCKED` med HTTP 503 (`getSafeOutboundFetchErrorStatus`; ruten til modelregistrering returnerer 400), og reelle SSRF-blokeringer under validering logges i revisionssporet som `provider.validation.ssrf_blocked`-hændelser
 
 ## Observerbarhed og operationelle signaler
 
@@ -1156,7 +1156,7 @@ Miljøvariabler, der anvendes aktivt af koden:
 4. Cloudfunktionaliteten afhænger af en korrekt `NEXT_PUBLIC_BASE_URL` og af, at cloudendepunktet kan nås.
 5. Mappen `open-sse/` udgives som **npm workspace-pakken** `@omniroute/open-sse`. Kildekoden importerer den via `@omniroute/open-sse/...` (opløst af Next.js `transpilePackages`). Filstier i dette dokument bruger fortsat mappenavnet `open-sse/` af hensyn til konsistens.
 6. Diagrammer i dashboardet bruger **Recharts** (SVG-baseret) til tilgængelige, interaktive analysevisualiseringer (søjlediagrammer over modelbrug og tabeller med udbyderfordeling og succesrater).
-7. E2E-tests bruger **Playwright** (`tests/e2e/`) og køres via `npm run test:e2e`. Enhedstests bruger **Node.js test runner** (`tests/unit/`) og køres via `npm run test:unit`. Kildekoden under `src/` er **TypeScript** (`.ts`/`.tsx`); workspacet `open-sse/` forbliver JavaScript (`.js`).
+7. E2E-tests bruger **Playwright** (`tests/e2e/`) og køres via `npm run test:e2e`. Enhedstests bruger **Node.js test runner** (`tests/unit/`) og køres via `npm run test:unit`. Kildekoden under `src/` er **TypeScript** (`.ts`/`.tsx`); workspacet `open-sse/` forbliver TypeScript (`.ts`).
 8. Indstillingssiden er organiseret i 7 faner: Generelt, Udseende, AI, Sikkerhed, Routing, Robusthed, Avanceret. Siden Robusthed konfigurerer kun anmodningskø, nedkøling af forbindelser, udbyderafbryder og adfærd for venten på nedkøling; live-runtimetilstanden for afbryderen vises på siden Sundhed.
 9. Strategien **Context Relay** (`context-relay`) er opdelt i to lag: `combo.ts` afgør, om en overdragelse skal genereres, og `chat.ts` indsætter overdragelsen efter kontoafklaring. Overdragelsesdata findes i SQLite-tabellen `context_handoffs`. Denne opdeling er tilsigtet, fordi kun `chat.ts` ved, om den faktiske konto er ændret.
 10. **Håndhævelse af proxy** er nu omfattende: `tokenHealthCheck.ts` finder proxyen for hver forbindelse, `/api/providers/validate` bruger `runWithProxyContext`, og `proxyFetch.ts` bruger `undici.fetch()` for at bevare dispatcher-kompatibilitet på Node 22.

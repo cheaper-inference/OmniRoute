@@ -22,17 +22,15 @@ if (typeof window !== "undefined" && typeof window.matchMedia !== "function") {
   };
 }
 
-// jsdom does not implement `ResizeObserver`. The kit `Table` (packages/ui-kit/src/table-scroll-area.tsx,
-// KEA-7886) measures its scroll area with one on mount, so any test rendering a dashboard table
-// crashes with "ResizeObserver is not defined" unless a no-op stub exists. ~50 test files used to
-// repeat this stub locally; registering it once here covers the rest (a file-local `??=` stub
-// stays harmless). Layout is never measured under jsdom, so a no-op is enough.
-if (typeof globalThis.ResizeObserver === "undefined") {
-  globalThis.ResizeObserver = class {
+// jsdom has no layout engine or ResizeObserver. The shared UI-kit table subscribes
+// to resize notifications on mount; browser-independent tests must still be able
+// to mount it. Geometry/resize tests can install their own observable implementation.
+if (typeof window !== "undefined" && typeof globalThis.ResizeObserver !== "function") {
+  globalThis.ResizeObserver = class ResizeObserver {
     observe() {}
     unobserve() {}
     disconnect() {}
-  } as unknown as typeof ResizeObserver;
+  };
 }
 
 // #7935 wired `useTranslations`/`useLocale` (next-intl) into ~180 dashboard/shared
@@ -52,6 +50,10 @@ import type { ReactNode } from "react";
 import { vi } from "vitest";
 import { createTranslator } from "use-intl/core";
 import en from "../../src/i18n/messages/en.json";
+
+// Manual createRoot tests also use act(); RTL sets this only for its own imports.
+// Keep React's checks for genuinely unwrapped updates enabled across both styles.
+(globalThis as { IS_REACT_ACT_ENVIRONMENT?: boolean }).IS_REACT_ACT_ENVIRONMENT = true;
 
 type Messages = Record<string, unknown>;
 

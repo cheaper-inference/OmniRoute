@@ -15,218 +15,283 @@ plan för att replikera samma system finns i
 
 ---
 
-## Inventering av grindar och körningsprofiler
+## Grindinventering och körningsprofiler
 
 ### Godkännande av kandidater
 
-Arbetsflödena CI och Quality Gates avger var sitt stabilt utslag: `Gate / CI` och
+Arbetsflödena CI och Quality Gates genererar var sin stabil bedömning: `Gate / CI` och
 `Gate / Quality`. Deras versionshanterade godkännandepolicy anger varje uppströmsjobb
 som obligatoriskt eller rådgivande. Ett tillämpligt obligatoriskt jobb måste lyckas:
-saknade, avbrutna, överhoppade, väntande och okända resultat kan inte fastställa PASS. En giltig
-klassificering som enbart dokumentation eller enbart katalog kan göra ett kodspår otillämpligt;
-en PR i utkastläge är inte en godkänd kandidat. Etiketten `hotfix` medför inget undantag från beviskraven.
+saknade, avbrutna, överhoppade, väntande och okända resultat kan inte fastställa PASS. En
+giltig klassificering som endast dokumentation eller endast katalog kan göra en kodfil
+icke tillämplig; ett PR-utkast är inte en godkänd kandidat. En `hotfix`-etikett medför
+inte undantag från evidenskraven.
 
-Båda arbetsflödena omfattar PR:er till main-/release-grenar, pushar till `main`, manuell körning
-och merge-group-händelser. Push, manuell körning och merge-group kör hela urvalet. Pushar till
-`release/**` startar dem inte (2026-10-18): varje ändring har redan kört matrisen i sin PR
-och den sammanslagna kombinationen hanteras av Release-Green (`docs/ops/RUNNER_BOX.md` → Hosted lane). Forkar
-och merge groups använder hostade runners för jobb som annars väljer egenhostade
-runners; tillräcklig hostad kapacitet måste verifieras före utrullning.
+Båda arbetsflödena omfattar PR:er till huvud-/releasegrenar, pushar till `main`, manuell
+start och merge-group-händelser. Push, manuell start och merge-group kör hela urvalet.
+Pushar till `release/**` startar dem inte (2026-10-18): varje ändring har redan kört
+matrisen i sin PR och den sammanslagna kombinationen är Release-Greens uppgift
+(`docs/ops/RUNNER_BOX.md` → Hosted lane). Förgreningar och merge groups använder hostade
+körare för jobb som annars väljer självhostade körare; tillräcklig hostad kapacitet måste
+verifieras före utrullning.
 
-Varje JSON-kvitto identifierar utcheckad SHA, arbetsflödeskörning och körningsförsök.
-CLI-verktyget avvisar en avvikelse mellan utcheckningens och händelsens SHA. Arbetsflödestester binder policymedlemskap
-till utslagsjobbets `needs`-lista så att ett nytt eller borttaget spår inte kan försvinna obemärkt.
-Kvittona omfattar det egna arbetsflödet, inte publicering, driftsättning eller de interna delarna
-av en befintlig rådgivande skanner. Att aktivera båda kontrollnamnen i grenreglerna är
-en separat administrativ ändring; tillägget av dessa jobb skyddar inte i sig en gren.
+Varje JSON-kvitto identifierar utcheckad SHA, arbetsflödeskörning och försök.
+CLI:n avvisar om SHA för utcheckning och händelse inte matchar. Arbetsflödestester
+binder policymedlemskap till bedömningsjobbets `needs`-lista så att en ny eller borttagen
+fil inte obemärkt kan försvinna. Kvittona omfattar det egna arbetsflödet, inte
+publicering, driftsättning eller det interna i en befintlig rådgivande skanner. Att
+aktivera båda kontrollnamnen i grenreglerna är en separat administrativ ändring; att
+lägga till dessa jobb skyddar inte i sig en gren.
+
+### Bevarad evidens i acceptansreduceraren
+
+`scripts/quality/validate-release-acceptance.mjs` reducerar en angiven plan och dess
+manifest; den fastställer inte att planen omfattar hela releasepipelinen.
+Dess rapporter anger uttryckligen `releaseAcceptance: false`, även när planen är
+`VERIFIED`. Arbetsflödet `release-acceptance.yml` använder fortfarande
+skuggfixturer, inte verkliga kvitton från bygge, paketering, start eller befordran.
+
+CLI:n kräver `--evidence-root` för att verifiera bevarad evidens. Filer löses upp
+som `<evidence-root>/<artifact_id>/<member>` och hashberäknas med SHA-256. En PASS-post
+utan evidens, en saknad eller ändrad fil, en osäker sökväg eller en symbolisk länk
+förhindrar verifiering. Saknade filer är inte likvärdiga med tomma lyckade loggar.
+Befintliga kontroller av SHA/körning/försök förblir oberoende: matchande byte kan inte
+rädda ett inaktuellt kvitto. Filintegritet är inte bevis på körningens autenticitet
+eller artefaktens befordran.
+
+### Körningskapacitet för gränssnittet
+
+CI kör hela gränssnittsinventeringen som fyra `test-vitest`-matrisskärvor, var och en
+med högst två arbetare per skärva och den befintliga jobbtidsgränsen på 15 minuter.
+Den första skärvan kör även Vitest-sviten för MCP/autoCombo. Det obligatoriska
+jobbresultatet omfattar varje del av matrisen; fel eller avbrott i en skärva kan inte
+fastställa att kandidaten godkänns.
+
+Den nattliga observatören bevarar ett separat kvitto för exakt kandidat för varje
+gränssnittsskärva, inklusive MCP-körningen i det första kvittot. Alla fyra kvitton,
+loggar och matchande körningsidentiteter krävs. Lokalt väljer
+`npm run test:vitest:ui` fortfarande hela sviten; en körning med `--shard` utgör endast
+partiell evidens.
+
+### Insamling av enhetstesttäckning
+
+De tolv enhetstestskärvorna samlar in V8-täckning under sina befintliga testkörningar.
+En skärva som lyckas kör `scripts/ci/compact-v8-coverage.mjs` för att komprimera
+originalfilerna utan att generera en mellanliggande Istanbul-rapport. Det avslutande
+Coverage-jobbet verifierar alla tolv manifest mot kandidatens SHA, körmiljö, källrot
+och datahashar och kör därefter c8:s rapportgeneratorer samt befintliga
+täckningströsklar. Indata behåller c8:s globala filnamnsordning; förhandssammanslagning
+per skärva är osäker för blandad funktions-/blocktäckning. Saknade, felaktigt utformade
+eller inkompatibla skärvor gör att godkännandet misslyckas. Misslyckade testskärvor
+bevarar rå diagnostisk täckning separat; den får inte ingå i den slutliga
+sammanslagningen.
 
 ### Inventering av statisk skanning
 
-Den versionshanterade inventeringen av npm-alias och medlemskapet i den statiska skanningen finns i
-`config/quality/gate-manifest.json`. Kör `npm run check:gate-manifest` för att validera
-skriptnamn och exakta kommandon mot `package.json`; tillägg, borttagningar och
-kommandoavvikelser gör att både den lokala hooken och ändringsklassificeringsjobben i CI misslyckas.
-Ett alias är inte ett arbetsflödesjobb, en matrisinstans eller ett testfall: dessa antal får
-inte framställas som utbytbara.
+Den versionshanterade inventeringen av npm-alias och medlemskapet för statisk skanning
+finns i `config/quality/gate-manifest.json`. Kör `npm run check:gate-manifest` för att
+validera skriptnamn och exakta kommandon mot `package.json`; tillägg, borttagningar och
+kommandodrift gör att både den lokala hooken och ändringsklassificeringsjobben i CI
+misslyckas. Ett alias är inte ett arbetsflödesjobb, en matrisinstans eller ett testfall:
+dessa antal får inte framställas som utbytbara.
 
 Använd `npm run quality:scan -- --list` eller `npm run quality:scan:fast -- --list`
-för att inspektera de valda aliasen utan att köra dem. Runnern anropar
-npm-startpunkten, så dess körningsmiljö (inklusive Bun där det är konfigurerat) bevaras.
+för att granska de valda aliasen utan att köra dem. Köraren anropar npm-startpunkten,
+så dess körmiljö (inklusive Bun där detta är konfigurerat) bevaras.
 Manifestet registrerar alias utanför dessa profiler som separat anropade, och
 underhållskommandon är förbjudna i skrivskyddade skanningsprofiler.
 
-Dessa profiler omfattar endast den statiska skanningen. De certifierar inte produkttester,
-täckning, paketering, externa kontroller eller en kandidats fullständiga releasegodkännande.
-Arbetsflödets godkännande använder den länkade `config/quality/admission-policy.json` och
-`scripts/quality/admission-verdict.mjs`. Release-observer-profiler förblir separata;
-inspektera deras tillämpliga kontroller och kvitton oberoende av varandra. Textinventeringen
-nedan är en referens, inte ett bevis på att en grind faktiskt kördes.
+Dessa profiler omfattar endast den statiska skanningen. De certifierar inte
+produkttester, täckning, paketering, externa kontroller eller en kandidats fullständiga
+releaseacceptans. Godkännande i arbetsflödet använder den länkade
+`config/quality/admission-policy.json` och
+`scripts/quality/admission-verdict.mjs`. Release-observer-profilerna förblir separata;
+granska deras tillämpliga kontroller och kvitton oberoende. Den fullständiga
+observatörens statiska kommandon deklareras i
+`config/quality/release-green-static-profile.json`, inklusive `audit:deps`,
+urval av mutationstester och översättningskontroller. Laddaren validerar npm-kommandon
+mot package.json och modellerade CI/Quality-deklarationer; den avvisar avvikelser i
+stället för att köra skaltoken som argument. Obligatoriska skannerutdata med
+SKIP/INCOMPLETE kan inte fastställa PASS. Profilen registrerar sina externa undantag
+och ersätter inte hostad täckning, testmatriser, paket- eller driftsättningsevidens.
+Prosaöversikten nedan är en referens, inte bevis på att en grind faktiskt kördes.
 
-Skripten finns under `scripts/check/` (policygrindar) och `scripts/quality/` (ratchet-motor).
-Den auktoritativa källan för CI är `.github/workflows/ci.yml`.
+Skript finns under `scripts/check/` (policygrindar) och `scripts/quality/`
+(spärrmotor). CI:s sanningskälla är `.github/workflows/ci.yml`.
 
-### Snabbspår för release-PR:er (`quality.yml`)
+### Snabbspår för release-PR (`quality.yml`)
 
-`.github/workflows/quality.yml` kompletterar CI för main-/release-PR:er, pushar till `main`,
-manuell körning och merge groups. PR:er använder sökvägsfiltrerade snabbkontroller. Det permanent
-inaktiverade duplicerade byggjobbet har tagits bort; de faktiska kontrollerna för bygge/paketering/uppstart finns kvar i CI.
+`.github/workflows/quality.yml` kompletterar CI för PR:er mot main/release, pushar till `main`,
+manuell körning och sammanslagningsgrupper. PR:er använder sökvägsfiltrerade snabbkontroller. Det permanent
+inaktiverade duplicerade bygget har tagits bort; de faktiska kontrollerna för bygge/paketering/uppstart finns kvar i CI.
 
-| Job                                              | Omfattning                                                                                                                                                                                                  | Blockerande          |
-| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| `Docs Gates (fast-path)`                         | Dokumentations-/kod-PR:er; API-dokumentationsreferenser och docs-all                                                                                                                                        | Ja                   |
-| `Fast Quality Gates`                             | Kod-PR:er; statiska kontroller, typkontroll, typkontroll av dashboard, berörda enhetstester                                                                                                                 | Ja                   |
-| `Forgotten sibling tests`                        | Kod-PR:er; ändrade moduler spåras till statiska konsumenter och möjliga syskontester; barrel- och dynamic-import-sökvägar rapporteras som rådgivande diagnostik, med refererade undantag i tillåtelselistan | **Rådgivande**       |
-| `Vitest (fast-path)`                             | Kod-PR:er; snabb Vitest-svit                                                                                                                                                                                | Ja                   |
-| `Unit Tests fast-path`                           | Kod-PR:er; enhetstestsvit med 4 shards                                                                                                                                                                      | Ja                   |
-| `No new ESLint warnings`                         | Kod-PR:er; undertryckningsmedvetet lint-skydd                                                                                                                                                               | Ja, inklusive forkar |
-| `Merge integrity (changelog + generated skills)` | PR:er som inte är utkast; synkronisering av ändringslogg och genererade färdigheter                                                                                                                         | Ja, inklusive forkar |
+| Jobb                                             | Omfattning                                                                                                                                                                                                                 | Blockerande         |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------- |
+| `Docs Gates (fast-path)`                         | Dokumentations-/kod-PR:er; referenser för API-dokumentation och docs-all                                                                                                                                                   | Ja                  |
+| `Fast Quality Gates`                             | Kod-PR:er; statiska kontroller, typkontroll, typkontroll av kontrollpanelen, berörda enhetstester                                                                                                                          | Ja                  |
+| `Forgotten sibling tests`                        | Kod-PR:er; ändrade moduler spåras till statiska konsumenter och möjliga relaterade tester; sökvägar för barrel-filer och dynamisk import rapporteras som rådgivande diagnostik, med refererade undantag i tillåtelselistan | **Rådgivande**      |
+| `Vitest (fast-path)`                             | Kod-PR:er; snabb Vitest-svit                                                                                                                                                                                               | Ja                  |
+| `Unit Tests fast-path`                           | Kod-PR:er; enhetstestsvit med 4 shardar                                                                                                                                                                                    | Ja                  |
+| `No new ESLint warnings`                         | Kod-PR:er; spärr för lintning som tar hänsyn till undertryckningar                                                                                                                                                         | Ja, inklusive forks |
+| `Merge integrity (changelog + generated skills)` | Icke-utkast-PR:er; synkronisering av ändringslogg och genererade färdigheter                                                                                                                                               | Ja, inklusive forks |
 
-#### Rapport över glömda syskontester
+#### Rapport om glömda relaterade tester
 
-`npm run check:forgotten-sibling-tests` återanvänder importmatcharen bakom testpåverkanskartan.
+`npm run check:forgotten-sibling-tests` återanvänder importlösaren bakom kartan över testpåverkan.
 För varje ändrad produktionsmodul rapporterar den deterministiska kedjor av typen
-`changed module/symbol -> static consumer -> candidate sibling test` när det föreslagna
-testet saknas i pull request-diffen. Markdown-sammanfattningen och JSON-resultatet sparas som
-workflow-artefakten `forgotten-sibling-tests` för kalibrering före en blockerande utrullning.
+`changed module/symbol -> static consumer -> candidate sibling test` när det möjliga
+testet saknas i pull requestens diff. Markdown-sammanfattningen och JSON-resultatet sparas som
+workflow-artefakten `forgotten-sibling-tests` för kalibrering före en eventuell blockerande lansering.
 
-Barrel-återexporter och dynamiska importer används endast för matchningsdiagnostik; de skapar
-aldrig ett blockerande fynd. Granskade undantag finns i
-`config/quality/forgotten-sibling-allowlist.json`. Varje post måste ange konsumenten och det föreslagna
-testet, ge en specifik motivering och länka till ett GitHub-ärende eller en pull request. Felaktigt
-utformade poster leder till ett säkert avslag. Undantag kan inte undertrycka ett borttaget föreslaget
-test eller en diff som lägger till `.skip`/`.todo`; försvagning av kontroller och annan maskering
-hanteras fortsatt av den oberoende blockerande kontrollen `check:test-masking`.
+Barrel-återexporter och dynamiska importer är endast lösningsdiagnostik; de skapar aldrig ett
+blockerande fynd. Granskade undantag finns i
+`config/quality/forgotten-sibling-allowlist.json`. Varje post måste ange konsumenten och det möjliga
+testet, ge en specifik motivering och länka till ett GitHub-ärende eller en pull request. Felaktiga poster
+leder till avslag. Undantag kan inte undertrycka ett borttaget möjligt test eller en diff som lägger till `.skip`/`.todo`;
+försvagning av kontroller och annan maskering hanteras fortsatt av den oberoende blockerande
+`check:test-masking`-spärren.
 
 ### Jobb: `lint`
 
-Körs för varje PR till `main`. Blockerar sammanslagning vid fel.
+Körs för varje PR mot `main`. Blockerar sammanslagning vid fel.
 
-| Skript (`npm run ...`)            | Validerar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Blockerande                                |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `check:node-runtime`              | Node.js-versionen ligger inom det intervall som stöds                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Ja                                         |
-| `check:cycles`                    | Cirkulära importer i hela `src/` + `open-sse/` (AST-baserat, `paths` i tsconfig löses upp). Kommandot utan suffix avslutas med kod 1 när en cykel förekommer (felsäkert sedan #15281) och listar SCC:erna. `check:cycles:ratchet` (som CI kör) blockerar när antalet överstiger taket för `metrics.cycles` i `quality-baseline.json` — för närvarande 14, `direction: down`, så det kan bara sjunka (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Ja (spärrmekanism)                         |
-| `check:boundary`                  | Koppling från `open-sse → src`: unika importer från fil till fil, från motorn till appen (`scripts/quality/measure-boundary.mjs`; listan över beroendekanter är åtgärdsbackloggen för uppdelningen av kärnan/modulerna i v4). Kommandot utan suffix = rådgivande rapport (samma som `quality:boundary`). `check:boundary:ratchet` (som CI kör, även i spärrslingan för snabbkontroller i `quality.yml`) blockerar när antalet överstiger taket för `metrics.boundaryOpenSseToSrc` i `quality-baseline.json` — initierat till det uppmätta värdet 771, `direction: down`; `--update` kan bara sänka det; basrelativt i PR:er (`--base-ref`, se nedan)                                                                                                                                                                                                                                                                                        | Ja (spärrmekanism)                         |
-| `check:route-validation:t06`      | Zod-scheman finns för alla routes (policy för nivå 6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Ja                                         |
-| `check:any-budget:t11`            | Antalet `@ts-expect-error // any` överskrider inte budgeten (nivå 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Ja                                         |
-| `check:provider-consistency`      | Varje leverantör i `providers.ts` har en motsvarande post i `providerRegistry.ts` (och vice versa, inom tillåtelselistan)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Ja                                         |
-| `check:model-lifecycle`           | De tre manuellt underhållna routningstabellerna förblir konsekventa med den incheckade livscykelögonblicksbilden (#11503): `FITNESS_TABLE` (`taskFitness.ts`) poängsätter inget avvecklat id som `REGISTRY` kan dirigera; varje mål för `BUILT_IN_ALIASES` finns i `REGISTRY` och saknas i ögonblicksbilden över avvecklade id:n; varje avvecklat id som fortfarande finns i `REGISTRY` vidarebefordras eller anges i `allowedRetiredInCatalog`; och ingen källa eller inget mål i `DEFAULT_DEGRADATION_MAP` visas som avvecklat i den ögonblicksbilden. Detta bevisar inte att en modell för närvarande betjänas av en aktiv uppströmsleverantör. Offline — jämför med `config/quality/model-lifecycle.json`, som uppdateras manuellt med `npm run quality:refresh-model-lifecycle` (nätverk; inte integrerat i CI). `allowedRetiredInCatalog` är en stegvis avvecklingsspärr: lägg bara till en post tillsammans med ett spårningsärende. | Ja                                         |
-| `check:fetch-targets`             | Varje `fetch("/api/...")` i `src/` på klientsidan matchar en verklig `route.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Ja                                         |
-| `check:deps`                      | Alla beroenden som kan installeras med `npm install` i varje `package.json` i kodförrådet finns i `dependency-allowlist.json`; nya ofästa eller slopsquattade paket flaggas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Ja                                         |
-| `audit:deps`                      | `npm audit` (rot + Electron) — inga varningar med hög eller kritisk allvarlighetsgrad (överlappar OSV-kontrollen `check:vuln-ratchet`; se rationaliseringsbackloggen)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Ja                                         |
-| `check:lockfile`                  | Integritet för `package-lock.json` — https-register, integritetshashar, inga värdåsidosättningar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Ja                                         |
-| `check:licenses`                  | Tillåtelselista för SPDX-licenser för produktionsberoenden                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Ja                                         |
-| `check:tracked-artifacts`         | Inga byggartefakter eller incheckade symboliska länkar till `node_modules` (körs även vid husky pre-commit; pre-push är avsiktligt lättviktig — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Ja                                         |
-| `check:ai-attribution`            | Ingen AI-/bot-trailer med `Co-Authored-By` eller AI-genererad sidfot i PR-committar, rubrik eller brödtext — strikt regel #16 (i snabbstyrningsloopen i `quality.yml` för PR→`release/**` — läser händelsens nyttolast, gör inget utanför PR:er — samt ett steg enbart för PR:er i lint-jobbet i `ci.yml` för PR→`main`; även husky-kroken `commit-msg`; mänskliga medförfattare är tillåtna; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `check:vitest-exclusions`         | Varje Vitest-undantag anger ett spårningsärende och finns i `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Ja                                         |
-| `check:file-size`                 | Källfiler (`.ts`/`.tsx` i `src/`, `open-sse/`, `electron/`, `bin/`) håller sig inom `cap` och testfiler (`*.test.ts(x)`) inom `testCap`; filer som frysts i `file-size-baseline.json` (`frozen` / `testFrozen`) får inte växa utöver sin registrerade storlek                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Ja                                         |
-| `check:error-helper`              | Felsvar i exekverare/hanterare använder `buildErrorBody()` / `sanitizeErrorMessage()` (hård regel nr 12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ja                                         |
-| `check:migration-numbering`       | SQL-filer för migrering är sekventiellt numrerade, utan luckor eller dubbletter                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Ja                                         |
-| `check:public-creds`              | Inga literala OAuth-uppgifter för `client_id`/`client_secret` eller Firebase-webbnycklar utanför `publicCreds.ts` (hård regel nr 11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Ja                                         |
-| `check:db-rules`                  | Ingen rå SQL utanför moduler i `src/lib/db/`; inga barrel-importer från `localDb.ts` (hårda regler nr 2/5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Ja                                         |
-| `check:known-symbols`             | Leverantörsexekverare, routningsstrategier och översättare som är registrerade i sina dispatch-tabeller matchar filerna på disken – inga övergivna eller odeklarerade symboler                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Ja                                         |
-| `check:route-guard-membership`    | Varje route som startar en underprocess klassificeras av `isLocalOnlyPath()` (hårda regler nr 15/17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Ja                                         |
-| `check:test-discovery`            | Varje `*.test.ts`-/`*.spec.ts`-fil i kodbasen samlas in av minst en testkörare (spärr: listan över föräldralösa filer i `test-discovery-baseline.json` får bara krympa)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Ja                                         |
-| `check:test-tla-order`            | Ingen `node:test`-fil under `tests/unit` registrerar ett test, når ett `await` på toppnivå och registrerar sedan fler (#18045; spärr: `test-tla-order-allowlist.json` får bara krympa)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Ja                                         |
-| `check:agent-skills-sync`         | Genererade agent-skills-artefakter överensstämmer med sin källkatalog (ingen avvikelse)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `check:provider-asset-provenance` | Leverantörslogotyper/-resurser har en registrerad provenienspost                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `lint:json`                       | JSON-konfigurationsfiler kan tolkas och uppfyller kodbasens lintregler                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `typecheck:core`                  | TypeScript-kompilering utan fel (endast rådgivande varningar)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Ja                                         |
-| `typecheck:noimplicit:core`       | Strikt `noImplicitAny` — framåtblickande; många befintliga anropsställen behöver fortfarande annoteringar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | **Rådgivande** (`continue-on-error: true`) |
-| `check:dashboard-typecheck`       | `tsc` begränsat till `src/app/(dashboard)/**` (#7033) — den noggrant utvalda tillåtelselistan med 27 filer i `typecheck:core` innehåller ingen TSX för kontrollpanelen, och `next build` typkontrollerar den inte heller (`next.config.mjs` anger `ignoreBuildErrors: true`), så regressioner med föräldralösa identifierare där (#6625/#6909) var osynliga för CI. Jämför mot en fryst baslinje för antal per fil och TS-kod (`config/quality/dashboard-typecheck-baseline.json`, samma mönster för kontroll av inaktualitet som `check:known-symbols`) — endast NYA fel utöver det baslinjeangivna antalet gör att kontrollen misslyckas; sänk baslinjen med `--update` när ett befintligt fel åtgärdas.                                                                                                                                                                                                                                  | Ja                                         |
+| Skript (`npm run ...`)            | Validerar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Blockerande                                |
+| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
+| `check:node-runtime`              | Node.js-versionen ligger inom det intervall som stöds                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Ja                                         |
+| `check:cycles`                    | Cykliska importer i hela `src/` + `open-sse/` (AST-baserat, `paths` i tsconfig matchas). Kommandot utan tillägg avslutas med kod 1 när en cykel finns (fail-closed sedan #15281) och listar SCC:erna. `check:cycles:ratchet` (som CI kör) blockerar när antalet överstiger taket `metrics.cycles` i `quality-baseline.json` — för närvarande 14, `direction: down`, så det kan endast minska (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Ja (spärrmekanism)                         |
+| `check:boundary`                  | Kopplingar från `open-sse → src`: unika importer från fil till fil från motorn till appen (`scripts/quality/measure-boundary.mjs`; kantlistan är åtgärdsbackloggen för uppdelningen av kärnan/modulerna i v4). Utan tillägg = rådgivande rapport (samma som `quality:boundary`). `check:boundary:ratchet` (som CI kör, även i spärrloopen för snabba kontroller i `quality.yml`) blockerar när antalet överstiger taket `metrics.boundaryOpenSseToSrc` i `quality-baseline.json` — initialiserat till det uppmätta värdet 771, `direction: down`; `--update` kan endast sänka det; basrelativt för PR:er (`--base-ref`, se nedan)                                                                                                                                                                                                                                                                                                         | Ja (spärrmekanism)                         |
+| `check:route-validation:t06`      | Zod-scheman finns för alla routes (policy för nivå 6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Ja                                         |
+| `check:any-budget:t11`            | Antalet `@ts-expect-error // any` överskrider inte budgeten (Tier 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Ja                                         |
+| `check:provider-consistency`      | Varje leverantör i `providers.ts` har en motsvarande post i `providerRegistry.ts` (och omvänt, inom tillåtelselistan)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Ja                                         |
+| `check:model-lifecycle`           | De tre manuellt underhållna routningstabellerna förblir konsekventa med den incheckade livscykelögonblicksbilden (#11503): `FITNESS_TABLE` (`taskFitness.ts`) poängsätter inget utfasat id som `REGISTRY` kan dirigera; varje mål i `BUILT_IN_ALIASES` finns i `REGISTRY` och saknas i ögonblicksbilden över utfasade id:n; varje utfasat id som fortfarande finns i `REGISTRY` vidarebefordras eller listas i `allowedRetiredInCatalog`; och ingen källa eller inget mål i `DEFAULT_DEGRADATION_MAP` visas som utfasat i den ögonblicksbilden. Detta bevisar inte att en modell för närvarande tillhandahålls av en aktiv uppströmsleverantör. Offline – jämför med `config/quality/model-lifecycle.json`, som uppdateras manuellt med `npm run quality:refresh-model-lifecycle` (nätverk; inte integrerat i CI). `allowedRetiredInCatalog` är en gradvis minskande spärr: lägg endast till en post tillsammans med ett spårningsärende. | Ja                                         |
+| `check:fetch-targets`             | Varje `fetch("/api/...")` i klientsidans `src/` matchar en faktisk `route.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Ja                                         |
+| `check:deps`                      | Alla beroenden som kan installeras med `npm install` i varje `package.json` i repo:t finns i `dependency-allowlist.json`; nya ofästa paket eller paket med namn som kan bero på felskrivningar flaggas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ja                                         |
+| `audit:deps`                      | npm-granskning av alla fem oberoende låsfiler (roten, Electron, OpenCode-insticksprogrammen v1/v2 och leverantören). Kritiska säkerhetsvarningar blockerar; säkerhetsvarningar med hög allvarlighetsgrad förblir synliga varningar. Saknade/misslyckade granskningar markeras som INCOMPLETE och blockerar; låshashar och rapporter per omfång sparas.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ja                                         |
+| `check:lockfile`                  | Integritet för `package-lock.json` — https-register, integritetshashar, inga värdåsidosättningar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Ja                                         |
+| `check:licenses`                  | Tillåtelselista för SPDX-licenser för produktionsberoenden                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Ja                                         |
+| `check:tracked-artifacts`         | Inga byggartefakter eller incheckade symboliska länkar till `node_modules` (körs även i husky pre-commit; pre-push är avsiktligt lättviktig — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Ja                                         |
+| `check:ai-attribution`            | Ingen AI-/bot-`Co-Authored-By`-trailer eller AI-genererad sidfot i PR-commits, titel eller brödtext — hård regel nr 16 (i snabbkontrollsloopen i `quality.yml` för PR→`release/**` — läser händelsens nyttolast, gör inget utanför PR:er — samt ett steg endast för PR:er i lint-jobbet i `ci.yml` för PR→`main`; även husky-hooken `commit-msg`; mänskliga medförfattare tillåts; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `check:vitest-exclusions`         | Varje Vitest-undantag anger ett spårningsärende och finns i `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Ja                                         |
+| `check:file-size`                 | Källfiler (`.ts`/`.tsx` i `src/`, `open-sse/`, `electron/`, `bin/`) håller sig inom `cap` och testfiler (`*.test.ts(x)`) inom `testCap`; filer som är låsta i `file-size-baseline.json` (`frozen` / `testFrozen`) får inte växa utöver sin registrerade storlek                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Ja                                         |
+| `check:error-helper`              | Felsvar i exekverare/hanterare använder `buildErrorBody()` / `sanitizeErrorMessage()` (hård regel nr 12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Ja                                         |
+| `check:migration-numbering`       | SQL-migreringsfiler är numrerade i ordningsföljd, utan luckor eller dubbletter                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Ja                                         |
+| `check:public-creds`              | Inga literala OAuth-`client_id`/`client_secret` eller Firebase-webbnycklar utanför `publicCreds.ts` (hård regel nr 11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ja                                         |
+| `check:db-rules`                  | Ingen rå SQL utanför modulerna i `src/lib/db/`; inga samlingsimporter från `localDb.ts` (hårda regler nr 2/5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Ja                                         |
+| `check:known-symbols`             | Leverantörsexekverare, routningsstrategier och översättare som registrerats i sina dispatch-tabeller överensstämmer med filerna på disken – inga föräldralösa eller odeklarerade symboler                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Ja                                         |
+| `check:route-guard-membership`    | Varje rutt som startar en underordnad process klassificeras av `isLocalOnlyPath()` (hårda regler nr 15/17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Ja                                         |
+| `check:test-discovery`            | Varje `*.test.ts`-/`*.spec.ts`-fil i repot samlas in av minst en testkörare (spärrmekanism: listan över föräldralösa filer i `test-discovery-baseline.json` kan endast krympa)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Ja                                         |
+| `check:test-tla-order`            | Ingen `node:test`-fil under `tests/unit` registrerar ett test, når en `await` på toppnivå och registrerar sedan fler (#18045; spärrmekanism: `test-tla-order-allowlist.json` kan endast krympa)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Ja                                         |
+| `check:agent-skills-sync`         | Genererade agentfärdighetsartefakter överensstämmer med sin källkatalog (ingen avvikelse)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `check:provider-asset-provenance` | Leverantörslogotyper/-resurser har en registrerad provenienspost                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `lint:json`                       | JSON-konfigurationsfiler kan tolkas och uppfyller repots lintregler                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `typecheck:core`                  | TypeScript-kompilering utan fel (endast rådgivande varningar)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Ja                                         |
+| `typecheck:noimplicit:core`       | Strikt `noImplicitAny` — framåtblickande; många befintliga anropsplatser behöver fortfarande annoteringar                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | **Rådgivande** (`continue-on-error: true`) |
+| `check:dashboard-typecheck`       | `tsc` begränsad till `src/app/(dashboard)/**` (#7033) — den noggrant utvalda tillåtelselistan med 27 filer i `typecheck:core` innehåller inga TSX-filer för instrumentpanelen, och `next build` typkontrollerar dem inte heller (`next.config.mjs` anger `ignoreBuildErrors: true`), vilket gjorde att regressioner med fristående identifierare där (#6625/#6909) inte upptäcktes av CI. Jämför mot en fryst baslinje med antal per fil och TS-kod (`config/quality/dashboard-typecheck-baseline.json`, samma mönster för kontroll av inaktuella poster som i `check:known-symbols`) — endast NYA fel utöver antalet i baslinjen gör att kontrollen misslyckas; sänk baslinjen med `--update` när ett befintligt fel har åtgärdats.                                                                                                                                                                                                      | Ja                                         |
 
 ### Jobb: `quality-gate`
 
 Körs efter `test-coverage`. Blockerar sammanslagning vid fel.
 
-| Skript                       | Validerar                                                                                                                                                                                | Blockerande               |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `quality:collect`            | Skapar `quality-metrics.json` (antal ESLint-varningar, täckning från den sammanslagna shard-rapporten)                                                                                   | Ja (före spärrmekanismen) |
-| `quality:ratchet`            | Varje mätvärde i `quality-baseline.json` har inte försämrats (ESLint-varningar ≤ baslinjen; täckning ≥ baslinjen)                                                                        | Ja                        |
-| `check:duplication`          | Kodduplicering (jscpd@4) överskrider inte baslinjen i `quality-baseline.json`                                                                                                            | Ja                        |
-| `check:complexity`           | Cyklomatisk komplexitet på filnivå överskrider inte gränsvärdet (ESLint-kärnreglerna `complexity` + `max-lines-per-function`)                                                            | Ja                        |
-| `check:cognitive-complexity` | Spärrmekanism för kognitiv komplexitet (`eslint-plugin-sonarjs`) — separat ESLint-körning; CI kör båda sammanslagna som det enda steget `check:complexity-ratchets`                      | Ja                        |
-| `check:dead-code`            | Spärrmekanismen för oanvända exporter/filer (knip) försämras inte jämfört med baslinjen                                                                                                  | Ja                        |
-| `check:compression-budget`   | Budget för komprimeringsbenchmark — lägstanivåerna för tokenbesparingar per motor får inte försämras                                                                                     | Ja                        |
-| `check:type-coverage`        | Spärrmekanismen för procentandel typad kod (`type-coverage`) försämras inte; ersätter till stor del `typecheck:noimplicit:core`                                                          | Ja                        |
-| `check:codeql-ratchet`       | Antalet öppna CodeQL-aviseringar försämras inte (läses via `gh api`; hoppas över utan fel om token saknas) — uppdateringsfrekvens och manuell utlösning: se ”CodeQL-spärrmekanism” nedan | Ja                        |
+| Skript                       | Validerar                                                                                                                                                                          | Blockerande             |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
+| `quality:collect`            | Skapar `quality-metrics.json` (antal ESLint-varningar, täckning från den sammanslagna shardrapporten)                                                                              | Ja (föregår spärrhaken) |
+| `quality:ratchet`            | Inget mätvärde i `quality-baseline.json` har försämrats (ESLint-varningar ≤ baslinjen; täckning ≥ baslinjen)                                                                       | Ja                      |
+| `check:duplication`          | Koddupliceringen (jscpd@4) överskrider inte baslinjen i `quality-baseline.json`                                                                                                    | Ja                      |
+| `check:complexity`           | Cyklomatisk komplexitet på filnivå överskrider inte gränsen (ESLint-kärnans `complexity` + `max-lines-per-function`)                                                               | Ja                      |
+| `check:cognitive-complexity` | Spärrhake för kognitiv komplexitet (`eslint-plugin-sonarjs`) — separat ESLint-körning; CI kör båda sammanslagna som det enda steget `check:complexity-ratchets`                    | Ja                      |
+| `check:dead-code`            | Spärrhaken för oanvända exporter/filer (knip) försämras inte jämfört med baslinjen                                                                                                 | Ja                      |
+| `check:compression-budget`   | Budget för komprimeringsprestanda — minimikraven för tokenbesparingar per motor får inte försämras                                                                                 | Ja                      |
+| `check:type-coverage`        | Spärrhaken för procentandel typad kod (`type-coverage`) försämras inte; ersätter till stor del `typecheck:noimplicit:core`                                                         | Ja                      |
+| `check:codeql-ratchet`       | Antalet öppna CodeQL-varningar försämras inte (läses via `gh api`; hoppas över utan fel om token saknas) — uppdateringsintervall och manuell utlösare: se ”CodeQL-spärrhake” nedan | Ja                      |
 
 ### Jobb: `quality-extended`
 
-Hela jobbet är rådgivande (`continue-on-error: true`). De npm-baserade spärrmekanismerna körs
-på riktigt; de externa skannrarna installeras via `gh release download` och hoppar över sig själva (avslutningskod 0)
-när en binärfil fortfarande saknas.
+Jobbet blockerar tillämpliga kandidater. Paketstorlek, upptäckta hemligheter, upptäckta
+sårbarheter, upptäckta arbetsflödesproblem och OpenAPI-ändringar kontrolleras med obligatoriska spärrhakar.
+Diagnostik av cirkulära beroenden är fortsatt rådgivande. Installation av skannrar krävs:
+`scripts/ci/install-quality-scanners.sh` installerar låsta versioner och vidarebefordrar
+installationsfel. Saknade verktyg, ogiltiga rapporter eller saknade baslinjer gör att
+den obligatoriska skannerkontrollen förblir OFULLSTÄNDIG.
 
-| Skript                   | Validerar                                                                                                                                                                                                                  | Blockerande                                       |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
-| `check:circular-deps`    | Inga cirkulära beroenden (dpdm)                                                                                                                                                                                            | **Rådgivande**                                    |
-| `check:bundle-size`      | Paketstorleken överskrider inte gränsvärdet                                                                                                                                                                                | **Rådgivande**                                    |
-| `check:secrets`          | Genomsökning efter hemligheter (gitleaks) — hoppas över om binärfilen saknas                                                                                                                                               | **Rådgivande**                                    |
-| `check:vuln-ratchet`     | Sårbarheter i beroenden (osv-scanner) försämras inte — hoppas över om binärfilen saknas                                                                                                                                    | **Rådgivande**                                    |
-| `check:workflows`        | Lintning av arbetsflöden (actionlint + zizmor); saknade/trasiga skannrar, ogiltiga rapporter eller en saknad spärrbaslinje ger statusen INCOMPLETE. Giltiga fynd följer den valda strikta/rådgivande/spärrbaserade policyn | Körning krävs; zizmor-spärren är blockerande i CI |
-| `check:openapi-breaking` | Bakåtinkompatibla ändringar i det offentliga API-kontraktet (`openapi.yaml`) jämfört med basgrenen (oasdiff) — genererar `openapiBreaking=N`; hoppas över om oasdiff saknas eller basspecifikationen inte kan läsas        | **Rådgivande**                                    |
+| Skript                   | Validerar                                                                                                                                                                                                                                   | Blockerande                                       |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `check:circular-deps`    | Inga cirkulära beroenden (dpdm)                                                                                                                                                                                                             | **Rådgivande**                                    |
+| `check:bundle-size`      | Paketstorleken överskrider inte gränsen; en otillgänglig mätning leder till fel                                                                                                                                                             | **Blockerande med --ratchet**                     |
+| `check:secrets`          | Gitleaks-resultat försämras inte; obligatoriska skanningar avvisar saknade verktyg/källor/baslinjer, misslyckade skanningar och ogiltiga rapporter                                                                                          | **Blockerande med --ratchet**                     |
+| `check:vuln-ratchet`     | Sårbarheter i beroenden försämras inte; obligatoriska skanningar avvisar saknade verktyg, ogiltiga rapporter eller saknade baslinjer                                                                                                        | **Blockerande med --ratchet**                     |
+| `check:workflows`        | Lintning av arbetsflöden (actionlint + zizmor); saknade/trasiga skannrar, ogiltiga rapporter eller en saknad spärrbaslinje leder till fel som INCOMPLETE. Giltiga resultat följer den valda strikta, rådgivande eller spärrbaserade policyn | Körning krävs; zizmor-spärren är blockerande i CI |
+| `check:openapi-breaking` | Det offentliga API-kontraktet jämförs med fästa händelse-commits (PR merge-base, push before, merge-group base; schemalagd/manuell utcheckning av första föräldern); obligatorisk mätning misslyckas på ett säkert sätt                     | **Blockerande med --ratchet**                     |
 
 ### Jobb: `docs-sync-strict`
 
-Körs för varje PR till `main`. Blockerar sammanslagning vid fel.
+För pull requests till `main` eller `release/**` körs jobbet endast för kandidater som inte är utkast (eller kommer från en betrodd kö) och som klassificerats som dokumentations- eller kodändringar. Det körs också vid CI-händelser som inte är PR-händelser; arbetsflödets push-trigger omfattar endast `main`, inte `release/**`. Ett steg som avslutas med en annan exitkod än noll blockerar jobbet; fynd som bara rapporteras och de dokumenterade undantagen nedan blockerar inte.
 
-| Skript                         | Validerar                                                                                                                                                         | Blockerande              |
-| ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `check:docs-all`               | Metagrind som kör de 6 delgrindarna nedan sekventiellt                                                                                                            | Ja                       |
-| ↳ `check:docs-sync`            | Versionsöverensstämmelse mellan CHANGELOG / OpenAPI / llm.txt                                                                                                     | Ja                       |
-| ↳ `check:docs-counts`          | Antal i löptext (antal leverantörer, antal migreringar osv.) ligger inom spärrintervallet för de verkliga antalen                                                 | Ja                       |
-| ↳ `check:env-doc-sync`         | Varje miljövariabel i `.env.example` dokumenteras i en dokumentationstabell, och vice versa                                                                       | Ja                       |
-| ↳ `check:deprecated-versions`  | Inga utfasade versionssträngar i dokumentationen                                                                                                                  | Ja                       |
-| ↳ `check:doc-links`            | Interna markdown-länkar i dokumentationen pekar på verkliga filer (formatet `[text]`/`(path)`)                                                                    | Ja                       |
-| ↳ `check:fabricated-docs`      | Rutter, miljövariabler, CLI-kommandon, hook-namn och filsökvägar som anges i dokumentationen finns i kodbasen. Hård grind via `--strict`; mjukt fel utan flaggan. | Ja (via `--strict` i CI) |
-| `check:cli-i18n`               | CLI-kommandosträngar finns i alla i18n-språkfiler                                                                                                                 | Ja                       |
-| `check:openapi-coverage`       | OpenAPI-specifikationen täcker minst en stegvis höjd lägstanivå av verkliga rutter                                                                                | Ja                       |
-| `check:openapi-security-tiers` | Säkerhetsnivåanteckningar i `openapi.yaml` överensstämmer med klassificeringarna i `routeGuard.ts`                                                                | **Rådgivande**           |
-| `check:openapi-routes`         | Varje sökväg i `openapi.yaml` kan kopplas till en verklig `route.ts` (motverkar hallucinationer)                                                                  | Ja                       |
-| `check:docs-symbols`           | Varje `/api/...`-referens i `docs/**/*.md` kan kopplas till en verklig `route.ts` (motverkar hallucinationer)                                                     | Ja                       |
-| `i18n translation drift`       | Oöversatta nycklar i i18n-språkfiler — endast varning                                                                                                             | **Rådgivande**           |
+| Skript                         | Validerar                                                                                                                                                                                                                                                                                                                      | Blockerande                                                                       |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------- |
+| `check:docs-all`               | Metagrind som kör de 7 delgrindarna nedan sekventiellt                                                                                                                                                                                                                                                                         | Ja                                                                                |
+| ↳ `check:docs-sync`            | Versionsöverensstämmelse mellan paket/OpenAPI/CHANGELOG, exakta `llm.txt`-speglar, avsnitts-/storleksinvarianter för översatt CHANGELOG och frånvaro av ersatta dokumentdubletter                                                                                                                                              | Ja                                                                                |
+| ↳ `check:docs-frontmatter`     | Kompilerade dokumentationssidor har giltiga frontmatter-titlar                                                                                                                                                                                                                                                                 | Ja                                                                                |
+| ↳ `check:docs-counts`          | Antalsinvarianter med hög tillförlitlighet är strikta; heuristiska kontroller av filantal varnar bara om skriptet inte får `--strict` (CI-metagrinden skickar inte med flaggan)                                                                                                                                                | Strikt nivå blockerar; mjuk nivå är rådgivande                                    |
+| ↳ `check:env-doc-sync`         | Läsning av miljövariabler i källkoden, `.env.example` och `docs/reference/ENVIRONMENT.md` överensstämmer efter att de uttryckliga ignore-, doc-only- och env-only-undantagslistorna tillämpats                                                                                                                                 | Ja, utanför de dokumenterade undantagslistorna                                    |
+| ↳ `check:deprecated-versions`  | Rapporterar potentiellt inaktuella versioner utanför säkra historiska sammanhang och gamla uppdateringsdatum, med undantag för ignorerade dokument                                                                                                                                                                             | Rådgivande i nuvarande CI-konfiguration (`--strict` skickas inte med)             |
+| ↳ `check:doc-links`            | Interna markdown-länkar i dokumentationen leder till verkliga filer (formatet `[text]`/`(path)`)                                                                                                                                                                                                                               | Ja                                                                                |
+| ↳ `check:fabricated-docs`      | Rutter, miljövariabler, CLI-kommandon, hook-namn och filsökvägar som anges i dokumentationen finns i kodbasen. Hård grind via `--strict`; mjukt fel utan flaggan.                                                                                                                                                              | Ja (via `--strict` i CI)                                                          |
+| `check:cli-i18n`               | Använda CLI-nycklar för `t()` finns i `en`; `pt-BR` behåller alla avsnitt på toppnivå; `zh-CN` och `zh-TW` innehåller varje nyckel från `en`                                                                                                                                                                                   | Ja                                                                                |
+| `check:openapi-coverage`       | OpenAPI-specifikationen täcker minst en spärrjusterad lägstanivå av verkliga rutter                                                                                                                                                                                                                                            | Ja                                                                                |
+| `check:openapi-security-tiers` | Deklarerade `x-loopback-only`-/`x-always-protected`-annoteringar måste ha stöd i `routeGuard.ts`; parserfel och avvikelser i framåtkontrollen blockerar. Bakåtkontrollen av saknade `x-loopback-only` under prefix som endast är lokala varnar, och rutter som enbart definieras av mönster undantas från den bakåtkontrollen. | Parser-/framåtkontroller blockerar; bakåtkontrollen är rådgivande                 |
+| `check:openapi-routes`         | Varje `/api...`-sökväg i `openapi.yaml` motsvarar en verklig rutt oberoende av parameternamn efter tillämpning av den motiverade undantagslistan `KNOWN_STALE_SPEC`; inaktuella poster i listan orsakar också fel                                                                                                              | Ja                                                                                |
+| `check:docs-symbols`           | Interna `/api/...`-URL-referenser i kanoniska dokument som inte är speglar motsvarar en verklig rutt eller ruttfamilj; proxy-/upstream-/platshållar-/filreferenser och motiverade `KNOWN_STALE_DOC_REFS`-poster undantas, och inaktuella poster i undantagslistan orsakar fel                                                  | Ja                                                                                |
+| `i18n translation drift`       | Käll-/målhashar för kärnuppsättningen översatta dokument stämmer med `.i18n-state.json`. PR:er misslyckas endast vid nytillkommen källdrift, saknat mål eller målhashdrift; kontroller utanför PR är strikta. Ärvd PR-drift och inaktuella källhashar för mål ger varningar.                                                   | Ny PR-drift/strikt drift utanför PR blockerar; ärvd/inaktuell drift är rådgivande |
+
+De tolv README-SVG:erna under `docs/diagrams/` genereras med `scripts/docs/gen-readme-<name>.mjs`; `npm run docs:readme-diagrams` genererar om dem alla.
+Var och en har ett enhetstest som jämför byte för byte (`tests/unit/docs/readme-*-svg.test.ts`, jobbet `test-unit`) och som misslyckas när den incheckade filen är inaktuell.
+`check:docs-counts` läser de kanoniska talen från deras `<text>`-noder, och därför omvandlas siffrorna aldrig till konturbanor.
+Kontrollen av kanoniska SVG-tal läser filerna som anges i `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, `public/images/tier-flow-dark.svg`, `tier-flow-light.svg`.
+Kontrollerna av påståenden om permanent kostnadsfria leverantörer, katalogposter, återkommande pooler och poängfaktorer läser också `promise-pillars.svg`, `free-tier-budget.svg`, `strategies-grid.svg`.
+`free-tier-budget.svg` hämtar sina siffror från den aktuella katalogens laddare, så en ändring i `FREE_MODEL_BUDGETS` eller en leverantörs visningsnamn får CI att misslyckas tills filen har genererats om.
 
 ### Jobb: `i18n-ui-coverage`
 
-| Skript                            | Validerar                                                                                                                                                                                                               | Blockerande    |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| `check-ui-keys-coverage` (inline) | Täckningen för UI-i18n-nycklar är ≥ 65 %                                                                                                                                                                                | Ja             |
-| `check-ui-value-drift` (inline)   | Ett omskrivet engelskt **värde** lämnar inte kvar någon inaktuell översättning                                                                                                                                          | Ja             |
-| `check-new-key-coverage` (inline) | En **ny** engelsk nyckel är översatt i varje språkversion — en `__MISSING__:`-markör avvisas                                                                                                                            | Ja             |
-| `check-translation-ratio`         | Andelen verkliga översättningar per språkversion (löv som är identiska med engelskan, platshållare eller saknas utanför tillåtelselistan) får inte överstiga `config/quality/i18n-translation-baseline.json` + marginal | **Rådgivande** |
+| Skript                             | Validerar                                                                                                                                                                                                 | Blockerande    |
+| ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `check-ui-keys-coverage` (infogat) | Täckningen för UI-i18n-nycklar är ≥ 65 %                                                                                                                                                                  | Ja             |
+| `check-ui-value-drift` (infogat)   | Ett omskrivet engelskt **värde** lämnar inte kvar någon inaktuell översättning                                                                                                                            | Ja             |
+| `check-new-key-coverage` (infogat) | En **ny** engelsk nyckel är översatt i varje språkversion — en `__MISSING__:`-markör avvisas                                                                                                              | Ja             |
+| `check-translation-ratio`          | Andelen riktiga översättningar per språkversion (identiska med engelskan/platshållare/saknade löv utanför tillåtelselistan) får inte överstiga `config/quality/i18n-translation-baseline.json` + marginal | **Rådgivande** |
 
-Kräver `fetch-depth: 0` — grinden för värdeavvikelse jämför `en.json` mot sammanslagningsbasen.
+Kräver `fetch-depth: 0` — kontrollen för värdeavvikelse jämför `en.json` med sammanslagningsbasen.
 
-#### `check-ui-value-drift` — grind för inaktuella översättningar
+#### `check-ui-value-drift` — kontroll för inaktuella översättningar
 
-Fångar den i18n-regression som de andra grindarna strukturellt inte kan upptäcka: ett engelskt värde
-skrivs om medan översättningarna som härletts från den _föregående_ engelska texten blir kvar, vilket gör att
-icke-engelskspråkiga användare fortsätter att läsa självsäkert formulerad men numera felaktig text.
+Fångar den enda i18n-regression som de andra kontrollerna strukturellt inte kan upptäcka: ett engelskt värde
+skrivs om och översättningarna som baserades på den _tidigare_ engelska texten blir kvar, vilket innebär att
+icke-engelskspråkiga användare fortsätter att läsa självsäkert formulerad text som nu är felaktig.
 
-Detta släpptes faktiskt. `oauthModal.googleOAuthWarning` skrevs om när Antigravity-
-inloggningshjälpen infördes (#5203); **39 av 43 språkversioner** behöll text som uppmanade operatörer att ”kopiera den
+Detta inträffade faktiskt i en utgåva. `oauthModal.googleOAuthWarning` skrevs om när inloggningshjälpen för Antigravity
+lades till (#5203); **39 av 43 språkversioner** behöll text som instruerade operatörer att ”kopiera den
 fullständiga URL:en och klistra in den nedan” — ett flöde som inte kan slutföras för den leverantören. Det
 förblev oupptäckt fram till #8463 eftersom:
 
-- `sync-ui-keys` fyller endast i nycklar som **saknas**, aldrig sådana som är **inaktuella**;
-- `check-ui-keys-coverage` räknar nyckel_närvaro_, så en inaktuell översättning räknas som täckt;
+- `sync-ui-keys` endast fyller i nycklar som **saknas**, aldrig sådana som är **inaktuella**;
+- `check-ui-keys-coverage` räknar nycklars _närvaro_, så en inaktuell översättning räknas som täckt;
 - `check-translation-drift` spårar dokumentationsspeglingarna i `docs/i18n/<locale>/**.md` —
   den läser aldrig `src/i18n/messages/*.json`. Blockerande i jobbet `docs-sync-strict` sedan
   omsynkroniseringen 2026-09: redigera ett centralt dokument → `npm run i18n:run -- --files=<doc>` (på avsnittsnivå, resurssnålt).
 
-**Differensmedveten, inte baslinjebaserad.** Den jämför `en.json` vid sammanslagningsbasen med
-arbetsträdet. För varje nyckel vars engelska värde har ändrats är en språkversion som
-fortfarande innehåller en orörd översättning inaktuell. Detta **fryser avsiktligt befintlig skuld** — en differens
-kan inte visa vilken äldre engelsk text en sedan länge befintlig översättning kom från, så kontrollen bedömer
-endast det som den aktuella ändringen berör. Alternativet (en baslinje med hash per nyckel) skulle kräva
-en genererad fil på ~600 KB, tre gånger större än den största befintliga baslinjen, som ändras vid varje i18n-PR.
+**Diffmedveten, inte baslinjebaserad.** Den jämför `en.json` vid sammanslagningsbasen med
+arbetsträdet. För varje nyckel vars engelska värde har ändrats betraktas en språkversion som fortfarande innehåller en
+orörd översättning som inaktuell. Detta **fryser avsiktligt befintlig skuld** — en diff
+kan inte visa vilken gammal engelsk text en sedan länge befintlig översättning härstammar från, så kontrollen bedömer
+endast vad den aktuella ändringen berör. Alternativet (en hashbaslinje per nyckel) skulle kräva
+en genererad fil på cirka 600 kB, tre gånger större än den största befintliga baslinjen, med ändringar vid varje i18n-PR.
 
 Det finns två sätt att uppfylla kravet:
 
 1. uppdatera de berörda översättningarna, eller
 2. ange dem som `__MISSING__:<new english>` — vid körning används då den korrigerade engelska texten
-   (`src/i18n/request.ts::deepMergeFallback`, #7258), och nyckeln köas för översättning.
+   (`src/i18n/request.ts::deepMergeFallback`, #7258) och nyckeln placeras i kön för översättning.
 
-Om strängens **betydelse** har ändrats bör du i stället **byta namn på nyckeln**: en ny nyckel kan inte ärva
+Om strängens **innebörd** har ändrats bör du i stället **byta namn på nyckeln**: en ny nyckel kan inte ärva
 en inaktuell översättning. Det är mönstret som användes i #8463.
 
 ```bash
@@ -235,133 +300,134 @@ npm run i18n:check-value-drift:warn     # endast rapportering
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Avslutas med 0 och `SKIP reason=base-unresolved` när baskatalogen inte kan läsas (ytlig
-klon utan basreferensen), vilket motsvarar beteendet för `check-openapi-breaking`.
+Avslutas med kod 0 och `SKIP reason=base-unresolved` när baskatalogen inte kan läsas (ytlig
+klon utan basreferensen), i linje med `check-openapi-breaking`.
 
 ### Jobb: `i18n`
 
-Fullständig matris för i18n-validering (ett jobb per språkversion). Hela jobbet är rådgivande.
+Fullständig valideringsmatris för i18n (ett jobb per språkversion). Hela jobbet är rådgivande.
 
-| Skript                          | Validerar                                         | Blockerande                                                |
-| ------------------------------- | ------------------------------------------------- | ---------------------------------------------------------- |
-| `validate_translation.py quick` | Översättningarnas fullständighet per språkversion | **Rådgivande** (`continue-on-error: true` för hela jobbet) |
+| Skript                          | Validerar                                    | Blockerande                                                |
+| ------------------------------- | -------------------------------------------- | ---------------------------------------------------------- |
+| `validate_translation.py quick` | Översättningsfullständighet per språkversion | **Rådgivande** (`continue-on-error: true` för hela jobbet) |
 
 ### Jobb: `pr-test-policy`
 
 Körs endast för pull requests.
 
-| Skript                 | Validerar                                                                                                                                         | Blockerande |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `check:pr-test-policy` | PR:er som ändrar produktionskod i `src/`, `open-sse/`, `electron/` eller `bin/` måste inkludera eller uppdatera tester (hård regel #8)            | Ja          |
-| `check:test-masking`   | Ändrade testfiler minskar inte nettoantalet kontroller och lägger inte till tautologier av typen `assert.ok(true)`                                | Ja          |
-| `check:pr-evidence`    | PR-beskrivningen hänvisar till test-/VPS-underlag för ändringen (automatiserar hård regel #18 genom att söka i PR-texten — bräckligt, se Backlog) | Ja          |
+| Skript                 | Validerar                                                                                                                                              | Blockerande |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- |
+| `check:pr-test-policy` | PR:er som ändrar produktionskod i `src/`, `open-sse/`, `electron/` eller `bin/` måste inkludera eller uppdatera tester (strikt regel nr 8)             | Ja          |
+| `check:test-masking`   | Ändrade testfiler minskar inte nettoantalet assertions och lägger inte till `assert.ok(true)`-tautologier                                              | Ja          |
+| `check:pr-evidence`    | PR-beskrivningen hänvisar till test-/VPS-belägg för ändringen (automatiserar strikt regel nr 18 genom att genomsöka PR-texten — bräckligt, se Backlog) | Ja          |
 
 ### Jobb: `test-vitest`
 
 Körs efter `build`. Blockerar sammanslagning vid fel.
 
-| Testsvit         | Validerar                                                   | Blockerande                                                                                                         |
-| ---------------- | ----------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP-server (110 verktyg), autoCombo, cache — vitest-körning | Ja                                                                                                                  |
-| `test:vitest:ui` | UI-komponenttester — vitest-körning                         | **Blockerande** — befintliga fel är uttryckligen undantagna i `vitest.config.ts`; nya fel gör att jobbet misslyckas |
+| Svit             | Validerar                                                   | Blockerande                                                                                                      |
+| ---------------- | ----------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `test:vitest`    | MCP-server (110 verktyg), autoCombo, cache — vitest-körning | Ja                                                                                                               |
+| `test:vitest:ui` | UI-komponenttester — vitest-körning                         | **Blockerande** — befintliga fel exkluderas uttryckligen i `vitest.config.ts`; nya fel gör att jobbet misslyckas |
 
 ### Nattliga arbetsflöden (schemalagda, rådgivande)
 
-Dessa körs enligt ett cron-schema (och via `workflow_dispatch`), aldrig för PR:er. Samtliga är rådgivande.
+Dessa körs enligt ett cron-schema (och `workflow_dispatch`), aldrig för PR:er. Samtliga är rådgivande.
 
-| Arbetsflöde            | Validerar                                                                                                                                                 | Blockerande    |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
-| `nightly-property`     | fast-check-egenskapstester med ett slumpmässigt seed-värde och ett stort antal körningar                                                                  | **Rådgivande** |
-| `nightly-resilience`   | kontroll av heap-tillväxt, felinjektion för kaostestning, k6-belastnings-/uthållighetstest                                                                | **Rådgivande** |
-| `nightly-llm-security` | promptfoo-skydd mot injektion (blockeringsläge) + garak-prober (hoppas över utan en leverantörshemlighet)                                                 | **Rådgivande** |
-| `nightly-schemathesis` | fuzzning av OpenAPI-kontrakt (schemathesis) mot en aktiv OmniRoute med `docs/openapi.yaml` — synliggör specifikationsbrott/ohanterade 500-fel (fas 8 B.4) | **Rådgivande** |
-| `nightly-mutation`     | poäng från Stryker-mutationstestning för den snabba enhetstestkörningen — överlevande mutanter synliggör svaga kontroller                                 | **Rådgivande** |
-| `nightly-compat`       | kompatibilitetsmatris för Node-motorn över de intervall som stöds av `engines.node`                                                                       | **Rådgivande** |
+| Arbetsflöde            | Validerar                                                                                                                                                             | Blockerande    |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| `nightly-property`     | fast-check-egenskapstester med ett slumpmässigt startvärde och ett högt antal körningar                                                                               | **Rådgivande** |
+| `nightly-resilience`   | gränskontroll för heap-tillväxt, kaosbaserad felinjektion, k6-belastnings-/uthållighetstestning                                                                       | **Rådgivande** |
+| `nightly-llm-security` | promptfoo-injektionsskydd (blockeringsläge) + garak-prober (hoppas över utan en leverantörshemlighet)                                                                 | **Rådgivande** |
+| `nightly-schemathesis` | fuzztestning av OpenAPI-kontrakt (schemathesis) mot en aktiv OmniRoute med `docs/openapi.yaml` — synliggör specifikationsöverträdelser/ohanterade 500-fel (Fas 8 B.4) | **Rådgivande** |
+| `nightly-mutation`     | Stryker-poäng för mutationstestning över det snabba enhetstestspåret — överlevande mutanter synliggör svaga verifieringar                                             | **Rådgivande** |
+| `nightly-compat`       | kompatibilitetsmatris för Node-motorn över de `engines.node`-intervall som stöds                                                                                      | **Rådgivande** |
 
-Prestandabaslinjer (heap, TTFB, byggtid) registreras men används inte som blockerande kontroller: se [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
+Prestandabaslinjer (heap, TTFB, byggtid) registreras men används inte som blockerande kriterier: se [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
 
 ---
 
 ## Hastighetsfas (2026-08-30 → v4.0 LTS): varje baslinje lättades med 20 %
 
 Ägarbeslut (2026-08-30): fram till modulariseringen i v4.0 är leveranshastigheten viktigare
-än att hålla nere den tekniska skulden. Varje **numerisk** ratchet-baslinje lättades med 20 % i en
-reviderbar engångsåtgärd, och fasen deklareras i `config/quality/quality-baseline.json`:
+än att hålla nere den tekniska skulden. Varje **numerisk** spärrbaslinje lättades med 20 % i en
+granskningsbar omgång, och fasen deklareras i `config/quality/quality-baseline.json`:
 
 ```json
 "_policy": { "phase": "velocity", "since": "2026-08-30", "until": "4.0.0",
              "relaxPct": 20, "requireTighten": false }
 ```
 
-| Vad som ändrades                                                                                                                                                                                         | Var                                                                                                    |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `metrics.*.value` — antal där lägre är bättre ×1,2, procenttal där högre är bättre ÷1,2 (täckningsgolvet 60 behölls, `eslintErrors` förblir 0, `eslintWarnings` 0 → 20 % av det frysta antalet undantag) | `quality-baseline.json` (`_relax_velocity_2026_08_30`-anteckningen listar varje före → efter)          |
-| `count` ×1,2 / `percentage` ×1,2                                                                                                                                                                         | `complexity-baseline.json`, `duplication-baseline.json`                                                |
-| `cap`, `testCap`, varje radgräns i `frozen[*]` / `testFrozen[*]` ×1,2                                                                                                                                    | `file-size-baseline.json`                                                                              |
-| antal per fil/per TS-kod ×1,2                                                                                                                                                                            | `api-typecheck-baseline.json`, `dashboard-typecheck-baseline.json`, `open-sse-typecheck-baseline.json` |
-| `THRESHOLD` 36 → 30                                                                                                                                                                                      | `scripts/check/check-openapi-coverage.mjs`                                                             |
-| `--require-tighten` blir rådgivande när `_policy.requireTighten === false`                                                                                                                               | `scripts/quality/check-quality-ratchet.mjs`                                                            |
-| nattliga `bank-ratchet-shrinks` pausas (det skulle registrera den uppmätta minskningen och upphäva marginalen)                                                                                           | `.github/workflows/nightly-release-green.yml`                                                          |
+| Vad som ändrades                                                                                                                                                                                                | Var                                                                                                    |
+| --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `metrics.*.value` — antal där lägre är bättre ×1,2, procenttal där högre är bättre ÷1,2 (täckningsgolvet 60 behölls, `eslintErrors` förblir 0, `eslintWarnings` 0 → 20 % av det frysta antalet undertryckanden) | `quality-baseline.json` (noten `_relax_velocity_2026_08_30` listar alla före → efter)                  |
+| `count` ×1,2 / `percentage` ×1,2                                                                                                                                                                                | `complexity-baseline.json`, `duplication-baseline.json`                                                |
+| `cap`, `testCap`, varje radgräns i `frozen[*]` / `testFrozen[*]` ×1,2                                                                                                                                           | `file-size-baseline.json`                                                                              |
+| antal per fil/per TS-kod ×1,2                                                                                                                                                                                   | `api-typecheck-baseline.json`, `dashboard-typecheck-baseline.json`, `open-sse-typecheck-baseline.json` |
+| `THRESHOLD` 36 → 30                                                                                                                                                                                             | `scripts/check/check-openapi-coverage.mjs`                                                             |
+| `--require-tighten` blir rådgivande medan `_policy.requireTighten === false`                                                                                                                                    | `scripts/quality/check-quality-ratchet.mjs`                                                            |
+| nattliga `bank-ratchet-shrinks` pausas (det skulle tillgodoräkna den uppmätta minskningen och upphäva marginalen)                                                                                               | `.github/workflows/nightly-release-green.yml`                                                          |
 
 Tillåtelselistor (`eslint-suppressions.json`, `test-masking-allowlist.json`, `test-discovery-baseline.json`,
-…) är **inte** budgetar och ändrades inte. Policygrindar för godkänt/underkänt (hemligheter, SQL-regler,
-docs/env-kontrakt, i18n-paritet, enhetstester) är oförändrade — ett rött test är fortfarande ett rött test.
+…) är **inte** budgetar och ändrades inte. Policyspärrar för godkänt/underkänt (hemligheter, SQL-regler,
+dokumentations-/miljökontrakt, i18n-paritet, enhetstester) är oförändrade — ett rött test är fortfarande ett rött test.
 
 **Verktyg**
 
-- `npm run quality:relax-baselines -- --pct 20 --note velocity_YYYY_MM_DD [--dry-run]` —
-  engångslättnaden (`scripts/quality/relax-baselines.mjs`); vägrar att köras två gånger med samma
-  anteckning.
+- `npm run quality:relax-baselines -- --pct 20 --note velocity_YYYY_MM_DD [--dry-run]` — den
+  engångsvisa lättnaden (`scripts/quality/relax-baselines.mjs`); vägrar att köras två gånger med
+  samma not.
 - `npm run quality:headroom [-- --only deadExports,fileSize] [--json out.json --md out.md]` —
-  mäter varje numerisk grind på samma sätt som CI och skriver ut återstående marginal per grind
+  mäter varje numerisk spärr på samma sätt som CI och visar återstående marginal per spärr
   (`scripts/quality/baseline-headroom.mjs`). Det nattliga jobbet `baseline-headroom` publicerar
-  tabellen i arbetsflödeskörningens sammanfattning och laddar upp dess JSON-/Markdown-rapport som
-  `baseline-headroom-<run_id>`, sparad i 90 dagar. Varningsrader och kritiska rader identifierar grindar
-  som ligger inom 10 % från sitt tak eller redan över det. Granska dessa rapporter som tidig varning
-  om att budgetarna förbrukas; inspektera `_rebaseline_*`-anteckningarna för den berörda grinden. Jobbet
+  tabellen i arbetsflödeskörningens sammanfattning och laddar upp sin JSON-/Markdown-rapport som
+  `baseline-headroom-<run_id>`, med 90 dagars lagringstid. Varningsrader och kritiska rader identifierar spärrar
+  som ligger inom 10 % av sitt tak eller redan har överskridit det. Granska dessa rapporter som en tidig varning om
+  att budgetar förbrukas; inspektera noterna `_rebaseline_*` för spärren i fråga. Jobbet
   skapar eller uppdaterar inte längre ett permanent ärende; #12149 bevarar den tidigare rapporthistoriken.
 
 **Läge för ny kod (Clean-as-You-Code) — sedan 2026-08-30, endast snabbspår för PR:er**
 
 Vid `pull_request`-händelser skickar `quality.yml` `--base-ref <PR base SHA>` till `check:file-size`,
 `check:complexity-ratchets` och `check:dead-code`. För `check:complexity-ratchets` och
-`check:dead-code` jämför grinden HEAD med merge-basen, **begränsat till de filer som PR:en
+`check:dead-code` jämför spärren HEAD med merge-basen, **begränsat till de filer som PR:en
 ändrade** (`scripts/check/newCodeMode.mjs`: merge-basen materialiseras i en tillfällig
 `git worktree`, ESLint/knip körs där och på HEAD, och antalen per fil jämförs):
 
-- **blockerande** — PR:en lade till cyklomatiska/kognitiva överträdelser eller döda exporter i filer som den ändrade
+- **blockerande** — PR:en lade till cyklomatiska/kognitiva överträdelser eller oanvända exporter i filer som den ändrade
   (`complexityNewCode=`, `cognitiveComplexityNewCode=`, `deadExportsNewCode=` i loggen);
-- **rådgivande** — den globala totalsumman jämfört med den frysta baslinjen. Ärftlig avvikelse gör aldrig en
-  oskyldig PR röd; avvikelsen fryses om vid versionsavstämningen och övervakas av marginaljobbet.
+- **rådgivande** — den globala totalsumman jämfört med den frysta baslinjen. Ärvd avvikelse gör aldrig en
+  oskyldig PR röd; avvikelsen fryses om vid versionsavstämning och övervakas av marginaljobbet.
 
-`check:file-size` använder basreferensen på sina egna villkor (`scripts/check/check-file-size.mjs`, #8522):
-det kontrollerar varje källkods- och testfil i trädet, läser varje fils radantal vid PR-basreferensen
+`check:file-size` använder basreferensen enligt sina egna villkor (`scripts/check/check-file-size.mjs`, #8522):
+det kontrollerar varje käll- och testfil i trädet, läser varje fils radantal vid PR-basen
 med `git show` och underkänner en fil endast när den växer förbi det större av dess baslinjetak
 (`frozen` / `testFrozen`, eller `cap` / `testCap` för en fil utanför baslinjen) och dess basstorlek.
-En fil som redan avvek i basen gör därför aldrig en oskyldig PR röd.
+En fil som redan hade avvikit i basen gör därför aldrig en oskyldig PR röd.
 
 `check:boundary:ratchet` tillämpar samma regel på sitt enda tal
 (`scripts/quality/measure-boundary.mjs --ratchet --base-ref <sha>`): vid PR-händelser skickar både
-snabbgrindarna i `quality.yml` och lint-jobbet i `ci.yml` PR-basens SHA, baskommitten
-mäts från en `git archive`-export, och PR:en misslyckas endast när dess antal kanter för
-`open-sse → src` överstiger det högre värdet av `metrics.boundaryOpenSseToSrc` och antalet i basen. Basdrift
-över taket rapporteras (`ärvd basdrift`) men gör aldrig att en oskyldig PR blir röd; push → main
-behåller det absoluta taket, och en bas-SHA som inte kan lösas faller tillbaka till det med en varning.
+snabbgrindarna i `quality.yml` och lint-jobbet i `ci.yml` med PR:ens bas-SHA, baskommitten
+mäts från en `git archive`-export och PR:en misslyckas endast när antalet kanter för `open-sse → src`
+överstiger det största av `metrics.boundaryOpenSseToSrc` och antalet i basen. Basdrift
+över taket rapporteras (`base drift herdado`) men gör aldrig en oskyldig PR röd; push → main
+behåller det absoluta taket, och om basens SHA inte kan lösas används det som reserv med en varning.
 
-`workflow_dispatch`-körningar, den releasegröna genomgången och det nattliga headroom-jobbet har ingen PR-bas
-och behåller den absoluta (globala) jämförelsen. Täckning, duplicering och typ­täckning förblir globala
-tills vidare (deras verktyg producerar inte billigt en diff per fil) — kandidater för samma behandling.
+Körningar via `workflow_dispatch`, releasekontrollen för grönt resultat och det nattliga jobbet för
+marginal har ingen PR-bas och behåller den absoluta (globala) jämförelsen. Täckning, duplicering och
+typtäckning förblir globala tills vidare (deras verktyg kan inte billigt producera en diff per fil) —
+kandidater för samma behandling.
 
 **Avsluta fasen vid v4.0 (LTS = striktare än tidigare, inte ”tillbaka till det normala”)**
 
-1. På den rena `release/v4.0.0`-toppen: `npm run quality:headroom --json` för dokumentation, därefter
-   `npm run quality:ratchet -- --update`, `check:file-size --update`,
-   `check:complexity-ratchets --update`, `check:dead-code --update`, varje typecheck-grinds
+1. På den rena spetsen av `release/v4.0.0`: `npm run quality:headroom --json` för dokumentation,
+   sedan `npm run quality:ratchet -- --update`, `check:file-size --update`,
+   `check:complexity-ratchets --update`, `check:dead-code --update`, samt varje typkontrollgrinds
    `--update` — varje baslinje sänks till det uppmätta värdet.
 2. Ta bort `_policy` från `quality-baseline.json` (återaktiverar `--require-tighten` och den nattliga
-   buffertuppbyggnaden), återställ `THRESHOLD = 36` (eller högre) i `check-openapi-coverage.mjs`.
-3. Skärp gränserna utöver de uppmätta värdena där modulariseringen gav resultat: återställ `cap` för filstorlek till 1000
-   (eller 800), höj täckningsgolven med 5, sätt antalet döda exporter till 0 för de modulariserade paketen.
+   ackumuleringen), återställ `THRESHOLD = 36` (eller högre) i `check-openapi-coverage.mjs`.
+3. Skärp utöver det uppmätta där modulariseringen gav resultat: återställ `cap` för filstorlek till
+   1000 (eller 800), höj täckningsgolven med 5 och sätt döda exporter till 0 för de modulariserade paketen.
 
 ## Ratchet-baslinje (`quality-baseline.json`)
 
@@ -495,39 +561,39 @@ En bot som skulle kunna höja ett tak vore strikt sämre än status quo. Regress
 Jobbet pushar aldrig till `release/*` — en människa slår samman PR:en, så en felaktig mätning
 kan inte införas utan granskning.
 
-## Princip för tillåtelselistor
+## Policy för tillåtelselistor
 
-Varje grind som inte får fallera på redan befintliga överträdelser använder en fryst tillåtelselista
-(t.ex. `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Principen är:
+Varje kontroll som inte kan misslyckas på grund av befintliga överträdelser använder en fryst tillåtelselista
+(t.ex. `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Policyn är:
 
-**Åtgärda grundorsaken; använd endast tillåtelselistan när överträdelsen redan fanns och
+**Åtgärda grundorsaken; använd tillåtelselistan endast när överträdelsen är befintlig och
 inte kan åtgärdas i samma PR.**
 
 När du lägger till en post i en tillåtelselista:
 
 1. Inkludera en kommentar med motiveringen.
-2. Hänvisa till spårningsärendet (t.ex. `// #3498 — Funktion i fas 2, ännu inte implementerad`).
-3. Ta bort posten i samma PR som åtgärdar överträdelsen — en inaktuell post som inte längre
-   undertrycker en aktiv överträdelse är i sig en defekt (kontrollen av inaktuell tillämpning i 6A.3
-   kommer att fälla grinden för en föräldralös post i tillåtelselistan när den har implementerats).
+2. Hänvisa till spårningsärendet (t.ex. `// #3498 — Phase 2 feature, not yet implemented`).
+3. Ta bort posten i samma PR som åtgärdar överträdelsen – en inaktuell post som inte längre
+   undertrycker en aktiv överträdelse är i sig ett fel (kontrollen för inaktuell tillämpning i 6A.3
+   kommer att misslyckas på en föräldralös post i tillåtelselistan när den har implementerats).
 
-Lägg **inte** till poster i tillåtelselistan för att få testerna att passera snabbare. En grön grind med en växande
+Lägg **inte** till poster i tillåtelselistan för att få testerna att godkännas snabbare. En godkänd kontroll med en växande
 tillåtelselista ger en falsk känsla av kvalitet.
 
-### När en grind fallerar för din PR
+### När en kontroll misslyckas för din PR
 
-1. **Läs utdata från grinden noggrant** — den anger exakt vilken fil eller symbol som bröt mot
+1. **Läs kontrollens utdata noggrant** – den talar om exakt vilken fil eller symbol som bröt mot
    regeln.
-2. **Åtgärda överträdelsen** — de flesta grindar är deterministiska filsystemskontroller som passerar så snart
+2. **Åtgärda överträdelsen** – de flesta kontroller är deterministiska filsystemskontroller som godkänns så snart
    koden är korrekt.
-3. **Om överträdelsen redan fanns** (dvs. du introducerade den inte, men grinden
+3. **Om överträdelsen är befintlig** (dvs. du introducerade den inte, men kontrollen
    omfattar den nu): lägg till en post i tillåtelselistan med en motiverande kommentar och ett spårningsärende.
-4. **Om grinden är en spärrhake** (täckning, ESLint-varningar, duplicering, komplexitet):
+4. **Om kontrollen är en spärrmekanism** (täckningsgrad, ESLint-varningar, duplicering, komplexitet):
    din ändring försämrade mätvärdet. Åtgärda det underliggande problemet eller kör (i sällsynta fall)
    `npm run quality:ratchet -- --update` om ändringen är avsiktlig och försämringen av mätvärdet
-   är acceptabel — men dokumentera varför i PR-beskrivningen.
-5. **Rådgivande grindar** (`continue-on-error: true`) är informativa — de blockerar inte
-   sammanslagning men visas i CI-sammanfattningen. Åtgärda dem ändå.
+   är acceptabel – men dokumentera varför i PR-beskrivningen.
+5. **Rådgivande kontroller** (`continue-on-error: true`) är informativa – de blockerar inte
+   sammanslagningen men visas i CI-sammanfattningen. Åtgärda dem ändå.
 
 ---
 
@@ -559,41 +625,41 @@ anslutningsfel och avbryter aldrig sessioner.
 
 ## Rationaliseringsbacklogg (ROI-granskning — fas 9 våg 3)
 
-Den här inventeringen stämdes av mot `ci.yml` den 2026-06-17 (den föregående versionen utelämnade
+Denna inventering stämdes av mot `ci.yml` den 2026-06-17 (den föregående versionen utelämnade
 `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
 `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
 `check:codeql-ratchet`, `check:pr-evidence`). En ROI-granskning av den avstämda uppsättningen
-identifierade följande kandidater för rationalisering. **Sammanslagningarna är mekaniska CI-
+identifierade följande rationaliseringskandidater. **Sammanslagningarna är mekaniska CI-
 ändringar; växlingarna/borttagningarna är policybeslut som är förbehållna operatören.** Inget nedan
 har tillämpats ännu.
 
 **Inte heller dokumenterat ovan** (rådgivande, låg signal): jobbet `docs-lint`
-(markdownlint + Vale, hela jobbet har `continue-on-error`) och de fristående skanningsarbetsflödena
+(markdownlint + Vale, hela jobbet `continue-on-error`) och de fristående skanningsarbetsflödena
 `semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` finns i
-`quality-baseline.json` men är inte kopplat till någon blockerande spärrmekanism i `ci.yml` — mätvärdet är
+`quality-baseline.json` men är inte kopplat till en blockerande spärrmekanism i `ci.yml` — mätvärdet är
 för närvarande frikopplat.
 
-### Slå ihop / deduplicera (mekaniskt, lägre risk)
+### Slå samman/deduplicera (mekaniskt, lägre risk)
 
-Varje kandidat validerades mot det aktuella grindläget den 2026-06-17 (lita men verifiera);
-flera ”uppenbara” sammanslagningar visade sig dölja skuld och är **inte** problemfria direktlösningar.
+Varje kandidat validerades mot det aktiva grindläget den 2026-06-17 (lita på, men verifiera);
+flera ”uppenbara” sammanslagningar visade sig dölja teknisk skuld och är **inte** rena direktbyten.
 
-- **`check:docs-sync` körs två gånger** — fristående i jobbet `lint` och återigen inuti `check:docs-all` (`docs-sync-strict`) samt i husky-pre-commit-kroken. ✅ **KLART** — den fristående anropningen i `lint` har tagits bort.
-- **CVE-skanning** — ❌ **INTE en problemfri sammanslagning.** `audit:deps` stoppar ovillkorligen vid varje CVE med hög/kritisk allvarlighetsgrad; `check:vuln-ratchet` (osv) misslyckas endast vid en _regression_ jämfört med baslinjen (för närvarande 1 MODERATE). Olika semantik — att ta bort `audit:deps` skulle innebära att den absoluta grinden för hög/kritisk allvarlighetsgrad försvinner. Behåll båda.
-- **Cykeldetektering** — ✅ **KLART** (#15159 G-01/G-02). Den gamla texten här kallade `check:cycles` för den ”gröna, handplockade” grinden och motiverade att den skulle förbli blockerande eftersom `check:circular-deps` (dpdm) rapporterade 91 cykler. Det gröna resultatet var **falskt grönt**: `check:cycles` skannade 5 underkataloger (450 filer), matchade endast statiska `import|export … from` och ignorerade varje `@/`- och `@omniroute/open-sse/`-specifierare, så den kunde inte se de cykler med dynamisk import + alias som dominerade kodbasen. Åtgärdat: grinden går nu igenom `src` + `open-sse` (5023 filer), samlar in specifierare från TypeScript-AST:n (så `import("…")` räknas medan `typeof import("…")` i typposition inte gör det) och löser tsconfig-`paths`. Den hittar **14** cykler, inte 0. Eftersom 14 befintliga cykler inte kan åtgärdas i en grind-PR är `check:cycles` nu en **spärrmekanism** (`--ratchet`, tak `metrics.cycles.value = 14` i `quality-baseline.json`, `direction: down`) — den blockerar varje _regression_ och antalet kan endast minska. CI kör `npm run check:cycles:ratchet`. Nedarbetningen följer med **A-01**. `check:circular-deps` (dpdm) förblir rådgivande som en bredare andrahandsbedömning.
-- **Komplexitet** — ✅ **KLART** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): en ESLint-genomgång, räknar per ruleId så att baslinjerna för cyklomatisk komplexitet + maximalt antal rader och kognitiv komplexitet förblir oberoende; individuella `check:complexity` / `check:cognitive-complexity` finns kvar för lokal `--update`.
-- **Antihallucination för `/api`** — ✅ **KLART** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): en FS-inventering av `src/app/api`, openapi-routes + docs-symbols rapporterar fortfarande oberoende; individuella kontroller finns kvar för lokala körningar.
-- **`check:node-runtime` körs i 11 jobb** — ⚠️ **låg ROI.** Varje jobb har en separat körmiljö och kontrollen tar <1 s; total besparing ~10 s, på bekostnad av att förlora ett billigt skydd per jobb. Inte värt omarbetningen.
-- **`typecheck:noimplicit:core` i CI-lint** — ✅ **borttaget från lint-jobbet** (var rådgivande med `continue-on-error`); den blockerande typytan är `typecheck:core` + `check:type-coverage`. Det lokala skriptet har behållits.
+- **`check:docs-sync` körs två gånger** — fristående i jobbet `lint` och återigen inuti `check:docs-all` (`docs-sync-strict`) samt i huskys pre-commit-hook. ✅ **KLART** — den fristående `lint`-körningen har tagits bort.
+- **CVE-skanning** — ❌ **INTE en ren sammanslagning.** `audit:deps` blockerar kritiska rekommendationer och ofullständiga granskningar för samtliga fem lockfiler, samtidigt som rekommendationer med hög allvarlighetsgrad rapporteras som varningar enligt den nuvarande policyn; `check:vuln-ratchet` (osv) misslyckas endast vid en _försämring_ jämfört med den incheckade baslinjen och avvisar saknade mätningar när de krävs. Olika semantik — om `audit:deps` tas bort försvinner den absoluta kritiska grinden och de oberoende granskningskvittot för paketen. Behåll båda.
+- **Cykeldetektering** — ✅ **KLART** (#15159 G-01/G-02). Den gamla texten här kallade `check:cycles` för den ”gröna, kuraterade” grinden och motiverade att den skulle förbli blockerande eftersom `check:circular-deps` (dpdm) rapporterade 91 cykler. Den gröna statusen var **falskt grön**: `check:cycles` skannade 5 underkataloger (450 filer), matchade endast statiska `import|export … from` och ignorerade varje `@/`- och `@omniroute/open-sse/`-specifierare, vilket innebar att den inte kunde se de cykler med dynamisk import och alias som dominerade i repot. Åtgärdat: grinden går nu igenom `src` + `open-sse` (5023 filer), samlar in specifierare från TypeScript-AST:n (så `import("…")` räknas medan `typeof import("…")` i typposition inte gör det) och löser upp `paths` från tsconfig. Den hittar **14** cykler, inte 0. Eftersom 14 befintliga cykler inte kan åtgärdas i en grind-PR är `check:cycles` nu en **spärrmekanism** (`--ratchet`, tak `metrics.cycles.value = 14` i `quality-baseline.json`, `direction: down`) — den blockerar varje _försämring_ och antalet kan endast sjunka. CI kör `npm run check:cycles:ratchet`. Nedtrappningen sker tillsammans med **A-01**. `check:circular-deps` (dpdm) förblir rådgivande som en bredare oberoende bedömning.
+- **Komplexitet** — ✅ **KLART** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): en ESLint-genomgång, räknar per ruleId så att baslinjerna för cyklomatisk komplexitet + maximalt antal rader och kognitiv komplexitet förblir oberoende; de enskilda `check:complexity` / `check:cognitive-complexity` finns kvar för lokal `--update`.
+- **Anti-hallucination för `/api`** — ✅ **KLART** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): en FS-inventering av `src/app/api`; openapi-routes + docs-symbols rapporterar fortfarande oberoende av varandra; de enskilda kontrollerna finns kvar för lokala körningar.
+- **`check:node-runtime` körs i 11 jobb** — ⚠️ **låg ROI.** Varje körning sker på en separat runner och kontrollen tar <1 s; total besparing ~10 s, till priset av att en billig skyddskontroll per jobb går förlorad. Inte värt omarbetningen.
+- **`typecheck:noimplicit:core` i CI-lintningen** — ✅ **borttagen från lint-jobbet** (var rådgivande med `continue-on-error`); den blockerande typytan är `typecheck:core` + `check:type-coverage`. Det lokala skriptet har behållits.
 
-### Växla / besluta (operatörspolicy)
+### Växla/besluta (operatörspolicy)
 
-- `check:openapi-security-tiers` (rådgivande) — ❌ **KAN INTE växlas utan föregående åtgärder.** Den avslutas med 0 men varnar för att flera `traffic-inspector`-rutter under `LOCAL_ONLY_API_PREFIXES` saknar annoteringen `x-loopback-only: true`. För att verkställa den måste dessa annoteringar först läggas till i `openapi.yaml`.
-- `typecheck:noimplicit:core` (rådgivande) — ersätts till stor del av den blockerande spärrmekanismen `check:type-coverage`. Växla till en spärrmekanism eller ta bort den redundanta andra `tsc`-körningen.
-- `test:vitest:ui` (nu **blockerande**) — befintliga fel exkluderas uttryckligen i `vitest.config.ts` med spårningskommentarer av typen `// #8618`; nya fel gör att jobbet misslyckas.
-- `check:secrets` (gitleaks, blockerande spärrmekanism fryst vid 3 dokumenterade falska positiva resultat) — tillåtelselista de 3 för att nå 0 eller nedgradera till rådgivande. Överlappar GitHubs inbyggda hemlighetsskanning + `check:public-creds`.
-- `check:pr-evidence` (blockerande, söker med grep i PR-beskrivningens prosa) — hög risk för falska positiva resultat; att ta bort den försvagar upprätthållandet av hård regel nr 18, så detta är ett verkligt policybeslut.
-- `semgrep` (fristående rådgivande) — överlappar CodeQL för OWASP-familjerna; koppla dess baslinje till en spärrmekanism eller ta bort den.
+- `check:openapi-security-tiers` (rådgivande) — ❌ **KAN INTE växlas rent.** Den avslutas med 0 men varnar för att flera `traffic-inspector`-rutter under `LOCAL_ONLY_API_PREFIXES` saknar annoteringen `x-loopback-only: true`. För att genomdriva den måste dessa annoteringar först läggas till i `openapi.yaml`.
+- `typecheck:noimplicit:core` (rådgivande) — ersätts till stor del av den blockerande spärrmekanismen `check:type-coverage`. Växla till en spärrmekanism eller ta bort den redundanta andra `tsc`-genomgången.
+- `test:vitest:ui` (nu **blockerande**) — befintliga fel undantas uttryckligen i `vitest.config.ts` med spårningskommentarerna `// #8618`; nya fel gör att jobbet misslyckas.
+- `check:secrets` (gitleaks, blockerande spärrmekanism) — det nuvarande taket är `metrics.secretFindings` i `quality-baseline.json`. Varje undantag kräver en motiverad post i `.gitleaks.toml`; en otillgänglig mätning är INCOMPLETE. Skanningen kompletterar GitHubs inbyggda hemlighetsskanning och `check:public-creds`.
+- `check:pr-evidence` (blockerande, söker med grep i PR-brödtext) — hög risk för falska positiva resultat; om den tas bort försvagas genomdrivningen av den hårda regeln nr 18, så detta är ett genuint policybeslut.
+- `semgrep` (rådgivande och fristående) — överlappar CodeQL för OWASP-familjerna; koppla dess baslinje till en spärrmekanism eller ta bort den.
 
 ---
 

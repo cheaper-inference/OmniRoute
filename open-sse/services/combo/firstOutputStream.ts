@@ -177,31 +177,21 @@ export async function awaitFirstOutput(
       }
       signal.addEventListener("abort", () => finish("cancelled"), { once: true });
     }
-    void (async () => {
-      try {
-        for (;;) {
-          const { done, value } = await reader.read();
-          if (done) {
-            // A body that closed still counts if its last event never got a terminator.
-            finish(scanner.flush() ? "output" : "empty");
-            return;
-          }
-          if (!value) continue;
-          if (scanner.push(decoder.decode(value, { stream: true }))) {
-            finish("output");
-            return;
-          }
-          if (scanner.overflowedWithoutOutput()) {
-            finish("output");
-            return;
-          }
-        }
-      } catch {
-        // A read error is the target's own failure; take what arrived as final rather than
-        // inventing a second failure mode here.
-        finish(scanner.flush() ? "output" : "empty");
+    const readUntilOutput = async (): Promise<"output" | "empty"> => {
+      for (;;) {
+        const { done, value } = await reader.read();
+        // A body that closed still counts if its last event never got a terminator.
+        if (done) return scanner.flush() ? "output" : "empty";
+        if (!value) continue;
+        if (scanner.push(decoder.decode(value, { stream: true }))) return "output";
+        if (scanner.overflowedWithoutOutput()) return "output";
       }
-    })();
+    };
+    readUntilOutput().then(finish, () => {
+      // A failed peek must settle the gate, not become an unhandled rejection or timeout.
+      // The original body still exposes the read error to the caller's quality validation.
+      finish(scanner.flush() ? "output" : "empty");
+    });
   });
 
   // Drop the peek branch either way: the clone is a tee of the original body, so cancelling it

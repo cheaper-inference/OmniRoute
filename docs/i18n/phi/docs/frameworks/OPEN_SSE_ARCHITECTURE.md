@@ -482,17 +482,17 @@ Pinangangasiwaan nito ang:
 
 ---
 
-## Konfigurasyon
+## Configuration
 
-Ang `open-sse/config/` ay naglalaman ng layer ng konfigurasyon:
+Nasa `open-sse/config/` ang configuration layer:
 
-| File                          | Layunin                                           |
-| ----------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`         | Registry ng chat-model sa catalog ng 376 provider |
-| `providerModels.ts`           | Mga alias ng modelo, mapping ng format            |
-| `constants.ts`                | Mga timeout, limit, status code                   |
-| `defaultThinkingSignature.ts` | Default na thinking signature ng Claude           |
-| `modelStrip.ts` (sa services) | Pag-strip ng field bawat provider                 |
+| File                          | Layunin                                                    |
+| ----------------------------- | ---------------------------------------------------------- |
+| `providerRegistry.ts`         | Registry ng chat model para sa catalog na may 376 provider |
+| `providerModels.ts`           | Mga alias ng model, pagmamapa ng format                    |
+| `constants.ts`                | Mga timeout, limit, at status code                         |
+| `defaultThinkingSignature.ts` | Default na thinking signature ng Claude                    |
+| `modelStrip.ts` (sa services) | Pag-aalis ng field ayon sa provider                        |
 
 ### Schema ng Provider Registry
 
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Tinitiyak ng Zod validation sa pag-load ng module na wasto ang lahat ng config ng provider.
+Tinitiyak ng Zod validation sa pag-load ng module na valid ang lahat ng provider config.
 
 ---
 

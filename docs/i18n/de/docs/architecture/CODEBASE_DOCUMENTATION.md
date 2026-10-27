@@ -779,7 +779,7 @@ Siehe [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) und den entsprechenden Abschn
    `open-sse/mcp-server/schemas/tools.ts` erweitern).
 2. Die entsprechenden Berechtigungsbereiche in `src/shared/constants/mcpScopes.ts` zuweisen.
 3. Das Tool in `open-sse/mcp-server/server.ts` registrieren.
-4. Tests unter `open-sse/mcp-server/__tests__/` hinzufügen.
+4. Tests unter `tests/unit/` hinzufügen.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) aktualisieren.
 
 ### Einen neuen A2A-Skill hinzufügen
@@ -797,7 +797,7 @@ Siehe [A2A-SERVER.md § Hinzufügen eines neuen Skills](../frameworks/A2A-SERVER
 - **Benennung**: Dateien in `camelCase` oder `kebab-case`, Komponenten in `PascalCase`,
   Konstanten in `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = überall `error`;
-  `no-explicit-any` = `warn` in `open-sse/` und `tests/`, andernorts `error`.
+  `no-explicit-any` = `error` in `open-sse/**/*.ts` und `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (historisch bedingt). An modulübergreifenden Grenzen explizite Typen
   gegenüber Typinferenz bevorzugen.
 - **Datenbank**: Niemals Roh-SQL in Routen oder Handlern schreiben — immer über
@@ -827,8 +827,7 @@ Siehe [A2A-SERVER.md § Hinzufügen eines neuen Skills](../frameworks/A2A-SERVER
   `a2a`, `memory`, `skills`.
 - **Branches**: Präfixe `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Niemals direkt nach `main` committen.
-- **Husky**: Vor dem Commit werden `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` ausgeführt; vor dem Push werden `check:any-budget:t11` + `check:tracked-artifacts` ausgeführt (schnelle Prüfungen; `test:unit` ist ausgeschlossen).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

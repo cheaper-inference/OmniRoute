@@ -12,6 +12,30 @@ Wait for checkout and dependency installation to finish before collecting eviden
 Borrowed dependencies can support diagnosis but cannot certify a clean install.
 Physical dependencies are required for standalone packaging; no external symlink.
 
+## 0a. Admit local heavy work
+
+Before dependency installation, full suites, coverage or build, follow
+`docs/ops/WORKTREE_ISOLATION.md` → “Running a disk-heavy local command” in the
+candidate. Admit the command through `scripts/dev/resource-budget.mjs` with an
+explicit planned/measured peak reservation and a survival floor. Include retained
+artifacts in that budget. Free space alone does not establish admission; an
+unknown demand or unavailable guard remains HOLD until a bounded plan is ready.
+Keep at most one heavy phase from this task active at a time.
+
+Use `run` only when its process group covers the workload. A supervisor that
+creates separate sessions must hold the shared compatibility lock and use the
+`reserve` → `check` → `release` interface while monitoring its own capacity and
+children. Match the cleanup grace to that supervisor's restoration work. Release
+the lease only after owned processes are quiescent and temporary environment state
+is restored; preserve it when either proof is incomplete. Inspect stale leases
+before explicit reclaim. The guard coordinates cooperating commands, not kernel
+quotas, and does not authorize deleting worktrees or artifacts to make room.
+
+Record the lease ID (never its capability), reservation/floor, sampled minimum
+available bytes, workload exit/signal, guard result and cleanup evidence. A
+capacity denial, interrupted command or `RESOURCE_HOLD` is incomplete validation,
+not PASS. Recheck capacity and quiescence before retrying.
+
 ## 1. Prove the behavior
 
 Run a focused RED test on the unfixed code, make the smallest proven correction,

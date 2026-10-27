@@ -49,6 +49,11 @@ const IGNORE_FROM_CODE = new Set([
   "LC_MESSAGES",
   "CI",
   "GITHUB_ACTIONS",
+  // Desktop release uploader context supplied by electron-release.yml (#18165).
+  // GITHUB_REPOSITORY is runner-owned; VERSION is the validated release tag.
+  // Neither is OmniRoute application configuration or belongs in a user's .env.
+  "GITHUB_REPOSITORY",
+  "VERSION",
   "RUNNER_OS",
   // Quality-gate harness knobs (optional cache/report paths for CI scripts — not product config).
   "ESLINT_RESULTS_JSON",

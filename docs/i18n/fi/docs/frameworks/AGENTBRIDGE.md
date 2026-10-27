@@ -543,26 +543,26 @@ Täydelliset OpenAPI-skeemat: `docs/openapi.yaml` → tunniste `AgentBridge`.
 
 ---
 
-## §8 Kehityssuunnitelma
+## §8 Etenemissuunnitelma
 
 ### Trae-selvitys
 
-Trae on suhteellisen uusi tekoälyavusteinen ohjelmointiassistentti. Ennen käsittelijän toteuttamista:
+Trae on suhteellisen uusi tekoälyavusteinen koodausavustaja. Ennen käsittelijän toteuttamista:
 
-1. Tunnista binääri/laajennus VS Code- tai JetBrains-markkinapaikoista tai erillissovelluksena
-2. Tallenna liikenne mitmproxylla API-isäntien ja päätepisteiden rakenteiden selvittämiseksi
+1. Tunnista binääri/laajennus VS Code- tai JetBrains-kauppapaikoista tai itsenäisenä sovelluksena
+2. Kaappaa liikenne mitmproxylla API-isäntien ja päätepisteiden rakenteiden selvittämiseksi
 3. Selvitä todennusmekanismi
-4. Arvioi käyttöehtojen ja API:n löydettävyyden perusteella, jatketaanko toteutusta vai ei
+4. Tee käyttöehdoista ja API:n löydettävyydestä go/no-go-arvio
 
-Kunnes selvitys valmistuu, hallintapaneelin Trae-kortissa näkyy "Selvitetään"-tunniste ja "Raportoi toteuttamiskelpoisuus" -linkki. Käsittelijän runko tiedostossa `src/mitm/handlers/trae.ts` antaa rakenteisen `Ei vielä toteutettu` -virheen.
+Kunnes selvitys valmistuu, Trae-kortissa näkyy hallintapaneelissa Tekeillä oleva selvitys -tunnus sekä linkki Toteutettavuusraportti. Käsittelijän runko tiedostossa `src/mitm/handlers/trae.ts` antaa rakenteisen `Not yet implemented`-virheen.
 
-### Työjonossa olevat agentit (MITM vaaditaan — ei mukautetun perus-URL-osoitteen tukea)
+### Työjonossa olevat agentit (MITM vaaditaan — mukautettua perus-URL-osoitetta ei tueta)
 
-Seuraavat työkalut eivät nykyisissä versioissaan tue mukautettuja perus-URL-osoitteita, joten MITM on ainoa tapa siepata liikennettä. Toteuttamiskelpoisuuden arviointi on kesken:
+Seuraavat työkalut eivät nykyisissä versioissaan tue mukautettuja perus-URL-osoitteita, joten MITM on ainoa tapa siepata liikenne. Toteutettavuuden arviointi on kesken:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — erillään Kiro IDE:stä)
+- **Amazon Q / Kiro CLI** (AWS Bedrock — erillinen Kiro IDE:stä)
 - **Cowork** (Anthropicin työpöytäsovellus)
 
-Huomautus: GitHub Copilot CLI ≥v1.0.19 tukee `COPILOT_PROVIDER_BASE_URL`-ympäristömuuttujaa — käytä kyseiselle työkalulle suoraa määritystä MITM:n sijaan.
+Huomautus: GitHub Copilot CLI ≥v1.0.19 tukee muuttujaa `COPILOT_PROVIDER_BASE_URL` — käytä kyseiselle työkalulle suoraa määritystä MITM:n sijaan.

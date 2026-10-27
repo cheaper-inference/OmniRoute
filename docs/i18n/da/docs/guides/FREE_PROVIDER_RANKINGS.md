@@ -187,7 +187,7 @@ To miljøvariabler styrer den (dokumenteret i
 | `ARENA_ELO_SYNC_ENABLED`  | `true`             | Sæt til `false` for at fravælge den udgående synkronisering. |
 | `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 timer) | Synkroniseringsinterval i sekunder.                          |
 
-### Manuel synkronisering / status / rydning
+### Manuel synkronisering/status/rydning
 
 For operatører giver et godkendt administrationsendepunkt manuel kontrol
 (`src/app/api/intelligence/sync/route.ts` — kræver administrationsgodkendelse):

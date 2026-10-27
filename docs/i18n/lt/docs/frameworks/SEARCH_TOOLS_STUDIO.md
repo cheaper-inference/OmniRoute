@@ -54,7 +54,7 @@ Naujas skirtukas, skirtas turiniui iš URL išgauti per `POST /v1/web/fetch` (su
 - Įvestis: URL + viso puslapio perjungiklis + formato parinkiklis (markdown / tekstas / HTML).
 - Pateikti → gauti → atvaizduoti `ScrapeResult.tsx`.
 - `ScrapeResult` atvaizduoja markdown peržiūrą ir neapdoroto turinio perjungiklį.
-- Riba: jei atsakymo turinys > **256 KB**, naudotojo sąsajoje rodoma `(sutrumpinta, peržiūrėti neapdorotą turinį)`, o neapdorotas turinys atidaromas Monaco modaliniame lange (D21).
+- Riba: jei atsakymo turinys > **256 KB**, naudotojo sąsajoje rodoma `View full raw content`, o neapdorotas turinys atidaromas modaliniame lange (D21).
 - Metaduomenų skydelis: teikėjas (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), delsa, kaina, atsakymo dydis, nuorodų skaičius.
 - Naudoja `useScrapeFetch.ts` kablį.
 

@@ -11,19 +11,19 @@ _Sist oppdatert: 2026-06-28_
 ## Sammendrag
 
 OmniRoute er en lokal AI-rutingsgateway og et kontrollpanel bygget på Next.js.
-Den tilbyr ett enkelt OpenAI-kompatibelt endepunkt (`/v1/*`) og ruter trafikk på tvers av flere oppstrømsleverandører med oversettelse, reservehåndtering, tokenfornyelse og bruksregistrering.
+Den tilbyr ett enkelt OpenAI-kompatibelt endepunkt (`/v1/*`) og ruter trafikk på tvers av flere oppstrømsleverandører med oversettelse, reservebytte, tokenfornyelse og bruksregistrering.
 
 Kjernefunksjoner:
 
-- OpenAI-kompatibel API-overflate for CLI/verktøy (376 leverandører, 156 eksekveringsmoduler)
+- OpenAI-kompatibelt API-grensesnitt for CLI/verktøy (376 leverandører, 156 eksekveringsmoduler)
 - Oversettelse av forespørsler/svar mellom leverandørformater
-- Reservehåndtering for modellkombinasjoner (sekvens med flere modeller)
-- Strukturerte kombinasjonstrinn (`provider + model + connection`) med kjøretidsrekkefølge basert på `compositeTiers`
-- Reservehåndtering på kontonivå (flere kontoer per leverandør)
+- Reservebytte for modellkombinasjoner (sekvens med flere modeller)
+- Strukturerte kombinasjonstrinn (`provider + model + connection`) med kjøretidsrekkefølge etter `compositeTiers`
+- Reservebytte på kontonivå (flere kontoer per leverandør)
 - Forhåndskontroll av kvoter og kvotebevisst P2C-kontovalg i hovedflyten for chat
-- Administrasjon av leverandørtilkoblinger med OAuth + API-nøkkel (27 OAuth-leverandørmoduler)
-- Generering av embeddings via `/v1/embeddings` (18 leverandører)
-- Bildegenerering via `/v1/images/generations` (over 10 leverandører, over 20 modeller)
+- Administrasjon av leverandørtilkoblinger med OAuth og API-nøkler (27 OAuth-leverandørmoduler)
+- Generering av innebygginger via `/v1/embeddings` (18 leverandører)
+- Bildegenerering via `/v1/images/generations` (10+ leverandører, 20+ modeller)
 - Lydtranskripsjon via `/v1/audio/transcriptions` (18 leverandører)
 - Tekst-til-tale via `/v1/audio/speech` (24 innebygde leverandører)
 - Videogenerering via `/v1/videos/generations` (ComfyUI + SD WebUI)
@@ -35,52 +35,52 @@ Kjernefunksjoner:
 - Rensing av svar for streng kompatibilitet med OpenAI SDK
 - Rollenormalisering (developer→system, system→user) for kompatibilitet på tvers av leverandører
 - Konvertering av strukturerte utdata (json_schema → Gemini responseSchema)
-- Lokal lagring av leverandører, nøkler, aliaser, kombinasjoner, innstillinger og priser (122 DB-moduler)
+- Lokal persistens for leverandører, nøkler, aliaser, kombinasjoner, innstillinger og prising (122 databasemoduler)
 - Registrering av bruk/kostnader og logging av forespørsler
 - Valgfri skysynkronisering for synkronisering av tilstand mellom flere enheter
 - Tillatelsesliste/blokkeringsliste for IP-adresser for tilgangskontroll til API-et
-- Administrasjon av tenkebudsjett (uendret videresending/automatisk/egendefinert/adaptivt)
-- Global injisering av systemprompt
-- Øktsporing og fingeravtrykksidentifisering
+- Administrasjon av tenkebudsjett (direkte videresending/automatisk/egendefinert/adaptivt)
+- Global innsetting av systemprompt
+- Øktsporing og fingeravtrykksgenerering
 - Forbedret hastighetsbegrensning per konto med leverandørspesifikke profiler
-- Circuit breaker-mønster for robusthet hos leverandører
-- Beskyttelse mot «thundering herd» med mutex-låsing
+- Kretsbrytermønster for robusthet hos leverandører
+- Beskyttelse mot samtidige forespørselsstormer med mutex-låsing
 - Signaturbasert hurtigbuffer for deduplisering av forespørsler
-- Domenelag: kostnadsregler, reservepolicy, utestengingspolicy
-- Context Relay: oppsummeringer for overføring av økter for å bevare kontinuitet ved kontorotasjon
-- Lagring av domenetilstand (SQLite-hurtigbuffer med direkte videreskriving for reserver, budsjetter, utestenginger og circuit breakere)
-- Policymotor for sentralisert evaluering av forespørsler (utestenging → budsjett → reserve)
+- Domenelag: kostnadsregler, reservepolicy, sperrepolicy
+- Context Relay: sammendrag for overlevering av økter som sikrer kontinuitet ved kontorotasjon
+- Persistens av domenetilstand (SQLite-hurtigbuffer med direkte gjennomskriving for reservevalg, budsjetter, sperrer og kretsbrytere)
+- Policymotor for sentralisert evaluering av forespørsler (sperre → budsjett → reservevalg)
 - Forespørselstelemetri med aggregering av p50/p95/p99-latens
 - Telemetri for kombinasjonsmål og historisk tilstand for kombinasjonsmål via `combo_execution_key` / `combo_step_id`
 - Korrelasjons-ID (X-Request-Id) for ende-til-ende-sporing
 - Revisjonslogging for samsvar med mulighet for bortvalg per API-nøkkel
 - Evalueringsrammeverk for kvalitetssikring av LLM-er
-- Tilstandskontrollpanel med sanntidsstatus for leverandørenes circuit breakere
-- MCP-server (110 verktøy) med 3 transporter (stdio/SSE/strømbart HTTP)
-- A2A-server (JSON-RPC 2.0 + SSE) med ferdigheter og livssyklus for oppgaver
-- Minnesystem (uttrekking, injisering, gjenfinning, oppsummering)
+- Tilstandskontrollpanel med kretsbryterstatus for leverandører i sanntid
+- MCP-server (110 verktøy) med 3 transportmekanismer (stdio/SSE/strømmebar HTTP)
+- A2A-server (JSON-RPC 2.0 + SSE) med ferdigheter og oppgavelivssyklus
+- Minnesystem (uttrekking, innsetting, gjenfinning, oppsummering)
 - Ferdighetssystem (register, eksekveringsmotor, sandkasse, innebygde ferdigheter)
 - MITM-proxy med sertifikatadministrasjon og DNS-håndtering
-- Mellomvare for beskyttelse mot promptinjisering
+- Mellomvare for beskyttelse mot promptinjeksjon
 - Pipeline for promptkomprimering med Caveman, RTK, stablede pipelines, komprimeringskombinasjoner, språkpakker og analyse
 - ACP-register (Agent Communication Protocol)
 - Modulære OAuth-leverandører (22 individuelle moduler under `src/lib/oauth/providers/`)
 - Skript for avinstallering/fullstendig avinstallering
-- Handling for reparasjon av OAuth-miljøet
+- Handling for reparasjon av OAuth-miljø
 - WebSocket-bro for OpenAI-kompatible WS-klienter (`/v1/ws`)
 - Administrasjon av synkroniseringstokener (utstedelse/tilbakekalling, nedlasting av ETag-versjonert konfigurasjonspakke)
-- GLM Thinking (`glmt`) som førsteklasses leverandørforhåndsinnstilling
-- Hybrid tokentelling (leverandørens `/messages/count_tokens` med estimat som reserve)
-- Automatisk oppretting av modellaliaser (over 30 normaliseringer på tvers av proxy-dialekter ved oppstart)
+- GLM Thinking (`glmt`) som fullverdig forhåndsinnstilling for leverandør
+- Hybrid tokenopptelling (leverandørbasert `/messages/count_tokens` med estimering som reserve)
+- Automatisk oppretting av modellaliaser (30+ normaliseringer mellom proxy-dialekter ved oppstart)
 - Sikker utgående henting med SSRF-beskyttelse, blokkering av private URL-er og konfigurerbare nye forsøk
 - Nedkjølingsbevisste nye chatforsøk med konfigurerbare `requestRetry` og `maxRetryIntervalSec`
-- Validering av kjøretidsmiljøet med Zod ved oppstart
-- Samsvarsrevisjon v2 med paginering, CRUD-hendelser for leverandører og logging av SSRF-blokkert validering
+- Validering av kjøretidsmiljø med Zod ved oppstart
+- Revisjonslogging for samsvar v2 med paginering, CRUD-hendelser for leverandører og valideringslogging av SSRF-blokkering
 
-Primær kjøremodell:
+Primær kjøretidsmodell:
 
-- Next.js-applikasjonsruter under `src/app/api/*` implementerer både API-er for kontrollpanelet og kompatibilitets-API-er
-- En delt SSE-/rutingskjerne i `src/sse/*` + `open-sse/*` håndterer leverandøreksekvering, oversettelse, strømming, reservehåndtering og bruk
+- Next.js-app-ruter under `src/app/api/*` implementerer både API-er for kontrollpanelet og kompatibilitets-API-er
+- En delt kjerne for SSE/ruting i `src/sse/*` + `open-sse/*` håndterer leverandøreksekvering, oversettelse, strømming, reservebytte og bruk
 
 ## Referansediagrammer
 
@@ -1102,11 +1102,11 @@ bakoverkompatibilitet. Den gjeldende kjøretidskontrakten bruker:
 - SQLite-skjemamigreringer og kroker for automatisk oppgradering ved oppstart
 - kompatibilitetsbane for migrering fra eldre JSON → SQLite
 
-## 6) SSRF-/utgående URL-beskyttelse
+## 6) SSRF / beskyttelse for utgående URL-er
 
-- `src/shared/network/outboundUrlGuard.ts` blokkerer alle private mål-URL-er, tilbakekoblings-URL-er og lokale koblings-URL-er før de når leverandørutførerne
-- Ruter for oppdagelse og validering av leverandørmodeller bruker `src/shared/network/safeOutboundFetch.ts`, som anvender beskyttelsen før hver utgående forespørsel
-- Beskyttelsesfeil vises som `URL_GUARD_BLOCKED` med HTTP 422 og logges i revisjonssporet for samsvar via `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) bruker `src/shared/network/outboundUrlGuard.ts` på chatteforespørsler som sendes gjennom `BaseExecutor.execute()`. I modus kun for offentlige adresser (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` med det private flagget deaktivert) blokkeres private verter, tilbakekoblingsverter og 169.254.0.0/16. I alle andre moduser blokkeres verter for skymetadata. Vertsnavnet eller IP-litteralen kontrolleres slik den er skrevet, før eventuelle DNS-oppslag. Innebygde lokale leverandører omgår kontrollen.
+- Ruter for oppdagelse og validering av leverandørmodeller bruker `src/shared/network/safeOutboundFetch.ts`, som utfører kontrollen før hver utgående forespørsel
+- Feil fra kontrollen vises som `URL_GUARD_BLOCKED` med HTTP 503 (`getSafeOutboundFetchErrorStatus`; ruten for modelloppdagelse returnerer 400), og reelle SSRF-blokkeringer under validering logges i revisjonssporet som `provider.validation.ssrf_blocked`-hendelser
 
 ## Observerbarhet og driftssignaler
 
@@ -1157,7 +1157,7 @@ Miljøvariabler som brukes aktivt av koden:
 4. Skyfunksjonaliteten avhenger av riktig `NEXT_PUBLIC_BASE_URL` og at skyendepunktet er tilgjengelig.
 5. Katalogen `open-sse/` publiseres som **npm workspace-pakken** `@omniroute/open-sse`. Kildekoden importerer den via `@omniroute/open-sse/...` (løst av Next.js `transpilePackages`). Filstier i dette dokumentet bruker fortsatt katalognavnet `open-sse/` for konsekvens.
 6. Diagrammer i kontrollpanelet bruker **Recharts** (SVG-basert) for tilgjengelige, interaktive analysevisualiseringer (søylediagrammer for modellbruk, tabeller over leverandørfordeling med suksessrater).
-7. E2E-tester bruker **Playwright** (`tests/e2e/`) og kjøres via `npm run test:e2e`. Enhetstester bruker **Node.js test runner** (`tests/unit/`) og kjøres via `npm run test:unit`. Kildekode under `src/` er **TypeScript** (`.ts`/`.tsx`); `open-sse/`-arbeidsområdet forblir JavaScript (`.js`).
+7. E2E-tester bruker **Playwright** (`tests/e2e/`) og kjøres via `npm run test:e2e`. Enhetstester bruker **Node.js test runner** (`tests/unit/`) og kjøres via `npm run test:unit`. Kildekode under `src/` er **TypeScript** (`.ts`/`.tsx`); `open-sse/`-arbeidsområdet forblir TypeScript (`.ts`).
 8. Innstillingssiden er organisert i 7 faner: Generelt, Utseende, KI, Sikkerhet, Ruting, Robusthet, Avansert. Robusthet-siden konfigurerer bare forespørselskø, nedkjøling av tilkoblinger, leverandørbryter og venting på at nedkjølingen skal fullføres; bryterens aktive kjøretidstilstand vises på Helsesiden.
 9. **Context Relay**-strategien (`context-relay`) er delt i to lag: `combo.ts` avgjør om en overlevering skal genereres, mens `chat.ts` setter inn overleveringen etter at kontoen er identifisert. Overleveringsdata lagres i SQLite-tabellen `context_handoffs`. Denne delingen er tilsiktet fordi bare `chat.ts` vet om den faktiske kontoen ble endret.
 10. **Håndheving av proxy** er nå omfattende: `tokenHealthCheck.ts` finner proxy per tilkobling, `/api/providers/validate` bruker `runWithProxyContext`, og `proxyFetch.ts` bruker `undici.fetch()` for å opprettholde kompatibilitet med dispatchere på Node 22.

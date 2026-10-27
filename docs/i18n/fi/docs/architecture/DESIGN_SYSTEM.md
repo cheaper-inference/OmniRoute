@@ -89,31 +89,27 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` kautta; ReactFlow-reunat ja
    orkestrointikanvas lukevat teematietoiset `--orch-status-*`-muuttujat
    (`src/shared/components/flow/edgeStyles.ts`).
-2. Älä koskaan paikkaa `packages/ui-kit/src`-hakemistoa käsin: synkronoi ajamalla
-   `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit-portti `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) epäonnistuu, jos yksikin tavu poikkeaa kiinnitetystä upstream-commitista
-   (se ohittaa tarkistuksen varoituksella, kun upstream-klooni, `UI_KIT_CLONE` tai
-   `_references/cheaper-inference-ui-kit`, puuttuu). Kun kitistä puuttuu jotain, kierrä puute
-   adapterissa tai näytössä ja pyydä sitä upstreamilta.
-3. Kitin tekstioletukset ovat englanniksi (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   välitä käännettyjä merkkijonoja `useTranslations(...)`-funktiosta aina, kun kitin komponentti
-   renderöi tekstiä.
-4. Tailwindin utility-luokat voittavat kitin komponenttiluokat (kit määrittelee
-   `@layer theme, base, components, utilities` ja sen säännöt sijaitsevat `components`-kerroksessa) —
-   käytä utilityjä välistykseen ja asetteluun, älä kitin komponenttien uudelleenvärjäämiseen.
-5. Otsikot: `.ci-heading` (Inter, ei trackingia) sivu- ja osiokohtaisiin otsikoihin;
-   `.ci-dashboard-display` (Instrument Serif) vain suurille, harvoille display-teksteille, kuten
-   virhesivun tilakoodille.
-6. `tests/unit/dashboard-kit-sweep.test.ts` valvoo kitin käyttöönottoa: ei Material-ligatuurien
-   span-elementtejä `src/app`:n tai `src/shared/components`:in alla; dashboard-puussa
-   (`src/app/(dashboard)` ja `src/shared/components`) ei raakoja `<select>`-, `<textarea>`- tai
-   `<table>`-elementtejä eikä itse rakennettuja `role="dialog"`-elementtejä lueteltujen poikkeusten
-   ulkopuolella (`Select`-adapterin natiivi haara, `RequestLoggerDetail`); jokainen raaka `<button>`
-   tai `<input>` siellä vaatii kommentin, joka sisältää `kit-exception:`-merkinnän (perusteineen) ja
-   päättyy enintään 3 riviä elementin yläpuolelle; palettisävyt ja `dark:`-variantit vain testin
-   luettelemissa tiedostoissa.
-7. Varmista molemmat teemat ja 390 px:n viewport ennen PR:ää (kuvakaappaukset);
-   `tests/e2e/a11y.spec.ts` ajaa axe-tarkistukset.
+2. Älä koskaan muokkaa `packages/ui-kit/src`-hakemistoa käsin: synkronoi se komennolla `scripts/dev/sync-ui-kit.sh <commit>`;
+   commitointia edeltävä tarkistus `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) epäonnistuu, jos yksikin tavu
+   poikkeaa kiinnitetystä upstream-commitista (tarkistus ohitetaan varoituksella, jos upstream-klooni
+   `UI_KIT_CLONE` tai `_references/cheaper-inference-ui-kit` puuttuu). Jos kitistä puuttuu jotakin,
+   kierrä puute adapterissa tai näkymässä ja pyydä ominaisuutta upstreamista.
+3. Kitin tekstien oletuskieli on englanti (`label = "Loading"`, `loadingLabel = "Loading table"`…) — välitä käännetyt
+   merkkijonot `useTranslations(...)`-funktiosta aina, kun kitin komponentti renderöi tekstiä.
+4. Tailwind-apuluokat ohittavat kitin komponenttiluokat (kit määrittää
+   `@layer theme, base, components, utilities`, ja sen säännöt sijaitsevat `components`-kerroksessa) — käytä apuluokkia
+   välistykseen ja asetteluun, älä kitin komponenttien värien muuttamiseen.
+5. Otsikot: `.ci-heading` (Inter, ei merkkivälistystä) sivujen ja osioiden otsikoihin; `.ci-dashboard-display`
+   (Instrument Serif) vain suuriin, väljiin näyttöteksteihin, kuten virhesivun tilakoodiin.
+6. `tests/unit/dashboard-kit-sweep.test.ts` valvoo kitin käyttöönottoa: ei Material-ligatuurin span-elementtiä
+   `src/app`- tai `src/shared/components`-hakemistoissa; dashboard-puussa (`src/app/(dashboard)` ja
+   `src/shared/components`) ei raakoja `<select>`-, `<textarea>`- tai `<table>`-elementtejä eikä itse toteutettua
+   `role="dialog"`-roolia lueteltujen poikkeusten ulkopuolella (`Select`-adapterin natiivi haara,
+   `RequestLoggerDetail`); jokainen raaka `<button>`- tai `<input>`-elementti tarvitsee kommentin, joka sisältää
+   `kit-exception:`-tekstin (sekä syyn) ja päättyy enintään 3 riviä ennen elementtiä; palettisävyt ja `dark:`-variantit
+   ovat sallittuja vain testin luettelemissa tiedostoissa.
+7. Tarkista molemmat teemat ja 390 px:n näkymä ennen PR:ää (kuvakaappaukset); `tests/e2e/a11y.spec.ts` suorittaa
+   axe-tarkistuksen.
 
 ## 3. Näkymän lisääminen
 
@@ -155,7 +151,23 @@ suhteellisista tuonneista). Sen jälkeen: tarkista `git diff packages/ui-kit`, t
 käyttö ja endpoint molemmissa teemoissa, suorita `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` sekä
 avaa PR upstream-muutoslokin kanssa.
 
-## 6. Viitehakemisto
+## 6. README-kaaviot
+
+Juurihakemiston `README.md`-tiedostoon upotetut kaksitoista kaaviota (`docs/diagrams/*.svg`) soveltavat kittiä staattisiin kuviin. Ne tuotetaan generaattoreilla, ei piirretä käsin: `scripts/docs/gen-readme-*.mjs` sisältää 13 generaattoritiedostoa (kaksitoista kaaviota ja ohjain `gen-readme-diagrams.mjs`), ja `tests/unit/docs/readme-*-svg.test.ts` sisältää 12 vanhentumista tarkistavaa testiä, yhden kutakin kaaviota kohti. Kukin testi vertaa commitoitua tiedostoa generaattorin tulokseen tavu tavulta (työ `test-unit`).
+
+- **Tokenit.** `scripts/docs/readme-diagram-theme.mjs` kopioi paletin tiedostosta `packages/ui-kit/src/ci-tokens.css` (vastaavuuden varmistaa `tests/unit/docs/readme-diagram-theme.test.ts`) ja määrittää tekstiroolit kitin kirjasimilla: Instrument Serif näyttäville otsikoille, Inter käyttöliittymätekstille ja IBM Plex Mono luvuille ja koodille. Nämä ovat samat `@fontsource`-paketit, jotka `src/app/globals.css` lataa hallintapaneelia varten. Vaaleat arvot ovat tiedoston `:root`-osassa ja tummat `prefers-color-scheme: dark`-ehdon takana, joten jokainen kuva seuraa GitHub-lukijan väriteemaa.
+
+- **Kirjasimet.** `scripts/docs/readme-fonts.mjs` rajaa nämä woff2-tiedostot kunkin kaavion piirtämiin glyyfeihin ja upottaa ne `@font-face`-määrityksinä `data:`-URI-osoitteiden avulla. Näin kitin kirjasimet pysyvät SVG:n sisällä. Paikallinen README-kuvatesti tarkistaa, ettei renderöinti tee ulkoisia kirjasinpyyntöjä. Osajoukot sisältävät vain latinalaisia merkkejä; järjestelmän kirjasinvalikoimaan turvautuvat symboliglyyfit sallitaan yksitellen kohdassa `SYMBOL_FALLBACKS`. Jokainen muu puuttuva glyyfi aiheuttaa virheen.
+
+- **Uudelleenluonti.** `npm run docs:readme-diagrams` kirjoittaa kaikki kaksitoista kaaviota uudelleen README-järjestyksessä ja tulostaa kustakin tiedostosta rivin, jolla on sen koko. Generaattorin voi ajaa myös yksin (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` tarvitsee komennon `node --import tsx/esm`, koska sen luvut tulevat ajantasaisen luettelon lataajasta `open-sse/config/freeModelCatalog.ts`; luettelomuutoksen vaikutus CI:hin kuvataan kohdassa `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commitoi generaattori ja SVG yhdessä.
+
+- **Todennus.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderöi tiedoston paikallisessa testissä (`<img>`-elementti, rajoittava `Content-Security-Policy` ja `image/svg+xml`-vastaus), tallentaa vaalean ja tumman kuvan sekä ilmoittaa sivun ulkoiset kirjasinpyynnöt; niiden määrän on oltava 0.
+
+- **Kokoraja.** Alle 200 KB tiedostoa kohti, minkä jokainen vanhentumistesti tarkistaa; 500 KB on kaikkien README-kuvien ehdoton enimmäiskoko (SVG studio -validaattorin sääntö).
+
+- **Yhteinen teksti, luvut gatesta.** Kukin generaattori säilyttää kaavionsa tekstin `*_COPY`-vakiossa tai rakentaa sen ajantasaisesta luettelosta. Sama teksti piirretään kuvaan ja syötetään kirjasinosajoukon muodostukseen. Kanoniset luvut säilyvät `<text>`-solmuissa, joita `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) lukee. Gaten lukemien kaavioiden vanhentumistestit suorittavat myös sen validaattorit tuotetulle tiedostolle. Koodista poikkeava luku kaataa testin: korjaa gaten lukema lähde, älä koskaan generaattorin lukua.
+
+## 7. Viitehakemisto
 
 - `src/app/globals.css` — token-silta, `.dark`-ohitukset, OmniRouten `@layer components` -laajennukset
 - `packages/ui-kit/UPSTREAM.md` — kiinnitetty upstream-commit ja lisenssivaltuutus; `packages/ui-kit/PATCHES.md`

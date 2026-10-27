@@ -131,7 +131,7 @@ Ledertavlekategorier knyttes til OmniRoute-oppgavekategorier:
 | `text`           | `default`, `review`, `documentation`, `debugging` |
 | `code`           | `coding`                                          |
 
-### Normalisering (oppgavetilpasningspoeng)
+### Normalisering (score for oppgaveegnethet)
 
 Rå ELO-poeng normaliseres per ledertavle til en **oppgavetilpasningsverdi i `[0.4, 0.98]`**:
 

@@ -196,7 +196,7 @@ DELETE /api/intelligence/sync          # tyhjennä kaikki synkronoidut arena_elo
 Jos sijoitussivu on tyhjä, manuaalinen `POST /api/intelligence/sync`-pyyntö (tai yksinkertaisesti
 palvelimen uudelleenkäynnistys) täyttää sen uudelleen.
 
-### Mallien yhdistäminen tulostaulukkoon
+### Mallien täsmäyttäminen tulostaulukkoon
 
 Rekisterin mallitunnukset ja Arenan mallinimet eivät aina vastaa toisiaan täsmälleen. Sijoituksissa käytetään
 joustavaa yhdistämistä (`findMatchingIntelligence` tiedostossa `src/lib/freeProviderRankings.ts`):
@@ -209,7 +209,7 @@ Synkronointipuolella tunnetut toimittajaetuliitteet (`anthropic/`, `openai/`, `g
 poistetaan, ja pieni aliaskartta laajentaa kanoniset nimet niihin muotoihin, joita OmniRoute käyttää
 sisäisesti, joten mallit ovat löydettävissä millä tahansa nimellä.
 
-### Miten palveluntarjoaja sijoitetaan
+### Miten palveluntarjoajan sijoitus määräytyy
 
 Moottori pisteyttää jokaisen ilmaisen palveluntarjoajan katalogin kaikki mallit, minkä jälkeen:
 

@@ -88,28 +88,12 @@
    `src/shared/utils/categoricalPalette.ts` dan, untuk strategi penghalaan,
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; tepi ReactFlow dan kanvas orkestrasi
    membaca pembolehubah `--orch-status-*` yang peka tema (`src/shared/components/flow/edgeStyles.ts`).
-2. Jangan tampal `packages/ui-kit/src` secara manual: segerak dengan `scripts/dev/sync-ui-kit.sh <commit>`;
-   pintu pra-komit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) gagal pada sebarang bait
-   yang berbeza daripada komit hulu yang dipasak (ia dilangkau dengan amaran apabila klon hulu,
-   `UI_KIT_CLONE` atau `_references/cheaper-inference-ui-kit`, tiada). Apabila kit kekurangan sesuatu,
-   atasinya dalam penyesuai atau skrin dan mintakannya daripada pihak hulu.
-3. Lalai teks kit adalah bahasa Inggeris (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   hantar rentetan terjemahan daripada `useTranslations(...)` setiap kali komponen kit memaparkan teks.
-4. Utiliti Tailwind mengatasi kelas komponen kit (kit mengisytiharkan
-   `@layer theme, base, components, utilities` dan peraturannya berada dalam `components`) —
-   gunakan utiliti untuk penjarakan dan susun atur, bukan untuk mewarnakan semula komponen kit.
-5. Pengepala: `.ci-heading` (Inter, tiada tracking) untuk tajuk halaman dan bahagian;
-   `.ci-dashboard-display` (Instrument Serif) hanya untuk teks paparan yang besar dan jarang seperti
-   kod status halaman ralat.
-6. `tests/unit/dashboard-kit-sweep.test.ts` menjaga penerimaan kit: tiada span ligatur Material di bawah
-   `src/app` atau `src/shared/components`; dalam pokok papan pemuka (`src/app/(dashboard)` dan
-   `src/shared/components`) tiada `<select>`, `<textarea>` atau `<table>` mentah dan tiada
-   `role="dialog"` buatan sendiri di luar pengecualian yang disenaraikan (cabang asli penyesuai
-   `Select`, `RequestLoggerDetail`); setiap `<button>` atau `<input>` mentah di sana memerlukan
-   komen yang mengandungi `kit-exception:` (dengan alasannya) yang berakhir tidak lebih 3 baris di
-   atasnya; rona palet dan varian `dark:` hanya dalam fail yang disenaraikan oleh ujian tersebut.
-7. Sahkan kedua-dua tema dan viewport 390 px sebelum PR (tangkapan skrin); `tests/e2e/a11y.spec.ts`
-   menjalankan axe.
+2. Jangan sesekali tampal `packages/ui-kit/src` secara manual: segerakkan dengan `scripts/dev/sync-ui-kit.sh <commit>`; get pra-komit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) akan gagal jika terdapat sebarang bait yang berbeza daripada komit huluan yang telah ditetapkan (ia dilangkau dengan amaran apabila klon huluan, `UI_KIT_CLONE` atau `_references/cheaper-inference-ui-kit`, tiada). Apabila kit tidak menyediakan sesuatu, gunakan penyelesaian alternatif dalam penyesuai atau skrin dan minta penambahbaikan tersebut daripada pihak huluan.
+3. Teks lalai kit adalah dalam bahasa Inggeris (`label = "Loading"`, `loadingLabel = "Loading table"`…) — berikan rentetan terjemahan daripada `useTranslations(...)` apabila komponen kit memaparkan teks.
+4. Utiliti Tailwind mengatasi kelas komponen kit (kit mengisytiharkan `@layer theme, base, components, utilities` dan peraturannya terletak dalam `components`) — gunakan utiliti untuk jarak dan reka letak, bukan untuk mewarnakan semula komponen kit.
+5. Tajuk: `.ci-heading` (Inter, tanpa penjarakan huruf) untuk tajuk halaman dan seksyen; `.ci-dashboard-display` (Instrument Serif) hanya untuk teks paparan yang besar dan jarang digunakan, seperti kod status halaman ralat.
+6. `tests/unit/dashboard-kit-sweep.test.ts` mengawal penggunaan kit: tiada span ligatur Material di bawah `src/app` atau `src/shared/components`; dalam pepohon papan pemuka (`src/app/(dashboard)` dan `src/shared/components`), tiada `<select>`, `<textarea>` atau `<table>` mentah dan tiada `role="dialog"` buatan sendiri di luar pengecualian yang disenaraikan (cabang asli penyesuai `Select`, `RequestLoggerDetail`); setiap `<button>` atau `<input>` mentah di situ memerlukan komen yang mengandungi `kit-exception:` (berserta sebabnya) dan berakhir paling banyak 3 baris di atasnya; rona palet dan varian `dark:` hanya dibenarkan dalam fail yang disenaraikan oleh ujian tersebut.
+7. Sahkan kedua-dua tema dan ruang pandang 390 px sebelum PR (tangkapan skrin); `tests/e2e/a11y.spec.ts` menjalankan axe.
 
 ## 3. Menambahkan skrin
 
@@ -149,7 +133,23 @@ import relatif). Kemudian: semak `git diff packages/ui-kit`, lakukan pemeriksaan
 penggunaan dan titik akhir dalam kedua-dua tema, jalankan `npm run check:ui-kit-snapshot` dan `npm run test:vitest:ui`, serta
 buka PR dengan log perubahan huluan.
 
-## 6. Indeks rujukan
+## 6. Rajah README
+
+Dua belas rajah yang dibenamkan dalam `README.md` akar (`docs/diagrams/*.svg`) menggunakan kit pada imej statik. Rajah ini dijana, bukan dilukis dengan tangan: 13 fail penjana di `scripts/docs/gen-readme-*.mjs` (dua belas rajah dan pengawal `gen-readme-diagrams.mjs`), serta 12 ujian keusangan di `tests/unit/docs/readme-*-svg.test.ts`, satu bagi setiap rajah. Setiap ujian membandingkan fail yang dikomit dengan output penjananya bait demi bait (tugas `test-unit`).
+
+- **Token.** `scripts/docs/readme-diagram-theme.mjs` menyalin palet daripada `packages/ui-kit/src/ci-tokens.css` (kesepadanan dengan fail itu dikunci oleh `tests/unit/docs/readme-diagram-theme.test.ts`) dan mentakrifkan peranan teks dengan fon kit: Instrument Serif untuk teks paparan, Inter untuk antara muka, IBM Plex Mono untuk angka dan kod. Ini pakej `@fontsource` yang sama yang dimuatkan oleh `src/app/globals.css` bagi papan pemuka. Nilai cerah berada pada `:root` dan nilai gelap di bawah `prefers-color-scheme: dark` dalam fail, supaya setiap imej mengikuti skema pembaca di GitHub.
+
+- **Fon.** `scripts/docs/readme-fonts.mjs` mengehadkan fail woff2 tersebut kepada glif yang dilukis oleh setiap rajah dan membenamkannya melalui `@font-face` sebagai URI `data:`. Dengan itu, fon kit kekal di dalam SVG. Ujian imej README setempat memeriksa bahawa perenderan tidak membuat permintaan fon luaran. Subset hanya mengandungi aksara Latin; glif simbol yang beralih kepada fon sistem sebagai sandaran dibenarkan satu demi satu dalam `SYMBOL_FALLBACKS`. Glif lain yang tidak diliputi mencetuskan ralat.
+
+- **Jana semula.** `npm run docs:readme-diagrams` menulis semula semua dua belas rajah mengikut susunan README dan mencetak satu baris bagi setiap fail dengan saiznya. Penjana juga boleh dijalankan sendiri (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` memerlukan `node --import tsx/esm` kerana angkanya datang daripada pemuat katalog semasa di `open-sse/config/freeModelCatalog.ts`; kesan perubahan katalog terhadap CI diterangkan di `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Komit penjana dan SVG bersama-sama.
+
+- **Bukti.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` merender fail dalam ujian setempat (tag `<img>`, `Content-Security-Policy` yang menyekat dan respons `image/svg+xml`), menangkap bingkai cerah dan gelap, serta melaporkan permintaan fon luaran oleh halaman; bilangannya mesti 0.
+
+- **Bajet.** Di bawah 200 KB setiap fail, diperiksa oleh setiap ujian keusangan; 500 KB ialah had mutlak bagi sebarang imej README (peraturan pengesah SVG studio).
+
+- **Teks bersama, kiraan daripada gate.** Setiap penjana menyimpan teks rajah dalam pemalar `*_COPY` atau membinanya daripada katalog semasa. Teks itu dilukis dan turut menjadi input bagi subset fon. Angka kanonik kekal dalam nod `<text>` yang dibaca oleh `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Ujian keusangan rajah yang dibaca gate turut menjalankan pengesahnya pada fail yang dijana. Angka yang menyimpang daripada kod menyebabkan ujian gagal: betulkan sumber yang dibaca gate, jangan sekali-kali angka dalam penjana.
+
+## 7. Indeks rujukan
 
 - `src/app/globals.css` — jambatan token, penggantian `.dark`, sambungan OmniRoute `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — komit huluan yang ditetapkan dan kebenaran lesen; `packages/ui-kit/PATCHES.md`

@@ -313,11 +313,11 @@ Hər ikisində standart olaraq **deaktivdir** — açıq şəkildə aktivləşdi
 `setImmediate()` ilə icra olunur, buna görə cavab axınını heç vaxt bloklamır:
 
 - **Üstünlük nümunələri** → `MemoryType.FACTUAL`
-  (məsələn, `Mən … üstün tuturam`, `Mən … çox xoşlayıram`, `ən sevdiyim …-dır`, `Mən … nifrət edirəm`)
+  (məsələn, `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Qərar nümunələri** → `MemoryType.EPISODIC`
-  (məsələn, `Mən … istifadə edəcəyəm`, `Mən … seçdim`, `Mən … qərar verdim`, `Mən … qəbul edəcəyəm`)
+  (məsələn, `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Davranış nümunələri** → `MemoryType.FACTUAL`
-  (məsələn, `Mən adətən …`, `Mən həmişə …`, `Mən … meylliyəm`)
+  (məsələn, `I usually …`, `I always …`, `I tend to …`)
 
 Hər uyğunluq təmizlənir (`trim`, boşluqların birləşdirilməsi, maksimum 500 simvol),
 sabit `factKey(category, content)` vasitəsilə paket daxilində dublikatlardan
@@ -536,7 +536,7 @@ yerləşir.
 ## Keşləmə
 
 `src/lib/memory/store.ts`, `getMemory(id)` oxumaları üçün prosesdaxili LRU-oxşar keş
-(`MEMORY_CACHE_TTL = 1 dəq`, `MEMORY_MAX_CACHE_SIZE = 500`, ən köhnə qeydlərin 20 %-nin
+(`MEMORY_CACHE_TTL = 1 min`, `MEMORY_MAX_CACHE_SIZE = 500`, ən köhnə qeydlərin 20 %-nin
 çıxarılması ilə), həmçinin öz əhatə dairəsinə malik keş istəyən çağırıcılar tərəfindən istifadə olunan
 `get`/`set`/`invalidate` metodlarına malik ümumi açar/dəyər `memoryCache` qatını
 (`src/lib/memory/cache.ts`) saxlayır (1 000 qeyddən ibarət LRU, standart TTL 5 dəq).
@@ -674,11 +674,11 @@ Tipik 4 nüvəli x86 serverində performans testi (hər mətn ~100 token):
 
 ### Standart Nümunə Kateqoriyaları
 
-| Kateqoriya          | Nümunə ifadə                                                                               | Çıxarılan məlumat               |
-| ------------------- | ------------------------------------------------------------------------------------------ | ------------------------------- |
-| PREFERENCE_PATTERNS | `"Mən <X>-ə üstünlük verirəm"`, `"Mən <X>-i sevirəm"`, `"Mən <X>-ə nifrət edirəm"`         | İstifadəçi seçimləri            |
-| DECISION_PATTERNS   | `"Mən <X>-dən istifadə edəcəyəm"`, `"Mən <X> etmək qərarına gəldim"`, `"Mən <X>-i seçdim"` | İstifadəçi qərarları (epizodik) |
-| PATTERN_PATTERNS    | `"Mən adətən <X> edirəm"`, `"Mən həmişə <X> edirəm"`, `"Mən heç vaxt <X> etmirəm"`         | Davamlı davranış nümunələri     |
+| Kateqoriya          | Nümunə ifadə                                                | Çıxarılan məlumat               |
+| ------------------- | ----------------------------------------------------------- | ------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | İstifadəçi seçimləri            |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | İstifadəçi qərarları (epizodik) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Davamlı davranış nümunələri     |
 
 ### Nümunə İfadələr (Sadələşdirilmiş)
 
@@ -714,7 +714,8 @@ const PATTERN_PATTERNS = [/\bI\s+usually\s+([^.,\n]+)/gi, /\bI\s+always\s+([^.,\
 
 Nəzarətsiz çıxarılmanın qarşısını almaq üçün aşağıdakı məhdudiyyətlər tətbiq olunur:
 
-| Minimum məzmun uzunluğu | 3 simvol |
+| Minimum məzmun uzunluğu  | 3 simvol   |
+| ------------------------ | ---------- |
 | Maksimum məzmun uzunluğu | 500 simvol |
 
 ### Çıxarılmanı Nə Zaman Deaktiv Etmək Lazımdır

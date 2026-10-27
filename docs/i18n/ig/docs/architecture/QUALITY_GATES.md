@@ -17,268 +17,326 @@ nke otu sistemụ ahụ na-adabereghị na ngwá ọrụ ọ bụla, lee
 
 ## Ndepụta gate na profaịlụ mmezu
 
-### Nnabata onye a na-atụle
+### Nnabata onye ndoro-ndoro
 
 Usoro ọrụ CI na Quality Gates na-ewepụta mkpebi kwụsiri ike nke ọ bụla: `Gate / CI` na
 `Gate / Quality`. Iwu nnabata ha nwere ụdị e depụtara na-akọwa ọrụ upstream ọ bụla
-dịka nke achọrọ ma ọ bụ nke ndụmọdụ. Ọrụ achọrọ nke metụtara ọnọdụ ahụ ga-aga nke ọma:
-nsonaazụ na-efu, a kagburu, a mafere, ka na-echere, ma ọ bụ amaghi enweghị ike igosi PASS.
-Nhazi docs-only ma ọ bụ catalog-only ziri ezi nwere ike ime ka ụzọ ọrụ koodu ghara ịdị mkpa;
-draft PR abụghị onye a na-anabata. Label `hotfix` anaghị ewepụ mkpa ihe akaebe.
+dị ka nke achọrọ ma ọ bụ nke ndụmọdụ. Ọrụ achọrọ nke metụtara ọnọdụ ahụ ga-aga nke ọma:
+nsonaazụ na-efu efu, nke akagbuuru, nke awụfere, nke ka na-echere na nke amaghị enweghị
+ike igosi PASS. Nkewa docs-only ma ọ bụ catalog-only ziri ezi nwere ike ime ka code lane
+ghara ịdị mkpa; a naghị anabata draft PR dị ka onye ndoro-ndoro. Label `hotfix` anaghị
+ewepụ mkpa ihe akaebe.
 
-Usoro ọrụ abụọ ahụ na-ekpuchi PR ndị na-abanye na branch main/release, push gaa `main`, dispatch
-e ji aka mee, na event merge-group. Push, dispatch, na merge-group na-eme nhọrọ zuru ezu. Push gaa
-`release/**` anaghị ebido ha (2026-10-18): mgbanwe ọ bụla agbaalarị matrix ahụ na PR ya,
-ebe ngwakọta e merge-ruru bụ ọrụ Release-Green (`docs/ops/RUNNER_BOX.md` → Ụzọ ọrụ hosted). Fork
-na merge group na-eji runner hosted maka ọrụ ndị gaara ahọrọ runner self-hosted;
-a ga-enyocha na ikike hosted zuru ezu tupu rollout.
+Usoro ọrụ abụọ ahụ na-ekpuchi PR ndị na-abanye na alaka main/release, push gaa na `main`,
+mmalite aka na merge-group events. Push, dispatch na merge-group na-eme nhọrọ zuru ezu.
+Push ndị na-aga `release/**` anaghị ebido ha (2026-10-18): mgbanwe ọ bụla emelarị matrix
+na PR ya, ebe njikọta nke ihe ndị e merge bụ ọrụ Release-Green
+(`docs/ops/RUNNER_BOX.md` → Hosted lane). Fork na merge group na-eji hosted runners
+maka ọrụ ndị gaara ahọrọ self-hosted runners; a ga-enyocha na ikike hosted zuru oke
+tupu rollout.
 
-Nnata JSON ọ bụla na-akọwapụta SHA e checkout-ruru, workflow run, na attempt.
-CLI na-ajụ ma SHA nke checkout na event adabaghị. Nnwale workflow na-ejikọta ndị otu policy
-na ndepụta `needs` nke ọrụ verdict ka ụzọ ọrụ ọhụrụ ma ọ bụ nke ewepụrụ ghara ịpụ n’amaghị ama.
-Nnata ndị ahụ na-ekpuchi workflow nke ha, ọ bụghị publication, deployment, ma ọ bụ ọrụ ime
-nke advisory scanner dị adị. Ime ka aha check abụọ ahụ rụọ ọrụ n’iwu branch bụ
-mgbanwe nchịkwa dị iche; ịgbakwunye ọrụ ndị a n’onwe ya anaghị echebe branch.
+Receipt JSON ọ bụla na-akọwa SHA e mere checkout, workflow run na attempt.
+CLI na-ajụ ma checkout/event SHA adabaghị. Nnwale workflow na-ejikọta ndị so na policy
+na ndepụta `needs` nke ọrụ verdict ka lane ọhụrụ ma ọ bụ nke ewepụrụ ghara ịla n'iyi
+na nzuzo. Receipt ndị ahụ na-ekpuchi workflow nke ha, ọ bụghị mbipụta, deployment, ma ọ bụ
+ihe dị n'ime advisory scanner dị adị. Ime ka aha check abụọ ahụ rụọ ọrụ n'ime branch rules
+bụ mgbanwe nchịkwa dị iche; ịgbakwunye ọrụ ndị a n'onwe ya anaghị echebe alaka.
+
+### Ihe akaebe echekwara n'ime acceptance reducer
+
+`scripts/quality/validate-release-acceptance.mjs` na-achịkọta plan e nyere na
+manifest ya; ọ naghị egosi na plan ahụ na-ekpuchi release pipeline zuru ezu.
+Report ya na-edobe `releaseAcceptance: false` n'ụzọ doro anya, ọbụlagodi mgbe plan ahụ bụ
+`VERIFIED`. Workflow `release-acceptance.yml` ka na-eji shadow fixtures, ọ bụghị
+receipt build, package, boot ma ọ bụ promotion n'ezie.
+
+CLI chọrọ `--evidence-root` iji nyochaa ihe akaebe echekwara. A na-achọta faịlụ dịka
+`<evidence-root>/<artifact_id>/<member>` ma jiri SHA-256 mee hash ha. Record PASS
+na-enweghị ihe akaebe, faịlụ na-efu efu ma ọ bụ gbanwere, path na-adịghị nchebe ma ọ bụ
+symlink na-egbochi verification. Faịlụ na-efu efu abụghị otu ihe na log efu nke gara nke ọma.
+Nyocha SHA/run/attempt ndị dị ugbu a ka na-anọpụ iche: byte ndị dabara enweghị ike idozi
+receipt ochie. Izuzuezu faịlụ abụghị ihe akaebe na execution bụ ezigbo ya ma ọ bụ na e mere
+artifact promotion.
+
+### Ikike mmezu UI
+
+CI na-eme ndepụta UI zuru ezu dịka matrix shard `test-vitest` anọ, nke ọ bụla nwere
+worker ruru abụọ kacha elu n'otu shard na oge njedebe ọrụ nkeji 15 dị ugbu a. Shard mbụ
+na-emekwa MCP/autoCombo Vitest suite. Nsonaazụ ọrụ achọrọ na-ekpuchi matrix leg niile;
+ọdịda ma ọ bụ nkagbu otu shard enweghị ike igosi nnabata onye ndoro-ndoro.
+
+Nightly observer na-edobe receipt exact-candidate dị iche maka shard UI ọ bụla,
+gụnyere mmezu MCP n'ime receipt mbụ. A chọrọ receipt anọ niile, log na execution identity
+ndị kwekọrọ. `npm run test:vitest:ui` nke local ka na-ahọrọ suite zuru ezu; otu mmezu
+`--shard` bụ naanị ihe akaebe ezughị ezu.
+
+### Nchịkọta unit coverage
+
+Unit shard iri na abụọ na-anakọta V8 coverage n'oge mmezu nnwale ha dị ugbu a. Shard
+gara nke ọma na-eme `scripts/ci/compact-v8-coverage.mjs` iji kpokọta faịlụ mbụ n'emepụtaghị
+Istanbul report nke etiti. Ọrụ Coverage ikpeazụ na-enyocha manifest iri na abụọ ahụ niile
+megide SHA onye ndoro-ndoro, runtime, source root na data hash, wee mee reporter nke c8
+na coverage threshold ndị dị ugbu a. Input na-edobe usoro filename zuru ụwa ọnụ nke c8;
+pre-merging nke shard n'otu n'otu adịghị nchebe maka function/block coverage agwakọtara.
+Shard na-efu efu, nke ọdịdị ya ezighị ezi ma ọ bụ nke na-adabaghị na-eme ka nnabata daa.
+Test shard dara ada na-edobe raw diagnostic coverage iche; ọ pụghị ịbanye na merge ikpeazụ.
 
 ### Ndepụta static scan
 
-Ndepụta npm-alias nwere ụdị e depụtara na ndị otu static-scan dị na
-`config/quality/gate-manifest.json`. Gbaa `npm run check:gate-manifest` iji nyochaa
-aha script na command kpọmkwem megide `package.json`; mgbakwunye, mwepụ, na
-mgbanwe command na-eme ka local hook na ọrụ change-classification dị na CI daa.
-Alias abụghị ọrụ workflow, instance matrix, ma ọ bụ test case: e kwesịghị
-igosi ọnụọgụ ndị a dịka ihe nwere ike dochie ibe ha.
+Ndepụta npm-alias nwere ụdị e depụtara na ndị so na static-scan dị na
+`config/quality/gate-manifest.json`. Mee `npm run check:gate-manifest` iji nyochaa
+aha script na command kpọmkwem megide `package.json`; mgbakwunye, mwepụ na
+command drift na-eme ka local hook na ọrụ change-classification dị na CI daa.
+Alias abụghị workflow job, matrix instance ma ọ bụ test case: a gaghị egosi ọnụ ọgụgụ
+ndị a dị ka ihe enwere ike iji dochie ibe ha.
 
 Jiri `npm run quality:scan -- --list` ma ọ bụ `npm run quality:scan:fast -- --list`
-nyochaa alias ndị ahọpụtara n’emeghị ha. Runner na-akpọ npm entrypoint,
-ya mere a na-echekwa runtime ya (gụnyere Bun ebe ahaziri ya).
-Manifest na-edekọ alias ndị na-anọghị na profaịlụ ndị ahụ dịka ndị a na-akpọ iche,
-a machibidokwara command mmezi iwu na profaịlụ scan read-only.
+iji lelee alias ahọpụtara n'emeghị ha. Runner na-akpọ npm entrypoint, ya mere a na-echekwa
+runtime ya (gụnyere Bun ebe ahaziri ya). Manifest na-edekọ alias ndị na-anọghị na profaịlụ
+ndị ahụ dị ka ndị a na-akpọ iche, a machibidoro maintenance command n'ime profaịlụ scan
+read-only.
 
 Profaịlụ ndị a na-ekpuchi naanị static scan. Ha anaghị akwado product test,
-coverage, packaging, external check, ma ọ bụ nnabata release zuru ezu nke onye a na-atụle.
+coverage, packaging, external check ma ọ bụ nnabata release zuru ezu nke onye ndoro-ndoro.
 Nnabata workflow na-eji `config/quality/admission-policy.json` e jikọtara na
 `scripts/quality/admission-verdict.mjs`. Profaịlụ release-observer ka dị iche;
-nyochaa check ndị metụtara ha na nnata ha iche iche. Ndepụta nkọwa
-dị n’okpuru bụ ntụaka, ọ bụghị ihe akaebe na gate gbara ọsọ n’ezie.
+nyochaa check na receipt ha metụtara n'onwe ha. A kọwara static command nke full observer
+na `config/quality/release-green-static-profile.json`, gụnyere
+`audit:deps`, nhọrọ mutation-test na translation check. Loader na-enyocha npm
+command megide package.json na nkwupụta CI/Quality e mere model; ọ na-ajụ drift
+kama ime shell token dị ka argument. Output SKIP/INCOMPLETE nke scanner achọrọ
+enweghị ike igosi PASS. Profaịlụ ahụ na-edekọ external exclusion ya ma ọ naghị anọchi
+hosted coverage, test matrix, package ma ọ bụ ihe akaebe deployment. Ndepụta prose dị
+n'okpuru bụ ntụaka, ọ bụghị ihe akaebe na gate mere n'ezie.
 
-Script dị n’okpuru `scripts/check/` (policy gate) na `scripts/quality/` (ratchet engine).
-Ebe eziokwu CI sitere bụ `.github/workflows/ci.yml`.
+Script dị n'okpuru `scripts/check/` (policy gate) na `scripts/quality/` (ratchet engine).
+Isi iyi eziokwu nke CI bụ `.github/workflows/ci.yml`.
 
-### Ụzọ ọsọ ọsọ nke Release PR (`quality.yml`)
+### Ụzọ-ngwa-ngwa Release PR (`quality.yml`)
 
-`.github/workflows/quality.yml` na-emeju CI na PR main/release, push gaa `main`,
-dispatch, na merge group. PR na-eji check ọsọ ọsọ e ji path filter. E wepụrụ
-duplicate build ahụ e gbanyụrụ kpamkpam; ezigbo check build/package/boot ka dị na CI.
+`.github/workflows/quality.yml` na-agbakwụnye na CI maka PR ndị main/release, push gaa `main`,
+dispatch na merge groups. PR na-eji nyocha ngwa ngwa e ji path nyochaa. E wepụrụ build oyiri ahụ
+e gbanyụrụ kpamkpam; ezigbo nyocha build/package/boot ka dị na CI.
 
-| Ọrụ                                              | Oke                                                                                                                                                                                                    | Na-egbochi       |
-| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------- |
-| `Docs Gates (fast-path)`                         | PR docs/koodu; ntụaka docs API na docs-all                                                                                                                                                             | Ee               |
-| `Fast Quality Gates`                             | PR koodu; static check, typecheck, dashboard typecheck, na unit test ndị mgbanwe metụtara                                                                                                              | Ee               |
-| `Forgotten sibling tests`                        | PR koodu; a na-esochi module ndị gbanwere ruo na static consumer na candidate sibling test; a na-akọ path barrel na dynamic-import dịka advisory diagnostic, yana allowlist exception e zoro aka na ha | **Ndụmọdụ**      |
-| `Vitest (fast-path)`                             | PR koodu; suite vitest ọsọ ọsọ                                                                                                                                                                         | Ee               |
-| `Unit Tests fast-path`                           | PR koodu; unit suite nwere shard 4                                                                                                                                                                     | Ee               |
-| `No new ESLint warnings`                         | PR koodu; nche lint na-eburu suppression n’uche                                                                                                                                                        | Ee, gụnyere fork |
-| `Merge integrity (changelog + generated skills)` | PR na-abụghị draft; mmekọrịta changelog na skill emepụtara                                                                                                                                             | Ee, gụnyere fork |
+| Ọrụ                                              | Oke                                                                                                                                                                                                          | Na-egbochi        |
+| ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------- |
+| `Docs Gates (fast-path)`                         | PR docs/koodu; ntụaka docs API na docs-all                                                                                                                                                                   | Ee                |
+| `Fast Quality Gates`                             | PR koodu; nyocha static, typecheck, typecheck dashboard, unit tests ndị mgbanwe metụtara                                                                                                                     | Ee                |
+| `Forgotten sibling tests`                        | PR koodu; a na-esochi modules ndị gbanwere ruo na static consumers na candidate sibling tests; a na-akọ ụzọ barrel na dynamic-import dịka diagnostics ndụmọdụ, tinyere exceptions allowlist e zoro aka na ha | **Ndụmọdụ**       |
+| `Vitest (fast-path)`                             | PR koodu; suite vitest ngwa ngwa                                                                                                                                                                             | Ee                |
+| `Unit Tests fast-path`                           | PR koodu; suite unit nwere shard 4                                                                                                                                                                           | Ee                |
+| `No new ESLint warnings`                         | PR koodu; lint guard maara suppressions                                                                                                                                                                      | Ee, gụnyere forks |
+| `Merge integrity (changelog + generated skills)` | PR ndị na-abụghị draft; mmekọrịta changelog na generated skill                                                                                                                                               | Ee, gụnyere forks |
 
 #### Akụkọ forgotten sibling tests
 
-`npm run check:forgotten-sibling-tests` na-ejigharị resolver mbubata dị n’azụ maapụ mmetụta ule ahụ.
-Maka modul production ọ bụla agbanwere, ọ na-akọ njikọ ndị na-agbanwebeghị
-`changed module/symbol -> static consumer -> candidate sibling test` mgbe ule a tụrụ aro
-adịghị na diff nke pull request ahụ. A na-edobe nchịkọta Markdown na nsonaazụ JSON dịka artifact workflow
-`forgotten-sibling-tests` maka nhazigharị tupu mwepụta ọ bụla ga-amalite igbochi.
+`npm run check:forgotten-sibling-tests` na-ejigharị import resolver dị n’azụ map test-impact.
+Maka production module ọ bụla gbanwere, ọ na-akọ usoro
+`changed module/symbol -> static consumer -> candidate sibling test` ndị a pụrụ imepụtaghachi otu ihe
+mgbe candidate test adịghị na diff pull-request. A na-edowe nchịkọta Markdown na nsonaazụ JSON dịka
+artifact workflow `forgotten-sibling-tests` maka calibration tupu mwepụta ọ bụla ga-egbochi.
 
-Mbupụgharị barrel na mbubata dynamic bụ naanị nchọpụta nsogbu resolution; ha anaghị emepụta
-nchọpụta na-egbochi ihe. Exception ndị enyochara dị na
-`config/quality/forgotten-sibling-allowlist.json`. Ntinye ọ bụla ga-akpọ aha consumer na ule a tụrụ aro,
-nye ezi ihe kpatara ya kpọmkwem, ma jikọọ ya na issue ma ọ bụ pull request GitHub. Ntinye ndị edepụtara
-n’ụzọ na-ezighi ezi na-eme ka usoro ahụ daa ma gbochie ya. Exception enweghị ike izochi ule a tụrụ aro ehichapụrụ ma ọ bụ diff nke na-agbakwunye `.skip`/`.todo`;
-ime ka assertion ghara isi ike na ụdị izochi ndị ọzọ ka bụ ọrụ gate
-`check:test-masking` nke na-egbochi ihe n’onwe ya.
+Barrel re-exports na dynamic imports bụ naanị diagnostics resolution; ha anaghị emepụta
+nchọpụta na-egbochi. Exceptions ndị a tụlere dị na
+`config/quality/forgotten-sibling-allowlist.json`. Ntinye ọ bụla ga-akpọrịrị consumer na candidate
+test, nye ihe kpatara ya kpọmkwem, ma jikọọ GitHub issue ma ọ bụ pull request. Ntinye ndị a hazighị
+nke ọma na-emechi site na ọdịda. Exceptions enweghị ike izochi candidate test ehichapụla ma ọ bụ diff na-agbakwụnye `.skip`/`.todo`;
+ime ka assertions ghara isi ike na masking ndị ọzọ ka bụ ọrụ gate
+`check:test-masking` nke na-egbochi n’onwe ya.
 
 ### Ọrụ: `lint`
 
 Ọ na-agba na PR ọ bụla gaa `main`. Ọ na-egbochi merge ma ọ bụrụ na ọ daa.
 
-| Script (`npm run ...`)            | Ihe ọ na-enyocha                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Na-egbochi                              |
-| --------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
-| `check:node-runtime`              | Ụdị Node.js dị n'ime oke a na-akwado                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ee                                      |
-| `check:cycles`                    | Mbubata okirikiri n'ime `src/` + `open-sse/` niile (dabere na AST, e doziri `paths` nke tsconfig). Mgbe a na-agba ya naanị ya, ọ na-eji koodu ọpụpụ 1 kwụsị mgbe ọ bụla okirikiri ọ bụla dị (ọ na-emechi mgbe ọdịda mere kemgbe #15281), ma depụta SCC ndị ahụ. `check:cycles:ratchet` (nke CI na-agba) na-egbochi mgbe ọnụọgụ ahụ gafere oke `metrics.cycles` dị na `quality-baseline.json` — ugbu a ọ bụ 14, `direction: down`, ya mere ọ nwere ike naanị ibelata (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Ee (ratchet)                            |
-| `check:boundary`                  | Njikọ `open-sse → src`: mbubata pụrụ iche sitere n'otu faịlụ gaa na faịlụ ọzọ site na engine banye na ngwa ahụ (`scripts/quality/measure-boundary.mjs`; ndepụta njikọ ahụ bụ ọrụ ndozi ndị ka fọdụrụ maka nkewa isi/modul v4). Mgbe a na-agba ya naanị ya = akụkọ ndụmọdụ (otu ihe ahụ dị ka `quality:boundary`). `check:boundary:ratchet` (nke CI na-agba, nke dịkwa na loop ratchet nke ọnụ ụzọ nyocha ngwa ngwa `quality.yml`) na-egbochi mgbe ọnụọgụ ahụ gafere oke `metrics.boundaryOpenSseToSrc` dị na `quality-baseline.json` — e ji ọnụọgụ a tụrụ, 771, malite ya, `direction: down`; `--update` na-ewedata ya naanị; ọ na-adabere na base na PR (`--base-ref`, lee n'okpuru)                                                                                                                                                                                                                                                                                   | Ee (ratchet)                            |
-| `check:route-validation:t06`      | Schema Zod dị na route niile (iwu Ọkwa 6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Ee                                      |
-| `check:any-budget:t11`            | Ọnụọgụ `@ts-expect-error // any` anaghị agafe oke e kenyere (Ọkwa 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Ee                                      |
-| `check:provider-consistency`      | Onye na-eweta ọrụ ọ bụla dị na `providers.ts` nwere ntinye kwekọrọ na ya na `providerRegistry.ts` (nakwa n'ụzọ ọzọ, n'ime ndepụta ndị e nyere ikike)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ee                                      |
-| `check:model-lifecycle`           | Tebụl atọ ndị a na-eji aka elekọta maka iduzi arịrịọ na-anọgide na-ekwekọrịta na snapshot usoro ndụ e tinyere na repo (#11503): `FITNESS_TABLE` (`taskFitness.ts`) anaghị enye akara nye id ọ bụla a kwụsịrị nke `REGISTRY` nwere ike iduzi; ebe ebumnuche `BUILT_IN_ALIASES` ọ bụla dị na `REGISTRY` ma ọ dịghị na snapshot id ndị a kwụsịrị; id ọ bụla a kwụsịrị nke ka dị na `REGISTRY` ka a na-ebufe gaa ebe ọzọ ma ọ bụ depụta ya na `allowedRetiredInCatalog`; ma isi mmalite ma ọ bụ ebe ebumnuche ọ bụla nke `DEFAULT_DEGRADATION_MAP` adịghị ka nke a kwụsịrị na snapshot ahụ. Nke a anaghị egosi na upstream dị ndụ na-enye model ugbu a. Ọ na-arụ ọrụ n'enweghị njikọ ịntanetị — ọ na-atụnyere megide `config/quality/model-lifecycle.json`, nke a na-eji aka emelite site na `npm run quality:refresh-model-lifecycle` (netwọk; ejikọtaghị ya na CI). `allowedRetiredInCatalog` bụ ratchet mbelata: tinye ntinye naanị ma ọ bụrụ na e nwere tracking issue. | Ee                                      |
-| `check:fetch-targets`             | `fetch("/api/...")` ọ bụla dị na `src/` nke akụkụ client na-edozu gaa na `route.ts` dị adị                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Ee                                      |
-| `check:deps`                      | deps niile a pụrụ iji `npm install` wụnye n'ofe `package.json` ọ bụla dị na repo nọ na `dependency-allowlist.json`; a na-akara package ọhụrụ ndị a na-akpọgideghị na ụdị kpọmkwem ma ọ bụ ndị a slopsquatara                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Ee                                      |
-| `audit:deps`                      | `npm audit` (root + electron) — enweghị ịdọ aka ná ntị dị elu/dị oke egwu (ọ na-ekpuchi akụkụ ụfọdụ nke osv `check:vuln-ratchet`; lee Rationalization Backlog)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Ee                                      |
-| `check:lockfile`                  | Iguzosi ike n'ezi ihe nke `package-lock.json` — ndebanye https, hashes iguzosi ike n'ezi ihe, enweghị mgbanwe ndị na-anọchi host                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Ee                                      |
-| `check:licenses`                  | Ndepụta ikike SPDX akwadoro maka dependencies mmepụta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Ee                                      |
-| `check:tracked-artifacts`         | Enweghị ihe ndị e mepụtara n'oge mwube / symlinks `node_modules` e tinyere na commit (ọ na-agbakwa na husky pre-commit; e kpachapụrụ anya mee ka pre-push dị mfe — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Ee                                      |
-| `check:ai-attribution`            | Enweghị trailer `Co-Authored-By` nke AI/bot ma ọ bụ ederede ala na-egosi mmepụta AI n'ime commits, aha ma ọ bụ ahụ PR — Iwu Siri Ike #16 (n'ime loop fast-gates nke `quality.yml` maka PR→`release/**` — ọ na-agụ payload nke event, ọ naghị eme ihe mgbe ọ bụghị PR — yana nzọụkwụ naanị maka PR n'ime lint nke `ci.yml` maka PR→`main`; tinyekwara hook `commit-msg` nke husky; a na-anabata ndị mmadụ dịka ndị odee ibe; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `check:vitest-exclusions`         | Mwepu Vitest ọ bụla na-akọwa issue nsuso ma pụta na `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ee                                      |
-| `check:file-size`                 | Faịlụ source (`.ts`/`.tsx` n'ime `src/`, `open-sse/`, `electron/`, `bin/`) ga-anọ n'ime `cap`, faịlụ ule (`*.test.ts(x)`) ga-anọkwa n'ime `testCap`; faịlụ akpọchiri n'ime `file-size-baseline.json` (`frozen` / `testFrozen`) agaghị eto gafee nha e dekọrọ maka ha                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ee                                      |
-| `check:error-helper`              | Nzaghachi njehie dị na ndị mmebe/ndị njikwa na-eji `buildErrorBody()` / `sanitizeErrorMessage()` (Iwu Siri Ike #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Ee                                      |
-| `check:migration-numbering`       | A na-enye faịlụ SQL nke mbugharị nọmba n'usoro, na-enweghị oghere ma ọ bụ nọmba e megharịrị                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Ee                                      |
-| `check:public-creds`              | Enweghị OAuth `client_id`/`client_secret` nkịtị ma ọ bụ igodo Firebase Web n'èzí `publicCreds.ts` (Iwu Siri Ike #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ee                                      |
-| `check:db-rules`                  | Enweghị SQL nkịtị n'èzí modul `src/lib/db/`; enweghị mbubata barrel sitere na `localDb.ts` (Iwu Siri Ike #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Ee                                      |
-| `check:known-symbols`             | Ndị mmebe nke ndị na-eweta ọrụ, usoro ntụgharị ụzọ, na ndị ntụgharị asụsụ e debanyere aha na tebụl nkesa ha kwekọrọ na faịlụ ndị dị na diski — enweghị akara na-enweghị njikọ ma ọ bụ nke a na-ekwupụtaghị                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Ee                                      |
-| `check:route-guard-membership`    | Ụzọ ọ bụla na-emepụta usoro nwa ka `isLocalOnlyPath()` na-ekewa n'ụdị (Iwu Siri Ike #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Ee                                      |
-| `check:test-discovery`            | A na-achịkọta faịlụ `*.test.ts` / `*.spec.ts` ọ bụla dị na repo site n’aka opekata mpe otu onye na-eme ule (ratchet: ndepụta faịlụ ndị na-enweghị onye na-achịkọta ha dị na `test-discovery-baseline.json` nwere ike naanị ibelata)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Ee                                      |
-| `check:test-tla-order`            | Ọ dịghị faịlụ `node:test` dị n’okpuru `tests/unit` na-edebanye ule, ruo na `await` nke ọkwa elu, ma mesịa debanye ule ndị ọzọ (#18045; ratchet: `test-tla-order-allowlist.json` nwere ike naanị ibelata)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Ee                                      |
-| `check:agent-skills-sync`         | Ihe nrụpụta agent-skills emepụtara dabara na katalọgụ isi mmalite ha (enweghị ndapụ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `check:provider-asset-provenance` | Akara/logo na akụ nke ndị na-eweta ọrụ nwere ndekọ ebe ha si                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `lint:json`                       | A na-agụ faịlụ nhazi JSON nke ọma, ha na-emezukwa iwu lint nke repo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `typecheck:core`                  | Nchịkọta TypeScript na-enweghị njehie (naanị ịdọ aka ná ntị ndụmọdụ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ee                                      |
-| `typecheck:noimplicit:core`       | `noImplicitAny` siri ike — maka mmepe n’ọdịnihu; ọtụtụ ebe oku ndị dịbu adị ka chọrọ nkọwa ụdị                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | **Ndụmọdụ** (`continue-on-error: true`) |
-| `check:dashboard-typecheck`       | `tsc` nke oke ya bụ naanị `src/app/(dashboard)/**` (#7033) — ndepụta ikike faịlụ 27 a họpụtara nke `typecheck:core` anaghị agụnye TSX dashboard ọ bụla, `next build` anaghịkwa eme nyocha ụdị na ya (`next.config.mjs` na-edobe `ignoreBuildErrors: true`), ya mere ndaghachi azụ nke njirimara ndị na-enweghị njikọ ebe ahụ (#6625/#6909) anaghị apụta ìhè na CI. Ọ na-atụnyere ọdịiche na ntọala ọnụọgụ nke akpọchiri akpọchi maka faịlụ ọ bụla/koodu TS ọ bụla (`config/quality/dashboard-typecheck-baseline.json`, otu usoro mmanye maka ihe ochie dị ka `check:known-symbols`) — naanị njehie ỌHỤRỤ gafere ọnụọgụ dị na ntọala na-eme ka ọnụ ụzọ ahụ daa; jiri `--update` wedata ntọala ahụ mgbe edoziri njehie dịbu adị.                                                                                                                                                                                                                                          | Ee                                      |
+| Skrip (`npm run ...`)             | Ihe ọ na-enyocha                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Na-egbochi                              |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------- |
+| `check:node-runtime`              | Ụdị Node.js dị n'ime oke ndị akwadoro                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Ee                                      |
+| `check:cycles`                    | Mbubata ndị na-agbagharị okirikiri n'ime `src/` + `open-sse/` niile (dabere na AST, a na-edozi `paths` nke tsconfig). Bare na-eji koodu 1 kwụsị mgbe ọ bụla okirikiri ọ bụla dị (ọ na-emechi ma ọ bụrụ na e nwere ọdịda kemgbe #15281), ma depụta SCC ndị ahụ. `check:cycles:ratchet` (nke CI na-agba) na-egbochi mgbe ọnụọgụ ahụ gafere oke `metrics.cycles` dị na `quality-baseline.json` — ugbu a ọ bụ 14, `direction: down`, ya mere ọ nwere ike naanị ibelata (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                              | Ee (ratchet)                            |
+| `check:boundary`                  | Njikọ `open-sse → src`: mbubata faịlụ-gaa-na-faịlụ pụrụ iche site na engine banye na ngwa ahụ (`scripts/quality/measure-boundary.mjs`; ndepụta edge ahụ bụ backlog mmezi nkewa core/module nke v4). Bare = akụkọ ndụmọdụ (otu ihe ahụ dị ka `quality:boundary`). `check:boundary:ratchet` (nke CI na-agba, nke dịkwa na loop ratchet nke fast-gates na `quality.yml`) na-egbochi mgbe ọnụọgụ ahụ gafere oke `metrics.boundaryOpenSseToSrc` dị na `quality-baseline.json` — e ji ọnụọgụ 771 a tụrụ malite ya, `direction: down`; `--update` na-ewedata ya naanị; ọ na-adabere n'ihe ntụnyere base na PR (`--base-ref`, lee n'okpuru)                                                                                                                                                                                                                                                | Ee (ratchet)                            |
+| `check:route-validation:t06`      | Schema Zod dị na route niile (usoro iwu Tier 6)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ee                                      |
+| `check:any-budget:t11`            | Ọnụọgụ `@ts-expect-error // any` anaghị agafe oke e nyere ya (Tier 11 catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Ee                                      |
+| `check:provider-consistency`      | Provider ọ bụla dị na `providers.ts` nwere ntinye kwekọrọ na ya na `providerRegistry.ts` (otu ahụkwa ka ọ dị n’akụkụ nke ọzọ, n’ime allowlist)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Ee                                      |
+| `check:model-lifecycle`           | Tebụl routing atọ a na-eji aka elekọta na-anọgide kwekọọ na lifecycle snapshot e tinyere na repository (#11503): `FITNESS_TABLE` (`taskFitness.ts`) anaghị enye akara nye retired id ọ bụla `REGISTRY` nwere ike iduga; target ọ bụla nke `BUILT_IN_ALIASES` dị na `REGISTRY` ma ọ dịghị na retired-id snapshot; retired id ọ bụla ka dị na `REGISTRY` ka a na-ebuga n’ebe ọzọ ma ọ bụ depụta ya na `allowedRetiredInCatalog`; source ma ọ bụ target ọ bụla nke `DEFAULT_DEGRADATION_MAP` adịghịkwa ka retired na snapshot ahụ. Nke a anaghị egosi na upstream dị ndụ na-enye model ugbu a. Offline — ọ na-atụnyere ya na `config/quality/model-lifecycle.json`, nke a na-eji aka eme ka ọ dị ọhụrụ site na `npm run quality:refresh-model-lifecycle` (network; ejikọghị ya na CI). `allowedRetiredInCatalog` bụ burn-down ratchet: tinye entry naanị mgbe e nwere tracking issue. | Ee                                      |
+| `check:fetch-targets`             | `fetch("/api/...")` ọ bụla dị na client-side `src/` na-eduga na `route.ts` dị adị                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Ee                                      |
+| `check:deps`                      | Dependency niile enwere ike iji `npm install` wụnye, n’ofe `package.json` ọ bụla dị na repo, nọ na `dependency-allowlist.json`; a na-akara package ọhụrụ ndị a na-apụghị pin ma ọ bụ ndị e slopsquat                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Ee                                      |
+| `audit:deps`                      | npm audit nke lockfile ise niile nọọrọ onwe ha (root, Electron, OpenCode plugins v1/v2 na provider). Critical advisories na-egbochi; high advisories na-anọgide dị ka ịdọ aka ná ntị a na-ahụ anya. Audit ndị na-efu efu/ndị dara ada bụ INCOMPLETE ma na-egbochi; a na-edobe lock hash na report nke scope ọ bụla.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Ee                                      |
+| `check:lockfile`                  | Iguzosi ike n'ezi ihe nke `package-lock.json` — ndekọ https, hash iguzosi ike n'ezi ihe, enweghị mgbanwe ndị na-akagbu host                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Ee                                      |
+| `check:licenses`                  | Ndepụta ikike SPDX ndị a nabatara maka dependencies mmepụta                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Ee                                      |
+| `check:tracked-artifacts`         | Enweghị artifacts build / symlink `node_modules` etinyere na commit (ọ na-arụkwa na husky pre-commit; e mere pre-push ka ọ dị mfe n'ebumnobi — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Ee                                      |
+| `check:ai-attribution`            | Enweghị trailer AI/bot `Co-Authored-By` ma ọ bụ footer ngosipụta mmepụta AI na commit PR, aha ma ọ bụ ahụ — Iwu Siri Ike #16 (n'ime loop fast-gates nke `quality.yml` maka PR→`release/**` — ọ na-agụ payload event, ọ naghị eme ihe ma ọ bụrụ na ọ bụghị PR — yana nzọụkwụ naanị-PR na lint `ci.yml` maka PR→`main`; tinyekwara hook husky `commit-msg`; a na-anabata ndị mmadụ so dee ya; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `check:vitest-exclusions`         | Mwepu Vitest ọ bụla na-akpọ issue nsuso ma na-apụta na `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Ee                                      |
+| `check:file-size`                 | Faịlụ source (`.ts`/`.tsx` n'ime `src/`, `open-sse/`, `electron/`, `bin/`) ga-anọ n'ime `cap`, faịlụ test (`*.test.ts(x)`) ga-anọkwa n'ime `testCap`; faịlụ ndị akpọchiri na `file-size-baseline.json` (`frozen` / `testFrozen`) agaghị eto gafee nha e dekọrọ maka ha                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Ee                                      |
+| `check:error-helper`              | Nzaghachi njehie dị na executors/handlers na-eji `buildErrorBody()` / `sanitizeErrorMessage()` (Iwu Siri Ike #12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Ee                                      |
+| `check:migration-numbering`       | Faịlụ SQL migration nwere nọmba na-aga n'usoro, na-enweghị oghere ma ọ bụ nọmba ugboro abụọ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Ee                                      |
+| `check:public-creds`              | Enweghị OAuth `client_id`/`client_secret` e dere ozugbo ma ọ bụ igodo Firebase Web n'èzí `publicCreds.ts` (Iwu Siri Ike #11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Ee                                      |
+| `check:db-rules`                  | Enweghị raw SQL n'èzí modulu `src/lib/db/`; enweghị barrel-imports sitere na `localDb.ts` (Iwu Siri Ike #2/#5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Ee                                      |
+| `check:known-symbols`             | Provider executors, usoro routing, na ndị ntụgharị e debanyere aha na dispatch tables ha kwekọrọ na faịlụ ndị dị na diski — enweghị symbols ndị na-enweghị njikọ ma ọ bụ ndị a na-ekwupụtaghị                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Ee                                      |
+| `check:route-guard-membership`    | Route ọ bụla na-ebido child process ka `isLocalOnlyPath()` na-ekewa n'ụdị kwesịrị ekwesị (Iwu Siri Ike #15/#17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Ee                                      |
+| `check:test-discovery`            | Onye na-agba ule ọbụla, ma ọ dịkarịa ala otu, na-achịkọta faịlụ `*.test.ts` / `*.spec.ts` niile dị na repo (ratchet: ndepụta faịlụ ndị na-enweghị onye na-agba ha na `test-discovery-baseline.json` nwere ike naanị ibelata)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Ee                                      |
+| `check:test-tla-order`            | Ọ dịghị faịlụ `node:test` dị n'okpuru `tests/unit` na-edebanye aha ule, rute `await` nke dị n'ọkwa kachasị elu, wee debanye aha ule ndị ọzọ (#18045; ratchet: `test-tla-order-allowlist.json` nwere ike naanị ibelata)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Ee                                      |
+| `check:agent-skills-sync`         | Artifact agent-skills ndị emepụtara dabara na katalọgụ isi mmalite ha (enweghị mgbanwe na-ekwekọghị ekwekọ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `check:provider-asset-provenance` | Akara ngosi/asset nke ndị na-eweta ọrụ nwere ndekọ ebe ha si bịa                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `lint:json`                       | A na-atụgharị faịlụ nhazi JSON nke ọma, ha na-emezukwa iwu lint nke repo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `typecheck:core`                  | Nchịkọta TypeScript na-enweghị njehie (naanị ịdọ aka ná ntị ndụmọdụ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Ee                                      |
+| `typecheck:noimplicit:core`       | `noImplicitAny` siri ike — nke na-ele anya n'ọdịnihu; ọtụtụ ebe oku ndị dịbu adị ka chọrọ nkọwa ụdị                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | **Ndụmọdụ** (`continue-on-error: true`) |
+| `check:dashboard-typecheck`       | `tsc` nke agbadoro naanị na `src/app/(dashboard)/**` (#7033) — ndepụta faịlụ 27 ahọpụtara nke `typecheck:core` anaghị etinye TSX dashboard ọ bụla, `next build` anaghịkwa eme type-check ya (`next.config.mjs` na-edobe `ignoreBuildErrors: true`), ya mere mmejọ nlọghachi nke identifier ndị enweghị njikọ dị ebe ahụ (#6625/#6909) anaghị apụta ìhè nye CI. Ọ na-atụnyere mgbanwe megide baseline oyi kpọnwụrụ nke ọnụọgụ koodu TS n'otu faịlụ (`config/quality/dashboard-typecheck-baseline.json`, otu usoro mmanye maka ihe meworo ochie dịka `check:known-symbols`) — naanị njehie ỌHỤRỤ gafere ọnụọgụ dị na baseline na-eme ka gate daa; jiri `--update` belata baseline mgbe edoziere njehie dịbu adị.                                                                                                                                                                     | Ee                                      |
 
 ### Ọrụ: `quality-gate`
 
-Na-arụ ọrụ mgbe `test-coverage` gasịrị. Na-egbochi ijikọta mgbanwe ma ọ bụrụ na ọ daa.
+Ọ na-agba ọsọ mgbe `test-coverage` gachara. Ọ na-egbochi merge ma ọ bụrụ na ọ daa.
 
-| Skripụ                       | Ihe ọ na-enyocha                                                                                                                                                                                               | Na-egbochi              |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------- |
-| `quality:collect`            | Na-emepụta `quality-metrics.json` (ọnụọgụ ịdọ aka ná ntị ESLint, mkpuchi sitere na akụkọ shard e jikọtara ọnụ)                                                                                                 | Ee (ọ na-ebute ratchet) |
-| `quality:ratchet`            | Metrik ọ bụla dị na `quality-baseline.json` alaghachighị azụ (ịdọ aka ná ntị ESLint ≤ ntọala; mkpuchi ≥ ntọala)                                                                                                | Ee                      |
-| `check:duplication`          | Mmegharị koodu ugboro ugboro (jscpd@4) anaghị agafe ntọala dị na `quality-baseline.json`                                                                                                                       | Ee                      |
-| `check:complexity`           | Mgbagwoju anya cyclomatic n'ogo faịlụ anaghị agafe oke (ESLint `complexity` bụ isi + `max-lines-per-function`)                                                                                                 | Ee                      |
-| `check:cognitive-complexity` | Ratchet mgbagwoju anya nke echiche (`eslint-plugin-sonarjs`) — ngafe ESLint dị iche; CI na-agba ha abụọ e jikọtara ọnụ dịka otu nzọụkwụ `check:complexity-ratchets`                                            | Ee                      |
-| `check:dead-code`            | Ratchet maka mbupụ / faịlụ ndị anaghị eji eme ihe (knip) anaghị alaghachi azụ ma e jiri ya tụnyere ntọala                                                                                                      | Ee                      |
-| `check:compression-budget`   | Oke benchmark mkpakọ — opekempe nchekwa token maka engine ọ bụla agaghị alaghachi azụ                                                                                                                          | Ee                      |
-| `check:type-coverage`        | Ratchet pasent nke e kenyere ụdị (`type-coverage`) anaghị alaghachi azụ; ọ na-ekpuchikarị `typecheck:noimplicit:core`                                                                                          | Ee                      |
-| `check:codeql-ratchet`       | Ọnụọgụ ọkwa CodeQL mepere emepe anaghị alaghachi azụ (ọ na-agụ site na `gh api`; ọ na-amafe n'enweghị nsogbu ma ọ bụrụ na token adịghị) — maka oge mmelite na ịkpalite ya n'aka: lee "Ratchet CodeQL" n'okpuru | Ee                      |
+| Skript                       | Ihe ọ na-enyocha                                                                                                                                                                                  | Na-egbochi        |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------- |
+| `quality:collect`            | Na-emepụta `quality-metrics.json` (ọnụọgụ ịdọ aka ná ntị ESLint, coverage sitere na akụkọ shard ejikọtara ọnụ)                                                                                    | Ee (tupu ratchet) |
+| `quality:ratchet`            | Metric ọ bụla dị na `quality-baseline.json` alaghachighị azụ (ịdọ aka ná ntị ESLint ≤ baseline; coverage ≥ baseline)                                                                              | Ee                |
+| `check:duplication`          | Mmegharị koodu ugboro ugboro (jscpd@4) agafebeghị baseline dị na `quality-baseline.json`                                                                                                          | Ee                |
+| `check:complexity`           | Cyclomatic complexity n'ogo faịlụ agafebeghị oke ahụ (ESLint isi `complexity` + `max-lines-per-function`)                                                                                         | Ee                |
+| `check:cognitive-complexity` | Ratchet nke cognitive complexity (`eslint-plugin-sonarjs`) — ngafe ESLint dị iche; CI na-agba ha abụọ ejikọtara dịka otu nzọụkwụ `check:complexity-ratchets`                                      | Ee                |
+| `check:dead-code`            | Ratchet maka export / faịlụ ndị anaghị eji (knip) alaghachighị azụ ma e jiri ya tụnyere baseline                                                                                                  | Ee                |
+| `check:compression-budget`   | Mmefu benchmark compression — oke kacha nta nke token-savings maka engine ọ bụla agaghị alaghachi azụ                                                                                             | Ee                |
+| `check:type-coverage`        | Ratchet pasent ihe e nyere type (`type-coverage`) alaghachighị azụ; ọ na-anọchi ọtụtụ ọrụ `typecheck:noimplicit:core`                                                                             | Ee                |
+| `check:codeql-ratchet`       | Ọnụọgụ ọkwa CodeQL mepere emepe alaghachighị azụ (na-agụ site na `gh api`; na-awụfe n'enweghị nsogbu ma ọ bụrụ na token adịghị) — maka oge mmegharị na trigger aka: lee "CodeQL ratchet" n'okpuru | Ee                |
 
 ### Ọrụ: `quality-extended`
 
-Ọrụ ahụ dum bụ ndụmọdụ (`continue-on-error: true`). Ratchet ndị dabere na npm na-arụ ọrụ
-n'ezie; scanner mpụga na-etinye site na `gh release download` ma na-amafe onwe ha (exit 0)
-mgbe binary ka na-adịghị.
+Ọrụ a na-egbochi ndị candidate metụtara ya. A na-enyocha nha bundle, ihe nzuzo achọpụtara, adịghị ike
+achọpụtara, nsogbu workflow achọpụtara na mgbanwe OpenAPI site na ratchet ndị a chọrọ.
+Nnyocha circular-dependency ka bụ ndụmọdụ. A chọrọ itinye scanner:
+`scripts/ci/install-quality-scanners.sh` na-akwadebe version ndị a kpọgidere ma na-ebufe
+ọdịda nrụnye. Tool ndị na-adịghị, akụkọ na-adịghị mma, ma ọ bụ baseline ndị na-adịghị na-eme ka
+gate scanner a chọrọ bụrụ INCOMPLETE.
 
-| Skripụ                   | Ihe ọ na-enyocha                                                                                                                                                                                                                | Na-egbochi                                     |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------- |
-| `check:circular-deps`    | Enweghị dependency ndị na-agbagharị okirikiri (dpdm)                                                                                                                                                                            | **Ndụmọdụ**                                    |
-| `check:bundle-size`      | Nha bundle anaghị agafe oke                                                                                                                                                                                                     | **Ndụmọdụ**                                    |
-| `check:secrets`          | Nnyocha ihe nzuzo (gitleaks) — na-amafe ma ọ bụrụ na binary adịghị                                                                                                                                                              | **Ndụmọdụ**                                    |
-| `check:vuln-ratchet`     | Adịghị ike nchekwa nke dependency (osv-scanner) anaghị alaghachi azụ — na-amafe ma ọ bụrụ na binary adịghị                                                                                                                      | **Ndụmọdụ**                                    |
-| `check:workflows`        | Lint workflow (actionlint + zizmor); scanner na-adịghị/adịghị arụ ọrụ, akụkọ na-ezighi ezi, ma ọ bụ ntọala ratchet na-adịghị na-eme ka ọ daa dịka EZUGHỊ EZO. Nchọpụta ziri ezi na-agbaso iwu strict/advisory/ratchet ahọpụtara | A chọrọ mmezu; ratchet zizmor na-egbochi na CI |
-| `check:openapi-breaking` | Mgbanwe ndị na-emebi nkwekọrịta API ọha (`openapi.yaml`) ma e jiri ya tụnyere branch ntọala (oasdiff) — na-emepụta `openapiBreaking=N`; na-amafe ma ọ bụrụ na oasdiff adịghị ma ọ bụ enweghị ike ịchọta spec ntọala             | **Ndụmọdụ**                                    |
+| Skript                   | Ihe ọ na-enyocha                                                                                                                                                                                                                        | Ihe na-egbochi                                    |
+| ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `check:circular-deps`    | Enweghị ndabere ndị na-agbagharị okirikiri (dpdm)                                                                                                                                                                                       | **Ndụmọdụ**                                       |
+| `check:bundle-size`      | Ogo bundle anaghị agafe oke e debere; enweghị ike inweta nha ahụ ga-eme ka nyocha daa                                                                                                                                                   | **Na-egbochi mgbe ejiri --ratchet**               |
+| `check:secrets`          | Nsonaazụ Gitleaks anaghị aka njọ; nyocha ndị achọrọ na-ajụ mgbe ngwaọrụ/source/baseline adịghị, mgbe nyocha dara, na mgbe akụkọ adịghị irè                                                                                              | **Na-egbochi mgbe ejiri --ratchet**               |
+| `check:vuln-ratchet`     | Adịghị ike nchekwa dị na ndabere anaghị aka njọ; nyocha ndị achọrọ na-ajụ mgbe ngwaọrụ adịghị, akụkọ adịghị irè, ma ọ bụ baseline adịghị                                                                                                | **Na-egbochi mgbe ejiri --ratchet**               |
+| `check:workflows`        | Nyocha lint nke workflow (actionlint + zizmor); scanner na-adịghị/adịghị arụ ọrụ, akụkọ na-adịghị irè, ma ọ bụ ratchet baseline na-adịghị ga-ada dịka INCOMPLETE. Nsonaazụ ndị ziri ezi na-agbaso iwu strict/advisory/ratchet ahọpụtara | A ga-agbarịrị ya; zizmor ratchet na-egbochi na CI |
+| `check:openapi-breaking` | Nkwekọrịta API ọha megide event commit ndị a kpọchiri (PR merge-base, push before, merge-group base; scheduled/manual checkout first parent); nha a chọrọ na-emechi usoro ahụ ma ọ bụrụ na ọ daa                                        | **Na-egbochi mgbe ejiri --ratchet**               |
 
 ### Ọrụ: `docs-sync-strict`
 
-Na-arụ ọrụ na PR ọ bụla gaa `main`. Na-egbochi ijikọta mgbanwe ma ọ bụrụ na ọ daa.
+Maka pull request na-aga `main` ma ọ bụ `release/**`, ọrụ a na-agba naanị maka mgbanwe ndị na-abụghị draft (ma ọ bụ ndị nọ n’ahịrị nchere a tụkwasịrị obi) ma bụrụ ndị a haziri dị ka mgbanwe akwụkwọ ma ọ bụ koodu. Ọ na-agbakwa na mmemme CI ndị na-abụghị PR; ihe na-akpalite ọrụ a mgbe e mere push na-ekpuchi naanị `main`, ọ bụghị `release/**`. Nzọụkwụ nke na-akwụsị na koodu ọpụpụ na-abụghị efu na-egbochi ọrụ ahụ; ihe a chọpụtara nke a na-akọ naanị na ihe ndị edere n’okpuru ka a hapụ anaghị egbochi ya.
 
-| Skripụ                         | Ihe ọ na-enyocha                                                                                                                                                          | Na-egbochi                    |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `check:docs-all`               | Ọnụ ụzọ nchịkọta nke na-agba ọnụ ụzọ nta 6 dị n'okpuru n'otu n'otu                                                                                                        | Ee                            |
-| ↳ `check:docs-sync`            | Nkwekọrịta ụdị n'etiti CHANGELOG / OpenAPI / llm.txt                                                                                                                      | Ee                            |
-| ↳ `check:docs-counts`          | Ọnụọgụ dị n'edemede nkọwa (ọnụọgụ ndị na-eweta ọrụ, ọnụọgụ mbugharị, wdg.) nọ n'ime oke ratchet nke ọnụọgụ ndị dị adị                                                     | Ee                            |
-| ↳ `check:env-doc-sync`         | E dekọrọ env var ọ bụla dị na `.env.example` n'ime tebụl akwụkwọ, nakwa n'aka nke ọzọ                                                                                     | Ee                            |
-| ↳ `check:deprecated-versions`  | Enweghị eriri ụdị ndị a kwụsịrị ịkwado n'ime akwụkwọ                                                                                                                      | Ee                            |
-| ↳ `check:doc-links`            | Njikọ markdown ime akwụkwọ na-eduga na faịlụ ndị dị adị (ụdị `[text]`/`(path)`)                                                                                           | Ee                            |
-| ↳ `check:fabricated-docs`      | Ụzọ, env vars, iwu CLI, aha hook, na ụzọ faịlụ ndị e kwuru n'akwụkwọ dị n'ezie na codebase. Ọnụ ụzọ siri ike site na `--strict`; ọ naghị egbochi ọdịda ma ọkọlọtọ adịghị. | Ee (site na `--strict` na CI) |
-| `check:cli-i18n`               | Eriri iwu CLI dị na faịlụ mpaghara-asụsụ i18n niile                                                                                                                       | Ee                            |
-| `check:openapi-coverage`       | Nkọwapụta OpenAPI kpuchiri ma ọ dịkarịa ala oke ala ratchet nke ụzọ ndị dị adị                                                                                            | Ee                            |
-| `check:openapi-security-tiers` | Nkọwa ọkwa nchekwa dị na `openapi.yaml` kwekọrọ na nhazi ọkwa dị na `routeGuard.ts`                                                                                       | **Ndụmọdụ**                   |
-| `check:openapi-routes`         | Ụzọ ọ bụla dị na `openapi.yaml` na-eduga na `route.ts` dị adị (igbochi ihe echepụtara n'enweghị isi)                                                                      | Ee                            |
-| `check:docs-symbols`           | Ntụaka `/api/...` ọ bụla dị na `docs/**/*.md` na-eduga na `route.ts` dị adị (igbochi ihe echepụtara n'enweghị isi)                                                        | Ee                            |
-| `i18n translation drift`       | Igodo ndị a na-atụgharịbeghị na faịlụ mpaghara-asụsụ i18n — naanị ịdọ aka ná ntị                                                                                          | **Ndụmọdụ**                   |
+| Skript                         | Ihe ọ na-enyocha                                                                                                                                                                                                                                                                                                                                        | Ihe na-egbochi                                                                                                         |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `check:docs-all`               | Meta-gate nke na-agba sub-gate 7 dị n'okpuru n'otu n'otu                                                                                                                                                                                                                                                                                                | Ee                                                                                                                     |
+| ↳ `check:docs-sync`            | Nkwekọrịta ụdịdị ngwugwu/OpenAPI/CHANGELOG, mbipụta `llm.txt` ndị kwekọrọ kpọmkwem, iwu na-anaghị agbanwe gbasara ngalaba na nha CHANGELOG a tụgharịrị, na enweghị akwụkwọ oyiri ndị akwụkwọ ọhụrụ dochiela                                                                                                                                             | Ee                                                                                                                     |
+| ↳ `check:docs-frontmatter`     | Peeji akwụkwọ ndị a chịkọtara nwere aha frontmatter ziri ezi                                                                                                                                                                                                                                                                                            | Ee                                                                                                                     |
+| ↳ `check:docs-counts`          | Iwu ọnụọgụ na-anaghị agbanwe nke e ji ntụkwasị obi dị elu mara na-arụ ọrụ siri ike; nyocha ọnụọgụ faịlụ nke na-eji atụmatụ naanị na-enye ịdọ aka ná ntị, ma e wezụga mgbe skripụ natara `--strict` (meta-gate CI anaghị enyefe ya)                                                                                                                      | Ọkwa siri ike na-egbochi; ọkwa dị nro na-enye ndụmọdụ naanị                                                            |
+| ↳ `check:env-doc-sync`         | Ịgụ mgbanwe gburugburu na koodu isi mmalite, `.env.example` na `docs/reference/ENVIRONMENT.md` kwekọrọ mgbe e tinyere ndepụta doro anya nke ihe a hapụrụ: ihe a na-eleghara anya, ihe dị naanị n’akwụkwọ na ihe dị naanị na gburugburu                                                                                                                  | Ee, ma e wezụga ihe dị na ndepụta nnwere onwe ndị edere n’akwụkwọ                                                      |
+| ↳ `check:deprecated-versions`  | Na-akọ ụdịdị nwere ike ịbụ ochie n’èzí ọnọdụ akụkọ ihe mere eme ndị ziri ezi, na ụbọchị mmelite ndị ochie, na-ewepụ akwụkwọ ndị a na-eleghara anya                                                                                                                                                                                                      | Naanị ndụmọdụ na nhazi CI ugbu a (anaghị enyefe `--strict`)                                                            |
+| ↳ `check:doc-links`            | Njikọ markdown ime na docs na-eduga na faịlụ ndị dị adị (ụdị `[text]`/`(path)`)                                                                                                                                                                                                                                                                         | Ee                                                                                                                     |
+| ↳ `check:fabricated-docs`      | Route, env var, iwu CLI, aha hook, na ụzọ faịlụ ndị e kwuru na docs dị n'ezie na codebase. Hard gate site na `--strict`; soft-fail ma ọ bụrụ na enweghị flag ahụ.                                                                                                                                                                                       | Ee (site na `--strict` na CI)                                                                                          |
+| `check:cli-i18n`               | Igodo `t()` CLI ji arụ ọrụ dị na `en`; `pt-BR` na-edobe ngalaba ọ bụla nke ọkwa kachasị elu; `zh-CN` na `zh-TW` nwere igodo ọ bụla dị na `en`                                                                                                                                                                                                           | Ee                                                                                                                     |
+| `check:openapi-coverage`       | Nkọwapụta OpenAPI na-ekpuchi ma ọ dịkarịa ala oke ala nke route ndị dị adị nke ratchet debere                                                                                                                                                                                                                                                           | Ee                                                                                                                     |
+| `check:openapi-security-tiers` | Nkọwa `x-loopback-only`/`x-always-protected` ndị ekwuputara ga-enwerịrị nkwado na `routeGuard.ts`; njehie parser na ihe na-adabaghị na nyocha n’ihu na-egbochi. Nyocha azụ na-enye ịdọ aka ná ntị maka `x-loopback-only` furu efu n’okpuru prefix maka nnweta mpaghara naanị, a na-ewepụkwa route ndị a kọwara naanị site na pattern na nyocha azụ ahụ. | Nyocha parser na nyocha n’ihu na-egbochi; nyocha azụ na-enye ndụmọdụ naanị                                             |
+| `check:openapi-routes`         | Ụzọ `/api...` ọ bụla na `openapi.yaml` kwekọrọ na route dị adị n’agbanyeghị paramita, mgbe e tinyere ndepụta ihe a hapụrụ `KNOWN_STALE_SPEC` nke e nyere ihe kpatara ya; ntinye ochie na ndepụta ahụ na-akpatakwa ọdịda                                                                                                                                 | Ee                                                                                                                     |
+| `check:docs-symbols`           | Ntụaka URL ime `/api/...` n’akwụkwọ isi ndị na-abụghị mbipụta oyiri kwekọrọ na route dị adị ma ọ bụ ezinụlọ route; a na-ewepụ ntụaka proxy/upstream/ihe na-ejide ọnọdụ/faịlụ na ntinye `KNOWN_STALE_DOC_REFS` ndị e nyere ihe kpatara ha, ntinye ochie na ndepụta ihe a hapụrụ na-akpatakwa ọdịda                                                       | Ee                                                                                                                     |
+| `i18n translation drift`       | Hash isi mmalite na ebumnuche nke akwụkwọ isi a tụgharịrị kwekọrọ na `.i18n-state.json`. PR na-ada naanị n’ihi ọdịiche ọhụrụ e webatara n’isi mmalite, ebumnuche na-efu efu ma ọ bụ hash ebumnuche; nyocha ndị na-abụghị PR siri ike. Ọdịiche PR ketara na hash isi mmalite nke ebumnuche ndị ochie bụ ịdọ aka ná ntị.                                  | Ọdịiche ọhụrụ na PR na ọdịiche na nyocha siri ike ndị na-abụghị PR na-egbochi; nke e ketara/nke ochie bụ naanị ndụmọdụ |
+
+A na-emepụta SVG iri na abụọ nke README dị n'okpuru `docs/diagrams/` site na `scripts/docs/gen-readme-<name>.mjs`; `npm run docs:readme-diagrams` na-emepụta ha niile ọzọ.
+Nke ọ bụla nwere ule otu nke na-atụnyere byte ọ bụla (`tests/unit/docs/readme-*-svg.test.ts`, ọrụ `test-unit`), nke na-ada mgbe faịlụ echekwara na ebe nchekwa koodu abụghịzi nke ugbu a.
+`check:docs-counts` na-agụ ọnụọgụ ndị bụ isi site na node `<text>` ha; ọ bụ ya mere a naghị agbanwe ọnụọgụ ndị ahụ ka ha bụrụ ụzọ eserese nke mpụta ha.
+Nlele ọnụọgụ ndị bụ isi na SVG na-agụ faịlụ ndị e depụtara na `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`): `docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, `public/images/tier-flow-dark.svg`, `tier-flow-light.svg`.
+Nlele nkwupụta gbasara ndị na-enye ọrụ n'efu ruo mgbe ebighị ebi, ndekọ katalọgụ, ọdọ mmiri akụrụngwa na-emegharị ugboro ugboro na ihe ndị e ji enye akara na-agụkwa `promise-pillars.svg`, `free-tier-budget.svg`, `strategies-grid.svg`.
+`free-tier-budget.svg` na-enweta ọnụọgụ ya n'aka ihe na-ebu katalọgụ ugbu a, ya mere mgbanwe na `FREE_MODEL_BUDGETS` ma ọ bụ aha ngosipụta nke onye na-enye ọrụ na-eme ka CI daa ruo mgbe e mepụtara faịlụ ahụ ọzọ.
 
 ### Ọrụ: `i18n-ui-coverage`
 
-| Skripụ                                 | Ihe ọ na-enyocha                                                                                                                                                                                               | Na-egbochi  |
-| -------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
-| `check-ui-keys-coverage` (n'ime ahịrị) | Mkpuchi igodo i18n nke UI bụ ≥ 65%                                                                                                                                                                             | Ee          |
-| `check-ui-value-drift` (n'ime ahịrị)   | Idegharị **uru** Bekee anaghị ahapụ ntụgharị ochie na-adabaghịzi n'azụ                                                                                                                                         | Ee          |
-| `check-new-key-coverage` (n'ime ahịrị) | A tụgharịrị igodo Bekee **ọhụrụ** na mpaghara-asụsụ ọ bụla — a na-ajụ akara `__MISSING__:`                                                                                                                     | Ee          |
-| `check-translation-ratio`              | Oke ntụgharị n'ezie maka mpaghara-asụsụ ọ bụla (nke yiri Bekee kpọmkwem / akara ndochi / ihe ndị na-efu n'èzí ndepụta nnabata) agaghị agafe `config/quality/i18n-translation-baseline.json` + ohere mgbakwunye | **Ndụmọdụ** |
+| Skript                                 | Ihe ọ na-enyocha                                                                                                                                                                                          | Na-egbochi  |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `check-ui-keys-coverage` (n'ime ahịrị) | Mkpuchi igodo i18n nke UI bụ ≥ 65%                                                                                                                                                                        | Ee          |
+| `check-ui-value-drift` (n'ime ahịrị)   | **Uru** Bekee e degharịrị anaghị ahapụ ntụgharị asụsụ ochie ọ bụla                                                                                                                                        | Ee          |
+| `check-new-key-coverage` (n'ime ahịrị) | A tụgharịala igodo Bekee **ọhụrụ** n'ime locale ọ bụla — a na-ajụ akara `__MISSING__:`                                                                                                                    | Ee          |
+| `check-translation-ratio`              | Oke ntụgharị asụsụ n'ezie n'otu locale (ndepụta ndị yiri Bekee / placeholder / ndị na-efu efu nke na-anọghị na allowlist) agaghị agafe `config/quality/i18n-translation-baseline.json` + ohere mgbakwunye | **Ndụmọdụ** |
 
-Ọ chọrọ `fetch-depth: 0` — ọnụ ụzọ value-drift na-atụnyere ọdịiche dị n'etiti `en.json` na ebe njikọta malitere.
+Ọ chọrọ `fetch-depth: 0` — mgbochi value-drift na-atụnyere ọdịiche `en.json` megide merge base.
 
-#### `check-ui-value-drift` — ọnụ ụzọ ntụgharị ochie na-adabaghịzi
+#### `check-ui-value-drift` — mgbochi ntụgharị asụsụ ochie
 
-Ọ na-achọpụta otu ndaghachi azụ i18n nke ọnụ ụzọ ndị ọzọ enweghị ike ịhụ site na nhazi: a na-edegharị uru Bekee,
-ma ntụgharị ndị sitere na Bekee _gara aga_ na-anọgide, ya mere
-ndị ọrụ na-abụghị ndị Bekee ka na-agụ ederede e ji nkwenye dee, nke na-ezighi ezi ugbu a.
+Ọ na-achọpụta otu ndaghachi azụ i18n nke mgbochi ndị ọzọ enweghị ike ịhụ site n'usoro ha: a na-edegharị uru Bekee,
+ma ntụgharị asụsụ ndị e si na Bekee _gara aga_ nweta na-anọgide, ya mere
+ndị ọrụ na-abụghị ndị Bekee ka na-agụ ederede e ji nkwenye dee ma nke na-ezighi ezi ugbu a.
 
-E wepụtara nsogbu a n'ezie. E degharịrị `oauthModal.googleOAuthWarning` mgbe ihe enyemaka nbanye Antigravity
-rutere (#5203); **39 n'ime mpaghara-asụsụ 43** jigidere ederede na-agwa ndị na-ahụ maka sistemụ ka ha “detuo
-URL zuru ezu ma mado ya n'okpuru” — usoro nke na-enweghị ike ịgụcha maka onye na-eweta ọrụ ahụ. Ahụghị
+Nke a mere n'ezie na mbipụta. E degharịrị `oauthModal.googleOAuthWarning` mgbe e tinyere
+ihe enyemaka nbanye Antigravity (#5203); **locale 39 n'ime 43** ka nwere ederede na-agwa ndị na-ahụ maka sistemụ ka ha "detuo
+URL zuru ezu ma mado ya n'okpuru" — usoro nke na-enweghị ike ịrụcha maka onye na-eweta ọrụ ahụ. A hụghị
 ya ruo #8463 n'ihi na:
 
-- `sync-ui-keys` na-agbakwunye naanị igodo ndị **na-adịghị adị**, ọ naghị agbakwunye ndị **ochie na-adabaghịzi**;
-- `check-ui-keys-coverage` na-agụta _ịdị adị_ nke igodo, ya mere a na-ewere ntụgharị ochie na-adabaghịzi dịka nke ekpuchiri;
-- `check-translation-drift` na-enyocha oyiri akwụkwọ `docs/i18n/<locale>/**.md` —
-  ọ naghị agụ `src/i18n/messages/*.json` ma ọlị. Ọ na-egbochi na ọrụ `docs-sync-strict` kemgbe
-  mwekọrịta ọzọ nke 2026-09: dezie akwụkwọ isi → `npm run i18n:run -- --files=<doc>` (n'ọkwa ngalaba, dị ọnụ ala).
+- `sync-ui-keys` na-agbakwunye naanị igodo ndị **na-adịghị**, ọ naghị agbakwunye ndị **ochie**;
+- `check-ui-keys-coverage` na-agụta _ọnụnọ_ igodo, ya mere a na-ewere ntụgharị asụsụ ochie dịka nke e kpuchiri;
+- `check-translation-drift` na-esochi oyiri dọkụmentị `docs/i18n/<locale>/**.md` —
+  ọ naghị agụ `src/i18n/messages/*.json`. Ọ na-egbochi n'ime job `docs-sync-strict` kemgbe
+  mmekọrịta ọzọ nke 2026-09: dezie dọkụmentị isi → `npm run i18n:run -- --files=<doc>` (n'ogo ngalaba, ọnụ ala).
 
-**Ọ na-amata diff, ọ bụghị baseline na-akwado ya.** Ọ na-atụnyere `en.json` dị na ntọala njikọta na
-osisi ọrụ; maka key ọ bụla uru Bekee ya gbanwere, locale ọ bụla ka nwere
-ntụgharị a na-emetụghị aka aghọla nke ochie. Nke a kpachaara anya **na-eme ka ụgwọ dịbu adị ghara ịgbanwe** — diff
-enweghị ike igosi ụdị Bekee ochie ntụgharị dịtere aka si na ya pụta, ya mere gate ahụ na-enyocha
-naanị ihe mgbanwe ugbu a metụtara. Nhọrọ ọzọ (baseline hash maka key ọ bụla) ga-achọ
-faịlụ emepụtara nke ruru ~600 KB, nke ji okpukpu 3 karịa baseline kachasị ukwuu dị ugbu a, ma na-agbanwe na PR i18n ọ bụla.
+**Ọ na-elebara diff anya, ọ bụghị baseline.** Ọ na-atụnyere `en.json` dị na merge base na
+working tree; maka igodo ọ bụla uru Bekee ya gbanwere, locale ọ bụla ka nwere
+ntụgharị asụsụ a na-emetụghị aka bụ nke ochie. Nke a kpachaara anya **na-akpọchi ụgwọ dịbu adị** — diff
+enweghị ike igosi Bekee ochie nke e si nweta ntụgharị asụsụ dịteworo aka, ya mere mgbochi ahụ na-ekpe
+naanị ihe mgbanwe dị ugbu a metụrụ. Nhọrọ ọzọ (baseline hash maka igodo ọ bụla) ga-achọ
+faịlụ emepụtara nke ruru ~600 KB, ugboro 3 karịa baseline kacha ibu dị ugbu a, ma na-agbanwe n'ime PR i18n ọ bụla.
 
-E nwere ụzọ abụọ isi mezuo ya:
+E nwere ụzọ abụọ iji mezuo ya:
 
-1. melite ntụgharị ndị o metụtara, ma ọ bụ
-2. tọọ ha ka ha bụrụ `__MISSING__:<new english>` — runtime ga-enyezi Bekee e meziri
-   (`src/i18n/request.ts::deepMergeFallback`, #7258), key ahụ ga-abanyekwa n'ahịrị ntụgharị.
+1. melite ntụgharị asụsụ ndị o metụtara, ma ọ bụ
+2. tọọ ha ka ha bụrụ `__MISSING__:<new english>` — runtime ga-eweta Bekee emeziri
+   (`src/i18n/request.ts::deepMergeFallback`, #7258), a ga-etinyekwa igodo ahụ n'ahịrị ntụgharị asụsụ.
 
-Ọ bụrụ na **nghọta** string ahụ gbanwere, họrọ **ịgbanwe aha key ahụ**: key ọhụrụ enweghị ike iketa
-ntụgharị ochie. Nke ahụ bụ ụkpụrụ #8463 jiri.
+Ọ bụrụ na **ihe eriri ahụ pụtara** gbanwere, họrọ **ịgbanwe aha igodo ahụ**: igodo ọhụrụ enweghị ike iketa
+ntụgharị asụsụ ochie. Nke ahụ bụ usoro #8463 jiri.
 
 ```bash
-npm run i18n:check-value-drift          # nke siri ike (nke CI na-agba)
-npm run i18n:check-value-drift:warn     # naanị mkpesa
+npm run i18n:check-value-drift          # siri ike (ihe CI na-agba)
+npm run i18n:check-value-drift:warn     # naanị nye akụkọ
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
-Ọ na-eji 0 pụọ yana `SKIP reason=base-unresolved` mgbe enweghị ike ịgụ katalọgụ ntọala (shallow
+Ọ na-eji 0 apụ na `SKIP reason=base-unresolved` mgbe enweghị ike ịgụ katalọgụ base (shallow
 clone na-enweghị base ref), dịka `check-openapi-breaking`.
 
-### Ọrụ: `i18n`
+### Job: `i18n`
 
-Matrix nkwado i18n zuru ezu (otu ọrụ maka locale ọ bụla). Ọrụ ahụ dum bụ nke ndụmọdụ.
+Matriks nyocha i18n zuru ezu (otu job maka locale ọ bụla). Job ahụ dum bụ nke ndụmọdụ.
 
-| Skript                          | Ihe ọ na-akwado                     | Na-egbochi                                                 |
-| ------------------------------- | ----------------------------------- | ---------------------------------------------------------- |
-| `validate_translation.py quick` | Izu oke ntụgharị maka locale ọ bụla | **Nke ndụmọdụ** (`continue-on-error: true` na ọrụ ahụ dum) |
+| Skript                          | Ihe ọ na-enyocha                      | Na-egbochi                                             |
+| ------------------------------- | ------------------------------------- | ------------------------------------------------------ |
+| `validate_translation.py quick` | Nzuzu nke ntụgharị asụsụ n'otu locale | **Ndụmọdụ** (`continue-on-error: true` na job ahụ dum) |
 
-### Ọrụ: `pr-test-policy`
+### Job: `pr-test-policy`
 
 Ọ na-agba naanị na pull request.
 
-| Skript                 | Ihe ọ na-akwado                                                                                                                                                               | Na-egbochi |
-| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
-| `check:pr-test-policy` | PR ndị na-agbanwe koodu mmepụta na `src/`, `open-sse/`, `electron/`, ma ọ bụ `bin/` ga-etinyerịrị ma ọ bụ melite ule (Iwu Siri Ike #8)                                        | Ee         |
-| `check:test-masking`   | Faịlụ ule ndị gbanwere anaghị ebelata ngụkọta assert net ma ọ bụ tinye tautology `assert.ok(true)`                                                                            | Ee         |
-| `check:pr-evidence`    | Ahụ PR na-ezo aka n'ihe akaebe ule/VPS maka mgbanwe ahụ (na-eme ka Iwu Siri Ike #18 rụọ ọrụ na-akpaghị aka site n'ịchọ n'ime ederede PR — adịghị ike, lee Ndepụta Ọrụ Fọdụrụ) | Ee         |
+| Skript                 | Ihe ọ na-enyocha                                                                                                                                            | Na-egbochi |
+| ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------- |
+| `check:pr-test-policy` | PR ndị na-agbanwe koodu production n'ime `src/`, `open-sse/`, `electron/`, ma ọ bụ `bin/` ga-etinyerịrị ma ọ bụ melite ule (Iwu Siri Ike #8)                | Ee         |
+| `check:test-masking`   | Faịlụ ule ndị gbanwere anaghị ebelata mkpokọta ọnụ ọgụgụ assert ma ọ bụ tinye tautology `assert.ok(true)`                                                   | Ee         |
+| `check:pr-evidence`    | Ahụ PR na-ezo aka n'ihe akaebe ule/VPS maka mgbanwe ahụ (ọ na-eme ka Iwu Siri Ike #18 rụọ ọrụ site n'iji grep nyochaa ederede PR — adịghị ike, lee Backlog) | Ee         |
 
-### Ọrụ: `test-vitest`
+### Job: `test-vitest`
 
-Ọ na-agba mgbe `build` gachara. Ọ na-egbochi njikọta ma ọ bụrụ na ọ daa.
+Ọ na-agba mgbe `build` gachara. Ọ na-egbochi merge ma ọ bụrụ na ọ daa.
 
-| Suite            | Ihe ọ na-akwado                                          | Na-egbochi                                                                                                           |
-| ---------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | Sava MCP (ngwaọrụ 110), autoCombo, cache — vitest runner | Ee                                                                                                                   |
-| `test:vitest:ui` | Ule component UI — vitest runner                         | **Na-egbochi** — ewepụla ọdịda ndị dịbu adị n'ụzọ doro anya na `vitest.config.ts`; ọdịda ọhụrụ ga-eme ka ọrụ ahụ daa |
+| Nchịkọta ule     | Ihe ọ na-enyocha                                                   | Ihe na-egbochi                                                                                                       |
+| ---------------- | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `test:vitest`    | Sava MCP (ngwaọrụ 110), autoCombo, cache — onye na-agba ule vitest | Ee                                                                                                                   |
+| `test:vitest:ui` | Ule kọmpọnenti UI — onye na-agba ule vitest                        | **Na-egbochi** — ewepụla ọdịda ndị dịbu adị n'ụzọ doro anya na `vitest.config.ts`; ọdịda ọhụrụ ga-eme ka ọrụ ahụ daa |
 
-### Workflow abalị (ahaziri oge, nke ndụmọdụ)
+### Usoro ọrụ abalị (ahaziri oge, nke ndụmọdụ)
 
-Ndị a na-agba dịka nhazi cron si dị (yana `workflow_dispatch`), ọ bụghịkwa na PR. Ha niile bụ nke ndụmọdụ.
+Ndị a na-agba ọsọ dịka nhazi cron si dị (nakwa `workflow_dispatch`), ọ bụghị mgbe ọ bụla na PR. Ha niile bụ nke ndụmọdụ.
 
-| Workflow               | Ihe ọ na-akwado                                                                                                                                               | Na-egbochi      |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `nightly-property`     | Ule property fast-check nwere seed na-enweghị usoro + ọnụ ọgụgụ ịgba dị elu                                                                                   | **Nke ndụmọdụ** |
-| `nightly-resilience`   | gate uto heap, itinye ntụpọ chaos, ibu/ịgba ogologo oge k6                                                                                                    | **Nke ndụmọdụ** |
-| `nightly-llm-security` | nchebe injection promptfoo (ọnọdụ mgbochi) + nyocha garak (a na-amafere ya ma ọ bụrụ na enweghị secret provider)                                              | **Nke ndụmọdụ** |
-| `nightly-schemathesis` | Fuzzing nkwekọrịta OpenAPI (schemathesis) megide OmniRoute dị ndụ site na iji `docs/openapi.yaml` — na-ekpughe mmebi spec / 500 ndị a na-edozighị (Oge 8 B.4) | **Nke ndụmọdụ** |
-| `nightly-mutation`     | Akara ule mutation Stryker n'elu ụzọ unit ngwa ngwa — mutant ndị lanarịrị na-ekpughe assert ndị na-adịghị ike                                                 | **Nke ndụmọdụ** |
-| `nightly-compat`       | Matrix ndakọrịta engine Node gafee range `engines.node` ndị a na-akwado                                                                                       | **Nke ndụmọdụ** |
+| Usoro ọrụ              | Ihe ọ na-enyocha                                                                                                                                                         | Ọ na-egbochi? |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------- |
+| `nightly-property`     | Ule njirimara fast-check nwere mkpụrụ ọnụọgụ enweghị usoro + ọnụ ọgụgụ ọsọ dị elu                                                                                        | **Ndụmọdụ**   |
+| `nightly-resilience`   | ọnụ ụzọ nyocha mmụba heap, itinye ntụpọ chaos, ibu/nnwale ogologo oge k6                                                                                                 | **Ndụmọdụ**   |
+| `nightly-llm-security` | ihe nche injection promptfoo (ọnọdụ mgbochi) + nyocha garak (a na-awụgharị ya ma ọ bụrụ na enweghị ozi nzuzo nke onye na-enye ọrụ)                                       | **Ndụmọdụ**   |
+| `nightly-schemathesis` | Nnwale fuzzing nkwekọrịta OpenAPI (schemathesis) megide OmniRoute dị ndụ site na iji `docs/openapi.yaml` — na-ekpughe mmebi nkọwa / njehie 500 a na-edozighị (Oge 8 B.4) | **Ndụmọdụ**   |
+| `nightly-mutation`     | Akara ule mutation Stryker n'elu ụzọ ule unit ngwa ngwa — mutant ndị lanarịrị na-ekpughe nkwenye ndị na-esighị ike                                                       | **Ndụmọdụ**   |
+| `nightly-compat`       | Matriks ndakọrịta engine Node n'ofe oke `engines.node` ndị a na-akwado                                                                                                   | **Ndụmọdụ**   |
 
-A na-edekọ baseline arụmọrụ (heap, TTFB, oge build), mana ha abụghị gate: lee [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
+A na-edekọ akara ntọala arụmọrụ (heap, TTFB, oge build), mana anaghị eji ha dịka ọnụ ụzọ mgbochi: lee [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
 
 ---
 
@@ -503,39 +561,39 @@ guard: `tests/unit/verify-ratchet-bank.test.ts`.
 Ọrụ ahụ anaghị eme push na `release/*` — mmadụ na-eme merge PR ahụ, ya mere nha na-ezighi ezi
 enweghị ike ịbanye n’enweghị nyocha.
 
-## Iwu Ndepụta Ikike
+## Iwu Allowlist
 
-Ọnụ ụzọ nyocha ọ bụla nke na-agaghị ada n’ihi mmebi ndị dịbu adị na-eji ndepụta ikike a kpọchiri akpọchi
-(dịka, `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Iwu ahụ bụ:
+Ọnụ ụzọ nyocha ọ bụla na-agaghị ada n’ihi mmebi ndị dịbu adị na-eji allowlist akpọchiri akpọchi
+(dịka, `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Iwu ya bụ:
 
-**Dozie isi ihe kpatara nsogbu ahụ; jiri ndepụta ikike naanị mgbe mmebi ahụ dịbu adị ma
+**Dozie isi ihe kpatara nsogbu ahụ; jiri allowlist naanị mgbe mmebi ahụ dịbu adị ma
 enweghị ike idozi ya n’otu PR ahụ.**
 
-Mgbe ị na-agbakwunye ntinye na ndepụta ikike:
+Mgbe ị na-agbakwunye ndenye na allowlist:
 
 1. Tinye nkọwa na-akọwa ihe mere e ji mee ya.
-2. Rụtụ aka n’okwu nlekota ahụ (dịka, `// #3498 — Njirimara Phase 2, emebebeghị ya`).
-3. Wepụ ntinye ahụ n’otu PR ahụ nke na-edozi mmebi ahụ — ntinye ochie nke na-anaghịzi
-   egbochi mmebi na-arụ ọrụ bụkwa ntụpọ (mmanye iwu megide ntinye ochie nke 6A.3 ga-eme ka
-   ọnụ ụzọ nyocha ahụ daa n’ihi ntinye ndepụta ikike na-enweghịzi ihe ọ metụtara ozugbo etinyere ya n’ọrụ).
+2. Tụọ aka na tracking issue ahụ (dịka, `// #3498 — Phase 2 feature, not yet implemented`).
+3. Wepụ ndenye ahụ n’otu PR ahụ na-edozi mmebi ahụ — ndenye ochie nke na-anaghịzi
+   egbochi mmebi na-arụ ọrụ bụkwa ntụpọ (nyocha stale-enforcement nke 6A.3 ga-eme ka
+   ọnụ ụzọ ahụ daa n’ihi ndenye allowlist na-enweghị ihe ọ metụtara ozugbo etinyere ya n’ọrụ).
 
-**Etinyela** ntinye na ndepụta ikike iji mee ka ule gafee ngwa ngwa. Ọnụ ụzọ nyocha na-acha akwụkwọ ndụ ebe
-ndepụta ikike na-aga n’ihu na-eto eto na-enye echiche ụgha banyere ịdịmma.
+**Etinyela** ndenye allowlist iji mee ka ule gafee ngwa ngwa. Ọnụ ụzọ gafere nke ọma ebe
+allowlist na-aga n’ihu na-eto na-enye echiche ụgha banyere ịdịmma.
 
 ### Mgbe ọnụ ụzọ nyocha dara na PR gị
 
-1. **Jiri nlezianya gụọ nsonaazụ ọnụ ụzọ nyocha ahụ** — ọ na-agwa gị kpọmkwem faịlụ ma ọ bụ akara nke
+1. **Jiri nlezianya gụọ nsonaazụ ọnụ ụzọ ahụ** — ọ ga-agwa gị kpọmkwem faịlụ ma ọ bụ akara nke
    mebiri iwu ahụ.
-2. **Dozie mmebi ahụ** — ọtụtụ ọnụ ụzọ nyocha bụ nlele sistemụ faịlụ a kara aka nke na-agafe ozugbo
+2. **Dozie mmebi ahụ** — ọtụtụ ọnụ ụzọ bụ nyocha filesystem nwere nsonaazụ a pụrụ ịtụ anya ya, nke ga-agafe ozugbo
    koodu ahụ ziri ezi.
-3. **Ọ bụrụ na mmebi ahụ dịbu adị** (ya bụ, ọ bụghị gị webatara ya mana ọnụ ụzọ nyocha ahụ
-   amalitela ikpuchi ya): gbakwunye ntinye ndepụta ikike nwere nkọwa ihe kpatara ya na okwu nlekota.
-4. **Ọ bụrụ na ọnụ ụzọ nyocha ahụ bụ ratchet** (mkpuchi, ịdọ aka ná ntị ESLint, mmegharị otu ihe ugboro ugboro, mgbagwoju anya):
-   mgbanwe gị mere ka metrik ahụ ka njọ. Dozie nsogbu dị n’okpuru ya, ma ọ bụ (n’ọnọdụ pụrụ iche) mee
-   `npm run quality:ratchet -- --update` ma ọ bụrụ na e bu n’obi mee mgbanwe ahụ ma a nabatara
-   mbelata metrik ahụ — mana kọwaa ihe kpatara ya na nkọwa PR.
-5. **Ọnụ ụzọ nyocha ndụmọdụ** (`continue-on-error: true`) bụ naanị maka ozi — ha anaghị egbochi
-   njikọta mana ha na-apụta na nchịkọta CI. Dozie ha n’agbanyeghị nke ahụ.
+3. **Ọ bụrụ na mmebi ahụ dịbu adị** (ya bụ, ọ bụghị gị webatara ya, mana ọnụ ụzọ ahụ
+   amalitela ikpuchi ya): gbakwunye ndenye allowlist nwere nkọwa ihe kpatara ya na tracking issue.
+4. **Ọ bụrụ na ọnụ ụzọ ahụ bụ ratchet** (coverage, ịdọ aka ná ntị ESLint, mmegharị ugboro ugboro, mgbagwoju anya):
+   mgbanwe gị mere ka metric ahụ ka njọ. Dozie nsogbu dị n’okpuru ya, ma ọ bụ (n’ọnọdụ a na-adịghị ahụkebe) gbaa
+   `npm run quality:ratchet -- --update` ma ọ bụrụ na mgbanwe ahụ bụ nke e bu n’obi ma a na-anabata
+   mbelata metric ahụ — mana kọwaa ihe kpatara ya na nkọwa PR.
+5. **Ọnụ ụzọ ndụmọdụ** (`continue-on-error: true`) bụ maka inye ozi — ha anaghị egbochi
+   merge mana ha na-apụta na nchịkọta CI. Dozie ha n’agbanyeghị nke ahụ.
 
 ---
 
@@ -565,110 +623,112 @@ njehie njikọ, ọ naghịkwa emebi oge ọrụ.
 
 ---
 
-## Ndepụta Ọrụ Nchịkọta Echiche (nyocha ROI — Agba 9 Ebili Mmiri 3)
+## Ndepụta Ọrụ Ntụgharị Uche (nyocha ROI — Oge 9 Ebili Mmiri 3)
 
-E mere ka ndepụta a kwekọọ na `ci.yml` na 2026-06-17 (ụdị gara aga ewepụghị
+E jiri `ci.yml` tụnyere ma mezie ndekọ a na 2026-06-17 (ụdị nke gara aga hapụrụ
 `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
 `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
-`check:codeql-ratchet`, `check:pr-evidence`). Nyocha ROI nke usoro ahụ e mere ka o kwekọọ
-chọpụtara ndị a dị ka ndị a ga-atụle maka ime ka usoro dị mfe. **Njikọ ndị ahụ bụ mgbanwe CI
-a na-eme n'ụzọ akpaaka; ntụgharị/nhichapụ ndị ahụ bụ mkpebi iwu ọrụ edobere maka onye na-ahụ maka ya.** Ọ dịghị ihe dị n'okpuru ebe a
-etinyela n'ọrụ ugbu a.
+`check:codeql-ratchet`, `check:pr-evidence`). Nnyocha ROI e mere n'ìgwè ahụ e meziri
+chọpụtara ndị na-esonụ dịka ndị a pụrụ ịtụle maka ntụgharị uche. **Njikọta ndị ahụ bụ mgbanwe CI
+ọrụ nkịtị; ịgbanwe/ịhapụ ha bụ mkpebi amụma echekwabara maka onye na-arụ ọrụ ahụ.** Ọ dịghị ihe dị n'okpuru
+e tinyere n'ọrụ ugbu a.
 
-**Ihe ọzọ a na-edeghị n'elu** (ndụmọdụ, mgbaàmà dị ala): ọrụ `docs-lint`
-(markdownlint + Vale, ọrụ ahụ dum bụ `continue-on-error`) na usoro ọrụ nyocha kwụụrụ onwe ha
+**Ndị ọzọ a na-edeghị n'elu** (ndụmọdụ, mgbaàmà dị ala): ọrụ `docs-lint`
+(markdownlint + Vale, ọrụ ahụ dum nwere `continue-on-error`) na usoro ọrụ nyocha kwụụrụ onwe ha
 `semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` dị na
-`quality-baseline.json` mana ejikọghị ya na ratchet na-egbochi ihe na `ci.yml` — metrik ahụ
-enweghịzi ihe jikọrọ ya ugbu a.
+`quality-baseline.json` mana ejikọtaghị ya na ratchet na-egbochi na `ci.yml` — metrik ahụ
+enweghịzi ihe ejikọtara ya ugbu a.
 
-### Jikọta / wepụ nkwugharị (nke akpaaka, ihe ize ndụ dị ala)
+### Jikọta / wepụ oyiri (ọrụ nkịtị, ihe ize ndụ dị ala)
 
-A nyochara onye ọ bụla a tụpụtara megide ọnọdụ gate dị ndụ na 2026-06-17 (tụkwasị obi mana nyochaa);
-ọtụtụ njikọ ndị yiri ihe "doro anya" mechara bụrụ na ha na-ezo ụgwọ teknụzụ ma ha **abụghị** ihe enwere ike dochie ozugbo n'enweghị nsogbu.
+E jiri ọnọdụ gate dị adị na 2026-06-17 nyochaa onye ọ bụla a họpụtara (tụkwasị obi-ma-nyochaa);
+ọtụtụ njikọta ndị yiri ihe “doro anya” mechara bụrụ na ha na-ezo ụgwọ ọrụ fọdụrụ ma **abụghị** ihe a pụrụ itinye ozugbo n'enweghị nsogbu.
 
-- **`check:docs-sync` na-agba ugboro abụọ** — naanị ya na ọrụ `lint`, ma ọzọkwa n'ime `check:docs-all` (`docs-sync-strict`) na husky pre-commit hook. ✅ **EMECHAA** — ewepụla ọkpụkpọ ya kwụụrụ onwe ya na `lint`.
-- **Nyocha CVE** — ❌ **Ọ bụghị njikọ dị ọcha.** `audit:deps` na-ada ozugbo ma ọ bụrụ na e nwere CVE ọ bụla dị elu/dị oke egwu; `check:vuln-ratchet` (osv) na-ada naanị mgbe e nwere _nlaghachi azụ_ ma e jiri ya tụnyere baseline (ugbu a 1 MODERATE). Ihe ha pụtara dị iche — iwepụ `audit:deps` ga-eme ka gate zuru oke maka ihe dị elu/dị oke egwu funahụ. Debe ha abụọ.
-- **Nchọpụta okirikiri** — ✅ **EMECHAA** (#15159 G-01/G-02). Ederede ochie ebe a kpọrọ `check:cycles` gate "na-acha akwụkwọ ndụ, ahọpụtara nke ọma" ma kwado ka ọ nọgide na-egbochi n'ihi na `check:circular-deps` (dpdm) gosipụtara okirikiri 91. Agba akwụkwọ ndụ ahụ bụ **agba akwụkwọ ndụ ụgha**: `check:cycles` nyochara subdirectory 5 (faịlụ 450), dakọtara naanị static `import|export … from`, ma wepụ specifier `@/` na `@omniroute/open-sse/` niile, ya mere ọ pụghị ịhụ okirikiri dynamic-import + alias ndị jupụtara na repo ahụ. Edozila ya: gate ahụ na-agafe ugbu a na `src` + `open-sse` (faịlụ 5023), na-anakọta specifier site na TypeScript AST (ya mere `import("…")` na-agụta mana `typeof import("…")` nọ n'ọnọdụ type anaghị agụta), ma na-edozi tsconfig `paths`. Ọ na-achọta okirikiri **14**, ọ bụghị 0. Ebe ọ bụ na enweghị ike idozi okirikiri 14 dịbu adị n'ime gate PR, `check:cycles` abụrụla **ratchet** ugbu a (`--ratchet`, oke elu `metrics.cycles.value = 14` na `quality-baseline.json`, `direction: down`) — ọ na-egbochi _nlaghachi azụ_ ọ bụla, ọnụ ọgụgụ ahụ nwekwara ike naanị ibelata. CI na-agba `npm run check:cycles:ratchet`. Mbelata ya ga-eso **A-01** gaa n'ihu. `check:circular-deps` (dpdm) na-anọgide dịka ndụmọdụ nke na-enye echiche nke abụọ sara mbara.
-- **Mgbagwoju anya** — ✅ **EMECHAA** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): otu ngafe ESLint, na-agụta dịka ruleId ka baseline cyclomatic+max-lines na cognitive wee nọgide na-anọpụ iche; `check:complexity` / `check:cognitive-complexity` nke ọ bụla ka dị maka `--update` mpaghara.
-- **Mgbochi echiche ụgha nke `/api`** — ✅ **EMECHAA** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): otu ndepụta FS nke `src/app/api`; openapi-routes + docs-symbols ka na-enye akụkọ iche iche; nke ọ bụla ka dị maka ịgba ọsọ mpaghara.
-- **`check:node-runtime` na-agba n'ọrụ 11** — ⚠️ **ROI dị ala.** Nke ọ bụla bụ runner dị iche, nyocha ahụ erughị 1s; mkpokọta oge echekwara bụ ihe dịka ~10s, mana nke ahụ ga-efu nchebe dị ọnụ ala n'ọrụ ọ bụla. O kwesịghị ọgba aghara mgbanwe ahụ.
-- **`typecheck:noimplicit:core` na CI lint** — ✅ **ewepụla ya na ọrụ lint** (ọ bụbu ndụmọdụ `continue-on-error`); mpaghara type na-egbochi bụ `typecheck:core` + `check:type-coverage`. E debere script mpaghara.
+- **`check:docs-sync` na-agba ugboro abụọ** — ọ na-agba naanị ya n'ọrụ `lint` ma na-agbakwa ọzọ n'ime `check:docs-all` (`docs-sync-strict`) na husky pre-commit hook. ✅ **EMECHAA** — ewepụla ịkpọ ya naanị ya na `lint`.
+- **Nnyocha CVE** — ❌ **Ọ BỤGHỊ njikọta dị ọcha.** `audit:deps` na-egbochi ndụmọdụ nchekwa dị oke egwu na nyocha ezughị ezu n'ime lockfile ise niile, ma na-akọ ndụmọdụ nchekwa dị elu dịka ịdọ aka ná ntị n'okpuru amụma dị ugbu a; `check:vuln-ratchet` (osv) na-ada naanị mgbe e nwere _nlaghachi azụ_ ma e jiri ya tụnyere baseline etinyere na repo, ma ọ na-ajụ nha ndị na-adịghị mgbe achọrọ ha. Nkọwa ọrụ ha dị iche — ịhapụ `audit:deps` ga-ewepụ gate zuru oke maka ihe ize ndụ dị oke egwu na akwụkwọ akaebe nyocha package nọọrọ onwe ya. Debe ha abụọ.
+- **Nchọpụta okirikiri** — ✅ **EMECHAA** (#15159 G-01/G-02). Ederede ochie ebe a kpọrọ `check:cycles` gate “akwụkwọ ndụ akwụkwọ ndụ, ahọpụtara nke ọma” ma kwado ka ọ nọgide na-egbochi n'ihi na `check:circular-deps` (dpdm) kọrọ okirikiri 91. Akwụkwọ ndụ akwụkwọ ndụ ahụ bụ **akwụkwọ ndụ akwụkwọ ndụ ụgha**: `check:cycles` nyochara subdirectory 5 (faịlụ 450), dakọtara naanị static `import|export … from`, ma tụfuo specifier `@/` na `@omniroute/open-sse/` niile, ya mere ọ pụghị ịhụ okirikiri dynamic-import + alias ndị jupụtara na repo ahụ. Edozila ya: gate ahụ na-agafezi `src` + `open-sse` (faịlụ 5023), na-anakọta specifier site na TypeScript AST (ya mere `import("…")` na-agụnye ma `typeof import("…")` nọ n'ọnọdụ type anaghị agụnye), ma na-edozi `paths` nke tsconfig. Ọ chọtara okirikiri **14**, ọ bụghị 0. Ebe ọ bụ na enweghị ike idozi okirikiri 14 dịbu adị n'ime gate PR, `check:cycles` bụzi **ratchet** (`--ratchet`, oke elu `metrics.cycles.value = 14` na `quality-baseline.json`, `direction: down`) — ọ na-egbochi _nlaghachi azụ_ ọ bụla, ọnụ ọgụgụ ahụ nwekwara ike naanị ịbelata. CI na-agba `npm run check:cycles:ratchet`. Mbelata ya ga-eso **A-01**. `check:circular-deps` (dpdm) na-anọgide dịka echiche nke abụọ sara mbara nke bụ ndụmọdụ.
+- **Mgbagwoju anya** — ✅ **EMECHAA** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): otu ngafe ESLint, na-agụ site na ruleId ka baseline cyclomatic+max-lines na cognitive nọgide na-anọrọ onwe ha; `check:complexity` / `check:cognitive-complexity` nke ọ bụla ka dị maka `--update` mpaghara.
+- **Mgbochi echiche ụgha nke `/api`** — ✅ **EMECHAA** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): otu ndekọ FS nke `src/app/api`, openapi-routes + docs-symbols ka na-akọ akụkọ iche iche; nke ọ bụla ka dị maka ịgba ọsọ mpaghara.
+- **`check:node-runtime` na-agba n'ọrụ 11** — ⚠️ **ROI dị ala.** Nke ọ bụla bụ runner dị iche, nyocha ahụ erughị sekọnd 1; ngụkọta oge a ga-echekwa bụ ihe dịka sekọnd 10, ma nke ahụ ga-ewepụ ihe nchebe dị ọnụ ala n'ọrụ ọ bụla. Ọ baghị uru mgbanwe ahụ ga-eweta.
+- **`typecheck:noimplicit:core` na CI lint** — ✅ **ewepụla ya n'ọrụ lint** (ọ bụ ndụmọdụ nwere `continue-on-error`); elu type na-egbochi bụ `typecheck:core` + `check:type-coverage`. E debere script mpaghara ahụ.
 
-### Tụgharịa / kpebie (iwu ọrụ onye na-ahụ maka ya)
+### Gbanwee / kpebie (amụma onye na-arụ ọrụ)
 
-- `check:openapi-security-tiers` (ndụmọdụ) — ❌ **Enweghị ike ịtụgharị ya n'ụzọ dị ọcha.** Ọ na-eji 0 pụọ mana na-adọ aka ná ntị na ọtụtụ route `traffic-inspector` dị n'okpuru `LOCAL_ONLY_API_PREFIXES` enweghị annotation `x-loopback-only: true`. Ịmanye ya chọrọ ibu ụzọ tinye annotation ndị ahụ na `openapi.yaml`.
-- `typecheck:noimplicit:core` (ndụmọdụ) — ratchet `check:type-coverage` na-egbochi ihe anọchiwo ọtụtụ ọrụ ya. Tụgharịa ya ka ọ bụrụ ratchet ma ọ bụ wepụ ngafe `tsc` nke abụọ na-eme otu ọrụ ọzọ.
-- `test:vitest:ui` (ugbu a **na-egbochi**) — ewepụla ọdịda ndị dịbu adị kpọmkwem na `vitest.config.ts` site na comment nsuso `// #8618`; ọdịda ọhụrụ ga-eme ka ọrụ ahụ daa.
-- `check:secrets` (gitleaks, ratchet na-egbochi nke akpọchiri na false-positive 3 edere n'akwụkwọ) — tinye atọ ahụ na allowlist ka ọ ruo 0, ma ọ bụ wedata ya ka ọ bụrụ ndụmọdụ. Ọ na-ekpuchi ụfọdụ ọrụ GitHub native secret-scanning + `check:public-creds` na-arụ.
-- `check:pr-evidence` (na-egbochi, na-eji grep chọọ prose dị na PR-body) — ihe ize ndụ false-positive dị elu; iwepụ ya ga-eme ka mmanye Hard Rule #18 ghara ịdị ike, ya mere nke a bụ ezigbo mkpebi iwu ọrụ.
-- `semgrep` (ndụmọdụ kwụụrụ onwe ya) — ya na CodeQL na-ekpuchi ụfọdụ otu OWASP; jikọta baseline ya na ratchet ma ọ bụ wepụ ya.
+- `check:openapi-security-tiers` (ndụmọdụ) — ❌ **ENWEGHỊ IKE ịgbanwe ya n'ụzọ dị ọcha.** Ọ na-eji 0 kwụsị mana ọ na-adọ aka ná ntị na ọtụtụ route `traffic-inspector` dị n'okpuru `LOCAL_ONLY_API_PREFIXES` enweghị annotation `x-loopback-only: true`. Ịmanye ya chọrọ iburu ụzọ tinye annotation ndị ahụ na `openapi.yaml`.
+- `typecheck:noimplicit:core` (ndụmọdụ) — ratchet `check:type-coverage` na-egbochi ekpuchila ọtụtụ ọrụ ya. Gbanwee ya ka ọ bụrụ ratchet ma ọ bụ hapụ ngafe `tsc` nke abụọ ahụ na-eme otu ọrụ.
+- `test:vitest:ui` (ugbu a **na-egbochi**) — ewepụla ọdịda ndị dịbu adị n'ụzọ doro anya na `vitest.config.ts` site na comment nsuso `// #8618`; ọdịda ọhụrụ ga-eme ka ọrụ ahụ daa.
+- `check:secrets` (gitleaks, ratchet na-egbochi) — oke elu dị ugbu a bụ `metrics.secretFindings` na `quality-baseline.json`. Mwepu ọ bụla chọrọ ntinye `.gitleaks.toml` nwere ezi ihe kpatara ya; nha na-adịghị adị bụ INCOMPLETE. Nnyocha ahụ na-akwado nyocha secret nke GitHub n'onwe ya na `check:public-creds`.
+- `check:pr-evidence` (na-egbochi, na-eji grep achọ prose dị n'ahụ PR) — ihe ize ndụ nke false-positive dị elu; ịhapụ ya ga-eme ka mmanye Hard Rule #18 daa mbà, ya mere nke a bụ ezigbo mkpebi amụma.
+- `semgrep` (ngwa ndụmọdụ kwụụrụ onwe ya) — ọrụ ya na CodeQL na-ekpuchi otu mpaghara OWASP; jikọọ baseline ya na ratchet ma ọ bụ hapụ ya.
 
 ---
 
 ## Akwụkwọ Nkọwa Ndị Metụtara Ya
 
-- Usoro-ọkọnọ (provenance, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
+- Usoro ọkọnọ (provenance, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
 
-#### `check-key-completeness` — mgbochi nhatanha nke nchịkọta igodo
+#### `check-key-completeness` — mgbochi nha nhata nke nchịkọta key
 
 `scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, ọrụ `i18n-ui-coverage`).
-Ọ na-atụnyere nchịkọta igodo njedebe nke `src/i18n/messages/<locale>.json` ọ bụla na `en.json` ma daa
-ma ọ bụrụ na igodo njedebe ọ bụla adịghị ma ọ bụ karịrị akarị, n'agbanyeghị mgbe agbakwunyere igodo ahụ. Ihe nnọchi
-`__MISSING__:` na-agụ dị ka ihe dị (ọdịnaya ha bụ ihe mgbochi oke ruru kwesịrị ilebara anya). Ọ bụ ihe mmeju zuru oke
-nke mgbochi abụọ ahụ dabere na diff/pasentị: `check-ui-keys-coverage` na-amanye opekempe 80 % n'otu
-locale (igodo 43 na-adịghị n'ime ~13,000 ka na-egosi 99.7 %) ebe `check-new-key-coverage` na-enyocha
-naanị igodo ndị PR gbakwunyere na `en.json`. A na-emepụta otu locale site na `en.json` nke ụbọchị
-e kewapụtara branch ya, ọ na-asụgharị ruo ọtụtụ ụbọchị ebe base ka na-agbakwụnye igodo; PR nke otu ahụ anaghị
-agbakwunye igodo n'onwe ya, ya mere mgbochi abụọ ndị ọzọ agbachiri nkịtị mgbe batch 1 (#13044) rutere na-enweghị igodo 43 n'ime
-locale itoolu, na batch 2 (#13660) enweghị igodo 10 n'ime asatọ (2026-09-15). Jiri
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers` dozie ọdịda; igodo njedebe `extra`
-pụtara na isi mmalite ewepụla ya — hichapụ ya na locale ahụ. `--warn` na-akọ nsogbu n'emeghị ka ọrụ daa.
-`--catalog=cli` na-eme otu ntụnyere ahụ n'elu `bin/cli/locales` (`npm run i18n:check-keys:cli`);
+Ọ na-atụnyere nchịkọta leaf key nke `src/i18n/messages/<locale>.json` ọ bụla na `en.json`, ma daa
+ma ọ bụrụ na leaf ọ bụla adịghị ma ọ bụ karịrị akarị, n'agbanyeghị mgbe agbakwunyere key ahụ. Ebe nnọchi
+`__MISSING__:` na-agụ dịka ihe dị adị (ọdịnaya ha bụ ọrụ mgbochi ratio). Ọ bụ ihe mmeju zuru oke
+nke mgbochi abụọ dabere na diff/pasent: `check-ui-keys-coverage` na-amanye opekempe 80 % maka
+locale ọ bụla (key 43 na-adịghị n'ime ihe dị ka 13,000 ka na-egosi 99.7 %), ebe `check-new-key-coverage`
+na-enyocha naanị key ndị PR gbakwunyere na `en.json`. A na-emepụta otu locale site na `en.json` nke ụbọchị
+e kewapụtara branch ya, ọ na-atụgharịkwa asụsụ ruo ọtụtụ ụbọchị ebe base na-aga n'ihu na-agbakwunye key;
+batch PR ahụ anaghị agbakwunye key n'onwe ya, ya mere mgbochi abụọ ahụ agbachiri nkịtị mgbe batch 1
+(#13044) rutere na-enweghị key 43 n'ime locale itoolu, na batch 2 (#13660) na-enweghị key 10 n'ime
+locale asatọ (2026-09-15). Jiri
+`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers` dozie ọnọdụ uhie; leaf `extra`
+pụtara na isi mmalite ewepụla ya — hichapụ ya na locale ahụ. `--warn` na-akọ nsogbu ahụ n'emeghị ka usoro daa.
+`--catalog=cli` na-eme otu ntụnyere ahụ n'ime `bin/cli/locales` (`npm run i18n:check-keys:cli`);
 usoro abụọ ahụ dị n'ọrụ `i18n-ui-coverage`.
 
-#### `check-new-key-coverage` — mgbochi i18n maka igodo ọhụrụ
+#### `check-new-key-coverage` — mgbochi i18n maka key ọhụrụ
 
-Ọ bụ nwanne `check-ui-value-drift`. Nke ahụ na-achọpụta uru Bekee nke **edegharịrị**
-ebe a hapụrụ ntụgharị-asụsụ ya n'azụ; nke a na-achọpụta igodo Bekee nke **agbakwunyere**
-ebe ụfọdụ locale na-enwetaghị ya.
+Ọ bụ nwanne `check-ui-value-drift`. Nke ahụ na-achọpụta uru Bekee e **degharịrị**
+mgbe a hapụrụ nsụgharị ya n'azụ; nke a na-achọpụta key Bekee e **tinyeere ọhụrụ**
+mgbe ụfọdụ locale enwetaghị ya ma ọlị.
 
-`check-ui-keys-coverage` enweghị ike ịhụ ụdị nsogbu a: ọ na-amanye opekempe pasentị n'otu locale, ebe
-igodo iri na otu na-adịghị n'ime ~13,000 na-ahapụ mkpuchi na 99.9%. Pasentị n'otu asụsụ enweghị ike
-ịkọwa na "e wepụtara atụmatụ a na-enweghị ntụgharị-asụsụ" — atụmatụ dum nwere ike ịbanye na locale ọhụrụ na-enweghị
-ederede ọ bụla ma ọnụọgụ ahụ agaghị agbanwe.
+`check-ui-keys-coverage` enweghị ike ịhụ ụdị nsogbu a: ọ na-amanye opekempe pasent maka locale ọ bụla,
+ma key iri na otu na-adịghị n'ime ihe dị ka leaf 13,000 na-ahapụ coverage na 99.9%. Pasent maka asụsụ
+ọ bụla enweghị ike ịkọwa “e wepụtara atụmatụ a na-enweghị nsụgharị” — otu atụmatụ zuru ezu nwere ike
+ịbanye na locale ọhụrụ n'enweghị ederede ọ bụla ma ọnụ ọgụgụ ahụ agbanweghị ma ọlị.
 
-Nsogbu ọ na-anọchi anya bụ nke a: Phase 3 nke Orchestration Canvas tụgharịrị igodo iri na otu ya n'ofe
-locale 42 ndị dị n'oge ahụ. Awa ole na ole ka e mesịrị, otu asụsụ EU (#13044) buliri repo ahụ
-ruo locale 51, ma ndị ọhụrụ itoolu ahụ (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) enwetaghị
-ha. `deepMergeFallback` na-eji Bekee dochie igodo na-adịghị, ya mere ụdị ọdịda ahụ bụ
-UI a na-atụgharịghị kama UI tọgbọ chakoo — ezigbo nsogbu, nke e mere ka ọ ghara ime mkpọtụ.
+Ihe merenụ ọ na-anọchite anya ya: Phase 3 nke Orchestration Canvas tụgharịrị key iri na otu ya n'ime
+locale 42 dị n'oge ahụ. Awa ole na ole ka e mesịrị, batch asụsụ EU (#13044) mere ka repo ahụ nwee
+locale 51, mana ndị ọhụrụ itoolu ahụ (`el`, `et`, `ga`, `hr`, `lt`, `lv`, `mt`, `sl`, `sr`) enwetaghị
+ha ma ọlị. `deepMergeFallback` na-etinye Bekee n'ọnọdụ key na-adịghị, ya mere ụdị ọdịda ahụ bụ UI
+a na-atụgharịghị asụsụ kama ịbụ UI efu — ọ bụ ezigbo nsogbu, nke e wuru ka ọ ghara inye ọkwa.
 
-Dị ka nwanne ya, ọ **na-eburu diff n'uche**, na-atụnyere Bekee dị na merge base na working
-tree, ya mere oghere ndị dịbu adị na-anọgide otu ahụ, mgbochi ahụ achọghịkwa migration tupu agbanye ya.
+Dịka nwanne ya, ọ **maara diff**, na-atụnyere Bekee dị na merge base na working
+tree, ya mere oghere ndị dịbu adị na-anọgide otu ahụ, mgbochi ahụ achọghịkwa migration iji malite ọrụ.
 
-**Ihe akara `__MISSING__:<english>` anaghị emezu ya (kemgbe 2026-09-17).** Na mbụ, ọ bụ
-usoro ndọtị oge e depụtara n'akwụkwọ — runtime na-alaghachi na Bekee ziri ezi — ruo mgbe PR atụmatụ asatọ na
-2026-09-16 gbakwunyere igodo 61 ma tinye ihe akara ahụ n'ime locale 65 niile kama ịtụgharị ha: mgbochi a
-nabataara ha niile, ọ dịghị ihe gbochiri PR ndị ahụ, mgbe ahụ mgbochi oke ruru nke ezigbo ntụgharị-asụsụ nke na-egbochi
-daa n'ọnụ release maka onye ọ bụla (pt-BR 3.2 % > 2.5 % + 0.5). Ugbu a, a na-ewere ihe akara
-dị ka ntụgharị-asụsụ na-adịghị. Jiri
-`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40` dozie ọdịda, ma ọ bụ
-mee locale niile n'otu oge site na `npm run i18n:translate-new-keys` (`scripts/i18n/translate-new-keys.sh`,
-nwere nchekwa mgbe detached, ọ na-ajụ ịmalite ma ọ bụrụ na env `OMNIROUTE_TRANSLATION_*` adịghị). Igodo kwesịrị ịnọ
-n'Bekee (aha product/engine/flag e kpọgidere) kwesịrị ịdị na `scripts/i18n/untranslatable-keys.json`,
-ọ bụghị n'azụ ihe akara. `vi` machibidoro ihe akara kpamkpam (`tests/unit/i18n-vi-completeness.test.ts`).
+**Marker `__MISSING__:<english>` anaghị emezu ya (kemgbe 2026-09-17).** Na mbụ, ọ bụ ụzọ nkwụsịtụ
+e depụtara n'akwụkwọ — runtime na-alaghachi na Bekee ziri ezi — ruo mgbe feature PR asatọ na
+2026-09-16 gbakwunyere key 61 ma tinye marker ahụ n'ime locale 65 niile kama ịtụgharị ha: mgbochi a
+nabataara ha niile, ọ dịghị ihe gbochiri PR ndị ahụ, mgbochi ratio nsụgharị-eziokwu nke na-egbochi
+wee daa na release tip maka onye ọ bụla (pt-BR 3.2 % > 2.5 % + 0.5). Ugbu a, a na-ewere marker
+dịka nsụgharị na-adịghị. Jiri
+`node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40` dozie ọnọdụ uhie,
+ma ọ bụ mee locale niile n'otu oge site na `npm run i18n:translate-new-keys`
+(`scripts/i18n/translate-new-keys.sh`, ọ na-arụ ọrụ nke ọma mgbe detached, ọ gaghị amalite ma ọ bụrụ na
+`OMNIROUTE_TRANSLATION_*` env adịghị). Key nke ga-anọrịrị na Bekee (aha product/engine/flag a kpọgidere)
+kwesịrị ịdị na `scripts/i18n/untranslatable-keys.json`, ọ bụghị n'azụ marker. `vi` machibidoro marker
+kpamkpam (`tests/unit/i18n-vi-completeness.test.ts`).
 
-#### `check-vitest-exclusions` — mgbochi ule e debere n'akụkụ
+#### `check-vitest-exclusions` — mgbochi ule e dọkwasịrị n'akụkụ
 
-Faịlụ dị na ndepụta `exclude` nke `vitest.config.ts` bụ ule na-adịghị agba, ma ọ na-adị ka
-mkpuchi nye onye ọ bụla na-agụ tree ahụ. Faịlụ iri isii na abụọ chịkọtara n'azụ nkọwa
-`// #8618 — ọdịda dịbu adị; wepụ exclusion a mgbe edoziri ya`. E mechiri Issue #8618 na
-2026-08-11 ebe ndepụta ọ na-esochi toro site na ntinye 45 ruo 62, nke ọhụrụ ọ bụla na-eketa nkọwa
-na-arụtụ aka n'issue nwụrụ anwụ. Mgbe e mesịrị tụọ ndepụta ahụ otu faịlụ n'otu faịlụ (#13204), **51 n'ime 62
-gafere megide tree dị ugbu a na-enweghị mgbanwe ọ bụla na isi mmalite**.
+Faịlụ dị na ndepụta `exclude` nke `vitest.config.ts` bụ ule na-adịghị agba ọsọ, ma ọ na-adị ka
+coverage n'anya onye ọ bụla na-agụ tree ahụ. Faịlụ iri isii na abụọ gbakọtara n'azụ comment
+`// #8618 — pre-existing failure; remove this exclusion when fixed`. E mechiri Issue #8618 na
+2026-08-11 ebe ndepụta ọ na-esochi toro site na entry 45 ruo 62, nke ọ bụla n'ime ndị ọhụrụ ahụ ketara
+comment na-ezo aka na issue nwụrụ anwụ. Mgbe e mesịrị tụọ ndepụta ahụ otu faịlụ n'otu faịlụ (#13204),
+**51 n'ime 62 ahụ gafere megide tree dị ugbu a n'enweghị mgbanwe ọ bụla na source**.
 
-Mgbochi ahụ chọrọ ka exclusion ọ bụla na-eduga na ezigbo faịlụ (a) kpọọ issue eji esochi ya na
-(b) pụta na `config/quality/vitest-exclusions.json` yana ọkwa ya a tụrụ, ka ịgbakwunye otu bụrụ
-diff a pụrụ inyocha n'ime faịlụ e kenyere ya kama ịbụ naanị otu ahịrị ọzọ n'ime array nwere ntinye 60. N'ebumnuche,
-ọ naghị agba ule ndị ewepụrụ ọzọ — nke ahụ na-ewe ~10 nkeji ma kwesị ịdị n'ọrụ oge ụfọdụ; ndekọ
-ngwaahịa ahụ na-edekọ mgbe e tụrụ nke ọ bụla na nke ikpeazụ.
+Mgbochi ahụ chọrọ ka exclusion ọ bụla na-eduga na ezigbo faịlụ (a) kpọọ tracking issue aha, ma
+(b) pụta na `config/quality/vitest-exclusions.json` ya na status e tụrụ, ka ịgbakwunye otu bụrụ
+diff a pụrụ inyocha n'ime faịlụ pụrụ iche kama ịbụ naanị otu ahịrị ọzọ n'ime array nwere entry 60.
+A kpachapụrụ anya mee ka ọ ghara ịgba ule ndị ewepụrụ ọsọ ọzọ — nke ahụ na-ewe ihe dị ka nkeji 10,
+ma kwesị ịdị n'ọrụ a na-eme oge ụfọdụ; inventory ahụ na-edekọ mgbe e tụrụ nke ọ bụla ikpeazụ.

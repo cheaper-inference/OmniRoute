@@ -543,16 +543,16 @@ Kumpletong mga OpenAPI schema: `docs/openapi.yaml` → tag na `AgentBridge`.
 
 Ang Trae ay isang medyo bagong AI coding assistant. Bago magpatupad ng handler:
 
-1. Tukuyin ang binary/extension sa mga marketplace ng VS Code / JetBrains o bilang standalone app
-2. Kunin ang traffic gamit ang mitmproxy upang matuklasan ang mga API host at anyo ng mga endpoint
+1. Tukuyin ang binary/extension sa mga marketplace ng VS Code / JetBrains o bilang standalone na app
+2. Kunan ang traffic gamit ang mitmproxy upang matuklasan ang mga API host at anyo ng endpoint
 3. Tukuyin ang mekanismo ng authentication
 4. Suriin kung itutuloy o hindi batay sa TOS at kung gaano kadaling matuklasan ang API
 
-Hanggang sa makumpleto ang pagsisiyasat, nagpapakita ang Trae card sa dashboard ng badge na "Sinisiyasat" na may link na "Iulat ang pagiging posible." Ang handler stub sa `src/mitm/handlers/trae.ts` ay naglalabas ng structured na error na `Hindi pa naipapatupad`.
+Hangga't hindi natatapos ang pagsisiyasat, nagpapakita ang Trae card sa dashboard ng badge na "Sinisiyasat" na may link na "Iulat ang pagiging magagamit." Ang handler stub sa `src/mitm/handlers/trae.ts` ay nagti-throw ng structured na error na `Not yet implemented`.
 
 ### Mga backlog agent (kailangan ang MITM — walang suporta para sa custom base URL)
 
-Hindi sinusuportahan ng mga sumusunod na tool ang mga custom base URL sa kanilang mga kasalukuyang bersyon, kaya MITM lamang ang paraan ng interception. Nakabinbin pa ang pagtatasa sa pagiging posible:
+Hindi sinusuportahan ng mga sumusunod na tool ang mga custom base URL sa kanilang mga kasalukuyang bersyon, kaya MITM lamang ang paraan ng interception. Nakabinbin pa ang pagsusuri sa pagiging magagamit:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)

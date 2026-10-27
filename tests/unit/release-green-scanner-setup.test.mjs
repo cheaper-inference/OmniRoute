@@ -96,6 +96,7 @@ function prepare(job, scenario = "complete") {
       GITHUB_PATH: pathFile,
       RUNNER_TEMP: sandbox,
       WORKFLOW_SHA: "1234567890123456789012345678901234567890",
+      EVENT_NAME: "push",
       QG_INSTALLER: join(root, "scripts/ci/install-workflow-scanners.sh"),
       QG_SCENARIO: scenario,
     };

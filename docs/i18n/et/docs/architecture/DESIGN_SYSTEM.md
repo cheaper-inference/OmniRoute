@@ -89,31 +89,28 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow servad ja
    orkestreerimislõuend loevad teematundlikke `--orch-status-*` muutujaid
    (`src/shared/components/flow/edgeStyles.ts`).
-2. Ära kunagi paiga `packages/ui-kit/src` käsitsi: sünkroniseeri skriptiga
-   `scripts/dev/sync-ui-kit.sh <commit>`; commit-eelne kontroll `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) ebaõnnestub iga baidi korral, mis erineb kinnitatud ülesvoolu commitist
-   (kontroll jäetakse hoiatusega vahele, kui ülesvoolu kloon, `UI_KIT_CLONE` või
-   `_references/cheaper-inference-ui-kit`, puudub). Kui kitist on midagi puudu, lahenda see adapteris
-   või ekraanis ja küsi seda ülesvoolult.
-3. Kiti tekstide vaikeväärtused on ingliskeelsed (`label = "Loading"`,
-   `loadingLabel = "Loading table"`…) — edasta tõlgitud stringid `useTranslations(...)` kaudu alati,
-   kui kiti komponent renderdab teksti.
-4. Tailwindi utiliidid võidavad kiti komponendiklasse (kit deklareerib
-   `@layer theme, base, components, utilities` ja selle reeglid asuvad `components`-kihis) — kasuta
-   utiliite vahede ja paigutuse jaoks, mitte kiti komponentide ülevärvimiseks.
-5. Pealkirjad: `.ci-heading` (Inter, ilma tähevaheta) lehe- ja jaotisepealkirjade jaoks;
-   `.ci-dashboard-display` (Instrument Serif) ainult suure, hõreda kuvateksti jaoks, näiteks vealehe
-   olekukoodi puhul.
-6. `tests/unit/dashboard-kit-sweep.test.ts` valvab kiti kasutuselevõttu: `src/app` ega
-   `src/shared/components` all ei tohi olla Materiali ligatuurspani; armatuurlaua puus
-   (`src/app/(dashboard)` ja `src/shared/components`) ei tohi olla tooreid `<select>`-,
-   `<textarea>`- ega `<table>`-elemente ega käsitsi ehitatud `role="dialog"` väljaspool loetletud
-   erandeid (`Select` adapteri natiivne haru, `RequestLoggerDetail`); iga toores `<button>` või
-   `<input>` vajab seal kommentaari, mis sisaldab `kit-exception:` (koos põhjendusega) ja lõppeb
-   kõige rohkem 3 rida selle kohal; paleti värvitoonid ja `dark:` variandid on lubatud ainult
-   failides, mille test loetleb.
-7. Kontrolli enne PR-i mõlemat teemat ja 390 px vaateakent (ekraanipildid);
-   `tests/e2e/a11y.spec.ts` käivitab axe'i.
+2. Ärge muutke `packages/ui-kit/src` kunagi käsitsi: sünkroonige käsuga `scripts/dev/sync-ui-kit.sh <commit>`;
+   commit'i-eelne kontroll `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) nurjub iga baidi puhul,
+   mis erineb fikseeritud ülesvoolu commit'ist (kontroll jäetakse hoiatusega vahele, kui ülesvoolu kloon
+   `UI_KIT_CLONE` või `_references/cheaper-inference-ui-kit` puudub). Kui komplektis midagi puudub,
+   leidke adapteris või kuval ajutine lahendus ja paluge see ülesvoolu lisada.
+3. Komplekti teksti vaikeväärtused on ingliskeelsed (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kui
+   komplekti komponent renderdab teksti, edastage funktsioonist `useTranslations(...)` tõlgitud stringid.
+4. Tailwindi utiliidid alistavad komplekti komponentide klassid (komplekt deklareerib
+   `@layer theme, base, components, utilities` ja selle reeglid asuvad kihis `components`) — kasutage utiliite
+   vahede ja paigutuse jaoks, mitte komplekti komponentide värvide muutmiseks.
+5. Pealkirjad: `.ci-heading` (Inter, ilma tähesammu muutmiseta) lehe- ja jaotispealkirjade jaoks;
+   `.ci-dashboard-display` (Instrument Serif) ainult suure ja hõreda esiletõstuteksti jaoks, näiteks
+   vealehe olekukood.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kontrollib komplekti kasutuselevõttu: kataloogides
+   `src/app` ega `src/shared/components` ei tohi olla Materiali ligatuuriga elementi span; töölauapuus
+   (`src/app/(dashboard)` ja `src/shared/components`) ei tohi olla tooreid elemente `<select>`,
+   `<textarea>` ega `<table>` ning käsitsi loodud atribuuti `role="dialog"` väljaspool loetletud erandeid
+   (`Select`-adapteri omamaine haru, `RequestLoggerDetail`); iga sealne toores `<button>` või `<input>`
+   vajab põhjust sisaldavat kommentaari `kit-exception:`, mis lõpeb sellest kuni 3 rida eespool;
+   paletitoonid ja variandid `dark:` on lubatud ainult testi loetletud failides.
+7. Kontrollige enne PR-i mõlemat teemat ja 390 px vaateava (ekraanipiltidega); `tests/e2e/a11y.spec.ts`
+   käitab axe'i.
 
 ## 3. Ekraani lisamine
 
@@ -153,7 +150,23 @@ Seejärel: vaadake üle `git diff packages/ui-kit`, kontrollige visuaalselt mõl
 kasutuse ja lõpp-punkti vaateid, käivitage `npm run check:ui-kit-snapshot` ja `npm run test:vitest:ui` ning
 avage PR koos ülesvoolu muudatuste logiga.
 
-## 6. Viiteindeks
+## 6. README diagrammid
+
+Juurkausta `README.md` faili lisatud kaksteist diagrammi (`docs/diagrams/*.svg`) rakendavad komplekti staatilistele piltidele. Need genereeritakse, mitte ei joonistata käsitsi: 13 generaatorifaili asukohas `scripts/docs/gen-readme-*.mjs` (kaksteist diagrammi ja juhtfail `gen-readme-diagrams.mjs`) ning 12 ajakohasustesti asukohas `tests/unit/docs/readme-*-svg.test.ts`, üks iga diagrammi kohta. Iga test võrdleb commit'itud faili bait baidi haaval generaatori väljundiga (töö `test-unit`).
+
+- **Tokenid.** `scripts/docs/readme-diagram-theme.mjs` kopeerib paleti failist `packages/ui-kit/src/ci-tokens.css` (vastavust sellele failile tagab `tests/unit/docs/readme-diagram-theme.test.ts`) ning määrab tekstirollid komplekti fontidega: Instrument Serif esiletõstetud tekstile, Inter kasutajaliidese tekstile ja IBM Plex Mono arvudele ning koodile. Need on samad `@fontsource` paketid, mille `src/app/globals.css` laadib juhtpaneelile. Heledad väärtused on failis `:root` all ja tumedad `prefers-color-scheme: dark` tingimuse taga, nii et iga pilt järgib GitHubi lugeja värviskeemi.
+
+- **Fondid.** `scripts/docs/readme-fonts.mjs` vähendab need woff2-failid iga diagrammi joonistatud glüüfideni ning põimib need `@font-face` määrangutena `data:` URI-de kaudu. Nii jäävad komplekti fondid SVG sisse. Kohalik README pilditest kontrollib, et renderdamine ei teeks väliseid fondipäringuid. Alamkomplektid sisaldavad ainult ladina märke; süsteemifontidele toetuvad sümboliglüüfid lubatakse ükshaaval loendis `SYMBOL_FALLBACKS`. Iga muu katmata glüüf põhjustab vea.
+
+- **Uuesti genereerimine.** `npm run docs:readme-diagrams` kirjutab kõik kaksteist diagrammi README järjekorras uuesti ning väljastab iga faili kohta suurusega rea. Generaator töötab ka eraldi (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` vajab käsku `node --import tsx/esm`, sest selle arvud tulevad jooksva kataloogi laadijast `open-sse/config/freeModelCatalog.ts`; kataloogimuudatuse mõju CI-le on kirjeldatud `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit'i generaator ja SVG koos.
+
+- **Tõendus.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderdab faili kohalikus testis (`<img>` element, piirav `Content-Security-Policy` ja `image/svg+xml` vastus), salvestab heleda ja tumeda kaadri ning teatab lehe välistest fondipäringutest; neid peab olema 0.
+
+- **Mahupiir.** Alla 200 KB faili kohta, mida kontrollib iga ajakohasustest; 500 KB on kõigi README piltide absoluutne ülempiir (SVG studio validaatori reegel).
+
+- **Ühine tekst, arvud gate'ist.** Iga generaator hoiab diagrammi teksti `*_COPY` konstandis või loob selle jooksva kataloogi põhjal. Sama tekst joonistatakse välja ja antakse fondialamkomplekti sisendiks. Kanoonilised arvud jäävad `<text>` sõlmedesse, mida loeb `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Gate'i loetavate diagrammide ajakohasustestid käivitavad ka selle validaatorid genereeritud failil. Koodist lahknev arv paneb testi läbi kukkuma: paranda gate'i loetavat allikat, mitte kunagi generaatoris olevat arvu.
+
+## 7. Viiteindeks
 
 - `src/app/globals.css` — tokenisild, `.dark`-alikirjutused, OmniRoute'i `@layer components` laiendused
 - `packages/ui-kit/UPSTREAM.md` — fikseeritud ülesvoolu commit ja litsentsivolitus; `packages/ui-kit/PATCHES.md`

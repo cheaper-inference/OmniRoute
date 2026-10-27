@@ -10,77 +10,77 @@ _최종 업데이트: 2026-06-28_
 
 ## 요약
 
-OmniRoute는 Next.js를 기반으로 구축된 로컬 AI 라우팅 게이트웨이 및 대시보드입니다.
-단일 OpenAI 호환 엔드포인트(`/v1/*`)를 제공하며, 변환, 폴백, 토큰 갱신 및 사용량 추적을 통해 여러 업스트림 공급자에 트래픽을 라우팅합니다.
+OmniRoute는 Next.js 기반으로 구축된 로컬 AI 라우팅 게이트웨이이자 대시보드입니다.
+단일 OpenAI 호환 엔드포인트(`/v1/*`)를 제공하며, 변환, 폴백, 토큰 갱신 및 사용량 추적 기능을 통해 여러 업스트림 제공자에 트래픽을 라우팅합니다.
 
 핵심 기능:
 
-- CLI/도구를 위한 OpenAI 호환 API 인터페이스(공급자 376개, 실행기 모듈 156개)
-- 공급자 형식 간 요청/응답 변환
+- CLI/도구용 OpenAI 호환 API 인터페이스(376개 제공자, 156개 실행기 모듈)
+- 제공자 형식 간 요청/응답 변환
 - 모델 조합 폴백(다중 모델 시퀀스)
-- 구조화된 조합 단계(`provider + model + connection`) 및 `compositeTiers`에 따른 런타임 순서 지정
-- 계정 수준 폴백(공급자별 다중 계정)
-- 기본 채팅 경로에서 할당량 사전 확인 및 할당량 인식 P2C 계정 선택
-- OAuth 및 API 키 기반 공급자 연결 관리(OAuth 공급자 모듈 27개)
-- `/v1/embeddings`를 통한 임베딩 생성(공급자 18개)
-- `/v1/images/generations`를 통한 이미지 생성(공급자 10개 이상, 모델 20개 이상)
-- `/v1/audio/transcriptions`를 통한 오디오 전사(공급자 18개)
-- `/v1/audio/speech`를 통한 텍스트 음성 변환(기본 제공 공급자 24개)
-- `/v1/videos/generations`를 통한 동영상 생성(ComfyUI + SD WebUI)
+- `compositeTiers`를 기준으로 런타임 순서가 결정되는 구조화된 조합 단계(`provider + model + connection`)
+- 계정 수준 폴백(제공자별 다중 계정)
+- 기본 채팅 경로에서 할당량 사전 검사 및 할당량 인식 P2C 계정 선택
+- OAuth + API 키 기반 제공자 연결 관리(27개 OAuth 제공자 모듈)
+- `/v1/embeddings`를 통한 임베딩 생성(18개 제공자)
+- `/v1/images/generations`를 통한 이미지 생성(10개 이상의 제공자, 20개 이상의 모델)
+- `/v1/audio/transcriptions`를 통한 오디오 전사(18개 제공자)
+- `/v1/audio/speech`를 통한 텍스트 음성 변환(24개 기본 제공자)
+- `/v1/videos/generations`를 통한 비디오 생성(ComfyUI + SD WebUI)
 - `/v1/music/generations`를 통한 음악 생성(ComfyUI)
-- `/v1/search`를 통한 웹 검색(공급자 20개)
+- `/v1/search`를 통한 웹 검색(20개 제공자)
 - `/v1/moderations`를 통한 콘텐츠 검토
 - `/v1/rerank`를 통한 재순위 지정
 - 추론 모델을 위한 Think 태그 파싱(`<think>...</think>`)
 - 엄격한 OpenAI SDK 호환성을 위한 응답 정제
-- 공급자 간 호환성을 위한 역할 정규화(developer→system, system→user)
+- 제공자 간 호환성을 위한 역할 정규화(developer→system, system→user)
 - 구조화된 출력 변환(json_schema → Gemini responseSchema)
-- 공급자, 키, 별칭, 조합, 설정 및 가격 정보의 로컬 영속성(DB 모듈 122개)
+- 제공자, 키, 별칭, 조합, 설정 및 가격 정보의 로컬 영속성(122개 DB 모듈)
 - 사용량/비용 추적 및 요청 로깅
-- 다중 기기/상태 동기화를 위한 선택적 클라우드 동기화
+- 여러 기기/상태 동기화를 위한 선택적 클라우드 동기화
 - API 접근 제어를 위한 IP 허용 목록/차단 목록
-- 추론 예산 관리(패스스루/자동/사용자 지정/적응형)
+- 추론 예산 관리(통과/자동/사용자 지정/적응형)
 - 전역 시스템 프롬프트 삽입
-- 세션 추적 및 지문 생성
-- 공급자별 프로필을 사용하는 계정별 고급 속도 제한
-- 공급자 복원력을 위한 서킷 브레이커 패턴
-- 뮤텍스 잠금을 통한 동시 요청 폭주 방지
+- 세션 추적 및 핑거프린팅
+- 제공자별 프로필을 적용하는 계정별 고급 요청 속도 제한
+- 제공자 복원력을 위한 서킷 브레이커 패턴
+- 뮤텍스 잠금을 통한 스탬피드 방지
 - 서명 기반 요청 중복 제거 캐시
 - 도메인 계층: 비용 규칙, 폴백 정책, 잠금 정책
-- Context Relay: 계정 전환 시 연속성을 위한 세션 인계 요약
-- 도메인 상태 영속성(폴백, 예산, 잠금 및 서킷 브레이커를 위한 SQLite 연속 기입 캐시)
+- Context Relay: 계정 순환 시 연속성을 유지하기 위한 세션 핸드오프 요약
+- 도메인 상태 영속성(폴백, 예산, 잠금, 서킷 브레이커를 위한 SQLite 연속 기입 캐시)
 - 중앙 집중식 요청 평가를 위한 정책 엔진(잠금 → 예산 → 폴백)
-- p50/p95/p99 지연 시간 집계를 지원하는 요청 텔레메트리
+- p50/p95/p99 지연 시간 집계를 포함하는 요청 텔레메트리
 - `combo_execution_key` / `combo_step_id`를 통한 조합 대상 텔레메트리 및 과거 조합 대상 상태
 - 엔드투엔드 추적을 위한 상관관계 ID(X-Request-Id)
-- API 키별 옵트아웃을 지원하는 규정 준수 감사 로깅
+- API 키별 옵트아웃이 가능한 규정 준수 감사 로깅
 - LLM 품질 보증을 위한 평가 프레임워크
-- 실시간 공급자 서킷 브레이커 상태를 제공하는 상태 대시보드
-- 3가지 전송 방식(stdio/SSE/Streamable HTTP)을 지원하는 MCP Server(도구 110개)
-- 스킬 및 작업 수명 주기를 지원하는 A2A Server(JSON-RPC 2.0 + SSE)
+- 실시간 제공자 서킷 브레이커 상태를 보여주는 상태 대시보드
+- 3가지 전송 방식(stdio/SSE/Streamable HTTP)을 지원하는 MCP 서버(110개 도구)
+- 스킬 및 작업 수명 주기를 지원하는 A2A 서버(JSON-RPC 2.0 + SSE)
 - 메모리 시스템(추출, 삽입, 검색, 요약)
 - 스킬 시스템(레지스트리, 실행기, 샌드박스, 기본 제공 스킬)
 - 인증서 관리 및 DNS 처리를 지원하는 MITM 프록시
 - 프롬프트 인젝션 방어 미들웨어
-- Caveman, RTK, 스택형 파이프라인, 압축 조합, 언어 팩 및 분석을 지원하는 프롬프트 압축 파이프라인
-- ACP (Agent Communication Protocol) 레지스트리
-- 모듈식 OAuth 공급자(`src/lib/oauth/providers/` 아래의 개별 모듈 22개)
+- Caveman, RTK, 스택형 파이프라인, 압축 조합, 언어 팩 및 분석 기능을 갖춘 프롬프트 압축 파이프라인
+- ACP(Agent Communication Protocol) 레지스트리
+- 모듈식 OAuth 제공자(`src/lib/oauth/providers/` 아래에 있는 22개 개별 모듈)
 - 제거/완전 제거 스크립트
 - OAuth 환경 복구 작업
-- OpenAI 호환 WS 클라이언트를 위한 WebSocket 브리지(`/v1/ws`)
-- 동기화 토큰 관리(발급/폐기, ETag 버전 관리형 구성 번들 다운로드)
-- 일급 공급자 프리셋인 GLM Thinking(`glmt`)
-- 하이브리드 토큰 계산(공급자 측 `/messages/count_tokens` 및 추정 폴백)
+- OpenAI 호환 WS 클라이언트용 WebSocket 브리지(`/v1/ws`)
+- 동기화 토큰 관리(발급/해지, ETag 버전 기반 구성 번들 다운로드)
+- 일급 제공자 프리셋인 GLM Thinking(`glmt`)
+- 하이브리드 토큰 계산(제공자 측 `/messages/count_tokens` 및 추정 폴백)
 - 모델 별칭 자동 시딩(시작 시 30개 이상의 프록시 간 방언 정규화)
-- SSRF 방어, 비공개 URL 차단 및 구성 가능한 재시도를 지원하는 안전한 아웃바운드 fetch
+- SSRF 방어, 비공개 URL 차단 및 구성 가능한 재시도를 지원하는 안전한 아웃바운드 가져오기
 - 구성 가능한 `requestRetry` 및 `maxRetryIntervalSec`를 사용하는 쿨다운 인식 채팅 재시도
-- 시작 시 Zod를 사용하는 런타임 환경 검증
-- 페이지네이션, 공급자 CRUD 이벤트 및 SSRF 차단 검증 로깅을 지원하는 규정 준수 감사 v2
+- 시작 시 Zod를 사용한 런타임 환경 검증
+- 페이지네이션, 제공자 CRUD 이벤트 및 SSRF 차단 검증 로깅을 지원하는 규정 준수 감사 v2
 
-기본 런타임 모델:
+주요 런타임 모델:
 
 - `src/app/api/*` 아래의 Next.js 앱 라우트가 대시보드 API와 호환성 API를 모두 구현
-- `src/sse/*` + `open-sse/*`의 공유 SSE/라우팅 코어가 공급자 실행, 변환, 스트리밍, 폴백 및 사용량을 처리
+- `src/sse/*` + `open-sse/*`의 공유 SSE/라우팅 코어가 제공자 실행, 변환, 스트리밍, 폴백 및 사용량을 처리
 
 ## 참조 다이어그램
 
@@ -1078,9 +1078,9 @@ flowchart LR
 
 ## 6) SSRF / 아웃바운드 URL 가드
 
-- `src/shared/network/outboundUrlGuard.ts`는 제공자 실행기에 도달하기 전에 모든 비공개/루프백/링크 로컬 대상 URL을 차단함
-- 제공자 모델 검색 및 검증 라우트는 모든 아웃바운드 요청 전에 가드를 적용하는 `src/shared/network/safeOutboundFetch.ts`를 사용함
-- 가드 오류는 HTTP 422와 함께 `URL_GUARD_BLOCKED`로 노출되며 `providerAudit.ts`를 통해 규정 준수 감사 추적에 기록됨
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`)는 `BaseExecutor.execute()`를 통해 전송되는 채팅 요청에 `src/shared/network/outboundUrlGuard.ts`를 적용합니다. 공개 전용 모드(비공개 플래그가 꺼져 있고 `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`인 경우)에서는 사설 및 루프백 호스트와 169.254.0.0/16을 차단하며, 그 외 모든 모드에서는 클라우드 메타데이터 호스트를 차단합니다. DNS 조회 전에 작성된 그대로의 호스트 이름 또는 IP 리터럴을 검사합니다. 기본 제공 로컬 공급자는 이 검사를 건너뜁니다.
+- 공급자 모델 검색 및 검증 라우트는 모든 아웃바운드 요청 전에 가드를 적용하는 `src/shared/network/safeOutboundFetch.ts`를 사용합니다.
+- 가드 오류는 HTTP 503과 함께 `URL_GUARD_BLOCKED`로 노출되며(`getSafeOutboundFetchErrorStatus`; 모델 검색 라우트는 400을 반환), 검증 중 실제 SSRF 차단은 `provider.validation.ssrf_blocked` 이벤트로 감사 추적에 기록됩니다.
 
 ## 관측 가능성 및 운영 신호
 
@@ -1131,7 +1131,7 @@ flowchart LR
 4. 클라우드 동작은 올바른 `NEXT_PUBLIC_BASE_URL`과 클라우드 엔드포인트의 연결 가능 여부에 따라 달라집니다.
 5. `open-sse/` 디렉터리는 `@omniroute/open-sse` **npm 워크스페이스 패키지**로 게시됩니다. 소스 코드는 `@omniroute/open-sse/...`를 통해 이를 가져옵니다(Next.js `transpilePackages`로 해석됨). 이 문서의 파일 경로는 일관성을 위해 계속 `open-sse/` 디렉터리 이름을 사용합니다.
 6. 대시보드의 차트는 접근성 높은 대화형 분석 시각화(모델 사용량 막대 차트, 성공률이 포함된 공급자 분석 표)를 위해 **Recharts**(SVG 기반)를 사용합니다.
-7. E2E 테스트는 **Playwright**(`tests/e2e/`)를 사용하며 `npm run test:e2e`를 통해 실행합니다. 단위 테스트는 **Node.js 테스트 러너**(`tests/unit/`)를 사용하며 `npm run test:unit`을 통해 실행합니다. `src/` 아래의 소스 코드는 **TypeScript**(`.ts`/`.tsx`)이며, `open-sse/` 워크스페이스는 JavaScript(`.js`)로 유지됩니다.
+7. E2E 테스트는 **Playwright**(`tests/e2e/`)를 사용하며 `npm run test:e2e`를 통해 실행합니다. 단위 테스트는 **Node.js 테스트 러너**(`tests/unit/`)를 사용하며 `npm run test:unit`을 통해 실행합니다. `src/` 아래의 소스 코드는 **TypeScript**(`.ts`/`.tsx`)이며, `open-sse/` 워크스페이스는 TypeScript(`.ts`)로 유지됩니다.
 8. 설정 페이지는 일반, 모양, AI, 보안, 라우팅, 복원력, 고급의 7개 탭으로 구성됩니다. 복원력 페이지에서는 요청 큐, 연결 쿨다운, 공급자 서킷 브레이커 및 쿨다운 대기 동작만 구성하며, 실시간 서킷 브레이커 런타임 상태는 상태 페이지에 표시됩니다.
 9. **Context Relay** 전략(`context-relay`)은 두 계층으로 나뉩니다. `combo.ts`는 핸드오프 생성 여부를 결정하고, `chat.ts`는 계정 확인 후 핸드오프를 삽입합니다. 핸드오프 데이터는 `context_handoffs` SQLite 테이블에 저장됩니다. 실제 계정이 변경되었는지는 `chat.ts`만 알 수 있으므로 이러한 분리는 의도된 것입니다.
 10. **프록시 적용**은 이제 포괄적으로 이루어집니다. `tokenHealthCheck.ts`는 연결별로 프록시를 확인하고, `/api/providers/validate`는 `runWithProxyContext`를 사용하며, `proxyFetch.ts`는 Node 22에서 디스패처 호환성을 유지하기 위해 `undici.fetch()`를 사용합니다.

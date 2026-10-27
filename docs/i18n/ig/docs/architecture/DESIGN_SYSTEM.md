@@ -81,36 +81,34 @@
 
 ## 2. Iwu
 
-1. Token, ọ bụghị literal. Ihe ndị pụrụ iche ka e debere n'echiche: console terminal nke na-adịnwa
-   gbara ọchịchịrị na `STATUS_HEX` (`src/shared/constants/statusColors.ts`), enyo hex edoziziri nke
+1. Token, ọ bụghị literal. Ihe ndị pụrụ iche ka e debere n'echiche: console terminal nke na-adị
+   gbara ọchịchịrị mgbe niile na `STATUS_HEX` (`src/shared/constants/statusColors.ts`), enyo hex edoziziri nke
    status palette nke kit maka ndị na-akpọ ya nke chọrọ hex literal. Categorical palettes abụghịzi
    ihe pụrụ iche ọzọ: ha na-adabere na token chart ise nke kit (`--color-chart-1..5`) site na
    `src/shared/utils/categoricalPalette.ts` na, maka atụmatụ routing,
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges na canvas orchestration
    na-agụ variables `--orch-status-*` ndị maara theme (`src/shared/components/flow/edgeStyles.ts`).
-2. Adịghị edozi `packages/ui-kit/src` n'aka: mee ka ọ kwekọrịta na
-   `scripts/dev/sync-ui-kit.sh <commit>`; ọnụ ụzọ pre-commit `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) na-adịghị aga byte ọ bụla dị iche na commit upstream e gbadoro ụkwụ (ọ
-   na-agafeti ya na ịdọ aka ná ntị mgbe clone upstream, `UI_KIT_CLONE` ma ọ bụ
-   `_references/cheaper-inference-ui-kit`, adịghị). Mgbe kit na-enweghị ihe, jiri ụzọ ọzọ dozie ya na
-   adapter ma ọ bụ ihuenyo wee jụọ upstream maka ya.
-3. Ederede ndabara kit bụ Bekee (`label = "Loading"`, `loadingLabel = "Loading table"`…) — nyefee
-   strings atụgharịrị sitere na `useTranslations(...)` mgbe ọ bụla kit component na-egosi ederede.
-4. Tailwind utilities na-emeri classes nke kit component (kit na-ekwupụta
-   `@layer theme, base, components, utilities` ma iwu ya na-ebi na `components`) — jiri utilities
-   maka spacing na layout, ọ bụghị iji gbanwee agba kit components.
-5. Isiokwu: `.ci-heading` (Inter, enweghị tracking) maka aha peeji na ngalaba;
-   `.ci-dashboard-display` (Instrument Serif) naanị maka ederede ngosi buru ibu ma na-adịghị ọtụtụ
-   dịka koodu ọkwa nke peeji njehie.
-6. `tests/unit/dashboard-kit-sweep.test.ts` na-echebe nnabata kit: enweghị Material ligature span
-   n'okpuru `src/app` ma ọ bụ `src/shared/components`; na osisi dashboard (`src/app/(dashboard)` na
-   `src/shared/components`) enweghị `<select>`, `<textarea>` ma ọ bụ `<table>` raw, na enweghị
-   `role="dialog"` e jiri aka dee n'èzí ihe ndị pụrụ iche e depụtara (alaka native nke `Select`
-   adapter, `RequestLoggerDetail`); `<button>` ma ọ bụ `<input>` raw ọ bụla ebe ahụ chọrọ nkọwa nke
-   nwere `kit-exception:` (ya na ihe kpatara ya) nke na-agwụ opekampe akara atọ n'elu ya; ụdị agba
-   palette na variants `dark:` naanị na faịlụ ndị ule ahụ depụtara.
-7. Nyochaa themes abụọ na viewport 390 px tupu PR (screenshots); `tests/e2e/a11y.spec.ts` na-agba
-   axe ọsọ.
+2. Ejila aka gbanwee `packages/ui-kit/src`: jiri `scripts/dev/sync-ui-kit.sh <commit>` mekọrịta ya; ọnụ ụzọ
+   pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) na-ada ma ọ bụrụ na byte ọ bụla
+   dị iche na upstream commit a kpọgidere (ọ na-amafe ya ma nye ịdọ aka ná ntị mgbe upstream clone,
+   `UI_KIT_CLONE` ma ọ bụ `_references/cheaper-inference-ui-kit`, adịghị). Mgbe ihe na-adịghị na kit,
+   chọta ụzọ ọzọ isi mee ya na adapter ma ọ bụ screen ma rịọ upstream ka ha tinye ya.
+3. Ndabara ederede kit dị n'asụsụ Bekee (`label = "Loading"`, `loadingLabel = "Loading table"`…) — nyefee
+   strings a tụgharịrị site na `useTranslations(...)` mgbe ọ bụla component kit na-egosipụta ederede.
+4. Tailwind utilities na-emeri classes component kit (kit na-ekwupụta
+   `@layer theme, base, components, utilities`, iwu ya dịkwa na `components`) — jiri utilities maka
+   oghere na nhazi, ọ bụghị iji nye components kit agba ọzọ.
+5. Isiokwu: `.ci-heading` (Inter, enweghị tracking) maka aha peeji na ngalaba; `.ci-dashboard-display`
+   (Instrument Serif) naanị maka nnukwu ederede ngosi na-adịghị ukwuu, dịka status code dị na peeji njehie.
+6. `tests/unit/dashboard-kit-sweep.test.ts` na-echekwa nnabata kit: enweghị Material ligature span n'okpuru
+   `src/app` ma ọ bụ `src/shared/components`; n'ime osisi dashboard (`src/app/(dashboard)` na
+   `src/shared/components`), enweghị `<select>`, `<textarea>` ma ọ bụ `<table>` raw, nakwa enweghị
+   `role="dialog"` e ji aka rụọ n'èzí ewezuga ndị edepụtara (native branch nke adapter `Select`,
+   `RequestLoggerDetail`); `<button>` ma ọ bụ `<input>` raw ọ bụla dị ebe ahụ chọrọ comment nwere
+   `kit-exception:` (ya na ihe kpatara ya) nke na-agwụcha n'ahịrị na-erughị ma ọ bụ hà 3 n'elu ya; palette hues na variants
+   `dark:` ga-adị naanị na faịlụ ndị test ahụ depụtara.
+7. Nyochaa themes abụọ ahụ na viewport 390 px tupu PR (screenshots); `tests/e2e/a11y.spec.ts` na-agba
+   axe.
 
 ## 3. Ịgbakwunye ihuenyo
 
@@ -150,7 +148,23 @@ relative imports). Mgbe ahụ: nyochaa `git diff packages/ui-kit`, jiri anya nyo
 usage na endpoint n'ime themes abụọ ahụ, mee `npm run check:ui-kit-snapshot` na `npm run test:vitest:ui`, ma
 mepee PR tinyere upstream changelog.
 
-## 6. Ndepụta ntụaka
+## 6. Eserese README
+
+Eserese iri na abụọ etinyere na `README.md` dị na mgbọrọgwụ (`docs/diagrams/*.svg`) na-etinye kit n'ihe oyiyi na-adịghị agagharị. A na-emepụta ha, a naghị eji aka ese ha: faịlụ generator 13 na `scripts/docs/gen-readme-*.mjs` (eserese iri na abụọ na onye njikwa `gen-readme-diagrams.mjs`) na ule 12 maka faịlụ ochie na `tests/unit/docs/readme-*-svg.test.ts`, otu maka eserese ọ bụla. Ule ọ bụla na-atụnyere faịlụ e debere na commit na mmepụta generator ya byte n'otu byte (ọrụ `test-unit`).
+
+- **Token.** `scripts/docs/readme-diagram-theme.mjs` na-edepụta palette si na `packages/ui-kit/src/ci-tokens.css` (ule `tests/unit/docs/readme-diagram-theme.test.ts` na-eme ka ọ kwekọọ na faịlụ ahụ) ma kọwaa ọrụ ederede site na font kit: Instrument Serif maka ederede ngosi, Inter maka ederede interface, IBM Plex Mono maka ọnụọgụ na koodu. Ha bụ otu ngwugwu `@fontsource` nke `src/app/globals.css` na-ebunye maka dashboard. Uru ọkụ dị na `:root`, nke gbara ọchịchịrị nọ n'okpuru `prefers-color-scheme: dark` n'ime faịlụ, ka ihe oyiyi ọ bụla soro atụmatụ agba onye na-agụ na GitHub.
+
+- **Font.** `scripts/docs/readme-fonts.mjs` na-ebelata faịlụ woff2 ndị ahụ ka ha nwee naanị glyph eserese ọ bụla na-ese, wee tinye ha site na `@font-face` dịka URI `data:`. Nke a na-edobe font kit n'ime SVG. Nnwale ihe oyiyi README nke mpaghara na-enyocha na igosi ihe oyiyi anaghị eziga arịrịọ font n'èzí. Obere nchịkọta ndị ahụ nwere naanị mkpụrụedemede Latin; glyph akara ndị na-eji font sistemụ dịka ndabere ka a na-ekwe otu otu na `SYMBOL_FALLBACKS`. Glyph ọ bụla ọzọ a na-ekpuchighị na-ebute njehie.
+
+- **Mmegharị mmepụta.** `npm run docs:readme-diagrams` na-edeghachi eserese iri na abụọ niile n'usoro README ma bipụta otu ahịrị maka faịlụ ọ bụla na nha ya. Generator nwekwara ike ịrụ naanị ya (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` chọrọ `node --import tsx/esm` n'ihi na ọnụọgụ ya si na onye na-ebunye katalọgụ ugbu a na `open-sse/config/freeModelCatalog.ts`; mmetụta mgbanwe katalọgụ na CI dị na `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Tinye generator na SVG n'otu commit.
+
+- **Ihe akaebe.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` na-egosi faịlụ na nnwale mpaghara (tag `<img>`, `Content-Security-Policy` na-egbochi ohere na nzaghachi `image/svg+xml`), na-ewere foto ọkụ na nke gbara ọchịchịrị, ma kọwaa arịrịọ font si n'èzí ibe ahụ mere; ha ga-abụrịrị 0.
+
+- **Oke nha.** N'okpuru 200 KB maka faịlụ ọ bụla, nke ule faịlụ ochie ọ bụla na-enyocha; 500 KB bụ oke siri ike maka ihe oyiyi README ọ bụla (iwu onye nkwado SVG studio).
+
+- **Ederede a na-ekekọrịta, ọnụọgụ si na gate.** Generator ọ bụla na-edobe ederede eserese ya na constant `*_COPY` ma ọ bụ na-ewu ya site na katalọgụ ugbu a. Otu ederede ahụ bụ ihe a na-ese na ntinye maka obere nchịkọta font. Ọnụọgụ ziri ezi na-anọ na node `<text>` nke `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) na-agụ. Ule faịlụ ochie nke eserese gate na-agụ na-ejikwa ndị nkwado ya enyocha faịlụ e mepụtara. Ọnụọgụ na-ekwekọghị na koodu na-eme ka ule daa: dozie isi iyi gate na-agụ, ọ bụghị ọnụọgụ dị na generator.
+
+## 7. Ndepụta ntụaka
 
 - `src/app/globals.css` — njikọ token, overrides nke `.dark`, mgbakwunye OmniRoute `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — upstream commit a kpọgidere na ikike license; `packages/ui-kit/PATCHES.md`

@@ -88,27 +88,12 @@
    `src/shared/utils/categoricalPalette.ts`، وبالنسبة لاستراتيجيات التوجيه،
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`؛ وتقرأ حواف ReactFlow ولوحة التنسيق
    متغيرات `--orch-status-*` الواعية بالسمة (`src/shared/components/flow/edgeStyles.ts`).
-2. لا تُرقّع `packages/ui-kit/src` يدويًا أبدًا: زامِن باستخدام `scripts/dev/sync-ui-kit.sh <commit>`؛
-   بوابة ما قبل الالتزام `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) تفشل عند أي بايت
-   يختلف عن الالتزام المثبَّت في المنبع (تُتخطَّى مع تحذير عندما يكون استنساخ المنبع،
-   `UI_KIT_CLONE` أو `_references/cheaper-inference-ui-kit`، غائبًا). عندما تفتقر الحزمة إلى شيء،
-   تحايَل عليه في المحوِّل أو الشاشة واطلبه من المنبع.
-3. النصوص الافتراضية في الحزمة إنجليزية (`label = "Loading"`، `loadingLabel = "Loading table"`…) — مرِّر
-   سلاسل مترجمة من `useTranslations(...)` كلما عرض مكوّن من الحزمة نصًا.
-4. الأدوات المساعدة في Tailwind تتغلّب على فئات مكونات الحزمة (فالحزمة تُعلن
-   `@layer theme, base, components, utilities` وقواعدها تعيش في `components`) — استخدم الأدوات المساعدة
-   للتباعد والتخطيط، لا لإعادة تلوين مكونات الحزمة.
-5. العناوين: `.ci-heading` (خط Inter، بلا تباعد أحرف) لعناوين الصفحات والأقسام؛ `.ci-dashboard-display`
-   (Instrument Serif) فقط لنصوص العرض الكبيرة القليلة مثل رمز الحالة في صفحة الخطأ.
-6. `tests/unit/dashboard-kit-sweep.test.ts` يحرس اعتماد الحزمة: ممنوع أي span برباط حروف Material تحت
-   `src/app` أو `src/shared/components`؛ وفي شجرة لوحة التحكم (`src/app/(dashboard)` و
-   `src/shared/components`) ممنوع وجود `<select>` أو `<textarea>` أو `<table>` خام، وممنوع أي
-   `role="dialog"` مُنفَّذ يدويًا خارج الاستثناءات المدرجة (الفرع الأصيل لمحوِّل `Select`،
-   `RequestLoggerDetail`)؛ وكل `<button>` أو `<input>` خام هناك يحتاج تعليقًا يتضمن
-   `kit-exception:` (مع ذكر السبب) ينتهي قبله بثلاثة أسطر على الأكثر؛ وتدرجات ألوان اللوحة ومتغيرات `dark:`
-   مقصورة على الملفات التي يعدّدها الاختبار.
-7. تحقّق من كلتا السمتين ومن منفذ العرض بعرض 390 px قبل فتح PR (بلقطات شاشة)؛ `tests/e2e/a11y.spec.ts` يشغّل
-   axe.
+2. لا تعدّل `packages/ui-kit/src` يدويًا مطلقًا: زامنه باستخدام `scripts/dev/sync-ui-kit.sh <commit>`؛ تفشل بوابة ما قبل الالتزام `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) عند اختلاف أي بايت عن الالتزام المثبّت في المصدر الرئيسي (وتتخطى الفحص مع تحذير عند غياب نسخة المصدر الرئيسي، `UI_KIT_CLONE` أو `_references/cheaper-inference-ui-kit`). عندما تفتقر العُدّة إلى شيء ما، تحايل على ذلك في المهايئ أو الشاشة واطلب إضافته من المصدر الرئيسي.
+3. القيم الافتراضية لنصوص العُدّة باللغة الإنجليزية (`label = "Loading"`، `loadingLabel = "Loading table"`…) — مرّر سلاسل نصية مترجمة من `useTranslations(...)` كلما عرض أحد مكوّنات العُدّة نصًا.
+4. تتغلب أدوات Tailwind على فئات مكوّنات العُدّة (تعلن العُدّة عن `@layer theme, base, components, utilities` وتوجد قواعدها ضمن `components`) — استخدم الأدوات للتباعد والتخطيط، وليس لإعادة تلوين مكوّنات العُدّة.
+5. العناوين: استخدم `.ci-heading` (خط Inter، من دون تباعد بين الأحرف) لعناوين الصفحات والأقسام؛ واستخدم `.ci-dashboard-display` (خط Instrument Serif) فقط لنصوص العرض الكبيرة والمتباعدة، مثل رمز الحالة في صفحة الخطأ.
+6. يحمي `tests/unit/dashboard-kit-sweep.test.ts` اعتماد العُدّة: يُمنع وجود عنصر span لوصلات Material ضمن `src/app` أو `src/shared/components`؛ وفي شجرة لوحة المعلومات (`src/app/(dashboard)` و`src/shared/components`) يُمنع استخدام `<select>` أو `<textarea>` أو `<table>` مباشرةً، كما يُمنع إنشاء `role="dialog"` يدويًا خارج الاستثناءات المدرجة (الفرع الأصلي للمهايئ `Select`، و`RequestLoggerDetail`)؛ وكل `<button>` أو `<input>` مستخدم مباشرةً هناك يحتاج إلى تعليق يتضمن `kit-exception:` (مع السبب) وينتهي على بُعد لا يزيد عن 3 أسطر فوقه؛ ولا يُسمح بدرجات ألوان لوحة الألوان ومتغيرات `dark:` إلا في الملفات التي يسردها الاختبار.
+7. تحقّق من كلا النسقين ومن إطار العرض بعرض 390 بكسل قبل طلب دمج (باستخدام لقطات شاشة)؛ يشغّل `tests/e2e/a11y.spec.ts` أداة axe.
 
 ## 3. إضافة شاشة
 
@@ -147,7 +132,23 @@
 والاستخدام ونقطة النهاية في كلا النسقين، وشغّل `npm run check:ui-kit-snapshot` و`npm run test:vitest:ui`، ثم
 افتح طلب الدمج مع سجل تغييرات المصدر.
 
-## 6. فهرس المراجع
+## 6. مخططات README
+
+تطبّق المخططات الاثنا عشر المضمّنة في `README.md` الجذري (`docs/diagrams/*.svg`) الحزمة على صور ثابتة. تُولَّد هذه المخططات ولا تُرسم يدويًا: يوجد 13 ملف توليد في `scripts/docs/gen-readme-*.mjs` (اثنا عشر مخططًا مع المشغّل `gen-readme-diagrams.mjs`)، و12 اختبارًا لكشف التقادم في `tests/unit/docs/readme-*-svg.test.ts`، واحد لكل مخطط. يقارن كل اختبار الملف المثبّت في commit بمخرجات مولّده بايتًا ببايت (المهمة `test-unit`).
+
+- **الرموز التصميمية.** ينسخ `scripts/docs/readme-diagram-theme.mjs` لوحة الألوان من `packages/ui-kit/src/ci-tokens.css` (ويثبّت `tests/unit/docs/readme-diagram-theme.test.ts` تطابقها مع ذلك الملف)، ويحدّد أدوار النص بخطوط الحزمة: Instrument Serif للنصوص البارزة، وInter لنص الواجهة، وIBM Plex Mono للأرقام والكود. وهي حزم `@fontsource` نفسها التي يحمّلها `src/app/globals.css` للوحة التحكم. تقع القيم الفاتحة على `:root` والداكنة خلف الشرط `prefers-color-scheme: dark` داخل الملف، فتتبع كل صورة نظام ألوان القارئ على GitHub.
+
+- **الخطوط.** يقلّص `scripts/docs/readme-fonts.mjs` ملفات woff2 تلك إلى المحارف الرسومية التي يرسمها كل مخطط، ويضمّنها عبر `@font-face` بصيغة عناوين URI من نوع `data:`. وبذلك تبقى خطوط الحزمة داخل SVG. يتحقق فحص صور README المحلي من أن العرض لا يرسل أي طلبات خطوط خارجية. تقتصر المجموعات الفرعية على المحارف اللاتينية؛ وتُسمح المحارف الرسومية للرموز التي ترجع إلى خطوط النظام واحدًا واحدًا في `SYMBOL_FALLBACKS`. وأي محرف رسومي آخر غير مغطّى يسبّب خطأ.
+
+- **إعادة التوليد.** يعيد `npm run docs:readme-diagrams` كتابة المخططات الاثني عشر بترتيب README ويطبع سطرًا لكل ملف يتضمن حجمه. ويمكن تشغيل كل مولّد منفردًا أيضًا (`node scripts/docs/gen-readme-<name>.mjs`؛ يحتاج `free-tier-budget` إلى `node --import tsx/esm` لأن أرقامه تأتي من محمّل الكتالوج الحالي في `open-sse/config/freeModelCatalog.ts`؛ ويُشرح أثر تغيير الكتالوج على CI في `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). ثبّت المولّد وملف SVG في commit واحد.
+
+- **الإثبات.** يعرض `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` الملف في الفحص المحلي (وسم `<img>`، وسياسة `Content-Security-Policy` مقيّدة، واستجابة `image/svg+xml`)، ويلتقط إطارًا فاتحًا وآخر داكنًا، ويبلّغ عن طلبات الخطوط الخارجية التي أرسلتها الصفحة؛ يجب أن يكون عددها 0.
+
+- **ميزانية الحجم.** أقل من 200 KB لكل ملف، وهو ما يؤكده كل اختبار تقادم؛ أما 500 KB فهو الحد الأقصى الصارم لأي صورة README (قاعدة مدقّق SVG studio).
+
+- **نص مشترك، والأعداد من gate.** يحتفظ كل مولّد بنص مخططه في ثابت `*_COPY`، أو يبنيه من الكتالوج الحالي. وهذا النص هو نفسه النص المرسوم والمدخل لاختيار المجموعة الفرعية للخط. تبقى الأرقام المرجعية في عقد `<text>` التي يقرأها `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). وتشغّل اختبارات تقادم المخططات التي يقرأها gate مدقّقاته أيضًا على الملف المولّد. لذلك يفشل الاختبار إذا انحرف رقم عن الكود: أصلح المصدر الذي يقرأه gate، ولا تصلح الرقم في المولّد أبدًا.
+
+## 7. فهرس المراجع
 
 - `src/app/globals.css` — جسر الرموز، وتجاوزات `.dark`، وامتدادات OmniRoute ضمن `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — الالتزام المثبّت من المصدر وتفويض الترخيص؛ `packages/ui-kit/PATCHES.md`

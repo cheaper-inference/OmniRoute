@@ -549,20 +549,20 @@ Išsamios OpenAPI schemos: `docs/openapi.yaml` → žyma `AgentBridge`.
 
 Trae yra palyginti naujas DI programavimo asistentas. Prieš įgyvendinant apdorojimo modulį:
 
-1. Identifikuoti vykdomąjį failą / plėtinį VS Code / JetBrains prekyvietėse arba kaip atskirą programą
-2. Perimti srautą naudojant mitmproxy, kad būtų nustatyti API serveriai ir galinių taškų struktūros
+1. Identifikuoti dvejetainį failą / plėtinį VS Code / JetBrains prekyvietėse arba kaip atskirą programą
+2. Perimti srautą naudojant mitmproxy, kad būtų aptikti API prieglobos serveriai ir galinių taškų struktūros
 3. Nustatyti autentifikavimo mechanizmą
-4. Įvertinti, ar tęsti, atsižvelgiant į naudojimo sąlygas ir API aptinkamumą
+4. Įvertinti, ar tęsti darbus, atsižvelgiant į paslaugų teikimo sąlygas ir API aptinkamumą
 
-Kol tyrimas nebaigtas, Trae kortelėje valdymo skydelyje rodoma žyma „Tiriama“ su nuoroda „Pranešti apie perspektyvumą“. Apdorojimo modulio ruošinys faile `src/mitm/handlers/trae.ts` pateikia struktūrizuotą klaidą `Dar neįgyvendinta`.
+Kol tyrimas nebaigtas, Trae kortelėje valdymo skydelyje rodoma žyma „Tiriama“ su nuoroda „Pranešti apie tinkamumą“. Apdorojimo modulio ruošinys, esantis `src/mitm/handlers/trae.ts`, pateikia struktūrizuotą klaidą `Not yet implemented`.
 
-### Laukiantys agentai (būtinas MITM — nėra tinkinto bazinio URL palaikymo)
+### Neatliktų darbų agentai (būtinas MITM — pasirinktinio bazinio URL palaikymo nėra)
 
-Toliau nurodyti įrankiai dabartinėse versijose nepalaiko tinkintų bazinių URL, todėl MITM yra vienintelis srauto perėmimo būdas. Perspektyvumo vertinimas dar neatliktas:
+Toliau nurodyti įrankiai dabartinėse savo versijose nepalaiko pasirinktinių bazinių URL, todėl MITM yra vienintelis srauto perėmimo būdas. Tinkamumo vertinimas dar neatliktas:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — atskirai nuo Kiro IDE)
 - **Cowork** (Anthropic darbalaukio programa)
 
-Pastaba: GitHub Copilot CLI ≥v1.0.19 palaiko `COPILOT_PROVIDER_BASE_URL` — šiam įrankiui vietoje MITM naudokite tiesioginę konfigūraciją.
+Pastaba: GitHub Copilot CLI ≥v1.0.19 palaiko `COPILOT_PROVIDER_BASE_URL` — šiam įrankiui naudokite tiesioginę konfigūraciją, o ne MITM.

@@ -94,12 +94,26 @@
 ## 2. Qoidalar
 
 1. Tokenlar, hech qachon literallar emas. Ataylab saqlab qolingan istisnolar: har doim qorong'u bo'lgan konsol terminali va `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — literal hex kerak bo'lgan chaqiruvchilar uchun kit status palitrasining resolved-hex ko'zgudagi nusxasi. Kategorik palitralar endi istisno emas: ular kitning beshta chart tokenidan (`--color-chart-1..5`) `src/shared/utils/categoricalPalette.ts` orqali, routing strategiyalari uchun esa `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` orqali foydalanadi; ReactFlow edge'lari va orkestratsiya canvas'i mavzuga mos `--orch-status-*` o'zgaruvchilarini o'qiydi (`src/shared/components/flow/edgeStyles.ts`).
-2. `packages/ui-kit/src` ni hech qachon qo'lda patch qilmang: `scripts/dev/sync-ui-kit.sh <commit>` bilan sinxronlang; pre-commit tekshiruvi `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) pinned upstream commit'dan farq qiladigan har qanday baytda muvaffaqiyatsiz bo'ladi (upstream clone, ya'ni `UI_KIT_CLONE` yoki `_references/cheaper-inference-ui-kit`, mavjud bo'lmasa, ogohlantirish bilan o'tkazib yuboradi). Kitda biror narsa yetishmasa, uni adapterda yoki ekranda chetlab o'ting va upstream'dan so'rang.
-3. Kit matn standartlari ingliz tilida (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit komponenti matn render qilganda har doim `useTranslations(...)` dan tarjima qilingan satrlarni uzating.
-4. Tailwind utility'lari kit komponent klasslaridan ustun keladi (kit `@layer theme, base, components, utilities` ni e'lon qiladi va uning qoidalari `components` da joylashgan) — utility'lardan spacing va layout uchun foydalaning, kit komponentlarini qayta ranglash uchun emas.
-5. Sarlavhalar: sahifa va bo'lim sarlavhalari uchun `.ci-heading` (Inter, tracking'siz); `.ci-dashboard-display` (Instrument Serif) faqat katta, kam joy egallaydigan display matn uchun, masalan, xatolik sahifasining status kodi.
-6. `tests/unit/dashboard-kit-sweep.test.ts` kit joriy etilishini himoya qiladi: `src/app` yoki `src/shared/components` ostida Material ligature span bo'lmasligi kerak; dashboard daraxtida (`src/app/(dashboard)` va `src/shared/components`) xom `<select>`, `<textarea>` yoki `<table>` bo'lmasligi va sanab o'tilgan istisnolardan (`Select` adapterining native branch'i, `RequestLoggerDetail`) tashqarida qo'lda yozilgan `role="dialog"` bo'lmasligi kerak; u yerdagi har bir xom `<button>` yoki `<input>` dan ko'pi bilan 3 qator yuqorida tugaydigan, `kit-exception:` (sababi ko'rsatilgan holda) ni o'z ichiga olgan izoh bo'lishi shart; palitra hue'lari va `dark:` variantlari faqat test sanab o'tgan fayllarda.
-7. PR'dan oldin ikkala mavzuni va 390 px viewport'ni tekshiring (skrinshotlar); `tests/e2e/a11y.spec.ts` axe'ni ishga tushiradi.
+2. `packages/ui-kit/src` fayllarini hech qachon qoʻlda oʻzgartirmang: `scripts/dev/sync-ui-kit.sh <commit>` orqali sinxronlang;
+   pre-commit tekshiruvi `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) mahkamlangan yuqori oqim commitidan
+   biror bayt farq qilsa, muvaffaqiyatsiz tugaydi (yuqori oqim kloni,
+   `UI_KIT_CLONE` yoki `_references/cheaper-inference-ui-kit` mavjud boʻlmasa, ogohlantirish bilan oʻtkazib yuboriladi). Kitda biror narsa yetishmasa,
+   adapter yoki ekranda muqobil yechimdan foydalaning va uni yuqori oqimdan soʻrang.
+3. Kit matnlarining standart qiymatlari ingliz tilida (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit komponenti matnni ko‘rsatganda
+   `useTranslations(...)` orqali tarjima qilingan satrlarni uzating.
+4. Tailwind utilitalari kit komponenti klasslaridan ustun turadi (kit
+   `@layer theme, base, components, utilities` ni eʼlon qiladi va uning qoidalari `components` ichida joylashgan) — kit komponentlari rangini
+   oʻzgartirish uchun emas, oraliqlar va maket uchun utilitalardan foydalaning.
+5. Sarlavhalar: sahifa va boʻlim sarlavhalari uchun `.ci-heading` (Inter, harflar oraligʻisiz); `.ci-dashboard-display`
+   (Instrument Serif) faqat xatolik sahifasidagi holat kodi kabi katta va siyrak joylashtirilgan namoyish matni uchun.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kitning joriy etilishini nazorat qiladi: `src/app` yoki
+   `src/shared/components` ostida Material ligatura span elementi boʻlmasligi kerak; dashboard daraxtida (`src/app/(dashboard)` va
+   `src/shared/components`) xom `<select>`, `<textarea>` yoki `<table>` hamda sanab oʻtilgan istisnolardan (`Select` adapterining mahalliy tarmogʻi,
+   `RequestLoggerDetail`) tashqarida qoʻlda yaratilgan `role="dialog"` boʻlmasligi kerak; u yerdagi har bir xom `<button>` yoki `<input>` undan koʻpi bilan
+   3 qator yuqorida tugaydigan, sabab koʻrsatilgan `kit-exception:` ni oʻz ichiga olgan izohga ega boʻlishi kerak; palitra tuslari va `dark:` variantlari
+   faqat test roʻyxatida koʻrsatilgan fayllarda boʻlishi mumkin.
+7. PR yuborishdan oldin ikkala mavzuni va 390 px ko‘rish maydonini tekshiring (skrinshotlar); `tests/e2e/a11y.spec.ts`
+   axeʼni ishga tushiradi.
 
 ## 3. Ekran qoʻshish
 
@@ -129,7 +143,23 @@ Shundan soʻng: `git diff packages/ui-kit` natijasini tekshiring, har ikkala mav
 foydalanish va endpointni vizual tekshiruvdan oʻtkazing, `npm run check:ui-kit-snapshot` va `npm run test:vitest:ui` buyruqlarini
 ishga tushiring hamda yuqori oqimdagi oʻzgarishlar jurnali bilan PR oching.
 
-## 6. Maʼlumotnoma indeksi
+## 6. README diagrammalari
+
+Ildizdagi `README.md` fayliga joylangan o'n ikkita diagramma (`docs/diagrams/*.svg`) to'plamni statik rasmlarga qo'llaydi. Ular qo'lda chizilmaydi, generatsiya qilinadi: `scripts/docs/gen-readme-*.mjs` ichida 13 ta generator fayli (o'n ikkita diagramma va `gen-readme-diagrams.mjs` boshqaruvchisi), `tests/unit/docs/readme-*-svg.test.ts` ichida esa har diagramma uchun bittadan 12 ta eskirish testi bor. Har bir test commit qilingan faylni generator chiqishi bilan baytma-bayt solishtiradi (`test-unit` vazifasi).
+
+- **Tokenlar.** `scripts/docs/readme-diagram-theme.mjs` palitrani `packages/ui-kit/src/ci-tokens.css` faylidan nusxalaydi (shu faylga moslikni `tests/unit/docs/readme-diagram-theme.test.ts` ta'minlaydi) va to'plam shriftlari bilan matn rollarini belgilaydi: ajratilgan matn uchun Instrument Serif, interfeys uchun Inter, raqamlar va kod uchun IBM Plex Mono. Bular `src/app/globals.css` boshqaruv paneli uchun yuklaydigan ayni `@fontsource` paketlaridir. Ochiq qiymatlar faylda `:root` ichida, to'q qiymatlar `prefers-color-scheme: dark` sharti ostida turadi; har rasm GitHub o'quvchisining rang sxemasiga moslashadi.
+
+- **Shriftlar.** `scripts/docs/readme-fonts.mjs` shu woff2 fayllarini har diagramma chizadigan gliflargacha qisqartiradi va `@font-face` orqali `data:` URI ko'rinishida joylaydi. Shunday qilib, to'plam shriftlari SVG ichida qoladi. Mahalliy README rasm sinovi renderlash tashqi shrift so'rovlarini yubormasligini tekshiradi. Qism to'plamlar faqat lotin belgilarini qamraydi; tizim shriftlariga qaytadigan ramz gliflariga `SYMBOL_FALLBACKS` da bittalab ruxsat beriladi. Qamralmagan boshqa har qanday glif xatoga sabab bo'ladi.
+
+- **Qayta generatsiya.** `npm run docs:readme-diagrams` barcha o'n ikkita diagrammani README tartibida qayta yozadi va har fayl uchun hajmi ko'rsatilgan bitta satr chiqaradi. Generator alohida ham ishlaydi (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` uchun `node --import tsx/esm` kerak, chunki raqamlar `open-sse/config/freeModelCatalog.ts` dagi joriy katalog yuklovchisidan olinadi; katalog o'zgarishining CI oqibati `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` da). Generator va SVG-ni birga commit qiling.
+
+- **Isbot.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` faylni mahalliy sinovda render qiladi (`<img>` tegi, cheklovchi `Content-Security-Policy` va `image/svg+xml` javobi), ochiq va to'q kadr oladi hamda sahifaning tashqi shrift so'rovlarini ko'rsatadi; ular 0 ta bo'lishi kerak.
+
+- **Hajm chegarasi.** Har fayl 200 KB dan kichik bo'lishi kerak; buni har eskirish testi tekshiradi. Har qanday README rasmi uchun qat'iy chegara 500 KB (SVG studio validatorining qoidasi).
+
+- **Umumiy matn, sonlar gate-dan.** Har generator diagramma matnini `*_COPY` konstantasida saqlaydi yoki joriy katalogdan tuzadi. Shu matn ham chiziladi, ham shrift qism to'plamiga kirish bo'ladi. Kanonik raqamlar `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) o'qiydigan `<text>` tugunlarida qoladi. Gate o'qiydigan diagrammalarning eskirish testlari yaratilgan faylda uning validatorlarini ham ishga tushiradi. Koddan farqlangan raqam testni yiqitadi: generatordagi raqamni emas, gate o'qiydigan manbani tuzating.
+
+## 7. Maʼlumotnoma indeksi
 
 - `src/app/globals.css` — token koʻprigi, `.dark` qayta belgilashlari, OmniRoute `@layer components` kengaytmalari
 - `packages/ui-kit/UPSTREAM.md` — biriktirilgan yuqori oqim commiti va litsenziya ruxsati; `packages/ui-kit/PATCHES.md`

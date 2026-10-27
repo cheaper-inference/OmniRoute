@@ -342,11 +342,11 @@ Išskyrimas yra **pagrįstas reguliariosiomis išraiškomis**, o ne LLM — jis 
 `setImmediate()`, todėl niekada neblokuoja atsakymo srauto:
 
 - **Nuostatų šablonai** → `MemoryType.FACTUAL`
-  (pvz., `Man labiau patinka …`, `Man labai patinka …`, `mano mėgstamiausias yra …`, `Aš nekenčiu …`)
+  (pvz., `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Sprendimų šablonai** → `MemoryType.EPISODIC`
-  (pvz., `Naudosiu …`, `Pasirinkau …`, `Nusprendžiau naudoti …`, `Ketinu pradėti naudoti …`)
+  (pvz., `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Elgsenos šablonai** → `MemoryType.FACTUAL`
-  (pvz., `Paprastai aš …`, `Aš visada …`, `Esu linkęs …`)
+  (pvz., `I usually …`, `I always …`, `I tend to …`)
 
 Kiekviena atitiktis išvaloma (`trim`, tarpų sutraukimas, apribojimas iki 500 simbolių),
 dublikatai pakete pašalinami naudojant stabilų `factKey(category, content)`, o
@@ -757,7 +757,8 @@ Kai naudotojas sako:
 
 Siekiant išvengti nekontroliuojamo išgavimo, taikomi šie apribojimai:
 
-| Minimalus turinio ilgis | 3 simboliai |
+| Minimalus turinio ilgis  | 3 simboliai  |
+| ------------------------ | ------------ |
 | Maksimalus turinio ilgis | 500 simbolių |
 
 ### Kada išjungti išgavimą

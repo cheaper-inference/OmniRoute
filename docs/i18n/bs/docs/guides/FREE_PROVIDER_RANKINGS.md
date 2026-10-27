@@ -153,7 +153,7 @@ Svaki unos dobiva nivo pouzdanosti na osnovu broja glasova na Areni:
 | `medium`   | ≥ 1.000 |
 | `low`      | < 1.000 |
 
-### Pohrana i svježina
+### Pohrana i ažurnost
 
 Normalizirani unosi upisuju se u DB tabelu `model_intelligence` sa
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Unosi **ističu nakon
@@ -204,7 +204,7 @@ interno, tako da modeli ostaju pronađivi pod bilo kojim nazivom.
 
 ### Kako se dobavljač rangira
 
-Za svakog besplatnog dobavljača, mehanizam ocjenjuje svaki model u njegovom katalogu, a zatim:
+Za svakog besplatnog dobavljača mehanizam ocjenjuje svaki model u njegovom katalogu, a zatim:
 
 - **Top Model** = model dobavljača s najvišim rezultatom.
 - **Avg Score** = prosječan rezultat svih ocijenjenih modela tog dobavljača.

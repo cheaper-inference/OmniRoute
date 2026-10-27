@@ -486,15 +486,15 @@ Dette håndterer:
 
 `open-sse/config/` indeholder konfigurationslaget:
 
-| Fil                           | Formål                                                        |
-| ----------------------------- | ------------------------------------------------------------- |
-| `providerRegistry.ts`         | Registrering af chat-modeller over kataloget med 376 udbydere |
-| `providerModels.ts`           | Modelaliasser, formatmapping                                  |
-| `constants.ts`                | Timeouts, grænser, statuskoder                                |
-| `defaultThinkingSignature.ts` | Standard-signatur for Claude-tænkning                         |
-| `modelStrip.ts` (i services)  | Fjernelse af felter pr. udbyder                               |
+| Fil                           | Formål                                           |
+| ----------------------------- | ------------------------------------------------ |
+| `providerRegistry.ts`         | Chatmodelregister for kataloget med 376 udbydere |
+| `providerModels.ts`           | Modelaliasser, formattilknytning                 |
+| `constants.ts`                | Timeouts, grænser, statuskoder                   |
+| `defaultThinkingSignature.ts` | Standardsignatur for Claude-tænkning             |
+| `modelStrip.ts` (i tjenester) | Fjernelse af felter pr. udbyder                  |
 
-### Skema for udbyderregistrering
+### Skema for udbyderregister
 
 ```ts
 interface ProviderConfig {

@@ -15,9 +15,9 @@ test("unrelated candidate builds cannot replace each other's pending concurrency
   assert.equal(workflow.jobs.build.concurrency["cancel-in-progress"], false);
 });
 
-test("superseded runs cancel only within the same workflow/ref", () => {
+test("same workflow/ref runs serialize without cancelling the running candidate", () => {
   assert.equal(workflow.concurrency.group, "${{ github.workflow }}-${{ github.ref }}");
-  assert.equal(workflow.concurrency["cancel-in-progress"], true);
+  assert.equal(workflow.concurrency["cancel-in-progress"], false);
 });
 
 test("no pull request or merge group Build reaches the self-hosted build slot", () => {

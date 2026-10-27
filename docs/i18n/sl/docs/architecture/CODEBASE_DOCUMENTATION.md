@@ -782,7 +782,7 @@ Glejte [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) in namenski razdelek v
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Dodelite ustrezne obsege v `src/shared/constants/mcpScopes.ts`.
 3. Registrirajte orodje v `open-sse/mcp-server/server.ts`.
-4. Dodajte teste v `open-sse/mcp-server/__tests__/`.
+4. Dodajte teste v `tests/unit/`.
 5. Posodobite [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Dodajanje nove veščine A2A
@@ -800,7 +800,7 @@ Glejte [A2A-SERVER.md § Dodajanje nove veščine](../frameworks/A2A-SERVER.md).
 - **Poimenovanje**: datoteke `camelCase` ali `kebab-case`, komponente `PascalCase`,
   konstante `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` povsod;
-  `no-explicit-any` = `warn` v `open-sse/` in `tests/`, drugje pa `error`.
+  `no-explicit-any` = `error` v `open-sse/**/*.ts` in `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (podedovana nastavitev). Na mejah med moduli dajte prednost izrecnim tipom
   pred sklepanjem tipov.
 - **Zbirka podatkov**: v poteh ali obdelovalnikih nikoli ne pišite surovega SQL-a — vedno uporabljajte
@@ -830,8 +830,7 @@ Glejte [A2A-SERVER.md § Dodajanje nove veščine](../frameworks/A2A-SERVER.md).
   `a2a`, `memory`, `skills`.
 - **Veje**: predpone `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Nikoli ne objavljajte sprememb neposredno v `main`.
-- **Husky**: pred objavo se zaženejo `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pred potiskom se zaženejo `check:any-budget:t11` + `check:tracked-artifacts` (hitra preverjanja; brez `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

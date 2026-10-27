@@ -54,7 +54,7 @@ Search Tools Studio បម្លែង `/dashboard/search-tools` ពីកន្
 - ទិន្នន័យបញ្ចូល៖ URL + ប៊ូតុងបិទបើកសម្រាប់ទំព័រពេញ + ឧបករណ៍ជ្រើសរើសទម្រង់ (markdown / អត្ថបទ / HTML)។
 - ដាក់ស្នើ → ទាញយក → បង្ហាញ `ScrapeResult.tsx`។
 - `ScrapeResult` បង្ហាញការមើលជាមុននៃ markdown + ប៊ូតុងបិទបើកសម្រាប់មើលទិន្នន័យដើម។
-- ដែនកំណត់៖ ប្រសិនបើតួការឆ្លើយតប > **256 KB** នោះ UI បង្ហាញ `(បានកាត់ខ្លី, មើលទិន្នន័យដើម)` ហើយបើកទិន្នន័យដើមក្នុងម៉ូឌែល Monaco (D21)។
+- ដែនកំណត់៖ ប្រសិនបើតួការឆ្លើយតប > **256 KB** នោះ UI បង្ហាញ `View full raw content` ហើយបើកទិន្នន័យដើមក្នុងម៉ូឌែល (D21)។
 - ផ្ទាំងមេតាទិន្នន័យ៖ អ្នកផ្តល់សេវា (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), រយៈពេលឆ្លើយតប, តម្លៃ, ទំហំការឆ្លើយតប, ចំនួនតំណ។
 - ប្រើ hook `useScrapeFetch.ts`។
 

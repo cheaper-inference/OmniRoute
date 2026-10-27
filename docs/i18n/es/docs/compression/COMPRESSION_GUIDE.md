@@ -179,7 +179,7 @@ Con Stacked:          10K-2.5K tokens enviados     (rango elegible de RTK+Cavema
 
 ### Panel
 
-Ve a `Panel → Contexto y caché`:
+Ve a `Dashboard → Context & Cache`:
 
 - **Caveman** — selección de modo, paquetes de idioma, vista previa y valores predeterminados globales
 - **RTK** — vista previa del filtro de comandos, configuración de seguridad de RTK y catálogo de filtros
@@ -188,7 +188,7 @@ Ve a `Panel → Contexto y caché`:
 
 ### Anulación por combinación
 
-En `Panel → Contexto y caché → Combinaciones de compresión`, asigna una combinación de compresión a una
+En `Dashboard → Context & Cache → Compression Combos`, asigna una combinación de compresión a una
 combinación de enrutamiento:
 
 ```txt
@@ -208,8 +208,8 @@ compresión de la combinación de enrutamiento** (Default/Off/Lite/Standard/Aggr
 el esquema del campo también acepta `rtk`, `stacked` y `omniglyph`): esa anulación no selecciona una
 canalización de combinación de compresión con nombre; simplemente establece el campo `compressionMode`
 consultado por `resolveCompressionPlan`. Puede configurarse en la tarjeta de la combinación
-(`Panel → Combinaciones`) o, desde #6760, por combinación de enrutamiento en la lista "Asignar al
-enrutamiento" de `Panel → Contexto y caché → Combinaciones de compresión`, justo al lado de la casilla
+(`Dashboard → Combos`) o, desde #6760, por combinación de enrutamiento en la lista "Asignar al
+enrutamiento" de `Dashboard → Context & Cache → Compression Combos`, justo al lado de la casilla
 de asignación de canalización documentada anteriormente. Ambas interfaces guardan los cambios mediante
 el mismo endpoint `PUT /api/combos/{id}`.
 

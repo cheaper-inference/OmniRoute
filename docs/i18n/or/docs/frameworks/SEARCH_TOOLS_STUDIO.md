@@ -54,7 +54,7 @@ Search Tools Studio, `/dashboard/search-tools`କୁ ଏକ ମୌଳିକ ସ�
 - ଇନ୍ପୁଟ୍: URL + ସମ୍ପୂର୍ଣ୍ଣ-ପୃଷ୍ଠା ଟୋଗଲ୍ + ଫର୍ମାଟ୍ ଚୟନକାରୀ (ମାର୍କଡାଉନ୍ / ଟେକ୍ସଟ୍ / HTML)।
 - ଦାଖଲ → ଫେଚ୍ → `ScrapeResult.tsx` ରେଣ୍ଡର୍ କରନ୍ତୁ।
 - `ScrapeResult` ମାର୍କଡାଉନ୍ ପୂର୍ବାବଲୋକନ + ର’ ଟୋଗଲ୍ ରେଣ୍ଡର୍ କରେ।
-- ସୀମା: ଯଦି ପ୍ରତିକ୍ରିୟା ବଡି > **256 KB**, UI `(କାଟଛାଣ୍ଟ କରାଯାଇଛି, ର’ ଦେଖନ୍ତୁ)` ଦେଖାଏ ଏବଂ ର’ ବିଷୟବସ୍ତୁକୁ ଏକ Monaco ମୋଡାଲ୍ରେ ଖୋଲେ (D21)।
+- ସୀମା: ଯଦି ପ୍ରତିକ୍ରିୟା ବଡି > **256 KB**, UI `View full raw content` ଦେଖାଏ ଏବଂ ର’ ବିଷୟବସ୍ତୁକୁ ଏକ ମୋଡାଲ୍ରେ ଖୋଲେ (D21)।
 - ମେଟାଡାଟା ପ୍ୟାନେଲ୍: ପ୍ରଦାନକାରୀ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), ବିଳମ୍ବ, ଖର୍ଚ୍ଚ, ପ୍ରତିକ୍ରିୟା ଆକାର, ଲିଙ୍କ୍ ସଂଖ୍ୟା।
 - `useScrapeFetch.ts` ହୁକ୍ ବ୍ୟବହାର କରେ।
 

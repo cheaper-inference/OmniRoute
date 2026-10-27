@@ -783,7 +783,7 @@ Lihat [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) dan bagian khusus di
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Tetapkan scope yang sesuai di `src/shared/constants/mcpScopes.ts`.
 3. Daftarkan alat di `open-sse/mcp-server/server.ts`.
-4. Tambahkan pengujian di bawah `open-sse/mcp-server/__tests__/`.
+4. Tambahkan pengujian di bawah `tests/unit/`.
 5. Perbarui [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Menambahkan skill A2A baru
@@ -801,7 +801,7 @@ Lihat [A2A-SERVER.md § Menambahkan Skill Baru](../frameworks/A2A-SERVER.md). Sk
 - **Penamaan**: file menggunakan `camelCase` atau `kebab-case`, komponen menggunakan `PascalCase`,
   konstanta menggunakan `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` di semua tempat;
-  `no-explicit-any` = `warn` di `open-sse/` dan `tests/`, error di tempat lain.
+  `no-explicit-any` = `error` di `open-sse/**/*.ts` dan `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (pendekatan lama). Utamakan tipe eksplisit daripada
   inferensi untuk batas antar-modul.
 - **Database**: jangan pernah menulis SQL mentah di route atau handler — selalu gunakan
@@ -831,8 +831,7 @@ Lihat [A2A-SERVER.md § Menambahkan Skill Baru](../frameworks/A2A-SERVER.md). Sk
   `a2a`, `memory`, `skills`.
 - **Branch**: awalan `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Jangan pernah melakukan commit langsung ke `main`.
-- **Husky**: pre-commit menjalankan `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push menjalankan `check:any-budget:t11` + `check:tracked-artifacts` (pemeriksaan cepat; mengecualikan `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

@@ -782,7 +782,7 @@ Skatiet [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) un tam veltīto sadaļu
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Piešķiriet atbilstošo tvērumu vai tvērumus failā `src/shared/constants/mcpScopes.ts`.
 3. Reģistrējiet rīku failā `open-sse/mcp-server/server.ts`.
-4. Pievienojiet testus direktorijā `open-sse/mcp-server/__tests__/`.
+4. Pievienojiet testus direktorijā `tests/unit/`.
 5. Atjauniniet [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Jaunas A2A prasmes pievienošana
@@ -800,7 +800,7 @@ direktorijā `src/lib/a2a/skills/` un tiek reģistrētas, izmantojot A2A uzdevum
 - **Nosaukumu piešķiršana**: faili — `camelCase` vai `kebab-case`, komponenti — `PascalCase`,
   konstantes — `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` visur;
-  `no-explicit-any` = `warn` direktorijās `open-sse/` un `tests/`, bet citur — `error`.
+  `no-explicit-any` = `error` direktorijās `open-sse/**/*.ts` un `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (mantotā pieeja). Starpmoduļu robežām dodiet priekšroku skaidri norādītiem tipiem,
   nevis tipu izsecināšanai.
 - **Datubāze**: nekad nerakstiet neapstrādātu SQL maršrutos vai apstrādātājos — vienmēr izmantojiet
@@ -829,8 +829,7 @@ direktorijā `src/lib/a2a/skills/` un tiek reģistrētas, izmantojot A2A uzdevum
   `a2a`, `memory`, `skills`.
 - **Zari**: prefiksi `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Nekad neveiciet komitu tieši zarā `main`.
-- **Husky**: pirms komita tiek izpildīti `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pirms nosūtīšanas tiek izpildīti `check:any-budget:t11` + `check:tracked-artifacts` (ātras pārbaudes; neietver `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

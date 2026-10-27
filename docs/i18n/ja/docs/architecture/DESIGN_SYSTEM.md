@@ -31,27 +31,27 @@
    `src/shared/utils/categoricalPalette.ts` 経由で利用し、ルーティング戦略については
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` を利用する。ReactFlow のエッジとオーケストレーション
    キャンバスは、テーマ対応の `--orch-status-*` 変数を読み取る（`src/shared/components/flow/edgeStyles.ts`）。
-2. `packages/ui-kit/src` を手動でパッチしてはならない: `scripts/dev/sync-ui-kit.sh <commit>` で同期すること。
-   pre-commit ゲートの `npm run check:ui-kit-snapshot`（`.husky/pre-commit`）は、ピン留めされた上流コミットと
-   1バイトでも異なると失敗する（上流クローン、
-   `UI_KIT_CLONE` または `_references/cheaper-inference-ui-kit` が存在しない場合は警告付きでスキップする）。キットに何かが不足している場合は、
-   アダプターか画面で回避し、上流にリクエストすること。
-3. キットのテキストのデフォルトは英語（`label = "Loading"`、`loadingLabel = "Loading table"` など）— キットコンポーネントがテキストをレンダリングするときは、
-   必ず `useTranslations(...)` から翻訳済みの文字列を渡すこと。
-4. Tailwind ユーティリティはキットのコンポーネントクラスより優先される（キットは
-   `@layer theme, base, components, utilities` を宣言しており、そのルールは `components` に存在する）— ユーティリティは
-   スペーシングとレイアウトに使い、キットコンポーネントの色を変えるためには使わないこと。
-5. 見出し: ページやセクションのタイトルには `.ci-heading`（Inter、トラッキングなし）。`.ci-dashboard-display`
-   （Instrument Serif）は、エラーページのステータスコードのような大きく情報量の少ないディスプレイテキストのみに使用すること。
-6. `tests/unit/dashboard-kit-sweep.test.ts` はキットの採用を保護する: `src/app` や `src/shared/components` 配下に
-   Material リガチャの span がないこと。ダッシュボードツリー（`src/app/(dashboard)` と
-   `src/shared/components`）では、生の `<select>`、`<textarea>`、`<table>` がなく、リストされた例外（`Select` アダプターのネイティブ分岐、
-   `RequestLoggerDetail`）以外に手作りの
-   `role="dialog"` がないこと。そこにある生の `<button>` や `<input>` にはすべて、
-   `kit-exception:` を含む（理由を記した）コメントが、最大でもその3行上で終わっている必要がある。パレットの色相と `dark:` バリアント
-   は、テストがリストするファイルのみで使用可能。
-7. PR の前に両テーマと 390 px ビューポートを確認すること（スクリーンショット）。`tests/e2e/a11y.spec.ts` が
-   axe を実行する。
+2. `packages/ui-kit/src` を手動で修正しないでください。`scripts/dev/sync-ui-kit.sh <commit>` で同期します。
+   pre-commit ゲートの `npm run check:ui-kit-snapshot`（`.husky/pre-commit`）は、固定されたアップストリームコミットと
+   1 バイトでも異なると失敗します（アップストリームのクローンである
+   `UI_KIT_CLONE` または `_references/cheaper-inference-ui-kit` が存在しない場合は、警告を表示してスキップします）。キットに必要なものがない場合は、
+   アダプターまたは画面側で回避策を講じ、アップストリームに対応を依頼してください。
+3. キットのテキストのデフォルト値は英語です（`label = "Loading"`、`loadingLabel = "Loading table"` など）。キットコンポーネントがテキストをレンダリングする場合は、必ず `useTranslations(...)` から翻訳済みの
+   文字列を渡してください。
+4. Tailwind ユーティリティはキットコンポーネントのクラスより優先されます（キットは
+   `@layer theme, base, components, utilities` を宣言し、そのルールは `components` にあります）。ユーティリティは
+   余白やレイアウトに使用し、キットコンポーネントの色変更には使用しないでください。
+5. 見出し：ページおよびセクションのタイトルには `.ci-heading`（Inter、字間調整なし）を使用します。`.ci-dashboard-display`
+   （Instrument Serif）は、エラーページのステータスコードのような、大きく余白の多いディスプレイテキストにのみ使用します。
+6. `tests/unit/dashboard-kit-sweep.test.ts` はキットの採用状況をチェックします。`src/app` または `src/shared/components` 配下では
+   Material のリガチャ用 span を禁止します。ダッシュボードツリー（`src/app/(dashboard)` および
+   `src/shared/components`）では、生の `<select>`、`<textarea>`、`<table>`、および列挙された例外（`Select` アダプターのネイティブ分岐、
+   `RequestLoggerDetail`）以外の独自実装の
+   `role="dialog"` を禁止します。同範囲にある生の `<button>` または `<input>` には、それぞれの要素から最大 3 行上までの位置に、理由を添えた
+   `kit-exception:` を含むコメントが必要です。パレットの色相と `dark:` バリアントは、
+   テストで列挙されているファイル内でのみ使用できます。
+7. PR の前に、両方のテーマと 390 px のビューポートをスクリーンショットで確認してください。`tests/e2e/a11y.spec.ts` では
+   axe が実行されます。
 
 ## 3. 画面の追加
 
@@ -84,7 +84,23 @@
 
 `scripts/dev/sync-ui-kit.sh <commit> [clone]` は、そのコミット時点のアップストリームの `src/` を `packages/ui-kit/src` にコピーし、許可されている唯一の変換（相対インポートから `.js` サフィックスを削除）を適用します。その後、`git diff packages/ui-kit` を確認し、両方のテーマでプロバイダー、設定、コンボ、使用状況、エンドポイントを目視確認し、`npm run check:ui-kit-snapshot` と `npm run test:vitest:ui` を実行して、アップストリームの変更履歴を添えて PR を作成します。
 
-## 6. リファレンス一覧
+## 6. README の図
+
+ルートの `README.md` に埋め込まれた12枚の図（`docs/diagrams/*.svg`）は、キットを静的画像に適用したものです。手描きではなく生成されます。`scripts/docs/gen-readme-*.mjs` に13個の生成ファイル（12枚の図とドライバー `gen-readme-diagrams.mjs`）、`tests/unit/docs/readme-*-svg.test.ts` に図ごとに1つ、計12個の鮮度テストがあり、コミット済みファイルと生成結果をバイト単位で比較します（ジョブ `test-unit`）。
+
+- **トークン。** `scripts/docs/readme-diagram-theme.mjs` は `packages/ui-kit/src/ci-tokens.css` からパレットをコピーし（そのファイルとの一致を `tests/unit/docs/readme-diagram-theme.test.ts` で固定）、キットの書体でテキストの役割を定義します。見出しなどのディスプレイ用に Instrument Serif、UI テキストに Inter、数値とコードに IBM Plex Mono を使います。いずれも `src/app/globals.css` がダッシュボード用に読み込むものと同じ `@fontsource` パッケージです。ファイル内の `:root` に明色の値、`prefers-color-scheme: dark` の条件下に暗色の値があり、各画像は GitHub の閲覧者の配色設定に従います。
+
+- **フォント。** `scripts/docs/readme-fonts.mjs` は各図が描くグリフだけをこれらの woff2 ファイルから抽出し、`@font-face` の `data:` URI として埋め込みます。 これにより、キットのフォントは SVG 内に保持されます。ローカルの README 画像プローブは、描画時に外部フォント要求が発生しないことを確認します。 サブセットはラテン文字のみで、システムのフォントスタックにフォールバックする記号グリフは `SYMBOL_FALLBACKS` で個別に許可されます。それ以外の未対応グリフはエラーになります。
+
+- **再生成。** `npm run docs:readme-diagrams` は12枚すべてを README の順序で書き直し、各ファイルのサイズを1行ずつ出力します。各生成器は単独でも実行できます（`node scripts/docs/gen-readme-<name>.mjs`。`free-tier-budget` の数値は `open-sse/config/freeModelCatalog.ts` の現行カタログローダーから得るため `node --import tsx/esm` が必要です。カタログ変更が CI に及ぼす影響は `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` を参照）。生成器と SVG は一緒にコミットしてください。
+
+- **証拠。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` はローカルのプローブでファイルを描画し（`<img>` タグ、制限的な `Content-Security-Policy`、`image/svg+xml` の応答）、明色と暗色のフレームを撮影して、ページが行った外部フォント要求を報告します。要求数は0でなければなりません。
+
+- **容量。** 1ファイル200 KB未満であることを各鮮度テストが確認します。README 画像の絶対上限は500 KBです（SVG studio バリデーターの規則）。
+
+- **共通の文言、数値は gate から。** 各生成器は図の文言を `*_COPY` 定数に保持するか、現行カタログから構築します。同じ文言が描画され、フォントのサブセット作成の入力にもなります。正規の数値は `<text>` ノードに残り、`check:docs-counts`（`scripts/check/check-docs-counts-sync.mjs`）が読み取ります。gate が読む図の鮮度テストは、生成ファイルに対してそのバリデーターも実行します。コードと数値が食い違えばテストが失敗するため、生成器の数値ではなく、gate が読むソースを修正してください。
+
+## 7. リファレンス一覧
 
 - `src/app/globals.css` — トークンブリッジ、`.dark` のオーバーライド、OmniRoute の `@layer components` 拡張
 - `packages/ui-kit/UPSTREAM.md` — 固定されたアップストリームコミットとライセンス認可、`packages/ui-kit/PATCHES.md`

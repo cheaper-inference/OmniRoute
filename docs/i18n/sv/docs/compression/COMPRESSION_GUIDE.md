@@ -188,7 +188,7 @@ Med Stacked:       10K-2.5K tokens skickade     (78-95% berättigat intervall f�
 
 ### Instrumentpanel
 
-Gå till `Instrumentpanel → Kontext och cache`:
+Gå till `Dashboard → Context & Cache`:
 
 - **Caveman** — val av läge, språkpaket, förhandsgranskning och globala standardvärden
 - **RTK** — förhandsgranskning av kommandofilter, RTK-säkerhetsinställningar och filterkatalog
@@ -197,7 +197,7 @@ Gå till `Instrumentpanel → Kontext och cache`:
 
 ### Åsidosättning per kombination
 
-I `Instrumentpanel → Kontext och cache → Komprimeringskombinationer` tilldelar du en komprimeringskombination till en
+I `Dashboard → Context & Cache → Compression Combos` tilldelar du en komprimeringskombination till en
 routningskombination:
 
 ```txt
@@ -216,9 +216,9 @@ Denna tilldelning av en ”åsidosättning per kombination” är en annan kontr
 (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — fältets
 schema godtar även `rtk`, `stacked` och `omniglyph`) — den åsidosättningen väljer inte en namngiven
 pipeline för en komprimeringskombination, utan anger endast fältet `compressionMode` som används av
-`resolveCompressionPlan`. Den kan anges antingen på kombinationskortet (`Instrumentpanel → Kombinationer`) eller, sedan
+`resolveCompressionPlan`. Den kan anges antingen på kombinationskortet (`Dashboard → Combos`) eller, sedan
 #6760, per routningskombination i listan ”Tilldela till routning” under
-`Instrumentpanel → Kontext och cache → Komprimeringskombinationer`, precis bredvid kryssrutan för pipeline-tilldelning
+`Dashboard → Context & Cache → Compression Combos`, precis bredvid kryssrutan för pipeline-tilldelning
 som dokumenteras ovan. Båda gränssnitten sparar via samma slutpunkt `PUT /api/combos/{id}`.
 
 ### Åsidosättning per begäran

@@ -121,7 +121,7 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ---
 
-## คะแนนทำงานอย่างไร
+## วิธีการทำงานของคะแนน
 
 ### แหล่งข้อมูล: Arena AI leaderboard
 

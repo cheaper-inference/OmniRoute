@@ -179,7 +179,7 @@ Kwa Stacked:              tokeni 10K-2.5K zimetumwa     (kiwango cha RTK+Caveman
 
 ### Dashibodi
 
-Nenda kwenye `Dashibodi → Muktadha na Akiba`:
+Nenda kwenye `Dashboard → Context & Cache`:
 
 - **Caveman** — uteuzi wa modi, vifurushi vya lugha, onyesho la kukagua, na chaguo-msingi za jumla
 - **RTK** — onyesho la kukagua kichujio cha amri, mipangilio ya usalama ya RTK, na katalogi ya vichujio
@@ -188,7 +188,7 @@ Nenda kwenye `Dashibodi → Muktadha na Akiba`:
 
 ### Ubatilishaji kwa Kila Mchanganyiko
 
-Katika `Dashibodi → Muktadha na Akiba → Michanganyiko ya Mfinyazo`, kabidhi mchanganyiko wa mfinyazo kwa mchanganyiko wa
+Katika `Dashboard → Context & Cache → Compression Combos`, kabidhi mchanganyiko wa mfinyazo kwa mchanganyiko wa
 uelekezaji:
 
 ```txt
@@ -207,9 +207,9 @@ Ukabidhi huu wa "Ubatilishaji kwa Kila Mchanganyiko" ni kidhibiti tofauti na uba
 (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — skima ya sehemu hiyo
 pia inakubali `rtk`, `stacked` na `omniglyph`) — ubatilishaji huo hauchagui mfuatano wa mchanganyiko wa mfinyazo
 uliopewa jina; unaweka tu sehemu ya `compressionMode` inayotumiwa na
-`resolveCompressionPlan`. Inaweza kuwekwa ama kwenye kadi ya mchanganyiko (`Dashibodi → Michanganyiko`) au, tangu
+`resolveCompressionPlan`. Inaweza kuwekwa ama kwenye kadi ya mchanganyiko (`Dashboard → Combos`) au, tangu
 #6760, kwa kila mchanganyiko wa uelekezaji katika orodha ya "Kabidhi kwa uelekezaji" kwenye
-`Dashibodi → Muktadha na Akiba → Michanganyiko ya Mfinyazo`, karibu kabisa na kisanduku tiki cha ukabidhi wa mfuatano
+`Dashboard → Context & Cache → Compression Combos`, karibu kabisa na kisanduku tiki cha ukabidhi wa mfuatano
 kilichoelezwa hapo juu. Sehemu zote mbili huhifadhi kupitia endpoint ileile ya `PUT /api/combos/{id}`.
 
 ### Ubatilishaji kwa kila ombi

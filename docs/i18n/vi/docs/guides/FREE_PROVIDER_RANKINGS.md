@@ -161,7 +161,7 @@ Mỗi mục được gán một mức độ tin cậy dựa trên số lượt b
 | `medium`   | ≥ 1.000           |
 | `low`      | < 1.000           |
 
-### Lưu trữ và độ mới của dữ liệu
+### Lưu trữ và độ mới
 
 Các mục đã chuẩn hóa được ghi vào bảng DB `model_intelligence` với
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Các mục **hết hạn sau
@@ -210,7 +210,7 @@ cơ chế ghép linh hoạt (`findMatchingIntelligence` trong `src/lib/freeProvi
 loại bỏ và một bảng ánh xạ bí danh nhỏ mở rộng các tên chuẩn thành các biến thể mà OmniRoute sử dụng
 nội bộ, nhờ đó các model luôn có thể được tìm thấy dưới bất kỳ tên nào.
 
-### Cách xếp hạng một nhà cung cấp
+### Cách xếp hạng nhà cung cấp
 
 Với mỗi nhà cung cấp miễn phí, công cụ chấm điểm mọi model trong danh mục của nhà cung cấp đó, sau đó:
 

@@ -580,28 +580,28 @@ post_install() {
 
 ### Environment Variables
 
-| Mgbanwe                                 | Ndabara                              | Nkọwa                                                                                                       |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Ihe nzuzo e ji abịanye aka na JWT (**gbanwee ya na production**)                                            |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Okwuntughe nbanye mbụ                                                                                       |
-| `DATA_DIR`                              | `~/.omniroute`                       | Ndekọ data (db, ojiji, ndekọ ihe omume)                                                                     |
-| `PORT`                                  | ndabara framework                    | Port ọrụ (`20128` n'ihe atụ)                                                                                |
-| `HOSTNAME`                              | ndabara framework                    | Host a ga-ejikọta na ya (ndabara Docker bụ `0.0.0.0`)                                                       |
-| `NODE_ENV`                              | ndabara runtime                      | Tọọ `production` maka mbugote                                                                               |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL ntọala ọha egosiri na dashboard ma mee ka sava nweta ya (na-anọchi `BASE_URL` ochie)                    |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL ntọala endpoint maka mmekọrịta cloud (na-anọchi `CLOUD_URL` ochie)                                      |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Ihe nzuzo HMAC maka igodo API ndị emepụtara                                                                 |
-| `REQUIRE_API_KEY`                       | `false`                              | Manye igodo API Bearer na `/v1/*`                                                                           |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Kwe ka ndị ọrụ dashboard akwadoro kpughee ụkpụrụ igodo API zuru ezu echekwara mgbe ha chọrọ                 |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Ugboro sava na-eme ka data Provider Limits echekwara ọhụrụ; bọtịnụ imegharị UI ka na-akpalite mmekọrịta aka |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Gbanyụọ snapshot SQLite akpaka tupu ide/mbubata/mweghachi; backup aka ka na-arụ ọrụ                         |
-| `APP_LOG_TO_FILE`                       | `true`                               | Na-eme ka mmepụta ndekọ ngwa na ndekọ nyocha gaa na diski                                                   |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Manye cookie nkwenye `Secure` (n'azụ HTTPS reverse proxy)                                                   |
-| `CLOUDFLARED_BIN`                       | edoghị ya                            | Jiri binary `cloudflared` dị adị kama nbudata a na-achịkwa                                                  |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Ụzọ mbufe maka Quick Tunnels a na-achịkwa (`http2`, `quic`, ma ọ bụ `auto`)                                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Oke heap Node.js na MB                                                                                      |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Ọnụọgụ ndenye kachasị na cache prompt                                                                       |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Ọnụọgụ ndenye kachasị na cache semantic                                                                     |
+| Mgbanwe                                 | Ndabara                            | Nkọwa                                                                                                                                                                |
+| --------------------------------------- | ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(a na-emepụta ya na-akpaghị aka)_ | Ihe nzuzo e ji abịanye aka na JWT — a na-emepụta ya na-akpaghị aka na mbido mbụ ma chekwaa ya na `server.env`; dozie ya kpọmkwem ma ọ bụrụ na ndekọ data bụ nwa oge  |
+| `INITIAL_PASSWORD`                      | _(edoghị ya)_                      | Okwuntughe nbanye mbụ. Ntinye sitere na npm/koodu isi mmalite na-amalite na `CHANGEME`: dochie ya. Ọ bụrụ na edoghị ya: ọkachamara onboarding                        |
+| `DATA_DIR`                              | `~/.omniroute`                     | Ndekọ data (db, ojiji, ndekọ ihe omume)                                                                                                                              |
+| `PORT`                                  | ndabara framework                  | Port ọrụ (`20128` n'ihe atụ)                                                                                                                                         |
+| `HOSTNAME`                              | ndabara framework                  | Host a ga-ejikọta na ya (ndabara Docker bụ `0.0.0.0`)                                                                                                                |
+| `NODE_ENV`                              | ndabara runtime                    | Tọọ `production` maka mbugote                                                                                                                                        |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`           | URL ntọala ọha egosiri na dashboard ma mee ka sava nweta ya (na-anọchi `BASE_URL` ochie)                                                                             |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`            | URL ntọala endpoint maka mmekọrịta cloud (na-anọchi `CLOUD_URL` ochie)                                                                                               |
+| `API_KEY_SECRET`                        | _(a na-emepụta ya na-akpaghị aka)_ | Ihe nzuzo checksum maka igodo API ejikọtara na igwe — bootstrap mmalite na-emepụta ya na-akpaghị aka ma ọ bụrụ na edoghị ya ma chekwaa ya na `server.env` a pụrụ ide |
+| `REQUIRE_API_KEY`                       | `false`                            | Manye igodo API Bearer na `/v1/*`                                                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                            | Kwe ka ndị ọrụ dashboard akwadoro kpughee ụkpụrụ igodo API zuru ezu echekwara mgbe ha chọrọ                                                                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                               | Ugboro sava na-eme ka data Provider Limits echekwara ọhụrụ; bọtịnụ imegharị UI ka na-akpalite mmekọrịta aka                                                          |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                            | Gbanyụọ snapshot SQLite akpaka tupu ide/mbubata/mweghachi; backup aka ka na-arụ ọrụ                                                                                  |
+| `APP_LOG_TO_FILE`                       | `true`                             | Na-eme ka mmepụta ndekọ ngwa na ndekọ nyocha gaa na diski                                                                                                            |
+| `AUTH_COOKIE_SECURE`                    | `false`                            | Manye cookie nkwenye `Secure` (n'azụ HTTPS reverse proxy)                                                                                                            |
+| `CLOUDFLARED_BIN`                       | edoghị ya                          | Jiri binary `cloudflared` dị adị kama nbudata a na-achịkwa                                                                                                           |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                            | Ụzọ mbufe maka Quick Tunnels a na-achịkwa (`http2`, `quic`, ma ọ bụ `auto`)                                                                                          |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                              | Oke heap Node.js na MB                                                                                                                                               |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                               | Ọnụọgụ ndenye kachasị na cache prompt                                                                                                                                |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                              | Ọnụọgụ ndenye kachasị na cache semantic                                                                                                                              |
 
 Maka ntụaka zuru ezu gbasara mgbanwe gburugburu, lee [README](../README.md).
 

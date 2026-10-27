@@ -89,31 +89,27 @@
    routingstrategieën, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-edges
    en het orkestratiecanvas lezen de thema-afhankelijke `--orch-status-*`-variabelen
    (`src/shared/components/flow/edgeStyles.ts`).
-2. Patch `packages/ui-kit/src` nooit met de hand: synchroniseer met
-   `scripts/dev/sync-ui-kit.sh <commit>`; de pre-commit-controle `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) faalt op elke byte die afwijkt van de vastgepinde upstream-commit (die met
-   een waarschuwing wordt overgeslagen wanneer de upstream-kloon, `UI_KIT_CLONE` of
-   `_references/cheaper-inference-ui-kit`, afwezig is). Wanneer de kit iets mist, omzeil het dan in
-   de adapter of het scherm en vraag er upstream om.
-3. De standaardteksten van de kit zijn Engels (`label = "Loading"`,
-   `loadingLabel = "Loading table"`…) — geef vertaalde strings uit `useTranslations(...)` door
-   wanneer een kit-component tekst rendert.
-4. Tailwind-utilities winnen het van de klassen van kit-componenten (de kit declareert
-   `@layer theme, base, components, utilities` en de regels ervan staan in `components`) — gebruik
-   utilities voor spatiëring en lay-out, niet om kit-componenten opnieuw in te kleuren.
-5. Koppen: `.ci-heading` (Inter, geen tracking) voor pagina- en sectietitels;
-   `.ci-dashboard-display` (Instrument Serif) alleen voor grote, spaarzaam ingezette displaytekst
-   zoals de statuscode van de foutpagina.
-6. `tests/unit/dashboard-kit-sweep.test.ts` bewaakt de adoptie van de kit: geen span met
-   Material-ligaturen onder `src/app` of `src/shared/components`; in de dashboardboom
-   (`src/app/(dashboard)` en `src/shared/components`) geen kale `<select>`, `<textarea>` of
-   `<table>` en geen handmatig gebouwde `role="dialog"` buiten de opgesomde uitzonderingen (de
-   native tak van de `Select`-adapter, `RequestLoggerDetail`); elke kale `<button>` of `<input>`
-   daar heeft een commentaarregel nodig met daarin `kit-exception:` (met de reden), die uiterlijk 3
-   regels erboven eindigt; palettinten en `dark:`-varianten alleen in de bestanden die de test
-   opsomt.
-7. Verifieer beide thema's en de 390 px-viewport vóór een PR (screenshots);
-   `tests/e2e/a11y.spec.ts` draait axe.
+2. Pas `packages/ui-kit/src` nooit handmatig aan: synchroniseer met `scripts/dev/sync-ui-kit.sh <commit>`; de
+   pre-commitcontrole `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) mislukt bij elke byte die
+   afwijkt van de vastgezette upstream-commit (de controle wordt met een waarschuwing overgeslagen wanneer de upstream-kloon,
+   `UI_KIT_CLONE` of `_references/cheaper-inference-ui-kit`, ontbreekt). Wanneer er iets in de kit ontbreekt,
+   omzeil dit dan in de adapter of het scherm en vraag upstream om toevoeging ervan.
+3. De standaardteksten van de kit zijn Engels (`label = "Loading"`, `loadingLabel = "Loading table"`…) — geef vertaalde
+   tekenreeksen vanuit `useTranslations(...)` door wanneer een kitcomponent tekst weergeeft.
+4. Tailwind-hulpprogramma's hebben voorrang op kitcomponentklassen (de kit declareert
+   `@layer theme, base, components, utilities` en de regels ervan bevinden zich in `components`) — gebruik hulpprogramma's voor
+   witruimte en lay-out, niet om kitcomponenten opnieuw in te kleuren.
+5. Koppen: `.ci-heading` (Inter, zonder letterspatiëring) voor pagina- en sectietitels; `.ci-dashboard-display`
+   (Instrument Serif) alleen voor grote, spaarzaam gebruikte weergavetekst, zoals de statuscode op de foutpagina.
+6. `tests/unit/dashboard-kit-sweep.test.ts` bewaakt de toepassing van de kit: geen Material-ligatuurspan onder
+   `src/app` of `src/shared/components`; in de dashboardstructuur (`src/app/(dashboard)` en
+   `src/shared/components`) geen onbewerkte `<select>`, `<textarea>` of `<table>` en geen zelfgemaakte
+   `role="dialog"` buiten de vermelde uitzonderingen (de native tak van de `Select`-adapter,
+   `RequestLoggerDetail`); elke onbewerkte `<button>` of `<input>` daar vereist een opmerking met
+   `kit-exception:` (met de reden) die maximaal 3 regels erboven eindigt; palettinten en `dark:`-varianten
+   alleen in de bestanden die door de test worden vermeld.
+7. Controleer vóór een PR beide thema's en de viewport van 390 px (screenshots); `tests/e2e/a11y.spec.ts` voert
+   axe uit.
 
 ## 3. Een scherm toevoegen
 
@@ -153,7 +149,23 @@ relatieve imports). Daarna: controleer `git diff packages/ui-kit`, voer in beide
 gebruik en endpoint, voer `npm run check:ui-kit-snapshot` en `npm run test:vitest:ui` uit en
 open de PR met de upstream-changelog.
 
-## 6. Referentie-index
+## 6. README-diagrammen
+
+De twaalf diagrammen in het `README.md` in de hoofdmap (`docs/diagrams/*.svg`) passen de kit toe op statische afbeeldingen. Ze worden gegenereerd, niet met de hand getekend: 13 generatorbestanden onder `scripts/docs/gen-readme-*.mjs` (twaalf diagrammen plus de driver `gen-readme-diagrams.mjs`) en 12 verouderingstests onder `tests/unit/docs/readme-*-svg.test.ts`, één per diagram. Elke test vergelijkt het gecommitte bestand byte voor byte met de uitvoer van de generator (job `test-unit`).
+
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopieert het palet uit `packages/ui-kit/src/ci-tokens.css` (de overeenkomst met dat bestand wordt vastgelegd door `tests/unit/docs/readme-diagram-theme.test.ts`) en definieert de tekstrollen met de lettertypen van de kit: Instrument Serif voor displaytekst, Inter voor UI-tekst en IBM Plex Mono voor cijfers en code. Dit zijn dezelfde `@fontsource`-pakketten die `src/app/globals.css` voor het dashboard laadt. Lichte waarden staan op `:root` en donkere onder `prefers-color-scheme: dark` in het bestand; zo volgt elke afbeelding het kleurenschema van de lezer op GitHub.
+
+- **Lettertypen.** `scripts/docs/readme-fonts.mjs` beperkt die woff2-bestanden tot de glyphs die elk diagram tekent en sluit ze via `@font-face` in als `data:`-URI's. Zo blijven de lettertypen van de kit in de SVG. De lokale README-afbeeldingsproef controleert dat het renderen geen externe lettertypeverzoeken doet. De subsets bevatten alleen Latijnse tekens; symboolglyphs die terugvallen op systeemlettertypen worden afzonderlijk toegestaan in `SYMBOL_FALLBACKS`. Elke andere ontbrekende glyph veroorzaakt een fout.
+
+- **Opnieuw genereren.** `npm run docs:readme-diagrams` herschrijft alle twaalf diagrammen in README-volgorde en toont per bestand één regel met de grootte. Elke generator werkt ook zelfstandig (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` vereist `node --import tsx/esm` omdat de cijfers uit de actuele cataloguslader in `open-sse/config/freeModelCatalog.ts` komen; de gevolgen van een cataloguswijziging voor CI staan in `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit de generator en de SVG samen.
+
+- **Bewijs.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` rendert een bestand in de lokale proef (een `<img>`-tag, een beperkende `Content-Security-Policy` en een `image/svg+xml`-respons), legt een licht en een donker beeld vast en meldt de externe lettertypeverzoeken van de pagina; dat moeten er 0 zijn.
+
+- **Budget.** Minder dan 200 KB per bestand, gecontroleerd door elke verouderingstest; 500 KB is de harde bovengrens voor elke README-afbeelding (de regel van de SVG studio-validator).
+
+- **Gedeelde tekst, aantallen uit de gate.** Elke generator bewaart de diagramtekst in een `*_COPY`-constante of stelt deze samen uit de actuele catalogus. De tekst wordt zowel getekend als gebruikt voor de lettertypesubset. Canonieke cijfers blijven in `<text>`-nodes, gelezen door `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). De verouderingstests van diagrammen die de gate leest, voeren ook diens validators uit op het gegenereerde bestand. Een cijfer dat van de code afwijkt, laat de test falen: herstel de bron die de gate leest, nooit het getal in de generator.
+
+## 7. Referentie-index
 
 - `src/app/globals.css` — tokenbridge, `.dark`-overrides, OmniRoute-uitbreidingen voor `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — vastgelegde upstream-commit en licentieautorisatie; `packages/ui-kit/PATCHES.md`

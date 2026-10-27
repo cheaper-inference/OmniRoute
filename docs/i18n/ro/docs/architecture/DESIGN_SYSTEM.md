@@ -88,27 +88,27 @@
    `src/shared/utils/categoricalPalette.ts` și, pentru strategiile de rutare,
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; muchiile ReactFlow și canvasul de orchestrare citesc
    variabilele sensibile la temă `--orch-status-*` (`src/shared/components/flow/edgeStyles.ts`).
-2. Nu modifica niciodată manual `packages/ui-kit/src`: sincronizează cu `scripts/dev/sync-ui-kit.sh <commit>`;
-   poarta pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) eșuează la orice octet care diferă de
-   commit-ul upstream fixat (trece peste cu un avertisment când clona upstream, `UI_KIT_CLONE` sau
-   `_references/cheaper-inference-ui-kit`, lipsește). Când kitului îi lipsește ceva, rezolvă printr-o soluție
-   ocolitoare în adaptor sau în ecran și cere upstream adăugarea ei.
-3. Textele implicite ale kitului sunt în engleză (`label = "Loading"`, `loadingLabel = "Loading table"`…) — transmite
-   șiruri traduse din `useTranslations(...)` ori de câte ori o componentă a kitului afișează text.
+2. Nu modificați niciodată manual `packages/ui-kit/src`: sincronizați cu `scripts/dev/sync-ui-kit.sh <commit>`; verificarea
+   pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) eșuează pentru orice octet care
+   diferă de commitul upstream fixat (este omisă cu un avertisment atunci când clona upstream,
+   `UI_KIT_CLONE` sau `_references/cheaper-inference-ui-kit`, lipsește). Când kitului îi lipsește ceva,
+   implementați o soluție alternativă în adaptor sau în ecran și solicitați funcționalitatea upstream.
+3. Textele implicite ale kitului sunt în limba engleză (`label = "Loading"`, `loadingLabel = "Loading table"`…) — transmiteți șiruri
+   traduse din `useTranslations(...)` ori de câte ori o componentă a kitului redă text.
 4. Utilitarele Tailwind au prioritate față de clasele componentelor kitului (kitul declară
-   `@layer theme, base, components, utilities` și regulile sale se află în `components`) — folosește utilitarele
-   pentru spațiere și layout, nu pentru a recolora componentele kitului.
-5. Titluri: `.ci-heading` (Inter, fără tracking) pentru titlurile de pagină și de secțiune; `.ci-dashboard-display`
-   (Instrument Serif) doar pentru text de afișare mare și rar, cum ar fi codul de stare al paginii de eroare.
-6. `tests/unit/dashboard-kit-sweep.test.ts` supraveghează adoptarea kitului: niciun span cu ligaturi Material în
-   `src/app` sau `src/shared/components`; în arborele dashboardului (`src/app/(dashboard)` și
-   `src/shared/components`) niciun `<select>`, `<textarea>` sau `<table>` brut și niciun `role="dialog"` implementat
-   manual în afara excepțiilor listate (ramura nativă a adaptorului `Select`, `RequestLoggerDetail`); fiecare
-   `<button>` sau `<input>` brut de acolo are nevoie de un comentariu care conține `kit-exception:` (cu motivul),
-   terminându-se la cel mult 3 linii deasupra lui; nuanțele paletei și variantele `dark:` doar în fișierele listate
-   de test.
-7. Verifică ambele teme și viewportul de 390 px înainte de un PR (capturi de ecran); `tests/e2e/a11y.spec.ts`
-   rulează axe.
+   `@layer theme, base, components, utilities`, iar regulile sale se află în `components`) — folosiți utilitare pentru
+   spațiere și dispunere, nu pentru a recolora componentele kitului.
+5. Titluri: `.ci-heading` (Inter, fără spațiere între litere) pentru titlurile paginilor și secțiunilor; `.ci-dashboard-display`
+   (Instrument Serif) numai pentru texte de afișare mari și rarefiate, precum codul de stare de pe pagina de eroare.
+6. `tests/unit/dashboard-kit-sweep.test.ts` protejează adoptarea kitului: niciun element span cu ligatură Material în
+   `src/app` sau `src/shared/components`; în arborele panoului de control (`src/app/(dashboard)` și
+   `src/shared/components`), niciun `<select>`, `<textarea>` sau `<table>` brut și niciun
+   `role="dialog"` implementat manual în afara excepțiilor enumerate (ramura nativă a adaptorului `Select`,
+   `RequestLoggerDetail`); fiecare `<button>` sau `<input>` brut de acolo necesită un comentariu care conține
+   `kit-exception:` (împreună cu motivul), al cărui sfârșit se află cu cel mult 3 linii mai sus; nuanțele paletei și variantele `dark:`
+   sunt permise numai în fișierele enumerate de test.
+7. Verificați ambele teme și viewportul de 390 px înainte de un PR (capturi de ecran); `tests/e2e/a11y.spec.ts` rulează
+   axe.
 
 ## 3. Adăugarea unui ecran
 
@@ -148,7 +148,23 @@ importurile relative). Apoi: examinați `git diff packages/ui-kit`, efectuați o
 utilizării și endpointului în ambele teme, rulați `npm run check:ui-kit-snapshot` și `npm run test:vitest:ui`, apoi
 deschideți PR-ul împreună cu jurnalul de modificări upstream.
 
-## 6. Index de referință
+## 6. Diagrame README
+
+Cele douăsprezece diagrame incluse în `README.md` din rădăcină (`docs/diagrams/*.svg`) aplică kitul unor imagini statice. Sunt generate, nu desenate manual: 13 fișiere generatoare în `scripts/docs/gen-readme-*.mjs` (douăsprezece diagrame și coordonatorul `gen-readme-diagrams.mjs`) și 12 teste de actualitate în `tests/unit/docs/readme-*-svg.test.ts`, câte unul pentru fiecare diagramă. Fiecare compară octet cu octet fișierul din commit cu ieșirea generatorului său (job `test-unit`).
+
+- **Tokenuri.** `scripts/docs/readme-diagram-theme.mjs` copiază paleta din `packages/ui-kit/src/ci-tokens.css` (corespondența cu acel fișier este fixată prin `tests/unit/docs/readme-diagram-theme.test.ts`) și definește rolurile textului folosind fonturile kitului: Instrument Serif pentru text de prezentare, Inter pentru interfață și IBM Plex Mono pentru numere și cod. Sunt aceleași pachete `@fontsource` pe care `src/app/globals.css` le încarcă pentru panou. Valorile deschise sunt în `:root`, cele închise sub condiția `prefers-color-scheme: dark` în fișier, astfel încât fiecare imagine urmează schema cititorului pe GitHub.
+
+- **Fonturi.** `scripts/docs/readme-fonts.mjs` restrânge aceste fișiere woff2 la glifele desenate de fiecare diagramă și le încorporează prin `@font-face` ca URI-uri `data:`. Astfel, fonturile kitului rămân în interiorul SVG-ului. Proba locală a imaginilor README verifică faptul că redarea nu efectuează solicitări externe de fonturi. Subseturile conțin numai caractere latine; glifele simbolurilor care folosesc fonturile sistemului ca rezervă sunt permise individual în `SYMBOL_FALLBACKS`. Orice altă glifă neacoperită produce o eroare.
+
+- **Regenerare.** `npm run docs:readme-diagrams` rescrie toate cele douăsprezece diagrame în ordinea README și afișează o linie pentru fiecare fișier, cu dimensiunea sa. Fiecare generator rulează și separat (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` necesită `node --import tsx/esm` deoarece cifrele provin din încărcătorul catalogului curent din `open-sse/config/freeModelCatalog.ts`; efectul unei schimbări de catalog asupra CI este descris în `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Includeți generatorul și SVG-ul în același commit.
+
+- **Dovadă.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` redă un fișier în proba locală (eticheta `<img>`, o `Content-Security-Policy` restrictivă și un răspuns `image/svg+xml`), capturează un cadru luminos și unul întunecat și raportează solicitările externe de fonturi ale paginii; acestea trebuie să fie 0.
+
+- **Buget.** Sub 200 KB pe fișier, verificat de fiecare test de actualitate; 500 KB este limita absolută pentru orice imagine README (regula validatorului SVG studio).
+
+- **Text comun, numere din gate.** Fiecare generator păstrează textul diagramei într-o constantă `*_COPY` sau îl construiește din catalogul curent. Același text este desenat și folosit la selectarea subsetului de fonturi. Numerele canonice rămân în noduri `<text>`, citite de `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Testele de actualitate ale diagramelor citite de gate rulează și validatorii săi pe fișierul generat. Un număr diferit de cod face testul să eșueze: corectați sursa citită de gate, niciodată numărul din generator.
+
+## 7. Index de referință
 
 - `src/app/globals.css` — puntea pentru tokenuri, suprascrierile `.dark`, extensiile OmniRoute pentru `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — commitul upstream fixat și autorizarea licenței; `packages/ui-kit/PATCHES.md`

@@ -486,13 +486,13 @@ Acesta gestionează:
 
 `open-sse/config/` conține stratul de configurare:
 
-| Fișier                        | Scop                                                           |
-| ----------------------------- | -------------------------------------------------------------- |
-| `providerRegistry.ts`         | Registru de modele de chat peste catalogul de 376 de furnizori |
-| `providerModels.ts`           | Aliasuri de modele, mapare de formate                          |
-| `constants.ts`                | Timeout-uri, limite, coduri de stare                           |
-| `defaultThinkingSignature.ts` | Semnătura de gândire Claude implicită                          |
-| `modelStrip.ts` (în services) | Eliminarea câmpurilor per furnizor                             |
+| Fișier                        | Scop                                                          |
+| ----------------------------- | ------------------------------------------------------------- |
+| `providerRegistry.ts`         | Registrul modelelor de chat din catalogul cu 376 de furnizori |
+| `providerModels.ts`           | Aliasuri de modele, maparea formatelor                        |
+| `constants.ts`                | Expirări, limite, coduri de stare                             |
+| `defaultThinkingSignature.ts` | Semnătura implicită de gândire Claude                         |
+| `modelStrip.ts` (în servicii) | Eliminarea câmpurilor pentru fiecare furnizor                 |
 
 ### Schema registrului de furnizori
 

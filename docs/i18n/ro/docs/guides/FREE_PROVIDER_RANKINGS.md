@@ -143,7 +143,7 @@ taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 Scorul nu atinge niciodată `0` sau `1`, lăsând marjă pentru suprascrierile utilizatorului.
 Acesta este câmpul `score` pe care îl vedeți în răspunsul API și eticheta afișată pe panoul de control.
 
-### Nivel de încredere
+### Încredere
 
 Fiecare intrare primește un nivel de încredere bazat pe numărul de voturi Arena:
 
@@ -184,7 +184,7 @@ Pentru operatori, un endpoint de administrare autentificat oferă control manual
 ```
 GET    /api/intelligence/sync          # starea curentă a sincronizării (enabled, lastSync, nextSync, intervalMs)
 POST   /api/intelligence/sync          # declanșează o sincronizare manuală; corp: { "dryRun": true } pentru previzualizare fără scriere
-DELETE /api/intelligence/sync          # șterge toate intrările de inteligență arena_elo sincronizate
+DELETE /api/intelligence/sync          # șterge toate intrările de informații arena_elo sincronizate
 ```
 
 Dacă pagina clasamentelor este goală, un `POST /api/intelligence/sync` manual (sau pur și simplu

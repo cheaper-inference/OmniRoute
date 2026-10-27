@@ -443,7 +443,7 @@ open-sse/
 | `COMPRESSION_ENGINES.md`        | Движки Caveman + RTK, контракт реестра    |
 | `COMPRESSION_RULES_FORMAT.md`   | JSON-схема пакета правил Caveman          |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Перечень пакетов правил для каждого языка |
-| `RTK_COMPRESSION.md`            | Декларативный конвейер RTK (49 фильтров)  |
+| `RTK_COMPRESSION.md`            | Декларативный конвейер RTK (56 фильтров)  |
 
 ### Развёртывание
 

@@ -153,7 +153,7 @@ campo `score` que vê na resposta da API e a etiqueta apresentada no painel.
 
 ### Confiança
 
-Cada entrada recebe um nível de confiança com base no número de votos da Arena:
+Cada entrada recebe um nível de confiança baseado no número de votos da Arena:
 
 | Confiança | Votos   |
 | --------- | ------- |
@@ -195,7 +195,7 @@ DELETE /api/intelligence/sync          # remove todas as entradas de inteligênc
 ```
 
 Se a página de classificações estiver vazia, um `POST /api/intelligence/sync` manual (ou simplesmente
-reiniciar o servidor) volta a preenchê-la.
+o reinício do servidor) volta a preenchê-la.
 
 ### Correspondência de modelos com a leaderboard
 

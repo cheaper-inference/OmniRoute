@@ -784,7 +784,7 @@ Consulta [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) e la sezione dedicata in
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Assegnare gli scope appropriati in `src/shared/constants/mcpScopes.ts`.
 3. Registrare lo strumento in `open-sse/mcp-server/server.ts`.
-4. Aggiungere i test in `open-sse/mcp-server/__tests__/`.
+4. Aggiungere i test in `tests/unit/`.
 5. Aggiornare [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Aggiungere una nuova skill A2A
@@ -802,7 +802,7 @@ Consultare [A2A-SERVER.md § Aggiunta di una nuova skill](../frameworks/A2A-SERV
 - **Denominazione**: file in `camelCase` o `kebab-case`, componenti in `PascalCase`,
   costanti in `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` ovunque;
-  `no-explicit-any` = `warn` in `open-sse/` e `tests/`, errore altrove.
+  `no-explicit-any` = `error` in `open-sse/**/*.ts` e `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (impostazione legacy). Preferire tipi espliciti
   all'inferenza per i confini tra moduli.
 - **Database**: non scrivere mai SQL grezzo nelle route o negli handler; passare sempre
@@ -833,8 +833,7 @@ Consultare [A2A-SERVER.md § Aggiunta di una nuova skill](../frameworks/A2A-SERV
   `a2a`, `memory`, `skills`.
 - **Branch**: prefissi `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Non eseguire mai commit direttamente su `main`.
-- **Husky**: il pre-commit esegue `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; il pre-push esegue `check:any-budget:t11` + `check:tracked-artifacts` (controlli rapidi; esclude `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

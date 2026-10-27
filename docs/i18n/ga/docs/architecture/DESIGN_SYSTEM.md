@@ -81,38 +81,20 @@
 
 ## 2. Rialacha
 
-1. Tocnaí, riamh litreacha. Eisceachtaí a coinníodh d'aon ghnó: an teirminéal consóile atá dorcha i
+1. Tocnaí, ní luachanna litriúla riamh. Eisceachtaí a coinníodh d'aon ghnó: an teirminéal consóile atá dorcha i
    gcónaí agus `STATUS_HEX` (`src/shared/constants/statusColors.ts`), an scáthán réitithe-hex de
-   phailéad stádais an kit do ghlaoiteoirí a dteastaíonn hex liteartha uathu. Ní eisceacht iad na
+   phailéad stádais an kit do ghlaoiteoirí a dteastaíonn hex litriúil uathu. Ní eisceacht iad na
    pailéid chatagóireacha a thuilleadh: tá siad bunaithe ar chúig thocan cairte an kit
    (`--color-chart-1..5`) trí `src/shared/utils/categoricalPalette.ts` agus, do straitéisí ródaithe,
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; léann imealla ReactFlow agus canbhas an
    eagrúcháin na hathróga `--orch-status-*` atá aireach don téama
    (`src/shared/components/flow/edgeStyles.ts`).
-2. Ná paistigh `packages/ui-kit/src` de láimh riamh: sioncrónaigh le
-   `scripts/dev/sync-ui-kit.sh <commit>`; theipeann an geata réamh-commit
-   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ar aon bheart a bhíonn difriúil ón gcommit
-   upstream pionnáilte (léimeann sé thairis le rabhadh nuair nach bhfuil an chlón upstream,
-   `UI_KIT_CLONE` nó `_references/cheaper-inference-ui-kit`, i láthair). Nuair nach bhfuil rud éigin
-   sa kit, déan bealach thart air san oiriúntóir nó sa scáileán agus iarr ar upstream é.
-3. Is Béarla iad réamhshocruithe téacs an kit (`label = "Loading"`,
-   `loadingLabel = "Loading table"`…) — tabhair teaghráin aistrithe ó `useTranslations(...)` aon uair
-   a rindreálann comhpháirt kit téacs.
-4. Tá tosaíocht ag fóntais Tailwind thar chlasa chomhpháirte an kit (fógraíonn an kit
-   `@layer theme, base, components, utilities` agus tá a rialacha lonnaithe i `components`) — bain
-   úsáid as fóntais le haghaidh spásála agus leagan amach, ní chun comhpháirte an kit a athdhathú.
-5. Ceannteidil: `.ci-heading` (Inter, gan rianú) do theidil leathanach agus rannóg;
-   `.ci-dashboard-display` (Instrument Serif) amháin do théacs taispeána mór, tearc amhail cód
-   stádais an leathanaigh earráide.
-6. Cosnaíonn `tests/unit/dashboard-kit-sweep.test.ts` glacadh an kit: gan aon span ligatúrach
-   Material faoi `src/app` nó `src/shared/components`; i gcrann an deais (`src/app/(dashboard)` agus
-   `src/shared/components`) gan aon `<select>`, `<textarea>` nó `<table>` amh agus gan aon
-   `role="dialog"` lámdhéanta lasmuigh de na heisceachtaí liostaithe (an brainse dúchais de chuid
-   oiriúntóra `Select`, `RequestLoggerDetail`); teastaíonn trácht ina bhfuil `kit-exception:` (leis
-   an gcúis) ó gach `<button>` nó `<input>` amh ann, trácht a chríochnaíonn 3 líne ar a mhéid os a
-   chionn; dathanna pailéid agus athraithe `dark:` sna comhaid a liostaíonn an tástáil amháin.
-7. Fíoraigh an dá théama agus radharcport 390 px roimh PR (scáileáin); ritheann
-   `tests/e2e/a11y.spec.ts` axe.
+2. Ná paisteáil `packages/ui-kit/src` de láimh riamh: sioncronaigh le `scripts/dev/sync-ui-kit.sh <commit>`; teipeann ar an ngeata réamh-churtha `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) má tá aon bheart difriúil ón tiomantas réamhtheachtach pionnáilte (scipeálann sé le rabhadh nuair atá an clón réamhtheachtach, `UI_KIT_CLONE` nó `_references/cheaper-inference-ui-kit`, ar iarraidh). Nuair nach bhfuil rud éigin sa trealamh, téigh timpeall air san oiriúntóir nó sa scáileán agus iarr é ón bhfoireann réamhtheachtach.
+3. Is i mBéarla atá réamhshocruithe téacs an trealaimh (`label = "Loading"`, `loadingLabel = "Loading table"`…) — tabhair teaghráin aistrithe ó `useTranslations(...)` gach uair a rindreálann comhpháirt trealaimh téacs.
+4. Bíonn forlámhas ag fóntais Tailwind ar aicmí comhpháirteanna an trealaimh (dearbhaíonn an trealamh `@layer theme, base, components, utilities` agus tá a rialacha in `components`) — úsáid fóntais le haghaidh spásála agus leagain amach, ní chun dath eile a chur ar chomhpháirteanna an trealaimh.
+5. Ceannteidil: `.ci-heading` (Inter, gan spásáil idir litreacha) le haghaidh teidil leathanaigh agus rannóige; `.ci-dashboard-display` (Instrument Serif) le haghaidh téacs mór taispeána nach bhfuil dlúth ach amháin, amhail cód stádais an leathanaigh earráide.
+6. Cosnaíonn `tests/unit/dashboard-kit-sweep.test.ts` glacadh an trealaimh: gan aon réise ligature Material faoi `src/app` ná `src/shared/components`; i gcrann an deais (`src/app/(dashboard)` agus `src/shared/components`), gan aon `<select>`, `<textarea>` ná `<table>` amh, agus gan aon `role="dialog"` lámhdhéanta lasmuigh de na heisceachtaí liostaithe (brainse dúchasach an oiriúntóra `Select`, `RequestLoggerDetail`); teastaíonn nóta tráchta ina bhfuil `kit-exception:` (mar aon leis an gcúis) ó gach `<button>` nó `<input>` amh ansin, agus ní mór don nóta críochnú 3 líne ar a mhéad os a chionn; ní cheadaítear líonna pailéid ná malairtí `dark:` ach amháin sna comhaid atá liostaithe sa tástáil.
+7. Fíoraigh an dá théama agus an t-amharcphort 390 px roimh PR (gabhálacha scáileáin); ritheann `tests/e2e/a11y.spec.ts` axe.
 
 ## 3. Scáileán a chur leis
 
@@ -152,7 +134,23 @@ iompórtálacha coibhneasta). Ansin: athbhreithnigh `git diff packages/ui-kit`, 
 úsáid agus críochphointe sa dá théama, rith `npm run check:ui-kit-snapshot` agus `npm run test:vitest:ui`, agus
 oscail an PR leis an loga athruithe réamhtheachtach.
 
-## 6. Innéacs tagartha
+## 6. Léaráidí README
+
+Cuireann an dá léaráid déag atá leabaithe sa `README.md` fréimhe (`docs/diagrams/*.svg`) an trealamh i bhfeidhm ar íomhánna statacha. Gintear iad, ní tharraingítear de láimh iad: 13 chomhad gineadóra in `scripts/docs/gen-readme-*.mjs` (dhá léaráid déag agus an tiománaí `gen-readme-diagrams.mjs`) agus 12 thástáil seandátaithe in `tests/unit/docs/readme-*-svg.test.ts`, ceann do gach léaráid. Déanann gach tástáil comparáid beart ar bheart idir an comhad sa commit agus aschur a ghineadóra (jab `test-unit`).
+
+- **Comharthaí.** Cóipeálann `scripts/docs/readme-diagram-theme.mjs` an pailéad ó `packages/ui-kit/src/ci-tokens.css` (coinníonn `tests/unit/docs/readme-diagram-theme.test.ts` é ar aon dul leis an gcomhad sin) agus sainíonn sé róil téacs le clófhoirne an trealaimh: Instrument Serif do théacs taispeána, Inter don chomhéadan agus IBM Plex Mono d'uimhreacha agus cód. Is iad na pacáistí `@fontsource` céanna iad a lódálann `src/app/globals.css` don deais. Tá na luachanna geala ar `:root` agus na cinn dhorcha faoi `prefers-color-scheme: dark` sa chomhad, ionas go leanann gach íomhá scéim dathanna an léitheora ar GitHub.
+
+- **Clófhoirne.** Laghdaíonn `scripts/docs/readme-fonts.mjs` na comhaid woff2 sin go dtí na glifí a tharraingíonn gach léaráid agus leabaíonn sé iad trí `@font-face` mar URIanna `data:`. Coinníonn sé seo clófhoirne an trealaimh laistigh den SVG. Seiceálann an triail áitiúil d'íomhánna README nach ndéanann an rindreáil aon iarratas seachtrach ar chlófhoirne. Níl ach carachtair Laidine sna fo-thacair; ceadaítear glifí siombailí a úsáideann clófhoirne an chórais mar chúltaca ceann ar cheann in `SYMBOL_FALLBACKS`. Cruthaíonn aon ghlif eile nach bhfuil clúdaithe earráid.
+
+- **Athghiniúint.** Athscríobhann `npm run docs:readme-diagrams` an dá léaráid déag in ord an README agus priontálann sé líne do gach comhad lena mhéid. Is féidir gineadóir a rith leis féin freisin (`node scripts/docs/gen-readme-<name>.mjs`; teastaíonn `node --import tsx/esm` ó `free-tier-budget` mar tagann a uimhreacha ó lódálaí an chatalóige reatha in `open-sse/config/freeModelCatalog.ts`; tá tionchar athrú catalóige ar CI in `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Cuir an gineadóir agus an SVG sa commit céanna.
+
+- **Cruthúnas.** Rindreálann `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` comhad sa triail áitiúil (clib `<img>`, `Content-Security-Policy` sriantach agus freagra `image/svg+xml`), gabhann sé íomhá gheal agus íomhá dhorcha agus tuairiscíonn sé iarratais sheachtracha na leathanach ar chlófhoirne; caithfidh 0 a bheith ann.
+
+- **Buiséad.** Faoi 200 KB sa chomhad, rud a dhearbhaíonn gach tástáil seandátaithe; is é 500 KB an uasteorainn chrua d'aon íomhá README (riail bhailíochtóir SVG studio).
+
+- **Téacs comhroinnte, uimhreacha ón gate.** Coinníonn gach gineadóir téacs a léaráide i dtairiseach `*_COPY` nó tógann sé é ón gcatalóg reatha. Úsáidtear an téacs céanna sa líníocht agus mar ionchur don fho-thacar clófhoirne. Fanann na huimhreacha canónacha i nóid `<text>` a léann `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Ritheann tástálacha seandátaithe na léaráidí a léann an gate a bhailíochtóirí ar an gcomhad ginte freisin. Teipeann ar an tástáil má imíonn uimhir ón gcód: ceartaigh an fhoinse a léann an gate, ní an uimhir sa ghineadóir riamh.
+
+## 7. Innéacs tagartha
 
 - `src/app/globals.css` — droichead comharthaí, sáruithe `.dark`, síntí OmniRoute `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — cur isteach réamhtheachtach pionnáilte agus údarú ceadúnais; `packages/ui-kit/PATCHES.md`

@@ -79,7 +79,7 @@
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` da `src/shared/components/ErrorPageScaffold.tsx`
   — suna nuna lockup; `tests/unit/brand-pages-static.test.ts` yana kiyaye hakan.
 
-## 2. Ka'idoji
+## 2. Dokoki
 
 1. Tokens kawai, ba a amfani da literals ba. An riƙe keɓancewa da gangan: tashar console da take
    duhu a kowane lokaci da `STATUS_HEX` (`src/shared/constants/statusColors.ts`), madubin hex da aka
@@ -89,29 +89,24 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; gefunan ReactFlow da canvas na
    orchestration suna karanta masu canji `--orch-status-*` da suka fahimci jigo
    (`src/shared/components/flow/edgeStyles.ts`).
-2. Kada a gyara `packages/ui-kit/src` da hannu: daidaita shi da `scripts/dev/sync-ui-kit.sh <commit>`;
-   ƙofar pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) tana gazawa a kan kowane
-   byte da ya bambanta da commit na upstream da aka kafa (tana tsallake da gargadi idan clone na
-   upstream, `UI_KIT_CLONE` ko `_references/cheaper-inference-ui-kit`, ba ya nan). Idan kit ya ɗace
-   da wani abu, nemo mafita a cikin adapter ko allon kuma ka nemi daga upstream.
-3. Tsoffin rubutu na kit Turanci ne (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ka
-   wuce strings da aka fassara daga `useTranslations(...)` a duk lokacin da wani abu na kit yana nuna
-   rubutu.
-4. Utilities na Tailwind suna rinjayar azuzuwan abubuwan kit (kit yana ayyana
-   `@layer theme, base, components, utilities` kuma dokokinsa suna zaune a cikin `components`) — ka
-   yi amfani da utilities don sarari da shimfiɗa, ba don sake ba abubuwan kit launi ba.
-5. Kanun labarai: `.ci-heading` (Inter, babu tracking) ga taken shafuka da ɓangarori;
-   `.ci-dashboard-display` (Instrument Serif) kawai ga manyan rubutu na nuni marasa yawa kamar lambar
-   matsayin shafin kuskure.
-6. `tests/unit/dashboard-kit-sweep.test.ts` yana tsaron karɓar kit: babu span na Material ligature a
-   ƙarƙashin `src/app` ko `src/shared/components`; a cikin itacen dashboard (`src/app/(dashboard)` da
-   `src/shared/components`) babu `<select>`, `<textarea>` ko `<table>` na zahiri kuma babu
-   `role="dialog"` da aka kirkira da hannu a wajen keɓancewa da aka lissafa (reshen native na adapter
-   na `Select`, `RequestLoggerDetail`); kowane `<button>` ko `<input>` na zahiri a can yana buƙatar
-   sharhi mai ɗauke da `kit-exception:` (tare da dalilin) wanda ya ƙare mafi yawa layi 3 a saman shi;
-   launukan palette da bambancewar `dark:` kawai a cikin fayilolin da gwajin ya lissafa.
-7. Ka tabbatar da jigogin biyu da viewport na 390 px kafin PR (hotunan allon);
-   `tests/e2e/a11y.spec.ts` yana gudanar da axe.
+2. Kada a taɓa gyara `packages/ui-kit/src` da hannu: yi sync da `scripts/dev/sync-ui-kit.sh <commit>`; matakin binciken pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) yana gaza idan akwai ko byte ɗaya da ya bambanta da pinned upstream commit (yana tsallakewa tare da gargaɗi idan upstream clone,
+   `UI_KIT_CLONE` ko `_references/cheaper-inference-ui-kit`, ba ya nan). Idan kit ɗin ba shi da wani abu,
+   nemo hanyar kewaye da hakan a adapter ko screen sannan a nemi upstream ya samar da shi.
+3. Tsoffin rubutun kit suna cikin Turanci (`label = "Loading"`, `loadingLabel = "Loading table"`…) — aika strings da aka fassara daga `useTranslations(...)` a duk lokacin da kit component yake render ɗin rubutu.
+4. Tailwind utilities suna rinjayar classes na kit component (kit ɗin yana ayyana
+   `@layer theme, base, components, utilities` kuma dokokinsa suna cikin `components`) — yi amfani da utilities don
+   spacing da layout, ba don sake canza launin kit components ba.
+5. Headings: `.ci-heading` (Inter, babu tracking) don page da section titles; `.ci-dashboard-display`
+   (Instrument Serif) kawai don manyan display text marasa yawa kamar status code na error-page.
+6. `tests/unit/dashboard-kit-sweep.test.ts` yana tabbatar da rungumar kit ɗin: babu Material ligature span a ƙarƙashin
+   `src/app` ko `src/shared/components`; a cikin dashboard tree (`src/app/(dashboard)` da
+   `src/shared/components`) babu raw `<select>`, `<textarea>` ko `<table>`, kuma babu `role="dialog"` da aka ƙirƙira da hannu
+   a wajen keɓancewar da aka lissafa (`Select` adapter's native branch,
+   `RequestLoggerDetail`); kowane raw `<button>` ko `<input>` a wurin yana buƙatar comment mai ɗauke da
+   `kit-exception:` (tare da dalili) wanda yake ƙarewa a mafi yawan layuka 3 a samansa; palette hues da `dark:` variants
+   suna cikin files da test ɗin ya lissafa kawai.
+7. Tabbatar da themes biyu da viewport na 390 px kafin PR (screenshots); `tests/e2e/a11y.spec.ts` yana gudanar da
+   axe.
 
 ## 3. Ƙara screen
 
@@ -151,7 +146,23 @@ relative imports). Sannan: duba `git diff packages/ui-kit`, gudanar da duban gan
 usage da endpoint a themes biyu, gudanar da `npm run check:ui-kit-snapshot` da `npm run test:vitest:ui`, sannan
 buɗe PR tare da changelog na upstream.
 
-## 6. Fihirisar manazarta
+## 6. Zane-zanen README
+
+Zane-zane goma sha biyu da aka saka a `README.md` na tushe (`docs/diagrams/*.svg`) suna amfani da kit a hotuna marasa motsi. Ana samar da su, ba zana su da hannu ba: fayilolin janareta 13 a `scripts/docs/gen-readme-*.mjs` (zane-zane goma sha biyu da mai sarrafawa `gen-readme-diagrams.mjs`) da gwaje-gwajen tsufa 12 a `tests/unit/docs/readme-*-svg.test.ts`, ɗaya ga kowane zane. Kowane gwaji yana kwatanta fayil ɗin da aka commit da fitowar janaretansa byte bayan byte (aiki `test-unit`).
+
+- **Token.** `scripts/docs/readme-diagram-theme.mjs` yana kwafin palet daga `packages/ui-kit/src/ci-tokens.css` (gwajin `tests/unit/docs/readme-diagram-theme.test.ts` yana tabbatar da dacewa da wannan fayil) kuma yana bayyana ayyukan rubutu da font ɗin kit: Instrument Serif don rubutun nuni, Inter don rubutun mu'amala, IBM Plex Mono don lambobi da lamba ta shiri. Waɗannan su ne fakitin `@fontsource` da `src/app/globals.css` yake ɗorawa don dashboard. Ƙimomin haske suna kan `:root`, na duhu suna ƙarƙashin `prefers-color-scheme: dark` cikin fayil, don haka kowane hoto yana bin tsarin launin mai karatu a GitHub.
+
+- **Font.** `scripts/docs/readme-fonts.mjs` yana rage waɗannan fayilolin woff2 zuwa glyph ɗin da kowane zane ke zana, sannan ya saka su ta `@font-face` a matsayin URI na `data:`. Hakan yana ajiye font na kit a cikin SVG. Gwajin hoton README na gida yana tabbatar da cewa nuna hoton ba ya aika buƙatun font zuwa waje. Ƙananan rukunin suna da haruffan Latin kawai; glyph na alamomi da suka koma ga font na tsarin kwamfuta a matsayin madadi ana ba su izini ɗaya bayan ɗaya a `SYMBOL_FALLBACKS`. Duk wani glyph da ba a rufe ba yana haifar da kuskure.
+
+- **Sake samarwa.** `npm run docs:readme-diagrams` yana sake rubuta duk zane-zane goma sha biyu bisa tsarin README kuma ya fitar da layi ɗaya ga kowane fayil da girmansa. Janareta yana iya aiki shi kaɗai (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` yana buƙatar `node --import tsx/esm` domin lambobinsa suna fitowa daga mai ɗora kundin yanzu a `open-sse/config/freeModelCatalog.ts`; tasirin sauyin kundin ga CI yana a `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Yi commit na janareta da SVG tare.
+
+- **Shaida.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` yana nuna fayil a gwajin gida (tag `<img>`, `Content-Security-Policy` mai takura da amsar `image/svg+xml`), ya ɗauki hoton haske da na duhu, kuma ya bayar da rahoton buƙatun font na waje da shafin ya yi; dole adadinsu ya zama 0.
+
+- **Iyaka.** Ƙasa da 200 KB ga kowane fayil, abin da kowane gwajin tsufa yake tabbatarwa; 500 KB shi ne iyakar dole ga kowane hoton README (ƙa'idar mai tantance SVG studio).
+
+- **Rubutu na bai ɗaya, adadi daga gate.** Kowane janareta yana riƙe rubutun zanensa a constant `*_COPY` ko ya gina shi daga kundin yanzu. Wannan rubutu ake zanawa kuma ake amfani da shi wajen zaɓar ƙaramin rukunin font. Lambobin hukuma suna nan a node `<text>` da `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) yake karantawa. Gwaje-gwajen tsufa na zane-zanen da gate yake karantawa suna gudanar da masu tantancewarsa a fayil ɗin da aka samar ma. Idan lamba ta bambanta da lambar shiri, gwajin ya gaza: gyara tushen da gate yake karantawa, kada a gyara lambar cikin janareta.
+
+## 7. Fihirisar manazarta
 
 - `src/app/globals.css` — gadar token, overrides na `.dark`, ƙarin faɗaɗawar OmniRoute na `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — commit na upstream da aka kulle da izinin lasisi; `packages/ui-kit/PATCHES.md`

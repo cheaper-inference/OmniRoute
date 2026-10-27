@@ -221,7 +221,7 @@ Senkronizasyon tarafında, bilinen satıcı ön ekleri (`anthropic/`, `openai/`,
 dahili olarak kullandığı varyantlara genişletir; böylece modeller herhangi bir ad
 altında bulunabilir kalır.
 
-### Bir sağlayıcı nasıl sıralanır
+### Bir sağlayıcının sıralanma biçimi
 
 Her ücretsiz sağlayıcı için motor, kataloğundaki her modeli puanlar, ardından:
 

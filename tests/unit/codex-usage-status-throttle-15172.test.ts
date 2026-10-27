@@ -7,9 +7,11 @@
  */
 import test from "node:test";
 import assert from "node:assert/strict";
+import { performance } from "node:perf_hooks";
 
 import { getUsageForProvider } from "../../open-sse/services/usage.ts";
 import { setCodexUsageFetchForTests } from "../../open-sse/services/usage/codex.ts";
+import { connectionProxyTestOverride } from "../../open-sse/services/connectionProxyFetch.ts";
 import {
   MinIntervalThrottle,
   resetQuotaFetchThrottle,
@@ -20,6 +22,10 @@ import {
   createQuotaAutoPingState,
   runQuotaAutoPingTick,
 } from "../../src/lib/services/quotaAutoPing.ts";
+import {
+  __setProxyHealthTcpCheckForTesting,
+  invalidateProxyHealth,
+} from "../../src/lib/proxyHealth.ts";
 
 const INTERVAL_MS = 250;
 
@@ -44,7 +50,7 @@ function installSharedThrottle(clock: FakeClock | null) {
 function installUsageFetch(clock: FakeClock | null) {
   const starts: number[] = [];
   setCodexUsageFetchForTests(async () => {
-    starts.push(clock ? clock.now() : Date.now());
+    starts.push(clock ? clock.now() : performance.now());
     return new Response(
       JSON.stringify({
         plan_type: "plus",
@@ -131,5 +137,66 @@ test("#15172 Auto-Ping's own gate adds at most one extra interval", async () => 
   } finally {
     restore();
     restoreThrottle();
+  }
+});
+
+test("#15172 proxy fast-fail invalidates a Codex fetch still waiting on the gate", async () => {
+  const proxyUrl = "http://127.0.0.1:1";
+  let now = 1_000;
+  let releaseSleep: (() => void) | null = null;
+  let markSleepStarted!: () => void;
+  const sleepStarted = new Promise<void>((resolve) => {
+    markSleepStarted = resolve;
+  });
+  const clock: ThrottleClock = {
+    now: () => now,
+    sleep: (ms: number) => {
+      markSleepStarted();
+      return new Promise<void>((resolve) => {
+        releaseSleep = () => {
+          now += ms;
+          resolve();
+        };
+      });
+    },
+  };
+  const throttle = new MinIntervalThrottle({ minIntervalMs: INTERVAL_MS, jitterMs: 0, clock });
+  setQuotaFetchThrottleForTests(throttle);
+  await throttle.acquire();
+
+  let fetchCalls = 0;
+  setCodexUsageFetchForTests(async () => {
+    fetchCalls++;
+    return new Response("{}", { status: 200 });
+  });
+  connectionProxyTestOverride.resolveProxyForConnection = async () => ({
+    proxy: { type: "http", host: "127.0.0.1", port: 1 },
+  });
+  invalidateProxyHealth(proxyUrl);
+  __setProxyHealthTcpCheckForTesting(async () => false);
+
+  try {
+    const resultPromise = getUsageForProvider({
+      id: "codex-proxy-fast-fail",
+      provider: "codex",
+      accessToken: "fixture-token",
+      providerSpecificData: { workspaceId: "fixture-workspace" },
+    });
+    await sleepStarted;
+    const result = (await resultPromise) as { message?: string };
+    assert.match(String(result.message), /proxied request failed/);
+    assert.equal(fetchCalls, 0, "fast-fail must settle before the gate is released");
+
+    releaseSleep?.();
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    await new Promise<void>((resolve) => setImmediate(resolve));
+    assert.equal(fetchCalls, 0, "a reported proxy failure must not dispatch a late fetch");
+  } finally {
+    releaseSleep?.();
+    __setProxyHealthTcpCheckForTesting(null);
+    invalidateProxyHealth(proxyUrl);
+    connectionProxyTestOverride.resolveProxyForConnection = null;
+    setCodexUsageFetchForTests(null);
+    resetQuotaFetchThrottle();
   }
 });

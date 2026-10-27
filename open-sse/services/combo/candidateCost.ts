@@ -46,6 +46,7 @@ async function lookupBlended(
     const bare = model.includes("/") ? model.split("/").pop() || model : model;
     return bare !== model ? blend(await getPricing(provider, bare)) : null;
   } catch {
+    // no-effect: unknown prices use the pool median (or an equal fallback if all are unknown).
     return null;
   }
 }

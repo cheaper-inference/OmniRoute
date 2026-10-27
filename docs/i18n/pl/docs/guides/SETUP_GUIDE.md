@@ -36,6 +36,8 @@ omniroute
 
 Dashboard otwiera się pod adresem `http://localhost:20128`, a bazowy URL API to `http://localhost:20128/v1`.
 
+> **Użytkownicy npm:** Jeśli npm ostrzega, że skrypty instalacyjne zostały zablokowane (np. `omniroute`, `better-sqlite3`), zobacz [Rozwiązywanie problemów — zablokowane skrypty instalacyjne npm](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+
 ### pnpm
 
 ```bash
@@ -62,6 +64,8 @@ PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm 
 ```
 
 > **Uwaga:** `npm install` przy pierwszym uruchomieniu automatycznie generuje `.env` z `.env.example`. Kolejne instalacje nie nadpisują istniejącego `.env`, więc Twoje zmiany są zachowane. Aby ponownie zainicjować, usuń `.env` przed ponownym uruchomieniem.
+
+> **Uwaga dotycząca Windows:** Domyślnie OmniRoute używa `%APPDATA%\omniroute`, gdy nie istnieje starszy katalog `%USERPROFILE%\.omniroute`. Ustaw `DATA_DIR`, aby wybrać inną lokalizację katalogu danych.
 
 ### Docker
 

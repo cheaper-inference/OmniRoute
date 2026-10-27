@@ -89,28 +89,27 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-kanter og
    orkestreringslærredet læser de temaafhængige `--orch-status-*`-variabler
    (`src/shared/components/flow/edgeStyles.ts`).
-2. Patch aldrig `packages/ui-kit/src` i hånden: synkronisér med `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit-gaten `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) fejler på enhver byte, der
-   afviger fra det fastlåste upstream-commit (den springer over med en advarsel, når upstream-klonen,
-   `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, mangler). Når kittet mangler noget,
-   så omgå det i adapteren eller skærmen, og bed upstream om det.
-3. Kittets standardtekster er på engelsk (`label = "Loading"`, `loadingLabel = "Loading table"`…) — send
-   oversatte strenge fra `useTranslations(...)`, hver gang en kit-komponent renderer tekst.
-4. Tailwind-utilities vinder over kit-komponentklasser (kittet deklarerer
-   `@layer theme, base, components, utilities`, og dets regler lever i `components`) — brug utilities
-   til spacing og layout, ikke til at omfarve kit-komponenter.
-5. Overskrifter: `.ci-heading` (Inter, ingen tracking) til side- og sektionstitler;
-   `.ci-dashboard-display` (Instrument Serif) kun til stor, sparsom displaytekst som fejlsidens
-   statuskode.
-6. `tests/unit/dashboard-kit-sweep.test.ts` vogter kit-adoptionen: intet Material-ligatur-span under
+2. Ret aldrig `packages/ui-kit/src` manuelt: synkroniser med `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit-
+   kontrollen `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) fejler ved enhver byte, der
+   afviger fra den fastlåste upstream-commit (den springer over med en advarsel, når upstream-klonen,
+   `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, ikke findes). Når sættet mangler noget,
+   skal du omgå det i adapteren eller skærmbilledet og anmode upstream om det.
+3. Sættets standardtekster er på engelsk (`label = "Loading"`, `loadingLabel = "Loading table"`…) — angiv oversatte
+   strenge fra `useTranslations(...)`, når en komponent fra sættet gengiver tekst.
+4. Tailwind-hjælpeklasser har forrang over sættets komponentklasser (sættet erklærer
+   `@layer theme, base, components, utilities`, og dets regler findes i `components`) — brug hjælpeklasser til
+   afstand og layout, ikke til at ændre farven på sættets komponenter.
+5. Overskrifter: `.ci-heading` (Inter, ingen tegnafstand) til side- og sektionsoverskrifter; `.ci-dashboard-display`
+   (Instrument Serif) kun til stor, sparsom displaytekst såsom statuskoden på fejlsiden.
+6. `tests/unit/dashboard-kit-sweep.test.ts` sikrer anvendelsen af sættet: ingen Material-ligaturspan under
    `src/app` eller `src/shared/components`; i dashboard-træet (`src/app/(dashboard)` og
-   `src/shared/components`) ingen rå `<select>`, `<textarea>` eller `<table>` og ingen hjemmerullet
-   `role="dialog"` uden for de listede undtagelser (`Select`-adapterens native-gren,
-   `RequestLoggerDetail`); hver rå `<button>` eller `<input>` der skal have en kommentar, der indeholder
-   `kit-exception:` (med begrundelsen), og som slutter højst 3 linjer over den; palette-nuancer og
-   `dark:`-varianter kun i de filer, testen lister.
-7. Verificér begge temaer og viewporten på 390 px før en PR (screenshots); `tests/e2e/a11y.spec.ts`
-   kører axe.
+   `src/shared/components`) må der ikke være rå `<select>`, `<textarea>` eller `<table>` og ingen hjemmelavet
+   `role="dialog"` uden for de angivne undtagelser (`Select`-adapterens native-gren,
+   `RequestLoggerDetail`); hver rå `<button>` eller `<input>` dér kræver en kommentar, der indeholder
+   `kit-exception:` (med årsagen), og som slutter højst 3 linjer over elementet; paletnuancer og `dark:`-varianter
+   må kun forekomme i de filer, som testen angiver.
+7. Kontrollér begge temaer og visningsområdet på 390 px før en PR (skærmbilleder); `tests/e2e/a11y.spec.ts` kører
+   axe.
 
 ## 3. Tilføjelse af et skærmbillede
 
@@ -150,7 +149,23 @@ relative imports). Derefter: gennemgå `git diff packages/ui-kit`, foretag en vi
 brug og endpoint i begge temaer, kør `npm run check:ui-kit-snapshot` og `npm run test:vitest:ui`, og
 opret PR'en med upstream-ændringsloggen.
 
-## 6. Referenceindeks
+## 6. README-diagrammer
+
+De tolv diagrammer i rodens `README.md` (`docs/diagrams/*.svg`) anvender kittet på statiske billeder. De genereres, ikke tegnes i hånden: 13 generatorfiler under `scripts/docs/gen-readme-*.mjs` (tolv diagrammer plus driveren `gen-readme-diagrams.mjs`) og 12 aktualitetstests under `tests/unit/docs/readme-*-svg.test.ts`, én pr. diagram. Hver test sammenligner den committede fil byte for byte med generatorens output (job `test-unit`).
+
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopierer paletten fra `packages/ui-kit/src/ci-tokens.css` (overensstemmelsen med filen fastholdes af `tests/unit/docs/readme-diagram-theme.test.ts`) og definerer tekstroller med kittets skrifter: Instrument Serif til fremhævet displaytekst, Inter til brugerfladetekst og IBM Plex Mono til tal og kode. Det er de samme `@fontsource`-pakker, som `src/app/globals.css` indlæser til dashboardet. Lyse værdier ligger på `:root` og mørke under `prefers-color-scheme: dark` i filen, så hvert billede følger læserens farveskema på GitHub.
+
+- **Skrifter.** `scripts/docs/readme-fonts.mjs` begrænser disse woff2-filer til de glyffer, hvert diagram tegner, og indlejrer dem via `@font-face` som `data:`-URI'er. Dermed forbliver kittets skrifter inde i SVG-filen. Den lokale README-billedtest kontrollerer, at rendering ikke foretager eksterne skriftanmodninger. Delmængderne indeholder kun latinske tegn; symbolglyffer, som falder tilbage til systemskrifterne, tillades enkeltvis i `SYMBOL_FALLBACKS`. Enhver anden udækket glyf udløser en fejl.
+
+- **Generér igen.** `npm run docs:readme-diagrams` omskriver alle tolv diagrammer i README-rækkefølge og udskriver én linje pr. fil med størrelsen. Hver generator kan også køre alene (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` kræver `node --import tsx/esm`, fordi tallene kommer fra den aktuelle katalogindlæser i `open-sse/config/freeModelCatalog.ts`; CI-konsekvensen af en katalogændring står i `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit generatoren og SVG-filen sammen.
+
+- **Bevis.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderer en fil i den lokale test (et `<img>`-tag, en restriktiv `Content-Security-Policy` og et `image/svg+xml`-svar), tager et lyst og et mørkt billede og rapporterer sidens eksterne skrifthentninger; antallet skal være 0.
+
+- **Budget.** Under 200 KB pr. fil, kontrolleret af hver aktualitetstest; 500 KB er den absolutte grænse for ethvert README-billede (SVG studio-validatorens regel).
+
+- **Fælles tekst, tal fra gaten.** Hver generator opbevarer diagramteksten i en `*_COPY`-konstant eller bygger den fra det aktuelle katalog. Teksten bruges både til tegningen og til skriftdelmængden. Kanoniske tal forbliver i `<text>`-noder, som læses af `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Aktualitetstestene for de diagrammer, gaten læser, kører også dens validatorer på den genererede fil. Et tal, der afviger fra koden, får testen til at fejle: ret kilden, gaten læser, aldrig tallet i generatoren.
+
+## 7. Referenceindeks
 
 - `src/app/globals.css` — token-bro, `.dark`-tilsidesættelser, OmniRoute-udvidelser under `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — fastlåst upstream-commit og licensgodkendelse; `packages/ui-kit/PATCHES.md`

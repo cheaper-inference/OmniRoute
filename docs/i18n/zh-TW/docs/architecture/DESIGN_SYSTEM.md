@@ -89,27 +89,12 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`；ReactFlow 的邊（edge）與
    編排畫布讀取可感知主題的 `--orch-status-*` 變數
    （`src/shared/components/flow/edgeStyles.ts`）。
-2. 絕不要手動修改 `packages/ui-kit/src`：請使用 `scripts/dev/sync-ui-kit.sh <commit>`
-   同步；pre-commit 閘道 `npm run check:ui-kit-snapshot`（`.husky/pre-commit`）會在任何
-   位元組與釘選的上游 commit 不同時判定失敗（當上游複本 `UI_KIT_CLONE` 或
-   `_references/cheaper-inference-ui-kit` 不存在時，則附帶警告略過）。當 kit 缺少某項
-   功能時，請在 adapter 或畫面中變通處理，並向上游提出需求。
-3. Kit 的文字預設值為英文（`label = "Loading"`、`loadingLabel = "Loading table"`……）——
-   每當 kit 元件要渲染文字時，請從 `useTranslations(...)` 傳入翻譯後的字串。
-4. Tailwind 工具類別的優先級高於 kit 元件類別（kit 宣告了
-   `@layer theme, base, components, utilities`，其規則位於 `components` 層）——工具類別
-   用於間距與版面配置，而不是用來重新為 kit 元件上色。
-5. 標題：頁面與區段標題使用 `.ci-heading`（Inter，無額外字距）；`.ci-dashboard-display`
-   （Instrument Serif）僅用於大型、稀疏的展示文字，例如錯誤頁面的狀態碼。
-6. `tests/unit/dashboard-kit-sweep.test.ts` 負責把關 kit 的採用情形：`src/app` 或
-   `src/shared/components` 底下不得出現 Material 連字（ligature）span；在 dashboard 樹
-   （`src/app/(dashboard)` 與 `src/shared/components`）中不得使用原生 `<select>`、
-   `<textarea>` 或 `<table>`，且在列出的例外（`Select` adapter 的原生分支、
-   `RequestLoggerDetail`）之外不得手刻 `role="dialog"`；該處每個原生 `<button>` 或
-   `<input>` 都需要一則包含 `kit-exception:`（附原因）的註解，且註解結尾距離它最多
-   3 行；調色盤色相與 `dark:` 變體僅允許出現在測試所列的檔案中。
-7. 提交 PR 前，請驗證兩種主題與 390 px 視口（附螢幕截圖）；`tests/e2e/a11y.spec.ts`
-   會執行 axe。
+2. 絕不可手動修改 `packages/ui-kit/src`：請使用 `scripts/dev/sync-ui-kit.sh <commit>` 同步；若有任何位元組與鎖定的上游提交不同，預先提交閘門 `npm run check:ui-kit-snapshot`（`.husky/pre-commit`）便會失敗（若缺少上游複製版本 `UI_KIT_CLONE` 或 `_references/cheaper-inference-ui-kit`，則會顯示警告並略過）。若套件缺少某項功能，請在轉接器或畫面中採取替代做法，並向上游提出需求。
+3. 套件文字的預設值為英文（`label = "Loading"`、`loadingLabel = "Loading table"`……）——只要套件元件會呈現文字，就應從 `useTranslations(...)` 傳入翻譯後的字串。
+4. Tailwind 工具類別的優先順序高於套件元件類別（套件宣告了 `@layer theme, base, components, utilities`，且其規則位於 `components`）——請使用工具類別處理間距與版面配置，不要用來重新設定套件元件的顏色。
+5. 標題：頁面與區段標題使用 `.ci-heading`（Inter，不使用字距）；只有錯誤頁面狀態碼這類大型、疏朗的展示文字才使用 `.ci-dashboard-display`（Instrument Serif）。
+6. `tests/unit/dashboard-kit-sweep.test.ts` 負責確保套件的採用情況：`src/app` 或 `src/shared/components` 下不得有 Material 連字 span；儀表板目錄樹（`src/app/(dashboard)` 和 `src/shared/components`）中不得有原始 `<select>`、`<textarea>` 或 `<table>`，且除列出的例外（`Select` 轉接器的原生分支、`RequestLoggerDetail`）外，不得有自行實作的 `role="dialog"`；該處每個原始 `<button>` 或 `<input>` 上方最多 3 行內都必須有包含 `kit-exception:`（並附上原因）的註解；調色盤色相與 `dark:` 變體只能出現在測試所列出的檔案中。
+7. 提交 PR 前，請透過螢幕截圖驗證兩種主題與 390 px 的視窗寬度；`tests/e2e/a11y.spec.ts` 會執行 axe。
 
 ## 3. 新增畫面
 
@@ -148,7 +133,23 @@
 用量及端點進行視覺檢查、執行 `npm run check:ui-kit-snapshot` 和 `npm run test:vitest:ui`，並
 附上上游變更日誌建立 PR。
 
-## 6. 參考索引
+## 6. README 圖示
+
+根目錄 `README.md` 中嵌入的十二張圖（`docs/diagrams/*.svg`）將套件應用於靜態影像。這些圖由程式產生，而非手工繪製：`scripts/docs/gen-readme-*.mjs` 下有 13 個產生器檔案（十二張圖加上驅動程式 `gen-readme-diagrams.mjs`），`tests/unit/docs/readme-*-svg.test.ts` 下有 12 項時效性測試，每張圖一項，逐位元組比較已提交檔案與產生器輸出（工作 `test-unit`）。
+
+- **權杖。** `scripts/docs/readme-diagram-theme.mjs` 從 `packages/ui-kit/src/ci-tokens.css` 複製調色盤（由 `tests/unit/docs/readme-diagram-theme.test.ts` 鎖定與該檔案的一致性），並使用套件字型定義文字角色：Instrument Serif 用於展示文字，Inter 用於介面文字，IBM Plex Mono 用於數字和程式碼。這些是 `src/app/globals.css` 為儀表板載入的同一組 `@fontsource` 套件。檔案內的亮色值位於 `:root`，暗色值位於 `prefers-color-scheme: dark` 條件下，因此每張圖都會跟隨 GitHub 閱讀者的配色設定。
+
+- **字型。** `scripts/docs/readme-fonts.mjs` 將這些 woff2 檔案裁切為各圖實際繪製的字形，並透過 `@font-face` 以 `data:` URI 嵌入。 這樣可將套件字型保留在 SVG 內。README 影像的本機探測會檢查渲染過程不發出外部字型請求。 子集僅包含拉丁字元；退回使用系統字型堆疊的符號字形會在 `SYMBOL_FALLBACKS` 中逐一獲准，任何其他未涵蓋字形都會擲出錯誤。
+
+- **重新產生。** `npm run docs:readme-diagrams` 按 README 順序重寫全部十二張圖，並為每個檔案輸出一行大小資訊。單一產生器也可獨立執行（`node scripts/docs/gen-readme-<name>.mjs`；`free-tier-budget` 需要 `node --import tsx/esm`，因為其數字來自 `open-sse/config/freeModelCatalog.ts` 中的目前目錄載入器；目錄變更對 CI 的影響見 `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`）。請將產生器與 SVG 一起提交。
+
+- **證據。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` 在本機探測中渲染檔案（`<img>` 標籤、具限制性的 `Content-Security-Policy` 和 `image/svg+xml` 回應），擷取亮色與暗色畫面，並回報頁面發出的外部字型請求，數量必須為 0。
+
+- **體積預算。** 每個檔案須小於 200 KB，由各項時效性測試斷言；任何 README 影像的硬性上限為 500 KB（SVG studio 驗證器的規則）。
+
+- **共用文案，計數來自 gate。** 每個產生器將圖中的文案保存在 `*_COPY` 常數中，或從目前目錄建構；同一份文案既是繪製的文字，也是字型子集的輸入。規範數字保留在 `<text>` 節點中，由 `check:docs-counts`（`scripts/check/check-docs-counts-sync.mjs`）讀取。對於 gate 會讀取的圖，其時效性測試還會對產生的檔案執行 gate 的驗證器；數字一旦偏離程式碼，測試便會失敗。應修復 gate 讀取的來源，而不要修改產生器中的數字。
+
+## 7. 參考索引
 
 - `src/app/globals.css` — token 橋接、`.dark` 覆寫、OmniRoute `@layer components` 擴充
 - `packages/ui-kit/UPSTREAM.md` — 固定的上游提交與授權許可；`packages/ui-kit/PATCHES.md`

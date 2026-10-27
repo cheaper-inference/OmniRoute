@@ -53,7 +53,7 @@ Search Tools Studio 將 `/dashboard/search-tools` 從基本搜尋測試介面轉
 - 輸入：URL + 完整頁面切換開關 + 格式選擇器（markdown / 文字 / HTML）。
 - 提交 → 擷取 → 轉譯 `ScrapeResult.tsx`。
 - `ScrapeResult` 轉譯 markdown 預覽 + 原始內容切換開關。
-- 上限：若回應本文大於 **256 KB**，UI 會顯示「（已截斷，檢視原始內容）」，並在 Monaco 模態視窗中開啟原始內容（D21）。
+- 上限：若回應本文大於 **256 KB**，UI 會顯示「`View full raw content`」，並在模態視窗中開啟原始內容（D21）。
 - 中繼資料面板：提供者（firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search）、延遲、成本、回應大小、連結數量。
 - 使用 `useScrapeFetch.ts` hook。
 

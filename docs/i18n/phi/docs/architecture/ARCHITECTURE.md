@@ -11,47 +11,47 @@ _Huling na-update: 2026-06-28_
 ## Buod para sa mga Ehekutibo
 
 Ang OmniRoute ay isang lokal na AI routing gateway at dashboard na binuo gamit ang Next.js.
-Nagbibigay ito ng iisang endpoint na compatible sa OpenAI (`/v1/*`) at nagruruta ng trapiko sa maraming upstream provider gamit ang translation, fallback, pag-refresh ng token, at pagsubaybay sa paggamit.
+Nagbibigay ito ng iisang endpoint na compatible sa OpenAI (`/v1/*`) at nagra-route ng trapiko sa maraming upstream provider gamit ang translation, fallback, token refresh, at pagsubaybay sa paggamit.
 
 Mga pangunahing kakayahan:
 
 - API surface na compatible sa OpenAI para sa mga CLI/tool (376 provider, 156 executor module)
 - Translation ng request/response sa iba't ibang format ng provider
-- Fallback ng kumbinasyon ng mga modelo (sequence ng maraming modelo)
-- Mga structured na hakbang ng kumbinasyon (`provider + model + connection`) na may runtime ordering ayon sa `compositeTiers`
-- Fallback sa antas ng account (maraming account bawat provider)
-- Paunang pagsusuri ng quota at pagpili ng P2C account na isinasaalang-alang ang quota sa pangunahing chat path
+- Model combo fallback (pagkakasunod-sunod ng maraming modelo)
+- Mga structured combo step (`provider + model + connection`) na may runtime ordering ayon sa `compositeTiers`
+- Account-level fallback (maraming account sa bawat provider)
+- Quota preflight at quota-aware na pagpili ng P2C account sa pangunahing chat path
 - Pamamahala ng koneksyon sa provider gamit ang OAuth + API key (27 OAuth provider module)
 - Pagbuo ng embedding sa pamamagitan ng `/v1/embeddings` (18 provider)
-- Pagbuo ng larawan sa pamamagitan ng `/v1/images/generations` (10+ provider, 20+ modelo)
-- Transkripsiyon ng audio sa pamamagitan ng `/v1/audio/transcriptions` (18 provider)
+- Pagbuo ng image sa pamamagitan ng `/v1/images/generations` (10+ provider, 20+ modelo)
+- Audio transcription sa pamamagitan ng `/v1/audio/transcriptions` (18 provider)
 - Text-to-speech sa pamamagitan ng `/v1/audio/speech` (24 built-in na provider)
 - Pagbuo ng video sa pamamagitan ng `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Pagbuo ng musika sa pamamagitan ng `/v1/music/generations` (ComfyUI)
 - Paghahanap sa web sa pamamagitan ng `/v1/search` (20 provider)
 - Mga moderation sa pamamagitan ng `/v1/moderations`
-- Muling pagraranggo sa pamamagitan ng `/v1/rerank`
+- Reranking sa pamamagitan ng `/v1/rerank`
 - Pag-parse ng think tag (`<think>...</think>`) para sa mga reasoning model
-- Paglilinis ng response para sa mahigpit na compatibility sa OpenAI SDK
-- Normalisasyon ng role (developer→system, system→user) para sa compatibility sa iba't ibang provider
+- Sanitization ng response para sa mahigpit na compatibility sa OpenAI SDK
+- Normalization ng role (developer→system, system→user) para sa cross-provider compatibility
 - Conversion ng structured output (json_schema → Gemini responseSchema)
-- Lokal na persistence para sa mga provider, key, alias, kumbinasyon, setting, at presyo (122 DB module)
+- Lokal na persistence para sa mga provider, key, alias, combo, setting, at pricing (122 DB module)
 - Pagsubaybay sa paggamit/gastos at pag-log ng request
-- Opsyonal na cloud sync para sa pag-sync ng state sa maraming device
-- Allowlist/blocklist ng IP para sa pagkontrol ng access sa API
+- Opsyonal na cloud sync para sa multi-device/state sync
+- IP allowlist/blocklist para sa kontrol ng access sa API
 - Pamamahala ng thinking budget (passthrough/auto/custom/adaptive)
-- Global na pag-inject ng system prompt
+- Pag-inject ng global system prompt
 - Pagsubaybay at fingerprinting ng session
-- Pinahusay na rate limiting sa bawat account na may mga profile na partikular sa provider
-- Circuit breaker pattern para sa katatagan ng provider
-- Proteksiyon laban sa thundering herd gamit ang mutex locking
-- Cache para sa deduplication ng request batay sa signature
+- Pinahusay na rate limiting sa bawat account gamit ang mga profile na partikular sa provider
+- Circuit breaker pattern para sa resilience ng provider
+- Proteksyon laban sa thundering herd gamit ang mutex locking
+- Cache para sa signature-based na pag-deduplicate ng request
 - Domain layer: mga panuntunan sa gastos, fallback policy, lockout policy
-- Context Relay: mga buod ng session handoff para sa pagpapatuloy kapag nagpapalit ng account
+- Context Relay: mga buod ng session handoff para sa continuity habang nagpapalit ng account
 - Persistence ng domain state (SQLite write-through cache para sa mga fallback, budget, lockout, at circuit breaker)
 - Policy engine para sa sentralisadong pagsusuri ng request (lockout → budget → fallback)
-- Telemetry ng request na may pagsasama-sama ng p50/p95/p99 latency
-- Telemetry ng target ng kumbinasyon at makasaysayang kalagayan ng target ng kumbinasyon sa pamamagitan ng `combo_execution_key` / `combo_step_id`
+- Request telemetry na may aggregation ng p50/p95/p99 latency
+- Combo target telemetry at dating kalagayan ng combo target sa pamamagitan ng `combo_execution_key` / `combo_step_id`
 - Correlation ID (X-Request-Id) para sa end-to-end tracing
 - Compliance audit logging na may opt-out sa bawat API key
 - Eval framework para sa quality assurance ng LLM
@@ -60,27 +60,27 @@ Mga pangunahing kakayahan:
 - A2A Server (JSON-RPC 2.0 + SSE) na may mga skill at lifecycle ng task
 - Memory system (extraction, injection, retrieval, summarization)
 - Skills system (registry, executor, sandbox, mga built-in na skill)
-- MITM proxy na may pamamahala ng certificate at pangangasiwa ng DNS
+- MITM proxy na may pamamahala ng certificate at DNS handling
 - Middleware na panangga laban sa prompt injection
-- Pipeline ng prompt compression na may Caveman, RTK, mga stacked pipeline, kumbinasyon ng compression, language pack, at analytics
+- Pipeline ng prompt compression na may Caveman, RTK, mga stacked pipeline, compression combo, language pack, at analytics
 - Registry ng ACP (Agent Communication Protocol)
 - Mga modular na OAuth provider (22 indibidwal na module sa ilalim ng `src/lib/oauth/providers/`)
-- Mga script para sa uninstall/full-uninstall
-- Aksiyon sa pagkukumpuni ng OAuth environment
+- Mga uninstall/full-uninstall script
+- Aksyon para sa pag-repair ng OAuth environment
 - WebSocket bridge para sa mga WS client na compatible sa OpenAI (`/v1/ws`)
-- Pamamahala ng sync token (pag-isyu/pagbawi, pag-download ng config bundle na may ETag versioning)
-- GLM Thinking (`glmt`) bilang first-class na preset ng provider
-- Hybrid na pagbibilang ng token (`/messages/count_tokens` sa panig ng provider na may estimation fallback)
-- Awtomatikong pag-seed ng model alias (30+ normalisasyon ng cross-proxy dialect sa pagsisimula)
-- Ligtas na outbound fetch na may SSRF guard, pag-block ng pribadong URL, at nako-configure na retry
-- Mga chat retry na isinasaalang-alang ang cooldown, na may nako-configure na `requestRetry` at `maxRetryIntervalSec`
-- Validation ng runtime environment gamit ang Zod sa pagsisimula
-- Compliance audit v2 na may pagination, mga CRUD event ng provider, at pag-log ng validation na na-block ng SSRF
+- Pamamahala ng sync token (issue/revoke, pag-download ng ETag-versioned config bundle)
+- GLM Thinking (`glmt`) bilang first-class na provider preset
+- Hybrid token counting (provider-side na `/messages/count_tokens` na may estimation fallback)
+- Awtomatikong pag-seed ng model alias (30+ normalization ng cross-proxy dialect sa startup)
+- Ligtas na outbound fetch na may SSRF guard, pag-block ng pribadong URL, at configurable na retry
+- Cooldown-aware na chat retry na may configurable na `requestRetry` at `maxRetryIntervalSec`
+- Validation ng runtime environment gamit ang Zod sa startup
+- Compliance audit v2 na may pagination, mga provider CRUD event, at pag-log ng validation na na-block ng SSRF
 
 Pangunahing runtime model:
 
-- Ipinapatupad ng mga ruta ng Next.js app sa ilalim ng `src/app/api/*` ang parehong mga dashboard API at compatibility API
-- Pinangangasiwaan ng shared SSE/routing core sa `src/sse/*` + `open-sse/*` ang execution ng provider, translation, streaming, fallback, at paggamit
+- Ipinapatupad ng mga Next.js app route sa ilalim ng `src/app/api/*` ang mga dashboard API at compatibility API
+- Isang shared SSE/routing core sa `src/sse/*` + `open-sse/*` ang nangangasiwa sa provider execution, translation, streaming, fallback, at paggamit
 
 ## Mga Reference Diagram
 
@@ -1102,11 +1102,11 @@ compatibility sa mga legacy na sistema. Ginagamit ng kasalukuyang runtime contra
 - Mga migration ng SQLite schema at mga hook para sa awtomatikong pag-upgrade sa startup
 - Compatibility path para sa migration mula sa legacy JSON → SQLite
 
-## 6) SSRF / Guard ng Outbound URL
+## 6) SSRF / Proteksiyon sa Outbound URL
 
-- Hinaharang ng `src/shared/network/outboundUrlGuard.ts` ang lahat ng pribado/loopback/link-local na target URL bago makarating ang mga ito sa mga provider executor
-- Gumagamit ang mga route para sa pagtuklas at validation ng provider model ng `src/shared/network/safeOutboundFetch.ts`, na inilalapat ang guard bago ang bawat outbound na kahilingan
-- Lumalabas ang mga error ng guard bilang `URL_GUARD_BLOCKED` na may HTTP 422 at nilo-log sa compliance audit trail sa pamamagitan ng `providerAudit.ts`
+- Inilalapat ng `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) ang `src/shared/network/outboundUrlGuard.ts` sa mga kahilingan sa chat na ipinadadala sa pamamagitan ng `BaseExecutor.execute()`. Sa public-only mode (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` habang naka-off ang private flag), bina-block nito ang mga private at loopback host at ang 169.254.0.0/16; sa lahat ng iba pang mode, bina-block nito ang mga cloud-metadata host. Sinusuri nito ang hostname o literal na IP ayon sa pagkakasulat, bago ang anumang DNS lookup. Nilalaktawan ito ng mga built-in na local provider.
+- Ginagamit ng mga ruta para sa pagtuklas at pagpapatunay ng provider model ang `src/shared/network/safeOutboundFetch.ts`, na inilalapat ang proteksiyon bago ang bawat outbound request
+- Lumalabas ang mga error ng proteksiyon bilang `URL_GUARD_BLOCKED` na may HTTP 503 (`getSafeOutboundFetchErrorStatus`; nagbabalik ng 400 ang ruta para sa pagtuklas ng model), at ang mga tunay na pag-block sa SSRF habang nagpapatunay ay itinatala sa audit trail bilang mga event na `provider.validation.ssrf_blocked`
 
 ## Observability at Mga Signal sa Operasyon
 
@@ -1157,7 +1157,7 @@ Mga environment variable na aktibong ginagamit ng code:
 4. Nakasalalay ang gawi ng cloud sa tamang `NEXT_PUBLIC_BASE_URL` at pagiging naaabot ng cloud endpoint.
 5. Pino-publish ang direktoryong `open-sse/` bilang **npm workspace package** na `@omniroute/open-sse`. Ini-import ito ng source code sa pamamagitan ng `@omniroute/open-sse/...` (nire-resolve ng Next.js `transpilePackages`). Ginagamit pa rin ng mga file path sa dokumentong ito ang pangalan ng direktoryong `open-sse/` para sa pagkakapare-pareho.
 6. Gumagamit ang mga chart sa dashboard ng **Recharts** (batay sa SVG) para sa naa-access at interaktibong mga visualization ng analytics (mga bar chart ng paggamit ng modelo, mga talahanayan ng breakdown ng provider na may mga success rate).
-7. Gumagamit ang mga E2E test ng **Playwright** (`tests/e2e/`), na pinapatakbo sa pamamagitan ng `npm run test:e2e`. Gumagamit ang mga unit test ng **Node.js test runner** (`tests/unit/`), na pinapatakbo sa pamamagitan ng `npm run test:unit`. Ang source code sa ilalim ng `src/` ay **TypeScript** (`.ts`/`.tsx`); nananatiling JavaScript (`.js`) ang workspace na `open-sse/`.
+7. Gumagamit ang mga E2E test ng **Playwright** (`tests/e2e/`), na pinapatakbo sa pamamagitan ng `npm run test:e2e`. Gumagamit ang mga unit test ng **Node.js test runner** (`tests/unit/`), na pinapatakbo sa pamamagitan ng `npm run test:unit`. Ang source code sa ilalim ng `src/` ay **TypeScript** (`.ts`/`.tsx`); nananatiling TypeScript (`.ts`) ang workspace na `open-sse/`.
 8. Nakaayos ang pahina ng mga setting sa 7 tab: General, Appearance, AI, Security, Routing, Resilience, Advanced. Kino-configure lamang ng pahinang Resilience ang request queue, connection cooldown, provider breaker, at gawi ng wait-for-cooldown; ipinapakita sa pahinang Health ang live na runtime state ng breaker.
 9. Nahahati sa dalawang layer ang estratehiyang **Context Relay** (`context-relay`): nagpapasya ang `combo.ts` kung dapat bumuo ng handoff, at ini-inject ng `chat.ts` ang handoff pagkatapos ng paglutas ng account. Nasa SQLite table na `context_handoffs` ang data ng handoff. Sinadya ang paghahating ito dahil ang `chat.ts` lamang ang nakaaalam kung nagbago ang aktuwal na account.
 10. Komprehensibo na ngayon ang **pagpapatupad ng proxy**: nire-resolve ng `tokenHealthCheck.ts` ang proxy para sa bawat koneksyon, ginagamit ng `/api/providers/validate` ang `runWithProxyContext`, at ginagamit ng `proxyFetch.ts` ang `undici.fetch()` upang mapanatili ang compatibility ng dispatcher sa Node 22.

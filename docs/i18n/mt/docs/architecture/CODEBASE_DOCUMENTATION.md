@@ -782,7 +782,7 @@ Ara [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) u t-taqsima ddedikata f'
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Agħti l-permessi xierqa fi `src/shared/constants/mcpScopes.ts`.
 3. Irreġistra l-għodda fi `open-sse/mcp-server/server.ts`.
-4. Żid testijiet taħt `open-sse/mcp-server/__tests__/`.
+4. Żid testijiet taħt `tests/unit/`.
 5. Aġġorna [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Żid ħiliet A2A ġdida
@@ -800,7 +800,7 @@ Ara [A2A-SERVER.md § Adding a New Skill](../frameworks/A2A-SERVER.md). Il-ħili
 - **Tmexxija tal-fajls**: `camelCase` jew `kebab-case`, il-komponenti `PascalCase`,
   il-kostanti `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` kullimkien;
-  `no-explicit-any` = `warn` fi `open-sse/` u `tests/`, error f'ħaġa oħra.
+  `no-explicit-any` = `error` fi `open-sse/**/*.ts` u `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (postura ta' wirt). Ibbaza aktar fuq tipi espliċiti minn
   inferment għal limiti bejn il-moduli.
 - **Database**: qatt miktub SQL frott fi rotot jew handler — dejjem għaddi permezz
@@ -829,8 +829,7 @@ Ara [A2A-SERVER.md § Adding a New Skill](../frameworks/A2A-SERVER.md). Il-ħili
   `a2a`, `memory`, `skills`.
 - **Fergħat**: iċċaffer `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Qatt tagħmel kummit direttament lejn `main`.
-- **Husky**: qabel il-kummit jingħata `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; qabel il-pixxina jingħata `check:any-budget:t11` + `check:tracked-artifacts` (porti mgħaġġla; jeskludi `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ## 12. Regoli Stretti (minn CLAUDE.md)
 

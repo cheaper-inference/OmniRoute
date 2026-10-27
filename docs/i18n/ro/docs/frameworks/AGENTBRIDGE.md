@@ -547,16 +547,16 @@ Scheme OpenAPI complete: `docs/openapi.yaml` → eticheta `AgentBridge`.
 
 ### Investigarea Trae
 
-Trae este un asistent de programare cu IA relativ nou. Înainte de implementarea unui handler:
+Trae este un asistent de programare cu inteligență artificială relativ nou. Înainte de implementarea unui handler:
 
 1. Identificați binarul/extensia în marketplace-urile VS Code / JetBrains sau ca aplicație autonomă
-2. Capturați traficul cu mitmproxy pentru a descoperi gazdele API și structura endpoint-urilor
+2. Capturați traficul cu mitmproxy pentru a descoperi gazdele API și structura endpointurilor
 3. Determinați mecanismul de autentificare
-4. Evaluați decizia de continuare sau renunțare pe baza TOS și a posibilității de descoperire a API-ului
+4. Luați decizia de continuare sau abandonare pe baza termenilor și condițiilor și a posibilității de descoperire a API-ului
 
-Până la finalizarea investigației, cardul Trae din tabloul de bord afișează o insignă „În curs de investigare” cu un link „Raportați viabilitatea”. Stub-ul handlerului din `src/mitm/handlers/trae.ts` generează o eroare structurată `Neimplementat încă`.
+Până la finalizarea investigației, cardul Trae din panoul de control afișează o insignă „În curs de investigare” cu un link „Raportați viabilitatea”. Stubul handlerului de la `src/mitm/handlers/trae.ts` generează o eroare structurată `Not yet implemented`.
 
-### Agenți din backlog (MITM obligatoriu — fără suport pentru un URL de bază personalizat)
+### Agenți din backlog (MITM obligatoriu — fără suport pentru URL de bază personalizat)
 
 Următoarele instrumente nu acceptă URL-uri de bază personalizate în versiunile lor actuale, ceea ce face ca MITM să fie singura metodă de interceptare. Evaluarea viabilității este în așteptare:
 

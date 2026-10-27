@@ -783,7 +783,7 @@ Consulte [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) e a secção dedicada em
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Atribua o(s) âmbito(s) adequado(s) em `src/shared/constants/mcpScopes.ts`.
 3. Registe a ferramenta em `open-sse/mcp-server/server.ts`.
-4. Adicione testes em `open-sse/mcp-server/__tests__/`.
+4. Adicione testes em `tests/unit/`.
 5. Atualize [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Adicionar uma nova competência A2A
@@ -801,7 +801,7 @@ Consulte [A2A-SERVER.md § Adicionar uma nova competência](../frameworks/A2A-SE
 - **Nomenclatura**: ficheiros em `camelCase` ou `kebab-case`, componentes em `PascalCase`,
   constantes em `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` em todo o lado;
-  `no-explicit-any` = `warn` em `open-sse/` e `tests/`, erro nos restantes locais.
+  `no-explicit-any` = `error` em `open-sse/**/*.ts` e `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (postura herdada). Prefira tipos explícitos à
   inferência nos limites entre módulos.
 - **Base de dados**: nunca escreva SQL em bruto em rotas ou manipuladores — utilize sempre
@@ -831,8 +831,7 @@ Consulte [A2A-SERVER.md § Adicionar uma nova competência](../frameworks/A2A-SE
   `a2a`, `memory`, `skills`.
 - **Ramos**: prefixos `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Nunca faça commits diretamente em `main`.
-- **Husky**: o pre-commit executa `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; o pre-push executa `check:any-budget:t11` + `check:tracked-artifacts` (verificações rápidas; exclui `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

@@ -54,7 +54,7 @@ Ny flik för att extrahera innehåll från en URL via `POST /v1/web/fetch` (skap
 - Inmatning: URL + växling för hela sidan + formatväljare (markdown/text/HTML).
 - Skicka → hämta → rendera `ScrapeResult.tsx`.
 - `ScrapeResult` renderar en förhandsvisning av markdown + växling till rådata.
-- Gräns: om svarskroppen är större än **256 kB** visar gränssnittet `(truncated, view raw)` och öppnar rådata i en Monaco-modal (D21).
+- Gräns: om svarskroppen är större än **256 kB** visar gränssnittet `View full raw content` och öppnar rådata i en modal (D21).
 - Metadatapanel: leverantör (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latens, kostnad, svarsstorlek, antal länkar.
 - Använder hooken `useScrapeFetch.ts`.
 

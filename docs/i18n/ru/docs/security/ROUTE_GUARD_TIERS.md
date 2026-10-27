@@ -201,6 +201,12 @@ Tunnel, Tailscale, Ngrok), проверка loopback-интерфейса по-�
 | `/api/providers/health-autopilot/actions` | Выполняет корректирующие действия автопилота                                     |
 | `/api/settings/obsidian`                  | Выпускает повторно используемые учётные данные WebDAV для любого корня хранилища |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                                     |
+| `/api/cli-tools/apply`                    | Перезаписывает конфигурацию CLI оператора на хосте                               |
+| `/api/cli-tools/guide-settings`           | Записывает файлы конфигурации CLI по руководствам                                |
+| `/api/cli-tools/hermes-agent-settings`    | Записывает конфигурацию агента Hermes                                            |
+| `/api/cli-tools/backups`                  | Восстанавливает и удаляет резервные копии конфигурации CLI                       |
+| `/api/log-export`                         | Отправляет журналы вызовов в настроенное место назначения                        |
+| `/api/restart`                            | Перезапускает серверный процесс                                                  |
 
 **Ответ при нарушении:** `401 Требуется аутентификация`
 
@@ -212,7 +218,7 @@ Tunnel, Tailscale, Ngrok), проверка loopback-интерфейса по-�
 (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` дополнительно отклоняет хранилище, которое совпадает
 с каталогом данных, находится внутри него или содержит его.
 
-#### Экспорт учётных данных доступен только оператору
+#### Экспорт учётных данных и восстановление доступны только оператору
 
 Уровень выше определяет только то, требуется ли _какая-либо_ учетная запись. Маршруты, которые загружают
 сохраненные учетные данные, выполняют вторую проверку в обработчике: `GET /api/settings/export-json` (расшифрованные
@@ -223,22 +229,9 @@ Tunnel, Tailscale, Ngrok), проверка loopback-интерфейса по-�
 и `admin`), а также для токенов доступа `oma_`. Выдача токенов синхронизации (`POST /api/sync/tokens`) использует
 ту же вспомогательную функцию, а также доверенный токен внутренней службы обратной петли.
 
-#### Credential exports and restores are operator-only
+Та же граница действует для соответствующих разрушительных операций: `POST /api/db-backups/import` (загруженный файл `.sqlite`, в том числе с `dryRun=true`), `POST /api/db-backups` (восстановление сохранённой копии по её id) и `POST /api/settings/import-json` (восстановление старого формата JSON) заменяют рабочую базу данных или весь набор настроек, подключений и ключей API. Машинные учётные данные также не позволяют запустить эти операции.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+Та же граница действует для уничтожения точек восстановления: `DELETE /api/db-backups` (очистка — оставить последние N или удалить старше D дней) и `PATCH /api/db-backups` (настройки хранения). Сохранённые правила — именно те, которые `cleanupDbBackups()` применяет после каждой автоматической копии (`src/lib/db/backup.ts`); машинные учётные данные с возможностью записать `keepLatest: 1` позволили бы удалить прежние точки при следующем снимке. Просмотр списка и создание копий (`GET`/`PUT /api/db-backups`) сохраняют обычную аутентификацию управления.
 
 ### Первоначальная настройка новой установки доступна только через обратную петлю — по фактическому узлу, а не по `Host`
 

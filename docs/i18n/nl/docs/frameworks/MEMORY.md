@@ -731,11 +731,11 @@ De module `extraction.ts` (`src/lib/memory/extraction.ts`) gebruikt **patroonher
 
 ### Standaardpatrooncategorieën
 
-| Categorie           | Voorbeeldpatroon                                                       | Legt vast                           |
-| ------------------- | ---------------------------------------------------------------------- | ----------------------------------- |
-| PREFERENCE_PATTERNS | `"Ik geef de voorkeur aan <X>"`, `"Ik vind <X> leuk"`, `"Ik haat <X>"` | Gebruikersvoorkeuren                |
-| DECISION_PATTERNS   | `"Ik gebruik <X>"`, `"Ik heb besloten om <X>"`, `"Ik koos voor <X>"`   | Gebruikersbeslissingen (episodisch) |
-| PATTERN_PATTERNS    | `"Ik doe meestal <X>"`, `"Ik doe altijd <X>"`, `"Ik doe nooit <X>"`    | Aanhoudende gedragspatronen         |
+| Categorie           | Voorbeeldpatroon                                            | Legt vast                           |
+| ------------------- | ----------------------------------------------------------- | ----------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Gebruikersvoorkeuren                |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Gebruikersbeslissingen (episodisch) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Aanhoudende gedragspatronen         |
 
 ### Voorbeeldpatronen (vereenvoudigd)
 
@@ -771,7 +771,8 @@ Wanneer een gebruiker zegt:
 
 Om ongebreidelde extractie te voorkomen, gelden de volgende limieten:
 
-| Minimale inhoudslengte | 3 tekens |
+| Minimale inhoudslengte | 3 tekens   |
+| ---------------------- | ---------- |
 | Maximale inhoudslengte | 500 tekens |
 
 ### Wanneer extractie moet worden uitgeschakeld

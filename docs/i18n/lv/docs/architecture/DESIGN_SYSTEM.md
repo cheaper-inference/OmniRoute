@@ -88,28 +88,27 @@
    `src/shared/utils/categoricalPalette.ts` un maršrutēšanas stratēģijām —
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow malas un orķestrācijas
    audekls lasa no motīva atkarīgos `--orch-status-*` mainīgos (`src/shared/components/flow/edgeStyles.ts`).
-2. Nekad nelabot `packages/ui-kit/src` manuāli: sinhronizēt ar `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit pārbaude `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) neizdodas, ja kāds
-   baits atšķiras no piespraustā upstream commit (tā izlaižas ar brīdinājumu, kad upstream klons —
-   `UI_KIT_CLONE` vai `_references/cheaper-inference-ui-kit` — nav pieejams). Kad kit kaut kā trūkst,
-   apiet to adapterī vai ekrānā un pieprasīt to upstream.
-3. Kit teksta noklusējumi ir angļu valodā (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   nodot iztulkotas virknes no `useTranslations(...)`, ikreiz, kad kit komponents attēlo tekstu.
-4. Tailwind utilītklases ir pārākas par kit komponentu klasēm (kit deklarē
-   `@layer theme, base, components, utilities`, un tā noteikumi atrodas `components` slānī) —
-   utilītklases izmantot atstarpēm un izkārtojumam, nevis kit komponentu pārkrāsošanai.
-5. Virsraksti: `.ci-heading` (Inter, bez tracking) lapu un sadaļu virsrakstiem;
-   `.ci-dashboard-display` (Instrument Serif) tikai lielam, retam displeja tekstam, piemēram,
-   kļūdas lapas statusa kodam.
-6. `tests/unit/dashboard-kit-sweep.test.ts` sargā kit ieviešanu: zem `src/app` vai
-   `src/shared/components` nedrīkst būt Material ligatūru span elementu; dashboard kokā
-   (`src/app/(dashboard)` un `src/shared/components`) nedrīkst būt jēlu `<select>`, `<textarea>` vai
-   `<table>` un paštaisītu `role="dialog"` ārpus uzskaitītajiem izņēmumiem (`Select` adaptera
-   natīvais zars, `RequestLoggerDetail`); katram jēlam `<button>` vai `<input>` tur nepieciešams
-   komentārs, kas satur `kit-exception:` (ar iemeslu) un beidzas ne vairāk kā 3 rindas virs tā;
-   paletes toņi un `dark:` varianti — tikai failos, kurus tests uzskaita.
-7. Pirms PR pārbaudīt abus motīvus un 390 px skatlauku (ekrānuzņēmumi); `tests/e2e/a11y.spec.ts`
-   palaiž axe.
+2. Nekad manuāli nemainiet `packages/ui-kit/src`: sinhronizējiet to ar `scripts/dev/sync-ui-kit.sh <commit>`;
+   pirmskomita pārbaude `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) neizdodas, ja kaut viens baits
+   atšķiras no fiksētā augšupstraumes komita (tā tiek izlaista ar brīdinājumu, ja augšupstraumes klons
+   `UI_KIT_CLONE` vai `_references/cheaper-inference-ui-kit` nav pieejams). Ja komplektā kaut kā trūkst,
+   apejiet šo ierobežojumu adapterī vai ekrānā un pieprasiet nepieciešamo augšupstraumes projektā.
+3. Komplekta teksta noklusējuma vērtības ir angļu valodā (`label = "Loading"`, `loadingLabel = "Loading table"`…) — nododiet tulkotas
+   virknes no `useTranslations(...)` ikreiz, kad komplekta komponents atveido tekstu.
+4. Tailwind utilītklases ir prioritārākas par komplekta komponentu klasēm (komplekts deklarē
+   `@layer theme, base, components, utilities`, un tā kārtulas atrodas slānī `components`) — izmantojiet utilītklases
+   atstarpēm un izkārtojumam, nevis komplekta komponentu krāsu maiņai.
+5. Virsraksti: `.ci-heading` (Inter, bez burtu retinājuma) lapu un sadaļu virsrakstiem; `.ci-dashboard-display`
+   (Instrument Serif) tikai lielam, reti izmantotam displeja tekstam, piemēram, kļūdas lapas statusa kodam.
+6. `tests/unit/dashboard-kit-sweep.test.ts` uzrauga komplekta ieviešanu: nedrīkst būt Material ligatūru `span` zem
+   `src/app` vai `src/shared/components`; informācijas paneļa kokā (`src/app/(dashboard)` un
+   `src/shared/components`) nedrīkst būt neapstrādātu `<select>`, `<textarea>` vai `<table>`, kā arī pašrocīgi veidotu
+   `role="dialog"` ārpus uzskaitītajiem izņēmumiem (`Select` adaptera vietējais atzars,
+   `RequestLoggerDetail`); katram neapstrādātam `<button>` vai `<input>` tur ir nepieciešams komentārs, kas satur
+   `kit-exception:` (ar iemeslu) un beidzas ne vairāk kā 3 rindas virs tā; palešu nokrāsas un `dark:` varianti
+   ir atļauti tikai testa uzskaitītajos failos.
+7. Pirms PR pārbaudiet abus motīvus un 390 px skata logu (ar ekrānuzņēmumiem); `tests/e2e/a11y.spec.ts` palaiž
+   axe.
 
 ## 3. Ekrāna pievienošana
 
@@ -149,7 +148,23 @@ Pēc tam: pārskatiet `git diff packages/ui-kit`, vizuāli pārbaudiet nodrošin
 lietojumu un galapunktu abos motīvos, palaidiet `npm run check:ui-kit-snapshot` un `npm run test:vitest:ui` un
 atveriet PR, pievienojot augšupstraumes izmaiņu žurnālu.
 
-## 6. Atsauču rādītājs
+## 6. README diagrammas
+
+Divpadsmit diagrammas, kas iekļautas saknes `README.md` (`docs/diagrams/*.svg`), pielieto komplektu statiskiem attēliem. Tās tiek ģenerētas, nevis zīmētas ar roku: `scripts/docs/gen-readme-*.mjs` ir 13 ģeneratoru faili (divpadsmit diagrammas un vadītājs `gen-readme-diagrams.mjs`), bet `tests/unit/docs/readme-*-svg.test.ts` ir 12 novecošanas testi, pa vienam katrai diagrammai. Katrs tests pa baitam salīdzina komitā saglabāto failu ar ģeneratora izvadi (darbs `test-unit`).
+
+- **Tokeni.** `scripts/docs/readme-diagram-theme.mjs` kopē paleti no `packages/ui-kit/src/ci-tokens.css` (atbilstību šim failam nodrošina `tests/unit/docs/readme-diagram-theme.test.ts`) un nosaka teksta lomas ar komplekta fontiem: Instrument Serif izceltam tekstam, Inter saskarnes tekstam, IBM Plex Mono skaitļiem un kodam. Tās ir tās pašas `@fontsource` pakotnes, kuras `src/app/globals.css` ielādē panelim. Gaišās vērtības atrodas faila `:root` daļā, tumšās – aiz `prefers-color-scheme: dark` nosacījuma, tāpēc katrs attēls seko GitHub lasītāja krāsu shēmai.
+
+- **Fonti.** `scripts/docs/readme-fonts.mjs` samazina šos woff2 failus līdz katras diagrammas izmantotajiem glifiem un iegulst tos ar `@font-face` kā `data:` URI. Tādējādi komplekta fonti paliek SVG iekšienē. Vietējā README attēlu pārbaude pārliecinās, ka renderēšana neveic ārējus fontu pieprasījumus. Apakškopās ir tikai latīņu rakstzīmes; simbolu glifi, kuri izmanto sistēmas fontus kā rezerves variantu, tiek atļauti atsevišķi `SYMBOL_FALLBACKS` sarakstā. Jebkurš cits neaptverts glifs izraisa kļūdu.
+
+- **Atkārtota ģenerēšana.** `npm run docs:readme-diagrams` pārraksta visas divpadsmit diagrammas README secībā un izvada rindu ar katra faila lielumu. Ģenerators darbojas arī atsevišķi (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` prasa `node --import tsx/esm`, jo tā skaitļi nāk no pašreizējā kataloga ielādētāja `open-sse/config/freeModelCatalog.ts`; kataloga izmaiņu ietekme uz CI ir aprakstīta `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Ģeneratoru un SVG saglabājiet vienā komitā.
+
+- **Pierādījums.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderē failu vietējā pārbaudē (`<img>` tags, ierobežojoša `Content-Security-Policy` un `image/svg+xml` atbilde), uzņem gaišu un tumšu attēlu un ziņo par lapas ārējiem fontu pieprasījumiem; to skaitam jābūt 0.
+
+- **Apjoma ierobežojums.** Mazāk par 200 KB failā, ko pārbauda katrs novecošanas tests; 500 KB ir jebkura README attēla absolūtais limits (SVG studio validatora noteikums).
+
+- **Kopīgs teksts, skaitļi no gate.** Katrs ģenerators saglabā diagrammas tekstu `*_COPY` konstantē vai veido to no pašreizējā kataloga. Tas pats teksts tiek zīmēts un izmantots fontu apakškopai. Kanoniskie skaitļi paliek `<text>` mezglos, kurus lasa `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Gate nolasīto diagrammu novecošanas testi palaiž arī tā validatorus ģenerētajam failam. Skaitlis, kas atšķiras no koda, izraisa testa kļūmi: labojiet avotu, kuru lasa gate, nekad skaitli ģeneratorā.
+
+## 7. Atsauču rādītājs
 
 - `src/app/globals.css` — pilnvaru tilts, `.dark` pārrakstījumi, OmniRoute `@layer components` paplašinājumi
 - `packages/ui-kit/UPSTREAM.md` — piesaistītais augšupstraumes komits un licences pilnvarojums; `packages/ui-kit/PATCHES.md`

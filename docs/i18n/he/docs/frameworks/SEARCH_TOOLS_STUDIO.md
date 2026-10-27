@@ -54,7 +54,7 @@ Search Tools Studio הופך את `/dashboard/search-tools` מסביבת ניס�
 - קלט: URL + מתג לעמוד מלא + בורר פורמט (Markdown / טקסט / HTML).
 - שליחה ← אחזור ← עיבוד `ScrapeResult.tsx`.
 - `ScrapeResult` מציג תצוגה מקדימה של Markdown + מתג להצגת התוכן הגולמי.
-- מגבלה: אם גוף התגובה גדול מ-**256 KB**, ממשק המשתמש מציג `(קוצר, הצגת תוכן גולמי)` ופותח את התוכן הגולמי בחלון Monaco מודאלי (D21).
+- מגבלה: אם גוף התגובה גדול מ-**256 KB**, ממשק המשתמש מציג `View full raw content` ופותח את התוכן הגולמי בחלון מודאלי (D21).
 - חלונית מטא-נתונים: ספק (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), זמן השהיה, עלות, גודל תגובה, מספר קישורים.
 - שימוש ב-hook‏ `useScrapeFetch.ts`.
 

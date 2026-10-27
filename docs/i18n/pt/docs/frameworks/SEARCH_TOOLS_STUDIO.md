@@ -54,7 +54,7 @@ Novo separador para extrair conteúdo de um URL através de `POST /v1/web/fetch`
 - Entrada: URL + opção de página completa + seletor de formato (markdown / texto / HTML).
 - Submeter → obter → apresentar `ScrapeResult.tsx`.
 - `ScrapeResult` apresenta a pré-visualização em markdown + opção para ver o conteúdo em bruto.
-- Limite: se o corpo da resposta for superior a **256 KB**, a IU apresenta `(truncado, ver conteúdo em bruto)` e abre o conteúdo em bruto numa janela modal do Monaco (D21).
+- Limite: se o corpo da resposta for superior a **256 KB**, a IU apresenta `View full raw content` e abre o conteúdo em bruto numa janela modal (D21).
 - Painel de metadados: fornecedor (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latência, custo, tamanho da resposta, número de ligações.
 - Utiliza o hook `useScrapeFetch.ts`.
 

@@ -486,15 +486,15 @@ Bộ biến đổi này xử lý:
 
 `open-sse/config/` chứa lớp cấu hình:
 
-| Tệp                              | Mục đích                                             |
-| -------------------------------- | ---------------------------------------------------- |
-| `providerRegistry.ts`            | Registry mô hình chat dựa trên danh mục 376 provider |
-| `providerModels.ts`              | Bí danh mô hình, ánh xạ định dạng                    |
-| `constants.ts`                   | Timeout, giới hạn, mã trạng thái                     |
-| `defaultThinkingSignature.ts`    | Chữ ký thinking mặc định của Claude                  |
-| `modelStrip.ts` (trong services) | Loại bỏ trường theo từng provider                    |
+| Tệp                              | Mục đích                                                    |
+| -------------------------------- | ----------------------------------------------------------- |
+| `providerRegistry.ts`            | Sổ đăng ký mô hình trò chuyện cho danh mục 376 nhà cung cấp |
+| `providerModels.ts`              | Bí danh mô hình, ánh xạ định dạng                           |
+| `constants.ts`                   | Thời gian chờ, giới hạn, mã trạng thái                      |
+| `defaultThinkingSignature.ts`    | Chữ ký suy luận mặc định của Claude                         |
+| `modelStrip.ts` (trong services) | Loại bỏ trường theo từng nhà cung cấp                       |
 
-### Schema của Provider Registry
+### Lược đồ sổ đăng ký nhà cung cấp
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Việc kiểm tra bằng Zod khi tải module đảm bảo mọi cấu hình provider đều hợp lệ.
+Việc xác thực bằng Zod khi tải mô-đun đảm bảo tất cả cấu hình nhà cung cấp đều hợp lệ.
 
 ---
 

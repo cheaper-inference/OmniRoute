@@ -22,7 +22,7 @@ OmniRoute-এ 376টি প্রোভাইডার নিবন্ধিত 
 1. ফ্রি-প্রোভাইডার তালিকা — `NOAUTH_PROVIDERS`, সাথে `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` এন্ট্রিগুলো যেগুলোতে `hasFree` ফ্ল্যাগ করা আছে
    (`src/shared/constants/providers.ts`)।
-2. প্রোভাইডার রেজিস্ট্রি থেকে প্রতিটি প্রোভাইডারের মডেল ক্যাটালগ
+2. প্রদানকারী রেজিস্ট্রি থেকে প্রতিটি প্রদানকারীর মডেল ক্যাটালগ
    (`open-sse/config/providerRegistry.ts`)।
 3. Arena ELO সিঙ্ক ইঞ্জিন দ্বারা `model_intelligence` DB টেবিলে সংরক্ষিত
    ELO-প্রাপ্ত টাস্ক-ফিট স্কোর (`src/lib/arenaEloSync.ts`)।
@@ -174,7 +174,7 @@ taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 | `ARENA_ELO_SYNC_ENABLED`  | `true`        | আউটবাউন্ড সিঙ্ক থেকে বাদ পড়তে `false`-এ সেট করুন। |
 | `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | সিঙ্ক ব্যবধান, সেকেন্ডে।                           |
 
-### ম্যানুয়াল সিঙ্ক / স্ট্যাটাস / মুছে ফেলা
+### ম্যানুয়াল সিঙ্ক / স্ট্যাটাস / পরিষ্কার করা
 
 অপারেটরদের জন্য, একটি অথেন্টিকেটেড ম্যানেজমেন্ট এন্ডপয়েন্ট ম্যানুয়াল নিয়ন্ত্রণ দেয়
 (`src/app/api/intelligence/sync/route.ts` — ম্যানেজমেন্ট অথ প্রয়োজন):

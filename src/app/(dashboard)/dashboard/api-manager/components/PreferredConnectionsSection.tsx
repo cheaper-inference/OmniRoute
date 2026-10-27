@@ -58,6 +58,7 @@ export const PreferredConnectionsSection = memo(function PreferredConnectionsSec
           <Button
             variant="ghost"
             size="sm"
+            type="button"
             onClick={onClearPreferred}
             className="shrink-0 text-xs font-medium text-text-muted"
           >
@@ -90,13 +91,16 @@ export const PreferredConnectionsSection = memo(function PreferredConnectionsSec
                   <Button
                     variant="ghost"
                     size="sm"
+                    type="button"
                     aria-pressed={isPreferred}
                     onClick={() => onTogglePreferred(conn.id)}
                     className="h-auto min-w-0 flex-1 justify-start gap-2 px-0 py-0 text-left text-xs font-normal"
                   >
                     <span
                       className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 text-[10px] font-semibold ${
-                        isPreferred ? "bg-primary border-primary text-bg" : "border-border"
+                        isPreferred
+                          ? "bg-primary border-primary text-accent-foreground"
+                          : "border-border"
                       }`}
                     >
                       {isPreferred ? rank + 1 : "+"}
@@ -111,22 +115,24 @@ export const PreferredConnectionsSection = memo(function PreferredConnectionsSec
                       <Button
                         variant="ghost"
                         size="icon-sm"
+                        type="button"
                         aria-label={tc("moveUp")}
                         title={tc("moveUp")}
                         disabled={rank === 0}
                         onClick={() => onMovePreferred(conn.id, -1)}
-                        className="h-6 w-6"
+                        className="h-6 w-6 disabled:opacity-30"
                       >
                         <Icon name="arrow_upward" size={16} />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon-sm"
+                        type="button"
                         aria-label={tc("moveDown")}
                         title={tc("moveDown")}
                         disabled={rank === preferredConnections.length - 1}
                         onClick={() => onMovePreferred(conn.id, 1)}
-                        className="h-6 w-6"
+                        className="h-6 w-6 disabled:opacity-30"
                       >
                         <Icon name="arrow_downward" size={16} />
                       </Button>

@@ -745,11 +745,11 @@ Das Modul `extraction.ts` (`src/lib/memory/extraction.ts`) verwendet **Musterabg
 
 ### Standardmäßige Musterkategorien
 
-| Kategorie           | Beispielmuster                                                                  | Erfasst                             |
-| ------------------- | ------------------------------------------------------------------------------- | ----------------------------------- |
-| PREFERENCE_PATTERNS | `"Ich bevorzuge <X>"`, `"Ich mag <X>"`, `"Ich hasse <X>"`                       | Benutzerpräferenzen                 |
-| DECISION_PATTERNS   | `"Ich werde <X> verwenden"`, `"Ich habe mich für <X> entschieden"`              | Benutzerentscheidungen (episodisch) |
-| PATTERN_PATTERNS    | `"Ich mache normalerweise <X>"`, `"Ich mache immer <X>"`, `"Ich mache nie <X>"` | Dauerhafte Verhaltensmuster         |
+| Kategorie           | Beispielmuster                                              | Erfasst                             |
+| ------------------- | ----------------------------------------------------------- | ----------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Benutzerpräferenzen                 |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Benutzerentscheidungen (episodisch) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Dauerhafte Verhaltensmuster         |
 
 ### Beispielmuster (vereinfacht)
 
@@ -785,7 +785,8 @@ Wenn ein Benutzer Folgendes sagt:
 
 Um eine unkontrollierte Extraktion zu verhindern, gelten die folgenden Grenzen:
 
-| Mindestlänge des Inhalts | 3 Zeichen |
+| Mindestlänge des Inhalts | 3 Zeichen   |
+| ------------------------ | ----------- |
 | Maximallänge des Inhalts | 500 Zeichen |
 
 ### Wann die Extraktion deaktiviert werden sollte

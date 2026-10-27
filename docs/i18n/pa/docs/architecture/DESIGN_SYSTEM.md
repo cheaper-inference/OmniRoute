@@ -86,26 +86,25 @@
    `src/shared/utils/categoricalPalette.ts` ਰਾਹੀਂ ਅਤੇ, ਰਾਊਟਿੰਗ ਰਣਨੀਤੀਆਂ ਲਈ,
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` ਰਾਹੀਂ ਚੱਲਦੇ ਹਨ; ReactFlow ਐਜਾਂ ਅਤੇ
    ਆਰਕੈਸਟ੍ਰੇਸ਼ਨ ਕੈਨਵਸ ਥੀਮ-ਜਾਣਕਾਰ `--orch-status-*` ਵੇਰੀਏਬਲਾਂ (`src/shared/components/flow/edgeStyles.ts`) ਨੂੰ ਪੜ੍ਹਦੇ ਹਨ।
-2. `packages/ui-kit/src` ਨੂੰ ਕਦੇ ਹੱਥੀਂ ਪੈਚ ਨਾ ਕਰੋ: `scripts/dev/sync-ui-kit.sh <commit>` ਨਾਲ ਸਿੰਕ ਕਰੋ;
-   pre-commit ਗੇਟ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ਕਿਸੇ ਵੀ ਅਜਿਹੇ ਬਾਈਟ ਉੱਤੇ ਫੇਲ ਹੋ ਜਾਂਦਾ ਹੈ
-   ਜੋ ਪਿੰਨ ਕੀਤੇ upstream ਕਮਿੱਟ ਤੋਂ ਵੱਖਰਾ ਹੋਵੇ (ਜਦੋਂ upstream ਕਲੋਨ,
-   `UI_KIT_CLONE` ਜਾਂ `_references/cheaper-inference-ui-kit`, ਗੈਰਹਾਜ਼ਰ ਹੋਵੇ ਤਾਂ ਇਹ ਚੇਤਾਵਨੀ ਨਾਲ ਅੱਗੇ ਵਧ ਜਾਂਦਾ ਹੈ)। ਜਦੋਂ ਕਿੱਟ ਵਿੱਚ ਕੁਝ ਘੱਟ ਹੋਵੇ,
-   ਤਾਂ ਅਡੈਪਟਰ ਜਾਂ ਸਕ੍ਰੀਨ ਵਿੱਚ ਉਸ ਦਾ ਜੁਗਾੜ ਕਰੋ ਅਤੇ upstream ਨੂੰ ਇਸ ਲਈ ਬੇਨਤੀ ਕਰੋ।
-3. ਕਿੱਟ ਦੇ ਟੈਕਸਟ ਡਿਫਾਲਟ ਅੰਗਰੇਜ਼ੀ ਹਨ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ਜਦੋਂ ਵੀ ਕੋਈ ਕਿੱਟ ਕੰਪੋਨੈਂਟ ਟੈਕਸਟ ਰੈਂਡਰ ਕਰੇ,
+2. `packages/ui-kit/src` ਨੂੰ ਕਦੇ ਵੀ ਹੱਥੀਂ ਪੈਚ ਨਾ ਕਰੋ: `scripts/dev/sync-ui-kit.sh <commit>` ਨਾਲ ਸਿੰਕ ਕਰੋ;
+   ਪ੍ਰੀ-ਕਮਿਟ ਗੇਟ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ਕਿਸੇ ਵੀ ਅਜਿਹੇ ਬਾਈਟ ਉੱਤੇ ਅਸਫਲ ਹੋ ਜਾਂਦਾ ਹੈ
+   ਜੋ ਪਿੰਨ ਕੀਤੇ ਅੱਪਸਟ੍ਰੀਮ ਕਮਿਟ ਤੋਂ ਵੱਖਰਾ ਹੋਵੇ (ਅੱਪਸਟ੍ਰੀਮ ਕਲੋਨ,
+   `UI_KIT_CLONE` ਜਾਂ `_references/cheaper-inference-ui-kit`, ਮੌਜੂਦ ਨਾ ਹੋਣ 'ਤੇ ਇਹ ਚੇਤਾਵਨੀ ਦੇ ਕੇ ਛੱਡ ਦਿੰਦਾ ਹੈ)। ਜਦੋਂ ਕਿੱਟ ਵਿੱਚ ਕੋਈ ਚੀਜ਼ ਨਾ ਹੋਵੇ,
+   ਤਾਂ ਅਡੈਪਟਰ ਜਾਂ ਸਕ੍ਰੀਨ ਵਿੱਚ ਉਸਦਾ ਵਿਕਲਪ ਬਣਾਓ ਅਤੇ ਅੱਪਸਟ੍ਰੀਮ ਤੋਂ ਉਸਦੀ ਮੰਗ ਕਰੋ।
+3. ਕਿੱਟ ਟੈਕਸਟ ਦੇ ਡਿਫਾਲਟ ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਹਨ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ਜਦੋਂ ਵੀ ਕੋਈ ਕਿੱਟ ਕੰਪੋਨੈਂਟ ਟੈਕਸਟ ਰੈਂਡਰ ਕਰਦਾ ਹੈ,
    `useTranslations(...)` ਤੋਂ ਅਨੁਵਾਦਿਤ ਸਟ੍ਰਿੰਗਾਂ ਪਾਸ ਕਰੋ।
-4. Tailwind ਯੂਟੀਲਿਟੀਆਂ ਕਿੱਟ ਕੰਪੋਨੈਂਟ ਕਲਾਸਾਂ ਉੱਤੇ ਜਿੱਤਦੀਆਂ ਹਨ (ਕਿੱਟ
-   `@layer theme, base, components, utilities` ਘੋਸ਼ਿਤ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸਦੇ ਨਿਯਮ `components` ਵਿੱਚ ਰਹਿੰਦੇ ਹਨ) — ਯੂਟੀਲਿਟੀਆਂ ਦੀ ਵਰਤੋਂ
-   ਸਪੇਸਿੰਗ ਅਤੇ ਲੇਆਉਟ ਲਈ ਕਰੋ, ਕਿੱਟ ਕੰਪੋਨੈਂਟਾਂ ਨੂੰ ਮੁੜ-ਰੰਗਣ ਲਈ ਨਹੀਂ।
-5. ਸਿਰਲੇਖ: ਪੰਨਾ ਅਤੇ ਸੈਕਸ਼ਨ ਸਿਰਲੇਖਾਂ ਲਈ `.ci-heading` (Inter, ਬਿਨਾ ਟਰੈਕਿੰਗ); `.ci-dashboard-display`
-   (Instrument Serif) ਸਿਰਫ਼ ਵੱਡੇ, ਵਿਰਲੇ ਡਿਸਪਲੇ ਟੈਕਸਟ ਲਈ ਜਿਵੇਂ ਕਿ ਐਰਰ-ਪੰਨੇ ਦਾ ਸਟੇਟਸ ਕੋਡ।
-6. `tests/unit/dashboard-kit-sweep.test.ts` ਕਿੱਟ ਅਪਣਾਉਣ ਦੀ ਰੱਖਿਆ ਕਰਦਾ ਹੈ: `src/app` ਜਾਂ
-   `src/shared/components` ਹੇਠ ਕੋਈ Material ਲਿਗੇਚਰ ਸਪੈਨ ਨਹੀਂ; ਡੈਸ਼ਬੋਰਡ ਟ੍ਰੀ (`src/app/(dashboard)` ਅਤੇ
-   `src/shared/components`) ਵਿੱਚ ਕੋਈ ਕੱਚਾ `<select>`, `<textarea>` ਜਾਂ `<table>` ਨਹੀਂ ਅਤੇ ਸੂਚੀਬੱਧ ਅਪਵਾਦਾਂ
-   (`Select` ਅਡੈਪਟਰ ਦੀ ਨੇਟਿਵ ਬ੍ਰਾਂਚ,
-   `RequestLoggerDetail`) ਤੋਂ ਬਾਹਰ ਕੋਈ ਹੱਥੀਂ ਬਣਾਇਆ `role="dialog"` ਨਹੀਂ; ਉੱਥੇ ਹਰ ਕੱਚੇ `<button>` ਜਾਂ `<input>` ਲਈ ਇੱਕ ਟਿੱਪਣੀ ਚਾਹੀਦੀ ਹੈ ਜਿਸ ਵਿੱਚ
-   `kit-exception:` (ਕਾਰਨ ਸਮੇਤ) ਹੋਵੇ ਅਤੇ ਜੋ ਇਸ ਤੋਂ ਵੱਧ ਤੋਂ ਵੱਧ 3 ਸਤਰਾਂ ਉੱਪਰ ਖਤਮ ਹੁੰਦੀ ਹੋਵੇ; ਪੈਲੇਟ ਹਿਊਜ਼ ਅਤੇ `dark:` ਵੇਰੀਐਂਟ
-   ਸਿਰਫ਼ ਉਹਨਾਂ ਫਾਈਲਾਂ ਵਿੱਚ ਜਿਨ੍ਹਾਂ ਨੂੰ ਟੈਸਟ ਸੂਚੀਬੱਧ ਕਰਦਾ ਹੈ।
-7. PR ਤੋਂ ਪਹਿਲਾਂ ਦੋਹਾਂ ਥੀਮਾਂ ਅਤੇ 390 px ਵਿਊਪੋਰਟ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ (ਸਕ੍ਰੀਨਸ਼ਾਟ); `tests/e2e/a11y.spec.ts`
+4. Tailwind ਯੂਟਿਲਿਟੀਆਂ ਕਿੱਟ ਕੰਪੋਨੈਂਟ ਕਲਾਸਾਂ ਤੋਂ ਪਹਿਲ ਲੈਂਦੀਆਂ ਹਨ (ਕਿੱਟ
+   `@layer theme, base, components, utilities` ਘੋਸ਼ਿਤ ਕਰਦੀ ਹੈ ਅਤੇ ਇਸਦੇ ਨਿਯਮ `components` ਵਿੱਚ ਹੁੰਦੇ ਹਨ) — ਕਿੱਟ ਕੰਪੋਨੈਂਟਾਂ ਦੇ ਰੰਗ ਬਦਲਣ ਲਈ ਨਹੀਂ,
+   ਸਗੋਂ ਸਪੇਸਿੰਗ ਅਤੇ ਲੇਆਉਟ ਲਈ ਯੂਟਿਲਿਟੀਆਂ ਵਰਤੋ।
+5. ਸਿਰਲੇਖ: ਪੇਜ ਅਤੇ ਸੈਕਸ਼ਨ ਸਿਰਲੇਖਾਂ ਲਈ `.ci-heading` (Inter, ਕੋਈ ਟ੍ਰੈਕਿੰਗ ਨਹੀਂ); `.ci-dashboard-display`
+   (Instrument Serif) ਸਿਰਫ਼ ਵੱਡੇ, ਵਿਰਲੇ ਡਿਸਪਲੇ ਟੈਕਸਟ ਲਈ, ਜਿਵੇਂ ਕਿ ਗਲਤੀ ਪੇਜ ਦਾ ਸਥਿਤੀ ਕੋਡ।
+6. `tests/unit/dashboard-kit-sweep.test.ts` ਕਿੱਟ ਅਪਣਾਉਣ ਦੀ ਨਿਗਰਾਨੀ ਕਰਦਾ ਹੈ: `src/app` ਜਾਂ
+   `src/shared/components` ਦੇ ਅਧੀਨ ਕੋਈ Material ਲਿਗੇਚਰ span ਨਹੀਂ; ਡੈਸ਼ਬੋਰਡ ਟ੍ਰੀ (`src/app/(dashboard)` ਅਤੇ
+   `src/shared/components`) ਵਿੱਚ ਕੋਈ ਕੱਚਾ `<select>`, `<textarea>` ਜਾਂ `<table>` ਨਹੀਂ ਅਤੇ ਸੂਚੀਬੱਧ ਅਪਵਾਦਾਂ (`Select` ਅਡੈਪਟਰ ਦੀ ਨੇਟਿਵ ਬ੍ਰਾਂਚ,
+   `RequestLoggerDetail`) ਤੋਂ ਬਾਹਰ ਹੱਥੀਂ ਬਣਾਇਆ `role="dialog"` ਨਹੀਂ; ਉੱਥੇ ਹਰ ਕੱਚੇ `<button>` ਜਾਂ `<input>` ਲਈ
+   ਵੱਧ ਤੋਂ ਵੱਧ 3 ਲਾਈਨਾਂ ਉੱਪਰ ਸਮਾਪਤ ਹੋਣ ਵਾਲੀ, ਕਾਰਨ ਸਮੇਤ `kit-exception:` ਵਾਲੀ ਟਿੱਪਣੀ ਲਾਜ਼ਮੀ ਹੈ; ਪੈਲੇਟ ਹਿਊ ਅਤੇ `dark:` ਵੇਰੀਐਂਟ
+   ਸਿਰਫ਼ ਟੈਸਟ ਦੁਆਰਾ ਸੂਚੀਬੱਧ ਫਾਈਲਾਂ ਵਿੱਚ ਹੀ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ।
+7. PR ਤੋਂ ਪਹਿਲਾਂ ਦੋਵੇਂ ਥੀਮਾਂ ਅਤੇ 390 px ਵਿਊਪੋਰਟ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ (ਸਕ੍ਰੀਨਸ਼ਾਟਾਂ ਨਾਲ); `tests/e2e/a11y.spec.ts`
    axe ਚਲਾਉਂਦਾ ਹੈ।
 
 ## 3. ਸਕ੍ਰੀਨ ਜੋੜਨਾ
@@ -146,12 +145,28 @@
 usage ਅਤੇ endpoint ਦੀ visual ਜਾਂਚ ਕਰੋ, `npm run check:ui-kit-snapshot` ਅਤੇ `npm run test:vitest:ui` ਚਲਾਓ, ਅਤੇ
 upstream changelog ਨਾਲ PR ਖੋਲ੍ਹੋ।
 
-## 6. ਹਵਾਲਾ ਸੂਚੀ
+## 6. README ਦੇ ਚਿੱਤਰ
 
-- `src/app/globals.css` — ਟੋਕਨ ਬ੍ਰਿਜ, `.dark` ਓਵਰਰਾਈਡ, OmniRoute `@layer components` ਐਕਸਟੈਂਸ਼ਨਾਂ
-- `packages/ui-kit/UPSTREAM.md` — ਪਿੰਨ ਕੀਤੀ ਗਈ ਅੱਪਸਟਰੀਮ ਕਮਿਟ ਅਤੇ ਲਾਇਸੰਸ ਅਧਿਕਾਰੀਕਰਨ; `packages/ui-kit/PATCHES.md`
+ਮੂਲ `README.md` ਵਿੱਚ ਸ਼ਾਮਲ ਬਾਰਾਂ ਚਿੱਤਰ (`docs/diagrams/*.svg`) ਕਿੱਟ ਨੂੰ ਸਥਿਰ ਤਸਵੀਰਾਂ ਉੱਤੇ ਲਾਗੂ ਕਰਦੇ ਹਨ। ਇਹ ਜਨਰੇਟ ਹੁੰਦੇ ਹਨ, ਹੱਥ ਨਾਲ ਨਹੀਂ ਬਣਾਏ ਜਾਂਦੇ: `scripts/docs/gen-readme-*.mjs` ਵਿੱਚ 13 ਜਨਰੇਟਰ ਫਾਈਲਾਂ (ਬਾਰਾਂ ਚਿੱਤਰ ਅਤੇ ਕੰਟਰੋਲਰ `gen-readme-diagrams.mjs`), ਅਤੇ `tests/unit/docs/readme-*-svg.test.ts` ਵਿੱਚ ਪੁਰਾਣੇ ਹੋਣ ਦੀਆਂ 12 ਜਾਂਚਾਂ ਹਨ, ਹਰੇਕ ਚਿੱਤਰ ਲਈ ਇੱਕ। ਹਰ ਜਾਂਚ commit ਕੀਤੀ ਫਾਈਲ ਨੂੰ ਉਸ ਦੇ ਜਨਰੇਟਰ ਦੇ ਆਉਟਪੁੱਟ ਨਾਲ ਬਾਈਟ-ਦਰ-ਬਾਈਟ ਮਿਲਾਉਂਦੀ ਹੈ (ਜੌਬ `test-unit`)।
+
+- **ਟੋਕਨ।** `scripts/docs/readme-diagram-theme.mjs` ਰੰਗ-ਪੈਲਟ `packages/ui-kit/src/ci-tokens.css` ਤੋਂ ਨਕਲ ਕਰਦਾ ਹੈ (ਉਸ ਫਾਈਲ ਨਾਲ ਮੇਲ `tests/unit/docs/readme-diagram-theme.test.ts` ਯਕੀਨੀ ਬਣਾਉਂਦਾ ਹੈ) ਅਤੇ ਕਿੱਟ ਦੇ ਫੌਂਟਾਂ ਨਾਲ ਲਿਖਤ ਦੀਆਂ ਭੂਮਿਕਾਵਾਂ ਨਿਰਧਾਰਤ ਕਰਦਾ ਹੈ: ਉਭਰੀ ਪ੍ਰਦਰਸ਼ਨੀ ਲਿਖਤ ਲਈ Instrument Serif, ਇੰਟਰਫੇਸ ਲਈ Inter, ਅੰਕਾਂ ਅਤੇ ਕੋਡ ਲਈ IBM Plex Mono। ਇਹ ਉਹੀ `@fontsource` ਪੈਕੇਜ ਹਨ ਜੋ `src/app/globals.css` ਡੈਸ਼ਬੋਰਡ ਲਈ ਲੋਡ ਕਰਦਾ ਹੈ। ਫਾਈਲ ਵਿੱਚ ਹਲਕੇ ਮੁੱਲ `:root` ਉੱਤੇ ਅਤੇ ਗੂੜ੍ਹੇ ਮੁੱਲ `prefers-color-scheme: dark` ਦੀ ਸ਼ਰਤ ਹੇਠ ਹਨ, ਇਸ ਲਈ ਹਰ ਤਸਵੀਰ GitHub ਪਾਠਕ ਦੀ ਰੰਗ-ਯੋਜਨਾ ਦੀ ਪਾਲਣਾ ਕਰਦੀ ਹੈ।
+
+- **ਫੌਂਟ।** `scripts/docs/readme-fonts.mjs` ਉਹਨਾਂ woff2 ਫਾਈਲਾਂ ਨੂੰ ਹਰ ਚਿੱਤਰ ਵਿੱਚ ਬਣਨ ਵਾਲੇ ਗਲਿਫਾਂ ਤੱਕ ਸੀਮਿਤ ਕਰਦਾ ਹੈ ਅਤੇ `@font-face` ਰਾਹੀਂ `data:` URI ਵਜੋਂ ਸ਼ਾਮਲ ਕਰਦਾ ਹੈ। ਇਸ ਨਾਲ ਕਿੱਟ ਦੇ ਫੌਂਟ SVG ਦੇ ਅੰਦਰ ਰਹਿੰਦੇ ਹਨ। README ਤਸਵੀਰ ਦੀ ਸਥਾਨਕ ਜਾਂਚ ਵੇਖਦੀ ਹੈ ਕਿ ਰੈਂਡਰਿੰਗ ਕੋਈ ਬਾਹਰੀ ਫੌਂਟ ਬੇਨਤੀ ਨਾ ਕਰੇ। ਉਪਸਮੂਹਾਂ ਵਿੱਚ ਸਿਰਫ਼ ਲਾਤੀਨੀ ਅੱਖਰ ਹਨ; ਸਿਸਟਮ ਫੌਂਟਾਂ ਵੱਲ ਮੁੜਦੇ ਚਿੰਨ੍ਹ-ਗਲਿਫਾਂ ਨੂੰ `SYMBOL_FALLBACKS` ਵਿੱਚ ਇੱਕ-ਇੱਕ ਕਰਕੇ ਮਨਜ਼ੂਰੀ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਹੋਰ ਕੋਈ ਅਣਕਵਰ ਕੀਤਾ ਗਲਿਫ ਗਲਤੀ ਪੈਦਾ ਕਰਦਾ ਹੈ।
+
+- **ਮੁੜ ਬਣਾਉਣਾ।** `npm run docs:readme-diagrams` ਸਾਰੇ ਬਾਰਾਂ ਚਿੱਤਰ README ਦੇ ਕ੍ਰਮ ਵਿੱਚ ਮੁੜ ਲਿਖਦਾ ਹੈ ਅਤੇ ਹਰ ਫਾਈਲ ਦੇ ਆਕਾਰ ਨਾਲ ਇੱਕ ਲਾਈਨ ਛਾਪਦਾ ਹੈ। ਜਨਰੇਟਰ ਵੱਖਰਾ ਵੀ ਚੱਲ ਸਕਦਾ ਹੈ (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ਨੂੰ `node --import tsx/esm` ਚਾਹੀਦਾ ਹੈ, ਕਿਉਂਕਿ ਇਸ ਦੇ ਅੰਕ `open-sse/config/freeModelCatalog.ts` ਦੇ ਮੌਜੂਦਾ ਕੈਟਾਲਾਗ ਲੋਡਰ ਤੋਂ ਆਉਂਦੇ ਹਨ; ਕੈਟਾਲਾਗ ਬਦਲਣ ਦਾ CI ਉੱਤੇ ਅਸਰ `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` ਵਿੱਚ ਹੈ)। ਜਨਰੇਟਰ ਅਤੇ SVG ਨੂੰ ਇਕੱਠੇ commit ਕਰੋ।
+
+- **ਸਬੂਤ।** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ਸਥਾਨਕ ਜਾਂਚ ਵਿੱਚ ਫਾਈਲ ਰੈਂਡਰ ਕਰਦਾ ਹੈ (`<img>` ਟੈਗ, ਪਾਬੰਦੀ ਵਾਲੀ `Content-Security-Policy` ਅਤੇ `image/svg+xml` ਜਵਾਬ), ਇੱਕ ਹਲਕਾ ਅਤੇ ਇੱਕ ਗੂੜ੍ਹਾ ਫਰੇਮ ਲੈਂਦਾ ਹੈ ਅਤੇ ਸਫ਼ੇ ਦੀਆਂ ਬਾਹਰੀ ਫੌਂਟ ਬੇਨਤੀਆਂ ਦੱਸਦਾ ਹੈ; ਉਹਨਾਂ ਦੀ ਗਿਣਤੀ 0 ਹੋਣੀ ਚਾਹੀਦੀ ਹੈ।
+
+- **ਆਕਾਰ ਦੀ ਹੱਦ।** ਹਰ ਫਾਈਲ 200 KB ਤੋਂ ਛੋਟੀ, ਜਿਸ ਦੀ ਹਰ ਪੁਰਾਣੇਪਣ ਵਾਲੀ ਜਾਂਚ ਪੁਸ਼ਟੀ ਕਰਦੀ ਹੈ; ਕਿਸੇ ਵੀ README ਤਸਵੀਰ ਦੀ ਸਖ਼ਤ ਉੱਪਰਲੀ ਹੱਦ 500 KB ਹੈ (SVG studio ਵੈਲੀਡੇਟਰ ਦਾ ਨਿਯਮ)।
+
+- **ਸਾਂਝੀ ਲਿਖਤ, ਗਿਣਤੀਆਂ gate ਤੋਂ।** ਹਰ ਜਨਰੇਟਰ ਆਪਣੇ ਚਿੱਤਰ ਦੀ ਲਿਖਤ `*_COPY` ਕਾਂਸਟੈਂਟ ਵਿੱਚ ਰੱਖਦਾ ਹੈ ਜਾਂ ਮੌਜੂਦਾ ਕੈਟਾਲਾਗ ਤੋਂ ਬਣਾਉਂਦਾ ਹੈ। ਉਹੀ ਲਿਖਤ ਖਿੱਚੀ ਜਾਂਦੀ ਹੈ ਅਤੇ ਫੌਂਟ ਉਪਸਮੂਹ ਦੀ ਇਨਪੁੱਟ ਵੀ ਹੁੰਦੀ ਹੈ। ਮਿਆਰੀ ਅੰਕ `<text>` ਨੋਡਾਂ ਵਿੱਚ ਰਹਿੰਦੇ ਹਨ, ਜਿਨ੍ਹਾਂ ਨੂੰ `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) ਪੜ੍ਹਦਾ ਹੈ। gate ਵੱਲੋਂ ਪੜ੍ਹੇ ਜਾਣ ਵਾਲੇ ਚਿੱਤਰਾਂ ਦੀਆਂ ਪੁਰਾਣੇਪਣ ਦੀਆਂ ਜਾਂਚਾਂ ਬਣੀ ਫਾਈਲ ਉੱਤੇ ਉਸ ਦੇ ਵੈਲੀਡੇਟਰ ਵੀ ਚਲਾਉਂਦੀਆਂ ਹਨ। ਕੋਡ ਤੋਂ ਵੱਖਰਾ ਅੰਕ ਜਾਂਚ ਫੇਲ੍ਹ ਕਰਦਾ ਹੈ: gate ਦੇ ਪੜ੍ਹੇ ਜਾਂਦੇ ਸਰੋਤ ਨੂੰ ਠੀਕ ਕਰੋ, ਜਨਰੇਟਰ ਦੇ ਅੰਕ ਨੂੰ ਕਦੇ ਨਹੀਂ।
+
+## 7. ਹਵਾਲਾ ਸੂਚਕਾਂਕ
+
+- `src/app/globals.css` — ਟੋਕਨ ਬ੍ਰਿਜ, `.dark` ਓਵਰਰਾਈਡ, OmniRoute `@layer components` ਐਕਸਟੈਂਸ਼ਨ
+- `packages/ui-kit/UPSTREAM.md` — ਪਿੰਨ ਕੀਤਾ ਅੱਪਸਟ੍ਰੀਮ ਕਮਿਟ ਅਤੇ ਲਾਇਸੈਂਸ ਅਧਿਕਾਰ; `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` ਅਤੇ ਇਸਦੇ ਨਾਲ ਮੌਜੂਦ ਐਡਾਪਟਰ; `src/shared/components/layouts/DashboardShell.tsx`,
+- `src/shared/components/index.tsx` ਅਤੇ ਇਸਦੇ ਨਾਲ ਵਾਲੇ ਅਡੈਪਟਰ; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`

@@ -482,19 +482,19 @@ createResponsesApiTransformStream(): TransformStream
 
 ---
 
-## သတ်မှတ်ချက်များ
+## ဖွဲ့စည်းသတ်မှတ်မှု
 
-`open-sse/config/` တွင် configuration layer ကို သိမ်းဆည်းထားသည်-
+`open-sse/config/` တွင် ဖွဲ့စည်းသတ်မှတ်မှုအလွှာ ပါဝင်သည်-
 
-| ဖိုင်                             | ရည်ရွယ်ချက်                                                              |
-| --------------------------------- | ------------------------------------------------------------------------ |
-| `providerRegistry.ts`             | provider 376 ခု ပါဝင်သော catalog အပေါ် အခြေခံထားသည့် chat-model registry |
-| `providerModels.ts`               | Model alias များ၊ format mapping                                         |
-| `constants.ts`                    | Timeout များ၊ limit များ၊ status code များ                               |
-| `defaultThinkingSignature.ts`     | Default Claude thinking signature                                        |
-| `modelStrip.ts` (services ထဲတွင်) | Provider တစ်ခုချင်းစီအတွက် field stripping                               |
+| ဖိုင်                             | ရည်ရွယ်ချက်                                                        |
+| --------------------------------- | ------------------------------------------------------------------ |
+| `providerRegistry.ts`             | ဝန်ဆောင်မှုပေးသူ 376 ခုပါ ကတ်တလောက်အတွက် Chat-model မှတ်ပုံတင်စနစ် |
+| `providerModels.ts`               | Model အမည်ကွဲများ၊ format ချိတ်ဆက်သတ်မှတ်မှု                       |
+| `constants.ts`                    | အချိန်ကုန်ဆုံးမှုများ၊ ကန့်သတ်ချက်များ၊ အခြေအနေကုဒ်များ            |
+| `defaultThinkingSignature.ts`     | မူလ Claude thinking signature                                      |
+| `modelStrip.ts` (services အတွင်း) | ဝန်ဆောင်မှုပေးသူတစ်ခုချင်းအလိုက် field များ ဖယ်ရှားခြင်း           |
 
-### Provider Registry Schema
+### ဝန်ဆောင်မှုပေးသူ မှတ်ပုံတင်စနစ် Schema
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Module load လုပ်ချိန်တွင် Zod validation က provider config အားလုံး မှန်ကန်ကြောင်း သေချာစေသည်။
+Module ကို load လုပ်ချိန်တွင် Zod validation က ဝန်ဆောင်မှုပေးသူ config အားလုံး မှန်ကန်ကြောင်း သေချာစေသည်။
 
 ---
 

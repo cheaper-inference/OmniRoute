@@ -370,3 +370,21 @@ test("restricted pool fails closed and logs a sanitized warning when the connect
   assert.match(entry, /COMBO_AUTO/);
   assert.equal(entry.includes(openaiAllowed.id), false, "the scope ids must not be logged");
 });
+
+test("candidate scoring cannot restore an unscoped target after the connection lookup fails", async () => {
+  const allowed = await seedConnection("openai", "scoring-lookup-failure");
+  const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
+  invalidateDbCache();
+  core.getDbInstance().exec("DROP TABLE provider_connections");
+
+  const candidates = await buildAutoCandidates(
+    [target("openai", "gpt-4o-mini"), target("openai", "gpt-4o-mini", allowed.id)],
+    "restricted-scoring-lookup-failure",
+    null,
+    undefined,
+    null,
+    [allowed.id]
+  );
+
+  assert.deepEqual(candidates, [], "unknown membership must not authorize any candidate");
+});

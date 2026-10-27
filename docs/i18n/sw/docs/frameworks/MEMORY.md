@@ -343,11 +343,11 @@ Utopoaji **unategemea regex**, si LLM — huendeshwa ndani ya mchakato kwa
 `setImmediate()` ili kamwe usizuie mtiririko wa jibu:
 
 - **Mifumo ya mapendeleo** → `MemoryType.FACTUAL`
-  (k.m. `Napendelea …`, `Ninapenda sana …`, `ninachopenda zaidi ni …`, `Nachukia …`)
+  (k.m. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Mifumo ya maamuzi** → `MemoryType.EPISODIC`
-  (k.m. `Nitatumia …`, `Nilichagua …`, `Niliamua kutumia …`, `Nitapitisha …`)
+  (k.m. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Mifumo ya tabia** → `MemoryType.FACTUAL`
-  (k.m. `Kwa kawaida mimi …`, `Daima mimi …`, `Mimi huwa …`)
+  (k.m. `I usually …`, `I always …`, `I tend to …`)
 
 Kila ulinganifu husafishwa (`trim`, kuunganisha nafasi tupu, na kuwekewa kikomo cha herufi 500),
 huondolewa nakala ndani ya kundi kupitia `factKey(category, content)` thabiti, na
@@ -720,9 +720,9 @@ Moduli ya `extraction.ts` (`src/lib/memory/extraction.ts`) hutumia **ulinganisha
 
 | Kategoria           | Mfano wa mfumo                                              | Kinachonaswa                    |
 | ------------------- | ----------------------------------------------------------- | ------------------------------- |
-| PREFERENCE_PATTERNS | `"Ninapendelea <X>"`, `"Ninapenda <X>"`, `"Ninachukia <X>"` | Mapendeleo ya mtumiaji          |
-| DECISION_PATTERNS   | `"Nitatumia <X>"`, `"Niliamua <X>"`, `"Nilichagua <X>"`     | Maamuzi ya mtumiaji (kiepisodi) |
-| PATTERN_PATTERNS    | `"Kwa kawaida <X>"`, `"Daima <X>"`, `"Kamwe <X>"`           | Mifumo endelevu ya tabia        |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Mapendeleo ya mtumiaji          |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Maamuzi ya mtumiaji (kiepisodi) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Mifumo endelevu ya tabia        |
 
 ### Mifano ya Mifumo (Imerahisishwa)
 
@@ -758,8 +758,9 @@ Mtumiaji anaposema:
 
 Ili kuzuia uchimbaji usiodhibitiwa, vikomo vifuatavyo hutumika:
 
-| Urefu wa chini wa maudhui | herufi 3 |
-| Urefu wa juu wa maudhui | herufi 500 |
+| Urefu wa chini wa maudhui | herufi 3   |
+| ------------------------- | ---------- |
+| Urefu wa juu wa maudhui   | herufi 500 |
 
 ### Wakati wa Kuzima Uchimbaji
 

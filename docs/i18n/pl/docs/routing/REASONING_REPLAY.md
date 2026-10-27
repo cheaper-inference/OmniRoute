@@ -165,6 +165,7 @@ Cache udostępnia dwa endpointy w `src/app/api/cache/reasoning/route.ts`. Oba wy
 - **Cleanup:** `cleanupReasoningCache()` usuwa wygasłe wpisy z pamięci i uruchamia `DELETE FROM reasoning_cache WHERE expires_at <= unixepoch('now')`. Workery health-check wywołują to okresowo.
 - **Odzyskanie po awarii:** Po restarcie pamięć jest pusta, ale DB nadal trzyma niewygasłe wpisy. Pierwszy lookup dla danego `tool_call_id` to traf DB; kolejne lookupy to trafy pamięci.
 - **Brak reasoning, brak cache:** `cacheReasoningFromAssistantMessage` zwraca `0`, gdy wiadomość asystenta nie ma pola `reasoning_content` / `reasoning`, więc odpowiedzi non-thinking nic nie kosztują.
+- **Zapis również jest warunkowy:** oba miejsca wywołania w `chatCore.ts` (bez strumieniowania i ze strumieniowaniem) wywołują `cacheReasoningFromAssistantMessage()` tylko wtedy, gdy `requiresReasoningReplay(provider, model)` ma wartość `true` — jest to ten sam predykat, który sprawdzany jest przy odczycie. Instalacje, które nigdy nie korzystają z providera wymagającego odtwarzania rozumowania, przestają ponosić koszt zapisu, aktualizacji indeksu i try/catch przy każdej odpowiedzi zawierającej rozumowanie.
 - **Nierygorystyczni providerzy:** Gdy `requiresReasoningReplay` jest `false`, a format docelowy to OpenAI, translator **usuwa** każde pole `reasoning_content` z wychodzących wiadomości — OpenAI Chat Completions go nie akceptuje.
 
 ## Zobacz też

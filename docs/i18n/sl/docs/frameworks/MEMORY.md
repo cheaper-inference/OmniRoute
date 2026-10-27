@@ -754,8 +754,9 @@ Ko uporabnik reče:
 
 Za preprečevanje nenadzorovanega pridobivanja veljajo naslednje omejitve:
 
-| Najmanjša dolžina vsebine | 3 znaki |
-| Največja dolžina vsebine | 500 znakov |
+| Najmanjša dolžina vsebine | 3 znaki    |
+| ------------------------- | ---------- |
+| Največja dolžina vsebine  | 500 znakov |
 
 ### Kdaj onemogočiti pridobivanje
 

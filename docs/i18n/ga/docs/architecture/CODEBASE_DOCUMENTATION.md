@@ -328,7 +328,7 @@ Comhaid ardleibhéil in `src/lib/`:
 
 #### 3.2.1 `src/lib/db/`
 
-Bunachar sonraí aonair SQLite (`getDbInstance()` in `core.ts`, iriseoireacht WAL).
+Bunachar sonraí aonair SQLite (`getDbInstance()` in `core.ts`, logáil WAL).
 **Ná scríobh SQL amh i mbealaí ná i láimhseálaithe riamh** — bain úsáid as na modúil seo.
 
 ![Forbhreathnú ar scéimre an bhunachair sonraí (croítháblaí roghnaithe)](../diagrams/exported/db-schema-overview.svg)
@@ -349,7 +349,7 @@ Modúil fearainn (is le gach ceann acu tábla amháin nó níos mó): `apiKeys.t
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-Tá 168 comhad leaganaithe `.sql` in `migrations/` (éidiótaca, idirbheartaíochta) agus
+Tá 168 comhad leaganaithe `.sql` in `migrations/` (idempotent, idirbheartaíochta) agus
 ritheann `migrationRunner.ts` iad ag an tosú.
 
 Táblaí a cruthaíodh ar fud na n-aistrithe (123 san iomlán):
@@ -785,7 +785,7 @@ Féach [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) agus an chuid thiomnaithe in
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Sanatóir an scóip/icí is fearr i `src/shared/constants/mcpScopes.ts`.
 3. Cláraigh an uirlis in `open-sse/mcp-server/server.ts`.
-4. Cuir tástálacha leis faoi `open-sse/mcp-server/__tests__/`.
+4. Cuir tástálacha leis faoi `tests/unit/`.
 5. Nuashonraigh [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Cuir scil A2A nua leis
@@ -803,7 +803,7 @@ Féach [A2A-SERVER.md § Adding a New Skill](../frameworks/A2A-SERVER.md). Tá s
 - **Ainmniúchán**: comhaid `camelCase` nó `kebab-case`, comhpháirteanna `PascalCase`,
   tairiscintí `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` i ngach áit;
-  `no-explicit-any` = `warn` in `open-sse/` agus `tests/`, error in áiteanna eile.
+  `no-explicit-any` = `error` in `open-sse/**/*.ts` agus `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (stát seanbhunaithe). Is fearr cineálacha sainráite ná
   inferences do theorainneacha idir-mhodúl.
 - **Bunachar sonraí**: ná scríobh SQL amh i rótaí nó láimhseálaithe — úsáid modúil
@@ -834,8 +834,7 @@ Féach [A2A-SERVER.md § Adding a New Skill](../frameworks/A2A-SERVER.md). Tá s
   `a2a`, `memory`, `skills`.
 - **Brainseanna**: réamhfhocail `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Ná déan tiomsúcháin díreach i `main`.
-- **Husky**: roimh thiomsúcháin rith `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; roimh bhrú rith `check:any-budget:t11` + `check:tracked-artifacts` (geataí tapa; eisiamh `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ## 12. Rialacha Crua (ó CLAUDE.md)
 

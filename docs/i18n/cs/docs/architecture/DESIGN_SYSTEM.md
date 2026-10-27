@@ -89,29 +89,12 @@
    `src/shared/utils/categoricalPalette.ts` a, pro směrovací strategie,
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; hrany ReactFlow a orchestrační
    plátno čtou proměnné `--orch-status-*` závislé na motivu (`src/shared/components/flow/edgeStyles.ts`).
-2. Nikdy ručně neupravujte `packages/ui-kit/src`: synchronizujte pomocí
-   `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit brána `npm run check:ui-kit-snapshot`
-   (`.husky/pre-commit`) selže při jakémkoli bajtu, který se liší od připnutého upstream
-   commitu (přeskočí se s varováním, pokud upstream klon — `UI_KIT_CLONE` nebo
-   `_references/cheaper-inference-ui-kit` — chybí). Když kitu něco chybí, obejděte to v adaptéru
-   nebo obrazovce a požádejte o to upstream.
-3. Výchozí texty kitu jsou anglické (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   kdykoli komponenta kitu vykresluje text, předávejte přeložené řetězce z `useTranslations(...)`.
-4. Utility Tailwindu mají přednost před třídami komponent kitu (kit deklaruje
-   `@layer theme, base, components, utilities` a jeho pravidla žijí v `components`) — utility
-   používejte pro mezery a rozložení, ne pro přebarvování komponent kitu.
-5. Nadpisy: `.ci-heading` (Inter, bez trackingu) pro titulky stránek a sekcí;
-   `.ci-dashboard-display` (Instrument Serif) pouze pro velký, řídce používaný akcidenční text,
-   jako je stavový kód chybové stránky.
-6. `tests/unit/dashboard-kit-sweep.test.ts` hlídá adopci kitu: žádný span s ligaturou Material
-   pod `src/app` nebo `src/shared/components`; ve stromu dashboardu (`src/app/(dashboard)` a
-   `src/shared/components`) žádné holé `<select>`, `<textarea>` nebo `<table>` a žádný ručně
-   vytvořený `role="dialog"` mimo uvedené výjimky (nativní větev adaptéru `Select`,
-   `RequestLoggerDetail`); každý holý `<button>` nebo `<input>` tam potřebuje komentář
-   obsahující `kit-exception:` (s důvodem) končící nejvýše 3 řádky nad ním; odstíny palety
-   a varianty `dark:` pouze v souborech, které test uvádí.
-7. Před PR ověřte oba motivy a viewport 390 px (snímky obrazovky); `tests/e2e/a11y.spec.ts`
-   spouští axe.
+2. Nikdy ručně neupravujte `packages/ui-kit/src`: synchronizujte pomocí `scripts/dev/sync-ui-kit.sh <commit>`; kontrola před commitem `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) selže při jakémkoli bajtu, který se liší od připnutého upstream commitu (pokud upstream klon, `UI_KIT_CLONE` nebo `_references/cheaper-inference-ui-kit`, chybí, kontrola se přeskočí s varováním). Pokud v kitu něco chybí, vyřešte to v adaptéru nebo na obrazovce a požádejte upstream o doplnění.
+3. Výchozí texty kitu jsou v angličtině (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kdykoli komponenta kitu vykresluje text, předejte jí přeložené řetězce z `useTranslations(...)`.
+4. Utility Tailwindu mají přednost před třídami komponent kitu (kit deklaruje `@layer theme, base, components, utilities` a jeho pravidla jsou ve vrstvě `components`) — utility používejte pro rozestupy a rozvržení, nikoli k přebarvování komponent kitu.
+5. Nadpisy: `.ci-heading` (Inter, bez prostrkání) pro názvy stránek a sekcí; `.ci-dashboard-display` (Instrument Serif) pouze pro velký, řídce používaný výrazný text, například stavový kód na chybové stránce.
+6. `tests/unit/dashboard-kit-sweep.test.ts` hlídá používání kitu: žádný element span s ligaturou Material pod `src/app` ani `src/shared/components`; ve stromu dashboardu (`src/app/(dashboard)` a `src/shared/components`) žádné nezpracované `<select>`, `<textarea>` ani `<table>` a žádné vlastní implementace `role="dialog"` mimo uvedené výjimky (nativní větev adaptéru `Select`, `RequestLoggerDetail`); každý nezpracovaný `<button>` nebo `<input>` v této oblasti vyžaduje komentář obsahující `kit-exception:` (s důvodem), který končí nejvýše 3 řádky nad ním; odstíny palety a varianty `dark:` jsou povoleny pouze v souborech uvedených v testu.
+7. Před PR ověřte obě témata a viewport o šířce 390 px (pomocí snímků obrazovky); `tests/e2e/a11y.spec.ts` spouští axe.
 
 ## 3. Přidání obrazovky
 
@@ -152,7 +135,23 @@ relativních importů). Poté: zkontrolujte `git diff packages/ui-kit`, proveďt
 využití a endpointu v obou motivech, spusťte `npm run check:ui-kit-snapshot` a `npm run test:vitest:ui` a
 otevřete PR s upstreamovým changelogem.
 
-## 6. Rejstřík odkazů
+## 6. Diagramy README
+
+Dvanáct diagramů vložených do kořenového `README.md` (`docs/diagrams/*.svg`) používá sadu ve statických obrázcích. Jsou generované, nikoli kreslené ručně: 13 souborů generátorů v `scripts/docs/gen-readme-*.mjs` (dvanáct diagramů a řídicí program `gen-readme-diagrams.mjs`) a 12 testů aktuálnosti v `tests/unit/docs/readme-*-svg.test.ts`, jeden pro každý diagram. Každý test porovnává po bajtech soubor v commitu s výstupem jeho generátoru (úloha `test-unit`).
+
+- **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` kopíruje paletu z `packages/ui-kit/src/ci-tokens.css` (shodu s tímto souborem zajišťuje `tests/unit/docs/readme-diagram-theme.test.ts`) a definuje role textu pomocí písem sady: Instrument Serif pro výrazný text, Inter pro text rozhraní a IBM Plex Mono pro čísla a kód. Jde o stejné balíčky `@fontsource`, které `src/app/globals.css` načítá pro dashboard. Světlé hodnoty jsou v `:root`, tmavé pod podmínkou `prefers-color-scheme: dark` uvnitř souboru; každý obrázek tak sleduje schéma čtenáře na GitHubu.
+
+- **Písma.** `scripts/docs/readme-fonts.mjs` zúží tyto soubory woff2 na glyfy vykreslované daným diagramem a vloží je přes `@font-face` jako URI `data:`. Písma sady tak zůstávají uvnitř SVG. Místní test obrázků README kontroluje, že vykreslování nevyvolává externí požadavky na písma. Podmnožiny obsahují pouze latinku; glyfy symbolů používající systémová písma jako náhradu jsou povoleny jednotlivě v `SYMBOL_FALLBACKS`. Jakýkoli jiný nepokrytý glyf vyvolá chybu.
+
+- **Opětovné generování.** `npm run docs:readme-diagrams` přepíše všech dvanáct diagramů v pořadí README a vypíše pro každý soubor řádek s jeho velikostí. Generátor lze spustit i samostatně (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` vyžaduje `node --import tsx/esm`, protože čísla pocházejí z načítače aktuálního katalogu v `open-sse/config/freeModelCatalog.ts`; dopad změny katalogu na CI je v `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commitujte generátor a SVG společně.
+
+- **Důkaz.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` vykreslí soubor v místním testu (značka `<img>`, omezující `Content-Security-Policy` a odpověď `image/svg+xml`), pořídí světlý a tmavý snímek a hlásí externí požadavky stránky na písma; jejich počet musí být 0.
+
+- **Rozpočet.** Méně než 200 KB na soubor, což ověřuje každý test aktuálnosti; 500 KB je pevný strop pro jakýkoli obrázek README (pravidlo validátoru SVG studio).
+
+- **Sdílený text, počty z gate.** Každý generátor uchovává text diagramu v konstantě `*_COPY` nebo jej sestavuje z aktuálního katalogu. Tento text se vykresluje a zároveň slouží jako vstup pro podmnožinu písma. Kanonická čísla zůstávají v uzlech `<text>`, které čte `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Testy aktuálnosti diagramů čtených gate spouštějí také jeho validátory nad vygenerovaným souborem. Číslo odlišné od kódu způsobí selhání testu: opravte zdroj čtený gate, nikdy číslo v generátoru.
+
+## 7. Rejstřík odkazů
 
 - `src/app/globals.css` — propojení tokenů, přepsání pro `.dark`, rozšíření OmniRoute v `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — připnutý upstreamový commit a licenční oprávnění; `packages/ui-kit/PATCHES.md`

@@ -4,8 +4,6 @@
 
 ---
 
-# OmniRoute Arhitektuur
-
 🌐 **Languages:** 🇺🇸 [English](../../../../architecture/ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/architecture/ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/architecture/ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/architecture/ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/architecture/ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/architecture/ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/architecture/ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/ARCHITECTURE.md) · 🇮🇱 [he](../../../he/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/ARCHITECTURE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/ARCHITECTURE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/architecture/ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/ARCHITECTURE.md) · 🇰🇭 [km](../../../km/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/architecture/ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/ARCHITECTURE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/architecture/ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/architecture/ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/architecture/ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/ARCHITECTURE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/ARCHITECTURE.md)
 
 _Viimati uuendatud: 2026-06-28_
@@ -1002,37 +1000,37 @@ Kõik muud pakkujad (kaasa arvatud kohandatud ühilduvad sõlmed) kasutavad `Def
 | OpenCode (Go/Zen)   | openai           | OAuth                     | ✅               | ✅         | ✅                | ❌                            |
 | CLIProxyAPI         | openai           | Kohandatud                | ✅               | ✅         | ❌                | ❌                            |
 
-## Vormingu teisendamise kaetus
+## Vormingute tõlkimise katvus
 
-Tuvastatud lähtevormingud sisaldavad:
+Tuvastatavad lähtevormingud on järgmised:
 
 - `openai`
 - `openai-responses`
 - `claude`
 - `gemini`
 
-Sihtvormingud sisaldavad:
+Sihtvormingud on järgmised:
 
-- OpenAI chat/Responses
+- OpenAI vestlus/Responses
 - Claude
-- Gemini/Antigravity envelope
+- Gemini/Antigravity ümbris
 - Kiro
 - Cursor
 
-Teisendused kasutavad **OpenAI-t keskse vormingina (hub format)** — kõik teisendused toimuvad läbi OpenAI vahepealse vorminguna:
+Tõlkimisel kasutatakse **OpenAI-d keskse vorminguna** — kõik teisendused läbivad vahevorminguna OpenAI-d:
 
 ```
-Lähtevorming → OpenAI (hub) → Sihtvorming
+Lähtevorming → OpenAI (keskne) → Sihtvorming
 ```
 
-Teisendused valitakse dünaamiliselt lähtekasuliku andmemahu kuju ja teenusepakkuja sihtvormingu alusel.
+Tõlked valitakse dünaamiliselt lähtekoormuse struktuuri ja teenusepakkuja sihtvormingu põhjal.
 
-Teisenduspipeline'i täiendavad töötlusetapid:
+Täiendavad töötluskihid tõlkekonveieris:
 
-- **Vastuse puhastamine (sanitization)** — Eemaldab OpenAI-vormingus vastustest (nii voogesituse kui mitte-voogesituse korral) mittestandardsed väljad, tagamaks range SDK-le vastavuse
-- **Rolli normaliseerimine** — Teisendab `developer` → `system` mitte-OpenAI sihtvormingute jaoks; ühendab `system` → `user` mudelite jaoks, mis lükkavad system-rolli tagasi (GLM, ERNIE)
-- **Think-tag'ide eraldamine** — Analüüsib `` blokid sisust ja eraldab need `reasoning_content` väljale
-- **Struktureeritud väljund** — Teisendab OpenAI `response_format.json_schema` Gemini `responseMimeType` + `responseSchema` vormingusse
+- **Vastuse puhastamine** — eemaldab OpenAI-vormingus vastustest ebastandardsed väljad (nii voogedastusega kui ka voogedastuseta), et tagada range vastavus SDK nõuetele
+- **Rollide normaliseerimine** — teisendab `developer` → `system` mitte-OpenAI sihtvormingute jaoks; ühendab `system` → `user` mudelite puhul, mis süsteemirolli ei aktsepteeri (GLM, ERNIE)
+- **Mõtlemismärgendite eraldamine** — sõelub sisust plokid `<think>...</think>` väljale `reasoning_content`
+- **Struktureeritud väljund** — teisendab OpenAI `response_format.json_schema` Gemini väljadeks `responseMimeType` + `responseSchema`
 
 ## Toetatud API lõpp-punktid
 
@@ -1098,11 +1096,11 @@ Vanem failipõhine päringulogija (`open-sse/utils/requestLogger.ts`) on säilit
 - SQLite skeemi migratsioonid ja automaatse uuendamise hoogud käivitamisel
 - vana JSON → SQLite migratsiooni ühilduvustee
 
-## 6) SSRF / väljuva URL-i kaitse
+## 6) SSRF / väljaminevate URL-ide kaitse
 
-- `src/shared/network/outboundUrlGuard.ts` blokeerib kõik privaatsed/loopback/link-local sihtmärk-URL-id enne, kui need jõuavad pakkuja täitjatesse
-- Pakkuja mudeli avastamise ja valideerimise rajad kasutavad `src/shared/network/safeOutboundFetch.ts`, mis rakendab kaitset enne igat väljuvat päringut
-- Kaitse vead ilmuvad kui `URL_GUARD_BLOCKED` koos HTTP 422 staatusega ning logitakse vastavuse auditi rajale `providerAudit.ts` kaudu
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) rakendab `src/shared/network/outboundUrlGuard.ts`-i vestluspäringutele, mis saadetakse `BaseExecutor.execute()` kaudu. Ainult avaliku võrgu režiimis (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false`, kui privaatvõrgu lipp on välja lülitatud) blokeerib see privaat- ja tagasisideaadressidega hostid ning vahemiku 169.254.0.0/16; kõigis teistes režiimides blokeerib see pilveteenuste metaandmete hostid. See kontrollib hostinime või IP-literaali täpselt kirjapandud kujul enne mis tahes DNS-päringut. Sisseehitatud kohalikud teenusepakkujad jätavad selle kontrolli vahele.
+- Teenusepakkuja mudelite tuvastamise ja valideerimise marsruudid kasutavad faili `src/shared/network/safeOutboundFetch.ts`, mis rakendab kaitset enne iga väljaminevat päringut.
+- Kaitsevead kuvatakse väärtusena `URL_GUARD_BLOCKED` koos HTTP olekukoodiga 503 (`getSafeOutboundFetchErrorStatus`; mudelite tuvastamise marsruut tagastab olekukoodi 400) ning valideerimise käigus tuvastatud tegelikud SSRF-i blokeerimised logitakse auditijälge sündmustena `provider.validation.ssrf_blocked`.
 
 ## Vaadeldavus ja operatiivsed signaalid
 
@@ -1153,7 +1151,7 @@ Koodis aktiivselt kasutatavad keskkonnamuutujad:
 4. Pilve käitumine sõltub õigest `NEXT_PUBLIC_BASE_URL` väärtusest ja pilve lõpp-punkti kättesaadavusest.
 5. Kataloog `open-sse/` avaldatakse **npm workspace paketina** `@omniroute/open-sse`. Lähtekood impordib seda kaudu `@omniroute/open-sse/...` (lahendatakse Next.js `transpilePackages` abil). Selle dokumendi failiteed kasutavad järjepidevuse huvides jätkuvalt kataloogi nime `open-sse/`.
 6. Töölaua diagrammid kasutavad **Recharts**'i (SVG-põhine) juurdepääsetavate, interaktiivsete analüütikavisualisatsioonide jaoks (mudeli kasutuse tulpdiagrammid, teenusepakkujate jaotuse tabelid õnnestumismääradega).
-7. E2E testid kasutavad **Playwright**'it (`tests/e2e/`), käivitatakse käsuga `npm run test:e2e`. Ühiktestid kasutavad **Node.js test runner**'it (`tests/unit/`), käivitatakse käsuga `npm run test:unit`. Lähtekood kataloogis `src/` on **TypeScript** (`.ts`/`.tsx`); `open-sse/` workspace jääb JavaScript'iks (`.js`).
+7. E2E testid kasutavad **Playwright**'it (`tests/e2e/`), käivitatakse käsuga `npm run test:e2e`. Ühiktestid kasutavad **Node.js test runner**'it (`tests/unit/`), käivitatakse käsuga `npm run test:unit`. Lähtekood kataloogis `src/` on **TypeScript** (`.ts`/`.tsx`); `open-sse/` workspace jääb TypeScript'iks (`.ts`).
 8. Seadete leht on jaotatud 7 vahelehele: General, Appearance, AI, Security, Routing, Resilience, Advanced. Resilience leht konfigureerib ainult päringujärjekorra, ühenduse jahtumisaja, teenusepakkuja katkestaja (breaker) ja jahtumisaja-ootamise käitumise; katkestaja käituse hetkeseisu näidatakse Health lehel.
 9. **Context Relay** strateegia (`context-relay`) on jaotatud kahe kihi vahel: `combo.ts` otsustab, kas üleandmine (handoff) tuleks genereerida, `chat.ts` süstib üleandmise pärast konto lahendamist. Üleandmisandmed elavad `context_handoffs` SQLite tabelis. See jaotus on tahtlik, sest ainult `chat.ts` teab, kas tegelik konto muutus.
 10. **Puhverserveri jõustamine** on nüüd põhjalik: `tokenHealthCheck.ts` lahendab puhverserveri ühenduse põhiselt, `/api/providers/validate` kasutab `runWithProxyContext`, ja `proxyFetch.ts` kasutab `undici.fetch()`, et säilitada dispetšeri ühilduvus Node 22-l.

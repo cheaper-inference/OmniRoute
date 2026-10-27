@@ -551,19 +551,19 @@ Esquemas OpenAPI completos: `docs/openapi.yaml` → etiqueta `AgentBridge`.
 O Trae é um assistente de programação com IA relativamente recente. Antes de implementar um handler:
 
 1. Identificar o binário/extensão nos marketplaces do VS Code / JetBrains ou como aplicação autónoma
-2. Capturar o tráfego com o mitmproxy para descobrir os anfitriões da API e os formatos dos endpoints
+2. Capturar o tráfego com mitmproxy para descobrir os hosts da API e os formatos dos endpoints
 3. Determinar o mecanismo de autenticação
-4. Avaliar a decisão de avançar/não avançar com base nos termos de serviço e na capacidade de descoberta da API
+4. Avaliar a viabilidade com base nos TOS e na possibilidade de descoberta da API
 
-Até a investigação estar concluída, o cartão do Trae no painel apresenta um emblema "Em investigação" com uma ligação "Comunicar viabilidade". O esqueleto do handler em `src/mitm/handlers/trae.ts` lança um erro estruturado `Ainda não implementado`.
+Até a investigação estar concluída, o cartão do Trae no painel apresenta um distintivo "Em investigação" com uma ligação "Comunicar viabilidade". O stub do handler em `src/mitm/handlers/trae.ts` lança um erro estruturado `Not yet implemented`.
 
-### Agentes pendentes (MITM obrigatório — sem suporte para URL base personalizado)
+### Agentes em backlog (MITM obrigatório — sem suporte para URL base personalizado)
 
-As seguintes ferramentas não suportam URLs base personalizados nas respetivas versões atuais, pelo que o MITM é a única via de interceção. A avaliação da viabilidade está pendente:
+As seguintes ferramentas não suportam URLs base personalizados nas respetivas versões atuais, o que torna o MITM a única via de interceção. A avaliação de viabilidade está pendente:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — distinto do Kiro IDE)
-- **Cowork** (aplicação de ambiente de trabalho da Anthropic)
+- **Cowork** (aplicação para computador da Anthropic)
 
-Nota: o GitHub Copilot CLI ≥v1.0.19 suporta `COPILOT_PROVIDER_BASE_URL` — utilize a configuração direta em vez do MITM para esta ferramenta.
+Nota: o GitHub Copilot CLI ≥v1.0.19 suporta `COPILOT_PROVIDER_BASE_URL` — utilize a configuração direta em vez de MITM para essa ferramenta.

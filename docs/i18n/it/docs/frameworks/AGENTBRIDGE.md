@@ -546,24 +546,24 @@ Schemi OpenAPI completi: `docs/openapi.yaml` → tag `AgentBridge`.
 
 ## §8 Roadmap
 
-### Indagine su Trae
+### Analisi di Trae
 
-Trae è un assistente di programmazione basato sull'IA relativamente nuovo. Prima di implementare un handler:
+Trae è un assistente di programmazione IA relativamente nuovo. Prima di implementare un handler:
 
-1. Identificare il file binario/l'estensione nei marketplace di VS Code / JetBrains o come applicazione autonoma
-2. Acquisire il traffico con mitmproxy per individuare gli host API e la struttura degli endpoint
+1. Individuare il binario/l'estensione nei marketplace di VS Code / JetBrains o come applicazione autonoma
+2. Acquisire il traffico con mitmproxy per identificare gli host API e la struttura degli endpoint
 3. Determinare il meccanismo di autenticazione
 4. Valutare se procedere o meno in base ai TOS e alla possibilità di individuare le API
 
-Fino al completamento dell'indagine, la scheda Trae nella dashboard mostra un badge "In fase di indagine" con un link "Segnala fattibilità". Lo stub dell'handler in `src/mitm/handlers/trae.ts` genera un errore strutturato `Non ancora implementato`.
+Fino al completamento dell'analisi, la scheda Trae nella dashboard mostra un badge "In fase di analisi" con un link "Segnala fattibilità". Lo stub dell'handler in `src/mitm/handlers/trae.ts` genera un errore strutturato `Not yet implemented`.
 
 ### Agenti nel backlog (MITM obbligatorio — nessun supporto per URL di base personalizzati)
 
-I seguenti strumenti non supportano URL di base personalizzati nelle versioni attuali, rendendo MITM l'unico metodo di intercettazione. La valutazione della fattibilità è in sospeso:
+I seguenti strumenti non supportano URL di base personalizzati nelle versioni correnti, rendendo MITM l'unico percorso di intercettazione. La valutazione della fattibilità è in sospeso:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — separato da Kiro IDE)
-- **Cowork** (applicazione desktop di Anthropic)
+- **Amazon Q / Kiro CLI** (AWS Bedrock — distinto da Kiro IDE)
+- **Cowork** (app desktop di Anthropic)
 
 Nota: GitHub Copilot CLI ≥v1.0.19 supporta `COPILOT_PROVIDER_BASE_URL` — per questo strumento, utilizzare la configurazione diretta anziché MITM.

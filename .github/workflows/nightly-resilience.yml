@@ -13,10 +13,10 @@ jobs:
     name: Heap-growth gate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
           cache: npm
@@ -30,10 +30,10 @@ jobs:
     name: Resilience chaos (fault injection)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
           cache: npm
@@ -52,10 +52,10 @@ jobs:
     # received a shutdown signal").
     runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
           cache: npm
@@ -96,7 +96,7 @@ jobs:
         run: |
           node dist/server.js > server.log 2>&1 &
           echo $! > server.pid
-          for i in $(seq 1 60); do
+          for _attempt in $(seq 1 60); do
             if curl -sf http://localhost:21776/api/monitoring/health >/dev/null; then echo "server up"; exit 0; fi
             sleep 2
           done
@@ -104,7 +104,7 @@ jobs:
           tail -40 server.log || true
           exit 1
       - name: Install k6
-        uses: grafana/setup-k6-action@v1
+        uses: grafana/setup-k6-action@43b9fc21641a76002687994433dd586f56e791b1 # v1
       - name: Run k6 soak
         run: k6 run tests/load/k6-soak.js
         env:
@@ -206,10 +206,10 @@ jobs:
       # silent wait because Playwright discards webServer stdout by default.
       OMNIROUTE_PLAYWRIGHT_WEB_SERVER_STDOUT: "pipe"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           node-version: "24"
           cache: npm
@@ -228,7 +228,7 @@ jobs:
         env:
           ONNXRUNTIME_NODE_INSTALL: "skip"
       - name: Cache Playwright browsers
-        uses: actions/cache@v6.1.0
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ~/.cache/ms-playwright
           key: playwright-chromium-${{ runner.os }}-${{ hashFiles('package-lock.json') }}

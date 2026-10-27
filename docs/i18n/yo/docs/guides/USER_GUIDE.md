@@ -579,28 +579,28 @@ post_install() {
 
 ### Àwọn Àyípadà Àyíká
 
-| Àyípadà                                 | Àkọ́ṣe                                | Àpèjúwe                                                                                                                               |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Àṣírí ìfọwọ́sí JWT (**yí i padà ní ìṣelọpọ**)                                                                                          |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Ọ̀rọ̀ aṣínà fún ìwọlé àkọ́kọ́                                                                                                             |
-| `DATA_DIR`                              | `~/.omniroute`                       | Àpò-ọ̀nà dátà (db, lílò, àwọn àkọsílẹ̀)                                                                                                 |
-| `PORT`                                  | àkọ́ṣe framework                      | Port iṣẹ́ (`20128` nínú àwọn àpẹẹrẹ)                                                                                                   |
-| `HOSTNAME`                              | àkọ́ṣe framework                      | Host ìsopọ̀ (Docker máa ń lo `0.0.0.0` gẹ́gẹ́ bí àkọ́ṣe)                                                                                  |
-| `NODE_ENV`                              | àkọ́ṣe runtime                        | Ṣètò sí `production` fún ìmúṣiṣẹ́                                                                                                      |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | URL ìpìlẹ̀ gbogbogbò tí a fi hàn sí dashboard tí server sì lè ráyè sí (ó rọ́pò `BASE_URL` àtijọ́)                                        |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | URL ìpìlẹ̀ endpoint fún ìṣiṣẹ́pọ̀ cloud (ó rọ́pò `CLOUD_URL` àtijọ́)                                                                       |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Àṣírí HMAC fún àwọn kọ́kọ́rọ́ API tí a ṣẹ̀dá                                                                                              |
-| `REQUIRE_API_KEY`                       | `false`                              | Fi ipa mú lílo kọ́kọ́rọ́ API Bearer lórí `/v1/*`                                                                                         |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Gba àwọn olùlò dashboard tí a ti jẹ́rìí sí láyè láti fi gbogbo iye kọ́kọ́rọ́ API tí a tọ́jú hàn nígbà ìbéèrè                               |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Àkókò ìmúdójúìwọ̀n ní ẹ̀gbẹ́ server fún dátà Provider Limits tí a fi pamọ́ sínú cache; àwọn bọ́tìnì ìmúdójúìwọ̀n UI ṣì ń fa ìṣiṣẹ́pọ̀ afọwọ́ṣe |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Pa àwọn snapshot SQLite aládàáṣiṣẹ́ ṣáájú kíkọ/import/restore; àwọn backup afọwọ́ṣe ṣì ń ṣiṣẹ́                                           |
-| `APP_LOG_TO_FILE`                       | `true`                               | Mú àbájáde àkọsílẹ̀ ohun èlò àti àyẹ̀wò lọ sí disk                                                                                      |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Fi ipa mú cookie ìjẹ́rìí `Secure` (lẹ́yìn HTTPS reverse proxy)                                                                          |
-| `CLOUDFLARED_BIN`                       | kò ṣètò                              | Lo binary `cloudflared` tó ti wà dípò gbígbàsílẹ̀ tí a ń ṣàkóso                                                                        |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Ọ̀nà ìgbékalẹ̀ fún àwọn Quick Tunnels tí a ń ṣàkóso (`http2`, `quic`, tàbí `auto`)                                                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Òpin heap Node.js ní MB                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Iye tó pọ̀ jù fún àwọn àkọọ́lẹ̀ prompt cache                                                                                             |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Iye tó pọ̀ jù fún àwọn àkọọ́lẹ̀ semantic cache                                                                                           |
+| Àyípadà                                 | Àkọ́ṣe                    | Àpèjúwe                                                                                                                                               |
+| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(a ṣẹ̀dá laifọwọyi)_     | Àṣírí ìfọwọ́sí JWT — a ṣẹ̀dá laifọwọyi ní ìbẹ̀rẹ̀ àkọ́kọ́, a sì pa á mọ́ pátápátá sínú `server.env`; ṣètò rẹ̀ kedere bí àkójọ data bá jẹ́ ti ìgbà díẹ̀          |
+| `INITIAL_PASSWORD`                      | _(a kò ṣètò)_            | Ọ̀rọ̀ aṣínà fún ìwọlé àkọ́kọ́. Àwọn fifi sori ẹrọ npm/orísun bẹ̀rẹ̀ pẹ̀lú `CHANGEME`: rọ́pò ó. Bí a kò bá ṣètò: wizard onboarding                             |
+| `DATA_DIR`                              | `~/.omniroute`           | Àpò-ọ̀nà dátà (db, lílò, àwọn àkọsílẹ̀)                                                                                                                 |
+| `PORT`                                  | àkọ́ṣe framework          | Port iṣẹ́ (`20128` nínú àwọn àpẹẹrẹ)                                                                                                                   |
+| `HOSTNAME`                              | àkọ́ṣe framework          | Host ìsopọ̀ (Docker máa ń lo `0.0.0.0` gẹ́gẹ́ bí àkọ́ṣe)                                                                                                  |
+| `NODE_ENV`                              | àkọ́ṣe runtime            | Ṣètò sí `production` fún ìmúṣiṣẹ́                                                                                                                      |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | URL ìpìlẹ̀ gbogbogbò tí a fi hàn sí dashboard tí server sì lè ráyè sí (ó rọ́pò `BASE_URL` àtijọ́)                                                        |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | URL ìpìlẹ̀ endpoint fún ìṣiṣẹ́pọ̀ cloud (ó rọ́pò `CLOUD_URL` àtijọ́)                                                                                       |
+| `API_KEY_SECRET`                        | _(a ṣẹ̀dá laifọwọyi)_     | Àṣírí checksum fún àwọn kọ́kọ́rọ́ API tí a so mọ́ ẹ̀rọ — bootstrap ìbẹ̀rẹ̀ ṣẹ̀dá a laifọwọyi bí a kò bá ṣètò rẹ̀, ó sì pa á mọ́ sínú `server.env` tí a lè kọ sí |
+| `REQUIRE_API_KEY`                       | `false`                  | Fi ipa mú lílo kọ́kọ́rọ́ API Bearer lórí `/v1/*`                                                                                                         |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Gba àwọn olùlò dashboard tí a ti jẹ́rìí sí láyè láti fi gbogbo iye kọ́kọ́rọ́ API tí a tọ́jú hàn nígbà ìbéèrè                                               |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Àkókò ìmúdójúìwọ̀n ní ẹ̀gbẹ́ server fún dátà Provider Limits tí a fi pamọ́ sínú cache; àwọn bọ́tìnì ìmúdójúìwọ̀n UI ṣì ń fa ìṣiṣẹ́pọ̀ afọwọ́ṣe                 |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | Pa àwọn snapshot SQLite aládàáṣiṣẹ́ ṣáájú kíkọ/import/restore; àwọn backup afọwọ́ṣe ṣì ń ṣiṣẹ́                                                           |
+| `APP_LOG_TO_FILE`                       | `true`                   | Mú àbájáde àkọsílẹ̀ ohun èlò àti àyẹ̀wò lọ sí disk                                                                                                      |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | Fi ipa mú cookie ìjẹ́rìí `Secure` (lẹ́yìn HTTPS reverse proxy)                                                                                          |
+| `CLOUDFLARED_BIN`                       | kò ṣètò                  | Lo binary `cloudflared` tó ti wà dípò gbígbàsílẹ̀ tí a ń ṣàkóso                                                                                        |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | Ọ̀nà ìgbékalẹ̀ fún àwọn Quick Tunnels tí a ń ṣàkóso (`http2`, `quic`, tàbí `auto`)                                                                      |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | Òpin heap Node.js ní MB                                                                                                                               |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Iye tó pọ̀ jù fún àwọn àkọọ́lẹ̀ prompt cache                                                                                                             |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Iye tó pọ̀ jù fún àwọn àkọọ́lẹ̀ semantic cache                                                                                                           |
 
 Fún àlàyé kíkún nípa àwọn àyípadà ayíká, wo [README](../README.md).
 

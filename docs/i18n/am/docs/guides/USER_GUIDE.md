@@ -582,28 +582,28 @@ post_install() {
 
 ### የአካባቢ ተለዋዋጮች
 
-| ተለዋዋጭ                                   | ነባሪ                                  | መግለጫ                                                                           |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT መፈረሚያ ሚስጥር (**በምርት አካባቢ ይቀይሩት**)                                           |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | የመጀመሪያ መግቢያ የይለፍ ቃል                                                            |
-| `DATA_DIR`                              | `~/.omniroute`                       | የውሂብ ማውጫ (የውሂብ ጎታ፣ አጠቃቀም፣ ምዝግቦች)                                               |
-| `PORT`                                  | የፍሬምወርኩ ነባሪ                          | የአገልግሎት ወደብ (በምሳሌዎች ውስጥ `20128`)                                               |
-| `HOSTNAME`                              | የፍሬምወርኩ ነባሪ                          | የማስተሳሰሪያ አስተናጋጅ (የDocker ነባሪ `0.0.0.0` ነው)                                     |
-| `NODE_ENV`                              | የአሂድ ጊዜ ነባሪ                          | ለማሰማራት `production` ያዘጋጁ                                                       |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ለዳሽቦርዱ የሚታይ እና ለአገልጋዩ የሚጋለጥ ይፋዊ መሠረታዊ URL (የቀድሞውን `BASE_URL` ይተካል)             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | የደመና ማመሳሰያ መጨረሻ ነጥብ መሠረታዊ URL (የቀድሞውን `CLOUD_URL` ይተካል)                        |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | ለሚፈጠሩ API ቁልፎች የHMAC ሚስጥር                                                      |
-| `REQUIRE_API_KEY`                       | `false`                              | በ`/v1/*` ላይ የBearer API ቁልፍን ያስገድዱ                                             |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | ማንነታቸው የተረጋገጠ የዳሽቦርድ ተጠቃሚዎች ሲጠይቁ ሙሉ የተከማቹ API ቁልፍ እሴቶችን እንዲመለከቱ ይፍቀዱ           |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | ለተሸጎጠ የአቅራቢ ገደቦች ውሂብ የአገልጋይ-ወገን ማደሻ ድግግሞሽ፤ የUI ማደሻ አዝራሮች አሁንም በእጅ ማመሳሰልን ያስነሳሉ |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | ከመጻፍ/ማስመጣት/መመለስ በፊት ራስ-ሰር የSQLite ቅጽበተ ቅጂዎችን ያሰናክሉ፤ በእጅ የሚደረጉ ምትኬዎች አሁንም ይሠራሉ  |
-| `APP_LOG_TO_FILE`                       | `true`                               | የመተግበሪያ እና የኦዲት ምዝግብ ውጤትን ወደ ዲስክ ማስቀመጥን ያነቃል                                   |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` የማረጋገጫ ኩኪን ያስገድዱ (ከHTTPS ተገላቢጦሽ ፕሮክሲ በስተጀርባ)                          |
-| `CLOUDFLARED_BIN`                       | አልተዋቀረም                              | በሚተዳደር ማውረድ ፈንታ ነባር `cloudflared` ባይነሪን ይጠቀሙ                                   |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | በሚተዳደሩ Quick Tunnels የሚጠቀመው ማጓጓዣ (`http2`፣ `quic`፣ ወይም `auto`)                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | የNode.js ሂፕ ገደብ በMB                                                            |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | ከፍተኛው የጥያቄ መሸጎጫ ግቤቶች ብዛት                                                       |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | ከፍተኛው የፍቺ መሸጎጫ ግቤቶች ብዛት                                                        |
+| ተለዋዋጭ                                   | ነባሪ                      | መግለጫ                                                                                                              |
+| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(በራስ-ሰር የሚፈጠር)_         | JWT መፈረሚያ ሚስጥር — በመጀመሪያ ማስጀመሪያ በራስ-ሰር ይፈጠራል እና በ `server.env` ውስጥ በቋሚነት ይቀመጣል፤ የውሂብ ማውጫው ጊዜያዊ ከሆነ በግልጽ ያዘጋጁት      |
+| `INITIAL_PASSWORD`                      | _(ያልተዘጋጀ)_               | የመጀመሪያ መግቢያ የይለፍ ቃል። የ npm/ምንጭ ጭነቶች በ `CHANGEME` ይጀምራሉ፤ ይቀይሩት። ካልተዘጋጀ፦ የመጀመሪያ ማዋቀር አዋቂ                            |
+| `DATA_DIR`                              | `~/.omniroute`           | የውሂብ ማውጫ (የውሂብ ጎታ፣ አጠቃቀም፣ ምዝግቦች)                                                                                  |
+| `PORT`                                  | የፍሬምወርኩ ነባሪ              | የአገልግሎት ወደብ (በምሳሌዎች ውስጥ `20128`)                                                                                  |
+| `HOSTNAME`                              | የፍሬምወርኩ ነባሪ              | የማስተሳሰሪያ አስተናጋጅ (የDocker ነባሪ `0.0.0.0` ነው)                                                                        |
+| `NODE_ENV`                              | የአሂድ ጊዜ ነባሪ              | ለማሰማራት `production` ያዘጋጁ                                                                                          |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | ለዳሽቦርዱ የሚታይ እና ለአገልጋዩ የሚጋለጥ ይፋዊ መሠረታዊ URL (የቀድሞውን `BASE_URL` ይተካል)                                                |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | የደመና ማመሳሰያ መጨረሻ ነጥብ መሠረታዊ URL (የቀድሞውን `CLOUD_URL` ይተካል)                                                           |
+| `API_KEY_SECRET`                        | _(በራስ-ሰር የሚፈጠር)_         | ከማሽኑ ጋር ለተያያዙ API ቁልፎች የቼክሰም ሚስጥር — ካልተዘጋጀ የማስጀመሪያ bootstrap በራስ-ሰር ይፈጥረዋል እና ሊጻፍበት በሚችል `server.env` ውስጥ ያስቀምጠዋል |
+| `REQUIRE_API_KEY`                       | `false`                  | በ`/v1/*` ላይ የBearer API ቁልፍን ያስገድዱ                                                                                |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | ማንነታቸው የተረጋገጠ የዳሽቦርድ ተጠቃሚዎች ሲጠይቁ ሙሉ የተከማቹ API ቁልፍ እሴቶችን እንዲመለከቱ ይፍቀዱ                                              |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | ለተሸጎጠ የአቅራቢ ገደቦች ውሂብ የአገልጋይ-ወገን ማደሻ ድግግሞሽ፤ የUI ማደሻ አዝራሮች አሁንም በእጅ ማመሳሰልን ያስነሳሉ                                    |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | ከመጻፍ/ማስመጣት/መመለስ በፊት ራስ-ሰር የSQLite ቅጽበተ ቅጂዎችን ያሰናክሉ፤ በእጅ የሚደረጉ ምትኬዎች አሁንም ይሠራሉ                                     |
+| `APP_LOG_TO_FILE`                       | `true`                   | የመተግበሪያ እና የኦዲት ምዝግብ ውጤትን ወደ ዲስክ ማስቀመጥን ያነቃል                                                                      |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` የማረጋገጫ ኩኪን ያስገድዱ (ከHTTPS ተገላቢጦሽ ፕሮክሲ በስተጀርባ)                                                             |
+| `CLOUDFLARED_BIN`                       | አልተዋቀረም                  | በሚተዳደር ማውረድ ፈንታ ነባር `cloudflared` ባይነሪን ይጠቀሙ                                                                      |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | በሚተዳደሩ Quick Tunnels የሚጠቀመው ማጓጓዣ (`http2`፣ `quic`፣ ወይም `auto`)                                                    |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | የNode.js ሂፕ ገደብ በMB                                                                                               |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | ከፍተኛው የጥያቄ መሸጎጫ ግቤቶች ብዛት                                                                                          |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | ከፍተኛው የፍቺ መሸጎጫ ግቤቶች ብዛት                                                                                           |
 
 የአካባቢ ተለዋዋጮችን ሙሉ ማጣቀሻ ለማየት [README](../README.md)ን ይመልከቱ።
 

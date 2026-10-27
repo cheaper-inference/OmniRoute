@@ -54,7 +54,7 @@ Nowa karta do wyodrębniania treści z adresu URL za pośrednictwem `POST /v1/we
 - Dane wejściowe: URL + przełącznik pełnej strony + selektor formatu (markdown / tekst / HTML).
 - Prześlij → pobierz → wyrenderuj `ScrapeResult.tsx`.
 - `ScrapeResult` renderuje podgląd markdown + przełącznik widoku surowego.
-- Limit: jeśli treść odpowiedzi przekracza **256 KB**, interfejs wyświetla `(obcięto, wyświetl surowe dane)` i otwiera surowe dane w oknie modalnym Monaco (D21).
+- Limit: jeśli treść odpowiedzi przekracza **256 KB**, interfejs wyświetla `View full raw content` i otwiera surowe dane w oknie modalnym (D21).
 - Panel metadanych: dostawca (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), opóźnienie, koszt, rozmiar odpowiedzi, liczba linków.
 - Używa hooka `useScrapeFetch.ts`.
 

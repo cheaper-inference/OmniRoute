@@ -486,13 +486,13 @@ See käsitleb järgmist:
 
 `open-sse/config/` sisaldab konfiguratsioonikihti:
 
-| Fail                          | Otstarve                                               |
-| ----------------------------- | ------------------------------------------------------ |
-| `providerRegistry.ts`         | Vestlusmudelite register 376 pakkujaga kataloogi kohal |
-| `providerModels.ts`           | Mudelite aliased, formaadi vastendamine                |
-| `constants.ts`                | Ajalõpud, piirangud, olekukoodid                       |
-| `defaultThinkingSignature.ts` | Claude'i vaikimisi mõtlemisallkiri                     |
-| `modelStrip.ts` (teenustes)   | Väljade eemaldamine pakkujapõhiselt                    |
+| Fail                          | Otstarve                                             |
+| ----------------------------- | ---------------------------------------------------- |
+| `providerRegistry.ts`         | Vestlusmudelite register 376 pakkuja kataloogi jaoks |
+| `providerModels.ts`           | Mudelite aliased, vormingute vastendus               |
+| `constants.ts`                | Ajalõpud, piirangud, olekukoodid                     |
+| `defaultThinkingSignature.ts` | Claude'i vaikimisi mõtlemissignatuur                 |
+| `modelStrip.ts` (teenustes)   | Pakkujapõhine väljade eemaldamine                    |
 
 ### Pakkujate registri skeem
 
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Zod-valideerimine mooduli laadimisel tagab, et kõik pakkujate konfiguratsioonid on kehtivad.
+Zodi valideerimine mooduli laadimisel tagab, et kõik pakkujate konfiguratsioonid on kehtivad.
 
 ---
 

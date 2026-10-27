@@ -164,7 +164,7 @@ Stacked móddal:   10K-2.5K token elküldve       (78-95%-os tartomány az arra 
 
 ### Irányítópult
 
-Lépjen az `Irányítópult → Kontextus és gyorsítótár` menüpontra:
+Lépjen a `Dashboard → Context & Cache` menüpontra:
 
 - **Caveman** — módválasztás, nyelvi csomagok, előnézet és globális alapértelmezések
 - **RTK** — parancsszűrők előnézete, RTK biztonsági beállítások és szűrőkatalógus
@@ -173,7 +173,7 @@ Lépjen az `Irányítópult → Kontextus és gyorsítótár` menüpontra:
 
 ### Kombinációnkénti felülbírálás
 
-Az `Irányítópult → Kontextus és gyorsítótár → Tömörítési kombinációk` menüpontban rendeljen hozzá egy tömörítési kombinációt egy útválasztási kombinációhoz:
+A `Dashboard → Context & Cache → Compression Combos` menüpontban rendeljen hozzá egy tömörítési kombinációt egy útválasztási kombinációhoz:
 
 ```txt
 Kombináció: "free-tier-fallback"
@@ -186,7 +186,7 @@ Kombináció: "free-tier-fallback"
 
 Ez lehetővé teszi a halmozott tömörítés használatát ingyenes/kódolási szolgáltatóknál, miközben a fizetős előfizetéseknél megtartja a Lite módot.
 
-Ez a „Kombinációnkénti felülbírálás” hozzárendelés eltérő vezérlőelem, mint az **útválasztási kombináció tömörítési módjának** felülbírálása (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — a mező sémája az `rtk`, `stacked` és `omniglyph` értékeket is elfogadja) — ez a felülbírálás nem választ ki névvel ellátott tömörítésikombináció-folyamatot; csupán beállítja a `resolveCompressionPlan` által figyelembe vett `compressionMode` mezőt. Beállítható a kombináció kártyáján (`Irányítópult → Kombinációk`), illetve a #6760 óta útválasztási kombinációnként az „Útválasztáshoz rendelés” listában is, az `Irányítópult → Kontextus és gyorsítótár → Tömörítési kombinációk` menüpontban, közvetlenül a fent dokumentált folyamathoz-rendelési jelölőnégyzet mellett. Mindkét felületen végzett módosítás ugyanazon a `PUT /api/combos/{id}` végponton keresztül marad meg.
+Ez a „Kombinációnkénti felülbírálás” hozzárendelés eltérő vezérlőelem, mint az **útválasztási kombináció tömörítési módjának** felülbírálása (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — a mező sémája az `rtk`, `stacked` és `omniglyph` értékeket is elfogadja) — ez a felülbírálás nem választ ki névvel ellátott tömörítésikombináció-folyamatot; csupán beállítja a `resolveCompressionPlan` által figyelembe vett `compressionMode` mezőt. Beállítható a kombináció kártyáján (`Dashboard → Combos`), illetve a #6760 óta útválasztási kombinációnként az „Útválasztáshoz rendelés” listában is, a `Dashboard → Context & Cache → Compression Combos` menüpontban, közvetlenül a fent dokumentált folyamathoz-rendelési jelölőnégyzet mellett. Mindkét felületen végzett módosítás ugyanazon a `PUT /api/combos/{id}` végponton keresztül marad meg.
 
 ### Kérésenkénti felülbírálás
 

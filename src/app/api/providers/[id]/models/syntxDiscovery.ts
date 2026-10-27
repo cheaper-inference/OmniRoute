@@ -7,10 +7,7 @@ import {
 } from "@omniroute/open-sse/services/syntxModels.ts";
 import { looksLikeJwt, resolveSyntxToken } from "@omniroute/open-sse/services/syntxAuth.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
-import {
-  toDiscoveryFailure,
-  type DiscoveryFailure,
-} from "@/shared/discovery/degradedCause";
+import { toDiscoveryFailure, type DiscoveryFailure } from "@/shared/discovery/degradedCause";
 
 interface DiscoveryWarnings {
   cacheWarning?: string;

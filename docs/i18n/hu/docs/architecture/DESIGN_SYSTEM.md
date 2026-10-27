@@ -99,32 +99,27 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` segítségével; a ReactFlow élek és az
    orkesztrációs vászon a témaérzékeny `--orch-status-*` változókat olvassák
    (`src/shared/components/flow/edgeStyles.ts`).
-2. A `packages/ui-kit/src`-et soha ne módosítsd kézzel: szinkronizálj a
-   `scripts/dev/sync-ui-kit.sh <commit>` paranccsal; a pre-commit kapu, az
-   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) minden olyan bájton elhasal, amely eltér a
-   rögzített upstream commit-tól (figyelmeztetéssel átugrik, ha az upstream klón — `UI_KIT_CLONE`
-   vagy `_references/cheaper-inference-ui-kit` — hiányzik). Ha valami hiányzik a kitből, kerüld meg
-   az adapterben vagy a képernyőn, és kérd meg az upstreamet, hogy adják hozzá.
-3. A kit szöveges alapértelmezései angolok (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   adj át lefordított sztringeket a `useTranslations(...)` hívásból, amikor egy kit-komponens
-   szöveget jelenít meg.
-4. A Tailwind utilityk felülírják a kit komponensosztályait (a kit deklarálja az
-   `@layer theme, base, components, utilities` rétegeket, és a szabályai a `components` rétegben
-   élnek) — az utilityket térközhöz és elrendezéshez használd, ne a kit-komponensek
-   újraszínezéséhez.
-5. Címsorok: `.ci-heading` (Inter, betűköz nélkül) oldal- és szakaszcímekhez;
-   `.ci-dashboard-display` (Instrument Serif) csak nagy, ritkán előforduló megjelenítési
-   szövegekhez, például a hibaoldal státuszkódjához.
-6. A `tests/unit/dashboard-kit-sweep.test.ts` őrzi a kit bevezetését: nincs Material-ligatúrás span
-   a `src/app` vagy a `src/shared/components` alatt; a dashboard fában (`src/app/(dashboard)` és
-   `src/shared/components`) nincs nyers `<select>`, `<textarea>` vagy `<table>`, és nincs kézzel
-   készített `role="dialog"` a felsorolt kivételeken kívül (a `Select` adapter natív ága,
-   `RequestLoggerDetail`); minden ottani nyers `<button>` vagy `<input>` esetén egy `kit-exception:`
-   szöveget (és az indoklást) tartalmazó megjegyzés kell, amely legfeljebb 3 sorral felette
-   végződik; palettaárnyalatok és `dark:` variánsok csak a teszt által felsorolt fájlokban
-   fordulhatnak elő.
-7. PR előtt ellenőrizd mindkét témát és a 390 px-es nézetablakot (képernyőképek); a
-   `tests/e2e/a11y.spec.ts` futtatja az axe-et.
+2. Soha ne módosítsd kézzel a `packages/ui-kit/src` tartalmát: szinkronizáld a `scripts/dev/sync-ui-kit.sh <commit>` használatával; a
+   commit előtti ellenőrzés, az `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) minden olyan bájteltérésnél
+   hibát jelez, amely eltér a rögzített upstream committól (figyelmeztetéssel kihagyja az ellenőrzést, ha az upstream klón,
+   a `UI_KIT_CLONE` vagy a `_references/cheaper-inference-ui-kit` hiányzik). Ha valami hiányzik a készletből,
+   kerüld meg az adapterben vagy a képernyőn, és kérd annak hozzáadását az upstream projektben.
+3. A készlet alapértelmezett szövegei angol nyelvűek (`label = "Loading"`, `loadingLabel = "Loading table"`…) — adj át lefordított
+   karakterláncokat a `useTranslations(...)` használatával minden olyan esetben, amikor egy készletkomponens szöveget jelenít meg.
+4. A Tailwind segédosztályai elsőbbséget élveznek a készlet komponensosztályaival szemben (a készlet deklarálja az
+   `@layer theme, base, components, utilities` rétegeket, szabályai pedig a `components` rétegben találhatók) — a segédosztályokat
+   térközök és elrendezés kialakítására használd, ne a készletkomponensek átszínezésére.
+5. Címsorok: `.ci-heading` (Inter, betűköz nélkül) az oldal- és szakaszcímekhez; `.ci-dashboard-display`
+   (Instrument Serif) csak nagyméretű, ritkásan elhelyezett megjelenítési szövegekhez, például a hibaoldal állapotkódjához.
+6. A `tests/unit/dashboard-kit-sweep.test.ts` felügyeli a készlet alkalmazását: nem lehet Material ligatúrát tartalmazó span a
+   `src/app` vagy a `src/shared/components` alatt; az irányítópult fában (`src/app/(dashboard)` és
+   `src/shared/components`) nem lehet nyers `<select>`, `<textarea>` vagy `<table>`, illetve kézzel készített
+   `role="dialog"` a felsorolt kivételeken kívül (a `Select` adapter natív ága,
+   `RequestLoggerDetail`); minden nyers `<button>` vagy `<input>` előtt olyan megjegyzésnek kell szerepelnie,
+   amely tartalmazza a `kit-exception:` szöveget (az indoklással együtt), és legfeljebb 3 sorral az elem fölött ér véget; a paletta színárnyalatai és a `dark:` változatok
+   csak a tesztben felsorolt fájlokban szerepelhetnek.
+7. PR előtt ellenőrizd mindkét témát és a 390 px széles nézetet (képernyőképekkel); a `tests/e2e/a11y.spec.ts`
+   az axe eszközt futtatja.
 
 ## 3. Képernyő hozzáadása
 
@@ -154,7 +149,23 @@ relatív importokból). Ezután: ellenőrizze a `git diff packages/ui-kit` kimen
 használat és végpont képernyőin mindkét témával, futtassa az `npm run check:ui-kit-snapshot` és az `npm run test:vitest:ui` parancsot, majd
 nyissa meg a PR-t az upstream változásnaplóval együtt.
 
-## 6. Hivatkozási jegyzék
+## 6. README-diagramok
+
+A gyökérkönyvtár `README.md` fájljába ágyazott tizenkét diagram (`docs/diagrams/*.svg`) statikus képeken alkalmazza a készletet. Generáltak, nem kézzel rajzoltak: 13 generátorfájl található itt: `scripts/docs/gen-readme-*.mjs` (tizenkét diagram és a `gen-readme-diagrams.mjs` vezérlő), valamint 12 elavulást vizsgáló teszt itt: `tests/unit/docs/readme-*-svg.test.ts`, diagramonként egy. Mindegyik bájtról bájtra hasonlítja össze a commitban lévő fájlt a generátor kimenetével (`test-unit` feladat).
+
+- **Tokenek.** A `scripts/docs/readme-diagram-theme.mjs` a `packages/ui-kit/src/ci-tokens.css` palettáját másolja (az egyezést a `tests/unit/docs/readme-diagram-theme.test.ts` rögzíti), és a készlet betűtípusaival határozza meg a szövegszerepeket: Instrument Serif a kiemelt szöveghez, Inter a felülethez, IBM Plex Mono a számokhoz és a kódhoz. Ugyanazokról a `@fontsource` csomagokról van szó, amelyeket a `src/app/globals.css` tölt be a vezérlőpulthoz. A világos értékek a `:root` alatt, a sötétek a `prefers-color-scheme: dark` feltétel mögött vannak a fájlban, így minden kép követi a GitHub-olvasó színsémáját.
+
+- **Betűtípusok.** A `scripts/docs/readme-fonts.mjs` ezeket a woff2 fájlokat az egyes diagramok által kirajzolt karakterképekre szűkíti, és `@font-face` szabályokkal, `data:` URI-ként ágyazza be. Így a készlet betűtípusai az SVG-n belül maradnak. A helyi README-képteszt ellenőrzi, hogy a renderelés nem küld külső betűtípus-kéréseket. A részhalmazok csak latin karaktereket tartalmaznak; a rendszer betűkészletére visszaeső szimbólumok egyenként engedélyezettek a `SYMBOL_FALLBACKS` listában. Minden más hiányzó karakterkép hibát vált ki.
+
+- **Újragenerálás.** A `npm run docs:readme-diagrams` a README sorrendjében újraírja mind a tizenkét diagramot, és fájlonként egy sort ír ki a mérettel. Egy generátor önállóan is fut (`node scripts/docs/gen-readme-<name>.mjs`; a `free-tier-budget` számára `node --import tsx/esm` szükséges, mert számai a `open-sse/config/freeModelCatalog.ts` aktuális katalógusbetöltőjéből származnak; a katalógusváltozás CI-következményét a `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` írja le). A generátort és az SVG-t együtt commitold.
+
+- **Bizonyíték.** A `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` helyi tesztben jeleníti meg a fájlt (`<img>` elem, korlátozó `Content-Security-Policy` és `image/svg+xml` válasz), világos és sötét képet készít, és jelenti az oldal külső betűtípus-kéréseit; ezek száma 0 kell legyen.
+
+- **Méretkeret.** Fájlonként 200 KB alatt, amit minden elavulást vizsgáló teszt ellenőriz; 500 KB minden README-kép abszolút felső korlátja (az SVG studio validátorának szabálya).
+
+- **Közös szöveg, számok a gate-ből.** Minden generátor egy `*_COPY` konstansban tárolja a diagram szövegét, vagy az aktuális katalógusból állítja elő. Ugyanez a szöveg kerül a képre és a betűkészlet-részhalmaz bemenetére. A kanonikus számok `<text>` csomópontokban maradnak, amelyeket a `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) olvas. A gate által olvasott diagramok elavulási tesztjei a generált fájlon annak validátorait is futtatják. A kódtól eltérő szám megbuktatja a tesztet: a gate által olvasott forrást javítsd, soha ne a generátor számát.
+
+## 7. Hivatkozási jegyzék
 
 - `src/app/globals.css` — tokenhíd, `.dark` felülírások, OmniRoute `@layer components`-bővítmények
 - `packages/ui-kit/UPSTREAM.md` — rögzített upstream commit és licencengedély; `packages/ui-kit/PATCHES.md`

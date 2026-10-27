@@ -543,26 +543,26 @@ Ipá-ọ̀nà ìpìlẹ̀: `/api/tools/agent-bridge/`
 
 ---
 
-## §8 Àtòjọ-ètò ọjọ́ iwájú
+## §8 Àtòjọ-ọ̀nà
 
 ### Ìwádìí Trae
 
-Trae jẹ́ olùrànlọ́wọ́ AI fún kíkọ kóòdù tí ó ṣẹ̀ṣẹ̀ dé. Ṣáájú ṣíṣe handler kan:
+Trae jẹ́ olùrànlọ́wọ́ ìkọ́ kóòdù AI tuntun kan. Ṣáájú ṣíṣe olùtọ́jú kan:
 
-1. Ṣe ìdánimọ̀ binary/extension náà ní àwọn ọjà VS Code / JetBrains tàbí gẹ́gẹ́ bí app aládàáṣe
-2. Gba traffic pẹ̀lú mitmproxy láti ṣàwárí àwọn API host àti àwọn ìrísí endpoint
-3. Ṣàwárí ọ̀nà authentication tí ó ń lò
-4. Ṣe àyẹ̀wò go/no-go ní ìbámu pẹ̀lú TOS àti bí API ṣe ṣeé ṣàwárí tó
+1. Ṣe ìdámọ̀ fáìlì aláṣẹ/àfikún náà nínú àwọn ọjà VS Code / JetBrains tàbí gẹ́gẹ́ bí ohun èlò aládàáṣe
+2. Ṣàkọsílẹ̀ ìjábọ̀ pẹ̀lú mitmproxy láti ṣàwárí àwọn olùgbàlejò API àti àwọn ìrísí endpoint
+3. Ṣe ìpinnu ọ̀nà ìfàṣẹsí
+4. Ṣàyẹ̀wò bóyá a ó tẹ̀síwájú tàbí a kò ní tẹ̀síwájú, ní ìbámu pẹ̀lú TOS àti bí API ṣe ṣeé ṣàwárí
 
-Títí ìwádìí yóò fi parí, káàdì Trae inú dashboard yóò máa fi àmì "Ó wà lábẹ́ ìwádìí" hàn pẹ̀lú ìjápọ̀ "Ṣàlàyé bóyá ó ṣeé ṣe". Àwòṣe handler ní `src/mitm/handlers/trae.ts` máa ń ju àṣìṣe `A kò tíì ṣe é` tí a ṣètò sílẹ̀.
+Títí tí ìwádìí yóò fi parí, káàdì Trae nínú dashboard ń ṣàfihàn báàjì "Ṣíṣe ìwádìí" pẹ̀lú ọ̀nà asopọ "Jábọ̀ bóyá ó ṣeé lò". Àpẹrẹ olùtọ́jú ní `src/mitm/handlers/trae.ts` ń dá àṣìṣe `Not yet implemented` tí a ṣètò kalẹ̀ padà.
 
-### Àwọn agent inú backlog (MITM pọndandan — kò sí àtìlẹ́yìn fún custom base URL)
+### Àwọn aṣojú tó wà nínú àtòjọ iṣẹ́ tó kù (MITM ṣe pàtàkì — kò sí àtìlẹ́yìn fún URL ìpìlẹ̀ àdáni)
 
-Àwọn irinṣẹ́ wọ̀nyí kò ṣe àtìlẹ́yìn fún custom base URL nínú àwọn ẹ̀yà wọn lọ́wọ́lọ́wọ́, èyí mú kí MITM jẹ́ ọ̀nà interception kan ṣoṣo. Àyẹ̀wò bóyá wọ́n ṣeé lò ṣì ń dúró:
+Àwọn irinṣẹ́ wọ̀nyí kò ṣàtìlẹ́yìn fún àwọn URL ìpìlẹ̀ àdáni nínú àwọn ẹ̀dà wọn lọ́wọ́lọ́wọ́, èyí tó mú kí MITM jẹ́ ọ̀nà ìdáwọ́dúró kan ṣoṣo. Ìṣàyẹ̀wò bóyá wọ́n ṣeé lò ṣì ń dúró:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — ó yàtọ̀ sí Kiro IDE)
 - **Cowork** (Anthropic desktop)
 
-Àkíyèsí: GitHub Copilot CLI ≥v1.0.19 ṣe àtìlẹ́yìn fún `COPILOT_PROVIDER_BASE_URL` — lo àtúnṣe tààrà dípò MITM fún irinṣẹ́ yẹn.
+Àkíyèsí: GitHub Copilot CLI ≥v1.0.19 ṣe àtìlẹ́yìn fún `COPILOT_PROVIDER_BASE_URL` — lo ìṣètò tààrà dípò MITM fún irinṣẹ́ yẹn.

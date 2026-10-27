@@ -1,7 +1,10 @@
-import { describe, it } from "node:test";
+import { after, describe, it } from "node:test";
 import assert from "node:assert/strict";
 
 import { DefaultExecutor } from "../../open-sse/executors/default.ts";
+import { resetDbInstance } from "../../src/lib/db/core.ts";
+
+after(() => resetDbInstance());
 
 // The native `deepseek` provider (alias `ds/`) documents only
 // `response_format: { type: "json_object" }`; a `json_schema` request is
@@ -77,6 +80,51 @@ describe("native DeepSeek json_schema fallback", () => {
     assert.match(systemText, /strictly follows this JSON schema/);
     assert.equal(body.messages[0].content, "You are concise.");
   });
+
+  for (const frozen of [false, true]) {
+    it(`preserves the caller's ${frozen ? "frozen" : "mutable"} system content array`, () => {
+      const content = [
+        { type: "text", text: "You are concise." },
+        { type: "text", text: "Keep the original instructions." },
+      ];
+      if (frozen) {
+        content.forEach(Object.freeze);
+        Object.freeze(content);
+      }
+      const body = {
+        model: "deepseek-v4-flash",
+        messages: [
+          { role: "system", content },
+          { role: "user", content: "x" },
+        ],
+        response_format: { type: "json_schema", json_schema: { name: "t", schema } },
+      };
+      const before = structuredClone(body);
+
+      const result = transform("deepseek", "deepseek-v4-flash", body);
+
+      assert.deepEqual(body, before);
+      assert.deepEqual(result.response_format, { type: "json_object" });
+      assert.equal(result.messages?.filter((message) => message.role === "system").length, 1);
+      const transformedContent = result.messages?.[0].content;
+      assert.ok(Array.isArray(transformedContent));
+      assert.notStrictEqual(transformedContent, content);
+      assert.equal(transformedContent.length, content.length + 1);
+      assert.deepEqual(transformedContent.slice(0, -1), content);
+      assert.equal(transformedContent.at(-1)?.type, "text");
+      assert.match(String(transformedContent.at(-1)?.text), /strictly follows this JSON schema/);
+      assert.ok(String(transformedContent.at(-1)?.text).includes(JSON.stringify(schema, null, 2)));
+      assert.deepEqual(result.messages?.[1], before.messages[1]);
+
+      const repeated = transform("deepseek", "deepseek-v4-flash", body);
+      assert.deepEqual(repeated.messages, result.messages);
+      assert.deepEqual(
+        body,
+        before,
+        "retries must not accumulate schema instructions on the input"
+      );
+    });
+  }
 
   it("leaves a json_object response_format untouched (DeepSeek accepts it natively)", () => {
     const body = {

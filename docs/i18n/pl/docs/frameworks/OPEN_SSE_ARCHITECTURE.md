@@ -1,15 +1,8 @@
-# open-sse Architecture (Polski)
+# Architektura open-sse (Polski)
 
 🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇪🇹 [am](../../../am/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇦🇿 [az](../../../az/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇩🇰 [da](../../../da/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇩🇪 [de](../../../de/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇬🇷 [el](../../../el/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇪🇸 [es](../../../es/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇪🇪 [et](../../../et/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇱 [he](../../../he/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇩 [id](../../../id/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇹 [it](../../../it/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇰🇭 [km](../../../km/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇲🇲 [my](../../../my/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇴 [no](../../../no/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [or](../../../or/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇱🇰 [si](../../../si/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇮🇳 [te](../../../te/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇹🇭 [th](../../../th/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OPEN_SSE_ARCHITECTURE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OPEN_SSE_ARCHITECTURE.md)
 
 ---
-
-title: "Architektura open-sse"
-version: 3.8.40
-lastUpdated: 2026-06-28
----
-
-# Architektura open-sse
 
 > **TL;DR**: `open-sse/` to rdzeń silnika strumieniowania, który obsługuje każde żądanie LLM w OmniRoute. Zawiera ~900 plików implementujących pipeline żądań, executory, serwisy, serwer MCP oraz warstwę tłumaczenia formatów. Ten przewodnik wyjaśnia, jak te elementy współgrają ze sobą.
 
@@ -491,15 +484,15 @@ Obsługuje:
 
 ## Konfiguracja
 
-Katalog `open-sse/config/` zawiera warstwę konfiguracji:
+`open-sse/config/` zawiera warstwę konfiguracji:
 
 | Plik                          | Przeznaczenie                                         |
 | ----------------------------- | ----------------------------------------------------- |
-| `providerRegistry.ts`         | Rejestr modeli czatu oparty na katalogu 376 dostawców |
+| `providerRegistry.ts`         | Rejestr modeli czatu obejmujący katalog 376 dostawców |
 | `providerModels.ts`           | Aliasy modeli, mapowanie formatów                     |
-| `constants.ts`                | Limity czasu, limity, kody statusu                    |
+| `constants.ts`                | Limity czasu, ograniczenia, kody stanu                |
 | `defaultThinkingSignature.ts` | Domyślna sygnatura myślenia Claude                    |
-| `modelStrip.ts` (w services)  | Usuwanie pól dla poszczególnych dostawców             |
+| `modelStrip.ts` (w usługach)  | Usuwanie pól właściwe dla poszczególnych dostawców    |
 
 ### Schemat rejestru dostawców
 
@@ -516,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Walidacja Zod przy ładowaniu modułu zapewnia poprawność wszystkich konfiguracji dostawców.
+Walidacja Zod podczas ładowania modułu zapewnia poprawność wszystkich konfiguracji dostawców.
 
 ---
 

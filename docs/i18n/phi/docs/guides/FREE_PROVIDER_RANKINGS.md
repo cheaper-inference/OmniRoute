@@ -135,10 +135,10 @@ nagdadala ng pangalan ng modelo, vendor, ELO `score`, confidence interval, at bi
 
 Ang mga kategorya ng leaderboard ay tumutugma sa mga kategorya ng gawain ng OmniRoute:
 
-| Arena leaderboard | Mga kategorya ng gawain ng OmniRoute              |
-| ----------------- | ------------------------------------------------- |
-| `text`            | `default`, `review`, `documentation`, `debugging` |
-| `code`            | `coding`                                          |
+| Leaderboard ng Arena | Mga kategorya ng gawain ng OmniRoute              |
+| -------------------- | ------------------------------------------------- |
+| `text`               | `default`, `review`, `documentation`, `debugging` |
+| `code`               | `coding`                                          |
 
 ### Normalisasyon (task-fit na score)
 
@@ -152,11 +152,11 @@ Ang score ay hindi kailanman umaabot sa `0` o `1`, na nag-iiwan ng puwang para s
 override ng gumagamit. Ito ang `score` field na nakikita mo sa tugon ng API at ang label
 na ipinapakita sa dashboard.
 
-### Kumpiyansa
+### Confidence
 
 Ang bawat entry ay nakakakuha ng antas ng kumpiyansa batay sa bilang ng boto ng Arena:
 
-| Kumpiyansa | Mga boto |
+| Confidence | Mga boto |
 | ---------- | -------- |
 | `high`     | ≥ 5,000  |
 | `medium`   | ≥ 1,000  |
@@ -216,7 +216,7 @@ ay inaalis at isang maliit na alias map ang nagpapalawak ng mga canonical na pan
 tungo sa mga variant na ginagamit ng OmniRoute sa loob, kaya ang mga modelo ay
 nananatiling mahahanap sa ilalim ng anumang pangalan.
 
-### Paano niraranggo ang isang provider
+### Paano nira-rank ang isang provider
 
 Para sa bawat libreng provider, binibigyan ng engine ng score ang bawat modelo sa katalogo
 nito, pagkatapos:

@@ -113,7 +113,7 @@ Atbildes struktūra:
 
 ## Kā darbojas vērtējumi
 
-### Avots: Arena AI līderu tabula
+### Avots: Arena AI līderu saraksts
 
 Arena ELO sinhronizācijas dzinējs (`src/lib/arenaEloSync.ts`) ielādē divas līderu tabulas — `text`
 un `code` — no Arena AI līderu tabulas API
@@ -126,10 +126,10 @@ satur modeļa nosaukumu, piegādātāju, ELO `score`, ticamības intervālu un b
 
 Līderu tabulu kategorijas tiek saistītas ar OmniRoute uzdevumu kategorijām:
 
-| Arena līderu tabula | OmniRoute uzdevumu kategorijas                    |
-| ------------------- | ------------------------------------------------- |
-| `text`              | `default`, `review`, `documentation`, `debugging` |
-| `code`              | `coding`                                          |
+| Arena līderu saraksts | OmniRoute uzdevumu kategorijas                    |
+| --------------------- | ------------------------------------------------- |
+| `text`                | `default`, `review`, `documentation`, `debugging` |
+| `code`                | `coding`                                          |
 
 ### Normalizācija (uzdevuma atbilstības vērtējums)
 

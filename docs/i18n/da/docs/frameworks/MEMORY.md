@@ -339,11 +339,11 @@ Udtrækningen er **regex-baseret**, ikke LLM-baseret — den kører i processen 
 `setImmediate()`, så den aldrig blokerer svarstrømmen:
 
 - **Præferencemønstre** → `MemoryType.FACTUAL`
-  (f.eks. `Jeg foretrækker …`, `Jeg kan virkelig godt lide …`, `min favorit er …`, `Jeg hader …`)
+  (f.eks. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
 - **Beslutningsmønstre** → `MemoryType.EPISODIC`
-  (f.eks. `Jeg vil bruge …`, `Jeg valgte …`, `Jeg endte med …`, `Jeg vil tage … i brug`)
+  (f.eks. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
 - **Adfærdsmønstre** → `MemoryType.FACTUAL`
-  (f.eks. `Jeg plejer …`, `Jeg gør altid …`, `Jeg har tendens til …`)
+  (f.eks. `I usually …`, `I always …`, `I tend to …`)
 
 Hvert match renses (`trim`, sammenfoldning af mellemrum, begrænset til 500 tegn),
 deduplikeres inden for batchen via en stabil `factKey(category, content)` og
@@ -568,7 +568,7 @@ Se [MCP-SERVER.md](./MCP-SERVER.md) for oplysninger om transport og omfang.
 - Konfigurationskort til omrangering (aktivering, valg af udbyder/model).
 
 Indstillinger for hukommelse og Qdrant findes også under
-`/dashboard/settings → Hukommelse og færdigheder` (`MemorySkillsTab.tsx`) som
+`/dashboard/settings → Hukommelse og færdigheder` (`/dashboard/settings → Memory & Skills`) (`MemorySkillsTab.tsx`) som
 den ældre/globale indstillingsflade.
 
 ## Cachelagring
@@ -713,11 +713,11 @@ Modulet `extraction.ts` (`src/lib/memory/extraction.ts`) bruger **matchning med 
 
 ### Standardkategorier for mønstre
 
-| Kategori            | Eksempel på mønster                                                  | Indfanger                       |
-| ------------------- | -------------------------------------------------------------------- | ------------------------------- |
-| PREFERENCE_PATTERNS | `"Jeg foretrækker <X>"`, `"Jeg kan lide <X>"`, `"Jeg hader <X>"`     | Brugerpræferencer               |
-| DECISION_PATTERNS   | `"Jeg vil bruge <X>"`, `"Jeg besluttede at <X>"`, `"Jeg valgte <X>"` | Brugerbeslutninger (episodiske) |
-| PATTERN_PATTERNS    | `"Jeg plejer at <X>"`, `"Jeg gør altid <X>"`, `"Jeg gør aldrig <X>"` | Vedvarende adfærdsmønstre       |
+| Kategori            | Eksempel på mønster                                         | Indfanger                       |
+| ------------------- | ----------------------------------------------------------- | ------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Brugerpræferencer               |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Brugerbeslutninger (episodiske) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Vedvarende adfærdsmønstre       |
 
 ### Eksempler på mønstre (forenklet)
 
@@ -753,7 +753,8 @@ Når en bruger siger:
 
 For at forhindre ukontrolleret udtrækning gælder følgende grænser:
 
-| Min. indholdslængde | 3 tegn |
+| Min. indholdslængde  | 3 tegn   |
+| -------------------- | -------- |
 | Maks. indholdslængde | 500 tegn |
 
 ### Hvornår udtrækning bør deaktiveres

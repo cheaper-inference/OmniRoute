@@ -197,6 +197,12 @@ o processo do servidor.
 | `/api/providers/health-autopilot/actions` | Executa ações de correção do piloto automático                     |
 | `/api/settings/obsidian`                  | Emite credenciais WebDAV reutilizáveis para qualquer raiz de cofre |
 | `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens                       |
+| `/api/cli-tools/apply`                    | Reescreve a configuração CLI do operador no host                   |
+| `/api/cli-tools/guide-settings`           | Grava arquivos de configuração CLI orientados por guias            |
+| `/api/cli-tools/hermes-agent-settings`    | Grava a configuração do agente Hermes                              |
+| `/api/cli-tools/backups`                  | Restaura e exclui backups da configuração CLI                      |
+| `/api/log-export`                         | Envia logs de chamadas a um destino configurado                    |
+| `/api/restart`                            | Reinicia o processo do servidor                                    |
 
 **Resposta em caso de violação:** `401 Authentication required`
 
@@ -208,7 +214,7 @@ da senha por `GET`; a emissão ainda estava na camada que permite acesso em caso
 (GHSA-7pq4-8pvv-rx7r). `enableObsidianVaultSync()` também recusa um cofre que seja o diretório
 de dados, esteja dentro dele ou o contenha.
 
-#### Exportações de credenciais são exclusivas para operadores
+#### Exportações de credenciais e restaurações são exclusivas para operadores
 
 O nível acima decide apenas se _alguma_ credencial é necessária. As rotas que baixam
 credenciais armazenadas adicionam uma segunda verificação no manipulador: `GET /api/settings/export-json` (conexões
@@ -219,22 +225,9 @@ uma instância com login desabilitado e responde com `403` a chaves de API de qu
 e `admin`) e a tokens de acesso `oma_`. A emissão de tokens de sincronização (`POST /api/sync/tokens`) usa o
 mesmo auxiliar, além do token confiável do serviço interno de loopback.
 
-#### Credential exports and restores are operator-only
+As operações destrutivas correspondentes seguem o mesmo limite: `POST /api/db-backups/import` (arquivo `.sqlite` enviado, incluindo `dryRun=true`), `POST /api/db-backups` (restaurar um backup armazenado pelo seu id) e `POST /api/settings/import-json` (restauração do formato JSON legado) substituem o banco de dados ativo ou todo o conjunto de configurações, conexões e chaves de API. Uma credencial de máquina também não pode iniciá-las.
 
-The tier above only decides whether _some_ credential is required. The routes that download
-stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
-provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
-`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
-(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
-an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
-and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
-`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
-(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
-replace the live database or the whole settings/connections/API-key set, so a machine credential
-cannot trigger them either. Listing, creating, retention and cleanup of backups
-(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
-issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
-internal-service token.
+A exclusão de pontos de restauração segue o mesmo limite: `DELETE /api/db-backups` (limpeza — manter os N mais recentes ou excluir os que tenham mais de D dias) e `PATCH /api/db-backups` (configurações de retenção). A retenção salva é exatamente a que `cleanupDbBackups()` aplica após cada backup automático (`src/lib/db/backup.ts`); uma credencial de máquina capaz de salvar `keepLatest: 1` poderia apagar os pontos de restauração anteriores no próximo snapshot. Listar e criar backups (`GET`/`PUT /api/db-backups`) mantém a autenticação de gerenciamento comum.
 
 ### O bootstrap de uma instalação nova é restrito ao loopback — pelo par real, não pelo `Host`
 

@@ -5,8 +5,9 @@ description: Run or inspect the local Release-Green observer for an exact base o
 
 # Validate Release-Green
 
-Read `../_shared/base-green.md` before interpreting remote status or attributing
-a failure. Resolve the current base and candidate SHA; use an isolated worktree.
+Read `../_shared/validation-gate.md` for environment and local resource admission,
+and `../_shared/base-green.md` before interpreting remote status or attributing a
+failure. Resolve the current base and candidate SHA; use an isolated worktree.
 The observer validates that working tree, not an abstract branch name.
 
 ## Select and execute the actual profile

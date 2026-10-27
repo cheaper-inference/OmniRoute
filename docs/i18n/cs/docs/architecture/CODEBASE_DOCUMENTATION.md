@@ -782,7 +782,7 @@ Viz [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) a vyhrazená část v souboru
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Přiřaďte odpovídající rozsah či rozsahy v `src/shared/constants/mcpScopes.ts`.
 3. Zaregistrujte nástroj v `open-sse/mcp-server/server.ts`.
-4. Přidejte testy do `open-sse/mcp-server/__tests__/`.
+4. Přidejte testy do `tests/unit/`.
 5. Aktualizujte [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Přidání nové dovednosti A2A
@@ -800,7 +800,7 @@ Viz [A2A-SERVER.md § Přidání nové dovednosti](../frameworks/A2A-SERVER.md).
 - **Pojmenování**: soubory `camelCase` nebo `kebab-case`, komponenty `PascalCase`,
   konstanty `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` všude;
-  `no-explicit-any` = `warn` v `open-sse/` a `tests/`, jinde `error`.
+  `no-explicit-any` = `error` v `open-sse/**/*.ts` a `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (kvůli zpětné kompatibilitě). Na hranicích mezi moduly upřednostňujte explicitní typy před
   inferencí.
 - **Databáze**: nikdy nezapisujte nezpracované SQL do tras ani obslužných funkcí — vždy používejte
@@ -830,8 +830,7 @@ Viz [A2A-SERVER.md § Přidání nové dovednosti](../frameworks/A2A-SERVER.md).
   `a2a`, `memory`, `skills`.
 - **Větve**: prefixy `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Nikdy necommitujte přímo do `main`.
-- **Husky**: před commitem se spouští `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; před odesláním se spouští `check:any-budget:t11` + `check:tracked-artifacts` (rychlé kontroly; nezahrnují `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

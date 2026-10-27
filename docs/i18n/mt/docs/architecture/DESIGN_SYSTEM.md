@@ -94,28 +94,12 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; il-edges ta' ReactFlow u l-canvas
    tal-orchestration jaqraw il-varjabbli li jimxu mat-tema `--orch-status-*`
    (`src/shared/components/flow/edgeStyles.ts`).
-2. Qatt tagħmel patch manwalment f'`packages/ui-kit/src`: issinkronizza b'`scripts/dev/sync-ui-kit.sh <commit>`;
-   il-gate tal-pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ifalli fuq kwalunkwe byte li
-   jkun differenti mill-commit upstream iffissat (jiskipja bi twissija meta l-clone upstream,
-   `UI_KIT_CLONE` jew `_references/cheaper-inference-ui-kit`, ma jkunx preżenti). Meta l-kit jonqosha xi
-   ħaġa, għaddej madwarha fl-adapter jew fl-iskrin u itlobha lill-upstream.
-3. Id-defaults tat-test tal-kit huma bl-Ingliż (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   għaddi strings tradotti minn `useTranslations(...)` kull meta komponent tal-kit juri test.
-4. L-utilities ta' Tailwind jipprevalew fuq il-klassijiet tal-komponenti tal-kit (il-kit jidikjara
-   `@layer theme, base, components, utilities` u r-regoli tiegħu jgħixu f'`components`) — uża l-utilities
-   għall-ispazjar u l-layout, mhux biex terġa' tikkulurixxi l-komponenti tal-kit.
-5. Headings: `.ci-heading` (Inter, mingħajr tracking) għat-titli tal-paġni u tas-sezzjonijiet;
-   `.ci-dashboard-display` (Instrument Serif) biss għal test ta' display kbir u skars, bħall-kodiċi
-   tal-istatus tal-paġna tal-iżball.
-6. `tests/unit/dashboard-kit-sweep.test.ts` jħares l-adozzjoni tal-kit: l-ebda span ta' ligature Material taħt
-   `src/app` jew `src/shared/components`; fis-siġra tad-dashboard (`src/app/(dashboard)` u
-   `src/shared/components`) l-ebda `<select>`, `<textarea>` jew `<table>` grezz u l-ebda
-   `role="dialog"` magħmul b'idejk barra mill-eċċezzjonijiet elenkati (il-fergħa nattiva tal-adapter
-   `Select`, `RequestLoggerDetail`); kull `<button>` jew `<input>` grezz hemmhekk jeħtieġ kumment li jkun fih
-   `kit-exception:` (bir-raġuni) li jispiċċa mhux aktar minn 3 linji fuqu; il-hues tal-paletta u l-varjanti
-   `dark:` biss fil-fajls li t-test jelenka.
-7. Ivverifika ż-żewġ temi u l-viewport ta' 390 px qabel PR (screenshots); `tests/e2e/a11y.spec.ts` imexxi
-   axe.
+2. Qatt timmodifika `packages/ui-kit/src` manwalment: issinkronizza ma’ `scripts/dev/sync-ui-kit.sh <commit>`; il-kontroll ta’ qabel il-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ifalli għal kwalunkwe byte li jkun differenti mill-commit upstream iffissat (jinqabeż bi twissija meta l-klonu upstream, `UI_KIT_CLONE` jew `_references/cheaper-inference-ui-kit`, ikun nieqes). Meta l-kit ma jkollux xi ħaġa, sib soluzzjoni alternattiva fl-adapter jew fl-iskrin u itlobha upstream.
+3. Il-valuri predefiniti tat-test tal-kit huma bl-Ingliż (`label = "Loading"`, `loadingLabel = "Loading table"`…) — għaddi strings tradotti minn `useTranslations(...)` kull meta komponent tal-kit jirrendi test.
+4. L-utilitajiet ta’ Tailwind jieħdu preċedenza fuq il-klassijiet tal-komponenti tal-kit (il-kit jiddikjara `@layer theme, base, components, utilities` u r-regoli tiegħu jinsabu f’`components`) — uża utilitajiet għall-ispazjar u t-tqassim, mhux biex tibdel il-kulur tal-komponenti tal-kit.
+5. Intestaturi: `.ci-heading` (Inter, mingħajr tracking) għat-titli tal-paġni u tas-sezzjonijiet; `.ci-dashboard-display` (Instrument Serif) biss għal test tal-wiri kbir u mhux dens, bħall-kodiċi tal-istatus tal-paġna tal-iżball.
+6. `tests/unit/dashboard-kit-sweep.test.ts` jiżgura l-adozzjoni tal-kit: l-ebda span tal-ligaturi ta’ Material taħt `src/app` jew `src/shared/components`; fis-siġra tad-dashboard (`src/app/(dashboard)` u `src/shared/components`) l-ebda `<select>`, `<textarea>` jew `<table>` mhux ipproċessat u l-ebda `role="dialog"` magħmul manwalment barra mill-eċċezzjonijiet elenkati (il-fergħa nattiva tal-adapter `Select`, `RequestLoggerDetail`); kull `<button>` jew `<input>` mhux ipproċessat hemmhekk jeħtieġ kumment li jkun fih `kit-exception:` (bir-raġuni) li jintemm mhux aktar minn 3 linji qablu; tonalitajiet tal-paletta u varjanti `dark:` biss fil-fajls elenkati mit-test.
+7. Ivverifika ż-żewġ temi u l-viewport ta’ 390 px qabel PR (screenshots); `tests/e2e/a11y.spec.ts` iħaddem axe.
 
 ## 3. Żieda ta’ skrin
 
@@ -155,7 +139,23 @@ imports relattivi). Imbagħad: irrevedi `git diff packages/ui-kit`, agħmel kont
 usage u endpoint fiż-żewġ temi, ħaddem `npm run check:ui-kit-snapshot` u `npm run test:vitest:ui`, u
 iftaħ il-PR bil-changelog upstream.
 
-## 6. Indiċi ta' referenza
+## 6. Dijagrammi README
+
+It-tnax-il dijagramma inkorporati fil-`README.md` tal-għerq (`docs/diagrams/*.svg`) japplikaw il-kit għal stampi statiċi. Huma ġġenerati, mhux imfassla bl-idejn: 13-il fajl ta' ġeneraturi f'`scripts/docs/gen-readme-*.mjs` (tnax-il dijagramma u s-sewwieq `gen-readme-diagrams.mjs`) u 12-il test tal-aġġornament f'`tests/unit/docs/readme-*-svg.test.ts`, wieħed għal kull dijagramma. Kull test iqabbel il-fajl fil-commit mal-output tal-ġeneratur tiegħu byte b'byte (xogħol `test-unit`).
+
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` jikkopja l-paletta minn `packages/ui-kit/src/ci-tokens.css` (il-konformità ma' dak il-fajl hija żgurata minn `tests/unit/docs/readme-diagram-theme.test.ts`) u jiddefinixxi r-rwoli tat-test bil-fonts tal-kit: Instrument Serif għal test prominenti, Inter għat-test tal-interfaċċa u IBM Plex Mono għan-numri u l-kodiċi. Dawn huma l-istess pakketti `@fontsource` li `src/app/globals.css` jgħabbi għad-dashboard. Il-valuri ċari huma f'`:root` u dawk skuri taħt `prefers-color-scheme: dark` fil-fajl, biex kull stampa ssegwi l-iskema tal-qarrej fuq GitHub.
+
+- **Fonts.** `scripts/docs/readme-fonts.mjs` inaqqas dawk il-fajls woff2 għall-glifi li tiġbed kull dijagramma u jinkorporahom permezz ta' `@font-face` bħala URI `data:`. B'hekk il-fonts tal-kit jibqgħu ġewwa l-SVG. Il-prova lokali tal-istampi README tiċċekkja li r-rendering ma jagħmilx talbiet esterni għall-fonts. Is-sottogruppi fihom biss karattri Latini; il-glifi tas-simboli li jirrikorru għall-fonts tas-sistema huma permessi wieħed wieħed f'`SYMBOL_FALLBACKS`. Kull glifu ieħor mhux kopert iqajjem żball.
+
+- **Ġenerazzjoni mill-ġdid.** `npm run docs:readme-diagrams` jerġa' jikteb it-tnax-il dijagramma fl-ordni tar-README u juri linja għal kull fajl bid-daqs tiegħu. Ġeneratur jista' jaħdem ukoll waħdu (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` jeħtieġ `node --import tsx/esm` għax in-numri jiġu mil-loader tal-katalgu attwali f'`open-sse/config/freeModelCatalog.ts`; l-effett ta' bidla fil-katalgu fuq CI jinsab f'`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Daħħal il-ġeneratur u l-SVG fl-istess commit.
+
+- **Prova.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` jirrendi fajl fil-prova lokali (tag `<img>`, `Content-Security-Policy` restrittiva u tweġiba `image/svg+xml`), jaqbad immaġni ċara u oħra skura u jirrapporta t-talbiet esterni għall-fonts magħmula mill-paġna; iridu jkunu 0.
+
+- **Baġit.** Inqas minn 200 KB għal kull fajl, ivverifikat minn kull test tal-aġġornament; 500 KB huwa l-limitu assolut għal kwalunkwe stampa README (ir-regola tal-validatur SVG studio).
+
+- **Test kondiviż, numri mill-gate.** Kull ġeneratur iżomm it-test tad-dijagramma f'kostanti `*_COPY` jew jibnih mill-katalgu attwali. L-istess test jintwera u jintuża bħala input għas-sottogrupp tal-font. In-numri kanoniċi jibqgħu f'nodi `<text>` li jinqraw minn `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). It-testijiet tal-aġġornament tad-dijagrammi li jaqra l-gate iħaddmu wkoll il-validaturi tiegħu fuq il-fajl iġġenerat. Numru li jiddevja mill-kodiċi jfalli t-test: ikkoreġi s-sors li jaqra l-gate, qatt in-numru fil-ġeneratur.
+
+## 7. Indiċi ta' referenza
 
 - `src/app/globals.css` — pont tat-tokens, overrides ta' `.dark`, estensjonijiet OmniRoute ta' `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — commit upstream iffissat u awtorizzazzjoni tal-liċenzja; `packages/ui-kit/PATCHES.md`

@@ -33,29 +33,26 @@
    üzerinden kit'in beş grafik token'ına (`--color-chart-1..5`) dayanıyor; ReactFlow kenarları ve
    orkestrasyon tuvali, temaya duyarlı `--orch-status-*` değişkenlerini okuyor
    (`src/shared/components/flow/edgeStyles.ts`).
-2. `packages/ui-kit/src` içini asla elle yamalamayın: `scripts/dev/sync-ui-kit.sh <commit>` ile
-   senkronize edin; pre-commit kontrolü `npm run check:ui-kit-snapshot` (`.husky/pre-commit`),
-   sabitlenmiş upstream commit'inden farklı olan tek bir byte'ta bile başarısız olur (upstream
-   klonu — `UI_KIT_CLONE` veya `_references/cheaper-inference-ui-kit` — mevcut değilse bir
-   uyarıyla atlar). Kit'te bir şey eksik olduğunda, adapter'da veya ekranda geçici bir çözümle
-   çalışın ve bunu upstream'den talep edin.
-3. Kit'in metin varsayılanları İngilizce'dir (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   bir kit bileşeni metin render ettiğinde `useTranslations(...)` çıktısından çevrilmiş dizgileri
-   geçirin.
-4. Tailwind utility'leri kit bileşen sınıflarını ezer (kit
-   `@layer theme, base, components, utilities` bildirir ve kuralları `components` katmanında yaşar) —
-   utility'leri aralık ve yerleşim için kullanın, kit bileşenlerini yeniden renklendirmek için değil.
-5. Başlıklar: sayfa ve bölüm başlıkları için `.ci-heading` (Inter, harf aralığı yok);
-   `.ci-dashboard-display` (Instrument Serif) yalnızca hata sayfası durum kodu gibi büyük, seyrek
-   gösterim metinleri için.
-6. `tests/unit/dashboard-kit-sweep.test.ts` kit benimsemesini korur: `src/app` veya
-   `src/shared/components` altında Material ligature span'i yok; dashboard ağacında
-   (`src/app/(dashboard)` ve `src/shared/components`) ham `<select>`, `<textarea>` veya `<table>`
-   yok ve listelenen istisnaların (`Select` adapter'ının native dalı, `RequestLoggerDetail`)
-   dışında elde yazılmış `role="dialog"` yok; oradaki her ham `<button>` veya `<input>`, en fazla
-   3 satır yukarısında biten ve (gerekçesiyle birlikte) `kit-exception:` içeren bir yorum
-   gerektirir; palet tonları ve `dark:` varyantları yalnızca testin listelediği dosyalarda.
-7. PR'dan önce her iki temayı ve 390 px görünüm alanını doğrulayın (ekran görüntüleri);
+2. `packages/ui-kit/src` dosyasını asla elle yamamayın: `scripts/dev/sync-ui-kit.sh <commit>` ile eşitleyin;
+   pre-commit denetimi `npm run check:ui-kit-snapshot` (`.husky/pre-commit`), sabitlenmiş upstream commit'inden
+   farklı olan herhangi bir baytta başarısız olur (upstream klonu,
+   `UI_KIT_CLONE` veya `_references/cheaper-inference-ui-kit` mevcut olmadığında bir uyarıyla atlanır). Kitte bir şey
+   eksik olduğunda, adaptörde veya ekranda geçici bir çözüm uygulayın ve bunun upstream'e eklenmesini talep edin.
+3. Kit metinlerinin varsayılanları İngilizcedir (`label = "Loading"`, `loadingLabel = "Loading table"`…) — bir kit
+   bileşeni metin oluşturduğunda `useTranslations(...)` üzerinden çevrilmiş dizeler geçirin.
+4. Tailwind yardımcı sınıfları, kit bileşeni sınıflarına göre önceliklidir (kit,
+   `@layer theme, base, components, utilities` tanımlar ve kuralları `components` içinde yer alır) — yardımcı sınıfları
+   aralık ve yerleşim için kullanın, kit bileşenlerini yeniden renklendirmek için değil.
+5. Başlıklar: sayfa ve bölüm başlıkları için `.ci-heading` (Inter, harf aralığı yok); `.ci-dashboard-display`
+   (Instrument Serif) yalnızca hata sayfasındaki durum kodu gibi büyük ve seyrek görüntüleme metinleri için kullanılmalıdır.
+6. `tests/unit/dashboard-kit-sweep.test.ts`, kitin benimsenmesini denetler: `src/app` veya
+   `src/shared/components` altında Material ligatür span'i olmamalıdır; dashboard ağacında (`src/app/(dashboard)` ve
+   `src/shared/components`) ham `<select>`, `<textarea>` veya `<table>` bulunmamalı ve listelenen istisnalar (`Select`
+   adaptörünün yerel dalı, `RequestLoggerDetail`) dışında elle oluşturulmuş `role="dialog"` kullanılmamalıdır; buradaki
+   her ham `<button>` veya `<input>`, en fazla 3 satır üstünde sona eren ve gerekçeyle birlikte
+   `kit-exception:` içeren bir yoruma sahip olmalıdır; palet tonları ve `dark:` varyantları yalnızca testin listelediği
+   dosyalarda kullanılmalıdır.
+7. Bir PR'dan önce her iki temayı ve 390 px görünüm alanını doğrulayın (ekran görüntüleri);
    `tests/e2e/a11y.spec.ts` axe'i çalıştırır.
 
 ## 3. Ekran ekleme
@@ -97,7 +94,23 @@ kaldırır). Ardından: `git diff packages/ui-kit` çıktısını inceleyin; sa�
 kullanım ve uç nokta üzerinde her iki temada da görsel kontrol yapın; `npm run check:ui-kit-snapshot` ve
 `npm run test:vitest:ui` komutlarını çalıştırın ve PR'ı yukarı akış değişiklik günlüğüyle açın.
 
-## 6. Referans dizini
+## 6. README diyagramları
+
+Kökteki `README.md` dosyasına gömülen on iki diyagram (`docs/diagrams/*.svg`), kiti statik görsellere uygular. Elle çizilmez, üretilirler: `scripts/docs/gen-readme-*.mjs` altında 13 üretici dosyası (on iki diyagram ve `gen-readme-diagrams.mjs` sürücüsü), `tests/unit/docs/readme-*-svg.test.ts` altında da diyagram başına bir tane olmak üzere 12 güncellik testi vardır. Her test, commit edilmiş dosyayı üreticisinin çıktısıyla bayt bayt karşılaştırır (`test-unit` işi).
+
+- **Tokenlar.** `scripts/docs/readme-diagram-theme.mjs`, paleti `packages/ui-kit/src/ci-tokens.css` dosyasından kopyalar (bu dosyayla eşleşme `tests/unit/docs/readme-diagram-theme.test.ts` ile sabitlenir) ve kitin yazı tipleriyle metin rollerini tanımlar: vurgu metni için Instrument Serif, arayüz için Inter, sayılar ve kod için IBM Plex Mono. Bunlar `src/app/globals.css` dosyasının pano için yüklediği aynı `@fontsource` paketleridir. Açık değerler dosyada `:root` üzerinde, koyu değerler `prefers-color-scheme: dark` koşulu altında bulunur; böylece her görsel GitHub okuyucusunun renk düzenini izler.
+
+- **Yazı tipleri.** `scripts/docs/readme-fonts.mjs`, bu woff2 dosyalarını her diyagramın çizdiği gliflerle sınırlar ve `@font-face` aracılığıyla `data:` URI'leri olarak gömer. Böylece kitin yazı tipleri SVG içinde kalır. Yerel README görsel denemesi, işlemenin dış yazı tipi isteği yapmadığını kontrol eder. Alt kümeler yalnızca Latin karakterlerini içerir; sistem yazı tiplerine geri düşen simge gliflerine `SYMBOL_FALLBACKS` içinde tek tek izin verilir. Kapsanmayan diğer tüm glifler hata üretir.
+
+- **Yeniden üretim.** `npm run docs:readme-diagrams` on iki diyagramı README sırasıyla yeniden yazar ve her dosyanın boyutuyla bir satır yazdırır. Her üretici tek başına da çalışır (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` için `node --import tsx/esm` gerekir, çünkü sayılar `open-sse/config/freeModelCatalog.ts` içindeki güncel katalog yükleyicisinden gelir; katalog değişikliğinin CI etkisi `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` bölümündedir). Üretici ve SVG'yi birlikte commit edin.
+
+- **Kanıt.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` dosyayı yerel denemede işler (`<img>` etiketi, kısıtlayıcı bir `Content-Security-Policy` ve bir `image/svg+xml` yanıtı), açık ve koyu birer kare yakalar ve sayfanın dış yazı tipi isteklerini bildirir; sayı 0 olmalıdır.
+
+- **Bütçe.** Dosya başına 200 KB altında olmalıdır; her güncellik testi bunu doğrular. Her README görseli için kesin üst sınır 500 KB'tır (SVG studio doğrulayıcısının kuralı).
+
+- **Ortak metin, sayılar gate'ten.** Her üretici diyagram metnini bir `*_COPY` sabitinde tutar ya da güncel katalogdan oluşturur. Aynı metin hem çizilir hem yazı tipi alt kümesinin girdisi olur. Kanonik sayılar, `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) tarafından okunan `<text>` düğümlerinde kalır. Gate'in okuduğu diyagramların güncellik testleri, üretilen dosyada onun doğrulayıcılarını da çalıştırır. Koddan sapan bir sayı testi başarısız kılar: üreticideki sayıyı değil, gate'in okuduğu kaynağı düzeltin.
+
+## 7. Referans dizini
 
 - `src/app/globals.css` — token köprüsü, `.dark` geçersiz kılmaları, OmniRoute `@layer components` uzantıları
 - `packages/ui-kit/UPSTREAM.md` — sabitlenmiş yukarı akış commit'i ve lisans yetkilendirmesi; `packages/ui-kit/PATCHES.md`

@@ -52,7 +52,7 @@
 // with no live network. The exception is downloading an http(s) input image, which goes
 // through the guarded remote-image fetch (its own test seam is setPinnedFetchTestOverride).
 
-import { fetchUntrustedRemoteImage } from "@/shared/network/remoteImageFetch";
+import { fetchUntrustedRemoteImage } from "../../../utils/remoteMediaFetch.ts";
 import { resolveUcCredential } from "../../../executors/uc/credentials.ts";
 import { mintUcSessionToken } from "../../../executors/uc/clerkAuth.ts";
 import { UC_ORIGIN } from "../../../executors/uc/constants.ts";

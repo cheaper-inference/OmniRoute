@@ -115,7 +115,7 @@ Arena ELO 同步引擎（`src/lib/arenaEloSync.ts`）从 Arena AI 排行榜 API
 `activeSource`、`lastError` 和 `lastFailedAt`。每个排行榜条目都包含模型名称、厂商、
 ELO `score`、置信区间和投票数。
 
-排行榜类别与 OmniRoute 任务类别的映射关系如下：
+排行榜类别映射到 OmniRoute 任务类别：
 
 | Arena 排行榜 | OmniRoute 任务类别                                |
 | ------------ | ------------------------------------------------- |

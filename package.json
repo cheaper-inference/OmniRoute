@@ -261,7 +261,7 @@
     "check:quality-skill-contract": "node scripts/quality/check-skill-contract.mjs",
     "quality:scan": "node scripts/quality/run-all-gates.mjs",
     "quality:scan:fast": "node scripts/quality/run-all-gates.mjs --fast",
-    "audit:deps": "npm audit --audit-level=critical && (npm audit --audit-level=high || echo '::warning::high-severity advisories present (non-blocking)') && npm run audit:electron",
+    "audit:deps": "node scripts/quality/audit-dependencies.mjs",
     "audit:electron": "npm --prefix electron audit --audit-level=critical && (npm --prefix electron audit --audit-level=high || echo '::warning::electron high-severity advisories present (non-blocking)')",
     "typecheck:core": "tsc --pretty false -p tsconfig.typecheck-core.json",
     "typecheck:noimplicit:core": "tsc --pretty false -p tsconfig.typecheck-noimplicit-core.json",
@@ -489,7 +489,7 @@
     "opencode-ai": "1.18.34",
     "playwright-ctrf-json-reporter": "^0.1.0",
     "prettier": "^3.9.6",
-    "promptfoo": "0.123.0",
+    "promptfoo": "0.125.1",
     "size-limit": "^14.1.0",
     "subset-font": "^2.9.0",
     "tailwindcss": "^4.3.0",
@@ -548,7 +548,7 @@
     "postcss": "^8.5.18",
     "ip-address": "^10.7.4",
     "axios": "^1.20.0",
-    "qs": "^6.16.0",
+    "qs": "^6.16.1",
     "uuid": "^14.0.2",
     "form-data": "^4.0.6",
     "vite": "^8.3.3",
@@ -611,6 +611,12 @@
     "monaco-editor": {
       "dompurify": "^3.4.17"
     },
-    "csv-parse": "^7.0.2"
+    "csv-parse": "^7.0.2",
+    "@azure/identity": {
+      "@azure/msal-node": "^7.1.0"
+    },
+    "get-uri": {
+      "basic-ftp": "^6.2.3"
+    }
   }
 }

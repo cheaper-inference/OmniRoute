@@ -85,6 +85,7 @@ function isBodySmallEnoughToHedge(body: unknown): boolean {
     if (!Number.isFinite(estimated) || estimated > HEDGE_MAX_BODY_BYTES) return false;
     return jsonLength(body) <= HEDGE_MAX_BODY_BYTES;
   } catch {
+    // no-effect: serial dispatch remains available; unknown size must not enable a second copy.
     return false;
   }
 }
@@ -142,6 +143,7 @@ async function computeEarliestSkippedRateLimitedUntil(
       }));
     return getEarliestRateLimitedUntil(accounts);
   } catch {
+    // no-effect: keep the terminal failure; unavailable metadata cannot invent a retry deadline.
     return null;
   }
 }
@@ -183,6 +185,7 @@ async function computeEarliestSkippedModelLockUntil(
     }
     return earliestMs === null ? null : new Date(earliestMs).toISOString();
   } catch {
+    // no-effect: keep the terminal failure without claiming an unverified lockout expiry.
     return null;
   }
 }

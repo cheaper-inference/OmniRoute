@@ -782,7 +782,7 @@ bin/
    το `open-sse/mcp-server/schemas/tools.ts`).
 2. Αναθέστε τα κατάλληλα scope(s) στο `src/shared/constants/mcpScopes.ts`.
 3. Καταχωρίστε το εργαλείο στο `open-sse/mcp-server/server.ts`.
-4. Προσθέστε δοκιμές στο `open-sse/mcp-server/__tests__/`.
+4. Προσθέστε δοκιμές στο `tests/unit/`.
 5. Ενημερώστε το [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Προσθήκη νέου A2A skill
@@ -800,7 +800,7 @@ bin/
 - **Ονοματολογία**: αρχεία `camelCase` ή `kebab-case`, components `PascalCase`,
   σταθερές `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` παντού·
-  `no-explicit-any` = `warn` στα `open-sse/` και `tests/`, error αλλού.
+  `no-explicit-any` = `error` στα `open-sse/**/*.ts` και `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (παλαιά στάση). Προτιμήστε ρητούς τύπους αντί
   συμπερασμού για cross-module όρια.
 - **Βάση δεδομένων**: μην γράφετε ποτέ ακατέργαστη SQL σε routes ή handlers — χρησιμοποιείτε
@@ -830,8 +830,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Branches**: προθέματα `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Μην κάνετε ποτέ commit απευθείας στο `main`.
-- **Husky**: το pre-commit εκτελεί `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`· το pre-push εκτελεί `check:any-budget:t11` + `check:tracked-artifacts` (γρήγορες πύλες· εξαιρεί το `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

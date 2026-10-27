@@ -548,22 +548,22 @@ Základní cesta: `/api/tools/agent-bridge/`
 
 ### Průzkum Trae
 
-Trae je relativně nový AI asistent pro programování. Před implementací handleru:
+Trae je relativně nový asistent pro programování s AI. Před implementací obslužné rutiny:
 
-1. Identifikujte binární soubor/rozšíření v tržištích VS Code / JetBrains nebo samostatnou aplikaci
+1. Identifikujte binární soubor/rozšíření v tržištích VS Code / JetBrains nebo jako samostatnou aplikaci
 2. Zachyťte provoz pomocí mitmproxy, abyste zjistili hostitele API a strukturu endpointů
 3. Určete mechanismus autentizace
-4. Na základě smluvních podmínek a zjistitelnosti API rozhodněte, zda pokračovat
+4. Na základě smluvních podmínek a zjistitelnosti API rozhodněte, zda pokračovat, či nikoli
 
-Dokud nebude průzkum dokončen, karta Trae na řídicím panelu zobrazuje odznak „Probíhá průzkum“ s odkazem „Nahlásit životaschopnost“. Zástupný handler v `src/mitm/handlers/trae.ts` vyvolá strukturovanou chybu `Dosud neimplementováno`.
+Dokud nebude průzkum dokončen, karta Trae na řídicím panelu zobrazuje odznak „Probíhá průzkum“ s odkazem „Nahlásit životaschopnost“. Zástupná obslužná rutina v `src/mitm/handlers/trae.ts` vyvolá strukturovanou chybu `Not yet implemented`.
 
-### Agenti v backlogu (vyžadován MITM — bez podpory vlastní základní adresy URL)
+### Agenti v backlogu (vyžadováno MITM — bez podpory vlastní základní URL)
 
-Následující nástroje ve svých aktuálních verzích nepodporují vlastní základní adresy URL, takže MITM je jedinou možností zachytávání. Posouzení životaschopnosti zatím nebylo dokončeno:
+Následující nástroje ve svých aktuálních verzích nepodporují vlastní základní URL, takže MITM je jedinou možností zachytávání komunikace. Posouzení životaschopnosti stále probíhá:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — oddělené od Kiro IDE)
 - **Cowork** (desktopová aplikace Anthropic)
 
-Poznámka: GitHub Copilot CLI ≥v1.0.19 podporuje `COPILOT_PROVIDER_BASE_URL` — pro tento nástroj použijte místo MITM přímou konfiguraci.
+Poznámka: GitHub Copilot CLI ≥v1.0.19 podporuje `COPILOT_PROVIDER_BASE_URL` — pro tento nástroj použijte přímou konfiguraci namísto MITM.

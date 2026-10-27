@@ -778,7 +778,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Задайте подходящия обхват или обхвати в `src/shared/constants/mcpScopes.ts`.
 3. Регистрирайте инструмента в `open-sse/mcp-server/server.ts`.
-4. Добавете тестове в `open-sse/mcp-server/__tests__/`.
+4. Добавете тестове в `tests/unit/`.
 5. Актуализирайте [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Добавяне на ново A2A умение
@@ -796,7 +796,7 @@ bin/
 - **Именуване**: файлове в `camelCase` или `kebab-case`, компоненти в `PascalCase`,
   константи в `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` навсякъде;
-  `no-explicit-any` = `warn` в `open-sse/` и `tests/`, а другаде е грешка.
+  `no-explicit-any` = `error` в `open-sse/**/*.ts` и `tests/**/*.ts`.
 - **TypeScript**: `strict: false` (наследен подход). Предпочитайте явни типове пред
   извеждане на типове при границите между модулите.
 - **База данни**: никога не пишете необработен SQL в маршрути или обработчици — винаги използвайте
@@ -826,8 +826,7 @@ bin/
   `a2a`, `memory`, `skills`.
 - **Клонове**: префикси `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Никога не правете комити директно в `main`.
-- **Husky**: преди комит се изпълняват `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; преди изпращане се изпълняват `check:any-budget:t11` + `check:tracked-artifacts` (бързи проверки; изключва `test:unit`).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

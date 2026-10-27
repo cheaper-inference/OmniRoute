@@ -783,7 +783,7 @@ Mijoz so‘rovi
    `open-sse/mcp-server/schemas/tools.ts` faylini kengaytiring).
 2. `src/shared/constants/mcpScopes.ts` faylida tegishli qamrov(lar)ni belgilang.
 3. Vositani `open-sse/mcp-server/server.ts` faylida roʻyxatdan oʻtkazing.
-4. Testlarni `open-sse/mcp-server/__tests__/` ichiga qoʻshing.
+4. Testlarni `tests/unit/` ichiga qoʻshing.
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) faylini yangilang.
 
 ### Yangi A2A koʻnikmasini qoʻshish
@@ -801,7 +801,7 @@ Mijoz so‘rovi
 - **Nomlash**: fayllar `camelCase` yoki `kebab-case`, komponentlar `PascalCase`,
   konstantalar `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = hamma joyda `error`;
-  `no-explicit-any` = `open-sse/` va `tests/` ichida `warn`, boshqa joylarda `error`.
+  `no-explicit-any` = `open-sse/**/*.ts` va `tests/**/*.ts` ichida `error`.
 - **TypeScript**: `strict: false` (eski yondashuv). Modullararo chegaralarda
   tiplarni aniqlashdan koʻra aniq tiplarni afzal koʻring.
 - **Maʼlumotlar bazasi**: marshrutlar yoki ishlov beruvchilarda hech qachon bevosita SQL yozmang — har doim
@@ -830,8 +830,7 @@ Mijoz so‘rovi
   `a2a`, `memory`, `skills`.
 - **Tarmoqlar**: prefikslar `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`. Hech qachon bevosita `main` tarmogʻiga kommit qilmang.
-- **Husky**: kommitdan oldin `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` ishga tushadi; yuborishdan oldin `check:any-budget:t11` + `check:tracked-artifacts` ishga tushadi (tezkor tekshiruvlar; `test:unit` bundan mustasno).
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

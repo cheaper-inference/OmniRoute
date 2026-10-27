@@ -783,7 +783,7 @@ Vaata [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) ja pühendatud jaotist
    `open-sse/mcp-server/schemas/tools.ts`).
 2. Määra vastav(at) ulatused `src/shared/constants/mcpScopes.ts`.
 3. Registreeri tööriist `open-sse/mcp-server/server.ts`.
-4. Lisa testid `open-sse/mcp-server/__tests__/` alla.
+4. Lisa testid `tests/unit/` alla.
 5. Uuenda [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### Uue A2A oskuse lisamine
@@ -793,46 +793,45 @@ Vaata [A2A-SERVER.md § Uue oskuse lisamine](../frameworks/A2A-SERVER.md). Oskus
 
 ---
 
-## 11. Konventsioonid
+## 11. Kokkulepped
 
-- **Koodistiil**: 2-tühiku sisesed, topelt jutumärgid, 100 märgi laius, semikoolonid,
-  `es5` järelolevad kriipsud – kehtestatud Prettieri poolt `lint-staged` kaudu.
+- **Koodistiil**: 2-tühikuline taane, topeltjutumärgid, rea pikkus 100 märki, semikoolonid,
+  `es5` lõpu komad — jõustab Prettier `lint-staged` kaudu.
 - **Impordid**: välised → sisemised (`@/`, `@omniroute/open-sse`) → suhtelised.
-- **Nimetusolemine**: failid `camelCase` või `kebab-case`, komponendid `PascalCase`,
+- **Nimetamine**: failid `camelCase` või `kebab-case`, komponendid `PascalCase`,
   konstandid `UPPER_SNAKE`.
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = `error` kõikjal;
-  `no-explicit-any` = `warn` `open-sse/` ja `tests/`, mujal error.
-- **TypeScript**: `strict: false` (pärandatud positsioon). Eelista selgeid tüüpe
-  inferentsile ristmooduli piiridel.
-- **Andmebaas**: ei tohi kirjata toor SQL-i marsruutides ega käsitsejates – alati läbi
-  `src/lib/db/` moodulite. Mitte kunagi barrel-import – kasuta konkreetseid `src/lib/db/*` mooduleid otse.
-- **DB-üksuse tüüpimine (#3512)**: funktsioon, mis kirjutab või loeb DB tabeli
-  rea kuju, peaks võtma/tagastama nimega TS liidese, mis peegeldab selle tabeli
-  veerge 1:1, mitte `any` või kohalikku anonüümset tüüpi kutsel. Paiguta
-  liide funktsiooni kõrvale (nt. `export interface UsageEntry`_failis
-  `src/lib/usage/usageHistory.ts` enne `saveRequestUsage`), hoia üksikuid
-  välju valikuliste/mittevigastatuna, kui erinevad kirjutajad täidavad rida
-  järk-järgult, ja eelista `unknown` `any` asemel välja jaoks, mille kuju
-  erineb kutsujate vahel (dokumenteeritud väljal, nt. `UsageEntry.tokens`
-  aktsepteerib nii toor tarnija kujundust kui ka normaliseeritud kujundit). Kui
-  faili `any` loenduri jõuab nulli, lisa see
-  `check:any-budget:t11` lubatud nimekirja (`scripts/check/check-t11-any-budget.mjs`,
-  `maxAny: 0`), et see ei saaks tagasi areneda. See on esialgne konventsioon –
-  laiem "anonüümse `any` mittekasutamine" puhtustamine on iteratiivne ülejäänud
-  koodibaasi.
-- **Vead**: try/catch konkreetsete veatüüpidega, logi pino kontekstiga. Mitte kunagi
-  neelata vaikides vigu SSE vooludes; kasusta abort signaale puhastamiseks.
-- **Turvalisus**: mitte kunagi kasuta `eval()` / `new Function()` / kaudset eval. Valideeri
-  kõiki sisendeid Zodiga. Krüpteeri mandaadid puhkeseisundis (AES-256-GCM). Hoia
-  `src/shared/constants/upstreamHeaders.ts` keelunimekiri ühilduvaks
-  puhastus/valideerimiskihiga.
-- **Kommid**: Conventional Commits – `feat(scope): teema`. Lubatud ulatused:
+  `no-explicit-any` = `error` kaustades `open-sse/**/*.ts` ja `tests/**/*.ts`.
+- **TypeScript**: `strict: false` (pärandkoodi käsitlus). Moodulitevahelistel piiridel eelista
+  tüübijäreldusele eksplitsiitseid tüüpe.
+- **Andmebaas**: ära kunagi kirjuta marsruutides ega käitlejates toorest SQL-i — kasuta alati
+  mooduleid kataloogis `src/lib/db/`. Ära kunagi kasuta koondimporti — kasuta konkreetseid `src/lib/db/*` mooduleid otse.
+- **Andmebaasiüksuste tüüpimine (#3512)**: funktsioon, mis kirjutab andmebaasitabelisse või loeb sealt
+  rea kuju, peaks võtma/tagastama nimega TS-liidese, mis peegeldab selle tabeli
+  veerge suhtes 1:1, mitte kasutama `any` või kutsekohas tekstisisest anonüümset tüüpi. Paiguta
+  liides funktsiooni kõrvale (nt `export interface UsageEntry` failis
+  `src/lib/usage/usageHistory.ts` enne `saveRequestUsage`), hoia üksikud
+  väljad valikulised/nullitavad, kui erinevad kirjutajad täidavad rida
+  järk-järgult, ning eelista tüüpi `unknown` tüübile `any` väljal, mille kuju
+  on kutsujate lõikes erinev (dokumenteeri see väljal, nt `UsageEntry.tokens`
+  aktsepteerib nii teenusepakkuja toorkujul kasutusandmeid kui ka normaliseeritud kuju). Kui faili
+  `any` arv jõuab sel viisil nulli, lisa see
+  `check:any-budget:t11` lubatud loendisse (`scripts/check/check-t11-any-budget.mjs`,
+  `maxAny: 0`), et vältida tagasilangust. See on esimese etapi kokkulepe —
+  laiem „anonüümset `any` tüüpi ei kasutata” puhastus toimub iteratiivselt kogu ülejäänud
+  koodibaasis.
+- **Vead**: kasuta try/catch-plokke konkreetsete veatüüpidega ja logi pino kontekstiga. Ära
+  kunagi neela SSE-voogudes vigu vaikides alla; kasuta puhastamiseks katkestussignaale.
+- **Turvalisus**: ära kunagi kasuta `eval()` / `new Function()` / kaudset eval'i. Valideeri
+  kõik sisendid Zodiga. Krüpteeri talletatud autentimisandmed (AES-256-GCM). Hoia
+  `src/shared/constants/upstreamHeaders.ts` keeluloend kooskõlas
+  puhastus-/valideerimiskihiga.
+- **Kommitid**: Conventional Commits — `feat(scope): subject`. Lubatud skoobid:
   `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`,
   `a2a`, `memory`, `skills`.
 - **Harud**: prefiksid `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
-  `chore/`. Mitte kunagi kommi otse `main`.
-- **Husky**: pre-commit käivitab `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push käivitab `check:any-budget:t11` + `check:tracked-artifacts` (kiired väravad; välistab `test:unit`).
+  `chore/`. Ära kunagi kommiti otse harusse `main`.
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

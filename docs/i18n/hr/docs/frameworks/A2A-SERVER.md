@@ -154,20 +154,20 @@ curl -X POST http://localhost:20128/a2a \
 
 OmniRoute izlaže 6 A2A vještina povezanih u `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Svaki modul vještine nalazi se u `src/lib/a2a/skills/`.
 
-| Vještina              | ID                   | Opis                                                                                                                                                         | Oznake                        | Primjeri                                |
-| :-------------------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :-------------------------------------- |
-| Pametno usmjeravanje  | `smart-routing`      | Usmjerava upit kroz optimalnog pružatelja usluga/kombinaciju koristeći OmniRouteov mehanizam kombinacija + bodovanje                                         | usmjeravanje, pružatelji      | „Usmjeri ovaj upit kroz najbolji model" |
-| Upravljanje kvotama   | `quota-management`   | Izvještava o stanju kvote po pružatelju usluga, pomaže pozivateljima odlučiti kada prigušiti/prebaciti                                                       | kvota, pružatelji             | „Provjeri kvotu za anthropic"           |
-| Otkrivanje pružatelja | `provider-discovery` | Navodi instalirane pružatelje usluga s mogućnostima, oznakama besplatne razine i OAuth statusom                                                              | pružatelji, otkrivanje        | „Koji su pružatelji usluga dostupni?"   |
-| Analiza troškova      | `cost-analysis`      | Procjenjuje trošak zahtjeva/razgovora na temelju kataloga + nedavne upotrebe                                                                                 | trošak, upotreba              | „Procijeni trošak ovog razgovora"       |
-| Izvješće o stanju     | `health-report`      | Objedinjuje stanja circuit breakera, cooldowna i lockouta po pružatelju usluga                                                                               | zdravlje, otpornost           | „Prikaži stanje svih pružatelja usluga" |
-| Popis mogućnosti      | `list-capabilities`  | Vraća potpuni katalog Agent Skills s 45 unosa (23 API + 21 CLI + 1 konfiguracija) kao markdown tablicu sa sirovim SKILL.md URL-ovima za ubacivanje konteksta | katalog, otkrivanje, vještine | „Navedi sve OmniRoute mogućnosti"       |
+| Vještina              | ID                   | Opis                                                                                                                                                           | Oznake                        | Primjeri                                   |
+| :-------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :----------------------------------------- |
+| Pametno usmjeravanje  | `smart-routing`      | Usmjerava upit putem optimalnog pružatelja/kombinacije koristeći OmniRouteov mehanizam za kombiniranje i bodovanje                                             | usmjeravanje, pružatelji      | "Usmjeri ovaj upit putem najboljeg modela" |
+| Upravljanje kvotama   | `quota-management`   | Izvještava o stanju kvote za svakog pružatelja i pomaže pozivateljima odlučiti kada ograničiti zahtjeve ili promijeniti pružatelja                             | kvote, pružatelji             | "Provjeri kvotu za anthropic"              |
+| Otkrivanje pružatelja | `provider-discovery` | Navodi instalirane pružatelje s njihovim mogućnostima, oznakama besplatne razine i OAuth statusom                                                              | pružatelji, otkrivanje        | "Koji su pružatelji dostupni?"             |
+| Analiza troškova      | `cost-analysis`      | Procjenjuje trošak zahtjeva/razgovora na temelju kataloga i nedavne uporabe                                                                                    | trošak, uporaba               | "Procijeni trošak ovog razgovora"          |
+| Izvješće o stanju     | `health-report`      | Objedinjuje stanje prekidača strujnog kruga, razdoblja čekanja i zaključavanja za svakog pružatelja                                                            | stanje, otpornost             | "Prikaži stanje svih pružatelja"           |
+| Popis mogućnosti      | `list-capabilities`  | Vraća potpuni katalog od 45 Agent Skills stavki (23 API + 21 CLI + 1 konfiguracijska) kao markdown tablicu s izvornim SKILL.md URL-ovima za umetanje konteksta | katalog, otkrivanje, vještine | "Navedi sve mogućnosti sustava OmniRoute"  |
 
-> Agent Card treba držati usklađenim sa živim katalogom od 376 pružatelja usluga; brojevi pružatelja i metapodaci o besplatnom pristupu/pristupu bez autentifikacije dolaze iz registra tijekom izvođenja.
+> Karticu agenta treba održavati usklađenom s aktualnim katalogom od 376 pružatelja; broj pružatelja i metapodaci o besplatnom pristupu bez autentifikacije preuzimaju se iz registra tijekom izvođenja.
 
-### Detalji vještine `list-capabilities`
+### Pojedinosti o vještini `list-capabilities`
 
-Vještina `list-capabilities` posebno je korisna za vanjske agente koji trebaju otkriti što OmniRoute izlaže prije slanja API poziva. Vraća artefakt strukturirane markdown tablice:
+Vještina `list-capabilities` posebno je korisna vanjskim agentima koji trebaju otkriti što OmniRoute izlaže prije slanja API poziva. Vraća strukturirani artefakt u obliku markdown tablice:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ Vještina `list-capabilities` posebno je korisna za vanjske agente koji trebaju 
 ...
 ```
 
-Svaki redak uključuje stupac `rawUrl` kako bi agenti mogli odmah dohvatiti cijeli SKILL.md. Polje `metadata.totalSkills` odražava veličinu kataloga (danas 45). Implementacija: `src/lib/a2a/skills/listCapabilities.ts`. Vidi također [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Svaki redak uključuje stupac `rawUrl` kako bi agenti mogli odmah dohvatiti cijeli SKILL.md. Polje `metadata.totalSkills` odražava veličinu kataloga (trenutačno 45). Implementacija: `src/lib/a2a/skills/listCapabilities.ts`. Pogledajte i [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -199,11 +199,11 @@ JSON-RPC krajnja točka `/a2a` je kanonična A2A ulazna točka. Dolje navedene R
 
 ## Dodavanje nove vještine
 
-1. **Stvori datoteku vještine:** `src/lib/a2a/skills/<your-skill>.ts`
+1. **Izradite datoteku vještine:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   Izvezi asinkronu funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Slijedi oblik postojećih vještina poput `smartRouting.ts`.
+   Izvezite asinkronu funkciju `(task: A2ATask) => Promise<{ artifacts, metadata }>`. Slijedite strukturu postojećih vještina, kao što je `smartRouting.ts`.
 
-2. **Registriraj rukovatelj:** u `src/lib/a2a/taskExecution.ts`, dodaj unos u `A2A_SKILL_HANDLERS`:
+2. **Registrirajte rukovatelj:** u datoteci `src/lib/a2a/taskExecution.ts` dodajte unos u `A2A_SKILL_HANDLERS`:
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
@@ -215,21 +215,21 @@ JSON-RPC krajnja točka `/a2a` je kanonična A2A ulazna točka. Dolje navedene R
    };
    ```
 
-3. **Izloži u Agent Cardu:** u `src/app/.well-known/agent.json/route.ts`, dodaj u niz `skills`:
+3. **Objavite u kartici agenta:** u datoteci `src/app/.well-known/agent.json/route.ts` dodajte stavku u polje `skills`:
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Kratki opis usmjeren na namjenu",
-     "tags": ["routing", "quota"],
+     "name": "Vaša vještina",
+     "description": "Kratak opis usmjeren na namjeru",
+     "tags": ["usmjeravanje", "kvota"],
      "examples": ["Primjer poziva na prirodnom jeziku"]
    }
    ```
 
-4. **Napiši testove:** `tests/unit/a2a-<your-skill>.test.ts`. Pokrij sretan put + put s greškom.
+4. **Napišite testove:** `tests/unit/a2a-<your-skill>.test.ts`. Obuhvatite uspješan tijek i tijek s pogreškom.
 
-5. **Dokumentiraj** novu vještinu u tablici `Dostupne vještine` ove datoteke.
+5. **Dokumentirajte** novu vještinu u tablici `Available Skills` ove datoteke.
 
 ---
 

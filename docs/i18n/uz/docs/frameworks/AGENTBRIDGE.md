@@ -536,22 +536,22 @@ Toʻliq OpenAPI sxemalari: `docs/openapi.yaml` → `AgentBridge` tegi.
 
 ### Trae’ni o‘rganish
 
-Trae — nisbatan yangi AI kod yozish yordamchisi. Handler’ni amalga oshirishdan oldin:
+Trae — nisbatan yangi sun’iy intellektga asoslangan dasturlash yordamchisi. Ishlov beruvchini amalga oshirishdan oldin:
 
-1. VS Code / JetBrains marketpleyslarida yoki mustaqil ilova sifatida binar fayl/kengaytmani aniqlash
-2. API hostlari va endpoint tuzilmalarini aniqlash uchun mitmproxy yordamida trafikni yozib olish
-3. Autentifikatsiya mexanizmini aniqlash
-4. TOS va API’ni aniqlash imkoniyatiga asoslanib, davom etish yoki etmaslikni baholash
+1. VS Code / JetBrains marketpleyslarida yoki mustaqil ilova sifatida binar fayl/kengaytmani aniqlang
+2. API xostlari va endpoint tuzilmalarini aniqlash uchun trafikni mitmproxy orqali yozib oling
+3. Autentifikatsiya mexanizmini aniqlang
+4. Foydalanish shartlari va API’ni aniqlash imkoniyatiga asoslanib, davom etish yoki etmaslik haqida qaror qabul qiling
 
-O‘rganish yakunlangunga qadar boshqaruv panelidagi Trae kartasida "Yaroqliligini bildirish" havolasi bilan "O‘rganilmoqda" belgisi ko‘rsatiladi. `src/mitm/handlers/trae.ts` dagi handler zagotovkasi tuzilmaviy `Hali amalga oshirilmagan` xatosini chiqaradi.
+O‘rganish yakunlangunga qadar boshqaruv panelidagi Trae kartasida «Tekshirilmoqda» belgisi va «Yaroqlilik haqida xabar berish» havolasi ko‘rsatiladi. `src/mitm/handlers/trae.ts` manzilidagi ishlov beruvchi zaglushkasi strukturalangan `Not yet implemented` xatosini chiqaradi.
 
-### Rejadagi agentlar (MITM talab qilinadi — maxsus asosiy URL’ni qo‘llab-quvvatlamaydi)
+### Navbatdagi agentlar (MITM talab qilinadi — maxsus asosiy URL qo‘llab-quvvatlanmaydi)
 
-Quyidagi vositalarning joriy versiyalari maxsus asosiy URL’larni qo‘llab-quvvatlamaydi, shu sababli MITM trafikni tutib olishning yagona usuli hisoblanadi. Yaroqlilikni baholash kutilmoqda:
+Quyidagi vositalarning joriy versiyalari maxsus asosiy URL manzillarini qo‘llab-quvvatlamaydi, shu sababli MITM tutib qolishning yagona yo‘li hisoblanadi. Yaroqlilikni baholash kutilmoqda:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — Kiro IDE’dan alohida)
-- **Cowork** (Anthropic desktop)
+- **Cowork** (Anthropic ish stoli ilovasi)
 
-Eslatma: GitHub Copilot CLI ≥v1.0.19 `COPILOT_PROVIDER_BASE_URL`’ni qo‘llab-quvvatlaydi — bu vosita uchun MITM o‘rniga bevosita konfiguratsiyadan foydalaning.
+Eslatma: GitHub Copilot CLI ≥v1.0.19 `COPILOT_PROVIDER_BASE_URL`’ni qo‘llab-quvvatlaydi — ushbu vosita uchun MITM o‘rniga to‘g‘ridan-to‘g‘ri konfiguratsiyadan foydalaning.

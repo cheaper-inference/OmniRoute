@@ -110,7 +110,7 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ---
 
-## اسکور کیسے کام کرتے ہیں
+## اسکورز کیسے کام کرتے ہیں
 
 ### ماخذ: Arena AI لیڈر بورڈ
 
@@ -125,7 +125,7 @@ Hugging Face datasets-server پر موجود سرکاری `lmarena-ai/leaderboar
 
 لیڈر بورڈ کیٹیگریز کا نقشہ OmniRoute ٹاسک کیٹیگریز پر اس طرح بنتا ہے:
 
-| Arena لیڈر بورڈ | OmniRoute ٹاسک کیٹیگریز                           |
+| Arena لیڈر بورڈ | OmniRoute ٹاسک زمرے                               |
 | --------------- | ------------------------------------------------- |
 | `text`          | `default`، `review`، `documentation`، `debugging` |
 | `code`          | `coding`                                          |

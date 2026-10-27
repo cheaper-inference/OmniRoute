@@ -490,8 +490,8 @@ Isso processa:
 | ----------------------------- | -------------------------------------------------------------- |
 | `providerRegistry.ts`         | Registro de modelos de chat sobre o catálogo de 376 provedores |
 | `providerModels.ts`           | Aliases de modelos, mapeamento de formatos                     |
-| `constants.ts`                | Timeouts, limites, códigos de status                           |
-| `defaultThinkingSignature.ts` | Assinatura de pensamento padrão do Claude                      |
+| `constants.ts`                | Tempos limite, limites, códigos de status                      |
+| `defaultThinkingSignature.ts` | Assinatura de raciocínio padrão do Claude                      |
 | `modelStrip.ts` (em services) | Remoção de campos por provedor                                 |
 
 ### Esquema do Registro de Provedores
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-A validação com Zod no carregamento do módulo garante que todas as configurações de provedores sejam válidas.
+A validação com Zod durante o carregamento do módulo garante que todas as configurações de provedores sejam válidas.
 
 ---
 

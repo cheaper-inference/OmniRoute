@@ -545,18 +545,18 @@ Skema OpenAPI penuh: `docs/openapi.yaml` → tag `AgentBridge`.
 
 ## §8 Hala Tuju
 
-### Siasatan Trae
+### Penyiasatan Trae
 
 Trae ialah pembantu pengekodan AI yang agak baharu. Sebelum melaksanakan pengendali:
 
-1. Kenal pasti binari/sambungan dalam gedung VS Code / JetBrains atau sebagai aplikasi kendiri
+1. Kenal pasti binari/sambungan dalam pasaran VS Code / JetBrains atau sebagai aplikasi kendiri
 2. Tangkap trafik dengan mitmproxy untuk mengenal pasti hos API dan bentuk titik akhir
 3. Tentukan mekanisme pengesahan
-4. Nilai teruskan/hentikan berdasarkan TOS dan kebolehkesanan API
+4. Nilai sama ada untuk diteruskan atau tidak berdasarkan TOS dan kebolehkesanan API
 
-Sehingga siasatan selesai, kad Trae dalam papan pemuka memaparkan lencana "Sedang Disiasat" dengan pautan "Laporkan kebolehlaksanaan". Rangka pengendali di `src/mitm/handlers/trae.ts` melontarkan ralat berstruktur `Belum dilaksanakan`.
+Sehingga penyiasatan selesai, kad Trae dalam papan pemuka memaparkan lencana "Sedang Disiasat" dengan pautan "Laporkan kebolehlaksanaan". Stub pengendali di `src/mitm/handlers/trae.ts` melontarkan ralat berstruktur `Not yet implemented`.
 
-### Ejen tertunggak (MITM diperlukan — tiada sokongan URL asas tersuai)
+### Ejen tunggakan (MITM diperlukan — tiada sokongan URL asas tersuai)
 
 Alat berikut tidak menyokong URL asas tersuai dalam versi semasa, menjadikan MITM satu-satunya laluan pemintasan. Penilaian kebolehlaksanaan masih belum selesai:
 

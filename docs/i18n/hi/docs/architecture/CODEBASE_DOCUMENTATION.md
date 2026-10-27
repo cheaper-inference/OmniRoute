@@ -783,7 +783,7 @@ bin/
    `open-sse/mcp-server/schemas/tools.ts` को विस्तारित करें)।
 2. `src/shared/constants/mcpScopes.ts` में उपयुक्त स्कोप निर्दिष्ट करें।
 3. टूल को `open-sse/mcp-server/server.ts` में पंजीकृत करें।
-4. `open-sse/mcp-server/__tests__/` के अंतर्गत परीक्षण जोड़ें।
+4. `tests/unit/` के अंतर्गत परीक्षण जोड़ें।
 5. [MCP-SERVER.md](../frameworks/MCP-SERVER.md) को अपडेट करें।
 
 ### नया A2A कौशल जोड़ें
@@ -801,7 +801,7 @@ bin/
 - **नामकरण**: फ़ाइलें `camelCase` या `kebab-case`, कॉम्पोनेंट `PascalCase`,
   कॉन्स्टेंट `UPPER_SNAKE`।
 - **ESLint**: `no-eval`, `no-implied-eval`, `no-new-func` = हर जगह `error`;
-  `no-explicit-any` = `open-sse/` और `tests/` में `warn`, अन्यत्र `error`।
+  `no-explicit-any` = `open-sse/**/*.ts` और `tests/**/*.ts` में `error`।
 - **TypeScript**: `strict: false` (विरासती स्थिति)। क्रॉस-मॉड्यूल सीमाओं के लिए
   अनुमानित प्रकारों की तुलना में स्पष्ट प्रकारों को प्राथमिकता दें।
 - **डेटाबेस**: रूट या हैंडलर में कभी भी रॉ SQL न लिखें — हमेशा
@@ -830,8 +830,7 @@ bin/
   `a2a`, `memory`, `skills`।
 - **ब्रांच**: प्रीफ़िक्स `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`। कभी भी सीधे `main` में कमिट न करें।
-- **Husky**: प्री-कमिट में `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11` चलते हैं; प्री-पुश में `check:any-budget:t11` + `check:tracked-artifacts` चलते हैं (त्वरित गेट; `test:unit` को शामिल नहीं करते)।
+- **Husky**: [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

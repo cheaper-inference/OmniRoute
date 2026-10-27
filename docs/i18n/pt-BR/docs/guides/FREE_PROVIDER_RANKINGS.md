@@ -172,13 +172,13 @@ A sincronização é executada **ativada por padrão**:
 - Ela é **não bloqueante e nunca fatal** — se a busca na origem falhar, o OmniRoute continua
   funcionando e os rankings simplesmente exibem os últimos dados válidos (ou um estado vazio).
 
-Duas variáveis de ambiente a controlam (documentadas em
+Duas variáveis de ambiente controlam esse comportamento (documentadas em
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Variável                  | Padrão        | Finalidade                                                   |
-| ------------------------- | ------------- | ------------------------------------------------------------ |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Defina como `false` para desativar a sincronização de saída. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Intervalo de sincronização, em segundos.                     |
+| Variável                  | Padrão        | Finalidade                                                  |
+| ------------------------- | ------------- | ----------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Defina como `false` para desativar a sincronização externa. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Intervalo de sincronização, em segundos.                    |
 
 ### Sincronização manual / status / limpeza
 

@@ -271,7 +271,7 @@
     },
     "tests/unit/dashboard/material-icons-self-hosted.test.ts": {
       "replacement": "tests/unit/material-symbols-removed.test.ts",
-      "reason": "KEA-7886 F4 (commit 2fc4c91e, Keak CI UI Kit migration): the Material Symbols icon font and its npm package were dropped from the dashboard, so the #3695 guard that pinned the self-hosted font import no longer has a subject. The same commit added tests/unit/material-symbols-removed.test.ts, which pins the inverse contract (no material-symbols import, no Google Fonts CDN preconnect) and is the replacement for this guard."
+      "reason": "KEA-7886 F4 (commit 2fc4c91e, Keak CI UI Kit migration): the Material Symbols icon font and its npm package were dropped from the dashboard, so the #3695 guard that pinned the self-hosted font import no longer has a subject. The same commit added tests/unit/material-symbols-removed.test.ts, which pins the inverse contract (no material-symbols import, no Google Fonts CDN preconnect) and is the replacement for this guard. Release-green base-red #17219 (2026-10-24)."
     },
     "tests/unit/design-grid-background.test.ts": {
       "replacement": "tests/unit/design-kit-bridge.test.ts",

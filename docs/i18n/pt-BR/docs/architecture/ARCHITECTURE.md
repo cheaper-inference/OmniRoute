@@ -1102,11 +1102,11 @@ compatibilidade legada. O contrato de runtime atual utiliza:
 - migrações de esquema do SQLite e hooks de atualização automática na inicialização
 - caminho de compatibilidade para migração de JSON legado → SQLite
 
-## 6) Proteção contra SSRF / URLs de Saída
+## 6) Proteção contra SSRF / URLs de saída
 
-- `src/shared/network/outboundUrlGuard.ts` bloqueia todos os URLs de destino privados, de loopback ou link-local antes que cheguem aos executores dos provedores
-- As rotas de descoberta e validação de modelos de provedores usam `src/shared/network/safeOutboundFetch.ts`, que aplica a proteção antes de cada solicitação de saída
-- Erros da proteção são expostos como `URL_GUARD_BLOCKED` com HTTP 422 e registrados na trilha de auditoria de conformidade por meio de `providerAudit.ts`
+- `BaseExecutor.assertOutboundUrlAllowed` (`open-sse/executors/base.ts`) aplica `src/shared/network/outboundUrlGuard.ts` às solicitações de chat enviadas por meio de `BaseExecutor.execute()`. No modo somente público (`OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` com a opção de endereços privados desativada), ela bloqueia hosts privados e de loopback, além de 169.254.0.0/16; em todos os outros modos, ela bloqueia hosts de metadados de nuvem. Ela verifica o nome do host ou o literal de IP conforme fornecido, antes de qualquer consulta DNS. Provedores locais integrados não passam por essa verificação.
+- As rotas de descoberta e validação de modelos dos provedores usam `src/shared/network/safeOutboundFetch.ts`, que aplica a proteção antes de cada solicitação de saída
+- Os erros da proteção são apresentados como `URL_GUARD_BLOCKED` com HTTP 503 (`getSafeOutboundFetchErrorStatus`; a rota de descoberta de modelos retorna 400), e bloqueios reais de SSRF durante a validação são registrados na trilha de auditoria como eventos `provider.validation.ssrf_blocked`
 
 ## Observabilidade e Sinais Operacionais
 
@@ -1157,7 +1157,7 @@ Variáveis de ambiente usadas ativamente pelo código:
 4. O comportamento da nuvem depende da configuração correta de `NEXT_PUBLIC_BASE_URL` e da acessibilidade do endpoint de nuvem.
 5. O diretório `open-sse/` é publicado como o **pacote de workspace npm** `@omniroute/open-sse`. O código-fonte o importa por meio de `@omniroute/open-sse/...` (resolvido por `transpilePackages` do Next.js). Os caminhos de arquivo neste documento continuam usando o nome de diretório `open-sse/` para manter a consistência.
 6. Os gráficos no painel usam **Recharts** (baseado em SVG) para visualizações analíticas acessíveis e interativas (gráficos de barras de uso de modelos, tabelas de detalhamento por provedor com taxas de sucesso).
-7. Os testes E2E usam **Playwright** (`tests/e2e/`) e são executados por meio de `npm run test:e2e`. Os testes unitários usam o **executor de testes do Node.js** (`tests/unit/`) e são executados por meio de `npm run test:unit`. O código-fonte em `src/` é **TypeScript** (`.ts`/`.tsx`); o workspace `open-sse/` permanece em JavaScript (`.js`).
+7. Os testes E2E usam **Playwright** (`tests/e2e/`) e são executados por meio de `npm run test:e2e`. Os testes unitários usam o **executor de testes do Node.js** (`tests/unit/`) e são executados por meio de `npm run test:unit`. O código-fonte em `src/` é **TypeScript** (`.ts`/`.tsx`); o workspace `open-sse/` permanece em TypeScript (`.ts`).
 8. A página de configurações está organizada em 7 abas: Geral, Aparência, IA, Segurança, Roteamento, Resiliência e Avançado. A página Resiliência configura apenas a fila de requisições, o período de espera da conexão, o disjuntor do provedor e o comportamento de espera pelo término do período de espera; o estado do runtime do disjuntor em tempo real é exibido na página Integridade.
 9. A estratégia **Context Relay** (`context-relay`) é dividida em duas camadas: `combo.ts` decide se uma transferência deve ser gerada, e `chat.ts` injeta a transferência após a resolução da conta. Os dados de transferência ficam na tabela SQLite `context_handoffs`. Essa divisão é intencional porque somente `chat.ts` sabe se a conta efetivamente mudou.
 10. A **aplicação de proxy** agora é abrangente: `tokenHealthCheck.ts` resolve o proxy por conexão, `/api/providers/validate` usa `runWithProxyContext`, e `proxyFetch.ts` usa `undici.fetch()` para manter a compatibilidade do dispatcher no Node 22.

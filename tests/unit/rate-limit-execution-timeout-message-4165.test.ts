@@ -14,6 +14,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { setImmediate as nextTurn } from "node:timers/promises";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-rl-execution-timeout-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -110,7 +111,7 @@ test("#4165 execution expiration is local and accurately named", async () => {
   );
 });
 
-test("execution outliving the queue-wait budget completes (opencode-go 504 regression)", async () => {
+test("execution outliving the queue-wait budget completes (opencode-go 504 regression)", async (t) => {
   // Regression: the queue-wait budget (maxWaitMs) used to be passed to
   // Bottleneck as the execution `expiration`, so a legitimate execution that
   // outlived it (e.g. glm-5.3-flash thinking for >45s before first bytes) was
@@ -125,20 +126,58 @@ test("execution outliving the queue-wait budget completes (opencode-go 504 regre
     maxWaitMs: 40, // queue-wait budget: 40ms
     executionMaxWaitMs: 5000, // execution backstop: 5s
   });
-  rateLimitManager.enableRateLimitProtection("conn-slow-exec");
+  // Keep Bottleneck's real dispatch/expiration behavior, but do not charge
+  // instrumentation or a busy event loop against the 40ms queue budget.
+  t.mock.timers.enable({ apis: ["Date", "setTimeout", "setInterval"] });
+  try {
+    rateLimitManager.enableRateLimitProtection("conn-slow-exec");
+    let startedAt: number | undefined;
+    let settled = false;
+    const result = rateLimitManager.withRateLimit(
+      "openai",
+      "conn-slow-exec",
+      "gpt-4o",
+      async () => {
+        startedAt = Date.now();
+        await wait(300); // outlives maxWaitMs, well within the execution backstop
+        return "ok";
+      }
+    );
+    void result.then(
+      () => (settled = true),
+      () => (settled = true)
+    );
 
-  const result = await rateLimitManager.withRateLimit(
-    "openai",
-    "conn-slow-exec",
-    "gpt-4o",
-    async () => {
-      await wait(300); // outlives maxWaitMs, well within the execution backstop
-      return "ok";
+    // Bottleneck yields through zero-delay timers before dispatch. Give each
+    // turn one logical millisecond, still within the unchanged queue budget.
+    for (let elapsed = 0; startedAt === undefined && !settled && elapsed < 40; elapsed += 1) {
+      t.mock.timers.tick(1);
+      await nextTurn();
     }
-  );
-  assert.equal(result, "ok", "execution must not be killed by the queue-wait budget");
-});
+    assert.notEqual(
+      startedAt,
+      undefined,
+      "the empty limiter must dispatch within its queue budget"
+    );
 
+    t.mock.timers.tick(299);
+    await nextTurn();
+    assert.equal(settled, false, "the running job must survive the 40ms queue-wait budget");
+
+    // Complete the 300ms execution and drain Bottleneck's asynchronous cleanup
+    // before the unchanged execution backstop. Never run all pending timers:
+    // that would also fire the backstop and the reservoir heartbeat.
+    for (let elapsed = 299; !settled && elapsed < 5000; elapsed += 1) {
+      t.mock.timers.tick(1);
+      await nextTurn();
+    }
+    assert.equal(settled, true, "the job must complete within its execution backstop");
+    assert.equal(await result, "ok", "execution must not be killed by the queue-wait budget");
+  } finally {
+    // The shared afterEach disconnects real Bottleneck instances using timers.
+    t.mock.timers.reset();
+  }
+});
 
 test("#4165 a job that completes within the execution expiration is unaffected", async () => {
   await rateLimitManager.applyRequestQueueSettings({

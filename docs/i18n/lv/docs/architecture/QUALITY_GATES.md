@@ -15,271 +15,338 @@ replikācijas plānu skatiet
 
 ---
 
-## Pārbaužu inventārs un izpildes profili
+## Vārtu uzskaite un izpildes profili
 
 ### Kandidātu pielaide
 
-Gan CI, gan Quality Gates darbplūsma izvada stabilu spriedumu: `Gate / CI` un
+Gan CI, gan Quality Gates darbplūsma izdod stabilu spriedumu: `Gate / CI` un
 `Gate / Quality`. To versijotā pielaides politika uzskaita katru augšupējo uzdevumu
-kā obligātu vai konsultatīvu. Piemērojamam obligātajam uzdevumam jābeidzas sekmīgi:
-trūkstoši, atcelti, izlaisti, gaidoši un nezināmi rezultāti nevar apstiprināt PASS. Derīga
-tikai dokumentācijas vai tikai kataloga klasifikācija var padarīt koda izpildes ceļu nepiemērojamu;
-melnraksta PR nav pieņemams kandidāts. `hotfix` etiķete neatceļ pierādījumu prasību.
+kā obligātu vai konsultatīvu. Piemērojamam obligātam uzdevumam jābūt veiksmīgam:
+trūkstoši, atcelti, izlaisti, gaidoši un nezināmi rezultāti nevar apstiprināt PASS.
+Derīga klasifikācija „tikai dokumentācija” vai „tikai katalogs” var padarīt koda
+izpildes zaru nepiemērojamu; PR melnraksts netiek uzskatīts par pieņemtu kandidātu.
+Etiķete `hotfix` neatceļ pierādījumu prasību.
 
-Abas darbplūsmas aptver PR uz main/release zariem, izmaiņu nosūtīšanu uz `main`, manuālu palaišanu
-un apvienošanas grupas notikumus. Nosūtīšana, manuāla palaišana un apvienošanas grupa izpilda pilno atlasi. Izmaiņu nosūtīšana uz
-`release/**` tās nepalaiž (2026-10-18): katrai izmaiņai matrica jau tika izpildīta tās PR ietvaros,
-bet apvienotā kombinācija ir Release-Green uzdevums (`docs/ops/RUNNER_BOX.md` → Hosted izpildes ceļš). Atzarojumi
-un apvienošanas grupas izmanto mitinātus izpildītājus uzdevumiem, kuri citādi izvēlētos pašmitinātus
-izpildītājus; pirms ieviešanas jāpārbauda pietiekama mitinātā infrastruktūras jauda.
+Abas darbplūsmas aptver PR uz galvenajiem/laidiena zariem, izmaiņu nosūtīšanu uz
+`main`, manuālu palaišanu un sapludināšanas grupas notikumus. Izmaiņu nosūtīšanas,
+manuālās palaišanas un sapludināšanas grupas gadījumā tiek izpildīta pilnā atlase.
+Izmaiņu nosūtīšana uz `release/**` tās nepalaiž (2026-10-18): katrai izmaiņai matrica
+jau tika izpildīta tās PR, savukārt sapludinātās kombinācijas pārbaude ir Release-Green
+uzdevums (`docs/ops/RUNNER_BOX.md` → mitinātais izpildes zars). Atzarojumi un
+sapludināšanas grupas izmanto mitinātos izpildītājus uzdevumiem, kuri citādi izvēlētos
+pašmitinātos izpildītājus; pirms ieviešanas jāpārbauda pietiekamas mitinātās jaudas
+pieejamība.
 
-Katrs JSON apliecinājums identificē izgūto SHA, darbplūsmas izpildi un mēģinājumu.
-CLI noraida neatbilstību starp izgūtās versijas un notikuma SHA. Darbplūsmu testi piesaista politikas dalību
-sprieduma uzdevuma `needs` sarakstam, lai jauns vai noņemts izpildes ceļš nevarētu nemanāmi pazust.
-Apliecinājumi aptver pašu attiecīgo darbplūsmu, nevis publicēšanu, izvietošanu vai esoša
-konsultatīva skenera iekšējo darbību. Abu pārbaužu nosaukumu aktivizēšana zaru kārtulās ir
-atsevišķa administratīva izmaiņa; šo uzdevumu pievienošana pati par sevi neaizsargā zaru.
+Katrā JSON apliecinājumā ir norādīts izrakstītais SHA, darbplūsmas izpildes gadījums
+un mēģinājums. CLI noraida neatbilstību starp izrakstījuma un notikuma SHA.
+Darbplūsmas testi sasaista dalību politikā ar sprieduma uzdevuma `needs` sarakstu,
+lai jauns vai noņemts izpildes zars nevarētu nemanāmi pazust. Apliecinājumi attiecas
+uz pašu darbplūsmu, nevis publicēšanu, izvietošanu vai esoša konsultatīva skenera
+iekšējo darbību. Abu pārbaužu nosaukumu aktivizēšana zaru noteikumos ir atsevišķa
+administratīva izmaiņa; šo uzdevumu pievienošana pati par sevi neaizsargā zaru.
 
-### Statiskās skenēšanas inventārs
+### Saglabātie pierādījumi pieņemšanas reducētājā
 
-Versijotais npm aizstājvārdu inventārs un statiskās skenēšanas dalība atrodas
-`config/quality/gate-manifest.json`. Palaidiet `npm run check:gate-manifest`, lai pārbaudītu
-skriptu nosaukumus un precīzas komandas pret `package.json`; papildinājumi, noņemšanas un
-komandu novirzes izraisa kļūmi gan lokālajā āķī, gan izmaiņu klasifikācijas uzdevumos CI.
-Aizstājvārds nav darbplūsmas uzdevums, matricas instance vai testa gadījums: šos skaitļus
-nedrīkst norādīt kā savstarpēji aizstājamus.
+`scripts/quality/validate-release-acceptance.mjs` reducē norādīto plānu un tā
+manifestus; tas neapstiprina, ka plāns aptver visu laidiena konveijeru. Tā pārskatos
+ir nepārprotami iestatīts `releaseAcceptance: false` pat tad, ja šis plāns ir
+`VERIFIED`. Darbplūsma `release-acceptance.yml` joprojām izmanto aizstājējtestu
+datus, nevis īstus būvējuma, pakotnes, palaišanas vai virzīšanas apliecinājumus.
+
+CLI pieprasa `--evidence-root`, lai pārbaudītu saglabātos pierādījumus. Faili tiek
+atrasti kā `<evidence-root>/<artifact_id>/<member>` un tiem tiek aprēķināta SHA-256
+jaucējvērtība. PASS ieraksts bez pierādījumiem, trūkstošs vai mainīts fails, nedrošs
+ceļš vai simboliskā saite liedz veikt pārbaudi. Trūkstoši faili nav līdzvērtīgi
+tukšiem sekmīgas izpildes žurnāliem. Esošās SHA, izpildes gadījuma un mēģinājuma
+pārbaudes paliek neatkarīgas: atbilstoši baiti nevar padarīt novecojušu apliecinājumu
+derīgu. Failu integritāte nav izpildes autentiskuma vai artefakta virzīšanas
+pierādījums.
+
+### UI izpildes jauda
+
+CI izpilda visu UI uzskaiti kā četras `test-vitest` matricas daļas, katrā izmantojot
+ne vairāk kā divus darbiniekus un saglabājot esošo 15 minūšu uzdevuma termiņu.
+Pirmā daļa izpilda arī MCP/autoCombo Vitest komplektu. Obligātā uzdevuma rezultāts
+aptver katru matricas elementu; vienas daļas kļūme vai atcelšana nevar apstiprināt
+kandidāta pielaidi.
+
+Nakts novērotājs saglabā atsevišķu precīzā kandidāta apliecinājumu katrai UI daļai,
+tostarp MCP izpildi pirmajā apliecinājumā. Ir nepieciešami visi četri apliecinājumi,
+žurnāli un atbilstošas izpildes identitātes. Lokālais `npm run test:vitest:ui`
+joprojām atlasa visu komplektu; viena `--shard` izpilde ir tikai daļējs pierādījums.
+
+### Vienībtestu pārklājuma apkopošana
+
+Divpadsmit vienībtestu daļas apkopo V8 pārklājumu savas esošās testu izpildes laikā.
+Sekmīga daļa izpilda `scripts/ci/compact-v8-coverage.mjs`, lai saspiestu sākotnējos
+failus, neģenerējot starpposma Istanbul pārskatu. Noslēguma Coverage uzdevums
+pārbauda visus divpadsmit manifestus pret kandidāta SHA, izpildlaiku, avota sakni un
+datu jaucējvērtībām, pēc tam palaiž c8 pārskatu ģeneratorus un esošos pārklājuma
+sliekšņus. Ievaddati saglabā c8 globālo failu nosaukumu secību; iepriekšēja
+sapludināšana katrā daļā nav droša jauktam funkciju/bloku pārklājumam. Trūkstošas,
+nepareizi veidotas vai nesaderīgas daļas izraisa pielaides kļūmi. Nesekmīgas testu
+daļas atsevišķi saglabā neapstrādātu diagnostikas pārklājumu; to nedrīkst iekļaut
+galīgajā sapludināšanā.
+
+### Statiskās skenēšanas uzskaite
+
+Versijotā npm aizstājvārdu uzskaite un dalība statiskajā skenēšanā atrodas
+`config/quality/gate-manifest.json`. Izpildiet `npm run check:gate-manifest`, lai
+pārbaudītu skriptu nosaukumus un precīzas komandas pret `package.json`;
+papildinājumi, noņemšana un komandu novirzes izraisa kļūmi gan lokālajā āķī, gan
+izmaiņu klasifikācijas uzdevumos CI vidē. Aizstājvārds nav darbplūsmas uzdevums,
+matricas instance vai testa gadījums: šos skaitļus nedrīkst attēlot kā savstarpēji
+aizstājamus.
 
 Izmantojiet `npm run quality:scan -- --list` vai `npm run quality:scan:fast -- --list`,
-lai apskatītu atlasītos aizstājvārdus, tos neizpildot. Izpildītājs izsauc
-npm ieejas punktu, tādēļ tiek saglabāta tā izpildlaika vide (tostarp Bun, kur tas konfigurēts).
-Manifests reģistrē ārpus šiem profiliem esošos aizstājvārdus kā atsevišķi izsaucamus, un
-uzturēšanas komandas ir aizliegtas tikai lasāmos skenēšanas profilos.
+lai pārskatītu atlasītos aizstājvārdus, tos neizpildot. Izpildītājs izsauc npm
+ieejas punktu, tādēļ tiek saglabāta tā izpildvide (tostarp Bun, kur tas ir
+konfigurēts). Manifests reģistrē aizstājvārdus ārpus šiem profiliem kā atsevišķi
+izsauktus, un tikai lasāmos skenēšanas profilos uzturēšanas komandas ir aizliegtas.
 
 Šie profili aptver tikai statisko skenēšanu. Tie neapliecina produkta testus,
-pārklājumu, pakošanu, ārējās pārbaudes vai kandidāta pilnīgu pieņemšanu laidienam.
-Darbplūsmas pielaide izmanto saistīto `config/quality/admission-policy.json` un
-`scripts/quality/admission-verdict.mjs`. Laidiena novērotāja profili paliek atsevišķi;
-pārbaudiet tiem piemērojamās pārbaudes un apliecinājumus neatkarīgi. Tālāk sniegtais aprakstošais
-inventārs ir atsauce, nevis pierādījums, ka pārbaude patiešām tika izpildīta.
+pārklājumu, pakotņošanu, ārējās pārbaudes vai kandidāta pilnīgu laidiena pieņemšanu.
+Darbplūsmas pielaide izmanto saistītos `config/quality/admission-policy.json` un
+`scripts/quality/admission-verdict.mjs`. Laidiena novērotāja profili paliek
+atsevišķi; pārbaudiet to piemērojamās pārbaudes un apliecinājumus neatkarīgi. Pilnā
+novērotāja statiskās komandas ir deklarētas
+`config/quality/release-green-static-profile.json`, tostarp `audit:deps`,
+mutāciju testu atlase un tulkojumu pārbaudes. Ielādētājs pārbauda npm komandas
+pret package.json un modelētajām CI/Quality deklarācijām; tas noraida novirzes,
+nevis izpilda čaulas marķierus kā argumentus. Obligāta skenera SKIP/INCOMPLETE
+izvade nevar apstiprināt PASS. Profils reģistrē savus ārējos izņēmumus un neaizstāj
+mitinātā pārklājuma, testu matricu, pakotņu vai izvietošanas pierādījumus. Tālāk
+sniegtā aprakstošā uzskaite ir atsauce, nevis pierādījums tam, ka vārti tiešām tika
+izpildīti.
 
-Skripti atrodas zem `scripts/check/` (politikas pārbaudes) un `scripts/quality/` (pakāpeniskās pastiprināšanas dzinis).
-CI patiesības avots ir `.github/workflows/ci.yml`.
+Skripti atrodas zem `scripts/check/` (politikas vārti) un `scripts/quality/`
+(slieksnīšu mehānisms). CI patiesības avots ir `.github/workflows/ci.yml`.
 
-### Laidiena PR ātrais ceļš (`quality.yml`)
+### Ātrais ceļš laidiena PR (`quality.yml`)
 
-`.github/workflows/quality.yml` papildina CI main/release PR, izmaiņu nosūtīšanai uz `main`,
-manuālai palaišanai un apvienošanas grupām. PR izmanto pēc ceļiem filtrētas ātrās pārbaudes. Pastāvīgi
-atspējotais būvējuma dublikāts tika noņemts; īstās būvēšanas/pakošanas/palaišanas pārbaudes paliek CI.
+`.github/workflows/quality.yml` papildina CI galvenā/laidiena zara PR, izmaiņu virzīšanai uz `main`,
+manuālai palaišanai un sapludināšanas grupām. PR izmanto pēc ceļiem filtrētas ātrās pārbaudes. Neatgriezeniski
+atspējotā dublētā būvēšana tika noņemta; faktiskās būvēšanas/pakošanas/palaišanas pārbaudes paliek CI.
 
-| Uzdevums                                         | Tvērums                                                                                                                                                                                                                                | Bloķējošs                |
-| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| `Docs Gates (fast-path)`                         | Dokumentācijas/koda PR; API dokumentācijas atsauces un docs-all                                                                                                                                                                        | Jā                       |
-| `Fast Quality Gates`                             | Koda PR; statiskās pārbaudes, tipu pārbaude, informācijas paneļa tipu pārbaude, ietekmētie vienību testi                                                                                                                               | Jā                       |
-| `Forgotten sibling tests`                        | Koda PR; izmainītie moduļi tiek izsekoti līdz statiskajiem patērētājiem un iespējamiem radniecīgajiem testiem; barrel un dinamiskās importēšanas ceļi tiek ziņoti kā konsultatīva diagnostika ar atsaucēm uz atļauto izņēmumu sarakstu | **Konsultatīvs**         |
-| `Vitest (fast-path)`                             | Koda PR; ātrais vitest komplekts                                                                                                                                                                                                       | Jā                       |
-| `Unit Tests fast-path`                           | Koda PR; 4 daļās sadalīts vienību testu komplekts                                                                                                                                                                                      | Jā                       |
-| `No new ESLint warnings`                         | Koda PR; lint aizsardzība, kas ņem vērā slāpēšanas norādes                                                                                                                                                                             | Jā, tostarp atzarojumiem |
-| `Merge integrity (changelog + generated skills)` | PR, kas nav melnraksti; izmaiņu žurnāla un ģenerēto prasmju sinhronizācija                                                                                                                                                             | Jā, tostarp atzarojumiem |
+| Uzdevums                                         | Tvērums                                                                                                                                                                                                                       | Bloķējošs                |
+| ------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| `Docs Gates (fast-path)`                         | Dokumentācijas/koda PR; API dokumentācijas atsauces un visa dokumentācija                                                                                                                                                     | Jā                       |
+| `Fast Quality Gates`                             | Koda PR; statiskās pārbaudes, tipu pārbaude, informācijas paneļa tipu pārbaude, ietekmētie vienībtesti                                                                                                                        | Jā                       |
+| `Forgotten sibling tests`                        | Koda PR; mainītie moduļi tiek izsekoti līdz statiskajiem patērētājiem un saistīto testu kandidātiem; apkopojošo moduļu un dinamiskā importa ceļi tiek ziņoti kā konsultatīva diagnostika ar atsauču atļauto izņēmumu sarakstu | **Konsultatīvs**         |
+| `Vitest (fast-path)`                             | Koda PR; ātrais vitest komplekts                                                                                                                                                                                              | Jā                       |
+| `Unit Tests fast-path`                           | Koda PR; 4 daļās sadalīts vienībtestu komplekts                                                                                                                                                                               | Jā                       |
+| `No new ESLint warnings`                         | Koda PR; uz apspiešanas nosacījumiem balstīta lintēšanas aizsardzība                                                                                                                                                          | Jā, tostarp atzarojumiem |
+| `Merge integrity (changelog + generated skills)` | PR, kas nav melnraksti; izmaiņu žurnāla un ģenerēto prasmju sinhronizācija                                                                                                                                                    | Jā, tostarp atzarojumiem |
 
-#### Aizmirsto radniecīgo testu pārskats
+#### Aizmirsto saistīto testu pārskats
 
-`npm run check:forgotten-sibling-tests` atkārtoti izmanto importa atrisinātāju, kas ir testa ietekmes kartes pamatā.
+`npm run check:forgotten-sibling-tests` atkārtoti izmanto importa atrisinātāju, kas ir testu ietekmes kartes pamatā.
 Katram mainītajam produkcijas modulim tas ziņo deterministiskas
 `changed module/symbol -> static consumer -> candidate sibling test` ķēdes, ja kandidāta
 tests nav iekļauts izmaiņu pieprasījuma atšķirībās. Markdown kopsavilkums un JSON rezultāts tiek saglabāti kā
-`forgotten-sibling-tests` darbplūsmas artefakts kalibrēšanai pirms bloķēšanas ieviešanas.
+`forgotten-sibling-tests` darbplūsmas artefakts kalibrēšanai pirms bloķējošas ieviešanas.
 
-Barrel atkārtotie eksporti un dinamiskie importi ir tikai atrisināšanas diagnostika; tie nekad nerada
+Apkopojošo moduļu reeksporti un dinamiskie importi ir tikai atrisināšanas diagnostika; tie nekad nerada
 bloķējošu atradni. Pārskatītie izņēmumi atrodas failā
 `config/quality/forgotten-sibling-allowlist.json`. Katrā ierakstā jānorāda patērētājs un kandidāta
-tests, jāsniedz konkrēts pamatojums un jāpievieno saite uz GitHub problēmu vai izmaiņu pieprasījumu. Nepareizi veidoti ieraksti
-izraisa bloķēšanu. Izņēmumi nevar ignorēt dzēstu kandidāta testu vai izmaiņas, kas pievieno `.skip`/`.todo`;
-apgalvojumu vājināšanu un citu maskēšanu joprojām pārvalda neatkarīgi bloķējošā
+tests, jāsniedz konkrēts pamatojums un saite uz GitHub problēmu vai izmaiņu pieprasījumu. Nepareizi veidoti ieraksti
+izraisa pārbaudes atteici. Izņēmumi nevar apspiest dzēstu kandidāta testu vai izmaiņas, kas pievieno `.skip`/`.todo`;
+apgalvojumu vājināšanu un citu maskēšanu turpina kontrolēt neatkarīgi bloķējošā
 `check:test-masking` pārbaude.
 
 ### Uzdevums: `lint`
 
-Tiek izpildīts katram PR uz `main`. Kļūmes gadījumā bloķē sapludināšanu.
+Tiek palaists katram PR uz `main`. Kļūmes gadījumā bloķē sapludināšanu.
 
-| Skripts (`npm run ...`)           | Pārbauda                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Bloķējošs                                    |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
-| `check:node-runtime`              | Node.js versija ir atbalstītajā diapazonā                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Jā                                           |
-| `check:cycles`                    | Cikliskos importus visā `src/` + `open-sse/` (balstīts uz AST, atrisināti tsconfig `paths`). Tieša palaišana beidzas ar kodu 1 ikreiz, kad pastāv kaut viens cikls (kopš #15281 kļūmes gadījumā piekļuve tiek liegta), un uzskaita SCC. `check:cycles:ratchet` (ko izpilda CI) bloķē, ja skaits pārsniedz `metrics.cycles` robežvērtību failā `quality-baseline.json` — pašlaik 14, `direction: down`, tāpēc tā var tikai samazināties (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Jā (sprūdrata pārbaude)                      |
-| `check:boundary`                  | `open-sse → src` saistību: unikālus failu savstarpējos importus no dzinēja lietotnē (`scripts/quality/measure-boundary.mjs`; malu saraksts ir v4 kodola/moduļu sadalīšanas uzlabojumu darbu saraksts). Tieša palaišana = konsultatīvs pārskats (tāds pats kā `quality:boundary`). `check:boundary:ratchet` (ko izpilda CI un kas ir iekļauts arī `quality.yml` ātro pārbaužu sprūdrata ciklā) bloķē, ja skaits pārsniedz `metrics.boundaryOpenSseToSrc` robežvērtību failā `quality-baseline.json` — sākotnēji iestatīta uz izmērīto vērtību 771, `direction: down`; `--update` to var tikai samazināt; PR pārbaudēs vērtība tiek salīdzināta attiecībā pret bāzes versiju (`--base-ref`, skatiet tālāk)                                                                                                                                                                                                                                                                                                                                                  | Jā (sprūdrata pārbaude)                      |
-| `check:route-validation:t06`      | Zod shēmu esamību visos maršrutos (6. līmeņa politika)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Jā                                           |
-| `check:any-budget:t11`            | `@ts-expect-error // any` skaits nepārsniedz budžetu (11. līmeņa catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Jā                                           |
-| `check:provider-consistency`      | Katram nodrošinātājam failā `providers.ts` ir atbilstošs ieraksts failā `providerRegistry.ts` (un otrādi — atļauto ierakstu saraksta ietvaros)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Jā                                           |
-| `check:model-lifecycle`           | Trīs manuāli uzturētās maršrutēšanas tabulas saglabā konsekvenci ar repozitorijā iekļauto dzīves cikla momentuzņēmumu (#11503): `FITNESS_TABLE` (`taskFitness.ts`) nepiešķir vērtējumu nevienam ekspluatāciju beigušam identifikatoram, uz kuru `REGISTRY` var maršrutēt; katrs `BUILT_IN_ALIASES` mērķis ir iekļauts `REGISTRY` un nav ekspluatāciju beigušo identifikatoru momentuzņēmumā; katrs ekspluatāciju beigušais identifikators, kas joprojām ir `REGISTRY`, tiek pārsūtīts vai uzskaitīts `allowedRetiredInCatalog`; un neviens `DEFAULT_DEGRADATION_MAP` avots vai mērķis šajā momentuzņēmumā nav atzīmēts kā ekspluatāciju beidzis. Tas nepierāda, ka modeli pašlaik apkalpo aktīvs augšupstraumes pakalpojums. Bezsaistes pārbaude — salīdzina ar `config/quality/model-lifecycle.json`, ko manuāli atsvaidzina ar `npm run quality:refresh-model-lifecycle` (nepieciešams tīkls; nav integrēts CI). `allowedRetiredInCatalog` ir pakāpeniskas samazināšanas sprūdrata mehānisms: pievienojiet ierakstu tikai kopā ar izsekošanas problēmu. | Jā                                           |
-| `check:fetch-targets`             | Katrs `fetch("/api/...")` klienta puses `src/` kodā tiek atrisināts uz reālu `route.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Jā                                           |
-| `check:deps`                      | Visas ar `npm install` instalējamās atkarības visos repozitorija failos `package.json` ir iekļautas `dependency-allowlist.json`; jaunas atkarības bez fiksētas versijas vai ar slopsquatting risku tiek atzīmētas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Jā                                           |
-| `audit:deps`                      | `npm audit` (saknes projekts + electron) — nav augstas/kritiskas nopietnības ieteikumu (pārklājas ar osv `check:vuln-ratchet`; skatiet racionalizācijas neizdarīto darbu sarakstu)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Jā                                           |
-| `check:lockfile`                  | `package-lock.json` integritāte — https reģistrs, integritātes jaucējkodi, nav resursdatora iestatījumu aizstāšanas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Jā                                           |
-| `check:licenses`                  | SPDX licenču atļauto saraksts produkcijas atkarībām                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Jā                                           |
-| `check:tracked-artifacts`         | Nav būvējuma artefaktu / repozitorijā iekļautu `node_modules` simbolisko saišu (tiek izpildīta arī husky pre-commit pārbaude; pre-push pārbaude ir apzināti vienkāršota — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Jā                                           |
-| `check:ai-attribution`            | PR komitos, virsrakstā vai aprakstā nav AI/robotu `Co-Authored-By` noslēguma rindiņas vai AI ģenerēšanas kājenes — stingrais noteikums #16 (`quality.yml` ātro pārbaužu ciklā PR→`release/**` gadījumā — nolasa notikuma datus un ārpus PR neveic nekādas darbības — un tikai PR paredzētā `ci.yml` lint darbībā PR→`main` gadījumā; arī husky `commit-msg` āķī; cilvēki kā līdzautori ir atļauti; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `check:vitest-exclusions`         | Katram Vitest izņēmumam ir norādīta izsekošanas problēma, un tas ir iekļauts failā `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Jā                                           |
-| `check:file-size`                 | Avota faili (`.ts`/`.tsx` direktorijās `src/`, `open-sse/`, `electron/`, `bin/`) nepārsniedz `cap`, bet testu faili (`*.test.ts(x)`) — `testCap`; faili, kas fiksēti failā `file-size-baseline.json` (`frozen` / `testFrozen`), nedrīkst pārsniegt tajā reģistrēto izmēru                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Jā                                           |
-| `check:error-helper`              | Kļūdu atbildēs izpildītājos/apstrādātājos tiek izmantots `buildErrorBody()` / `sanitizeErrorMessage()` (stingrais noteikums Nr. 12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Jā                                           |
-| `check:migration-numbering`       | Migrāciju SQL faili ir secīgi numurēti, bez iztrūkumiem vai dublikātiem                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Jā                                           |
-| `check:public-creds`              | Ārpus `publicCreds.ts` nav literālu OAuth `client_id`/`client_secret` vai Firebase tīmekļa atslēgu (stingrais noteikums Nr. 11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Jā                                           |
-| `check:db-rules`                  | Ārpus `src/lib/db/` moduļiem nav neapstrādāta SQL; nav apkopojuma importu no `localDb.ts` (stingrie noteikumi Nr. 2/Nr. 5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Jā                                           |
-| `check:known-symbols`             | Pakalpojumu sniedzēju izpildītāji, maršrutēšanas stratēģijas un tulkotāji, kas reģistrēti to dispečertabulās, atbilst diskā esošajiem failiem — nav pamestu vai nedeklarētu simbolu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Jā                                           |
-| `check:route-guard-membership`    | Katrs maršruts, kas palaiž bērnprocesu, ir klasificēts ar `isLocalOnlyPath()` (stingrie noteikumi Nr. 15/Nr. 17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Jā                                           |
-| `check:test-discovery`            | Katru repozitorijā esošo `*.test.ts` / `*.spec.ts` failu atrod vismaz viens testu izpildītājs (sprūdrata princips: bāreņu saraksts failā `test-discovery-baseline.json` var tikai sarukt)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Jā                                           |
-| `check:test-tla-order`            | Neviens `node:test` fails direktorijā `tests/unit` nereģistrē testu, nesasniedz augstākā līmeņa `await` un pēc tam nereģistrē vēl citus testus (#18045; sprūdrata princips: saraksts failā `test-tla-order-allowlist.json` var tikai sarukt)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Jā                                           |
-| `check:agent-skills-sync`         | Ģenerētie aģentu prasmju artefakti atbilst to avota katalogam (nav noviržu)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `check:provider-asset-provenance` | Pakalpojumu sniedzēju logotipiem/resursiem ir reģistrēts izcelsmes ieraksts                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `lint:json`                       | JSON konfigurācijas faili tiek parsēti un atbilst repozitorija lintēšanas kārtulām                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `typecheck:core`                  | TypeScript kompilācija bez kļūdām (tikai konsultatīvi brīdinājumi)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Jā                                           |
-| `typecheck:noimplicit:core`       | Stingrs `noImplicitAny` — vērsts uz nākotni; daudzām iepriekš esošām izsaukuma vietām joprojām nepieciešamas anotācijas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | **Konsultatīvs** (`continue-on-error: true`) |
-| `check:dashboard-typecheck`       | `tsc`, kas attiecas tikai uz `src/app/(dashboard)/**` (#7033) — `typecheck:core` rūpīgi atlasītais 27 failu atļauto failu saraksts neietver nevienu informācijas paneļa TSX failu, un arī `next build` nekad neveic to tipu pārbaudi (`next.config.mjs` iestata `ignoreBuildErrors: true`), tāpēc ar nesaistītiem identifikatoriem saistītās regresijas tur (#6625/#6909) CI sistēmai nebija redzamas. Atšķirības tiek salīdzinātas ar fiksētu bāzes līmeni, kurā norādīts kļūdu skaits katram failam un TS kodam (`config/quality/dashboard-typecheck-baseline.json`, tāds pats novecojušu ierakstu pārbaudes princips kā `check:known-symbols`) — pārbaude neizdodas tikai tad, ja ir JAUNAS kļūdas, kas pārsniedz bāzes līmenī noteikto skaitu; kad iepriekš pastāvējusi kļūda ir novērsta, samaziniet bāzes līmeni ar `--update`.                                                                                                                                                                                                                     | Jā                                           |
+| Skripts (`npm run ...`)           | Pārbauda                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Bloķējošs                                    |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
+| `check:node-runtime`              | Node.js versija ir atbalstītajā diapazonā                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Jā                                           |
+| `check:cycles`                    | Cikliskos importus visā `src/` + `open-sse/` (balstīts uz AST, atrisināti tsconfig `paths`). Pamata variants pabeidz darbu ar kodu 1, ja pastāv kaut viens cikls (kļūmes gadījumā bloķē kopš #15281), un uzskaita SCC. `check:cycles:ratchet` (ko izpilda CI) bloķē, ja skaits pārsniedz `metrics.cycles` robežvērtību failā `quality-baseline.json` — pašlaik 14, `direction: down`, tādēļ tā var tikai samazināties (#15159 G-01/G-02)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Jā (sprūdrata pārbaude)                      |
+| `check:boundary`                  | `open-sse → src` saistība: unikāli importi no faila uz failu no dzinēja lietojumprogrammā (`scripts/quality/measure-boundary.mjs`; malu saraksts ir v4 kodola/moduļu sadalīšanas labojumu neizpildīto darbu saraksts). Pamata variants = konsultatīvs pārskats (tāds pats kā `quality:boundary`). `check:boundary:ratchet` (ko izpilda CI un arī `quality.yml` ātro pārbaužu sprūdrata cikls) bloķē, ja skaits pārsniedz `metrics.boundaryOpenSseToSrc` robežvērtību failā `quality-baseline.json` — sākotnēji iestatīta uz izmērīto vērtību 771, `direction: down`; `--update` to tikai samazina; PR pārbaudēs attiecībā pret bāzi (`--base-ref`, skatiet tālāk)                                                                                                                                                                                                                                                                                                                                    | Jā (sprūdrata pārbaude)                      |
+| `check:route-validation:t06`      | Zod shēmu klātbūtni visos maršrutos (6. līmeņa politika)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             | Jā                                           |
+| `check:any-budget:t11`            | `@ts-expect-error // any` skaits nepārsniedz budžetu (11. līmeņa catraca)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | Jā                                           |
+| `check:provider-consistency`      | Katram pakalpojumu sniedzējam failā `providers.ts` ir atbilstošs ieraksts failā `providerRegistry.ts` (un otrādi, atļauto ierakstu saraksta ietvaros)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Jā                                           |
+| `check:model-lifecycle`           | Trīs manuāli uzturētās maršrutēšanas tabulas saglabā atbilstību repozitorijā iekļautajam dzīves cikla momentuzņēmumam (#11503): `FITNESS_TABLE` (`taskFitness.ts`) nepiešķir vērtējumu nevienam izņemtam ID, uz kuru `REGISTRY` var maršrutēt; katrs `BUILT_IN_ALIASES` mērķis ir atrodams reģistrā `REGISTRY` un nav atrodams izņemto ID momentuzņēmumā; katrs izņemtais ID, kas joprojām atrodas reģistrā `REGISTRY`, tiek pārsūtīts vai ir norādīts sarakstā `allowedRetiredInCatalog`; un neviens `DEFAULT_DEGRADATION_MAP` avots vai mērķis šajā momentuzņēmumā nav atzīmēts kā izņemts. Tas nepierāda, ka modeli pašlaik apkalpo aktīvs augšupstraumes pakalpojums. Bezsaistē — salīdzina ar `config/quality/model-lifecycle.json`, kas tiek manuāli atsvaidzināts ar `npm run quality:refresh-model-lifecycle` (nepieciešams tīkls; nav integrēts CI). `allowedRetiredInCatalog` ir pakāpeniskas samazināšanas sprūdrata mehānisms: pievienojiet ierakstu tikai kopā ar izsekošanas problēmu. | Jā                                           |
+| `check:fetch-targets`             | Katrs `fetch("/api/...")` klienta puses direktorijā `src/` norāda uz reālu `route.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Jā                                           |
+| `check:deps`                      | Visas ar `npm install` instalējamās atkarības visos repozitorija failos `package.json` ir iekļautas failā `dependency-allowlist.json`; jaunās atkarības bez fiksētām versijām vai ar maldinoši līdzīgiem pakotņu nosaukumiem tiek atzīmētas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Jā                                           |
+| `audit:deps`                      | Visu piecu neatkarīgo slēgšanas failu (saknes, Electron, OpenCode spraudņu v1/v2 un pakalpojumu sniedzēja) npm audits. Kritiski drošības paziņojumi bloķē; augstas prioritātes drošības paziņojumi paliek redzami kā brīdinājumi. Trūkstoši vai nesekmīgi auditi tiek atzīmēti kā NEPILNĪGI un bloķē; katra tvēruma slēgšanas failu jaucējvērtības un pārskati tiek saglabāti.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Jā                                           |
+| `check:lockfile`                  | `package-lock.json` integritāte — https reģistrs, integritātes jaucējvērtības, bez resursdatora pārrakstīšanas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | Jā                                           |
+| `check:licenses`                  | SPDX licenču atļauto licenču saraksts produkcijas atkarībām                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Jā                                           |
+| `check:tracked-artifacts`         | Nav būvējuma artefaktu / repozitorijā iekļautu `node_modules` simbolisko saišu (tiek izpildīta arī husky pirmskomita pārbaude; pirmsnosūtīšanas pārbaude ir apzināti viegla — #6716)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Jā                                           |
+| `check:ai-attribution`            | PR komitos, virsrakstā vai pamattekstā nav MI/bota `Co-Authored-By` noslēguma rindas vai MI ģenerēšanas kājenes — stingrais noteikums Nr. 16 (`quality.yml` ātro pārbaužu ciklā PR→`release/**` gadījumā — nolasa notikuma lietderīgo slodzi, ārpus PR neveic nekādas darbības — un tikai PR paredzētā `ci.yml` lintēšanas solī PR→`main` gadījumā; arī husky `commit-msg` āķī; līdzautori cilvēki ir atļauti; #14436)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `check:vitest-exclusions`         | Katram Vitest izņēmumam ir norādīta izsekošanas problēma, un tas ir iekļauts failā `config/quality/vitest-exclusions.json` (#13204)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Jā                                           |
+| `check:file-size`                 | Avota faili (`.ts`/`.tsx` mapēs `src/`, `open-sse/`, `electron/`, `bin/`) nepārsniedz `cap`, bet testu faili (`*.test.ts(x)`) — `testCap`; faili, kas iesaldēti failā `file-size-baseline.json` (`frozen` / `testFrozen`), nedrīkst pārsniegt tajā reģistrēto izmēru                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Jā                                           |
+| `check:error-helper`              | Kļūdu atbildēs izpildītājos/apstrādātājos tiek izmantots `buildErrorBody()` / `sanitizeErrorMessage()` (stingrais noteikums Nr. 12)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | Jā                                           |
+| `check:migration-numbering`       | Migrāciju SQL faili ir secīgi numurēti, bez iztrūkumiem vai dublikātiem                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Jā                                           |
+| `check:public-creds`              | Ārpus `publicCreds.ts` nav literālu OAuth `client_id`/`client_secret` vai Firebase tīmekļa atslēgu (stingrais noteikums Nr. 11)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Jā                                           |
+| `check:db-rules`                  | Ārpus `src/lib/db/` moduļiem nav neapstrādāta SQL; nav apkopojuma importu no `localDb.ts` (stingrie noteikumi Nr. 2/Nr. 5)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Jā                                           |
+| `check:known-symbols`             | Pakalpojumu sniedzēju izpildītāji, maršrutēšanas stratēģijas un tulkotāji, kas reģistrēti to nosūtīšanas tabulās, atbilst diskā esošajiem failiem — nav savrupu vai nedeklarētu simbolu                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Jā                                           |
+| `check:route-guard-membership`    | Katrs maršruts, kas palaiž bērnprocesu, ir klasificēts ar `isLocalOnlyPath()` (stingrie noteikumi Nr. 15/Nr. 17)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | Jā                                           |
+| `check:test-discovery`            | Katru repozitorijā esošo `*.test.ts` / `*.spec.ts` failu atrod vismaz viens testu izpildītājs (ratchet: bāreņfailu saraksts failā `test-discovery-baseline.json` var tikai sarukt)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Jā                                           |
+| `check:test-tla-order`            | Neviens `node:test` fails mapē `tests/unit` nereģistrē testu, nesasniedz augstākā līmeņa `await` un pēc tam nereģistrē vēl citus testus (#18045; ratchet: atļauto vienumu saraksts failā `test-tla-order-allowlist.json` var tikai sarukt)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Jā                                           |
+| `check:agent-skills-sync`         | Ģenerētie aģentu prasmju artefakti atbilst to avota katalogam (nav noviržu)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `check:provider-asset-provenance` | Nodrošinātāju logotipiem/resursiem ir reģistrēts izcelsmes ieraksts                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `lint:json`                       | JSON konfigurācijas faili tiek parsēti un atbilst repozitorija lintēšanas kārtulām                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `typecheck:core`                  | TypeScript kompilācija bez kļūdām (tikai konsultatīvi brīdinājumi)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Jā                                           |
+| `typecheck:noimplicit:core`       | Stingrs `noImplicitAny` — uz nākotni vērsta pārbaude; daudzām jau esošām izsaukuma vietām joprojām nepieciešamas anotācijas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | **Konsultatīvs** (`continue-on-error: true`) |
+| `check:dashboard-typecheck`       | `tsc`, kas attiecas tikai uz `src/app/(dashboard)/**` (#7033) — `typecheck:core` rūpīgi atlasītais 27 failu atļauto elementu saraksts neietver nevienu informācijas paneļa TSX failu, un arī `next build` nekad neveic tā tipu pārbaudi (`next.config.mjs` iestata `ignoreBuildErrors: true`), tāpēc nesaistītu identifikatoru regresijas šajā daļā (#6625/#6909) CI sistēmai nebija redzamas. Atšķirības tiek salīdzinātas ar fiksētu bāzes līmeni, kurā norādīts skaits katram failam un TS kodam (`config/quality/dashboard-typecheck-baseline.json`, tāds pats novecojušu ierakstu kontroles modelis kā `check:known-symbols`) — pārbaude neizdodas tikai tad, ja rodas JAUNAS kļūdas, kas pārsniedz bāzes līmeņa skaitu; kad iepriekš pastāvējusi kļūda ir novērsta, pakāpeniski samaziniet bāzes līmeni ar `--update`.                                                                                                                                                                         | Jā                                           |
 
 ### Uzdevums: `quality-gate`
 
 Tiek izpildīts pēc `test-coverage`. Kļūmes gadījumā bloķē sapludināšanu.
 
-| Skripts                      | Pārbauda                                                                                                                                                                                                             | Bloķējošs                     |
-| ---------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- |
-| `quality:collect`            | Izveido `quality-metrics.json` (ESLint brīdinājumu skaits, pārklājums no apvienotā segmentu pārskata)                                                                                                                | Jā (pirms sliekšņa pārbaudes) |
-| `quality:ratchet`            | Neviena `quality-baseline.json` metrika nav pasliktinājusies (ESLint brīdinājumi ≤ bāzes līmenis; pārklājums ≥ bāzes līmenis)                                                                                        | Jā                            |
-| `check:duplication`          | Koda dublēšanās (jscpd@4) nepārsniedz `quality-baseline.json` norādīto bāzes līmeni                                                                                                                                  | Jā                            |
-| `check:complexity`           | Faila līmeņa ciklomātiskā sarežģītība nepārsniedz ierobežojumu (ESLint pamatnoteikumi `complexity` + `max-lines-per-function`)                                                                                       | Jā                            |
-| `check:cognitive-complexity` | Kognitīvās sarežģītības sliekšņa pārbaude (`eslint-plugin-sonarjs`) — atsevišķa ESLint pārbaude; CI abas pārbaudes izpilda apvienoti vienā `check:complexity-ratchets` solī                                          | Jā                            |
-| `check:dead-code`            | Neizmantoto eksportu/failu sliekšņa pārbaudes rezultāts (knip) nav pasliktinājies salīdzinājumā ar bāzes līmeni                                                                                                      | Jā                            |
-| `check:compression-budget`   | Saspiešanas etalona budžets — marķieru ietaupījuma minimālās robežas katram dzinim nedrīkst pasliktināties                                                                                                           | Jā                            |
-| `check:type-coverage`        | Tipizētā koda procentuālā īpatsvara sliekšņa pārbaudes rezultāts (`type-coverage`) nav pasliktinājies; lielā mērā aizstāj `typecheck:noimplicit:core`                                                                | Jā                            |
-| `check:codeql-ratchet`       | Atvērto CodeQL brīdinājumu skaits nav pieaudzis (nolasa, izmantojot `gh api`; bez pilnvaras marķiera korekti izlaiž) — atsvaidzināšanas biežumu un manuālo palaišanu skatiet tālāk sadaļā "CodeQL sliekšņa pārbaude" | Jā                            |
+| Skripts                      | Ko pārbauda                                                                                                                                                                                                                              | Bloķējošs                      |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| `quality:collect`            | Izveido `quality-metrics.json` (ESLint brīdinājumu skaits, pārklājums no apvienotā segmentu pārskata)                                                                                                                                    | Jā (pirms sprūdrata pārbaudes) |
+| `quality:ratchet`            | Neviena `quality-baseline.json` metrika nav pasliktinājusies (ESLint brīdinājumi ≤ bāzes līmenis; pārklājums ≥ bāzes līmenis)                                                                                                            | Jā                             |
+| `check:duplication`          | Koda dublēšanās (`jscpd@4`) nepārsniedz `quality-baseline.json` norādīto bāzes līmeni                                                                                                                                                    | Jā                             |
+| `check:complexity`           | Faila līmeņa ciklomātiskā sarežģītība nepārsniedz robežvērtību (pamata ESLint `complexity` + `max-lines-per-function`)                                                                                                                   | Jā                             |
+| `check:cognitive-complexity` | Kognitīvās sarežģītības sprūdrata pārbaude (`eslint-plugin-sonarjs`) — atsevišķa ESLint pārbaude; CI abas izpilda apvienoti vienā `check:complexity-ratchets` solī                                                                       | Jā                             |
+| `check:dead-code`            | Neizmantoto eksportu/failu sprūdrata pārbaude (`knip`) neuzrāda pasliktinājumu salīdzinājumā ar bāzes līmeni                                                                                                                             | Jā                             |
+| `check:compression-budget`   | Saspiešanas etalonpārbaudes budžets — katram dzinim noteiktais minimālais marķieru ietaupījums nedrīkst samazināties                                                                                                                     | Jā                             |
+| `check:type-coverage`        | Tipizētā koda procentuālās daļas sprūdrata pārbaude (`type-coverage`) neuzrāda pasliktinājumu; lielā mērā aizstāj `typecheck:noimplicit:core`                                                                                            | Jā                             |
+| `check:codeql-ratchet`       | Atvērto CodeQL brīdinājumu skaits nepalielinās (nolasa, izmantojot `gh api`; ja nav pilnvaras marķiera, pārbaude tiek korekti izlaista) — atsvaidzināšanas biežumu un manuālu palaišanu skatiet tālāk sadaļā "CodeQL sprūdrata pārbaude" | Jā                             |
 
 ### Uzdevums: `quality-extended`
 
-Viss uzdevums ir informatīvs (`continue-on-error: true`). Uz npm balstītās sliekšņa pārbaudes
-tiek izpildītas pilnvērtīgi; ārējie skeneri tiek instalēti ar `gh release download` un paši izlaiž pārbaudi (izejas kods 0),
-ja binārā datne joprojām nav pieejama.
+Uzdevums bloķē attiecīgos kandidātus. Pakotnes lielums, atrastie noslēpumi, ievainojamību
+atradumi, darbplūsmu atradumi un OpenAPI izmaiņas tiek pārbaudītas ar obligātām sprūdrata pārbaudēm.
+Ciklisko atkarību diagnostikai joprojām ir ieteikuma raksturs. Skeneru instalēšana ir obligāta:
+`scripts/ci/install-quality-scanners.sh` nodrošina fiksētas versijas un tālāk propagē
+instalēšanas kļūmes. Ja trūkst rīku, pārskati nav derīgi vai nav bāzes līmeņu,
+obligātās skenera pārbaudes statuss paliek INCOMPLETE.
 
-| Skripts                  | Pārbauda                                                                                                                                                                                                                                           | Bloķējošs                                                          |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------ |
-| `check:circular-deps`    | Nav ciklisku atkarību (dpdm)                                                                                                                                                                                                                       | **Informatīvs**                                                    |
-| `check:bundle-size`      | Pakotnes izmērs nepārsniedz ierobežojumu                                                                                                                                                                                                           | **Informatīvs**                                                    |
-| `check:secrets`          | Noslēpumu skenēšana (gitleaks) — tiek izlaista, ja nav binārās datnes                                                                                                                                                                              | **Informatīvs**                                                    |
-| `check:vuln-ratchet`     | Atkarību ievainojamību stāvoklis (osv-scanner) nav pasliktinājies — tiek izlaista, ja nav binārās datnes                                                                                                                                           | **Informatīvs**                                                    |
-| `check:workflows`        | Darbplūsmu lintēšana (actionlint + zizmor); neesoši vai bojāti skeneri, nederīgi pārskati vai neesošs sliekšņa bāzes līmenis izraisa statusu INCOMPLETE. Derīgi atradumi tiek apstrādāti saskaņā ar izvēlēto stingro/informatīvo/sliekšņa politiku | Izpilde ir obligāta; zizmor sliekšņa pārbaude CI vidē ir bloķējoša |
-| `check:openapi-breaking` | Publiskā API līguma (`openapi.yaml`) nesaderīgas izmaiņas salīdzinājumā ar pamata zaru (oasdiff) — izvada `openapiBreaking=N`; tiek izlaista, ja nav oasdiff vai pamata specifikāciju nevar atrisināt                                              | **Informatīvs**                                                    |
+| Skripts                  | Pārbauda                                                                                                                                                                                                                                                            | Bloķēšana                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `check:circular-deps`    | Nav ciklisku atkarību (dpdm)                                                                                                                                                                                                                                        | **Konsultatīva**                                  |
+| `check:bundle-size`      | Pakotnes izmērs nepārsniedz ierobežojumu; ja mērījums nav pieejams, pārbaude neizdodas                                                                                                                                                                              | **Bloķējoša ar --ratchet**                        |
+| `check:secrets`          | Gitleaks atradumu skaits nepalielinās; obligātās skenēšanas noraida trūkstošus rīkus, avotu vai bāzes līniju, neveiksmīgas skenēšanas un nederīgus pārskatus                                                                                                        | **Bloķējoša ar --ratchet**                        |
+| `check:vuln-ratchet`     | Atkarību ievainojamību skaits nepalielinās; obligātās skenēšanas noraida trūkstošus rīkus, nederīgus pārskatus vai trūkstošas bāzes līnijas                                                                                                                         | **Bloķējoša ar --ratchet**                        |
+| `check:workflows`        | Darbplūsmu lintēšana (actionlint + zizmor); trūkstoši vai bojāti skeneri, nederīgi pārskati vai trūkstoša ratchet bāzes līnija izraisa statusu INCOMPLETE. Derīgajiem atradumiem piemēro izvēlēto stingro, konsultatīvo vai ratchet politiku                        | Izpilde ir obligāta; zizmor ratchet bloķē CI vidē |
+| `check:openapi-breaking` | Publiskās API līgums tiek pārbaudīts pret piesaistītajiem notikumu komitiem (PR sapludināšanas bāze, push iepriekšējais komits, merge-group bāze; ieplānotai/manuālai palaišanai — checkout pirmais vecāks); obligāta mērījuma kļūmes gadījumā piekļuve tiek liegta | **Bloķējoša ar --ratchet**                        |
 
-### Uzdevums: `docs-sync-strict`
+### Darbs: `docs-sync-strict`
 
-Tiek izpildīts katram PR uz `main`. Kļūmes gadījumā bloķē sapludināšanu.
+Pull requestiem uz `main` vai `release/**` šis darbs tiek izpildīts tikai kandidātiem, kas nav melnraksti (vai atrodas uzticamā rindā) un ir klasificēti kā dokumentācijas vai koda izmaiņas. Tas tiek izpildīts arī CI notikumiem ārpus PR; šī darbplūsmas push palaišana attiecas tikai uz `main`, nevis `release/**`. Solis ar izejas kodu, kas nav nulle, bloķē darbu; tālāk norādītie tikai ziņojamie atradumi un dokumentētie izņēmumi to nebloķē.
 
-| Skripts                        | Pārbauda                                                                                                                                                                    | Bloķējošs                  |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------- |
-| `check:docs-all`               | Metapārbaude, kas secīgi izpilda tālāk norādītās 6 apakšpārbaudes                                                                                                           | Jā                         |
-| ↳ `check:docs-sync`            | CHANGELOG / OpenAPI / llm.txt versiju konsekvenci                                                                                                                           | Jā                         |
-| ↳ `check:docs-counts`          | Prozas tekstā norādītie skaitļi (nodrošinātāju skaits, migrāciju skaits utt.) ir faktisko skaitļu pakāpeniskās stingrības logā                                              | Jā                         |
-| ↳ `check:env-doc-sync`         | Katrs `.env.example` vides mainīgais ir dokumentēts dokumentācijas tabulā un otrādi                                                                                         | Jā                         |
-| ↳ `check:deprecated-versions`  | Dokumentācijā nav novecojušu versiju virkņu                                                                                                                                 | Jā                         |
-| ↳ `check:doc-links`            | Iekšējās markdown saites dokumentācijā norāda uz reāliem failiem (`[text]`/`(path)` formātā)                                                                                | Jā                         |
-| ↳ `check:fabricated-docs`      | Dokumentācijā minētie maršruti, vides mainīgie, CLI komandas, āķu nosaukumi un failu ceļi pastāv kodu bāzē. Stingra pārbaude ar `--strict`; bez karoga kļūme nav bloķējoša. | Jā (CI vidē ar `--strict`) |
-| `check:cli-i18n`               | CLI komandu virknes ir iekļautas visos i18n lokalizācijas failos                                                                                                            | Jā                         |
-| `check:openapi-coverage`       | OpenAPI specifikācija aptver vismaz pakāpeniski paaugstināto faktisko maršrutu minimumu                                                                                     | Jā                         |
-| `check:openapi-security-tiers` | Drošības līmeņu anotācijas failā `openapi.yaml` atbilst klasifikācijām failā `routeGuard.ts`                                                                                | **Informatīvs**            |
-| `check:openapi-routes`         | Katrs ceļš failā `openapi.yaml` atbilst reālam `route.ts` (aizsardzība pret halucinācijām)                                                                                  | Jā                         |
-| `check:docs-symbols`           | Katra `/api/...` atsauce failos `docs/**/*.md` atbilst reālam `route.ts` (aizsardzība pret halucinācijām)                                                                   | Jā                         |
-| `i18n translation drift`       | Netulkotas atslēgas i18n lokalizācijas failos — tikai brīdinājums                                                                                                           | **Informatīvs**            |
+| Skripts                        | Pārbauda                                                                                                                                                                                                                                                                                                                                           | Bloķēšana                                                                   |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+| `check:docs-all`               | Meta-vārteja, kas secīgi izpilda 7 tālāk norādītās apakšvārtejas                                                                                                                                                                                                                                                                                   | Jā                                                                          |
+| ↳ `check:docs-sync`            | Pakotnes/OpenAPI/CHANGELOG versiju saskaņotība, precīzi `llm.txt` spoguļi, tulkotā CHANGELOG sadaļu/izmēra invarianti un aizstātu dokumentu dublikātu neesamība                                                                                                                                                                                    | Jā                                                                          |
+| ↳ `check:docs-frontmatter`     | Kompilētajām dokumentācijas lapām ir derīgi frontmatter virsraksti                                                                                                                                                                                                                                                                                 | Jā                                                                          |
+| ↳ `check:docs-counts`          | Augstas uzticamības skaita invarianti ir stingri; heuristiskās failu skaita pārbaudes tikai brīdina, ja vien skripts nesaņem `--strict` (CI meta-vārteja to nenodod)                                                                                                                                                                               | Stingrais līmenis bloķē; mīkstais līmenis ir konsultatīvs                   |
+| ↳ `check:env-doc-sync`         | Vides mainīgo nolasījumi pirmkodā, `.env.example` un `docs/reference/ENVIRONMENT.md` sakrīt pēc skaidri noteikto ignore, doc-only un env-only izņēmumu sarakstu piemērošanas                                                                                                                                                                       | Jā, ārpus dokumentētajiem izņēmumu sarakstiem                               |
+| ↳ `check:deprecated-versions`  | Ziņo par iespējami novecojušām versijām ārpus drošiem vēsturiskiem kontekstiem un novecojušiem atjaunināšanas datumiem, neiekļaujot ignorētos dokumentus                                                                                                                                                                                           | Konsultatīvi pašreizējā CI konfigurācijā (`--strict` netiek nodots)         |
+| ↳ `check:doc-links`            | Iekšējās Markdown saites dokumentācijā norāda uz reāliem failiem (`[text]`/`(path)` formā)                                                                                                                                                                                                                                                         | Jā                                                                          |
+| ↳ `check:fabricated-docs`      | Dokumentācijā minētie maršruti, vides mainīgie, CLI komandas, āķu nosaukumi un failu ceļi pastāv kodu bāzē. Stingra vārteja ar `--strict`; bez karoga kļūme ir nebloķējoša.                                                                                                                                                                        | Jā (CI vidē ar `--strict`)                                                  |
+| `check:cli-i18n`               | Izmantotās CLI `t()` atslēgas pastāv `en`; `pt-BR` saglabā visas augstākā līmeņa sadaļas; `zh-CN` un `zh-TW` satur visas `en` atslēgas                                                                                                                                                                                                             | Jā                                                                          |
+| `check:openapi-coverage`       | OpenAPI specifikācija aptver vismaz ratchet noteikto minimālo reālo maršrutu skaitu                                                                                                                                                                                                                                                                | Jā                                                                          |
+| `check:openapi-security-tiers` | Deklarētajām `x-loopback-only`/`x-always-protected` anotācijām jābūt pamatotām ar `routeGuard.ts`; parsētāja kļūdas un tiešās pārbaudes neatbilstības bloķē. Apgrieztā pārbaude par trūkstošām `x-loopback-only` anotācijām zem tikai lokāliem prefiksiem brīdina; tikai ar šabloniem definēti maršruti šajā apgrieztajā pārbaudē netiek iekļauti. | Parsētāja/tiešās pārbaudes bloķē; apgrieztā pārbaude ir konsultatīva        |
+| `check:openapi-routes`         | Katrs `/api...` ceļš failā `openapi.yaml` neatkarīgi no parametru nosaukumiem atbilst reālam maršrutam pēc pamatotā izņēmumu saraksta `KNOWN_STALE_SPEC` piemērošanas; arī novecojuši saraksta ieraksti izraisa kļūmi                                                                                                                              | Jā                                                                          |
+| `check:docs-symbols`           | Iekšējās `/api/...` URL atsauces kanoniskajos dokumentos, kas nav spoguļi, atbilst reālam maršrutam vai maršrutu saimei; proxy/upstream/vietturu/failu atsauces un pamatoti `KNOWN_STALE_DOC_REFS` ieraksti ir izslēgti, bet novecojuši izņēmumu saraksta ieraksti izraisa kļūmi                                                                   | Jā                                                                          |
+| `i18n translation drift`       | Tulkoto dokumentu pamatkopas avota/mērķa jaucējvērtības atbilst `.i18n-state.json`. PR neizdodas tikai no jauna ieviestas avota novirzes, trūkstoša mērķa vai mērķa jaucējvērtības novirzes dēļ; pārbaudes ārpus PR ir stingras. Mantota PR novirze un novecojušu mērķu avota jaucējvērtības ir brīdinājumi.                                       | Jauna PR/stingra ārpus-PR novirze bloķē; mantota/novecojusi ir konsultatīva |
 
-### Uzdevums: `i18n-ui-coverage`
+Divpadsmit README SVG faili direktorijā `docs/diagrams/` tiek ģenerēti ar `scripts/docs/gen-readme-<name>.mjs`; `npm run docs:readme-diagrams` tos visus ģenerē no jauna.
+Katram ir vienībtests ar salīdzināšanu baitu pa baitam (`tests/unit/docs/readme-*-svg.test.ts`, uzdevums `test-unit`), kas neizdodas, ja repozitorijā saglabātais fails ir novecojis.
+`check:docs-counts` nolasa kanoniskos skaitļus no to `<text>` mezgliem, tādēļ skaitļus nekad nepārvērš kontūru ceļos.
+SVG kanonisko skaitļu pārbaude lasa `SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`) uzskaitītos failus: `docs/diagrams/readme-hero.svg`, `free-tier-budget.svg`, `promise-pillars.svg`, `comparison-table.svg`, `cli-terminal.svg`, `tier-cascade.svg`, `public/images/tier-flow-dark.svg`, `tier-flow-light.svg`.
+Apgalvojumu pārbaudes par pastāvīgi bezmaksas pakalpojumu sniedzējiem, kataloga ierakstiem, atkārtotiem pūliem un vērtēšanas faktoriem lasa arī `promise-pillars.svg`, `free-tier-budget.svg`, `strategies-grid.svg`.
+`free-tier-budget.svg` iegūst skaitļus no pašreizējā kataloga ielādētāja, tādēļ `FREE_MODEL_BUDGETS` vai pakalpojumu sniedzēja parādāmā nosaukuma izmaiņa izraisa CI kļūmi, līdz šis fails tiek ģenerēts no jauna.
 
-| Skripts                           | Pārbauda                                                                                                                                                                                                                     | Bloķējošs       |
-| --------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------- |
-| `check-ui-keys-coverage` (inline) | UI i18n atslēgu pārklājums ir ≥ 65%                                                                                                                                                                                          | Jā              |
-| `check-ui-value-drift` (inline)   | Pārrakstīta angļu valodas **vērtība** neatstāj novecojušu tulkojumu                                                                                                                                                          | Jā              |
-| `check-new-key-coverage` (inline) | **Jauna** angļu valodas atslēga ir iztulkota katrā lokalizācijā — marķieris `__MISSING__:` tiek noraidīts                                                                                                                    | Jā              |
-| `check-translation-ratio`         | Reālo tulkojumu īpatsvars katrā lokalizācijā (ar angļu valodu identiskas / vietturu / trūkstošas lapu vērtības ārpus atļauto izņēmumu saraksta) nedrīkst pārsniegt `config/quality/i18n-translation-baseline.json` + rezervi | **Informatīvs** |
+### Darbs: `i18n-ui-coverage`
 
-Nepieciešams `fetch-depth: 0` — vērtību novirzes pārbaude salīdzina `en.json` ar sapludināšanas bāzi.
+| Skripts                             | Pārbauda                                                                                                                                                                                                  | Bloķējošs        |
+| ----------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
+| `check-ui-keys-coverage` (iekļauts) | UI i18n atslēgu pārklājums ir ≥ 65%                                                                                                                                                                       | Jā               |
+| `check-ui-value-drift` (iekļauts)   | Pārrakstīta angļu valodas **vērtība** neatstāj novecojušus tulkojumus                                                                                                                                     | Jā               |
+| `check-new-key-coverage` (iekļauts) | **Jauna** angļu valodas atslēga ir iztulkota katrā lokalizācijā — marķieris `__MISSING__:` tiek noraidīts                                                                                                 | Jā               |
+| `check-translation-ratio`           | Reālo tulkojumu īpatsvars katrā lokalizācijā (angļu tekstam identiskas / vietturu / trūkstošas lapas ārpus atļauto saraksta) nedrīkst pārsniegt `config/quality/i18n-translation-baseline.json` + rezervi | **Konsultatīvs** |
 
-#### `check-ui-value-drift` — novecojušu tulkojumu pārbaude
+Nepieciešams `fetch-depth: 0` — vērtību novirzes vārteja salīdzina `en.json` ar apvienošanas bāzi.
 
-Atklāj vienu i18n regresijas veidu, ko pārējās pārbaudes strukturāli nespēj pamanīt: angļu valodas vērtība
-tiek pārrakstīta, bet no _iepriekšējā_ angļu teksta atvasinātie tulkojumi paliek, tāpēc
-lietotāji, kuri nelieto angļu valodu, turpina lasīt pārliecinoši formulētu, bet nu jau nepareizu tekstu.
+#### `check-ui-value-drift` — novecojušu tulkojumu vārteja
 
-Tas patiešām nonāca produkcijā. `oauthModal.googleOAuthWarning` tika pārrakstīts, kad tika
-ieviests Antigravity pieteikšanās palīgrīks (#5203); **39 no 43 lokalizācijām** saglabāja tekstu, kas operatoriem lika „kopēt
-pilno URL un ielīmēt to tālāk” — šim nodrošinātājam šādu plūsmu nav iespējams pabeigt. Tas
-palika nepamanīts līdz #8463, jo:
+Atklāj vienīgo i18n regresijas veidu, ko citas vārtejas strukturāli nespēj pamanīt: angļu valodas vērtība
+tiek pārrakstīta, bet no _iepriekšējā_ angļu teksta atvasinātie tulkojumi paliek nemainīti, tāpēc
+lietotāji, kuri nelieto angļu valodu, turpina lasīt pārliecinoši formulētu, taču nu jau nepareizu tekstu.
 
-- `sync-ui-keys` aizpilda tikai **trūkstošās** atslēgas, bet nekad neatjaunina **novecojušās**;
+Tas reāli nonāca laidienā. `oauthModal.googleOAuthWarning` tika pārrakstīts, kad tika ieviests Antigravity
+pieteikšanās palīgs (#5203); **39 no 43 lokalizācijām** saglabāja tekstu, kas operatoriem lika „nokopēt
+pilno URL un ielīmēt to zemāk” — plūsmu, kuru šim nodrošinātājam nav iespējams pabeigt. Tas palika
+nepamanīts līdz #8463, jo:
+
+- `sync-ui-keys` aizpilda tikai **neesošas** atslēgas, nevis **novecojušas**;
 - `check-ui-keys-coverage` skaita atslēgas _esamību_, tāpēc novecojis tulkojums tiek uzskatīts par pārklātu;
-- `check-translation-drift` izseko `docs/i18n/<locale>/**.md` dokumentācijas spoguļfailus —
-  tas nekad nelasa `src/i18n/messages/*.json`. Bloķējoša pārbaude uzdevumā `docs-sync-strict` kopš
-  2026-09 atkārtotās sinhronizācijas: rediģējot pamatdokumentu → `npm run i18n:run -- --files=<doc>` (sadaļas līmenī, ātri un resursu ziņā lēti).
+- `check-translation-drift` izseko dokumentācijas spoguļus `docs/i18n/<locale>/**.md` —
+  tas nekad nelasa `src/i18n/messages/*.json`. Bloķējošs uzdevumā `docs-sync-strict` kopš
+  2026-09 atkārtotās sinhronizācijas: rediģējiet pamatdokumentu → `npm run i18n:run -- --files=<doc>` (sadaļas līmenī, lēti).
 
-**Balstīts uz atšķirībām, nevis bāzlīniju.** Tas salīdzina `en.json` sapludināšanas bāzes punktā ar
-darba koku; katrai atslēgai, kuras vērtība angļu valodā ir mainījusies, lokalizācija, kurā
-joprojām ir nemainīts tulkojums, tiek uzskatīta par novecojušu. Tas apzināti **iesaldē jau
-pastāvošo tehnisko parādu** — atšķirības nevar atklāt, no kuras vecās angļu valodas vērtības
-ir radies sen pastāvošs tulkojums, tāpēc pārbaude vērtē tikai to, ko skar pašreizējās izmaiņas.
-Alternatīva (katras atslēgas jaucējkoda bāzlīnija) prasītu ~600 KB ģenerētu failu, kas būtu
-3× lielāks par lielāko esošo bāzlīniju un mainītos ar katru i18n PR.
+**Ņem vērā izmaiņas, nevis balstās uz bāzlīniju.** Tas salīdzina `en.json` apvienošanas bāzē ar
+darba koku; katrai atslēgai, kuras angļu valodas vērtība ir mainījusies, jebkura lokalizācija, kurā
+joprojām ir neskarts tulkojums, tiek uzskatīta par novecojušu. Tas apzināti **iesaldē iepriekš pastāvošo parādu** — izmaiņu
+salīdzinājums nevar atklāt, no kura vecā angļu teksta ir radies sen pastāvošs tulkojums, tāpēc vārteja vērtē
+tikai to, ko skar pašreizējās izmaiņas. Alternatīva (katras atslēgas jaucējvērtību bāzlīnija) prasītu
+aptuveni 600 KB ģenerētu failu, kas būtu 3× lielāks par lielāko esošo bāzlīniju un mainītos katrā i18n PR.
 
 To var izpildīt divos veidos:
 
 1. atjaunināt skartos tulkojumus vai
-2. iestatīt to vērtību uz `__MISSING__:<new english>` — izpildlaikā tad tiek nodrošināts izlabotais teksts angļu valodā
+2. iestatīt tos uz `__MISSING__:<new english>` — izpildlaikā tad tiek izmantots izlabotais angļu teksts
    (`src/i18n/request.ts::deepMergeFallback`, #7258), un atslēga tiek ievietota tulkošanas rindā.
 
 Ja ir mainījusies virknes **nozīme**, ieteicams **pārdēvēt atslēgu**: jauna atslēga nevar mantot
 novecojušu tulkojumu. Šādu pieeju izmantoja #8463.
 
 ```bash
-npm run i18n:check-value-drift          # stingrā pārbaude (to palaiž CI)
-npm run i18n:check-value-drift:warn     # tikai ziņojums
+npm run i18n:check-value-drift          # stingrā pārbaude (to izpilda CI)
+npm run i18n:check-value-drift:warn     # tikai pārskats
 BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 ```
 
 Beidzas ar kodu 0 un `SKIP reason=base-unresolved`, ja bāzes katalogu nevar nolasīt (sekls
-klons bez bāzes atsauces), tāpat kā `check-openapi-breaking`.
+klons bez bāzes atsauces), līdzīgi kā `check-openapi-breaking`.
 
 ### Uzdevums: `i18n`
 
 Pilna i18n validācijas matrica (viens uzdevums katrai lokalizācijai). Viss uzdevums ir konsultatīvs.
 
-| Skripts                         | Validē                                   | Bloķējošs                                                    |
-| ------------------------------- | ---------------------------------------- | ------------------------------------------------------------ |
-| `validate_translation.py quick` | Tulkojuma pilnīgumu katrai lokalizācijai | **Konsultatīvs** (`continue-on-error: true` visam uzdevumam) |
+| Skripts                         | Pārbauda                               | Bloķējošs                                                    |
+| ------------------------------- | -------------------------------------- | ------------------------------------------------------------ |
+| `validate_translation.py quick` | Tulkojuma pilnīgumu katrā lokalizācijā | **Konsultatīvs** (`continue-on-error: true` visam uzdevumam) |
 
 ### Uzdevums: `pr-test-policy`
 
 Tiek izpildīts tikai izmaiņu pieprasījumiem.
 
-| Skripts                | Validē                                                                                                                                                          | Bloķējošs |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- |
-| `check:pr-test-policy` | PR, kas maina produkcijas kodu mapēs `src/`, `open-sse/`, `electron/` vai `bin/`, ir jāiekļauj vai jāatjaunina testi (stingrais noteikums Nr. 8)                | Jā        |
-| `check:test-masking`   | Mainītie testu faili nesamazina kopējo apgalvojumu skaitu un nepievieno `assert.ok(true)` tautoloģijas                                                          | Jā        |
-| `check:pr-evidence`    | PR aprakstā ir norādīti izmaiņu testu/VPS pierādījumi (automatizē stingro noteikumu Nr. 18, pārmeklējot PR tekstu — trausli; skatiet neizdarīto darbu sarakstu) | Jā        |
+| Skripts                | Pārbauda                                                                                                                                                     | Bloķējošs |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------- |
+| `check:pr-test-policy` | PR, kas maina produkcijas kodu mapēs `src/`, `open-sse/`, `electron/` vai `bin/`, ir jāiekļauj vai jāatjaunina testi (Stingrais noteikums Nr. 8)             | Jā        |
+| `check:test-masking`   | Mainītie testu faili nesamazina kopējo apgalvojumu skaitu un nepievieno `assert.ok(true)` tautoloģijas                                                       | Jā        |
+| `check:pr-evidence`    | PR aprakstā ir norādīti izmaiņu testu/VPS pierādījumi (automatizē Stingro noteikumu Nr. 18, meklējot PR tekstā — trausli, skatiet nepadarīto darbu sarakstu) | Jā        |
 
 ### Uzdevums: `test-vitest`
 
-Tiek izpildīts pēc `build`. Kļūmes gadījumā bloķē sapludināšanu.
+Tiek izpildīts pēc `build`. Kļūmes gadījumā bloķē apvienošanu.
 
-| Komplekts        | Validē                                                            | Bloķējošs                                                                                                                           |
-| ---------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `test:vitest`    | MCP serveri (110 rīki), autoCombo, kešatmiņu — vitest izpildītājs | Jā                                                                                                                                  |
-| `test:vitest:ui` | UI komponentu testus — vitest izpildītājs                         | **Bloķējošs** — iepriekš pastāvošās kļūmes ir nepārprotami izslēgtas failā `vitest.config.ts`; jaunas kļūmes izraisa uzdevuma kļūmi |
+| Komplekts        | Pārbauda                                                          | Bloķējošs                                                                                                                      |
+| ---------------- | ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `test:vitest`    | MCP serveri (110 rīki), autoCombo, kešatmiņu — vitest izpildītājs | Jā                                                                                                                             |
+| `test:vitest:ui` | UI komponentu testus — vitest izpildītājs                         | **Bloķējošs** — iepriekš pastāvošās kļūmes ir skaidri izslēgtas failā `vitest.config.ts`; jaunas kļūmes izraisa uzdevuma kļūmi |
 
 ### Nakts darbplūsmas (ieplānotas, konsultatīvas)
 
-Tās tiek izpildītas pēc cron grafika (un ar `workflow_dispatch`), bet nekad PR ietvaros. Tās visas ir konsultatīvas.
+Tās tiek palaistas pēc cron grafika (un ar `workflow_dispatch`), nekad PR ietvaros. Visas ir konsultatīvas.
 
-| Darbplūsma             | Validē                                                                                                                                                                              | Bloķējoša        |
+| Darbplūsma             | Pārbauda                                                                                                                                                                            | Bloķējoša        |
 | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------- |
 | `nightly-property`     | fast-check īpašību testus ar nejaušu sākumvērtību un lielu izpildes reižu skaitu                                                                                                    | **Konsultatīva** |
-| `nightly-resilience`   | atmiņas kaudzes pieauguma pārbaudi, kļūmju haotisku ievadīšanu, k6 slodzes/ilgstošas slodzes testus                                                                                 | **Konsultatīva** |
-| `nightly-llm-security` | promptfoo injekciju aizsardzību (bloķēšanas režīmā) un garak pārbaudes (tiek izlaistas bez pakalpojumu sniedzēja noslēpuma)                                                         | **Konsultatīva** |
-| `nightly-schemathesis` | OpenAPI līguma izpludināto testēšanu (schemathesis) pret aktīvu OmniRoute, izmantojot `docs/openapi.yaml` — atklāj specifikācijas pārkāpumus/neapstrādātas 500 kļūdas (8. fāze B.4) | **Konsultatīva** |
-| `nightly-mutation`     | Stryker mutāciju testēšanas rezultātu ātrajā vienībtestu ceļā — izdzīvojušās mutācijas atklāj vājus apgalvojumus                                                                    | **Konsultatīva** |
-| `nightly-compat`       | Node dzinēja saderības matricu visiem atbalstītajiem `engines.node` diapazoniem                                                                                                     | **Konsultatīva** |
+| `nightly-resilience`   | steka pieauguma slieksni, kļūmju ievadi haosa testēšanai, k6 slodzes/ilgstošas slodzes testus                                                                                       | **Konsultatīva** |
+| `nightly-llm-security` | promptfoo injekciju aizsardzību (bloķēšanas režīmā) + garak zondes (tiek izlaistas bez pakalpojuma sniedzēja noslēpuma)                                                             | **Konsultatīva** |
+| `nightly-schemathesis` | OpenAPI līguma izplūdušo testēšanu (schemathesis) pret aktīvu OmniRoute, izmantojot `docs/openapi.yaml` — atklāj specifikācijas pārkāpumus / neapstrādātas 500 kļūdas (8. fāze B.4) | **Konsultatīva** |
+| `nightly-mutation`     | Stryker mutāciju testēšanas rezultātu ātrajā vienībtestu joslā — izdzīvojušās mutācijas atklāj vājus apgalvojumus                                                                   | **Konsultatīva** |
+| `nightly-compat`       | Node dzinēja saderības matricu visos atbalstītajos `engines.node` diapazonos                                                                                                        | **Konsultatīva** |
 
-Veiktspējas bāzlīnijas (atmiņas kaudze, TTFB, būvēšanas laiks) tiek reģistrētas, bet netiek izmantotas kā bloķējošas pārbaudes: skatiet [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
+Veiktspējas etalonvērtības (steks, TTFB, būvēšanas laiks) tiek reģistrētas, bet netiek izmantotas kā slieksnis: skatiet [`PERF_BASELINE.md`](../ops/PERF_BASELINE.md) (`npm run perf:lts-baseline`).
 
 ---
 
@@ -499,39 +566,39 @@ aizsardzība: `tests/unit/verify-ratchet-bank.test.ts`.
 Uzdevums nekad neveic `push` uz `release/*` — PR apvieno cilvēks, tādēļ kļūdains mērījums
 nevar nonākt zarā bez pārskatīšanas.
 
-## Atļauto vienumu saraksta politika
+## Atļauto izņēmumu saraksta politika
 
-Katra pārbaude, kas nevar neizdoties jau pastāvošu pārkāpumu dēļ, izmanto fiksētu atļauto vienumu sarakstu
+Katrā pārbaudē, kas nedrīkst neizdoties jau esošu pārkāpumu dēļ, tiek izmantots fiksēts atļauto izņēmumu saraksts
 (piemēram, `KNOWN_STALE_DOC_REFS`, `KNOWN_MISSING`, `KNOWN_RAW_SQL`). Politika ir šāda:
 
-**Novērsiet pamatcēloni; izmantojiet atļauto vienumu sarakstu tikai tad, ja pārkāpums jau pastāvēja un
+**Novērsiet pamatcēloni; izmantojiet atļauto izņēmumu sarakstu tikai tad, ja pārkāpums jau pastāvēja un
 to nevar novērst tajā pašā PR.**
 
-Pievienojot ierakstu atļauto vienumu sarakstam:
+Pievienojot ierakstu atļauto izņēmumu sarakstam:
 
 1. Iekļaujiet komentāru ar pamatojumu.
-2. Norādiet izsekošanas problēmu (piemēram, `// #3498 — 2. posma funkcionalitāte vēl nav ieviesta`).
-3. Noņemiet ierakstu tajā pašā PR, kurā tiek novērsts pārkāpums — novecojis ieraksts, kas vairs
-   nenomāc aktīvu pārkāpumu, pats par sevi ir defekts (pēc 6A.3 novecojušo ierakstu kontroles
-   ieviešanas pārbaude neizdosies, ja atļauto vienumu sarakstā būs bāreņieraksts).
+2. Norādiet izsekošanas pieteikumu (piemēram, `// #3498 — Phase 2 feature, not yet implemented`).
+3. Dzēsiet ierakstu tajā pašā PR, kurā tiek novērsts pārkāpums — novecojis ieraksts, kas vairs
+   neapspiež aktīvu pārkāpumu, pats par sevi ir defekts (pēc ieviešanas 6A.3 novecojušo kontroles noteikumu pārbaude
+   neizturēs pārbaudi, ja atļauto izņēmumu sarakstā būs palicis bāreņieraksts).
 
-**Nepievienojiet** atļauto vienumu saraksta ierakstus, lai testi izpildītos ātrāk. Sekmīga pārbaude ar augošu
-atļauto vienumu sarakstu rada maldīgu kvalitātes iespaidu.
+**Nepievienojiet** ierakstus atļauto izņēmumu sarakstam, lai testi tiktu izpildīti ātrāk. Sekmīga pārbaude ar augošu
+atļauto izņēmumu sarakstu rada maldīgu kvalitātes iespaidu.
 
 ### Ja pārbaude jūsu PR neizdodas
 
-1. **Rūpīgi izlasiet pārbaudes izvadi** — tajā ir precīzi norādīts, kurš fails vai simbols
-   pārkāpa noteikumu.
-2. **Novērsiet pārkāpumu** — vairums pārbaužu ir deterministiskas failu sistēmas pārbaudes, kas ir sekmīgas, tiklīdz
+1. **Rūpīgi izlasiet pārbaudes izvadi** — tajā precīzi norādīts, kurš fails vai simbols
+   ir pārkāpis noteikumu.
+2. **Novērsiet pārkāpumu** — lielākā daļa pārbaužu ir deterministiskas failu sistēmas pārbaudes, kas izdodas, tiklīdz
    kods ir pareizs.
-3. **Ja pārkāpums jau pastāvēja** (t. i., jūs to neieviesāt, bet pārbaude tagad
-   to aptver): pievienojiet atļauto vienumu saraksta ierakstu ar pamatojuma komentāru un izsekošanas problēmu.
+3. **Ja pārkāpums jau pastāvēja** (proti, jūs to neieviesāt, bet pārbaude tagad
+   to aptver): pievienojiet ierakstu atļauto izņēmumu sarakstam ar pamatojuma komentāru un izsekošanas pieteikumu.
 4. **Ja pārbaude ir sprūdrata tipa** (pārklājums, ESLint brīdinājumi, dublēšanās, sarežģītība):
-   jūsu izmaiņas pasliktināja metriku. Novērsiet pamatproblēmu vai (retos gadījumos) izpildiet
+   jūsu izmaiņas ir pasliktinājušas metriku. Novērsiet pamatproblēmu vai (retos gadījumos) izpildiet
    `npm run quality:ratchet -- --update`, ja izmaiņas ir apzinātas un metrikas
-   pasliktināšanās ir pieņemama, taču dokumentējiet iemeslu PR aprakstā.
+   pasliktināšanās ir pieņemama, taču PR aprakstā dokumentējiet tās iemeslu.
 5. **Konsultatīvās pārbaudes** (`continue-on-error: true`) ir informatīvas — tās nebloķē
-   sapludināšanu, taču tiek parādītas CI kopsavilkumā. Tik un tā tās novērsiet.
+   sapludināšanu, taču ir redzamas CI kopsavilkumā. Tik un tā novērsiet tajās konstatētās problēmas.
 
 ---
 
@@ -561,43 +628,43 @@ savienojuma kļūdu un nekad nepārtrauc sesijas.
 
 ---
 
-## Racionalizācijas neizdarīto darbu saraksts (ROI pārskats — 9. fāze, 3. vilnis)
+## Racionalizācijas neizpildīto darbu saraksts (ROI pārskatīšana — 9. fāze, 3. vilnis)
 
-Šis inventārs 2026-06-17 tika saskaņots ar `ci.yml` (iepriekšējā versijā bija izlaisti
+Šis uzskaitījums 2026-06-17 tika saskaņots ar `ci.yml` (iepriekšējā versijā nebija iekļauti
 `audit:deps`, `check:tracked-artifacts`, `check:lockfile`, `check:licenses`,
 `check:dead-code`, `check:cognitive-complexity`, `check:type-coverage`,
-`check:codeql-ratchet`, `check:pr-evidence`). Saskaņotās kopas ROI pārskatā
-tika identificēti tālāk norādītie racionalizācijas kandidāti. **Apvienošanas ir mehāniskas CI
-izmaiņas; pārslēgšanas/atmešanas ir politikas lēmumi, kas atstāti operatora ziņā.** Nekas no tālāk minētā
-vēl nav piemērots.
+`check:codeql-ratchet`, `check:pr-evidence`). Saskaņotās kopas ROI pārskatīšanā
+tika noteikti tālāk minētie racionalizācijas kandidāti. **Apvienošanas ir mehāniskas CI
+izmaiņas; režīma maiņa/noņemšana ir operatoram atstāti politikas lēmumi.** Nekas no tālāk
+minētā vēl nav ieviests.
 
 **Iepriekš nav dokumentēti arī** (konsultatīvi, zems signāla līmenis): `docs-lint` darbs
 (markdownlint + Vale, visam darbam iestatīts `continue-on-error`) un savrupās skenēšanas darbplūsmas
-`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` ir ietverts
-`quality-baseline.json`, bet nav piesaistīts bloķējošam sprūdratam failā `ci.yml` — šī metrika
-pašlaik ir bāreņmetrika.
+`semgrep.yml` / `codeql.yml` / `scorecard.yml`. `semgrepFindings: 0` ir norādīts
+`quality-baseline.json`, taču nav piesaistīts bloķējošam sliekšņa mehānismam failā `ci.yml` — šis rādītājs
+pašlaik ir nesaistīts.
 
 ### Apvienošana / dublikātu novēršana (mehāniski, zemāks risks)
 
-Katrs kandidāts 2026-06-17 tika pārbaudīts pret aktuālo vārtu stāvokli (uzticies, bet pārbaudi);
-vairākas „acīmredzamas” apvienošanas tomēr slēpa tehnisko parādu un **nav** tīri, tieši aizstājēji.
+Katrs kandidāts 2026-06-17 tika pārbaudīts pret aktīvo vārteju stāvokli (uzticies, bet pārbaudi);
+vairākas „acīmredzamas” apvienošanas izrādījās tādas, kas slēpj tehnisko parādu, un **nav** tieši aizstājamas.
 
-- **`check:docs-sync` tiek palaists divreiz** — atsevišķi `lint` darbā un vēlreiz `check:docs-all` (`docs-sync-strict`) ietvaros un husky pirmskomita āķī. ✅ **PABEIGTS** — atsevišķā izsaukšana `lint` darbā ir noņemta.
-- **CVE skenēšana** — ❌ **NAV tīri apvienojama.** `audit:deps` izraisa stingru kļūmi jebkuras augstas/kritiskas CVE gadījumā; `check:vuln-ratchet` (osv) izraisa kļūmi tikai _regresijas_ gadījumā salīdzinājumā ar bāzes līmeni (pašlaik 1 MODERATE). Atšķirīga semantika — atmetot `audit:deps`, tiktu zaudēti absolūtie augstas/kritiskas nozīmības vārti. Paturēt abus.
-- **Ciklu noteikšana** — ✅ **PABEIGTS** (#15159 G-01/G-02). Iepriekšējā tekstā `check:cycles` bija nosaukts par „zaļajiem, rūpīgi atlasītajiem” vārtiem, un to bloķējošais statuss tika pamatots ar to, ka `check:circular-deps` (dpdm) ziņoja par 91 ciklu. Šis zaļais statuss bija **kļūdaini zaļš**: `check:cycles` skenēja 5 apakšdirektorijus (450 failus), atpazina tikai statiskos `import|export … from` un atmeta katru `@/` un `@omniroute/open-sse/` specifikatoru, tādēļ tas nevarēja konstatēt dinamiskās importēšanas un aizstājvārdu ciklus, kas dominēja repozitorijā. Labots: tagad vārti apstaigā `src` + `open-sse` (5023 failus), apkopo specifikatorus no TypeScript AST (tādēļ `import("…")` tiek ieskaitīts, bet tipa pozīcijas `typeof import("…")` — netiek) un atrisina tsconfig `paths`. Tas atrod **14** ciklus, nevis 0. Tā kā 14 iepriekš pastāvošus ciklus nevar novērst vārtu PR ietvaros, `check:cycles` tagad ir **sprūdrats** (`--ratchet`, griesti `metrics.cycles.value = 14` failā `quality-baseline.json`, `direction: down`) — tas bloķē jebkuru _regresiju_, un ciklu skaits var tikai samazināties. CI izpilda `npm run check:cycles:ratchet`. Pakāpeniskā samazināšana notiek kopā ar **A-01**. `check:circular-deps` (dpdm) paliek konsultatīvs kā plašāks otrais viedoklis.
-- **Sarežģītība** — ✅ **PABEIGTS** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): viena ESLint apstaigāšana, uzskaite pēc ruleId, lai ciklomātiskās sarežģītības+max-lines un kognitīvās sarežģītības bāzes līmeņi paliktu neatkarīgi; individuālie `check:complexity` / `check:cognitive-complexity` paliek lokālai `--update` izmantošanai.
-- **`/api` prethalucināciju pārbaude** — ✅ **PABEIGTS** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): viena `src/app/api` failu sistēmas inventarizācija; openapi-routes + docs-symbols joprojām sniedz pārskatus neatkarīgi; individuālās pārbaudes paliek lokālai izpildei.
-- **`check:node-runtime` tiek palaists 11 darbos** — ⚠️ **zema ROI.** Katrs izmanto atsevišķu izpildītāju, un pārbaude ilgst <1 s; kopējais ietaupījums ir ~10 s, taču tiktu zaudēta lēta katra darba aizsargpārbaude. Nav vērts radīt izmaiņu troksni.
-- **`typecheck:noimplicit:core` CI lintēšanas darbā** — ✅ **noņemts no lintēšanas darba** (bija konsultatīvs `continue-on-error`); bloķējošo tipu virsmu nodrošina `typecheck:core` + `check:type-coverage`. Lokālais skripts ir saglabāts.
+- **`check:docs-sync` tiek palaists divreiz** — atsevišķi `lint` darbā un vēlreiz `check:docs-all` (`docs-sync-strict`) ietvaros, kā arī husky pirmskomita āķī. ✅ **PABEIGTS** — atsevišķais `lint` izsaukums noņemts.
+- **CVE skenēšana** — ❌ **NAV iespējama vienkārša apvienošana.** `audit:deps` bloķē kritiskus drošības ieteikumus un nepabeigtas revīzijas visos piecos bloķēšanas failos, bet saskaņā ar pašreizējo politiku par augsta līmeņa drošības ieteikumiem ziņo kā par brīdinājumiem; `check:vuln-ratchet` (osv) neizdodas tikai tad, ja salīdzinājumā ar repozitorijā saglabāto bāzes līmeni ir notikusi _regresija_, un noraida trūkstošus mērījumus, ja tie ir obligāti. Semantika atšķiras — noņemot `audit:deps`, tiktu zaudēta absolūtā kritisko problēmu vārteja un neatkarīgie pakotņu revīzijas apliecinājumi. Jāsaglabā abi.
+- **Ciklu noteikšana** — ✅ **PABEIGTS** (#15159 G-01/G-02). Iepriekšējā tekstā `check:cycles` tika saukts par „zaļo, rūpīgi atlasīto” vārteju, un tā saglabāšana bloķējošā režīmā tika pamatota ar to, ka `check:circular-deps` (dpdm) ziņoja par 91 ciklu. Šis zaļais statuss bija **kļūdaini pozitīvs**: `check:cycles` skenēja 5 apakšdirektorijus (450 failus), atrada tikai statiskus `import|export … from` lietojumus un atmeta katru `@/` un `@omniroute/open-sse/` specifikatoru, tādēļ nespēja konstatēt dinamiskā importa un aizstājvārdu ciklus, kas dominēja repozitorijā. Labots: vārteja tagad apstaigā `src` + `open-sse` (5023 failus), apkopo specifikatorus no TypeScript AST (tādēļ `import("…")` tiek ieskaitīts, bet tipa pozīcijā esošais `typeof import("…")` — netiek) un atrisina tsconfig `paths`. Tā atrod **14** ciklus, nevis 0. Tā kā 14 iepriekš pastāvējušus ciklus nevar novērst vārtejas PR ietvaros, `check:cycles` tagad ir **sliekšņa mehānisms** (`--ratchet`, augšējā robeža `metrics.cycles.value = 14` failā `quality-baseline.json`, `direction: down`) — tas bloķē jebkuru _regresiju_, un skaits var tikai samazināties. CI izpilda `npm run check:cycles:ratchet`. Pakāpeniska samazināšana tiek veikta kopā ar **A-01**. `check:circular-deps` (dpdm) paliek konsultatīvs kā plašāks otrais viedoklis.
+- **Sarežģītība** — ✅ **PABEIGTS** (`check:complexity-ratchets` / `eslint.complexity-ratchets.config.mjs`): viena ESLint apstaigāšana, skaitīšana pēc ruleId, lai ciklomātiskās sarežģītības un maksimālā rindu skaita bāzes līmeņi paliktu neatkarīgi no kognitīvās sarežģītības bāzes līmeņa; atsevišķie `check:complexity` / `check:cognitive-complexity` tiek saglabāti lokālai `--update` lietošanai.
+- **`/api` antihalucināciju pārbaude** — ✅ **PABEIGTS** (`check:api-docs-refs` + `scripts/check/lib/apiRoutes.mjs`): viena `src/app/api` failu sistēmas inventarizācija; openapi-routes un docs-symbols joprojām ziņo neatkarīgi; atsevišķās pārbaudes tiek saglabātas lokālai palaišanai.
+- **`check:node-runtime` tiek palaists 11 darbos** — ⚠️ **zems ROI.** Katram darbam ir atsevišķs izpildītājs, un pārbaude ilgst <1 s; kopējais ietaupījums būtu ~10 s, bet tiktu zaudēta lēta katra darba aizsardzība. Izmaiņu radītā slodze nav tā vērta.
+- **`typecheck:noimplicit:core` CI lint pārbaudē** — ✅ **noņemts no lint darba** (bija konsultatīvs `continue-on-error`); bloķējošo tipu tvērumu nodrošina `typecheck:core` + `check:type-coverage`. Lokālais skripts saglabāts.
 
-### Pārslēgt / izlemt (operatora politika)
+### Mainīt režīmu / izlemt (operatora politika)
 
-- `check:openapi-security-tiers` (konsultatīvs) — ❌ **NAV tīri pārslēdzams.** Tas iziet ar kodu 0, bet brīdina, ka vairākiem `traffic-inspector` maršrutiem zem `LOCAL_ONLY_API_PREFIXES` trūkst anotācijas `x-loopback-only: true`. Lai to padarītu obligātu, vispirms šīs anotācijas jāpievieno failam `openapi.yaml`.
-- `typecheck:noimplicit:core` (konsultatīvs) — lielākoties to aizstāj bloķējošais `check:type-coverage` sprūdrats. Pārslēgt uz sprūdratu vai atmest lieko otro `tsc` izpildi.
-- `test:vitest:ui` (tagad **bloķējošs**) — iepriekš pastāvošās kļūmes ir tieši izslēgtas failā `vitest.config.ts` ar `// #8618` izsekošanas komentāriem; jaunas kļūmes izraisa darba kļūmi.
-- `check:secrets` (gitleaks, bloķējošs sprūdrats, iesaldēts pie 3 dokumentētiem kļūdaini pozitīviem rezultātiem) — pievienot šos 3 atļauto vienumu sarakstam, lai sasniegtu 0, vai pazemināt līdz konsultatīvam statusam. Pārklājas ar GitHub iebūvēto slepeno datu skenēšanu + `check:public-creds`.
-- `check:pr-evidence` (bloķējošs, meklē atbilstības PR apraksta prozas tekstā) — augsts kļūdaini pozitīvu rezultātu risks; atmešana vājinātu Stingrā noteikuma Nr. 18 izpildi, tāpēc šis ir īsts politikas lēmums.
-- `semgrep` (konsultatīva savrupā pārbaude) — OWASP kategorijās pārklājas ar CodeQL; piesaistīt tā bāzes līmeni sprūdratam vai atmest.
+- `check:openapi-security-tiers` (konsultatīvs) — ❌ **NAV iespējams vienkārši pārslēgt.** Tas beidz darbu ar kodu 0, bet brīdina, ka vairākiem `traffic-inspector` maršrutiem zem `LOCAL_ONLY_API_PREFIXES` trūkst anotācijas `x-loopback-only: true`. Lai to padarītu obligātu, vispirms šīs anotācijas jāpievieno failam `openapi.yaml`.
+- `typecheck:noimplicit:core` (konsultatīvs) — to lielā mērā aizstāj bloķējošais `check:type-coverage` sliekšņa mehānisms. Pārveidojiet to par sliekšņa mehānismu vai noņemiet lieko otro `tsc` izpildi.
+- `test:vitest:ui` (tagad **bloķējošs**) — iepriekš pastāvējušās kļūmes ir nepārprotami izslēgtas failā `vitest.config.ts`, izmantojot `// #8618` izsekošanas komentārus; jaunas kļūmes izraisa darba neizdošanos.
+- `check:secrets` (gitleaks, bloķējošs sliekšņa mehānisms) — pašreizējā augšējā robeža ir `metrics.secretFindings` failā `quality-baseline.json`. Katram izņēmumam nepieciešams pamatots `.gitleaks.toml` ieraksts; nepieejams mērījums tiek uzskatīts par NEPILNĪGU. Skenēšana papildina GitHub iebūvēto noslēpumu skenēšanu un `check:public-creds`.
+- `check:pr-evidence` (bloķējošs, meklē atbilstības PR apraksta tekstā) — augsts kļūdaini pozitīvu rezultātu risks; tā noņemšana vājinātu stingrā noteikuma Nr. 18 izpildi, tādēļ tas ir īsts politikas lēmums.
+- `semgrep` (konsultatīvs, savrups) — OWASP kategorijās pārklājas ar CodeQL; piesaistiet tā bāzes līmeni sliekšņa mehānismam vai noņemiet.
 
 ---
 
@@ -605,75 +672,72 @@ vairākas „acīmredzamas” apvienošanas tomēr slēpa tehnisko parādu un **
 
 - Piegādes ķēde (izcelsme, SBOM, Trivy, Scorecard): [`docs/security/SUPPLY_CHAIN.md`](../security/SUPPLY_CHAIN.md)
 
-#### `check-key-completeness` — atslēgu kopu paritātes pārbaude
+#### `check-key-completeness` — atslēgu kopu atbilstības vārteja
 
-`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, darbs `i18n-ui-coverage`).
-Salīdzina katra `src/i18n/messages/<locale>.json` lapu atslēgu kopu ar `en.json` un izraisa kļūdu,
-ja trūkst kādas lapas atslēgas vai ir kāda lieka, neatkarīgi no tā, kad atslēga tika pievienota.
-Vietturi `__MISSING__:` tiek uzskatīti par esošiem (to saturs ir attiecības pārbaudes kompetencē).
-Šī pārbaude ir absolūts papildinājums abām uz izmaiņām/procentiem balstītajām pārbaudēm:
-`check-ui-keys-coverage` katrai lokalizācijai nosaka 80 % minimumu (43 trūkstošas atslēgas no
-~13 000 joprojām uzrāda 99,7 %), bet `check-new-key-coverage` vērtē tikai tās atslēgas, ko PR
-pievieno failam `en.json`. Lokalizāciju pakete tiek ģenerēta no tās dienas `en.json`, kad tiek
-izveidots tās zars, un tulkošana turpinās vairākas dienas, kamēr pamata zarā tiek pievienotas
-jaunas atslēgas; pats paketes PR nepievieno nevienu atslēgu, tādēļ abas saistītās pārbaudes
-klusēja, kad 1. pakete (#13044) tika sapludināta ar 43 trūkstošām atslēgām deviņās lokalizācijās
-un 2. pakete (#13660) — ar 10 trūkstošām atslēgām astoņās lokalizācijās (2026-09-15). Kļūdu
-novērsiet ar `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; `extra`
-lapas atslēga nozīmē, ka avotā tā ir noņemta — izdzēsiet to no lokalizācijas. `--warn` ziņo,
-neizraisot kļūdu. `--catalog=cli` veic tādu pašu salīdzināšanu direktorijā `bin/cli/locales`
-(`npm run i18n:check-keys:cli`); abas darbības atrodas darbā `i18n-ui-coverage`.
+`scripts/i18n/check-key-completeness.mjs` (`npm run i18n:check-keys`, uzdevums `i18n-ui-coverage`).
+Salīdzina katra `src/i18n/messages/<locale>.json` gala atslēgu kopu ar `en.json` un konstatē
+kļūmi, ja trūkst kādas gala atslēgas vai ir kāda lieka gala atslēga, neatkarīgi no tā, kad atslēga
+tika pievienota. `__MISSING__:` vietturi tiek uzskatīti par esošiem (to saturs ir attiecības
+vārtejas kompetencē). Tas ir abu uz atšķirībām/procentuālo daļu balstīto vārteju absolūts
+papildinājums: `check-ui-keys-coverage` katrai lokalizācijai nosaka 80 % minimumu (43 trūkstošas
+atslēgas no ~13 000 joprojām uzrāda 99,7 %), savukārt `check-new-key-coverage` vērtē tikai tās
+atslēgas, kuras PR pievieno failam `en.json`. Lokalizāciju pakete tiek ģenerēta no tās dienas
+`en.json`, kad tiek izveidots tās zars, un tulkošana turpinās vairākas dienas, kamēr bāzes zarā
+joprojām tiek pievienotas atslēgas; paketes PR pats nepievieno nevienu atslēgu, tāpēc abas radniecīgās
+vārtejas neko neziņoja, kad 1. paketei (#13044) deviņās lokalizācijās trūka 43 atslēgu un 2. paketei (#13660) astoņās lokalizācijās trūka 10 atslēgu (2026-09-15). Lai novērstu kļūmi,
+izmantojiet `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers`; `extra` gala
+atslēga nozīmē, ka avotā tā ir noņemta — izdzēsiet to no lokalizācijas. `--warn` ziņo, neizraisot
+kļūmi. `--catalog=cli` veic tādu pašu salīdzināšanu direktorijā `bin/cli/locales`
+(`npm run i18n:check-keys:cli`); abas darbības atrodas uzdevumā `i18n-ui-coverage`.
 
-#### `check-new-key-coverage` — jauno atslēgu i18n pārbaude
+#### `check-new-key-coverage` — jauno atslēgu i18n vārteja
 
-`check-ui-value-drift` saistītā pārbaude. Tā konstatē gadījumu, kad angļu valodas vērtība ir
-**pārrakstīta**, bet tās tulkojumi nav atjaunināti; šī pārbaude konstatē gadījumu, kad angļu
-valodas atslēga ir **pievienota**, bet dažas lokalizācijas to nekad nav saņēmušas.
+`check-ui-value-drift` radniecīgā vārteja. Tā konstatē gadījumus, kad angļu valodas vērtība ir
+**pārrakstīta**, bet tās tulkojumi nav atjaunināti; šī vārteja konstatē gadījumus, kad angļu valodas
+atslēga ir **pievienota**, bet dažas lokalizācijas to tā arī nav saņēmušas.
 
-`check-ui-keys-coverage` nevar konstatēt šīs kategorijas problēmas: tā katrai lokalizācijai nosaka
-procentuālu minimumu, un vienpadsmit trūkstošas atslēgas no ~13 000 saglabā pārklājumu 99,9 %
-līmenī. Procentuāls rādītājs katrai valodai nevar izteikt, ka „šis līdzeklis tika izlaists
-netulkots” — viss līdzeklis var nonākt jaunā lokalizācijā bez jebkāda teksta, nemaz nemainot šo
-skaitli.
+`check-ui-keys-coverage` nevar konstatēt šādas situācijas: tā katrai lokalizācijai nosaka minimālo
+procentuālo daļu, un vienpadsmit trūkstošas atslēgas no ~13 000 saglabā pārklājumu 99,9 % līmenī.
+Procentuālā daļa katrai valodai nespēj izteikt, ka „šis līdzeklis tika izlaists neiztulkots” — jaunā
+lokalizācijā var nonākt vesels līdzeklis bez jebkāda teksta, nemainot šo skaitli.
 
-Notikums, ko tā kodificē: Orchestration Canvas 3. posmā tā vienpadsmit atslēgas tika iztulkotas
-visās 42 tobrīd esošajās lokalizācijās. Dažas stundas vēlāk ES valodu pakete (#13044) palielināja
-repozitorija lokalizāciju skaitu līdz 51, un deviņas jaunpienācējas (`el`, `et`, `ga`, `hr`, `lt`,
-`lv`, `mt`, `sl`, `sr`) tās nekad nesaņēma. `deepMergeFallback` trūkstošas atslēgas vietā izmanto
-angļu valodu, tādēļ problēma izpaudās kā netulkota, nevis tukša lietotāja saskarne — reāla un pēc
-uzbūves klusa.
+Incidents, ko tā novērš: Orchestration Canvas 3. posmā tā vienpadsmit atslēgas tika iztulkotas
+visās 42 tajā laikā esošajās lokalizācijās. Pēc dažām stundām ES valodu pakete (#13044) palielināja
+repozitorijā esošo lokalizāciju skaitu līdz 51, un deviņas jaunās lokalizācijas (`el`, `et`, `ga`,
+`hr`, `lt`, `lv`, `mt`, `sl`, `sr`) tās tā arī nesaņēma. `deepMergeFallback` trūkstošas atslēgas
+vietā ievieto angļu tekstu, tāpēc kļūmes izpausme bija netulkota, nevis tukša lietotāja saskarne —
+reāla un pēc konstrukcijas nemanāma.
 
-Tāpat kā saistītā pārbaude, arī šī **ņem vērā izmaiņas**, salīdzinot angļu valodu sapludināšanas
-bāzē ar darba koku, tādēļ iepriekš pastāvējušie iztrūkumi paliek iesaldēti un pārbaudes
-ieslēgšanai nebija nepieciešama migrācija.
+Tāpat kā radniecīgā vārteja, tā **ņem vērā atšķirības**, salīdzinot angļu valodu sapludināšanas bāzē
+ar darba koku, tāpēc iepriekš pastāvējušie iztrūkumi paliek fiksēti un vārtejas ieslēgšanai nebija
+nepieciešama migrācija.
 
-**Marķieris `__MISSING__:<english>` to neapmierina (kopš 2026-09-17).** Iepriekš tas bija
-dokumentētais atlikšanas mehānisms — izpildlaikā tiek izmantota pareizā angļu valodas vērtība —,
-līdz astoņi līdzekļu PR 2026-09-16 pievienoja 61 atslēgu un tulkošanas vietā ievietoja marķieri
-visās 65 lokalizācijās: šī pārbaude pieņēma ikvienu no tiem, nekas nebloķēja PR, un bloķējošā
-īsto tulkojumu attiecības pārbaude pēc tam neizdevās laidiena galotnē visiem (pt-BR 3,2 % >
-2,5 % + 0,5). Marķieris tagad tiek vērtēts kā trūkstošs tulkojums. Kļūdu novērsiet ar
+**Marķieris `__MISSING__:<english>` šo prasību neizpilda (kopš 2026-09-17).** Iepriekš tas bija
+dokumentētais atlikšanas mehānisms — izpildlaikā tika izmantots pareizais angļu teksts —, līdz astoņi
+līdzekļu PR 2026-09-16 pievienoja 61 atslēgu un ievietoja marķieri visās 65 lokalizācijās, nevis tās
+iztulkoja: šī vārteja pieņēma ikvienu no tiem, nekas nebloķēja PR, un bloķējošā reālo tulkojumu
+attiecības vārteja pēc tam neizturēja pārbaudi laidiena zara galā visiem (pt-BR 3,2 % > 2,5 % + 0,5).
+Marķieris tagad tiek uzskatīts par trūkstošu tulkojumu. Lai novērstu kļūmi, izmantojiet
 `node scripts/i18n/sync-ui-keys.mjs --locale=<codes> --translate-markers --batch-size=40` vai
-visās lokalizācijās paralēli ar `npm run i18n:translate-new-keys`
-(`scripts/i18n/translate-new-keys.sh`, drošs lietošanai atvienotā režīmā, atsakās sākt darbu bez
-vides mainīgajiem `OMNIROUTE_TRANSLATION_*`). Atslēgai, kurai jāpaliek angļu valodā
-(fiksētam produkta, dzinēja vai karoga nosaukumam), jāatrodas failā
-`scripts/i18n/untranslatable-keys.json`, un tā nekad nav slēpjama aiz marķiera. `vi` marķieri
-aizliedz pilnībā (`tests/unit/i18n-vi-completeness.test.ts`).
+visām lokalizācijām paralēli — `npm run i18n:translate-new-keys`
+(`scripts/i18n/translate-new-keys.sh`, drošs darbībai atsaistītā režīmā, atsakās sākt darbu bez
+`OMNIROUTE_TRANSLATION_*` vides mainīgajiem). Atslēga, kurai jāpaliek angļu valodā (fiksēts
+produkta/dzinēja/karoga nosaukums), jāievieto failā `scripts/i18n/untranslatable-keys.json`, un to
+nekad nedrīkst slēpt aiz marķiera. `vi` pilnībā aizliedz marķierus
+(`tests/unit/i18n-vi-completeness.test.ts`).
 
-#### `check-vitest-exclusions` — atlikto testu pārbaude
+#### `check-vitest-exclusions` — atlikto testu vārteja
 
-Fails `vitest.config.ts` sarakstā `exclude` ir tests, kas netiek izpildīts, lai gan ikvienam,
-kurš aplūko koku, tas izskatās pēc pārklājuma. Aiz komentāra
-`// #8618 — iepriekš pastāvoša kļūme; pēc izlabošanas noņemiet šo izņēmumu` bija sakrājušies
-sešdesmit divi faili. Problēma #8618 tika aizvērta 2026-08-11, kamēr tās izsekotais saraksts
-pieauga no 45 līdz 62 ierakstiem un katrs jaunais ieraksts mantoja komentāru ar atsauci uz
-slēgtu problēmu. Kad saraksts beidzot tika pārbaudīts failu pa failam (#13204), **51 no 62
-testiem pašreizējā kokā izdevās bez avota koda izmaiņām**.
+Fails `vitest.config.ts` sarakstā `exclude` ir tests, kas netiek izpildīts, taču ikvienam, kas
+aplūko koku, tas izskatās pēc pārklājuma. Aiz komentāra
+`// #8618 — pre-existing failure; remove this exclusion when fixed` bija uzkrājušies sešdesmit divi
+faili. Problēma #8618 tika slēgta 2026-08-11, kamēr tās izsekotais saraksts pieauga no 45 līdz
+62 ierakstiem, un katrs jaunais ieraksts pārmantoja komentāru, kas norādīja uz slēgtu problēmu.
+Kad saraksts beidzot tika pārbaudīts pa vienam failam (#13204), **51 no 62 testiem pašreizējā kokā
+izdevās bez jebkādām avota izmaiņām**.
 
-Pārbaude pieprasa, lai katrs izņēmums, kas norāda uz reālu failu, (a) nosauktu izsekošanas
-problēmu un (b) būtu iekļauts failā `config/quality/vitest-exclusions.json` kopā ar tā izmērīto
-statusu, lai jauna izņēmuma pievienošana būtu pārskatāma izmaiņa īpaši tam paredzētā failā,
-nevis vēl viena rinda 60 ierakstu masīvā. Tā apzināti neizpilda izslēgtos testus atkārtoti —
-tas aizņem ~10 minūtes un ir periodiska darba uzdevums; uzskaitē tiek reģistrēts, kad katrs
-tests pēdējo reizi tika pārbaudīts.
+Vārteja pieprasa, lai katrs izņēmums, kas norāda uz reālu failu, (a) nosauktu izsekošanas problēmu
+un (b) būtu iekļauts failā `config/quality/vitest-exclusions.json` ar tā izmērīto statusu, tādējādi
+jauna izņēmuma pievienošana kļūst par pārskatāmu izmaiņu tam paredzētā failā, nevis vēl vienu rindu
+60 ierakstu masīvā. Tā apzināti neizpilda izslēgtos testus atkārtoti — tas aizņem ~10 minūtes un ir
+periodiska uzdevuma kompetencē; uzskaitē tiek reģistrēts, kad katrs tests pēdējoreiz tika pārbaudīts.

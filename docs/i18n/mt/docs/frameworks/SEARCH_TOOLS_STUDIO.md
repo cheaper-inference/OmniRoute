@@ -54,7 +54,7 @@ Tab ġdid għall-estrazzjoni tal-kontenut minn URL permezz ta’ `POST /v1/web/f
 - Input: URL + swiċċ għall-paġna sħiħa + selettur tal-format (markdown / test / HTML).
 - Issottometti → ġib → irrendi `ScrapeResult.tsx`.
 - `ScrapeResult` jirrendi previżjoni tal-markdown + swiċċ għall-verżjoni mhux ipproċessata.
-- Limitu: jekk il-korp tar-rispons ikun akbar minn **256 KB**, l-UI turi `(maqtugħ, ara l-verżjoni mhux ipproċessata)` u tiftaħ il-verżjoni mhux ipproċessata f’modal ta’ Monaco (D21).
+- Limitu: jekk il-korp tar-rispons ikun akbar minn **256 KB**, l-UI turi `View full raw content` u tiftaħ il-verżjoni mhux ipproċessata f’modal (D21).
 - Pannell tal-metadata: fornitur (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latenza, spiża, daqs tar-rispons, għadd ta’ links.
 - Juża l-hook `useScrapeFetch.ts`.
 

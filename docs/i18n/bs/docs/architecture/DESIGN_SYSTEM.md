@@ -93,26 +93,26 @@
    `src/shared/utils/categoricalPalette.ts` i, za strategije rutiranja,
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow bridovi i orkestracijsko
    platno čitaju varijable `--orch-status-*` svjesne teme (`src/shared/components/flow/edgeStyles.ts`).
-2. Nikad ručno ne zakrpljuj `packages/ui-kit/src`: sinhroniziraj sa `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit kontrola `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) pada na svakom bajtu koji
-   se razlikuje od prikvačenog upstream commita (preskače uz upozorenje kad upstream klon,
-   `UI_KIT_CLONE` ili `_references/cheaper-inference-ui-kit`, nedostaje). Kad kitu nešto nedostaje,
-   zaobiđi to u adapteru ili na ekranu i zatraži to od upstreama.
-3. Zadani tekstovi kita su na engleskom (`label = "Loading"`, `loadingLabel = "Loading table"`…) — proslijedi
-   prevedene stringove iz `useTranslations(...)` kad god komponenta kita renderira tekst.
-4. Tailwind utility klase imaju prednost nad klasama komponenti kita (kit deklarira
-   `@layer theme, base, components, utilities` i njegova pravila žive u `components`) — koristi utility
-   klase za razmake i raspored, ne za ponovno bojanje komponenti kita.
-5. Naslovi: `.ci-heading` (Inter, bez proreda) za naslove stranica i sekcija; `.ci-dashboard-display`
-   (Instrument Serif) samo za velik, rijedak display tekst poput statusnog koda na stranici greške.
-6. `tests/unit/dashboard-kit-sweep.test.ts` čuva usvajanje kita: nijedan Material ligature span pod
-   `src/app` ili `src/shared/components`; u stablu dashboarda (`src/app/(dashboard)` i
-   `src/shared/components`) nema sirovih `<select>`, `<textarea>` ili `<table>` i nema ručno
-   izrađenih `role="dialog"` izvan navedenih iznimki (nativna grana `Select` adaptera,
-   `RequestLoggerDetail`); svaki sirovi `<button>` ili `<input>` tamo treba komentar koji sadrži
-   `kit-exception:` (s razlogom) i završava najviše 3 linije iznad njega; nijanse palete i `dark:`
-   varijante samo u datotekama koje test navodi.
-7. Provjeri obje teme i viewport od 390 px prije PR-a (snimke ekrana); `tests/e2e/a11y.spec.ts` pokreće
+2. Nikada ručno ne mijenjajte `packages/ui-kit/src`: sinhronizujte pomoću `scripts/dev/sync-ui-kit.sh <commit>`; provjera
+   prije commita `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ne uspijeva za bilo koji bajt koji
+   se razlikuje od prikvačenog upstream commita (preskače se uz upozorenje kada upstream klon,
+   `UI_KIT_CLONE` ili `_references/cheaper-inference-ui-kit`, nije prisutan). Kada kitu nešto nedostaje,
+   zaobiđite to u adapteru ili na ekranu i zatražite to od upstream projekta.
+3. Zadane tekstualne vrijednosti kita su na engleskom (`label = "Loading"`, `loadingLabel = "Loading table"`…) — proslijedite prevedene
+   stringove iz `useTranslations(...)` kad god komponenta kita prikazuje tekst.
+4. Tailwind pomoćne klase imaju prednost nad klasama komponenti kita (kit deklarira
+   `@layer theme, base, components, utilities`, a njegova pravila se nalaze u `components`) — koristite pomoćne klase za
+   razmake i raspored, a ne za promjenu boje komponenti kita.
+5. Naslovi: `.ci-heading` (Inter, bez razmaka između znakova) za naslove stranica i odjeljaka; `.ci-dashboard-display`
+   (Instrument Serif) samo za veliki, rijetko raspoređeni prikazni tekst, poput statusnog koda na stranici greške.
+6. `tests/unit/dashboard-kit-sweep.test.ts` osigurava usvajanje kita: nema Material ligature span elementa unutar
+   `src/app` ili `src/shared/components`; u stablu kontrolne ploče (`src/app/(dashboard)` i
+   `src/shared/components`) nema sirovih `<select>`, `<textarea>` ili `<table>` elemenata niti ručno izrađenog
+   `role="dialog"` izvan navedenih izuzetaka (izvorna grana adaptera `Select`,
+   `RequestLoggerDetail`); svaki sirovi `<button>` ili `<input>` tamo zahtijeva komentar koji sadrži
+   `kit-exception:` (s razlogom) i završava najviše 3 reda iznad njega; nijanse palete i `dark:` varijante
+   dozvoljene su samo u datotekama koje test navodi.
+7. Prije PR-a provjerite obje teme i prikaz širine 390 px (snimci ekrana); `tests/e2e/a11y.spec.ts` pokreće
    axe.
 
 ## 3. Dodavanje ekrana
@@ -153,7 +153,23 @@ relativnih uvoza). Zatim: pregledajte `git diff packages/ui-kit`, obavite vizuel
 upotrebe i krajnje tačke u obje teme, pokrenite `npm run check:ui-kit-snapshot` i `npm run test:vitest:ui` te
 otvorite PR s upstream dnevnikom promjena.
 
-## 6. Indeks referenci
+## 6. Dijagrami README
+
+Dvanaest dijagrama ugrađenih u korijenski `README.md` (`docs/diagrams/*.svg`) primjenjuje komplet na statične slike. Generiraju se, ne crtaju ručno: 13 generatorskih datoteka u `scripts/docs/gen-readme-*.mjs` (dvanaest dijagrama i upravljački program `gen-readme-diagrams.mjs`) i 12 testova zastarjelosti u `tests/unit/docs/readme-*-svg.test.ts`, po jedan za svaki dijagram. Svaki test poredi datoteku spremljenu u commitu s izlazom generatora bajt po bajt (posao `test-unit`).
+
+- **Tokeni.** `scripts/docs/readme-diagram-theme.mjs` kopira paletu iz `packages/ui-kit/src/ci-tokens.css` (usklađenost s tom datotekom osigurava `tests/unit/docs/readme-diagram-theme.test.ts`) i određuje uloge teksta fontovima kompleta: Instrument Serif za istaknuti tekst, Inter za tekst interfejsa i IBM Plex Mono za brojke i kod. To su isti paketi `@fontsource` koje `src/app/globals.css` učitava za kontrolnu ploču. Svijetle vrijednosti su u `:root`, a tamne iza uslova `prefers-color-scheme: dark` unutar datoteke, pa svaka slika prati shemu čitaoca na GitHubu.
+
+- **Fontovi.** `scripts/docs/readme-fonts.mjs` sužava te woff2 datoteke na glifove koje crta pojedini dijagram i ugrađuje ih putem `@font-face` kao URI-je `data:`. Time fontovi kompleta ostaju unutar SVG-a. Lokalna provjera slika README provjerava da renderiranje ne šalje vanjske zahtjeve za fontovima. Podskupovi sadrže samo latinične znakove; glifovi simbola koji koriste sistemske fontove kao zamjenu dopuštaju se pojedinačno u `SYMBOL_FALLBACKS`. Svaki drugi nepokriveni glif izaziva grešku.
+
+- **Ponovno generiranje.** `npm run docs:readme-diagrams` prepisuje svih dvanaest dijagrama redoslijedom iz README-a i ispisuje po red s veličinom datoteke. Svaki generator radi i samostalno (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` zahtijeva `node --import tsx/esm` jer brojke dolaze iz učitavača trenutnog kataloga u `open-sse/config/freeModelCatalog.ts`; utjecaj promjene kataloga na CI opisan je u `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Generator i SVG spremite u isti commit.
+
+- **Dokaz.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderira datoteku u lokalnoj provjeri (oznaka `<img>`, ograničavajući `Content-Security-Policy` i odgovor `image/svg+xml`), snima svijetli i tamni prikaz te prijavljuje vanjske zahtjeve stranice za fontovima; mora ih biti 0.
+
+- **Ograničenje.** Manje od 200 KB po datoteci, što provjerava svaki test zastarjelosti; 500 KB je čvrsta granica za svaku sliku README (pravilo validatora SVG studio).
+
+- **Zajednički tekst, brojke iz gatea.** Svaki generator čuva tekst dijagrama u konstanti `*_COPY` ili ga sastavlja iz trenutnog kataloga. Isti se tekst crta i koristi kao ulaz za podskup fonta. Kanonske brojke ostaju u čvorovima `<text>`, koje čita `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`). Testovi zastarjelosti dijagrama koje gate čita pokreću i njegove validatore nad generiranom datotekom. Brojka koja odstupa od koda obara test: ispravite izvor koji gate čita, nikada brojku u generatoru.
+
+## 7. Indeks referenci
 
 - `src/app/globals.css` — most tokena, `.dark` nadjačavanja, OmniRoute `@layer components` proširenja
 - `packages/ui-kit/UPSTREAM.md` — prikvačeni upstream commit i autorizacija licence; `packages/ui-kit/PATCHES.md`

@@ -133,7 +133,7 @@ RTK는 서로 독립적인 두 계층에서 중복 라인을 축약합니다.
    `open-sse/services/compression/engines/rtk/filterSchema.ts`의
    `deduplicate: z.boolean().default(false)`.
 2. **엔진 전체 `deduplicateThreshold`(기본값 `3`).** 모든 필터가 실행된 후 엔진은 전체 결과에서
-   동일한 라인이 `deduplicateThreshold`개 이상 연속되는 모든 구간을 축약합니다
+   동일한 라인이 `>= deduplicateThreshold`개 이상 연속되는 모든 구간을 축약합니다
    (`deduplicateRepeatedLines`, `engines/rtk/index.ts`에서 적용). 정규화 시 값은 2–100 범위로
    제한됩니다.
 

@@ -54,7 +54,7 @@ Táàbù tuntun fún yíyọ àkóónú jáde láti URL kan nípasẹ̀ `POST /v
 - Ìṣàfilọ́lẹ̀: URL + yíyan ojú-ìwé-kíkún + aṣàyàn format (markdown / text / HTML).
 - Firanṣẹ́ → mú wá → ṣàfihàn `ScrapeResult.tsx`.
 - `ScrapeResult` ń ṣàfihàn àkọ́kọ́ markdown + yíyan raw.
-- Ààlà: bí body ìdáhùn bá ju **256 KB**, UI yóò fi `(a ti gé kúrú, wo raw)` hàn, yóò sì ṣí raw nínú Monaco modal kan (D21).
+- Ààlà: bí body ìdáhùn bá ju **256 KB**, UI yóò fi `View full raw content` hàn, yóò sì ṣí raw nínú modal kan (D21).
 - Páànù metadata: olùpèsè (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), àkókò ìdádúró, ìnáwó, ìwọ̀n ìdáhùn, iye àwọn link.
 - Lo hook `useScrapeFetch.ts`.
 

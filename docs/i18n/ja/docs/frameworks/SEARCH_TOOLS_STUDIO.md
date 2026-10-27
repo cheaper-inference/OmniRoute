@@ -54,7 +54,7 @@ Web 検索、Web スクレイピング、プロバイダーの並列比較を統
 - 入力：URL + ページ全体の切り替え + 形式セレクター（markdown / text / HTML）。
 - 送信 → 取得 → `ScrapeResult.tsx` でレンダリング。
 - `ScrapeResult` は markdown プレビューと raw 表示の切り替えを提供。
-- 上限：レスポンス本文が **256 KB** を超える場合、UI に `(切り詰められました。raw を表示)` と表示し、raw コンテンツを Monaco モーダル（D21）で開きます。
+- 上限：レスポンス本文が **256 KB** を超える場合、UI に `View full raw content` と表示し、raw コンテンツをモーダル（D21）で開きます。
 - メタデータパネル：プロバイダー（firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search）、レイテンシ、コスト、レスポンスサイズ、リンク数。
 - `useScrapeFetch.ts` フックを使用。
 

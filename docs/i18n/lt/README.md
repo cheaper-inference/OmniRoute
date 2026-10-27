@@ -11,27 +11,27 @@
 <br/>
 <br/>
 
-# 🚀 OmniRoute — nemokamas DI šliuzas
+# 🚀 OmniRoute — nemokami AI vartai
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — niekada nenustokite programuoti. Kiekvienas DI įrankis → 376 teikėjai — daugiau nei 150 nemokamų — per vieną galinį tašką. Claude Code, Codex, Cursor, Cline, Copilot ir Antigravity į NEMOKAMUS Claude / GPT / Gemini su automatiniu atsarginiu perjungimu. RTK + Caveman daugiasluoksnis glaudinimas sutaupo 15–95 % žetonų (vid. ~89 %) — niekada nepasiekite limitų. 376 DI teikėjai · daugiau nei 150 nemokamų planų · ~1,62 mlrd. nemokamų žetonų per mėn. · 20 maršruto parinkimo strategijų · pradėkite nuo 0 $."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — programuokite be sustojimo. Kiekvienas AI įrankis → 376 paslaugų teikėjai — daugiau nei 150 nemokamų — per vieną galinį tašką. Claude Code, Codex, Cursor, Cline, Copilot ir Antigravity su NEMOKAMAIS Claude / GPT / Gemini bei automatiniu atsarginiu perjungimu. RTK ir Caveman kombinuotas glaudinimas sutaupo 15–95 % žetonų (vid. ~89 %) — niekada nepasiekite limitų. 376 AI paslaugų teikėjai · daugiau nei 150 nemokamų pakopų · ~1,62 mlrd. nemokamų žetonų per mėn. · 20 maršruto parinkimo strategijų · pradėkite už 0 USD."/>
 
 </div>
 
 <div align="center">
 
-## 💰 ~1.62B žetonų per mėnesį iš trečiųjų šalių nemokamų planų
+## 💰 ~1,62 mlrd. žetonų per mėnesį naudojant trečiųjų šalių nemokamus planus
 
 </div>
 
-> **Naudokite savo paslaugų teikėjų paskyras.** Tai yra apytikslė bendra suma iš atskirai prieinamų trečiųjų šalių nemokamų planų, o ne OmniRoute suteikiami žetonai. Užsiregistruokite, prireikus gaukite prisijungimo duomenis ir prijunkite paslaugų teikėjus, kuriais galite naudotis; kiekvienas paslaugų teikėjas pats nustato savo limitus, prieinamumą ir sąlygas.
+> **Naudokite savo paslaugų teikėjų paskyras.** Tai yra apytikslė bendra atskirai prieinamų trečiųjų šalių nemokamų planų apimtis, o ne „OmniRoute“ suteikiamas žetonų paketas. Užsiregistruokite, kur reikia gaukite prisijungimo duomenis ir prijunkite paslaugų teikėjus, kuriais galite naudotis; kiekvienas paslaugų teikėjas pats nustato savo apribojimus, pasiekiamumą ir sąlygas.
 >
-> Rankiniu būdu sujungti nemokamus planus sudėtinga — dešimtys SDK, dešimtys užklausų dažnio limitų ir jokio aiškumo, kiek išteklių iš tikrųjų turite. OmniRoute kataloge yra **484 nemokamo plano įrašas, apimantis 34 pasikartojančių telkinių raktus**, o antraštėje rodomą žetonų skaičių apskaičiuoja pagal **17 telkinių, kuriems paskelbtas teigiamas mėnesio biudžetas, ir penkis atskirų Groq modelių limitus**, pašalindamas bendrų telkinių dublikatus. Kvotos, kurios tampa prieinamos tik patvirtinus tapatybę konkrečiame regione (šiuo metu: ModelScope), rodomos atskirai — +~6M po regioninio tapatybės patvirtinimo — ir niekada neįtraukiamos į antraštėje pateikiamą sumą. Rezultatas visada matomas valdymo skydelyje (`/dashboard/free-tiers`).
+> Rankiniu būdu sujungti nemokamus planus sudėtinga — dešimtys SDK, dešimtys užklausų dažnio apribojimų ir jokio aiškumo, kiek išteklių iš tikrųjų turite. „OmniRoute“ kataloge yra **484 nemokamų planų įrašai, priskirti 34 pasikartojančių išteklių telkinių raktams**, o bendras žetonų skaičius apskaičiuojamas pagal **17 telkinių, kuriems paskelbtas teigiamas mėnesinis biudžetas, ir penkis kiekvienam „Groq“ modeliui taikomus limitus**, pašalinant pasikartojimus pagal bendrą telkinį. Kvotos, kurios tampa prieinamos tik patvirtinus regioninę tapatybę (šiuo metu: „ModelScope“), rodomos atskirai — dar apie 6 mln. po regioninės tapatybės patvirtinimo — ir niekada neįtraukiamos į pagrindinį skaičių. Rezultatas visada matomas valdymo skydelyje (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute nemokamų planų biudžeto kortelė: stabiliai ~1.62B nemokamų žetonų per mėnesį, o pirmąjį mėnesį su registracijos kreditais — iki ~2.22B, iš 34 dokumentuotų pasikartojančių telkinių raktų, apimančių 484 kataloge esantį nemokamo plano įrašą ir pasiekiamų per vieną galinį tašką. Sąžiningi skaičiavimai pašalinant telkinių dublikatus — kiekvienas bendras telkinys skaičiuojamas vieną kartą, įskaitant 17 pasikartojančių telkinių su paskelbtu teigiamu mėnesio žetonų biudžetu ir penkis atskirų Groq modelių limitus; sąlygų rizikos kataloge 12 paslaugų teikėjų pažymėti kaip vengtini, kad galėtumėte apsispręsti patys. Biudžeto juostoje pateikiami Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (penki atskirų modelių limitai) ir mažesni telkiniai, taip pat pirmojo mėnesio registracijos kreditai ir nuolat nemokami paslaugų teikėjai be žetonų limito, rodomi atskirai, kad niekada dirbtinai nepadidintų antraštėje pateikiamo skaičiaus. Tiesioginiai panaudotų ir likusių išteklių duomenys pateikiami /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="„OmniRoute“ nemokamų planų biudžeto kortelė: stabiliai apie 1,62 mlrd. nemokamų žetonų per mėnesį, o pirmąjį mėnesį su registracijos kreditais — iki maždaug 2,22 mlrd.; 34 dokumentuoti pasikartojančių išteklių telkinių raktai apima 484 kataloguotus nemokamų planų įrašus, pasiekiamus per vieną galinį tašką. Sąžiningas skaičiavimas pašalinant pasikartojančius telkinius — kiekvienas bendras telkinys skaičiuojamas vieną kartą, įskaitant 17 pasikartojančių telkinių, kuriems paskelbtas teigiamas mėnesinis žetonų biudžetas, ir penkis kiekvienam „Groq“ modeliui taikomus limitus; sąlygų rizikos kataloge 12 paslaugų teikėjų pažymėti kaip vengtini, tad sprendžiate jūs. Biudžeto juostoje pateikiami „Mistral“ 1 mlrd., „Nara“ 210 mln., „LLM7“ 150 mln., „xKiro“ 150 mln., „Groq“ 30 mln. (penki kiekvienam modeliui taikomi limitai) ir mažesni telkiniai, taip pat pirmojo mėnesio registracijos kreditai bei nuolat nemokami paslaugų teikėjai be žetonų limito, rodomi atskirai, kad jie niekada nepadidintų pagrindinio skaičiaus. Dabartinis panaudotas ir likęs kiekis pateikiamas /dashboard/free-tiers."/>
 
-> Tiesioginio `/dashboard/free-tiers` puslapio animuota santrauka. Visa metodika (telkinių dublikatų šalinimas, kreditų lygiai, paslaugų teikėjų sąlygos): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
+> Animacinė tiesioginio `/dashboard/free-tiers` puslapio santrauka. Visa metodika (telkinių pasikartojimų šalinimas, kreditų lygiai, paslaugų teikėjų sąlygos): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
-> <sub>Šie skaičiai kas dvi savaites iš naujo patikrinami pagal aktualų katalogą ir **gali keistis į abi puses** — paslaugų teikėjui nutraukus nemokamą planą, skaičius sumažėja, o atsiradus naujam — padidėja. Skelbiame tai, ką iš tikrųjų apskaičiuoja katalogas, o ne suapvalintą geriausią įmanomą rezultatą.</sub>
+> <sub>Šie skaičiai kas dvi savaites pakartotinai tikrinami pagal tiesioginį katalogą ir **gali keistis abiem kryptimis** — paslaugų teikėjui nutraukus nemokamą planą skaičius sumažėja, o atsiradus naujam — padidėja. Skelbiame tai, ką iš tikrųjų apskaičiuoja katalogas, o ne suapvalintą optimistinį variantą.</sub>
 
 <br/>
 
@@ -45,43 +45,43 @@
 
 [![Žvaigždutės](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Žvaigždučių istorijos reitingas](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Žvaigždučių istorijos reitingas](https://api.star-history.com/badge?repo=diegosouzapw/Omniroute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 Prisijunkite prie bendruomenės
 
-**👋 Sekite projekto prižiūrėtoją — pirmieji sužinokite apie naujus paslaugų teikėjus, leidimus ir patarimus:**
+**👋 Sekite prižiūrėtoją — pirmieji sužinokite apie naujus paslaugų teikėjus, leidimus ir patarimus:**
 
-[![Sekite Diego platformoje LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Sekite @diegosouzapw platformoje GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![Sekite Diego platformoje „LinkedIn“](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
+[![Sekite @diegosouzapw platformoje „GitHub“](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
 
 [![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
 [![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp visame pasaulyje](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brazilijoje](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![WhatsApp pasaulinė grupė](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp Brazilija](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
 [![Svetainė](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
 
-**Klausimai, patarimai apie paslaugų teikėjus, plėtros planas ir pagalba → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 visame pasaulyje](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brazilijoje](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [portalas](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**Klausimai, patarimai apie paslaugų teikėjus, veiksmų planas ir pagalba → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Pasaulinė grupė](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brazilija](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portalas](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
-## 📈 Gateway nuolat auga
+## 📈 Tinklų sietuvas ir toliau auga
 
 <div align="center">
 
-|                                      |             v3.8.50              | **v3.8.51** |      `v3.8.53+`       |
-| ------------------------------------ | :------------------------------: | :---------: | :-------------------: |
-| 🌐 Tiekėjai                          |               352                |   **358**   |          375          |
-| 🧠 Unikalūs pokalbių modelių ID      |               1320               |  **1374**   |         1475          |
-| 🖼️ Modality Bridge                   | 🆕 rega + garsas + vaizdo įrašas |      ✓      |           ✓           |
-| 📡 Radar nemokamas katalogas         |         🆕 pasirenkamas          |      ✓      |           ✓           |
-| ⚖️ Planavimas atsižvelgiant į kvotas |          🆕 Quota-Share          |      ✓      |           ✓           |
-| 📊 Kvotų telemetrija                 |          🆕 tiesioginė           |      ✓      |           ✓           |
-| 🧰 Režimas be sąsajos                |                —                 |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS linijos infrastruktūra        |                —                 |      —      |  🆕 leidimo kanalai   |
-| 🔎 Modelių aptikimo API              |                —                 |      —      | 🆕 `/v1/models/query` |
+|                                      |               v3.8.50               | **v3.8.51** |      `v3.8.53+`       |
+| ------------------------------------ | :---------------------------------: | :---------: | :-------------------: |
+| 🌐 Teikėjai                          |                 352                 |   **358**   |          376          |
+| 🧠 Unikalūs pokalbių modelių ID      |                1320                 |  **1374**   |         1475          |
+| 🖼️ Modalumų tiltas                   | 🆕 vaizdai + garsas + vaizdo įrašai |      ✓      |           ✓           |
+| 📡 Nemokamas „Radar“ katalogas       |           🆕 pasirenkamas           |      ✓      |           ✓           |
+| ⚖️ Planavimas atsižvelgiant į kvotas |           🆕 Quota-Share            |      ✓      |           ✓           |
+| 📊 Kvotų telemetrija                 |            🆕 tiesioginė            |      ✓      |           ✓           |
+| 🧰 Režimas be grafinės sąsajos       |                  —                  |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS šakos infrastruktūra          |                  —                  |      —      |  🆕 leidimų kanalai   |
+| 🔎 Modelių paieškos API              |                  —                  |      —      | 🆕 `/v1/models/query` |
 
-**→ [Veiksmų planas](ROADMAP.md) — riedame bėgiais link `v3.9.0 LTS`**
+**→ [Plėtros planas](ROADMAP.md) — LTS šaka link `v3.9.0 LTS`**
 
 </div>
 
@@ -101,7 +101,7 @@
     <td align="right"><b>🚀 Pradžia</b></td>
     <td align="center"><a href="#-quick-start">🚀 Greitoji pradžia</a></td>
     <td align="center"><a href="#-more-install-methods--docker-source-pnpm-arch">📦 Diegimas</a></td>
-    <td align="center"><a href="#first-run">🆓 Prijunkite teikėją</a></td>
+    <td align="center"><a href="#first-run">🆓 Prijungti teikėją</a></td>
   </tr>
   <tr>
     <td align="right"><b>💡 Sužinokite</b></td>
@@ -122,14 +122,14 @@
     <td align="center"><a href="#-private--local-first">🔒 Privatu</a></td>
   </tr>
   <tr>
-    <td align="right"><b>👀 Pamatykite</b></td>
+    <td align="right"><b>👀 Peržiūrėkite</b></td>
     <td align="center"><a href="#-omniroute-in-action">🎬 Veikimas</a></td>
-    <td align="center"><a href="#-whats-new">✨ Kas naujo</a></td>
+    <td align="center"><a href="#-whats-new">✨ Naujienos</a></td>
     <td align="center"><a href="#-compatible-clis--coding-agents">🤖 Suderinamos CLI</a></td>
   </tr>
   <tr>
-    <td align="right"><b>💚 Palaikymas</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 Palaikykite / paaukokite</a></td>
+    <td align="right"><b>💚 Parama</b></td>
+    <td align="center"><a href="#-support-omniroute">💚 Paremti / paaukoti</a></td>
     <td align="center"><a href="#-community--help">💬 Bendruomenė</a></td>
     <td align="center"><a href="#-sponsors">💖 Rėmėjai</a></td>
   </tr>
@@ -226,19 +226,19 @@
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Trys veiksmai: įdiekite ir paleiskite OmniRoute, prijunkite tinkamą teikėją naudodami savo paskyrą arba API raktą, tada nukreipkite savo įrankį į localhost:20128/v1 naudodami OmniRoute API raktą ir modelį auto. Maršrutizavimas priklauso nuo prieinamų tinkamų jungčių ir teikėjų apribojimų."/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="Trys veiksmai: įdiekite ir paleiskite „OmniRoute“, prijunkite tinkamą teikėją naudodami savo paskyrą arba API raktą, tada nukreipkite savo įrankį į localhost:20128/v1, naudodami „OmniRoute“ API raktą ir modelį auto. Maršruto parinkimas priklauso nuo pasiekiamų tinkamų jungčių ir teikėjų apribojimų."/>
 
 ```bash
-# Prijungę teikėją, nukopijuokite savo OmniRoute raktą iš Dashboard → Endpoints:
+# Prijungę teikėją, nukopijuokite savo „OmniRoute“ raktą iš Dashboard → Endpoints:
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>Modeliui `auto` reikalingas tinkamas maršrutas. Naujame diegime gali nebūti tinkamų taikinių be rakto, o be rakto veikiantis teikėjas gali atmesti trečiųjų šalių klientus. Teikėjai, pažymėti `tos: avoid`, įskaitant Kiro, pagal numatytuosius nustatymus pašalinami iš automatinio maršrutizavimo; paskyros prijungimas to nustatymo nepakeičia. Prieš rinkdamiesi teikėją, peržiūrėkite [Nemokamų planų vadovą](docs/getting-started/FREE-TIERS-GUIDE.md).</sub>
+<sub>Norint naudoti `auto`, būtinas tinkamas maršrutas. Naujoje diegtyje gali nebūti nė vieno tinkamo taikinio, kuriam nereikia rakto, o teikėjas, kuriam nereikia rakto, gali atmesti trečiųjų šalių klientus. Teikėjai, pažymėti `tos: avoid`, įskaitant „Kiro“, pagal numatytuosius nustatymus neįtraukiami į automatinį maršruto parinkimą; paskyros prijungimas šio nustatymo nepaiso. Prieš pasirinkdami teikėją, žr. [Nemokamų planų vadovą](docs/getting-started/FREE-TIERS-GUIDE.md).</sub>
 
-<sub>📦 Greito pradėjimo scenarijai, kuriuos galite kopijuoti ir įklijuoti, skirti **Python, Node.js, PHP ir cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Nukopijuojami greitosios pradžios scenarijai, skirti **Python, Node.js, PHP ir cURL** → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
@@ -248,22 +248,22 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis taškas ir 376 teikėjai. Automatinis perjungimas į atsarginį variantą palaiko maršrutizavimą, kol yra kitas sveikas taikinys. Šeši ramsčiai: atsparus perjungimas tarp 376 teikėjų · iki 95 % žetonų sutaupymas tinkamose darbo apkrovose · 0 $ pradžiai su 150+ nemokamų planų ir 52 pasikartojančiu arba be rakto veikiančiu visam laikui nemokamu teikėju · 37 CLI/agentų integracijos per vieną konfigūraciją · OpenAI, Claude, Gemini ir Responses API suderinamumas ties /v1 · produkcijos lygio valdikliai, įskaitant grandinių pertraukiklius, TLS stealth, 110 MCP įrankių, A2A, atmintį, apsaugas, vertinimus ir 56 000+ statinių testų deklaracijų daugiau nei 7 800 sekamuose testų failuose."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="Pažadas — vienas galinis taškas ir 376 teikėjai. Automatinis atsarginis perjungimas palaiko maršruto parinkimą, kol pasiekiamas kitas veikiantis taikinys. Šeši ramsčiai: atsparus atsarginis perjungimas tarp 376 teikėjų · iki 95 % mažesnės žetonų sąnaudos tinkamoms darbo apkrovoms · pradžia už 0 USD su daugiau nei 150 nemokamų planų ir 52 pasikartojančiais arba rakto nereikalaujančiais visam laikui nemokamais teikėjais · 37 CLI ir agentų integracijos naudojant vieną konfigūraciją · „OpenAI“, „Claude“, „Gemini“ ir „Responses API“ suderinamumas per /v1 · produkcinės aplinkos valdikliai, įskaitant grandinės išjungiklius, TLS maskavimą, MCP 110 įrankių, A2A, atmintį, apsaugos priemones, vertinimus ir daugiau nei 56 000 statinių testų deklaracijų daugiau nei 7 800 stebimų testų failų."/>
 
 <br/>
 <br/>
 
 <div align="center">
 
-# 🤔 Kodėl OmniRoute?
+# 🤔 Kodėl „OmniRoute“?
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Kodėl OmniRoute — nustokite žongliruoti 10 valdymo skydų, neveiksniais API raktais ir netikėtomis sąskaitomis. Dešimt kasdienių problemų ir sprendimų: nepanaudota kvota nustoja galioti → maksimaliai išnaudokite prenumeratas; užklausų limitai programavimo metu → 4 pakopų automatinis perjungimas (Prenumerata → API → Ekonominė → Nemokama); įrankių išvestys ryja žetonus → RTK + Caveman glaudinimas (15–95 %); brangūs API → pagal išlaidas optimizuotas maršrutizavimas; kiekvienas įrankis turi savo sąranką → vienas galinis taškas, vienas valdymo skydas; AI užblokuotas → 3 lygių proxy + TLS stealth; neveiksnūs raktai → 3 sluoksnių atsparumas (grandinių pertraukikliai, rakto atvėsimas, modelio blokavimas); komanda dalijasi viena prenumerata → raktų telkiniai su sąžiningo paskirstymo kvotomis; raginimai per kažkieno debesį → pirmiausia lokalu (local-first) su AES-256-GCM šifruotais raktais; nėra išlaidų matomumo → tiesioginė analitika (naudojimas, kvotos, santaupos, p95 delsa)."/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="Kodėl „OmniRoute“ — nebereikia blaškytis tarp 10 valdymo skydelių, neveikiančių API raktų ir netikėtų sąskaitų. Dešimt kasdienių problemų ir jų sprendimų: nepanaudota kvota baigia galioti → maksimaliai išnaudokite prenumeratas; programavimo metu pasiekiami spartos apribojimai → 4 lygių automatinis atsarginis perjungimas (Prenumerata → API → Pigu → Nemokama); įrankių išvestis eikvoja žetonus → RTK ir „Caveman“ glaudinimas (15–95 %); brangios API → pagal kainą optimizuotas maršruto parinkimas; kiekvienam įrankiui reikia atskiros sąrankos → vienas galinis taškas, vienas valdymo skydelis; AI užblokuotas → 3 lygių tarpinis serveris ir TLS maskavimas; neveikiantys raktai → 3 sluoksnių atsparumas (grandinės išjungikliai, raktų atvėsimo laikotarpis, modelio blokavimas); komanda dalijasi viena prenumerata → raktų telkiniai su sąžiningai paskirstytomis kvotomis; užklausos siunčiamos per kieno nors debesiją → pirmiausia vietinis veikimas su AES-256-GCM užšifruotais raktais; nematote išlaidų → tiesioginė analizė (naudojimas, kvota, sutaupyta suma, p95 delsa)."/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute užklausų srautas: jūsų IDE arba CLI (Claude Code, Cursor, Cline…) kreipiasi į vieną lokalų galinį tašką (http://localhost:20128/v1); OmniRoute išmanusis maršrutizatorius (RTK + Caveman glaudinimas, 20 maršrutizavimo strategijų, grandinių pertraukikliai, TLS stealth, MCP, A2A, apsaugos) gali persijungti tarp 4 teikėjų pakopų, kol lieka tinkamas sveikas taikinys — 1 pakopa: prenumerata, 2 pakopa: API raktas, 3 pakopa: ekonominė ir 4 pakopa: nemokama."/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="„OmniRoute“ užklausos eiga: jūsų IDE arba CLI („Claude Code“, „Cursor“, „Cline“…‎) kreipiasi į vieną vietinį galinį tašką (http://localhost:20128/v1); „OmniRoute Smart Router“ (RTK ir „Caveman“ glaudinimas, 20 maršruto parinkimo strategijų, grandinės išjungikliai, TLS maskavimas, MCP, A2A, apsaugos priemonės) gali vykdyti atsarginį perjungimą tarp 4 teikėjų lygių, kol lieka tinkamas ir veikiantis taikinys — 1 lygis: prenumerata, 2 lygis: API raktas, 3 lygis: pigu, 4 lygis: nemokama."/>
 
 </div>
 
@@ -504,13 +504,13 @@ Visos **20** strategijų – derinkite jas kiekviename kombinacijos žingsnyje:
 
 <div align="center">
 
-## 🏆 Kuo išsiskiria „OmniRoute“
+## 🏆 Kuo išsiskiria OmniRoute
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kuo išsiskiria „OmniRoute“ — tam tikros datos funkcijų palyginimas su „9router“, „OpenRouter“, „CLIProxyAPI“ ir „LiteLLM“ pagal 13 galimybių. „OmniRoute“: 376 paslaugų teikėjai, integruota daugiau nei 150 nemokamų planų, 20 maršruto parinkimo strategijų, 12 variklių žetonų glaudinimas, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, nuolatinė atmintis, apsaugos priemonės, debesijos agentai, nepastebimas TLS kontrolinis atspaudas, „Desktop“ / „Termux“ / PWA ir 67 internacionalizuotos naudotojo sąsajos lokalės. „OmniRoute“ platinama pagal MIT licenciją ir gali būti talpinama savarankiškai. Konkurentų galimybės ir jų skaičius gali keistis; žr. pateiktą nuorodą į metodiką."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Kuo išsiskiria OmniRoute — tam tikro laikotarpio 13 galimybių palyginimas su 9router, OpenRouter, CLIProxyAPI ir LiteLLM. OmniRoute: 376 teikėjai, integruota daugiau nei 150 nemokamų planų, 20 maršruto parinkimo strategijų, 12 variklių žetonų glaudinimas, integruotas MCP serveris su 110 įrankių, A2A agentų protokolas, ilgalaikė atmintis, apsaugos priemonės, debesijos agentai, nepastebimas TLS kontrolinis atspaudas, Desktop/Termux/PWA ir 67 lokalizuotos naudotojo sąsajos kalbos. OmniRoute platinama pagal MIT licenciją ir gali būti talpinama savarankiškai. Konkurentų galimybės ir jų skaičius gali keistis; žr. pateiktą nuorodą į metodiką."/>
 
-<sub>📊 Visa metodika ir išsami informacija apie kiekvieną funkciją, palyginti su „9router“, „OpenRouter“, „CLIProxyAPI“ ir „LiteLLM“ → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 Visa metodika ir išsami informacija apie kiekvieną funkciją, palyginti su 9router, OpenRouter, CLIProxyAPI ir LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
@@ -586,35 +586,35 @@ dabartinį katalogą rasite **[radar.omniroute.online/planos](https://radar.omni
 
 </div>
 
-> Naujausi akcentai nuo **v3.8.20 → v3.8.53**. Visa istorija – [`CHANGELOG.md`](CHANGELOG.md).
+> Naujausi svarbiausi pakeitimai nuo **v3.8.20 → v3.8.53**. Visą istoriją rasite faile [`CHANGELOG.md`](CHANGELOG.md).
 
-- **⚖️ `quota-weighted` maršrutizavimas** — 20-oji kombinacijų strategija praleidžia išsemtas paskyras, o tada atrenka iš likusiųjų proporcingai likusiai kvotai ÷ vykdomai apkrovai, esamus pokalbius išlaikydama prisegtus. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 Headless režimas** — `omniroute serve --headless` (arba `OMNIROUTE_HEADLESS=1`) paleidžia tik `/v1/*` tarpinio serverio variklį, išjungus valdymo skydelį ir tik jam skirtas posistemes. → [Headless režimas](docs/guides/HEADLESS.md)
-- **🔎 Modelių paieška** — `/v1/models` filtruoja pagal galimybes, kontekstą, tipą ir tekstą, o `POST /v1/models/query` grąžina trumpą deterministinį atrankos sąrašą su tokiu pačiu matomumu pagal raktą. → [API žinynas](docs/reference/API_REFERENCE.md)
-- **🔑 Maršrutizavimo valdymas pagal raktą** — prisekite API raktą prie vieno modelio ar kombinacijos su `forcedModel`, o rakto modelius ir kombinacijas pridėkite arba šalinkite atomiškai (`/api/keys/{id}/access`). → [API žinynas](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ Tikslensnis PII valdymas** — pasirinkimas pagal tipą, iki 20 patvirtintų pasirinktinių maskavimo šablonų ir aptikimo skaitikliai pagal tipą; pats maskavimas lieka pasirenkamas. → [Apsaugos priemonės](docs/security/GUARDRAILS.md)
-- **🌍 67 kalbos** — valdymo skydelis, dokumentacijos veidrodžiai ir CLI; `npm run i18n:add-locale` viena komanda prideda kalbą visur. → [i18n vadovas](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — gaunamasis A2A delegavimas jūsų agentų parkui, Conductor įgūdžiai Agent Card kortelėje ir valdymo skydelio skydas su Faro push-to-talk balso pokalbiais. → [A2A serveris](docs/frameworks/A2A-SERVER.md)
-- **🛂 Adaptyvus priėmimas ir apsauga nuo perkrovos** — sunkiosios pokalbių užklausos laukia eilėje, o ne grąžina 503 klaidą, su atominėmis slenkančiosiomis RPM nuomomis kiekvienam ryšiui. → [Atsparumo vadovas](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ Kanoninė `/v1/models` rikiuotė** — vienas vientisas, pagal tiekėjus sugrupuotas blokas kiekvienam tiekėjui (kombinacijos prisegtos pirmos), stabilus visuose katalogų šaltiniuose. → [API žinynas](docs/reference/API_REFERENCE.md)
-- **🗜️ Glaudinimo sustiprinimas** — pagal numatymą įjungta apsauga nuo išpūtimo, Caveman paketai DE / FR / JA + kinų kalbai (wényán), RTK filtrai Gradle ir .NET. → [Glaudinimas](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 Sąžininga fiksuota kainodara** — prenumeratos / kodavimo plano tiekėjai sąnaudų analitikoje rodomi kaip **$0**; biudžetas, kvotos ir maršrutizavimas toliau atlieka įvertinimus. → [API žinynas](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Share maršrutizavimas** — sąžiningai paskirsto bendros paskyros kvotą tarp telkinio raktų, tausodamas darbą, kad neveikiančios dalys būtų paskolintos. → [Atsparumo vadovas](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 CLI/agentų sąranka viena komanda** — 15 užregistruotų `setup-*` komandų; `omniroute run` paleidžia 7 CLI įrankius (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` palaiko 11 taikinių su interaktyviu tiekėjo+modelio rinkikliu ir mėgstamiausiais pagal kontekstą. → [CLI integracijos](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ Nuotolinis režimas** — valdykite nuotolinį OmniRoute ribotos apimties tokenais (`connect` / `contexts` / `tokens`) + `antigravity` OAuth pagalbininku VPS diegimams. → [Nuotolinis režimas](docs/guides/REMOTE-MODE.md)
-- **🧭 Išmanesnis automatinis maršrutizavimas** — `auto/<category>:<tier>` kombinacijos, **Fusion** (modelių kolegija + vertintojas), užduotį atpažįstantis maršrutizavimas, kiekvienos užklausos modelio / režimo / USD biudžeto perrašymai. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ Prijungiamas glaudinimas** — 12 derinamų variklių + Compression Studios: LLMLingua-2, dviejų pakopų Ultra, omniglyph, kiekvieno žingsnio tikslumo kontrolė, GCF v3.2, redaktorius su perrikiavimu tempiant. → [Glaudinimas](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ Skaidrus MITM iššifravimas (TPROXY)** — sugaukite CLI įrankius, ignoruojančius tarpinio serverio aplinkos kintamuosius, su CA pagal SNI + pasitikėjimo saugyklos diegimo programa. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 Sąnaudų telemetrija visur** — `X-OmniRoute-*` sąnaudų/naudojimo antraštės kiekviename galutiniame taške, talpyklos pataikymo (cache-HIT) sutaupymų antraštė, USD išlaidų kvotos pagal raktą. → [API žinynas](docs/reference/API_REFERENCE.md)
-- **🧠 Jūsų valdoma atmintis** — pagal numatymą išjungta, pasirenkamas int8 vektorių kvantavimas + tipizuotas silpimas, kiekvienai užklausai – `x-omniroute-no-memory`. → [Atmintis](docs/frameworks/MEMORY.md)
-- **🛡️ Saugumas** — apsauga nuo raginimų injekcijų kiekviename LLM maršrute (red-team testų rinkinys), pasirenkama kredencialų maskavimo apsauga (užmaskuoja nutekėjusius API raktus/paslaptis abiem kryptimis), nemokama DuckDuckGo paieška žiniatinklyje kaip paskutinė išeitis ir pasirenkami OIDC prisijungimo vartai valdymo skydeliui (prisijungimas slaptažodžiu visada lieka prieinamas). → [Apsaugos priemonės](docs/security/GUARDRAILS.md)
-- **🖼️ Nauji galutiniai taškai** — `/v1/ocr` (Mistral OCR) ir `/v1/audio/translations` (Whisper stiliaus) užbaigia medijos galimybių rinkinį. → [API žinynas](docs/reference/API_REFERENCE.md)
-- **🎨 Paveikslėlių / vaizdo įrašų / garso generavimas** — viena API visai medijai: xAI Grok Imagine ir Novita AI vaizdo įrašai, ComfyUI, Magnific, Adobe Firefly, Segmind ir kalbos tiekėjai, tokie kaip ElevenLabs. → [API žinynas](docs/reference/API_REFERENCE.md)
-- **🌍 Diegimas ir eksploatavimas** — atvirkštinio tarpinio serverio `basePath`, automatinis naršyklės kalbos aptikimas, įrenginių sekimas pagal raktą, MITM pasitikėjimas be root teisių, zh-TW lokalizacija. → [Aplinka](docs/reference/ENVIRONMENT.md)
-- **🤝 Daugiau tiekėjų ir agentų** — debesijos agentai (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) su prisijungimu per naršyklę + OAuth, visaverte Ollama kortelė, Claude Opus 5 ir Sonnet 5, oficiali Kimi partnerystė (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ir atnaujintas **376 tiekėjų katalogas**. → [Tiekėjai](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 Maršrutizavimo skaidrumas** — kiekvienas atsakymas pateikiamas su `X-OmniRoute-Decision` antrašte, nurodančia jį aptarnavusią strategiją/tiekėją/delą, nauja `cache-optimized` kombinacijų strategija + Auto-Combo `cacheAffinity` faktorius nukreipia pasikartojančias užklausas atgal į ryšį, kuriame laikomas talpykloje esantis prefiksas, o tik skaitymui skirtas `/v1/auto-combo/{channel}/candidates` galutinis taškas atskleidžia `auto/*` kanalo kandidatų telkinį realiu laiku. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **⚡ Vietinis našumas ir infrastruktūra** — vienu spustelėjimu paleidžiamas vietinis Redis, Cloudflare Workers / Deno Deploy relay diegikliai, Bifrost ir Mux kaip prižiūrimos įterptosios paslaugos. → [Įterptosios paslaugos](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 Taip pat komplekte** — papildinių karkasas + turgavietė, Omni/Agent/GitHub įgūdžių karkasai, Obsidian vault integracija (22 MCP įrankiai), su OpenAI suderinamos Batch ir Files API, semantinis atsakymų podėlis, gamifikacija su lyderių lentelėmis, ACP agentų aptikimas (15 integruotų agentų), suplanuotas žurnalų eksportas į BigQuery, `auto/chaos` lygiagretus kelių modelių platinimas (fan-out), Telegram boto tiltas, programoje integruotas versijų tvarkytuvas ir LMArena-ELO nemokamų teikėjų reitingai. → [Dokumentacija](docs/README.md)
+- **⚖️ `quota-weighted` maršruto parinkimas** — 20-oji kombinuotoji strategija praleidžia paskyras, kurių kvota išnaudota, o iš likusių renkasi proporcingai pagal likusią kvotą ÷ vykdomą apkrovą, išlaikydama esamus pokalbius susietus su tuo pačiu maršrutu. → [Automatiniai deriniai](docs/routing/AUTO-COMBO.md)
+- **🧰 Begalvė veiksena** — `omniroute serve --headless` (arba `OMNIROUTE_HEADLESS=1`) paleidžia tik `/v1/*` tarpinio serverio modulį, išjungiant valdymo skydelį ir tik jam skirtas posistemes. → [Begalvė veiksena](docs/guides/HEADLESS.md)
+- **🔎 Modelių aptikimas** — `/v1/models` filtruoja pagal galimybes, kontekstą, tipą ir tekstą, o `POST /v1/models/query` pateikia trumpą deterministinį sąrašą, išlaikydamas tokį patį kiekvieno rakto matomumą. → [API žinynas](docs/reference/API_REFERENCE.md)
+- **🔑 Maršruto valdymas kiekvienam raktui** — susiekite API raktą su vienu modeliu arba deriniu naudodami `forcedModel` ir atomiškai pridėkite arba pašalinkite rakto modelius bei derinius (`/api/keys/{id}/access`). → [API žinynas](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ Išsamesnis AII valdymas** — pasirinkimas pagal tipą, iki 20 patikrintų pasirinktinių maskavimo šablonų ir aptikimų skaitikliai pagal tipą; pats maskavimas ir toliau įjungiamas pasirinktinai. → [Apsaugos priemonės](docs/security/GUARDRAILS.md)
+- **🌍 67 kalbos** — valdymo skydelyje, dokumentacijos kopijose ir CLI; `npm run i18n:add-locale` viena komanda prideda kalbą visur. → [i18n vadovas](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — gaunamų A2A užduočių perdavimas jūsų agentų parkui, Conductor gebėjimai Agent Card kortelėje ir valdymo skydelio skydelis su Faro tiesioginiu balso pokalbiu paspaudus ir kalbant. → [A2A serveris](docs/frameworks/A2A-SERVER.md)
+- **🛂 Adaptyvus užklausų priėmimas ir apsauga nuo perkrovos** — daug išteklių reikalaujančios pokalbių užklausos įtraukiamos į eilę, užuot grąžinus 503, o kiekvienam ryšiui naudojamos atominės slenkančios RPM nuomos. → [Atsparumo vadovas](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ Kanoninė `/v1/models` tvarka** — kiekvienam teikėjui skiriamas vienas vientisas pagal teikėją sugrupuotas blokas (deriniai pateikiami pirmiausia), stabilus visuose katalogo šaltiniuose. → [API žinynas](docs/reference/API_REFERENCE.md)
+- **🗜️ Patikimesnis glaudinimas** — pagal numatytuosius nustatymus įjungta išskleidimo apsauga, Caveman paketai DE / FR / JA ir kinų kalbai (wényán), RTK filtrai, skirti Gradle ir .NET. → [Glaudinimas](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 Sąžiningos fiksuoto tarifo sąnaudos** — prenumeratos / programavimo planų teikėjams sąnaudų analizėje rodoma **$0**; biudžetas, kvota ir maršruto parinkimas toliau apskaičiuojami apytiksliai. → [API žinynas](docs/reference/API_REFERENCE.md)
+- **⚖️ Quota-Share maršruto parinkimas** — bendros paskyros kvota sąžiningai paskirstoma tarp sujungtų raktų, o nenaudojamos dalys paskolinamos, kad ištekliai nebūtų švaistomi. → [Atsparumo vadovas](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 CLI / agento sąranka viena komanda** — 15 registruotų `setup-*` komandų; `omniroute run` paleidžia 7 CLI (Claude Code, Codex, Aider, Goose, OpenCode, Qwen Code, Gemini CLI); `omniroute configure` palaiko 11 paskirties sistemų, interaktyvų teikėjo ir modelio parinkiklį bei kiekvieno konteksto parankinius. → [CLI integracijos](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ Nuotolinė veiksena** — valdykite nuotolinį OmniRoute naudodami apribotos apimties prieigos raktus (`connect` / `contexts` / `tokens`) ir `antigravity` OAuth pagalbinę priemonę, skirtą VPS diegimams. → [Nuotolinė veiksena](docs/guides/REMOTE-MODE.md)
+- **🧭 Išmanesnis automatinis maršruto parinkimas** — `auto/<category>:<tier>` deriniai, **Fusion** (modelių komisija ir vertintojas), į užduotį atsižvelgiantis maršruto parinkimas, kiekvienos užklausos modelio / veiksenos / USD biudžeto perrašymas. → [Automatiniai deriniai](docs/routing/AUTO-COMBO.md)
+- **🗜️ Modulinis glaudinimas** — 12 derinamų modulių ir Compression Studios: LLMLingua-2, dviejų lygių Ultra, omniglyph, kiekvieno etapo tikslumo patikra, GCF v3.2, nuvilkimu pertvarkomas redaktorius. → [Glaudinimas](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ Skaidrus MITM iššifravimas (TPROXY)** — perimkite CLI, kurios nepaiso tarpinio serverio aplinkos kintamųjų, naudodami kiekvienam SNI skirtą CA ir patikimų sertifikatų saugyklos diegimo priemonę. → [MITM/TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 Sąnaudų telemetrija visur** — `X-OmniRoute-*` sąnaudų / naudojimo antraštės kiekviename galiniame taške, talpyklos pataikymo sutaupymo antraštė ir kiekvieno rakto išlaidų USD kvotos. → [API žinynas](docs/reference/API_REFERENCE.md)
+- **🧠 Jūsų valdoma atmintis** — pagal numatytuosius nustatymus išjungta, pasirinktinai įjungiama int8 vektorių kvantizacija ir tipizuotas nykimas, kiekvienos užklausos `x-omniroute-no-memory`. → [Atmintis](docs/frameworks/MEMORY.md)
+- **🛡️ Saugumas** — raginimų įterpimo apsauga kiekviename LLM maršrute (su įsilaužimų imitavimo testų rinkiniu), pasirinktinai įjungiama kredencialų maskavimo apsauga (abiem kryptimis užmaskuoja nutekėjusius API raktus / paslaptis), nemokama DuckDuckGo žiniatinklio paieška kraštutiniu atveju ir pasirinktinis OIDC prisijungimo barjeras valdymo skydeliui (prisijungimas slaptažodžiu visada išlieka prieinamas). → [Apsaugos priemonės](docs/security/GUARDRAILS.md)
+- **🖼️ Nauji galiniai taškai** — `/v1/ocr` (Mistral OCR) ir `/v1/audio/translations` (Whisper tipo) papildo medijos funkcijų rinkinį. → [API žinynas](docs/reference/API_REFERENCE.md)
+- **🎨 Vaizdų / vaizdo įrašų / garso generavimas** — viena API medijai: xAI Grok Imagine ir Novita AI vaizdo įrašai, ComfyUI, Magnific, Adobe Firefly, Segmind bei kalbos teikėjai, pavyzdžiui, ElevenLabs. → [API žinynas](docs/reference/API_REFERENCE.md)
+- **🌍 Diegimas ir eksploatavimas** — atvirkštinio tarpinio serverio `basePath`, automatinis naršyklės kalbos aptikimas, įrenginių stebėjimas pagal raktą, MITM patikimumo nustatymas be root teisių, zh-TW lokalizacija. → [Aplinka](docs/reference/ENVIRONMENT.md)
+- **🤝 Daugiau teikėjų ir agentų** — debesijos agentai (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) su naršykle ir OAuth prisijungimu, visavertė Ollama kortelė, Claude Opus 5 ir Sonnet 5, oficiali partnerystė su Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… ir atnaujintas **376 teikėjų katalogas**. → [Teikėjai](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 Maršruto parinkimo skaidrumas** — kiekviename atsakyme pateikiama `X-OmniRoute-Decision` antraštė, nurodanti jį aptarnavusią strategiją / teikėją / delsą; nauja `cache-optimized` derinių strategija ir Auto-Combo `cacheAffinity` veiksnys pakartotines užklausas nukreipia atgal į ryšį, kuriame saugomas talpyklos prefiksas, o tik skaitymui skirtas `/v1/auto-combo/{channel}/candidates` galinis taškas pateikia tiesioginį `auto/*` kanalo kandidatų telkinį. → [Automatiniai deriniai](docs/routing/AUTO-COMBO.md)
+- **⚡ Vietinis našumas ir infrastruktūra** — vienu spustelėjimu paleidžiamas vietinis Redis, Cloudflare Workers / Deno Deploy retransliavimo diegimo priemonės, Bifrost ir Mux kaip prižiūrimos įterptosios paslaugos. → [Įterptosios paslaugos](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 Taip pat įtraukta** — papildinių sistema ir prekyvietė, Omni/Agent/GitHub įgūdžių sistemos, Obsidian saugyklos integracija (22 MCP įrankiai), su OpenAI suderinamos Batch ir Files API, semantinė atsakymų podėlio sistema, žaidybinimas su lyderių lentelėmis, ACP agentų aptikimas (15 integruotų agentų), suplanuotas žurnalų eksportavimas į BigQuery, `auto/chaos` lygiagretus užklausų paskirstymas keliems modeliams, Telegram boto sąsaja, programėlėje integruota versijų tvarkyklė ir LMArena-ELO nemokamų teikėjų reitingai. → [Dokumentacija](docs/README.md)
 
 <br/>
 
@@ -699,11 +699,11 @@ patekti į jūsų apvalkalo istoriją. → [CLI integracijos](docs/guides/CLI-IN
 
 </div>
 
-> **376 registruoti teikėjai** kanoniniuose pokalbių, medijos, paieškos, vietinių, debesijos agentų ir sistemos rinkiniuose, įskaitant **153 su `hasFree: true` paieškos metaduomenimis**. Pokalbių modelių registras apima **239 teikėjus / 3 059 skirtingas teikėjo ir modelio poras / 1 475 neapdorotus modelių ID**; atskirame nemokamų limitų kataloge yra **471 kiekvieno modelio įrašas**, **34 periodiškai atsinaujinančių limitų telkiniai** ir **52 periodiškai atsinaujinantis arba be rakto visam laikui nemokamas teikėjas**. Šie vardikliai skiriasi sąmoningai; apibrėžtys ir skaičiavimai, kuriuose pašalinti telkinių dublikatai, pateikiami [Teikėjų žinyne](docs/reference/PROVIDER_REFERENCE.md) ir [Nemokamuose planuose](docs/reference/FREE_TIERS.md).
+> **376 registruoti teikėjai** kanoniniuose pokalbių, medijos, paieškos, vietinių, debesijos agentų ir sistemos rinkiniuose, iš kurių **153 turi `hasFree: true` aptikimo metaduomenis**. Pokalbių modelių registras apima **239 teikėjus / 3 059 unikalias teikėjo ir modelio poras / 1 475 neapdorotus modelių ID**; atskirame nemokamų limitų kataloge yra **484 kiekvieno modelio įrašas**, **34 periodiškai atsinaujinantys fondai** ir **52 periodiškai atsinaujinantys / be rakto amžinai nemokami teikėjai**. Šie vardikliai skiriasi sąmoningai; apibrėžtys ir skaičiavimai, kuriuose fondų dublikatai pašalinti, pateikiami [Teikėjų žinyne](docs/reference/PROVIDER_REFERENCE.md) ir [Nemokamų planų apraše](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
-### 🏢 Visos pagrindinės laboratorijos — per vieną prieigos tašką
+### 🏢 Visos pagrindinės laboratorijos — per vieną galinį tašką
 
 <table>
   <tr>
@@ -732,15 +732,15 @@ patekti į jūsų apvalkalo istoriją. → [CLI integracijos](docs/guides/CLI-IN
   </tr>
 </table>
 
-<sub>…ir dar daugiau nei 350 — kiekviena piktograma dinamiškai įkeliama iš valdymo skydelio teikėjų katalogo. 📖 [Teikėjų žinynas](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>…ir dar daugiau nei 350 — kiekviena piktograma tiesiogiai gaunama iš valdymo skydelio teikėjų katalogo. 📖 [Teikėjų žinynas](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 Nemokama visam laikui — $0, kortelės nereikia
+### 🆓 Nemokamai visam laikui — $0, kortelės nereikia
 
 <table>
   <tr>
-    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Be žetonų apribojimo</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="OpenCode Zen"/><br/><b>OpenCode Zen</b><br/><sub>DeepSeek V4, Nemotron 3<br/>Nėra žetonų limito</sub></td>
     <td align="center" width="150"><img src="./public/providers/cli-generic.svg" width="42" alt="Kilo Code"/><br/><b>Kilo Code</b><br/><sub>Automatinis maršruto parinkimas, Tencent Hy3<br/>Nemokamai visam laikui</sub></td>
     <td align="center" width="150"><img src="./public/providers/requesty.svg" width="42" alt="Requesty"/><br/><b>Requesty</b><br/><sub>GPT-OSS 120B, Nemotron<br/>Nemokamai visam laikui</sub></td>
     <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/siliconcloud-color.svg" width="42" alt="SiliconFlow"/><br/><b>SiliconFlow</b><br/><sub>DeepSeek V3.2 / R1<br/>Nemokamas planas</sub></td>
@@ -752,8 +752,8 @@ patekti į jūsų apvalkalo istoriją. → [CLI integracijos](docs/guides/CLI-IN
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT, Llama, Claude<br/>Rakto nereikia</sub></td>
     <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ modelių<br/>10 tūkst. neuronų per dieną</sub></td>
     <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM, MiniMax<br/>~40 RPM nemokamai</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Vienkartinis 5 $ kreditas; būtina kortelė</sub></td>
-    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free modeliai<br/>+10 $ → didesnis RPM</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7, GPT-OSS<br/>Vienkartinis $5 kreditas; būtina kortelė</sub></td>
+    <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free modeliai<br/>+$10 → didesnis RPM</sub></td>
   </tr>
 </table>
 
@@ -1314,21 +1314,21 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 <table>
   <tr><th align="left">Sluoksnis</th><th align="left">Technologija</th></tr>
   <tr><td nowrap><b>Vykdymo aplinka</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>Kalba</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> kataloguose <code>src/</code> ir <code>open-sse/</code> (nulis <code>any</code> branduolyje nuo v2.0)</td></tr>
+  <tr><td nowrap><b>Kalba</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> kataloguose <code>src/</code> ir <code>open-sse/</code> (pagrindinėje dalyje nėra nė vieno <code>any</code> nuo v2.0)</td></tr>
   <tr><td nowrap><b>Karkasas</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalizavimas) + LowDB (JSON senoji sistema) — 147 domenų moduliai, 211 migracijos</td></tr>
-  <tr><td nowrap><b>Atmintis</b></td><td>SQLite FTS5 visateksčio paieška + int8 kvantuoti vektorių įterpiniai, tipizuotas blukimas</td></tr>
-  <tr><td nowrap><b>Schemos</b></td><td>Zod 4 — MCP įrankių įvesties/išvesties validacija + API sutartys</td></tr>
+  <tr><td nowrap><b>Duomenų bazė</b></td><td>better-sqlite3 (SQLite, WAL žurnalizavimas) + LowDB (senesnis JSON formatas) — 147 domeno moduliai, 211 migracijų</td></tr>
+  <tr><td nowrap><b>Atmintis</b></td><td>SQLite FTS5 viso teksto paieška + int8 kvantuotos vektorinės įterptys, tipizuotas nykimas</td></tr>
+  <tr><td nowrap><b>Schemos</b></td><td>Zod 4 — MCP įrankių įvesties ir išvesties tikrinimas + API sutartys</td></tr>
   <tr><td nowrap><b>Protokolai</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
   <tr><td nowrap><b>Srautinis perdavimas</b></td><td>Server-Sent Events (SSE) + WebSocket tiltas (<code>/v1/ws</code>)</td></tr>
-  <tr><td nowrap><b>Suspaudimas</b></td><td>12 variklių konvejeris — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
-  <tr><td nowrap><b>Autentifikavimas ir saugumas</b></td><td>OAuth 2.0 (PKCE) + JWT + API raktai + MCP apimties autentifikavimas · AES-256-GCM saugomiems duomenims · DOMPurify</td></tr>
-  <tr><td nowrap><b>Slėpymasis</b></td><td>wreq-js — JA3 / JA4 TLS pirštų atspaudų apsimetimas, 3 lygių tarpinis serveris</td></tr>
-  <tr><td nowrap><b>Atsparumas</b></td><td>Grandinės pertraukiklis, eksponentinis kartojimo atidėjimas, apsauga nuo staigios apkrovos bangos, automatinio derinio savigyda</td></tr>
-  <tr><td nowrap><b>Žurnalizavimas</b></td><td>pino — struktūrizuoti JSON žurnalai su užklausos kontekstu</td></tr>
-  <tr><td nowrap><b>Testavimas</b></td><td>Node.js testų vykdytuvas + Vitest — <b>56 000+ statinių testų deklaracijų</b> daugiau nei 7 800 stebimų testų failų (vienetų, integraciniai, E2E, saugumo, ekosistemos)</td></tr>
-  <tr><td nowrap><b>Platformos</b></td><td>Stalinis kompiuteris (Electron) · Android (Termux) · PWA (bet kuri naršyklė)</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatinis npm publikavimas + Docker Hub išleidimo metu</td></tr>
+  <tr><td nowrap><b>Glaudinimas</b></td><td>12 variklių konvejeris — RTK, Caveman, LLMLingua-2 (MobileBERT ONNX), GCF, OmniGlyph</td></tr>
+  <tr><td nowrap><b>Autentifikavimas ir saugumas</b></td><td>OAuth 2.0 (PKCE) + JWT + API raktai + MCP aprėptimi pagrįstas autentifikavimas · AES-256-GCM duomenims saugoti · DOMPurify</td></tr>
+  <tr><td nowrap><b>Maskavimas</b></td><td>wreq-js — JA3 / JA4 TLS kontrolinio atspaudo imitavimas, 3 lygių tarpinis serveris</td></tr>
+  <tr><td nowrap><b>Atsparumas</b></td><td>Grandinės pertraukiklis, eksponentinis delsos didinimas, apsauga nuo užklausų antplūdžio, automatinis derinių atkūrimas</td></tr>
+  <tr><td nowrap><b>Žurnalų rašymas</b></td><td>pino — struktūrizuoti JSON žurnalai su užklausos kontekstu</td></tr>
+  <tr><td nowrap><b>Testavimas</b></td><td>Node.js testų vykdyklė + Vitest — <b>daugiau nei 56 000 statinių testų deklaracijų</b> daugiau nei 7 800 stebimų testų failų (modulių, integraciniai, E2E, saugumo, ekosistemos)</td></tr>
+  <tr><td nowrap><b>Platformos</b></td><td>Darbalaukis (Electron) · Android (Termux) · PWA (bet kuri naršyklė)</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — automatinis publikavimas npm ir Docker Hub išleidus versiją</td></tr>
   <tr><td nowrap><b>Nuorodos</b></td><td><a href="https://omniroute.online">Svetainė</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1344,11 +1344,11 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 
 <table>
   <tr><th align="left">Dokumentas</th><th align="left">Aprašymas</th></tr>
-  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Naudotojo vadovas</a></b></td><td>Teikėjai, deriniai, CLI integravimas, diegimas</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/USER_GUIDE.md">Naudotojo vadovas</a></b></td><td>Teikėjai, deriniai, CLI integracija, diegimas</td></tr>
   <tr><td nowrap><b><a href="docs/guides/SETUP_GUIDE.md">Sąrankos vadovas</a></b></td><td>Visi diegimo būdai, CLI įrankių konfigūracijos, protokolų sąranka, skirtojo laiko derinimas</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI įrankių vadovas</a></b></td><td>Atskira Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo ir Copilot įrankių sąranka</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Nuotolinis režimas</a></b></td><td>Nuotolinio OmniRoute (VPS) valdymas iš nešiojamojo kompiuterio CLI naudojant ribotos aprėpties prieigos prieigos raktus</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code konfigūracija</a></b></td><td>Claude Code prijungimas prie OmniRoute (vietinio / nuotolinio) naudojant <code>launch</code> ir atskirus kiekvieno modelio profilius</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/CLI-TOOLS.md">CLI įrankių vadovas</a></b></td><td>Atskira Claude Code, Codex, Cursor, Cline, OpenClaw, Kilo ir Copilot sąranka</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/REMOTE-MODE.md">Nuotolinis režimas</a></b></td><td>Nuotolinio OmniRoute (VPS) valdymas iš nešiojamojo kompiuterio CLI naudojant ribotos apimties prieigos prieigos raktus</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/CLAUDE-CODE-CONFIGURATION.md">Claude Code konfigūracija</a></b></td><td>Claude Code prijungimas prie OmniRoute (vietinio arba nuotolinio) naudojant <code>launch</code> ir atskirus modelių profilius</td></tr>
   <tr><td nowrap><b><a href="README.md#-quick-start">Greitoji pradžia</a></b></td><td>3 žingsniai: įdiegti → prijungti → sukonfigūruoti</td></tr>
 </table>
 
@@ -1357,31 +1357,31 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 <table>
   <tr><th align="left">Dokumentas</th><th align="left">Aprašymas</th></tr>
   <tr><td nowrap><b><a href="docs/guides/DOCKER_GUIDE.md">Docker vadovas</a></b></td><td>Docker paleidimas, Compose profiliai, Caddy HTTPS, tuneliai, atvaizdų žymos</td></tr>
-  <tr><td nowrap><b><a href="contrib/podman/README.md">Podman vadovas</a></b></td><td>Quadlet integravimas su systemd, podman-compose, SELinux</td></tr>
+  <tr><td nowrap><b><a href="contrib/podman/README.md">Podman vadovas</a></b></td><td>Quadlet systemd integracija, podman-compose, SELinux</td></tr>
   <tr><td nowrap><b><a href="docs/ops/VM_DEPLOYMENT_GUIDE.md">Diegimas virtualiojoje mašinoje</a></b></td><td>Išsamus vadovas: virtualiosios mašinos, nginx ir Cloudflare sąranka</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Diegimas Fly.io</a></b></td><td>Diegimas Fly.io naudojant išliekamąją saugyklą</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/FLY_IO_DEPLOYMENT_GUIDE.md">Diegimas Fly.io</a></b></td><td>Diegimas Fly.io naudojant nuolatinę saugyklą</td></tr>
   <tr><td nowrap><b><a href="docs/guides/TERMUX_GUIDE.md">Termux vadovas</a></b></td><td>OmniRoute paleidimas Android sistemoje naudojant Termux</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA vadovas</a></b></td><td>Progresyviosios žiniatinklio programos diegimas, podėliavimas, architektūra</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/PWA_GUIDE.md">PWA vadovas</a></b></td><td>Progresyviosios saityno programos diegimas, podėlis ir architektūra</td></tr>
   <tr><td nowrap><b><a href="docs/guides/UNINSTALL.md">Šalinimo vadovas</a></b></td><td>Švarus pašalinimas naudojant visus diegimo būdus</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Aplinkos konfigūracija</a></b></td><td>Visi <code>.env</code> kintamieji ir nuorodos</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/ENVIRONMENT.md">Aplinkos konfigūracija</a></b></td><td>Visi <code>.env</code> kintamieji ir jų aprašai</td></tr>
 </table>
 
 ### 🧠 Funkcijos ir architektūra
 
 <table>
   <tr><th align="left">Dokumentas</th><th align="left">Aprašymas</th></tr>
-  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Architektūra</a></b></td><td>Sistemos architektūra, duomenų srautas ir vidiniai mechanizmai</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Glaudinimo vadovas</a></b></td><td>7 parinkčių apdorojimo seka: off / lite / standard / aggressive / ultra / RTK / stacked</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/ARCHITECTURE.md">Architektūra</a></b></td><td>Sistemos architektūra, duomenų srautas ir vidinė sandara</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_GUIDE.md">Glaudinimo vadovas</a></b></td><td>7 parinkčių konvejeris: išjungtas / lengvas / standartinis / intensyvus / maksimalus / RTK / sudėtinis</td></tr>
   <tr><td nowrap><b><a href="docs/compression/RTK_COMPRESSION.md">RTK glaudinimas</a></b></td><td>Komandų išvesties glaudinimas, filtrai, pasitikėjimas, tikrinimas, neapdorotos išvesties atkūrimas</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Glaudinimo moduliai</a></b></td><td>Caveman, RTK, sudėtinės apdorojimo sekos, prietaisų skydelio / API / MCP sąsajos</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Glaudinimo taisyklių formatas</a></b></td><td>Caveman ir RTK filtrų JSON taisyklių rinkinių schemos</td></tr>
-  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Glaudinimo kalbų paketai</a></b></td><td>Kalbos aptikimas ir Caveman taisyklių rinkinių kūrimas</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Atsparumo vadovas</a></b></td><td>Grandinės pertraukikliai, atvėsimo laikotarpiai, eilė, apsauga nuo lavininio užklausų srauto, TLS klastojimas</td></tr>
-  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo modulis</a></b></td><td>16 veiksnių vertinimas, režimų paketai, automatinis atsikūrimas</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_ENGINES.md">Glaudinimo varikliai</a></b></td><td>Caveman, RTK, sudėtiniai konvejeriai, valdymo skydelio, API ir MCP sąsajos</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_RULES_FORMAT.md">Glaudinimo taisyklių formatas</a></b></td><td>Caveman ir RTK filtrų JSON taisyklių paketų schemos</td></tr>
+  <tr><td nowrap><b><a href="docs/compression/COMPRESSION_LANGUAGE_PACKS.md">Glaudinimo kalbų paketai</a></b></td><td>Kalbos aptikimas ir Caveman taisyklių paketų kūrimas</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Atsparumo vadovas</a></b></td><td>Grandinės pertraukikliai, atvėsimo laikotarpiai, eilė, masinių vienalaikių užklausų prevencija, TLS imitavimas</td></tr>
+  <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Auto-Combo variklis</a></b></td><td>16 veiksnių vertinimas, režimų paketai, savaiminis atkūrimas</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Tarpinio serverio vadovas</a></b></td><td>3 lygių tarpinių serverių sistema, 1proxy prekyvietė, registro CRUD operacijos</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Nemokami planai</a></b></td><td>Sujungtas katalogas: 34 dokumentuoti pasikartojantys fondai / 484 kataloguotas nemokamo plano įrašas</td></tr>
-  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funkcijų galerija</a></b></td><td>Vaizdinė prietaisų skydelio apžvalga su ekrano kopijomis</td></tr>
-  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Programinio kodo bazės dokumentacija</a></b></td><td>Pradedantiesiems pritaikyta programinio kodo bazės apžvalga</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Nemokami planai</a></b></td><td>Suvestinis katalogas: 34 dokumentuoti periodiškai atnaujinami telkiniai / 484 kataloguoti nemokamų planų įrašai</td></tr>
+  <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Funkcijų galerija</a></b></td><td>Vaizdinė valdymo skydelio apžvalga su ekrano kopijomis</td></tr>
+  <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Kodo bazės dokumentacija</a></b></td><td>Pradedantiesiems pritaikyta kodo bazės apžvalga</td></tr>
 </table>
 
 ### 🤖 Protokolai ir API
@@ -1390,8 +1390,8 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
   <tr><th align="left">Dokumentas</th><th align="left">Aprašymas</th></tr>
   <tr><td nowrap><b><a href="docs/reference/API_REFERENCE.md">API žinynas</a></b></td><td>Visi galiniai taškai su pavyzdžiais</td></tr>
   <tr><td nowrap><b><a href="docs/openapi.yaml">OpenAPI specifikacija</a></b></td><td>OpenAPI 3.0 specifikacija</td></tr>
-  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP serveris</a></b></td><td>110 MCP įrankių, IDE konfigūracijos, Python / TS / Go klientai</td></tr>
-  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP serverio vadovas</a></b></td><td>MCP diegimas, transportai ir įrankių žinynas</td></tr>
+  <tr><td nowrap><b><a href="open-sse/mcp-server/README.md">MCP serveris</a></b></td><td>110 MCP įrankių, IDE konfigūracijos, Python/TS/Go klientai</td></tr>
+  <tr><td nowrap><b><a href="docs/frameworks/MCP-SERVER.md">MCP serverio vadovas</a></b></td><td>MCP diegimas, perdavimo būdai ir įrankių žinynas</td></tr>
   <tr><td nowrap><b><a href="src/lib/a2a/README.md">A2A serveris</a></b></td><td>JSON-RPC 2.0 protokolas, gebėjimai, srautinis perdavimas, užduočių valdymas</td></tr>
   <tr><td nowrap><b><a href="docs/frameworks/A2A-SERVER.md">A2A serverio vadovas</a></b></td><td>A2A agento kortelė, užduotys, gebėjimai ir srautinis perdavimas</td></tr>
 </table>
@@ -1400,27 +1400,27 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
 
 <table>
   <tr><th align="left">Dokumentas</th><th align="left">Aprašymas</th></tr>
-  <tr><td nowrap><b><a href="CONTRIBUTING.md">Prisidėjimas</a></b></td><td>Kūrimo aplinkos parengimas ir gairės</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Šakų ir leidimų modelis</a></b></td><td>Į kur nukreipiamos PR (<code>release/*</code>), ką reiškia <code>main</code> ir žymos</td></tr>
-  <tr><td nowrap><b><a href="CHANGELOG.md">Pakeitimų žurnalas</a></b></td><td>Visa kiekvienos versijos leidimų istorija</td></tr>
-  <tr><td nowrap><b><a href="SECURITY.md">Saugumo politika</a></b></td><td>Pranešimas apie pažeidžiamumus ir saugumo praktika</td></tr>
+  <tr><td nowrap><b><a href="CONTRIBUTING.md">Prisidėjimas</a></b></td><td>Kūrimo aplinkos paruošimas ir gairės</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/BRANCHING_MODEL.md">Šakų ir leidimų modelis</a></b></td><td>Į ką nukreipiamos PR (<code>release/*</code>) ir ką reiškia <code>main</code> bei žymos</td></tr>
+  <tr><td nowrap><b><a href="CHANGELOG.md">Pakeitimų žurnalas</a></b></td><td>Išsami kiekvienos versijos leidimų istorija</td></tr>
+  <tr><td nowrap><b><a href="SECURITY.md">Saugumo politika</a></b></td><td>Pranešimas apie pažeidžiamumus ir saugumo praktikos</td></tr>
   <tr><td nowrap><b><a href="docs/guides/I18N.md">i18n vadovas</a></b></td><td>67 kalbų palaikymas, vertimo darbo eiga, RTL</td></tr>
   <tr><td nowrap><b><a href="docs/ops/RELEASE_CHECKLIST.md">Leidimo kontrolinis sąrašas</a></b></td><td>Patikros veiksmai prieš leidimą</td></tr>
-  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Aprėpties planas</a></b></td><td>Testų aprėpties strategija, skirta daugiau nei 56 000 statinių testų deklaracijų daugiau nei 7 800 stebimų testų failų</td></tr>
+  <tr><td nowrap><b><a href="docs/ops/COVERAGE_PLAN.md">Testų aprėpties planas</a></b></td><td>56 000+ statinių testų deklaracijų strategija 7 800+ stebimų testų failų</td></tr>
 </table>
 
 <br/>
 
 <div align="center">
 
-# ⭐ Daugiausia prisidėję asmenys
+# ⭐ Daugiausia prisidėję dalyviai
 
-> „OmniRoute“ formuoja entuziastinga atvirojo kodo bendruomenė. Šie žmonės išskirtinai prisidėjo prie projekto kokybės, stabilumo ir pasiekiamumo. **Ačiū.**
+> „OmniRoute“ kuria entuziastinga atvirojo kodo bendruomenė. Šie žmonės išskirtinai prisidėjo prie projekto kokybės, stabilumo ir pasiekiamumo. **Ačiū.**
 
-### Išoriniai dalyviai pagal sujungtas PR
+### Išoriniai dalyviai pagal sujungtas pakeitimų užklausas
 
 <table>
-  <tr><th align="center">Vieta</th><th align="left">Dalyvis</th><th align="center">Sujungtos PR</th><th align="right">~Pakeistos eilutės</th></tr>
+  <tr><th align="center">Vieta</th><th align="left">Dalyvis</th><th align="center">Sujungtos PR</th><th align="right">~Pakeistų eilučių</th></tr>
   <tr><td align="center">1</td><td align="left"><a href="https://github.com/maxmad64bis"><b>maxmad64bis</b></a></td><td align="center">371</td><td align="right">25,326,561</td></tr>
   <tr><td align="center">2</td><td align="left"><a href="https://github.com/HouMinXi"><b>HouMinXi</b></a></td><td align="center">269</td><td align="right">13,456,272</td></tr>
   <tr><td align="center">3</td><td align="left"><a href="https://github.com/backryun"><b>backryun</b></a></td><td align="center">210</td><td align="right">270,562</td></tr>
@@ -1443,9 +1443,9 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
   <tr><td align="center">20</td><td align="left"><a href="https://github.com/MumuTW"><b>MumuTW</b></a></td><td align="center">40</td><td align="right">26,093</td></tr>
 </table>
 
-<sub>Duomenys surinkti 2026-10-18 15:09:09 UTC naudojant aktualią <code>release/v3.8.52</code> viršūnę <code>656f01cb43</code>. Puslapiais pateikiama „GitHub GraphQL“ suvestinė apima 9 191 sujungtą PR: 3 834 pateikė saugyklos savininkas, 229 – Dependabot, 6 – kiti botai ar programos, o <b>5 122 išorines PR pateikė 835 skirtingi dalyviai</b>. „Pakeistos eilutės“ – tai „GitHub“ pridėtų ir pašalintų eilučių suma, apimanti sugeneruotus failus, priklausomybių užrakinimo failus, katalogus, vertimus ir dokumentaciją; tai pakeitimų apimtis, o ne autoriaus parašytų kodo eilučių skaičius. 49 PR „GitHub“ skirtumuose nurodoma daugiau nei 500 000 eilučių (pavyzdžiui, #13399 – vieno teikėjo pridėjimas – apima 2 347 pakeistus failus), todėl keli pirmiau pateikti bendri skaičiai yra išpūsti. Vienodus rezultatus turintiems dalyviams skiriama ta pati vieta.</sub>
+<sub>Duomenys surinkti 2026-10-18 15:09:09 UTC, naudojant dabartinę <code>release/v3.8.52</code> šakos viršūnę <code>656f01cb43</code>. Puslapiais suskirstytoje „GitHub GraphQL“ suvestinėje yra 9 191 sujungta PR: 3 834 pateikė saugyklos savininkas, 229 – „Dependabot“, 6 – kiti robotai ar programos, o <b>5 122 išorines PR pateikė 835 skirtingi dalyviai</b>. „Pakeistos eilutės“ – tai „GitHub“ pridėtų ir pašalintų eilučių suma, į kurią įtraukti sugeneruoti failai, priklausomybių fiksavimo failai, katalogai, vertimai ir dokumentacija; tai pakeitimų apimtis, o ne autoriaus parašytų kodo eilučių skaičius. 49 PR „GitHub“ skirtumuose turi daugiau nei 500 000 eilučių (pavyzdžiui, #13399 – vieno teikėjo pridėjimas – nurodo 2 347 pakeistus failus), todėl keli pirmiau pateikti bendri skaičiai yra išpūsti. Vienodus rezultatus pasiekę dalyviai užima tą pačią vietą.</sub>
 
-### „GitHub“ priskirti commitai
+### „GitHub“ priskirti patvirtinimai
 
 <table>
   <tr>
@@ -1531,9 +1531,9 @@ Kanoninės metrikos 2026-10-18: **1.976 unikalūs vaizdo įrašai** · **20.220.
   </tr>
 </table>
 
-<sub>Pakartotinai patikrinta 2026-10-18 14:44:45 UTC: saugyklos Contributors API nurodyti su GitHub susieti įnašai numatytajai <code>release/v3.8.52</code> šakai. API grąžino 849 tapatybes (429 naudotojus, 2 robotus ir 418 anoniminių tapatybių); į šią lentelę neįtrauktas prižiūrėtojas, robotai ir anoniminės tapatybės, o vienodi konkurso rezultatai palikti. Ši lentelė skiriasi ir nuo aukščiau pateikto sujungtų PR reitingo, ir nuo žemiau pateikto Git metaduomenų surašymo.</sub>
+<sub>Pakartotinai patikrinta 2026-10-18 14:44:45 UTC: saugyklos Contributors API pateikti su GitHub susieti numatytosios <code>release/v3.8.52</code> šakos įnašai. API grąžino 849 tapatybes (429 naudotojus, 2 robotus ir 418 anoniminių tapatybių); šioje lentelėje neįtraukti prižiūrėtojas, robotai ir anoniminės tapatybės, tačiau išsaugotos vienodos konkurso vietos. Ji skiriasi tiek nuo aukščiau pateikto sujungtų PR reitingo, tiek nuo žemiau pateikto Git metaduomenų surašymo.</sub>
 
-> 🙏 Šių bendraautorių funkcijos, klaidų taisymai ir infrastruktūros patobulinimai yra **esminė dalis** to, kas daro OmniRoute patikimą ir funkcionalų. Svarbi kiekviena įtraukimo užklausa, kiekvienas testavimo atvejis ir kiekvienas i18n vertimo failas. Atvirąjį kodą kuria tokie žmonės kaip jie.
+> 🙏 Šių bendraautorių funkcijos, klaidų pataisymai ir infrastruktūros patobulinimai yra **esminė dalis** to, kas užtikrina OmniRoute patikimumą ir funkcionalumą. Svarbi kiekviena įtraukimo užklausa, kiekvienas testo atvejis ir kiekvienas i18n vertimo failas. Atvirąjį kodą kuria tokie žmonės kaip jie.
 
 </div>
 

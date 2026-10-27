@@ -1,0 +1,1 @@
+- **Routing error guard:** Document bounded fallbacks and fail-closed authorization, handle the first-output reader promise explicitly, and remove ten obsolete exceptions. Regression checks preserve original stream errors, malformed-response rejection, registry timeout fallback, and existing quota limits.

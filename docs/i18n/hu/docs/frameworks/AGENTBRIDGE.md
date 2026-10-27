@@ -535,24 +535,24 @@ Teljes OpenAPI-sémák: `docs/openapi.yaml` → `AgentBridge` címke.
 
 ## §8 Ütemterv
 
-### A Trae vizsgálata
+### Trae-vizsgálat
 
-A Trae egy viszonylag új MI-alapú kódolási asszisztens. A kezelő implementálása előtt:
+A Trae egy viszonylag új, MI-alapú kódolási asszisztens. A kezelő implementálása előtt:
 
-1. Azonosítsa a bináris fájlt/bővítményt a VS Code / JetBrains piacterein vagy önálló alkalmazásként
-2. Rögzítse a forgalmat a mitmproxy segítségével az API-gazdagépek és a végpontok felépítésének felderítéséhez
-3. Határozza meg a hitelesítési mechanizmust
-4. Mérlegelje a folytatás vagy leállítás lehetőségét a szolgáltatási feltételek és az API feltérképezhetősége alapján
+1. Azonosítani kell a bináris fájlt/bővítményt a VS Code / JetBrains piacterein vagy önálló alkalmazásként
+2. A forgalmat mitmproxy segítségével kell rögzíteni az API-gazdagépek és a végpontok szerkezetének feltárásához
+3. Meg kell határozni a hitelesítési mechanizmust
+4. Az ÁSZF és az API feltérképezhetősége alapján dönteni kell a folytatásról vagy a leállításról
 
-A vizsgálat befejezéséig az irányítópulton lévő Trae-kártyán a „Vizsgálat alatt” jelvény és egy „Életképesség jelentése” hivatkozás látható. A `src/mitm/handlers/trae.ts` fájlban lévő kezelőváz egy strukturált `Még nincs implementálva` hibát dob.
+A vizsgálat befejezéséig az irányítópult Trae-kártyáján a „Vizsgálat alatt” jelvény és egy „Életképesség jelentése” hivatkozás jelenik meg. A `src/mitm/handlers/trae.ts` helyen található kezelőváz strukturált `Not yet implemented` hibát dob.
 
-### Hátralékban lévő ügynökök (MITM szükséges — egyéni alap-URL nem támogatott)
+### Hátralékban lévő ügynökök (MITM szükséges — az egyéni alap-URL nem támogatott)
 
-A következő eszközök jelenlegi verziói nem támogatják az egyéni alap-URL-eket, így a MITM az egyetlen elfogási lehetőség. Az életképességi felmérés még folyamatban van:
+A következő eszközök jelenlegi verziói nem támogatják az egyéni alap-URL-eket, így a MITM az egyetlen elfogási lehetőség. Az életképesség értékelése még folyamatban van:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — a Kiro IDE-től különálló eszköz)
 - **Cowork** (Anthropic asztali alkalmazás)
 
-Megjegyzés: A GitHub Copilot CLI ≥v1.0.19 támogatja a `COPILOT_PROVIDER_BASE_URL` változót — ennél az eszköznél a MITM helyett közvetlen konfigurációt használjon.
+Megjegyzés: A GitHub Copilot CLI ≥v1.0.19 támogatja a `COPILOT_PROVIDER_BASE_URL` változót — ennél az eszköznél MITM helyett közvetlen konfigurációt használjon.

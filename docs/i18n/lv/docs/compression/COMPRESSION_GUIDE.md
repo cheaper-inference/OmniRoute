@@ -179,7 +179,7 @@ Ar Stacked:       nosūtīti 10K-2.5K tokenu     (piemērotās RTK+Caveman slodz
 
 ### Informācijas panelis
 
-Dodieties uz `Informācijas panelis → Konteksts un kešatmiņa`:
+Dodieties uz `Dashboard → Context & Cache`:
 
 - **Caveman** — režīma izvēle, valodu pakotnes, priekšskatījums un globālie noklusējumi
 - **RTK** — komandu filtru priekšskatījums, RTK drošības iestatījumi un filtru katalogs
@@ -188,7 +188,7 @@ Dodieties uz `Informācijas panelis → Konteksts un kešatmiņa`:
 
 ### Pārrakstīšana katrai kombinācijai
 
-Sadaļā `Informācijas panelis → Konteksts un kešatmiņa → Saspiešanas kombinācijas` piešķiriet saspiešanas kombināciju maršrutēšanas
+Sadaļā `Dashboard → Context & Cache → Compression Combos` piešķiriet saspiešanas kombināciju maršrutēšanas
 kombinācijai:
 
 ```txt
@@ -207,9 +207,9 @@ abonementiem.
 režīma** pārrakstīšanas (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — lauka
 shēma pieņem arī `rtk`, `stacked` un `omniglyph`) — šī pārrakstīšana neizvēlas nosauktu
 saspiešanas kombinācijas konveijeru; tā tikai iestata lauku `compressionMode`, ko izmanto
-`resolveCompressionPlan`. To var iestatīt vai nu kombinācijas kartītē (`Informācijas panelis → Kombinācijas`), vai, sākot ar
+`resolveCompressionPlan`. To var iestatīt vai nu kombinācijas kartītē (`Dashboard → Combos`), vai, sākot ar
 #6760, katrai maršrutēšanas kombinācijai sarakstā „Piešķirt maršrutēšanai”, kas atrodas
-`Informācijas panelis → Konteksts un kešatmiņa → Saspiešanas kombinācijas`, tieši blakus iepriekš aprakstītajai konveijera piešķiršanas izvēles rūtiņai.
+`Dashboard → Context & Cache → Compression Combos`, tieši blakus iepriekš aprakstītajai konveijera piešķiršanas izvēles rūtiņai.
 Abās saskarnēs izmaiņas tiek saglabātas, izmantojot vienu un to pašu galapunktu `PUT /api/combos/{id}`.
 
 ### Pārrakstīšana katram pieprasījumam

@@ -146,7 +146,7 @@ range    = 1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 Dat getal van `78-95%` is van toepassing wanneer zowel RTK als Caveman dezelfde invoer-/contextpayload
 kunnen verkleinen. De uitvoermodus voor Caveman-antwoorden staat hiervan los: gebruik, wanneer deze is
-ingeschakeld, de eigen uitvoerbesparingen van Caveman (gemiddeld `65%`, ongeveer `75%` als hoofdgetal,
+ingeschakeld, de eigen uitvoerbesparingen van Caveman (gemiddeld `65%`, ongeveer `~75%` als hoofdgetal,
 bereik van `22-87%`). De totale factureringsbesparing hangt af van uw verhouding tussen prompts en uitvoer.
 
 ### Wat "geschikt" daadwerkelijk betekent

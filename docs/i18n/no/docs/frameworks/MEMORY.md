@@ -568,7 +568,7 @@ Se [MCP-SERVER.md](./MCP-SERVER.md) for detaljer om transport og omfang.
 - Konfigurasjonskort for omrangering (aktiveringsbryter, leverandør-/modellvelger).
 
 Innstillinger for minne og Qdrant finnes også under
-`/dashboard/settings → Minne og ferdigheter` (`MemorySkillsTab.tsx`) for
+`/dashboard/settings → Minne og ferdigheter` (`/dashboard/settings → Memory & Skills`) (`MemorySkillsTab.tsx`) for
 den eldre/globale innstillingsflaten.
 
 ## Hurtigbufring
@@ -713,11 +713,11 @@ Modulen `extraction.ts` (`src/lib/memory/extraction.ts`) bruker **mønstergjenkj
 
 ### Standardkategorier for mønstre
 
-| Kategori            | Eksempelmønster                                                            | Fanger opp                      |
-| ------------------- | -------------------------------------------------------------------------- | ------------------------------- |
-| PREFERENCE_PATTERNS | `"Jeg foretrekker <X>"`, `"Jeg liker <X>"`, `"Jeg hater <X>"`              | Brukerpreferanser               |
-| DECISION_PATTERNS   | `"Jeg skal bruke <X>"`, `"Jeg bestemte meg for å <X>"`, `"Jeg valgte <X>"` | Brukerbeslutninger (episodiske) |
-| PATTERN_PATTERNS    | `"Jeg pleier å <X>"`, `"Jeg gjør alltid <X>"`, `"Jeg gjør aldri <X>"`      | Vedvarende atferdsmønstre       |
+| Kategori            | Eksempelmønster                                             | Fanger opp                      |
+| ------------------- | ----------------------------------------------------------- | ------------------------------- |
+| PREFERENCE_PATTERNS | `"I prefer <X>"`, `"I like <X>"`, `"I hate <X>"`            | Brukerpreferanser               |
+| DECISION_PATTERNS   | `"I'll use <X>"`, `"I decided to <X>"`, `"I went with <X>"` | Brukerbeslutninger (episodiske) |
+| PATTERN_PATTERNS    | `"I usually <X>"`, `"I always <X>"`, `"I never <X>"`        | Vedvarende atferdsmønstre       |
 
 ### Eksempelmønstre (forenklet)
 
@@ -753,7 +753,8 @@ Når en bruker sier:
 
 For å forhindre ukontrollert uttrekking gjelder følgende grenser:
 
-| Minste innholdslengde | 3 tegn |
+| Minste innholdslengde  | 3 tegn   |
+| ---------------------- | -------- |
 | Største innholdslengde | 500 tegn |
 
 ### Når uttrekking bør deaktiveres

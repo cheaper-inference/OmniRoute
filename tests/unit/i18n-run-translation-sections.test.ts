@@ -189,6 +189,55 @@ test("mirrorNeedsRebuild: a real translation is left alone", () => {
   assert.equal(mirrorNeedsRebuild(mirror, SRC), false);
 });
 
+test("mirrorNeedsRebuild: an extra body H1 is stale even when the mirror is translated", () => {
+  const source = "# Quality Gates Reference\n\n## Inventory\n\nQuality checks are required.";
+  const prefix = "# Referenca (Bosanski)\n\n🌐 Languages\n\n---\n\n";
+  const body = "## Inventar\n\nProvjere kvaliteta su obavezne.";
+  assert.equal(mirrorNeedsRebuild(prefix + body, source), false);
+  assert.equal(
+    mirrorNeedsRebuild(prefix + "# Referenca za Quality Gates\n\n" + body, source),
+    true
+  );
+});
+
+test("mirrorNeedsRebuild: initial indented code is preserved as translated code", () => {
+  const source = "# Example\n\n    # Example comment\n    npm ci";
+  const mirror = "# Exemplo\n\n🌐 Languages\n\n---\n\n    ### Comentário traduzido\n    npm ci";
+  assert.equal(mirrorNeedsRebuild(mirror, source), false);
+});
+
+test("section reuse retranslates heading drift despite matching source hashes", () => {
+  const sections = ["Introduction.", "## Settings\n\n### Limits\n\nSet the limits."];
+  const prefix = "Introdução.";
+  const complete = "## Configurações\n\n### Limites\n\nConfigure os limites.";
+  for (const broken of [
+    "# Título extra\n\n" + complete,
+    complete.replace("### Limites", "Limites"),
+    complete.replace("### Limites", "#### Limites"),
+  ]) {
+    const plan = planSectionReuse({
+      previousHashes: sectionHashes(sections),
+      sections,
+      mirrorSections: [prefix, broken],
+    });
+    assert.deepEqual(plan.translate, [1]);
+    assert.deepEqual([...plan.reuse.entries()], [[0, prefix]]);
+  }
+  const valid = planSectionReuse({
+    previousHashes: sectionHashes(sections),
+    sections,
+    mirrorSections: [prefix, complete],
+  });
+  assert.deepEqual(valid.translate, []);
+  assert.deepEqual(
+    [...valid.reuse.entries()],
+    [
+      [0, prefix],
+      [1, complete],
+    ]
+  );
+});
+
 test("mergeStateUpdates keeps other runners' entries and applies this run's records", () => {
   const fresh = {
     sources: {
@@ -219,6 +268,50 @@ test("planSectionReuse retranslates a section that is still mostly English even 
     looksUntranslated(
       "## Einrichtung\n\nKlone das Repository und installiere zuerst die Abhängigkeiten.\n\nStarte den Entwicklungsserver und öffne das Dashboard.\n\nErstelle deine env-Datei aus der Vorlage.\n",
       sec
+    ),
+    false
+  );
+});
+
+test("section reuse revalidates cached code literals and table rows despite matching hashes", () => {
+  const sections = [
+    "Introduction.",
+    "## Settings\n\n| Variable | Meaning |\n| --- | --- |\n| `QODER_CLI_MAX_CONCURRENCY` | Queue limit |\n| `KIRO_REQUIRE_CREDITS` | Credit policy |",
+    "## Next\n\nContinue with setup.",
+  ];
+  const complete =
+    "## Configuração\n\n| Variável | Significado |\n| --- | --- |\n| `QODER_CLI_MAX_CONCURRENCY` | Limite da fila |\n| `KIRO_REQUIRE_CREDITS` | Política de créditos |";
+  for (const broken of [
+    complete
+      .split("\n")
+      .filter((line) => !line.includes("KIRO_REQUIRE_CREDITS"))
+      .join("\n"),
+    complete.replace("KIRO_REQUIRE_CREDITS", "KIRO_EXIGE_CREDITOS"),
+  ]) {
+    const plan = planSectionReuse({
+      previousHashes: sectionHashes(sections),
+      sections,
+      mirrorSections: ["Introdução.", broken, "## Próximo\n\nContinue a configuração."],
+    });
+    assert.deepEqual(plan.translate, [1]);
+    assert.deepEqual([...plan.reuse.keys()], [0, 2]);
+  }
+  const valid = planSectionReuse({
+    previousHashes: sectionHashes(sections),
+    sections,
+    mirrorSections: ["Introdução.", complete, "## Próximo\n\nContinue a configuração."],
+  });
+  assert.deepEqual(valid.translate, []);
+});
+
+test("a mirror with missing source literals is rebuilt even when its prose is translated", () => {
+  const source = "# Configuration\n\nSet `QODER_CLI_MAX_CONCURRENCY` and `KIRO_REQUIRE_CREDITS`.";
+  const mirror = "# Configuração\n\n🌐 Languages\n\n---\n\nConfigure `QODER_CLI_MAX_CONCURRENCY`.";
+  assert.equal(mirrorNeedsRebuild(mirror, source), true);
+  assert.equal(
+    mirrorNeedsRebuild(
+      mirror.replace("CONCURRENCY`.", "CONCURRENCY` e `KIRO_REQUIRE_CREDITS`."),
+      source
     ),
     false
   );

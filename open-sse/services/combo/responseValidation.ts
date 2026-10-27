@@ -186,6 +186,7 @@ function validJsonArguments(value: unknown): boolean {
   try {
     return isRecord(JSON.parse(value));
   } catch {
+    // no-effect: malformed arguments stay invalid and cannot bypass minimum-content checks.
     return false;
   }
 }

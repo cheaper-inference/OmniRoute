@@ -781,7 +781,7 @@ Command ដែលប្រើជាទូទៅ៖
    `open-sse/mcp-server/schemas/tools.ts`)។
 2. កំណត់ scope ដែលសមស្របក្នុង `src/shared/constants/mcpScopes.ts`។
 3. ចុះឈ្មោះឧបករណ៍ក្នុង `open-sse/mcp-server/server.ts`។
-4. បន្ថែមការធ្វើតេស្តក្រោម `open-sse/mcp-server/__tests__/`។
+4. បន្ថែមការធ្វើតេស្តក្រោម `tests/unit/`។
 5. ធ្វើបច្ចុប្បន្នភាព [MCP-SERVER.md](../frameworks/MCP-SERVER.md)។
 
 ### បន្ថែមជំនាញ A2A ថ្មី
@@ -799,7 +799,7 @@ Command ដែលប្រើជាទូទៅ៖
 - **ការដាក់ឈ្មោះ**៖ ឯកសារប្រើ `camelCase` ឬ `kebab-case`, components ប្រើ `PascalCase`,
   constants ប្រើ `UPPER_SNAKE`។
 - **ESLint**៖ `no-eval`, `no-implied-eval`, `no-new-func` = `error` គ្រប់ទីកន្លែង;
-  `no-explicit-any` = `warn` ក្នុង `open-sse/` និង `tests/`, ជា error នៅកន្លែងផ្សេង។
+  `no-explicit-any` = `error` ក្នុង `open-sse/**/*.ts` និង `tests/**/*.ts`។
 - **TypeScript**៖ `strict: false` (ជំហរដើម្បីគាំទ្រប្រព័ន្ធចាស់)។ គួរប្រើ types ដែលបញ្ជាក់ច្បាស់លាស់ជំនួស
   inference សម្រាប់ព្រំដែនឆ្លងម៉ូឌុល។
 - **មូលដ្ឋានទិន្នន័យ**៖ មិនត្រូវសរសេរ SQL ដើមក្នុង routes ឬ handlers ឡើយ — ត្រូវឆ្លងកាត់
@@ -829,8 +829,7 @@ Command ដែលប្រើជាទូទៅ៖
   `a2a`, `memory`, `skills`។
 - **Branches**៖ prefixes `feat/`, `fix/`, `refactor/`, `docs/`, `test/`,
   `chore/`។ មិនត្រូវ commit ដោយផ្ទាល់ទៅ `main` ឡើយ។
-- **Husky**៖ pre-commit ដំណើរការ `lint-staged` + `check:docs-sync` +
-  `check:any-budget:t11`; pre-push ដំណើរការ `check:any-budget:t11` + `check:tracked-artifacts` (ការត្រួតពិនិត្យរហ័ស; មិនរាប់បញ្ចូល `test:unit`)។
+- **Husky**៖ [`pre-commit`](../../../../../.husky/pre-commit) · [`pre-push`](../../../../../.husky/pre-push).
 
 ---
 

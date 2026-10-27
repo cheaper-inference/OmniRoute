@@ -162,7 +162,7 @@ Vsak vnos dobi raven zaupanja na podlagi števila glasov na Areni:
 | `medium` | ≥ 1.000 |
 | `low`    | < 1.000 |
 
-### Shranjevanje in svežina
+### Shranjevanje in aktualnost
 
 Normalizirani vnosi se zapišejo v tabelo `model_intelligence` v bazi podatkov z
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Vnosi **potečejo po

@@ -88,28 +88,27 @@
    रणनीतिहरूका लागि, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` मार्फत चल्छन्;
    ReactFlow एजहरू र अर्केस्ट्रेसन क्यानभासले थिम-सचेत `--orch-status-*` भेरिएबलहरू पढ्छन्
    (`src/shared/components/flow/edgeStyles.ts`)।
-2. `packages/ui-kit/src` लाई कहिल्यै हातले प्याच नगर्नुहोस्: `scripts/dev/sync-ui-kit.sh <commit>`
-   ले सिङ्क गर्नुहोस्; प्रि-कमिट गेट `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) पिन
-   गरिएको अपस्ट्रिम कमिटभन्दा फरक हुने जुनसुकै बाइटमा फेल हुन्छ (अपस्ट्रिम क्लोन, `UI_KIT_CLONE` वा
-   `_references/cheaper-inference-ui-kit`, नभएकोमा चेतावनीसहित छोड्छ)। किटमा केही कुरा नभएमा,
-   एडाप्टर वा स्क्रिनभित्र वैकल्पिक उपायले काम गर्नुहोस् र अपस्ट्रिमसँग त्यसको माग गर्नुहोस्।
-3. किट टेक्स्ट डिफल्टहरू अंग्रेजी हुन्छन् (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   किट कम्पोनेन्टले टेक्स्ट रेन्डर गर्दा जहिले पनि `useTranslations(...)` बाट अनुवादित स्ट्रिङहरू
-   पास गर्नुहोस्।
-4. Tailwind युटिलिटीहरूले किट कम्पोनेन्ट क्लासहरूलाई जित्छन् (किटले
-   `@layer theme, base, components, utilities` घोषणा गर्छ र यसका नियमहरू `components` मा बस्छन्) —
-   स्पेसिङ र लेआउटका लागि युटिलिटीहरू प्रयोग गर्नुहोस्, किट कम्पोनेन्टहरूलाई फेरि रंग दिन होइन।
-5. शीर्षकहरू: पेज र सेक्सन शीर्षकहरूका लागि `.ci-heading` (Inter, ट्र्याकिङ बिना); एरर-पेज स्टेटस
-   कोड जस्ता ठूला, विरल डिस्प्ले टेक्स्टका लागि मात्र `.ci-dashboard-display` (Instrument Serif)।
-6. `tests/unit/dashboard-kit-sweep.test.ts` ले किट अपनाइएको कुराको रक्षा गर्छ: `src/app` वा
-   `src/shared/components` मुनि कुनै Material ligature span छैन; ड्यासबोर्ड ट्रीमा
-   (`src/app/(dashboard)` र `src/shared/components`) सूचीबद्ध अपवादहरू बाहिर कुनै कच्चा `<select>`,
-   `<textarea>` वा `<table>` छैन र कुनै हातले बनाइएको `role="dialog"` छैन (`Select` एडाप्टरको
-   नेटिभ शाखा, `RequestLoggerDetail`); त्यहाँ हरेक कच्चा `<button>` वा `<input>` लाई
-   `kit-exception:` समावेश भएको कमेन्ट (कारणसहित) चाहिन्छ जुन यसभन्दा बढीमा 3 लाइन माथि सकिएको
-   हुनुपर्छ; प्यालेट ह्यूहरू र `dark:` भेरिएन्टहरू केवल टेस्टले सूचीबद्ध गरेका फाइलहरूमा मात्र।
-7. PR अघि दुवै थिमहरू र 390 px भ्युपोर्ट प्रमाणित गर्नुहोस् (स्क्रिनसटहरू);
-   `tests/e2e/a11y.spec.ts` ले axe चलाउँछ।
+2. `packages/ui-kit/src` लाई कहिल्यै हातैले प्याच नगर्नुहोस्: `scripts/dev/sync-ui-kit.sh <commit>` मार्फत सिङ्क गर्नुहोस्;
+   प्रि-कमिट गेट `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) पिन गरिएको अपस्ट्रिम कमिटभन्दा
+   कुनै पनि बाइट फरक भएमा असफल हुन्छ (अपस्ट्रिम क्लोन,
+   `UI_KIT_CLONE` वा `_references/cheaper-inference-ui-kit`, नभएमा यसले चेतावनीसहित जाँच छोड्छ)। किटमा केही कुरा नभएमा,
+   एडाप्टर वा स्क्रिनमा वैकल्पिक समाधान प्रयोग गर्नुहोस् र त्यसका लागि अपस्ट्रिमलाई अनुरोध गर्नुहोस्।
+3. किटका पाठका पूर्वनिर्धारित मानहरू अङ्ग्रेजीमा छन् (`label = "Loading"`, `loadingLabel = "Loading table"`…) — किट कम्पोनेन्टले पाठ रेन्डर गर्दा
+   `useTranslations(...)` बाट अनुवाद गरिएका स्ट्रिङहरू पठाउनुहोस्।
+4. Tailwind युटिलिटीहरूले किट कम्पोनेन्टका क्लासहरूलाई प्राथमिकतामा उछिन्छन् (किटले
+   `@layer theme, base, components, utilities` घोषणा गर्छ र यसका नियमहरू `components` मा रहन्छन्) — स्पेसिङ र लेआउटका लागि युटिलिटीहरू
+   प्रयोग गर्नुहोस्, किट कम्पोनेन्टहरूलाई पुनः रङ दिनका लागि होइन।
+5. हेडिङहरू: पृष्ठ र खण्डका शीर्षकहरूका लागि `.ci-heading` (Inter, ट्र्याकिङविना); `.ci-dashboard-display`
+   (Instrument Serif) केवल त्रुटि-पृष्ठको स्थिति कोडजस्ता ठूला र विरल डिस्प्ले पाठका लागि।
+6. `tests/unit/dashboard-kit-sweep.test.ts` ले किट प्रयोगको निगरानी गर्छ: `src/app` वा
+   `src/shared/components` अन्तर्गत Material लिगेचर स्प्यान हुनु हुँदैन; ड्यासबोर्ड ट्री (`src/app/(dashboard)` र
+   `src/shared/components`) मा कच्चा `<select>`, `<textarea>` वा `<table>` हुनु हुँदैन र सूचीबद्ध
+   अपवादहरू (`Select` एडाप्टरको नेटिभ शाखा,
+   `RequestLoggerDetail`) बाहिर हातैले बनाइएको `role="dialog"` हुनु हुँदैन; त्यहाँको प्रत्येक कच्चा `<button>` वा `<input>` भन्दा बढीमा
+   3 लाइनमाथि समाप्त हुने, कारणसहितको `kit-exception:` भएको टिप्पणी आवश्यक हुन्छ; प्यालेट ह्युहरू र `dark:` भेरियन्टहरू
+   परीक्षणले सूचीबद्ध गरेका फाइलहरूमा मात्र हुनुपर्छ।
+7. PR अघि दुवै थिम र 390 px भ्यूपोर्टलाई स्क्रिनसटसहित प्रमाणित गर्नुहोस्; `tests/e2e/a11y.spec.ts` ले
+   axe चलाउँछ।
 
 ## 3. स्क्रिन थप्ने तरिका
 
@@ -149,7 +148,23 @@ relative imports बाट `.js` suffix हटाउँछ)। त्यसप�
 usage र endpoint को visual pass गर्नुहोस्, `npm run check:ui-kit-snapshot` र `npm run test:vitest:ui` चलाउनुहोस्, र
 upstream changelog सहित PR खोल्नुहोस्।
 
-## 6. सन्दर्भ अनुक्रमणिका
+## 6. README का रेखाचित्रहरू
+
+मूल `README.md` मा राखिएका बाह्र रेखाचित्रहरू (`docs/diagrams/*.svg`) ले किटलाई स्थिर चित्रमा लागू गर्छन्। तिनलाई हातले कोरिँदैन, जनरेट गरिन्छ: `scripts/docs/gen-readme-*.mjs` मा 13 जनरेटर फाइलहरू (बाह्र रेखाचित्र र सञ्चालक `gen-readme-diagrams.mjs`), अनि `tests/unit/docs/readme-*-svg.test.ts` मा प्रत्येक रेखाचित्रका लागि एउटा गरी 12 पुरानो भएको जाँच्ने परीक्षणहरू छन्। हरेक परीक्षणले commit गरिएको फाइललाई त्यसको जनरेटरको आउटपुटसँग बाइट-बाइट तुलना गर्छ (कार्य `test-unit`)।
+
+- **टोकनहरू।** `scripts/docs/readme-diagram-theme.mjs` ले रङ-प्यालेट `packages/ui-kit/src/ci-tokens.css` बाट प्रतिलिपि गर्छ (त्यो फाइलसँगको मेल `tests/unit/docs/readme-diagram-theme.test.ts` ले सुनिश्चित गर्छ) र किटका फन्टबाट पाठका भूमिका निर्धारण गर्छ: प्रमुख प्रदर्शन पाठका लागि Instrument Serif, इन्टरफेसका लागि Inter, सङ्ख्या र कोडका लागि IBM Plex Mono। यी `src/app/globals.css` ले ड्यासबोर्डका लागि लोड गर्ने उही `@fontsource` प्याकेजहरू हुन्। फाइलभित्र उज्याला मान `:root` मा र गाढा मान `prefers-color-scheme: dark` सर्तअन्तर्गत छन्, त्यसैले हरेक चित्रले GitHub मा पाठकको रङ-योजना पछ्याउँछ।
+
+- **फन्टहरू।** `scripts/docs/readme-fonts.mjs` ले ती woff2 फाइलहरूलाई प्रत्येक रेखाचित्रले कोर्ने ग्लिफमा सीमित गर्छ र `@font-face` मार्फत `data:` URI का रूपमा समावेश गर्छ। यसले किटका फन्टहरू SVG भित्रै राख्छ। README चित्रको स्थानीय परीक्षणले रेन्डर गर्दा बाहिरी फन्ट अनुरोध नहुने जाँच गर्छ। उपसमूहहरूमा ल्याटिन अक्षर मात्र हुन्छन्; प्रणालीका फन्टमा फर्किने प्रतीक-ग्लिफहरू `SYMBOL_FALLBACKS` मा एक-एक गरी अनुमति दिइन्छन्। अरू कुनै नसमेटिएको ग्लिफले त्रुटि उत्पन्न गर्छ।
+
+- **पुनः जनरेट।** `npm run docs:readme-diagrams` ले सबै बाह्र रेखाचित्र README को क्रममा फेरि लेख्छ र हरेक फाइलको आकारसहित एक पङ्क्ति छाप्छ। जनरेटर छुट्टै पनि चल्छ (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` लाई `node --import tsx/esm` चाहिन्छ, किनकि सङ्ख्याहरू `open-sse/config/freeModelCatalog.ts` को हालको क्याटलग लोडरबाट आउँछन्; क्याटलग परिवर्तनको CI प्रभाव `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` मा छ)। जनरेटर र SVG सँगै commit गर्नुहोस्।
+
+- **प्रमाण।** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` ले स्थानीय परीक्षणमा फाइल रेन्डर गर्छ (`<img>` ट्याग, प्रतिबन्धात्मक `Content-Security-Policy` र `image/svg+xml` प्रतिक्रिया), उज्यालो र गाढा फ्रेम लिन्छ र पृष्ठका बाहिरी फन्ट अनुरोधहरू रिपोर्ट गर्छ; तिनको सङ्ख्या 0 हुनुपर्छ।
+
+- **आकार सीमा।** हरेक फाइल 200 KB भन्दा सानो, जसलाई हरेक पुरानोपन परीक्षणले जाँच्छ; कुनै पनि README चित्रको कडा अधिकतम सीमा 500 KB हो (SVG studio भ्यालिडेटरको नियम)।
+
+- **साझा पाठ, गणना gate बाट।** हरेक जनरेटरले रेखाचित्रको पाठ `*_COPY` स्थिराङ्कमा राख्छ वा हालको क्याटलगबाट बनाउँछ। यही पाठ कोरिन्छ र फन्ट उपसमूहको इनपुट पनि हुन्छ। प्रामाणिक सङ्ख्याहरू `<text>` नोडमा रहन्छन्, जसलाई `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) ले पढ्छ। gate ले पढ्ने रेखाचित्रका पुरानोपन परीक्षणले जनरेट गरिएको फाइलमा त्यसका भ्यालिडेटर पनि चलाउँछन्। कोडसँग फरक सङ्ख्याले परीक्षण असफल बनाउँछ: gate ले पढ्ने स्रोत सच्याउनुहोस्, जनरेटरको सङ्ख्या कहिल्यै नसच्याउनुहोस्।
+
+## 7. सन्दर्भ अनुक्रमणिका
 
 - `src/app/globals.css` — token bridge, `.dark` overrides, OmniRoute `@layer components` extensions
 - `packages/ui-kit/UPSTREAM.md` — pin गरिएको upstream commit र license authorization; `packages/ui-kit/PATCHES.md`

@@ -21,6 +21,7 @@ export async function resolveTargetTokenLimit(target: {
     const tpm = overrides?.tpm;
     return typeof tpm === "number" && tpm > 0 ? tpm : undefined;
   } catch {
+    // no-effect: post-dispatch quota accounting keeps the store's prior limit on lookup failure.
     return undefined;
   }
 }

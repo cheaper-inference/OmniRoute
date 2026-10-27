@@ -88,17 +88,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Cơ chế:** Sử dụng các API của hệ điều hành để chuyển hướng toàn bộ lưu lượng HTTP/HTTPS qua trình lắng nghe HTTP_PROXY:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
+- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` và các thiết lập máy chủ/cổng HTTP/HTTPS
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Phạm vi:** Mọi ứng dụng trên máy tuân theo cài đặt proxy hệ thống
   **Lưu ý:** `source` = `"system-proxy"`
 
 **Cơ chế an toàn:**
 
-- Bộ hẹn giờ tự động vô hiệu hóa (mặc định 30 phút, có thể cấu hình thông qua `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
-- Trạng thái proxy hệ thống trước đó được lưu trong DB và khôi phục khi hoàn nguyên
-- Bảng điều khiển hiển thị lời nhắc "Đang hoàn nguyên proxy hệ thống" nếu người dùng rời khỏi trang trong khi proxy đang hoạt động
-- Giao diện người dùng hiển thị huy hiệu `⚠ Nâng cao` + hộp kiểm xác nhận rõ ràng
+- Áp dụng proxy sẽ lên lịch bộ hẹn giờ hoàn tác cục bộ trong tiến trình, cố gắng hết mức nhưng không bảo đảm thành công (mặc định 30 phút, cấu hình qua `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Bộ hẹn giờ không tồn tại sau khi tiến trình máy chủ kết thúc.
+- Trạng thái proxy trước đó được giữ trong bộ nhớ tiến trình; kho trạng thái thu thập này không lưu bền vững vào cơ sở dữ liệu. Hoàn tác khôi phục các thiết lập macOS/GNOME đã lưu; trên Windows, nó đặt lại proxy WinHTTP thay vì khôi phục cấu hình trước đó.
+- Trong khi proxy được báo là đã áp dụng, việc dỡ trang gửi yêu cầu hoàn tác keepalive theo khả năng tốt nhất và yêu cầu hộp xác nhận gốc có nội dung do trình duyệt quyết định. Việc gỡ inspector khi điều hướng SPA cũng thử hoàn tác, nhưng không có hộp thoại đó của trình duyệt.
+- Thanh công cụ thu thập hiển thị điều khiển `System-wide` đã bản địa hóa cùng biểu tượng cảnh báo. Hiện tại, nhấp vào chỉ thay đổi trạng thái UI cục bộ; không hiển thị hộp kiểm xác nhận và không áp dụng hay hoàn tác proxy hệ thống.
 
 ### Chế độ 5 — Giải mã trong suốt TPROXY (Linux, root, tùy chọn bật)
 
@@ -113,13 +113,13 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 
 ### So sánh các chế độ thu thập
 
-| Chế độ            | Thiết lập                      |           Sudo?           | Phạm vi                    | Ghi chú                                                                                                                   |
-| ----------------- | ------------------------------ | :-----------------------: | -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge    | Tự động                        | Một lần (chứng chỉ+hosts) | 9 tác nhân IDE             | Bật mặc định                                                                                                              |
-| 2. Host tùy chỉnh | Nhập theo từng host            |      Có (tệp hosts)       | Mọi ứng dụng dùng host đó  | Được lưu trong DB                                                                                                         |
-| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`       |           Không           | Các ứng dụng tuân theo env | Cổng 8080; HTTPS được tạo đường hầm bằng CONNECT (chỉ metadata, không bao giờ được giải mã)                               |
-| 4. Toàn hệ thống  | Bật/tắt + xác nhận             |            Có             | Tất cả ứng dụng trên máy   | Tự động tắt sau 30 phút                                                                                                   |
-| 5. Giải mã TPROXY | Bật/tắt (Linux + addon native) |  Có (root + cài đặt CA)   | Mọi host trên cổng đích    | Giải mã các host tùy ý; mặc định tắt — xem `docs/security/MITM-TPROXY-DECRYPT.md` (git; không được biên dịch vào `/docs`) |
+| Chế độ            | Thiết lập                                                      |           Sudo?           | Phạm vi                    | Ghi chú                                                                                                                   |
+| ----------------- | -------------------------------------------------------------- | :-----------------------: | -------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge    | Tự động                                                        | Một lần (chứng chỉ+hosts) | 9 tác nhân IDE             | Bật mặc định                                                                                                              |
+| 2. Host tùy chỉnh | Nhập theo từng host                                            |      Có (tệp hosts)       | Mọi ứng dụng dùng host đó  | Được lưu trong DB                                                                                                         |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`                                       |           Không           | Các ứng dụng tuân theo env | Cổng 8080; HTTPS được tạo đường hầm bằng CONNECT (chỉ metadata, không bao giờ được giải mã)                               |
+| 4. Toàn hệ thống  | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |            Có             | Tất cả ứng dụng trên máy   | Bộ hẹn giờ hoàn tác theo khả năng tốt nhất, không bảo đảm (mặc định 30 phút)                                              |
+| 5. Giải mã TPROXY | Bật/tắt (Linux + addon native)                                 |  Có (root + cài đặt CA)   | Mọi host trên cổng đích    | Giải mã các host tùy ý; mặc định tắt — xem `docs/security/MITM-TPROXY-DECRYPT.md` (git; không được biên dịch vào `/docs`) |
 
 ---
 
@@ -315,7 +315,7 @@ sẽ được bổ sung sau).
 ### 5.1 Ghi một phiên
 
 1. Nhấp vào **"● Ghi phiên"** trên thanh công cụ → nhập tên (không bắt buộc)
-2. Theo dõi trực tiếp tiếp tục như bình thường; một chỉ báo màu đỏ nhấp nháy hiển thị `◉ ĐANG GHI · <tên> · 00:42 · 23 yêu cầu`
+2. Theo dõi trực tiếp tiếp tục như bình thường; thanh ghi hiển thị chấm đỏ nhấp nháy, thời gian đã trôi qua, tên phiên nếu có và điều khiển Dừng đã bản địa hóa.
 3. Nhấp vào **"⏹ Dừng"** → ảnh chụp nhanh của phiên được lưu vào `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Xem một phiên đã ghi
@@ -323,7 +323,7 @@ sẽ được bổ sung sau).
 Trình đơn thả xuống **Phiên** trên thanh công cụ liệt kê các phiên đã lưu. Khi chọn một phiên:
 
 - Tải ảnh chụp nhanh của phiên (trạng thái đóng băng)
-- Một biểu ngữ hiển thị: `Đang xem phiên đã ghi "<tên>" — [Quay lại trực tiếp]`
+- Một biểu ngữ hiển thị nhãn phiên đã ghi được bản địa hóa và tên phiên (hoặc văn bản dự phòng đã bản địa hóa cho phiên không có tiêu đề), bên cạnh nút trở lại chế độ trực tiếp đã bản địa hóa.
 - Tab Thống kê sẽ khả dụng với dữ liệu tổng hợp bằng Recharts
 
 ### 5.3 Định dạng xuất
@@ -347,7 +347,7 @@ Traffic Inspector hiển thị **toàn bộ lưu lượng HTTPS bị chặn**, b
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                   | Tất cả các tuyến và điểm cuối WebSocket chỉ có thể truy cập qua loopback (được thực thi trong `routeGuard.ts` trước bước xác thực)                                                       |
 | **Che giấu thông tin bí mật**    | Trình quét tuyến tính `maskSecret()` che thông tin xác thực Bearer theo RFC 6750, các khóa có tiền tố nhà cung cấp và token mờ dài trước `TrafficBuffer.push()`                          |
-| **Giới hạn kích thước nội dung** | Nội dung > `INSPECTOR_MAX_BODY_KB` (mặc định 1024 KB) bị cắt bớt kèm thông báo `"(đã cắt bớt để đảm bảo hiệu năng)"`                                                                     |
+| **Giới hạn kích thước nội dung** | Nội dung > `INSPECTOR_MAX_BODY_KB` (mặc định 1024 KB) bị cắt bớt kèm thông báo `"(truncated for performance)"`                                                                           |
 | **Làm sạch tiêu đề**             | Tên được chuyển thành chữ thường; các tiêu đề đóng khung/hop-by-hop và xác thực proxy bị loại bỏ; cookie bị che hoàn toàn; các giá trị thông tin xác thực được chuyển cho `maskSecret()` |
 | **CSP**                          | Chính sách bảo mật nội dung nghiêm ngặt trên các trang Traffic Inspector nhằm ngăn chặn XSS thông qua nội dung phản hồi bị chèn                                                          |
 | **Mặc định không lưu trữ**       | `TrafficBuffer` nằm trong bộ nhớ và bị mất khi máy chủ khởi động lại. Các phiên chỉ được lưu trữ khi được ghi lại một cách rõ ràng                                                       |
@@ -415,7 +415,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Bảng điều khiển cũng sẽ cung cấp tùy chọn "Khôi phục proxy hệ thống" trong lần tải tiếp theo nếu phát hiện trạng thái DB cho biết proxy đã hoạt động.
+Trạng thái proxy đã lưu chỉ tồn tại trong tiến trình máy chủ. Sau sự cố hoặc khởi động lại, kho trạng thái thu thập hiện tại không thể khôi phục bản chụp đó từ cơ sở dữ liệu; hãy dùng các lệnh khôi phục của nền tảng ở trên khi cần khôi phục thủ công.
 
 ### Bộ đệm đầy
 

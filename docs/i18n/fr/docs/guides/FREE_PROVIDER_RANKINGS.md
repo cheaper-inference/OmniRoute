@@ -189,7 +189,7 @@ DELETE /api/intelligence/sync          # effacer toutes les entrées d'intellige
 Si la page des classements est vide, un `POST /api/intelligence/sync` manuel (ou simplement
 le redémarrage du serveur) la repeuple.
 
-### Correspondance des modèles avec le classement
+### Association des modèles au classement
 
 Les identifiants de modèles du registre et les noms de modèles Arena ne correspondent pas
 toujours exactement. Le classement utilise une correspondance flexible

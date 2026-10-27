@@ -54,7 +54,7 @@ Tab mới để trích xuất nội dung từ một URL thông qua `POST /v1/web
 - Đầu vào: URL + nút bật/tắt toàn trang + bộ chọn định dạng (markdown / văn bản / HTML).
 - Gửi → tìm nạp → hiển thị `ScrapeResult.tsx`.
 - `ScrapeResult` hiển thị bản xem trước markdown + nút bật/tắt nội dung thô.
-- Giới hạn: nếu nội dung phản hồi > **256 KB**, giao diện người dùng hiển thị `(đã cắt bớt, xem nội dung thô)` và mở nội dung thô trong một hộp thoại Monaco (D21).
+- Giới hạn: nếu nội dung phản hồi > **256 KB**, giao diện người dùng hiển thị `View full raw content` và mở nội dung thô trong một hộp thoại (D21).
 - Bảng siêu dữ liệu: nhà cung cấp (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), độ trễ, chi phí, kích thước phản hồi, số lượng liên kết.
 - Sử dụng hook `useScrapeFetch.ts`.
 

@@ -4,6 +4,8 @@
 
 ---
 
+> **Napomena o opsegu:** `socket.yml` konfiguriše Socket.dev skeniranje npm artefakta na strani registra nakon objave (ignore-paths za sadržaj koji se ne isporučuje, kao što su `tests/`, `docs/` i izvještaji izgradnje). Ne uspostavlja CI/PR provjeru koja uslovljava merge — nijedan workflow u `.github/workflows`, nijedna skripta u `package.json` ni cilj u `Makefile` ne poziva Socket.dev.
+
 # Socket.dev / supply-chain pronalaženje potvrde (attestation)
 
 Ovaj dokument je potvrda koju je napisao održavatelj za šest

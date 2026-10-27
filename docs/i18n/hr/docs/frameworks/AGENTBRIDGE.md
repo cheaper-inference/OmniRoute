@@ -550,16 +550,16 @@ Potpune OpenAPI sheme: `docs/openapi.yaml` → oznaka `AgentBridge`.
 
 Trae je relativno nov AI pomoćnik za programiranje. Prije implementacije rukovatelja:
 
-1. Identificirati binarnu datoteku/proširenje na VS Code / JetBrains tržištima ili kao samostalnu aplikaciju
-2. Snimiti promet pomoću alata mitmproxy kako bi se otkrili API hostovi i oblici krajnjih točaka
-3. Utvrditi mehanizam autentifikacije
-4. Procijeniti treba li nastaviti ili odustati na temelju uvjeta korištenja i mogućnosti otkrivanja API-ja
+1. Identificirajte binarnu datoteku/proširenje na tržištima za VS Code / JetBrains ili kao samostalnu aplikaciju
+2. Snimite promet pomoću mitmproxyja kako biste otkrili API hostove i strukture krajnjih točaka
+3. Utvrdite mehanizam autentifikacije
+4. Procijenite nastavak ili odustajanje na temelju uvjeta korištenja i mogućnosti otkrivanja API-ja
 
-Dok se istraživanje ne dovrši, kartica Trae na nadzornoj ploči prikazuje oznaku "Istraživanje u tijeku" s poveznicom "Prijavi izvedivost". Kostur rukovatelja u `src/mitm/handlers/trae.ts` izbacuje strukturiranu pogrešku `Još nije implementirano`.
+Dok se istraživanje ne dovrši, kartica Trae na nadzornoj ploči prikazuje oznaku "U istraživanju" s poveznicom "Prijavi održivost". Kostur rukovatelja u `src/mitm/handlers/trae.ts` generira strukturiranu pogrešku `Not yet implemented`.
 
-### Agenti na popisu zadataka (potreban je MITM — nema podrške za prilagođeni osnovni URL)
+### Agenti na popisu zadataka (MITM je obavezan — nema podrške za prilagođeni osnovni URL)
 
-Sljedeći alati u svojim trenutačnim verzijama ne podržavaju prilagođene osnovne URL-ove, zbog čega je MITM jedini način presretanja. Procjena izvedivosti je u tijeku:
+Sljedeći alati u svojim trenutačnim verzijama ne podržavaju prilagođene osnovne URL-ove, zbog čega je MITM jedini način presretanja. Procjena održivosti još je u tijeku:
 
 - **Windsurf** (Codeium/Cognition)
 - **Amp** (Sourcegraph)

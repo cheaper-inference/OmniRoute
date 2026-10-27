@@ -81,12 +81,27 @@
 ## 2. စည်းမျဉ်းများ
 
 1. Token များကိုသာ သုံးပါ၊ literal များ ဘယ်တော့မှ မသုံးပါနှင့်။ ရည်ရွယ်ချက်ဖြင့် ထားရှိထားသော ခြွင်းချက်များမှာ အမြဲမှောင်နေသော console terminal နှင့် `STATUS_HEX` (`src/shared/constants/statusColors.ts`) တို့ဖြစ်ပြီး၊ ၎င်းသည် literal hex လိုအပ်သော caller များအတွက် kit status palette ၏ resolved-hex mirror ဖြစ်သည်။ categorical palette များကမူ ခြွင်းချက် မဟုတ်တော့ပါ- ၎င်းတို့သည် `src/shared/utils/categoricalPalette.ts` မှတစ်ဆင့်၊ routing strategy များအတွက်မူ `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` မှတစ်ဆင့် kit ၏ chart token ငါးခု (`--color-chart-1..5`) ပေါ်တွင် အမှီပြုနေကြသည်။ ReactFlow edge များနှင့် orchestration canvas သည်မူ theme-aware `--orch-status-*` variable များကို (`src/shared/components/flow/edgeStyles.ts`) ဖတ်ရှုသည်။
-2. `packages/ui-kit/src` ကို လက်ဖြင့် ဘယ်တော့မှ patch မလုပ်ပါနှင့်- `scripts/dev/sync-ui-kit.sh <commit>` ဖြင့် sync လုပ်ပါ။ pre-commit gate ဖြစ်သော `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) သည် pin ချထားသော upstream commit နှင့် ကွာခြားသော byte တစ်ခုခု ရှိပါက fail ဖြစ်သည် (upstream clone ဖြစ်သော `UI_KIT_CLONE` သို့မဟုတ် `_references/cheaper-inference-ui-kit` မရှိပါက သတိပေးချက်ဖြင့် ကျော်ဖြတ်သွားသည်)။ kit တွင် တစ်ခုခု လိုအပ်နေပါက adapter သို့မဟုတ် screen ၌ workaround ဖြင့် ဖြေရှင်းပြီး upstream သို့ တောင်းဆိုပါ။
-3. Kit text default များသည် အင်္ဂလိပ်ဘာသာဖြစ်သည် (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit component တစ်ခုခုက text ကို render လုပ်သည့်အခါတိုင်း `useTranslations(...)` မှ ဘာသာပြန်ထားသော string များကို ပေးပါ။
-4. Tailwind utility များသည် kit component class များထက် ဦးစားရသည် (kit သည် `@layer theme, base, components, utilities` ကို declare လုပ်ထားပြီး ၎င်း၏ rule များသည် `components` ၌ ရှိသည်) — utility များကို spacing နှင့် layout အတွက် သုံးပါ၊ kit component များ၏ အရောင်ကို ပြန်လည်ပြောင်းလဲရန်အတွက် မဟုတ်ပါ။
-5. Heading များ- စာမျက်နှာနှင့် section ခေါင်းစဉ်များအတွက် `.ci-heading` (Inter, tracking မရှိ) ကို သုံးပါ။ error-page status code ကဲ့သို့ ကြီးမားပြီး နည်းပါးသော display text များအတွက်သာ `.ci-dashboard-display` (Instrument Serif) ကို သုံးပါ။
-6. `tests/unit/dashboard-kit-sweep.test.ts` သည် kit အသုံးပြုမှုကို စောင့်ကြည့်ကာကွယ်သည်- `src/app` သို့မဟုတ် `src/shared/components` အောက်တွင် Material ligature span မရှိရ၊ dashboard tree (`src/app/(dashboard)` နှင့် `src/shared/components`) ၌ raw `<select>`, `<textarea>` သို့မဟုတ် `<table>` မရှိရပါ၊ စာရင်းပြစားထားသော ခြွင်းချက်များ (`Select` adapter ၏ native branch၊ `RequestLoggerDetail`) အပြင် လက်ဖြင့် ပြုလုပ်ထားသော `role="dialog"` လည်း မရှိရပါ။ ထိုနေရာရှိ raw `<button>` သို့မဟုတ် `<input>` တိုင်းတွင် ၎င်း၏အထက် အများဆုံး 3 ကြောင်းအတွင်းတွင် ဆုံးသော `kit-exception:` (အကြောင်းပြချက်နှင့်အတူ) ပါဝင်သော comment တစ်ခု လိုအပ်သည်။ palette hue များနှင့် `dark:` variant များကို test ၌ စာရင်းပြစားထားသော ဖိုင်များတွင်သာ သုံးနိုင်သည်။
-7. PR မတင်မီ (screenshot များဖြင့်) theme နှစ်မျိုးလုံးနှင့် 390 px viewport ကို စစ်ဆေးပါ။ `tests/e2e/a11y.spec.ts` သည် axe ကို run သည်။
+2. `packages/ui-kit/src` ကို လက်ဖြင့် မည်သည့်အခါမျှ patch မလုပ်ပါနှင့်။ `scripts/dev/sync-ui-kit.sh <commit>` ဖြင့် sync လုပ်ပါ။ pinned လုပ်ထားသော upstream commit နှင့်
+   byte တစ်ခုခု ကွာခြားပါက pre-commit gate ဖြစ်သည့် `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) သည်
+   fail ဖြစ်မည် (upstream clone ဖြစ်သည့်
+   `UI_KIT_CLONE` သို့မဟုတ် `_references/cheaper-inference-ui-kit` မရှိပါက သတိပေးချက်ဖြင့် ကျော်သွားမည်)။ Kit တွင် တစ်စုံတစ်ခု မပါရှိပါက
+   adapter သို့မဟုတ် screen ထဲတွင် workaround လုပ်ပြီး upstream ထံ တောင်းဆိုပါ။
+3. Kit ၏ မူလ text များသည် အင်္ဂလိပ်ဘာသာဖြစ်သည် (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit component တစ်ခုက text ကို render လုပ်သည့်အခါတိုင်း `useTranslations(...)` မှ
+   ဘာသာပြန်ထားသော string များကို ပေးပို့ပါ။
+4. Tailwind utility များသည် kit component class များထက် ဦးစားပေးအလုပ်လုပ်သည် (kit က
+   `@layer theme, base, components, utilities` ဟု ကြေညာထားပြီး ၎င်း၏ rule များသည် `components` တွင်ရှိသည်) — spacing နှင့် layout အတွက် utility များကို
+   အသုံးပြုပါ၊ kit component များ၏ အရောင်ကို ပြန်ပြောင်းရန် မသုံးပါနှင့်။
+5. Heading များအတွက် page နှင့် section title များတွင် `.ci-heading` (Inter၊ tracking မပါ) ကို အသုံးပြုပါ။ `.ci-dashboard-display`
+   (Instrument Serif) ကို error page status code ကဲ့သို့ ကြီးမားပြီး နေရာကျယ်ကျယ်ခြားထားသော display text များအတွက်သာ အသုံးပြုပါ။
+6. `tests/unit/dashboard-kit-sweep.test.ts` သည် kit အသုံးပြုမှုကို စောင့်ကြည့်ကာကွယ်သည်။ `src/app` သို့မဟုတ် `src/shared/components` အောက်တွင်
+   Material ligature span မရှိရပါ။ dashboard tree (`src/app/(dashboard)` နှင့်
+   `src/shared/components`) အတွင်း raw `<select>`, `<textarea>` သို့မဟုတ် `<table>` မရှိရသကဲ့သို့ စာရင်းပြုစုထားသော ခြွင်းချက်များ (`Select` adapter ၏ native branch,
+   `RequestLoggerDetail`) ပြင်ပတွင် ကိုယ်တိုင်ရေးထားသော
+   `role="dialog"` မရှိရပါ။ ထိုနေရာရှိ raw `<button>` သို့မဟုတ် `<input>` တစ်ခုစီ၏ အပေါ်ဘက် အများဆုံး 3 လိုင်းအတွင်း အဆုံးသတ်ပြီး
+   အကြောင်းရင်းနှင့်အတူ `kit-exception:` ပါဝင်သော comment တစ်ခု လိုအပ်သည်။ Palette hue များနှင့် `dark:` variant များကို
+   test တွင် စာရင်းပြုစုထားသော file များ၌သာ အသုံးပြုရမည်။
+7. PR မတင်မီ theme နှစ်မျိုးစလုံးနှင့် 390 px viewport ကို screenshot များဖြင့် စစ်ဆေးအတည်ပြုပါ။ `tests/e2e/a11y.spec.ts` က
+   axe ကို run သည်။
 
 ## 3. Screen တစ်ခု ထည့်သွင်းခြင်း
 
@@ -114,7 +129,23 @@
 
 `scripts/dev/sync-ui-kit.sh <commit> [clone]` သည် ထို commit ရှိ upstream `src/` ကို `packages/ui-kit/src` ထဲသို့ ကူးယူပြီး ခွင့်ပြုထားသည့် တစ်ခုတည်းသော ပြောင်းလဲမှုကို အသုံးချသည် (relative import များမှ `.js` suffix ကို ဖယ်ရှားသည်)။ ထို့နောက် `git diff packages/ui-kit` ကို ပြန်လည်စစ်ဆေးပါ၊ theme နှစ်ခုလုံးတွင် providers၊ settings၊ combos၊ usage နှင့် endpoint တို့ကို အမြင်ပိုင်းဆိုင်ရာ စစ်ဆေးပါ၊ `npm run check:ui-kit-snapshot` နှင့် `npm run test:vitest:ui` ကို run လုပ်ပြီး upstream changelog နှင့်အတူ PR ကို ဖွင့်ပါ။
 
-## 6. ကိုးကားရန် အညွှန်း
+## 6. README ပုံကြမ်းများ
+
+အမြစ်ရှိ `README.md` တွင် ထည့်သွင်းထားသော ပုံကြမ်းဆယ့်နှစ်ခု (`docs/diagrams/*.svg`) သည် kit ကို မလှုပ်ရှားသောပုံများတွင် အသုံးချထားခြင်းဖြစ်သည်။ လက်ဖြင့်ဆွဲထားခြင်းမဟုတ်ဘဲ ထုတ်လုပ်ထားခြင်းဖြစ်သည်: `scripts/docs/gen-readme-*.mjs` တွင် generator ဖိုင် 13 ခု (ပုံကြမ်းဆယ့်နှစ်ခုနှင့် ထိန်းချုပ်သူ `gen-readme-diagrams.mjs`)၊ `tests/unit/docs/readme-*-svg.test.ts` တွင် ပုံကြမ်းတစ်ခုလျှင်တစ်ခုစီ ခေတ်မမီတော့မှုစစ်ဆေးချက် 12 ခု ရှိသည်။ စစ်ဆေးချက်တိုင်းသည် commit ထားသောဖိုင်ကို ၎င်း၏ generator ရလဒ်နှင့် byte တစ်ခုချင်း နှိုင်းယှဉ်သည် (အလုပ် `test-unit`)။
+
+- **တိုကင်များ။** `scripts/docs/readme-diagram-theme.mjs` သည် အရောင်စုံကို `packages/ui-kit/src/ci-tokens.css` မှ ကူးယူပြီး (ထိုဖိုင်နှင့် ကိုက်ညီမှုကို `tests/unit/docs/readme-diagram-theme.test.ts` က အတည်ပြုသည်) kit ၏ ဖောင့်များဖြင့် စာသားအခန်းကဏ္ဍများကို သတ်မှတ်သည်: အထင်ရှားပြစာသားအတွက် Instrument Serif၊ UI စာသားအတွက် Inter၊ ကိန်းဂဏန်းနှင့် ကုဒ်အတွက် IBM Plex Mono။ ၎င်းတို့သည် `src/app/globals.css` က dashboard အတွက် တင်သည့် တူညီသော `@fontsource` package များဖြစ်သည်။ ဖိုင်အတွင်း အလင်းတန်ဖိုးများသည် `:root` တွင်၊ အမှောင်တန်ဖိုးများသည် `prefers-color-scheme: dark` အခြေအနေအောက်တွင် ရှိသဖြင့် ပုံတိုင်းသည် GitHub ဖတ်သူ၏ အရောင်စနစ်ကို လိုက်နာသည်။
+
+- **ဖောင့်များ။** `scripts/docs/readme-fonts.mjs` သည် ထို woff2 ဖိုင်များကို ပုံကြမ်းတစ်ခုချင်းဆွဲသည့် glyph များအထိ လျှော့ချပြီး `@font-face` မှတစ်ဆင့် `data:` URI များအဖြစ် ထည့်သွင်းသည်။ ထို့ကြောင့် kit ၏ ဖောင့်များသည် SVG အတွင်း၌ ရှိနေသည်။ စက်အတွင်း README ပုံစမ်းသပ်မှုက ပြသချိန်တွင် ပြင်ပဖောင့်တောင်းဆိုမှုများ မရှိကြောင်း စစ်ဆေးသည်။ အစုငယ်များတွင် လက်တင်အက္ခရာများသာ ပါဝင်ပြီး စနစ်ဖောင့်များကို အစားထိုးအသုံးပြုသည့် သင်္ကေတ glyph များကို `SYMBOL_FALLBACKS` တွင် တစ်ခုချင်း ခွင့်ပြုထားသည်။ အခြား မလွှမ်းခြုံသော glyph တစ်ခုခုသည် အမှားဖြစ်စေသည်။
+
+- **ပြန်ထုတ်လုပ်ခြင်း။** `npm run docs:readme-diagrams` သည် ပုံကြမ်းဆယ့်နှစ်ခုလုံးကို README အစဉ်အတိုင်း ပြန်ရေးပြီး ဖိုင်တစ်ခုလျှင် အရွယ်အစားပါသော စာကြောင်းတစ်ကြောင်း ထုတ်ပြသည်။ generator တစ်ခုတည်းကိုလည်း လည်ပတ်နိုင်သည် (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` သည် `node --import tsx/esm` လိုအပ်သည်၊ ကိန်းဂဏန်းများကို `open-sse/config/freeModelCatalog.ts` ရှိ လက်ရှိကတ်တလောက်တင်သူမှ ရယူသောကြောင့်ဖြစ်သည်; ကတ်တလောက်ပြောင်းလဲမှု၏ CI သက်ရောက်မှုသည် `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` တွင် ရှိသည်)။ generator နှင့် SVG ကို အတူတကွ commit လုပ်ပါ။
+
+- **အထောက်အထား။** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` သည် စက်အတွင်းစမ်းသပ်မှု၌ ဖိုင်ကို ပြသသည် (`<img>` tag၊ ကန့်သတ်ထားသော `Content-Security-Policy` နှင့် `image/svg+xml` တုံ့ပြန်မှု)၊ အလင်းနှင့်အမှောင် frame တစ်ခုစီ ရိုက်ယူပြီး စာမျက်နှာ၏ ပြင်ပဖောင့်တောင်းဆိုမှုများကို အစီရင်ခံသည်; အရေအတွက်သည် 0 ဖြစ်ရမည်။
+
+- **အရွယ်အစားကန့်သတ်ချက်။** ဖိုင်တစ်ခုလျှင် 200 KB အောက်ဖြစ်ရပြီး ခေတ်မမီတော့မှုစစ်ဆေးချက်တိုင်းက စစ်သည်; 500 KB သည် မည်သည့် README ပုံအတွက်မဆို တိကျသည့် အများဆုံးကန့်သတ်ချက်ဖြစ်သည် (SVG studio စစ်ဆေးသူ၏ စည်းမျဉ်း)။
+
+- **တူညီစွာသုံးသောစာသား၊ ကိန်းဂဏန်းများ gate မှ။** Generator တိုင်းသည် ပုံကြမ်းစာသားကို `*_COPY` ကိန်းသေတွင် သိမ်းထားခြင်း သို့မဟုတ် လက်ရှိကတ်တလောက်မှ တည်ဆောက်ခြင်း ပြုသည်။ ထိုစာသားသည် ပုံတွင်ဆွဲသည့်စာသားနှင့် ဖောင့်အစုငယ်၏ ထည့်သွင်းချက် နှစ်မျိုးလုံးဖြစ်သည်။ စံကိန်းဂဏန်းများသည် `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) ဖတ်သည့် `<text>` node များတွင် ရှိနေသည်။ gate ဖတ်သည့် ပုံကြမ်းများ၏ ခေတ်မမီတော့မှုစစ်ဆေးချက်များက ထုတ်လုပ်ထားသောဖိုင်တွင် ၎င်း၏ စစ်ဆေးသူများကိုလည်း လည်ပတ်စေသည်။ ကုဒ်နှင့်ကွာသော ကိန်းဂဏန်းသည် စစ်ဆေးချက်ကို မအောင်မြင်စေသည်: gate ဖတ်သည့်ရင်းမြစ်ကို ပြင်ပါ၊ generator အတွင်းကိန်းဂဏန်းကို ဘယ်တော့မှ မပြင်ပါနှင့်။
+
+## 7. ကိုးကားရန် အညွှန်း
 
 - `src/app/globals.css` — token bridge၊ `.dark` overrides၊ OmniRoute `@layer components` extensions
 - `packages/ui-kit/UPSTREAM.md` — သတ်မှတ်ထားသော upstream commit နှင့် လိုင်စင်ခွင့်ပြုချက်၊ `packages/ui-kit/PATCHES.md`

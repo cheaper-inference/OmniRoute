@@ -54,7 +54,7 @@ Search Tools Studio, `/dashboard/search-tools`ను ప్రాథమిక �
 - ఇన్పుట్: URL + పూర్తి-పేజీ టాగుల్ + ఫార్మాట్ సెలెక్టర్ (markdown / text / HTML).
 - సమర్పణ → ఫెచ్ → `ScrapeResult.tsx`ను రెండర్ చేయడం.
 - `ScrapeResult` మార్క్డౌన్ ప్రివ్యూ + రా టాగుల్ను రెండర్ చేస్తుంది.
-- పరిమితి: రెస్పాన్స్ బాడీ **256 KB** కంటే ఎక్కువగా ఉంటే, UI `(కుదించబడింది, రాను వీక్షించండి)` అని చూపి, రా కంటెంట్ను Monaco మోడల్లో తెరుస్తుంది (D21).
+- పరిమితి: రెస్పాన్స్ బాడీ **256 KB** కంటే ఎక్కువగా ఉంటే, UI `View full raw content` అని చూపి, రా కంటెంట్ను మోడల్లో తెరుస్తుంది (D21).
 - మెటాడేటా ప్యానెల్: ప్రొవైడర్ (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), లేటెన్సీ, ఖర్చు, రెస్పాన్స్ పరిమాణం, లింక్ల సంఖ్య.
 - `useScrapeFetch.ts` హుక్ను ఉపయోగిస్తుంది.
 

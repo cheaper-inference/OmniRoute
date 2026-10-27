@@ -93,30 +93,12 @@
    `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` روی پنج توکن نمودار کیت
    (`--color-chart-1..5`) سوار میشوند؛ یالهای ReactFlow و بوم ارکستراسیون، متغیرهای آگاه از تم
    `--orch-status-*` را میخوانند (`src/shared/components/flow/edgeStyles.ts`).
-2. هرگز `packages/ui-kit/src` را دستی وصله نکنید: با `scripts/dev/sync-ui-kit.sh <commit>`
-   همگامسازی کنید؛ دریچهٔ pre-commit یعنی `npm run check:ui-kit-snapshot` (`.husky/pre-commit`)
-   روی هر بایتی که با کامیت سنجاقشدهٔ بالادست متفاوت باشد شکست میخورد (وقتی کلون بالادست، یعنی
-   `UI_KIT_CLONE` یا `_references/cheaper-inference-ui-kit`، وجود نداشته باشد، با یک هشدار از آن
-   صرفنظر میکند). وقتی کیت چیزی را ندارد، در آداپتور یا صفحه دورش بزنید و آن را از بالادست
-   بخواهید.
-3. پیشفرضهای متنی کیت انگلیسی است (`label = "Loading"`، `loadingLabel = "Loading table"` و…) —
-   هر وقت یک کامپوننت کیت متنی رندر میکند، رشتههای ترجمهشده را از `useTranslations(...)` به آن
-   پاس بدهید.
-4. یوتیلیتیهای Tailwind بر کلاسهای کامپوننت کیت غلبه میکنند (کیت
-   `@layer theme, base, components, utilities` را اعلام میکند و قواعدش در `components` زندگی
-   میکنند) — از یوتیلیتیها برای فاصلهگذاری و چیدمان استفاده کنید، نه برای رنگآمیزی مجدد
-   کامپوننتهای کیت.
-5. سرفصلها: `.ci-heading` (Inter، بدون tracking) برای عناوین صفحه و بخش؛ `.ci-dashboard-display`
-   (Instrument Serif) فقط برای متن نمایشی بزرگ و پراکنده مانند کد وضعیتِ صفحهٔ خطا.
-6. `tests/unit/dashboard-kit-sweep.test.ts` از پذیرش کیت محافظت میکند: هیچ اسپن لیگاچر Material
-   زیر `src/app` یا `src/shared/components` مجاز نیست؛ در درخت داشبورد (`src/app/(dashboard)` و
-   `src/shared/components`) هیچ `<select>`، `<textarea>` یا `<table>` خام و هیچ `role="dialog"`
-   دستسازی خارج از استثناهای فهرستشده (شاخهٔ بومیِ آداپتور `Select`، `RequestLoggerDetail`)؛ هر
-   `<button>` یا `<input>` خام در آنجا به کامنتی حاوی `kit-exception:` (همراه با دلیل) نیاز دارد
-   که حداکثر ۳ خط بالاتر از آن تمام شود؛ رنگهای پالت و واریانتهای `dark:` فقط در فایلهایی که
-   تست فهرست میکند.
-7. قبل از PR، هر دو تم و ویوپورت ۳۹۰ پیکسلی را بررسی کنید (اسکرینشات)؛ `tests/e2e/a11y.spec.ts`
-   ابزار axe را اجرا میکند.
+2. هرگز `packages/ui-kit/src` را بهصورت دستی وصله نکنید: آن را با `scripts/dev/sync-ui-kit.sh <commit>` همگامسازی کنید؛ گیت پیش از کامیتِ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) در صورت وجود هر بایتی که با کامیت بالادستی پینشده متفاوت باشد، شکست میخورد (اگر کلون بالادستی، یعنی `UI_KIT_CLONE` یا `_references/cheaper-inference-ui-kit`، وجود نداشته باشد، با یک هشدار از بررسی صرفنظر میکند). وقتی چیزی در کیت وجود ندارد، در آداپتور یا صفحه راهحلی جایگزین پیاده کنید و آن را از تیم بالادستی درخواست کنید.
+3. مقادیر پیشفرض متن کیت انگلیسی هستند (`label = "Loading"`، `loadingLabel = "Loading table"`…) — هر زمان که یک کامپوننت کیت متنی را رندر میکند، رشتههای ترجمهشده را از `useTranslations(...)` به آن ارسال کنید.
+4. ابزارهای Tailwind بر کلاسهای کامپوننت کیت اولویت دارند (کیت `@layer theme, base, components, utilities` را تعریف میکند و قواعد آن در `components` قرار دارند) — از ابزارها برای فاصلهگذاری و چیدمان استفاده کنید، نه برای تغییر دوباره رنگ کامپوننتهای کیت.
+5. عنوانها: از `.ci-heading` (Inter، بدون فاصلهگذاری حروف) برای عنوانهای صفحه و بخشها استفاده کنید؛ `.ci-dashboard-display` (Instrument Serif) فقط برای متنهای نمایشی بزرگ و پراکنده، مانند کد وضعیت صفحه خطا، استفاده شود.
+6. `tests/unit/dashboard-kit-sweep.test.ts` بر پذیرش کیت نظارت میکند: هیچ span مربوط به لیگچر Material در `src/app` یا `src/shared/components` مجاز نیست؛ در درخت داشبورد (`src/app/(dashboard)` و `src/shared/components`) هیچ `<select>`، `<textarea>` یا `<table>` خام و هیچ `role="dialog"` دستسازی خارج از استثناهای فهرستشده (شاخه بومی آداپتور `Select` و `RequestLoggerDetail`) مجاز نیست؛ هر `<button>` یا `<input>` خام در آنجا به توضیحی حاوی `kit-exception:` (همراه با دلیل) نیاز دارد که حداکثر ۳ خط بالاتر از آن پایان یابد؛ رنگمایههای پالت و گونههای `dark:` فقط در فایلهایی مجاز هستند که آزمون فهرست کرده است.
+7. پیش از PR هر دو پوسته و نمای 390 px را بررسی کنید (با اسکرینشات)؛ `tests/e2e/a11y.spec.ts` ابزار axe را اجرا میکند.
 
 ## 3. افزودن صفحه
 
@@ -150,7 +132,23 @@
 `packages/ui-kit/src` کپی میکند و تنها تبدیل مجاز را اعمال میکند (پسوند `.js` را از importهای نسبی حذف میکند). سپس: `git diff packages/ui-kit` را بررسی کنید، providerها، تنظیمات، comboها،
 usage و endpoint را در هر دو theme بهصورت بصری بازبینی کنید، `npm run check:ui-kit-snapshot` و `npm run test:vitest:ui` را اجرا کنید و PR را همراه با changelog بالادستی باز کنید.
 
-## 6. فهرست مراجع
+## 6. نمودارهای README
+
+دوازده نمودار جاسازی‌شده در `README.md` ریشه (`docs/diagrams/*.svg`)، کیت را روی تصاویر ثابت اعمال می‌کنند. این نمودارها تولید می‌شوند، نه اینکه دستی رسم شوند: 13 فایل مولد در `scripts/docs/gen-readme-*.mjs` (دوازده نمودار و راه‌انداز `gen-readme-diagrams.mjs`) و 12 آزمون تشخیص کهنگی در `tests/unit/docs/readme-*-svg.test.ts`، یکی برای هر نمودار، وجود دارد. هر آزمون فایل ثبت‌شده در commit را بایت‌به‌بایت با خروجی مولد آن مقایسه می‌کند (کار `test-unit`).
+
+- **توکن‌ها.** `scripts/docs/readme-diagram-theme.mjs` پالت را از `packages/ui-kit/src/ci-tokens.css` کپی می‌کند (تطابق با آن فایل به‌وسیلهٔ `tests/unit/docs/readme-diagram-theme.test.ts` تثبیت می‌شود) و نقش‌های متن را با قلم‌های کیت تعیین می‌کند: Instrument Serif برای متن نمایشی، Inter برای رابط کاربری و IBM Plex Mono برای اعداد و کد. این‌ها همان بسته‌های `@fontsource` هستند که `src/app/globals.css` برای داشبورد بارگذاری می‌کند. مقادیر روشن روی `:root` و مقادیر تیره پشت شرط `prefers-color-scheme: dark` درون فایل قرار دارند؛ بنابراین هر تصویر از طرح رنگ خواننده در GitHub پیروی می‌کند.
+
+- **قلم‌ها.** `scripts/docs/readme-fonts.mjs` این فایل‌های woff2 را به گلیف‌هایی محدود می‌کند که هر نمودار رسم می‌کند و آن‌ها را از طریق `@font-face` به‌صورت URIهای `data:` جاسازی می‌کند. به این ترتیب قلم‌های کیت داخل SVG باقی می‌مانند. بررسی محلی تصاویر README کنترل می‌کند که رندر هیچ درخواست قلم خارجی ایجاد نکند. زیرمجموعه‌ها فقط نویسه‌های لاتین دارند؛ گلیف‌های نمادهایی که به قلم‌های سیستم بازمی‌گردند، تک‌به‌تک در `SYMBOL_FALLBACKS` مجاز می‌شوند. هر گلیف پوشش‌داده‌نشدهٔ دیگر خطا ایجاد می‌کند.
+
+- **تولید دوباره.** `npm run docs:readme-diagrams` هر دوازده نمودار را به ترتیب README بازنویسی می‌کند و برای هر فایل یک خط با اندازهٔ آن چاپ می‌کند. هر مولد جداگانه نیز اجرا می‌شود (`node scripts/docs/gen-readme-<name>.mjs`؛ `free-tier-budget` به `node --import tsx/esm` نیاز دارد، چون اعداد آن از بارگذار کاتالوگ جاری در `open-sse/config/freeModelCatalog.ts` می‌آیند؛ پیامد تغییر کاتالوگ برای CI در `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` آمده است). مولد و SVG را با هم commit کنید.
+
+- **اثبات.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` فایل را در بررسی محلی رندر می‌کند (برچسب `<img>`، یک `Content-Security-Policy` محدودکننده و پاسخ `image/svg+xml`)، یک قاب روشن و یک قاب تیره می‌گیرد و درخواست‌های قلم خارجی صفحه را گزارش می‌کند؛ تعداد آن‌ها باید 0 باشد.
+
+- **بودجهٔ حجم.** کمتر از 200 KB برای هر فایل، که هر آزمون کهنگی آن را بررسی می‌کند؛ 500 KB سقف قطعی هر تصویر README است (قاعدهٔ اعتبارسنج SVG studio).
+
+- **متن مشترک، شمارش‌ها از gate.** هر مولد متن نمودارش را در یک ثابت `*_COPY` نگه می‌دارد یا از کاتالوگ جاری می‌سازد. همین متن هم رسم می‌شود و هم ورودی زیرمجموعهٔ قلم است. اعداد مرجع در گره‌های `<text>` باقی می‌مانند که `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`) آن‌ها را می‌خواند. آزمون‌های کهنگی نمودارهای خوانده‌شده توسط gate، اعتبارسنج‌های آن را نیز روی فایل تولیدشده اجرا می‌کنند. پس عددی که با کد متفاوت باشد آزمون را شکست می‌دهد: منبعی را اصلاح کنید که gate می‌خواند، هرگز عدد داخل مولد را تغییر ندهید.
+
+## 7. فهرست مراجع
 
 - `src/app/globals.css` — پل token، overrideهای `.dark`، افزونههای OmniRoute در `@layer components`
 - `packages/ui-kit/UPSTREAM.md` — commit پینشده بالادستی و مجوز لایسنس؛ `packages/ui-kit/PATCHES.md`

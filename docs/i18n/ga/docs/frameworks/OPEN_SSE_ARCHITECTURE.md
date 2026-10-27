@@ -484,17 +484,17 @@ Láimhseálann sé seo:
 
 ## Cumraíocht
 
-Coinníonn `open-sse/config/` an ciseal cumraíochta:
+Coinníonn `open-sse/config/` an tsraith chumraíochta:
 
-| Comhad                        | Cuspóir                                                   |
-| ----------------------------- | --------------------------------------------------------- |
-| `providerRegistry.ts`         | Clárlann shamhlacha comhrá thar an gcatalóg 376 soláthraí |
-| `providerModels.ts`           | Ailiasanna samhla, mapáil formáide                        |
-| `constants.ts`                | Teorainneacha ama, teorainneacha, códanna stádais         |
-| `defaultThinkingSignature.ts` | Síniú smaoinimh réamhshocraithe Claude                    |
-| `modelStrip.ts` (in services) | Baint réimsí in aghaidh an tsoláthraí                     |
+| Comhad                        | Cuspóir                                               |
+| ----------------------------- | ----------------------------------------------------- |
+| `providerRegistry.ts`         | Clárlann samhlacha comhrá thar chatalóg 376 soláthraí |
+| `providerModels.ts`           | Ailiasanna samhlacha, mapáil formáide                 |
+| `constants.ts`                | Teorainneacha ama, teorainneacha, cóid stádais        |
+| `defaultThinkingSignature.ts` | Síniú réamhshocraithe smaointeoireachta Claude        |
+| `modelStrip.ts` (i seirbhísí) | Baint réimsí de réir soláthraí                        |
 
-### Scéimre na Clárlainne Soláthraithe
+### Scéimre Chlárlann na Soláthraithe
 
 ```ts
 interface ProviderConfig {
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Cinntíonn bailíochtú Zod ag am luchtaithe an mhodúil go bhfuil gach cumraíocht soláthraí bailí.
+Cinntíonn bailíochtú Zod agus an modúl á luchtú go bhfuil gach cumraíocht soláthraí bailí.
 
 ---
 
