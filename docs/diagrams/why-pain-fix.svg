@@ -1,107 +1,111 @@
-<svg viewBox="0 0 1200 664" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Why OmniRoute — stop juggling 10 dashboards, dead API keys and surprise bills. Ten daily pains and how OmniRoute fixes each: subscription quota expiring unused — maximize subscriptions, track quota and use every token before reset. Rate limits stopping you mid-coding — 4-tier auto-fallback from Subscription to API to Cheap to Free in milliseconds. Tool outputs like git diff, grep and logs burning tokens — RTK + Caveman compression saves 15 to 95 percent of eligible tokens per request. Expensive APIs at 20 to 50 dollars per month per provider — cost-optimized routing to the cheapest viable model. Each AI tool wanting its own setup — one endpoint, every tool, one dashboard. AI blocked in your country — 3-level proxy plus TLS fingerprint stealth. Dead keys and banned accounts killing your flow — 3-layer resilience with circuit breakers, key cooldown and model lockout. One subscription shared by a whole team — key pools with fair-share quotas per member enforced in the hot path. Prompts routed through someone else's cloud — local-first, runs on your machine with AES-256-GCM encrypted keys. No idea where tokens and money go — live analytics with usage, quota, savings and p95 latency per provider.">
-  <desc>Animated comparison ledger: ten pain-versus-fix rows are fully readable on the first frame; a soft green highlight sweeps down the rows in a continuous cycle.</desc>
+<svg viewBox="0 0 1200 664" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="t d">
+  <title id="t">Why OmniRoute — stop juggling 10 dashboards, dead API keys and surprise bills. Ten daily pains and how OmniRoute fixes each: subscription quota expiring unused — maximize subscriptions, track quota and use every token before reset. Rate limits stopping you mid-coding — 4-tier auto-fallback from Subscription to API to Cheap to Free in milliseconds. Tool outputs like git diff, grep and logs burning tokens — RTK + Caveman compression saves 15 to 95 percent of eligible tokens per request. Expensive APIs at 20 to 50 dollars per month per provider — cost-optimized routing to the cheapest viable model. Each AI tool wanting its own setup — one endpoint, every tool, one dashboard. AI blocked in your country — 3-level proxy plus TLS fingerprint stealth. Dead keys and banned accounts killing your flow — 3-layer resilience with circuit breakers, key cooldown and model lockout. One subscription shared by a whole team — key pools with fair-share quotas per member enforced in the hot path. Prompts routed through someone else's cloud — local-first, runs on your machine with AES-256-GCM encrypted keys. No idea where tokens and money go — live analytics with usage, quota, savings and p95 latency per provider.</title>
+  <desc id="d">Animated comparison ledger: ten pain-versus-fix rows are fully readable on the first frame; a soft highlight sweeps down the rows in a continuous cycle.</desc>
+  <style>
+@font-face{font-family:"CI Sans";font-style:normal;font-weight:400;src:url(data:font/woff2;base64,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) format("woff2")}
+@font-face{font-family:"CI Sans";font-style:normal;font-weight:600;src:url(data:font/woff2;base64,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) format("woff2")}
+@font-face{font-family:"CI Mono";font-style:normal;font-weight:500;src:url(data:font/woff2;base64,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) format("woff2")}
+:root{--bg:#fbfbf8;--surface:#ffffff;--ink:#040d10;--body:#031a1b;--muted:#575f5f;--border:rgba(4,13,16,0.24);--grid:rgba(4,13,16,0.06);--accent:#d8ff00;--accent-ink:#040d10;--ok:#087a4f;--ok-bg:#e8f7f0;--warn:#a75a00;--warn-bg:#fff3df;--err:#bf3636;--err-bg:#ffeded;--info:#2869d8;--info-bg:#edf4ff;--surface-subtle:#f7f7f2;--surface-muted:#eeeee8;--inverse-bg:#040d10;--inverse-text:#f1f7f7;--track:rgba(4,13,16,0.14);--accent-soft:rgba(216,255,0,0.22)}
+@media (prefers-color-scheme: dark){:root{--bg:#040d10;--surface:#0d191c;--ink:#ffffff;--body:#f1f7f7;--muted:#c7cbc5;--border:rgba(241,247,247,0.24);--grid:rgba(241,247,247,0.05);--accent:#d8ff00;--accent-ink:#040d10;--ok:#5dd6a5;--ok-bg:#0f3328;--warn:#f4cf8b;--warn-bg:#38280f;--err:#ff8f8f;--err-bg:#3b1919;--info:#8fbaff;--info-bg:#142b4f;--surface-subtle:#1e2c2f;--surface-muted:#394446;--inverse-bg:#040d10;--inverse-text:#f1f7f7;--track:rgba(241,247,247,0.2);--accent-soft:rgba(216,255,0,0.12)}}
+.kicker{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:12px;letter-spacing:0.18em;fill:var(--muted)}
+.headline{font-family: "CI Serif", "Instrument Serif", Georgia, "Times New Roman", serif;font-weight:400;font-size:72px;fill:var(--ink)}
+.sub{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:400;font-size:23px;fill:var(--body)}
+.body{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:400;font-size:14px;fill:var(--muted)}
+.mono{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:13px;fill:var(--body)}
+.num{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:32px;fill:var(--ink)}
+.lbl{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:10px;letter-spacing:0.16em;fill:var(--muted)}
+.foot{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:10px;letter-spacing:0.16em;fill:var(--muted)}
+.cmd{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:16px;fill:var(--accent-ink)}
+.bg{fill:var(--bg)} .surface{fill:var(--surface);stroke:var(--border)} .accent{fill:var(--accent)} .rule{stroke:var(--border)} .grid{stroke:var(--grid)}
+.h2{font-family: "CI Serif", "Instrument Serif", Georgia, "Times New Roman", serif;font-weight:400;font-size:40px;fill:var(--ink)}
+.h3{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:600;font-size:18px;fill:var(--ink)}
+.h4{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:600;font-size:14px;fill:var(--ink)}
+.cell{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:400;font-size:13px;fill:var(--body)}
+.small{font-family: "CI Sans", Inter, "Segoe UI", Arial, Helvetica, sans-serif;font-weight:400;font-size:11px;fill:var(--muted)}
+.num-sm{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:20px;fill:var(--ink)}
+.mono-sm{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:11px;fill:var(--body)}
+.mono-xs{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:9px;letter-spacing:0.08em;fill:var(--muted)}
+.term{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:13px;fill:var(--inverse-text)}
+.term-lg{font-family: "CI Mono", "IBM Plex Mono", Consolas, "Liberation Mono", monospace;font-weight:500;font-size:16px;fill:var(--inverse-text)}
+.ok{fill:var(--ok)} .warn{fill:var(--warn)} .err{fill:var(--err)} .info{fill:var(--info)} .ok-bg{fill:var(--ok-bg)} .warn-bg{fill:var(--warn-bg)} .err-bg{fill:var(--err-bg)} .info-bg{fill:var(--info-bg)} .stroke-ok{stroke:var(--ok)} .stroke-warn{stroke:var(--warn)} .stroke-err{stroke:var(--err)} .stroke-info{stroke:var(--info)} .stroke-accent{stroke:var(--accent)} .stroke-ink{stroke:var(--ink)} .surface-subtle{fill:var(--surface-subtle)} .surface-muted{fill:var(--surface-muted)} .inverse{fill:var(--inverse-bg)} .track{fill:var(--track)} .accent-soft{fill:var(--accent-soft)} .ink{fill:var(--ink)} .body-fill{fill:var(--body)} .muted{fill:var(--muted)}
+  </style>
   <defs>
-    <pattern id="gridPaperW" width="32" height="32" patternUnits="userSpaceOnUse">
-      <path d="M 32 0 L 0 0 0 32" fill="none" stroke="#ffffff" stroke-opacity="0.06" stroke-width="1"/>
+    <pattern id="wpf-grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M 32 0 L 0 0 0 32" fill="none" class="grid" stroke-width="1"/>
     </pattern>
-    <radialGradient id="bgGlowW" cx="76%" cy="12%" r="55%">
-      <stop offset="0%" stop-color="#e54d5e" stop-opacity="0.10"/>
-      <stop offset="55%" stop-color="#8b5cf6" stop-opacity="0.05"/>
-      <stop offset="100%" stop-color="#6366f1" stop-opacity="0"/>
-    </radialGradient>
   </defs>
-
-  <rect width="1200" height="664" fill="#0b0e14"/>
-  <rect width="1200" height="664" fill="url(#gridPaperW)"/>
-  <rect width="1200" height="664" fill="url(#bgGlowW)"/>
-
-  <!-- header -->
-  <text x="40" y="56" font-family="Consolas, 'Courier New', monospace" font-size="13" letter-spacing="2.5" fill="#a78bfa">WHY OMNIROUTE</text>
-  <line x1="172" y1="51" x2="1160" y2="51" stroke="#232b38" stroke-width="1.5"/>
-  <text x="40" y="100" font-family="Inter, 'Segoe UI', Arial, Helvetica, system-ui, sans-serif" font-size="23" font-weight="600" fill="#c9d1d9">Stop juggling <tspan fill="#f87171" font-weight="800">10 dashboards</tspan>, <tspan fill="#fdcb6e" font-weight="800">dead API keys</tspan>, and <tspan fill="#e17055" font-weight="800">surprise bills</tspan>.</text>
-
-  <!-- column headers -->
-  <g transform="translate(48,138)" stroke="#f87171" stroke-width="2.4" fill="none" stroke-linecap="round">
-    <line x1="0" y1="0" x2="11" y2="11"/><line x1="11" y1="0" x2="0" y2="11"/>
-  </g>
-  <text x="72" y="149" font-family="Consolas, 'Courier New', monospace" font-size="12.5" letter-spacing="2" fill="#f87171">THE DAILY PAIN</text>
-  <g transform="translate(632,137)" stroke="#7ee787" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round">
-    <path d="M 0,7 L 4.5,11.5 L 13,2"/>
-  </g>
-  <text x="660" y="149" font-family="Consolas, 'Courier New', monospace" font-size="12.5" letter-spacing="2" fill="#7ee787">HOW OMNIROUTE FIXES IT</text>
-  <line x1="40" y1="166" x2="1160" y2="166" stroke="#232b38" stroke-width="1.5"/>
-
-  <!-- sweeping row highlight (invisible on the first frame) -->
-  <rect x="40" y="170" width="1120" height="46" fill="#7ee787" opacity="0">
+  <rect class="bg" x="0" y="0" width="1200" height="664"/>
+  <rect x="0" y="0" width="1200" height="664" fill="url(#wpf-grid)"/>
+  <text x="40" y="56" class="kicker">WHY OMNIROUTE</text>
+  <line x1="200" y1="51" x2="1160" y2="51" class="rule" stroke-width="1"/>
+  <text x="40" y="100" class="sub">Stop juggling <tspan font-weight="600" style="fill:var(--err)">10 dashboards</tspan>, <tspan font-weight="600" style="fill:var(--warn)">dead API keys</tspan>, and <tspan font-weight="600" style="fill:var(--err)">surprise bills</tspan>.</text>
+  <g transform="translate(48,138)" class="stroke-err" stroke-width="2.4" fill="none" stroke-linecap="round"><line x1="0" y1="0" x2="11" y2="11"/><line x1="11" y1="0" x2="0" y2="11"/></g>
+  <text x="72" y="149" class="kicker" style="fill:var(--err)">THE DAILY PAIN</text>
+  <g transform="translate(632,137)" class="stroke-ok" stroke-width="2.6" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M 0,7 L 4.5,11.5 L 13,2"/></g>
+  <text x="660" y="149" class="kicker" style="fill:var(--ok)">HOW OMNIROUTE FIXES IT</text>
+  <line x1="40" y1="166" x2="1160" y2="166" class="rule" stroke-width="1"/>
+  <rect x="40" y="170" width="1120" height="46" class="ok-bg" opacity="0">
     <animate attributeName="y" calcMode="discrete" values="170;216;262;308;354;400;446;492;538;584" keyTimes="0;0.1;0.2;0.3;0.4;0.5;0.6;0.7;0.8;0.9" dur="15s" repeatCount="indefinite"/>
-    <animate attributeName="opacity" values="0;0.055;0.055;0" keyTimes="0;0.015;0.985;1" dur="15s" repeatCount="indefinite"/>
+    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.015;0.985;1" dur="15s" repeatCount="indefinite"/>
   </rect>
-
-  <!-- rows -->
-  <g font-family="Inter, 'Segoe UI', Arial, Helvetica, system-ui, sans-serif" font-size="14.5">
-    <!-- row separators -->
-    <g stroke="#232b38" stroke-width="1">
-      <line x1="40" y1="216" x2="1160" y2="216"/><line x1="40" y1="262" x2="1160" y2="262"/>
-      <line x1="40" y1="308" x2="1160" y2="308"/><line x1="40" y1="354" x2="1160" y2="354"/>
-      <line x1="40" y1="400" x2="1160" y2="400"/><line x1="40" y1="446" x2="1160" y2="446"/>
-      <line x1="40" y1="492" x2="1160" y2="492"/><line x1="40" y1="538" x2="1160" y2="538"/>
-      <line x1="40" y1="584" x2="1160" y2="584"/>
-    </g>
-    <line x1="612" y1="170" x2="612" y2="630" stroke="#232b38" stroke-width="1"/>
-
-    <!-- pain markers -->
-    <g stroke="#f87171" stroke-opacity="0.85" stroke-width="2" fill="none" stroke-linecap="round">
-      <g transform="translate(48,188)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
-      <g transform="translate(48,234)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
-      <g transform="translate(48,280)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
-      <g transform="translate(48,326)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
-      <g transform="translate(48,372)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
-      <g transform="translate(48,418)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
-      <g transform="translate(48,464)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
-      <g transform="translate(48,510)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
-      <g transform="translate(48,556)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
-      <g transform="translate(48,602)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
-    </g>
-    <!-- fix markers -->
-    <g stroke="#7ee787" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
-      <g transform="translate(632,187)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
-      <g transform="translate(632,233)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
-      <g transform="translate(632,279)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
-      <g transform="translate(632,325)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
-      <g transform="translate(632,371)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
-      <g transform="translate(632,417)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
-      <g transform="translate(632,463)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
-      <g transform="translate(632,509)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
-      <g transform="translate(632,555)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
-      <g transform="translate(632,601)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
-    </g>
-
-    <!-- pain column -->
-    <g fill="#c9d1d9">
-      <text x="72" y="197">Subscription quota expires unused every month</text>
-      <text x="72" y="243">Rate limits stop you mid-coding</text>
-      <text x="72" y="289">Tool outputs (git diff, grep, logs) burn tokens</text>
-      <text x="72" y="335">Expensive APIs — $20–50/mo per provider</text>
-      <text x="72" y="381">Each AI tool wants its own setup</text>
-      <text x="72" y="427">AI blocked in your country</text>
-      <text x="72" y="473">Dead keys and banned accounts kill your flow</text>
-      <text x="72" y="519">One subscription, a whole team fighting over it</text>
-      <text x="72" y="565">Your prompts routed through someone else's cloud</text>
-      <text x="72" y="611">No idea where tokens and money go</text>
-    </g>
-
-    <!-- fix column -->
-    <g fill="#a1a1aa">
-      <text x="660" y="197"><tspan font-weight="700" fill="#7ee787">Maximize subscriptions</tspan> — track quota, use every token before reset</text>
-      <text x="660" y="243"><tspan font-weight="700" fill="#7ee787">4-tier auto-fallback</tspan> — Subscription → API → Cheap → Free, in ms</text>
-      <text x="660" y="289"><tspan font-weight="700" fill="#7ee787">RTK + Caveman compression</tspan> — save 15–95% eligible tokens</text>
-      <text x="660" y="335"><tspan font-weight="700" fill="#7ee787">Cost-optimized routing</tspan> — auto-route to the cheapest viable model</text>
-      <text x="660" y="381"><tspan font-weight="700" fill="#7ee787">One endpoint</tspan> — every tool, one config, one dashboard</text>
-      <text x="660" y="427"><tspan font-weight="700" fill="#7ee787">3-level proxy + TLS stealth</tspan> — use AI from anywhere</text>
-      <text x="660" y="473"><tspan font-weight="700" fill="#7ee787">3-layer resilience</tspan> — circuit breakers, key cooldown, model lockout</text>
-      <text x="660" y="519"><tspan font-weight="700" fill="#7ee787">Key pools</tspan> — fair-share quotas per member, hot-path enforced</text>
-      <text x="660" y="565"><tspan font-weight="700" fill="#7ee787">Local-first</tspan> — your machine, keys encrypted (AES-256-GCM)</text>
-      <text x="660" y="611"><tspan font-weight="700" fill="#7ee787">Live analytics</tspan> — usage, quota, savings &amp; p95 latency per provider</text>
-    </g>
+  <g class="rule" stroke-width="1" stroke-opacity="0.5">
+    <line x1="40" y1="216" x2="1160" y2="216"/>
+    <line x1="40" y1="262" x2="1160" y2="262"/>
+    <line x1="40" y1="308" x2="1160" y2="308"/>
+    <line x1="40" y1="354" x2="1160" y2="354"/>
+    <line x1="40" y1="400" x2="1160" y2="400"/>
+    <line x1="40" y1="446" x2="1160" y2="446"/>
+    <line x1="40" y1="492" x2="1160" y2="492"/>
+    <line x1="40" y1="538" x2="1160" y2="538"/>
+    <line x1="40" y1="584" x2="1160" y2="584"/>
+    <line x1="612" y1="170" x2="612" y2="630"/>
+  </g>
+  <g class="stroke-err" stroke-opacity="0.85" stroke-width="2" fill="none" stroke-linecap="round">
+    <g transform="translate(48,188)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
+    <g transform="translate(48,234)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
+    <g transform="translate(48,280)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
+    <g transform="translate(48,326)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
+    <g transform="translate(48,372)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
+    <g transform="translate(48,418)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
+    <g transform="translate(48,464)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
+    <g transform="translate(48,510)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
+    <g transform="translate(48,556)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
+    <g transform="translate(48,602)"><line x1="0" y1="0" x2="8" y2="8"/><line x1="8" y1="0" x2="0" y2="8"/></g>
+  </g>
+  <g class="stroke-ok" stroke-width="2.2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <g transform="translate(632,187)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
+    <g transform="translate(632,233)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
+    <g transform="translate(632,279)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
+    <g transform="translate(632,325)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
+    <g transform="translate(632,371)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
+    <g transform="translate(632,417)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
+    <g transform="translate(632,463)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
+    <g transform="translate(632,509)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
+    <g transform="translate(632,555)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
+    <g transform="translate(632,601)"><path d="M 0,6 L 4,10 L 11.5,1.5"/></g>
+  </g>
+  <g>
+    <text x="72" y="197" class="body" style="fill:var(--body)">Subscription quota expires unused every month</text>
+    <text x="72" y="243" class="body" style="fill:var(--body)">Rate limits stop you mid-coding</text>
+    <text x="72" y="289" class="body" style="fill:var(--body)">Tool outputs (git diff, grep, logs) burn tokens</text>
+    <text x="72" y="335" class="body" style="fill:var(--body)">Expensive APIs — $20–50/mo per provider</text>
+    <text x="72" y="381" class="body" style="fill:var(--body)">Each AI tool wants its own setup</text>
+    <text x="72" y="427" class="body" style="fill:var(--body)">AI blocked in your country</text>
+    <text x="72" y="473" class="body" style="fill:var(--body)">Dead keys and banned accounts kill your flow</text>
+    <text x="72" y="519" class="body" style="fill:var(--body)">One subscription, a whole team fighting over it</text>
+    <text x="72" y="565" class="body" style="fill:var(--body)">Your prompts routed through someone else's cloud</text>
+    <text x="72" y="611" class="body" style="fill:var(--body)">No idea where tokens and money go</text>
+  </g>
+  <g>
+    <text x="660" y="197" class="body"><tspan font-weight="600" style="fill:var(--ok)">Maximize subscriptions</tspan> — track quota, use every token before reset</text>
+    <text x="660" y="243" class="body"><tspan font-weight="600" style="fill:var(--ok)">4-tier auto-fallback</tspan> — Subscription → API → Cheap → Free, in ms</text>
+    <text x="660" y="289" class="body"><tspan font-weight="600" style="fill:var(--ok)">RTK + Caveman compression</tspan> — save 15–95% eligible tokens</text>
+    <text x="660" y="335" class="body"><tspan font-weight="600" style="fill:var(--ok)">Cost-optimized routing</tspan> — auto-route to the cheapest viable model</text>
+    <text x="660" y="381" class="body"><tspan font-weight="600" style="fill:var(--ok)">One endpoint</tspan> — every tool, one config, one dashboard</text>
+    <text x="660" y="427" class="body"><tspan font-weight="600" style="fill:var(--ok)">3-level proxy + TLS stealth</tspan> — use AI from anywhere</text>
+    <text x="660" y="473" class="body"><tspan font-weight="600" style="fill:var(--ok)">3-layer resilience</tspan> — circuit breakers, key cooldown, model lockout</text>
+    <text x="660" y="519" class="body"><tspan font-weight="600" style="fill:var(--ok)">Key pools</tspan> — fair-share quotas per member, hot-path enforced</text>
+    <text x="660" y="565" class="body"><tspan font-weight="600" style="fill:var(--ok)">Local-first</tspan> — your machine, keys encrypted (AES-256-GCM)</text>
+    <text x="660" y="611" class="body"><tspan font-weight="600" style="fill:var(--ok)">Live analytics</tspan> — usage, quota, savings &amp; p95 latency per provider</text>
   </g>
 </svg>

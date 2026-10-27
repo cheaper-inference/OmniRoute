@@ -61,6 +61,8 @@ export default function VscodeCopilotBanner() {
   };
 
   // Partner identity colour (#007ACC) — brand, not a semantic status tone; kept as-is.
+  // White on #007ACC is 4.5:1 (AA). The note uses full-strength text-muted at 12px — the old
+  // 9px at 70% opacity was the last axe color-contrast node on /dashboard (KEA-7886 P7).
   return (
     <div
       role="complementary"
@@ -88,7 +90,7 @@ export default function VscodeCopilotBanner() {
             {t("cta")}
             <Icon name="open_in_new" size={14} />
           </a>
-          <span className="text-[9px] text-text-muted/70">{t("secondaryNote")}</span>
+          <span className="text-xs text-text-muted">{t("secondaryNote")}</span>
         </div>
         <Button
           variant="ghost"

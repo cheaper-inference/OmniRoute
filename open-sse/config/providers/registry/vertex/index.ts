@@ -20,6 +20,7 @@ export const vertexProvider: RegistryEntry = {
   authType: "apikey",
   authHeader: "bearer",
   models: [
+    { id: "gemini-4-argon", name: "Gemini 4 Argon (Vertex)" },
     { id: "gemini-3.7-flash", name: "Gemini 3.7 Flash (Vertex)" },
     { id: "gemini-3.6-flash", name: "Gemini 3.6 Flash (Vertex)" },
     { id: "gemini-3.5-flash", name: "Gemini 3.5 Flash (Vertex)" },

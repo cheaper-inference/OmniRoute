@@ -185,11 +185,17 @@ export const opencode_zenProvider: RegistryEntry = {
     // and laguna-s-2.1-free added.
     // 2026-10-18 sync: deepseek-v4-flash-free delisted upstream and replaced by
     // deepseek-v4.1-flash-free; keep the old id as a compatibility alias.
+    // 2026-10-26: the free backend rejects prompts above ~330k tokens
+    // (`400 context_length_exceeded`) although models.dev lists 1M; advertise
+    // the real window so clients compact before the upstream rejects. The
+    // synced 1M row is overridden in AUTHORITATIVE_PROVIDER_CONTEXT_WINDOWS.
     {
       id: "deepseek-v4.1-flash-free",
       name: "DeepSeek V4.1 Flash Free",
       aliases: ["deepseek-v4-flash-free"],
       supportsReasoning: true,
+      contextLength: 330000,
+      maxOutputTokens: 128000,
     },
     { id: "mimo-v2.5-free", name: "MiMo V2.5 Free", contextLength: 1048576 },
     // MiMo V2.6 Flash Free ships a 1M window upstream (same as V2.5); without

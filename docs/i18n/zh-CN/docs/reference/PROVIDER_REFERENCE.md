@@ -4,11 +4,11 @@
 
 ---
 
-> **自动生成** 自 `src/shared/constants/providers.ts` — 请勿手动编辑。
-> 重新生成请运行：`npm run gen:provider-reference`
-> **最后生成时间：** 2026-10-18
+> **自动生成**自 `src/shared/constants/providers.ts` — 请勿手动编辑。
+> 使用以下命令重新生成：`npm run gen:provider-reference`
+> **最后生成时间：** 2026-10-27
 
-提供者总数：**375**。请参阅下方的分类明细。
+提供者总数：**376**。请参阅下方的分类明细。
 
 ## 类别
 
@@ -120,7 +120,7 @@
 | `zai-web`              | `zw`            | Z.ai Web                        | Web Cookie | [链接](https://chat.z.ai)                 | 从 chat.z.ai → DevTools → Application → Local Storage 复制 "token" 值。不要复制 Cookie；OmniRoute 会通过其浏览器传输机制处理每个请求的 CAPTCHA。                                                                                                                                                                                                                                                                                                                                                                                                                    | —        |
 | `zenmux-free`          | `zmf`           | ZenMux Free (Web)               | Web Cookie | [链接](https://zenmux.ai)                 | 登录 zenmux.ai，然后使用 EditThisCookie 或 Cookie-Editor 导出所有 Cookie，并将完整的 Cookie 标头字符串粘贴到此处。大约每 30 天刷新一次。                                                                                                                                                                                                                                                                                                                                                                                                                            | —        |
 
-## API 密钥提供者（付费 / 付费但含免费额度）（252）
+## API 密钥提供者（付费 / 付费但含免费额度）（253）
 
 | ID                       | 别名            | 名称                            | 标签                   | 网站                                                                                                     | 备注                                                                                                                                                                                                                                                                                                                                                                                         |
 | ------------------------ | --------------- | ------------------------------- | ---------------------- | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -131,6 +131,7 @@
 | `ai21`                   | `ai21`          | AI21 Labs                       | API 密钥               | [链接](https://www.ai21.com)                                                                             | 注册即送 $10 试用额度（有效期 3 个月），无需信用卡                                                                                                                                                                                                                                                                                                                                           |
 | `aimlapi`                | `aiml`          | AI/ML API                       | API 密钥，聚合         | [链接](https://aimlapi.com)                                                                              | 免费套餐已暂停（2026）— AI/ML API 现在仅支持按量付费（最低充值 $20）；不再有周期性免费额度。                                                                                                                                                                                                                                                                                                 |
 | `ainative`               | `ainative`      | AINative Studio                 | API 密钥               | [链接](https://ainative.studio)                                                                          | 在 ainative.studio 创建免费 API 密钥（无需信用卡），然后将其作为 Bearer 令牌粘贴到此处。                                                                                                                                                                                                                                                                                                     |
+| `ainetcafe`              | `ainetcafe`     | ainetcafe                       | API key                | [link](https://ainetcafe.com/k3/)                                                                        | Sign-up credit toward available models; amount and eligibility are set by ainetcafe, not OmniRoute.                                                                                                                                                                                                                                                                                          |
 | `aion`                   | `aion`          | Aion Labs                       | API 密钥               | [链接](https://www.aionlabs.ai)                                                                          | 在 aionlabs.ai 创建免费 API 密钥（无需信用卡），然后将其作为 Bearer 令牌粘贴到此处。                                                                                                                                                                                                                                                                                                         |
 | `alibaba`                | `ali`           | Alibaba Cloud Model Studio      | API 密钥               | [链接](https://bailian.console.alibabacloud.com/)                                                        | —                                                                                                                                                                                                                                                                                                                                                                                            |
 | `alibaba-cn`             | `ali-cn`        | Alibaba（中国）                 | API 密钥               | [链接](https://dashscope.console.aliyun.com/)                                                            | —                                                                                                                                                                                                                                                                                                                                                                                            |
@@ -459,10 +460,10 @@
 
 ## 事实来源
 
-- 目录（Catalog）：[`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- 注册表（各模型详细信息）：[`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- 执行器（Executors）：[`open-sse/executors/`](../../open-sse/executors/)（154 个实现）
-- 转换器（Translators）：[`open-sse/translator/`](../../open-sse/translator/)
+- 目录：[`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- 注册表（各模型的详细信息）：[`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- 执行器：[`open-sse/executors/`](../../open-sse/executors/)（156 个实现）
+- 转换器：[`open-sse/translator/`](../../open-sse/translator/)
 
 ## 另请参阅
 

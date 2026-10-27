@@ -162,7 +162,7 @@ OmniRoute 6টি A2A স্কিল এক্সপোজ করে, যেগ
 | Health Report      | `health-report`      | প্রতি প্রোভাইডারের সার্কিট ব্রেকার, কুলডাউন, লকআউট অবস্থা একত্রিত করে                                                                                     | health, resilience         | "Show health status of all providers"  |
 | List Capabilities  | `list-capabilities`  | কনটেক্সট ইনজেকশনের জন্য raw SKILL.md URL সহ সম্পূর্ণ 45-এন্ট্রির Agent Skills ক্যাটালগ (23 API + 21 CLI + 1 config) একটি মার্কডাউন টেবিল হিসেবে ফেরত দেয় | catalog, discovery, skills | "List all OmniRoute capabilities"      |
 
-> Agent Cardটি লাইভ 375-প্রোভাইডার ক্যাটালগের সাথে সামঞ্জস্যপূর্ণ রাখা উচিত; প্রোভাইডার সংখ্যা এবং ফ্রি/নো-অথ মেটাডেটা রানটাইম রেজিস্ট্রি থেকে সংগৃহীত হয়।
+> Agent Cardটি লাইভ 376-প্রোভাইডার ক্যাটালগের সাথে সামঞ্জস্যপূর্ণ রাখা উচিত; প্রোভাইডার সংখ্যা এবং ফ্রি/নো-অথ মেটাডেটা রানটাইম রেজিস্ট্রি থেকে সংগৃহীত হয়।
 
 ### `list-capabilities` স্কিলের বিস্তারিত
 

@@ -60,6 +60,17 @@ test("tones split at the thresholds the column colours depend on", () => {
   assert.equal(formatUsageReliability(usage({ successRate: 0.799 })).tone, "poor");
 });
 
+test("tone classes are the kit semantic tones, mirroring the score column (KEA-7886, P8)", () => {
+  // Same success/warning/error ramp the score cell uses on the rankings page; no raw hue.
+  assert.equal(usageToneClass("good"), "text-success");
+  assert.equal(usageToneClass("fair"), "text-warning");
+  assert.equal(usageToneClass("poor"), "text-error");
+  assert.equal(usageToneClass("unknown"), "text-text-muted");
+  for (const tone of ["good", "fair", "poor", "unknown"] as const) {
+    assert.doesNotMatch(usageToneClass(tone), /-(green|yellow|orange|red)-\d/);
+  }
+});
+
 test("percent is rounded, and the window travels with it", () => {
   const d = formatUsageReliability(usage({ successRate: 0.9449, windowHours: 168 }));
   assert.equal(d.percent, 94);

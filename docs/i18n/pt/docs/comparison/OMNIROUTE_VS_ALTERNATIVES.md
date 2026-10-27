@@ -39,7 +39,7 @@ Comparação objetiva de funcionalidades face a routers de IA open-source popula
 
 ## Quando escolher o OmniRoute
 
-- Faz self-hosting e pretende a **máxima cobertura de fornecedores** (375 fornecedores, 155 entradas de catálogo gratuitas/sem autenticação)
+- Faz self-hosting e pretende a **máxima cobertura de fornecedores** (376 fornecedores, 155 entradas de catálogo gratuitas/sem autenticação)
 - Precisa de um **servidor MCP integrado** (ferramentas LLM, memória e competências expostas como ferramentas)
 - Precisa do **protocolo A2A** para fluxos de trabalho agente-a-agente
 - Pretende **furtividade de fingerprint** (JA3/JA4) para evitar a deteção por CAPTCHAs a montante

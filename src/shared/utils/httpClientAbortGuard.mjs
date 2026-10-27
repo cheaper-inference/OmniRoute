@@ -253,6 +253,22 @@ export function isUpstreamNetworkError(err) {
 }
 
 /**
+ * Account-semaphore capacity rejection (`rateLimitSemaphore.acquire`): the queue
+ * wait expired (`SEMAPHORE_TIMEOUT`) or the queue refused the waiter
+ * (`SEMAPHORE_QUEUE_FULL`). The request layer already answers these with a 429
+ * (`open-sse/handlers/chatCore/streamErrorResult.ts::isSemaphoreCapacityError`),
+ * so a stray copy reaching the process-level handlers is a capacity signal, not
+ * a fault. Kept as literal checks because this file must stay build-free (#17229).
+ *
+ * @param {unknown} err
+ * @returns {boolean}
+ */
+function isSemaphoreCapacityError(err) {
+  if (!err || typeof err !== "object") return false;
+  return err.code === "SEMAPHORE_TIMEOUT" || err.code === "SEMAPHORE_QUEUE_FULL";
+}
+
+/**
  * A stream-lifecycle error OmniRoute's own streaming pipeline already accounted
  * for. `open-sse/utils/stream.ts` stamps `markPendingRequestCleared()` on every
  * stream error whose pending-request entry was cleared at emit time (the empty
@@ -301,7 +317,8 @@ export function shouldSwallowUncaught(err, origin) {
     !isRecoverableUpstreamTimeoutError(err) &&
     !isIntentionalComboAbort(err) &&
     !isUpstreamNetworkError(err) &&
-    !isHandledStreamLifecycleError(err)
+    !isHandledStreamLifecycleError(err) &&
+    !isSemaphoreCapacityError(err)
   ) {
     return false;
   }

@@ -20,7 +20,7 @@ IDE agenti (məsələn, GitHub Copilot, Cursor, Claude Code) API çağırışı 
 
 Bu o deməkdir ki, siz:
 
-- **İstənilən agenti istənilən provayderə yönləndirə bilərsiniz**: Copilot OpenAI ilə danışır? Onu Anthropic Claude, Gemini və ya OmniRoute-un 375 provayderindən istənilən birinə yönləndirin.
+- **İstənilən agenti istənilən provayderə yönləndirə bilərsiniz**: Copilot OpenAI ilə danışır? Onu Anthropic Claude, Gemini və ya OmniRoute-un 376 provayderindən istənilən birinə yönləndirin.
 - **Model uyğunlaşdırmaları tətbiq edin**: `gemini-3-flash` → `claude-sonnet-4.7` handler səviyyəsində şəffaf şəkildə.
 - **Bütün agent trafikini izləyin**: hər bir ələ keçirilmiş sorğu [Trafik İnspektoruna](./TRAFFIC_INSPECTOR.md) dərc olunur.
 - **OmniRoute dayanıqlılığını tətbiq edin**: kombo marşrutlaşdırma, circuit breaker-lər, fallback-lər və xərc izləmə IDE agent trafiki üçün də işləyir.

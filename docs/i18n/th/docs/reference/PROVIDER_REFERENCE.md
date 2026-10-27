@@ -4,11 +4,11 @@
 
 ---
 
-> **สร้างอัตโนมัติ** จาก `src/shared/constants/providers.ts` — ห้ามแก้ไขด้วยตนเอง
+> **สร้างโดยอัตโนมัติ** จาก `src/shared/constants/providers.ts` — ห้ามแก้ไขด้วยตนเอง
 > สร้างใหม่ด้วย: `npm run gen:provider-reference`
-> **สร้างล่าสุดเมื่อ:** 2026-10-18
+> **สร้างล่าสุด:** 2026-10-27
 
-จำนวนผู้ให้บริการทั้งหมด: **375** ราย ดูรายละเอียดแยกตามหมวดหมู่ด้านล่าง
+ผู้ให้บริการทั้งหมด: **376** ราย ดูรายละเอียดแยกตามหมวดหมู่ด้านล่าง
 
 ## หมวดหมู่
 
@@ -120,7 +120,7 @@
 | `zai-web`              | `zw`            | Z.ai Web                                          | คุกกี้เว็บ | [ลิงก์](https://chat.z.ai)                 | คัดลอกค่า "token" จาก chat.z.ai → DevTools → Application → Local Storage อย่าคัดลอกคุกกี้ เนื่องจาก OmniRoute จะจัดการ CAPTCHA สำหรับแต่ละคำขอผ่านการส่งข้อมูลด้วยเบราว์เซอร์                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | —                     |
 | `zenmux-free`          | `zmf`           | ZenMux Free (เว็บ)                                | คุกกี้เว็บ | [ลิงก์](https://zenmux.ai)                 | เข้าสู่ระบบที่ zenmux.ai จากนั้นส่งออกคุกกี้ทั้งหมดโดยใช้ EditThisCookie หรือ Cookie-Editor แล้ววางสตริงส่วนหัว Cookie ทั้งหมดที่นี่ รีเฟรชทุก ๆ ~30 วัน                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | —                     |
 
-## ผู้ให้บริการ API Key (แบบชำระเงิน / ชำระเงินพร้อมเครดิตฟรี) (252)
+## ผู้ให้บริการ API Key (แบบชำระเงิน / ชำระเงินพร้อมเครดิตฟรี) (253)
 
 | ID                       | ชื่อย่อ         | ชื่อ                            | แท็ก                           | เว็บไซต์                                                                                                 | หมายเหตุ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 | ------------------------ | --------------- | ------------------------------- | ------------------------------ | -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -131,6 +131,7 @@
 | `ai21`                   | `ai21`          | AI21 Labs                       | คีย์ API                       | [link](https://www.ai21.com)                                                                             | เครดิตทดลอง $10 เมื่อสมัคร (ใช้ได้ 3 เดือน) ไม่ต้องใช้บัตรเครดิต                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `aimlapi`                | `aiml`          | AI/ML API                       | คีย์ API, อะกริเกเตอร์         | [link](https://aimlapi.com)                                                                              | ระดับฟรีถูกพักชั่วคราว (2026) — AI/ML API เปลี่ยนเป็นแบบจ่ายตามการใช้งานเท่านั้น (เติมเงินขั้นต่ำ $20); ไม่มีเครดิตฟรีแบบต่อเนื่อง                                                                                                                                                                                                                                                                                                                                                                                   |
 | `ainative`               | `ainative`      | AINative Studio                 | คีย์ API                       | [link](https://ainative.studio)                                                                          | สร้างคีย์ API ฟรีที่ ainative.studio (ไม่ต้องใช้บัตร) แล้ววางที่นี่เป็น Bearer token                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `ainetcafe`              | `ainetcafe`     | ainetcafe                       | API key                        | [link](https://ainetcafe.com/k3/)                                                                        | Sign-up credit toward available models; amount and eligibility are set by ainetcafe, not OmniRoute.                                                                                                                                                                                                                                                                                                                                                                                                                  |
 | `aion`                   | `aion`          | Aion Labs                       | คีย์ API                       | [link](https://www.aionlabs.ai)                                                                          | สร้างคีย์ API ฟรีที่ aionlabs.ai (ไม่ต้องใช้บัตร) แล้ววางที่นี่เป็น Bearer token                                                                                                                                                                                                                                                                                                                                                                                                                                     |
 | `alibaba`                | `ali`           | Alibaba Cloud Model Studio      | คีย์ API                       | [link](https://bailian.console.alibabacloud.com/)                                                        | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
 | `alibaba-cn`             | `ali-cn`        | Alibaba (China)                 | คีย์ API                       | [link](https://dashscope.console.aliyun.com/)                                                            | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
@@ -457,12 +458,12 @@
 | ------ | ------ | --------------------------- | ---- | -------- | -------- |
 | `auto` | `auto` | อัตโนมัติ (ไม่ต้องกำหนดค่า) | ระบบ | —        | —        |
 
-## แหล่งข้อมูลอ้างอิงหลัก
+## แหล่งข้อมูลที่เชื่อถือได้
 
-- แคตตาล็อก: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- แค็ตตาล็อก: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
 - รีจิสทรี (รายละเอียดของแต่ละโมเดล): [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- ตัวดำเนินการ (Executors): [`open-sse/executors/`](../../open-sse/executors/) (154 อิมพลีเมนเทชัน)
-- ตัวแปล (Translators): [`open-sse/translator/`](../../open-sse/translator/)
+- ตัวดำเนินการ: [`open-sse/executors/`](../../open-sse/executors/) (การใช้งาน 156 รายการ)
+- ตัวแปล: [`open-sse/translator/`](../../open-sse/translator/)
 
 ## ดูเพิ่มเติม
 

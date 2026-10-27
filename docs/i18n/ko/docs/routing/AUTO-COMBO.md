@@ -430,53 +430,53 @@ Auto Combo 엔진에는 사전 정의된 콤보가 필요하지 않습니다. �
 
 **전용 `POST /api/combos/auto` 엔드포인트는 없습니다** — Auto-Combo는 다음 두 가지 방식으로 사용됩니다.
 
-1. **제로 구성(권장):** `model: "auto"` 또는 `model: "auto/<variant>"`를 지정하여 채팅 완료 요청을 전송합니다. 가상 팩토리가 요청마다 콤보를 생성하므로 지속성이나 API 호출이 필요하지 않습니다.
+1. **구성 불필요(권장):** `model: "auto"` 또는 `model: "auto/<variant>"`를 사용하여 채팅 완성 요청을 보내세요. 가상 팩토리가 요청마다 콤보를 생성하므로 영속화나 API 호출이 필요하지 않습니다.
 
-2. **`strategy: "auto"`를 사용하는 영구 저장 콤보:** `POST /api/combos`를 통해 일반 콤보를 생성하고 `strategy: "auto"`와 함께 `config.auto.weights` / `config.auto.candidatePool`을 설정합니다. 동일한 점수 산정 엔진이 사용되며, 콤보는 `combos`에 저장되어 ID로 재사용할 수 있습니다.
+2. **`strategy: "auto"`를 사용하는 영속 콤보:** `POST /api/combos`를 통해 일반 콤보를 생성하고 `strategy: "auto"`와 함께 `config.auto.weights` / `config.auto.candidatePool`을 설정하세요. 동일한 점수 산정 엔진이 사용되며, 콤보는 `combos`에 저장되어 ID로 재사용할 수 있습니다.
 
-탐색을 위해 `GET /api/combos/auto`는 확인된 후보 풀과 함께 각 변형을 나열하며, 후보 풀의 윈도우 전체에서 최댓값인 `context_length` / `max_output_tokens`도 제공합니다. 클라이언트(예: opencode 플러그인)는 `0` 대신 이 값들을 알려야 합니다. 컨텍스트가 0이면 opencode의 자동 압축이 완전히 비활성화되어, 게이트웨이의 기록 제거로 컨텍스트가 파괴될 때까지 세션이 계속 커집니다. Auto-Combo의 컨텍스트 사전 필터가 크기가 초과된 요청을 큰 윈도우를 가진 후보로 라우팅하므로 최댓값을 알리는 것이 안전합니다.
+탐색을 위해 `GET /api/combos/auto`는 해석된 후보 풀과 함께 모든 변형을 나열하며, 후보 풀의 컨텍스트 윈도우에서 가장 큰 값인 `context_length` / `max_output_tokens`도 제공합니다. 클라이언트(예: opencode 플러그인)는 `0` 대신 이 값을 표시해야 합니다. 컨텍스트가 0이면 opencode의 자동 압축이 완전히 비활성화되어, 게이트웨이의 기록 정리로 컨텍스트가 소실될 때까지 세션이 계속 커집니다. Auto-Combo의 컨텍스트 사전 필터가 크기가 초과된 요청을 큰 윈도우를 가진 후보로 라우팅하므로 최댓값을 표시해도 안전합니다.
 
 ```bash
-# 제로 구성 사용법(콤보 생성 없음)
+# 구성을 생성하지 않고 사용(콤보 생성 없음)
 curl -X POST http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer <key>" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto/coding","messages":[{"role":"user","content":"Hello"}]}'
 
-# 일반 콤보 엔드포인트를 통한 영구 저장 Auto-Combo
+# 일반 콤보 엔드포인트를 통한 영속 Auto 콤보
 curl -X POST http://localhost:20128/api/combos \
   -H "Content-Type: application/json" \
   -d '{"id":"my-auto","name":"Auto Coder","strategy":"auto","config":{"auto":{"candidatePool":["anthropic","google","openai"],"weights":{"quota":0.15,"health":0.3,"costInv":0.05,"latencyInv":0.35,"taskFit":0.1,"stability":0,"tierPriority":0.05}}}}'
 ```
 
-### 자동 라우터 전략
+### Auto 라우터 전략
 
-영구 저장된 `strategy: "auto"` 콤보에서는 `config.routerStrategy`(또는 레거시
+영속 `strategy: "auto"` 콤보는 `config.routerStrategy`(또는 레거시
 `config.auto.routerStrategy`)를 다음 중 하나로 설정할 수 있습니다.
 
-- `rules` — 기본 가중 점수 산정
+- `rules` — 기본 가중치 기반 점수 산정
 - `score` — 구성된 가중 점수가 가장 높은 후보를 선택합니다. 점수가 정확히 같은 경우 구성된
-  후보 순서가 유지되며, 기존 `explorationRate`는 순위가 지정된 전체 풀에서 샘플링합니다.
-- `cost` / `eco` — 가장 저렴하고 정상 상태인 제공자
-- `latency` / `fast` — 신뢰성 페널티가 적용된 가장 낮은 p95 지연 시간
+  후보 순서를 유지하며, 기존 `explorationRate`는 순위가 매겨진 전체 풀에서 샘플링합니다.
+- `cost` / `eco` — 정상 상태인 공급자 중 가장 저렴한 공급자
+- `latency` / `fast` — 신뢰성 페널티를 적용한 가장 낮은 p95 지연 시간
 - `sla-aware` / `sla` — p95 지연 시간, 오류율 및 선택적
   비용 SLO를 충족하는 후보를 우선합니다.
-- `lkgp` — 마지막으로 정상 상태였던 제공자를 우선합니다.
-- `nadir` — [Nadir](https://getnadir.com)의 결정 API에 풀 내에서 프롬프트에 필요한 모델이
-  무엇인지 질의합니다. 옵트인이며, 실패 시 `rules`로 개방형 폴백합니다.
+- `lkgp` — 마지막으로 정상 상태였던 공급자를 우선합니다.
+- `nadir` — 풀에서 프롬프트에 필요한 모델을 [Nadir](https://getnadir.com)의 의사 결정 API에
+  질의합니다. 옵트인 방식이며, 실패 시 `rules`로 개방형 장애 처리를 수행합니다.
 
-### 라우터 전략 상세 설명
+### 라우터 전략 상세
 
-Auto-Combo 엔진은 `config.routerStrategy`(또는 레거시 `config.auto.routerStrategy`)를
-통해 교체할 수 있는 7개의 플러그형 **RouterStrategy** 구현을 제공합니다.
+Auto-Combo 엔진은 `config.routerStrategy`(또는 레거시 `config.auto.routerStrategy`)를 통해
+교체할 수 있는 7개의 플러그형 **RouterStrategy** 구현을 제공합니다.
 각 전략은 `RoutingContext`(작업 유형, 도구/비전 힌트, 토큰 추정치, 선택적 SLA 정책,
-선택적 마지막 정상 제공자)를 기반으로 후보 풀에서 하나의 제공자를 선택합니다.
+선택적 마지막 정상 공급자)를 기반으로 후보 풀에서 하나의 공급자를 선택합니다.
 
-#### 1. `rules` (기본값) — 16개 요소 가중 점수 산정
+#### 1. `rules` (기본값) — 16개 요소 가중치 기반 점수 산정
 
-기존 점수 산정 엔진을 래핑합니다. `OPEN` 회로 차단기 상태인
-후보를 필터링한 다음, 현재 작업 유형과 `getTaskFitness()`를 사용하여 `scorePool()`을
-실행하고 점수가 가장 높은 제공자를 선택합니다.
+기존 점수 산정 엔진을 래핑합니다. `OPEN` 상태인 회로 차단기
+후보를 제외한 다음, 현재 작업 유형 및 `getTaskFitness()`와 함께 `scorePool()`을 실행하여
+점수가 가장 높은 공급자를 선택합니다.
 
 ```ts
 class RulesStrategyImpl implements RouterStrategy {
@@ -496,16 +496,16 @@ class RulesStrategyImpl implements RouterStrategy {
 }
 ```
 
-**사용 시점**: 기본값입니다. 모든 신호 간에 균형 잡힌 절충이 필요할 때 사용합니다.
+**사용 시점**: 기본값입니다. 모든 신호를 균형 있게 절충하려는 경우 사용하세요.
 
 **별칭**: `rules` (별칭 없음)
 
 ---
 
-#### 2. `cost` / `eco` — 가장 저렴하고 정상 상태인 제공자
+#### 2. `cost` / `eco` — 정상 상태인 공급자 중 가장 저렴한 공급자
 
-후보 풀을 `costPer1MTokens` 기준 오름차순으로 정렬하고 가장 저렴한 후보를 선택합니다.
-먼저 `OPEN` 상태인 후보를 필터링합니다.
+후보 풀을 `costPer1MTokens` 기준 오름차순으로 정렬하고 가장 저렴한 공급자를 선택합니다.
+먼저 `OPEN` 상태인 후보를 제외합니다.
 
 ```ts
 class CostStrategyImpl implements RouterStrategy {
@@ -520,16 +520,16 @@ class CostStrategyImpl implements RouterStrategy {
 }
 ```
 
-**사용 시점**: 비용에 민감한 워크로드, 배치 처리 또는 백그라운드 작업에 사용합니다.
+**사용 시점**: 비용에 민감한 워크로드, 배치 처리 또는 백그라운드 작업에 사용하세요.
 
 **별칭**: `cost`, `eco`
 
 ---
 
-#### 3. `latency` / `fast` — 신뢰성 페널티가 적용된 가장 낮은 p95 지연 시간
+#### 3. `latency` / `fast` — 신뢰성 페널티를 적용한 가장 낮은 p95 지연 시간
 
-`p95LatencyMs + (errorRate * 1000)`를 기준으로 정렬합니다. 오류율 페널티를 통해
-명목상 지연 시간이 짧더라도 신뢰성이 낮은 제공자의 순위가 낮아집니다.
+`p95LatencyMs + (errorRate * 1000)`을 기준으로 정렬합니다. 오류율 페널티를 통해
+명목상 지연 시간이 낮더라도 신뢰할 수 없는 공급자의 순위가 낮아집니다.
 
 ```ts
 class LatencyStrategyImpl implements RouterStrategy {
@@ -546,8 +546,8 @@ class LatencyStrategyImpl implements RouterStrategy {
 }
 ```
 
-**사용 시점**: 실시간 채팅, 자동 완성 또는 대화형 코딩 어시스턴트처럼 지연 시간에 민감한
-워크로드에 사용합니다.
+**사용 시점**: 실시간 채팅, 자동 완성 또는 대화형 코딩 어시스턴트와 같이
+지연 시간에 민감한 워크로드에 사용하세요.
 
 **별칭**: `latency`, `fast`
 
@@ -563,9 +563,9 @@ class LatencyStrategyImpl implements RouterStrategy {
 | 오류 점수      | 35%    | `threshold / max(value, ε)`                       |
 | 상태 점수      | 15%    | `1.0` (CLOSED) / `0.5` (HALF_OPEN) / `0.0` (OPEN) |
 | 비용 점수      | 10%    | `threshold / max(value, ε)` 또는 역정규화         |
-| 안정성 점수    | 5%     | 지연 시간 표준 편차의 역정규화                    |
+| 안정성 점수    | 5%     | 지연 시간 표준 편차를 역정규화                    |
 
-`hardConstraints: true`인 경우 후보는 먼저 **위반 점수**
+`hardConstraints: true`인 경우 후보는 우선 **위반 점수**
 (SLO를 얼마나 초과하는지)를 기준으로 정렬된 다음, 종합 점수를 기준으로 정렬됩니다. 그렇지 않으면
 종합 점수만 사용됩니다.
 
@@ -576,7 +576,7 @@ class SLAStrategyImpl implements RouterStrategy {
     "Selects the provider most likely to satisfy latency, error-rate, and cost SLOs";
 
   select(pool, context) {
-    // ... 정책에 따라 각 후보의 점수를 계산: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
+    // ... 정책에 따라 각 후보의 점수를 계산합니다: { targetP95Ms, maxErrorRate, maxCostPer1MTokens, hardConstraints }
   }
 }
 ```
@@ -602,11 +602,11 @@ class SLAStrategyImpl implements RouterStrategy {
 
 ---
 
-#### 5. `lkgp` — 마지막으로 정상 작동한 공급자 우선
+#### 5. `lkgp` — 마지막으로 정상 동작한 공급자를 우선 사용
 
-**마지막으로 정상 작동한 공급자**가 설정되어 있으면 먼저 시도한 다음,
-`rules` 전략으로 폴백합니다. 세션 고정성에 유용하며, 대화의 후속 요청을
-동일한 공급자가 처리하게 합니다.
+**마지막으로 정상 동작한 공급자**가 설정되어 있으면 먼저 시도한 다음,
+`rules` 전략으로 폴백합니다. 세션 고정에 유용하며, 대화의 후속 요청을
+동일한 공급자가 처리합니다.
 
 ```ts
 class LKGPStrategyImpl implements RouterStrategy {
@@ -633,21 +633,21 @@ class LKGPStrategyImpl implements RouterStrategy {
 }
 ```
 
-**사용 시점**: 동일한 공급자가 후속 요청을 처리하도록 하려는 다중 턴 대화
-(예: 캐싱, 컨텍스트 연속성 또는 가격 일관성을 위해).
+**사용 시점**: 후속 요청을 동일한 공급자가 처리하도록 하려는
+멀티턴 대화(예: 캐싱, 컨텍스트 연속성 또는 가격 일관성을 위해).
 
-**별칭**: `lkgp` (별칭 없음)
+**별칭**: `lkgp`(별칭 없음)
 
 ---
 
 #### 6. `nadir` — Nadir를 통한 프롬프트 인식 모델 선택
 
-위의 모든 전략은 자체 텔레메트리를 기준으로 후보의 순위를 지정하며, 요청 내용은 읽지
-않습니다. `nadir`는 마지막 사용자 턴과 풀의 모델 ID를
-[Nadir](https://getnadir.com)의 결정 API(`POST /v1/bucket`)로 전송하고, 해당 메뉴에서 Nadir가
-선택한 모델로 라우팅합니다(`simple` → 처리 가능한 가장 저렴한 모델, `complex` → 최첨단
-모델). 해당 모델을 제공하는 연결은 여전히 `rules`에 의해 선택되므로 할당량,
-상태 및 비용에 따라 사용할 계정이 계속 결정됩니다.
+위의 모든 전략은 자체 텔레메트리를 기준으로 후보의 순위를 지정하며, 요청 내용은 읽지 않습니다.
+`nadir`는 마지막 사용자 턴과 풀의 모델 ID를
+[Nadir](https://getnadir.com)의 결정 API(`POST /v1/bucket`)로 전송하고, 해당 목록에서 Nadir가
+선택한 모델로 라우팅합니다(`simple` → 요구 사항을 충족하는 가장 저렴한 모델, `complex` → 최첨단
+모델). 해당 모델을 제공하는 연결은 여전히 `rules`에 의해 선택되므로, 어떤 계정을 사용할지는
+할당량, 상태 및 비용에 따라 계속 결정됩니다.
 
 ```json
 {
@@ -664,28 +664,31 @@ class LKGPStrategyImpl implements RouterStrategy {
 ```
 
 `OMNIROUTE_NADIR_API_KEY`와 `OMNIROUTE_NADIR_BASE_URL`은 두 문자열에 대한 환경 변수
-폴백입니다. `baseUrl`은 자체 호스팅 Nadir에만 필요합니다(끝에 `/v1`이 있어도 허용됨).
-키가 없는 호출은 IP별로 속도가 제한되는 Nadir의 익명 티어로 전달됩니다.
+폴백입니다. `baseUrl`은 자체 호스팅 Nadir에만 필요합니다(끝의 `/v1`은 허용됨).
+키가 없는 호출은 IP별 속도 제한이 적용되는 Nadir의 익명 티어로 전달됩니다. 키를 사용하면
+([키 생성](https://app.getnadir.com/dashboard/api-keys)) 각 결정이
+Nadir 대시보드에 기록됩니다. 전체 설정 및 확인 방법:
+[getnadir.com/docs/gateway-omniroute](https://getnadir.com/docs/gateway-omniroute/).
 
 외부로 전송되는 정보: 마지막 사용자 메시지의 텍스트(처음 16k자), 후보
-모델 ID 및 `source: "omniroute"` 채널 태그. 시스템 프롬프트, 기록, 도구 또는
+모델 ID 및 `source: "omniroute"` 채널 태그입니다. 시스템 프롬프트, 기록, 도구 또는
 헤더는 전송되지 않습니다.
 
-실패 시 동작은 페일 오픈 방식입니다. 시간 초과(기본값 2000 ms), 2xx가 아닌 응답, 연결할 수 없는
-호스트, 잘못된 형식의 응답 또는 풀에 없는 항목 선택이 발생하면 `rules`
-결정으로 처리되며, 사유 앞에 `NadirStrategy: fallback (…)`이 추가됩니다. 호출이 실패한 후에는
-전략이 30초 동안 네트워크 요청을 건너뛰므로, 장애 발생 시 요청마다 한 번이 아니라
-30초마다 한 번의 시간 초과만 발생합니다. 라우팅 이벤트는 Nadir가 실제로
-선택한 경우에만 `strategy: "nadir"`를 보고합니다.
+실패 시에는 페일 오픈 방식으로 동작합니다. 시간 초과(기본값 2000 ms), 2xx가 아닌 응답, 연결할 수 없는
+호스트, 잘못된 형식의 응답 또는 풀에 없는 선택 항목이 발생하면 `rules`
+결정으로 폴백하며, 사유 앞에 `NadirStrategy: fallback (…)`가 붙습니다. 호출이 실패하면
+전략은 30초 동안 네트워크 호출을 건너뛰므로, 장애 발생 시 요청마다 한 번이 아니라 30초마다
+한 번의 시간 초과 비용만 발생합니다. Nadir가 실제로 선택을 수행한 경우에만 라우팅 이벤트에서
+`strategy: "nadir"`가 보고됩니다.
 
-**사용 시점**: 여러 모델 티어(소형, 중형 및 최첨단 모델)에 걸친 풀에서 난이도가 혼합된
-트래픽을 처리하며, 항상 최첨단 모델을 사용하는 비용을 절감하려는 경우.
+**사용 시점**: 여러 모델 티어(소형, 중간급 및 최첨단 모델)에 걸친 풀에서 난이도가 다양한
+트래픽을 처리하며, 항상 최첨단 모델을 사용하는 데 드는 비용을 절감하려는 경우.
 
-**별칭**: `nadir` (별칭 없음)
+**별칭**: `nadir`(별칭 없음)
 
 ---
 
-### 사용자 지정 라우터 전략
+### 사용자 정의 라우터 전략
 
 공개 API를 통해 자체 `RouterStrategy` 구현을 등록할 수 있습니다.
 
@@ -700,7 +703,7 @@ class MyCustomStrategy implements RouterStrategy {
   readonly description = "My custom routing strategy";
 
   select(pool, context) {
-    // 여기에 라우팅 로직 작성
+    // 여기에 라우팅 로직을 작성합니다
     return {
       provider: pool[0].provider,
       model: pool[0].model,
@@ -730,14 +733,14 @@ registerStrategy("my-custom", new MyCustomStrategy());
 
 ### 라우터 전략 선택 가이드
 
-| 사용 사례          | 전략        | 이유                                     |
-| ------------------ | ----------- | ---------------------------------------- |
-| 균형 잡힌 워크로드 | `rules`     | 기본값 — 모든 요소를 고려                |
-| 비용 최소화        | `cost`      | 항상 가장 저렴한 공급자를 선택           |
-| 지연 시간 최소화   | `latency`   | 가장 빠르고 신뢰할 수 있는 공급자를 선택 |
-| 엄격한 SLO         | `sla-aware` | p95/오류/비용 임계값으로 필터링          |
-| 다중 턴 채팅       | `lkgp`      | 세션 고정성                              |
-| 혼합된 난이도      | `nadir`     | 프롬프트별로 모델 티어를 선택            |
+| 사용 사례          | 전략        | 이유                                   |
+| ------------------ | ----------- | -------------------------------------- |
+| 균형 잡힌 워크로드 | `rules`     | 기본값 — 모든 요소를 고려              |
+| 비용 최소화        | `cost`      | 항상 가장 저렴한 옵션을 선택           |
+| 지연 시간 최소화   | `latency`   | 가장 빠르고 안정적인 제공업체를 선택   |
+| 엄격한 SLO         | `sla-aware` | p95/오류/비용 임계값을 기준으로 필터링 |
+| 멀티턴 채팅        | `lkgp`      | 세션 고정성                            |
+| 다양한 난이도      | `nadir`     | 프롬프트별로 모델 티어를 선택          |
 
 SLA 인식 필드:
 

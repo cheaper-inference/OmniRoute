@@ -4,11 +4,11 @@
 
 ---
 
-> `src/shared/constants/providers.ts` から**自動生成**されています — 手動で編集しないでください。
+> **自動生成**: `src/shared/constants/providers.ts` から生成されています。手動で編集しないでください。
 > 再生成するには: `npm run gen:provider-reference`
-> **最終生成日:** 2026-10-18
+> **最終生成日:** 2026-10-27
 
-プロバイダー総数: **375**。カテゴリー別の内訳は以下を参照してください。
+プロバイダー総数: **376**。以下のカテゴリ別内訳を参照してください。
 
 ## カテゴリ
 
@@ -120,7 +120,7 @@
 | `zai-web`              | `zw`            | Z.ai Web                                | Web Cookie | [リンク](https://chat.z.ai)                 | chat.z.ai → DevTools → Application → Local Storageから"token"の値をコピーします。Cookieはコピーしないでください。OmniRouteがブラウザートランスポートを介してリクエストごとのCAPTCHAを処理します。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | —              |
 | `zenmux-free`          | `zmf`           | ZenMux Free（Web）                      | Web Cookie | [リンク](https://zenmux.ai)                 | zenmux.aiにログインし、EditThisCookieまたはCookie-Editorを使用してすべてのCookieをエクスポートしてから、Cookieヘッダー文字列全体をここに貼り付けます。約30日ごとに更新してください。                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     | —              |
 
-## APIキープロバイダー（有料 / 無料クレジット付き有料）(252)
+## APIキープロバイダー（有料 / 無料クレジット付き有料）(253)
 
 | ID                       | エイリアス      | 名前                            | タグ                          | ウェブサイト                                                                                             | 備考                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | ------------------------ | --------------- | ------------------------------- | ----------------------------- | -------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -131,6 +131,7 @@
 | `ai21`                   | `ai21`          | AI21 Labs                       | APIキー                       | [リンク](https://www.ai21.com)                                                                           | 登録時に$10のトライアルクレジット（有効期限3か月）、クレジットカード不要                                                                                                                                                                                                                                                                                                                                                                                                                                        |
 | `aimlapi`                | `aiml`          | AI/ML API                       | APIキー、アグリゲーター       | [リンク](https://aimlapi.com)                                                                            | 無料枠は停止中（2026年）— AI/ML API は現在従量課金制のみ（最低$20のチャージ）。継続的な無料クレジットはありません。                                                                                                                                                                                                                                                                                                                                                                                             |
 | `ainative`               | `ainative`      | AINative Studio                 | APIキー                       | [リンク](https://ainative.studio)                                                                        | ainative.studio で無料のAPIキーを作成し（カード不要）、Bearerトークンとしてここに貼り付けてください。                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `ainetcafe`              | `ainetcafe`     | ainetcafe                       | API key                       | [link](https://ainetcafe.com/k3/)                                                                        | Sign-up credit toward available models; amount and eligibility are set by ainetcafe, not OmniRoute.                                                                                                                                                                                                                                                                                                                                                                                                             |
 | `aion`                   | `aion`          | Aion Labs                       | APIキー                       | [リンク](https://www.aionlabs.ai)                                                                        | aionlabs.ai で無料のAPIキーを作成し（カード不要）、Bearerトークンとしてここに貼り付けてください。                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `alibaba`                | `ali`           | Alibaba Cloud Model Studio      | APIキー                       | [リンク](https://bailian.console.alibabacloud.com/)                                                      | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | `alibaba-cn`             | `ali-cn`        | Alibaba (China)                 | APIキー                       | [リンク](https://dashscope.console.aliyun.com/)                                                          | —                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
@@ -457,12 +458,12 @@
 | ------ | ---------- | --------------- | -------- | ------------ | ---- |
 | `auto` | `auto`     | 自動 (ゼロ設定) | システム | —            | —    |
 
-## 信頼できる情報源（Sources of truth）
+## 信頼できる情報源
 
-- カタログ: [`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
-- レジストリ（モデルごとの詳細）: [`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
-- エグゼキューター: [`open-sse/executors/`](../../open-sse/executors/)（154件の実装）
-- トランスレーター: [`open-sse/translator/`](../../open-sse/translator/)
+- カタログ：[`src/shared/constants/providers.ts`](../../src/shared/constants/providers.ts)
+- レジストリ（モデルごとの詳細）：[`open-sse/config/providerRegistry.ts`](../../open-sse/config/providerRegistry.ts)
+- エグゼキューター：[`open-sse/executors/`](../../open-sse/executors/)（156 実装）
+- トランスレーター：[`open-sse/translator/`](../../open-sse/translator/)
 
 ## 関連項目
 
