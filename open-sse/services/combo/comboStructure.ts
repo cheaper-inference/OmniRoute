@@ -671,6 +671,36 @@ export type CompatFilterOptions = {
   outputLimitAdvisory?: boolean;
 };
 
+/**
+ * #17958: under `outputLimitAdvisory` a target whose known output limit sits
+ * below `max_tokens` stays in the pool, and dispatch caps its reply at that
+ * limit (`getExplicitModelOutputCap` into `enforceOutputTokenBudget`). Size its
+ * context-window check with the same cap, so it is not demoted for a budget it
+ * would never be sent. The output_tokens check still sees the full request, and
+ * an unknown limit keeps the full requested budget.
+ */
+function contextRequirementsForTarget(
+  target: ResolvedComboTarget,
+  requirements: RequestCompatibilityRequirements,
+  outputLimitAdvisory: boolean
+): RequestCompatibilityRequirements {
+  if (!outputLimitAdvisory) return requirements;
+  const { maxOutputTokens } = getResolvedModelCapabilities({
+    provider: target.providerId || target.provider || null,
+    model: target.modelStr,
+  });
+  if (
+    typeof maxOutputTokens !== "number" ||
+    !exceedsKnownOutputLimit(requirements.requestedOutputTokens, maxOutputTokens)
+  ) {
+    return requirements;
+  }
+  return {
+    ...requirements,
+    requiredContextTokens: requirements.estimatedInputTokens + maxOutputTokens,
+  };
+}
+
 function highestKnownOutputLimit(targets: ResolvedComboTarget[]): number {
   let ceiling = 0;
   for (const target of targets) {
@@ -771,8 +801,16 @@ export function filterTargetsByRequestCompatibility(
 
   const rejected: Array<{ target: ResolvedComboTarget; reasons: string[] }> = [];
   const targetReasons = new Map<ResolvedComboTarget, string[]>();
+  const targetRequirements = new Map(
+    targets.map((target) => [
+      target,
+      contextRequirementsForTarget(target, requirements, outputLimitAdvisory),
+    ])
+  );
+  const requirementsFor = (target: ResolvedComboTarget) =>
+    targetRequirements.get(target) ?? requirements;
   for (const target of targets) {
-    const reasons = getTargetCompatibilityFailures(target, requirements);
+    const reasons = getTargetCompatibilityFailures(target, requirementsFor(target));
     targetReasons.set(target, reasons);
     if (reasons.length > 0) rejected.push({ target, reasons });
   }
@@ -793,7 +831,7 @@ export function filterTargetsByRequestCompatibility(
     compatible.length > 1
   ) {
     const knownContextCompatible = compatible.filter((target) =>
-      hasKnownCompatibleContextLimit(target, requirements)
+      hasKnownCompatibleContextLimit(target, requirementsFor(target))
     );
     // #13870: an operator-verified override must not be outranked by a
     // catalog-only "known compatible" target (e.g. a large but unconfirmed
@@ -814,7 +852,7 @@ export function filterTargetsByRequestCompatibility(
       (target) =>
         !knownContextCompatible.includes(target) &&
         (targetReasons.get(target) || []).includes("context_window") &&
-        isNearBoundaryOverrideReject(target, requirements)
+        isNearBoundaryOverrideReject(target, requirementsFor(target))
     );
     const preferredTier = [
       ...overrideVerifiedCompatible,
