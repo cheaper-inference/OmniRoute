@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — ይፋዊ ሰነዶች (7 ዋና ፋይሎች + 17 ንዑስ ማውጫዎች)
+## `docs/` — ሕዝባዊ ዶኩመንቴሽን (7 የሥር ፋይሎች + 17 ንዑስ ማውጫዎች)
 
-### ዋና መመሪያዎች
+### የከፍተኛ ደረጃ መመሪያዎች
 
-| ሰነድ                         | ዓላማ                                                                                |
-| --------------------------- | ---------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | ከፍተኛ-ደረጃ አርክቴክቸር፣ የንዑስ ስርዓቶች ካርታ፣ የዳሽቦርድ ገጽታ                                       |
-| `CODEBASE_DOCUMENTATION.md` | የምህንድስና ማጣቀሻ፦ ማውጫዎች፣ ሞጁሎች፣ ልማዶች                                                    |
-| `FEATURES.md`               | የባህሪያት ሰንጠረዥ ከv3.8 ዋና ዋና ለውጦች ጋር                                                   |
-| `USER_GUIDE.md`             | የዋና ተጠቃሚ መመሪያ (ማዋቀር፣ ሞዴሎች፣ ጥምረቶች፣ CLIs፣ ድምፅ፣ ወዘተ)                                  |
-| `API_REFERENCE.md`          | የAPI መጨረሻ ነጥብ ማጣቀሻ ከማረጋገጫ ሞዴል ጋር                                                   |
-| `openapi.yaml`              | የOpenAPI 3.0 ዝርዝር መግለጫ (121 መንገዶች)                                                 |
-| `SETUP_GUIDE.md`            | የመጫኛ ዘዴዎች (npm፣ npx፣ Docker፣ Electron፣ Termux፣ ከምንጭ)                               |
-| `ENVIRONMENT.md`            | ሁሉም የአካባቢ ተለዋዋጮች (~800 የተመዘገቡ፣ ~3,050 የ`.env.example` መስመሮች)                       |
-| `TROUBLESHOOTING.md`        | የተለመዱ ስህተቶች + የv3.8.0 የታወቁ ችግሮች                                                    |
-| `RELEASE_CHECKLIST.md`      | ሙሉ የልቀት ሂደት (ክህሎቶች፣ husky፣ conventional commits፣ ማሰማራት)                            |
-| `COVERAGE_PLAN.md`          | የሽፋን ግቦች እና የአሁኑ ሁኔታ                                                               |
-| `FREE_TIERS.md`             | በጥንቃቄ የተመረጡ የነፃ-ደረጃ አቅራቢዎች (48+ ነፃ + 11 OAuth)                                     |
-| `CLI-TOOLS.md`              | ውጫዊ የCLI ውህደቶች + ውስጣዊ OmniRoute CLI                                                |
-| `I18N.md`                   | የi18n አርክቴክቸር፣ ቋንቋ ማከል፣ 67 የአካባቢ ቅንብሮች                                             |
-| `UNINSTALL.md`              | ሙሉ ለሙሉ የማራገፍ ደረጃዎች                                                                 |
-| `PROVIDER_REFERENCE.md`     | **በራስ-ሰር የተፈጠረ** የ376 አቅራቢዎች ካታሎግ (እንደገና ለማመንጨት፦ `npm run gen:provider-reference`) |
+| ሰነድ                         | ዓላማ                                                                               |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | ከፍተኛ-ደረጃ አርክቴክቸር፣ የንዑስ-ስርዓት ካርታ፣ የዳሽቦርድ ገጽ                                        |
+| `CODEBASE_DOCUMENTATION.md` | የምህንድስና ማጣቀሻ፦ ማውጫዎች፣ ሞጁሎች፣ ስምምነቶች                                                 |
+| `FEATURES.md`               | የባህሪያት ማትሪክስ ከ v3.8 ዋና ዋና ነገሮች ጋር                                                 |
+| `USER_GUIDE.md`             | የመጨረሻ-ተጠቃሚ መመሪያ (ማዋቀር፣ ሞዴሎች፣ combos፣ CLIs፣ ኦዲዮ፣ ወዘተ.)                             |
+| `API_REFERENCE.md`          | የ API endpoints ማጣቀሻ ከ auth ሞዴል ጋር                                                |
+| `openapi.yaml`              | OpenAPI 3.0 ስፔክ (121 paths)                                                       |
+| `SETUP_GUIDE.md`            | የመጫኛ ዘዴዎች (npm, npx, Docker, Electron, Termux, ምንጭ)                               |
+| `ENVIRONMENT.md`            | ሁሉም env ተለዋዋጮች (~800 የተሰነዱ፣ ~3,050 መስመሮች `.env.example`)                          |
+| `TROUBLESHOOTING.md`        | የተለመዱ ስህተቶች + v3.8.0 የታወቁ ችግሮች                                                    |
+| `RELEASE_CHECKLIST.md`      | ሙሉ የልቀት ፍሰት (skills፣ husky፣ conventional commits፣ ማሰማራት)                          |
+| `COVERAGE_PLAN.md`          | የሽፋን ግቦች እና አሁናዊ ሁኔታ                                                              |
+| `FREE_TIERS.md`             | የተመረጡ ነጻ-ደረጃ አቅራቢዎች (48+ ነጻ + 11 OAuth)                                           |
+| `CLI-TOOLS.md`              | የውጭ CLI ውህደቶች + ውስጣዊ OmniRoute CLI                                                |
+| `I18N.md`                   | i18n አርክቴክቸር፣ ቋንቋ መጨመር፣ 67 locales                                                |
+| `UNINSTALL.md`              | ንጹህ የማስወገጃ ደረጃዎች                                                                  |
+| `PROVIDER_REFERENCE.md`     | **በራስ-ሰር የተፈጠረ** የ376 አቅራቢዎች ካታሎግ (እንደገና ማመንጨት፦ `npm run gen:provider-reference`) |
 
-### የንዑስ ስርዓቶች ጥልቅ ማብራሪያዎች
+### የንዑስ-ስርዓት ጥልቅ ትንታኔዎች
 
-| ሰነድ                                        | ዓላማ                                                          |
-| ------------------------------------------ | ------------------------------------------------------------ |
-| `MCP-SERVER.md`                            | MCP አገልጋይ፦ 110 መሣሪያዎች፣ 3 ማጓጓዣዎች፣ 33 ወሰኖች፣ REST መጨረሻ ነጥቦች     |
-| `A2A-SERVER.md`                            | A2A v0.3፦ JSON-RPC፣ 6 ክህሎቶች፣ REST ረዳቶች፣ የወኪል ካርድ             |
-| `AGENT_PROTOCOLS_GUIDE.md`                 | የተዋሃደ መመሪያ፦ A2A ከ ACP እና Cloud Agents ጋር                     |
-| `CLOUD_AGENT.md`                           | የCodex Cloud / Devin / Jules ቅንጅት                            |
-| `SKILLS.md`                                | የክህሎት ማዕቀፍ (አብሮገነብ + የገበያ ቦታ + SkillsSH + ማጠሪያ)              |
-| `RADAR.md`                                 | የRadar ነፃ-ሞዴል ካታሎግ ተደራቢ (`RADAR_ENABLED`፣ በነባሪ ጠፍቷል)         |
-| `MEMORY.md`                                | የማህደረ ትውስታ ስርዓት (SQLite FTS5 + Qdrant)                       |
-| `EVALS.md`                                 | የግምገማ ማዕቀፍ (ስብስቦች፣ አፈጻጸሞች፣ መመዘኛዎች)                           |
-| `GUARDRAILS.md`                            | PII መሸፈኛ፣ የጥያቄ መርፌ ጥቃት፣ የእይታ ድልድይ                            |
-| `COMPLIANCE.md`                            | የኦዲት ምዝግብ፣ የማቆያ ጊዜ፣ የnoLog አለመሳተፍ                            |
-| `WEBHOOKS.md`                              | በHMAC የተፈረመ የwebhook ማድረስ                                    |
-| `REASONING_REPLAY.md`                      | ድብልቅ ማህደረ ትውስታ/SQLite መሸጎጫ ለ`reasoning_content`              |
-| `AUTHZ_GUIDE.md`                           | የፍቃድ አሰጣጥ ቧንቧ መስመር (`classify` → `policies` → `enforce`)     |
-| `RESILIENCE_GUIDE.md`                      | የወረዳ መቋረጫ + የማቀዝቀዣ ጊዜ + የሞዴል መቆለፍ                            |
-| `docs/security/STEALTH_GUIDE.md` (በgit ብቻ) | TLS አሻራ መለየት (JA3/JA4)፣ Claude Code CCH፣ MITM ሰርቲፊኬት         |
-| `AUTO-COMBO.md`                            | Auto Combo ሞተር (ባለ16-ምክንያት ነጥብ አሰጣጥ፣ 6 የሁነታ ጥቅሎች፣ ምናባዊ ፋብሪካ) |
+| ሰነድ                                       | ዓላማ                                                             |
+| ----------------------------------------- | --------------------------------------------------------------- |
+| `MCP-SERVER.md`                           | MCP ሰርቨር፦ 110 tools፣ 3 transports፣ 33 scopes፣ REST endpoints    |
+| `A2A-SERVER.md`                           | A2A v0.3፦ JSON-RPC፣ 6 skills፣ REST ረዳቶች፣ agent card             |
+| `AGENT_PROTOCOLS_GUIDE.md`                | የተዋሃደ መመሪያ፦ A2A vs ACP vs Cloud Agents                          |
+| `CLOUD_AGENT.md`                          | Codex Cloud / Devin / Jules ማስቀናጃ                               |
+| `SKILLS.md`                               | Skills ፍሬምወርክ (built-in + marketplace + SkillsSH + sandbox)     |
+| `RADAR.md`                                | Radar ነጻ-ሞዴል ካታሎግ ኦቨርለይ (`RADAR_ENABLED`፣ በነባሪነት ጠፍቷል)          |
+| `MEMORY.md`                               | የማስታወሻ ስርዓት (SQLite FTS5 + Qdrant)                              |
+| `EVALS.md`                                | Eval ፍሬምወርክ (suites፣ runs፣ rubrics)                             |
+| `GUARDRAILS.md`                           | PII masker፣ prompt injection፣ vision bridge                     |
+| `COMPLIANCE.md`                           | የኦዲት ምዝገባ፣ retention፣ noLog opt-out                             |
+| `WEBHOOKS.md`                             | HMAC-የተፈረመ webhook አቅርቦት                                        |
+| `REASONING_REPLAY.md`                     | ተቀላቅሎ ያለ memory/SQLite cache ለ `reasoning_content`              |
+| `AUTHZ_GUIDE.md`                          | የፈቃድ ፓይፕላይን (`classify` → `policies` → `enforce`)               |
+| `RESILIENCE_GUIDE.md`                     | Circuit breaker + cooldown + የሞዴል መከለከያ                         |
+| `docs/security/STEALTH_GUIDE.md` (git ብቻ) | TLS ፊንገርፕሪንቲንግ (JA3/JA4)፣ Claude Code CCH፣ MITM ምስክር ወረቀት       |
+| `AUTO-COMBO.md`                           | Auto Combo ሞተር (16-factor ስኮሪንግ፣ 6 mode packs፣ virtual factory) |
 
-### መጭመቅ
+### ማበት
 
 | ሰነድ                             | ዓላማ                                |
 | ------------------------------- | ---------------------------------- |
-| `COMPRESSION_GUIDE.md`          | የመጭመቂያ ሁነታዎች አጠቃላይ እይታ + የመንገድ ካርታ |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK ሞተሮች፣ የመዝገብ ውል       |
-| `COMPRESSION_RULES_FORMAT.md`   | የCaveman ደንብ ጥቅል JSON schema       |
-| `COMPRESSION_LANGUAGE_PACKS.md` | በየቋንቋው የደንብ ጥቅል ዝርዝር               |
-| `RTK_COMPRESSION.md`            | RTK መግለጫዊ ቧንቧ መስመር (49 ማጣሪያዎች)     |
+| `COMPRESSION_GUIDE.md`          | የማበት ሁነታዎች አጠቃላይ እይታ + roadmap     |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK engines፣ registry ውል |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman የህግ ጥቅል JSON schema        |
+| `COMPRESSION_LANGUAGE_PACKS.md` | በቋንቋ የህግ ጥቅል ዝርዝር                  |
+| `RTK_COMPRESSION.md`            | RTK declarative ፓይፕላይን (56 ማጣሪያዎች) |
 
 ### ማሰማራት
 
 | ሰነድ                          | ዓላማ                                                            |
 | ---------------------------- | -------------------------------------------------------------- |
 | `DOCKER_GUIDE.md`            | Docker ግንባታ፣ መገለጫዎች (base/cli/host/cliproxyapi)፣ Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | አጠቃላይ የVM/VPS ማሰማራት (Ubuntu/Debian + nginx + systemd)          |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | የFly.io ማሰማራት (በአሁኑ ጊዜ በቻይንኛ ብቻ)                               |
-| `TERMUX_GUIDE.md`            | በTermux በኩል ያለ ግራፊክ በይነገጽ የAndroid አጠቃቀም                       |
-| `PWA_GUIDE.md`               | የProgressive Web App ጭነት + service worker                      |
+| `VM_DEPLOYMENT_GUIDE.md`     | አጠቃላይ VM/VPS ማሰማራት (Ubuntu/Debian + nginx + systemd)           |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io ማሰማራት (በአሁኑ ጊዜ በቻይንኛ ብቻ)                                |
+| `TERMUX_GUIDE.md`            | Android headless በ Termux አማካኝነት                               |
+| `PWA_GUIDE.md`               | Progressive Web App መጫን + service worker                       |
 | `ELECTRON_GUIDE.md`          | የዴስክቶፕ መተግበሪያ ግንባታ + ፊርማ + ስርጭት                                |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                         |
-| `PROXY_GUIDE.md`             | ባለ4-ደረጃ ወጪ proxy + የ1proxy የገበያ ቦታ                             |
+| `PROXY_GUIDE.md`             | 4-ደረጃ ወጪ ፕሮክሲ + 1proxy ገበያ                                     |
 
 ### ንዑስ ማውጫዎች
 
-| ንዑስ ማውጫ               | ዓላማ                                                                                                                                                                                      |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ወደ አካባቢያዊ ቋንቋዎች የተተረጎሙ ሰነዶች (41 ቋንቋዊ አካባቢዎች)                                                                                                                                             |
-| `docs/screenshots/`   | ለመመሪያዎች የሚያገለግሉ የምስል ሀብቶች                                                                                                                                                                |
-| `_tasks/superpowers/` | ከsuperpowers (`writing-plans`/`brainstorming`) የተገኙ ዕቅዶች/ዝርዝር መግለጫዎች + ጥናት — ተለይቶ የተቀመጠ፣ ለብቻው የስሪት ቁጥጥር የሚደረግበት repo፣ በዋናው ዛፍ በgitignored የተደረገ። CLAUDE.md → "የዕቅድ እና የጥናት ቅርሶች"ን ይመልከቱ። |
+| ንዑስ ማውጫ               | ዓላማ                                                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | የተካቱ ሰነድ ትርጉሞች (41 ቋንቋዎች)                                                                                                                                                            |
+| `docs/screenshots/`   | ለመመሪያዎች የምስል ንብረቶች                                                                                                                                                                   |
+| `_tasks/superpowers/` | ከ superpowers የተገኙ እቅዶች/ስፔኮች (`writing-plans`/`brainstorming`) + ምርምር — የተነጠለ፣ በተናጠል የቅጂ አያያዝ ያለው repo፣ በዋናው ዛፍ gitignored የሚደረግ። CLAUDE.md → "Planning & Research Artifacts" ይመልከቱ። |
 
 ---
 

@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — مستندات عمومی (۷ فایل ریشه + ۱۷ زیرشاخه)
+## `docs/` — مستندات عمومی (۷ فایل ریشه + ۱۷ زیرپوشه)
 
 ### راهنماهای سطح بالا
 
-| سند                         | هدف                                                                                                 |
-| --------------------------- | --------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | معماری سطح بالا، نقشهٔ زیرسیستمها، نمای داشبورد                                                     |
-| `CODEBASE_DOCUMENTATION.md` | مرجع مهندسی: شاخهها، ماژولها، قراردادها                                                             |
-| `FEATURES.md`               | ماتریس قابلیتها بههمراه نکات برجستهٔ v3.8                                                           |
-| `USER_GUIDE.md`             | راهنمای کاربر نهایی (راهاندازی، مدلها، ترکیبها، CLIها، صدا و غیره)                                  |
-| `API_REFERENCE.md`          | مرجع نقاط پایانی API بههمراه مدل احراز هویت                                                         |
-| `openapi.yaml`              | مشخصات OpenAPI 3.0 (۱۲۱ مسیر)                                                                       |
-| `SETUP_GUIDE.md`            | روشهای نصب (npm، npx، Docker، Electron، Termux، کد منبع)                                            |
-| `ENVIRONMENT.md`            | همهٔ متغیرهای محیطی (حدود ۸۰۰ مورد مستندشده، حدود ۳٬۰۵۰ خط در `.env.example`)                       |
-| `TROUBLESHOOTING.md`        | خطاهای رایج + مشکلات شناختهشدهٔ v3.8.0                                                              |
-| `RELEASE_CHECKLIST.md`      | فرایند کامل انتشار (مهارتها، husky، کامیتهای متعارف، استقرار)                                       |
-| `COVERAGE_PLAN.md`          | اهداف پوشش و وضعیت کنونی                                                                            |
-| `FREE_TIERS.md`             | ارائهدهندگان منتخب با سطح رایگان (بیش از ۴۸ رایگان + ۱۱ OAuth)                                      |
-| `CLI-TOOLS.md`              | یکپارچهسازیهای CLI خارجی + CLI داخلی OmniRoute                                                      |
-| `I18N.md`                   | معماری i18n، افزودن زبان، ۶۷ منطقهٔ زبانی                                                           |
-| `UNINSTALL.md`              | مراحل حذف نصب پاک و کامل                                                                            |
-| `PROVIDER_REFERENCE.md`     | کاتالوگ **تولیدشده بهصورت خودکار** از ۳۷۶ ارائهدهنده (تولید مجدد: `npm run gen:provider-reference`) |
+| سند                         | هدف                                                                                        |
+| --------------------------- | ------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | معماری سطح بالا، نقشه زیرسیستمها، سطح داشبورد                                              |
+| `CODEBASE_DOCUMENTATION.md` | مرجع مهندسی: دایرکتوریها، ماژولها، قراردادها                                               |
+| `FEATURES.md`               | ماتریس قابلیتها با نکات برجسته v3.8                                                        |
+| `USER_GUIDE.md`             | راهنمای کاربر نهایی (راهاندازی، مدلها، کمبوها، CLIها، صدا و غیره)                          |
+| `API_REFERENCE.md`          | مرجع endpointهای API همراه با مدل احراز هویت                                               |
+| `openapi.yaml`              | مشخصات OpenAPI 3.0 (121 مسیر)                                                              |
+| `SETUP_GUIDE.md`            | روشهای نصب (npm، npx، Docker، Electron، Termux، سورس)                                      |
+| `ENVIRONMENT.md`            | تمام متغیرهای محیطی (~۸۰۰ مستندشده، ~۳٬۰۵۰ خط `.env.example`)                              |
+| `TROUBLESHOOTING.md`        | خطاهای رایج + مشکلات شناختهشده v3.8.0                                                      |
+| `RELEASE_CHECKLIST.md`      | جریان کامل انتشار (skillها، husky، conventional commits، استقرار)                          |
+| `COVERAGE_PLAN.md`          | اهداف پوشش تست و وضعیت فعلی                                                                |
+| `FREE_TIERS.md`             | ارائهدهندگان سطح رایگان منتخب (۴۸+ رایگان + ۱۱ OAuth)                                      |
+| `CLI-TOOLS.md`              | یکپارچهسازیهای CLI خارجی + CLI داخلی OmniRoute                                             |
+| `I18N.md`                   | معماری i18n، افزودن زبان، ۶۷ locale                                                        |
+| `UNINSTALL.md`              | مراحل حذف نصب تمیز                                                                         |
+| `PROVIDER_REFERENCE.md`     | کاتالوگ **تولیدشده خودکار** از ۳۷۶ ارائهدهنده (بازتولید: `npm run gen:provider-reference`) |
 
-### بررسی عمیق زیرسیستمها
+### بررسیهای عمیق زیرسیستمها
 
-| سند                                           | هدف                                                                       |
-| --------------------------------------------- | ------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | سرور MCP: ۱۱۰ ابزار، ۳ روش انتقال، ۳۳ دامنه، نقاط پایانی REST             |
-| `A2A-SERVER.md`                               | A2A v0.3: ‏JSON-RPC،‏ ۶ مهارت، ابزارهای کمکی REST، کارت عامل              |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | راهنمای یکپارچه: A2A در برابر ACP در برابر عاملهای ابری                   |
-| `CLOUD_AGENT.md`                              | هماهنگسازی Codex Cloud / Devin / Jules                                    |
-| `SKILLS.md`                                   | چارچوب مهارتها (داخلی + بازارچه + SkillsSH + محیط ایزوله)                 |
-| `RADAR.md`                                    | لایهٔ کاتالوگ مدلهای رایگان Radar (`RADAR_ENABLED`، بهطور پیشفرض غیرفعال) |
-| `MEMORY.md`                                   | سیستم حافظه (SQLite FTS5 + Qdrant)                                        |
-| `EVALS.md`                                    | چارچوب ارزیابی (مجموعهها، اجراها، معیارهای امتیازدهی)                     |
-| `GUARDRAILS.md`                               | پوشانندهٔ PII، تزریق پرامپت، پل بینایی                                    |
-| `COMPLIANCE.md`                               | گزارش ممیزی، نگهداری، انصراف با noLog                                     |
-| `WEBHOOKS.md`                                 | تحویل webhook با امضای HMAC                                               |
-| `REASONING_REPLAY.md`                         | حافظهٔ ترکیبی/کش SQLite برای `reasoning_content`                          |
-| `AUTHZ_GUIDE.md`                              | خط لولهٔ مجوزدهی (`classify` ← `policies` ← `enforce`)                    |
-| `RESILIENCE_GUIDE.md`                         | قطعکنندهٔ مدار + دورهٔ انتظار + قفل مدل                                   |
-| `docs/security/STEALTH_GUIDE.md` (فقط در git) | اثرانگشت TLS ‏(JA3/JA4)،‏ Claude Code CCH، گواهی MITM                     |
-| `AUTO-COMBO.md`                               | موتور Auto Combo (امتیازدهی ۱۶عاملی، ۶ بستهٔ حالت، کارخانهٔ مجازی)        |
+| سند                                        | هدف                                                                     |
+| ------------------------------------------ | ----------------------------------------------------------------------- |
+| `MCP-SERVER.md`                            | سرور MCP: ‏۱۱۰ ابزار، ۳ transport،‏ ۳۳ scope، endpointهای REST          |
+| `A2A-SERVER.md`                            | A2A v0.3: ‏JSON-RPC،‏ ۶ skill، کمککنندههای REST، کارت عامل              |
+| `AGENT_PROTOCOLS_GUIDE.md`                 | راهنمای یکپارچه: A2A در مقابل ACP در مقابل Cloud Agents                 |
+| `CLOUD_AGENT.md`                           | ارکستراسیون Codex Cloud / Devin / Jules                                 |
+| `SKILLS.md`                                | چارچوب Skills (داخلی + مارکتپلیس + SkillsSH + سندباکس)                  |
+| `RADAR.md`                                 | پوشش کاتالوگ مدلهای رایگان Radar (`RADAR_ENABLED`، بهصورت پیشفرض خاموش) |
+| `MEMORY.md`                                | سیستم حافظه (SQLite FTS5 + Qdrant)                                      |
+| `EVALS.md`                                 | چارچوب Eval (suiteها، runها، rubricها)                                  |
+| `GUARDRAILS.md`                            | ماسککننده PII، تزریق پرامپت، پل vision                                  |
+| `COMPLIANCE.md`                            | لاگ حسابرسی، نگهداری داده، انصراف noLog                                 |
+| `WEBHOOKS.md`                              | تحویل webhook امضاشده با HMAC                                           |
+| `REASONING_REPLAY.md`                      | کش ترکیبی حافظه/SQLite برای `reasoning_content`                         |
+| `AUTHZ_GUIDE.md`                           | خط لوله مجوزدهی (`classify` ← `policies` ← `enforce`)                   |
+| `RESILIENCE_GUIDE.md`                      | Circuit breaker + cooldown + قفل شدن مدل                                |
+| `docs/security/STEALTH_GUIDE.md` (فقط git) | اثرانگشت TLS (JA3/JA4)، Claude Code CCH، گواهی MITM                     |
+| `AUTO-COMBO.md`                            | موتور Auto Combo (امتیازدهی ۱۶ عاملی، ۶ بسته حالت، کارخانه مجازی)       |
 
 ### فشردهسازی
 
 | سند                             | هدف                                     |
 | ------------------------------- | --------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | نمای کلی حالتهای فشردهسازی + نقشهٔ راه  |
+| `COMPRESSION_GUIDE.md`          | مرور کلی حالتهای فشردهسازی + نقشه راه   |
 | `COMPRESSION_ENGINES.md`        | موتورهای Caveman + RTK، قرارداد رجیستری |
-| `COMPRESSION_RULES_FORMAT.md`   | شِمای JSON بستهٔ قواعد Caveman          |
-| `COMPRESSION_LANGUAGE_PACKS.md` | فهرست بستههای قواعد بهازای هر زبان      |
-| `RTK_COMPRESSION.md`            | خط لولهٔ اعلانی RTK ‏(۴۹ فیلتر)         |
+| `COMPRESSION_RULES_FORMAT.md`   | اسکیمای JSON بسته قوانین Caveman        |
+| `COMPRESSION_LANGUAGE_PACKS.md` | فهرست بستههای قوانین به تفکیک زبان      |
+| `RTK_COMPRESSION.md`            | خط لوله اعلانی RTK (۵۶ فیلتر)           |
 
 ### استقرار
 
-| سند                          | هدف                                                                   |
-| ---------------------------- | --------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | ساخت Docker، پروفایلها (base/cli/host/cliproxyapi)، سرویس جانبی Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | استقرار عمومی روی VM/VPS ‏(Ubuntu/Debian بههمراه nginx و systemd)     |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | استقرار روی Fly.io (در حال حاضر فقط به زبان چینی)                     |
-| `TERMUX_GUIDE.md`            | اجرای بدون رابط گرافیکی Android از طریق Termux                        |
-| `PWA_GUIDE.md`               | نصب Progressive Web App و service worker                              |
-| `ELECTRON_GUIDE.md`          | ساخت، امضا و توزیع برنامه دسکتاپ                                      |
-| `TUNNELS_GUIDE.md`           | Cloudflared و ngrok و Tailscale Funnel                                |
-| `PROXY_GUIDE.md`             | پروکسی خروجی ۴سطحی و بازار 1proxy                                     |
+| سند                          | کاربرد                                                            |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | ساخت Docker، پروفایلها (base/cli/host/cliproxyapi)، سایدکار Redis |
+| `VM_DEPLOYMENT_GUIDE.md`     | استقرار عمومی VM/VPS ‏(Ubuntu/Debian + nginx + systemd)           |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | استقرار Fly.io (در حال حاضر فقط به زبان چینی)                     |
+| `TERMUX_GUIDE.md`            | اجرای بدون رابط کاربری (headless) اندروید از طریق Termux          |
+| `PWA_GUIDE.md`               | نصب اپلیکیشن وب پیشرونده + سرویسورکر                              |
+| `ELECTRON_GUIDE.md`          | ساخت + امضا + توزیع اپلیکیشن دسکتاپ                               |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                            |
+| `PROXY_GUIDE.md`             | پروکسی خروجی ۴سطحی + مارکتپلیس 1proxy                             |
 
 ### زیرشاخهها
 
-| زیرشاخه               | هدف                                                                                                                                                                                                                |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | ترجمههای بومیسازیشده مستندات (۴۱ زبان)                                                                                                                                                                             |
-| `docs/screenshots/`   | داراییهای تصویری راهنماها                                                                                                                                                                                          |
-| `_tasks/superpowers/` | طرحها/مشخصات حاصل از superpowers ‏(`writing-plans`/`brainstorming`) و پژوهشها — مخزنی مجزا با نسخهبندی مستقل که در درخت اصلی توسط git نادیده گرفته میشود. به CLAUDE.md ← «مصنوعات برنامهریزی و پژوهش» مراجعه کنید. |
+| زیرشاخه               | کاربرد                                                                                                                                                                                                                     |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | ترجمههای بومیشدهی اسناد (۴۱ لوکیل)                                                                                                                                                                                         |
+| `docs/screenshots/`   | داراییهای تصویری برای راهنماها                                                                                                                                                                                             |
+| `_tasks/superpowers/` | طرحها/مشخصات حاصل از superpowers ‏(`writing-plans`/`brainstorming`) بهعلاوهی پژوهش — مخزنی ایزوله با نسخهبندی جداگانه که توسط درخت اصلی gitignore شده است. به CLAUDE.md ← بخش «Planning & Research Artifacts» مراجعه کنید. |
 
 ---
 

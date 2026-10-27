@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — အများပြည်သူသုံး စာရွက်စာတမ်းများ (ပင်မဖိုင် 7 ခု + လမ်းညွှန်ခွဲ 17 ခု)
+## `docs/` — အများပြည်သူအသုံးပြု စာရွက်စာတမ်းများ (root files ၇ ခု + subdirs ၁၇ ခု)
 
-### ထိပ်တန်းအဆင့် လမ်းညွှန်များ
+### အထက်အဆင့် လမ်းညွှန်ချက်များ
 
-| စာရွက်စာတမ်း                | ရည်ရွယ်ချက်                                                                                                     |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | အဆင့်မြင့် ဗိသုကာဖွဲ့စည်းပုံ၊ စနစ်ခွဲမြေပုံ၊ ဒက်ရှ်ဘုတ် မျက်နှာပြင်များ                                         |
-| `CODEBASE_DOCUMENTATION.md` | အင်ဂျင်နီယာဆိုင်ရာ အကိုးအကား− လမ်းညွှန်များ၊ မော်ဂျူးများ၊ စံသတ်မှတ်ချက်များ                                    |
-| `FEATURES.md`               | v3.8 အထူးအချက်များပါဝင်သော လုပ်ဆောင်ချက် မက်ထရစ်                                                                |
-| `USER_GUIDE.md`             | နောက်ဆုံးအသုံးပြုသူ လက်စွဲ (တပ်ဆင်ပြင်ဆင်မှု၊ မော်ဒယ်များ၊ ပေါင်းစပ်မှုများ၊ CLI များ၊ အသံ စသည်)                |
-| `API_REFERENCE.md`          | စစ်မှန်ကြောင်းအတည်ပြုမှု မော်ဒယ်ပါဝင်သော API endpoint အကိုးအကား                                                 |
-| `openapi.yaml`              | OpenAPI 3.0 သတ်မှတ်ချက် (လမ်းကြောင်း 121 ခု)                                                                    |
-| `SETUP_GUIDE.md`            | ထည့်သွင်းနည်းများ (npm၊ npx၊ Docker၊ Electron၊ Termux၊ source)                                                  |
-| `ENVIRONMENT.md`            | env var အားလုံး (မှတ်တမ်းတင်ထားသည်မှာ ~800 ခု၊ `.env.example` စာကြောင်း ~3,050)                                 |
-| `TROUBLESHOOTING.md`        | အဖြစ်များသော အမှားများ + v3.8.0 တွင် သိရှိထားသော ပြဿနာများ                                                      |
-| `RELEASE_CHECKLIST.md`      | အပြည့်အစုံ release လုပ်ငန်းစဉ် (skills၊ husky၊ conventional commits၊ deploy)                                    |
-| `COVERAGE_PLAN.md`          | Coverage ရည်မှန်းချက်များနှင့် လက်ရှိအခြေအနေ                                                                    |
-| `FREE_TIERS.md`             | စိစစ်ရွေးချယ်ထားသော အခမဲ့အဆင့် provider များ (အခမဲ့ 48+ ခု + OAuth 11 ခု)                                       |
-| `CLI-TOOLS.md`              | ပြင်ပ CLI ပေါင်းစပ်မှုများ + အတွင်းပိုင်း OmniRoute CLI                                                         |
-| `I18N.md`                   | i18n ဗိသုကာဖွဲ့စည်းပုံ၊ ဘာသာစကားထည့်သွင်းခြင်း၊ locale 67 ခု                                                    |
-| `UNINSTALL.md`              | အပြည့်အဝ ရှင်းလင်းဖယ်ရှားရန် အဆင့်များ                                                                          |
-| `PROVIDER_REFERENCE.md`     | provider 376 ခု၏ **အလိုအလျောက်ထုတ်လုပ်ထားသော** ကတ်တလောက် (ပြန်လည်ထုတ်လုပ်ရန်− `npm run gen:provider-reference`) |
+| စာရွက်စာတမ်း                | ရည်ရွယ်ချက်                                                                                                   |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | အဆင့်မြင့်ဗိသုကာ၊ subsystem မြေပုံ၊ dashboard မျက်နှာပြင်                                                     |
+| `CODEBASE_DOCUMENTATION.md` | အင်ဂျင်နီယာရေးရာ ရည်ညွှန်းချက်: directory များ၊ module များ၊ convention များ                                  |
+| `FEATURES.md`               | v3.8 အထူးခြားချက်များပါဝင်သည့် feature matrix                                                                 |
+| `USER_GUIDE.md`             | နောက်ဆုံးအသုံးပြုသူ လက်စွဲ (setup၊ models၊ combos၊ CLIs၊ audio စသည်တို့)                                      |
+| `API_REFERENCE.md`          | auth model ပါဝင်သည့် API endpoint ရည်ညွှန်းချက်                                                               |
+| `openapi.yaml`              | OpenAPI 3.0 spec (paths ၁၂၁ ခု)                                                                               |
+| `SETUP_GUIDE.md`            | ထည့်သွင်းနည်းလမ်းများ (npm, npx, Docker, Electron, Termux, source)                                            |
+| `ENVIRONMENT.md`            | env vars အားလုံး (ခန့်မှန်း ၈၀၀ ခု မှတ်တမ်းတင်ထား၊ `.env.example` ခန့်မှန်း လိုင်း ၃၀၅၀)                      |
+| `TROUBLESHOOTING.md`        | အဖြစ်များသော error များ + v3.8.0 သိထားပြီးသား ပြဿနာများ                                                       |
+| `RELEASE_CHECKLIST.md`      | release flow အပြည့်အစုံ (skills၊ husky၊ conventional commits၊ deploy)                                         |
+| `COVERAGE_PLAN.md`          | coverage ပန်းတိုင်များနှင့် လက်ရှိအခြေအနေ                                                                     |
+| `FREE_TIERS.md`             | စိတ်ကြိုက်ရွေးချယ်ထားသော free-tier provider များ (အခမဲ့ ၄၈+ ခု + OAuth ၁၁ ခု)                                 |
+| `CLI-TOOLS.md`              | ပြင်ပ CLI integration များ + အတွင်းပိုင်း OmniRoute CLI                                                       |
+| `I18N.md`                   | i18n ဗိသုကာ၊ ဘာသာစကားအသစ်ထည့်သွင်းနည်း၊ locales ၆၇ ခု                                                         |
+| `UNINSTALL.md`              | သန့်ရှင်းစွာ ဖယ်ရှားထုတ်သွင်းခြင်း အဆင့်များ                                                                  |
+| `PROVIDER_REFERENCE.md`     | providers ၃၇၆ ခု၏ **အလိုအလျောက်ပြုလုပ်ထားသော** catalog (ပြန်လည်ထုတ်လုပ်ရန်: `npm run gen:provider-reference`) |
 
-### စနစ်ခွဲအလိုက် အသေးစိတ်လေ့လာချက်များ
+### Subsystem အသေးစိတ် လေ့လာသုံးသပ်ချက်များ
 
-| စာရွက်စာတမ်း                                  | ရည်ရွယ်ချက်                                                                     |
-| --------------------------------------------- | ------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | MCP ဆာဗာ− tool 110 ခု၊ transport 3 မျိုး၊ scope 33 ခု၊ REST endpoint များ       |
-| `A2A-SERVER.md`                               | A2A v0.3− JSON-RPC၊ skill 6 ခု၊ REST helper များ၊ agent card                    |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | စုစည်းထားသော လမ်းညွှန်− A2A နှင့် ACP နှင့် Cloud Agents နှိုင်းယှဉ်ချက်        |
-| `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules စီမံညှိနှိုင်းမှု                                   |
-| `SKILLS.md`                                   | Skills framework (ထည့်သွင်းပြီးသား + marketplace + SkillsSH + sandbox)          |
-| `RADAR.md`                                    | Radar အခမဲ့မော်ဒယ် ကတ်တလောက် overlay (`RADAR_ENABLED`၊ မူလအတိုင်း ပိတ်ထားသည်)   |
-| `MEMORY.md`                                   | Memory စနစ် (SQLite FTS5 + Qdrant)                                              |
-| `EVALS.md`                                    | Eval framework (suite များ၊ run များ၊ rubric များ)                              |
-| `GUARDRAILS.md`                               | PII ဖုံးကွယ်စနစ်၊ prompt injection၊ vision bridge                               |
-| `COMPLIANCE.md`                               | စစ်ဆေးမှတ်တမ်း၊ ထိန်းသိမ်းကာလ၊ noLog ဖြင့် မပါဝင်ရန် ရွေးချယ်မှု                |
-| `WEBHOOKS.md`                                 | HMAC လက်မှတ်ရေးထိုးထားသော webhook ပေးပို့မှု                                    |
-| `REASONING_REPLAY.md`                         | `reasoning_content` အတွက် ပေါင်းစပ် memory/SQLite cache                         |
-| `AUTHZ_GUIDE.md`                              | လုပ်ပိုင်ခွင့်သတ်မှတ်ရေး pipeline (`classify` → `policies` → `enforce`)         |
-| `RESILIENCE_GUIDE.md`                         | Circuit breaker + cooldown + model lockout                                      |
-| `docs/security/STEALTH_GUIDE.md` (git တွင်သာ) | TLS fingerprinting (JA3/JA4)၊ Claude Code CCH၊ MITM cert                        |
-| `AUTO-COMBO.md`                               | Auto Combo အင်ဂျင် (အချက် 16 ချက် အမှတ်ပေးမှု၊ mode pack 6 ခု၊ virtual factory) |
+| စာရွက်စာတမ်း                                  | ရည်ရွယ်ချက်                                                                           |
+| --------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                               | MCP server: tools ၁၁၀ ခု၊ transports ၃ ခု၊ scopes ၃၃ ခု၊ REST endpoints               |
+| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC၊ skills ၆ ခု၊ REST helpers၊ agent card                             |
+| `AGENT_PROTOCOLS_GUIDE.md`                    | ပေါင်းစည်းညှိနှိုင်းထားသော လမ်းညွှန်: A2A vs ACP vs Cloud Agents                      |
+| `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules ညှိနှိုင်းစီမံခန့်ခွဲမှု                                  |
+| `SKILLS.md`                                   | Skills framework (built-in + marketplace + SkillsSH + sandbox)                        |
+| `RADAR.md`                                    | Radar အခမဲ့-model catalog overlay (`RADAR_ENABLED`၊ မူလအတိုင်း ပိတ်ထားသည်)            |
+| `MEMORY.md`                                   | Memory system (SQLite FTS5 + Qdrant)                                                  |
+| `EVALS.md`                                    | Eval framework (suites၊ runs၊ rubrics)                                                |
+| `GUARDRAILS.md`                               | PII masker၊ prompt injection၊ vision bridge                                           |
+| `COMPLIANCE.md`                               | Audit log၊ retention၊ noLog opt-out                                                   |
+| `WEBHOOKS.md`                                 | HMAC-signed webhook ပေးပို့မှု                                                        |
+| `REASONING_REPLAY.md`                         | `reasoning_content` အတွက် hybrid memory/SQLite cache                                  |
+| `AUTHZ_GUIDE.md`                              | Authorization pipeline (`classify` → `policies` → `enforce`)                          |
+| `RESILIENCE_GUIDE.md`                         | Circuit breaker + cooldown + model lockout                                            |
+| `docs/security/STEALTH_GUIDE.md` (git တွင်သာ) | TLS fingerprinting (JA3/JA4)၊ Claude Code CCH၊ MITM cert                              |
+| `AUTO-COMBO.md`                               | Auto Combo engine (factor ၁၆ ခုဖြင့် အမှတ်ပေးခြင်း၊ mode packs ၆ ခု၊ virtual factory) |
 
-### ချုံ့ခြင်း
+### ချုံ့ယူခြင်း
 
-| စာရွက်စာတမ်း                    | ရည်ရွယ်ချက်                                             |
-| ------------------------------- | ------------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | ချုံ့ခြင်း mode များ၏ ခြုံငုံသုံးသပ်ချက် + လမ်းပြမြေပုံ |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK အင်ဂျင်များ၊ registry contract            |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON schema                           |
-| `COMPRESSION_LANGUAGE_PACKS.md` | ဘာသာစကားအလိုက် rule pack စာရင်း                         |
-| `RTK_COMPRESSION.md`            | RTK declarative pipeline (filter 49 ခု)                 |
+| စာရွက်စာတမ်း                    | ရည်ရွယ်ချက်                                         |
+| ------------------------------- | --------------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | compression modes များ ခြုံငုံသုံးသပ်ချက် + roadmap |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK engine များ၊ registry contract        |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman rule pack JSON schema                       |
+| `COMPRESSION_LANGUAGE_PACKS.md` | ဘာသာစကားအလိုက် rule pack စာရင်း                     |
+| `RTK_COMPRESSION.md`            | RTK declarative pipeline (filters ၅၆ ခု)            |
 
-### ဖြန့်ကျက်တပ်ဆင်ခြင်း
+### နေရာချထားခြင်း
 
-| စာရွက်စာတမ်း                 | ရည်ရွယ်ချက်                                                               |
-| ---------------------------- | ------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker တည်ဆောက်ခြင်း၊ profiles (base/cli/host/cliproxyapi)၊ Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | ယေဘုယျ VM/VPS ဖြန့်ချိခြင်း (Ubuntu/Debian + nginx + systemd)             |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io ဖြန့်ချိခြင်း (လက်ရှိတွင် တရုတ်ဘာသာဖြင့်သာ ရရှိနိုင်သည်)           |
-| `TERMUX_GUIDE.md`            | Termux မှတစ်ဆင့် Android headless အသုံးပြုခြင်း                           |
-| `PWA_GUIDE.md`               | Progressive Web App ထည့်သွင်းခြင်း + service worker                       |
-| `ELECTRON_GUIDE.md`          | Desktop app တည်ဆောက်ခြင်း + လက်မှတ်ရေးထိုးခြင်း + ဖြန့်ဝေခြင်း            |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                    |
-| `PROXY_GUIDE.md`             | အဆင့် ၄ ဆင့်ပါ outbound proxy + 1proxy ဈေးကွက်                            |
+| စာရွက်စာတမ်း                 | ရည်ရွယ်ချက်                                                       |
+| ---------------------------- | ----------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker build၊ profiles (base/cli/host/cliproxyapi)၊ Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | ယေဘုယျ VM/VPS deployment (Ubuntu/Debian + nginx + systemd)        |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io deployment (လက်ရှိတွင် တရုတ်ဘာသာတစ်ခုတည်းသာ ရှိသည်)        |
+| `TERMUX_GUIDE.md`            | Termux မှတစ်ဆင့် Android headless အသုံးပြုခြင်း                   |
+| `PWA_GUIDE.md`               | Progressive Web App install + service worker                      |
+| `ELECTRON_GUIDE.md`          | Desktop app build + sign + ဖြန့်ဖြူးခြင်း                         |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                            |
+| `PROXY_GUIDE.md`             | အဆင့် ၄ ဆင့် outbound proxy + 1proxy marketplace                  |
 
-### လမ်းညွှန်ခွဲများ
+### ဆပ်ဒရက်တရီများ
 
-| လမ်းညွှန်ခွဲ          | ရည်ရွယ်ချက်                                                                                                                                                                                                                                              |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ဒေသန္တရဘာသာပြန်ထားသော စာရွက်စာတမ်းများ (ဘာသာစကားဒေသ ၄၁ ခု)                                                                                                                                                                                               |
-| `docs/screenshots/`   | လမ်းညွှန်များအတွက် ရုပ်ပုံဖိုင်များ                                                                                                                                                                                                                      |
-| `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) မှ အစီအစဉ်များ/သတ်မှတ်ချက်များ + သုတေသနများ — သီးခြားခွဲထားပြီး သီးခြား version ထိန်းချုပ်ထားသော repo ဖြစ်ကာ ပင်မ tree တွင် gitignore လုပ်ထားသည်။ CLAUDE.md → "Planning & Research Artifacts" ကို ကြည့်ပါ။ |
+| ဆပ်ဒရက်တရီ            | ရည်ရွယ်ချက်                                                                                                                                                                                                                        |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | ဒေသန္တရဘာသာပြန် စာရွက်စာတမ်းများ (locales 41 ခု)                                                                                                                                                                                   |
+| `docs/screenshots/`   | လမ်းညွှန်များအတွက် ရုပ်ပုံ assets များ                                                                                                                                                                                             |
+| `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) မှ plans/specs များ + သုတေသန — သီးခြားခွဲထားပြီး version သီးသန့်သတ်မှတ်ထားသော repo ဖြစ်ကာ main tree မှ gitignore လုပ်ထားသည်။ CLAUDE.md → "Planning & Research Artifacts" ကိုကြည့်ပါ။ |
 
 ---
 

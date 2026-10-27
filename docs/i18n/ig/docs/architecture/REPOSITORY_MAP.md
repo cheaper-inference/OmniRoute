@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Akwụkwọ Nduzi Ọha (faịlụ mgbọrọgwụ 7 + obere ndekọ 17)
+## `docs/` — Akwụkwọ Ndekọ Ọha (faịlụ mgbọrọgwụ 7 + ndekọ-ime 17)
 
-### Ntuziaka ndị dị n’ogo elu
+### Akwụkwọ nduzi kacha elu
 
-| Akwụkwọ                     | Ebumnuche                                                                                           |
-| --------------------------- | --------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Nhazi usoro n’ogo dị elu, maapụ obere sistemụ, na elu dashboard                                     |
-| `CODEBASE_DOCUMENTATION.md` | Nrụtụaka injinia: ndekọ, modul, na ụkpụrụ                                                           |
-| `FEATURES.md`               | Matriks atụmatụ nwere ihe ndị pụtara ìhè na v3.8                                                    |
-| `USER_GUIDE.md`             | Akwụkwọ ntuziaka onye ọrụ ikpeazụ (nhazi, ụdị, ngwakọta, CLI, ọdịyo, wdg.)                          |
-| `API_REFERENCE.md`          | Nrụtụaka endpoint API nwere ụdị njirimara ikike                                                     |
-| `openapi.yaml`              | Nkọwapụta OpenAPI 3.0 (ụzọ 121)                                                                     |
-| `SETUP_GUIDE.md`            | Ụzọ nrụnye (npm, npx, Docker, Electron, Termux, koodu isi)                                          |
-| `ENVIRONMENT.md`            | Env vars niile (~800 e dere nkọwa ha, ahịrị `.env.example` ~3,050)                                  |
-| `TROUBLESHOOTING.md`        | Njehie ndị a na-ahụkarị + nsogbu v3.8.0 ndị a maara                                                 |
-| `RELEASE_CHECKLIST.md`      | Usoro mwepụta zuru ezu (nkà, husky, conventional commits, mbuga)                                    |
-| `COVERAGE_PLAN.md`          | Ebumnuche mkpuchi na ọnọdụ dị ugbu a                                                                |
-| `FREE_TIERS.md`             | Ndị na-eweta ọkwa efu ahọpụtara nke ọma (48+ efu + 11 OAuth)                                        |
-| `CLI-TOOLS.md`              | Njikọ CLI mpụga + CLI OmniRoute dị n’ime                                                            |
-| `I18N.md`                   | Nhazi i18n, ịgbakwunye asụsụ, locales 67                                                            |
-| `UNINSTALL.md`              | Usoro iwepụ nrụnye n’enweghị ihe fọdụrụ                                                             |
-| `PROVIDER_REFERENCE.md`     | Katalọgụ ndị na-eweta 376 **emepụtara na-akpaghị aka** (megharịa: `npm run gen:provider-reference`) |
+| Akwụkwọ                     | Ebumnuche                                                                                          |
+| --------------------------- | -------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Architecture dị elu, maapụ subsystem, ihu dashboard                                                |
+| `CODEBASE_DOCUMENTATION.md` | Ntụaka injinia: ndekọ, modul, omume e si ede koodu                                                 |
+| `FEATURES.md`               | Matriks atụmatụ nwere ihe pụtara ìhè nke v3.8                                                      |
+| `USER_GUIDE.md`             | Akwụkwọ nduzi onye ọrụ ikpeazụ (ntọala, ụdị, combo, CLI, ụda, wdg.)                                |
+| `API_REFERENCE.md`          | Ntụaka endpoint API nwere ụdị auth                                                                 |
+| `openapi.yaml`              | Nkọwapụta OpenAPI 3.0 (ụzọ 121)                                                                    |
+| `SETUP_GUIDE.md`            | Ụzọ ntinye (npm, npx, Docker, Electron, Termux, isi)                                               |
+| `ENVIRONMENT.md`            | Env vars niile (~800 e dekọrọ, ahịrị ~3,050 nke `.env.example`)                                    |
+| `TROUBLESHOOTING.md`        | Njehie a na-ahụkarị + nsogbu a ma ama nke v3.8.0                                                   |
+| `RELEASE_CHECKLIST.md`      | Usoro mwepụta zuru ezu (skills, husky, conventional commits, deploy)                               |
+| `COVERAGE_PLAN.md`          | Ebumnuche mkpuchi na ọnọdụ dị ugbu a                                                               |
+| `FREE_TIERS.md`             | Ndị na-enye ọkwa n'efu a họpụtara nke ọma (48+ n'efu + 11 OAuth)                                   |
+| `CLI-TOOLS.md`              | Njikọ CLI si mpụga + CLI OmniRoute si n'ime                                                        |
+| `I18N.md`                   | Architecture i18n, itinye asụsụ, locale 67                                                         |
+| `UNINSTALL.md`              | Nzọụkwụ iwepụ dị ọcha                                                                              |
+| `PROVIDER_REFERENCE.md`     | Katalọgụ ndị na-enye 376 **a na-emepụta akpaaka** (mepụtaghachi: `npm run gen:provider-reference`) |
 
-### Nkọwa miri emi banyere obere sistemụ
+### Nnyocha miri emi nke subsystem
 
-| Akwụkwọ                                      | Ebumnuche                                                                  |
-| -------------------------------------------- | -------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                              | Sava MCP: ngwaọrụ 110, ụzọ mbufe 3, scopes 33, REST endpoints              |
-| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, nkà 6, ndị enyemaka REST, kaadị agent                  |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | Ntuziaka jikọrọ ọnụ: A2A vs ACP vs Cloud Agents                            |
-| `CLOUD_AGENT.md`                             | Nhazi ọrụ Codex Cloud / Devin / Jules                                      |
-| `SKILLS.md`                                  | Framework nkà (ndị arụnyere n’ime + marketplace + SkillsSH + sandbox)      |
-| `RADAR.md`                                   | Ihe mkpuchi katalọgụ ụdị efu Radar (`RADAR_ENABLED`, agbanyụrụ na ndabara) |
-| `MEMORY.md`                                  | Sistemụ ebe nchekwa (SQLite FTS5 + Qdrant)                                 |
-| `EVALS.md`                                   | Framework nyocha (usoro nnwale, ọsọ, rubrics)                              |
-| `GUARDRAILS.md`                              | Ihe nzuzo PII, prompt injection, àkwà mmiri ọhụụ                           |
-| `COMPLIANCE.md`                              | Ndekọ audit, njigide, na nhọrọ ịpụ na noLog                                |
-| `WEBHOOKS.md`                                | Nnyefe webhook e ji HMAC bịanye aka                                        |
-| `REASONING_REPLAY.md`                        | Ebe nchekwa ngwakọ/SQLite cache maka `reasoning_content`                   |
-| `AUTHZ_GUIDE.md`                             | Pipeline ikike (`classify` → `policies` → `enforce`)                       |
-| `RESILIENCE_GUIDE.md`                        | Circuit breaker + cooldown + mkpọchi model                                 |
-| `docs/security/STEALTH_GUIDE.md` (git naanị) | TLS fingerprinting (JA3/JA4), Claude Code CCH, asambodo MITM               |
-| `AUTO-COMBO.md`                              | Injin Auto Combo (ntule ihe 16, ngwugwu mode 6, ụlọ nrụpụta mebere)        |
+| Akwụkwọ                                      | Ebumnuche                                                               |
+| -------------------------------------------- | ----------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | Server MCP: ngwá ọrụ 110, ụzọ mbufe 3, oke 33, endpoint REST            |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, skill 6, ihe enyemaka REST, kaadị agent             |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Nduzi jikọtara ọnụ: A2A vs ACP vs Cloud Agents                          |
+| `CLOUD_AGENT.md`                             | Nhazi otu Codex Cloud / Devin / Jules                                   |
+| `SKILLS.md`                                  | Ọkwa Skills (nke arụnyere n'ime + marketplace + SkillsSH + sandbox)     |
+| `RADAR.md`                                   | Overlay katalọgụ ụdị n'efu Radar (`RADAR_ENABLED`, gbanyụrụ na ndabere) |
+| `MEMORY.md`                                  | Usoro ncheta (SQLite FTS5 + Qdrant)                                     |
+| `EVALS.md`                                   | Ọkwa nyocha Eval (suites, ọsọ, rubrics)                                 |
+| `GUARDRAILS.md`                              | Ihe nzobe PII, ntinye prompt, àkwà vision                               |
+| `COMPLIANCE.md`                              | Ndekọ nyocha, idobe, opt-out noLog                                      |
+| `WEBHOOKS.md`                                | Nnyefe webhook bụ HMAC bịanyere aka                                     |
+| `REASONING_REPLAY.md`                        | Cache ncheta/SQLite ngwakọta maka `reasoning_content`                   |
+| `AUTHZ_GUIDE.md`                             | Pipeline ikike (`classify` → `policies` → `enforce`)                    |
+| `RESILIENCE_GUIDE.md`                        | Circuit breaker + cooldown + ịgbachi ụdị                                |
+| `docs/security/STEALTH_GUIDE.md` (naanị git) | Fingerprinting TLS (JA3/JA4), Claude Code CCH, asambodo MITM            |
+| `AUTO-COMBO.md`                              | Injin Auto Combo (inye akara ihe 16, ngwugwu mode 6, ụlọ ọrụ virtual)   |
 
-### Mkpakọ
+### Mbelata
 
 | Akwụkwọ                         | Ebumnuche                                |
 | ------------------------------- | ---------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Nchịkọta ụdị mkpakọ + roadmap            |
-| `COMPRESSION_ENGINES.md`        | Injin Caveman + RTK, nkwekọrịta registry |
-| `COMPRESSION_RULES_FORMAT.md`   | JSON schema nke ngwugwu iwu Caveman      |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Ndepụta ngwugwu iwu maka asụsụ ọ bụla    |
-| `RTK_COMPRESSION.md`            | Pipeline RTK nkwupụta (ihe nzacha 49)    |
+| `COMPRESSION_GUIDE.md`          | Nleba anya ụdị mbelata + maapụ ụzọ       |
+| `COMPRESSION_ENGINES.md`        | Injin Caveman + RTK, nkwekọrịta ndekọ    |
+| `COMPRESSION_RULES_FORMAT.md`   | Schema JSON nke ngwugwu iwu Caveman      |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Ndepụta ngwugwu iwu kwa asụsụ            |
+| `RTK_COMPRESSION.md`            | Pipeline declarative RTK (ihe nzacha 56) |
 
-### Mbuga
+### Ntinye n'Ọrụ
 
-| Dọkụmentị                    | Ebumnuche                                                         |
-| ---------------------------- | ----------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Mwube Docker, profaịlụ (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Nwụnye VM/VPS izugbe (Ubuntu/Debian + nginx + systemd)            |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Nwụnye Fly.io (ọ dị ugbu a naanị n'asụsụ Chaịniiz)                |
-| `TERMUX_GUIDE.md`            | Android na-enweghị interface site na Termux                       |
-| `PWA_GUIDE.md`               | Nwụnye Progressive Web App + service worker                       |
-| `ELECTRON_GUIDE.md`          | Mwube ngwa desktọpụ + mbinye aka + nkesa                          |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                            |
-| `PROXY_GUIDE.md`             | Proxy ọpụpụ nwere ọkwa 4 + ahịa 1proxy                            |
+| Akwụkwọ                      | Ebumnuche                                                       |
+| ---------------------------- | --------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Ịlụ Docker, profaịlụ (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Ntinye VM/VPS nkịtị (Ubuntu/Debian + nginx + systemd)           |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Ntinye Fly.io (dị na asụsụ Chinese naanị ugbu a)                |
+| `TERMUX_GUIDE.md`            | Android headless site na Termux                                 |
+| `PWA_GUIDE.md`               | Ntinye Progressive Web App + service worker                     |
+| `ELECTRON_GUIDE.md`          | Ịlụ + ibinye aka + ịkesa ngwa desktọpụ                          |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                          |
+| `PROXY_GUIDE.md`             | Proxy ọpụpụ n'ọkwa 4 + ahịa 1proxy                              |
 
-### Ngalaba nta
+### Ndekọ ndị dị n'ime
 
-| Ngalaba nta           | Ebumnuche                                                                                                                                                                                                           |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Ntụgharị asụsụ dọkụmentị ahaziri maka mpaghara dị iche iche (mpaghara 41)                                                                                                                                           |
-| `docs/screenshots/`   | Akụrụngwa onyonyo maka ntuziaka                                                                                                                                                                                     |
-| `_tasks/superpowers/` | Atụmatụ/nkọwapụta sitere na superpowers (`writing-plans`/`brainstorming`) + nyocha — repo e kewapụrụ ma nwee ụdị nke ya, nke isi osisi na-eleghara anya site na git. Lee CLAUDE.md → "Akụrụngwa Atụmatụ & Nnyocha". |
+| Ndekọ dị n'ime        | Ebumnuche                                                                                                                                                                                                               |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Ntụgharị akwụkwọ n'asụsụ obodo (asụsụ 41)                                                                                                                                                                               |
+| `docs/screenshots/`   | Ihe onyonyo maka nduzi                                                                                                                                                                                                  |
+| `_tasks/superpowers/` | Atụmatụ/nkọwapụta sitere na superpowers (`writing-plans`/`brainstorming`) + nyocha — nke ewepụrụ n'otu, repo nke enweere ụdị nke ya, nke osisi isi na-ahapụ na git. Lee CLAUDE.md → "Ihe E Nwetara n'Atụmatụ & Nyocha". |
 
 ---
 

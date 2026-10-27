@@ -395,44 +395,44 @@ open-sse/
 
 ### Üst düzey kılavuzlar
 
-| Belge                       | Amaç                                                                                                            |
-| --------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Üst düzey mimari, alt sistem haritası, pano yüzeyi                                                              |
-| `CODEBASE_DOCUMENTATION.md` | Mühendislik referansı: dizinler, modüller, kurallar                                                             |
-| `FEATURES.md`               | v3.8'de öne çıkan özellikleri içeren özellik matrisi                                                            |
-| `USER_GUIDE.md`             | Son kullanıcı kılavuzu (kurulum, modeller, kombinasyonlar, CLI'lar, ses vb.)                                    |
-| `API_REFERENCE.md`          | Kimlik doğrulama modeliyle birlikte API uç noktası referansı                                                    |
-| `openapi.yaml`              | OpenAPI 3.0 spesifikasyonu (121 yol)                                                                            |
-| `SETUP_GUIDE.md`            | Kurulum yöntemleri (npm, npx, Docker, Electron, Termux, kaynak koddan)                                          |
-| `ENVIRONMENT.md`            | Tüm ortam değişkenleri (~800 belgelenmiş, `.env.example` ~3.050 satır)                                          |
-| `TROUBLESHOOTING.md`        | Yaygın hatalar + v3.8.0'da bilinen sorunlar                                                                     |
-| `RELEASE_CHECKLIST.md`      | Tam sürüm yayımlama akışı (beceriler, husky, geleneksel commit'ler, dağıtım)                                    |
-| `COVERAGE_PLAN.md`          | Kapsama hedefleri ve mevcut durum                                                                               |
-| `FREE_TIERS.md`             | Seçilmiş ücretsiz katman sağlayıcıları (48+ ücretsiz + 11 OAuth)                                                |
-| `CLI-TOOLS.md`              | Harici CLI entegrasyonları + Dahili OmniRoute CLI                                                               |
-| `I18N.md`                   | i18n mimarisi, dil ekleme, 67 yerel ayar                                                                        |
-| `UNINSTALL.md`              | Temiz kaldırma adımları                                                                                         |
-| `PROVIDER_REFERENCE.md`     | 376 sağlayıcıdan oluşan **otomatik oluşturulmuş** katalog (yeniden oluşturma: `npm run gen:provider-reference`) |
+| Belge                       | Amaç                                                                                                     |
+| --------------------------- | -------------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Üst düzey mimari, alt sistem haritası, pano yüzeyi                                                       |
+| `CODEBASE_DOCUMENTATION.md` | Mühendislik referansı: dizinler, modüller, konvansiyonlar                                                |
+| `FEATURES.md`               | v3.8 öne çıkanlarıyla özellik matrisi                                                                    |
+| `USER_GUIDE.md`             | Son kullanıcı kılavuzu (kurulum, modeller, combo'lar, CLI'lar, ses vb.)                                  |
+| `API_REFERENCE.md`          | Kimlik doğrulama modeliyle API uç noktası referansı                                                      |
+| `openapi.yaml`              | OpenAPI 3.0 spesifikasyonu (121 path)                                                                    |
+| `SETUP_GUIDE.md`            | Kurulum yöntemleri (npm, npx, Docker, Electron, Termux, kaynak)                                          |
+| `ENVIRONMENT.md`            | Tüm ortam değişkenleri (~800 tanesi belgelenmiş, ~3.050 satır `.env.example`)                            |
+| `TROUBLESHOOTING.md`        | Yaygın hatalar + v3.8.0 bilinen sorunları                                                                |
+| `RELEASE_CHECKLIST.md`      | Tam sürüm akışı (skills, husky, conventional commits, dağıtım)                                           |
+| `COVERAGE_PLAN.md`          | Kapsam hedefleri ve mevcut durum                                                                         |
+| `FREE_TIERS.md`             | Özenle derlenmiş ücretsiz katman sağlayıcıları (48+ ücretsiz + 11 OAuth)                                 |
+| `CLI-TOOLS.md`              | Harici CLI entegrasyonları + dahili OmniRoute CLI'ı                                                      |
+| `I18N.md`                   | i18n mimarisi, dil ekleme, 67 yerel ayar                                                                 |
+| `UNINSTALL.md`              | Temiz kaldırma adımları                                                                                  |
+| `PROVIDER_REFERENCE.md`     | 376 sağlayıcının **otomatik oluşturulan** kataloğu (yeniden oluşturma: `npm run gen:provider-reference`) |
 
-### Alt sistemlere ayrıntılı bakış
+### Alt sistem derinlemesine incelemeler
 
 | Belge                                           | Amaç                                                                              |
 | ----------------------------------------------- | --------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                                 | MCP sunucusu: 110 araç, 3 aktarım yöntemi, 33 kapsam, REST uç noktaları           |
-| `A2A-SERVER.md`                                 | A2A v0.3: JSON-RPC, 6 beceri, REST yardımcıları, ajan kartı                       |
+| `MCP-SERVER.md`                                 | MCP sunucusu: 110 araç, 3 transport, 33 kapsam, REST uç noktaları                 |
+| `A2A-SERVER.md`                                 | A2A v0.3: JSON-RPC, 6 skill, REST yardımcıları, aracı kartı                       |
 | `AGENT_PROTOCOLS_GUIDE.md`                      | Birleşik kılavuz: A2A, ACP ve Cloud Agents karşılaştırması                        |
 | `CLOUD_AGENT.md`                                | Codex Cloud / Devin / Jules orkestrasyonu                                         |
-| `SKILLS.md`                                     | Beceri çerçevesi (yerleşik + pazar yeri + SkillsSH + korumalı alan)               |
+| `SKILLS.md`                                     | Skills çerçevesi (yerleşik + pazar yeri + SkillsSH + sandbox)                     |
 | `RADAR.md`                                      | Radar ücretsiz model kataloğu katmanı (`RADAR_ENABLED`, varsayılan olarak kapalı) |
 | `MEMORY.md`                                     | Bellek sistemi (SQLite FTS5 + Qdrant)                                             |
-| `EVALS.md`                                      | Değerlendirme çerçevesi (paketler, çalıştırmalar, değerlendirme ölçütleri)        |
-| `GUARDRAILS.md`                                 | PII maskeleyici, istem enjeksiyonu, görüntü köprüsü                               |
-| `COMPLIANCE.md`                                 | Denetim günlüğü, saklama, noLog ile devre dışı bırakma                            |
+| `EVALS.md`                                      | Eval çerçevesi (suiteler, çalıştırmalar, değerlendirme ölçütleri)                 |
+| `GUARDRAILS.md`                                 | PII masker, prompt injection, vision bridge                                       |
+| `COMPLIANCE.md`                                 | Denetim günlüğü, saklama, noLog opt-out                                           |
 | `WEBHOOKS.md`                                   | HMAC imzalı webhook teslimi                                                       |
 | `REASONING_REPLAY.md`                           | `reasoning_content` için hibrit bellek/SQLite önbelleği                           |
 | `AUTHZ_GUIDE.md`                                | Yetkilendirme işlem hattı (`classify` → `policies` → `enforce`)                   |
-| `RESILIENCE_GUIDE.md`                           | Devre kesici + bekleme süresi + model kilitleme                                   |
-| `docs/security/STEALTH_GUIDE.md` (yalnızca git) | TLS parmak izi oluşturma (JA3/JA4), Claude Code CCH, MITM sertifikası             |
+| `RESILIENCE_GUIDE.md`                           | Devre kesici + cooldown + model kilitleme                                         |
+| `docs/security/STEALTH_GUIDE.md` (yalnızca git) | TLS parmak izi tespiti (JA3/JA4), Claude Code CCH, MITM sertifikası               |
 | `AUTO-COMBO.md`                                 | Auto Combo motoru (16 faktörlü puanlama, 6 mod paketi, sanal fabrika)             |
 
 ### Sıkıştırma
@@ -440,31 +440,31 @@ open-sse/
 | Belge                           | Amaç                                            |
 | ------------------------------- | ----------------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Sıkıştırma modlarına genel bakış + yol haritası |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK motorları, kayıt sözleşmesi       |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK motorları, registry sözleşmesi    |
 | `COMPRESSION_RULES_FORMAT.md`   | Caveman kural paketi JSON şeması                |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Dil başına kural paketi envanteri               |
-| `RTK_COMPRESSION.md`            | RTK bildirimsel işlem hattı (49 filtre)         |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Dil bazında kural paketi envanteri              |
+| `RTK_COMPRESSION.md`            | RTK deklaratif işlem hattı (56 filtre)          |
 
 ### Dağıtım
 
-| Belge                        | Amaç                                                                       |
-| ---------------------------- | -------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker derlemesi, profiller (base/cli/host/cliproxyapi), Redis yan hizmeti |
-| `VM_DEPLOYMENT_GUIDE.md`     | Genel VM/VPS dağıtımı (Ubuntu/Debian + nginx + systemd)                    |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io dağıtımı (şu anda yalnızca Çince)                                   |
-| `TERMUX_GUIDE.md`            | Termux aracılığıyla ekransız Android kullanımı                             |
-| `PWA_GUIDE.md`               | Progressive Web App kurulumu + service worker                              |
-| `ELECTRON_GUIDE.md`          | Masaüstü uygulaması derleme + imzalama + dağıtma                           |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                     |
-| `PROXY_GUIDE.md`             | 4 seviyeli giden proxy + 1proxy pazaryeri                                  |
+| Belge                        | Amaç                                                                     |
+| ---------------------------- | ------------------------------------------------------------------------ |
+| `DOCKER_GUIDE.md`            | Docker derlemesi, profiller (base/cli/host/cliproxyapi), Redis sidecar'ı |
+| `VM_DEPLOYMENT_GUIDE.md`     | Genel VM/VPS dağıtımı (Ubuntu/Debian + nginx + systemd)                  |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io dağıtımı (şu anda yalnızca Çince)                                 |
+| `TERMUX_GUIDE.md`            | Termux aracılığıyla Android'de başsız (headless) çalıştırma              |
+| `PWA_GUIDE.md`               | Progressive Web App kurulumu + service worker                            |
+| `ELECTRON_GUIDE.md`          | Masaüstü uygulaması derleme + imzalama + dağıtma                         |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                   |
+| `PROXY_GUIDE.md`             | 4 seviyeli giden (outbound) proxy + 1proxy pazaryeri                     |
 
-### Alt dizinler
+### Alt Dizinler
 
-| Alt dizin             | Amaç                                                                                                                                                                                                                                    |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Yerelleştirilmiş belge çevirileri (41 yerel ayar)                                                                                                                                                                                       |
-| `docs/screenshots/`   | Kılavuzlar için görsel varlıkları                                                                                                                                                                                                       |
-| `_tasks/superpowers/` | superpowers kaynaklı planlar/özellikler (`writing-plans`/`brainstorming`) + araştırmalar — izole edilmiş, ayrı sürümlendirilen depo; ana ağaç tarafından gitignore ile yok sayılır. Bkz. CLAUDE.md → "Planlama ve Araştırma Çıktıları". |
+| Alt Dizin             | Amaç                                                                                                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Yerelleştirilmiş belge çevirileri (41 yerel ayar)                                                                                                                                                                                     |
+| `docs/screenshots/`   | Kılavuzlar için görsel varlıklar                                                                                                                                                                                                      |
+| `_tasks/superpowers/` | superpowers'dan gelen planlar/şartnameler (`writing-plans`/`brainstorming`) + araştırma — izole, ayrı olarak sürümlendirilen depo; ana ağaç tarafından gitignore ile hariç tutulur. Bkz. CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

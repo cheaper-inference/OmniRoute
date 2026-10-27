@@ -397,53 +397,53 @@ open-sse/
 
 | 文件                        | 用途                                                                          |
 | --------------------------- | ----------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | 高階架構、子系統對照表、儀表板介面                                            |
+| `ARCHITECTURE.md`           | 高階架構、子系統地圖、儀表板介面                                              |
 | `CODEBASE_DOCUMENTATION.md` | 工程參考：目錄、模組、慣例                                                    |
-| `FEATURES.md`               | 包含 v3.8 重點功能的功能矩陣                                                  |
+| `FEATURES.md`               | 功能矩陣與 v3.8 重點                                                          |
 | `USER_GUIDE.md`             | 終端使用者手冊（設定、模型、組合、CLI、音訊等）                               |
-| `API_REFERENCE.md`          | 包含驗證模型的 API 端點參考                                                   |
+| `API_REFERENCE.md`          | API 端點參考與認證模型                                                        |
 | `openapi.yaml`              | OpenAPI 3.0 規格（121 個路徑）                                                |
 | `SETUP_GUIDE.md`            | 安裝方式（npm、npx、Docker、Electron、Termux、原始碼）                        |
 | `ENVIRONMENT.md`            | 所有環境變數（約 800 個已記錄，`.env.example` 約 3,050 行）                   |
 | `TROUBLESHOOTING.md`        | 常見錯誤 + v3.8.0 已知問題                                                    |
-| `RELEASE_CHECKLIST.md`      | 完整發布流程（技能、husky、conventional commits、部署）                       |
+| `RELEASE_CHECKLIST.md`      | 完整發布流程（skills、husky、conventional commits、部署）                     |
 | `COVERAGE_PLAN.md`          | 覆蓋率目標與目前狀態                                                          |
-| `FREE_TIERS.md`             | 精選免費方案提供者（48+ 個免費提供者 + 11 個 OAuth 提供者）                   |
+| `FREE_TIERS.md`             | 精選免費方案提供者（48+ 免費 + 11 個 OAuth）                                  |
 | `CLI-TOOLS.md`              | 外部 CLI 整合 + 內部 OmniRoute CLI                                            |
 | `I18N.md`                   | i18n 架構、新增語言、67 個地區設定                                            |
 | `UNINSTALL.md`              | 完整解除安裝步驟                                                              |
 | `PROVIDER_REFERENCE.md`     | **自動產生**的 376 個提供者目錄（重新產生：`npm run gen:provider-reference`） |
 
-### 子系統深入解析
+### 子系統深入探討
 
-| 文件                                         | 用途                                                         |
-| -------------------------------------------- | ------------------------------------------------------------ |
-| `MCP-SERVER.md`                              | MCP 伺服器：110 個工具、3 種傳輸方式、33 個作用域、REST 端點 |
-| `A2A-SERVER.md`                              | A2A v0.3：JSON-RPC、6 個技能、REST 輔助工具、代理程式卡片    |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | 統一指南：A2A、ACP 與雲端代理程式的比較                      |
-| `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules 編排                             |
-| `SKILLS.md`                                  | 技能框架（內建 + 市集 + SkillsSH + 沙箱）                    |
-| `RADAR.md`                                   | Radar 免費模型目錄覆蓋層（`RADAR_ENABLED`，預設關閉）        |
-| `MEMORY.md`                                  | 記憶系統（SQLite FTS5 + Qdrant）                             |
-| `EVALS.md`                                   | 評估框架（套件、執行、評分規準）                             |
-| `GUARDRAILS.md`                              | PII 遮蔽器、提示詞注入、視覺橋接器                           |
-| `COMPLIANCE.md`                              | 稽核日誌、保留政策、noLog 選擇退出機制                       |
-| `WEBHOOKS.md`                                | 經 HMAC 簽署的 Webhook 傳遞                                  |
-| `REASONING_REPLAY.md`                        | 用於 `reasoning_content` 的混合式記憶體/SQLite 快取          |
-| `AUTHZ_GUIDE.md`                             | 授權管線（`classify` → `policies` → `enforce`）              |
-| `RESILIENCE_GUIDE.md`                        | 斷路器 + 冷卻機制 + 模型鎖定                                 |
-| `docs/security/STEALTH_GUIDE.md`（僅限 git） | TLS 指紋辨識（JA3/JA4）、Claude Code CCH、中間人憑證         |
-| `AUTO-COMBO.md`                              | Auto Combo 引擎（16 因子評分、6 個模式套件、虛擬工廠）       |
+| 文件                                       | 用途                                                       |
+| ------------------------------------------ | ---------------------------------------------------------- |
+| `MCP-SERVER.md`                            | MCP 伺服器：110 個工具、3 種傳輸方式、33 個範圍、REST 端點 |
+| `A2A-SERVER.md`                            | A2A v0.3：JSON-RPC、6 個技能、REST 輔助工具、代理卡片      |
+| `AGENT_PROTOCOLS_GUIDE.md`                 | 統一指南：A2A vs ACP vs Cloud Agents                       |
+| `CLOUD_AGENT.md`                           | Codex Cloud / Devin / Jules 協調編排                       |
+| `SKILLS.md`                                | Skills 框架（內建 + 市集 + SkillsSH + 沙箱）               |
+| `RADAR.md`                                 | Radar 免費模型目錄覆疊（`RADAR_ENABLED`，預設關閉）        |
+| `MEMORY.md`                                | 記憶系統（SQLite FTS5 + Qdrant）                           |
+| `EVALS.md`                                 | 評估框架（測試套件、執行、評分標準）                       |
+| `GUARDRAILS.md`                            | PII 遮罩器、提示注入防護、視覺橋接                         |
+| `COMPLIANCE.md`                            | 稽核日誌、資料保留、noLog 選擇退出                         |
+| `WEBHOOKS.md`                              | HMAC 簽章的 webhook 遞送                                   |
+| `REASONING_REPLAY.md`                      | `reasoning_content` 的混合記憶體/SQLite 快取               |
+| `AUTHZ_GUIDE.md`                           | 授權管線（`classify` → `policies` → `enforce`）            |
+| `RESILIENCE_GUIDE.md`                      | 斷路器 + 冷卻 + 模型鎖定                                   |
+| `docs/security/STEALTH_GUIDE.md`（僅 git） | TLS 指紋識別（JA3/JA4）、Claude Code CCH、MITM 憑證        |
+| `AUTO-COMBO.md`                            | Auto Combo 引擎（16 因子評分、6 個模式套件、虛擬工廠）     |
 
 ### 壓縮
 
 | 文件                            | 用途                           |
 | ------------------------------- | ------------------------------ |
 | `COMPRESSION_GUIDE.md`          | 壓縮模式概覽 + 路線圖          |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK 引擎、登錄檔合約 |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK 引擎、註冊表契約 |
 | `COMPRESSION_RULES_FORMAT.md`   | Caveman 規則套件 JSON 結構描述 |
 | `COMPRESSION_LANGUAGE_PACKS.md` | 各語言規則套件清單             |
-| `RTK_COMPRESSION.md`            | RTK 宣告式管線（49 個篩選器）  |
+| `RTK_COMPRESSION.md`            | RTK 宣告式管線（56 個篩選器）  |
 
 ### 部署
 
@@ -451,20 +451,20 @@ open-sse/
 | ---------------------------- | --------------------------------------------------------------- |
 | `DOCKER_GUIDE.md`            | Docker 建置、設定檔（base/cli/host/cliproxyapi）、Redis sidecar |
 | `VM_DEPLOYMENT_GUIDE.md`     | 通用 VM/VPS 部署（Ubuntu/Debian + nginx + systemd）             |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io 部署（目前僅提供中文版）                                 |
-| `TERMUX_GUIDE.md`            | 透過 Termux 在 Android 上以無介面模式執行                       |
-| `PWA_GUIDE.md`               | Progressive Web App 安裝 + service worker                       |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io 部署（目前僅有中文版）                                   |
+| `TERMUX_GUIDE.md`            | 透過 Termux 在 Android 上無頭運行                               |
+| `PWA_GUIDE.md`               | 漸進式網頁應用程式（PWA）安裝 + service worker                  |
 | `ELECTRON_GUIDE.md`          | 桌面應用程式建置 + 簽署 + 發佈                                  |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                          |
-| `PROXY_GUIDE.md`             | 4 級對外代理 + 1proxy 市集                                      |
+| `PROXY_GUIDE.md`             | 4 層出站代理 + 1proxy 市集                                      |
 
 ### 子目錄
 
-| 子目錄                | 用途                                                                                                                                                                          |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | 本地化文件翻譯（41 種語言地區）                                                                                                                                               |
-| `docs/screenshots/`   | 指南所用的圖片資源                                                                                                                                                            |
-| `_tasks/superpowers/` | 來自 superpowers（`writing-plans`/`brainstorming`）的計畫／規格 + 研究資料——獨立、單獨進行版本控制的儲存庫，且已被主目錄樹的 git 忽略。請參閱 CLAUDE.md →「規劃與研究產出」。 |
+| 子目錄                | 用途                                                                                                                                                                                         |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | 本地化文件翻譯（41 種語言）                                                                                                                                                                  |
+| `docs/screenshots/`   | 指南使用的圖片資源                                                                                                                                                                           |
+| `_tasks/superpowers/` | 來自 superpowers（`writing-plans`/`brainstorming`）的計畫/規格文件及研究資料 — 獨立隔離、單獨版本控制的儲存庫，已被主目錄樹 gitignore。請參閱 CLAUDE.md →「Planning & Research Artifacts」。 |
 
 ---
 

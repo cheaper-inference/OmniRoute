@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Viešoji dokumentacija (7 šakniniai failai + 17 pakatalogių)
+## `docs/` — Viešoji dokumentacija (7 šakninio lygio failai + 17 pakatalogių)
 
-### Pagrindiniai vadovai
+### Aukščiausio lygio vadovai
 
-| Dokumentas                  | Paskirtis                                                                                                  |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Aukšto lygio architektūra, posistemių žemėlapis, valdymo skydelio sąsaja                                   |
-| `CODEBASE_DOCUMENTATION.md` | Techninė informacija kūrėjams: katalogai, moduliai, susitarimai                                            |
-| `FEATURES.md`               | Funkcijų matrica su svarbiausiais v3.8 pakeitimais                                                         |
-| `USER_GUIDE.md`             | Galutinio naudotojo vadovas (sąranka, modeliai, deriniai, CLI, garsas ir kt.)                              |
-| `API_REFERENCE.md`          | API galinių taškų žinynas su autentifikavimo modeliu                                                       |
-| `openapi.yaml`              | OpenAPI 3.0 specifikacija (121 kelias)                                                                     |
-| `SETUP_GUIDE.md`            | Diegimo būdai (npm, npx, Docker, Electron, Termux, iš šaltinio kodo)                                       |
-| `ENVIRONMENT.md`            | Visi aplinkos kintamieji (dokumentuota ~800, `.env.example` sudaro ~3 050 eilučių)                         |
-| `TROUBLESHOOTING.md`        | Dažnos klaidos ir žinomos v3.8.0 problemos                                                                 |
-| `RELEASE_CHECKLIST.md`      | Visas leidimo procesas (įgūdžiai, husky, įprastiniai commit’ai, diegimas)                                  |
-| `COVERAGE_PLAN.md`          | Aprėpties tikslai ir dabartinė būsena                                                                      |
-| `FREE_TIERS.md`             | Atrinkti nemokamų planų teikėjai (48+ nemokami + 11 OAuth)                                                 |
-| `CLI-TOOLS.md`              | Išorinės CLI integracijos ir vidinė OmniRoute CLI                                                          |
-| `I18N.md`                   | i18n architektūra, kalbos pridėjimas, 67 lokalės                                                           |
-| `UNINSTALL.md`              | Švaraus pašalinimo veiksmai                                                                                |
-| `PROVIDER_REFERENCE.md`     | **Automatiškai sugeneruotas** 376 teikėjų katalogas (generuoti iš naujo: `npm run gen:provider-reference`) |
+| Dokumentas                  | Paskirtis                                                                                       |
+| --------------------------- | ----------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Aukšto lygio architektūra, posistemių žemėlapis, valdymo skydo sąsaja                           |
+| `CODEBASE_DOCUMENTATION.md` | Inžinerinė nuoroda: katalogai, moduliai, konvencijos                                            |
+| `FEATURES.md`               | Funkcijų matrica su v3.8 akcentais                                                              |
+| `USER_GUIDE.md`             | Galutinio vartotojo vadovas (sąranka, modeliai, kombinacijos, CLI, garsas ir kt.)               |
+| `API_REFERENCE.md`          | API galinių taškų nuoroda su autentifikacijos modeliu                                           |
+| `openapi.yaml`              | OpenAPI 3.0 specifikacija (121 kelias)                                                          |
+| `SETUP_GUIDE.md`            | Diegimo būdai (npm, npx, Docker, Electron, Termux, išeities kodas)                              |
+| `ENVIRONMENT.md`            | Visi aplinkos kintamieji (~800 dokumentuota, ~3 050 eilučių `.env.example`)                     |
+| `TROUBLESHOOTING.md`        | Dažnos klaidos + v3.8.0 žinomos problemos                                                       |
+| `RELEASE_CHECKLIST.md`      | Pilna leidimo eiga (skills, husky, conventional commits, diegimas)                              |
+| `COVERAGE_PLAN.md`          | Kodo padengimo tikslai ir dabartinė būsena                                                      |
+| `FREE_TIERS.md`             | Atrinkti nemokamų planų teikėjai (48+ nemokami + 11 OAuth)                                      |
+| `CLI-TOOLS.md`              | Išorinės CLI integracijos + vidinė OmniRoute CLI                                                |
+| `I18N.md`                   | i18n architektūra, kalbos pridėjimas, 67 lokalės                                                |
+| `UNINSTALL.md`              | Švaraus pašalinimo veiksmai                                                                     |
+| `PROVIDER_REFERENCE.md`     | **Automatiškai generuojamas** 376 teikėjų katalogas (atkurti: `npm run gen:provider-reference`) |
 
-### Išsamūs posistemių aprašai
+### Išsamios posistemių apžvalgos
 
-| Dokumentas                                 | Paskirtis                                                                                      |
-| ------------------------------------------ | ---------------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                            | MCP serveris: 110 įrankių, 3 transportai, 33 sritys, REST galiniai taškai                      |
-| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 įgūdžiai, REST pagalbinės priemonės, agento kortelė                      |
-| `AGENT_PROTOCOLS_GUIDE.md`                 | Bendras vadovas: A2A, ACP ir debesijos agentų palyginimas                                      |
-| `CLOUD_AGENT.md`                           | Codex Cloud / Devin / Jules orkestravimas                                                      |
-| `SKILLS.md`                                | Įgūdžių sistema (integruoti + prekyvietė + SkillsSH + izoliuota aplinka)                       |
-| `RADAR.md`                                 | Radar nemokamų modelių katalogo perdanga (`RADAR_ENABLED`, pagal numatytąją nuostatą išjungta) |
-| `MEMORY.md`                                | Atminties sistema (SQLite FTS5 + Qdrant)                                                       |
-| `EVALS.md`                                 | Vertinimo sistema (rinkiniai, vykdymai, vertinimo kriterijai)                                  |
-| `GUARDRAILS.md`                            | PII maskavimas, raginimų injekcijos, vaizdų tiltas                                             |
-| `COMPLIANCE.md`                            | Audito žurnalas, saugojimas, atsisakymas naudojant noLog                                       |
-| `WEBHOOKS.md`                              | HMAC pasirašytų webhook’ų pristatymas                                                          |
-| `REASONING_REPLAY.md`                      | Hibridinė atminties / SQLite podėlio sistema, skirta `reasoning_content`                       |
-| `AUTHZ_GUIDE.md`                           | Autorizavimo konvejeris (`classify` → `policies` → `enforce`)                                  |
-| `RESILIENCE_GUIDE.md`                      | Grandinės pertraukiklis + atvėsimo laikotarpis + modelio blokavimas                            |
-| `docs/security/STEALTH_GUIDE.md` (tik git) | TLS kontrolinių atspaudų kūrimas (JA3/JA4), Claude Code CCH, MITM sertifikatas                 |
-| `AUTO-COMBO.md`                            | Auto Combo variklis (16 veiksnių vertinimas, 6 režimų paketai, virtualioji gamykla)            |
+| Dokumentas                                 | Paskirtis                                                                                  |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `MCP-SERVER.md`                            | MCP serveris: 110 įrankių, 3 perdavimo protokolai, 33 taikymo sritys, REST galiniai taškai |
+| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 įgūdžiai, REST pagalbinės funkcijos, agento kortelė                  |
+| `AGENT_PROTOCOLS_GUIDE.md`                 | Vieningas vadovas: A2A vs ACP vs Cloud Agents                                              |
+| `CLOUD_AGENT.md`                           | Codex Cloud / Devin / Jules orkestravimas                                                  |
+| `SKILLS.md`                                | Įgūdžių karkasas (integruoti + marketplace + SkillsSH + smėlio dėžė)                       |
+| `RADAR.md`                                 | Radar nemokamų modelių katalogo sluoksnis (`RADAR_ENABLED`, pagal numatymą išjungta)       |
+| `MEMORY.md`                                | Atminties sistema (SQLite FTS5 + Qdrant)                                                   |
+| `EVALS.md`                                 | Vertinimo karkasas (rinkiniai, paleidimai, vertinimo kriterijai)                           |
+| `GUARDRAILS.md`                            | PII maskavimas, prompt injekcijų apsauga, vaizdo tiltas                                    |
+| `COMPLIANCE.md`                            | Audito žurnalas, saugojimo laikotarpis, noLog atsisakymas                                  |
+| `WEBHOOKS.md`                              | HMAC pasirašytas webhook pristatymas                                                       |
+| `REASONING_REPLAY.md`                      | Hibridinė atminties/SQLite talpykla, skirta `reasoning_content`                            |
+| `AUTHZ_GUIDE.md`                           | Autorizavimo procesas (`classify` → `policies` → `enforce`)                                |
+| `RESILIENCE_GUIDE.md`                      | Grandinės pertraukiklis + atvėsimo laikotarpis + modelio užblokavimas                      |
+| `docs/security/STEALTH_GUIDE.md` (tik git) | TLS pirštų atspaudų atpažinimas (JA3/JA4), Claude Code CCH, MITM sertifikatas              |
+| `AUTO-COMBO.md`                            | Auto Combo variklis (16 faktorių vertinimas, 6 režimų paketai, virtuali gamykla)           |
 
 ### Glaudinimas
 
-| Dokumentas                      | Paskirtis                                    |
-| ------------------------------- | -------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Glaudinimo režimų apžvalga ir veiksmų planas |
-| `COMPRESSION_ENGINES.md`        | Caveman ir RTK varikliai, registro sutartis  |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman taisyklių paketo JSON schema         |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Atskirų kalbų taisyklių paketų sąrašas       |
-| `RTK_COMPRESSION.md`            | RTK deklaratyvusis konvejeris (49 filtrai)   |
+| Dokumentas                      | Paskirtis                                   |
+| ------------------------------- | ------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Glaudinimo režimų apžvalga + veiksmų planas |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK varikliai, registro sutartis  |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman taisyklių paketo JSON schema        |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Taisyklių paketų pagal kalbas sąrašas       |
+| `RTK_COMPRESSION.md`            | RTK deklaratyvus procesas (56 filtrai)      |
 
 ### Diegimas
 
-| Dokumentas                   | Paskirtis                                                                           |
-| ---------------------------- | ----------------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker kūrimas, profiliai (base/cli/host/cliproxyapi), papildomas Redis konteineris |
-| `VM_DEPLOYMENT_GUIDE.md`     | Bendras diegimas VM/VPS aplinkoje (Ubuntu/Debian + nginx + systemd)                 |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Diegimas Fly.io aplinkoje (šiuo metu tik kinų kalba)                                |
-| `TERMUX_GUIDE.md`            | Android veikimas be grafinės sąsajos naudojant Termux                               |
-| `PWA_GUIDE.md`               | Progresyviosios žiniatinklio programos diegimas + tarnybinė programa                |
-| `ELECTRON_GUIDE.md`          | Darbalaukio programos kūrimas + pasirašymas + platinimas                            |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                              |
-| `PROXY_GUIDE.md`             | 4 lygių išeinantis tarpinis serveris + 1proxy prekyvietė                            |
+| Dok.                         | Paskirtis                                                            |
+| ---------------------------- | -------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker kūrimas, profiliai (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Bendrasis VM/VPS diegimas (Ubuntu/Debian + nginx + systemd)          |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io diegimas (šiuo metu tik kinų kalba)                           |
+| `TERMUX_GUIDE.md`            | Android headless režimas per Termux                                  |
+| `PWA_GUIDE.md`               | Progressive Web App diegimas + service worker                        |
+| `ELECTRON_GUIDE.md`          | Darbalaukio programos kūrimas + pasirašymas + platinimas             |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                               |
+| `PROXY_GUIDE.md`             | 4 lygių išeinantis proxy + 1proxy turgavietė                         |
 
 ### Pakatalogiai
 
-| Pakatalogis           | Paskirtis                                                                                                                                                                                                           |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokalizuoti dokumentacijos vertimai (41 lokalė)                                                                                                                                                                     |
-| `docs/screenshots/`   | Vadovams skirti vaizdų ištekliai                                                                                                                                                                                    |
-| `_tasks/superpowers/` | Planai / specifikacijos iš superpowers (`writing-plans`/`brainstorming`) + tyrimai — izoliuota, atskirai versijuojama saugykla, kurios nepaiso pagrindinis medis. Žr. CLAUDE.md → „Planavimo ir tyrimų artefaktai“. |
+| Pakatalogis           | Paskirtis                                                                                                                                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokalizuoti dokumentacijos vertimai (41 lokalė)                                                                                                                                                                            |
+| `docs/screenshots/`   | Vadovų paveikslėlių failai                                                                                                                                                                                                 |
+| `_tasks/superpowers/` | Planai ir specifikacijos iš superpowers (`writing-plans`/`brainstorming`) + tyrimai — izoliuota, atskirai versijuojama repozitorija, pagrindinio medžio gitignore sąraše. Žr. CLAUDE.md → „Planning & Research Artifacts“. |
 
 ---
 

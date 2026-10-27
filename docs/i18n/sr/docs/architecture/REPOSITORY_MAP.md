@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Јавна документација (7 коренских датотека + 17 поддиректоријума)
+## `docs/` — Јавна документација (7 корених датотека + 17 поддиректоријума)
 
 ### Водичи највишег нивоа
 
-| Документ                    | Намена                                                                                                |
-| --------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Архитектура високог нивоа, мапа подсистема, површина контролне табле                                  |
-| `CODEBASE_DOCUMENTATION.md` | Инжењерска референца: директоријуми, модули, конвенције                                               |
-| `FEATURES.md`               | Матрица функционалности са најважнијим новинама у v3.8                                                |
-| `USER_GUIDE.md`             | Приручник за крајње кориснике (подешавање, модели, комбинације, CLI-ји, звук итд.)                    |
-| `API_REFERENCE.md`          | Референца API крајњих тачака са моделом аутентификације                                               |
-| `openapi.yaml`              | OpenAPI 3.0 спецификација (121 путања)                                                                |
-| `SETUP_GUIDE.md`            | Начини инсталације (npm, npx, Docker, Electron, Termux, изворни код)                                  |
-| `ENVIRONMENT.md`            | Све променљиве окружења (~800 документованих, ~3.050 редова у `.env.example`)                         |
-| `TROUBLESHOOTING.md`        | Уобичајене грешке + познати проблеми у v3.8.0                                                         |
-| `RELEASE_CHECKLIST.md`      | Комплетан ток издавања (вештине, husky, конвенционални комитови, примена)                             |
-| `COVERAGE_PLAN.md`          | Циљеви покривености и тренутно стање                                                                  |
-| `FREE_TIERS.md`             | Одабрани добављачи бесплатних пакета (48+ бесплатних + 11 OAuth)                                      |
-| `CLI-TOOLS.md`              | Спољне CLI интеграције + интерни OmniRoute CLI                                                        |
-| `I18N.md`                   | i18n архитектура, додавање језика, 67 локализација                                                    |
-| `UNINSTALL.md`              | Кораци за чисту деинсталацију                                                                         |
-| `PROVIDER_REFERENCE.md`     | **Аутоматски генерисан** каталог 376 добављача (поновно генерисање: `npm run gen:provider-reference`) |
+| Документ                    | Сврха                                                                                                  |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | Архитектура високог нивоа, мапа подсистема, површина надзорне табле                                    |
+| `CODEBASE_DOCUMENTATION.md` | Инжењерска референца: директоријуми, модули, конвенције                                                |
+| `FEATURES.md`               | Матрица функција са истакнутим новитетима у v3.8                                                       |
+| `USER_GUIDE.md`             | Приручник за крајње кориснике (подешавање, модели, комбоји, CLI алати, аудио итд.)                     |
+| `API_REFERENCE.md`          | Референца API крајњих тачака са моделом аутентификације                                                |
+| `openapi.yaml`              | OpenAPI 3.0 спецификација (121 путања)                                                                 |
+| `SETUP_GUIDE.md`            | Методе инсталације (npm, npx, Docker, Electron, Termux, изворни код)                                   |
+| `ENVIRONMENT.md`            | Све променљиве окружења (~800 документованих, ~3.050 линија у `.env.example`)                          |
+| `TROUBLESHOOTING.md`        | Уобичајене грешке + познати проблеми у v3.8.0                                                          |
+| `RELEASE_CHECKLIST.md`      | Комплетан ток издања (вештине, husky, conventional commits, размештање)                                |
+| `COVERAGE_PLAN.md`          | Циљеви покривености и тренутно стање                                                                   |
+| `FREE_TIERS.md`             | Курирани провајдери бесплатних нивоа (48+ бесплатних + 11 OAuth)                                       |
+| `CLI-TOOLS.md`              | Интеграције спољних CLI алата + интерни OmniRoute CLI                                                  |
+| `I18N.md`                   | i18n архитектура, додавање језика, 67 локала                                                           |
+| `UNINSTALL.md`              | Кораци за чисту деинсталацију                                                                          |
+| `PROVIDER_REFERENCE.md`     | **Аутоматски генерисан** каталог 376 провајдера (поновно генерисање: `npm run gen:provider-reference`) |
 
-### Детаљни прегледи подсистема
+### Дубинске анализе подсистема
 
-| Документ                                    | Намена                                                                                   |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | MCP сервер: 110 алата, 3 транспорта, 33 опсега, REST крајње тачке                        |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 вештина, REST помоћне функције, картица агента                     |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | Обједињени водич: A2A наспрам ACP-а наспрам агената у облаку                             |
-| `CLOUD_AGENT.md`                            | Оркестрација Codex Cloud / Devin / Jules                                                 |
-| `SKILLS.md`                                 | Оквир вештина (уграђене + маркетплејс + SkillsSH + sandbox)                              |
-| `RADAR.md`                                  | Слој Radar каталога бесплатних модела (`RADAR_ENABLED`, подразумевано искључен)          |
-| `MEMORY.md`                                 | Систем меморије (SQLite FTS5 + Qdrant)                                                   |
-| `EVALS.md`                                  | Оквир за евалуацију (скупови, покретања, рубрике)                                        |
-| `GUARDRAILS.md`                             | Маскирање личних података, убацивање упита, мост за визуелни садржај                     |
-| `COMPLIANCE.md`                             | Дневник ревизије, задржавање, одустајање преко noLog                                     |
-| `WEBHOOKS.md`                               | Испорука webhook-ова потписана HMAC-ом                                                   |
-| `REASONING_REPLAY.md`                       | Хибридни меморијски/SQLite кеш за `reasoning_content`                                    |
-| `AUTHZ_GUIDE.md`                            | Ток ауторизације (`classify` → `policies` → `enforce`)                                   |
-| `RESILIENCE_GUIDE.md`                       | Прекидач кола + период хлађења + блокирање модела                                        |
-| `docs/security/STEALTH_GUIDE.md` (само git) | TLS идентификација отиском (JA3/JA4), Claude Code CCH, MITM сертификат                   |
-| `AUTO-COMBO.md`                             | Механизам Auto Combo (бодовање на основу 16 фактора, 6 пакета режима, виртуелна фабрика) |
+| Документ                                    | Сврха                                                                              |
+| ------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | MCP сервер: 110 алата, 3 транспорта, 33 опсега, REST крајње тачке                  |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 вештина, REST помоћници, картица агента                      |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | Унификовани водич: A2A vs ACP vs Cloud Agents                                      |
+| `CLOUD_AGENT.md`                            | Оркестрација Codex Cloud / Devin / Jules                                           |
+| `SKILLS.md`                                 | Оквир вештина (уграђене + тржиште + SkillsSH + песковник)                          |
+| `RADAR.md`                                  | Radar преклоп каталога бесплатних модела (`RADAR_ENABLED`, подразумевано искључен) |
+| `MEMORY.md`                                 | Систем меморије (SQLite FTS5 + Qdrant)                                             |
+| `EVALS.md`                                  | Оквир за евалуацију (пакети, покретања, рубрике)                                   |
+| `GUARDRAILS.md`                             | Маскирање PII података, убризгавање упита, визуелни мост                           |
+| `COMPLIANCE.md`                             | Дневник ревизије, задржавање, одјава из noLog                                      |
+| `WEBHOOKS.md`                               | Испорука webhook-ова потписана HMAC потписом                                       |
+| `REASONING_REPLAY.md`                       | Хибридни меморијски/SQLite кеш за `reasoning_content`                              |
+| `AUTHZ_GUIDE.md`                            | Пајплајн ауторизације (`classify` → `policies` → `enforce`)                        |
+| `RESILIENCE_GUIDE.md`                       | Прекидач кола + хлађење + закључавање модела                                       |
+| `docs/security/STEALTH_GUIDE.md` (само git) | TLS препознавање отиска (JA3/JA4), Claude Code CCH, MITM сертификат                |
+| `AUTO-COMBO.md`                             | Auto Combo механизам (бодовање по 16 фактора, 6 пакета режима, виртуелна фабрика)  |
 
 ### Компресија
 
-| Документ                        | Намена                                   |
+| Документ                        | Сврха                                    |
 | ------------------------------- | ---------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Преглед режима компресије + план развоја |
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK механизми, уговор регистра |
-| `COMPRESSION_RULES_FORMAT.md`   | JSON шема пакета Caveman правила         |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Инвентар пакета правила за сваки језик   |
-| `RTK_COMPRESSION.md`            | RTK декларативни ток обраде (49 филтера) |
+| `COMPRESSION_RULES_FORMAT.md`   | JSON шема Caveman пакета правила         |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Попис пакета правила по језицима         |
+| `RTK_COMPRESSION.md`            | RTK декларативни пајплајн (56 филтера)   |
 
-### Примена
+### Размештање
 
-| Документ                     | Намена                                                                        |
-| ---------------------------- | ----------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker изградња, профили (base/cli/host/cliproxyapi), Redis пратећи контејнер |
-| `VM_DEPLOYMENT_GUIDE.md`     | Генеричко постављање на VM/VPS (Ubuntu/Debian + nginx + systemd)              |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Постављање на Fly.io (тренутно само на кинеском)                              |
-| `TERMUX_GUIDE.md`            | Android без графичког интерфејса путем Termux-а                               |
-| `PWA_GUIDE.md`               | Инсталација прогресивне веб-апликације + сервисни радник                      |
-| `ELECTRON_GUIDE.md`          | Изградња + потписивање + дистрибуција десктоп апликације                      |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                        |
-| `PROXY_GUIDE.md`             | Излазни прокси са 4 нивоа + 1proxy тржиште                                    |
+| Dokument                     | Namena                                                             |
+| ---------------------------- | ------------------------------------------------------------------ |
+| `DOCKER_GUIDE.md`            | Docker izrada, profili (base/cli/host/cliproxyapi), Redis sidecar  |
+| `VM_DEPLOYMENT_GUIDE.md`     | Generičko postavljanje na VM/VPS (Ubuntu/Debian + nginx + systemd) |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Postavljanje na Fly.io (trenutno samo na kineskom)                 |
+| `TERMUX_GUIDE.md`            | Android headless režim preko Termux-a                              |
+| `PWA_GUIDE.md`               | Instalacija Progressive Web App-a + service worker                 |
+| `ELECTRON_GUIDE.md`          | Izrada desktop aplikacije + potpisivanje + distribucija            |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                             |
+| `PROXY_GUIDE.md`             | 4-nivojni odlazni proksi + 1proxy prodavnica                       |
 
-### Потфасцикле
+### Pod direktorijumi
 
-| Потфасцикла           | Намена                                                                                                                                                                                                                                         |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Локализовани преводи документације (41 локализација)                                                                                                                                                                                           |
-| `docs/screenshots/`   | Сликовни ресурси за водиче                                                                                                                                                                                                                     |
-| `_tasks/superpowers/` | Планови/спецификације из superpowers (`writing-plans`/`brainstorming`) + истраживање — изоловани репозиторијум са засебним верзионисањем, који главно стабло игнорише путем git-а. Погледајте CLAUDE.md → „Артефакти планирања и истраживања“. |
+| Poddir                | Namena                                                                                                                                                                                                                                  |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokalizovani prevodi dokumentacije (41 lokalizacija)                                                                                                                                                                                    |
+| `docs/screenshots/`   | Slikovni resursi za vodiče                                                                                                                                                                                                              |
+| `_tasks/superpowers/` | Planovi/specifikacije iz superpowers (`writing-plans`/`brainstorming`) + istraživanje — izolovan, zasebno verzionisan repo, ignorisan od strane glavnog stabla putem gitignore. Pogledajte CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

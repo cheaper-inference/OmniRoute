@@ -393,78 +393,78 @@ open-sse/
 
 ## `docs/` — Avalik dokumentatsioon (7 juurfaili + 17 alamkataloogi)
 
-### Üldjuhendid
+### Ülataseme juhendid
 
-| Dokument                    | Otstarve                                                                                                  |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Kõrgtaseme arhitektuur, alamsüsteemide kaart, juhtpaneeli liides                                          |
-| `CODEBASE_DOCUMENTATION.md` | Tehniline teatmik: kataloogid, moodulid, kokkulepped                                                      |
-| `FEATURES.md`               | Funktsioonide maatriks koos v3.8 olulisemate uuendustega                                                  |
-| `USER_GUIDE.md`             | Lõppkasutaja käsiraamat (seadistus, mudelid, kombinatsioonid, CLI-d, heli jne)                            |
-| `API_REFERENCE.md`          | API lõpp-punktide teatmik koos autentimismudeliga                                                         |
-| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsioon (121 teed)                                                                   |
-| `SETUP_GUIDE.md`            | Paigaldusviisid (npm, npx, Docker, Electron, Termux, lähtekood)                                           |
-| `ENVIRONMENT.md`            | Kõik keskkonnamuutujad (~800 dokumenteeritud, `.env.example` ~3050 rida)                                  |
-| `TROUBLESHOOTING.md`        | Levinud vead + v3.8.0 teadaolevad probleemid                                                              |
-| `RELEASE_CHECKLIST.md`      | Täielik väljalaskeprotsess (oskused, husky, tavapärased sissekanded, juurutamine)                         |
-| `COVERAGE_PLAN.md`          | Testikatte eesmärgid ja praegune seis                                                                     |
-| `FREE_TIERS.md`             | Kureeritud tasuta tasemega teenusepakkujad (48+ tasuta + 11 OAuth)                                        |
-| `CLI-TOOLS.md`              | Välised CLI-integratsioonid + sisemine OmniRoute CLI                                                      |
-| `I18N.md`                   | i18n arhitektuur, keele lisamine, 67 lokaati                                                              |
-| `UNINSTALL.md`              | Puhta desinstallimise juhised                                                                             |
-| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** 376 teenusepakkuja kataloog (taasloomine: `npm run gen:provider-reference`) |
+| Dok                         | Eesmärk                                                                                                |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | Kõrgtaseme arhitektuur, alamsüsteemide kaart, armatuurlaua pind                                        |
+| `CODEBASE_DOCUMENTATION.md` | Tehniline viide: kataloogid, moodulid, konventsioonid                                                  |
+| `FEATURES.md`               | Funktsioonimaatriks koos v3.8 esiletõstetega                                                           |
+| `USER_GUIDE.md`             | Lõppkasutaja juhend (seadistus, mudelid, kombod, CLI-d, heli jne)                                      |
+| `API_REFERENCE.md`          | API lõpp-punktide viide koos autentimismudeliga                                                        |
+| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsioon (121 teed)                                                                |
+| `SETUP_GUIDE.md`            | Paigaldusmeetodid (npm, npx, Docker, Electron, Termux, lähtekood)                                      |
+| `ENVIRONMENT.md`            | Kõik keskkonnamuutujad (~800 dokumenteeritud, ~3 050 rida `.env.example`-is)                           |
+| `TROUBLESHOOTING.md`        | Levinud vead + v3.8.0 teadaolevad probleemid                                                           |
+| `RELEASE_CHECKLIST.md`      | Täielik väljalaskevoog (skills, husky, conventional commits, juurutus)                                 |
+| `COVERAGE_PLAN.md`          | Kattuvuse eesmärgid ja praegune seis                                                                   |
+| `FREE_TIERS.md`             | Kureeritud tasuta taseme pakkujad (48+ tasuta + 11 OAuth-i)                                            |
+| `CLI-TOOLS.md`              | Välised CLI-integreerimised + sisemine OmniRoute CLI                                                   |
+| `I18N.md`                   | i18n arhitektuur, keele lisamine, 67 lokaati                                                           |
+| `UNINSTALL.md`              | Puhta desinstallimise sammud                                                                           |
+| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** 376 pakkuja kataloog (regenereerimine: `npm run gen:provider-reference`) |
 
-### Alamsüsteemide üksikasjalikud kirjeldused
+### Alamsüsteemide süvitsiminekud
 
-| Dokument                                      | Otstarve                                                                           |
-| --------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | MCP-server: 110 tööriista, 3 transporti, 33 skoopy, REST-lõpp-punktid              |
-| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 oskust, REST-abifunktsioonid, agendikaart                    |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | Ühtne juhend: A2A vs ACP vs pilveagendid                                           |
-| `CLOUD_AGENT.md`                              | Codex Cloudi / Devini / Julesi orkestreerimine                                     |
-| `SKILLS.md`                                   | Oskuste raamistik (sisseehitatud + turuplats + SkillsSH + liivakast)               |
-| `RADAR.md`                                    | Radari tasuta mudelite kataloogi ülekate (`RADAR_ENABLED`, vaikimisi väljas)       |
-| `MEMORY.md`                                   | Mälusüsteem (SQLite FTS5 + Qdrant)                                                 |
-| `EVALS.md`                                    | Hindamisraamistik (komplektid, käitused, hindamisjuhised)                          |
-| `GUARDRAILS.md`                               | Isikuandmete masker, viibasüst, nägemissild                                        |
-| `COMPLIANCE.md`                               | Auditilogi, säilitamine, noLogist loobumine                                        |
-| `WEBHOOKS.md`                                 | HMAC-allkirjastatud webhook’ide edastamine                                         |
-| `REASONING_REPLAY.md`                         | Hübriidmälu / SQLite’i vahemälu `reasoning_content` jaoks                          |
-| `AUTHZ_GUIDE.md`                              | Autoriseerimiskonveier (`classify` → `policies` → `enforce`)                       |
-| `RESILIENCE_GUIDE.md`                         | Kaitselüliti + ooteaeg + mudeli lukustus                                           |
-| `docs/security/STEALTH_GUIDE.md` (ainult git) | TLS-sõrmejäljestamine (JA3/JA4), Claude Code CCH, MITM-sertifikaat                 |
-| `AUTO-COMBO.md`                               | Auto Combo mootor (16 teguriga punktiarvestus, 6 režiimipaketti, virtuaalne tehas) |
+| Dok                                             | Eesmärk                                                                               |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                                 | MCP server: 110 tööriista, 3 transporti, 33 skoopi, REST-i lõpp-punktid               |
+| `A2A-SERVER.md`                                 | A2A v0.3: JSON-RPC, 6 oskust, REST-i abimeetodid, agendikaart                         |
+| `AGENT_PROTOCOLS_GUIDE.md`                      | Ühtne juhend: A2A vs ACP vs Cloud Agents                                              |
+| `CLOUD_AGENT.md`                                | Codex Cloud / Devin / Jules orkestreerimine                                           |
+| `SKILLS.md`                                     | Skills-raamistik (sisseehitatud + turuplats + SkillsSH + liivakast)                   |
+| `RADAR.md`                                      | Radari tasuta mudelite kataloogi ülekate (`RADAR_ENABLED`, vaikimisi välja lülitatud) |
+| `MEMORY.md`                                     | Mälusüsteem (SQLite FTS5 + Qdrant)                                                    |
+| `EVALS.md`                                      | Hindamisraamistik (komplektid, käivitused, ruubrikud)                                 |
+| `GUARDRAILS.md`                                 | PII-maskeerija, käskluse injektsioon, nägemissild                                     |
+| `COMPLIANCE.md`                                 | Auditilogi, säilitamine, noLog-st loobumine                                           |
+| `WEBHOOKS.md`                                   | HMAC-allkirjastatud webhooki kohaletoimetamine                                        |
+| `REASONING_REPLAY.md`                           | Hübriidne mälu-/SQLite-vahemälu `reasoning_content` jaoks                             |
+| `AUTHZ_GUIDE.md`                                | Autoriseerimiskonveier (`classify` → `policies` → `enforce`)                          |
+| `RESILIENCE_GUIDE.md`                           | Ahelakatkesti + cooldown + mudeli lukustus                                            |
+| `docs/security/STEALTH_GUIDE.md` (ainult gitis) | TLS-i sõrmejäljetuvastus (JA3/JA4), Claude Code CCH, MITM-sertifikaat                 |
+| `AUTO-COMBO.md`                                 | Auto Combo mootor (16-teguriline hindamine, 6 režiimipaketti, virtuaaltehas)          |
 
 ### Tihendamine
 
-| Dokument                        | Otstarve                                 |
-| ------------------------------- | ---------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Tihendusrežiimide ülevaade + tegevuskava |
-| `COMPRESSION_ENGINES.md`        | Cavemani + RTK mootorid, registri leping |
-| `COMPRESSION_RULES_FORMAT.md`   | Cavemani reeglipaketi JSON-skeem         |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Keelepõhiste reeglipakettide inventuur   |
-| `RTK_COMPRESSION.md`            | RTK deklaratiivne konveier (49 filtrit)  |
+| Dok                             | Eesmärk                                 |
+| ------------------------------- | --------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Tihendamisrežiimide ülevaade + teekaart |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK mootorid, registri leping |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman reeglipaki JSON-skeem           |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Keelekohtane reeglipakkide inventuur    |
+| `RTK_COMPRESSION.md`            | RTK deklaratiivne konveier (56 filtrit) |
 
 ### Juurutamine
 
-| Dokument                     | Eesmärk                                                                   |
+| Dok                          | Eesmärk                                                                   |
 | ---------------------------- | ------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Dockeri koostamine, profiilid (base/cli/host/cliproxyapi), Redise sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Üldine juurutamine VM-i/VPS-i (Ubuntu/Debian + nginx + systemd)           |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Juurutamine Fly.io-s (praegu ainult hiina keeles)                         |
-| `TERMUX_GUIDE.md`            | Androidi taustarežiim Termuxi kaudu                                       |
+| `DOCKER_GUIDE.md`            | Dockeri ehitamine, profiilid (base/cli/host/cliproxyapi), Redis'i sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Üldine VM-i/VPS-i juurutus (Ubuntu/Debian + nginx + systemd)              |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io juurutus (praegu ainult hiina keeles)                              |
+| `TERMUX_GUIDE.md`            | Androidi headless-režiim Termuxi kaudu                                    |
 | `PWA_GUIDE.md`               | Progressiivse veebirakenduse installimine + service worker                |
-| `ELECTRON_GUIDE.md`          | Töölauarakenduse koostamine + allkirjastamine + levitamine                |
+| `ELECTRON_GUIDE.md`          | Töölauarakenduse ehitamine + allkirjastamine + levitamine                 |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                    |
-| `PROXY_GUIDE.md`             | Neljatasemeline väljaminev puhverserver + 1proxy turg                     |
+| `PROXY_GUIDE.md`             | 4-tasemeline väljuvproksi + 1proxy turuplats                              |
 
-### Alamkataloogid
+### Alamkaustad
 
-| Alamkataloog          | Eesmärk                                                                                                                                                                                                                              |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | Dokumentatsiooni lokaliseeritud tõlked (41 lokaati)                                                                                                                                                                                  |
-| `docs/screenshots/`   | Juhendite pildifailid                                                                                                                                                                                                                |
-| `_tasks/superpowers/` | Superpowersi plaanid/spetsifikatsioonid (`writing-plans`/`brainstorming`) + uurimismaterjalid — isoleeritud, eraldi versioonihaldusega hoidla, mida põhipuu gitignore eirab. Vt CLAUDE.md → „Planeerimise ja uurimistöö artefaktid“. |
+| Alamkaust             | Eesmärk                                                                                                                                                                                                                                            |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokaliseeritud dokumentide tõlked (41 lokaati)                                                                                                                                                                                                     |
+| `docs/screenshots/`   | Juhendite pildimaterjal                                                                                                                                                                                                                            |
+| `_tasks/superpowers/` | Plaanid ja spetsifikatsioonid tööriistast superpowers (`writing-plans`/`brainstorming`) + uurimused — isoleeritud, eraldi versioonitav repositoorium, mille põhipuu on gitignore'iga välja jätnud. Vt CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

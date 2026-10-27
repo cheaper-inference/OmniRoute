@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — ਜਨਤਕ ਦਸਤਾਵੇਜ਼ੀਕਰਨ (7 ਰੂਟ ਫ਼ਾਈਲਾਂ + 17 ਉਪ-ਡਾਇਰੈਕਟਰੀਆਂ)
+## `docs/` — ਪਬਲਿਕ ਦਸਤਾਵੇਜ਼ (7 ਰੂਟ ਫਾਈਲਾਂ + 17 ਸਬਡਾਇਰੈਕਟਰੀਆਂ)
 
-### ਸਿਖਰਲੇ ਪੱਧਰ ਦੀਆਂ ਗਾਈਡਾਂ
+### ਟੌਪ-ਲੈਵਲ ਗਾਈਡਾਂ
 
-| ਦਸਤਾਵੇਜ਼                    | ਉਦੇਸ਼                                                                                                     |
-| --------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | ਉੱਚ-ਪੱਧਰੀ ਆਰਕੀਟੈਕਚਰ, ਸਬ-ਸਿਸਟਮ ਨਕਸ਼ਾ, ਡੈਸ਼ਬੋਰਡ ਸਤ੍ਹਾ                                                       |
-| `CODEBASE_DOCUMENTATION.md` | ਇੰਜੀਨੀਅਰਿੰਗ ਹਵਾਲਾ: ਡਾਇਰੈਕਟਰੀਆਂ, ਮੋਡੀਊਲ, ਪਰੰਪਰਾਵਾਂ                                                         |
-| `FEATURES.md`               | v3.8 ਦੀਆਂ ਮੁੱਖ ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ ਸਮੇਤ ਫ਼ੀਚਰ ਮੈਟ੍ਰਿਕਸ                                                           |
-| `USER_GUIDE.md`             | ਅੰਤਿਮ ਉਪਭੋਗਤਾ ਮੈਨੂਅਲ (ਸੈੱਟਅੱਪ, ਮਾਡਲ, ਕੌਂਬੋ, CLI, ਆਡੀਓ ਆਦਿ)                                                |
-| `API_REFERENCE.md`          | ਪ੍ਰਮਾਣੀਕਰਨ ਮਾਡਲ ਸਮੇਤ API ਐਂਡਪੌਇੰਟ ਹਵਾਲਾ                                                                   |
-| `openapi.yaml`              | OpenAPI 3.0 ਵਿਸ਼ੇਸ਼ਤਾ (121 ਪਾਥ)                                                                           |
-| `SETUP_GUIDE.md`            | ਇੰਸਟਾਲੇਸ਼ਨ ਵਿਧੀਆਂ (npm, npx, Docker, Electron, Termux, ਸਰੋਤ)                                              |
-| `ENVIRONMENT.md`            | ਸਾਰੇ ਵਾਤਾਵਰਣ ਵੇਰੀਏਬਲ (~800 ਦਸਤਾਵੇਜ਼ਬੱਧ, `.env.example` ਦੀਆਂ ~3,050 ਲਾਈਨਾਂ)                                |
-| `TROUBLESHOOTING.md`        | ਆਮ ਗਲਤੀਆਂ + v3.8.0 ਦੀਆਂ ਜਾਣੀਆਂ-ਪਛਾਣੀਆਂ ਸਮੱਸਿਆਵਾਂ                                                          |
-| `RELEASE_CHECKLIST.md`      | ਸੰਪੂਰਨ ਰਿਲੀਜ਼ ਪ੍ਰਵਾਹ (ਸਕਿੱਲਾਂ, husky, ਪਰੰਪਰਾਗਤ ਕਮਿਟ, ਡਿਪਲੌਇਮੈਂਟ)                                          |
-| `COVERAGE_PLAN.md`          | ਕਵਰੇਜ ਟੀਚੇ ਅਤੇ ਮੌਜੂਦਾ ਸਥਿਤੀ                                                                               |
-| `FREE_TIERS.md`             | ਚੁਣੇ ਹੋਏ ਮੁਫ਼ਤ-ਟੀਅਰ ਪ੍ਰਦਾਤਾ (48+ ਮੁਫ਼ਤ + 11 OAuth)                                                        |
-| `CLI-TOOLS.md`              | ਬਾਹਰੀ CLI ਏਕੀਕਰਨ + ਅੰਦਰੂਨੀ OmniRoute CLI                                                                  |
-| `I18N.md`                   | i18n ਆਰਕੀਟੈਕਚਰ, ਭਾਸ਼ਾ ਸ਼ਾਮਲ ਕਰਨਾ, 67 ਲੋਕੇਲ                                                                |
-| `UNINSTALL.md`              | ਸਾਫ਼-ਸੁਥਰੇ ਢੰਗ ਨਾਲ ਅਣਇੰਸਟਾਲ ਕਰਨ ਦੇ ਕਦਮ                                                                    |
-| `PROVIDER_REFERENCE.md`     | 376 ਪ੍ਰਦਾਤਾਵਾਂ ਦੀ **ਆਟੋਮੈਟਿਕ ਤੌਰ 'ਤੇ ਤਿਆਰ ਕੀਤੀ** ਕੈਟਾਲੌਗ (ਮੁੜ ਤਿਆਰ ਕਰੋ: `npm run gen:provider-reference`) |
+| ਦਸਤਾਵੇਜ਼                    | ਉਦੇਸ਼                                                                                  |
+| --------------------------- | -------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | ਉੱਚ-ਪੱਧਰੀ ਆਰਕੀਟੈਕਚਰ, ਸਬਸਿਸਟਮ ਨਕਸ਼ਾ, ਡੈਸ਼ਬੋਰਡ ਸਤਹ                                       |
+| `CODEBASE_DOCUMENTATION.md` | ਇੰਜੀਨੀਅਰਿੰਗ ਹਵਾਲਾ: ਡਾਇਰੈਕਟਰੀਆਂ, ਮੋਡੀਊਲ, ਕਨਵੈਨਸ਼ਨਾਂ                                     |
+| `FEATURES.md`               | v3.8 ਹਾਈਲਾਈਟਾਂ ਸਮੇਤ ਫੀਚਰ ਮੈਟ੍ਰਿਕਸ                                                      |
+| `USER_GUIDE.md`             | ਅੰਤਮ-ਉਪਭੋਗਤਾ ਮੈਨੂਅਲ (ਸੈਟਅੱਪ, ਮਾਡਲ, ਕੰਬੋ, CLI, ਆਡੀਓ ਆਦਿ)                                |
+| `API_REFERENCE.md`          | ਆਥ ਮਾਡਲ ਸਮੇਤ API ਐਂਡਪੁਆਇੰਟ ਹਵਾਲਾ                                                       |
+| `openapi.yaml`              | OpenAPI 3.0 ਸਪੈੱਕ (121 ਪਾਥ)                                                            |
+| `SETUP_GUIDE.md`            | ਇੰਸਟਾਲ ਵਿਧੀਆਂ (npm, npx, Docker, Electron, Termux, ਸੋਰਸ)                               |
+| `ENVIRONMENT.md`            | ਸਾਰੇ env ਵੇਰੀਏਬਲ (~800 ਦਸਤਾਵੇਜ਼ੀਕ੍ਰਿਤ, ~3,050 ਲਾਈਨਾਂ `.env.example`)                   |
+| `TROUBLESHOOTING.md`        | ਆਮ ਗਲਤੀਆਂ + v3.8.0 ਦੀਆਂ ਜਾਣੀਆਂ ਸਮੱਸਿਆਵਾਂ                                               |
+| `RELEASE_CHECKLIST.md`      | ਪੂਰਾ ਰਿਲੀਜ਼ ਫਲੋ (ਸਕਿੱਲਜ਼, husky, conventional commits, ਡਿਪਲਾਏ)                         |
+| `COVERAGE_PLAN.md`          | ਕਵਰੇਜ ਟੀਚੇ ਅਤੇ ਮੌਜੂਦਾ ਸਥਿਤੀ                                                            |
+| `FREE_TIERS.md`             | ਚੁਣੇ ਹੋਏ ਮੁਫ਼ਤ-ਟੀਅਰ ਪ੍ਰੋਵਾਈਡਰ (48+ ਮੁਫ਼ਤ + 11 OAuth)                                   |
+| `CLI-TOOLS.md`              | ਬਾਹਰੀ CLI ਇੰਟੀਗਰੇਸ਼ਨਾਂ + ਅੰਦਰੂਨੀ OmniRoute CLI                                         |
+| `I18N.md`                   | i18n ਆਰਕੀਟੈਕਚਰ, ਭਾਸ਼ਾ ਜੋੜਨਾ, 67 ਲੋਕੇਲ                                                  |
+| `UNINSTALL.md`              | ਸਾਫ਼ ਅਣਇੰਸਟਾਲ ਕਦਮ                                                                      |
+| `PROVIDER_REFERENCE.md`     | 376 ਪ੍ਰੋਵਾਈਡਰਾਂ ਦੀ **ਸਵੈ-ਜਨਰੇਟ ਕੀਤੀ** ਕੈਟਾਲਾਗ (ਰੀਜਨ: `npm run gen:provider-reference`) |
 
-### ਸਬ-ਸਿਸਟਮਾਂ ਦਾ ਡੂੰਘਾਈ ਨਾਲ ਵੇਰਵਾ
+### ਸਬਸਿਸਟਮ ਡੀਪ-ਡਾਈਵਜ਼
 
-| ਦਸਤਾਵੇਜ਼                                    | ਉਦੇਸ਼                                                              |
-| ------------------------------------------- | ------------------------------------------------------------------ |
-| `MCP-SERVER.md`                             | MCP ਸਰਵਰ: 110 ਟੂਲ, 3 ਟ੍ਰਾਂਸਪੋਰਟ, 33 ਸਕੋਪ, REST ਐਂਡਪੌਇੰਟ            |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 ਸਕਿੱਲਾਂ, REST ਸਹਾਇਕ, ਏਜੰਟ ਕਾਰਡ               |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | ਏਕੀਕ੍ਰਿਤ ਗਾਈਡ: A2A ਬਨਾਮ ACP ਬਨਾਮ Cloud Agents                      |
-| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules ਆਰਕੈਸਟ੍ਰੇਸ਼ਨ                           |
-| `SKILLS.md`                                 | ਸਕਿੱਲ ਫਰੇਮਵਰਕ (ਬਿਲਟ-ਇਨ + ਮਾਰਕੀਟਪਲੇਸ + SkillsSH + ਸੈਂਡਬਾਕਸ)         |
-| `RADAR.md`                                  | Radar ਮੁਫ਼ਤ-ਮਾਡਲ ਕੈਟਾਲੌਗ ਓਵਰਲੇ (`RADAR_ENABLED`, ਮੂਲ ਰੂਪ ਵਿੱਚ ਬੰਦ) |
-| `MEMORY.md`                                 | ਮੈਮੋਰੀ ਸਿਸਟਮ (SQLite FTS5 + Qdrant)                                |
-| `EVALS.md`                                  | ਮੁਲਾਂਕਣ ਫਰੇਮਵਰਕ (ਸੂਟ, ਰਨ, ਰੂਬ੍ਰਿਕ)                                 |
-| `GUARDRAILS.md`                             | PII ਮਾਸਕਰ, ਪ੍ਰੌਂਪਟ ਇੰਜੈਕਸ਼ਨ, ਵਿਜ਼ਨ ਬ੍ਰਿਜ                           |
-| `COMPLIANCE.md`                             | ਆਡਿਟ ਲੌਗ, ਰਿਟੈਂਸ਼ਨ, noLog ਔਪਟ-ਆਊਟ                                  |
-| `WEBHOOKS.md`                               | HMAC-ਦਸਤਖ਼ਤਸ਼ੁਦਾ ਵੈੱਬਹੁੱਕ ਡਿਲੀਵਰੀ                                  |
-| `REASONING_REPLAY.md`                       | `reasoning_content` ਲਈ ਹਾਈਬ੍ਰਿਡ ਮੈਮੋਰੀ/SQLite ਕੈਸ਼                 |
-| `AUTHZ_GUIDE.md`                            | ਪ੍ਰਮਾਣੀਕਰਨ ਪਾਈਪਲਾਈਨ (`classify` → `policies` → `enforce`)          |
-| `RESILIENCE_GUIDE.md`                       | ਸਰਕਿਟ ਬ੍ਰੇਕਰ + ਕੂਲਡਾਊਨ + ਮਾਡਲ ਲੌਕਆਊਟ                               |
-| `docs/security/STEALTH_GUIDE.md` (ਕੇਵਲ git) | TLS ਫਿੰਗਰਪ੍ਰਿੰਟਿੰਗ (JA3/JA4), Claude Code CCH, MITM ਸਰਟੀਫਿਕੇਟ      |
-| `AUTO-COMBO.md`                             | Auto Combo ਇੰਜਣ (16-ਕਾਰਕ ਸਕੋਰਿੰਗ, 6 ਮੋਡ ਪੈਕ, ਵਰਚੁਅਲ ਫੈਕਟਰੀ)        |
+| ਦਸਤਾਵੇਜ਼                                     | ਉਦੇਸ਼                                                                 |
+| -------------------------------------------- | --------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | MCP ਸਰਵਰ: 110 ਟੂਲ, 3 ਟ੍ਰਾਂਸਪੋਰਟ, 33 ਸਕੋਪ, REST ਐਂਡਪੁਆਇੰਟ              |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 ਸਕਿੱਲਜ਼, REST ਹੈਲਪਰ, ਏਜੰਟ ਕਾਰਡ                  |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | ਏਕੀਕ੍ਰਿਤ ਗਾਈਡ: A2A ਬਨਾਮ ACP ਬਨਾਮ Cloud Agents                         |
+| `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules ਆਰਕੈਸਟ੍ਰੇਸ਼ਨ                              |
+| `SKILLS.md`                                  | ਸਕਿੱਲਜ਼ ਫਰੇਮਵਰਕ (ਬਿਲਟ-ਇਨ + ਮਾਰਕੀਟਪਲੇਸ + SkillsSH + ਸੈਂਡਬੌਕਸ)          |
+| `RADAR.md`                                   | Radar ਮੁਫ਼ਤ-ਮਾਡਲ ਕੈਟਾਲਾਗ ਓਵਰਲੇ (`RADAR_ENABLED`, ਡਿਫੌਲਟ ਰੂਪ ਵਿੱਚ ਬੰਦ) |
+| `MEMORY.md`                                  | ਮੈਮੋਰੀ ਸਿਸਟਮ (SQLite FTS5 + Qdrant)                                   |
+| `EVALS.md`                                   | ਈਵੈਲ ਫਰੇਮਵਰਕ (ਸੂਟ, ਰਨ, ਰੂਬਰਿਕ)                                        |
+| `GUARDRAILS.md`                              | PII ਮਾਸਕਰ, ਪ੍ਰਾਂਪਟ ਇੰਜੈਕਸ਼ਨ, ਵਿਜ਼ਨ ਬ੍ਰਿਜ                              |
+| `COMPLIANCE.md`                              | ਆਡਿਟ ਲਾਗ, ਰਿਟੈਂਸ਼ਨ, noLog ਔਪਟ-ਆਉਟ                                     |
+| `WEBHOOKS.md`                                | HMAC-ਸਾਈਨ ਕੀਤੀ ਵੈੱਬਹੁੱਕ ਡਿਲੀਵਰੀ                                       |
+| `REASONING_REPLAY.md`                        | `reasoning_content` ਲਈ ਹਾਈਬ੍ਰਿਡ ਮੈਮੋਰੀ/SQLite ਕੈਸ਼                    |
+| `AUTHZ_GUIDE.md`                             | ਆਥਰਾਈਜ਼ੇਸ਼ਨ ਪਾਈਪਲਾਈਨ (`classify` → `policies` → `enforce`)            |
+| `RESILIENCE_GUIDE.md`                        | ਸਰਕਟ ਬ੍ਰੇਕਰ + ਕੂਲਡਾਊਨ + ਮਾਡਲ ਲੌਕਆਉਟ                                   |
+| `docs/security/STEALTH_GUIDE.md` (ਸਿਰਫ਼ git) | TLS ਫਿੰਗਰਪ੍ਰਿੰਟਿੰਗ (JA3/JA4), Claude Code CCH, MITM ਸਰਟ               |
+| `AUTO-COMBO.md`                              | Auto Combo ਇੰਜਣ (16-ਫੈਕਟਰ ਸਕੋਰਿੰਗ, 6 ਮੋਡ ਪੈਕ, ਵਰਚੁਅਲ ਫੈਕਟਰੀ)          |
 
 ### ਕੰਪ੍ਰੈਸ਼ਨ
 
-| ਦਸਤਾਵੇਜ਼                        | ਉਦੇਸ਼                                     |
-| ------------------------------- | ----------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | ਕੰਪ੍ਰੈਸ਼ਨ ਮੋਡਾਂ ਦੀ ਸੰਖੇਪ ਜਾਣਕਾਰੀ + ਰੋਡਮੈਪ |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK ਇੰਜਣ, ਰਜਿਸਟਰੀ ਇਕਰਾਰਨਾਮਾ     |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman ਰੂਲ ਪੈਕ JSON ਸਕੀਮਾ                |
-| `COMPRESSION_LANGUAGE_PACKS.md` | ਪ੍ਰਤੀ-ਭਾਸ਼ਾ ਰੂਲ ਪੈਕ ਸੂਚੀ                  |
-| `RTK_COMPRESSION.md`            | RTK ਘੋਸ਼ਣਾਤਮਕ ਪਾਈਪਲਾਈਨ (49 ਫਿਲਟਰ)         |
+| ਦਸਤਾਵੇਜ਼                        | ਉਦੇਸ਼                                 |
+| ------------------------------- | ------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | ਕੰਪ੍ਰੈਸ਼ਨ ਮੋਡਾਂ ਦਾ ਸੰਖੇਪ + ਰੋਡਮੈਪ     |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK ਇੰਜਣ, ਰਜਿਸਟਰੀ ਕਾਂਟ੍ਰੈਕਟ |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman ਰੂਲ ਪੈਕ JSON ਸਕੀਮਾ            |
+| `COMPRESSION_LANGUAGE_PACKS.md` | ਪ੍ਰਤੀ-ਭਾਸ਼ਾ ਰੂਲ ਪੈਕ ਇਨਵੈਂਟਰੀ          |
+| `RTK_COMPRESSION.md`            | RTK ਡਿਕਲੇਰੇਟਿਵ ਪਾਈਪਲਾਈਨ (56 ਫਿਲਟਰ)    |
 
-### ਡਿਪਲੌਇਮੈਂਟ
+### ਡਿਪਲਾਏਮੈਂਟ
 
-| ਦਸਤਾਵੇਜ਼                     | ਉਦੇਸ਼                                                             |
-| ---------------------------- | ----------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker ਬਿਲਡ, ਪ੍ਰੋਫ਼ਾਈਲ (base/cli/host/cliproxyapi), Redis ਸਾਈਡਕਾਰ |
-| `VM_DEPLOYMENT_GUIDE.md`     | ਆਮ VM/VPS ਡਿਪਲੌਇਮੈਂਟ (Ubuntu/Debian + nginx + systemd)            |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io ਡਿਪਲੌਇਮੈਂਟ (ਫ਼ਿਲਹਾਲ ਸਿਰਫ਼ ਚੀਨੀ ਭਾਸ਼ਾ ਵਿੱਚ)                 |
-| `TERMUX_GUIDE.md`            | Termux ਰਾਹੀਂ Android ਹੈੱਡਲੈੱਸ ਚਲਾਉਣਾ                              |
-| `PWA_GUIDE.md`               | Progressive Web App ਇੰਸਟਾਲੇਸ਼ਨ + ਸਰਵਿਸ ਵਰਕਰ                       |
-| `ELECTRON_GUIDE.md`          | ਡੈਸਕਟਾਪ ਐਪ ਬਿਲਡ + ਸਾਈਨ + ਵੰਡ                                      |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                            |
-| `PROXY_GUIDE.md`             | 4-ਪੱਧਰੀ ਆਉਟਬਾਊਂਡ ਪ੍ਰੌਕਸੀ + 1proxy ਮਾਰਕੀਟਪਲੇਸ                      |
+| ਦਸਤਾਵੇਜ਼                     | ਉਦੇਸ਼                                                            |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker ਬਿਲਡ, ਪ੍ਰੋਫਾਈਲ (base/cli/host/cliproxyapi), Redis ਸਾਈਡਕਾਰ |
+| `VM_DEPLOYMENT_GUIDE.md`     | ਜੇਨਰਿਕ VM/VPS ਡਿਪਲਾਇਮੈਂਟ (Ubuntu/Debian + nginx + systemd)       |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io ਡਿਪਲਾਇਮੈਂਟ (ਫਿਲਹਾਲ ਸਿਰਫ਼ ਚੀਨੀ ਵਿੱਚ)                       |
+| `TERMUX_GUIDE.md`            | Termux ਰਾਹੀਂ Android ਹੈੱਡਲੈੱਸ                                    |
+| `PWA_GUIDE.md`               | Progressive Web App ਇੰਸਟਾਲ + ਸਰਵਿਸ ਵਰਕਰ                          |
+| `ELECTRON_GUIDE.md`          | ਡੈਸਕਟਾਪ ਐਪ ਬਿਲਡ + ਸਾਈਨ + ਵੰਡ                                     |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                           |
+| `PROXY_GUIDE.md`             | 4-ਪੱਧਰੀ ਆਊਟਬਾਊਂਡ ਪ੍ਰਾਕਸੀ + 1proxy ਮਾਰਕੀਟਪਲੇਸ                     |
 
-### ਉਪ-ਡਾਇਰੈਕਟਰੀਆਂ
+### ਸਬਡਾਇਰੈਕਟਰੀਆਂ
 
-| ਉਪ-ਡਾਇਰੈਕਟਰੀ          | ਉਦੇਸ਼                                                                                                                                                                                                    |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ਸਥਾਨਕੀਕ੍ਰਿਤ ਦਸਤਾਵੇਜ਼ ਅਨੁਵਾਦ (41 ਲੋਕੇਲ)                                                                                                                                                                   |
-| `docs/screenshots/`   | ਗਾਈਡਾਂ ਲਈ ਚਿੱਤਰ ਸੰਪਤੀਆਂ                                                                                                                                                                                  |
-| `_tasks/superpowers/` | superpowers ਤੋਂ ਯੋਜਨਾਵਾਂ/ਵਿਸ਼ੇਸ਼ਤਾਵਾਂ (`writing-plans`/`brainstorming`) + ਖੋਜ — ਅਲੱਗ, ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਵਰਜਨ ਕੀਤਾ ਰਿਪੋਜ਼ਟਰੀ, ਮੁੱਖ ਟ੍ਰੀ ਵੱਲੋਂ gitignore ਕੀਤਾ ਹੋਇਆ। CLAUDE.md → "ਯੋਜਨਾ ਅਤੇ ਖੋਜ ਆਰਟੀਫੈਕਟ" ਵੇਖੋ। |
+| ਸਬਡਾਇਰੈਕਟਰੀ           | ਉਦੇਸ਼                                                                                                                                                                                                  |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | ਸਥਾਨੀਕ੍ਰਿਤ ਦਸਤਾਵੇਜ਼ ਅਨੁਵਾਦ (41 ਲੋਕੇਲ)                                                                                                                                                                  |
+| `docs/screenshots/`   | ਗਾਈਡਾਂ ਲਈ ਚਿੱਤਰ ਐਸੈੱਟਸ                                                                                                                                                                                 |
+| `_tasks/superpowers/` | superpowers ਤੋਂ ਪਲਾਨ/ਸਪੈੱਕ (`writing-plans`/`brainstorming`) + ਰਿਸਰਚ — ਅਲੱਗ-ਥਲੱਗ, ਵੱਖਰੇ ਤੌਰ 'ਤੇ ਵਰਜ਼ਨ ਕੀਤਾ ਰੈਪੋ, ਮੁੱਖ ਟ੍ਰੀ ਦੁਆਰਾ gitignore ਕੀਤਾ ਗਿਆ। ਦੇਖੋ CLAUDE.md → "Planning & Research Artifacts"। |
 
 ---
 

@@ -393,78 +393,78 @@ open-sse/
 
 ## `docs/` — Publiskā dokumentācija (7 saknes faili + 17 apakšdirektoriji)
 
-### Augstākā līmeņa ceļveži
+### Augšējā līmeņa ceļveži
 
-| Dokuments                   | Mērķis                                                                                                               |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Augsta līmeņa arhitektūra, apakšsistēmu karte, informācijas paneļa saskarne                                          |
-| `CODEBASE_DOCUMENTATION.md` | Izstrādes uzziņu materiāls: direktoriji, moduļi, konvencijas                                                         |
-| `FEATURES.md`               | Funkcionalitātes matrica ar v3.8 svarīgākajiem jaunumiem                                                             |
-| `USER_GUIDE.md`             | Lietotāja rokasgrāmata (iestatīšana, modeļi, kombinācijas, CLI, audio u.c.)                                          |
-| `API_REFERENCE.md`          | API galapunktu uzziņu materiāls ar autentifikācijas modeli                                                           |
-| `openapi.yaml`              | OpenAPI 3.0 specifikācija (121 ceļš)                                                                                 |
-| `SETUP_GUIDE.md`            | Instalēšanas metodes (npm, npx, Docker, Electron, Termux, no pirmkoda)                                               |
-| `ENVIRONMENT.md`            | Visi vides mainīgie (dokumentēti ~800, `.env.example` ir ~3050 rindu)                                                |
-| `TROUBLESHOOTING.md`        | Biežāk sastopamās kļūdas un zināmās v3.8.0 problēmas                                                                 |
-| `RELEASE_CHECKLIST.md`      | Pilna laidiena darbplūsma (prasmes, husky, konvencionālie iesniegumi, izvietošana)                                   |
-| `COVERAGE_PLAN.md`          | Pārklājuma mērķi un pašreizējais stāvoklis                                                                           |
-| `FREE_TIERS.md`             | Apkopoti bezmaksas līmeņa pakalpojumu sniedzēji (48+ bezmaksas un 11 OAuth)                                          |
-| `CLI-TOOLS.md`              | Ārējo CLI integrācijas un iekšējais OmniRoute CLI                                                                    |
-| `I18N.md`                   | i18n arhitektūra, valodas pievienošana, 67 lokalizācijas                                                             |
-| `UNINSTALL.md`              | Pilnīgas atinstalēšanas darbības                                                                                     |
-| `PROVIDER_REFERENCE.md`     | **Automātiski ģenerēts** 376 pakalpojumu sniedzēju katalogs (atkārtota ģenerēšana: `npm run gen:provider-reference`) |
+| Dokuments                   | Mērķis                                                                                         |
+| --------------------------- | ---------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Augsta līmeņa arhitektūra, apakšsistēmu karte, informācijas paneļa virsma                      |
+| `CODEBASE_DOCUMENTATION.md` | Inženierijas atsauce: direktoriji, moduļi, konvencijas                                         |
+| `FEATURES.md`               | Funkciju matrica ar v3.8 izcelumiem                                                            |
+| `USER_GUIDE.md`             | Galalietotāja rokasgrāmata (iestatīšana, modeļi, kombinācijas, CLI, audio utt.)                |
+| `API_REFERENCE.md`          | API galapunktu atsauce ar autentifikācijas modeli                                              |
+| `openapi.yaml`              | OpenAPI 3.0 specifikācija (121 ceļš)                                                           |
+| `SETUP_GUIDE.md`            | Instalēšanas metodes (npm, npx, Docker, Electron, Termux, avots)                               |
+| `ENVIRONMENT.md`            | Visi vides mainīgie (~800 dokumentēti, ~3 050 rindas `.env.example`)                           |
+| `TROUBLESHOOTING.md`        | Biežākās kļūdas + v3.8.0 zināmās problēmas                                                     |
+| `RELEASE_CHECKLIST.md`      | Pilna izlaiduma plūsma (prasmes, husky, conventional commits, izvietošana)                     |
+| `COVERAGE_PLAN.md`          | Pārklājuma mērķi un pašreizējais stāvoklis                                                     |
+| `FREE_TIERS.md`             | Atlasīti bezmaksas līmeņa nodrošinātāji (48+ bezmaksas + 11 OAuth)                             |
+| `CLI-TOOLS.md`              | Ārējās CLI integrācijas + iekšējais OmniRoute CLI                                              |
+| `I18N.md`                   | i18n arhitektūra, valodas pievienošana, 67 lokales                                             |
+| `UNINSTALL.md`              | Tīras atinstalēšanas soļi                                                                      |
+| `PROVIDER_REFERENCE.md`     | **Automātiski ģenerēts** 376 nodrošinātāju katalogs (regen.: `npm run gen:provider-reference`) |
 
 ### Apakšsistēmu padziļināti apraksti
 
 | Dokuments                                    | Mērķis                                                                                 |
 | -------------------------------------------- | -------------------------------------------------------------------------------------- |
 | `MCP-SERVER.md`                              | MCP serveris: 110 rīki, 3 transporti, 33 tvērumi, REST galapunkti                      |
-| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 prasmes, REST palīgfunkcijas, aģenta kartīte                     |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | Vienots ceļvedis: A2A salīdzinājumā ar ACP un mākoņa aģentiem                          |
-| `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules orķestrēšana                                               |
-| `SKILLS.md`                                  | Prasmju ietvars (iebūvētās + tirgus + SkillsSH + smilškaste)                           |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 prasmes, REST palīgfunkcijas, aģenta karte                       |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Vienots ceļvedis: A2A pret ACP pret mākoņa aģentiem                                    |
+| `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules orķestrācija                                               |
+| `SKILLS.md`                                  | Prasmju ietvars (iebūvētās + tirgusvieta + SkillsSH + smilškaste)                      |
 | `RADAR.md`                                   | Radar bezmaksas modeļu kataloga pārklājums (`RADAR_ENABLED`, pēc noklusējuma izslēgts) |
 | `MEMORY.md`                                  | Atmiņas sistēma (SQLite FTS5 + Qdrant)                                                 |
-| `EVALS.md`                                   | Novērtēšanas ietvars (komplekti, izpildes, rubrikas)                                   |
+| `EVALS.md`                                   | Izvērtēšanas ietvars (komplekti, palaidumi, rubrikas)                                  |
 | `GUARDRAILS.md`                              | PII maskētājs, uzvedņu injekcija, redzes tilts                                         |
-| `COMPLIANCE.md`                              | Audita žurnāls, saglabāšana, `noLog` atteikšanās opcija                                |
-| `WEBHOOKS.md`                                | Ar HMAC parakstīta tīmekļa aizķeru piegāde                                             |
-| `REASONING_REPLAY.md`                        | Hibrīda atmiņas/SQLite kešatmiņa `reasoning_content` datiem                            |
+| `COMPLIANCE.md`                              | Audita žurnāls, glabāšanas termiņi, noLog atteikšanās                                  |
+| `WEBHOOKS.md`                                | Ar HMAC parakstīta webhook piegāde                                                     |
+| `REASONING_REPLAY.md`                        | Hibrīdā atmiņas/SQLite kešatmiņa priekš `reasoning_content`                            |
 | `AUTHZ_GUIDE.md`                             | Autorizācijas konveijers (`classify` → `policies` → `enforce`)                         |
-| `RESILIENCE_GUIDE.md`                        | Ķēdes pārtraucējs + nogaidīšanas periods + modeļa bloķēšana                            |
-| `docs/security/STEALTH_GUIDE.md` (tikai git) | TLS digitālā nospieduma noteikšana (JA3/JA4), Claude Code CCH, MITM sertifikāts        |
-| `AUTO-COMBO.md`                              | Auto Combo dzinis (16 faktoru vērtēšana, 6 režīmu pakotnes, virtuālā rūpnīca)          |
+| `RESILIENCE_GUIDE.md`                        | Ķēdes pārtraucējs + atdzesēšana + modeļa bloķēšana                                     |
+| `docs/security/STEALTH_GUIDE.md` (tikai git) | TLS pirkstu nospiedumu noteikšana (JA3/JA4), Claude Code CCH, MITM sertifikāts         |
+| `AUTO-COMBO.md`                              | Auto Combo dzinējs (16 faktoru vērtēšana, 6 režīmu pakas, virtuālā fabrika)            |
 
-### Saspiešana
+### Kompresija
 
-| Dokuments                       | Mērķis                                              |
-| ------------------------------- | --------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Saspiešanas režīmu pārskats un attīstības plāns     |
-| `COMPRESSION_ENGINES.md`        | Caveman un RTK dziņi, reģistra līgums               |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman noteikumu pakotnes JSON shēma               |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Katrai valodai paredzēto noteikumu pakotņu saraksts |
-| `RTK_COMPRESSION.md`            | RTK deklaratīvais konveijers (49 filtri)            |
+| Dokuments                       | Mērķis                                   |
+| ------------------------------- | ---------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Kompresijas režīmu pārskats + ceļa karte |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK dzinēji, reģistra līgums   |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman noteikumu pakas JSON shēma       |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Noteikumu paku krājumi pa valodām        |
+| `RTK_COMPRESSION.md`            | RTK deklaratīvais konveijers (56 filtri) |
 
 ### Izvietošana
 
-| Dokuments                    | Mērķis                                                                        |
-| ---------------------------- | ----------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker būvēšana, profili (base/cli/host/cliproxyapi), Redis blakus konteiners |
-| `VM_DEPLOYMENT_GUIDE.md`     | Vispārīga izvietošana VM/VPS vidē (Ubuntu/Debian + nginx + systemd)           |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Izvietošana Fly.io (pašlaik tikai ķīniešu valodā)                             |
-| `TERMUX_GUIDE.md`            | Android bezgrafiskā režīmā, izmantojot Termux                                 |
-| `PWA_GUIDE.md`               | Progresīvās tīmekļa lietotnes instalēšana + servisa darbinieks                |
-| `ELECTRON_GUIDE.md`          | Darbvirsmas lietotnes būvēšana + parakstīšana + izplatīšana                   |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                        |
-| `PROXY_GUIDE.md`             | 4 līmeņu izejošais starpniekserveris + 1proxy tirgus                          |
+| Dokuments                    | Mērķis                                                              |
+| ---------------------------- | ------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker būvēšana, profili (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Vispārīga VM/VPS izvietošana (Ubuntu/Debian + nginx + systemd)      |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io izvietošana (pašlaik pieejama tikai ķīniešu valodā)          |
+| `TERMUX_GUIDE.md`            | Android headless režīms, izmantojot Termux                          |
+| `PWA_GUIDE.md`               | Progresīvās tīmekļa lietotnes (PWA) instalēšana + service worker    |
+| `ELECTRON_GUIDE.md`          | Darbvirsmas lietotnes izveide + parakstīšana + izplatīšana          |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                              |
+| `PROXY_GUIDE.md`             | 4 līmeņu izejošais starpniekserveris + 1proxy tirgusvieta           |
 
 ### Apakšdirektoriji
 
-| Apakšdirektorijs      | Mērķis                                                                                                                                                                                                                             |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokalizēti dokumentācijas tulkojumi (41 lokalizācija)                                                                                                                                                                              |
-| `docs/screenshots/`   | Attēlu resursi rokasgrāmatām                                                                                                                                                                                                       |
-| `_tasks/superpowers/` | Plāni/specifikācijas no superpowers (`writing-plans`/`brainstorming`) + izpēte — izolēts repozitorijs ar atsevišķu versiju kontroli, ko galvenais koks ignorē ar gitignore. Skatiet CLAUDE.md → "Plānošanas un izpētes artefakti". |
+| Apakšdirektorijs      | Mērķis                                                                                                                                                                                                                  |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokalizēti dokumentācijas tulkojumi (41 lokalizācija)                                                                                                                                                                   |
+| `docs/screenshots/`   | Ceļvežu attēlu resursi                                                                                                                                                                                                  |
+| `_tasks/superpowers/` | Plāni/specifikācijas no superpowers (`writing-plans`/`brainstorming`) + izpēte — izolēts, atsevišķi versionēts repozitorijs, ko galvenais koks ignorē ar gitignore. Skatīt CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

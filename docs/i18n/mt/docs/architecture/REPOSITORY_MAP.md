@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Dokumentazzjoni Pubblika (7 fajls fl-għerq + 17-il sottodirettorju)
+## `docs/` — Dokumentazzjoni Pubblika (7 fajls prinċipali + 17-il sottodirettorju)
 
-### Gwidi ewlenin
+### Gwidi ta' livell ogħla
 
-| Dokument                    | Għan                                                                                                     |
-| --------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Arkitettura ta’ livell għoli, mappa tas-sottosistemi, wiċċ tad-dashboard                                 |
-| `CODEBASE_DOCUMENTATION.md` | Referenza tal-inġinerija: direttorji, moduli, konvenzjonijiet                                            |
-| `FEATURES.md`               | Matriċi tal-karatteristiċi bil-punti ewlenin ta’ v3.8                                                    |
-| `USER_GUIDE.md`             | Manwal għall-utent aħħari (konfigurazzjoni, mudelli, combos, CLIs, awdjo, eċċ.)                          |
-| `API_REFERENCE.md`          | Referenza tal-endpoints tal-API bil-mudell tal-awtentikazzjoni                                           |
-| `openapi.yaml`              | Speċifikazzjoni OpenAPI 3.0 (121 mogħdija)                                                               |
-| `SETUP_GUIDE.md`            | Metodi ta’ installazzjoni (npm, npx, Docker, Electron, Termux, kodiċi sors)                              |
-| `ENVIRONMENT.md`            | Il-varjabbli kollha tal-ambjent (~800 dokumentati, ~3,050 linja f’`.env.example`)                        |
-| `TROUBLESHOOTING.md`        | Żbalji komuni + problemi magħrufa ta’ v3.8.0                                                             |
-| `RELEASE_CHECKLIST.md`      | Fluss sħiħ tar-rilaxx (skills, husky, commits konvenzjonali, skjerament)                                 |
-| `COVERAGE_PLAN.md`          | Għanijiet tal-kopertura u l-istat attwali                                                                |
-| `FREE_TIERS.md`             | Fornituri magħżula b’livell bla ħlas (48+ bla ħlas + 11 OAuth)                                           |
-| `CLI-TOOLS.md`              | Integrazzjonijiet CLI esterni + CLI intern ta’ OmniRoute                                                 |
-| `I18N.md`                   | Arkitettura tal-i18n, kif iżżid lingwa, 67 lokalizzazzjoni                                               |
-| `UNINSTALL.md`              | Passi għal diżinstallazzjoni nadifa                                                                      |
-| `PROVIDER_REFERENCE.md`     | Katalgu ta’ 376 fornitur **iġġenerat awtomatikament** (riġenerazzjoni: `npm run gen:provider-reference`) |
+| Dok                         | Għan                                                                                      |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Arkitettura ta' livell għoli, mappa tas-subsistemi, wiċċ tad-dashboard                    |
+| `CODEBASE_DOCUMENTATION.md` | Referenza tal-inġinerija: direttorji, moduli, konvenzjonijiet                             |
+| `FEATURES.md`               | Matriċi tal-karatteristiċi bl-aħjar punti tal-v3.8                                        |
+| `USER_GUIDE.md`             | Manwal tal-utent finali (setup, mudelli, combos, CLIs, awdjo, eċċ.)                       |
+| `API_REFERENCE.md`          | Referenza tal-endpoints tal-API bil-mudell ta' awtentikazzjoni                            |
+| `openapi.yaml`              | Speċifikazzjoni OpenAPI 3.0 (121 path)                                                    |
+| `SETUP_GUIDE.md`            | Metodi ta' installazzjoni (npm, npx, Docker, Electron, Termux, sors)                      |
+| `ENVIRONMENT.md`            | Il-varjabbli kollha tal-ambjent (~800 dokumentati, ~3,050 linja f'`.env.example`)         |
+| `TROUBLESHOOTING.md`        | Żbalji komuni + problemi magħrufa fil-v3.8.0                                              |
+| `RELEASE_CHECKLIST.md`      | Fluss sħiħ tar-rilaxx (skills, husky, conventional commits, deploy)                       |
+| `COVERAGE_PLAN.md`          | Miri ta' kopertura u stat attwali                                                         |
+| `FREE_TIERS.md`             | Providituri free-tier magħżula b'attenzjoni (48+ b'xejn + 11 OAuth)                       |
+| `CLI-TOOLS.md`              | Integrazzjonijiet ta' CLI esterni + CLI intern ta' OmniRoute                              |
+| `I18N.md`                   | Arkitettura i18n, kif iżżid lingwa, 67 locale                                             |
+| `UNINSTALL.md`              | Passi għal disinstallazzjoni nadifa                                                       |
+| `PROVIDER_REFERENCE.md`     | Katalogu **awto-ġenerat** ta' 376 providitur (riġenera: `npm run gen:provider-reference`) |
 
-### Analiżijiet dettaljati tas-sottosistemi
+### Analiżi fil-fond tas-subsistemi
 
-| Dokument                                    | Għan                                                                                        |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | Server MCP: 110 għodod, 3 mezzi ta’ trasport, 33 ambitu, endpoints REST                     |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 skills, għodod awżiljarji REST, kard tal-aġent                        |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | Gwida unifikata: A2A kontra ACP kontra Cloud Agents                                         |
-| `CLOUD_AGENT.md`                            | Orkestrazzjoni ta’ Codex Cloud / Devin / Jules                                              |
-| `SKILLS.md`                                 | Qafas tal-skills (integrati + marketplace + SkillsSH + sandbox)                             |
-| `RADAR.md`                                  | Overlay tal-katalgu Radar ta’ mudelli bla ħlas (`RADAR_ENABLED`, diżattivat awtomatikament) |
-| `MEMORY.md`                                 | Sistema tal-memorja (SQLite FTS5 + Qdrant)                                                  |
-| `EVALS.md`                                  | Qafas tal-evalwazzjoni (suites, eżekuzzjonijiet, rubriki)                                   |
-| `GUARDRAILS.md`                             | Maskra tal-PII, injezzjoni fil-prompt, pont tal-viżjoni                                     |
-| `COMPLIANCE.md`                             | Reġistru tal-awditjar, żamma, għażla ta’ esklużjoni noLog                                   |
-| `WEBHOOKS.md`                               | Twassil ta’ webhooks iffirmati b’HMAC                                                       |
-| `REASONING_REPLAY.md`                       | Cache ibrida tal-memorja/SQLite għal `reasoning_content`                                    |
-| `AUTHZ_GUIDE.md`                            | Pipeline tal-awtorizzazzjoni (`classify` → `policies` → `enforce`)                          |
-| `RESILIENCE_GUIDE.md`                       | Circuit breaker + perjodu ta’ stennija + imblukkar tal-mudell                               |
-| `docs/security/STEALTH_GUIDE.md` (git biss) | Identifikazzjoni tal-marki TLS (JA3/JA4), Claude Code CCH, ċertifikat MITM                  |
-| `AUTO-COMBO.md`                             | Magna Auto Combo (punteġġ ibbażat fuq 16-il fattur, 6 pakketti ta’ modi, fabbrika virtwali) |
+| Dok                                         | Għan                                                                                  |
+| ------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | Server MCP: 110 għodda, 3 trasporti, 33 skop, endpoints REST                          |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 ħiliet, helpers REST, agent card                                |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | Gwida unifikata: A2A vs ACP vs Cloud Agents                                           |
+| `CLOUD_AGENT.md`                            | Orkestrazzjoni ta' Codex Cloud / Devin / Jules                                        |
+| `SKILLS.md`                                 | Qafas Skills (built-in + marketplace + SkillsSH + sandbox)                            |
+| `RADAR.md`                                  | Overlay tal-katalogu tal-mudelli b'xejn ta' Radar (`RADAR_ENABLED`, mitfi by default) |
+| `MEMORY.md`                                 | Sistema tal-memorja (SQLite FTS5 + Qdrant)                                            |
+| `EVALS.md`                                  | Qafas tal-evalwazzjoni (suites, runs, rubriki)                                        |
+| `GUARDRAILS.md`                             | Masker ta' PII, injezzjoni ta' prompt, pont tal-viżjoni                               |
+| `COMPLIANCE.md`                             | Log tal-awditjar, retention, opt-out ta' noLog                                        |
+| `WEBHOOKS.md`                               | Kunsinna ta' webhooks ffirmata b'HMAC                                                 |
+| `REASONING_REPLAY.md`                       | Cache ibrida memorja/SQLite għal `reasoning_content`                                  |
+| `AUTHZ_GUIDE.md`                            | Pipeline tal-awtorizzazzjoni (`classify` → `policies` → `enforce`)                    |
+| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + lockout tal-mudell                                       |
+| `docs/security/STEALTH_GUIDE.md` (git biss) | Fingerprinting TLS (JA3/JA4), Claude Code CCH, ċertifikat MITM                        |
+| `AUTO-COMBO.md`                             | Magna Auto Combo (skorjar b'16-il fattur, 6 pakketti ta' modi, fabbrika virtwali)     |
 
 ### Kompressjoni
 
-| Dokument                        | Għan                                                             |
-| ------------------------------- | ---------------------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Ħarsa ġenerali lejn il-modi ta’ kompressjoni + pjan direzzjonali |
-| `COMPRESSION_ENGINES.md`        | Magni Caveman + RTK, kuntratt tar-reġistru                       |
-| `COMPRESSION_RULES_FORMAT.md`   | Skema JSON tal-pakkett ta’ regoli Caveman                        |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Inventarju tal-pakketti ta’ regoli għal kull lingwa              |
-| `RTK_COMPRESSION.md`            | Pipeline dikjarattiv RTK (49 filtru)                             |
+| Dok                             | Għan                                                   |
+| ------------------------------- | ------------------------------------------------------ |
+| `COMPRESSION_GUIDE.md`          | Ħarsa ġenerali lejn il-modi ta' kompressjoni + roadmap |
+| `COMPRESSION_ENGINES.md`        | Magni Caveman + RTK, kuntratt tar-reġistru             |
+| `COMPRESSION_RULES_FORMAT.md`   | Skema JSON tal-pakkett tar-regoli Caveman              |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Inventarju tal-pakketti tar-regoli għal kull lingwa    |
+| `RTK_COMPRESSION.md`            | Pipeline dikjarattiva RTK (56 filtru)                  |
 
-### Skjerament
+### Distribuzzjoni
 
-| Dokument                     | Għan                                                                  |
-| ---------------------------- | --------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Bini b’Docker, profili (base/cli/host/cliproxyapi), sidecar ta’ Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | Distribuzzjoni ġenerika fuq VM/VPS (Ubuntu/Debian + nginx + systemd)  |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Distribuzzjoni fuq Fly.io (bħalissa biċ-Ċiniż biss)                   |
-| `TERMUX_GUIDE.md`            | Android mingħajr interfaċċa grafika permezz ta’ Termux                |
-| `PWA_GUIDE.md`               | Installazzjoni ta’ Progressive Web App + service worker               |
-| `ELECTRON_GUIDE.md`          | Bini + iffirmar + distribuzzjoni tal-applikazzjoni tad-desktop        |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                |
-| `PROXY_GUIDE.md`             | Proxy tal-ħruġ b’4 livelli + is-suq 1proxy                            |
+| Dok                          | Skop                                                                    |
+| ---------------------------- | ----------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Bini ta' Docker, profili (base/cli/host/cliproxyapi), sidecar ta' Redis |
+| `VM_DEPLOYMENT_GUIDE.md`     | Deployment ġeneriku fuq VM/VPS (Ubuntu/Debian + nginx + systemd)        |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Deployment fuq Fly.io (bħalissa disponibbli fiċ-Ċiniż biss)             |
+| `TERMUX_GUIDE.md`            | Android headless permezz ta' Termux                                     |
+| `PWA_GUIDE.md`               | Installazzjoni ta' Progressive Web App + service worker                 |
+| `ELECTRON_GUIDE.md`          | Bini + ffirmar + distribuzzjoni tal-app tad-desktop                     |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                  |
+| `PROXY_GUIDE.md`             | Proxy outbound b'4 livelli + marketplace ta' 1proxy                     |
 
-### Sottodirettorji
+### Subdirettorji
 
-| Sottodirettorju       | Għan                                                                                                                                                                                                                            |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Traduzzjonijiet lokalizzati tad-dokumentazzjoni (41 lingwa)                                                                                                                                                                     |
-| `docs/screenshots/`   | Riżorsi tal-immaġnijiet għall-gwidi                                                                                                                                                                                             |
-| `_tasks/superpowers/` | Pjanijiet/speċifikazzjonijiet minn superpowers (`writing-plans`/`brainstorming`) + riċerka — repożitorju iżolat, b’verżjonijiet separati, injorat minn git fis-siġra ewlenija. Ara CLAUDE.md → "Planning & Research Artifacts". |
+| Subdir                | Skop                                                                                                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Traduzzjonijiet lokaliżżati tad-dokumentazzjoni (41 locale)                                                                                                                                                      |
+| `docs/screenshots/`   | Riżorsi ta' immaġini għall-gwidi                                                                                                                                                                                 |
+| `_tasks/superpowers/` | Pjanijiet/speċifikazzjonijiet minn superpowers (`writing-plans`/`brainstorming`) + riċerka — repo iżolata, b'verzjonar separat, gitignored mit-tree prinċipali. Ara CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

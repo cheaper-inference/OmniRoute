@@ -393,78 +393,78 @@ open-sse/
 
 ## `docs/` — Documentation publique (7 fichiers racine + 17 sous-répertoires)
 
-### Guides principaux
+### Guides de premier niveau
 
-| Document                    | Objectif                                                                                                   |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Architecture générale, cartographie des sous-systèmes, interface du tableau de bord                        |
-| `CODEBASE_DOCUMENTATION.md` | Référence d’ingénierie : répertoires, modules, conventions                                                 |
-| `FEATURES.md`               | Matrice des fonctionnalités avec les nouveautés de la v3.8                                                 |
-| `USER_GUIDE.md`             | Manuel utilisateur (configuration, modèles, combos, CLI, audio, etc.)                                      |
-| `API_REFERENCE.md`          | Référence des points de terminaison de l’API avec modèle d’authentification                                |
-| `openapi.yaml`              | Spécification OpenAPI 3.0 (121 chemins)                                                                    |
-| `SETUP_GUIDE.md`            | Méthodes d’installation (npm, npx, Docker, Electron, Termux, code source)                                  |
-| `ENVIRONMENT.md`            | Toutes les variables d’environnement (~800 documentées, ~3 050 lignes dans `.env.example`)                 |
-| `TROUBLESHOOTING.md`        | Erreurs courantes + problèmes connus de la v3.8.0                                                          |
-| `RELEASE_CHECKLIST.md`      | Processus complet de publication (skills, husky, commits conventionnels, déploiement)                      |
-| `COVERAGE_PLAN.md`          | Objectifs de couverture et état actuel                                                                     |
-| `FREE_TIERS.md`             | Fournisseurs avec offre gratuite sélectionnés (48+ gratuits + 11 OAuth)                                    |
-| `CLI-TOOLS.md`              | Intégrations CLI externes + CLI OmniRoute interne                                                          |
-| `I18N.md`                   | Architecture i18n, ajout d’une langue, 67 paramètres régionaux                                             |
-| `UNINSTALL.md`              | Étapes de désinstallation complète                                                                         |
-| `PROVIDER_REFERENCE.md`     | Catalogue **généré automatiquement** de 376 fournisseurs (régénération : `npm run gen:provider-reference`) |
+| Doc                         | Objectif                                                                                             |
+| --------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Architecture générale, carte des sous-systèmes, surface du tableau de bord                           |
+| `CODEBASE_DOCUMENTATION.md` | Référence d'ingénierie : répertoires, modules, conventions                                           |
+| `FEATURES.md`               | Matrice des fonctionnalités avec les points forts de la v3.8                                         |
+| `USER_GUIDE.md`             | Manuel utilisateur (installation, modèles, combos, CLI, audio, etc.)                                 |
+| `API_REFERENCE.md`          | Référence des endpoints API avec le modèle d'authentification                                        |
+| `openapi.yaml`              | Spécification OpenAPI 3.0 (121 chemins)                                                              |
+| `SETUP_GUIDE.md`            | Méthodes d'installation (npm, npx, Docker, Electron, Termux, source)                                 |
+| `ENVIRONMENT.md`            | Toutes les variables d'environnement (~800 documentées, ~3 050 lignes dans `.env.example`)           |
+| `TROUBLESHOOTING.md`        | Erreurs courantes + problèmes connus de la v3.8.0                                                    |
+| `RELEASE_CHECKLIST.md`      | Flux complet de publication (skills, husky, commits conventionnels, déploiement)                     |
+| `COVERAGE_PLAN.md`          | Objectifs de couverture et état actuel                                                               |
+| `FREE_TIERS.md`             | Fournisseurs avec niveau gratuit sélectionnés (48+ gratuits + 11 OAuth)                              |
+| `CLI-TOOLS.md`              | Intégrations CLI externes + CLI OmniRoute interne                                                    |
+| `I18N.md`                   | Architecture i18n, ajout d'une langue, 67 locales                                                    |
+| `UNINSTALL.md`              | Étapes de désinstallation propre                                                                     |
+| `PROVIDER_REFERENCE.md`     | Catalogue **généré automatiquement** de 376 fournisseurs (regén. : `npm run gen:provider-reference`) |
 
-### Présentations détaillées des sous-systèmes
+### Analyses approfondies des sous-systèmes
 
-| Document                                    | Objectif                                                                                  |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | Serveur MCP : 110 outils, 3 transports, 33 portées, points de terminaison REST            |
-| `A2A-SERVER.md`                             | A2A v0.3 : JSON-RPC, 6 skills, assistants REST, fiche d’agent                             |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | Guide unifié : A2A ou ACP ou Cloud Agents                                                 |
-| `CLOUD_AGENT.md`                            | Orchestration de Codex Cloud / Devin / Jules                                              |
-| `SKILLS.md`                                 | Infrastructure de skills (intégrés + place de marché + SkillsSH + bac à sable)            |
-| `RADAR.md`                                  | Surcouche du catalogue Radar de modèles gratuits (`RADAR_ENABLED`, désactivée par défaut) |
-| `MEMORY.md`                                 | Système de mémoire (SQLite FTS5 + Qdrant)                                                 |
-| `EVALS.md`                                  | Infrastructure d’évaluation (suites, exécutions, grilles d’évaluation)                    |
-| `GUARDRAILS.md`                             | Masqueur de données personnelles, injection de prompt, passerelle de vision               |
-| `COMPLIANCE.md`                             | Journal d’audit, conservation, désactivation via noLog                                    |
-| `WEBHOOKS.md`                               | Livraison de webhooks signés par HMAC                                                     |
-| `REASONING_REPLAY.md`                       | Cache hybride mémoire/SQLite pour `reasoning_content`                                     |
-| `AUTHZ_GUIDE.md`                            | Pipeline d’autorisation (`classify` → `policies` → `enforce`)                             |
-| `RESILIENCE_GUIDE.md`                       | Disjoncteur + délai de récupération + verrouillage de modèle                              |
-| `docs/security/STEALTH_GUIDE.md` (git only) | Empreinte TLS (JA3/JA4), CCH de Claude Code, certificat MITM                              |
-| `AUTO-COMBO.md`                             | Moteur Auto Combo (notation à 16 facteurs, 6 packs de modes, fabrique virtuelle)          |
+| Doc                                               | Objectif                                                                                 |
+| ------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                                   | Serveur MCP : 110 outils, 3 transports, 33 scopes, endpoints REST                        |
+| `A2A-SERVER.md`                                   | A2A v0.3 : JSON-RPC, 6 skills, aides REST, carte d'agent                                 |
+| `AGENT_PROTOCOLS_GUIDE.md`                        | Guide unifié : A2A vs ACP vs Cloud Agents                                                |
+| `CLOUD_AGENT.md`                                  | Orchestration Codex Cloud / Devin / Jules                                                |
+| `SKILLS.md`                                       | Framework de skills (intégrées + marketplace + SkillsSH + sandbox)                       |
+| `RADAR.md`                                        | Surcouche du catalogue de modèles gratuits Radar (`RADAR_ENABLED`, désactivé par défaut) |
+| `MEMORY.md`                                       | Système de mémoire (SQLite FTS5 + Qdrant)                                                |
+| `EVALS.md`                                        | Framework d'évaluation (suites, exécutions, grilles d'évaluation)                        |
+| `GUARDRAILS.md`                                   | Masquage des PII, injection de prompts, pont vision                                      |
+| `COMPLIANCE.md`                                   | Journal d'audit, rétention, option d'exclusion noLog                                     |
+| `WEBHOOKS.md`                                     | Livraison de webhooks signés HMAC                                                        |
+| `REASONING_REPLAY.md`                             | Cache hybride mémoire/SQLite pour `reasoning_content`                                    |
+| `AUTHZ_GUIDE.md`                                  | Pipeline d'autorisation (`classify` → `policies` → `enforce`)                            |
+| `RESILIENCE_GUIDE.md`                             | Disjoncteur + temporisation + verrouillage de modèle                                     |
+| `docs/security/STEALTH_GUIDE.md` (git uniquement) | Empreinte TLS (JA3/JA4), CCH Claude Code, certificat MITM                                |
+| `AUTO-COMBO.md`                                   | Moteur Auto Combo (score à 16 facteurs, 6 packs de modes, fabrique virtuelle)            |
 
 ### Compression
 
-| Document                        | Objectif                                                   |
+| Doc                             | Objectif                                                   |
 | ------------------------------- | ---------------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Vue d’ensemble des modes de compression + feuille de route |
-| `COMPRESSION_ENGINES.md`        | Moteurs Caveman + RTK, contrat de registre                 |
+| `COMPRESSION_GUIDE.md`          | Vue d'ensemble des modes de compression + feuille de route |
+| `COMPRESSION_ENGINES.md`        | Moteurs Caveman + RTK, contrat du registre                 |
 | `COMPRESSION_RULES_FORMAT.md`   | Schéma JSON des packs de règles Caveman                    |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Inventaire des packs de règles par langue                  |
-| `RTK_COMPRESSION.md`            | Pipeline déclaratif RTK (49 filtres)                       |
+| `RTK_COMPRESSION.md`            | Pipeline déclaratif RTK (56 filtres)                       |
 
 ### Déploiement
 
-| Doc                          | Objectif                                                                  |
-| ---------------------------- | ------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Build Docker, profils (base/cli/host/cliproxyapi), conteneur annexe Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | Déploiement générique sur VM/VPS (Ubuntu/Debian + nginx + systemd)        |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Déploiement sur Fly.io (actuellement disponible uniquement en chinois)    |
-| `TERMUX_GUIDE.md`            | Android sans interface graphique via Termux                               |
-| `PWA_GUIDE.md`               | Installation de la Progressive Web App + service worker                   |
-| `ELECTRON_GUIDE.md`          | Build, signature et distribution de l’application de bureau               |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                    |
-| `PROXY_GUIDE.md`             | Proxy sortant à 4 niveaux + place de marché 1proxy                        |
+| Doc                          | Objectif                                                           |
+| ---------------------------- | ------------------------------------------------------------------ |
+| `DOCKER_GUIDE.md`            | Build Docker, profils (base/cli/host/cliproxyapi), sidecar Redis   |
+| `VM_DEPLOYMENT_GUIDE.md`     | Déploiement VM/VPS générique (Ubuntu/Debian + nginx + systemd)     |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Déploiement Fly.io (actuellement disponible en chinois uniquement) |
+| `TERMUX_GUIDE.md`            | Android en mode headless via Termux                                |
+| `PWA_GUIDE.md`               | Installation de la Progressive Web App + service worker            |
+| `ELECTRON_GUIDE.md`          | Build, signature et distribution de l'application de bureau        |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                             |
+| `PROXY_GUIDE.md`             | Proxy sortant à 4 niveaux + marketplace 1proxy                     |
 
 ### Sous-répertoires
 
-| Sous-répertoire       | Objectif                                                                                                                                                                                                                               |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Traductions localisées de la documentation (41 paramètres régionaux)                                                                                                                                                                   |
-| `docs/screenshots/`   | Ressources d’images pour les guides                                                                                                                                                                                                    |
-| `_tasks/superpowers/` | Plans/spécifications issus de superpowers (`writing-plans`/`brainstorming`) + recherches — dépôt isolé avec versionnement distinct, ignoré par Git dans l’arborescence principale. Voir CLAUDE.md → « Planning & Research Artifacts ». |
+| Sous-répertoire       | Objectif                                                                                                                                                                                                                        |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Traductions localisées de la documentation (41 locales)                                                                                                                                                                         |
+| `docs/screenshots/`   | Ressources d'images pour les guides                                                                                                                                                                                             |
+| `_tasks/superpowers/` | Plans/spécifications issus de superpowers (`writing-plans`/`brainstorming`) + recherche — dépôt isolé, versionné séparément, ignoré par git dans l'arborescence principale. Voir CLAUDE.md → « Planning & Research Artifacts ». |
 
 ---
 

@@ -391,80 +391,82 @@ open-sse/
 
 ---
 
-## `docs/` — 公开文档（7 个根文件 + 17 个子目录）
+## `docs/` — 公共文档（7 个根文件 + 17 个子目录）
 
 ### 顶层指南
 
-| 文档                        | 用途                                                                              |
-| --------------------------- | --------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | 高层架构、子系统映射、仪表板界面                                                  |
-| `CODEBASE_DOCUMENTATION.md` | 工程参考：目录、模块、约定                                                        |
-| `FEATURES.md`               | 包含 v3.8 亮点的功能矩阵                                                          |
-| `USER_GUIDE.md`             | 最终用户手册（设置、模型、组合、CLI、音频等）                                     |
-| `API_REFERENCE.md`          | 包含身份验证模型的 API 端点参考                                                   |
-| `openapi.yaml`              | OpenAPI 3.0 规范（121 个路径）                                                    |
-| `SETUP_GUIDE.md`            | 安装方式（npm、npx、Docker、Electron、Termux、源码）                              |
-| `ENVIRONMENT.md`            | 所有环境变量（已记录约 800 个，`.env.example` 约 3,050 行）                       |
-| `TROUBLESHOOTING.md`        | 常见错误 + v3.8.0 已知问题                                                        |
-| `RELEASE_CHECKLIST.md`      | 完整发布流程（技能、husky、约定式提交、部署）                                     |
-| `COVERAGE_PLAN.md`          | 覆盖率目标和当前状态                                                              |
-| `FREE_TIERS.md`             | 精选免费套餐提供者（48+ 个免费提供者 + 11 个 OAuth 提供者）                       |
-| `CLI-TOOLS.md`              | 外部 CLI 集成 + 内部 OmniRoute CLI                                                |
-| `I18N.md`                   | i18n 架构、添加语言、67 个区域设置                                                |
-| `UNINSTALL.md`              | 完全卸载步骤                                                                      |
-| `PROVIDER_REFERENCE.md`     | 包含 376 个提供者的**自动生成**目录（重新生成：`npm run gen:provider-reference`） |
+| 文档                        | 用途                                                                          |
+| --------------------------- | ----------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | 高层架构、子系统地图、仪表板界面                                              |
+| `CODEBASE_DOCUMENTATION.md` | 工程参考：目录、模块、约定                                                    |
+| `FEATURES.md`               | 功能矩阵及 v3.8 亮点                                                          |
+| `USER_GUIDE.md`             | 终端用户手册（设置、模型、组合、CLI、音频等）                                 |
+| `API_REFERENCE.md`          | API 端点参考（含认证模型）                                                    |
+| `openapi.yaml`              | OpenAPI 3.0 规范（121 个路径）                                                |
+| `SETUP_GUIDE.md`            | 安装方法（npm、npx、Docker、Electron、Termux、源码）                          |
+| `ENVIRONMENT.md`            | 所有环境变量（约 800 个已记录，`.env.example` 约 3,050 行）                   |
+| `TROUBLESHOOTING.md`        | 常见错误 + v3.8.0 已知问题                                                    |
+| `RELEASE_CHECKLIST.md`      | 完整发布流程（skills、husky、conventional commits、部署）                     |
+| `COVERAGE_PLAN.md`          | 覆盖率目标与当前状态                                                          |
+| `FREE_TIERS.md`             | 精选免费套餐提供者（48+ 个免费 + 11 个 OAuth）                                |
+| `CLI-TOOLS.md`              | 外部 CLI 集成 + 内部 OmniRoute CLI                                            |
+| `I18N.md`                   | i18n 架构、添加语言、67 个语言环境                                            |
+| `UNINSTALL.md`              | 彻底卸载步骤                                                                  |
+| `PROVIDER_REFERENCE.md`     | **自动生成**的 376 个提供者目录（重新生成：`npm run gen:provider-reference`） |
 
 ### 子系统深入解析
 
 | 文档                                       | 用途                                                         |
 | ------------------------------------------ | ------------------------------------------------------------ |
 | `MCP-SERVER.md`                            | MCP 服务器：110 个工具、3 种传输方式、33 个作用域、REST 端点 |
-| `A2A-SERVER.md`                            | A2A v0.3：JSON-RPC、6 项技能、REST 辅助工具、智能体卡片      |
-| `AGENT_PROTOCOLS_GUIDE.md`                 | 统一指南：A2A、ACP 与云端智能体对比                          |
+| `A2A-SERVER.md`                            | A2A v0.3：JSON-RPC、6 个技能、REST 辅助工具、代理卡片        |
+| `AGENT_PROTOCOLS_GUIDE.md`                 | 统一指南：A2A 对比 ACP 对比云代理                            |
 | `CLOUD_AGENT.md`                           | Codex Cloud / Devin / Jules 编排                             |
 | `SKILLS.md`                                | 技能框架（内置 + 市场 + SkillsSH + 沙箱）                    |
-| `RADAR.md`                                 | Radar 免费模型目录覆盖层（`RADAR_ENABLED`，默认关闭）        |
+| `RADAR.md`                                 | Radar 免费模型目录叠加层（`RADAR_ENABLED`，默认关闭）        |
 | `MEMORY.md`                                | 记忆系统（SQLite FTS5 + Qdrant）                             |
 | `EVALS.md`                                 | 评估框架（套件、运行、评分标准）                             |
-| `GUARDRAILS.md`                            | PII 屏蔽器、提示词注入防护、视觉桥接                         |
+| `GUARDRAILS.md`                            | PII 掩码器、提示注入、视觉桥接                               |
 | `COMPLIANCE.md`                            | 审计日志、保留策略、noLog 退出选项                           |
-| `WEBHOOKS.md`                              | HMAC 签名的 Webhook 投递                                     |
-| `REASONING_REPLAY.md`                      | 用于 `reasoning_content` 的混合记忆/SQLite 缓存              |
+| `WEBHOOKS.md`                              | HMAC 签名的 webhook 投递                                     |
+| `REASONING_REPLAY.md`                      | `reasoning_content` 的混合内存/SQLite 缓存                   |
 | `AUTHZ_GUIDE.md`                           | 授权管道（`classify` → `policies` → `enforce`）              |
-| `RESILIENCE_GUIDE.md`                      | 断路器 + 冷却 + 模型锁定                                     |
-| `docs/security/STEALTH_GUIDE.md`（仅 git） | TLS 指纹识别（JA3/JA4）、Claude Code CCH、中间人证书         |
-| `AUTO-COMBO.md`                            | Auto Combo 引擎（16 因素评分、6 个模式包、虚拟工厂）         |
+| `RESILIENCE_GUIDE.md`                      | 熔断器 + 冷却 + 模型锁定                                     |
+| `docs/security/STEALTH_GUIDE.md`（仅 git） | TLS 指纹（JA3/JA4）、Claude Code CCH、MITM 证书              |
+| `AUTO-COMBO.md`                            | Auto Combo 引擎（16 因子评分、6 种模式包、虚拟工厂）         |
 
 ### 压缩
 
 | 文档                            | 用途                           |
 | ------------------------------- | ------------------------------ |
-| `COMPRESSION_GUIDE.md`          | 压缩模式概览 + 路线图          |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK 引擎、注册表契约 |
+| `COMPRESSION_GUIDE.md`          | 压缩模式概述 + 路线图          |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK 引擎、注册表约定 |
 | `COMPRESSION_RULES_FORMAT.md`   | Caveman 规则包 JSON 模式       |
-| `COMPRESSION_LANGUAGE_PACKS.md` | 各语言规则包清单               |
-| `RTK_COMPRESSION.md`            | RTK 声明式管道（49 个过滤器）  |
+| `COMPRESSION_LANGUAGE_PACKS.md` | 按语言的规则包清单             |
+| `RTK_COMPRESSION.md`            | RTK 声明式管道（56 个过滤器）  |
 
 ### 部署
 
-| 文档                         | 用途                                                           |
-| ---------------------------- | -------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker 构建、配置（base/cli/host/cliproxyapi）、Redis 边车容器 |
-| `VM_DEPLOYMENT_GUIDE.md`     | 通用 VM/VPS 部署（Ubuntu/Debian + nginx + systemd）            |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io 部署（目前仅提供中文版本）                              |
-| `TERMUX_GUIDE.md`            | 通过 Termux 在 Android 上以无头模式运行                        |
-| `PWA_GUIDE.md`               | 渐进式 Web 应用安装 + Service Worker                           |
-| `ELECTRON_GUIDE.md`          | 桌面应用构建 + 签名 + 分发                                     |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                         |
-| `PROXY_GUIDE.md`             | 4 级出站代理 + 1proxy 市场                                     |
+| 文档                         | 用途                                                            |
+| ---------------------------- | --------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker 构建、配置档（base/cli/host/cliproxyapi）、Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | 通用 VM/VPS 部署（Ubuntu/Debian + nginx + systemd）             |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io 部署（目前仅有中文版）                                   |
+| `TERMUX_GUIDE.md`            | 通过 Termux 在 Android 上无界面运行                             |
+| `PWA_GUIDE.md`               | 渐进式 Web 应用（PWA）安装 + service worker                     |
+| `ELECTRON_GUIDE.md`          | 桌面应用构建 + 签名 + 分发                                      |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                          |
+| `PROXY_GUIDE.md`             | 四级出站代理 + 1proxy 市场                                      |
 
 ### 子目录
 
-| 子目录                | 用途                                                                                                                                                                      |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | 本地化文档翻译（41 种语言区域）                                                                                                                                           |
-| `docs/screenshots/`   | 指南所用的图像资源                                                                                                                                                        |
-| `_tasks/superpowers/` | 来自 superpowers（`writing-plans`/`brainstorming`）的计划/规范 + 研究资料——隔离的、单独进行版本控制的仓库，已被主目录树的 git 忽略。请参阅 CLAUDE.md → “规划与研究产物”。 |
+| 子目录                | 用途                                                                                                                                                                                                |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | 本地化文档翻译（41 种语言环境）                                                                                                                                                                     |
+| `docs/screenshots/`   | 指南所用的图片资源                                                                                                                                                                                  |
+| `_tasks/superpowers/` | 来自 superpowers 的计划/规范（`writing-plans`/`brainstorming`）及研究资料——相互隔离、独立版本化的仓库，已被主代码树 gitignore。参见 CLAUDE.md → “Planning & Research Artifacts”（规划与研究产物）。 |
+
+---
 
 ## `tests/` — 测试套件
 

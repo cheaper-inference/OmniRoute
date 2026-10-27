@@ -395,76 +395,76 @@ open-sse/
 
 ### Handleidingen op hoofdniveau
 
-| Document                    | Doel                                                                                                           |
+| Doc                         | Doel                                                                                                           |
 | --------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Architectuur op hoofdlijnen, overzicht van subsystemen, dashboardinterface                                     |
+| `ARCHITECTURE.md`           | Architectuur op hoog niveau, subsysteemoverzicht, dashboardoppervlak                                           |
 | `CODEBASE_DOCUMENTATION.md` | Technische referentie: mappen, modules, conventies                                                             |
-| `FEATURES.md`               | Functiematrix met hoogtepunten van v3.8                                                                        |
-| `USER_GUIDE.md`             | Handleiding voor eindgebruikers (configuratie, modellen, combo's, CLI's, audio, enz.)                          |
-| `API_REFERENCE.md`          | Referentie voor API-eindpunten met authenticatiemodel                                                          |
+| `FEATURES.md`               | Featurematrix met highlights van v3.8                                                                          |
+| `USER_GUIDE.md`             | Handleiding voor eindgebruikers (installatie, modellen, combo's, CLI's, audio, enz.)                           |
+| `API_REFERENCE.md`          | Referentie van API-endpoints met authenticatiemodel                                                            |
 | `openapi.yaml`              | OpenAPI 3.0-specificatie (121 paden)                                                                           |
 | `SETUP_GUIDE.md`            | Installatiemethoden (npm, npx, Docker, Electron, Termux, broncode)                                             |
-| `ENVIRONMENT.md`            | Alle omgevingsvariabelen (~800 gedocumenteerd, ~3.050 regels in `.env.example`)                                |
+| `ENVIRONMENT.md`            | Alle omgevingsvariabelen (~800 gedocumenteerd, ~3.050 regels `.env.example`)                                   |
 | `TROUBLESHOOTING.md`        | Veelvoorkomende fouten + bekende problemen in v3.8.0                                                           |
-| `RELEASE_CHECKLIST.md`      | Volledige releaseprocedure (skills, husky, conventional commits, implementatie)                                |
-| `COVERAGE_PLAN.md`          | Dekkingsdoelen en huidige status                                                                               |
-| `FREE_TIERS.md`             | Samengestelde lijst van providers met een gratis niveau (48+ gratis + 11 OAuth)                                |
-| `CLI-TOOLS.md`              | Externe CLI-integraties + interne OmniRoute-CLI                                                                |
+| `RELEASE_CHECKLIST.md`      | Volledige releaseflow (skills, husky, conventional commits, deploy)                                            |
+| `COVERAGE_PLAN.md`          | Coverage-doelen en huidige status                                                                              |
+| `FREE_TIERS.md`             | Samengestelde providers met gratis tier (48+ gratis + 11 OAuth)                                                |
+| `CLI-TOOLS.md`              | Externe CLI-integraties + interne OmniRoute CLI                                                                |
 | `I18N.md`                   | i18n-architectuur, een taal toevoegen, 67 locales                                                              |
-| `UNINSTALL.md`              | Stappen voor een volledige verwijdering                                                                        |
+| `UNINSTALL.md`              | Stappen voor een schone deïnstallatie                                                                          |
 | `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerde** catalogus van 376 providers (opnieuw genereren: `npm run gen:provider-reference`) |
 
-### Diepgaande documentatie over subsystemen
+### Verdiepingen per subsysteem
 
-| Document                                      | Doel                                                                                        |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | MCP-server: 110 tools, 3 transportmethoden, 33 scopes, REST-eindpunten                      |
-| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 skills, REST-helpers, agentkaart                                      |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | Geünificeerde handleiding: A2A versus ACP versus Cloud Agents                               |
-| `CLOUD_AGENT.md`                              | Orkestratie van Codex Cloud / Devin / Jules                                                 |
-| `SKILLS.md`                                   | Skills-framework (ingebouwd + marketplace + SkillsSH + sandbox)                             |
-| `RADAR.md`                                    | Radar-overlay voor catalogus met gratis modellen (`RADAR_ENABLED`, standaard uitgeschakeld) |
-| `MEMORY.md`                                   | Geheugensysteem (SQLite FTS5 + Qdrant)                                                      |
-| `EVALS.md`                                    | Evaluatieframework (suites, uitvoeringen, rubrieken)                                        |
-| `GUARDRAILS.md`                               | PII-maskering, promptinjectie, vision bridge                                                |
-| `COMPLIANCE.md`                               | Auditlogboek, bewaarbeleid, noLog-opt-out                                                   |
-| `WEBHOOKS.md`                                 | Met HMAC ondertekende webhooklevering                                                       |
-| `REASONING_REPLAY.md`                         | Hybride geheugen-/SQLite-cache voor `reasoning_content`                                     |
-| `AUTHZ_GUIDE.md`                              | Autorisatiepijplijn (`classify` → `policies` → `enforce`)                                   |
-| `RESILIENCE_GUIDE.md`                         | Circuit breaker + afkoelperiode + modelblokkering                                           |
-| `docs/security/STEALTH_GUIDE.md` (alleen git) | TLS-fingerprinting (JA3/JA4), Claude Code CCH, MITM-certificaat                             |
-| `AUTO-COMBO.md`                               | Auto Combo-engine (scoreberekening met 16 factoren, 6 moduspakketten, virtuele fabriek)     |
+| Doc                                           | Doel                                                                         |
+| --------------------------------------------- | ---------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                               | MCP-server: 110 tools, 3 transports, 33 scopes, REST-endpoints               |
+| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 skills, REST-helpers, agent card                       |
+| `AGENT_PROTOCOLS_GUIDE.md`                    | Geünificeerde gids: A2A vs ACP vs Cloud Agents                               |
+| `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules-orkestratie                                      |
+| `SKILLS.md`                                   | Skills-framework (ingebouwd + marketplace + SkillsSH + sandbox)              |
+| `RADAR.md`                                    | Radar-overlay voor de gratis-modelcatalogus (`RADAR_ENABLED`, standaard uit) |
+| `MEMORY.md`                                   | Geheugensysteem (SQLite FTS5 + Qdrant)                                       |
+| `EVALS.md`                                    | Eval-framework (suites, runs, rubrics)                                       |
+| `GUARDRAILS.md`                               | PII-maskering, prompt injection, vision bridge                               |
+| `COMPLIANCE.md`                               | Auditlog, retentie, noLog-opt-out                                            |
+| `WEBHOOKS.md`                                 | HMAC-ondertekende webhook-levering                                           |
+| `REASONING_REPLAY.md`                         | Hybride memory/SQLite-cache voor `reasoning_content`                         |
+| `AUTHZ_GUIDE.md`                              | Autorisatiepipeline (`classify` → `policies` → `enforce`)                    |
+| `RESILIENCE_GUIDE.md`                         | Circuit breaker + cooldown + model-lockout                                   |
+| `docs/security/STEALTH_GUIDE.md` (alleen git) | TLS-fingerprinting (JA3/JA4), Claude Code CCH, MITM-certificaat              |
+| `AUTO-COMBO.md`                               | Auto Combo-engine (scoring op 16 factoren, 6 mode packs, virtuele factory)   |
 
 ### Compressie
 
-| Document                        | Doel                                      |
+| Doc                             | Doel                                      |
 | ------------------------------- | ----------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Overzicht van compressiemodi + roadmap    |
-| `COMPRESSION_ENGINES.md`        | Caveman- en RTK-engines, registercontract |
-| `COMPRESSION_RULES_FORMAT.md`   | JSON-schema voor Caveman-regelpakketten   |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Inventaris van regelpakketten per taal    |
-| `RTK_COMPRESSION.md`            | Declaratieve RTK-pijplijn (49 filters)    |
+| `COMPRESSION_ENGINES.md`        | Caveman- + RTK-engines, registry-contract |
+| `COMPRESSION_RULES_FORMAT.md`   | JSON-schema van Caveman-rule packs        |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Inventaris van rule packs per taal        |
+| `RTK_COMPRESSION.md`            | RTK-declaratieve pipeline (56 filters)    |
 
-### Implementatie
+### Deployment
 
-| Document                     | Doel                                                               |
+| Doc                          | Doel                                                               |
 | ---------------------------- | ------------------------------------------------------------------ |
 | `DOCKER_GUIDE.md`            | Docker-build, profielen (base/cli/host/cliproxyapi), Redis-sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Algemene VM/VPS-implementatie (Ubuntu/Debian + nginx + systemd)    |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-implementatie (momenteel alleen in het Chinees)             |
-| `TERMUX_GUIDE.md`            | Headless Android via Termux                                        |
-| `PWA_GUIDE.md`               | Installatie van Progressive Web App + serviceworker                |
+| `VM_DEPLOYMENT_GUIDE.md`     | Generieke VM/VPS-deployment (Ubuntu/Debian + nginx + systemd)      |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-deployment (momenteel alleen in het Chinees)                |
+| `TERMUX_GUIDE.md`            | Android headless via Termux                                        |
+| `PWA_GUIDE.md`               | Progressive Web App-installatie + service worker                   |
 | `ELECTRON_GUIDE.md`          | Desktop-app bouwen + ondertekenen + distribueren                   |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                             |
 | `PROXY_GUIDE.md`             | Uitgaande proxy met 4 niveaus + 1proxy-marktplaats                 |
 
 ### Submappen
 
-| Submap                | Doel                                                                                                                                                                                                                                          |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Gelokaliseerde documentatievertalingen (41 talen)                                                                                                                                                                                             |
-| `docs/screenshots/`   | Afbeeldingsbestanden voor handleidingen                                                                                                                                                                                                       |
-| `_tasks/superpowers/` | Plannen/specificaties van superpowers (`writing-plans`/`brainstorming`) + onderzoek — geïsoleerde repository met afzonderlijk versiebeheer, genegeerd door Git in de hoofdstructuur. Zie CLAUDE.md → "Artefacten voor planning en onderzoek". |
+| Submap                | Doel                                                                                                                                                                                                             |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Gelokaliseerde documentatievertalingen (41 locales)                                                                                                                                                              |
+| `docs/screenshots/`   | Afbeeldingsassets voor handleidingen                                                                                                                                                                             |
+| `_tasks/superpowers/` | Plannen/specs van superpowers (`writing-plans`/`brainstorming`) + onderzoek — geïsoleerde, afzonderlijk geversioneerde repo, gitignored door de hoofdboom. Zie CLAUDE.md → "Plannings- en onderzoeksartefacten". |
 
 ---
 

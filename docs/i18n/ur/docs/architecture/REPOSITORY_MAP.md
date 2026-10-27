@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — عوامی دستاویزات (7 روٹ فائلیں + 17 ذیلی ڈائریکٹریاں)
+## `docs/` — عوامی دستاویزات (7 جڑ فائلیں + 17 ذیلی ڈائریکٹریاں)
 
-### اعلیٰ سطحی رہنما
+### اعلیٰ درجے کی رہنما دستاویزات
 
-| دستاویز                     | مقصد                                                                                                         |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | اعلیٰ سطحی آرکیٹیکچر، ذیلی نظاموں کا نقشہ، ڈیش بورڈ کی سطح                                                   |
-| `CODEBASE_DOCUMENTATION.md` | انجینئرنگ حوالہ: ڈائریکٹریاں، ماڈیولز، اصول و ضوابط                                                          |
-| `FEATURES.md`               | v3.8 کی نمایاں خصوصیات کے ساتھ فیچر میٹرکس                                                                   |
-| `USER_GUIDE.md`             | آخری صارف کا رہنما (سیٹ اپ، ماڈلز، کومبوز، CLIs، آڈیو وغیرہ)                                                 |
-| `API_REFERENCE.md`          | توثیقی ماڈل کے ساتھ API اینڈ پوائنٹ کا حوالہ                                                                 |
-| `openapi.yaml`              | OpenAPI 3.0 تفصیلات (121 پاتھز)                                                                              |
-| `SETUP_GUIDE.md`            | تنصیب کے طریقے (npm، npx، Docker، Electron، Termux، سورس)                                                    |
-| `ENVIRONMENT.md`            | تمام env vars (تقریباً 800 دستاویزی، `.env.example` کی تقریباً 3,050 سطور)                                   |
-| `TROUBLESHOOTING.md`        | عام خرابیاں + v3.8.0 کے معلوم مسائل                                                                          |
-| `RELEASE_CHECKLIST.md`      | مکمل ریلیز کا طریقۂ کار (اسکلز، husky، روایتی commits، تعیناتی)                                              |
-| `COVERAGE_PLAN.md`          | کوریج کے اہداف اور موجودہ حالت                                                                               |
-| `FREE_TIERS.md`             | منتخب کردہ مفت درجے کے فراہم کنندگان (48+ مفت + 11 OAuth)                                                    |
-| `CLI-TOOLS.md`              | بیرونی CLI انضمامات + اندرونی OmniRoute CLI                                                                  |
-| `I18N.md`                   | i18n آرکیٹیکچر، زبان شامل کرنے کا طریقہ، 67 لوکیلز                                                           |
-| `UNINSTALL.md`              | مکمل طور پر اَن انسٹال کرنے کے مراحل                                                                         |
-| `PROVIDER_REFERENCE.md`     | 376 فراہم کنندگان کا **خودکار طور پر تیار کردہ** کیٹلاگ (دوبارہ تیار کریں: `npm run gen:provider-reference`) |
+| دستاویز                     | مقصد                                                                                                   |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | اعلیٰ سطحی آرکیٹیکچر، سب سسٹم نقشہ، ڈیش بورڈ کی سطح                                                    |
+| `CODEBASE_DOCUMENTATION.md` | انجینئرنگ حوالہ: ڈائریکٹریاں، ماڈیولز، کنونشنز                                                         |
+| `FEATURES.md`               | فیچر میٹرکس مع v3.8 نمایاں خصوصیات                                                                     |
+| `USER_GUIDE.md`             | اختتامی صارف کا رہنما (سیٹ اپ، ماڈلز، کومبوز، CLIs، آڈیو، وغیرہ)                                       |
+| `API_REFERENCE.md`          | API اینڈ پوائنٹ حوالہ مع توثیقی ماڈل                                                                   |
+| `openapi.yaml`              | OpenAPI 3.0 تفصیلات (121 راستے)                                                                        |
+| `SETUP_GUIDE.md`            | انسٹالیشن کے طریقے (npm، npx، Docker، Electron، Termux، سورس)                                          |
+| `ENVIRONMENT.md`            | تمام ماحولیاتی متغیرات (~800 دستاویزی، ~3,050 سطریں `.env.example`)                                    |
+| `TROUBLESHOOTING.md`        | عام خرابیاں + v3.8.0 معلوم مسائل                                                                       |
+| `RELEASE_CHECKLIST.md`      | مکمل ریلیز عمل (سکلز، husky، conventional commits، تعیناتی)                                            |
+| `COVERAGE_PLAN.md`          | کوریج کے اہداف اور موجودہ صورتحال                                                                      |
+| `FREE_TIERS.md`             | منتخب شدہ مفت درجے کے فراہم کنندگان (48+ مفت + 11 OAuth)                                               |
+| `CLI-TOOLS.md`              | بیرونی CLI انضمام + داخلی OmniRoute CLI                                                                |
+| `I18N.md`                   | i18n آرکیٹیکچر، زبان کا اضافہ، 67 لوکیلز                                                               |
+| `UNINSTALL.md`              | مکمل ان انسٹال کے اقدامات                                                                              |
+| `PROVIDER_REFERENCE.md`     | **خودکار طور پر تیار شدہ** 376 فراہم کنندگان کی فہرست (دوبارہ تیاری: `npm run gen:provider-reference`) |
 
-### ذیلی نظاموں کی گہری تفصیلات
+### سب سسٹم تفصیلی جائزے
 
-| دستاویز                                    | مقصد                                                                  |
-| ------------------------------------------ | --------------------------------------------------------------------- |
-| `MCP-SERVER.md`                            | MCP سرور: 110 ٹولز، 3 ٹرانسپورٹس، 33 اسکوپس، REST اینڈ پوائنٹس        |
-| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC، 6 اسکلز، REST معاونین، ایجنٹ کارڈ                 |
-| `AGENT_PROTOCOLS_GUIDE.md`                 | متحد رہنما: A2A بمقابلہ ACP بمقابلہ Cloud Agents                      |
-| `CLOUD_AGENT.md`                           | Codex Cloud / Devin / Jules کی تنظیم کاری                             |
-| `SKILLS.md`                                | اسکلز فریم ورک (بلٹ اِن + مارکیٹ پلیس + SkillsSH + سینڈ باکس)         |
-| `RADAR.md`                                 | Radar مفت ماڈل کیٹلاگ اوورلے (`RADAR_ENABLED`، بطور ڈیفالٹ بند)       |
-| `MEMORY.md`                                | میموری سسٹم (SQLite FTS5 + Qdrant)                                    |
-| `EVALS.md`                                 | تشخیصی فریم ورک (سوٹس، رنز، پیمانے)                                   |
-| `GUARDRAILS.md`                            | PII ماسکر، پرامپٹ انجیکشن، وژن برج                                    |
-| `COMPLIANCE.md`                            | آڈٹ لاگ، برقرار رکھنے کی مدت، noLog آپٹ آؤٹ                           |
-| `WEBHOOKS.md`                              | HMAC سے دستخط شدہ webhook کی ترسیل                                    |
-| `REASONING_REPLAY.md`                      | `reasoning_content` کے لیے ہائبرڈ میموری/SQLite کیش                   |
-| `AUTHZ_GUIDE.md`                           | اجازت دہی پائپ لائن (`classify` → `policies` → `enforce`)             |
-| `RESILIENCE_GUIDE.md`                      | سرکٹ بریکر + کول ڈاؤن + ماڈل لاک آؤٹ                                  |
-| `docs/security/STEALTH_GUIDE.md` (صرف git) | TLS فنگر پرنٹنگ (JA3/JA4)، Claude Code CCH، MITM سرٹیفکیٹ             |
-| `AUTO-COMBO.md`                            | Auto Combo انجن (16 عوامل پر مبنی اسکورنگ، 6 موڈ پیکس، ورچوئل فیکٹری) |
+| دستاویز                                    | مقصد                                                                 |
+| ------------------------------------------ | -------------------------------------------------------------------- |
+| `MCP-SERVER.md`                            | MCP سرور: 110 ٹولز، 3 ٹرانسپورٹس، 33 اسکوپس، REST اینڈ پوائنٹس       |
+| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC، 6 سکلز، REST معاونین، ایجنٹ کارڈ                 |
+| `AGENT_PROTOCOLS_GUIDE.md`                 | متحد رہنما: A2A بمقابلہ ACP بمقابلہ Cloud Agents                     |
+| `CLOUD_AGENT.md`                           | Codex Cloud / Devin / Jules آرکسٹریشن                                |
+| `SKILLS.md`                                | سکلز فریم ورک (بلٹ اِن + مارکیٹ پلیس + SkillsSH + سینڈ باکس)         |
+| `RADAR.md`                                 | Radar مفت ماڈل کیٹلاگ اوورلے (`RADAR_ENABLED`، بطور ڈیفالٹ غیر فعال) |
+| `MEMORY.md`                                | میموری سسٹم (SQLite FTS5 + Qdrant)                                   |
+| `EVALS.md`                                 | تشخیصی فریم ورک (سوٹس، رنز، روبرکس)                                  |
+| `GUARDRAILS.md`                            | PII ماسکر، پرامپٹ انجیکشن، ویژن برج                                  |
+| `COMPLIANCE.md`                            | آڈٹ لاگ، برقرار رکھنے کی مدت، noLog آپٹ آؤٹ                          |
+| `WEBHOOKS.md`                              | HMAC سے دستخط شدہ ویب ہک ترسیل                                       |
+| `REASONING_REPLAY.md`                      | `reasoning_content` کے لیے ہائبرڈ میموری/SQLite کیشے                 |
+| `AUTHZ_GUIDE.md`                           | اجازت کی پائپ لائن (`classify` → `policies` → `enforce`)             |
+| `RESILIENCE_GUIDE.md`                      | سرکٹ بریکر + کول ڈاؤن + ماڈل لاک آؤٹ                                 |
+| `docs/security/STEALTH_GUIDE.md` (صرف git) | TLS فنگر پرنٹنگ (JA3/JA4)، Claude Code CCH، MITM سرٹیفکیٹ            |
+| `AUTO-COMBO.md`                            | Auto Combo انجن (16 عناصر کی اسکورنگ، 6 موڈ پیکس، ورچوئل فیکٹری)     |
 
 ### کمپریشن
 
-| دستاویز                         | مقصد                               |
-| ------------------------------- | ---------------------------------- |
-| `COMPRESSION_GUIDE.md`          | کمپریشن موڈز کا جائزہ + روڈ میپ    |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK انجنز، رجسٹری معاہدہ |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman رول پیک JSON اسکیما        |
-| `COMPRESSION_LANGUAGE_PACKS.md` | ہر زبان کے لیے رول پیک کی فہرست    |
-| `RTK_COMPRESSION.md`            | RTK اعلانیہ پائپ لائن (49 فلٹرز)   |
+| دستاویز                         | مقصد                              |
+| ------------------------------- | --------------------------------- |
+| `COMPRESSION_GUIDE.md`          | کمپریشن موڈز کا جائزہ + روڈ میپ   |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK انجن، رجسٹری معاہدہ |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman رول پیک JSON اسکیما       |
+| `COMPRESSION_LANGUAGE_PACKS.md` | فی زبان رول پیک کی فہرست          |
+| `RTK_COMPRESSION.md`            | RTK اعلانیہ پائپ لائن (56 فلٹرز)  |
 
 ### تعیناتی
 
-| دستاویز                      | مقصد                                                                   |
-| ---------------------------- | ---------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker کی تعمیر، پروفائلز (base/cli/host/cliproxyapi)، Redis سائیڈ کار |
-| `VM_DEPLOYMENT_GUIDE.md`     | عمومی VM/VPS تعیناتی (Ubuntu/Debian + nginx + systemd)                 |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io تعیناتی (فی الحال صرف چینی زبان میں)                            |
-| `TERMUX_GUIDE.md`            | Termux کے ذریعے Android ہیڈ لیس سیٹ اپ                                 |
-| `PWA_GUIDE.md`               | Progressive Web App کی تنصیب + سروس ورکر                               |
-| `ELECTRON_GUIDE.md`          | ڈیسک ٹاپ ایپ کی تعمیر + دستخط + تقسیم                                  |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                 |
-| `PROXY_GUIDE.md`             | 4 سطحی آؤٹ باؤنڈ پراکسی + 1proxy مارکیٹ پلیس                           |
+| دستاویز                      | مقصد                                                             |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker بلڈ، پروفائلز (base/cli/host/cliproxyapi)، Redis سائیڈکار |
+| `VM_DEPLOYMENT_GUIDE.md`     | عمومی VM/VPS تعیناتی (Ubuntu/Debian + nginx + systemd)           |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io تعیناتی (فی الحال صرف چینی زبان میں)                      |
+| `TERMUX_GUIDE.md`            | Termux کے ذریعے Android ہیڈلیس                                   |
+| `PWA_GUIDE.md`               | Progressive Web App انسٹالیشن + سروس ورکر                        |
+| `ELECTRON_GUIDE.md`          | ڈیسک ٹاپ ایپ کی تعمیر + دستخط + تقسیم                            |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                           |
+| `PROXY_GUIDE.md`             | چار درجوں کی آؤٹ باؤنڈ پراکسی + 1proxy مارکیٹ پلیس               |
 
 ### ذیلی ڈائریکٹریاں
 
-| ذیلی ڈائریکٹری        | مقصد                                                                                                                                                                                                       |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | دستاویزات کے مقامی زبانوں میں تراجم (41 زبانیں)                                                                                                                                                            |
-| `docs/screenshots/`   | رہنما دستاویزات کے لیے تصویری اثاثے                                                                                                                                                                        |
-| `_tasks/superpowers/` | superpowers سے منصوبے/تفصیلات (`writing-plans`/`brainstorming`) + تحقیق — الگ تھلگ، علیحدہ ورژن والا ریپوزٹری، جسے مرکزی ٹری میں gitignore کیا گیا ہے۔ CLAUDE.md → "Planning & Research Artifacts" دیکھیں۔ |
+| ذیلی ڈائریکٹری        | مقصد                                                                                                                                                                                              |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | مقامی زبانوں میں دستاویزی ترجمے (41 زبانیں)                                                                                                                                                       |
+| `docs/screenshots/`   | رہنمائیوں کے لیے تصویری اثاثے                                                                                                                                                                     |
+| `_tasks/superpowers/` | سپر پاورز (`writing-plans`/`brainstorming`) سے منصوبے/تفصیلات + تحقیق — الگ تھلگ، الگ سے ورژن شدہ ریپو، جو مرکزی ٹری کی طرف سے gitignored ہے۔ دیکھیں CLAUDE.md ← "Planning & Research Artifacts"۔ |
 
 ---
 

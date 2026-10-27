@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Doiciméadacht Phoiblí (7 gcomhad fréimhe + 17 bhfochomhadlann)
+## `docs/` — Doiciméadú Poiblí (7 gcomhad fréimhe + 17 fhochomhadlann)
 
-### Treoracha ardleibhéil
+### Treoracha barrleibhéil
 
-| Doiciméad                   | Cuspóir                                                                                  |
-| --------------------------- | ---------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Ailtireacht ardleibhéil, léarscáil na bhfochóras, dromchla an deais                      |
-| `CODEBASE_DOCUMENTATION.md` | Tagairt innealtóireachta: comhadlanna, modúil, coinbhinsiúin                             |
-| `FEATURES.md`               | Maitrís gnéithe le buaicphointí v3.8                                                     |
-| `USER_GUIDE.md`             | Lámhleabhar don úsáideoir deiridh (socrú, samhlacha, teaglamaí, CLIanna, fuaim, etc.)    |
-| `API_REFERENCE.md`          | Tagairt do chríochphointí API leis an tsamhail fíordheimhnithe                           |
-| `openapi.yaml`              | Sonraíocht OpenAPI 3.0 (121 chonair)                                                     |
-| `SETUP_GUIDE.md`            | Modhanna suiteála (npm, npx, Docker, Electron, Termux, foinse)                           |
-| `ENVIRONMENT.md`            | Gach athróg timpeallachta (~800 doiciméadaithe, ~3,050 líne in `.env.example`)           |
-| `TROUBLESHOOTING.md`        | Earráidí coitianta + fadhbanna aitheanta in v3.8.0                                       |
-| `RELEASE_CHECKLIST.md`      | Sreabhadh iomlán eisiúna (scileanna, husky, tiomantais choinbhinsiúnacha, imscaradh)     |
-| `COVERAGE_PLAN.md`          | Spriocanna cumhdaigh agus an staid reatha                                                |
-| `FREE_TIERS.md`             | Soláthraithe roghnaithe sraithe in aisce (48+ saor in aisce + 11 OAuth)                  |
-| `CLI-TOOLS.md`              | Comhtháthuithe seachtracha CLI + CLI inmheánach OmniRoute                                |
-| `I18N.md`                   | Ailtireacht i18n, teanga a chur leis, 67 logchaighdeán                                   |
-| `UNINSTALL.md`              | Céimeanna díshuiteála glaine                                                             |
-| `PROVIDER_REFERENCE.md`     | Catalóg **uathghinte** de 376 soláthraí (athghiniúint: `npm run gen:provider-reference`) |
+| Doic                        | Cuspóir                                                                             |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Ailtireacht ardleibhéil, léarscáil fochóras, dromchla an deais                      |
+| `CODEBASE_DOCUMENTATION.md` | Tagairt innealtóireachta: comhadlanna, modúil, coinbhinsiúin                        |
+| `FEATURES.md`               | Maitrís gnéithe le buaicphointí v3.8                                                |
+| `USER_GUIDE.md`             | Lámhleabhar don úsáideoir deiridh (socrú, samhlacha, cumaisc, CLIanna, fuaim, srl.) |
+| `API_REFERENCE.md`          | Tagairt chríochphointí API le samhail fíordheimhnithe                               |
+| `openapi.yaml`              | Sonraíocht OpenAPI 3.0 (121 chosán)                                                 |
+| `SETUP_GUIDE.md`            | Modhanna suiteála (npm, npx, Docker, Electron, Termux, foinse)                      |
+| `ENVIRONMENT.md`            | Gach athróg chomhshaoil (~800 doiciméadaithe, ~3,050 líne `.env.example`)           |
+| `TROUBLESHOOTING.md`        | Earráidí coitianta + fadhbanna aitheanta v3.8.0                                     |
+| `RELEASE_CHECKLIST.md`      | Sreabhadh iomlán eisiúna (scileanna, husky, conventional commits, imscaradh)        |
+| `COVERAGE_PLAN.md`          | Spriocanna clúdaigh agus an staid reatha                                            |
+| `FREE_TIERS.md`             | Soláthraithe saorchiseal curaithe (48+ saor in aisce + 11 OAuth)                    |
+| `CLI-TOOLS.md`              | Comhtháthuithe CLI seachtracha + CLI inmheánach OmniRoute                           |
+| `I18N.md`                   | Ailtireacht i18n, teanga a chur leis, 67 locale                                     |
+| `UNINSTALL.md`              | Céimeanna dísuiteála glana                                                          |
+| `PROVIDER_REFERENCE.md`     | Catalóg **uathghinte** de 376 soláthraí (athghin: `npm run gen:provider-reference`) |
 
-### Mionléargais ar fhochórais
+### Anailís dhomhain ar fhochórais
 
-| Doiciméad                                     | Cuspóir                                                                                             |
-| --------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | Freastalaí MCP: 110 uirlis, 3 iompar, 33 raon feidhme, críochphointí REST                           |
-| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 scil, áiseanna REST, cárta gníomhaire                                         |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | Treoir aontaithe: A2A vs ACP vs Gníomhairí Néalríomhaireachta                                       |
-| `CLOUD_AGENT.md`                              | Ceolfhoirniú Codex Cloud / Devin / Jules                                                            |
-| `SKILLS.md`                                   | Creat scileanna (ionsuite + margadh + SkillsSH + bosca gainimh)                                     |
-| `RADAR.md`                                    | Forleagan catalóige samhlacha saor in aisce Radar (`RADAR_ENABLED`, múchta de réir réamhshocraithe) |
-| `MEMORY.md`                                   | Córas cuimhne (SQLite FTS5 + Qdrant)                                                                |
-| `EVALS.md`                                    | Creat meastóireachta (foirne, rite, rúibricí)                                                       |
-| `GUARDRAILS.md`                               | Mascálaí PII, instealladh leid, droichead físe                                                      |
-| `COMPLIANCE.md`                               | Loga iniúchta, coinneáil, rogha diúltaithe noLog                                                    |
-| `WEBHOOKS.md`                                 | Seachadadh crúca gréasáin sínithe le HMAC                                                           |
-| `REASONING_REPLAY.md`                         | Taisce hibrideach cuimhne/SQLite le haghaidh `reasoning_content`                                    |
-| `AUTHZ_GUIDE.md`                              | Píblíne údaraithe (`classify` → `policies` → `enforce`)                                             |
-| `RESILIENCE_GUIDE.md`                         | Scoradán ciorcaid + tréimhse shuaimhnithe + frithdhúnadh samhla                                     |
-| `docs/security/STEALTH_GUIDE.md` (git amháin) | Méarlorgaireacht TLS (JA3/JA4), Claude Code CCH, teastas MITM                                       |
-| `AUTO-COMBO.md`                               | Inneall Auto Combo (scóráil 16 fhachtóir, 6 phaca móid, monarcha fhíorúil)                          |
+| Doic                                          | Cuspóir                                                                                               |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                               | Freastalaí MCP: 110 uirlis, 3 iompar, 33 raon feidhme, críochphointí REST                             |
+| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 scil, cúntóirí REST, cárta gníomhaire                                           |
+| `AGENT_PROTOCOLS_GUIDE.md`                    | Treoir aontaithe: A2A vs ACP vs Cloud Agents                                                          |
+| `CLOUD_AGENT.md`                              | Orchóiriú Codex Cloud / Devin / Jules                                                                 |
+| `SKILLS.md`                                   | Creat scileanna (ionsuiteáilte + marglann + SkillsSH + bosca gainimh)                                 |
+| `RADAR.md`                                    | Forleagan Radar ar chatalóg samhlacha saor in aisce (`RADAR_ENABLED`, múchta de réir réamhshocraithe) |
+| `MEMORY.md`                                   | Córas cuimhne (SQLite FTS5 + Qdrant)                                                                  |
+| `EVALS.md`                                    | Creat meastóireachta (sraitheanna, rite, rubraicí)                                                    |
+| `GUARDRAILS.md`                               | Mascaire PII, instealladh leideanna, droichead radhairc                                               |
+| `COMPLIANCE.md`                               | Loga iniúchta, coinneáil, tarraingt siar as noLog                                                     |
+| `WEBHOOKS.md`                                 | Seachadadh webhook sínithe le HMAC                                                                    |
+| `REASONING_REPLAY.md`                         | Taisce hibrideach cuimhne/SQLite le haghaidh `reasoning_content`                                      |
+| `AUTHZ_GUIDE.md`                              | Píblíne údaraithe (`classify` → `policies` → `enforce`)                                               |
+| `RESILIENCE_GUIDE.md`                         | Bristeoir ciorcaid + fuarú + glasáil samhla                                                           |
+| `docs/security/STEALTH_GUIDE.md` (git amháin) | Méarloirgeadh TLS (JA3/JA4), Claude Code CCH, deimhniú MITM                                           |
+| `AUTO-COMBO.md`                               | Inneall Auto Combo (scóráil 16-fhachtóir, 6 phacáiste móid, monarcha fhíorúil)                        |
 
 ### Comhbhrú
 
-| Doiciméad                       | Cuspóir                                           |
-| ------------------------------- | ------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Forbhreathnú ar mhodhanna comhbhrúite + treochlár |
-| `COMPRESSION_ENGINES.md`        | Innill Caveman + RTK, conradh clárlainne          |
-| `COMPRESSION_RULES_FORMAT.md`   | Scéimre JSON do phaca rialacha Caveman            |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Fardal pacáistí rialacha de réir teanga           |
-| `RTK_COMPRESSION.md`            | Píblíne dhearbhaitheach RTK (49 scagaire)         |
+| Doic                            | Cuspóir                                       |
+| ------------------------------- | --------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Forbhreathnú ar mhóid chomhbhrú + treochlár   |
+| `COMPRESSION_ENGINES.md`        | Innill Caveman + RTK, conradh clárlainne      |
+| `COMPRESSION_RULES_FORMAT.md`   | Scéimre JSON pacáiste rialacha Caveman        |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Fardal pacáistí rialacha in aghaidh na teanga |
+| `RTK_COMPRESSION.md`            | Píblíne dhearbhaitheach RTK (56 scagaire)     |
 
 ### Imscaradh
 
-| Doiciméad                    | Cuspóir                                                                     |
-| ---------------------------- | --------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Tógáil Docker, próifílí (base/cli/host/cliproxyapi), taobh-choimeádán Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | Imscaradh cineálach VM/VPS (Ubuntu/Debian + nginx + systemd)                |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Imscaradh Fly.io (i Sínis amháin faoi láthair)                              |
-| `TERMUX_GUIDE.md`            | Android gan chomhéadan grafach trí Termux                                   |
-| `PWA_GUIDE.md`               | Suiteáil Aip Ghréasáin Fhorásach + oibrí seirbhíse                          |
-| `ELECTRON_GUIDE.md`          | Tógáil + síniú + dáileadh aipe deisce                                       |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                      |
-| `PROXY_GUIDE.md`             | Seachfhreastalaí amach 4 leibhéal + margadh 1proxy                          |
+| Doiciméad                    | Cuspóir                                                               |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Tógáil Docker, próifílí (base/cli/host/cliproxyapi), taobhcharr Redis |
+| `VM_DEPLOYMENT_GUIDE.md`     | Imscaradh ginearálta VM/VPS (Ubuntu/Debian + nginx + systemd)         |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Imscaradh Fly.io (sa tSínis amháin faoi láthair)                      |
+| `TERMUX_GUIDE.md`            | Android headless trí Termux                                           |
+| `PWA_GUIDE.md`               | Suiteáil Progressive Web App + service worker                         |
+| `ELECTRON_GUIDE.md`          | Tógáil + síniú + dáileadh na haipe deisce                             |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                |
+| `PROXY_GUIDE.md`             | Seachfhreastalaí amach 4 leibhéal + margadh 1proxy                    |
 
 ### Fochomhadlanna
 
-| Fochomhadlann         | Cuspóir                                                                                                                                                                                                                                     |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Aistriúcháin logánaithe ar dhoiciméid (41 logchaighdeán)                                                                                                                                                                                    |
-| `docs/screenshots/`   | Sócmhainní íomhá do threoracha                                                                                                                                                                                                              |
-| `_tasks/superpowers/` | Pleananna/sonraíochtaí ó superpowers (`writing-plans`/`brainstorming`) + taighde — stór leithlisithe a bhfuil a leaganacha féin aige agus a ndéanann an príomhchrann neamhaird git de. Féach CLAUDE.md → "Déantáin Phleanála agus Taighde". |
+| Fochomhadlann         | Cuspóir                                                                                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Aistriúcháin logánaithe ar dhoiciméid (41 logánacht)                                                                                                                                                                |
+| `docs/screenshots/`   | Sócmhainní íomhá do na treoracha                                                                                                                                                                                    |
+| `_tasks/superpowers/` | Pleananna/sonraíochtaí ó superpowers (`writing-plans`/`brainstorming`) + taighde — repo scoite amach, le leaganú ar leith, faoi gitignore ag an bpríomhchrann. Féach CLAUDE.md → "Déantáin Phleanála agus Taighde". |
 
 ---
 

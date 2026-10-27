@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — תיעוד ציבורי (7 קובצי שורש + 17 תיקיות משנה)
+## `docs/` — תיעוד ציבורי (7 קבצי שורש + 17 תתי-תיקיות)
 
 ### מדריכים ברמה העליונה
 
-| מסמך                        | מטרה                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | ארכיטקטורה ברמה גבוהה, מפת תת־מערכות, ממשק לוח המחוונים                              |
-| `CODEBASE_DOCUMENTATION.md` | חומר עזר הנדסי: תיקיות, מודולים, מוסכמות                                             |
-| `FEATURES.md`               | מטריצת יכולות עם נקודות עיקריות מ־v3.8                                               |
-| `USER_GUIDE.md`             | מדריך למשתמש הקצה (הגדרה, מודלים, שילובים, ממשקי CLI, שמע וכו')                      |
-| `API_REFERENCE.md`          | חומר עזר לנקודות קצה של ה־API, כולל מודל אימות                                       |
-| `openapi.yaml`              | מפרט OpenAPI 3.0‏ (121 נתיבים)                                                       |
-| `SETUP_GUIDE.md`            | שיטות התקנה (npm, npx, Docker, Electron, Termux, קוד מקור)                           |
-| `ENVIRONMENT.md`            | כל משתני הסביבה (כ־800 מתועדים, כ־3,050 שורות ב־`.env.example`)                      |
-| `TROUBLESHOOTING.md`        | שגיאות נפוצות + בעיות ידועות ב־v3.8.0                                                |
-| `RELEASE_CHECKLIST.md`      | תהליך הפצה מלא (מיומנויות, husky, הודעות commit מוסכמות, פריסה)                      |
-| `COVERAGE_PLAN.md`          | יעדי כיסוי והמצב הנוכחי                                                              |
-| `FREE_TIERS.md`             | ספקים נבחרים עם מסלולים חינמיים (48+ בחינם + 11 עם OAuth)                            |
-| `CLI-TOOLS.md`              | שילובי CLI חיצוניים + CLI פנימי של OmniRoute                                         |
-| `I18N.md`                   | ארכיטקטורת i18n, הוספת שפה, 67 אזורים                                                |
-| `UNINSTALL.md`              | שלבים להסרה נקייה                                                                    |
-| `PROVIDER_REFERENCE.md`     | קטלוג **שנוצר אוטומטית** של 376 ספקים (יצירה מחדש: `npm run gen:provider-reference`) |
+| מסמך                        | מטרה                                                                                |
+| --------------------------- | ----------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | ארכיטקטורה ברמה גבוהה, מפת תת-מערכות, משטח לוח הבקרה                                |
+| `CODEBASE_DOCUMENTATION.md` | מדריך הנדסי: תיקיות, מודולים, מוסכמות                                               |
+| `FEATURES.md`               | מטריצת תכונות עם נקודות הדגשה של v3.8                                               |
+| `USER_GUIDE.md`             | מדריך למשתמש קצה (התקנה, מודלים, קומבו, CLIs, אודיו וכו')                           |
+| `API_REFERENCE.md`          | מדריך נקודות קצה של API עם מודל האימות                                              |
+| `openapi.yaml`              | מפרט OpenAPI 3.0 (121 נתיבים)                                                       |
+| `SETUP_GUIDE.md`            | שיטות התקנה (npm, npx, Docker, Electron, Termux, מקור)                              |
+| `ENVIRONMENT.md`            | כל משתני הסביבה (~800 מתועדים, ~3,050 שורות `.env.example`)                         |
+| `TROUBLESHOOTING.md`        | שגיאות נפוצות + בעיות ידועות של v3.8.0                                              |
+| `RELEASE_CHECKLIST.md`      | זרימת שחרור מלאה (skills, husky, conventional commits, פריסה)                       |
+| `COVERAGE_PLAN.md`          | יעדי כיסוי ומצב נוכחי                                                               |
+| `FREE_TIERS.md`             | ספקי free-tier נבחרים (48+ חינמיים + 11 OAuth)                                      |
+| `CLI-TOOLS.md`              | אינטגרציות CLI חיצוניות + ה-CLI הפנימי של OmniRoute                                 |
+| `I18N.md`                   | ארכיטקטורת i18n, הוספת שפה, 67 אזורים (locales)                                     |
+| `UNINSTALL.md`              | שלבי הסרה נקייה                                                                     |
+| `PROVIDER_REFERENCE.md`     | קטלוג **נוצר אוטומטית** של 376 ספקים (יצירה מחדש: `npm run gen:provider-reference`) |
 
-### סקירות מעמיקות של תת־מערכות
+### צלילה עמוקה לתת-מערכות
 
 | מסמך                                        | מטרה                                                                       |
 | ------------------------------------------- | -------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                             | שרת MCP:‏ 110 כלים, 3 תעבורות, 33 תחומים, נקודות קצה של REST               |
-| `A2A-SERVER.md`                             | A2A v0.3:‏ JSON-RPC,‏ 6 מיומנויות, כלי עזר ל־REST, כרטיס סוכן              |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | מדריך מאוחד: A2A לעומת ACP לעומת סוכני ענן                                 |
-| `CLOUD_AGENT.md`                            | תזמור של Codex Cloud / Devin / Jules                                       |
-| `SKILLS.md`                                 | מסגרת מיומנויות (מובנות + זירת מסחר + SkillsSH + ארגז חול)                 |
-| `RADAR.md`                                  | שכבת קטלוג המודלים החינמיים של Radar ‏(`RADAR_ENABLED`, כבויה כברירת מחדל) |
+| `MCP-SERVER.md`                             | שרת MCP: 110 כלים, 3 תעבורות, 33 היקפים, נקודות קצה REST                   |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 מיומנויות, עוזרי REST, כרטיס סוכן                    |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | מדריך מאוחד: A2A מול ACP מול Cloud Agents                                  |
+| `CLOUD_AGENT.md`                            | תזמור Codex Cloud / Devin / Jules                                          |
+| `SKILLS.md`                                 | מסגרת Skills (מובנית + marketplace + SkillsSH + sandbox)                   |
+| `RADAR.md`                                  | שכבת-על לקטלוג מודלים חינמיים של Radar (`RADAR_ENABLED`, כבוי כברירת מחדל) |
 | `MEMORY.md`                                 | מערכת זיכרון (SQLite FTS5 + Qdrant)                                        |
-| `EVALS.md`                                  | מסגרת הערכה (חבילות, הרצות, מחווני הערכה)                                  |
-| `GUARDRAILS.md`                             | מיסוך PII, הזרקת הנחיות, גשר ראייה                                         |
-| `COMPLIANCE.md`                             | יומן ביקורת, מדיניות שמירה, ביטול רישום באמצעות noLog                      |
-| `WEBHOOKS.md`                               | מסירת webhook חתומה באמצעות HMAC                                           |
-| `REASONING_REPLAY.md`                       | מטמון היברידי של זיכרון/SQLite עבור `reasoning_content`                    |
+| `EVALS.md`                                  | מסגרת הערכות (suites, runs, rubrics)                                       |
+| `GUARDRAILS.md`                             | מסווה PII, הזרקת פרומפטים, גשר ראייה (vision bridge)                       |
+| `COMPLIANCE.md`                             | יומן ביקורת, שמירת מידע, ביטול הצטרפות ל-noLog                             |
+| `WEBHOOKS.md`                               | מסירת webhook חתומה ב-HMAC                                                 |
+| `REASONING_REPLAY.md`                       | מטמון היברידי זיכרון/SQLite עבור `reasoning_content`                       |
 | `AUTHZ_GUIDE.md`                            | צינור הרשאות (`classify` → `policies` → `enforce`)                         |
-| `RESILIENCE_GUIDE.md`                       | מפסק זרם + תקופת צינון + נעילת מודל                                        |
-| `docs/security/STEALTH_GUIDE.md` (git בלבד) | טביעת אצבע של TLS ‏(JA3/JA4),‏ Claude Code CCH, אישור MITM                 |
-| `AUTO-COMBO.md`                             | מנוע Auto Combo (ניקוד לפי 16 גורמים, 6 חבילות מצבים, מפעל וירטואלי)       |
+| `RESILIENCE_GUIDE.md`                       | מפסק מעגל (circuit breaker) + cooldown + נעילת מודל                        |
+| `docs/security/STEALTH_GUIDE.md` (git בלבד) | טביעת אצבע TLS (JA3/JA4), Claude Code CCH, אישור MITM                      |
+| `AUTO-COMBO.md`                             | מנוע Auto Combo (ניקוד של 16 גורמים, 6 חבילות מצב, מפעל וירטואלי)          |
 
 ### דחיסה
 
-| מסמך                            | מטרה                                 |
-| ------------------------------- | ------------------------------------ |
-| `COMPRESSION_GUIDE.md`          | סקירה של מצבי דחיסה + מפת דרכים      |
-| `COMPRESSION_ENGINES.md`        | מנועי Caveman + RTK, חוזה הרישום     |
-| `COMPRESSION_RULES_FORMAT.md`   | סכמת JSON של חבילת הכללים של Caveman |
-| `COMPRESSION_LANGUAGE_PACKS.md` | מלאי חבילות כללים לפי שפה            |
-| `RTK_COMPRESSION.md`            | צינור הצהרתי של RTK ‏(49 מסננים)     |
+| מסמך                            | מטרה                                |
+| ------------------------------- | ----------------------------------- |
+| `COMPRESSION_GUIDE.md`          | סקירה של מצבי דחיסה + מפת דרכים     |
+| `COMPRESSION_ENGINES.md`        | מנועי Caveman + RTK, חוזה הרג'יסטרי |
+| `COMPRESSION_RULES_FORMAT.md`   | סכמת JSON של חבילת כללי Caveman     |
+| `COMPRESSION_LANGUAGE_PACKS.md` | מלאי חבילות כללים לפי שפה           |
+| `RTK_COMPRESSION.md`            | צינור דקלרטיבי של RTK (56 מסננים)   |
 
 ### פריסה
 
-| מסמך                         | מטרה                                                                  |
-| ---------------------------- | --------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | בניית Docker, פרופילים (base/cli/host/cliproxyapi), שירות Redis נלווה |
-| `VM_DEPLOYMENT_GUIDE.md`     | פריסה כללית ב-VM/VPS‏ (Ubuntu/Debian‏ + nginx‏ + systemd)             |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | פריסה ב-Fly.io (זמין כרגע בסינית בלבד)                                |
-| `TERMUX_GUIDE.md`            | הפעלה ללא ממשק גרפי ב-Android באמצעות Termux                          |
-| `PWA_GUIDE.md`               | התקנת יישום ווב מתקדם + service worker                                |
-| `ELECTRON_GUIDE.md`          | בניית יישום שולחני + חתימה + הפצה                                     |
-| `TUNNELS_GUIDE.md`           | Cloudflared‏ + ngrok‏ + Tailscale Funnel                              |
-| `PROXY_GUIDE.md`             | פרוקסי יוצא ב-4 רמות + זירת המסחר 1proxy                              |
+| מסמך                         | מטרה                                                                          |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | בניית Docker, פרופילים (base/cli/host/cliproxyapi), קונטיינר sidecar של Redis |
+| `VM_DEPLOYMENT_GUIDE.md`     | פריסה גנרית על VM/VPS (Ubuntu/Debian + nginx + systemd)                       |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | פריסה ב-Fly.io (כרגע בסינית בלבד)                                             |
+| `TERMUX_GUIDE.md`            | הרצת Android ללא ממשק גרפי (headless) דרך Termux                              |
+| `PWA_GUIDE.md`               | התקנת Progressive Web App + service worker                                    |
+| `ELECTRON_GUIDE.md`          | בנייה, חתימה והפצה של אפליקציית שולחן עבודה                                   |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                        |
+| `PROXY_GUIDE.md`             | פרוקסי יוצא בן 4 רמות + מרקטפלייס 1proxy                                      |
 
-### תיקיות משנה
+### תתי-תיקיות
 
-| תיקיית משנה           | מטרה                                                                                                                                                                                        |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | תרגומים מקומיים של התיעוד (41 אזורים)                                                                                                                                                       |
-| `docs/screenshots/`   | נכסי תמונה עבור מדריכים                                                                                                                                                                     |
-| `_tasks/superpowers/` | תוכניות/מפרטים מ-superpowers‏ (`writing-plans`/`brainstorming`) + מחקר — מאגר נפרד ומבודד עם ניהול גרסאות עצמאי, שמוחרג באמצעות gitignore מהעץ הראשי. ראו CLAUDE.md‏ ← "תוצרי תכנון ומחקר". |
+| תת-תיקייה             | מטרה                                                                                                                                                                                            |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | תרגומי מסמכים מקומיים (41 שפות)                                                                                                                                                                 |
+| `docs/screenshots/`   | נכסי תמונות עבור המדריכים                                                                                                                                                                       |
+| `_tasks/superpowers/` | תוכניות/מפרטים מ-superpowers (`writing-plans`/`brainstorming`) וכן מחקר — ריפו מבודד עם ניהול גרסאות נפרד, מוחרג ב-gitignore על ידי העץ הראשי. ראו CLAUDE.md ← "Planning & Research Artifacts". |
 
 ---
 
