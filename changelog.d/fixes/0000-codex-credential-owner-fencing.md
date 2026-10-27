@@ -1,1 +1,0 @@
-- **fix(codex):** prevent stale credential, quota and catalog results from mutating replacement accounts or clearing newer failures while preserving valid token rotations and independent quota scopes.
