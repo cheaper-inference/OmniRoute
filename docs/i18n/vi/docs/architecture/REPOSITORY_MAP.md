@@ -397,74 +397,74 @@ open-sse/
 
 | Tài liệu                    | Mục đích                                                                                   |
 | --------------------------- | ------------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | Kiến trúc cấp cao, sơ đồ các hệ thống con, giao diện bảng điều khiển                       |
-| `CODEBASE_DOCUMENTATION.md` | Tài liệu tham khảo kỹ thuật: thư mục, mô-đun, quy ước                                      |
+| `ARCHITECTURE.md`           | Kiến trúc tổng quan, bản đồ hệ thống con, bề mặt dashboard                                 |
+| `CODEBASE_DOCUMENTATION.md` | Tài liệu tham khảo kỹ thuật: thư mục, module, quy ước                                      |
 | `FEATURES.md`               | Ma trận tính năng với các điểm nổi bật của v3.8                                            |
-| `USER_GUIDE.md`             | Hướng dẫn sử dụng cho người dùng cuối (thiết lập, mô hình, tổ hợp, CLI, âm thanh, v.v.)    |
-| `API_REFERENCE.md`          | Tài liệu tham khảo về endpoint API cùng mô hình xác thực                                   |
+| `USER_GUIDE.md`             | Hướng dẫn người dùng cuối (cài đặt, models, combos, CLIs, audio, v.v.)                     |
+| `API_REFERENCE.md`          | Tài liệu tham khảo API endpoint kèm mô hình xác thực                                       |
 | `openapi.yaml`              | Đặc tả OpenAPI 3.0 (121 đường dẫn)                                                         |
 | `SETUP_GUIDE.md`            | Các phương thức cài đặt (npm, npx, Docker, Electron, Termux, mã nguồn)                     |
-| `ENVIRONMENT.md`            | Tất cả biến môi trường (~800 biến được ghi lại, tệp `.env.example` dài ~3.050 dòng)        |
-| `TROUBLESHOOTING.md`        | Các lỗi thường gặp + các vấn đề đã biết của v3.8.0                                         |
-| `RELEASE_CHECKLIST.md`      | Quy trình phát hành đầy đủ (kỹ năng, husky, commit theo quy ước, triển khai)               |
-| `COVERAGE_PLAN.md`          | Mục tiêu về độ bao phủ và trạng thái hiện tại                                              |
-| `FREE_TIERS.md`             | Danh sách tuyển chọn các nhà cung cấp gói miễn phí (48+ miễn phí + 11 OAuth)               |
-| `CLI-TOOLS.md`              | Tích hợp CLI bên ngoài + CLI OmniRoute nội bộ                                              |
-| `I18N.md`                   | Kiến trúc i18n, cách thêm ngôn ngữ, 67 locale                                              |
-| `UNINSTALL.md`              | Các bước gỡ cài đặt sạch                                                                   |
+| `ENVIRONMENT.md`            | Tất cả biến môi trường (~800 được tài liệu hóa, ~3.050 dòng `.env.example`)                |
+| `TROUBLESHOOTING.md`        | Lỗi thường gặp + các vấn đề đã biết của v3.8.0                                             |
+| `RELEASE_CHECKLIST.md`      | Quy trình phát hành đầy đủ (skills, husky, conventional commits, deploy)                   |
+| `COVERAGE_PLAN.md`          | Mục tiêu coverage và trạng thái hiện tại                                                   |
+| `FREE_TIERS.md`             | Danh mục nhà cung cấp free-tier được tuyển chọn (48+ miễn phí + 11 OAuth)                  |
+| `CLI-TOOLS.md`              | Tích hợp CLI bên ngoài + OmniRoute CLI nội bộ                                              |
+| `I18N.md`                   | Kiến trúc i18n, thêm ngôn ngữ mới, 67 locales                                              |
+| `UNINSTALL.md`              | Các bước gỡ cài đặt sạch sẽ                                                                |
 | `PROVIDER_REFERENCE.md`     | Danh mục 376 nhà cung cấp **được tạo tự động** (tạo lại: `npm run gen:provider-reference`) |
 
-### Phân tích chuyên sâu các hệ thống con
+### Phân tích chuyên sâu theo hệ thống con
 
-| Tài liệu                                   | Mục đích                                                                      |
-| ------------------------------------------ | ----------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                            | Máy chủ MCP: 110 công cụ, 3 phương thức truyền tải, 33 phạm vi, endpoint REST |
-| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 kỹ năng, trình trợ giúp REST, thẻ tác nhân              |
-| `AGENT_PROTOCOLS_GUIDE.md`                 | Hướng dẫn hợp nhất: A2A so với ACP so với Cloud Agents                        |
-| `CLOUD_AGENT.md`                           | Điều phối Codex Cloud / Devin / Jules                                         |
-| `SKILLS.md`                                | Khung kỹ năng (tích hợp sẵn + marketplace + SkillsSH + sandbox)               |
-| `RADAR.md`                                 | Lớp phủ danh mục mô hình miễn phí Radar (`RADAR_ENABLED`, mặc định tắt)       |
-| `MEMORY.md`                                | Hệ thống bộ nhớ (SQLite FTS5 + Qdrant)                                        |
-| `EVALS.md`                                 | Khung đánh giá (bộ kiểm thử, lượt chạy, tiêu chí chấm điểm)                   |
-| `GUARDRAILS.md`                            | Trình che PII, chống chèn prompt, cầu nối thị giác                            |
-| `COMPLIANCE.md`                            | Nhật ký kiểm toán, thời gian lưu giữ, tùy chọn không tham gia noLog           |
-| `WEBHOOKS.md`                              | Phân phối webhook được ký bằng HMAC                                           |
-| `REASONING_REPLAY.md`                      | Bộ nhớ lai/bộ nhớ đệm SQLite cho `reasoning_content`                          |
-| `AUTHZ_GUIDE.md`                           | Quy trình phân quyền (`classify` → `policies` → `enforce`)                    |
-| `RESILIENCE_GUIDE.md`                      | Bộ ngắt mạch + thời gian chờ + khóa mô hình                                   |
-| `docs/security/STEALTH_GUIDE.md` (chỉ git) | Lấy dấu vân tay TLS (JA3/JA4), Claude Code CCH, chứng chỉ MITM                |
-| `AUTO-COMBO.md`                            | Công cụ Auto Combo (chấm điểm theo 16 yếu tố, 6 gói chế độ, nhà máy ảo)       |
+| Tài liệu                                   | Mục đích                                                                     |
+| ------------------------------------------ | ---------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                            | MCP server: 110 công cụ, 3 phương thức truyền tải, 33 scopes, REST endpoints |
+| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 skills, REST helpers, agent card                       |
+| `AGENT_PROTOCOLS_GUIDE.md`                 | Hướng dẫn tổng hợp: A2A vs ACP vs Cloud Agents                               |
+| `CLOUD_AGENT.md`                           | Điều phối Codex Cloud / Devin / Jules                                        |
+| `SKILLS.md`                                | Framework Skills (tích hợp sẵn + marketplace + SkillsSH + sandbox)           |
+| `RADAR.md`                                 | Lớp phủ danh mục model miễn phí Radar (`RADAR_ENABLED`, tắt mặc định)        |
+| `MEMORY.md`                                | Hệ thống bộ nhớ (SQLite FTS5 + Qdrant)                                       |
+| `EVALS.md`                                 | Framework đánh giá (suites, runs, rubrics)                                   |
+| `GUARDRAILS.md`                            | Trình che giấu PII, chống prompt injection, vision bridge                    |
+| `COMPLIANCE.md`                            | Audit log, retention, tùy chọn noLog                                         |
+| `WEBHOOKS.md`                              | Phân phối webhook ký bằng HMAC                                               |
+| `REASONING_REPLAY.md`                      | Bộ nhớ đệm lai memory/SQLite cho `reasoning_content`                         |
+| `AUTHZ_GUIDE.md`                           | Pipeline phân quyền (`classify` → `policies` → `enforce`)                    |
+| `RESILIENCE_GUIDE.md`                      | Circuit breaker + cooldown + model lockout                                   |
+| `docs/security/STEALTH_GUIDE.md` (chỉ git) | TLS fingerprinting (JA3/JA4), Claude Code CCH, chứng chỉ MITM                |
+| `AUTO-COMBO.md`                            | Engine Auto Combo (chấm điểm 16 yếu tố, 6 gói chế độ, virtual factory)       |
 
-### Nén
+### Nén dữ liệu
 
-| Tài liệu                        | Mục đích                                 |
-| ------------------------------- | ---------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Tổng quan về các chế độ nén + lộ trình   |
-| `COMPRESSION_ENGINES.md`        | Công cụ Caveman + RTK, hợp đồng registry |
-| `COMPRESSION_RULES_FORMAT.md`   | Lược đồ JSON cho gói quy tắc Caveman     |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Danh mục gói quy tắc theo từng ngôn ngữ  |
-| `RTK_COMPRESSION.md`            | Quy trình khai báo RTK (49 bộ lọc)       |
+| Tài liệu                        | Mục đích                                |
+| ------------------------------- | --------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Tổng quan các chế độ nén + lộ trình     |
+| `COMPRESSION_ENGINES.md`        | Engine Caveman + RTK, hợp đồng registry |
+| `COMPRESSION_RULES_FORMAT.md`   | Schema JSON của gói quy tắc Caveman     |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Danh mục gói quy tắc theo từng ngôn ngữ |
+| `RTK_COMPRESSION.md`            | Pipeline khai báo RTK (56 bộ lọc)       |
 
 ### Triển khai
 
 | Tài liệu                     | Mục đích                                                                |
 | ---------------------------- | ----------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Xây dựng Docker, các profile (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Triển khai VM/VPS thông thường (Ubuntu/Debian + nginx + systemd)        |
+| `DOCKER_GUIDE.md`            | Bản dựng Docker, các profile (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Triển khai VM/VPS thông dụng (Ubuntu/Debian + nginx + systemd)          |
 | `FLY_IO_DEPLOYMENT_GUIDE.md` | Triển khai Fly.io (hiện chỉ có tiếng Trung)                             |
-| `TERMUX_GUIDE.md`            | Chạy không giao diện trên Android thông qua Termux                      |
-| `PWA_GUIDE.md`               | Cài đặt Ứng dụng web tiến bộ + service worker                           |
-| `ELECTRON_GUIDE.md`          | Xây dựng + ký + phân phối ứng dụng máy tính                             |
+| `TERMUX_GUIDE.md`            | Chạy Android headless qua Termux                                        |
+| `PWA_GUIDE.md`               | Cài đặt Progressive Web App + service worker                            |
+| `ELECTRON_GUIDE.md`          | Xây dựng + ký + phân phối ứng dụng desktop                              |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                  |
-| `PROXY_GUIDE.md`             | Proxy đầu ra 4 cấp + thị trường 1proxy                                  |
+| `PROXY_GUIDE.md`             | Proxy outbound 4 cấp + marketplace 1proxy                               |
 
 ### Thư mục con
 
-| Thư mục con           | Mục đích                                                                                                                                                                                                                          |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Các bản dịch tài liệu được bản địa hóa (41 ngôn ngữ)                                                                                                                                                                              |
-| `docs/screenshots/`   | Tài nguyên hình ảnh dành cho các hướng dẫn                                                                                                                                                                                        |
-| `_tasks/superpowers/` | Các kế hoạch/đặc tả từ superpowers (`writing-plans`/`brainstorming`) + nghiên cứu — kho lưu trữ riêng biệt, được quản lý phiên bản độc lập và bị cây chính bỏ qua qua gitignore. Xem CLAUDE.md → "Planning & Research Artifacts". |
+| Thư mục con           | Mục đích                                                                                                                                                                                                               |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Các bản dịch tài liệu đã bản địa hóa (41 ngôn ngữ)                                                                                                                                                                     |
+| `docs/screenshots/`   | Tài nguyên hình ảnh cho các hướng dẫn                                                                                                                                                                                  |
+| `_tasks/superpowers/` | Các kế hoạch/đặc tả từ superpowers (`writing-plans`/`brainstorming`) + nghiên cứu — repo biệt lập, được quản lý phiên bản riêng, bị cây chính loại trừ qua gitignore. Xem CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

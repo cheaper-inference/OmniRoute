@@ -27,24 +27,24 @@ Concatenati:     1 - (1 - 0.80) * (1 - 0.46) = 89.2% risparmiato
 Intervallo:      1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Cosa comprime
+## Cosa Comprime
 
-Il catalogo integrato include attualmente 49 filtri suddivisi nelle seguenti categorie:
+Il catalogo integrato include attualmente 56 filtri suddivisi in queste categorie:
 
 | Categoria | Esempi                                                        |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, Playwright, test Go, test Cargo         |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, test Cargo     |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
 | `shell`   | `ls`, `find`, `grep`, log generici della shell                |
 | `docker`  | `docker ps`, log di Docker                                    |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | Output JSON, stack trace, fallback generico per l'output      |
+| `generic` | output JSON, stack trace, fallback per output generico        |
 
 Il rilevatore in `open-sse/services/compression/engines/rtk/commandDetector.ts` classifica l'output
-prima della selezione del filtro. I filtri possono anche trovare corrispondenze in base al pattern del comando o a un'espressione regolare sull'output quando una classe
-di comandi non è sufficiente.
+prima della selezione del filtro. I filtri possono anche corrispondere in base a un pattern di comando
+o a una regex sull'output quando la classe di comando non è sufficiente.
 
 ## Risoluzione dei filtri
 
@@ -348,15 +348,15 @@ node --import tsx/esm --test \
 
 ## Livelli di intensità (v3.8.16+)
 
-RTK supporta **3 livelli di intensità** che bilanciano **aggressività della compressione** e **sicurezza**. Il livello viene impostato tramite `config.intensity` nella configurazione del motore.
+RTK supporta **3 livelli di intensità** che bilanciano **aggressività della compressione** e **sicurezza**. Il livello si imposta tramite `config.intensity` nella configurazione del motore.
 
 ### I 3 livelli
 
-| Livello              | Soglia di troncamento | Risparmio di token | Rischio     | Ideale per                            |
-| -------------------- | --------------------- | ------------------ | ----------- | ------------------------------------- |
-| `minimal`            | 24 righe per sezione  | ~20-40%            | Molto basso | Produzione con contesto critico       |
-| `standard` (default) | 24 righe per sezione  | ~50-70%            | Basso       | Sessioni quotidiane di programmazione |
-| `aggressive`         | 16 righe per sezione  | ~70-90%            | Medio       | Sessioni lunghe, massimo risparmio    |
+| Livello              | Soglia di troncamento | Risparmio di token | Rischio     | Ideale per                         |
+| -------------------- | --------------------- | ------------------ | ----------- | ---------------------------------- |
+| `minimal`            | 24 righe per sezione  | ~20-40%            | Molto basso | Produzione con contesto critico    |
+| `standard` (default) | 24 righe per sezione  | ~50-70%            | Basso       | Sessioni di codifica quotidiane    |
+| `aggressive`         | 16 righe per sezione  | ~70-90%            | Medio       | Sessioni lunghe, massimo risparmio |
 
 ### Dove avviene il troncamento
 
@@ -368,39 +368,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Vengono conservate sia la **parte iniziale** sia la **parte finale** di ogni sezione; il contenuto intermedio viene eliminato quando si attiva il troncamento.
+Sia la **testa** che la **coda** di ogni sezione vengono preservate; il contenuto intermedio viene eliminato quando scatta il troncamento.
 
-### Cosa viene conservato e cosa viene tagliato
+### Cosa rimane e cosa viene tagliato
 
-| Contenuto                           | minimal       | standard      | aggressive    |
-| ----------------------------------- | ------------- | ------------- | ------------- |
-| Errori / tracce dello stack         | ✅ conservati | ✅ conservati | ✅ conservati |
-| Test non superati                   | ✅ conservati | ✅ conservati | ✅ conservati |
-| Errori di build                     | ✅ conservati | ✅ conservati | ✅ conservati |
-| Test superati (output dettagliato)  | ✅ conservati | 🟡 compressi  | 🟡 compressi  |
-| Output di routine (log informativi) | 🟡 compresso  | 🟡 compresso  | ❌ eliminato  |
-| Barre di avanzamento                | 🟡 compresse  | ❌ eliminate  | ❌ eliminate  |
-| Banner / grafica ASCII              | 🟡 compressi  | ❌ eliminati  | ❌ eliminati  |
+| Contenuto                    | minimal       | standard      | aggressive    |
+| ---------------------------- | ------------- | ------------- | ------------- |
+| Errori / stack trace         | ✅ preservati | ✅ preservati | ✅ preservati |
+| Test falliti                 | ✅ preservati | ✅ preservati | ✅ preservati |
+| Errori di build              | ✅ preservati | ✅ preservati | ✅ preservati |
+| Test superati (verbosi)      | ✅ preservati | 🟡 compressi  | 🟡 compressi  |
+| Output di routine (log info) | 🟡 compressi  | 🟡 compressi  | ❌ eliminati  |
+| Barre di avanzamento         | 🟡 compresse  | ❌ eliminate  | ❌ eliminate  |
+| Banner / ASCII art           | 🟡 compressi  | ❌ eliminati  | ❌ eliminati  |
 
-### Scelta dell'intensità corretta
+### Scegliere l'intensità giusta
 
 ```
-                  Perdere il contesto sarebbe catastrofico?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     SÌ          NO         NON SO
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Quanto è critico  Prova prima `standard`
-      │      il throughput?    (funziona nell'80%
-      │           │            dei casi)
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │    BASSO      ALTO
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -408,9 +408,9 @@ Vengono conservate sia la **parte iniziale** sia la **parte finale** di ogni sez
       └──────┴─────────┘
 ```
 
-### Configurazione dell'intensità
+### Configurare l'intensità
 
-**Per combo** (nella configurazione della combo):
+**Per combo** (nella configurazione del combo):
 
 ```json
 {
@@ -423,11 +423,11 @@ Vengono conservate sia la **parte iniziale** sia la **parte finale** di ogni sez
 }
 ```
 
-**A livello di codice**:
+**Tramite codice**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) è un
-`CompressionEngine` e non dispone del metodo `updateConfig`. Aggiorna la configurazione di un motore
-tramite l'helper del registro:
+`CompressionEngine` e non ha un metodo `updateConfig`. Aggiorna invece la configurazione
+di un motore tramite l'helper del registry:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -435,16 +435,16 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Verifica dell'effetto
+### Verificare l'effetto
 
-Usa il **gate di verifica** (vedi sotto) per confermare che il filtro sia sicuro con l'intensità scelta:
+Usa il **Verify Gate** (vedi sotto) per confermare che il tuo filtro sia sicuro all'intensità scelta:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";
 
 const result = runRtkFilterTests({ intensity: "aggressive" });
 if (!result.passed) {
-  console.error("I filtri non sono stati superati con intensità aggressive");
+  console.error("Filters failed at aggressive intensity");
 }
 ```
 

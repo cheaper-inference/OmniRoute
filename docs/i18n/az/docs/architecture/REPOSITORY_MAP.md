@@ -391,49 +391,49 @@ open-sse/
 
 ---
 
-## `docs/` — İctimai sənədləşmə (7 kök fayl + 17 alt kataloq)
+## `docs/` — Açıq Sənədlər (7 kök fayl + 17 alt qovluq)
 
-### Üst səviyyəli təlimatlar
+### Yuxarı səviyyəli bələdçilər
 
-| Sənəd                       | Məqsəd                                                                                                       |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | Yüksək səviyyəli arxitektura, alt sistemlərin xəritəsi, idarəetmə panelinin səthi                            |
-| `CODEBASE_DOCUMENTATION.md` | Mühəndislik arayışı: kataloqlar, modullar, konvensiyalar                                                     |
-| `FEATURES.md`               | v3.8 yenilikləri ilə xüsusiyyət matrisi                                                                      |
-| `USER_GUIDE.md`             | Son istifadəçi təlimatı (quraşdırma, modellər, kombinasiyalar, CLI-lər, audio və s.)                         |
-| `API_REFERENCE.md`          | Autentifikasiya modeli ilə API son nöqtələri arayışı                                                         |
-| `openapi.yaml`              | OpenAPI 3.0 spesifikasiyası (121 yol)                                                                        |
-| `SETUP_GUIDE.md`            | Quraşdırma üsulları (npm, npx, Docker, Electron, Termux, mənbə kodu)                                         |
-| `ENVIRONMENT.md`            | Bütün mühit dəyişənləri (~800 sənədləşdirilib, `.env.example` faylında ~3,050 sətir)                         |
-| `TROUBLESHOOTING.md`        | Ümumi xətalar + v3.8.0 məlum problemləri                                                                     |
-| `RELEASE_CHECKLIST.md`      | Tam buraxılış prosesi (bacarıqlar, husky, conventional commits, yerləşdirmə)                                 |
-| `COVERAGE_PLAN.md`          | Əhatə məqsədləri və cari vəziyyət                                                                            |
-| `FREE_TIERS.md`             | Seçilmiş pulsuz səviyyəli provayderlər (48+ pulsuz + 11 OAuth)                                               |
-| `CLI-TOOLS.md`              | Xarici CLI inteqrasiyaları + daxili OmniRoute CLI                                                            |
-| `I18N.md`                   | i18n arxitekturası, dil əlavə edilməsi, 67 lokalizasiya                                                      |
-| `UNINSTALL.md`              | Təmiz silmə addımları                                                                                        |
-| `PROVIDER_REFERENCE.md`     | 376 provayderdən ibarət **avtomatik yaradılmış** kataloq (yenidən yaratma: `npm run gen:provider-reference`) |
+| Sənəd                       | Məqsəd                                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | Yüksək səviyyəli arxitektura, altsistem xəritəsi, idarəetmə paneli səthi                               |
+| `CODEBASE_DOCUMENTATION.md` | Mühəndislik arayışı: qovluqlar, modullar, konvensiyalar                                                |
+| `FEATURES.md`               | v3.8 əsas yenilikləri ilə funksiya matrisi                                                             |
+| `USER_GUIDE.md`             | Son istifadəçi təlimatı (quraşdırma, modellər, kombolar, CLI-lər, audio və s.)                         |
+| `API_REFERENCE.md`          | Autentifikasiya modeli ilə API endpoint arayışı                                                        |
+| `openapi.yaml`              | OpenAPI 3.0 spesifikasiyası (121 yol)                                                                  |
+| `SETUP_GUIDE.md`            | Quraşdırma üsulları (npm, npx, Docker, Electron, Termux, mənbədən)                                     |
+| `ENVIRONMENT.md`            | Bütün mühit dəyişənləri (~800 sənədləşdirilmiş, ~3 050 sətirlik `.env.example`)                        |
+| `TROUBLESHOOTING.md`        | Ümumi xətalar + v3.8.0-da bilinən problemlər                                                           |
+| `RELEASE_CHECKLIST.md`      | Tam buraxılış axını (skills, husky, conventional commits, yerləşdirmə)                                 |
+| `COVERAGE_PLAN.md`          | Əhatə hədəfləri və cari vəziyyət                                                                       |
+| `FREE_TIERS.md`             | Seçilmiş pulsuz səviyyə təminatçıları (48+ pulsuz + 11 OAuth)                                          |
+| `CLI-TOOLS.md`              | Xarici CLI inteqrasiyaları + Daxili OmniRoute CLI                                                      |
+| `I18N.md`                   | i18n arxitekturası, dil əlavə etmə, 67 lokal                                                           |
+| `UNINSTALL.md`              | Təmiz silmə addımları                                                                                  |
+| `PROVIDER_REFERENCE.md`     | 376 təminatçının **avtomatik yaradılmış** kataloqu (yenidən yaratma: `npm run gen:provider-reference`) |
 
-### Alt sistemlər üzrə ətraflı icmallar
+### Altsistem dərin təhlilləri
 
-| Sənəd                                         | Məqsəd                                                                           |
-| --------------------------------------------- | -------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | MCP serveri: 110 alət, 3 nəqliyyat üsulu, 33 əhatə dairəsi, REST son nöqtələri   |
-| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 bacarıq, REST köməkçiləri, agent kartı                     |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | Vahid təlimat: A2A, ACP və Cloud Agents müqayisəsi                               |
-| `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules orkestrasiya prosesi                                 |
-| `SKILLS.md`                                   | Bacarıqlar çərçivəsi (daxili + marketplace + SkillsSH + sandbox)                 |
-| `RADAR.md`                                    | Radar pulsuz model kataloqu örtüyü (`RADAR_ENABLED`, standart olaraq söndürülüb) |
-| `MEMORY.md`                                   | Yaddaş sistemi (SQLite FTS5 + Qdrant)                                            |
-| `EVALS.md`                                    | Qiymətləndirmə çərçivəsi (dəstlər, icralar, meyarlar)                            |
-| `GUARDRAILS.md`                               | PII maskalayıcısı, prompt inyeksiyası, görüntü körpüsü                           |
-| `COMPLIANCE.md`                               | Audit jurnalı, saxlama müddəti, noLog imtina seçimi                              |
-| `WEBHOOKS.md`                                 | HMAC ilə imzalanmış webhook çatdırılması                                         |
-| `REASONING_REPLAY.md`                         | `reasoning_content` üçün hibrid yaddaş/SQLite keşi                               |
-| `AUTHZ_GUIDE.md`                              | Avtorizasiya konveyeri (`classify` → `policies` → `enforce`)                     |
-| `RESILIENCE_GUIDE.md`                         | Dövrə açarı + gözləmə müddəti + modelin bloklanması                              |
-| `docs/security/STEALTH_GUIDE.md` (yalnız git) | TLS barmaq izi (JA3/JA4), Claude Code CCH, MITM sertifikatı                      |
-| `AUTO-COMBO.md`                               | Auto Combo mühərriki (16 amilli qiymətləndirmə, 6 rejim paketi, virtual fabrik)  |
+| Sənəd                                         | Məqsəd                                                                            |
+| --------------------------------------------- | --------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                               | MCP serveri: 110 alət, 3 transport, 33 skop, REST endpoint-ləri                   |
+| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 bacarıq, REST köməkçiləri, agent kartı                      |
+| `AGENT_PROTOCOLS_GUIDE.md`                    | Vahid bələdçi: A2A vs ACP vs Cloud Agents                                         |
+| `CLOUD_AGENT.md`                              | Codex Cloud / Devin / Jules orkestrasiyası                                        |
+| `SKILLS.md`                                   | Skills çərçivəsi (daxili + marketplace + SkillsSH + sandbox)                      |
+| `RADAR.md`                                    | Radar pulsuz model kataloqu örtüyü (`RADAR_ENABLED`, defolt olaraq söndürülüb)    |
+| `MEMORY.md`                                   | Yaddaş sistemi (SQLite FTS5 + Qdrant)                                             |
+| `EVALS.md`                                    | Eval çərçivəsi (suitlər, icralar, rubrikalar)                                     |
+| `GUARDRAILS.md`                               | PII maskalayıcı, prompt injection, görmə körpüsü                                  |
+| `COMPLIANCE.md`                               | Audit jurnalı, saxlanma müddəti, noLog imtinası                                   |
+| `WEBHOOKS.md`                                 | HMAC ilə imzalanmış webhook çatdırılması                                          |
+| `REASONING_REPLAY.md`                         | `reasoning_content` üçün hibrid yaddaş/SQLite keşi                                |
+| `AUTHZ_GUIDE.md`                              | Avtorizasiya kəməri (`classify` → `policies` → `enforce`)                         |
+| `RESILIENCE_GUIDE.md`                         | Circuit breaker + cooldown + model bloklanması                                    |
+| `docs/security/STEALTH_GUIDE.md` (yalnız git) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM sertifikatı                   |
+| `AUTO-COMBO.md`                               | Auto Combo mühərriki (16 faktorlu qiymətləndirmə, 6 rejim paketi, virtual fabrik) |
 
 ### Sıxılma
 
@@ -441,30 +441,30 @@ open-sse/
 | ------------------------------- | ---------------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Sıxılma rejimlərinə ümumi baxış + yol xəritəsi |
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK mühərrikləri, reyestr müqaviləsi |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman qayda paketinin JSON sxemi             |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Hər dil üzrə qayda paketlərinin inventarı      |
-| `RTK_COMPRESSION.md`            | RTK deklarativ konveyeri (49 filtr)            |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman qayda paketi JSON sxemi                |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Dillər üzrə qayda paketi inventarı             |
+| `RTK_COMPRESSION.md`            | RTK deklarativ kəməri (56 filtr)               |
 
 ### Yerləşdirmə
 
-| Sənəd                        | Məqsəd                                                                        |
-| ---------------------------- | ----------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker qurulması, profillər (base/cli/host/cliproxyapi), Redis yan konteyneri |
-| `VM_DEPLOYMENT_GUIDE.md`     | Ümumi VM/VPS yerləşdirilməsi (Ubuntu/Debian + nginx + systemd)                |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-da yerləşdirmə (hazırda yalnız Çin dilindədir)                         |
-| `TERMUX_GUIDE.md`            | Termux vasitəsilə Android-də qrafik interfeyssiz işləmə                       |
-| `PWA_GUIDE.md`               | Progressive Web App quraşdırılması + xidmət işçisi                            |
-| `ELECTRON_GUIDE.md`          | Masaüstü tətbiqin qurulması + imzalanması + paylanması                        |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                        |
-| `PROXY_GUIDE.md`             | 4 səviyyəli çıxış proksisi + 1proxy bazarı                                    |
+| Sənəd                        | Məqsəd                                                             |
+| ---------------------------- | ------------------------------------------------------------------ |
+| `DOCKER_GUIDE.md`            | Docker build, profillər (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Ümumi VM/VPS yerləşdirməsi (Ubuntu/Debian + nginx + systemd)       |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io yerləşdirməsi (hazırda yalnız çin dilində)                  |
+| `TERMUX_GUIDE.md`            | Termux vasitəsilə Android-də headless rejim                        |
+| `PWA_GUIDE.md`               | Progressive Web App quraşdırması + service worker                  |
+| `ELECTRON_GUIDE.md`          | Masaüstü tətbiqin build edilməsi + imzalanması + paylanması        |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                             |
+| `PROXY_GUIDE.md`             | 4 səviyyəli gedən proksi + 1proxy marketplace                      |
 
 ### Alt qovluqlar
 
-| Alt qovluq            | Məqsəd                                                                                                                                                                                                                                                            |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokallaşdırılmış sənəd tərcümələri (41 dil variantı)                                                                                                                                                                                                              |
-| `docs/screenshots/`   | Təlimatlar üçün şəkil resursları                                                                                                                                                                                                                                  |
-| `_tasks/superpowers/` | superpowers-dən planlar/spesifikasiyalar (`writing-plans`/`brainstorming`) + araşdırma — təcrid edilmiş, ayrıca versiyalaşdırılan repozitoriya; əsas ağac tərəfindən git-də nəzərə alınmır. CLAUDE.md → "Planlaşdırma və Araşdırma Artefaktları" bölməsinə baxın. |
+| Alt qovluq            | Məqsəd                                                                                                                                                                                                                                    |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokallaşdırılmış sənəd tərcümələri (41 lokal)                                                                                                                                                                                             |
+| `docs/screenshots/`   | Bələdçilər üçün şəkil resursları                                                                                                                                                                                                          |
+| `_tasks/superpowers/` | Superpowers-dan gələn planlar/spesifikasiyalar (`writing-plans`/`brainstorming`) + tədqiqat — izolyasiya olunmuş, ayrıca versiyalaşdırılan repo, əsas ağac tərəfindən gitignore edilir. Bax: CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

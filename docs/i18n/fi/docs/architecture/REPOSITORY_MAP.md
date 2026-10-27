@@ -395,76 +395,76 @@ open-sse/
 
 ### Ylätason oppaat
 
-| Dokumentti                  | Tarkoitus                                                                                          |
-| --------------------------- | -------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Korkean tason arkkitehtuuri, alijärjestelmäkartta ja hallintapaneelin pinta                        |
-| `CODEBASE_DOCUMENTATION.md` | Kehityksen viitemateriaali: hakemistot, moduulit ja käytännöt                                      |
-| `FEATURES.md`               | Ominaisuusmatriisi ja v3.8:n kohokohdat                                                            |
-| `USER_GUIDE.md`             | Loppukäyttäjän opas (määritys, mallit, yhdistelmät, CLI:t, ääni jne.)                              |
-| `API_REFERENCE.md`          | API-päätepisteiden viitemateriaali ja todennusmalli                                                |
-| `openapi.yaml`              | OpenAPI 3.0 -määritys (121 polkua)                                                                 |
-| `SETUP_GUIDE.md`            | Asennustavat (npm, npx, Docker, Electron, Termux, lähdekoodi)                                      |
-| `ENVIRONMENT.md`            | Kaikki ympäristömuuttujat (~800 dokumentoitua, ~3 050 riviä `.env.example`-tiedostossa)            |
-| `TROUBLESHOOTING.md`        | Yleiset virheet ja v3.8.0:n tunnetut ongelmat                                                      |
-| `RELEASE_CHECKLIST.md`      | Koko julkaisuprosessi (taidot, husky, conventional commits, käyttöönotto)                          |
-| `COVERAGE_PLAN.md`          | Kattavuustavoitteet ja nykytila                                                                    |
-| `FREE_TIERS.md`             | Kuratoidut ilmaistasojen tarjoajat (48+ ilmaista + 11 OAuth-palvelua)                              |
-| `CLI-TOOLS.md`              | Ulkoiset CLI-integraatiot ja sisäinen OmniRoute CLI                                                |
-| `I18N.md`                   | i18n-arkkitehtuuri, kielen lisääminen ja 67 kielialuetta                                           |
-| `UNINSTALL.md`              | Puhtaan asennuksen poiston vaiheet                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Automaattisesti luotu** 376 tarjoajan luettelo (luo uudelleen: `npm run gen:provider-reference`) |
+| Dokumentti                  | Tarkoitus                                                                                            |
+| --------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Korkean tason arkkitehtuuri, alijärjestelmien kartta, kojelaudan pinta                               |
+| `CODEBASE_DOCUMENTATION.md` | Tekninen viite: hakemistot, moduulit, käytännöt                                                      |
+| `FEATURES.md`               | Ominaisuusmatriisi v3.8-kohokohdilla                                                                 |
+| `USER_GUIDE.md`             | Loppukäyttäjän käyttöopas (asennus, mallit, kombot, CLI-työkalut, ääni jne.)                         |
+| `API_REFERENCE.md`          | API-päätepisteiden viite todennusmallineen                                                           |
+| `openapi.yaml`              | OpenAPI 3.0 -määrittely (121 polkua)                                                                 |
+| `SETUP_GUIDE.md`            | Asennusmenetelmät (npm, npx, Docker, Electron, Termux, lähdekoodi)                                   |
+| `ENVIRONMENT.md`            | Kaikki ympäristömuuttujat (~800 dokumentoitua, ~3 050 riviä `.env.example`-tiedostossa)              |
+| `TROUBLESHOOTING.md`        | Yleiset virheet + v3.8.0:n tunnetut ongelmat                                                         |
+| `RELEASE_CHECKLIST.md`      | Täysi julkaisuprosessi (skillit, husky, conventional commits, käyttöönotto)                          |
+| `COVERAGE_PLAN.md`          | Kattavuustavoitteet ja nykytilanne                                                                   |
+| `FREE_TIERS.md`             | Kuratoidut ilmaistason tarjoajat (48+ ilmaista + 11 OAuth)                                           |
+| `CLI-TOOLS.md`              | Ulkoiset CLI-integraatiot + sisäinen OmniRoute CLI                                                   |
+| `I18N.md`                   | i18n-arkkitehtuuri, kielen lisääminen, 67 kielialuetta                                               |
+| `UNINSTALL.md`              | Puhtaan asennuksen poiston vaiheet                                                                   |
+| `PROVIDER_REFERENCE.md`     | **Automaattisesti luotu** 376 tarjoajan luettelo (uudelleenluonti: `npm run gen:provider-reference`) |
 
-### Alijärjestelmien syväluotaukset
+### Alijärjestelmien syventävät kuvaukset
 
-| Dokumentti                                      | Tarkoitus                                                                                  |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `MCP-SERVER.md`                                 | MCP-palvelin: 110 työkalua, 3 siirtotapaa, 33 käyttöaluetta ja REST-päätepisteet           |
-| `A2A-SERVER.md`                                 | A2A v0.3: JSON-RPC, 6 taitoa, REST-aputoiminnot ja agenttikortti                           |
-| `AGENT_PROTOCOLS_GUIDE.md`                      | Yhtenäinen opas: A2A vs. ACP vs. pilviagentit                                              |
-| `CLOUD_AGENT.md`                                | Codex Cloudin / Devinin / Julesin orkestrointi                                             |
-| `SKILLS.md`                                     | Taitokehys (sisäänrakennetut + markkinapaikka + SkillsSH + hiekkalaatikko)                 |
-| `RADAR.md`                                      | Radarin ilmaisten mallien luettelon peittokuva (`RADAR_ENABLED`, oletuksena pois käytöstä) |
-| `MEMORY.md`                                     | Muistijärjestelmä (SQLite FTS5 + Qdrant)                                                   |
-| `EVALS.md`                                      | Arviointikehys (testikokonaisuudet, ajot ja arviointikriteerit)                            |
-| `GUARDRAILS.md`                                 | Henkilötietojen peittäjä, kehotesyötteet ja konenäköyhdyskäytävä                           |
-| `COMPLIANCE.md`                                 | Tarkastusloki, säilytys ja noLog-kieltäytymisvalinta                                       |
-| `WEBHOOKS.md`                                   | HMAC-allekirjoitettu webhook-toimitus                                                      |
-| `REASONING_REPLAY.md`                           | Hybridi muisti-/SQLite-välimuisti kohteelle `reasoning_content`                            |
-| `AUTHZ_GUIDE.md`                                | Valtuutusputki (`classify` → `policies` → `enforce`)                                       |
-| `RESILIENCE_GUIDE.md`                           | Katkaisija + jäähdytysjakso + mallin lukitus                                               |
-| `docs/security/STEALTH_GUIDE.md` (vain gitissä) | TLS-sormenjälkitunnistus (JA3/JA4), Claude Code CCH ja MITM-varmenne                       |
-| `AUTO-COMBO.md`                                 | Auto Combo -moottori (16 tekijän pisteytys, 6 tilapakettia ja virtuaalinen tehdas)         |
+| Dokumentti                                  | Tarkoitus                                                                      |
+| ------------------------------------------- | ------------------------------------------------------------------------------ |
+| `MCP-SERVER.md`                             | MCP-palvelin: 110 työkalua, 3 transporttia, 33 scopea, REST-päätepisteet       |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 skilliä, REST-apurit, agenttikortti                      |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | Yhtenäinen opas: A2A vs ACP vs Cloud Agents                                    |
+| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules -orkestrointi                                      |
+| `SKILLS.md`                                 | Skills-kehys (sisäänrakennetut + markkinapaikka + SkillsSH + hiekkalaatikko)   |
+| `RADAR.md`                                  | Radar-ilmaismalliluettelon päällys (`RADAR_ENABLED`, oletuksena pois käytöstä) |
+| `MEMORY.md`                                 | Muistijärjestelmä (SQLite FTS5 + Qdrant)                                       |
+| `EVALS.md`                                  | Eval-kehys (testikokonaisuudet, ajot, arviointikriteerit)                      |
+| `GUARDRAILS.md`                             | PII-peittäjä, kehoiteinjektio, vision-silta                                    |
+| `COMPLIANCE.md`                             | Auditointiloki, säilytys, noLog-poisjättäytyminen                              |
+| `WEBHOOKS.md`                               | HMAC-allekirjoitettu webhook-toimitus                                          |
+| `REASONING_REPLAY.md`                       | Hybridimuisti/SQLite-välimuisti `reasoning_content`-sisällölle                 |
+| `AUTHZ_GUIDE.md`                            | Valtuutusputki (`classify` → `policies` → `enforce`)                           |
+| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + mallien lukitus                                   |
+| `docs/security/STEALTH_GUIDE.md` (vain git) | TLS-sormenjäljitys (JA3/JA4), Claude Code CCH, MITM-varmenne                   |
+| `AUTO-COMBO.md`                             | Auto Combo -moottori (16 tekijän pisteytys, 6 tilapakettia, virtuaalitehdas)   |
 
 ### Pakkaus
 
-| Dokumentti                      | Tarkoitus                                            |
-| ------------------------------- | ---------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Pakkaustilojen yleiskatsaus ja etenemissuunnitelma   |
-| `COMPRESSION_ENGINES.md`        | Caveman- ja RTK-moottorit sekä rekisterisopimus      |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman-sääntöpaketin JSON-skeema                    |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Kielikohtaisten sääntöpakettien luettelo             |
-| `RTK_COMPRESSION.md`            | RTK:n deklaratiivinen käsittelyputki (49 suodatinta) |
+| Dokumentti                      | Tarkoitus                                    |
+| ------------------------------- | -------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Yleiskatsaus pakkauksen tiloihin + tiekartta |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK -moottorit, rekisterisopimus   |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman-sääntöpaketin JSON-skeema            |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Kielikohtaisten sääntöpakettien inventaario  |
+| `RTK_COMPRESSION.md`            | RTK:n deklaratiivinen putki (56 suodatinta)  |
 
 ### Käyttöönotto
 
 | Dokumentti                   | Tarkoitus                                                              |
 | ---------------------------- | ---------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker-koonti, profiilit (base/cli/host/cliproxyapi), Redis-sivukontti |
+| `DOCKER_GUIDE.md`            | Docker-koonti, profiilit (base/cli/host/cliproxyapi), Redis-sidecar    |
 | `VM_DEPLOYMENT_GUIDE.md`     | Yleinen VM/VPS-käyttöönotto (Ubuntu/Debian + nginx + systemd)          |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-käyttöönotto (tällä hetkellä saatavilla vain kiinaksi)          |
-| `TERMUX_GUIDE.md`            | Android ilman graafista käyttöliittymää Termuxin kautta                |
-| `PWA_GUIDE.md`               | Progressiivisen verkkosovelluksen asennus + service worker             |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-käyttöönotto (tällä hetkellä vain kiinaksi)                     |
+| `TERMUX_GUIDE.md`            | Android headless -tilassa Termuxin avulla                              |
+| `PWA_GUIDE.md`               | Progressive Web App -asennus + service worker                          |
 | `ELECTRON_GUIDE.md`          | Työpöytäsovelluksen koonti + allekirjoitus + jakelu                    |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                 |
 | `PROXY_GUIDE.md`             | 4-tasoinen lähtevän liikenteen välityspalvelin + 1proxy-markkinapaikka |
 
-### Alihakemistot
+### Alahakemistot
 
-| Alihakemisto          | Tarkoitus                                                                                                                                                                                                                      |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `docs/i18n/`          | Lokalisoidut dokumentaatiokäännökset (41 kielialuetta)                                                                                                                                                                         |
-| `docs/screenshots/`   | Oppaiden kuvaresurssit                                                                                                                                                                                                         |
-| `_tasks/superpowers/` | Superpowersin suunnitelmat/määritykset (`writing-plans`/`brainstorming`) + tutkimusaineisto — eristetty, erikseen versioitu tietovarasto, jonka pääpuu ohittaa Gitissä. Katso CLAUDE.md → "Suunnittelu- ja tutkimusaineistot". |
+| Alahakemisto          | Tarkoitus                                                                                                                                                                                                               |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Lokalisoidut dokumenttikäännökset (41 kielialuetta)                                                                                                                                                                     |
+| `docs/screenshots/`   | Ohjeiden kuvatiedostot                                                                                                                                                                                                  |
+| `_tasks/superpowers/` | Suunnitelmat/määrittelyt superpowersista (`writing-plans`/`brainstorming`) sekä tutkimus — eristetty, erikseen versioitu repositorio, jonka pääpuu on gitignorannut. Katso CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 
