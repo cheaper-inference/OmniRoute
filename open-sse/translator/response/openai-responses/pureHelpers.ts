@@ -261,63 +261,86 @@ function toCitation(annotation: unknown): ResponsesWebSearchHit | null {
   return toHit(record);
 }
 
+/** True for a web_search_call whose status says it finished (a missing status counts as finished). */
+function isCompletedStatus(status: unknown): boolean {
+  return status === undefined || status === "completed";
+}
+
+/** `output_item.added` / `output_item.done` for a `web_search_call` item. */
+function extractWebSearchCallItemEvidence(
+  eventType: unknown,
+  item: Record<string, unknown>
+): ResponsesWebSearchChunkEvidence {
+  const empty: ResponsesWebSearchChunkEvidence = { citations: [] };
+  // Only a finished call is evidence of a search that actually ran. A call that
+  // failed/incomplete is not evidence — and it must REVOKE the call the
+  // `output_item.added` event already recorded, so no empty result pair is
+  // emitted for a search that never produced anything.
+  if (eventType === "response.output_item.done" && !isCompletedStatus(item.status)) {
+    const id = typeof item.id === "string" ? item.id : "";
+    return id ? { citations: [], revokeCallId: id } : empty;
+  }
+  const call = toCall(item);
+  return call ? { call, citations: [] } : empty;
+}
+
+/** Every `url_citation` among the annotations of one message content part. */
+function collectPartCitations(part: unknown): ResponsesWebSearchHit[] {
+  const annotations = toRecord(part).annotations;
+  if (!Array.isArray(annotations)) return [];
+  const citations: ResponsesWebSearchHit[] = [];
+  for (const annotation of annotations) {
+    const citation = toCitation(annotation);
+    if (citation) citations.push(citation);
+  }
+  return citations;
+}
+
+/** `response.completed` / `response.incomplete`: the final output array, read in one pass. */
+function extractFinalResponseEvidence(
+  payload: Record<string, unknown>
+): ResponsesWebSearchChunkEvidence {
+  const response = toRecord(payload.response);
+  const output = Array.isArray(response.output) ? response.output : [];
+  const citations: ResponsesWebSearchHit[] = [];
+  let call: ResponsesWebSearchCall | null = null;
+  for (const value of output) {
+    const outputItem = toRecord(value);
+    if (outputItem.type === "web_search_call") {
+      // Same rule as the incremental events: a call that never completed is
+      // not evidence of a search that ran.
+      if (!isCompletedStatus(outputItem.status)) continue;
+      call = toCall(outputItem) ?? call;
+    } else if (outputItem.type === "message" && Array.isArray(outputItem.content)) {
+      for (const part of outputItem.content) citations.push(...collectPartCitations(part));
+    }
+  }
+  return { ...(call ? { call } : {}), citations };
+}
+
 /**
  * Read the web-search evidence out of one raw Responses SSE chunk. Returns an empty
  * result for every other event, so a caller can invoke it unconditionally.
  */
 export function extractResponsesWebSearchEvidence(chunk: unknown): ResponsesWebSearchChunkEvidence {
-  const empty: ResponsesWebSearchChunkEvidence = { citations: [] };
   const root = toRecord(chunk);
   const eventType = root.type || root.event;
   const payload = toRecord(root.data || root);
   const item = toRecord(payload.item);
 
-  if (eventType === "response.output_item.added" && item.type === "web_search_call") {
-    const call = toCall(item);
-    return call ? { call, citations: [] } : empty;
-  }
-  if (eventType === "response.output_item.done" && item.type === "web_search_call") {
-    // Only a finished call is evidence of a search that actually ran. A call that
-    // failed/incomplete is not evidence — and it must REVOKE the call the
-    // `output_item.added` event already recorded, so no empty result pair is
-    // emitted for a search that never produced anything.
-    if (item.status !== undefined && item.status !== "completed") {
-      const id = typeof item.id === "string" ? item.id : "";
-      return id ? { citations: [], revokeCallId: id } : empty;
-    }
-    const call = toCall(item);
-    return call ? { call, citations: [] } : empty;
+  const isItemEvent =
+    eventType === "response.output_item.added" || eventType === "response.output_item.done";
+  if (isItemEvent && item.type === "web_search_call") {
+    return extractWebSearchCallItemEvidence(eventType, item);
   }
   if (eventType === "response.output_text.annotation.added") {
     const citation = toCitation(payload.annotation);
-    return citation ? { citations: [citation] } : empty;
+    return { citations: citation ? [citation] : [] };
   }
   if (eventType === "response.completed" || eventType === "response.incomplete") {
-    const response = toRecord(payload.response);
-    const output = Array.isArray(response.output) ? response.output : [];
-    const citations: ResponsesWebSearchHit[] = [];
-    let call: ResponsesWebSearchCall | null = null;
-    for (const value of output) {
-      const outputItem = toRecord(value);
-      if (outputItem.type === "web_search_call") {
-        // Same rule as the incremental events: a call that never completed is
-        // not evidence of a search that ran.
-        if (outputItem.status !== undefined && outputItem.status !== "completed") continue;
-        call = toCall(outputItem) ?? call;
-      } else if (outputItem.type === "message" && Array.isArray(outputItem.content)) {
-        for (const part of outputItem.content) {
-          const annotations = toRecord(part).annotations;
-          if (!Array.isArray(annotations)) continue;
-          for (const annotation of annotations) {
-            const citation = toCitation(annotation);
-            if (citation) citations.push(citation);
-          }
-        }
-      }
-    }
-    return { ...(call ? { call } : {}), citations };
+    return extractFinalResponseEvidence(payload);
   }
-  return empty;
+  return { citations: [] };
 }
 
 export function normalizeUpstreamFailure(data: unknown, fallbackType = "server_error") {

@@ -927,6 +927,29 @@ export function translateRequest(
   return result;
 }
 
+// Shared per-stream web-search evidence record (created on first use).
+function getResponsesWebSearchEvidence(state) {
+  const existing = state._responsesWebSearchEvidence;
+  const evidence =
+    existing && typeof existing === "object" && Array.isArray(existing.calls)
+      ? existing
+      : { calls: [], citations: [] };
+  state._responsesWebSearchEvidence = evidence;
+  return evidence;
+}
+
+// Merge a call into the recorded ones: a later record for the same id fills in the
+// query / sources instead of duplicating the call.
+function mergeResponsesWebSearchCall(evidence, call) {
+  const previous = evidence.calls.find((entry) => entry.id === call.id);
+  if (!previous) {
+    evidence.calls.push(call);
+    return;
+  }
+  if (call.query) previous.query = call.query;
+  if (call.items.length > 0) previous.items = call.items;
+}
+
 // Accumulate the per-chunk web-search evidence (see extractResponsesWebSearchEvidence)
 // on the shared stream state. `output_item.added` announces a call without its action
 // and `output_item.done` carries the resolved action, so a later record for the same id
@@ -935,26 +958,13 @@ function accumulateResponsesWebSearchEvidence(state, chunk) {
   if (!state || typeof state !== "object") return;
   const { call, citations, revokeCallId } = extractResponsesWebSearchEvidence(chunk);
   if (!call && citations.length === 0 && !revokeCallId) return;
-  const existing = state._responsesWebSearchEvidence;
-  const evidence =
-    existing && typeof existing === "object" && Array.isArray(existing.calls)
-      ? existing
-      : { calls: [], citations: [] };
-  state._responsesWebSearchEvidence = evidence;
+  const evidence = getResponsesWebSearchEvidence(state);
   // A call whose `done` reported a non-completed status never ran: drop the entry
   // the `added` event recorded, so no (empty) search pair is emitted for it.
   if (revokeCallId) {
     evidence.calls = evidence.calls.filter((entry) => entry.id !== revokeCallId);
   }
-  if (call) {
-    const previous = evidence.calls.find((entry) => entry.id === call.id);
-    if (previous) {
-      if (call.query) previous.query = call.query;
-      if (call.items.length > 0) previous.items = call.items;
-    } else {
-      evidence.calls.push(call);
-    }
-  }
+  if (call) mergeResponsesWebSearchCall(evidence, call);
   for (const citation of citations) evidence.citations.push(citation);
 }
 
