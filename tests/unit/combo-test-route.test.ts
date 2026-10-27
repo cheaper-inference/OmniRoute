@@ -602,7 +602,10 @@ test("combo test route still probes every target beyond 180s accumulated elapsed
         { status: "ok", statusCode: undefined },
       ]
     );
-    assert.deepEqual(body.results.slice(0, 2).map((result) => result.error), ["boom", "boom"]);
+    assert.deepEqual(
+      body.results.slice(0, 2).map((result) => result.error),
+      ["boom", "boom"]
+    );
     assert.equal(body.resolvedBy, "provider/third");
     assert.equal(body.results[2].responseText, "healthy");
   } finally {
