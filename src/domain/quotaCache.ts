@@ -530,7 +530,8 @@ function isClaudeQuotaExhaustedForRequest(
 
 export type ClaudeQuotaScopeDecision = {
   scope: "model" | "connection";
-  evidence: "none" | "blocking";
+  // "headroom": fresh telemetry proves every account-wide window has quota left (#18296).
+  evidence: "none" | "blocking" | "headroom";
   resetAt: string | null;
   cooldownMs: number | null;
 };
@@ -558,6 +559,25 @@ const BLOCKING_CONNECTION_SCOPED_CLAUDE_QUOTA: ClaudeQuotaScopeDecision = {
   resetAt: null,
   cooldownMs: null,
 };
+
+const HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA: ClaudeQuotaScopeDecision = {
+  scope: "model",
+  evidence: "headroom",
+  resetAt: null,
+  cooldownMs: null,
+};
+
+// #18296 — Anthropic does not always report a per-model weekly window (e.g. Fable). When the
+// account-wide session AND weekly windows are both reported with quota left, an explicit quota
+// 429 can only be about the requested model, so it must not take the whole connection out.
+function hasProvenClaudeAccountHeadroom(globalWindows: QuotaInfo[]): boolean {
+  const kinds = new Set<string>();
+  for (const quota of globalWindows) {
+    if (quota.fractionReported === false || quota.remainingPercentage <= 0) return false;
+    kinds.add(quota.claudeQuota?.kind ?? "");
+  }
+  return kinds.has("session") && kinds.has("weekly_all");
+}
 
 function decisionForLatestClaudeReset(
   quotas: QuotaInfo[],
@@ -644,6 +664,8 @@ export function getCachedClaudeQuotaScopeDecision(input: {
       BLOCKING_CONNECTION_SCOPED_CLAUDE_QUOTA
     );
   }
+
+  if (hasProvenClaudeAccountHeadroom(globalWindows)) return HEADROOM_MODEL_SCOPED_CLAUDE_QUOTA;
 
   return CONNECTION_SCOPED_CLAUDE_QUOTA;
 }

@@ -2753,6 +2753,9 @@ export async function markAccountUnavailable(
     const disableCooling = connProviderSpecificData.disableCooling === true;
     const claudeQuotaScope = readClaudeScope({ connectionId, provider, status, errorText, model });
     const isModelScopedClaudeQuota = claudeQuotaScope.scope === "model";
+    // #18296: headroom-scoped decisions carry no cached reset, so they use the 429's own hint
+    // under the operator's maxCooldownMs instead of an uncapped "upstream reset".
+    const hasClaudeScopedReset = isModelScopedClaudeQuota && claudeQuotaScope.cooldownMs !== null;
     const isPerModelQuotaProvider =
       hasPerModelQuota(provider, model, connectionPassthroughModels) || isModelScopedClaudeQuota;
     // #10334 — connection-scope branch: the matched provider rule declared scope
@@ -3001,18 +3004,18 @@ export async function markAccountUnavailable(
         effectiveProviderProfile,
         {
           ...modelLockoutOptions,
-          exactCooldownMs: isModelScopedClaudeQuota
+          exactCooldownMs: hasClaudeScopedReset
             ? claudeQuotaScope.cooldownMs
             : fallbackResult.usedUpstreamRetryHint === true
               ? fallbackResult.cooldownMs
-              : (fallbackResult.quotaResetHintMs ?? null),
+              : (fallbackResult.quotaResetHintMs ??
+                (isModelScopedClaudeQuota ? fallbackResult.cooldownMs : null)),
           maxCooldownMs: mlSettings.maxCooldownMs,
           scope: usesExactAntigravityLock ? "exact" : undefined,
           // Only a transport header, google.rpc.RetryInfo, or cached Claude reset can bypass
           // maxCooldownMs. Prose and generic JSON hints remain exact but operator-capped.
           exactCooldownIsUpstreamReset:
-            retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) ||
-            isModelScopedClaudeQuota,
+            retryHintBypassesMaxCooldownMs(fallbackResult.retryHintSource) || hasClaudeScopedReset,
         }
       );
       // Update last error for observability (without changing terminal status)
