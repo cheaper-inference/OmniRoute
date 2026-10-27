@@ -31,11 +31,9 @@
 // in dark mode an inverse surface equals the canvas — give it a border); accentSoft is the kit's
 // --ci-color-accent-surface-range, which the dark block lowers to 0.12 alpha.
 //
-// Not kit tokens, so not pinned by the test: `grid` is a lighter tint of the border for the canvas
-// pattern, and the dark `border` keeps the rgba(241,247,247,0.18) stroke the hero shipped with —
-// the kit's dark block sets --ci-color-border to rgb(241 247 247 / 0.24); adopting it rewrites
-// every committed SVG, so it waits for the owner's call. The light `border` IS pinned to
-// --ci-color-border.
+// `border` is the kit's --ci-color-border in both blocks (light rgb(4 13 16 / 0.24), dark
+// rgb(241 247 247 / 0.24), pinned by the test); `grid` is the one value that is not a kit token —
+// a lighter tint of the border for the canvas pattern.
 //
 // extraCss naming: diagram-local classes and custom properties passed through svgOpen's
 // `extraCss` carry the diagram's abbreviation as a prefix (`rl-…`, `cmp-…`, `--inv-*`…), never a
@@ -74,7 +72,7 @@ export const KIT = {
     ink: "#ffffff",
     body: "#f1f7f7",
     muted: "#c7cbc5",
-    border: "rgba(241,247,247,0.18)",
+    border: "rgba(241,247,247,0.24)",
     grid: "rgba(241,247,247,0.05)",
     accent: "#d8ff00",
     accentInk: "#040d10",

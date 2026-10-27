@@ -116,10 +116,9 @@ test("every new KIT value equals what its kit token resolves to in ci-tokens.css
   }
 });
 
-test("the light border is pinned to the kit's --ci-color-border (the dark border is not)", () => {
+test("border is pinned to the kit's --ci-color-border in both blocks", () => {
   assert.equal(KIT.light.border, resolve("--ci-color-border", lightBlock));
-  // KIT.dark.border (0.18 alpha) is softer than the kit's dark --ci-color-border (0.24): a
-  // hero-era value every committed SVG carries — see the module header; not pinned on purpose.
+  assert.equal(KIT.dark.border, resolve("--ci-color-border", darkBlock));
 });
 
 test("themeCss declares the light palette and a dark override behind prefers-color-scheme", () => {
