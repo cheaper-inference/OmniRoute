@@ -3,7 +3,11 @@ import test from "node:test";
 import * as codexClient from "../../open-sse/config/codexClient.ts";
 
 const originalVersion = process.env.CODEX_CLIENT_VERSION;
-const registryResponse = (version = "0.160.1") => Response.json({ name: "@openai/codex", version });
+const newerVersion = codexClient.DEFAULT_CODEX_CLIENT_VERSION.replace(/\d+$/, (patch) =>
+  String(Number(patch) + 1)
+);
+const registryResponse = (version = newerVersion) =>
+  Response.json({ name: "@openai/codex", version });
 
 test.beforeEach(() => {
   delete process.env.CODEX_CLIENT_VERSION;
@@ -49,7 +53,7 @@ test("a successful refresh does not warn", async () => {
 
   assert.equal(
     await codexClient.refreshCodexClientVersion(async () => registryResponse()),
-    "0.160.1"
+    newerVersion
   );
   assert.deepEqual(warnings, []);
 });
@@ -65,7 +69,7 @@ test("the refresh outcome is observable so discovery can report a degraded catal
 
   assert.equal(
     await codexClient.refreshCodexClientVersion(async () => registryResponse()),
-    "0.160.1"
+    newerVersion
   );
   assert.equal(codexClient.getCodexClientVersionSource(), "registry");
 });
@@ -148,8 +152,8 @@ test("an older registry version keeps reporting the registry source once a newer
     warnings.push(args.map(String).join(" "));
   });
   assert.equal(
-    await codexClient.refreshCodexClientVersion(async () => registryResponse("0.160.1")),
-    "0.160.1"
+    await codexClient.refreshCodexClientVersion(async () => registryResponse(newerVersion)),
+    newerVersion
   );
   assert.equal(codexClient.getCodexClientVersionSource(), "registry");
 
@@ -158,7 +162,7 @@ test("an older registry version keeps reporting the registry source once a newer
   test.mock.method(Date, "now", () => realNow() + codexClient.CODEX_VERSION_CACHE_TTL_MS + 1);
   assert.equal(
     await codexClient.refreshCodexClientVersion(async () => registryResponse("0.1.0")),
-    "0.160.1"
+    newerVersion
   );
   assert.deepEqual(warnings, []);
   assert.equal(codexClient.getCodexClientVersionSource(), "registry");
