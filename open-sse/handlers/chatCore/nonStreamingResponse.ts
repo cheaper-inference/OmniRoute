@@ -930,6 +930,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           status: HTTP_STATUS.BAD_GATEWAY,
           finishReason: routingFinishReason(translatedResponse),
           connectionId: credentials?.connectionId ?? null,
+          apiKeyId: apiKeyInfo?.id ?? null,
         })
       );
       return {
@@ -1089,6 +1090,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         status: 200,
         finishReason: routingFinishReason(translatedResponse),
         connectionId: credentials?.connectionId ?? null,
+        apiKeyId: apiKeyInfo?.id ?? null,
       })
     );
 

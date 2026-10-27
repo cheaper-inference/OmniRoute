@@ -79,33 +79,39 @@
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` da `src/shared/components/ErrorPageScaffold.tsx`
   — suna nuna lockup; `tests/unit/brand-pages-static.test.ts` yana kiyaye hakan.
 
-## 2. Ka’idoji
+## 2. Ka'idoji
 
-1. A yi amfani da tokens, ba literals ba. Keɓance-keɓancen da aka bari da gangan: terminal ɗin console mai duhu a koyaushe, layukan SVG na ReactFlow
-   ta hanyar `STATUS_HEX` (`src/shared/constants/statusColors.ts`), da palettes na rukuni
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) da
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Kada a taɓa yin gyaran hannu ga `packages/ui-kit/src`: a daidaita shi da `scripts/dev/sync-ui-kit.sh <commit>`; shingen
-   pre-commit na `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) yana gaza idan akwai ko byte ɗaya
-   da ya bambanta da upstream commit da aka tsayar (yana tsallakewa tare da gargaɗi idan upstream clone,
-   `UI_KIT_CLONE` ko `_references/cheaper-inference-ui-kit`, ba ya nan). Idan kit ɗin ba shi da wani abu,
-   a nemo hanyar kauce wa matsalar a adapter ko screen sannan a nemi upstream ya samar da shi.
-3. Tsoffin rubutun kit ɗin Turanci ne (`label = "Loading"`, `loadingLabel = "Loading table"`…) — a tura rubutun da aka fassara
-   daga `useTranslations(...)` duk lokacin da wani component na kit yake nuna rubutu.
-4. Tailwind utilities suna rinjayar classes na component ɗin kit (kit ɗin yana bayyana
-   `@layer theme, base, components, utilities` kuma dokokinsa suna cikin `components`) — a yi amfani da utilities don
-   tazara da tsarin shimfiɗa, ba don sake canza launin components na kit ba.
-5. Kanun labarai: `.ci-heading` (Inter, babu tracking) don taken shafi da sashe; `.ci-dashboard-display`
-   (Instrument Serif) kawai don manyan rubutun nuni masu sarari, kamar status code na shafin kuskure.
-6. `tests/unit/dashboard-kit-sweep.test.ts` yana tsare karɓar kit ɗin: kada a sami Material ligature span a ƙarƙashin
-   `src/app` ko `src/shared/components`; a cikin bishiyar dashboard (`src/app/(dashboard)` da
-   `src/shared/components`) kada a sami ɗanyen `<select>`, `<textarea>` ko `<table>`, kuma kada a ƙirƙiri
-   `role="dialog"` da hannu a wajen keɓance-keɓancen da aka jera (native branch na adapter ɗin `Select`,
-   `RequestLoggerDetail`); duk wani ɗanyen `<button>` ko `<input>` a wurin yana buƙatar comment mai ɗauke da
-   `kit-exception:` (tare da dalili) wanda zai ƙare a layuka 3 ko ƙasa da haka a samansa; palette hues da variants na `dark:`
-   suna halatta ne kawai a fayilolin da test ɗin ya jera.
-7. A tabbatar da themes biyun da viewport na 390 px kafin PR (screenshots); `tests/e2e/a11y.spec.ts` yana gudanar da
-   axe.
+1. Tokens kawai, ba a amfani da literals ba. An riƙe keɓancewa da gangan: tashar console da take
+   duhu a kowane lokaci da `STATUS_HEX` (`src/shared/constants/statusColors.ts`), madubin hex da aka
+   warware na palette na matsayin kit ga masu kira da ke buƙatar hex na zahiri. Palettes na rukuni
+   ba su cikin keɓancewa kuma: suna tafiya a kan tokens biyar na chart na kit (`--color-chart-1..5`)
+   ta hanyar `src/shared/utils/categoricalPalette.ts` kuma, ga dabarun routing,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; gefunan ReactFlow da canvas na
+   orchestration suna karanta masu canji `--orch-status-*` da suka fahimci jigo
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Kada a gyara `packages/ui-kit/src` da hannu: daidaita shi da `scripts/dev/sync-ui-kit.sh <commit>`;
+   ƙofar pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) tana gazawa a kan kowane
+   byte da ya bambanta da commit na upstream da aka kafa (tana tsallake da gargadi idan clone na
+   upstream, `UI_KIT_CLONE` ko `_references/cheaper-inference-ui-kit`, ba ya nan). Idan kit ya ɗace
+   da wani abu, nemo mafita a cikin adapter ko allon kuma ka nemi daga upstream.
+3. Tsoffin rubutu na kit Turanci ne (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ka
+   wuce strings da aka fassara daga `useTranslations(...)` a duk lokacin da wani abu na kit yana nuna
+   rubutu.
+4. Utilities na Tailwind suna rinjayar azuzuwan abubuwan kit (kit yana ayyana
+   `@layer theme, base, components, utilities` kuma dokokinsa suna zaune a cikin `components`) — ka
+   yi amfani da utilities don sarari da shimfiɗa, ba don sake ba abubuwan kit launi ba.
+5. Kanun labarai: `.ci-heading` (Inter, babu tracking) ga taken shafuka da ɓangarori;
+   `.ci-dashboard-display` (Instrument Serif) kawai ga manyan rubutu na nuni marasa yawa kamar lambar
+   matsayin shafin kuskure.
+6. `tests/unit/dashboard-kit-sweep.test.ts` yana tsaron karɓar kit: babu span na Material ligature a
+   ƙarƙashin `src/app` ko `src/shared/components`; a cikin itacen dashboard (`src/app/(dashboard)` da
+   `src/shared/components`) babu `<select>`, `<textarea>` ko `<table>` na zahiri kuma babu
+   `role="dialog"` da aka kirkira da hannu a wajen keɓancewa da aka lissafa (reshen native na adapter
+   na `Select`, `RequestLoggerDetail`); kowane `<button>` ko `<input>` na zahiri a can yana buƙatar
+   sharhi mai ɗauke da `kit-exception:` (tare da dalilin) wanda ya ƙare mafi yawa layi 3 a saman shi;
+   launukan palette da bambancewar `dark:` kawai a cikin fayilolin da gwajin ya lissafa.
+7. Ka tabbatar da jigogin biyu da viewport na 390 px kafin PR (hotunan allon);
+   `tests/e2e/a11y.spec.ts` yana gudanar da axe.
 
 ## 3. Ƙara screen
 

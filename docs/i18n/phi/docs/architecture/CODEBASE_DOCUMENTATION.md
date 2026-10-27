@@ -499,7 +499,7 @@ para sa bawat provider (mga tool schema, fetch/TTS adapter, quirk handler). Kabi
 (nakabahaging identity helper) at `index.ts` (registry).
 
 > Tandaan: ang mga provider na hindi nakalista rito ay pinaglilingkuran ng `default.ts` gamit ang generic na
-> OpenAI-compatible executor. Ang buong katalogo ng provider (375 provider) ay nasa
+> OpenAI-compatible executor. Ang buong katalogo ng provider (376 provider) ay nasa
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

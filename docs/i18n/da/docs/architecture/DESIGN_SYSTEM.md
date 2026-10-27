@@ -81,31 +81,36 @@
 
 ## 2. Regler
 
-1. Tokens, aldrig litteraler. Bevidst bevarede undtagelser: den altid mørke konsolterminal, ReactFlow SVG-
-   streger via `STATUS_HEX` (`src/shared/constants/statusColors.ts`) samt de kategoriske paletter
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) og
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Ret aldrig `packages/ui-kit/src` manuelt: synkroniser med `scripts/dev/sync-ui-kit.sh <commit>`; pre-
-   commit-kontrollen `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) fejler ved enhver byte, der
-   afviger fra den fastlåste upstream-commit (den springes over med en advarsel, når upstream-klonen,
+1. Tokens, aldrig literaler. Undtagelser, der med vilje er beholdt: den altid mørke konsolterminal og
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), spejlingen med opløst hex af kittets
+   statuspalette til kaldere, der har brug for en literal hex. De kategoriske paletter er ikke længere
+   nogen undtagelse: de kører på kittets fem chart-tokens (`--color-chart-1..5`) gennem
+   `src/shared/utils/categoricalPalette.ts` og, for routing-strategier,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-kanter og
+   orkestreringslærredet læser de temaafhængige `--orch-status-*`-variabler
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Patch aldrig `packages/ui-kit/src` i hånden: synkronisér med `scripts/dev/sync-ui-kit.sh <commit>`;
+   pre-commit-gaten `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) fejler på enhver byte, der
+   afviger fra det fastlåste upstream-commit (den springer over med en advarsel, når upstream-klonen,
    `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, mangler). Når kittet mangler noget,
-   skal du omgå det i adapteren eller skærmbilledet og anmode upstream om det.
-3. Kittets standardtekster er på engelsk (`label = "Loading"`, `loadingLabel = "Loading table"`…) — send oversatte
-   strenge fra `useTranslations(...)`, når en kitkomponent gengiver tekst.
-4. Tailwind-hjælpeklasser har forrang over kitkomponentklasser (kittet deklarerer
-   `@layer theme, base, components, utilities`, og dets regler findes i `components`) — brug hjælpeklasser til
-   afstand og layout, ikke til at ændre kitkomponenters farver.
-5. Overskrifter: `.ci-heading` (Inter, ingen bogstavafstand) til side- og sektionsoverskrifter; `.ci-dashboard-display`
-   (Instrument Serif) kun til stor, sparsom visningstekst såsom fejlsidens statuskode.
-6. `tests/unit/dashboard-kit-sweep.test.ts` sikrer anvendelsen af kittet: ingen Material-ligatur-span under
+   så omgå det i adapteren eller skærmen, og bed upstream om det.
+3. Kittets standardtekster er på engelsk (`label = "Loading"`, `loadingLabel = "Loading table"`…) — send
+   oversatte strenge fra `useTranslations(...)`, hver gang en kit-komponent renderer tekst.
+4. Tailwind-utilities vinder over kit-komponentklasser (kittet deklarerer
+   `@layer theme, base, components, utilities`, og dets regler lever i `components`) — brug utilities
+   til spacing og layout, ikke til at omfarve kit-komponenter.
+5. Overskrifter: `.ci-heading` (Inter, ingen tracking) til side- og sektionstitler;
+   `.ci-dashboard-display` (Instrument Serif) kun til stor, sparsom displaytekst som fejlsidens
+   statuskode.
+6. `tests/unit/dashboard-kit-sweep.test.ts` vogter kit-adoptionen: intet Material-ligatur-span under
    `src/app` eller `src/shared/components`; i dashboard-træet (`src/app/(dashboard)` og
-   `src/shared/components`) må der ikke være rå `<select>`, `<textarea>` eller `<table>` og ingen håndbyggede
-   `role="dialog"` uden for de angivne undtagelser (`Select`-adapterens native-gren,
-   `RequestLoggerDetail`); hver rå `<button>` eller `<input>` dér kræver en kommentar, der indeholder
-   `kit-exception:` (med begrundelsen), og som slutter højst 3 linjer over elementet; paletfarvetoner og `dark:`-varianter
-   må kun forekomme i de filer, som testen angiver.
-7. Kontrollér begge temaer og visningsområdet på 390 px før en PR (skærmbilleder); `tests/e2e/a11y.spec.ts` kører
-   axe.
+   `src/shared/components`) ingen rå `<select>`, `<textarea>` eller `<table>` og ingen hjemmerullet
+   `role="dialog"` uden for de listede undtagelser (`Select`-adapterens native-gren,
+   `RequestLoggerDetail`); hver rå `<button>` eller `<input>` der skal have en kommentar, der indeholder
+   `kit-exception:` (med begrundelsen), og som slutter højst 3 linjer over den; palette-nuancer og
+   `dark:`-varianter kun i de filer, testen lister.
+7. Verificér begge temaer og viewporten på 390 px før en PR (screenshots); `tests/e2e/a11y.spec.ts`
+   kører axe.
 
 ## 3. Tilføjelse af et skærmbillede
 

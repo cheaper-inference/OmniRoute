@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API komponent řídicího panelu: adaptéry nad `packages/ui-kit` — viz `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: názvy ikon používané obrazovkami → komponenty Lucide (`<Icon>`)                              |
-| `constants/providers.ts`         | **375 poskytovatelů** s validací Zod (jediný zdroj pravdy)                                               |
+| `constants/providers.ts`         | **376 poskytovatelů** s validací Zod (jediný zdroj pravdy)                                               |
 | `constants/cliTools.ts`          | Registr externích nástrojů CLI                                                                           |
 | `constants/routingStrategies.ts` | **20 strategií směrování** s prioritami                                                                  |
 | `constants/publicApiRoutes.ts`   | Trasy, které vyžadují ověření Bearer (oproti ověření pro správu)                                         |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrace externích nástrojů CLI + interní CLI OmniRoute                                          |
 | `I18N.md`                   | Architektura i18n, přidání jazyka, 67 lokalizací                                                  |
 | `UNINSTALL.md`              | Postup čisté odinstalace                                                                          |
-| `PROVIDER_REFERENCE.md`     | **Automaticky generovaný** katalog 375 poskytovatelů (obnovení: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaticky generovaný** katalog 376 poskytovatelů (obnovení: `npm run gen:provider-reference`) |
 
 ### Podrobné popisy subsystémů
 

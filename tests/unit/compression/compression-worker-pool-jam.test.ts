@@ -66,7 +66,7 @@ function captureWarn(): { lines: string[]; restore(): void } {
 
 /**
  * EventEmitter-based Worker stand-in: mirrors node:worker_threads' surface
- * (on/once/off, postMessage, terminate). Construction is observable so a
+ * (on/once/off, postMessage, terminate, ref/unref). Construction is observable so a
  * factory can busy the first worker(s), then start throwing.
  */
 type FakeWorker = Worker & { messages: unknown[] };
@@ -78,6 +78,8 @@ function fakeWorker(): FakeWorker {
     worker.messages.push(message);
   }) as Worker["postMessage"];
   worker.terminate = (() => Promise.resolve(0)) as Worker["terminate"];
+  worker.ref = () => {};
+  worker.unref = () => {};
   return worker;
 }
 

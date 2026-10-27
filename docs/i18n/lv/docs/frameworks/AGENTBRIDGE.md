@@ -20,7 +20,7 @@ Kad IDE aģents (piem., GitHub Copilot, Cursor, Claude Code) veic API izsaukumu,
 
 Tas nozīmē, ka jūs varat:
 
-- **Pāradresēt jebkuru aģentu uz jebkuru pakalpojumu sniedzēju**: Copilot sazinās ar OpenAI? Pāradresējiet to uz Anthropic Claude, Gemini vai jebkuru no OmniRoute 375 pakalpojumu sniedzējiem.
+- **Pāradresēt jebkuru aģentu uz jebkuru pakalpojumu sniedzēju**: Copilot sazinās ar OpenAI? Pāradresējiet to uz Anthropic Claude, Gemini vai jebkuru no OmniRoute 376 pakalpojumu sniedzējiem.
 - **Lietot modeļu kartējumus**: `gemini-3-flash` → `claude-sonnet-4.7` caurspīdīgi apstrādātāja līmenī.
 - **Vērot visu aģentu trafiku**: katrs pārķertais pieprasījums tiek publicēts [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
 - **Lietot OmniRoute noturību**: kombinētā maršrutēšana, ķēdes pārtraucēji, rezerves maršruti un izmaksu izsekošana darbojas arī IDE aģentu trafikā.

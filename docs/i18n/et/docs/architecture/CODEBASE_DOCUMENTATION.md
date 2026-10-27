@@ -499,7 +499,7 @@ abifunktsioonid (tööriistaskeemid, päringu-/TTS-adapterid, eripärade töötl
 (jagatud identiteedi abifunktsioon) ja `index.ts` (register).
 
 > Märkus: siin loetlemata teenusepakkujaid teenindab `default.ts`, kasutades üldist
-> OpenAI-ga ühilduvat täiturit. Teenusepakkujate täielik kataloog (375 teenusepakkujat) asub failis
+> OpenAI-ga ühilduvat täiturit. Teenusepakkujate täielik kataloog (376 teenusepakkujat) asub failis
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

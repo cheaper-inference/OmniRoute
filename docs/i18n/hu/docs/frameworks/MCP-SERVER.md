@@ -72,6 +72,16 @@ curl -i \
 
 Egy nem `manage` kulcs (vagy Bearer hiánya) `403 LOCAL_ONLY` hibát ad vissza. A `/api/cli-tools/runtime/*` testvér előtag szándékosan NEM megkerülhető – lásd [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Origin-ellenőrzés
+
+Hitelesítés után minden `/api/mcp/*` felé irányuló kérés — a transportok és az olyan kezelőútvonalak, mint `status`, `tools`, `audit`, `restart` — `Origin` fejlécét ellenőrizzük, bárki is a hívó (API-kulcs, CLI-token, dashboard-munkamenet vagy névtelen loopback kikapcsolt bejelentkezéssel). Ez az MCP Streamable HTTP specifikáció által megkövetelt DNS rebinding elleni védelem.
+
+- **Nincs `Origin` fejléc** → engedélyezett. Az OmniRoute CLI, az SDK és az IDE-kliensek nem küldik.
+- **Engedélyezett `Origin`** → `localhost` / `127.0.0.1` / `[::1]` bármely porton, vagy az OmniRoute saját nyilvános originje: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, egy megbízható reverse proxy által továbbított origin (`OMNIROUTE_TRUST_PROXY`, csak ha nincs base URL beállítva), vagy közvetlenül elért loopback/LAN IP-hoszt. Önmagában a `Host` fejléc soha nem tesz megbízhatóvá egy origint.
+- **Bármely más `Origin`, beleértve a `null` értéket** → `403` JSON-RPC hibatörzzsel: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Az érvényes CSRF-tokent felmutató dashboard-munkamenet továbbra is elfogadott, akárcsak a többi dashboard-írásnál.
+
+A reverse proxy mögül kiszolgált böngészős MCP-kliensnek `OMNIROUTE_PUBLIC_BASE_URL` szükséges; más originekhez nincs engedélyezőlista. A CORS előzetes kérés (`OPTIONS`) nincs Origin-ellenőrzés alatt; az utána következő kérés igen.
+
 ## IDE konfiguráció
 
 Lásd az [MCP kliens konfigurációt](../guides/SETUP_GUIDE.md#mcp-client-configuration) a Claude Desktop, Cursor, Cline és kompatibilis MCP kliens beállításához.

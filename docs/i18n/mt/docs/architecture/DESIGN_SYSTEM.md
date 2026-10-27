@@ -86,30 +86,35 @@
 
 ## 2. Regoli
 
-1. Tokens, qatt valuri litterali. Eċċezzjonijiet miżmuma apposta: it-terminal tal-console dejjem skur, il-linji SVG ta’ ReactFlow
-   permezz ta’ `STATUS_HEX` (`src/shared/constants/statusColors.ts`), u l-paletti kategoriċi
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) u
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Qatt timmodifika `packages/ui-kit/src` bl-idejn: issinkronizza b’`scripts/dev/sync-ui-kit.sh <commit>`; il-kontroll
-   ta’ qabel il-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ifalli jekk ikun hemm xi byte li
-   jkun differenti mill-commit upstream iffissat (jinqabeż bi twissija meta l-klonu upstream,
-   `UI_KIT_CLONE` jew `_references/cheaper-inference-ui-kit`, ma jkunx preżenti). Meta jkun jonqos xi ħaġa fil-kit,
-   sib soluzzjoni alternattiva fl-adapter jew fl-iskrin u itlobha mingħand l-upstream.
-3. Il-valuri awtomatiċi tat-test fil-kit huma bl-Ingliż (`label = "Loading"`, `loadingLabel = "Loading table"`…) — għaddi strings tradotti
-   minn `useTranslations(...)` kull meta komponent tal-kit jirrendi test.
-4. L-utilitajiet ta’ Tailwind jieħdu preċedenza fuq il-klassijiet tal-komponenti tal-kit (il-kit jiddikjara
-   `@layer theme, base, components, utilities` u r-regoli tiegħu jinsabu f’`components`) — uża utilitajiet għall-
-   ispazjar u t-tqassim, mhux biex tibdel il-kulur tal-komponenti tal-kit.
-5. Intestaturi: `.ci-heading` (Inter, mingħajr spazjar bejn l-ittri) għat-titli tal-paġni u tas-sezzjonijiet; `.ci-dashboard-display`
-   (Instrument Serif) biss għal test tal-wiri kbir u mhux dens, bħall-kodiċi tal-istatus fil-paġna tal-iżball.
-6. `tests/unit/dashboard-kit-sweep.test.ts` jipproteġi l-adozzjoni tal-kit: l-ebda span b’ligatura Material taħt
+1. Tokens, qatt literals. Eċċezzjonijiet miżmuma apposta: it-terminal tal-console li huwa dejjem skur u
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ir-rifless resolved-hex tal-paletta tal-istatus
+   tal-kit għall-callers li jeħtieġu hex letterali. Il-paletti kategorici m'għadhomx eċċezzjoni:
+   jimxu fuq il-ħames chart tokens tal-kit (`--color-chart-1..5`) permezz ta'
+   `src/shared/utils/categoricalPalette.ts` u, għall-istrateġiji tar-routing,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; il-edges ta' ReactFlow u l-canvas
+   tal-orchestration jaqraw il-varjabbli li jimxu mat-tema `--orch-status-*`
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Qatt tagħmel patch manwalment f'`packages/ui-kit/src`: issinkronizza b'`scripts/dev/sync-ui-kit.sh <commit>`;
+   il-gate tal-pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ifalli fuq kwalunkwe byte li
+   jkun differenti mill-commit upstream iffissat (jiskipja bi twissija meta l-clone upstream,
+   `UI_KIT_CLONE` jew `_references/cheaper-inference-ui-kit`, ma jkunx preżenti). Meta l-kit jonqosha xi
+   ħaġa, għaddej madwarha fl-adapter jew fl-iskrin u itlobha lill-upstream.
+3. Id-defaults tat-test tal-kit huma bl-Ingliż (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   għaddi strings tradotti minn `useTranslations(...)` kull meta komponent tal-kit juri test.
+4. L-utilities ta' Tailwind jipprevalew fuq il-klassijiet tal-komponenti tal-kit (il-kit jidikjara
+   `@layer theme, base, components, utilities` u r-regoli tiegħu jgħixu f'`components`) — uża l-utilities
+   għall-ispazjar u l-layout, mhux biex terġa' tikkulurixxi l-komponenti tal-kit.
+5. Headings: `.ci-heading` (Inter, mingħajr tracking) għat-titli tal-paġni u tas-sezzjonijiet;
+   `.ci-dashboard-display` (Instrument Serif) biss għal test ta' display kbir u skars, bħall-kodiċi
+   tal-istatus tal-paġna tal-iżball.
+6. `tests/unit/dashboard-kit-sweep.test.ts` jħares l-adozzjoni tal-kit: l-ebda span ta' ligature Material taħt
    `src/app` jew `src/shared/components`; fis-siġra tad-dashboard (`src/app/(dashboard)` u
-   `src/shared/components`) m’għandux ikun hemm `<select>`, `<textarea>` jew `<table>` dirett u lanqas
-   `role="dialog"` magħmul apposta barra mill-eċċezzjonijiet elenkati (il-fergħa nattiva tal-adapter `Select`,
-   `RequestLoggerDetail`); kull `<button>` jew `<input>` dirett hemmhekk jeħtieġ kumment li jkun fih
-   `kit-exception:` (bir-raġuni) u li jintemm mhux aktar minn 3 linji ’l fuq minnu; lwien tal-paletta u varjanti `dark:`
-   huma permessi biss fil-fajls elenkati mit-test.
-7. Ivverifika ż-żewġ temi u l-viewport ta’ 390 px qabel PR (screenshots); `tests/e2e/a11y.spec.ts` iħaddem
+   `src/shared/components`) l-ebda `<select>`, `<textarea>` jew `<table>` grezz u l-ebda
+   `role="dialog"` magħmul b'idejk barra mill-eċċezzjonijiet elenkati (il-fergħa nattiva tal-adapter
+   `Select`, `RequestLoggerDetail`); kull `<button>` jew `<input>` grezz hemmhekk jeħtieġ kumment li jkun fih
+   `kit-exception:` (bir-raġuni) li jispiċċa mhux aktar minn 3 linji fuqu; il-hues tal-paletta u l-varjanti
+   `dark:` biss fil-fajls li t-test jelenka.
+7. Ivverifika ż-żewġ temi u l-viewport ta' 390 px qabel PR (screenshots); `tests/e2e/a11y.spec.ts` imexxi
    axe.
 
 ## 3. Żieda ta’ skrin

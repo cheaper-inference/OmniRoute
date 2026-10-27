@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `components/`                    | የዳሽቦርድ ክፍለ አካል API፦ በ`packages/ui-kit` ላይ ያሉ አስማሚዎች — `docs/architecture/DESIGN_SYSTEM.md`ን ይመልከቱ |
 | `constants/iconMap.ts`           | `ICON_MAP`፦ በስክሪኖቹ ጥቅም ላይ የሚውሉ የአዶ ስሞች → የLucide ክፍለ አካላት (`<Icon>`)                              |
-| `constants/providers.ts`         | የZod ማረጋገጫ ያላቸው **375 አቅራቢዎች** (ዋና የእውነት ምንጭ)                                                     |
+| `constants/providers.ts`         | የZod ማረጋገጫ ያላቸው **376 አቅራቢዎች** (ዋና የእውነት ምንጭ)                                                     |
 | `constants/cliTools.ts`          | የውጫዊ CLI መሣሪያዎች መዝገብ                                                                              |
 | `constants/routingStrategies.ts` | ቅድሚያዎች ያላቸው **20 የማስተላለፊያ ስልቶች**                                                                  |
 | `constants/publicApiRoutes.ts`   | የBearer (ከአስተዳደር ማረጋገጫ በተቃራኒ) ማረጋገጫ የሚፈልጉ መስመሮች                                                   |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ውጫዊ CLI ውህደቶች + ውስጣዊ OmniRoute CLI                                                  |
 | `I18N.md`                   | i18n አርክቴክቸር፣ ቋንቋ ማከል፣ 67 የአካባቢ ቅንብሮች                                               |
 | `UNINSTALL.md`              | ሙሉ በሙሉ የማራገፍ ደረጃዎች                                                                  |
-| `PROVIDER_REFERENCE.md`     | 375 አቅራቢዎችን የያዘ **በራስ-ሰር የተፈጠረ** ካታሎግ (ዳግም ማመንጨት፦ `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 376 አቅራቢዎችን የያዘ **በራስ-ሰር የተፈጠረ** ካታሎግ (ዳግም ማመንጨት፦ `npm run gen:provider-reference`) |
 
 ### የንዑስ ስርዓቶች ጥልቅ ማብራሪያዎች
 

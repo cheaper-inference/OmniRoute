@@ -186,6 +186,25 @@ export function providerHonorsOpenAIFormatCacheControl(
 }
 
 /**
+ * Providers that accept OpenAI's explicit prompt-caching field
+ * `prompt_cache_breakpoint` on content parts (GPT-5.6+ explicit mode). Kept
+ * separate from OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS: that set is about
+ * Anthropic-style `cache_control`, which openai/openrouter must not receive,
+ * and strict OpenAI-compatible upstreams reject unknown part fields (#16384).
+ */
+const OPENAI_PROMPT_CACHE_BREAKPOINT_PROVIDERS = new Set(["openai", "openrouter"]);
+
+/**
+ * Whether `prompt_cache_breakpoint` on content parts is forwarded to `provider`
+ * on the OpenAI-format passthrough. Not gated on caching-aware client detection:
+ * a client that sends the field opted into explicit caching on purpose.
+ */
+export function providerAcceptsPromptCacheBreakpoint(provider: string | null | undefined): boolean {
+  if (!provider) return false;
+  return OPENAI_PROMPT_CACHE_BREAKPOINT_PROVIDERS.has(provider.toLowerCase());
+}
+
+/**
  * Detect if the client is Claude Code or another caching-aware client
  */
 export function isClaudeCodeClient(userAgent: string | null | undefined): boolean {

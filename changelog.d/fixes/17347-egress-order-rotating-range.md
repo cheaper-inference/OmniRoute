@@ -1,0 +1,1 @@
+- **fix(proxy-registry):** a pool member whose observed exits stay inside one IPv4 range is now ranked under that range, so two members sharing a range no longer serve one after the other — order only, nobody is ever excluded, and the default order is unchanged ([#17347](https://github.com/diegosouzapw/OmniRoute/pull/17347)) — thanks @maxmad64bis

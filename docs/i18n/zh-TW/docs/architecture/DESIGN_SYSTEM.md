@@ -81,29 +81,35 @@
 
 ## 2. 規則
 
-1. 使用設計權杖，絕不使用字面值。刻意保留的例外：固定為深色的主控台終端、透過 `STATUS_HEX` (`src/shared/constants/statusColors.ts`) 設定的 ReactFlow SVG
-   筆畫，以及分類調色盤
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) 和
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`)。
-2. 絕不手動修補 `packages/ui-kit/src`：請使用 `scripts/dev/sync-ui-kit.sh <commit>` 同步；若有任何位元組
-   與固定的上游提交不同，預先提交閘門 `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) 就會失敗
-   （若上游複製版本 `UI_KIT_CLONE` 或 `_references/cheaper-inference-ui-kit` 不存在，則會顯示警告並
-   略過）。當套件缺少某項功能時，請在轉接器或畫面中採取替代作法，並向上游提出需求。
-3. 套件的文字預設值為英文（`label = "Loading"`、`loadingLabel = "Loading table"`……）——每當套件元件
-   轉譯文字時，請傳入來自 `useTranslations(...)` 的翻譯字串。
-4. Tailwind 公用類別的優先順序高於套件元件類別（套件宣告
-   `@layer theme, base, components, utilities`，而其規則位於 `components`）——請使用公用類別處理
-   間距與版面配置，不要用它們重新設定套件元件的顏色。
-5. 標題：頁面與區段標題使用 `.ci-heading`（Inter，無字距調整）；`.ci-dashboard-display`
+1. 一律使用 Token，絕不寫死字面值。刻意保留的例外：永遠保持深色的主控台終端機，以及
+   `STATUS_HEX`（`src/shared/constants/statusColors.ts`），它是 kit 狀態調色盤的已解析
+   hex 映射版本，供需要字面 hex 值的呼叫端使用。分類調色盤不再是例外：它們透過
+   `src/shared/utils/categoricalPalette.ts` 建立在 kit 的五個圖表 token
+   （`--color-chart-1..5`）之上，路由策略則透過
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`；ReactFlow 的邊（edge）與
+   編排畫布讀取可感知主題的 `--orch-status-*` 變數
+   （`src/shared/components/flow/edgeStyles.ts`）。
+2. 絕不要手動修改 `packages/ui-kit/src`：請使用 `scripts/dev/sync-ui-kit.sh <commit>`
+   同步；pre-commit 閘道 `npm run check:ui-kit-snapshot`（`.husky/pre-commit`）會在任何
+   位元組與釘選的上游 commit 不同時判定失敗（當上游複本 `UI_KIT_CLONE` 或
+   `_references/cheaper-inference-ui-kit` 不存在時，則附帶警告略過）。當 kit 缺少某項
+   功能時，請在 adapter 或畫面中變通處理，並向上游提出需求。
+3. Kit 的文字預設值為英文（`label = "Loading"`、`loadingLabel = "Loading table"`……）——
+   每當 kit 元件要渲染文字時，請從 `useTranslations(...)` 傳入翻譯後的字串。
+4. Tailwind 工具類別的優先級高於 kit 元件類別（kit 宣告了
+   `@layer theme, base, components, utilities`，其規則位於 `components` 層）——工具類別
+   用於間距與版面配置，而不是用來重新為 kit 元件上色。
+5. 標題：頁面與區段標題使用 `.ci-heading`（Inter，無額外字距）；`.ci-dashboard-display`
    （Instrument Serif）僅用於大型、稀疏的展示文字，例如錯誤頁面的狀態碼。
-6. `tests/unit/dashboard-kit-sweep.test.ts` 會守護套件的採用情況：`src/app` 或
-   `src/shared/components` 下不得有 Material 連字 span；儀表板樹狀目錄（`src/app/(dashboard)` 和
-   `src/shared/components`）中不得有原始 `<select>`、`<textarea>` 或 `<table>`，也不得在列出的
-   例外之外自行實作 `role="dialog"`（例外包括 `Select` 轉接器的原生分支、
-   `RequestLoggerDetail`）；其中每個原始 `<button>` 或 `<input>` 的上方至多 3 行內，都必須有一則
-   包含 `kit-exception:`（以及原因）的註解；調色盤色相與 `dark:` 變體只能出現在測試列出的檔案中。
-7. PR 前請驗證兩種主題與 390 px 視窗寬度（附螢幕擷取畫面）；`tests/e2e/a11y.spec.ts` 會執行
-   axe。
+6. `tests/unit/dashboard-kit-sweep.test.ts` 負責把關 kit 的採用情形：`src/app` 或
+   `src/shared/components` 底下不得出現 Material 連字（ligature）span；在 dashboard 樹
+   （`src/app/(dashboard)` 與 `src/shared/components`）中不得使用原生 `<select>`、
+   `<textarea>` 或 `<table>`，且在列出的例外（`Select` adapter 的原生分支、
+   `RequestLoggerDetail`）之外不得手刻 `role="dialog"`；該處每個原生 `<button>` 或
+   `<input>` 都需要一則包含 `kit-exception:`（附原因）的註解，且註解結尾距離它最多
+   3 行；調色盤色相與 `dark:` 變體僅允許出現在測試所列的檔案中。
+7. 提交 PR 前，請驗證兩種主題與 390 px 視口（附螢幕截圖）；`tests/e2e/a11y.spec.ts`
+   會執行 axe。
 
 ## 3. 新增畫面
 

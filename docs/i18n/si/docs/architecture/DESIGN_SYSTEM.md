@@ -81,27 +81,33 @@
 
 ## 2. නීති
 
-1. ලිටරල් අගයන් නොව, ටෝකන භාවිත කරන්න. හිතාමතා තබා ඇති ව්යතිරේක: සැමවිටම අඳුරු කොන්සෝල් ටර්මිනලය, `STATUS_HEX` (`src/shared/constants/statusColors.ts`) හරහා ReactFlow SVG
-   ස්ට්රෝක්, සහ `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) හා
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`) යන වර්ගීකරණ වර්ණ මාලා.
-2. `packages/ui-kit/src` කිසිවිටෙක අතින් පැච් නොකරන්න: `scripts/dev/sync-ui-kit.sh <commit>` සමඟ සමමුහුර්ත කරන්න; පින් කර ඇති upstream commit එකෙන් වෙනස් වන ඕනෑම බයිටයක් සඳහා
-   pre-commit gate වන `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) අසාර්ථක වේ (upstream clone එක,
-   `UI_KIT_CLONE` හෝ `_references/cheaper-inference-ui-kit`, නොමැති විට එය අනතුරු ඇඟවීමක් සමඟ මඟ හරියි). kit එකේ යමක් නොමැති විට,
-   adapter එකේ හෝ screen එකේ ඒ සඳහා විකල්ප විසඳුමක් යොදා upstream වෙතින් එය ඉල්ලන්න.
-3. Kit පෙළෙහි පෙරනිමි ඉංග්රීසියෙන් ඇත (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit component එකක් පෙළ පෙන්වන සෑම අවස්ථාවකම `useTranslations(...)` වෙතින් පරිවර්තනය කළ
-   පෙළ යොමු කරන්න.
-4. Tailwind utility, kit component class අභිබවා ක්රියා කරයි (kit එක
-   `@layer theme, base, components, utilities` ප්රකාශ කරන අතර එහි rules `components` තුළ පවතී) — kit component නැවත වර්ණ ගැන්වීමට නොව,
-   පරතරය සහ layout සඳහා utility භාවිත කරන්න.
-5. ශීර්ෂ: page සහ section title සඳහා `.ci-heading` (Inter, tracking රහිත); error-page status code වැනි විශාල, විරල display text සඳහා පමණක් `.ci-dashboard-display`
-   (Instrument Serif).
-6. `tests/unit/dashboard-kit-sweep.test.ts` මඟින් kit භාවිතය ආරක්ෂා කරයි: `src/app` හෝ `src/shared/components` යටතේ
-   Material ligature span නොතිබිය යුතුය; dashboard tree එකේ (`src/app/(dashboard)` සහ
-   `src/shared/components`) raw `<select>`, `<textarea>` හෝ `<table>` නොතිබිය යුතු අතර ලැයිස්තුගත ව්යතිරේකවලින් (`Select` adapter හි native branch එක,
-   `RequestLoggerDetail`) පිටත අතින් සකස් කළ `role="dialog"` නොතිබිය යුතුය; එහි ඇති සෑම raw `<button>` හෝ `<input>` එකකටම,
-   එයට උපරිම වශයෙන් පේළි 3කට ඉහළින් අවසන් වන, හේතුව සහිත `kit-exception:` අඩංගු comment එකක් අවශ්යය; palette hue සහ `dark:` variant
-   සඳහා අවසර ඇත්තේ test එක ලැයිස්තුගත කරන file තුළ පමණි.
-7. PR එකකට පෙර theme දෙකම සහ 390 px viewport එකත් සත්යාපනය කරන්න (screenshot සමඟ); `tests/e2e/a11y.spec.ts` මඟින්
+1. ටෝකන, කිසිවිටෙක literal නොවේ. හිතාමතා තබා ඇති ව්යතිරේක: සැමවිටම අඳුරු කොන්සෝල ටර්මිනලය සහ
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), literal hex එකක් අවශ්ය අමතන්නන් සඳහා kit තත්ත්ව
+   පැලට් එකේ resolved-hex කැඩපත. කාණ්ඩීය පැලට් තවදුරටත් ව්යතිරේකයක් නොවේ: ඒවා
+   `src/shared/utils/categoricalPalette.ts` හරහා සහ, routing උපාය මාර්ග සඳහා,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` හරහා kit එකේ chart ටෝකන පහ
+   (`--color-chart-1..5`) මත රඳා පවතී; ReactFlow දාර සහ orchestration කැන්වස් එක theme-හැඟීම් සහිත
+   `--orch-status-*` විචල්යයන් කියවයි (`src/shared/components/flow/edgeStyles.ts`).
+2. `packages/ui-kit/src` කිසිවිටෙක අතින් patch නොකරන්න: `scripts/dev/sync-ui-kit.sh <commit>` සමඟ sync කරන්න;
+   pre-commit දොරටුව වන `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) pin කර ඇති upstream commit
+   එකෙන් වෙනස් ඕනෑම byte එකක් මත අසාර්ථක වේ (upstream clone එක, `UI_KIT_CLONE` හෝ
+   `_references/cheaper-inference-ui-kit`, නොමැති විට එය අනතුරු ඇඟවීමක් සමඟ මඟ හරියි). kit එකේ යමක්
+   නොමැති විට, adapter එකේ හෝ screen එකේ එය වටා workaround කර, එය upstream වෙතින් ඉල්ලන්න.
+3. Kit පෙළ පෙරනිමි ඉංග්රීසි වේ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — kit සංරචකයක්
+   පෙළ render කරන සෑම විටම `useTranslations(...)` වෙතින් පරිවර්තනය කළ strings ලබා දෙන්න.
+4. Tailwind utilities kit සංරචක classes වලට ජය ගනී (kit එක `@layer theme, base, components, utilities`
+   ප්රකාශ කරන අතර එහි rules `components` තුළ පවතී) — spacing සහ layout සඳහා utilities භාවිතා කරන්න,
+   kit සංරචක නැවත වර්ණය කිරීමට නොවේ.
+5. ශීර්ෂ: පිටු සහ කොටස මාතෘකා සඳහා `.ci-heading` (Inter, tracking නොමැති); දෝෂ-පිටු තත්ත්ව කේතය වැනි
+   විශාල, විරල display පෙළ සඳහා පමණක් `.ci-dashboard-display` (Instrument Serif).
+6. `tests/unit/dashboard-kit-sweep.test.ts` kit යොදාගැනීම ආරක්ෂා කරයි: `src/app` හෝ `src/shared/components`
+   යටතේ Material ligature span කිසිවක් නොවේ; dashboard ගසේ (`src/app/(dashboard)` සහ
+   `src/shared/components`) raw `<select>`, `<textarea>` හෝ `<table>` කිසිවක් නොවේ සහ ලැයිස්තුගත
+   ව්යතිරේකවලින් (`Select` adapter එකේ native ශාඛාව, `RequestLoggerDetail`) පිටත අතින් සාදන ලද
+   (hand-rolled) `role="dialog"` ද නොවේ; එහි ඇති සෑම raw `<button>` හෝ `<input>` එකකටම `kit-exception:`
+   (හේතුව සමඟ) අඩංගු comment එකක් අවශ්ය වන අතර එය එයට ඉහළින් වැඩිම වශයෙන් පේළි 3කින් අවසන් විය යුතුය;
+   palette hues සහ `dark:` variants ඇත්තේ පරීක්ෂණය ලැයිස්තුගත කරන ගොනුවල පමණි.
+7. PR එකකට පෙර තේමා දෙකම සහ 390 px viewport එක සත්යාපනය කරන්න (screenshots); `tests/e2e/a11y.spec.ts`
    axe ධාවනය කරයි.
 
 ## 3. Screen එකක් එක් කිරීම

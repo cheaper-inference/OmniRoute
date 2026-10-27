@@ -574,10 +574,12 @@ function isNearBoundaryOverrideReject(
 const HARD_COMPAT_REASONS = new Set(["tools", "vision", "structured_output", "output_tokens"]);
 
 /**
- * #8332: vision is a hard requirement, not a soft preference — a target whose vision
- * support is not confirmed can never succeed on an image_url request. Callers
- * reconsidering compat-rejected targets (fallback tiers, degrade-to-unfiltered) MUST
- * exclude these via this predicate.
+ * #8332: rejected fallback tiers must never resurrect a target whose vision
+ * support was not confirmed. #17289 allows unknown support only in the initial
+ * eligible pool, AFTER proven vision targets, not in a rejected-target bypass.
+ * Explicitly unsupported models are never eligible for an image request.
+ * This predicate stays strict (`!== true`) on purpose: it also gates the fusion
+ * panel (dispatchPrelude.ts), which still requires confirmed vision.
  */
 export function isVisionIncompatibleTarget(
   target: ResolvedComboTarget,
@@ -627,13 +629,10 @@ function getTargetCompatibilityFailures(
     failures.push("tools");
   }
 
-  // For a request that carries an image, only route to a target whose vision
-  // support is *confirmed* (`=== true`). Treat `false` AND `null` (unknown) as
-  // incompatible: an unknown-capability model receiving the image is exactly how
-  // a text-only model (e.g. ministral) ended up answering "image not provided".
-  // #8488: when none qualify the filter fails closed (empty list) unless the
-  // operator opts into compatFilterFailOpen.
-  if (requirements.requiresVision && capabilities.supportsVision !== true) {
+  // #17289: metadata gaps are not proof of incompatibility. Explicit false
+  // remains a hard exclusion; null (unknown) can be tried only after confirmed
+  // vision models, so a provider that accepts images is not wrongly vetoed.
+  if (requirements.requiresVision && capabilities.supportsVision === false) {
     failures.push("vision");
   }
 
@@ -723,7 +722,7 @@ export function describeCapabilityFilterExhaustion(
   if (primary === "tools") {
     message = `No target in combo ${name} supports tool calling; request carried ${toolCount} tools`;
   } else if (primary === "vision") {
-    message = `No target in combo ${name} has confirmed vision support for this image request`;
+    message = `No target in combo ${name} accepts image input: every target is explicitly marked non-vision for this image request`;
   } else if (primary === "output_tokens") {
     // #12229: name the real reason. Collapsing this into the structured-output
     // message sent operators chasing response_format when the request's
@@ -748,6 +747,47 @@ export function describeCapabilityFilterExhaustion(
     message,
     terminalReason: "capability_mismatch",
   };
+}
+
+/**
+ * Stable split of an image request's targets into confirmed-vision (`=== true`)
+ * and unknown-capability tiers (#17289). Neither tier includes explicitly
+ * non-vision targets: the hard filter already removed those. `confirmedCount`
+ * is the length of the confirmed prefix of `targets`, or 0 when no tiering
+ * applies (not an image request, or one of the tiers is empty).
+ */
+export function partitionConfirmedVisionTargets<
+  T extends Pick<ResolvedComboTarget, "provider" | "providerId" | "modelStr">,
+>(
+  targets: T[],
+  requirements: RequestCompatibilityRequirements
+): { targets: T[]; confirmedCount: number } {
+  if (!requirements.requiresVision || targets.length <= 1) return { targets, confirmedCount: 0 };
+  const confirmed: T[] = [];
+  const unknown: T[] = [];
+  for (const target of targets) {
+    const verdict = getResolvedModelCapabilities({
+      provider: target.providerId || target.provider || null,
+      model: target.modelStr,
+    }).supportsVision;
+    if (verdict === true) confirmed.push(target);
+    else unknown.push(target);
+  }
+  if (confirmed.length === 0 || unknown.length === 0) return { targets, confirmedCount: 0 };
+  return { targets: [...confirmed, ...unknown], confirmedCount: confirmed.length };
+}
+
+/**
+ * Keep image-capable targets ahead of unknown-capability fallbacks regardless
+ * of strategy order or context-size tiering. Strategies that rotate the result
+ * afterwards (round-robin) must rotate WITHIN each tier — see
+ * `partitionConfirmedVisionTargets` and roundRobinCombo.ts.
+ */
+function preferConfirmedVisionTargets(
+  targets: ResolvedComboTarget[],
+  requirements: RequestCompatibilityRequirements
+): ResolvedComboTarget[] {
+  return partitionConfirmedVisionTargets(targets, requirements).targets;
 }
 
 export function filterTargetsByRequestCompatibility(
@@ -833,11 +873,13 @@ export function filterTargetsByRequestCompatibility(
       // filter over `targets`) is already correct and re-wrapping it would be
       // a no-op.
       const changedOrder = reordered.some((target, index) => target !== compatible[index]);
-      if (changedOrder) return reordered;
+      if (changedOrder) return preferConfirmedVisionTargets(reordered, requirements);
     }
   }
 
-  if (compatible.length === targets.length) return targets;
+  if (compatible.length === targets.length) {
+    return preferConfirmedVisionTargets(compatible, requirements);
+  }
   if (compatible.length === 0) {
     const hardRejected = rejected.some((entry) => hasHardCapabilityFailure(entry.reasons));
     const failOpen = options?.failOpen === true;
@@ -932,7 +974,7 @@ export function filterTargetsByRequestCompatibility(
         .join(", ")}`
     );
   }
-  return compatible;
+  return preferConfirmedVisionTargets(compatible, requirements);
 }
 
 export function sortTargetsByContextSize(targets: ResolvedComboTarget[]) {

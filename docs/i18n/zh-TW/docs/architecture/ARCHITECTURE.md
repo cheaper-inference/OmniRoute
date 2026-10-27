@@ -22,7 +22,7 @@ OmniRoute 是一個以 Next.js 建構的本機 AI 路由閘道與儀表板。
 
 核心功能：
 
-- 適用於 CLI／工具的 OpenAI 相容 API 介面（375 個提供者、156 個執行器模組）
+- 適用於 CLI／工具的 OpenAI 相容 API 介面（376 個提供者、156 個執行器模組）
 - 跨提供者格式的請求／回應轉換
 - 模型組合後援（多模型序列）
 - 結構化組合步驟（`provider + model + connection`），並依 `compositeTiers` 於執行階段排序

@@ -499,7 +499,7 @@ sniedzējam paredzēti palīgmoduļi (rīku shēmas, pieprasījumu/TTS adapteri,
 (koplietojams identitātes palīgmodulis) un `index.ts` (reģistrs).
 
 > Piezīme: pakalpojumu sniedzējus, kas šeit nav uzskaitīti, apkalpo `default.ts`, izmantojot vispārīgo
-> ar OpenAI saderīgo izpildītāju. Pilns pakalpojumu sniedzēju katalogs (375 pakalpojumu sniedzēji) atrodas
+> ar OpenAI saderīgo izpildītāju. Pilns pakalpojumu sniedzēju katalogs (376 pakalpojumu sniedzēji) atrodas
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

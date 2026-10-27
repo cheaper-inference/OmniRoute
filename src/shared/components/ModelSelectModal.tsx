@@ -39,6 +39,8 @@ import {
 } from "@/shared/constants/providers";
 import { hasEligibleConnectionForModel } from "@/domain/connectionModelRules";
 import { useNotificationStore } from "@/store/notificationStore";
+import { fetchProviderModels, type ProviderDegradation } from "./modelSelectDiscovery";
+import { DiscoveryDegradedNotice } from "./DiscoveryDegradedNotice";
 
 // Model/combo chips: compact pill on the kit outline Button (toggle via aria-pressed).
 const CHIP_CLASS = "h-auto min-h-0 rounded-xl px-2 py-1 text-xs font-medium";
@@ -150,6 +152,10 @@ export default function ModelSelectModal({
     localStorage.setItem("modelSelectShowConfiguredOnly", String(showConfiguredOnly));
   }, [showConfiguredOnly]);
   const [fetchedModels, setFetchedModels] = useState<Record<string, any[]>>({});
+  // Providers whose list comes from the built-in catalog, with the reason.
+  const [degradedProviders, setDegradedProviders] = useState<Record<string, ProviderDegradation>>(
+    {}
+  );
   // Provider-level selection for "Test Selected Providers" (combo builder only).
   const [selectedProviderIds, setSelectedProviderIds] = useState<Set<string>>(() => new Set());
   const [testingProviders, setTestingProviders] = useState(false);
@@ -220,32 +226,6 @@ export default function ModelSelectModal({
     fetchCustomModels();
   }, [isOpen]);
 
-  // Fetch the live model catalog for one custom provider from its connection's
-  // upstream `/models` endpoint. Returns the model array, or null on any failure.
-  const fetchProviderModels = async (providerId: string): Promise<any[] | null> => {
-    try {
-      // Find the connection id for this provider — the route is keyed by connection.
-      const connection = activeProviders.find((p) => p.provider === providerId);
-      if (!connection?.id) return null;
-
-      // #9203: ask the live route to drop hidden models server-side too, so the
-      // operator's visibility settings apply before the rows reach the picker,
-      // while chatOnly excludes media and retired models from this chat surface.
-      const res = await fetch(
-        `/api/providers/${connection.id}/models?excludeHidden=true&chatOnly=true`
-      );
-      if (!res.ok) {
-        console.warn(`Failed to fetch models for ${providerId}: ${res.status}`);
-        return null;
-      }
-      const data = await res.json();
-      return data.models || [];
-    } catch (error) {
-      console.error(`Error fetching models for ${providerId}:`, error);
-      return null;
-    }
-  };
-
   // When the modal opens, dynamically load models for every connected custom
   // (openai-/anthropic-compatible) provider in parallel.
   useEffect(() => {
@@ -263,16 +243,30 @@ export default function ModelSelectModal({
       if (customProviderIds.length === 0) return;
 
       const fetched: Record<string, any[]> = {};
+      const degraded: Record<string, ProviderDegradation> = {};
       await Promise.all(
         customProviderIds.map(async (providerId) => {
-          const models = await fetchProviderModels(providerId);
-          if (models && models.length > 1) {
-            fetched[providerId] = models;
+          const connection = activeProviders.find((p) => p.provider === providerId);
+          const discovery = await fetchProviderModels(providerId, connection?.id);
+          if (discovery.models.length > 1) {
+            fetched[providerId] = discovery.models;
+          }
+          // A fallback catalog is reported even when it holds a single row: the
+          // list the operator sees is then the built-in one, and the reason
+          // must not be lost.
+          if (discovery.degraded) {
+            degraded[providerId] = {
+              degraded: true,
+              ...(discovery.cause ? { cause: discovery.cause } : {}),
+            };
           }
         })
       );
 
-      if (!cancelled) setFetchedModels(fetched);
+      if (!cancelled) {
+        setFetchedModels(fetched);
+        setDegradedProviders(degraded);
+      }
     };
 
     loadCustomProviderModels();
@@ -280,7 +274,6 @@ export default function ModelSelectModal({
     return () => {
       cancelled = true;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen, activeProviders]);
 
   const allProviders = useMemo(
@@ -1020,8 +1013,17 @@ export default function ModelSelectModal({
         {/* Provider models */}
         {Object.entries(connectionFilteredGroups).map(([providerId, group]: [string, any]) => {
           const providerSelected = selectedProviderIds.has(providerId);
+          const degradation = degradedProviders[providerId];
           return (
             <div key={providerId}>
+              {degradation && (
+                <div className="mb-1.5">
+                  <DiscoveryDegradedNotice
+                    degraded={degradation.degraded}
+                    cause={degradation.cause}
+                  />
+                </div>
+              )}
               {/* Provider header — opaque sticky bg so model chips never bleed through */}
               <div
                 className={`flex items-center gap-1.5 mb-2 sticky top-0 z-10 py-1.5 px-1 rounded bg-surface ${
