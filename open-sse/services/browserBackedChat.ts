@@ -25,6 +25,7 @@ import {
   type PooledContext,
 } from "./browserPool.ts";
 import tlsClient from "../utils/tlsClient.ts";
+import { discardResponseBody } from "../executors/opencodeResponseBody.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import { resolveHttpBackedChatFingerprint } from "./httpBackedChatFingerprint.ts";
 import type {
@@ -552,6 +553,7 @@ export async function httpBackedChat(
     if (contentLengthHeader) {
       const contentLength = parseInt(contentLengthHeader, 10);
       if (contentLength > MAX_RESPONSE_BYTES) {
+        discardResponseBody(response);
         throw new Error("Response too large");
       }
     }

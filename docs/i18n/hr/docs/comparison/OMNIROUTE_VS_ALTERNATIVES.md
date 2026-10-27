@@ -39,7 +39,7 @@ Objektivna usporedba značajki s popularnim open-source AI usmjerivačima.
 
 ## Kada odabrati OmniRoute
 
-- Samostalno hostate i želite **maksimalnu pokrivenost pružatelja** (375 pružatelja, 155 besplatnih zapisa/zapisa bez autentikacije u katalogu)
+- Samostalno hostate i želite **maksimalnu pokrivenost pružatelja** (376 pružatelja, 155 besplatnih zapisa/zapisa bez autentikacije u katalogu)
 - Trebate **ugrađeni MCP poslužitelj** (LLM alati, memorija, vještine izložene kao alati)
 - Trebate **A2A protokol** za tijekove rada između agenata
 - Želite **nevidljivost otiska prsta** (JA3/JA4) kako biste izbjegli otkrivanje od strane upstream CAPTCHA-a

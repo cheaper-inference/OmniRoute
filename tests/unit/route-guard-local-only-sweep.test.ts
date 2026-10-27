@@ -47,7 +47,11 @@ const EMBED_PARENT = "src/app/(dashboard)/dashboard/providers/services";
  * (LOCAL_ONLY_API_GET_EXEMPTIONS, #13941). Pinned so a new exemption under a
  * spawn-capable root is a deliberate, reviewed change.
  */
-const EXPECTED_GET_EXEMPT = ["/api/mcp/audit", "/api/mcp/audit/stats"];
+const EXPECTED_GET_EXEMPT = [
+  "/api/mcp/audit",
+  "/api/mcp/audit/stats",
+  "/api/services/cliproxy/status",
+];
 
 const WRITE_METHODS = ["POST", "PUT", "PATCH", "DELETE"];
 const READ_METHODS = ["GET", "HEAD"];
@@ -156,7 +160,7 @@ test("every mcp / cli-tools runtime / services / embed route is LOCAL_ONLY for e
   );
 });
 
-test("read-method exemptions inside these roots are only the pinned read-only MCP audit routes", () => {
+test("read-method exemptions inside these roots are only the pinned read-only MCP audit and cliproxy status routes", () => {
   const exempt = IN_SCOPE_PATHS.filter((p) =>
     READ_METHODS.some((method) => !isLocalOnlyPath(p, method))
   ).sort();

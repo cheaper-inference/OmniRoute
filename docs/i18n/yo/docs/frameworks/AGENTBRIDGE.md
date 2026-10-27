@@ -20,7 +20,7 @@ Nígbà tí aṣojú IDE kan (bí àpẹẹrẹ GitHub Copilot, Cursor, Claude C
 
 Èyí túmọ̀ sí pé o lè:
 
-- **Darúkọ aṣojú kankan padà sí olùpèsè kankan**: Copilot ń bá OpenAI sọ̀rọ̀? Darúkọ ọ́ padà sí Anthropic Claude, Gemini, tàbí ọ̀kan lára àwọn olùpèsè 375 ti OmniRoute.
+- **Darúkọ aṣojú kankan padà sí olùpèsè kankan**: Copilot ń bá OpenAI sọ̀rọ̀? Darúkọ ọ́ padà sí Anthropic Claude, Gemini, tàbí ọ̀kan lára àwọn olùpèsè 376 ti OmniRoute.
 - **Lo ìmúbáṣepọ̀ àwọn awoṣe**: `gemini-3-flash` → `claude-sonnet-4.7` láìfarahàn ní ìpele handler.
 - **Ṣàkíyèsí gbogbo ìrìnnàjò aṣojú**: gbogbo ìbéèrè tí wọ́n dí lọ́wọ́ ni wọ́n ń kéjáde lọ sí [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
 - **Lo agbára ìfaradà OmniRoute**: combo routing, circuit breakers, fallbacks, àti ìtọ́pa ìnáwó (cost tracking) tún ń ṣiṣẹ́ fún ìrìnnàjò aṣojú IDE pẹ̀lú.

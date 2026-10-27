@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ਫਾਈਲ                           | ਉਦੇਸ਼                                        |
 | ------------------------------ | -------------------------------------------- |
-| `providerRegistry.ts`          | 375-ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ ਦੇ ਉੱਤੇ ਚੈਟ-ਮਾਡਲ ਰਜਿਸਟਰੀ |
+| `providerRegistry.ts`          | 376-ਪ੍ਰਦਾਤਾ ਕੈਟਾਲਾਗ ਦੇ ਉੱਤੇ ਚੈਟ-ਮਾਡਲ ਰਜਿਸਟਰੀ |
 | `providerModels.ts`            | ਮਾਡਲ ਉਪਨਾਮ, ਫਾਰਮੈਟ ਮੈਪਿੰਗ                    |
 | `constants.ts`                 | ਟਾਈਮਆਉਟ, ਸੀਮਾਵਾਂ, ਸਥਿਤੀ ਕੋਡ                  |
 | `defaultThinkingSignature.ts`  | ਡਿਫੌਲਟ Claude ਥਿੰਕਿੰਗ ਸਿਗਨੇਚਰ                |

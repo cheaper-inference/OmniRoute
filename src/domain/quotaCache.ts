@@ -17,7 +17,6 @@
  */
 
 import { hasOllamaPurchasedCredits } from "@omniroute/open-sse/services/ollamaPurchasedCredits.ts";
-import { getUsageForProvider } from "@omniroute/open-sse/services/usage.ts";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
@@ -49,9 +48,9 @@ import {
 } from "@omniroute/open-sse/services/usage/claudeQuota.ts";
 import { readClaudeUsageLimitConfig } from "@omniroute/open-sse/services/claudeLowPriority.ts";
 import type { ClaudeQuotaMetadata } from "@omniroute/open-sse/services/usage/quota.ts";
+import { getRequestQuotaCacheState as getState } from "./quotaCacheReadView";
 import {
   EXHAUSTED_MAX_PARK_MS,
-  getQuotaCacheState as getState,
   type QuotaCacheEntry,
   type QuotaInfo,
   unmarkQuotaHealthy,
@@ -62,6 +61,7 @@ import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
 // Keep markQuotaHealthy's public import path; the remaining leaf state stays internal.
 export { markQuotaHealthy } from "./quotaCacheState";
 
+export { normalizeQuotas, isExhausted, earliestResetAt, capParkWindow };
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 interface QuotaWindowStatus {
@@ -283,7 +283,7 @@ function normalizeQuotas(rawQuotas: Record<string, unknown>): Record<string, Quo
   return result;
 }
 
-function normalizeConnectionQuotas(rawQuotas: Record<string, unknown>, provider: string) {
+export function normalizeConnectionQuotas(rawQuotas: Record<string, unknown>, provider: string) {
   const quotas = normalizeQuotas(rawQuotas);
   // Preserve unknown aggregate headroom through snapshots; raw usage retains the plan fraction.
   if (hasOllamaPurchasedCredits({ quotas: rawQuotas }, provider)) {
@@ -1091,9 +1091,8 @@ async function refreshEntry(entry: QuotaCacheEntry) {
     }
 
     const proxyInfo = await resolveProxyForConnection(entry.connectionId);
-    const usage = await runWithProxyContext(proxyInfo?.proxy || null, () =>
-      getUsageForProvider(connection)
-    );
+    const getUsage = (await import("@omniroute/open-sse/services/usage.ts")).getUsageForProvider;
+    const usage = await runWithProxyContext(proxyInfo?.proxy || null, () => getUsage(connection));
 
     if (usage?.quotas) {
       setQuotaCache(

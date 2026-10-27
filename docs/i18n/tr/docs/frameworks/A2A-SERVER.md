@@ -165,7 +165,7 @@ OmniRoute, `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` içinde tanımlanm
 | Health Report      | `health-report`      | Sağlayıcı başına circuit breaker, cooldown ve lockout durumlarını bir araya getirir                                                                                        | health, resilience         | "Tüm sağlayıcıların sağlık durumunu göster"  |
 | List Capabilities  | `list-capabilities`  | 45 girdilik Agent Skills kataloğunun tamamını (23 API + 21 CLI + 1 config), bağlam enjeksiyonu için ham SKILL.md URL'leriyle birlikte bir markdown tablosu olarak döndürür | catalog, discovery, skills | "Tüm OmniRoute yeteneklerini listele"        |
 
-> Agent Card, canlı 375 sağlayıcılı katalogla uyumlu tutulmalıdır; sağlayıcı sayıları ile ücretsiz/kimlik doğrulamasız (no-auth) meta verileri çalışma zamanı kayıt defterinden (runtime registry) alınır.
+> Agent Card, canlı 376 sağlayıcılı katalogla uyumlu tutulmalıdır; sağlayıcı sayıları ile ücretsiz/kimlik doğrulamasız (no-auth) meta verileri çalışma zamanı kayıt defterinden (runtime registry) alınır.
 
 ### `list-capabilities` Beceri Detayı
 

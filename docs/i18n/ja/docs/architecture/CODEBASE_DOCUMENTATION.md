@@ -496,7 +496,7 @@ open-sse/
 （共有アイデンティティヘルパー）と `index.ts`（レジストリ）。
 
 > 注: ここに記載されていないプロバイダーは、汎用の
-> OpenAI 互換エグゼキューターを使用する `default.ts` によって処理されます。完全なプロバイダーカタログ（375 プロバイダー）は
+> OpenAI 互換エグゼキューターを使用する `default.ts` によって処理されます。完全なプロバイダーカタログ（376 プロバイダー）は
 > `src/shared/constants/providers.ts` にあります。
 
 ### 4.3 `open-sse/translator/`

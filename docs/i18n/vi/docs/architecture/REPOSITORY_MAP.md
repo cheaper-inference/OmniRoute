@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API thành phần dashboard: các adapter trên `packages/ui-kit` — xem `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: tên biểu tượng được các màn hình sử dụng → các thành phần Lucide (`<Icon>`)                 |
-| `constants/providers.ts`         | **375 nhà cung cấp** với xác thực Zod (nguồn chân lý)                                                   |
+| `constants/providers.ts`         | **376 nhà cung cấp** với xác thực Zod (nguồn chân lý)                                                   |
 | `constants/cliTools.ts`          | Registry công cụ CLI bên ngoài                                                                          |
 | `constants/routingStrategies.ts` | **20 chiến lược định tuyến** kèm mức độ ưu tiên                                                         |
 | `constants/publicApiRoutes.ts`   | Các route yêu cầu xác thực Bearer (thay vì xác thực quản lý)                                            |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Tích hợp CLI bên ngoài + CLI OmniRoute nội bộ                                              |
 | `I18N.md`                   | Kiến trúc i18n, cách thêm ngôn ngữ, 67 locale                                              |
 | `UNINSTALL.md`              | Các bước gỡ cài đặt sạch                                                                   |
-| `PROVIDER_REFERENCE.md`     | Danh mục 375 nhà cung cấp **được tạo tự động** (tạo lại: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Danh mục 376 nhà cung cấp **được tạo tự động** (tạo lại: `npm run gen:provider-reference`) |
 
 ### Phân tích chuyên sâu các hệ thống con
 

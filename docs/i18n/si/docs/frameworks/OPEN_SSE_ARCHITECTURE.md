@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ගොනුව                          | අරමුණ                                                |
 | ------------------------------ | ---------------------------------------------------- |
-| `providerRegistry.ts`          | සපයන්නන් 375 ක නාමාවලිය මත පදනම් වූ chat-ආකෘති ලේඛනය |
+| `providerRegistry.ts`          | සපයන්නන් 376 ක නාමාවලිය මත පදනම් වූ chat-ආකෘති ලේඛනය |
 | `providerModels.ts`            | ආකෘති අන්වර්ථ නාම, ආකෘති සිතියම්කරණය                 |
 | `constants.ts`                 | කාලසීමා, සීමාවන්, තත්ත්ව කේත                         |
 | `defaultThinkingSignature.ts`  | පෙරනිමි Claude සිතීමේ අත්සන                          |

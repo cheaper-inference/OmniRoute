@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API til dashboardkomponenter: adaptere over `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnavne, der bruges af skærmbillederne → Lucide-komponenter (`<Icon>`)                    |
-| `constants/providers.ts`         | **375 udbydere** med Zod-validering (autoritativ kilde)                                                 |
+| `constants/providers.ts`         | **376 udbydere** med Zod-validering (autoritativ kilde)                                                 |
 | `constants/cliTools.ts`          | Register over eksterne CLI-værktøjer                                                                    |
 | `constants/routingStrategies.ts` | **20 routingstrategier** med prioriteter                                                                |
 | `constants/publicApiRoutes.ts`   | Ruter, der kræver Bearer-godkendelse (i modsætning til administrationsgodkendelse)                      |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI-integrationer + intern OmniRoute-CLI                                             |
 | `I18N.md`                   | i18n-arkitektur, tilføjelse af et sprog, 67 lokaliteter                                       |
 | `UNINSTALL.md`              | Trin til fuldstændig afinstallation                                                           |
-| `PROVIDER_REFERENCE.md`     | **Automatisk genereret** katalog over 375 udbydere (gendan: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatisk genereret** katalog over 376 udbydere (gendan: `npm run gen:provider-reference`) |
 
 ### Dybdegående beskrivelser af undersystemer
 
