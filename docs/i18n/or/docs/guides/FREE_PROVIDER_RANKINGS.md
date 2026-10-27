@@ -1,6 +1,6 @@
 # Free Provider Rankings (Arena ELO) (ଓଡ଼ିଆ)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇰 [da](../../../da/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇷 [el](../../../el/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇮 [fi](../../../fi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇪 [ka](../../../ka/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇱 [pl](../../../pl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇹 [am](../../../am/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇦 [ar](../../../ar/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇿 [az](../../../az/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇬 [bg](../../../bg/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇩 [bn](../../../bn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇦 [bs](../../../bs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇿 [cs](../../../cs/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇰 [da](../../../da/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇩🇪 [de](../../../de/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇷 [el](../../../el/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇸 [es](../../../es/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇪🇪 [et](../../../et/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇷 [fa](../../../fa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇮 [fi](../../../fi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇫🇷 [fr](../../../fr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇪 [ga](../../../ga/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [gu](../../../gu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ha](../../../ha/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇱 [he](../../../he/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [hi](../../../hi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇷 [hr](../../../hr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇭🇺 [hu](../../../hu/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇦🇲 [hy](../../../hy/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇩 [id](../../../id/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [ig](../../../ig/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇹 [it](../../../it/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇯🇵 [ja](../../../ja/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇬🇪 [ka](../../../ka/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇭 [km](../../../km/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [kn](../../../kn/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇷 [ko](../../../ko/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇹 [lt](../../../lt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇻 [lv](../../../lv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ml](../../../ml/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [mr](../../../mr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇾 [ms](../../../ms/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇹 [mt](../../../mt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇲🇲 [my](../../../my/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇵 [ne](../../../ne/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇱 [nl](../../../nl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇴 [no](../../../no/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [pa](../../../pa/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇭 [phi](../../../phi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇱 [pl](../../../pl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇹 [pt](../../../pt/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇴 [ro](../../../ro/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇺 [ru](../../../ru/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇱🇰 [si](../../../si/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇰 [sk](../../../sk/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇮 [sl](../../../sl/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇷🇸 [sr](../../../sr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇸🇪 [sv](../../../sv/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇰🇪 [sw](../../../sw/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [ta](../../../ta/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇮🇳 [te](../../../te/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇭 [th](../../../th/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇷 [tr](../../../tr/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇵🇰 [ur](../../../ur/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇺🇿 [uz](../../../uz/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇻🇳 [vi](../../../vi/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇳🇬 [yo](../../../yo/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/FREE_PROVIDER_RANKINGS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/FREE_PROVIDER_RANKINGS.md)
 
 ---
 
@@ -11,32 +11,33 @@
 
 ---
 
-## ଏହା କ’ଣ
+## ଏହା କ'ଣ
 
-OmniRoute 329ଟି ପ୍ରଦାନକାରୀଙ୍କୁ ପଞ୍ଜୀକୃତ କରେ, ଯେଉଁଥିରେ **free/no-auth** ଭାବେ ଚିହ୍ନିତ 155ଟି କ୍ୟାଟାଲଗ୍ ଏଣ୍ଟ୍ରି ଅନ୍ତର୍ଭୁକ୍ତ
+OmniRoute 375 ଜଣ ପ୍ରୋଭାଇଡର ପଞ୍ଜୀକୃତ କରେ, ଯେଉଁଥିରେ 155 ଟି କାଟାଲଗ ଏଣ୍ଟ୍ରି **free/no-auth** ଭାବରେ ଚିହ୍ନଟ ଅଛି
 (no-auth,
 free-tier OAuth, କିମ୍ବା free-tier API key —
 [Free Tiers Guide](../getting-started/FREE-TIERS-GUIDE.md) ଏବଂ ସମ୍ପୂର୍ଣ୍ଣ
-[Free Tiers directory](../reference/FREE_TIERS.md) ଦେଖନ୍ତୁ)। ସମସ୍ୟା ହେଉଛି: ମାଗଣା ପ୍ରଦାନକାରୀମାନଙ୍କର
-ମଡେଲ୍ ଗୁଣବତ୍ତାରେ ବ୍ୟାପକ ପାର୍ଥକ୍ୟ ରହିଥାଏ। ଏକ ଫ୍ରଣ୍ଟିୟର୍ ମଡେଲ୍ ପ୍ରଦାନ କରୁଥିବା no-auth ପ୍ରଦାନକାରୀ,
-ଏକ ଛୋଟ ପୁରୁଣା ମଡେଲ୍ ପ୍ରଦାନ କରୁଥିବା ପ୍ରଦାନକାରୀଠାରୁ ଅଧିକ ଉପଯୋଗୀ।
+[Free Tiers directory](../reference/FREE_TIERS.md) ଦେଖନ୍ତୁ)। ଅସୁବିଧା ହେଉଛି: ମାଗଣା
+ପ୍ରୋଭାଇଡରମାନଙ୍କ ମଡେଲ ଗୁଣବତ୍ତାରେ ବହୁତ ବଡ଼ ପାର୍ଥକ୍ୟ ରହେ। ଗୋଟିଏ frontier ମଡେଲ ପ୍ରଦାନ କରୁଥିବା
+no-auth ପ୍ରୋଭାଇଡର, ଗୋଟିଏ ଛୋଟ legacy ମଡେଲ ପ୍ରଦାନ କରୁଥିବା ପ୍ରୋଭାଇଡର ଅପେକ୍ଷା ଅନେକ ଅଧିକ ଉପଯୋଗୀ।
 
-**Free Provider Rankings**, "**କେଉଁ ମାଗଣା ପ୍ରଦାନକାରୀ ମୋତେ ସର୍ବୋତ୍ତମ ମଡେଲ୍ ଦେଉଛନ୍ତି?**" ପ୍ରଶ୍ନର ଉତ୍ତର
-ପ୍ରତ୍ୟେକ ମାଗଣା ପ୍ରଦାନକାରୀଙ୍କ କ୍ୟାଟାଲଗ୍କୁ **Arena AI leaderboard**-ର
-**କ୍ରାଉଡ୍-ସୋର୍ସ୍ଡ୍ ଗୁଣବତ୍ତା ସ୍କୋର୍** ସହିତ ଯୋଡ଼ି ଦେଇଥାଏ (ମାନବ-ପସନ୍ଦ ELO, LMArena
-ଚାଟ୍ବଟ୍ ଆରେନା ପଛରେ ଥିବା ସମାନ ଧାରଣା)। ତା’ପରେ ପ୍ରଦାନକାରୀମାନଙ୍କୁ ସେମାନଙ୍କର **ସର୍ବୋତ୍ତମ ମାଗଣା ମଡେଲ୍**-ର କ୍ଷମତା ଅନୁସାରେ ରାଙ୍କ୍ କରାଯାଏ।
+**Free Provider Rankings** "**କେଉଁ ମାଗଣା ପ୍ରୋଭାଇଡର ମୋତେ ସର୍ବୋତ୍ତମ ମଡେଲ ଦେଇଥାଏ?**" ଏହି ପ୍ରଶ୍ନର
+ଉତ୍ତର ଦିଏ, ପ୍ରତ୍ୟେକ ମାଗଣା ପ୍ରୋଭାଇଡରର କାଟାଲଗକୁ **Arena AI leaderboard**ର
+**crowd-sourced ଗୁଣବତ୍ତା ସ୍କୋର** (human-preference ELO, LMArena
+chatbot arena ପଛରେ ଥିବା ସେହି ସମାନ ଧାରଣା) ସହିତ ଯୋଡ଼ି। ତାପରେ ପ୍ରୋଭାଇଡରମାନଙ୍କୁ
+ସେମାନଙ୍କର **ସର୍ବୋତ୍ତମ ମାଗଣା ମଡେଲ**ର ଶକ୍ତି ଅନୁଯାୟୀ ରାଙ୍କ କରାଯାଏ।
 
-ଏହି ରାଙ୍କିଂ ତିନୋଟି ବାସ୍ତବ ଉତ୍ସରୁ ଗଣନା କରାଯାଏ:
+ରାଙ୍କିଂ ତିନୋଟି ପ୍ରକୃତ ଉତ୍ସରୁ ଗଣନା କରାଯାଏ:
 
-1. ମାଗଣା-ପ୍ରଦାନକାରୀ ତାଲିକାଗୁଡ଼ିକ — `NOAUTH_PROVIDERS`, ଏବଂ `hasFree` ଭାବେ ଫ୍ଲାଗ୍ ହୋଇଥିବା `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ
+1. ମାଗଣା-ପ୍ରୋଭାଇଡର ତାଲିକାଗୁଡ଼ିକ — `NOAUTH_PROVIDERS`, ଏବଂ `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` ଏଣ୍ଟ୍ରିଗୁଡ଼ିକ ଯେଉଁଥିରେ `hasFree` ଫ୍ଲାଗ ଅଛି
    (`src/shared/constants/providers.ts`)।
-2. ପ୍ରଦାନକାରୀ ରେଜିଷ୍ଟ୍ରିରୁ ପ୍ରତ୍ୟେକ ପ୍ରଦାନକାରୀଙ୍କ ମଡେଲ୍ କ୍ୟାଟାଲଗ୍
+2. ପ୍ରୋଭାଇଡର ରେଜିଷ୍ଟ୍ରିରୁ ପ୍ରତ୍ୟେକ ପ୍ରୋଭାଇଡରର ମଡେଲ କାଟାଲଗ
    (`open-sse/config/providerRegistry.ts`)।
-3. Arena ELO ସିଙ୍କ୍ ଇଞ୍ଜିନ୍ (`src/lib/arenaEloSync.ts`) ଦ୍ୱାରା `model_intelligence` DB ଟେବୁଲ୍ରେ ସଂରକ୍ଷିତ
-   ELO-ରୁ ପ୍ରାପ୍ତ ଟାସ୍କ୍-ଫିଟ୍ ସ୍କୋର୍ଗୁଡ଼ିକ।
+3. Arena ELO sync ଇଞ୍ଜିନ (`src/lib/arenaEloSync.ts`) ଦ୍ୱାରା `model_intelligence` DB
+   ଟେବୁଲରେ ସଂରକ୍ଷିତ ELO-ଭିତ୍ତିକ task-fit ସ୍କୋରଗୁଡ଼ିକ।
 
-ଯୋଡ଼ିବାର ଲଜିକ୍ `src/lib/freeProviderRankings.ts`-ରେ ରହିଛି।
+join ଲଜିକ `src/lib/freeProviderRankings.ts` ରେ ରହିଛି।
 
 ---
 

@@ -80,7 +80,7 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS limitation:** HTTPS `CONNECT` tunnels are captured as metadata only (host, port, timing) — TLS body is not decrypted by default. Enable "Decrypt HTTPS in proxy mode" toggle (opt-in, requires AgentBridge cert to be trusted) for full body inspection.
+**TLS limitation:** HTTPS goes through a plain `CONNECT` tunnel: the listener relays the encrypted bytes untouched and records metadata only (host, port, timing). It never decrypts HTTPS, and there is no setting that turns decryption on for this mode. To capture HTTPS bodies, route the host through Mode 1 (AgentBridge), Mode 2 (Custom Hosts) or Mode 5 (TPROXY decrypt).
 
 **Port conflict:** If port 8080 is in use, AgentBridge returns a 409 with a structured error. Change the port via `INSPECTOR_HTTP_PROXY_PORT` env var.
 
@@ -115,12 +115,12 @@ This is a substantial subsystem with its own dedicated operator guide — see `d
 
 ### Capture mode comparison
 
-| Mode              | Setup                         |          Sudo?          | Reach                       | Notes                                                                                                       |
-| ----------------- | ----------------------------- | :---------------------: | --------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge    | Automatic                     |    Once (cert+hosts)    | 9 IDE agents                | Default on                                                                                                  |
-| 2. Custom Hosts   | Per-host input                |    Yes (hosts file)     | Any app using that host     | Persisted in DB                                                                                             |
-| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`      |           No            | Apps respecting env         | Port 8080, no TLS decrypt by default                                                                        |
-| 4. System-wide    | Toggle + confirm              |           Yes           | All apps on machine         | Auto-disable in 30 min                                                                                      |
+| Mode              | Setup                         |          Sudo?          | Reach                       | Notes                                                                                                                  |
+| ----------------- | ----------------------------- | :---------------------: | --------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge    | Automatic                     |    Once (cert+hosts)    | 9 IDE agents                | Default on                                                                                                             |
+| 2. Custom Hosts   | Per-host input                |    Yes (hosts file)     | Any app using that host     | Persisted in DB                                                                                                        |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`      |           No            | Apps respecting env         | Port 8080; HTTPS is CONNECT-tunneled (metadata only, never decrypted)                                                  |
+| 4. System-wide    | Toggle + confirm              |           Yes           | All apps on machine         | Auto-disable in 30 min                                                                                                 |
 | 5. TPROXY decrypt | Toggle (Linux + native addon) | Yes (root + CA install) | Any host on the target port | Decrypts arbitrary hosts; off by default — see `docs/security/MITM-TPROXY-DECRYPT.md` (git; not compiled into `/docs`) |
 
 ---
@@ -364,7 +364,7 @@ Traffic Inspector shows **all intercepted HTTPS traffic**, including authorizati
 ### Known limitations
 
 - **System-wide proxy mode** affects all applications on the machine, including VPN clients and SSO. Always use with the auto-disable timer. Do not use on shared machines.
-- **CONNECT tunnel HTTPS**: Mode 3 (HTTP_PROXY) captures only tunnel metadata for HTTPS destinations unless TLS interception is enabled. This is by design — transparent capture without the AgentBridge cert being trusted would break TLS verification for those apps.
+- **CONNECT tunnel HTTPS**: Mode 3 (HTTP_PROXY) captures only tunnel metadata for HTTPS destinations and never decrypts them. This is by design — decrypting would require every client to trust a MITM certificate, so the listener keeps HTTPS end-to-end encrypted. Use AgentBridge, Custom Hosts or TPROXY decrypt when you need HTTPS bodies.
 - **Hardcoded strings in some components**: Some UI components (F7/F8) have a small number of hardcoded strings not yet covered by i18n keys. These are documented as a Known Limitation in the i18n gap report; they will be migrated in a follow-up pass. Affected strings are UI decorative labels that don't require translation for functional use.
 
 ---
@@ -467,12 +467,11 @@ Base path: `/api/tools/traffic-inspector/`
 
 ### Capture modes
 
-| Method | Path                           | Description                                                                                            |
-| ------ | ------------------------------ | ------------------------------------------------------------------------------------------------------ |
-| GET    | `/capture-modes`               | State of the AgentBridge / custom-hosts / HTTP_PROXY / system-proxy modes + the `tls-intercept` toggle |
-| POST   | `/capture-modes/http-proxy`    | Start/stop HTTP_PROXY listener (`{action: "start"\|"stop"}`)                                           |
-| POST   | `/capture-modes/system-proxy`  | Apply/revert system-wide proxy (`{action: "apply"\|"revert"}`)                                         |
-| POST   | `/capture-modes/tls-intercept` | Toggle HTTPS body decryption in proxy mode (`{enabled: boolean}`)                                      |
+| Method | Path                          | Description                                                               |
+| ------ | ----------------------------- | ------------------------------------------------------------------------- |
+| GET    | `/capture-modes`              | State of the AgentBridge / custom-hosts / HTTP_PROXY / system-proxy modes |
+| POST   | `/capture-modes/http-proxy`   | Start/stop HTTP_PROXY listener (`{action: "start"\|"stop"}`)              |
+| POST   | `/capture-modes/system-proxy` | Apply/revert system-wide proxy (`{action: "apply"\|"revert"}`)            |
 
 > **TPROXY decrypt** (capture mode 5) is driven by a **separate** route under the
 > AgentBridge prefix — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — not

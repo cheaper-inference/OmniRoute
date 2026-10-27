@@ -131,7 +131,7 @@ export function parseDsmlToolCalls(text: string): ParseDsmlResult {
     const toolName = openMatch[1];
     const afterOpen = remaining.slice(openMatch.index + openMatch[0].length);
     const closeRe = dsmlCloseRe(toolName);
-    const closeMatch = afterOpen.match(closeRe);
+    const closeMatch = closeRe.exec(afterOpen);
     if (!closeMatch) {
       // Opener without a closer — incomplete block. Treat the opener itself
       // as held-back (drop it from content) rather than leaking the marker.

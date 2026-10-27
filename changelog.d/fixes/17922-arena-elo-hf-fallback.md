@@ -1,0 +1,1 @@
+- fix(intelligence): fall back to the lmarena-ai Hugging Face dataset when the Arena ELO scraper API is empty and expose lastError/activeSource in the sync status (#17922)

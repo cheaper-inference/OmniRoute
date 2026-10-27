@@ -32,8 +32,6 @@ const vscodeV1ChatCompletionsRoute =
 const vscodeChatCompletionsRoute =
   await import("../../src/app/api/v1/vscode/[token]/chat/completions/route.ts");
 const vscodeResponsesRoute = await import("../../src/app/api/v1/vscode/[token]/responses/route.ts");
-const serviceTierVariants =
-  await import("../../src/app/api/v1/vscode/[token]/serviceTierVariants.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
 
 async function resetStorage() {
@@ -319,11 +317,11 @@ test("vscode tokenized models route exposes reasoning effort metadata for import
     new Request(`http://localhost/api/v1/vscode/${encodeURIComponent(key.key)}/models`)
   );
   const body = (await response.json()) as any;
-  const model = (body.data || []).find((entry: any) => entry.id === "gpt-5.4__provider_gh");
+  const model = (body.data || []).find((entry: any) => entry.id === "gpt-5.6-sol__provider_gh");
 
   assert.equal(response.status, 200);
-  assert.ok(model, "missing gpt-5.4__provider_gh in tokenized VS Code models route");
-  assert.equal(model.family, "gpt-5.4");
+  assert.ok(model, "missing gpt-5.6-sol__provider_gh in tokenized VS Code models route");
+  assert.equal(model.family, "gpt-5.6-sol");
   assert.deepEqual(model.supportsReasoningEffort, ["none", "low", "medium", "high", "max"]);
   assert.deepEqual(model.supportedReasoningEfforts, [
     "none",
@@ -1133,15 +1131,6 @@ test("vscode tokenized api/show route exposes service tier variants with suffixe
   assert.equal(body.details.family, "gpt-5.6-sol");
 });
 
-test("vscode tokenized chat routes rewrite family-first ids back to the codex provider id", async () => {
-  const payload = serviceTierVariants.resolveVscodeServiceTierRequest({
-    model: "gpt-5.6-sol__provider_cx__tier_priority",
-  });
-
-  assert.equal(payload.model, "cx/gpt-5.6-sol");
-  assert.equal(payload.service_tier, "priority");
-});
-
 test("vscode tokenized /chat/completions route applies the path token and codex tier rewrite", async () => {
   await settingsDb.updateSettings({
     requireLogin: true,
@@ -1169,9 +1158,10 @@ test("vscode tokenized /chat/completions route applies the path token and codex 
 
   // #10797: zero-active-credentials for a single-model (non-combo) request now
   // remaps to 401 instead of leaking the combo-fallback 404 to a direct client.
-  // The 401 OpenAI error code mapping is "invalid_api_key" (errorConfig.ts:26).
+  // The code is "provider_not_configured" (not the 401 default "invalid_api_key"):
+  // the fix is connecting an account in the dashboard, not a new OmniRoute key.
   assert.equal(response.status, 401);
-  assert.equal(body.error?.code, "invalid_api_key");
+  assert.equal(body.error?.code, "provider_not_configured");
   assert.equal(body.error?.message, "No active credentials for provider: codex.");
 });
 
@@ -1202,7 +1192,7 @@ test("vscode tokenized /responses route applies the path token and codex tier re
 
   // #10797: see chat/completions sibling test above.
   assert.equal(response.status, 401);
-  assert.equal(body.error?.code, "invalid_api_key");
+  assert.equal(body.error?.code, "provider_not_configured");
   assert.equal(body.error?.message, "No active credentials for provider: codex.");
 });
 

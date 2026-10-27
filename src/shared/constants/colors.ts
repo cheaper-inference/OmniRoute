@@ -4,7 +4,6 @@
  * Previously duplicated in:
  * - RequestLoggerV2.js (PROTOCOL_COLORS, PROVIDER_COLORS, getStatusStyle)
  * - ProxyLogger.js (PROVIDER_COLORS, TYPE_COLORS, LEVEL_COLORS, getStatusStyle)
- * - UsageAnalytics.js (MODEL_COLORS, getModelColor)
  */
 
 // ═══════════════════════════════════════════
@@ -69,37 +68,6 @@ export const LEVEL_COLORS = {
   global: { bg: "#6B7280", text: "#fff", label: "Global" },
   direct: { bg: "#374151", text: "#9CA3AF", label: "Direct" },
 };
-
-// ═══════════════════════════════════════════
-// Model Colors (charts/analytics)
-// ═══════════════════════════════════════════
-
-export const MODEL_COLORS = [
-  "#D97757",
-  "#60A5FA",
-  "#34D399",
-  "#A78BFA",
-  "#F472B6",
-  "#FBBF24",
-  "#38BDF8",
-  "#FB923C",
-  "#818CF8",
-  "#2DD4BF",
-  "#E879F9",
-  "#F87171",
-  "#4ADE80",
-  "#C084FC",
-  "#FB7185",
-];
-
-/**
- * Get a model color by index (cycles through palette).
- * @param {number} index
- * @returns {string} Hex color
- */
-export function getModelColor(index) {
-  return MODEL_COLORS[index % MODEL_COLORS.length];
-}
 
 // ═══════════════════════════════════════════
 // Status Styling Helpers

@@ -16,6 +16,10 @@ const healthMatrixQuerySchema = z.object({
     .enum(["true", "false", "1", "0"])
     .nullable()
     .transform((value) => (value === null ? true : value === "true" || value === "1")),
+  includeIdleModels: z
+    .enum(["true", "false", "1", "0"])
+    .nullable()
+    .transform((value) => (value === null ? false : value === "true" || value === "1")),
 });
 
 export async function GET(request: Request) {
@@ -28,6 +32,7 @@ export async function GET(request: Request) {
       provider: url.searchParams.get("provider"),
       range: url.searchParams.get("range"),
       includeHealthy: url.searchParams.get("includeHealthy"),
+      includeIdleModels: url.searchParams.get("includeIdleModels"),
     });
 
     if (!parsedQuery.success) {
@@ -40,6 +45,7 @@ export async function GET(request: Request) {
       provider: parsedQuery.data.provider,
       range: parsedQuery.data.range,
       includeHealthy: parsedQuery.data.includeHealthy,
+      includeIdleModels: parsedQuery.data.includeIdleModels,
     });
     return NextResponse.json(report);
   } catch (error) {

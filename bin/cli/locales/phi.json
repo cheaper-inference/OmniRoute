@@ -123,7 +123,9 @@
       "maxCostOpt": "Pinakamataas na gastos kada araw (USD)",
       "allowedModelsOpt": "Listahan ng mga pinapayagang model na pinaghihiwalay ng kuwit",
       "nothingToSet": "Walang ibinigay na field ng patakaran. Gamitin ang --rate-limit, --max-cost, o --allowed-models.",
-      "updated": "Na-update ang patakaran."
+      "updated": "Na-update ang patakaran.",
+      "modelAccessModeOpt": "Mode ng access sa modelo (all | restricted)",
+      "unrestrictedOpt": "Payagan ang lahat ng modelo (--model-access-mode all)"
     },
     "expiration": {
       "title": "Pag-expire ng Key",
@@ -254,6 +256,7 @@
     "log": "Ipakita ang mga log ng server nang inline",
     "no_recovery": "I-disable ang awtomatikong pag-restart kapag nag-crash (debugging mode)",
     "max_restarts": "Pinakamataas na bilang ng pag-restart dahil sa pag-crash sa loob ng 30s bago sumuko (default: 2)",
+    "headless": "Patakbuhin lamang ang proxy engine: naka-disable ang dashboard (404), nilalaktawan ang mga opsyonal na subsystem (nagse-set ng OMNIROUTE_HEADLESS=1)",
     "tray": "Magsimula sa system tray (desktop lang, kailangang i-enable)",
     "no_tray": "I-disable ang icon sa system tray",
     "ready_timeout": "Timeout ng readiness probe sa ms (OMNIROUTE_READY_TIMEOUT_MS din, default na 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "I-sync ang configuration sa pagitan ng mga instance ng OmniRoute",
     "push": {
-      "description": "I-push ang config sa cloud o remote instance",
-      "target": "Target (cloud o context:name)",
-      "bundle": "Mga bahagi ng bundle na isi-sync",
-      "dryRun": "I-preview nang hindi inilalapat"
+      "description": "I-push ang config sa cloud o remote instance"
     },
     "pull": {
-      "description": "Kunin ang config mula sa cloud o remote",
-      "source": "Pinagmulan (cloud o context:name)",
-      "merge": "Pagsamahin sa kasalukuyang config",
-      "replace": "Palitan ang kasalukuyang config",
-      "dryRun": "I-preview nang hindi inilalapat"
-    },
-    "diff": {
-      "source": "Context ng pinagmulan",
-      "target": "Target na context"
+      "description": "Kunin ang config mula sa cloud o remote"
     },
     "bundle": {
       "description": "I-export ang config bilang bundle file",
-      "include": "Mga bahaging isasama (pinaghihiwalay ng kuwit)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Mag-import ng bundle file",
       "dryRun": "I-validate nang hindi inilalapat"
-    },
-    "initialize": {
-      "fromCloud": "I-initialize mula sa cloud backup"
     },
     "tokens": {
       "description": "Pamahalaan ang mga sync token",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Laktawan ang kumpirmasyon"
       }
-    },
-    "resolve": {
-      "description": "Lutasin ang mga salungatan sa pag-sync nang interaktibo"
     }
   },
   "config": {

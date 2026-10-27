@@ -1,6 +1,6 @@
 # Remote Mode (Hrvatski)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/REMOTE-MODE.md) · 🇪🇹 [am](../../../am/docs/guides/REMOTE-MODE.md) · 🇸🇦 [ar](../../../ar/docs/guides/REMOTE-MODE.md) · 🇦🇿 [az](../../../az/docs/guides/REMOTE-MODE.md) · 🇧🇬 [bg](../../../bg/docs/guides/REMOTE-MODE.md) · 🇧🇩 [bn](../../../bn/docs/guides/REMOTE-MODE.md) · 🇧🇦 [bs](../../../bs/docs/guides/REMOTE-MODE.md) · 🇨🇿 [cs](../../../cs/docs/guides/REMOTE-MODE.md) · 🇩🇰 [da](../../../da/docs/guides/REMOTE-MODE.md) · 🇩🇪 [de](../../../de/docs/guides/REMOTE-MODE.md) · 🇬🇷 [el](../../../el/docs/guides/REMOTE-MODE.md) · 🇪🇸 [es](../../../es/docs/guides/REMOTE-MODE.md) · 🇪🇪 [et](../../../et/docs/guides/REMOTE-MODE.md) · 🇮🇷 [fa](../../../fa/docs/guides/REMOTE-MODE.md) · 🇫🇮 [fi](../../../fi/docs/guides/REMOTE-MODE.md) · 🇫🇷 [fr](../../../fr/docs/guides/REMOTE-MODE.md) · 🇮🇪 [ga](../../../ga/docs/guides/REMOTE-MODE.md) · 🇮🇳 [gu](../../../gu/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ha](../../../ha/docs/guides/REMOTE-MODE.md) · 🇮🇱 [he](../../../he/docs/guides/REMOTE-MODE.md) · 🇮🇳 [hi](../../../hi/docs/guides/REMOTE-MODE.md) · 🇭🇺 [hu](../../../hu/docs/guides/REMOTE-MODE.md) · 🇦🇲 [hy](../../../hy/docs/guides/REMOTE-MODE.md) · 🇮🇩 [id](../../../id/docs/guides/REMOTE-MODE.md) · 🇳🇬 [ig](../../../ig/docs/guides/REMOTE-MODE.md) · 🇮🇹 [it](../../../it/docs/guides/REMOTE-MODE.md) · 🇯🇵 [ja](../../../ja/docs/guides/REMOTE-MODE.md) · 🇬🇪 [ka](../../../ka/docs/guides/REMOTE-MODE.md) · 🇰🇭 [km](../../../km/docs/guides/REMOTE-MODE.md) · 🇮🇳 [kn](../../../kn/docs/guides/REMOTE-MODE.md) · 🇰🇷 [ko](../../../ko/docs/guides/REMOTE-MODE.md) · 🇱🇹 [lt](../../../lt/docs/guides/REMOTE-MODE.md) · 🇱🇻 [lv](../../../lv/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ml](../../../ml/docs/guides/REMOTE-MODE.md) · 🇮🇳 [mr](../../../mr/docs/guides/REMOTE-MODE.md) · 🇲🇾 [ms](../../../ms/docs/guides/REMOTE-MODE.md) · 🇲🇹 [mt](../../../mt/docs/guides/REMOTE-MODE.md) · 🇲🇲 [my](../../../my/docs/guides/REMOTE-MODE.md) · 🇳🇵 [ne](../../../ne/docs/guides/REMOTE-MODE.md) · 🇳🇱 [nl](../../../nl/docs/guides/REMOTE-MODE.md) · 🇳🇴 [no](../../../no/docs/guides/REMOTE-MODE.md) · 🇮🇳 [or](../../../or/docs/guides/REMOTE-MODE.md) · 🇮🇳 [pa](../../../pa/docs/guides/REMOTE-MODE.md) · 🇵🇭 [phi](../../../phi/docs/guides/REMOTE-MODE.md) · 🇵🇱 [pl](../../../pl/docs/guides/REMOTE-MODE.md) · 🇵🇹 [pt](../../../pt/docs/guides/REMOTE-MODE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/REMOTE-MODE.md) · 🇷🇴 [ro](../../../ro/docs/guides/REMOTE-MODE.md) · 🇷🇺 [ru](../../../ru/docs/guides/REMOTE-MODE.md) · 🇱🇰 [si](../../../si/docs/guides/REMOTE-MODE.md) · 🇸🇰 [sk](../../../sk/docs/guides/REMOTE-MODE.md) · 🇸🇮 [sl](../../../sl/docs/guides/REMOTE-MODE.md) · 🇷🇸 [sr](../../../sr/docs/guides/REMOTE-MODE.md) · 🇸🇪 [sv](../../../sv/docs/guides/REMOTE-MODE.md) · 🇰🇪 [sw](../../../sw/docs/guides/REMOTE-MODE.md) · 🇮🇳 [ta](../../../ta/docs/guides/REMOTE-MODE.md) · 🇮🇳 [te](../../../te/docs/guides/REMOTE-MODE.md) · 🇹🇭 [th](../../../th/docs/guides/REMOTE-MODE.md) · 🇹🇷 [tr](../../../tr/docs/guides/REMOTE-MODE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/REMOTE-MODE.md) · 🇵🇰 [ur](../../../ur/docs/guides/REMOTE-MODE.md) · 🇺🇿 [uz](../../../uz/docs/guides/REMOTE-MODE.md) · 🇻🇳 [vi](../../../vi/docs/guides/REMOTE-MODE.md) · 🇳🇬 [yo](../../../yo/docs/guides/REMOTE-MODE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/REMOTE-MODE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/REMOTE-MODE.md)
 
 ---
 
@@ -246,22 +246,19 @@ veza ne prikaže kao aktivna.
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ ispisuje tajnu SAMO JEDNOM — kopirajte je odmah
-omniroute tokens list                 # maskirano: ID, naziv, opseg, prefiks, status, istek
-omniroute tokens revoke <id|prefix>   # odmah opozovite
+#   ↳ ispisuje tajnu SAMO JEDNOM — odmah je kopirajte
+omniroute tokens list                 # maskirano: id, naziv, opseg, prefiks, status, istek
+omniroute tokens revoke <id|prefix>   # trenutačni opoziv
 omniroute tokens scopes               # objašnjava tri opsega
 ```
 
-Naredbe `tokens` zahtijevaju vjerodajnicu **administratora**. Tokenima možete
-upravljati i na nadzornoj ploči u odjeljku **Postavke → Pristupni tokeni**
-(stvaranje, opozivanje, jednokratno kopiranje).
+Naredbe `tokens` zahtijevaju vjerodajnicu **admin**. Tokenima možete upravljati i na nadzornoj ploči pod **Settings → Access Tokens** (stvaranje, opoziv, kopiranje jednom). Token se nikada ne može izdati s većim privilegijama od onih koje ima njegov tvorac. Token `admin` može izdati samo operater — sesija nadzorne ploče, lokalni CLI na samom poslužitelju ili `omniroute connect` s lozinkom. Strojne vjerodajnice (pristupni token `admin` ili API ključ s opsegom `manage`/`admin`) mogu izdavati samo tokene `write` i `read`; traženje `--scope admin` od njih vraća `403`. Isključivanje prijave ne otvara izdavanje: pristupni token bilo kojeg opsega vjerodajnica je koju prihvaćaju rute koje uvijek zahtijevaju autentifikaciju, pa anonimni poziv dobiva `401` pri bilo kojem opsegu.
 
 ---
 
-## Konfiguriranje CLI-ja za programiranje iz udaljenog kataloga
+## Konfiguriranje CLI-ja za kodiranje iz udaljenog kataloga
 
-`omniroute configure` čita aktualni katalog modela **aktivnog poslužitelja** i
-zapisuje konfiguraciju na **vaše** računalo.
+`omniroute configure` čita živi katalog modela **aktivnog poslužitelja** i zapisuje konfiguraciju na **vaše** računalo.
 
 ```bash
 omniroute configure codex
@@ -269,147 +266,124 @@ omniroute configure codex
 #   Pružatelj: glm
 #   ID modela: glm/glm-5.2
 #   ✔ Zapisano ~/.codex/glm52.config.toml
-#   Upotrijebite:  codex --profile glm52
+#   Upotreba:  codex --profile glm52
 
 # neinteraktivno
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# zadržite često korišten model na vrhu interaktivnog birača
+# zadržite često korišteni model na vrhu interaktivnog izbornika
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Birač u lokalnoj datoteci `model-preferences.json` čuva samo ID-ove modela
-(nikada URL-ove ili vjerodajnice), razvrstane prema kontekstu i ciljnom CLI-ju.
-Favoriti se prikazuju prije nedavnih odabira; upotrijebite `--unfavorite` kako
-biste uklonili odabrani model s popisa za taj kontekst/cilj.
+Birač u lokalnoj datoteci `model-preferences.json` pohranjuje samo ID-jeve modela (nikada URL-ove ili vjerodajnice), unutar konteksta i cilja CLI-ja. Favoriti se prikazuju prije nedavnih odabira; pomoću `--unfavorite` uklonite odabrani model s popisa tog konteksta/cilja.
 
-Zapisani profil referencira ključ za izvođenje zaključivanja putem varijable
-okruženja (`OMNIROUTE_API_KEY`) — tajna se nikada ne zapisuje na disk. Za
-jednokratno osnovno postavljanje Codexa (blok `[model_providers.omniroute]`)
-pogledajte [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Zapisani profil se na ključ za inferenciju poziva preko okolinske varijable (`OMNIROUTE_API_KEY`) — tajna se nikada ne zapisuje na disk. Za jednokratno osnovno postavljanje Codexa (blok `[model_providers.omniroute]`) pogledajte [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Pokretanje CLI-ja prema udaljenom poslužitelju (bez zapisivanja konfiguracije)
+### Pokretanje CLI-ja protiv udaljenog poslužitelja (bez zapisivanja konfiguracije)
 
-`omniroute run <target>` također poštuje aktivni kontekst: udaljeni osnovni URL
-i vjerodajnica konteksta umeću se samo u pokrenuti proces.
+`omniroute run <target>` također poštuje aktivni kontekst: udaljeni bazni URL i vjerodajnica konteksta ubacuju se samo u pokrenuti proces.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → udaljeni poslužitelj
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → udaljeno
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Pregledajte točno što bi se pokrenulo (samo NAZIVI KLJUČEVA varijabli okruženja, nikada vrijednosti):
+# Pregled točno onoga što će se pokrenuti (samo NAZIVI env varijabli, nikada vrijednosti):
 omniroute run codex --dry-run --json
 ```
 
-Ciljevi: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(jedinstveni izvor: `bin/cli/cli-manifest.mjs`). Qwen i Gemini pokreću se s
-privremenim izoliranim matičnim direktorijem koji se uklanja pri izlasku, pa
-pokretanje nikada ne mijenja vašu osobnu konfiguraciju alata — niti u nju
-propušta podatke.
+Ciljevi: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (jedinstveni izvor: `bin/cli/cli-manifest.mjs`). Qwen i Gemini rade u privremenom izoliranom kućnom direktoriju koji se uklanja pri izlasku, pa pokretanje nikada ne dira niti curi u vašu osobnu konfiguraciju alata.
 
-### Naredbe za postavljanje pojedinačnih CLI-jeva
+### Naredbe za postavljanje pojedinog CLI-ja
 
-Svaki podržani CLI ima naredbu za postavljanje prilagođenu udaljenom poslužitelju
-(sve poštuju aktivni kontekst ili `--remote <url> --api-key <key>`):
+Svaki podržani CLI ima naredbu za postavljanje koja je svjesna udaljenog poslužitelja (sve poštuju aktivni kontekst ili `--remote <url> --api-key <key>`):
 
-| CLI         | Naredba                    | Što zapisuje                                                                                                                                                                                             |
-| ----------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | profile `~/.codex/<name>.config.toml` (po modelu)                                                                                                                                                        |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (po modelu)                                                                                                                                                    |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — pružatelj `omniroute` kompatibilan s OpenAI-jem sa svim modelima iz kataloga (pokrenite `opencode -m omniroute/<model>`)                                            |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI način rada) + ispisuje postavke proširenja za VS Code koje treba zalijepiti (kompatibilno s OpenAI-jem, osnovni URL **bez** `/v1`)                       |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + postavke `kilocode.*` za VS Code — kompatibilno s OpenAI-jem, osnovni URL **s** `/v1`                                                                            |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **s** `/v1`, ključ putem `${{ secrets.OMNIROUTE_API_KEY }}`                                                     |
-| Cursor      | `omniroute setup-cursor`   | ispisuje korake unutar aplikacije (Postavke → Modeli → nadjačajte osnovni URL za OpenAI **s** `/v1` + ključ + model). Cursorova konfiguracija neprozirna je SQLite baza — samo ploča za razgovor         |
-| Roo Code    | `omniroute setup-roo`      | zapisuje Roo JSON za uvoz (`~/.omniroute/roo-settings.json`) + postavlja `roo-cline.autoImportSettingsPath` + ispisuje korake u korisničkom sučelju (kompatibilno s OpenAI-jem, osnovni URL **s** `/v1`) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — pružatelj `openai-compat`, `base_url` **s** `/v1`, ključ putem `$OMNIROUTE_API_KEY`                                                                                       |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **bez** `/v1` + `GOOSE_MODEL`) + upute za varijable okruženja                                                                     |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **bez** `/v1` + `model: openai/<id>`) + upute za varijable okruženja (`aider --message --yes`)                                                                    |
-| Qwen Code   | `omniroute setup-qwen`     | unos V4 `modelProviders.openai` u `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` u `~/.qwen/.env`                                                                                                         |
+| CLI         | Naredba                    | Što zapisuje                                                                                                                                                                         |
+| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Codex       | `omniroute setup-codex`    | profili `~/.codex/<name>.config.toml` (po modelu)                                                                                                                                    |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (po modelu)                                                                                                                                |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — pružatelj `omniroute` kompatibilan s openai sa svim modelima iz kataloga (pokrenite `opencode -m omniroute/<model>`)                            |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (CLI način) + ispisuje postavke proširenja VS Code za lijepljenje (kompatibilno s OpenAI, Base URL **bez** `/v1`)                         |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + postavke VS Code `kilocode.*` — kompatibilno s OpenAI, Base URL **s** `/v1`                                                                  |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + CLI `cn`) — `provider: openai`, `apiBase` **s** `/v1`, ključ preko `${{ secrets.OMNIROUTE_API_KEY }}`                                 |
+| Cursor      | `omniroute setup-cursor`   | ispisuje korake u aplikaciji (Settings → Models → Override OpenAI Base URL **s** `/v1` + ključ + model). Konfiguracija Cursora je neprozirna SQLite — samo panel chata               |
+| Roo Code    | `omniroute setup-roo`      | zapisuje uvozni JSON za Roo (`~/.omniroute/roo-settings.json`), postavlja `roo-cline.autoImportSettingsPath` i ispisuje korake u UI-ju (kompatibilno s OpenAI, Base URL **s** `/v1`) |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — pružatelj `openai-compat`, `base_url` **s** `/v1`, ključ preko `$OMNIROUTE_API_KEY`                                                                   |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json` — `language_models.openai_compatible.omniroute`, `api_url` **s** `/v1`, ključ Zed čita iz `$OMNIROUTE_API_KEY` (nikada se ne zapisuje)                 |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **bez** `/v1` + `GOOSE_MODEL`) + env recept                                                                   |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **bez** `/v1` + `model: openai/<id>`) + env recept (`aider --message --yes`)                                                                  |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 unos `modelProviders.openai` + `OMNIROUTE_API_KEY` u `~/.qwen/.env`                                                                                       |
 
 ```bash
-# OpenCode (pružatelj kompatibilan s OpenAI-jem, svi modeli iz kataloga, udaljeni VPS)
+# OpenCode (pružatelj kompatibilan s openai, svi modeli iz kataloga, udaljeni VPS)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # zadrži samo modele koji se podudaraju
-opencode -m omniroute/glm/glm-5.2 "..."          # najprije izvezi OMNIROUTE_API_KEY
+omniroute setup-opencode --only glm,kimi        # zadrži samo odgovarajuće modele
+opencode -m omniroute/glm/glm-5.2 "..."          # prvo izvezite OMNIROUTE_API_KEY
 ```
 
-> OpenCode također ima bogatiju integraciju putem **dodatka**: `omniroute setup opencode`
-> (sada podržava udaljene sustave putem `--remote`) instalira `@omniroute/opencode-plugin`.
-> `setup-opencode` je lagana alternativa kompatibilna s OpenAI-jem. Na API ključ
-> upućuje se putem `{env:OMNIROUTE_API_KEY}` — nikada se ne zapisuje na disk.
+> OpenCode ima i bogatiju integraciju u obliku **dodatka**: `omniroute setup opencode` (sada svjestan udaljenog poslužitelja putem `--remote`) instalira `@omniroute/opencode-plugin`.
+> `setup-opencode` je laganija alternativa kompatibilna s openai. Ključ API referencira se putem `{env:OMNIROUTE_API_KEY}` — nikada se ne zapisuje na disk.
 >
-> Na OpenCodeu v2 umjesto toga upotrijebite `@omniroute/opencode-plugin-v2`: isti katalog,
-> drukčiji ugovor učitavača. Ključ čita iz OpenCodeova vlastitog spremišta vjerodajnica
-> kada je integracija povezana, pa udaljeni pristupnik uopće ne treba ključ u
-> `opencode.json`.
+> Na OpenCode v2 umjesto toga koristite `@omniroute/opencode-plugin-v2`: isti katalog, drugačiji ugovor učitavača. Kad je integracija povezana, čita ključ iz vlastitog spremišta vjerodajnica OpenCodea, pa udaljenom pristupniku ključ u `opencode.json` uopće nije potreban.
 
 ---
 
 ## Upravljanje kontekstima (prebacivanje između poslužitelja)
 
 **Kontekst** je spremljeni poslužitelj (baseUrl + vjerodajnica + opseg). `omniroute connect`
-stvara kontekst i čini ga aktivnim; od tada je svaka naredba usmjerena na njega. Upravljajte
-kontekstima i prebacujte se između njih pomoću `omniroute contexts`:
+stvara jedan i čini ga aktivnim; od tada svaka naredba cilja taj kontekst. Upravljajte i
+prebacujte se između njih pomoću `omniroute contexts`:
 
 ```bash
-omniroute contexts list            # svi konteksti; aktivni je označen s ●
-omniroute contexts current         # aktivni poslužitelj, status autentifikacije, opseg
+omniroute contexts list            # all contexts; the active one is marked ●
+omniroute contexts current         # the active server, auth status, scope
 ```
 
 ```text
-  | Naziv   | Osnovni URL               | Autent. | Opseg | Opis
-● | vps     | http://100.67.86.91:20128 | token   | admin | Udaljeni OmniRoute (…)
-  | default | http://localhost:20128    | ✗       |       |
+  | Name    | Base URL                  | Auth  | Scope | Description
+● | vps     | http://100.67.86.91:20128 | token | admin | Remote OmniRoute (…)
+  | default | http://localhost:20128    | ✗     |       |
 ```
 
-**Prebacivanje između poslužitelja** — svaka sljedeća naredba koristi aktivni kontekst:
+**Prebacivanje poslužitelja** — svaka sljedeća naredba slijedi aktivni kontekst:
 
 ```bash
-omniroute contexts use vps         # → sve naredbe sada pristupaju udaljenom VPS-u
+omniroute contexts use vps         # → sve naredbe sada ciljaju udaljeni VPS
 omniroute tokens list              #   (izvršava se na VPS-u)
 
-omniroute contexts use default     # → povratak na localhost
+omniroute contexts use default     # → natrag na localhost
 omniroute tokens list              #   (izvršava se na lokalnom poslužitelju)
 ```
 
-**Ručno dodavanje konteksta** (umjesto naredbe `connect`), pregledavanje ili preimenovanje:
+**Ručno dodavanje konteksta** (umjesto `connect`), pregled ili preimenovanje:
 
 ```bash
 omniroute contexts add staging --url https://staging.example.com:20128 \
   --access-token oma_live_xxxx --scope write --description "staging box"
-omniroute contexts show staging    # potpuni detalji za jedan kontekst
+omniroute contexts show staging    # full details for one context
 omniroute contexts rename staging stg
 ```
 
-**Uklanjanje konteksta** — traži potvrdu; navedite `--yes` kako biste je preskočili
-(obavezno za skripte / neinteraktivne ljuske, koje inače sigurno odbijaju radnju):
+**Uklanjanje konteksta** — traži potvrdu; proslijedite `--yes` da biste je preskočili
+(potrebno za skripte / neinteraktivne ljuske, koje bi inače sigurno odbile):
 
 ```bash
 omniroute contexts remove stg --yes
 ```
 
-> `default` (localhost) nije moguće ukloniti. Uklanjanjem aktivnog konteksta automatski
-> se prelazi na `default`. Savjet: uklanjanjem konteksta briše se samo **lokalno**
-> spremljena vjerodajnica — opozovite token na poslužitelju naredbom
-> `omniroute tokens revoke <id>` kako biste doista onemogućili pristup.
+> `default` (localhost) ne može se ukloniti. Uklanjanje aktivnog konteksta vraća na `default`. Savjet: uklanjanje konteksta samo briše **lokalno** spremljene vjerodajnice — opozovite token na poslužitelju s `omniroute tokens revoke <id>` kako biste stvarno prekinuli pristup.
 
-**Izvoz / uvoz** konteksta (npr. radi premještanja između računala). Za nove kontekste
-sprema se samo referenca na privjesak ključeva; vjerodajnice se ne kopiraju u izvoz kada
-je dostupan privjesak ključeva operacijskog sustava:
+**Izvoz / uvoz** konteksta (npr. za premještanje između strojeva). Izvozi izostavljaju vjerodajnice prema zadanim postavkama, uključujući vjerodajnice spremljene putem rezervnog mehanizma datoteka. Eksplicitno koristite `--include-secrets` kada je potrebna prenosiva sigurnosna kopija koja sadrži vjerodajnice:
 
 ```bash
-omniroute contexts export --out contexts.json     # zadano: stdout
-omniroute contexts import contexts.json            # prebrisivanje; --merge za zadržavanje postojećih
-omniroute contexts migrate --yes                  # premještanje naslijeđenih tokena u običnom tekstu u privjesak ključeva
+omniroute contexts export --out contexts.json     # redacted; default destination: stdout
+omniroute contexts export --include-secrets --out private-contexts.json
+omniroute contexts import contexts.json            # overwrite; --merge to keep existing
+omniroute contexts migrate --yes                  # move legacy plaintext tokens to keychain
 ```
 
-Na sustavima bez grafičkog sučelja i bez upotrebljivog privjeska ključeva operacijskog
-sustava, CLI kao pričuvnu mogućnost koristi `config.json` s načinom rada `0600` i
-prikazuje jednokratno upozorenje. Izvoze nastale tom pričuvnom metodom (kao i sve
-naslijeđene konfiguracije prije migracije) smatrajte tajnim materijalom.
+`--include-secrets` razrješava reference na privjesak ključeva prije izvoza i ne uspijeva ako se bilo koja referencirana vjerodajnica ne može pročitati. `--no-secrets` uvijek ima prednost. Izvozne datoteke se pišu atomično s načinom `0600`. Eksplicitni izvoz koji sadrži tajne tretirajte kao tajni materijal. Na sustavima bez glave bez upotrebljivog privjeska ključeva OS-a, CLI se vraća na `config.json` s načinom `0600` i ispisuje jednokratno upozorenje; zadani izvoz ostaje redigiran u ovom načinu rada.
 
 ---
 

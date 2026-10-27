@@ -1,18 +1,37 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  getDatabaseSettings,
+  getUserDatabaseSettings,
   updateDatabaseSettings,
   type UserDatabaseSettings,
 } from "@/lib/db/databaseSettings";
 import { getSettings, updateSettings } from "@/lib/db/settings";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { ensureSemanticCacheDbBridge } from "@/lib/cache/semanticCacheDbBridge";
+import { resetSemanticCacheManager } from "@omniroute/open-sse/services/cache/semanticCacheManager";
+import { getEmbeddingOptions } from "./embeddingOptions";
 import { z } from "zod";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
+import { redactCacheSecrets, CacheCredentialEndpointError } from "@/lib/db/cacheSecrets";
+import { validateEmbeddingEndpoint } from "@omniroute/open-sse/services/cache/embeddingEndpoint";
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+
+ensureSemanticCacheDbBridge();
 
 const cacheConfigUpdateSchema = z.object({
   semanticCacheEnabled: z.boolean().optional(),
   semanticCacheMaxSize: z.number().positive().optional(),
   semanticCacheTTL: z.number().positive().optional(),
+  semanticCacheVectorEnabled: z.boolean().optional(),
+  semanticCacheBackend: z.enum(["memory", "redis"]).optional(),
+  semanticCacheThreshold: z.number().min(0).max(1).optional(),
+  semanticCacheEmbeddingProvider: z.string().trim().optional(),
+  semanticCacheEmbeddingModel: z.string().trim().optional(),
+  semanticCacheEmbeddingDimension: z.number().positive().nullable().optional(),
+  semanticCacheEmbeddingBaseUrl: z.string().trim().nullable().optional(),
+  semanticCacheEmbeddingApiKey: z.string().trim().nullable().optional(),
+  semanticCacheRedisUrl: z.string().trim().nullable().optional(),
+  semanticCacheRedisPrefix: z.string().trim().optional(),
+  semanticCacheRequireZeroTemp: z.boolean().optional(),
   promptCacheEnabled: z.boolean().optional(),
   promptCacheStrategy: z.enum(["auto", "system-only", "manual"]).optional(),
   alwaysPreserveClientCache: z.enum(["auto", "always", "never"]).optional(),
@@ -24,6 +43,17 @@ const CACHE_CONFIG_KEYS = [
   "semanticCacheEnabled",
   "semanticCacheMaxSize",
   "semanticCacheTTL",
+  "semanticCacheVectorEnabled",
+  "semanticCacheBackend",
+  "semanticCacheThreshold",
+  "semanticCacheEmbeddingProvider",
+  "semanticCacheEmbeddingModel",
+  "semanticCacheEmbeddingDimension",
+  "semanticCacheEmbeddingBaseUrl",
+  "semanticCacheEmbeddingApiKey",
+  "semanticCacheRedisUrl",
+  "semanticCacheRedisPrefix",
+  "semanticCacheRequireZeroTemp",
   "promptCacheEnabled",
   "promptCacheStrategy",
   "alwaysPreserveClientCache",
@@ -33,8 +63,19 @@ const CACHE_CONFIG_KEYS = [
 
 const DEFAULTS = {
   semanticCacheEnabled: true,
-  semanticCacheMaxSize: 100,
+  semanticCacheMaxSize: 1000,
   semanticCacheTTL: 1800000,
+  semanticCacheVectorEnabled: false,
+  semanticCacheBackend: "memory",
+  semanticCacheThreshold: 0.8,
+  semanticCacheEmbeddingProvider: "lemonade",
+  semanticCacheEmbeddingModel: "harrier-oss-v1-0.6b",
+  semanticCacheEmbeddingDimension: 1024,
+  semanticCacheEmbeddingBaseUrl: "",
+  semanticCacheEmbeddingApiKey: "",
+  semanticCacheRedisUrl: "",
+  semanticCacheRedisPrefix: "omniroute:semcache:",
+  semanticCacheRequireZeroTemp: true,
   promptCacheEnabled: true,
   promptCacheStrategy: "auto",
   alwaysPreserveClientCache: "auto",
@@ -50,12 +91,15 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const dbSettings = getDatabaseSettings();
+    const dbSettings = getUserDatabaseSettings();
     const cache = dbSettings.cache ?? {};
     // idempotencyWindowMs is not part of the databaseSettings "cache" section —
     // it lives in the flat general settings (src/lib/db/settings.ts), which is
     // where src/lib/idempotencyLayer.ts actually reads it from.
-    const flatSettings = await getSettings();
+    const [flatSettings, embeddingOptions] = await Promise.all([
+      getSettings(),
+      getEmbeddingOptions(),
+    ]);
     const config: Record<string, unknown> = {};
     for (const key of CACHE_CONFIG_KEYS) {
       if (key === "idempotencyWindowMs" || key === "alwaysPreserveClientCache") {
@@ -68,9 +112,10 @@ export async function GET(request: NextRequest) {
         config[key] = (cache as Record<string, unknown>)[key] ?? DEFAULTS[key];
       }
     }
-    return NextResponse.json(config);
+    config.embeddingOptions = embeddingOptions;
+    return NextResponse.json(redactCacheSecrets(config));
   } catch (error) {
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    return NextResponse.json({ error: sanitizeErrorMessage(error) }, { status: 500 });
   }
 }
 
@@ -89,11 +134,21 @@ export async function PUT(request: NextRequest) {
 
     const validation = validateBody(cacheConfigUpdateSchema, rawBody);
     if (isValidationFailure(validation)) {
-      return validation.response;
+      return NextResponse.json({ error: validation.error }, { status: 400 });
     }
 
     const updates: Partial<UserDatabaseSettings["cache"]> = {};
     const body = validation.data;
+    if (body.semanticCacheEmbeddingBaseUrl) {
+      try {
+        validateEmbeddingEndpoint(body.semanticCacheEmbeddingBaseUrl);
+      } catch {
+        return NextResponse.json(
+          { error: "Embedding endpoint is invalid or blocked" },
+          { status: 400 }
+        );
+      }
+    }
 
     if (body.semanticCacheEnabled !== undefined) {
       updates.semanticCacheEnabled = body.semanticCacheEnabled;
@@ -103,6 +158,39 @@ export async function PUT(request: NextRequest) {
     }
     if (body.semanticCacheTTL !== undefined) {
       updates.semanticCacheTTL = body.semanticCacheTTL;
+    }
+    if (body.semanticCacheVectorEnabled !== undefined) {
+      updates.semanticCacheVectorEnabled = body.semanticCacheVectorEnabled;
+    }
+    if (body.semanticCacheBackend !== undefined) {
+      updates.semanticCacheBackend = body.semanticCacheBackend;
+    }
+    if (body.semanticCacheThreshold !== undefined) {
+      updates.semanticCacheThreshold = body.semanticCacheThreshold;
+    }
+    if (body.semanticCacheEmbeddingProvider !== undefined) {
+      updates.semanticCacheEmbeddingProvider = body.semanticCacheEmbeddingProvider;
+    }
+    if (body.semanticCacheEmbeddingModel !== undefined) {
+      updates.semanticCacheEmbeddingModel = body.semanticCacheEmbeddingModel;
+    }
+    if (body.semanticCacheEmbeddingDimension !== undefined) {
+      updates.semanticCacheEmbeddingDimension = body.semanticCacheEmbeddingDimension ?? undefined;
+    }
+    if (body.semanticCacheEmbeddingBaseUrl !== undefined) {
+      updates.semanticCacheEmbeddingBaseUrl = body.semanticCacheEmbeddingBaseUrl ?? undefined;
+    }
+    if (body.semanticCacheEmbeddingApiKey !== undefined) {
+      updates.semanticCacheEmbeddingApiKey = body.semanticCacheEmbeddingApiKey ?? "";
+    }
+    if (body.semanticCacheRedisUrl !== undefined) {
+      updates.semanticCacheRedisUrl = body.semanticCacheRedisUrl ?? "";
+    }
+    if (body.semanticCacheRedisPrefix !== undefined) {
+      updates.semanticCacheRedisPrefix = body.semanticCacheRedisPrefix;
+    }
+    if (body.semanticCacheRequireZeroTemp !== undefined) {
+      updates.semanticCacheRequireZeroTemp = body.semanticCacheRequireZeroTemp;
     }
     if (body.promptCacheEnabled !== undefined) {
       updates.promptCacheEnabled = body.promptCacheEnabled;
@@ -119,6 +207,9 @@ export async function PUT(request: NextRequest) {
     // up the fresh TTL — no separate version bump needed here.
     if (Object.keys(updates).length > 0) {
       updateDatabaseSettings({ cache: updates });
+      // Drop the in-memory semantic cache manager so the next request rebuilds it
+      // from the freshly-persisted databaseSettings (dual-layer cache work).
+      resetSemanticCacheManager();
     }
 
     // idempotencyWindowMs and alwaysPreserveClientCache are read from the flat
@@ -138,6 +229,9 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json({ ok: true });
   } catch (error) {
-    return NextResponse.json({ error: String(error) }, { status: 500 });
+    if (error instanceof CacheCredentialEndpointError) {
+      return NextResponse.json({ error: sanitizeErrorMessage(error) }, { status: 400 });
+    }
+    return NextResponse.json({ error: sanitizeErrorMessage(error) }, { status: 500 });
   }
 }

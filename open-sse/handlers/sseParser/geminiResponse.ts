@@ -22,6 +22,16 @@ type GeminiSSEAccumulator = {
 
 function stripZeroWidth(value: unknown): unknown {
   if (typeof value === "string") return stripObfuscationZeroWidth(value);
+  if (value && typeof value === "object") {
+    if (Array.isArray(value)) {
+      return value.map(stripZeroWidth);
+    }
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(value as Record<string, unknown>)) {
+      out[k] = stripZeroWidth(v);
+    }
+    return out;
+  }
   return value;
 }
 
@@ -54,7 +64,25 @@ function extractGeminiMarkdownShortcut(parsed: Record<string, unknown>): string 
 
 /** Append one candidate content part (text or textual tool call) onto the accumulator. */
 function applyCandidatePart(part: Record<string, unknown>, acc: GeminiSSEAccumulator): void {
-  if (typeof part.text !== "string" || part.thought || part.thoughtSignature) return;
+  // Native function calls (Gemini 3.x / Antigravity)
+  const fc = part.functionCall as Record<string, unknown> | undefined;
+  if (fc && typeof fc.name === "string") {
+    acc.toolCalls.push({
+      id:
+        typeof fc.id === "string" && fc.id.length > 0
+          ? fc.id
+          : `${fc.name}-${Date.now()}-${acc.toolCalls.length}`,
+      index: acc.toolCalls.length,
+      type: "function",
+      function: {
+        name: fc.name,
+        arguments: JSON.stringify(stripZeroWidth(fc.args ?? {})),
+      },
+    });
+    return;
+  }
+
+  if (typeof part.text !== "string" || part.thought === true) return;
 
   const textualToolCall = tryParseTextualToolCall(part.text);
   if (textualToolCall) {
@@ -99,14 +127,22 @@ function applyFinishReason(
 
 /** Extract usageMetadata into the OpenAI-shaped usage object, if present. */
 function applyUsageMetadata(parsed: Record<string, unknown>, acc: GeminiSSEAccumulator): void {
-  const response = parsed.response as Record<string, unknown> | undefined;
+  const response = (parsed.response ?? parsed) as Record<string, unknown>;
   const um = response?.usageMetadata as Record<string, unknown> | undefined;
   if (!um) return;
+  const promptTokens = Number(um.promptTokenCount) || 0;
+  const completionTokens = Number(um.candidatesTokenCount) || 0;
   acc.usage = {
-    prompt_tokens: um.promptTokenCount || 0,
-    completion_tokens: um.candidatesTokenCount || 0,
-    total_tokens: um.totalTokenCount || 0,
+    prompt_tokens: promptTokens,
+    completion_tokens: completionTokens,
+    // Gemini may omit totalTokenCount; derive it instead of reporting 0.
+    total_tokens: Number(um.totalTokenCount) || promptTokens + completionTokens,
   };
+  const cachedTokens = Number(um.cachedContentTokenCount) || 0;
+  if (cachedTokens > 0) {
+    // Cache reads are a breakdown of the inclusive prompt count, not extra input.
+    acc.usage.prompt_tokens_details = { cached_tokens: cachedTokens };
+  }
 }
 
 /** Parse one `data:` line's JSON payload and fold it into the accumulator (best-effort). */
@@ -120,7 +156,7 @@ function applyGeminiSSEDataLine(payload: string, acc: GeminiSSEAccumulator): voi
       acc.sawContent = true;
     }
 
-    const response = parsed.response as Record<string, unknown> | undefined;
+    const response = (parsed.response ?? parsed) as Record<string, unknown>;
     const candidates = response?.candidates;
     const candidate = Array.isArray(candidates)
       ? (candidates[0] as Record<string, unknown> | undefined)

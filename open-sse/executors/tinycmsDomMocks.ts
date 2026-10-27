@@ -86,7 +86,13 @@ function ensureUsableLocation(target: Record<string, unknown>, key: "location"):
 export function setupDomMocks(): DomMockRestore {
   if (typeof global === "undefined") return () => {};
 
-  const g = global as typeof globalThis & Record<string, unknown>;
+  // A loose record on purpose: intersecting with `typeof globalThis` pulls the
+  // DOM lib types in (Window, HTMLCanvasElement, document...) so every stub
+  // assignment below fails against the real constructor signatures, and the
+  // `delete g.window` narrows `g` to `never` (13 diagnostics under the api
+  // typecheck, which loads lib.dom). This function exists to overwrite those
+  // globals with stubs; it must not be typed as if they were the real ones.
+  const g = global as unknown as Record<string, unknown>;
   const hadWindow = "window" in g;
   const hadWindowCtor = "Window" in g;
   const hadCanvasElement = "HTMLCanvasElement" in g;

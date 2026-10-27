@@ -4,6 +4,16 @@ import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+// The shared Select renders the kit (Radix) Select for `options` since KEA-7886: no DOM
+// <select>/<option>; the helpers read the menu items (data-value) and the controlled value.
+import { kitSelectOptions, kitSelectTriggers, kitSelectValue } from "../../../helpers/kitSelect";
+
+// Imported once at module scope: the shared Modal is a kit Dialog (KEA-7886) and the first
+// import of the kit pays its transform cost, which must not land inside a 5 s test budget.
+const { default: KiroAuthModal } = await import("@/shared/components/KiroAuthModal");
+
+// The shared Modal is a kit Dialog (Radix) since KEA-7886: its content is portaled to
+// document.body, so queries start there (the container is a child of body).
 
 const cleanupCallbacks: Array<() => void> = [];
 
@@ -46,7 +56,6 @@ describe("KiroAuthModal", () => {
   });
 
   it("shows Google Account and starts Google social login when clicked", async () => {
-    const { default: KiroAuthModal } = await import("@/shared/components/KiroAuthModal");
     const container = makeContainer();
     const root = createRoot(container);
     const onMethodSelect = vi.fn();
@@ -57,7 +66,7 @@ describe("KiroAuthModal", () => {
       );
     });
 
-    const googleButton = Array.from(container.querySelectorAll("button")).find((button) =>
+    const googleButton = Array.from(document.body.querySelectorAll("button")).find((button) =>
       button.textContent?.includes("Google Account")
     );
 
@@ -72,7 +81,6 @@ describe("KiroAuthModal", () => {
   });
 
   it("notifies API key import success before closing the modal", async () => {
-    const { default: KiroAuthModal } = await import("@/shared/components/KiroAuthModal");
     const container = makeContainer();
     const root = createRoot(container);
     const calls: string[] = [];
@@ -94,7 +102,7 @@ describe("KiroAuthModal", () => {
         );
       });
 
-      const apiKeyButton = Array.from(container.querySelectorAll("button")).find(
+      const apiKeyButton = Array.from(document.body.querySelectorAll("button")).find(
         (button) => button.querySelector("h3")?.textContent === "API Key"
       );
 
@@ -102,8 +110,8 @@ describe("KiroAuthModal", () => {
         apiKeyButton?.click();
       });
 
-      const apiKeyInput = container.querySelector("input") as HTMLInputElement;
-      const saveButton = Array.from(container.querySelectorAll("button")).find((button) =>
+      const apiKeyInput = document.body.querySelector("input") as HTMLInputElement;
+      const saveButton = Array.from(document.body.querySelectorAll("button")).find((button) =>
         button.textContent?.includes("Validate and Save API Key")
       );
 
@@ -125,8 +133,60 @@ describe("KiroAuthModal", () => {
     }
   });
 
+  it("offers Auto / US East / Frankfurt for API keys and sends auto by default", async () => {
+    const container = makeContainer();
+    const root = createRoot(container);
+    const originalFetch = globalThis.fetch;
+    const fetchMock = vi.fn(async () => {
+      return new Response(JSON.stringify({ success: true, connection: { id: "conn-1" } }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
+    });
+    globalThis.fetch = fetchMock as typeof fetch;
+
+    try {
+      await act(async () => {
+        root.render(withIntl(<KiroAuthModal isOpen onClose={vi.fn()} onMethodSelect={vi.fn()} />));
+      });
+
+      const apiKeyButton = Array.from(document.body.querySelectorAll("button")).find(
+        (button) => button.querySelector("h3")?.textContent === "API Key"
+      );
+      await act(async () => {
+        apiKeyButton?.click();
+      });
+
+      const regionSelect = kitSelectTriggers(document.body)[0];
+      expect(regionSelect).toBeTruthy();
+      expect(kitSelectOptions(regionSelect).map((option) => option.value)).toEqual([
+        "auto",
+        "us-east-1",
+        "eu-central-1",
+      ]);
+      expect(kitSelectValue(regionSelect)).toBe("auto");
+
+      const apiKeyInput = document.body.querySelector("input") as HTMLInputElement;
+      await act(async () => {
+        setInputValue(apiKeyInput, "ksk_test_key");
+      });
+      const saveButton = Array.from(document.body.querySelectorAll("button")).find((button) =>
+        button.textContent?.includes("Validate and Save API Key")
+      );
+      await act(async () => {
+        saveButton?.click();
+      });
+
+      expect(fetchMock).toHaveBeenCalledTimes(1);
+      const [, init] = fetchMock.mock.calls[0] as unknown as [string, RequestInit];
+      expect(JSON.parse(String(init.body))).toEqual({ apiKey: "ksk_test_key", region: "auto" });
+    } finally {
+      await act(async () => root.unmount());
+      globalThis.fetch = originalFetch;
+    }
+  });
+
   it("treats successful auto-import as completed instead of importing twice", async () => {
-    const { default: KiroAuthModal } = await import("@/shared/components/KiroAuthModal");
     const container = makeContainer();
     const root = createRoot(container);
     const calls: string[] = [];
@@ -148,7 +208,7 @@ describe("KiroAuthModal", () => {
         );
       });
 
-      const importButton = Array.from(container.querySelectorAll("button")).find(
+      const importButton = Array.from(document.body.querySelectorAll("button")).find(
         (button) => button.querySelector("h3")?.textContent === "Import Token"
       );
       await act(async () => {
@@ -194,7 +254,7 @@ describe("KiroAuthModal", () => {
         root.render(withIntl(<KiroOAuthWrapper isOpen onClose={vi.fn()} onSuccess={vi.fn()} />));
       });
 
-      const googleButton = Array.from(container.querySelectorAll("button")).find((button) =>
+      const googleButton = Array.from(document.body.querySelectorAll("button")).find((button) =>
         button.textContent?.includes("Google Account")
       );
       await act(async () => {

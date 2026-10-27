@@ -9,6 +9,10 @@
  */
 
 import { useEffect, useRef, useState } from "react";
+import { useTranslations } from "next-intl";
+import Button from "@/shared/components/Button";
+import Input from "@/shared/components/Input";
+import { cn } from "@/shared/utils/cn";
 
 declare global {
   interface Window {
@@ -34,6 +38,7 @@ interface ChatMessage {
 const STREAM_URL = "/api/telegram/update";
 
 export default function TelegramMiniApp() {
+  const t = useTranslations("publicSystem");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
@@ -98,34 +103,20 @@ export default function TelegramMiniApp() {
   }
 
   return (
-    <main
-      style={{
-        maxWidth: 480,
-        margin: "0 auto",
-        padding: 16,
-        display: "flex",
-        flexDirection: "column",
-        minHeight: "100vh",
-        fontFamily: "system-ui, -apple-system, sans-serif",
-      }}
-    >
-      <h1 style={{ fontSize: 18, margin: "0 0 12px" }}>OmniRoute Mini App</h1>
-      {error && <p style={{ color: "#e5484d", fontSize: 13, margin: "0 0 12px" }}>{error}</p>}
+    <main className="mx-auto flex min-h-screen max-w-[480px] flex-col p-4">
+      <h1 className="ci-heading mb-3 text-lg">OmniRoute Mini App</h1>
+      {error && <p className="mb-3 text-[13px] text-error">{error}</p>}
 
-      <div style={{ flex: 1, overflowY: "auto", marginBottom: 12 }}>
+      <div className="mb-3 flex flex-1 flex-col overflow-y-auto">
         {messages.map((m, i) => (
           <div
             key={i}
-            style={{
-              margin: "6px 0",
-              padding: "8px 12px",
-              borderRadius: 12,
-              background: m.role === "user" ? "#10a37f" : "#f0f0f0",
-              color: m.role === "user" ? "#fff" : "#111",
-              alignSelf: m.role === "user" ? "flex-end" : "flex-start",
-              whiteSpace: "pre-wrap",
-              wordBreak: "break-word",
-            }}
+            className={cn(
+              "my-1.5 whitespace-pre-wrap break-words rounded-card px-3 py-2",
+              m.role === "user"
+                ? "self-end bg-primary text-accent-foreground"
+                : "self-start bg-bg-subtle text-text-main"
+            )}
           >
             {m.content}
           </div>
@@ -133,36 +124,19 @@ export default function TelegramMiniApp() {
         <div ref={bottomRef} />
       </div>
 
-      <div style={{ display: "flex", gap: 8 }}>
-        <input
+      <div className="flex items-end gap-2">
+        <Input
+          className="flex-1"
+          aria-label={t("miniapp.askAnything")}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && send()}
-          placeholder="Ask anything…"
+          placeholder={t("miniapp.askAnything")}
           disabled={busy}
-          style={{
-            flex: 1,
-            padding: "10px 12px",
-            borderRadius: 10,
-            border: "1px solid #ccc",
-            fontSize: 15,
-          }}
         />
-        <button
-          onClick={send}
-          disabled={busy || !input.trim()}
-          style={{
-            padding: "10px 18px",
-            borderRadius: 10,
-            border: "none",
-            background: "#10a37f",
-            color: "#fff",
-            fontSize: 15,
-            cursor: busy ? "default" : "pointer",
-          }}
-        >
+        <Button onClick={send} disabled={busy || !input.trim()}>
           {busy ? "…" : "Send"}
-        </button>
+        </Button>
       </div>
     </main>
   );

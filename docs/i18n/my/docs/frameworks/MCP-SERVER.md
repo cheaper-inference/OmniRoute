@@ -1,6 +1,6 @@
 # OmniRoute MCP Server Documentation (မြန်မာ)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MCP-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/MCP-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MCP-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/MCP-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MCP-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MCP-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MCP-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/MCP-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/MCP-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/MCP-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/MCP-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/MCP-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MCP-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MCP-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MCP-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MCP-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MCP-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MCP-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MCP-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MCP-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MCP-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/MCP-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MCP-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MCP-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MCP-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MCP-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MCP-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MCP-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MCP-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MCP-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MCP-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MCP-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MCP-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MCP-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MCP-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MCP-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MCP-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MCP-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MCP-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/MCP-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MCP-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MCP-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MCP-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MCP-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/MCP-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/MCP-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MCP-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MCP-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MCP-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MCP-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MCP-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MCP-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MCP-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MCP-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/MCP-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MCP-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/MCP-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MCP-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MCP-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/MCP-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MCP-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/MCP-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/MCP-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/MCP-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/MCP-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/MCP-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MCP-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MCP-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MCP-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MCP-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MCP-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MCP-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MCP-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MCP-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MCP-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/MCP-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MCP-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MCP-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MCP-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MCP-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MCP-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MCP-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MCP-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MCP-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MCP-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MCP-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MCP-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MCP-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MCP-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MCP-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MCP-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MCP-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MCP-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/MCP-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MCP-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MCP-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MCP-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MCP-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/MCP-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/MCP-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MCP-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MCP-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MCP-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MCP-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MCP-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MCP-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MCP-SERVER.md)
 
 ---
 
@@ -72,6 +72,16 @@ curl -i \
 ```
 
 `manage` scope မပါသော key (သို့မဟုတ် Bearer မပါခြင်း) သည် `403 LOCAL_ONLY` ကို ပြန်ပေးသည်။ ဆက်စပ် prefix ဖြစ်သော `/api/cli-tools/runtime/*` ကိုမူ ရည်ရွယ်ချက်ရှိရှိ ကျော်ဖြတ်၍မရနိုင်အောင် ပြုလုပ်ထားသည် — [Route Guard Tiers — Manage-scope ခြွင်းချက်](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) ကို ကြည့်ပါ။
+
+### Origin စစ်ဆေးခြင်း
+
+အထောက်အထားစိစစ်ပြီးနောက် `/api/mcp/*` သို့ ရောက်လာသော တောင်းဆိုမှုတိုင်း — transport များနှင့် `status`, `tools`, `audit`, `restart` ကဲ့သို့ စီမံခန့်ခွဲမှုလမ်းကြောင်းများ — ၏ `Origin` header ကို ခေါ်ဆိုသူ မည်သူပင်ဖြစ်စေ (API key၊ CLI token၊ dashboard session သို့မဟုတ် login ပိတ်ထားစဉ် အမည်မသိ loopback) စစ်ဆေးသည်။ ၎င်းသည် MCP Streamable HTTP သတ်မှတ်ချက်က လိုအပ်သော DNS rebinding ကာကွယ်မှုဖြစ်သည်။
+
+- **`Origin` header မရှိ** → ခွင့်ပြုသည်။ OmniRoute CLI၊ SDK နှင့် IDE client များသည် ၎င်းကို မပို့ပါ။
+- **ခွင့်ပြုထားသော `Origin`** → မည်သည့် port ပေါ်ရှိ `localhost` / `127.0.0.1` / `[::1]` မဆို၊ သို့မဟုတ် OmniRoute ၏ ကိုယ်ပိုင် အများသုံး origin — `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`၊ ယုံကြည်ရသော reverse proxy က ဆက်ပို့သော origin (`OMNIROUTE_TRUST_PROXY`၊ base URL မသတ်မှတ်ထားမှသာ)၊ သို့မဟုတ် တိုက်ရိုက်ဝင်ရောက်သော loopback/LAN IP host။ `Host` header တစ်ခုတည်းဖြင့် မည်သည့် origin ကိုမျှ ယုံကြည်ရသည်ဟု မသတ်မှတ်ပါ။
+- **`null` အပါအဝင် အခြား `Origin` မည်သည့်ဟာမဆို** → JSON-RPC error body နှင့်အတူ `403` — `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`။ မှန်ကန်သော CSRF token ပြသသည့် dashboard session ကို အခြား dashboard ရေးသားမှုများကဲ့သို့ပင် ဆက်လက်လက်ခံသည်။
+
+reverse proxy နောက်ကွယ်မှ ဝန်ဆောင်မှုပေးသော browser MCP client သည် `OMNIROUTE_PUBLIC_BASE_URL` လိုအပ်သည်၊ အခြား origin များအတွက် ခွင့်ပြုစာရင်း မရှိပါ။ CORS preflight (`OPTIONS`) ကို Origin အတွက် မစစ်ဆေးပါ၊ နောက်ဆက်တွဲ တောင်းဆိုမှုကိုမူ စစ်ဆေးသည်။
 
 ## IDE ဖွဲ့စည်းသတ်မှတ်မှု
 
@@ -287,10 +297,109 @@ Settings တွင် MCP server ကို ဖွင့်ထားခြင်�
 
 ---
 
-## စစ်မှန်ကြောင်းအတည်ပြုခြင်းနှင့် Scope များ
+## အထောက်အထားစိစစ်ခြင်းနှင့် Scope များ
 
-MCP tool များကို API key scope များမှတစ်ဆင့် စစ်မှန်ကြောင်းအတည်ပြုထားသည်။ Scope သတ်မှတ်ချက်များကို အတည်ပြုကျင့်သုံးခြင်းအား
-`open-sse/mcp-server/scopeEnforcement.ts` တွင် ဗဟိုပြုထားသည်။ Tool တစ်ခုစီအတွက် သီးခြား scope များ လိုအပ်သည်။
+MCP tool ခေါ်ဆိုမှုများသည် ခေါ်ဆိုသူထံမှ scope string များကို ဖတ်ယူသည်။ ထိုစစ်ဆေးမှုသည် သီးခြားလွတ်လပ်သော namespace သုံးခုအနက် တစ်ခုဖြစ်သည်။ Checker တစ်ခုတွင် အောင်မြင်ခြင်းသည် အခြား checker များတွင် အောင်မြင်ခြင်းမဟုတ်ပါ။ စည်းမျဉ်းများကို [Scope namespace သုံးခု](#three-scope-namespaces) တွင် ကြည့်ပါ။
+Tool catalog ကို [MCP tool scope များ](#mcp-tool-scopes) တွင် ကြည့်ပါ။
+
+### Scope namespace သုံးခု
+
+API key တစ်ခုရှိ `manage`၊ MCP tool တစ်ခုရှိ `read:compression` နှင့်
+`oma_live_…` access token တစ်ခုရှိ `read` တို့သည် မတူညီသော ခွင့်ပြုချက်သုံးခုဖြစ်သည်။ ပြောင်းလဲမှုလုပ်ဆောင်သော management route တစ်ခုသို့ `read`
+access token ပေးပို့သည့် ခေါ်ဆိုသူများသည် HTTP 403
+`Access token scope 'read' is insufficient; 'write' required.`
+ကို ရရှိမည်။ ထိုအဆင့်သတ်မှတ်ချက်ကို `scopeSatisfies` ဟုခေါ်သည်။ ၎င်းသည် MCP ဇယားကို မစစ်ဆေးသကဲ့သို့ MCP
+matcher ကလည်း ၎င်းကို မစစ်ဆေးပါ။
+
+| Namespace          | အထောက်အထား                                                                    | Checker                       | အောင်မြင်ပါက ခွင့်ပြုသည့်အရာ                             |
+| :----------------- | :---------------------------------------------------------------------------- | :---------------------------- | :------------------------------------------------------- |
+| API-key management | `api_keys.scopes`                                                             | `hasManageScope`              | ထို Bearer key အတွက် Management REST                     |
+| API-key additive   | တူညီသော array အတွင်းရှိ အတိအကျတူညီသည့် string တစ်ခု                           | အောက်တွင် ဖော်ပြထားသော helper | ထိုစွမ်းရည်တစ်ခုတည်း                                     |
+| MCP tool scopes    | တူညီသော array၊ မရှိပါက MCP `_meta`၊ ထိုသို့လည်းမရှိပါက `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | Enforcement ဖွင့်ထားသည့်အခါ ထို tool ကို အသုံးပြုခြင်း   |
+| Access token       | `oma_live_…`                                                                  | `scopeSatisfies`              | Method နှင့် path အရ ထိုအဆင့်လိုအပ်သည့် management route |
+
+Credential တစ်ခုစီ ထုတ်ပေးပုံကို
+[Management အထောက်အထားစိစစ်ခြင်း](../guides/MANAGEMENT-AUTH.md) တွင် ဖော်ပြထားသည်။
+
+#### API-key scope များ
+
+`api_keys.scopes` array တစ်ခုက လုပ်ငန်းနှစ်ခုကို ပံ့ပိုးသည်။ ၎င်းတို့သည် မတူညီသော function များကို အသုံးပြုသည်။
+
+**Management REST။** `manage` နှင့် `admin` တို့သည်
+`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`) ၏ member များဖြစ်သည်။
+`hasManageScope` သည် ထို key အတွက် management route များကို ခွင့်ပြုပေးသည့်အရာဖြစ်သည်။ ထို route များတွင် `admin` သည်
+management လုပ်ဆောင်နိုင်စွမ်းရှိသည်။ ဤနေရာရှိ `admin` ဟူသော စကားလုံးသည်
+access-token အဆင့်မဟုတ်သကဲ့သို့ MCP tool scope များအဖြစ်လည်း ချဲ့ထွင်မသွားပါ။
+
+**ထပ်ပေါင်း string များ။** တစ်ခုစီသည် အတိအကျပါဝင်မှုရှိမရှိ စစ်ဆေးမှုဖြစ်ပြီး တစ်ခုစီသည်
+`MANAGEMENT_API_KEY_SCOPES` ၏ အပြင်ဘက်တွင်သာ ရှိနေသည်။
+
+| Scope                          | အောင်မြင်ပါက ခွင့်ပြုသည့်အရာ                                                                                                                                                    |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mcp:connect`                  | Loopback မဟုတ်သော `/api/mcp/` အတွက် LOCAL_ONLY ခြွင်းချက်သာ (`hasMcpConnectOrManageScope`)။ `manage` သို့မဟုတ် `admin` ပါသော key သည် ထိုခြွင်းချက်ကိုလည်း အောင်မြင်သည်။         |
+| `self:usage`                   | ဤ key အတွက် `GET /api/v1/me/status` (`src/app/api/v1/me/status/route.ts`)။ `POST /api/keys` သည် ဖန်တီးချိန်တွင် ဤ scope ကို ထည့်ပေးသည် (`normalizeSelfServiceScopesForCreate`)။ |
+| `self:account-quota`           | ထို status payload အတွင်းရှိ upstream account quota များ (`src/lib/usage/apiKeySelfService.ts`)။ Status route သည် `self:usage` ကို ဆက်လက်လိုအပ်သည်။                             |
+| `policy:bypass-provider-quota` | ဤ key ၏ inference ခေါ်ဆိုမှုများသည် provider-quota policy ကို ကျော်သွားသည် (`src/sse/handlers/chat.ts` ရှိ `hasProviderQuotaBypassScope`)။                                      |
+
+#### ကိုက်ညီမှုစစ်ဆေးခြင်း
+
+Catalog သည် [MCP tool scope များ](#mcp-tool-scopes) အောက်ရှိ ဇယားဖြစ်သည်။
+`src/shared/constants/mcpScopes.ts` ရှိ `MCP_SCOPE_LIST` ကို ထို catalog အဖြစ် မယူဆပါနှင့်။
+၎င်းသည် မူလ type သတ်မှတ်ထားသော subset ဖြစ်သည်။ နောက်ပိုင်း tool များသည် ၎င်းနှင့်အတူ နောက်ထပ် scope များကို ကြေညာထားသည်
+(`read:notion`၊ `read:skills`၊ `read:local-corpus` နှင့် ဇယားရှိ အခြား scope များ)။
+
+`open-sse/mcp-server/scopeEnforcement.ts` ရှိ `evaluateToolScopes` သည်
+လိုအပ်သည့် scope တစ်ခုစီက ခွင့်ပြုထားသော scope တစ်ခုခုနှင့် ကိုက်ညီသည့်အခါ ခေါ်ဆိုမှုကို ခွင့်ပြုသည်-
+
+- `*` သည် လိုအပ်သည့် scope အားလုံးနှင့် ကိုက်ညီသည်။
+- `*` ဖြင့် အဆုံးသတ်သော ခွင့်ပြုထားသည့် scope တစ်ခုသည် ကြယ်ပွင့်မတိုင်မီရှိ prefix ဖြင့် စတင်သော လိုအပ်သည့် scope နှင့် ကိုက်ညီသည်။ `read:*` သည် `read:compression` နှင့် ကိုက်ညီသည်။
+- အခြားခွင့်ပြုထားသည့် scope တစ်ခုစီသည် အတိအကျတူညီသော လိုအပ်သည့် string နှင့်သာ ကိုက်ညီသည်။
+
+Scope များအဖြစ် `["manage"]` ပါရှိသော key တစ်ခုသည် `read:compression` အတွက် `scopeMatches` ကို မအောင်မြင်ပါ။
+`admin`၊ `mcp:connect`၊ `read` နှင့် `write` တို့သည် ခွင့်ပြုထားသော တစ်ခုတည်းသော string များဖြစ်သည့်အခါ တူညီသော ခေါ်ဆိုမှုသည်လည်း မအောင်မြင်ပါ။ နောက်ဆုံးရှိ `*` မှအပ MCP tool scope များအကြား
+အဆင့်ဆင့်ဆက်နွှယ်မှု မရှိပါ။
+
+`OMNIROUTE_MCP_ENFORCE_SCOPES=true` မဟုတ်ပါက enforcement ကို ပိတ်ထားသည် (မူလတန်ဖိုး
+`false`)။ ပိတ်ထားစဉ် `evaluateToolScopes` သည် ခေါ်ဆိုမှုကို ခွင့်ပြုပြီး
+catalog ကို ကျော်သွားသည်။ ဖွင့်ထားစဉ် HTTP သည် Bearer key ၏ `api_keys.scopes` ကို
+`authInfo` အဖြစ် အသုံးပြုသည် ([Key တစ်ခုချင်းအလိုက် HTTP scope ချိတ်ဆက်ခြင်း](#per-key-http-scope-binding-7895) ကို ကြည့်ပါ)။
+မည်သည့် key scope ကိုမျှ မသတ်မှတ်နိုင်ပါက ခွင့်ပြုထားသော set သည် MCP `_meta` သို့ ဆက်လက်စစ်ဆေးပြီးနောက်
+`OMNIROUTE_MCP_SCOPES` သို့ ဆက်လက်စစ်ဆေးသည်။
+
+#### Access-token scope များ
+
+`oma_live_…` token များ (`src/lib/accessTokens/scopes.ts`) တွင် `read`၊ `write`
+သို့မဟုတ် `admin` ပါရှိသည်။ `scopeSatisfies` သည် အဆင့်သတ်မှတ်ချက်တစ်ခုဖြစ်သည်- `admin` သည် `write` နှင့် `read` ကို လွှမ်းခြုံပြီး
+`write` သည် `read` ကို လွှမ်းခြုံသည်။ မသိရှိသော scope များသည် မည်သည့်အရာကိုမျှ မလွှမ်းခြုံပါ။
+
+`evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) သည် ထိုအဆင့်ကို
+`inferRequiredScope` (`src/server/authz/accessScopes.ts`) နှင့် နှိုင်းယှဉ်သည်-
+
+- `GET`၊ `HEAD` နှင့် `OPTIONS` တို့သည် `read` လိုအပ်သည်။
+- အခြား method အားလုံးသည် `write` လိုအပ်သည်။
+- `ADMIN_SCOPE_PREFIXES` အတွင်းရှိ path များသည် method အားလုံးအတွက် `admin` လိုအပ်သည်။ `/api/mcp`
+  သည် ထိုစာရင်းထဲတွင် ပါဝင်သောကြောင့် `write` access token တစ်ခုသည် MCP HTTP
+  မျက်နှာပြင်ကို ခေါ်ဆို၍ မရသေးပါ။
+- `ADMIN_MUTATION_PREFIXES` အတွင်းရှိ path များသည် ပြောင်းလဲမှုများအတွက်သာ `admin` လိုအပ်သည်။
+- `ADMIN_MUTATION_EXACT_PATHS` အတွင်းရှိ path များ (`/api/settings`၊
+  `/api/settings/require-login`) သည် ပြောင်းလဲမှုများအတွက်သာ `admin` လိုအပ်ပြီး ထို
+  အတိအကျ path တွင်သာ သက်ရောက်သည် — အခြား `/api/settings/*` sub-route များသည် `write` ကို ဆက်လက်အသုံးပြုသည်။
+
+`PATCH /api/keys/{id}` သည် ပြောင်းလဲမှုတစ်ခုဖြစ်ပြီး အဆိုပါ admin စာရင်းများတွင် မပါဝင်သောကြောင့်
+`read` token သည် 403 ကို ရရှိပါသည်။
+`Access token scope 'read' သည် မလုံလောက်ပါ၊ 'write' လိုအပ်ပါသည်။`
+`write` သို့မဟုတ် `admin` access token သည် ထို route ၏ လိုအပ်ချက်ကို ဖြည့်ဆည်းပေးပါသည်။ dashboard JWT၊
+loopback CLI machine-id token နှင့် `manage` သို့မဟုတ် `admin` ပါရှိသော API key တို့သည်
+အခြား branch များကို အသုံးပြုကြပြီး ဤ rank ကြောင့် ကန့်သတ်ခြင်းမခံရပါ။
+
+`/api/mcp` အတွက် `scopeSatisfies` ကို ဖြတ်ကျော်သော access token သည်
+စီမံခန့်ခွဲမှု gate ကိုသာ ဖြတ်ကျော်ပြီးဖြစ်ပါသည်။ Tool call များသည် API-key
+scope များနှင့် `scopeMatches` ကို ဆက်လက် run ပါသည်။ access-token rank သည် `scopeMatches` အတွက် input မဟုတ်ပါ။
+
+### MCP tool scope များ
+
+Scope enforcement ကို `open-sse/mcp-server/scopeEnforcement.ts` တွင် ဗဟိုပြုထားပါသည်။
+Tool တစ်ခုစီသည် သီးခြား scope များကို လိုအပ်ပါသည်။
 
 | နယ်ပယ်                | ကိရိယာများ                                                                                                                                                                           |
 | :-------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -332,53 +441,64 @@ Wildcard scope များကို ပံ့ပိုးထားသည်- `r
 
 ### `mcp:connect` — ကန့်သတ်ထားသော route လုပ်ဆောင်နိုင်စွမ်း (#7895)
 
-loopback မဟုတ်သော နေရာမှ HTTP/SSE MCP transport (`/api/mcp/*`) သို့ ရောက်ရှိရန်
+non-loopback မှ HTTP/SSE MCP transport (`/api/mcp/*`) ကို ရောက်ရှိရန်
 `/api/mcp/` LOCAL_ONLY carve-out လိုအပ်သည် (`docs/security/ROUTE_GUARD_TIERS.md` ကို ကြည့်ပါ)။ ယခင်က
-ထို carve-out သည် `manage`/`admin`-scope အပြည့်ရှိသော API key ကိုသာ လက်ခံခဲ့သည် — MCP နှင့်သာ
-ဆက်သွယ်ရန်လိုအပ်သည့် caller တစ်ခုအတွက် ယင်းသည် အလွန်ကျယ်ပြန့်လွန်းသည်။
-`src/shared/constants/managementScopes.ts` သည် ယခု
-`MCP_CONNECT_SCOPE = "mcp:connect"` ကို export လုပ်သည်- ၎င်းသည်
-`src/server/authz/policies/management.ts` ရှိ `/api/mcp/` bypass ကိုသာ ခွင့်ပြုသော
-ထပ်ပေါင်းထားသည့် ကန့်သတ် scope တစ်ခု (`SELF_USAGE_SCOPE` နှင့် တူညီသော ရှေ့သာဓက) ဖြစ်သည် — ၎င်းသည် အခြား
-management-route ဝင်ရောက်အသုံးပြုခွင့်ကို မပေးဘဲ `MANAGEMENT_API_KEY_SCOPES` ထဲမှ ရည်ရွယ်ချက်ရှိရှိ
-ချန်လှပ်ထားသည်။ `manage`/`admin` ပါရှိသော key သည် carve-out ကို မပြောင်းလဲဘဲ ဆက်လက်ဖြတ်သန်းနိုင်သည်။
-`mcp:connect` သည် remote MCP-only caller များအတွက် အခွင့်အရေးနိမ့်သော အစားထိုးရွေးချယ်မှုတစ်ခုဖြစ်ပြီး
-`hasMcpConnectOrManageScope()` မှတစ်ဆင့် စစ်ဆေးသည်။
+ထို carve-out သည် `manage`/`admin`-scope အပြည့်ပါသည့် API key ကိုသာ လက်ခံခဲ့သည် — MCP နှင့်သာ
+ဆက်သွယ်ရန်လိုအပ်သည့် caller အတွက် အလွန်ကျယ်ပြန့်လွန်းသည်။
+ယခု `src/shared/constants/managementScopes.ts` သည် `MCP_CONNECT_SCOPE = "mcp:connect"` ကို
+export လုပ်သည်- ၎င်းသည် (`SELF_USAGE_SCOPE` နှင့် တူညီသော ရှေ့နမူနာအတိုင်း) ထပ်ပေါင်းထားသည့် ကန့်သတ် scope တစ်ခုဖြစ်ပြီး
+`src/server/authz/policies/management.ts` ရှိ `/api/mcp/` bypass ကိုသာ ခွင့်ပြုသည် — အခြား
+management-route ဝင်ရောက်ခွင့်တစ်စုံတစ်ရာကို မပေးဘဲ `MANAGEMENT_API_KEY_SCOPES` ထဲမှ တမင်တကာ
+ဖယ်ထုတ်ထားသည်။ `manage`/`admin` ကိုင်ဆောင်ထားသော key သည် carve-out ကို ယခင်အတိုင်း
+ဆက်လက်ဖြတ်သန်းနိုင်သည်။ `mcp:connect` သည် remote MCP သီးသန့် caller များအတွက် privilege ပိုနိမ့်သော
+အခြားရွေးချယ်စရာဖြစ်ပြီး `hasMcpConnectOrManageScope()` မှတစ်ဆင့် စစ်ဆေးသည်။
 
 ### Key တစ်ခုချင်းစီအလိုက် HTTP scope ချိတ်ဆက်သတ်မှတ်ခြင်း (#7895)
 
-HTTP/SSE မှတစ်ဆင့် `open-sse/mcp-server/httpTransport.ts` သည် ယခု caller ၏ အမှန်တကယ်
-`api_keys.scopes` ကို `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`)
-မှတစ်ဆင့် ရယူဖြေရှင်းပြီး MCP SDK ၏ `transport.handleRequest(req, { authInfo })` သို့ လွှဲပေးသည်။ ထို့ကြောင့်
-tool call တစ်ခုချင်းစီသို့ ရောက်ရှိသော `extra.authInfo.scopes` သည် Bearer key ကိုယ်တိုင်၏ scope များကို
-ထင်ဟပ်စေသည်။ `scopeEnforcement.ts` ၏ `resolveCallerScopeContext()` သည် `_meta` နှင့်
-`OMNIROUTE_MCP_SCOPES` env fallback ထက် `authInfo` ကို ဦးစားပေးထားပြီးဖြစ်သည် — ဤပြောင်းလဲမှုသည်
-HTTP မှတစ်ဆင့် ယခင်က data မဖြည့်သွင်းခဲ့သော ပထမဆုံးနှင့် ဦးစားပေးအမြင့်ဆုံး source ကိုသာ ဖြည့်သွင်းပေးခြင်းဖြစ်သည်။
-API key ကို ရယူဖြေရှင်း၍မရသည့်အခါ (header မရှိခြင်း၊ key မမှန်ခြင်း) `authInfo` သည်
-`undefined` အဖြစ် ဆက်ရှိနေပြီး resolution သည် လက်ရှိ `meta`/env chain သို့ မပြောင်းလဲဘဲ ဆက်လက်ကျသွားသည်။
-ဤအရာသည် `OMNIROUTE_MCP_ENFORCE_SCOPES` ၏ default ကို မပြောင်းလဲပါ — enforcement ကို
-ဆက်လက်၍ အတိအလင်း ဖွင့်ထားရန်လိုအပ်သည်။ ဤပြောင်းလဲမှုသည် ဖွင့်ထားပြီးသည့်အချိန်တွင် per-key path ကို
-ဦးစားပေးစေခြင်းသာ ဖြစ်သည်။ stdio တွင် caller တစ်ဦးချင်း၏ identity မရှိပါ
-(`mcpCallerIdentity.ts` ကို ကြည့်ပါ)၊ ထို့ကြောင့် သက်ရောက်မှုမရှိဘဲ `_meta`/env fallback chain ကိုသာ
-ဆက်လက်အသုံးပြုသည်။
+HTTP/SSE ပေါ်တွင် `open-sse/mcp-server/httpTransport.ts` သည် caller ၏ အမှန်တကယ်
+`api_keys.scopes` ကို `resolveMcpCallerAuthInfo()` (`open-sse/mcp-server/httpAuthContext.ts`) မှတစ်ဆင့်
+ယခု ရှာဖွေသတ်မှတ်ပြီး MCP SDK ၏ `transport.handleRequest(req, { authInfo })` ထံ ပေးပို့သည်။ ထို့ကြောင့်
+tool call တစ်ခုစီထံ ရောက်ရှိသော `extra.authInfo.scopes` သည် Bearer key ကိုယ်တိုင်၏ scope များကို
+ထင်ဟပ်စေသည်။ `scopeEnforcement.ts` ရှိ `resolveCallerScopeContext()` သည် `_meta` နှင့်
+`OMNIROUTE_MCP_SCOPES` env fallback ထက် `authInfo` ကို ဦးစားပေးထားပြီးသားဖြစ်သည် — ဤပြောင်းလဲမှုသည်
+HTTP ပေါ်တွင် ယခင်က မဖြည့်သွင်းခဲ့သော ပထမဆုံးနှင့် ဦးစားပေးအမြင့်ဆုံး source ကိုသာ ဖြည့်သွင်းပေးခြင်းဖြစ်သည်။
+API key တစ်ခုမျှ ရှာဖွေမရသည့်အခါ (header မရှိခြင်း၊ key မမှန်ကန်ခြင်း) `authInfo` သည် `undefined`
+အဖြစ် ဆက်ရှိနေပြီး resolution သည် ရှိပြီးသား `meta`/env chain သို့ ယခင်အတိုင်း ဆက်လက် fallback လုပ်သည်။
+stdio တွင် caller တစ်ဦးချင်းစီအလိုက် identity မရှိပါ (`mcpCallerIdentity.ts` ကို ကြည့်ပါ)၊ ထို့ကြောင့်
+သက်ရောက်မှုမရှိဘဲ `_meta`/env fallback chain ကို ဆက်လက်အသုံးပြုသည်။
+
+**ကန့်သတ် scope ပါသော HTTP/SSE caller များအတွက် `OMNIROUTE_MCP_ENFORCE_SCOPES` မည်သို့ပင်ဖြစ်စေ
+enforcement ကို အတင်းဖွင့်ထားသည်။** `OMNIROUTE_MCP_ENFORCE_SCOPES` ၏ default တန်ဖိုး `false` သည်
+scope သတ်မှတ်စရာ caller တစ်ဦးချင်းစီ၏ identity မရှိသော local/stdio single-operator flow အတွက်သာ
+လုံခြုံသည်။ `resolveCallerScopeContext()` မှ
+`source === "authInfo"` (ဆိုလိုသည်မှာ key တစ်ခုချင်းစီအလိုက် အမှန်တကယ် HTTP Authorization header ဖြစ်ပြီး HTTP/SSE အတွက်သာ) ကို resolve လုပ်နိုင်ပြီး ထို
+key တွင် `manage`/`admin` scope အပြည့် မရှိသည့်အခါတိုင်း
+`open-sse/mcp-server/server.ts::withScopeEnforcement()` သည် tool တစ်ခုချင်းစီအလိုက် scope
+enforcement ကို ခြွင်းချက်မရှိ ဖွင့်ပေးသည် (`scopeEnforcement.ts` ရှိ `shouldForceScopeEnforcement()`)။
+ဤအရာက အထက်တွင် `/api/mcp/` LOCAL_ONLY carve-out မှလွဲ၍ မည်သည့်အရာကိုမျှ ခွင့်မပြုကြောင်း
+မှတ်တမ်းတင်ထားသည့် ကန့်သတ် `mcp:connect` bypass scope သာ ကိုင်ဆောင်သော key တစ်ခုသည် operator က
+remote/non-loopback MCP ဝင်ရောက်ခွင့်ကို ဖွင့်ပြီးနောက် `OMNIROUTE_MCP_ENFORCE_SCOPES` ကို default အနေဖြင့်
+`false` ဖြင့် ဖြန့်ချိထားခြင်းကြောင့် MCP tool အားလုံးကို ခေါ်ယူနိုင်သွားမည့် ဟာကွက်ကို ပိတ်ပေးသည်။
+HTTP ပေါ်ရှိ `manage`/`admin` key အပြည့်နှင့် stdio/local caller အားလုံးအတွက်မူ ရှိပြီးသား
+`OMNIROUTE_MCP_ENFORCE_SCOPES` ဖြင့် ထိန်းချုပ်သည့် အပြုအမူသည် မပြောင်းလဲဘဲ ဆက်ရှိနေသည်။
 
 ---
 
 ## ပတ်ဝန်းကျင် ကိန်းရှင်များ
 
-| ကိန်းရှင်                               | မူလသတ်မှတ်ချက်                    | ရည်ရွယ်ချက်                                                                                                                                    |
-| :-------------------------------------- | :-------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`          | အတွင်းပိုင်း OmniRoute API များကို ခေါ်ဆိုသည့်အခါ MCP ဆာဗာက အသုံးပြုသည့် အခြေခံ URL                                                            |
-| `OMNIROUTE_API_KEY`                     | (ဗလာ)                             | အတွင်းပိုင်း API ခေါ်ဆိုမှုများသို့ `Authorization: Bearer` အဖြစ် လက်ဆင့်ကမ်းပေးသည့် API သော့                                                  |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (`"true"` သာ ဖွင့်ပေးသည်) | ဖွင့်ထားသည့်အခါ scope များ မရှိပါက ကိရိယာခေါ်ဆိုမှုများကို ငြင်းပယ်ပြီး စာရင်းစစ်မှတ်တမ်းတွင် `scope_denied:<reason>` ကို မှတ်တမ်းတင်သည်       |
-| `OMNIROUTE_MCP_SCOPES`                  | (ဗလာ)                             | မူလအားဖြင့် "ရရှိနိုင်သည်" ဟု ယူဆသော scope များ၏ ကော်မာခြား allowlist (ခေါ်ဆိုသူက ၎င်း၏ကိုယ်ပိုင် scope များကို မပေးသည့်အခါ အသုံးပြုသည်)       |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (မသတ်မှတ်ထား = ဖွင့်ထား)          | `0/false/off/no` ဟု သတ်မှတ်ထားသည့်အခါ မှတ်ပုံတင်ချိန်တွင် MCP ဖော်ပြချက် ချုံ့ခြင်းကို ပိတ်သည်                                                 |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (မသတ်မှတ်ထား = ဖွင့်ထား)          | အထက်ပါ အဖွင့်/အပိတ် ဆက်တင်အတွက် အခြားအမည်                                                                                                      |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                           | အတွင်းပိုင်း စီမံခန့်ခွဲမှုဆိုင်ရာ ဖတ်ရှုမှုများ (ကျန်းမာရေး၊ ခံနိုင်ရည်၊ ပေါင်းစပ်မှုများ၊ quota၊ အသုံးပြုမှု) အတွက် ပယ်ဖျက်ချိန် ကန့်သတ်ချက် |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                           | ပံ့ပိုးသူကို စောင့်ဆိုင်းရသည့် အဆင့်များ (`route_request`, `web_search`, `web_fetch`) အတွက် ပယ်ဖျက်ချိန် ကန့်သတ်ချက်                           |
-| `MCP_TOOL_DENY`                         | (မသတ်မှတ်ထား = စစ်ထုတ်မှုမရှိ)    | `tools/list` မှ ဖယ်ရှားရန် ကော်မာခြား ကိရိယာအမည်များ (ကိရိယာအရေအတွက် လျှော့ချခြင်း — အောက်တွင် ကြည့်ပါ)                                        |
-| `MCP_TOOL_ALLOW`                        | (မသတ်မှတ်ထား = စစ်ထုတ်မှုမရှိ)    | သီးသန့်ထားရှိမည့် ကော်မာခြား ကိရိယာအမည်များ (allow-list စနစ် — အောက်တွင် ကြည့်ပါ)                                                              |
-| `DATA_DIR`                              | `~/.omniroute`                    | Heartbeat ဖိုင်ကို `${DATA_DIR}/runtime/mcp-heartbeat.json` သို့ ရေးသားသည်                                                                     |
+| ကိန်းရှင်                               | မူလတန်ဖိုး                         | ရည်ရွယ်ချက်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| :-------------------------------------- | :--------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`           | OmniRoute အတွင်းပိုင်း API များကို ခေါ်ဆိုသည့်အခါ MCP ဆာဗာက အသုံးပြုသော အခြေခံ URL                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `OMNIROUTE_API_KEY`                     | (ဗလာ)                              | အတွင်းပိုင်း API ခေါ်ဆိုမှုများသို့ `Authorization: Bearer` အဖြစ် လွှဲပို့သော API key                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (`"true"` သာ ဖွင့်ပေးသည်)  | ဖွင့်ထားသည့်အခါ လိုအပ်သော scope များ မရှိပါက tool ခေါ်ဆိုမှုများကို ငြင်းပယ်ပြီး audit log တွင် `scope_denied:<reason>` ဟု မှတ်တမ်းတင်သည်။ ထို့အပြင် per-key Authorization header မှ သတ်မှတ်ဖော်ထုတ်ထားသော (`source === "authInfo"`) HTTP/SSE ခေါ်ဆိုသူတစ်ဦးတွင် အပြည့်အဝ `manage`/`admin` scope မရှိပါက ဤ flag နှင့်မသက်ဆိုင်ဘဲ စစ်ဆေးမှုကို မဖြစ်မနေ ဖွင့်ထားသည် — ဥပမာ ကျဉ်းမြောင်းသော `mcp:connect` bypass scope သာရှိသည့် key တစ်ခု — ထို့ကြောင့် ဤမူလသတ်မှတ်ချက်သည် local/stdio တစ်ဦးတည်း စီမံအသုံးပြုသည့် စီးဆင်းမှုအတွက်သာ လုံခြုံပြီး အဝေးမှ non-loopback ဝင်ရောက်မှုအတွက် လုံးဝ မလုံခြုံပါ |
+| `OMNIROUTE_MCP_SCOPES`                  | (ဗလာ)                              | မူလအားဖြင့် "ရရှိနိုင်သည်" ဟု ယူဆသည့် scope များ၏ ကော်မာဖြင့် ခွဲထားသော allowlist (ခေါ်ဆိုသူက ၎င်း၏ကိုယ်ပိုင် scope များကို မပေးသည့်အခါ အသုံးပြုသည်)                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (မသတ်မှတ်ထားပါ = ဖွင့်ထားသည်)      | `0/false/off/no` ဟု သတ်မှတ်ထားသည့်အခါ မှတ်ပုံတင်ချိန်တွင် MCP ဖော်ပြချက်ချုံ့ခြင်းကို ပိတ်သည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (မသတ်မှတ်ထားပါ = ဖွင့်ထားသည်)      | အထက်ပါ toggle နှင့် တူညီသော အစားထိုး alias                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                            | အတွင်းပိုင်း စီမံခန့်ခွဲမှုဆိုင်ရာ ဖတ်ရှုမှုများ (ကျန်းမာရေး၊ ခံနိုင်ရည်၊ ပေါင်းစပ်မှုများ၊ quota၊ အသုံးပြုမှု) အတွက် ရပ်ဆိုင်းသည့် အချိန်ကန့်သတ်ချက်                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                            | provider တစ်ခုကို စောင့်ဆိုင်းရသော hop များ (`route_request`, `web_search`, `web_fetch`) အတွက် ရပ်ဆိုင်းသည့် အချိန်ကန့်သတ်ချက်                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `MCP_TOOL_DENY`                         | (မသတ်မှတ်ထားပါ = filter မရှိပါ)    | `tools/list` မှ ဖယ်ရှားရန် ကော်မာဖြင့် ခွဲထားသော tool အမည်များ (tool အရေအတွက် လျှော့ချခြင်း — အောက်တွင် ကြည့်ပါ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `MCP_TOOL_ALLOW`                        | (မသတ်မှတ်ထားပါ = စစ်ထုတ်မှုမရှိပါ) | သီးသန့်ထားရှိမည့် ကော်မာဖြင့်ခွဲထားသော tool အမည်များ (ခွင့်ပြုစာရင်းမုဒ် — အောက်တွင်ကြည့်ပါ)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `DATA_DIR`                              | `~/.omniroute`                     | Heartbeat ဖိုင်ကို `${DATA_DIR}/runtime/mcp-heartbeat.json` သို့ ရေးသားပါသည်                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 
 ---
 

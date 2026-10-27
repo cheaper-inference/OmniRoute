@@ -12,10 +12,13 @@
 
 import { resolveScoresAs } from "@omniroute/open-sse/services/autoCombo/scoresAs.ts";
 
+import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
+
 import { isArenaEloSyncEnabled } from "@/shared/utils/featureFlags";
 
 import { getDbInstance } from "./db/core";
 import { backupDbFile } from "./db/backup";
+import { fetchHuggingFaceLeaderboards } from "./arenaEloHfSource";
 import {
   applyArenaEloRefresh,
   deleteModelIntelligenceBySource,
@@ -55,6 +58,8 @@ export interface ArenaLeaderboardData {
     leaderboard: string;
     /** Total number of models in this leaderboard. */
     model_count: number;
+    /** Publish date of the snapshot, when the source reports one (HF fallback). */
+    dataset_date?: string;
   };
   /** Ranked model entries. */
   models: ArenaModelEntry[];
@@ -97,6 +102,14 @@ export interface SyncStatus {
   intervalMs: number;
   /** Active data sources. */
   sources: string[];
+  /** Message of the last failed sync (cleared on success), or null. */
+  lastError: string | null;
+  /** ISO timestamp of the last failed sync (cleared on success), or null. */
+  lastFailedAt: string | null;
+  /** Upstream that served the last successful sync, or null. */
+  activeSource: "wulong" | "huggingface" | null;
+  /** Publish date of the last synced snapshot (HF fallback only), or null. */
+  datasetDate: string | null;
 }
 
 // ─── Configuration ───────────────────────────────────────
@@ -211,6 +224,42 @@ function clearLastFailedAt(): void {
   }
 }
 
+function readKv(key: string): string | null {
+  try {
+    const row = getDbInstance().prepare(KV_READ_SQL).get("arena_elo", key) as
+      { value: string } | undefined;
+    return row?.value || null;
+  } catch {
+    return null;
+  }
+}
+
+function writeKv(key: string, value: string | null): void {
+  try {
+    const db = getDbInstance();
+    if (value === null) {
+      db.prepare(`DELETE FROM key_value WHERE namespace = ? AND key = ?`).run("arena_elo", key);
+    } else {
+      db.prepare(KV_WRITE_SQL).run("arena_elo", key, value);
+    }
+  } catch {
+    // kv problems must never break the sync itself
+  }
+}
+
+/** Which upstream served the most recent fetch (set by fetchArenaLeaderboards). */
+let lastFetchSource: "wulong" | "huggingface" = "wulong";
+
+function recordSyncSuccess(leaderboards: ArenaLeaderboardMap): void {
+  const datasetDate =
+    lastFetchSource === "huggingface"
+      ? (Object.values(leaderboards).find((b) => b.meta?.dataset_date)?.meta.dataset_date ?? null)
+      : null;
+  writeKv("lastError", null);
+  writeKv("activeSource", lastFetchSource);
+  writeKv("datasetDate", datasetDate);
+}
+
 function getEffectiveArenaEloSyncEnabled(): boolean {
   try {
     return isArenaEloSyncEnabled();
@@ -284,7 +333,7 @@ export function resetArenaEloFetchFailureStreaksForTests(): void {
  * @returns Map of leaderboard category to its data.
  * @throws If all category fetches fail (individual failures are logged and skipped).
  */
-export async function fetchArenaLeaderboards(): Promise<ArenaLeaderboardMap> {
+async function fetchPrimaryArenaLeaderboards(): Promise<ArenaLeaderboardMap> {
   const result: ArenaLeaderboardMap = {};
   const errors: string[] = [];
 
@@ -295,8 +344,11 @@ export async function fetchArenaLeaderboards(): Promise<ArenaLeaderboardMap> {
         signal: AbortSignal.timeout(30000),
       });
       if (!response.ok) {
+        const body = (await response.text().catch(() => "")).trim().slice(0, 100);
         throw new Error(
-          `Arena API fetch failed for "${category}" [${response.status}]: ${response.statusText}`
+          `Arena API fetch failed for "${category}" [${response.status}]: ${
+            response.statusText || sanitizeErrorMessage(body)
+          }`
         );
       }
       const text = await response.text();
@@ -326,10 +378,42 @@ export async function fetchArenaLeaderboards(): Promise<ArenaLeaderboardMap> {
   await Promise.all(fetches);
 
   if (Object.keys(result).length === 0) {
-    throw new Error(`All Arena leaderboard fetches failed: ${errors.join("; ")}`);
+    throw new Error(`All Arena leaderboard fetches failed: ${errors.join("; ") || "no models"}`);
   }
 
   return result;
+}
+
+/**
+ * Fetch leaderboards: primary scraper API first, then (only when it yields no usable
+ * board) the official lmarena-ai Hugging Face dataset (#17922). Sources are never
+ * blended in one refresh.
+ */
+export async function fetchArenaLeaderboards(): Promise<ArenaLeaderboardMap> {
+  let primaryEmpty: ArenaLeaderboardMap | null = null;
+  try {
+    const boards = await fetchPrimaryArenaLeaderboards();
+    lastFetchSource = "wulong";
+    const usable = Object.values(boards).some(
+      (b) => Array.isArray(b?.models) && b.models.length > 0
+    );
+    if (usable) return boards;
+    primaryEmpty = boards;
+    throw new Error("Arena API returned only empty leaderboards");
+  } catch (primaryErr) {
+    try {
+      const boards = await fetchHuggingFaceLeaderboards();
+      lastFetchSource = "huggingface";
+      console.warn(
+        `[ARENA_ELO_SYNC] Primary source unusable, served from Hugging Face fallback: ${getErrorMessage(primaryErr)}`
+      );
+      return boards;
+    } catch (fallbackErr) {
+      // Primary answered (just empty): keep the old "0 entries" contract, no failure.
+      if (primaryEmpty) return primaryEmpty;
+      throw new Error(`${getErrorMessage(primaryErr)} | ${getErrorMessage(fallbackErr)}`);
+    }
+  }
 }
 
 // ─── Core: Transform ─────────────────────────────────────
@@ -532,6 +616,7 @@ export async function syncArenaElo(dryRun = false): Promise<SyncResult> {
         // Atomic replace: upsert all + prune not-in-refreshed-set in one tx.
         applyArenaEloRefresh(entries);
         clearLastFailedAt();
+        recordSyncSuccess(leaderboards);
       } catch (err) {
         const message = getErrorMessage(err);
         console.warn(`[ARENA_ELO_SYNC] Failed to apply intelligence refresh: ${message}`);
@@ -566,6 +651,7 @@ export async function syncArenaElo(dryRun = false): Promise<SyncResult> {
       // Persist the failure so restarts/periodic ticks back off instead of
       // retrying a dead upstream in a loop.
       writeLastFailedAt(Date.now());
+      writeKv("lastError", sanitizeErrorMessage(message).slice(0, 500));
     }
     return {
       success: false,
@@ -666,9 +752,22 @@ export function stopArenaEloSync(): void {
  */
 export function getArenaEloSyncStatus(): SyncStatus {
   const enabled = getEffectiveArenaEloSyncEnabled();
+  // Stored synced_at comes from SQLite datetime('now'): UTC "YYYY-MM-DD HH:MM:SS"
+  // without a timezone suffix. Date.parse reads that as local time, which
+  // shifts the served date under non-UTC TZ, so normalize to ISO UTC here.
+  let persisted: string | null = null;
+  try {
+    const persistedRaw = getLatestSyncedAt("arena_elo");
+    const persistedMs = persistedRaw
+      ? Date.parse(persistedRaw.includes("T") ? persistedRaw : `${persistedRaw.replace(" ", "T")}Z`)
+      : NaN;
+    persisted = Number.isFinite(persistedMs) ? new Date(persistedMs).toISOString() : null;
+  } catch (error) {
+    console.warn(`[ARENA_ELO_SYNC] Failed to read persisted sync time: ${getErrorMessage(error)}`);
+  }
   return {
     enabled,
-    lastSync: lastSyncTime,
+    lastSync: persisted ?? lastSyncTime,
     lastSyncModelCount,
     nextSync:
       syncTimer && lastSyncTime
@@ -676,6 +775,15 @@ export function getArenaEloSyncStatus(): SyncStatus {
         : null,
     intervalMs: activeSyncIntervalMs,
     sources: ["arena_elo"],
+    lastError: readKv("lastError"),
+    lastFailedAt: readKv("lastFailedAt"),
+    activeSource:
+      readKv("activeSource") === "huggingface"
+        ? "huggingface"
+        : readKv("activeSource") === "wulong"
+          ? "wulong"
+          : null,
+    datasetDate: readKv("datasetDate"),
   };
 }
 

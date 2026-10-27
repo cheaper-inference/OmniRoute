@@ -2,6 +2,7 @@
 
 import { Suspense } from "react";
 import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
 import RequestTimeline from "@/shared/components/RequestTimeline";
 
 function LogsTimelinePageContent() {
@@ -16,11 +17,12 @@ function LogsTimelinePageContent() {
 }
 
 export default function LogsTimelinePage() {
+  const t = useTranslations("logs");
   return (
     <Suspense
       fallback={
         <div className="flex items-center justify-center py-12 text-text-muted text-sm">
-          Loading timeline...
+          {t("loading")}
         </div>
       }
     >

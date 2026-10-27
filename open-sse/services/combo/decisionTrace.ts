@@ -4,7 +4,8 @@
  * Priority combos can be impossible to audit after a mixed fallback: dispatched
  * attempts are persisted in call_logs, but candidates excluded before dispatch
  * (circuit open, provider cooldown, model lockout, quota cutoff, availability,
- * credential gate, concurrency cap, admission lane, predictive TTFT) leave no
+ * model not in the live catalog, credential gate, concurrency cap, admission
+ * lane, predictive TTFT) leave no
  * correlated decision record. This module records one ordered, allowlisted
  * decision per target per invocation so operators can reconstruct what the
  * chain actually did.
@@ -14,9 +15,17 @@
  * reason, timestamps, terminal status. Never prompts, request/response bodies,
  * headers, credentials, account ids, or raw upstream error strings.
  *
+ * An unknown skip reason is a caller defect: it is logged and the decision is
+ * recorded without a reason, so diagnostic tracing never fails the observed
+ * request.
+ *
  * Retention: bounded in-memory (TTL + LRU cap) — see TRACE_TTL_MS/MAX_TRACES.
  */
 import { randomUUID } from "node:crypto";
+
+import { logger } from "../../utils/logger.ts";
+
+const log = logger("COMBO");
 
 export const COMBO_SKIP_REASONS = [
   "circuit_open",
@@ -26,10 +35,15 @@ export const COMBO_SKIP_REASONS = [
   "model_lockout",
   "quota_cutoff",
   "availability",
+  "model_not_in_catalog",
   "credential_gate",
   "concurrency_cap",
   "admission_lane",
   "predictive_ttft",
+  "auto_resilience_filter",
+  "auto_strict_zero_cost",
+  "auto_constraint_filter",
+  "cliproxy_management_health",
 ] as const;
 
 export type ComboSkipReason = (typeof COMBO_SKIP_REASONS)[number];
@@ -52,18 +66,56 @@ export interface ComboTraceEntry {
   detail?: string;
 }
 
+export const AUTO_EVALUATION_STAGES = [
+  "resilience",
+  "paid_only",
+  "model_lockout",
+  "model_exposure",
+  "strict_zero_cost",
+  "tos",
+  "candidate_override",
+  "category_tier",
+  "subscription_ladder",
+] as const;
+
+export type AutoEvaluationStage = (typeof AUTO_EVALUATION_STAGES)[number];
+
+export interface AutoEvaluationCandidate {
+  target: string;
+  provider: string;
+  model: string;
+}
+
+export interface AutoEvaluationTransition {
+  target: string;
+  stage: AutoEvaluationStage;
+  outcome: "excluded" | "survived";
+  reason?: ComboSkipReason;
+  detail?: string;
+  ts: number;
+}
+
+export interface AutoEvaluationTrace {
+  schemaVersion: 1;
+  stages: AutoEvaluationStage[];
+  candidates: AutoEvaluationCandidate[];
+  transitions: AutoEvaluationTransition[];
+}
+
 export interface ComboTrace {
   invocationId: string;
   createdAt: number;
   strategy: string | null;
   comboName: string | null;
   decisions: ComboTraceEntry[];
+  autoEvaluation: AutoEvaluationTrace | null;
   terminal: { status: number | null; errorClass: string | null } | null;
 }
 
 const TRACE_TTL_MS = 30 * 60 * 1000;
 const MAX_TRACES = 2000;
 const traces = new Map<string, ComboTrace>();
+let forceAutoEvaluationWriteFailureForTests = false;
 
 export function createInvocationId(): string {
   return `combo-${randomUUID()}`;
@@ -76,6 +128,75 @@ function isComboSkipReason(value: unknown): value is ComboSkipReason {
 /** Test hook: clear the in-memory store. */
 export function resetComboTraceStore(): void {
   traces.clear();
+  forceAutoEvaluationWriteFailureForTests = false;
+}
+
+/** Test hook: force best-effort Auto evaluation writes to fail. */
+export function setAutoEvaluationWriteFailureForTests(enabled: boolean): void {
+  forceAutoEvaluationWriteFailureForTests = enabled;
+}
+
+function bestEffortAutoEvaluationWrite(write: () => void): void {
+  try {
+    if (forceAutoEvaluationWriteFailureForTests) {
+      throw new Error("forced Auto evaluation trace write failure");
+    }
+    write();
+  } catch {
+    // Diagnostic tracing is deliberately fail-open and must never affect routing.
+  }
+}
+
+export function startAutoEvaluationTrace(invocationId: string): void {
+  bestEffortAutoEvaluationWrite(() => {
+    const trace = traces.get(invocationId);
+    if (!trace || trace.autoEvaluation) return;
+    trace.autoEvaluation = {
+      schemaVersion: 1,
+      stages: [...AUTO_EVALUATION_STAGES],
+      candidates: [],
+      transitions: [],
+    };
+  });
+}
+
+function autoCandidateKey(candidate: AutoEvaluationCandidate): string {
+  return [candidate.target, candidate.provider, candidate.model].join("\u0000");
+}
+
+export function recordAutoEvaluationCandidate(
+  invocationId: string,
+  candidate: AutoEvaluationCandidate
+): void {
+  bestEffortAutoEvaluationWrite(() => {
+    const evaluation = traces.get(invocationId)?.autoEvaluation;
+    if (!evaluation) return;
+    const key = autoCandidateKey(candidate);
+    if (evaluation.candidates.some((existing) => autoCandidateKey(existing) === key)) return;
+    evaluation.candidates.push({ ...candidate });
+  });
+}
+
+export function recordAutoEvaluationTransition(
+  invocationId: string,
+  transition: Omit<AutoEvaluationTransition, "ts">
+): void {
+  bestEffortAutoEvaluationWrite(() => {
+    const evaluation = traces.get(invocationId)?.autoEvaluation;
+    if (!evaluation) return;
+    if (transition.reason !== undefined && !isComboSkipReason(transition.reason)) return;
+    if (
+      evaluation.transitions.some(
+        (existing) =>
+          existing.target === transition.target &&
+          existing.stage === transition.stage &&
+          existing.outcome === transition.outcome
+      )
+    ) {
+      return;
+    }
+    evaluation.transitions.push({ ...transition, ts: Date.now() });
+  });
 }
 
 export function startComboTrace(
@@ -106,6 +227,7 @@ export function startComboTrace(
       strategy: meta.strategy ?? null,
       comboName: meta.comboName ?? null,
       decisions: [],
+      autoEvaluation: null,
       terminal: null,
     });
   }
@@ -117,16 +239,19 @@ export function recordComboDecision(
 ): void {
   const trace = traces.get(invocationId);
   if (!trace) return;
-  if (entry.reason !== undefined && !isComboSkipReason(entry.reason)) {
-    throw new Error(
-      `invalid combo skip reason: ${String(entry.reason)} (allowlist: ${COMBO_SKIP_REASONS.join(", ")})`
+  const reason = isComboSkipReason(entry.reason) ? entry.reason : undefined;
+  if (entry.reason !== undefined && reason === undefined) {
+    // Diagnostics are fail-open by contract (see the module header): an unknown
+    // skip reason never fails the observed request.
+    log.warn(
+      `unknown combo skip reason ${String(entry.reason)} (decision recorded without a reason; allowlist: ${COMBO_SKIP_REASONS.join(", ")})`
     );
   }
   trace.decisions.push({
     step: entry.step,
     target: entry.target,
     decision: entry.decision,
-    reason: entry.reason as ComboSkipReason | undefined,
+    reason,
     ts: Date.now(),
     detail: entry.detail,
   });

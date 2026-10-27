@@ -75,7 +75,7 @@ async function tryI18nFallback(slug: string[], locale: string): Promise<string |
 export default async function Page(props: { params: Promise<{ slug: string[] }> }) {
   const params = await props.params;
   const { source } = await import("../../../lib/source");
-  const [{ DocsPage, DocsBody }, defaultMdxComponents] = await Promise.all([
+  const [{ DocsPage, DocsBody }, { default: defaultMdxComponents }] = await Promise.all([
     import("fumadocs-ui/layouts/docs/page"),
     import("fumadocs-ui/mdx"),
   ]);

@@ -435,7 +435,7 @@ export function getHistory(apiKeyId: string, limit: number): TokenLedgerEntry[] 
     .prepare(
       `SELECT * FROM token_ledger
      WHERE from_api_key_id = ? OR to_api_key_id = ?
-     ORDER BY created_at DESC LIMIT ?`
+     ORDER BY created_at DESC, id DESC LIMIT ?`
     )
     .all(apiKeyId, apiKeyId, limit) as Array<{
     id: number;

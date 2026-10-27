@@ -6,7 +6,7 @@
  */
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
-import { describe, it, expect, afterEach, vi } from "vitest";
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vitest";
 
 vi.mock("next-intl", () => ({
   useTranslations: () => (k: string, v?: Record<string, unknown>) =>
@@ -22,6 +22,16 @@ vi.mock("@/app/(dashboard)/dashboard/orchestration/drawer/OrchestrationDrawer", 
 }));
 
 import { HistoryTab } from "@/app/(dashboard)/dashboard/orchestration/tabs/HistoryTab";
+
+// The history grid is the kit Table (KEA-7886), whose persistent scrollbar measures the table
+// with ResizeObserver — jsdom does not implement it.
+beforeAll(() => {
+  globalThis.ResizeObserver ??= class {
+    observe() {}
+    unobserve() {}
+    disconnect() {}
+  } as unknown as typeof ResizeObserver;
+});
 
 function render(el: React.ReactElement) {
   const c = document.createElement("div");
@@ -50,12 +60,18 @@ afterEach(() => {
   document.body.innerHTML = "";
   drawerCalls.length = 0;
   vi.unstubAllGlobals();
+  vi.useRealTimers();
 });
 
 const NOW = Date.parse("2026-09-01T12:00:00Z");
+beforeEach(() => {
+  // Fixture timestamps and the component's sliding window share one clock.
+  // Fake Date only: React scheduling and asynchronous fetch flushing stay real.
+  vi.useFakeTimers({ toFake: ["Date"] });
+  vi.setSystemTime(NOW);
+});
 const hoursAgo = (h: number) => new Date(NOW - h * 60 * 60 * 1000).toISOString();
-/** Relative to the REAL clock — for assertions that must hold inside the 1d window too
- * (the component derives its range from `Date.now()`, not from the fixed `NOW` above). */
+/** Relative to the controlled current clock, including explicit time advances. */
 const realHoursAgo = (h: number) => new Date(Date.now() - h * 60 * 60 * 1000).toISOString();
 
 function mockFetch(opts: {
@@ -267,6 +283,8 @@ describe("HistoryTab", () => {
     expect((drawerCalls.at(-1) as { node: unknown }).node).toBeTruthy();
     const callsBefore = fetchMock.mock.calls.length;
 
+    // Completing an action occurs after mount; a new sampled time refreshes the range.
+    vi.setSystemTime(NOW + 1000);
     await act(async () => {
       (drawerCalls.at(-1) as { onActionDone: () => void }).onActionDone();
     });
@@ -414,8 +432,8 @@ describe("HistoryTab", () => {
       // without leaving/re-entering compare mode.
       //
       // `buildHistoryGrid` (historyModel.ts) buckets purely client-side by `createdAt` against
-      // `range`, which is derived from the REAL `Date.now()` (not the fixed `NOW` constant this
-      // file otherwise uses) — an item outside the requested window is dropped from the grid
+      // `range`, which is derived from the controlled `Date.now()` — an item outside the
+      // requested window is dropped from the grid
       // entirely, row and all. Both fixtures below use `realHoursAgo` so they survive the
       // switch to the 1d preset too; the assertion is about the ring/selection state, not about
       // which items the grid happens to still show.

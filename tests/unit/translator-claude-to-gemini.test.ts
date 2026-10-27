@@ -39,8 +39,150 @@ function getFunctionResponse(part: unknown) {
   assert.ok(part && typeof part === "object", "expected Gemini part");
   const functionResponse = (part as UnknownRecord).functionResponse;
   assert.ok(functionResponse && typeof functionResponse === "object", "expected functionResponse");
-  return functionResponse as { name: string };
+  return functionResponse as UnknownRecord & {
+    name: string;
+    response: { result: string };
+  };
 }
+
+type TestGeminiTurn = { role: string; parts: unknown[] };
+
+function translateToolResultTurn(
+  toolUseId: string,
+  trailingBlocks: UnknownRecord[] = [],
+  trailingMessages: Array<{ role: string; content: string }> = [],
+  toolResultContent: unknown = "found"
+): TestGeminiTurn {
+  const namespace = `conn-${toolUseId}`;
+  storeGeminiThoughtSignature(
+    buildGeminiThoughtSignatureKey(namespace, toolUseId),
+    "SIG_TOOL_RESULT"
+  );
+
+  const result = claudeToGeminiRequest(
+    "gemini-3.8-flash",
+    {
+      messages: [
+        { role: "user", content: "run the tool" },
+        {
+          role: "assistant",
+          content: [{ type: "tool_use", id: toolUseId, name: "lookup", input: {} }],
+        },
+        {
+          role: "user",
+          content: [
+            { type: "tool_result", tool_use_id: toolUseId, content: toolResultContent },
+            ...trailingBlocks,
+          ],
+        },
+        ...trailingMessages,
+      ],
+    },
+    false,
+    { _signatureNamespace: namespace, _provider: "vertex" }
+  );
+
+  return result.contents.at(-1)!;
+}
+
+function assertFunctionResponseTurn(turn: TestGeminiTurn, expectedResult: string) {
+  assert.equal(turn.role, "user");
+  assert.equal(turn.parts.length, 1);
+  assert.equal(getFunctionResponse(turn.parts[0]).response.result, expectedResult);
+}
+
+test("Claude -> Gemini keeps text after tool_result inside the function response", () => {
+  const turn = translateToolResultTurn("tu_trailing_text", [
+    { type: "text", text: "first attachment note" },
+    { type: "text", text: "second attachment note" },
+  ]);
+
+  assertFunctionResponseTurn(turn, "found\nfirst attachment note\nsecond attachment note");
+});
+
+test("Claude -> Gemini keeps trailing text with an image-bearing tool result", () => {
+  const turn = translateToolResultTurn(
+    "tu_image_trailing_text",
+    [{ type: "text", text: "attachment note" }],
+    [],
+    [
+      {
+        type: "image",
+        source: { type: "base64", media_type: "image/png", data: "aW1hZ2U=" },
+      },
+    ]
+  );
+
+  assert.equal(turn.role, "user");
+  assert.equal(turn.parts.length, 2);
+  assert.equal(
+    getFunctionResponse(turn.parts[0]).response.result,
+    "[tool returned an image; see attached]\nattachment note"
+  );
+  assert.deepEqual(turn.parts[1], {
+    inlineData: { mimeType: "image/png", data: "aW1hZ2U=" },
+  });
+});
+
+test("Claude -> Gemini attaches text between parallel tool results to the preceding response", () => {
+  const namespace = "conn-tu_parallel_text";
+  for (const toolUseId of ["tu_parallel_first", "tu_parallel_second"]) {
+    storeGeminiThoughtSignature(
+      buildGeminiThoughtSignatureKey(namespace, toolUseId),
+      `SIG_${toolUseId}`
+    );
+  }
+
+  const result = claudeToGeminiRequest(
+    "gemini-3.8-flash",
+    {
+      messages: [
+        { role: "user", content: "run the tools" },
+        {
+          role: "assistant",
+          content: [
+            { type: "tool_use", id: "tu_parallel_first", name: "first", input: {} },
+            { type: "tool_use", id: "tu_parallel_second", name: "second", input: {} },
+          ],
+        },
+        {
+          role: "user",
+          content: [
+            { type: "tool_result", tool_use_id: "tu_parallel_first", content: "first result" },
+            { type: "text", text: "note between results" },
+            { type: "tool_result", tool_use_id: "tu_parallel_second", content: "second result" },
+          ],
+        },
+      ],
+    },
+    false,
+    { _signatureNamespace: namespace, _provider: "vertex" }
+  );
+
+  const turn = result.contents.at(-1)!;
+  assert.equal(turn.parts.length, 2);
+  assert.equal(
+    getFunctionResponse(turn.parts[0]).response.result,
+    "first result\nnote between results"
+  );
+  assert.equal(getFunctionResponse(turn.parts[1]).response.result, "second result");
+});
+
+test("Claude -> Gemini keeps a trailing system message inside the function response", () => {
+  const turn = translateToolResultTurn(
+    "tu_trailing_system",
+    [],
+    [{ role: "system", content: "attachment note" }]
+  );
+
+  assertFunctionResponseTurn(turn, "found\nattachment note");
+});
+
+test("Claude -> Gemini leaves a tool response unchanged without trailing text", () => {
+  const turn = translateToolResultTurn("tu_no_trailing_text");
+
+  assertFunctionResponseTurn(turn, "found");
+});
 
 test("Claude -> Gemini maps system, thinking, tool use, tool result and tools", () => {
   // Native functionCall requires a cached thoughtSignature (#8979 / #3688).

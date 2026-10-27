@@ -4,9 +4,14 @@
 // to the original inline defs. The host dispatcher still owns the SPECIALTY_VALIDATORS map
 // construction + dispatch — these are just the leaf validator bodies.
 import { validateQoderCliPat } from "@omniroute/open-sse/services/qoderCli.ts";
+import {
+  resolveKiroApiKeyRegion,
+  resolveKiroRuntimeRegion,
+} from "@omniroute/open-sse/services/kiroRegion.ts";
 import { KiroService } from "@/lib/oauth/services/kiro";
 import { resolveNvidiaValidationModel } from "@/lib/providers/nvidiaValidationModel";
 import { normalizeBaseUrl } from "./urlHelpers";
+import { resolveXiaomiTokenPlanBaseUrl } from "@/shared/constants/xiaomiTokenPlanRegions";
 import { buildBearerHeaders, directHttpsRequest } from "./headers";
 import { toValidationErrorResult, validationRead, validationWrite } from "./transport";
 import { validateKiroApiKeyRuntimeProbe } from "./kiro";
@@ -68,7 +73,7 @@ export async function validateCursorApiProvider({ apiKey }: { apiKey?: string })
   if (!isCursorApiKey(key)) {
     return {
       valid: false,
-      error: "Cursor user API keys start with crsr_ (cursor.com/dashboard/api)",
+      error: "Cursor user API keys start with crsr_ or grok_ (cursor.com/dashboard/api)",
       unsupported: false,
       statusCode: 400,
     };
@@ -122,7 +127,8 @@ export async function validateQoderProvider({ apiKey, providerSpecificData }: an
 
 export async function validateKiroProvider({ apiKey, providerSpecificData }: any) {
   try {
-    const region = providerSpecificData?.region || "us-east-1";
+    // Validate in the exact region the executor will route this connection to.
+    const region = resolveKiroApiKeyRegion(resolveKiroRuntimeRegion(providerSpecificData));
     const credential = await new KiroService().validateApiKey(apiKey, region);
     if (!credential.profileArn) {
       return await validateKiroApiKeyRuntimeProbe({
@@ -320,6 +326,41 @@ export async function validateZaiProvider({ apiKey, providerSpecificData }: any)
     }
     // Any non-auth response (200, 400, 422, 429, 502) means auth passed;
     // 502 "job timed out" is z.ai's own server-side queue limit, not an auth error.
+    return { valid: true, error: null };
+  } catch (error: any) {
+    return toValidationErrorResult(error);
+  }
+}
+
+export async function validateXiaomiMimoTokenPlanProvider({
+  apiKey,
+  providerSpecificData,
+  isLocal,
+}: any) {
+  try {
+    const baseUrl = normalizeBaseUrl(
+      resolveXiaomiTokenPlanBaseUrl(
+        providerSpecificData,
+        "https://token-plan-sgp.xiaomimimo.com/v1"
+      )
+    );
+    const chatUrl = `${baseUrl.replace(/\/chat\/completions$/, "")}/chat/completions`;
+    const res = await validationWrite(
+      chatUrl,
+      {
+        method: "POST",
+        headers: buildBearerHeaders(apiKey, providerSpecificData),
+        body: JSON.stringify({
+          model: "mimo-v2.5-pro",
+          messages: [{ role: "user", content: "test" }],
+          max_tokens: 1,
+        }),
+      },
+      isLocal
+    );
+    if (res.status === 401 || res.status === 403) {
+      return { valid: false, error: "Invalid API key" };
+    }
     return { valid: true, error: null };
   } catch (error: any) {
     return toValidationErrorResult(error);

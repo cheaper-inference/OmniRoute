@@ -1,28 +1,35 @@
 # Guardrails (Ελληνικά)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/GUARDRAILS.md) · 🇪🇹 [am](../../../am/docs/security/GUARDRAILS.md) · 🇸🇦 [ar](../../../ar/docs/security/GUARDRAILS.md) · 🇦🇿 [az](../../../az/docs/security/GUARDRAILS.md) · 🇧🇬 [bg](../../../bg/docs/security/GUARDRAILS.md) · 🇧🇩 [bn](../../../bn/docs/security/GUARDRAILS.md) · 🇨🇿 [cs](../../../cs/docs/security/GUARDRAILS.md) · 🇩🇰 [da](../../../da/docs/security/GUARDRAILS.md) · 🇩🇪 [de](../../../de/docs/security/GUARDRAILS.md) · 🇪🇸 [es](../../../es/docs/security/GUARDRAILS.md) · 🇪🇪 [et](../../../et/docs/security/GUARDRAILS.md) · 🇮🇷 [fa](../../../fa/docs/security/GUARDRAILS.md) · 🇫🇮 [fi](../../../fi/docs/security/GUARDRAILS.md) · 🇫🇷 [fr](../../../fr/docs/security/GUARDRAILS.md) · 🇮🇪 [ga](../../../ga/docs/security/GUARDRAILS.md) · 🇮🇳 [gu](../../../gu/docs/security/GUARDRAILS.md) · 🇳🇬 [ha](../../../ha/docs/security/GUARDRAILS.md) · 🇮🇱 [he](../../../he/docs/security/GUARDRAILS.md) · 🇮🇳 [hi](../../../hi/docs/security/GUARDRAILS.md) · 🇭🇷 [hr](../../../hr/docs/security/GUARDRAILS.md) · 🇭🇺 [hu](../../../hu/docs/security/GUARDRAILS.md) · 🇦🇲 [hy](../../../hy/docs/security/GUARDRAILS.md) · 🇮🇩 [id](../../../id/docs/security/GUARDRAILS.md) · 🇳🇬 [ig](../../../ig/docs/security/GUARDRAILS.md) · 🇮🇹 [it](../../../it/docs/security/GUARDRAILS.md) · 🇯🇵 [ja](../../../ja/docs/security/GUARDRAILS.md) · 🇬🇪 [ka](../../../ka/docs/security/GUARDRAILS.md) · 🇰🇭 [km](../../../km/docs/security/GUARDRAILS.md) · 🇮🇳 [kn](../../../kn/docs/security/GUARDRAILS.md) · 🇰🇷 [ko](../../../ko/docs/security/GUARDRAILS.md) · 🇱🇹 [lt](../../../lt/docs/security/GUARDRAILS.md) · 🇱🇻 [lv](../../../lv/docs/security/GUARDRAILS.md) · 🇮🇳 [ml](../../../ml/docs/security/GUARDRAILS.md) · 🇮🇳 [mr](../../../mr/docs/security/GUARDRAILS.md) · 🇲🇾 [ms](../../../ms/docs/security/GUARDRAILS.md) · 🇲🇹 [mt](../../../mt/docs/security/GUARDRAILS.md) · 🇲🇲 [my](../../../my/docs/security/GUARDRAILS.md) · 🇳🇵 [ne](../../../ne/docs/security/GUARDRAILS.md) · 🇳🇱 [nl](../../../nl/docs/security/GUARDRAILS.md) · 🇳🇴 [no](../../../no/docs/security/GUARDRAILS.md) · 🇮🇳 [or](../../../or/docs/security/GUARDRAILS.md) · 🇮🇳 [pa](../../../pa/docs/security/GUARDRAILS.md) · 🇵🇭 [phi](../../../phi/docs/security/GUARDRAILS.md) · 🇵🇱 [pl](../../../pl/docs/security/GUARDRAILS.md) · 🇵🇹 [pt](../../../pt/docs/security/GUARDRAILS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/GUARDRAILS.md) · 🇷🇴 [ro](../../../ro/docs/security/GUARDRAILS.md) · 🇷🇺 [ru](../../../ru/docs/security/GUARDRAILS.md) · 🇱🇰 [si](../../../si/docs/security/GUARDRAILS.md) · 🇸🇰 [sk](../../../sk/docs/security/GUARDRAILS.md) · 🇸🇮 [sl](../../../sl/docs/security/GUARDRAILS.md) · 🇷🇸 [sr](../../../sr/docs/security/GUARDRAILS.md) · 🇸🇪 [sv](../../../sv/docs/security/GUARDRAILS.md) · 🇰🇪 [sw](../../../sw/docs/security/GUARDRAILS.md) · 🇮🇳 [ta](../../../ta/docs/security/GUARDRAILS.md) · 🇮🇳 [te](../../../te/docs/security/GUARDRAILS.md) · 🇹🇭 [th](../../../th/docs/security/GUARDRAILS.md) · 🇹🇷 [tr](../../../tr/docs/security/GUARDRAILS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/GUARDRAILS.md) · 🇵🇰 [ur](../../../ur/docs/security/GUARDRAILS.md) · 🇺🇿 [uz](../../../uz/docs/security/GUARDRAILS.md) · 🇻🇳 [vi](../../../vi/docs/security/GUARDRAILS.md) · 🇳🇬 [yo](../../../yo/docs/security/GUARDRAILS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/GUARDRAILS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/GUARDRAILS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/GUARDRAILS.md) · 🇪🇹 [am](../../../am/docs/security/GUARDRAILS.md) · 🇸🇦 [ar](../../../ar/docs/security/GUARDRAILS.md) · 🇦🇿 [az](../../../az/docs/security/GUARDRAILS.md) · 🇧🇬 [bg](../../../bg/docs/security/GUARDRAILS.md) · 🇧🇩 [bn](../../../bn/docs/security/GUARDRAILS.md) · 🇧🇦 [bs](../../../bs/docs/security/GUARDRAILS.md) · 🇨🇿 [cs](../../../cs/docs/security/GUARDRAILS.md) · 🇩🇰 [da](../../../da/docs/security/GUARDRAILS.md) · 🇩🇪 [de](../../../de/docs/security/GUARDRAILS.md) · 🇪🇸 [es](../../../es/docs/security/GUARDRAILS.md) · 🇪🇪 [et](../../../et/docs/security/GUARDRAILS.md) · 🇮🇷 [fa](../../../fa/docs/security/GUARDRAILS.md) · 🇫🇮 [fi](../../../fi/docs/security/GUARDRAILS.md) · 🇫🇷 [fr](../../../fr/docs/security/GUARDRAILS.md) · 🇮🇪 [ga](../../../ga/docs/security/GUARDRAILS.md) · 🇮🇳 [gu](../../../gu/docs/security/GUARDRAILS.md) · 🇳🇬 [ha](../../../ha/docs/security/GUARDRAILS.md) · 🇮🇱 [he](../../../he/docs/security/GUARDRAILS.md) · 🇮🇳 [hi](../../../hi/docs/security/GUARDRAILS.md) · 🇭🇷 [hr](../../../hr/docs/security/GUARDRAILS.md) · 🇭🇺 [hu](../../../hu/docs/security/GUARDRAILS.md) · 🇦🇲 [hy](../../../hy/docs/security/GUARDRAILS.md) · 🇮🇩 [id](../../../id/docs/security/GUARDRAILS.md) · 🇳🇬 [ig](../../../ig/docs/security/GUARDRAILS.md) · 🇮🇹 [it](../../../it/docs/security/GUARDRAILS.md) · 🇯🇵 [ja](../../../ja/docs/security/GUARDRAILS.md) · 🇬🇪 [ka](../../../ka/docs/security/GUARDRAILS.md) · 🇰🇭 [km](../../../km/docs/security/GUARDRAILS.md) · 🇮🇳 [kn](../../../kn/docs/security/GUARDRAILS.md) · 🇰🇷 [ko](../../../ko/docs/security/GUARDRAILS.md) · 🇱🇹 [lt](../../../lt/docs/security/GUARDRAILS.md) · 🇱🇻 [lv](../../../lv/docs/security/GUARDRAILS.md) · 🇮🇳 [ml](../../../ml/docs/security/GUARDRAILS.md) · 🇮🇳 [mr](../../../mr/docs/security/GUARDRAILS.md) · 🇲🇾 [ms](../../../ms/docs/security/GUARDRAILS.md) · 🇲🇹 [mt](../../../mt/docs/security/GUARDRAILS.md) · 🇲🇲 [my](../../../my/docs/security/GUARDRAILS.md) · 🇳🇵 [ne](../../../ne/docs/security/GUARDRAILS.md) · 🇳🇱 [nl](../../../nl/docs/security/GUARDRAILS.md) · 🇳🇴 [no](../../../no/docs/security/GUARDRAILS.md) · 🇮🇳 [or](../../../or/docs/security/GUARDRAILS.md) · 🇮🇳 [pa](../../../pa/docs/security/GUARDRAILS.md) · 🇵🇭 [phi](../../../phi/docs/security/GUARDRAILS.md) · 🇵🇱 [pl](../../../pl/docs/security/GUARDRAILS.md) · 🇵🇹 [pt](../../../pt/docs/security/GUARDRAILS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/GUARDRAILS.md) · 🇷🇴 [ro](../../../ro/docs/security/GUARDRAILS.md) · 🇷🇺 [ru](../../../ru/docs/security/GUARDRAILS.md) · 🇱🇰 [si](../../../si/docs/security/GUARDRAILS.md) · 🇸🇰 [sk](../../../sk/docs/security/GUARDRAILS.md) · 🇸🇮 [sl](../../../sl/docs/security/GUARDRAILS.md) · 🇷🇸 [sr](../../../sr/docs/security/GUARDRAILS.md) · 🇸🇪 [sv](../../../sv/docs/security/GUARDRAILS.md) · 🇰🇪 [sw](../../../sw/docs/security/GUARDRAILS.md) · 🇮🇳 [ta](../../../ta/docs/security/GUARDRAILS.md) · 🇮🇳 [te](../../../te/docs/security/GUARDRAILS.md) · 🇹🇭 [th](../../../th/docs/security/GUARDRAILS.md) · 🇹🇷 [tr](../../../tr/docs/security/GUARDRAILS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/GUARDRAILS.md) · 🇵🇰 [ur](../../../ur/docs/security/GUARDRAILS.md) · 🇺🇿 [uz](../../../uz/docs/security/GUARDRAILS.md) · 🇻🇳 [vi](../../../vi/docs/security/GUARDRAILS.md) · 🇳🇬 [yo](../../../yo/docs/security/GUARDRAILS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/GUARDRAILS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/GUARDRAILS.md)
 
 ---
 
 > **Πηγή αλήθειας:** `src/lib/guardrails/`
-> **Τελευταία ενημέρωση:** 2026-08-29 — v3.8.51 (η προέλευση της απομαγνητοφώνησης του Video Bridge δηλώνεται από τον καλούντα,
-> δεν επαληθεύεται ακόμη από τον διακομιστή — διευκρινίστηκε σύμφωνα με το #11661)
+> **Τελευταία ενημέρωση:** 2026-10-17 — v3.8.52 (προστέθηκε [Κάλυψη και όρια](#coverage-and-limits):
+> ποιες διαδρομές και μονοπάτια απόκρισης φτάνουν τα hooks, οι συγχωνευμένες κεφαλίδες απενεργοποίησης (#16412), η λειτουργία
+> αποκλεισμού injection ως υποχρεωτικό όριο (#16413), και τι βλέπει μια απόκριση πριν από το post-call)
 
 Τα guardrails επιβάλλουν μετασχηματισμούς ασφάλειας, πολιτικής και περιεχομένου στο όριο
-μεταξύ του OmniRoute και των ανάντη παρόχων. Κάθε guardrail μπορεί να επιθεωρεί (και
-προαιρετικά να απορρίπτει, να μετασχηματίζει ή να επισημαίνει) τα ωφέλιμα φορτία αιτημάτων (`preCall`) και
-τις ανάντη αποκρίσεις (`postCall`).
+μεταξύ του OmniRoute και των upstream παρόχων. Κάθε guardrail μπορεί να επιθεωρήσει (και
+προαιρετικά να απορρίψει, μετασχηματίσει ή σχολιάσει) τα payloads αιτημάτων (`preCall`) και
+τις upstream αποκρίσεις (`postCall`).
 
-Το σύστημα λειτουργεί με **fail-open**: αν ένα guardrail προκαλέσει εξαίρεση κατά την εκτέλεση, το μητρώο
-καταγράφει το σφάλμα και συνεχίζει με το επόμενο guardrail αντί να αποτύχει
-το αίτημα. Ο αποκλεισμός αποτελεί ρητή απόφαση (`block: true`) και ποτέ ατύχημα.
+Το σύστημα είναι **fail-open**: αν ένα guardrail πετάξει εξαίρεση κατά την εκτέλεση, το registry
+καταγράφει το σφάλμα και συνεχίζει με το επόμενο guardrail αντί να αποτύχει το
+αίτημα. Ο αποκλεισμός είναι μια ρητή απόφαση (`block: true`), ποτέ ένα ατύχημα.
+Η μόνη εξαίρεση είναι ένα ματαιωμένο αίτημα: όταν το `signal` του καλούντος ματαιώνεται,
+ένα guardrail που πετάει εξαίρεση απορρίπτει την εκτέλεση του hook αντί να παραλειφθεί.
+
+Τα hooks **δεν** εκτελούνται σε κάθε διαδρομή ή κάθε απόκριση. Διαβάστε
+[Κάλυψη και όρια](#coverage-and-limits) πριν βασιστείτε σε ένα guardrail ως
+μέσο ελέγχου ασφάλειας.
 
 ## Ενσωματωμένα Guardrails
 
-Κατά την εισαγωγή, το μητρώο φορτώνει αυτόματα έξι guardrails κατά σειρά προτεραιότητας
-(βλ. `registry.ts` → `registerDefaultGuardrails()`):
+Το registry φορτώνει αυτόματα έξι guardrails με σειρά προτεραιότητας κατά την εισαγωγή
+(δείτε `registry.ts` → `registerDefaultGuardrails()`):
 
-| Προτεραιότητα | Όνομα               | Στάδιο(-α)     | Αρχείο                |
+| Προτεραιότητα | Όνομα               | Στάδιο(α)      | Αρχείο                |
 | ------------- | ------------------- | -------------- | --------------------- |
 | `5`           | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
 | `6`           | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
@@ -33,78 +40,116 @@
 
 Οι χαμηλότεροι αριθμοί προτεραιότητας εκτελούνται **πρώτοι**.
 
-### Vision Bridge (`visionBridge.ts`) — Γέφυρα Τροπικότητας PR-1
+### Vision Bridge (`visionBridge.ts`) — Modality Bridge PR-1
 
-Αναχαιτίζει αιτήματα που περιλαμβάνουν εικόνες και προορίζονται για **μοντέλα χωρίς δυνατότητα όρασης** και είτε
-αναδρομολογεί ολόκληρο το αίτημα σε ένα μοντέλο με δυνατότητα όρασης είτε αντικαθιστά τα τμήματα
-εικόνας με περιγραφές κειμένου που παράγονται από ένα διαμορφώσιμο μοντέλο όρασης πριν
-από την ανάντη κλήση. Αυτό επιτρέπει στους παρόχους που υποστηρίζουν μόνο κείμενο να χειρίζονται με διαφάνεια
-πολυτροπικά ωφέλιμα φορτία.
+Το βασικό μοντέλο GLM 5.3 και τα `glm-5.3-{low,high,max}` έχουν ρητά
+μεταδεδομένα `supportsVision:false` στο registry/spec. Οι παραλλαγές GLM 5.3 Flash
+παραμένουν μοντέλα με εγγενή υποστήριξη vision. Η διαδρομή `/v1/messages` του Claude Code
+εισέρχεται στην κοινή αλυσίδα pre-call guardrails `handleChat` **πριν** από τη
+μετάφραση Claude-σε-OpenAI· οι εικόνες εμφωλευμένων αποτελεσμάτων του εργαλείου `Read` πρέπει να περιγραφούν ή να
+αντιμετωπιστούν πριν από εκείνη τη μετάφραση που τις ανυψώνει σε περιεχόμενο `image_url` του OpenAI (#17069).
+
+Υποκλέπτει αιτήματα που φέρουν εικόνες και απευθύνονται σε **μοντέλα χωρίς vision** και είτε
+αναδρομολογεί ολόκληρο το αίτημα σε ένα μοντέλο με δυνατότητα vision είτε αντικαθιστά τα
+τμήματα εικόνας με περιγραφές κειμένου που παράγονται από ένα παραμετροποιήσιμο μοντέλο vision πριν
+από την upstream κλήση. Αυτό επιτρέπει σε παρόχους μόνο κειμένου να χειρίζονται διαφανώς
+πολυτροπικά payloads.
 
 Ροή:
 
-1. Παράλειψη αν το μοντέλο-στόχος υποστηρίζει ήδη όραση (εκτός αν εμφανίζεται στη
-   λίστα εξαναγκασμένης γεφύρωσης `isVisionBridgeForcedModel`).
-2. Εξαγωγή των τμημάτων εικόνας μέσω του `extractImageParts(messages)`
-   (`visionBridgeHelpers.ts`), το οποίο αναθέτει την εργασία στον **ενοποιημένο ανιχνευτή
-   πολυμέσων** `detectMediaParts()` στο `open-sse/utils/mediaParts.ts` — τη
-   μοναδική πηγή αλήθειας που χρησιμοποιείται από κοινού με το φίλτρο συμβατότητας combo.
-   Η εξαγωγή περιορίζεται μέσω λίστας επιτρεπόμενων στοιχείων στα τμήματα ανώτατου επιπέδου με μορφές
-   που το `replaceImageParts` μπορεί να επανενσωματώσει (η σύμβαση extract↔replace): OpenAI
-   `image_url`, Anthropic base64 `source.type:"base64"`, Anthropic URL
-   `source.type:"url"` και Responses API `input_image`. Οι ένθετες αντιστοιχίσεις και
-   οι μορφές που λειτουργούν μόνο ως ενδείξεις αποτελούν υλικό για το φίλτρο combo και δεν εξάγονται ποτέ.
-   Παράλειψη αν δεν βρεθεί κανένα.
-3. Επίλυση της διαμόρφωσης χρόνου εκτέλεσης μέσω του `resolveVisionBridgeRuntimeSettings()`
-   (`src/shared/constants/modalityBridgeDefaults.ts`): τα νέα κλειδιά ρυθμίσεων `modalityBridge*`
-   υπερισχύουν· τα παλαιά κλειδιά `visionBridge*` παραμένουν ως **εναλλακτική λύση ενός κύκλου
-   (one-cycle fallback)** (παράθυρο επαναφοράς). Παράλειψη πριν από οποιαδήποτε διάσχιση πολυμέσων όταν η
-   γέφυρα είναι απενεργοποιημένη.
-4. Ο επιλογέας λειτουργίας (`modalityBridgeVisionMode`, βλ. τον παρακάτω πίνακα) αποφασίζει
-   μεταξύ αναδρομολόγησης και περιγραφής. Η αναδρομολόγηση επιστρέφει `modifiedPayload` με αλλαγμένο μόνο το `model`,
-   μαζί με μεταδεδομένα `{ rerouted, fromModel, toModel, imagesKept }`.
-5. Διαδρομή περιγραφής: περιορισμός των εικόνων στο `maxImages`, σύνθεση της προτροπής με επίγνωση της εργασίας,
-   αναζήτηση στην κρυφή μνήμη περιγραφών, κλήση του μοντέλου όρασης **παράλληλα**
-   (`Promise.allSettled`) και εισαγωγή τμημάτων κειμένου `[Image N]: <description>` στη
-   θέση τους. Μια αποτυχημένη περιγραφή αποδίδει `null` και το αρχικό τμήμα εικόνας
-   **διατηρείται** (#4012) — εκτός από τη διαδρομή περιγραφής combo, όταν απέτυχαν
-   όλες οι περιγραφές, οπότε ένα επιβεβαιωμένα ανάντη μοντέλο χωρίς δυνατότητα όρασης λαμβάνει αντ’ αυτού το υποκατάστατο
-   `(μη διαθέσιμο — δεν έχει συνδεθεί πάροχος με δυνατότητα όρασης)` (#8430).
-6. Επιστροφή `modifiedPayload` + μεταδεδομένα (`imagesProcessed`, `descriptions`,
+1. Παράλειψη αν το μοντέλο-στόχος υποστηρίζει ήδη vision (εκτός αν εμφανίζεται στη
+   λίστα υποχρεωτικού bridge `isVisionBridgeForcedModel`).
+2. Εξαγωγή τμημάτων εικόνας μέσω `extractImageParts(messages)`
+   (`visionBridgeHelpers.ts`), το οποίο αναθέτει στον **ενιαίο ανιχνευτή
+   μέσων** `detectMediaParts()` στο `open-sse/utils/mediaParts.ts` — τη
+   μοναδική πηγή αλήθειας που μοιράζεται με το φίλτρο συμβατότητας combo.
+   Η εξαγωγή περιορίζεται με allowlist στα σχήματα που το `replaceImageParts` μπορεί να
+   ενσωματώσει ξανά (η σύμβαση extract↔replace): OpenAI `image_url`, Anthropic base64
+   `source.type:"base64"`, Anthropic URL `source.type:"url"`, και Responses
+   API `input_image`. Οι αντίστοιχες εικόνες εμφωλευμένες μέσα σε
+   `tool_result.content` του Claude Code και σε εξόδους εργαλείων του Responses επίσης εξάγονται και
+   αντικαθίστανται στις αρχικές τους διαδρομές· τα σχήματα μόνο-δείκτη είναι υλικό του
+   φίλτρου combo και δεν εξάγονται.
+   Παράλειψη αν δεν βρεθεί καμία.
+3. Επίλυση της runtime παραμετροποίησης μέσω `resolveVisionBridgeRuntimeSettings()`
+   (`src/shared/constants/modalityBridgeDefaults.ts`): τα νέα κλειδιά ρυθμίσεων
+   `modalityBridge*` υπερκαλύπτουν· τα παλαιά κλειδιά `visionBridge*` παραμένουν **εναλλακτικό
+   ενός κύκλου** (παράθυρο rollback). Παράλειψη πριν από οποιαδήποτε διάσχιση μέσων όταν το
+   bridge είναι απενεργοποιημένο.
+4. Ο επιλογέας λειτουργίας (`modalityBridgeVisionMode`, δείτε τον πίνακα παρακάτω) αποφασίζει
+   αναδρομολόγηση έναντι περιγραφής. Η αναδρομολόγηση επιστρέφει `modifiedPayload` με μόνο το `model`
+   αλλαγμένο, συν meta `{ rerouted, fromModel, toModel, imagesKept }`.
+5. Διαδρομή περιγραφής: όριο εικόνων στο `maxImages`, σύνθεση του προσαρμοσμένου στην εργασία prompt,
+   συμβουλή της cache περιγραφών, κλήση του μοντέλου vision **παράλληλα**
+   (`Promise.allSettled`), και έγχυση τμημάτων κειμένου `[Image N]: <description>` στη θέση
+   τους. Μια αποτυχημένη περιγραφή δίνει `null`: η ακατέργαστη εικόνα διατηρείται για
+   στόχους άγνωστους/με δυνατότητα vision (#4012), αλλά ένας **επιβεβαιωμένος απευθείας στόχος
+   μόνο-κειμένου** ή combo με μηδενικό vision λαμβάνει ένα ρητό κείμενο-υποκατάστατο
+   `(unavailable — no vision-capable provider connected)` για
+   κάθε μη περιγραφείσα εικόνα, συμπεριλαμβανομένων μερικών αποτυχιών και εικόνων πέρα από το
+   όριο κλήσεων περιγραφής (#17069). Η υπάρχουσα εναλλακτική περιγραφής combo όταν αποτύχουν όλες
+   παραμένει σε ισχύ (#8430).
+6. Επιστροφή `modifiedPayload` + meta (`imagesProcessed`, `descriptions`,
    `processingTimeMs`, `visionModel`).
 
 #### Επιλογέας λειτουργίας (`modalityBridgeVisionMode`)
 
-| Λειτουργία | Προεπιλογή | Συμπεριφορά                                                                                                                                                                                                                                                                                                                                                                   |
-| ---------- | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `auto`     | ✔          | Παλαιού τύπου ευρετική, αμετάβλητη (#6640/#7204): τα μοντέλα που δεν είναι combo/`auto/` αναδρομολογούνται στο καλύτερο μοντέλο όρασης, εκτός αν το αρχικό μοντέλο διαθέτει ήδη χρησιμοποιήσιμα διαπιστευτήρια (οπότε γίνεται περιγραφή)· οι στόχοι combo περιγράφονται πάντα.                                                                                                |
-| `describe` |            | Πάντα περιγραφή — το μπλοκ αναδρομολόγησης παραλείπεται πλήρως· απαντά πάντα το μοντέλο που επέλεξε ο χρήστης.                                                                                                                                                                                                                                                                |
-| `reroute`  |            | Εξαναγκασμένη αναδρομολόγηση: η δικλείδα διατήρησης του μοντέλου με διαπιστευτήρια παρακάμπτεται. Η δικλείδα διαπιστευτηρίων του **στόχου** αναδρομολόγησης εξακολουθεί να εφαρμόζεται — όταν δεν υπάρχει χρησιμοποιήσιμος στόχος όρασης, το αίτημα μεταπίπτει σε περιγραφή, ώστε οι ακατέργαστες εικόνες να μη φτάνουν ποτέ σε backend που υποστηρίζει μόνο κείμενο (#8430). |
+| Λειτουργία | Προεπιλογή | Συμπεριφορά                                                                                                                                                                                                                                                                                                                                      |
+| ---------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `auto`     | ✔          | Παλαιού τύπου ευρετική λογική, ανέπαφη (#6640/#7204): μοντέλα μη-combo/`auto/` ανακατευθύνονται στο καλύτερο μοντέλο όρασης, εκτός αν το αρχικό μοντέλο διαθέτει ήδη χρησιμοποιήσιμα διαπιστευτήρια (τότε describe)· στόχοι combo κάνουν πάντα describe.                                                                                         |
+| `describe` |            | Πάντα describe — το μπλοκ ανακατεύθυνσης παραλείπεται πλήρως· το μοντέλο που επέλεξε ο χρήστης απαντά πάντα.                                                                                                                                                                                                                                     |
+| `reroute`  |            | Εξαναγκασμένη ανακατεύθυνση: ο έλεγχος διατήρησης μοντέλου με διαπιστευτήρια παρακάμπτεται. Ο έλεγχος διαπιστευτηρίων του **στόχου** ανακατεύθυνσης εξακολουθεί να ισχύει — όταν δεν υπάρχει χρησιμοποιήσιμος στόχος όρασης, η γέφυρα μπλοκάρει με σαφές σφάλμα αντί να κάνει describe ή να στέλνει ακατέργαστες εικόνες σε στόχο μόνο-κειμένου. |
 
-Οι εξαναγκασμένες λειτουργίες εκτελούν βραχυκύκλωση **πριν** από την αυτόματη ευρετική· η συμπεριφορά `auto`
-είναι πανομοιότυπη σε επίπεδο byte με το guardrail πριν από το PR-1.
+Οι εξαναγκασμένες λειτουργίες βραχυκυκλώνουν **πριν** εκτελεστεί η ευρετική
+λογική του auto· η συμπεριφορά του `auto` είναι ταυτόσημη byte-προς-byte με το
+guardrail πριν από το PR-1.
 
-#### Προτροπή περιγραφής με επίγνωση της εργασίας (`modalityBridgeVisionTaskAware`)
+#### Εύρος κλειδιού API (`visionBridgeKeyScope.ts`)
 
-Προεπιλογή: **true**. Το `composeVisionPrompt()` (`visionBridgeHelpers.ts`) προσαρτά
-το κείμενο του **τελευταίου μηνύματος χρήστη** (περικομμένο στους 500 χαρακτήρες) στη βασική
-προτροπή περιγραφής, κατευθύνοντας την περιγραφή προς αυτό που ζήτησε πραγματικά ο χρήστης
-(μοτίβο codex-vision-proxy) και ζητώντας από το μοντέλο όρασης να μεταγράψει το ορατό
-κείμενο. Όταν η σημαία είναι απενεργοποιημένη — ή δεν υπάρχει κείμενο χρήστη — χρησιμοποιείται αμετάβλητη η βασική προτροπή.
+Όταν το κλειδί API του καλούντος περιορίζει `allowedConnections`, pools quota
+(`allowedQuotas`) ή μοντέλα (`allowedModels` / `blockedModels` /
+`modelAccessMode: "restricted"` / `disableNonPublicModels`), η γέφυρα επιλέγει
+μόνο μοντέλα reroute και describe που επιτρέπεται να χρησιμοποιήσει το κλειδί,
+σε συνδέσεις που επιτρέπεται να χρησιμοποιήσει το κλειδί. Η κλήση describe
+στη συνέχεια περνά πάντα μέσω του self-loop του OmniRoute με την κεφαλίδα
+`x-omniroute-self-loop-key-id`, ώστε το λαμβάνον αίτημα chat να επιβάλλει εκ
+νέου την πολιτική συνδέσεων και μοντέλων αυτού του κλειδιού. Η
+`enforceApiKeyPolicy()` τιμά αυτή την κεφαλίδα μόνο σε συνδυασμό με το
+self-loop bearer, επομένως μπορεί μόνο να περιορίσει την πρόσβαση, και ένα id
+που δεν επιλύεται απορρίπτεται.
 
-Το ίδιο το OpenAI-compatible αίτημα του βρόχου αυτοκλήσης describe (`callVisionModelSingle()`
-στο `visionBridgeHelpers.ts`) ζητά πάντα `image_url.detail: "high"` —
-άνευ όρων, για κάθε καλούντα/πάροχο, χωρίς να εξαρτάται από κάποιο σήμα του client.
-Η δειγματοληψία χαμηλής λεπτομέρειας υποβαθμίζει την ακρίβεια OCR ακριβώς για την εργασία
-μεταγραφής κειμένου που ζητά αυτό το prompt, επομένως η ίδια η κλήση describe ζητά πάντα
-υψηλή λεπτομέρεια, ανεξάρτητα από το επίπεδο λεπτομέρειας που χρησιμοποίησε το αρχικό
-εισερχόμενο αίτημα. Αυτό επηρεάζει μόνο το εσωτερικό σώμα του αιτήματος describe· δεν
-αλλάζει τον τρόπο με τον οποίο το OmniRoute προωθεί το `image_url.detail` του ίδιου του
-καλούντος στο κύριο αίτημα — αυτή η προεπιλογή εφαρμόζεται ξεχωριστά και μόνο για
-ανιχνευμένους clients OpenCode, στη `defaultImageDetail()`
-(`open-sse/handlers/chatCore/upstreamBody.ts`). Ο κλάδος wire-format του Anthropic
-στον βρόχο αυτοκλήσης describe δεν διαθέτει πεδίο `detail` και δεν επηρεάζεται από
-καμία από τις δύο προεπιλογές.
+Αν δεν επιτρέπεται κανένα μοντέλο όρασης για το κλειδί, ένας **επιβεβαιωμένος
+στόχος μόνο-κειμένου** απορρίπτει το αίτημα εικόνας τοπικά με σαφές HTTP 400
+αντί να προωθεί bytes εικόνας σε ανίκανο upstream (#17069). Για στόχους με
+άγνωστη ή εγγενή ικανότητα όρασης, η διαδρομή describe διατηρεί την
+προηγούμενη fail-open συμπεριφορά της (meta `{ skipped: true, reason: "no_permitted_vision_model" }`).
+Αιτήματα χωρίς κλειδί, και κλειδιά χωρίς αυτούς τους περιορισμούς,
+συμπεριφέρονται ακριβώς όπως πριν.
+
+#### Prompt describe με επίγνωση εργασίας (`modalityBridgeVisionTaskAware`)
+
+Προεπιλογή **true**. Η `composeVisionPrompt()` (`visionBridgeHelpers.ts`)
+προσαρτά το κείμενο του **τελευταίου μηνύματος χρήστη** (περικομμένο στους
+500 χαρακτήρες) στο βασικό prompt describe, κατευθύνοντας την περιγραφή προς
+αυτό που ο χρήστης πραγματικά ζήτησε (μοτίβο codex-vision-proxy) και ζητώντας
+από το μοντέλο όρασης να μεταγράψει το ορατό κείμενο. Με τη σημαία
+απενεργοποιημένη — ή χωρίς κείμενο χρήστη — το βασικό prompt χρησιμοποιείται
+αμετάβλητο.
+
+Το δικό του OpenAI-συμβατό αίτημα του self-loop describe (η
+`callVisionModelSingle()` στο `visionBridgeHelpers.ts`) ζητά πάντα
+`image_url.detail: "high"` — άνευ όρων, για κάθε καλούντα/πάροχο, χωρίς να
+εξαρτάται από οποιοδήποτε σήμα πελάτη. Η δειγματοληψία χαμηλής λεπτομέρειας
+υποβαθμίζει την ακρίβεια OCR ακριβώς για την εργασία μεταγραφής κειμένου που
+ζητά αυτό το prompt, επομένως η ίδια η κλήση describe ζητά πάντα υψηλή
+λεπτομέρεια ανεξάρτητα από το επίπεδο λεπτομέρειας που χρησιμοποίησε το αρχικό
+εισερχόμενο αίτημα. Αυτό επηρεάζει μόνο το σώμα του εσωτερικού αιτήματος
+describe· δεν αλλάζει τον τρόπο με τον οποίο το OmniRoute προωθεί το δικό του
+`image_url.detail` του καλούντος στο κύριο αίτημα — αυτή η προεπιλογή
+εφαρμόζεται ξεχωριστά, και μόνο για ανιχνευμένους πελάτες OpenCode, στην
+`defaultImageDetail()` (`open-sse/handlers/chatCore/upstreamBody.ts`). Ο κλάδος
+wire-format Anthropic του self-loop describe δεν διαθέτει πεδίο `detail` και
+δεν επηρεάζεται από καμία από τις δύο προεπιλογές.
 
 #### Όριο εξόδου describe (`modalityBridgeVisionMaxChars`)
 
@@ -112,30 +157,30 @@
 | ------------------------------ | ---------- | --------------- |
 | `modalityBridgeVisionMaxChars` | `0`        | `0` ή 100–50000 |
 
-Το `0` (προεπιλογή) σημαίνει **χωρίς όριο** — η περιγραφή που επιστρέφεται από τη
-`callVisionModel()` προωθείται χωρίς τροποποίηση, διατηρώντας την υπάρχουσα
-συμπεριφορά. Οποιαδήποτε τιμή στο εύρος 100–50000 περικόπτει την περιγραφή με ένα
-επίθημα `…` προτού αυτή ενσωματωθεί ξανά ως `[Image N]: <description>`
+Το `0` (προεπιλογή) σημαίνει **χωρίς όριο** — η περιγραφή που επιστρέφει η
+`callVisionModel()` περνά ατροποίητη, διατηρώντας την υπάρχουσα συμπεριφορά.
+Οποιαδήποτε τιμή στο εύρος 100–50000 περικόπτει την περιγραφή με επίθεμα `…`
+πριν αυτή ενσωματωθεί ξανά ως `[Image N]: <description>`
 (`VisionBridgeGuardrail.preCall()` στο `src/lib/guardrails/visionBridge.ts`).
-Αυξήστε την τιμή για εργασίες OCR με πολλές λεπτομέρειες, όπου το μεταγενέστερο
-μοντέλο χρειάζεται την πλήρη μεταγραφή· μειώστε την για να περιορίσετε τη χρήση
-token σε πολυλογά μοντέλα όρασης. Το πεδίο του dashboard βρίσκεται στον πίνακα
+Αυξήστε την για εργασίες OCR με πολλή λεπτομέρεια όπου το downstream μοντέλο
+χρειάζεται την πλήρη μεταγραφή· μειώστε την για να περιορίσετε τη χρήση token
+σε φλύαρα μοντέλα όρασης. Το πεδίο του dashboard βρίσκεται στον πίνακα
 Advanced της καρτέλας Vision (`modality-bridge-max-chars` στο
-`ModalityBridgeVisionTab.tsx`) και περιορίζει οποιαδήποτε τιμή μεταξύ 1 και 99 προς
-τα πάνω, στο ελάχιστο όριο των 100, ενώ αφήνει ένα ρητό `0` ανέπαφο — το `0` είναι
-αυτοτελώς έγκυρη τιμή Zod
-(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`) και όχι απλώς
-η προεπιλογή «δεν έχει οριστεί».
+`ModalityBridgeVisionTab.tsx`) και αναγκάζει οποιαδήποτε τιμή μεταξύ 1 και 99
+στο κατώτατο όριο των 100, αφήνοντας ένα ρητό `0` ανέπαφο — το `0` είναι
+έγκυρη τιμή Zod από μόνο του
+(`z.union([z.literal(0), z.number().int().min(100).max(50000)])`), όχι απλώς η
+προεπιλογή «unset».
 
 #### Cache describe (`modalityBridge/bridgeCache.ts`)
 
-Cache LRU + TTL στη μνήμη για τις εξόδους describe, κοινόχρηστη σε όλη τη διεργασία.
-Κλειδί = `sha256(imageRef + composedPrompt + configuredBridgeModel)` με
-πλαισίωση μέσω προθέματος μήκους (χωρίς συγκρούσεις στα όρια των πεδίων). Το στοιχείο
-μοντέλου είναι το **ρυθμισμένο** μοντέλο bridge και όχι το μοντέλο που απάντησε
-πραγματικά — η `callVisionModel` μπορεί να χρησιμοποιήσει εσωτερικά εναλλακτικό
-μοντέλο και η δημιουργία κλειδιών ανά προσπάθεια θα κατακερμάτιζε την cache.
-Οι αποτυχημένες περιγραφές δεν αποθηκεύονται ποτέ στην cache. Ρυθμίσεις:
+Cache LRU + TTL εντός μνήμης για εξόδους describe, κοινόχρηστη σε όλη τη
+διεργασία. Κλειδί = `sha256(imageRef + composedPrompt + configuredBridgeModel)`
+με πλαισίωση προθέματος μήκους (χωρίς συγκρούσεις ορίων πεδίων). Η συνιστώσα
+μοντέλου είναι το **ρυθμισμένο** μοντέλο γέφυρας, όχι το μοντέλο που
+πραγματικά απάντησε — η `callVisionModel` μπορεί να κάνει εσωτερικό fallback,
+και η κλείδωση ανά προσπάθεια θα κατακερμάτιζε την cache. Τα αποτυχημένα
+describe δεν αποθηκεύονται ποτέ στην cache. Ρυθμίσεις:
 
 | Κλειδί                          | Προεπιλογή | Εύρος   |
 | ------------------------------- | ---------- | ------- |
@@ -143,579 +188,589 @@ Cache LRU + TTL στη μνήμη για τις εξόδους describe, κοι�
 | `modalityBridgeCacheTtlMinutes` | `60`       | 1–1440  |
 | `modalityBridgeCacheMaxEntries` | `200`      | 10–5000 |
 
-#### Κανονικοποίηση απομακρυσμένων εικόνων (αυτοκλήση describe/ανάκτηση base64)
+#### Κανονικοποίηση απομακρυσμένων εικόνων (self-loop describe/base64 fetch)
 
-Όταν το bridge ανακτά μόνο του μια **απομακρυσμένη** εικόνα — στην αυτοκλήση describe
-του Anthropic και στη μετατροπή base64 με claude-wire-format
-(`ensureBase64ImagesForClaudeWire`), και στις δύο περιπτώσεις μέσω της
-`fetchRemoteImageAsDataUri()` στο `visionBridgeHelpers.ts` — το data URI που
-προκύπτει περνά από τη `normalizeDataUri()`
-(`open-sse/utils/imageNormalize.ts`) προτού ενσωματωθεί στο αίτημα προς το μοντέλο
-όρασης. Οι υπερμεγέθεις εικόνες μειώνονται σε **2048px στη μεγάλη πλευρά**
-(αντιστοιχώντας στο όριο αλλαγής μεγέθους που εφαρμόζουν ήδη τα OpenAI/Anthropic
-στην πλευρά του server), γεγονός που μειώνει τα byte/την καθυστέρηση μεταφόρτωσης
-χωρίς να αλλάζει αυτό που βλέπει το μοντέλο όρασης. Η αλλαγή μεγέθους χρησιμοποιεί
-το `sharp`, το οποίο φορτώνεται μέσω δυναμικού import: σε πλατφόρμα όπου αποτυγχάνει
-η φόρτωση του native binary του, η `normalizeDataUri()` **δεν κάνει ποτέ throw** —
-επιστρέφει αυτούσια τα αρχικά byte, ώστε η διαδρομή describe/μετατροπής base64 να
-συνεχίζει πάντα να λειτουργεί. Τα byte που δεν αντιστοιχούν σε εικόνα (ανάκτηση που
-δεν επέστρεψε αποκωδικοποιήσιμη εικόνα) προωθούνται επίσης χωρίς αλλαγή. Αυτή η
-κανονικοποίηση περιορίζεται στις εικόνες που ανακτά το bridge για τη δική του
-αυτοκλήση — δεν εφαρμόζεται ποτέ στο ακατέργαστο payload διέλευσης του καλούντος,
-σε συμφωνία με την αρχή τροποποίησης μόνο κατόπιν ρητής επιλογής (Αυστηρός Κανόνας
-#20).
+Όταν το bridge ανακτά μόνο του μια **απομακρυσμένη** εικόνα — η self-call describe του Anthropic και η μετατροπή base64 σε claude-wire-format
+(`ensureBase64ImagesForClaudeWire`), και οι δύο μέσω
+`fetchRemoteImageAsDataUri()` στο `visionBridgeHelpers.ts` — το data URI που προκύπτει περνά μέσα από `normalizeDataUri()`
+(`open-sse/utils/imageNormalize.ts`) πριν ενσωματωθεί στο αίτημα του vision-model. Οι υπερμεγέθεις εικόνες υποβαθμίζονται σε **μεγάλη ακμή 2048px** (ταιριάζοντας με το όριο αλλαγής μεγέθους που OpenAI/Anthropic ήδη εφαρμόζουν server-side), κάτι που μειώνει
+τα bytes/την καθυστέρηση αποστολής χωρίς να αλλάζει αυτό που βλέπει το vision model. Η αλλαγή μεγέθους χρησιμοποιεί `sharp`, φορτωμένο μέσω dynamic import: σε μια πλατφόρμα όπου το εγγενές δυαδικό του αποτυγχάνει να φορτωθεί, η `normalizeDataUri()` **δεν πετά ποτέ εξαίρεση** — υποχωρεί σε passthrough των αρχικών bytes, ώστε η διαδρομή describe/μετατροπής-base64 να συνεχίζει πάντα να λειτουργεί. Bytes που δεν είναι εικόνα (ένα fetch που δεν επέστρεψε αποκωδικοποιήσιμη εικόνα) επίσης περνούν ανέπαφα. Αυτή η κανονικοποίηση περιορίζεται σε εικόνες που το bridge ανακτά για τη δική του self-call — δεν εφαρμόζεται ποτέ στο ακατέργαστο passthrough payload του καλούντος, σύμφωνα με την αρχή τροποποίησης μόνο κατόπιν opt-in (Σκληρός Κανόνας #20).
 
-#### Σχήμα ρυθμίσεων + migration
+#### Σχήμα ρυθμίσεων + μετανάστευση
 
-Τα νέα κλειδιά `modalityBridge*` επικυρώνονται μέσω Zod στο `updateSettingsSchema`
+Τα νέα κλειδιά `modalityBridge*` επικυρώνονται με Zod στο `updateSettingsSchema`
 (`src/shared/validation/settingsSchemas.ts`): `modalityBridgeVisionEnabled`,
 `modalityBridgeVisionMode`, `modalityBridgeVisionModel`,
 `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`,
 `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`,
-`modalityBridgeVisionMaxChars`, η τριάδα `modalityBridgeCache*` και η ομάδα
-`modalityBridgeAudio*` που χρησιμοποιείται από το Audio Bridge. Το migration
-`141_modality_bridge_settings.sql` αντιγράφει τις υπάρχουσες παλαιού τύπου τιμές
-`visionBridge*` στα αντίστοιχα νέα κλειδιά (είναι idempotent και δεν αντικαθιστά
-ποτέ μια τιμή `modalityBridge*` που έχει οριστεί από τον διαχειριστή)· τα παλαιού
-τύπου κλειδιά εξακολουθούν να γίνονται αποδεκτά ως εφεδρική πηγή ανάγνωσης για
-έναν κύκλο έκδοσης.
+`modalityBridgeVisionMaxChars`, η τριάδα `modalityBridgeCache*`, και η
+ομάδα `modalityBridgeAudio*` που χρησιμοποιεί το Audio Bridge. Η μετανάστευση
+`141_modality_bridge_settings.sql` αντιγράφει τις υπάρχουσες παλαιές τιμές
+`visionBridge*` στα αντίστοιχα νέα κλειδιά (είναι idempotent, δεν αντικαθιστά ποτέ
+μια τιμή `modalityBridge*` που έχει ορίσει ο χειριστής); τα παλαιά κλειδιά παραμένουν αποδεκτά ως
+read fallback για έναν κύκλο έκδοσης.
 
-#### Header διαφάνειας + στατιστικά
+#### Κεφαλίδα διαφάνειας + στατιστικά
 
-Οι αποκρίσεις που έχουν μετασχηματιστεί μέσω describe φέρουν
+Οι απαντήσεις που έχουν υποστεί μετασχηματισμό describe φέρουν
 `x-omniroute-modality-bridge: image->text;model=<visionModel>;parts=<n>`
-(δημιουργείται από τη `buildModalityBridgeHeader()` στο
-`modalityBridge/bridgeStats.ts` και προστίθεται από τη
-`withModalityBridgeHeader()` στο `src/sse/handlers/chatHelpers.ts`).
-Τα αιτήματα που αναδρομολογούνται **δεν** λαμβάνουν header — το payload παρέμεινε
-ανέπαφο και η αλλαγή μοντέλου είναι ήδη ορατή στο πεδίο `model` του σώματος της
-απόκρισης.
+(κατασκευάζεται από την `buildModalityBridgeHeader()` στο `modalityBridge/bridgeStats.ts`,
+τοποθετείται από την `withModalityBridgeHeader()` στο `src/sse/handlers/chatHelpers.ts`).
+Τα ανακατευθυνόμενα αιτήματα **δεν** λαμβάνουν κεφαλίδα — το payload παρέμεινε ανέπαφο και η
+αλλαγή μοντέλου είναι ήδη ορατή στο πεδίο `model` του σώματος της απάντησης.
 
-Το `GET /api/modality-bridge/stats` (με έλεγχο ταυτότητας διαχείρισης, στο ίδιο
-επίπεδο με το `GET /api/settings`) επιστρέφει τους μετρητές ανά modality στη μνήμη
+Το `GET /api/modality-bridge/stats` (management auth, ίδιο επίπεδο με
+`GET /api/settings`) επιστρέφει τους in-memory μετρητές ανά τρόπο (modality)
 `{ attempts, successes, bridged, cacheHits, failures, totalLatencyMs,
 latencySamples, averageLatencyMs, lastUsedAt }` για `vision`, `audio` και
-`video`. Το `averageLatencyMs` χρησιμοποιεί ως παρονομαστή το `latencySamples`
-και όχι όλες τις προσπάθειες· μια λειτουργία χωρίς χρονομέτρηση δεν δημιουργεί
-τεχνητά δείγμα μηδενικών χιλιοστών του δευτερολέπτου. Το `bridged` παραμένει το
-backward-compatible ψευδώνυμο για τις επιτυχημένες μετατροπές· οι αποτυχημένες
-προσπάθειες δεν το αυξάνουν.
+`video`. Το `averageLatencyMs` χρησιμοποιεί ως παρονομαστή το `latencySamples`, όχι όλες τις προσπάθειες· μια λειτουργία χωρίς χρονισμό δεν κατασκευάζει ένα
+δείγμα μηδενικών χιλιοστών του δευτερολέπτου. Το `bridged` παραμένει το backward-compatible alias για επιτυχημένες
+μετατροπές· οι αποτυχημένες προσπάθειες δεν το αυξάνουν.
 Οι μετρητές μηδενίζονται κατά την επανεκκίνηση της διεργασίας εκ σχεδιασμού
-(τηλεμετρία, όχι λογιστική καταγραφή).
+(τηλεμετρία, όχι λογιστική).
 
-#### Ρύθμιση παραμέτρων dashboard
+#### Διαμόρφωση dashboard
 
-Η αποκλειστική σελίδα του πίνακα ελέγχου είναι η
-`/dashboard/settings/modality-bridge`. Οι καρτέλες της `Vision`, `Audio` και
-`Video`, οι οποίες είναι προσβάσιμες μέσω URL, διατηρούν τις παραμέτρους ερωτήματος κατά την εναλλαγή της τιμής `tab`.
-Η καρτέλα Vision παρέχει ενεργοποίηση, λειτουργία, επιλογή μοντέλου (συμπεριλαμβανομένης της αυτόματης
-προεπιλογής), προτροπές με επίγνωση της εργασίας, προηγμένα όρια χρονικού ορίου/εικόνας/μήκους περιγραφής/κρυφής μνήμης,
-μετρητές χρόνου εκτέλεσης και ένα προστατευμένο δοκιμαστικό αίτημα. Η καρτέλα Audio είναι επίσης ενεργή: παρέχει
-ενεργοποίηση, επιλογέα μοντέλου αποκλειστικά για STT με Αυτόματο, όρια χρονικού ορίου/μέγιστης διάρκειας κλιπ, μετρητές
-ήχου και μια δοκιμή δείγματος `input_audio`. Η καρτέλα Video είναι λειτουργική: αναφέρει
-την κατάσταση χρόνου εκτέλεσης των FFmpeg/ffprobe — μία από τέσσερις ρητές καταστάσεις διεπαφής χρήστη (`unknown` όσο
-ο έλεγχος βρίσκεται σε εξέλιξη ή δεν μπόρεσε να ολοκληρωθεί, `restricted` σε έναν κεντρικό υπολογιστή
-πίνακα ελέγχου που δεν είναι loopback, όπου ο έλεγχος παραλείπεται στην πλευρά του πελάτη, `unavailable` αφού εκτελεστεί ο έλεγχος
-και επιβεβαιωθεί ότι λείπουν, ή `available` με τις εκδόσεις των FFmpeg/ffprobe) — αποθηκεύει μόνιμα
-τα όρια ενεργοποίησης/μοντέλου/καρέ/βίντεο/χρονικού ορίου, φιλτράρει τον επιλογέα μοντέλου ώστε να εμφανίζει μοντέλα
-με δυνατότητες όρασης και παρέχει μετρητές βίντεο.
+Η αποκλειστική σελίδα dashboard είναι
+`/dashboard/settings/modality-bridge`. Οι URL-προσβάσιμες καρτέλες της `Vision`, `Audio`
+και `Video` διατηρούν τα query parameters κατά την εναλλαγή της τιμής `tab`.
+Η καρτέλα Vision εκθέτει ενεργοποίηση, λειτουργία, επιλογή μοντέλου (συμπεριλαμβανομένης της αυτόματης
+προεπιλογής), task-aware prompting, προχωρημένα όρια timeout/εικόνων/μήκους-περιγραφής/cache,
+μετρητές χρόνου εκτέλεσης και ένα προστατευμένο δείγμα αιτήματος. Η καρτέλα Audio είναι επίσης live: εκθέτει
+ενεργοποίηση, έναν επιλογέα μοντέλου μόνο για STT με Auto, όρια timeout/μέγιστου-clip, μετρητές
+ήχου και ένα δοκιμαστικό δείγμα `input_audio`. Η καρτέλα Video είναι λειτουργική: αναφέρει
+την κατάσταση χρόνου εκτέλεσης FFmpeg/ffprobe — μία από τέσσερις ρητές καταστάσεις UI (`unknown` όσο
+η διερεύνηση είναι σε εξέλιξη ή δεν μπόρεσε να ολοκληρωθεί, `restricted` σε μη-loopback
+host του dashboard όπου η διερεύνηση παραλείπεται από την πλευρά του πελάτη, `unavailable` μόλις διερευνηθεί
+και επιβεβαιωθεί ότι λείπει, ή `available` με τις εκδόσεις FFmpeg/ffprobe) — αποθηκεύει
+όρια ενεργοποίησης/μοντέλου/frames/βίντεο/timeout, φιλτράρει τον επιλογέα μοντέλων σε μοντέλα με δυνατότητα
+όρασης και εκθέτει μετρητές βίντεο.
 
-Η παλαιότερη κάρτα Vision Bridge στις ρυθμίσεις AI αποτελεί σύνδεσμο συμβατότητας προς τη
-νέα σελίδα· δεν διαθέτει πλέον δεύτερο αντίγραφο της φόρμας. Η ενότητα Media Providers επίσης
+Η πρώην κάρτα Vision Bridge κάτω από τις ρυθμίσεις AI είναι σύνδεσμος συμβατότητας προς τη
+νέα σελίδα· δεν κατέχει πλέον ένα δεύτερο αντίγραφο της φόρμας. Το Media Providers επίσης
 συνδέει τις ροές εργασίας Image-to-Text και Speech-to-Text με τις αντίστοιχες καρτέλες του Modality
-Bridge, χωρίς να καταργεί το υπάρχον περιβάλλον δοκιμών Speech-to-Text.
+Bridge χωρίς να αφαιρεί το υπάρχον Speech-to-Text playground.
 
-**Παράκαμψη αποδοχής αυτοβρόχου:** όταν η κλήση περιγραφής δρομολογείται μέσω του
-αυτοβρόχου `/v1` του ίδιου του OmniRoute (μη τυπικό μοντέλο παρόχου), το υποαίτημα στέλνει
-`x-omniroute-admission-bypass: internal` και πραγματοποιεί έλεγχο ταυτότητας με το επιλυμένο
-διαπιστευτήριο αυτοβρόχου — την τοπική τιμή-δείκτη `sk_omniroute` σε τοπική λειτουργία ή το
-κλειδί περιβάλλοντος `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` που έχει διαμορφωθεί από τον διαχειριστή (#1350), ώστε
-οι αναπτύξεις με `REQUIRE_API_KEY=true` να μπορούν ακόμα να εκτελούν την κλήση περιγραφής. Η παράκαμψη
-γίνεται αποδεκτή μόνο για αυτά ακριβώς τα διαπιστευτήρια, επομένως οι εξωτερικοί πελάτες δεν μπορούν να χρησιμοποιήσουν την
+**Παράκαμψη αποδοχής self-loop:** όταν η κλήση describe δρομολογείται μέσα από το δικό του
+`/v1` self-loop του OmniRoute (μοντέλο μη τυπικού παρόχου), το υπο-αίτημα στέλνει
+`x-omniroute-admission-bypass: internal` και αυθεντικοποιείται με το επιλυμένο
+διαπιστευτήριο self-loop — το τοπικό σκηνικό `sk_omniroute` σε local mode, ή το
+κλειδί env `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` που έχει ορίσει ο χειριστής (#1350), ώστε
+αναπτύξεις με `REQUIRE_API_KEY=true` να μπορούν ακόμα να εκτελούν την κλήση describe. Η παράκαμψη
+τιμάται μόνο για αυτά ακριβώς τα διαπιστευτήρια, οπότε εξωτερικοί πελάτες δεν μπορούν να χρησιμοποιήσουν την
 κεφαλίδα για να παρακάμψουν την αποδοχή.
 
-Οι παλαιού τύπου προεπιλογές βρίσκονται στο `src/shared/constants/visionBridgeDefaults.ts`· οι
-νέες προεπιλογές λειτουργίας/επίγνωσης εργασίας/κρυφής μνήμης και ο επιλυτής ρυθμίσεων βρίσκονται στο
-`src/shared/constants/modalityBridgeDefaults.ts`. Ο μηχανισμός προστασίας παρέχει μια επιλογή κατασκευαστή
-`deps`, ώστε οι δοκιμές να μπορούν να εισάγουν εικονικές υλοποιήσεις των `getSettings` και
+Οι παλαιές προεπιλογές βρίσκονται στο `src/shared/constants/visionBridgeDefaults.ts`· οι
+νέες προεπιλογές λειτουργίας/task-aware/cache και ο resolver ρυθμίσεων βρίσκονται στο
+`src/shared/constants/modalityBridgeDefaults.ts`. Το guardrail εκθέτει μια
+επιλογή κατασκευαστή `deps` ώστε τα tests να μπορούν να εισάγουν ψεύτικες υλοποιήσεις `getSettings` και
 `callVisionModel`.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
-Αναχαιτίζει αιτήματα συνομιλίας που περιέχουν ήχο προτού φτάσουν σε έναν προορισμό ο οποίος δεν είναι
-γνωστό ότι δέχεται είσοδο ήχου. Δεν επαναδρομολογεί ποτέ το αίτημα συνομιλίας: τα τμήματα ήχου
-μεταγράφονται μέσω του υπάρχοντος τελικού σημείου πολλαπλών τμημάτων, συμβατού με το OpenAI, και το
-επιλεγμένο μοντέλο συνομιλίας συνεχίζει με τις μεταγραφές κειμένου.
+Παρεμβαίνει σε αιτήματα chat που φέρουν ήχο πριν φτάσουν σε έναν στόχο που δεν είναι
+γνωστό ότι δέχεται είσοδο ήχου. Δεν ανακατευθύνει ποτέ το αίτημα chat: τα τμήματα ήχου
+μεταγράφονται μέσω του υπάρχοντος OpenAI-συμβατού multipart endpoint και το
+επιλεγμένο μοντέλο chat συνεχίζει με μεταγραφές κειμένου.
 
 Ροή:
 
-1. Επιλύστε το `supportsAudio` μέσω του `getResolvedModelCapabilities()`. Τα ρητά
-   μεταδεδομένα του μητρώου παρόχων υπερισχύουν, ακολουθούμενα από τα στατικά μεταδεδομένα μοντέλου και έπειτα από το συγχρονισμένο
-   `modalities_input`. Μια δηλωμένη λίστα εισόδου χωρίς `audio` έχει τιμή `false`· όταν δεν υπάρχουν
-   στοιχεία για τη δυνατότητα, η τιμή παραμένει `null`. Τόσο το `false` όσο και το `null` ενεργοποιούν τη
-   συντηρητική γέφυρα, ενώ το `true` την παρακάμπτει.
-2. Επιλύστε τις ρυθμίσεις `modalityBridgeAudio*` και εξαγάγετε τα τμήματα ήχου ανώτατου επιπέδου
-   που μπορούν να αντικατασταθούν από κάθε μήνυμα, μέσω του κοινόχρηστου ανιχνευτή `detectMediaParts()`.
-   Τα υποστηριζόμενα σχήματα μετάδοσης είναι τα OpenAI `input_audio`, `audio_url` και
-   `source.media_type: "audio/*"`. Ο ένθετος ήχος ανιχνεύεται για τη δρομολόγηση, αλλά δεν
-   αφαιρείται από τη διαδρομή αντικατάστασης. Η εργασία περιορίζεται από το `modalityBridgeAudioMaxClips`·
-   τα επόμενα τμήματα παραμένουν ανέπαφα.
-3. Τηρήστε ένα διαμορφωμένο `provider/model` ή αφήστε το `selectAudioBridgeModel()` να διατρέξει
-   το `AUDIO_TRANSCRIPTION_PROVIDERS` με τη σταθερή σειρά του καταλόγου και να επιλέξει το πρώτο
-   μοντέλο με χρησιμοποιήσιμο ενεργό διαπιστευτήριο παρόχου.
-4. Το `callAudioTranscription()` μετατρέπει ήχο base64/data-URI σε ένα τμήμα πολλαπλών τμημάτων
-   `file` ή πραγματοποιεί λήψη ενός απομακρυσμένου `audio_url` μέσω του μηχανισμού προστασίας εξερχόμενων συνδέσεων
-   αποκλειστικά προς δημόσιες διευθύνσεις, με σταθεροποίηση DNS και όριο 25 MB. Στη συνέχεια, αποστέλλει μέσω POST το αρχείο και το επιλεγμένο
-   μοντέλο στον τοπικό αυτοβρόχο `/v1/audio/transcriptions`, με έλεγχο ταυτότητας μέσω του
-   `resolveSelfLoopBearer()`. Η υπάρχουσα διαδρομή μεταγραφής εκτελεί την κανονική
-   αναζήτηση διαπιστευτηρίων, τον χειρισμό περιόδων αναμονής/ορίων ρυθμού και την αποστολή στον πάροχο.
-5. Οι επιτυχημένες κλήσεις αντικαθιστούν τα τμήματά τους με `[Audio N]: <transcript>`. Οι κλήσεις
-   εκτελούνται με `Promise.allSettled`: μια μεμονωμένη αποτυχία διατηρεί το αντίστοιχο αρχικό
-   τμήμα ήχου (σύμβαση #4012). Αν αποτύχουν όλες οι κλήσεις και έχει αποδειχθεί ότι ο προορισμός έχει
+1. Επιλύστε το `supportsAudio` μέσω της `getResolvedModelCapabilities()`.
+   Πρώτα υπερισχύουν τα ρητά μεταδεδομένα του μητρώου παρόχων, μετά τα στατικά
+   μεταδεδομένα του μοντέλου και μετά το συγχρονισμένο `modalities_input`. Μια
+   δηλωμένη λίστα εισόδων χωρίς `audio` αξιολογείται ως `false`· η απουσία
+   αποδεικτικών στοιχείων δυνατοτήτων παραμένει `null`. Τόσο το `false` όσο και
+   το `null` ενεργοποιούν τη συντηρητική γέφυρα, ενώ το `true` την παρακάμπτει.
+2. Επιλύστε τις ρυθμίσεις `modalityBridgeAudio*` και εξάγετε τα τμήματα ήχου
+   ανώτατου επιπέδου που μπορούν να υποβληθούν σε splice από κάθε μήνυμα μέσω
+   του κοινόχρηστου ανιχνευτή `detectMediaParts()`. Οι υποστηριζόμενες μορφές
+   wire είναι OpenAI `input_audio`, `audio_url` και
+   `source.media_type: "audio/*"`. Ο ένθετος ήχος ανιχνεύεται για δρομολόγηση,
+   αλλά δεν αφαιρείται από τη διαδρομή splice. Η εργασία περιορίζεται από το
+   `modalityBridgeAudioMaxClips`· τα επόμενα τμήματα παραμένουν ανέπαφα.
+3. Τηρήστε ένα διαμορφωμένο `provider/model`, ή αφήστε την
+   `selectAudioBridgeModel()` να διατρέξει τους `AUDIO_TRANSCRIPTION_PROVIDERS`
+   με τη σταθερή σειρά του καταλόγου και να επιλέξει το πρώτο μοντέλο με
+   χρησιμοποιήσιμο ενεργό διαπιστευτήριο παρόχου.
+4. Η `callAudioTranscription()` μετατρέπει ήχο base64/data-URI σε multipart
+   `file`, ή κατεβάζει ένα απομακρυσμένο `audio_url` μέσω του φράγματος
+   εξερχόμενων συνδέσεων μόνο προς δημόσιους προορισμούς με DNS pinning και
+   όριο 25 MB. Στη συνέχεια υποβάλλει με POST το αρχείο και το επιλεγμένο
+   μοντέλο στον τοπικό self-loop `/v1/audio/transcriptions`, με έλεγχο
+   ταυτότητας μέσω `resolveSelfLoopBearer()`. Η υπάρχουσα διαδρομή μεταγραφής
+   εκτελεί την κανονική αναζήτηση διαπιστευτηρίων, τη διαχείριση
+   cooldown/ορίου ρυθμού και την αποστολή προς τον πάροχο.
+5. Οι επιτυχείς κλήσεις αντικαθιστούν τα τμήματά τους με
+   `[Audio N]: <transcript>`. Οι κλήσεις εκτελούνται με `Promise.allSettled`:
+   μια μεμονωμένη αποτυχία διατηρεί το αρχικό τμήμα ήχου (σύμβαση #4012). Εάν
+   αποτύχουν όλες οι κλήσεις και ο στόχος έχει αποδειχθεί
    `supportsAudio === false`, τα τμήματα γίνονται
-   `[Audio N]: (μη διαθέσιμο — δεν έχει συνδεθεί πάροχος STT)` (σύμβαση #8430). Για
-   έναν άγνωστο προορισμό (`null`), σε περίπτωση συνολικής αποτυχίας το περιεχόμενο παραμένει ανέπαφο. Ένας αποδεδειγμένα
-   αποκλειστικά κειμενικός προορισμός χωρίς χρησιμοποιήσιμο διαπιστευτήριο STT λαμβάνει το ίδιο ρητό
-   υποκατάστατο χωρίς να εκδίδεται κλήση δικτύου.
+   `[Audio N]: (unavailable — no STT provider connected)` (σύμβαση #8430). Για
+   άγνωστο στόχο (`null`), ένα αποτέλεσμα καθολικής αποτυχίας παραμένει
+   ανέπαφο. Ένας αποδεδειγμένα αμιγώς κειμενικός στόχος χωρίς χρησιμοποιήσιμο
+   διαπιστευτήριο STT λαμβάνει το ίδιο ρητό υποκατάστατο χωρίς να
+   πραγματοποιηθεί δικτυακή κλήση.
 
-Οι επιτυχημένες μεταγραφές χρησιμοποιούν την καθολική για τη διεργασία κρυφή μνήμη LRU/TTL του Modality Bridge. Το
-κλειδί συνδυάζει την αναφορά ήχου, τη σταθερή ετικέτα λειτουργίας `audio-transcription`
-και το επιλεγμένο μοντέλο STT· οι αποτυχίες δεν αποθηκεύονται ποτέ στην κρυφή μνήμη. Οι προσπάθειες επεξεργασίας ήχου ενημερώνουν
-τους κοινόχρηστους μετρητές `bridged`, `cacheHits`, `failures` και `lastUsedAt`.
-Οι μετασχηματισμένες αποκρίσεις περιλαμβάνουν
-`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`· τα ανέπαφα
-αιτήματα δεν λαμβάνουν τμήμα Audio Bridge.
+Οι επιτυχείς μεταγραφές χρησιμοποιούν την κρυφή μνήμη LRU/TTL της Γέφυρας
+Τροπικοτήτων σε επίπεδο διεργασίας. Το κλειδί συνδυάζει την αναφορά ήχου, τη
+σταθερή ετικέτα λειτουργίας `audio-transcription` και το επιλεγμένο μοντέλο
+STT· οι αποτυχίες δεν αποθηκεύονται ποτέ στην κρυφή μνήμη. Οι προσπάθειες ήχου
+ενημερώνουν τους κοινόχρηστους μετρητές `bridged`, `cacheHits`, `failures` και
+`lastUsedAt`. Οι μετασχηματισμένες αποκρίσεις φέρουν
+`x-omniroute-modality-bridge: audio->text;model=<sttModel>;parts=<n>`· τα
+ανέπαφα αιτήματα δεν λαμβάνουν τμήμα Γέφυρας Ήχου.
 
-Οι ρυθμίσεις χρόνου εκτέλεσης υποστηρίζονται από βάση δεδομένων και επικυρώνονται μέσω Zod:
+Οι ρυθμίσεις χρόνου εκτέλεσης αποθηκεύονται σε βάση δεδομένων και επικυρώνονται
+με Zod:
 
-| Κλειδί                        | Προεπιλογή | Εύρος                        |
-| ----------------------------- | ---------- | ---------------------------- |
-| `modalityBridgeAudioEnabled`  | `true`     | —                            |
-| `modalityBridgeAudioModel`    | `""`       | Αυτόματο ή αναγνωριστικό STT |
-| `modalityBridgeAudioTimeout`  | `60000`    | 1000–300000                  |
-| `modalityBridgeAudioMaxClips` | `3`        | 1–10                         |
+| Κλειδί                        | Προεπιλογή | Εύρος             |
+| ----------------------------- | ---------- | ----------------- |
+| `modalityBridgeAudioEnabled`  | `true`     | —                 |
+| `modalityBridgeAudioModel`    | `""`       | Αυτόματο ή STT ID |
+| `modalityBridgeAudioTimeout`  | `60000`    | 1000–300000       |
+| `modalityBridgeAudioMaxClips` | `3`        | 1–10              |
 
-Η κοινόχρηστη κρυφή μνήμη εξακολουθεί να ελέγχεται από τα `modalityBridgeCacheEnabled`,
-`modalityBridgeCacheTtlMinutes` και `modalityBridgeCacheMaxEntries`.
+Η κοινόχρηστη κρυφή μνήμη εξακολουθεί να ελέγχεται από τα
+`modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` και
+`modalityBridgeCacheMaxEntries`.
 
-### Video Bridge (`videoBridge.ts`, `videoBridgePipeline.ts`)
+### Γέφυρα Βίντεο (`videoBridge.ts`, `videoBridgePipeline.ts`)
 
-Παρεμβάλλεται στα τμήματα βίντεο ανώτατου επιπέδου στα `messages` του Chat Completions και στο
-`input` του Responses API πριν κληθεί ένας στόχος χωρίς γνωστή εγγενή υποστήριξη βίντεο.
-Οι υποστηριζόμενες μορφές είναι `input_video`, `video_url`, `video_source`, URL HTTPS
-και URI δεδομένων `data:video/*;base64,...`. Τα απλά ονόματα αρχείων μέσα σε κείμενο δεν αντιμετωπίζονται
-ως βίντεο.
+Αναχαιτίζει τμήματα βίντεο ανώτατου επιπέδου στα `messages` του Chat
+Completions και στο `input` του Responses API πριν κληθεί ένας στόχος χωρίς
+γνωστή εγγενή υποστήριξη βίντεο. Οι υποστηριζόμενες μορφές είναι `input_video`,
+`video_url`, `video_source`, HTTPS URLs και data URIs
+`data:video/*;base64,...`. Τα απλά ονόματα αρχείων μέσα σε κείμενο δεν
+αντιμετωπίζονται ως βίντεο.
 
-Το `VideoBridgeGuardrail.preCall` (`videoBridge.ts`) αναλαμβάνει τη διάσχιση του αιτήματος, τον
-έλεγχο δυνατοτήτων/πολιτικής, τη συγκέντρωση ανά αίτημα και το ωφέλιμο φορτίο της απόκρισης.
-Η επεξεργασία ανά βίντεο — η απόκτηση, η κρυφή μνήμη ολόκληρου του αποτελέσματος, η περιγραφή μιας ακολουθίας
-καρέ (η οποία ενσωματώνει τυχόν μεταγραφή ήχου που έχει δηλώσει ο καλών) και οι μετρήσεις/η ματαίωση/η εκκαθάριση
-ανά προσπάθεια — αποκρύπτεται πίσω από το `processVideoPart` στο
-`videoBridgePipeline.ts`, το οποίο καλείται μία φορά ανά τμήμα βίντεο μέσα στον βρόχο του `preCall`.
-Αυτό το module ορίζει επίσης τα ρητά όρια θυρών `VideoMediaBrokerPort`
-(απόκτηση byte και εξαγωγή δειγματοληπτημένων καρέ), `VideoAudioTranscriptionPort`
-(ενσωμάτωση μιας μεταγραφής ήχου που έχει δηλώσει ο καλών με τις λεζάντες των δειγματοληπτημένων καρέ) και
-`VideoDrilldownPort` (το όριο διατήρησης δεδομένων για τη λεπτομερή διερεύνηση καρέ· δεν έχει ακόμη συνδεθεί
-με το `processVideoPart` — σήμερα μόνο η ξεχωριστή διαδρομή `/api/modality-bridge/video/drilldown`
-γράφει καταχωρίσεις λεπτομερούς διερεύνησης).
+Το `VideoBridgeGuardrail.preCall` (`videoBridge.ts`) έχει την ευθύνη της
+διάσχισης του αιτήματος, του ελέγχου δυνατοτήτων/πολιτικής, της συνάθροισης ανά
+αίτημα και του φορτίου απόκρισης. Η εργασία ανά βίντεο — η ανάκτηση, η κρυφή
+μνήμη ολόκληρου του αποτελέσματος, η περιγραφή μιας ακολουθίας καρέ (που
+συγχωνεύει τυχόν μεταγραφή ήχου δηλωμένη από τον καλούντα) και τα
+μετρικά/η ματαίωση/η εκκαθάριση ανά απόπειρα — κρύβεται πίσω από την
+`processVideoPart` στο `videoBridgePipeline.ts`, η οποία καλείται μία φορά ανά
+τμήμα βίντεο μέσα στον βρόχο του `preCall`. Αυτή η μονάδα ορίζει επίσης τα
+ρητά όρια θυρών `VideoMediaBrokerPort` (ανάκτηση bytes και εξαγωγή
+δειγματοληφθέντων καρέ), `VideoAudioTranscriptionPort` (συγχώνευση της
+μεταγραφής ήχου που δήλωσε ο καλών με τις δειγματοληφθείσες λεζάντες) και
+`VideoDrilldownPort` (το όριο μονιμοποίησης drill-down καρέ· δεν έχει ακόμη
+συνδεθεί στην `processVideoPart` — σήμερα μόνο η ξεχωριστή διαδρομή
+`/api/modality-bridge/video/drilldown` γράφει εγγραφές drill-down).
 
-Η δημόσια διαδρομή αιτήματος `/v1` δεν εισάγει ούτε εκτελεί ποτέ υποδιεργασία. Τα απομακρυσμένα
-βίντεο λαμβάνονται με όριο 50 MiB· τα ενσωματωμένα βίντεο base64 έχουν συντηρητικό ανώτατο όριο
-36 MiB αποκωδικοποιημένων δεδομένων ανά βίντεο, ώστε το περίβλημα μοντέλου/μηνυμάτων/πλαισίωσης
-να μπορεί να παραμένει εντός του δημόσιου ορίου αποδοχής αιτημάτων JSON των 50 MiB. Το μήκος των ενσωματωμένων
-δεδομένων και οι εκτιμήσεις αποκωδικοποιημένου μεγέθους ελέγχονται πριν από την εκχώρηση μνήμης. Απαιτείται HTTPS
-στο αρχικό απομακρυσμένο URL και σε κάθε ανακατεύθυνση, με χρήση του υπάρχοντος
-μηχανισμού προστασίας εξερχόμενης κίνησης μόνο προς δημόσιες διευθύνσεις και με καρφίτσωμα DNS. Στη συνέχεια, τα byte διασχίζουν το ακριβές εσωτερικό
-όριο μεσολαβητή `POST /api/modality-bridge/video/extract`. Αυτή η διαδρομή είναι ταυτόχρονα
-`LOCAL_ONLY` και `SPAWN_CAPABLE`, δέχεται μόνο ένα πιστοποιημένο ανά διεργασία αίτημα
-από αξιόπιστη διεύθυνση βρόχου επιστροφής και δεν δέχεται ποτέ URL, διαδρομή συστήματος αρχείων, εκτελέσιμο
-ή λίστα ορισμάτων. Η διοχέτευση μεγέθους σώματος του API και ο αυξητικός αναγνώστης σώματος
-του χειριστή επιβάλλουν ανεξάρτητα ανώτατο όριο εισόδου 50 MiB για τον μεσολαβητή. Η οριοθετημένη ουρά του εκτελεί
-μία εξαγωγή κάθε φορά, επιτρέπει τέσσερις εκκρεμείς εργασίες και περιορίζει την εκκρεμή είσοδο
-στα 100 MiB.
+Η δημόσια διαδρομή αιτήματος `/v1` δεν εισάγει ούτε καλεί ποτέ υποδιεργασία.
+Τα απομακρυσμένα βίντεο λαμβάνονται με όριο 50 MiB· τα ενσωματωμένα βίντεο
+base64 έχουν ένα συντηρητικό ανώτατο όριο αποκωδικοποιημένου μεγέθους 36 MiB
+ανά βίντεο, ώστε ο φάκελος μοντέλου/μηνυμάτων/πλαισίωσης να παραμένει εντός του
+δημόσιου ορίου αποδοχής αιτημάτων JSON των 50 MiB. Το μήκος του inline και οι
+εκτιμήσεις αποκωδικοποιημένου μεγέθους ελέγχονται πριν από τη δέσμευση.
+Απαιτείται HTTPS στο αρχικό απομακρυσμένο URL και σε κάθε ανακατεύθυνση, με
+χρήση του υπάρχοντος φράγματος εξερχόμενων συνδέσεων μόνο προς δημόσιους
+προορισμούς με DNS pinning. Στη συνέχεια τα bytes διασχίζουν το ακριβές
+εσωτερικό όριο μεσολαβητή `POST /api/modality-bridge/video/extract`. Αυτή η
+διαδρομή είναι ταυτόχρονα `LOCAL_ONLY` και `SPAWN_CAPABLE`, δέχεται μόνο ένα
+πιστοποιημένο ανά διεργασία αίτημα από αξιόπιστο loopback και δεν δέχεται ποτέ
+URL, διαδρομή συστήματος αρχείων, εκτελέσιμο ή λίστα ορισμάτων. Το pipeline
+μεγέθους σώματος του API και ο αναγνώστης σώματος σταδιακής ανάγνωσης του
+χειριστή επιβάλλουν ανεξάρτητα ένα όριο εισόδου μεσολαβητή 50 MiB. Η
+οριοθετημένη ουρά του εκτελεί μία εξαγωγή κάθε φορά, επιτρέπει τέσσερις
+εκκρεμείς εργασίες και θέτει ανώτατο όριο εκκρεμούς εισόδου στα 100 MiB.
 
-Στο εσωτερικό του μεσολαβητή, το `ffprobe` διαβάζει ένα ιδιωτικό τοπικό αρχείο· η σταθερή λίστα επιτρεπόμενων
-μορφών αποκλείει μορφές λίστας αναπαραγωγής και δηλωτικού. Για τα επιτρεπόμενα κοντέινερ της οικογένειας MOV,
-οι εξωτερικές αναφορές δεδομένων MOV παραμένουν απενεργοποιημένες από προεπιλογή και η
-σταθερή εντολή δεν τις ενεργοποιεί. Τόσο το `ffprobe` όσο και το `ffmpeg` χρησιμοποιούν τη λίστα επιτρεπόμενων
-πρωτοκόλλων μόνο για `file`, ένα νήμα, σταθερούς πίνακες ορισμάτων, χωρίς κέλυφος,
-και εκτελέσιμα που επιλύονται από το `PATH`. Οι ροές εικόνων εξωφύλλου τύπου συνημμένης εικόνας δεν αποτελούν
-υποψήφιες ροές για αναπαραγωγή. Όλες οι αναπαραγώγιμες ροές πρέπει να ικανοποιούν τα όρια, ενώ
-προτιμάται μια ρητή προεπιλεγμένη ροή πριν από την ντετερμινιστική εναλλακτική επιλογή του χαμηλότερου δείκτη.
-Τα βίντεο περιορίζονται σε 600 δευτερόλεπτα, 8.192 pixel ανά διάσταση και
-33.554.432 pixel πηγής. Το FFmpeg δειγματοληπτεί 1–16 ενδιάμεσα καρέ JPEG, μειώνει
-την κλίμακα της μεγάλης πλευράς σε έως 1.024 pixel χωρίς αύξηση κλίμακας για μικρότερες εισόδους και
-δεν λαμβάνει ποτέ URL. Η δειγματοληψία είναι `uniform` από προεπιλογή. Οι προαιρετικές
-πολιτικές `scene_aware` και η πειραματική `segment_aware` εκτελούν ένα επιπλέον
-σταθερό πέρασμα FFmpeg πάνω στην ήδη επικυρωμένη τοπική ροή, επιλέγουν οριοθετημένες
-χρονικές σημάνσεις σκηνών `showinfo` και επιστρέφουν ντετερμινιστικά στα ίδια
-ομοιόμορφα ενδιάμεσα σημεία σε περίπτωση αποτυχίας του ανιχνευτή, λήξης χρονικού ορίου, εσφαλμένης μορφής εξόδου ή κενού
-συνόλου υποψηφίων. Η λειτουργία με επίγνωση τμημάτων κατανέμει δείγματα ενδιάμεσων σημείων αναλογικά στα
-επικυρωμένα διαστήματα σκηνών· τα τεκμήρια και η συμπεριφορά εναλλακτικής επιλογής της λειτουργίας με επίγνωση τμημάτων
-περιγράφονται αναλυτικά παρακάτω. Το αυστηρό ανώτατο όριο των 16 καρέ
-εφαρμόζεται μετά την επιλογή σε κάθε πολιτική. Όταν ένα αίτημα με επίγνωση σκηνών διαθέτει προϋπολογισμό μόνο
-ενός καρέ, χρησιμοποιεί το ομοιόμορφο ενδιάμεσο σημείο του ενεργού παραθύρου πλήρους βίντεο ή εστίασης
-και αναφέρει `policyEffective: uniform`: ένα μόνο επιλεγμένο καρέ σκηνής
-δεν μπορεί να διατηρήσει και τα δύο χρονικά άκρα. Ο καλών μπορεί προαιρετικά να παρέχει ένα
-πεπερασμένο παράθυρο εστίασης (`start`/`end` σε δευτερόλεπτα)· τα όρια προσαρμόζονται στη διάρκεια του μέσου,
-τα ανεστραμμένα ή μη πεπερασμένα παράθυρα απορρίπτονται και όλες οι πολιτικές δειγματοληψίας
-εκτελούνται μόνο εντός του κανονικοποιημένου διαστήματος. Το παράθυρο που προκύπτει
-περιλαμβάνεται στα μεταδεδομένα δειγματοληψίας και στο μη αξιόπιστο πρόθεμα περιγραφής, ώστε τα κατάντη μοντέλα
-να μπορούν να διακρίνουν ένα εστιασμένο απόσπασμα από το πλήρες χρονολόγιο.
+Μέσα στον broker, το `ffprobe` διαβάζει ένα ιδιωτικό τοπικό αρχείο· η σταθερή
+λίστα επιτρεπόμενων μορφών εξαιρεί τις μορφές playlist και manifest. Για
+επιτρεπόμενα container της οικογένειας MOV, οι εξωτερικές αναφορές δεδομένων MOV
+παραμένουν απενεργοποιημένες από προεπιλογή και η σταθερή εντολή δεν τις
+ενεργοποιεί. Τόσο το `ffprobe` όσο και το `ffmpeg` χρησιμοποιούν τη λίστα
+επιτρεπόμενων πρωτοκόλλων μόνο `file`, ένα νήμα, σταθερούς πίνακες ορισμάτων,
+χωρίς shell, και εκτελέσιμα που επιλύονται από το `PATH`. Οι ροές εξώφυλλων
+επισυναπτόμενων εικόνων δεν αποτελούν υποψήφιες αναπαραγώγιμες ροές. Όλες οι
+αναπαραγώγιμες ροές πρέπει να ικανοποιούν τα όρια, και μια ρητή προεπιλεγμένη
+ροή προτιμάται πριν από τον ντετερμινιστικό εναλλακτικό μηχανισμό του χαμηλότερου
+δείκτη. Τα βίντεο περιορίζονται σε 600 δευτερόλεπτα, 8.192 pixel ανά διάσταση και
+33.554.432 pixel πηγής. Το FFmpeg δειγματοληπτεί 1–16 καρέ JPEG στο μέσο της
+διάρκειας, σμικρύνει τη μεγάλη πλευρά σε το πολύ 1.024 pixel χωρίς
+μεγέθυνση μικρότερων εισόδων, και δεν λαμβάνει ποτέ URL. Η δειγματοληψία είναι
+`uniform` από προεπιλογή. Οι προαιρετικές πολιτικές `scene_aware` και η
+πειραματική `segment_aware` εκτελούν ένα επιπλέον σταθερό πέρασμα FFmpeg πάνω
+στην ήδη επικυρωμένη τοπική ροή, επιλέγουν φραγμένες χρονοσημάνσεις σκηνών
+`showinfo` και υποχωρούν ντετερμινιστικά στα ίδια ομοιόμορφα μέσα σημεία σε
+περίπτωση αποτυχίας του ανιχνευτή, λήξης χρονικού ορίου, ακατάλληλης εξόδου ή
+κενού συνόλου υποψηφίων. Η λειτουργία segment-aware κατανέμει τα δείγματα μέσων
+σημείων αναλογικά προς τα επικυρωμένα διαστήματα σκηνών· τα τεκμήρια της
+λειτουργίας segment-aware και η συμπεριφορά υποχώρησης περιγράφονται αναλυτικά
+παρακάτω. Το σκληρό ανώτατο όριο των 16 καρέ εφαρμόζεται μετά την επιλογή σε κάθε
+πολιτική. Όταν ένα αίτημα scene-aware διαθέτει προϋπολογισμό μόνο ενός καρέ,
+χρησιμοποιεί το ομοιόμορφο μέσο σημείο του ενεργού παραθύρου πλήρους βίντεο ή
+εστίασης και αναφέρει `policyEffective: uniform`: ένα μοναδικό επιλεγμένο καρέ
+σκηνής δεν μπορεί να διατηρήσει και τα δύο χρονικά άκρα. Ένας καλών μπορεί
+προαιρετικά να παρέχει ένα πεπερασμένο παράθυρο εστίασης (δευτερόλεπτα
+`start`/`end`)· τα όρια περικόπτονται στη διάρκεια του μέσου, τα ανεστραμμένα ή
+μη πεπερασμένα παράθυρα απορρίπτονται, και όλες οι πολιτικές δειγματοληψίας
+εκτελούνται μόνο εντός του κανονικοποιημένου διαστήματος. Το προκύπτον παράθυρο
+συμπεριλαμβάνεται στα μεταδεδομένα δειγματοληψίας και στο πρόθεμα μη αξιόπιστης
+περιγραφής, ώστε τα μοντέλα κατάντη να μπορούν να διακρίνουν ένα εστιασμένο
+απόσπασμα από την πλήρη χρονογραμμή.
 
-Η σημασιολογική εστίαση λεζάντας αποτελεί ξεχωριστή, ρητή ρύθμιση. Η προεπιλεγμένη λειτουργία ανάλυσης `full`
-διατηρεί την υπάρχουσα προτροπή καρέ και δεν προωθεί ποτέ κείμενο αιτήματος
-στο μοντέλο δημιουργίας λεζαντών. Στη λειτουργία `focused`, η γέφυρα διαβάζει μόνο το πιο πρόσφατο
-μη κενό `text`/`input_text` που έχει συνταχθεί από τον χρήστη από το ίδιο κοντέινερ Chat ή Responses,
-το κανονικοποιεί σε NFC, συμπτύσσει τους χαρακτήρες ελέγχου και τα κενά διαστήματα
-και το περιορίζει σε 500 σημεία κώδικα Unicode. Ένα κενό αποτέλεσμα επιστρέφει στην
-ακριβή προτροπή `full`. Μια αξιοποιήσιμη υπόδειξη σειριοποιείται ως JSON σε ειδικό
-μπλοκ μη αξιόπιστου περιβάλλοντος χρήστη και μπορεί μόνο να δίνει προτεραιότητα σε παρατηρήσιμες λεπτομέρειες· δεν
-μπορεί να παρακάμψει την ξεχωριστή προειδοποίηση κατά της εκτέλεσης οδηγιών που είναι ορατές
-ή ακούγονται στο μέσο. Η εστίαση βάσει κειμένου δεν συνάγει ποτέ `start`/`end` ούτε αλλάζει
-τον χρονικό δειγματολήπτη.
+Η σημασιολογική εστίαση λεζάντας είναι μια ξεχωριστή, ρητή ρύθμιση. Η
+προεπιλεγμένη λειτουργία ανάλυσης `full` διατηρεί την υπάρχουσα προτροπή καρέ
+και δεν προωθεί ποτέ κείμενο αιτήματος στο μοντέλο λεζάντας. Στη λειτουργία
+`focused`, η γέφυρα διαβάζει μόνο το πιο πρόσφατο μη κενό `text`/`input_text`
+συνταγμένο από τον χρήστη από το ίδιο container Chat ή Responses, το
+κανονικοποιεί σε NFC, συμπτύσσει τους χαρακτήρες ελέγχου και τα κενά, και το
+περιορίζει σε 500 σημεία κώδικα Unicode. Ένα κενό αποτέλεσμα υποχωρεί στην
+ακριβή προτροπή `full`. Μια χρήσιμη υπόδειξη σειριοποιείται ως JSON σε ένα
+ειδικό μπλοκ μη αξιόπιστου πλαισίου χρήστη και μπορεί μόνο να δώσει προτεραιότητα
+σε παρατηρήσιμες λεπτομέρειες· δεν μπορεί να παρακάμψει την ξεχωριστή
+προειδοποίηση κατά της τήρησης οδηγιών που είναι ορατές ή ακουστές στο μέσο. Η
+κειμενική εστίαση δεν συνάγει ποτέ `start`/`end` ούτε αλλάζει τον χρονικό
+δειγματολήπτη.
 
 #### Δομικά τεκμήρια τμημάτων FU-07
 
-Το `segment_aware` χρησιμοποιεί ένα οριοθετημένο πέρασμα προκαταρκτικής ανάλυσης πάνω στην ήδη επικυρωμένη
-τοπική ροή βίντεο. Η σταθερή αλυσίδα φίλτρων αρχικά μειώνει την κλίμακα σε πλάτος έως 320 pixel,
-ανιχνεύει αλλαγές σκηνής και παγωμένα διαστήματα και έπειτα πραγματοποιεί δειγματοληψία με 1 καρέ ανά
-δευτερόλεπτο για θόλωση, μέση φωτεινότητα και χωρικές/χρονικές πληροφορίες. Το πέρασμα
-περιορίζεται σε 600 δομικά δείγματα, ένα νήμα FFmpeg/φίλτρων, τις ίδιες
-λίστες επιτρεπόμενων πρωτοκόλλων μόνο για `file` και κοντέινερ, όριο εξόδου διεργασίας 1 MiB
-και το πολύ 30 δευτερόλεπτα εντός της κοινής ματαίωσης/προθεσμίας του μεσολαβητή. Δεν
+Το `segment_aware` χρησιμοποιεί ένα φραγμένο πέρασμα προ-ανάλυσης πάνω στην ήδη
+επικυρωμένη τοπική ροή βίντεο. Η σταθερή αλυσίδα φίλτρων πρώτα κλιμακώνει σε το
+πολύ 320 pixel πλάτος, ανιχνεύει αλλαγές σκηνών και παγωμένα διαστήματα, και
+στη συνέχεια δειγματοληπτεί με ρυθμό 1 καρέ ανά δευτερόλεπτο για θόλωση, μέση
+φωτεινότητα και χωρική/χρονική πληροφορία. Το πέρασμα περιορίζεται σε 600
+δομικά δείγματα, ένα νήμα FFmpeg/φίλτρου, τις ίδιες λίστες επιτρεπόμενων
+πρωτοκόλλων μόνο `file` και container, ένα όριο εξόδου διεργασίας 1 MiB, και το
+πολύ 30 δευτερόλεπτα εντός του κοινού ορίου ακύρωσης/προθεσμίας του broker. Δεν
 δέχεται ποτέ εντολή, φίλτρο, διαδρομή ή URL από το αίτημα.
 
-Οι δομικές τιμές αποτελούν τεκμήρια ντετερμινιστικής δειγματοληψίας και όχι σημασιολογική
-κατανόηση βίντεο. Δεν συνάγουν υποκείμενα, ενέργειες, λεζάντες, ομιλία ή πρόθεση
-του χρήστη. Τα όρια σκηνών και παγώματος σχηματίζουν τμήματα· η κάλυψη παγώματος, η θόλωση,
-η έκθεση, η χωρική λεπτομέρεια και η χρονική μεταβολή επηρεάζουν μόνο τον τρόπο κατανομής
-του υπάρχοντος προϋπολογισμού 1–16 καρέ. Ένα πλήρως παγωμένο τμήμα περιορίζεται σε ένα καρέ,
-ενώ τα μη παγωμένα τμήματα ανταγωνίζονται για τον υπόλοιπο προϋπολογισμό. Όταν τα όρια
-είναι περισσότερα από τα καρέ, διατηρείται ομοιόμορφη κάλυψη της χρονικής γραμμής, ώστε οι γρήγορες
-πρώιμες εναλλαγές να μην μπορούν να αποκρύψουν ένα μεγάλο καταληκτικό τμήμα. Τα όρια σκηνών που βρίσκονται εντός
-της ανάλυσης 1 δευτερολέπτου από ένα όριο παγώματος συγχωνεύονται.
+Οι δομικές τιμές είναι ντετερμινιστικά τεκμήρια δειγματοληψίας, όχι
+σημασιολογική κατανόηση βίντεο. Δεν συνάγουν θέματα, ενέργειες, λεζάντες, ομιλία
+ή πρόθεση χρήστη. Τα όρια σκηνών και παγώματος σχηματίζουν τμήματα· η κάλυψη
+παγώματος, η θόλωση, η έκθεση, η χωρική λεπτομέρεια και η χρονική μεταβολή
+επηρεάζουν μόνο τον τρόπο κατανομής του υπάρχοντος προϋπολογισμού 1–16 καρέ. Ένα
+πλήρως παγωμένο τμήμα περιορίζεται σε ένα καρέ, ενώ τα μη παγωμένα τμήματα
+ανταγωνίζονται για τον υπόλοιπο προϋπολογισμό. Όταν τα όρια είναι περισσότερα
+από τα καρέ, διατηρείται η ομοιόμορφη κάλυψη της χρονογραμμής, ώστε ταχείες
+πρώιμες τομές να μην μπορούν να αποκρύψουν ένα μακρύ τελικό τμήμα. Τα όρια
+σκηνών εντός της ανάλυσης 1 δευτερολέπτου από ένα όριο παγώματος συγχωνεύονται.
 
-Η απουσία φίλτρων, τα κακοσχηματισμένα/κενά τεκμήρια, ένα σφάλμα ανιχνευτή ή η λήξη χρονικού ορίου
-της περιορισμένης προκαταρκτικής ανάλυσης οδηγούν, σε κατάσταση ανοικτής αποτυχίας, στην ακριβή πολιτική ομοιόμορφων μέσων σημείων. Μια ματαίωση από τον καλούντα
-ή η προθεσμία του broker δεν οδηγεί σε ανοικτή αποτυχία: τερματίζει την υπό εκτέλεση
-υποδιεργασία, αποτρέπει τη μεταγενέστερη εξαγωγή καρέ και το ιδιωτικό προσωρινό δέντρο
+Τα ελλιπή φίλτρα, τα ακατάλληλα/κενά τεκμήρια, ένα σφάλμα του ανιχνευτή ή το
+φραγμένο χρονικό όριο προ-ανάλυσης υποχωρούν ανοιχτά στην ακριβή πολιτική
+ομοιόμορφων μέσων σημείων. Μια ακύρωση από τον καλούντα ή μια προθεσμία του
+broker δεν υποχωρεί ανοιχτά: τερματίζει την εν εξελίξει υποδιεργασία,
+αποτρέπει μεταγενέστερη εξαγωγή καρέ, και το ιδιωτικό προσωρινό δέντρο
 αφαιρείται στο `finally`.
 
-Το `scripts/perf/video-bridge-fu07-eval.ts` δημιουργεί ντετερμινιστικά πραγματικά fixtures του FFmpeg
-για την εξοικονόμηση κλήσεων λεζαντών μετά την αποδιπλοποίηση, την κατανομή προϋπολογισμού πυκνής κίνησης,
-τα τεκμήρια θόλωσης/έκθεσης/SI-TI, τις γρήγορες εναλλαγές με μεγάλη ουρά και τα ψευδώς θετικά
-αποτελέσματα σταδιακής εξασθένησης. Καταγράφει τον χρόνο προκαταρκτικής ανάλυσης σε πραγματικό χρόνο και, όπου είναι διαθέσιμο το `/usr/bin/time`,
-τον χρόνο CPU της θυγατρικής διεργασίας και τη μέγιστη RSS. Οι έλεγχοι ποιότητάς του είναι μόνο δομικά σημεία αναφοράς.
-Η ποιότητα του πραγματικού μοντέλου λεζαντών παραμένει `HOLD`, επειδή αυτή η υποδομή δοκιμών δεν διαθέτει
-εξουσιοδοτημένο endpoint ή παγιωμένο κριτή. Η χρηματική εξοικονόμηση παραμένει επίσης `HOLD`,
-εκτός εάν το `--caption-cost-per-call-usd` παρέχει μια ρητή θετική εκτίμηση κόστους ανά κλήση·
-το script δεν κατασκευάζει ποτέ τεχνητά κανένα από τα δύο αποτελέσματα.
+Το `scripts/perf/video-bridge-fu07-eval.ts` δημιουργεί ντετερμινιστικά
+πραγματικά fixtures FFmpeg για εξοικονομήσεις κλήσεων λεζάντας μετά την
+απαλοιφή διπλότυπων, κατανομή προϋπολογισμού σε πυκνή κίνηση, τεκμήρια
+θόλωσης/έκθεσης/SI-TI, ταχείες τομές με μακριά ουρά, και ψευδώς θετικά
+αποτελέσματα σε σταδιακά ξεθωριάσματα. Καταγράφει τον πραγματικό χρόνο
+προ-ανάλυσης και, όπου είναι διαθέσιμο το `/usr/bin/time`, τον CPU του θυγατρικού
+και τη μέγιστη RSS. Οι ποιοτικοί έλεγχοί του είναι αποκλειστικά δομικά
+μαντεία. Η πραγματική ποιότητα του μοντέλου λεζάντας παραμένει σε `HOLD`,
+επειδή αυτό το πλαίσιο δοκιμών δεν διαθέτει εξουσιοδοτημένο τελικό σημείο ή
+παγωμένο κριτή. Οι οικονομικές εξοικονομήσεις επίσης παραμένουν σε `HOLD`,
+εκτός εάν το `--caption-cost-per-call-usd` παρέχει μια ρητή θετική εκτίμηση ανά
+κλήση· το σενάριο δεν κατασκευάζει ποτέ κανένα από τα δύο αποτελέσματα.
 
-Κάθε καρέ περιορίζεται στα 4 MiB, όλα τα ανεπεξέργαστα καρέ μαζί στα 23 MiB και η
-σειριοποιημένη απόκριση του broker στα 32 MiB. Ένας ιδιωτικός προσωρινός κατάλογος αφαιρείται
-στο `finally`. Το OmniRoute δεν περιλαμβάνει το FFmpeg και δεν δέχεται προσαρμοσμένη
-διαδρομή εκτελέσιμου αρχείου. Πριν από τη δημιουργία λεζαντών, η γέφυρα εφαρμόζει ένα συντηρητικό πέρασμα οπτικής
-αποδιπλοποίησης: κάθε JPEG μειώνεται σε έναν buffer κλίμακας του γκρι 16×16 και
-συγκρίνεται μόνο με το τελευταίο καρέ που διατηρήθηκε. Για ζητούμενο προϋπολογισμό λεζαντών
-μεγαλύτερο του ενός καρέ, η εξαγωγή παρέχει μια
-περιορισμένη δεξαμενή υποψηφίων έως και διπλάσια από αυτόν τον προϋπολογισμό και ποτέ μεγαλύτερη από 16 καρέ.
-Το ζητούμενο ανώτατο όριο εφαρμόζεται μόνο μετά την αποδιπλοποίηση, ενώ ο πρώτος και ο τελευταίος
-επιλεγμένος υποψήφιος διατηρούνται κατά την τελική αραίωση όταν ο προϋπολογισμός είναι τουλάχιστον
-δύο. Η πολιτική με εκδόσεις
-`grayscale-16x16-mean-cells-v2` χρησιμοποιεί τη μεγαλύτερη τιμή μεταξύ της μέσης διαφοράς φωτεινότητας και
-του λόγου των κελιών μικρογραφίας των οποίων η κανονικοποιημένη διαφορά είναι τουλάχιστον 0.05. Το
-κατώφλι διπλοτύπων είναι η σταθερά 0.04, επιλεγμένη για λόγους προβλεψιμότητας αντί να
-εκτίθεται ως ρύθμιση χρόνου εκτέλεσης. Αυτό το δευτερεύον
-σήμα υψηλής αντίθεσης διατηρεί τις μικρές κινήσεις και τις αλλαγές ορατού κειμένου που μια
-σύγκριση μόνο βάσει μέσου όρου μπορεί να αποκρύψει. Τα σφάλματα του συγκριτή ή του αποκωδικοποιητή οδηγούν σε ανοικτή αποτυχία και διατηρούν
-την κάλυψη. Τα μεταδεδομένα εξόδου διαχωρίζουν τους εξαχθέντες υποψηφίους, τα καρέ που χρησιμοποιήθηκαν
-επιτυχώς και τα οπτικά διπλότυπα που απορρίφθηκαν.
+Κάθε καρέ περιορίζεται στα 4 MiB, όλα τα ακατέργαστα καρέ μαζί στα 23 MiB, και η σειριοποιημένη απόκριση του broker στα 32 MiB. Ένας ιδιωτικός προσωρινός κατάλογος αφαιρείται στο `finally`. Το OmniRoute δεν ενσωματώνει το FFmpeg και δεν δέχεται προσαρμοσμένη διαδρομή εκτελέσιμου. Πριν από τη δημιουργία λεζάντας, η γέφυρα εφαρμόζει ένα συντηρητικό πέρασμα οπτικής απαλοιφής διπλότυπων: κάθε JPEG συρρικνώνεται σε έναν buffer αποχρώσεων του γκρι 16×16 και συγκρίνεται μόνο με το τελευταίο καρέ που διατηρήθηκε. Για ζητούμενο προϋπολογισμό λεζάντας πάνω από ένα καρέ, η εξαγωγή παρέχει μια φραγμένη δεξαμενή υποψηφίων έως το διπλάσιο αυτού του προϋπολογισμού και ποτέ περισσότερα από 16 καρέ. Το ζητούμενο ανώτατο όριο εφαρμόζεται μόνο μετά την απαλοιφή διπλότυπων, με το πρώτο και το τελευταίο επιλεγμένο υποψήφιο να διατηρούνται κατά την τελική αραίωση όταν ο προϋπολογισμός είναι τουλάχιστον δύο. Η εκδοχοποιημένη πολιτική `grayscale-16x16-mean-cells-v2` χρησιμοποιεί τη μεγαλύτερη τιμή μεταξύ της μέσης διαφοράς φωτεινότητας και του λόγου των κελιών μικρογραφίας των οποίων η κανονικοποιημένη διαφορά είναι τουλάχιστον 0.05. Το κατώφλι διπλότυπου είναι η σταθερά 0.04, επιλεγμένη για προβλεψιμότητα αντί να εκτίθεται ως ρύθμιση χρόνου εκτέλεσης. Αυτό το δευτερεύον σήμα υψηλής αντίθεσης διατηρεί μικρές κινήσεις και αλλαγές ορατού κειμένου που μια σύγκριση μόνο με μέσο όρο μπορεί να αποκρύψει. Σφάλματα του συγκριτή ή του αποκωδικοποιητή αποτυγχάνουν ανοιχτά (fail open) και διατηρούν την κάλυψη. Τα μεταδεδομένα εξόδου διαχωρίζουν τα εξαχθέντα υποψήφια, τα καρέ που χρησιμοποιήθηκαν με επιτυχία και τα οπτικά διπλότυπα που απορρίφθηκαν.
 
-Ένα ρητά επισημασμένο τμήμα βίντεο μπορεί να ζητήσει ένα φύλλο επαφών με χρονικές σημάνσεις. Η
-γέφυρα δημιουργεί ένα πλέγμα JPEG με έως 4 στήλες και 16 καρέ. Κάθε κελί 512 pixel ενσωματώνει
-τη χρονική σήμανση της πηγής του σε μια κάτω ζώνη υψηλής αντίθεσης, ενώ οι ίδιες χρονικές σημάνσεις
-παραμένουν στα μεταδεδομένα κειμένου για μεταγενέστερη συσχέτιση και έλεγχο. Το πλήρες
-JPEG παραμένει περιορισμένο στα 32 MiB. Εάν το `sharp` δεν μπορεί να αποκωδικοποιήσει ή να συνθέσει το πλέγμα, η
-γέφυρα επιστρέφει στα μεμονωμένα καρέ JPEG· μια ματαίωση από τον πελάτη εξακολουθεί να διαδίδεται
-μέσω της λειτουργίας του φύλλου.
+Ένα ρητά σημασμένο τμήμα βίντεο μπορεί να ζητήσει ένα φύλλο επαφών με χρονοσφραγίδες. Η γέφυρα κατασκευάζει το πολύ ένα πλέγμα JPEG 4 στηλών και 16 καρέ. Κάθε κελί 512 pixel ενσωματώνει τη χρονοσφραγίδα πηγής του σε μια κάτω ζώνη υψηλής αντίθεσης, ενώ οι ίδιες χρονοσφραγίδες παραμένουν σε κειμενικά μεταδεδομένα για κατάντη συσχέτιση και έλεγχο. Το ολοκληρωμένο JPEG παραμένει περιορισμένο στα 32 MiB. Εάν το `sharp` δεν μπορεί να αποκωδικοποιήσει ή να συνθέσει το πλέγμα, η γέφυρα υποχωρεί στα επιμέρους καρέ JPEG· μια ματαίωση πελάτη εξακολουθεί να διαδίδεται μέσω της λειτουργίας του φύλλου.
 
-Τα τεκμήρια προώθησης διατηρούνται σκόπιμα ξεχωριστά από το συνθετικό μικροσημείο αναφοράς
-σύνθεσης. Το `scripts/perf/video-bridge-contact-sheet-eval.ts` ορίζει μια
-υποδομή δοκιμών A/B με έκδοση σχήματος για πραγματικά μοντέλα όρασης συμβατά με OpenAI. Μετρά
-τα tokens που αναφέρει ο πάροχος, τη συνολική καθυστέρηση πραγματικού χρόνου (συμπεριλαμβανομένης της σύνθεσης του φύλλου),
-τον αριθμό κλήσεων μοντέλου και τη διατήρηση στοιχείων που ορίζονται στο manifest. Οι ανεπεξέργαστες αποκρίσεις του μοντέλου δεν
-εγγράφονται στην αναφορά· διατηρούνται μόνο συνόψεις SHA-256 και αναγνωριστικά αντιστοιχισμένων στοιχείων. Η
-υποδομή δοκιμών δεν πραγματοποιεί καμία κλήση δικτύου ή επί πληρωμή κλήση μοντέλου, εκτός εάν μεταβιβαστεί το `--execute-real` και
-έχουν διαμορφωθεί τα `--model`, `OMNIROUTE_BASE_URL` και `OMNIROUTE_API_KEY`. Χωρίς
-αυτή τη ρητή πραγματική εκτέλεση, η μηχαναγνώσιμη ετυμηγορία της παραμένει `HOLD`· οι συνθετικές
-μετρήσεις ωφέλιμου φορτίου/αριθμού κλήσεων από μόνες τους δεν αποτελούν τεκμήρια προώθησης.
+Τα αποδεικτικά στοιχεία προαγωγής είναι σκόπιμα ξεχωριστά από το συνθετικό microbenchmark σύνθεσης. Το `scripts/perf/video-bridge-contact-sheet-eval.ts` ορίζει ένα δοκιμαστικό πλαίσιο A/B με εκδοχοποίηση σχήματος για πραγματικά μοντέλα όρασης συμβατά με OpenAI. Μετρά tokens που αναφέρει ο πάροχος, καθυστέρηση πραγματικού χρόνου από άκρο σε άκρο (συμπεριλαμβανομένης της σύνθεσης του φύλλου), αριθμό κλήσεων μοντέλου και διατήρηση γεγονότων που ορίζεται από το manifest. Οι ακατέργαστες αποκρίσεις του μοντέλου δεν γράφονται στην αναφορά· διατηρούνται μόνο αποτυπώματα SHA-256 και αναγνωριστικά γεγονότων που ταυτοποιήθηκαν. Το πλαίσιο δεν πραγματοποιεί κλήση δικτύου ή επί πληρωμή μοντέλου εκτός εάν περαστεί το `--execute-real` και ρυθμιστούν τα `--model`, `OMNIROUTE_BASE_URL` και `OMNIROUTE_API_KEY`. Χωρίς αυτή τη ρητή πραγματική εκτέλεση, η μηχανικά αναγνώσιμη απόφασή του παραμένει `HOLD`· οι συνθετικές μετρήσεις ωφέλιμου φορτίου/αριθμού κλήσεων από μόνες τους δεν αποτελούν αποδεικτικά στοιχεία προαγωγής.
 
-Οι καλούντες μπορούν να επισυνάψουν έναν προαιρετικό πίνακα `transcript.cues` σε ένα υποστηριζόμενο τμήμα
-βίντεο, όταν διαθέτουν ήδη ευθυγραμμισμένο κείμενο. Κάθε cue πρέπει να περιλαμβάνει `text`, ένα
-πεπερασμένο διάστημα `start`/`end` εντός της ανιχνευμένης διάρκειας και ένα
-`source` από τη λίστα επιτρεπόμενων τιμών (`client`, `embedded` ή `audio-bridge`)· το `confidence` έχει προεπιλεγμένη τιμή
-`1` και πρέπει να παραμένει μεταξύ `0` και `1`. Τα ακριβώς πανομοιότυπα cues συμπτύσσονται.
-Το OmniRoute δεν ξεκινά ποτέ μεταγραφή από αυτά τα μεταδεδομένα: τα επικυρωμένα cues
-αντιγράφονται στο περιγραφόμενο αποτέλεσμα μαζί με την πηγή, τη βεβαιότητα και το χρονικό διάστημα και
-αποδίδονται ως μη έμπιστες παρατηρήσεις παράλληλα με τις λεζάντες των καρέ. Κείμενο που είναι μη έγκυρο,
-εκτός εύρους ή χωρίς προέλευση απορρίπτεται αντί να αναμειγνύεται στη
-ροή λεζαντών. Το πεδίο `source` δηλώνεται επί του παρόντος από τον καλούντα και δεν
-επαληθεύεται από τον διακομιστή: το OmniRoute επιβάλλει η τιμή να είναι μία από τις τρεις
-επιτρεπόμενες συμβολοσειρές, αλλά δεν επιβεβαιώνει ακόμη κρυπτογραφικά ότι μια ετικέτα
-`embedded` ή `audio-bridge` προήλθε πράγματι από εξαγωγή που ανήκει
-στον διακομιστή. Αντιμετωπίστε το `source` ως μη έμπιστη ένδειξη μέχρι να υλοποιηθεί αυτή η επαλήθευση·
-μη βασίζετε σε αυτό αποφάσεις εξουσιοδότησης.
+Οι καλούντες μπορούν να επισυνάψουν έναν προαιρετικό πίνακα `transcript.cues` σε ένα υποστηριζόμενο τμήμα βίντεο όταν διαθέτουν ήδη ευθυγραμμισμένο κείμενο. Κάθε cue πρέπει να φέρει `text`, ένα πεπερασμένο διάστημα `start`/`end` εντός της ανιχνευμένης διάρκειας και μια `source` από λευκή λίστα (`client`, `embedded` ή `audio-bridge`)· το `confidence` έχει προεπιλογή `1` και πρέπει να παραμένει μεταξύ `0` και `1`. Τα ακριβή διπλότυπα cues συγχωνεύονται. Το OmniRoute δεν ξεκινά ποτέ μεταγραφή από αυτά τα μεταδεδομένα: τα επικυρωμένα cues αντιγράφονται στο περιγραφόμενο αποτέλεσμα με πηγή, εμπιστοσύνη και διάστημα, και αποδίδονται ως μη αξιόπιστες παρατηρήσεις παράλληλα με τις λεζάντες των καρέ. Μη έγκυρο, εκτός εύρους ή χωρίς προέλευση κείμενο απορρίπτεται αντί να αναμειχθεί στη ροή λεζάντας. Και τα δύο κανάλια μεταγραφής του σώματος αιτήματος κανονικοποιούν την παρεχόμενη προέλευση σε `client`, συμπεριλαμβανομένων αυτοδηλούμενων ετικετών `embedded` ή `audio-bridge`. Μόνο ένας προσαρμογέας που ανήκει στον διακομιστή μπορεί να εκχωρήσει αυτές τις αξιόπιστες ετικέτες μέσω του αποκλειστικά κωδικοποιημένου ορίσματος `trustedSource`· ένα πεδίο JSON αιτήματος δεν μπορεί να φτάσει σε αυτό το όρισμα. Το κείμενο μεταγραφής παραμένει μη αξιόπιστο περιεχόμενο προερχόμενο από μέσα, ανεξάρτητα από την προέλευσή του, και δεν πρέπει ποτέ να καθορίζει εξουσιοδότηση.
 
-Ένας προηγμένος καλών μπορεί να παρέχει ένα ήδη εξουσιοδοτημένο track
-`audioTranscript` για το ίδιο βίντεο. Το σημείο συγχώνευσης εκτελεί τις οπτικές
-και ηχητικές παρατηρήσεις με κοινή προθεσμία και κοινό σήμα ματαίωσης, τις
-ταξινομεί σε ένα κοινό χρονολόγιο, συμπτύσσει τα ακριβή διπλότυπα και αναφέρει
-μερικό αποτέλεσμα όταν επιτυγχάνει μόνο η μία πλευρά. Ένα μη έγκυρο
-`audioTranscript` υποβαθμίζεται σε αυτό το μερικό αποτέλεσμα — η οπτική
-περιγραφή διατηρείται και ο κλάδος ήχου καταγράφει έναν εξυγιασμένο κωδικό
-αποτυχίας — αντί να αποτυγχάνει ολόκληρο το βίντεο. Η διαθεσιμότητα ανά κλάδο,
-η ένδειξη μερικού αποτελέσματος και οι εξυγιασμένοι κωδικοί αποτυχίας
-διατηρούνται στο περιγραφόμενο αποτέλεσμα, στα μεταδεδομένα του μηχανισμού
-προστασίας (`audioFusionRuns`/`audioFusionPartials`/
-`audioFusionFailureCodes`), στα μεταδεδομένα της κρυφής μνήμης αποτελεσμάτων
-και στους μετρητές συγχώνευσης της γέφυρας. Η προεπιλεγμένη διαδρομή του Video
-Bridge δεν καλεί μετατροπή ομιλίας σε κείμενο ούτε κάνει λήψη δεύτερου
-αντιγράφου πολυμέσων· χωρίς αυτό το ρητά παρεχόμενο track, παραμένει αποκλειστικά
-για βίντεο.
+Ένας προχωρημένος καλών μπορεί να παρέχει ένα κομμάτι `audioTranscript` για το ίδιο βίντεο· αντιμετωπίζεται ως κείμενο που παρέχεται από τον πελάτη, όχι ως απόδειξη μεταγραφής από τον διακομιστή. Η ραφή συγχώνευσης εκτελεί οπτικές και ηχητικές παρατηρήσεις υπό μία προθεσμία και σήμα ματαίωσης, τις ταξινομεί σε ένα κοινό χρονοδιάγραμμα, συγχωνεύει τα ακριβή διπλότυπα και αναφέρει μερικό αποτέλεσμα όταν μόνο η μία πλευρά επιτυγχάνει. Ένα μη έγκυρο `audioTranscript` υποβαθμίζεται σε αυτό το μερικό αποτέλεσμα — η οπτική περιγραφή διατηρείται και ο κλάδος ήχου καταγράφει έναν εξυγειασμένο κωδικό αποτυχίας — αντί να αποτύχει ολόκληρο το βίντεο. Η διαθεσιμότητα ανά κλάδο, η σημαία μερικού αποτελέσματος και οι εξυγειασμένοι κωδικοί αποτυχίας διατηρούνται στο περιγραφόμενο αποτέλεσμα, στα μεταδεδομένα guardrail (`audioFusionRuns`/`audioFusionPartials`/`audioFusionFailureCodes`), στα μεταδεδομένα της προσωρινής μνήμης αποτελεσμάτων και στους μετρητές συγχώνευσης της γέφυρας. Η προεπιλεγμένη διαδρομή Video Bridge δεν καλεί ομιλία-σε-κείμενο ούτε κατεβάζει ένα δεύτερο αντίγραφο του μέσου· χωρίς αυτό το ρητό κομμάτι, παραμένει μόνο βίντεο.
 
-**Διατήρηση απομαγνητοφώνησης (#12150 P1).** Αυτό εφαρμόζεται αυτόματα κάθε φορά
-που το Video Bridge (το οποίο είναι προαιρετικό) αποδίδει μια ένδειξη
-απομαγνητοφώνησης — δεν υπάρχει ξεχωριστή σημαία διατήρησης. Όταν ένα αίτημα
-αποδίδει οποιαδήποτε ένδειξη απομαγνητοφώνησης (ένα `transcript` δηλωμένο από
-τον καλούντα ή ένα συγχωνευμένο `audioTranscript`), ο μηχανισμός προστασίας το
-επισημαίνει ως `videoBridgeObserved` και παράγει ένα απαλειμμένο σκιώδες
-αντίγραφο της περιγραφής του βίντεο — μια πανομοιότυπη απόδοση στην οποία το
-σώμα ελεύθερου κειμένου κάθε ένδειξης αντικαθίσταται από
-`[redacted-video-transcript]`, το οποίο δημιουργείται με αντικατάσταση του
-δομημένου πεδίου της ένδειξης πριν συναρμολογηθεί η συμβολοσειρά (ποτέ με
-ανάλυση του ισοπεδωμένου κειμένου, ώστε να μην μπορεί να διατηρηθεί κανένα
-περιεχόμενο ένδειξης — κακόβουλο ή συνηθισμένο, συμπεριλαμβανομένων σωμάτων που
-περιέχουν `]`, όπως `[inaudible]`/`[music]`). Το σώμα αιτήματος του
-αποθηκευμένου αρχείου καταγραφής κλήσεων αντικαθιστά κάθε τμήμα κειμένου που
-προέρχεται από βίντεο με αυτό το απαλειμμένο σκιώδες αντίγραφο, μέσω
-αντιστοίχισης ισότητας περιεχομένου· η άγκυρα `fullText` διαβάζεται ξανά από το
-ολοκληρωμένο ωφέλιμο φορτίο του μηχανισμού προστασίας πριν από την κλήση, ώστε
-η αντιστοίχιση να εξακολουθεί να επιτυγχάνει αφού μεταγενέστεροι αλυσιδωτοί
-μηχανισμοί προστασίας (οι μηχανισμοί απόκρυψης PII και διαπιστευτηρίων, με
-προτεραιότητες 10/95) επανεγγράψουν επιτόπου το κείμενο της περιγραφής και αφού
-η εισαγωγή προτροπής συστήματος/μεταβίβασης/Μνήμης αναδιαμορφώσει τον πίνακα
-μηνυμάτων. Το σώμα που αποστέλλεται ανάντη στο μοντέλο παραμένει αμετάβλητο.
-Ένα παρατηρούμενο αίτημα επίσης δεν συμπληρώνει καμία μόνιμη Μνήμη (παραλείπεται
-τόσο η εξαγωγή από το αίτημα όσο και εκείνη από την απόκριση), ώστε η ίδια η
-απάντηση του μοντέλου να μην μπορεί να επαναλάβει κείμενο απομαγνητοφώνησης στη
-Μνήμη.
+**Διατήρηση απομαγνητοφωνήσεων (#12150 P1).** Αυτό εφαρμόζεται αυτόματα κάθε φορά που η
+Γέφυρα Βίντεο (η οποία απαιτεί ρητή ενεργοποίηση) αποδίδει μια ένδειξη απομαγνητοφώνησης — δεν υπάρχει ξεχωριστή
+σημαία διατήρησης. Όταν ένα αίτημα αποδίδει οποιαδήποτε ένδειξη απομαγνητοφώνησης (ένα δηλωμένο από τον καλούντα
+`transcript` ή ένα συγχωνευμένο `audioTranscript`), ο μηχανισμός προστασίας το επισημαίνει ως
+`videoBridgeObserved` και παράγει μια σκιά της περιγραφής βίντεο με απαλοιφές —
+μια πανομοιότυπη απόδοση στην οποία το σώμα ελεύθερου κειμένου κάθε ένδειξης αντικαθίσταται από
+`[redacted-video-transcript]`, μέσω αντικατάστασης του δομημένου πεδίου της ένδειξης
+πριν από τη σύνθεση της συμβολοσειράς (ποτέ μέσω ανάλυσης του ισοπεδωμένου κειμένου, ώστε κανένα περιεχόμενο
+ένδειξης — κακόβουλο ή συνηθισμένο, συμπεριλαμβανομένων σωμάτων που περιέχουν `]`, όπως
+`[inaudible]`/`[music]` — να μην μπορεί να διατηρηθεί). Το διατηρούμενο σώμα αιτήματος του αρχείου καταγραφής κλήσεων αντικαθιστά
+κάθε τμήμα κειμένου που προέρχεται από βίντεο με αυτήν τη σκιά με απαλοιφές, με αντιστοίχιση βάσει ισότητας
+περιεχομένου· η άγκυρα `fullText` διαβάζεται ξανά από το ολοκληρωμένο ωφέλιμο φορτίο του μηχανισμού προστασίας
+πριν από την κλήση, ώστε η αντιστοίχιση να εξακολουθεί να επιτυγχάνει αφού μεταγενέστεροι μηχανισμοί προστασίας της αλυσίδας (οι μηχανισμοί
+απόκρυψης PII και διαπιστευτηρίων, με προτεραιότητες 10/95) επανεγγράψουν επιτόπου το κείμενο περιγραφής και
+αφού η εισαγωγή προτροπής συστήματος/μεταβίβασης/Memory αναδιαμορφώσει τον πίνακα μηνυμάτων. Το
+σώμα που αποστέλλεται ανάντη στο μοντέλο παραμένει αμετάβλητο. Ένα παρατηρημένο αίτημα επίσης δεν συμπληρώνει
+καμία μόνιμη Memory (παραλείπεται τόσο η εξαγωγή από το αίτημα όσο και εκείνη από την απόκριση),
+ώστε η ίδια η απάντηση του μοντέλου να μην μπορεί να αντιγράψει κείμενο απομαγνητοφώνησης στη Memory.
 
-Οι επιφάνειες διατήρησης που παραμένουν ανοικτές και παρακολουθούνται για
-μελλοντική εργασία (**P2**, #12430) είναι: το ανεπεξέργαστο στιγμιότυπο αιτήματος
-πελάτη πριν από τον μηχανισμό προστασίας, στο τεχνούργημα λεπτομερούς
-καταγραφής· η συνέχιση μέσω `previous_response_id` με κλείσιμο σε περίπτωση
-αποτυχίας· οι εσωτερικές αποστολές παραγόμενων προτροπών που ενσωματώνουν την
-απομαγνητοφώνηση μέσα σε μια συντεθειμένη προτροπή συμβολοσειράς (στάδια
-διοχέτευσης, μεταβίβαση περιβάλλοντος)· και το σώμα απόκρισης / αντίγραφο
-σημασιολογικής κρυφής μνήμης μιας απάντησης του μοντέλου που παραθέτει την
-απομαγνητοφώνηση. Πρόκειται για ανεπεξέργαστες επιφάνειες/επιφάνειες κατηγορίας
-απόκρισης ή προαιρετικές επιφάνειες, εκτός του πεδίου εφαρμογής του P1 για το
-αποθηκευμένο σώμα αιτήματος + τη Μνήμη.
+**Ακατέργαστα πεδία βίντεο (#12430).** Όταν η γέφυρα είναι ενεργοποιημένη και η εγγενής υποστήριξη βίντεο είναι άγνωστη ή απουσιάζει, τα ορισμένα πεδία `transcript`/`audioTranscript` ενεργοποιούν επίσης το `videoBridgeObserved`, ακόμη και μετά από αποτυχία περιγραφής ή υπέρβαση ενός ορίου `maxVideos`. Το `null` και οι κενές συμβολοσειρές υπολογίζονται· τα απόντα πεδία και τα μεταδεδομένα που δεν αφορούν βίντεο δεν υπολογίζονται. Στα διατηρούμενα αντίγραφα, αυτά τα πεδία αποκρύπτονται ή το αίτημα παραλείπεται, ενώ οι κρυφές μνήμες/Memory παρακάμπτονται.
 
-Ο εσωτερικός κύκλος ζωής `/api/modality-bridge/video/drilldown` είναι ένα
-ξεχωριστό υπόστρωμα κρυφής μνήμης, προσπελάσιμο μέσω loopback και ελέγχου
-ταυτότητας με token. Κάθε λειτουργία απαιτεί επίσης ένα κανονικοποιημένο,
-αδιαφανές αναγνωριστικό εντολέα. Προτού ενεργοποιηθεί ένας καλών παραγωγής,
-πρέπει να αντλεί αυτό το αναγνωριστικό από τον πιστοποιημένο μισθωτή και δεν
-πρέπει ποτέ να προωθεί μια τιμή επιλεγμένη από τον πελάτη. Τα κλειδιά κρυφής
-μνήμης δεσμεύουν αυτόν τον εντολέα στα κανονικοποιημένα αναγνωριστικά συνεδρίας
-και αναφοράς βίντεο, αποθηκεύουν μόνο τα κλειδιά τους που προκύπτουν μέσω
-SHA-256 και περιορίζουν τόσο τις αναγνώσεις όσο και τη διαγραφή στον ίδιο
-εντολέα. Η κρυφή μνήμη αποθηκεύει το πολύ 16 παραγόμενα καρέ JPEG ανά
-καταχώριση, τα λήγει μετά από δέκα λεπτά και υποστηρίζει οριοθετημένες
-αναγνώσεις `start`/`end` ή ρητή διαγραφή συνεδρίας.
+Σε αυτές τις διαδρομές εφεδρικής λειτουργίας, οι έγκυρες ενδείξεις του καλούντος μετατρέπονται σε υποστηριζόμενα τμήματα `text`/`input_text`
+αντί για μη τυπικά πεδία παρόχου. Και τα δύο ίχνη που παρέχονται από το αίτημα
+παραμένουν μη έμπιστες παρατηρήσεις `client`, με ρητή προειδοποίηση ότι το βίντεο
+δεν περιγράφηκε και ότι οι χρονικές σημάνσεις δεν επαληθεύτηκαν ως προς το μέσο. Οι υπάρχοντες
+προϋπολογισμοί των 256 ενδείξεων/64 KiB συνολικά και ανά ένδειξη εφαρμόζονται αθροιστικά και στα δύο ίχνη·
+οι χρονικές σημάνσεις πρέπει να χωρούν εντός του ανώτατου ορίου των 600 δευτερολέπτων του μεσολαβητή και οποιουδήποτε παρεχόμενου παραθύρου
+εστίασης. Τα μη έγκυρα ίχνη απορρίπτονται και δεν προωθούνται ως αυθαίρετο κείμενο· ένα έγκυρο
+συγγενικό ίχνος μπορεί να εξακολουθήσει να χρησιμοποιείται, εκτός αν ξεπεραστεί ο συνδυασμένος προϋπολογισμός τους. Τα πεδία null/κενής
+τιμής δεν προσθέτουν κείμενο. Αυτή η εφεδρική λειτουργία δεν προσθέτει ανάκτηση μέσων ή απομαγνητοφώνηση.
+Τα πεδία επέκτασης απομαγνητοφώνησης αφαιρούνται από τον φορέα βίντεο της εφεδρικής λειτουργίας και από τα
+αντικείμενά του `video_url`/`source`. Η λίστα επιτρεπόμενων πεδίων του OpenAI παραμένει αυστηρή· οι φορείς βίντεο
+με άγνωστη εγγενή υποστήριξη παραμένουν διαθέσιμοι και οι γνωστοί προορισμοί μόνο κειμένου διατηρούν ασφαλείς δείκτες.
+Οι δομημένες σκιές με απαλοιφές προστατεύουν το προσαρτημένο κείμενο απομαγνητοφώνησης, ενώ το
+αρχικό αίτημα που ανήκει στον καλούντα παραμένει αμετάβλητο. Οι προορισμοί με εγγενή υποστήριξη και οι
+απενεργοποιημένες γέφυρες διατηρούν την υπάρχουσα συμπεριφορά παράκαμψης.
 
-Κάθε εντολέας περιορίζεται σε 16 καταχωρίσεις και 64 MiB κανονικοποιημένων
-δεδομένων JPEG. Αυτά τα όρια είναι ανεξάρτητα από το καθολικό ανώτατο όριο των
-64 καταχωρίσεων/256 MiB: η πίεση του ορίου ενός εντολέα εκδιώκει μόνο τις
-λιγότερο πρόσφατα χρησιμοποιημένες καταχωρίσεις αυτού του εντολέα, προτού
-εξεταστεί η καθολική εκδίωξη LRU. Οι ληγμένες καταχωρίσεις εκκαθαρίζονται τόσο
-από τη λογιστική ανά εντολέα όσο και από την καθολική λογιστική κατά τη
-δραστηριότητα της κρυφής μνήμης, ενώ η ακύρωση και η αποτυχία επικύρωσης δεν
-καταχωρίζουν μια μερική αντικατάσταση.
+Τα πρόσθετα διατηρούμενα αντίγραφα χρησιμοποιούν το ίδιο σήμα παρατηρημένου αιτήματος. Το ακατέργαστο
+στιγμιότυπο του αιτήματος πελάτη πριν από τον μηχανισμό προστασίας, το εκκρεμές αίτημα στη μνήμη και το αρχείο καταγραφής
+αιτήματος που απορρίφθηκε πρόωρα αντικαθιστούν δομικά τα πεδία απομαγνητοφώνησης στα τμήματα βίντεο·
+οι προτροπές συμβολοσειράς που συντίθενται από στάδια της διοχέτευσης και τη μεταβίβαση περιβάλλοντος αποκρύπτονται
+στον αποδέκτη του διατηρούμενου σώματος αιτήματος. Ο διατηρούμενος δείκτης `video_content_removed`
+κάνει τη συνέχιση μέσω `previous_response_id` να αποτυγχάνει με ασφαλή τρόπο αντί να ανακατασκευάζει
+κείμενο που απορρίφθηκε σκόπιμα. Αν ένα παρατηρημένο αίτημα χάσει τη σκιά απαλοιφών
+ανά τμήμα πριν από την καταγραφή, ή ακόμη και μία από τις πολλές σκιές βίντεο
+δεν αντιστοιχιστεί μετά από μεταγενέστερες μεταβολές του αιτήματος, το διατηρούμενο σώμα αιτήματος
+παραλείπεται εξ ολοκλήρου αντί να διατηρηθεί μια μερικώς αποκρυμμένη απομαγνητοφώνηση.
 
-Η κρυφή μνήμη απορρίπτει μη κανονικοποιημένο Base64, υπερβολικό padding,
-πολυμέσα που δεν είναι JPEG, κακοσχηματισμένα ή περικομμένα JPEG και JPEG που
-παράγουν προειδοποίηση κατά τη διάρκεια οριοθετημένης αποκωδικοποίησης πλήρους
-εικόνας με `sharp`. Επανακωδικοποιεί κάθε αποδεκτή εικόνα ως κανονικοποιημένο
-JPEG, αντλεί το πλάτος και το ύψος από τα αποκωδικοποιημένα byte αντί να
-εμπιστεύεται τα πεδία του καλούντος και απορρίπτει τυχόν τελικά πολυγλωττιδικά
-byte αντί να τα διατηρεί. Μόνο το οριοθετημένο, κανονικοποιημένο, συμπιεσμένο
-buffer χρεώνεται και στα δύο όρια. Το όριο JSON στη μετάδοση περιλαμβάνει την
-επιβάρυνση του Base64 για το ανώτατο όριο αποκωδικοποιημένης εισόδου των 32 MiB.
-Κάθε αποθηκευμένη παραγωγή καταγράφει την επικυρωμένη μορφή/ανάλυση JPEG, την
-πολιτική δειγματοληψίας, την έκδοση παραγωγής, τον χρόνο δημιουργίας, το hash
-περιεχομένου που υπολογίστηκε από τον διακομιστή και την κατακερματισμένη
-γονική αναφορά μαζί με το hash γονικού περιεχομένου του έμπιστου καλούντος. Η
-ακύρωση ελέγχεται μεταξύ των ασύγχρονων φάσεων αποκωδικοποίησης/hash πριν από
-την ατομική καταχώριση στην κρυφή μνήμη.
+Για ένα παρατηρημένο αίτημα, μια απόκριση μοντέλου ενδέχεται να παραθέσει οποιοδήποτε τμήμα της
+απομαγνητοφώνησης χωρίς δομημένο όριο ένδειξης. Συνεπώς, το διατηρούμενο `responseBody`
+του αρχείου καταγραφής κλήσεων αντικαθίσταται από έναν δείκτη παράλειψης· το λεπτομερές
+τέχνεργο της διοχέτευσης (το οποίο μπορεί να περιλαμβάνει σώματα ανάντη/πελάτη και τμήματα ροής)
+δεν διατηρείται. Οι κρυφές μνήμες σημασιολογίας, ιδιοδυναμίας και αναπαραγωγής συλλογισμού παρακάμπτουν
+τις αναγνώσεις και τις εγγραφές για το συγκεκριμένο αίτημα. Το αίτημα προς τον πάροχο και η ορατή από τον πελάτη
+απόκριση παραμένουν αμετάβλητα. Τα πρώιμα byte διατήρησης σύνδεσης αφαιρούνται από το προσωρινό
+buffer όταν παραλείπεται το λεπτομερές τέχνεργο. Η προειδοποίηση του Kiro για κακοσχηματισμένο EventStream
+αναφέρει μόνο το πλήθος των byte του ωφέλιμου φορτίου, ποτέ τα περιεχόμενά του ή το ακατέργαστο σφάλμα του αναλυτή
+JSON.
+Αυτό δεν ισχυρίζεται ότι έχουν ελεγχθεί όλα τα άσχετα διαγνωστικά παρόχων/plugin·
+η ευρύτερη σάρωση διατηρούμενων αποδεκτών παρακολουθείται στο #11658.
 
-Αυτή η δέσμη εργασιών δεν συνδέει ακόμη έναν παραγωγό περιβάλλοντος παραγωγής
-με τη διαδρομή και δεν παρέχει επιλογή παραλλαγής πολλαπλών αναλύσεων. Επομένως,
-η διαφανής διαδρομή αιτήματος του Video Bridge δεν επιβαρύνεται με πρόσθετη
-εργασία, ενώ η παραγωγή εντολέα δεσμευμένου στον μισθωτή και ο πλήρης κύκλος
-ζωής πολλαπλών αναλύσεων FU-08 παραμένουν ρητές μελλοντικές εργασίες, αντί να
-τεκμηριώνονται ως ολοκληρωμένη συμπεριφορά.
+Ο εσωτερικός κύκλος ζωής `/api/modality-bridge/video/drilldown` είναι ένα ξεχωριστό
+υπόστρωμα κρυφής μνήμης, προσβάσιμο μέσω loopback και ελέγχου ταυτότητας με token. Κάθε λειτουργία απαιτεί επίσης ένα
+κανονικοποιημένο αδιαφανές αναγνωριστικό οντότητας. Προτού ενεργοποιηθεί ένας καλών παραγωγής, πρέπει
+να παράγει αυτό το αναγνωριστικό από τον πιστοποιημένο μισθωτή και δεν πρέπει ποτέ να προωθεί μια
+τιμή που επιλέχθηκε από τον πελάτη. Τα κλειδιά κρυφής μνήμης δεσμεύουν αυτήν την οντότητα με κανονικοποιημένα αναγνωριστικά συνεδρίας και
+αναφοράς βίντεο, αποθηκεύουν μόνο τα κλειδιά τους που παράγονται μέσω SHA-256 και περιορίζουν τόσο τις αναγνώσεις
+όσο και τη διαγραφή στην ίδια οντότητα. Η κρυφή μνήμη αποθηκεύει το πολύ 16 παραγόμενα καρέ JPEG
+ανά καταχώριση, τα λήγει μετά από δέκα λεπτά και υποστηρίζει περιορισμένες αναγνώσεις
+`start`/`end` ή ρητή διαγραφή συνεδρίας.
 
-Τα καρέ λαμβάνουν λεζάντες διαδοχικά με το διαμορφωμένο μοντέλο Video. Μια κενή
-παράκαμψη Video κληρονομεί τη ρύθμιση Vision· αν και οι δύο είναι κενές, ο
-αυτόματος δρομολογητής του Vision επιλέγει το ενεργό μοντέλο με δυνατότητες όρασης. Οι επιτυχημένες λεζάντες
-αντικαθιστούν το αρχικό τμήμα με ένα σταθερό πρόθεμα `[Περιγραφή βίντεο:` το οποίο επίσης
-επισημαίνει το κείμενο ως μη αξιόπιστη παρατήρηση προερχόμενη από πολυμέσα και υποδεικνύει στα κατάντη
-μοντέλα να μην ακολουθούν οδηγίες που βρίσκονται στα πολυμέσα. Τα κλειδιά cache των λεζαντών καρέ
-περιλαμβάνουν τα bytes JPEG, το prompt, τη χρονική σήμανση και το ενεργό μοντέλο· μόνο οι επιτυχημένες
-λεζάντες αποθηκεύονται στην cache. Οι καταχωρίσεις της cache διατηρούν το πραγματικό επιτυχημένο μοντέλο παραγωγής,
+Κάθε οντότητα περιορίζεται σε 16 καταχωρίσεις και 64 MiB κανονικοποιημένων δεδομένων JPEG. Αυτά τα
+όρια είναι ανεξάρτητα από το καθολικό ανώτατο όριο των 64 καταχωρίσεων/256 MiB: η πίεση στο όριο μιας οντότητας
+εκτοπίζει μόνο τις λιγότερο πρόσφατα χρησιμοποιημένες καταχωρίσεις της συγκεκριμένης οντότητας πριν εξεταστεί η καθολική
+εκτόπιση LRU. Οι ληγμένες καταχωρίσεις αφαιρούνται τόσο από τη λογιστική ανά οντότητα όσο και από την καθολική
+λογιστική κατά τη δραστηριότητα της κρυφής μνήμης, ενώ η ακύρωση και η αποτυχία επικύρωσης δεν
+οριστικοποιούν μια μερική αντικατάσταση.
+
+Η κρυφή μνήμη απορρίπτει μη κανονικοποιημένο Base64, περιττή συμπλήρωση, πολυμέσα που δεν είναι JPEG, κατεστραμμένα ή
+περικομμένα JPEG και JPEG που παράγουν προειδοποίηση κατά τη διάρκεια μιας οριοθετημένης αποκωδικοποίησης πλήρους εικόνας με το `sharp`.
+Επανακωδικοποιεί κάθε αποδεκτή εικόνα ως κανονικοποιημένο JPEG, εξάγει το πλάτος και το ύψος
+από τα αποκωδικοποιημένα byte αντί να εμπιστεύεται τα πεδία του καλούντος και απορρίπτει τυχόν τελικά
+πολυγλωττιδικά byte αντί να τα διατηρεί. Μόνο η οριοθετημένη κανονικοποιημένη συμπιεσμένη ενδιάμεση μνήμη
+χρεώνεται και στα δύο όρια. Το όριο μεταφοράς JSON περιλαμβάνει την επιβάρυνση του Base64 για το ανώτατο όριο
+αποκωδικοποιημένης εισόδου των 32 MiB. Κάθε
+αποθηκευμένο παράγωγο καταγράφει την επικυρωμένη μορφή/ανάλυση JPEG, την πολιτική δειγματοληψίας,
+την έκδοση παραγωγής, τον χρόνο δημιουργίας, τον κατακερματισμό περιεχομένου που υπολογίστηκε από τον διακομιστή και την κατακερματισμένη αναφορά
+γονέα μαζί με τον κατακερματισμό περιεχομένου γονέα του έμπιστου καλούντος. Η ακύρωση ελέγχεται
+μεταξύ των ασύγχρονων φάσεων αποκωδικοποίησης/κατακερματισμού, πριν από την ατομική καταχώριση στην κρυφή μνήμη.
+
+Αυτή η παρτίδα δεν συνδέει ακόμη κάποιον producer παραγωγής με τη διαδρομή και δεν
+παρέχει επιλογή παραλλαγών πολλαπλής ανάλυσης. Επομένως, η διαφανής διαδρομή αιτήματος
+της Γέφυρας Βίντεο δεν επιβαρύνεται με πρόσθετη εργασία, ενώ η παραγωγή principal με δέσμευση στον μισθωτή και
+ο πλήρης κύκλος ζωής πολλαπλής ανάλυσης του FU-08 παραμένουν ρητές επακόλουθες εργασίες και
+δεν τεκμηριώνονται ως ολοκληρωμένη συμπεριφορά.
+
+Στα καρέ προστίθενται λεζάντες διαδοχικά με το ρυθμισμένο μοντέλο Βίντεο. Μια κενή
+παράκαμψη Βίντεο κληρονομεί τη ρύθμιση Vision· εάν και οι δύο είναι κενές, ο αυτόματος
+δρομολογητής Vision επιλέγει το ενεργό μοντέλο με δυνατότητες όρασης. Οι επιτυχείς λεζάντες
+αντικαθιστούν το αρχικό τμήμα με ένα σταθερό πρόθεμα `[Video description:` το οποίο επίσης
+επισημαίνει το κείμενο ως μη έμπιστη παρατήρηση προερχόμενη από πολυμέσα και ενημερώνει τα κατάντη
+μοντέλα να μην ακολουθούν οδηγίες που εντοπίζονται στα πολυμέσα. Τα κλειδιά κρυφής μνήμης για τις λεζάντες καρέ
+περιλαμβάνουν τα byte JPEG, την προτροπή, τη χρονική σήμανση και το ενεργό μοντέλο· μόνο οι επιτυχείς
+λεζάντες αποθηκεύονται στην κρυφή μνήμη. Οι εγγραφές της κρυφής μνήμης διατηρούν το πραγματικό επιτυχές μοντέλο παραγωγής,
 συμπεριλαμβανομένου ενός εφεδρικού μοντέλου· η γέφυρα αναφέρει `mixed` όταν διαφορετικά καρέ
-παράχθηκαν από διαφορετικά μοντέλα. Ένα cache hit επαναχρησιμοποιεί αυτήν την ταυτότητα παραγωγού
-αντί να την επαναχαρακτηρίζει ως το ζητούμενο σχέδιο δρομολόγησης. Η cache αποτελεσμάτων
-ολόκληρου του βίντεο έχει κλειδί που βασίζεται σε κάθε είσοδο που μεταβάλλει την έξοδο — prompt, ενεργό
-μοντέλο, πολιτική δειγματοληψίας, πλήθος καρέ, λειτουργία σημασιολογικής ανάλυσης, το αποτύπωμα SHA-256
-της κανονικοποιημένης υπόδειξης εστίασης, παράθυρο εστίασης, `transcript`,
+παρήχθησαν από διαφορετικά μοντέλα. Ένα εύρημα στην κρυφή μνήμη επαναχρησιμοποιεί αυτήν την ταυτότητα παραγωγού
+αντί να την επαναχαρακτηρίζει ως το ζητούμενο σχέδιο δρομολόγησης. Η κρυφή μνήμη αποτελεσμάτων
+ολόκληρου του βίντεο χρησιμοποιεί ως κλειδί κάθε είσοδο που μεταβάλλει την έξοδο — την προτροπή, το ενεργό
+μοντέλο, την πολιτική δειγματοληψίας, τον αριθμό καρέ, τη λειτουργία σημασιολογικής ανάλυσης, το αποτύπωμα SHA-256
+της κανονικοποιημένης υπόδειξης εστίασης, το παράθυρο εστίασης, τα `transcript`,
 `audioTranscript` και τη σημαία φύλλου επαφών — επομένως, η αλλαγή οποιασδήποτε από αυτές τις
-διαστάσεις αποτελεί cache miss και ποτέ επαναχρησιμοποίηση παρωχημένου αποτελέσματος. Η έκδοση της πολιτικής
-οπτικής αποδιπλοποίησης, το όριο και το φραγμένο πλήθος υποψήφιων καρέ είναι επίσης ρητά
-στο κλειδί και στα μεταδεδομένα της cache αποτελεσμάτων· συνεπώς, μια αλλαγή πολιτικής δεν μπορεί να επαναχρησιμοποιήσει μια παρωχημένη
-περιγραφή ολόκληρου του βίντεο. Τα μεταδεδομένα v4 της cache αποτελεσμάτων διατηρούν τη λειτουργία και
-το αποτύπωμα, ποτέ την ανεπεξέργαστη εργασία του χρήστη. Τα μεταδεδομένα του προστατευτικού μηχανισμού αναφέρουν τόσο τη
+διαστάσεις προκαλεί αστοχία κρυφής μνήμης και ποτέ επαναχρησιμοποίηση παρωχημένων δεδομένων. Η έκδοση της πολιτικής
+οπτικής αποδιπλοποίησης, το κατώφλι και ο οριοθετημένος αριθμός υποψήφιων καρέ περιλαμβάνονται επίσης ρητά στο
+κλειδί και στα μεταδεδομένα της κρυφής μνήμης αποτελεσμάτων· συνεπώς, μια αλλαγή πολιτικής δεν μπορεί να επαναχρησιμοποιήσει μια παρωχημένη
+περιγραφή ολόκληρου του βίντεο. Τα μεταδεδομένα v4 της κρυφής μνήμης αποτελεσμάτων διατηρούν τη λειτουργία και το
+αποτύπωμα, αλλά ποτέ την ανεπεξέργαστη εργασία του χρήστη. Τα μεταδεδομένα δικλίδων ασφαλείας αναφέρουν τόσο τη
 ζητούμενη όσο και την ενεργή λειτουργία ανάλυσης· μια ζητούμενη λειτουργία `focused` χωρίς
-χρησιμοποιήσιμο κείμενο χρήστη αναφέρεται ως ενεργά `full`.
+αξιοποιήσιμο κείμενο χρήστη αναφέρεται ως ουσιαστικά `full`.
 
-Ο προστατευτικός μηχανισμός εξάγει κάθε υποστηριζόμενο τμήμα βίντεο, αλλά δεν περιγράφει περισσότερα από
-`modalityBridgeVideoMaxVideos`. Για έναν προορισμό που έχει αποδεδειγμένα
+Η δικλίδα ασφαλείας εξάγει κάθε υποστηριζόμενο τμήμα βίντεο, αλλά δεν περιγράφει περισσότερα από
+`modalityBridgeVideoMaxVideos`. Για έναν στόχο που έχει αποδεδειγμένα
 `supportsVideo === false`, τα αποτυχημένα βίντεο και όσα υπερβαίνουν το όριο μετατρέπονται σε ρητούς ασφαλείς
-δείκτες κειμένου, ώστε να μην παραμένει κανένα ανεπεξέργαστο βίντεο. Όταν η δυνατότητα είναι άγνωστη, αυτά τα τμήματα
-παραμένουν ανέπαφα. Οι προορισμοί με `supportsVideo === true` παρακάμπτουν τη γέφυρα.
-Το σήμα ματαίωσης του αιτήματος πελάτη διαδίδεται μέσω της λήψης, της ουράς του broker,
-των υποδιεργασιών και των κλήσεων δημιουργίας λεζαντών· οι ματαιώσεις σταματούν μεταξύ των βίντεο και δεν καταλήγουν ποτέ
-σε αποτυχία ανοικτού τύπου που αφήνει να περάσουν ανεπεξέργαστα πολυμέσα.
+δείκτες κειμένου, ώστε να μην επιβιώνει κανένα ανεπεξέργαστο βίντεο. Όταν η δυνατότητα είναι άγνωστη, αυτά τα τμήματα
+διατηρούν τον φορέα βίντεο· κάθε εφεδρική απομαγνητοφώνηση ακολουθεί την παραπάνω οριοθετημένη μετατροπή
+σε κείμενο. Οι στόχοι με `supportsVideo === true` παρακάμπτουν τη γέφυρα.
+Το σήμα ακύρωσης αιτήματος του client διαδίδεται μέσω της λήψης, της ουράς broker,
+των υποδιεργασιών και των κλήσεων δημιουργίας λεζάντας· οι ακυρώσεις διακόπτουν την εκτέλεση μεταξύ των βίντεο και δεν επιτρέπουν ποτέ
+τη συνέχιση με ανεπεξέργαστα πολυμέσα.
 
-Οι ρυθμίσεις χρόνου εκτέλεσης υποστηρίζονται από DB και επικυρώνονται με Zod:
+Οι ρυθμίσεις χρόνου εκτέλεσης υποστηρίζονται από ΒΔ και επικυρώνονται με Zod:
 
-| Κλειδί                              | Προεπιλογή  | Εύρος / συμπεριφορά                                                                                                        |
-| ----------------------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `modalityBridgeVideoEnabled`        | `false`     | Προαιρετική λειτουργία χρόνου εκτέλεσης, με ρητή ενεργοποίηση                                                              |
-| `modalityBridgeVideoAnalysisMode`   | `"full"`    | Το `full` διατηρεί γενικές λεζάντες· το `focused` χρησιμοποιεί φραγμένο, μη αξιόπιστο περιεχόμενο του πιο πρόσφατου χρήστη |
-| `modalityBridgeVideoModel`          | `""`        | Κληρονομεί το μοντέλο Vision Bridge                                                                                        |
-| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                                       |
-| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` ή αναλογικό `segment_aware`· η αποτυχία του ανιχνευτή επιστρέφει στο `uniform`                    |
-| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                                        |
-| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                             |
+| Κλειδί                              | Προεπιλογή  | Εύρος / συμπεριφορά                                                                                                         |
+| ----------------------------------- | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `modalityBridgeVideoEnabled`        | `false`     | Προαιρετικός χρόνος εκτέλεσης, με ρητή ενεργοποίηση                                                                         |
+| `modalityBridgeVideoAnalysisMode`   | `"full"`    | Το `full` διατηρεί γενικές λεζάντες· το `focused` χρησιμοποιεί οριοθετημένο, μη έμπιστο περιβάλλον του πιο πρόσφατου χρήστη |
+| `modalityBridgeVideoModel`          | `""`        | Κληρονομεί το μοντέλο της Γέφυρας Vision                                                                                    |
+| `modalityBridgeVideoFrameCount`     | `8`         | 1–16                                                                                                                        |
+| `modalityBridgeVideoSamplingPolicy` | `"uniform"` | `uniform`, `scene_aware` ή αναλογικό `segment_aware`· η αποτυχία του ανιχνευτή επιστρέφει στο `uniform`                     |
+| `modalityBridgeVideoMaxVideos`      | `1`         | 1–4                                                                                                                         |
+| `modalityBridgeVideoTimeout`        | `120000`    | 1000–120000 ms                                                                                                              |
 
-Οι παλαιές αποθηκευμένες τιμές χρονικού ορίου Video άνω των 120 δευτερολέπτων περιορίζονται στην
+Οι παλαιές αποθηκευμένες τιμές χρονικού ορίου Βίντεο άνω των 120 δευτερολέπτων περιορίζονται στην
 προθεσμία του broker· οι νέες εγγραφές ρυθμίσεων πάνω από αυτό το όριο απορρίπτονται.
-Το `GET /api/modality-bridge/video/runtime` απαιτεί αξιόπιστη, σφραγισμένη τοπικότητα loopback
-πριν από τον έλεγχο ταυτότητας ή τη διερεύνηση του χρόνου εκτέλεσης και, στη συνέχεια, απαιτεί εξουσιοδότηση
-διαχείρισης. Επιστρέφει μόνο τα `available`, απολυμασμένες εκδόσεις FFmpeg/ffprobe και έναν σταθερό
+Το `GET /api/modality-bridge/video/runtime` απαιτεί έμπιστη, επισημασμένη τοπικότητα loopback
+πριν από τον έλεγχο ταυτότητας ή τη διερεύνηση του χρόνου εκτέλεσης και, στη συνέχεια, απαιτεί έλεγχο ταυτότητας
+διαχείρισης. Επιστρέφει μόνο τα `available`, εξυγιασμένες εκδόσεις FFmpeg/ffprobe και έναν σταθερό
 λόγο όταν ο χρόνος εκτέλεσης δεν είναι διαθέσιμος. Το εσωτερικό endpoint εξαγωγής δεν αποτελεί
-δημόσιο API μεταφόρτωσης: ο κορεσμός της ουράς επιστρέφει `503` μαζί με `Retry-After`, η αποσύνδεση
-ενός καλούντος επιστρέφει `499` και η σταθερή προθεσμία του broker επιστρέφει `504`. Οι μετατρεπόμενες αποκρίσεις προσθέτουν
-`video->text;model=<visionModel>;parts=<videos>` στην κεντρική
-κεφαλίδα `x-omniroute-modality-bridge` χωρίς να αφαιρούν τα τμήματα Vision ή Audio.
+δημόσιο API μεταφόρτωσης: ο κορεσμός της ουράς επιστρέφει `503` μαζί με `Retry-After`, μια αποσύνδεση του καλούντος
+επιστρέφει `499` και η σταθερή προθεσμία του broker επιστρέφει `504`. Οι αποκρίσεις που έχουν μετατραπεί προσθέτουν
+το `video->text;model=<visionModel>;parts=<videos>` στην κεντρική κεφαλίδα
+`x-omniroute-modality-bridge` χωρίς να αφαιρούν τα τμήματα Vision ή Audio.
 
 ### Απόκρυψη PII (`piiMasker.ts`)
 
 Εκτελείται και στα **δύο** στάδια.
 
-- Το **`preCall`** κλωνοποιεί το ωφέλιμο φορτίο, διατρέχει τα `system`, `messages`, `input` και
-  `prompt` (συμπεριλαμβανομένων των στοιχείων απλής συμβολοσειράς) και εφαρμόζει το `processPII()` (από
-  το `@/shared/utils/inputSanitizer`) στα πεδία συμβολοσειράς `content`/`text`. Όταν
-  `PII_REDACTION_ENABLED=true`, τα εντοπισμένα PII αποκρύπτονται στο εξερχόμενο
-  ωφέλιμο φορτίο. Αυτό είναι ανεξάρτητο από το `INPUT_SANITIZER_MODE` (το οποίο ελέγχει μόνο
-  την πολιτική έγχυσης prompt). Όταν η απόκρυψη είναι απενεργοποιημένη, η κλήση καταγράφει τα πλήθη
-  ανιχνεύσεων χωρίς να επανεγγράφει το περιεχόμενο.
-- Το **`postCall`** δημιουργεί ένα βαθύ κλώνο της απόκρισης και εκτελεί το `sanitizePIIResponse()` μαζί με
-  τον μηχανισμό απόκρυψης για τη δομή του Responses API (`maskResponsesOutput` — καλύπτει τα
-  `output_text` και `output[].content[].text`). Αν πραγματοποιηθεί οποιαδήποτε απόκρυψη, η
-  τροποποιημένη απόκριση αντικαθιστά την αρχική.
+- **`preCall`** κλωνοποιεί το payload, διατρέχει τα `system`, `messages`, `input` και
+  `prompt` (συμπεριλαμβανομένων απλών στοιχείων string) και εφαρμόζει το
+  `processPII()` (από το `@/shared/utils/inputSanitizer`) σε πεδία string
+  `content`/`text`. Όταν `PII_REDACTION_ENABLED=true`, τα ανιχνευμένα PII
+  υποκρύπτονται στο εξερχόμενο payload. Αυτό είναι ανεξάρτητο από το
+  `INPUT_SANITIZER_MODE` (το οποίο ελέγχει μόνο την πολιτική prompt-injection).
+  Όταν η υποκάλυψη είναι απενεργοποιημένη, η κλήση καταγράφει μετρήσεις
+  ανίχνευσης χωρίς να ξαναγράφει το περιεχόμενο.
+- **`postCall`** κάνει βαθιά κλωνοποίηση της απάντησης, εκτελεί το
+  `sanitizePIIResponse()` συν τον masker σχήματος Responses-API
+  (`maskResponsesOutput` — καλύπτει `output_text` και
+  `output[].content[].text`). Εάν γίνει οποιαδήποτε υποκάλυψη, η τροποποιημένη
+  απάντηση αντικαθιστά την αρχική.
 
-Ο προστατευτικός μηχανισμός δεν αποκλείει ποτέ· μόνο προσθέτει επισημειώσεις (`meta.detections`,
-`meta.redacted`) ή επανεγγράφει.
+Το guardrail δεν μπλοκάρει ποτέ· μόνο σχολιάζει (`meta.detections`,
+`meta.redacted`) ή ξαναγράφει.
 
-### Έγχυση Prompt (`promptInjection.ts`)
+#### Επιλογή ανά τύπο, προσαρμοσμένα patterns και μετρητές ανίχνευσης
 
-Ανιχνεύει ανταγωνιστικές δομές σε περιεχόμενο που παρέχεται από τον χρήστη και επιβάλλει τη
-διαμορφωμένη πολιτική. Η συμπεριφορά καθορίζεται από μεταβλητές περιβάλλοντος και επιλογές
-του constructor:
+Το **Πίνακας ελέγχου → Ρυθμίσεις → Ασφάλεια → Μασκάρισμα PII** επιλέγει _τι_
+μασκαρίζεται. Δεν ενεργοποιεί το μασκάρισμα: αυτό εξακολουθεί να ελέγχεται από
+το `PII_REDACTION_ENABLED` (αίτημα) και το `PII_RESPONSE_SANITIZATION`
+(απάντηση + SSE), και τα δύο απενεργοποιημένα από προεπιλογή.
 
-| Ρύθμιση          | Μεταβλητή περιβάλλοντος                                                                                    | Προεπιλογή | Επίδραση                                                                                                                                                                                                         |
-| ---------------- | ---------------------------------------------------------------------------------------------------------- | ---------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Ενεργοποίηση     | `INPUT_SANITIZER_ENABLED`                                                                                  | `true`     | Όταν είναι `false`, ο μηχανισμός προστασίας τερματίζεται πρόωρα.                                                                                                                                                 |
-| Λειτουργία       | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                            | `warn`     | Πολιτική έγχυσης: `block`, `warn` ή `log`. (Το `redact` γίνεται δεκτό για συμβατότητα προς τα πίσω, αλλά **δεν** αφαιρεί κείμενο έγχυσης· η επανεγγραφή PII αιτημάτων ελέγχεται από το `PII_REDACTION_ENABLED`.) |
-| Όριο αποκλεισμού | επιλογή `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (ψευδώνυμο `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`     | Ελάχιστη σοβαρότητα που απαιτείται για αποκλεισμό. Η μεσαία σοβαρότητα χρησιμοποιείται μόνο για παρατήρηση με τις προεπιλεγμένες ρυθμίσεις.                                                                      |
+- **Επιλογή ανά τύπο** — τα ενσωματωμένα ids παρατίθενται στο
+  `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`). Η μη ορισμένη τιμή
+  σημαίνει κάθε τύπος (η συμπεριφορά πριν υπάρξει αυτή η ρύθμιση). Το pattern
+  `ssn_us` της μηχανής αιτήματος αντιστοιχίζεται στο `ssn`. Τα πρότυπα
+  (Minimal, Standard, Financial, Brazilian, USA, Full) απλώς συμπληρώνουν τα
+  checkboxes στο UI.
+- **Προσαρμοσμένα patterns** — έως 20 patterns regex ή wildcard (`*` = έως 64
+  μη κενοί χαρακτήρες, `?` = ένας). Οι αντιστοιχίσεις γίνονται
+  `[CUSTOM_REDACTED]`. Κάθε pattern περνά μέσα από το
+  `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): το πολύ
+  500 χαρακτήρες, flags περιορισμένα σε `g i m s u`, πρέπει να μεταγλωττίζεται,
+  πρέπει να περνά το `safe-regex` (καταστροφικό backtracking) και δεν πρέπει να
+  αντιστοιχίζει κενό string ή placeholder υποκάλυψης. Ένα pattern που
+  αποτυγχάνει απορρίπτεται κατά την αποθήκευση και κατά τη δοκιμή, και μια
+  αποθηκευμένη γραμμή που αποτυγχάνει παραλείπεται κατά την εκτέλεση αντί να
+  μεταγλωττίζεται. Τα προσαρμοσμένα patterns εκτελούνται μόνο όταν το
+  μασκάρισμα είναι ενεργοποιημένο.
+- **Μετρητές ανίχνευσης** — μετρήσεις ανά τύπο (ποτέ αντιστοιχισμένες τιμές),
+  που κρατούνται στη μνήμη και μηδενίζονται κατά την επανεκκίνηση
+  (`src/lib/pii/piiDetectionStats.ts`). Αυξάνονται μόνο όταν το μασκάρισμα
+  είναι ενεργοποιημένο.
+
+Οι ρυθμίσεις βρίσκονται στον πίνακα `key_value` (namespace `pii_settings`,
+`src/lib/db/piiSettings.ts`) και διαβάζονται μέσω cache 1 s. API:
+
+| Μέθοδος | Διαδρομή                 | Σκοπός                                                                            |
+| ------- | ------------------------ | --------------------------------------------------------------------------------- |
+| `GET`   | `/api/settings/pii`      | Κατάσταση flag, `enabledTypes`, `customPatterns`, μετρητές ανίχνευσης             |
+| `PUT`   | `/api/settings/pii`      | Αντικατάσταση `enabledTypes` (`null` = όλα) ή/και `customPatterns`                |
+| `POST`  | `/api/settings/pii/test` | Δοκιμαστική εκτέλεση ενός pattern σε δείγμα το πολύ 8 KB· τίποτα δεν αποθηκεύεται |
+
+Και τα τρία απαιτούν management auth και επικυρώνουν το body με Zod
+(`src/shared/validation/schemas/piiSettings.ts`).
+
+### Prompt Injection (`promptInjection.ts`)
+
+Ανιχνεύει επιθετικές δομές σε περιεχόμενο που παρέχεται από τον χρήστη και
+επιβάλλει τη διαμορφωμένη πολιτική. Η συμπεριφορά καθοδηγείται από μεταβλητές
+περιβάλλοντος και επιλογές constructor:
+
+| Ρύθμιση                | Μεταβλητή περιβάλλοντος                                                                                | Προεπιλογή | Επίδραση                                                                                                                                                                                                                   |
+| ---------------------- | ------------------------------------------------------------------------------------------------------ | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ενεργοποιημένο         | `INPUT_SANITIZER_ENABLED`                                                                              | `true`     | Όταν `false`, το guardrail βραχυκυκλώνει.                                                                                                                                                                                  |
+| Λειτουργία             | `INJECTION_GUARD_MODE` / `INPUT_SANITIZER_MODE`                                                        | `warn`     | Πολιτική injection: `block`, `warn` ή `log`. (Το `redact` γίνεται αποδεκτό για συμβατότητα προς τα πίσω αλλά **δεν** αφαιρεί κείμενο injection· η επανεγγραφή PII του αιτήματος ελέγχεται από το `PII_REDACTION_ENABLED`.) |
+| Κατώφλι μπλοκαρίσματος | επιλογή `blockThreshold` / `INPUT_SANITIZER_BLOCK_THRESHOLD` (alias `INJECTION_GUARD_BLOCK_THRESHOLD`) | `high`     | Ελάχιστη σοβαρότητα που απαιτείται για μπλοκάρισμα. Το Medium είναι μόνο-παρατήρηση στην προεπιλογή.                                                                                                                       |
 
 **Προτεραιότητα λειτουργίας** (`getMode`): `options.mode` του καλούντος →
-παράκαμψη **σημαίας λειτουργίας της ΒΔ** `INJECTION_GUARD_MODE` (Πίνακας ελέγχου → Ρυθμίσεις →
-Σημαίες λειτουργιών) → μεταβλητή περιβάλλοντος `INJECTION_GUARD_MODE` → μεταβλητή περιβάλλοντος `INPUT_SANITIZER_MODE` →
-`warn`. Επομένως, μια παράκαμψη από τον πίνακα ελέγχου υπερισχύει των μεταβλητών περιβάλλοντος, ώστε το περιβάλλον εργασίας
-Σημαιών λειτουργιών να ελέγχει ζωντανά τον εκτελούμενο μηχανισμό προστασίας (χωρίς επανεκκίνηση). Η ανάγνωση από τη ΒΔ είναι ασφαλής έναντι αποτυχίας:
-αν προκύψει σφάλμα, ο μηχανισμός προστασίας επιστρέφει στη συμπεριφορά που βασίζεται στις μεταβλητές περιβάλλοντος, και όταν δεν
-έχει οριστεί παράκαμψη, η συμπεριφορά είναι πανομοιότυπη με την επίλυση που βασίζεται αποκλειστικά στις μεταβλητές περιβάλλοντος.
+`INJECTION_GUARD_MODE` **παράκαμψη DB feature-flag** (Πίνακας ελέγχου →
+Ρυθμίσεις → Feature Flags) → env `INJECTION_GUARD_MODE` → env
+`INPUT_SANITIZER_MODE` → `warn`. Μια παράκαμψη από τον πίνακα ελέγχου κερδίζει
+επομένως έναντι των env vars, οπότε το UI Feature Flags ελέγχει ζωντανά το
+ενεργό guard (χωρίς επανεκκίνηση). Η ανάγνωση DB είναι fail-safe: αν αποτύχει,
+το guard υποχωρεί στη συμπεριφορά βάσει env, και όταν δεν έχει οριστεί
+παράκαμψη η συμπεριφορά είναι πανομοιότυπη με την επίλυση μόνο μέσω env.
 
 Πηγές ανίχνευσης:
 
-1. `sanitizeRequest()` από το `@/shared/utils/inputSanitizer` (κοινόχρηστο σύνολο ανιχνευτών
-   που χρησιμοποιείται και αλλού στη διοχέτευση).
-2. Ενσωματωμένα `DEFAULT_GUARD_PATTERNS` (επί του παρόντος τα `system_override_inline` και
-   `markdown_system_block`, αμφότερα με σοβαρότητα `high`).
-3. Προαιρετικά `customPatterns` που μεταβιβάζονται μέσω των επιλογών του κατασκευαστή (συμβολοσειρές, κανονικές εκφράσεις
-   ή εγγραφές `{ name, pattern, severity }`).
+1. `sanitizeRequest()` από το `@/shared/utils/inputSanitizer` (κοινό σετ
+   ανιχνευτών που χρησιμοποιείται αλλού στο pipeline).
+2. Ενσωματωμένα `DEFAULT_GUARD_PATTERNS` (προς το παρόν `system_override_inline`
+   και `markdown_system_block`, και τα δύο σοβαρότητας `high`).
+3. Προαιρετικά `customPatterns` που περνούν μέσω επιλογών constructor (strings,
+   regex ή εγγραφές `{ name, pattern, severity }`).
 
-Όταν `mode === "block"` **και** τουλάχιστον μία ανίχνευση πληροί το όριο
+Όταν `mode === "block"` **και** τουλάχιστον ένας εντοπισμός πληροί το κατώφλι
 σοβαρότητας, το `preCall` επιστρέφει `{ block: true, message: "Request rejected:
-suspicious content detected" }`. Στις λειτουργίες `warn`/`log`, ο μηχανισμός προστασίας καταγράφει το συμβάν αλλά
-επιτρέπει την κλήση. Η κοινόχρηστη βοηθητική συνάρτηση `evaluatePromptInjection()` εξάγεται επίσης
-για καλούντες που χρειάζεται να αξιολογούν προτροπές χωρίς να περνούν από το μητρώο.
+suspicious content detected" }`. Στις λειτουργίες `warn`/`log` το guardrail
+καταγράφει αλλά επιτρέπει την κλήση. Το κοινό βοηθητικό `evaluatePromptInjection()`
+εξάγεται επίσης για καλούντες που χρειάζονται να αξιολογήσουν prompts χωρίς να
+περάσουν μέσω του registry.
 
 **Όριο σάρωσης (v3.8.20):** ο ανιχνευτής εξετάζει μόνο τα **πρώτα 16 KB** του
-συνενωμένου κειμένου προτροπής — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 byte) στο
+ενωμένου κειμένου prompt — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16 384 bytes) στο
 `src/shared/utils/inputSanitizer.ts`. Τόσο το `detectInjection()` όσο και το
-`evaluatePromptInjection()` εκτελούν `slice(0, MAX_INJECTION_SCAN_BYTES)` πριν από την εκτέλεση
-του βρόχου μοτίβων. Οι οδηγίες έγχυσης βρίσκονται κοντά στην αρχή μιας εισόδου, επομένως αυτό
-περιορίζει τη χρήση CPU/GC από τις κανονικές εκφράσεις σε ωφέλιμα φορτία πολλών εκατοντάδων KB χωρίς να αποδυναμώνει την ανίχνευση (βλ.
-#3932, #4041).
+`evaluatePromptInjection()` εφαρμόζουν `slice(0, MAX_INJECTION_SCAN_BYTES)` πριν
+εκτελέσουν τον βρόχο προτύπων. Οι οδηγίες injection βρίσκονται κοντά στην αρχή μιας
+εισόδου, επομένως αυτό περιορίζει τη χρήση CPU/GC του regex σε payloads πολλαπλών
+εκατοντάδων KB χωρίς να αποδυναμώνει την ανίχνευση (βλ. #3932, #4041).
 
-### Μηχανισμός απόκρυψης διαπιστευτηρίων (`credentialMasker.ts`)
+### Απόκρυψη διαπιστευτηρίων (`credentialMasker.ts`)
 
-Εκτελείται και στα **δύο** στάδια, τελευταίος στην προεπιλεγμένη αλυσίδα (προτεραιότητα `95`). Αποκρύπτει
-γνωστά μοτίβα κλειδιών API / μυστικών διακριτικών από το εξερχόμενο ωφέλιμο φορτίο (περιεχόμενο
-μηνυμάτων, ορίσματα κλήσεων εργαλείων, αποτελέσματα εργαλείων) **και** από την απόκριση του παρόχου, ώστε ένα
-διαπιστευτήριο που επικολλάται σε μια προτροπή (ή επιστρέφεται ως ηχώ από ένα αποτέλεσμα εργαλείου) να μη διαρρέει
-προς τον ανάντη πάροχο ή πίσω στον πελάτη.
+Εκτελείται και στα **δύο** στάδια, τελευταίο στην προεπιλεγμένη αλυσίδα
+(προτεραιότητα `95`). Αποκρύπτει γνωστά πρότυπα κλειδιών API / μυστικών token από
+το εξερχόμενο payload (περιεχόμενο μηνυμάτων, ορίσματα κλήσεων εργαλείων,
+αποτελέσματα εργαλείων) **και** την απόκριση του παρόχου, ώστε ένα διαπιστευτήριο
+που επικολλήθηκε σε ένα prompt (ή αναμεταδόθηκε από ένα αποτέλεσμα εργαλείου) να
+μην διαρρέει προς τον ανάντη πάροχο ή πίσω στον πελάτη.
 
-- **Μόνο κατόπιν ρητής ενεργοποίησης**, σύμφωνα με την ίδια σύμβαση που ισχύει για την απόκρυψη PII (συναφές με τον Αυστηρό Κανόνα #20):
-  απενεργοποιημένο εκτός εάν `settings.credentialRedactionEnabled === true` **ή**
-  `CREDENTIAL_REDACTION_ENABLED=true`. Όταν είναι απενεργοποιημένο, ο μηχανισμός προστασίας δεν εκτελεί καμία ενέργεια —
-  δεν αποκλείει ποτέ και δεν επανεγγράφει ποτέ.
-- Το `redactCredentials()` διατρέχει ολόκληρο το δέντρο ωφέλιμου φορτίου/απόκρισης (`walkValue()`,
-  με προστασία από ρύπανση πρωτοτύπων και από κύκλους μέσω `WeakSet`) και αντικαθιστά τις αντιστοιχίες με
-  ένα σύμβολο κράτησης θέσης `[REDACTED:<type>]`, κλωνοποιώντας μόνο τους κλάδους που πράγματι
-  άλλαξαν.
+- **Μόνο με opt-in**, ίδια σύμβαση με την απόκρυψη PII (συναφές με τον Σκληρό
+  Κανόνα #20): απενεργοποιημένο εκτός αν `settings.credentialRedactionEnabled === true`
+  **ή** `CREDENTIAL_REDACTION_ENABLED=true`. Με αυτό απενεργοποιημένο, το guardrail
+  είναι no-op — δεν μπλοκάρει ποτέ και δεν ξαναγράφει ποτέ.
+- Το `redactCredentials()` διασχίζει ολόκληρο το δέντρο payload/απόκρισης
+  (`walkValue()`, ασφαλές έναντι prototype pollution, ασφαλές έναντι κύκλων μέσω
+  `WeakSet`) και αντικαθιστά τα ταιριάσματα με ένα placeholder `[REDACTED:<type>]`,
+  κλωνοποιώντας μόνο τους κλάδους που πραγματικά άλλαξαν.
 - Το `CREDENTIAL_PATTERNS` καλύπτει κλειδιά παρόχων LLM (OpenAI, OpenAI-proj,
-  Anthropic, Google, Hugging Face, Replicate), διακριτικά VCS/SaaS (GitHub, Slack,
-  Linear, Notion, npm, Postman, Discord), κλειδιά πληρωμών (Stripe, Square), κλειδιά
-  cloud (κλειδί πρόσβασης AWS, Twilio, SendGrid, Mailgun), ιδιωτικά κλειδιά / JWT,
-  συμβολοσειρές σύνδεσης που περιέχουν διαπιστευτήρια (`mongodb://user:pass@...` κ.λπ.) και
-  ένα γενικό μοτίβο τιμής κεφαλίδας `Authorization`/`x-api-key`/`api-key`/`apikey`.
-  Τα κλειδιά που έχουν μορφή κεφαλίδας (`authorization`, `x-api-key`, `api-key`,
-  `apikey`) αποκρύπτονται δομικά (μόνο η τιμή, ενώ διατηρείται το πρόθεμα σχήματος όπως
-  `Bearer `/`Basic `) και όχι μέσω της γενικής κανονικής έκφρασης κειμένου.
-- Ο μηχανισμός προστασίας δεν αποκλείει ποτέ· εκτελεί μόνο επανεγγραφή (`modifiedPayload` /
-  `modifiedResponse`) και προσθέτει επισημειώσεις (`meta.credentialsRedacted`, `meta.count`).
+  Anthropic, Google, Hugging Face, Replicate), token VCS/SaaS (GitHub, Slack,
+  Linear, Notion, npm, Postman, Discord), κλειδιά πληρωμών (Stripe, Square),
+  κλειδιά cloud (AWS access key, Twilio, SendGrid, Mailgun), ιδιωτικά κλειδιά /
+  JWT, συμβολοσειρές σύνδεσης που φέρουν διαπιστευτήρια
+  (`mongodb://user:pass@...`, κ.λπ.), και ένα γενικό πρότυπο τιμής κεφαλίδας
+  `Authorization`/`x-api-key`/`api-key`/`apikey`. Τα κλειδιά σε μορφή κεφαλίδας
+  (`authorization`, `x-api-key`, `api-key`, `apikey`) αποκρύπτονται δομικά (μόνο η
+  τιμή, με το πρόθεμα scheme όπως `Bearer `/`Basic ` να διατηρείται) και όχι μέσω
+  του γενικού regex κειμένου.
+- Το guardrail δεν μπλοκάρει ποτέ· μόνο ξαναγράφει (`modifiedPayload` /
+  `modifiedResponse`) και προσθέτει σημειώσεις (`meta.credentialsRedacted`,
+  `meta.count`).
 
-Προστασία από παλινδρόμηση: `tests/unit/credential-masker-guardrail.test.ts`.
+Προστασία παλινδρόμησης: `tests/unit/credential-masker-guardrail.test.ts`.
 
-## Βασικό συμβόλαιο (`base.ts`)
+## Βασικό Συμβόλαιο (`base.ts`)
 
 ```typescript
 class BaseGuardrail {
@@ -731,11 +786,11 @@ class BaseGuardrail {
 }
 
 interface GuardrailResult<TValue = unknown> {
-  block?: boolean; // το true διακόπτει άμεσα την αλυσίδα
-  message?: string; // εμφανίζεται όταν γίνεται αποκλεισμός
+  block?: boolean; // true short-circuits the chain
+  message?: string; // surfaced when blocking
   meta?: Record<string, unknown> | null;
-  modifiedPayload?: TValue; // επιστρέφεται από το preCall για την τροποποίηση του αιτήματος
-  modifiedResponse?: TValue; // επιστρέφεται από το postCall για την τροποποίηση της απόκρισης
+  modifiedPayload?: TValue; // returned by preCall to rewrite the request
+  modifiedResponse?: TValue; // returned by postCall to rewrite the response
 }
 
 interface GuardrailContext {
@@ -754,107 +809,187 @@ interface GuardrailContext {
 }
 ```
 
-Ένας μηχανισμός προστασίας δηλώνει «καμία αλλαγή» επιστρέφοντας είτε `void`, `{}` είτε
-`{ block: false }`. Η επιστροφή ενός `modifiedPayload`/`modifiedResponse` αντικαθιστά
-την τιμή που διατρέχει την αλυσίδα για τους επόμενους μηχανισμούς προστασίας.
-Το `signal?: AbortSignal` μεταφέρει τον κύκλο ζωής του καλούντος στους μηχανισμούς προστασίας. Η ακύρωση ενός αιτήματος αποτελεί τη σκόπιμη εξαίρεση ανοικτής αποτυχίας: οι γέφυρες πολυμέσων διακόπτουν την εργασία και εκτελούν εκκαθάριση χωρίς να επαναφέρουν ακατέργαστα πολυμέσα σε έναν προορισμό που είναι γνωστό ότι δεν τα υποστηρίζει.
+Ένα guardrail σηματοδοτεί «καμία αλλαγή» επιστρέφοντας είτε `void`, είτε `{}`, είτε
+`{ block: false }`. Η επιστροφή `modifiedPayload`/`modifiedResponse` αντικαθιστά
+την τιμή που ρέει μέσα στην αλυσίδα για τα επόμενα (downstream) guardrails.
+Το `signal?: AbortSignal` μεταφέρει τον κύκλο ζωής του καλούντος στα guardrails. Η ακύρωση αιτήματος είναι η σκόπιμη εξαίρεση fail-open: οι γέφυρες μέσων (media bridges) σταματούν την εργασία και καθαρίζουν χωρίς να επαναφέρουν ακατέργαστα μέσα σε έναν στόχο για τον οποίο είναι γνωστό ότι δεν τα υποστηρίζει.
 
 ## Μητρώο (`registry.ts`)
 
-Το μοναδικό στιγμιότυπο `guardrailRegistry` εκθέτει:
+Το singleton `guardrailRegistry` εκθέτει:
 
-- `register(guardrail)` — προσθέτει έναν μηχανισμό προστασίας (ή τον αντικαθιστά βάσει κανονικοποιημένου ονόματος) και
-  επαναταξινομεί κατά αύξουσα `priority`.
-- `clear()` / `list()` — βοηθητικές λειτουργίες διαχείρισης.
-- `runPreCallHooks(payload, context)` — διατρέχει τους ενεργούς μηχανισμούς προστασίας, προωθεί το
-  ωφέλιμο φορτίο μέσω του `modifiedPayload` και σταματά στο πρώτο `block: true`.
-- `runPostCallHooks(response, context)` — ίδια ροή στην πλευρά της απόκρισης.
-- `resetGuardrailsForTests({ registerDefaults })` — εκκαθαρίζει την κατάσταση και, προαιρετικά,
-  καταχωρίζει ξανά τις προεπιλογές για καθαρή απομόνωση των δοκιμών.
+- `register(guardrail)` — προσθέτει (ή αντικαθιστά με βάση το κανονικοποιημένο όνομα) ένα guardrail και
+  αναταξινομεί κατά αύξουσα `priority`.
+- `clear()` / `list()` — διαχειριστικά βοηθήματα.
+- `runPreCallHooks(payload, context)` — διατρέχει τα ενεργά guardrails, περνά το
+  payload μέσω του `modifiedPayload`, και σταματά στο πρώτο `block: true`.
+- `runPostCallHooks(response, context)` — η ίδια ροή στην πλευρά της απάντησης.
+- `resetGuardrailsForTests({ registerDefaults })` — καθαρίζει την κατάσταση και προαιρετικά
+  επανεγγράφει τα προεπιλεγμένα για καθαρή απομόνωση δοκιμών.
 
-Και οι δύο εκτελεστές επιστρέφουν `{ blocked, payload|response, results, guardrail?, message? }`,
+Και οι δύο runners επιστρέφουν `{ blocked, payload|response, results, guardrail?, message? }`
 όπου το `results` είναι ένας πίνακας εγγραφών `GuardrailExecutionResult` που περιλαμβάνουν
-τα πεδία `blocked`, `skipped`, `modified`, `error` και `meta` ανά μηχανισμό προστασίας,
-χρήσιμα για την ιχνηλάτηση.
+ανά guardrail τα πεδία `blocked`, `skipped`, `modified`, `error` και `meta`,
+χρήσιμα για ιχνηλάτηση.
 
-### Απενεργοποίηση μηχανισμών προστασίας ανά αίτημα
+### Απενεργοποίηση Guardrails ανά Αίτημα
 
 Το `resolveDisabledGuardrails({ apiKeyInfo, body, headers })` συγκεντρώνει μια
-λίστα χωρίς διπλότυπα με τα ονόματα των μηχανισμών προστασίας που πρέπει να παραλειφθούν για το τρέχον
-αίτημα. Πηγές (όλες προαιρετικές, όλες συγχωνεύονται):
+λίστα χωρίς διπλότυπα με ονόματα guardrails που πρέπει να παραλειφθούν για το
+τρέχον αίτημα. Υπάρχουν πέντε κανάλια, που διαβάζονται με αυτή τη σειρά και συγχωνεύονται σε μία λίστα
+(στην αφαίρεση διπλοτύπων επικρατεί η πρώτη εμφάνιση):
 
-- `apiKeyInfo.disabledGuardrails`
-- `disabledGuardrails` στο σώμα του αιτήματος (ανώτατο επίπεδο)
-- `metadata.disabledGuardrails` στο σώμα του αιτήματος
-- Κεφαλίδα `x-omniroute-disabled-guardrails` (ή η παλαιότερη
-  `x-disabled-guardrails`)
+1. `apiKeyInfo.disabledGuardrails`
+2. `disabledGuardrails` του σώματος αιτήματος (ανώτατο επίπεδο)
+3. `metadata.disabledGuardrails` του σώματος αιτήματος (μόνο όταν το `metadata` είναι αντικείμενο)
+4. Κεφαλίδα `x-omniroute-disabled-guardrails`
+5. Παλαιά κεφαλίδα `x-disabled-guardrails`
 
-Οι τιμές μπορούν να είναι πίνακες συμβολοσειρών ή μια συμβολοσειρά διαχωρισμένη με κόμματα· τα ονόματα
-κανονικοποιούνται σε πεζά γράμματα και μορφή kebab-case (`pii_masker` → `pii-masker`). Το αποτέλεσμα
-μεταβιβάζεται μέσω του `context.disabledGuardrails` στο μητρώο, το οποίο παραλείπει
-τους αντίστοιχους μηχανισμούς προστασίας (`skipped: true` στο `results`).
+Και τα πέντε κανάλια συγχωνεύονται, συμπεριλαμβανομένων των δύο κεφαλίδων: η αποστολή και των δύο
+`x-omniroute-disabled-guardrails` και `x-disabled-guardrails` παραλείπει την ένωση των
+λίστων τους, και μια κενή σύγχρονη κεφαλίδα δεν αποκρύπτει πλέον την παλαιά
+([#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412), διορθώθηκε στο
+[#16805](https://github.com/diegosouzapw/OmniRoute/pull/16805)).
 
-## Σειρά εκτέλεσης
+Οι τιμές μπορεί να είναι πίνακες συμβολοσειρών ή μια συμβολοσειρά διαχωρισμένη με κόμματα· τα ονόματα περικόπτονται
+και κανονικοποιούνται σε πεζό kebab-case (`pii_masker` → `pii-masker`), και οι κενές
+εγγραφές απορρίπτονται. Το αποτέλεσμα περνά μέσω του `context.disabledGuardrails`
+στο μητρώο, το οποίο παραλείπει τα αντίστοιχα guardrails (`skipped: true` στα `results`).
 
-Για κάθε αίτημα που διέρχεται από τα `src/sse/handlers/chat.ts` και
-`open-sse/handlers/chatCore.ts`:
+Η λίστα απενεργοποίησης επηρεάζει μόνο το **μητρώο**. Η λειτουργία `block` του prompt-injection είναι
+υποχρεωτικό όριο: το middleware injection-guard
+(`src/middleware/promptInjectionGuard.ts`) καλεί το `evaluatePromptInjection()`
+χωρίς καμία λίστα απενεργοποίησης ελεγχόμενη από τον καλούντα (η νεκρή κλήση
+`resolveDisabledGuardrails({ body })` που έκανε παλιότερα αφαιρέθηκε στο
+[#16934](https://github.com/diegosouzapw/OmniRoute/pull/16934)), οπότε ένα αίτημα
+που απενεργοποιεί το `prompt-injection` εξακολουθεί να απορρίπτεται σε λειτουργία `block`. Αυτό είναι
+σκόπιμο. Τα κανάλια απενεργοποίησης ελέγχονται από τον καλούντα (σώμα αιτήματος,
+metadata, κεφαλίδες), και ένας καλών δεν πρέπει να μπορεί να απενεργοποιήσει έναν έλεγχο
+ασφαλείας που όρισε ο χειριστής
+([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Η ένωση
+κεφαλίδων από το [#16412](https://github.com/diegosouzapw/OmniRoute/issues/16412)
+αλλάζει μόνο ποια guardrails του μητρώου παραλείπονται· δεν επιτρέπει σε έναν πελάτη
+να παρακάμψει το middleware. Οι υποχρεωτικές πολιτικές guardrails ανά κλειδί και ανά ομάδα
+παρακολουθούνται στο RFC v4 [#16417](https://github.com/diegosouzapw/OmniRoute/issues/16417).
+Δείτε [Κάλυψη και όρια](#coverage-and-limits).
 
-1. Η `resolveDisabledGuardrails(...)` δημιουργεί τη λίστα παράλειψης από το κλειδί API, το σώμα
-   και τις κεφαλίδες.
-2. Η `guardrailRegistry.runPreCallHooks(body, ctx)` εκτελεί τα guardrails κατά αύξουσα
+## Σειρά Εκτέλεσης
+
+Για κάθε αίτημα που ρέει μέσα από τα `src/sse/handlers/chat.ts` και
+`open-sse/handlers/chatCore.ts` (οι διαδρομές της οικογένειας chat που παρατίθενται στην ενότητα
+[Κάλυψη και όρια](#coverage-and-limits)):
+
+1. Η `resolveDisabledGuardrails(...)` δημιουργεί τη λίστα παράλειψης από το κλειδί API, το body
+   και τα headers.
+2. Η `guardrailRegistry.runPreCallHooks(body, ctx)` εκτελεί τα guardrails σε αύξουσα
    σειρά προτεραιότητας:
    - Τα απενεργοποιημένα guardrails καταγράφονται ως `skipped`.
-   - Το `preCall` κάθε guardrail μπορεί να τροποποιήσει το payload μέσω του `modifiedPayload`.
-   - Το πρώτο `block: true` διακόπτει άμεσα την αλυσίδα και ο handler επιστρέφει
-     μια απόκριση απόρριψης από guardrail.
-3. Το (ενδεχομένως τροποποιημένο) payload προωθείται στη συνδυαστική δρομολόγηση και στην
-   αποστολή προς το upstream.
-4. Αφού συγκροτηθεί η απόκριση, η `guardrailRegistry.runPostCallHooks(...)`
-   εκτελεί την ίδια αλυσίδα στην απόκριση. Το `block: true` σε αυτό το σημείο απορρίπτει την upstream
-   απόκριση.
+   - Το `preCall` κάθε guardrail μπορεί να ξαναγράψει το payload μέσω του `modifiedPayload`.
+   - Το πρώτο `block: true` βραχυκυκλώνει την αλυσίδα και ο handler επιστρέφει
+     μια απόκριση απόρριψης guardrail.
+3. Το (ενδεχομένως ξαναγραμμένο) payload ρέει προς τη δρομολόγηση combo και την
+   αποστολή upstream.
+4. **Μόνο χωρίς ροή (non-streaming):** αφού συναρμολογηθεί η απόκριση,
+   η `guardrailRegistry.runPostCallHooks(...)` εκτελεί την ίδια αλυσίδα πάνω στην
+   απόκριση. Το `block: true` εδώ απορρίπτει την απόκριση upstream και επιστρέφει HTTP 400. Οι αποκρίσεις ροής παραλείπουν εντελώς αυτό το βήμα.
 
-Τα guardrails που προκαλούν εξαίρεση καταγράφονται με `error: <message>` και καταχωρίζονται στα αρχεία καταγραφής μέσω
-της `logger.warn`, αλλά η αλυσίδα συνεχίζεται — βάσει σχεδιασμού, οι αστοχίες δεν εμποδίζουν τη ροή.
+Τα guardrails που πετάνε εξαίρεση καταγράφονται με `error: <message>` και καταχωρούνται στο log μέσω
+`logger.warn`, αλλά η αλυσίδα συνεχίζει — fail-open εκ σχεδιασμού.
+
+## Κάλυψη και όρια
+
+Το μητρώο guardrail είναι συνδεδεμένο μόνο στο pipeline του chat. Τα όρια αυτά
+κατοχυρώνονται από τα `tests/unit/guardrail-pipeline-wiring-characterization.test.ts` και
+`tests/unit/guardrail-pipeline-characterization.test.ts`· ενημερώστε τα τεστ αυτά
+σκόπιμα όταν αλλάζει η συμπεριφορά.
+
+### Πού εκτελούνται τα hooks
+
+| Hook / έλεγχος                             | Εκτελείται σε                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `runPreCallHooks`                          | Αιτήματα που διαχειρίζεται η `handleChat` (`src/sse/handlers/chat.ts`): `/v1/chat/completions`, `/v1/completions`, `/v1/messages`, `/v1/responses` (και `/v1/responses/*`), `/v1/relay/chat/completions`, `/v1/providers/{provider}/chat/completions`, `/v1/api/chat`, `/v1/antigravity`, `/v1beta/models/*` και το chat proxy του Telegram. Επίσης το endpoint δοκιμών του dashboard `/api/guardrails/test`. Ένας αποκλεισμός pre-call επιστρέφει HTTP 400. |
+| `runPostCallHooks`                         | **Μόνο** αποκρίσεις chat **χωρίς ροή (non-streaming)** (`open-sse/handlers/chatCore/nonStreamingResponse.ts`). Οι αποκρίσεις ροής δεν φτάνουν ποτέ σε αυτήν.                                                                                                                                                                                                                                                                                                 |
+| PII ροής                                   | Η `createPiiSseTransform` (`src/lib/streamingPiiTransform.ts`), που εντάσσεται στη σωλήνωση στο `streamingPipeline.ts` όταν το `PII_RESPONSE_SANITIZATION` είναι ενεργό. Δεν είναι guardrail, επομένως τα κανάλια απενεργοποίησης δεν την επηρεάζουν.                                                                                                                                                                                                        |
+| Middleware injection-guard (παλαιού τύπου) | Κάθε διαδρομή `/v1` που φέρει prompt, συμπεριλαμβανομένης της οικογένειας chat (βλ. [κάλυψη διαδρομών](#injection-guard-route-coverage--red-team-phase-8--block-d)). Μόνο prompt injection.                                                                                                                                                                                                                                                                  |
+
+### Τι δεν καλύπτεται
+
+- **Διαδρομές πολυμέσων, embeddings και δεδομένων** (`/v1/images/*`, `/v1/embeddings`,
+  `/v1/audio/*`, `/v1/videos/generations`, `/v1/music/generations`,
+  `/v1/rerank`, `/v1/search`, `/v1/moderations`) δεν φτάνουν ποτέ στο μητρώο. Δεν
+  εκτελείται εκεί απόκρυψη PII, απόκρυψη διαπιστευτηρίων ή modality bridge. Ο μόνος
+  τους έλεγχος είναι το παλαιού τύπου middleware injection-guard.
+- **Οι αποκρίσεις ροής** δεν περνούν από guardrails post-call: ούτε post-call `pii-masker` ή
+  `credential-masker`, ούτε αποκλεισμό post-call. Μόνο ο μετασχηματισμός PII ροής
+  εφαρμόζεται (όταν το `PII_RESPONSE_SANITIZATION` είναι ενεργό). Ένα διαπιστευτήριο
+  που αναμεταδίδεται σε μια απόκριση ροής δεν αποκρύπτεται.
+- **Κανάλια απενεργοποίησης έναντι του middleware (εκ σχεδιασμού):** το middleware αξιολογεί
+  το prompt injection με δική του κλήση στην `evaluatePromptInjection()`, χωρίς
+  να περνά καμία λίστα απενεργοποίησης που ελέγχεται από τον καλούντα. Η λειτουργία `block` είναι ένα
+  υποχρεωτικό όριο που οι απενεργοποιήσεις υπό τον έλεγχο του καλούντος δεν μπορούν να παρακάμψουν, συμπεριλαμβανομένων των διαδρομών της οικογένειας chat
+  ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)). Η απενεργοποίηση
+  του `prompt-injection` παραλείπει μόνο το guardrail του μητρώου.
+
+### Τι βλέπει μια απόκριση πριν από το post-call
+
+Στη διαδρομή χωρίς ροή η σειρά είναι: εξαγωγή μνήμης → εκτέλεση ενσωματωμένων εργαλείων
+→ guardrails post-call → έξοδος με αποκλεισμό post-call → αποθήκευση στη σημασιολογική κρυφή μνήμη (semantic cache).
+
+- **Η εξαγωγή μνήμης** και **η εκτέλεση εργαλείων** βλέπουν την απάντηση πριν τα
+  guardrails μετά την κλήση (post-call) προλάβουν να την ξαναγράψουν ή να την
+  μπλοκάρουν. Από το
+  [#16401](https://github.com/diegosouzapw/OmniRoute/pull/16401), η εξαγωγή
+  μνήμης περνά το εξαγόμενο κείμενο μέσα από το `sanitizePII` όταν το
+  `PII_RESPONSE_SANITIZATION` είναι ενεργό (τόσο σε streaming όσο και σε
+  non-streaming), αλλά μια απάντηση που το στάδιο post-call μπλοκάρει αργότερα
+  έχει ήδη προσφερθεί στη μνήμη και στα εργαλεία.
+- **Η σημασιολογική cache** αποθηκεύει την απάντηση μετά το post-call, οπότε
+  αποθηκεύει την ξαναγραμμένη απάντηση, ενώ μια μπλοκαρισμένη απάντηση δεν
+  αποθηκεύεται ποτέ στην cache. Οι εγγραφές της cache κλειδώνονται ανά κλειδί
+  API.
 
 ## Διαμόρφωση
 
-Μεταβλητές περιβάλλοντος που διαβάζονται από τα ενσωματωμένα guardrails:
+Μεταβλητές περιβάλλοντος που διαβάζονται από τους ενσωματωμένους μηχανισμούς προστασίας:
 
-| Μεταβλητή                             | Χρησιμοποιείται από       | Επίδραση                                                                                                                                 |
-| ------------------------------------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`        | Ορίστε την τιμή σε `false` για να απενεργοποιήσετε πλήρως την ανίχνευση.                                                                 |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`        | Πολιτική injection: `warn`, `block` ή `log`. Η παλαιότερη τιμή `redact` δεν τροποποιεί το κείμενο του injection.                         |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`        | Λειτουργία για το injection guard· αποτελεί επίσης σημαία λειτουργίας στη ΒΔ που **υπερισχύει** των μεταβλητών περιβάλλοντος (DB > ENV). |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`        | Ελάχιστη σοβαρότητα που απορρίπτεται όταν `MODE=block`: `high` (προεπιλογή), `medium` ή `low`.                                           |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`        | Παλαιότερο ψευδώνυμο του `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                                              |
-| `PII_REDACTION_ENABLED`               | `pii-masker`              | Όταν είναι `true`, τα PII του αιτήματος αποκρύπτονται (ανεξάρτητα από τη λειτουργία injection).                                          |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream) | Ελέγχει τη συμπεριφορά του masker στην πλευρά της απόκρισης.                                                                             |
+| Μεταβλητή                             | Χρησιμοποιείται από       | Επίδραση                                                                                                                         |
+| ------------------------------------- | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`        | Ορίστε `false` για πλήρη απενεργοποίηση του εντοπισμού.                                                                          |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`        | Πολιτική injection: `warn`, `block` ή `log`. Η παλαιού τύπου τιμή `redact` δεν ξαναγράφει το κείμενο injection.                  |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`        | Λειτουργία του φρουρού injection· επίσης σημαία χαρακτηριστικού DB που **υπερκαλύπτει** τις μεταβλητές περιβάλλοντος (DB > ENV). |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`        | Ελάχιστη σοβαρότητα που απορρίπτει το `MODE=block`: `high` (προεπιλογή), `medium` ή `low`.                                       |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`        | Παλαιό ψευδώνυμο του `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                                          |
+| `PII_REDACTION_ENABLED`               | `pii-masker`              | Όταν `true`, τα PII του αιτήματος αποκρύπτονται (ανεξάρτητα από τη λειτουργία injection).                                        |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (downstream) | Ελέγχει τη συμπεριφορά του masker στην πλευρά της απάντησης.                                                                     |
 
-Τα guardrails του Modality Bridge διαβάζουν τη διαμόρφωση χρόνου εκτέλεσης από τον χώρο αποθήκευσης ρυθμίσεων
-που υποστηρίζεται από ΒΔ (`getSettings()`), όχι από μεταβλητές περιβάλλοντος. Τα κύρια κλειδιά του Vision είναι
-`modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`,
+Οι μηχανισμοί προστασίας του Modality Bridge διαβάζουν τη διαμόρφωση χρόνου
+εκτέλεσης από το χώρο αποθήκευσης ρυθμίσεων με υποστήριξη DB
+(`getSettings()`), όχι από μεταβλητές περιβάλλοντος. Τα κύρια κλειδιά του
+Vision είναι `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`,
 `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`,
 `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`,
 `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`,
 `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` και
-`modalityBridgeCacheMaxEntries`. Τα παλαιότερα κλειδιά
-`visionBridge*` γίνονται αποδεκτά μόνο ως η τεκμηριωμένη εφεδρική επιλογή ανάγνωσης για έναν κύκλο·
-οι εγγραφές από τον πίνακα ελέγχου χρησιμοποιούν τα κύρια κλειδιά. Οι προεπιλογές και ο μηχανισμός επίλυσης
-εφεδρικών τιμών βρίσκονται στο `src/shared/constants/modalityBridgeDefaults.ts`, ενώ οι παλαιότερες
-σταθερές διατηρούνται στο `src/shared/constants/visionBridgeDefaults.ts`.
+`modalityBridgeCacheMaxEntries`. Τα παλαιά κλειδιά
+`visionBridge*` γίνονται αποδεκτά μόνο ως η τεκμηριωμένη εφεδρεία
+ανάγνωσης ενός κύκλου· οι εγγραφές του dashboard χρησιμοποιούν τα κύρια
+κλειδιά. Οι προεπιλογές και ο resolver εφεδρείας βρίσκονται στο
+`src/shared/constants/modalityBridgeDefaults.ts`, με τις παλαιές σταθερές να
+διατηρούνται στο `src/shared/constants/visionBridgeDefaults.ts`.
 
 Το Audio χρησιμοποιεί τα `modalityBridgeAudioEnabled`, `modalityBridgeAudioModel`,
-`modalityBridgeAudioTimeout` και `modalityBridgeAudioMaxClips`, καθώς και τις κοινόχρηστες
-ρυθμίσεις `modalityBridgeCache*`. Το Audio δεν διαθέτει εφεδρική χρήση παλαιότερων κλειδιών, επειδή αυτά
-τα κλειδιά εισήχθησαν με το σχήμα του Modality Bridge.
+`modalityBridgeAudioTimeout` και `modalityBridgeAudioMaxClips`, συν τις κοινές
+ρυθμίσεις `modalityBridgeCache*`. Το Audio δεν διαθέτει εφεδρεία παλαιών κλειδιών
+επειδή αυτά τα κλειδιά εισήχθησαν με το σχήμα του Modality Bridge.
 
 Το Video χρησιμοποιεί τα `modalityBridgeVideoEnabled`, `modalityBridgeVideoAnalysisMode`,
 `modalityBridgeVideoModel`,
 `modalityBridgeVideoFrameCount`, `modalityBridgeVideoSamplingPolicy`,
 `modalityBridgeVideoMaxVideos` και
-`modalityBridgeVideoTimeout`, καθώς και τις κοινόχρηστες ρυθμίσεις `modalityBridgeCache*`.
-Είναι απενεργοποιημένο από προεπιλογή, επειδή τα FFmpeg/ffprobe αποτελούν προαιρετικές λειτουργικές
-εξαρτήσεις και η δημιουργία λεζάντας για τα καρέ προσθέτει καθυστέρηση και κόστος μοντέλου.
+`modalityBridgeVideoTimeout`, συν τις κοινές ρυθμίσεις `modalityBridgeCache*`.
+Είναι απενεργοποιημένο από προεπιλογή επειδή τα FFmpeg/ffprobe αποτελούν
+προαιρετικές λειτουργικές εξαρτήσεις και η δημιουργία λεζάντας καρέ προσθέτει
+καθυστέρηση και κόστος μοντέλου.
 
 ## Προσαρμοσμένα Guardrails
 
@@ -880,68 +1015,70 @@ guardrailRegistry.register(new BudgetGuardrail());
 Βήματα:
 
 1. Δημιουργήστε το `src/lib/guardrails/myGuardrail.ts` επεκτείνοντας το `BaseGuardrail`.
-2. Υλοποιήστε το `preCall` ή/και το `postCall`.
-3. Είτε πραγματοποιήστε την εγγραφή κατά την εισαγωγή (προσθήκη από το `registerDefaultGuardrails`) είτε
-   καλέστε το `guardrailRegistry.register(...)` κατά τον χρόνο εκτέλεσης — το μητρώο αντικαθιστά
-   οποιοδήποτε προηγούμενο guardrail με το ίδιο κανονικοποιημένο όνομα.
-4. Προσθέστε δοκιμές στον κατάλογο `tests/unit/` (υπάρχοντα παραδείγματα:
+2. Υλοποιήστε το `preCall` και/ή το `postCall`.
+3. Είτε κάντε εγγραφή κατά την εισαγωγή (push από το `registerDefaultGuardrails`)
+   είτε καλέστε το `guardrailRegistry.register(...)` κατά την εκτέλεση — το μητρώο
+   αντικαθιστά οποιοδήποτε προηγούμενο guardrail με το ίδιο κανονικοποιημένο όνομα.
+4. Προσθέστε tests στον φάκελο `tests/unit/` (υπάρχοντα παραδείγματα:
    `tests/unit/guardrails-registry.test.ts`,
    `tests/unit/prompt-injection-guard.test.ts`,
    `tests/unit/guardrails/visionBridge.test.ts`).
 
 ## Δοκιμές
 
-Χρησιμοποιήστε το `resetGuardrailsForTests()` μεταξύ των δοκιμών, ώστε να ξεκινάτε από μια γνωστή κατάσταση.
-Περάστε `{ registerDefaults: false }` για να ξεκινήσετε με κενό μητρώο και
-να καταχωρίσετε μόνο τα guardrails που υποβάλλονται σε δοκιμή. Το Vision Bridge δέχεται έγχυση
-εξαρτήσεων (`deps.getSettings`, `deps.callVisionModel`)· το Audio Bridge εκθέτει τα
-αντίστοιχα σημεία παρέμβασης για ρυθμίσεις, δυνατότητες, επιλογή μοντέλου STT, ελέγχους
-διαπιστευτηρίων και μεταγραφή. Επομένως, οι δοκιμές μπορούν να καλύψουν και τις δύο ροές χωρίς
-πρόσβαση σε βάση δεδομένων ή δίκτυο.
+Χρησιμοποιήστε το `resetGuardrailsForTests()` μεταξύ των tests για να ξεκινάτε από
+μια γνωστή κατάσταση. Περάστε `{ registerDefaults: false }` για να ξεκινήσετε με ένα
+κενό μητρώο και να εγγράψετε μόνο τα guardrails που δοκιμάζονται. Το Vision Bridge
+δέχεται dependency injection (`deps.getSettings`, `deps.callVisionModel`)· το Audio
+Bridge εκθέτει τα αντίστοιχα σημεία διασύνδεσης για ρυθμίσεις, δυνατότητες, επιλογή
+μοντέλου STT, ελέγχους διαπιστευτηρίων και μεταγραφή. Τα tests μπορούν έτσι να
+εξετάσουν και τις δύο ροές χωρίς πρόσβαση σε βάση δεδομένων ή δίκτυο.
 
 ## Δείτε Επίσης
 
 - `src/lib/guardrails/` — υλοποίηση
-- `src/shared/utils/inputSanitizer.ts` — κοινόχρηστος ανιχνευτής που υποστηρίζει
-  την ανίχνευση prompt injection και την απόκρυψη PII
-- `src/shared/constants/visionBridgeDefaults.ts` — προεπιλογές του Vision Bridge και
-  λίστα μοντέλων υποχρεωτικής γεφύρωσης
-- `src/shared/constants/modalityBridgeDefaults.ts` — κοινόχρηστες προεπιλογές χρόνου εκτέλεσης για Vision/Audio
-- `docs/architecture/RESILIENCE_GUIDE.md` — ορθογώνιο επίπεδο (circuit breaker, περίοδοι αναμονής)
+- `src/shared/utils/inputSanitizer.ts` — κοινός ανιχνευτής που τροφοδοτεί την
+  προστασία prompt-injection και την απόκρυψη PII
+- `src/shared/constants/visionBridgeDefaults.ts` — προεπιλογές Vision Bridge και
+  λίστα μοντέλων με υποχρεωτική γέφυρα
+- `src/shared/constants/modalityBridgeDefaults.ts` — κοινές προεπιλογές χρόνου εκτέλεσης Vision/Audio
+- `docs/architecture/RESILIENCE_GUIDE.md` — ορθογώνιο στρώμα (circuit breaker, cooldowns)
 - `docs/reference/ENVIRONMENT.md` — πλήρης αναφορά μεταβλητών περιβάλλοντος
 
-## Κάλυψη διαδρομών και red-team για το injection guard (Φάση 8 · Μπλοκ D)
+## Κάλυψη routes του injection-guard & red-team (Φάση 8 · Μπλοκ D)
 
-Το injection guard (`createInjectionGuard` / `withInjectionGuard`) καλύπτει όλες τις διαδρομές
-που δέχονται prompts χρηστών. Σέβεται το `INJECTION_GUARD_MODE` (προεπιλογή `warn` = μόνο καταγραφή·
-`block` = επιστρέφει HTTP 400 `SECURITY_001`).
+Το injection-guard (`createInjectionGuard` / `withInjectionGuard`) καλύπτει όλα τα routes
+που δέχονται προτροπές χρήστη. Σέβεται το `INJECTION_GUARD_MODE` (προεπιλογή `warn` = μόνο
+καταγραφή· `block` = επιστρέφει HTTP 400 `SECURITY_001`).
 
-| Τύπος                | Διαδρομές                                                                                                                                            | Προεπιλεγμένη λειτουργία |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
-| Κείμενο (υφιστάμενο) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | warn                     |
-| Παραγωγικό           | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | warn                     |
-| Δεδομένα             | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | warn                     |
+| Τύπος             | Routes                                                                                                                                               | Προεπιλεγμένη λειτουργία |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------ |
+| Κείμενο (υπάρχον) | `/v1/chat/completions`, `/v1/completions`, `/v1/relay/chat/completions`                                                                              | warn                     |
+| Παραγωγικά        | `/v1/messages`, `/v1/responses`, `/v1/images/generations`, `/v1/images/edits`, `/v1/videos/generations`, `/v1/music/generations`, `/v1/audio/speech` | warn                     |
+| Δεδομένα          | `/v1/embeddings`, `/v1/rerank`, `/v1/search`, `/v1/moderations`                                                                                      | warn                     |
 
 Η εξαγωγή κειμένου (`extractMessageContents`) καλύπτει τα `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system`.
 
-**Red-team (κάθε βράδυ, `nightly-llm-security.yml`):** το promptfoo επαληθεύει ότι κάθε διαδρομή αποκλείει
-το σύνολο δεδομένων OWASP-LLM όταν ισχύει `INJECTION_GUARD_MODE=block`· το garak εκτελεί δοκιμές διερεύνησης (παραλείπονται χωρίς μυστικό).
-Το `moderations` περιλαμβάνεται για λόγους συνέπειας — οι διαχειριστές σε λειτουργία αποκλεισμού μπορούν να το εξαιρέσουν μέσω του
-`resolveDisabledGuardrails`.
+**Red-team (νυχτερινό, `nightly-llm-security.yml`):** το promptfoo επαληθεύει ότι κάθε route
+μπλοκάρει το corpus OWASP-LLM σε `INJECTION_GUARD_MODE=block`· το garak εκτελεί probes
+(παραλείπεται χωρίς secret). Το `moderations` περιλαμβάνεται για συνέπεια. Η λειτουργία
+block είναι ένα υποχρεωτικό όριο: το `evaluatePromptInjection()` αγνοεί τη λίστα
+απενεργοποίησης ανά αίτημα που του περνά το middleware, οπότε το `disabledGuardrails`
+**δεν** εξαιρεί ένα route από αυτό ([#16413](https://github.com/diegosouzapw/OmniRoute/issues/16413)).
 
-Η νυχτερινή ροή εργασίας (`.github/workflows/nightly-llm-security.yml`, cron + χειροκίνητη
-ενεργοποίηση) διαθέτει δύο εργασίες:
+Το νυχτερινό workflow (`.github/workflows/nightly-llm-security.yml`, cron + χειροκίνητη
+ενεργοποίηση) έχει δύο jobs:
 
-- **`promptfoo-guard` (υποχρεωτική)** — εκτελεί το `promptfoo eval -c promptfooconfig.yaml`
-  με `INJECTION_GUARD_MODE=block`. Κάθε αντίπαλη περίπτωση (π.χ. «αγνόησε όλες τις
-  προηγούμενες οδηγίες…», jailbreaks τύπου DAN) επιβεβαιώνει ότι η απόκριση περιέχει
-  `error.code === "SECURITY_001"`, δηλαδή ότι το guard απέρριψε πράγματι το αίτημα.
-- **`garak` (συμβουλευτική)** — εκτελεί το garak `--probes promptinject,dan,leakreplay`
-  σε ένα τοπικό στιγμιότυπο του OmniRoute (`http://localhost:20128/v1`). Εξαρτάται από την ύπαρξη ενός
-  μυστικού παρόχου (`PROMPTFOO_PROVIDER_KEY`)· παραλείπεται ομαλά και έχει την κατάληξη
-  `|| true`, ώστε να δημιουργεί αναφορά χωρίς να προκαλεί αποτυχία του CI.
+- **`promptfoo-guard` (blocking)** — εκτελεί `promptfoo eval -c promptfooconfig.yaml`
+  με `INJECTION_GUARD_MODE=block`. Κάθε εχθρική περίπτωση (π.χ. «αγνόησε όλες τις
+  προηγούμενες οδηγίες…», jailbreaks τύπου DAN) επιβεβαιώνει ότι η απάντηση φέρει
+  `error.code === "SECURITY_001"`, δηλαδή ότι το guard όντως απέρριψε το αίτημα.
+- **`garak` (συμβουλευτικό)** — εκτελεί garak `--probes promptinject,dan,leakreplay`
+  εναντίον μιας τοπικής εγκατάστασης OmniRoute (`http://localhost:20128/v1`). Εξαρτάται
+  από ένα provider secret (`PROMPTFOO_PROVIDER_KEY`)· παραλείπεται ομαλά και καταλήγει
+  σε `|| true`, ώστε να αναφέρει αποτελέσματα χωρίς να αποτυγχάνει το CI.
 
-Η κάλυψη του βοηθητικού guard (`createInjectionGuard` / `withInjectionGuard`)
-εκτείνεται σε κάθε διαδρομή `/v1` που δέχεται prompt· το κείμενο του prompt αντλείται από τα
+Η κάλυψη του βοηθού guard (`createInjectionGuard` / `withInjectionGuard`) εκτείνεται σε
+κάθε route `/v1` που φέρει προτροπές· το κείμενο της προτροπής αντλείται από τα
 `messages`/`input`/`prompt`/`query`+`documents`/`instructions`/`system` μέσω του
 `extractMessageContents()` στο `src/shared/utils/inputSanitizer.ts`.

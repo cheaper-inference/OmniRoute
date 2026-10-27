@@ -1,30 +1,33 @@
 # CLI Integrations (Hausa)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLI-INTEGRATIONS.md) · 🇪🇹 [am](../../../am/docs/guides/CLI-INTEGRATIONS.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLI-INTEGRATIONS.md) · 🇦🇿 [az](../../../az/docs/guides/CLI-INTEGRATIONS.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLI-INTEGRATIONS.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLI-INTEGRATIONS.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLI-INTEGRATIONS.md) · 🇩🇰 [da](../../../da/docs/guides/CLI-INTEGRATIONS.md) · 🇩🇪 [de](../../../de/docs/guides/CLI-INTEGRATIONS.md) · 🇬🇷 [el](../../../el/docs/guides/CLI-INTEGRATIONS.md) · 🇪🇸 [es](../../../es/docs/guides/CLI-INTEGRATIONS.md) · 🇪🇪 [et](../../../et/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLI-INTEGRATIONS.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLI-INTEGRATIONS.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇱 [he](../../../he/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLI-INTEGRATIONS.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLI-INTEGRATIONS.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLI-INTEGRATIONS.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇩 [id](../../../id/docs/guides/CLI-INTEGRATIONS.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇹 [it](../../../it/docs/guides/CLI-INTEGRATIONS.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLI-INTEGRATIONS.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLI-INTEGRATIONS.md) · 🇰🇭 [km](../../../km/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLI-INTEGRATIONS.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLI-INTEGRATIONS.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLI-INTEGRATIONS.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLI-INTEGRATIONS.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLI-INTEGRATIONS.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLI-INTEGRATIONS.md) · 🇲🇲 [my](../../../my/docs/guides/CLI-INTEGRATIONS.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLI-INTEGRATIONS.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLI-INTEGRATIONS.md) · 🇳🇴 [no](../../../no/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [or](../../../or/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLI-INTEGRATIONS.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLI-INTEGRATIONS.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLI-INTEGRATIONS.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLI-INTEGRATIONS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLI-INTEGRATIONS.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLI-INTEGRATIONS.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLI-INTEGRATIONS.md) · 🇱🇰 [si](../../../si/docs/guides/CLI-INTEGRATIONS.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLI-INTEGRATIONS.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLI-INTEGRATIONS.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLI-INTEGRATIONS.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLI-INTEGRATIONS.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [te](../../../te/docs/guides/CLI-INTEGRATIONS.md) · 🇹🇭 [th](../../../th/docs/guides/CLI-INTEGRATIONS.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLI-INTEGRATIONS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CLI-INTEGRATIONS.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLI-INTEGRATIONS.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLI-INTEGRATIONS.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLI-INTEGRATIONS.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLI-INTEGRATIONS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLI-INTEGRATIONS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLI-INTEGRATIONS.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLI-INTEGRATIONS.md) · 🇪🇹 [am](../../../am/docs/guides/CLI-INTEGRATIONS.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLI-INTEGRATIONS.md) · 🇦🇿 [az](../../../az/docs/guides/CLI-INTEGRATIONS.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLI-INTEGRATIONS.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLI-INTEGRATIONS.md) · 🇧🇦 [bs](../../../bs/docs/guides/CLI-INTEGRATIONS.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLI-INTEGRATIONS.md) · 🇩🇰 [da](../../../da/docs/guides/CLI-INTEGRATIONS.md) · 🇩🇪 [de](../../../de/docs/guides/CLI-INTEGRATIONS.md) · 🇬🇷 [el](../../../el/docs/guides/CLI-INTEGRATIONS.md) · 🇪🇸 [es](../../../es/docs/guides/CLI-INTEGRATIONS.md) · 🇪🇪 [et](../../../et/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLI-INTEGRATIONS.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLI-INTEGRATIONS.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇱 [he](../../../he/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLI-INTEGRATIONS.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLI-INTEGRATIONS.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLI-INTEGRATIONS.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇩 [id](../../../id/docs/guides/CLI-INTEGRATIONS.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇹 [it](../../../it/docs/guides/CLI-INTEGRATIONS.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLI-INTEGRATIONS.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLI-INTEGRATIONS.md) · 🇰🇭 [km](../../../km/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLI-INTEGRATIONS.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLI-INTEGRATIONS.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLI-INTEGRATIONS.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLI-INTEGRATIONS.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLI-INTEGRATIONS.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLI-INTEGRATIONS.md) · 🇲🇲 [my](../../../my/docs/guides/CLI-INTEGRATIONS.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLI-INTEGRATIONS.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLI-INTEGRATIONS.md) · 🇳🇴 [no](../../../no/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [or](../../../or/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLI-INTEGRATIONS.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLI-INTEGRATIONS.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLI-INTEGRATIONS.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLI-INTEGRATIONS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLI-INTEGRATIONS.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLI-INTEGRATIONS.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLI-INTEGRATIONS.md) · 🇱🇰 [si](../../../si/docs/guides/CLI-INTEGRATIONS.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLI-INTEGRATIONS.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLI-INTEGRATIONS.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLI-INTEGRATIONS.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLI-INTEGRATIONS.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLI-INTEGRATIONS.md) · 🇮🇳 [te](../../../te/docs/guides/CLI-INTEGRATIONS.md) · 🇹🇭 [th](../../../th/docs/guides/CLI-INTEGRATIONS.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLI-INTEGRATIONS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CLI-INTEGRATIONS.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLI-INTEGRATIONS.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLI-INTEGRATIONS.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLI-INTEGRATIONS.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLI-INTEGRATIONS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLI-INTEGRATIONS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLI-INTEGRATIONS.md)
 
 ---
 
-OmniRoute na zuwa da jerin umarnin `setup-*` waɗanda ke saita CLI na rubuta lamba
-(Codex, Claude Code, OpenCode, Cline, …) don amfani da OmniRoute a matsayin backend ɗinsa — ta yadda
-kayan aikin zai yi magana da endpoint **ɗaya** kawai, sannan OmniRoute ya tura buƙatar zuwa provider da ya dace tare da
-sauyawa ta atomatik idan ya gaza. Kowane umarni yana karanta kundin model na **kai tsaye** daga OmniRoute da ke aiki
-(na gida ko na nesa), sannan ya rubuta fayil ɗin saitin kayan aikin a kan na'urar **ka**.
-Ana nuni da API key ta hanyar environment variable a duk inda kayan aikin yake goyon bayansa.
-An nuna a ƙasa umarnin da ke adana fayil ɗin environment na cikin kayan aikin.
+Don bayanin manifest ɗin executable na bai ɗaya, keɓantattun muhallan child da saitin
+Gemini mai ɗorewa, duba [yarjejeniyoyin ƙaddamar da CLI](./CLI-LAUNCH-CONTRACTS.md).
 
-Akwai kuma launcher na gama-gari — `omniroute run <target>` — wanda ke ƙaddamar da
-`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` ko `gemini` tare da
-shigar da env da ya dace, ba tare da rubuta wani saitin ba kwata-kwata. Targets da
-aliases ɗinsu suna fitowa daga manifest na asali `bin/cli/cli-manifest.mjs`
+OmniRoute yana zuwa da jerin umarnin `setup-*` waɗanda ke saita wani
+CLI na rubuta lamba (Codex, Claude Code, OpenCode, Cline, …) don amfani da OmniRoute a matsayin backend ɗinsa — don haka
+kayan aikin yana sadarwa da endpoint **ɗaya** kuma OmniRoute yana tura buƙatar zuwa provider da ya dace tare da
+auto-fallback. Kowane umarni yana karanta kundin model na **live** daga OmniRoute da ke gudana
+(na gida ko na nesa) sannan ya rubuta fayil ɗin saitunan kayan aikin a kan na'urarka
+**kai tsaye**. Ana komawa ga API key ta hanyar environment variable a duk inda kayan aikin
+ke goyon bayansa. An bayyana a ƙasa umarnin da ke adana environment file na cikin kayan aikin har abada.
+
+Haka kuma akwai launcher na gama-gari — `omniroute run <target>` — wanda ke ƙaddamar da
+`claude`, `codex`, `aider`, `goose`, `opencode`, `qwen` ko `gemini` tare da shigar da
+env da ya dace, ba tare da rubuta wani config ko kaɗan ba. Targets da
+aliases nasu suna fitowa daga canonical manifest `bin/cli/cli-manifest.mjs`
 (`claude-code|cc|anthropic`, `codex-cli|openai-codex|openai`, `goose-cli`,
-`open-code`, `qwen-code`, `gemini-cli`), kuma `omniroute completion` yana bayar da
-kalmomin target iri ɗaya waɗanda aka samo daga manifest. Tsoffin launchers na kowane kayan aiki —
+`open-code`, `qwen-code`, `gemini-cli`), sannan `omniroute completion` yana bayar da
+waɗannan target words da aka samo daga manifest. Tsofaffin launchers na kowane kayan aiki —
 `omniroute launch` (Claude Code) da `omniroute launch-codex` (Codex) — har yanzu suna
 nan.
 
-Ana iya fara haɗa provider daga wannan yanayin na gida/nesa. Umarnin da ke ƙasa, waɗanda
-suka fara da API, suna ware tabbatar da izinin gudanarwa daga bayanan shaidar provider
-kuma ba sa taɓa buga bayanin shaida a cikin structured output:
+Ana iya fara amfani da provider daga wannan mahallin na gida/nesa. Umarnin da ke
+ƙasa waɗanda suka fi karkata ga API suna ware management authentication daga provider
+credentials kuma ba sa taɓa buga credential a structured output:
 
 ```bash
 omniroute providers add glm --credential-env GLM_API_KEY --name work
@@ -34,17 +37,23 @@ omniroute providers edit <connection-id> --default-model glm/glm-5.2
 omniroute providers remove <connection-id> --yes
 ```
 
-Don scripts, fi son `--credential-stdin` ko `--credential-env`; an ci gaba da riƙe `--credential`
+Don scripts, fi son `--credential-stdin` ko `--credential-env`; an bar `--credential`
 don amfani na gida da ake sarrafawa. `providers remove` yana buƙatar `--yes` a kan
-terminal marar hulɗa, kuma duk umarnin biyar suna bin active context ko kuma
-zaɓuɓɓukan global `--base-url`/`--api-key`.
+terminal mara hulɗa, kuma dukkan umarnin biyar suna mutunta active context ko
+global options na `--base-url`/`--api-key`.
 
-Don saitin tushe na sau ɗaya da ake rubutawa da hannu ga integrations biyu mafi cikakken fasali, duba
+Provider selectors suna ƙin ID prefixes, names ko provider names masu ruɗani; yi amfani da
+cikakken connection ID idan connections da yawa sun yi daidai. Umarnin ƙirƙira da gyarawa suna sake karanta
+saved connection, sannan cirewa yana tabbatar da cewa ba a ƙara iya karanta shi ba.
+Import yana tsallake provider/name pair da ya riga ya wanzu. Imported entries ba za su iya maye gurbin
+management endpoint, context ko management credentials da aka bayar ga CLI ba.
+
+Don saitin tushe na lokaci ɗaya, wanda aka rubuta da hannu, na integrations biyu mafi cikar fasali, duba
 cikakken bayani na kowane kayan aiki:
 
 - [Saitin Claude Code](./CLAUDE-CODE-CONFIGURATION.md)
 - [Saitin Codex CLI](./CODEX-CLI-CONFIGURATION.md)
-- [Yanayin Nesa](./REMOTE-MODE.md) — sarrafa OmniRoute na nesa (VPS / Tailnet) daga kwamfutar tafi-da-gidanka
+- [Remote Mode](./REMOTE-MODE.md) — sarrafa OmniRoute na nesa (VPS / Tailnet) daga laptop ɗinka
 - [VS Code Copilot Chat](./VSCODE-COPILOT.md) — extension na OmniCopilot; yana kuma iya gudanar da waɗannan
   umarnin `setup-*` a madadinka daga cikin editor
 
@@ -52,94 +61,94 @@ cikakken bayani na kowane kayan aiki:
 
 ## Babban tebur
 
-Kowane umarni yana bin **active context** (wanda aka saita da `omniroute connect`,
-duba [Yanayin Nesa](./REMOTE-MODE.md)) ko flags na kai tsaye
-`--remote <url> --api-key <key>`. Ma'anar "Na gida da na nesa" a ƙasa ita ce:
-idan babu flags, yana nufar `http://localhost:20128`; idan akwai `--remote` (ko
-active remote context), yana ɗauko kundin daga wannan server sannan ya rubuta
-config ɗin a cikin na'urar gida.
+Kowane umarni yana bin **mahallin da ke aiki** (wanda aka saita da `omniroute connect`, duba
+[Yanayin Nesa](./REMOTE-MODE.md)) ko takamaiman tutocin `--remote <url> --api-key <key>`.
+“Na gida da na nesa” a ƙasa yana nufin: idan babu tutoci, yana nufar `http://localhost:20128`;
+idan akwai `--remote` (ko mahallin nesa da ke aiki), yana ɗauko kundin daga wannan
+uwar garken sannan ya rubuta daidaitawar a gida.
 
-| Umarni                     | Kayan aiki                        | Abin da yake rubutawa                                                                                                                                                                        | Muhimman flags                                                                                                                             | Na gida ko na nesa |
-| -------------------------- | --------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
-| `omniroute setup-codex`    | OpenAI Codex CLI                  | `~/.codex/<name>.config.toml` — profile ɗaya ga kowane samfurin rubutu mai jituwa (`codex --profile <name>`)                                                                                 | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Dukansu            |
-| `omniroute setup-claude`   | Claude Code                       | `~/.claude/profiles/<name>/settings.json` — profile ɗaya ga kowane samfurin da ya dace (`CLAUDE_CONFIG_DIR`)                                                                                 | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Dukansu            |
-| `omniroute setup-opencode` | OpenCode (mai jituwa da openai)   | `~/.config/opencode/opencode.json` — mai samar da `omniroute` tare da kowane samfurin kundin (`opencode -m omniroute/<model>`)                                                               | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Dukansu            |
-| `omniroute setup-cline`    | Cline                             | `~/.cline/data/{globalState,secrets}.json` (yanayin CLI) + yana fitar da saitunan tsawaitawar VS Code                                                                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Dukansu            |
-| `omniroute setup-kilo`     | Kilo Code                         | `~/.local/share/kilo/auth.json` (CLI) + yana haɗa `kilocode.*` cikin `settings.json` na VS Code idan yana nan                                                                                | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Dukansu            |
-| `omniroute setup-continue` | Continue / `cn` CLI               | `~/.continue/config.yaml` — samfuran `provider: openai`, maɓalli ta `${{ secrets.OMNIROUTE_API_KEY }}`                                                                                       | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Dukansu            |
-| `omniroute setup-cursor`   | Cursor                            | Babu komai — yana fitar da matakan da za a bi cikin manhajar (tsarin saitunan Cursor SQLite ne marar bayyana)                                                                                | `--remote` `--api-key` `--only` `--port`                                                                                                   | Dukansu            |
-| `omniroute setup-roo`      | Roo Code                          | `~/.omniroute/roo-settings.json` (takardar shigo da bayanai) + yana saita `roo-cline.autoImportSettingsPath` idan `settings.json` na VS Code yana nan                                        | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Dukansu            |
-| `omniroute setup-crush`    | Crush                             | `~/.config/crush/crush.json` — mai samar da `openai-compat`, maɓalli ta `$OMNIROUTE_API_KEY`                                                                                                 | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Dukansu            |
-| `omniroute setup-goose`    | Goose                             | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + yana fitar da umarnin tsara env                                                                               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Dukansu            |
-| `omniroute setup-aider`    | Aider                             | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + yana fitar da umarnin tsara env                                                                                             | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Dukansu            |
-| `omniroute setup-qwen`     | Qwen Code                         | `~/.qwen/settings.json` — jerin V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` a cikin `~/.qwen/.env`                                                                                      | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Dukansu            |
-| `omniroute setup-5dive`    | 5dive (rukunin wakilai)           | Babu komai ƙarƙashin `$HOME` — yana rubuta **profile na auth** na 5dive (`/var/lib/5dive/auth-profiles/<name>/`) ta `5dive agent auth set`; na root kaɗai, yana aiki a kan kwamfutar rukunin | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Dukansu            |
-| `omniroute run <target>`   | Ƙaddamarwa yayin aiki (gama-gari) | Babu komai — yana ƙaddamar da `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` tare da env da args da suka dace; Qwen da Gemini suna amfani da home na wucin gadi mai keɓewa      | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Dukansu            |
-| `omniroute launch`         | Claude Code                       | Babu komai — yana ƙaddamar da `claude` tare da saka `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                                              | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Dukansu            |
-| `omniroute launch-codex`   | OpenAI Codex CLI                  | Babu komai — yana ƙaddamar da `codex` tare da saka mai samar da `omniroute` ta flags na `-c`                                                                                                 | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Dukansu            |
+| Umurni                     | Kayan aiki                           | Abin da yake rubutawa                                                                                                                                                                               | Muhimman tutoci                                                                                                                            | Na gida ko na nesa |
+| -------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | ------------------ |
+| `omniroute setup-codex`    | OpenAI Codex CLI                     | `~/.codex/<name>.config.toml` — bayanin martaba ɗaya ga kowane samfurin rubutu mai jituwa (`codex --profile <name>`)                                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--codex-home`                                                                        | Dukansu            |
+| `omniroute setup-claude`   | Claude Code                          | `~/.claude/profiles/<name>/settings.json` — bayanin martaba ɗaya ga kowane samfurin da ya dace (`CLAUDE_CONFIG_DIR`)                                                                                | `--remote` `--api-key` `--only` `--dry-run` `--port` `--claude-home`                                                                       | Dukansu            |
+| `omniroute setup-opencode` | OpenCode (mai jituwa da openai)      | `~/.config/opencode/opencode.json` — mai samarwa na `omniroute` tare da kowane samfurin kundin bayanai (`opencode -m omniroute/<model>`)                                                            | `--remote` `--api-key` `--only` `--model` `--dry-run` `--port`                                                                             | Dukansu            |
+| `omniroute setup-cline`    | Cline                                | `~/.cline/data/{globalState,secrets}.json` (yanayin CLI) + yana buga saitunan tsawaitawar VS Code                                                                                                   | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--cline-dir`                                                                | Dukansu            |
+| `omniroute setup-kilo`     | Kilo Code                            | `~/.local/share/kilo/auth.json` (CLI) + yana haɗa `kilocode.*` cikin `settings.json` na VS Code idan yana nan                                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--auth-path` `--vscode-settings`                                            | Dukansu            |
+| `omniroute setup-continue` | Continue / `cn` CLI                  | `~/.continue/config.yaml` — samfuran `provider: openai`, maɓalli ta hanyar `${{ secrets.OMNIROUTE_API_KEY }}`                                                                                       | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Dukansu            |
+| `omniroute setup-cursor`   | Cursor                               | Babu komai — yana buga matakan cikin manhaja (tsarin Cursor na SQLite ne marar bayyananniyar siga)                                                                                                  | `--remote` `--api-key` `--only` `--port`                                                                                                   | Dukansu            |
+| `omniroute setup-roo`      | Roo Code                             | `~/.omniroute/roo-settings.json` (takardar shigo da bayanai) + yana saita `roo-cline.autoImportSettingsPath` idan `settings.json` na VS Code yana nan                                               | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--import-path` `--vscode-settings`                                          | Dukansu            |
+| `omniroute setup-crush`    | Crush                                | `~/.config/crush/crush.json` — mai samarwa na `openai-compat`, maɓalli ta hanyar `$OMNIROUTE_API_KEY`                                                                                               | `--remote` `--api-key` `--only` `--dry-run` `--port` `--config-path`                                                                       | Dukansu            |
+| `omniroute setup-zed`      | Zed                                  | `~/.config/zed/settings.json` — mai samarwa na `openai_compatible.omniroute` (samfura masu iya amfani da kayan aiki ≤ 25), maɓalli ta hanyar `$OMNIROUTE_API_KEY`                                   | `--remote` `--api-key` `--only` `--reset` `--dry-run` `--port` `--config-path`                                                             | Dukansu            |
+| `omniroute setup-goose`    | Goose                                | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER`/`OPENAI_HOST`/`GOOSE_MODEL`) + yana buga tsarin umarnin env                                                                                         | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Dukansu            |
+| `omniroute setup-aider`    | Aider                                | `~/.aider.conf.yml` (`openai-api-base` + `model: openai/<id>`) + yana buga tsarin umarnin env                                                                                                       | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path`                                                              | Dukansu            |
+| `omniroute setup-qwen`     | Qwen Code                            | `~/.qwen/settings.json` — jerin V4 na `modelProviders.openai` + `OMNIROUTE_API_KEY` a cikin `~/.qwen/.env`                                                                                          | `--remote` `--api-key` `--model` `--yes` `--dry-run` `--port` `--config-path` `--env-path`                                                 | Dukansu            |
+| `omniroute setup-5dive`    | 5dive (rukunin agents)               | Babu komai a ƙarƙashin `$HOME` — yana rubuta **auth profile** na 5dive (`/var/lib/5dive/auth-profiles/<name>/`) ta hanyar `5dive agent auth set`; na root kawai, yana gudana a kan host ɗin rukunin | `--remote` `--api-key` `--model` `--auth-profile` `--agent` `--byo-provider` `--fivedive-bin` `--no-sudo` `--yes` `--dry-run` `--port`     | Dukansu            |
+| `omniroute run <target>`   | Ƙaddamarwa a lokacin aiki (gabaɗaya) | Babu komai — yana ƙaddamar da `claude`/`codex`/`aider`/`goose`/`opencode`/`qwen`/`gemini` tare da env da args masu dacewa; Qwen da Gemini suna amfani da keɓantaccen home na wucin gadi             | `--remote` `--base-url` `--context` `--provider` `--model` `--api-key` `--api-key-env` `--dry-run` `--json` `--port` `--profile` `--token` | Dukansu            |
+| `omniroute launch`         | Claude Code                          | Babu komai — yana ƙaddamar da `claude` tare da saka `ANTHROPIC_BASE_URL`/`ANTHROPIC_AUTH_TOKEN`                                                                                                     | `--remote` `--api-key` `--token` `--profile` `--port`                                                                                      | Dukansu            |
+| `omniroute launch-codex`   | OpenAI Codex CLI                     | Babu komai — yana ƙaddamar da `codex` tare da saka provider na `omniroute` ta hanyar flags na `-c`                                                                                                  | `--remote` `--api-key` `--profile` (`-p`) `--port`                                                                                         | Dukansu            |
 
-Bayanai kan tutoci (an tabbatar da su a tushen umarnin):
+Bayanan flags (an tabbatar da su a tushen command):
 
-- `--remote <url>` — ɗauko kundin daga OmniRoute mai nisa (yana rinjayar `--port`
-  da mahallin da yake aiki). `--api-key <key>` yana samar da bayanan shaidar wannan
-  sabar (ta tsohuwa yana amfani da env var `OMNIROUTE_API_KEY`, ko token na mahallin da yake aiki).
-- `--only <patterns>` — ƙananan jimloli da waƙafi ya raba; a bar ID ɗin samfura kawai waɗanda suka dace
-  (misali `--only glm,kimi`). Akwai shi a kan `setup-codex`, `setup-claude`,
-  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`.
-- `--dry-run` — nuna ainihin abin da za a rubuta ba tare da taɓa
-  tsarin fayiloli ba. Akwai shi a kowane umarnin `setup-*` **sai dai** `setup-cursor`
-  (wanda ba ya taɓa rubuta fayil).
-- `--model <id>` — wajibi ne (ko a zaɓa ta hulɗa) ga kayan aikin da ba su da
-  gano samfuri ta atomatik: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Waɗannan kayan aikin
-  kuma suna karɓar `--yes` don gudanarwa ba tare da hulɗa ba (wanda a lokacin ke buƙatar `--model`).
-  `setup-opencode` yana karɓar `--model` don saita samfuri na sama a matsayin tsoho.
-- `--model <id>` a kan `omniroute run` yana bin haɗin kowane maƙasudi na manifest
+- `--remote <url>` — ɗauko catalog daga OmniRoute na nesa (yana rinjayar `--port`
+  da context mai aiki). `--api-key <key>` yana bayar da credential na wannan
+  server (ta tsohuwa daga env var na `OMNIROUTE_API_KEY`, ko token na context mai aiki).
+- `--only <patterns>` — substrings da waƙafi ya raba; a bar model IDs kawai da suka dace
+  (misali `--only glm,kimi`). Akwai a kan `setup-codex`, `setup-claude`,
+  `setup-opencode`, `setup-continue`, `setup-cursor`, `setup-crush`, `setup-zed`.
+- `--dry-run` — buga ainihin abin da za a rubuta ba tare da taɓa
+  filesystem ba. Akwai a kowane command na `setup-*` **sai** `setup-cursor`
+  (wanda ba ya taɓa rubuta file).
+- `--model <id>` — wajibi ne (ko a zaɓa ta hulɗa) ga tools waɗanda ba su da
+  gano model ta atomatik: Cline, Kilo, Roo, Goose, Qwen, Aider, 5dive. Waɗannan tools
+  kuma suna karɓar `--yes` don gudana ba tare da hulɗa ba (wanda a lokacin yake buƙatar `--model`).
+  `setup-opencode` yana karɓar `--model` domin saita model na top-level na tsohuwa.
+- `--model <id>` a kan `omniroute run` yana bin haɗin kowane target na manifest
   (`bin/cli/cli-manifest.mjs`): **aider** yana karɓar `--model openai/<id>` sannan
   **opencode** `--model omniroute/<id>` (ana ƙara prefix ne kawai idan id
-  bai riga ya ƙunsa ba); **qwen** da **gemini** suna karɓar id ɗin yadda yake;
-  **claude** yana samun sa ta `ANTHROPIC_MODEL`, **goose** ta `GOOSE_MODEL`, sannan
-  **codex** ta args na `-c model_providers.omniroute.*`. **Qwen ne kaɗai maƙasudin gudanarwa
-  da ke tilasta buƙatar `--model`** — `omniroute run qwen` ba tare da shi ba yana fita da
-  `2` tare da bayyanannen kuskure.
-- `--port <port>` — tashar OmniRoute ta gida (tsoho `20128`, ana watsi da ita idan an saita `--remote`).
-  Yana nan a kan duk `setup-*` da masu ƙaddamarwa biyun.
-- Lambobin fita na `omniroute run`: ana isar da lambar fita ta CLI ɗin yaro
-  yadda take; `2` = hujjoji marasa inganci (maƙasudi mara tallafi, `--model` na wajibi da ya ɓace,
-  kariyar container); `127` = binary na maƙasudin ba ya cikin `PATH`;
-  `130`/`143`/`129` idan `SIGINT`/`SIGTERM`/`SIGHUP` ya kawo ƙarshen ƙaddamarwar;
-  `1` = wata gazawar ƙaddamarwa yayin aiki.
-- Masu ƙaddamarwa biyun (`launch`, `launch-codex`) suna karɓar `--profile <name>` don zaɓar
-  profile da `setup-claude` / `setup-codex` ya rubuta, tare da args da ake miƙawa kai tsaye ga
-  binary na `claude` / `codex` da ke ƙarƙashinsu.
+  bai riga yana ɗauke da shi ba); **qwen** da **gemini** suna karɓar id yadda yake;
+  **claude** yana samunsa ta `ANTHROPIC_MODEL`, **goose** ta `GOOSE_MODEL`, sannan
+  **codex** ta args na `-c model_providers.omniroute.*`. **Qwen ne kaɗai run
+  target da ke tilasta buƙatar `--model`** — `omniroute run qwen` ba tare da shi ba yana fita
+  da `2` tare da kuskure bayyananne.
+- `--port <port>` — port na OmniRoute na gida (tsoho `20128`, ana watsi da shi idan an saita `--remote`).
+  Yana nan a duk `setup-*` da launchers ɗin biyu.
+- Exit codes na `omniroute run`: ana tura exit code na child CLI
+  yadda yake; `2` = arguments marasa inganci (target mara tallafi, rashin
+  `--model` da ake buƙata, container guard); `127` = binary na target ba ya cikin `PATH`;
+  `130`/`143`/`129` idan an ƙare ƙaddamarwar ta `SIGINT`/`SIGTERM`/`SIGHUP`;
+  `1` = wata gazawar ƙaddamarwa a lokacin aiki.
+- Launchers ɗin biyu (`launch`, `launch-codex`) suna karɓar `--profile <name>` don zaɓar
+  profile da `setup-claude` / `setup-codex` ya rubuta, tare da args da ake wucewa kai tsaye zuwa
+  binary na `claude` / `codex`.
 
-Mai zaɓin hulɗa kuma ana amfani da shi tare a girke-girken saitawa:
+Haka kuma recipes na setup suna amfani da interactive picker ɗaya:
 
 ```bash
-# Zaɓa daga kundin samfura na gida ko mai nisa da yake aiki sannan a saita maƙasudin.
+# Zaɓa daga catalog na model na gida ko na nesa mai aiki, sannan a saita target.
 omniroute configure claude
 omniroute configure opencode --provider glm
 omniroute configure qwen --model qwen/qwen3.8-max-preview --yes
 ```
 
-A halin yanzu `configure` yana wakilta zuwa girke-girken da aka gwada na `codex`, `claude`,
+A halin yanzu `configure` yana miƙa aikin ga recipes da aka gwada na `codex`, `claude`,
 `opencode`, `qwen`, `aider`, `goose`, `cline`, `continue`, `kilo`, da `5dive`.
-Shigarwar kundin da suka keɓanta ga IDE,
-MITM, da jagora kawai suna ci gaba da zama bayyanannun hanyoyin `setup-*`/na hannu kuma
-ba a gabatar da su a matsayin maƙasudan da za a iya ƙaddamarwa ba.
+Abubuwan catalog na IDE kawai,
+MITM, da na jagora kawai suna ci gaba da amfani da tsarin `setup-*`/na hannu a sarari kuma
+ba a nuna su a matsayin targets da za a iya ƙaddamarwa.
 
-> `setup-opencode` shi ne haɗawar OpenCode mai **sauƙi kuma mai jituwa da openai**.
-> Haka kuma akwai haɗawar plugin mai ƙarin fasali — `omniroute setup opencode` — wadda
-> ke girka `@omniroute/opencode-plugin`. Umarnai ne daban-daban; jadawalin
-> da ke sama yana bayyana `setup-opencode`.
+> `setup-opencode` shi ne haɗin OpenCode na **lightweight openai-compatible**.
+> Haka kuma akwai haɗin plugin mai ƙarin fasali — `omniroute setup opencode` — wanda
+> yake shigar da `@omniroute/opencode-plugin`. Commands ne daban-daban; table
+> da ke sama yana bayanin `setup-opencode`.
 >
-> Plugin ɗin yana zuwa a cikin packages guda biyu, ɗaya ga kowane babban sigar OpenCode, saboda loaders biyun
+> Plugin ɗin yana zuwa cikin packages biyu, ɗaya ga kowane babban sigar OpenCode, saboda loaders ɗin biyu
 > suna tsammanin entrypoints daban-daban:
-> `@omniroute/opencode-plugin` na OpenCode v1 da
-> `@omniroute/opencode-plugin-v2` na OpenCode v2. Package na v2 sabo ne
-> (`0.1.0`) kuma yana bin kwangilar host da har yanzu take sauyawa, don haka yana karanta
-> tsarin da OpenCode ya shigar cikin daftarin kundin maimakon ya ɗauka kai tsaye. Girka
-> shi ta ƙara shigarwar `plugins` zuwa `opencode.json`; `omniroute setup opencode`
-> har yanzu yana girka package na v1. Zaɓuɓɓuka da tsarin binciken bayanan shaida suna cikin
+> `@omniroute/opencode-plugin` don OpenCode v1 da
+> `@omniroute/opencode-plugin-v2` don OpenCode v2. Package na v2 sabo ne
+> (`0.1.0`) kuma yana bin host contract wanda har yanzu yana canzawa, don haka yana karanta
+> shape da OpenCode yake sakawa cikin catalog draft maimakon ɗauka da kansa. Shigar
+> da shi ta ƙara entry na `plugins` zuwa `opencode.json`; `omniroute setup opencode`
+> har yanzu yana shigar da package na v1. Options da tsarin neman credential suna cikin
 > README na package.
 
 ---
@@ -264,23 +273,24 @@ kammala sauran matakansa a kan fallback kuma bai taɓa bayyana katsewar ba.
 
 ---
 
-## Ka’idojin Base URL (waɗanne kayan aiki ne ke buƙatar `/v1`)
+## Ka'idojin Base URL (waɗanne kayan aiki ne ke buƙatar `/v1`)
 
-OmniRoute yana samar da shimfiɗar OpenAI a `/v1`, shimfiɗar Anthropic a tushe,
-da kuma shimfiɗar Gemini ta asali a `/v1beta`. An haɗa kowace hulɗa da tsarin da
-kayan aikinta ke tsammani (an tabbatar a cikin tushen umarnin):
+OmniRoute yana samar da mahadar OpenAI a `/v1`, mahadar Anthropic a tushen URL,
+da kuma mahadar Gemini ta asali a `/v1beta`. An saita kowace haɗawa bisa tsarin da
+kayan aikinta ke tsammani (an tabbatar da hakan a cikin lambar umarni):
 
 | Haɗawa                                                                     | Base URL da aka rubuta | `/v1`?                                         |
 | -------------------------------------------------------------------------- | ---------------------- | ---------------------------------------------- |
-| `setup-cline` (`openAiBaseUrl`)                                            | tushe                  | A’a — Cline yana ƙara `/v1/chat/completions`   |
-| `setup-goose` (`OPENAI_HOST`)                                              | tushe                  | A’a — Goose yana ƙara hanyar                   |
-| `setup-aider` (`OPENAI_API_BASE`)                                          | tushe                  | A’a — LiteLLM yana ƙara `/v1/chat/completions` |
+| `setup-cline` (`openAiBaseUrl`)                                            | tushe                  | A'a — Cline yana ƙara `/v1/chat/completions`   |
+| `setup-goose` (`OPENAI_HOST`)                                              | tushe                  | A'a — Goose yana ƙara hanyar                   |
+| `setup-aider` (`OPENAI_API_BASE`)                                          | tushe                  | A'a — LiteLLM yana ƙara `/v1/chat/completions` |
 | `setup-kilo`, `setup-roo`, `setup-continue`, `setup-crush`, `setup-cursor` | tare da `/v1`          | E                                              |
-| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | tushe                  | A’a — Claude Code yana ƙara `/v1/messages`     |
+| `setup-zed` (`language_models.openai_compatible.omniroute.api_url`)        | tare da `/v1`          | E                                              |
+| `setup-claude` (`ANTHROPIC_BASE_URL`), `launch`                            | tushe                  | A'a — Claude Code yana ƙara `/v1/messages`     |
 | `setup-codex`, `launch-codex` (`model_providers.omniroute.base_url`)       | tare da `/v1`          | E                                              |
 | `setup-qwen` (`modelProviders.openai[].baseUrl`)                           | tare da `/v1`          | E                                              |
-| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | tushe                  | A’a — SDK yana ƙara `/v1beta/models/…`         |
-| `setup-5dive` (`ANTHROPIC_BASE_URL` a cikin bayanin auth)                  | tushe                  | A’a — Claude Code yana ƙara `/v1/messages`     |
+| `run gemini` (`GOOGLE_GEMINI_BASE_URL`)                                    | tushe                  | A'a — SDK ɗin yana ƙara `/v1beta/models/…`     |
+| `setup-5dive` (`ANTHROPIC_BASE_URL` a cikin bayanan tantancewa)            | tushe                  | A'a — Claude Code yana ƙara `/v1/messages`     |
 
 ---
 

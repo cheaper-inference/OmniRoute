@@ -1,6 +1,6 @@
 # OmniRoute A2A Server Documentation (Ελληνικά)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/A2A-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/A2A-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/A2A-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/A2A-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/A2A-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/A2A-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/A2A-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/A2A-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/A2A-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/A2A-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/A2A-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/A2A-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/A2A-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/A2A-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/A2A-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/A2A-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/A2A-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/A2A-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/A2A-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/A2A-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/A2A-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/A2A-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/A2A-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/A2A-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/A2A-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/A2A-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/A2A-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/A2A-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/A2A-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/A2A-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/A2A-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/A2A-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/A2A-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/A2A-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/A2A-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/A2A-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/A2A-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/A2A-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/A2A-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/A2A-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/A2A-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/A2A-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/A2A-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/A2A-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/A2A-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/A2A-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/A2A-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/A2A-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/A2A-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/A2A-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/A2A-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/A2A-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/A2A-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/A2A-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/A2A-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/A2A-SERVER.md)
 
 ---
 
@@ -45,9 +45,9 @@ Authorization: Bearer YOUR_OMNIROUTE_API_KEY
 
 ## Μέθοδοι JSON-RPC 2.0
 
-### `message/send` — Σύγχρονη Εκτέλεση
+### `message/send` — Σύγχρονη εκτέλεση
 
-Αποστέλλει ένα μήνυμα σε μια δεξιότητα και αναμένει την πλήρη απόκριση.
+Στέλνει ένα μήνυμα σε μια δεξιότητα και περιμένει την πλήρη απόκριση.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Για το `smart-routing`, το `metadata.combo` αποτελεί ρητή παράκαμψη του
+`metadata.model` για το αίτημα προς την πύλη· αποστέλλεται ως το πραγματικό `model`
+και όχι ως ένα αγνοούμενο πεδίο JSON `x-combo`. Εξακολουθούν να ισχύουν το κανονικό κλειδί API της πύλης και
+η εξουσιοδότηση ανά προορισμό. Ένα μη έγκυρο ή κενό combo απορρίπτεται.
+
+Το αποτέλεσμα εκθέτει τα `requested_combo` (πρόθεση καλούντος), `dispatched_model`
+(το πραγματικό αίτημα προς την πύλη), `response_model` (απόκριση πύλης) και
+`confirmed_combo`. Το τελευταίο πεδίο είναι `null`, εκτός εάν η πύλη
+προσδιορίσει ρητά ένα combo. Τα αρχεία καταγραφής αποφάσεων A2A αποδίδουν την εκτέλεση μόνο σε ένα
+επιβεβαιωμένο combo, διατηρώντας ένα μη επιβεβαιωμένο αίτημα ως `requestedCombo`.
+
 **Απόκριση:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Ροή SSE
 
-Ίδιο με το `message/send` αλλά επιστρέφει Server-Sent Events για ροή σε πραγματικό χρόνο.
+Όπως το `message/send`, αλλά επιστρέφει Server-Sent Events για ροή σε πραγματικό χρόνο.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -126,7 +130,7 @@ data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","s
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"completed"},"metadata":{...}}}
 ```
 
-### `tasks/get` — Ερώτημα Κατάστασης Εργασίας
+### `tasks/get` — Έλεγχος κατάστασης εργασίας
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -135,7 +139,7 @@ curl -X POST http://localhost:20128/a2a \
   -d '{"jsonrpc":"2.0","id":"2","method":"tasks/get","params":{"taskId":"TASK_UUID"}}'
 ```
 
-### `tasks/cancel` — Ακύρωση Εργασίας
+### `tasks/cancel` — Ακύρωση εργασίας
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -148,22 +152,22 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Διαθέσιμες Δεξιότητες
 
-Το OmniRoute εκθέτει 6 δεξιότητες A2A που καταχωρούνται στο `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Κάθε module δεξιότητας βρίσκεται στο `src/lib/a2a/skills/`.
+Το OmniRoute εκθέτει 6 δεξιότητες A2A που είναι συνδεδεμένες στο `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Κάθε μονάδα δεξιότητας βρίσκεται στο `src/lib/a2a/skills/`.
 
-| Δεξιότητα          | ID                   | Περιγραφή                                                                                                                                          | Ετικέτες                   | Παραδείγματα                           |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------- |
-| Smart Routing      | `smart-routing`      | Δρομολογεί ένα prompt μέσω του βέλτιστου παρόχου/συνδυασμού χρησιμοποιώντας τη μηχανή συνδυασμών και βαθμολόγησης του OmniRoute                    | routing, providers         | "Route this prompt via the best model" |
-| Quota Management   | `quota-management`   | Αναφέρει την κατάσταση ορίου χρήσης ανά πάροχο, βοηθά τους καλούντες να αποφασίσουν πότε να περιορίσουν ή να αλλάξουν πάροχο                       | quota, providers           | "Check quota for anthropic"            |
-| Provider Discovery | `provider-discovery` | Παραθέτει τους εγκατεστημένους παρόχους με τις δυνατότητές τους, σημαίες δωρεάν επιπέδου και κατάσταση OAuth                                       | providers, discovery       | "What providers are available?"        |
-| Cost Analysis      | `cost-analysis`      | Εκτιμά το κόστος ενός αιτήματος/συνομιλίας βάσει του καταλόγου και της πρόσφατης χρήσης                                                            | cost, usage                | "Estimate cost for this conversation"  |
-| Health Report      | `health-report`      | Συγκεντρώνει την κατάσταση του circuit breaker, της περιόδου αναμονής και του αποκλεισμού ανά πάροχο                                               | health, resilience         | "Show health status of all providers"  |
-| List Capabilities  | `list-capabilities`  | Επιστρέφει τον πλήρη κατάλογο 45 δεξιοτήτων Agent (23 API + 21 CLI + 1 διαμόρφωση) ως πίνακα markdown με raw SKILL.md URLs για έγχυση περιεχομένου | catalog, discovery, skills | "List all OmniRoute capabilities"      |
+| Δεξιότητα          | ID                   | Περιγραφή                                                                                                                                                  | Ετικέτες                   | Παραδείγματα                                             |
+| :----------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------------------- |
+| Smart Routing      | `smart-routing`      | Δρομολογεί ένα prompt μέσω του βέλτιστου provider/combo χρησιμοποιώντας τη μηχανή combo + βαθμολόγηση του OmniRoute                                        | routing, providers         | "Δρομολόγησε αυτό το prompt μέσω του καλύτερου μοντέλου" |
+| Quota Management   | `quota-management`   | Αναφέρει την κατάσταση quota ανά provider, βοηθά τους καλούντες να αποφασίσουν πότε να επιβραδύνουν/αλλάξουν                                               | quota, providers           | "Έλεγξε το quota για το anthropic"                       |
+| Provider Discovery | `provider-discovery` | Καταγράφει τους εγκατεστημένους providers με δυνατότητες, σημαίες δωρεάν επιπέδου, κατάσταση OAuth                                                         | providers, discovery       | "Ποιοι providers είναι διαθέσιμοι;"                      |
+| Cost Analysis      | `cost-analysis`      | Εκτιμά το κόστος ενός αιτήματος/συνομιλίας με βάση τον κατάλογο + την πρόσφατη χρήση                                                                       | cost, usage                | "Εκτίμησε το κόστος για αυτή τη συνομιλία"               |
+| Health Report      | `health-report`      | Συγκεντρώνει την κατάσταση circuit breaker, cooldown, lockout ανά provider                                                                                 | health, resilience         | "Εμφάνισε την κατάσταση υγείας όλων των providers"       |
+| List Capabilities  | `list-capabilities`  | Επιστρέφει τον πλήρη κατάλογο 45 καταχωρήσεων Agent Skills (23 API + 21 CLI + 1 config) ως πίνακα markdown με ακατέργαστα URL SKILL.md για έγχυση πλαισίου | catalog, discovery, skills | "Κατάγραψε όλες τις δυνατότητες του OmniRoute"           |
 
-> Το Agent Card θα πρέπει να παραμένει συγχρονισμένο με τον ενεργό κατάλογο 352 παρόχων· τα πλήθη παρόχων και τα μεταδεδομένα δωρεάν/χωρίς-πιστοποίηση αντλούνται από το μητρώο εκτέλεσης.
+> Η Agent Card θα πρέπει να παραμένει ευθυγραμμισμένη με τον ζωντανό κατάλογο 376 providers· οι αριθμοί providers και τα μεταδεδομένα free/no-auth προέρχονται από το μητρώο χρόνου εκτέλεσης.
 
-### Λεπτομέρειες Δεξιότητας `list-capabilities`
+### Λεπτομέρειες δεξιότητας `list-capabilities`
 
-Η δεξιότητα `list-capabilities` είναι ιδιαίτερα χρήσιμη για εξωτερικούς agents που χρειάζεται να ανακαλύψουν τι εκθέτει το OmniRoute πριν στείλουν κλήσεις API. Επιστρέφει ένα δομημένο artifact πίνακα markdown:
+Η δεξιότητα `list-capabilities` είναι ιδιαίτερα χρήσιμη για εξωτερικούς agents που πρέπει να ανακαλύψουν τι εκθέτει το OmniRoute πριν στείλουν κλήσεις API. Επιστρέφει ένα δομημένο artifact πίνακα markdown:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -172,7 +176,7 @@ curl -X POST http://localhost:20128/a2a \
 ...
 ```
 
-Κάθε γραμμή περιλαμβάνει τη στήλη `rawUrl` ώστε οι agents να μπορούν αμέσως να ανακτήσουν το πλήρες SKILL.md. Το πεδίο `metadata.totalSkills` αντικατοπτρίζει το μέγεθος του καταλόγου (45 σήμερα). Υλοποίηση: `src/lib/a2a/skills/listCapabilities.ts`. Δείτε επίσης [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Κάθε γραμμή περιλαμβάνει τη στήλη `rawUrl` ώστε οι agents να μπορούν να ανακτήσουν αμέσως το πλήρες SKILL.md. Το πεδίο `metadata.totalSkills` αντικατοπτρίζει το μέγεθος του καταλόγου (45 σήμερα). Υλοποίηση: `src/lib/a2a/skills/listCapabilities.ts`. Δείτε επίσης [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -262,7 +266,7 @@ submitted → working → completed
 
 ---
 
-## Παραδείγματα Ενσωμάτωσης
+## Παραδείγματα ενσωμάτωσης
 
 ### Python (requests)
 

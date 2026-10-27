@@ -1,6 +1,6 @@
 # Obsidian Context Source (Tiếng Việt)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇹 [am](../../../am/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇿 [az](../../../az/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇰 [da](../../../da/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇪 [de](../../../de/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇷 [el](../../../el/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇸 [es](../../../es/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇪 [et](../../../et/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇱 [he](../../../he/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇩 [id](../../../id/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇹 [it](../../../it/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇭 [km](../../../km/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇲 [my](../../../my/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇴 [no](../../../no/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [or](../../../or/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇰 [si](../../../si/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [te](../../../te/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇭 [th](../../../th/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OBSIDIAN_CONTEXT.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇹 [am](../../../am/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇿 [az](../../../az/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇰 [da](../../../da/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇩🇪 [de](../../../de/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇷 [el](../../../el/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇸 [es](../../../es/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇪🇪 [et](../../../et/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇱 [he](../../../he/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇩 [id](../../../id/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇹 [it](../../../it/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇭 [km](../../../km/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇲🇲 [my](../../../my/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇴 [no](../../../no/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [or](../../../or/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇱🇰 [si](../../../si/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇮🇳 [te](../../../te/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇭 [th](../../../th/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/OBSIDIAN_CONTEXT.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/OBSIDIAN_CONTEXT.md)
 
 ---
 
@@ -32,27 +32,27 @@ Obsidian và (tùy chọn) điều phối quá trình đồng bộ kho ghi chú 
 ## Thiết lập
 
 **Không có biến môi trường** cho token hoặc URL cơ sở của Obsidian — cả hai đều được
-lưu trong bảng SQLite `key_value` (không gian tên `obsidian`) thông qua
-`src/lib/db/obsidian.ts`. Token được **mã hóa khi lưu trữ** (AES-256-GCM, với cơ chế
-dự phòng tương thích ngược bằng văn bản thuần). Hãy cấu hình từ tab **Nguồn ngữ cảnh** của
-bảng điều khiển Điểm cuối (`ObsidianSourceCard`), hoặc thông qua API REST cài đặt.
+lưu trữ trong bảng SQLite `key_value` (namespace `obsidian`) thông qua
+`src/lib/db/obsidian.ts`. Token được **mã hóa khi lưu trữ** (AES-256-GCM, với
+cơ chế dự phòng tương thích ngược dùng văn bản thuần). Cấu hình từ tab **Nguồn ngữ cảnh** của
+bảng điều khiển Endpoint (`ObsidianSourceCard`), hoặc thông qua API REST cài đặt.
 
 > [!IMPORTANT]
 > Plugin **Obsidian Local REST API** phải được cài đặt và đang chạy. Giao diện REST của
 > plugin lắng nghe trên **HTTP `127.0.0.1:27123`** (URL cơ sở mặc định). Cổng `27124`
-> là một điểm cuối MCP/HTTPS _riêng biệt_ và bị tuyến cài đặt từ chối rõ ràng.
-> Nếu kết nối từ một thiết bị khác, hãy dùng `http://<tailscale-ip>:27123`.
+> là một điểm cuối MCP/HTTPS _riêng biệt_ và bị route cài đặt từ chối rõ ràng.
+> Nếu kết nối từ một thiết bị khác, hãy sử dụng `http://<tailscale-ip>:27123`.
 
-### Các khóa cấu hình (SQLite `key_value`, không gian tên `obsidian`)
+### Các khóa cấu hình (SQLite `key_value`, namespace `obsidian`)
 
-| Khóa              | Mục đích                                                 | Được mã hóa |
-| ----------------- | -------------------------------------------------------- | ----------- |
-| `api_key`         | Token mang xác thực của Local REST API                   | có          |
-| `base_url`        | URL cơ sở REST (mặc định `http://127.0.0.1:27123`)       | không       |
-| `vault_path`      | Đường dẫn tuyệt đối tới thư mục kho ghi chú (để đồng bộ) | không       |
-| `webdav_username` | Tên người dùng WebDAV được tạo (đồng bộ kho ghi chú)     | không       |
-| `webdav_password` | Mật khẩu WebDAV được tạo (đồng bộ kho ghi chú)           | có          |
-| `webdav_enabled`  | Liệu đồng bộ kho ghi chú WebDAV có được bật hay không    | không       |
+| Khóa              | Mục đích                                            | Được mã hóa |
+| ----------------- | --------------------------------------------------- | ----------- |
+| `api_key`         | Token bearer của Local REST API                     | có          |
+| `base_url`        | URL cơ sở REST (mặc định `http://127.0.0.1:27123`)  | không       |
+| `vault_path`      | Đường dẫn tuyệt đối đến thư mục vault (để đồng bộ)  | không       |
+| `webdav_username` | Tên người dùng WebDAV được tạo (đồng bộ vault)      | không       |
+| `webdav_password` | Mật khẩu WebDAV được tạo (đồng bộ vault)            | có          |
+| `webdav_enabled`  | Liệu đồng bộ vault qua WebDAV có được bật hay không | không       |
 
 ### Cấu hình qua REST
 
@@ -69,18 +69,17 @@ curl http://localhost:20128/api/settings/obsidian
 curl -X DELETE http://localhost:20128/api/settings/obsidian
 ```
 
-Tất cả phương thức đều yêu cầu xác thực bảng điều khiển. `POST` từ chối mọi URL trên cổng
-`27124` và xác thực token bằng cách gọi điểm cuối trạng thái của Local REST API trước khi lưu.
+Tất cả các phương thức đều yêu cầu xác thực bảng điều khiển. `POST` từ chối mọi URL trên cổng `27124`
+và xác thực token bằng cách gọi điểm cuối trạng thái của Local REST API trước khi lưu lại.
 
-### Đồng bộ kho ghi chú WebDAV
+### Đồng bộ vault qua WebDAV
 
-`src/app/api/settings/obsidian/webdav/route.ts` quản lý tính năng đồng bộ kho ghi chú
-dựa trên WebDAV (do `src/lib/obsidianSync.ts` điều khiển). Khi bật, tính năng này trỏ
-OmniRoute tới một thư mục kho ghi chú cục bộ và tạo một cặp tên người dùng/mật khẩu
-WebDAV ngẫu nhiên:
+`src/app/api/settings/obsidian/webdav/route.ts` quản lý tính năng đồng bộ vault tùy chọn
+dựa trên WebDAV (được điều khiển bởi `src/lib/obsidianSync.ts`). Khi bật, tính năng này trỏ OmniRoute đến một
+thư mục vault cục bộ và tạo một cặp tên người dùng/mật khẩu WebDAV ngẫu nhiên:
 
 ```bash
-# Bật đồng bộ WebDAV cho một thư mục kho ghi chú (tạo tên người dùng/mật khẩu)
+# Bật đồng bộ WebDAV cho một thư mục vault (tạo tên người dùng/mật khẩu)
 curl -X POST http://localhost:20128/api/settings/obsidian/webdav \
   -H "Content-Type: application/json" \
   -d '{"vaultPath":"/home/me/MyVault"}'
@@ -94,11 +93,19 @@ curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 
 ### Nguồn ngữ cảnh theo từng khóa API (tùy chọn)
 
-Cấu hình Obsidian có thể được đặt phạm vi **theo từng khóa API** thông qua bảng
-`api_key_context_sources` (`src/lib/db/apiKeyContextSources.ts`). Khi một lệnh gọi MCP
-mang id khóa API đã được xác thực, `getObsidianConfigForApiKey()` ưu tiên
-token/URL cơ sở/đường dẫn kho ghi chú riêng của khóa đó (`source: "api_key"`) và nếu không
-có thì dùng cấu hình toàn cục làm phương án dự phòng (`source: "global"`).
+Cấu hình Obsidian có thể được giới hạn phạm vi **theo từng khóa API** thông qua bảng `api_key_context_sources`
+(`src/lib/db/apiKeyContextSources.ts`). Khi một lệnh gọi MCP mang theo id khóa API đã xác thực,
+`getObsidianConfigForApiKey()` ưu tiên token/URL-cơ-sở/đường-dẫn-vault riêng của khóa đó
+(`source: "api_key"`) và nếu không có thì dùng cấu hình toàn cục làm phương án dự phòng (`source: "global"`).
+
+Các công cụ MCP không dùng để đồng bộ yêu cầu danh tính người gọi đã được phân giải trước khi đọc cấu hình này.
+Người gọi không có danh tính sẽ nhận được `Obsidian API token not configured`, và không có yêu cầu nào
+được gửi đến vault. Người gọi HTTP được phân giải thông qua thông tin xác thực trong yêu cầu của họ; người gọi stdio
+có thể được phân giải thông qua `OMNIROUTE_API_KEY` hoặc `ROUTER_API_KEY`. Người gọi HTTP chưa được phân giải
+không thể kế thừa danh tính môi trường của máy chủ. Chỉ riêng các ID giữ chỗ không cấp quyền
+truy cập; thông tin xác thực môi trường hợp lệ phân giải thành `env-key` vẫn được hỗ trợ.
+Các khóa đã xác thực nhưng không có cấu hình Obsidian riêng cho khóa vẫn sử dụng phương án dự phòng toàn cục.
+Bốn công cụ `obsidian_sync_*` vẫn giữ hành vi token đồng bộ riêng biệt của chúng.
 
 ## Công cụ MCP (22)
 

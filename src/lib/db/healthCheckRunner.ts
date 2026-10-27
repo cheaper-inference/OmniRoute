@@ -29,17 +29,20 @@ export function createDbHealthCoordinator(
     skipIntegrityCheck: boolean;
     promise: Promise<DbHealthCheckResult>;
   } | null = null;
-  let cached: { result: DbHealthCheckResult; expires: number } | null = null;
+  const cached = new Map<boolean, { result: DbHealthCheckResult; expires: number }>();
+  let generation = 0;
   return {
     get busy(): boolean {
       return active !== null;
     },
     invalidate(): void {
-      cached = null;
+      cached.clear();
+      generation++;
     },
     async stop(cancel: () => void): Promise<void> {
       stopping = true;
-      cached = null;
+      cached.clear();
+      generation++;
       cancel();
       await active?.promise.catch(() => {});
     },
@@ -53,8 +56,15 @@ export function createDbHealthCoordinator(
           ? active.promise
           : Promise.reject(new Error("Database health check already in progress"));
       }
-      if (!autoRepair && cached && now() < cached.expires) return Promise.resolve(cached.result);
-      cached = null;
+      if (!autoRepair) {
+        const hit = [cached.get(false), skipIntegrityCheck ? cached.get(true) : undefined].find(
+          (entry) => entry && now() < entry.expires
+        );
+        if (hit) return Promise.resolve(hit.result);
+      }
+      if (autoRepair) cached.clear();
+      else cached.delete(skipIntegrityCheck);
+      const startedGeneration = generation;
       let resolve!: (result: DbHealthCheckResult) => void;
       let reject!: (error: unknown) => void;
       const promise = new Promise<DbHealthCheckResult>((yes, no) => {
@@ -63,9 +73,10 @@ export function createDbHealthCoordinator(
       });
       active = { autoRepair, skipIntegrityCheck, promise };
       const succeed = (result: DbHealthCheckResult) => {
-        // Only a full (integrity-scanning) diagnosis may be replayed from the cache:
-        // caching a skipped scan would silently downgrade a later full request (#13149).
-        if (!autoRepair && !skipIntegrityCheck) cached = { result, expires: now() + cacheMs };
+        // Keep light/full diagnoses separate: waived scans never satisfy full requests.
+        if (!autoRepair && generation === startedGeneration && !stopping) {
+          cached.set(skipIntegrityCheck, { result, expires: now() + cacheMs });
+        }
         active = null;
         resolve(result);
       };

@@ -210,6 +210,12 @@ interface BuildTelemetryPayloadOptions {
   activeSessions: SessionSnapshot[];
 }
 
+/** Event-loop stall counters for the recorder started at boot. */
+export type EventLoopStallSummary = {
+  count: number;
+  maxMs: number;
+};
+
 interface BuildHealthPayloadOptions {
   appVersion: string;
   /** #10427: git SHA the running artifact was built from, so a deploy is auditable over HTTP. */
@@ -254,6 +260,8 @@ interface BuildHealthPayloadOptions {
   chatAdmission?: ChatAdmissionSnapshot | null;
   /** #12853: optional WAL maintenance snapshot; projected, never raw-spread. */
   walMaintenance?: WalMaintenanceSnapshot | null;
+  /** Stall counters from the boot recorder (healthzLag); additive key, nothing moves. */
+  eventLoopStall?: EventLoopStallSummary | null;
 }
 
 function limitMonitors(monitors: QuotaMonitorSnapshot[], maxItems = 8): QuotaMonitorSnapshot[] {
@@ -485,6 +493,7 @@ export function buildHealthPayload({
   adaptiveAdmission = null,
   chatAdmission = null,
   walMaintenance = null,
+  eventLoopStall = null,
   buildSha = null,
 }: BuildHealthPayloadOptions) {
   const timestamp = new Date().toISOString();
@@ -593,6 +602,9 @@ export function buildHealthPayload({
     // #12853: WAL maintenance next to the admission gates — additive key,
     // nothing existing moves.
     walMaintenance: projectWalMaintenanceSummary(walMaintenance),
+    // Stall counters from the boot recorder — additive key, nothing moves.
+    // A caller that never starts the recorder passes null and reads {0,0}.
+    eventLoopStall: eventLoopStall ?? { count: 0, maxMs: 0 },
     dedup: {
       inflightRequests,
     },
@@ -605,4 +617,55 @@ export function buildHealthPayload({
     },
     setupComplete: settings?.setupComplete || false,
   };
+}
+
+/** Short cache window for the opt-in deep-health verdict (distinct from the 1s payload cache). */
+export const DEEP_HEALTH_VERDICT_TTL_MS = 30_000;
+/** Bounded probe budget: the deep check never holds a monitoring request hostage. */
+export const DEEP_HEALTH_PROBE_TIMEOUT_MS = 3_000;
+
+export interface DeepHealthVerdict {
+  ok: boolean;
+  /** Failover signal: true ONLY on 502/503. 4xx/timeout/network never trip it (fail-open). */
+  failover: boolean;
+  status: number | null;
+  latencyMs: number;
+  at: string;
+}
+
+/**
+ * Minimal opt-in liveness probe against the completions surface: 1 token,
+ * non-streaming, bounded timeout. Never throws — every failure mode returns
+ * a verdict with failover:false except 502/503. Never logs bodies.
+ */
+export async function probeDeepHealth(
+  url: string,
+  opts: { timeoutMs?: number; token?: string; fetcher?: typeof fetch } = {}
+): Promise<DeepHealthVerdict> {
+  const timeoutMs = opts.timeoutMs ?? DEEP_HEALTH_PROBE_TIMEOUT_MS;
+  const fetcher = opts.fetcher ?? fetch;
+  const started = Date.now();
+  const verdict = (ok: boolean, failover: boolean, status: number | null): DeepHealthVerdict => ({
+    ok,
+    failover,
+    status,
+    latencyMs: Date.now() - started,
+    at: new Date().toISOString(),
+  });
+  try {
+    const res = await fetcher(url, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        ...(opts.token ? { authorization: `Bearer ${opts.token}` } : {}),
+      },
+      body: JSON.stringify({ max_tokens: 1, stream: false }),
+      signal: AbortSignal.timeout(timeoutMs),
+    });
+    const status = res.status;
+    if (status >= 200 && status < 300) return verdict(true, false, status);
+    return verdict(false, status === 502 || status === 503, status);
+  } catch {
+    return verdict(false, false, null);
+  }
 }

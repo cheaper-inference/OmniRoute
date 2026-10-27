@@ -1,6 +1,6 @@
 # OmniRoute MCP Server Documentation (中文 (繁體))
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MCP-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/MCP-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MCP-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/MCP-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MCP-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MCP-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MCP-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/MCP-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/MCP-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/MCP-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/MCP-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/MCP-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MCP-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MCP-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MCP-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MCP-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MCP-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MCP-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MCP-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MCP-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MCP-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/MCP-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MCP-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MCP-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MCP-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MCP-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MCP-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MCP-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MCP-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MCP-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/MCP-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MCP-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MCP-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MCP-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MCP-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MCP-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MCP-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MCP-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MCP-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MCP-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/MCP-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MCP-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MCP-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MCP-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MCP-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/MCP-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/MCP-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MCP-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MCP-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MCP-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MCP-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MCP-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MCP-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MCP-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/MCP-SERVER.md) · 🇸🇦 [ar](../../../ar/docs/frameworks/MCP-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/MCP-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MCP-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MCP-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/MCP-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MCP-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/MCP-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/MCP-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/MCP-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/MCP-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/MCP-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MCP-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MCP-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MCP-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MCP-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MCP-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MCP-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MCP-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MCP-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MCP-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/MCP-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MCP-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MCP-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MCP-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MCP-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MCP-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MCP-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MCP-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MCP-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/MCP-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MCP-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MCP-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MCP-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MCP-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MCP-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MCP-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MCP-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MCP-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MCP-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/MCP-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MCP-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MCP-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MCP-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MCP-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/MCP-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/MCP-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MCP-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MCP-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MCP-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MCP-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MCP-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MCP-SERVER.md)
 
 ---
 
@@ -71,6 +71,16 @@ curl -i \
 ```
 
 不具 `manage` 範圍的金鑰（或未提供 Bearer）會傳回 `403 LOCAL_ONLY`。相鄰的前綴 `/api/cli-tools/runtime/*` 刻意設計為不可略過——請參閱[路由防護層級——manage 範圍例外](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)。
+
+### Origin 驗證
+
+通過驗證後，所有送往 `/api/mcp/*` 的請求（包括傳輸端點與 `status`, `tools`, `audit`, `restart` 等管理路由）都會驗證 `Origin` 標頭，不論呼叫方為何（API key、CLI token、dashboard 工作階段，或停用登入時的匿名回環存取）。這是 MCP Streamable HTTP 規範要求的 DNS rebinding 防護。
+
+- **沒有 `Origin` 標頭** → 允許。OmniRoute CLI、SDK 與 IDE 用戶端都不會傳送此標頭。
+- **允許的 `Origin`** → 任意連接埠上的 `localhost` / `127.0.0.1` / `[::1]`，或 OmniRoute 自身的公開 origin：`OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`、受信任反向代理轉送的 origin（`OMNIROUTE_TRUST_PROXY`，僅在未設定 base URL 時生效），或直連的回環／區域網路 IP 主機。單憑 `Host` 標頭絕不會讓某個 origin 變成受信任。
+- **其他任何 `Origin`（包括 `null`）** → `403`，回應本文為 JSON-RPC 錯誤：`id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`。帶有有效 CSRF token 的 dashboard 工作階段仍會被接受，與其他 dashboard 寫入操作一致。
+
+部署在反向代理後方的瀏覽器 MCP 用戶端需要設定 `OMNIROUTE_PUBLIC_BASE_URL`；不提供其他 origin 的允許清單。CORS 預檢（`OPTIONS`）不驗證 Origin，但隨後的實際請求會驗證。
 
 ## IDE 設定
 
@@ -288,8 +298,105 @@ LLM 提供者相同的連線模型接入 OmniRoute。它們透過自身的 REST 
 
 ## 驗證與範圍
 
-MCP 工具透過 API 金鑰範圍進行驗證。範圍強制執行集中於
-`open-sse/mcp-server/scopeEnforcement.ts`。每個工具都需要特定範圍：
+MCP 工具呼叫會從呼叫端讀取範圍字串。該檢查是三個彼此獨立的命名空間之一。通過其中一個檢查器，不代表也通過其他檢查器。規則請參閱[三種範圍命名空間](#three-scope-namespaces)。
+工具目錄請參閱 [MCP 工具範圍](#mcp-tool-scopes)。
+
+### 三種範圍命名空間
+
+API 金鑰上的 `manage`、MCP 工具上的 `read:compression`，以及
+`oma_live_…` 存取權杖上的 `read`，是三種不同的授權。呼叫端若將 `read`
+存取權杖傳送至會進行變更的管理路由，將收到 HTTP 403：
+`Access token scope 'read' is insufficient; 'write' required.`
+該層級由 `scopeSatisfies` 判定。它不會查閱 MCP 表格，而 MCP
+比對器也不會查閱它。
+
+| 命名空間         | 憑證                                                          | 檢查器             | 通過後允許的操作                     |
+| :--------------- | :------------------------------------------------------------ | :----------------- | :----------------------------------- |
+| API 金鑰管理     | `api_keys.scopes`                                             | `hasManageScope`   | 使用該 Bearer 金鑰存取管理 REST      |
+| API 金鑰附加範圍 | 相同陣列中的一個完全相符字串                                  | 下方指定的輔助函式 | 僅限該項能力                         |
+| MCP 工具範圍     | 相同陣列，否則為 MCP `_meta`，再否則為 `OMNIROUTE_MCP_SCOPES` | `scopeMatches`     | 啟用強制執行後，可使用該工具         |
+| 存取權杖         | `oma_live_…`                                                  | `scopeSatisfies`   | 使用需要該層級之方法與路徑的管理路由 |
+
+各種憑證的簽發方式請參閱
+[管理驗證](../guides/MANAGEMENT-AUTH.md)。
+
+#### API 金鑰範圍
+
+同一個 `api_keys.scopes` 陣列負責兩項工作。兩者使用不同的函式。
+
+**管理 REST。** `manage` 與 `admin` 是
+`MANAGEMENT_API_KEY_SCOPES`（`src/shared/constants/managementScopes.ts`）的成員。
+`hasManageScope` 負責授權該金鑰存取管理路由。在這些路由上，`admin`
+具備管理能力。此處的 `admin` 並不是存取權杖的層級，也不會展開成
+MCP 工具範圍。
+
+**附加字串。** 每個字串都使用完全相符的成員資格測試，而且都位於
+`MANAGEMENT_API_KEY_SCOPES` 之外。
+
+| 範圍                           | 通過後允許的操作                                                                                                                                              |
+| :----------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `mcp:connect`                  | 僅限非回送位址的 `/api/mcp/` LOCAL_ONLY 例外（`hasMcpConnectOrManageScope`）。具有 `manage` 或 `admin` 的金鑰仍可通過此例外。                                 |
+| `self:usage`                   | 取得此金鑰的 `GET /api/v1/me/status`（`src/app/api/v1/me/status/route.ts`）。`POST /api/keys` 會在建立時加入此範圍（`normalizeSelfServiceScopesForCreate`）。 |
+| `self:account-quota`           | 該狀態承載資料中的上游帳戶配額（`src/lib/usage/apiKeySelfService.ts`）。該狀態路由仍需要 `self:usage`。                                                       |
+| `policy:bypass-provider-quota` | 此金鑰的推論呼叫會略過提供者配額原則（`src/sse/handlers/chat.ts` 中的 `hasProviderQuotaBypassScope`）。                                                       |
+
+#### 比對
+
+目錄是 [MCP 工具範圍](#mcp-tool-scopes)下方的表格。請勿將
+`src/shared/constants/mcpScopes.ts` 中的 `MCP_SCOPE_LIST` 視為該目錄：
+它是原始的類型化子集。後續工具在其旁宣告了其他範圍
+（`read:notion`、`read:skills`、`read:local-corpus`，以及表格中的其餘範圍）。
+
+`open-sse/mcp-server/scopeEnforcement.ts` 中的 `evaluateToolScopes`
+會在每個必要範圍都與某個已授予範圍相符時允許呼叫：
+
+- `*` 會比對所有必要範圍。
+- 以 `*` 結尾的已授予範圍，會比對開頭符合星號前綴的必要範圍。
+  `read:*` 會比對 `read:compression`。
+- 其他所有已授予範圍只會比對完全相同的必要字串。
+
+範圍為 `["manage"]` 的金鑰無法通過 `read:compression` 的
+`scopeMatches`。如果唯一授予的字串分別是 `admin`、`mcp:connect`、`read`
+或 `write`，相同的呼叫也會失敗。除了結尾的 `*` 之外，MCP 工具範圍之間
+不存在任何階層關係。
+
+除非 `OMNIROUTE_MCP_ENFORCE_SCOPES=true`，否則不會啟用強制執行（預設值為
+`false`）。停用時，`evaluateToolScopes` 會允許呼叫並略過目錄。啟用時，
+HTTP 會使用 Bearer 金鑰的 `api_keys.scopes` 作為 `authInfo`
+（請參閱[每個金鑰的 HTTP 範圍繫結](#per-key-http-scope-binding-7895)）。
+如果無法解析出任何金鑰範圍，已授予集合會依序改用 MCP `_meta`，再改用
+`OMNIROUTE_MCP_SCOPES`。
+
+#### 存取權杖範圍
+
+`oma_live_…` 權杖（`src/lib/accessTokens/scopes.ts`）帶有 `read`、`write`
+或 `admin`。`scopeSatisfies` 採用層級判定：`admin` 涵蓋 `write` 與 `read`，
+而 `write` 涵蓋 `read`。未知範圍不涵蓋任何權限。
+
+`evaluateAccessTokenAuth`（`src/server/authz/accessTokenAuth.ts`）會將該層級
+與 `inferRequiredScope`（`src/server/authz/accessScopes.ts`）進行比較：
+
+- `GET`、`HEAD` 與 `OPTIONS` 需要 `read`。
+- 其他所有方法都需要 `write`。
+- `ADMIN_SCOPE_PREFIXES` 中的路徑，其所有方法都需要 `admin`。`/api/mcp`
+  位於該清單中，因此具有 `write` 的存取權杖仍無法呼叫 MCP HTTP
+  介面。
+- `ADMIN_MUTATION_PREFIXES` 中的路徑，只有變更操作需要 `admin`。
+- `ADMIN_MUTATION_EXACT_PATHS` 中的路徑（`/api/settings`、
+  `/api/settings/require-login`）只有變更操作才需要 `admin`，且僅適用於
+  該完全相符的路徑——其他 `/api/settings/*` 子路由仍維持使用 `write`。
+
+`PATCH /api/keys/{id}` 是一項變更操作，且不在那些管理員清單中，因此
+`read` 權杖會收到 403：
+`Access token scope 'read' is insufficient; 'write' required.`
+`write` 或 `admin` 存取權杖可滿足該路由的要求。儀表板 JWT、回送 CLI machine-id 權杖，以及具有 `manage` 或 `admin` 的 API 金鑰會採用其他分支，不受此等級限制。
+
+針對 `/api/mcp` 通過 `scopeSatisfies` 的存取權杖只代表已通過管理閘門。工具呼叫仍會針對 API 金鑰範圍執行 `scopeMatches`。存取權杖的等級不會作為 `scopeMatches` 的輸入。
+
+### MCP 工具範圍
+
+範圍強制執行集中在 `open-sse/mcp-server/scopeEnforcement.ts` 中。
+每項工具都需要特定的範圍：
 
 | 範圍                  | 工具                                                                                                                                                                         |
 | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -327,53 +434,66 @@ MCP 工具透過 API 金鑰範圍進行驗證。範圍強制執行集中於
 | `write:obsidian`      | 9 個寫入工具 — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …                |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                            |
 
-支援萬用字元權限範圍：`read:*` 授予所有讀取權限範圍，`*` 授予完整存取權。
+支援萬用字元作用域：`read:*` 授予所有讀取作用域，`*` 授予完整存取權。
 
-### `mcp:connect` — 限定路由能力（#7895）
+### `mcp:connect` — 窄範圍路由能力 (#7895)
 
-從非回送位址存取 HTTP/SSE MCP 傳輸端點（`/api/mcp/*`）時，需要使用
-`/api/mcp/` 的 LOCAL_ONLY 例外規則（請參閱 `docs/security/ROUTE_GUARD_TIERS.md`）。過去，
-該例外規則只接受具有完整 `manage`/`admin` 權限範圍的 API 金鑰——對於只需要與 MCP
-通訊的呼叫端而言，權限過於寬泛。`src/shared/constants/managementScopes.ts` 現在會
-匯出 `MCP_CONNECT_SCOPE = "mcp:connect"`：這是一個附加的限定權限範圍（遵循
-`SELF_USAGE_SCOPE` 的相同先例），僅授權略過
-`src/server/authz/policies/management.ts` 中的 `/api/mcp/` 限制——它不授予任何其他
-管理路由存取權，且刻意未納入 `MANAGEMENT_API_KEY_SCOPES`。具有 `manage`/`admin`
-權限範圍的金鑰仍可照常通過此例外規則；`mcp:connect` 則是提供給僅從遠端呼叫 MCP
-之呼叫端的低權限替代方案，並透過 `hasMcpConnectOrManageScope()` 進行檢查。
+若要從非迴路位址存取 HTTP/SSE MCP 傳輸層（`/api/mcp/*`），需要使用
+`/api/mcp/` 的 LOCAL_ONLY 例外（請參閱 `docs/security/ROUTE_GUARD_TIERS.md`）。過去，
+該例外僅接受具有完整 `manage`/`admin` 作用域的 API 金鑰——對於只需與 MCP
+通訊的呼叫者而言，權限過於寬泛。`src/shared/constants/managementScopes.ts` 現在
+會匯出 `MCP_CONNECT_SCOPE = "mcp:connect"`：這是一個附加的窄範圍作用域（與
+`SELF_USAGE_SCOPE` 採用相同先例），僅授權略過
+`src/server/authz/policies/management.ts` 中的 `/api/mcp/` 限制——它不授予任何其他管理路由的存取權，
+並刻意排除在 `MANAGEMENT_API_KEY_SCOPES` 之外。持有 `manage`/`admin`
+的金鑰仍可照常通過該例外；`mcp:connect` 則是供僅需遠端 MCP 存取的呼叫者使用之
+較低權限替代方案，透過 `hasMcpConnectOrManageScope()` 檢查。
 
-### 每個金鑰的 HTTP 權限範圍繫結（#7895）
+### 每個金鑰的 HTTP 作用域繫結 (#7895)
 
-透過 HTTP/SSE 時，`open-sse/mcp-server/httpTransport.ts` 現在會藉由
-`resolveMcpCallerAuthInfo()`（`open-sse/mcp-server/httpAuthContext.ts`）解析呼叫端實際的
-`api_keys.scopes`，並將其傳遞給 MCP SDK 的 `transport.handleRequest(req, { authInfo })`，
-因此傳入每次工具呼叫的 `extra.authInfo.scopes` 會反映 Bearer 金鑰本身的權限範圍。
-`scopeEnforcement.ts` 的 `resolveCallerScopeContext()` 原本就會優先採用 `authInfo`，而非
-`_meta` 與 `OMNIROUTE_MCP_SCOPES` 環境變數的備援值——此變更只是填入第一個、
-最高優先順序的來源；先前透過 HTTP 時，該來源並未獲得資料。若未解析出任何 API 金鑰
-（沒有標頭或金鑰無效），`authInfo` 會維持為 `undefined`，解析流程則會照常回退至現有的
-`meta`/環境變數鏈。此變更不會改變 `OMNIROUTE_MCP_ENFORCE_SCOPES` 的預設值——仍須
-明確啟用強制執行；此變更僅讓每個金鑰的處理路徑在啟用後具有優先權。stdio 沒有每個
-呼叫端各自的身分（請參閱 `mcpCallerIdentity.ts`），因此不受影響——仍會使用
-`_meta`/環境變數備援鏈。
+透過 HTTP/SSE 時，`open-sse/mcp-server/httpTransport.ts` 現在會透過
+`resolveMcpCallerAuthInfo()`（`open-sse/mcp-server/httpAuthContext.ts`）
+解析呼叫者實際的 `api_keys.scopes`，並將其傳遞給 MCP SDK 的
+`transport.handleRequest(req, { authInfo })`，使每次工具呼叫收到的
+`extra.authInfo.scopes` 都能反映 Bearer 金鑰本身的作用域。
+`scopeEnforcement.ts` 的 `resolveCallerScopeContext()` 原本就會優先使用 `authInfo`，
+而非 `_meta` 與 `OMNIROUTE_MCP_SCOPES` 環境變數備援——此變更只是填入第一個、
+優先順序最高的來源，而先前透過 HTTP 時並未提供此來源。若無法解析 API 金鑰
+（沒有標頭、金鑰無效），`authInfo` 會維持 `undefined`，而解析流程則會照常
+退回至現有的 `meta`/環境變數鏈。stdio 沒有個別呼叫者身分（請參閱
+`mcpCallerIdentity.ts`），因此不受影響——它會繼續使用 `_meta`/環境變數備援鏈。
+
+**對於窄作用域的 HTTP/SSE 呼叫者，無論
+`OMNIROUTE_MCP_ENFORCE_SCOPES` 為何，都會強制啟用執行限制。** `OMNIROUTE_MCP_ENFORCE_SCOPES`
+預設為 `false`，僅對本機/stdio 單一操作者流程安全，因為該流程沒有可用於限制作用域的個別呼叫者身分。
+只要 `resolveCallerScopeContext()` 解析出
+`source === "authInfo"`（即真實的逐金鑰 HTTP Authorization 標頭，僅限 HTTP/SSE），且該
+金鑰不具有完整的 `manage`/`admin` 作用域，`open-sse/mcp-server/server.ts::withScopeEnforcement()`
+就會無條件啟用每個工具的作用域限制（透過 `scopeEnforcement.ts` 中的
+`shouldForceScopeEnforcement()`）。這修補了一項缺口：僅持有窄範圍 `mcp:connect`
+略過作用域的金鑰——如上所述，它除了授權 `/api/mcp/` 的 LOCAL_ONLY 例外之外，
+不授予任何其他權限——原本可能在操作者啟用遠端/非迴路 MCP 存取後，僅因
+`OMNIROUTE_MCP_ENFORCE_SCOPES` 出廠預設為 `false`，便可叫用所有 MCP 工具。
+透過 HTTP 使用完整 `manage`/`admin` 金鑰的情況，以及所有 stdio/本機呼叫者，
+都會維持現有由 `OMNIROUTE_MCP_ENFORCE_SCOPES` 控制的行為不變。
 
 ---
 
 ## 環境變數
 
-| 變數                                    | 預設值                          | 用途                                                                             |
-| :-------------------------------------- | :------------------------------ | :------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`        | MCP 伺服器呼叫 OmniRoute 內部 API 時使用的基礎 URL                               |
-| `OMNIROUTE_API_KEY`                     | （空）                          | 以 `Authorization: Bearer` 形式轉送至內部 API 呼叫的 API 金鑰                    |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false`（只有 `"true"` 會啟用） | 啟用後，缺少範圍將拒絕工具呼叫，並在稽核記錄中記錄 `scope_denied:<reason>`       |
-| `OMNIROUTE_MCP_SCOPES`                  | （空）                          | 以逗號分隔的範圍允許清單，預設視為「可用」（當呼叫者未提供自己的範圍時使用）     |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | （未設定 = 開啟）               | 設為 `0/false/off/no` 時，停用註冊階段的 MCP 描述壓縮                            |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | （未設定 = 開啟）               | 上述相同切換設定的替代別名                                                       |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                         | 內部管理讀取作業（健康狀態、韌性、組合、配額、使用量）的中止時間限制             |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                         | 等待提供者回應之操作（`route_request`、`web_search`、`web_fetch`）的中止時間限制 |
-| `MCP_TOOL_DENY`                         | （未設定 = 不篩選）             | 以逗號分隔、要從 `tools/list` 中移除的工具名稱（減少工具基數 — 請參閱下文）      |
-| `MCP_TOOL_ALLOW`                        | （未設定 = 不篩選）             | 以逗號分隔、要獨家保留的工具名稱（允許清單模式 — 請參閱下文）                    |
-| `DATA_DIR`                              | `~/.omniroute`                  | 活動訊號檔案會寫入 `${DATA_DIR}/runtime/mcp-heartbeat.json`                      |
+| 變數                                    | 預設值                        | 用途                                                                                                                                                                                                                                                                                                                                                                               |
+| :-------------------------------------- | :---------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`      | MCP 伺服器呼叫 OmniRoute 內部 API 時使用的基底 URL                                                                                                                                                                                                                                                                                                                                 |
+| `OMNIROUTE_API_KEY`                     | （空白）                      | 以 `Authorization: Bearer` 形式轉送至內部 API 呼叫的 API 金鑰                                                                                                                                                                                                                                                                                                                      |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false`（僅 `"true"` 會啟用） | 啟用後，缺少範圍時會拒絕工具呼叫，並在稽核日誌中記錄 `scope_denied:<reason>`。此外，若任何 HTTP/SSE 呼叫端是透過個別金鑰的 Authorization 標頭解析而得（`source === "authInfo"`），且缺少完整的 `manage`/`admin` 範圍，則無論此旗標為何都會強制執行；例如，金鑰僅具有狹義的 `mcp:connect` 繞過範圍。因此，此預設值僅適用於本機/stdio 的單一操作者流程，絕不可用於遠端非迴路位址存取 |
+| `OMNIROUTE_MCP_SCOPES`                  | （空白）                      | 以逗號分隔的範圍允許清單，預設視為「可用」（在呼叫端未提供自己的範圍時使用）                                                                                                                                                                                                                                                                                                       |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | （未設定 = 開啟）             | 設為 `0/false/off/no` 時，停用註冊階段的 MCP 描述壓縮                                                                                                                                                                                                                                                                                                                              |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | （未設定 = 開啟）             | 上述相同切換設定的替代別名                                                                                                                                                                                                                                                                                                                                                         |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                       | 內部管理讀取作業（健康狀態、韌性、組合、配額、使用量）的中止時間上限                                                                                                                                                                                                                                                                                                               |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                       | 等待提供者之各階段（`route_request`、`web_search`、`web_fetch`）的中止時間上限                                                                                                                                                                                                                                                                                                     |
+| `MCP_TOOL_DENY`                         | （未設定 = 不篩選）           | 以逗號分隔、要從 `tools/list` 中移除的工具名稱（降低工具基數——請參閱下文）                                                                                                                                                                                                                                                                                                         |
+| `MCP_TOOL_ALLOW`                        | （未設定 = 不篩選）           | 以逗號分隔、要獨家保留的工具名稱（允許清單模式 — 請見下文）                                                                                                                                                                                                                                                                                                                        |
+| `DATA_DIR`                              | `~/.omniroute`                | 心跳檔案會寫入 `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                                                                            |
 
 ---
 
@@ -415,9 +535,9 @@ MCP_TOOL_ALLOW="omniroute_route_request,omniroute_check_quota" omniroute --mcp
 
 ---
 
-## 執行階段心跳
+## 執行時心跳 (Runtime Heartbeat)
 
-stdio 傳輸每 5 秒會將存活狀態持久化至 `${DATA_DIR}/runtime/mcp-heartbeat.json`。儀表板 (`/api/mcp/status`) 會讀取此檔案並檢查 PID 存活狀態，以判定 `online`。HTTP 傳輸則改由程序內的 `getMcpHttpStatus()` 回報狀態（不寫入檔案）。
+stdio 傳輸層每 5 秒將存活狀態持久化到 `${DATA_DIR}/runtime/mcp-heartbeat.json`。儀表板 (`/api/mcp/status`) 讀取此檔案以及 PID 存活狀態以推導出 `online` 狀態。HTTP 傳輸層則從程序內的 `getMcpHttpStatus()` 報告狀態（不寫入檔案）。
 
 心跳快照包含：
 

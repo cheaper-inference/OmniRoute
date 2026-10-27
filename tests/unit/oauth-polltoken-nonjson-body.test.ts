@@ -2,7 +2,11 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import PROVIDERS_MAP from "../../src/lib/oauth/providers/index.ts";
-import { GITHUB_CONFIG, KIMI_CODING_CONFIG } from "../../src/lib/oauth/constants/oauth.ts";
+import {
+  GITHUB_CONFIG,
+  KIMI_CODING_CONFIG,
+  MUSE_CODE_CONFIG,
+} from "../../src/lib/oauth/constants/oauth.ts";
 
 // Regression guard for the OAuth device-flow pollToken double body read.
 //
@@ -28,11 +32,16 @@ function stubFetch(body: string, init?: ResponseInit) {
 const providers = [
   { id: "kimi-coding", config: KIMI_CODING_CONFIG },
   { id: "github", config: GITHUB_CONFIG },
+  { id: "muse-code", config: MUSE_CODE_CONFIG },
 ] as const;
 
 for (const { id, config } of providers) {
   test(`${id} pollToken returns invalid_response (not a rejection) on non-JSON body`, async () => {
-    const restore = stubFetch("<html><body>502 Bad Gateway</body></html>", {
+    const upstreamBody =
+      id === "muse-code"
+        ? "<html><body>502 Bad Gateway: muse-sensitive-fixture-15869</body></html>"
+        : "<html><body>502 Bad Gateway</body></html>";
+    const restore = stubFetch(upstreamBody, {
       status: 502,
       headers: { "content-type": "text/html" },
     });
@@ -40,7 +49,15 @@ for (const { id, config } of providers) {
       const result = await PROVIDERS_MAP[id].pollToken(config, "device-code-stub");
       assert.equal(result.ok, false);
       assert.equal(result.data.error, "invalid_response");
-      assert.match(result.data.error_description, /502 Bad Gateway/);
+      if (id === "muse-code") {
+        // Muse's fixed-error contract must not expose an arbitrary upstream body (#15869).
+        assert.doesNotMatch(
+          JSON.stringify(result),
+          /502 Bad Gateway|muse-sensitive-fixture-15869|<html>/
+        );
+      } else {
+        assert.match(result.data.error_description, /502 Bad Gateway/);
+      }
     } finally {
       restore();
     }

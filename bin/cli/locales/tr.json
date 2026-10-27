@@ -123,7 +123,9 @@
       "maxCostOpt": "Günlük maksimum maliyet (USD)",
       "allowedModelsOpt": "İzin verilen modellerin virgülle ayrılmış listesi",
       "nothingToSet": "Hiçbir politika alanı sağlanmadı. --rate-limit, --max-cost veya --allowed-models kullanın.",
-      "updated": "Politika güncellendi."
+      "updated": "Politika güncellendi.",
+      "modelAccessModeOpt": "Model erişim modu (all | restricted)",
+      "unrestrictedOpt": "Tüm modellere izin ver (--model-access-mode all)"
     },
     "expiration": {
       "title": "Anahtar Süre Sonu",
@@ -254,6 +256,7 @@
     "log": "Sunucu günlüklerini satır içinde göster",
     "no_recovery": "Çökme durumunda otomatik yeniden başlatmayı devre dışı bırak (hata ayıklama modu)",
     "max_restarts": "Vazgeçmeden önce 30 saniye içinde izin verilen en fazla çökme sonrası yeniden başlatma sayısı (varsayılan: 2)",
+    "headless": "Yalnızca proxy motorunu çalıştır: kontrol paneli devre dışı (404), isteğe bağlı alt sistemler atlanır (OMNIROUTE_HEADLESS=1 ayarlar)",
     "tray": "Sistem tepsisinde başlat (yalnızca masaüstü, isteğe bağlı)",
     "no_tray": "Sistem tepsisi simgesini devre dışı bırak",
     "ready_timeout": "Hazır olma denetimi zaman aşımı, ms cinsinden (ayrıca OMNIROUTE_READY_TIMEOUT_MS, varsayılan 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Yapılandırmayı OmniRoute örnekleri arasında eşitle",
     "push": {
-      "description": "Yapılandırmayı buluta veya uzak örneğe gönder",
-      "target": "Hedef (cloud veya context:name)",
-      "bundle": "Eşitlenecek paket bölümleri",
-      "dryRun": "Uygulamadan önizle"
+      "description": "Yapılandırmayı buluta veya uzak örneğe gönder"
     },
     "pull": {
-      "description": "Yapılandırmayı buluttan veya uzak örnekten çek",
-      "source": "Kaynak (cloud veya context:name)",
-      "merge": "Mevcut yapılandırmayla birleştir",
-      "replace": "Mevcut yapılandırmayı değiştir",
-      "dryRun": "Uygulamadan önizle"
-    },
-    "diff": {
-      "source": "Kaynak bağlam",
-      "target": "Hedef bağlam"
+      "description": "Yapılandırmayı buluttan veya uzak örnekten çek"
     },
     "bundle": {
       "description": "Yapılandırmayı paket dosyası olarak dışa aktar",
-      "include": "Dahil edilecek bölümler (virgülle ayrılmış)"
+      "token": "Sync token (from `sync tokens create`); defaults to OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
       "description": "Bir paket dosyasını içe aktar",
       "dryRun": "Uygulamadan doğrula"
-    },
-    "initialize": {
-      "fromCloud": "Bulut yedeğinden başlat"
     },
     "tokens": {
       "description": "Eşitleme belirteçlerini yönet",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Onayı atla"
       }
-    },
-    "resolve": {
-      "description": "Eşitleme çakışmalarını etkileşimli olarak çöz"
     }
   },
   "config": {

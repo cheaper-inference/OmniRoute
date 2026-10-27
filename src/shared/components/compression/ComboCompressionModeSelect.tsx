@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import Select from "../Select";
 
 export interface ComboCompressionModeSelectCombo {
   id: string;
@@ -93,22 +94,23 @@ export function ComboCompressionModeSelect({
   };
 
   return (
-    <select
+    // Kit-styled native select (adapter `Select` with <option> children). A caller's
+    // `className` still lands on the control itself, as with the legacy native select.
+    <Select
+      compact
       value={compressionOverride}
       onChange={(e) => handleChange(e.target.value)}
       disabled={disabled || isSaving}
-      className={
-        className ||
-        "text-xs py-1 px-2 rounded border border-black/10 dark:border-white/10 bg-surface text-text-main focus:border-primary focus:outline-none transition-colors disabled:opacity-50"
-      }
+      selectClassName={className}
       title={title}
+      aria-label={title || t("compressionSettings")}
     >
       {OPTIONS.map((option) => (
-        <option key={option.value} value={option.value} className="bg-surface text-text-main">
+        <option key={option.value} value={option.value}>
           {t(`modeOptions.${option.key}`)}
         </option>
       ))}
-    </select>
+    </Select>
   );
 }
 

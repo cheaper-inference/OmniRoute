@@ -48,20 +48,8 @@ test("nous-research Hermes-4-405B is labelled 405B (Nous Research)", () => {
   assert.equal(model.name, "Hermes 4 405B (Nous Research)");
 });
 
-test("nous-research free-model catalog display names match their modelId's parameter size", () => {
+test("unverified Nous Hermes rows stay outside the free catalog", () => {
+  // #16781: the public Free plan does not identify these registry models as covered.
   const rows = FREE_MODEL_BUDGETS.filter((model) => model.provider === "nous-research");
-  assert.ok(rows.length > 0, "FREE_MODEL_BUDGETS must list nous-research models");
-
-  for (const row of rows) {
-    const idSize = extractParamSize(row.modelId);
-    assert.ok(idSize, `nous-research free-catalog modelId "${row.modelId}" must encode a size`);
-
-    const nameSize = extractParamSize(row.displayName);
-    assert.equal(
-      nameSize,
-      idSize,
-      `nous-research free-catalog "${row.modelId}" displayName "${row.displayName}" advertises ` +
-        `${nameSize} but the modelId says ${idSize}`
-    );
-  }
+  assert.deepEqual(rows, []);
 });

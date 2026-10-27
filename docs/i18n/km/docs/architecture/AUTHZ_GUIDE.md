@@ -1,31 +1,31 @@
 # Authorization Guide (ខ្មែរ)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../architecture/AUTHZ_GUIDE.md) · 🇪🇹 [am](../../../am/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇿 [az](../../../az/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇰 [da](../../../da/docs/architecture/AUTHZ_GUIDE.md) · 🇩🇪 [de](../../../de/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇷 [el](../../../el/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇸 [es](../../../es/docs/architecture/AUTHZ_GUIDE.md) · 🇪🇪 [et](../../../et/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/architecture/AUTHZ_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇱 [he](../../../he/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/architecture/AUTHZ_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/architecture/AUTHZ_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇩 [id](../../../id/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇹 [it](../../../it/docs/architecture/AUTHZ_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/architecture/AUTHZ_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/architecture/AUTHZ_GUIDE.md) · 🇲🇲 [my](../../../my/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇴 [no](../../../no/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [or](../../../or/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/architecture/AUTHZ_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/architecture/AUTHZ_GUIDE.md) · 🇱🇰 [si](../../../si/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/architecture/AUTHZ_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/architecture/AUTHZ_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/architecture/AUTHZ_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/architecture/AUTHZ_GUIDE.md) · 🇮🇳 [te](../../../te/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇭 [th](../../../th/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/architecture/AUTHZ_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/architecture/AUTHZ_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/architecture/AUTHZ_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/architecture/AUTHZ_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/architecture/AUTHZ_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/architecture/AUTHZ_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/architecture/AUTHZ_GUIDE.md)
 
 ---
 
-> **ប្រភពយោងចម្បង:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
-> **បានធ្វើបច្ចុប្បន្នភាពចុងក្រោយ:** 2026-06-28 — v3.8.40
+> **ប្រភពនៃការពិត:** `src/server/authz/`, `src/shared/constants/publicApiRoutes.ts`, `src/lib/api/requireManagementAuth.ts`, `src/shared/utils/apiAuth.ts`
+> **បានធ្វើបច្ចុប្បន្នភាពចុងក្រោយ:** 2026-09-22 — ឈ្មោះលំហនៃវិសាលភាពចង្អុលទៅ MCP-SERVER.md
 
-OmniRoute មានខ្សែដំណើរការផ្តល់សិទ្ធិដែលយល់ដឹងអំពី route និងគ្រប់គ្រងរាល់សំណើ API។ ការចាត់ថ្នាក់គឺ **មានលក្ខណៈកំណត់ច្បាស់លាស់** និង **បិទការចូលប្រើនៅពេលបរាជ័យ** — អ្វីក៏ដោយដែលមិនអាចចាត់ថ្នាក់បាន នឹងត្រូវចាត់ជា `MANAGEMENT` ហើយទាមទារ session ឬ token កម្រិតគ្រប់គ្រង។ ទំព័រនេះពន្យល់អំពីម៉ូដែលសម្រាប់វិស្វករដែលថែទាំ route ឬរចនា endpoint ថ្មីៗ។
+OmniRoute មានបំពង់បង្ហូរការអនុញ្ញាតដែលដឹងពីផ្លូវ ដែលទប់ស្កាត់រាល់សំណើ API។ ការចាត់ថ្នាក់គឺ **កំណត់បាន** និង **បរាជ័យបិទ** — អ្វីដែលមិនអាចចាត់ថ្នាក់បាននឹងក្លាយជា `MANAGEMENT` ហើយទាមទារវគ្គ ឬថូខឹនកម្រិតគ្រប់គ្រង។ ទំព័រនេះពន្យល់ពីគំរូសម្រាប់វិស្វករដែលថែទាំផ្លូវ ឬរចនាចំណុចបញ្ចប់ថ្មី។
 
-![ខ្សែដំណើរការ AuthZ (ចំណាត់ថ្នាក់ route 3 + ការវាយតម្លៃគោលការណ៍)](../diagrams/exported/authz-pipeline.svg)
+![AuthZ pipeline (3 route classes + policy evaluation)](../diagrams/exported/authz-pipeline.svg)
 
-> ប្រភព៖ [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
+> ប្រភព: [diagrams/authz-pipeline.mmd](../diagrams/authz-pipeline.mmd)
 
 ## របៀបផ្ទៀងផ្ទាត់អត្តសញ្ញាណពីរ
 
-### 1. API Key (Bearer)
+### 1. សោ API (Bearer)
 
-ប្រើសម្រាប់ API របស់ client ដែលត្រូវគ្នាជាមួយ OpenAI/Anthropic/Gemini និង route គ្រប់គ្រងមួយចំនួន នៅពេល key មាន scope `manage`។
+ប្រើសម្រាប់ API របស់ client ដែលឆបគ្នាជាមួយ OpenAI/Anthropic/Gemini និង route គ្រប់គ្រងមួយចំនួន នៅពេលសោមាន scope `manage`។
 
 ```
 Authorization: Bearer <api-key>
 ```
 
-ត្រូវបានផ្ទៀងផ្ទាត់ដោយ `isValidApiKey()` / `extractApiKey()` នៅក្នុង `src/sse/services/auth.ts` ហើយត្រូវបាន export ឡើងវិញតាមរយៈ `src/shared/utils/apiAuth.ts`។ កម្មវិធីផ្ទៀងផ្ទាត់ក៏ទទួលយក env vars `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` ជា passthrough key អចិន្ត្រៃយ៍ផងដែរ (បញ្ហា #1350)។
+ត្រូវបានផ្ទៀងផ្ទាត់ដោយ `isValidApiKey()` / `extractApiKey()` ក្នុង `src/sse/services/auth.ts` ហើយត្រូវបាន re-export តាមរយៈ `src/shared/utils/apiAuth.ts`។ កម្មវិធីផ្ទៀងផ្ទាត់ក៏ទទួលយក env vars `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` ជាសោ passthrough អចិន្ត្រៃយ៍ផងដែរ (បញ្ហា #1350)។
 
-### 2. Dashboard Session (cookie auth_token)
+### 2. សម័យ Dashboard (cookie auth_token)
 
 សម្រាប់ទំព័រ dashboard និងប្រតិបត្តិការរដ្ឋបាល។
 
@@ -33,53 +33,103 @@ Authorization: Bearer <api-key>
 Cookie: auth_token=<JWT signed with JWT_SECRET>
 ```
 
-cookie មួយត្រូវបានចាត់ទុកជា session លុះត្រាតែ JWT ត្រូវបានផ្ទៀងផ្ទាត់ **ហើយ** មាន `authenticated: true`
-(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)។ គ្រប់
-កន្លែងដែលប្រើប្រាស់ cookie (route guard, ការធ្វើឱ្យ authz pipeline ស្រស់ឡើងវិញ, WebSocket handshake, live
+cookie មួយគឺជាសម័យ លុះត្រាតែ JWT ត្រូវបានផ្ទៀងផ្ទាត់ **ហើយ** មាន `authenticated: true`
+(`src/shared/utils/dashboardSessionToken.ts` → `verifyDashboardSessionToken`)។ រាល់
+ផ្នែកដែលប្រើ cookie នេះ (ឧបករណ៍ការពារ route របស់ dashboard (`isDashboardSessionAuthenticated()`), ការធ្វើឱ្យ authz pipeline ស្រស់ឡើងវិញ, WebSocket handshake, live
 server, `/api/settings/require-login`, `/api/auth/status`) សុទ្ធតែឆ្លងកាត់ helper នោះ។
 មាន JWT ផ្សេងទៀតដែលបានចុះហត្ថលេខាដោយ `JWT_SECRET` — Cursor CLI passthrough បង្កើត
-token `iss "omniroute" / aud "cursor-cli"` សម្រាប់អ្នកកាន់ key — ហើយ token ទាំងនេះមិនត្រូវបានចាត់ទុកជា session ឡើយ
+token `iss "omniroute" / aud "cursor-cli"` សម្រាប់អ្នកកាន់សោ — ហើយ token ទាំងនេះមិនមែនជាសម័យឡើយ
 (#13298)។
 
-ត្រូវបានផ្ទៀងផ្ទាត់ដោយ `isDashboardSessionAuthenticated()` នៅក្នុង `src/shared/utils/apiAuth.ts`។ ខ្សែដំណើរការនេះធ្វើឱ្យ JWT ស្រស់ឡើងវិញដោយស្វ័យប្រវត្តិ នៅពេលវាមានសុពលភាពនៅសល់តិចជាង 7 ថ្ងៃ ក្នុងរយៈពេលសុពលភាពសរុប 30 ថ្ងៃ។
+ត្រូវបានផ្ទៀងផ្ទាត់ដោយ `isDashboardSessionAuthenticated()` ក្នុង `src/shared/utils/apiAuth.ts`។ pipeline នឹងធ្វើឱ្យ JWT ស្រស់ឡើងវិញដោយស្វ័យប្រវត្តិ នៅពេលវានៅសល់អាយុកាលតិចជាង 7 ថ្ងៃ ក្នុងចំណោមអាយុកាលសរុប 30 ថ្ងៃរបស់វា។
 
-route គ្រប់គ្រងមួយចំនួនទទួលយក **របៀបណាមួយក៏បាន**៖ cookie ឬ `Bearer <key>` នៅពេល API key មាន scope `manage` (ឬ `admin`)។ នេះជាអ្វីដែលអនុញ្ញាតឱ្យមានលំហូរការងារ "អាចកំណត់រចនាសម្ព័ន្ធតាមរយៈការហៅ API" ដែលបានបន្ថែមនៅក្នុង v3.8។
+សម័យមួយក៏អាចបញ្ចប់មុនរយៈពេល 30 ថ្ងៃបានដែរ ព្រោះគ្រប់ផ្នែកដែលបង្កើត token សុទ្ធតែឆ្លងកាត់ `mintDashboardSessionToken` (ពេលវេលាចេញ `iat` និងលេខសម្គាល់ `jti`) ហើយកម្មវិធីផ្ទៀងផ្ទាត់នឹងពិនិត្យការកំណត់ពីរ៖ `sessionsValidAfter` ដែលត្រូវបានកំណត់ដោយការផ្លាស់ប្តូរពាក្យសម្ងាត់ ដើម្បីឱ្យរាល់សម័យដែលបានចេញមុនពេលនោះឈប់ឆ្លងការផ្ទៀងផ្ទាត់ (កម្មវិធីរុករកដែលបានផ្លាស់ប្តូរពាក្យសម្ងាត់នឹងទទួលបាន cookie ថ្មី) និង `revokedDashboardSessions` ដែល `POST /api/auth/logout` នឹងបន្ថែម `jti` របស់សម័យដែលបានចាកចេញទៅក្នុងនោះ។ សម័យដែលបានបង្កើតដោយកំណែចាស់មិនមាន claim ទាំងពីរនេះទេ ហើយនៅតែមានសុពលភាពរហូតដល់ការផ្លាស់ប្តូរពាក្យសម្ងាត់លើកដំបូង។ ប្រសិនបើមិនអាចអានការកំណត់បានទេ សម័យនោះនឹងមិនត្រូវបានទុកចិត្តឡើយ។
 
-#### ច្រកចូល OIDC ជាជម្រើស (#6973)
+route គ្រប់គ្រងមួយចំនួនទទួលយករបៀប **មួយណាក៏បាន**៖ cookie ឬ `Bearer <key>` នៅពេលសោ API មាន scope `manage` (ឬ `admin`)។ នេះជាអ្វីដែលអនុញ្ញាតឱ្យមានដំណើរការ "អាចកំណត់រចនាសម្ព័ន្ធបានតាមរយៈការហៅ API" ដែលបានបន្ថែមក្នុង v3.8។
 
-ការចូលជាអ្នកគ្រប់គ្រង dashboard ក៏គាំទ្រលំហូរ OIDC (OpenID Connect) ដែលត្រូវតែ **បើកប្រើដោយជាក់លាក់**
-រួមជាមួយការចូលដោយពាក្យសម្ងាត់លំនាំដើម — ការចូលដោយពាក្យសម្ងាត់មិនត្រូវបានលុបចេញឡើយ គ្រាន់តែ
-ត្រូវបានបំពេញបន្ថែមប៉ុណ្ណោះ៖
+#### របាំងចូល OIDC ជាជម្រើស (#6973)
 
-- ត្រូវបានបិទ លុះត្រាតែ `settings.oidcEnabled === true` **ហើយ** `oidcIssuer` /
-  `oidcClientId` / `oidcClientSecret` ទាំងអស់ត្រូវបានកំណត់រចនាសម្ព័ន្ធ (Settings → Auth)។
-  `GET /api/auth/oidc/login` ត្រឡប់ `400` បើមិនដូច្នោះទេ។
+ការចូលជាអ្នកគ្រប់គ្រង dashboard ក៏គាំទ្រលំហូរ OIDC (OpenID Connect) ដែលត្រូវ **បើកប្រើដោយចេតនា**
+រួមជាមួយការចូលដោយពាក្យសម្ងាត់លំនាំដើមផងដែរ — ការចូលដោយពាក្យសម្ងាត់មិនត្រូវបានដកចេញឡើយ គឺគ្រាន់តែ
+ត្រូវបានបន្ថែមជម្រើសបន្ថែមប៉ុណ្ណោះ៖
+
+- ត្រូវបានបិទ លុះត្រាតែ `settings.oidcEnabled === true` **និង** `oidcIssuer` /
+  `oidcClientId` / `oidcClientSecret` ត្រូវបានកំណត់រចនាសម្ព័ន្ធទាំងអស់ (Settings → Auth)។
+  បើមិនដូច្នោះទេ `GET /api/auth/oidc/login` នឹងត្រឡប់ `400`។
 - `GET /api/auth/oidc/login` ស្វែងរក `authorization_endpoint` ពី
-  `/.well-known/openid-configuration` របស់ issuer (បើរកមិនឃើញ វាប្រើ
-  `<issuer>/authorize`) បង្កើត redirect URI ពីសំណើដែលចូលមក
+  `/.well-known/openid-configuration` របស់ issuer (ប្រើ
+  `<issuer>/authorize` ជាជម្រើសបម្រុង) បង្កើត redirect URI ពីសំណើចូល
   (គាំទ្រ `x-forwarded-proto`) ហើយបញ្ជូនបន្តទៅ IdP ជាមួយ `state` ចៃដន្យ
   ដែលរក្សាទុកក្នុង cookie `oidc_state` ប្រភេទ `httpOnly`។
-- `GET /api/auth/oidc/callback` ផ្ទៀងផ្ទាត់ `state` ប្តូរ authorization
-  code ហើយផ្ទៀងផ្ទាត់ហត្ថលេខារបស់ ID token តាមរយៈ JWKS របស់ issuer
-  (`createRemoteJWKSet` របស់ `jose` ដែលត្រូវបាន cache សម្រាប់ JWKS URI នីមួយៗ) ជាមួយការត្រួតពិនិត្យ `issuer`/`audience`។
-  បញ្ជីអនុញ្ញាត `oidcAllowedSubjects` ដែលជាជម្រើស ផ្គូផ្គងនឹង claim
-  `sub` របស់ token ឬ claim `email` របស់វា — claim អ៊ីមែលត្រូវបានទទួលស្គាល់តែនៅពេល
-  `email_verified === true` ប៉ុណ្ណោះ ដូច្នេះអ៊ីមែលដែលមិនបានផ្ទៀងផ្ទាត់នៅ IdP មិនអាចឆ្លងកាត់
-  ច្រកត្រួតពិនិត្យនេះបានឡើយ។
-- នៅពេលជោគជ័យ វាបង្កើត JWT `auth_token` អាយុកាល 30 ថ្ងៃដែល **ដូចគ្នាបេះបិទ** នឹង JWT ដែលការចូលដោយពាក្យសម្ងាត់
-  ចេញឱ្យ (`src/app/api/auth/login/route.ts`) ដូច្នេះផ្នែកផ្សេងទៀតនៃ
-  ខ្សែដំណើរការ dashboard session (ការធ្វើឱ្យស្រស់ដោយស្វ័យប្រវត្តិ និង cookie flags) នៅតែមិនផ្លាស់ប្តូរ —
-  OIDC គ្រាន់តែជំនួសរបៀបដែល cookie ត្រូវបានបង្កើតប៉ុណ្ណោះ មិនមែនសិទ្ធិដែលវាផ្តល់ឱ្យនោះទេ។
+- `GET /api/auth/oidc/callback` ផ្ទៀងផ្ទាត់ `state` ប្ដូរ authorization
+  code និងផ្ទៀងផ្ទាត់ signature របស់ ID token តាមរយៈ JWKS របស់ issuer
+  (`createRemoteJWKSet` របស់ `jose` ដែលត្រូវបាន cache តាម JWKS URI នីមួយៗ) ដោយមានការត្រួតពិនិត្យ `issuer`/`audience`។
+  ការអនុញ្ញាតឱ្យចូល dashboard តម្រូវឱ្យមានបញ្ជី `oidcAllowedSubjects` ដែលមិនទទេ
+  គោលការណ៍ `oidcAdmissionClaim` ឬទាំងពីរ។ បញ្ជី subject ផ្គូផ្គង `sub` ឬ
+  `email` តែនៅពេល `email_verified === true` ប៉ុណ្ណោះ។ គោលការណ៍ claim ដែលជាជម្រើស
+  ទទួលយក path របស់ claim ក្នុង ID-token ដែលបំបែកដោយសញ្ញាចុច (ឧទាហរណ៍ `realm_access.roles`) និង
+  array នៃតម្លៃដែលទទួលយកបាន។ claim ដែលបានដោះស្រាយត្រូវតែជា array នៃ string
+  ដែលមានតម្លៃទទួលយកបានយ៉ាងហោចណាស់មួយ។ ប្រសិនបើគោលការណ៍ទាំងពីរត្រូវបានកំណត់រចនាសម្ព័ន្ធ
+  នោះទាំងពីរត្រូវតែឆ្លងកាត់។ claim ដែលបាត់ ឬមានទម្រង់មិនត្រឹមត្រូវត្រូវបានបដិសេធតាមលំនាំដើម ហើយបើគ្មានគោលការណ៍ណាមួយ
+  callback នឹងបដិសេធការចូល (`not_configured`)។ ការកំណត់រចនាសម្ព័ន្ធដែលមានតែ subject
+  ដែលមានស្រាប់ បន្តដំណើរការដោយគ្មានការផ្លាស់ប្ដូរ។
+- ជាធម្មតា Keycloak ផ្គូផ្គង realm roles ទៅក្នុង access tokens មិនមែនចាំបាច់ទៅក្នុង ID
+  tokens ទេ។ ដើម្បីតម្រូវឱ្យមាន realm role `admin` សូមកំណត់រចនាសម្ព័ន្ធ protocol mapper សម្រាប់
+  client នេះ ដើម្បីបញ្ចូល `realm_access.roles` ក្នុង **ID token** របស់វា បន្ទាប់មកកំណត់
+  `oidcAdmissionClaim` ទៅជា `{ "path": "realm_access.roles", "values": ["admin"] }`។
+  សូមពិនិត្យ claim ជាក់ស្ដែងរបស់ ID-token សម្រាប់ client នេះ មុនពេលបើកការអនុញ្ញាតដោយផ្អែកតែលើ role;
+  កម្មវិធីមិនអាន roles ពី access-token ទេ។ ការបដិសេធ token នៅខាង IdP
+  អាចបំពេញបន្ថែម ប៉ុន្តែមិនអាចជំនួសការត្រួតពិនិត្យនៅខាងកម្មវិធីនេះបានទេ។
+- នៅពេលជោគជ័យ វាបង្កើត JWT `auth_token` រយៈពេល 30 ថ្ងៃដែល **ដូចគ្នាបេះបិទ** នឹង JWT ដែល
+  password login ចេញឱ្យ (`src/app/api/auth/login/route.ts`) ដូច្នេះផ្នែកផ្សេងទៀតនៃ
+  pipeline របស់ dashboard session (ការធ្វើឱ្យស្រស់ដោយស្វ័យប្រវត្តិ និង cookie flags) មិនផ្លាស់ប្ដូរទេ —
+  OIDC ជំនួសតែវិធីបង្កើត cookie ប៉ុណ្ណោះ មិនមែនសិទ្ធិដែល cookie នោះផ្ដល់ឱ្យទេ។ ការផ្លាស់ប្ដូរ
+  roles/groups នៅលើ IdP មិនធ្វើឱ្យ OmniRoute sessions ដែលមានស្រាប់អសុពលភាពទេ; logout,
+  ការប្ដូរ password ឬការផុតកំណត់ session នៅតែគ្រប់គ្រងអាយុកាលរបស់វា។
+- setting `oidc*` នីមួយៗ (`oidcEnabled`, `oidcDisablePasswordLogin`,
+  `oidcIssuer`, `oidcClientId`, `oidcClientSecret`, `oidcAllowedSubjects`,
+  `oidcAdmissionClaim`, `oidcRedirectPath`, `oidcScopes`) ស្ថិតនៅក្នុង `SECURITY_IMPACTING_SETTINGS_KEYS`
+  (`src/shared/constants/securityImpactingSettings.ts`)៖ `PATCH /api/settings`
+  ឆ្លើយតប `400 PASSWORD_REQUIRED` លុះត្រាតែ body មាន management
+  password ជា `currentPassword` (`401 PASSWORD_MISMATCH` នៅពេលវាមិនត្រឹមត្រូវ)។
+  `oidcDisablePasswordLogin` បដិសេធ _login_ ដោយ password (`POST /api/auth/login`)
+  ប៉ុន្តែរក្សាទុក password hash ហើយការផ្ទៀងផ្ទាត់អត្តសញ្ញាណឡើងវិញនៅតែពិនិត្យ
+  `currentPassword` ផ្ទៀងនឹងវា។
+- `corsOrigins` និង `bruteForceProtection` ក៏ស្ថិតនៅក្នុង `SECURITY_IMPACTING_SETTINGS_KEYS`
+  ដែរ៖ ការបន្ធូរបន្ថយការកំណត់ណាមួយក្នុងចំណោមទាំងពីរ ធ្វើឱ្យការការពារ login ចុះខ្សោយ ដូច្នេះវាតម្រូវឱ្យមានការផ្ទៀងផ្ទាត់អត្តសញ្ញាណឡើងវិញដោយ
+  `currentPassword` ដូចគ្នា (ផ្ទាំង Security ស្នើសុំវា) ហើយការនាំចូល JSON
+  នឹងលុបវាចេញ។
+- key នៃគោលការណ៍សុវត្ថិភាពនីមួយៗ — ធាតុនៅក្នុង `SECURITY_IMPACTING_SETTINGS_KEYS`,
+  key `oidc*` នីមួយៗ និងស្ថានភាព dashboard session — គឺសម្រាប់ **operator ប៉ុណ្ណោះ** នៅលើ
+  `PATCH /api/settings`៖ API key ដែលមាន scope `manage` ឬ access token `oma_`
+  ត្រូវបានបដិសេធដោយ `403` ទោះបីជាវាផ្ញើ `currentPassword` ត្រឹមត្រូវក៏ដោយ ហើយ
+  ការបដិសេធត្រូវបានកត់ត្រាក្នុង audit ជា `settings.update_failed` ជាមួយ `reason: OPERATOR_REQUIRED`
+  (`requireOperatorCredential()` នៅក្នុង `src/lib/api/operatorCredential.ts`)។
+  setting ធម្មតា (theme និងចំណូលចិត្តការបង្ហាញ) នៅតែអាចកែប្រែបានដោយ key ដែលមាន `manage`
+  ឬ access token ដែលមាន `admin`។ mutation នីមួយៗនៃ `/api/settings` ផ្ទាល់ (និង
+  `/api/settings/require-login`) ក៏ត្រូវការ scope `admin` របស់ access-token ផងដែរ
+  (`ADMIN_MUTATION_EXACT_PATHS` នៅក្នុង `src/server/authz/accessScopes.ts` ដោយផ្គូផ្គង
+  path ឱ្យត្រូវគ្នាបេះបិទ); `GET` នៅតែជា `read` ហើយ sub-route `/api/settings/*` ផ្សេងទៀត (proxies,
+  combo defaults, model aliases, compression, purges…) រក្សា scope `write`
+  ដែលសន្និដ្ឋានពី method។
+- `POST /api/settings/import-json` រំលងការផ្ទៀងផ្ទាត់អត្តសញ្ញាណឡើងវិញនោះ ដូច្នេះវាលុប key ទាំងអស់ក្នុង
+  `IMPORT_STRIPPED_SETTINGS_KEYS` (ឯកសារដូចគ្នា) មុនពេលសរសេរ៖ password និង
+  `currentPassword` ធាតុនីមួយៗក្នុង `SECURITY_IMPACTING_SETTINGS_KEYS` និង
+  ស្ថានភាព dashboard session (`sessionsValidAfter`, `revokedDashboardSessions`)។
+  ដូច្នេះ ការនាំចូល backup ចាស់មិនអាចធ្វើឱ្យ session ដែលត្រូវបានបញ្ចប់រួចដោយការប្ដូរ password
+  ឬការចាកចេញពីគណនី មានសុពលភាពឡើងវិញបានទេ។
 
-## ថ្នាក់ Route
+## ប្រភេទ Route
 
-`src/server/authz/types.ts` កំណត់ class ចំនួនបី; route ណាមួយដែលមិនអាចចាត់ថ្នាក់បានយ៉ាងច្បាស់លាស់ នឹងត្រឡប់ទៅប្រើ `MANAGEMENT`។
+`src/server/authz/types.ts` កំណត់ប្រភេទបី; route ណាមួយដែលមិនអាចចាត់ថ្នាក់ដោយកំណត់បានត្រូវធ្លាក់ទៅ `MANAGEMENT`។
 
-| ថ្នាក់       | សេចក្ដីពិពណ៌នា                                                                                                                                            | តម្រូវការ Auth                                                               |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `PUBLIC`     | Route ដែលបានកំណត់យ៉ាងច្បាស់ថាមានសុវត្ថិភាព — ការចូល ការចាកចេញ ស្ថានភាព ការចាប់ផ្ដើម សុខភាព និងការរៀបចំដំបូងសម្រាប់ onboarding។                            | មិនត្រូវការ                                                                  |
-| `CLIENT_API` | Endpoint សម្រាប់បម្រើ model — `/api/v1/*`, `/api/v1beta/*` ព្រមទាំង alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`។ | Bearer key នៅពេល feature flag `REQUIRE_API_KEY` ដែលមានប្រសិទ្ធភាពត្រូវបានបើក |
-| `MANAGEMENT` | ទំព័រ Dashboard ការកំណត់ provider key endpoint សម្រាប់ admin និងការធ្វើរោគវិនិច្ឆ័យ។                                                                      | Session របស់ Dashboard ឬ Bearer ដែលមាន scope `manage`                        |
+| ប្រភេទ       | ការពិពណ៌នា                                                                                                                                     | ត្រូវការ auth                                                  |
+| ------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `PUBLIC`     | Route ដែលមានសុវត្ថិភាពច្បាស់លាស់ — login, logout, status, init, health, onboarding bootstrap។                                                  | គ្មាន                                                          |
+| `CLIENT_API` | Endpoint បម្រើម៉ូដែល — `/api/v1/*`, `/api/v1beta/*`, និង alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`។ | Bearer key នៅពេល feature flag `REQUIRE_API_KEY` ដែលត្រូវបានបើក |
+| `MANAGEMENT` | ទំព័រ dashboard, settings, provider, key, endpoint admin និង diagnostics។                                                                      | Dashboard session ឬ Bearer ដែលមាន scope `manage`               |
+
+សកម្មភាព `MANAGEMENT` មួយចំនួនជា **operator-only**: key `manage` មិនគ្រប់គ្រាន់ទេ។ ការនាំចេញ credential ដែលបានរក្សាទុក (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), ការស្តារ backup ជំនួស data ផ្ទាល់ (`POST /api/db-backups/import` រួមទាំង `dryRun=true`, `POST /api/db-backups` ស្តារតាម id, `POST /api/settings/import-json`), ការលុប restore point (`DELETE /api/db-backups` cleanup និង `PATCH /api/db-backups` ព្រោះ retention ដែលវារក្សាជំរុញការលុបដោយស្វ័យប្រវត្តិ បន្ទាប់ពីគ្រប់ backup) ទាំងនេះត្រូវការ dashboard session, CLI subject មូលដ្ឋាន ឬការចូលត្រូវបានបិទ។ ការចេញ sync token (`POST /api/sync/tokens`) និងការបង្កើត CLI access token `admin` (`POST /api/cli/tokens`) ត្រូវការ dashboard session ឬ CLI subject មូលដ្ឋានក្នុងគ្រប់ mode ការចូលទាំងអស់។ API key នៃ scope ណាមួយ និង access token `oma_` មិនមែនជា credential operator ទេ: ពួកវាទទួល `403` គ្រប់ពេលដែលត្រូវការ។ ការពិនិត្យស្ថិតនៅ `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`)។ ការផ្លាស់ប្តូរ setting ការចូលក៏ជា operator-only ដែរ: `POST /api/settings/require-login` (កំណត់ management password / បិទបើក `requireLogin`) ទទួលយកតែ credential ទាំងនោះនៅពេលមាន password រួចហើយ — បង្អួច bootstrap លើកដំបូង (មិនទាន់មាន password) មិនផ្លាស់ប្តូរ — ហើយ session dashboard ត្រូវតែផ្ញើ `currentPassword` ដើម្បីជំនួស password (`403` នៅពេលវាបាត់ ឬខុស ត្រូវបានកត់ត្រាជា `settings.update_failed`)។ CLI មូលដ្ឋាន និង instance ដែលបិទការចូល រក្សាផ្លូវសង្គ្រោះ ហើយអាចកំណត់ password ដោយមិនមាន `currentPassword` បាន ព្រោះទាំងពីរភ្ជាប់ជាមួយ host ដែលគ្រប់គ្រង data directory។
 
 ## Pipeline
 
@@ -198,38 +248,34 @@ export async function POST(request: Request) {
 
 ជ្រើសរើស set តាមទម្រង់ មិនមែនតាមភាពងាយស្រួលទេ។ Route មួយត្រូវដាក់ក្នុង `PUBLIC_API_ROUTES_EXACT` (ឬ `PUBLIC_READONLY_CORS_API_ROUTES` សម្រាប់ GET-only)។ មានតែ subtree ពិតប្រាកដប៉ុណ្ណោះដែលត្រូវដាក់ក្នុង `PUBLIC_API_ROUTE_PREFIXES` ហើយវា **ត្រូវតែបញ្ចប់ដោយ `/`**។ ការដាក់ route ទោលមួយក្នុងបញ្ជី prefix ក៏ធ្វើឱ្យ path ជាប់គ្នាទាំងអស់ដែលមានតួអក្សរដើមដូចគ្នាក្លាយជាសាធារណៈផងដែរ — រួមទាំង dynamic-segment sibling ដែលត្រូវបានបន្ថែមនៅពេលក្រោយ (GHSA-74g9-q8f6-793h)។ ធ្វើបច្ចុប្បន្នភាព unit test នៅ `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts` និង `tests/unit/authz/classify.test.ts`។
 
-## វិសាលភាព
+## Scopes
 
-API key មានអារេ `scopes` (រក្សាទុកជា JSON នៅក្នុង `api_keys.scopes` សូមមើល `src/lib/db/apiKeys.ts`)។
+ឈ្មោះលំហបី។ កម្មវិធីពិនិត្យនីមួយៗអានតែខ្សែអក្សររបស់វាប៉ុណ្ណោះ។ ការប្រៀបធៀបគ្នា រួមទាំងមូលហេតុដែល `manage` បរាជ័យ `scopeMatches` សម្រាប់ `read:compression` និងមូលហេតុដែល access token `read` មិនអាច `PATCH /api/keys/{id}` គឺ [ឈ្មោះលំហបី](../frameworks/MCP-SERVER.md#three-scope-namespaces)។
 
-### វិសាលភាពគ្រប់គ្រង
+API keys មាន array `scopes` (រក្សាទុកជា JSON ក្នុង `api_keys.scopes` សូមមើល `src/lib/db/apiKeys.ts`)។
 
-- `manage` / `admin` — ផ្តល់សិទ្ធិឱ្យ key ចូលប្រើ endpoint របស់ management API នៅពេលផ្ញើជា Bearer។
+### Management scope
 
-### វិសាលភាព MCP (`src/shared/constants/mcpScopes.ts`)
+- `manage` / `admin` — `hasManageScope`។ ការចូលប្រើ Bearer ទៅកាន់ផ្លូវ API គ្រប់គ្រង។
+- `mcp:connect`, `self:usage`, `self:account-quota`, និង `policy:bypass-provider-quota` គឺជា scopes ដែលត្រូវគ្នាពិតប្រាកដបន្ថែម។ ពួកវាស្ថិតនៅខាងក្រៅ `MANAGEMENT_API_KEY_SCOPES`។ `mcp:connect` បើកតែ `/api/mcp/` non-loopback carve-out ប៉ុណ្ណោះ។
 
-ឧបករណ៍ MCP នីមួយៗតម្រូវឱ្យមានវិសាលភាពជាក់លាក់តាមរយៈ `MCP_TOOL_SCOPES`។ បញ្ជីពេញលេញ (`MCP_SCOPE_LIST`)៖
+### MCP tool scopes
 
-```
-read:health, read:combos, write:combos, read:quota, read:usage,
-read:models, execute:completions, execute:search, write:budget,
-write:resilience, pricing:write, read:cache, write:cache,
-read:compression, write:compression, read:proxies
-```
+កាតាឡុក និងច្បាប់ផ្គូផ្គង (ខ្សែអក្សរដូចគ្នា ឬ scope ដែលបានផ្តល់ដែលបញ្ចប់ដោយ `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes)។ `MCP_SCOPE_LIST` ក្នុង `src/shared/constants/mcpScopes.ts` គឺជា subset ដែលបានកំណត់ប្រភេទដើម មិនមែនជាកាតាឡុកពេញលេញនោះទេ។ ការអនុវត្តដំណើរការក្នុង `open-sse/mcp-server/scopeEnforcement.ts` បន្ទាប់ពី `resolveCallerScopeContext()` ដោះស្រាយ scopes ពីព័ត៌មាន MCP auth, metadata សំណើ, ឬ `OMNIROUTE_MCP_SCOPES`។ វានៅតែបិទ លុះត្រាតែ `OMNIROUTE_MCP_ENFORCE_SCOPES=true`។
 
-ការអនុវត្តវិសាលភាពនៅក្នុង `open-sse/mcp-server/server.ts` បញ្ជូនបញ្ជីវិសាលភាពរបស់ឧបករណ៍នីមួយៗទៅក្នុង
-`evaluateToolScopes()` បន្ទាប់ពី `resolveCallerScopeContext()` កំណត់វិសាលភាពពីព័ត៌មានផ្ទៀងផ្ទាត់ MCP,
-metadata របស់ request ឬ `OMNIROUTE_MCP_SCOPES`។
+### Access-token scopes
 
-## ការបិទបើកតម្រូវការផ្ទៀងផ្ទាត់
+`read` / `write` / `admin` លើ tokens `oma_live_…` ដែលត្រូវបានចាត់ថ្នាក់ដោយ `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`)។ ចំណាត់ថ្នាក់នេះអនុវត្តចំពោះ access-token credential ប៉ុណ្ណោះ។ សូមមើល [Management Authentication](../guides/MANAGEMENT-AUTH.md)។
 
-`isAuthRequired()` នៅក្នុង `src/shared/utils/apiAuth.ts` សម្រេចថាតើការផ្ទៀងផ្ទាត់ **ណាមួយ** ត្រូវបានអនុវត្តសម្រាប់ request ដែរឬទេ៖
+## ប៊ូតុងបើក/បិទការត្រួតពិនិត្យ Auth
 
-- `settings.requireLogin === false` → ការផ្ទៀងផ្ទាត់ត្រូវបានបិទជាសកល។
-- មិនមាន password ដែលបានកំណត់រចនាសម្ព័ន្ធ **និង** មិនមាន env var `INITIAL_PASSWORD` → bootstrap mode អនុញ្ញាត onboarding wizard និង loopback request ប៉ុន្តែ request តាមបណ្ដាញដែលបើកឱ្យចូលប្រើនៅតែត្រូវការព័ត៌មានសម្គាល់អត្តសញ្ញាណ។
-- កំហុស DB ណាមួយ → បដិសេធជានិច្ច (សុវត្ថិភាពតាមលំនាំដើម)។
+`isAuthRequired()` នៅ `src/shared/utils/apiAuth.ts` សម្រេចថាតើ auth **ណាមួយ** ត្រូវបានអនុវត្តសម្រាប់សំណើឬអត់:
 
-ការអនុវត្ត API key របស់ client ប្រើ `isRequireApiKeyEnabled()` នៅក្នុង `src/shared/utils/featureFlags.ts` មិនមែនអាន `process.env.REQUIRE_API_KEY` ដោយផ្ទាល់ទេ។ ចំណុចនេះសំខាន់សម្រាប់ instance ដែលបាន deploy៖ ការបិទបើក `REQUIRE_API_KEY` នៅក្នុង Dashboard → Feature Flags នឹងរក្សាទុក override ក្នុង DB ហើយមានប្រសិទ្ធភាពភ្លាមៗលើ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` និងការត្រួតពិនិត្យផ្ទៀងផ្ទាត់ client API ផ្សេងទៀតដែលប្រើ helper នេះរួមគ្នា។ ប្រសិនបើមិនអាចអាន feature flag store បានទេ ការផ្ទៀងផ្ទាត់ client API នឹងបដិសេធជានិច្ច និងតម្រូវឱ្យមាន key។
+- `settings.requireLogin === false` → auth ត្រូវបានបិទទូទាំងប្រព័ន្ធ លើកលែងតែ tier ដែលការពារជានិច្ច (មើល [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) និងការហៅដែលផ្ដល់ credential ដែលវាទទួលយក ដែលត្រូវការ credential ដូចគ្នាដូចពេលការចូលបើក: ការចេញ sync token, ការបង្កើត CLI access token នៃ scope ណាមួយ, និងការបង្កើត API key ដែលមាន scope `manage`/`admin`, ការផ្ដល់ scope នោះទៅ key, ឬការបង្កើតឡើងវិញ ឬការបង្ហាញ key បែបនោះ (`requireCredentialForManagementScopedKey()` នៅ `src/lib/api/requireManagementAuth.ts`)។ Key សម្រាប់ inference តែប៉ុណ្ណោះនៅតែបើក។
+- មិនបានកំណត់ password **និង** មិនមាន env var `INITIAL_PASSWORD` → mode bootstrap អនុញ្ញាត onboarding wizard និងសំណើ loopback ប៉ុន្តែសំណើបណ្តាញខាងក្រៅនៅតែត្រូវការ credential។
+- កំហុស DB ណាមួយ → fail closed (ការពារសុវត្ថិភាពតាមលំនាំដើម)។
+
+ការអនុវត្ត API key របស់ client ប្រើ `isRequireApiKeyEnabled()` នៅ `src/shared/utils/featureFlags.ts` មិនមែនការអាន `process.env.REQUIRE_API_KEY` ដោយផ្ទាល់ទេ។ នេះសំខាន់សម្រាប់ instance ដែលបានដាក់ពង្រាយ: ការប្ដូរ `REQUIRE_API_KEY` ក្នុង Dashboard → Feature Flags ទុក DB override ហើយមានផលភ្លាមៗលើ `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` និងការពិនិត្យ auth client-API ផ្សេងទៀតដែលចែករំលែក helper នេះ។ ប្រសិនបើមិនអាចអាន store feature flag ទេ auth client API fail closed ហើយតម្រូវឱ្យមាន key។
 
 ## ការផ្លាស់ប្តូរដែលមិនត្រូវគ្នាជាមួយកំណែមុន — v3.8.0
 
@@ -267,7 +313,7 @@ x-omniroute-auth-scopes:    បញ្ជីដែលបំបែកដោយស�
 
 ## សូមមើលផងដែរ
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — សញ្ញាសម្គាល់ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណតាម endpoint នីមួយៗ
-- [COMPLIANCE.md](../security/COMPLIANCE.md) — កំណត់ហេតុសវនកម្មសម្រាប់ព្រឹត្តិការណ៍ផ្ទៀងផ្ទាត់អត្តសញ្ញាណ
-- [MCP-SERVER.md](../frameworks/MCP-SERVER.md) — ព័ត៌មានលម្អិតអំពីការអនុវត្ត MCP scope
-- កូដប្រភព៖ `src/server/authz/`, `src/lib/api/requireManagementAuth.ts`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — សញ្ញាសម្គាល់ការផ្ទៀងផ្ទាត់សម្រាប់ចុងចំណុចនីមួយៗ
+- [COMPLIANCE.md](../security/COMPLIANCE.md) — កំណត់ហេតុសវនកម្មសម្រាប់ព្រឹត្តិការណ៍ផ្ទៀងផ្ទាត់
+- [MCP-SERVER.md](../frameworks/MCP-SERVER.md#three-scope-namespaces) — ដែនឈ្មោះវិសាលភាពបី និងកាតាឡុកវិសាលភាពឧបករណ៍ MCP
+- ប្រភព: `src/server/authz/`, `src/lib/api/requireManagementAuth.ts`

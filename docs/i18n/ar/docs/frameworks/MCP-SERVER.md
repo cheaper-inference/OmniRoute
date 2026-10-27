@@ -1,6 +1,6 @@
 # OmniRoute MCP Server Documentation (العربية)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MCP-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/MCP-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/MCP-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MCP-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MCP-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MCP-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/MCP-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/MCP-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/MCP-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/MCP-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/MCP-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MCP-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MCP-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MCP-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MCP-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MCP-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MCP-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MCP-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MCP-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MCP-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/MCP-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MCP-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MCP-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MCP-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MCP-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MCP-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MCP-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MCP-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MCP-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/MCP-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MCP-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MCP-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MCP-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MCP-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MCP-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MCP-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MCP-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MCP-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MCP-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/MCP-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MCP-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MCP-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MCP-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MCP-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/MCP-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/MCP-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MCP-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MCP-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MCP-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MCP-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MCP-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MCP-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MCP-SERVER.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../frameworks/MCP-SERVER.md) · 🇪🇹 [am](../../../am/docs/frameworks/MCP-SERVER.md) · 🇦🇿 [az](../../../az/docs/frameworks/MCP-SERVER.md) · 🇧🇬 [bg](../../../bg/docs/frameworks/MCP-SERVER.md) · 🇧🇩 [bn](../../../bn/docs/frameworks/MCP-SERVER.md) · 🇧🇦 [bs](../../../bs/docs/frameworks/MCP-SERVER.md) · 🇨🇿 [cs](../../../cs/docs/frameworks/MCP-SERVER.md) · 🇩🇰 [da](../../../da/docs/frameworks/MCP-SERVER.md) · 🇩🇪 [de](../../../de/docs/frameworks/MCP-SERVER.md) · 🇬🇷 [el](../../../el/docs/frameworks/MCP-SERVER.md) · 🇪🇸 [es](../../../es/docs/frameworks/MCP-SERVER.md) · 🇪🇪 [et](../../../et/docs/frameworks/MCP-SERVER.md) · 🇮🇷 [fa](../../../fa/docs/frameworks/MCP-SERVER.md) · 🇫🇮 [fi](../../../fi/docs/frameworks/MCP-SERVER.md) · 🇫🇷 [fr](../../../fr/docs/frameworks/MCP-SERVER.md) · 🇮🇪 [ga](../../../ga/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [gu](../../../gu/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ha](../../../ha/docs/frameworks/MCP-SERVER.md) · 🇮🇱 [he](../../../he/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [hi](../../../hi/docs/frameworks/MCP-SERVER.md) · 🇭🇷 [hr](../../../hr/docs/frameworks/MCP-SERVER.md) · 🇭🇺 [hu](../../../hu/docs/frameworks/MCP-SERVER.md) · 🇦🇲 [hy](../../../hy/docs/frameworks/MCP-SERVER.md) · 🇮🇩 [id](../../../id/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [ig](../../../ig/docs/frameworks/MCP-SERVER.md) · 🇮🇹 [it](../../../it/docs/frameworks/MCP-SERVER.md) · 🇯🇵 [ja](../../../ja/docs/frameworks/MCP-SERVER.md) · 🇬🇪 [ka](../../../ka/docs/frameworks/MCP-SERVER.md) · 🇰🇭 [km](../../../km/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [kn](../../../kn/docs/frameworks/MCP-SERVER.md) · 🇰🇷 [ko](../../../ko/docs/frameworks/MCP-SERVER.md) · 🇱🇹 [lt](../../../lt/docs/frameworks/MCP-SERVER.md) · 🇱🇻 [lv](../../../lv/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ml](../../../ml/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [mr](../../../mr/docs/frameworks/MCP-SERVER.md) · 🇲🇾 [ms](../../../ms/docs/frameworks/MCP-SERVER.md) · 🇲🇹 [mt](../../../mt/docs/frameworks/MCP-SERVER.md) · 🇲🇲 [my](../../../my/docs/frameworks/MCP-SERVER.md) · 🇳🇵 [ne](../../../ne/docs/frameworks/MCP-SERVER.md) · 🇳🇱 [nl](../../../nl/docs/frameworks/MCP-SERVER.md) · 🇳🇴 [no](../../../no/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [or](../../../or/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [pa](../../../pa/docs/frameworks/MCP-SERVER.md) · 🇵🇭 [phi](../../../phi/docs/frameworks/MCP-SERVER.md) · 🇵🇱 [pl](../../../pl/docs/frameworks/MCP-SERVER.md) · 🇵🇹 [pt](../../../pt/docs/frameworks/MCP-SERVER.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/frameworks/MCP-SERVER.md) · 🇷🇴 [ro](../../../ro/docs/frameworks/MCP-SERVER.md) · 🇷🇺 [ru](../../../ru/docs/frameworks/MCP-SERVER.md) · 🇱🇰 [si](../../../si/docs/frameworks/MCP-SERVER.md) · 🇸🇰 [sk](../../../sk/docs/frameworks/MCP-SERVER.md) · 🇸🇮 [sl](../../../sl/docs/frameworks/MCP-SERVER.md) · 🇷🇸 [sr](../../../sr/docs/frameworks/MCP-SERVER.md) · 🇸🇪 [sv](../../../sv/docs/frameworks/MCP-SERVER.md) · 🇰🇪 [sw](../../../sw/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [ta](../../../ta/docs/frameworks/MCP-SERVER.md) · 🇮🇳 [te](../../../te/docs/frameworks/MCP-SERVER.md) · 🇹🇭 [th](../../../th/docs/frameworks/MCP-SERVER.md) · 🇹🇷 [tr](../../../tr/docs/frameworks/MCP-SERVER.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/frameworks/MCP-SERVER.md) · 🇵🇰 [ur](../../../ur/docs/frameworks/MCP-SERVER.md) · 🇺🇿 [uz](../../../uz/docs/frameworks/MCP-SERVER.md) · 🇻🇳 [vi](../../../vi/docs/frameworks/MCP-SERVER.md) · 🇳🇬 [yo](../../../yo/docs/frameworks/MCP-SERVER.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/frameworks/MCP-SERVER.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/frameworks/MCP-SERVER.md)
 
 ---
 
@@ -71,6 +71,16 @@ curl -i \
 ```
 
 يُرجع المفتاح الذي لا يحمل نطاق manage (أو الطلب الذي لا يتضمن Bearer) الخطأ `403 LOCAL_ONLY`. أما البادئة الشقيقة `/api/cli-tools/runtime/*`، فلا يمكن تجاوز قيودها عمدًا — راجع [مستويات حارس المسارات — استثناء نطاق manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
+
+### التحقق من Origin
+
+بعد المصادقة، يُتحقَّق من ترويسة `Origin` في كل طلب إلى `/api/mcp/*` — وسائل النقل ومسارات الإدارة مثل `status`, `tools`, `audit`, `restart` — أيًّا كان المستدعي (مفتاح API، أو رمز CLI، أو جلسة لوحة التحكم، أو loopback مجهول مع تعطيل تسجيل الدخول). هذه هي الحماية من DNS rebinding التي تشترطها مواصفة MCP Streamable HTTP.
+
+- **لا توجد ترويسة `Origin`** ← مسموح. لا يرسلها CLI الخاص بـ OmniRoute ولا الـ SDK ولا عملاء IDE.
+- **`Origin` المسموح** ← `localhost` / `127.0.0.1` / `[::1]` على أي منفذ، أو الـ origin العام لـ OmniRoute نفسه: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`، أو الـ origin الذي يمرّره وكيل عكسي موثوق (`OMNIROUTE_TRUST_PROXY`، فقط عند عدم ضبط base URL)، أو مضيف IP من نوع loopback/LAN يُوصَل إليه مباشرة. ترويسة `Host` وحدها لا تجعل أي origin موثوقًا أبدًا.
+- **أي `Origin` آخر، بما في ذلك `null`** ← `403` مع جسم خطأ JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. تظل جلسة لوحة التحكم التي تقدّم رمز CSRF صالحًا مقبولة، كما في عمليات الكتابة الأخرى من لوحة التحكم.
+
+يحتاج عميل MCP يعمل في المتصفح خلف وكيل عكسي إلى `OMNIROUTE_PUBLIC_BASE_URL`؛ ولا توجد قائمة سماح لأي origins أخرى. لا يُتحقَّق من Origin في طلب CORS التمهيدي (`OPTIONS`)؛ بل في الطلب الذي يليه.
 
 ## إعداد بيئة التطوير المتكاملة
 
@@ -290,8 +300,110 @@ OmniRoute من خلال نموذج الاتصال نفسه المستخدم لم
 
 ## المصادقة والنطاقات
 
-تتم مصادقة أدوات MCP من خلال نطاقات مفتاح API. ويجري تطبيق النطاقات مركزيًا في
-`open-sse/mcp-server/scopeEnforcement.ts`. تتطلب كل أداة نطاقات محددة:
+تقرأ استدعاءات أدوات MCP سلاسل النطاقات من المستدعي. وهذا التحقق هو أحد ثلاثة
+فضاءات أسماء مستقلة. ولا يعني اجتياز أحد أدوات التحقق اجتياز الأدوات الأخرى.
+القواعد موضحة في [فضاءات أسماء النطاقات الثلاثة](#three-scope-namespaces).
+وفهرس الأدوات موجود في [نطاقات أدوات MCP](#mcp-tool-scopes).
+
+### فضاءات أسماء النطاقات الثلاثة
+
+يُعد `manage` في مفتاح API، و`read:compression` في أداة MCP، و`read` في رمز
+وصول `oma_live_…` ثلاثة أذونات مختلفة. يحصل المستدعون الذين يرسلون رمز وصول
+بنطاق `read` إلى مسار إدارة يُجري تعديلات على HTTP 403
+`Access token scope 'read' is insufficient; 'write' required.`
+تُسمى هذه المرتبة `scopeSatisfies`. وهي لا ترجع إلى جدول MCP، كما أن أداة
+مطابقة MCP لا ترجع إليها.
+
+| فضاء الأسماء              | بيانات الاعتماد                                               | أداة التحقق                   | ما يسمح به الاجتياز                               |
+| :------------------------ | :------------------------------------------------------------ | :---------------------------- | :------------------------------------------------ |
+| إدارة مفتاح API           | `api_keys.scopes`                                             | `hasManageScope`              | واجهة REST الإدارية لمفتاح Bearer ذاك             |
+| نطاقات مفتاح API الإضافية | المصفوفة نفسها، سلسلة مطابقة تمامًا                           | الدالة المساعدة المسماة أدناه | تلك الإمكانية وحدها                               |
+| نطاقات أدوات MCP          | المصفوفة نفسها، وإلا MCP `_meta`، وإلا `OMNIROUTE_MCP_SCOPES` | `scopeMatches`                | تلك الأداة، بعد تفعيل الإنفاذ                     |
+| رمز الوصول                | `oma_live_…`                                                  | `scopeSatisfies`              | مسار الإدارة الذي يتطلب أسلوبه ومساره تلك المرتبة |
+
+تتناول
+[مصادقة الإدارة](../guides/MANAGEMENT-AUTH.md) كيفية إصدار كل نوع من بيانات الاعتماد.
+
+#### نطاقات مفاتيح API
+
+تُستخدم مصفوفة `api_keys.scopes` واحدة لمهمتين. وتستخدم كل مهمة دوال مختلفة.
+
+**واجهة REST الإدارية.** العنصران `manage` و`admin` هما عضوا
+`MANAGEMENT_API_KEY_SCOPES` (`src/shared/constants/managementScopes.ts`).
+والدالة `hasManageScope` هي التي تُخوّل مسارات الإدارة لذلك المفتاح. يُعد `admin`
+قادرًا على الإدارة في تلك المسارات. ولا تمثل كلمة `admin` هنا
+مرتبة رمز الوصول، ولا تتوسع لتشمل نطاقات أدوات MCP.
+
+**السلاسل الإضافية.** يخضع كل نطاق لاختبار عضوية مطابق تمامًا، ويبقى كل منها
+خارج `MANAGEMENT_API_KEY_SCOPES`.
+
+| النطاق                         | ما يسمح به الاجتياز                                                                                                                                               |
+| :----------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mcp:connect`                  | استثناء LOCAL_ONLY للمسار `/api/mcp/` غير المرتبط بواجهة loopback فقط (`hasMcpConnectOrManageScope`). ويجتاز مفتاح يحمل `manage` أو `admin` هذا الاستثناء أيضًا.  |
+| `self:usage`                   | `GET /api/v1/me/status` لهذا المفتاح (`src/app/api/v1/me/status/route.ts`). يضيف `POST /api/keys` هذا النطاق عند الإنشاء (`normalizeSelfServiceScopesForCreate`). |
+| `self:account-quota`           | حصص الحسابات المنبع داخل حمولة الحالة (`src/lib/usage/apiKeySelfService.ts`). ولا يزال مسار الحالة يتطلب `self:usage`.                                            |
+| `policy:bypass-provider-quota` | تتجاوز استدعاءات الاستدلال الخاصة بهذا المفتاح سياسة حصة المزوّد (`hasProviderQuotaBypassScope` في `src/sse/handlers/chat.ts`).                                   |
+
+#### المطابقة
+
+الفهرس هو الجدول الموجود ضمن [نطاقات أدوات MCP](#mcp-tool-scopes). لا تتعامل مع
+`MCP_SCOPE_LIST` في `src/shared/constants/mcpScopes.ts` على أنه ذلك الفهرس:
+فهو المجموعة الفرعية الأصلية محددة الأنواع. وتُعلن الأدوات اللاحقة نطاقات إضافية بجانبه
+(`read:notion` و`read:skills` و`read:local-corpus` وبقية نطاقات الجدول).
+
+تسمح `evaluateToolScopes` في `open-sse/mcp-server/scopeEnforcement.ts` بإجراء استدعاء
+عندما يطابق كل نطاق مطلوب أحد النطاقات الممنوحة:
+
+- يطابق `*` كل نطاق مطلوب.
+- يطابق النطاق الممنوح الذي ينتهي بـ`*` نطاقًا مطلوبًا يبدأ
+  بالبادئة السابقة للنجمة. يطابق `read:*` النطاق `read:compression`.
+- لا يطابق أي نطاق ممنوح آخر إلا السلسلة المطلوبة المطابقة له تمامًا.
+
+يفشل مفتاح نطاقاته `["manage"]` في `scopeMatches` بالنسبة إلى `read:compression`.
+ويفشل الاستدعاء نفسه مع `admin` و`mcp:connect` و`read` و`write` عندما تكون هذه
+هي السلاسل الممنوحة الوحيدة. ولا يوجد تسلسل هرمي بين نطاقات أدوات MCP
+باستثناء حرف `*` اللاحق.
+
+يكون الإنفاذ معطلًا ما لم تكن `OMNIROUTE_MCP_ENFORCE_SCOPES=true` (القيمة الافتراضية
+`false`). وأثناء تعطيله، تسمح `evaluateToolScopes` بالاستدعاء وتتجاوز
+الفهرس. وأثناء تفعيله، يستخدم HTTP النطاق `api_keys.scopes` الخاص بمفتاح Bearer
+بصفته `authInfo` (راجع [ربط نطاق HTTP لكل مفتاح](#per-key-http-scope-binding-7895)).
+وعندما لا تُحل أي نطاقات للمفتاح، تنتقل مجموعة النطاقات الممنوحة إلى MCP `_meta`، ثم
+`OMNIROUTE_MCP_SCOPES`.
+
+#### نطاقات رموز الوصول
+
+تحمل رموز `oma_live_…` (`src/lib/accessTokens/scopes.ts`) النطاق `read` أو `write`
+أو `admin`. تعمل `scopeSatisfies` كمرتبة: يغطي `admin` كلًا من `write` و`read`،
+ويغطي `write` النطاق `read`. ولا تغطي النطاقات غير المعروفة أي شيء.
+
+تقارن `evaluateAccessTokenAuth` (`src/server/authz/accessTokenAuth.ts`) تلك
+المرتبة مع `inferRequiredScope` (`src/server/authz/accessScopes.ts`):
+
+- تتطلب `GET` و`HEAD` و`OPTIONS` النطاق `read`.
+- تتطلب كل الأساليب الأخرى النطاق `write`.
+- تتطلب المسارات الموجودة في `ADMIN_SCOPE_PREFIXES` النطاق `admin` لكل أسلوب. يقع `/api/mcp`
+  ضمن تلك القائمة، ولذلك لا يزال رمز وصول بنطاق `write` غير قادر على استدعاء سطح HTTP الخاص
+  بـMCP.
+- تتطلب المسارات الموجودة في `ADMIN_MUTATION_PREFIXES` النطاق `admin` للتعديلات فقط.
+- تتطلب المسارات الموجودة في `ADMIN_MUTATION_EXACT_PATHS` (`/api/settings`
+  و`/api/settings/require-login`) النطاق `admin` للتعديلات فقط، وعلى
+  ذلك المسار المطابق تمامًا فحسب — بينما تحتفظ المسارات الفرعية الأخرى ضمن `/api/settings/*` بالنطاق `write`.
+
+`PATCH /api/keys/{id}` هي عملية تعديل وليست ضمن قوائم المسؤول تلك، لذا فإن رمز
+`read` يتلقى 403
+`Access token scope 'read' is insufficient; 'write' required.`
+ويفي رمز وصول بنطاق `write` أو `admin` بمتطلبات ذلك المسار. أما JWT الخاص بلوحة المعلومات، ورمز machine-id الخاص بـ CLI عبر loopback، ومفتاح API ذي النطاق `manage` أو `admin`، فتسلك
+فروعًا أخرى ولا تخضع للتقييد بحسب هذه الرتبة.
+
+رمز الوصول الذي يجتاز `scopeSatisfies` للمسار `/api/mcp` يكون قد اجتاز
+بوابة الإدارة فقط. تظل استدعاءات الأدوات تُشغّل `scopeMatches` للتحقق من نطاقات مفتاح API.
+ولا تُعد رتبة رمز الوصول مُدخلًا إلى `scopeMatches`.
+
+### نطاقات أدوات MCP
+
+يتم فرض النطاقات مركزيًا في `open-sse/mcp-server/scopeEnforcement.ts`.
+تتطلب كل أداة نطاقات محددة:
 
 | النطاق                | الأدوات                                                                                                                                                                      |
 | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -329,55 +441,65 @@ OmniRoute من خلال نموذج الاتصال نفسه المستخدم لم
 | `write:obsidian`      | 9 أدوات كتابة — `obsidian_write_note`, `obsidian_append_note`, `obsidian_patch_note`, `obsidian_move_note`, `obsidian_delete_note`, `obsidian_sync_trigger`, …               |
 | `read:local-corpus`   | `local_corpus_search`, `local_corpus_read`, `local_corpus_status`                                                                                                            |
 
-النطاقات ذات أحرف البدل مدعومة: يمنح `read:*` جميع نطاقات القراءة، ويمنح `*` وصولًا كاملًا.
+نطاقات أحرف البدل مدعومة: يمنح `read:*` جميع نطاقات القراءة، ويمنح `*` صلاحية وصول كاملة.
 
-### `mcp:connect` — صلاحية محدودة للمسار (#7895)
+### `mcp:connect` — إمكانية محدودة للمسار (#7895)
 
-يتطلب الوصول إلى نقل HTTP/SSE الخاص بـ MCP (`/api/mcp/*`) من عنوان غير loopback
-استثناء LOCAL_ONLY للمسار `/api/mcp/` (راجع `docs/security/ROUTE_GUARD_TIERS.md`). تاريخيًا،
-لم يكن هذا الاستثناء يقبل إلا مفتاح API بنطاق `manage`/`admin` كامل — وهو نطاق أوسع مما
-يحتاج إليه مستدعٍ لا يحتاج إلا إلى التواصل مع MCP. يصدّر `src/shared/constants/managementScopes.ts` الآن
-‏`MCP_CONNECT_SCOPE = "mcp:connect"`: نطاقًا إضافيًا محدودًا (وفق السابقة نفسها الخاصة بـ
-`SELF_USAGE_SCOPE`) لا يمنح سوى صلاحية تجاوز `/api/mcp/` في
-`src/server/authz/policies/management.ts` — ولا يمنح أي وصول آخر إلى مسارات الإدارة،
-وقد أُبقي خارج `MANAGEMENT_API_KEY_SCOPES` عمدًا. يظل المفتاح الذي يحمل `manage`/`admin`
-قادرًا على اجتياز الاستثناء دون تغيير؛ أما `mcp:connect` فهو بديل ذو صلاحيات أقل
+يتطلب الوصول إلى نقل MCP عبر HTTP/SSE‏ (`/api/mcp/*`) من عنوان غير حلقي استثناء LOCAL_ONLY للمسار
+`/api/mcp/` (راجع `docs/security/ROUTE_GUARD_TIERS.md`). تاريخيًا، لم يكن هذا
+الاستثناء يقبل سوى مفتاح API بنطاق `manage`/`admin` كامل — وهو نطاق أوسع مما يلزم
+لمستدعٍ لا يحتاج سوى إلى التواصل مع MCP. يصدّر `src/shared/constants/managementScopes.ts` الآن
+`MCP_CONNECT_SCOPE = "mcp:connect"`: نطاقًا إضافيًا محدودًا (باتباع السابقة نفسها التي يتبعها
+`SELF_USAGE_SCOPE`) لا يصرّح إلا بتجاوز `/api/mcp/` في
+`src/server/authz/policies/management.ts` — ولا يمنح أي صلاحية وصول أخرى إلى مسارات الإدارة،
+كما أُبقي عمدًا خارج `MANAGEMENT_API_KEY_SCOPES`. يظل المفتاح الذي يحمل `manage`/`admin`
+يجتاز الاستثناء دون تغيير؛ ويمثل `mcp:connect` بديلًا أقل امتيازًا
 للمستدعين البعيدين الذين يستخدمون MCP فقط، ويُتحقق منه عبر `hasMcpConnectOrManageScope()`.
 
 ### ربط نطاق HTTP بكل مفتاح (#7895)
 
 عبر HTTP/SSE، يحلّ `open-sse/mcp-server/httpTransport.ts` الآن نطاقات
-`api_keys.scopes` الفعلية للمستدعي باستخدام `resolveMcpCallerAuthInfo()`
-(`open-sse/mcp-server/httpAuthContext.ts`) ويمررها إلى
-`transport.handleRequest(req, { authInfo })` في MCP SDK، بحيث تعكس
-`extra.authInfo.scopes` التي تصل إلى كل استدعاء أداة نطاقات مفتاح Bearer نفسه.
-كانت `resolveCallerScopeContext()` في `scopeEnforcement.ts` تعطي الأولوية بالفعل إلى
-`authInfo` على `_meta` وخيار الرجوع إلى متغير البيئة `OMNIROUTE_MCP_SCOPES` — ولا يؤدي
-هذا التغيير إلا إلى تعبئة ذلك المصدر الأول ذي الأولوية القصوى، والذي لم يكن يُغذّى سابقًا
-عبر HTTP. عندما لا يُحل أي مفتاح API (بسبب عدم وجود ترويسة أو وجود مفتاح غير صالح)، تظل
-`authInfo` بقيمة `undefined` وتنتقل عملية الحل إلى سلسلة الرجوع الحالية `meta`/env دون تغيير.
-لا يغيّر هذا القيمة الافتراضية لـ `OMNIROUTE_MCP_ENFORCE_SCOPES` — إذ لا يزال فرض النطاقات
-يتطلب تمكينًا صريحًا؛ ولا يؤدي هذا التغيير إلا إلى منح مسار النطاقات الخاص بكل مفتاح الأولوية
-بمجرد تمكينه. لا يملك stdio هوية خاصة بكل مستدعٍ (راجع `mcpCallerIdentity.ts`) ولا يتأثر
-بهذا التغيير — إذ يظل يعتمد على سلسلة الرجوع `_meta`/env.
+`api_keys.scopes` الفعلية للمستدعي عبر `resolveMcpCallerAuthInfo()` ‏(`open-sse/mcp-server/httpAuthContext.ts`)
+ويمررها إلى `transport.handleRequest(req, { authInfo })` الخاص بحزمة MCP SDK، بحيث
+تعكس `extra.authInfo.scopes` التي تصل إلى كل استدعاء أداة النطاقات الخاصة بمفتاح Bearer نفسه.
+كانت `resolveCallerScopeContext()` في `scopeEnforcement.ts` تمنح `authInfo` الأولوية بالفعل على
+`_meta` وعلى القيمة الاحتياطية لمتغير البيئة `OMNIROUTE_MCP_SCOPES` — ولا يؤدي هذا التغيير إلا إلى تعبئة
+هذا المصدر الأول ذي الأولوية القصوى، والذي لم تكن تُمرر إليه بيانات سابقًا عبر HTTP. عندما لا يُحلّ
+أي مفتاح API (بسبب غياب الترويسة أو عدم صلاحية المفتاح)، تظل `authInfo` بقيمة `undefined` ويستمر الحل عبر
+سلسلة `meta`/متغير البيئة الحالية دون تغيير. لا يملك stdio هوية خاصة بكل مستدعٍ (راجع
+`mcpCallerIdentity.ts`) ولذلك لا يتأثر — إذ يظل يعتمد على سلسلة `_meta`/متغير البيئة الاحتياطية.
+
+**يُفرض الإنفاذ على مستدعي HTTP/SSE ذوي النطاقات المحدودة بصرف النظر عن
+`OMNIROUTE_MCP_ENFORCE_SCOPES`.** إن القيمة الافتراضية `false` لـ `OMNIROUTE_MCP_ENFORCE_SCOPES` آمنة فقط
+لتدفق المشغّل الواحد المحلي/stdio، حيث لا توجد هوية خاصة بكل مستدعٍ لتطبيق النطاق عليها.
+تُفعّل `open-sse/mcp-server/server.ts::withScopeEnforcement()` إنفاذ نطاق كل أداة
+دون قيد أو شرط (`shouldForceScopeEnforcement()` في `scopeEnforcement.ts`)
+عندما تحلّ `resolveCallerScopeContext()` القيمة
+`source === "authInfo"` (أي ترويسة HTTP Authorization فعلية خاصة بكل مفتاح، عبر HTTP/SSE فقط) وعندما
+لا يحمل ذلك المفتاح نطاق `manage`/`admin` الكامل. يسد هذا الفجوة التي كان يمكن فيها لمفتاح لا يحمل سوى
+نطاق التجاوز المحدود `mcp:connect` — الموثق أعلاه بأنه لا يصرّح سوى باستثناء LOCAL_ONLY للمسار
+`/api/mcp/` — أن يستدعي جميع أدوات MCP بمجرد أن يفعّل أحد المشغّلين
+وصول MCP البعيد/غير الحلقي، لمجرد أن القيمة الافتراضية المرفقة لـ `OMNIROUTE_MCP_ENFORCE_SCOPES` هي
+`false`. يظل مفتاح `manage`/`admin` الكامل عبر HTTP، وجميع مستدعي stdio/المستدعين المحليين، على
+السلوك الحالي المقيّد بواسطة `OMNIROUTE_MCP_ENFORCE_SCOPES` دون تغيير.
 
 ---
 
 ## متغيرات البيئة
 
-| المتغير                                 | القيمة الافتراضية                         | الغرض                                                                                                          |
-| :-------------------------------------- | :---------------------------------------- | :------------------------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                  | عنوان URL الأساسي الذي يستخدمه خادم MCP عند استدعاء واجهات API الداخلية لـ OmniRoute                           |
-| `OMNIROUTE_API_KEY`                     | (فارغ)                                    | مفتاح API يُمرَّر بصيغة `Authorization: Bearer` إلى استدعاءات API الداخلية                                     |
-| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (لا يؤدي إلى تفعيله سوى `"true"`) | عند التفعيل، يؤدي غياب النطاقات إلى رفض استدعاءات الأدوات وتسجيل `scope_denied:<reason>` في سجل التدقيق        |
-| `OMNIROUTE_MCP_SCOPES`                  | (فارغ)                                    | قائمة نطاقات مسموح بها مفصولة بفواصل وتُعد «متاحة» افتراضيًا (تُستخدم عندما لا يوفّر المستدعي نطاقاته الخاصة)  |
-| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (غير معيّن = مفعّل)                       | عند ضبطه على `0/false/off/no`، يعطّل ضغط أوصاف MCP وقت التسجيل                                                 |
-| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (غير معيّن = مفعّل)                       | اسم بديل للمفتاح نفسه المذكور أعلاه                                                                            |
-| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                   | المهلة الزمنية قبل الإلغاء لعمليات القراءة الإدارية الداخلية (الصحة، والمرونة، والتركيبات، والحصة، والاستخدام) |
-| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                   | المهلة الزمنية قبل الإلغاء للخطوات التي تنتظر موفّرًا (`route_request`، و`web_search`، و`web_fetch`)           |
-| `MCP_TOOL_DENY`                         | (غير معيّن = بلا تصفية)                   | أسماء الأدوات المفصولة بفواصل والمطلوب إسقاطها من `tools/list` (تقليل عدد الأدوات — انظر أدناه)                |
-| `MCP_TOOL_ALLOW`                        | (غير معيّن = بلا تصفية)                   | أسماء الأدوات المفصولة بفواصل والمطلوب الاحتفاظ بها حصريًا (وضع قائمة السماح — انظر أدناه)                     |
-| `DATA_DIR`                              | `~/.omniroute`                            | يُكتب ملف نبض الحياة في `${DATA_DIR}/runtime/mcp-heartbeat.json`                                               |
+| المتغير                                 | القيمة الافتراضية                       | الغرض                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| :-------------------------------------- | :-------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_BASE_URL`                    | `http://localhost:20128`                | عنوان URL الأساسي الذي يستخدمه خادم MCP عند استدعاء واجهات API الداخلية لـ OmniRoute                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `OMNIROUTE_API_KEY`                     | (فارغ)                                  | مفتاح API الذي يُمرَّر بصيغة `Authorization: Bearer` إلى استدعاءات API الداخلية                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `OMNIROUTE_MCP_ENFORCE_SCOPES`          | `false` (لا تفعّله سوى القيمة `"true"`) | عند تمكينه، يؤدي غياب النطاقات إلى رفض استدعاءات الأدوات وتسجيل `scope_denied:<reason>` في سجل التدقيق. ويُفرَض التطبيق أيضًا بغض النظر عن هذه العلامة على أي مستدعٍ عبر HTTP/SSE جرى تحديده من ترويسة Authorization خاصة بكل مفتاح (`source === "authInfo"`) ولا يمتلك نطاق `manage`/`admin` الكامل — مثل مفتاح لا يحمل سوى نطاق التجاوز المحدود `mcp:connect` — لذا فإن هذه القيمة الافتراضية آمنة فقط لتدفق محلي أحادي المشغّل عبر stdio، وليست آمنة مطلقًا للوصول البعيد من خارج عنوان الاسترجاع |
+| `OMNIROUTE_MCP_SCOPES`                  | (فارغ)                                  | قائمة سماح مفصولة بفواصل للنطاقات التي تُعدّ "متاحة" افتراضيًا (تُستخدم عندما لا يقدّم المستدعي نطاقاته الخاصة)                                                                                                                                                                                                                                                                                                                                                                                      |
+| `OMNIROUTE_MCP_COMPRESS_DESCRIPTIONS`   | (غير معيّن = مفعّل)                     | عند ضبطه على `0/false/off/no`، يعطّل ضغط أوصاف MCP في وقت التسجيل                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `OMNIROUTE_MCP_DESCRIPTION_COMPRESSION` | (غير معيّن = مفعّل)                     | اسم مستعار بديل للمفتاح نفسه المذكور أعلاه                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `OMNIROUTE_MCP_FETCH_TIMEOUT_MS`        | `10000`                                 | المهلة الزمنية للإلغاء لعمليات قراءة الإدارة الداخلية (الصحة، والمرونة، والتركيبات، والحصة، والاستخدام)                                                                                                                                                                                                                                                                                                                                                                                              |
+| `OMNIROUTE_MCP_UPSTREAM_TIMEOUT_MS`     | `60000`                                 | المهلة الزمنية للإلغاء للانتقالات التي تنتظر موفّرًا (`route_request`، و`web_search`، و`web_fetch`)                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `MCP_TOOL_DENY`                         | (غير معيّن = بلا تصفية)                 | أسماء أدوات مفصولة بفواصل لإسقاطها من `tools/list` (تقليل عدد الأدوات — انظر أدناه)                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `MCP_TOOL_ALLOW`                        | (غير معيّن = بلا تصفية)                 | أسماء الأدوات المفصولة بفواصل للاحتفاظ بها حصريًا (وضع قائمة السماح — انظر أدناه)                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `DATA_DIR`                              | `~/.omniroute`                          | يُكتب ملف نبضات القلب إلى `${DATA_DIR}/runtime/mcp-heartbeat.json`                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
 ---
 

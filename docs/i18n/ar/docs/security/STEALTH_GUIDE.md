@@ -1,6 +1,6 @@
 # Stealth Guide (العربية)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../security/STEALTH_GUIDE.md) · 🇪🇹 [am](../../../am/docs/security/STEALTH_GUIDE.md) · 🇦🇿 [az](../../../az/docs/security/STEALTH_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/security/STEALTH_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/security/STEALTH_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/security/STEALTH_GUIDE.md) · 🇩🇰 [da](../../../da/docs/security/STEALTH_GUIDE.md) · 🇩🇪 [de](../../../de/docs/security/STEALTH_GUIDE.md) · 🇬🇷 [el](../../../el/docs/security/STEALTH_GUIDE.md) · 🇪🇸 [es](../../../es/docs/security/STEALTH_GUIDE.md) · 🇪🇪 [et](../../../et/docs/security/STEALTH_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/security/STEALTH_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/security/STEALTH_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/security/STEALTH_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/security/STEALTH_GUIDE.md) · 🇮🇱 [he](../../../he/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/security/STEALTH_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/security/STEALTH_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/security/STEALTH_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/security/STEALTH_GUIDE.md) · 🇮🇩 [id](../../../id/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/security/STEALTH_GUIDE.md) · 🇮🇹 [it](../../../it/docs/security/STEALTH_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/security/STEALTH_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/security/STEALTH_GUIDE.md) · 🇰🇭 [km](../../../km/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/security/STEALTH_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/security/STEALTH_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/security/STEALTH_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/security/STEALTH_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/security/STEALTH_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/security/STEALTH_GUIDE.md) · 🇲🇲 [my](../../../my/docs/security/STEALTH_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/security/STEALTH_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/security/STEALTH_GUIDE.md) · 🇳🇴 [no](../../../no/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [or](../../../or/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/security/STEALTH_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/security/STEALTH_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/security/STEALTH_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/security/STEALTH_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/STEALTH_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/security/STEALTH_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/security/STEALTH_GUIDE.md) · 🇱🇰 [si](../../../si/docs/security/STEALTH_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/security/STEALTH_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/security/STEALTH_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/security/STEALTH_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/security/STEALTH_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [te](../../../te/docs/security/STEALTH_GUIDE.md) · 🇹🇭 [th](../../../th/docs/security/STEALTH_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/security/STEALTH_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/STEALTH_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/security/STEALTH_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/security/STEALTH_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/security/STEALTH_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/STEALTH_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/STEALTH_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../security/STEALTH_GUIDE.md) · 🇪🇹 [am](../../../am/docs/security/STEALTH_GUIDE.md) · 🇦🇿 [az](../../../az/docs/security/STEALTH_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/security/STEALTH_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/security/STEALTH_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/security/STEALTH_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/security/STEALTH_GUIDE.md) · 🇩🇰 [da](../../../da/docs/security/STEALTH_GUIDE.md) · 🇩🇪 [de](../../../de/docs/security/STEALTH_GUIDE.md) · 🇬🇷 [el](../../../el/docs/security/STEALTH_GUIDE.md) · 🇪🇸 [es](../../../es/docs/security/STEALTH_GUIDE.md) · 🇪🇪 [et](../../../et/docs/security/STEALTH_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/security/STEALTH_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/security/STEALTH_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/security/STEALTH_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/security/STEALTH_GUIDE.md) · 🇮🇱 [he](../../../he/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/security/STEALTH_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/security/STEALTH_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/security/STEALTH_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/security/STEALTH_GUIDE.md) · 🇮🇩 [id](../../../id/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/security/STEALTH_GUIDE.md) · 🇮🇹 [it](../../../it/docs/security/STEALTH_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/security/STEALTH_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/security/STEALTH_GUIDE.md) · 🇰🇭 [km](../../../km/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/security/STEALTH_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/security/STEALTH_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/security/STEALTH_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/security/STEALTH_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/security/STEALTH_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/security/STEALTH_GUIDE.md) · 🇲🇲 [my](../../../my/docs/security/STEALTH_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/security/STEALTH_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/security/STEALTH_GUIDE.md) · 🇳🇴 [no](../../../no/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [or](../../../or/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/security/STEALTH_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/security/STEALTH_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/security/STEALTH_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/security/STEALTH_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/security/STEALTH_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/security/STEALTH_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/security/STEALTH_GUIDE.md) · 🇱🇰 [si](../../../si/docs/security/STEALTH_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/security/STEALTH_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/security/STEALTH_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/security/STEALTH_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/security/STEALTH_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/security/STEALTH_GUIDE.md) · 🇮🇳 [te](../../../te/docs/security/STEALTH_GUIDE.md) · 🇹🇭 [th](../../../th/docs/security/STEALTH_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/security/STEALTH_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/security/STEALTH_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/security/STEALTH_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/security/STEALTH_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/security/STEALTH_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/security/STEALTH_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/security/STEALTH_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/security/STEALTH_GUIDE.md)
 
 ---
 
@@ -16,64 +16,61 @@
 
 ---
 
-## طبقة أخذ بصمات TLS
+## طبقة بصمة TLS
 
-### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
+### `open-sse/utils/tlsClient.ts` — wreq-js ‏(Chrome 124)
 
-تُنشأ جلسات `wreq-js` الدائمة عند الحاجة لكل نطاق حساب ووكيل محلول. يحتفظ
-`TlsClient` على مستوى العملية بمجمّع لا يتجاوز 128 جلسة تنتحل هوية **Chrome 124 على macOS** لدى
-الجهات المنبع الواقعة خلف Cloudflare. يفشل `TlsClient.fetch()` بشكل مغلق عندما تكون بيئة التشغيل
-الأصلية غير متاحة؛ ويمكن للجهة المستدعية اختيار مسار احتياطي صراحةً خارج هذا الغلاف.
+تُنشأ جلسات `wreq-js` الدائمة بشكل كسول لكل نطاق حساب ووكيل محلول. يحتفظ `TlsClient` على مستوى العملية بتجمّع لا يتجاوز 128 جلسة تنتحل شخصية **Chrome 124 على macOS** للوجهات الأصلية الموجودة خلف Cloudflare. يفشل `TlsClient.fetch()` بشكل مغلق عندما تكون بيئة التشغيل الأصلية غير متاحة؛ ويمكن للمستدعي تحديد خيار احتياطي صراحةً خارج هذا المغلّف.
 
 - ملف تعريف الجلسة: `browser: "chrome_124", os: "macos"`
-- حلّ الوكيل (حسب الأولوية): `HTTPS_PROXY` ← `HTTP_PROXY` ← `ALL_PROXY` (وكذلك الصيغ ذات الأحرف الصغيرة)
+- تحليل الوكيل (حسب الأولوية): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (وكذلك الصيغ ذات الأحرف الصغيرة)
 - المهلة: `TLS_CLIENT_TIMEOUT_MS` (ترث من `FETCH_TIMEOUT_MS`، والقيمة الافتراضية 600000)
-- استجابة `wreq-js` متوافقة مع fetch (`headers`، و`text()`، و`json()`، و`clone()`، و`body`).
-- مراقب البايت الأول (`open-sse/utils/tlsFirstByteWatchdog.ts`، #12656): يُحلّ `TlsClient.fetch()`
-  بمجرد وصول ترويسات الجهة المنبع، ولذلك لا يستطيع `TLS_CLIENT_TIMEOUT_MS` وحده فرض حد زمني على
-  جسم لا يُنتج بايته الأول أبدًا. يجعل `guardTlsFirstByte()` أول استدعاء `read()` للجسم يتسابق
-  مع `TLS_FIRST_BYTE_WATCHDOG_MS` (القيمة الافتراضية `10000`، وتعطّله القيمة `0`)؛ ولا يتأثر
-  الجسم السليم، بينما يؤدي الجسم المتوقف إلى إلغاء قارئ wreq ويسمح لمنطق الرجوع الاحتياطي
-  الحالي لـ TLS في `proxyFetch` بالانتقال إلى موزّع الاتصال المباشر/عبر الوكيل (أما الطلب غير
-  الآمن لإعادة الإرسال، مثل طلب POST ذي جسم، فسيظل يرمي خطأً بدل إعادة محاولته بصمت).
+- استجابة `wreq-js` متوافقة مع fetch ‏(`headers`، و`text()`، و`json()`، و`clone()`، و`body`).
+- مراقب البايت الأول (`open-sse/utils/tlsFirstByteWatchdog.ts`، ‏#12656): يُحلّ `TlsClient.fetch()`
+  بمجرد وصول ترويسات الوجهة الأصلية، ولذلك لا يستطيع `TLS_CLIENT_TIMEOUT_MS` وحده تقييد جسم
+  لا يُنتج بايته الأول مطلقًا. يجعل `guardTlsFirstByte()` أول استدعاء `read()` للجسم في سباق
+  مع `TLS_FIRST_BYTE_WATCHDOG_MS` (القيمة الافتراضية `10000`، وتؤدي القيمة `0` إلى تعطيله)؛ ولا يتأثر
+  الجسم السليم، بينما يؤدي الجسم المتوقف إلى إلغاء قارئ wreq ويسمح لمنطق الرجوع الاحتياطي الحالي لـTLS
+  في `proxyFetch` بالانتقال إلى موزّع الاتصال المباشر/الوكيل (أما الطلب غير الآمن لإعادة التشغيل، مثل
+  طلب POST ذي جسم، فسيظل يطرح خطأً بدلًا من إعادة محاولته بصمت).
 
-### نقل مزوّدي ملفات تعريف ارتباط الويب — wreq-js 3.2.0
+### نقل موفّر ملفات تعريف ارتباط الويب — wreq-js 3.2.0
 
-يمثّل `open-sse/services/tlsClientBase.ts` المحوّل المشترك لوسائل نقل ملفات تعريف ارتباط الويب
-الخمس المتخصصة أدناه. يختار كل غلاف رفيع خاص بمزوّد ملف تعريف متصفح/نظام تشغيل. يستخدم المحوّل
-محمّل بيئة تشغيل wreq الوحيد ومجمّع النقل في `open-sse/utils/tlsClient.ts`، مع الفهرسة حسب
-ملف التعريف + نظام التشغيل + الوكيل المحلول، بينما يستخدم كل طلب `cookieMode: "ephemeral"`.
-ولذلك تشترك الحسابات والطلبات في اتصالات مستوى النقل، لكنها لا تشترك مطلقًا في جلسة wreq أو
-مخزن ملفات تعريف ارتباط.
+يمثّل `open-sse/services/tlsClientBase.ts` المهايئ المشترك لوسائل نقل ملفات تعريف ارتباط الويب
+الخمس المتخصصة أدناه. يحدد كل مغلّف رفيع خاص بموفّر ملف تعريف للمتصفح/نظام التشغيل. يستخدم المهايئ
+محمّل بيئة تشغيل wreq الوحيد وتجمّع النقل في `open-sse/utils/tlsClient.ts`، مع الفهرسة حسب
+ملف التعريف + نظام التشغيل + الوكيل المحلول، بينما يستخدم كل طلب `cookieMode: "ephemeral"`. لذلك
+تتشارك الحسابات والطلبات الاتصالات على مستوى النقل، لكنها لا تتشارك أبدًا جلسة wreq أو مخزن ملفات تعريف الارتباط.
 
-| المزوّد    | ملف التعريف   | نظام التشغيل المحاكى | سياسة نهاية تدفق EOF                  |
-| ---------- | ------------- | -------------------- | ------------------------------------- |
-| Claude     | `chrome_146`  | Linux                | تضمين `[DONE]`                        |
-| Perplexity | `firefox_148` | macOS                | تضمين `event: end_of_stream`          |
-| Grok       | `chrome_146`  | Linux                | استبعاد `[DONE]`                      |
-| Notion     | `chrome_146`  | Windows              | تضمين `[DONE]`                        |
-| LMArena    | `chrome_146`  | Windows              | بلا علامة حارسة؛ الإغلاق عند EOF أصلي |
+| الموفّر    | ملف التعريف   | نظام التشغيل المُحاكى | سياسة نهاية تدفق EOF                         |
+| ---------- | ------------- | --------------------- | -------------------------------------------- |
+| Claude     | `chrome_146`  | Linux                 | تضمين `[DONE]`                               |
+| Perplexity | `firefox_151` | macOS                 | تضمين `event: end_of_stream`                 |
+| Grok       | `chrome_146`  | Linux                 | استبعاد `[DONE]`                             |
+| Notion     | `chrome_146`  | Windows               | تضمين `[DONE]`                               |
+| LMArena    | `chrome_146`  | Windows               | لا توجد علامة ختامية؛ الإغلاق عند EOF الأصلي |
 
-- يستهلك البث `ReadableStream` للاستجابة الأصلية مباشرةً؛ ولا يُنشأ أي ملف مؤقت أو عملية جانبية.
-- يُفحص ما يصل إلى 256 بايت أولية قبل إتاحة التدفق. يخزّن مزوّدو SSE الأخطاء غير التابعة لـ SSE
-  مؤقتًا؛ ويحوّل Grok/LMArena تحديات Cloudflare إلى `403` وصفحات HTML الاعتراضية إلى `502`.
-- تظل مهلة الطلب الأصلية مغلّفة بموعد نهائي مطلق صارم في JS. يؤدي التعليق إلى إبطال وإغلاق وسيلة
-  النقل المتأثرة فقط لملف التعريف/نظام التشغيل/الوكيل، قبل أن يعيد الطلب التالي إنشاءها.
-- تكون أولوية حلّ الوكيل كالتالي: `proxyUrl` الخاص بكل استدعاء ← سياق الحساب/لوحة المعلومات الخاص
-  بالطلب ← `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (بما في ذلك الصيغ ذات الأحرف الصغيرة). تفشل
-  أخطاء الحلّ بشكل مغلق بدل تسريب اتصال مباشر. يتعمّد LMArena إجراء الحلّ مقابل `arena.ai`.
-- يعيد `byteResponse` عنوان URL من نوع `data:` محددًا بنوع المحتوى من دون إفساد UTF-8.
-- الأخطاء هي `TlsClientUnavailableError` (عدم توفر الحزمة/الملحق)، و`TlsClientHangError`
-  (تجاوز الموعد النهائي)، و`WreqTransportCapacityError` (رمز خطأ سعة الجلسات المشتركة)
+- يستهلك البث `ReadableStream` الخاص بالاستجابة الأصلية مباشرةً؛ ولا يُنشأ أي ملف مؤقت أو عملية
+  جانبية.
+- يُفحص ما يصل إلى 256 بايتًا أوليًا قبل إتاحة التدفق. تخزّن موفّرات SSE أخطاء غير SSE مؤقتًا؛
+  ويربط Grok/LMArena تحديات Cloudflare بالحالة `403` وصفحات HTML البينية بالحالة `502`.
+- تظل مهلة الطلب الأصلية مغلّفة بموعد نهائي صارم ومطلق في JS. يؤدي التعليق إلى إبطال وإغلاق
+  وسيلة النقل المتأثرة فقط لملف التعريف/نظام التشغيل/الوكيل قبل أن يعيد الطلب التالي إنشاءها.
+- تكون أولوية تحليل الوكيل لكل استدعاء كما يلي: `proxyUrl` → سياق الحساب/لوحة المعلومات الخاص بالطلب →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (بما في ذلك الصيغ ذات الأحرف الصغيرة). تفشل أخطاء التحليل
+  بشكل مغلق بدلًا من تسريب اتصال مباشر. يتعمد LMArena إجراء التحليل مقابل `arena.ai`.
+- يعيد `byteResponse` عنوان URL من النوع `data:` ومحددًا بنوع المحتوى من دون إتلاف UTF-8.
+- الأخطاء هي `TlsClientUnavailableError` (الحزمة/الملحق غير متاح)، و`TlsClientHangError`
+  (تجاوز الموعد النهائي)، و`WreqTransportCapacityError` (رمز خطأ سعة الجلسة المشتركة)
   عندما تكون جميع خانات ملف التعريف/نظام التشغيل/الوكيل المحدودة البالغ عددها 128 نشطة أو قيد الإغلاق.
 
-تظل جلسة `TlsClient` العامة أعلاه متخصصة في حالة ملفات تعريف الارتباط الدائمة المدعومة بالمتصفح.
-يعيد المساران استخدام محمّل واحد مخزّن مؤقتًا لوحدة wreq وخطاف دورة حياة العملية؛ وتظل مجمّعاتهما
-منفصلة لأن مدد صلاحية ملفات تعريف الارتباط فيهما مختلفة عمدًا.
+تظل جلسة `TlsClient` العامة أعلاه متخصصة في حالة ملفات تعريف الارتباط الدائمة والمدعومة بالمتصفح.
+يعيد كلا المسارين استخدام محمّل واحد مخزّن مؤقتًا لوحدة wreq وخطاف دورة حياة العملية؛ بينما تظل
+تجمّعاتهما منفصلة لأن مدد صلاحية ملفات تعريف الارتباط الخاصة بهما مختلفة عمدًا.
 
-تدعم الحزمة المثبّتة ملفات التعريف، لكن قبول WAF الفعلي قد يتغير بصورة مستقلة عن اختبارات العقود
-المحلية. تحقّق من تغييرات البصمة باستخدام حساب فعلي مصرّح به صراحةً قبل الادعاء بتحقيق التكافؤ
-مع متصفح الجهة المنبع.
+تدعم الحزمة المثبّتة ملفات التعريف، لكن قبول WAF الفعلي يمكن أن يتغير بصورة مستقلة عن اختبارات
+العقد المحلية. تحقّق من تغييرات البصمة باستخدام حساب فعلي مصرّح به صراحةً قبل الادعاء بالتكافؤ
+مع متصفح الوجهة الأصلية.
 
 ---
 
@@ -122,7 +119,7 @@ aider, continue.dev, copilot, avante, codecompanion
 
 لخدمات ترحيل Anthropic التابعة لجهات خارجية التي لا تقبل سوى حركة مرور «Claude Code حقيقية»:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - القيمة الافتراضية لـ `anthropic-beta` هي `"claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
@@ -242,12 +239,12 @@ interface CliFingerprint {
 
 ---
 
-## تجاوزات وكيل المستخدم — متغيرات البيئة (القسم 12 من `.env.example`)
+## تجاوزات User-Agent — متغيرات البيئة (القسم 12 من `.env.example`)
 
 | المتغير                  | القيمة الافتراضية                                               |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
-| `CODEX_USER_AGENT`       | `codex-cli/0.149.0 (Windows 10.0.26200; x64)`                   |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
+| `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
 | `KIRO_USER_AGENT`        | `AWS-SDK-JS/3.0.0 kiro-ide/1.0.0`                               |

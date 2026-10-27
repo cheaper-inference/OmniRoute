@@ -431,3 +431,105 @@ test("parseSSEToGeminiResponse ignores thought/thoughtSignature parts", () => {
   assert.ok(parsed);
   assert.equal(parsed.choices[0].message.content, "visible answer");
 });
+
+test("parseSSEToGeminiResponse preserves text that carries a thoughtSignature", () => {
+  const rawSSE = [
+    `data: ${JSON.stringify({
+      response: {
+        candidates: [
+          {
+            content: {
+              parts: [
+                { text: "internal reasoning", thought: true },
+                { text: "visible answer after thinking", thoughtSignature: "sig-xyz-123" },
+              ],
+            },
+            finishReason: "STOP",
+          },
+        ],
+      },
+    })}`,
+  ].join("\n");
+
+  const parsed = parseSSEToGeminiResponse(rawSSE, "gemini-3.8-flash-tiered");
+
+  assert.ok(parsed);
+  assert.equal(parsed.choices[0].message.content, "visible answer after thinking");
+});
+
+test("parseSSEToGeminiResponse extracts native functionCall parts carrying thoughtSignature", () => {
+  const rawSSE = [
+    `data: ${JSON.stringify({
+      response: {
+        candidates: [
+          {
+            content: {
+              parts: [
+                {
+                  functionCall: { name: "search_documentation", args: { query: "test" } },
+                  thoughtSignature: "sig-abc",
+                },
+              ],
+            },
+            finishReason: "STOP",
+          },
+        ],
+      },
+    })}`,
+  ].join("\n");
+
+  const parsed = parseSSEToGeminiResponse(rawSSE, "gemini-3.8-flash-tiered");
+
+  assert.ok(parsed);
+  assert.equal(parsed.choices[0].finish_reason, "tool_calls");
+  assert.equal(parsed.choices[0].message.tool_calls?.length, 1);
+  assert.equal(parsed.choices[0].message.tool_calls[0].function.name, "search_documentation");
+  assert.deepEqual(JSON.parse(parsed.choices[0].message.tool_calls[0].function.arguments), {
+    query: "test",
+  });
+});
+
+for (const wrapped of [false, true]) {
+  for (const tool of [false, true]) {
+    test(`parseSSEToGeminiResponse preserves ${wrapped ? "wrapped" : "native"} ${tool ? "tool" : "text"} events and usage`, () => {
+      const payload = {
+        candidates: [
+          {
+            content: {
+              parts: tool
+                ? [{ functionCall: { name: "lookup", args: { q: "docs" } } }]
+                : [{ text: "hello" }],
+            },
+            finishReason: "STOP",
+          },
+        ],
+        usageMetadata: {
+          promptTokenCount: 3,
+          candidatesTokenCount: 5,
+          totalTokenCount: 8,
+          cachedContentTokenCount: 2,
+        },
+      };
+      const raw = `data: ${JSON.stringify(wrapped ? { response: payload } : payload)}\n\n`;
+      const parsed = parseSSEToGeminiResponse(raw, "gemini-model");
+      assert.ok(parsed);
+      assert.deepEqual(parsed.usage, {
+        prompt_tokens: 3,
+        completion_tokens: 5,
+        total_tokens: 8,
+        prompt_tokens_details: { cached_tokens: 2 },
+      });
+      const choice = parsed.choices[0];
+      if (tool) {
+        assert.equal(choice.finish_reason, "tool_calls");
+        assert.equal(choice.message.tool_calls[0].function.name, "lookup");
+        assert.deepEqual(JSON.parse(choice.message.tool_calls[0].function.arguments), {
+          q: "docs",
+        });
+      } else {
+        assert.equal(choice.finish_reason, "stop");
+        assert.equal(choice.message.content, "hello");
+      }
+    });
+  }
+}

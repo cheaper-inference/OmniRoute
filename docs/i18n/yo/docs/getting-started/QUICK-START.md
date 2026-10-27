@@ -1,10 +1,10 @@
 # Quick Start: Get OmniRoute Running in 3 Minutes (Yorùbá)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../getting-started/QUICK-START.md) · 🇪🇹 [am](../../../am/docs/getting-started/QUICK-START.md) · 🇸🇦 [ar](../../../ar/docs/getting-started/QUICK-START.md) · 🇦🇿 [az](../../../az/docs/getting-started/QUICK-START.md) · 🇧🇬 [bg](../../../bg/docs/getting-started/QUICK-START.md) · 🇧🇩 [bn](../../../bn/docs/getting-started/QUICK-START.md) · 🇨🇿 [cs](../../../cs/docs/getting-started/QUICK-START.md) · 🇩🇰 [da](../../../da/docs/getting-started/QUICK-START.md) · 🇩🇪 [de](../../../de/docs/getting-started/QUICK-START.md) · 🇬🇷 [el](../../../el/docs/getting-started/QUICK-START.md) · 🇪🇸 [es](../../../es/docs/getting-started/QUICK-START.md) · 🇪🇪 [et](../../../et/docs/getting-started/QUICK-START.md) · 🇮🇷 [fa](../../../fa/docs/getting-started/QUICK-START.md) · 🇫🇮 [fi](../../../fi/docs/getting-started/QUICK-START.md) · 🇫🇷 [fr](../../../fr/docs/getting-started/QUICK-START.md) · 🇮🇪 [ga](../../../ga/docs/getting-started/QUICK-START.md) · 🇮🇳 [gu](../../../gu/docs/getting-started/QUICK-START.md) · 🇳🇬 [ha](../../../ha/docs/getting-started/QUICK-START.md) · 🇮🇱 [he](../../../he/docs/getting-started/QUICK-START.md) · 🇮🇳 [hi](../../../hi/docs/getting-started/QUICK-START.md) · 🇭🇷 [hr](../../../hr/docs/getting-started/QUICK-START.md) · 🇭🇺 [hu](../../../hu/docs/getting-started/QUICK-START.md) · 🇦🇲 [hy](../../../hy/docs/getting-started/QUICK-START.md) · 🇮🇩 [id](../../../id/docs/getting-started/QUICK-START.md) · 🇳🇬 [ig](../../../ig/docs/getting-started/QUICK-START.md) · 🇮🇹 [it](../../../it/docs/getting-started/QUICK-START.md) · 🇯🇵 [ja](../../../ja/docs/getting-started/QUICK-START.md) · 🇬🇪 [ka](../../../ka/docs/getting-started/QUICK-START.md) · 🇰🇭 [km](../../../km/docs/getting-started/QUICK-START.md) · 🇮🇳 [kn](../../../kn/docs/getting-started/QUICK-START.md) · 🇰🇷 [ko](../../../ko/docs/getting-started/QUICK-START.md) · 🇱🇹 [lt](../../../lt/docs/getting-started/QUICK-START.md) · 🇱🇻 [lv](../../../lv/docs/getting-started/QUICK-START.md) · 🇮🇳 [ml](../../../ml/docs/getting-started/QUICK-START.md) · 🇮🇳 [mr](../../../mr/docs/getting-started/QUICK-START.md) · 🇲🇾 [ms](../../../ms/docs/getting-started/QUICK-START.md) · 🇲🇹 [mt](../../../mt/docs/getting-started/QUICK-START.md) · 🇲🇲 [my](../../../my/docs/getting-started/QUICK-START.md) · 🇳🇵 [ne](../../../ne/docs/getting-started/QUICK-START.md) · 🇳🇱 [nl](../../../nl/docs/getting-started/QUICK-START.md) · 🇳🇴 [no](../../../no/docs/getting-started/QUICK-START.md) · 🇮🇳 [or](../../../or/docs/getting-started/QUICK-START.md) · 🇮🇳 [pa](../../../pa/docs/getting-started/QUICK-START.md) · 🇵🇭 [phi](../../../phi/docs/getting-started/QUICK-START.md) · 🇵🇱 [pl](../../../pl/docs/getting-started/QUICK-START.md) · 🇵🇹 [pt](../../../pt/docs/getting-started/QUICK-START.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/getting-started/QUICK-START.md) · 🇷🇴 [ro](../../../ro/docs/getting-started/QUICK-START.md) · 🇷🇺 [ru](../../../ru/docs/getting-started/QUICK-START.md) · 🇱🇰 [si](../../../si/docs/getting-started/QUICK-START.md) · 🇸🇰 [sk](../../../sk/docs/getting-started/QUICK-START.md) · 🇸🇮 [sl](../../../sl/docs/getting-started/QUICK-START.md) · 🇷🇸 [sr](../../../sr/docs/getting-started/QUICK-START.md) · 🇸🇪 [sv](../../../sv/docs/getting-started/QUICK-START.md) · 🇰🇪 [sw](../../../sw/docs/getting-started/QUICK-START.md) · 🇮🇳 [ta](../../../ta/docs/getting-started/QUICK-START.md) · 🇮🇳 [te](../../../te/docs/getting-started/QUICK-START.md) · 🇹🇭 [th](../../../th/docs/getting-started/QUICK-START.md) · 🇹🇷 [tr](../../../tr/docs/getting-started/QUICK-START.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/getting-started/QUICK-START.md) · 🇵🇰 [ur](../../../ur/docs/getting-started/QUICK-START.md) · 🇺🇿 [uz](../../../uz/docs/getting-started/QUICK-START.md) · 🇻🇳 [vi](../../../vi/docs/getting-started/QUICK-START.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/getting-started/QUICK-START.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/getting-started/QUICK-START.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../getting-started/QUICK-START.md) · 🇪🇹 [am](../../../am/docs/getting-started/QUICK-START.md) · 🇸🇦 [ar](../../../ar/docs/getting-started/QUICK-START.md) · 🇦🇿 [az](../../../az/docs/getting-started/QUICK-START.md) · 🇧🇬 [bg](../../../bg/docs/getting-started/QUICK-START.md) · 🇧🇩 [bn](../../../bn/docs/getting-started/QUICK-START.md) · 🇧🇦 [bs](../../../bs/docs/getting-started/QUICK-START.md) · 🇨🇿 [cs](../../../cs/docs/getting-started/QUICK-START.md) · 🇩🇰 [da](../../../da/docs/getting-started/QUICK-START.md) · 🇩🇪 [de](../../../de/docs/getting-started/QUICK-START.md) · 🇬🇷 [el](../../../el/docs/getting-started/QUICK-START.md) · 🇪🇸 [es](../../../es/docs/getting-started/QUICK-START.md) · 🇪🇪 [et](../../../et/docs/getting-started/QUICK-START.md) · 🇮🇷 [fa](../../../fa/docs/getting-started/QUICK-START.md) · 🇫🇮 [fi](../../../fi/docs/getting-started/QUICK-START.md) · 🇫🇷 [fr](../../../fr/docs/getting-started/QUICK-START.md) · 🇮🇪 [ga](../../../ga/docs/getting-started/QUICK-START.md) · 🇮🇳 [gu](../../../gu/docs/getting-started/QUICK-START.md) · 🇳🇬 [ha](../../../ha/docs/getting-started/QUICK-START.md) · 🇮🇱 [he](../../../he/docs/getting-started/QUICK-START.md) · 🇮🇳 [hi](../../../hi/docs/getting-started/QUICK-START.md) · 🇭🇷 [hr](../../../hr/docs/getting-started/QUICK-START.md) · 🇭🇺 [hu](../../../hu/docs/getting-started/QUICK-START.md) · 🇦🇲 [hy](../../../hy/docs/getting-started/QUICK-START.md) · 🇮🇩 [id](../../../id/docs/getting-started/QUICK-START.md) · 🇳🇬 [ig](../../../ig/docs/getting-started/QUICK-START.md) · 🇮🇹 [it](../../../it/docs/getting-started/QUICK-START.md) · 🇯🇵 [ja](../../../ja/docs/getting-started/QUICK-START.md) · 🇬🇪 [ka](../../../ka/docs/getting-started/QUICK-START.md) · 🇰🇭 [km](../../../km/docs/getting-started/QUICK-START.md) · 🇮🇳 [kn](../../../kn/docs/getting-started/QUICK-START.md) · 🇰🇷 [ko](../../../ko/docs/getting-started/QUICK-START.md) · 🇱🇹 [lt](../../../lt/docs/getting-started/QUICK-START.md) · 🇱🇻 [lv](../../../lv/docs/getting-started/QUICK-START.md) · 🇮🇳 [ml](../../../ml/docs/getting-started/QUICK-START.md) · 🇮🇳 [mr](../../../mr/docs/getting-started/QUICK-START.md) · 🇲🇾 [ms](../../../ms/docs/getting-started/QUICK-START.md) · 🇲🇹 [mt](../../../mt/docs/getting-started/QUICK-START.md) · 🇲🇲 [my](../../../my/docs/getting-started/QUICK-START.md) · 🇳🇵 [ne](../../../ne/docs/getting-started/QUICK-START.md) · 🇳🇱 [nl](../../../nl/docs/getting-started/QUICK-START.md) · 🇳🇴 [no](../../../no/docs/getting-started/QUICK-START.md) · 🇮🇳 [or](../../../or/docs/getting-started/QUICK-START.md) · 🇮🇳 [pa](../../../pa/docs/getting-started/QUICK-START.md) · 🇵🇭 [phi](../../../phi/docs/getting-started/QUICK-START.md) · 🇵🇱 [pl](../../../pl/docs/getting-started/QUICK-START.md) · 🇵🇹 [pt](../../../pt/docs/getting-started/QUICK-START.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/getting-started/QUICK-START.md) · 🇷🇴 [ro](../../../ro/docs/getting-started/QUICK-START.md) · 🇷🇺 [ru](../../../ru/docs/getting-started/QUICK-START.md) · 🇱🇰 [si](../../../si/docs/getting-started/QUICK-START.md) · 🇸🇰 [sk](../../../sk/docs/getting-started/QUICK-START.md) · 🇸🇮 [sl](../../../sl/docs/getting-started/QUICK-START.md) · 🇷🇸 [sr](../../../sr/docs/getting-started/QUICK-START.md) · 🇸🇪 [sv](../../../sv/docs/getting-started/QUICK-START.md) · 🇰🇪 [sw](../../../sw/docs/getting-started/QUICK-START.md) · 🇮🇳 [ta](../../../ta/docs/getting-started/QUICK-START.md) · 🇮🇳 [te](../../../te/docs/getting-started/QUICK-START.md) · 🇹🇭 [th](../../../th/docs/getting-started/QUICK-START.md) · 🇹🇷 [tr](../../../tr/docs/getting-started/QUICK-START.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/getting-started/QUICK-START.md) · 🇵🇰 [ur](../../../ur/docs/getting-started/QUICK-START.md) · 🇺🇿 [uz](../../../uz/docs/getting-started/QUICK-START.md) · 🇻🇳 [vi](../../../vi/docs/getting-started/QUICK-START.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/getting-started/QUICK-START.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/getting-started/QUICK-START.md)
 
 ---
 
-> **Ní ṣókí**: Fi sílẹ̀ → So olùpèsè ọ̀fẹ́ kan pọ̀ → Darí IDE rẹ sí OmniRoute. Ó parí.
+> **Ní ṣókí**: Fi sílẹ̀ → So mọ́ olùpèsè tó yẹ → Darí IDE rẹ sí OmniRoute. Ó ti parí.
 
 ---
 
@@ -47,33 +47,11 @@ OmniRoute máa bẹ̀rẹ̀ ní `http://localhost:20128`. Pátákó ìdarí ná�
 
 ---
 
-## Ìgbésẹ̀ 3: So Olùpèsè Ọ̀fẹ́ Kan Pọ̀
+## Ìgbésẹ̀ 3: So Olùpèsè Tó Yẹ Pọ̀
 
-O lè lo OmniRoute **láìsan owó kankan** nípa sísopọ̀ olùpèsè ọ̀fẹ́ kan.
+Yan olùpèsè kan tí àwọn òfin àti ìwọ̀n lílò rẹ̀ bá àwọn àìní rẹ mu. Nínú **Pátákó Ìṣàkóso → Àwọn Olùpèsè**, so àkọọ́lẹ̀ tàbí kọ́kọ́rọ́ API tìrẹ pọ̀, lẹ́yìn náà dán àsopọ̀ náà wò. A kò ṣe ìdánilójú pé ìwọ̀le ọ̀fẹ́ àti lílò láìsí kọ́kọ́rọ́ yóò wà.
 
-### Àṣàyàn A: Kiro (Claude Ọ̀fẹ́ — Kò Nílò Káàdì Kírẹ́díìtì)
-
-1. Ṣí pátákó ìdarí náà ní `http://localhost:20128`
-2. Lọ sí **Àwọn Olùpèsè** → **Ṣàfikún Olùpèsè**
-3. Yan **Kiro AI**
-4. Tẹ **Sopọ̀** (kò nílò kọ́kọ́rọ́ API!)
-5. Ó parí! O ti lè wọ àwọn model Claude lọ́fẹ̀ẹ́ báyìí.
-
-### Àṣàyàn B: OpenCode Ọ̀fẹ́ (Kò Nílò Ìfàṣẹsí)
-
-1. Ṣí pátákó ìdarí náà ní `http://localhost:20128`
-2. Lọ sí **Àwọn Olùpèsè** → **Ṣàfikún Olùpèsè**
-3. Yan **OpenCode Free**
-4. Tẹ **Sopọ̀** (kò nílò kọ́kọ́rọ́ API!)
-5. Ó parí! O ti lè wọ ọ̀pọ̀ model lọ́fẹ̀ẹ́ báyìí.
-
-### Àṣàyàn C: Pollinations (Kò Nílò Kọ́kọ́rọ́)
-
-1. Ṣí pátákó ìdarí náà ní `http://localhost:20128`
-2. Lọ sí **Àwọn Olùpèsè** → **Ṣàfikún Olùpèsè**
-3. Yan **Pollinations**
-4. Tẹ **Sopọ̀** (kò nílò kọ́kọ́rọ́ API!)
-5. Ó parí! O ti lè wọ GPT-5, Claude, Gemini, àti àwọn míì lọ́fẹ̀ẹ́ báyìí.
+`auto` kì í fi àwọn olùpèsè tí a sàmì sí `tos: avoid` kún, títí kan Kiro, gẹ́gẹ́ bí ìṣètò àkọ́kọ́. Sísopọ̀ àkọọ́lẹ̀ kan kò ní yí ìlànà yẹn padà. Ìforúkọsílẹ̀ àfẹ́nú nínú **Pátákó Ìṣàkóso → Àwọn Àkójọpọ̀** kan gbogbo àwọn àkójọpọ̀ aládàáṣiṣẹ́. Ṣàyẹ̀wò [Ìtọ́sọ́nà Àwọn Ìpele Ọ̀fẹ́](./FREE-TIERS-GUIDE.md) kí o tó yan olùpèsè kan.
 
 ---
 
@@ -153,33 +131,33 @@ O lè rí àwọn kúlẹ̀kúlẹ̀ ìbéèrè náà nípa títẹ [Àbójútó
 ## Kí Ló Kàn?
 
 - **[Ìtọ́sọ́nà Auto-Combo](./AUTO-COMBO-GUIDE.md)** — Jẹ́ kí OmniRoute yan AI tó dára jù lọ fún ọ
-- **[Ìtọ́sọ́nà Àwọn Olùpèsè](./PROVIDERS-GUIDE.md)** — So àwọn olùpèsè sí i pọ̀ (ọ̀fẹ́ àti ti owó)
-- **[Ìtọ́sọ́nà Àwọn Ìpele Ọ̀fẹ́](./FREE-TIERS-GUIDE.md)** — Gba AI ọ̀fẹ́ láìsí káàdì kírẹ́díìtì
-- **[Ṣíṣe Àwárí Àṣìṣe](../guides/TROUBLESHOOTING.md)** — Ṣàtúnṣe àwọn ìṣòro tó wọ́pọ̀
+- **[Ìtọ́sọ́nà Àwọn Olùpèsè](./PROVIDERS-GUIDE.md)** — So àwọn olùpèsè míì pọ̀ (ọ̀fẹ́ àti sísan owó)
+- **[Ìtọ́sọ́nà Àwọn Ìpele Ọ̀fẹ́](./FREE-TIERS-GUIDE.md)** — Ṣàyẹ̀wò àwọn òfin olùpèsè àti àwọn ààlà ìpele ọ̀fẹ́
+- **[Yíyanjú Àwọn Ìṣòro](../guides/TROUBLESHOOTING.md)** — Yanjú àwọn ìṣòro tó wọ́pọ̀
 
 ---
 
-## Àwọn Ìbéèrè Tó Wọ́pọ̀
+## Àwọn Ìbéèrè Tí A Máa Ń Béèrè
 
 ### "Ṣé mo nílò kọ́kọ́rọ́ API?"
 
-**Rárá!** O lè lo àwọn olùpèsè ọ̀fẹ́ (Kiro, OpenCode Free, Pollinations) láìsí kọ́kọ́rọ́ API kankan. Kàn so wọ́n pọ̀ nínú pátákó ìdarí.
+Kọ́kọ́rọ́ API OmniRoute ń jẹ́rìí sí àwọn irinṣẹ́ rẹ. Àwọn ìwé-ẹ̀rí upstream dá lórí olùpèsè: àwọn kan nílò kọ́kọ́rọ́ API tàbí wíwọlé sí àkọọ́lẹ̀. A kò ṣe ìdánilójú pé ìwọlé ọ̀fẹ́ yóò wà.
 
 ### "Kí ni `auto`?"
 
-`auto` sọ fún OmniRoute láti yan olùpèsè tó dára jù lọ fún ìbéèrè kọ̀ọ̀kan láìfọwọ́ṣe. Ó máa ń gbé iyára, iye owó, dídára, àti wíwà-lárọ̀ọ́wọ́tó yẹ̀wò. Wo [Ìtọ́sọ́nà Auto-Combo](./AUTO-COMBO-GUIDE.md) fún àwọn kúlẹ̀kúlẹ̀.
+`auto` sọ fún OmniRoute láti yan olùpèsè tó dára jù lọ fún ìbéèrè kọ̀ọ̀kan láìfọwọ́ṣe. Ó máa ń gbé iyára, iye owó, dídára, àti ìwàláàyè iṣẹ́ yẹ̀ wò. Wo [Ìtọ́sọ́nà Auto-Combo](./AUTO-COMBO-GUIDE.md) fún àlàyé.
 
-### "Ẹ̀lówó ni ó ń ná?"
+### "Eélòó ni ó ń ná?"
 
-OmniRoute fúnra rẹ̀ jẹ́ **ọ̀fẹ́ àti open-source**. Àwọn olùpèsè tí o lò nìkan ni o máa san owó fún. Ọ̀pọ̀ olùpèsè ní àwọn ìpele ọ̀fẹ́ — wo [Ìtọ́sọ́nà Àwọn Ìpele Ọ̀fẹ́](./FREE-TIERS-GUIDE.md).
+OmniRoute fúnra rẹ̀ jẹ́ **ọ̀fẹ́ àti orísun-ṣíṣí**. Àwọn olùpèsè tí o bá lò nìkan ni o máa sanwó fún. Ọ̀pọ̀ àwọn olùpèsè ní àwọn ìpele ọ̀fẹ́ — wo [Ìtọ́sọ́nà Àwọn Ìpele Ọ̀fẹ́](./FREE-TIERS-GUIDE.md).
 
 ### "Ṣé mo lè lò ó pẹ̀lú Claude Code / Cursor / Copilot?"
 
-**Bẹ́ẹ̀ ni!** OmniRoute ń ṣiṣẹ́ pẹ̀lú irinṣẹ́ èyíkéyìí tó ṣe àtìlẹ́yìn fún format OpenAI. Kàn ṣètò base URL sí `http://localhost:20128/v1`. Wo [Ìtọ́sọ́nà Àwọn Irinṣẹ́ CLI](../reference/CLI-TOOLS.md) fún àwọn ìtọ́nisọ́nà ìṣètò pàtó.
+**Bẹ́ẹ̀ ni!** OmniRoute ń ṣiṣẹ́ pẹ̀lú irinṣẹ́ èyíkéyìí tó ṣàtìlẹ́yìn fún ọ̀nà ìṣètò OpenAI. Kàn ṣètò URL ìpìlẹ̀ sí `http://localhost:20128/v1`. Wo [Ìtọ́sọ́nà Àwọn Irinṣẹ́ CLI](../reference/CLI-TOOLS.md) fún àwọn ìlànà ìṣètò pàtó.
 
-### "Kí ló máa ṣẹlẹ̀ tí olùpèsè kan bá dáwọ́ iṣẹ́ dúró?"
+### "Kí ló máa ṣẹlẹ̀ bí iṣẹ́ olùpèsè kan bá dáwọ́ dúró?"
 
-OmniRoute máa fo àwọn olùpèsè tí ó kùnà kọjá láìfọwọ́ṣe, yóò sì gbìyànjú èyí tó kàn. O kò nílò láti ṣe ohunkóhun. Wo [Ìtọ́sọ́nà Auto-Combo](./AUTO-COMBO-GUIDE.md) fún àwọn kúlẹ̀kúlẹ̀.
+OmniRoute máa ń fo àwọn olùpèsè tí wọ́n kùnà láìfọwọ́ṣe, yóò sì gbìyànjú èyí tó kàn. O kò nílò láti ṣe ohunkóhun. Wo [Ìtọ́sọ́nà Auto-Combo](./AUTO-COMBO-GUIDE.md) fún àlàyé.
 
 ---
 

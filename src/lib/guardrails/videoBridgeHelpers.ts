@@ -102,6 +102,7 @@ export interface VideoPart {
   transcript?: unknown;
   audioTranscript?: unknown;
   contactSheet?: boolean;
+  audioTranscription?: boolean;
 }
 
 /**
@@ -169,6 +170,7 @@ export function extractVideoParts(body: VideoRequestBody): VideoPart[] {
       const contactSheet = objects.find(
         (object) => object.contactSheet !== undefined
       )?.contactSheet;
+      const audioTranscription = objects.some((object) => object.audioTranscription === true);
       return {
         container,
         ...(startSeconds === undefined && endSeconds === undefined
@@ -181,6 +183,7 @@ export function extractVideoParts(body: VideoRequestBody): VideoPart[] {
         ...(transcript === undefined ? {} : { transcript }),
         ...(audioTranscript === undefined ? {} : { audioTranscript }),
         ...(contactSheet === undefined ? {} : { contactSheet: contactSheet === true }),
+        ...(audioTranscription ? { audioTranscription: true } : {}),
       };
     });
 }
@@ -217,6 +220,8 @@ export interface DescribeVideoOptions {
 }
 
 export interface DescribeVideoDependencies {
+  /** Server-owned adapter output; never read from request JSON. */
+  serverAudioTranscript?: unknown;
   extractFrames?: (
     bytes: Uint8Array,
     options: BrokerExtractionOptions
@@ -286,15 +291,20 @@ export const VIDEO_DEDUP_MAX_CANDIDATE_FRAMES = 16;
  * Expand a final caption budget into the bounded pool evaluated by visual deduplication.
  *
  * @param frameCount - Requested number of frames that may reach captioning.
- * @returns One candidate for a one-frame budget, otherwise twice the budget capped at 16.
+ * Structural sampling allocates the final budget across scene intervals itself; doubling
+ * that allocation and uniformly thinning it later can discard the short events it selected.
+ * @returns The final budget for segment-aware sampling, otherwise a bounded doubled pool.
  */
-export function resolveVideoDedupCandidateFrameCount(frameCount: number): number {
+export function resolveVideoDedupCandidateFrameCount(
+  frameCount: number,
+  samplingPolicy: VideoSamplingPolicy = "uniform"
+): number {
   const normalizedFrameCount = Number.isFinite(frameCount) ? Math.floor(frameCount) : 1;
   const finalFrameCount = Math.max(
     1,
     Math.min(VIDEO_DEDUP_MAX_CANDIDATE_FRAMES, normalizedFrameCount)
   );
-  if (finalFrameCount === 1) return 1;
+  if (finalFrameCount === 1 || samplingPolicy === "segment_aware") return finalFrameCount;
   return Math.min(VIDEO_DEDUP_MAX_CANDIDATE_FRAMES, finalFrameCount * 2);
 }
 
@@ -503,7 +513,10 @@ export function composeVideoFramePrompt(
 // bypass it.
 export const VIDEO_TRANSCRIPT_REDACTION_PLACEHOLDER = "[redacted-video-transcript]";
 
-function formatTranscriptCue(cue: VideoTranscriptCue, options?: { redact?: boolean }): string {
+export function formatTranscriptCue(
+  cue: VideoTranscriptCue,
+  options?: { redact?: boolean }
+): string {
   const text = options?.redact ? VIDEO_TRANSCRIPT_REDACTION_PLACEHOLDER : cue.text;
   return `transcript[source=${cue.source};confidence=${cue.confidence.toFixed(2)};interval=${formatVideoTimestamp(cue.startSeconds)}-${formatVideoTimestamp(cue.endSeconds)}] ${text}`;
 }
@@ -534,7 +547,10 @@ export async function describeVideoPart(
     if (signal.aborted) throw new Error("Video Bridge processing timed out or was aborted");
     if (bytes.byteLength > maxBytes) throw new Error("Video exceeds the maximum size");
     const extractFrames = deps.extractFrames ?? extractVideoFramesViaBroker;
-    const candidateFrameCount = resolveVideoDedupCandidateFrameCount(options.frameCount);
+    const candidateFrameCount = resolveVideoDedupCandidateFrameCount(
+      options.frameCount,
+      options.samplingPolicy
+    );
     const extracted = await extractFrames(bytes, {
       focusWindow: options.focusWindow,
       frameCount: candidateFrameCount,
@@ -627,7 +643,7 @@ export async function describeVideoPart(
     // without re-running `fuseVideoAndAudio` (which has side effects and must
     // execute exactly once per part).
     let renderInterleavedTranscript: ((redact: boolean) => string[]) | undefined;
-    if (part.audioTranscript !== undefined) {
+    if (deps.serverAudioTranscript !== undefined || part.audioTranscript !== undefined) {
       let normalizedFusionTranscriptCues: VideoTranscriptCue[] = [];
       // Audio validation runs inside the fusion's audio branch on purpose: an
       // invalid audioTranscript must surface as a partial fusion (video kept,
@@ -635,15 +651,14 @@ export async function describeVideoPart(
       const fused = await fuseVideoAndAudio({
         audio: async () => {
           normalizedFusionTranscriptCues = normalizeVideoTranscript(
-            part.audioTranscript,
+            deps.serverAudioTranscript ?? part.audioTranscript,
             extracted.durationSeconds,
-            // Structural trust seam: whatever the caller supplies in the
-            // dedicated audioTranscript field is always labeled "audio-bridge"
-            // by this fusion channel, regardless of any per-cue `source` the
-            // caller declared. This is not an authenticity claim about the
-            // caller's own transcription — only that it arrived through the
-            // audio-bridge fusion field rather than the generic transcript.
-            { trustedSource: "audio-bridge", focusWindow }
+            // A request-body field cannot establish server provenance. Only
+            // the code-owned STT dependency may mint the audio-bridge label.
+            {
+              trustedSource: deps.serverAudioTranscript !== undefined ? "audio-bridge" : "client",
+              focusWindow,
+            }
           );
           return {
             observations: normalizedFusionTranscriptCues.map((cue) => ({

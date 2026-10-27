@@ -1,6 +1,6 @@
 # 📖 Setup Guide — OmniRoute (Azərbaycan dili)
 
-🌐 **Languages:** 🇺🇸 [English](../../../../guides/SETUP_GUIDE.md) · 🇪🇹 [am](../../../am/docs/guides/SETUP_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/guides/SETUP_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/guides/SETUP_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/guides/SETUP_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/guides/SETUP_GUIDE.md) · 🇩🇰 [da](../../../da/docs/guides/SETUP_GUIDE.md) · 🇩🇪 [de](../../../de/docs/guides/SETUP_GUIDE.md) · 🇬🇷 [el](../../../el/docs/guides/SETUP_GUIDE.md) · 🇪🇸 [es](../../../es/docs/guides/SETUP_GUIDE.md) · 🇪🇪 [et](../../../et/docs/guides/SETUP_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/guides/SETUP_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/guides/SETUP_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/guides/SETUP_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/guides/SETUP_GUIDE.md) · 🇮🇱 [he](../../../he/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/guides/SETUP_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/guides/SETUP_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/guides/SETUP_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/guides/SETUP_GUIDE.md) · 🇮🇩 [id](../../../id/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/guides/SETUP_GUIDE.md) · 🇮🇹 [it](../../../it/docs/guides/SETUP_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/guides/SETUP_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/guides/SETUP_GUIDE.md) · 🇰🇭 [km](../../../km/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/guides/SETUP_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/guides/SETUP_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/guides/SETUP_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/guides/SETUP_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/guides/SETUP_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/guides/SETUP_GUIDE.md) · 🇲🇲 [my](../../../my/docs/guides/SETUP_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/guides/SETUP_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/guides/SETUP_GUIDE.md) · 🇳🇴 [no](../../../no/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [or](../../../or/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/guides/SETUP_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/guides/SETUP_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/guides/SETUP_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/guides/SETUP_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/SETUP_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/guides/SETUP_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/guides/SETUP_GUIDE.md) · 🇱🇰 [si](../../../si/docs/guides/SETUP_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/guides/SETUP_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/guides/SETUP_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/guides/SETUP_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/guides/SETUP_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [te](../../../te/docs/guides/SETUP_GUIDE.md) · 🇹🇭 [th](../../../th/docs/guides/SETUP_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/guides/SETUP_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/SETUP_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/guides/SETUP_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/guides/SETUP_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/guides/SETUP_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/SETUP_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/SETUP_GUIDE.md)
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/SETUP_GUIDE.md) · 🇪🇹 [am](../../../am/docs/guides/SETUP_GUIDE.md) · 🇸🇦 [ar](../../../ar/docs/guides/SETUP_GUIDE.md) · 🇧🇬 [bg](../../../bg/docs/guides/SETUP_GUIDE.md) · 🇧🇩 [bn](../../../bn/docs/guides/SETUP_GUIDE.md) · 🇧🇦 [bs](../../../bs/docs/guides/SETUP_GUIDE.md) · 🇨🇿 [cs](../../../cs/docs/guides/SETUP_GUIDE.md) · 🇩🇰 [da](../../../da/docs/guides/SETUP_GUIDE.md) · 🇩🇪 [de](../../../de/docs/guides/SETUP_GUIDE.md) · 🇬🇷 [el](../../../el/docs/guides/SETUP_GUIDE.md) · 🇪🇸 [es](../../../es/docs/guides/SETUP_GUIDE.md) · 🇪🇪 [et](../../../et/docs/guides/SETUP_GUIDE.md) · 🇮🇷 [fa](../../../fa/docs/guides/SETUP_GUIDE.md) · 🇫🇮 [fi](../../../fi/docs/guides/SETUP_GUIDE.md) · 🇫🇷 [fr](../../../fr/docs/guides/SETUP_GUIDE.md) · 🇮🇪 [ga](../../../ga/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [gu](../../../gu/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [ha](../../../ha/docs/guides/SETUP_GUIDE.md) · 🇮🇱 [he](../../../he/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [hi](../../../hi/docs/guides/SETUP_GUIDE.md) · 🇭🇷 [hr](../../../hr/docs/guides/SETUP_GUIDE.md) · 🇭🇺 [hu](../../../hu/docs/guides/SETUP_GUIDE.md) · 🇦🇲 [hy](../../../hy/docs/guides/SETUP_GUIDE.md) · 🇮🇩 [id](../../../id/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [ig](../../../ig/docs/guides/SETUP_GUIDE.md) · 🇮🇹 [it](../../../it/docs/guides/SETUP_GUIDE.md) · 🇯🇵 [ja](../../../ja/docs/guides/SETUP_GUIDE.md) · 🇬🇪 [ka](../../../ka/docs/guides/SETUP_GUIDE.md) · 🇰🇭 [km](../../../km/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [kn](../../../kn/docs/guides/SETUP_GUIDE.md) · 🇰🇷 [ko](../../../ko/docs/guides/SETUP_GUIDE.md) · 🇱🇹 [lt](../../../lt/docs/guides/SETUP_GUIDE.md) · 🇱🇻 [lv](../../../lv/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [ml](../../../ml/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [mr](../../../mr/docs/guides/SETUP_GUIDE.md) · 🇲🇾 [ms](../../../ms/docs/guides/SETUP_GUIDE.md) · 🇲🇹 [mt](../../../mt/docs/guides/SETUP_GUIDE.md) · 🇲🇲 [my](../../../my/docs/guides/SETUP_GUIDE.md) · 🇳🇵 [ne](../../../ne/docs/guides/SETUP_GUIDE.md) · 🇳🇱 [nl](../../../nl/docs/guides/SETUP_GUIDE.md) · 🇳🇴 [no](../../../no/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [or](../../../or/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [pa](../../../pa/docs/guides/SETUP_GUIDE.md) · 🇵🇭 [phi](../../../phi/docs/guides/SETUP_GUIDE.md) · 🇵🇱 [pl](../../../pl/docs/guides/SETUP_GUIDE.md) · 🇵🇹 [pt](../../../pt/docs/guides/SETUP_GUIDE.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/SETUP_GUIDE.md) · 🇷🇴 [ro](../../../ro/docs/guides/SETUP_GUIDE.md) · 🇷🇺 [ru](../../../ru/docs/guides/SETUP_GUIDE.md) · 🇱🇰 [si](../../../si/docs/guides/SETUP_GUIDE.md) · 🇸🇰 [sk](../../../sk/docs/guides/SETUP_GUIDE.md) · 🇸🇮 [sl](../../../sl/docs/guides/SETUP_GUIDE.md) · 🇷🇸 [sr](../../../sr/docs/guides/SETUP_GUIDE.md) · 🇸🇪 [sv](../../../sv/docs/guides/SETUP_GUIDE.md) · 🇰🇪 [sw](../../../sw/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [ta](../../../ta/docs/guides/SETUP_GUIDE.md) · 🇮🇳 [te](../../../te/docs/guides/SETUP_GUIDE.md) · 🇹🇭 [th](../../../th/docs/guides/SETUP_GUIDE.md) · 🇹🇷 [tr](../../../tr/docs/guides/SETUP_GUIDE.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/SETUP_GUIDE.md) · 🇵🇰 [ur](../../../ur/docs/guides/SETUP_GUIDE.md) · 🇺🇿 [uz](../../../uz/docs/guides/SETUP_GUIDE.md) · 🇻🇳 [vi](../../../vi/docs/guides/SETUP_GUIDE.md) · 🇳🇬 [yo](../../../yo/docs/guides/SETUP_GUIDE.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/SETUP_GUIDE.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/SETUP_GUIDE.md)
 
 ---
 
@@ -140,7 +140,7 @@ omniroute providers validate
 
 ### 1) Provayderləri Qoşun və API Açarı Yaradın
 
-1. İdarəetmə panelində → `Providers` bölməsini açın və ən azı bir provayderi qoşun (OAuth və ya API açarı).
+1. İdarəetmə panelində → `Providers` bölməsini açın və ən azı bir provayderi (OAuth və ya API açarı vasitəsilə) qoşun.
 2. İdarəetmə panelində → `Endpoints` bölməsini açın və API açarı yaradın.
 3. (İstəyə bağlı) İdarəetmə panelində → `Combos` bölməsini açın və ehtiyat keçid zəncirinizi təyin edin.
 
@@ -148,51 +148,52 @@ omniroute providers validate
 
 ```txt
 Baza URL-i: http://localhost:20128/v1
-API açarı:  [Endpoint səhifəsindən kopyalayın]
+API açarı:  [Endpoint səhifəsindən köçürün]
 Model:      if/qwen3.8-max-preview (və ya istənilən provayder/model prefiksi)
 ```
 
-Əgər redaktorunuz `Authorization: Bearer ...` göndərə bilmirsə, əvəzində tokenləşdirilmiş uyğunluq bazasından istifadə edin:
+Redaktorunuz `Authorization: Bearer ...` göndərə bilmirsə, əvəzinə token əlavə edilmiş uyğunluq baza ünvanından istifadə edin:
 
 ```txt
 Baza URL-i: http://localhost:20128/api/v1/vscode/YOUR_KEY/
 Modellər URL-i: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
 Söhbət URL-i: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-Ollama teqləri URL-i: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Ollama Teqləri URL-i: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
 Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode və OpenAI ilə uyğun SDK-larla işləyir.
 
 #### `setup-*` ilə avtomatik konfiqurasiya
 
-Baza URL-ini və açarı əl ilə daxil etmək əvəzinə, OmniRoute-un aktiv model kataloqu əsasında hər alətin
-öz konfiqurasiyasını yazmasına icazə verin. Hər alət üçün bir əmr:
+Baza URL-ini və açarı əl ilə daxil etmək əvəzinə, OmniRoute-un hər bir alətin
+öz konfiqurasiyasını aktual model kataloqu əsasında yazmasına icazə verin. Hər alət üçün bir əmr:
 
 ```bash
 omniroute setup-codex        # ~/.codex/<name>.config.toml profilləri
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (OpenAI ilə uyğun)
-omniroute setup-cline        # Cline CLI + VS Code genişləndirməsinin parametrləri
+omniroute setup-cline        # Cline CLI + VS Code genişlənməsi parametrləri
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # Cursor-un tətbiqdaxili addımlarını göstərir
 omniroute setup-roo          # Roo Code idxalı + autoImport göstəricisi
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Hər biri lokal aləti **uzaq** OmniRoute-a qarşı konfiqurasiya etmək üçün `--remote <url> --api-key <key>`, önizləmə üçün isə `--dry-run` qəbul edir. Düzgün
-mühit dəyişənləri daxil edilmiş şəkildə və ümumiyyətlə heç bir konfiqurasiya yazmadan CLI-ni işə salmaq üçün ümumi başlatma əmrindən
+Hər biri yerli aləti **uzaq** OmniRoute-a uyğun konfiqurasiya etmək üçün `--remote <url> --api-key <key>`, eləcə də önizləmə üçün `--dry-run` qəbul edir. CLI-ni düzgün
+mühit dəyişənləri daxil edilmiş şəkildə və ümumiyyətlə heç bir konfiqurasiya yazmadan işə salmaq üçün ümumi başladıcıdan
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini) istifadə edin;
-hər alət üçün köhnə başlatma əmrləri `omniroute launch` (Claude Code) və
-`omniroute launch-codex` (Codex) hələ də əlçatandır.
+köhnə, alətə xas başladıcılar `omniroute launch` (Claude Code) və
+`omniroute launch-codex` (Codex) istifadəyə açıq qalır.
 
-Tam cədvəl (hər əmrin nə yazdığı, bütün bayraqlar, lokal və uzaq rejimlər, baza URL-i
+Tam cədvəl (hər əmrin nə yazdığı, bütün bayraqlar, yerli və uzaq rejimlər, baza URL-i
 üçün `/v1` qaydaları) üçün **[CLI İnteqrasiyaları](./CLI-INTEGRATIONS.md)** bölməsinə baxın.
 
-Hər alət üzrə ətraflı konfiqurasiya (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot və digərləri) üçün ayrıca **[CLI Alətləri Təlimatı](../reference/CLI-TOOLS.md)** sənədinə baxın.
+Hər bir alət üçün ətraflı konfiqurasiya (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot və digərləri) üçün xüsusi **[CLI Alətləri Təlimatına](../reference/CLI-TOOLS.md)** baxın.
 
 ---
 
@@ -321,7 +322,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Void Linux (`xbps-src`) Şablonu
+## Void Linux (`xbps-src`) şablonu
 
 Void Linux istifadəçiləri `xbps-src` vasitəsilə yerli paket yarada bilərlər. Bu bloku `srcpkgs/omniroute/template` kimi yadda saxlayın:
 

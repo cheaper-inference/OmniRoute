@@ -15,6 +15,7 @@ type JsonRecord = Record<string, unknown>;
 type WebSearchFallbackBody = JsonRecord & {
   tools?: unknown;
   tool_choice?: unknown;
+  input?: unknown;
 };
 
 export interface WebSearchFallbackPlan {
@@ -33,10 +34,17 @@ function isBuiltInWebSearchTool(tool: unknown): tool is JsonRecord {
   return WEB_SEARCH_TOOL_TYPES.test(toolType) && !toolRecord.function;
 }
 
-function isBuiltInWebSearchToolChoice(toolChoice: unknown): boolean {
+function isBuiltInWebSearchToolChoice(toolChoice: unknown, toolNames: Set<string>): boolean {
   const choice = toRecord(toolChoice);
   const toolType = typeof choice.type === "string" ? choice.type : "";
-  return WEB_SEARCH_TOOL_TYPES.test(toolType);
+  if (WEB_SEARCH_TOOL_TYPES.test(toolType)) return true;
+  // Anthropic names server tools via { type: "tool", name: "web_search" }.
+  // Do not steal an explicit choice of a preserved custom function with that name.
+  return (
+    !toolNames.has("web_search") &&
+    (toolType === "tool" || toolType === "function") &&
+    (choice.name === "web_search" || toRecord(choice.function).name === "web_search")
+  );
 }
 
 function buildFallbackDescription(tool: JsonRecord): string {
@@ -130,6 +138,14 @@ function buildFallbackTool(tool: JsonRecord, targetFormat?: string | null): Json
     return { type: "function", name, description, parameters };
   }
 
+  // Anthropic Messages targets expect FLAT Anthropic tools ({ name, input_schema }).
+  // The nested Chat Completions shape reaches the upstream as tools[0] = { type,
+  // function } with no top-level `name`/`input_schema`, and strict Anthropic-compatible
+  // upstreams (e.g. a vLLM /v1/messages) reject it with "tools.0.name missing".
+  if (targetFormat === FORMATS.CLAUDE) {
+    return { name, description, input_schema: parameters };
+  }
+
   return {
     type: "function",
     function: { name, description, parameters },
@@ -187,6 +203,50 @@ export function supportsNativeWebSearchFallbackBypass({
   return false;
 }
 
+// A Responses client gets the fallback's internal round trip in the output (#12030):
+// function_call omniroute_web_search plus the executed function_call_output. Codex
+// records both, then answers the function_call itself because it never declared that
+// tool ("unsupported call: omniroute_web_search"), so its next request carries two
+// outputs for one call. Translated to Chat that is two tool messages for one tool
+// call: the model reads a failed search, and strict upstreams reject the transcript.
+// Keep one output per fallback call, the executed result when it is there.
+function isExecutedFallbackOutput(item: unknown): boolean {
+  const output = toRecord(item).output;
+  if (typeof output !== "string" || !output.trimStart().startsWith("{")) return false;
+  try {
+    const parsed: unknown = JSON.parse(output);
+    return !!parsed && typeof parsed === "object" && !Array.isArray(parsed);
+  } catch {
+    return false;
+  }
+}
+
+function dropClientRejectionsOfFallbackCalls(input: unknown[]): unknown[] {
+  // An output answers the latest call with its id: some upstreams reuse ids per turn.
+  const latestCall = new Map<string, number>();
+  const outputsByFallbackCall = new Map<number, number[]>();
+  input.forEach((item, index) => {
+    const record = toRecord(item);
+    const callId = record.call_id;
+    if (typeof callId !== "string") return;
+    if (record.type === "function_call") {
+      latestCall.set(callId, record.name === OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME ? index : -1);
+      return;
+    }
+    const callIndex = latestCall.get(callId);
+    if (record.type !== "function_call_output" || callIndex === undefined || callIndex < 0) return;
+    outputsByFallbackCall.set(callIndex, [...(outputsByFallbackCall.get(callIndex) ?? []), index]);
+  });
+
+  const dropped = new Set<number>();
+  for (const outputs of outputsByFallbackCall.values()) {
+    if (outputs.length < 2) continue;
+    const kept = outputs.find((index) => isExecutedFallbackOutput(input[index])) ?? outputs[0];
+    for (const index of outputs) if (index !== kept) dropped.add(index);
+  }
+  return dropped.size === 0 ? input : input.filter((_, index) => !dropped.has(index));
+}
+
 export function prepareWebSearchFallbackBody<T extends WebSearchFallbackBody>(
   body: T,
   options: {
@@ -237,25 +297,30 @@ export function prepareWebSearchFallbackBody<T extends WebSearchFallbackBody>(
     return true;
   });
 
-  const isResponsesTarget = options.targetFormat === FORMATS.OPENAI_RESPONSES;
+  // chatCore calls this before translateRequest: injected tools must speak the
+  // client's format. Keep the target fallback for callers without source metadata.
+  const format = options.sourceFormat ?? options.targetFormat;
 
   if (!toolNames.has(OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME)) {
-    preservedTools.unshift(
-      buildFallbackTool(toRecord(builtInSearchTools[0]), options.targetFormat)
-    );
+    preservedTools.unshift(buildFallbackTool(toRecord(builtInSearchTools[0]), format));
   }
 
   const nextBody: T = {
     ...body,
     tools: preservedTools as T["tools"],
   };
+  if (Array.isArray(body.input)) {
+    nextBody.input = dropClientRejectionsOfFallbackCalls(body.input) as T["input"];
+  }
 
-  if (isBuiltInWebSearchToolChoice(body.tool_choice)) {
-    // Match the injected tool shape: flat for Responses API, nested for Chat Completions.
+  if (isBuiltInWebSearchToolChoice(body.tool_choice, toolNames)) {
+    // Match the injected source-format tool so the normal translator can convert both.
     nextBody.tool_choice = (
-      isResponsesTarget
-        ? { type: "function", name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME }
-        : { type: "function", function: { name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } }
+      format === FORMATS.CLAUDE
+        ? { type: "tool", name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME }
+        : format === FORMATS.OPENAI_RESPONSES
+          ? { type: "function", name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME }
+          : { type: "function", function: { name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } }
     ) as T["tool_choice"];
   }
 
