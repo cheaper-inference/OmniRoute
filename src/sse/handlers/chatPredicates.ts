@@ -6,6 +6,7 @@ import {
 import { isRequestScopedUpstreamFailure } from "./comboFailureLogging";
 import { getTrustedLocalRateLimitResponse } from "@omniroute/open-sse/services/rateLimitManager/errors";
 import { TRANSLATION_FAILURE_CODE } from "@omniroute/open-sse/handlers/chatCore/translationFailure";
+import { MALFORMED_TOOL_CALL_ARGUMENTS_CODE } from "@omniroute/open-sse/handlers/chatCore/malformedToolCallArguments";
 import { isProviderCircuitOpenResult } from "@omniroute/open-sse/services/combo/comboPredicates.ts";
 
 export const PROVIDER_BREAKER_FAILURE_STATUSES = new Set([408, 500, 502, 503, 504]);
@@ -48,6 +49,8 @@ export function shouldTripProviderBreakerForResult(
     result.errorCode !== "RATE_LIMIT_QUEUE_WEDGED" &&
     // #14815: a request that failed translation never left OmniRoute.
     result.errorCode !== TRANSLATION_FAILURE_CODE &&
+    // #17198: the provider answered; only its tool-call arguments were malformed.
+    result.errorCode !== MALFORMED_TOOL_CALL_ARGUMENTS_CODE &&
     !isModelCapacityOverloadError(result.error) &&
     !isModelCapacityOverloadError(result.status) &&
     PROVIDER_BREAKER_FAILURE_STATUSES.has(Number(result.status))
