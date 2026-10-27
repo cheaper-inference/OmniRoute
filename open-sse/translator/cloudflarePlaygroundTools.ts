@@ -134,13 +134,27 @@ export function parseCfToolCalls(text: string, availableTools: CfToolDef[]): CfP
     const content = match[2].trim();
     // Only accept tool calls with valid JSON arguments
     if (!isValidJson(content)) continue;
-    const nameMatch = attrs.match(/name\s*=\s*["']([^"']+)["']/i);
-    const name = nameMatch ? nameMatch[1] : inferToolName(content, availableTools);
+    // Handle format: <tool>{"name": "shell", "arguments": {...}}</tool>
+    let name: string | null = null;
+    let argsJson = content;
+    try {
+      const parsed = JSON.parse(content);
+      if (parsed && typeof parsed === "object" && parsed.name && parsed.arguments) {
+        name = parsed.name;
+        argsJson = JSON.stringify(parsed.arguments);
+      }
+    } catch {
+      // not the wrapped format, continue
+    }
+    if (!name) {
+      const nameMatch = attrs.match(/name\s*=\s*["']([^"']+)["']/i);
+      name = nameMatch ? nameMatch[1] : inferToolName(argsJson, availableTools);
+    }
     if (name) {
       calls.push({
         id: `call_${crypto.randomUUID().slice(0, 8)}`,
         name,
-        arguments: content,
+        arguments: argsJson,
       });
     }
   }
