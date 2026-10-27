@@ -15532,7 +15532,6 @@
     "nextConversation": "Kitas pokalbis",
     "gotoLatestRequest": "Eiti į naujausią užklausą",
     "goToBottom": "Eiti žemyn",
-    "closeConversation": "Uždaryti pokalbį",
     "statusInProgress": "Vykdoma",
     "continuationGenuineTitle": "Naujausias žingsnis naudojo previous_response_id ir jis buvo išspręstas serverio pusėje",
     "continuationBadge": "tęsinys",

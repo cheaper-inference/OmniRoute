@@ -15532,7 +15532,6 @@
     "nextConversation": "পরবর্তী কথোপকথন",
     "gotoLatestRequest": "সর্বশেষ অনুরোধে যান",
     "goToBottom": "নীচে যান",
-    "closeConversation": "কথোপকথন বন্ধ করুন",
     "statusInProgress": "চলমান",
     "continuationGenuineTitle": "সর্বশেষ টার্নে previous_response_id ব্যবহার করা হয়েছে এবং এটি সার্ভার-সাইডে সমাধান হয়েছে",
     "continuationBadge": "চলমান",

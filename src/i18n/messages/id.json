@@ -15532,7 +15532,6 @@
     "nextConversation": "Percakapan berikutnya",
     "gotoLatestRequest": "Ke permintaan terbaru",
     "goToBottom": "Ke bawah",
-    "closeConversation": "Tutup percakapan",
     "statusInProgress": "Sedang berlangsung",
     "continuationGenuineTitle": "Giliran terbaru menggunakan previous_response_id dan telah teresolusi di sisi server",
     "continuationBadge": "lanjutan",

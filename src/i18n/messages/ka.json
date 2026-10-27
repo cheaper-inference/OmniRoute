@@ -15532,7 +15532,6 @@
     "nextConversation": "შემდეგი განხილვა",
     "gotoLatestRequest": "ბოლო მოთხოვნაზე გადასვლა",
     "goToBottom": "ბოლოში გადასვლა",
-    "closeConversation": "საუბრის დახურვა",
     "statusInProgress": "მიმდინარეობს",
     "continuationGenuineTitle": "ბოლო სვლამ გამოიყენა previous_response_id და ის სერვერის მხარეს დამუშავდა",
     "continuationBadge": "გაგრძელება",

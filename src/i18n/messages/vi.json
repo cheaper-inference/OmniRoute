@@ -15532,7 +15532,6 @@
     "nextConversation": "Cuộc hội thoại tiếp theo",
     "gotoLatestRequest": "Chuyển đến yêu cầu mới nhất",
     "goToBottom": "Chuyển xuống cuối",
-    "closeConversation": "Đóng hội thoại",
     "statusInProgress": "Đang xử lý",
     "continuationGenuineTitle": "Lượt mới nhất đã sử dụng previous_response_id và được giải quyết phía máy chủ",
     "continuationBadge": "tiếp nối",

@@ -15532,7 +15532,6 @@
     "nextConversation": "次の会話",
     "gotoLatestRequest": "最新のリクエストに移動",
     "goToBottom": "一番下に移動",
-    "closeConversation": "会話を閉じる",
     "statusInProgress": "進行中",
     "continuationGenuineTitle": "最新ターンで previous_response_id が使用され、サーバーサイドで解決されました",
     "continuationBadge": "継続",

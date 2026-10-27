@@ -15532,7 +15532,6 @@
     "nextConversation": "Następna rozmowa",
     "gotoLatestRequest": "Przejdź do ostatniego żądania",
     "goToBottom": "Przejdź do końca",
-    "closeConversation": "Zamknij rozmowę",
     "statusInProgress": "W trakcie",
     "continuationGenuineTitle": "Ostatni ruch używał previous_response_id i został rozstrzygnięty po stronie serwera",
     "continuationBadge": "kontynuacja",

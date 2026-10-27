@@ -15532,7 +15532,6 @@
     "nextConversation": "अगली बाधा",
     "gotoLatestRequest": "नवीनतम अनुरोध पर जाएँ",
     "goToBottom": "नीचे जाएँ",
-    "closeConversation": "संवाद बंद करें",
     "statusInProgress": "प्रगति पर है",
     "continuationGenuineTitle": "नवीनतम टर्न ने previous_response_id का उपयोग किया और इसे सर्वर-साइड पर रिजॉल्व कर दिया गया",
     "continuationBadge": "अनुवर्ती",

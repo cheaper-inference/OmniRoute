@@ -15532,7 +15532,6 @@
     "nextConversation": "Sljedeći razgovor",
     "gotoLatestRequest": "Idi na zadnju zahtjev",
     "goToBottom": "Idi na dno",
-    "closeConversation": "Zatvori razgovor",
     "statusInProgress": "U tijeku",
     "continuationGenuineTitle": "Zadnji potez koristio je previous_response_id i riješen je na serveru",
     "continuationBadge": "nastavak",

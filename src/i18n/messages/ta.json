@@ -15532,7 +15532,6 @@
     "nextConversation": "அடுத்த கலந்துரையாடல்",
     "gotoLatestRequest": "செயலாக்கப்பட்ட கோரலுக்கு செல்",
     "goToBottom": "கீழே செல்",
-    "closeConversation": "கையாள்குறிப்பை மூடு",
     "statusInProgress": "முன்னேற்றம்",
     "continuationGenuineTitle": "செயலாக்கப்பட்ட திருப்பம் previous_response_id பயன்படுத்தியது, இது சர்வர்-சைட்டு ரீதியாக தீர்வடைந்தது",
     "continuationBadge": "தொடர்ச்சி",

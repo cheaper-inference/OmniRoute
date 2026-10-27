@@ -15532,7 +15532,6 @@
     "nextConversation": "다음 대화",
     "gotoLatestRequest": "가장 최근 요청으로 이동",
     "goToBottom": "맨 위로 이동",
-    "closeConversation": "대화 닫기",
     "statusInProgress": "진행 중",
     "continuationGenuineTitle": "가장 최근 턴에 previous_response_id가 사용되었으며 서버 측에서 해결되었습니다",
     "continuationBadge": "계속",

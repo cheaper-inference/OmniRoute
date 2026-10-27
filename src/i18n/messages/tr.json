@@ -15532,7 +15532,6 @@
     "nextConversation": "Sonraki sohbet",
     "gotoLatestRequest": "En son isteğe git",
     "goToBottom": "Alta git",
-    "closeConversation": "Sohbeti kapat",
     "statusInProgress": "Devam ediyor",
     "continuationGenuineTitle": "En son tur previous_response_id'yi kullandı ve sunucu tarafında çözüldü",
     "continuationBadge": "devam",

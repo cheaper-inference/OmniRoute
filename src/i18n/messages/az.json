@@ -15532,7 +15532,6 @@
     "nextConversation": "Növbəti söhbət",
     "gotoLatestRequest": "Ən son sorğuya keçid",
     "goToBottom": "Aşağıya keçid",
-    "closeConversation": "Söhbəti bağla",
     "statusInProgress": "Davam edir",
     "continuationGenuineTitle": "Ən son mərhələ previous_response_id istifadə etdi və bu, server tərəfində həll olundu",
     "continuationBadge": "davamı",

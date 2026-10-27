@@ -15532,7 +15532,6 @@
     "nextConversation": "Neste samtale",
     "gotoLatestRequest": "Gå til siste forespørsel",
     "goToBottom": "Gå til bunnen",
-    "closeConversation": "Lukk samtalen",
     "statusInProgress": "Pågår",
     "continuationGenuineTitle": "Siste runde brukte previous_response_id og den ble løst på tjenersiden",
     "continuationBadge": "fortsettelse",

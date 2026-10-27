@@ -15532,7 +15532,6 @@
     "nextConversation": "Nasledujúci rozhovor",
     "gotoLatestRequest": "Prejsť na najnovší dopyt",
     "goToBottom": "Prejsť na spodok",
-    "closeConversation": "Zavrieť konverzáciu",
     "statusInProgress": "Prebieha",
     "continuationGenuineTitle": "Najnovšie kolo použilo previous_response_id a vyriešilo sa na serverovej strane",
     "continuationBadge": "pokračovanie",

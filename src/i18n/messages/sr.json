@@ -15532,7 +15532,6 @@
     "nextConversation": "Следећи разговор",
     "gotoLatestRequest": "Иди на последње захтев",
     "goToBottom": "Иди на дно",
-    "closeConversation": "Затвори разговор",
     "statusInProgress": "У току",
     "continuationGenuineTitle": "Последњи круг користио previous_response_id и решен је на серверу",
     "continuationBadge": "наставак",

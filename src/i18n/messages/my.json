@@ -15532,7 +15532,6 @@
     "nextConversation": "နောက်ဆက်ကြွိဳ",
     "gotoLatestRequest": "နောက်ဆုံးနေရာသို့ ပြန်သွားရန်",
     "goToBottom": "အောက်ဆုံးသို့ ပြန်သွားရန်",
-    "closeConversation": "အကြောင်းအရာအသွင်ပြန်ဖျက်ရန်",
     "statusInProgress": "လုပ်ငန်းဆောင်ချက်ဆက်လုပ်နေသည်",
     "continuationGenuineTitle": "နောက်ဆုံးအဆင့်သည် previous_response_id ကို အသုံးပြုပြီး server-side မှ ဖြေရှင်းပြီးပါသည်",
     "continuationBadge": "ဆက်လက်လုပ်ဆောင်မှု",

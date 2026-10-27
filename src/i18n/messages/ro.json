@@ -15532,7 +15532,6 @@
     "nextConversation": "Conversația următoare",
     "gotoLatestRequest": "Mergi la ultima cerere",
     "goToBottom": "Mergi la final",
-    "closeConversation": "Închide conversația",
     "statusInProgress": "În curs",
     "continuationGenuineTitle": "Ultimul tur a utilizat previous_response_id și acesta s-a rezolvat pe server",
     "continuationBadge": "continuire",

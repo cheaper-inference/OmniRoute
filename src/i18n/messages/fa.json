@@ -15532,7 +15532,6 @@
     "nextConversation": "مذاکره بعدی",
     "gotoLatestRequest": "رفتن به آخرین درخواست",
     "goToBottom": "رفتن به انتهای صفحه",
-    "closeConversation": "بستن گفتگو",
     "statusInProgress": "در حال انجام",
     "continuationGenuineTitle": "آخرین دور از previous_response_id استفاده کرد و آن در سمت سرور حل شد",
     "continuationBadge": "ادامه‌دادن",

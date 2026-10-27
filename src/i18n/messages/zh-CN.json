@@ -15532,7 +15532,6 @@
     "nextConversation": "下一条对话",
     "gotoLatestRequest": "跳到最新请求",
     "goToBottom": "回到底部",
-    "closeConversation": "关闭对话",
     "statusInProgress": "进行中",
     "continuationGenuineTitle": "最后一轮使用了 previous_response_id 且已在服务端解析",
     "continuationBadge": "续接",

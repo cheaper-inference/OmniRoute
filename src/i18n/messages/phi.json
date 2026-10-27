@@ -15532,7 +15532,6 @@
     "nextConversation": "Susunod na kausapan",
     "gotoLatestRequest": "Pumunta sa pinakabagong request",
     "goToBottom": "Pumunta sa pinakamababang bahagi",
-    "closeConversation": "Isara ang pag-uusap",
     "statusInProgress": "Nagtatagpo",
     "continuationGenuineTitle": "Ginamit ng pinakabagong turn ang previous_response_id at naunawaan nito sa server-side",
     "continuationBadge": "pagpapatuloy",

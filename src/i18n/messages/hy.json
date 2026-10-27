@@ -15532,7 +15532,6 @@
     "nextConversation": "Հաջորդ իրականացումը",
     "gotoLatestRequest": "Անցնել վերջին հայտադրությանը",
     "goToBottom": "Անցնել ներքև",
-    "closeConversation": "Փակել զրույցը",
     "statusInProgress": "Հաստատված",
     "continuationGenuineTitle": "Վերջին քայլը օգտագործել է previous_response_id, և այն համապատասխանեց ավտոմատ կերպով",
     "continuationBadge": "շարունակում",

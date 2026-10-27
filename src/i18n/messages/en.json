@@ -15532,7 +15532,6 @@
     "nextConversation": "Next conversation",
     "gotoLatestRequest": "Go to latest request",
     "goToBottom": "Go to bottom",
-    "closeConversation": "Close conversation",
     "statusInProgress": "In progress",
     "continuationGenuineTitle": "Latest turn used previous_response_id and it resolved server-side",
     "continuationBadge": "continuation",

@@ -15532,7 +15532,6 @@
     "nextConversation": "Следващ разговор",
     "gotoLatestRequest": "Отиди към последното запитване",
     "goToBottom": "Към края",
-    "closeConversation": "Затвори разговора",
     "statusInProgress": "В процес",
     "continuationGenuineTitle": "Последният ход използва previous_response_id и е разрешен от страна на сървъра",
     "continuationBadge": "продължение",

@@ -15532,7 +15532,6 @@
     "nextConversation": "Seuraava keskustelu",
     "gotoLatestRequest": "Siirry viimeisimpään pyyntöön",
     "goToBottom": "Siirry alareunaan",
-    "closeConversation": "Sulje keskustelu",
     "statusInProgress": "Käynnissä",
     "continuationGenuineTitle": "Viimeisellä kierrolla käytettiin previous_response_id, joka ratkaistiin palvelinpuolella",
     "continuationBadge": "jatko",

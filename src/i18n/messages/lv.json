@@ -15532,7 +15532,6 @@
     "nextConversation": "Nākamā saruna",
     "gotoLatestRequest": "Pāriet uz pēdējo pieprasījumu",
     "goToBottom": "Pāriet uz leju",
-    "closeConversation": "Aizvērt sarunu",
     "statusInProgress": "Notiek",
     "continuationGenuineTitle": "Pēdējais apmaiņas cikls izmantoja previous_response_id, un tas tika atrisināts servera pusē",
     "continuationBadge": "turpinājums",

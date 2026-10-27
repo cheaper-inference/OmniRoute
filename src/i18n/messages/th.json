@@ -15532,7 +15532,6 @@
     "nextConversation": "การสนทนาถัดไป",
     "gotoLatestRequest": "ไปยังคำขอล่าสุด",
     "goToBottom": "ไปด้านล่าง",
-    "closeConversation": "ปิดบทสนทนา",
     "statusInProgress": "กำลังดำเนินการ",
     "continuationGenuineTitle": "รอบล่าสุดใช้ previous_response_id และถูกรับรองเสร็จสิ้นที่เซิร์ฟเวอร์",
     "continuationBadge": "การดำเนินการต่อ",

@@ -15532,7 +15532,6 @@
     "nextConversation": "Επόμενος διάλογος",
     "gotoLatestRequest": "Περπατήστε στην τελευταία αίτηση",
     "goToBottom": "Μετάβαση στο κάτω μέρος",
-    "closeConversation": "Κλείσιμο συνομιλίας",
     "statusInProgress": "Σε εξέλιξη",
     "continuationGenuineTitle": "Η τελευταία στροφή χρησιμοποίησε previous_response_id και επιλύθηκε server-side",
     "continuationBadge": "συνέχιση",

@@ -15532,7 +15532,6 @@
     "nextConversation": "المحادثة التالية",
     "gotoLatestRequest": "الانتقال إلى أحدث طلب",
     "goToBottom": "الانتقال إلى الأسفل",
-    "closeConversation": "إغلاق المحادثة",
     "statusInProgress": "قيد التنفيذ",
     "continuationGenuineTitle": "استخدم أحدث رد previous_response_id وتم حلّه على مستوى الخادم",
     "continuationBadge": "تتابع",

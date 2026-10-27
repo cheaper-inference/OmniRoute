@@ -15532,7 +15532,6 @@
     "nextConversation": "Järgmine vestlus",
     "gotoLatestRequest": "Mine viimasele taotlusele",
     "goToBottom": "Mine lõppu",
-    "closeConversation": "Sulge vestlus",
     "statusInProgress": "Käib",
     "continuationGenuineTitle": "Viimane käik kasutas previous_response_id-i ja see lahendati serveril",
     "continuationBadge": "jätkamine",
