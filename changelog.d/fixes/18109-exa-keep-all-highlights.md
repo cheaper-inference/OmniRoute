@@ -1,1 +1,0 @@
-- **fix(search):** Exa results now carry every highlight in `provider_raw.highlights`, next to the `highlight_scores` they belong to; before, only the first highlight survived (as the `snippet`) ([#18109](https://github.com/diegosouzapw/OmniRoute/issues/18109)) — thanks @floydous
