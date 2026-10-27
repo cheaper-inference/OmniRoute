@@ -35,6 +35,20 @@ const { HANDLED_COMBO_STRATEGIES } =
   await import("../../open-sse/services/combo/strategyDispatch.ts");
 const { createComboSchema } = await import("../../src/shared/validation/schemas.ts");
 const { runComboCreateCommand } = await import("../../bin/cli/commands/combo.mjs");
+const { handleComboChat } = await import("../../open-sse/services/combo.ts");
+const { saveModelsDevCapabilities } = await import("../../src/lib/modelsDevSync.ts");
+const evalsDb = await import("../../src/lib/db/evals.ts");
+const { resetEvalRoutingCache } = await import("../../open-sse/services/evalRouting.ts");
+const { clearAllStickyBindings } =
+  await import("../../open-sse/services/combo/sessionStickiness.ts");
+const { getCircuitBreaker, resetAllCircuitBreakers } =
+  await import("../../src/shared/utils/circuitBreaker.ts");
+const { connectionCircuitBreakerName } =
+  await import("../../open-sse/services/connectionCircuitBreaker.ts");
+const { pinNativeCodexTurn, clearNativeCodexTurnPinsForTests } =
+  await import("../../open-sse/services/combo/nativeCodexTurnPin.ts");
+const { applyPromptCacheAffinity } =
+  await import("../../open-sse/services/combo/promptCacheAffinity.ts");
 
 after(() => {
   dbCore.resetDbInstance();
@@ -426,21 +440,6 @@ describe("expiry-first combo ordering", () => {
 /* ------------------------------------------------------------------------ */
 /* Group B -- dispatch-level interplay (spec §8 cases 11-15, 20-25)          */
 /* ------------------------------------------------------------------------ */
-
-const { handleComboChat } = await import("../../open-sse/services/combo.ts");
-const { saveModelsDevCapabilities } = await import("../../src/lib/modelsDevSync.ts");
-const evalsDb = await import("../../src/lib/db/evals.ts");
-const { resetEvalRoutingCache } = await import("../../open-sse/services/evalRouting.ts");
-const { clearAllStickyBindings } =
-  await import("../../open-sse/services/combo/sessionStickiness.ts");
-const { getCircuitBreaker, resetAllCircuitBreakers } =
-  await import("../../src/shared/utils/circuitBreaker.ts");
-const { connectionCircuitBreakerName } =
-  await import("../../open-sse/services/connectionCircuitBreaker.ts");
-const { pinNativeCodexTurn, clearNativeCodexTurnPinsForTests } =
-  await import("../../open-sse/services/combo/nativeCodexTurnPin.ts");
-const { applyPromptCacheAffinity } =
-  await import("../../open-sse/services/combo/promptCacheAffinity.ts");
 
 const URGENT_IN_MS = 39 * 60 * 1000; // resets in 39 minutes
 const IDLE_IN_MS = 9 * HOUR + 44 * 60 * 1000; // resets in 9h44m
