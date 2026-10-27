@@ -13,6 +13,7 @@ import {
   CloudflarePlaygroundExecutor,
   toCfMessages,
   type CfTransport,
+  type CfTransportConfig,
   type CfTransportStartResult,
 } from "../../open-sse/executors/cloudflare-playground.ts";
 
@@ -394,4 +395,79 @@ test("toCfMessages handles tool result without tool_call_id", () => {
   assert.equal(out.length, 1);
   assert.ok(out[0].parts[0].text.includes("<tool_result>"));
   assert.ok(!out[0].parts[0].text.includes("call_id="));
+});
+
+// ── Conversation cap (10 user messages per conversation) ─────────────────────
+
+/** Transport that records the payload the executor hands to the playground. */
+class CapturingTransport implements CfTransport {
+  static last: CfTransportConfig | null = null;
+
+  constructor(private framesList: string[]) {}
+
+  async start(config: CfTransportConfig): Promise<CfTransportStartResult> {
+    CapturingTransport.last = config;
+    return { ok: true };
+  }
+
+  async *frames(): AsyncGenerator<string> {
+    for (const frame of this.framesList) yield frame;
+  }
+
+  async close(): Promise<void> {}
+}
+
+test("executor trims a long conversation to the playground's 10-user-message cap", async () => {
+  const executor = new CloudflarePlaygroundExecutor(
+    (chatId) => new CapturingTransport(buildSuccessFrames(chatId, "ok"))
+  );
+  // Every turn contributes two user-role messages once replayed (the user turn
+  // itself and the tool result), plus the injected contract.
+  const messages = [
+    ...Array.from({ length: 14 }, (_, i) => [
+      { role: "user", content: `turn ${i}` },
+      { role: "assistant", content: `reply ${i}` },
+      { role: "tool", content: `result ${i}`, tool_call_id: `call_${i}` },
+    ]).flat(),
+    { role: "user", content: "latest question" },
+  ];
+
+  const result = await executor.execute(
+    executeArgs(
+      {
+        model: "test-model",
+        messages,
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "bash",
+              description: "Run a command",
+              parameters: {
+                type: "object",
+                properties: { command: { type: "string" } },
+                required: ["command"],
+              },
+            },
+          },
+        ],
+      },
+      false
+    )
+  );
+
+  assert.equal(result.response.status, 200);
+  const sent = CapturingTransport.last;
+  assert.ok(sent, "transport.start should have been called");
+
+  const userMessages = sent!.messages.filter((m) => m.role === "user");
+  assert.ok(
+    userMessages.length <= 10,
+    `expected at most 10 user messages, sent ${userMessages.length}`
+  );
+  // The model still sees the tool contract and the current question.
+  assert.ok(userMessages[0].parts[0].text.includes("# Tools"));
+  assert.equal(userMessages[userMessages.length - 1].parts[0].text, "latest question");
+  // Oldest history is dropped first.
+  assert.ok(!userMessages.some((m) => m.parts[0].text.includes("turn 0")));
 });

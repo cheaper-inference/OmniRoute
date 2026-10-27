@@ -23,9 +23,13 @@
  * Notes:
  *   - The playground's system prompt is server-side (set via setConfig by the
  *     app itself); client `system` messages are dropped. Tool calls are emulated
- *     by serializing OpenAI `tools[]` into a prompt contract (folded into the
- *     first user message) and parsing the model's text reply back into
- *     OpenAI `tool_calls`.
+ *     by serializing OpenAI `tools[]` into a prompt contract (sent as its own
+ *     user message) and parsing the model's text reply back into OpenAI
+ *     `tool_calls`.
+ *   - A conversation may carry at most 10 user-role messages; longer payloads
+ *     are rejected in-band ("This demo is limited to 10 messages per
+ *     conversation. Start a new chat to continue."). The oldest turns are
+ *     trimmed to fit — the contract and replayed tool results included.
  *   - Upstream rate limits arrive in-band as `error:true` frames. Non-streaming
  *     requests surface them as HTTP 429/502; streaming requests emit an SSE
  *     error chunk before `[DONE]` (the response status is already committed).
@@ -196,8 +200,9 @@ export interface CfChatMessage {
  * Convert OpenAI-format messages to the playground's chat body shape.
  * `system` messages are dropped (the playground's persona is server-side).
  * Tool calls and tool results are replayed as text so the model sees the
- * conversation history. The tool contract (from `tools[]`) is injected into
- * the first user message via `buildCfToolConversationPrompt` in `execute()`.
+ * conversation history. `execute()` runs the messages through
+ * `buildCfToolConversationPrompt` first, which injects the tool contract and
+ * trims the history to the playground's 10-user-message cap.
  */
 export function toCfMessages(
   messages: Array<{ role?: string; content?: unknown }>
@@ -570,23 +575,26 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       }>) || [];
     const hasTools = tools.length > 0;
 
-    // Build messages with tool contract injected into first user message
+    // Build the playground payload: inject the tool contract, then enforce the
+    // playground's 10-user-message conversation cap (it rejects longer ones with
+    // "[429] This demo is limited to 10 messages per conversation"). Tool results
+    // replay as user messages, so an agent loop fills that budget fast — without
+    // trimming, every later turn of a long session fails and the client just
+    // retries the same oversized payload.
     const originalMessages =
       (bodyObj.messages as Array<{ role?: string; content?: unknown }>) || [];
-    const messagesWithTools = hasTools
-      ? buildCfToolConversationPrompt(
-          originalMessages,
-          tools as Array<{
-            type: string;
-            function: { name: string; description?: string; parameters: Record<string, unknown> };
-          }>
-        )
-      : originalMessages;
+    const preparedMessages = buildCfToolConversationPrompt(
+      originalMessages,
+      tools as Array<{
+        type: string;
+        function: { name: string; description?: string; parameters: Record<string, unknown> };
+      }>
+    );
 
     const transport = this.transportFactory(chatId);
     const started = await transport.start({
       model,
-      messages: toCfMessages(messagesWithTools),
+      messages: toCfMessages(preparedMessages),
       temperature,
       signal,
     });

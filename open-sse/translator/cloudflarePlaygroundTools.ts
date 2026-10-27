@@ -49,6 +49,44 @@ export interface CfParsedToolCall {
 export const CF_MAX_MESSAGE_CHARS = 5800;
 
 /**
+ * The Cloudflare Playground rejects a conversation carrying more than 10
+ * user-role messages ("This demo is limited to 10 messages per conversation.
+ * Start a new chat to continue."). Assistant messages do NOT count — measured
+ * live: 10 user turns pass and 11 fail, whatever number of assistant replies
+ * sits between them. Tool results are replayed as user messages and the tool
+ * contract travels as a user message, so both share this budget.
+ */
+export const CF_MAX_CONVERSATION_MESSAGES = 10;
+
+/** Roles the playground counts toward the 10-message conversation cap. */
+function countsTowardCfConversationCap(role: string | undefined): boolean {
+  return role === "user" || role === "tool";
+}
+
+/**
+ * Keep only the most recent `maxUserMessages` user-role turns (tool results
+ * included), dropping the oldest history first.
+ *
+ * Trimming always stops on a user turn, so a trimmed history never starts with
+ * an assistant tool-call whose results were dropped. Returns the input
+ * untouched when it already fits.
+ */
+export function trimCfConversation(
+  messages: ChatCompletionMessageParam[],
+  maxUserMessages: number
+): ChatCompletionMessageParam[] {
+  const list = messages ?? [];
+  if (maxUserMessages <= 0) return [];
+  let seen = 0;
+  for (let i = list.length - 1; i >= 0; i--) {
+    if (!countsTowardCfConversationCap(list[i]?.role)) continue;
+    seen++;
+    if (seen === maxUserMessages) return list.slice(i);
+  }
+  return list;
+}
+
+/**
  * Render a JSON schema as a compact TypeScript-ish signature.
  * Keeps the model-oriented information (names, types, required flags, enums)
  * while dropping descriptions/annotations that blow up the prompt budget.
@@ -624,30 +662,43 @@ function inferToolName(
  * Build the conversation prompt with the tool contract inserted as its own
  * user message(s) before the first user turn (the playground drops system
  * messages, and rejects any single message longer than 6000 chars).
+ *
+ * Also enforces the playground's 10-user-message conversation cap: the contract
+ * and the trimmed conversation together never exceed it. Works with an empty
+ * `tools` list too — the caller can always route messages through here and get
+ * a payload the playground will accept.
  */
 export function buildCfToolConversationPrompt(
   messages: ChatCompletionMessageParam[],
   tools: ChatCompletionTool[]
 ): ChatCompletionMessageParam[] {
-  const toolPrompt = serializeCfToolPrompt(tools);
-  if (!toolPrompt) return messages;
+  const toolPrompt = tools && tools.length > 0 ? serializeCfToolPrompt(tools) : "";
 
-  // Find the first user message — the contract is inserted immediately before it.
-  const firstUserIndex = messages.findIndex((m) => m.role === "user");
-  if (firstUserIndex === -1) return messages;
+  // The contract shares the 10-user-message budget with the conversation, so
+  // budget for it first — but never let it consume the caller's own turn: at
+  // least one slot always stays free for the latest message (a pathological
+  // contract needing more than 9 messages is truncated to fit).
+  const contractMessages: ChatCompletionMessageParam[] = toolPrompt
+    ? chunkPrompt(toolPrompt, CF_MAX_MESSAGE_CHARS)
+        .slice(0, CF_MAX_CONVERSATION_MESSAGES - 1)
+        .map((chunk) => ({ role: "user" as const, content: chunk }))
+    : [];
 
-  // The playground rejects any message >6000 chars, so the contract goes in as
-  // its own user message(s) instead of being folded into the user's prompt.
-  const contractMessages: ChatCompletionMessageParam[] = chunkPrompt(
-    toolPrompt,
-    CF_MAX_MESSAGE_CHARS
-  ).map((chunk) => ({ role: "user" as const, content: chunk }));
+  const retained = trimCfConversation(
+    messages ?? [],
+    CF_MAX_CONVERSATION_MESSAGES - contractMessages.length
+  );
+  if (contractMessages.length === 0) return retained;
 
-  return [
-    ...messages.slice(0, firstUserIndex),
-    ...contractMessages,
-    ...messages.slice(firstUserIndex),
-  ];
+  // Require an actual user turn to answer; a conversation made only of assistant
+  // / system messages is left alone (the playground would reject it anyway).
+  if (!retained.some((message) => message.role === "user")) return retained;
+
+  // Insert before the first user turn — which is also the first tool result when
+  // trimming dropped the tool call that produced it.
+  const insertAt = retained.findIndex((message) => countsTowardCfConversationCap(message.role));
+
+  return [...retained.slice(0, insertAt), ...contractMessages, ...retained.slice(insertAt)];
 }
 
 /**

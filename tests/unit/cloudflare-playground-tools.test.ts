@@ -5,7 +5,7 @@
  * - serializeCfToolPrompt: contract block generation
  * - parseCfToolCalls: all observed markup shapes (4 patterns)
  * - hasMalformedCfToolIntent: detection of incomplete/broken tool tags
- * - buildCfToolConversationPrompt: injection into first user message
+ * - buildCfToolConversationPrompt: contract injection + conversation cap
  * - stripCfToolMarkup: cleaning model output
  */
 import test from "node:test";
@@ -15,8 +15,10 @@ import {
   parseCfToolCalls,
   hasMalformedCfToolIntent,
   buildCfToolConversationPrompt,
+  trimCfConversation,
   stripCfToolMarkup,
   CF_MAX_MESSAGE_CHARS,
+  CF_MAX_CONVERSATION_MESSAGES,
   type CfToolDef,
 } from "../../open-sse/translator/cloudflarePlaygroundTools.ts";
 
@@ -346,6 +348,108 @@ test("hasMalformedCfToolIntent returns true for invalid JSON in tool call", () =
 });
 
 // ── buildCfToolConversationPrompt ─────────────────────────────────────────────
+
+// ── conversation cap (10 user messages per conversation) ─────────────────────
+
+/** Count the messages the playground's 10-message cap counts. */
+const userishCount = (messages: Array<{ role?: string }>) =>
+  messages.filter((m) => m.role === "user" || m.role === "tool").length;
+
+test("trimCfConversation returns messages untouched when they already fit", () => {
+  const messages = [
+    { role: "user" as const, content: "hi" },
+    { role: "assistant" as const, content: "hello" },
+    { role: "user" as const, content: "bye" },
+  ];
+  assert.deepEqual(trimCfConversation(messages, 10), messages);
+});
+
+test("trimCfConversation keeps the newest user turns and drops the oldest", () => {
+  const messages = [
+    { role: "user" as const, content: "turn 1" },
+    { role: "assistant" as const, content: "reply 1" },
+    { role: "user" as const, content: "turn 2" },
+    { role: "assistant" as const, content: "reply 2" },
+    { role: "user" as const, content: "turn 3" },
+    { role: "assistant" as const, content: "reply 3" },
+    { role: "user" as const, content: "turn 4" },
+  ];
+  const trimmed = trimCfConversation(messages, 2);
+  assert.equal(userishCount(trimmed), 2);
+  // Starts on a user turn, never on an orphaned assistant reply.
+  assert.equal(trimmed[0].role, "user");
+  assert.equal(trimmed[0].content, "turn 3");
+  assert.equal(trimmed[trimmed.length - 1].content, "turn 4");
+  assert.ok(!trimmed.some((m) => m.content === "turn 1"));
+  assert.ok(!trimmed.some((m) => m.content === "turn 2"));
+});
+
+test("trimCfConversation counts replayed tool results as user turns", () => {
+  const messages = [
+    { role: "user" as const, content: "run it" },
+    { role: "assistant" as const, content: '<tool name="bash">{}</tool>' },
+    { role: "tool" as const, content: "ok" },
+    { role: "assistant" as const, content: "done" },
+    { role: "user" as const, content: "and again" },
+  ];
+  const trimmed = trimCfConversation(messages, 2);
+  assert.equal(userishCount(trimmed), 2);
+  assert.equal(trimmed[0].role, "tool");
+  assert.equal(trimmed[0].content, "ok");
+  assert.equal(trimmed[trimmed.length - 1].content, "and again");
+});
+
+test("trimCfConversation returns nothing for a non-positive budget", () => {
+  const messages = [{ role: "user" as const, content: "hi" }];
+  assert.deepEqual(trimCfConversation(messages, 0), []);
+});
+
+test("buildCfToolConversationPrompt trims the conversation to the 10 user-message cap", () => {
+  // 12 user turns + their assistant replies + 1 contract = 13 user messages,
+  // one past the playground's limit.
+  const messages = Array.from({ length: 12 }, (_, i) => [
+    { role: "user" as const, content: `turn ${i}` },
+    { role: "assistant" as const, content: `reply ${i}` },
+  ]).flat();
+  messages.push({ role: "user" as const, content: "latest question" });
+
+  const result = buildCfToolConversationPrompt(messages, TEST_TOOLS_OPENAI);
+
+  assert.equal(userishCount(result), CF_MAX_CONVERSATION_MESSAGES);
+  // The contract survives the trim and the caller's own turn is never dropped.
+  assert.ok((result[0].content as string).includes("# Tools"));
+  assert.equal(result[result.length - 1].content, "latest question");
+  // Oldest history goes first.
+  assert.ok(!result.some((m) => m.content === "turn 0"));
+});
+
+test("buildCfToolConversationPrompt trims even when there are no tools", () => {
+  const messages = Array.from({ length: 13 }, (_, i) => ({
+    role: "user" as const,
+    content: `turn ${i}`,
+  }));
+  const result = buildCfToolConversationPrompt(messages, []);
+  assert.equal(userishCount(result), CF_MAX_CONVERSATION_MESSAGES);
+  assert.equal(result[result.length - 1].content, "turn 12");
+});
+
+test("buildCfToolConversationPrompt never lets the contract swallow the user's turn", () => {
+  // A contract big enough to need every slot still leaves room for the prompt.
+  const manyTools = Array.from({ length: 400 }, (_, i) => ({
+    type: "function" as const,
+    function: {
+      name: `tool_${i}`,
+      description: "A tool with a fairly long description ".repeat(4),
+      parameters: { type: "object", properties: { command: { type: "string" } } },
+    },
+  }));
+  const result = buildCfToolConversationPrompt(
+    [{ role: "user" as const, content: "the only question" }],
+    manyTools
+  );
+  assert.equal(userishCount(result), CF_MAX_CONVERSATION_MESSAGES);
+  assert.equal(result[result.length - 1].content, "the only question");
+});
 
 test("buildCfToolConversationPrompt returns original messages when no tools", () => {
   const messages = [{ role: "user" as const, content: "hi" }];
