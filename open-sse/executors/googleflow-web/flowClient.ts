@@ -157,42 +157,72 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     });
     await page.waitForTimeout(3_000);
 
+    // 1. Force navigation directly to creating a brand new project, or click New Project button
+    await page.goto("https://flow.google.com/", {
+      waitUntil: "domcontentloaded",
+      timeout: 30_000,
+    });
+    await page.waitForTimeout(2_000);
     console.log("[FLOW_DEBUG] Navigated to:", page.url());
     if (page.url().includes("accounts.google.com")) {
       throw new Error("Google Flow session is expired or requires re-authentication");
     }
 
-    // Ensure we start a fresh project or session
+    // Always create a FRESH new project so we never touch canvas from previous runs
+    let newProjectCreated = false;
     const newProjBtn = page
       .locator(
-        "button.new-project-button, button:has-text('Новый проект'), button:has-text('New project'), button:has-text('Start Creating')"
+        "button.new-project-button, button:has-text('Новый проект'), button:has-text('New project'), button:has-text('Start Creating'), a[href*='/project/new'], button:has-text('add')"
       )
       .first();
-    if (await newProjBtn.isVisible({ timeout: 6_000 }).catch(() => false)) {
+
+    if (await newProjBtn.isVisible({ timeout: 4_000 }).catch(() => false)) {
       try {
         await newProjBtn.click();
-        await page.waitForURL(/.*\/project\/.*/, { timeout: 20_000 });
+        await page.waitForURL(/\/project\/[a-zA-Z0-9_-]+/, { timeout: 15_000 });
+        newProjectCreated = true;
+        console.log("[FLOW_DEBUG] Created fresh project via button:", page.url());
       } catch {}
-    } else if (page.url().includes("/project/")) {
-      const newChatBtn = page
-        .locator("button[aria-label='Начать новый сеанс'], button:has-text('edit_square')")
+    }
+
+    // If still on home or existing project, try clicking new project / plus inside project
+    if (!newProjectCreated && page.url().includes("/project/")) {
+      const homeOrNewBtn = page
+        .locator(
+          "button[aria-label='Начать новый сеанс'], button:has-text('edit_square'), a[href='/']"
+        )
         .first();
-      if (await newChatBtn.isVisible({ timeout: 3_000 }).catch(() => false)) {
-        await newChatBtn.click().catch(() => {});
-        await page.waitForTimeout(1_500);
+      if (await homeOrNewBtn.isVisible({ timeout: 2_000 }).catch(() => false)) {
+        await homeOrNewBtn.click().catch(() => {});
+        await page.waitForTimeout(2_000);
       }
     }
-    console.log("[FLOW_DEBUG] Active project URL:", page.url());
 
-    // Collect existing videos already on the page/project canvas
+    // Collect existing videos and video asset IDs already on the page/project canvas
     const existingVideoUrls = new Set<string>();
+    const existingAssetIds = new Set<string>();
+
+    const extractAssetId = (url: string) => {
+      const match = /\/video\/([a-f0-9-]{36})/.exec(url);
+      return match ? match[1] : null;
+    };
+
     try {
       const existing = await page.$$eval("video", (els: any[]) =>
         els.map((e: any) => e.src || e.currentSrc).filter((s: string) => s && s.startsWith("http"))
       );
-      for (const u of existing) existingVideoUrls.add(u);
+      for (const u of existing) {
+        existingVideoUrls.add(u);
+        const aid = extractAssetId(u);
+        if (aid) existingAssetIds.add(aid);
+      }
     } catch {}
-    console.log("[FLOW_DEBUG] Existing video URLs count:", existingVideoUrls.size);
+    console.log(
+      "[FLOW_DEBUG] Existing video URLs count:",
+      existingVideoUrls.size,
+      "existing asset IDs:",
+      existingAssetIds.size
+    );
 
     let promptSentAt = 0;
     let videoUrl = "";
@@ -210,12 +240,15 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         if (!promptSentAt || now - promptSentAt < 15_000) {
           if (url.includes("flow-content.google/video")) {
             existingVideoUrls.add(url);
+            const aid = extractAssetId(url);
+            if (aid) existingAssetIds.add(aid);
           }
           return;
         }
 
         if (url.includes("flow-content.google/video") && url.includes("Signature=")) {
-          if (!existingVideoUrls.has(url)) {
+          const aid = extractAssetId(url);
+          if (!existingVideoUrls.has(url) && (!aid || !existingAssetIds.has(aid))) {
             console.log("[FLOW_DEBUG] RESOLVED videoPromise with direct URL:", url);
             clearTimeout(timeout);
             resolve(url);
@@ -237,7 +270,12 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
                 const cleanUrl = match[1]
                   .replace(/\\\\u003d|\\u003d/g, "=")
                   .replace(/\\\\u0026|\\u0026/g, "&");
-                if (!existingVideoUrls.has(cleanUrl) && cleanUrl.includes("Signature=")) {
+                const aid = extractAssetId(cleanUrl);
+                if (
+                  !existingVideoUrls.has(cleanUrl) &&
+                  (!aid || !existingAssetIds.has(aid)) &&
+                  cleanUrl.includes("Signature=")
+                ) {
                   console.log("[FLOW_DEBUG] RESOLVED batchexecute with clean URL:", cleanUrl);
                   clearTimeout(timeout);
                   resolve(cleanUrl);
@@ -314,9 +352,14 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
             .map((e: any) => e.src || e.currentSrc)
             .filter((s: string) => s && s.startsWith("http"))
         );
-        const newVideos = videos.filter(
-          (v: string) => !existingVideoUrls.has(v) && v.includes("flow-content.google")
-        );
+        const newVideos = videos.filter((v: string) => {
+          const aid = extractAssetId(v);
+          return (
+            !existingVideoUrls.has(v) &&
+            (!aid || !existingAssetIds.has(aid)) &&
+            v.includes("flow-content.google")
+          );
+        });
         if (newVideos.length > 0) {
           return newVideos[0];
         }
