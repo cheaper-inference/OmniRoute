@@ -29,7 +29,7 @@ Running tests: see [Testing](#testing) below (run the most focused test for chan
 
 ## Project at a Glance
 
-**OmniRoute** — unified AI proxy/router. One endpoint, 375 LLM providers, auto-fallback.
+**OmniRoute** — unified AI proxy/router. One endpoint, 376 LLM providers, auto-fallback.
 
 - API Routes — `src/app/api/v1/` (Next.js App Router entry points)
 - Handlers — `open-sse/handlers/` (request processing: chat, embeddings, etc)
