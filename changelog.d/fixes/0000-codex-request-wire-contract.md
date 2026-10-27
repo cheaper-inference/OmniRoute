@@ -1,0 +1,1 @@
+- **fix(codex):** Preserve nonnegative safe-integer reasoning budgets (including zero), model-defined effort spelling, explicit Responses summary delivery, and boolean `defer_loading` when normalizing requests. Keep forced/suffix effort precedence, compact/WebSocket field removal, `strict: null`, and tool-schema repairs unchanged.
