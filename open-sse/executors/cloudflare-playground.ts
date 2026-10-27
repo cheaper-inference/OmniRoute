@@ -316,8 +316,14 @@ export interface CfTransport {
   close(): Promise<void>;
 }
 
-/** Open the anonymous playground session inside the browser page context. */
-function openPlaygroundSession(args: {
+/**
+ * Open the anonymous playground session inside the browser page context.
+ *
+ * Exported so tests can assert session isolation: every call must mint a new
+ * `playground-<uuid>` room and a new `_pk` key, so two requests can never share
+ * a playground conversation (and its 10-user-message history budget).
+ */
+export function openPlaygroundSession(args: {
   chatId: string;
   model: string;
   messages: CfChatMessage[];
