@@ -54,7 +54,6 @@ import { buildConnectionConcurrencyFields } from "./connectionConcurrencyFields.
 import { getConnectionErrorPenalty, getConnectionRecencyPenalty } from "./p2cScoreTerms.ts";
 import { getP2CLatencyPenalties } from "@omniroute/open-sse/services/connectionLatencyTracker.ts";
 import {
-  DEFAULT_QUOTA_THRESHOLD_PERCENT,
   getCachedClaudeQuotaScopeDecision as readClaudeScope,
   getQuotaCache,
   getQuotaWindowStatus,
@@ -63,7 +62,18 @@ import {
   getClaudeQuotaPreflightResetAt,
   resolveClaudeQuotaCooldownMs as resolveClaudeCooldown,
 } from "@/domain/quotaCache";
-import { defersQuotaCutoff, hasCodexCreditOptIn } from "@/lib/providers/quotaCutoffOptIns";
+import {
+  resolveQuotaLimitPolicy,
+  evaluateQuotaLimitPolicy,
+  normalizeWindowName,
+  type QuotaLimitPolicy,
+} from "./quotaLimitPolicy";
+import {
+  shouldApplyQuotaCutoff,
+  resolveMinRemainingPercent,
+  isConfiguredCutoff,
+} from "./quotaPreflightPolicy";
+export { shouldApplyQuotaCutoff, resolveMinRemainingPercent } from "./quotaPreflightPolicy";
 import {
   getQuotaScopeLabelForProvider,
   isAntigravityQuotaProvider,
@@ -110,10 +120,7 @@ import {
   isEgressBucketedLockScope,
   egressBucketedLockProviders,
 } from "@omniroute/open-sse/config/providerErrorRules.ts";
-import {
-  preflightQuota,
-  isQuotaPreflightEnabled,
-} from "@omniroute/open-sse/services/quotaPreflight.ts";
+import { preflightQuota } from "@omniroute/open-sse/services/quotaPreflight.ts";
 import { resolveResilienceSettings } from "@/lib/resilience/settings";
 import { resolveModelLockoutSettings } from "@/lib/resilience/modelLockoutSettings";
 import {
@@ -138,10 +145,8 @@ import {
 import {
   getCodexModelScope,
   getCodexQuotaWindowFilterForModel,
-  toCodexBaseQuotaWindowName,
   toCodexScopedQuotaWindowName,
 } from "@omniroute/open-sse/config/codexQuotaScopes.ts";
-import { formatQuotaUsageReason } from "@omniroute/open-sse/services/quotaWindowLabel.ts";
 import {
   getCodexChildCooldown,
   isCodexChildUnavailable,
@@ -240,36 +245,13 @@ interface CooldownInspectionState {
   codexScopeCooldownMs: number | null;
   retryableModelCooldownMs: number | null;
 }
-const MIN_QUOTA_THRESHOLD_PERCENT = 1;
-const MAX_QUOTA_THRESHOLD_PERCENT = 100;
 const NON_RETRYABLE_MODEL_LOCKOUT_REASONS = new Set(["not_found", "not_found_local"]);
 // Antigravity Gemini family 429 with no parseable upstream hint: seed the backoff at
 // this base. Real upstream Retry-After hints still win — they flow through
 // `exactCooldownMs` (usedUpstreamRetryHint), not this base. (#5222)
 const ANTIGRAVITY_FAMILY_INFERRED_BASE_COOLDOWN_MS = 30_000;
-function asRecord(value: unknown): JsonRecord {
-  return value && typeof value === "object" && !Array.isArray(value) ? (value as JsonRecord) : {};
-}
 function toStringOrNull(value: unknown): string | null {
   return typeof value === "string" && value.trim().length > 0 ? value : null;
-}
-function toBooleanOrDefault(value: unknown, fallback: boolean): boolean {
-  return typeof value === "boolean" ? value : fallback;
-}
-function getCodexLimitPolicy(providerSpecificData: JsonRecord): {
-  use5h: boolean;
-  useWeekly: boolean;
-} {
-  const policy = asRecord(providerSpecificData.codexLimitPolicy);
-  return {
-    use5h: toBooleanOrDefault(policy.use5h, true),
-    useWeekly: toBooleanOrDefault(policy.useWeekly, true),
-  };
-}
-interface QuotaLimitPolicy {
-  enabled: boolean;
-  thresholdPercent: number;
-  windows: string[];
 }
 interface QuotaCacheView {
   quotas?: Record<
@@ -279,49 +261,6 @@ interface QuotaCacheView {
       resetAt?: string | null;
     }
   >;
-}
-function normalizeQuotaThreshold(
-  value: unknown,
-  fallback = DEFAULT_QUOTA_THRESHOLD_PERCENT
-): number {
-  const parsed = toNumber(value, fallback);
-  return Math.min(MAX_QUOTA_THRESHOLD_PERCENT, Math.max(MIN_QUOTA_THRESHOLD_PERCENT, parsed));
-}
-function normalizeWindowName(windowName: unknown): string | null {
-  if (typeof windowName !== "string") return null;
-  const normalized = windowName.trim().toLowerCase();
-  return normalized.length > 0 ? normalized : null;
-}
-function uniqueWindows(windows: string[]): string[] {
-  return [...new Set(windows)];
-}
-function normalizeCodexWindowName(windowName: unknown): string | null {
-  if (typeof windowName !== "string") return null;
-  const normalized = windowName.trim().toLowerCase();
-  if (normalized === "session (5h)" || normalized === "5h" || normalized === "five_hour") {
-    return "session";
-  }
-  if (normalized === "weekly (7d)" || normalized === "7d" || normalized === "seven_day") {
-    return "weekly";
-  }
-  return toCodexBaseQuotaWindowName(normalized);
-}
-function applyCodexWindowPolicy(rawWindows: string[], providerSpecificData: JsonRecord): string[] {
-  const codexPolicy = getCodexLimitPolicy(providerSpecificData);
-  const normalizedRaw = rawWindows.map(normalizeCodexWindowName).filter(Boolean) as string[];
-
-  // Preserve explicitly configured custom windows, but enforce canonical Codex windows
-  // from toggles so weekly exhaustion is never skipped when useWeekly=true.
-  let windows = [...normalizedRaw];
-  windows = windows.filter((windowName) => {
-    if (windowName === "session") return codexPolicy.use5h;
-    if (windowName === "weekly") return codexPolicy.useWeekly;
-    return true;
-  });
-  if (codexPolicy.use5h) windows.push("session");
-  if (codexPolicy.useWeekly) windows.push("weekly");
-
-  return uniqueWindows(windows);
 }
 function normalizeStatus(value: string | null): string {
   return (value || "").trim().toLowerCase();
@@ -354,77 +293,7 @@ function isTerminalConnectionStatusForModel(
   return true;
 }
 
-export function resolveQuotaLimitPolicy(
-  provider: string,
-  providerSpecificData: JsonRecord
-): QuotaLimitPolicy {
-  const rawPolicy = asRecord(providerSpecificData.limitPolicy);
-  const rawWindows = Array.isArray(rawPolicy.windows) ? rawPolicy.windows : [];
-  const windows = rawWindows.map(normalizeWindowName).filter(Boolean) as string[];
-
-  if (provider === "codex") {
-    const defaultWindows = applyCodexWindowPolicy(windows, providerSpecificData);
-    const enabled = toBooleanOrDefault(rawPolicy.enabled, defaultWindows.length > 0);
-
-    return {
-      enabled,
-      thresholdPercent: normalizeQuotaThreshold(rawPolicy.thresholdPercent),
-      windows: defaultWindows,
-    };
-  }
-
-  return {
-    enabled: toBooleanOrDefault(rawPolicy.enabled, false),
-    thresholdPercent: normalizeQuotaThreshold(rawPolicy.thresholdPercent),
-    windows,
-  };
-}
-export function evaluateQuotaLimitPolicy(
-  provider: string,
-  connection: ProviderConnectionView,
-  requestedModel: string | null = null
-): { blocked: boolean; reasons: string[]; resetAt: string | null } {
-  // Extra usage and Codex paid credits are opt-in billing, not a pre-dispatch skip: 5h/weekly
-  // bars must not hide the account (Codex defers to its mandatory credit-aware preflight).
-  if (defersQuotaCutoff(provider, connection.providerSpecificData, requestedModel)) {
-    return { blocked: false, reasons: [], resetAt: null };
-  }
-  const policy = resolveQuotaLimitPolicy(provider, connection.providerSpecificData);
-  if (!policy.enabled || policy.windows.length === 0) {
-    return { blocked: false, reasons: [], resetAt: null };
-  }
-
-  const reasons: string[] = [];
-  const resetCandidates: Array<string | null> = [];
-
-  for (const windowName of policy.windows) {
-    const effectiveWindowName =
-      provider === "codex" ? toCodexScopedQuotaWindowName(windowName, requestedModel) : windowName;
-    const status = getQuotaWindowStatus(
-      connection.id,
-      effectiveWindowName,
-      policy.thresholdPercent
-    );
-    if (!status?.reachedThreshold) continue;
-    reasons.push(
-      formatQuotaUsageReason(
-        {
-          key: effectiveWindowName,
-          displayName: status.displayName,
-          windowSeconds: status.windowSeconds,
-        },
-        status.usedPercentage
-      )
-    );
-    resetCandidates.push(status.resetAt);
-  }
-
-  return {
-    blocked: reasons.length > 0,
-    reasons,
-    resetAt: getEarliestFutureDate(resetCandidates),
-  };
-}
+export { resolveQuotaLimitPolicy, evaluateQuotaLimitPolicy } from "./quotaLimitPolicy";
 function parseFutureDateMs(value: string | null): number | null {
   if (!value) return null;
   // Tolerate numeric-epoch strings (e.g. "1781696905131.0") as well as ISO
@@ -2145,17 +2014,7 @@ export async function getProviderCredentialsWithQuotaPreflight(
   );
 
   const resilience = resolveResilienceSettings(await getCachedSettings());
-  const { defaultThresholdPercent, warnThresholdPercent, providerWindowDefaults } =
-    resilience.quotaPreflight;
-  const providerWindowMap = providerWindowDefaults[provider] || {};
-  const providerHasDefaults = Object.keys(providerWindowMap).length > 0;
-  // The factory default is "block at 2% remaining" — effectively "right
-  // before 429." Skipping preflight at that level is a clean no-op. If an
-  // operator has raised the global to anything stricter (e.g. 20% remaining
-  // = stop at 80% used), preflight needs to run for every connection so the
-  // tighter floor is honored.
-  const FACTORY_NO_OP_REMAINING_PERCENT = 2;
-  const globalDefaultIsRestrictive = defaultThresholdPercent > FACTORY_NO_OP_REMAINING_PERCENT;
+  const { warnThresholdPercent } = resilience.quotaPreflight;
   let pendingCredentialSelection: Awaited<ReturnType<typeof getProviderCredentials>> | undefined;
 
   while (true) {
@@ -2231,80 +2090,13 @@ export async function getProviderCredentialsWithQuotaPreflight(
       return { ...credentials, exclusiveLease: claim.lease };
     };
 
-    // Cascading resolver: per-connection override → per-(provider, window)
-    // default → global default. Used per-window when the fetcher exposes
-    // multiple windows, and once (with window=null) for single-signal
-    // fetchers. The warn fallback is uniform — windows don't need their own
-    // warn levels in v1.
-    const perConnectionWindowOverrides =
-      (credentials as { quotaWindowThresholds?: Record<string, number> | null })
-        .quotaWindowThresholds || {};
-
-    // Latency gate: skip the upstream usage fetch entirely when there's
-    // nothing to enforce. Preflight is only worth its cost when at least
-    // one of the following is true:
-    //   • a per-connection override on this row
-    //   • a per-(provider, window) default in resilience settings
-    //   • the legacy `quotaPreflightEnabled` flag in providerSpecificData
-    //   • the operator-enabled quota cutoff (resilience.quotaPreflight.enabled /
-    //     QUOTA_PREFLIGHT_CUTOFF_ENABLED) — #11234: it previously only armed the
-    //     auto-strategy candidate builder and the per-target cutoff for pinned
-    //     connections, so priority combos over sibling connections (no pinned
-    //     connectionId) never filtered an exhausted sister
-    //   • the global default is stricter than the factory no-op level
-    //     (factory = 2% remaining, basically "right before 429" — anything
-    //     stricter means the operator wants enforcement everywhere)
-    // Otherwise the resolver would return the factory default for every
-    // window, and a near-exhausted account would still be caught by the
-    // normal 429 → cooldown path.
-    // Explicit per-connection opt-out always wins over global/provider defaults.
-    // isQuotaPreflightEnabled is strict-=== true (back-compat), so it returns
-    // false for both "not set" and "explicit false" — we need an explicit check
-    // here to distinguish them.
-    const legacyForceDisable =
-      (credentials as { providerSpecificData?: Record<string, unknown> }).providerSpecificData
-        ?.quotaPreflightEnabled === false;
-    if (legacyForceDisable && !hasCodexCreditOptIn(provider, credentials, requestedModel)) {
+    if (!shouldApplyQuotaCutoff(provider, credentials, resilience.quotaPreflight, requestedModel)) {
       const committed = await commitLease();
       if (committed === null) continue;
       return committed;
     }
-
-    const hasConnectionOverrides = Object.keys(perConnectionWindowOverrides).length > 0;
-    const legacyForceEnable = isQuotaPreflightEnabled(credentials as Record<string, unknown>);
-    const globalCutoffEnabled = resilience.quotaPreflight.enabled === true;
-    if (
-      !hasConnectionOverrides &&
-      !providerHasDefaults &&
-      !(legacyForceEnable || hasCodexCreditOptIn(provider, credentials, requestedModel)) &&
-      !globalCutoffEnabled &&
-      !globalDefaultIsRestrictive
-    ) {
-      const committed = await commitLease();
-      if (committed === null) continue;
-      return committed;
-    }
-
-    // Returns the minimum-remaining cutoff for a window — matches the
-    // dashboard's quota bars so the number the user types in the modal
-    // means the same thing as the percentage rendered on the bar.
-    const lookupWindowNames = (windowName: string): string[] =>
-      provider === "codex"
-        ? uniqueWindows(
-            [windowName, toCodexBaseQuotaWindowName(windowName)].filter(Boolean) as string[]
-          )
-        : [windowName];
-    const resolveMinRemainingPercent = (windowName: string | null): number => {
-      if (windowName !== null) {
-        for (const lookupWindowName of lookupWindowNames(windowName)) {
-          const override = perConnectionWindowOverrides[lookupWindowName];
-          if (typeof override === "number") return override;
-          const providerDefault = providerWindowMap[lookupWindowName];
-          if (typeof providerDefault === "number") return providerDefault;
-        }
-      }
-      return defaultThresholdPercent;
-    };
+    const resolveCutoff = (windowName: string | null) =>
+      resolveMinRemainingPercent(provider, credentials, resilience.quotaPreflight, windowName);
     // #6842: openrouter also needs requestedModel, for the :free-window check.
     // agy/antigravity need it so Claude weekly cannot cool a Gemini request.
     const modelAwarePreflight =
@@ -2318,21 +2110,10 @@ export async function getProviderCredentialsWithQuotaPreflight(
         connectionId,
         preflightCredentials as Record<string, unknown>,
         {
-          resolveMinRemainingPercent,
+          resolveMinRemainingPercent: resolveCutoff,
           resolveWarnRemainingPercent: () => warnThresholdPercent,
-          isConfiguredCutoff: (windowName) => {
-            if (windowName !== null) {
-              for (const name of lookupWindowNames(windowName)) {
-                if (
-                  Object.hasOwn(perConnectionWindowOverrides, name) ||
-                  Object.hasOwn(providerWindowMap, name)
-                ) {
-                  return true;
-                }
-              }
-            }
-            return globalCutoffEnabled || globalDefaultIsRestrictive || legacyForceEnable;
-          },
+          isConfiguredCutoff: (windowName) =>
+            isConfiguredCutoff(provider, credentials, resilience.quotaPreflight, windowName),
         }
       );
     } catch (error) {
