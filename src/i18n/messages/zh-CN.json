@@ -6634,7 +6634,7 @@
       "claude": "使用现有的 OAuth 流程连接 Claude Code。",
       "cline": "使用现有的 OAuth 流程连接 Cline。",
       "cursor": "使用现有的 OAuth 流程连接 Cursor IDE。",
-      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
+      "cursor-api": "使用来自 cursor.com/dashboard/api 的用户 API 密钥（crsr_... 或 grok_...）连接 Cursor；无需 IDE 会话。",
       "github": "使用现有的 OAuth 流程连接 GitHub Copilot。",
       "gitlab-duo": "具有 ai_features + read_user 作用域的 OAuth 应用程序。在此 OmniRoute 实例上配置 GITLAB_DUO_OAUTH_CLIENT_ID 以及可选的 GITLAB_DUO_OAUTH_CLIENT_SECRET。",
       "kilocode": "使用现有的 OAuth 流程连接 Kilo Code。",

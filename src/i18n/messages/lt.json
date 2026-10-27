@@ -6634,7 +6634,7 @@
       "claude": "Prijunkite Claude Code naudodami esamą OAuth procesą.",
       "cline": "Prijunkite Cline naudodami esamą OAuth procesą.",
       "cursor": "Prijunkite Cursor IDE naudodami esamą OAuth procesą.",
-      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
+      "cursor-api": "Prijunkite Cursor naudodami vartotojo API raktą (crsr_... arba grok_...) iš cursor.com/dashboard/api; IDE seansas nereikalingas.",
       "github": "Prijunkite GitHub Copilot naudodami esamą OAuth procesą.",
       "gitlab-duo": "OAuth programa su ai_features + read_user prieigos sritimis. Šiame OmniRoute dieginyje sukonfigūruokite GITLAB_DUO_OAUTH_CLIENT_ID ir, jei reikia, GITLAB_DUO_OAUTH_CLIENT_SECRET.",
       "kilocode": "Prijunkite Kilo Code naudodami esamą OAuth procesą.",

@@ -6634,7 +6634,7 @@
       "claude": "기존 OAuth 흐름으로 Claude Code를 연결합니다.",
       "cline": "기존 OAuth 흐름으로 Cline을 연결합니다.",
       "cursor": "기존 OAuth 흐름으로 Cursor IDE를 연결합니다.",
-      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
+      "cursor-api": "cursor.com/dashboard/api에서 발급한 사용자 API 키(crsr_... 또는 grok_...)로 Cursor를 연결하세요. IDE 세션은 필요 없습니다.",
       "github": "기존 OAuth 흐름으로 GitHub Copilot을 연결합니다.",
       "gitlab-duo": "ai_features + read_user 스코프가 있는 OAuth 애플리케이션입니다. 이 OmniRoute 인스턴스에서 GITLAB_DUO_OAUTH_CLIENT_ID 및 선택적으로 GITLAB_DUO_OAUTH_CLIENT_SECRET을 구성하세요.",
       "kilocode": "기존 OAuth 흐름으로 Kilo Code를 연결합니다.",

@@ -6634,7 +6634,7 @@
       "claude": "Mevcut OAuth akışıyla Claude Code'u bağlayın.",
       "cline": "Mevcut OAuth akışıyla Cline'ı bağlayın.",
       "cursor": "Mevcut OAuth akışıyla Cursor IDE'yi bağlayın.",
-      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
+      "cursor-api": "Cursor'ı cursor.com/dashboard/api adresinden alınan bir kullanıcı API anahtarıyla (crsr_... veya grok_...) bağlayın; IDE oturumu gerekmez.",
       "github": "Mevcut OAuth akışıyla GitHub Copilot'ı bağlayın.",
       "gitlab-duo": "ai_features + read_user kapsamlarına sahip OAuth uygulaması. Bu OmniRoute örneğinde GITLAB_DUO_OAUTH_CLIENT_ID ve isteğe bağlı olarak GITLAB_DUO_OAUTH_CLIENT_SECRET yapılandırın.",
       "kilocode": "Mevcut OAuth akışıyla Kilo Code'u bağlayın.",

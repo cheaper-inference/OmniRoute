@@ -6634,7 +6634,7 @@
       "claude": "Savienojiet Claude Code ar esošo OAuth plūsmu.",
       "cline": "Savienojiet Cline ar esošo OAuth plūsmu.",
       "cursor": "Savienojiet Cursor IDE ar esošo OAuth plūsmu.",
-      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
+      "cursor-api": "Savienojiet Cursor ar lietotāja API atslēgu (crsr_... vai grok_...) no cursor.com/dashboard/api; IDE sesija nav nepieciešama.",
       "github": "Savienojiet GitHub Copilot ar esošo OAuth plūsmu.",
       "gitlab-duo": "OAuth lietojumprogramma ar ai_features + read_user tvērumiem. Konfigurējiet GITLAB_DUO_OAUTH_CLIENT_ID un pēc izvēles GITLAB_DUO_OAUTH_CLIENT_SECRET šajā OmniRoute instancē.",
       "kilocode": "Savienojiet Kilo Code ar esošo OAuth plūsmu.",

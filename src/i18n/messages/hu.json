@@ -6634,7 +6634,7 @@
       "claude": "A Claude Code összekapcsolása a meglévő OAuth-folyamattal.",
       "cline": "A Cline összekapcsolása a meglévő OAuth-folyamattal.",
       "cursor": "A Cursor IDE összekapcsolása a meglévő OAuth-folyamattal.",
-      "cursor-api": "__MISSING__:Connect Cursor with a user API key (crsr_... or grok_...) from cursor.com/dashboard/api; no IDE session needed.",
+      "cursor-api": "Csatlakoztassa a Cursort egy felhasználói API-kulccsal (crsr_... vagy grok_...) a cursor.com/dashboard/api oldalról; nincs szükség IDE-munkamenetre.",
       "github": "A GitHub Copilot összekapcsolása a meglévő OAuth-folyamattal.",
       "gitlab-duo": "OAuth alkalmazás ai_features + read_user hatókörökkel. Konfigurálja a GITLAB_DUO_OAUTH_CLIENT_ID és opcionálisan a GITLAB_DUO_OAUTH_CLIENT_SECRET változókat ezen az OmniRoute példányon.",
       "kilocode": "A Kilo Code összekapcsolása a meglévő OAuth-folyamattal.",
