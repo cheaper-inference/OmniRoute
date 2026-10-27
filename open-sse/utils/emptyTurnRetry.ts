@@ -12,6 +12,7 @@ import {
 import { isEmptyTurnCore } from "./streamEmptyChoices.ts";
 import { sanitizeStreamingChunk } from "../handlers/responseSanitizer.ts";
 import { getAnyReasoningValue, getReadableReasoningValue } from "./reasoningFields.ts";
+import { SYSTEM_ECHO_THRESHOLD } from "./directivePreambleStripper.ts";
 
 /** Max upstream bytes buffered for flush-empty-retry classification (flag-gated). */
 export const FLUSH_EMPTY_RETRY_MAX_BYTES = 256_000;
@@ -32,41 +33,43 @@ export type EmptyTurnSummary = {
 };
 
 /**
- * Which replay path a turn belongs to.
+ * Draft / system-echo blocks a model can emit instead of an answer:
+ * `<summary>…</summary>`, `<analysis>…</analysis>`, `<system-reminder>…</system-reminder>`.
  *
- * - `translated`: the upstream answer is translated for the client; the
- *   historical classifier judges the turn.
- * - `direct`: upstream and client speak the same format; the visible output
- *   of the turn decides.
- * - `unsupported`: a same-format pair the bounded probe cannot read (claude,
- *   gemini, ...): the replay arm stays closed for it.
+ * OmniRoute already treats exactly these constructs as system echoes that must
+ * not reach the client (see `directivePreambleStripper.ts`), so a turn whose
+ * ENTIRE content is such markup carries no answer — the downstream consumer
+ * strips the tags and is left with an empty turn (#17461).
+ *
+ * A block carrying >= `SYSTEM_ECHO_THRESHOLD` chars of content is NOT a draft
+ * skeleton: `directivePreambleStripper` preserves it as the model's real response
+ * (e.g. a Claude Code compaction reply `<analysis>…</analysis><summary>…</summary>`),
+ * so it counts as usable here too and is never retried as an empty turn.
+ *
+ * Bounded, non-overlapping repetition: one pass over the text, no nested
+ * quantifiers, so it cannot backtrack on untrusted content.
  */
-export type EmptyTurnReplayPath = "translated" | "direct" | "unsupported";
+const DRAFT_BLOCK_PATTERN = /<(summary|analysis|system-reminder)\b[^>]*>([\s\S]*?)<\/\1\s*>/gi;
 
 /**
- * The one replay-path rule of the repository: the upstream format decides
- * which classifier judges the turn, and the client format decides whether the
- * answer is translated at all.
+ * True when the text carries something a client can use as an answer.
+ *
+ * Draft/system-echo markup alone does not count: the turn is then "empty" for
+ * the flush-empty-retry classifier, so the recovery path can retry it on
+ * another connection instead of shipping a degenerate turn. Whitespace-only
+ * text does not count either (it used to, via `length > 0`).
  */
-export function resolveEmptyTurnReplayPath(
-  upstreamFormat: string,
-  clientFormat: string
-): EmptyTurnReplayPath {
-  // The Responses transformation has its own frame shape: the client speaks
-  // Responses too, yet the turn is still translated.
-  if (upstreamFormat === FORMATS.OPENAI_RESPONSES) return "translated";
-  if (upstreamFormat !== clientFormat) return "translated";
-  // The bounded probe reads the chat-completions shape exactly.
-  if (upstreamFormat === FORMATS.OPENAI) return "direct";
-  return "unsupported";
-}
-
-/**
- * A turn that ended legitimately (token limit, tool call, filtered content)
- * carries a valid completion, never a missing answer: never a retry trigger.
- */
-function isLegitEmptyTurn(summary: EmptyTurnSummary): boolean {
-  return LEGIT_EMPTY_TURN_FINISH.has(summary.finishReason) || summary.toolCallsPresent;
+export function hasUsableContentText(contentText: string | null | undefined): boolean {
+  const text = typeof contentText === "string" ? contentText : "";
+  if (!text.trim()) return false;
+  let hasSubstantialBlock = false;
+  // `String.prototype.replace` with a global regex always starts at index 0 and
+  // leaves `lastIndex` reset, so no manual state handling is needed.
+  const stripped = text.replace(DRAFT_BLOCK_PATTERN, (_match, _tag, inner: string) => {
+    if (inner.length >= SYSTEM_ECHO_THRESHOLD) hasSubstantialBlock = true;
+    return "";
+  });
+  return hasSubstantialBlock || stripped.trim().length > 0;
 }
 
 /**
@@ -76,8 +79,14 @@ function isLegitEmptyTurn(summary: EmptyTurnSummary): boolean {
  * (length/tool_calls/content_filter) and tool-call turns are never empty.
  */
 export function isUselessEmptyTurn(summary: EmptyTurnSummary): boolean {
-  if (isLegitEmptyTurn(summary)) return false;
-  if (summary.contentText.length > 0) return false;
+  if (LEGIT_EMPTY_TURN_FINISH.has(summary.finishReason)) return false;
+  if (summary.toolCallsPresent) return false;
+  if (hasUsableContentText(summary.contentText)) return false;
+  // Draft-only turn (#17461): the chunks carried content, but only
+  // `<summary>`/`<analysis>`/`<system-reminder>` markup, so nothing usable
+  // reached the client. The forwarded-chunk / usage arms below would call
+  // this a normal turn — it is not.
+  if (summary.contentText.trim().length > 0) return true;
   // Reasoning-only arm: non-empty reasoning with no content. The stop gate
   // applies to chat turns (finish=stop disambiguates from mid-stream deltas);
   // Responses translators never set a probe finish reason, so Responses
@@ -92,13 +101,38 @@ export function isUselessEmptyTurn(summary: EmptyTurnSummary): boolean {
 }
 
 /**
- * The direct-path rule: a turn is mute when it produced neither visible text
- * nor a tool call, whatever the number of tokens it spent. A text made of
- * blanks only is not a visible text.
+ * Which rule judges a buffered turn.
+ *
+ * - `translated`: the historical classifier (`isUselessEmptyTurn`).
+ * - `direct`: the upstream answer reaches the client untranslated in the
+ *   chat-completions shape, which the bounded probe reads exactly: the usable
+ *   output of the turn decides (`isMuteDirectTurn`).
+ *
+ * Every other pair (including a same-format claude or gemini pair) keeps the
+ * historical classifier.
  */
-function isMuteDirectTurn(summary: EmptyTurnSummary): boolean {
-  if (isLegitEmptyTurn(summary)) return false;
-  return summary.contentText.trim().length === 0;
+export type EmptyTurnReplayPath = "translated" | "direct";
+
+export function resolveEmptyTurnReplayPath(
+  upstreamFormat: string,
+  clientFormat: string
+): EmptyTurnReplayPath {
+  return upstreamFormat === FORMATS.OPENAI && clientFormat === FORMATS.OPENAI
+    ? "direct"
+    : "translated";
+}
+
+/**
+ * The direct-path rule: a turn is mute when it produced neither usable text nor
+ * a tool call, whatever number of tokens it spent. `isUselessEmptyTurn` lets a
+ * blank turn pass when the upstream reported usage; on the direct path that
+ * usage is the cost of the missing answer, so the turn is replayed instead.
+ * Legit empty stops (length, tool_calls, content_filter) are never mute.
+ */
+export function isMuteDirectTurn(summary: EmptyTurnSummary): boolean {
+  if (LEGIT_EMPTY_TURN_FINISH.has(summary.finishReason)) return false;
+  if (summary.toolCallsPresent) return false;
+  return !hasUsableContentText(summary.contentText);
 }
 
 /** A read that outlived the idle budget, kept distinct from a real chunk. */
@@ -132,7 +166,7 @@ async function drainBoundedChunks(
   maxBytes: number,
   idleMs: number,
   deadlineMs = 0,
-  opts?: { targetFormat?: string; sourceFormat?: string; replayPath?: EmptyTurnReplayPath }
+  opts?: { targetFormat?: string; sourceFormat?: string }
 ): Promise<{
   chunks: Uint8Array[];
   total: number;
@@ -149,10 +183,8 @@ async function drainBoundedChunks(
   // lines already fed (no re-split of consumed prefix).
   let probe: ProbeAccum | null = null;
   let consumed = 0;
-  // The early stop follows the replay path: without a path the historical
-  // predicate applies.
-  const { targetFormat = "", sourceFormat = "", replayPath = "translated" } = opts ?? {};
-
+  const targetFormat = opts?.targetFormat ?? "";
+  const sourceFormat = opts?.sourceFormat ?? "";
   // Probe cadence: probe every push while cheap; when the buffer is already
   // large without content, check every 16th push (worst case bounded ~2x
   // the end summary on content-free turns — measured 2.15x all-push at
@@ -203,7 +235,7 @@ async function drainBoundedChunks(
         for (const line of todo) replayParseLineQuiet(line, targetFormat, sourceFormat, probe);
         consumed = end;
       }
-      if (isUsefulTurn(buildProbeSummary(probe), replayPath)) {
+      if (isUsefulSummary(buildProbeSummary(probe))) {
         // Stop WITHOUT awaiting cancel: the clone is dropped and its reader
         // released in `finally`; awaiting cancel here can hang when the
         // producer only serves pull() on demand (the pending pull never
@@ -301,12 +333,7 @@ export async function readBoundedResponseOutcome(
   response: Response,
   maxBytes: number,
   idleMs = 0,
-  opts?: {
-    maxTotalMs?: number;
-    targetFormat?: string;
-    sourceFormat?: string;
-    replayPath?: EmptyTurnReplayPath;
-  }
+  opts?: { maxTotalMs?: number; targetFormat?: string; sourceFormat?: string }
 ): Promise<BoundedReadOutcome> {
   const clone = response.clone();
   if (!clone.body) return { kind: "skipped" };
@@ -324,7 +351,7 @@ export async function readBoundedResponseOutcome(
       maxBytes,
       idleMs,
       deadlineMs,
-      opts
+      { targetFormat: opts?.targetFormat, sourceFormat: opts?.sourceFormat }
     );
     if (earlyPass) {
       // Checked FIRST, before idle/over: the clone was already
@@ -432,10 +459,12 @@ export function judgeBufferedTurn(
   }
   const summary = summarizeReplayedUpstreamTurn(read.text, targetFormat, clientFormat);
   if (!summary) return { kind: "pass", why: "turn could not be summarized" };
-  // The replay path picks the rule: the direct path judges the visible output,
+  // The replay path picks the rule: the direct path judges the usable output,
   // every other path keeps the historical classifier.
-  const replayPath = resolveEmptyTurnReplayPath(targetFormat, clientFormat);
-  const mute = replayPath === "direct" ? isMuteDirectTurn(summary) : isUselessEmptyTurn(summary);
+  const mute =
+    resolveEmptyTurnReplayPath(targetFormat, clientFormat) === "direct"
+      ? isMuteDirectTurn(summary)
+      : isUselessEmptyTurn(summary);
   return mute
     ? { kind: "retry", reason: "empty turn" }
     : { kind: "pass", why: "turn has usable content" };
@@ -705,24 +734,14 @@ function buildProbeSummary(probe: ProbeAccum): EmptyTurnSummary {
  * summary already carries usable content or a tool call. Reasoning-only
  * never stops (judged by the idle branch + `isUselessEmptyTurn`).
  * Pure read of the summary — never throws on a well-formed summary.
+ *
+ * #17461: draft-only content (`<summary>`/`<analysis>` markup) is not usable
+ * content, so it must not end the read early and hide the turn from the
+ * judge.
  */
 export function isUsefulSummary(summary: EmptyTurnSummary | null): boolean {
   if (!summary) return false;
-  return summary.contentText.length > 0 || summary.toolCallsPresent;
-}
-
-/**
- * Early-stop predicate of the bounded read, per replay path.
- *
- * On the direct path the read stops on visible text only: a turn made of
- * blanks is not a usable answer, and stopping there would hide the turn from
- * the verdict that replays it. Every other path keeps the historical
- * predicate, unchanged.
- */
-function isUsefulTurn(summary: EmptyTurnSummary, path: EmptyTurnReplayPath): boolean {
-  if (summary.toolCallsPresent) return true;
-  if (path === "direct") return summary.contentText.trim().length > 0;
-  return isUsefulSummary(summary);
+  return hasUsableContentText(summary.contentText) || summary.toolCallsPresent;
 }
 
 /**

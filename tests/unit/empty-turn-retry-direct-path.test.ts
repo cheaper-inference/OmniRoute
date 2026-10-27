@@ -3,7 +3,6 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import type { EmptyTurnReplayPath } from "../../open-sse/utils/emptyTurnRetry.ts";
 
 // The hook case below opens the local database, so the whole file runs against
 // an isolated data directory, removed when the file ends.
@@ -21,6 +20,7 @@ process.env.STREAM_READINESS_TIMEOUT_MS = "1000";
 const emptyTurnRetry = await import("../../open-sse/utils/emptyTurnRetry.ts");
 const {
   FLUSH_EMPTY_RETRY_MAX_BYTES,
+  isMuteDirectTurn,
   isUselessEmptyTurn,
   judgeBufferedTurn,
   readBoundedResponseOutcome,
@@ -65,6 +65,32 @@ function chatStream(
 /** Tokens were produced, but no character of visible text reached the client. */
 const MUTE_TOKENS_TURN = chatStream(
   { delta: { role: "assistant", content: "" } },
+  { delta: {}, finish: "stop" }
+);
+
+/**
+ * Tokens were spent (the upstream reports usage), but no usable text reached the
+ * client. The historical classifier lets such a turn pass (the role chunk counts
+ * as a forwarded chunk and the usage as a working upstream); the direct rule
+ * replays it.
+ */
+const MUTE_WITH_USAGE_TURN = chatStream(
+  { delta: { role: "assistant", content: "" } },
+  { delta: {}, finish: "stop" }
+).replace(
+  "data: [DONE]",
+  frame({
+    id: "chatcmpl-empty-turn-direct",
+    object: "chat.completion.chunk",
+    model: "probe",
+    choices: [],
+    usage: { prompt_tokens: 12, completion_tokens: 40, total_tokens: 52 },
+  }) + "data: [DONE]"
+);
+
+/** Draft markup only: nothing usable reached the client (#17461). */
+const DRAFT_ONLY_TURN = chatStream(
+  { delta: { content: "<summary>draft</summary>" } },
   { delta: {}, finish: "stop" }
 );
 
@@ -141,14 +167,16 @@ test("a pair that needs a translation keeps the translated path", () => {
   );
 });
 
-test("a same-format pair the probe cannot read stays unsupported", () => {
+test("a same-format pair other than chat-completions keeps the translated path", () => {
+  // The replay arm is open for every pair (#17791): these pairs stay armed and
+  // are judged by the historical classifier.
   assert.equal(
     emptyTurnRetry.resolveEmptyTurnReplayPath(FORMATS.CLAUDE, FORMATS.CLAUDE),
-    "unsupported"
+    "translated"
   );
   assert.equal(
     emptyTurnRetry.resolveEmptyTurnReplayPath(FORMATS.GEMINI, FORMATS.GEMINI),
-    "unsupported"
+    "translated"
   );
 });
 
@@ -160,6 +188,23 @@ function directVerdict(body: string) {
 
 test("a direct turn with tokens but no visible text is replayed", () => {
   assert.equal(directVerdict(MUTE_TOKENS_TURN).kind, "retry");
+});
+
+test("a direct turn that spent tokens but has no usable text is replayed even with usage", () => {
+  const summary = summarizeReplayedUpstreamTurn(
+    MUTE_WITH_USAGE_TURN,
+    FORMATS.OPENAI,
+    FORMATS.OPENAI
+  );
+  assert.ok(summary, "the production summary reader must classify the turn");
+  // The historical classifier lets the turn through: that is the gap.
+  assert.equal(isUselessEmptyTurn(summary), false);
+  assert.equal(isMuteDirectTurn(summary), true);
+  assert.equal(directVerdict(MUTE_WITH_USAGE_TURN).kind, "retry");
+});
+
+test("a direct turn made of draft markup only is replayed", () => {
+  assert.equal(directVerdict(DRAFT_ONLY_TURN).kind, "retry");
 });
 
 test("a direct turn that carries reasoning only is replayed", () => {
@@ -206,28 +251,23 @@ test("the translated path keeps the historical verdicts", () => {
   assert.equal(translatedVerdict(RESPONSES_USAGE_TURN).kind, "pass");
 });
 
-// ── The bounded read stops on visible output only, on the direct path ──────
+// ── The bounded read stops on usable output only ──────────────────────────
 
-test("the direct path keeps reading a blanks-only turn instead of stopping early", async () => {
-  const replayPath: EmptyTurnReplayPath = "direct";
-  const direct = await readBoundedResponseOutcome(
-    sseResponse(WHITESPACE_TURN),
-    FLUSH_EMPTY_RETRY_MAX_BYTES,
-    1000,
-    { replayPath }
-  );
-  assert.equal(direct.kind, "text", "a blanks-only turn is read to its end on the direct path");
-
-  const historical = await readBoundedResponseOutcome(
-    sseResponse(WHITESPACE_TURN),
+test("the bounded read keeps reading a blanks-only or draft-only turn instead of stopping early", async () => {
+  for (const body of [WHITESPACE_TURN, DRAFT_ONLY_TURN]) {
+    const outcome = await readBoundedResponseOutcome(
+      sseResponse(body),
+      FLUSH_EMPTY_RETRY_MAX_BYTES,
+      1000
+    );
+    assert.equal(outcome.kind, "text", "a turn without usable text is read to its end");
+  }
+  const visible = await readBoundedResponseOutcome(
+    sseResponse(VISIBLE_TURN),
     FLUSH_EMPTY_RETRY_MAX_BYTES,
     1000
   );
-  assert.equal(
-    historical.kind,
-    "early-pass",
-    "the path without a replay rule keeps the historical early stop"
-  );
+  assert.equal(visible.kind, "early-pass", "a turn with usable text stops the read early");
 });
 
 // ── The replay loop ─────────────────────────────────────────────────────────
@@ -295,35 +335,21 @@ test("the direct replay loop adopts the turn that carries content", async () => 
   assert.equal(result.providerResponse, retried);
 });
 
-test("the replay loop refuses a same-format pair the probe cannot read", async () => {
+test("the direct replay loop replays a mute turn that reported usage", async () => {
   let executions = 0;
-  const original = sseResponse(MUTE_TOKENS_TURN);
-  // The bounded read clones the body before reading it: counting the clones
-  // counts the reads the loop performed.
-  let clones = 0;
-  const clone = original.clone.bind(original);
-  Object.defineProperty(original, "clone", {
-    configurable: true,
-    value: () => {
-      clones++;
-      return clone();
-    },
-  });
+  const retried = sseResponse(CONTENT_UPSTREAM_TURN);
   const result = await runEmptyTurnRetryLoop(
     baseDeps({
-      providerResponse: original,
-      targetFormat: FORMATS.CLAUDE,
-      clientResponseFormat: FORMATS.CLAUDE,
+      providerResponse: sseResponse(MUTE_WITH_USAGE_TURN),
       executeProviderRequest: async () => {
         executions++;
-        return { response: sseResponse(CONTENT_UPSTREAM_TURN) };
+        return { response: retried };
       },
     })
   );
-  assert.equal(executions, 0, "an unsupported pair never reaches the upstream again");
-  assert.equal(clones, 0, "an unsupported pair is never read");
-  assert.equal(result.adopted, false);
-  assert.equal(result.providerResponse, original);
+  assert.equal(executions, 1, "a mute turn with usage is replayed on the tip's armed path");
+  assert.equal(result.adopted, true);
+  assert.equal(result.providerResponse, retried);
 });
 
 test("a native terminal is never replayed", async () => {
@@ -461,7 +487,7 @@ test.after(async () => {
 test("the armed flag replays a mute direct turn and serves the replayed content", async () => {
   const dispatches: string[] = [];
   stubFetch(dispatches, (callIndex) =>
-    callIndex === 0 ? sseResponse(MUTE_TOKENS_TURN) : sseResponse(CONTENT_UPSTREAM_TURN)
+    callIndex === 0 ? sseResponse(MUTE_WITH_USAGE_TURN) : sseResponse(CONTENT_UPSTREAM_TURN)
   );
   const response = await handleChat(streamRequest());
   const bodyText = await response.text();

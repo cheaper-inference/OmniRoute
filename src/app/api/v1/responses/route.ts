@@ -25,7 +25,10 @@ import {
 } from "@omniroute/open-sse/utils/earlyStreamKeepalive";
 import { createStreamDeadlineSignal } from "@omniroute/open-sse/utils/streamDeadlineSignal";
 import { resolveKeepaliveThreshold } from "@omniroute/open-sse/utils/keepaliveThreshold";
-import { OPENAI_RESPONSES_IN_PROGRESS_FRAME } from "@omniroute/open-sse/utils/sseHeartbeat";
+import {
+  buildKeepaliveResponseId,
+  buildResponsesInProgressFrame,
+} from "@omniroute/open-sse/utils/responsesKeepaliveFrame";
 
 // NOTE: We do NOT call initTranslators() here — the translator registry is
 // bootstrapped at module level inside open-sse/translator/index.ts when it
@@ -226,12 +229,17 @@ async function postHandler(request: any) {
         admission.lease,
         { signal: streamSignal }
       );
+      // #17825: per-request complete frame (stable id, request-time created_at, request model).
+      const keepaliveFrame = buildResponsesInProgressFrame({
+        id: buildKeepaliveResponseId(),
+        model: typeof resolvedBody?.model === "string" ? resolvedBody.model : undefined,
+      });
       return await withEarlyStreamKeepalive(handlerResponse, {
         signal: streamSignal,
         thresholdMs,
-        startupFrame: OPENAI_RESPONSES_IN_PROGRESS_FRAME,
+        startupFrame: keepaliveFrame,
         applicationKeepalive: {
-          frame: OPENAI_RESPONSES_IN_PROGRESS_FRAME,
+          frame: keepaliveFrame,
           intervalMs: SSE_HEARTBEAT_INTERVAL_MS,
         },
         errorFrame: OPENAI_RESPONSES_ERROR_FRAME,

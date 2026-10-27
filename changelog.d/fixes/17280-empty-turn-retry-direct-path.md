@@ -1,1 +1,1 @@
-- **fix(sse):** an empty upstream turn on the direct streaming path is now replayed through the normal credential path instead of being returned as an empty 200 ([#17280](https://github.com/diegosouzapw/OmniRoute/pull/17280)) — thanks @maxmad64bis
+- **fix(sse):** a direct chat-completions streaming turn that spent tokens but produced no usable text is now replayed through the normal credential path (opt-in `FLUSH_EMPTY_RETRY_ENABLED`) instead of passing because the upstream reported usage ([#17280](https://github.com/diegosouzapw/OmniRoute/pull/17280)) — thanks @maxmad64bis
