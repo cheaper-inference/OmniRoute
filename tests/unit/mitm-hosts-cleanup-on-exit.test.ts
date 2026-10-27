@@ -45,7 +45,22 @@ async function resetStorage() {
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
 }
 
-test.beforeEach(async () => {
+test.beforeEach(async (t) => {
+  const hostsPath =
+    os.platform() === "win32"
+      ? path.join(process.env.SystemRoot || "C:\\Windows", "System32", "drivers", "etc", "hosts")
+      : "/etc/hosts";
+  // Removal is injected below; status must inspect the same clean fixture instead of host DNS.
+  t.mock.method(
+    fs,
+    "readFileSync",
+    new Proxy(fs.readFileSync, {
+      apply(read, receiver, args) {
+        if (args[0] === hostsPath) return "127.0.0.1 localhost\n";
+        return Reflect.apply(read, receiver, args);
+      },
+    })
+  );
   await resetStorage();
   manager.clearCachedPassword();
 });

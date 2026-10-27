@@ -8,7 +8,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { firstFailureLine, hostedSuiteIdentity } from "../quality/validate-release-green.mjs";
 
-const NAME_RE = /^(unit-\d+|integration-\d+|vitest)$/;
+const NAME_RE = /^(unit-\d+|integration-\d+|vitest(?:-\d+)?)$/;
 
 /** The JSON one suite job reports: its name, exit code and first failure line. */
 export function suiteResult(name, exitCode, log) {
@@ -39,7 +39,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const result = {
     ...suiteResult(name, exitCode, log),
     ...identity,
-    script: name === "vitest" ? "test:vitest+test:vitest:ui" : script,
+    script: name === "vitest" || name === "vitest-1" ? "test:vitest+test:vitest:ui" : script,
     shard,
     logSha256: createHash("sha256").update(log).digest("hex"),
   };

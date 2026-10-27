@@ -31,27 +31,19 @@ Mgbe osv ma ọ bụ Trivy ghọrọ ọbara ọbara n'ihi CVE ekpughere ọhụ
 
 Ọnụ ụzọ abụọ ahụ **na-agafe nwayọ** (exit 0) mgbe ngwa ọrụ adịghị ma ọ bụ mgbe nlele ahụ daa (osv-scanner adịghị na PATH, osv.dev/network enweghị ike iru, JSON ezighi ezi) — ọdịda **nlele** anaghị egbochi, naanị mbelata **tụrụ atụ** ka na-egbochi.
 
-## Ihe Egwu Anabatara Amaara
+## Ihe ize ndụ nke dependency a kwụsịrị iji
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Root lockfile anaghịzi agụnye `extract-zip` ma ọ bụ dependency edge na-eduga na ya mgbe
+e bulichara ụdị pinned nke ngwá ọrụ mmepe promptfoo. Nke a na-akwụsị chain
+`promptfoo` → `@openai/codex-security` → `extract-zip` nke a nabatara na mbụ ma soro ya na #14482.
+Nyocha regression ndị dị na `tests/unit/extract-zip-14482-exposure.test.ts` na-ajụ
+iweghachite ya ma na-edobe mmachibido iwu nke ibubata ya site na koodu production.
 
-`extract-zip@2.0.1` nwere ndụmọdụ abụọ dị oke egwu gbasara symlink-traversal na-enweghị ndozi.
-Dị ka ngalaba "enweghị ndozi n'elu" nke ngwọta CVE Variance dị n'elu si dị, nke a bụ **ihe egwu anabatara**, ọ bụghị nkwalite:
-
-- **Njikọ:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Ekwenyere site na `package-lock.json` — otu ngwugwu kpọmkwem n'ime osisi ndabere niile
-  (`@openai/codex-security`) na-ekwupụta `extract-zip`, ma otu ngwugwu kpọmkwem
-  (`promptfoo`) na-ekwupụta `@openai/codex-security`.
-- **Enweghị mwepụta edoziri dị ebe ọ bụla na njikọ ahụ.** `extract-zip@2.0.1` (ewepụtara na 2020) bụ mwepụta ikpeazụ nke ngwugwu ahụ — anaghị elekọta ya. `@openai/codex-security`'s
-  npm-latest ugbu a (`0.1.29`) ka na-adọta `extract-zip@2.0.1`.
-- **Enweghị ike iru ya site na mmepụta.** `promptfoo` bụ naanị devDependency (anaghị edepụta ya
-  n'okpuru `dependencies`), ma ọ nweghị faịlụ dị n'okpuru `src/`, `open-sse/`, ma ọ bụ `bin/` na-ebubata ngwugwu npm `extract-zip` — onye enyemaka `extractZip()` nke OmniRoute
-  (`src/lib/versionManager/binaryManager.ts:93`) na-eji `unzip`/`tar` nke ala ma ọ nweghị njikọ. `@openai/codex-security` na-ebukwa nchedo symlink-traversal nke ya n'elu onEntry callback nke extract-zip.
-- **Emelela** `extract-zip` site na `package.json` `overrides` — naanị ihe nnọchi anya kwesịrị ekwesị bụ Electron-org-internal ma ọ dakọghị na API na nyocha onEntry/defaultDirMode/defaultFileMode nke
-  `@openai/codex-security`; ịkwụsị ya ga-emebi nyocha nchekwa nke ngwugwu ahụ n'ụzọ dị jụụ.
-- **Ntọala:** osv `vulnCount` a tụrụ (3) adịlarị n'okpuru ntọala `config/quality/quality-baseline.json` (27) — ọ dịghị mgbanwe ratchet achọrọ.
-- **Nchedo mmebi:** `tests/unit/extract-zip-14482-exposure.test.ts` na-ekwusi ike na njikọ ahụ na enweghị ntinye mmepụta n'elu; ọ na-ada CI ma ọ bụrụ na otu n'ime ha emebie (dịka ọmụmaatụ, PR n'ọdịnihu na-eme ka `extract-zip` nwee ike iru site na mmepụta).
-- **Nsochi:** okwu #14482.
+Ndozi dependency dị ugbu a na-amachikwa compatibility overrides na MSAL client nke Azure identity,
+FTP client nke get-uri, na Zod dependency nke OpenCode v1 SDK. A na-eji controlled transports
+anwale inweta token Azure na iwepụta ihe site na FTP; package OpenCode abụọ ahụ
+na-eme build na test suite nke ha. Ọnụọgụ advisory nke registry bụ nha e mere
+n'otu oge, ọ pụkwara ịgbanwe mgbe e mechara commit lockfile.
 
 ## Nchịkọta ọrụ: Ndụmọdụ Scorecard → igbochi
 

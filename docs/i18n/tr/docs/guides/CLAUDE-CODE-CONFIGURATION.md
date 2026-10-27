@@ -49,17 +49,16 @@ etkin bağlamdan çözümler (böylece `omniroute connect <vps>` ve ardından
 
 ---
 
-## Keşif takma adları — Claude dışı modelleri `/model` seçicisinde gösterin
+## Keşif takma adları — Claude dışı modelleri `/model` seçicisinde gösterme
 
-Claude Code'un ağ geçidi model keşfi yalnızca kimlikleri `claude` veya
-`anthropic` ile başlayan modelleri listeler; bu nedenle
-`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` olduğunda yerel `/model` seçicisi
-normalde **yalnızca** OmniRoute'un Claude/Anthropic modellerini gösterir —
-`kimi/kimi-k2.6` veya `glm/glm-5.2`, sorunsuz yönlendirilse bile hiçbir zaman
-görünmez.
+Claude Code'un ağ geçidi model keşfi yalnızca `claude` veya `anthropic` ile başlayan
+kimlikleri listeler; bu nedenle `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1`
+ayarıyla yerel `/model` seçicisi normalde **yalnızca** OmniRoute'un
+Claude/Anthropic modellerini gösterir — bir `kimi/kimi-k2.6` veya `glm/glm-5.2`,
+sorunsuz şekilde yönlendirilse bile asla görünmez.
 
-OmniRoute, etkinleştirilmiş herhangi bir modeli (ve kombinasyonu), bu filtreden
-geçip seçicide görünmesi için bir `claude/…` kimliği altında yansıtabilir:
+OmniRoute, etkinleştirilmiş herhangi bir modeli (ve komboyu) bir `claude/…` kimliği
+altında yansıtabilir; böylece model bu filtreden geçer ve seçicide görünür:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -67,35 +66,43 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Claude Code'da bunlardan birini seçtiğinizde OmniRoute, yönlendirmeden önce
-`claude/` sarmalayıcısını kaldırarak gerçek kimliğe döner — gerçek bir
-`claude/<real-claude-model>` kimliğine (asıl Claude OAuth sağlayıcısı) ise her
-zaman dokunulmaz.
+Claude Code'da bunlardan birini seçtiğinizde, OmniRoute yönlendirmeden önce
+`claude/` sarmalayıcısını kaldırarak gerçek kimliğe geri döner — gerçek bir
+`claude/<real-claude-model>` kimliği (asıl Claude OAuth sağlayıcısı) her zaman
+olduğu gibi bırakılır.
 
-**Bu özellik varsayılan olarak kapalıdır** ve üç seviyeli bir geçit tarafından
-denetlenir (en özel olan önceliklidir); böylece standart bir OmniRoute,
-Claude Code kullanmayan istemciler için kataloğunu ikiye katlamaz:
+Varsayılan olarak yalnızca temel kimlikler yansıtılır. İsteğe bağlı
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` özellik bayrağı açıkken, kataloğun zaten
+listelediği akıl yürütme çabası varyantları (örn. `codex/gpt-6-sol-high`) diğer
+tüm kimlikler gibi yansıtılır; böylece Claude Code açık bir çaba seviyesi
+seçebilir ve istek yolunun somutlaştıramayacağı yerleşik `auto/*` kimlikleri
+yansıtılmaz. Çaba varyantlarının hiç listelenip listelenmeyeceği yine de
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` tarafından belirlenir — yansıtma,
+temel katalogda bulunmayan bir varyantı asla eklemez.
 
-| Seviye    | Konum                                                                                   |
-| --------- | --------------------------------------------------------------------------------------- |
-| Model     | Sağlayıcı ayrıntı sayfası → model bazlı "Claude Code'da göster" anahtarı                |
-| Sağlayıcı | Sağlayıcı ayrıntı sayfası → sağlayıcı düzeyindeki anahtar (tüm modellerini kapsar)      |
-| Genel     | Ayarlar → Özellik Bayrakları → `EXPOSE_CC_DISCOVERY_ALIASES` (varsayılan olarak kapalı) |
+**Bu özellik varsayılan olarak kapalıdır** ve üç seviyeli bir kapıyla kontrol
+edilir (en özel olan kazanır); böylece sade bir OmniRoute, Claude Code
+kullanmayan istemciler için kataloğunu asla ikiye katlamaz:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` ortam değişkeni, genel seviyeyi zorunlu olarak
-etkinleştirir ve kontrol panelindeki geçersiz kılma ayarına göre önceliklidir
-(Özellik Bayrakları ekranı, bu durumda "ortam değişkeni aracılığıyla etkin"
-notunu gösterir). Sağlayıcı ve model bazlı anahtarlar buradan itibaren ayarı
-daha da özelleştirir — örneğin genel ayar kapalı + Kimi sağlayıcısı açık
-olduğunda yalnızca Kimi'nin modelleri gösterilir.
+| Seviye    | Nerede                                                                             |
+| --------- | ---------------------------------------------------------------------------------- |
+| Model     | Sağlayıcı ayrıntı sayfası → model bazında "Claude Code'da göster" anahtarı         |
+| Sağlayıcı | Sağlayıcı ayrıntı sayfası → sağlayıcı seviyesinde anahtar (tüm modellerini kapsar) |
+| Genel     | Ayarlar → Özellik Bayrakları → `EXPOSE_CC_DISCOVERY_ALIASES` (varsayılan kapalı)   |
 
-> ⚠️ **Claude dışı modellerde pencere uyuşmazlığı.** Claude Code, tanımadığı tüm
-> kimlikler için 200K bağlam penceresi varsayar (`/v1/models` üzerinden gerçek
-> pencereyi okuyamaz). Daha büyük pencereye sahip bir modelde (ör. Kimi K2'nin
-> 256K penceresi), otomatik sıkıştırmanın zamanından önce devreye girmemesi için
-> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` değerini modelin gerçek penceresinden daha
-> düşük bir değere ayarlayın. Yukarıda oluşturulan profiller bunu zaten her
-> model için ayrı ayrı yapar.
+`EXPOSE_CC_DISCOVERY_ALIASES` ortam değişkeni genel seviyeyi zorla açar ve pano
+üzerinden yapılan geçersiz kılmanın önüne geçer (bu durumda Özellik Bayrakları
+ekranı "ortam değişkeni aracılığıyla etkin" notunu gösterir). Sağlayıcı başına ve
+model başına anahtarlar buradan itibaren ince ayar yapar — örneğin genel kapalı +
+Kimi sağlayıcısı açık ise yalnızca Kimi'nin modelleri gösterilir.
+
+> ⚠️ **Claude dışı modellerde pencere uyumsuzluğu.** Claude Code, tanımadığı
+> herhangi bir kimlik için 200K bağlam penceresi varsayar (`/v1/models`
+> üzerinden gerçek pencereyi okuyamaz). Daha büyük pencereye sahip bir model için
+> (örn. Kimi K2'nin 256K'sı), otomatik sıkıştırmanın erken tetiklenmemesi adına
+> `CLAUDE_CODE_AUTO_COMPACT_WINDOW` değişkenini modelin gerçek penceresinin
+> altında bir değere ayarlayın. Yukarıdaki oluşturulmuş profiller bunu model
+> başına zaten yapmaktadır.
 
 ---
 

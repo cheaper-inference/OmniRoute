@@ -1,0 +1,1 @@
+- Release-Green rejects incomplete workflow audits instead of accepting missing or broken scanners as advisory drift. Its report verifier requires explicit measured evidence for workflow checks, and scheduled-run/provenance policy violations remain blocking while measured ratchet debt keeps its existing classification.

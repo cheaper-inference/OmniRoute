@@ -1,0 +1,1 @@
+- **fix(ci):** Compare OpenAPI contracts against immutable event commits, preventing false removals after the base advances and rejecting incomplete required measurements.

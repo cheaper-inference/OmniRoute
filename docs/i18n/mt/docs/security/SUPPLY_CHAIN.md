@@ -31,36 +31,21 @@ Meta osv jew Trivy jsiru ħomor minħabba CVE żvelat ġdid, ir-rimedju huwa:
 
 Iż-żewġ gates **jaqbżu b'mod grazzjuż** (exit 0) meta l-għodda tkun assenti jew il-kejl ifalli (osv-scanner mhux fil-PATH, osv.dev/network ma jistax jintlaħaq, JSON invalidu) — falliment ta' **kejl** qatt ma jimblokka, biss rigressjoni **mkejla** timblokka.
 
-## Riskji Aċċettati Magħrufa
+## Riskju minn dipendenza rtirata
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Il-lockfile ewlieni ma għadux jinkludi `extract-zip` jew rabta ta’ dipendenza miegħu wara
+l-aġġornament tal-għodda tal-iżvilupp promptfoo bil-verżjoni ffissata. Dan itemm il-katina
+`promptfoo` → `@openai/codex-security` → `extract-zip`, li kienet ġiet aċċettata qabel
+u li hija ssorveljata f’#14482. Il-kontrolli ta’ rigressjoni f’`tests/unit/extract-zip-14482-exposure.test.ts`
+jirrifjutaw l-introduzzjoni mill-ġdid tagħha u jżommu l-projbizzjoni fuq importazzjonijiet
+mill-kodiċi tal-produzzjoni.
 
-`extract-zip@2.0.1` iġorr żewġ pariri ta' symlink-traversal ta' gravità għolja mhux irranġati.
-Skont il-fergħa "l-ebda soluzzjoni upstream" tar-rimedju tal-CVE Variance hawn fuq, dan huwa
-**riskju aċċettat**, mhux żieda:
-
-- **Katina:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Ikkonfermat permezz ta' `package-lock.json` — eżattament pakkett wieħed fis-siġra kollha tad-dipendenza
-  (`@openai/codex-security`) jiddikjara `extract-zip`, u eżattament pakkett wieħed
-  (`promptfoo`) jiddikjara `@openai/codex-security`.
-- **L-ebda rilaxx fiss ma jeżisti mkien fil-katina.** `extract-zip@2.0.1` (ippubblikat fl-2020) huwa l-aħħar rilaxx tal-pakkett — mhuwiex miżmum. `@openai/codex-security`'s
-  npm-latest kurrenti (`0.1.29`) għadu jiġbed `extract-zip@2.0.1`.
-- **Ma jistax jintlaħaq mill-produzzjoni.** `promptfoo` huwa devDependency-only (qatt ma elenkat
-  taħt `dependencies`), u l-ebda fajl taħt `src/`, `open-sse/`, jew `bin/` ma jimporta l-
-  pakkett npm `extract-zip` — il-helper `extractZip()` ta' OmniRoute stess
-  (`src/lib/versionManager/binaryManager.ts:93`) juża `unzip`/`tar` nattiv
-  u mhuwiex relatat. `@openai/codex-security` jinkludi wkoll il-gwardja tiegħu stess ta' symlink-traversal
-  fuq il-callback onEntry ta' extract-zip.
-- **Taliasx** `extract-zip` permezz ta' `package.json` `overrides` — l-unika sostituzzjoni vijabbli
-  hija Electron-org-internal u API-inkompatibbli mal-kontrolli onEntry/defaultDirMode/defaultFileMode ta'
-  `@openai/codex-security`;
-  li tissuperaha tkisser is-silenzju l-kontrolli tas-sigurtà ta' dak il-pakkett.
-- **Bażi:** il-`vulnCount` imkejjel ta' osv (3) diġà huwa ferm taħt il-bażi ffriżata
-  `config/quality/quality-baseline.json` (27) — l-ebda bidla ta' ratchet mhi meħtieġa.
-- **Gwardja ta' rigressjoni:** `tests/unit/extract-zip-14482-exposure.test.ts` jasserixxi l-
-  katina u l-invarjant ta' l-ebda importazzjoni ta' produzzjoni hawn fuq; ifalli CI jekk xi wieħed
-  qatt jinkiser (eż. PR futur jagħmel `extract-zip` jintlaħaq mill-produzzjoni).
-- **Traċċar:** issue #14482.
+It-tiswija attwali tad-dipendenzi tillimita wkoll is-sovrastrutturi tal-kompatibbiltà
+għall-klijent MSAL ta’ Azure identity, għall-klijent FTP ta’ get-uri, u għad-dipendenza
+Zod tal-SDK OpenCode v1. Il-kisba tat-tokens ta’ Azure u l-irkupru permezz tal-FTP jiġu
+ttestjati bi trasporti kkontrollati; iż-żewġ pakketti OpenCode iħaddmu s-suites tagħhom
+stess għall-build u għall-ittestjar. L-għadd ta’ avviżi fir-reġistru huwa kejl f’waqt
+partikolari u jista’ jinbidel wara li jiġi kkommitjat il-lockfile.
 
 ## Backlog: Parir ta' Scorecard → imblukkar
 

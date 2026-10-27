@@ -146,33 +146,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Kullanılabilir Beceriler
+## Mevcut Beceriler
 
-OmniRoute, `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` içinde bağlanmış 6 A2A becerisi sunar. Her beceri modülü `src/lib/a2a/skills/` içinde yer alır.
+OmniRoute, `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` içinde tanımlanmış 6 A2A becerisi sunar. Her beceri modülü `src/lib/a2a/skills/` dizininde bulunur.
 
-| Beceri               | ID                   | Açıklama                                                                                                                                                                  | Etiketler                   | Örnekler                                     |
-| :------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | :-------------------------- | :------------------------------------------- |
-| Akıllı Yönlendirme   | `smart-routing`      | OmniRoute'un kombinasyon motoru ve puanlama sistemini kullanarak bir istemi en uygun sağlayıcı/kombinasyon üzerinden yönlendirir                                          | yönlendirme, sağlayıcılar   | "Bu istemi en iyi model üzerinden yönlendir" |
-| Kota Yönetimi        | `quota-management`   | Sağlayıcı başına kota durumunu bildirir, çağrı yapanların ne zaman hız sınırlaması uygulayacağına/sağlayıcı değiştireceğine karar vermesine yardımcı olur                 | kota, sağlayıcılar          | "anthropic için kotayı kontrol et"           |
-| Sağlayıcı Keşfi      | `provider-discovery` | Yüklü sağlayıcıları yetenekleri, ücretsiz katman bayrakları ve OAuth durumlarıyla listeler                                                                                | sağlayıcılar, keşif         | "Hangi sağlayıcılar kullanılabilir?"         |
-| Maliyet Analizi      | `cost-analysis`      | Katalog ve son kullanıma göre bir isteğin/konuşmanın maliyetini tahmin eder                                                                                               | maliyet, kullanım           | "Bu konuşmanın maliyetini tahmin et"         |
-| Sistem Durumu Raporu | `health-report`      | Sağlayıcı başına devre kesici, bekleme süresi ve kilitlenme durumlarını toplar                                                                                            | sistem durumu, dayanıklılık | "Tüm sağlayıcıların durumunu göster"         |
-| Yetenekleri Listele  | `list-capabilities`  | Bağlam ekleme amacıyla ham SKILL.md URL'leri içeren bir markdown tablosu olarak 45 girdilik Agent Skills kataloğunun tamamını (23 API + 21 CLI + 1 yapılandırma) döndürür | katalog, keşif, beceriler   | "Tüm OmniRoute yeteneklerini listele"        |
+| Beceri             | ID                   | Açıklama                                                                                                                                                                   | Etiketler                  | Örnekler                                     |
+| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------- |
+| Smart Routing      | `smart-routing`      | OmniRoute'un combo motorunu ve puanlama sistemini kullanarak bir istemi en uygun sağlayıcı/kombo üzerinden yönlendirir                                                     | routing, providers         | "Bu istemi en iyi model üzerinden yönlendir" |
+| Quota Management   | `quota-management`   | Sağlayıcı bazında kota durumunu raporlar; çağıranların ne zaman kısıtlama yapmaya veya sağlayıcı değiştirmeye karar vermesine yardımcı olur                                | quota, providers           | "anthropic için kotayı kontrol et"           |
+| Provider Discovery | `provider-discovery` | Yüklü sağlayıcıları yetenekleri, ücretsiz katman bayrakları ve OAuth durumuyla birlikte listeler                                                                           | providers, discovery       | "Hangi sağlayıcılar mevcut?"                 |
+| Cost Analysis      | `cost-analysis`      | Katalog ve son kullanım verilerine dayanarak bir isteğin/konuşmanın maliyetini tahmin eder                                                                                 | cost, usage                | "Bu konuşmanın maliyetini tahmin et"         |
+| Health Report      | `health-report`      | Sağlayıcı başına circuit breaker, cooldown ve lockout durumlarını bir araya getirir                                                                                        | health, resilience         | "Tüm sağlayıcıların sağlık durumunu göster"  |
+| List Capabilities  | `list-capabilities`  | 45 girdilik Agent Skills kataloğunun tamamını (23 API + 21 CLI + 1 config), bağlam enjeksiyonu için ham SKILL.md URL'leriyle birlikte bir markdown tablosu olarak döndürür | catalog, discovery, skills | "Tüm OmniRoute yeteneklerini listele"        |
 
-> Agent Card, güncel 374 sağlayıcılı katalogla uyumlu tutulmalıdır; sağlayıcı sayıları ve ücretsiz/kimlik doğrulamasız kullanım meta verileri çalışma zamanı kayıt defterinden alınır.
+> Agent Card, canlı 375 sağlayıcılı katalogla uyumlu tutulmalıdır; sağlayıcı sayıları ile ücretsiz/kimlik doğrulamasız (no-auth) meta verileri çalışma zamanı kayıt defterinden (runtime registry) alınır.
 
-### `list-capabilities` Beceri Ayrıntıları
+### `list-capabilities` Beceri Detayı
 
-`list-capabilities` becerisi, API çağrıları göndermeden önce OmniRoute'un neler sunduğunu keşfetmesi gereken harici aracılar için özellikle kullanışlıdır. Yapılandırılmış bir markdown tablo yapıtı döndürür:
+`list-capabilities` becerisi, API çağrıları göndermeden önce OmniRoute'un neler sunduğunu keşfetmesi gereken harici aracılar (agent) için özellikle kullanışlıdır. Yapılandırılmış bir markdown tablosu çıktısı (artifact) döndürür:
 
 ```
-| ID | Ad | Kategori | Alan | Uç Noktalar/Komutlar | Ham URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Kimlik Doğrulama ve Oturumlar | api | kimlik doğrulama | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Her satır, aracıların SKILL.md dosyasının tamamını hemen getirebilmesi için `rawUrl` sütununu içerir. `metadata.totalSkills` alanı, katalog boyutunu yansıtır (bugün 45). Uygulama: `src/lib/a2a/skills/listCapabilities.ts`. Ayrıca bkz. [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Her satır, aracıların tam SKILL.md dosyasını anında alabilmesi için `rawUrl` sütununu içerir. `metadata.totalSkills` alanı katalog boyutunu yansıtır (bugün 45). Uygulama: `src/lib/a2a/skills/listCapabilities.ts`. Ayrıca bkz. [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -225,7 +225,7 @@ JSON-RPC uç noktası `/a2a`, standart A2A giriş noktasıdır. Aşağıdaki RES
 
 4. **Testleri yazın:** `tests/unit/a2a-<your-skill>.test.ts`. Başarılı senaryoyu ve hata senaryosunu kapsayın.
 
-5. Yeni yeteneği bu dosyadaki `Kullanılabilir Yetenekler` tablosunda **belgeleyin**.
+5. Yeni yeteneği bu dosyadaki `Available Skills` tablosunda **belgeleyin**.
 
 ---
 

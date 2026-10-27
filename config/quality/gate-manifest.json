@@ -702,6 +702,76 @@
       "name": "check:free-catalog-evidence",
       "command": "node scripts/check/check-free-catalog-evidence.mjs",
       "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check",
+      "command": "node scripts/i18n/check-translation-drift.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-ui-coverage",
+      "command": "node scripts/i18n/check-ui-keys-coverage.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-value-drift",
+      "command": "node scripts/i18n/check-ui-value-drift.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-value-drift:warn",
+      "command": "node scripts/i18n/check-ui-value-drift.mjs --warn",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-glossary",
+      "command": "node scripts/i18n/check-glossary-consistency.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-glossary:ko",
+      "command": "node scripts/i18n/check-glossary-consistency.mjs --locale=ko",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-ratio",
+      "command": "node scripts/i18n/check-translation-ratio.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-ratio:update",
+      "command": "node scripts/i18n/check-translation-ratio.mjs --update",
+      "disposition": "maintenance"
+    },
+    {
+      "name": "audit:deps",
+      "command": "node scripts/quality/audit-dependencies.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "audit:electron",
+      "command": "npm --prefix electron audit --audit-level=critical && (npm --prefix electron audit --audit-level=high || echo '::warning::electron high-severity advisories present (non-blocking)')",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-new-keys",
+      "command": "node scripts/i18n/check-new-key-coverage.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-keys",
+      "command": "node scripts/i18n/check-key-completeness.mjs",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "i18n:check-keys:cli",
+      "command": "node scripts/i18n/check-key-completeness.mjs --catalog=cli",
+      "disposition": "separately-invoked"
+    },
+    {
+      "name": "check:test-tla-order",
+      "command": "node scripts/check/check-test-tla-order.mjs",
+      "disposition": "separately-invoked"
     }
   ],
   "profiles": {

@@ -148,31 +148,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## 可用技能
 
-OmniRoute 公開了 6 項 A2A 技能，並在 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` 中完成連接。每個技能模組都位於 `src/lib/a2a/skills/`。
+OmniRoute 提供 6 個 A2A 技能,連接於 `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`。每個技能模組皆位於 `src/lib/a2a/skills/`。
 
-| 技能         | ID                   | 說明                                                                                                                           | 標籤             | 範例                          |
-| :----------- | :------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :--------------- | :---------------------------- |
-| 智慧路由     | `smart-routing`      | 使用 OmniRoute 的組合引擎與評分機制，透過最佳提供者／組合路由提示詞                                                            | 路由、提供者     | 「透過最佳模型路由此提示詞」  |
-| 配額管理     | `quota-management`   | 回報各提供者的配額狀態，協助呼叫端決定何時限流／切換                                                                           | 配額、提供者     | 「檢查 anthropic 的配額」     |
-| 提供者探索   | `provider-discovery` | 列出已安裝的提供者及其功能、免費方案標記與 OAuth 狀態                                                                          | 提供者、探索     | 「有哪些可用的提供者？」      |
-| 成本分析     | `cost-analysis`      | 根據目錄與近期使用量，估算請求／對話的成本                                                                                     | 成本、使用量     | 「估算此對話的成本」          |
-| 健康狀態報告 | `health-report`      | 彙總各提供者的斷路器、冷卻與鎖定狀態                                                                                           | 健康狀態、韌性   | 「顯示所有提供者的健康狀態」  |
-| 列出功能     | `list-capabilities`  | 以 markdown 表格傳回完整的 45 項 Agent Skills 目錄（23 項 API、21 項 CLI 與 1 項設定），並附上原始 SKILL.md URL 以供注入上下文 | 目錄、探索、技能 | 「列出 OmniRoute 的所有功能」 |
+| 技能          | ID                   | 說明                                                                                                                           | 標籤                       | 範例                            |
+| :------------ | :------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------ |
+| 智慧路由      | `smart-routing`      | 使用 OmniRoute 的 combo 引擎與評分機制,將提示詞路由至最佳的 provider/combo                                                     | routing, providers         | "使用最佳模型路由此提示詞"      |
+| 配額管理      | `quota-management`   | 回報各 provider 的配額狀態,協助呼叫端決定何時節流/切換                                                                         | quota, providers           | "檢查 anthropic 的配額"         |
+| Provider 探索 | `provider-discovery` | 列出已安裝的 providers,包含其功能能力、免費方案標記與 OAuth 狀態                                                               | providers, discovery       | "有哪些可用的 providers?"       |
+| 成本分析      | `cost-analysis`      | 根據目錄與近期用量,估算請求/對話的成本                                                                                         | cost, usage                | "估算此對話的成本"              |
+| 健康報告      | `health-report`      | 彙總各 provider 的熔斷器(circuit breaker)、冷卻與鎖定狀態                                                                      | health, resilience         | "顯示所有 providers 的健康狀態" |
+| 列出功能      | `list-capabilities`  | 以 markdown 表格回傳完整的 45 項 Agent Skills 目錄(23 個 API + 21 個 CLI + 1 個 config),並附上原始 SKILL.md URL 以供注入上下文 | catalog, discovery, skills | "列出所有 OmniRoute 功能"       |
 
-> Agent Card 應與即時的 374 個提供者目錄保持一致；提供者數量與免費／免驗證中繼資料皆取自執行階段登錄檔。
+> Agent Card 應與即時的 375 個 provider 目錄保持一致;provider 數量與免費/免驗證的中繼資料皆取自執行時期註冊表(runtime registry)。
 
-### `list-capabilities` 技能詳細資訊
+### `list-capabilities` 技能詳細說明
 
-`list-capabilities` 技能對於需要先探索 OmniRoute 所公開內容，再傳送 API 呼叫的外部代理程式特別實用。它會傳回結構化的 markdown 表格成品：
+`list-capabilities` 技能對於需要在發送 API 呼叫之前,先探索 OmniRoute 所提供內容的外部代理程式特別有用。它會回傳一個結構化的 markdown 表格產出物(artifact):
 
 ```
-| ID | 名稱 | 類別 | 領域 | 端點／命令 | 原始 URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | 驗證與工作階段 | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-每一列都包含 `rawUrl` 欄位，讓代理程式可立即擷取完整的 SKILL.md。`metadata.totalSkills` 欄位會反映目錄大小（目前為 45）。實作：`src/lib/a2a/skills/listCapabilities.ts`。另請參閱 [AGENT-SKILLS.md](./AGENT-SKILLS.md)。
+每一列都包含 `rawUrl` 欄位,讓代理程式可以立即擷取完整的 SKILL.md。`metadata.totalSkills` 欄位會反映目錄大小(目前為 45)。實作位置:`src/lib/a2a/skills/listCapabilities.ts`。另請參閱 [AGENT-SKILLS.md](./AGENT-SKILLS.md)。
 
 ---
 
@@ -264,7 +264,7 @@ JSON-RPC 端點 `/a2a` 是標準的 A2A 進入點。以下 REST 端點為儀表�
 
 ## 整合範例
 
-### Python（requests）
+### Python (requests)
 
 ```python
 import requests
@@ -283,7 +283,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript（fetch）
+### TypeScript (fetch)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {

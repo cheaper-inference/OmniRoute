@@ -31,28 +31,19 @@ osv ו-Trivy משווים תלויות (deps) מול מסדי נתונים של 
 
 שני השערים **מדלגים בחן** (exit 0) כאשר הכלי חסר או שהמדידה נכשלת (osv-scanner אינו ב-PATH, osv.dev/network בלתי נגיש, JSON לא חוקי) — כשל **מדידה** לעולם אינו חוסם, רק רגרסיה **נמדדת** חוסמת.
 
-## סיכונים ידועים ומקובלים
+## סיכון מתלות שהוצאה משימוש
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+קובץ הנעילה הראשי אינו כולל עוד את `extract-zip` או קישור תלות אליו, לאחר
+שדרוג כלי הפיתוח promptfoo שגרסתו קובעה. בכך הוצאה משימוש שרשרת התלויות שאושרה בעבר,
+`promptfoo` → `@openai/codex-security` → `extract-zip`, המתועדת ב-#14482.
+בדיקות הרגרסיה ב-`tests/unit/extract-zip-14482-exposure.test.ts` מונעות את
+החזרתה ושומרות על האיסור לייבא אותה מקוד הייצור.
 
-`extract-zip@2.0.1` מכיל שתי אזהרות חמורות של symlink-traversal שאינן מתוקנות.
-בהתאם לענף "אין תיקון במעלה הזרם" של פתרון CVE Variance לעיל, זהו **סיכון מקובל**,
-ולא עדכון גרסה:
-
-- **שרשרת:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  אומת באמצעות `package-lock.json` — בדיוק חבילה אחת בכל עץ התלויות
-  (`@openai/codex-security`) מצהירה על `extract-zip`, ובדיוק חבילה אחת
-  (`promptfoo`) מצהירה על `@openai/codex-security`.
-- **לא קיימת גרסה מתוקנת בשום מקום בשרשרת.** `extract-zip@2.0.1` (פורסם ב-2020) היא הגרסה הסופית של החבילה — היא אינה מתוחזקת. `npm-latest` הנוכחי של `@openai/codex-security` (`0.1.29`) עדיין מושך את `extract-zip@2.0.1`.
-- **בלתי נגיש מפרודקשן.** `promptfoo` הוא devDependency בלבד (מעולם לא מופיע
-  תחת `dependencies`), ואף קובץ תחת `src/`, `open-sse/`, או `bin/` אינו מייבא את
-  חבילת ה-npm `extract-zip` — פונקציית העזר `extractZip()` של OmniRoute
-  (`src/lib/versionManager/binaryManager.ts:93`) מפעילה `unzip`/`tar` מקומי ואינה קשורה. `@openai/codex-security` גם כוללת מנגנון הגנה משלה מפני symlink-traversal בנוסף לקריאת החוזר `onEntry` של extract-zip.
-- **אין** ליצור כינוי ל-`extract-zip` באמצעות `overrides` ב-`package.json` — התחליף היחיד בר-קיימא הוא Electron-org-internal ואינו תואם API לבדיקות `onEntry`/`defaultDirMode`/`defaultFileMode` של `@openai/codex-security`; עקיפה שלו תשבור בשקט את בדיקות האבטחה של חבילה זו.
-- **בסיס:** `vulnCount` הנמדד של osv (3) כבר נמוך בהרבה מהבסיס הקפוא
-  `config/quality/quality-baseline.json` (27) — אין צורך בשינוי רצ'ט.
-- **הגנת רגרסיה:** `tests/unit/extract-zip-14482-exposure.test.ts` מאמת את השרשרת ואת אי-הייבוא לפרודקשן הנ"ל; הוא גורם לכישלון CI אם אחד מהם אי פעם נשבר (לדוגמה, PR עתידי הופך את `extract-zip` לנגיש מפרודקשן).
-- **מעקב:** גיליון #14482.
+תיקון התלויות הנוכחי גם מגביל את מעקפי התאימות ללקוח MSAL של Azure identity,
+ללקוח FTP של get-uri ולתלות Zod של OpenCode v1 SDK. קבלת אסימוני Azure
+ואחזור באמצעות FTP נבדקים עם תעבורות מבוקרות; שתי חבילות OpenCode
+מריצות את חבילות הבנייה והבדיקות שלהן. ספירות האזהרות במאגר הן מדידות
+בנקודת זמן מסוימת ועשויות להשתנות לאחר שקובץ הנעילה נשמר במאגר.
 
 ## צבר משימות: אזהרת Scorecard ← חסימה
 

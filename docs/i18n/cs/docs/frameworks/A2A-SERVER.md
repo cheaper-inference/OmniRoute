@@ -148,31 +148,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Dostupné dovednosti
 
-OmniRoute zpřístupňuje 6 dovedností A2A propojených v `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Každý modul dovednosti se nachází v `src/lib/a2a/skills/`.
+OmniRoute zpřístupňuje 6 dovedností A2A zapojených v `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Každý modul dovednosti se nachází v `src/lib/a2a/skills/`.
 
-| Dovednost                | ID                   | Popis                                                                                                                                                                 | Štítky                          | Příklady                                |
-| :----------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------ | :-------------------------------------- |
-| Chytré směrování         | `smart-routing`      | Směruje výzvu přes optimálního poskytovatele nebo kombinaci pomocí kombinačního a hodnoticího enginu OmniRoute                                                        | směrování, poskytovatelé        | „Směruj tuto výzvu přes nejlepší model“ |
-| Správa kvót              | `quota-management`   | Informuje o stavu kvót jednotlivých poskytovatelů a pomáhá volajícím rozhodnout, kdy omezit provoz nebo přepnout                                                      | kvóty, poskytovatelé            | „Zkontroluj kvótu pro anthropic“        |
-| Zjišťování poskytovatelů | `provider-discovery` | Vypisuje nainstalované poskytovatele včetně funkcí, příznaků bezplatné úrovně a stavu OAuth                                                                           | poskytovatelé, zjišťování       | „Kteří poskytovatelé jsou k dispozici?“ |
-| Analýza nákladů          | `cost-analysis`      | Odhaduje náklady na požadavek nebo konverzaci na základě katalogu a nedávného využití                                                                                 | náklady, využití                | „Odhadni náklady na tuto konverzaci“    |
-| Zpráva o stavu           | `health-report`      | Agreguje stav jističe, období zklidnění a uzamčení pro jednotlivé poskytovatele                                                                                       | stav, odolnost                  | „Zobraz stav všech poskytovatelů“       |
-| Výpis funkcí             | `list-capabilities`  | Vrací úplný katalog 45 dovedností agenta (23 API + 21 CLI + 1 konfigurace) jako tabulku markdownu s nezpracovanými adresami URL souborů SKILL.md pro vložení kontextu | katalog, zjišťování, dovednosti | „Vypiš všechny funkce OmniRoute“        |
+| Dovednost          | ID                   | Popis                                                                                                                                                    | Štítky                     | Příklady                                    |
+| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------ |
+| Smart Routing      | `smart-routing`      | Směruje prompt přes optimálního poskytovatele/kombinaci pomocí combo enginu OmniRoute + skórování                                                        | routing, providers         | "Nasměruj tento prompt přes nejlepší model" |
+| Quota Management   | `quota-management`   | Hlásí stav kvót jednotlivých poskytovatelů a pomáhá volajícím rozhodnout, kdy omezit/přepnout                                                            | quota, providers           | "Zkontroluj kvótu pro anthropic"            |
+| Provider Discovery | `provider-discovery` | Vypisuje nainstalované poskytovatele s jejich schopnostmi, příznaky free-tier a stavem OAuth                                                             | providers, discovery       | "Jací poskytovatelé jsou k dispozici?"      |
+| Cost Analysis      | `cost-analysis`      | Odhaduje náklady požadavku/konverzace na základě katalogu + nedávného využití                                                                            | cost, usage                | "Odhadni náklady této konverzace"           |
+| Health Report      | `health-report`      | Agreguje stav circuit breakeru, cooldownu a zablokování pro jednotlivé poskytovatele                                                                     | health, resilience         | "Zobraz stav všech poskytovatelů"           |
+| List Capabilities  | `list-capabilities`  | Vrací kompletní katalog Agent Skills se 45 položkami (23 API + 21 CLI + 1 config) jako markdown tabulku s raw URL adresami SKILL.md pro vložení kontextu | catalog, discovery, skills | "Vypiš všechny schopnosti OmniRoute"        |
 
-> Karta agenta by měla být udržována v souladu s aktuálním katalogem 374 poskytovatelů; počty poskytovatelů a metadata o bezplatném přístupu bez ověření pocházejí z registru za běhu.
+> Agent Card by měl být udržován v souladu s živým katalogem 375 poskytovatelů; počty poskytovatelů a metadata free/no-auth pocházejí z běhového registru.
 
-### Podrobnosti o dovednosti `list-capabilities`
+### Podrobnosti dovednosti `list-capabilities`
 
-Dovednost `list-capabilities` je zvláště užitečná pro externí agenty, kteří potřebují zjistit, co OmniRoute zpřístupňuje, než odešlou volání API. Vrací strukturovaný artefakt v podobě tabulky markdownu:
+Dovednost `list-capabilities` je obzvláště užitečná pro externí agenty, kteří potřebují před odesláním volání API zjistit, co OmniRoute zpřístupňuje. Vrací artefakt ve formě strukturované markdown tabulky:
 
 ```
-| ID | Název | Kategorie | Oblast | Koncové body/příkazy | Nezpracovaná adresa URL |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Ověřování a relace | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Každý řádek obsahuje sloupec `rawUrl`, takže agenti mohou okamžitě načíst celý soubor SKILL.md. Pole `metadata.totalSkills` odpovídá velikosti katalogu (aktuálně 45). Implementace: `src/lib/a2a/skills/listCapabilities.ts`. Viz také [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Každý řádek obsahuje sloupec `rawUrl`, takže agenti mohou okamžitě stáhnout celý soubor SKILL.md. Pole `metadata.totalSkills` odráží velikost katalogu (dnes 45). Implementace: `src/lib/a2a/skills/listCapabilities.ts`. Viz také [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

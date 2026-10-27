@@ -31,29 +31,19 @@ Ketika osv atau Trivy menjadi merah karena CVE yang baru diungkapkan, solusinya 
 
 Kedua gerbang **melewati dengan anggun** (exit 0) ketika alat tidak ada atau pengukuran gagal (osv-scanner tidak ada di PATH, osv.dev/network tidak dapat dijangkau, JSON tidak valid) — kegagalan **pengukuran** tidak pernah memblokir, hanya regresi yang **terukur** yang memblokir.
 
-## Risiko yang Diketahui dan Diterima
+## Risiko dependensi yang dihentikan
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Lockfile root tidak lagi menyertakan `extract-zip` atau jalur dependensi menuju paket tersebut setelah
+memutakhirkan alat pengembangan promptfoo yang versinya dikunci. Langkah ini menghentikan rantai
+`promptfoo` → `@openai/codex-security` → `extract-zip` yang sebelumnya diterima dan dilacak dalam #14482.
+Pemeriksaan regresi dalam `tests/unit/extract-zip-14482-exposure.test.ts` menolak
+diperkenalkannya kembali rantai tersebut dan mempertahankan larangan impor dari kode produksi.
 
-`extract-zip@2.0.1` memiliki dua advisori traversal symlink tingkat keparahan tinggi yang belum ditambal.
-Sesuai cabang "no upstream fix" dari perbaikan CVE Variance di atas, ini adalah
-**risiko yang diterima**, bukan peningkatan:
-
-- **Rantai:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Dikonfirmasi melalui `package-lock.json` — tepat satu paket di seluruh pohon dependensi
-  (`@openai/codex-security`) mendeklarasikan `extract-zip`, dan tepat satu paket
-  (`promptfoo`) mendeklarasikan `@openai/codex-security`.
-- **Tidak ada rilis perbaikan yang ada di mana pun dalam rantai.** `extract-zip@2.0.1` (diterbitkan 2020) adalah rilis terakhir paket tersebut — tidak lagi dipelihara. `@openai/codex-security` versi npm-latest saat ini (`0.1.29`) masih menarik `extract-zip@2.0.1`.
-- **Tidak dapat dijangkau dari produksi.** `promptfoo` hanya merupakan devDependency (tidak pernah terdaftar
-  di bawah `dependencies`), dan tidak ada file di bawah `src/`, `open-sse/`, atau `bin/` yang mengimpor
-  paket npm `extract-zip` — helper `extractZip()` milik OmniRoute sendiri
-  (`src/lib/versionManager/binaryManager.ts:93`) menggunakan `unzip`/`tar` asli
-  dan tidak terkait. `@openai/codex-security` juga menyertakan pelindung traversal symlink-nya sendiri
-  di atas callback onEntry `extract-zip`.
-- **Jangan** membuat alias `extract-zip` melalui `overrides` di `package.json` — satu-satunya pengganti langsung yang layak adalah Electron-org-internal dan tidak kompatibel dengan API dengan pemeriksaan onEntry/defaultDirMode/defaultFileMode milik `@openai/codex-security`; menimpanya akan secara diam-diam merusak pemeriksaan keamanan paket tersebut.
-- **Baseline:** `vulnCount` osv yang terukur (3) sudah jauh di bawah baseline `config/quality/quality-baseline.json` yang dibekukan (27) — tidak diperlukan perubahan ratchet.
-- **Penjaga Regresi:** `tests/unit/extract-zip-14482-exposure.test.ts` menegaskan rantai dan invarian tanpa impor produksi di atas; ini akan menggagalkan CI jika salah satunya rusak (misalnya, PR di masa mendatang membuat `extract-zip` dapat dijangkau dari produksi).
-- **Pelacakan:** isu #14482.
+Perbaikan dependensi saat ini juga membatasi override kompatibilitas pada klien MSAL milik Azure identity,
+klien FTP milik get-uri, dan dependensi Zod milik OpenCode v1 SDK. Akuisisi token Azure
+dan pengambilan melalui FTP diuji dengan transport yang dikontrol; kedua paket OpenCode
+menjalankan rangkaian build dan pengujiannya masing-masing. Jumlah advisory registry merupakan pengukuran
+pada satu titik waktu dan dapat berubah setelah lockfile di-commit.
 
 ## Backlog: Saran Scorecard → pemblokiran
 

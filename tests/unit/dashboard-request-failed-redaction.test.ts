@@ -7,6 +7,7 @@ import { test } from "node:test";
 import { fileURLToPath } from "node:url";
 
 import type { RequestFailedPayload } from "../../src/lib/events/types.ts";
+import { DEFAULT_CODEX_CLIENT_VERSION } from "../../src/shared/constants/codexClient.ts";
 
 const RESULT_PREFIX = "DASHBOARD_FAILURE_PROBE_RESULT=";
 const repoRoot = fileURLToPath(new URL("../../", import.meta.url));
@@ -71,6 +72,10 @@ test("persistAttemptLogs redacts request.failed delivery/replay but keeps its in
       DATA_DIR: dataDir,
       OMNIROUTE_PLUGINS_DIR: pluginsDir,
       API_KEY_SECRET: "test-dashboard-failure-redaction-secret",
+      // The subprocess is not a node:test worker. Pin this unrelated identity
+      // so importing the real pipeline cannot start an npm registry refresh.
+      GITHUB_COPILOT_CLI_VERSION: "1.0.91",
+      CODEX_CLIENT_VERSION: DEFAULT_CODEX_CLIENT_VERSION,
       PII_RESPONSE_SANITIZATION: "false",
       OMNIROUTE_ENABLE_LIVE_WS: "0",
     });

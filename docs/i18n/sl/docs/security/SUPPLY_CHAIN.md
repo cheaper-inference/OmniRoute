@@ -31,33 +31,11 @@ Ko osv ali Trivy postaneta rdeča zaradi novo razkrite CVE, je rešitev:
 
 Oba prehoda se **elegantno PRESKOČITA** (izhod 0), če orodje ni prisotno ali meritev ne uspe (osv-scanner ni v PATH, osv.dev/omrežje nedosegljivo, neveljaven JSON) — napaka **meritve** nikoli ne blokira, blokira le **izmerjena** regresija.
 
-## Znana sprejeta tveganja
+## Tveganje opuščene odvisnosti
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Korenska zaklepna datoteka po nadgradnji pripetega razvojnega orodja promptfoo ne vključuje več paketa `extract-zip` ali povezave odvisnosti do njega. S tem je opuščena predhodno sprejeta veriga `promptfoo` → `@openai/codex-security` → `extract-zip`, ki se spremlja v #14482. Preverjanja regresij v `tests/unit/extract-zip-14482-exposure.test.ts` zavrnejo njegovo ponovno uvedbo in ohranjajo prepoved uvozov iz produkcijske kode.
 
-`extract-zip@2.0.1` vsebuje dve nepopravljeni visoko-kritični opozorili o prečkanju simbolnih povezav.
-V skladu z vejo "brez popravka navzgor" zgoraj omenjenega popravka CVE Variance je to **sprejeto tveganje**, ne posodobitev:
-
-- **Veriga:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  Potrjeno preko `package-lock.json` — natanko en paket v celotnem drevesu odvisnosti
-  (`@openai/codex-security`) deklarira `extract-zip`, in natanko en paket
-  (`promptfoo`) deklarira `@openai/codex-security`.
-- **V verigi ne obstaja nobena popravljena izdaja.** `extract-zip@2.0.1` (objavljeno 2020) je končna izdaja paketa — ni vzdrževan. Trenutna npm-najsodobnejša različica (`0.1.29`) `@openai/codex-security` še vedno uporablja `extract-zip@2.0.1`.
-- **Nedosegljivo iz produkcije.** `promptfoo` je samo devDependency (nikoli ni naveden
-  pod `dependencies`), in nobena datoteka pod `src/`, `open-sse/` ali `bin/` ne uvaža
-  paketa npm `extract-zip` — lastna pomočna funkcija `extractZip()` OmniRoute
-  (`src/lib/versionManager/binaryManager.ts:93`) uporablja izvorne `unzip`/`tar`
-  in ni povezana. `@openai/codex-security` prav tako vključuje lastno zaščito pred prečkanjem simbolnih povezav, poleg povratnega klica `onEntry` paketa `extract-zip`.
-- **Ne** uporabljajte vzdevka `extract-zip` preko `package.json` `overrides` — edina izvedljiva
-  nadomestna rešitev je Electron-org-internal in je API-nezdružljiva z
-  lastnimi preverjanji `onEntry`/`defaultDirMode`/`defaultFileMode` paketa
-  `@openai/codex-security`; preglasitev bi tiho pokvarila varnostna preverjanja tega paketa.
-- **Osnovna vrednost:** izmerjeno osv `vulnCount` (3) je že precej pod zamrznjeno
-  osnovno vrednostjo `config/quality/quality-baseline.json` (27) — sprememba "ratchet" ni potrebna.
-- **Zaščita pred regresijo:** `tests/unit/extract-zip-14482-exposure.test.ts` potrjuje
-  verigo in zgoraj omenjeno invarianto brez uvoza v produkcijo; CI ne uspe, če se katera koli od teh kdaj
-  pokvari (npr. prihodnji PR omogoči dosegljivost `extract-zip` iz produkcije).
-- **Sledenje:** težava #14482.
+Trenutni popravek odvisnosti prav tako omejuje preglasitve združljivosti na odjemalca MSAL storitve Azure Identity, odjemalca FTP paketa get-uri in odvisnost Zod kompleta SDK OpenCode v1. Pridobivanje žetonov Azure in pridobivanje prek FTP sta preizkušena z nadzorovanimi transporti; oba paketa OpenCode izvajata lastna postopka gradnje in zbirki preizkusov. Število varnostnih opozoril v registru predstavlja meritev v določenem trenutku in se lahko po uveljavitvi zaklepne datoteke spremeni.
 
 ## Zaostanek: Opozorilo Scorecard → blokiranje
 
