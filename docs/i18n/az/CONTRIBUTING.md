@@ -170,18 +170,18 @@ refactor(db): consolidate rate limit tables
 ## Testlərin işə salınması
 
 ```bash
-# Bütün testlər (modul + vitest + ekosistem + e2e)
+# Bütün testlər (unit + vitest + ecosystem + e2e)
 npm run test:all
 
-# Tək test faylı (Node.js-ün daxili test icraedicisi — testlərin əksəriyyəti bundan istifadə edir)
+# Tək test faylı (Node.js-ın daxili test icraedicisi — əksər testlər bundan istifadə edir)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Yalnız etdiyiniz dəyişiklikdən təsirlənən modul testləri (CI keçidi ilə eyni TIA selektoru, #8084)
-npm run test:scoped            # son commit-dəki (və ya işçi ağacındakı) dəyişikliklər
-npm run test:scoped:staged     # yalnız mərhələlənmiş dəyişikliklər — pre-commit işə salınması ilə yaxşı uyğunlaşır
-npm run test:scoped:full       # əvvəlcə import qrafı xəritəsini yenidən qurur (fayllar əlavə edildikdən/köçürüldükdən sonra)
-# Çıxış 1 + "tam dəsti işə salın" mesajı mərkəzi faylın (tsconfig, package.json, …) və ya
-# xəritələnməmiş mənbənin dəyişdiyini bildirir — selektor təhlükəsiz şəkildə dayanır və heç vaxt səssizcə testləri ötürmür.
+# Yalnız dəyişikliyinizin təsir etdiyi unit testləri (CI keçidi ilə eyni TIA seçicisi, #8084)
+npm run test:scoped            # son commit-dəki (və ya işçi ağacdakı) dəyişikliklər
+npm run test:scoped:staged     # yalnız stage edilmiş dəyişikliklər — pre-commit icrası ilə yaxşı uyğunlaşır
+npm run test:scoped:full       # əvvəlcə import qrafiki xəritəsini yenidən qurur (fayllar əlavə edildikdən/köçürüldükdən sonra)
+# Exit 1 + "run the full suite" o deməkdir ki, mərkəzi fayl (tsconfig, package.json, …) və ya
+# xəritələndirilməmiş mənbə dəyişib — seçici təhlükəsiz şəkildə uğursuz olur, heç vaxt səssizcə ötürmür.
 
 # Vitest (MCP serveri, autoCombo, keş)
 npm run test:vitest
@@ -189,13 +189,13 @@ npm run test:vitest
 # E2E testləri (Playwright tələb edir)
 npm run test:e2e
 
-# Protokol klientlərinin E2E testləri (MCP nəqliyyatları, A2A)
+# Protokol müştərilərinin E2E testləri (MCP nəqletmə mexanizmləri, A2A)
 npm run test:protocols:e2e
 
 # Ekosistem uyğunluğu testləri
 npm run test:ecosystem
 
-# Əhatə keçidi: ifadələrin/sətirlərin/funksiyaların/budaqların 60%-i
+# Örtük keçidi: ifadələrin/sətirlərin/funksiyaların/budaqların 60%-i
 npm run test:coverage
 npm run coverage:report
 
@@ -203,51 +203,52 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Keçidlə qorunan real yuxarı axın kombinasiya tüstü testi (VPS girişi + real provayder kreditləri tələb edir)
-# REAL provayderlərə sorğu göndərir — kiçik xərc yaradır. CI-də HEÇ VAXT işə salınmır. Keçid olmadan düzgün şəkildə ötürülür.
-# Tələb olunur: ssh root@192.168.0.15 girişi (VPS-dən yalnız oxunan DB şəklini mənbə kimi yükləyir).
+# Keçidlə qorunan real yuxarı axın combo smoke testi (VPS girişi + real provayder kreditləri tələb edir)
+# REAL provayderlərə sorğu göndərir — kiçik xərc yaradır. CI-da HEÇ VAXT işləmir. Keçid olmadan problemsiz ötürülür.
+# Tələb olunur: ssh root@192.168.0.15 girişi (VPS-dən yalnız oxunan DB snapshot-ını mənbə kimi qoşur).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Mərhələ-3 VPS canlı tüstü testi — adi Node ESM skriptləri, birbaşa canlı .15 serverinə sorğu göndərir.
-# Tələb olunur: ssh root@192.168.0.15 girişi (kombinasiyalar SSH sqlite vasitəsilə yaradılır/sökülür).
-# REAL provayderlərə sorğu göndərir (kiçik xərc). Yalnız __live_test__* kombinasiyalarını yaradır/silir. CI-də HEÇ VAXT işə salınmır.
-# .15-də REQUIRE_API_KEY=false olduğundan API açarı lazım deyil, lakin təyin edilibsə COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY nəzərə alınır.
-npm run test:combo:live:vps              # 7 HTTP ssenarisi (prioritet/dövri/çəkili/xərc/birləşdirmə/avtomatik + sağlamlıq)
-npm run test:combo:live:vps:failover     # real provayderlərarası ehtiyat keçid ssenarisi əlavə edir (cəmi 8)
+# Mərhələ-3 VPS canlı smoke testi — sadə Node ESM skriptləri, canlı .15 serverinə birbaşa sorğu göndərir.
+# Tələb olunur: ssh root@192.168.0.15 girişi (combo-lar SSH sqlite vasitəsilə yaradılır/silinir).
+# REAL provayderlərə sorğu göndərir (kiçik xərc). Yalnız __live_test__* combo-larını yaradır/silir. CI-da HEÇ VAXT işləmir.
+# .15 üzərində REQUIRE_API_KEY=false olduğuna görə API açarı lazım deyil, lakin təyin edilərsə COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY nəzərə alınır.
+npm run test:combo:live:vps              # 7 HTTP ssenarisi (prioritet/dövrü/çəkili/xərc/fusion/auto + sağlamlıq)
+npm run test:combo:live:vps:failover     # real provayderlərarası failover ssenarisi əlavə edir (cəmi 8)
 ```
 
-Əhatə qeydləri:
+Örtüklə bağlı qeydlər:
 
-- `npm run test:coverage` əsas modul test dəsti üçün mənbə kodunun əhatəsini ölçür, `tests/**` qovluğunu istisna edir və `open-sse/**` qovluğunu daxil edir
-- Pull request-lər ifadələr/sətirlər/funksiyalar/budaqlar üzrə əhatə keçidini **60%+** səviyyəsində saxlamalıdır
-- PR `src/`, `open-sse/`, `electron/` və ya `bin/` daxilindəki istehsal kodunu dəyişdirirsə, həmin PR-da avtomatlaşdırılmış testlər əlavə edilməli və ya yenilənməlidir
-- `npm run coverage:report` son əhatə işə salınmasından əldə edilmiş fayl-fayl təfərrüatlı hesabatı çap edir
+- `npm run test:coverage` əsas unit test dəsti üçün mənbə örtüyünü ölçür, `tests/**` qovluğunu istisna edir və `open-sse/**` qovluğunu daxil edir
+- Pull request-lər ifadələr/sətirlər/funksiyalar/budaqlar üçün örtük keçidini **60%+** səviyyəsində saxlamalıdır
+- PR `src/`, `open-sse/`, `electron/` və ya `bin/` daxilindəki istehsal kodunu dəyişirsə, həmin PR-da avtomatlaşdırılmış testlər əlavə edilməli və ya yenilənməlidir
+- `npm run coverage:report` son örtük icrasından əldə edilən fayl-fayl ətraflı hesabatı çap edir
 - `npm run test:coverage:legacy` tarixi müqayisə üçün köhnə metrikanı qoruyur
-- Əhatənin mərhələli şəkildə yaxşılaşdırılması yol xəritəsi üçün `docs/ops/COVERAGE_PLAN.md` faylına baxın
+- Mərhələli örtük təkmilləşdirmə yol xəritəsi üçün `docs/ops/COVERAGE_PLAN.md` sənədinə baxın
 
 ### Pull Request tələbləri
 
-PR açmazdan əvvəl dəyişdirdiyiniz hissə üçün fokuslanmış dövrü işə salmaq məqsədilə
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) sənədindən istifadə edin.
-Tam modul test dəsti (4 CI hissəsi), Vitest, **60%+** əhatə keçidi və istehsal qurulması
-CI-ın məsuliyyətidir — bunları lokal olaraq işə salmaq PR yoxlamalarının sizə onsuz da
-verəcəyi məlumatdan əlavə heç bir məlumat vermir və daha zəif maşınlarda sistemi tam yükləyə bilər (#8084):
+PR açmazdan əvvəl dəyişdirdiyiniz hissə üçün fokuslanmış dövrəni icra etmək məqsədilə
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) təlimatından istifadə edin.
+Tam unit test dəsti (4 CI shard-ı), Vitest, **60%+** örtük keçidi və istehsal build-i CI-ın
+məsuliyyətidir — onları lokal olaraq işə salmaq PR yoxlamalarının onsuz da verməyəcəyi əlavə
+məlumat vermir və daha zəif maşınlarda host-u həddən artıq yükləyə bilər (#8084):
 
 - Dəyişikliyinizi əhatə edən test fayllarını işə salın: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint` əmrini işə salın
-- İstehsal kodu dəyişdikdə həmin PR-da avtomatlaşdırılmış testlər əlavə edin və ya yeniləyin
+- İstehsal kodu dəyişdikdə eyni PR-da avtomatlaşdırılmış testlər əlavə edin və ya yeniləyin
+- `node:test` fayllarında hər bir üst səviyyəli `await` ifadəsini (məsələn, `await import(...)`) ilk `test()` / `describe()` çağırışından əvvəl yerləşdirin: `--test-force-exit` altında bundan sonra qeydiyyatdan keçirilən testlər səssizcə heç vaxt işləməyə bilər (#18045; `npm run check:test-tla-order` vasitəsilə məcburi yoxlanılır)
 - İstehsal kodu dəyişdikdə dəyişdirilmiş və ya əlavə edilmiş test fayllarını PR təsvirinə daxil edin
-- Layihə sirləri CI-da konfiqurasiya edildikdə PR-dakı SonarQube nəticəsini yoxlayın
+- Layihə sirləri CI-da konfiqurasiya edilibsə, PR-da SonarQube nəticəsini yoxlayın
 
-Cari test vəziyyəti: aşağıdakıları əhatə edən **122 modul test faylı**:
+Cari test vəziyyəti: aşağıdakıları əhatə edən **122 unit test faylı**:
 
 - Provayder tərcüməçiləri və format çevrilməsi
 - Sürət məhdudlaşdırması, dövrə açarı və dayanıqlılıq
-- Semantik keş, idempotentlik, irəliləyişin izlənməsi
+- Semantik keş, idempotentlik, gedişatın izlənməsi
 - Verilənlər bazası əməliyyatları və sxem (21 DB modulu)
 - OAuth axınları və autentifikasiya
-- API son nöqtələrinin yoxlanması (Zod v4)
-- MCP server alətləri və əhatə dairəsinin məcburi tətbiqi
+- API endpoint validasiyası (Zod v4)
+- MCP server alətləri və scope məhdudiyyətlərinin tətbiqi
 - Yaddaş və Bacarıqlar sistemləri
 
 ---

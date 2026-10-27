@@ -26,7 +26,8 @@ test("Gemini -> OpenAI maps generation config, system instructions and tools", (
   );
 
   assert.equal(result.stream, false);
-  assert.equal(result.max_tokens, 32000);
+  // Explicit maxOutputTokens is honored even with tools (no tool-floor bump).
+  assert.equal(result.max_tokens, 200);
   assert.equal(result.temperature, 0.4);
   assert.equal(result.top_p, 0.8);
   assert.deepEqual(result.messages, [{ role: "system", content: "Rules" }]);

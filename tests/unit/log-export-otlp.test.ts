@@ -8,6 +8,7 @@ import { createHmac } from "node:crypto";
 import { once } from "node:events";
 import { getLogExportDestinationType } from "../../src/lib/logExport/registry.ts";
 import type { LogExportRecord } from "../../src/lib/logExport/types.ts";
+import { createManagementSessionToken } from "../helpers/managementSession.ts";
 
 const packageVersion: string = JSON.parse(
   fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8")
@@ -16,6 +17,14 @@ const packageVersion: string = JSON.parse(
 const dir = fs.mkdtempSync(path.join(os.tmpdir(), "otlp-"));
 process.env.DATA_DIR = dir;
 process.env.STORAGE_ENCRYPTION_KEY = "synthetic-otlp-encryption-key";
+
+// The log-export routes require a dashboard session in every mode (#18276).
+const SESSION_COOKIE = `auth_token=${await createManagementSessionToken()}`;
+function authed(url: string, init: RequestInit = {}): Request {
+  const headers = new Headers(init.headers);
+  headers.set("cookie", SESSION_COOKIE);
+  return new Request(url, { ...init, headers });
+}
 Object.assign(process.env, { NODE_ENV: "test" });
 const core = await import("../../src/lib/db/core.ts");
 const dbDest = await import("../../src/lib/db/logExportDestinations.ts");
@@ -990,7 +999,7 @@ test("child hydration sends capped bodies only when includeBodies is enabled", a
 
 async function create(overrides: Record<string, unknown> = {}) {
   return route.POST(
-    new Request("http://localhost/api/log-export/destinations", {
+    authed("http://localhost/api/log-export/destinations", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -1019,11 +1028,11 @@ test("routes encrypt/redact headers and generated salt; updates retain salt and 
   assert.match(String(stored.config.identitySalt), /^enc:v1:/);
   const plain = secrets.decryptDestinationConfig("otlp-http", stored.config);
   assert.match(String(plain.identitySalt), /^[a-f0-9]{64}$/);
-  const get = await oneRoute.GET(new Request("http://localhost/"), {
+  const get = await oneRoute.GET(authed("http://localhost/"), {
     params: Promise.resolve({ id: stored.id }),
   });
   const getText = await get.text();
-  const listed = await route.GET(new Request("http://localhost/api/log-export/destinations"));
+  const listed = await route.GET(authed("http://localhost/api/log-export/destinations"));
   const listText = await listed.text();
   for (const text of [JSON.stringify(body), getText, listText]) {
     assert.equal(text.includes("synthetic-route-value"), false);
@@ -1032,7 +1041,7 @@ test("routes encrypt/redact headers and generated salt; updates retain salt and 
     assert.equal(text.includes(String(stored.config.identitySalt)), false);
   }
   const put = await oneRoute.PUT(
-    new Request("http://localhost/", {
+    authed("http://localhost/", {
       method: "PUT",
       body: JSON.stringify({ config: { ...body.destination.config, serviceName: "renamed" } }),
     }),

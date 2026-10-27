@@ -62,17 +62,17 @@ Faoi bhun an tairseach **ní** mheastar go bhfuil an soláthraí ag fuarú; glan
 `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`.
 Garda cúlchéimnithe: `tests/unit/provider-cooldown-window-gate.test.ts`.
 
-## 2. Fuarú Ceangail
+## 2. Fuarú an Cheangail
 
-**Scóip:** ceangal/cuntas/eochair soláthraí aonair.
+**Scóip:** ceangal/cuntas/eochair aon soláthraí amháin.
 
-**Cuspóir:** eochair lochtach amháin a scipeáil fad a leanann ceangail eile ón soláthraí céanna ag freastal.
+**Cuspóir:** scipeáil eochair lochtach amháin fad is atá ceangail eile don tsoláthraí céanna fós ag freastal.
 
-**Cur i bhFeidhm:**
+**Cur chun feidhme:**
 
-- Marcáil mar neamh-infhaighte: `src/sse/services/auth.ts::markAccountUnavailable()`
+- Marcáil mar neamh-ar-fáil: `src/sse/services/auth.ts::markAccountUnavailable()`
 - Roghnú: `getProviderCredentials*` sa chomhad céanna
-- Ríomhaire fuaraithe: `open-sse/services/accountFallback.ts::checkFallbackError()`
+- Ríomh fuaraithe: `open-sse/services/accountFallback.ts::checkFallbackError()`
 - Socruithe: `src/lib/resilience/settings.ts`
 
 **Réimsí in aghaidh an cheangail:**
@@ -80,137 +80,121 @@ Garda cúlchéimnithe: `tests/unit/provider-cooldown-window-gate.test.ts`.
 - `rateLimitedUntil` — stampa ama go dtí go rachaidh an fuarú in éag
 - `testStatus: "unavailable"`
 - `lastError`, `lastErrorType`, `errorCode`
-- `backoffLevel` — cuntar cúlaithe easpónantach
+- `backoffLevel` — cuntadóir cúlchoigeartaithe easpónantúil
 
-**Fuarúcháin réamhshocraithe:**
+**Fuaruithe réamhshocraithe:**
 
-- Bun-OAuth: 5s
-- Bun-eochair API: 3s
-- Eochair API 429: tugtar tús áite do cheanntásca srutha suas `Retry-After`/reset nó téacs athshocraithe inléite
-- Cúlú: `baseCooldownMs * 2 ** failureIndex`
+- Bunfhuarú OAuth: 5s
+- Bunfhuarú eochair API: 3s
+- Eochair API 429: tugtar tosaíocht do cheanntásca `Retry-After`/athshocraithe ón sruthuas nó do théacs athshocraithe inpharsáilte
+- Cúlchoigeartú: `baseCooldownMs * 2 ** failureIndex`
 
-**Cosaint frith-“thundering herd”:** cosnaíonn i gcoinne teipeanna comhuaineacha fuarú a leathnú an-iomarca nó `backoffLevel` a dhúbailt.
+**Cosaint frith-thréad toirní:** cuireann sé cosc ar theipeanna comhuaineacha an fuarú a ró-shíneadh nó `backoffLevel` a mhéadú faoi dhó.
 
-**Ní ardaíonn 429anna “concurrency-limit” an dréimire cúlaithe.** Ciallaíonn `429` a bhfuil a cholainn ag tuairisciú teorainn chomhuaineach ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`) go bhfuil an cuntas sláintiúil ach gnóthach. Filleann `checkFallbackError()` cúis `concurrency_limited`: aistrigh anois go dtí an chéad cheangal eile, fuaraigh an ceann seo ar feadh `CONCURRENCY_LIMIT_COOLDOWN_MS` seasta (1s) nó leid athsheachadta an srutha suas, ná hathraigh `backoffLevel`, agus socraigh `skipProviderBreaker`. Má tá colainn shoiléir chuóta ann, bíonn sí i réim fós; mar sin má mheaitseálann colainn patrún chuóta, fanann sé mar bhreithiúnas chuóta. Brath: `looksLikeConcurrencyLimit()` i `src/shared/utils/classify429.ts`; breithiúnas: `open-sse/services/accountFallback/concurrencyLimit429.ts`. Ní athraíonn `classify429()` (`FailureKind` an bhristeora) agus léann sé fós `rate_limit` do na colainneacha seo.
+**Ní dhreapann 429anna teorainne comhuaineachta dréimire an chúlchoigeartaithe.** Ciallaíonn `429` a dtuairiscíonn a chorp teorainn comhuaineachta ("too many concurrent requests", "concurrency limit", "parallel request limit", GLM `并发数过高`) go bhfuil an cuntas sláintiúil ach gnóthach.
+Filleann `checkFallbackError()` le fáth `concurrency_limited`: déan seachfhadhbú chuig an gcéad cheangal eile láithreach, fuaire an ceann seo ar feadh `CONCURRENCY_LIMIT_COOLDOWN_MS` seasta (1s) nó leid atrialta ón sruthuas, coinnigh `backoffLevel` gan athrú, agus socraigh `skipProviderBreaker`.
+Bíonn an lámh in uachtar ag corp cuóta sainráite i gcónaí, mar sin fanann corp a mheaitseálann patrún cuóta freisin ina bhreithiúnas cuóta.
+Braiteadh: `looksLikeConcurrencyLimit()` i `src/shared/utils/classify429.ts`;
+breithiúnas: `open-sse/services/accountFallback/concurrencyLimit429.ts`. Níl `classify429()` (`FailureKind` an scoradáin) athraithe agus léann sé `rate_limit` go fóil do na coirp seo.
 
-**Ní fhuaraíonn moilleanna ábhair srutha an cuntas.** Nuair a éiríonn faireadóir moille-ábhair (`open-sse/utils/streamHandler.ts`) as ar shruth nach ndearna aon aschur samhail in am, taifeadann `markAccountUnavailable()` an earráid ar an gceangal ach ní socraíonn sé fuarú: baineann an mhoill leis an iarratas sin, go minic cas smaointeoireachta fhada gan aschur fós. Is féidir le hoibreoirí roghnú isteach arís le `resilienceSettings.streamStallCooldown.enabled` (réamhshocrú `false`).
+**Ní fhuaraíonn stadanna inneachair srutha an cuntas.** Nuair a éiríonn madra faire an stad-inneachair
+(`open-sse/utils/streamHandler.ts`) as sruth nár sheol aon aschur múnla in am, taifeadann `markAccountUnavailable()` an earráid ar an gceangal ach ní shocraíonn sé aon fhuarú: baineann an stad leis an iarratas sin, is minice gurb é cas réasúnaíochta fada gan aon aschur go fóil é. Is féidir le hoibreoirí roghnú isteach arís le `resilienceSettings.streamStallCooldown.enabled`
+(réamhshocrú `false`).
 
-**Tosaíonn frámaí réasúnaíochta buiséad moille-ábhair arís.** Féadfaidh samhail réasúnaíochta smaoineamh ar feadh nóiméad roimh a chéad chomhartha le feiceáil: craolann Claude frámaí `thinking_delta` lena dtéacs smaointeoireachta folamh, agus craolann API na bhFreagraí mír réasúnaíochta i ndiaidh a chéile. Aithníonn `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) na frámaí seo, agus atosaíonn an faireadóir a bhuiséad ar gach ceann díobh in ionad an casadh a chealú. Níl siad fós ina n-aschur samhail, mar sin tuairiscítear casadh a chríochnaíonn le réasúnaíocht amháin fós mar fholamh, agus tripálann casadh a stopann réasúnaíocht agus a sheolann croíbhuille amháin an faireadóir fós.
+**Comhartha moille ar bhonn roghnaithe isteach maidir le roghnú cuntas `p2c`.** Taifeadann gach iarracht seolta a ham go dtí an chéad bheart agus a toradh in aghaidh an cheangail (agus in aghaidh an cheangail + múnla) i bhfuinneog rollta i gcuimhne: an 20 sampla deireanach laistigh de 15 nóiméad
+(`open-sse/services/connectionLatencyTracker.ts`, taifeadta ó `safeLogEvents()` i
+`src/sse/handlers/chatHelpers.ts`). Nuair a bhíonn `resilienceSettings.p2cLatency.weight` os cionn `0`
+(raon 0-20, réamhshocrú `0` = as), cuireann `compareP2CConnections()` i `src/sse/services/auth.ts` suas le
+`weight` pointe le gach iarrthóir den phéire. Tagann leath de sin ón moill mar chóimheas leis an iarrthóir is gasta (glacann an ceann atá faoi dhó níos moille an leath iomlán) agus an leath eile ón ráta earráidí rollta.
+Ní bhaineann an téarma ach amháin nuair a bhíonn 3 shampla ar a laghad ag an mbeirt iarrthóirí, ionas nach bpionósítear cuntais nua, agus fanann a uasteorainn faoi bhun pionóis na stáide cuóta-bhlocáilte agus cuóta-ídithe. Ní chuireann sé aon chiorcad dá chuid féin leis: déileálann na sraitheanna fuaraithe, dianghlasála agus scoradáin leis na cuntais atá ag teip go fóil. Socraigh é le `PATCH /api/resilience` `{ "p2cLatency": { "weight": 10 } }`.
 
-Coinníonn frámaí dénacha `reasoningContentEvent` Kiro le síniú neamh-fholamh an ghníomhaíocht réasúnaíochta seo tríd an fhorghníomhaitheoir mar dhelta folamh `reasoning_content`. Ní chuirtear an síniú ar aghaidh. Ní atosaíonn meiteashonraí, frámaí neamhiomlána ná sínithe folmha an buiséad ábhair; tá an teorainn ama srutha-gníomhach neamhspleách agus cealú cliant i bhfeidhm fós (`open-sse/executors/kiro/reasoning.ts`).
+**Atosóidh frámaí réasúnaíochta buiséad an stad-inneachair.** Is féidir le múnla réasúnaíochta smaoineamh ar feadh nóiméad sula dtagann a chéad chomhartha infheicthe: sruthaíonn Claude frámaí `thinking_delta` a bhféadfadh a dtéacs smaointeoireachta a bheith folamh, agus sruthaíonn an Responses API mír réasúnaíochta i ndiaidh a chéile. Aithníonn `isReasoningProgressFrame()` (`open-sse/utils/streamReadiness.ts`) na frámaí seo, agus atosóidh an madra faire a bhuiséad ar gach ceann in ionad an cas a chealú. Ní aschur múnla iad go fóil, mar sin tuairiscítear cas a chríochnaíonn le réasúnaíocht amháin fós mar cheann folamh, agus spreagann cas a stadann den réasúnaíocht agus nach seolann ach bíoga croí an madra faire go fóil.
 
-**Stáit chríochnacha (NÍ fuarúcháin):**
+Caomhnaíonn frámaí dénártha `reasoningContentEvent` de chuid Kiro le síniú neamhfholamh an ghníomhaíocht réasúnaíochta seo tríd an rithire mar dheilta `reasoning_content` fholamh. Ní chuirtear an síniú ar aghaidh. Ní atosóidh meiteashonraí, frámaí neamhiomlána ná síniúithe folmha an buiséad inneachair; bíonn feidhm ag teorainn ama neamhspleách an tsrutha ghníomhaí agus ag cealú an chliaint go fóil
+(`open-sse/executors/kiro/reasoning.ts`).
 
-- `banned` — socraithe ag braiteadh eochairfhocail toirmiscthe / toirmeasc cuntais (féach [BAN_DETECTION](../security/BAN_DETECTION.md)), agus trí dhiúltú srutha suas in-a-ghcionn in aghaidh an iarratais (`request_rejected`, m.sh. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ní dhéanann diúltú aonair ach an ceangal a fhuarú
-- `expired` (aistríonn go críoch tar éis líon teoranta athiarrachtaí — `EXPIRED_RETRY_MAX = 3` le cúlú easpónantach — ionas gur féidir le hearráidí sealadacha OAuth féin-leigheas sula ndíchoimisiúnaítear an cuntas go buan)
+**Stáid fhoirceanta (NÍ fuaruithe):**
+
+- `banned` — socraithe ag braiteadh eochairfhocal coiscthe / coisc cuntais (féach [BAN_DETECTION](../security/BAN_DETECTION.md)), agus ag trí dhiúltú as a chéile in aghaidh an iarratais ón sruthuas (`request_rejected`, m.sh. Anthropic OAuth 403 "Request not allowed" — `open-sse/services/requestRejectedStreak.ts`); ní dhéanann diúltú aonair ach an ceangal a fhuarú
+- `expired` (aistríonn sé go foirceanta tar éis atriallacha teoranta — `EXPIRED_RETRY_MAX = 3` le cúlchoigeartú easpónantúil — ionas gur féidir le hearráidí sealadacha OAuth féin-leigheas sula ndíghníomhaítear an cuntas go buan)
 - `credits_exhausted`
 
-Fanann siad seo go dtí go n-athraíonn dintiúir nó go ndéanann oibreoir iad a athshocrú. Ná scríobh thar stáit chríochnacha le stát fuaraithe sealadach.
+Mairfidh siad seo go dtí go n-athraítear na dintiúir nó go n-athshocraíonn oibreoir iad. Ná forscríobh stáid fhoirceanta le stáid fhuaraithe shealadach.
 
-**Aisghabháil leisciúil:** nuair atá `rateLimitedUntil` caite, éiríonn an ceangal incháilithe arís. Ar úsáid rathúil, glanann `clearAccountError()` gach réimse earráide.
+**Aisfháil leisciúil:** nuair a bhíonn `rateLimitedUntil` thart, bíonn an ceangal incháilithe arís. Nuair a úsáidtear go rathúil é, glanann `clearAccountError()` gach réimse earráide.
 
 ### Balla úsáide Claude OAuth: lána tosaíochta níos ísle + athshocrú teorainn seisiúin
 
-**Scóip:** ceangal síntiúis amháin Claude (OAuth). Tá an dá ghné **opt-in in aghaidh an cheangail** (Cuir ceangal in eagar → rannán Claude → `lowPriorityMode` / `autoLimitReset` i `providerSpecificData`, araon díchumasaithe de réir réamhshocraithe) agus léiríonn siad orduithe `/low-priority` agus `/limit-reset` Claude Code (conradh sreinge gafa ó Claude Code 2.1.263).
-
-**Cur i bhFeidhm:**
-
-- Meaisín stáit + aicmiú freagraí: `open-sse/services/claudeLowPriority.ts`
-- Stádas athshocraithe/cliant éileamh: `open-sse/services/claudeLimitReset.ts`
-- Crúca fhorghníomhaitheora (instealladh ceanntásc + athiarracht ceangail chéanna): `open-sse/executors/base.ts::execute()`
-- Perseist opt-in: `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
-
-**Cúrsóir:** an balla úsáide 5-uair — `429` a bhfuil na ceanntásca `anthropic-ratelimit-unified-status: rejected` agus, nuair atá an cuntas incháilithe, `anthropic-ratelimit-unified-slow-offer: treatment`. Ní sheoltar tada roimh an chéad 429 balla sin; téann 429 bhorb gan cheanntásca aontaithe tríd an ngnáth-chosán fuaraithe.
-
-**Lána tosaíochta níos ísle** (`lowPriorityMode`):
-
-- Ag an mballa 429 glacann an feidhmitheoir leis an tairiscint agus baineann sé triail eile **láithreach** as an gcuntas céanna le `anthropic-usage-limit: slow`; fanann an lána gníomhach go dtí an `anthropic-ratelimit-unified-reset` fógartha (+60s de thréimhse mhaolaithe) agus bíonn an ceanntásc ar gach iarratas san fhuinneog sin. Ní shroicheann an 429 idircheaptha `handleChatCore` riamh, mar sin **ní** chuirtear an nasc i dtréimhse fuaraithe agus ní rothlaítear amach é.
-- `anthropic-ratelimit-unified-slow-status` ar fhreagairtí níos déanaí: coinníonn `active` / `not_needed`
-  an lána; fanann `slot_busy` (429) nó `529` ar feadh
-  `anthropic-ratelimit-unified-slow-retry-after` an fhreastalaí (20s de réir réamhshocraithe, teorainn 5–600s, giodam ±30%)
-  agus baineann siad triail eile as, faoi theorainn `anthropic-ratelimit-unified-slow-max-wait` (20 nóiméad de réir réamhshocraithe, teorainn
-  1 nóiméad–6 h) — ina dhiaidh sin cuirtear deireadh leis an lána agus cuireann tréimhse fuaraithe 10 nóiméad bac ar athghlacadh. Ina theannta sin,
-  cuirtear teorainn leis an bhfeitheamh de réir an ama atá fágtha de theorainn ama thús uas-srutha an iarratais féin
-  (`resolveFetchStartTimeout`, 10 nóiméad de réir réamhshocraithe) lúide corrlach 5 s: gan an teorainn sin mhairfeadh
-  an t-uasfheitheamh réamhshocraithe 20 nóiméad níos faide ná an t-iarratas agus chuirfí deireadh leis an gcodladh
-  i lár an fheithimh, rud a thaispeánfadh `TimeoutError` in ionad an deiridh shéimh `max_wait` + fuarú.
-- Cuireann `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, athchasadh fuinneoige 5h, nó
-  `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (a chuireann deireadh leis mar
-  `extra_usage` ar aon stádas, ós rud é go gclúdaíonn an farasbarr íoctha an balla anois) deireadh leis an lána; ansin
-  téann an fhreagairt ar aghaidh chuig gnáthchonair an fhuaraithe. Coinnítear `budget_exhausted` i gcuimhne go dtí
-  athshocrú fógartha an bhuiséid (≤ 8 lá).
-- Ritheann seiceáil an bhalla tar éis atrialacha laistigh den iarracht, arna spreagadh ag 400, de chuid an fheidhmitheora féin (eagarthóireacht
-  comhthéacs, teorainneacha smaointeoireachta/iarrachta, uathfhoghlaim paraiméadar), mar sin déantar 429 balla nach dtagann chun solais ach ar
-  cheann de na hatrialacha sin a idircheapadh fós seachas ligean dó conair an fhuaraithe a bhaint amach.
-- Coinnítear an staid sa chuimhne de réir naisc (cosnaíonn atosú 429 balla breise amháin chun athghlacadh).
-
-**Athshocrú teorann seisiúin** (`autoLimitReset`, baintear triail as roimh an lána nuair atá an dá cheann ar siúl):
-
-- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → bloc `juniper_tide`;
-  nuair atá `arm: "reset"` agus `available: true`,
-  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` le
-  `{ "program": "juniper_tide" }` (UUID na heagraíochta ó
-  `providerSpecificData.organizationUUID`, cúltaca tosaithe).
-- `result: reset|not_limited` → baintear triail eile as an iarratas ar lánluas (gan ceanntásc moille).
-  Meamraíonn `already_used` / `not_offered` `next_available_at` (seachtain amháin de réir réamhshocraithe); tar éis
-  teipe ar bith déantar cúlú 15 nóiméad. Déantar an t-athshocrú uair sa tseachtain agus áirítear é fós i dtreo na
-  teorann seachtainiúla.
-
-Cosaintí cúlchéimnithe: `tests/unit/claude-low-priority-mode.test.ts`,
-`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
-
-### Cleamhnas seisiúin (#7274)
-
-**Raon feidhme:** seisiún cliaint amháin (ceanntásc `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) ceangailte le nasc amháin, le haghaidh soláthraí **ar bith**.
-
-**Cuspóir:** gníomhaire ilbabhta (Claude Code, aider, gníomhairí saincheaptha) a choinneáil ar an gcuntas céanna thar iarratais, rud a laghdaíonn caillteanas comhthéacs idir cuntais agus 429anna tosaithe fhuair arís agus arís eile ar sholáthraithe a bhfuil staid seisiúin in aghaidh an chuntais acu.
+**Scóip:** ceangal amháin síntiúis Claude (OAuth). Tá an dá ghné **ar bhonn roghnaithe isteach in aghaidh an cheangail** (Cuir an ceangal in eagar → rannán Claude → `lowPriorityMode` / `autoLimitReset` i
+`providerSpecificData`, beirt réamhshocraithe as) agus aithrisíonn siad orduithe `/low-priority` agus
+`/limit-reset` de chuid Claude Code (conradh sreinge a gabhadh ó Claude Code 2.1.263).
 
 **Cur chun feidhme:**
 
+- Meaisín staide + aicmiú freagartha: `open-sse/services/claudeLowPriority.ts`
+- Cliant stádais/éilimh athshocraithe: `open-sse/services/claudeLimitReset.ts`
+- Crúca feidhmeora (instaolladh ceanntásca + atriail ar an gcuntas céanna): `open-sse/executors/base.ts::execute()`
+- Marthanacht roghnaithe (opt-in): `src/lib/providers/requestDefaults.ts::normalizeProviderSpecificData()`
+
+**Spreagthóir:** balla úsáide na 5 huaire — `429` a n-iompraíonn a cheanntásca
+`anthropic-ratelimit-unified-status: rejected` agus, nuair atá an cuntas incháilithe,
+`anthropic-ratelimit-unified-slow-offer: treatment`. Ní sheoltar aon rud roimh an gcéad 429
+balla sin; téann 429 pléasctha gan na ceanntásca aontaithe tríd an gconair fuaraithe gnách.
+
+**Lána tosaíochta níos ísle** (`lowPriorityMode`):
+
+- Ar an 429 balla, glacann an feidhmeoir leis an tairiscint agus déanann sé atriail láithreach ar an **gcuntas céanna** le `anthropic-usage-limit: slow`; fanann an lána gníomhach go dtí an `anthropic-ratelimit-unified-reset` fógartha (+60s grástachta) agus iompraíonn gach iarratas sa fhuinneog sin an ceanntásc. Ní shroicheann an 429 idircheaptha `handleChatCore` choíche, mar sin **ní** chuirtear an nasc i bhfuarú agus ní dhéantar é a rothlú amach.
+- `anthropic-ratelimit-unified-slow-status` ar fhreagraí níos déanaí: coinníonn `active` / `not_needed` an lána; fanann `slot_busy` (429) nó `529` ar `anthropic-ratelimit-unified-slow-retry-after` an fhreastalaí (réamhshocrú 20s, clamp 5–600s, ±30% jitter) agus déanann siad atriail, teoranta ag `anthropic-ratelimit-unified-slow-max-wait` (réamhshocrú 20 nóiméad, clamp 1 nóiméad–6 huaire) — thar sin chríochnaíonn an lána agus cuireann fuaradh 10 nóiméad cosc ar athghlacadh. Cuirtear uasteorainn bhreise ar an bhfanacht freisin leis an méid atá fágtha de theoirainn ama tosaithe uasabhreá an iarratais féin (`resolveFetchStartTimeout`, 10 nóiméad de réir réamhshocraithe) lúide corrlach 5 s: gan an uasteorainn sin, mhairfeadh an t-uasfhanacht 20 nóiméad réamhshocraithe níos faide ná an t-iarratas agus scoirfí an chodladh i lár an fhanachta, rud a nochtfaí `TimeoutError` in ionad deireadh séimh `max_wait` + fuaradh.
+- Críochnaíonn `weekly_limit` / `budget_exhausted` / `off` / `ineligible`, athrolladh fhuinneog na 5 huaire, nó `ineligible` + `anthropic-ratelimit-unified-overage-in-use: true` (a chríochnaíonn é mar `extra_usage` ar aon stádas, ó chlúdaíonn an ró-úsáid íoctha an balla anois) an lána; sreabhann an freagra ansin chuig an gconair fuaraithe gnách. Cuimhnítear ar `budget_exhausted` go dtí an t-athshocrú buiséid fógartha (≤ 8 lá).
+- Ritheann an tseiceáil bhalla tar éis atriailiú inmheánacha an fheidhmeora féin atá tiomáinte ag 400 (eagarthóireacht comhthéacs, clampanna smaointeoireachta/iarrachta, uathfhoghlaim paraiméadar), mar sin go n-idircheaptar fós 429 balla nach nochtann ach ar cheann de na hatriailiú sin in ionad teacht chuig an gconair fuaraithe.
+- Tá an staid i gcuimhne in aghaidh gach ceangail (cosnaíonn atosú 429 balla breise chun athghlacadh).
+
+**Athshocrú teorann seisiúin** (`autoLimitReset`, déantar iarracht air roimh an lána nuair a bhíonn an dá cheann ar siúl):
+
+- `GET https://api.anthropic.com/api/oauth/usage?at_wall=1&skip_spend=1` → bloc `juniper_tide`; nuair atá `arm: "reset"` agus `available: true`,
+  `POST https://api.anthropic.com/api/organizations/{orgUUID}/reset_rate_limits` le
+  `{ "program": "juniper_tide" }` (UUID na heagraíochta ó
+  `providerSpecificData.organizationUUID`, le teacht ar ais ar an bootstrap).
+- `result: reset|not_limited` → déantar an t-iarratas a atriail ag luas iomlán (gan ceanntásc mall). Meamraíonn `already_used` / `not_offered` `next_available_at` (réamhshocrú seachtain amháin); cúlaíonn aon theip 15 nóiméad. Is uair sa tseachtain amháin a dhéantar an t-athshocrú agus áirítear é fós i leith na teorann seachtainiúla.
+
+Gardaí in aghaidh cúlaithe: `tests/unit/claude-low-priority-mode.test.ts`,
+`tests/unit/claude-limit-reset.test.ts`, `tests/unit/claude-low-priority-executor.test.ts`.
+
+### Dlúthchoibhneas seisiúin (#7274)
+
+**Raon feidhme:** seisiún cliant amháin (ceannásc `X-Session-Id` / `x-codex-session-id` / `x-omniroute-session`) pionáilte ar nasc amháin, le haghaidh **aon** sholáthraí.
+
+**Cuspóir:** gníomhaire ilchaslóide (Claude Code, aider, gníomhairí saincheaptha) a choinneáil ar an gcuntas céanna thar iarratais, ag laghdú caillteanas comhthéacs tras-chuntais agus 429 tosaithe fuair arís agus arís eile ar sholáthraithe a bhfuil staid sheisiúin in aghaidh an chuntais acu.
+
+**Feidhmiú:**
+
 - Réiteach TTL: `src/sse/services/sessionAffinityPin.ts::resolveSessionAffinityTtlMs()`
-- Roghnú/cruthú ceangail: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
-- Asbhaint ceanntáisc (cineálach, soláthraí ar bith): `src/sse/services/auth.ts::extractSessionAffinityKey()`
-- Tábla ceangail marthanach: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
-- Socrú: `sessionAffinityTtlMs` (TTL domhanda in ms, díchumasaíonn `0` é) — `src/lib/db/settings.ts`. Athainmníodh é ón `codexSessionAffinityTtlMs`, a bhain le Codex amháin, leis an ascnamh `124_generic_session_affinity_ttl.sql`, a thugann aon TTL Codex a cumraíodh roimhe seo ar aghaidh mar an réamhshocrú nua.
+- Roghnú/cruthú pionála: `src/sse/services/sessionAffinityPin.ts::selectSessionAffinityConnection()`
+- Eastóscadh ceanntásca (ginearálta, aon soláthraí): `src/sse/services/auth.ts::extractSessionAffinityKey()`
+- Tábla pionála marthanach: `sessionAccountAffinity` (`src/lib/db/sessionAccountAffinity.ts`)
+- Socrú: `sessionAffinityTtlMs` (TTL domhanda i ms, díchumasaíonn `0`) — `src/lib/db/settings.ts`. Athainmníodh é ón `codexSessionAffinityTtlMs` a bhí dírithe ar Codex amháin tríd an imirce `124_generic_session_affinity_ttl.sql`, a iompraíonn aon TTL Codex a bhí cumraithe roimhe seo thar mar an réamhshocrú nua.
 
-Roimh #7274, d'fhill `resolveSessionAffinityTtlMs()` láithreach le `0` i gcás gach soláthraí seachas `codex`, mar sin ní raibh éifeacht ag an socrú TTL (ná ag ceanntásca an tseisiúin) in aon áit eile, cé go raibh an sásra ceangail agus asbhaint na gceannteideal neamhspleách ar an soláthraí cheana féin. Baineadh an luathfhilleadh sin leis an gceartúchán; cuirtear an TTL i bhfeidhm go haonfhoirmeach anois ar gach soláthraí a luaithe a shocraítear go domhanda é os cionn `0`.
+Roimh #7274, d'fhill `resolveSessionAffinityTtlMs()` go crua ar `0` do gach soláthraí seachas `codex`, mar sin ní raibh aon éifeacht ag an socrú TTL (ná ag na ceanntásca seisiúin) in aon áit eile cé go raibh an meicníocht pionála agus an t-eastóscadh ceanntásca neamhspleách ar sholáthraí cheana féin. Bhain an ceartúchán an luathfhilleadh sin; baineann an TTL anois go haonfhoirmeach le gach soláthraí a luaithe a shocraítear go domhanda é os cionn `0`.
 
-Ní chuirtear na trí cheanntásc cleamhnais seisiúin ar aghaidh chuig an uas-sruth riamh — tógann feidhmitheoirí a gceanntásca uas-srutha féin ón tús seachas ceanntásca cliaint a chur ar aghaidh, mar sin fanann sé seo ina aitheantas comhghaolmhaireachta inmheánach amháin.
+Ní threoraítear na trí cheanntásc dlúthchoibhnis seisiúin ar aghaidh uasabhreá riamh — tógann feidhmeoirí a gceanntásca uasabhreá féin ón tús in ionad ceanntásca an chliaint a chur ar aghaidh, mar sin fanann sé seo mar id comhchaidrimh inmheánach amháin.
 
-### Léasanna eisiacha naisc seisiúin bhainistithe
+### Léasanna eisiacha ar naisc do sheisiúin bhainistithe
 
-**Raon feidhme:** is le cliant/seisiún HTTP bainistithe gníomhach amháin nasc incháilithe OmniRoute amháin.
+**Raon feidhme:** is le cliant/seisiún HTTP bainistithe gníomhach amháin nasc OmniRoute incháilithe amháin.
 
-**Cuspóir:** úinéireacht eisiach mharthanach naisc a sholáthar do chliaint a dteastaíonn
-teorainn dhocht ródaithe uathu thar iarratais. Ní hionann é seo agus cleamhnas seisiúin, ar rogha bhog leanúnachais é:
-coinníonn léas eisiach staid saolré in SQLite, forfheidhmíonn sé uathúlacht dhomhanda an úinéara ghníomhaigh agus
-an naisc ghníomhaigh, agus diúltaíonn sé do ghlúin as dáta roimh sheoladh chuig an soláthraí.
+**Cuspóir:** úinéireacht eisiach marthanach ar nasc a sholáthar do chliaint a dteastaíonn fál ródaithe crua uathu thar iarratais. Tá sé seo difriúil ó dhlúthchoibhneas seisiúin, arb é sin rogha bhog leanúnachais: coimeádann léas eisiach staid saoilré in SQLite, forchuireann sé uathúlacht an úinéara ghníomhaigh agus an naisc ghníomhaigh go domhanda, agus diúltaíonn sé do ghlúin stálaithe sular seoladh chuig an soláthraí é.
 
-Is gné roghnach í seo de réir eochair API. Ní mór raon feidhme `lease:exclusive` agus
-liosta sainráite neamhfholamh `allowedConnections` a bheith ag eochair bhainistithe. Is féidir le cliant HTTP ar bith críochphointe na saolré a úsáid; ní
-theastaíonn ainm cliaint, user-agent, soláthraí, modh OAuth ná samhail. Is le nasc an léas,
-ní le samhail, mar sin coinnítear an ceangal nuair a athraítear an tsamhail fad a fhanann an nasc
-incháilithe de ghnáth. Fanann na gnáthrialacha maidir le samhail, cuóta, sláinte, fuarú agus liosta ceadaithe i bhfeidhm agus féadfaidh siad
-an ghlúin chéanna a aistriú chuig nasc eile atá saor agus incháilithe.
+Tá an ghné seo le roghnú isteach in aghaidh gach eochair API. Ní mór go mbeadh scóip `lease:exclusive` ag eochair bhainistithe agus liosta `allowedConnections` sainráite neamhfholamh. Is féidir le haon chliant HTTP an críochphointe saolré a úsáid; ní theastaíonn ainm cliant, user-agent, soláthraí, modh OAuth, ná samhail. Tá nasc, agus ní samhail, faoi úinéireacht an léasa, mar sin coinníonn athrú samhla an ceangal fad is a fhanann an nasc incháilithe ar an ngnáthbhealach. Fanann na gnáthrialacha maidir le samhail, cuóta, sláinte, fuarú síos, agus liosta ceadaithe údarásach, agus féadfaidh siad an ghiniúint chéanna a aistriú chuig nasc saor incháilithe eile.
 
-Is é an saolré ná `POST /api/v1/session-leases` le gníomhartha JSON `acquire`, `renew`, agus `release`.
-Cuireann iarratais inference faoi bhainistiú an luach teimhneach `X-OmniRoute-Lease-Owner` agus
-`X-OmniRoute-Lease-Generation` cruinn i láthair. Úsáideann an t-úinéir `vlo_` le 43 carachtar base64url
-ina dhiaidh; ní stóráiltear ach a hais SHA-256. Ceanglaíonn gach fál seolta deiridh ID na heochrach API
-fíoraithe agus ID an naisc ghníomhaigh freisin. Baintear ceanntásca rialúcháin léasa as logaí, as
-léargais iarratais a choinnítear, agus as ceanntásca feidhmeora upstream.
+Is é `POST /api/v1/session-leases` an saolré le gníomhartha JSON `acquire`, `renew`, agus `release`. Cuireann iarratais bhainistithe tátála an luach dofheicthe `X-OmniRoute-Lease-Owner` agus `X-OmniRoute-Lease-Generation` beacht i láthair. Úsáideann an t-úinéir `vlo_` agus 43 carachtar base64url ina dhiaidh; ní stóráiltear ach a hais SHA-256. Ceanglaíonn gach fál seolta deiridh ID na heochrach API fíoraithe agus ID an naisc ghníomhaigh freisin. Baintear ceanntásca rialaithe an léasa as logaí, as grianghraif coinnithe iarratas, agus as ceanntásca an fheidhmitheora uas an tsrutha.
 
-Má tá iarrthóirí bainistithe incháilithe ag an ngnáthródú ach go bhfuil gach iarrthóir saor á áitiú ag
-léas gníomhach eachtrach, tugann OmniRoute HTTP `429` ar ais, cód lease-capacity-unavailable, stát
-waiting-for-capacity, agus `Retry-After` teoranta a dhíorthaítear ón éag is luaithe ábhartha. Ní
-conspóid léasa í an ghnáth-incháilitheacht fholamh agus coinníonn sí a séimeantaic earráide ródúcháin
-atá ann cheana féin.
+Má tá iarrthóirí bainistithe incháilithe ag an ngnáthródú ach má tá gach iarrthóir saor á áitiú ag léas gníomhach eachtrach, tugann OmniRoute HTTP `429` ar ais, cód lease-capacity-unavailable, stát waiting-for-capacity, agus `Retry-After` teoranta a dhíorthaítear ón éaga is luaithe ábhartha. Ní hionann gnáth-incháilitheacht fholamh agus conspóid léasa, agus coinníonn sí a séimeantaic reatha earráide ródaithe.
 
 Fanann meicníochtaí gaolmhara ar leithligh:
 
-- Is dáileadh bog atá áitiúil don phróiseas é áitiú seisiúin OAuth do chuntais OAuth.
-- Deonaíonn semafóirí cuntais ceadanna comhuaineachais iarratais agus tagann deireadh leo nuair a chuirtear iarratas i gcrích.
-- Is úinéireacht saolré mharthanach iad léasa eisiacha seisiúin bhainistithe le fál glúine.
+- Is dáileadh bog próiseas-áitiúil é áitiú seisiúin OAuth do chuntais OAuth.
+- Deonaíonn séimeafóir cuntais ceadanna comhthráthachta iarratas agus críochnaíonn siad nuair a thagann iarratas chun críche.
+- Is úinéireacht saolré mharthanach iad léasanna eisiacha bainistithe seisiúin le fál giniúna.
 
 ---
 

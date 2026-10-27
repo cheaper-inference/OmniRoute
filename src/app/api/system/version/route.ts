@@ -21,6 +21,7 @@ import { NEWS_JSON_URL, parseActiveNewsPayload } from "@/shared/utils/releaseNot
 import {
   clearLatestVersionCache,
   isNewer,
+  isUpdateCheckDisabled,
   resolveDistTagsCached,
   resolveLatestVersionCached,
 } from "@/lib/system/versionCheck";
@@ -80,10 +81,13 @@ export async function GET(req: NextRequest) {
     bypassCache: /(?:^|,)\s*(?:no-cache|no-store)\b/i.test(cacheControl),
     storeResult: !/(?:^|,)\s*no-store\b/i.test(cacheControl),
   };
+  // OMNIROUTE_NO_UPDATE_NOTIFIER: no npm/GitHub/news egress and no "update available" banner
+  // (offline / air-gapped / pinned installs). POST still updates on an explicit request.
+  const updateCheckDisabled = isUpdateCheckDisabled();
   const [latest, distTags, news, validation] = await Promise.all([
-    resolveLatestVersionCached(cacheOptions),
-    resolveDistTagsCached(cacheOptions),
-    getNews(),
+    updateCheckDisabled ? null : resolveLatestVersionCached(cacheOptions),
+    updateCheckDisabled ? null : resolveDistTagsCached(cacheOptions),
+    updateCheckDisabled ? null : getNews(),
     validateAutoUpdateRuntime(config),
   ]);
   // Additive (rail 3.8.54): `channel` keeps meaning the deployment mode
@@ -95,6 +99,7 @@ export async function GET(req: NextRequest) {
     current,
     latest: latest ?? "unavailable",
     updateAvailable: isNewer(latest, current),
+    updateCheckDisabled,
     channel: config.mode,
     autoUpdateSupported: validation.supported,
     autoUpdateError: validation.reason,

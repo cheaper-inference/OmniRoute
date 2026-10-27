@@ -308,3 +308,65 @@ test("handleEmbedding keeps gemini-embedding-001 text batches on the OpenAI shim
     globalThis.fetch = originalFetch;
   }
 });
+
+test("#18244: Gemini native embedContent usage reaches the API response", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({
+    embedding: { values: [0.125, -0.25] },
+    usageMetadata: {
+      promptTokenCount: 8,
+      promptTokenDetails: [{ modality: "TEXT", tokenCount: 8 }],
+    },
+  }), { status: 200, headers: { "content-type": "application/json" } });
+
+  try {
+    const result = await handleEmbedding({
+      body: { model: "gemini/gemini-embedding-2", input: "account for these tokens" },
+      credentials: { apiKey: "test-gemini-token" },
+      log: null,
+    });
+    assert.equal(result.success, true, result.error);
+    const data = result.data as {
+      data: Array<{ object: string; embedding: number[]; index: number }>;
+      usage: { prompt_tokens: number; total_tokens: number };
+    };
+    assert.deepEqual(data.usage, { prompt_tokens: 8, total_tokens: 8 });
+    assert.deepEqual(data.data, [
+      { object: "embedding", embedding: [0.125, -0.25], index: 0 },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("#18244: Gemini native batch token usage is accounted once, not once per embedding", async () => {
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({
+    embeddings: [{ values: [0.1, 0.2] }, { values: [-0.3, 0.4] }, { values: [0.5, -0.6] }],
+    usageMetadata: {
+      promptTokenCount: 19,
+      promptTokenDetails: [{ modality: "TEXT", tokenCount: 19 }],
+    },
+  }), { status: 200, headers: { "content-type": "application/json" } });
+
+  try {
+    const result = await handleEmbedding({
+      body: { model: "gemini/gemini-embedding-2", input: ["first", "second", "third"] },
+      credentials: { apiKey: "test-gemini-token" },
+      log: null,
+    });
+    assert.equal(result.success, true, result.error);
+    const data = result.data as {
+      data: Array<{ object: string; embedding: number[]; index: number }>;
+      usage: { prompt_tokens: number; total_tokens: number };
+    };
+    assert.deepEqual(data.usage, { prompt_tokens: 19, total_tokens: 19 });
+    assert.deepEqual(data.data, [
+      { object: "embedding", embedding: [0.1, 0.2], index: 0 },
+      { object: "embedding", embedding: [-0.3, 0.4], index: 1 },
+      { object: "embedding", embedding: [0.5, -0.6], index: 2 },
+    ]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

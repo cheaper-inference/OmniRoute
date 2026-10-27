@@ -86,6 +86,10 @@
   --color-bg-primary: var(--ci-color-background);
   --color-bg-subtle: var(--ci-color-surface-subtle);
   --color-surface: var(--ci-color-surface);
+  /* Secondary/muted panel tints (`bg-surface-secondary/30`, `bg-muted/50`): kit subtle and
+     muted surfaces — the kit flips both under data-theme="dark". */
+  --color-surface-secondary: var(--ci-color-surface-subtle);
+  --color-muted: var(--ci-color-surface-muted);
   --color-card: var(--ci-color-surface);
   --color-sidebar: var(--ci-color-surface);
   --surface-2: var(--ci-color-surface-muted);
@@ -186,8 +190,14 @@
   /* Auto-switch colors (use CSS variables from :root/.dark) */
   --color-bg: var(--color-bg);
   --color-bg-primary: var(--color-bg-primary);
+  /* bg-alt / muted / surface-secondary had a :root value but no @theme entry, so their
+     utilities (41× bg-bg-alt, bg-muted/50, bg-surface-secondary/30) generated nothing
+     (KEA-7886 P4 — tests/unit/design-kit-bridge.test.ts pins these three). */
+  --color-bg-alt: var(--color-bg-alt);
   --color-bg-subtle: var(--color-bg-subtle);
   --color-surface: var(--color-surface);
+  --color-surface-secondary: var(--color-surface-secondary);
+  --color-muted: var(--color-muted);
   --color-card: var(--color-card);
   --color-sidebar: var(--color-sidebar);
   --color-border: var(--color-border);

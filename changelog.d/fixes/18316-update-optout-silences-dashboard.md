@@ -1,0 +1,1 @@
+- **fix(api):** `OMNIROUTE_NO_UPDATE_NOTIFIER` now also silences the dashboard "update available" notice: `GET /api/system/version` skips the npm, GitHub and news lookups and reports no update ([#18316](https://github.com/cheaper-inference/OmniRoute/pull/18316)) — thanks @ifauzeee

@@ -26,7 +26,7 @@ export function geminiToOpenAIRequest(model, body, stream) {
     const config = body.generationConfig;
     if (config.maxOutputTokens) {
       const tempBody = { max_tokens: config.maxOutputTokens, tools: body.tools };
-      result.max_tokens = adjustMaxTokens(tempBody);
+      result.max_tokens = adjustMaxTokens(tempBody, { honorExplicitCap: true });
     }
     if (config.temperature !== undefined) {
       result.temperature = config.temperature;
