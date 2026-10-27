@@ -79,31 +79,34 @@
 
 ## 2. ਨਿਯਮ
 
-1. ਟੋਕਨ, ਕਦੇ ਵੀ ਲਿਟਰਲ ਨਹੀਂ। ਜਾਣਬੁੱਝ ਕੇ ਰੱਖੇ ਗਏ ਅਪਵਾਦ: ਹਮੇਸ਼ਾ-ਡਾਰਕ ਕੰਸੋਲ ਟਰਮੀਨਲ, `STATUS_HEX` (`src/shared/constants/statusColors.ts`) ਰਾਹੀਂ ReactFlow SVG
-   ਸਟ੍ਰੋਕ, ਅਤੇ ਸ਼੍ਰੇਣੀਬੱਧ ਪੈਲੇਟਾਂ
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) ਅਤੇ
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`)।
-2. `packages/ui-kit/src` ਨੂੰ ਕਦੇ ਵੀ ਹੱਥੀਂ ਪੈਚ ਨਾ ਕਰੋ: `scripts/dev/sync-ui-kit.sh <commit>` ਨਾਲ ਸਿੰਕ ਕਰੋ;
-   ਪ੍ਰੀ-ਕਮਿਟ ਗੇਟ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ਉਸ ਹਰ ਬਾਈਟ ਉੱਤੇ ਅਸਫਲ ਹੁੰਦਾ ਹੈ ਜੋ
-   ਪਿੰਨ ਕੀਤੇ ਅੱਪਸਟ੍ਰੀਮ ਕਮਿਟ ਤੋਂ ਵੱਖਰੀ ਹੋਵੇ (ਜਦੋਂ ਅੱਪਸਟ੍ਰੀਮ ਕਲੋਨ,
-   `UI_KIT_CLONE` ਜਾਂ `_references/cheaper-inference-ui-kit`, ਮੌਜੂਦ ਨਾ ਹੋਵੇ ਤਾਂ ਇਹ ਚੇਤਾਵਨੀ ਦੇ ਕੇ ਛੱਡ ਦਿੰਦਾ ਹੈ)। ਜਦੋਂ ਕਿਟ ਵਿੱਚ ਕੋਈ ਚੀਜ਼ ਨਾ ਹੋਵੇ,
-   ਤਾਂ ਅਡੈਪਟਰ ਜਾਂ ਸਕ੍ਰੀਨ ਵਿੱਚ ਉਸ ਲਈ ਵਿਕਲਪਕ ਹੱਲ ਬਣਾਓ ਅਤੇ ਅੱਪਸਟ੍ਰੀਮ ਤੋਂ ਉਸਦੀ ਬੇਨਤੀ ਕਰੋ।
-3. ਕਿਟ ਟੈਕਸਟ ਦੇ ਡਿਫਾਲਟ ਅੰਗਰੇਜ਼ੀ ਵਿੱਚ ਹਨ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ਜਦੋਂ ਵੀ ਕੋਈ ਕਿਟ ਕੰਪੋਨੈਂਟ ਟੈਕਸਟ ਰੈਂਡਰ ਕਰਦਾ ਹੈ,
+1. ਟੋਕਨ, ਕਦੇ ਵੀ ਲਿਟਰਲ ਨਹੀਂ। ਜਾਣਬੁੱਝ ਕੇ ਰੱਖੇ ਗਏ ਅਪਵਾਦ: ਹਮੇਸ਼ਾ-ਹਨੇਰੀ ਕੰਸੋਲ ਟਰਮੀਨਲ ਅਤੇ
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`) — ਕਿੱਟ ਸਟੇਟਸ ਪੈਲੇਟ ਦਾ resolved-hex ਅਕਸ,
+   ਉਹਨਾਂ ਕਾਲਰਾਂ ਲਈ ਜਿਨ੍ਹਾਂ ਨੂੰ ਲਿਟਰਲ hex ਚਾਹੀਦਾ ਹੈ। ਕੈਟੇਗੋਰੀਕਲ ਪੈਲੇਟ ਹੁਣ ਹੋਰ ਅਪਵਾਦ ਨਹੀਂ ਰਹੇ:
+   ਇਹ ਕਿੱਟ ਦੇ ਪੰਜ ਚਾਰਟ ਟੋਕਨਾਂ (`--color-chart-1..5`) ਉੱਤੇ
+   `src/shared/utils/categoricalPalette.ts` ਰਾਹੀਂ ਅਤੇ, ਰਾਊਟਿੰਗ ਰਣਨੀਤੀਆਂ ਲਈ,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` ਰਾਹੀਂ ਚੱਲਦੇ ਹਨ; ReactFlow ਐਜਾਂ ਅਤੇ
+   ਆਰਕੈਸਟ੍ਰੇਸ਼ਨ ਕੈਨਵਸ ਥੀਮ-ਜਾਣਕਾਰ `--orch-status-*` ਵੇਰੀਏਬਲਾਂ (`src/shared/components/flow/edgeStyles.ts`) ਨੂੰ ਪੜ੍ਹਦੇ ਹਨ।
+2. `packages/ui-kit/src` ਨੂੰ ਕਦੇ ਹੱਥੀਂ ਪੈਚ ਨਾ ਕਰੋ: `scripts/dev/sync-ui-kit.sh <commit>` ਨਾਲ ਸਿੰਕ ਕਰੋ;
+   pre-commit ਗੇਟ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ਕਿਸੇ ਵੀ ਅਜਿਹੇ ਬਾਈਟ ਉੱਤੇ ਫੇਲ ਹੋ ਜਾਂਦਾ ਹੈ
+   ਜੋ ਪਿੰਨ ਕੀਤੇ upstream ਕਮਿੱਟ ਤੋਂ ਵੱਖਰਾ ਹੋਵੇ (ਜਦੋਂ upstream ਕਲੋਨ,
+   `UI_KIT_CLONE` ਜਾਂ `_references/cheaper-inference-ui-kit`, ਗੈਰਹਾਜ਼ਰ ਹੋਵੇ ਤਾਂ ਇਹ ਚੇਤਾਵਨੀ ਨਾਲ ਅੱਗੇ ਵਧ ਜਾਂਦਾ ਹੈ)। ਜਦੋਂ ਕਿੱਟ ਵਿੱਚ ਕੁਝ ਘੱਟ ਹੋਵੇ,
+   ਤਾਂ ਅਡੈਪਟਰ ਜਾਂ ਸਕ੍ਰੀਨ ਵਿੱਚ ਉਸ ਦਾ ਜੁਗਾੜ ਕਰੋ ਅਤੇ upstream ਨੂੰ ਇਸ ਲਈ ਬੇਨਤੀ ਕਰੋ।
+3. ਕਿੱਟ ਦੇ ਟੈਕਸਟ ਡਿਫਾਲਟ ਅੰਗਰੇਜ਼ੀ ਹਨ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ਜਦੋਂ ਵੀ ਕੋਈ ਕਿੱਟ ਕੰਪੋਨੈਂਟ ਟੈਕਸਟ ਰੈਂਡਰ ਕਰੇ,
    `useTranslations(...)` ਤੋਂ ਅਨੁਵਾਦਿਤ ਸਟ੍ਰਿੰਗਾਂ ਪਾਸ ਕਰੋ।
-4. Tailwind ਯੂਟਿਲਿਟੀਆਂ ਕਿਟ ਕੰਪੋਨੈਂਟ ਕਲਾਸਾਂ ਉੱਤੇ ਤਰਜੀਹ ਲੈਂਦੀਆਂ ਹਨ (ਕਿਟ
-   `@layer theme, base, components, utilities` ਘੋਸ਼ਿਤ ਕਰਦੀ ਹੈ ਅਤੇ ਇਸਦੇ ਨਿਯਮ `components` ਵਿੱਚ ਰਹਿੰਦੇ ਹਨ) — ਸਪੇਸਿੰਗ ਅਤੇ ਲੇਆਉਟ ਲਈ ਯੂਟਿਲਿਟੀਆਂ ਵਰਤੋ,
-   ਕਿਟ ਕੰਪੋਨੈਂਟਾਂ ਨੂੰ ਮੁੜ ਰੰਗਣ ਲਈ ਨਹੀਂ।
-5. ਸਿਰਲੇਖ: ਪੇਜ ਅਤੇ ਸੈਕਸ਼ਨ ਸਿਰਲੇਖਾਂ ਲਈ `.ci-heading` (Inter, ਕੋਈ ਟ੍ਰੈਕਿੰਗ ਨਹੀਂ); `.ci-dashboard-display`
-   (Instrument Serif) ਸਿਰਫ਼ ਵੱਡੇ, ਘੱਟ-ਘਣਤਾ ਵਾਲੇ ਡਿਸਪਲੇ ਟੈਕਸਟ ਲਈ, ਜਿਵੇਂ ਕਿ ਗਲਤੀ ਪੇਜ ਦਾ ਸਟੇਟਸ ਕੋਡ।
-6. `tests/unit/dashboard-kit-sweep.test.ts` ਕਿਟ ਅਪਣਾਉਣ ਦੀ ਨਿਗਰਾਨੀ ਕਰਦੀ ਹੈ: `src/app` ਜਾਂ `src/shared/components` ਦੇ ਅਧੀਨ
-   ਕੋਈ Material ਲਿਗੇਚਰ span ਨਹੀਂ; ਡੈਸ਼ਬੋਰਡ ਟ੍ਰੀ (`src/app/(dashboard)` ਅਤੇ
-   `src/shared/components`) ਵਿੱਚ ਕੋਈ ਕੱਚਾ `<select>`, `<textarea>` ਜਾਂ `<table>` ਨਹੀਂ ਅਤੇ ਸੂਚੀਬੱਧ ਅਪਵਾਦਾਂ (`Select` ਅਡੈਪਟਰ ਦੀ ਨੇਟਿਵ ਬ੍ਰਾਂਚ,
-   `RequestLoggerDetail`) ਤੋਂ ਬਾਹਰ ਹੱਥੀਂ ਬਣਾਇਆ
-   `role="dialog"` ਨਹੀਂ; ਉੱਥੇ ਹਰ ਕੱਚੇ `<button>` ਜਾਂ `<input>` ਲਈ ਕਾਰਨ ਸਮੇਤ
-   `kit-exception:` ਵਾਲੀ ਟਿੱਪਣੀ ਲਾਜ਼ਮੀ ਹੈ, ਜੋ ਉਸ ਤੋਂ ਵੱਧ ਤੋਂ ਵੱਧ 3 ਲਾਈਨਾਂ ਉੱਪਰ ਖਤਮ ਹੋਵੇ; ਪੈਲੇਟ ਹਿਊ ਅਤੇ `dark:` ਵੇਰੀਐਂਟ
-   ਸਿਰਫ਼ ਟੈਸਟ ਵਿੱਚ ਸੂਚੀਬੱਧ ਫਾਈਲਾਂ ਵਿੱਚ ਹੀ ਹੋਣੇ ਚਾਹੀਦੇ ਹਨ।
-7. PR ਤੋਂ ਪਹਿਲਾਂ ਦੋਵੇਂ ਥੀਮਾਂ ਅਤੇ 390 px ਵਿਊਪੋਰਟ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ (ਸਕ੍ਰੀਨਸ਼ਾਟਾਂ ਨਾਲ); `tests/e2e/a11y.spec.ts`
-   axe ਚਲਾਉਂਦੀ ਹੈ।
+4. Tailwind ਯੂਟੀਲਿਟੀਆਂ ਕਿੱਟ ਕੰਪੋਨੈਂਟ ਕਲਾਸਾਂ ਉੱਤੇ ਜਿੱਤਦੀਆਂ ਹਨ (ਕਿੱਟ
+   `@layer theme, base, components, utilities` ਘੋਸ਼ਿਤ ਕਰਦਾ ਹੈ ਅਤੇ ਇਸਦੇ ਨਿਯਮ `components` ਵਿੱਚ ਰਹਿੰਦੇ ਹਨ) — ਯੂਟੀਲਿਟੀਆਂ ਦੀ ਵਰਤੋਂ
+   ਸਪੇਸਿੰਗ ਅਤੇ ਲੇਆਉਟ ਲਈ ਕਰੋ, ਕਿੱਟ ਕੰਪੋਨੈਂਟਾਂ ਨੂੰ ਮੁੜ-ਰੰਗਣ ਲਈ ਨਹੀਂ।
+5. ਸਿਰਲੇਖ: ਪੰਨਾ ਅਤੇ ਸੈਕਸ਼ਨ ਸਿਰਲੇਖਾਂ ਲਈ `.ci-heading` (Inter, ਬਿਨਾ ਟਰੈਕਿੰਗ); `.ci-dashboard-display`
+   (Instrument Serif) ਸਿਰਫ਼ ਵੱਡੇ, ਵਿਰਲੇ ਡਿਸਪਲੇ ਟੈਕਸਟ ਲਈ ਜਿਵੇਂ ਕਿ ਐਰਰ-ਪੰਨੇ ਦਾ ਸਟੇਟਸ ਕੋਡ।
+6. `tests/unit/dashboard-kit-sweep.test.ts` ਕਿੱਟ ਅਪਣਾਉਣ ਦੀ ਰੱਖਿਆ ਕਰਦਾ ਹੈ: `src/app` ਜਾਂ
+   `src/shared/components` ਹੇਠ ਕੋਈ Material ਲਿਗੇਚਰ ਸਪੈਨ ਨਹੀਂ; ਡੈਸ਼ਬੋਰਡ ਟ੍ਰੀ (`src/app/(dashboard)` ਅਤੇ
+   `src/shared/components`) ਵਿੱਚ ਕੋਈ ਕੱਚਾ `<select>`, `<textarea>` ਜਾਂ `<table>` ਨਹੀਂ ਅਤੇ ਸੂਚੀਬੱਧ ਅਪਵਾਦਾਂ
+   (`Select` ਅਡੈਪਟਰ ਦੀ ਨੇਟਿਵ ਬ੍ਰਾਂਚ,
+   `RequestLoggerDetail`) ਤੋਂ ਬਾਹਰ ਕੋਈ ਹੱਥੀਂ ਬਣਾਇਆ `role="dialog"` ਨਹੀਂ; ਉੱਥੇ ਹਰ ਕੱਚੇ `<button>` ਜਾਂ `<input>` ਲਈ ਇੱਕ ਟਿੱਪਣੀ ਚਾਹੀਦੀ ਹੈ ਜਿਸ ਵਿੱਚ
+   `kit-exception:` (ਕਾਰਨ ਸਮੇਤ) ਹੋਵੇ ਅਤੇ ਜੋ ਇਸ ਤੋਂ ਵੱਧ ਤੋਂ ਵੱਧ 3 ਸਤਰਾਂ ਉੱਪਰ ਖਤਮ ਹੁੰਦੀ ਹੋਵੇ; ਪੈਲੇਟ ਹਿਊਜ਼ ਅਤੇ `dark:` ਵੇਰੀਐਂਟ
+   ਸਿਰਫ਼ ਉਹਨਾਂ ਫਾਈਲਾਂ ਵਿੱਚ ਜਿਨ੍ਹਾਂ ਨੂੰ ਟੈਸਟ ਸੂਚੀਬੱਧ ਕਰਦਾ ਹੈ।
+7. PR ਤੋਂ ਪਹਿਲਾਂ ਦੋਹਾਂ ਥੀਮਾਂ ਅਤੇ 390 px ਵਿਊਪੋਰਟ ਦੀ ਪੁਸ਼ਟੀ ਕਰੋ (ਸਕ੍ਰੀਨਸ਼ਾਟ); `tests/e2e/a11y.spec.ts`
+   axe ਚਲਾਉਂਦਾ ਹੈ।
 
 ## 3. ਸਕ੍ਰੀਨ ਜੋੜਨਾ
 
@@ -143,12 +146,12 @@
 usage ਅਤੇ endpoint ਦੀ visual ਜਾਂਚ ਕਰੋ, `npm run check:ui-kit-snapshot` ਅਤੇ `npm run test:vitest:ui` ਚਲਾਓ, ਅਤੇ
 upstream changelog ਨਾਲ PR ਖੋਲ੍ਹੋ।
 
-## 6. ਹਵਾਲਾ ਸੂਚਕਾਂਕ
+## 6. ਹਵਾਲਾ ਸੂਚੀ
 
-- `src/app/globals.css` — token bridge, `.dark` overrides, OmniRoute `@layer components` extensions
-- `packages/ui-kit/UPSTREAM.md` — pinned upstream commit ਅਤੇ license authorization; `packages/ui-kit/PATCHES.md`
+- `src/app/globals.css` — ਟੋਕਨ ਬ੍ਰਿਜ, `.dark` ਓਵਰਰਾਈਡ, OmniRoute `@layer components` ਐਕਸਟੈਂਸ਼ਨਾਂ
+- `packages/ui-kit/UPSTREAM.md` — ਪਿੰਨ ਕੀਤੀ ਗਈ ਅੱਪਸਟਰੀਮ ਕਮਿਟ ਅਤੇ ਲਾਇਸੰਸ ਅਧਿਕਾਰੀਕਰਨ; `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
-- `src/shared/components/index.tsx` ਅਤੇ ਇਸਦੇ ਨਾਲ ਵਾਲੇ ਅਡੈਪਟਰ; `src/shared/components/layouts/DashboardShell.tsx`,
+- `src/shared/components/index.tsx` ਅਤੇ ਇਸਦੇ ਨਾਲ ਮੌਜੂਦ ਐਡਾਪਟਰ; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
 - `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
   `scripts/dev/codemod-material-icons.mjs`

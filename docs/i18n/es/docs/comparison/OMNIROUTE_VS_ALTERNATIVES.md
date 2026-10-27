@@ -39,7 +39,7 @@ Comparación objetiva de características frente a routers de IA de código abie
 
 ## Cuándo elegir OmniRoute
 
-- Te autoalojas y quieres **la máxima cobertura de proveedores** (375 proveedores, 155 entradas de catálogo gratuitas/sin autenticación)
+- Te autoalojas y quieres **la máxima cobertura de proveedores** (376 proveedores, 155 entradas de catálogo gratuitas/sin autenticación)
 - Necesitas un **servidor MCP integrado** (herramientas de LLM, memoria y habilidades expuestas como herramientas)
 - Necesitas el **protocolo A2A** para flujos de trabajo entre agentes
 - Quieres **sigilo de huella digital** (JA3/JA4) para evitar la detección por parte de los CAPTCHAs del proveedor upstream

@@ -499,7 +499,7 @@ apureita (työkaluskeemat, fetch/TTS-sovittimet ja erikoistapausten käsittelij�
 (jaettu identiteettiapuri) ja `index.ts` (rekisteri).
 
 > Huomautus: palveluntarjoajia, joita ei ole lueteltu tässä, palvelee `default.ts` käyttäen yleistä
-> OpenAI-yhteensopivaa suorittajaa. Täydellinen palveluntarjoajaluettelo (375 palveluntarjoajaa) sijaitsee tiedostossa
+> OpenAI-yhteensopivaa suorittajaa. Täydellinen palveluntarjoajaluettelo (376 palveluntarjoajaa) sijaitsee tiedostossa
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

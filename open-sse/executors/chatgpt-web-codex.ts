@@ -97,9 +97,15 @@ function configuredString(data: Record<string, unknown>, ...keys: string[]): str
   return undefined;
 }
 
+/**
+ * The browser to launch. Only the operator chooses it: the server's own environment
+ * (CHATGPT_WEB_CODEX_CHROME_PATH, CHROME_PATH) or the known install locations. `explicit`
+ * comes from the connection's providerSpecificData — caller input on remote management
+ * requests, stored and read again by health checks and inference — so it may only pick
+ * one of those, never name another program on the host.
+ */
 export function detectChromeExecutable(explicit?: string): string | undefined {
-  const candidates = [
-    explicit,
+  const operatorChoices = [
     process.env.CHATGPT_WEB_CODEX_CHROME_PATH,
     process.env.CHROME_PATH,
     "/usr/bin/google-chrome",
@@ -107,10 +113,13 @@ export function detectChromeExecutable(explicit?: string): string | undefined {
     "/usr/bin/chromium",
     "/usr/bin/chromium-browser",
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
-  ];
-  return candidates.find((candidate): candidate is string =>
-    Boolean(candidate && existsSync(candidate))
-  );
+  ].filter((candidate): candidate is string => Boolean(candidate?.trim()));
+  const preferred = explicit?.trim();
+  const candidates =
+    preferred && operatorChoices.includes(preferred)
+      ? [preferred, ...operatorChoices]
+      : operatorChoices;
+  return candidates.find((candidate) => existsSync(candidate));
 }
 
 function responseStateNamespace(connectionId: string, parsed: CodexParsedRequest): string {

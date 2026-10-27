@@ -79,37 +79,40 @@
   `src/app/offline/page.tsx`, `src/app/not-found.tsx` at `src/shared/components/ErrorPageScaffold.tsx`
   — ay nagpapakita ng lockup; tinitiyak ito ng `tests/unit/brand-pages-static.test.ts`.
 
-## 2. Mga Panuntunan
+## 2. Mga Tuntunin
 
-1. Mga token, hindi kailanman mga literal. Mga sinadyang panatilihing exception: ang terminal ng console na
-   palaging madilim, mga SVG stroke ng ReactFlow sa pamamagitan ng `STATUS_HEX`
-   (`src/shared/constants/statusColors.ts`), at ang mga categorical palette na
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) at
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Huwag kailanman manu-manong baguhin ang `packages/ui-kit/src`: i-sync gamit ang
-   `scripts/dev/sync-ui-kit.sh <commit>`; nabibigo ang pre-commit gate na
-   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) kapag may anumang byte na naiiba sa
-   naka-pin na upstream commit (nilalaktawan nito ang pagsusuri nang may babala kapag wala ang upstream
-   clone na `UI_KIT_CLONE` o `_references/cheaper-inference-ui-kit`). Kapag may kulang sa kit,
-   gumawa ng workaround sa adapter o sa screen at hilingin ito sa upstream.
-3. English ang mga default na text ng kit (`label = "Loading"`, `loadingLabel = "Loading table"`…) — magpasa
-   ng mga isinaling string mula sa `useTranslations(...)` sa tuwing nagre-render ng text ang isang
-   component ng kit.
-4. Nangunguna ang mga Tailwind utility kaysa sa mga class ng component ng kit (idineklara ng kit ang
-   `@layer theme, base, components, utilities` at nasa `components` ang mga rule nito) — gumamit ng mga
-   utility para sa spacing at layout, hindi para baguhin ang kulay ng mga component ng kit.
-5. Mga heading: `.ci-heading` (Inter, walang tracking) para sa mga title ng page at seksyon;
-   `.ci-dashboard-display` (Instrument Serif) para lamang sa malalaki at hindi siksik na display text,
-   gaya ng status code sa error page.
-6. Binabantayan ng `tests/unit/dashboard-kit-sweep.test.ts` ang paggamit sa kit: walang Material ligature
+1. Mga token, hindi kailanman mga literal. Sadyang itinabi ang mga eksepsiyon: ang laging-madilim na
+   console terminal at ang `STATUS_HEX` (`src/shared/constants/statusColors.ts`), ang katumbas na
+   resolved-hex ng kit status palette para sa mga caller na nangangailangan ng literal na hex. Ang
+   mga categorical palette ay hindi na eksepsiyon: nakasakay ang mga ito sa limang chart token ng
+   kit (`--color-chart-1..5`) sa pamamagitan ng `src/shared/utils/categoricalPalette.ts` at, para sa
+   mga routing strategy, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; binabasa ng mga
+   ReactFlow edge at ng orchestration canvas ang mga theme-aware na variable na `--orch-status-*`
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Huwag kailanman i-patch nang manu-mano ang `packages/ui-kit/src`: mag-sync gamit ang
+   `scripts/dev/sync-ui-kit.sh <commit>`; ang pre-commit gate na `npm run check:ui-kit-snapshot`
+   (`.husky/pre-commit`) ay babagsak sa anumang byte na naiiba sa naka-pin na upstream commit
+   (nilalaktawan nito nang may babala kapag wala ang upstream clone, `UI_KIT_CLONE` o
+   `_references/cheaper-inference-ui-kit`). Kapag may kulang sa kit, gumawa ng paraan sa adapter o sa
+   screen at humingi nito sa upstream.
+3. Ang mga default na teksto ng kit ay nasa Ingles (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   ipasa ang mga isinaling string mula sa `useTranslations(...)` tuwing nagre-render ng teksto ang isang kit
+   component.
+4. Nananaig ang mga Tailwind utility sa mga klase ng kit component (idinedeklara ng kit ang
+   `@layer theme, base, components, utilities` at ang mga patakaran nito ay nasa `components`) — gamitin ang
+   mga utility para sa spacing at layout, hindi para muling kulayan ang mga kit component.
+5. Mga heading: `.ci-heading` (Inter, walang tracking) para sa mga pamagat ng pahina at seksiyon;
+   `.ci-dashboard-display` (Instrument Serif) lamang para sa malaki at kakaunting display text tulad ng
+   status code ng error page.
+6. Binabantayan ng `tests/unit/dashboard-kit-sweep.test.ts` ang pag-adopt ng kit: walang Material ligature
    span sa ilalim ng `src/app` o `src/shared/components`; sa dashboard tree (`src/app/(dashboard)` at
-   `src/shared/components`), walang raw na `<select>`, `<textarea>` o `<table>` at walang sariling gawang
-   `role="dialog"` sa labas ng mga nakalistang exception (ang native branch ng `Select` adapter,
-   `RequestLoggerDetail`); kailangan ng bawat raw na `<button>` o `<input>` doon ng comment na naglalaman
-   ng `kit-exception:` (kasama ang dahilan) na nagtatapos nang hindi lalampas sa 3 linya sa itaas nito;
-   pinapayagan lamang ang mga hue ng palette at mga variant na `dark:` sa mga file na nakalista sa test.
-7. Suriin ang parehong theme at ang 390 px viewport bago ang isang PR (mga screenshot); nagpapatakbo ng
-   axe ang `tests/e2e/a11y.spec.ts`.
+   `src/shared/components`) walang hilaw na `<select>`, `<textarea>` o `<table>` at walang hand-rolled na
+   `role="dialog"` sa labas ng mga nakalistang eksepsiyon (ang native branch ng `Select` adapter,
+   `RequestLoggerDetail`); bawat hilaw na `<button>` o `<input>` doon ay nangangailangan ng komentong
+   naglalaman ng `kit-exception:` (kasama ang dahilan) na nagtatapos nang hindi hihigit sa 3 linya sa itaas
+   nito; mga palette hue at `dark:` variant ay tanging nasa mga file na nakalista sa test.
+7. I-verify ang parehong mga tema at ang 390 px viewport bago ang isang PR (mga screenshot); pinapatakbo ng
+   `tests/e2e/a11y.spec.ts` ang axe.
 
 ## 3. Pagdaragdag ng screen
 

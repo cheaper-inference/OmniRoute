@@ -163,7 +163,7 @@ OmniRoute razkriva 6 veščin A2A, povezanih v `src/lib/a2a/taskExecution.ts::A2
 | Health Report      | `health-report`      | Združi stanja odklopnika (circuit breaker), ohlajanja in zaklepa po posameznih ponudnikih                                                           | health, resilience         | "Prikaži stanje zdravja vseh ponudnikov"  |
 | List Capabilities  | `list-capabilities`  | Vrne celoten katalog veščin agenta s 45 vnosi (23 API + 21 CLI + 1 config) kot tabelo markdown s surovimi URL-ji SKILL.md za vbrizgavanje konteksta | catalog, discovery, skills | "Navedi vse zmogljivosti OmniRoute"       |
 
-> Kartico agenta (Agent Card) je treba ohranjati usklajeno z živim katalogom 375 ponudnikov; števila ponudnikov ter metapodatki o brezplačnih možnostih in možnostih brez avtentikacije izvirajo iz izvajalnega registra.
+> Kartico agenta (Agent Card) je treba ohranjati usklajeno z živim katalogom 376 ponudnikov; števila ponudnikov ter metapodatki o brezplačnih možnostih in možnostih brez avtentikacije izvirajo iz izvajalnega registra.
 
 ### Podrobnosti veščine `list-capabilities`
 

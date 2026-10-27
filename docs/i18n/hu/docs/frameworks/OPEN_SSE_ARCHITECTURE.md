@@ -488,7 +488,7 @@ Az `open-sse/config/` könyvtár tartalmazza a konfigurációs réteget:
 
 | Fájl                            | Funkció                                                               |
 | ------------------------------- | --------------------------------------------------------------------- |
-| `providerRegistry.ts`           | Chatmodelleket nyilvántartó regiszter a 375 szolgáltatós katalógushoz |
+| `providerRegistry.ts`           | Chatmodelleket nyilvántartó regiszter a 376 szolgáltatós katalógushoz |
 | `providerModels.ts`             | Modellaliaszok, formátumleképezés                                     |
 | `constants.ts`                  | Időtúllépések, korlátok, státuszkódok                                 |
 | `defaultThinkingSignature.ts`   | Alapértelmezett Claude thinking-aláírás                               |

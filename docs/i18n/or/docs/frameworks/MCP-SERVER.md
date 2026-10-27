@@ -72,6 +72,16 @@ curl -i \
 
 `manage` ନଥିବା କୀ (କିମ୍ବା Bearer ନଥିଲେ) `403 LOCAL_ONLY` ଫେରାଏ। ସହୋଦର ପ୍ରିଫିକ୍ସ `/api/cli-tools/runtime/*`କୁ ଉଦ୍ଦେଶ୍ୟମୂଳକ ଭାବେ ବାଇପାସ୍ କରାଯାଇପାରିବ ନାହିଁ — [ରୁଟ୍ ଗାର୍ଡ ସ୍ତରଗୁଡ଼ିକ — Manage-scope ବ୍ୟତିକ୍ରମ](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) ଦେଖନ୍ତୁ।
 
+### Origin ଯାଞ୍ଚ
+
+ପ୍ରମାଣୀକରଣ ପରେ `/api/mcp/*` କୁ ଯାଉଥିବା ପ୍ରତ୍ୟେକ ଅନୁରୋଧର — ଟ୍ରାନ୍ସପୋର୍ଟ ଏବଂ `status`, `tools`, `audit`, `restart` ପରି ପରିଚାଳନା ରୁଟ — `Origin` ହେଡର ଯାଞ୍ଚ କରାଯାଏ, କଲର ଯିଏ ବି ହୁଅନ୍ତୁ (API କି, CLI ଟୋକେନ, ଡ୍ୟାସବୋର୍ଡ ସେସନ, କିମ୍ବା ଲଗଇନ ବନ୍ଦ ଥିବାବେଳେ ଅଜ୍ଞାତ loopback)। ଏହା MCP Streamable HTTP ନିର୍ଦ୍ଦିଷ୍ଟକରଣ ଆବଶ୍ୟକ କରୁଥିବା DNS rebinding ସୁରକ୍ଷା।
+
+- **`Origin` ହେଡର ନାହିଁ** → ଅନୁମତି ଅଛି। OmniRoute CLI, SDK ଏବଂ IDE କ୍ଲାଏଣ୍ଟ ଏହାକୁ ପଠାନ୍ତି ନାହିଁ।
+- **ଅନୁମୋଦିତ `Origin`** → ଯେକୌଣସି ପୋର୍ଟରେ `localhost` / `127.0.0.1` / `[::1]`, କିମ୍ବା OmniRoute ର ନିଜସ୍ୱ ସାର୍ବଜନୀନ origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, ବିଶ୍ୱସ୍ତ ରିଭର୍ସ ପ୍ରକ୍ସି ଦ୍ୱାରା ଫରୱାର୍ଡ ହୋଇଥିବା origin (`OMNIROUTE_TRUST_PROXY`, କେବଳ base URL ସେଟ ହୋଇନଥିଲେ), କିମ୍ବା ସିଧାସଳଖ ପ୍ରବେଶ କରାଯାଇଥିବା loopback/LAN IP ହୋଷ୍ଟ। କେବଳ `Host` ହେଡର କେବେ ବି କୌଣସି origin କୁ ବିଶ୍ୱସ୍ତ କରେ ନାହିଁ।
+- **`null` ସମେତ ଅନ୍ୟ କୌଣସି `Origin`** → JSON-RPC ତ୍ରୁଟି ବଡି ସହିତ `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`। ବୈଧ CSRF ଟୋକେନ ଦେଖାଉଥିବା ଡ୍ୟାସବୋର୍ଡ ସେସନ, ଅନ୍ୟ ଡ୍ୟାସବୋର୍ଡ ଲେଖା ପରି, ଏବେ ବି ଗ୍ରହଣ କରାଯାଏ।
+
+ରିଭର୍ସ ପ୍ରକ୍ସି ପଛରେ ପରିବେଷିତ ବ୍ରାଉଜର MCP କ୍ଲାଏଣ୍ଟ ପାଇଁ `OMNIROUTE_PUBLIC_BASE_URL` ଆବଶ୍ୟକ; ଅନ୍ୟ origins ପାଇଁ କୌଣସି ଅନୁମତି-ତାଲିକା ନାହିଁ। CORS ପ୍ରିଫ୍ଲାଇଟ (`OPTIONS`) ର Origin ଯାଞ୍ଚ ହୁଏ ନାହିଁ; ତା ପରବର୍ତ୍ତୀ ଅନୁରୋଧର ହୁଏ।
+
 ## IDE ବିନ୍ୟାସ
 
 Claude Desktop, Cursor, Cline ଏବଂ ସୁସଙ୍ଗତ MCP କ୍ଲାଏଣ୍ଟ ସେଟଅପ୍ ପାଇଁ [MCP କ୍ଲାଏଣ୍ଟ ବିନ୍ୟାସ](../guides/SETUP_GUIDE.md#mcp-client-configuration) ଦେଖନ୍ତୁ।

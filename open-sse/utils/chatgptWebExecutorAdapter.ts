@@ -346,8 +346,10 @@ export function resolveChatGptWebChromeExecutable(
 ): string | undefined {
   const env = deps.env ?? process.env;
   const exists = deps.exists ?? existsSync;
-  const candidates = [
-    explicit,
+  // Only the operator chooses the browser (see detectChromeExecutable in
+  // executors/chatgpt-web-codex.ts): `explicit` is stored connection data and may only
+  // select one of these, never name another program on the host.
+  const operatorChoices = [
     env.CHATGPT_WEB_CHROME_PATH,
     env.CHROME_PATH,
     "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
@@ -364,10 +366,15 @@ export function resolveChatGptWebChromeExecutable(
     ...(env.LOCALAPPDATA
       ? [join(env.LOCALAPPDATA, "Google", "Chrome", "Application", "chrome.exe")]
       : []),
-  ];
-  return candidates.find((candidate): candidate is string =>
-    Boolean(candidate?.trim() && exists(candidate.trim()))
-  );
+  ]
+    .map((candidate) => candidate?.trim())
+    .filter((candidate): candidate is string => Boolean(candidate));
+  const preferred = explicit?.trim();
+  const candidates =
+    preferred && operatorChoices.includes(preferred)
+      ? [preferred, ...operatorChoices]
+      : operatorChoices;
+  return candidates.find((candidate) => exists(candidate));
 }
 
 async function createDefaultSession(

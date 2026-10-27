@@ -81,31 +81,36 @@
 
 ## 2. Kanuni
 
-1. Tokeni, kamwe si thamani halisi. Vighairi vilivyowekwa kimakusudi: terminali ya dashibodi iliyo nyeusi kila wakati, mistari ya ReactFlow SVG
-   kupitia `STATUS_HEX` (`src/shared/constants/statusColors.ts`), pamoja na paleti za kategoria
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) na
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Kamwe usibadilishe `packages/ui-kit/src` kwa mkono: sawazisha kwa `scripts/dev/sync-ui-kit.sh <commit>`; lango la
-   pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) hushindwa ikiwa baiti yoyote
-   inatofautiana na commit iliyobainishwa ya upstream (hurukwa pamoja na onyo wakati clone ya upstream,
-   `UI_KIT_CLONE` au `_references/cheaper-inference-ui-kit`, haipo). Wakati kit haina kitu fulani,
-   tumia suluhisho mbadala katika adapta au skrini na uiombe upstream ikiongeze.
-3. Chaguo-msingi za maandishi ya kit ni Kiingereza (`label = "Loading"`, `loadingLabel = "Loading table"`…) — pitisha mifuatano
-   iliyotafsiriwa kutoka `useTranslations(...)` kila wakati kijenzi cha kit kinapoonyesha maandishi.
-4. Huduma za Tailwind zina kipaumbele dhidi ya class za vijenzi vya kit (kit hutangaza
-   `@layer theme, base, components, utilities` na kanuni zake ziko katika `components`) — tumia huduma kwa
-   nafasi na mpangilio, si kubadilisha rangi za vijenzi vya kit.
-5. Vichwa: `.ci-heading` (Inter, bila nafasi ya ziada kati ya herufi) kwa vichwa vya kurasa na sehemu; `.ci-dashboard-display`
-   (Instrument Serif) kwa maandishi makubwa na machache ya kuonyesha pekee, kama vile msimbo wa hali wa ukurasa wa hitilafu.
-6. `tests/unit/dashboard-kit-sweep.test.ts` hulinda matumizi ya kit: hakuna span ya ligature ya Material chini ya
-   `src/app` au `src/shared/components`; katika mti wa dashibodi (`src/app/(dashboard)` na
-   `src/shared/components`) kusiwe na `<select>`, `<textarea>` au `<table>` ghafi, wala
-   `role="dialog"` iliyotengenezwa kwa mkono nje ya vighairi vilivyoorodheshwa (tawi asilia la adapta ya `Select`,
-   `RequestLoggerDetail`); kila `<button>` au `<input>` ghafi humo inahitaji maoni yenye
-   `kit-exception:` (pamoja na sababu) yanayoishia si zaidi ya mistari 3 juu yake; rangi za paleti na vibadala vya `dark:`
-   vinaruhusiwa tu katika faili zilizoorodheshwa na jaribio.
-7. Thibitisha mandhari zote mbili na viewport ya px 390 kabla ya PR (picha za skrini); `tests/e2e/a11y.spec.ts` huendesha
-   axe.
+1. Tokeni, kamwe si thamani halisi. Mambo ya kipekee yamehifadhiwa kimakusudi: terminali ya konsole
+   inayodumu kuwa giza kila wakati na `STATUS_HEX` (`src/shared/constants/statusColors.ts`), kioo cha
+   hex iliyotatuliwa cha paleti ya hali ya kit kwa wanaohitaji hex halisi. Paleti za kategoria si za
+   kipekee tena: zinatembea juu ya tokeni tano za chati za kit (`--color-chart-1..5`) kupitia
+   `src/shared/utils/categoricalPalette.ts` na, kwa mikakati ya uelekezaji,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; kingo za ReactFlow na kanvasi ya uratibu
+   husoma vigezo `--orch-status-*` vinavyotambua mandhari (`src/shared/components/flow/edgeStyles.ts`).
+2. Kamwe usirekebishe `packages/ui-kit/src` kwa mkono: sawazisha kwa `scripts/dev/sync-ui-kit.sh <commit>`;
+   kizingiti cha pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) hushindwa kwa baiti
+   yoyote inayotofautiana na commit ya upstream iliyobanwa (huruka kwa onyo wakati kloni ya upstream,
+   `UI_KIT_CLONE` au `_references/cheaper-inference-ui-kit`, haipo). Kit kinapokosa kitu, zunguka tatizo
+   hilo katika adaptha au skrini, kisha ukiombe kutoka upstream.
+3. Chaguo-msingi za maandishi ya kit ni Kiingereza (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   pitisha mifululizo iliyotafsiriwa kutoka `useTranslations(...)` kila wakati kipengele cha kit
+   kinapoonyesha maandishi.
+4. Utilities za Tailwind hushinda madarasa ya vipengele vya kit (kit inatangaza
+   `@layer theme, base, components, utilities` na sheria zake ziko katika `components`) — tumia utilities
+   kwa nafasi na mpangilio, si kwa kupaka rangi upya vipengele vya kit.
+5. Vichwa: `.ci-heading` (Inter, bila tracking) kwa vichwa vya ukurasa na sehemu; `.ci-dashboard-display`
+   (Instrument Serif) tu kwa maandishi makubwa, machache ya kuonyesha kama vile msimbo wa hali wa ukurasa
+   wa hitilafu.
+6. `tests/unit/dashboard-kit-sweep.test.ts` hulinda utumiaji wa kit: hakuna span ya ligature ya Material
+   chini ya `src/app` au `src/shared/components`; katika mti wa dashibodi (`src/app/(dashboard)` na
+   `src/shared/components`) hakuna `<select>`, `<textarea>` au `<table>` ghafi na hakuna `role="dialog"`
+   iliyotengenezwa kwa mkono nje ya mambo ya kipekee yaliyoorodheshwa (tawi la asili la adaptha ya
+   `Select`, `RequestLoggerDetail`); kila `<button>` au `<input>` ghafi huko inahitaji maoni yaliyo na
+   `kit-exception:` (pamoja na sababu) yanayokwisha kwa kiwango cha juu cha mistari 3 juu yake; toni za
+   rangi za paleti na vibadiliko vya `dark:` tu katika faili ambazo jaribio linaorodhesha.
+7. Thibitisha mandhari zote mbili na viewport ya 390 px kabla ya PR (picha za skrini);
+   `tests/e2e/a11y.spec.ts` huendesha axe.
 
 ## 3. Kuongeza skrini
 

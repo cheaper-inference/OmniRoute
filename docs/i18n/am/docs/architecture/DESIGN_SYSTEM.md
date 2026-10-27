@@ -79,33 +79,15 @@
   `src/app/offline/page.tsx`፣ `src/app/not-found.tsx` እና `src/shared/components/ErrorPageScaffold.tsx`
   — lockupውን ያሳያሉ፤ `tests/unit/brand-pages-static.test.ts` ይህን ይጠብቃል።
 
-## 2. ደንቦች
+## 2. ህጎች
 
-1. ሁልጊዜ tokensን ይጠቀሙ፤ literalsን በፍጹም አይጠቀሙ። ሆን ተብለው የተቀመጡ ልዩ ሁኔታዎች፦ ሁልጊዜ ጨለማ የሆነው የconsole terminal፣ በ`STATUS_HEX` (`src/shared/constants/statusColors.ts`) በኩል የሚተገበሩ የReactFlow SVG
-   strokes፣ እንዲሁም ምድባዊ palettes የሆኑት
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) እና
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`) ናቸው።
-2. `packages/ui-kit/src`ን በእጅ ፈጽሞ patch አያድርጉ፦ በ`scripts/dev/sync-ui-kit.sh <commit>` ያመሳስሉት፤
-   የpre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ከተወሰነው upstream commit በአንድ byte እንኳ
-   የተለየ ነገር ካለ አይሳካም (የupstream clone፣
-   `UI_KIT_CLONE` ወይም `_references/cheaper-inference-ui-kit`፣ ከሌለ ከማስጠንቀቂያ ጋር ይዘለዋል)። kit አንድ ነገር ካልያዘ፣
-   በadapter ወይም በscreen ውስጥ አማራጭ መፍትሔ ይጠቀሙ እና upstream እንዲያክለው ይጠይቁ።
-3. የkit ነባሪ ጽሑፎች በእንግሊዝኛ ናቸው (`label = "Loading"`, `loadingLabel = "Loading table"`…) — የkit component ጽሑፍ በሚያሳይበት ጊዜ ሁሉ ከ`useTranslations(...)`
-   የተገኙ የተተረጎሙ ሕብረቁምፊዎችን ያስተላልፉ።
-4. የTailwind utilities ከkit component classes ቅድሚያ ያገኛሉ (kit
-   `@layer theme, base, components, utilities` ያውጃል እና ደንቦቹ በ`components` ውስጥ ይገኛሉ) — utilitiesን ለ
-   ክፍተት እና layout ይጠቀሙ፤ የkit componentsን ቀለም ለመቀየር አይጠቀሙባቸው።
-5. ርዕሶች፦ `.ci-heading` (Inter፣ tracking የሌለው) ለገጽ እና ለክፍል ርዕሶች፤ `.ci-dashboard-display`
-   (Instrument Serif) እንደ የerror-page status code ላሉ ትልቅና የተራራቁ display ጽሑፎች ብቻ።
-6. `tests/unit/dashboard-kit-sweep.test.ts` የkit አጠቃቀምን ይቆጣጠራል፦
-   በ`src/app` ወይም `src/shared/components` ስር Material ligature span መኖር የለበትም፤ በdashboard tree (`src/app/(dashboard)` እና
-   `src/shared/components`) ውስጥ raw `<select>`፣ `<textarea>` ወይም `<table>`፣ እንዲሁም ከተዘረዘሩት ልዩ ሁኔታዎች (የ`Select` adapter native branch፣
-   `RequestLoggerDetail`) ውጪ በእጅ የተሠራ
-   `role="dialog"` መኖር የለበትም፤ እያንዳንዱ raw `<button>` ወይም `<input>` ምክንያቱን የሚገልጽ
-   `kit-exception:` የያዘና ከእሱ ቢበዛ 3 መስመሮች በላይ የሚያልቅ comment ሊኖረው ይገባል፤ palette hues እና `dark:` variants
-   testው በዘረዘራቸው files ውስጥ ብቻ መኖር አለባቸው።
-7. PR ከመክፈትዎ በፊት ሁለቱንም themes እና የ390 px viewportን በscreenshots ያረጋግጡ፤ `tests/e2e/a11y.spec.ts`
-   axeን ያስኬዳል።
+1. ቶክኖች፣ ፈጽሞ literals አይደሉም። በዓላማ የተቀሩ ልወጣዎች፦ ሁልጊዜ ጨለማ የሆነው ኮንሶል ተርሚናል እና `STATUS_HEX` (`src/shared/constants/statusColors.ts`)፣ ይህም ቀጥተኛ hex ለሚያስፈልጋቸው ጠሪዎች የኪቱ የሁኔታ ፓሌት የተፈታ-hex አንፀባራቂ ነው። የምድብ ፓሌቶች ከእንግዲህ ልወጣ አይደሉም፦ በ `src/shared/utils/categoricalPalette.ts` በኩል በኪቱ አምስት የቻርት ቶክኖች (`--color-chart-1..5`) ላይ ይመሠርታሉ፣ እና ለራውቲንግ ስትራቴጂዎች ደግሞ በ `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` በኩል፤ የReactFlow ጠርዞች እና የኦርኬስትሬሽን ካንቫስ ገጽታን የሚገነዘቡትን `--orch-status-*` ተለዋዋጮች ያነባሉ (`src/shared/components/flow/edgeStyles.ts`)።
+2. `packages/ui-kit/src`ን በእጅ ፓች አያድርጉ፦ በ `scripts/dev/sync-ui-kit.sh <commit>` ያመሳስሉ፤ የpre-commit መከላከያ `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ከተሰነጠጠው የupstream ኮሚት ከሚለይ ማንኛውም ባይት ላይ ይወድቃል (የupstream ክሎኑ፣ `UI_KIT_CLONE` ወይም `_references/cheaper-inference-ui-kit`፣ ሲጎድል በማስጠንቀቂያ ይዘለላል)። ኪቱ የሆነ ነገር ሲያጎድል፣ በአዳፕተሩ ወይም በስክሪኑ ውስጥ መዝለሊያ መፍትሔ ይፈጥሩ እና ከupstream ይጠይቁ።
+3. የኪት ጽሑፍ ነባሪ እሴቶች እንግሊዝኛ ናቸው (`label = "Loading"`, `loadingLabel = "Loading table"`…) — የኪት ኮምፖነንት ጽሑፍ በሚያሳይበት ጊዜ ሁሉ ከ `useTranslations(...)` የተተረጎሙ ሕብረቁምፊዎችን ያስተላልፉ።
+4. የTailwind utilities የኪት ኮምፖነንት ክላሶችን ያሸንፋሉ (ኪቱ `@layer theme, base, components, utilities`ን ያወጃል እና ህጎቹ በ `components` ውስጥ ይኖራሉ) — utilitiesን ለክፍተት እና ለአቀማመጥ ይጠቀሙ፣ የኪት ኮምፖነንቶችን ቀለም እንደገና ለመቀየር ሳይሆን።
+5. ርዕሶች፦ `.ci-heading` (Inter፣ ያለ tracking) ለገጽ እና ክፍል ርዕሶች፤ `.ci-dashboard-display` (Instrument Serif) ለትላልቅ፣ ዝርዝር የሆነ የማሳያ ጽሑፍ ብቻ፣ እንደ የስህተት ገጽ ሁኔታ ኮድ ያሉ።
+6. `tests/unit/dashboard-kit-sweep.test.ts` የኪቱን ተቀባይነት ይጠብቃል፦ በ `src/app` ወይም `src/shared/components` ሥር የMaterial ligature span የለም፤ በዳሽቦርድ ዛፉ (`src/app/(dashboard)` እና `src/shared/components`) ውስጥ ጥሬ `<select>`፣ `<textarea>` ወይም `<table>` የለም፣ እና ከተዘረዘሩት ልወጣዎች ውጭ በእጅ የተሰራ `role="dialog"` የለም (የ `Select` አዳፕተሩ native ቅርንጫፍ፣ `RequestLoggerDetail`)፤ እያንዳንዱ በዚያ የሚገኝ ጥሬ `<button>` ወይም `<input>` `kit-exception:` የሚያካትት (ምክንያቱን ጨምሮ) እና ከእሱ በላይ ቢበዛ በ3 መስመሮች የሚያበቃ አስተያየት ያስፈልገዋል፤ የፓሌት ቀለሞች (hues) እና `dark:` ቫሪያንቶች በሙከራው በተዘረዘሩት ፋይሎች ውስጥ ብቻ ናቸው።
+7. ከPR በፊት ሁለቱንም ገጽታዎች እና የ390 px ቪውፖርት ያረጋግጡ (ስክሪንሾቶች)፤ `tests/e2e/a11y.spec.ts` axeን ያካሂዳል።
 
 ## 3. Screen ማከል
 

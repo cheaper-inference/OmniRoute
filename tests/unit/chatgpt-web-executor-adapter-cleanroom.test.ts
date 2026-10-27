@@ -282,8 +282,11 @@ describe("ChatGPT Web clean-room executor request adapter", () => {
 describe("ChatGPT Web clean-room storage state", () => {
   test("prefers an explicit installed Chrome path for the headed first-party session", () => {
     const checked: string[] = [];
+    // The explicit path is stored connection data, so it must name a browser the operator
+    // configured (here through CHROME_PATH); an arbitrary path is ignored — see
+    // tests/unit/browser-executable-boundary.test.ts.
     const resolved = resolveChatGptWebChromeExecutable("/custom/chrome", {
-      env: {},
+      env: { CHROME_PATH: "/custom/chrome" },
       exists: (candidate) => {
         checked.push(candidate);
         return candidate === "/custom/chrome";

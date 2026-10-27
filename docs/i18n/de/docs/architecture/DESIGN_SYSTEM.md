@@ -81,31 +81,37 @@
 
 ## 2. Regeln
 
-1. Tokens, niemals Literale. Bewusst beibehaltene Ausnahmen: das stets dunkle Konsolenterminal, ReactFlow-SVG-
-   Konturen über `STATUS_HEX` (`src/shared/constants/statusColors.ts`) sowie die kategorialen Paletten
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) und
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. `packages/ui-kit/src` niemals manuell patchen: mit `scripts/dev/sync-ui-kit.sh <commit>` synchronisieren; die
-   Pre-Commit-Prüfung `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) schlägt bei jedem Byte fehl, das
-   vom angehefteten Upstream-Commit abweicht (sie wird mit einer Warnung übersprungen, wenn der Upstream-Klon,
-   `UI_KIT_CLONE` oder `_references/cheaper-inference-ui-kit`, fehlt). Wenn dem Kit etwas fehlt,
-   im Adapter oder im Bildschirm eine Umgehung implementieren und die Funktion beim Upstream-Projekt anfragen.
-3. Die Standardtexte des Kits sind Englisch (`label = "Loading"`, `loadingLabel = "Loading table"`…) — immer
-   übersetzte Zeichenfolgen aus `useTranslations(...)` übergeben, wenn eine Kit-Komponente Text darstellt.
-4. Tailwind-Utilities haben Vorrang vor den Komponentenklassen des Kits (das Kit deklariert
-   `@layer theme, base, components, utilities`, und seine Regeln befinden sich in `components`) — Utilities für
-   Abstände und Layout verwenden, nicht zum Umfärben von Kit-Komponenten.
-5. Überschriften: `.ci-heading` (Inter, kein Zeichenabstand) für Seiten- und Abschnittstitel; `.ci-dashboard-display`
-   (Instrument Serif) nur für große, sparsam eingesetzte Anzeigetexte wie den Statuscode auf der Fehlerseite.
-6. `tests/unit/dashboard-kit-sweep.test.ts` überwacht die Kit-Einführung: kein Material-Ligatur-Span unter
-   `src/app` oder `src/shared/components`; im Dashboard-Baum (`src/app/(dashboard)` und
-   `src/shared/components`) keine rohen `<select>`-, `<textarea>`- oder `<table>`-Elemente und keine selbst
-   implementierten `role="dialog"` außerhalb der aufgeführten Ausnahmen (der native Zweig des `Select`-Adapters,
-   `RequestLoggerDetail`); jeder rohe `<button>` oder `<input>` dort benötigt einen Kommentar mit
-   `kit-exception:` (einschließlich Begründung), der höchstens 3 Zeilen darüber endet; Palettenfarbtöne und
-   `dark:`-Varianten sind nur in den von diesem Test aufgeführten Dateien zulässig.
-7. Vor einem PR beide Themes und den 390-px-Viewport überprüfen (Screenshots); `tests/e2e/a11y.spec.ts` führt
-   axe aus.
+1. Tokens, niemals Literale. Bewusst beibehaltene Ausnahmen: das immer dunkle Konsolen-Terminal und
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), der aufgelöste Hex-Spiegel der
+   Kit-Statuspalette für Aufrufer, die einen literalen Hex-Wert benötigen. Die kategorialen Paletten
+   sind keine Ausnahme mehr: Sie basieren auf den fünf Chart-Tokens des Kits (`--color-chart-1..5`)
+   über `src/shared/utils/categoricalPalette.ts` und, für Routing-Strategien, über
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-Kanten und die
+   Orchestrierungs-Canvas lesen die theme-sensitiven `--orch-status-*`-Variablen
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. `packages/ui-kit/src` niemals von Hand patchen: mit `scripts/dev/sync-ui-kit.sh <commit>`
+   synchronisieren; das Pre-Commit-Gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`)
+   schlägt bei jedem Byte fehl, das vom angepinnten Upstream-Commit abweicht (es wird mit einer
+   Warnung übersprungen, wenn der Upstream-Klon, `UI_KIT_CLONE` oder
+   `_references/cheaper-inference-ui-kit`, fehlt). Wenn dem Kit etwas fehlt, im Adapter oder im
+   Screen darum herumarbeiten und es upstream anfordern.
+3. Die Text-Defaults des Kits sind Englisch (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   übersetzte Strings aus `useTranslations(...)` übergeben, wann immer eine Kit-Komponente Text rendert.
+4. Tailwind-Utilities gewinnen gegenüber Kit-Komponentenklassen (das Kit deklariert
+   `@layer theme, base, components, utilities` und seine Regeln leben in `components`) — Utilities
+   für Abstände und Layout verwenden, nicht, um Kit-Komponenten umzufärben.
+5. Überschriften: `.ci-heading` (Inter, kein Tracking) für Seiten- und Abschnittstitel;
+   `.ci-dashboard-display` (Instrument Serif) nur für großen, spärlichen Display-Text wie den
+   Statuscode der Fehlerseite.
+6. `tests/unit/dashboard-kit-sweep.test.ts` überwacht die Kit-Übernahme: kein Material-Ligatur-Span
+   unter `src/app` oder `src/shared/components`; im Dashboard-Baum (`src/app/(dashboard)` und
+   `src/shared/components`) keine rohen `<select>`, `<textarea>` oder `<table>` und kein
+   handgeschriebenes `role="dialog"` außerhalb der gelisteten Ausnahmen (der native Zweig des
+   `Select`-Adapters, `RequestLoggerDetail`); jedes rohe `<button>` oder `<input>` dort braucht
+   einen Kommentar, der `kit-exception:` enthält (mit der Begründung) und höchstens 3 Zeilen darüber
+   endet; Paletten-Farbtöne und `dark:`-Varianten nur in den Dateien, die der Test auflistet.
+7. Vor einem PR beide Themes und den 390-px-Viewport prüfen (Screenshots); `tests/e2e/a11y.spec.ts`
+   führt axe aus.
 
 ## 3. Einen Bildschirm hinzufügen
 

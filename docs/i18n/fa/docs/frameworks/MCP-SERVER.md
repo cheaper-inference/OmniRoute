@@ -73,6 +73,16 @@ curl -i \
 
 یک کلید فاقد حوزهٔ manage (یا نبود Bearer) پاسخ `403 LOCAL_ONLY` را بازمیگرداند. پیشوند همسطح `/api/cli-tools/runtime/*` عمداً قابل دور زدن نیست — به بخش [سطوح محافظ مسیر — استثنای حوزهٔ manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) مراجعه کنید.
 
+### اعتبارسنجی Origin
+
+پس از احراز هویت، سرآیند `Origin` در هر درخواست به `/api/mcp/*` — ترابری‌ها و مسیرهای مدیریتی مانند `status`, `tools`, `audit`, `restart` — اعتبارسنجی می‌شود، فارغ از اینکه فراخوان کیست (کلید API، توکن CLI، نشست داشبورد یا loopback ناشناس با ورود غیرفعال). این همان محافظت در برابر DNS rebinding است که مشخصات MCP Streamable HTTP الزام می‌کند.
+
+- **بدون سرآیند `Origin`** ← مجاز. CLI ـِ OmniRoute، SDK و کلاینت‌های IDE آن را ارسال نمی‌کنند.
+- **`Origin` مجاز** ← `localhost` / `127.0.0.1` / `[::1]` روی هر پورت، یا origin عمومی خود OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`، origin ارسال‌شده توسط یک پراکسی معکوس مورد اعتماد (`OMNIROUTE_TRUST_PROXY`، فقط وقتی base URL تنظیم نشده باشد)، یا میزبان IP از نوع loopback/LAN که مستقیم به آن دسترسی می‌شود. سرآیند `Host` به‌تنهایی هرگز یک origin را مورد اعتماد نمی‌کند.
+- **هر `Origin` دیگر، از جمله `null`** ← `403` با بدنهٔ خطای JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. نشست داشبوردی که توکن CSRF معتبر ارائه کند، مانند سایر نوشتن‌های داشبورد، همچنان پذیرفته می‌شود.
+
+کلاینت MCP مرورگری که پشت پراکسی معکوس سرو می‌شود به `OMNIROUTE_PUBLIC_BASE_URL` نیاز دارد؛ فهرست مجاز برای originهای دیگر وجود ندارد. درخواست پیش‌پرواز CORS (`OPTIONS`) از نظر Origin بررسی نمی‌شود؛ درخواست بعدی بررسی می‌شود.
+
 ## پیکربندی IDE
 
 برای راهاندازی Claude Desktop،‏ Cursor،‏ Cline و کلاینتهای سازگار با MCP، به [پیکربندی کلاینت MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) مراجعه کنید.

@@ -90,13 +90,41 @@
 
 ## 2. Szabályok
 
-1. Tokeneket használj, soha ne literálokat. Szándékosan megtartott kivételek: a mindig sötét konzolterminál, a ReactFlow SVG-körvonalai a `STATUS_HEX` használatával (`src/shared/constants/statusColors.ts`), valamint a kategorikus `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) és `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`) paletták.
-2. Soha ne módosítsd kézzel a `packages/ui-kit/src` tartalmát: szinkronizáld a `scripts/dev/sync-ui-kit.sh <commit>` használatával; a pre-commit ellenőrzés, az `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) meghiúsul, ha bármely bájt eltér a rögzített upstream committól (figyelmeztetéssel kihagyja az ellenőrzést, ha az upstream klón, az `UI_KIT_CLONE` vagy az `_references/cheaper-inference-ui-kit` hiányzik). Ha valami hiányzik a készletből, kerüld meg az adapterben vagy a képernyőn, és kérd annak hozzáadását az upstream projektben.
-3. A készlet alapértelmezett szövegei angol nyelvűek (`label = "Loading"`, `loadingLabel = "Loading table"`…) — amikor egy készletkomponens szöveget jelenít meg, mindig a `useTranslations(...)` által biztosított lefordított karakterláncokat add át.
-4. A Tailwind segédosztályai elsőbbséget élveznek a készlet komponensosztályaival szemben (a készlet deklarációja `@layer theme, base, components, utilities`, a szabályai pedig a `components` rétegben találhatók) — a segédosztályokat térközökhöz és elrendezéshez használd, ne a készletkomponensek átszínezéséhez.
-5. Címsorok: `.ci-heading` (Inter, betűköz nélkül) az oldalak és szakaszok címeihez; `.ci-dashboard-display` (Instrument Serif) csak nagy méretű, ritkán használt kiemelt szövegekhez, például a hibaoldal állapotkódjához.
-6. A `tests/unit/dashboard-kit-sweep.test.ts` felügyeli a készlet használatát: nem lehet Material-ligatúrát tartalmazó span a `src/app` vagy a `src/shared/components` alatt; a dashboard könyvtárfájában (`src/app/(dashboard)` és `src/shared/components`) nem lehet nyers `<select>`, `<textarea>` vagy `<table>`, illetve kézzel készített `role="dialog"` a felsorolt kivételeken kívül (a `Select` adapter natív ága, `RequestLoggerDetail`); minden nyers `<button>` vagy `<input>` előtt legfeljebb 3 sorral egy, az indoklást is tartalmazó `kit-exception:` megjegyzésnek kell szerepelnie; a palettaárnyalatok és a `dark:` változatok csak a teszt által felsorolt fájlokban használhatók.
-7. PR létrehozása előtt ellenőrizd mindkét témát és a 390 px széles nézetet (képernyőképekkel); a `tests/e2e/a11y.spec.ts` az axe-ot futtatja.
+1. Tokenek, soha literális értékek. A kivételek szándékosan maradtak meg: a mindig sötét
+   konzolterminál és a `STATUS_HEX` (`src/shared/constants/statusColors.ts`), a kit
+   státuszpalettájának feloldott hexadecimális tükörképe azoknak a hívóknak, amelyeknek literális
+   hex értékre van szükségük. A kategorikus paletták már nem kivételek: a kit öt
+   diagramtokenjére (`--color-chart-1..5`) támaszkodnak a
+   `src/shared/utils/categoricalPalette.ts` segítségével, útválasztási stratégiák esetén pedig a
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` segítségével; a ReactFlow élek és az
+   orkesztrációs vászon a témaérzékeny `--orch-status-*` változókat olvassák
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. A `packages/ui-kit/src`-et soha ne módosítsd kézzel: szinkronizálj a
+   `scripts/dev/sync-ui-kit.sh <commit>` paranccsal; a pre-commit kapu, az
+   `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) minden olyan bájton elhasal, amely eltér a
+   rögzített upstream commit-tól (figyelmeztetéssel átugrik, ha az upstream klón — `UI_KIT_CLONE`
+   vagy `_references/cheaper-inference-ui-kit` — hiányzik). Ha valami hiányzik a kitből, kerüld meg
+   az adapterben vagy a képernyőn, és kérd meg az upstreamet, hogy adják hozzá.
+3. A kit szöveges alapértelmezései angolok (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   adj át lefordított sztringeket a `useTranslations(...)` hívásból, amikor egy kit-komponens
+   szöveget jelenít meg.
+4. A Tailwind utilityk felülírják a kit komponensosztályait (a kit deklarálja az
+   `@layer theme, base, components, utilities` rétegeket, és a szabályai a `components` rétegben
+   élnek) — az utilityket térközhöz és elrendezéshez használd, ne a kit-komponensek
+   újraszínezéséhez.
+5. Címsorok: `.ci-heading` (Inter, betűköz nélkül) oldal- és szakaszcímekhez;
+   `.ci-dashboard-display` (Instrument Serif) csak nagy, ritkán előforduló megjelenítési
+   szövegekhez, például a hibaoldal státuszkódjához.
+6. A `tests/unit/dashboard-kit-sweep.test.ts` őrzi a kit bevezetését: nincs Material-ligatúrás span
+   a `src/app` vagy a `src/shared/components` alatt; a dashboard fában (`src/app/(dashboard)` és
+   `src/shared/components`) nincs nyers `<select>`, `<textarea>` vagy `<table>`, és nincs kézzel
+   készített `role="dialog"` a felsorolt kivételeken kívül (a `Select` adapter natív ága,
+   `RequestLoggerDetail`); minden ottani nyers `<button>` vagy `<input>` esetén egy `kit-exception:`
+   szöveget (és az indoklást) tartalmazó megjegyzés kell, amely legfeljebb 3 sorral felette
+   végződik; palettaárnyalatok és `dark:` variánsok csak a teszt által felsorolt fájlokban
+   fordulhatnak elő.
+7. PR előtt ellenőrizd mindkét témát és a 390 px-es nézetablakot (képernyőképek); a
+   `tests/e2e/a11y.spec.ts` futtatja az axe-et.
 
 ## 3. Képernyő hozzáadása
 

@@ -40,6 +40,63 @@ test("buildCacheUsageLogMeta reads prompt_tokens_details shapes", () => {
   assert.deepEqual(meta, { cacheReadTokens: 7, cacheCreationTokens: 2 });
 });
 
+test("buildCacheUsageLogMeta emits bounded Gemini cache evidence", () => {
+  const meta = buildCacheUsageLogMeta(
+    {
+      prompt_tokens: 46_212,
+      prompt_tokens_details: { cached_tokens: 40_929 },
+      cache_evidence: "hit",
+    },
+    { mode: "implicit" }
+  );
+
+  assert.deepEqual(meta, {
+    cacheReadTokens: 40_929,
+    cacheCreationTokens: 0,
+    geminiPromptCache: {
+      schemaVersion: 1,
+      mode: "implicit",
+      evidence: "hit",
+      providerCounters: { cachedContentTokenCount: 40_929 },
+      prefixBoundary: "unknown",
+      prefixMethod: "unavailable",
+    },
+  });
+  assert.equal(JSON.stringify(meta).includes("46_212"), false);
+});
+
+test("buildCacheUsageLogMeta records compression and timing only when measured", () => {
+  assert.deepEqual(buildCacheUsageLogMeta(null, { mode: "off", compressionTokens: 0 }), {
+    geminiPromptCache: {
+      schemaVersion: 1,
+      mode: "off",
+      evidence: "unreported",
+      providerCounters: {},
+      prefixBoundary: "unknown",
+      prefixMethod: "unavailable",
+    },
+  });
+  assert.deepEqual(
+    buildCacheUsageLogMeta(null, {
+      mode: "implicit",
+      compressionTokens: 8,
+      timing: { ttftMs: 12, itlMs: 4 },
+    }),
+    {
+      geminiPromptCache: {
+        schemaVersion: 1,
+        mode: "implicit",
+        evidence: "unreported",
+        providerCounters: {},
+        prefixBoundary: "unknown",
+        prefixMethod: "unavailable",
+        compressionDecision: { applied: true, tokens: 8 },
+        timing: { ttftMs: 12, itlMs: 4 },
+      },
+    }
+  );
+});
+
 test("attachLogMeta returns the payload untouched when meta is empty", () => {
   const payload = { a: 1 };
   assert.equal(attachLogMeta(payload, null), payload);

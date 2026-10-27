@@ -81,31 +81,39 @@
 
 ## 2. Reeglid
 
-1. Kasuta tookenite, mitte literaale. Teadlikult säilitatud erandid: alati tume konsooliterminal, ReactFlow' SVG
-   jooned `STATUS_HEX` kaudu (`src/shared/constants/statusColors.ts`) ning kategoorilised paletid
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) ja
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Ära kunagi muuda kataloogi `packages/ui-kit/src` käsitsi: sünkrooni käsuga `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit-kontroll `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) nurjub iga baidi korral,
-   mis erineb fikseeritud upstream-commiti sisust (kui upstream-kloon,
-   `UI_KIT_CLONE` või `_references/cheaper-inference-ui-kit`, puudub, jäetakse kontroll hoiatusega vahele). Kui komplektis midagi puudub,
-   lahenda see adapteris või ekraanil ja taotle selle lisamist upstreamis.
-3. Komplekti teksti vaikeväärtused on ingliskeelsed (`label = "Loading"`, `loadingLabel = "Loading table"`…) — edasta tõlgitud
-   stringid funktsioonist `useTranslations(...)` alati, kui komplekti komponent teksti renderdab.
-4. Tailwindi utiliidid on komplekti komponendiklasside suhtes ülimuslikud (komplekt deklareerib
-   `@layer theme, base, components, utilities` ja selle reeglid asuvad kihis `components`) — kasuta utiliite
-   vahede ja paigutuse jaoks, mitte komplekti komponentide värvide muutmiseks.
-5. Pealkirjad: `.ci-heading` (Inter, ilma tähevahe muutmiseta) lehe- ja jaotisepealkirjade jaoks; `.ci-dashboard-display`
-   (Instrument Serif) ainult suure ja hõreda kuvateksti jaoks, näiteks vealehe olekukood.
-6. `tests/unit/dashboard-kit-sweep.test.ts` kontrollib komplekti kasutuselevõttu: kataloogides
-   `src/app` ja `src/shared/components` ei tohi olla Materiali ligatuuri span-elemente; juhtpaneeli puus (`src/app/(dashboard)` ja
-   `src/shared/components`) ei tohi olla töötlemata `<select>`, `<textarea>` ega `<table>` elemente ega käsitsi loodud
-   `role="dialog"` atribuute väljaspool loetletud erandeid (`Select`-adapteri omalahenduse haru,
-   `RequestLoggerDetail`); iga sealne töötlemata `<button>` või `<input>` vajab põhjust sisaldavat kommentaari
-   `kit-exception:`, mis lõpeb kõige rohkem 3 rida enne elementi; paleti värvitoonid ja `dark:` variandid
-   on lubatud ainult testi loetletud failides.
-7. Kontrolli enne PR-i mõlemat teemat ja 390 px vaateava (ekraanipiltidega); `tests/e2e/a11y.spec.ts` käivitab
-   axe'i.
+1. Tokenid, mitte kunagi literaalid. Teadlikult jäetud erandid: alati tume konsooliterminal ja
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), kiti olekupaleti heksiks lahendatud peegel
+   kutsujatele, kes vajavad literaalset heksväärtust. Kategooriapaletid ei ole enam erand: need
+   tuginevad kiti viiele diagrammitokenile (`--color-chart-1..5`) läbi
+   `src/shared/utils/categoricalPalette.ts` ja suunamisstrateegiate puhul läbi
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow servad ja
+   orkestreerimislõuend loevad teematundlikke `--orch-status-*` muutujaid
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Ära kunagi paiga `packages/ui-kit/src` käsitsi: sünkroniseeri skriptiga
+   `scripts/dev/sync-ui-kit.sh <commit>`; commit-eelne kontroll `npm run check:ui-kit-snapshot`
+   (`.husky/pre-commit`) ebaõnnestub iga baidi korral, mis erineb kinnitatud ülesvoolu commitist
+   (kontroll jäetakse hoiatusega vahele, kui ülesvoolu kloon, `UI_KIT_CLONE` või
+   `_references/cheaper-inference-ui-kit`, puudub). Kui kitist on midagi puudu, lahenda see adapteris
+   või ekraanis ja küsi seda ülesvoolult.
+3. Kiti tekstide vaikeväärtused on ingliskeelsed (`label = "Loading"`,
+   `loadingLabel = "Loading table"`…) — edasta tõlgitud stringid `useTranslations(...)` kaudu alati,
+   kui kiti komponent renderdab teksti.
+4. Tailwindi utiliidid võidavad kiti komponendiklasse (kit deklareerib
+   `@layer theme, base, components, utilities` ja selle reeglid asuvad `components`-kihis) — kasuta
+   utiliite vahede ja paigutuse jaoks, mitte kiti komponentide ülevärvimiseks.
+5. Pealkirjad: `.ci-heading` (Inter, ilma tähevaheta) lehe- ja jaotisepealkirjade jaoks;
+   `.ci-dashboard-display` (Instrument Serif) ainult suure, hõreda kuvateksti jaoks, näiteks vealehe
+   olekukoodi puhul.
+6. `tests/unit/dashboard-kit-sweep.test.ts` valvab kiti kasutuselevõttu: `src/app` ega
+   `src/shared/components` all ei tohi olla Materiali ligatuurspani; armatuurlaua puus
+   (`src/app/(dashboard)` ja `src/shared/components`) ei tohi olla tooreid `<select>`-,
+   `<textarea>`- ega `<table>`-elemente ega käsitsi ehitatud `role="dialog"` väljaspool loetletud
+   erandeid (`Select` adapteri natiivne haru, `RequestLoggerDetail`); iga toores `<button>` või
+   `<input>` vajab seal kommentaari, mis sisaldab `kit-exception:` (koos põhjendusega) ja lõppeb
+   kõige rohkem 3 rida selle kohal; paleti värvitoonid ja `dark:` variandid on lubatud ainult
+   failides, mille test loetleb.
+7. Kontrolli enne PR-i mõlemat teemat ja 390 px vaateakent (ekraanipildid);
+   `tests/e2e/a11y.spec.ts` käivitab axe'i.
 
 ## 3. Ekraani lisamine
 
