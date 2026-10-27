@@ -1,0 +1,1 @@
+- **feat(dashboard):** drag-to-reorder provider sections in the Quota Tracker; the order is saved per operator (`settings.quotaProviderOrder` via `PATCH /api/settings`), is display-only, and a "Reset provider order" action restores the built-in order ([#18344](https://github.com/cheaper-inference/OmniRoute/pull/18344)) — thanks @ape1121

@@ -29,16 +29,18 @@ import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { useNotificationStore } from "@/store/notificationStore";
 
 import { useQuotaVisibility } from "./useQuotaVisibility";
+import { useQuotaProviderOrder } from "./useQuotaProviderOrder";
 import QuotaCutoffModal from "./QuotaCutoffModal";
 import QuotaCardGrid from "./QuotaCardGrid";
 import CodexResetCreditsModal from "./CodexResetCreditsModal";
 import { useVisibleQuotaData } from "./useVisibleQuotaData";
 import { useCodexResetCreditRedemption } from "./useCodexResetCreditRedemption";
-import { PROVIDER_LABEL, PROVIDER_ORDER, TIER_FILTERS } from "./constants";
+import { PROVIDER_LABEL, TIER_FILTERS } from "./constants";
 import { formatAutoRefreshCountdown } from "./formatters";
 import { translateUsageOrFallback, type UsageTranslationValues } from "./i18nFallback";
 import { compareTr } from "@/shared/utils/turkishText";
 import { fetchWithTimeout } from "@/shared/utils/fetchTimeout";
+import { providerSequence } from "@/shared/utils/quotaProviderOrder";
 
 // Bound the two first-paint requests so a stalled connection cannot wedge
 // `initialLoading` on `true` and freeze the quota page on its skeleton forever
@@ -239,6 +241,13 @@ export default function ProviderLimits({
   const [initialLoading, setInitialLoading] = useState(true);
   const [tierFilter, setTierFilter] = useState("all");
   const { quotaVisibility, handleHideQuota, handleShowQuota } = useQuotaVisibility(tr, notify);
+  const {
+    providerRankMap,
+    hasCustomOrder,
+    savingProviderOrder,
+    reorderProviders,
+    resetProviderOrder,
+  } = useQuotaProviderOrder(tr, notify);
   const resetCreditRedemption = useCodexResetCreditRedemption(
     tr,
     setErrors,
@@ -570,12 +579,12 @@ export default function ProviderLimits({
   const sortedConnections = useMemo(() => {
     return [...filteredConnections].sort((a, b) =>
       compareQuotaConnections(a, b, {
-        providerOrder: PROVIDER_ORDER,
+        providerOrder: providerRankMap,
         providerLabels: PROVIDER_LABEL,
         compare: compareTr,
       })
     );
-  }, [filteredConnections]);
+  }, [filteredConnections, providerRankMap]);
   const visibleQuotaData = useVisibleQuotaData(sortedConnections, quotaData);
 
   const resolvedPlanByConnection = useMemo(
@@ -706,7 +715,7 @@ export default function ProviderLimits({
     };
     return [...filtered].sort((a, b) =>
       compareQuotaConnections(a, b, {
-        providerOrder: PROVIDER_ORDER,
+        providerOrder: providerRankMap,
         providerLabels: PROVIDER_LABEL,
         compare: compareTr,
         accountCompare: (x, y) => {
@@ -730,7 +739,16 @@ export default function ProviderLimits({
     envFilter,
     providerFilter,
     visibleQuotaData,
+    providerRankMap,
   ]);
+
+  // Drag-to-reorder moves a provider within the FULL provider sequence (not just
+  // the filtered groups) so the saved order keeps every provider's slot.
+  const handleReorderProviders = useCallback(
+    (fromProvider: string, toProvider: string) =>
+      reorderProviders(providerSequence(sortedConnections), fromProvider, toProvider),
+    [reorderProviders, sortedConnections]
+  );
 
   // Distinct provider keys present in the current connection set (after the
   // upstream OAuth/api-key + USAGE_SUPPORTED_PROVIDERS filter), sorted via
@@ -877,6 +895,21 @@ export default function ProviderLimits({
         </div>
 
         <div className="flex items-center gap-2">
+          {hasCustomOrder && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={resetProviderOrder}
+              disabled={savingProviderOrder}
+              className="gap-1.5 text-[13px]"
+              title={tr("resetProviderOrder", "Reset provider order")}
+            >
+              <Icon name="restart_alt" size={16} />
+              <span className="hidden sm:inline">
+                {tr("resetProviderOrder", "Reset provider order")}
+              </span>
+            </Button>
+          )}
           <Button
             variant="outline"
             size="sm"
@@ -1108,6 +1141,10 @@ export default function ProviderLimits({
           redeemingResetCreditId={resetCreditRedemption.redeemingResetCreditId}
           loadingResetCreditsId={resetCreditRedemption.loadingResetCreditsId}
           compact={layoutMode === "compact"}
+          providerOrder={providerRankMap}
+          onReorderProviders={handleReorderProviders}
+          dragDisabled={savingProviderOrder}
+          dragHandleLabel={tr("dragToReorder", "Drag to reorder providers")}
         />
       </div>
 

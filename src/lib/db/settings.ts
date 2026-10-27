@@ -171,6 +171,9 @@ export async function getSettings() {
     // ProviderLimits/utils.tsx) — this is a personal view preference, not an
     // admin model-catalog edit. Ported from upstream decolua/9router#2371.
     quotaVisibility: {},
+    // Per-operator Quota Tracker provider group order (drag-to-reorder). Empty =
+    // built-in PROVIDER_ORDER. Display-only; never touches connection priority.
+    quotaProviderOrder: [],
     // #13917: operator-configurable ceiling for POST /api/settings/proxies/bulk-import.
     // Resolved through resolveProxyBulkImportLimit at both enforcement points.
     proxyBulkImportLimit: PROXY_BULK_IMPORT_LIMIT_DEFAULT,

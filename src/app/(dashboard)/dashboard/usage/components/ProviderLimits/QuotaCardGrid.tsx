@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { useState } from "react";
 import { PROVIDER_ORDER } from "./constants";
 import QuotaCard from "./QuotaCard";
+import { SortableProviderItem, SortableProviderList } from "./SortableProviderList";
 import {
   worstStatus,
   type CardStatus,
@@ -34,6 +35,12 @@ interface Props {
   onHideQuota?: (scope: QuotaVisibilityScope, quota: any) => void;
   onShowQuota?: (scope: QuotaVisibilityScope, quota: any) => void;
   compact?: boolean;
+  /** Provider group rank map; defaults to the built-in PROVIDER_ORDER. */
+  providerOrder?: Record<string, number>;
+  /** Drag-to-reorder provider sections (full layout only); omitted = no drag. */
+  onReorderProviders?: (fromProvider: string, toProvider: string) => void;
+  dragDisabled?: boolean;
+  dragHandleLabel?: string;
 }
 
 const STATUS_RANK: Record<CardStatus, number> = {
@@ -117,7 +124,8 @@ export function sortProviderConnectionsByPriority(
 function buildProviderGroups(
   connections: any[],
   quotaData: Record<string, any>,
-  providerLabels: Record<string, string>
+  providerLabels: Record<string, string>,
+  providerOrder: Record<string, number>
 ) {
   const groups = new Map<string, typeof connections>();
   for (const conn of connections) {
@@ -133,7 +141,7 @@ function buildProviderGroups(
     }))
     .sort((a, b) =>
       compareProviderGroups(a.provider, b.provider, {
-        providerOrder: PROVIDER_ORDER,
+        providerOrder,
         providerLabels,
         compare: compareTr,
       })
@@ -144,6 +152,7 @@ interface ProviderQuotaSectionProps extends Omit<Props, "connections"> {
   provider: string;
   connections: any[];
   defaultOpen?: boolean;
+  dragHandle?: ReactNode;
 }
 
 function ProviderQuotaSection({
@@ -166,6 +175,7 @@ function ProviderQuotaSection({
   quotaVisibility,
   onHideQuota,
   onShowQuota,
+  dragHandle = null,
 }: ProviderQuotaSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
   const activeCount = connections.filter((conn) => conn.isActive ?? true).length;
@@ -178,6 +188,7 @@ function ProviderQuotaSection({
       className="rounded-lg border border-border bg-surface overflow-hidden"
     >
       <summary className="flex items-center gap-3 px-3 py-2.5 cursor-pointer select-none hover:bg-surface-2 [&::-webkit-details-marker]:hidden">
+        {dragHandle}
         <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
         <div className="min-w-0 flex-1">
           <h3 className="text-sm font-semibold text-text-main leading-5 truncate">
@@ -247,6 +258,10 @@ export default function QuotaCardGrid({
   onHideQuota,
   onShowQuota,
   compact = false,
+  providerOrder = PROVIDER_ORDER,
+  onReorderProviders,
+  dragDisabled = false,
+  dragHandleLabel = "Drag to reorder providers",
 }: Props) {
   if (connections.length === 0) return null;
 
@@ -291,37 +306,55 @@ export default function QuotaCardGrid({
   }
 
   // Default layout: expandable provider sections. Provider groups are ordered
-  // deterministically (PROVIDER_ORDER rank → label → key) so the group order
-  // never shuffles between quota refreshes, and connections are
-  // priority-sorted within each provider.
-  const groups = buildProviderGroups(connections, quotaData, providerLabels);
+  // deterministically (operator drag order, else PROVIDER_ORDER rank → label →
+  // key) so the group order never shuffles between quota refreshes, and
+  // connections are priority-sorted within each provider.
+  const groups = buildProviderGroups(connections, quotaData, providerLabels, providerOrder);
+  const canReorder = !!onReorderProviders && groups.length > 1;
+  const sortDisabled = dragDisabled || !canReorder;
 
   return (
     <div className="space-y-4">
-      {groups.map(({ provider, connections: conns }) => (
-        <ProviderQuotaSection
-          key={provider}
-          provider={provider}
-          connections={conns}
-          quotaData={quotaData}
-          loading={loading}
-          errors={errors}
-          lastRefreshedAt={lastRefreshedAt}
-          emailsVisible={emailsVisible}
-          providerLabels={providerLabels}
-          onRefresh={onRefresh}
-          onOpenCutoff={onOpenCutoff}
-          onOpenResetCredits={onOpenResetCredits}
-          onToggleActive={onToggleActive}
-          togglingActiveId={togglingActiveId}
-          quotaVisibility={quotaVisibility}
-          onHideQuota={onHideQuota}
-          onShowQuota={onShowQuota}
-          redeemingResetCreditId={redeemingResetCreditId}
-          loadingResetCreditsId={loadingResetCreditsId}
-          defaultOpen
-        />
-      ))}
+      <SortableProviderList
+        providerIds={groups.map((group) => group.provider)}
+        disabled={sortDisabled}
+        onReorder={(from, to) => onReorderProviders?.(from, to)}
+      >
+        {groups.map(({ provider, connections: conns }) => (
+          <SortableProviderItem
+            key={provider}
+            id={provider}
+            disabled={sortDisabled}
+            showHandle={canReorder}
+            handleLabel={`${dragHandleLabel}: ${providerLabels[provider] || provider}`}
+          >
+            {(dragHandle) => (
+              <ProviderQuotaSection
+                provider={provider}
+                connections={conns}
+                quotaData={quotaData}
+                loading={loading}
+                errors={errors}
+                lastRefreshedAt={lastRefreshedAt}
+                emailsVisible={emailsVisible}
+                providerLabels={providerLabels}
+                onRefresh={onRefresh}
+                onOpenCutoff={onOpenCutoff}
+                onOpenResetCredits={onOpenResetCredits}
+                onToggleActive={onToggleActive}
+                togglingActiveId={togglingActiveId}
+                quotaVisibility={quotaVisibility}
+                onHideQuota={onHideQuota}
+                onShowQuota={onShowQuota}
+                redeemingResetCreditId={redeemingResetCreditId}
+                loadingResetCreditsId={loadingResetCreditsId}
+                dragHandle={dragHandle}
+                defaultOpen
+              />
+            )}
+          </SortableProviderItem>
+        ))}
+      </SortableProviderList>
     </div>
   );
 }
