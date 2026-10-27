@@ -105,7 +105,7 @@ export async function renderReadmeWhyPainFix() {
   // Sweep beat: discrete y steps every 1.5 s over the ten rows, same keyTimes as before; the
   // highlight is the kit's ok tint, faded in/out at the loop seam.
   const sweepValues = rowYs.join(";");
-  const sweepKeyTimes = rowYs.map((_, i) => (i / ROWS).toFixed(1).replace(/\.0$/, "")).join(";");
+  const sweepKeyTimes = rowYs.map((_, i) => String(+(i / ROWS).toFixed(3))).join(";");
 
   const marks = C.headlineMarks;
   return (
