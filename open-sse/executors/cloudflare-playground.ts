@@ -45,6 +45,7 @@ import {
   parseCfToolCalls,
   buildCfToolConversationPrompt,
   stripCfToolMarkup,
+  CF_MAX_MESSAGE_CHARS,
   type CfToolDef,
 } from "../translator/cloudflarePlaygroundTools.ts";
 
@@ -235,6 +236,12 @@ export function toCfMessages(
       text = toolCallId
         ? `<tool_result call_id="${toolCallId}">${resultText}</tool_result>`
         : `<tool_result>${resultText}</tool_result>`;
+    }
+    // The playground rejects any single message >6000 chars. Truncate here so a
+    // large file read / tool result cannot take the whole request down.
+    if (text.length > CF_MAX_MESSAGE_CHARS) {
+      const marker = "\n…[truncated to fit the playground's 6000-char limit]";
+      text = text.slice(0, CF_MAX_MESSAGE_CHARS - marker.length) + marker;
     }
     if (!text) continue;
     out.push({
@@ -627,7 +634,10 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
         if (toolCalls.length > 0) {
           finishReason = "tool_calls";
           // Strip tool markup from content
-          content = stripCfToolMarkup(text);
+          content = stripCfToolMarkup(
+            text,
+            availableTools.map((t) => t.name)
+          );
           if (!content) content = null;
         }
 
@@ -709,7 +719,10 @@ export class CloudflarePlaygroundExecutor extends BaseExecutor {
       let content: string | null = fullText;
       if (toolCalls.length > 0) {
         finishReason = "tool_calls";
-        content = stripCfToolMarkup(fullText);
+        content = stripCfToolMarkup(
+          fullText,
+          availableTools.map((t) => t.name)
+        );
         if (!content) content = null;
       }
 
