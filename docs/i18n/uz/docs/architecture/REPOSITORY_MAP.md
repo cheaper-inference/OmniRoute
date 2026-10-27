@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Ommaviy hujjatlar (7 ta ildiz fayl + 17 ta quyi katalog)
+## `docs/` — Ommaviy hujjatlar (7 ta ildiz fayli + 17 ta pastki katalog)
 
-### Yuqori darajadagi qoʻllanmalar
+### Yuqori darajadagi qo'llanmalar
 
-| Hujjat                      | Maqsad                                                                                                         |
-| --------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Yuqori darajadagi arxitektura, quyi tizimlar xaritasi, boshqaruv paneli interfeysi                             |
-| `CODEBASE_DOCUMENTATION.md` | Muhandislik maʼlumotnomasi: kataloglar, modullar, kelishuvlar                                                  |
-| `FEATURES.md`               | v3.8 yangiliklari bilan imkoniyatlar matritsasi                                                                |
-| `USER_GUIDE.md`             | Yakuniy foydalanuvchi qoʻllanmasi (sozlash, modellar, kombinatsiyalar, CLIʼlar, audio va boshqalar)            |
-| `API_REFERENCE.md`          | Autentifikatsiya modeli bilan API endpointlari maʼlumotnomasi                                                  |
-| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsiyasi (121 ta yoʻl)                                                                    |
-| `SETUP_GUIDE.md`            | Oʻrnatish usullari (npm, npx, Docker, Electron, Termux, manba kodidan)                                         |
-| `ENVIRONMENT.md`            | Barcha muhit oʻzgaruvchilari (~800 tasi hujjatlashtirilgan, `.env.example` ~3 050 qator)                       |
-| `TROUBLESHOOTING.md`        | Keng tarqalgan xatolar + v3.8.0 versiyasining maʼlum muammolari                                                |
-| `RELEASE_CHECKLIST.md`      | Toʻliq reliz jarayoni (koʻnikmalar, husky, anʼanaviy commitlar, joylashtirish)                                 |
-| `COVERAGE_PLAN.md`          | Qamrov maqsadlari va joriy holat                                                                               |
-| `FREE_TIERS.md`             | Saralangan bepul tarif provayderlari (48+ bepul + 11 ta OAuth)                                                 |
-| `CLI-TOOLS.md`              | Tashqi CLI integratsiyalari + ichki OmniRoute CLI                                                              |
-| `I18N.md`                   | i18n arxitekturasi, til qoʻshish, 67 ta lokal                                                                  |
-| `UNINSTALL.md`              | Toza oʻchirish bosqichlari                                                                                     |
-| `PROVIDER_REFERENCE.md`     | 376 ta provayderdan iborat **avtomatik yaratilgan** katalog (qayta yaratish: `npm run gen:provider-reference`) |
+| Hujjat                      | Maqsad                                                                                                    |
+| --------------------------- | --------------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Yuqori darajadagi arxitektura, pastki tizimlar xaritasi, dashboard yuzasi                                 |
+| `CODEBASE_DOCUMENTATION.md` | Muhandislik ma'lumotnomasi: kataloglar, modullar, konvensiyalar                                           |
+| `FEATURES.md`               | v3.8 asosiy jihatlari bilan funksiyalar matritsasi                                                        |
+| `USER_GUIDE.md`             | Yakuniy foydalanuvchi qo'llanmasi (sozlash, modellar, combo'lar, CLI'lar, audio va boshqalar)             |
+| `API_REFERENCE.md`          | Autentifikatsiya modeli bilan API endpointlari ma'lumotnomasi                                             |
+| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsiyasi (121 ta yo'l)                                                               |
+| `SETUP_GUIDE.md`            | O'rnatish usullari (npm, npx, Docker, Electron, Termux, manbadan)                                         |
+| `ENVIRONMENT.md`            | Barcha muhit o'zgaruvchilari (~800 tasi hujjatlashtirilgan, ~3,050 qator `.env.example`)                  |
+| `TROUBLESHOOTING.md`        | Keng tarqalgan xatolar + v3.8.0 dagi ma'lum muammolar                                                     |
+| `RELEASE_CHECKLIST.md`      | To'liq reliz jarayoni (skills, husky, conventional commits, deploy)                                       |
+| `COVERAGE_PLAN.md`          | Qamrov maqsadlari va joriy holat                                                                          |
+| `FREE_TIERS.md`             | Saralangan bepul tarifli provayderlar (48+ bepul + 11 OAuth)                                              |
+| `CLI-TOOLS.md`              | Tashqi CLI integratsiyalari + ichki OmniRoute CLI                                                         |
+| `I18N.md`                   | i18n arxitekturasi, til qo'shish, 67 ta lokal                                                             |
+| `UNINSTALL.md`              | Toza o'chirish qadamlari                                                                                  |
+| `PROVIDER_REFERENCE.md`     | 376 ta provayderning **avtomatik yaratilgan** katalogi (qayta yaratish: `npm run gen:provider-reference`) |
 
-### Quyi tizimlar boʻyicha batafsil qoʻllanmalar
+### Pastki tizimlar bo'yicha chuqur tahlillar
 
-| Hujjat                                       | Maqsad                                                                              |
-| -------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                              | MCP serveri: 110 ta vosita, 3 ta transport, 33 ta qamrov, REST endpointlari         |
-| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 ta koʻnikma, REST yordamchilari, agent kartasi                |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | Yagona qoʻllanma: A2A va ACP va Cloud Agents taqqoslanishi                          |
-| `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules orkestratsiyasi                                         |
-| `SKILLS.md`                                  | Koʻnikmalar freymvorki (ichki + marketplace + SkillsSH + sandbox)                   |
-| `RADAR.md`                                   | Radar bepul modellar katalogi ustqurmasi (`RADAR_ENABLED`, standart holatda oʻchiq) |
-| `MEMORY.md`                                  | Xotira tizimi (SQLite FTS5 + Qdrant)                                                |
-| `EVALS.md`                                   | Baholash freymvorki (toʻplamlar, ishga tushirishlar, mezonlar)                      |
-| `GUARDRAILS.md`                              | PII niqoblagichi, prompt inʼeksiyasi, koʻrish koʻprigi                              |
-| `COMPLIANCE.md`                              | Audit jurnali, saqlash muddati, noLog orqali rad etish                              |
-| `WEBHOOKS.md`                                | HMAC bilan imzolangan webhook yetkazib berish                                       |
-| `REASONING_REPLAY.md`                        | `reasoning_content` uchun gibrid xotira/SQLite keshi                                |
-| `AUTHZ_GUIDE.md`                             | Avtorizatsiya konveyeri (`classify` → `policies` → `enforce`)                       |
-| `RESILIENCE_GUIDE.md`                        | Avtomatik uzgich + sovish davri + modelni bloklash                                  |
-| `docs/security/STEALTH_GUIDE.md` (faqat git) | TLS barmoq izini aniqlash (JA3/JA4), Claude Code CCH, MITM sertifikati              |
-| `AUTO-COMBO.md`                              | Auto Combo mexanizmi (16 omilli baholash, 6 ta rejim paketi, virtual fabrika)       |
+| Hujjat                                       | Maqsad                                                                           |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | MCP serveri: 110 ta vosita, 3 ta transport, 33 ta scope, REST endpointlar        |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 ta ko'nikma, REST yordamchilari, agent kartasi             |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Yagona qo'llanma: A2A vs ACP vs Cloud Agents                                     |
+| `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules orkestratsiyasi                                      |
+| `SKILLS.md`                                  | Ko'nikmalar freymvorki (ichki + marketplace + SkillsSH + sandbox)                |
+| `RADAR.md`                                   | Radar bepul modellar katalogi qoplamasi (`RADAR_ENABLED`, sukut bo'yicha o'chiq) |
+| `MEMORY.md`                                  | Xotira tizimi (SQLite FTS5 + Qdrant)                                             |
+| `EVALS.md`                                   | Baholash freymvorki (to'plamlar, ishga tushirishlar, rubrikalar)                 |
+| `GUARDRAILS.md`                              | PII maskirovkasi, prompt injection, vision bridge                                |
+| `COMPLIANCE.md`                              | Audit jurnali, ma'lumotlarni saqlash, noLog opt-out                              |
+| `WEBHOOKS.md`                                | HMAC bilan imzolangan webhook yetkazib berish                                    |
+| `REASONING_REPLAY.md`                        | `reasoning_content` uchun gibrid xotira/SQLite keshi                             |
+| `AUTHZ_GUIDE.md`                             | Avtorizatsiya konveyeri (`classify` → `policies` → `enforce`)                    |
+| `RESILIENCE_GUIDE.md`                        | Circuit breaker + cooldown + model blokirovkasi                                  |
+| `docs/security/STEALTH_GUIDE.md` (faqat git) | TLS fingerprinting (JA3/JA4), Claude Code CCH, MITM sertifikati                  |
+| `AUTO-COMBO.md`                              | Auto Combo dvigateli (16 omilli baholash, 6 ta rejim to'plami, virtual fabrika)  |
 
 ### Siqish
 
 | Hujjat                          | Maqsad                                                  |
 | ------------------------------- | ------------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Siqish rejimlari haqida umumiy maʼlumot + yoʻl xaritasi |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK mexanizmlari, reyestr shartnomasi         |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman qoidalar paketi uchun JSON sxemasi              |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Har bir til uchun qoidalar paketlari roʻyxati           |
-| `RTK_COMPRESSION.md`            | RTK deklarativ konveyeri (49 ta filtr)                  |
+| `COMPRESSION_GUIDE.md`          | Siqish rejimlari haqida umumiy ma'lumot + yo'l xaritasi |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK dvigatellari, reestr shartnomasi          |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman qoida to'plami JSON sxemasi                     |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Har bir til uchun qoida to'plamlari inventari           |
+| `RTK_COMPRESSION.md`            | RTK deklarativ konveyeri (56 ta filtr)                  |
 
 ### Joylashtirish
 
-| Hujjat                       | Maqsad                                                                               |
-| ---------------------------- | ------------------------------------------------------------------------------------ |
-| `DOCKER_GUIDE.md`            | Docker yig‘ilishi, profillar (base/cli/host/cliproxyapi), Redis yordamchi konteyneri |
-| `VM_DEPLOYMENT_GUIDE.md`     | Umumiy VM/VPS joylashtirish (Ubuntu/Debian + nginx + systemd)                        |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io platformasida joylashtirish (hozircha faqat xitoy tilida)                     |
-| `TERMUX_GUIDE.md`            | Termux orqali Android qurilmasida grafik interfeyssiz ishlash                        |
-| `PWA_GUIDE.md`               | Progressive Web App o‘rnatish + xizmat ishchisi                                      |
-| `ELECTRON_GUIDE.md`          | Ish stoli ilovasini yig‘ish + imzolash + tarqatish                                   |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                               |
-| `PROXY_GUIDE.md`             | 4 darajali chiquvchi proksi + 1proxy bozori                                          |
+| Hujjat                       | Maqsad                                                              |
+| ---------------------------- | ------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker qurish, profillar (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Umumiy VM/VPS joylashtirish (Ubuntu/Debian + nginx + systemd)       |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io joylashtirish (hozircha faqat xitoy tilida)                  |
+| `TERMUX_GUIDE.md`            | Termux orqali headless Android                                      |
+| `PWA_GUIDE.md`               | Progressive Web App o'rnatish + service worker                      |
+| `ELECTRON_GUIDE.md`          | Ish stoli ilovasini qurish + imzolash + tarqatish                   |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                              |
+| `PROXY_GUIDE.md`             | 4 darajali chiquvchi proksi + 1proxy marketplace                    |
 
-### Quyi kataloglar
+### Ichki kataloglar
 
-| Quyi katalog          | Maqsad                                                                                                                                                                                                                                                                                   |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Mahalliylashtirilgan hujjat tarjimalari (41 ta lokal)                                                                                                                                                                                                                                    |
-| `docs/screenshots/`   | Qo‘llanmalar uchun tasvir resurslari                                                                                                                                                                                                                                                     |
-| `_tasks/superpowers/` | superpowers’dan olingan rejalar/spetsifikatsiyalar (`writing-plans`/`brainstorming`) + tadqiqotlar — ajratilgan, versiyalari alohida boshqariladigan repo, asosiy daraxtda git tomonidan e’tiborsiz qoldiriladi. CLAUDE.md → «Rejalashtirish va tadqiqot artefaktlari» bo‘limiga qarang. |
+| Ichki katalog         | Maqsad                                                                                                                                                                                                                                                                |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Mahalliylashtirilgan hujjat tarjimalari (41 ta lokal)                                                                                                                                                                                                                 |
+| `docs/screenshots/`   | Qo'llanmalar uchun tasvir resurslari                                                                                                                                                                                                                                  |
+| `_tasks/superpowers/` | Superpowers'dan olingan rejalar/spetsifikatsiyalar (`writing-plans`/`brainstorming`) + tadqiqot — izolyatsiya qilingan, alohida versiyalanadigan repozitoriy bo'lib, asosiy daraxt tomonidan gitignore qilingan. Qarang: CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

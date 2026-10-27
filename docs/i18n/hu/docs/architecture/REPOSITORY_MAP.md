@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Nyilvános dokumentáció (7 gyökérszintű fájl + 17 alkönyvtár)
+## `docs/` — Nyilvános dokumentáció (7 gyökérfájl + 17 alkönyvtár)
 
-### Felső szintű útmutatók
+### Legfelső szintű útmutatók
 
 | Dokumentum                  | Cél                                                                                                       |
 | --------------------------- | --------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Magas szintű architektúra, alrendszertérkép, irányítópult-felület                                         |
+| `ARCHITECTURE.md`           | Magas szintű architektúra, alrendszer-térkép, dashboard-felület                                           |
 | `CODEBASE_DOCUMENTATION.md` | Mérnöki referencia: könyvtárak, modulok, konvenciók                                                       |
-| `FEATURES.md`               | Funkciómátrix a v3.8 kiemelt újdonságaival                                                                |
-| `USER_GUIDE.md`             | Végfelhasználói kézikönyv (beállítás, modellek, kombinációk, CLI-k, hang stb.)                            |
+| `FEATURES.md`               | Funkciómátrix a v3.8 főbb újdonságaival                                                                   |
+| `USER_GUIDE.md`             | Végfelhasználói kézikönyv (beállítás, modellek, kombók, CLI-k, hang stb.)                                 |
 | `API_REFERENCE.md`          | API-végpontok referenciája hitelesítési modellel                                                          |
-| `openapi.yaml`              | OpenAPI 3.0-specifikáció (121 útvonal)                                                                    |
-| `SETUP_GUIDE.md`            | Telepítési módok (npm, npx, Docker, Electron, Termux, forráskód)                                          |
-| `ENVIRONMENT.md`            | Minden környezeti változó (~800 dokumentálva, ~3 050 soros `.env.example`)                                |
-| `TROUBLESHOOTING.md`        | Gyakori hibák + a v3.8.0 ismert problémái                                                                 |
-| `RELEASE_CHECKLIST.md`      | Teljes kiadási folyamat (készségek, husky, conventional commits, üzembe helyezés)                         |
+| `openapi.yaml`              | OpenAPI 3.0 specifikáció (121 útvonal)                                                                    |
+| `SETUP_GUIDE.md`            | Telepítési módszerek (npm, npx, Docker, Electron, Termux, forrás)                                         |
+| `ENVIRONMENT.md`            | Összes környezeti változó (~800 dokumentált, ~3050 soros `.env.example`)                                  |
+| `TROUBLESHOOTING.md`        | Gyakori hibák + v3.8.0 ismert problémái                                                                   |
+| `RELEASE_CHECKLIST.md`      | Teljes kiadási folyamat (skillek, husky, conventional commits, deploy)                                    |
 | `COVERAGE_PLAN.md`          | Lefedettségi célok és aktuális állapot                                                                    |
-| `FREE_TIERS.md`             | Válogatott ingyenes csomagot kínáló szolgáltatók (48+ ingyenes + 11 OAuth)                                |
+| `FREE_TIERS.md`             | Válogatott ingyenes csomagú szolgáltatók (48+ ingyenes + 11 OAuth)                                        |
 | `CLI-TOOLS.md`              | Külső CLI-integrációk + belső OmniRoute CLI                                                               |
 | `I18N.md`                   | i18n-architektúra, nyelv hozzáadása, 67 területi beállítás                                                |
-| `UNINSTALL.md`              | A tiszta eltávolítás lépései                                                                              |
-| `PROVIDER_REFERENCE.md`     | **Automatikusan generált** katalógus 376 szolgáltatóról (újragenerálás: `npm run gen:provider-reference`) |
+| `UNINSTALL.md`              | Tiszta eltávolítás lépései                                                                                |
+| `PROVIDER_REFERENCE.md`     | **Automatikusan generált** katalógus 376 szolgáltatóval (újragenerálás: `npm run gen:provider-reference`) |
 
-### Alrendszerek részletes bemutatása
+### Alrendszerek részletes ismertetése
 
-| Dokumentum                                  | Cél                                                                                  |
-| ------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `MCP-SERVER.md`                             | MCP-kiszolgáló: 110 eszköz, 3 átvitel, 33 hatókör, REST-végpontok                    |
-| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 készség, REST-segédfüggvények, ügynökkártya                    |
-| `AGENT_PROTOCOLS_GUIDE.md`                  | Egységes útmutató: A2A kontra ACP kontra felhőügynökök                               |
-| `CLOUD_AGENT.md`                            | Codex Cloud / Devin / Jules vezénylése                                               |
-| `SKILLS.md`                                 | Készségkeretrendszer (beépített + piactér + SkillsSH + tesztkörnyezet)               |
-| `RADAR.md`                                  | Radar ingyenesmodell-katalógusréteg (`RADAR_ENABLED`, alapértelmezetten kikapcsolva) |
-| `MEMORY.md`                                 | Memóriarendszer (SQLite FTS5 + Qdrant)                                               |
-| `EVALS.md`                                  | Kiértékelési keretrendszer (tesztcsomagok, futtatások, értékelési szempontok)        |
-| `GUARDRAILS.md`                             | Személyesadat-maszkoló, promptinjektálás, képfeldolgozási híd                        |
-| `COMPLIANCE.md`                             | Auditnapló, megőrzés, noLog letiltási lehetőség                                      |
-| `WEBHOOKS.md`                               | HMAC-aláírással ellátott webhook-kézbesítés                                          |
-| `REASONING_REPLAY.md`                       | Hibrid memória-/SQLite-gyorsítótár a `reasoning_content` számára                     |
-| `AUTHZ_GUIDE.md`                            | Engedélyezési folyamat (`classify` → `policies` → `enforce`)                         |
-| `RESILIENCE_GUIDE.md`                       | Áramkör-megszakító + várakozási idő + modellzárolás                                  |
-| `docs/security/STEALTH_GUIDE.md` (csak git) | TLS-ujjlenyomat-készítés (JA3/JA4), Claude Code CCH, MITM-tanúsítvány                |
-| `AUTO-COMBO.md`                             | Auto Combo motor (16 tényezős pontozás, 6 módcsomag, virtuális gyár)                 |
+| Dokumentum                                     | Cél                                                                                     |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                                | MCP-szerver: 110 eszköz, 3 átvitel, 33 hatókör, REST-végpontok                          |
+| `A2A-SERVER.md`                                | A2A v0.3: JSON-RPC, 6 skill, REST-segédfüggvények, ügynökkártya                         |
+| `AGENT_PROTOCOLS_GUIDE.md`                     | Egységes útmutató: A2A vs ACP vs Cloud Agents                                           |
+| `CLOUD_AGENT.md`                               | Codex Cloud / Devin / Jules orchestráció                                                |
+| `SKILLS.md`                                    | Skills-keretrendszer (beépített + marketplace + SkillsSH + sandbox)                     |
+| `RADAR.md`                                     | Radar ingyenesmodell-katalógus felület (`RADAR_ENABLED`, alapértelmezetten kikapcsolva) |
+| `MEMORY.md`                                    | Memóriarendszer (SQLite FTS5 + Qdrant)                                                  |
+| `EVALS.md`                                     | Értékelési keretrendszer (csomagok, futtatások, szempontrendszerek)                     |
+| `GUARDRAILS.md`                                | PII-maszkoló, prompt injection, vision bridge                                           |
+| `COMPLIANCE.md`                                | Auditnapló, adatmegőrzés, noLog leiratkozás                                             |
+| `WEBHOOKS.md`                                  | HMAC-aláírt webhook-kézbesítés                                                          |
+| `REASONING_REPLAY.md`                          | Hibrid memória/SQLite-gyorsítótár a `reasoning_content` számára                         |
+| `AUTHZ_GUIDE.md`                               | Jogosultságkezelési folyamat (`classify` → `policies` → `enforce`)                      |
+| `RESILIENCE_GUIDE.md`                          | Circuit breaker + cooldown + modellkizárás                                              |
+| `docs/security/STEALTH_GUIDE.md` (csak gitben) | TLS-ujjlenyomat (JA3/JA4), Claude Code CCH, MITM-tanúsítvány                            |
+| `AUTO-COMBO.md`                                | Auto Combo motor (16 tényezős pontozás, 6 módcsomag, virtuális gyár)                    |
 
 ### Tömörítés
 
-| Dokumentum                      | Cél                                             |
-| ------------------------------- | ----------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | A tömörítési módok áttekintése + ütemterv       |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK motorok, regisztrációs szerződés  |
-| `COMPRESSION_RULES_FORMAT.md`   | A Caveman szabálycsomag JSON-sémája             |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Nyelvenkénti szabálycsomag-leltár               |
-| `RTK_COMPRESSION.md`            | RTK deklaratív feldolgozási folyamat (49 szűrő) |
+| Dokumentum                      | Cél                                       |
+| ------------------------------- | ----------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | A tömörítési módok áttekintése + ütemterv |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK motorok, registry-szerződés |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman szabálycsomag JSON-séma           |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Nyelvenkénti szabálycsomag-jegyzék        |
+| `RTK_COMPRESSION.md`            | RTK deklaratív pipeline (56 szűrő)        |
 
 ### Üzembe helyezés
 
 | Dokumentum                   | Cél                                                               |
 | ---------------------------- | ----------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker-build, profilok (base/cli/host/cliproxyapi), Redis-sidecar |
+| `DOCKER_GUIDE.md`            | Docker-build, profilok (base/cli/host/cliproxyapi), Redis sidecar |
 | `VM_DEPLOYMENT_GUIDE.md`     | Általános VM/VPS-telepítés (Ubuntu/Debian + nginx + systemd)      |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-telepítés (jelenleg csak kínai nyelven)                    |
-| `TERMUX_GUIDE.md`            | Grafikus felület nélküli Android használata Termux segítségével   |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-telepítés (jelenleg csak kínaiul)                          |
+| `TERMUX_GUIDE.md`            | Fej nélküli Android Termux segítségével                           |
 | `PWA_GUIDE.md`               | Progresszív webalkalmazás telepítése + service worker             |
 | `ELECTRON_GUIDE.md`          | Asztali alkalmazás buildelése + aláírása + terjesztése            |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                            |
-| `PROXY_GUIDE.md`             | Négyszintű kimenő proxy + 1proxy piactér                          |
+| `PROXY_GUIDE.md`             | 4 szintű kimenő proxy + 1proxy-piactér                            |
 
 ### Alkönyvtárak
 
-| Alkönyvtár            | Cél                                                                                                                                                                                                                                            |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | A dokumentáció honosított fordításai (41 területi beállítás)                                                                                                                                                                                   |
-| `docs/screenshots/`   | A kézikönyvek képanyagai                                                                                                                                                                                                                       |
-| `_tasks/superpowers/` | A superpowers tervei/specifikációi (`writing-plans`/`brainstorming`) + kutatási anyagok — elkülönített, külön verziókezelt adattár, amelyet a fő munkafa gitignore-szabályai kizárnak. Lásd: CLAUDE.md → „Tervezési és kutatási segédanyagok”. |
+| Alkönyvtár            | Cél                                                                                                                                                                                                                  |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Honosított dokumentumfordítások (41 nyelven)                                                                                                                                                                         |
+| `docs/screenshots/`   | Képi elemek az útmutatókhoz                                                                                                                                                                                          |
+| `_tasks/superpowers/` | Tervek és specifikációk a superpowersből (`writing-plans`/`brainstorming`) + kutatás — elkülönített, külön verziózott repó, amelyet a fő könyvtárfa gitignore-ol. Lásd: CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

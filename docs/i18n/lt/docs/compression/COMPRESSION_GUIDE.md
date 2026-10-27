@@ -32,89 +32,82 @@ Kliento užklausa
 
 ## Glaudinimo režimai
 
-### Išjungtas
+### Išjungta
 
 Glaudinimas netaikomas. Visi pranešimai perduodami nepakeisti.
 
-### Lengvas režimas (~15 % sutaupoma, <1 ms delsa)
+### Lite režimas (~15 % sutaupoma, <1 ms delsa)
 
-Saugiausias režimas — jokių semantinių pakeitimų, tik formatavimo sutvarkymas:
+Saugiausias režimas — jokio semantinio pakeitimo, tik formatavimo sutvarkymas:
 
-| Metodas                  | Aprašymas                                                          |
-| ------------------------ | ------------------------------------------------------------------ |
-| `collapseWhitespace`     | Sujungia kelias tuščias eilutes ir pašalina tarpus eilučių galuose |
-| `dedupSystemPrompt`      | Pašalina pasikartojančius sistemos pranešimus                      |
-| `compressToolResults`    | Suglaudina išsamią įrankių ar funkcijų išvestį                     |
-| `removeRedundantContent` | Pašalina pasikartojančias instrukcijas                             |
-| `replaceImageUrls`       | Sutrumpina base64 vaizdų duomenų URI                               |
+| Technika                 | Aprašymas                                                      |
+| ------------------------ | -------------------------------------------------------------- |
+| `collapseWhitespace`     | Sujungia iš eilės einančias tuščias eilutes ir galinius tarpus |
+| `dedupSystemPrompt`      | Pašalina pasikartojančius sistemos pranešimus                  |
+| `compressToolResults`    | Glaudina išsamias įrankių/funkcijų išvestis                    |
+| `removeRedundantContent` | Šalina pasikartojančias instrukcijas                           |
+| `replaceImageUrls`       | Sutrumpina base64 paveikslėlių duomenų URI                     |
 
-**Geriausiai tinka:** nuolatiniam naudojimui ir saugai itin svarbioms darbo eigoms.
+**Tinka:** Nuolatiniam naudojimui, saugumui jautrioms darbo eigoms.
 
 ### Standartinis režimas (~30 % sutaupoma)
 
-Įkvėptas [Caveman](https://github.com/JuliusBrussee/caveman) — pašalina perteklinius žodžius ir daugiažodes formuluotes, išsaugodamas prasmę:
+Įkvėptas [Caveman](https://github.com/JuliusBrussee/caveman) — pašalina pildomuosius žodžius ir pernešamai ilgas frazes, išsaugodamas prasmę:
 
-- Pašalina perteklinius žodžius („prašau“, „manau“, „iš esmės“, „tiesą sakant“)
-- Sutrumpina daugiažodes frazes („tam, kad“ → „kad“, „dėl to, kad“ → „nes“)
-- Pašalina mandagų neužtikrintumą („Ar galėtumėte...“, „Jei tik galėtumėte...“)
+- Pašalina pildomuosius žodžius („please", „I think", „basically", „actually")
+- Sutrumpina ilgas frazes („in order to" → „to", „as a result of" → „because")
+- Šalina mandagius suvelninimus („Would you mind...", „If you could possibly...")
 - Daugiau nei 30 reguliariųjų išraiškų taisyklių, pritaikytų programavimo užklausoms
 
-**Geriausiai tinka:** kasdienėms programavimo darbo eigoms ir išlaidas kontroliuojančioms komandoms.
+**Tinka:** Kasdienėms programavimo darbo eigoms, išlaidas taupančioms komandoms.
 
 ### Agresyvus režimas (~50 % sutaupoma)
 
-Išmanus istorijos valdymas ilgoms sesijoms:
+Išmanus istorijos valdymas ilgiems seansams:
 
-- **Pranešimų sendinimas** — senesni pranešimai palaipsniui vis labiau glaudinami
-- **Įrankių rezultatų glaudinimas** — ilga įrankių išvestis sutrumpinama arba praleidžiama (pirmosios ir paskutinės eilutės,
-  atitinkančių eilučių filtravimas, JSON raktų sutankinimas)
-- **Struktūrinio vientisumo apsaugos** — užtikrina, kad `tool_use` ir `tool_result` poros išliktų suderintos
-- **Konteksto lango paisymas** — atsižvelgia į kiekvieno modelio žetonų ribas
+- **Pranešimų senėjimas** — senesni pranešimai palaipsniui glaudinami
+- **Įrankių rezultatų glaudinimas** — ilgos įrankių išvestys apkertamos arba sutrumpinamos (pirmos/paskutinės eilutės, atitikties eilučių filtravimas, JSON raktų glaudinimas)
+- **Struktūros vientisumo apsaugos** — užtikrina, kad `tool_use` + `tool_result` poros išliktų nuoseklios
+- **Konteksto lango suvokimas** — atsižvelgia į konkretaus modelio žetonų limitus
 
-**Geriausiai tinka:** ilgoms derinimo sesijoms ir didelėms kodų bazėms.
+**Tinka:** Ilgoms derinimo sesijoms, didelėms kodo bazėms.
 
 ### Ultra režimas (~75 % sutaupoma)
 
-Didžiausias glaudinimas situacijoms, kai itin svarbu taupyti žetonus:
+Maksimalus glaudinimas situacijoms, kai kritiškai svarbūs žetonai:
 
-- **Euristinis genėjimas** — įverčiais pagrįstas prozos žetonų genėjimas
-- **Struktūros išsaugojimas** — atitverti kodo blokai, įterptinis kodas, URL ir identifikatoriai
-  pakeičiami žymekliais ir vėliau atkuriami pažodžiui; jie niekada negenimi
-- **Pasirinktinė SLM pakopa** — sukonfigūravus mažą vietinį modelį, jis gali patikslinti genėjimą
-- Nepriklauso nuo agresyvaus režimo: nevykdo pranešimų sendinimo, įrankių rezultatų glaudinimo
-  ar atsarginio apibendrinimo (tik SLM pakopos triktis gali nukreipti atsarginę eigą per
-  agresyvų režimą)
+- **Euristinis retinimas** — prozos žetonų retinimas pagal balus
+- **Struktūros išsaugojimas** — apsiremti kodo blokai, įterptasis kodas, URL ir identifikatoriai pažymimi „tombstone" žymėmis ir vėl sujungiami pažodžiui, niekada neišretinami
+- **Neprivalomas SLM lygmuo** — sukonfigūravus, nedidelis vietinis modelis gali patobulinti retinimą
+- Nepriklausomas nuo Agresyvaus režimo: nevykdo pranešimų senėjimo, įrankių rezultatų glaudinimo ar atsarginio santraukos sudarytojo (tik SLM lygmens gedimas gali nukreipti atsarginį praejimą per agresyvų režimą)
 
-**Geriausiai tinka:** kai nuolat pasiekiate konteksto ribas.
+**Tinka:** Kai nuolat susiduriate su konteksto limitais.
 
-### RTK režimas (60–90 % išorinio srauto diapazonas)
+### RTK režimas (60–90 % pirminiame apdorojime)
 
-RTK režimas optimizuotas išsamiai įrankių išvesčiai, pasitaikančiai programavimo agentų sesijose:
+RTK režimas optimizuotas išsamioms įrankių išvestims, pasitaikančioms kodavimo agentų seansuose:
 
-- Aptinka komandų ir išvesties klases, pvz., `git status`, `git diff`, `git log`, testų vykdymo priemones,
-  TypeScript/Vite/Webpack komponavimą, ESLint/Biome/Prettier, npm audit ir diegimus, Docker žurnalus, infrastruktūros
-  išvestį bei bendrąją apvalkalo išvestį
-- Taiko JSON filtrų rinkinius iš `open-sse/services/compression/engines/rtk/filters/`
-- Importuoja RTK TOML schemos v1 filtrus iš projekto arba visuotinių `filters.toml` failų, taikydamas įterptųjų testų
-  patikrą ir projekto failų patikimumo kontrolę
-- Pateikia 55 integruotus filtrus su įterptais tikrinimo pavyzdžiais
-- Pašalina ANSI valdymo sekas, eigos juostas, pasikartojančias eilutes ir nereikšmingą triukšmą
-- Išsaugo triktis, klaidas, įspėjimus, pakeistus failus, suvestines ir ilgos išvesties pabaigą
-- Palaiko patikimumo kontrolę taikančius projekto filtrus, visuotinius filtrus ir pasirinktinį nuasmenintos neapdorotos išvesties atkūrimą
+- Atpažįsta komandų/išvesčių klases, tokias kaip `git status`, `git diff`, `git log`, testų paleidimo įrankiai, TypeScript/Vite/Webpack kūrimai, ESLint/Biome/Prettier, npm audit/installs, Docker žurnalai, infrastruktūros išvestis ir bendroji apvalkalo išvestis
+- Taiko JSON filtrų paketus iš `open-sse/services/compression/engines/rtk/filters/`
+- Importuoja RTK TOML schemos v1 filtrus iš projekto arba globalių `filters.toml` failų, su tikrinimu integruotais testais ir pasitikėjimo patvirtinimu projekto failams
+- Pateikiamas su 56 įtaisytaisiais filtrais su integruotais tikrinimo pavyzdžiais
+- Pašalina ANSI valdymo sekas, eigos juostas, pasikartojančias eilutes ir neinformatyvų triukšmą
+- Išsaugo gedimus, klaidas, įspėjimus, pakeistus failus, santraukas ir ilgų išvesčių pabaigas
+- Palaiko projekto filtrus su pasitikėjimo patvirtinimu, globalius filtrus ir neprivalomą redaguotos žalios išvesties atkūrimą
 
-**Geriausiai tinka:** agentų sesijoms su apvalkalo, komponavimo, testavimo, git, grep ir failų išvesties išrašais.
+**Tinka:** Agentų seansams su apvalkalo, kūrimo, testavimo, git, grep ir failų išvesčių transkripcijomis.
 
-### Sudėtinis režimas (78–95 % tinkamo turinio diapazonas)
+### Sluoksniuotas režimas (78–95 % tinkamų duomenų diapazonas)
 
-Sudėtinis režimas paleidžia kelis glaudinimo variklius nustatyta tvarka. Numatytasis konvejeris yra:
+Sluoksniuotas režimas paleidžia kelis glaudinimo variklius deterministine tvarka. Numatytoji vamzdyno seka:
 
 ```txt
 RTK -> Caveman
 ```
 
-Tokia tvarka pirmiausia sutankina terminalo ir įrankių išvestį, o tada likusiai natūraliosios kalbos užklausai pritaiko Caveman semantinį glaudinimą. Sudėtinius konvejerius galima konfigūruoti visuotinai arba naudojant glaudinimo derinius, priskirtus maršruto parinkimo deriniams.
+Ši tvarka pirmiausia sutvarko terminalo/įrankių išvestį, o tada likusiai natūralios kalbos užklausai pritaiko Caveman semantinį glaudinimą. Sluoksniuotus vamzdynus galima konfigūruoti globaliai arba per glaudinimo kombinacijas, priskirtas maršrutizavimo kombinacijoms.
 
-**Geriausiai tinka:** mišriam kontekstui, kuriame dideli įrankių žurnalai derinami su žmogaus instrukcijomis arba asistento suvestinėmis.
+**Tinka:** Mišriam kontekstui su dideliais įrankių žurnalais ir žmogaus instrukcijomis ar asistento santraukomis.
 
 ---
 

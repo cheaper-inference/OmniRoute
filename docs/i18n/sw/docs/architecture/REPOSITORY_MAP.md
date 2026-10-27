@@ -395,76 +395,76 @@ open-sse/
 
 ### Miongozo ya kiwango cha juu
 
-| Hati                        | Madhumuni                                                                                                   |
+| Hati                        | Kusudi                                                                                                      |
 | --------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Usanifu wa kiwango cha juu, ramani ya mifumo midogo, kiolesura cha dashibodi                                |
-| `CODEBASE_DOCUMENTATION.md` | Rejeleo la uhandisi: saraka, moduli, kanuni                                                                 |
-| `FEATURES.md`               | Jedwali la vipengele lenye vivutio vya v3.8                                                                 |
-| `USER_GUIDE.md`             | Mwongozo wa mtumiaji wa mwisho (usanidi, modeli, michanganyiko, CLI, sauti, n.k.)                           |
-| `API_REFERENCE.md`          | Rejeleo la endpoint za API lenye muundo wa uthibitishaji                                                    |
-| `openapi.yaml`              | Vipimo vya OpenAPI 3.0 (njia 121)                                                                           |
-| `SETUP_GUIDE.md`            | Mbinu za usakinishaji (npm, npx, Docker, Electron, Termux, msimbo chanzo)                                   |
-| `ENVIRONMENT.md`            | Vigeu vyote vya mazingira (~800 vimeandikwa, mistari ~3,050 ya `.env.example`)                              |
-| `TROUBLESHOOTING.md`        | Hitilafu za kawaida + matatizo yanayojulikana ya v3.8.0                                                     |
-| `RELEASE_CHECKLIST.md`      | Mtiririko kamili wa toleo (ujuzi, husky, conventional commits, upelekaji)                                   |
+| `ARCHITECTURE.md`           | Usanifu wa kiwango cha juu, ramani ya mifumo ndogo, uso wa dashibodi                                        |
+| `CODEBASE_DOCUMENTATION.md` | Marejeo ya uhandisi: saraka, moduli, kanuni                                                                 |
+| `FEATURES.md`               | Jedwali la vipengele lenye mambo muhimu ya v3.8                                                             |
+| `USER_GUIDE.md`             | Mwongozo wa mtumiaji wa mwisho (usanidi, mifano, combo, CLI, sauti, n.k.)                                   |
+| `API_REFERENCE.md`          | Marejeo ya mwisho wa API yenye mfano wa uthibitishaji                                                       |
+| `openapi.yaml`              | Spesifikasi ya OpenAPI 3.0 (njia 121)                                                                       |
+| `SETUP_GUIDE.md`            | Njia za usakinishaji (npm, npx, Docker, Electron, Termux, msimbo chanzo)                                    |
+| `ENVIRONMENT.md`            | Vigezo vyote vya mazingira (~800 vilivyoandikwa, mistari ~3,050 `.env.example`)                             |
+| `TROUBLESHOOTING.md`        | Hitilafu za kawaida + masuala yanayojulikana ya v3.8.0                                                      |
+| `RELEASE_CHECKLIST.md`      | Mtiririko kamili wa kutoa toleo (ujuzi, husky, conventional commits, usambazaji)                            |
 | `COVERAGE_PLAN.md`          | Malengo ya ufunikaji na hali ya sasa                                                                        |
-| `FREE_TIERS.md`             | Watoa huduma wa viwango vya bila malipo walioteuliwa (48+ bila malipo + 11 OAuth)                           |
-| `CLI-TOOLS.md`              | Miunganisho ya CLI za nje + CLI ya ndani ya OmniRoute                                                       |
-| `I18N.md`                   | Usanifu wa i18n, kuongeza lugha, lugha 67                                                                   |
-| `UNINSTALL.md`              | Hatua za uondoaji safi                                                                                      |
-| `PROVIDER_REFERENCE.md`     | Katalogi ya watoa huduma 376 **inayozalishwa kiotomatiki** (zalisha upya: `npm run gen:provider-reference`) |
+| `FREE_TIERS.md`             | Watoa huduma wa kiwango cha bure waliochaguliwa (48+ bure + 11 OAuth)                                       |
+| `CLI-TOOLS.md`              | Ujumuishaji wa CLI za nje + CLI ya ndani ya OmniRoute                                                       |
+| `I18N.md`                   | Usanifu wa i18n, kuongeza lugha, lugha za eneo 67                                                           |
+| `UNINSTALL.md`              | Hatua za kuondoa usakinishaji kikamilifu                                                                    |
+| `PROVIDER_REFERENCE.md`     | Orodha **iliyozalishwa kiotomatiki** ya watoa huduma 376 (kuzalisha upya: `npm run gen:provider-reference`) |
 
-### Uchambuzi wa kina wa mifumo midogo
+### Uchunguzi wa kina wa mifumo ndogo
 
-| Hati                                         | Madhumuni                                                                                          |
-| -------------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                              | Seva ya MCP: zana 110, njia 3 za usafirishaji, mawanda 33, endpoint za REST                        |
-| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, ujuzi 6, visaidizi vya REST, kadi ya wakala                                    |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | Mwongozo uliounganishwa: A2A dhidi ya ACP dhidi ya Mawakala wa Wingu                               |
-| `CLOUD_AGENT.md`                             | Uratibu wa Codex Cloud / Devin / Jules                                                             |
-| `SKILLS.md`                                  | Mfumo wa ujuzi (iliyojengewa ndani + soko + SkillsSH + sandbox)                                    |
-| `RADAR.md`                                   | Tabaka la katalogi ya modeli za Radar zisizolipishwa (`RADAR_ENABLED`, imezimwa kwa chaguo-msingi) |
-| `MEMORY.md`                                  | Mfumo wa kumbukumbu (SQLite FTS5 + Qdrant)                                                         |
-| `EVALS.md`                                   | Mfumo wa tathmini (makundi, utekelezaji, rubriki)                                                  |
-| `GUARDRAILS.md`                              | Kificha PII, udungaji wa prompt, daraja la maono                                                   |
-| `COMPLIANCE.md`                              | Kumbukumbu ya ukaguzi, uhifadhi, kujiondoa kwa noLog                                               |
-| `WEBHOOKS.md`                                | Uwasilishaji wa webhook uliotiwa saini kwa HMAC                                                    |
-| `REASONING_REPLAY.md`                        | Akiba mseto ya kumbukumbu/SQLite kwa `reasoning_content`                                           |
-| `AUTHZ_GUIDE.md`                             | Msururu wa uidhinishaji (`classify` → `policies` → `enforce`)                                      |
-| `RESILIENCE_GUIDE.md`                        | Kikatiza saketi + kipindi cha kupoa + kufungiwa kwa modeli                                         |
-| `docs/security/STEALTH_GUIDE.md` (git pekee) | Uwekaji alama wa kidole wa TLS (JA3/JA4), Claude Code CCH, cheti cha MITM                          |
-| `AUTO-COMBO.md`                              | Injini ya Auto Combo (upimaji wa vipengele 16, vifurushi 6 vya modi, kiwanda pepe)                 |
+| Hati                                         | Kusudi                                                                                       |
+| -------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | Seva ya MCP: zana 110, njia 3 za usafirishaji, wigo 33, mwisho wa REST                       |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, ujuzi 6, wasaidizi wa REST, kadi ya wakala                               |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Mwongozo wa pamoja: A2A dhidi ya ACP dhidi ya Cloud Agents                                   |
+| `CLOUD_AGENT.md`                             | Uratibu wa Codex Cloud / Devin / Jules                                                       |
+| `SKILLS.md`                                  | Mfumo wa ujuzi (uliojengwa ndani + soko + SkillsSH + sandbox)                                |
+| `RADAR.md`                                   | Kifuniko cha orodha ya mifano ya bure ya Radar (`RADAR_ENABLED`, imezimwa kwa chaguo-msingi) |
+| `MEMORY.md`                                  | Mfumo wa kumbukumbu (SQLite FTS5 + Qdrant)                                                   |
+| `EVALS.md`                                   | Mfumo wa tathmini (seti, utekelezaji, viwango vya upimaji)                                   |
+| `GUARDRAILS.md`                              | Kuficha PII, uingizaji wa prompt, daraja la maono                                            |
+| `COMPLIANCE.md`                              | Kumbukumbu ya ukaguzi, uhifadhi, kujiondoa kwenye noLog                                      |
+| `WEBHOOKS.md`                                | Uwasilishaji wa webhook uliosainiwa kwa HMAC                                                 |
+| `REASONING_REPLAY.md`                        | Hifadhi mseto ya kumbukumbu/SQLite kwa `reasoning_content`                                   |
+| `AUTHZ_GUIDE.md`                             | Mrija wa idhini (`classify` → `policies` → `enforce`)                                        |
+| `RESILIENCE_GUIDE.md`                        | Kivunja mzunguko + kupooza + kufungia mfano                                                  |
+| `docs/security/STEALTH_GUIDE.md` (git pekee) | Utambuzi wa vidole vya TLS (JA3/JA4), Claude Code CCH, cheti cha MITM                        |
+| `AUTO-COMBO.md`                              | Injini ya Auto Combo (upimaji alama wa vigezo 16, pakiti 6 za hali, kiwanda cha virtual)     |
 
-### Mfinyazo
+### Ukandamizaji
 
-| Hati                            | Madhumuni                                         |
-| ------------------------------- | ------------------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Muhtasari wa modi za mfinyazo + ramani ya njia    |
-| `COMPRESSION_ENGINES.md`        | Injini za Caveman + RTK, mkataba wa sajili        |
-| `COMPRESSION_RULES_FORMAT.md`   | Schema ya JSON ya kifurushi cha kanuni za Caveman |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Orodha ya vifurushi vya kanuni kwa kila lugha     |
-| `RTK_COMPRESSION.md`            | Msururu tangazaji wa RTK (vichujio 49)            |
+| Hati                            | Kusudi                                                  |
+| ------------------------------- | ------------------------------------------------------- |
+| `COMPRESSION_GUIDE.md`          | Muhtasari wa hali za ukandamizaji + mpango wa maendeleo |
+| `COMPRESSION_ENGINES.md`        | Injini za Caveman + RTK, mkataba wa rejista             |
+| `COMPRESSION_RULES_FORMAT.md`   | Skema ya JSON ya pakiti ya sheria za Caveman            |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Orodha ya pakiti za sheria kwa kila lugha               |
+| `RTK_COMPRESSION.md`            | Mrija wa kufafanua wa RTK (vichujio 56)                 |
 
-### Upelekaji
+### Usambazaji
 
-| Hati                         | Madhumuni                                                                      |
-| ---------------------------- | ------------------------------------------------------------------------------ |
-| `DOCKER_GUIDE.md`            | Uundaji wa Docker, wasifu (base/cli/host/cliproxyapi), huduma saidizi ya Redis |
-| `VM_DEPLOYMENT_GUIDE.md`     | Usambazaji wa kawaida wa VM/VPS (Ubuntu/Debian + nginx + systemd)              |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Usambazaji kwenye Fly.io (kwa sasa inapatikana kwa Kichina pekee)              |
-| `TERMUX_GUIDE.md`            | Android isiyo na kiolesura kupitia Termux                                      |
-| `PWA_GUIDE.md`               | Usakinishaji wa Progressive Web App + mfanyakazi wa huduma                     |
-| `ELECTRON_GUIDE.md`          | Kuunda + kutia saini + kusambaza programu ya eneo-kazi                         |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                         |
-| `PROXY_GUIDE.md`             | Proksi ya kutoka ya viwango 4 + soko la 1proxy                                 |
+| Nyaraka                      | Kusudi                                                                |
+| ---------------------------- | --------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Ujenzi wa Docker, profaili (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Uwekaji wa jumla wa VM/VPS (Ubuntu/Debian + nginx + systemd)          |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Uwekaji wa Fly.io (kwa sasa upo kwa Kichina pekee)                    |
+| `TERMUX_GUIDE.md`            | Android headless kupitia Termux                                       |
+| `PWA_GUIDE.md`               | Usakinishaji wa Progressive Web App + service worker                  |
+| `ELECTRON_GUIDE.md`          | Ujenzi wa programu ya desktop + kusaini + kusambaza                   |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                |
+| `PROXY_GUIDE.md`             | Proksi ya nje ya ngazi 4 + soko la 1proxy                             |
 
-### Saraka ndogo
+### Sarakasi Ndogo
 
-| Saraka ndogo          | Madhumuni                                                                                                                                                                                                                                |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Tafsiri zilizojanibishwa za nyaraka (lugha na maeneo 41)                                                                                                                                                                                 |
-| `docs/screenshots/`   | Rasilimali za picha kwa ajili ya miongozo                                                                                                                                                                                                |
-| `_tasks/superpowers/` | Mipango/vibainisho kutoka superpowers (`writing-plans`/`brainstorming`) + utafiti — repo iliyotengwa na yenye matoleo yanayodhibitiwa kivyake, iliyopuuzwa na git katika mti mkuu. Angalia CLAUDE.md → "Vizalia vya Mipango na Utafiti". |
+| Sarakasi ndogo        | Kusudi                                                                                                                                                                                                                       |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Tafsiri za nyaraka za lugha mbalimbali (maeneo 41)                                                                                                                                                                           |
+| `docs/screenshots/`   | Mali za picha kwa ajili ya miongozo                                                                                                                                                                                          |
+| `_tasks/superpowers/` | Mipango/vipimo kutoka superpowers (`writing-plans`/`brainstorming`) pamoja na utafiti — repo iliyotengwa yenye matoleo tofauti, iliyowekwa kwenye gitignore na mti kuu. Angalia CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

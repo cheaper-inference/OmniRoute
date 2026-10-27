@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Àkọsílẹ̀ fún Gbogbo Èèyàn (àwọn fáìlì gbòǹgbò 7 + àwọn ìtọ́sọ́nà abẹ́ 17)
+## `docs/` — Ìwé Ìtànisi Gbangba (7 fáìlì gbòngbo + 17 abò-àkópọ̀)
 
-### Àwọn ìtọ́sọ́nà ìpele-òkè
+### Àwọn ìtòsọna ipele-òkè
 
-| Àkọsílẹ̀                     | Ète                                                                                              |
-| --------------------------- | ------------------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | Faaji ìpele-gíga, àwòrán àwọn ẹ̀ka-ètò, ojú dashboard                                             |
-| `CODEBASE_DOCUMENTATION.md` | Ìtọ́kasí ìmọ̀-ẹ̀rọ: àwọn ìtọ́sọ́nà, àwọn module, àwọn àṣà                                             |
-| `FEATURES.md`               | Àtòjọ-àfikún pẹ̀lú àwọn ohun pàtàkì inú v3.8                                                      |
-| `USER_GUIDE.md`             | Ìwé ìtọ́sọ́nà olùmúlò (ìṣètò, àwọn awoṣe, àwọn combo, àwọn CLI, ohun, àti bẹ́ẹ̀ bẹ́ẹ̀ lọ)              |
-| `API_REFERENCE.md`          | Ìtọ́kasí endpoint API pẹ̀lú awoṣe ìfàṣẹsí                                                          |
-| `openapi.yaml`              | Ìlànà OpenAPI 3.0 (àwọn path 121)                                                                |
-| `SETUP_GUIDE.md`            | Àwọn ọ̀nà ìfisórí ẹrọ (npm, npx, Docker, Electron, Termux, source)                                |
-| `ENVIRONMENT.md`            | Gbogbo àwọn àyípadà àyíká (~800 tí a ṣàkọsílẹ̀, ~3,050 ìlà `.env.example`)                        |
-| `TROUBLESHOOTING.md`        | Àwọn àṣìṣe tó wọ́pọ̀ + àwọn ìṣòro v3.8.0 tí a mọ̀                                                   |
-| `RELEASE_CHECKLIST.md`      | Gbogbo ìṣàn ìtújáde (àwọn ọgbọ́n, husky, conventional commits, ìmúṣiṣẹ́)                           |
-| `COVERAGE_PLAN.md`          | Àwọn ibi-afẹ́ ìborí àti ipò lọ́wọ́lọ́wọ́                                                              |
-| `FREE_TIERS.md`             | Àwọn olùpèsè ipele-ọ̀fẹ́ tí a ti yan (48+ ọ̀fẹ́ + 11 OAuth)                                          |
-| `CLI-TOOLS.md`              | Àwọn ìṣọ̀kan CLI òde + CLI OmniRoute inú                                                          |
-| `I18N.md`                   | Faaji i18n, fífi èdè kan kún un, àwọn locale 67                                                  |
-| `UNINSTALL.md`              | Àwọn ìgbésẹ̀ ìyọkúrò tó mọ́                                                                        |
-| `PROVIDER_REFERENCE.md`     | Kátálọ́ọ̀gù àwọn olùpèsè 376 tí a **ṣẹ̀dá láìfọwọ́ṣe** (tún un ṣe: `npm run gen:provider-reference`) |
+| Ìwé                         | Ète                                                                                          |
+| --------------------------- | -------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Ìṣètò ipele-òkè, máàpù àwọn abò-èto, ojú dashboard                                           |
+| `CODEBASE_DOCUMENTATION.md` | Ìtọ́kasí ẹ̀rọ̀: àwọn àkópọ̀, àwọn mójúlù, àwọn ìlànà                                             |
+| `FEATURES.md`               | Máàtírísì àwọn ẹ̀yà pẹ̀lú àwọn kókó ṣíṣe v3.8                                                  |
+| `USER_GUIDE.md`             | Ìwé ìtòsọna olùmúlò (ìṣètò, àwọn àpẹẹrẹ, àwọn combo, àwọn CLI, ohùn, abbl.)                  |
+| `API_REFERENCE.md`          | Ìtọ́kasí àwọn endpoint API pẹ̀lú àpẹẹrẹ ìfàṣẹsí                                                |
+| `openapi.yaml`              | Àlàyé OpenAPI 3.0 (121 àwọn ọ̀nà)                                                             |
+| `SETUP_GUIDE.md`            | Àwọn ọ̀nà ìgbéfi (npm, npx, Docker, Electron, Termux, orísun kóòdù)                           |
+| `ENVIRONMENT.md`            | Gbogbo àwọn ayípadà ayíká (~800 tí a kọ sílẹ̀, ~3,050 àwọn ìlà `.env.example`)                |
+| `TROUBLESHOOTING.md`        | Àwọn aṣìṣe tí ó ṣọ́ọ̀ṣì + àwọn ìṣòro tí a mọ̀ ní v3.8.0                                         |
+| `RELEASE_CHECKLIST.md`      | Ìṣàn ìtúlẹ̀ kíkún (skills, husky, conventional commits, ìfisílẹ̀)                              |
+| `COVERAGE_PLAN.md`          | Àwọn ète ìbòmọlẹ̀ àti ipò lọ́wọ́lọ́wọ́                                                            |
+| `FREE_TIERS.md`             | Àwọn olùpèsè ọ̀fẹ́ tí a yan pátó (48+ ọ̀fẹ́ + 11 OAuth)                                          |
+| `CLI-TOOLS.md`              | Àwọn ìsopọ̀ CLI òde + CLI inú OmniRoute                                                       |
+| `I18N.md`                   | Ìṣètò i18n, ṣífi èdè kún, 67 àwọn locale                                                     |
+| `UNINSTALL.md`              | Àwọn ìgbésẹ̀ yíyọ kúrò tọ́ọ́rẹ́                                                                  |
+| `PROVIDER_REFERENCE.md`     | Àkójọ **tí a ṣẹ̀dá fúnra rẹ̀** fún àwọn olùpèsè 376 (tún-ṣe: `npm run gen:provider-reference`) |
 
-### Ìtúpalẹ̀ jinlẹ̀ àwọn ẹ̀ka-ètò
+### Ìjìnlẹ̀ àwọn abò-èto
 
-| Àkọsílẹ̀                                      | Ète                                                                               |
-| -------------------------------------------- | --------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                              | Server MCP: irinṣẹ́ 110, ọ̀nà ìrìnnà 3, ààlà 33, àwọn endpoint REST                 |
-| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, ọgbọ́n 6, àwọn olùrànlọ́wọ́ REST, káàdì agent                    |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | Ìtọ́sọ́nà àpapọ̀: A2A sí ACP sí Cloud Agents                                         |
-| `CLOUD_AGENT.md`                             | Ìṣàkóso ìṣiṣẹ́pọ̀ Codex Cloud / Devin / Jules                                       |
-| `SKILLS.md`                                  | Ìlànà àwọn ọgbọ́n (tí a kọ́ sínú rẹ̀ + ọjà + SkillsSH + sandbox)                     |
-| `RADAR.md`                                   | Fẹ́lẹ̀fẹ́lẹ̀ àfikún kátálọ́ọ̀gù awoṣe-ọ̀fẹ́ Radar (`RADAR_ENABLED`, ó jẹ́ pípa láti ìbẹ̀rẹ̀) |
-| `MEMORY.md`                                  | Ètò ìrántí (SQLite FTS5 + Qdrant)                                                 |
-| `EVALS.md`                                   | Ìlànà ìgbéléwọ̀n (àwọn suite, àwọn ìṣiṣẹ́, àwọn rubric)                             |
-| `GUARDRAILS.md`                              | Ìbòjú PII, ìkọlù àṣẹ prompt, afárá ìran                                           |
-| `COMPLIANCE.md`                              | Àkọsílẹ̀ àyẹ̀wò, ìmúṣẹ́pamọ́, yíyọ ara ẹni kúrò nípasẹ̀ noLog                          |
-| `WEBHOOKS.md`                                | Ìfiránṣẹ́ webhook tí HMAC fọwọ́ sí                                                  |
-| `REASONING_REPLAY.md`                        | Ìrántí àdàpọ̀/cache SQLite fún `reasoning_content`                                 |
-| `AUTHZ_GUIDE.md`                             | Ìṣàn ìfúnni-láṣẹ (`classify` → `policies` → `enforce`)                            |
-| `RESILIENCE_GUIDE.md`                        | Olùdádúró iyíká + àkókò ìtutù + ìdènà awoṣe                                       |
-| `docs/security/STEALTH_GUIDE.md` (git nìkan) | Ìdánimọ̀ ìka ọwọ́ TLS (JA3/JA4), Claude Code CCH, ìwé-ẹ̀rí MITM                      |
-| `AUTO-COMBO.md`                              | Ẹ̀rọ Auto Combo (ìṣírò àmì onífókítà 16, àkójọpọ̀ mode 6, ilé-iṣẹ́ aláfojúrí)        |
+| Ìwé                                          | Ète                                                                              |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                              | Server MCP: 110 àwọn irinṣẹ́, 3 àwọn ọ̀nà ìrùnà, 33 àwọn scope, àwọn endpoint REST |
+| `A2A-SERVER.md`                              | A2A v0.3: JSON-RPC, 6 àwọn skill, àwọn ìrànwọ́ REST, káàdì agent                  |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | Ìtòsọna àpapọ̀: A2A vs ACP vs Cloud Agents                                        |
+| `CLOUD_AGENT.md`                             | Ìdarí àjọṣe Codex Cloud / Devin / Jules                                          |
+| `SKILLS.md`                                  | Ìlànà Skills (tí ó wà nínú + marketplace + SkillsSH + sandbox)                   |
+| `RADAR.md`                                   | Ìbòra àkójọ àwọn àpẹẹrẹ ọ̀fẹ́ Radar (`RADAR_ENABLED`, pipa ní àtìlẹ́wa)             |
+| `MEMORY.md`                                  | Ètò ìrántí (SQLite FTS5 + Qdrant)                                                |
+| `EVALS.md`                                   | Ìlànà ìdíwọ́n (àwọn suite, àwọn ìṣiṣẹ́, àwọn rubric)                               |
+| `GUARDRAILS.md`                              | Ohun ìbòjú PII, ìfikún prompt, afárá vision                                      |
+| `COMPLIANCE.md`                              | Àkọsílẹ̀ ìṣàyẹ̀wò, ìmúni, yíyọ kúrò noLog                                          |
+| `WEBHOOKS.md`                                | Ìfìránṣẹ́ webhook tí a fowó sí pẹ̀lú HMAC                                          |
+| `REASONING_REPLAY.md`                        | Cache ìrántí/SQLite arápò fún `reasoning_content`                                |
+| `AUTHZ_GUIDE.md`                             | Pipeline ìfàṣẹsí (`classify` → `policies` → `enforce`)                           |
+| `RESILIENCE_GUIDE.md`                        | Circuit breaker + cooldown + ìdíwọ́ àpẹẹrẹ                                        |
+| `docs/security/STEALTH_GUIDE.md` (git nìkan) | Ìtẹ̀nà ọwọ́ TLS (JA3/JA4), Claude Code CCH, iwe-ẹrí MITM                           |
+| `AUTO-COMBO.md`                              | Ẹ̀rọ Auto Combo (ìṣirò àwọn kókó 16, 6 àwọn àkópọ̀ ipò, ilé-iṣẹ́ fáàà)              |
 
-### Ìfúnpọ̀
+### Ìdínkù
 
-| Àkọsílẹ̀                         | Ète                                     |
+| Ìwé                             | Ète                                     |
 | ------------------------------- | --------------------------------------- |
-| `COMPRESSION_GUIDE.md`          | Àkíyèsí àwọn mode ìfúnpọ̀ + àwòrán-ọ̀nà   |
+| `COMPRESSION_GUIDE.md`          | Àkótán àwọn ipò ìdínkù + máàpù ọ̀nà      |
 | `COMPRESSION_ENGINES.md`        | Àwọn ẹ̀rọ Caveman + RTK, àdéhùn registry |
-| `COMPRESSION_RULES_FORMAT.md`   | Schema JSON fún àkójọpọ̀ òfin Caveman    |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Àkójọ àkójọpọ̀ òfin fún èdè kọ̀ọ̀kan       |
-| `RTK_COMPRESSION.md`            | Ìṣàn iṣẹ́ ìkéde RTK (àwọn filter 49)     |
+| `COMPRESSION_RULES_FORMAT.md`   | Schema JSON àkópọ̀ òfin Caveman          |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Ìṣirò àkópọ̀ òfin lọ́nà èdè-kọ̀ọ̀kan        |
+| `RTK_COMPRESSION.md`            | Pipeline ìkéde RTK (56 àwọn àlẹmọ́)      |
 
-### Ìmúṣiṣẹ́
+### Ìfisílẹ̀
 
-| Ìwé                          | Ète                                                                  |
-| ---------------------------- | -------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Ìkọ́ Docker, àwọn prófáìlì (base/cli/host/cliproxyapi), Redis sidecar |
-| `VM_DEPLOYMENT_GUIDE.md`     | Ìmúṣiṣẹ́ VM/VPS gbogbogbòò (Ubuntu/Debian + nginx + systemd)          |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Ìmúṣiṣẹ́ Fly.io (ó wà ní èdè Ṣáínà nìkan lọ́wọ́lọ́wọ́)                    |
-| `TERMUX_GUIDE.md`            | Android láìsí ojú-iṣẹ́ nípasẹ̀ Termux                                  |
-| `PWA_GUIDE.md`               | Fífì Progressive Web App sori ẹrọ + service worker                   |
-| `ELECTRON_GUIDE.md`          | Ìkọ́ ètò ìṣàfilọ́lẹ̀ desktop + fífi ìbùwọ́lé sí i + pípín rẹ̀             |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                               |
-| `PROXY_GUIDE.md`             | Proxy àbájáde onípele mẹ́rin + ọjà 1proxy                             |
+| Ìwé àlàyé                    | Ohun tó ń ṣe                                                           |
+| ---------------------------- | ---------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Ìkọ́lò Docker, àwọn profáílì (base/cli/host/cliproxyapi), Redis sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Ìgbéfásílẹ̀ VM/VPS gbogbogboò (Ubuntu/Debian + nginx + systemd)         |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Ìgbéfásílẹ̀ Fly.io (ó wà ní èdè Chinese nìkan lọ́wọ́lọ́wọ́)                 |
+| `TERMUX_GUIDE.md`            | Android headless nípasẹ̀ Termux                                         |
+| `PWA_GUIDE.md`               | Ìfiwásí Progressive Web App + service worker                           |
+| `ELECTRON_GUIDE.md`          | Ìkọ́lò ètò desktop + ìfowọ́sí + pínpín                                   |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                 |
+| `PROXY_GUIDE.md`             | Proxy ìsọ̀dọ̀de ìpele mẹ́rin + ọjà 1proxy                                 |
 
-### Àwọn ìtọ́sọ́nà kékeré
+### Àwọn subdirectory
 
-| Ìtọ́sọ́nà kékeré        | Ète                                                                                                                                                                                                                                |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Àwọn ìtumọ̀ ìwé sí àwọn èdè agbègbè (àwọn locale 41)                                                                                                                                                                                |
-| `docs/screenshots/`   | Àwọn ohun-èlò àwòrán fún àwọn ìtọ́sọ́nà                                                                                                                                                                                              |
-| `_tasks/superpowers/` | Àwọn ètò/àlàyé pàtó láti inú superpowers (`writing-plans`/`brainstorming`) + ìwádìí — ibi ìpamọ́ repo tí a ya sọ́tọ̀, tí a sì ń ṣàkóso ẹ̀yà rẹ̀ lọ́tọ̀, tí igi àkọ́kọ́ sì fi sínú gitignore. Wo CLAUDE.md → "Àwọn Ohun Èlò Ìṣètò & Ìwádìí". |
+| Subdir                | Ohun tó ń ṣe                                                                                                                                                                                                                      |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Àwọn òkíjikì ìwé àlàyé sí èdè agbègbè (locales mẹ́rìnlélógbọ̀n)                                                                                                                                                                     |
+| `docs/screenshots/`   | Àwọn ohun èlò àwòrán fún àwọn ìtọ́nisọ́nà                                                                                                                                                                                           |
+| `_tasks/superpowers/` | Àwọn ète/spec láti ọ̀dọ̀ superpowers (`writing-plans`/`brainstorming`) + ìwádìí — repo tí a ya sọ́tọ̀, tí a ṣe version rẹ̀ lọ́tọ̀, tí git fò kọ sílẹ̀ (gitignored) láti inu igi gbígbóná. Wo CLAUDE.md → "Planning & Research Artifacts". |
 
 ---
 

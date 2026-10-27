@@ -395,76 +395,76 @@ open-sse/
 
 ### Panduan tingkat atas
 
-| Dokumen                     | Tujuan                                                                                       |
-| --------------------------- | -------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Arsitektur tingkat tinggi, peta subsistem, cakupan dashboard                                 |
-| `CODEBASE_DOCUMENTATION.md` | Referensi rekayasa: direktori, modul, konvensi                                               |
-| `FEATURES.md`               | Matriks fitur dengan sorotan v3.8                                                            |
-| `USER_GUIDE.md`             | Panduan pengguna akhir (penyiapan, model, combo, CLI, audio, dll.)                           |
-| `API_REFERENCE.md`          | Referensi endpoint API beserta model autentikasi                                             |
-| `openapi.yaml`              | Spesifikasi OpenAPI 3.0 (121 path)                                                           |
-| `SETUP_GUIDE.md`            | Metode instalasi (npm, npx, Docker, Electron, Termux, sumber)                                |
-| `ENVIRONMENT.md`            | Semua variabel lingkungan (~800 didokumentasikan, ~3.050 baris `.env.example`)               |
-| `TROUBLESHOOTING.md`        | Kesalahan umum + masalah umum yang diketahui pada v3.8.0                                     |
-| `RELEASE_CHECKLIST.md`      | Alur rilis lengkap (skill, husky, conventional commit, deployment)                           |
-| `COVERAGE_PLAN.md`          | Target cakupan dan kondisi saat ini                                                          |
-| `FREE_TIERS.md`             | Penyedia tingkat gratis yang dikurasi (48+ gratis + 11 OAuth)                                |
-| `CLI-TOOLS.md`              | Integrasi CLI eksternal + CLI Internal OmniRoute                                             |
-| `I18N.md`                   | Arsitektur i18n, menambahkan bahasa, 67 locale                                               |
-| `UNINSTALL.md`              | Langkah-langkah penghapusan instalasi secara bersih                                          |
-| `PROVIDER_REFERENCE.md`     | Katalog 376 penyedia yang **dibuat otomatis** (buat ulang: `npm run gen:provider-reference`) |
+| Dok                         | Tujuan                                                                                 |
+| --------------------------- | -------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Arsitektur tingkat tinggi, peta subsistem, permukaan dashboard                         |
+| `CODEBASE_DOCUMENTATION.md` | Referensi rekayasa: direktori, modul, konvensi                                         |
+| `FEATURES.md`               | Matriks fitur dengan sorotan v3.8                                                      |
+| `USER_GUIDE.md`             | Manual pengguna akhir (setup, model, kombo, CLI, audio, dll.)                          |
+| `API_REFERENCE.md`          | Referensi endpoint API dengan model autentikasi                                        |
+| `openapi.yaml`              | Spesifikasi OpenAPI 3.0 (121 path)                                                     |
+| `SETUP_GUIDE.md`            | Metode instalasi (npm, npx, Docker, Electron, Termux, sumber)                          |
+| `ENVIRONMENT.md`            | Semua variabel env (~800 terdokumentasi, ~3.050 baris `.env.example`)                  |
+| `TROUBLESHOOTING.md`        | Error umum + masalah yang diketahui di v3.8.0                                          |
+| `RELEASE_CHECKLIST.md`      | Alur rilis lengkap (skills, husky, conventional commits, deploy)                       |
+| `COVERAGE_PLAN.md`          | Target cakupan dan kondisi saat ini                                                    |
+| `FREE_TIERS.md`             | Penyedia tier gratis terkurasi (48+ gratis + 11 OAuth)                                 |
+| `CLI-TOOLS.md`              | Integrasi CLI eksternal + CLI OmniRoute internal                                       |
+| `I18N.md`                   | Arsitektur i18n, menambahkan bahasa, 67 lokal                                          |
+| `UNINSTALL.md`              | Langkah-langkah uninstall bersih                                                       |
+| `PROVIDER_REFERENCE.md`     | Katalog 376 provider **dihasilkan otomatis** (regen: `npm run gen:provider-reference`) |
 
 ### Pembahasan mendalam subsistem
 
-| Dokumen                                       | Tujuan                                                                        |
-| --------------------------------------------- | ----------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                               | Server MCP: 110 alat, 3 transport, 33 scope, endpoint REST                    |
-| `A2A-SERVER.md`                               | A2A v0.3: JSON-RPC, 6 skill, helper REST, kartu agen                          |
-| `AGENT_PROTOCOLS_GUIDE.md`                    | Panduan terpadu: A2A vs ACP vs Cloud Agents                                   |
-| `CLOUD_AGENT.md`                              | Orkestrasi Codex Cloud / Devin / Jules                                        |
-| `SKILLS.md`                                   | Kerangka kerja skill (bawaan + marketplace + SkillsSH + sandbox)              |
-| `RADAR.md`                                    | Overlay katalog model gratis Radar (`RADAR_ENABLED`, nonaktif secara default) |
-| `MEMORY.md`                                   | Sistem memori (SQLite FTS5 + Qdrant)                                          |
-| `EVALS.md`                                    | Kerangka kerja evaluasi (suite, proses, rubrik)                               |
-| `GUARDRAILS.md`                               | Penyamar PII, injeksi prompt, jembatan vision                                 |
-| `COMPLIANCE.md`                               | Log audit, retensi, pilihan untuk tidak menggunakan noLog                     |
-| `WEBHOOKS.md`                                 | Pengiriman webhook bertanda tangan HMAC                                       |
-| `REASONING_REPLAY.md`                         | Cache memori/SQLite hibrida untuk `reasoning_content`                         |
-| `AUTHZ_GUIDE.md`                              | Pipeline otorisasi (`classify` → `policies` → `enforce`)                      |
-| `RESILIENCE_GUIDE.md`                         | Circuit breaker + cooldown + penguncian model                                 |
-| `docs/security/STEALTH_GUIDE.md` (khusus git) | Fingerprinting TLS (JA3/JA4), Claude Code CCH, sertifikat MITM                |
-| `AUTO-COMBO.md`                               | Mesin Auto Combo (penilaian 16 faktor, 6 paket mode, pabrik virtual)          |
+| Dok                                         | Tujuan                                                                        |
+| ------------------------------------------- | ----------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                             | Server MCP: 110 tool, 3 transport, 33 scope, endpoint REST                    |
+| `A2A-SERVER.md`                             | A2A v0.3: JSON-RPC, 6 skill, helper REST, kartu agen                          |
+| `AGENT_PROTOCOLS_GUIDE.md`                  | Panduan terpadu: A2A vs ACP vs Cloud Agents                                   |
+| `CLOUD_AGENT.md`                            | Orkestrasi Codex Cloud / Devin / Jules                                        |
+| `SKILLS.md`                                 | Framework Skills (bawaan + marketplace + SkillsSH + sandbox)                  |
+| `RADAR.md`                                  | Overlay katalog model gratis Radar (`RADAR_ENABLED`, nonaktif secara default) |
+| `MEMORY.md`                                 | Sistem memori (SQLite FTS5 + Qdrant)                                          |
+| `EVALS.md`                                  | Framework eval (suite, run, rubrik)                                           |
+| `GUARDRAILS.md`                             | Penyamaran PII, prompt injection, vision bridge                               |
+| `COMPLIANCE.md`                             | Log audit, retensi, opt-out noLog                                             |
+| `WEBHOOKS.md`                               | Pengiriman webhook bertanda tangan HMAC                                       |
+| `REASONING_REPLAY.md`                       | Cache hybrid memori/SQLite untuk `reasoning_content`                          |
+| `AUTHZ_GUIDE.md`                            | Pipeline otorisasi (`classify` → `policies` → `enforce`)                      |
+| `RESILIENCE_GUIDE.md`                       | Circuit breaker + cooldown + penguncian model                                 |
+| `docs/security/STEALTH_GUIDE.md` (git only) | Fingerprinting TLS (JA3/JA4), Claude Code CCH, sertifikat MITM                |
+| `AUTO-COMBO.md`                             | Mesin Auto Combo (skoring 16 faktor, 6 paket mode, virtual factory)           |
 
 ### Kompresi
 
-| Dokumen                         | Tujuan                                |
+| Dok                             | Tujuan                                |
 | ------------------------------- | ------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Ikhtisar mode kompresi + roadmap      |
 | `COMPRESSION_ENGINES.md`        | Mesin Caveman + RTK, kontrak registry |
 | `COMPRESSION_RULES_FORMAT.md`   | Skema JSON paket aturan Caveman       |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Inventaris paket aturan per bahasa    |
-| `RTK_COMPRESSION.md`            | Pipeline deklaratif RTK (49 filter)   |
+| `RTK_COMPRESSION.md`            | Pipeline deklaratif RTK (56 filter)   |
 
 ### Deployment
 
-| Dokumen                      | Tujuan                                                            |
+| Dok                          | Tujuan                                                            |
 | ---------------------------- | ----------------------------------------------------------------- |
 | `DOCKER_GUIDE.md`            | Build Docker, profil (base/cli/host/cliproxyapi), sidecar Redis   |
 | `VM_DEPLOYMENT_GUIDE.md`     | Deployment VM/VPS generik (Ubuntu/Debian + nginx + systemd)       |
 | `FLY_IO_DEPLOYMENT_GUIDE.md` | Deployment Fly.io (saat ini hanya tersedia dalam bahasa Mandarin) |
 | `TERMUX_GUIDE.md`            | Android headless melalui Termux                                   |
 | `PWA_GUIDE.md`               | Instalasi Progressive Web App + service worker                    |
-| `ELECTRON_GUIDE.md`          | Build + penandatanganan + distribusi aplikasi desktop             |
+| `ELECTRON_GUIDE.md`          | Build + tanda tangan + distribusi aplikasi desktop                |
 | `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                            |
 | `PROXY_GUIDE.md`             | Proxy keluar 4 tingkat + marketplace 1proxy                       |
 
 ### Subdirektori
 
-| Subdirektori          | Tujuan                                                                                                                                                                                                                                       |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Terjemahan dokumentasi yang dilokalkan (41 locale)                                                                                                                                                                                           |
-| `docs/screenshots/`   | Aset gambar untuk panduan                                                                                                                                                                                                                    |
-| `_tasks/superpowers/` | Rencana/spesifikasi dari superpowers (`writing-plans`/`brainstorming`) + riset — repositori yang terisolasi dan diberi versi secara terpisah, serta diabaikan oleh git pada struktur utama. Lihat CLAUDE.md → "Artefak Perencanaan & Riset". |
+| Subdirektori          | Tujuan                                                                                                                                                                                              |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Terjemahan dokumen terlokalisasi (41 lokal)                                                                                                                                                         |
+| `docs/screenshots/`   | Aset gambar untuk panduan                                                                                                                                                                           |
+| `_tasks/superpowers/` | Rencana/spesifikasi dari superpowers (`writing-plans`/`brainstorming`) + riset — repo terisolasi, berversi terpisah, di-gitignore oleh tree utama. Lihat CLAUDE.md → "Artefak Perencanaan & Riset". |
 
 ---
 

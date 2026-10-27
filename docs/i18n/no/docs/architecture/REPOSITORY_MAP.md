@@ -391,80 +391,80 @@ open-sse/
 
 ---
 
-## `docs/` — Offentlig dokumentasjon (7 rotfiler + 17 underkataloger)
+## `docs/` — Offentlig dokumentasjon (7 rotfiler + 17 undermapper)
 
 ### Veiledninger på toppnivå
 
-| Dokument                    | Formål                                                                                              |
-| --------------------------- | --------------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Overordnet arkitektur, delsystemkart og dashboardflate                                              |
-| `CODEBASE_DOCUMENTATION.md` | Teknisk referanse: kataloger, moduler og konvensjoner                                               |
-| `FEATURES.md`               | Funksjonsmatrise med høydepunkter fra v3.8                                                          |
-| `USER_GUIDE.md`             | Brukerhåndbok (oppsett, modeller, kombinasjoner, CLI-er, lyd osv.)                                  |
-| `API_REFERENCE.md`          | Referanse for API-endepunkter med autentiseringsmodell                                              |
-| `openapi.yaml`              | OpenAPI 3.0-spesifikasjon (121 baner)                                                               |
-| `SETUP_GUIDE.md`            | Installasjonsmetoder (npm, npx, Docker, Electron, Termux, kildekode)                                |
-| `ENVIRONMENT.md`            | Alle miljøvariabler (~800 dokumentert, ~3 050 linjer i `.env.example`)                              |
-| `TROUBLESHOOTING.md`        | Vanlige feil + kjente problemer i v3.8.0                                                            |
-| `RELEASE_CHECKLIST.md`      | Komplett utgivelsesflyt (ferdigheter, husky, konvensjonelle commits, utrulling)                     |
-| `COVERAGE_PLAN.md`          | Mål for testdekning og nåværende status                                                             |
-| `FREE_TIERS.md`             | Kuraterte leverandører med gratisnivå (48+ gratis + 11 OAuth)                                       |
-| `CLI-TOOLS.md`              | Eksterne CLI-integrasjoner + intern OmniRoute-CLI                                                   |
-| `I18N.md`                   | i18n-arkitektur, hvordan legge til et språk, 67 lokaliteter                                         |
-| `UNINSTALL.md`              | Fremgangsmåte for ren avinstallering                                                                |
-| `PROVIDER_REFERENCE.md`     | **Automatisk generert** katalog over 376 leverandører (regenerer: `npm run gen:provider-reference`) |
+| Dok                         | Formål                                                                                    |
+| --------------------------- | ----------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Overordnet arkitektur, delsystemkart, dashbordflate                                       |
+| `CODEBASE_DOCUMENTATION.md` | Teknisk referanse: kataloger, moduler, konvensjoner                                       |
+| `FEATURES.md`               | Funksjonsmatrise med høydepunkter fra v3.8                                                |
+| `USER_GUIDE.md`             | Brukerhåndbok (oppsett, modeller, kombinasjoner, CLI-er, lyd osv.)                        |
+| `API_REFERENCE.md`          | API-endepunktreferanse med autentiseringsmodell                                           |
+| `openapi.yaml`              | OpenAPI 3.0-spesifikasjon (121 stier)                                                     |
+| `SETUP_GUIDE.md`            | Installasjonsmetoder (npm, npx, Docker, Electron, Termux, kildekode)                      |
+| `ENVIRONMENT.md`            | Alle miljøvariabler (~800 dokumentert, ~3 050 linjer i `.env.example`)                    |
+| `TROUBLESHOOTING.md`        | Vanlige feil + kjente problemer i v3.8.0                                                  |
+| `RELEASE_CHECKLIST.md`      | Full utgivelsesflyt (skills, husky, conventional commits, utrulling)                      |
+| `COVERAGE_PLAN.md`          | Dekningsmål og nåværende status                                                           |
+| `FREE_TIERS.md`             | Kuraterte gratistilbydere (48+ gratis + 11 OAuth)                                         |
+| `CLI-TOOLS.md`              | Eksterne CLI-integrasjoner + internt OmniRoute-CLI                                        |
+| `I18N.md`                   | i18n-arkitektur, legge til et språk, 67 språkversjoner                                    |
+| `UNINSTALL.md`              | Trinn for ren avinstallasjon                                                              |
+| `PROVIDER_REFERENCE.md`     | **Autogenerert** katalog over 376 tilbydere (regenerer: `npm run gen:provider-reference`) |
 
-### Fordypninger i delsystemer
+### Dybdegående gjennomgang av delsystemer
 
-| Dokument                                   | Formål                                                                              |
-| ------------------------------------------ | ----------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                            | MCP-server: 110 verktøy, 3 transporter, 33 tilgangsområder, REST-endepunkter        |
-| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 ferdigheter, REST-hjelpere, agentkort                         |
-| `AGENT_PROTOCOLS_GUIDE.md`                 | Samlet veiledning: A2A kontra ACP kontra Cloud Agents                               |
-| `CLOUD_AGENT.md`                           | Orkestrering av Codex Cloud / Devin / Jules                                         |
-| `SKILLS.md`                                | Rammeverk for ferdigheter (innebygde + markedsplass + SkillsSH + sandkasse)         |
-| `RADAR.md`                                 | Radar-overlegg for katalogen over gratismodeller (`RADAR_ENABLED`, av som standard) |
-| `MEMORY.md`                                | Minnesystem (SQLite FTS5 + Qdrant)                                                  |
-| `EVALS.md`                                 | Evalueringsrammeverk (testsamlinger, kjøringer, vurderingskriterier)                |
-| `GUARDRAILS.md`                            | PII-maskering, promptinjeksjon, bro for bildeanalyse                                |
-| `COMPLIANCE.md`                            | Revisjonslogg, oppbevaring, noLog-reservasjon                                       |
-| `WEBHOOKS.md`                              | HMAC-signert levering av webhooks                                                   |
-| `REASONING_REPLAY.md`                      | Hybrid minne-/SQLite-hurtigbuffer for `reasoning_content`                           |
-| `AUTHZ_GUIDE.md`                           | Autorisasjonsforløp (`classify` → `policies` → `enforce`)                           |
-| `RESILIENCE_GUIDE.md`                      | Kretsbryter + nedkjøling + modellutestenging                                        |
-| `docs/security/STEALTH_GUIDE.md` (kun git) | TLS-fingeravtrykk (JA3/JA4), Claude Code CCH, MITM-sertifikat                       |
-| `AUTO-COMBO.md`                            | Auto Combo-motor (poengberegning med 16 faktorer, 6 moduspakker, virtuell fabrikk)  |
+| Dok                                        | Formål                                                                     |
+| ------------------------------------------ | -------------------------------------------------------------------------- |
+| `MCP-SERVER.md`                            | MCP-server: 110 verktøy, 3 transporter, 33 scopes, REST-endepunkter        |
+| `A2A-SERVER.md`                            | A2A v0.3: JSON-RPC, 6 skills, REST-hjelpere, agentkort                     |
+| `AGENT_PROTOCOLS_GUIDE.md`                 | Samlet veiledning: A2A vs ACP vs Cloud Agents                              |
+| `CLOUD_AGENT.md`                           | Codex Cloud / Devin / Jules-orkestrering                                   |
+| `SKILLS.md`                                | Skills-rammeverk (innebygd + markedsplass + SkillsSH + sandkasse)          |
+| `RADAR.md`                                 | Radar-overlegg for gratismodellkatalog (`RADAR_ENABLED`, av som standard)  |
+| `MEMORY.md`                                | Minnesystem (SQLite FTS5 + Qdrant)                                         |
+| `EVALS.md`                                 | Eval-rammeverk (suiter, kjøringer, vurderingsmatriser)                     |
+| `GUARDRAILS.md`                            | PII-maskering, prompt-injeksjon, vision-bro                                |
+| `COMPLIANCE.md`                            | Revisjonslogg, oppbevaring, noLog-opt-out                                  |
+| `WEBHOOKS.md`                              | HMAC-signert webhook-levering                                              |
+| `REASONING_REPLAY.md`                      | Hybrid minne-/SQLite-cache for `reasoning_content`                         |
+| `AUTHZ_GUIDE.md`                           | Autorisasjonspipeline (`classify` → `policies` → `enforce`)                |
+| `RESILIENCE_GUIDE.md`                      | Circuit breaker + nedkjøling + modellutestengelse                          |
+| `docs/security/STEALTH_GUIDE.md` (kun git) | TLS-fingeravtrykk (JA3/JA4), Claude Code CCH, MITM-sertifikat              |
+| `AUTO-COMBO.md`                            | Auto Combo-motor (16-faktor poengsetting, 6 moduspakker, virtuell fabrikk) |
 
 ### Komprimering
 
-| Dokument                        | Formål                                       |
+| Dok                             | Formål                                       |
 | ------------------------------- | -------------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Oversikt over komprimeringsmoduser + veikart |
 | `COMPRESSION_ENGINES.md`        | Caveman- og RTK-motorer, registerkontrakt    |
-| `COMPRESSION_RULES_FORMAT.md`   | JSON-skjema for Caveman-regelpakker          |
-| `COMPRESSION_LANGUAGE_PACKS.md` | Oversikt over språkspesifikke regelpakker    |
-| `RTK_COMPRESSION.md`            | Deklarativ RTK-prosesskjede (49 filtre)      |
+| `COMPRESSION_RULES_FORMAT.md`   | JSON-skjema for Caveman-regelpakke           |
+| `COMPRESSION_LANGUAGE_PACKS.md` | Inventar over regelpakker per språk          |
+| `RTK_COMPRESSION.md`            | RTK deklarativ pipeline (56 filtre)          |
 
 ### Utrulling
 
-| Dokument                     | Formål                                                               |
-| ---------------------------- | -------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker-bygging, profiler (base/cli/host/cliproxyapi), Redis-sidevogn |
-| `VM_DEPLOYMENT_GUIDE.md`     | Generisk distribusjon til VM/VPS (Ubuntu/Debian + nginx + systemd)   |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Distribusjon til Fly.io (foreløpig kun på kinesisk)                  |
-| `TERMUX_GUIDE.md`            | Hodeløs Android via Termux                                           |
-| `PWA_GUIDE.md`               | Installasjon av progressiv nettapp + service worker                  |
-| `ELECTRON_GUIDE.md`          | Bygging + signering + distribusjon av skrivebordsapp                 |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                               |
-| `PROXY_GUIDE.md`             | 4-nivå utgående proxy + 1proxy-markedsplass                          |
+| Dokument                     | Formål                                                           |
+| ---------------------------- | ---------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker-bygg, profiler (base/cli/host/cliproxyapi), Redis-sidecar |
+| `VM_DEPLOYMENT_GUIDE.md`     | Generisk VM/VPS-distribusjon (Ubuntu/Debian + nginx + systemd)   |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io-distribusjon (foreløpig kun på kinesisk)                  |
+| `TERMUX_GUIDE.md`            | Headless Android via Termux                                      |
+| `PWA_GUIDE.md`               | Installasjon av Progressive Web App + service worker             |
+| `ELECTRON_GUIDE.md`          | Bygg + signering + distribusjon av skrivebordsapp                |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                           |
+| `PROXY_GUIDE.md`             | 4-nivås utgående proxy + 1proxy-markedsplass                     |
 
 ### Underkataloger
 
-| Underkatalog          | Formål                                                                                                                                                                                                                      |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokaliserte dokumentoversettelser (41 språkinnstillinger)                                                                                                                                                                   |
-| `docs/screenshots/`   | Bilderessurser for veiledninger                                                                                                                                                                                             |
-| `_tasks/superpowers/` | Planer/spesifikasjoner fra superpowers (`writing-plans`/`brainstorming`) + forskning — isolert repositorium med separat versjonering, ignorert av Git i hovedtreet. Se CLAUDE.md → «Planleggings- og forskningsartefakter». |
+| Underkatalog          | Formål                                                                                                                                                                                                       |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | Lokaliserte oversettelser av dokumentasjonen (41 språk)                                                                                                                                                      |
+| `docs/screenshots/`   | Bilderessurser for veiledninger                                                                                                                                                                              |
+| `_tasks/superpowers/` | Planer/spesifikasjoner fra superpowers (`writing-plans`/`brainstorming`) + forskning — isolert, separat versjonert repo, git-ignorert av hovedtreet. Se CLAUDE.md → «Planleggings- og forskningsartefakter». |
 
 ---
 

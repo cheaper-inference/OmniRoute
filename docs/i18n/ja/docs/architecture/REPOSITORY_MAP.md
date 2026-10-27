@@ -395,45 +395,45 @@ open-sse/
 
 ### トップレベルガイド
 
-| ドキュメント                | 目的                                                                                 |
-| --------------------------- | ------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | 高レベルアーキテクチャ、サブシステムマップ、ダッシュボード画面                       |
-| `CODEBASE_DOCUMENTATION.md` | エンジニアリングリファレンス：ディレクトリ、モジュール、規約                         |
-| `FEATURES.md`               | v3.8 のハイライトを含む機能マトリックス                                              |
-| `USER_GUIDE.md`             | エンドユーザー向けマニュアル（セットアップ、モデル、コンボ、CLI、音声など）          |
-| `API_REFERENCE.md`          | 認証モデルを含む API エンドポイントリファレンス                                      |
-| `openapi.yaml`              | OpenAPI 3.0 仕様（121 パス）                                                         |
-| `SETUP_GUIDE.md`            | インストール方法（npm、npx、Docker、Electron、Termux、ソース）                       |
-| `ENVIRONMENT.md`            | すべての環境変数（約 800 件を文書化、`.env.example` は約 3,050 行）                  |
-| `TROUBLESHOOTING.md`        | 一般的なエラー + v3.8.0 の既知の問題                                                 |
-| `RELEASE_CHECKLIST.md`      | 完全なリリースフロー（スキル、husky、Conventional Commits、デプロイ）                |
-| `COVERAGE_PLAN.md`          | カバレッジ目標と現在の状況                                                           |
-| `FREE_TIERS.md`             | 厳選された無料枠プロバイダー（48 以上の無料プロバイダー + 11 の OAuth プロバイダー） |
-| `CLI-TOOLS.md`              | 外部 CLI 連携 + 内部 OmniRoute CLI                                                   |
-| `I18N.md`                   | i18n アーキテクチャ、言語の追加方法、67 ロケール                                     |
-| `UNINSTALL.md`              | クリーンアンインストール手順                                                         |
-| `PROVIDER_REFERENCE.md`     | 376 プロバイダーの**自動生成**カタログ（再生成：`npm run gen:provider-reference`）   |
+| ドキュメント                | 目的                                                                               |
+| --------------------------- | ---------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | 高レベルアーキテクチャ、サブシステムマップ、ダッシュボード画面                     |
+| `CODEBASE_DOCUMENTATION.md` | エンジニアリングリファレンス：ディレクトリ、モジュール、規約                       |
+| `FEATURES.md`               | v3.8 のハイライトを含む機能マトリックス                                            |
+| `USER_GUIDE.md`             | エンドユーザーマニュアル（セットアップ、モデル、コンボ、CLI、オーディオなど）      |
+| `API_REFERENCE.md`          | 認証モデルを含む API エンドポイントリファレンス                                    |
+| `openapi.yaml`              | OpenAPI 3.0 仕様（121 パス）                                                       |
+| `SETUP_GUIDE.md`            | インストール方法（npm、npx、Docker、Electron、Termux、ソース）                     |
+| `ENVIRONMENT.md`            | すべての環境変数（約 800 件を文書化、約 3,050 行の `.env.example`）                |
+| `TROUBLESHOOTING.md`        | よくあるエラー + v3.8.0 の既知の問題                                               |
+| `RELEASE_CHECKLIST.md`      | 完全なリリースフロー（スキル、husky、Conventional Commits、デプロイ）              |
+| `COVERAGE_PLAN.md`          | カバレッジ目標と現状                                                               |
+| `FREE_TIERS.md`             | 厳選された無料ティアプロバイダー（48+ 無料 + 11 OAuth）                            |
+| `CLI-TOOLS.md`              | 外部 CLI 統合 + 内部 OmniRoute CLI                                                 |
+| `I18N.md`                   | i18n アーキテクチャ、言語の追加、67 ロケール                                       |
+| `UNINSTALL.md`              | クリーンなアンインストール手順                                                     |
+| `PROVIDER_REFERENCE.md`     | 376 プロバイダーの**自動生成**カタログ（再生成：`npm run gen:provider-reference`） |
 
 ### サブシステムの詳細解説
 
-| ドキュメント                                 | 目的                                                                              |
-| -------------------------------------------- | --------------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                              | MCP サーバー：110 ツール、3 トランスポート、33 スコープ、REST エンドポイント      |
-| `A2A-SERVER.md`                              | A2A v0.3：JSON-RPC、6 スキル、REST ヘルパー、エージェントカード                   |
-| `AGENT_PROTOCOLS_GUIDE.md`                   | 統合ガイド：A2A と ACP と Cloud Agents の比較                                     |
-| `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules のオーケストレーション                                |
-| `SKILLS.md`                                  | スキルフレームワーク（組み込み + マーケットプレイス + SkillsSH + サンドボックス） |
-| `RADAR.md`                                   | Radar 無料モデルカタログオーバーレイ（`RADAR_ENABLED`、デフォルトでは無効）       |
-| `MEMORY.md`                                  | メモリシステム（SQLite FTS5 + Qdrant）                                            |
-| `EVALS.md`                                   | 評価フレームワーク（スイート、実行、ルーブリック）                                |
-| `GUARDRAILS.md`                              | PII マスカー、プロンプトインジェクション、ビジョンブリッジ                        |
-| `COMPLIANCE.md`                              | 監査ログ、保持、noLog オプトアウト                                                |
-| `WEBHOOKS.md`                                | HMAC 署名付き Webhook 配信                                                        |
-| `REASONING_REPLAY.md`                        | `reasoning_content` 用のハイブリッドメモリ/SQLite キャッシュ                      |
-| `AUTHZ_GUIDE.md`                             | 認可パイプライン（`classify` → `policies` → `enforce`）                           |
-| `RESILIENCE_GUIDE.md`                        | サーキットブレーカー + クールダウン + モデルロックアウト                          |
-| `docs/security/STEALTH_GUIDE.md`（git のみ） | TLS フィンガープリンティング（JA3/JA4）、Claude Code CCH、MITM 証明書             |
-| `AUTO-COMBO.md`                              | Auto Combo エンジン（16 要素スコアリング、6 モードパック、仮想ファクトリー）      |
+| ドキュメント                                 | 目的                                                                                 |
+| -------------------------------------------- | ------------------------------------------------------------------------------------ |
+| `MCP-SERVER.md`                              | MCP サーバー：110 ツール、3 トランスポート、33 スコープ、REST エンドポイント         |
+| `A2A-SERVER.md`                              | A2A v0.3：JSON-RPC、6 スキル、REST ヘルパー、エージェントカード                      |
+| `AGENT_PROTOCOLS_GUIDE.md`                   | 統合ガイド：A2A vs ACP vs Cloud Agents                                               |
+| `CLOUD_AGENT.md`                             | Codex Cloud / Devin / Jules オーケストレーション                                     |
+| `SKILLS.md`                                  | Skills フレームワーク（ビルトイン + マーケットプレイス + SkillsSH + サンドボックス） |
+| `RADAR.md`                                   | Radar 無料モデルカタログオーバーレイ（`RADAR_ENABLED`、デフォルトでオフ）            |
+| `MEMORY.md`                                  | メモリシステム（SQLite FTS5 + Qdrant）                                               |
+| `EVALS.md`                                   | 評価フレームワーク（スイート、実行、ルーブリック）                                   |
+| `GUARDRAILS.md`                              | PII マスカー、プロンプトインジェクション、ビジョンブリッジ                           |
+| `COMPLIANCE.md`                              | 監査ログ、保持、noLog オプトアウト                                                   |
+| `WEBHOOKS.md`                                | HMAC 署名付き Webhook 配信                                                           |
+| `REASONING_REPLAY.md`                        | `reasoning_content` のハイブリッドメモリ/SQLite キャッシュ                           |
+| `AUTHZ_GUIDE.md`                             | 認可パイプライン（`classify` → `policies` → `enforce`）                              |
+| `RESILIENCE_GUIDE.md`                        | サーキットブレーカー + クールダウン + モデルロックアウト                             |
+| `docs/security/STEALTH_GUIDE.md`（git のみ） | TLS フィンガープリンティング（JA3/JA4）、Claude Code CCH、MITM 証明書                |
+| `AUTO-COMBO.md`                              | Auto Combo エンジン（16 ファクタースコアリング、6 モードパック、仮想ファクトリ）     |
 
 ### 圧縮
 
@@ -441,30 +441,30 @@ open-sse/
 | ------------------------------- | --------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | 圧縮モードの概要 + ロードマップ         |
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK エンジン、レジストリ契約  |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman ルールパックの JSON スキーマ    |
+| `COMPRESSION_RULES_FORMAT.md`   | Caveman ルールパック JSON スキーマ      |
 | `COMPRESSION_LANGUAGE_PACKS.md` | 言語別ルールパック一覧                  |
-| `RTK_COMPRESSION.md`            | RTK 宣言型パイプライン（49 フィルター） |
+| `RTK_COMPRESSION.md`            | RTK 宣言型パイプライン（56 フィルター） |
 
 ### デプロイメント
 
-| ドキュメント                 | 目的                                                                         |
-| ---------------------------- | ---------------------------------------------------------------------------- |
-| `DOCKER_GUIDE.md`            | Docker のビルド、プロファイル（base/cli/host/cliproxyapi）、Redis サイドカー |
-| `VM_DEPLOYMENT_GUIDE.md`     | 汎用 VM/VPS へのデプロイ（Ubuntu/Debian + nginx + systemd）                  |
-| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io へのデプロイ（現在は中国語のみ）                                      |
-| `TERMUX_GUIDE.md`            | Termux を使用した Android でのヘッドレス運用                                 |
-| `PWA_GUIDE.md`               | Progressive Web App のインストール + Service Worker                          |
-| `ELECTRON_GUIDE.md`          | デスクトップアプリのビルド + 署名 + 配布                                     |
-| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                       |
-| `PROXY_GUIDE.md`             | 4 段階のアウトバウンドプロキシ + 1proxy マーケットプレイス                   |
+| ドキュメント                 | 目的                                                                      |
+| ---------------------------- | ------------------------------------------------------------------------- |
+| `DOCKER_GUIDE.md`            | Docker ビルド、プロファイル (base/cli/host/cliproxyapi)、Redis サイドカー |
+| `VM_DEPLOYMENT_GUIDE.md`     | 汎用 VM/VPS デプロイ (Ubuntu/Debian + nginx + systemd)                    |
+| `FLY_IO_DEPLOYMENT_GUIDE.md` | Fly.io デプロイ (現在は中国語のみ)                                        |
+| `TERMUX_GUIDE.md`            | Termux による Android ヘッドレス実行                                      |
+| `PWA_GUIDE.md`               | Progressive Web App のインストール + サービスワーカー                     |
+| `ELECTRON_GUIDE.md`          | デスクトップアプリのビルド + 署名 + 配布                                  |
+| `TUNNELS_GUIDE.md`           | Cloudflared + ngrok + Tailscale Funnel                                    |
+| `PROXY_GUIDE.md`             | 4 段階のアウトバウンドプロキシ + 1proxy マーケットプレイス                |
 
 ### サブディレクトリ
 
-| サブディレクトリ      | 目的                                                                                                                                                                                                                              |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | ローカライズされたドキュメント翻訳（41 ロケール）                                                                                                                                                                                 |
-| `docs/screenshots/`   | ガイド用の画像アセット                                                                                                                                                                                                            |
-| `_tasks/superpowers/` | superpowers（`writing-plans`/`brainstorming`）の計画・仕様 + 調査資料 — 分離され、個別にバージョン管理されるリポジトリで、メインツリーでは gitignore の対象です。CLAUDE.md →「Planning & Research Artifacts」を参照してください。 |
+| サブディレクトリ      | 目的                                                                                                                                                                                                                           |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | ローカライズされたドキュメント翻訳 (41 ロケール)                                                                                                                                                                               |
+| `docs/screenshots/`   | ガイド用の画像アセット                                                                                                                                                                                                         |
+| `_tasks/superpowers/` | superpowers (`writing-plans`/`brainstorming`) によるプラン/仕様 + リサーチ — 分離され、個別にバージョン管理されるリポジトリで、メインツリーからは gitignore されています。CLAUDE.md → "Planning & Research Artifacts" を参照。 |
 
 ---
 

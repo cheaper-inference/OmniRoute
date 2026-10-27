@@ -34,77 +34,77 @@ Klientförfrågan
 
 ### Av
 
-Ingen komprimering tillämpas. Alla meddelanden skickas vidare oförändrade.
+Ingen komprimering tillämpas. Alla meddelanden passerar oförändrade.
 
-### Lätt läge (~15 % besparing, <1 ms latens)
+### Lite-läge (~15 % besparing, <1 ms latens)
 
-Det säkraste läget — ingen semantisk förändring, endast rensning av formatering:
+Det säkraste läget — ingen semantisk förändring, endast formateringsrensning:
 
-| Teknik                   | Beskrivning                                                |
-| ------------------------ | ---------------------------------------------------------- |
-| `collapseWhitespace`     | Slå samman efterföljande tomrader och avslutande blanksteg |
-| `dedupSystemPrompt`      | Ta bort duplicerade systemmeddelanden                      |
-| `compressToolResults`    | Komprimera utförliga verktygs-/funktionsutdata             |
-| `removeRedundantContent` | Ta bort upprepade instruktioner                            |
-| `replaceImageUrls`       | Förkorta data-URI:er för base64-bilder                     |
+| Teknik                   | Beskrivning                                                           |
+| ------------------------ | --------------------------------------------------------------------- |
+| `collapseWhitespace`     | Slår samman på varandra följande tomma rader och avslutande blanksteg |
+| `dedupSystemPrompt`      | Tar bort dubbletter av systemmeddelanden                              |
+| `compressToolResults`    | Komprimerar utförliga verktygs-/funktionsutdata                       |
+| `removeRedundantContent` | Tar bort upprepade instruktioner                                      |
+| `replaceImageUrls`       | Förkortar base64-bilddata-URI:er                                      |
 
-**Bäst för:** Alltid aktiv användning och säkerhetskritiska arbetsflöden.
+**Passar bäst för:** Kontinuerlig användning, säkerhetskritiska arbetsflöden.
 
 ### Standardläge (~30 % besparing)
 
-Inspirerat av [Caveman](https://github.com/JuliusBrussee/caveman) — tar bort utfyllnadsord och omständliga formuleringar samtidigt som betydelsen bevaras:
+Inspirerat av [Caveman](https://github.com/JuliusBrussee/caveman) — tar bort utfyllnadsord och utförliga formuleringar samtidigt som betydelsen bevaras:
 
-- Tar bort utfyllnadsord ("snälla", "jag tror", "i princip", "faktiskt")
-- Kortar ned omständliga fraser ("för att kunna" → "för att", "som ett resultat av" → "eftersom")
-- Tar bort artiga förbehåll ("Skulle du kunna...", "Om du möjligen kunde...")
-- Över 30 regex-regler anpassade för kodningsprompter
+- Tar bort utfyllnadsord ("please", "I think", "basically", "actually")
+- Förtätar utförliga fraser ("in order to" → "to", "as a result of" → "because")
+- Tar bort artiga förbehåll ("Would you mind...", "If you could possibly...")
+- 30+ regex-regler finjusterade för kodprompter
 
-**Bäst för:** Dagliga kodningsarbetsflöden och kostnadsmedvetna team.
+**Passar bäst för:** Dagliga kodarbetsflöden, kostnadsmedvetna team.
 
 ### Aggressivt läge (~50 % besparing)
 
 Smart historikhantering för långa sessioner:
 
-- **Åldring av meddelanden** — äldre meddelanden komprimeras gradvis
-- **Komprimering av verktygsresultat** — långa verktygsutdata trunkeras eller utelämnas (första/sista raderna,
+- **Meddelandeåldrande** — äldre meddelanden komprimeras progressivt
+- **Komprimering av verktygsresultat** — långa verktygsutdata trunkeras eller kortas ned (första/sista raderna,
   filtrering av matchande rader, kompaktering av JSON-nycklar)
-- **Skydd för strukturell integritet** — säkerställer att par av `tool_use` + `tool_result` förblir konsekventa
-- **Medvetenhet om kontextfönstret** — respekterar tokenbegränsningar per modell
+- **Strukturella integritetsskydd** — säkerställer att `tool_use` + `tool_result`-par förblir konsekventa
+- **Medvetenhet om kontextfönster** — respekterar tokengränser per modell
 
-**Bäst för:** Långa felsökningssessioner och stora kodbaser.
+**Passar bäst för:** Långa felsökningssessioner, stora kodbaser.
 
 ### Ultra-läge (~75 % besparing)
 
-Maximal komprimering för scenarier där tokenanvändningen är kritisk:
+Maximal komprimering för tokenkritiska scenarier:
 
 - **Heuristisk beskärning** — poängbaserad tokenbeskärning av prosa
-- **Bevarande av struktur** — inhägnade kodblock, infogad kod, URL:er och identifierare
-  ersätts tillfälligt med markörer och återinfogas ordagrant; de beskärs aldrig
+- **Strukturbevarande** — omslutna kodblock, inline-kod, URL:er och identifierare märks med tombstones
+  och sys samman igen ordagrant, de beskärs aldrig
 - **Valfri SLM-nivå** — en liten lokal modell kan förfina beskärningen när den är konfigurerad
-- Oberoende av aggressivt läge: det kör inte åldring av meddelanden, komprimering av verktygsresultat
-  eller reservsammanfattaren (endast ett fel på SLM-nivån kan dirigera en reservkörning genom
-  aggressivt läge)
+- Oberoende av Aggressivt läge: det kör inte meddelandeåldrande, komprimering av verktygsresultat
+  eller reservsammanfattaren (endast ett fel i SLM-nivån kan dirigera ett reservpass genom
+  aggressive)
 
-**Bäst för:** När du upprepade gånger når kontextgränserna.
+**Passar bäst för:** När du upprepade gånger når kontextgränserna.
 
-### RTK-läge (60–90 % uppströmsintervall)
+### RTK-läge (60-90 % uppströmsintervall)
 
 RTK-läget är optimerat för utförliga verktygsutdata som förekommer i sessioner med kodningsagenter:
 
 - Identifierar kommando-/utdataklasser som `git status`, `git diff`, `git log`, testkörare,
-  TypeScript-/Vite-/Webpack-byggen, ESLint/Biome/Prettier, npm-granskningar/-installationer, Docker-loggar, infrastrukturutdata
-  och generiska skalutdata
+  TypeScript/Vite/Webpack-byggen, ESLint/Biome/Prettier, npm audit/install, Docker-loggar,
+  infrastrukturutdata och allmänna skalutdata
 - Tillämpar JSON-filterpaket från `open-sse/services/compression/engines/rtk/filters/`
-- Importerar RTK-filter med TOML-schema v1 från projektets eller globala `filters.toml`-filer, med validering
-  genom inbäddade tester och förtroendestyrning för projektfiler
-- Levereras med 55 inbyggda filter med inbäddade verifieringsexempel
-- Tar bort ANSI-styrsekvenser, förloppsindikatorer, upprepade rader och brus som inte går att agera på
+- Importerar RTK TOML schema v1-filter från projekt- eller globala `filters.toml`-filer, med
+  validering via inline-tester och tillitsstyrning för projektfiler
+- Levereras med 56 inbyggda filter med inline-verifieringsexempel
+- Tar bort ANSI-styrsekvenser, förloppsindikatorer, upprepade rader och icke-åtgärdbart brus
 - Bevarar misslyckanden, fel, varningar, ändrade filer, sammanfattningar och slutet av långa utdata
-- Stöder förtroendestyrda projektfilter, globala filter och valfri återställning av maskerade råutdata
+- Stöder tillitsstyrda projektfilter, globala filter och valfri återställning av maskerade råutdata
 
-**Bäst för:** Agentsessioner med transkript från skal, byggen, tester, git, grep och filutdata.
+**Passar bäst för:** Agentsessioner med utskrifter från skal, byggen, tester, git, grep och filutdata.
 
-### Staplat läge (78–95 % kvalificerat intervall)
+### Staplat läge (78-95 % tillämpligt intervall)
 
 Staplat läge kör flera komprimeringsmotorer i en deterministisk ordning. Standardpipelinen är:
 
@@ -112,11 +112,11 @@ Staplat läge kör flera komprimeringsmotorer i en deterministisk ordning. Stand
 RTK -> Caveman
 ```
 
-Den ordningen komprimerar först terminal-/verktygsutdata och tillämpar sedan semantisk kondensering med Caveman på
-den återstående prompten i naturligt språk. Staplade pipelines kan konfigureras globalt eller via
-komprimeringskombinationer som tilldelats routningskombinationer.
+Den ordningen håller terminal-/verktygsutdata kompakta först, och tillämpar sedan Cavemans semantiska
+förtätning på den återstående prompten på naturligt språk. Staplade pipelines kan konfigureras globalt
+eller via komprimeringskombinationer som tilldelas routingkombinationer.
 
-**Bäst för:** Blandad kontext med stora verktygsloggar samt mänskliga instruktioner eller assistentsammanfattningar.
+**Passar bäst för:** Blandade kontexter med stora verktygsloggar plus mänskliga instruktioner eller assistentsammanfattningar.
 
 ---
 
