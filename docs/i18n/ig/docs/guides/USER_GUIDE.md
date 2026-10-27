@@ -607,22 +607,22 @@ Maka ntụaka zuru ezu gbasara mgbanwe gburugburu, lee [README](../README.md).
 
 ---
 
-## 📊 Ụdịdịdị Dịnụ
+## 📊 Ụdị Ndị Dị
 
 <details>
-<summary><b>Lelee ụdịdịdị niile dịnụ</b></summary>
+<summary><b>Lee ụdị niile dị</b></summary>
 
-> A họpụtara ndepụta dị n'okpuru site na `open-sse/config/providerRegistry.ts` maka v3.8.0. A na-emekọrịta katalọgụ igwe ojii (Gemini, OpenRouter, wdg.) n'ụzọ akpaaka — iji hụ katalọgụ zuru ezu dị ugbu a, mepee **Dashboard → Providers → [provider] → Available Models** ma ọ bụ kpọọ `GET /api/models/catalog`.
+> Ndepụta dị n'okpuru a ka a họpụtara nke ọma site na `open-sse/config/providerRegistry.ts` maka v3.8.0. A na-eziga katalọgụ ígwe ojii (Gemini, OpenRouter, wdg.) na-akpaghị aka — maka katalọgụ ndụ zuru ezu mepee **Dashboard → Providers → [provider] → Available Models** ma ọ bụ kpọọ `GET /api/models/catalog`.
 >
-> Ọ bụrụ na ndepụta etinyere n'ime nke onye na-eweta ọrụ agbanweela, jiri **Import from /models** na peeji ahụ (ma ọ bụ gbanye **Auto-Sync**) iji dọpụta katalọgụ dị ugbu a site na isi mmalite. E kwadoro nke a na v3.8.50 maka LLM7.io (`gemini-3.1-flash-lite`) na UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ohere Pollinations na-enweghị njirimara ka nọgidere bụrụ nke isi mmalite machibidoro n'oge otu ule ahụ.
+> Ọ bụrụ na ndepụta arụnyere n'ime nke onye na-enye ọrụ agbanweela, jiri **Import from /models** na peeji ahụ (ma ọ bụ mee ka **Auto-Sync** rụọ ọrụ) iji dọpụta katalọgụ ndụ si n'isi mmiri. E gosipụtara nke a na v3.8.50 maka LLM7.io (`gemini-3.1-flash-lite`) na UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); nnweta amaghị aha nke Pollinations ka nọgidere n'okpuru oke si n'isi mmiri n'oge otu ule ahụ.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ọkwa mgbalị: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ ogo mbọ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth N'EFU: jiri katalọgụ dị ugbu a nke egosiri n'okpuru **Dashboard → Providers → Kiro → Available Models**. Ịdịnụ ya dabere na akaụntụ na atụmatụ.
+**Kiro (`kr/`)** — OAuth N'EFU: jiri katalọgụ ndụ egosipụtara n'okpuru **Dashboard → Providers → Kiro → Available Models**. Nnweta dabere na akaụntụ na atụmatụ.
 
 **Qoder (`if/`)** — OAuth N'EFU: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,37 +630,37 @@ Maka ntụaka zuru ezu gbasara mgbanwe gburugburu, lee [README](../README.md).
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ọnwa otu ọnụahịa ma ọ bụ ụgwọ dabere n'ojiji: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9 kwa ọnwa ozugbo ma ọ bụ kwa ojiji: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Igodo API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ọsọ dị ukwuu: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ọsọ karịa: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok nke mbụ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok izizi: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — A na-akwado ya na EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — A na-anabata na EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Nchọ na-agbakwụnye ike: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Nke ọchụchọ kwalitere: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Isi mmalite mepere emepe: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (n'efu), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Ntụpụta ngwa ngwa: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Inference ọsọ ọsọ: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — N'ogo wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Ogo wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Lekwasịrị anya na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — A na-elekwasị anya na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Maka ụlọ ọrụ: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3-super-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Ọkwa ụlọ ọrụ: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: A na-emekọrịta ya ozugbo site na Google dịka igodo API si dị — enweghị ndepụta na-adịgide adịgide. Jikọọ igodo na **Dashboard → Providers**, wee jiri **Available Models** bubata katalọgụ dị ugbu a (dịka `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: A na-eziga ya ndụ kwa igodo API si na Google — enweghị ndepụta kwụsiri ike. Jikọọ igodo na **Dashboard → Providers** wee jiri **Available Models** bụnye katalọgụ dị ugbu a (dịka `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Ndị ọzọ na-eweta ọrụ dakọtara** (ndị ahọpụtara): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (site na `aws-bedrock`), `azure-ai`, `openrouter` (katalọgụ a na-ebufe ozugbo), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Onye ọ bụla na-edobe ndepụta ụdịdị nke ya na `providerRegistry.ts`, a pụkwara ịmekọrịta ya n'ụzọ akpaaka mgbe onye na-eweta ọrụ gosipụtara njedebe `/models`.
+**Ndị na-enye ọrụ ndị ọzọ kwadoro** (ndị a họpụtara): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (site na `aws-bedrock`), `azure-ai`, `openrouter` (katalọgụ passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Onye ọ bụla na-edebe ndepụta ụdị nke ya na `providerRegistry.ts` ma nwee ike ịziga akpaghị aka mgbe onye na-enye ọrụ gosipụtara njedebe `/models`.
 
-**Nkọwa gbasara ID ụdịdị:** OmniRoute na-eji ID ndị sitere n'aka onye na-eweta ọrụ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ụfọdụ ID nwere ụdị mbipụta nwere ntụpọ n'ihi na ọ bụ otu API nke isi mmalite si atụ anya ha. Ọ bụrụ na edepụtaghị otu ụdịdị n'elu, gbaa `omniroute models --search <term>` ma ọ bụ kpọọ `GET /api/models/catalog` iji kwado na ọ dịnụ.
+**Ndeturu banyere ID ụdị:** OmniRoute na-eji ID ndị nke onye na-enye ọrụ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ụfọdụ ID gụnyere ụdị nwere ntụpọ n'ihi na otú ahụ ka API elu chọrọ ha. Ọ bụrụ na ụdị adịghị na ndepụta dị n'elu, gbaa `omniroute models --search <term>` ma ọ bụ kụọ `GET /api/models/catalog` iji kwenye nnweta.
 
 </details>
 
