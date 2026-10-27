@@ -24,8 +24,7 @@ import { normalizeServiceTier } from "./usageHistory/helpers";
 import { readReportedCost } from "./creditMeteredProviders";
 import { emitUsageRecorded } from "./usageEvents";
 import {
-  getLoggedInputTokens,
-  getLoggedOutputTokens,
+  getStoredTokenCount,
   getPromptCacheCreationTokens,
   getPromptCacheReadTokens,
   getReasoningTokens,
@@ -105,8 +104,8 @@ type PreparedEntry = {
   entry: UsageEntry;
   timestamp: string;
   serviceTier: string;
-  tokensInput: number;
-  tokensOutput: number;
+  tokensInput: number | null;
+  tokensOutput: number | null;
   accountIdentity: {
     accountKey: string | null;
     accountLabel: string | null;
@@ -124,8 +123,8 @@ function prepareEntry(db: ReturnType<typeof getDbInstance>, entry: UsageEntry): 
     entry,
     timestamp,
     serviceTier: normalizeServiceTier(entry.serviceTier ?? entry.service_tier),
-    tokensInput: getLoggedInputTokens(entry.tokens),
-    tokensOutput: getLoggedOutputTokens(entry.tokens),
+    tokensInput: getStoredTokenCount(entry.tokens, "input"),
+    tokensOutput: getStoredTokenCount(entry.tokens, "output"),
     accountIdentity: connection
       ? resolveUsageAccountIdentity(connection)
       : resolveOrphanedUsageAccountIdentity(entry.provider, entry.connectionId),

@@ -8,6 +8,7 @@ export const MODEL_SUPPORTED_ENDPOINT_VALUES = [
   "audio-speech",
   "audio-transcriptions",
   "music",
+  "systemone",
   "images-generations",
   // Persisted legacy values remain valid input and normalize on write/edit.
   "video",
@@ -25,6 +26,8 @@ export function normalizeModelSupportedEndpoints(endpoints: readonly string[]): 
   for (const endpoint of endpoints) {
     if (endpoint === "video") {
       add("videos");
+    } else if (endpoint === "decision" || endpoint === "decisions") {
+      add("systemone");
     } else if (endpoint === "audio") {
       add("audio-speech");
       add("audio-transcriptions");

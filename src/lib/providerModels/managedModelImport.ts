@@ -26,6 +26,7 @@ import { isDiscoverableAgyModelId } from "@omniroute/open-sse/config/agyModels.t
 import {
   declaresOnlyNonChatEndpoints,
   filterChatSelectableModels,
+  getModelEndpointDecision,
 } from "@omniroute/open-sse/services/modelEndpointPolicy.ts";
 import { filterSelectableModels } from "@omniroute/open-sse/services/modelLifecycle.ts";
 import { isSelfHostedChatProvider } from "@/shared/constants/providers";
@@ -286,6 +287,13 @@ export async function importManagedModels({
   const discoveredModels = isSelfHostedChatProvider(providerId)
     ? selectableModels
     : filterChatSelectableModels(providerId, selectableModels);
+  // The chat guard needs decision endpoint evidence even when no chat model is imported.
+  const syncedDiscoveredModels = isSelfHostedChatProvider(providerId)
+    ? selectableModels
+    : selectableModels.filter((model) => {
+        const endpoint = getModelEndpointDecision(providerId, model.id, model.supportedEndpoints);
+        return endpoint.chatSelectable || endpoint.kind === "decision";
+      });
   const candidateImportedModels = normalizeImportedModels(discoveredModels);
   const importedIds = new Set(candidateImportedModels.map((model) => model.id));
 
@@ -341,11 +349,11 @@ export async function importManagedModels({
   preserveRemovedCustomModelCompat(providerId, removedCustomModels);
 
   let syncedAvailableModels: SyncedAvailableModel[] = previousSyncedAvailableModels;
-  if (discoveredModels.length > 0) {
+  if (syncedDiscoveredModels.length > 0) {
     syncedAvailableModels = await replaceSyncedAvailableModelsForConnection(
       providerId,
       connectionId,
-      discoveredModels
+      syncedDiscoveredModels
     );
   }
 
@@ -436,7 +444,12 @@ export async function importManagedModels({
 
   let syncedAliases = 0;
   if (usesManagedAvailableModels(providerId) && (mode === "merge" || discoveredModels.length > 0)) {
-    const aliasModelIds = mode === "sync" ? syncedAvailableModels : discoveredModels;
+    const aliasModelIds =
+      mode === "sync"
+        ? selfHosted
+          ? syncedAvailableModels
+          : filterChatSelectableModels(providerId, syncedAvailableModels)
+        : discoveredModels;
     // #3782: eye-hidden models now survive in `syncedAvailableModels` (so they stay
     // listed-but-hidden), but they must NOT be re-assigned a routable managed alias
     // — otherwise auto-sync silently re-enables routing for a model the operator hid.

@@ -726,6 +726,8 @@ Upstream contracts: [sound effects](https://elevenlabs.io/docs/api-reference/tex
 | POST   | `/v1/classify`                            | Jina classify (`api.jina.ai`)      |
 | POST   | `/v1/segment`                             | Jina segmenter (`segment.jina.ai`) |
 | POST   | `/v1/moderations`                         | OpenAI Moderations                 |
+| POST   | `/v1/systemone`                           | Native typed decisions             |
+| GET    | `/v1/systemone/models`                    | Decision model catalog             |
 | GET    | `/v1/models`                              | OpenAI                             |
 | POST   | `/v1/models/query`                        | Filtered model shortlist           |
 | POST   | `/v1/messages/count_tokens`               | Anthropic                          |
@@ -758,6 +760,12 @@ POST /v1/search      { "query": "...", "provider": "jina-search" }
 
 # Moderations
 POST /v1/moderations { "model": "omni-moderation-latest", "input": "..." }
+
+# System One native decision
+POST /v1/systemone { "model": "jev", "state": "A support request", "questions": { "urgent": { "type": "noul", "instructions": "Is this urgent?" } } }
+
+# Native System One accepts only model/state/questions. Gateway ordinary-LLM fallback
+# extensions and client-supplied transport options are rejected before account selection.
 
 # TTS — returns audio/mpeg (or requested format) body
 POST /v1/audio/speech { "model": "openai/tts-1", "input": "Hello", "voice": "alloy" }
@@ -2301,3 +2309,56 @@ Token, manage-scoped API key) and how they differ from inference keys.
 - "management token" / "management-scoped API key" in this reference means one of the families in that guide — not an undefined extra secret type
 
 > **Breaking change (v3.8.0)** — `/api/v1/agents/tasks/*` and the cooldown management endpoints now require **management auth** (dashboard `auth_token` cookie or a management-scoped API key). Clients that previously called these routes unauthenticated will receive `401 Unauthorized`. See commit `588a0333` (`fix(auth): require management auth for agent and cooldown APIs`).
+
+### Native System One scope
+
+The local native lane supports text/structured-JSON `state` with Noul, Choice and Score
+through direct TypeSafe, OpenRouter, Vercel's TypeSafe-compatible endpoint and the
+documented OpenCode Console native endpoint.
+`jev` and `jev-1.13` intentionally pin Jev 1.13 (Vercel spelling `typesafe-ai/jev-1.13.0`);
+use a provider-qualified catalog ID for other versions. `jev-free` stays on the keyed,
+explicitly free-tagged OpenCode connection pool. A catalog entry does not prove account
+entitlement or a successful inference test.
+
+The OpenCode POST URL is `https://opencode.ai/inference/systemone/v1/systemone`;
+its model catalog remains `https://opencode.ai/inference/v1/models`.
+Vercel uses `/typesafe/v1/systemone`, not its different `/v1/evaluate` or `/v1/decisions`
+contracts. OpenAI Decisions, images, experimental headers, ordinary-LLM fallback
+and smart chat model/effort selection are outside this lane's supported scope.
+
+Only `model`, `state` and `questions` are accepted at the top level. Decisions never
+substitute ordinary chat. Named explicit refusal answers remain refusal outcomes,
+including mixed responses; missing or malformed native distributions are rejected,
+not converted to false or confidence zero. Confidence is preserved separately from
+the winning probability and is not a correctness guarantee.
+
+Client-key endpoint/model/connection policy applies to every concrete target.
+401/402/403/429/451 responses stop identity rotation; retryable transient errors have at most
+three account attempts per backend and three backend candidates. A 30-second dispatch
+budget covers canonical target checks, selection, queuing and all inference attempts.
+Initial JSON/auth/request-level policy work precedes that timer. Cancellation prevents
+later inference/fallback and aborts the active inference signal. A stable-selector quota
+preflight already in progress can outlive the caller because it has no cancellation API.
+
+Exact provider-reported cost, including zero, uses the existing `provider_cost_usd`
+ledger. Token-pricing estimates retain their provenance. Unknown/partial tokens remain
+NULL per request; configured USD quotas fail closed when unpriced native usage is
+incomplete. A malformed HTTP-success response is still accounted for because it may
+have been billed, while its client response remains `502 upstream_protocol_error`.
+Admission is rechecked before each physical attempt and after the capacity queue without
+consuming another client request-rate allowance. Existing exclusive session leases are
+honored; these routes do not accept managed lease contexts. Unknown completion is recorded
+as unknown usage, and local accounting failures stop fallback. These checks use the existing
+best-effort counters, not a new crash-safe spending reservation system or a provider-enforced
+dollar ceiling. No new schema migration is required on the active release base.
+
+The native adapters have offline contract and handler tests. Earlier direct synthetic
+provider successes are not proof that this extracted gateway branch works with every live
+account. Catalog availability, account entitlement and actual inference success are distinct.
+An OpenCode `FreeUsageLimitError` does not establish its limiting scope or authentication
+success. This lane adds no identity impersonation or quota bypass.
+
+Official native contracts: [TypeSafe](https://docs.typesafe.ai/api/system-one),
+[OpenRouter](https://openrouter.ai/docs/guides/community/typesafe-sdk),
+[Vercel](https://vercel.com/docs/ai-gateway/sdks-and-apis/typesafe), and
+[OpenCode Console](https://opencode.ai/v2/docs/console/models/#jev).

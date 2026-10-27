@@ -700,6 +700,17 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     hasRequestBody: false,
   },
   {
+    path: "/api/v1/models/health",
+    method: "GET",
+    summary: "Per-model pause state for the caller's key",
+    description:
+      "Read-only liveness view over the in-memory model lockout store. `ok` means no pause observed by this instance (not a health verdict); connection-level pauses live outside the store read here. Additive: leaves GET /v1/models and its cache untouched. `retry_after` carries the shortest remaining lockout in seconds, rounded up, only when `state` is `cooling`. One documented difference from the dispatch 429 `model_cooldown` rule: a model with one lockout-covered connection and one connection-level cooldown still reads `cooling` here, while the 429 requires every connection to carry a model cooldown.",
+    tag: "Models",
+    tags: ["Models"],
+    requiresAuth: true,
+    hasRequestBody: false,
+  },
+  {
     path: "/api/v1/models/query",
     method: "POST",
     summary: "Query a model shortlist",
@@ -1107,6 +1118,28 @@ export const OPENAPI_ENDPOINTS: OpenApiEndpoint[] = [
     tags: ["Audio"],
     requiresAuth: true,
     hasRequestBody: true,
+  },
+  {
+    path: "/api/v1/systemone",
+    method: "POST",
+    summary: "Ask a typed decision question",
+    description:
+      "Typed decision endpoint. A System One model answers `noul` (yes/no), `choice` and `score` questions about the supplied `state` with backend-reported probabilities instead of text, so this is not a chat path: no streaming, no translation, no combo expansion. `model` is either a bare alias (`jev`, `jev-free`) or a provider-qualified id (`openrouter/typesafe/jev-1.13`); a qualified id and a free-tier alias are dispatched to exactly one backend. Restricted API keys need the `systemone` endpoint category. Only model/state/questions are accepted; providerOptions and ordinary-LLM fallbacks are rejected. Authentication and entitlement failures stop account rotation. Dispatch has one 30-second budget across selection, queueing and all attempts.",
+    tag: "System One",
+    tags: ["System One"],
+    requiresAuth: true,
+    hasRequestBody: true,
+  },
+  {
+    path: "/api/v1/systemone/models",
+    method: "GET",
+    summary: "List typed decision models",
+    description:
+      "Decision models this installation can actually route, assembled live from the configured backends. Decision-only models are deliberately absent from `GET /api/v1/models`, so this is the only catalog that lists them. Read-only and never cached; the calling key's connection allowlist and model rules are both applied.",
+    tag: "System One",
+    tags: ["System One"],
+    requiresAuth: true,
+    hasRequestBody: false,
   },
   {
     path: "/api/v1/text-to-speech/{voiceId}",

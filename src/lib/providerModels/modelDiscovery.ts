@@ -11,6 +11,9 @@ import { filterSelectableModels } from "@omniroute/open-sse/services/modelLifecy
 import { getEmbeddingProvider } from "@omniroute/open-sse/config/embeddingRegistry.ts";
 import { hasPayloadFreeEvidence, hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
 
+import { normalizeModelSupportedEndpoints } from "@/shared/constants/modelSupportedEndpoints";
+import { getDeclaredModelEndpoints } from "@omniroute/open-sse/services/modelEndpointPolicy.ts";
+
 type JsonRecord = Record<string, unknown>;
 
 function asRecord(value: unknown): JsonRecord {
@@ -589,14 +592,9 @@ export function normalizeDiscoveredModels(
           : undefined;
     const explicitInputTypes = Array.isArray(record.supportedInputTypes);
 
-    const supportedEndpoints = Array.isArray(record.supportedEndpoints)
-      ? Array.from(
-          new Set(
-            record.supportedEndpoints
-              .map((endpoint) => toNonEmptyString(endpoint))
-              .filter((endpoint): endpoint is string => Boolean(endpoint))
-          )
-        ).sort()
+    const declaredEndpoints = getDeclaredModelEndpoints({ ...record, id }, providerId);
+    const supportedEndpoints = declaredEndpoints
+      ? normalizeModelSupportedEndpoints(declaredEndpoints).sort()
       : modality.isEmbedding
         ? ["embeddings"]
         : modality.isRerank

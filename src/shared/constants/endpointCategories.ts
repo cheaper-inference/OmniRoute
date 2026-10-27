@@ -25,6 +25,16 @@ export const ENDPOINT_CATEGORIES: readonly EndpointCategory[] = [
     prefixes: ["/v1/chat/completions", "/v1/completions", "/v1/messages", "/v1/responses"],
   },
   {
+    // Typed decision models (System One) answer noul/choice/score questions
+    // instead of producing text, so they are their own category: a chat key
+    // must not reach them, and a decision key must not reach chat. The prefix
+    // also covers `/v1/systemone/models`, the decision catalog.
+    id: "systemone",
+    label: "System One / Decisions",
+    description: "Typed decision models (noul / choice / score) and their model catalog",
+    prefixes: ["/v1/systemone"],
+  },
+  {
     id: "search",
     label: "Web Search",
     description: "Web search and search analytics",

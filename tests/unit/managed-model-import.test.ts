@@ -87,6 +87,69 @@ test("sync mode builds aliases from provider-level synced available models", asy
   assert.equal(aliases["model-a"], "openrouter/shared/model-a");
   assert.equal(aliases["model-b"], "openrouter/shared/model-b");
 });
+
+test("decision-only discovery remains stored evidence without becoming a chat model or alias", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "openrouter",
+    name: "synthetic decision catalog",
+    authType: "apikey",
+    isActive: true,
+  });
+  const fetchedModels = [
+    {
+      id: "fixture/decision-v2",
+      architecture: { input_modalities: ["text"], output_modalities: ["decisions"] },
+    },
+  ];
+
+  for (const mode of ["sync", "merge", "sync"] as const) {
+    const result = await importManagedModels({
+      providerId: "openrouter",
+      connectionId: connection.id,
+      mode,
+      fetchedModels,
+    });
+    assert.deepEqual(result.discoveredModels, []);
+    assert.deepEqual(result.importedModels, []);
+    const synced = await modelsDb.getSyncedAvailableModelsForConnection(
+      "openrouter",
+      connection.id
+    );
+    assert.equal(synced.length, 1);
+    assert.equal(synced[0].id, "fixture/decision-v2");
+    assert.deepEqual(synced[0].supportedEndpoints, ["systemone"]);
+    const aliases = await localDb.getModelAliases();
+    assert.ok(!Object.values(aliases).includes("openrouter/fixture/decision-v2"));
+  }
+});
+
+test("mixed decision and text discovery retains its chat import and alias", async () => {
+  const connection = await providersDb.createProviderConnection({
+    provider: "openrouter",
+    name: "synthetic mixed catalog",
+    authType: "apikey",
+    isActive: true,
+  });
+  const result = await importManagedModels({
+    providerId: "openrouter",
+    connectionId: connection.id,
+    mode: "sync",
+    fetchedModels: [
+      {
+        id: "fixture/mixed-v2",
+        architecture: { output_modalities: ["text", "decisions"] },
+      },
+    ],
+  });
+  assert.deepEqual(
+    result.discoveredModels.map((model) => model.id),
+    ["fixture/mixed-v2"]
+  );
+  assert.deepEqual(result.importedModels[0].supportedEndpoints, ["chat", "systemone"]);
+  const aliases = await localDb.getModelAliases();
+  assert.ok(Object.values(aliases).includes("openrouter/fixture/mixed-v2"));
+});
+
 test("Crof managed import persists boolean reasoning effort metadata", async () => {
   const result = await importManagedModels({
     providerId: "crof",

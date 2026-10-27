@@ -43,6 +43,8 @@ tags:
     description: Content moderation
   - name: Rerank
     description: Document reranking
+  - name: System One
+    description: Typed decision models (noul / choice / score) and their catalog
   - name: Search
     description: Unified web, news, and X search
   - name: Models
@@ -2059,6 +2061,132 @@ paths:
             cost-telemetry headers (see `POST /api/v1/chat/completions`); rerank
             cost is computed per search-unit when pricing is available,
             otherwise `0` (fail-open).
+
+  /api/v1/systemone:
+    post:
+      tags: [System One]
+      summary: Ask a typed decision question
+      description: >-
+        Typed decision endpoint. A System One model answers `noul` (yes/no),
+        `choice` and `score` questions about the supplied `state` with
+        backend-reported probabilities instead of text, so this is not a chat path:
+        no streaming, no translation, no combo expansion. `model` is either a
+        bare alias (`jev`, `jev-free`) or a provider-qualified id
+        (`openrouter/typesafe/jev-1.13`); a qualified id and a free-tier alias
+        are dispatched to exactly one backend. Restricted API keys need the
+        `systemone` endpoint category. Only model/state/questions are accepted;
+        providerOptions and ordinary-LLM fallbacks are rejected. Authentication
+        and entitlement failures stop account rotation. Dispatch has one
+        30-second budget across selection, queueing and all attempts.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [model, state, questions]
+              additionalProperties: false
+              properties:
+                model:
+                  type: string
+                  example: jev
+                state:
+                  oneOf:
+                    - type: string
+                    - type: object
+                    - type: array
+                      items: {}
+                  description: Text or structured JSON to evaluate, preserved without rewriting.
+                questions:
+                  type: object
+                  minProperties: 1
+                  maxProperties: 64
+                  description: >-
+                    One entry per question, keyed by the name the answer comes
+                    back under. Each value is `{ type: noul | choice | score,
+                    instructions?, criteria? }` — `criteria` is an option map
+                    for `choice` (1–255 options) and 2–10 ordered levels for
+                    `score`. Instructions accept text or structured JSON;
+                    `noul` requires instructions or a described true/false
+                    outcome. Choice/score instructions may be omitted or null.
+                  additionalProperties:
+                    type: object
+                    required: [type]
+                    properties:
+                      type:
+                        type: string
+                        enum: [noul, choice, score]
+                      instructions:
+                        nullable: true
+                        oneOf:
+                          - type: string
+                          - type: object
+                          - type: array
+                            items: {}
+                      criteria:
+                        oneOf:
+                          - type: object
+                          - type: array
+                            minItems: 2
+                            maxItems: 10
+                            items:
+                              oneOf:
+                                - type: string
+                                - type: object
+                                - type: array
+                                  items: {}
+      responses:
+        "200":
+          description: >-
+            The backend's named answers, including explicit refusal outcomes, passed through unchanged. Carries the
+            `X-OmniRoute-*` telemetry headers plus `X-OmniRoute-Cost-Status`
+            (`known` when the cost was reported or priced, `unknown`
+            otherwise — a decision is never reported as free by default).
+        "400":
+          description: Invalid envelope, unroutable model, or no available backend.
+        "401":
+          description: Authentication required, or no usable credential for the backend.
+        "403":
+          description: >-
+            The key may not use this category/model, or a free-tier model was
+            requested on a paid account.
+        "413":
+          description: The request exceeds the backend's body budget.
+        "429":
+          description: All eligible accounts are rate limited (carries `Retry-After`).
+        "502":
+          description: >-
+            Invalid upstream answers (upstream_protocol_error), or exhausted
+            fallback after a gateway/transport failure (upstream_error).
+        "504":
+          description: Dispatch deadline or upstream timeout; no further fallback after cancellation.
+
+  /api/v1/systemone/models:
+    get:
+      tags: [System One]
+      summary: List typed decision models
+      description: >-
+        Decision models this installation can actually route, assembled live
+        from the configured backends. Decision-only models are deliberately
+        absent from `GET /api/v1/models`, so this is the only catalog that
+        lists them. Read-only and never cached; the calling key's connection
+        allowlist and model rules are both applied.
+      security:
+        - BearerAuth: []
+      responses:
+        "200":
+          description: >-
+            Decision model list. `X-OmniRoute-Catalog-Status` is `complete`,
+            `partial` (at least one backend failed) or `unconfigured` (no
+            backend connection exists).
+        "403":
+          description: The key may not use the `systemone` endpoint category.
+        "502":
+          description: Every configured backend failed to answer.
+        "504":
+          description: Every configured backend timed out.
 
   /api/v1:
     get:

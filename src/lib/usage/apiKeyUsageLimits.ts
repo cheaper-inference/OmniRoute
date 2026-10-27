@@ -61,6 +61,7 @@ export interface ApiKeyUsageLimitDeps {
 interface UsageCostRow {
   storedCost: number | null;
   unmeteredRequests: number | null;
+  incompleteRequests: number | null;
   provider: string | null;
   model: string | null;
   serviceTier: string | null;
@@ -469,16 +470,18 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
         LOWER(model) as model,
         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
         COALESCE(SUM(provider_cost_usd), 0) as storedCost,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL
+          AND (tokens_input IS NULL OR tokens_output IS NULL) THEN 1 ELSE 0 END), 0) as incompleteRequests,
         COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN 1 ELSE 0 END), 0) as unmeteredRequests,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) as promptTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) as completionTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END), 0) as cacheReadTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as cacheCreationTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END), 0) as reasoningTokens
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND tokens_input IS NOT NULL AND tokens_output IS NOT NULL THEN tokens_input ELSE 0 END), 0) as promptTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND tokens_input IS NOT NULL AND tokens_output IS NOT NULL THEN tokens_output ELSE 0 END), 0) as completionTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND tokens_input IS NOT NULL AND tokens_output IS NOT NULL THEN tokens_cache_read ELSE 0 END), 0) as cacheReadTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND tokens_input IS NOT NULL AND tokens_output IS NOT NULL THEN tokens_cache_creation ELSE 0 END), 0) as cacheCreationTokens,
+        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND tokens_input IS NOT NULL AND tokens_output IS NOT NULL THEN tokens_reasoning ELSE 0 END), 0) as reasoningTokens
       FROM usage_history
       WHERE api_key_id = @apiKeyId
         AND timestamp >= @sinceIso
-        AND (success = 1 OR provider_cost_usd IS NOT NULL)
+        AND (success = 1 OR provider_cost_usd IS NOT NULL OR endpoint = '/v1/systemone')
       GROUP BY LOWER(provider), LOWER(model), serviceTier
     `
     )
@@ -496,6 +499,11 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
     // unpriced: only rows without a stored cost are priced from tokens.
     total += toNumber(row.storedCost);
     if (toNumber(row.unmeteredRequests) === 0) continue;
+
+    if (toNumber(row.incompleteRequests) > 0) {
+      hasUnpricedUsage = true;
+      // Price only complete rows, while the incomplete marker keeps the window closed.
+    }
 
     const { costUsd, priced } = await calculateCostDetailed(
       provider,

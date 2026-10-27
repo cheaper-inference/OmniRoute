@@ -430,6 +430,11 @@ export function getBudget(apiKeyId: string): NormalizedBudgetConfig | null {
   return null;
 }
 
+/** Evict one process-local config so a later check reads committed budget changes. */
+export function invalidateBudgetCache(apiKeyId: string): void {
+  budgets.delete(apiKeyId);
+}
+
 /**
  * Delete budget config and recorded spend for an API key.
  *

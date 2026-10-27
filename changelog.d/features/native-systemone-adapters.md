@@ -1,0 +1,1 @@
+- **feat(api):** Add native System One decision inference and scoped model discovery, including Vercel's TypeSafe-compatible adapter, explicit provider identities, sanitized provider diagnostics, bounded access-aware dispatch and honest unknown usage/cost accounting. Ordinary chat routing and defaults remain unchanged.

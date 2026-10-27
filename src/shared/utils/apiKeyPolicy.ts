@@ -10,11 +10,16 @@
 
 import { extractApiKey } from "@/sse/services/auth";
 import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
-import { getApiKeyMetadata, isModelAllowedForKey, getApiKeyById } from "@/lib/db/apiKeys";
+import {
+  getApiKeyMetadata,
+  isModelAllowedForKey,
+  getApiKeyById,
+  clearApiKeyCaches,
+} from "@/lib/db/apiKeys";
 import { getComboByName } from "@/lib/db/combos";
 import { isDashboardSessionAuthenticated } from "./apiAuth";
 import { resolveComboForModel } from "@/lib/db/modelComboMappings";
-import { checkBudget } from "@/domain/costRules";
+import { checkBudget, invalidateBudgetCache } from "@/domain/costRules";
 import { checkKeyQuota } from "@/domain/keyQuota";
 import { checkTokenLimits } from "@omniroute/open-sse/services/tokenLimitCounter.ts";
 import {
@@ -444,6 +449,12 @@ export interface ApiKeyPolicyResult {
 }
 
 export interface EnforceApiKeyPolicyOptions {
+  /**
+   * Server-only admission option. False skips only the consuming client request
+   * rate-limit check and its throttle delay; all other ordinary checks remain.
+   * Use revalidateApiKeyPolicy for a later physical attempt of an admitted request.
+   */
+  consumeRequestRateLimit?: boolean;
   /**
    * Where the metered dollar budget is enforced for this request.
    *
@@ -979,10 +990,11 @@ async function validateSelfLoopScopedAccess(
   return (await validateQuotaAccess(context)) ?? (await validateModelAccess(context));
 }
 
-export async function enforceApiKeyPolicy(
+async function evaluateApiKeyPolicy(
   request: Request,
   modelStr: string | null,
-  options?: EnforceApiKeyPolicyOptions
+  options: EnforceApiKeyPolicyOptions | undefined,
+  revalidation: boolean
 ): Promise<ApiKeyPolicyResult> {
   const { apiKey, selfLoopScope } = await resolveEnforcedPolicyKey(request);
   if (selfLoopScope.rejection) {
@@ -991,6 +1003,15 @@ export async function enforceApiKeyPolicy(
 
   // No API key = local/session mode, skip policy checks
   if (!apiKey) {
+    // An explicitly narrowed playground identity must not become unrestricted
+    // local mode if its key was removed while the request was queued.
+    if (revalidation && request.headers.get(PLAYGROUND_KEY_ID_HEADER)?.trim()) {
+      return {
+        apiKey: null,
+        apiKeyInfo: null,
+        rejection: errorResponse(HTTP_STATUS.FORBIDDEN, "Scoped API key is not available"),
+      };
+    }
     return { apiKey: null, apiKeyInfo: null, rejection: null };
   }
 
@@ -1010,13 +1031,23 @@ export async function enforceApiKeyPolicy(
 
   // Key not found in DB — skip policy (auth layer handles validation)
   if (!apiKeyInfo) {
-    return { apiKey, apiKeyInfo: null, rejection: unresolvedScopedKeyRejection(selfLoopScope) };
+    return {
+      apiKey,
+      apiKeyInfo: null,
+      rejection:
+        unresolvedScopedKeyRejection(selfLoopScope) ??
+        (revalidation ? errorResponse(HTTP_STATUS.UNAUTHORIZED, "Invalid API key") : null),
+    };
   }
+
+  // Another worker may have committed a budget edit while this request waited.
+  // Evict only this config; ordinary admission caching and recorded spend stay intact.
+  if (revalidation && apiKeyInfo.id) invalidateBudgetCache(apiKeyInfo.id);
 
   const context = { request, apiKey, apiKeyInfo, modelStr };
   const statusRejection = validateKeyStatus(context);
   if (statusRejection) return { apiKey, apiKeyInfo, rejection: statusRejection };
-  if (selfLoopScope.key) {
+  if (selfLoopScope.key && !revalidation) {
     return { apiKey, apiKeyInfo, rejection: await validateSelfLoopScopedAccess(context) };
   }
   const scheduleRejection = await validateKeyScheduleAndUsage(context);
@@ -1035,8 +1066,35 @@ export async function enforceApiKeyPolicy(
   if (keyQuotaRejection) return { apiKey, apiKeyInfo, rejection: keyQuotaRejection };
   const tokenRejection = validateTokenLimit(context);
   if (tokenRejection) return { apiKey, apiKeyInfo, rejection: tokenRejection };
-  const rateRejection = await validateRateLimitAndThrottle(context);
+  const rateRejection =
+    options?.consumeRequestRateLimit === false ? null : await validateRateLimitAndThrottle(context);
   if (rateRejection) return { apiKey, apiKeyInfo, rejection: rateRejection };
 
   return { apiKey, apiKeyInfo, rejection: null };
+}
+
+/** Ordinary admission; omitted options retain all existing endpoint behavior. */
+export async function enforceApiKeyPolicy(
+  request: Request,
+  modelStr: string | null,
+  options?: EnforceApiKeyPolicyOptions
+): Promise<ApiKeyPolicyResult> {
+  return evaluateApiKeyPolicy(request, modelStr, options, false);
+}
+
+/**
+ * Fresh policy check before a physical attempt or after waiting for capacity.
+ * Reuses admission's current metadata and validators without charging another
+ * client request or repeating throttling. A deleted/unknown presented key fails
+ * closed; scoped internal requests also recheck their full limits here.
+ * This checks current limits, not a reservation or a guarantee of future cost.
+ */
+export async function revalidateApiKeyPolicy(
+  request: Request,
+  modelStr: string | null
+): Promise<ApiKeyPolicyResult> {
+  // Admission caches may predate another worker's committed revocation or ACL
+  // edit. Revalidation must consult durable metadata and model permissions.
+  clearApiKeyCaches();
+  return evaluateApiKeyPolicy(request, modelStr, { consumeRequestRateLimit: false }, true);
 }
