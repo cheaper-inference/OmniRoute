@@ -98,6 +98,6 @@
     <text x="826" y="410" class="cell" style="fill:var(--muted)">tools), A2A, memory, guardrails, evals —</text>
     <text x="826" y="432" class="cell" style="fill:var(--muted)">39,000+ static test declarations.</text>
   </g>
-  <text x="40" y="516" class="mono-sm" style="fill:var(--muted)">$ npm i -g omniroute  ·  point your tool at localhost:20128/v1  ·  $0</text>
+  <text x="40" y="516" class="mono-sm" style="fill:var(--muted)">$ npm i -g omniroute  ·  point your tool at http://localhost:20128/v1  ·  $0</text>
   <text x="1160" y="516" text-anchor="end" class="kicker">MIT · OPEN SOURCE</text>
 </svg>

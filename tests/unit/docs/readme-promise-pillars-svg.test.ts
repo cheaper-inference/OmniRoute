@@ -31,7 +31,10 @@ test("the diagram embeds the three kit faces (ui, uiBold, mono) and nothing exte
   for (const fam of ["CI Sans", "CI Mono"]) {
     assert.ok(svg.includes(`font-family:"${fam}"`), fam);
   }
-  assert.doesNotMatch(svg, /https?:\/\/(?!www\.w3\.org\/2000\/svg)|@import|<script|<foreignObject/);
+  assert.doesNotMatch(
+    svg,
+    /(href|src|xlink:href)=["']https?:|url\(["']?https?:|@import|<script|<foreignObject/
+  );
   assert.match(svg, /^<svg viewBox="0 0 1200 540" [^>]*role="img"/);
   assert.ok(Buffer.byteLength(svg) < 200 * 1024, "must stay under the 200 KB studio target");
 });

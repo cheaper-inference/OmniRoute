@@ -50,7 +50,7 @@ export const PROMISE_PILLARS_COPY = {
     "39,000+ static test declarations.",
   ],
   footer: [
-    `$ npm i -g omniroute${NB}${NB}·${NB}${NB}point your tool at localhost:20128/v1${NB}${NB}·${NB}${NB}$0`,
+    `$ npm i -g omniroute${NB}${NB}·${NB}${NB}point your tool at http://localhost:20128/v1${NB}${NB}·${NB}${NB}$0`,
   ],
   footerRight: ["MIT · OPEN SOURCE"],
 };
@@ -84,7 +84,7 @@ const PILLARS = [
     sweep: { values: "0;0;0.9;0;0", keyTimes: "0;0.334;0.389;0.454;1" },
     icon:
       '<path d="M 2,9.5 L 2,3 A 1,1 0 0 1 3,2 L 9.5,2 L 20,12.5 A 1.6,1.6 0 0 1 20,14.8 L 14.8,20 A 1.6,1.6 0 0 1 12.5,20 Z"/>' +
-      '<circle cx="6.6" cy="6.6" r="1.4" class="ok" stroke="none"/>',
+      '<circle cx="6.6" cy="6.6" r="1.4" class="__TONE__" stroke="none"/>',
     iconWidth: "2.2",
     join: true,
   },
@@ -103,7 +103,7 @@ const PILLARS = [
     sweep: { values: "0;0;0.9;0;0", keyTimes: "0;0.667;0.722;0.787;1" },
     icon:
       '<path d="M 2,3 L 13,8.5 M 2,11 L 13,11 M 2,19 L 13,13.5"/>' +
-      '<circle cx="18.5" cy="11" r="3.2" class="info" stroke="none"/>',
+      '<circle cx="18.5" cy="11" r="3.2" class="__TONE__" stroke="none"/>',
     iconWidth: "2.2",
     join: false,
   },
@@ -130,7 +130,7 @@ function pillar(i, C) {
     `    <rect x="${x}" y="${y}" width="${TILE_W}" height="${TILE_H}" rx="12" class="accent-soft stroke-accent" stroke-width="2" opacity="0">` +
     `<animate attributeName="opacity" values="${p.sweep.values}" keyTimes="${p.sweep.keyTimes}" dur="12s" begin="3s" repeatCount="indefinite"/></rect>\n` +
     `    <rect x="${x}" y="${y + 16}" width="4" height="132" rx="2" class="${p.tone}"/>\n` +
-    `    <g transform="translate(${x + 26},${y + 22})" class="stroke-${p.tone}" stroke-width="${p.iconWidth}" fill="none" stroke-linecap="round"${join}>${p.icon}</g>\n` +
+    `    <g transform="translate(${x + 26},${y + 22})" class="stroke-${p.tone}" stroke-width="${p.iconWidth}" fill="none" stroke-linecap="round"${join}>${p.icon.replaceAll("__TONE__", p.tone)}</g>\n` +
     `    <text x="${x + 62}" y="${y + 40}" class="h3">${esc(C.titles[i])}</text>\n` +
     [0, 1, 2]
       .map(
