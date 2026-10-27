@@ -2,6 +2,10 @@
 
 import { useState, useCallback, useRef, useEffect } from "react";
 import { useTranslations } from "next-intl";
+import { cn } from "@/shared/utils/cn";
+import Button from "./Button";
+import Icon from "./Icon";
+import { ConfirmModal } from "./Modal";
 
 type ButtonState = "idle" | "distributing" | "complete";
 
@@ -23,6 +27,7 @@ export default function DistributeProxiesButton({
   size = "md",
 }: DistributeProxiesButtonProps) {
   const [state, setState] = useState<ButtonState>("idle");
+  const [confirmOpen, setConfirmOpen] = useState(false);
   const t = useTranslations("sharedComponents.distributeProxies");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -34,6 +39,7 @@ export default function DistributeProxiesButton({
 
   const handleClick = useCallback(async () => {
     if (disabled || state === "distributing") return;
+    setConfirmOpen(false);
     setState("distributing");
     try {
       await onDistribute();
@@ -46,14 +52,14 @@ export default function DistributeProxiesButton({
 
   const isDisabled = disabled || state === "distributing";
 
-  const sizeClasses = size === "sm" ? "px-2 py-1 text-[11px]" : "px-3 py-1.5 text-xs";
+  const sizeClasses = size === "sm" ? "h-7 px-2 py-1 text-[11px]" : "px-3 py-1.5 text-xs";
 
   const stateClasses =
     state === "distributing"
       ? "bg-primary/20 border-primary/40 text-primary animate-pulse"
       : state === "complete"
-        ? "bg-green-500/15 border-green-500/40 text-green-500"
-        : "bg-bg-subtle border-border text-text-muted hover:text-text-primary hover:border-primary/40";
+        ? "bg-success/15 border-success/40 text-success"
+        : "text-text-muted hover:text-text-main hover:border-primary/40";
 
   const icon = state === "distributing" ? "sync" : state === "complete" ? "check" : "swap_horiz";
   const displayLabel =
@@ -64,19 +70,33 @@ export default function DistributeProxiesButton({
         : label || t("defaultLabel");
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={isDisabled}
-      className={`flex items-center gap-1.5 rounded-lg font-medium border transition-colors ${sizeClasses} ${stateClasses}`}
-      title={displayLabel}
-      aria-label={displayLabel}
-    >
-      <span
-        className={`material-symbols-outlined text-[14px] ${state === "distributing" ? "animate-spin" : ""}`}
+    <>
+      <Button
+        variant="outline"
+        size="sm"
+        onClick={() => setConfirmOpen(true)}
+        disabled={isDisabled}
+        className={cn("gap-1.5", sizeClasses, stateClasses)}
+        title={displayLabel}
+        aria-label={displayLabel}
       >
-        {icon}
-      </span>
-      {displayLabel}
-    </button>
+        <Icon
+          name={icon}
+          size={14}
+          className={state === "distributing" ? "animate-spin" : undefined}
+        />
+        {displayLabel}
+      </Button>
+      <ConfirmModal
+        isOpen={confirmOpen}
+        onClose={() => setConfirmOpen(false)}
+        onConfirm={handleClick}
+        title={displayLabel}
+        message={t("confirmMessage")}
+        confirmText={t("confirmDistribute")}
+        cancelText={t("cancel")}
+        variant="primary"
+      />
+    </>
   );
 }

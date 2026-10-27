@@ -1,9 +1,12 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { SectionHeader } from "@omniroute/ui-kit/page-header";
+import { Button, ProviderCardGrid } from "@/shared/components";
 import { getProviderAlias } from "@/shared/constants/providers";
 import type { ProviderEntry } from "../providerPageUtils";
 import ProviderCard from "./ProviderCard";
+import { CategoryDot } from "./CategoryDot";
 import ProviderCountBadge from "./ProviderCountBadge";
 
 /** Provider shape consumed by {@link ProviderCard} for a no-auth entry. */
@@ -84,32 +87,30 @@ export default function NoAuthProvidersSection({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center gap-2">
-        <h2 className="text-xl font-semibold flex items-center gap-2 flex-1 min-w-0">
-          {t("noAuthProviders")}{" "}
-          <span className="size-2.5 rounded-full bg-stone-500" title={t("noAuthLabel")} />
-          <ProviderCountBadge {...count} />
-        </h2>
-        <button
-          onClick={() => onBatchTest("no-auth")}
-          disabled={!!testingMode}
-          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors ${
-            testingMode === "no-auth"
-              ? "bg-primary/20 border-primary/40 text-primary animate-pulse"
-              : "bg-bg-subtle border-border text-text-muted hover:text-text-primary hover:border-primary/40"
-          }`}
-          title={t("testAll")}
-        >
-          <span
-            className={`material-symbols-outlined text-[14px]${testingMode === "no-auth" ? " animate-spin" : ""}`}
-          >
-            play_arrow
+      <SectionHeader
+        title={
+          <span className="flex items-center gap-2">
+            {t("noAuthProviders")}{" "}
+            <CategoryDot category="no-auth" size="md" label={t("noAuthLabel")} />
+            <ProviderCountBadge {...count} />
           </span>
-          {testingMode === "no-auth" ? t("testing") : t("testAll")}
-        </button>
-      </div>
-      <p className="text-sm text-text-muted -mt-2">{t("noAuthProvidersDesc")}</p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3">
+        }
+        description={t("noAuthProvidersDesc")}
+        actions={
+          <Button
+            size="sm"
+            variant="outline"
+            icon="play_arrow"
+            loading={testingMode === "no-auth"}
+            onClick={() => onBatchTest("no-auth")}
+            disabled={!!testingMode}
+            title={t("testAll")}
+          >
+            {testingMode === "no-auth" ? t("testing") : t("testAll")}
+          </Button>
+        }
+      />
+      <ProviderCardGrid>
         {visibleEntries.map(({ providerId, provider, stats, toggleAuthType }) => (
           <ProviderCard
             key={providerId}
@@ -120,13 +121,13 @@ export default function NoAuthProvidersSection({
             onToggle={(active) => onToggleProvider(providerId, toggleAuthType, active)}
           />
         ))}
-      </div>
+      </ProviderCardGrid>
       {blockedEntries.length > 0 && (
         <div className="flex flex-col gap-2">
           <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
             {t("disabled")}
           </p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3">
+          <ProviderCardGrid>
             {blockedEntries.map(({ providerId, provider }) => (
               <div
                 key={providerId}
@@ -136,22 +137,23 @@ export default function NoAuthProvidersSection({
                   <span className="truncate text-sm font-medium text-text-main">
                     {provider.name}
                   </span>
-                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-red-600 dark:text-red-400">
-                    <span className="size-1.5 rounded-full bg-red-500" />
+                  <span className="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wide text-error">
+                    <span className="size-1.5 rounded-full bg-error" />
                     {t("disabled")}
                   </span>
                 </div>
-                <button
-                  type="button"
+                <Button
+                  size="sm"
+                  variant="outline"
                   onClick={() => handleUnblock(providerId)}
-                  className="shrink-0 rounded-md border border-border px-2 py-1 text-xs font-medium text-text-muted transition-colors hover:border-primary/40 hover:text-text-primary"
+                  className="shrink-0"
                   title={t("enableProvider")}
                 >
                   {t("enableProvider")}
-                </button>
+                </Button>
               </div>
             ))}
-          </div>
+          </ProviderCardGrid>
         </div>
       )}
     </div>

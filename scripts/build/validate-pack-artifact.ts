@@ -4,11 +4,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
-import {
-  makeGitAncestryProbe,
-  readBuildSha,
-  resolveBuildProvenance,
-} from "./buildProvenance.ts";
+import { makeGitAncestryProbe, readBuildSha, resolveBuildProvenance } from "./buildProvenance.ts";
 
 import {
   MCP_CLOSURE_SPOT_CHECK_PATH,
@@ -16,6 +12,7 @@ import {
   findLeakedTestArtifactPaths,
   findMissingMcpClosurePaths,
 } from "./mcpPublishedFilesClosure.ts";
+import { resolveNpmInvocation } from "./resolveNpmEntry.ts";
 import {
   PACK_ARTIFACT_ALLOWED_EXACT_PATHS,
   PACK_ARTIFACT_ALLOWED_PATH_PREFIXES,
@@ -28,13 +25,13 @@ import {
 const __filename: string = fileURLToPath(import.meta.url);
 const __dirname: string = dirname(__filename);
 const ROOT: string = join(__dirname, "..", "..");
-const npmCommand: string = process.platform === "win32" ? "npm.cmd" : "npm";
 
 function runNpm(args: string[], stdio: "inherit" | "pipe" = "pipe"): string {
-  const npmExecPath = process.env.npm_execpath;
-  const isBunRuntime = "Bun" in globalThis;
-  const command = npmExecPath && !isBunRuntime ? process.execPath : npmCommand;
-  const commandArgs = npmExecPath && !isBunRuntime ? [npmExecPath, ...args] : args;
+  // Prefer running npm's own `npm-cli.js` through the current Node binary.
+  // Never treat `npm_execpath` as a JS entry unconditionally: `bun run` points
+  // it at the bare `bun` ELF binary, which Node then tries to execute as
+  // JavaScript and dumps into the error output (#16321).
+  const { command, args: commandArgs } = resolveNpmInvocation(args);
 
   if (stdio === "inherit") {
     execFileSync(command, commandArgs, {

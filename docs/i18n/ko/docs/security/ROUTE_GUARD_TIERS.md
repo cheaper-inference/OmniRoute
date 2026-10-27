@@ -8,85 +8,100 @@
 
 모든 OmniRoute 관리 API 경로는 세 가지 보호 계층 중 하나로 분류됩니다. 분류는 정적이며 `src/server/authz/routeGuard.ts`에 정의되어 있고, 다른 모든 인증 분기가 실행되기 전에 평가됩니다.
 
-## 티어
+## 계층
 
-### 티어 1 — LOCAL_ONLY
+### 계층 1 — LOCAL_ONLY
 
-**적용 방식:** `isLocalOnlyPath(path)` → 루프백 호스트 검사  
-**우회:** 기본적으로 없음. 요청에 `manage` 스코프가 있는 유효한 API 키가 포함된 경우, `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`에 지정된 경로에 한해 제한적으로 예외가 적용됩니다([관리 스코프 예외](#manage-scope-carve-out) 참조).
+**적용 기준:** `isLocalOnlyPath(path)` → 루프백 호스트 검사
+**우회:** 기본적으로 없음. 요청에 `manage` 범위를 가진 유효한 API 키가 포함된 경우
+`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`에 속하는 경로에 한해 제한적으로 예외가 적용됩니다
+([관리 범위 예외](#manage-scope-carve-out) 참조).
 
-이러한 라우트는 자식 프로세스를 생성하거나 런타임 코드를 실행합니다. 이를 비루프백 트래픽에 노출하면 유효한 JWT를 획득한 공격자(예: Cloudflared/Ngrok 터널을 통해 획득)가 프로세스 생성을 유발할 수 있으며, 이는 알려진 CVE 유형입니다([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
+이러한 라우트는 자식 프로세스를 생성하거나 런타임 코드를 실행합니다. 이를
+루프백이 아닌 트래픽에 노출하면 유효한 JWT를 획득한 공격자(예:
+Cloudflared/Ngrok 터널을 통해 획득)가 프로세스 생성을 유발할 수 있으며, 이는 알려진 CVE
+유형입니다([GHSA-fhh6-4qxv-rpqj](https://github.com/advisories/GHSA-fhh6-4qxv-rpqj)).
 
-**GHSA-fhh6-4qxv-rpqj의 의미(공격 유형):** 관리/에이전트 서버가 하위 프로세스(`npm install`, `node`, 브라우저, 프록시, `git`, `tar` 등)를 실행하는 엔드포인트를 노출합니다. 운영자가 OmniRoute를 nginx/Cloudflare/Tailscale 터널 뒤에 배치했는데 JWT가 유출되었거나 인증이 잘못 구성되어 해당 엔드포인트에 호스트 외부에서 접근할 수 있게 되면, 공격자는 "API 호출"을 "호스트에서 명령 실행"(원격 코드 실행)으로 전환할 수 있습니다. OmniRoute는 프로세스를 생성할 수 있는 모든 라우트에서 **인증 검사 전에 항상 루프백 호스트 검사를 적용**하여 이를 차단합니다. 따라서 터널을 통해 토큰이 유출되더라도 프로세스 생성 기능에는 접근할 수 없습니다.
+**GHSA-fhh6-4qxv-rpqj이 나타내는 공격 유형:** 관리/에이전트 서버가
+하위 프로세스(`npm install`, `node`, 브라우저,
+프록시, `git`, `tar`, …)를 실행하는 엔드포인트를 노출합니다. 운영자가 OmniRoute를
+nginx/Cloudflare/Tailscale 터널 뒤에 배치했고 JWT가 유출되었거나 인증이 잘못 구성되어
+해당 엔드포인트에 호스트 외부에서 접근할 수 있게 되면, 공격자는 "API 호출"을 "호스트에서
+명령 실행"(원격 코드 실행)으로 전환할 수 있습니다. OmniRoute는 프로세스 생성이 가능한
+모든 라우트에서 **인증 검사 전에 항상 루프백 호스트 검사를 적용**하여 이를 차단합니다.
+따라서 터널을 통해 토큰이 유출되더라도 프로세스 생성 기능에 접근할 수 없습니다.
 
-**전체 LOCAL_ONLY 집합.** 권위 있는 기준은 `src/server/authz/routeGuard.ts`의 `LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS`이며, 아래 표는 현재 상태를 그대로 반영합니다. `check-route-guard-membership` 게이트는 프로세스 생성이 가능한 접두사 아래의 모든 `route.ts`를 열거하고, 그중 하나라도 로컬 전용으로 분류되지 않으면 CI를 실패 처리합니다.
+**전체 LOCAL_ONLY 집합.** 신뢰할 수 있는 기준 소스는
+`src/server/authz/routeGuard.ts`의
+`LOCAL_ONLY_API_PREFIXES` / `LOCAL_ONLY_API_PATTERNS`이며, 아래 표는 현재 상태를 반영합니다.
+`check-route-guard-membership` 게이트는 프로세스 생성 가능 접두사 아래의 모든 `route.ts`를
+열거하고, 그중 하나라도 로컬 전용으로 분류되지 않은 경우 CI를 실패 처리합니다.
 
-| 접두사 / 패턴                                                                                            | 로컬 전용인 이유                                                                            |
-| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
-| `/api/mcp/`                                                                                              | MCP 서버 — stdio 브리지와 SSE 핸들러를 생성                                                 |
-| `/api/cli-tools/runtime/`                                                                                | CLI 도구 런타임 — 임의의 플러그인 코드를 실행                                               |
-| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | 호스트의 도구 바이너리/구성을 변경할 수 있는 도구별 설정 작성기                             |
-| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | 위의 여섯 형제 항목과 동일하게 `getCliRuntimeStatus()`를 생성 (GHSA-35fw-cv32-2373)         |
-| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI 인벤토리 검사 — 도구별로 `command -v` / `--version`을 생성 (GHSA-35fw-cv32-2373)        |
-| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM 프록시 제어(시스템 프록시를 생성/지정)                                     |
-| `/api/modality-bridge/video/`                                                                            | 신뢰할 수 있는 루프백으로 엄격히 제한된 Video Bridge 런타임 검사 및 내부 추출 브리지        |
-| `/api/services/`                                                                                         | 임베디드 서비스(9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + 프로세스 생성 |
-| `/dashboard/providers/services/`                                                                         | 임베디드 서비스 UI로의 역방향 프록시                                                        |
-| `/api/tunnels/cloudflared`                                                                               | cloudflared 바이너리를 설치/생성                                                            |
-| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | 호스트에서 tailscaled를 설치/제어                                                           |
-| `/api/copilot/`                                                                                          | 인증되지 않은 LLM 드라이버 — 기본적으로 CLI 전용                                            |
-| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM 서버 생성 + DNS 수정                                                     |
-| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy 리스너 + 시스템 프록시                                       |
-| `/api/settings/mitm`                                                                                     | MITM 가로채기 활성화(시스템 수준 프록시 상태)                                               |
-| `/api/issue-agent/`                                                                                      | 이슈 에이전트 — 저장소를 대상으로 로컬 도구를 생성                                          |
-| `/api/plugins/`, `/api/plugins`                                                                          | 플러그인 — `worker_threads` + `child_process`를 통해 로드/실행                              |
-| `/api/middleware/`                                                                                       | 사용자 미들웨어 — 운영자 코드를 프로세스 내에서 로드/실행                                   |
-| `/api/system/version`                                                                                    | 자동 업데이트(POST만 해당, GET/HEAD/OPTIONS 제외) — `git checkout` + `npm install` 생성     |
-| `/api/db-backups/exportAll`                                                                              | 내보내기 아카이브 생성을 위해 `tar` 실행                                                    |
-| `/api/local/`                                                                                            | 원클릭 로컬 실행기(현재 Redis) — podman/docker 생성                                         |
-| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom 프록시 수명 주기 — python CLI 생성 / PID에 신호 전송                               |
-| `/api/jobs`, `/api/jobs/`                                                                                | 작업 실행기 제어 — 예약된 호스트 측 작업을 실행                                             |
-| `/api/oauth/cursor/auto-import`                                                                          | 자격 증명을 가져오기 전에 `execFile("which", ["cursor"])` 실행                              |
-| `/api/oauth/kiro/auto-import`                                                                            | 호스트에서 Kiro CLI 자격 증명 파일을 읽음                                                   |
-| `/api/skills/collect/`                                                                                   | 스킬 수집 — 로컬 도구를 감지/설치                                                           |
-| `/api/skills/install`, `/api/skills/executions`                                                          | 스킬 핸들러 등록 + 실행 — 샌드박스 컨테이너 생성까지 도달 (GHSA-jx89)                       |
-| `/api/discovery/`                                                                                        | 로컬 네트워크/공급자 검색 검사                                                              |
-| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | 대화형 로그인을 위해 헤드풀 브라우저 + VNC 세션을 생성합니다                                |
-| `/api/acp/agents`                                                                                        | ACP — 로컬 CLI 에이전트 바이너리를 검색하고 실행합니다                                      |
-| `/api/resilience/connections`                                                                            | 계정별 복원력 JSON(쿨다운, 차단기, 잠금). 대시보드 HTML은 로컬 전용이 아닙니다.             |
-| `/api/providers/cursor/agent-availability`                                                               | 대시보드 설치 유도 확인 — `cursor-agent status --format json`을 실행합니다                  |
-| `/api/providers/{id}/login` (정규식)                                                                     | 웹 쿠키 로그인을 위해 헤드풀 Playwright Chromium을 실행합니다                               |
-| `/api/providers/volcengine-plan/connect` (정규식)                                                        | 수동 헤드풀 흐름 + 세션 기반 전화번호/SMS 자동 로그인(Playwright 실행)                      |
-| `/api/providers/{id}/refresh-cursor` (정규식)                                                            | 수동 Cursor 세션 갱신 — `cursor-agent`를 호출합니다                                         |
-| `/api/providers/{id}/chatgpt-web-codex-doctor` (정규식)                                                  | 로컬 Codex CLI 설치를 진단합니다(바이너리 실행)                                             |
+| 접두사 / 패턴                                                                                            | 로컬 전용인 이유                                                                          |
+| -------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `/api/mcp/`                                                                                              | MCP 서버 — stdio 브리지 및 SSE 핸들러를 생성                                              |
+| `/api/cli-tools/runtime/`                                                                                | CLI 도구 런타임 — 임의의 플러그인 코드를 실행                                             |
+| `/api/cli-tools/{omp,letta,grok-build,forge,jcode,qwen}-settings`                                        | 호스트의 도구 바이너리/구성을 변경할 수 있는 도구별 설정 작성기                           |
+| `/api/cli-tools/{claude,cline,codewhale,codex,crush,deepseek-tui,droid,kilo,openclaw,pi,smelt}-settings` | 위의 6개 항목과 동일하게 `getCliRuntimeStatus()`를 생성 (GHSA-35fw-cv32-2373)             |
+| `/api/cli-tools/{all-statuses,status,detect}`                                                            | CLI 인벤토리 검사 — 도구별로 `command -v` / `--version`을 생성 (GHSA-35fw-cv32-2373)      |
+| `/api/cli-tools/antigravity-mitm`                                                                        | Antigravity MITM 프록시 제어(시스템 프록시 생성/지정)                                     |
+| `/api/modality-bridge/video/`                                                                            | 신뢰할 수 있는 루프백으로 엄격히 제한된 Video Bridge 런타임 검사 및 내부 추출 브리지      |
+| `/api/services/`                                                                                         | 임베디드 서비스(9Router / CLIProxy / Bifrost / Mux / Dario) — `npm install` + 생성        |
+| `/dashboard/providers/services/`                                                                         | 임베디드 서비스 UI로 연결되는 리버스 프록시                                               |
+| `/api/tunnels/cloudflared`                                                                               | cloudflared 바이너리를 설치/생성                                                          |
+| `/api/tunnels/tailscale/{install,enable,disable,login,start-daemon}`                                     | 호스트에서 tailscaled를 설치/제어                                                         |
+| `/api/copilot/`                                                                                          | 인증되지 않은 LLM 드라이버 — 기본적으로 CLI 전용                                          |
+| `/api/tools/agent-bridge/`                                                                               | AgentBridge — MITM 서버 생성 및 DNS 편집                                                  |
+| `/api/tools/traffic-inspector/`                                                                          | Traffic Inspector — http-proxy 리스너 및 시스템 프록시                                    |
+| `/api/settings/mitm`                                                                                     | MITM 가로채기를 활성화(시스템 수준 프록시 상태)                                           |
+| `/api/issue-agent/`                                                                                      | 이슈 에이전트 — 저장소를 대상으로 로컬 도구를 생성                                        |
+| `/api/plugins/`, `/api/plugins`                                                                          | 플러그인 — `worker_threads` + `child_process`를 통해 로드/실행                            |
+| `/api/middleware/`                                                                                       | 사용자 미들웨어 — 운영자 코드를 프로세스 내에서 로드/실행                                 |
+| `/api/system/version`                                                                                    | 자동 업데이트(POST만 해당, GET/HEAD/OPTIONS는 제외) — `git checkout` + `npm install` 생성 |
+| `/api/db-backups/exportAll`                                                                              | 내보내기 아카이브를 위해 `tar` 생성                                                       |
+| `/api/local/`                                                                                            | 원클릭 로컬 실행기(현재 Redis) — podman/docker 생성                                       |
+| `/api/headroom/start`, `/api/headroom/stop`                                                              | Headroom 프록시 수명 주기 — python CLI 생성 / PID에 시그널 전송                           |
+| `/api/jobs`, `/api/jobs/`                                                                                | 작업 실행기 제어 — 예약된 호스트 측 작업 실행                                             |
+| `/api/oauth/cursor/auto-import`                                                                          | 자격 증명을 가져오기 전에 `execFile("which", ["cursor"])` 실행                            |
+| `/api/oauth/kiro/auto-import`                                                                            | 호스트에서 Kiro CLI 자격 증명 파일을 읽음                                                 |
+| `/api/skills/collect/`                                                                                   | 스킬 수집 — 로컬 도구 감지/설치                                                           |
+| `/api/skills/install`, `/api/skills/executions`                                                          | 스킬 핸들러 등록 + 실행 — 샌드박스 컨테이너 생성까지 도달(GHSA-jx89)                      |
+| `/api/discovery/`                                                                                        | 로컬 네트워크/공급자 검색 프로브                                                          |
+| `/api/vnc-session` (`VNC_ROUTE_PREFIX`)                                                                  | 대화형 로그인을 위해 헤드풀 브라우저 + VNC 세션 생성                                      |
+| `/api/acp/agents`                                                                                        | ACP — 로컬 CLI 에이전트 바이너리를 검색하고 생성                                          |
+| `/api/resilience/connections`                                                                            | 계정별 복원력 JSON(쿨다운, 차단기, 잠금). 대시보드 HTML은 로컬 전용이 아님.               |
+| `/api/providers/cursor/agent-availability`                                                               | 대시보드 설치 유도 확인 — `cursor-agent status --format json` 생성                        |
+| `/api/providers/{id}/login` (정규식)                                                                     | 웹 쿠키 로그인을 위해 헤드풀 Playwright Chromium 실행                                     |
+| `/api/providers/volcengine-plan/connect` (정규식)                                                        | 수동 헤드풀 흐름 + 세션 기반 전화번호/SMS 자동 로그인(Playwright 생성)                    |
+| `/api/providers/{id}/refresh-cursor` (정규식)                                                            | 수동 Cursor 세션 갱신 — `cursor-agent` 실행 유도                                          |
+| `/api/providers/{id}/chatgpt-web-codex-doctor` (정규식)                                                  | 로컬 Codex CLI 설치 진단(바이너리 생성)                                                   |
 
 **위반 시 응답:** `403 LOCAL_ONLY`
 
 #### 관리 범위 예외
 
-LOCAL_ONLY 경로의 일부는 요청에 `manage` 범위(또는 `admin`)가
-메타데이터에 포함된 `Authorization: Bearer <api-key>`가 있는 경우에만
-루프백이 아닌 곳에서도 접근할 수 있습니다. 이 예외는
-`LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`를 통해 경로별로 명시적으로 제한되므로,
-새로운 LOCAL_ONLY 경로의 기본값은 계속 엄격한 루프백 전용입니다. 인증되지 않은
-요청과 관리 권한이 없는 키를 사용하는 요청은 여전히
-`403 LOCAL_ONLY`로 거부됩니다.
+LOCAL_ONLY 경로의 일부는 요청에 메타데이터가 `manage` 범위(또는 `admin`)를
+포함하는 `Authorization: Bearer <api-key>`가 있는 경우에만 루프백이 아닌
+위치에서도 접근할 수 있습니다. 이 예외는 `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES`를
+통해 경로별로 명시적으로 제한되므로, 새로운 LOCAL_ONLY 경로의 기본값은
+엄격한 루프백 전용으로 유지됩니다. 인증되지 않은 요청과 관리 권한이 없는
+키를 사용하는 요청은 여전히 `403 LOCAL_ONLY`로 거부됩니다.
 
 현재 우회 가능한 접두사는 `/api/mcp/`뿐입니다. `/api/cli-tools/runtime/`과
-`/api/services/`는 임의의 하위 프로세스(`npm install`, `node`)를 생성할 수 있기 때문에
-의도적으로 제외됩니다. 이는 LOCAL_ONLY 계층이 방지하기 위해 존재하는
-바로 그 CVE 유형입니다.
+`/api/services/`는 임의의 하위 프로세스(`npm install`, `node`)를 생성할 수
+있으므로 의도적으로 제외됩니다. 이는 LOCAL_ONLY 계층이 방지하기 위해
+존재하는 바로 그 CVE 유형입니다.
 
 **#7895 — `mcp:connect`의 제한된 범위:** `/api/mcp/` 예외는
-제한된 `mcp:connect` 범위를 보유한 Bearer 키도 허용합니다
-(`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`). 이는
-`src/server/authz/policies/management.ts`의 `hasMcpConnectOrManageScope()`를 통해
-확인됩니다. 이 범위는 `/api/mcp/`에만 한정됩니다. 즉, `mcp:connect`는 다른
+`src/shared/constants/managementScopes.ts::MCP_CONNECT_SCOPE`의 좁은
+`mcp:connect` 범위를 보유한 Bearer 키도 허용하며, 이는
+`src/server/authz/policies/management.ts`의 `hasMcpConnectOrManageScope()`를
+통해 확인됩니다. 이는 `/api/mcp/`에만 적용됩니다. `mcp:connect`는 다른
 어떤 관리 경로에서도 권한을 부여하지 않으며(향후 추가될 수 있는 다른 모든
-LOCAL_ONLY 우회 접두사 포함), 의도적으로 `MANAGEMENT_API_KEY_SCOPES`에서도
-제외됩니다. `manage`/`admin`을 보유한 키는 이전과 동일하게 예외를 통과하며,
-`mcp:connect`는 광범위한 관리 액세스가 필요하지 않은 원격 MCP 전용 호출자를
-위한 더 낮은 권한의 대안입니다.
+LOCAL_ONLY 우회 접두사 포함), 의도적으로 `MANAGEMENT_API_KEY_SCOPES`에서
+제외됩니다. `manage`/`admin`을 보유한 키는 이전과 정확히 동일하게 예외를
+통과합니다. `mcp:connect`는 광범위한 관리 액세스가 필요하지 않은 원격
+MCP 전용 호출자를 위한 더 낮은 권한의 대안입니다.
 
 | 요청                                           | 경로                       | 결과              |
 | ---------------------------------------------- | -------------------------- | ----------------- |
@@ -96,94 +111,152 @@ LOCAL_ONLY 우회 접두사 포함), 의도적으로 `MANAGEMENT_API_KEY_SCOPES`
 | 비루프백, `manage`/`mcp:connect`가 없는 Bearer | `/api/mcp/*`               | 403 LOCAL_ONLY    |
 | 비루프백, `mcp:connect` 범위가 있는 Bearer     | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY    |
 | 비루프백, `manage` 범위가 있는 Bearer          | `/api/cli-tools/runtime/*` | 403 LOCAL_ONLY    |
-| 루프백, Bearer 유무와 무관                     | 모든 LOCAL_ONLY            | 허용(게이트 통과) |
+| 루프백, Bearer 유무 무관                       | 모든 LOCAL_ONLY            | 허용(게이트 통과) |
 
 #### 운영자 지침 및 감사
 
-OmniRoute를 리버스 프록시 또는 터널(nginx, Caddy, Cloudflare
-Tunnel, Tailscale, Ngrok) 뒤에서 실행하더라도 루프백 검사는 위의
-프로세스 생성 가능 경로를 계속 보호합니다. 클라이언트 주소가 비루프백인 요청은
-**인증이 실행되기 전에** `403 LOCAL_ONLY`로 거부되므로, 유출된 JWT로는
-프로세스 생성에 도달할 수 없습니다. 운영자에게는 다음 두 가지 책임이 남습니다.
+OmniRoute를 리버스 프록시나 터널(nginx, Caddy, Cloudflare Tunnel,
+Tailscale, Ngrok) 뒤에서 실행하더라도 루프백 검사는 위의 프로세스 생성 가능
+경로를 계속 보호합니다. 클라이언트 주소가 비루프백인 요청은 **인증이
+실행되기 전에** `403 LOCAL_ONLY`로 거부되므로 유출된 JWT로도 프로세스
+생성에 도달할 수 없습니다. 운영자에게는 두 가지 책임이 남아 있습니다:
 
-- **클라이언트 IP를 루프백으로 위조하여 403을 "수정"하지 마십시오.**
+- **클라이언트 IP를 루프백으로 위조하여 403을 "해결"하지 마세요.**
   `X-Forwarded-For: 127.0.0.1`을 설정하거나 소스 주소를 루프백으로
-  다시 작성하는 프록시를 사용하면, 이 계층이 차단하는 바로 그 RCE 유형에
-  다시 노출됩니다. 대시보드/API는 프록시를 통해 노출하되, 프로세스 생성 가능
-  경로는 절대 노출하지 마십시오.
-- **관리 범위 우회는 최소한으로 유지하십시오.** 우회 가능한 경로는 `/api/mcp/`뿐이며,
-  `manage` 범위의 API 키를 사용해야 합니다. `SPAWN_CAPABLE_PREFIXES`는 절대로
-  우회 목록에 추가할 수 없습니다. zod 스키마가 이를 거부하고
-  `isLocalOnlyBypassableByManageScope`가 런타임에 이를 차단하는
-  심층 방어 구조이며, 이것이 대시보드에서 "우회 가능하도록 만들 수 없음"이라는
-  문구가 의미하는 바입니다. `/api/providers/` 아래의 동적 세그먼트 및 정적 경로
-  기반 프로세스 생성 가능 경로(예: `/login`, `/refresh-cursor`)는 평면
-  `SPAWN_CAPABLE_PREFIXES` 배열이 아니라
-  `src/shared/constants/spawnCapablePrefixes.ts`의 정규식 기반
+  재작성하는 프록시를 사용하면, 이 계층이 차단하는 바로 그 RCE 유형의 취약점이 다시
+  열립니다. 프록시를 통해 대시보드/API를 노출하되, 프로세스 생성이 가능한 라우트는 절대 노출하지 마세요.
+- **manage 범위 우회는 최소한으로 유지하세요.** `/api/mcp/`만 우회할 수 있으며,
+  `manage` 범위의 API 키가 있는 경우에만 가능합니다. `SPAWN_CAPABLE_PREFIXES`는
+  절대로 우회 목록에 추가할 수 없습니다. zod 스키마가 이를 거부하고
+  `isLocalOnlyBypassableByManageScope`가 런타임에도 이를 차단하는 심층 방어
+  방식이 적용되기 때문입니다. 이것이 대시보드에서 "우회 가능하도록 설정할 수 없음"이라고
+  표현하는 의미입니다. 동일한 거부 목록에는 프로세스를 생성하지는 않지만 원격에서 절대
+  접근할 수 없어야 하는 몇 가지 LOCAL_ONLY 라우트도 포함됩니다.
+  `/api/oauth/kiro/auto-import`(호스트 로컬 Kiro 자격 증명 파일 읽기),
+  `/api/discovery/`, `/api/issue-agent/`가 이에 해당합니다. 런타임
+  스냅샷 로더도 저장된 설정 행에서 이러한 항목을 제거하며, 레거시 JSON 가져오기
+  (`/api/settings/import-json`)는 우회 키를 기록하지 않습니다.
+  모든 `LOCAL_ONLY_API_PREFIXES` 항목은 거부 목록에 포함되거나
+  우회 가능 대상으로 검토되어야 합니다(`tests/unit/authz/local-only-bypass-spawn-denylist.test.ts`).
+  `/api/providers/` 아래의 동적 세그먼트 및 정적 경로 기반 프로세스 생성 가능 라우트
+  (예: `/login`, `/refresh-cursor`)는 평면적인 `SPAWN_CAPABLE_PREFIXES`
+  배열이 아니라 `src/shared/constants/spawnCapablePrefixes.ts`의 정규식 기반
   `SPAWN_CAPABLE_PATTERNS` / `SPAWN_CAPABLE_PATTERN_ANCESTORS` 보조 항목으로
-  처리됩니다. 평면 배열로 이를 포착하려면 전체 `/api/providers/` 접두사를
-  포함해야 하며, 그러면 원격 대시보드가 공급자 CRUD에 합법적으로 사용하는
-  라우트 트리까지 지나치게 광범위하게 제한하게 됩니다.
+  처리됩니다. 평면 배열로 이를 포착하려면 `/api/providers/` 접두사 전체를
+  포함해야 하므로, 원격 대시보드가 공급자 CRUD에 정상적으로 사용하는 라우트 트리까지
+  지나치게 광범위하게 제한하게 됩니다.
 
-**액세스 감사** — 호스트 외부에서 이러한 경로에 접근하지 못하는지 확인하려면:
+**접근 감사** — 호스트 외부에서 이러한 라우트에 접근하지 않는지 확인하려면:
 
-- `/dashboard/settings/security`에서 **Authorization Inventory**를 여세요. 여기에는
-  현재 적용 중인 LOCAL_ONLY 접두사 목록, 우회 가능한 접두사, 그리고 컴파일 시점에
-  결정되는 프로세스 실행 가능("우회 가능하게 만들 수 없음") 집합이 표시됩니다.
-- 리버스 프록시/액세스 로그에서 위 접두사와 루프백이 아닌 클라이언트 주소가 함께
-  나타나는 항목을 grep으로 검색하세요. 이러한 요청이 `403 LOCAL_ONLY` 대신
-  `200`을 반환했다면 프록시가 실제 클라이언트 IP를 가리고 있다는 뜻이므로 프록시를 수정하세요.
-- 이러한 경로 중 하나에 대해 OmniRoute 로그에 기록된 `403 LOCAL_ONLY`는 가드가
-  의도대로 작동하는 것이며, 숨겨야 할 오류가 아닙니다.
+- `/dashboard/settings/security`에서 **권한 부여 인벤토리**를 여세요. 여기에는
+  현재의 LOCAL_ONLY 접두사 목록, 우회 가능한 접두사, 컴파일 타임에 정의된
+  프로세스 생성 가능("우회 가능하도록 설정할 수 없음") 집합이 표시됩니다.
+- 위 접두사와 비루프백 클라이언트 주소가 함께 나타나는지 리버스 프록시/접근 로그를
+  grep으로 검색하세요. 이러한 요청이 `403 LOCAL_ONLY` 대신 `200`을 반환했다면,
+  프록시가 실제 클라이언트 IP를 가리고 있다는 뜻이므로 프록시를 수정하세요.
+- 이러한 경로 중 하나에 대해 OmniRoute 로그에 나타나는 `403 LOCAL_ONLY`는
+  가드가 의도대로 작동하고 있다는 의미이며, 억제해야 할 오류가 아닙니다.
 
-### 티어 2 — ALWAYS_PROTECTED
+#### 호출 지점 프로브 게이트가 적용되는 원격 접근 가능 라우트
 
-**적용 주체:** `isAlwaysProtectedPath(path)` → `requireLogin=false` 우회 건너뜀
+일부 라우트는 원격 대시보드에서 계속 접근할 수 있어야 하지만, 로컬 호출자에 대해서는
+호스트 측 프로브(`which <binary>`, `<binary> --version`,
+`tailscale status --json`)를 실행합니다. 이러한 라우트의 `GET`은 LOCAL_ONLY가
+아닙니다. 대신 핸들러가 `getRequestPeerLocality()`
+(`src/shared/utils/apiAuth.ts`)를 사용해 신뢰할 수 있는 피어 판정 결과를 읽고,
+`loopback` / `lan` 호출자에 대해서만 프로브를 실행합니다. `remote` 호출자는
+프로세스를 생성하지 않는 소스(영속 상태, 설정, fs 검사)로 구성된 동일한 응답 형식을
+받으며, `probed: false`로 표시됩니다.
+
+| 라우트                                                           | 원격 호출자에 대해 건너뛰는 프로브                                    |
+| ---------------------------------------------------------------- | --------------------------------------------------------------------- |
+| `POST /api/providers/{id}/test`, `/api/providers/test-batch`     | CLI 런타임 프로브(`allowLocalRuntimeProbe`) 및 CLI 폴백 프로세스 생성 |
+| `GET /api/headroom/status`                                       | `which headroom` 및 python `--version` 프로브                         |
+| `GET /api/tunnels/tailscale`, `GET /api/tunnels/tailscale/check` | `which tailscale`, `tailscale status/funnel --json`, `which brew`     |
+| `GET /api/tunnels/cloudflared` (LOCAL_ONLY에서 제외되는 GET)     | `which cloudflared` PATH 조회                                         |
+
+호스트를 프로브하는 새로운 읽기 라우트는 동일한 패턴을 따르거나, 아예
+LOCAL_ONLY로 분류됩니다.
+
+### 계층 2 — ALWAYS_PROTECTED
+
+**적용 방식:** `isAlwaysProtectedPath(path)` → `requireLogin=false` 우회 건너뜀
 **우회:** `requireLogin=false`인 경우에도 없음. JWT가 항상 필요함
 
 이러한 라우트는 파괴적이거나 되돌릴 수 없는 작업을 수행합니다. "비밀번호 없음"
-설치에서 이를 허용하면 동일한 LAN에 있는 누구나 데이터베이스를 삭제하거나 서버
-프로세스를 종료할 수 있습니다.
+설치에서 이를 허용하면 동일한 LAN에 있는 누구든 데이터베이스를 삭제하거나 서버
+프로세스를 종료할 수 있게 됩니다.
 
-| 경로                                      | 이유                                                     |
-| ----------------------------------------- | -------------------------------------------------------- |
-| `/api/shutdown`                           | 서버 프로세스를 종료함                                   |
-| `/api/settings/database`                  | 데이터베이스 내보내기, 가져오기 및 삭제                  |
-| `/api/db-backups`                         | 전체 데이터베이스 백업 아카이브에 액세스                 |
-| `/api/settings/export-json`               | 전체 설정 블롭을 내보냄(비밀 정보 포함)                  |
-| `/api/settings/import-json`               | 전체 설정 블롭을 교체함                                  |
-| `/api/providers/health-autopilot/actions` | 자동 복구 조치를 실행함                                  |
-| `/api/settings/obsidian`                  | 모든 볼트 루트에 재사용 가능한 WebDAV 자격 증명을 발급함 |
+| 경로                                      | 이유                                                 |
+| ----------------------------------------- | ---------------------------------------------------- |
+| `/api/shutdown`                           | 서버 프로세스 종료                                   |
+| `/api/settings/database`                  | 데이터베이스 내보내기, 가져오기 및 삭제              |
+| `/api/db-backups`                         | 전체 데이터베이스 백업 아카이브 접근                 |
+| `/api/settings/export-json`               | 전체 설정 블롭 내보내기(비밀 정보 포함)              |
+| `/api/settings/import-json`               | 전체 설정 블롭 교체                                  |
+| `/api/providers/health-autopilot/actions` | 오토파일럿 복구 작업 실행                            |
+| `/api/settings/obsidian`                  | 모든 볼트 루트에 재사용 가능한 WebDAV 자격 증명 발급 |
+| `/api/relay/tokens`                       | Mints, lists, edits and revokes relay tokens         |
 
 **위반 시 응답:** `401 Authentication required`
 
-`/api/settings/obsidian`은 하위 경로인 `/webdav`도 포함합니다. `POST`는 이 파이프라인
-외부에서 Next.js보다 먼저 사용자 지정 Node 계층에 의해 제공되는 WebDAV 파일 서비스를
-호출자가 선택한 루트로 지정하고, 새로 발급된 Basic 자격 증명을 그대로 반환합니다.
-`DELETE`는 해당 자격 증명을 교체하며, 상위 경로의 `POST`는 Obsidian REST API 토큰을
-저장합니다. GHSA-62vw는 `GET`의 비밀번호 노출만 차단했으며, 발급 기능은 여전히
-실패 시 개방되는 티어에 있었습니다(GHSA-7pq4-8pvv-rx7r). 또한
-`enableObsidianVaultSync()`는 데이터 디렉터리 자체이거나, 그 내부에 있거나, 이를
-포함하는 볼트를 거부합니다.
+`/api/settings/obsidian`은 하위 `/webdav`도 포함합니다. `POST`는 이 파이프라인 외부에서
+Next.js보다 먼저 커스텀 Node 계층이 제공하는 WebDAV 파일 서비스가 호출자가 선택한 루트를
+가리키도록 하고, 새로 발급된 Basic 자격 증명을 그대로 반환합니다. `DELETE`는 해당 자격
+증명을 교체하며, 상위 `POST`는 Obsidian REST API 토큰을 저장합니다. GHSA-62vw는
+`GET`의 비밀번호 노출만 가렸을 뿐, 발급 기능은 여전히 장애 시 허용 계층에 남아 있었습니다
+(GHSA-7pq4-8pvv-rx7r). 또한 `enableObsidianVaultSync()`는 데이터 디렉터리 자체이거나,
+그 내부에 있거나, 데이터 디렉터리를 포함하는 볼트를 거부합니다.
 
-### 신규 설치 부트스트랩은 `Host`가 아닌 실제 피어를 기준으로 루프백에서만 허용됨
+#### 자격 증명 내보내기는 운영자 전용입니다
 
-관리 비밀번호가 구성되지 않았고 `INITIAL_PASSWORD`도 없으면,
+상위 티어는 _어떤_ 자격 증명이 필요한지 여부만 결정합니다. 저장된 자격 증명을 다운로드하는
+라우트는 핸들러에서 두 번째 검사를 추가합니다. `GET /api/settings/export-json`(복호화된
+프로바이더 연결 및 원시 API 키), `GET /api/db-backups/export`(SQLite 파일), 그리고
+`GET /api/db-backups/exportAll`(전체 아카이브)은 `requireOperatorCredential()`
+(`src/lib/api/operatorCredential.ts`)을 호출합니다. 이 함수는 대시보드 세션, 로컬 CLI 주체,
+또는 로그인이 비활성화된 인스턴스를 허용하며, 모든 범위의 API 키(`manage` 및 `admin`
+포함)와 `oma_` 액세스 토큰에는 `403`으로 응답합니다. 동기화 토큰 발급
+(`POST /api/sync/tokens`)도 동일한 헬퍼와 신뢰할 수 있는 루프백 내부 서비스 토큰을
+사용합니다.
+
+#### Credential exports and restores are operator-only
+
+The tier above only decides whether _some_ credential is required. The routes that download
+stored credentials add a second check in the handler: `GET /api/settings/export-json` (decrypted
+provider connections and raw API keys), `GET /api/db-backups/export` (the SQLite file) and
+`GET /api/db-backups/exportAll` (the full archive) call `requireOperatorCredential()`
+(`src/lib/api/operatorCredential.ts`). It accepts a dashboard session, the local CLI subject, or
+an instance with login disabled, and answers `403` to API keys of any scope (including `manage`
+and `admin`) and to `oma_` access tokens. The destructive counterparts hold the same boundary:
+`POST /api/db-backups/import` (uploaded `.sqlite`, `dryRun=true` included), `POST /api/db-backups`
+(restore a stored backup by id) and `POST /api/settings/import-json` (legacy JSON restore)
+replace the live database or the whole settings/connections/API-key set, so a machine credential
+cannot trigger them either. Listing, creating, retention and cleanup of backups
+(`GET`/`PUT`/`PATCH`/`DELETE /api/db-backups`) keep ordinary management auth. Sync token
+issuance (`POST /api/sync/tokens`) uses the same helper, plus the trusted loopback
+internal-service token.
+
+### 신규 설치 부트스트랩은 루프백으로만 제한됨 — `Host`가 아닌 실제 피어 기준
+
+관리 비밀번호가 구성되지 않은 경우(`INITIAL_PASSWORD`도 없는 경우),
 `src/shared/utils/apiAuth.ts`의 `isAuthRequired()`는 익명 부트스트랩을 **루프백 피어에
 대해서만** 열어 둡니다. 루프백 여부는 신뢰할 수 있는 피어 신호를 다음 순서로 사용해
-결정합니다. 토큰이 스탬프된 실제 TCP 피어(`PEER_IP_HEADER` + `VIA_PROXY_HEADER`,
-정책이 확인하는 대상), 파이프라인 자체의 `AUTHZ_HEADER_PEER_LOCALITY` 판정(라우트
-핸들러가 확인하는 대상으로, `OMNIROUTE_PEER_STAMP_TOKEN`이 설정된 동안에만 신뢰),
-또는 직접 호출자의 실제 소켓 피어입니다. `Host` / `nextUrl.hostname`은 절대 참조하지
-않으며, 최초 비밀번호 쓰기(`POST /api/settings/require-login`)도 모든 네트워크 피어에
-개방되지 않고 동일한 제약을 적용받습니다(GHSA-7pq4-8pvv-rx7r). `managementPolicy`는
-자체 `peerContext` 판정을 명시적으로 하위 계층에 전달하므로, ORIGINAL(제거 전) 요청의
-헤더가 이를 결정하는 일은 없습니다.
+판단합니다. 토큰으로 표시된 실제 TCP 피어(`PEER_IP_HEADER` +
+`VIA_PROXY_HEADER`, 정책이 확인하는 값), 파이프라인 자체의
+`AUTHZ_HEADER_PEER_LOCALITY` 판정(라우트 핸들러가 확인하는 값이며,
+`OMNIROUTE_PEER_STAMP_TOKEN`이 설정된 동안에만 신뢰됨), 또는 직접 호출자의 실제
+소켓 피어입니다. `Host` / `nextUrl.hostname`은 절대 참조하지 않으며, 첫 번째 비밀번호
+설정(`POST /api/settings/require-login`) 역시 모든 네트워크 피어에 열려 있는 대신
+동일한 제약을 적용받습니다(GHSA-7pq4-8pvv-rx7r). `managementPolicy`는 자체
+`peerContext` 판정을 명시적으로 전달하므로, ORIGINAL(제거 전) 요청의 헤더가 이를
+결정하는 일은 없습니다.
 
-### 티어 3 — MANAGEMENT(기본값)
+### 티어 3 — 관리(MANAGEMENT, 기본값)
 
-그 밖의 모든 관리 라우트입니다. `requireLogin=false`가 구성된 경우를 제외하면 인증이
-필요합니다. CLI 토큰으로 이러한 라우트를 인증할 수 있습니다(루프백 + 유효한 HMAC).
+그 밖의 모든 관리 라우트입니다. `requireLogin=false`로 구성하지 않는 한 인증이
+필요합니다. CLI 토큰은 이러한 라우트에서 인증에 사용할 수 있습니다(루프백 + 유효한
+HMAC).
 
 ## 평가 순서
 

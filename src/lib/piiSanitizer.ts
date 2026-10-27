@@ -14,6 +14,8 @@
 // ── Configuration ──
 
 import { isFeatureFlagEnabled, resolveFeatureFlag } from "@/shared/utils/featureFlags";
+import { getPiiRuleConfig, type PiiRuleConfig } from "@/lib/pii/piiRuleConfig";
+import { recordPiiDetections } from "@/lib/pii/piiDetectionStats";
 
 const isEnabled = () => isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION");
 
@@ -32,6 +34,11 @@ const getMode = (): PiiMode => {
   console.error(`[PII] Invalid PII_RESPONSE_SANITIZATION_MODE: "${value}", defaulting to "redact"`);
   return "redact";
 };
+
+/** Current response-sanitization mode (redact | warn | block | off). */
+export function getPiiResponseMode(): PiiMode {
+  return getMode();
+}
 
 // ── PII Patterns ──
 
@@ -96,8 +103,20 @@ const PII_PATTERNS: PIIPattern[] = [
   },
   {
     name: "ipv6_address",
+    // The bare `::` alternative is deliberately absent. `::` on its own is the
+    // IPv6 unspecified address — never a usable host address — while a double
+    // colon is load-bearing syntax in Python (`s[::-1]`), Rust (`::std`), C++
+    // (`std::`), Haskell (`x :: Int`), Elixir, Scala and Markdown (`:::note`).
+    // Matching it rewrote generated code to `[IP_REDACTED]`, and the result is
+    // usually still syntactically valid (a function definition that is never
+    // called), so downstream execution gates reported success on broken code.
+    // The lookbehind admits a preceding `[` only when that bracket is itself
+    // preceded by a non-alphanumeric character, so a URL literal
+    // (`http://[::1]:8080/`) is still matched while a subscript (`s[::1]`) is
+    // not. Every `::`-bearing IPv6 form is still caught: `::1`, `fe80::1`,
+    // `::ffff:0:0`, `[::1]`.
     regex:
-      /(?<=^|[^A-Za-z0-9:])(?:[0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{1,4}){7}|(?:[0-9a-fA-F]{1,4}:){1,7}:|::(?:[0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}|::|[0-9a-fA-F]{1,4}::(?:[0-9a-fA-F]{1,4}:){0,5}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){2}:(?:[0-9a-fA-F]{1,4}:){0,4}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){3}:(?:[0-9a-fA-F]{1,4}:){0,3}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){4}:(?:[0-9a-fA-F]{1,4}:){0,2}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){5}:(?:[0-9a-fA-F]{1,4}:){0,1}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){6}:[0-9a-fA-F]{1,4})(?=$|[^A-Za-z0-9])(?!:[0-9a-fA-F:])/g,
+      /(?<=^|[^A-Za-z0-9:\[]|[^A-Za-z0-9]\[)(?:[0-9a-fA-F]{1,4}(?::[0-9a-fA-F]{1,4}){7}|(?:[0-9a-fA-F]{1,4}:){1,7}:|::(?:[0-9a-fA-F]{1,4}:){0,6}[0-9a-fA-F]{1,4}|[0-9a-fA-F]{1,4}::(?:[0-9a-fA-F]{1,4}:){0,5}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){2}:(?:[0-9a-fA-F]{1,4}:){0,4}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){3}:(?:[0-9a-fA-F]{1,4}:){0,3}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){4}:(?:[0-9a-fA-F]{1,4}:){0,2}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){5}:(?:[0-9a-fA-F]{1,4}:){0,1}[0-9a-fA-F]{1,4}|(?:[0-9a-fA-F]{1,4}:){6}:[0-9a-fA-F]{1,4})(?=$|[^A-Za-z0-9])(?!:[0-9a-fA-F:])/g,
     replacement: "[IP_REDACTED]",
     severity: "low",
   },
@@ -115,7 +134,26 @@ const PII_PATTERNS: PIIPattern[] = [
   },
 ];
 
+/** Built-in patterns the operator kept enabled, followed by their gate-checked custom rules. */
+function resolveActivePatterns(rules: PiiRuleConfig): PIIPattern[] {
+  const builtins = rules.enabledTypes
+    ? PII_PATTERNS.filter((pattern) => rules.enabledTypes!.has(pattern.name))
+    : PII_PATTERNS;
+  if (rules.customRules.length === 0) return builtins;
+  return [
+    ...builtins,
+    ...rules.customRules.map((rule) => ({ ...rule, severity: "high" as const })),
+  ];
+}
+
 // ── Public API ──
+
+export interface SanitizePiiOptions {
+  /** Override the stored per-type selection / custom rules (defaults to the DB settings). */
+  rules?: PiiRuleConfig;
+  /** Count the detections in the dashboard stats (response masking paths only). */
+  recordStats?: boolean;
+}
 
 export interface SanitizeResult {
   text: string;
@@ -131,12 +169,17 @@ export interface SanitizeResult {
 /**
  * Scan and optionally redact PII from LLM response text.
  */
-export function sanitizePII(text: string, isStreaming = false): SanitizeResult {
+export function sanitizePII(
+  text: string,
+  isStreaming = false,
+  options: SanitizePiiOptions = {}
+): SanitizeResult {
   if (!isEnabled() || !text || typeof text !== "string") {
     return { text, detections: [], redacted: false };
   }
 
   const mode = getMode();
+  const activePatterns = resolveActivePatterns(options.rules ?? getPiiRuleConfig());
   const detections: SanitizeResult["detections"] = [];
 
   // Build a map of clean character index to original character index.
@@ -183,10 +226,15 @@ export function sanitizePII(text: string, isStreaming = false): SanitizeResult {
   const ranges: RedactRange[] = [];
   let endMatchIndex: number | undefined = undefined;
 
-  for (const pattern of PII_PATTERNS) {
+  for (const pattern of activePatterns) {
     pattern.regex.lastIndex = 0;
     let match;
     while ((match = pattern.regex.exec(cleanText)) !== null) {
+      if (match[0].length === 0) {
+        // Defense in depth: custom rules that match "" are refused at save time.
+        pattern.regex.lastIndex++;
+        continue;
+      }
       const cleanStart = match.index;
       const cleanEnd = cleanStart + match[0].length;
       const start = cleanToOrig[cleanStart];
@@ -232,13 +280,15 @@ export function sanitizePII(text: string, isStreaming = false): SanitizeResult {
     patternCounts.set(range.pattern, (patternCounts.get(range.pattern) || 0) + 1);
   }
   for (const [name, count] of patternCounts.entries()) {
-    const patternDef = PII_PATTERNS.find((p) => p.name === name);
+    const patternDef = activePatterns.find((p) => p.name === name);
     detections.push({
       pattern: name,
       count,
       severity: patternDef?.severity || "medium",
     });
   }
+
+  if (options.recordStats) recordPiiDetections("response", detections);
 
   if (detections.length > 0) {
     if (mode === "warn") {
@@ -315,7 +365,7 @@ export function sanitizePIIResponse(response: any): any {
       }
       if (!obj) return obj;
       if (typeof obj === "string") {
-        return sanitizePII(obj).text;
+        return sanitizePII(obj, false, { recordStats: true }).text;
       }
       if (typeof obj === "object") {
         if (visited.has(obj)) {
@@ -361,7 +411,7 @@ export function sanitizePIIResponse(response: any): any {
     // Fail secure — try raw string sanitization instead of failing open
     try {
       const serialized = JSON.stringify(response);
-      const { text: sanitized } = sanitizePII(serialized);
+      const { text: sanitized } = sanitizePII(serialized, false, { recordStats: true });
       return JSON.parse(sanitized);
     } catch (fallbackErr) {
       // Suppress err.message — never surface upstream error detail to the client

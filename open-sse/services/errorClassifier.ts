@@ -7,13 +7,15 @@ import {
   isOAuthInvalidToken,
 } from "./accountFallback.ts";
 import { isSubscriptionQuotaText } from "./quotaTextCooldowns.ts";
+import { isModelScopedAccessDenial } from "./accountFallback/modelScopedAccessDenial.ts";
 import { getProviderCategory, getRegistryEntry } from "../config/providerRegistry.ts";
 
 // Terminal stop signals where an empty content payload is still a legitimate,
 // successful completion (truncated at the token limit, or a tool-call turn) —
 // NOT a silent "fake success" failure. Used to avoid rewriting a valid HTTP 200
 // (e.g. a Claude Code `max_tokens: 1` connectivity ping) into a synthetic 502.
-const LEGIT_EMPTY_CLAUDE_STOP = new Set(["max_tokens", "tool_use"]);
+// A "refusal" is the model declining under usage policy; the client must see it.
+const LEGIT_EMPTY_CLAUDE_STOP = new Set(["max_tokens", "tool_use", "refusal"]);
 const LEGIT_EMPTY_OPENAI_FINISH = new Set(["length", "tool_calls", "content_filter"]);
 
 // #14160: first-party APIs where an empty completion carrying a NORMAL terminal
@@ -30,10 +32,11 @@ const NORMAL_STOP_CLAUDE_STOP = new Set(["end_turn"]);
 
 export function isEmptyContentResponse(
   responseBody: unknown,
-  opts?: { provider?: string | null }
+  opts?: { provider?: string | null; trustedEmptyTurn?: boolean }
 ): boolean {
   const trustedEmptyStop =
-    typeof opts?.provider === "string" && TRUSTED_EMPTY_STOP_PROVIDERS.has(opts.provider);
+    opts?.trustedEmptyTurn === true ||
+    (typeof opts?.provider === "string" && TRUSTED_EMPTY_STOP_PROVIDERS.has(opts.provider));
   if (!responseBody || typeof responseBody !== "object") return false;
 
   const body = responseBody as Record<string, unknown>;
@@ -79,7 +82,11 @@ export function isEmptyContentResponse(
     // failure. Only flag empty content when no such terminal stop_reason is present.
     const stopReason = typeof body.stop_reason === "string" ? body.stop_reason : "";
     // #14160: same exemption for the Claude wire shape on trusted first-party APIs.
-    if (trustedEmptyStop && NORMAL_STOP_CLAUDE_STOP.has(stopReason)) return false;
+    if (
+      (trustedEmptyStop && NORMAL_STOP_CLAUDE_STOP.has(stopReason)) ||
+      (opts?.trustedEmptyTurn === true && stopReason === "stop_sequence")
+    )
+      return false;
     return !LEGIT_EMPTY_CLAUDE_STOP.has(stopReason);
   }
 
@@ -395,7 +402,9 @@ export function classifyProviderError(
 ): ProviderErrorType | null {
   const bodyStr = responseBodyToString(responseBody);
   const creditsExhausted = isCreditsExhausted(bodyStr);
-  const subscriptionQuotaExhausted = isSubscriptionQuotaText(bodyStr.toLowerCase());
+  // Claude's native weekly 429 wording is provider-scoped; omitting provider
+  // silently classified the long-window quota as a short RPM rate limit.
+  const subscriptionQuotaExhausted = isSubscriptionQuotaText(bodyStr.toLowerCase(), provider);
   const accountDeactivated = isAccountDeactivated(bodyStr);
   const oauthInvalid = isOAuthInvalidToken(bodyStr);
   const preserveQuota429 = shouldPreserveQuotaSignalsFor429(provider);
@@ -430,6 +439,10 @@ export function classifyProviderError(
   // make an unknown file/item id valid. (#6827)
   if (statusCode === 404) {
     if (isResourceNotFoundResponse(responseBody)) return null;
+    return PROVIDER_ERROR_TYPES.MODEL_NOT_FOUND;
+  }
+
+  if (isModelScopedAccessDenial(provider, statusCode, responseBody)) {
     return PROVIDER_ERROR_TYPES.MODEL_NOT_FOUND;
   }
 

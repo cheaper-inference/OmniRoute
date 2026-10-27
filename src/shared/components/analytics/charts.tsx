@@ -3,6 +3,8 @@
 import { useState, useMemo, useCallback, useRef, useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import Card from "../Card";
+import Icon from "../Icon";
+import Input from "../Input";
 import Tooltip from "../Tooltip";
 import { PROVIDER_COLORS } from "./chartColors";
 import {
@@ -16,6 +18,15 @@ import {
   translateCostText,
   type TranslationFn,
 } from "@/shared/utils/serviceTierLabels";
+import { SortableTableHead, type DataTableSortDirection } from "@omniroute/ui-kit/data-table-shell";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@omniroute/ui-kit/table";
 
 function createDateFormatter(locale: string, options: Intl.DateTimeFormatOptions) {
   try {
@@ -29,16 +40,14 @@ function createDateFormatter(locale: string, options: Intl.DateTimeFormatOptions
 
 export function SortIndicator({ active, sortOrder }: { active: boolean; sortOrder: string }) {
   if (!active) {
-    return (
-      <span className="material-symbols-outlined text-[12px] opacity-0 group-hover:opacity-30">
-        unfold_more
-      </span>
-    );
+    return <Icon name="unfold_more" size={12} className="opacity-0 group-hover:opacity-30" />;
   }
   return (
-    <span className="material-symbols-outlined text-[12px] text-primary">
-      {sortOrder === "asc" ? "expand_less" : "expand_more"}
-    </span>
+    <Icon
+      name={sortOrder === "asc" ? "expand_less" : "expand_more"}
+      size={12}
+      className="text-primary"
+    />
   );
 }
 
@@ -81,21 +90,15 @@ export function StatCard({
   return (
     <Card className="px-4 py-3 flex flex-col gap-1 min-w-0">
       <div className="flex items-center gap-1.5 text-text-muted text-[11px] uppercase font-semibold tracking-wide min-w-0">
-        <span className="material-symbols-outlined text-[14px] shrink-0">{icon}</span>
+        <Icon name={icon} size={14} />
         <span className="truncate">{label}</span>
       </div>
       {tooltipText ? (
         <Tooltip
           content={
             <div className="flex flex-col gap-0.5 text-left py-0.5 min-w-[140px]">
-              <div className="font-semibold text-white/95 text-xs">{label}</div>
-              <div
-                className={`font-mono text-xs ${
-                  color && color !== "text-text-main" ? color : "text-violet-400"
-                } tracking-wide`}
-              >
-                {tooltipText}
-              </div>
+              <div className="font-semibold text-xs">{label}</div>
+              <div className="font-mono text-xs tracking-wide opacity-80">{tooltipText}</div>
             </div>
           }
           className="w-fit max-w-full"
@@ -126,9 +129,7 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
       <div className="flex flex-col gap-3">
         {sections.map((section, si) => (
           <div key={si}>
-            {si > 0 && (
-              <div className="border-t border-black/[0.06] dark:border-white/[0.06] mb-3" />
-            )}
+            {si > 0 && <div className="border-t border-border mb-3" />}
             <div className="text-[10px] uppercase font-semibold tracking-widest text-text-muted/50 mb-2">
               {section.title}
             </div>
@@ -155,9 +156,7 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
                     <div
                       className={`flex items-center gap-1.5 ${section.wideValues ? "shrink-0" : "min-w-0"}`}
                     >
-                      <span className="material-symbols-outlined text-[14px] text-text-muted shrink-0">
-                        {stat.icon}
-                      </span>
+                      <Icon name={stat.icon} size={14} className="text-text-muted" />
                       <span
                         className={`text-[11px] uppercase font-semibold tracking-wide text-text-muted ${section.wideValues ? "whitespace-nowrap" : "truncate"}`}
                       >
@@ -168,10 +167,8 @@ export function CompactStatGrid({ sections }: { sections: CompactStatSection[] }
                       <Tooltip
                         content={
                           <div className="flex flex-col gap-0.5 text-left py-0.5 min-w-[120px]">
-                            <div className="font-semibold text-white/95 text-xs">{stat.label}</div>
-                            <div
-                              className={`font-mono text-xs ${stat.color || "text-violet-400"} tracking-wide`}
-                            >
+                            <div className="font-semibold text-xs">{stat.label}</div>
+                            <div className="font-mono text-xs tracking-wide opacity-80">
                               {String(stat.tooltip).includes(":")
                                 ? stat.tooltip
                                 : `${stat.label.toLowerCase().includes("cost") ? "cost" : "tokens"} : ${stat.tooltip}`}
@@ -272,7 +269,7 @@ export function ActivityHeatmap({ activityMap }) {
   );
 
   function getCellColor(value) {
-    if (!value || value === 0) return "bg-white/[0.04]";
+    if (!value || value === 0) return "bg-surface-2";
     const intensity = Math.min(value / (cells.maxVal || 1), 1);
     if (intensity < 0.25) return "bg-primary/20";
     if (intensity < 0.5) return "bg-primary/40";
@@ -347,7 +344,7 @@ export function ActivityHeatmap({ activityMap }) {
 
       <div className="flex items-center gap-1 mt-2 ml-6 text-[10px] text-text-muted">
         <span>{t("activityLess")}</span>
-        <div className="w-[10px] h-[10px] rounded-[2px] bg-white/[0.04]" />
+        <div className="w-[10px] h-[10px] rounded-[2px] bg-surface-2" />
         <div className="w-[10px] h-[10px] rounded-[2px] bg-primary/20" />
         <div className="w-[10px] h-[10px] rounded-[2px] bg-primary/40" />
         <div className="w-[10px] h-[10px] rounded-[2px] bg-primary/60" />
@@ -358,11 +355,17 @@ export function ActivityHeatmap({ activityMap }) {
   );
 }
 
-export function ApiKeyTable({ byApiKey }) {
+export function ApiKeyTable({
+  byApiKey,
+  displayMode = "compact",
+}: {
+  byApiKey: any;
+  displayMode?: "compact" | "exact";
+}) {
   const t = useTranslations("analytics");
   const [query, setQuery] = useState("");
   const [sortBy, setSortBy] = useState("totalTokens");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState<DataTableSortDirection>("desc");
 
   const data = useMemo(() => byApiKey || [], [byApiKey]);
 
@@ -389,17 +392,12 @@ export function ApiKeyTable({ byApiKey }) {
     return arr;
   }, [filtered, sortBy, sortOrder]);
 
-  const toggleSort = useCallback(
-    (field) => {
-      if (sortBy === field) {
-        setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-        return;
-      }
-      setSortBy(field);
-      setSortOrder("desc");
-    },
-    [sortBy]
-  );
+  // The kit's SortableTableHead computes the next direction (flip on the active column,
+  // "desc" on a new one) — the same rule the legacy header click applied.
+  const toggleSort = useCallback((field: string, direction: DataTableSortDirection) => {
+    setSortBy(field);
+    setSortOrder(direction);
+  }, []);
 
   const hasData = data.length > 0;
 
@@ -420,108 +418,119 @@ export function ApiKeyTable({ byApiKey }) {
         <h3 className="text-sm font-semibold text-text-muted uppercase tracking-wider">
           {t("chartApiKeyBreakdown")}
         </h3>
-        <input
-          type="text"
+        <Input
+          type="search"
           value={query}
           onChange={(e) => setQuery(e.target.value)}
           placeholder={t("filterSearchKeys")}
-          className="w-full max-w-[220px] px-3 py-1.5 rounded-lg bg-bg-subtle border border-border text-xs text-text-primary placeholder:text-text-muted focus:outline-none focus:border-primary"
+          aria-label={t("filterSearchKeys")}
+          icon="search"
+          className="w-full max-w-[220px]"
         />
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="text-xs text-text-muted uppercase bg-black/[0.02] dark:bg-white/[0.02]">
-            <tr>
-              <th
-                className="px-4 py-2.5 text-left cursor-pointer group"
-                onClick={() => toggleSort("apiKeyName")}
+      <Table
+        containerClassName="rounded-none border-0"
+        className="text-sm"
+        scrollbarLabel={t("chartApiKeyBreakdown")}
+      >
+        <TableHeader>
+          <TableRow>
+            <SortableTableHead
+              direction={sortBy === "apiKeyName" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("apiKeyName", direction)}
+            >
+              {t("chartApiKey")}
+            </SortableTableHead>
+            <SortableTableHead
+              align="right"
+              direction={sortBy === "requests" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("requests", direction)}
+            >
+              {t("chartRequests")}
+            </SortableTableHead>
+            <SortableTableHead
+              align="right"
+              direction={sortBy === "promptTokens" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("promptTokens", direction)}
+            >
+              {t("chartInput")}
+            </SortableTableHead>
+            <SortableTableHead
+              align="right"
+              direction={sortBy === "completionTokens" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("completionTokens", direction)}
+            >
+              {t("chartOutput")}
+            </SortableTableHead>
+            <SortableTableHead
+              align="right"
+              direction={sortBy === "totalTokens" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("totalTokens", direction)}
+            >
+              {t("chartTotal")}
+            </SortableTableHead>
+            <SortableTableHead
+              align="right"
+              direction={sortBy === "cost" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("cost", direction)}
+            >
+              {t("chartCost")}
+            </SortableTableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sorted.map((row, i) => (
+            <TableRow key={`${row.apiKeyId || row.apiKeyName || "key"}-${i}`}>
+              <TableCell className="px-4 py-2.5">
+                <span className="font-medium" title={row.apiKeyName || row.apiKeyId || "unknown"}>
+                  {maskApiKeyLabel(row.apiKeyName, row.apiKeyId)}
+                </span>
+              </TableCell>
+              <TableCell className="px-4 py-2.5 text-right font-mono text-text-muted">
+                {fmtFull(row.requests)}
+              </TableCell>
+              <TableCell
+                className="px-4 py-2.5 text-right font-mono text-primary"
+                title={
+                  displayMode === "exact" ? `~${fmt(row.promptTokens)}` : fmtFull(row.promptTokens)
+                }
               >
-                {t("chartApiKey")}{" "}
-                <SortIndicator active={sortBy === "apiKeyName"} sortOrder={sortOrder} />
-              </th>
-              <th
-                className="px-4 py-2.5 text-right cursor-pointer group"
-                onClick={() => toggleSort("requests")}
+                {displayMode === "exact" ? fmtFull(row.promptTokens) : fmt(row.promptTokens)}
+              </TableCell>
+              <TableCell
+                className="px-4 py-2.5 text-right font-mono text-success"
+                title={
+                  displayMode === "exact"
+                    ? `~${fmt(row.completionTokens)}`
+                    : fmtFull(row.completionTokens)
+                }
               >
-                {t("chartRequests")}{" "}
-                <SortIndicator active={sortBy === "requests"} sortOrder={sortOrder} />
-              </th>
-              <th
-                className="px-4 py-2.5 text-right cursor-pointer group"
-                onClick={() => toggleSort("promptTokens")}
+                {displayMode === "exact"
+                  ? fmtFull(row.completionTokens)
+                  : fmt(row.completionTokens)}
+              </TableCell>
+              <TableCell
+                className="px-4 py-2.5 text-right font-mono font-semibold"
+                title={
+                  displayMode === "exact" ? `~${fmt(row.totalTokens)}` : fmtFull(row.totalTokens)
+                }
               >
-                {t("chartInput")}{" "}
-                <SortIndicator active={sortBy === "promptTokens"} sortOrder={sortOrder} />
-              </th>
-              <th
-                className="px-4 py-2.5 text-right cursor-pointer group"
-                onClick={() => toggleSort("completionTokens")}
-              >
-                {t("chartOutput")}{" "}
-                <SortIndicator active={sortBy === "completionTokens"} sortOrder={sortOrder} />
-              </th>
-              <th
-                className="px-4 py-2.5 text-right cursor-pointer group"
-                onClick={() => toggleSort("totalTokens")}
-              >
-                {t("chartTotal")}{" "}
-                <SortIndicator active={sortBy === "totalTokens"} sortOrder={sortOrder} />
-              </th>
-              <th
-                className="px-4 py-2.5 text-right cursor-pointer group"
-                onClick={() => toggleSort("cost")}
-              >
-                {t("chartCost")} <SortIndicator active={sortBy === "cost"} sortOrder={sortOrder} />
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {sorted.map((row, i) => (
-              <tr
-                key={`${row.apiKeyId || row.apiKeyName || "key"}-${i}`}
-                className="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
-              >
-                <td className="px-4 py-2.5">
-                  <span className="font-medium" title={row.apiKeyName || row.apiKeyId || "unknown"}>
-                    {maskApiKeyLabel(row.apiKeyName, row.apiKeyId)}
-                  </span>
-                </td>
-                <td className="px-4 py-2.5 text-right font-mono text-text-muted">
-                  {fmtFull(row.requests)}
-                </td>
-                <td
-                  className="px-4 py-2.5 text-right font-mono text-primary"
-                  title={fmtFull(row.promptTokens)}
-                >
-                  {fmt(row.promptTokens)}
-                </td>
-                <td
-                  className="px-4 py-2.5 text-right font-mono text-emerald-500"
-                  title={fmtFull(row.completionTokens)}
-                >
-                  {fmt(row.completionTokens)}
-                </td>
-                <td
-                  className="px-4 py-2.5 text-right font-mono font-semibold"
-                  title={fmtFull(row.totalTokens)}
-                >
-                  {fmt(row.totalTokens)}
-                </td>
-                <td className="px-4 py-2.5 text-right font-mono text-amber-500">
-                  {fmtCost(row.cost)}
-                </td>
-              </tr>
-            ))}
-            {sorted.length === 0 && (
-              <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-text-muted">
-                  {t("filterNoKeysMatch")}
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+                {displayMode === "exact" ? fmtFull(row.totalTokens) : fmt(row.totalTokens)}
+              </TableCell>
+              <TableCell className="px-4 py-2.5 text-right font-mono text-warning">
+                {fmtCost(row.cost)}
+              </TableCell>
+            </TableRow>
+          ))}
+          {sorted.length === 0 && (
+            <TableRow>
+              <TableCell colSpan={6} className="px-4 py-8 text-center text-text-muted">
+                {t("filterNoKeysMatch")}
+              </TableCell>
+            </TableRow>
+          )}
+        </TableBody>
+      </Table>
     </Card>
   );
 }
@@ -579,8 +588,8 @@ export function MostActiveDay7d({ activityMap }) {
           <Tooltip
             content={
               <div className="flex flex-col gap-0.5 text-left py-0.5 min-w-[140px]">
-                <div className="font-semibold text-white/95 text-xs">{data.weekday}</div>
-                <div className="font-mono text-xs text-violet-400 tracking-wide">
+                <div className="font-semibold text-xs">{data.weekday}</div>
+                <div className="font-mono text-xs tracking-wide opacity-80">
                   tokens : {fmtFull(data.tokens)} tokens
                 </div>
               </div>
@@ -642,9 +651,10 @@ export function WeeklySquares7d({ activityMap }) {
   }, [activityMap, dateFormatter, weekdayFormatter]);
 
   function getSquareStyle(intensity) {
-    if (intensity === 0) return { background: "rgba(255,255,255,0.04)" };
-    const opacity = 0.15 + intensity * 0.75;
-    return { background: `rgba(229, 77, 94, ${opacity.toFixed(2)})` };
+    if (intensity === 0) return { background: "var(--color-surface-2)" };
+    const pct = Math.round((0.15 + intensity * 0.75) * 100);
+    // Same 15–90 % intensity ramp as before, on the kit's first chart token.
+    return { background: `color-mix(in oklab, var(--color-chart-1) ${pct}%, transparent)` };
   }
 
   return (
@@ -700,19 +710,19 @@ function getServiceTierIcon(serviceTier) {
 }
 
 function getServiceTierIconClass(serviceTier) {
-  if (serviceTier === "priority") return "text-sky-500";
-  if (serviceTier === "flex") return "text-emerald-500";
+  if (serviceTier === "priority") return "text-info";
+  if (serviceTier === "flex") return "text-success";
   return "text-text-muted";
 }
 
 function getServiceTierBarClass(serviceTier) {
-  if (serviceTier === "priority") return "bg-sky-500";
-  if (serviceTier === "flex") return "bg-emerald-500";
+  if (serviceTier === "priority") return "bg-info";
+  if (serviceTier === "flex") return "bg-success";
   return "bg-text-muted/50";
 }
 
 function getServiceTierCostClass(serviceTier) {
-  return serviceTier === "flex" ? "text-emerald-500" : "text-amber-500";
+  return serviceTier === "flex" ? "text-success" : "text-warning";
 }
 
 export function ServiceTierBreakdown({ byServiceTier, summary }) {
@@ -765,13 +775,11 @@ export function ServiceTierBreakdown({ byServiceTier, summary }) {
             <div key={tier.serviceTier} className="p-4 flex flex-col gap-3">
               <div className="flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
-                  <span
-                    className={`material-symbols-outlined text-[18px] ${getServiceTierIconClass(
-                      tier.serviceTier
-                    )}`}
-                  >
-                    {getServiceTierIcon(tier.serviceTier)}
-                  </span>
+                  <Icon
+                    name={getServiceTierIcon(tier.serviceTier)}
+                    size={18}
+                    className={getServiceTierIconClass(tier.serviceTier)}
+                  />
                   <div>
                     <div className="text-sm font-semibold text-text-main">{tierLabel}</div>
                     <div className="text-xs text-text-muted">
@@ -794,7 +802,7 @@ export function ServiceTierBreakdown({ byServiceTier, summary }) {
                   <div className="text-xs text-text-muted">{costDetailText}</div>
                 </div>
               </div>
-              <div className="h-1.5 rounded-full bg-black/5 dark:bg-white/10 overflow-hidden">
+              <div className="h-1.5 rounded-full bg-surface-2 overflow-hidden">
                 <div
                   className={`h-full rounded-full ${getServiceTierBarClass(tier.serviceTier)}`}
                   style={{ width: `${requestPct}%` }}
@@ -815,7 +823,7 @@ export function UsageDetail({ summary }) {
   const items = [
     { label: t("chartInput"), value: summary?.promptTokens, color: "text-primary" },
     { label: t("chartCacheRead"), value: 0, color: "text-text-muted" },
-    { label: t("chartOutput"), value: summary?.completionTokens, color: "text-emerald-500" },
+    { label: t("chartOutput"), value: summary?.completionTokens, color: "text-success" },
   ];
 
   return (
@@ -837,25 +845,26 @@ export function UsageDetail({ summary }) {
 
 // ── ProviderTable ──────────────────────────────────────────────────────────
 
-export function ProviderTable({ byProvider }) {
+export function ProviderTable({
+  byProvider,
+  displayMode = "compact",
+}: {
+  byProvider: any;
+  displayMode?: "compact" | "exact";
+}) {
   const t = useTranslations("analytics");
   const [sortBy, setSortBy] = useState("totalTokens");
-  const [sortOrder, setSortOrder] = useState("desc");
+  const [sortOrder, setSortOrder] = useState<DataTableSortDirection>("desc");
 
   const data = useMemo(() => byProvider || [], [byProvider]);
   const totalTokens = useMemo(() => data.reduce((acc, p) => acc + p.totalTokens, 0), [data]);
 
-  const toggleSort = useCallback(
-    (field) => {
-      if (sortBy === field) {
-        setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-      } else {
-        setSortBy(field);
-        setSortOrder("desc");
-      }
-    },
-    [sortBy]
-  );
+  // The kit's SortableTableHead computes the next direction (flip on the active column,
+  // "desc" on a new one) — the same rule the legacy header click applied.
+  const toggleSort = useCallback((field: string, direction: DataTableSortDirection) => {
+    setSortBy(field);
+    setSortOrder(direction);
+  }, []);
 
   const sorted = useMemo(() => {
     const arr = [...data];
@@ -887,117 +896,124 @@ export function ProviderTable({ byProvider }) {
           {t("chartProviderBreakdown")}
         </h3>
       </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
-          <thead className="text-xs text-text-muted uppercase bg-black/[0.02] dark:bg-white/[0.02]">
-            <tr>
-              <th
-                className="px-4 py-2.5 text-left cursor-pointer group"
-                onClick={() => toggleSort("provider")}
-              >
-                {t("chartProvider")}{" "}
-                <SortIndicator active={sortBy === "provider"} sortOrder={sortOrder} />
-              </th>
-              <th
-                className="px-4 py-2.5 text-right cursor-pointer group"
-                onClick={() => toggleSort("requests")}
-              >
-                {t("chartRequests")}{" "}
-                <SortIndicator active={sortBy === "requests"} sortOrder={sortOrder} />
-              </th>
-              <th
-                className="px-4 py-2.5 text-right cursor-pointer group"
-                onClick={() => toggleSort("promptTokens")}
-              >
-                {t("chartInput")}{" "}
-                <SortIndicator active={sortBy === "promptTokens"} sortOrder={sortOrder} />
-              </th>
-              <th
-                className="px-4 py-2.5 text-right cursor-pointer group"
-                onClick={() => toggleSort("completionTokens")}
-              >
-                {t("chartOutput")}{" "}
-                <SortIndicator active={sortBy === "completionTokens"} sortOrder={sortOrder} />
-              </th>
-              <th
-                className="px-4 py-2.5 text-right cursor-pointer group"
-                onClick={() => toggleSort("totalTokens")}
-              >
-                {t("chartTotal")}{" "}
-                <SortIndicator active={sortBy === "totalTokens"} sortOrder={sortOrder} />
-              </th>
-              <th
-                className="px-4 py-2.5 text-right cursor-pointer group"
-                onClick={() => toggleSort("cost")}
-              >
-                {t("chartCost")} <SortIndicator active={sortBy === "cost"} sortOrder={sortOrder} />
-              </th>
-              <th className="px-4 py-2.5 text-right w-36">{t("chartShare")}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border">
-            {sorted.map((p, i) => {
-              const pct = totalTokens > 0 ? ((p.totalTokens / totalTokens) * 100).toFixed(1) : "0";
-              return (
-                <tr
-                  key={`${p.provider}-${i}`}
-                  className="hover:bg-black/[0.02] dark:hover:bg-white/[0.02] transition-colors"
+      <Table
+        containerClassName="rounded-none border-0"
+        className="text-sm"
+        scrollbarLabel={t("chartProviderBreakdown")}
+      >
+        <TableHeader>
+          <TableRow>
+            <SortableTableHead
+              direction={sortBy === "provider" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("provider", direction)}
+            >
+              {t("chartProvider")}
+            </SortableTableHead>
+            <SortableTableHead
+              align="right"
+              direction={sortBy === "requests" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("requests", direction)}
+            >
+              {t("chartRequests")}
+            </SortableTableHead>
+            <SortableTableHead
+              align="right"
+              direction={sortBy === "promptTokens" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("promptTokens", direction)}
+            >
+              {t("chartInput")}
+            </SortableTableHead>
+            <SortableTableHead
+              align="right"
+              direction={sortBy === "completionTokens" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("completionTokens", direction)}
+            >
+              {t("chartOutput")}
+            </SortableTableHead>
+            <SortableTableHead
+              align="right"
+              direction={sortBy === "totalTokens" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("totalTokens", direction)}
+            >
+              {t("chartTotal")}
+            </SortableTableHead>
+            <SortableTableHead
+              align="right"
+              direction={sortBy === "cost" ? sortOrder : undefined}
+              onDirectionChange={(direction) => toggleSort("cost", direction)}
+            >
+              {t("chartCost")}
+            </SortableTableHead>
+            <TableHead className="px-4 py-2.5 text-right w-36">{t("chartShare")}</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {sorted.map((p, i) => {
+            const pct = totalTokens > 0 ? ((p.totalTokens / totalTokens) * 100).toFixed(1) : "0";
+            return (
+              <TableRow key={`${p.provider}-${i}`}>
+                <TableCell className="px-4 py-2.5">
+                  <div className="flex items-center gap-2">
+                    <span
+                      className="w-2 h-2 rounded-full shrink-0"
+                      style={{ backgroundColor: PROVIDER_COLORS[i % PROVIDER_COLORS.length] }}
+                    />
+                    <span className="font-medium capitalize">{p.provider}</span>
+                  </div>
+                </TableCell>
+                <TableCell className="px-4 py-2.5 text-right font-mono text-text-muted">
+                  {fmtFull(p.requests)}
+                </TableCell>
+                <TableCell
+                  className="px-4 py-2.5 text-right font-mono text-primary"
+                  title={
+                    displayMode === "exact" ? `~${fmt(p.promptTokens)}` : fmtFull(p.promptTokens)
+                  }
                 >
-                  <td className="px-4 py-2.5">
-                    <div className="flex items-center gap-2">
-                      <span
-                        className="w-2 h-2 rounded-full shrink-0"
-                        style={{ backgroundColor: PROVIDER_COLORS[i % PROVIDER_COLORS.length] }}
+                  {displayMode === "exact" ? fmtFull(p.promptTokens) : fmt(p.promptTokens)}
+                </TableCell>
+                <TableCell
+                  className="px-4 py-2.5 text-right font-mono text-success"
+                  title={
+                    displayMode === "exact"
+                      ? `~${fmt(p.completionTokens)}`
+                      : fmtFull(p.completionTokens)
+                  }
+                >
+                  {displayMode === "exact" ? fmtFull(p.completionTokens) : fmt(p.completionTokens)}
+                </TableCell>
+                <TableCell
+                  className="px-4 py-2.5 text-right font-mono font-semibold"
+                  title={
+                    displayMode === "exact" ? `~${fmt(p.totalTokens)}` : fmtFull(p.totalTokens)
+                  }
+                >
+                  {displayMode === "exact" ? fmtFull(p.totalTokens) : fmt(p.totalTokens)}
+                </TableCell>
+                <TableCell className="px-4 py-2.5 text-right font-mono text-warning">
+                  {fmtCost(p.cost)}
+                </TableCell>
+                <TableCell className="px-4 py-2.5 text-right">
+                  <div className="flex items-center gap-2 justify-end">
+                    <div className="w-16 h-1.5 rounded-full bg-surface-2 overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all"
+                        style={{
+                          width: `${pct}%`,
+                          backgroundColor: PROVIDER_COLORS[i % PROVIDER_COLORS.length],
+                        }}
                       />
-                      <span className="font-medium capitalize">{p.provider}</span>
                     </div>
-                  </td>
-                  <td className="px-4 py-2.5 text-right font-mono text-text-muted">
-                    {fmtFull(p.requests)}
-                  </td>
-                  <td
-                    className="px-4 py-2.5 text-right font-mono text-primary"
-                    title={fmtFull(p.promptTokens)}
-                  >
-                    {fmt(p.promptTokens)}
-                  </td>
-                  <td
-                    className="px-4 py-2.5 text-right font-mono text-emerald-500"
-                    title={fmtFull(p.completionTokens)}
-                  >
-                    {fmt(p.completionTokens)}
-                  </td>
-                  <td
-                    className="px-4 py-2.5 text-right font-mono font-semibold"
-                    title={fmtFull(p.totalTokens)}
-                  >
-                    {fmt(p.totalTokens)}
-                  </td>
-                  <td className="px-4 py-2.5 text-right font-mono text-amber-500">
-                    {fmtCost(p.cost)}
-                  </td>
-                  <td className="px-4 py-2.5 text-right">
-                    <div className="flex items-center gap-2 justify-end">
-                      <div className="w-16 h-1.5 rounded-full bg-white/[0.06] overflow-hidden">
-                        <div
-                          className="h-full rounded-full transition-all"
-                          style={{
-                            width: `${pct}%`,
-                            backgroundColor: PROVIDER_COLORS[i % PROVIDER_COLORS.length],
-                          }}
-                        />
-                      </div>
-                      <span className="text-xs font-mono text-text-muted w-10 text-right">
-                        {pct}%
-                      </span>
-                    </div>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
-      </div>
+                    <span className="text-xs font-mono text-text-muted w-10 text-right">
+                      {pct}%
+                    </span>
+                  </div>
+                </TableCell>
+              </TableRow>
+            );
+          })}
+        </TableBody>
+      </Table>
     </Card>
   );
 }

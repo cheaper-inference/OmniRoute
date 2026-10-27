@@ -4,377 +4,386 @@
 
 ---
 
-> **For brukere**: Ser du etter en enkel veiledning? Se [veiledningen for gratisnivåer](../getting-started/FREE-TIERS-GUIDE.md) for trinnvise instruksjoner om hvordan du får gratis KI.
+> **For brukere**: Ser du etter en enkel veiledning? Se [Veiledning for gratisnivåer](../getting-started/FREE-TIERS-GUIDE.md) for trinnvise instruksjoner om hvordan du får gratis KI.
 
-> **Sist undersøkt:** 2026-06-17 — nettundersøkelser for hver leverandør (offisiell dokumentasjon + nyheter fra de siste 7 dagene, gjennomgang med 50 agenter og kontradiktorisk verifisering) som oppdaterer alle kvoter for gratisnivåer og bruksvilkår. **Delvis ny revisjon 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — se den daterte merknaden nedenfor).
-> **Fasitkilde (katalog):** `open-sse/config/freeModelCatalog.ts` (budsjetter per MODELL, deduplisert etter pool). Tallene for tokenbudsjetter nedenfor kommer fra løpende nettundersøkelser og er en **tilnærming** — se [Metodikk og forbehold](#methodology--caveats).
+> **Sist undersøkt:** 2026-06-17 — nettundersøkelse per leverandør (offisiell dokumentasjon + nyheter fra de siste 7 dagene, gjennomgang med 50 agenter og kontradiktorisk verifisering) som oppdaterte alle gratisnivåkvoter og bruksvilkår. **Delvis ny gjennomgang 2026-09-02** (`gemini`, `ollama-cloud`, `groq`, `nara`, `mistral` — se den daterte merknaden nedenfor).
+> **Autoritativ kilde (katalog):** `open-sse/config/freeModelCatalog.ts` (budsjetter per MODELL, deduplisert etter pott). Tallene for tokenbudsjett nedenfor kommer fra løpende nettundersøkelser og er en **tilnærming** — se [Metode og forbehold](#methodology--caveats).
 
 ## Kort fortalt — hvor mye gratis inferens samler OmniRoute egentlig?
 
-| Måleverdi                                         | Tokener / måned        | Betydning                                                                                                                                                                                                                                                                                                          |
-| ------------------------------------------------- | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Dokumentert, gjentakende tildeling (fast)**     | **~1.62B**             | **Pooler** på gratisnivået (katalog per modell), der hver delte pool telles **én gang**. Den aktive kilden bak `/api/free-tier/summary` og siden for gratisnivåbudsjett i kontrollpanelet. **Bruk dette tallet.**                                                                                                  |
-| **+ første måned med registreringskreditter**     | **~2.22B**             | Fast tildeling + engangskreditter ved registrering (Z.AI 20M, DeepSeek 5M, …), deduplisert per konto. **Kun den første måneden** — gjentas ikke.                                                                                                                                                                   |
-| **+ permanent gratis, uten publisert grense**     | _ikke kvantifiserbart_ | `siliconflow`, `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud` — reell, gjentakende tilgang, begrenset av hastighet/samtidighet, **uten noen tokengrense å telle**. Oppført, men aldri summert (å beregne dem som `RPM×24/7` er den oppblåsingen vi avviser). |
-| **+ økning som låses opp med innskudd**           | **+~24M**              | En engangsinnbetaling på **$10** hos OpenRouter øker gratispoolen fra 50 → 1000 forespørsler/dag. Rapporteres separat, slik at den aldri blåser opp det faste tallet.                                                                                                                                              |
-| **+ bak en regional identitetskontroll**          | **+~6M**               | `modelscope` (tilknytning til Alibaba Cloud + verifisering med ekte navn i Fastlands-Kina). Reell, gjentakende kvote, tilgjengelig som `gatedRecurringTokens` / `gatedProviders` og i kontrollpanelet. Summeres aldri inn i hovedtallet: +~6M bak regional identitetsverifisering.                                 |
-| Teoretisk maksimum (alle hastighetsgrenser, 24/7) | ~10B                   | Summen av alle leverandørenes hastighetsgrenser ekstrapolert til kontinuerlig bruk. **Ingen garanti** — ikke bruk dette som hovedtall.                                                                                                                                                                             |
+Disse tallene beskriver separate tredjepartskontoer og kvalifikasjonskrav på tvers av katalogen. OmniRoute tildeler ikke dette budsjettet: Du må skaffe de nødvendige kontoene eller påloggingsopplysningene, koble til kvalifiserte leverandører og overholde grensene deres. Den faktiske tilgjengelige kapasiteten kan være lavere, inkludert null i en ny installasjon uten en kvalifisert rute. Leverandører merket med `tos: avoid` utelates som standard fra automatisk ruting.
 
-**Ærlig hovedbudskap:** _OmniRoute samler **~1.62B dokumenterte gratistokener per måned** (opptil ~2.22B den første måneden med registreringskreditter) på tvers av 35 gratisnivåpooler — i tillegg til en lang rekke permanent gratis leverandører uten tak — og RTK + Caveman-komprimering (15–95 % tokenbesparelse) får dem til å vare enda lenger._
+**Kontrollert 2026-10-08:** [Cerebras](https://www.cerebras.ai/pricing) tilbyr en kampanjekreditt på $5 som gis én gang, krever en betalingsmåte og utløper etter 30 dager. [Gemini](https://ai.google.dev/gemini-api/docs/rate-limits) publiserer hastighetsgrenser for prosjekt/modell/nivå. Tjenesten er fortsatt ikke inkludert i den kvantifiserte månedlige overskriften.
 
-> **Hvorfor dette falt fra de tidligere ~1,94B.** Oppdateringen 2026-06-17 er en ærlighetskorreksjon, ikke et tap: `gemini` er nå deduplisert per pool (var overdrevet fordi hver Flash-variant ble telt separat, 462M → 60M), `cloudflare-ai` er korrigert til de faktiske 10k Neurons/dag (122M → 30M), `doubao` er omklassifisert som en engangskreditt ved registrering (ikke gjentakende), og nedlagte nivåer er fjernet (`chutes`/`phind`/`kluster` er avviklet). Dette oppveies delvis av `llm7` (korrekt 5M/dag → 150M) og nye gratisleverandører (Kilo, OpenCode Zen, Z.AI GLM-Flash).
->
-> **Ytterligere korrigert til ~1,37B i v3.8.42:** `longcat` ble omklassifisert fra en gjentakende tildeling på 150M/mnd. til en engangskreditt på 10M ved registrering etter at gratisforhåndsvisningen ble avsluttet. Samme ærlighetsregel — ingen leverandør ble fjernet ved en feil.
->
-> **Oppdatert 2026-08-26 etter avviklingen av Felo Web:** Felo Web er utelatt så lenge opphavet/lisensieringen basert på GPL fortsatt er PÅ VENT; kilden rapporterte 38 pool-nøkler på det tidspunktet. Pool-antallet er dynamisk og CI-kontrollert (`check:docs-counts` gjør at bygget mislykkes hvis tallene ovenfor avviker fra `computeFreeModelTotals()`).
->
-> **Kontrollert på nytt 2026-09-02 mot leverandørenes egne sider** (kilder: `// evidence:`-kommentarene ved siden av hver oppføring som ble kontrollert på nytt i `open-sse/config/freeModelCatalog.data.ts`): `gemini` og `ollama-cloud` publiserer ikke lenger noe tokentall (Google fjernet gratistabellen per modell 2025-12-23; Ollamas Free-abonnement er «startkreditter for bruk») og er nå oppført som **uten øvre grense**, og tas aldri med i summen (−80M); `groq` har fem grenser på 200K TPD **per modell** (6M hver, +15M), og tre utgåtte ID-er er fjernet; `nara` har én kvote på 7M/dag (+60M, 210M). `mistral` sine 1B er bare synlige i kontokonsollen — se _Evidensklasser_ under Metodikk.
->
-> **Korrigert 2026-09-03 (#11773):** `cerebras` ble omklassifisert fra en gjentakende tildeling på 30M/mnd. (gammel prøveperiode uten kort med 1M tokens/dag) til en engangskreditt på $5 ved registrering som krever en betalingsmåte. Samme ærlighetsregel som for LongCat.
->
-> **Pluss xKiro (2026-09-03):** den nye poolen `xkiro-free` (150M/mnd.) legger til en 35. gjentakende pool-nøkkel. Felo Web forblir utelatt så lenge opphavet/lisensieringen basert på GPL fortsatt er PÅ VENT. Kilden rapporterer nå **35 gjentakende pool-nøkler** og **~1,62B stabilt** — det dynamiske, CI-kontrollerte tallet (`check:docs-counts` gjør at bygget mislykkes hvis dette avviker fra `computeFreeModelTotals()`).
+| Måleenhet                                         | Tokens / måned           | Betydning                                                                                                                                                                                                                                                                                               |
+| ------------------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Dokumentert gjentakende kvote (stabil)**        | **~1.62B**               | **Potter** på gratisnivå (katalog per modell), der hver delte pott telles **én gang**. Den løpende kilden bak `/api/free-tier/summary` og kontrollpanelets side for gratisnivåbudsjett. **Bruk dette tallet.**                                                                                          |
+| **+ første måned med registreringskreditter**     | **~2.22B**               | Stabil kvote + registreringskreditter som gis én gang (Z.AI 20M, DeepSeek 5M, …), deduplisert per konto. **Kun den første måneden** — gjentas ikke.                                                                                                                                                     |
+| **+ permanent gratis, ingen publisert grense**    | _kan ikke kvantifiseres_ | `glm-cn` (GLM-4-Flash), `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud` — reell, gjentakende tilgang begrenset av hastighet/samtidighet, men **ingen tokengrense som kan telles**. Oppføres, men summeres aldri (å beregne dem som `RPM×24/7` er oppblåsingen vi avviser). |
+| **+ økning som låses opp med innskudd**           | **+~24M**                | En engangsinnbetaling på **$10** til OpenRouter øker gratispotten fra 50 → 1000 forespørsler/dag. Rapporteres separat, slik at den aldri blåser opp det stabile tallet.                                                                                                                                 |
+| **+ bak en regional identitetskontroll**          | **+~6M**                 | `modelscope` (tilknytning til Alibaba Cloud + identitetsverifisering med fullt navn i Fastlands-Kina). Reell, gjentakende kvote, eksponert som `gatedRecurringTokens` / `gatedProviders` og i kontrollpanelet. Summeres aldri inn i overskriftstallet: +~6M bak regional identitetsverifisering.        |
+| Teoretisk maksimum (alle hastighetsgrenser, 24/7) | ~10B                     | Summen av alle leverandørenes hastighetsgrenser ekstrapolert til kontinuerlig bruk. **Ingen garanti** — ikke bruk dette som overskrift.                                                                                                                                                                 |
 
-De største **dokumenterte** bidragsyterne: `mistral` 1,00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (fem grenser per modell), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` er utelatt — tildelingen på 10M for LongCat-2.0 er en engangskreditt ved registrering med krav om KYC, ikke et gjentakende månedlig budsjett.)
+**Ærlig overskrift:** _OmniRoute samler **~1.62B dokumenterte gratis tokens per måned** (opptil ~2.22B den første måneden med registreringskreditter) på tvers av 34 gratisnivåpotter — i tillegg til en lang rekke permanent gratis leverandører uten øvre grense — og RTK + Caveman-komprimering (15–95 % tokenbesparelse) strekker dette enda lenger._
 
-> ⚠️ Det teoretiske taket (~10B) blåses opp av leverandører som bare har hastighetsbegrensninger og **ingen publisert tokengrense** (`tencent`, `siliconflow`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`), der tallene ville vært `RPM/TPM × 24/7 × 30d` — et teoretisk maksimum som ingen enkeltkonto vil kunne opprettholde. De er **utelatt** fra det forsvarlige tallet (og vises i stedet i raden «permanent gratis, uten grense»). Det er den samme oppblåsingen som gjør konkurrentenes påstander om flere milliarder upålitelige.
+> **Hvorfor dette falt fra tidligere ~1,94B.** Oppdateringen 2026-06-17 er en korrigering for å gi et ærlig bilde, ikke et tap: `gemini` dedupliseres nå på tvers av ressursutvalget (tallet var tidligere overdrevet fordi hver Flash-variant ble telt separat, 462M → 60M), `cloudflare-ai` ble korrigert til de faktiske 10k Neurons/dag (122M → 30M), `doubao` ble omklassifisert til en engangskreditt ved registrering (ikke gjentakende), og avsluttede nivåer ble fjernet (`chutes`/`phind`/`kluster` er avviklet). Dette oppveies delvis av `llm7` (korrekt 5M/dag → 150M) og nye gratisleverandører (Kilo, OpenCode Zen, Z.AI GLM-Flash).
+>
+> **Ytterligere korrigert til ~1,37B i v3.8.42:** `longcat` ble omklassifisert fra en gjentakende tildeling på 150M/md. til en engangskreditt på 10M ved registrering etter at gratisforhåndsvisningen ble avsluttet. Samme prinsipp om ærlighet — ingen leverandør ble fjernet ved en feil.
+>
+> **Oppdatert 2026-08-26 etter avviklingen av Felo Web:** Felo Web er ekskludert så lenge opprinnelsen/lisensieringen basert på GPL fortsatt er satt på vent; kilden rapporterte 38 ressursutvalgsnøkler på det tidspunktet. Antallet i ressursutvalget er dynamisk og kontrollert av CI (`check:docs-counts` får byggingen til å feile hvis tallene ovenfor avviker fra `computeFreeModelTotals()`).
+>
+> **Revidert på nytt 2026-09-02 mot leverandørenes egne sider** (kilder: `// evidence:`-kommentarene ved siden av hver reviderte oppføring i `open-sse/config/freeModelCatalog.data.ts`): `gemini` og `ollama-cloud` publiserer ikke lenger et tokenantall (Google fjernet gratistabellen per modell 2025-12-23; Ollamas Free-abonnement består av «startkreditter for bruk») og er nå oppført som **uten tak**, og tas aldri med i summen (−80M); `groq` har fem **modellspesifikke** tak på 200K TPD (6M hver, +15M), og tre utgåtte ID-er er fjernet; `nara` har én samlet kvote på 7M/dag (+60M, 210M). `mistral` sine 1B er bare synlige i kontokonsollen — se _Evidensklasser_ under Metodikk.
+>
+> **Korrigert 2026-09-03 (#11773):** `cerebras` ble omklassifisert fra en gjentakende tildeling på 30M/md. (den gamle prøveperioden uten betalingskort med 1M tokens/dag) til en engangskreditt på $5 ved registrering som krever en betalingsmåte. Samme prinsipp om ærlighet som for LongCat.
+>
+> **Pluss xKiro (2026-09-03):** det nye `xkiro-free`-ressursutvalget (150M/md.) legger til en 35. gjentakende ressursutvalgsnøkkel. Felo Web forblir ekskludert så lenge opprinnelsen/lisensieringen basert på GPL fortsatt er satt på vent. Kilden rapporterer nå **34 gjentakende ressursutvalgsnøkler** og **~1,62B stabilt** — det dynamiske, CI-kontrollerte tallet (`check:docs-counts` får byggingen til å feile hvis dette avviker fra `computeFreeModelTotals()`).
+
+De største **dokumenterte** bidragsyterne: `mistral` 1,00B, `nara` 210M, `llm7` 150M, `xkiro` 150M, `groq` 30M (fem modellspesifikke tak), `cloudflare-ai` 30M, `api-airforce` 24M. (`longcat` er ekskludert — LongCat-2.0-tildelingen på 10M er en KYC-betinget engangskreditt ved registrering, ikke et gjentakende månedsbudsjett.)
+
+> ⚠️ Det teoretiske taket (~10B) er overdrevet av leverandører som bare har hastighetsbegrensninger og **ikke noe publisert tokentak** (`tencent`, `nvidia`, `baidu`, `glm-cn`, `sparkdesk`), der tallene ville vært `RPM/TPM × 24/7 × 30d` — et teoretisk maksimum som ingen enkeltkonto vil kunne opprettholde. De er **ekskludert** fra det forsvarlige tallet (og vises i stedet i raden «permanent gratis, uten tak»). Dette er den samme overdrivelsen som gjør konkurrentenes påstander om flere milliarder upålitelige.
 
 ---
 
 ## Oppdatering 2026-06-17 — hva er endret siden 2026-06-05
 
-En nettundersøkelse med 50 agenter (offisiell dokumentasjon + nyheter fra de siste 7 dagene, kontradiktorisk verifisert) oppdaterte hele katalogen. Høydepunkter:
+En nettbasert undersøkelse utført av 50 agenter (offisiell dokumentasjon + nyheter fra de siste 7 dagene, verifisert med kontradiktorisk kontroll) oppdaterte hele katalogen. Høydepunkter:
 
-- **Fjernet / ingen gratisnivå (2026):** `chutes` (gratisnivået opphørte 2026-03), `phind` (selskapet ble nedlagt 2026-01), `kluster` (avviklet 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (gratis MiMo-tilgang trukket tilbake 2026-05-24, Nemotron-kampanjen opphørte 2026-06 — verifisert på nytt 2026-06-18), `aimlapi` (gratisnivået satt på pause — verifisert på nytt 2026-06-18), `yi` (Yi-Light avviklet, bruksbasert betaling — verifisert på nytt 2026-06-18), `featherless-ai` (ingen aktiv gratisnivå), `chipotle` (Chipotles «Pepper AI» — den omvendt konstruerte Amelia-chatmodulen på `amelia.chipotle.com` som leverandøren kommuniserte med, returnerer nå 404 på alle ruter, inkludert roten; backend avviklet/flyttet, bekreftet 2026-09-15 — fullstendig fjernet fra katalogen, #13131/#4037). `iflytek` / `sparkdesk` forblir oppført, men har en merknad om forsiktighet knyttet til bruksvilkårene (Spark Lite er gratis; bruksvilkårene begrenser bruk som mellomtjener/videresending).
-- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` ble stengt ned 2026-06-01, og `2.5 Pro` forlot gratisnivået (2026-04); gratisnivået omfatter nå **kun Flash-familien** (2.5/3/3.1/3.5 Flash + Gemma). Katalogen **samler** nå Flash-familien i én kvote (tidligere oppblåst ved å telle hver variant separat: 462M → 60M).
-- **Korrigerte tall:** `cloudflare-ai` 122M → **30M** (reelt 10k Neurons/dag), `doubao` omklassifisert som en engangskreditt ved registrering (ikke gjentakende), `llm7` 4M → **150M** (dokumenterte 5M tokens/dag), `together`-endepunkter med «-Free» avviklet → registreringskreditten på $25 er også fjernet (krever et minimumskjøp på $5, ingen gratis prøveperiode), forhåndsvisningen av `longcat` avsluttet + Flash-modellene avviklet → kun **LongCat-2.0**, omklassifisert som en engangskreditt på **10M** tokens ved registrering (KYC-betinget, ikke gjentakende).
-- **Nye gratisleverandører oppdaget:** ⭐ **Kilo Code** (`kilo-gateway` — roterende «Auto Free»-utvalg: NVIDIA Nemotron 3-familien, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 6 roterende gratis kodemodeller), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash permanent gratis + 20M registreringsbonus), og `arcee-ai` Trinity Large Preview.
-- **Nye, ærlige nivåer** (se Metodikk): en kategori som er _permanent gratis, men uten øvre grense_ (reell, gjentakende tilgang uten noen token-grense å telle) og en _innskuddsopplåst økning_ (OpenRouter $10 → +24M/md.), begge vist **separat**, slik at de aldri blåser opp hovedtallet.
+- **Fjernet / ingen gratisnivå (2026):** `chutes` (gratisnivået ble avsluttet 2026-03), `phind` (selskapet ble lagt ned 2026-01), `kluster` (avviklet 2026-06-09 → MITO), `gitlawb` + `gitlawb-gmi` (gratis MiMo-tilgang trukket tilbake 2026-05-24, Nemotron-kampanjen ble avsluttet 2026-06 — verifisert på nytt 2026-06-18), `aimlapi` (gratisnivået satt på pause — verifisert på nytt 2026-06-18), `yi` (Yi-Light avviklet, bruksbasert betaling — verifisert på nytt 2026-06-18), `featherless-ai` (har for øyeblikket ikke noe gratisnivå), `chipotle` (Chipotles «Pepper AI» — den omvendt utviklede Amelia-chatmodulen på `amelia.chipotle.com` som leverandøren kommuniserte med, returnerer nå 404 på alle ruter, inkludert roten; serverdelen er avviklet/flyttet, bekreftet 2026-09-15 — fullstendig fjernet fra katalogen, #13131/#4037). `iflytek` / `sparkdesk` står fortsatt oppført, men har en advarsel om bruksvilkårene (Spark Lite er gratis; bruksvilkårene begrenser bruk som proxy/relé).
+- **Gemini** — `2.0 Flash` / `2.0 Flash-Lite` ble avviklet 2026-06-01, og `2.5 Pro` forlot gratisnivået (2026-04); gratisnivået omfatter nå **kun Flash-familien** (2.5/3/3.1/3.5 Flash + Gemma). Katalogen **samler** nå Flash-familien i én kvote (den var tidligere kunstig oppblåst fordi hver variant ble telt separat: 462M → 60M).
+- **Korrigerte tall:** `cloudflare-ai` 122M → **30M** (faktisk 10k nevroner/dag), `doubao` er omklassifisert som en engangskreditt ved registrering (ikke gjentakende), `llm7` 4M → **150M** (dokumenterte 5M tokener/dag), `together`-endepunkter med «-Free» avviklet → registreringskreditten på $25 er også fjernet (krever et minimumskjøp på $5, ingen gratis prøveperiode), `longcat`-forhåndsvisningen avsluttet + Flash-modellene avviklet → kun **LongCat-2.0**, omklassifisert som en engangskreditt på **10M** tokener ved registrering (KYC-påkrevd, ikke gjentakende).
+- **Nye gratisleverandører oppdaget:** ⭐ **Kilo Code** (`kilo-gateway` — roterende «Auto Free»-utvalg: NVIDIA Nemotron 3-familien, StepFun, Poolside, Nex-N2-Pro), ⭐ **OpenCode Zen** (`opencode-zen` — 10 roterende gratis kodemodeller, oppdatert 2026-10-20), ⭐ **Z.AI / Zhipu** (`glm-cn` — GLM-4-Flash / 4.5-Flash / 4.7-Flash er permanent gratis + 20M i registreringsbonus), og `arcee-ai` Trinity Large Preview.
+- **Nye redelige nivåer** (se Metodikk): en kategori for _permanent gratis, men uten fastsatt tak_ (reell, gjentakende tilgang uten noen tokenbegrensning som kan telles) og en _innskuddsutløst økning_ (OpenRouter $10 → +24M/md.), begge vist **separat** slik at de aldri blåser opp hovedtallet.
 
-> Den detaljerte tabellen per leverandør lenger ned er **øyeblikksbildet fra 2026-06-05**; endringene ovenfor erstatter den. Den aktive, kanoniske kilden er katalogen per modell i `open-sse/config/freeModelCatalog.ts`.
+> Den detaljerte tabellen for hver leverandør lenger nede er **øyeblikksbildet fra 2026-06-05**; endringene ovenfor erstatter det. Den løpende, autoritative kilden er katalogen per modell i `open-sse/config/freeModelCatalog.ts`.
 
 ---
 
-## To regimer — opptelling kontra avgjørelser
+## 2026-10-18 Korrigering av SiliconFlow-gratismodeller (#17028)
 
-OmniRoute besvarer «er det gratis?» gjennom to regimer som med hensikt leser
-ulike kilder:
+Ti av SiliconFlows flaggskipmodeller med publiserte positive priser per token ble feilaktig
+levert som gratis tilgang av typen `recurring-uncapped`. Disse ti radene er **fjernet** fra den
+statiske katalogen, som nå har **467 oppføringer**. SiliconFlow bidrar ikke lenger med en
+ubetinget rad for gratis modeller eller en permanent gratis leverandør i de statiske totalene.
 
-| Regime                   | Sannhetskilde                                                                                                                                                                      | Bruksområder                                                                                                                          |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **Opptelling / visning** | Ferdigbehandlet katalog — den medfølgende grunnversjonen overlagt med Radar-feeden (`getRadarCatalog`)                                                                             | Totaler for gratisnivåer, budsjettkort, kontrollpaneler                                                                               |
-| **Avgjørelser**          | Kun den medfølgende katalogen (`FREE_MODEL_BUDGETS` i `open-sse/config/freeModelCatalog.data.ts`) pluss de lokale heuristikkene (`:free`-suffiks, nullprising, `grantsFreeAccess`) | Alle brukere av `src/shared/utils/freeModels.ts`: modellimport, `auto/*`-ruting, `GET /v1/models` og forhåndsvisningene i nettleseren |
+Dette betyr **ikke** at SiliconFlow ikke har noen gratis modeller. Importen som bare inkluderer gratisinnhold, og Free-merket,
+krever nå **positive bevis per modell fra leverandørens aktive modellrespons**, for eksempel en
+eksplisitt boolsk gratismarkør eller at begge tokenprisene er null. Et eksplisitt betalt-flagg eller en
+positiv numerisk pris har forrang fremfor en optimistisk gratismarkør. En modell uten
+tilgjengelige aktive bevis antas **ikke** å være gratis; engangskreditten for nye kontoer kan ikke
+etablere en gjentakende gratistildeling. Hvis det gjeldende leverandør-API-et ikke kan oppgi pålitelig
+prisinformasjon på modellnivå, må dette bekreftes i leverandørkonsollen før ruting. Dette konservative
+valget forhindrer uventede kostnader gjennom importer som bare inkluderer gratisinnhold, og automatiske kombinasjoner.
 
-Opptellingen kan forbedres hver gang en feed er tilgjengelig. Avgjørelsene forblir basert på
-utgivelsesartefakten, slik at svaret er identisk i nettleseren og på serveren,
-kan reproduseres uten nettforbindelse og testes uten en database. Hvis nettleserens
-forhåndsvisning leste én kilde mens serverimporten leste en annen, ville det føre til en
-forhåndsvisning som ikke samsvarer med det som skjer ved klikk — oppdelingen er beholdt med
-hensikt.
+Den historiske leverandørtabellen nedenfor er ikke et aktivt løfte om tilgjengelighet. Den tidligere
+oppføringen for SiliconFlow med ubegrenset tilgang/10 modeller er med hensikt utelatt fordi den ikke lenger
+representerer en etablert, gjentakende gratistildeling.
+
+---
+
+## 2026-10-15 Korrigering for Bytez og Nous
+
+[Bytez-fakturering](https://docs.bytez.com/model-api/docs/billing) begrenser de åpne modellene i gratisabonnementet til 7B parametere. Oppføringene med 70B og 72B krever opplåsing med kjøpte kreditter og er fjernet. Mistral-7B forblir `recurring-credit`: Kredittene fornyes hver fjerde uke, men faktureringen skjer per inferenssekund, og ingen tokenkvote er publisert. Token-tellerne er satt til null for å representere en ukjent mengde og erstatter det ikke-støttede anslaget på 1M tokens. Dette betyr ikke at det er null gratiskreditter. Nous-endringene er beskrevet i leverandørmerknaden nedenfor.
+
+## To regimer — telling kontra avgjørelse
+
+OmniRoute svarer på «er det gratis?» gjennom to regimer som med hensikt leser fra forskjellige kilder:
+
+| Regime                | Sannhetskilde                                                                                                                                                           | Bruksområder                                                                                                                          |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| **Telling / visning** | Løst katalog — den leverte grunnversjonen overlagt med Radar-feeden (`getRadarCatalog`)                                                                                 | Totaler for gratisnivået, budsjettkort, instrumentpaneler                                                                             |
+| **Avgjørelse**        | Kun levert katalog (`FREE_MODEL_BUDGETS` i `open-sse/config/freeModelCatalog.data.ts`) pluss de lokale heuristikkene (`:free`-suffiks, nullprising, `grantsFreeAccess`) | Alle brukere av `src/shared/utils/freeModels.ts`: modellimport, `auto/*`-ruting, `GET /v1/models` og forhåndsvisningene i nettleseren |
+
+Tellingen kan forbedres når en feed er tilgjengelig. Avgjørelsen forblir basert på utgivelsesartefakten, slik at svaret er identisk i nettleseren og på serveren, kan reproduseres uten nett og kan testes uten en database. Hvis forhåndsvisningen i nettleseren leser fra én kilde mens importen på serveren leser fra en annen, vil forhåndsvisningen være uenig med det som skjer ved klikk — oppdelingen beholdes med hensikt.
 
 ## Metodikk og forbehold
 
-- Tallene er **øvre estimater** basert på hver leverandørs dokumenterte grenser for gratisnivået per **2026-06-17**, innhentet gjennom nettsøk. Gratisnivåer endres stadig — kontroller dem på nytt før du baserer deg på et tall.
-- **Hva en oppføring faktisk bekrefter.** Ingen oppføring har en konfidensvurdering per rad, og API-et tilbyr heller ingen — behandle hvert tall ovenfor som et estimat av samme, uoppgitte kvalitet. To opplysninger skiller seg ut fordi de er manuelt kuratert fremfor utledet: 44 oppføringer har en uavhengig dokumentert absolutt stopp (39 av dem er xKiro-radene, som alle deler én daglig kvote), og 13 oppføringer har informasjon om bruk av ledetekster til trening. `hardStopGuaranteed` angis bare når leverandørens egne vilkår sier at forespørselen avvises når gratiskvoten overskrides, fremfor at du automatisk begynner å bli belastet, med kilden i en kommentar ved siden av oppføringen; den settes aldri som standard til `true`, og en oppføring som ingen har verifisert, forblir uten verdi. Et manglende flagg for absolutt stopp betyr derfor «ikke fastslått», ikke «kjent for å belaste deg». **STRICT-modus** (den valgfrie rutingsbeskyttelsen `freeAccessPolicy=strict`) stoler bare på oppføringer som har flagget; alle andre gratisnivåer ekskluderes som `no-hard-stop` (se `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Når beskyttelsen filtrerer en pulje, rapporterer den operatørsynlige loggen både antallet ekskluderinger og andelen deres med `no-hard-stop`.
-- `estMonthlyFreeTokens` = kun gjentakende månedlige tokener. **Engangskreditter ved registrering gjentas ikke** og regnes som 0. Avviklede nivåer er også 0.
-- Daglig tokengrense → `monthly = daily × 30`. Kun dokumentert RPD → `RPD × ~800 output tokens × 30`. Kun RPM/TPM (ingen daglig grense) → **ubegrenset** (se nedenfor).
-- **Permanent gratis, men uten publisert tokengrense** (`siliconflow`, `glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): Dette er reell, gjentakende gratistilgang, begrenset av hastighet/samtidighet. Vi klassifiserer dem som `recurring-uncapped` og **summerer dem aldri** — å multiplisere `RPM × 24/7 × 30d` ville gitt et urealistisk tak (den oppblåsingen av tallene som vi avviser). De er oppført slik at du vet at de finnes.
-- **Økning låst opp med innskudd:** En liten engangsinnbetaling som permanent øker en gratiskvote (OpenRouter: $10 → 1000 forespørsler/dag ≈ +24M/måned). Rapporteres som et separat tall og holdes utenfor det løpende hovedtallet.
-- **Kvalifikasjonsbegrensede kvoter** (`eligibilityGate: "regional-identity"`): En reell, gjentakende kvote som bare åpnes etter en regionbundet identitetskontroll (i dag verifisering med ekte navn i Fastlands-Kina). Regnes med den samme regelen for deduplisering av puljer i et separat tall (`gatedRecurringTokens`), aldri i det løpende hovedtallet. Regimet (`freeType`) forblir uendret, så rutingen er uendret.
-- **Evidensklasser.** Regelen er at et tall i katalogen oppgir kilden sin i en `// evidence:`-kommentar ved siden av oppføringen — `public-page` (en leverandørside som alle kan lese), `api-public` (et uautentisert endepunkt hos leverandøren, for eksempel NaraRouters offentlige endepunkt for abonnementer på router.bynara.id), eller `console-verified <date> por <who>` (tallet er bare synlig i en kontokonsoll; kommentaren registrerer hvem som så det og når, samt den offentlige siden som sier at grensen finnes). Status i dag er at de fem blokkene som ble kontrollert på nytt 2026-09-02, har dette (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`); oppføringer fra før den nye kontrollen 2026-09-02 arver den tidligere undersøkelsen frem til de endres; ethvert **nytt eller endret** tall uten en evidenskommentar er en feil. I dag er bare `mistral` konsollverifisert.
+- Tallene er **øvre grense-estimater** fra hver leverandørs dokumenterte grenser for gratisnivået per **2026-06-17**, innhentet gjennom nettundersøkelser. Gratisnivåer endres hele tiden — kontroller på nytt før du stoler på et tall.
+- **Hva en oppføring faktisk garanterer.** Ingen oppføring har en konfidensvurdering per rad, og API-et leverer heller ingen — behandle alle tallene ovenfor som estimater av samme, uspesifiserte kvalitet. To fakta skiller seg ut fordi de er manuelt kuratert i stedet for utledet: 44 oppføringer har en uavhengig dokumentert absolutt stopp (39 av dem er xKiro-radene, som alle deler én daglig kvote), og 12 oppføringer har en erklæring om bruk til prompttrening. `hardStopGuaranteed` angis bare når leverandørens egne vilkår sier at forespørselen avvises ved overskridelse av gratiskvoten, i stedet for at fakturering starter uten varsel, med kilden i en kommentar ved siden av oppføringen. Den settes aldri som standard til `true`, og en oppføring som ingen har verifisert, forblir uten verdi. Et manglende flagg for absolutt stopp betyr derfor «ikke fastslått», ikke «kjent for å fakturere deg». **STRICT-modus** (den valgfrie rutingsbeskyttelsen `freeAccessPolicy=strict`) stoler bare på oppføringer som har flagget. Alle andre gratisnivåer ekskluderes som `no-hard-stop` (se `open-sse/services/autoCombo/strictZeroCostFilter.ts`). Når beskyttelsen filtrerer et utvalg, rapporterer den operatørsynlige loggen både antallet ekskluderinger og andelen deres med `no-hard-stop`.
+- `estMonthlyFreeTokens` = kun månedlige, tilbakevendende tokens. **Engangskreditter ved registrering gjentas ikke** og teller som 0. Avviklede nivåer er også 0.
+- Daglig tokengrense → `monthly = daily × 30`. Kun RPD dokumentert → `RPD × ~800 output tokens × 30`. Kun RPM/TPM (ingen daglig grense) → **uten øvre grense** (se nedenfor).
+- **Permanent gratis, men uten publisert tokengrense** (`glm-cn`, `tencent`, `baidu`, `kilo-gateway`, `opencode-zen`, `gemini`, `ollama-cloud`): Dette er reell, tilbakevendende gratistilgang, begrenset av forespørselsfrekvens/samtidighet. Vi klassifiserer dem som `recurring-uncapped` og **summerer dem aldri** — å multiplisere `RPM × 24/7 × 30d` ville gitt et urealistisk tak (den oppblåsingen vi avviser). De er oppført slik at du vet at de finnes.
+- **Økning ved innskuddsopplåsing:** En liten engangsinnbetaling som permanent øker en gratiskvote (OpenRouter: $10 → 1000 forespørsler/dag ≈ +24M/mnd.). Rapporteres som et separat tall og holdes utenfor den stabile overskriften.
+- **Kvalifikasjonsbegrensede kvoter** (`eligibilityGate: "regional-identity"`): En reell, tilbakevendende kvote som først åpnes etter en regionsbundet identitetskontroll (i dag verifisering med virkelig navn i Fastlands-Kina). Telles med den samme regelen for deduplisering av utvalg i et separat tall (`gatedRecurringTokens`), aldri i den stabile overskriften. Regimet (`freeType`) er uendret, så rutingen er uendret.
+- **Evidensklasser.** Regelen er at et tall i katalogen oppgir kilden sin i en `// evidence:`-kommentar ved siden av oppføringen — `public-page` (en leverandørside som alle kan lese), `api-public` (et uautentisert endepunkt hos leverandøren, for eksempel NaraRouters offentlige endepunkt for abonnementer på router.bynara.id), eller `console-verified <date> por <who>` (tallet er bare synlig i en kontokonsoll; kommentaren registrerer hvem som så det og når, samt den offentlige siden som sier at grensen finnes). Dagens status: De fem blokkene som ble revidert på nytt 2026-09-02, har dette (`gemini`, `groq`, `mistral`, `ollama-cloud`, `nara`). Oppføringer som er eldre enn den nye revisjonen 2026-09-02, arver den tidligere undersøkelsen til de blir endret. Ethvert **nytt eller endret** tall uten en evidenskommentar er en feil. I dag er bare `mistral` konsollverifisert.
 
 ---
 
-## Hvorfor tallet vårt er lavere enn hos andre aggregatorer
+## Hvorfor tallet vårt er lavere enn andre aggregatorers
 
-De fleste tallene for «gratis tokens per måned» på dette området er summen av etiketter per modell. Vårt er med hensikt ikke det:
+De fleste tall for «gratis tokens per måned» på dette området er summer av etiketter per modell. Vårt er med hensikt ikke det:
 
 - **Hver delte kvote telles én gang.** Mistrals gratisabonnement har én kvote på 1B/måned per organisasjon; å føre den opp under fem modeller gjør den ikke til 5B. Summert per modell ville vår egen katalog vist **~7.4B** (beregnet på nytt 2026-09-03; dette tallet kontrolleres ikke av CI — mål det på nytt hver gang katalogen endres) — overskriften sier **~1.47B** fordi det er dette én konto hos hver leverandør faktisk kan bruke.
-- **Daglige tak konverteres, rater gjør ikke det.** Et dokumentert tak på tokens/dag blir `× 30`; et dokumentert tak på forespørsler/dag blir `RPD × ~800 tokens × 30`; en leverandør som bare oppgir forespørsler per minutt, har **ikke** noe månedlig tall og oppføres som _uten tak_, aldri summert. Å multiplisere en ratebegrensning med 24/7 er den oppblåsingen vi nekter å gjøre.
-- **Kvoter som krever regional identitetskontroll, vises separat** (`+~6M behind regional identity verification`), fordi de fleste lesere ikke kan bruke dem.
+- **Daglige grenser konverteres, rater gjør det ikke.** En dokumentert grense for tokens/dag blir `× 30`; en dokumentert grense for forespørsler/dag blir `RPD × ~800 tokens × 30`; en leverandør som bare publiserer forespørsler per minutt, har **ikke noe** månedlig tall og oppføres som _uten grense_, aldri summert. Å multiplisere en rategrense med 24/7 er den oppblåsingen vi nekter å gjøre.
+- **Kvoter bak en regional identitetskontroll vises separat** (`+~6M bak regional identitetsverifisering`), fordi de fleste lesere ikke kan bruke dem.
 - **Registreringskreditter gjelder bare den første måneden** og rapporteres som et eget tall, aldri blandet inn i det løpende tallet.
-- **Tallet håndheves av CI.** `npm run check:docs-counts` beregner totalsummene på nytt fra katalogen og lar bygget feile når denne filen, README-filen eller budsjettkortet avviker fra dem.
+- **Tallet håndheves av CI.** `npm run check:docs-counts` beregner totalsummene på nytt fra katalogen og lar byggingen feile når denne filen, README-filen eller budsjettkortet avviker fra dem.
 
 ---
 
-## Tabell over vilkår som krever oppmerksomhet
+## Tabell over ToS-forbehold
 
-> **Vilkårsflagget er veiledende, ikke en rutingssperre.** Leverandører merket med `tos` inkluderes fortsatt som standard i ruting og kombinasjons-/reserveløsninger; flagget vises bare på `/dashboard/free-tiers` og `/api/free-tier/summary`. Spørringsparameteren `excludeTosAvoid` påvirker bare sammendragsvisningen, ikke global ruting. Vurderingen ligger i `open-sse/config/freeTierCatalog.ts` (til informasjon, leses ikke av rutingsmotorer).
+> **ToS-flagget er veiledende, ikke en rutingsperre.** Leverandører merket med `tos` er fortsatt inkludert i ruting og kombinasjons-/reservevalg som standard; flagget vises bare på `/dashboard/free-tiers` og `/api/free-tier/summary`. Spørringsparameteren `excludeTosAvoid` påvirker bare sammendragsvisningen, ikke global ruting. Vurderingen finnes i `open-sse/config/freeTierCatalog.ts` (til informasjon, leses ikke av rutingmotorer).
 
-> En rask gjennomgang av vilkårene til hver leverandør for en egenhostet, personlig proxy for én bruker. `caution` = en klausul om personlig bruk eller proxybruk som bør sjekkes; `ambiguous` = uklart; `ok` = uttrykkelig tillatt. Kun til informasjon, ikke juridisk rådgivning — du avgjør.
+> En rask gjennomgang av vilkårene til hver leverandør for en selvdrevet personlig proxy med én bruker. `caution` = en klausul om personlig bruk eller proxy-bruk som bør undersøkes; `ambiguous` = uklart; `ok` = uttrykkelig tillatt. Kun til informasjon, ikke juridisk rådgivning — du avgjør.
 
-### ⚠️ Vær oppmerksom — klausuler om personlig bruk / proxybruk som bør sjekkes (16)
+### ⚠️ Forsiktig — klausuler om personlig bruk / proxy-bruk som bør undersøkes (16)
 
-> Gratistilgangen deres er reell, og OmniRoute kan rute til dem; klausulene nedenfor er bare verdt å kjenne til. Alternativene med OAuth / uten nøkkel kan ikke kvantifiseres i tokens, så de er ikke inkludert i overskriftstallet (ikke fordi de er ubrukelige).
+> Gratistilgangen deres er reell, og OmniRoute kan rute til dem; klausulene nedenfor er bare verdt å kjenne til. De OAuth-/nøkkelfrie alternativene kan ikke kvantifiseres i tokens, så de er ikke med i overskriftstallet (ikke fordi de er ubrukelige).
 
-| Leverandør       | Merknad                                                                                                                                                                                 |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `agy`            | Vilkårene for Google Antigravity forbyr uttrykkelig bruk av tredjepartsprogramvare, -verktøy eller -tjenester (inkludert proxyer) for å få tilgang til tjenesten via OAuth; dette…      |
-| `ai21`           | Vilkårenes §4.2/§8.2 forbyr viderelisensiering eller distribusjon av API-tilgang til tredjeparter; §3.3 begrenser prøve-/evalueringsprodukter til «intern evaluering på…                |
-| `amazon-q`       | Produktet er avviklet for nye registreringer; eksisterende brukere er underlagt AWS Customer Agreement, som regulerer bruk av administrerte tjenester — egenhostet pro…                 |
-| `blackbox`       | Vilkårene forbyr uttrykkelig viderelisensiering, videresalg, å gjøre tjenesten tilgjengelig for tredjeparter og å bygge avledede tjenester — en egenhostet per…                         |
-| `coze`           | Cozes vilkår begrenser uttrykkelig bruken til «personlig og ikke-kommersiell bruk» og forbyr utleie, distribusjon, viderelisensiering eller videresalg av tjenesten; en…                |
-| `duckduckgo-web` | Vilkårene for Duck.ai (duckduckgo.com/duckai/privacy-terms) forbyr uttrykkelig «automatiserte spørringer og utvikling eller tilbud av KI-tjenester» samt omgåelse av …                  |
-| `featherless-ai` | Individuelle abonnementer er uttrykkelig begrenset til «interaktiv bruk eller prototyping og eksperimentering utført av kjøperen» — videresalg av inferens og proxybruk kre…            |
-| `fireworks`      | Vilkårene forbyr uttrykkelig bruk som proxy/mellomledd, overføring av API-nøkler og viderelisensiering (avsnitt 2.1 og 2.2(i)(j)); egenhostede personlige proxyer er i…                 |
-| `friendliai`     | Avsnitt 8(e) og 8(f) i vilkårene forbyr uttrykkelig å bruke FriendliAI som proxy eller å tillate tredjepartstilgang som en frittstående tjeneste, og forbyr videresalg/…                |
-| `iflytek`        | Avsnitt 2.4(3) i iFlytek Spark LLM Service Agreement forbyr uttrykkelig «bruk av automatiserte eller programmatiske metoder for å hente ut data eller resultater…                       |
-| `kiro`           | Kiros FAQ forbyr uttrykkelig bruk med «OpenClaw og lignende verktøy som benytter tredjepartsrammeverk» — en egenhostet KI-proxy (som OmniRoute) ru…                                     |
-| `modal`          | Avsnitt 1.3 i vilkårene forbyr uttrykkelig å «leie ut, videreselge eller på annen måte gi tredjeparter direkte tilgang til eller bruk av tjenesten» — å bygge en egenhoste…             |
-| `muse-spark-web` | Metas vilkår forbyr uttrykkelig automatisert tilgang uten forhåndstillatelse, omvendt utvikling uten skriftlig tillatelse og omgåelse av teknologi…                                     |
-| `nlpcloud`       | Vilkårene forbyr uttrykkelig «å sette opp en proxy eller annen enhet som gir andre tilgang til tjenesten gjennom den» og gir bare en ikke-overførbar,…                                  |
-| `opencode`       | Vilkårene (Anomaly Innovations, Inc.) begrenser uttrykkelig bruken til «din egen interne bruk, og ikke på vegne av eller til fordel for noen tredjepart» — åpen…                        |
-| `t3-web`         | Vilkårene begrenser uttrykkelig kontoer til kun personlig bruk, forbyr deling av påloggingsopplysninger med tredjeparter og forbyr automatisert tilgang samt bot-/skrapetilgang — en e… |
+| Leverandør       | Merknad                                                                                                                                                                       |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `agy`            | Google Antigravity ToS forbyr uttrykkelig bruk av tredjepartsprogramvare, -verktøy eller -tjenester (inkludert proxyer) for å få tilgang til tjenesten via OAuth; å gjøre…    |
+| `ai21`           | ToS §4.2/§8.2 forbyr viderelisensiering eller distribusjon av API-tilgang til tredjeparter; §3.3 begrenser prøve-/evalueringsprodukter til «intern evaluering på…             |
+| `amazon-q`       | Produktet er avviklet for nye registreringer; eksisterende brukere er underlagt AWS Customer Agreement, som regulerer bruken av administrerte tjenester — selvdrevet pro…     |
+| `blackbox`       | ToS forbyr uttrykkelig viderelisensiering, videresalg, å gjøre tjenesten tilgjengelig for tredjeparter og å bygge avledede tjenester — en selvdrevet per…                     |
+| `coze`           | Coze ToS begrenser uttrykkelig bruken til «personlig og ikke-kommersiell bruk» og forbyr utleie, distribusjon, viderelisensiering eller videresalg av tjenesten; en…          |
+| `duckduckgo-web` | Duck.ai ToS (duckduckgo.com/duckai/privacy-terms) forbyr uttrykkelig «automatiserte spørringer og utvikling eller tilbud av AI-tjenester» samt omgåelse av …                  |
+| `featherless-ai` | Individuelle abonnementer er uttrykkelig begrenset til «interaktiv bruk eller prototyping og eksperimentering utført av kjøperen» — videresalg av inferens og proxy-bruk kre… |
+| `fireworks`      | ToS forbyr uttrykkelig bruk som proxy/mellomledd, overføring av API-nøkler og viderelisensiering (avsnitt 2.1 og 2.2(i)(j)); selvdrevne personlige proxyer er i…              |
+| `friendliai`     | ToS avsnitt 8(e) og 8(f) forbyr uttrykkelig bruk av FriendliAI som proxy eller å gi tredjeparter selvstendig tilgang, og forbyr videresalg/…                                  |
+| `iflytek`        | Avsnitt 2.4(3) i iFlytek Spark LLM Service Agreement forbyr uttrykkelig «bruk av automatiserte eller programmatiske metoder for å hente ut data eller resultater…             |
+| `kiro`           | Kiro FAQ forbyr uttrykkelig bruk med «OpenClaw og lignende verktøy som benytter tredjepartsrammeverk» — en selvdrevet AI-proxy (som OmniRoute) ru…                            |
+| `modal`          | ToS avsnitt 1.3 forbyr uttrykkelig å «leie ut, videreselge eller på annen måte gi en tredjepart direkte tilgang til eller bruk av tjenesten» — å bygge en selvdreve…          |
+| `muse-spark-web` | Meta ToS forbyr uttrykkelig automatisert tilgang uten forhåndstillatelse, omvendt utvikling uten skriftlig tillatelse og omgåelse av teknologis…                              |
+| `nlpcloud`       | ToS forbyr uttrykkelig «å sette opp en proxy eller annen enhet som lar andre få tilgang til tjenesten gjennom den» og gir bare en ikke-overførbar,…                           |
+| `t3-web`         | ToS begrenser uttrykkelig kontoer til kun personlig bruk, forbyr deling av påloggingsopplysninger med tredjeparter og forbyr automatisert/bot-/skrapingstilgang — en s…       |
 
-### ✅ Generelt tillatende — forsiktig / tvetydig / ok (resten)
+### ✅ Generelt romslige vilkår — caution / ambiguous / ok (resten)
 
-| Leverandør       | Bruksvilkår   | Merknad                                                                                                                                                                         |
-| ---------------- | ------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `aimlapi`        | tvetydig      | Bruksvilkårene gir en ikke-eksklusiv brukslisens, men tillater eller forbyr ikke uttrykkelig egenvertsbasert proxy eller videresalg; ingen «pers…                               |
-| `baichuan`       | tvetydig      | Det ble ikke funnet noe uttrykkelig forbud mot egenvertsbaserte personlige proxyer i offentlig tilgjengelig dokumentasjon; gratisabonnementet M3 Plus…                          |
-| `bluesminds`     | tvetydig      | Det ble ikke funnet noen uttrykkelige klausuler i bruksvilkårene om egenvertsbasert proxying eller videresalg; prissiden fokuserer på funksjons-/hastighetsbegrensninger…       |
-| `bytez`          | tvetydig      | Ingen uttrykkelig side med bruksvilkår var tilgjengelig (404); ingen offentlige klausuler om kun evaluering eller forbud mot proxy ble funnet i dokumentasjonen, men plattfor…  |
-| `doubao`         | tvetydig      | Det ble ikke funnet noe uttrykkelig forbud mot proxy eller videresalg i offentlig indeksert dokumentasjon; Volcengine er en utviklerrettet sky…                                 |
-| `gitlawb-gmi`    | tvetydig      | Det ble ikke funnet noen uttrykkelig klausul i bruksvilkårene som forbyr bruk av egenvertsbasert personlig proxy; den kostnadsfrie Nemotron-modellen har en NVIDIA-ansvarsfr…   |
-| `monsterapi`     | tvetydig      | MonsterAPIs side med bruksvilkår (monsterapi.ai/terms-of-service) var utilgjengelig under undersøkelsen; ingen spesifikke klausuler om proxy/videresalg/person…                 |
-| `nous-research`  | tvetydig      | Nous Portal er selv en aggregator-/proxytjeneste; bruk av den som bakserver for en annen egenvertsbasert proxy oppretter en proxy-…                                             |
-| `ollama-cloud`   | tvetydig      | Bruksvilkårene forbyr bruk av tjenesten «til å utvikle konkurrerende produkter», men har ikke noe uttrykkelig forbud mot egenvertsbaserte personlige proxyer…                   |
-| `stepfun`        | tvetydig      | Det ble ikke funnet noe uttrykkelig forbud mot egenvertsbasert personlig proxy, men bruksvilkårene for Step Plan retter seg mot utviklere som bruker bestemte ko…               |
-| `api-airforce`   | vær forsiktig | Bruksvilkårene forbyr uttrykkelig «å bygge konkurrerende tjenester uten tillatelse» og «deling av påloggingsopplysninger» — en egenvertsbasert pers…                            |
-| `arcee-ai`       | vær forsiktig | Gratis tilgang skjer via OpenRouters :free-rutingslag (ikke Arcees direkte API-vilkår); OpenRouters bruksvilkår tillater personlig utv…                                         |
-| `baidu`          | vær forsiktig | Bruksvilkårene ble ikke uttrykkelig gjennomgått med tanke på klausuler om proxy/videresalg, men plattformen krever autentisering med virkelig identitet (vanligvis kinesisk ID… |
-| `baseten`        | vær forsiktig | Bruksvilkårene begrenser bruk til «kundens interne forretningsformål» og forbyr uttrykkelig underlisensiering, videresalg eller å till…                                         |
-| `bazaarlink`     | vær forsiktig | Bruksvilkårene forbyr uttrykkelig videresalg eller underlisensiering av API-nøkler til tredjeparter; en egenvertsbasert personlig proxy for personlig…                          |
-| `brave-search`   | vær forsiktig | Bruksvilkårene forbyr redistribusjon, videresalg og underlisensiering av søkeresultater; bruk av API-et til å «replikere eller forsøke å repl…                                  |
-| `byteplus`       | vær forsiktig | Tokener kan ikke overføres og er begrenset til én konto; intet uttrykkelig proxyforbud, men BytePlus forbeholder seg retten til å …                                             |
-| `cerebras`       | vær forsiktig | Bruksvilkårene gir en ikke-eksklusiv, ikke-overførbar og ikke-underlisensierbar rett til personlig eller forretningsmessig bruk; forbyr videresalg, u…                          |
-| `cloudflare-ai`  | vær forsiktig | Cloudflares bruksvilkår for selvbetjening §2.2.1(j) forbyr bruk av tjenestene til å «tilby et virtuelt privat nettverk eller annen lignende pro…                                |
-| `cohere`         | vær forsiktig | Cohere forbyr uttrykkelig bruk av prøvenøkler til «produksjons- eller kommersielle formål»; en egenvertsbasert personlig proxy som ruter fo…                                    |
-| `deepinfra`      | vær forsiktig | Bruksvilkårene tillater lovlig kommersiell bruk i vid forstand, men forbyr bruk «som direkte eller indirekte konkurrerer med noen av selskapets virksomheter…                   |
-| `deepseek`       | vær forsiktig | Bruksvilkårene for Open Platform (gjelder fra 2026-04-29) tillater omfattende bruk, inkludert «utvikling av avledede produkter» og personlig/komm…                              |
-| `dify`           | vær forsiktig | Egenvertsbasert personlig proxy for én bruker er tillatt under den modifiserte Apache 2.0-lisensen; distribusjoner med flere leietakere…                                        |
-| `exa-search`     | vær forsiktig | Ingen uttrykkelige klausuler om «ingen proxy» eller «kun evaluering» ble funnet; Exa tilbyr aktivt et partnerprogram for forhandlere som tillater API-…                         |
-| `firecrawl`      | vær forsiktig | Det ble ikke funnet noe uttrykkelig forbud mot personlig proxy i bruksvilkårene for sky-API-et, men den egenvertsbaserte versjonen med åpen kildekode er AGPL-3.0 (kre…         |
-| `gemini`         | vær forsiktig | Bruksvilkårene sier uttrykkelig at gratisnivået er for «utviklere som bygger med Googles AI-modeller for profesjonelle eller forretningsmessige form…                           |
-| `groq`           | vær forsiktig | Tjenesteavtalen §6.3 forbyr videresalg, underlisensiering eller distribusjon av API-tilgang; §3.2 forbyr videresalg/utleie av konto…                                            |
-| `huggingchat`    | vær forsiktig | Hugging Faces bruksvilkår forbyr ikke uttrykkelig personlige egenvertsbaserte proxyer, men tilleggsvilkår (henvist til, men ikke fullstendig…                                   |
-| `huggingface`    | vær forsiktig | Bruksvilkårene gir en begrenset lisens til å få tilgang til/bruke tjenesten; dokumentet tillater eller forbyr ikke uttrykkelig en enkeltbruker…                                 |
-| `hyperbolic`     | vær forsiktig | Bruksvilkårene gir API-tilgang «utelukkende for dine egne personlige eller interne forretningsformål» og forbyr uttrykkelig lisensiering, …                                     |
-| `inference-net`  | vær forsiktig | Bruksvilkårene forbyr uttrykkelig å «underlisensiere, videreselge, distribuere» og å overføre API-nøkler uten skriftlig samtykke; en enkeltb…                                   |
-| `jina-ai`        | vær forsiktig | De 10M gratis tokenene er uttrykkelig ikke-kommersielle (CC-BY-NC 4.0-modelllisens); en egenvertsbasert personlig proxy for personlig L…                                        |
-| `jina-reader`    | vær forsiktig | Bruksvilkårene forbyr bruk av resultater til å bygge konkurrerende tjenester og forbyr «automatiserte metoder for å hente ut informasjon via skraping…                          |
-| `llm7`           | vær forsiktig | Bruksvilkårene posisjonerer tjenesten for «eksperimentering, utvikling og forskning»; intet uttrykkelig forbud mot egenvertsbasert personlig …                                  |
-| `longcat`        | vær forsiktig | Tjenesteavtalen for API-plattformen (longcat.chat/platform/private/) tillater kommersiell integrasjon og egenvertsbaserte apper…                                                |
-| `mistral`        | vær forsiktig | Bruksvilkårene for forbrukere sier uttrykkelig at API-er kun kan brukes til «personlige behov», og forbyr å gjøre API-nøkler tilgjengelige for tr…                              |
-| `morph`          | forsiktig     | Vilkårene tillater generelt kommersiell bruk; egenhostede proxy-distribusjoner krever en uttrykkelig avtale med salgsavdelingen. Punkt 18.…                                     |
-| `nebius`         | forsiktig     | Vilkårene (punkt 5f) forbyr uttrykkelig videresalg, videreformidling eller å tilby tjenesten «på frittstående basis» — en egenh…                                                |
-| `nomic`          | forsiktig     | Vilkårene gir en ikke-eksklusiv, ikke-overførbar API-lisens; punkt 6.b forbyr utvikling av en konkurrerende tjeneste. Bruk av t…                                                |
-| `novita`         | forsiktig     | Vilkårene forbyr videresalg og konkurrerende tjenester, men omtaler ikke uttrykkelig personlige, egenhostede proxyer; personlig bruk …                                          |
-| `nscale`         | forsiktig     | Retningslinjene for akseptabel bruk forbyr å «kopiere, endre, duplisere ... ramme inn, speile, publisere på nytt ... distribuere hele eller deler av Nscale-plattformen…        |
-| `nvidia`         | forsiktig     | Gratisnivået er uttrykkelig kun for prototyping/utvikling/forskning/evaluering — produksjonsbruk (betjening av faktiske sluttbrukere) krever…                                   |
-| `openrouter`     | forsiktig     | Vilkårene forbyr uttrykkelig videresalg av API-tilgang eller utvikling av en konkurrerende tjeneste; en egenhostet personlig proxy for én bruker…                               |
-| `pollinations`   | forsiktig     | MIT License, som det henvises til i API-dokumentasjonen, antyder liberal gjenbruk; det ble ikke funnet noe uttrykkelig forbud mot egenhostet proxy-bruk. Imidlertid, u…         |
-| `predibase`      | forsiktig     | Predibase er posisjonert som en bedriftsplattform for finjustering/tjenestelevering; gratisprøven er uttrykkelig ment for utforskning og…                                       |
-| `publicai`       | forsiktig     | Vilkårene (publicai.co/tc) angir at tjenestene «primært er for forsknings- og utdanningsbruk»; ingen uttrykkelige bestemmelser om proxy eller videresalg…                       |
-| `qoder`          | forsiktig     | Vilkårssiden returnerte ikke noe lesbart innhold; Qoder er en IDE-klient for programmering (ikke et offentlig API), og tredjeparts proxy-innpakninger …                         |
-| `reka`           | forsiktig     | Forretningsvilkårene forbyr underlisensiering eller distribusjon av tilgang til tredjeparter; en personlig proxy for én bruker er sannsynligvis gre…                            |
-| `sambanova`      | forsiktig     | Punkt 1.5(c) i vilkårene forbyr uttrykkelig videresalg, underlisensiering eller å gjøre tjenesten tilgjengelig for tredjeparter; en se…                                         |
-| `sensenova`      | forsiktig     | Det ble ikke funnet noe uttrykkelig forbud mot proxy eller videresalg i de gjennomgåtte vilkårene, men gratisnivået er en kampanjebeta uten SLA, Sen…                           |
-| `serper-search`  | forsiktig     | Vilkårene forbyr uttrykkelig «speiling av materiale uendret på en annen server uten tilført verdi» — en enkel videreformidlingsproxy…                                           |
-| `siliconflow`    | forsiktig     | Vilkårene (punkt 3.4(e)(f)(p)) forbyr uttrykkelig å gjøre tjenesten tilgjengelig for en tredjepart, videresalg/underlisensiering,…                                              |
-| `sparkdesk`      | forsiktig     | SparkDesk-brukeravtalen gir kun rettigheter til personlig, ikke-kommersiell bruk; retningslinjene for API-grensesnittet forbyr automatisert data…                               |
-| `tavily-search`  | forsiktig     | Vilkårene slår uttrykkelig fast at API-et «ikke kan overføres, tildeles, deles eller på annen måte gjøres tilgjengelig for noen tredjepart…                                     |
-| `tencent`        | forsiktig     | Tencent Cloud-vilkårene forbyr uttrykkelig underlisensiering eller videresalg av API-tilgang; en egenhostet personlig proxy for personlig …                                     |
-| `together`       | forsiktig     | Punkt 4.3(d) i vilkårene forbyr uttrykkelig overføring, distribusjon, videresalg, utleie eller å tilby tjenestene på en s…                                                      |
-| `uncloseai`      | forsiktig     | Personlig proxy-bruk er mulig, men ikke uttrykkelig tillatt; vilkårene forbyr utvikling av «konkurrerende maskinlæringstjenester me…                                            |
-| `veoaifree-web`  | forsiktig     | Vilkårene forbyr uttrykkelig automatiserte boter eller skript som kjører med «umenneskelig hastighet», og forbyr kopiering av plattformen for å opprette …                      |
-| `vertex`         | forsiktig     | Google Cloud-tjenestevilkårene begrenser videresalg til kun autoriserte forhandlere (punkt 14 krever en forhandleravtale); en e…                                                |
-| `voyage-ai`      | forsiktig     | Vilkårene gir rett til «personlig, ikke-kommersiell bruk» av nettstedets innhold og forbyr deling av påloggingsopplysninger/konto med tredjeparter;…                            |
-| `xkiro`          | forsiktig     | Vilkårene (2026-07-30) forbyr videresalg/videreformidling av tjenesten og brudd på vilkårene til oppstrømsleverandørene; personlig pro…                                         |
-| `360ai`          | ukjent        | Vilkårene for utvikler-API-et er ikke offentlig tilgjengelige uten registrering; tilgang krever godkjenning av søknad, noe som innebærer …                                      |
-| `chutes`         | ukjent        | Det finnes en vilkårsside på chutes.ai/terms, men innholdet var ikke tilgjengelig via henting; ingen uttrykkelige bestemmelser om proxy/videresalg ble funnet i …               |
-| `freemodel-dev`  | ukjent        | Vilkårssiden (freemodel.dev/terms) returnerte bare en overskrift uten lesbart innhold via WebFetch; ingen bestemmelse…                                                          |
-| `gitlawb`        | ukjent        | Ingen vilkår eller retningslinjer for akseptabel bruk ble funnet; begrensninger på proxy/videresalg er ukjente — utvis forsiktighet ved egenhostet proxy-bruk.                  |
-| `liquid`         | ukjent        | Det finnes ikke noe driftet API å bruke som proxy; kommersiell bruk av modellen med åpen kildekode er gratis for organisasjoner med årlig omsetning under $10M. Ingen egenhos…  |
-| `yi`             | ukjent        | Vilkårene er ikke offentlig tilgjengelige uten innlogging; ingen bestemmelser om proxy/videresalg kunne gjennomgås. Egenhostet personlig proxy-bruk fo…                         |
-| `comfyui`        | ok            | GPL-3.0-lisensen for åpen kildekode tillater uttrykkelig egenhostet personlig proxy-bruk; Comfy Org-vilkårene bekrefter kommersiell bruk av…                                    |
-| `scaleway`       | ok            | Scaleways generelle tjenestevilkår er en standard kommersiell nettskyavtale uten noe uttrykkelig forbud mot egenhos…                                                            |
-| `sdwebui`        | ok            | AGPL-3.0-lisensen: gratis å drifte selv for personlig bruk uten begrensninger på bruksvolum; en personlig proxy som bruker dette …                                              |
-| `searxng-search` | ok            | AGPL-3.0-lisensen for åpen kildekode tillater uttrykkelig egenhostet personlig proxy-bruk uten begrensninger på brukstype, videresal…                                           |
-
----
-
-## Gratisnivå per leverandør (oppdatert 2026-09-02 for de reviderte radene; ellers 2026-06-17)
-
-> Generert på nytt fra modellkatalogen (`open-sse/config/freeModelCatalog.ts`), med duplikater fjernet på tvers av utvalg. Sortert etter faste, gjentakende tokens/mnd. `uncapped*` = permanent gratis, men uten publisert token-grense (begrenset av forespørselsfrekvens/samtidighet) — reell tilgang, **ikke** inkludert i hovedtotalen. `—` = kun kreditt / nøkkelfri / kan ikke kvantifiseres i tokens.
-
-| Leverandør       | Gratistype           | Faste tokener/mnd. | Kreditt første måned | Bruksvilkår | Modeller |
-| ---------------- | -------------------- | ------------------ | -------------------- | ----------- | -------- |
-| `mistral`        | gjentakende          | ~1.00B             | —                    | forsiktig   | 5        |
-| `nara`           | gjentakende          | ~210M              | —                    | forsiktig   | 8        |
-| `llm7`           | gjentakende          | ~150M              | —                    | forsiktig   | 4        |
-| `xkiro`          | gjentakende          | ~150M              | —                    | forsiktig   | 39       |
-| `longcat`        | engangs              | —                  | 10M                  | forsiktig   | 1        |
-| `cerebras`       | engangs              | —                  | $5 i kreditt         | forsiktig   | 2        |
-| `cloudflare-ai`  | gjentakende          | ~30M               | —                    | forsiktig   | 9        |
-| `groq`           | gjentakende          | ~30M               | —                    | forsiktig   | 5        |
-| `api-airforce`   | gjentakende          | ~24M               | —                    | forsiktig   | 7        |
-| `bluesminds`     | gjentakende          | ~7M                | —                    | tvetydig    | 22       |
-| `sambanova`      | gjentakende          | ~6M                | —                    | forsiktig   | 5        |
-| `arcee-ai`       | gjentakende          | ~5M                | —                    | forsiktig   | 1        |
-| `bazaarlink`     | gjentakende          | ~4M                | —                    | forsiktig   | 32       |
-| `openrouter`     | gjentakende          | ~1M                | —                    | forsiktig   | 1        |
-| `cohere`         | gjentakende          | ~800K              | —                    | forsiktig   | 6        |
-| `huggingchat`    | gjentakende          | ~500K              | —                    | forsiktig   | 4        |
-| `morph`          | gjentakende          | ~400K              | —                    | ok          | 2        |
-| `huggingface`    | gjentakende          | ~200K              | —                    | forsiktig   | 6        |
-| `kiro`           | gjentakende          | ~25K               | —                    | unngå       | 12       |
-| `glm-cn`         | ubegrenset           | ubegrenset\*       | ~20M                 | ok          | 4        |
-| `baidu`          | ubegrenset           | ubegrenset\*       | —                    | forsiktig   | 1        |
-| `gemini`         | ubegrenset           | ubegrenset\*       | —                    | forsiktig   | 4        |
-| `kilo-gateway`   | ubegrenset           | ubegrenset\*       | —                    | forsiktig   | 7        |
-| `ollama-cloud`   | ubegrenset           | ubegrenset\*       | —                    | tvetydig    | 8        |
-| `opencode-zen`   | ubegrenset           | ubegrenset\*       | —                    | forsiktig   | 6        |
-| `siliconflow`    | ubegrenset           | ubegrenset\*       | —                    | forsiktig   | 10       |
-| `tencent`        | ubegrenset           | ubegrenset\*       | —                    | forsiktig   | 1        |
-| `vertex`         | registreringskreditt | —                  | ~300M                | forsiktig   | 10       |
-| `agentrouter`    | registreringskreditt | —                  | ~200M                | forsiktig   | 4        |
-| `predibase`      | registreringskreditt | —                  | ~25M                 | forsiktig   | 1        |
-| `doubao`         | registreringskreditt | —                  | ~15M                 | tvetydig    | 1        |
-| `ai21`           | registreringskreditt | —                  | ~10M                 | unngå       | 2        |
-| `deepseek`       | registreringskreditt | —                  | ~5M                  | ok          | 2        |
-| `hyperbolic`     | registreringskreditt | —                  | ~5M                  | ok          | 8        |
-| `nscale`         | registreringskreditt | —                  | ~5M                  | forsiktig   | 6        |
-| `bytez`          | registreringskreditt | —                  | ~1M                  | tvetydig    | 3        |
-| `deepinfra`      | registreringskreditt | —                  | ~1M                  | forsiktig   | 22       |
-| `fireworks`      | registreringskreditt | —                  | ~1M                  | unngå       | 10       |
-| `nebius`         | registreringskreditt | —                  | ~1M                  | forsiktig   | 1        |
-| `qoder`          | registreringskreditt | —                  | ~1M                  | forsiktig   | 14       |
-| `scaleway`       | registreringskreditt | —                  | ~1M                  | ok          | 6        |
-| `novita`         | registreringskreditt | —                  | ~500K                | forsiktig   | 1        |
-| `agy`            | nøkkelfri            | —                  | —                    | unngå       | 16       |
-| `baichuan`       | nøkkelfri            | —                  | —                    | tvetydig    | 1        |
-| `blackbox`       | nøkkelfri            | —                  | —                    | unngå       | 6        |
-| `coze`           | nøkkelfri            | —                  | —                    | unngå       | 1        |
-| `duckduckgo-web` | nøkkelfri            | —                  | —                    | unngå       | 6        |
-| `freemodel-dev`  | nøkkelfri            | —                  | —                    | ukjent      | 4        |
-| `friendliai`     | nøkkelfri            | —                  | —                    | unngå       | 2        |
-| `iflytek`        | nøkkelfri            | —                  | —                    | unngå       | 1        |
-| `inference-net`  | nøkkelfri            | —                  | —                    | forsiktig   | 3        |
-| `liquid`         | nøkkelfri            | —                  | —                    | ukjent      | 1        |
-| `monsterapi`     | nøkkelfri            | —                  | —                    | tvetydig    | 1        |
-| `muse-spark-web` | nøkkelfri            | —                  | —                    | unngå       | 3        |
-| `nlpcloud`       | nøkkelfri            | —                  | —                    | unngå       | 1        |
-| `nous-research`  | nøkkelfri            | —                  | —                    | tvetydig    | 2        |
-| `nvidia`         | nøkkelfri            | —                  | —                    | forsiktig   | 13       |
-| `opencode`       | nøkkelfri            | —                  | —                    | unngå       | 7        |
-| `pollinations`   | nøkkelfri            | —                  | —                    | forsiktig   | 31       |
-| `publicai`       | nøkkelfri            | —                  | —                    | forsiktig   | 3        |
-| `reka`           | nøkkelfri            | —                  | —                    | forsiktig   | 2        |
-| `sensenova`      | nøkkelfri            | —                  | —                    | forsiktig   | 1        |
-| `sparkdesk`      | nøkkelfri            | —                  | —                    | forsiktig   | 1        |
-| `stepfun`        | nøkkelfri            | —                  | —                    | ok          | 1        |
-| `t3-web`         | nøkkelfri            | —                  | —                    | unngå       | 23       |
-| `uncloseai`      | nøkkelfri            | —                  | —                    | forsiktig   | 3        |
+| Leverandør       | Bruksvilkår | Merknad                                                                                                                                                                                   |
+| ---------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `aimlapi`        | tvetydig    | Bruksvilkårene gir en ikke-eksklusiv brukslisens, men tillater eller forbyr ikke uttrykkelig egenhostet proxy eller videresalg; ingen «pers…                                              |
+| `baichuan`       | tvetydig    | Det ble ikke funnet noe uttrykkelig forbud mot egenhostede personlige proxyer i offentlig tilgjengelig dokumentasjon; gratisabonnementet M3 Plus…                                         |
+| `bluesminds`     | tvetydig    | Det ble ikke funnet noen uttrykkelige klausuler i bruksvilkårene om egenhostet proxying eller videresalg; prissiden fokuserer på funksjons-/hastighetsbegrensninger…                      |
+| `bytez`          | tvetydig    | Ingen uttrykkelig side med bruksvilkår var tilgjengelig (404); ingen offentlige klausuler om kun evaluering eller forbud mot proxy ble funnet i dokumentasjonen, men plattfor…            |
+| `doubao`         | tvetydig    | Det ble ikke funnet noe uttrykkelig forbud mot proxy eller videresalg i offentlig indeksert dokumentasjon; Volcengine er en utviklerorientert sky…                                        |
+| `gitlawb-gmi`    | tvetydig    | Det ble ikke funnet noen uttrykkelig klausul i bruksvilkårene som forbyr bruk av en egenhostet personlig proxy; den gratis Nemotron-modellen har en NVIDIA-ansvarsfraskriv…               |
+| `monsterapi`     | tvetydig    | MonsterAPIs side med bruksvilkår (monsterapi.ai/terms-of-service) var utilgjengelig under undersøkelsen; ingen spesifikke begrensninger for proxy/videresalg/person…                      |
+| `nous-research`  | tvetydig    | Nous Portal er selv en aggregator-/proxytjeneste; bruk av den som backend for en annen egenhostet proxy skaper en proxy-…                                                                 |
+| `ollama-cloud`   | tvetydig    | Bruksvilkårene forbyr bruk av tjenesten «for å utvikle konkurrerende produkter», men har ikke noe uttrykkelig forbud mot egenhostede personlige proxyer…                                  |
+| `stepfun`        | tvetydig    | Det ble ikke funnet noe uttrykkelig forbud mot en egenhostet personlig proxy, men bruksvilkårene for Step Plan retter seg mot utviklere som bruker spesifikke vil…                        |
+| `api-airforce`   | advarsel    | Bruksvilkårene forbyr uttrykkelig «å bygge konkurrerende tjenester uten tillatelse» og «deling av påloggingsopplysninger» — en egenhostet pers…                                           |
+| `arcee-ai`       | advarsel    | Gratis tilgang skjer via OpenRouters `:free`-rutelag (ikke Arcees direkte API-vilkår); OpenRouters bruksvilkår tillater personlig utvik…                                                  |
+| `baidu`          | advarsel    | Bruksvilkårene ble ikke uttrykkelig gjennomgått med hensyn til klausuler om proxy/videresalg, men plattformen krever autentisering med virkelig navn (vanligvis kinesisk ID…              |
+| `baseten`        | advarsel    | Bruksvilkårene begrenser bruken til «kundens interne forretningsformål» og forbyr uttrykkelig underlisensiering, videresalg eller å tillat…                                               |
+| `bazaarlink`     | advarsel    | Bruksvilkårene forbyr uttrykkelig videresalg eller underlisensiering av API-nøkler til tredjeparter; en egenhostet personlig proxy for personlig…                                         |
+| `brave-search`   | advarsel    | Bruksvilkårene forbyr redistribusjon, videresalg og underlisensiering av søkeresultater; bruk av API-et til å «replikere eller forsøke å repl…                                            |
+| `byteplus`       | advarsel    | Tokener kan ikke overføres og er begrenset til én konto; det finnes ikke noe uttrykkelig proxyforbud, men BytePlus forbeholder seg retten til å …                                         |
+| `cerebras`       | advarsel    | Bruksvilkårene gir en ikke-eksklusiv, ikke-overførbar rett som ikke kan underlisensieres, for personlig eller forretningsmessig bruk; forbyr videresalg, u…                               |
+| `cloudflare-ai`  | advarsel    | Cloudflares bruksvilkår for selvbetjening §2.2.1(j) forbyr bruk av tjenestene til å «tilby et virtuelt privat nettverk eller en annen lignende pro…                                       |
+| `cohere`         | advarsel    | Cohere forbyr uttrykkelig bruk av prøvenøkler til «produksjons- eller kommersielle formål»; en egenhostet personlig proxy som ruter fo…                                                   |
+| `deepinfra`      | advarsel    | Bruksvilkårene tillater generelt lovlig kommersiell bruk, men forbyr bruk som er «direkte eller indirekte konkurrerende med noen av virksomhetene til…                                    |
+| `deepseek`       | advarsel    | Bruksvilkårene for Open Platform (gjeldende fra 2026-04-29) tillater bred bruk, inkludert «utvikling av avledede produkter» og personlig/komm…                                            |
+| `dify`           | advarsel    | En egenhostet personlig proxy for én bruker er tillatt under den modifiserte Apache 2.0-lisensen; distribusjoner med flere leietakere…                                                    |
+| `exa-search`     | advarsel    | Det ble ikke funnet noen uttrykkelige klausuler om «ingen proxy» eller «kun evaluering»; Exa tilbyr aktivt et partnerprogram for forhandlere som tillater API-…                           |
+| `firecrawl`      | advarsel    | Det ble ikke funnet noe uttrykkelig forbud mot personlig proxy i bruksvilkårene for sky-API-et, men den egenhostede versjonen med åpen kildekode er AGPL-3.0 (kr…                         |
+| `gemini`         | advarsel    | Bruksvilkårene fastslår uttrykkelig at gratisnivået er for «utviklere som bygger med Google AI-modeller for profesjonelle eller forretningsmessige form…                                  |
+| `groq`           | advarsel    | Tjenesteavtalens §6.3 forbyr videresalg, underlisensiering eller distribusjon av API-tilgang; §3.2 forbyr videresalg/utleie av konto…                                                     |
+| `huggingchat`    | advarsel    | Hugging Faces bruksvilkår forbyr ikke uttrykkelig personlige egenhostede proxyer, men tilleggsvilkårene (som det henvises til, men som ikke er fullstendig…                               |
+| `huggingface`    | advarsel    | Bruksvilkårene gir en begrenset lisens til å få tilgang til/bruke tjenesten; dokumentet verken tillater eller forbyr uttrykkelig en énbruker…                                             |
+| `hyperbolic`     | advarsel    | Bruksvilkårene gir API-tilgang «utelukkende for egne personlige eller interne forretningsformål» og forbyr uttrykkelig lisensiering, …                                                    |
+| `inference-net`  | advarsel    | Bruksvilkårene forbyr uttrykkelig å «underlisensiere, videreselge, distribuere» og å overføre API-nøkler uten skriftlig samtykke; en énbruker…                                            |
+| `jina-ai`        | advarsel    | De 10M gratis tokenene er uttrykkelig ikke-kommersielle (modelllisensen CC-BY-NC 4.0); en personlig proxy for én bruker til personlig L…                                                  |
+| `jina-reader`    | advarsel    | Bruksvilkårene forbyr bruk av resultater til å bygge konkurrerende tjenester og forbyr «automatiserte metoder for å hente ut informasjon via scraping…                                    |
+| `llm7`           | advarsel    | Bruksvilkårene beskriver tjenesten som beregnet på «eksperimentering, utvikling og forskning»; det finnes ikke noe uttrykkelig forbud mot egenhostet personlig …                          |
+| `longcat`        | advarsel    | API Platform Service Agreement (longcat.chat/platform/private/) tillater kommersiell integrasjon og egenhostede apper…                                                                    |
+| `mistral`        | advarsel    | Bruksvilkårene for forbrukere fastslår uttrykkelig at API-er bare kan brukes til «personlige behov», og forbyr å gjøre API-nøkler tilgjengelige for tr…                                   |
+| `morph`          | advarsel    | Bruksvilkårene tillater generelt kommersiell bruk; egenadministrerte proxy-distribusjoner krever en uttrykkelig avtale med salgsavdelingen. Avsnitt 18.…                                  |
+| `nebius`         | advarsel    | Bruksvilkårene (avsnitt 5f) forbyr uttrykkelig videresalg, videredistribusjon eller å tilby tjenesten «på frittstående basis» — en egenadministrert…                                      |
+| `nomic`          | advarsel    | Bruksvilkårene gir en ikke-eksklusiv, ikke-overførbar API-lisens; avsnitt 6.b forbyr utvikling av en konkurrerende tjeneste. Bruk av…                                                     |
+| `novita`         | advarsel    | Bruksvilkårene forbyr videresalg og konkurrerende tjenester, men omtaler ikke uttrykkelig personlige egenadministrerte proxyer; personlig bruk…                                           |
+| `nscale`         | advarsel    | Retningslinjene for akseptabel bruk forbyr å «kopiere, endre, duplisere ... ramme inn, speile, publisere på nytt ... distribuere hele eller deler av Nscale-plattformen…                  |
+| `nvidia`         | advarsel    | Gratisnivået er uttrykkelig kun for prototyping/utvikling/forskning/evaluering — produksjonsbruk (betjening av faktiske sluttbrukere) krever…                                             |
+| `openrouter`     | advarsel    | Bruksvilkårene forbyr uttrykkelig videresalg av API-tilgang eller utvikling av en konkurrerende tjeneste; en egenadministrert personlig proxy for én bruker…                              |
+| `pollinations`   | advarsel    | MIT-lisensen som er oppgitt i API-dokumentasjonen, antyder liberal gjenbruk; det ble ikke funnet noe uttrykkelig forbud mot egenadministrert proxy-bruk. Men…                             |
+| `predibase`      | advarsel    | Predibase er posisjonert som en plattform for finjustering/servering til virksomheter; gratisprøven er uttrykkelig ment for utforsking og…                                                |
+| `publicai`       | advarsel    | Bruksvilkårene (publicai.co/tc) angir at tjenestene «primært er til forsknings- og undervisningsbruk»; ingen uttrykkelige bestemmelser om proxy eller videresalg…                         |
+| `qoder`          | advarsel    | Siden med bruksvilkår returnerte ikke noe lesbart innhold; Qoder er en IDE-klient for programmering (ikke et offentlig API), og proxy-omslag fra tredjeparter…                            |
+| `reka`           | advarsel    | Forretningsvilkårene forbyr viderelisensiering eller distribusjon av tilgang til tredjeparter; en personlig proxy for én bruker er sannsynligvis grei…                                    |
+| `sambanova`      | advarsel    | Avsnitt 1.5(c) i bruksvilkårene forbyr uttrykkelig videresalg, viderelisensiering eller å gjøre tjenesten tilgjengelig for tredjeparter; en egen…                                         |
+| `sensenova`      | advarsel    | Det ble ikke funnet noe uttrykkelig forbud mot proxy eller videresalg i de gjennomgåtte bruksvilkårene, men gratisnivået er en kampanjebeta uten SLA, Sen…                                |
+| `serper-search`  | advarsel    | Bruksvilkårene forbyr uttrykkelig «speiling av materialer på en hvilken som helst annen server som de er, uten merverdi» — en enkel proxy som bare videresender…                          |
+| `siliconflow`    | advarsel    | Bruksvilkårene (klausul 3.4(e)(f)(p)) forbyr uttrykkelig å gjøre tjenesten tilgjengelig for en tredjepart, videresalg/viderelisensiering,…                                                |
+| `sparkdesk`      | advarsel    | SparkDesk-brukeravtalen gir bare rettigheter til personlig, ikke-kommersiell bruk; retningslinjene for API-grensesnitt forbyr automatisert data…                                          |
+| `tavily-search`  | advarsel    | Bruksvilkårene fastslår uttrykkelig at API-et «ikke kan overføres, tildeles, deles eller på annen måte gjøres tilgjengelig for noen tredjepart…                                           |
+| `tencent`        | advarsel    | Bruksvilkårene for Tencent Cloud forbyr uttrykkelig viderelisensiering eller videresalg av API-tilgang; en egenadministrert personlig proxy til personlig…                                |
+| `together`       | advarsel    | Avsnitt 4.3(d) i bruksvilkårene forbyr uttrykkelig overføring, distribusjon, videresalg, utleie eller å tilby tjenestene som en…                                                          |
+| `uncloseai`      | advarsel    | Personlig proxy-bruk virker mulig, men er ikke uttrykkelig tillatt; bruksvilkårene forbyr utvikling av «konkurrerende maskinlæringstjenester med…                                         |
+| `veoaifree-web`  | advarsel    | Bruksvilkårene forbyr uttrykkelig automatiserte roboter eller skript som kjører i «umenneskelige hastigheter», og forbyr kopiering av plattformen for å opprette…                         |
+| `vertex`         | advarsel    | Tjenestevilkårene for Google Cloud begrenser videresalg til kun autoriserte forhandlere (avsnitt 14 krever en forhandleravtale); en egen…                                                 |
+| `voyage-ai`      | advarsel    | Bruksvilkårene gir «personlig, ikke-kommersiell bruk» av nettstedets innhold og forbyr deling av legitimasjon/konto med tredjeparter;…                                                    |
+| `xkiro`          | advarsel    | Bruksvilkårene (2026-07-30) forbyr videresalg/videredistribusjon av tjenesten og brudd på vilkårene til oppstrømsleverandørene; personlig proxy…                                          |
+| `360ai`          | ukjent      | Bruksvilkårene for utvikler-API-et er ikke offentlig tilgjengelige uten registrering; tilgang krever godkjenning av en søknad, noe som antyder…                                           |
+| `chutes`         | ukjent      | Det finnes en side med bruksvilkår på chutes.ai/terms, men innholdet var ikke tilgjengelig via innhenting; ingen uttrykkelige klausuler om proxy/videresalg ble funnet i…                 |
+| `freemodel-dev`  | ukjent      | Siden med bruksvilkår (freemodel.dev/terms) returnerte bare en overskrift uten lesbart innhold via WebFetch; ingen klausul…                                                               |
+| `gitlawb`        | ukjent      | Ingen bruksvilkår eller retningslinjer for akseptabel bruk ble funnet; begrensninger for proxy/videresalg er ukjente — utvis forsiktighet ved egenadministrert proxy-bruk.                |
+| `liquid`         | ukjent      | Det finnes ikke noe driftet API å sende via proxy; kommersiell bruk av modellen med åpen kildekode er gratis for organisasjoner med under $10M i årlig omsetning. Ingen egenadministrert… |
+| `yi`             | ukjent      | Bruksvilkårene er ikke offentlig tilgjengelige uten innlogging; ingen klausuler om proxy/videresalg kunne gjennomgås. Personlig bruk av en egenadministrert proxy…                        |
+| `comfyui`        | ok          | GPL-3.0-lisensen med åpen kildekode tillater uttrykkelig personlig bruk av egenadministrert proxy; bruksvilkårene til Comfy Org bekrefter kommersiell bruk av…                            |
+| `scaleway`       | ok          | Scaleways generelle tjenestevilkår er en standard kommersiell skyavtale uten noe uttrykkelig forbud mot egenadministrert…                                                                 |
+| `sdwebui`        | ok          | AGPL-3.0-lisens: gratis å drifte selv til personlig bruk uten begrensninger på bruksvolum; en personlig proxy som bruker dette…                                                           |
+| `searxng-search` | ok          | AGPL-3.0-lisensen med åpen kildekode tillater uttrykkelig personlig bruk av egenadministrert proxy uten begrensninger på brukstype, videresalg…                                           |
 
 ---
 
-## OpenCode Free: begrensning i klientkontrakten (#14313)
+## Gratisnivå per leverandør (Bytez/Nous kontrollert 2026-10-15; rader kontrollert på nytt 2026-09-02; øvrige 2026-06-17)
 
-Den nøkkelfrie `opencode`-leverandøren (offentlig `https://opencode.ai/zen/v1`) avviser alle forespørsler
-som ikke samsvarer med OpenCode-klientkontrakten, med **403 `FreeTierError`** og
-setningen _«OpenCodes gratisnivå kan bare brukes fra OpenCode»_. Dette er et
-forespørselsspesifikt avslag (samme resultat for alle kontoer med samme forespørselsstruktur), ikke et
-modellforbud eller en nedkjølingsperiode for tilkoblingen — OmniRoute klassifiserer det som `project_route_error`, hopper over
-modellås / nedkjølingsperiode og setter (på den syntetiske `noauth`-ruten) automatisk valg av kombinasjon
-på pause i en kort TTL-periode. Send forespørsler som inneholder en ikke-tom verktøyliste, `stream: true` og
-OpenCode-øktshodene/UA-hodene (`opencodeFreeTierContract.ts`), ellers må du forvente 403.
+> Regenerert fra katalogen per modell (`open-sse/config/freeModelCatalog.ts`), deduplisert på tvers av pooler. Sortert etter tilbakevendende, stabile tokens/md. `uncapped*` = permanent gratis, men uten publisert tokenbegrensning (hastighets-/samtidighetsbegrenset) — reell tilgang, **ikke** inkludert i hovedsummen. `—` = kun kreditt / uten nøkkel / ikke kvantifiserbart i tokens.
 
-## Hva som er endret siden den leverte katalogen (`freeNote`)
+| Leverandør       | Gratistype           | Faste tokener/md. | Kreditt første måned | Bruksvilkår | Modeller |
+| ---------------- | -------------------- | ----------------- | -------------------- | ----------- | -------- |
+| `mistral`        | løpende              | ~1.00B            | —                    | varsomhet   | 5        |
+| `nara`           | løpende              | ~210M             | —                    | varsomhet   | 8        |
+| `llm7`           | løpende              | ~150M             | —                    | varsomhet   | 4        |
+| `xkiro`          | løpende              | ~150M             | —                    | varsomhet   | 39       |
+| `longcat`        | engangs              | —                 | 10M                  | varsomhet   | 1        |
+| `cerebras`       | engangs              | —                 | $5 kreditt           | varsomhet   | 2        |
+| `cloudflare-ai`  | løpende              | ~30M              | —                    | varsomhet   | 9        |
+| `groq`           | løpende              | ~30M              | —                    | varsomhet   | 5        |
+| `api-airforce`   | løpende              | ~24M              | —                    | varsomhet   | 7        |
+| `bluesminds`     | løpende              | ~7M               | —                    | tvetydig    | 22       |
+| `sambanova`      | løpende              | ~6M               | —                    | varsomhet   | 5        |
+| `arcee-ai`       | løpende              | ~5M               | —                    | varsomhet   | 1        |
+| `bazaarlink`     | løpende              | ~4M               | —                    | varsomhet   | 32       |
+| `openrouter`     | løpende              | ~1M               | —                    | varsomhet   | 1        |
+| `cohere`         | løpende              | ~800K             | —                    | varsomhet   | 6        |
+| `huggingchat`    | løpende              | ~500K             | —                    | varsomhet   | 4        |
+| `morph`          | løpende              | ~400K             | —                    | ok          | 2        |
+| `huggingface`    | løpende              | ~200K             | —                    | varsomhet   | 6        |
+| `kiro`           | løpende              | ~25K              | —                    | unngå       | 12       |
+| `glm-cn`         | uten tak             | uten tak\*        | ~20M                 | ok          | 4        |
+| `baidu`          | uten tak             | uten tak\*        | —                    | varsomhet   | 1        |
+| `gemini`         | uten tak             | uten tak\*        | —                    | varsomhet   | 4        |
+| `kilo-gateway`   | uten tak             | uten tak\*        | —                    | varsomhet   | 7        |
+| `ollama-cloud`   | uten tak             | uten tak\*        | —                    | tvetydig    | 8        |
+| `opencode-zen`   | uten tak             | uten tak\*        | —                    | varsomhet   | 10       |
+| `tencent`        | uten tak             | uten tak\*        | —                    | varsomhet   | 1        |
+| `vertex`         | registreringskreditt | —                 | ~300M                | varsomhet   | 10       |
+| `agentrouter`    | registreringskreditt | —                 | ~200M                | varsomhet   | 4        |
+| `predibase`      | registreringskreditt | —                 | ~25M                 | varsomhet   | 1        |
+| `doubao`         | registreringskreditt | —                 | ~15M                 | tvetydig    | 1        |
+| `ai21`           | registreringskreditt | —                 | ~10M                 | unngå       | 2        |
+| `deepseek`       | registreringskreditt | —                 | ~5M                  | ok          | 2        |
+| `hyperbolic`     | registreringskreditt | —                 | ~5M                  | ok          | 8        |
+| `nscale`         | registreringskreditt | —                 | ~5M                  | varsomhet   | 6        |
+| `bytez`          | kreditt (løpende)    | —                 | ukjent               | tvetydig    | 1        |
+| `deepinfra`      | registreringskreditt | —                 | ~1M                  | varsomhet   | 22       |
+| `fireworks`      | registreringskreditt | —                 | ~1M                  | unngå       | 10       |
+| `nebius`         | registreringskreditt | —                 | ~1M                  | varsomhet   | 1        |
+| `qoder`          | registreringskreditt | —                 | ~1M                  | varsomhet   | 14       |
+| `scaleway`       | registreringskreditt | —                 | ~1M                  | ok          | 6        |
+| `novita`         | registreringskreditt | —                 | ~500K                | varsomhet   | 1        |
+| `agy`            | uten nøkkel          | —                 | —                    | unngå       | 16       |
+| `baichuan`       | uten nøkkel          | —                 | —                    | tvetydig    | 1        |
+| `blackbox`       | uten nøkkel          | —                 | —                    | unngå       | 6        |
+| `coze`           | uten nøkkel          | —                 | —                    | unngå       | 1        |
+| `duckduckgo-web` | uten nøkkel          | —                 | —                    | unngå       | 6        |
+| `freemodel-dev`  | uten nøkkel          | —                 | —                    | ukjent      | 4        |
+| `friendliai`     | uten nøkkel          | —                 | —                    | unngå       | 2        |
+| `iflytek`        | uten nøkkel          | —                 | —                    | unngå       | 1        |
+| `inference-net`  | uten nøkkel          | —                 | —                    | varsomhet   | 3        |
+| `liquid`         | uten nøkkel          | —                 | —                    | ukjent      | 1        |
+| `monsterapi`     | uten nøkkel          | —                 | —                    | tvetydig    | 1        |
+| `muse-spark-web` | uten nøkkel          | —                 | —                    | unngå       | 3        |
+| `nlpcloud`       | uten nøkkel          | —                 | —                    | unngå       | 1        |
+| `nvidia`         | uten nøkkel          | —                 | —                    | varsomhet   | 13       |
+| `pollinations`   | uten nøkkel          | —                 | —                    | varsomhet   | 31       |
+| `publicai`       | uten nøkkel          | —                 | —                    | varsomhet   | 3        |
+| `reka`           | uten nøkkel          | —                 | —                    | varsomhet   | 2        |
+| `sensenova`      | uten nøkkel          | —                 | —                    | varsomhet   | 1        |
+| `sparkdesk`      | nøkkelfri            | —                 | —                    | forsiktig   | 1        |
+| `stepfun`        | nøkkelfri            | —                 | —                    | ok          | 1        |
+| `t3-web`         | nøkkelfri            | —                 | —                    | unngå       | 23       |
+| `uncloseai`      | nøkkelfri            | —                 | —                    | forsiktig   | 3        |
 
-> `freeNote`-strengene fra v3.8.0-perioden er utdaterte. Korrigeringer som ble funnet gjennom denne undersøkelsen (disse styrer katalogoppdateringen i `_tasks/features-v3.8.12`):
+---
 
-- **`360ai`** — Den medfølgende freeNote-teksten «Gratis 360 AI Brain-modeller» virker utdatert. Nåværende tilgang krever søknad og er betalt. Kampanjetokenene fra lanseringsperioden i 2023 (100M–250M som engangstildeling) kan ha vært grunnlaget for …
-- **`agentrouter`** — Den medfølgende freeNote-teksten vår sier «$200 i gratis kreditter ved registrering». I realiteten mottar ordinære registreringer (uten henvisning) nå bare $100; registreringer via henvisning kan få $200, men en kommentar fra fellesskapet fra april 2026 …
-- **`agy`** — Den medfølgende freeNote-teksten vår sier «(ingen)», noe som antyder at det ikke finnes noe gratisnivå, men Antigravity har et gratisnivå som krever OAuth. Tjenestevilkårene forbyr imidlertid uttrykkelig bruk av dette gratisnivået gjennom en proxy som OmniRoute …
-- **`ai21`** — Strammet inn: prøveperioden er redusert fra «3 måneder» til 7 dager. Kredittbeløpet på $10 er fortsatt det samme, men gyldigheten er kraftig redusert fra ~90 dager til 7 dager.
-- **`aimlapi`** — Betydelig endret. Den medfølgende freeNote-teksten annonserte «$0.025/dag i gratis kreditter — over 200 modeller», men gratisnivået er nå satt på pause/avviklet. Kredittildelingen på $0.025/dag (50 000 kreditter/dag, 10 forespørsler/d…
-- **`amazon-q`** — Den medfølgende freeNote-teksten vår sier «(ingen)» — realiteten er verre: Produktet er nå avviklet for nye registreringer (15. mai 2026). Tidligere tilbød gratisnivået 50 agentbaserte forespørsler/måned + ubegrenset inneby…
-- **`api-airforce`** — Katalogen leveres med freeNote «(ingen)», men det finnes et dokumentert gratisnivå: 1 RPM / 1 000 RPD løpende, kontoregistrering kreves, begrenset til grunnleggende modeller.
-- **`arcee-ai`** — Den medfølgende freeNote-teksten («Gratis Trinity Large Thinking-modell (262K kontekst)») er delvis korrekt — Trinity Large Thinking er faktisk gratis via OpenRouter med 262K kontekst — men merknaden utelater at dette …
-- **`baichuan`** — Den medfølgende freeNote-teksten vår sier «Gratis Baichuan-modeller», noe som antyder kontinuerlig gratis tilgang, men realiteten nå er bare en engangskreditt på 80 CNY for nye brukere (gyldig i 3 måneder). Det finnes ingen permanent …
-- **`baidu`** — Katalogen sier «Gratis ERNIE Speed/Lite-modeller», noe som i hovedsak er korrekt, men undervurderer omfanget: ERNIE-Tiny og flere varianter med ulike kontekstvinduer (8K og 128K) er også gratis. Gratisnivået ser …
-- **`bazaarlink`** — Stemmer i hovedsak — den medfølgende freeNote-teksten beskriver `auto:free`-ruting for inferens uten kostnad på en korrekt måte. Den nåværende realiteten omfatter imidlertid eksplisitte hastighetsgrenser (10–20 RPM, ~150 RPD) som ikke er nevnt i …
-- **`blackbox`** — Den medfølgende freeNote-teksten vår hevder «ubegrenset grunnleggende chat samt Minimax-M2.5». I realiteten er ubegrensede Minimax-M2.5-agentforespørsler en funksjon i en betalt plan (Pro+), ikke en del av gratisnivået. Gratisnivået har beg…
-- **`bluesminds`** — Den medfølgende freeNote-teksten vår var «(ingen)» — men BluesMinds har et dokumentert gratisnivå: 500 pi-kreditter, 20 RPM, 300 RPD, permanent gratisplan. Katalogen undervurderer tilbudet betydelig.
-- **`brave-search`** — Katalogen angir «(ingen)», noe som antyder at det ikke ble registrert noe gratisnivå, men i realiteten fantes det et gratisnivå med 5 000 søk/måned (uten kort) frem til 12. februar 2026, som siden har blitt erstattet av en plan til $5/måned …
-- **`byteplus`** — Katalogen vår ble levert med «(ingen)», men BytePlus ModelArk har et gratisnivå: en prøveperiode med en engangstildeling på 500k tokens per LLM-modell for nye kontoer. Katalogen underrapporterer dette.
-- **`cerebras`** — Prøveperioden uten kort med 1M tokens/dag er borte. Den aktive prissiden på cerebras.ai/pricing (2026-09-03) oppgir en engangskreditt på $5 ved registrering, betalingsmåte er påkrevd, med 30 dagers gyldighet. Omklassifisert som `one-time-initial` (LongCat-formet); fjernet fra `LEGACY_FREE_PROVIDERS` og det løpende budsjettet.
-- **`chutes`** — Den medfølgende freeNote-teksten sier «Gratisnivå tilgjengelig», men fra og med 15. mars 2026 er gratisnivået offisielt avviklet. Katalogmerknaden er utdatert og bør oppdateres for å gjenspeile at det ikke finnes noen l…
-- **`coze`** — Den medfølgende merknaden «Gratis agentplattform fra ByteDance» er i hovedsak korrekt, men utelater at gratisnivået nå har en streng kredittgrense (10 kreditter/dag ≈ 5–100 meldinger avhengig av modell), en begrensning …
-- **`deepinfra`** — Den medfølgende freeNote-teksten vår sier «Gratis registreringskreditter for API-testing» — dette virker utdatert. Den offisielle prissiden krever nå kort/forskuddsbetaling og dokumenterer ingen generell gratis registreringskreditt. Gratisni…
-- **`deepseek`** — Den medfølgende merknaden vår sier «5M gratis tokens ved registrering – kredittkort er ikke påkrevd» — dette er fortsatt korrekt for engangstildelingen, men det er viktig å merke seg at kredittene utløper etter 30 dager (ikke nevnt i den medfø…
-- **`dify`** — Den medfølgende freeNote-teksten («Gratis AI-appbygger med åpen kildekode + RAG») er i hovedsak korrekt, men ufullstendig. Gratisnivået i skyen er mer begrenset enn antydet: 200 meldingskreditter ser ut til å være en eng…
-- **`doubao`** — Den medfølgende freeNote-teksten «Gratis Doubao-modeller (ByteDance)» er i hovedsak korrekt, men mangler detaljer. Den nåværende realiteten er mer strukturert: Det finnes et kvantifisert, løpende daglig gratisnivå (2M tokens/dag v…
-- **`duckduckgo-web`** — Kjernebeskrivelsen «gratis anonym tilgang» gjelder fortsatt, men tjenesten har utviklet seg betydelig: Den har nå eksplisitte betalte nivåer (Plus/Pro) med høyere grenser, noe som antyder at gratisnivået er hastighetsbegrens…
-- **`exa-search`** — Katalogen leveres med freeNote «(ingen)», men Exa har et dokumentert, løpende gratisnivå på 1 000 forespørsler/måned. Dette er en betydelig mangel — gratisnivået finnes og er permanent.
-- **`featherless-ai`** — Den medfølgende freeNote-teksten vår sier «Gratisnivå tilgjengelig», men det finnes ikke noe generelt gratisnivå. Den eneste gratis tilgangen er gjennom et invitasjons-/søknadsbasert Builder Series-program, som ikke er et standard gratis…
-- **`firecrawl`** — Katalogen vår ble levert med freeNote «(ingen)», noe som antyder at det ikke finnes noe gratisnivå. Firecrawl har i realiteten en dokumentert, løpende gratisplan med 1 000 kreditter/måned — katalogoppføringen er feil.
-- **`freemodel-dev`** — Den medfølgende freeNote-teksten vår er «(ingen)» — dette var sannsynligvis en plassholder som betydde at leverandøren ennå ikke var katalogisert. Leverandøren har i realiteten et tilbud om en engangskreditt på $300 for prøvebruk. Dette er imidlertid en e…
-- **`friendliai`** — Den medfølgende freeNote («Gratisnivå for serverløs inferens») er delvis korrekt, men misvisende. Det finnes gratis tilgang via Tier 0 og modeller merket som gratis, men hastighetsgrensene er udefinerte og ada…
-- **`gemini`** — Den medfølgende freeNote sier «1 500 forespørsler/dag for Gemini 2.5 Flash» — dette var korrekt før desember 2025. Google reduserte grensene for gratisnivået med 50–80 % i desember 2025, og reduserte Gemini 2.5 Flash fra 1 500 f…
-- **`gitlawb`** — Den medfølgende freeNote «Gratisnivå tilgjengelig» er i praksis utdatert. Den opprinnelige gratis MiMo-tilgangen ble fjernet i mai 2026; det eneste gjenværende «gratisalternativet» er en midlertidig kampanjemodell (Nemotron 3 U…
+## Hva er endret siden den leverte katalogen (`freeNote`)
+
+> `freeNote`-strengene fra v3.8.0 er utdaterte. Korrigeringene som ble funnet i denne undersøkelsen (disse danner grunnlaget for katalogoppdateringen i `_tasks/features-v3.8.12`):
+
+- **`360ai`** — Den medfølgende freeNote-teksten «Gratis 360 AI Brain-modeller» virker utdatert. Dagens tilgang krever søknad og betaling. Kampanjetokenene fra lanseringsperioden i 2023 (100M–250M som engangstildeling) kan ha vært grunnlaget for…
+- **`agentrouter`** — Den medfølgende freeNote-teksten vår sier «$200 i gratis kreditter ved registrering». I realiteten mottar vanlige registreringer (uten vervekode) nå bare $100. Registreringer via verving kan få $200, men en kommentar fra fellesskapet fra april 2026…
+- **`agy`** — Den medfølgende freeNote-teksten vår sier «(ingen)», noe som antyder at det ikke finnes noe gratisnivå, men Antigravity har faktisk et gratisnivå med tilgang via OAuth. Bruksvilkårene forbyr imidlertid uttrykkelig bruk av dette gratisnivået gjennom en proxy som OmniRoute …
+- **`ai21`** — Strammet inn: Prøveperioden er redusert fra «3 måneder» til 7 dager. Kredittbeløpet på $10 er fortsatt det samme, men gyldigheten er kraftig redusert fra ~90 dager til 7 dager.
+- **`aimlapi`** — Betydelig endret. Den medfølgende freeNote-teksten annonserte «$0.025/dag i gratis kreditter — over 200 modeller», men gratisnivået er nå satt på pause/avviklet. Kredittildelingen på $0.025/dag (50,000 kreditter/dag, 10 forespørsler/d…
+- **`amazon-q`** — Den medfølgende freeNote-teksten vår sier «(ingen)» — realiteten er verre: Produktet er nå avviklet for nye registreringer (15. mai 2026). Tidligere tilbød gratisnivået 50 agentbaserte forespørsler per måned + ubegrensede innebyg…
+- **`api-airforce`** — Katalogen leveres med freeNote-teksten «(ingen)», men det finnes et dokumentert gratisnivå: 1 RPM / 1,000 RPD løpende, registrering av konto kreves, begrenset til grunnleggende modeller.
+- **`arcee-ai`** — Den medfølgende freeNote-teksten («Gratis Trinity Large Thinking-modell (262K kontekst)») er delvis korrekt — Trinity Large Thinking er faktisk gratis via OpenRouter med 262K kontekst — men teksten utelater at dette…
+- **`baichuan`** — Den medfølgende freeNote-teksten vår sier «Gratis Baichuan-modeller», noe som antyder løpende gratistilgang, men dagens realitet er bare en engangskreditt på 80 CNY for nye brukere (gyldig i 3 måneder). Det finnes ingen permanent…
+- **`baidu`** — Katalogen sier «Gratis ERNIE Speed/Lite-modeller», noe som i hovedsak er korrekt, men undervurderer omfanget: ERNIE-Tiny og flere varianter med ulike kontekstvinduer (8K og 128K) er også gratis. Gratisnivået ser…
+- **`bazaarlink`** — Stemmer i hovedsak — den medfølgende freeNote-teksten beskriver korrekt auto:free-ruting for kostnadsfri inferens. Dagens løsning har imidlertid uttrykkelige hastighetsgrenser (10–20 RPM, ~150 RPD) som ikke er nevnt i…
+- **`blackbox`** — Den medfølgende freeNote-teksten vår hevder «ubegrenset grunnleggende chat pluss Minimax-M2.5». I realiteten er ubegrensede Minimax-M2.5-agentforespørsler en funksjon i et betalt abonnement (Pro+), ikke en del av gratisnivået. Gratisnivået har beg…
+- **`bluesminds`** — Den medfølgende freeNote-teksten vår var «(ingen)» — men BluesMinds har et dokumentert gratisnivå: 500 pi-kreditter, 20 RPM, 300 RPD og et permanent gratisabonnement. Katalogen underrapporterer tilbudet betydelig.
+- **`brave-search`** — Katalogen oppgir «(ingen)», noe som antyder at det ikke ble registrert noe gratisnivå, men i realiteten fantes det et gratisnivå med 5,000 søk per måned (uten kort) frem til 12. februar 2026. Dette er siden blitt erstattet av et abonnement til $5/måned…
+- **`byteplus`** — Katalogen vår ble levert med «(ingen)», men BytePlus ModelArk har faktisk et gratisnivå: en engangskreditt på 500k tokens per LLM-modell for nye kontoer. Katalogen underrapporterer dette.
+- **`cerebras`** — Prøveordningen uten kort med 1M tokens/dag er borte. Den aktive prissiden på cerebras.ai/pricing (2026-09-03) viser en engangskreditt på $5 ved registrering, betalingsmetode kreves, med 30 dagers gyldighet. Omklassifisert som `one-time-initial` (LongCat-formet); fjernet fra `LEGACY_FREE_PROVIDERS` og det løpende budsjettet.
+- **`chutes`** — Den medfølgende freeNote-teksten sier «Gratisnivå tilgjengelig», men fra og med 15. mars 2026 er gratisnivået offisielt avviklet. Katalogteksten er utdatert og bør oppdateres for å gjenspeile at det ikke finnes noe l…
+- **`coze`** — Den medfølgende teksten «Gratis agentplattform fra ByteDance» er i hovedsak korrekt, men utelater at gratisnivået nå har en streng kredittgrense (10 kreditter/dag ≈ 5–100 meldinger avhengig av modell), en begrensning…
+- **`deepinfra`** — Den medfølgende freeNote-teksten vår sier «Gratis registreringskreditter for API-testing» — dette virker utdatert. Den offisielle prissiden krever nå kort/forskuddsbetaling uten noen dokumentert generell gratis registreringskreditt. Gratisniv…
+- **`deepseek`** — Den medfølgende teksten vår sier «5M gratis tokens ved registrering – kredittkort kreves ikke» — dette er fortsatt korrekt for engangstildelingen, men det er viktig å merke seg at kredittene utløper etter 30 dager (ikke nevnt i den medfø…
+- **`dify`** — Den medfølgende freeNote-teksten («Gratis AI-appbygger med åpen kildekode + RAG») er i hovedsak korrekt, men ufullstendig. Gratisnivået i nettskyen er mer begrenset enn antydet: 200 meldingskreditter ser ut til å være en engan…
+- **`doubao`** — Den medfølgende freeNote-teksten «Gratis Doubao-modeller (ByteDance)» er i hovedsak korrekt, men mangler detaljer. Dagens løsning er mer strukturert: Det finnes et kvantifisert, løpende daglig gratisnivå (2M tokens/dag v…
+- **`duckduckgo-web`** — Kjernebeskrivelsen «gratis anonym tilgang» gjelder fortsatt, men tjenesten har blitt betydelig mer moden: Den har nå uttrykkelige betalingsnivåer (Plus/Pro) med høyere grenser, noe som antyder at gratisnivået er hastighetsbegrens…
+- **`exa-search`** — Katalogen leveres med freeNote-teksten «(ingen)», men Exa har et dokumentert, løpende gratisnivå på 1,000 forespørsler per måned. Dette er et betydelig avvik — gratisnivået finnes og er permanent.
+- **`featherless-ai`** — Den medfølgende freeNote-teksten vår sier «Gratisnivå tilgjengelig», men det finnes ikke noe generelt gratisnivå. Den eneste gratistilgangen er gjennom et invitasjons-/søknadsbasert Builder Series-program, som ikke er et standard gratis…
+- **`firecrawl`** — Katalogen vår ble levert med freeNote-teksten «(ingen)», noe som antyder at det ikke finnes noe gratisnivå. I realiteten har Firecrawl et dokumentert, løpende gratisabonnement med 1,000 kreditter per måned — katalogoppføringen er feil.
+- **`freemodel-dev`** — Den medfølgende freeNote-teksten vår er «(ingen)» — dette var sannsynligvis en plassholder som betydde at leverandøren ennå ikke var katalogisert. I realiteten har leverandøren et tilbud med $300 i engangskreditt for prøvebruk. Dette er imidlertid et e…
+- **`friendliai`** — Den medfølgende freeNote-teksten («Gratisnivå for serverløs inferens») er delvis korrekt, men misvisende. Det finnes gratis tilgang via Tier 0 og modeller som er merket som gratis, men hastighetsgrensene er udefinerte og ada…
+- **`gemini`** — Den medfølgende freeNote-teksten sier «1 500 forespørsler/dag for Gemini 2.5 Flash» — dette var korrekt før desember 2025. Google reduserte grensene for gratisnivået med 50–80 % i desember 2025 og reduserte Gemini 2.5 Flash fra 1 500 R…
+- **`gitlawb`** — Den medfølgende freeNote-teksten «Gratisnivå tilgjengelig» er i praksis utdatert. Den opprinnelige gratis MiMo-tilgangen ble fjernet i mai 2026. Det eneste gjenværende «gratisalternativet» er en midlertidig kampanjemodell (Nemotron 3 U…
 - **`gitlawb-gmi`** — Fortsatt delvis korrekt — gratisnivået finnes, men er nå begrenset til én enkelt modell (Nemotron 3 Ultra) etter at gratis MiMo-tilgang ble trukket tilbake i slutten av mai 2026. Den medfølgende merknaden «Gratisnivå tilgjengelig» under…
-- **`groq`** — Den medfølgende freeNote «30 RPM / 14,4K RPD» er bare korrekt for llama-3.1-8b-instant. De fleste andre modeller (inkludert llama-3.3-70b-versatile) har en mye lavere grense på 1K RPD. Merknaden utelater modellspesifikke … **Løst 2026-09-02:** `freeNote` lyder nå «Gratisabonnement: grenser per modell (200K tokener/dag per chatmodell; se console.groq.com/docs/rate-limits for RPM/RPD) — ingen betalingsmåte registrert.» og katalogen inneholder fem modellspesifikke grenser på 6M (llama-3.3-70b-versatile ble fjernet fra gratisnivået 2026-08-16) — se [merknaden fra den nye revisjonen 2026-09-02](#tldr--how-much-free-inference-does-omniroute-actually-aggregate).
-- **`huggingchat`** — Den medfølgende freeNote («Gratis LLM-chat — krever ikke abonnement. Hastighetsgrenser gjelder.») er delvis korrekt, men undervurderer begrensningene betydelig. Gratisnivået opererer nå med en fast grense på $0,10/…
-- **`huggingface`** — Betydelig innstrammet. Den medfølgende freeNote («Gratis Inference API for tusenvis av modeller») antydet ubegrenset/sjenerøs gratistilgang, men fra midten av 2025 er gratisnivået begrenset til $0,10/måned i gjentak…
-- **`hyperbolic`** — Vår medfølgende freeNote sier «$1–5 i prøvekreditter ved registrering» — delen om $1 i prøvekreditt er korrekt, men tallet «$5» viser til minimumsinnskuddet som kreves for å låse opp GPU-leie (ikke gratis kreditter …
-- **`iflytek`** — Katalogen sier «Gratis Spark Lite-modeller» — dette er i hovedsak korrekt. Dagens situasjon er imidlertid mer nyansert: Bare Spark Lite er gratis (tilbudet med 100M tokener for Max var en engangskampanje, ikke gjentakende); …
-- **`inference-net`** — Den medfølgende freeNote oppgir «$25 i gratiskreditter ved registrering samt forskningsstipender». Den nåværende prissiden viser bare $1 i gjentakende månedlige kreditter, uten omtale av en registreringsbonus på $25 eller forskningsstipe…
-- **`jina-reader`** — Vår medfølgende freeNote var «(ingen)», noe som er feil. Jina Reader har hatt et offentlig dokumentert gratisnivå siden lanseringen: nøkkelfri tilgang med 20 RPM samt en engangstildeling på 10M tokener med en gratis API-nøkkel. …
-- **`kiro`** — Katalogen ble levert med freeNote «(ingen)» — men Kiro har et dokumentert, permanent gratisnivå på 50 kreditter/måned. Gratisnivået har eksistert siden Kiros offentlige lansering (prisene ble formalisert rundt oktober 2025). Dette er et …
-- **`llm7`** — Hastighetsgrensene har økt fra den medfølgende freeNote (20 RPM / 100 forespørsler/time → 40 RPM / 200 forespørsler/time). Påstanden «ingen registrering nødvendig» er nå utdatert — et gratis token fra token.llm7.io kreves nå (selv o…
-- **`longcat`** — Den offentlige forhåndsvisningen/betaversjonen er avsluttet, og Flash-modellene er trukket tilbake; bare den generelt tilgjengelige `LongCat-2.0` gjenstår. Gratisnivået er en **engangstildeling på 10M tokener** som låses opp etter kontoregistrering + **KYC-verifisering** — den tilbakestilles **ikke** daglig eller månedlig. Etter at tildelingen er brukt opp, betaler man etter forbruk.
-- **`mistral`** — Den medfølgende freeNote («Gratis Experiment-nivå: hastighetsbegrenset tilgang til alle modeller») er i hovedsak korrekt, men mangelfull. Dagens situasjon inkluderer spesifikke dokumenterte grenser: 2 RPM, 500K TPM, 1B tokener/…
-- **`monsterapi`** — Den medfølgende freeNote sier «Gratiskreditter for desentralisert GPU-inferens», noe som er delvis korrekt — man får prøvekreditter én gang ved registrering. Det gjentakende gratisnivået har imidlertid 0 kreditter/måned…
-- **`morph`** — Den medfølgende freeNote nevner «250K kreditter/måned», noe som samsvarer med den nåværende kredittildelingen. Den viktigere begrensningen er imidlertid 200 forespørsler/måned, noe som ikke ble oppgitt i den opprinnelige k…
-- **`muse-spark-web`** — Den medfølgende freeNote («Gratis med innlogging — Meta AI-plattform med Llama-modeller») er i hovedsak korrekt når det gjelder krav om innlogging og tilgang til Llama-modeller. Det ble ikke funnet noen innstramming av gratisnivået; det f…
-- **`nlpcloud`** — Den medfølgende freeNote sier «Prøvekreditter for nye kontoer», noe som antyder en engangsprøve. I virkeligheten er NLP Clouds gratisnivå et gjentakende månedlig gratisabonnement (10 000 forespørsler/måned), ikke prøvekredi…
-- **`nomic`** — Vår medfølgende freeNote sier «Gratis Nomic Embed API» uten forbehold, noe som antyder løpende gratistilgang. I virkeligheten er det bare en engangskreditt for 1M tokener — etter at dette tokenbudsjettet er brukt opp, kreves et betalt abon…
-- **`nous-research`** — Den medfølgende freeNote («Gratisnivå: 50 RPM, 500 000 TPM») samsvarer ikke med det nåværende Nous Portal-produktet. Portalen ble lansert 27. april 2026 og strukturerer gratisnivået som $0,10/måned i gjentakende kre…
-- **`nvidia`** — Hastighetsgrensen «40 RPM, 70+ modeller» samsvarer med katalogen, men freeNote-fremstillingen som et enkelt nivå for utviklertilgang underkommuniserer at den gamle engangspoolen med kreditter er fjernet — tilgangen er nå vir…
-- **`ollama-cloud`** — Vår medfølgende freeNote er «(ingen)» — dette er utdatert. Ollama Cloud lanserte et skybasert inferensprodukt med et reelt gratisnivå som gir lett, ukentlig GPU-tidsbasert tilgang til driftede åpne modeller.
-- **`openrouter`** — RPD strammet inn fra 200 til 50 for kontoer uten kreditt (RPM er uendret på 20). Katalogmerknaden var korrekt for RPM, men oppga en RPD som var 4 ganger for høy for basisnivået uten kreditt. **Sporing under kjøring (#6842)**: Dette er ikke lenger bare en statisk merknad — `open-sse/services/openrouterQuotaFetcher.ts` spør jevnlig `/api/v1/key` + `/api/v1/credits` om kredittramme/gjenstående kreditt/tilbakestilling per nøkkel og daglig/ukentlig/månedlig forbruk i USD, og `open-sse/services/openrouterFreeWindow.ts` sporer lokalt vinduene beskrevet ovenfor med 50 eller 1000 per dag + 20 RPM for `:free`-modeller (korrigert fra `X-RateLimit-*`-responsheadere ved 429-feil), vist i Kontrollpanel → Leverandørkvote.
-- **`phind`** — Phind ble lagt ned 16. januar 2026. Leverandøren er nå **fullstendig fjernet** fra katalogen (registeret, eksekveringskomponenten og både katalogoppføringene for nettinfokapsler og API-nøkler) — i tråd med presedensen for fjerning av nedlagte tjenester (#5246 Gemini CLI).
-- **`pollinations`** — Stemmer delvis — påstanden «ingen API-nøkkel kreves» gjelder fortsatt for anonym tilgang, men katalogens freeNote utelater at: (1) hastighetsgrenser gjelder (intervallbegrensning på ~1 forespørsel/6–15 s for anonyme …
-- **`predibase`** — Den medfølgende freeNote ($25 i gratis prøvekreditt, gyldig i 30 dager) stemmer fortsatt med gjeldende dokumentasjon. Katalogen utelater imidlertid den samtidige serverløse hastighetsgrensen på 20 000 tokens/dag som gjelder i …
-- **`publicai`** — Den medfølgende freeNote («Gratis nivå for fellesskapsinferens») er i hovedsak korrekt, men mangler detaljer: Hastighetsgrensen på 20 RPM er nå dokumentert. Ingen større innstramming er funnet; tjenesten er fortsatt gra…
-- **`puter`** — **Fullstendig fjernet** fra katalogen (registeret, eksekveringskomponenten, katalogen over gratismodeller og API-nøkkeloppføringen) på forespørsel fra Puters eier (Nariman Jelveh) — se presedensen for fjerning av nedlagte tjenester ovenfor (`phind`).
-- **`qoder`** — Katalogen vår leveres med freeNote «(ingen)», men Qoder har et gratisnivå: en Community Edition med ubegrensede fullføringer fra grunnmodeller (daglig grense, uspesifisert antall), pluss en engangs prøveperiode på 14 dager/300 kreditter …
-- **`sambanova`** — Den medfølgende merknaden vår beskrev bare engangskreditten på $5 (gyldig i 30 dager). Dagens tilbud inkluderer et permanent, gjentakende gratisnivå med dokumenterte hastighetsgrenser (20 RPM, 20 RPD, 200k TPD) som vedv…
-- **`sensenova`** — Den medfølgende freeNote sier «Gratis SenseTime-modeller», noe som er vagt, men i hovedsak korrekt — gratis tilgang finnes. Virkeligheten er imidlertid mer nyansert: Gratis tilgang er en tidsbegrenset offentlig betaversjon (Token…
-- **`serper-search`** — Den medfølgende freeNote sier «(ingen)», noe som er delvis korrekt — det finnes ingen gjentakende gratisplan — men Serper tilbyr 2 500 engangskreditter ved registrering. Katalogmerknaden kunne vært mer presis…
-- **`siliconflow`** — Stemmer delvis, men er mer nyansert: Gratiskreditten på $1 er en engangs prøveordning (ikke gjentakende), mens komponenten med «permanent gratis modeller» fortsatt gjelder — gratis $0-modeller finnes fremdeles (Qwen3-8B, D…
-- **`sparkdesk`** — Stemmer delvis — den medfølgende freeNote «Gratis iFlytek Spark-modeller» er korrekt i den forstand at Spark Lite er permanent gratis, men underkommuniserer begrensningen (2 QPS per App ID) og overdriver omfanget (bare S…
-- **`stepfun`** — Den medfølgende freeNote «Gratis Step-2-modeller» er utdatert. Gratis tilgang til Step-2 LLM tilbys ikke lenger; plattformen har gått over til Step 3.x-modeller med betaling per token og uten noe gratis LLM-nivå. Bare…
-- **`t3-web`** — Den medfølgende freeNote er i hovedsak korrekt (begrenset modelltilgang, Pro låser opp over 50 modeller for $8/måned), men mangler to viktige oppdateringer: (1) gratisnivået tilbakestilles nå daglig i stedet for månedlig (endret rundt…
-- **`tavily-search`** — Katalogen leveres med freeNote «(ingen)», noe som antyder at det ikke finnes noe gratisnivå, men Tavily tilbyr faktisk et dokumentert, gjentakende gratisnivå på 1 000 kreditter/måned uten krav om kredittkort. Dette er et betydelig avvi…
-- **`tencent`** — Stemmer i stor grad — den medfølgende freeNote («Gratis Hunyuan Lite-modeller») er korrekt. Hunyuan-lite har vært permanent gratis siden mai 2024 og er det fortsatt per 2026. Katalogmerknaden underkommuniserer detalj…
-- **`together`** — Den medfølgende merknaden sier «$25 i registreringskreditt + 3 permanent gratis modeller», men Together krever nå et kredittkjøp på minst $5 og tilbyr ingen gratis prøveperiode. Registreringskreditten på $25 ble fjernet fra katalogen (#12526). Leverandøren tilbyr fortsatt ~80 permanent gratis modeller, men bruksvilkårene (avsnitt 4.3(d)) forbyr uttrykkelig overføring, distribusjon, videresalg eller tilbud av tjenestene.
-- **`uncloseai`** — Stemmer i stor grad — fortsatt gratis for alltid uten registrering. Bruksvilkårene (terms-of-use.html) presiserer imidlertid at IP-basert begrensning brukes ved overdreven bruk, og forbyr utvikling av konkurrerende ML-tjenester uten …
-- **`veoaifree-web`** — Den medfølgende freeNote oppgir «6 forespørsler/time», men ingen slik uttrykkelig grense er for øyeblikket dokumentert noe sted på veoaifree.com. Nettstedet hevder å tilby ubegrenset gratis generering uten innlogging. Modellene som er oppført …
-- **`voyage-ai`** — Den medfølgende freeNote «200M gratis tokens for embeddings og rerangering» er i hovedsak korrekt når det gjelder antall tokens, men er misvisende — den utelater at dette er en engangstildeling per konto, ikke en gjentak…
-- **`yi`** — Den medfølgende freeNote «Gratis Yi-Light-modeller» viser til et modellnavn («Yi-Light») som ikke finnes i noen gjeldende dokumentasjon eller modellkatalog fra 01.AI — ingen slik modell er oppført på platform.01.ai, …
+- **`groq`** — Den medfølgende freeNote-teksten «30 RPM / 14,4K RPD» er bare korrekt for llama-3.1-8b-instant. De fleste andre modeller (inkludert llama-3.3-70b-versatile) har en mye lavere grense på 1K RPD. Merknaden utelater modellspesifikke … **Løst 2026-09-02:** `freeNote` lyder nå «Gratisabonnement: grenser per modell (200K tokens/dag per chatmodell; se console.groq.com/docs/rate-limits for RPM/RPD) — ingen betalingsmåte er registrert.» og katalogen inneholder fem modellspesifikke grenser på 6M (llama-3.3-70b-versatile ble fjernet fra gratisnivået 2026-08-16) — se [merknaden fra den nye gjennomgangen 2026-09-02](#tldr--how-much-free-inference-does-omniroute-actually-aggregate).
+- **`huggingchat`** — Den medfølgende freeNote-teksten («Gratis LLM-chat — krever ikke abonnement. Bruksgrenser gjelder.») er delvis korrekt, men undervurderer begrensningene betydelig. Gratisnivået opererer nå med en hard grense på $0.10/…
+- **`huggingface`** — Betydelig innstrammet. Den medfølgende freeNote-teksten («Gratis Inference API for tusenvis av modeller») antydet ubegrenset/sjenerøs gratistilgang, men fra midten av 2025 er gratisnivået begrenset til $0.10/måned i tilbakeven…
+- **`hyperbolic`** — Den medfølgende freeNote-teksten vår sier «$1–5 i prøvekreditt ved registrering» — delen om $1 i prøvekreditt er korrekt, men beløpet på «$5» viser til minimumsinnskuddet som kreves for å låse opp GPU-leie (ikke gratis kreditt g…
+- **`iflytek`** — Katalogen sier «Gratis Spark Lite-modeller» — dette er i hovedsak korrekt. Dagens situasjon er imidlertid mer nyansert: Bare Spark Lite er gratis (tilbudet på 100M tokens for Max var en engangskampanje, ikke tilbakevendende); …
+- **`inference-net`** — Den medfølgende freeNote-teksten oppgir «$25 i gratis kreditt ved registrering samt forskningsstipender». Den gjeldende prissiden viser bare $1 i tilbakevendende månedlig kreditt, uten omtale av en registreringsbonus på $25 eller forskningsstipend…
+- **`jina-reader`** — Den medfølgende freeNote-teksten vår var «(ingen)», noe som er feil. Jina Reader har hatt et offentlig dokumentert gratisnivå siden lanseringen: nøkkelfri tilgang med 20 RPM samt en engangstildeling på 10M tokens med en gratis API-nøkkel. …
+- **`kiro`** — Katalogen ble levert med freeNote «(ingen)» — men Kiro har et dokumentert, permanent gratisnivå på 50 kreditter/måned. Gratisnivået har eksistert siden den offentlige lanseringen av Kiro (prisstrukturen ble formalisert rundt oktober 2025). Dette er en …
+- **`llm7`** — Bruksgrensene har økt fra den medfølgende freeNote-teksten (20 RPM / 100 forespørsler/time → 40 RPM / 200 forespørsler/time). Påstanden «krever ingen registrering» er nå utdatert — et gratis token fra token.llm7.io kreves nå (selv o…
+- **`longcat`** — Den offentlige forhåndsvisningen/betaversjonen er avsluttet, og Flash-modellene er avviklet. Bare GA-versjonen `LongCat-2.0` gjenstår. Gratisnivået er en **engangstildeling på 10M tokens** som låses opp etter kontoregistrering + **KYC-verifisering** — den tilbakestilles **ikke** daglig eller månedlig. Etter at tildelingen er brukt opp, gjelder betaling etter forbruk.
+- **`mistral`** — Den medfølgende freeNote-teksten («Gratis Experiment-nivå: hastighetsbegrenset tilgang til alle modeller») er i hovedsak korrekt, men mangelfull. Dagens situasjon inkluderer spesifikke dokumenterte grenser: 2 RPM, 500K TPM, 1B tokens/…
+- **`monsterapi`** — Den medfølgende freeNote-teksten sier «Gratis kreditt for desentralisert GPU-inferens», noe som er delvis korrekt — det gis prøvekreditt én gang ved registrering. Det tilbakevendende gratisnivået har imidlertid 0 kreditter/måned…
+- **`morph`** — Den medfølgende freeNote-teksten nevner «250K kreditter/måned», som samsvarer med dagens kredittildeling. Den viktigere begrensningen er imidlertid 200 forespørsler/måned, noe som ikke fremgikk av den opprinnelige c…
+- **`muse-spark-web`** — Den medfølgende freeNote-teksten («Gratis med innlogging — Meta AI-plattform med Llama-modeller») er i hovedsak korrekt når det gjelder innloggingskravet og tilgangen til Llama-modeller. Det ble ikke oppdaget noen innstramming av gratisnivået; det f…
+- **`nlpcloud`** — Den medfølgende freeNote-teksten sier «Prøvekreditt for nye kontoer», noe som antyder en engangsprøve. I virkeligheten er gratisnivået til NLP Cloud et tilbakevendende månedlig gratisabonnement (10 000 forespørsler/måned), ikke prøvekredi…
+- **`nomic`** — Den medfølgende freeNote-teksten vår sier «Gratis Nomic Embed API» uten forbehold, noe som antyder vedvarende gratistilgang. I virkeligheten er dette bare en engangskreditt på 1M tokens — etter at tokenbudsjettet er brukt opp, kreves et betalt abon…
+- **`nous-research`** — Kontrollert på nytt 2026-10-15: [Gratisabonnementet i Nous Portal](https://portal.nousresearch.com/) tilbyr gratis modeller med $0 i månedlig kreditt, men dokumenterer ikke gratis tilgang til Hermes-4-405B eller Hermes-4-70B. Begge ubekreftede oppføringene er utelatt fra den medfølgende gratiskatalogen. Dette fastslår ikke at Nous ikke har noen gratis modeller.
+- **`nvidia`** — Bruksgrensen «40 RPM, 70+ modeller» samsvarer med katalogen, men freeNote-fremstillingen av dette som et enkelt nivå for utviklertilgang underkommuniserer at den gamle engangspuljen med kreditt er fjernet — tilgangen er nå vir…
+- **`ollama-cloud`** — Den medfølgende freeNote-teksten vår er «(ingen)» — dette er utdatert. Ollama Cloud lanserte et skybasert inferensprodukt med et reelt gratisnivå som gir begrenset ukentlig, GPU-tidsbasert tilgang til driftede åpne modeller.
+- **`openrouter`** — RPD strammet inn fra 200 til 50 for kontoer uten kreditt (RPM uendret på 20). Katalogmerknaden var riktig for RPM, men oppga 4 ganger for høy RPD for basisnivået uten kreditt. **Kjøretidssporing (#6842)**: Dette er ikke lenger bare en statisk merknad — `open-sse/services/openrouterQuotaFetcher.ts` spør jevnlig `/api/v1/key` + `/api/v1/credits` om kredittgrense/gjenstående kreditt/tilbakestilling per nøkkel og daglig/ukentlig/månedlig forbruk i USD, og `open-sse/services/openrouterFreeWindow.ts` sporer lokalt vinduene beskrevet ovenfor for `:free`-modeller med 50 eller 1000 per dag + 20 RPM (korrigert ved hjelp av `X-RateLimit-*`-responsheadere ved 429-feil), og viser dette i Dashboard → Provider Quota.
+- **`phind`** — Phind ble lagt ned 16. januar 2026. Leverandøren er nå **fullstendig fjernet** fra katalogen (registeret, eksekveringsmodulen og både katalogoppføringene for nettinformasjonskapsler og API-nøkler) — i tråd med presedensen for fjerning av nedlagte tjenester (#5246 Gemini CLI).
+- **`pollinations`** — Stemmer delvis — påstanden «ingen API-nøkkel kreves» gjelder fortsatt for anonym tilgang, men katalogens freeNote utelater at: (1) hastighetsbegrensninger gjelder (intervallbegrensning på ~1 forespørsel/6–15 s for anonyme …
+- **`predibase`** — Den leverte freeNote ($25 i gratis prøvekreditt, gyldig i 30 dager) samsvarer fortsatt med gjeldende dokumentasjon. Katalogen utelater imidlertid den samtidige serverløse hastighetsbegrensningen på 20 000 tokener/dag som gjelder under …
+- **`publicai`** — Den leverte freeNote («Gratis fellesskapsnivå for inferens») er i hovedsak korrekt, men mangler presisjon: Hastighetsbegrensningen på 20 RPM er nå dokumentert. Ingen større innstramming er funnet; tjenesten forblir gra…
+- **`puter`** — **Fullstendig fjernet** fra katalogen (registeret, eksekveringsmodulen, gratismodellkatalogen og API-nøkkeloppføringen) etter ønske fra Puters eier (Nariman Jelveh) — se presedensen ovenfor for fjerning av nedlagte tjenester (`phind`).
+- **`qoder`** — Katalogen vår leveres med freeNote «(ingen)», men Qoder har et gratisnivå: en Community Edition med ubegrensede fullføringer fra basismodeller (daglig begrenset, uspesifisert grense), i tillegg til en engangs prøveperiode på 14 dager/300 kreditter …
+- **`sambanova`** — Den leverte merknaden vår beskrev bare engangskreditten på $5 (gyldig i 30 dager). Dagens tilbud inkluderer et permanent, gjentakende gratisnivå med dokumenterte hastighetsbegrensninger (20 RPM, 20 RPD, 200k TPD) som vedv…
+- **`sensenova`** — Den leverte freeNote sier «Gratis SenseTime-modeller», noe som er vagt, men i hovedsak riktig — gratis tilgang finnes. Virkeligheten er imidlertid mer nyansert: Gratistilgangen er en tidsbegrenset offentlig betaversjon (Token…
+- **`serper-search`** — Den leverte freeNote sier «(ingen)», noe som er delvis korrekt — det finnes ingen gjentakende gratisplan — men Serper tilbyr 2 500 engangskreditter som prøve ved registrering. Katalogmerknaden kunne vært mer presis…
+- **`siliconflow`** — Oppdatert 2026-10-18 (#17028): Registreringskreditten er en engangs prøvefordel, ikke en gjentakende gratisplan. Ti fakturerbare flaggskip-ID-er er fjernet fra den statiske gratiskatalogen. Enkelte modeller kan fortsatt være merket som gratis i SiliconFlows aktive katalog per modell; importen og Free-merket krever slik dokumentasjon (og enhver positiv pris overstyrer dette). Det hevdes ingen statisk, ubegrenset gratiskvote.
+- **`sparkdesk`** — Stemmer delvis — den leverte freeNote «Gratis iFlytek Spark-modeller» er korrekt ved at Spark Lite er permanent gratis, men undervurderer begrensningen (2 QPS per App ID) og overdriver omfanget (bare S…
+- **`stepfun`** — Den leverte freeNote «Gratis Step-2-modeller» er utdatert. Gratis tilgang til Step-2 LLM tilbys ikke lenger; plattformen har gått over til Step 3.x-modeller med betaling per token og uten noe gratis LLM-nivå. Bare…
+- **`t3-web`** — Den leverte freeNote er i hovedsak korrekt (begrenset modelltilgang, Pro låser opp over 50 modeller for $8/måned), men mangler to viktige oppdateringer: (1) gratisnivået tilbakestilles nå daglig i stedet for månedlig (endret rundt…
+- **`tavily-search`** — Katalogen leveres med freeNote «(ingen)», noe som antyder at det ikke finnes noe gratisnivå, men Tavily tilbyr faktisk et dokumentert, gjentakende gratisnivå på 1 000 kreditter/måned uten krav om kredittkort. Dette er et betydelig avv…
+- **`tencent`** — Stemmer i stor grad — den leverte freeNote («Gratis Hunyuan Lite-modeller») er korrekt. Hunyuan-lite har vært permanent gratis siden mai 2024 og er det fortsatt per 2026. Katalogmerknaden underkommuniserer detal…
+- **`together`** — Den leverte merknaden sier «$25 i registreringskreditt + 3 permanent gratis modeller», men Together krever nå et kredittkjøp på minst $5 og tilbyr ingen gratis prøveperiode. Registreringskreditten på $25 ble fjernet fra katalogen (#12526). Leverandøren tilbyr fortsatt ~80 permanent gratis modeller, men tjenestevilkårene (avsnitt 4.3(d)) forbyr uttrykkelig å overføre, distribuere, videreselge eller tilby tjenestene.
+- **`uncloseai`** — Stemmer i stor grad — fortsatt gratis for alltid uten registrering. Tjenestevilkårene (terms-of-use.html) presiserer imidlertid at IP-basert begrensning brukes ved overdreven bruk, og forbyr utvikling av konkurrerende ML-tjenester uten e…
+- **`veoaifree-web`** — Den leverte freeNote oppgir «6 forespørsler/time», men ingen slik eksplisitt grense er for øyeblikket dokumentert noe sted på veoaifree.com. Nettstedet hevder å tilby ubegrenset gratis generering uten innlogging. Modellene som er oppført …
+- **`voyage-ai`** — Den leverte freeNote «200M gratis tokener for innebygginger og omrangering» er i hovedsak korrekt når det gjelder antall tokener, men misvisende — den utelater at dette er en engangstildeling per konto, ikke en gjent…
+- **`yi`** — Den leverte freeNote «Gratis Yi-Light-modeller» viser til et modellnavn («Yi-Light») som ikke finnes i gjeldende dokumentasjon eller modellkatalog fra 01.AI — ingen slik modell er oppført på platform.01.ai, …
 
 ---
 
 ## Ordliste
 
-| Begrep                    | Betydning                                                                               |
-| ------------------------- | --------------------------------------------------------------------------------------- |
-| **RPM / RPD / RPH**       | Forespørsler per minutt / dag / time                                                    |
-| **TPM / TPD**             | Tokener per minutt / dag                                                                |
-| **Dokumentert tildeling** | Leverandøren publiserer en eksplisitt daglig/månedlig tokengrense (forsvarlig budsjett) |
-| **Teoretisk maksimum**    | `rate-limit × 24/7 × 30d` — et maksimum, ikke et tildelt budsjett                       |
-| **Nevron**                | Cloudflare-beregningsenhet (~1 utdatatoken)                                             |
+| Begrep                 | Betydning                                                                               |
+| ---------------------- | --------------------------------------------------------------------------------------- |
+| **RPM / RPD / RPH**    | Forespørsler per minutt / dag / time                                                    |
+| **TPM / TPD**          | Tokener per minutt / dag                                                                |
+| **Dokumentert kvote**  | Leverandøren publiserer en eksplisitt daglig/månedlig tokengrense (forsvarlig budsjett) |
+| **Teoretisk maksimum** | `rate-limit × 24/7 × 30d` — et maksimum, ikke en tildelt kvote                          |
+| **Neuron**             | Cloudflare-beregningsenhet (~1 utdatatoken)                                             |
 
 > Generert fra undersøkelser av hver leverandør 2026-06-05. Kjør undersøkelsesarbeidsflyten på nytt (se `_tasks/features-v3.8.12`) for å oppdatere.

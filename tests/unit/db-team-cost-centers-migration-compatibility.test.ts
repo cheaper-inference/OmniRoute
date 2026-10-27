@@ -36,12 +36,12 @@ fs.copyFileSync(
 // behavior has its own focused tests.
 fs.writeFileSync(path.join(migrationsDir, "164_retire_microsoft_designer_web.sql"), "SELECT 1;\n");
 fs.copyFileSync(
-  path.resolve("src/lib/db/migrations/197_team_cost_centers.sql"),
-  path.join(migrationsDir, "197_team_cost_centers.sql")
+  path.resolve("src/lib/db/migrations/215_team_cost_centers.sql"),
+  path.join(migrationsDir, "215_team_cost_centers.sql")
 );
 fs.copyFileSync(
-  path.resolve("src/lib/db/migrations/198_team_cost_shapes.sql"),
-  path.join(migrationsDir, "198_team_cost_shapes.sql")
+  path.resolve("src/lib/db/migrations/216_team_cost_shapes.sql"),
+  path.join(migrationsDir, "216_team_cost_shapes.sql")
 );
 
 const { runMigrations } = await import("../../src/lib/db/migrationRunner.ts");
@@ -68,7 +68,7 @@ test("Team compatibility uses exact version+name guards through the final slot",
     historicalTeamVersions.map((fromVersion) => ({
       fromVersion,
       fromName: "team_cost_centers",
-      toVersion: "197",
+      toVersion: "215",
       toName: "team_cost_centers",
     }))
   );
@@ -115,8 +115,8 @@ for (const legacyVersion of historicalTeamVersions) {
       `);
 
       // Historical Team slot already created this table before the runner
-      // rehomes its version/name marker to 197.
-      db.exec(fs.readFileSync(path.join(migrationsDir, "197_team_cost_centers.sql"), "utf8"));
+      // rehomes its version/name marker to 215.
+      db.exec(fs.readFileSync(path.join(migrationsDir, "215_team_cost_centers.sql"), "utf8"));
 
       assert.equal(runMigrations(db), 7);
       assert.deepEqual(
@@ -128,8 +128,8 @@ for (const legacyVersion of historicalTeamVersions) {
           { version: "161", name: "config_audit_log" },
           { version: "163", name: "radar_feed_cache_generated_at" },
           { version: "164", name: "retire_microsoft_designer_web" },
-          { version: "197", name: "team_cost_centers" },
-          { version: "198", name: "team_cost_shapes" },
+          { version: "215", name: "team_cost_centers" },
+          { version: "216", name: "team_cost_shapes" },
         ]
       );
       for (const table of [
@@ -162,7 +162,7 @@ for (const legacyVersion of historicalTeamVersions) {
   });
 }
 
-test("an already-applied canonical live 163 row is untouched and Team runs at 197", () => {
+test("an already-applied canonical live 163 row is untouched and Team runs at 215", () => {
   const db = new Database(":memory:");
   try {
     db.exec(`
@@ -186,14 +186,14 @@ test("an already-applied canonical live 163 row is untouched and Team runs at 19
     assert.equal(runMigrations(db), 7);
     const rows = db
       .prepare(
-        "SELECT version, name, applied_at FROM _omniroute_migrations WHERE version IN ('163', '197') ORDER BY version"
+        "SELECT version, name, applied_at FROM _omniroute_migrations WHERE version IN ('163', '215') ORDER BY version"
       )
       .all() as Array<{ version: string; name: string; applied_at: string }>;
     assert.deepEqual(
       rows.map(({ version, name }) => ({ version, name })),
       [
         { version: "163", name: "radar_feed_cache_generated_at" },
-        { version: "197", name: "team_cost_centers" },
+        { version: "215", name: "team_cost_centers" },
       ]
     );
     assert.equal(rows[0]?.applied_at, "2026-08-25 00:00:00");
@@ -203,7 +203,7 @@ test("an already-applied canonical live 163 row is untouched and Team runs at 19
   }
 });
 
-test("an already-applied 197 Team schema gains shape columns without losing legacy rows", () => {
+test("an already-applied 215 Team schema gains shape columns without losing legacy rows", () => {
   const db = new Database(":memory:");
   try {
     db.exec(`
@@ -213,11 +213,11 @@ test("an already-applied 197 Team schema gains shape columns without losing lega
       CREATE TABLE usage_history (id INTEGER PRIMARY KEY, billing_team_id TEXT, team_rollup_processed_at TEXT, timestamp TEXT);
       CREATE TABLE radar_feed_cache (id TEXT PRIMARY KEY);
     `);
-    db.exec(fs.readFileSync(path.join(migrationsDir, "197_team_cost_centers.sql"), "utf8"));
+    db.exec(fs.readFileSync(path.join(migrationsDir, "215_team_cost_centers.sql"), "utf8"));
     db.exec(`INSERT INTO teams (id, name, created_at, updated_at) VALUES ('t', 'Legacy', '2026-01-01', '2026-01-01');
       INSERT INTO daily_team_usage_summary (team_id, api_key_id, provider, model, date, total_requests, successful_requests)
       VALUES ('t', 'k', 'openai', 'gpt-legacy', '2026-01-01', 1, 1);
-      INSERT INTO _omniroute_migrations (version, name, applied_at) VALUES ('197', 'team_cost_centers', '2026-01-01');`);
+      INSERT INTO _omniroute_migrations (version, name, applied_at) VALUES ('215', 'team_cost_centers', '2026-01-01');`);
     runMigrations(db);
     assert.deepEqual(
       db

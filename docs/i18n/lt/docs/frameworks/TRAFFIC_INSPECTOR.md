@@ -40,33 +40,33 @@ Traffic Inspector yra „OmniRoute“ integruota HTTPS srauto derinimo priemonė
 
 ## §2 Fiksavimo režimai
 
-Traffic Inspector palaiko **5 vienu metu veikiančius fiksavimo šaltinius**. Kiekvieną jų galima įjungti arba išjungti atskirai. Kiekvieno `InterceptedRequest` (`src/mitm/inspector/types.ts`) laukas `source` yra viena iš šių reikšmių: `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` arba `"tproxy"`.
+Traffic Inspector palaiko **5 vienu metu veikiančius fiksavimo šaltinius**. Kiekvieną iš jų galima įjungti arba išjungti atskirai. Kiekvieno `InterceptedRequest` (`src/mitm/inspector/types.ts`) laukas `source` turi vieną iš šių reikšmių: `"agent-bridge"`, `"custom-host"`, `"http-proxy"`, `"system-proxy"` arba `"tproxy"`.
 
 ### 1 režimas — AgentBridge (numatytasis, visada įjungtas)
 
 **Šaltinis:** AgentBridge apdorojimo programos (`src/mitm/handlers/base.ts`)
-**Mechanizmas:** Kiekvienas `intercept()` iškvietimas klasėje `MitmHandlerBase` prieš persiųsdamas iškviečia `hookBufferStart()`, o baigęs — `hookBufferUpdate()`. Nereikia jokios papildomos konfigūracijos — veikia iškart, kai paleidžiamas AgentBridge.
+**Mechanizmas:** Kiekvienas `intercept()` iškvietimas klasėje `MitmHandlerBase` prieš persiųsdamas iškviečia `hookBufferStart()`, o baigęs — `hookBufferUpdate()`. Nereikia jokios papildomos konfigūracijos — veikia vos paleidus AgentBridge.
 **Aprėptis:** 9 IDE agentai, sukonfigūruoti AgentBridge
 **Pastaba:** `InterceptedRequest` laukas `source` = `"agent-bridge"`
 
 ### 2 režimas — pasirinktiniai pagrindiniai kompiuteriai (DNS peradresavimas)
 
-**Šaltinis:** Naudotojo apibrėžtas pagrindinių kompiuterių sąrašas (`inspector_custom_hosts` lentelė)
-**Mechanizmas:** Pridėjus pagrindinį kompiuterį per naudotojo sąsają, į `/etc/hosts` įrašoma `127.0.0.1 <host>` (reikia sudo). Esamas AgentBridge MITM serveris (443 prievadas) dinamiškai sugeneruoja naujo pagrindinio kompiuterio SNI sertifikatą.
-**Aprėptis:** Bet kuri pridėtą pagrindinį kompiuterį naudojanti programa — programos konfigūracijos keisti nereikia
+**Šaltinis:** Naudotojo apibrėžtas pagrindinių kompiuterių sąrašas (lentelė `inspector_custom_hosts`)
+**Mechanizmas:** Per NS pridėjus pagrindinį kompiuterį, į `/etc/hosts` įrašoma `127.0.0.1 <host>` (reikia sudo). Esamas AgentBridge MITM serveris (443 prievadas) dinamiškai sugeneruoja naujo pagrindinio kompiuterio SNI sertifikatą.
+**Aprėptis:** Bet kuri programa, naudojanti pridėtą pagrindinį kompiuterį — programos konfigūracijos keisti nereikia
 **Pastaba:** `source` = `"custom-host"`
 
-Naudojimo pavyzdžiai:
+Naudojimo atvejų pavyzdžiai:
 
 - Stebėti `api.openai.com` srautą iš Python scenarijų
 - Derinti `my-internal-llm.company.com`
-- Fiksuoti srautą iš mobiliųjų įrenginių tame pačiame tinkle (naudojant ARP klastojimą — išplėstinis naudojimas)
+- Fiksuoti srautą iš tame pačiame tinkle esančių mobiliųjų įrenginių (naudojant ARP klastojimą — skirta pažengusiesiems)
 
-### 3 režimas — HTTP_PROXY klausytojas (8080 prievadas)
+### 3 režimas — HTTP_PROXY klausymo tarnyba (8080 prievadas)
 
 **Šaltinis:** Programos, naudojančios `HTTP_PROXY`/`HTTPS_PROXY` aplinkos kintamuosius
-**Mechanizmas:** Antrinis 8080 prievado klausytojas (`src/mitm/inspector/httpProxyServer.ts`), veikiantis kaip standartinis tiesiogiai nurodomas HTTP/HTTPS tarpinis serveris. Priima `CONNECT` tunelius (HTTPS) ir tiesiogines HTTP užklausas.
-**Aprėptis:** Bet kuri programa, naudojanti `HTTP_PROXY` aplinkos kintamąjį — nereikia keisti DNS, nereikia sudo
+**Mechanizmas:** Antrinė klausymo tarnyba, veikianti 8080 prievade (`src/mitm/inspector/httpProxyServer.ts`) ir atliekanti standartinio tiesioginio HTTP/HTTPS tarpinio serverio funkciją. Priima `CONNECT` tunelius (HTTPS) ir tiesiogines HTTP užklausas.
+**Aprėptis:** Bet kuri programa, naudojanti `HTTP_PROXY` aplinkos kintamąjį — nereikia keisti DNS ir nereikia sudo
 **Pastaba:** `source` = `"http-proxy"`
 
 ```bash
@@ -78,48 +78,48 @@ export HTTP_PROXY=http://127.0.0.1:8080
 export HTTPS_PROXY=http://127.0.0.1:8080
 ```
 
-**TLS apribojimas:** HTTPS `CONNECT` tuneliuose pagal numatytąją nuostatą fiksuojami tik metaduomenys (pagrindinis kompiuteris, prievadas, laiko informacija) — TLS turinys neiššifruojamas. Norėdami tikrinti visą turinį, įjunkite perjungiklį „Iššifruoti HTTPS tarpinio serverio režimu“ (pasirenkama nuostata, reikia pasitikėti AgentBridge sertifikatu).
+**TLS apribojimas:** HTTPS perduodamas per paprastą `CONNECT` tunelį: klausymo tarnyba persiunčia užšifruotus baitus jų nekeisdama ir įrašo tik metaduomenis (pagrindinį kompiuterį, prievadą, laiko informaciją). Ji niekada neiššifruoja HTTPS, o nustatymo, kuris įjungtų šio režimo iššifravimą, nėra. Norėdami fiksuoti HTTPS turinį, nukreipkite pagrindinį kompiuterį per 1 režimą (AgentBridge), 2 režimą (pasirinktiniai pagrindiniai kompiuteriai) arba 5 režimą (TPROXY iššifravimas).
 
 **Prievado konfliktas:** Jei 8080 prievadas naudojamas, AgentBridge grąžina 409 su struktūrizuota klaida. Pakeiskite prievadą naudodami `INSPECTOR_HTTP_PROXY_PORT` aplinkos kintamąjį.
 
-### 4 režimas — visos sistemos tarpinis serveris (išplėstinis, pasirenkamas)
+### 4 režimas — visos sistemos tarpinis serveris (skirta pažengusiesiems, pasirenkama)
 
-**Šaltinis:** OS lygmens tarpinio serverio nuostatos (taikomos visoms kompiuterio programoms)
-**Mechanizmas:** Naudojamos OS API, kad visas HTTP/HTTPS srautas būtų peradresuotas per HTTP_PROXY klausytoją:
+**Šaltinis:** OS lygmens tarpinio serverio nustatymai (taikomi visoms kompiuterio programoms)
+**Mechanizmas:** Naudoja OS API, kad per HTTP_PROXY klausymo tarnybą peradresuotų visą HTTP/HTTPS srautą:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
 - **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
-  **Aprėptis:** Kiekviena kompiuterio programa, naudojanti sistemos tarpinio serverio nuostatas
+  **Aprėptis:** Kiekviena kompiuterio programa, naudojanti sistemos tarpinio serverio nustatymus
   **Pastaba:** `source` = `"system-proxy"`
 
 **Saugos mechanizmai:**
 
-- Automatinio išjungimo laikmatis (numatytoji trukmė — 30 min., konfigūruojama naudojant `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- Automatinio išjungimo laikmatis (numatytoji reikšmė — 30 min., konfigūruojamas naudojant `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
 - Ankstesnė sistemos tarpinio serverio būsena išsaugoma DB ir atkuriama atšaukus pakeitimus
-- Jei naudotojas bando išeiti, kol funkcija aktyvi, valdymo skydelyje rodomas raginimas „Atkuriamas sistemos tarpinis serveris“
-- Naudotojo sąsajoje rodomas ženklelis `⚠ Išplėstinis` ir aiškus patvirtinimo žymimasis langelis
+- Jei naudotojas išeina iš puslapio, kol funkcija aktyvi, valdymo skydelyje rodomas raginimas „Atkuriami sistemos tarpinio serverio nustatymai“
+- NS rodomas ženklelis `⚠ Pažengusiesiems` ir aiškus patvirtinimo žymimasis langelis
 
-### 5 režimas — TPROXY skaidrusis iššifravimas (Linux, root, pasirenkamas)
+### 5 režimas — TPROXY skaidrusis iššifravimas (Linux, root, pasirenkama)
 
 **Šaltinis:** Branduolio TPROXY + strateginis maršruto parinkimas (`src/mitm/tproxy/`)
-**Mechanizmas:** Nauji vietiniai išeinantys TCP ryšiai į tikslinį prievadą (numatytasis — `443`) pažymimi `mangle OUTPUT`, `ip rule` nukreipia pažymėtus paketus vietiniam pristatymui, o `mangle PREROUTING` paskirties elementas `TPROXY` perduoda juos skaidriajam (**IP_TRANSPARENT**) klausytojui (numatytasis prievadas — `8443`). Klausytojas nutraukia TLS ryšį naudodamas dinaminės CA **pagal poreikį kiekvienam SNI pagrindinio kompiuterio vardui išduotą** galutinio subjekto sertifikatą, užfiksuoja iššifruotą apsikeitimą duomenimis ir persiunčia iš naujo užšifruotą užklausą į pradinę paskirties vietą.
-**Aprėptis:** **Bet kokie** paskirties pagrindiniai kompiuteriai tiksliniame prievade — nereikia `/etc/hosts` klastojimo, `HTTP_PROXY` aplinkos kintamojo ar visos sistemos tarpinio serverio keitimo. Perimamo proceso konfigūracijos keisti nereikia, tačiau jis turi pasitikėti dinamine CA.
+**Mechanizmas:** Nauji vietiniai į tikslinį prievadą (numatytasis — `443`) nukreipti išeinantys TCP ryšiai pažymimi grandinėje `mangle OUTPUT`, `ip rule` peradresuoja pažymėtus paketus vietiniam pristatymui, o grandinės `mangle PREROUTING` paskirties vieta `TPROXY` perduoda juos skaidriajai (**IP_TRANSPARENT**) klausymo tarnybai (numatytasis prievadas — `8443`). Klausymo tarnyba užbaigia TLS ryšį naudodama dinaminės CA **kiekvienam SNI pagrindinio kompiuterio vardui pareikalavus** išduotą galutinio subjekto sertifikatą, užfiksuoja iššifruotus duomenų mainus ir persiunčia iš naujo užšifruotą užklausą į pradinę paskirties vietą.
+**Aprėptis:** **Bet kokie** paskirties pagrindiniai kompiuteriai tiksliniame prievade — nereikia `/etc/hosts` klastojimo, `HTTP_PROXY` aplinkos kintamojo ar visos sistemos tarpinio serverio pakeitimų. Perimamo proceso konfigūracijos keisti nereikia, tačiau jis turi pasitikėti dinamine CA.
 **Pastaba:** `source` = `"tproxy"`
 
-**Reikalavimai:** Tik Linux (**IP_TRANSPARENT** veikia tik Linux), **CAP_NET_ADMIN** galimybė (root) ir savasis N-API priedas, kurį reikia sukurti naudojant C įrankių grandinę (`npm run build:native:tproxy`). Kai šių komponentų nėra, valdymo skydelio perjungiklis išjungiamas ir rodoma paaiškinamoji žyma „TPROXY iššifravimui reikia Linux + root + savojo priedo“. Užkardos taisyklės pritaikomos ir atšaukiamos kaip operacija (strigtis niekada nepalieka `mangle` taisyklės), o paleidus iš naujo jos išvalomos. SO_MARK pagrįsta apsauga nuo ciklų neleidžia pakartotinai perimti paties tarpinio serverio iš naujo užšifruoto persiuntimo.
+**Reikalavimai:** Tik Linux (**IP_TRANSPARENT** veikia tik Linux), galimybė **CAP_NET_ADMIN** (root) ir savasis N-API priedas, kurį reikia sukompiliuoti naudojant C įrankių grandinę (`npm run build:native:tproxy`). Kai funkcija nepasiekiama, valdymo skydelio jungiklis išjungiamas ir rodoma paaiškinamoji etiketė „TPROXY iššifravimui reikia Linux + root + savojo priedo“. Užkardos taisyklės pritaikomos ir atšaukiamos tranzakciniu būdu (dėl gedimo niekada nelieka `mangle` taisyklės), o paleidus sistemą iš naujo jos pašalinamos. SO_MARK pagrįsta apsauga nuo ciklų neleidžia pakartotinai perimti paties tarpinio serverio iš naujo užšifruoto persiunčiamo srauto.
 
-Tai yra didelė posistemė, turinti atskirą išsamų operatoriaus vadovą — visą užkardos konfigūraciją, kiekvienam SNI skirtą dinaminę CA ir patikimų sertifikatų saugyklos diegimo programą, tik vietinį maršrutą, apsaugos nuo ciklų informaciją bei konfigūracijos schemą rasite `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiliuojama į `/docs`). Perjungiklis valdomas naudojant `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (pastaba: maršrutas yra po AgentBridge prefiksu, o ne Traffic Inspector prefiksu).
+Tai yra didelė posistemė, turinti atskirą operatoriaus vadovą — išsamų užkardos receptą, kiekvienam SNI dinamiškai veikiančios CA ir patikimų sertifikatų saugyklos diegimo programą, tik vietinį maršrutą, išsamią informaciją apie apsaugą nuo ciklų ir konfigūracijos schemą žr. `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiliuojama į `/docs`). Jungiklis valdomas naudojant `GET / POST / DELETE /api/tools/agent-bridge/tproxy` (pastaba: maršrutas yra su AgentBridge prefiksu, o ne su Traffic Inspector prefiksu).
 
 ### Fiksavimo režimų palyginimas
 
-| Režimas                | Sąranka                                      |       Reikia sudo?        | Aprėptis                                              | Pastabos                                                                                                                                                               |
-| ---------------------- | -------------------------------------------- | :-----------------------: | ----------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge         | Automatinė                                   | Vieną kartą (cert+hosts)  | 9 IDE agentai                                         | Įjungta pagal numatytuosius nustatymus                                                                                                                                 |
-| 2. Custom Hosts        | Įvestis kiekvienam pagrindiniam kompiuteriui |   Taip (`hosts` failas)   | Bet kuri tą pagrindinį kompiuterį naudojanti programa | Išsaugoma DB                                                                                                                                                           |
-| 3. HTTP_PROXY          | `export HTTPS_PROXY=...`                     |            Ne             | Aplinkos kintamuosius palaikančios programos          | 8080 prievadas, pagal numatytuosius nustatymus TLS neiššifruojamas                                                                                                     |
-| 4. Visos sistemos      | Perjungti ir patvirtinti                     |           Taip            | Visos kompiuterio programos                           | Automatiškai išjungiama po 30 min.                                                                                                                                     |
-| 5. TPROXY iššifravimas | Perjungiklis (Linux + savasis priedas)       | Taip (root + CA diegimas) | Bet kuris tikslinio prievado pagrindinis kompiuteris  | Iššifruoja bet kokius pagrindinius kompiuterius; pagal numatytuosius nustatymus išjungta — žr. `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiliuojama į `/docs`) |
+| Režimas                 | Sąranka                              |            Reikia sudo?            | Aprėptis                                     | Pastabos                                                                                                                                            |
+| ----------------------- | ------------------------------------ | :--------------------------------: | -------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge          | Automatinė                           | Vieną kartą (sertifikatas + hosts) | 9 IDE agentai                                | Įjungta pagal numatytuosius nustatymus                                                                                                              |
+| 2. Pasirinktiniai hosts | Įvestis kiekvienam host atskirai     |        Taip (hosts failas)         | Bet kuri tą host naudojanti programa         | Išsaugoma DB                                                                                                                                        |
+| 3. HTTP_PROXY           | `export HTTPS_PROXY=...`             |                 Ne                 | Aplinkos kintamuosius naudojančios programos | 8080 prievadas; HTTPS perduodamas per CONNECT tunelį (tik metaduomenys, niekada neiššifruojamas)                                                    |
+| 4. Visos sistemos       | Perjungti + patvirtinti              |                Taip                | Visos įrenginio programos                    | Automatiškai išjungiama po 30 min.                                                                                                                  |
+| 5. TPROXY iššifravimas  | Perjungti (Linux + vietinis priedas) |     Taip (root + CA diegimas)      | Bet kuris host tiksliniame prievade          | Iššifruoja savavališkus host; pagal numatytuosius nustatymus išjungta — žr. `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiliuojama į `/docs`) |
 
 ---
 
@@ -343,29 +343,29 @@ Eksportuokite naudodami `GET /api/tools/traffic-inspector/sessions/{id}/export.h
 
 ## §6 Saugumas
 
-Srauto inspektorius rodo **visą perimtą HTTPS srautą**, įskaitant autorizavimo antraštes ir užklausų turinį. Taikomos šios kontrolės priemonės:
+Traffic Inspector rodo **visą perimtą HTTPS srautą**, įskaitant autorizavimo antraštes ir užklausų turinį. Taikomos šios kontrolės priemonės:
 
-| Kontrolės priemonė                           | Išsami informacija                                                                                                                                                                                                       |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **LOCAL_ONLY**                               | Visi maršrutai ir WebSocket galinis taškas pasiekiami tik per atgalinio ryšio sąsają (tai užtikrinama faile `routeGuard.ts` prieš autentifikavimą)                                                                       |
-| **Paslapčių maskavimas**                     | Tiesinis `maskSecret()` skaitytuvas prieš `TrafficBuffer.push()` paslepia RFC 6750 Bearer prisijungimo duomenis, teikėjo prefiksus turinčius raktus ir ilgus neskaidrius prieigos raktus                                 |
-| **Turinio dydžio apribojimas**               | Turinys, didesnis nei `INSPECTOR_MAX_BODY_KB` (numatytoji reikšmė – 1024 KB), sutrumpinamas pateikiant pranešimą `„(sutrumpinta siekiant geresnio našumo)“`                                                              |
-| **Antraščių išvalymas**                      | Pavadinimai paverčiami mažosiomis raidėmis; kadravimo, tarpinio mazgo ir tarpinio serverio autentifikavimo antraštės pašalinamos; slapukai visiškai paslepiami; prisijungimo duomenų reikšmės perduodamos `maskSecret()` |
-| **CSP**                                      | Srauto inspektoriaus puslapiuose taikoma griežta turinio saugos politika, apsauganti nuo XSS per įterptą atsakymų turinį                                                                                                 |
-| **Pagal numatytąsias nuostatas neišsaugoma** | `TrafficBuffer` laikomas atmintyje ir prarandamas paleidus serverį iš naujo. Seansai išsaugomi tik tada, kai jų įrašymas aiškiai įjungiamas                                                                              |
+| Kontrolės priemonė                             | Išsami informacija                                                                                                                                                                                              |
+| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **LOCAL_ONLY**                                 | Visi maršrutai ir WebSocket galinis taškas pasiekiami tik per loopback sąsają (tai užtikrinama `routeGuard.ts` prieš autentifikavimą)                                                                           |
+| **Paslapčių maskavimas**                       | Tiesinis `maskSecret()` skaitytuvas paslepia RFC 6750 Bearer kredencialus, teikėjo prefiksą turinčius raktus ir ilgus neskaidrius prieigos raktus prieš `TrafficBuffer.push()`                                  |
+| **Turinio dydžio riba**                        | Turinys, viršijantis `INSPECTOR_MAX_BODY_KB` (numatytoji reikšmė – 1024 KB), sutrumpinamas pateikiant pranešimą `"(sutrumpinta siekiant didesnio našumo)"`                                                      |
+| **Antraščių išvalymas**                        | Pavadinimai paverčiami mažosiomis raidėmis; kadravimo, tarpinių mazgų ir tarpinio serverio autentifikavimo antraštės pašalinamos; slapukai visiškai paslepiami; kredencialų reikšmės perduodamos `maskSecret()` |
+| **CSP**                                        | Traffic Inspector puslapiams taikoma griežta turinio saugos politika, apsauganti nuo XSS per įterptą atsakymų turinį                                                                                            |
+| **Pagal numatytuosius nustatymus neišsaugoma** | `TrafficBuffer` laikomas atmintyje ir prarandamas paleidus serverį iš naujo. Seansai išsaugomi tik tada, kai aiškiai nurodoma juos įrašyti                                                                      |
 
-### Taikomos griežtosios taisyklės
+### Taikomos griežtos taisyklės
 
 | Taisyklė                          | Taikymas                                                                                             |
 | --------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **#12** `sanitizeErrorMessage`    | Visi HTTP klaidų atsakymai iš Srauto inspektoriaus maršrutų išvalomi                                 |
+| **#12** `sanitizeErrorMessage`    | Visi HTTP klaidų atsakymai iš Traffic Inspector maršrutų yra išvalomi                                |
 | **#15 + #17** `isLocalOnlyPath()` | `/api/tools/traffic-inspector/` yra LOCAL_ONLY + SPAWN_CAPABLE (sistemos tarpinio serverio komandos) |
 
 ### Žinomi apribojimai
 
-- **Visos sistemos tarpinio serverio režimas** veikia visas kompiuteryje esančias programas, įskaitant VPN klientus ir SSO. Visada naudokite jį su automatinio išjungimo laikmačiu. Nenaudokite bendro naudojimo kompiuteriuose.
-- **CONNECT tunelio HTTPS**: 3 režimas (HTTP_PROXY) fiksuoja tik HTTPS paskirties vietų tunelio metaduomenis, nebent įjungtas TLS perėmimas. Taip numatyta specialiai — skaidrus fiksavimas, kai „AgentBridge“ sertifikatu nepasitikima, sutrikdytų tų programų TLS patikrą.
-- **Kai kuriuose komponentuose fiksuotai įrašytos eilutės**: kai kuriuose UI komponentuose (F7/F8) yra nedaug fiksuotai įrašytų eilučių, kurioms dar netaikomi i18n raktai. Jos i18n spragų ataskaitoje nurodytos kaip žinomas apribojimas; jos bus perkeltos per kitą atnaujinimo etapą. Paveiktos eilutės yra dekoratyvinės UI žymos, kurių nereikia versti funkciniam naudojimui.
+- **Visos sistemos tarpinio serverio režimas** veikia visas įrenginio programas, įskaitant VPN klientus ir SSO. Visada naudokite su automatinio išjungimo laikmačiu. Nenaudokite bendro naudojimo įrenginiuose.
+- **CONNECT tunelio HTTPS**: 3 režimas (HTTP_PROXY) fiksuoja tik HTTPS paskirties vietų tunelio metaduomenis ir niekada jų neiššifruoja. Taip numatyta – norint iššifruoti, kiekvienas klientas turėtų pasitikėti MITM sertifikatu, todėl klausytuvas išlaiko ištisinį HTTPS šifravimą nuo vieno galinio taško iki kito. Kai reikia HTTPS turinio, naudokite AgentBridge, Custom Hosts arba TPROXY decrypt.
+- **Kai kuriuose komponentuose tiesiogiai įrašytos eilutės**: kai kuriuose UI komponentuose (F7/F8) yra nedaug tiesiogiai įrašytų eilučių, kurioms dar netaikomi i18n raktai. Jos dokumentuotos kaip žinomas apribojimas i18n spragų ataskaitoje; jos bus perkeltos per kitą etapą. Paveiktos eilutės yra dekoratyvinės UI žymos, kurių nereikia versti funkciniam naudojimui.
 
 ---
 
@@ -428,9 +428,9 @@ Kai buferis pasiekia `INSPECTOR_BUFFER_SIZE` dydį (numatytoji reikšmė — 100
 
 ---
 
-## §8 API žinynas
+## §8 API nuoroda
 
-Visi maršrutai yra `LOCAL_ONLY` (pasiekiami tik per grįžtamąjį ryšį) ir `SPAWN_CAPABLE` (sistemos tarpinio serverio komandos). Žr. `src/server/authz/routeGuard.ts`.
+Visi maršrutai yra `LOCAL_ONLY` (pasiekiami tik per grįžtamąją sąsają) ir `SPAWN_CAPABLE` (sistemos tarpinio serverio komandos). Žr. `src/server/authz/routeGuard.ts`.
 
 Bazinis kelias: `/api/tools/traffic-inspector/`
 
@@ -438,62 +438,61 @@ Bazinis kelias: `/api/tools/traffic-inspector/`
 
 | Metodas | Kelias                      | Aprašymas                                                                                           |
 | ------- | --------------------------- | --------------------------------------------------------------------------------------------------- |
-| GET     | `/requests`                 | Pateikti užklausų sąrašą (galima filtruoti: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
+| GET     | `/requests`                 | Pateikia užklausų sąrašą (galima filtruoti: `?profile=llm&host=&agent=&status=&source=&sessionId=`) |
 | GET     | `/requests/{id}`            | Vienos užklausos informacija                                                                        |
-| DELETE  | `/requests`                 | Išvalyti atmintyje laikomą buferį                                                                   |
-| POST    | `/requests/{id}/replay`     | Pakartotinai vykdyti tą pačią užklausą per OmniRoute maršruto parinktuvą                            |
-| PUT     | `/requests/{id}/annotation` | Išsaugoti arba atnaujinti užklausos pastabą                                                         |
+| DELETE  | `/requests`                 | Išvalo atmintyje esantį buferį                                                                      |
+| POST    | `/requests/{id}/replay`     | Iš naujo įvykdo tą pačią užklausą per OmniRoute maršruto parinktuvą                                 |
+| PUT     | `/requests/{id}/annotation` | Išsaugo arba atnaujina užklausos pastabą                                                            |
 
 ### WebSocket
 
 | Metodas | Kelias | Aprašymas                                                                                               |
 | ------- | ------ | ------------------------------------------------------------------------------------------------------- |
-| GET     | `/ws`  | Tiesioginis WebSocket srautas. Prisijungus siunčiamas `snapshot`, tada — `new`/`update`/`clear` įvykiai |
+| GET     | `/ws`  | Tiesioginis WebSocket srautas. Prisijungus siunčiamas `snapshot`, tada – `new`/`update`/`clear` įvykiai |
 
 ### Eksportavimas
 
-| Metodas | Kelias        | Aprašymas                                           |
-| ------- | ------------- | --------------------------------------------------- |
-| GET     | `/export.har` | Eksportuoti dabartinį filtruotą sąrašą kaip HAR 1.2 |
+| Metodas | Kelias        | Aprašymas                                              |
+| ------- | ------------- | ------------------------------------------------------ |
+| GET     | `/export.har` | Eksportuoja dabartinį filtruotą sąrašą HAR 1.2 formatu |
 
 ### Pasirinktiniai pagrindiniai kompiuteriai
 
-| Metodas | Kelias          | Aprašymas                                                              |
-| ------- | --------------- | ---------------------------------------------------------------------- |
-| GET     | `/hosts`        | Pateikti pasirinktinių pagrindinių kompiuterių sąrašą                  |
-| POST    | `/hosts`        | Pridėti pagrindinį kompiuterį (automatiškai redaguojamas `/etc/hosts`) |
-| DELETE  | `/hosts/{host}` | Pašalinti pagrindinį kompiuterį                                        |
-| PATCH   | `/hosts/{host}` | Perjungti `enabled`                                                    |
+| Metodas | Kelias          | Aprašymas                                                           |
+| ------- | --------------- | ------------------------------------------------------------------- |
+| GET     | `/hosts`        | Pateikia pasirinktinių pagrindinių kompiuterių sąrašą               |
+| POST    | `/hosts`        | Prideda pagrindinį kompiuterį (automatiškai redaguoja `/etc/hosts`) |
+| DELETE  | `/hosts/{host}` | Pašalina pagrindinį kompiuterį                                      |
+| PATCH   | `/hosts/{host}` | Perjungia `enabled` būseną                                          |
 
-### Fiksavimo režimai
+### Perėmimo režimai
 
-| Metodas | Kelias                         | Aprašymas                                                                                                                                   |
-| ------- | ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET     | `/capture-modes`               | AgentBridge / pasirinktinių pagrindinių kompiuterių / HTTP_PROXY / sistemos tarpinio serverio režimų būsena ir `tls-intercept` perjungiklis |
-| POST    | `/capture-modes/http-proxy`    | Paleisti / sustabdyti HTTP_PROXY klausyklę (`{action: "start"\|"stop"}`)                                                                    |
-| POST    | `/capture-modes/system-proxy`  | Taikyti / atkurti visos sistemos tarpinio serverio nuostatas (`{action: "apply"\|"revert"}`)                                                |
-| POST    | `/capture-modes/tls-intercept` | Perjungti HTTPS turinio iššifravimą tarpinio serverio režimu (`{enabled: boolean}`)                                                         |
+| Metodas | Kelias                        | Aprašymas                                                                                                   |
+| ------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| GET     | `/capture-modes`              | AgentBridge / pasirinktinių pagrindinių kompiuterių / HTTP_PROXY / sistemos tarpinio serverio režimų būsena |
+| POST    | `/capture-modes/http-proxy`   | Paleidžia / sustabdo HTTP_PROXY klausyklę (`{action: "start"\|"stop"}`)                                     |
+| POST    | `/capture-modes/system-proxy` | Pritaiko / atšaukia visos sistemos tarpinį serverį (`{action: "apply"\|"revert"}`)                          |
 
-> **TPROXY iššifravimas** (5 fiksavimo režimas) valdomas **atskiru** maršrutu su
-> AgentBridge prefiksu — `GET / POST / DELETE /api/tools/agent-bridge/tproxy` — o ne
+> **TPROXY iššifravimas** (5-asis perėmimo režimas) valdomas per **atskirą** maršrutą su
+> AgentBridge prefiksu – `GET / POST / DELETE /api/tools/agent-bridge/tproxy`, o ne
 > per `/api/tools/traffic-inspector/`. Žr.
 > `docs/security/MITM-TPROXY-DECRYPT.md` (git; nekompiliuojama į `/docs`).
 
-### Sesijos
+### Seansai
 
-| Metodas | Kelias                      | Aprašymas                                                                |
-| ------- | --------------------------- | ------------------------------------------------------------------------ |
-| POST    | `/sessions`                 | Pradėti įrašymą (`{name?: string}`)                                      |
-| PATCH   | `/sessions/{id}`            | Sustabdyti arba pervadinti (`{action: "stop"\|"rename", name?: string}`) |
-| GET     | `/sessions`                 | Pateikti visų išsaugotų sesijų sąrašą                                    |
-| GET     | `/sessions/{id}`            | Sesijos momentinė kopija (visos užklausos)                               |
-| DELETE  | `/sessions/{id}`            | Ištrinti sesiją                                                          |
-| GET     | `/sessions/{id}/export.har` | Eksportuoti sesiją kaip HAR 1.2                                          |
+| Metodas | Kelias                      | Aprašymas                                                             |
+| ------- | --------------------------- | --------------------------------------------------------------------- |
+| POST    | `/sessions`                 | Pradeda įrašymą (`{name?: string}`)                                   |
+| PATCH   | `/sessions/{id}`            | Sustabdo arba pervadina (`{action: "stop"\|"rename", name?: string}`) |
+| GET     | `/sessions`                 | Pateikia visų išsaugotų seansų sąrašą                                 |
+| GET     | `/sessions/{id}`            | Seanso momentinė kopija (visos užklausos)                             |
+| DELETE  | `/sessions/{id}`            | Ištrina seansą                                                        |
+| GET     | `/sessions/{id}/export.har` | Eksportuoja seansą HAR 1.2 formatu                                    |
 
 ### Vidinis duomenų priėmimas (D4 atsarginis mechanizmas)
 
-| Metodas | Kelias             | Aprašymas                                                                                                    |
-| ------- | ------------------ | ------------------------------------------------------------------------------------------------------------ |
-| POST    | `/internal/ingest` | Priima perimtą užklausą iš `server.cjs` tranzitinio kelio; būtina `INSPECTOR_INTERNAL_INGEST_TOKEN` antraštė |
+| Metodas | Kelias             | Aprašymas                                                                                                              |
+| ------- | ------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| POST    | `/internal/ingest` | Priima perimtą užklausą iš `server.cjs` tiesioginio perdavimo kelio; būtina `INSPECTOR_INTERNAL_INGEST_TOKEN` antraštė |
 
 Išsamios OpenAPI schemos: `docs/openapi.yaml` → žyma `Traffic Inspector`.

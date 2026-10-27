@@ -52,9 +52,16 @@ function flatten(value: Json, prefix = ""): Map<string, string> {
  * *sub-message*, so `endpoint{count, plural, one {} other {s}}` interpolates
  * `count` alone — the `s` is literal text every translation is free to replace
  * ("točke", "ų", or nothing at all).
+ *
+ * Tag names (`<em>`, `<prefix>`, any other `<tag>`) are collected by the same
+ * single pass (`scan`), outside ICU literal runs only, so the two sets can
+ * never drift apart. A `<` not followed by a letter (comparisons such as
+ * `a < b`, URLs) is plain text; attributes are skipped, closing and
+ * self-closing forms collapse to the same name.
  */
-function placeholders(message: string): Set<string> {
+function scan(message: string): { placeholders: Set<string>; tags: Set<string> } {
   const names = new Set<string>();
+  const tags = new Set<string>();
   let i = 0;
 
   const skipSpace = () => {
@@ -70,12 +77,69 @@ function placeholders(message: string): Set<string> {
     }
   };
 
+  // Reads one `<name …>`, `</name>` or `<name/>` at `i` (which points at
+  // `<` followed by a letter or `/` + letter). Attributes are skipped up to
+  // the closing `>`. A `<` not followed by a letter is plain text: the
+  // caller advances one character without collecting anything.
+  const readTag = () => {
+    let j = i + 1;
+    if (message[j] === "/") j++;
+    let name = "";
+    while (j < message.length && /[A-Za-z0-9]/.test(message[j])) name += message[j++];
+    if (!name) {
+      i++;
+      return;
+    }
+    tags.add(name);
+    while (j < message.length && message[j] !== ">") j++;
+    i = j < message.length ? j + 1 : message.length;
+  };
+
   // Text with arguments; stops at the `}` that closes the enclosing sub-message.
+  // A straight quote before `{` or `<` opens a literal run (ICU quoting):
+  // text up to the next lone quote is literal, not a placeholder. A doubled
+  // quote is an escaped quote, inside a run as well as outside.
   const readMessage = () => {
     while (i < message.length && message[i] !== "}") {
+      if (message[i] === "'") {
+        if (message[i + 1] === "'") {
+          i += 2;
+          continue;
+        }
+        if (message[i + 1] === "{" || message[i + 1] === "<") {
+          i += 2;
+          while (i < message.length) {
+            if (message[i] === "'") {
+              if (message[i + 1] === "'") {
+                i += 2;
+                continue;
+              }
+              i++;
+              break;
+            }
+            i++;
+          }
+          continue;
+        }
+        i++;
+        continue;
+      }
       if (message[i] === "{") {
         i++;
         readArgument();
+        continue;
+      }
+      if (message[i] === "<") {
+        const next = message[i + 1];
+        const nextNext = message[i + 2];
+        if (
+          (next !== undefined && /[A-Za-z]/.test(next)) ||
+          (next === "/" && nextNext !== undefined && /[A-Za-z]/.test(nextNext))
+        ) {
+          readTag();
+          continue;
+        }
+        i++;
         continue;
       }
       i++;
@@ -122,7 +186,15 @@ function placeholders(message: string): Set<string> {
   };
 
   readMessage();
-  return names;
+  return { placeholders: names, tags };
+}
+
+function placeholders(message: string): Set<string> {
+  return scan(message).placeholders;
+}
+
+function tags(message: string): Set<string> {
+  return scan(message).tags;
 }
 
 const english = flatten(loadLocale("en.json"));
@@ -130,7 +202,7 @@ const locales = readdirSync(messagesDir)
   .filter((file) => file.endsWith(".json") && file !== "en.json")
   .sort();
 
-test("every locale keeps the placeholders its English source defines", () => {
+test("every locale keeps the placeholders and tags its English source defines", () => {
   const drift: string[] = [];
 
   for (const file of locales) {
@@ -138,17 +210,26 @@ test("every locale keeps the placeholders its English source defines", () => {
       const source = english.get(key);
       if (typeof source !== "string") continue;
 
-      const expected = placeholders(source);
-      const actual = placeholders(translated);
-      const missing = [...expected].filter((name) => !actual.has(name));
-      const unknown = [...actual].filter((name) => !expected.has(name));
-      if (missing.length === 0 && unknown.length === 0) continue;
+      const expected = scan(source);
+      const actual = scan(translated);
+      const missing = [...expected.placeholders].filter((name) => !actual.placeholders.has(name));
+      const unknown = [...actual.placeholders].filter((name) => !expected.placeholders.has(name));
+      const missingTags = [...expected.tags].filter((name) => !actual.tags.has(name));
+      const unknownTags = [...actual.tags].filter((name) => !expected.tags.has(name));
+      if (
+        missing.length === 0 &&
+        unknown.length === 0 &&
+        missingTags.length === 0 &&
+        unknownTags.length === 0
+      )
+        continue;
 
       drift.push(
         `${file} ${key}\n` +
           `      en: ${source}\n` +
           `      ${file.replace(".json", "")}: ${translated}\n` +
-          `      missing=[${missing.join(", ")}] unknown=[${unknown.join(", ")}]`
+          `      missing=[${missing.join(", ")}] unknown=[${unknown.join(", ")}]` +
+          ` missingTags=[${missingTags.join(", ")}] unknownTags=[${unknownTags.join(", ")}]`
       );
     }
   }
@@ -184,4 +265,38 @@ test("the checker itself recognises the drift it is meant to catch", () => {
     [...placeholders("{count, plural, one {one {name}} other {many {name}}}")],
     ["count", "name"]
   );
+  // A straight quote before syntax opens a literal run: the name inside is
+  // text, not a placeholder.
+  assert.deepEqual([...placeholders("f'{providers}")], []);
+  assert.deepEqual([...placeholders("'{model}'")], []);
+  // A quote before ordinary text is just a character: the name stays visible.
+  assert.deepEqual([...placeholders("l'utilisateur {name}")], ["name"]);
+  // A wanted literal reads empty on both sides, so no drift is reported.
+  assert.deepEqual([...placeholders("'<name>'")], []);
+  assert.deepEqual([...placeholders("'<nom>'")], []);
+  // A doubled quote is an escaped quote, not a literal run opener.
+  assert.deepEqual([...placeholders("f''{providers}")], ["providers"]);
+  // A closing quote ends the literal run: later names are visible again.
+  assert.deepEqual([...placeholders("selector='<name>' for {field}")], ["field"]);
+  // Rich-text tag names are collected alongside placeholders, outside ICU
+  // literal runs only. Open/close pairs collapse to one name, attributes are
+  // skipped, self-closing tags count, and a `<` not followed by a letter is
+  // plain text (a comparison stays silent when both sides copy it).
+  assert.deepEqual([...tags("in <em>this</em> browser")], ["em"]);
+  assert.deepEqual([...tags('<span class="x">y</span>')], ["span"]);
+  assert.deepEqual([...tags("line<br/>break")], ["br"]);
+  assert.deepEqual([...tags("under the <prefix>9router/</prefix> prefix")], ["prefix"]);
+  assert.deepEqual([...tags("a<b")].sort(), ["b"]);
+  // A `<` followed by a letter is collected, then compared at equal sets:
+  // copied on both sides, it stays silent (no false positive).
+  assert.deepEqual(
+    [...tags("value a<b and {count}")].sort(),
+    [...tags("valeur a<b et {count}")].sort()
+  );
+  assert.deepEqual([...tags("'<name>'")], []);
+  assert.deepEqual([...tags("'<nom>'")], []);
+  assert.deepEqual([...tags("f'{path}")], []);
+  // A tag inside a plural branch is followed like a placeholder there.
+  assert.deepEqual([...tags("{count, plural, one {<em>one</em>} other {many}}")].sort(), ["em"]);
+  assert.deepEqual([...tags("a < b")], []);
 });

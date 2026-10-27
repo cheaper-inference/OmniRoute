@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+برای `smart-routing`، مقدار `metadata.combo` یک بازنویسی صریح برای
+`metadata.model` در درخواست درگاه است؛ این مقدار بهعنوان `model` واقعی ارسال میشود،
+نه بهعنوان یک فیلد JSON نادیدهگرفتهشدهی `x-combo`. احراز هویت معمول درگاه بر اساس کلید API و
+مجوزدهی بهازای هر مقصد همچنان اعمال میشود. یک combo نامعتبر یا خالی رد میشود.
+
+نتیجه شامل `requested_combo` (قصد فراخواننده)، `dispatched_model`
+(درخواست واقعی درگاه)، `response_model` (پاسخ درگاه) و
+`confirmed_combo` است. فیلد آخر `null` خواهد بود، مگر اینکه درگاه صراحتاً
+یک combo را مشخص کند. گزارشهای تصمیمگیری A2A اجرا را فقط به یک
+combo تأییدشده نسبت میدهند و درخواست تأییدنشده را بهصورت `requestedCombo` نگه میدارند.
+
 **پاسخ:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — استریم SSE
 
-مانند `message/send` عمل میکند، اما برای استریم بلادرنگ، رویدادهای ارسالشده از سوی سرور را برمیگرداند.
+مانند `message/send` است، اما برای استریم بلادرنگ، رویدادهای ارسالشده از سرور را برمیگرداند.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -146,33 +150,33 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## مهارتهای موجود
+## مهارتهای در دسترس
 
-OmniRoute شش مهارت A2A را ارائه میکند که در `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` متصل شدهاند. هر ماژول مهارت در `src/lib/a2a/skills/` قرار دارد.
+OmniRoute شش مهارت A2A را ارائه میدهد که در `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS` متصل شدهاند. ماژول هر مهارت در `src/lib/a2a/skills/` قرار دارد.
 
-| مهارت           | شناسه                | توضیحات                                                                                                                                                                | برچسبها                | مثالها                                          |
-| :-------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- | :---------------------------------------------- |
-| مسیریابی هوشمند | `smart-routing`      | یک درخواست را با استفاده از موتور ترکیب و امتیازدهی OmniRoute، از طریق ارائهدهنده/ترکیب بهینه مسیریابی میکند                                                           | مسیریابی، ارائهدهندگان | «این درخواست را از طریق بهترین مدل مسیریابی کن» |
-| مدیریت سهمیه    | `quota-management`   | وضعیت سهمیه هر ارائهدهنده را گزارش میکند و به فراخوانندگان کمک میکند درباره محدودسازی نرخ/تعویض ارائهدهنده تصمیم بگیرند                                                | سهمیه، ارائهدهندگان    | «سهمیه anthropic را بررسی کن»                   |
-| کشف ارائهدهنده  | `provider-discovery` | ارائهدهندگان نصبشده را همراه با قابلیتها، وضعیت طرح رایگان و وضعیت OAuth فهرست میکند                                                                                   | ارائهدهندگان، کشف      | «چه ارائهدهندگانی موجود هستند؟»                 |
-| تحلیل هزینه     | `cost-analysis`      | هزینه یک درخواست/گفتوگو را بر اساس کاتالوگ و میزان استفاده اخیر تخمین میزند                                                                                            | هزینه، استفاده         | «هزینه این گفتوگو را تخمین بزن»                 |
-| گزارش سلامت     | `health-report`      | وضعیت قطعکننده مدار، دوره انتظار و قفلشدگی را برای هر ارائهدهنده تجمیع میکند                                                                                           | سلامت، تابآوری         | «وضعیت سلامت همه ارائهدهندگان را نشان بده»      |
-| فهرست قابلیتها  | `list-capabilities`  | کاتالوگ کامل 45 موردی Agent Skills ‏(23 مورد API،‏ 21 مورد CLI و 1 مورد پیکربندی) را بهصورت یک جدول markdown همراه با URLهای خام SKILL.md برای تزریق زمینه بازمیگرداند | کاتالوگ، کشف، مهارتها  | «همه قابلیتهای OmniRoute را فهرست کن»           |
+| مهارت           | شناسه                | توضیحات                                                                                                                                                    | برچسبها                | مثالها                                      |
+| :-------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------- | :--------------------- | :------------------------------------------ |
+| مسیریابی هوشمند | `smart-routing`      | یک پرامپت را با استفاده از موتور کامبو + امتیازدهی OmniRoute از مسیر بهینهترین ارائهدهنده/کامبو هدایت میکند                                                | مسیریابی، ارائهدهندگان | «این پرامپت را از طریق بهترین مدل هدایت کن» |
+| مدیریت سهمیه    | `quota-management`   | وضعیت سهمیه هر ارائهدهنده را گزارش میدهد و به فراخوانندگان کمک میکند تصمیم بگیرند چه زمانی محدودسازی یا تعویض انجام دهند                                   | سهمیه، ارائهدهندگان    | «سهمیه anthropic را بررسی کن»               |
+| کشف ارائهدهنده  | `provider-discovery` | ارائهدهندگان نصبشده را همراه با قابلیتها، پرچمهای سطح رایگان و وضعیت OAuth فهرست میکند                                                                     | ارائهدهندگان، کشف      | «چه ارائهدهندگانی در دسترس هستند؟»          |
+| تحلیل هزینه     | `cost-analysis`      | هزینه یک درخواست/مکالمه را با توجه به کاتالوگ + مصرف اخیر تخمین میزند                                                                                      | هزینه، مصرف            | «هزینه این مکالمه را تخمین بزن»             |
+| گزارش سلامت     | `health-report`      | وضعیت circuit breaker، cooldown و lockout را برای هر ارائهدهنده تجمیع میکند                                                                                | سلامت، تابآوری         | «وضعیت سلامت همه ارائهدهندگان را نشان بده»  |
+| فهرست قابلیتها  | `list-capabilities`  | کاتالوگ کامل ۴۵ موردی Agent Skills (بهعلاوه 23 API + 21 CLI + 1 config) را بهصورت جدول مارکداون همراه با URLهای خام SKILL.md برای تزریق کانتکست برمیگرداند | کاتالوگ، کشف، مهارتها  | «همه قابلیتهای OmniRoute را فهرست کن»       |
 
-> Agent Card باید با کاتالوگ زنده 352 ارائهدهندهای همگام نگه داشته شود؛ تعداد ارائهدهندگان و فراداده مربوط به رایگان بودن/عدم نیاز به احراز هویت از رجیستری زمان اجرا دریافت میشوند.
+> کارت ایجنت (Agent Card) باید با کاتالوگ زنده 375 ارائهدهنده همراستا نگه داشته شود؛ تعداد ارائهدهندگان و متادیتای رایگان/بدون احراز هویت از رجیستری زمان اجرا تأمین میشود.
 
 ### جزئیات مهارت `list-capabilities`
 
-مهارت `list-capabilities` بهویژه برای عاملهای خارجی مفید است که باید پیش از ارسال فراخوانیهای API، امکانات ارائهشده توسط OmniRoute را کشف کنند. این مهارت یک آرتیفکت جدولی ساختیافته در قالب markdown بازمیگرداند:
+مهارت `list-capabilities` بهویژه برای ایجنتهای خارجی مفید است که پیش از ارسال فراخوانیهای API نیاز دارند کشف کنند OmniRoute چه چیزی ارائه میدهد. این مهارت یک آرتیفکت جدول مارکداون ساختیافته برمیگرداند:
 
 ```
-| شناسه | نام | دستهبندی | حوزه | نقاط پایانی/فرمانها | URL خام |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | احراز هویت و نشستها | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-هر ردیف شامل ستون `rawUrl` است تا عاملها بتوانند بلافاصله فایل کامل SKILL.md را دریافت کنند. فیلد `metadata.totalSkills` اندازه کاتالوگ را منعکس میکند (امروز 45). پیادهسازی: `src/lib/a2a/skills/listCapabilities.ts`. همچنین [AGENT-SKILLS.md](./AGENT-SKILLS.md) را ببینید.
+هر ردیف شامل ستون `rawUrl` است تا ایجنتها بتوانند بلافاصله فایل کامل SKILL.md را دریافت کنند. فیلد `metadata.totalSkills` اندازه کاتالوگ را منعکس میکند (در حال حاضر ۴۵). پیادهسازی: `src/lib/a2a/skills/listCapabilities.ts`. همچنین مراجعه کنید به [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -264,7 +268,7 @@ OmniRoute شش مهارت A2A را ارائه میکند که در `src/lib/a2a/
 
 ## نمونههای یکپارچهسازی
 
-### Python (requests)
+### پایتون (requests)
 
 ```python
 import requests
@@ -274,7 +278,7 @@ resp = requests.post("http://localhost:20128/a2a", json={
     "method": "message/send",
     "params": {
         "skill": "smart-routing",
-        "messages": [{"role": "user", "content": "Hello"}]
+        "messages": [{"role": "user", "content": "سلام"}]
     }
 }, headers={"Authorization": "Bearer YOUR_KEY"})
 
@@ -283,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### تایپاسکریپت (fetch)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {
@@ -298,7 +302,7 @@ const resp = await fetch("http://localhost:20128/a2a", {
     method: "message/send",
     params: {
       skill: "smart-routing",
-      messages: [{ role: "user", content: "Hello" }],
+      messages: [{ role: "user", content: "سلام" }],
     },
   }),
 });

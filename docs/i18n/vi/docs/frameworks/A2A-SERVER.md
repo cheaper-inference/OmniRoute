@@ -43,11 +43,11 @@ A2A được kiểm soát bằng nút chuyển đổi **Endpoints → A2A** và 
 
 ---
 
-## Các phương thức JSON-RPC 2.0
+## Phương thức JSON-RPC 2.0
 
 ### `message/send` — Thực thi đồng bộ
 
-Gửi một thông điệp tới một kỹ năng và chờ phản hồi hoàn chỉnh.
+Gửi một thông điệp đến một kỹ năng và chờ phản hồi hoàn chỉnh.
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
@@ -65,6 +65,17 @@ curl -X POST http://localhost:20128/a2a \
   }'
 ```
 
+Đối với `smart-routing`, `metadata.combo` là giá trị ghi đè rõ ràng lên
+`metadata.model` cho yêu cầu đến gateway; nó được gửi dưới dạng `model` thực tế,
+không phải dưới dạng trường JSON `x-combo` bị bỏ qua. Cơ chế ủy quyền thông thường
+của gateway theo khóa API và từng đích vẫn được áp dụng. Combo không hợp lệ hoặc trống sẽ bị từ chối.
+
+Kết quả cung cấp `requested_combo` (ý định của bên gọi), `dispatched_model`
+(yêu cầu thực tế đến gateway), `response_model` (phản hồi từ gateway) và
+`confirmed_combo`. Trường cuối cùng là `null` trừ khi gateway xác định rõ
+một combo. Nhật ký quyết định A2A chỉ quy kết việc thực thi cho một
+combo đã được xác nhận, đồng thời lưu giữ yêu cầu chưa được xác nhận dưới dạng `requestedCombo`.
+
 **Phản hồi:**
 
 ```json
@@ -76,22 +87,15 @@ curl -X POST http://localhost:20128/a2a \
     "artifacts": [{ "type": "text", "content": "..." }],
     "metadata": {
       "routing_explanation": "Selected claude-sonnet via provider \"anthropic\" (latency: 1200ms, cost: $0.003)",
-      "cost_envelope": {
-        "estimated": 0.005,
-        "actual": 0.003,
-        "currency": "USD"
-      },
+      "requested_combo": "fast-coding",
+      "confirmed_combo": null,
+      "dispatched_model": "fast-coding",
+      "response_model": "claude-sonnet",
+      "cost_envelope": { "estimated": 0.005, "actual": 0.003, "currency": "USD" },
       "resilience_trace": [
-        {
-          "event": "primary_selected",
-          "provider": "anthropic",
-          "timestamp": "..."
-        }
+        { "event": "primary_selected", "provider": "anthropic", "timestamp": "..." }
       ],
-      "policy_verdict": {
-        "allowed": true,
-        "reason": "within budget and quota limits"
-      }
+      "policy_verdict": { "allowed": true, "reason": "within budget and quota limits" }
     }
   }
 }
@@ -99,7 +103,7 @@ curl -X POST http://localhost:20128/a2a \
 
 ### `message/stream` — Truyền phát SSE
 
-Tương tự như `message/send` nhưng trả về Server-Sent Events để truyền phát theo thời gian thực.
+Giống như `message/send` nhưng trả về Server-Sent Events để truyền phát theo thời gian thực.
 
 ```bash
 curl -N -X POST http://localhost:20128/a2a \
@@ -116,7 +120,7 @@ curl -N -X POST http://localhost:20128/a2a \
   }'
 ```
 
-**Các sự kiện SSE:**
+**Sự kiện SSE:**
 
 ```
 data: {"jsonrpc":"2.0","method":"message/stream","params":{"task":{"id":"...","state":"working"},"chunk":{"type":"text","content":"..."}}}
@@ -148,31 +152,31 @@ curl -X POST http://localhost:20128/a2a \
 
 ## Các kỹ năng khả dụng
 
-OmniRoute cung cấp 6 kỹ năng A2A được liên kết trong `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Mỗi mô-đun kỹ năng nằm trong `src/lib/a2a/skills/`.
+OmniRoute cung cấp 6 kỹ năng A2A được kết nối trong `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Mỗi module kỹ năng nằm trong `src/lib/a2a/skills/`.
 
-| Kỹ năng               | ID                   | Mô tả                                                                                                                                          | Thẻ                           | Ví dụ                                                    |
-| :-------------------- | :------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------- | :------------------------------------------------------- |
-| Định tuyến thông minh | `smart-routing`      | Định tuyến một câu lệnh qua nhà cung cấp/tổ hợp tối ưu bằng công cụ tổ hợp + chấm điểm của OmniRoute                                           | định tuyến, nhà cung cấp      | "Định tuyến câu lệnh này qua mô hình tốt nhất"           |
-| Quản lý hạn ngạch     | `quota-management`   | Báo cáo trạng thái hạn ngạch theo từng nhà cung cấp, giúp bên gọi quyết định thời điểm điều tiết/chuyển đổi                                    | hạn ngạch, nhà cung cấp       | "Kiểm tra hạn ngạch cho anthropic"                       |
-| Khám phá nhà cung cấp | `provider-discovery` | Liệt kê các nhà cung cấp đã cài đặt cùng khả năng, cờ gói miễn phí và trạng thái OAuth                                                         | nhà cung cấp, khám phá        | "Có những nhà cung cấp nào?"                             |
-| Phân tích chi phí     | `cost-analysis`      | Ước tính chi phí của một yêu cầu/cuộc hội thoại dựa trên danh mục + mức sử dụng gần đây                                                        | chi phí, mức sử dụng          | "Ước tính chi phí cho cuộc hội thoại này"                |
-| Báo cáo tình trạng    | `health-report`      | Tổng hợp trạng thái bộ ngắt mạch, thời gian chờ và khóa theo từng nhà cung cấp                                                                 | tình trạng, khả năng phục hồi | "Hiển thị trạng thái tình trạng của tất cả nhà cung cấp" |
-| Liệt kê khả năng      | `list-capabilities`  | Trả về toàn bộ danh mục 45 mục Kỹ năng Agent (23 API + 21 CLI + 1 cấu hình) dưới dạng bảng markdown cùng các URL SKILL.md thô để chèn ngữ cảnh | danh mục, khám phá, kỹ năng   | "Liệt kê tất cả khả năng của OmniRoute"                  |
+| Kỹ năng            | ID                   | Mô tả                                                                                                                                        | Thẻ                        | Ví dụ                                        |
+| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :------------------------------------------- |
+| Smart Routing      | `smart-routing`      | Định tuyến một prompt qua provider/combo tối ưu bằng combo engine + cơ chế chấm điểm của OmniRoute                                           | routing, providers         | "Định tuyến prompt này qua mô hình tốt nhất" |
+| Quota Management   | `quota-management`   | Báo cáo trạng thái quota theo từng provider, giúp phía gọi quyết định khi nào cần điều tiết/chuyển đổi                                       | quota, providers           | "Kiểm tra quota của anthropic"               |
+| Provider Discovery | `provider-discovery` | Liệt kê các provider đã cài đặt cùng với capabilities, cờ free-tier, trạng thái OAuth                                                        | providers, discovery       | "Có những provider nào khả dụng?"            |
+| Cost Analysis      | `cost-analysis`      | Ước tính chi phí của một request/cuộc hội thoại dựa trên catalog + mức sử dụng gần đây                                                       | cost, usage                | "Ước tính chi phí cho cuộc hội thoại này"    |
+| Health Report      | `health-report`      | Tổng hợp trạng thái circuit breaker, cooldown, lockout theo từng provider                                                                    | health, resilience         | "Hiển thị tình trạng của tất cả provider"    |
+| List Capabilities  | `list-capabilities`  | Trả về toàn bộ catalog Agent Skills gồm 45 mục (23 API + 21 CLI + 1 config) dưới dạng bảng markdown kèm URL SKILL.md thô để chèn vào context | catalog, discovery, skills | "Liệt kê tất cả khả năng của OmniRoute"      |
 
-> Thẻ Agent phải được duy trì đồng bộ với danh mục trực tiếp gồm 352 nhà cung cấp; số lượng nhà cung cấp và siêu dữ liệu miễn phí/không cần xác thực được lấy từ sổ đăng ký thời gian chạy.
+> Agent Card cần được giữ đồng bộ với catalog 375 provider đang hoạt động; số lượng provider cùng metadata free/no-auth được lấy từ registry tại runtime.
 
 ### Chi tiết kỹ năng `list-capabilities`
 
-Kỹ năng `list-capabilities` đặc biệt hữu ích cho các agent bên ngoài cần khám phá những gì OmniRoute cung cấp trước khi gửi lệnh gọi API. Kỹ năng này trả về một thành phần bảng markdown có cấu trúc:
+Kỹ năng `list-capabilities` đặc biệt hữu ích cho các agent bên ngoài cần khám phá những gì OmniRoute cung cấp trước khi gửi các lệnh gọi API. Nó trả về một artifact là bảng markdown có cấu trúc:
 
 ```
-| ID | Tên | Danh mục | Lĩnh vực | Điểm cuối/Lệnh | URL thô |
+| ID | Name | Category | Area | Endpoints/Commands | Raw URL |
 | --- | --- | --- | --- | --- | --- |
-| omni-auth | Xác thực & Phiên | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
+| omni-auth | Auth & Sessions | api | auth | POST /api/auth/login, ... | https://raw.githubusercontent.com/... |
 ...
 ```
 
-Mỗi hàng bao gồm cột `rawUrl` để các agent có thể ngay lập tức truy xuất toàn bộ SKILL.md. Trường `metadata.totalSkills` phản ánh kích thước danh mục (hiện là 45). Phần triển khai: `src/lib/a2a/skills/listCapabilities.ts`. Xem thêm [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Mỗi hàng đều bao gồm cột `rawUrl` để các agent có thể fetch ngay SKILL.md đầy đủ. Trường `metadata.totalSkills` phản ánh kích thước catalog (45 ở thời điểm hiện tại). Triển khai: `src/lib/a2a/skills/listCapabilities.ts`. Xem thêm [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

@@ -1,6 +1,6 @@
 /**
  * #7623 — auto-combo candidate pool must honor existing model lockouts so
- * repeatedly failing no-auth models (e.g. opencode 401) are not re-advertised.
+ * repeatedly failing no-auth models (e.g. duckduckgo-web 401) are not re-advertised.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -15,6 +15,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const settingsDb = await import("../../src/lib/db/settings.ts");
 const virtualFactory = await import("../../open-sse/services/autoCombo/virtualFactory.ts");
 const accountFallback = await import("../../open-sse/services/accountFallback.ts");
 
@@ -27,6 +28,9 @@ async function resetStorage() {
 
 test.beforeEach(async () => {
   await resetStorage();
+  // #15059: excludeTosAvoid defaults to true and every duckduckgo-web model is tos:avoid;
+  // these tests exercise the no-auth pool builder, so opt out of the ToS filter.
+  await settingsDb.updateSettings({ excludeTosAvoid: false });
 });
 
 test.after(async () => {
@@ -40,27 +44,27 @@ test.after(async () => {
   }
 });
 
-test("#7623: a model-locked no-auth opencode model is ABSENT from the auto-combo candidate pool", async () => {
-  accountFallback.lockModel("opencode", "noauth", "mimo-v2.5-free", "model_not_found", 60_000);
+test("#7623: a model-locked no-auth duckduckgo-web model is ABSENT from the auto-combo candidate pool", async () => {
+  accountFallback.lockModel("duckduckgo-web", "noauth", "gpt-5.4-mini", "model_not_found", 60_000);
 
   const combo = await virtualFactory.createVirtualAutoCombo(undefined);
   const modelStrings = combo.models.map((m: { model: string }) => m.model);
 
   assert.ok(
-    !modelStrings.some((model: string) => model.endsWith("/mimo-v2.5-free")),
+    !modelStrings.some((model: string) => model === "ddgw/gpt-5.4-mini"),
     "BUG #7623: locked no-auth model must not appear in auto-combo pool. Pool: " +
       JSON.stringify(modelStrings)
   );
 });
 
 test("#7623: sibling no-auth models stay in the pool when only one model is locked", async () => {
-  accountFallback.lockModel("opencode", "noauth", "mimo-v2.5-free", "model_not_found", 60_000);
+  accountFallback.lockModel("duckduckgo-web", "noauth", "gpt-5.4-mini", "model_not_found", 60_000);
 
   const combo = await virtualFactory.createVirtualAutoCombo(undefined);
   const modelStrings = combo.models.map((m: { model: string }) => m.model);
 
   assert.ok(
-    modelStrings.some((model: string) => model.endsWith("/big-pickle")),
+    modelStrings.some((model: string) => model === "ddgw/gpt-5.6-luna"),
     `healthy sibling model must remain in pool. Pool: ${JSON.stringify(modelStrings)}`
   );
 });

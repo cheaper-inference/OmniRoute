@@ -7,7 +7,6 @@
  * @module shared/utils/apiAuth
  */
 
-import { cookies } from "next/headers";
 import { getOrCreateBootstrapToken, peekBootstrapToken } from "@/lib/auth/bootstrapToken";
 import { getSettings } from "@/lib/db/settings";
 import {
@@ -350,6 +349,30 @@ async function validateBearerApiKeyForManagement(apiKey: string | null): Promise
   }
 }
 
+/**
+ * Whether the bearer key on this request holds `scope`, or a full management
+ * scope. Used by the cache routes so a machine client with `read:cache` or
+ * `write:cache` can reach them without a dashboard session (#14304). A key
+ * with only one of those scopes does not pass `isAuthenticated`, which is
+ * what keeps it out of every other management route.
+ */
+export async function isCacheScopedKey(request: Request, scope: string): Promise<boolean> {
+  const apiKey = extractApiKey(request, { allowUrl: false });
+  if (!apiKey) return false;
+  try {
+    const [{ validateApiKey, getApiKeyMetadata }, { hasCacheScope }] = await Promise.all([
+      import("@/lib/db/apiKeys"),
+      import("@/shared/constants/managementScopes"),
+    ]);
+    if (!(await validateApiKey(apiKey))) return false;
+    const metadata = await getApiKeyMetadata(apiKey);
+    if (!metadata) return false;
+    return hasCacheScope(metadata.scopes, scope);
+  } catch {
+    return false;
+  }
+}
+
 export function isManagementApiRequest(request: RequestLike | Request): boolean {
   const pathname = getRequestPathname(request);
   if (!pathname?.startsWith("/api/")) return false;
@@ -379,6 +402,10 @@ export async function isDashboardSessionAuthenticated(
 
   if (!token) {
     try {
+      // Lazy: `next/headers` only resolves inside the Next.js runtime. The MCP server
+      // bundle now reaches this module through keyConnectionScope → comboTargetKeyPolicy
+      // → apiKeyPolicy (#16499) and must stay importable on plain Node.
+      const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
       token = cookieStore.get(DASHBOARD_SESSION_COOKIE)?.value || null;
     } catch {

@@ -16,82 +16,155 @@ pipeline é um registro, portanto outros destinos podem ser adicionados.
 ## 1. Como funciona
 
 ```
-call_logs (SQLite)
-  → callLogExportSource.getCallLogsForExport(cursor, batchSize)
-    → LogExportRecord[]  (o conjunto de campos da aba Logs)
-      → destination client.send(batch)
-        → advanceLogExportCursor(id, lastRowId, count)
+servidor (descriptografa + valida a configuração, reconcilia o cursor)
+  → inicia IPC → processo isolado exportChild do SO
+    → storage.sqlite somente leitura → consulta/mapeamento compartilhado do registro de chamadas
+      → hidratação assíncrona de artefatos → prepare()/send() do destino
+        → IPC do lote → servidor persiste o cursor → IPC de confirmação
+          → próximo lote; IPC de conclusão → servidor registra o sucesso
 ```
 
-- **Agendamento** — um trabalho cron do `JobRegistry`, `log_export`, com o valor padrão `0 * * * *` (a cada hora,
+- **Agendamento** — um trabalho cron do `JobRegistry`, `log_export`, com o padrão `0 * * * *` (a cada hora,
   UTC). Registrado em `src/lib/initCloudSync.ts`; pode ser substituído por `OMNIROUTE_LOG_EXPORT_CRON`.
-  Cada execução processa sequencialmente todos os destinos **habilitados** até esvaziá-los.
+  Cada execução processa sequencialmente todos os destinos **habilitados**.
 - **Cursor** — o `call_logs.rowid` implícito do SQLite, persistido por destino em
-  `log_export_destinations.cursor_row_id`. `timestamp` deliberadamente não é usado como cursor: os chamadores
-  podem fornecer seus próprios valores, portanto uma requisição lenta pode ser gravada depois de outra mais rápida que começou
+  `log_export_destinations.cursor_row_id`. `timestamp` deliberadamente não é o cursor: os chamadores
+  podem fornecer seu próprio valor, portanto uma solicitação lenta pode ser gravada depois de outra mais rápida que começou
   posteriormente, e um cursor de timestamp a ignoraria.
-- **Processamento em lotes** — `batch_size` linhas por requisição (padrão: 500), `max_rows_per_run` linhas por execução
-  (padrão: 10000), para que um grande acúmulo seja processado ao longo de várias execuções em vez de bloquear uma única.
+- **Processamento em lotes** — `batch_size` linhas por solicitação (padrão 500), `max_rows_per_run` linhas por execução
+  (padrão 10000), para que um grande acúmulo seja processado ao longo de várias execuções, em vez de bloquear uma única.
 - **Entrega** — o cursor avança somente depois que `send()` é resolvido. Um lote com falha deixa o
-  cursor onde estava, portanto as mesmas linhas são processadas novamente na próxima execução. A garantia é de
-  pelo menos uma entrega com desduplicação no destino, e não de exatamente uma entrega: o BigQuery identifica cada
-  linha pelo ID do log de chamada, o qual ele respeita com base em melhor esforço dentro da própria janela de desduplicação.
-- **Proteção contra sobreposição** — a execução cron e `POST .../run` podem ocorrer simultaneamente. Um destino
-  que já esteja sendo processado é ignorado em vez de ser processado duas vezes (`skipped: true` no resultado da execução),
-  portanto uma execução concorrente não pode reenviar um lote nem retroceder o cursor.
-- **Recuperação após expurgo** — se `cursor_row_id` ficar acima de `MAX(rowid)` (a tabela inteira foi
-  expurgada e os rowids foram reiniciados), o executor retrocede para 0 em vez de ficar permanentemente sem detectar novos registros.
+  cursor onde estava, portanto as mesmas linhas são tentadas novamente na próxima execução. A garantia é
+  de pelo menos uma vez, mais a desduplicação no destino, e não de exatamente uma vez de fato: o BigQuery identifica cada
+  linha pelo ID do registro de chamadas, que ele respeita com base no melhor esforço dentro de sua própria janela de desduplicação.
+- **Proteção contra sobreposição** — a execução cron e `POST .../run` podem ocorrer juntas. Um destino
+  que já está sendo processado é ignorado, em vez de ser processado duas vezes (`skipped: true` no resultado da execução),
+  portanto uma execução simultânea não pode reenviar um lote nem retroceder o cursor.
+- **Recuperação após limpeza** — se `cursor_row_id` ficar acima de `MAX(rowid)` (a tabela inteira foi
+  limpa e os rowids foram reiniciados), o executor retrocede para 0, em vez de ficar permanentemente sem detectar novas linhas.
+
+### Executor isolado e limites
+
+Cada execução de destino no Node inicia um processo filho separado e de curta duração do SO (`child_process`
+com IPC, não `worker_threads`). Leituras de corpos, análise/serialização do JSON da carga, o
+`prepare()` do destino e a E/S de rede do destino são todos executados nele, não no loop de eventos do servidor.
+Somente a configuração e pequenas mensagens de progresso passam pelo IPC; os registros exportados nunca retornam ao
+servidor. O trabalho cron e a rota Executar agora mantêm o mesmo resultado público e a mesma proteção contra sobreposição.
+
+O processo filho abre o `DATA_DIR/storage.sqlite` resolvido do servidor no modo somente leitura usando `node:sqlite`,
+com `busy_timeout=5000` e `query_only=ON`. Ele não importa nenhum singleton de banco de dados e não realiza
+migrações, backups nem atualizações do SQLite. A escrituração de artefatos ausentes/corrompidos (incluindo o
+UPDATE de artefato corrompido) permanece apenas no caminho de detalhes do painel. Ambos os caminhos compartilham um
+resolvedor de detalhes puro; a exportação usa leituras assíncronas do sistema de arquivos e a mesma ordem de resolução
+artefato → inline legado → disco legado → nenhum. Uma execução captura o rowid máximo de inserção
+quando o processo filho abre seu leitor; inserções posteriores aguardam a próxima execução. Esse é um limite de
+inserção, não uma transação SQLite de longa duração: gravadores WAL e checkpoints permanecem livres durante
+esperas de rede. Atualizações/exclusões de linhas existentes não são congeladas por esse limite.
+
+Após cada lote aceito, o processo filho aguarda uma confirmação. Primeiro, o servidor persiste
+o cursor com `advanceLogExportCursor` e, em seguida, envia `ack`; nenhum novo lote é iniciado antes disso.
+Uma falha no envio, uma falha do processo ou um timeout registra a falha sem avançar esse lote. Os lotes
+confirmados anteriormente permanecem efetivados; no máximo, o único lote não confirmado pode ser reenviado.
+O sucesso é registrado somente após `done` e uma saída limpa do processo filho. As falhas encerram o processo filho
+com SIGTERM, escalando para SIGKILL após 500 ms, e o executor aguarda o encerramento do processo.
+
+| Variável de ambiente                          | Padrão | Finalidade                                         |
+| --------------------------------------------- | ------ | -------------------------------------------------- |
+| `OMNIROUTE_LOG_EXPORT_RUN_TIMEOUT_MS`         | 900000 | Limite de tempo decorrido por destino              |
+| `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB` | 1024   | Limite de old-space do V8 no processo filho, em MB |
+
+Valores inválidos, não positivos ou não inteiros usam os padrões. A configuração de heap não é um limite total de
+RSS; lotes muito grandes ainda podem esgotar a memória do processo filho e fazer com que a execução falhe com segurança.
+O padrão de 1024 MB deixa margem para o lote padrão de 500 linhas com artefatos de 512 KiB e
+corpos habilitados, incluindo a serialização JSON em blocos de bytes do BigQuery. Isso não torna seguro um
+lote de corpos com 10000 linhas. O esgotamento do heap do V8 registra uma falha que permite ação corretiva: reduza o tamanho
+do lote ou aumente `OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB`; o cursor permanece no último
+lote confirmado. Corpos históricos inline/em disco não são cobertos pelo limite moderno de artefatos.
+Os operadores devem dimensionar o RSS separadamente, especialmente em contêineres com memória limitada.
+
+O processo filho herda apenas o `DATA_DIR` resolvido, `NODE_ENV`, o `TZ` explícito (resolução por horário
+local de nomes de arquivos legados), `ELECTRON_RUN_AS_NODE` quando presente e as seguintes entradas de saída:
+`HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY`, `NO_PROXY` (e suas formas em letras minúsculas),
+`OMNIROUTE_LOCAL_PROVIDER_NODE_HOSTS`, `NODE_EXTRA_CA_CERTS`, `SSL_CERT_FILE`, `SSL_CERT_DIR`.
+Um dispatcher global do Undici compartilha a resolução pura de proxy por ambiente do servidor e as regras de desvio
+para hosts locais, incluindo `NO_PROXY`; ele não importa `proxyFetch.ts` nem seus sinalizadores de banco de dados/recursos.
+As credenciais de proxy são ocultadas da saída encaminhada e dos erros registrados. As credenciais do destino
+trafegam somente em uma mensagem IPC de inicialização, nunca em argv nem no ambiente; o encaminhamento de saída/erros
+recebe um prefixo e é sanitizado. Somente `ExperimentalWarning` é desabilitado nos argumentos de execução do processo filho para evitar
+a repetição do aviso do SQLite do Node a cada execução cron; os outros tipos de aviso permanecem visíveis.
+
+Os módulos de destino devem poder ser importados sem dependências exclusivas do Next.js/servidor. A implementação existente do
+BigQuery já atende a esse contrato. Os caches de tokens de acesso duram apenas durante a execução
+filha, não entre execuções. Node é o runtime compatível (`package.json` engines), mas a seção de
+instalação do Bun no README e o `Dockerfile.bun` também divulgam um caminho de compatibilidade
+para produção usando `bun:sqlite` (`src/lib/db/core.ts` / adaptadores). Portanto, no Bun, as
+exportações mantêm o caminho anterior no processo e emitem um aviso uma única vez: o isolamento
+de heap/timeout do processo filho não está disponível. Use Node para isolamento do loop de eventos
+e de OOM; o Bun não é tratado aqui como exclusivo para desenvolvimento.
+
+Quando `includeBodies` estiver habilitado, prefira uma cadência em nível de minutos, como
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, em vez de acumular um backlog de payloads por uma hora.
+Os limites de lote e de linhas ainda restringem cada execução. O custo de inicialização do processo
+é incorrido por destino, a cada execução; isso troca um pequeno custo de inicialização pelo
+isolamento do loop de eventos do servidor, não pela redução do uso total de CPU.
 
 ### Payloads (prompts e conclusões)
 
-Por padrão, a exportação inclui apenas os campos de resumo exibidos na **lista** de Logs. Ativar
+Por padrão, a exportação contém apenas os campos de resumo exibidos pela **lista** de Logs. Ativar
 **Exportar prompts e respostas** (`includeBodies`) também envia o que o painel de **detalhes**
 de Logs mostra para cada chamada:
 
-| Campo                            | O que contém                                                  |
-| -------------------------------- | ------------------------------------------------------------- |
-| `request_body` / `response_body` | Os payloads da chamada conforme renderizados pelo painel      |
-| `pipeline_route_decision`        | O destino e o modelo escolhidos pelo roteador                 |
-| `pipeline_client_request`        | A requisição bruta exatamente como foi enviada pelo cliente   |
-| `pipeline_openai_request`        | Após a tradução para o formato OpenAI interno                 |
-| `pipeline_provider_request`      | Como efetivamente enviada ao upstream, no dialeto do provedor |
-| `pipeline_provider_response`     | A resposta bruta do upstream                                  |
-| `pipeline_client_response`       | O que foi retornado ao chamador                               |
-| `pipeline_error`                 | Detalhes do erro de pipeline de uma chamada com falha         |
-| `bodies_truncated`               | Verdadeiro quando algum campo acima atingiu `maxBodyBytes`    |
+| Campo                            | O que contém                                                     |
+| -------------------------------- | ---------------------------------------------------------------- |
+| `request_body` / `response_body` | Os payloads da chamada conforme renderizados pelo dashboard      |
+| `pipeline_route_decision`        | Qual destino e modelo o roteador escolheu                        |
+| `pipeline_client_request`        | A solicitação bruta exatamente como o cliente a enviou           |
+| `pipeline_openai_request`        | Após a tradução para o formato interno do OpenAI                 |
+| `pipeline_provider_request`      | Como foi realmente enviada ao upstream, no dialeto do provedor   |
+| `pipeline_provider_response`     | A resposta upstream bruta                                        |
+| `pipeline_client_response`       | O que foi devolvido ao chamador                                  |
+| `pipeline_error`                 | Detalhes do erro no nível do pipeline para uma chamada com falha |
+| `bodies_truncated`               | Verdadeiro quando qualquer campo acima atingiu `maxBodyBytes`    |
 
-Esse é o conteúdo do prompt, portanto fica **desativado por padrão** e é deliberadamente uma escolha por destino.
-O que é enviado corresponde ao que o painel mostra, pois ambos leem por meio de `getCallLogById`: os payloads já são
-sanitizados para remover PII e têm dados secretos ocultados quando são gravados; além disso, uma chamada feita com uma
-chave de API `noLog` não armazena nenhum payload, portanto não há nada a exportar.
+Isso é conteúdo de prompt, portanto fica **desativado por padrão** e é deliberadamente uma escolha
+por destino. O que é enviado corresponde ao que o dashboard mostra, pois a exportação e
+`getCallLogById` compartilham a resolução dos detalhes: os payloads já têm as PII sanitizadas e os
+segredos ocultados quando são gravados, e uma chamada feita com uma chave de API `noLog` não
+armazena nenhum payload, portanto não há nada para exportar.
 
-Os payloads são lidos por linha a partir do artefato no sistema de arquivos, portanto a hidratação só é executada para destinos
-que a solicitaram. Uma linha cujo artefato esteja ausente ou corrompido exporta seu resumo com payloads nulos,
-em vez de causar falha no lote e impedir o avanço do cursor.
+Os payloads são lidos por linha a partir do artefato no sistema de arquivos, portanto a hidratação
+só é executada para os destinos que a solicitaram. Um artefato ausente ou corrompido exporta seu
+resumo com payloads nulos, em vez de causar falha no lote e deixar o cursor travado.
 
-`maxBodyBytes` (padrão: 262144) limita cada campo. Payloads mais longos são **truncados em vez de
-descartados** — um prompt cortado ainda responde à pergunta "o que foi solicitado" — e a linha é sinalizada com
-`bodies_truncated`. Deltas transmitidos fragmento por fragmento não são exportados; a resposta montada já está
-em `pipeline_provider_response` e `pipeline_client_response`.
+`maxBodyBytes` (padrão 262144) limita cada campo. Payloads mais longos são **truncados em vez de
+descartados** — um prompt cortado ainda responde à pergunta "o que foi solicitado" — e a linha é
+marcada com `bodies_truncated`. Deltas transmitidos em streaming, parte por parte, não são
+exportados; a resposta montada já está em `pipeline_provider_response` e
+`pipeline_client_response`.
 
 ---
 
 ## 2. Arquivos
 
-| Componente                   | Localização                                  |
-| ---------------------------- | -------------------------------------------- |
-| Contrato de destino          | `src/lib/logExport/types.ts`                 |
-| Registro                     | `src/lib/logExport/registry.ts`              |
-| Tratamento de segredos       | `src/lib/logExport/secrets.ts`               |
-| Executor (loop do cursor)    | `src/lib/logExport/runner.ts`                |
-| Projeção da API              | `src/lib/logExport/presenter.ts`             |
-| Destino BigQuery             | `src/lib/logExport/destinations/bigquery.ts` |
-| Autenticação de SA do Google | `src/lib/logExport/googleServiceAccount.ts`  |
-| Fonte de logs de chamadas    | `src/lib/usage/callLogExportSource.ts`       |
-| Persistência                 | `src/lib/db/logExportDestinations.ts`        |
-| Tarefa cron                  | `src/lib/jobs/logExportJob.ts`               |
-| Camada REST                  | `src/app/api/log-export/`                    |
-| Página do painel             | `src/app/(dashboard)/dashboard/log-export/`  |
+| Componente                        | Localização                                  |
+| --------------------------------- | -------------------------------------------- |
+| Contrato de destino               | `src/lib/logExport/types.ts`                 |
+| Registro                          | `src/lib/logExport/registry.ts`              |
+| Gerenciamento de segredos         | `src/lib/logExport/secrets.ts`               |
+| Executor (IPC pai)                | `src/lib/logExport/runner.ts`                |
+| Ciclo de vida do processo         | `src/lib/logExport/childRunner.ts`           |
+| Entrada do processo filho         | `src/lib/logExport/exportChild.ts`           |
+| Abertura somente leitura          | `src/lib/db/logExportReadOnly.ts`            |
+| Consulta/mapeamento compartilhado | `src/lib/usage/callLogExportQueries.ts`      |
+| Resolvedor de detalhes            | `src/lib/usage/callLogDetailResolver.ts`     |
+| Projeção da API                   | `src/lib/logExport/presenter.ts`             |
+| Destino do BigQuery               | `src/lib/logExport/destinations/bigquery.ts` |
+| Autenticação de SA do Google      | `src/lib/logExport/googleServiceAccount.ts`  |
+| Fonte do registro de chamadas     | `src/lib/usage/callLogExportSource.ts`       |
+| Persistência                      | `src/lib/db/logExportDestinations.ts`        |
+| Tarefa cron                       | `src/lib/jobs/logExportJob.ts`               |
+| Camada REST                       | `src/app/api/log-export/`                    |
+| Página do painel                  | `src/app/(dashboard)/dashboard/log-export/`  |
 
 Esquema: `src/lib/db/migrations/170_log_export_destinations.sql`.
 

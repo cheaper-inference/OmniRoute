@@ -36,36 +36,36 @@ Studio bi tliet tabs li jgħaqqad it-tiftix fuq il-web, l-estrazzjoni ta' konten
 
 ## Tabs
 
-### Tab tat-Tiftix
+### Tab tat-Tfittxija
 
-Jevolvi l-`SearchForm` + `ResultsPanel` + `RerankPanel` eżistenti f'tab:
+Jieħu l-`SearchForm` + `ResultsPanel` + `RerankPanel` eżistenti u jiżviluppahom f’tab:
 
-- Mistoqsija → riżultati (titlu, URL, silta, punteġġ ta' rilevanza).
-- Metadata tal-fornitur fil-panew tal-Konfigurazzjoni (spiża, kwota, status).
-- Taqsima tar-riklassifikazzjoni: agħżel mudell ta' riklassifikazzjoni, ordna mill-ġdid ir-riżultati, uri `positionDelta`.
-- Stat vojt b'CTA meta ma jkun ikkonfigurat l-ebda fornitur tat-tiftix.
-- Kronoloġija tat-tiftix permezz ta' `SearchHistory.tsx`.
-- Issejjaħ `POST /v1/search` (endpoint eżistenti, mingħajr tibdil).
+- Mistoqsija → riżultati (titlu, URL, silta, punteġġ tar-rilevanza).
+- Metadata tal-fornitur fil-pannell Config (spiża, kwota, status).
+- Taqsima tar-riklassifikazzjoni: agħżel mudell ta’ riklassifikazzjoni, ordna mill-ġdid ir-riżultati, uri `positionDelta`.
+- Stat vojt b’CTA meta ma jkun ikkonfigurat l-ebda fornitur tat-tfittxija.
+- Storja tat-tfittxija permezz ta’ `SearchHistory.tsx`.
+- Jagħmel sejħa lil `POST /v1/search` (endpoint eżistenti, l-ebda bidla).
 
 ### Tab tal-Estrattazzjoni
 
-Tab ġdida għall-estrazzjoni ta' kontenut minn URL permezz ta' `POST /v1/web/fetch` (maħluq fil-pjan 05):
+Tab ġdid għall-estrazzjoni tal-kontenut minn URL permezz ta’ `POST /v1/web/fetch` (maħluq fil-pjan 05):
 
 - Input: URL + swiċċ għall-paġna sħiħa + selettur tal-format (markdown / test / HTML).
-- Ibgħat → ġib → irrendi `ScrapeResult.tsx`.
-- `ScrapeResult` jirrendi previżjoni markdown + swiċċ għall-kontenut mhux ipproċessat.
-- Limitu: jekk il-korp tar-rispons ikun akbar minn **256 KB**, l-UI turi `(maqtugħ, ara l-kontenut mhux ipproċessat)` u tiftaħ il-kontenut mhux ipproċessat f'modal ta' Monaco (D21).
-- Panew tal-metadata: fornitur (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search), latenza, spiża, daqs tar-rispons, għadd ta' links.
+- Issottometti → ġib → irrendi `ScrapeResult.tsx`.
+- `ScrapeResult` jirrendi previżjoni tal-markdown + swiċċ għall-verżjoni mhux ipproċessata.
+- Limitu: jekk il-korp tar-rispons ikun akbar minn **256 KB**, l-UI turi `(maqtugħ, ara l-verżjoni mhux ipproċessata)` u tiftaħ il-verżjoni mhux ipproċessata f’modal ta’ Monaco (D21).
+- Pannell tal-metadata: fornitur (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latenza, spiża, daqs tar-rispons, għadd ta’ links.
 - Juża l-hook `useScrapeFetch.ts`.
 
 ### Tab tat-Tqabbil
 
-Iħaddem l-istess mistoqsija/URL fuq sa **4 fornituri b'mod parallel** (D22):
+Iħaddem l-istess mistoqsija/URL fuq sa **4 fornituri b’mod parallel** (D22):
 
-- Kolonni maġenb xulxin għal kull fornitur.
-- Metriċi: latenza, spiża, għadd ta' riżultati, daqs tar-rispons.
-- Kalkolu tal-koinċidenza tal-URLs għat-tiftix (l-għadd ta' URLs kondiviżi meta mqabbel mar-riżultat inizjali).
-- Issejjaħ `POST /v1/search` (tiftix) jew `POST /v1/web/fetch` (estrazzjoni) għal kull fornitur.
+- Kolonni ħdejn xulxin għal kull fornitur.
+- Metriċi: latenza, spiża, għadd ta’ riżultati, daqs tar-rispons.
+- Kalkolu tal-koinċidenza tal-URLs għat-tfittxija (għadd ta’ URLs kondiviżi meta mqabbel mar-riżultat inizjali).
+- Jagħmel sejħa lil `POST /v1/search` (tfittxija) jew `POST /v1/web/fetch` (estrazzjoni) għal kull fornitur.
 
 ---
 
@@ -101,12 +101,12 @@ Iħaddem l-istess mistoqsija/URL fuq sa **4 fornituri b'mod parallel** (D22):
 ## Katalgu tal-Fornituri
 
 `ProviderCatalog.tsx` jesponi l-lista sħiħa tal-fornituri minn `GET /api/search/providers`
-(estiża f'F4 biex tinkludi l-fornituri tal-ġbir):
+(estiża f'F4 biex tinkludi l-fornituri tal-fetch):
 
-| `kind` | `"search"` (20 fornitur) jew `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search) |
+| `kind` | `"search"` (20 fornitur) jew `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
 
-L-istatus jiġi **derivat fil-ħin tat-talba** billi jiġi ċċekkjat jekk jeżistux il-kredenzjali u jekk
-iċ-ċwievet kollha humiex bħalissa f'perjodu ta' stennija.
+L-istatus jiġi **derivat fil-ħin tat-talba** billi jiġi ċċekkjat jekk jeżistux kredenzjali u jekk
+iċ-ċwievet kollha humiex attwalment fil-perjodu ta' cooldown.
 
 ---
 
@@ -120,16 +120,16 @@ Il-valur provviżorju taċ-ċavetta tal-API huwa dejjem `$OMNIROUTE_API_KEY` (D1
 
 ## Bidliet fil-Backend
 
-Kienet meħtieġa bidla waħda biss fil-backend għal din il-karatteristika:
+Kienet meħtieġa bidla waħda biss fil-backend għal din il-funzjonalità:
 
 ### `GET /api/search/providers` Estiż
 
 `src/app/api/search/providers/route.ts` ġie estiż biex:
 
-- Jinkludi s-6 fornituri kollha tal-ġbir (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`) fl-array.
-- Iżid `kind: "search" | "fetch"` ma' kull element.
+- Jinkludi kull fornitur tal-fetch (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`) fl-array.
+- Iżid `kind: "search" | "fetch"` ma’ kull element.
 - Iżid `status: "configured" | "missing" | "rate_limited"` derivat mill-istat attwali tal-kredenzjali.
-- Iżomm il-kompatibbiltà b'lura — l-oqsma eżistenti (`id`, `name`, eċċ.) jibqgħu l-istess.
+- Iżomm il-kompatibbiltà b’lura — l-oqsma eżistenti (`id`, `name`, eċċ.) jibqgħu l-istess.
 
 ---
 

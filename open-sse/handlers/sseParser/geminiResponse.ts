@@ -127,14 +127,22 @@ function applyFinishReason(
 
 /** Extract usageMetadata into the OpenAI-shaped usage object, if present. */
 function applyUsageMetadata(parsed: Record<string, unknown>, acc: GeminiSSEAccumulator): void {
-  const response = parsed.response as Record<string, unknown> | undefined;
+  const response = (parsed.response ?? parsed) as Record<string, unknown>;
   const um = response?.usageMetadata as Record<string, unknown> | undefined;
   if (!um) return;
+  const promptTokens = Number(um.promptTokenCount) || 0;
+  const completionTokens = Number(um.candidatesTokenCount) || 0;
   acc.usage = {
-    prompt_tokens: um.promptTokenCount || 0,
-    completion_tokens: um.candidatesTokenCount || 0,
-    total_tokens: um.totalTokenCount || 0,
+    prompt_tokens: promptTokens,
+    completion_tokens: completionTokens,
+    // Gemini may omit totalTokenCount; derive it instead of reporting 0.
+    total_tokens: Number(um.totalTokenCount) || promptTokens + completionTokens,
   };
+  const cachedTokens = Number(um.cachedContentTokenCount) || 0;
+  if (cachedTokens > 0) {
+    // Cache reads are a breakdown of the inclusive prompt count, not extra input.
+    acc.usage.prompt_tokens_details = { cached_tokens: cachedTokens };
+  }
 }
 
 /** Parse one `data:` line's JSON payload and fold it into the accumulator (best-effort). */
@@ -148,7 +156,7 @@ function applyGeminiSSEDataLine(payload: string, acc: GeminiSSEAccumulator): voi
       acc.sawContent = true;
     }
 
-    const response = parsed.response as Record<string, unknown> | undefined;
+    const response = (parsed.response ?? parsed) as Record<string, unknown>;
     const candidates = response?.candidates;
     const candidate = Array.isArray(candidates)
       ? (candidates[0] as Record<string, unknown> | undefined)

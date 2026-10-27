@@ -120,8 +120,9 @@ async function render(locale = "en") {
   await flush();
   await flush();
 }
+// The kit Dialog (Modal) portals its content to document.body, outside `container`.
 function button(label: string) {
-  const found = [...container.querySelectorAll("button")].find((item) => {
+  const found = [...document.body.querySelectorAll("button")].find((item) => {
     const copy = item.cloneNode(true) as HTMLElement;
     copy.querySelectorAll('[aria-hidden="true"]').forEach((icon) => icon.remove());
     return copy.textContent?.trim() === label;
@@ -136,13 +137,13 @@ async function click(label: string) {
   await flush();
 }
 function control(label: string) {
-  const labelElement = [...container.querySelectorAll("label")].find(
+  const labelElement = [...document.body.querySelectorAll("label")].find(
     (item) => item.textContent?.replace("*", "").trim() === label
   );
   const found =
-    container.querySelector(`[aria-label="${label}"]`) ||
+    document.body.querySelector(`[aria-label="${label}"]`) ||
     (labelElement?.htmlFor
-      ? container.querySelector(`[id="${labelElement.htmlFor}"]`)
+      ? document.body.querySelector(`[id="${labelElement.htmlFor}"]`)
       : labelElement?.querySelector("input,textarea,select"));
   if (!found) throw new Error("Missing control " + label);
   return found as HTMLInputElement;
@@ -249,7 +250,7 @@ describe("real team costs components", () => {
     });
     await click("Save");
     expect(writes()).toHaveLength(1);
-    expect(container.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.body.querySelector('[role="dialog"]')).toBeNull();
     expect(container.querySelector('[role="alert"]')).not.toBeNull();
   });
   it("ignores delayed A after B selection and follows browser URL changes", async () => {
@@ -323,7 +324,7 @@ describe("real team costs components", () => {
     expect(writes()).toHaveLength(0);
     await click("Assign");
     expect(writes()).toHaveLength(0);
-    expect(container.querySelector('[role="dialog"]')?.textContent).toContain(
+    expect(document.body.querySelector('[role="dialog"]')?.textContent).toContain(
       "from “Beta” to “Alpha”"
     );
     await click("Confirm");
@@ -337,8 +338,8 @@ describe("real team costs components", () => {
     expect(writes()).toHaveLength(0);
     mutationStatus = 403;
     await click("Confirm");
-    expect(container.querySelector('[role="dialog"]')).not.toBeNull();
-    expect(container.textContent).toContain(en.teamCosts.forbidden);
+    expect(document.body.querySelector('[role="dialog"]')).not.toBeNull();
+    expect(document.body.textContent).toContain(en.teamCosts.forbidden);
     expect(writes()[0][0]).toBe("/api/teams/a/members?apiKeyId=member");
   });
   it("archived teams have no mutation controls", async () => {
@@ -361,7 +362,7 @@ describe("real team costs components", () => {
     expect(control("Rolling budget window").disabled).toBe(false);
     await click("Save");
     expect(writes()).toHaveLength(0);
-    expect(container.textContent).toContain(en.teamCosts.invalidAmount);
+    expect(document.body.textContent).toContain(en.teamCosts.invalidAmount);
     await act(async () => control("Enable shared soft budget").click());
     await click("Save");
     expect(JSON.parse(writes()[0][1].body)).toMatchObject({
@@ -383,7 +384,7 @@ describe("real team costs components", () => {
       resolve = done;
     });
     await act(async () =>
-      container
+      document.body
         .querySelector("form")!
         .dispatchEvent(new Event("submit", { bubbles: true, cancelable: true }))
     );
@@ -391,7 +392,7 @@ describe("real team costs components", () => {
     await act(async () =>
       document.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }))
     );
-    expect(container.querySelector("form")).not.toBeNull();
+    expect(document.body.querySelector("form")).not.toBeNull();
     expect(JSON.parse(writes()[0][1].body)).toMatchObject({
       maxBudgetUsd: 0.5,
       budgetDuration: "30d",
@@ -399,7 +400,7 @@ describe("real team costs components", () => {
     await act(async () => resolve(response({}, 403)));
     await flush();
     expect(control("Team name").value).toBe("New team");
-    expect(container.textContent).toContain(en.teamCosts.forbidden);
+    expect(document.body.textContent).toContain(en.teamCosts.forbidden);
     expect(button("Save").disabled).toBe(false);
   });
   it("uses real Chinese catalog and keeps refresh failures visible", async () => {

@@ -239,50 +239,44 @@ ssh -L 20128:127.0.0.1:20128 -L 1455:127.0.0.1:1455 <user>@192.168.0.15
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ 只顯示一次密鑰——請立即複製
+#   ↳ 金鑰只會顯示一次，請立即複製
 omniroute tokens list                 # 已遮罩：id、名稱、範圍、前綴、狀態、到期時間
 omniroute tokens revoke <id|prefix>   # 立即撤銷
 omniroute tokens scopes               # 說明三種範圍
 ```
 
-`tokens` 命令需要 **admin** 憑證。您也可以在儀表板的
-**設定 → 存取權杖**中管理權杖（建立、撤銷、僅可複製一次）。
+`tokens` 指令需要 **admin** 憑證。你也可以在儀表板的 **設定 → 存取權杖** 中管理權杖（建立、撤銷、一次性複製）。
+
+權杖的權限永遠不能超過其建立者所持有的權限。`admin` 權杖只能由操作員建立：即儀表板工作階段、伺服器本機上的 CLI，或使用密碼的 `omniroute connect`。機器憑證（`admin` 存取權杖，或具有 `manage`/`admin` 範圍的 API 金鑰）只能核發 `write` 與 `read` 權杖；若要求 `--scope admin`，則回傳 `403`。停用登入並不會開放核發權限：任何範圍的存取權杖都是始終受認證保護的路由所接受的憑證，因此匿名呼叫在任何範圍下都會得到 `401`。
 
 ---
 
-## 從遠端目錄設定程式設計 CLI
+## 從遠端目錄設定程式設計用 CLI
 
-`omniroute configure` 會讀取**作用中伺服器的**即時模型目錄，並在
-**您的**機器上寫入設定。
+`omniroute configure` 會讀取**目前啟用中伺服器**的即時模型目錄，並在**你的**機器上寫入設定。
 
 ```bash
 omniroute configure codex
-#   提供者：glm、kmc、ollamacloud、opencode-go、…
+#   提供者：glm, kmc, ollamacloud, opencode-go, …
 #   提供者：glm
-#   模型 id：glm/glm-5.2
+#   模型 ID：glm/glm-5.2
 #   ✔ 已寫入 ~/.codex/glm52.config.toml
-#   使用方式：codex --profile glm52
+#   使用方式：  codex --profile glm52
 
-# 非互動模式
+# 非互動式
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# 將常用模型保留在互動式選擇器頂端
+# 讓常用模型保持在互動式選擇器的最上方
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-選擇器只會將模型 ID（絕不包含 URL 或憑證）保存在本機
-`model-preferences.json` 檔案中，並依情境與 CLI 目標劃分。收藏項目會顯示在
-最近選擇之前；使用 `--unfavorite` 可從該情境／目標清單中移除所選模型。
+選擇器只會在本機的 `model-preferences.json` 檔案中保存模型 ID（從不保存 URL 或憑證），並依情境與 CLI 目標分別保存。收藏的模型會排在最近選取的模型之前；使用 `--unfavorite` 可將所選模型從該情境/目標的清單中移除。
 
-寫入的設定檔會透過環境變數參照推論金鑰
-(`OMNIROUTE_API_KEY`)——密鑰絕不會寫入磁碟。關於一次性的
-Codex 基礎設定（`[model_providers.omniroute]` 區塊），請參閱
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md)。
+寫入的設定檔會透過環境變數（`OMNIROUTE_API_KEY`）參照推論金鑰，金鑰本身從不寫入磁碟。關於一次性的基礎 Codex 設定（`[model_providers.omniroute]` 區塊），請參閱 [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md)。
 
-### 啟動 CLI 以連線遠端（不寫入設定）
+### 從遠端啟動 CLI（不寫入設定）
 
-`omniroute run <target>` 也會遵循作用中的情境：遠端基礎 URL
-與情境憑證只會注入至產生的程序中。
+`omniroute run <target>` 同樣會遵循目前的啟用情境：遠端基礎 URL 與情境憑證只會注入到衍生的行程中。
 
 ```bash
 omniroute connect 192.168.0.15
@@ -290,50 +284,43 @@ omniroute run claude   --model openai/gpt-5.4          # Claude Code → 遠端
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# 精確預覽將產生的內容（僅顯示環境變數金鑰名稱，絕不顯示值）：
+# 預覽將要衍生的確切內容（僅顯示環境變數名稱，從不顯示值）：
 omniroute run codex --dry-run --json
 ```
 
-目標：`claude`、`codex`、`aider`、`goose`、`opencode`、`qwen`、`gemini`
-（單一來源：`bin/cli/cli-manifest.mjs`）。Qwen 與 Gemini 會使用
-暫時且隔離的主目錄執行，該目錄會在結束時移除，因此啟動程序絕不會更動——
-或洩漏至——您的個人工具設定。
+目標：`claude`、`codex`、`aider`、`goose`、`opencode`、`qwen`、`gemini`（唯一來源：`bin/cli/cli-manifest.mjs`）。Qwen 與 Gemini 會在暫時的隔離主目錄中執行，該目錄會在結束時移除，因此啟動動作絕不會觸及或洩漏到你個人的工具設定中。
 
-### 各 CLI 的設定命令
+### 各 CLI 的設定指令
 
-每個受支援的 CLI 都有可感知遠端環境的設定命令（全都會遵循作用中的
-情境，或使用 `--remote <url> --api-key <key>`）：
+每個受支援的 CLI 都有一個支援遠端的設定指令（均遵循目前的啟用情境，或使用 `--remote <url> --api-key <key>`）：
 
-| CLI         | 指令                       | 寫入內容                                                                                                                                                     |
-| ----------- | -------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` 設定檔（每個模型各一份）                                                                                                       |
-| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json`（每個模型各一份）                                                                                                  |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — 包含目錄中所有模型的 `omniroute` OpenAI 相容提供者（執行 `opencode -m omniroute/<model>`）                              |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json`（CLI 模式）+ 印出要貼上的 VS Code 擴充功能設定（OpenAI 相容，Base URL **不含** `/v1`）                            |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json`（CLI）+ VS Code `kilocode.*` 設定 — OpenAI 相容，Base URL **包含** `/v1`                                                     |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml`（VS Code/JetBrains + `cn` CLI）— `provider: openai`、`apiBase` **包含** `/v1`，金鑰透過 `${{ secrets.OMNIROUTE_API_KEY }}` 提供    |
-| Cursor      | `omniroute setup-cursor`   | 印出應用程式內的操作步驟（Settings → Models → Override OpenAI Base URL **包含** `/v1` + 金鑰 + 模型）。Cursor 設定儲存在不透明的 SQLite 中 — 僅限聊天面板    |
-| Roo Code    | `omniroute setup-roo`      | 寫入 Roo 匯入用 JSON（`~/.omniroute/roo-settings.json`）+ 設定 `roo-cline.autoImportSettingsPath` + 印出 UI 操作步驟（OpenAI 相容，Base URL **包含** `/v1`） |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — `openai-compat` 提供者，`base_url` **包含** `/v1`，金鑰透過 `$OMNIROUTE_API_KEY` 提供                                         |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml`（`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **不含** `/v1` + `GOOSE_MODEL`）+ 環境變數設定方式                                    |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml`（`openai-api-base` **不含** `/v1` + `model: openai/<id>`）+ 環境變數設定方式（`aider --message --yes`）                                  |
-| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 的 `modelProviders.openai` 項目 + `~/.qwen/.env` 中的 `OMNIROUTE_API_KEY`                                                         |
+| CLI         | 指令                       | 寫入內容                                                                                                                                                   |
+| ----------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codex       | `omniroute setup-codex`    | `~/.codex/<name>.config.toml` 設定檔（每個模型一個）                                                                                                       |
+| Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json`（每個模型一個）                                                                                                  |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`：包含目錄中所有模型的 `omniroute` openai 相容提供者（執行 `opencode -m omniroute/<model>`）                             |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json`（CLI 模式），並列印需要貼到 VS Code 擴充功能設定中的內容（OpenAI 相容，Base URL **不含** `/v1`）                |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json`（CLI）以及 VS Code 的 `kilocode.*` 設定：OpenAI 相容，Base URL **含** `/v1`                                                |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml`（VS Code/JetBrains 以及 `cn` CLI）：`provider: openai`，`apiBase` **含** `/v1`，金鑰透過 `${{ secrets.OMNIROUTE_API_KEY }}` 參照 |
+| Cursor      | `omniroute setup-cursor`   | 列印應用程式內的步驟（Settings → Models → Override OpenAI Base URL **含** `/v1` + 金鑰 + 模型）。Cursor 的設定是不透明的 SQLite，僅適用於聊天面板          |
+| Roo Code    | `omniroute setup-roo`      | 寫入 Roo 匯入 JSON（`~/.omniroute/roo-settings.json`），設定 `roo-cline.autoImportSettingsPath`，並列印介面步驟（OpenAI 相容，Base URL **含** `/v1`）      |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`：`openai-compat` 提供者，`base_url` **含** `/v1`，金鑰透過 `$OMNIROUTE_API_KEY` 參照                                          |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`：`language_models.openai_compatible.omniroute`，`api_url` **含** `/v1`，金鑰由 Zed 從 `$OMNIROUTE_API_KEY` 讀取（從不寫入）  |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml`（`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **不含** `/v1` + `GOOSE_MODEL`）+ 環境變數設定方案                                  |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml`（`openai-api-base` **不含** `/v1` + `model: openai/<id>`）+ 環境變數設定方案（`aider --message --yes`）                                |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` V4 `modelProviders.openai` 項目，以及 `~/.qwen/.env` 中的 `OMNIROUTE_API_KEY`                                                      |
 
 ```bash
-# OpenCode（OpenAI 相容提供者、所有目錄模型、遠端 VPS）
+# OpenCode（openai 相容提供者，包含所有目錄模型，遠端 VPS）
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
-omniroute setup-opencode --only glm,kimi        # 僅保留相符的模型
+omniroute setup-opencode --only glm,kimi        # 只保留符合的模型
 opencode -m omniroute/glm/glm-5.2 "..."          # 請先匯出 OMNIROUTE_API_KEY
 ```
 
-> OpenCode 也提供功能更豐富的**外掛程式**整合：`omniroute setup opencode`
-> （現在可透過 `--remote` 支援遠端）會安裝 `@omniroute/opencode-plugin`。
-> `setup-opencode` 是輕量級的 OpenAI 相容替代方案。API 金鑰會透過 `{env:OMNIROUTE_API_KEY}` 參照 — 絕不寫入磁碟。
+> OpenCode 還有功能更豐富的**外掛程式**整合：`omniroute setup opencode`（現已透過 `--remote` 支援遠端）會安裝 `@omniroute/opencode-plugin`。
+> `setup-opencode` 是輕量級的 openai 相容替代方案。API 金鑰透過 `{env:OMNIROUTE_API_KEY}` 參照，從不寫入磁碟。
 >
-> 在 OpenCode v2 上，請改用 `@omniroute/opencode-plugin-v2`：使用相同的目錄，
-> 但載入器合約不同。連接整合後，它會從 OpenCode 自己的認證
-> 儲存區讀取金鑰，因此遠端閘道完全不需要在
-> `opencode.json` 中設定金鑰。
+> 在 OpenCode v2 上，請改用 `@omniroute/opencode-plugin-v2`：目錄相同，但載入器契約不同。當整合已連線時，它會從 OpenCode 自身的憑證儲存區讀取金鑰，因此遠端閘道根本不需要在 `opencode.json` 中放入金鑰。
 
 ---
 

@@ -4,46 +4,46 @@
 
 ---
 
-Comparaison objective des fonctionnalités avec les routeurs d’IA open source les plus populaires.
+Comparaison objective des fonctionnalités avec les routeurs IA open source populaires.
 
-> **Méthodologie** : dépôts publics audités au 2e trimestre 2026. Versions indiquées.
-> Soumettez les corrections via une PR — nous souhaitons que ces informations soient exactes.
+> **Méthodologie** : Dépôts publics audités au T2 2026. Versions telles qu'indiquées.
+> Soumettez vos corrections via une PR — nous voulons que ces informations soient exactes.
 
-| Fonctionnalité                                                     |                 OmniRoute 3.8                  | LiteLLM 1.x  | OpenRouter (SaaS) |   Portkey    |
-| ------------------------------------------------------------------ | :--------------------------------------------: | :----------: | :---------------: | :----------: |
-| **Fournisseurs**                                                   |                    **329**                     |     ~100     |        ~50        |     ~30      |
-| **Entrées de catalogue gratuites/sans authentification**           |                    **155**                     |     n/a      | transfert direct  |     n/a      |
-| **Auto-hébergeable**                                               |                       ✅                       |      ✅      |        ❌         |   ⚠ payant   |
-| **Entrées de catalogue OAuth**                                     |                     **23**                     |   partiel    |        ❌         |      ❌      |
-| **Combinaisons de repli automatique**                              |               **19 stratégies**                | par priorité |    par niveaux    |   pondéré    |
-| **Fusion (panel parallèle + synthèse par un juge)**                |                       ✅                       |      ❌      |        ❌         |      ❌      |
-| **Repli niveaux 1/2/3 (abonnement→économique→gratuit)**            |                    ✅ + UI                     |    manuel    |        n/a        |    manuel    |
-| **Compression des tokens**                                         | pile de 12 moteurs (RTK + Caveman + LLMLingua) |    aucune    |      aucune       |    aucune    |
-| **Génération multimodale (voix/musique/vidéo)**                    |                       ✅                       |      ❌      | transfert direct  |      ❌      |
-| **Serveur MCP intégré**                                            |          ✅ 110 outils, 33 périmètres          |      ❌      |        ❌         |      ❌      |
-| **Protocole A2A**                                                  |                ✅ 6 compétences                |      ❌      |        ❌         |      ❌      |
-| **Mémoire (FTS5 + vectorielle)**                                   |                       ✅                       |      ❌      |        ❌         |      ❌      |
-| **Garde-fous (PII, injection, vision)**                            |                       ✅                       |   partiel    |        ❌         |  ✅ payant   |
-| **Intégrations d’agents cloud**                                    |          Codex, Cursor, Devin, Jules           |      ❌      |        ❌         |      ❌      |
-| **Disjoncteur par fournisseur**                                    |       ✅ 3 états, récupération différée        |   basique    |        ❌         |      ✅      |
-| **Furtivité des empreintes TLS (JA3/JA4)**                         |                   ✅ wreq-js                   |      ❌      |        ❌         |      ❌      |
-| **Framework d’évaluation**                                         |                   ✅ intégré                   |      ❌      |        ❌         |   ⚠ payant   |
-| **Proxy MITM (intercepte Cursor/Antigravity)**                     |               ✅ multiplateforme               |      ❌      |        ❌         |      ❌      |
-| **CLI avec zone de notification (sans Electron)**                  |                       ✅                       |      ❌      |        n/a        |     n/a      |
-| **Authentification automatique de la CLI par identifiant machine** |                       ✅                       |      ❌      |        n/a        |     n/a      |
-| **Tableau de bord**                                                |                   Next.js 16                   |   basique    |   propriétaire    | propriétaire |
-| **i18n**                                                           |          **42 paramètres régionaux**           |      ❌      |        ❌         |      ⚠       |
-| **Compétences publiques d’agents (SKILL.md)**                      |                     ✅ 45                      |      ❌      |        ❌         |      ❌      |
-| **Prise en charge des tunnels (Cloudflared, Tailscale, Ngrok)**    |                       ✅                       |      ❌      |        n/a        |     n/a      |
-| **Licence**                                                        |                      MIT                       |     MIT      |   propriétaire    | propriétaire |
+| Fonctionnalité                                                  |                 OmniRoute 3.8                  |    LiteLLM 1.x    | OpenRouter (SaaS) |   Portkey    |
+| --------------------------------------------------------------- | :--------------------------------------------: | :---------------: | :---------------: | :----------: |
+| **Fournisseurs**                                                |                    **329**                     |       ~100        |        ~50        |     ~30      |
+| **Entrées de catalogue gratuites/sans authentification**        |                    **155**                     |        n/a        |    passthrough    |     n/a      |
+| **Auto-hébergeable**                                            |                       ✅                       |        ✅         |        ❌         |   ⚠ payant   |
+| **Entrées de catalogue OAuth**                                  |                     **23**                     |      partiel      |        ❌         |      ❌      |
+| **Combinaisons de basculement automatique**                     |               **20 stratégies**                | basé sur priorité | basé sur niveaux  |   pondéré    |
+| **Fusion (panel parallèle + synthèse par juge)**                |                       ✅                       |        ❌         |        ❌         |      ❌      |
+| **Basculement niveau 1/2/3 (abonnement→économique→gratuit)**    |                    ✅ + UI                     |      manuel       |        n/a        |    manuel    |
+| **Compression de tokens**                                       | Pile de 12 moteurs (RTK + Caveman + LLMLingua) |      aucune       |      aucune       |    aucune    |
+| **Génération multimodale (parole/musique/vidéo)**               |                       ✅                       |        ❌         |    passthrough    |      ❌      |
+| **Serveur MCP intégré**                                         |           ✅ 110 outils, 33 portées            |        ❌         |        ❌         |      ❌      |
+| **Protocole A2A**                                               |                ✅ 6 compétences                |        ❌         |        ❌         |      ❌      |
+| **Mémoire (FTS5 + vectorielle)**                                |                       ✅                       |        ❌         |        ❌         |      ❌      |
+| **Garde-fous (PII, injection, vision)**                         |                       ✅                       |      partiel      |        ❌         |  ✅ payant   |
+| **Intégrations d'agents cloud**                                 |          Codex, Cursor, Devin, Jules           |        ❌         |        ❌         |      ❌      |
+| **Disjoncteur par fournisseur**                                 |          ✅ 3 états, reprise différée          |      basique      |        ❌         |      ✅      |
+| **Furtivité des empreintes TLS (JA3/JA4)**                      |                   ✅ wreq-js                   |        ❌         |        ❌         |      ❌      |
+| **Framework d'évaluation**                                      |                   ✅ intégré                   |        ❌         |        ❌         |   ⚠ payant   |
+| **Proxy MITM (intercepte Cursor/Antigravity)**                  |               ✅ multiplateforme               |        ❌         |        ❌         |      ❌      |
+| **CLI avec zone de notification système (sans Electron)**       |                       ✅                       |        ❌         |        n/a        |     n/a      |
+| **Auto-authentification CLI par ID de machine**                 |                       ✅                       |        ❌         |        n/a        |     n/a      |
+| **Tableau de bord**                                             |                   Next.js 16                   |      basique      |   propriétaire    | propriétaire |
+| **i18n**                                                        |                 **67 locales**                 |        ❌         |        ❌         |      ⚠       |
+| **Compétences d'agent publiques (SKILL.md)**                    |                     ✅ 45                      |        ❌         |        ❌         |      ❌      |
+| **Prise en charge des tunnels (Cloudflared, Tailscale, Ngrok)** |                       ✅                       |        ❌         |        n/a        |     n/a      |
+| **Licence**                                                     |                      MIT                       |        MIT        |   propriétaire    | propriétaire |
 
 ## Quand choisir OmniRoute
 
-- Vous auto-hébergez et souhaitez une **couverture maximale des fournisseurs** (329 fournisseurs, 155 entrées de catalogue gratuites/sans authentification)
-- Vous avez besoin d’un **serveur MCP intégré** (outils LLM, mémoire et compétences exposés sous forme d’outils)
-- Vous avez besoin du **protocole A2A** pour les workflows d’agent à agent
-- Vous souhaitez une **furtivité des empreintes** (JA3/JA4) pour éviter la détection par les CAPTCHA en amont
-- Vous avez besoin de **fonctionnalités d’entreprise** (garde-fous, évaluations, piste d’audit) sans facture SaaS
+- Vous auto-hébergez et souhaitez une **couverture maximale de fournisseurs** (375 fournisseurs, 155 entrées de catalogue gratuites/sans authentification)
+- Vous avez besoin d'un **serveur MCP intégré** (outils LLM, mémoire, compétences exposées comme outils)
+- Vous avez besoin du **protocole A2A** pour les flux de travail agent-à-agent
+- Vous souhaitez une **furtivité d'empreinte** (JA3/JA4) pour éviter la détection par les CAPTCHAs en amont
+- Vous avez besoin de **fonctionnalités d'entreprise** (garde-fous, évaluations, piste d'audit) sans facture SaaS
 
 ## Quand choisir LiteLLM
 

@@ -3,6 +3,8 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { NodeTypes } from "@xyflow/react";
+import Button from "@/shared/components/Button";
+import Icon from "@/shared/components/Icon";
 import { FlowCanvas } from "@/shared/components/flow/FlowCanvas";
 import { EngineNode } from "./nodes/EngineNode";
 import { IoNode } from "./nodes/IoNode";
@@ -45,17 +47,15 @@ function SpeedButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      variant={active ? "secondary" : "ghost"}
+      size="sm"
       onClick={onClick}
-      className="px-2 py-0.5 rounded text-[11px] border transition-colors"
-      style={{
-        borderColor: active ? "var(--color-primary)" : "var(--color-border)",
-        color: active ? "var(--color-primary)" : "var(--color-text-muted)",
-        background: active ? "var(--color-primary-subtle)" : "transparent",
-      }}
+      aria-pressed={active}
+      className={`h-6 min-h-6 px-2 text-[11px] ${active ? "text-primary" : "text-text-muted"}`}
     >
       {s}×
-    </button>
+    </Button>
   );
 }
 
@@ -73,19 +73,16 @@ function ViewButton({
   onClick: () => void;
 }) {
   return (
-    <button
+    <Button
+      variant={active ? "secondary" : "ghost"}
+      size="sm"
       onClick={onClick}
       data-testid={testId}
       aria-pressed={active}
-      className="px-2 py-0.5 rounded text-[11px] border transition-colors"
-      style={{
-        borderColor: active ? "var(--color-primary)" : "var(--color-border)",
-        color: active ? "var(--color-primary)" : "var(--color-text-muted)",
-        background: active ? "var(--color-primary-subtle)" : "transparent",
-      }}
+      className={`h-6 min-h-6 px-2 text-[11px] ${active ? "text-primary" : "text-text-muted"}`}
     >
       {label}
-    </button>
+    </Button>
   );
 }
 
@@ -95,7 +92,7 @@ function EmptyState() {
   const t = useTranslations("compressionStudio");
   return (
     <div
-      className="flex flex-col items-center justify-center h-full gap-3 text-muted"
+      className="flex flex-col items-center justify-center h-full gap-3 text-text-muted"
       data-testid="compression-cockpit-empty"
     >
       <span className="text-3xl opacity-40">⌁</span>
@@ -176,13 +173,17 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
     <div className="flex flex-col h-full gap-2" data-testid="compression-cockpit">
       {/* ── Header ─────────────────────────────────────────────────────── */}
       <div className="flex items-center gap-3 px-3 py-2 rounded-lg border border-border bg-bg/60 shrink-0">
-        <span className="text-xs font-semibold text-muted uppercase tracking-wide">{run.mode}</span>
+        <span className="text-xs font-semibold text-text-muted uppercase tracking-wide">
+          {run.mode}
+        </span>
         {run.comboId && (
-          <span className="text-xs text-muted px-1.5 py-0.5 rounded bg-border/40 font-mono">
+          <span className="text-xs text-text-muted px-1.5 py-0.5 rounded bg-border/40 font-mono">
             {run.comboId}
           </span>
         )}
-        <span className="text-xs text-muted font-mono opacity-70 truncate">{run.requestId}</span>
+        <span className="text-xs text-text-muted font-mono opacity-70 truncate">
+          {run.requestId}
+        </span>
         <CompressionAnnotation
           stats={{
             originalTokens: run.originalTokens,
@@ -210,14 +211,14 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
               onClick={() => setView("waterfall")}
             />
           </div>
-          <span className="text-[11px] text-muted">
+          <span className="text-[11px] text-text-muted">
             {fmt(run.originalTokens)} → {fmt(run.compressedTokens)} {t("tokenShort")}
           </span>
           <span className="text-xs font-bold" style={{ color: "var(--orch-status-success)" }}>
             −{run.savingsPercent.toFixed(1)}%
           </span>
           {isComplete && view === "canvas" && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded border border-border text-muted">
+            <span className="text-[10px] px-1.5 py-0.5 rounded border border-border text-text-muted">
               {t("replayDone")}
             </span>
           )}
@@ -244,27 +245,32 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
       {/* ── Replay controls (canvas only — the waterfall is static) ──────── */}
       {view === "canvas" && (
         <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-border bg-bg/60 shrink-0">
-          <button
+          <Button
+            variant="outline"
+            size="sm"
+            icon={isPlaying ? "pause" : "play_arrow"}
             onClick={isPlaying ? pause : play}
-            className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-border text-xs hover:bg-border/30 transition-colors"
+            className="h-7 min-h-7 px-2.5 text-xs"
             aria-label={isPlaying ? t("pauseReplay") : t("playReplay")}
           >
-            {isPlaying ? `⏸ ${t("pause")}` : `▷ ${t("replay")}`}
-          </button>
-          <button
+            {isPlaying ? t("pause") : t("replay")}
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={reset}
-            className="px-2 py-1 rounded border border-border text-xs text-muted hover:bg-border/30 transition-colors"
+            className="text-text-muted"
             aria-label={t("resetReplay")}
           >
-            ⟳
-          </button>
+            <Icon name="replay" size={16} />
+          </Button>
           <div className="flex items-center gap-1 ml-2">
             {SPEEDS.map((s) => (
               <SpeedButton key={s} s={s} active={speed === s} onClick={() => setSpeed(s)} />
             ))}
           </div>
           {displayRun && currentFrame && (
-            <span className="ml-auto text-[11px] text-muted">
+            <span className="ml-auto text-[11px] text-text-muted">
               {t("stepProgress", {
                 current: displayRun?.steps.length ?? 0,
                 total: run.steps.length,

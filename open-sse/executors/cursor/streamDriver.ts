@@ -2,6 +2,7 @@ import * as fs from "node:fs";
 import * as zlib from "node:zlib";
 import { promisify } from "node:util";
 
+import { projectCursorError } from "./errorProjection.ts";
 import type { McpToolDefinition } from "../../utils/cursorAgentProtobuf.ts";
 import type { CursorClientPlatform, CursorTodoHistoryItem } from "./builtinToolBridge.ts";
 
@@ -45,17 +46,8 @@ const CONNECT_END_STREAM_FLAG = 0x02;
 
 /** The error an end-of-stream payload reports, or null when it reports none. */
 export function connectEndStreamError(payload: Buffer): string | null {
-  let parsed: unknown;
-  try {
-    parsed = JSON.parse(payload.toString("utf8"));
-  } catch {
-    return null;
-  }
-  const error = (parsed as { error?: { code?: unknown; message?: unknown } } | null)?.error;
-  if (!error || typeof error !== "object") return null;
-  const code = typeof error.code === "string" ? error.code : "unknown";
-  const message = typeof error.message === "string" ? `: ${error.message.slice(0, 200)}` : "";
-  return `cursor-agent stream ended with error ${code}${message}`;
+  const error = projectCursorError(payload);
+  return error ? `cursor-agent stream ended with error ${error}` : null;
 }
 
 type DriverContext = {
@@ -122,11 +114,12 @@ export function driveCursorH2(
       debugLog("[cursor-agent] stream safety timeout fired");
       teardown();
       const lastField = ctx.lastUnknownUpdateField;
-      reject(
-        new Error(
-          `cursor-agent stream timed out${lastField != null ? ` (last unhandled interaction update field ${lastField})` : ""}`
-        )
-      );
+      const timeoutError = new Error(
+        `cursor-agent stream timed out${lastField != null ? ` (last unhandled interaction update field ${lastField})` : ""}`
+      ) as Error & { code?: string };
+      // Tagged so execute() can finish a partially-streamed turn gracefully (#14727).
+      timeoutError.code = "CURSOR_STREAM_TIMEOUT";
+      reject(timeoutError);
     }, CURSOR_STREAM_TIMEOUT_MS);
 
     // Idle watchdog: once an exec variant arrives that this build cannot

@@ -246,107 +246,92 @@ amilifu.
 
 ---
 
-## Kudhibiti tokeni
+## Kusimamia tokens
 
 ```bash
 omniroute tokens create --name "laptop" --scope write [--expires 30]
-#   ↳ huchapisha siri MARA MOJA — inakili sasa
-omniroute tokens list                 # imefichwa: id, jina, scope, prefix, hali, muda wa kuisha
+#   ↳ inaonyesha siri MARA MOJA; ikili sasa
+omniroute tokens list                 # imefichwa: id, name, scope, prefix, status, expiry
 omniroute tokens revoke <id|prefix>   # batilisha mara moja
-omniroute tokens scopes               # eleza scope tatu
+omniroute tokens scopes               # eleza wigo tatu
 ```
 
-Amri za `tokens` zinahitaji kitambulisho cha **admin**. Unaweza pia kudhibiti tokeni kwenye
-dashibodi chini ya **Mipangilio → Tokeni za Ufikiaji** (unda, batilisha, nakili mara moja).
+Amri za `tokens` zinahitaji kitambulisho cha **admin**. Unaweza pia kusimamia tokens kwenye dashboard chini ya **Settings → Access Tokens** (unda, batilisha, nakili-mara-moja).
+
+Token haiwezi kamwe kutengenezwa ikiwa na haki zaidi kuliko muumbaji wake anazo. Token ya `admin` inaweza kuundwa tu na operator: kipindi cha dashboard, CLI ya ndani kwenye server yenyewe, au `omniroute connect` pamoja na nenosiri. Credentials za mashine (access token ya `admin`, au ufunguo wa API wenye wigo wa `manage`/`admin`) zinaweza kutengeneza tokens za `write` na `read` pekee. Zikiomba `--scope admin`, zinarudisha `403`. Kuzima kuingia hakufungui utengenezaji: access token ya wigo wowote ni credential ambayo njia zinazohitaji uthibitishaji kila wakati zinaikubali, kwa hiyo wito usiojulikana unapata `401` katika wigo wowote.
 
 ---
 
-## Kusanidi CLI ya uandishi wa msimbo kutoka katalogi ya mbali
+## Kusanidi CLI ya usimbaji kutoka katalogi ya mbali
 
-`omniroute configure` husoma katalogi ya moja kwa moja ya modeli ya **seva amilifu** na kuandika
-usanidi kwenye mashine **yako**.
+`omniroute configure` inasoma katalogi hai ya modeli ya **server inayotumika** na kuandika config kwenye mashine **yako**.
 
 ```bash
 omniroute configure codex
 #   Watoa huduma: glm, kmc, ollamacloud, opencode-go, …
-#   Mtoa huduma: glm
+#   Provider: glm
 #   Model id: glm/glm-5.2
 #   ✔ Imeandika ~/.codex/glm52.config.toml
 #   Itumie:  codex --profile glm52
 
-# isiyoingiliana
+# bila mwingiliano
 omniroute configure codex --provider glm --model glm/glm-5.2 --name glm52
 
-# weka modeli inayotumiwa mara kwa mara juu ya kichaguzi shirikishi
+# weka modeli inayotumika mara kwa mara juu kabisa ya kichaguzi cha mwingiliano
 omniroute configure codex --provider glm --model glm/glm-5.2 --favorite --yes
 ```
 
-Kichaguzi huhifadhi vitambulisho vya modeli pekee (kamwe si URLs au vitambulisho vya ufikiaji) kwenye faili ya ndani ya
-`model-preferences.json`, vikiwa na upeo kulingana na muktadha na lengo la CLI. Vipendwa
-huonyeshwa kabla ya chaguo za hivi karibuni; tumia `--unfavorite` ili kuondoa modeli iliyochaguliwa
-kwenye orodha hiyo ya muktadha/lengo.
+Kichaguzi kinahifadhi model IDs pekee (kamwe si URLs wala credentials) kwenye faili ya ndani `model-preferences.json`, kikigawanywa kwa muktadha na lengo la CLI. Vipendwa vinaonyeshwa kabla ya chaguo za hivi karibuni; tumia `--unfavorite` kuondoa modeli iliyochaguliwa kutoka orodha ya muktadha/lengo hilo.
 
-Wasifu ulioandikwa hurejelea ufunguo wa inference kupitia env var
-(`OMNIROUTE_API_KEY`) — siri haiandikwi kamwe kwenye diski. Kwa usanidi wa msingi wa Codex wa mara moja
-(kizuizi cha `[model_providers.omniroute]`), angalia
-[CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
+Profile iliyoandikwa inarejelea ufunguo wa inference kupitia env var (`OMNIROUTE_API_KEY`). Siri haiandikwi kwenye diski kamwe. Kwa usanidi wa msingi wa Codex wa mara moja (kizuizi cha `[model_providers.omniroute]`), tazama [CODEX-CLI-CONFIGURATION.md](./CODEX-CLI-CONFIGURATION.md).
 
-### Kuanzisha CLI dhidi ya seva ya mbali (hakuna usanidi unaoandikwa)
+### Kuzindua CLI dhidi ya mbali (bila kuandika config)
 
-`omniroute run <target>` pia huheshimu muktadha amilifu: URL ya msingi ya mbali
-na kitambulisho cha ufikiaji cha muktadha huingizwa kwenye mchakato ulioanzishwa pekee.
+`omniroute run <target>` pia inaheshimu muktadha unaotumika: base URL ya mbali na credential ya muktadha huingizwa kwenye mchakato uliozinduliwa pekee.
 
 ```bash
 omniroute connect 192.168.0.15
-omniroute run claude   --model openai/gpt-5.4          # Claude Code → seva ya mbali
+omniroute run claude   --model openai/gpt-5.4          # Claude Code → remote
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "hello"
 omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 
-# Hakiki kwa usahihi kile ambacho kingeanzishwa (MAJINA YA KEY za env pekee, kamwe si thamani):
+# Onyesha kwa usahihi kile kitakachozinduliwa (majina ya env KEY pekee, si thamani):
 omniroute run codex --dry-run --json
 ```
 
-Malengo: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini`
-(chanzo kimoja: `bin/cli/cli-manifest.mjs`). Qwen na Gemini huendeshwa kwa kutumia
-home ya muda iliyotengwa ambayo huondolewa wakati wa kuondoka, kwa hivyo uzinduzi haugusi kamwe —
-wala kuvuja hadi kwenye — usanidi wako binafsi wa zana.
+Malengo: `claude`, `codex`, `aider`, `goose`, `opencode`, `qwen`, `gemini` (chanzo kimoja: `bin/cli/cli-manifest.mjs`). Qwen na Gemini zinaendeshwa kwenye nyumba ya muda iliyotengwa inayofutwa wakati wa kutoka, kwa hiyo uzinduzi hauguswi kamwe, wala haumwagi kwenye, usanidi wako binafsi wa zana.
 
 ### Amri za usanidi kwa kila CLI
 
-Kila CLI inayotumika ina amri ya usanidi inayotambua seva ya mbali (zote huheshimu
-muktadha amilifu, au `--remote <url> --api-key <key>`):
+Kila CLI inayoungwa mkono ina amri ya usanidi inayofahamu mbali (zote zinaheshimu muktadha unaotumika, au `--remote <url> --api-key <key>`):
 
 | CLI         | Amri                       | Inachoandika                                                                                                                                                                                        |
 | ----------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codex       | `omniroute setup-codex`    | wasifu wa `~/.codex/<name>.config.toml` (kwa kila modeli)                                                                                                                                           |
+| Codex       | `omniroute setup-codex`    | profaili za `~/.codex/<name>.config.toml` (kwa kila modeli)                                                                                                                                         |
 | Claude Code | `omniroute setup-claude`   | `~/.claude/profiles/<name>/settings.json` (kwa kila modeli)                                                                                                                                         |
-| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json` — mtoa huduma `omniroute` anayeoana na OpenAI akiwa na kila modeli ya katalogi (endesha `opencode -m omniroute/<model>`)                                         |
-| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (hali ya CLI) + huchapisha mipangilio ya kiendelezi cha VS Code ya kubandika (inayoana na OpenAI, Base URL **bila** `/v1`)                               |
-| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + mipangilio ya VS Code ya `kilocode.*` — inayoana na OpenAI, Base URL **ikiwa na** `/v1`                                                                     |
-| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI) — `provider: openai`, `apiBase` **ikiwa na** `/v1`, ufunguo kupitia `${{ secrets.OMNIROUTE_API_KEY }}`                                     |
-| Cursor      | `omniroute setup-cursor`   | huchapisha hatua za ndani ya programu (Settings → Models → Override OpenAI Base URL **ikiwa na** `/v1` + ufunguo + modeli). Usanidi wa Cursor ni SQLite isiyo wazi — paneli ya gumzo pekee          |
-| Roo Code    | `omniroute setup-roo`      | huandika JSON ya kuleta mipangilio ya Roo (`~/.omniroute/roo-settings.json`) + huweka `roo-cline.autoImportSettingsPath` + huchapisha hatua za UI (inayoana na OpenAI, Base URL **ikiwa na** `/v1`) |
-| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json` — mtoa huduma wa `openai-compat`, `base_url` **ikiwa na** `/v1`, ufunguo kupitia `$OMNIROUTE_API_KEY`                                                                  |
-| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **bila** `/v1` + `GOOSE_MODEL`) + maelekezo ya env                                                                           |
-| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **bila** `/v1` + `model: openai/<id>`) + maelekezo ya env (`aider --message --yes`)                                                                          |
-| Qwen Code   | `omniroute setup-qwen`     | ingizo la V4 `modelProviders.openai` katika `~/.qwen/settings.json` + `OMNIROUTE_API_KEY` katika `~/.qwen/.env`                                                                                     |
+| OpenCode    | `omniroute setup-opencode` | `~/.config/opencode/opencode.json`: mtoa huduma `omniroute` anayeoana na openai pamoja na kila modeli ya katalogi (endesha `opencode -m omniroute/<model>`)                                         |
+| Cline       | `omniroute setup-cline`    | `~/.cline/data/{globalState,secrets}.json` (hali ya CLI) + inachapisha mipangilio ya kiendelezi cha VS Code ya kubandika (inayooana na OpenAI, Base URL **bila** `/v1`)                             |
+| Kilo Code   | `omniroute setup-kilo`     | `~/.local/share/kilo/auth.json` (CLI) + mipangilio ya VS Code `kilocode.*`: inayooana na OpenAI, Base URL **pamoja na** `/v1`                                                                       |
+| Continue    | `omniroute setup-continue` | `~/.continue/config.yaml` (VS Code/JetBrains + `cn` CLI): `provider: openai`, `apiBase` **pamoja na** `/v1`, ufunguo kupitia `${{ secrets.OMNIROUTE_API_KEY }}`                                     |
+| Cursor      | `omniroute setup-cursor`   | inachapisha hatua za ndani ya programu (Settings → Models → Override OpenAI Base URL **pamoja na** `/v1` + ufunguo + modeli). Config ya Cursor ni SQLite isiyoeleweka, kwa hiyo ni chat panel pekee |
+| Roo Code    | `omniroute setup-roo`      | inaandika JSON ya kuingiza ya Roo (`~/.omniroute/roo-settings.json`) + inaweka `roo-cline.autoImportSettingsPath` + inachapisha hatua za UI (inayooana na OpenAI, Base URL **pamoja na** `/v1`)     |
+| Crush       | `omniroute setup-crush`    | `~/.config/crush/crush.json`: mtoa huduma `openai-compat`, `base_url` **pamoja na** `/v1`, ufunguo kupitia `$OMNIROUTE_API_KEY`                                                                     |
+| Zed         | `omniroute setup-zed`      | `~/.config/zed/settings.json`: `language_models.openai_compatible.omniroute`, `api_url` **pamoja na** `/v1`, Zed inasoma ufunguo kutoka `$OMNIROUTE_API_KEY` (haujawahi kuandikwa)                  |
+| Goose       | `omniroute setup-goose`    | `~/.config/goose/config.yaml` (`GOOSE_PROVIDER=openai` + `OPENAI_HOST` **bila** `/v1` + `GOOSE_MODEL`) + env recipe                                                                                 |
+| Aider       | `omniroute setup-aider`    | `~/.aider.conf.yml` (`openai-api-base` **bila** `/v1` + `model: openai/<id>`) + env recipe (`aider --message --yes`)                                                                                |
+| Qwen Code   | `omniroute setup-qwen`     | `~/.qwen/settings.json` ingizo la V4 `modelProviders.openai` + `OMNIROUTE_API_KEY` katika `~/.qwen/.env`                                                                                            |
 
 ```bash
-# OpenCode (mtoa huduma anayeoana na OpenAI, modeli zote za katalogi, VPS ya mbali)
+# OpenCode (mtoa huduma anayeoana na openai, modeli zote za katalogi, VPS ya mbali)
 omniroute setup-opencode --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 omniroute setup-opencode --only glm,kimi        # weka modeli zinazolingana pekee
-opencode -m omniroute/glm/glm-5.2 "..."          # kwanza hamisha OMNIROUTE_API_KEY
+opencode -m omniroute/glm/glm-5.2 "..."          # hamisha OMNIROUTE_API_KEY kwanza
 ```
 
-> OpenCode pia ina muunganisho wa **plugin** wenye uwezo zaidi: `omniroute setup opencode`
-> (sasa unatambua mazingira ya mbali kupitia `--remote`) husakinisha `@omniroute/opencode-plugin`.
-> `setup-opencode` ni chaguo jepesi linalooana na OpenAI. Ufunguo wa API
-> hurejelewa kupitia `{env:OMNIROUTE_API_KEY}` — hauandikwi kamwe kwenye diski.
+> OpenCode pia ina integration tajiri zaidi ya **plugin**: `omniroute setup opencode` (sasa inazingatia mbali kupitia `--remote`) husakinisha `@omniroute/opencode-plugin`.
+> `setup-opencode` ni mbadala mwepesi unaooana na OpenAI. Ufunguo wa API unarejelewa kupitia `{env:OMNIROUTE_API_KEY}`, haujawahi kuandikwa kwenye diski.
 >
-> Kwenye OpenCode v2, tumia `@omniroute/opencode-plugin-v2` badala yake: katalogi ileile,
-> mkataba tofauti wa kipakiaji. Husoma ufunguo kutoka kwenye hifadhi ya vitambulisho
-> ya OpenCode yenyewe wakati muunganisho umeunganishwa, kwa hivyo lango la mbali halihitaji ufunguo wowote katika
-> `opencode.json`.
+> Kwenye OpenCode v2, tumia `@omniroute/opencode-plugin-v2` badala yake: orodha ile ile ya modeli, mkataba tofauti wa loader. Inasoma ufunguo kutoka kwenye hifadhi ya credentials ya OpenCode yenyewe pale integration inapounganishwa, kwa hiyo gateway ya mbali haihitaji ufunguo wowote ndani ya `opencode.json`.
 
 ---
 

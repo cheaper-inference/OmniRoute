@@ -1,3 +1,4 @@
+import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
 import type { RecordedTriageRun } from "@/lib/issueAgent/recordedTriage";
 
 export interface RecordedTriageExecutionInput {
@@ -90,6 +91,8 @@ export async function executeRecordedTriageChatCompletion(
         signal: controller.signal,
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${resolveSelfLoopBearer()}`,
+          "x-omniroute-no-memory": "true",
           ...(routingPolicy ? { "X-OmniRoute-Mode": routingPolicy } : {}),
         },
         body: JSON.stringify({

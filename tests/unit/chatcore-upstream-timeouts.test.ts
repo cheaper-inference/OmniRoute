@@ -27,6 +27,13 @@ test("error factories set name and message", () => {
   assert.equal(ab.name, "AbortError");
 });
 
+test("only Antigravity outer header watchdog receives the private pre-response marker", () => {
+  const ag = createUpstreamStartTimeoutError(12000, "antigravity", "gemini-3.8-flash-tiered");
+  assert.equal((ag as Error & { code?: string }).code, "ANTIGRAVITY_PRE_RESPONSE_TIMEOUT");
+  const codex = createUpstreamStartTimeoutError(12000, "codex", "gpt-test");
+  assert.equal((codex as Error & { code?: string }).code, undefined);
+});
+
 test("computeBillableTokens sums input+output+reasoning (no cache double-count)", () => {
   const total = computeBillableTokens({
     prompt_tokens: 10,
@@ -57,6 +64,25 @@ test("normalizeExecutorResult rejects malformed executor output", () => {
   assert.throws(
     () => normalizeExecutorResult({ response: "not-a-response" }),
     /must contain a Response/
+  );
+});
+
+// #3229: the executor's bounded upstream classification is the only diagnostic chatCore can
+// persist for Antigravity failures. If the normalizer drops it, the handler silently falls back
+// to logging nothing at all — the bug this seam exists to catch.
+test("normalizeExecutorResult carries upstreamDiagnostic through, and bare Responses have none", () => {
+  const diagnostic = { httpStatus: 400, validationCategory: "tool_schema" };
+  const rich = normalizeExecutorResult({
+    response: new Response("x", { status: 400 }),
+    url: "u",
+    upstreamDiagnostic: diagnostic,
+  });
+  assert.deepEqual(rich.upstreamDiagnostic, diagnostic);
+
+  assert.equal(normalizeExecutorResult(new Response("x")).upstreamDiagnostic, undefined);
+  assert.equal(
+    normalizeExecutorResult({ response: new Response("x"), url: "u" }).upstreamDiagnostic,
+    undefined
   );
 });
 test("executeWithUpstreamStartTimeout leaves no abort listener on the client signal after a resolving execute", async () => {

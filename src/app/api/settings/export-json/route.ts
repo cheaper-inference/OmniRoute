@@ -5,7 +5,10 @@ import { getCachedProviderNodes } from "@/lib/db/readCache";
 import { getCombos } from "@/lib/db/combos";
 import { getApiKeys } from "@/lib/db/apiKeys";
 import { listAllApiKeyBillingHistory, listTeams } from "@/lib/db/teams";
-import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import {
+  CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
+  requireOperatorCredential,
+} from "@/lib/api/operatorCredential";
 import {
   getAllDailyTeamUsageSummary,
   getAllUsageHistory,
@@ -49,8 +52,12 @@ export function filterPaidComboSteps<T extends { models?: unknown }>(combos: T[]
  * Exports a legacy OmniRoute-compatible JSON backup.
  */
 export async function GET(request: Request) {
-  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
-  if (authError) return authError;
+  // Hands out every stored credential: operator only (dashboard session, local CLI, or login
+  // disabled). API keys of any scope and `oma_` access tokens get 403.
+  const operatorVerdict = await requireOperatorCredential(request, {
+    forbiddenMessage: CREDENTIAL_EXPORT_FORBIDDEN_MESSAGE,
+  });
+  if (operatorVerdict.ok === false) return operatorVerdict.response;
 
   try {
     const url = new URL(request.url);

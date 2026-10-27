@@ -1,6 +1,7 @@
 import { getPendingById } from "@/lib/usage/usageHistory";
 import { getChatLogMaxDepth, getChatLogArrayTailItems } from "@/lib/logEnv";
 import { sanitizeErrorMessage } from "./error.ts";
+import { redactUrlQuerySecrets } from "./errorSanitization.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -44,6 +45,7 @@ type RequestLogger = {
     headers: HeaderInput,
     body: unknown
   ) => void;
+  logProviderDiagnostic: (diagnostic: JsonRecord | null) => void;
   appendProviderChunk: (chunk: string) => void;
   appendOpenAIChunk: (chunk: string) => void;
   logConvertedResponse: (body: unknown) => void;
@@ -93,6 +95,8 @@ function maskSensitiveHeaders(headers: HeaderInput): Record<string, unknown> {
     "apikey",
     "cookie",
     "token",
+    "secret",
+    "password",
     "runtimekey",
     "storage-state",
     "storagestate",
@@ -126,6 +130,17 @@ function maskSensitiveHeaders(headers: HeaderInput): Record<string, unknown> {
   return masked;
 }
 
+/**
+ * Provider URLs can carry the credential in the query string (Vertex Express / Google
+ * media `?key=`, search providers' `api_key=`). Captured URLs are persisted to call-log
+ * artifacts, so mask those params before storing; anything else passes through as-is.
+ */
+function maskUrlSecrets(url: unknown): unknown {
+  if (typeof url === "string") return redactUrlQuerySecrets(url);
+  if (url instanceof URL) return redactUrlQuerySecrets(url.toString());
+  return url;
+}
+
 function createEmptyStreamChunks() {
   return {
     provider: [] as string[],
@@ -146,6 +161,22 @@ function isTruncatedArrayMarker(value: unknown): boolean {
   );
 }
 
+function slicePrefixWithoutSplitSurrogate(value: string, end: number): string {
+  const code = end > 0 ? value.charCodeAt(end - 1) : 0;
+  // A cut that keeps a high surrogate (U+D800–U+DBFF) without its pair becomes
+  // U+FFFD in the Buffer round-trip below. Shorten by one code unit instead.
+  const cut = code >= 0xd800 && code <= 0xdbff ? end - 1 : end;
+  return value.slice(0, cut);
+}
+
+function sliceSuffixWithoutSplitSurrogate(value: string, length: number): string {
+  const start = Math.max(0, value.length - Math.max(0, length));
+  const prev = start > 0 ? value.charCodeAt(start - 1) : 0;
+  const curr = start < value.length ? value.charCodeAt(start) : 0;
+  const split = prev >= 0xd800 && prev <= 0xdbff && curr >= 0xdc00 && curr <= 0xdfff;
+  return value.slice(split ? start + 1 : start);
+}
+
 function truncateLogString(value: string, maxLength = MAX_LOG_STRING_LENGTH): string {
   if (value.length <= maxLength) return value;
   // The marker has to fit INSIDE the budget (#7847): keeping maxLength characters and then
@@ -153,7 +184,12 @@ function truncateLogString(value: string, maxLength = MAX_LOG_STRING_LENGTH): st
   // bounded string truncated it a second time and the function was not idempotent.
   const marker = `\n[...truncated ${value.length - maxLength} chars...]\n`;
   const keep = Math.max(0, maxLength - marker.length);
-  return `${value.slice(0, Math.floor(keep / 2))}${marker}${value.slice(-Math.ceil(keep / 2))}`;
+  const head = slicePrefixWithoutSplitSurrogate(value, Math.floor(keep / 2));
+  const tail = sliceSuffixWithoutSplitSurrogate(value, Math.ceil(keep / 2));
+  // Flatten the bounded string before it is retained anywhere (call-log details,
+  // previews): String#slice() returns a V8 SlicedString whose parent is the whole
+  // source, so a 64 KB preview would keep a multi-megabyte request body alive.
+  return Buffer.from(`${head}${marker}${tail}`, "utf8").toString("utf8");
 }
 
 /**
@@ -393,6 +429,7 @@ export async function createRequestLogger(
       logOpenAIRequest() {},
       logTargetRequest() {},
       logProviderResponse() {},
+      logProviderDiagnostic() {},
       appendProviderChunk: chunkMethods.appendProviderChunk,
       appendOpenAIChunk: chunkMethods.appendOpenAIChunk,
       logConvertedResponse() {},
@@ -449,7 +486,7 @@ export async function createRequestLogger(
     logTargetRequest(url, headers, body) {
       payloads.providerRequest = {
         timestamp: new Date().toISOString(),
-        url,
+        url: maskUrlSecrets(url),
         headers: maskSensitiveHeaders(headers),
         body: cloneBoundedForLog(body),
       };
@@ -462,6 +499,24 @@ export async function createRequestLogger(
         statusText,
         headers: maskSensitiveHeaders(headers),
         body: cloneBoundedForLog(body),
+      };
+    },
+
+    /**
+     * Record a terminal upstream failure by its already-allowlisted classification INSTEAD of
+     * its response (#3229).
+     *
+     * Deliberately narrower than {@link logProviderResponse}: no status text, no response
+     * headers, no upstream body. Callers pass a small fixed-shape record they have already
+     * projected to a closed set of scalars/enums — this method does not sanitize arbitrary
+     * provider data and must never be handed a raw upstream payload. Used for providers whose
+     * error bodies may echo request content, where the only safe thing to retain is the
+     * classification itself.
+     */
+    logProviderDiagnostic(diagnostic) {
+      payloads.providerResponse = {
+        timestamp: new Date().toISOString(),
+        diagnostic: (diagnostic ? cloneBoundedForLog(diagnostic) : null) as JsonRecord | null,
       };
     },
 

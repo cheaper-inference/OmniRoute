@@ -140,51 +140,59 @@ omniroute providers validate
 
 ### 1) Unganisha Watoa Huduma na Uunde Ufunguo wa API
 
-1. Fungua Dashboard → `Providers` na uunganishe angalau mtoa huduma mmoja (OAuth au ufunguo wa API).
-2. Fungua Dashboard → `Endpoints` na uunde ufunguo wa API.
-3. (Si lazima) Fungua Dashboard → `Combos` na uweke mnyororo wako wa mbadala.
+1. Fungua Dashibodi → `Providers` na uunganishe angalau mtoa huduma mmoja (OAuth au ufunguo wa API).
+2. Fungua Dashibodi → `Endpoints` na uunde ufunguo wa API.
+3. (Si lazima) Fungua Dashibodi → `Combos` na usanidi mnyororo wako wa mbadala.
 
-### 2) Elekeza Zana Yako ya Uandishi wa Msimbo
-
-```txt
-URL ya Msingi: http://localhost:20128/v1
-Ufunguo wa API:  [nakili kutoka ukurasa wa Endpoint]
-Modeli:          if/qwen3.8-max-preview (au kiambishi awali chochote cha mtoa huduma/modeli)
-```
-
-Ikiwa kihariri chako hakiwezi kutuma `Authorization: Bearer ...`, tumia anwani ya msingi ya uoanifu yenye tokeni badala yake:
+### 2) Elekeza Zana Yako ya Kuandika Misimbo
 
 ```txt
-URL ya Msingi: http://localhost:20128/api/v1/vscode/YOUR_KEY/
-URL ya Modeli: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-URL ya Gumzo: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-URL ya Lebo za Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Base URL: http://localhost:20128/v1
+API Key:  [copy from Endpoint page]
+Model:    if/qwen3.8-max-preview (or any provider/model prefix)
 ```
 
-Hufanya kazi na Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, na SDK zinazooana na OpenAI.
+Ikiwa kihariri chako hakiwezi kutuma `Authorization: Bearer ...`, tumia anwani msingi ya uoanifu iliyo na tokeni badala yake:
+
+```txt
+Base URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+Models URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+Chat URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+Ollama Tags URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+```
+
+Hufanya kazi na Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode, na SDK zinazoendana na OpenAI.
 
 #### Sanidi kiotomatiki kwa `setup-*`
 
-Badala ya kubandika URL ya msingi na ufunguo mwenyewe, ruhusu OmniRoute kuandika usanidi wa kila zana kutoka kwenye katalogi hai ya modeli. Amri moja kwa kila zana:
+Badala ya kubandika anwani msingi na ufunguo mwenyewe, ruhusu OmniRoute iandike usanidi
+wa kila zana kutoka kwenye katalogi hai ya modeli. Amri moja kwa kila zana:
 
 ```bash
-omniroute setup-codex        # wasifu wa ~/.codex/<name>.config.toml
+omniroute setup-codex        # profaili za ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
-omniroute setup-opencode     # ~/.config/opencode/opencode.json (inaoana na OpenAI)
-omniroute setup-cline        # Mipangilio ya Cline CLI + kiendelezi cha VS Code
+omniroute setup-opencode     # ~/.config/opencode/opencode.json (inaoendana na OpenAI)
+omniroute setup-cline        # mipangilio ya Cline CLI + kiendelezi cha VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
 omniroute setup-cursor       # huchapisha hatua za ndani ya programu ya Cursor
-omniroute setup-roo          # Uingizaji wa Roo Code + kielekezi cha autoImport
+omniroute setup-roo          # uingizaji wa Roo Code + kielekezi cha autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 ```
 
-Kila moja hukubali `--remote <url> --api-key <key>` ili kusanidi zana ya ndani dhidi ya OmniRoute ya **mbali**, pamoja na `--dry-run` ili kuona hakikisho. Ili kuanzisha CLI ikiwa mazingira yanayofaa yameingizwa bila kuandika usanidi wowote, tumia kizinduzi cha jumla `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini); vizinduzi vya zamani vya kila zana `omniroute launch` (Claude Code) na `omniroute launch-codex` (Codex) bado vinapatikana.
+Kila moja hukubali `--remote <url> --api-key <key>` ili kusanidi zana ya ndani dhidi ya
+OmniRoute ya **mbali**, pamoja na `--dry-run` ili kuhakiki. Ili kuzindua CLI huku
+mazingira sahihi yakiwa yameingizwa na bila kuandika usanidi wowote, tumia kizinduzi cha jumla
+`omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
+vizinduzi vya awali vya kila zana `omniroute launch` (Claude Code) na
+`omniroute launch-codex` (Codex) bado vinapatikana.
 
-Kwa jedwali kamili (kile ambacho kila amri huandika, kila alama, ya ndani dhidi ya ya mbali, na kanuni za `/v1` za URL ya msingi), tazama **[Miunganisho ya CLI](./CLI-INTEGRATIONS.md)**.
+Kwa jedwali kamili (kile ambacho kila amri huandika, kila alama, ya ndani dhidi ya ya mbali, kanuni za anwani msingi
+za `/v1`), tazama **[Miunganisho ya CLI](./CLI-INTEGRATIONS.md)**.
 
 Kwa usanidi wa kina wa kila zana (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot, na nyinginezo), tazama **[Mwongozo wa Zana za CLI](../reference/CLI-TOOLS.md)** uliotengwa.
 
@@ -317,16 +325,16 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Kiolezo cha Void Linux (xbps-src)
 
-Kwa watumiaji wa Void Linux, unaweza kuunda kifurushi asilia ukitumia `xbps-src`. Hifadhi sehemu hii kama `srcpkgs/omniroute/template`:
+Kwa watumiaji wa Void Linux, unaweza kuunda kifurushi asilia kwa kutumia `xbps-src`. Hifadhi sehemu hii kama `srcpkgs/omniroute/template`:
 
 ```bash
-# Faili ya kiolezo cha 'omniroute'
+# Faili ya kiolezo ya 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Lango la AI la jumla lenye uelekezaji mahiri kwa watoa huduma wengi wa LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"

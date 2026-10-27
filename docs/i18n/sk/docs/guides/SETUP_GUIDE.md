@@ -140,44 +140,45 @@ omniroute providers validate
 
 ### 1) Pripojenie poskytovateľov a vytvorenie kľúča API
 
-1. Otvorte Dashboard → `Providers` a pripojte aspoň jedného poskytovateľa (OAuth alebo kľúč API).
-2. Otvorte Dashboard → `Endpoints` a vytvorte kľúč API.
-3. (Voliteľné) Otvorte Dashboard → `Combos` a nastavte svoj záložný reťazec.
+1. Otvorte Ovládací panel → `Providers` a pripojte aspoň jedného poskytovateľa (pomocou OAuth alebo kľúča API).
+2. Otvorte Ovládací panel → `Endpoints` a vytvorte kľúč API.
+3. (Voliteľné) Otvorte Ovládací panel → `Combos` a nastavte reťazec záložných možností.
 
-### 2) Nasmerovanie vášho nástroja na programovanie
+### 2) Nastavenie nástroja na programovanie
 
 ```txt
 Základná URL: http://localhost:20128/v1
 Kľúč API:     [skopírujte zo stránky Endpoint]
-Model:        if/qwen3.8-max-preview (alebo ľubovoľný prefix poskytovateľa/modelu)
+Model:        if/qwen3.8-max-preview (alebo ľubovoľná predpona poskytovateľ/model)
 ```
 
-Ak váš editor nedokáže odosielať `Authorization: Bearer ...`, použite namiesto toho tokenizovanú kompatibilnú základnú adresu:
+Ak váš editor nedokáže odoslať `Authorization: Bearer ...`, použite namiesto toho tokenizovanú základnú URL na zaistenie kompatibility:
 
 ```txt
-Základná URL:         http://localhost:20128/api/v1/vscode/YOUR_KEY/
-URL modelov:          http://localhost:20128/api/v1/vscode/YOUR_KEY/models
-URL chatu:            http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
-URL značiek Ollama:   http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
+Základná URL: http://localhost:20128/api/v1/vscode/YOUR_KEY/
+URL modelov: http://localhost:20128/api/v1/vscode/YOUR_KEY/models
+URL chatu: http://localhost:20128/api/v1/vscode/YOUR_KEY/chat/completions
+URL značiek Ollama: http://localhost:20128/api/v1/vscode/YOUR_KEY/api/tags
 ```
 
-Funguje s Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode a súpravami SDK kompatibilnými s OpenAI.
+Funguje s nástrojmi Claude Code, Codex CLI, Cursor, Cline, OpenClaw, OpenCode a súpravami SDK kompatibilnými s OpenAI.
 
 #### Automatická konfigurácia pomocou `setup-*`
 
-Namiesto ručného vkladania základnej adresy URL a kľúča nechajte OmniRoute zapísať vlastnú
+Namiesto ručného vkladania základnej URL a kľúča nechajte OmniRoute zapísať vlastnú
 konfiguráciu každého nástroja podľa aktuálneho katalógu modelov. Jeden príkaz pre každý nástroj:
 
 ```bash
 omniroute setup-codex        # profily ~/.codex/<name>.config.toml
 omniroute setup-claude       # ~/.claude/profiles/<name>/settings.json
 omniroute setup-opencode     # ~/.config/opencode/opencode.json (kompatibilné s OpenAI)
-omniroute setup-cline        # nastavenia Cline CLI + rozšírenia VS Code
+omniroute setup-cline        # nastavenia Cline CLI a rozšírenia VS Code
 omniroute setup-kilo         # Kilo Code
 omniroute setup-continue     # ~/.continue/config.yaml (Continue / cn)
-omniroute setup-cursor       # vypíše kroky v aplikácii Cursor
-omniroute setup-roo          # import Roo Code + ukazovateľ autoImport
+omniroute setup-cursor       # vypíše postup v aplikácii Cursor
+omniroute setup-roo          # import do Roo Code a ukazovateľ autoImport
 omniroute setup-crush        # ~/.config/crush/crush.json
+omniroute setup-zed          # ~/.config/zed/settings.json (openai_compatible)
 omniroute setup-goose        # ~/.config/goose/config.yaml
 omniroute setup-aider        # ~/.aider.conf.yml
 omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
@@ -185,15 +186,15 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 Každý z nich podporuje `--remote <url> --api-key <key>` na konfiguráciu lokálneho nástroja voči
 **vzdialenému** OmniRoute a tiež `--dry-run` na zobrazenie náhľadu. Ak chcete spustiť CLI so správne
-vloženými premennými prostredia bez zápisu akejkoľvek konfigurácie, použite všeobecný spúšťač
+vloženými premennými prostredia bez akéhokoľvek zápisu konfigurácie, použite všeobecný spúšťač
 `omniroute run <target>` (claude, codex, aider, goose, opencode, qwen, gemini);
-staršie spúšťače pre jednotlivé nástroje `omniroute launch` (Claude Code) a
-`omniroute launch-codex` (Codex) zostávajú dostupné.
+pôvodné spúšťače pre jednotlivé nástroje `omniroute launch` (Claude Code) a
+`omniroute launch-codex` (Codex) zostávajú k dispozícii.
 
-Úplnú tabuľku (čo každý príkaz zapisuje, všetky príznaky, lokálne oproti vzdialenému režimu, konvencie
-`/v1` pre základnú adresu URL) nájdete v dokumente **[Integrácie CLI](./CLI-INTEGRATIONS.md)**.
+Úplnú tabuľku (čo jednotlivé príkazy zapisujú, všetky príznaky, lokálne a vzdialené použitie, konvencie
+`/v1` pre základnú URL) nájdete v dokumente **[Integrácie CLI](./CLI-INTEGRATIONS.md)**.
 
-Podrobnú konfiguráciu jednotlivých nástrojov (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot a ďalšie) nájdete v samostatnej **[Príručke nástrojov CLI](../reference/CLI-TOOLS.md)**.
+Podrobnú konfiguráciu jednotlivých nástrojov (Claude Code, Codex CLI, Cursor, Cline, OpenClaw, Kilo Code, Copilot a ďalšie) nájdete v samostatnej **[príručke nástrojov CLI](../reference/CLI-TOOLS.md)**.
 
 ---
 
@@ -324,21 +325,21 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Šablóna pre Void Linux (xbps-src)
 
-Používatelia systému Void Linux môžu zostaviť natívny balík pomocou `xbps-src`. Uložte tento blok ako `srcpkgs/omniroute/template`:
+Používatelia Void Linuxu môžu zostaviť natívny balík pomocou `xbps-src`. Uložte tento blok ako `srcpkgs/omniroute/template`:
 
 ```bash
-# Súbor šablóny pre balík „omniroute“
+# Súbor šablóny pre „omniroute“
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Universal AI gateway with smart routing for multiple LLM providers"
+short_desc="Univerzálna brána AI s inteligentným smerovaním pre viacerých poskytovateľov LLM"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Pre každé vydanie znova vygenerujte kontrolný súčet pomocou:
+# Kontrolný súčet pre každé vydanie vygenerujte znova pomocou:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

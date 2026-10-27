@@ -1,5 +1,6 @@
 import {
   EXECUTOR_CONTRACT_VIOLATION_CODE,
+  ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE,
   FETCH_TIMEOUT_MS,
   HTTP_STATUS,
 } from "../../config/constants.ts";
@@ -47,6 +48,12 @@ export function createUpstreamStartTimeoutError(
     `Upstream request did not return response headers after ${timeoutMs}ms (${provider}/${model})`
   );
   err.name = "TimeoutError";
+  // The outer response-start watchdog and Antigravity executor readiness
+  // watchdog describe the same confirmed pre-response failure. Preserve its
+  // private marker so the non-streaming leg can route away from this account.
+  if (provider === "antigravity") {
+    (err as Error & { code?: string }).code = ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE;
+  }
   return err;
 }
 
@@ -194,6 +201,7 @@ export function normalizeExecutorResult(result: unknown): {
   transport?: string;
   /** Wire model id the executor actually sent upstream (undefined if unknown). */
   model?: unknown;
+  upstreamDiagnostic?: Record<string, unknown>;
 } {
   if (isResponseLike(result)) {
     return { response: result, url: "", headers: {}, transformedBody: null };
@@ -213,6 +221,7 @@ export function normalizeExecutorResult(result: unknown): {
     transformedBody?: unknown;
     transport?: string;
     model?: unknown;
+    upstreamDiagnostic?: Record<string, unknown>;
   };
   return {
     response: normalized.response,
@@ -221,6 +230,10 @@ export function normalizeExecutorResult(result: unknown): {
     transformedBody: normalized.transformedBody ?? null,
     transport: normalized.transport,
     model: normalized.model,
+    // Internal-only failure classification (#3229). Travels with the response it
+    // describes so a later retry/recovery/fallback that replaces the response also
+    // replaces (or clears) the diagnostic instead of mislabelling the new one.
+    upstreamDiagnostic: normalized.upstreamDiagnostic,
   };
 }
 

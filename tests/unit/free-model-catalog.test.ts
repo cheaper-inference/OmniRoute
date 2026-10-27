@@ -63,11 +63,13 @@ test("recurring-uncapped models are surfaced but NEVER summed into the steady he
     if (m.freeType === "recurring-uncapped")
       assert.equal(m.monthlyTokens, 0, `${m.provider}/${m.modelId} uncapped but counted`);
   }
-  // uncappedProviders is the de-duped provider list and is non-empty (siliconflow, glm-cn, kilo…)
+  // uncappedProviders is the de-duped provider list and is non-empty (glm-cn, kilo, tencent…)
   assert.ok(Array.isArray(t.uncappedProviders) && t.uncappedProviders.length >= 3);
-  for (const p of ["siliconflow", "glm-cn", "kilo-gateway"]) {
+  for (const p of ["glm-cn", "kilo-gateway", "tencent"]) {
     assert.ok(t.uncappedProviders.includes(p), `expected ${p} among uncapped providers`);
   }
+  // #17028: SiliconFlow's flagship models are priced per token — no recurring free grant.
+  assert.ok(!t.uncappedProviders.includes("siliconflow"), "siliconflow must not be uncapped");
 });
 
 test("deposit-unlock boost is reported separately, not folded into steady", () => {
@@ -87,7 +89,9 @@ test("2026-06-17 refresh: discontinued providers dropped, new free providers add
   }
   assert.equal(providers.has("qwen-web"), false, "retired qwen-web must stay out of routing");
   // discovered in the refresh — must be present
-  for (const fresh of ["kilo-gateway", "opencode-zen", "glm-cn"]) {
+  // opencode-zen's free rows were dropped with the OpenCode Free removal
+  // (docs/reference/REMOVED_PROVIDERS.md): the free models only work from the OpenCode client.
+  for (const fresh of ["kilo-gateway", "glm-cn"]) {
     assert.ok(providers.has(fresh), `${fresh} should be added`);
   }
 });

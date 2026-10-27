@@ -84,12 +84,10 @@ async function rowCost(row: TeamUsageCostRow): Promise<{ costUsd: number; priced
   return { costUsd, priced };
 }
 
-export async function getTeamUsageReport(
-  teamId: string,
-  options: { startIso?: string | null; endIso?: string | null } = {}
-): Promise<TeamUsageReport> {
-  const db = getDbInstance();
-  const bind = {
+type ReportOptions = { startIso?: string | null; endIso?: string | null };
+
+function buildReportBind(teamId: string, options: ReportOptions) {
+  return {
     teamId,
     startIso: options.startIso || "0000-01-01T00:00:00.000Z",
     endIso: options.endIso || "9999-12-31T23:59:59.999Z",
@@ -110,7 +108,12 @@ export async function getTeamUsageReport(
         : date;
     })(),
   };
+}
 
+function loadReportRows(
+  db: ReturnType<typeof getDbInstance>,
+  bind: ReturnType<typeof buildReportBind>
+): TeamUsageCostRow[] {
   const rawRows = db
     .prepare(
       `SELECT
@@ -160,7 +163,10 @@ export async function getTeamUsageReport(
     )
     .all(bind) as TeamUsageCostRow[];
 
-  const rows = [...rawRows, ...summaryRows];
+  return [...rawRows, ...summaryRows];
+}
+
+async function aggregateReportRows(rows: TeamUsageCostRow[]) {
   const byKey = new Map<
     string,
     {
@@ -204,6 +210,33 @@ export async function getTeamUsageReport(
     current.hasUnpricedUsage ||= !priced;
     byKey.set(row.apiKeyId, current);
   }
+
+  return {
+    requests,
+    successfulRequests,
+    inputTokens,
+    outputTokens,
+    estimatedListCostUsd,
+    hasUnpricedUsage,
+    byKey,
+  };
+}
+
+export async function getTeamUsageReport(
+  teamId: string,
+  options: ReportOptions = {}
+): Promise<TeamUsageReport> {
+  const bind = buildReportBind(teamId, options);
+  const rows = loadReportRows(getDbInstance(), bind);
+  const {
+    requests,
+    successfulRequests,
+    inputTokens,
+    outputTokens,
+    estimatedListCostUsd,
+    hasUnpricedUsage,
+    byKey,
+  } = await aggregateReportRows(rows);
 
   return {
     teamId,

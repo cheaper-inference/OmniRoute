@@ -513,10 +513,10 @@ Nếu lệnh trả về bất kỳ nội dung nào khác `ok`, hãy **ngừng s�
 
 ### Tình huống 1: Mất tệp WAL
 
-Tệp `-wal` bị thiếu nhưng `-shm` và cơ sở dữ liệu chính vẫn còn nguyên vẹn:
+Tệp `-wal` bị thiếu nhưng `-shm` và DB chính vẫn còn nguyên vẹn:
 
 ```bash
-# Tự động khôi phục ở lần mở tiếp theo
+# Tự động khôi phục trong lần mở tiếp theo
 omniroute
 ```
 
@@ -528,23 +528,26 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Tình huống 2: Tệp cơ sở dữ liệu chính bị hỏng
+### Tình huống 2: Tệp DB chính bị hỏng
 
 Khôi phục từ bản sao lưu:
 
 ```bash
-omniroute sync pull --merge   # hoặc: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
+
+`omniroute sync pull [outPath]` chỉ tải xuống một kho lưu trữ `.tar.gz` đầy đủ từ máy chủ đang chạy
+(`GET /api/db-backups/exportAll`, yêu cầu thông tin xác thực của người vận hành); lệnh này không khôi phục bất kỳ dữ liệu nào.
 
 ### Tình huống 3: Mất khóa mã hóa
 
-**Không thể khôi phục** nếu không có khóa. Không thể đọc được các trường đã mã hóa. Hãy thêm lại tất cả nhà cung cấp theo cách thủ công bằng thông tin xác thực mới.
+**Không thể khôi phục** nếu không có khóa. Các trường đã mã hóa sẽ không thể đọc được. Hãy thêm lại tất cả nhà cung cấp theo cách thủ công bằng thông tin xác thực mới.
 
-> **Biện pháp giảm thiểu**: Luôn sao lưu khóa mã hóa riêng biệt, tốt nhất là trong trình quản lý mật khẩu hoặc KMS.
+> **Biện pháp giảm thiểu**: Luôn sao lưu riêng khóa mã hóa, lý tưởng nhất là trong trình quản lý mật khẩu hoặc KMS.
 
-### Tình huống 4: Ổ đĩa đầy
+### Tình huống 4: Đĩa đầy
 
-SQLite sẽ trả về lỗi `SQLITE_FULL`. Hãy giải phóng dung lượng ổ đĩa, sau đó:
+SQLite sẽ trả về lỗi `SQLITE_FULL`. Hãy giải phóng dung lượng đĩa, sau đó:
 
 ```bash
 # Tạo checkpoint cho WAL để giải phóng dung lượng

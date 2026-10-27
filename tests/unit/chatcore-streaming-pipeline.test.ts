@@ -43,6 +43,7 @@ function makeDeps(over: Record<string, unknown> = {}) {
     pipeWithDisconnect: (..._a: unknown[]) => fakeStream("pii-base", log),
     isFeatureFlagEnabled: () => false,
     createPiiSseTransform: () => ({ __tag: "pii-flag" }),
+    createCredentialSseTransform: () => ({ __tag: "credential-flag" }),
     createProgressTransform: () => ({ __tag: "progress" }),
     createSseHeartbeatTransform: () => ({ __tag: "heartbeat" }),
     shapeForClientFormat: (f: unknown) => f,
@@ -137,6 +138,72 @@ test("full chain order: pii → progress → heartbeat → echo", () => {
   });
   assembleStreamingPipeline(baseArgs({ echoModel: "alias-x" }), deps);
   assert.deepEqual(log, ["pii-flag", "progress", "heartbeat", "echo"]);
+});
+
+test("credential gate off by default → chain unchanged", () => {
+  const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
+  assembleStreamingPipeline(baseArgs(), deps);
+  assert.deepEqual(log, ["pii-flag", "heartbeat"]);
+});
+
+test("credential gate on → credential transform runs after pii, before heartbeat", () => {
+  const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
+  assembleStreamingPipeline(
+    baseArgs({ credentialRedactionEnabled: true, credentialDisabledGuardrails: [] }),
+    deps
+  );
+  assert.deepEqual(log, ["pii-flag", "credential-flag", "heartbeat"]);
+});
+
+test("credential opt-out → credential transform skipped", () => {
+  const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
+  assembleStreamingPipeline(
+    baseArgs({
+      credentialRedactionEnabled: true,
+      credentialDisabledGuardrails: ["credential-masker"],
+    }),
+    deps
+  );
+  assert.deepEqual(log, ["pii-flag", "heartbeat"]);
+});
+
+test("credential gate off → credential transform skipped", () => {
+  const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
+  assembleStreamingPipeline(
+    baseArgs({ credentialRedactionEnabled: false, credentialDisabledGuardrails: [] }),
+    deps
+  );
+  assert.deepEqual(log, ["pii-flag", "heartbeat"]);
+});
+
+test("explicit pii transform plus credential gate → explicit pii then credential", () => {
+  const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
+  const explicit = () => ({ __tag: "pii-explicit" });
+  assembleStreamingPipeline(
+    baseArgs({
+      createPiiTransform: explicit,
+      credentialRedactionEnabled: true,
+      credentialDisabledGuardrails: [],
+    }),
+    deps
+  );
+  assert.deepEqual(log, ["pii-explicit", "credential-flag", "heartbeat"]);
+});
+
+test("full chain order with credential: pii → credential → progress → heartbeat → echo", () => {
+  const { deps, log } = makeDeps({
+    isFeatureFlagEnabled: () => true,
+    wantsProgress: () => true,
+  });
+  assembleStreamingPipeline(
+    baseArgs({
+      echoModel: "alias-x",
+      credentialRedactionEnabled: true,
+      credentialDisabledGuardrails: [],
+    }),
+    deps
+  );
+  assert.deepEqual(log, ["pii-flag", "credential-flag", "progress", "heartbeat", "echo"]);
 });
 
 test("pipeline assembly creates performance mark and measure entries", () => {

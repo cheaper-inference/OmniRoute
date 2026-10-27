@@ -4,46 +4,46 @@
 
 ---
 
-Populyar açıq mənbəli süni intellekt marşrutlayıcıları ilə obyektiv funksiya müqayisəsi.
+Populyar açıq mənbəli AI routerləri ilə obyektiv xüsusiyyət müqayisəsi.
 
-> **Metodologiya**: İctimai repozitoriyalar 2026-Q2 dövründə audit edilib. Versiyalar göstərildiyi kimidir.
+> **Metodologiya**: Açıq repozitoriyalar 2026-Q2-də yoxlanılıb. Versiyalar göstərildiyi kimidir.
 > Düzəlişləri PR vasitəsilə göndərin — bunun dəqiq olmasını istəyirik.
 
-| Funksiya                                                 |                 OmniRoute 3.8                  |   LiteLLM 1.x    | OpenRouter (SaaS) |   Portkey   |
-| -------------------------------------------------------- | :--------------------------------------------: | :--------------: | :---------------: | :---------: |
-| **Provayderlər**                                         |                    **329**                     |       ~100       |        ~50        |     ~30     |
-| **Pulsuz/autentifikasiyasız kataloq qeydləri**           |                    **155**                     |       n/a        |      ötürmə       |     n/a     |
-| **Öz infrastrukturunda yerləşdirilə bilmə**              |                       ✅                       |        ✅        |        ❌         | ⚠ ödənişli  |
-| **OAuth kataloq qeydləri**                               |                     **23**                     |      qismən      |        ❌         |     ❌      |
-| **Avtomatik alternativə keçid kombinasiyaları**          |               **19 strategiya**                | prioritet əsaslı |  səviyyə əsaslı   |   çəkili    |
-| **Fusion (paralel panel + hakim sintezi)**               |                       ✅                       |        ❌        |        ❌         |     ❌      |
-| **Səviyyə 1/2/3 alternativə keçid (abunə→ucuz→pulsuz)**  |                    ✅ + UI                     |      manual      |        n/a        |   manual    |
-| **Token sıxılması**                                      | 12 mühərrikli stek (RTK + Caveman + LLMLingua) |      yoxdur      |      yoxdur       |   yoxdur    |
-| **Multimodal generasiya (nitq/musiqi/video)**            |                       ✅                       |        ❌        |      ötürmə       |     ❌      |
-| **Daxili MCP serveri**                                   |          ✅ 110 alət, 33 əhatə sahəsi          |        ❌        |        ❌         |     ❌      |
-| **A2A protokolu**                                        |                  ✅ 6 bacarıq                  |        ❌        |        ❌         |     ❌      |
-| **Yaddaş (FTS5 + vektor)**                               |                       ✅                       |        ❌        |        ❌         |     ❌      |
-| **Qoruyucu mexanizmlər (PII, inyeksiya, görüntü)**       |                       ✅                       |      qismən      |        ❌         | ✅ ödənişli |
-| **Bulud agenti inteqrasiyaları**                         |          Codex, Cursor, Devin, Jules           |        ❌        |        ❌         |     ❌      |
-| **Hər provayder üçün dövrə kəsicisi**                    |         ✅ 3 vəziyyətli, tənbəl bərpa          |       əsas       |        ❌         |     ✅      |
-| **TLS barmaq izi gizliliyi (JA3/JA4)**                   |                   ✅ wreq-js                   |        ❌        |        ❌         |     ❌      |
-| **Qiymətləndirmə çərçivəsi**                             |                   ✅ daxili                    |        ❌        |        ❌         | ⚠ ödənişli  |
-| **MITM proksisi (Cursor/Antigravity sorğularını tutur)** |             ✅ çarpaz platformalı              |        ❌        |        ❌         |     ❌      |
-| **Sistem treyi olan CLI (Electron olmadan)**             |                       ✅                       |        ❌        |        n/a        |     n/a     |
-| **CLI maşın-ID avtomatik autentifikasiyası**             |                       ✅                       |        ❌        |        n/a        |     n/a     |
-| **İdarəetmə paneli**                                     |                   Next.js 16                   |       əsas       |    proprietar     | proprietar  |
-| **i18n**                                                 |                  **42 lokal**                  |        ❌        |        ❌         |      ⚠      |
-| **İctimai agent bacarıqları (SKILL.md)**                 |                     ✅ 45                      |        ❌        |        ❌         |     ❌      |
-| **Tunel dəstəyi (Cloudflared, Tailscale, Ngrok)**        |                       ✅                       |        ❌        |        n/a        |     n/a     |
-| **Lisenziya**                                            |                      MIT                       |       MIT        |    proprietar     | proprietar  |
+| Xüsusiyyət                                          |                 OmniRoute 3.8                  |   LiteLLM 1.x    | OpenRouter (SaaS) |   Portkey   |
+| --------------------------------------------------- | :--------------------------------------------: | :--------------: | :---------------: | :---------: |
+| **Provayderlər**                                    |                    **329**                     |       ~100       |        ~50        |     ~30     |
+| **Pulsuz/auth-suz kataloq qeydləri**                |                    **155**                     |       n/a        |    passthrough    |     n/a     |
+| **Öz serverində işlədilə bilən**                    |                       ✅                       |        ✅        |        ❌         | ⚠ ödənişli  |
+| **OAuth kataloq qeydləri**                          |                     **23**                     |      qismən      |        ❌         |     ❌      |
+| **Avtomatik fallback kombinasiyaları**              |               **20 strategiya**                | prioritet əsaslı |  səviyyə əsaslı   |   çəkili    |
+| **Fusion (paralel panel + hakim sintezi)**          |                       ✅                       |        ❌        |        ❌         |     ❌      |
+| **Tier 1/2/3 fallback (abunəlik→ucuz→pulsuz)**      |                    ✅ + UI                     |      əl ilə      |        n/a        |   əl ilə    |
+| **Token sıxılması**                                 | 12 mühərrikli stek (RTK + Caveman + LLMLingua) |      yoxdur      |      yoxdur       |   yoxdur    |
+| **Multimodal generasiya (nitq/musiqi/video)**       |                       ✅                       |        ❌        |    passthrough    |     ❌      |
+| **Daxili MCP serveri**                              |             ✅ 110 alət, 33 əhatə              |        ❌        |        ❌         |     ❌      |
+| **A2A protokolu**                                   |                  ✅ 6 bacarıq                  |        ❌        |        ❌         |     ❌      |
+| **Yaddaş (FTS5 + vektor)**                          |                       ✅                       |        ❌        |        ❌         |     ❌      |
+| **Guardrails (PII, inyeksiya, görmə)**              |                       ✅                       |      qismən      |        ❌         | ✅ ödənişli |
+| **Bulud agent inteqrasiyaları**                     |          Codex, Cursor, Devin, Jules           |        ❌        |        ❌         |     ❌      |
+| **Hər provayder üzrə circuit breaker**              |          ✅ 3 vəziyyətli, lazy bərpa           |       əsas       |        ❌         |     ✅      |
+| **TLS barmaq izi gizliliyi (JA3/JA4)**              |                   ✅ wreq-js                   |        ❌        |        ❌         |     ❌      |
+| **Eval çərçivəsi**                                  |                   ✅ daxili                    |        ❌        |        ❌         | ⚠ ödənişli  |
+| **MITM proksi (Cursor/Antigravity-ni ələ keçirir)** |               ✅ kross-platforma               |        ❌        |        ❌         |     ❌      |
+| **Sistem treyi ilə CLI (Electron-suz)**             |                       ✅                       |        ❌        |        n/a        |     n/a     |
+| **CLI maşın-ID avtomatik autentifikasiyası**        |                       ✅                       |        ❌        |        n/a        |     n/a     |
+| **İdarə paneli**                                    |                   Next.js 16                   |       əsas       |    proprietar     | proprietar  |
+| **i18n**                                            |                  **67 lokal**                  |        ❌        |        ❌         |      ⚠      |
+| **Açıq agent bacarıqları (SKILL.md)**               |                     ✅ 45                      |        ❌        |        ❌         |     ❌      |
+| **Tunel dəstəyi (Cloudflared, Tailscale, Ngrok)**   |                       ✅                       |        ❌        |        n/a        |     n/a     |
+| **Lisenziya**                                       |                      MIT                       |       MIT        |    proprietar     | proprietar  |
 
-## OmniRoute-u nə zaman seçməli
+## OmniRoute-u nə vaxt seçməli
 
-- Öz infrastrukturunuzda yerləşdirirsiniz və **maksimum provayder əhatəsi** istəyirsiniz (329 provayder, 155 pulsuz/autentifikasiyasız kataloq qeydi)
-- **Daxili MCP serverinə** ehtiyacınız var (LLM alətləri, yaddaş və alət kimi təqdim edilən bacarıqlar)
-- Agentlərarası iş axınları üçün **A2A protokoluna** ehtiyacınız var
-- Yuxarı axındakı CAPTCHA-lar tərəfindən aşkarlanmanın qarşısını almaq üçün **barmaq izi gizliliyi** (JA3/JA4) istəyirsiniz
-- SaaS ödənişi olmadan **korporativ funksiyalara** (qoruyucu mexanizmlər, qiymətləndirmələr, audit izi) ehtiyacınız var
+- Öz serverinizdə yerləşdirirsinizsə və **maksimum provayder əhatəsi** istəyirsinizsə (375 provayder, 155 pulsuz/autentifikasiyasız kataloq yazısı)
+- **Daxili MCP serverinə** ehtiyacınız varsa (LLM alətləri, yaddaş, alətlər kimi təqdim olunan bacarıqlar)
+- Agentlər arası iş axınları üçün **A2A protokoluna** ehtiyacınız varsa
+- Yuxarı axın CAPTCHA-ları tərəfindən aşkarlanmamaq üçün **barmaq izi gizliliyi** (JA3/JA4) istəyirsinizsə
+- SaaS hesabı ödəmədən **korporativ funksiyalara** (qoruma mexanizmləri, qiymətləndirmələr, audit jurnalı) ehtiyacınız varsa
 
 ## LiteLLM-i nə zaman seçməli
 

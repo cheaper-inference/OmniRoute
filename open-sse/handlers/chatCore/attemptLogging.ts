@@ -17,6 +17,7 @@ import { maybeLogToolCallSpecViolation } from "./toolCallSpecViolationAudit.ts";
 import type { RequestCompletedPayload, RequestFailedPayload } from "@/lib/events/types";
 import { saveCallLog } from "@/lib/usageDb";
 import type { VideoBridgeLogRedactionEntry } from "@/lib/guardrails/videoBridge";
+import { redactVideoTranscriptFieldsForLog } from "@/lib/guardrails/videoBridgeSnapshotRedaction";
 import { FORMATS } from "../../translator/formats.ts";
 import { takeEarlyKeepaliveBytes } from "../../utils/earlyKeepaliveByteBuffer.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
@@ -24,6 +25,7 @@ import { isEstimatedUsage } from "../../utils/usageTracking.ts";
 import { cloneBoundedChatLogPayload, truncateForLog } from "./logTruncation.ts";
 import { attachLogMeta } from "./cacheUsageMeta.ts";
 import { readAddedWait } from "../../utils/proxyFetch.ts";
+import { clientSessionIdFromRawRequest } from "./clientSessionId.ts";
 
 const OMITTED_VIDEO_TRANSCRIPT_REQUEST = { _omniroute_omitted: "video-transcript" };
 
@@ -68,12 +70,12 @@ function mutableVideoLogMessage(
  *
  * `body` itself is NEVER mutated: by the time an attempt is logged, this same
  * `body` reference has already been sent upstream (the model path), so
- * mutating it here would be both unsafe and pointless. Only the containers on
- * the path to each redacted part are cloned (container array -> message ->
- * content array -> part); every sibling message/part keeps referencing the
- * original objects. Returns `body` unchanged (same reference, no allocation)
- * when there is nothing to redact, so the common non-video path is
- * byte-identical to before this function existed.
+ * mutating it here would be both unsafe and pointless. Shadow replacement
+ * clones only the containers on the path to each redacted part (container
+ * array -> message -> content array -> part). With failClosedOnMiss enabled,
+ * the final structural redactor also clones the result to protect raw video
+ * siblings. The common non-video path still returns `body` unchanged (same
+ * reference, no allocation) when there is nothing to redact.
  *
  * #12150 fix round 1 (adversarial review, CRITICAL): matches by CONTENT
  * (`entry.fullText === part.text`), never by `entry.messageIndex`/
@@ -209,7 +211,10 @@ export function applyVideoBridgeLogRedaction(
     if (failClosedOnMiss && !matchedEntry) return OMITTED_VIDEO_TRANSCRIPT_REQUEST;
   }
 
-  return redacted && cloneState.rootClone ? cloneState.rootClone : body;
+  const result = redacted && cloneState.rootClone ? cloneState.rootClone : body;
+  // A matched description shadow does not cover raw video siblings left by a
+  // failed description or maxVideos. Redact their fields on the retained copy.
+  return failClosedOnMiss ? redactVideoTranscriptFieldsForLog(result) : result;
 }
 
 /**
@@ -278,7 +283,7 @@ export type PersistAttemptLogsContext = {
   detailedLoggingEnabled: boolean;
   reqLogger: { getPipelinePayloads?: () => Record<string, unknown> | undefined } | null | undefined;
   pendingRequestId: unknown;
-  clientRawRequest: { endpoint?: string } | null | undefined;
+  clientRawRequest: { endpoint?: string; headers?: unknown; body?: unknown } | null | undefined;
   requestedModel: unknown;
   credentials: { connectionId?: string } | null | undefined;
   startTime: number;
@@ -462,7 +467,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
       : redactedRequest;
   const retainedResponse = videoContentRemoved
     ? { _omniroute_omitted: "video-transcript" }
-    : responseBody;
+    : (responseBody ?? (status >= 400 ? providerResponse : undefined));
   const retainedError = videoContentRemoved && error ? "[omitted: video transcript]" : error;
 
   const providerWarnings = extractProviderWarnings(providerResponse, clientResponse, responseBody);
@@ -620,6 +625,7 @@ export function persistAttemptLogs(args: PersistAttemptLogsArgs, ctx: PersistAtt
     correlationId: correlationId || traceId,
     modelPinned: modelPinned || false,
     sessionTag: sessionTag || null,
+    clientSessionId: clientSessionIdFromRawRequest(clientRawRequest),
     responseId: extractResponsesId(sourceFormat, clientResponse),
     videoContentRemoved: videoContentRemoved || false,
     addedWaitMs: addedWait?.ms ?? null,

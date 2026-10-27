@@ -6,6 +6,7 @@ import { useParams, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Card, Button, CardSkeleton } from "@/shared/components";
+import ProviderTosNotice from "@/shared/components/ProviderTosNotice";
 import {
   NOAUTH_PROVIDERS,
   getProviderAlias,
@@ -39,6 +40,8 @@ import {
 import { findDefaultReferral } from "@/lib/radar/referrals";
 import { type ConnectionRowConnection } from "./components/ConnectionRow";
 import { useProviderConnections } from "./hooks/useProviderConnections";
+import { useDevinAgenticAuthStatus } from "../hooks/useDevinAgenticAuthStatus";
+import { useProviderQuota } from "./hooks/useProviderQuota";
 import { useProviderSettings } from "./hooks/useProviderSettings";
 import { useProviderModels } from "./hooks/useProviderModels";
 import { useCommandCodeAuth } from "./hooks/useCommandCodeAuth";
@@ -57,6 +60,7 @@ import CustomModelsSection from "./components/CustomModelsSection";
 import ConnectionsListPanel from "./components/ConnectionsListPanel";
 import CoolingConnectionsPanel from "./components/CoolingConnectionsPanel";
 import ConnectionsHeaderToolbar from "./components/ConnectionsHeaderToolbar";
+import { ConnectionPinTip } from "./components/ConnectionIdChip";
 import VolcengineConnectModal from "./components/VolcengineConnectModal";
 import ProviderAccountRoutingCard from "../../settings/components/ProviderAccountRoutingCard";
 import ZedImportCard from "./components/ZedImportCard";
@@ -150,6 +154,7 @@ export default function ProviderDetailPageClient() {
     handleToggleRateLimit,
     handleToggleQuotaVisibility,
     handleToggleClaudeExtraUsage,
+    handleToggleCodexPaidCredits,
     handleToggleCodexLimit,
     handleToggleCliproxyapiMode,
     handleSetUpstreamProxyMode,
@@ -205,6 +210,19 @@ export default function ProviderDetailPageClient() {
   const t = useTranslations("providers");
   const emailsVisible = useEmailPrivacyStore((s) => s.emailsVisible);
   const notify = useNotificationStore();
+  // Per-account usage/limits strip — cached snapshot from the server's
+  // providerLimitsCache, with per-connection on-demand live refresh.
+  const {
+    quotaByConnectionId,
+    refreshingIds: quotaRefreshingIds,
+    refreshConnection,
+  } = useProviderQuota();
+  const handleRefreshQuota = useCallback(
+    (connectionId: string) => {
+      void refreshConnection(connectionId);
+    },
+    [refreshConnection]
+  );
 
   // Phase 1i: external link flow — placed after notify/fetchConnections are defined
   const {
@@ -283,6 +301,9 @@ export default function ProviderDetailPageClient() {
   const supportsDualAuth = supportsDualAuthProvider(providerId);
   const isOAuth = providerSupportsOAuth && !providerSupportsPat;
   const providerAlias = getProviderAlias(providerId);
+  const devinAgenticAuthenticated = useDevinAgenticAuthStatus(providerId === "devin-cli-agentic");
+  const displayConnectionCount =
+    connections.length + (devinAgenticAuthenticated && connections.length === 0 ? 1 : 0);
   const isFreeNoAuth =
     NOAUTH_PROVIDERS[providerId]?.noAuth === true ||
     getProviderById(providerId)?.managedAccount === true;
@@ -352,7 +373,10 @@ export default function ProviderDetailPageClient() {
     connections,
     setConnections,
     notify,
-    t
+    t,
+    async () => {
+      await Promise.all([fetchConnections(), fetchProviderModelMeta()]);
+    }
   );
 
   // ── model-related effects (loading gate) ────────────────────────────────
@@ -553,13 +577,15 @@ export default function ProviderDetailPageClient() {
       <ProviderPageHeader
         providerId={providerId}
         providerInfo={{ ...providerInfo, website: providerHeaderWebsite }}
-        connectionsCount={connections.length}
+        connectionsCount={displayConnectionCount}
         isOpenAICompatible={isOpenAICompatible}
         isAnthropicProtocolCompatible={isAnthropicProtocolCompatible}
         onOpenTutorial={() => setShowTutorialModal(true)}
         t={t}
         isReferralLink={isReferralLink}
       />
+
+      <ProviderTosNotice providerId={providerId} />
 
       {providerId === "zed" && (
         <ZedImportCard fetchConnections={fetchConnections} notify={notify} />
@@ -635,6 +661,10 @@ export default function ProviderDetailPageClient() {
             loadCodexSettings={loadCodexSettings}
             onSetProxyTarget={setProxyTarget}
             handleDistributeProxies={handleDistributeProxies}
+            onAccountProxiesReset={async () => {
+              await fetchConnections();
+              await refreshProxyState();
+            }}
             handleBatchTestAll={handleBatchTestAll}
             gateConnectionFlow={gateConnectionFlow}
             openApiKeyAddFlow={openApiKeyAddFlow}
@@ -675,6 +705,7 @@ export default function ProviderDetailPageClient() {
             />
           ) : (
             <>
+              <ConnectionPinTip />
               <CoolingConnectionsPanel
                 connections={connections}
                 onClearCooldown={handleClearCooldown}
@@ -714,6 +745,7 @@ export default function ProviderDetailPageClient() {
                 handleToggleRateLimit={handleToggleRateLimit}
                 handleToggleQuotaVisibility={handleToggleQuotaVisibility}
                 handleToggleClaudeExtraUsage={handleToggleClaudeExtraUsage}
+                handleToggleCodexPaidCredits={handleToggleCodexPaidCredits}
                 canAutoSync={!usesCuratedModelsOnly && compatibleSupportsModelImport}
                 handleToggleConnectionAutoSync={handleToggleConnectionAutoSync}
                 handleToggleCliproxyapiMode={handleToggleCliproxyapiMode}
@@ -733,6 +765,9 @@ export default function ProviderDetailPageClient() {
                 handleToggleSelectAll={handleToggleSelectAll}
                 handleDistributeProxies={handleDistributeProxies}
                 cpaProviderEnabled={cpaProviderEnabled}
+                quotaByConnectionId={quotaByConnectionId}
+                quotaRefreshingIds={quotaRefreshingIds}
+                handleRefreshQuota={handleRefreshQuota}
                 onOpenEditModal={(conn) => {
                   setSelectedConnection(conn);
                   setShowEditModal(true);

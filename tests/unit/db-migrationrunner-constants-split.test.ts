@@ -63,7 +63,7 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 
   it("OPTIONAL_FTS5_MIGRATION_VERSIONS includes dependent FTS migrations", () => {
     assert.ok(OPTIONAL_FTS5_MIGRATION_VERSIONS instanceof Set);
-    assert.deepEqual([...OPTIONAL_FTS5_MIGRATION_VERSIONS].sort(), ["022", "023", "178"]);
+    assert.deepEqual([...OPTIONAL_FTS5_MIGRATION_VERSIONS].sort(), ["022", "023", "178", "203"]);
   });
 });
 
@@ -176,13 +176,13 @@ describe("migrationRunner/constants — large-table integrity", () => {
     });
   });
 
-  it("name-locks every published Team draft slot to canonical migration 197", () => {
+  it("name-locks every published Team draft slot to canonical migration 215", () => {
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.filter((entry) => entry.toName === "team_cost_centers"),
       ["153", "154", "155", "161", "163", "164"].map((fromVersion) => ({
         fromVersion,
         fromName: "team_cost_centers",
-        toVersion: "197",
+        toVersion: "215",
         toName: "team_cost_centers",
       }))
     );

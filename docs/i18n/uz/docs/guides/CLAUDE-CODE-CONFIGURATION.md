@@ -48,16 +48,11 @@ faol kontekstdan aniqlaydi (shuning uchun `omniroute connect <vps>`, undan so‘
 
 ---
 
-## Aniqlash aliaslari — Claude bo‘lmagan modellarni `/model` tanlagichida ko‘rsating
+## Kashfiyot taxalluslari — Claude-ga tegishli bo'lmagan modellarni `/model` tanlovchisida ko'rsatish
 
-Claude Code’ning shlyuz orqali model aniqlash mexanizmi faqat `claude` yoki
-`anthropic` bilan boshlanadigan id’larni ko‘rsatadi. Shu sababli
-`CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` bo‘lganda ichki `/model` tanlagichi
-odatda OmniRoute’ning **faqat** Claude/Anthropic modellarini ko‘rsatadi —
-`kimi/kimi-k2.6` yoki `glm/glm-5.2`, marshrutlash to‘g‘ri ishlasa ham, hech qachon ko‘rinmaydi.
+Claude Code ning shluz model kashfiyoti faqat `claude` yoki `anthropic` bilan boshlanadigan id-larni ro'yxatga oladi, shuning uchun `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` yoqilganda asl `/model` tanlovchisi odatda **faqat** OmniRoute ning Claude/Anthropic modellarini ko'rsatadi — `kimi/kimi-k2.6` yoki `glm/glm-5.2` hech qachon paydo bo'lmaydi, garchi u bemalol marshrutlansa ham.
 
-OmniRoute istalgan yoqilgan modelni (va kombinatsiyani) `claude/…` id ostida
-aks ettirishi mumkin, shunda u ushbu filtrdan o‘tib, tanlagichda ko‘rinadi:
+OmniRoute har qanday yoqilgan modelni (va komboni) `claude/…` id ostida aks ettirishi mumkin, shunda u bu filtrdan o'tib, tanlovchida ko'rinadi:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
@@ -65,39 +60,27 @@ glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
 <combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Claude Code’da ulardan birini tanlaganingizda, OmniRoute marshrutlashdan oldin
-`claude/` o‘ramini olib tashlab, haqiqiy id’ni tiklaydi — haqiqiy
-`claude/<real-claude-model>` id’ga (haqiqiy Claude OAuth provayderi) esa hech qachon tegilmaydi.
+Claude Code da ulardan birini tanlaganingizda, OmniRoute marshrutlashdan oldin `claude/` o'rovchini olib tashlab, haqiqiy id-ga qaytaradi — chinakam `claude/<real-claude-model>` id (asl Claude OAuth provayderi) esa har doim o'z holicha qoldiriladi.
 
-**Bu standart holatda o‘chirilgan** va uch darajali boshqaruv orqali nazorat qilinadi
-(eng aniq sozlama ustunlik qiladi), shuning uchun oddiy OmniRoute Claude Code’dan
-foydalanmaydigan mijozlar uchun o‘z katalogini ikki baravar ko‘paytirmaydi:
+Odatiy holda faqat asosiy id-lar aks ettiriladi. Tanlov asosida yoqiladigan `CATALOG_MIRROR_REFINEMENTS_ENABLED` funksiya bayrog'i yoqilganda, katalogda allaqachon ro'yxatga olingan fikrlash-harakati variantlari (masalan, `codex/gpt-6-sol-high`) boshqa har qanday id kabi aks ettiriladi, shunda Claude Code aniq harakat darajasini tanlashi mumkin, so'rov yo'li shakllantira olmaydigan o'rnatilgan `auto/*` id-lar esa aks ettirilmaydi. Harakat variantlari umuman ro'yxatga olinishi yoki olinmasligi baribir `OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` tomonidan boshqariladi — aks ettirish asosiy katalogda mavjud bo'lmagan variantni hech qachon qo'shmaydi.
 
-| Daraja    | Qayerda                                                                                                        |
-| --------- | -------------------------------------------------------------------------------------------------------------- |
-| Model     | Provayder tafsilotlari sahifasi → har bir model uchun "Expose in Claude Code" almashtirgichi                   |
-| Provayder | Provayder tafsilotlari sahifasi → provayder darajasidagi almashtirgich (uning barcha modellarini qamrab oladi) |
-| Global    | Settings → Feature Flags → `EXPOSE_CC_DISCOVERY_ALIASES` (standart holatda o‘chirilgan)                        |
+**Bu odatiy holda o'chiq** va uch darajali nazorat orqali boshqariladi (eng aniq bo'lgani ustun keladi), shuning uchun oddiy OmniRoute Claude Code dan foydalanmaydigan mijozlar uchun o'z katalogini hech qachon ikki barobarga ko'paytirmaydi:
 
-`EXPOSE_CC_DISCOVERY_ALIASES` muhit o‘zgaruvchisi global darajani majburan yoqadi
-va boshqaruv panelidagi sozlamadan ustun turadi (Feature Flags ekrani bu holatda
-"active via environment variable" qaydini ko‘rsatadi). Har bir provayder va
-har bir model uchun almashtirgichlar bu sozlamani yanada aniqlashtiradi — masalan,
-global daraja o‘chiq, ammo Kimi provayderi yoqilgan bo‘lsa, faqat Kimi modellari ko‘rsatiladi.
+| Daraja    | Qayerda                                                                                                     |
+| --------- | ----------------------------------------------------------------------------------------------------------- |
+| Model     | Provayder tafsilotlari sahifasi → har bir model uchun «Claude Code da ko'rsatish» o'tkazgichi               |
+| Provayder | Provayder tafsilotlari sahifasi → provayder darajasidagi o'tkazgich (uning barcha modellarini qamrab oladi) |
+| Global    | Sozlamalar → Funksiya bayroqlari → `EXPOSE_CC_DISCOVERY_ALIASES` (odatiy holda o'chiq)                      |
 
-> ⚠️ **Claude bo‘lmagan modellarda kontekst oynasi nomuvofiqligi.** Claude Code o‘zi
-> tanimaydigan har qanday id uchun 200K kontekst oynasini qabul qiladi (u haqiqiy
-> oynani `/v1/models`dan o‘qiy olmaydi). Kattaroq oynaga ega model uchun (masalan,
-> Kimi K2’ning 256K oynasi) avtomatik ixchamlash muddatidan oldin ishga tushmasligi
-> uchun `CLAUDE_CODE_AUTO_COMPACT_WINDOW` qiymatini modelning haqiqiy oynasidan
-> kichikroq qilib belgilang. Yuqorida yaratilgan profillar buni har bir model uchun
-> allaqachon sozlaydi.
+`EXPOSE_CC_DISCOVERY_ALIASES` muhit o'zgaruvchisi global darajani majburiy yoqadi va boshqaruv panelidagi bekor qilishdan ustun turadi (bunday bo'lganda Funksiya bayroqlari ekranida «muhit o'zgaruvchisi orqali faol» yozuvi ko'rsatiladi). Har bir provayder va har bir model o'tkazgichlari shu zahoti aniqlashtirish kiritadi — masalan, global o'chiq + Kimi provayderi yoqilganda faqat Kimi modellari ko'rinadi.
+
+> ⚠️ **Claude-ga tegishli bo'lmagan modellarda oyna nomuvofiqligi.** Claude Code tanimaydigan har qanday id uchun 200K kontekst oynasini nazarda tutadi (u `/v1/models` dan haqiqiy oynani o'qiy olmaydi). Kattaroq oynaga ega model uchun (masalan, Kimi K2 ning 256K oynasi), avtomatik siqish muddatidan oldin ishga tushib qolmasligi uchun `CLAUDE_CODE_AUTO_COMPACT_WINDOW` qiymatini modelning haqiqiy oynasidan pastroq qilib o'rnating. Yuqorida yaratilgan profillar buni har bir model uchun allaqachon bajaradi.
 
 ---
 
-## Boshqaruv panelidagi boshlangʻich sozlash bloki
+## Boshqaruv panelidagi ishga tushirish bloki
 
-Claude vositasi kartasi (**Boshqaruv paneli → CLI Code**) ushbu instansiya uchun aniq `settings.json` fragmentini aniqlash taxallusi haqidagi maʼlumot tugmasi yonida, nusxalash tugmasi bilan birga ko‘rsatadi:
+Claude vosita kartasi (**Boshqaruv paneli → CLI Code**) ushbu instansiya uchun aniq `settings.json` fragmentini aniqlash taxallusi haqidagi maʼlumot tugmasi yonida nusxalash tugmasi bilan ko‘rsatadi:
 
 ```jsonc
 {
@@ -109,27 +92,29 @@ Claude vositasi kartasi (**Boshqaruv paneli → CLI Code**) ushbu instansiya uch
 }
 ```
 
-Asosiy URL — karta aniqlagan URL (jumladan, siz kiritgan maxsus almashtirish) bo‘lib, u allaqachon
-normallashtirilgan — `/v1` suffiksisiz va oxirgi qiya chiziqsiz. **Kalit hech qachon ko‘rsatilmaydi**: blok
-to‘ldiruvchi qiymat bilan taqdim etiladi, shu sababli skrinshot yoki joylangan parcha kalitni oshkor qila olmaydi.
-Uning o‘rniga kalitingizni joylang.
+Asosiy URL — kartada aniqlangan (shu jumladan, siz kiritgan maxsus almashtirish bilan) va allaqachon normallashtirilgan manzil: `/v1` suffiksisiz va oxirgi qiya chiziqsiz. **Kalit hech qachon ko‘rsatilmaydi**: blok o‘rinbosar bilan taqdim etiladi, shuning uchun skrinshot yoki joylangan parcha kalitni oshkor qila olmaydi. O‘rinbosar ustiga kalitingizni kiriting.
 
-Haqiqiy kontekst oynasi 200K bo‘lmagan har qanday model uchun xuddi shu `env` bloki ostiga
-`CLAUDE_CODE_AUTO_COMPACT_WINDOW` qo‘shing — Claude Code o‘zi tanimaydigan har bir id uchun 200K deb
-hisoblaydi, shu sababli aks holda avtomatik ixchamlash noto‘g‘ri nuqtada ishga tushadi (oldingi bo‘limdagi
-ogohlantirishga qarang). Parcha tuzuvchisi bu qiymatni ham qabul qiladi, shuning uchun maqsadli model oynasini
-biladigan chaqiruvchi uni bevosita chiqarishi mumkin.
+Haqiqiy kontekst oynasi 200K bo‘lmagan har qanday model uchun o‘sha `env` bloki ichiga `CLAUDE_CODE_AUTO_COMPACT_WINDOW` ni qo‘shing — Claude Code o‘zi tanimaydigan har bir identifikator uchun 200K ni qabul qiladi, shu sababli aks holda avtomatik ixchamlash noto‘g‘ri nuqtada ishga tushadi (oldingi bo‘limdagi ogohlantirishga qarang). Parcha tuzuvchisi bu qiymatni ham qabul qiladi, shuning uchun maqsadli model oynasini biladigan chaqiruvchi uni bevosita chiqarishi mumkin.
 
-Manba: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (sof
-tuzuvchi, birlik testlaridan o‘tkazilgan), `ClaudeGatewayOnboardingBlock` tomonidan ko‘rsatiladi.
+Manba: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (sof tuzuvchi, modul testlari bilan tekshirilgan), `ClaudeGatewayOnboardingBlock` tomonidan ko‘rsatiladi.
+
+### Bitta hisobni biriktirish (ixtiyoriy)
+
+Har bir Claude Code so‘rovini muayyan provayder hisobidan yuborish uchun o‘sha `env` blokidagi `ANTHROPIC_CUSTOM_HEADERS` orqali `x-omniroute-connection` sarlavhasini qo‘shing:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Identifikatorni provayder sahifasidagi ulanish qatorida joylashgan `xxxxxxxx…` belgisidan nusxalang. Biriktirish faqat bitta modelli identifikatorlarga (`provider/model`) taalluqli, kombinatsiyalarga emas. Aniq zaxira xatti-harakati uchun [Har bir so‘rov bo‘yicha hisobni biriktirish](../reference/API_REFERENCE.md#account-pinning-per-request) bo‘limiga qarang.
 
 ---
 
 ## Profillar (`CLAUDE_CONFIG_DIR`)
 
-Claude Code’da **mahalliy profil fayllari mavjud emas** (Codex’dagi `~/.codex/<name>.config.toml`dan farqli ravishda).
-Odatiy mexanizm — `CLAUDE_CONFIG_DIR`: har bir profil uchun alohida konfiguratsiya katalogi
-bo‘lib, ularning har biri o‘z `settings.json` fayli, hisob maʼlumotlari, tarixi va keshiga ega.
+Claude Code’da **mahalliy profil fayllari mavjud emas** (Codex’dagi `~/.codex/<name>.config.toml` dan farqli ravishda).
+Odatiy mexanizm — `CLAUDE_CONFIG_DIR`: har bir profil uchun alohida konfiguratsiya katalogi bo‘lib,
+ularning har biri o‘z `settings.json` fayli, hisob ma’lumotlari, tarixi va keshiga ega.
 
 `omniroute setup-claude` amaldagi `/v1/models` katalogini oladi va har bir model uchun
 `~/.claude/profiles/<name>/settings.json` manzilida bittadan profil yozadi hamda
@@ -151,19 +136,19 @@ bo‘lib, ularning har biri o‘z `settings.json` fayli, hisob maʼlumotlari, ta
 ```
 
 > **Autentifikatsiya tokeni hech qachon profilga yozilmaydi.** `omniroute launch --profile <name>`
-> orqali ishga tushiring (u faol kontekstdan `ANTHROPIC_AUTH_TOKEN`ni kiritadi) yoki
-> `ANTHROPIC_AUTH_TOKEN`ni o‘zingiz eksport qiling va
-> `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`ni ishga tushiring.
+> orqali ishga tushiring (u faol kontekstdan `ANTHROPIC_AUTH_TOKEN` ni kiritadi) yoki
+> `ANTHROPIC_AUTH_TOKEN` ni o‘zingiz eksport qilib,
+> `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude` ni ishga tushiring.
 
-**Model aniqlangandan keyingi avtomatik sinxronlash (ixtiyoriy).** Provayder modellari
-sinxronlanishi amaldagi katalogni o‘zgartirganda OmniRoute xuddi shu
-`~/.claude/profiles/<name>/settings.json` fayllarini avtomatik ravishda qayta yaratishi mumkin — shunda
-yangi yoki nomi o‘zgartirilgan modellar buyruqni qayta ishga tushirmasdan profilga ega bo‘ladi.
-U **standart holatda o‘chirilgan**: uni **CLI Code boshqaruv paneli** orqali yoqing ("CLI profile
-auto-sync" → Claude Code) yoki `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` qiymatini o‘rnating (u standart
-holatda yoqilgan `CLI_ALLOW_CONFIG_WRITES`ni ham hisobga oladi). Yoqilganda u faqat profil fayllarini yozadi;
-faol/standart Claude konfiguratsiyangizni, autentifikatsiyani yoki `~/.claude/settings.json` faylini hech qachon
-o‘zgartirmaydi.
+**Modellar aniqlangandan keyingi avtomatik sinxronlash (ixtiyoriy).** Provayder modellari
+sinxronlanishi amaldagi katalogni o‘zgartirganida OmniRoute ayni
+`~/.claude/profiles/<name>/settings.json` fayllarini avtomatik ravishda qayta yaratishi mumkin —
+shu tariqa yangi yoki nomi o‘zgartirilgan modellar buyruqni qayta ishga tushirmasdan profillarga ega
+bo‘ladi. Bu imkoniyat **standart holatda o‘chirilgan**: uni **CLI Code boshqaruv paneli** orqali
+yoqing ("CLI profile auto-sync" → Claude Code) yoki `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true`
+qiymatini o‘rnating (u standart holatda yoqilgan `CLI_ALLOW_CONFIG_WRITES` ni ham hisobga oladi).
+Yoqilganda u faqat profil fayllarini yozadi; faol/standart Claude konfiguratsiyangizni,
+autentifikatsiyani yoki `~/.claude/settings.json` faylini hech qachon o‘zgartirmaydi.
 
 ### Profillarni yaratish va ulardan foydalanish
 
@@ -177,7 +162,11 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 # Faqat ayrim provayderlar
 omniroute setup-claude --only glm,kimi
 
-# Yozmasdan oldindan ko‘rish
+# Ushbu xostda aniqlanmagan mahalliy CLI provayderlari (zcode, auggie, devin-cli-agentic,
+# codex-app-server) uchun ham profillar yozish (mahalliy nishon uchun standart holatda o‘tkazib yuboriladi)
+omniroute setup-claude --include-local
+
+# Fayllarga yozmasdan ko‘rib chiqish
 omniroute setup-claude --dry-run
 
 # Profilni ishga tushirish

@@ -94,9 +94,10 @@ test("messages/count_tokens uses real provider count when Claude-compatible upst
     assert.equal(body.input_tokens, 321);
     assert.equal(body.source, "provider");
     assert.equal(body.provider, "anthropic");
-    assert.equal(body.model, "claude-opus-4.6");
+    // The dotted catalog id goes upstream in the dashed form the Messages API accepts (#16425).
+    assert.equal(body.model, "claude-opus-4-6");
     assert.ok(captured.url.includes("/v1/messages/count_tokens"));
-    assert.equal(captured.body.model, "claude-opus-4.6");
+    assert.equal(captured.body.model, "claude-opus-4-6");
     assert.equal(captured.headers["x-api-key"], "sk-ant-count");
   } finally {
     globalThis.fetch = originalFetch;

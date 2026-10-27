@@ -19,29 +19,31 @@
 
 ---
 
-## 1. پشته فناوری
+## 1. پشتهٔ فناوری
 
-| موضوع         | انتخاب                                                                                                                  |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| چارچوب وب     | **Next.js 16** (App Router، خروجی مستقل، بدون میانافزار سراسری)                                                         |
-| زبان          | **TypeScript 6.0+** — هدف `ES2022`،‏ `module: esnext`،‏ `moduleResolution: bundler`،‏ `strict: false`                   |
-| زمان اجرا     | **Node.js** `>=22.22.2 <23` یا `>=24.0.0 <27` (اعمالشده از طریق `engines` و `SUPPORTED_NODE_RANGE`)                     |
-| پایگاه داده   | **SQLite** از طریق `better-sqlite3` (تکنمونه، ثبت وقایع WAL)                                                            |
-| دسکتاپ        | **Electron 41** + `electron-builder` 26.10 (فضای کاری جداگانه در `electron/`)                                           |
-| آزمونها       | **اجراکننده آزمون بومی Node** (واحد/یکپارچهسازی)، **Vitest** (MCP، autoCombo، کش)، **Playwright** (e2e + protocols-e2e) |
-| ساخت          | خروجی مستقل Next.js از طریق `scripts/build/build-next-isolated.mjs`                                                     |
-| لینت/قالببندی | پیکربندی مسطح ESLint + Prettier (`lint-staged` از طریق پیشکامیت Husky)                                                  |
-| سیستم ماژول   | ESM در همهجا (`"type": "module"`)                                                                                       |
-| فضاهای کاری   | فضای کاری npm — ‏`open-sse` تنها زیرفضای کاری است                                                                       |
+| موضوع               | انتخاب                                                                                                                                   |
+| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| چارچوب وب           | **Next.js 16** ‏(App Router، خروجی مستقل، بدون میانافزار سراسری)                                                                         |
+| زبان                | **TypeScript 6.0+** — هدف `ES2022`،‏ `module: esnext`،‏ `moduleResolution: bundler`،‏ `strict: false`                                    |
+| محیط اجرا           | **Node.js** `>=22.22.2 <23` یا `>=24.0.0 <27` (اعمالشده از طریق `engines` و `SUPPORTED_NODE_RANGE`)                                      |
+| پایگاه داده         | **SQLite** از طریق `better-sqlite3` (تکنمونه، با ثبت وقایع WAL)                                                                          |
+| دسکتاپ              | **Electron 41** + `electron-builder` 26.10 (فضای کاری جداگانه در `electron/`)                                                            |
+| آزمونها             | **اجراکنندهٔ بومی آزمون Node** (واحد/یکپارچهسازی)، **Vitest** ‏(MCP،‏ autoCombo، حافظهٔ نهان)، **Playwright** ‏(e2e + protocols-e2e)     |
+| ساخت                | خروجی مستقل Next.js از طریق `scripts/build/build-next-isolated.mjs`                                                                      |
+| بررسی/قالببندی      | پیکربندی مسطح ESLint + Prettier ‏(`lint-staged` از طریق pre-commit مربوط به Husky)                                                       |
+| سیستم ماژول         | ESM در همهجا (`"type": "module"`)                                                                                                        |
+| رابط کاربری داشبورد | **Tailwind CSS 4** + نسخهٔ موجود در مخزن از **Keak CI UI Kit** ‏(`packages/ui-kit`)، آیکونهای Lucide — به `DESIGN_SYSTEM.md` مراجعه کنید |
+| فضاهای کاری         | فضاهای کاری npm — `open-sse`،‏ `packages/browser-pool`،‏ `packages/ui-kit`                                                               |
 
 نامهای مستعار مسیر (`tsconfig.json`):
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
+- `@omniroute/ui-kit` → `packages/ui-kit/src`،‏ `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
-پورت پیشفرض HTTP: **`20128`** (API و داشبورد فرایند یکسانی را به اشتراک میگذارند). پوشه
-دادهها متغیر محیطی `DATA_DIR` است که مقدار پیشفرض آن `~/.omniroute/` است.
+درگاه پیشفرض HTTP: **`20128`** (API و داشبورد از فرایند یکسانی استفاده میکنند). دایرکتوری
+داده از متغیر محیطی `DATA_DIR` استفاده میکند و مقدار پیشفرض آن `~/.omniroute/` است.
 
 ---
 
@@ -49,17 +51,18 @@
 
 ```
 OmniRoute/
-├── src/                  برنامه Next.js (App Router، کتابخانهها، دامنه، سرور، اجزای مشترک)
+├── src/                  برنامه Next.js (App Router، کتابخانهها، دامنه، سرور، بخشهای مشترک)
 ├── open-sse/             فضای کاری موتور استریم (@omniroute/open-sse)
-├── electron/             پوشش دسکتاپ (فرایند اصلی Electron 41 + preload)
+├── packages/             فضاهای کاری: ui-kit (نسخه درونسپاریشده Keak CI UI Kit)، browser-pool
+├── electron/             پوسته دسکتاپ (Electron 41، فرایند اصلی + preload)
 ├── bin/                  نقاط ورود CLI (omniroute، reset-password)
-├── tests/                آزمونهای واحد، یکپارچهسازی، e2e، protocols-e2e، مترجم، امنیت و دادههای آزمون
+├── tests/                تستهای واحد، یکپارچهسازی، e2e، protocols-e2e، مترجم، امنیت و fixtureها
 ├── scripts/              اسکریپتهای کمکی ساخت، همگامسازی، بررسی، مهاجرت و زمان اجرا
 ├── docs/                 مستندات عمومی (این پوشه)
-├── public/               داراییهای ایستا، مانیفست PWA، سرویسورکر
+├── public/               داراییهای استاتیک، مانیفست PWA، service worker
 ├── config/               نمونههای پیکربندی زمان اجرا
 ├── images/               داراییهای بازاریابی/تصاویر صفحه
-├── _ideia/, _references/, _mono_repo/, _tasks/   یادداشتهای موقت / برنامهریزی داخلی (توزیع نمیشوند)
+├── _ideia/, _references/, _mono_repo/, _tasks/   یادداشتها / برنامهریزی داخلی (منتشر نمیشوند)
 ├── CLAUDE.md             قواعد مخزن برای Claude Code
 ├── AGENTS.md             مرجع عمیقتر معماری برای عاملها
 ├── package.json          v3.8.51، ریشه فضای کاری
@@ -73,35 +76,35 @@ OmniRoute/
 ```
 src/
 ├── app/                  صفحات App Router و مسیرهای API
-├── lib/                  کتابخانههای اصلی (پایگاه داده، احراز هویت، OAuth، مهارتها، حافظه و غیره)
-├── domain/               لایه دامنه خالص (سیاست، جایگزینی، هزینه، قفلشدن و غیره)
-├── server/               ماژولهای مختص سرور (مجوزدهی، cors، احراز هویت)
-├── shared/               نوعها، ثابتها، اعتبارسنجی، قراردادها و ابزارهای کمکی (ایمن برای استفاده در مرزهای مختلف)
-├── mitm/                 ابزارهای کمکی پروکسی مرد میانی برای یکپارچهسازی CLI
-├── models/               فراداده مدلهای محلی / نامگذاری مستعار
-├── sse/                  کنترلکنندههای قدیمی SSE که همچنان در src/ قرار دارند (نه open-sse/)
+├── lib/                  کتابخانههای اصلی (پایگاه داده، احراز هویت، OAuth، مهارتها، حافظه و …)
+├── domain/               لایه خالص دامنه (خطمشی، مسیر جایگزین، هزینه، قفلکردن و …)
+├── server/               ماژولهای مختص سرور (مجوزدهی، CORS، احراز هویت)
+├── shared/               نوعها، ثابتها، اعتبارسنجی، قراردادها و ابزارهای کمکی (ایمن برای استفاده میان مرزها)
+├── mitm/                 ابزارهای کمکی پروکسی مرد میانی برای یکپارچهسازی با CLI
+├── models/               فراداده و نامهای مستعار مدلهای محلی
+├── sse/                  کنترلکنندههای قدیمی SSE که همچنان زیر src/ قرار دارند (نه open-sse/)
 ├── store/                مخازن وضعیت سمت کلاینت
-├── middleware/           ابزارهای میانافزار در سطح مسیر (نه میانافزار سراسری Next.js)
+├── middleware/           ابزارهای کمکی میانافزار در سطح مسیر (نه میانافزار سراسری Next.js)
 ├── scripts/              اسکریپتهای دروندرختی قابل واردکردن توسط کد برنامه
-├── types/                نوعهای محیطی و مشترک TS
+├── types/                نوعهای محیطی و اشتراکی TS
 ├── i18n/                 بستههای زبان
 ├── instrumentation.ts    هوک ابزاربندی Next.js
 ├── instrumentation-node.ts
-└── proxy.ts              ابزار کمکی راهاندازی پروکسی سطح بالا
+└── proxy.ts              ابزار کمکی راهاندازی اولیه پروکسی در سطح بالا
 ```
 
 ### 3.1 `src/app/` — App Router
 
 App Router هم رابط کاربری داشبورد و هم API عمومی/مدیریتی HTTP را ارائه میکند.
-**هیچ میانافزار سراسریای وجود ندارد** — رهگیری بهصورت مجزا برای هر مسیر انجام میشود.
+**هیچ میانافزار سراسری وجود ندارد** — رهگیری برای هر مسیر بهصورت جداگانه انجام میشود.
 
 بخشهای سطح بالا در `src/app/`:
 
 | مسیر                                                                          | هدف                                                 |
 | ----------------------------------------------------------------------------- | --------------------------------------------------- |
 | `api/`                                                                        | همه مسیرهای API مبتنی بر HTTP (تفکیک زیر را ببینید) |
-| `a2a/`                                                                        | نقطه پایانی A2A مبتنی بر JSON-RPC 2.0 (`POST /a2a`) |
-| `.well-known/agent.json/`                                                     | سند کشف Agent Card مربوط به A2A                     |
+| `a2a/`                                                                        | نقطه پایانی JSON-RPC 2.0 برای A2A (`POST /a2a`)     |
+| `.well-known/agent.json/`                                                     | سند کشف کارت عامل A2A                               |
 | `(dashboard)/`                                                                | رابط کاربری داشبورد (گروه مسیر، بدون پیشوند URL)    |
 | `auth/`, `login/`, `forgot-password/`, `callback/`                            | جریانهای احراز هویت                                 |
 | `landing/`                                                                    | صفحه بازاریابی/فرود                                 |
@@ -186,7 +189,7 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — مدیریت سرویسهای تعبیهشده
 
 مسیرهایی برای نصب، راهاندازی، توقف و پایش 9Router و CLIProxyAPI.
-همه مسیرها در رده **LOCAL_ONLY** طبقهبندی میشوند (فقط loopback، قانون قطعی شماره 17)، زیرا میتوانند
+همه مسیرها بهعنوان **LOCAL_ONLY** طبقهبندی شدهاند (فقط loopback، قانون قطعی شماره ۱۷)، زیرا میتوانند
 `npm install` را فراخوانی کرده و فرایندهای فرزند ایجاد کنند.
 
 ```
@@ -211,12 +214,12 @@ src/app/api/services/
 │   ├── status/route.ts     GET  — وضعیت زنده + وضعیت DB + فراداده نسخه
 │   └── auto-start/route.ts POST — تغییر وضعیت پرچم auto_start
 └── [name]/
-    └── logs/route.ts       GET  — دنباله زنده گزارشها با SSE (مشترک میان همه سرویسها)
+    └── logs/route.ts       GET  — دنباله زنده لاگ با SSE (مشترک میان همه سرویسها)
 ```
 
-رابط کاربری داشبورد مربوطه:
+رابط کاربری داشبورد متناظر:
 `src/app/(dashboard)/dashboard/providers/services/` — صفحهای با دو زبانه (CLIProxyAPI + 9Router).
-پراکسی معکوس برای رابط کاربری تعبیهشده 9Router:
+پروکسی معکوس برای رابط کاربری تعبیهشده 9Router:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
 بررسی عمیق: `docs/frameworks/EMBEDDED-SERVICES.md`
@@ -227,30 +230,30 @@ src/app/api/services/
 v1/
 ├── accounts/[id]/                       جستوجوی حساب
 ├── agents/tasks/[id]/, agents/tasks/    نقاط پایانی وظایف با سبک A2A
-├── api/                                 توابع کمکی API داخلی که زیر v1/api ارائه میشوند
+├── api/                                 توابع کمکی API داخلی که زیر v1/api ارائه شدهاند
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      API دستههای OpenAI
-├── chat/completions/                    تکمیلهای چت (نقطه پایانی اصلی)
+├── chat/completions/                    تکمیلهای گفتگو (نقطه پایانی اصلی)
 ├── completions/                         تکمیلهای متنی قدیمی
-├── embeddings/                          جاسازیها
+├── embeddings/                          تعبیهها
 ├── files/[id]/, files/                  API فایلها
 ├── _helpers/                            توابع کمکی مشترک مسیر (بدون URL عمومی)
 ├── images/{edits, generations}/         تولید + ویرایش تصویر
 ├── issues/                              نقاط پایانی کمکی برای اولویتبندی
-├── management/{proxies}/                مسیرهای محدود به مدیریت درون v1
+├── management/{proxies}/                مسیرهای دارای دامنه مدیریتی درون v1
 ├── messages/{count_tokens}/             سازگاری پیامها به سبک Anthropic
-├── models/                              فهرست مدلها (`route.ts`، `catalog.ts`)
+├── models/                              فهرست مدلها (`route.ts`, `catalog.ts`)
 ├── moderations/                         تعدیل محتوا
 ├── music/                               تولید موسیقی
 ├── providers/[provider]/                عملیات مختص هر ارائهدهنده
-├── quotas/{check}                       بررسیهای سهمیه
+├── quotas/{check}                       بررسی سهمیه
 ├── registered-keys/                     مدیریت کلیدهای ثبتشده
 ├── rerank/                              رتبهبندی مجدد
-├── responses/[...path]/                 API پاسخهای OpenAI (فراگیر)
+├── responses/[...path]/                 API پاسخهای OpenAI (مسیر فراگیر)
 ├── search/                              جستوجوی وب
 ├── videos/                              تولید ویدئو
 ├── ws/                                  پل WebSocket
-└── route.ts                             کنترلکننده نمایه
+└── route.ts                             کنترلکننده ایندکس
 ```
 
 هر فایل مسیر از الگوی یکسانی پیروی میکند:
@@ -263,55 +266,55 @@ v1/
 `v1beta/` سطح سازگاری به سبک Gemini است (یک پوشش نازک که درخواستها را به
 همان خط لوله `open-sse/handlers/` ترجمه میکند).
 
-### 3.2 `src/lib/` — کتابخانههای اصلی
+### 3.2 `src/lib/` — کتابخانههای هسته
 
-همیشه دادهها، همگامسازی، OAuth، مهارت، حافظه و موارد مشابه را از طریق این ماژولها وارد کنید.
-این جدول، دایرکتوریهای واقعی و فایلهای سطح بالای قابلتوجه را گروهبندی میکند.
+داده، همگامسازی، OAuth، مهارت، حافظه و موارد مشابه را همیشه از طریق این ماژولها وارد کنید.
+جدول، دایرکتوریهای واقعی و فایلهای شاخص سطح بالا را گروهبندی میکند.
 
-| ماژول             | هدف                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | سرور پروتکل A2A:‏ `taskManager.ts`، `streaming.ts`، `taskExecution.ts`، `routingLogger.ts`، ‏`skills/` (۶ مهارت: تحلیل هزینه، گزارش سلامت، کشف ارائهدهنده، مدیریت سهمیه، مسیریابی هوشمند، فهرست قابلیتها)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `acp/`            | پروتکل کنترل عامل:‏ `index.ts`، `manager.ts`، `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `api/`            | ابزارهای کمکی API داخلی:‏ `requireManagementAuth.ts`، `requireCliToolsAuth.ts`، `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `auth/`           | `managementPassword.ts` (بازنشانی / هشکردن گذرواژه)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `batches/`        | سرویس OpenAI Batches API ‏(`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `catalog/`        | همگامسازی کاتالوگ OpenRouter ‏(`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `cloudAgent/`     | رجیستری عامل ابری:‏ `api.ts`، `baseAgent.ts`، `db.ts`، `index.ts`، `registry.ts`، `types.ts`، `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `combos/`         | ابزارهای کمکی تفکیک ترکیبها                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `compliance/`     | ممیزی + ممیزی ارائهدهنده:‏ `index.ts`، `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `config/`         | کد اتصال پیکربندی زمان اجرا                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `db/`             | ماژولهای دامنه SQLite (نگاه کنید به §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `display/`        | ابزارهای کمکی رابط کاربری/نمایش که پاسخهای API از آنها استفاده میکنند                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `embeddings/`     | رجیستری سرویس تعبیهسازی                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `env/`            | بارگذاری + بررسی درونی محیط                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `evals/`          | زمان اجرای ارزیابی                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `guardrails/`     | `piiMasker.ts`، `promptInjection.ts`، `visionBridge.ts`، `visionBridgeHelpers.ts`، `registry.ts`، `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `jobs/`           | کارهای پسزمینه (`autoUpdate.ts`، …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `memory/`         | حافظه پایدار:‏ `store.ts`، `cache.ts`، `retrieval.ts`، `summarization.ts`، `extraction.ts`، `injection.ts`، `qdrant.ts`، `settings.ts`، `verify.ts`، `schemas.ts`، `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `oauth/`          | ماژولهای OAuth/واردسازی ارائهدهنده (۲۲ مورد):‏ `agy`، `antigravity`، `claude`، `cline`، `codebuddy-cn`، `codex`، `cursor`، `devin-desktop`، `ghe-copilot`، `github`، `gitlab-duo`، `grok-cli-oauth`، `grok-cli`، `kilocode`، `kimi-coding`، `kiro`، `openference`، `qoder`، `trae`، `xai-oauth`، `zed-hosted`، `zed`، بهعلاوه `services/`، `utils/` و `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                        |
-| `plugins/`        | بارگذار افزونه (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `promptCache/`    | `prefixAnalyzer.ts`، `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `providerModels/` | چرخه عمر مدل مدیریتشده:‏ `modelDiscovery.ts`، `managedModelImport.ts`، `managedAvailableModels.ts`، `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `providers/`      | ابزارهای کمکی ارائهدهنده:‏ `catalog.ts`، `validation.ts`، `imageValidation.ts`، `claudeExtraUsage.ts`، `codexConnectionDefaults.ts`، `codexFastTier.ts`، `webCookieAuth.ts`، `managedAvailableModels.ts`، `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `resilience/`     | `settings.ts` — تنظیمات قطعکننده مدار، دوره انتظار و قفل موقت                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `runtime/`        | تشخیص قابلیتها در زمان اجرا                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `services/`       | چارچوب سرویسهای تعبیهشده:‏ `ServiceSupervisor.ts` (ناظر عمومی فرایند فرزند با قفل عملیات، بافر حلقوی و بررسیکننده سلامت)، `bootstrap.ts` (ثبت در سطح فرایند و شروع خودکار)، `registry.ts` (نگاشت ابزار ← ناظر)، `apiKey.ts` (مخزن کلید AES-256-GCM)، `modelSync.ts` (همگامسازی دورهای مدل)، `ringBuffer.ts` (بافر حلقوی گزارش ۵ مگابایتی)، `healthCheck.ts` (کاوش سلامت HTTP)، `types.ts`، `embedWsProxy.ts` (پراکسی WebSocket)، `installers/{ninerouter,cliproxy}.ts`. نگاه کنید به `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                                                                                                                       |
-| `agentSkills/`    | کاتالوگ + مولد مهارتهای عامل:‏ `catalog.ts` ‏(getCatalog/getSkillById/filterCatalog/computeCoverage)، `generator.ts` ‏(generateAgentSkills → در `skills/{id}/SKILL.md` مینویسد)، `openapiParser.ts` (نقاط پایانی REST را از مشخصات OpenAPI استخراج میکند)، `cliRegistryParser.ts` (زیرفرمانهای CLI را از bin/cli-registry استخراج میکند)، `schemas.ts` ‏(Zod: AgentSkillSchema، SkillCoverageSchema، ListQuerySchema، GenerateBodySchema)، `types.ts` ‏(AgentSkill، SkillCoverage، SkillMarkdown، GeneratorReport). مسیرهای REST ‏(`/api/agent-skills/*`)، ابزارهای MCP ‏(`omniroute_agent_skills_*`) و مهارت A2A با نام `list-capabilities` از آن استفاده میکنند. نگاه کنید به [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | چارچوب مهارت:‏ `registry.ts`، `executor.ts`، `interception.ts`، `injection.ts`، `sandbox.ts`، `custom.ts`، `hybrid.ts`، `builtins.ts`، `a2a.ts`، `providerSettings.ts`، `schemas.ts`، `skillssh.ts`، `types.ts`، بهعلاوه `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `spend/`          | `batchWriter.ts` (بافر نوشتن با تأخیر)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `sync/`           | `bundle.ts`، `tokens.ts` (همگامسازی ابری)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `system/`         | ابزارهای کمکی سطح سیستم                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `translator/`     | کد اتصال سطحبالای مترجم (به `open-sse/translator/` واگذار میکند)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `usage/`          | حسابداری مصرف:‏ `costCalculator.ts`، `tokenAccounting.ts`، `usageHistory.ts`، `aggregateHistory.ts`، `usageStats.ts`، `callLogs.ts`، `callLogArtifacts.ts`، `fetcher.ts`، `providerLimits.ts`، `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `versionManager/` | بهروزرسانی خودکار + مانیفست نسخه                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `ws/`             | پل WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `zed-oauth/`      | جریان OAuth ویرایشگر Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| ماژول             | هدف                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | سرور پروتکل A2A: `taskManager.ts`، `streaming.ts`، `taskExecution.ts`، `routingLogger.ts`، `skills/` (۶ مهارت: تحلیل هزینه، گزارش سلامت، کشف ارائهدهنده، مدیریت سهمیه، مسیریابی هوشمند، فهرست قابلیتها)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `acp/`            | پروتکل کنترل عامل: `index.ts`، `manager.ts`، `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `api/`            | ابزارهای کمکی API داخلی: `requireManagementAuth.ts`، `requireCliToolsAuth.ts`، `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `auth/`           | `managementPassword.ts` (بازنشانی / هشکردن گذرواژه)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `batches/`        | سرویس API دستههای OpenAI (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `catalog/`        | همگامسازی کاتالوگ OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `cloudAgent/`     | رجیستری عامل ابری: `api.ts`، `baseAgent.ts`، `db.ts`، `index.ts`، `registry.ts`، `types.ts`، `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `combos/`         | ابزارهای کمکی حل ترکیبها                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `compliance/`     | ممیزی + ممیزی ارائهدهنده: `index.ts`، `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `config/`         | کد یکپارچهسازی پیکربندی زمان اجرا                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `db/`             | ماژولهای دامنه SQLite (به §3.2.1 مراجعه کنید)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `display/`        | ابزارهای کمکی رابط کاربری/نمایش که در پاسخهای API استفاده میشوند                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `embeddings/`     | رجیستری سرویس تعبیهسازی                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `env/`            | بارگذاری + دروننگری محیط                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `evals/`          | زمان اجرای ارزیابی                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `guardrails/`     | `piiMasker.ts`، `promptInjection.ts`، `visionBridge.ts`، `visionBridgeHelpers.ts`، `registry.ts`، `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `jobs/`           | کارهای پسزمینه (`autoUpdate.ts`، …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `memory/`         | حافظهٔ پایدار: `store.ts`، `cache.ts`، `retrieval.ts`، `summarization.ts`، `extraction.ts`، `injection.ts`، `qdrant.ts`، `settings.ts`، `verify.ts`، `schemas.ts`، `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `oauth/`          | ماژولهای ارائهدهندهٔ OAuth/درونریزی (22): `agy`، `antigravity`، `claude`، `cline`، `codebuddy-cn`، `codex`، `cursor`، `devin-desktop`، `ghe-copilot`، `github`، `gitlab-duo`، `grok-cli-oauth`، `grok-cli`، `kilocode`، `kimi-coding`، `kiro`، `openference`، `qoder`، `trae`، `xai-oauth`، `zed-hosted`، `zed`، بهعلاوهٔ `services/`، `utils/` و `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                                                     |
+| `plugins/`        | بارگذار افزونه (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `promptCache/`    | `prefixAnalyzer.ts`، `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `providerModels/` | چرخهٔ حیات مدل مدیریتشده: `modelDiscovery.ts`، `managedModelImport.ts`، `managedAvailableModels.ts`، `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `providers/`      | ابزارهای کمکی ارائهدهنده: `catalog.ts`، `validation.ts`، `imageValidation.ts`، `claudeExtraUsage.ts`، `codexConnectionDefaults.ts`، `codexFastTier.ts`، `webCookieAuth.ts`، `managedAvailableModels.ts`، `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `resilience/`     | `settings.ts` — تنظیمات قطعکنندهٔ مدار، دورهٔ انتظار و قفل                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `runtime/`        | تشخیص قابلیتها در زمان اجرا                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `services/`       | چارچوب سرویسهای توکار: `ServiceSupervisor.ts` (ناظر عمومی پردازش فرزند با قفل عملیات، بافر حلقوی و بررسیکنندهٔ سلامت)، `bootstrap.ts` (ثبت در سطح پردازش و شروع خودکار)، `registry.ts` (نگاشت ابزار → ناظر)، `apiKey.ts` (مخزن کلید AES-256-GCM)، `modelSync.ts` (همگامسازی دورهای مدل)، `ringBuffer.ts` (بافر حلقوی گزارش با ظرفیت 5 MB)، `healthCheck.ts` (پویش سلامت HTTP)، `types.ts`، `embedWsProxy.ts` (پراکسی WebSocket)، `installers/{ninerouter,cliproxy}.ts`. به `docs/frameworks/EMBEDDED-SERVICES.md` مراجعه کنید                                                                                                                                                                                              |
+| `agentSkills/`    | کاتالوگ و مولد مهارتهای عامل: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage)، `generator.ts` (generateAgentSkills → در `skills/{id}/SKILL.md` مینویسد)، `openapiParser.ts` (نقاط پایانی REST را از مشخصات OpenAPI استخراج میکند)، `cliRegistryParser.ts` (زیرفرمانهای CLI را از bin/cli-registry استخراج میکند)، `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema)، `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). توسط مسیرهای REST (`/api/agent-skills/*`)، ابزارهای MCP (`omniroute_agent_skills_*`) و مهارت A2A با نام `list-capabilities` استفاده میشود. به [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md) مراجعه کنید. |
+| `skills/`         | چارچوب مهارت: `registry.ts`، `executor.ts`، `interception.ts`، `injection.ts`، `sandbox.ts`، `custom.ts`، `hybrid.ts`، `builtins.ts`، `a2a.ts`، `providerSettings.ts`، `schemas.ts`، `skillssh.ts`، `types.ts`، بهعلاوهٔ `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `spend/`          | `batchWriter.ts` (بافر نوشتن با تأخیر)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `sync/`           | `bundle.ts`، `tokens.ts` (همگامسازی ابری)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `system/`         | ابزارهای کمکی سطح سیستم                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `translator/`     | کد اتصال سطحبالای مترجم (وظایف را به `open-sse/translator/` واگذار میکند)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `usage/`          | حسابداری مصرف: `costCalculator.ts`، `tokenAccounting.ts`، `usageHistory.ts`، `aggregateHistory.ts`، `usageStats.ts`، `callLogs.ts`، `callLogArtifacts.ts`، `fetcher.ts`، `providerLimits.ts`، `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `versionManager/` | بهروزرسانی خودکار + مانیفست نسخه                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `ws/`             | پل WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `zed-oauth/`      | جریان OAuth ویرایشگر Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
 
-فایلهای سطح بالای `src/lib/`:
+فایلهای سطحبالا در `src/lib/`:
 
-- فایل barrel قدیمی `localDb.ts` حذف شده است — مصرفکنندگان ماژولهای مشخص `src/lib/db/*` را مستقیماً import میکنند.
+- barrel قدیمی `localDb.ts` حذف شد — مصرفکنندگان ماژولهای مشخص `src/lib/db/*` را مستقیماً import میکنند.
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -325,8 +328,8 @@ v1/
 
 #### 3.2.1 `src/lib/db/`
 
-پایگاه دادهٔ SQLite تکنمونه (`getDbInstance()` در `core.ts`، با ثبت وقایع WAL).
-**هرگز SQL خام را در routeها یا handlerها ننویسید** — از این ماژولها استفاده کنید.
+پایگاه دادهٔ تکنمونهای SQLite (`getDbInstance()` در `core.ts`، با ثبت وقایع WAL).
+**هرگز در routeها یا handlerها SQL خام ننویسید** — از این ماژولها استفاده کنید.
 
 ![نمای کلی شِمای پایگاه داده (جدولهای اصلی منتخب)](../diagrams/exported/db-schema-overview.svg)
 
@@ -346,10 +349,10 @@ v1/
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-`migrations/` شامل 168 فایل نسخهبندیشدهٔ `.sql` (ایدِمپوتنت و تراکنشی) است و
+`migrations/` شامل 168 فایل نسخهبندیشدهٔ `.sql` (idempotent و تراکنشی) است و
 هنگام راهاندازی توسط `migrationRunner.ts` اجرا میشود.
 
-جدولهای ایجادشده در مجموع migrationها (در کل 123 مورد):
+جدولهای ایجادشده در مجموع migrationها (در کل 123 جدول):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -369,60 +372,60 @@ v1/
 
 ### 3.3 `src/domain/` — لایهٔ دامنه
 
-منطق کسبوکار خالص، بدون I/O. توسط routeها و handlerها import میشود.
+منطق کسبوکار خالص و بدون I/O. توسط routeها و handlerها import میشود.
 
-| فایل                                       | هدف                                             |
-| ------------------------------------------ | ----------------------------------------------- |
-| `policyEngine.ts`                          | حلکنندهٔ سیاست سطح بالا                         |
-| `fallbackPolicy.ts`                        | درخت تصمیم fallback                             |
-| `costRules.ts`                             | قواعد محاسبهٔ هزینه                             |
-| `lockoutPolicy.ts`                         | تصمیمهای قفلکردن مدل                            |
-| `tagRouter.ts`                             | مسیریابی مبتنی بر برچسب                         |
-| `comboResolver.ts`                         | حل combo از درخواست → فهرست مقصد                |
-| `connectionModelRules.ts`                  | فیلترهای مدل برای هر اتصال                      |
-| `modelAvailability.ts`                     | بررسی دسترسپذیری مدل                            |
-| `degradation.ts`                           | گذارهای حالت تنزلیافته                          |
-| `providerExpiration.ts`                    | تشخیص حساب/کلید منقضیشده                        |
-| `quotaCache.ts`                            | تصمیمهای cacheشدهٔ سهمیه                        |
-| `responses.ts`, `omnirouteResponseMeta.ts` | ابزارهای کمکی ساختار پاسخ                       |
-| `configAudit.ts`                           | ممیزی تغییرات پیکربندی                          |
-| `assessment/`                              | ارزیابی مدل (طبق RFC، بهطور جزئی پیادهسازی شده) |
-| `types.ts`                                 | typeهای مشترک دامنه                             |
+| فایل                                       | هدف                                            |
+| ------------------------------------------ | ---------------------------------------------- |
+| `policyEngine.ts`                          | resolver سطحبالای policy                       |
+| `fallbackPolicy.ts`                        | درخت تصمیم fallback                            |
+| `costRules.ts`                             | قواعد محاسبهٔ هزینه                            |
+| `lockoutPolicy.ts`                         | تصمیمگیری برای قفلکردن مدل                     |
+| `tagRouter.ts`                             | مسیریابی مبتنی بر tag                          |
+| `comboResolver.ts`                         | تبدیل درخواست به فهرست مقصد برای combo         |
+| `connectionModelRules.ts`                  | فیلترهای مدل برای هر connection                |
+| `modelAvailability.ts`                     | بررسی در دسترس بودن مدل                        |
+| `degradation.ts`                           | گذارهای حالت تنزلیافته                         |
+| `providerExpiration.ts`                    | تشخیص حساب/کلید منقضیشده                       |
+| `quotaCache.ts`                            | تصمیمهای cacheشدهٔ quota                       |
+| `responses.ts`, `omnirouteResponseMeta.ts` | ابزارهای کمکی ساختار response                  |
+| `configAudit.ts`                           | ممیزی تغییرات config                           |
+| `assessment/`                              | ارزیابی مدل (بر اساس RFC، تا حدی پیادهسازیشده) |
+| `types.ts`                                 | typeهای مشترک دامنه                            |
 
 ### 3.4 `src/server/` — فقط سمت سرور
 
-نمیتوان آن را از کامپوننتهای کلاینت import کرد.
+نمیتوان آن را از componentهای سمت client، import کرد.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        routeها را به عمومی یا مدیریتی دستهبندی میکند
+│   ├── classify.ts        routeها را به عمومی یا مدیریتی طبقهبندی میکند
 │   ├── assertAuth.ts      ابزار کمکی assertion
 │   ├── context.ts         context مجوزدهی برای هر درخواست
 │   ├── headers.ts
 │   ├── pipeline.ts        pipeline مجوزدهی
-│   ├── policies/          سیاستهای عملیاتی
+│   ├── policies/          policyهای مشخص
 │   └── types.ts
-└── cors/origins.ts        فهرست مجاز originهای CORS
+└── cors/origins.ts        فهرست مجاز مبدأهای CORS
 ```
 
-### 3.5 `src/shared/` — ایمن برای اشتراکگذاری
+### 3.5 `src/shared/` — امن برای اشتراکگذاری
 
-به زیرشاخههای متمرکز تقسیم شده است:
+به زیردایرکتوریهای متمرکز تقسیم شده است:
 
-- `constants/` — `providers.ts` (فهرست ارائهدهندگان اعتبارسنجیشده با Zod)، `models.ts`،
+- `constants/` — شامل `providers.ts` (کاتالوگ ارائهدهندگان اعتبارسنجیشده با Zod)، `models.ts`،
   `modelSpecs.ts`، `modelCompat.ts`، `pricing.ts`، `cliTools.ts`،
   `cliCompatProviders.ts`، `routingStrategies.ts`، `comboConfigMode.ts`،
-  `headers.ts`، `upstreamHeaders.ts` (فهرست موارد ممنوع)، `mcpScopes.ts`،
+  `headers.ts`، `upstreamHeaders.ts` (فهرست ممنوعه)، `mcpScopes.ts`،
   `errorCodes.ts`، `publicApiRoutes.ts`، `batch.ts`، `batchEndpoints.ts`،
   `bodySize.ts`، `colors.ts`، `appConfig.ts`، `config.ts`،
   `sidebarVisibility.ts`، `visionBridgeDefaults.ts`.
-- `validation/` — `schemas.ts` (حدود ۸۰ شِمای Zod)، `compressionConfigSchemas.ts`،
+- `validation/` — شامل `schemas.ts` (حدود ۸۰ شِمای Zod)، `compressionConfigSchemas.ts`،
   `providerSchema.ts`، `settingsSchemas.ts`، `helpers.ts`.
-- `contracts/` — قراردادهای API عمومی منتشرشده در npm.
-- `types/` — انواع مشترک TS.
-- `utils/` — `circuitBreaker.ts`، `apiAuth.ts`، `apiKey.ts`، `apiKeyPolicy.ts`،
+- `contracts/` — قراردادهای API عمومی که در npm منتشر میشوند.
+- `types/` — نوعهای مشترک TS.
+- `utils/` — شامل `circuitBreaker.ts`، `apiAuth.ts`، `apiKey.ts`، `apiKeyPolicy.ts`،
   `api.ts`، `classify429.ts`، `cliCompat.ts`، `clipboard.ts`، `cloud.ts`، `cn.ts`،
   `cors.ts`، `featureFlags.ts`،
   `fetchTimeout.ts`، `formatting.ts`، `inputSanitizer.ts`، `logger.ts`،
@@ -431,13 +434,22 @@ server/
   `providerModelAliases.ts`، `rateLimiter.ts`، `releaseNotes.ts`،
   `a11yAudit.ts`، بهعلاوه هوکها/کامپوننتهای داشبورد در `services/`، `network/`،
   `middleware/`، `schemas/`، `hooks/`، `components/`.
+- `components/` — API کامپوننت داشبورد (فایل تجمیعی `index.tsx`:‏ `Button`، `Input`،
+  `Select`، `Modal`، `Card`، `DataTable`، …). اجزای پایه، آداپتورهایی بر روی کیت
+  درونسپاریشده هستند (`packages/ui-kit`، با زیرمسیر کامپوننت مانند
+  `@omniroute/ui-kit/button` ایمپورت میشود)؛ بنابراین صفحهها ایمپورتهای خود را حفظ
+  میکنند، درحالیکه نشانهگذاری متعلق به کیت است. پوسته شامل
+  `layouts/DashboardLayout.tsx` ← `layouts/DashboardShell.tsx`
+  (`SidebarProvider`/`SidebarInset` کیت) بههمراه `Sidebar.tsx` و `Header.tsx` است؛
+  آیکونها از مسیر `Icon.tsx` و `constants/iconMap.ts` عبور میکنند. به
+  `docs/architecture/DESIGN_SYSTEM.md` مراجعه کنید.
 
 ---
 
 ## 4. `open-sse/` — فضای کاری موتور استریم
 
-یک فضای کاری npm مستقل که با نام `@omniroute/open-sse` منتشر میشود. مالک پردازش
-درخواست، اجراکنندهها، مترجمها، سرویسها، تبدیلکننده و سرور MCP است.
+یک فضای کاری npm مجزا که با نام `@omniroute/open-sse` منتشر میشود. مسئول پردازش
+درخواستها، اجراکنندهها، مترجمها، سرویسها، تبدیلکننده و سرور MCP است.
 
 ```
 open-sse/
@@ -445,107 +457,111 @@ open-sse/
 ├── package.json            مانیفست فضای کاری
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 رجیستریهای ارائهدهندگان، پروفایلهای هدر، هویت، …
-├── handlers/               کنترلکنندههای درخواست (چت، تعبیهها، صوت، تصویر، …)
-├── executors/              ۱۰۸ اجراکننده HTTP مختص ارائهدهندگان
-├── translator/             تبدیل قالب (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── config/                 رجیستریهای ارائهدهندگان، پروفایلهای هدر، هویت و …
+├── handlers/               کنترلکنندههای درخواست (چت، امبدینگ، صدا، تصویر و …)
+├── executors/              ۱۵۶ ماژول اجراکننده ارائهدهندگان (کلاسهای اجراکننده + ابزارهای کمکی مختص هر ارائهدهنده)
+├── translator/             تبدیل فرمت (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
 ├── transformer/            تبدیلکننده استریم Responses API ↔ Chat Completions
-├── services/               بیش از ۸۰ ماژول سرویس (ترکیبها، جایگزینی، سهمیهها، هویت، …)
-├── utils/                  ابزارهای کمکی استریم، کلاینت TLS، AWS SigV4، واکشی از طریق پروکسی، …
-└── mcp-server/             سرور MCP (۳ روش انتقال، ۳۳ حوزه، ۱۱۰ ابزار)
+├── services/               بیش از ۸۰ ماژول سرویس (ترکیبها، جایگزینی، سهمیهها، هویت و …)
+├── utils/                  ابزارهای کمکی استریم، کلاینت TLS، AWS SigV4، واکشی پروکسی و …
+└── mcp-server/             سرور MCP (۳ روش انتقال، ۳۳ محدوده، ۱۱۰ ابزار)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| کنترلکننده              | هدف                                                                    |
-| ----------------------- | ---------------------------------------------------------------------- |
-| `chatCore.ts`           | خط لوله اصلی چت (کش، محدودیت نرخ، مسیریابی ترکیبی، ارسال به اجراکننده) |
-| `responsesHandler.ts`   | نقطه ورود OpenAI Responses API                                         |
-| `embeddings.ts`         | تعبیهها                                                                |
-| `imageGeneration.ts`    | تولید تصویر                                                            |
-| `audioSpeech.ts`        | تبدیل متن به گفتار                                                     |
-| `audioTranscription.ts` | تبدیل گفتار به متن                                                     |
-| `videoGeneration.ts`    | تولید ویدئو                                                            |
-| `musicGeneration.ts`    | تولید موسیقی                                                           |
-| `rerank.ts`             | رتبهبندی مجدد                                                          |
-| `moderations.ts`        | تعدیل محتوا                                                            |
-| `search.ts`             | جستوجوی وب                                                             |
-| `sseParser.ts`          | تجزیهکننده رویداد SSE                                                  |
-| `usageExtractor.ts`     | استخراج تعداد توکنها از استریمهای بالادستی                             |
-| `responseSanitizer.ts`  | حذف نویز مختص ارائهدهنده                                               |
-| `responseTranslator.ts` | لایه اتصال میان پاسخ ارائهدهنده و لایه مترجم                           |
+| کنترلکننده              | هدف                                                                          |
+| ----------------------- | ---------------------------------------------------------------------------- |
+| `chatCore.ts`           | خط لوله اصلی چت (کش، محدودسازی نرخ، مسیریابی ترکیبی، توزیع میان اجراکنندهها) |
+| `responsesHandler.ts`   | نقطه ورود OpenAI Responses API                                               |
+| `embeddings.ts`         | امبدینگها                                                                    |
+| `imageGeneration.ts`    | تولید تصویر                                                                  |
+| `audioSpeech.ts`        | تبدیل متن به گفتار                                                           |
+| `audioTranscription.ts` | تبدیل گفتار به متن                                                           |
+| `videoGeneration.ts`    | تولید ویدئو                                                                  |
+| `musicGeneration.ts`    | تولید موسیقی                                                                 |
+| `rerank.ts`             | رتبهبندی مجدد                                                                |
+| `moderations.ts`        | تعدیل محتوا                                                                  |
+| `search.ts`             | جستوجوی وب                                                                   |
+| `sseParser.ts`          | تجزیهکننده رویداد SSE                                                        |
+| `usageExtractor.ts`     | استخراج تعداد توکنها از استریمهای بالادستی                                   |
+| `responseSanitizer.ts`  | حذف نویز مختص ارائهدهنده                                                     |
+| `responseTranslator.ts` | لایه اتصال میان پاسخ ارائهدهنده و لایه مترجم                                 |
 
 ### 4.2 `open-sse/executors/`
 
-۱۰۸ اجراکننده ارائهدهنده که هرکدام `BaseExecutor` (`base.ts`) را گسترش میدهند:
+۱۵۶ ماژول اجراکننده سطحبالا (`*.ts` بهجز `base.ts`، `index.ts` و آزمونها — این تعداد را
+`npm run check:docs-counts` اندازهگیری میکند). هر کلاس اجراکننده، بهصورت مستقیم یا از طریق
+`DefaultExecutor` یا اجراکنندهای دیگر، از `BaseExecutor` (`base.ts`) ارثبری میکند؛ ماژولهای
+باقیمانده ابزارهای کمکی مختص هر ارائهدهنده هستند (طرحوارههای ابزار، آداپتورهای fetch/TTS و
+کنترلکنندههای رفتارهای خاص). اجراکنندهها شامل موارد زیر هستند:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
-`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
-`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
-`pollinations`, `qoder`, `vertex`, `devin-desktop`، بهعلاوه `claudeIdentity.ts`
-(ابزار کمکی مشترک هویت) و `index.ts` (رجیستری).
+`antigravity`، `azure-openai`، `blackbox-web`، `cliproxyapi`،
+`chatgpt-web-codex`، `cloudflare-ai`، `codex`، `commandCode`، `cursor`، `default`، `devin-cli`،
+`muse-spark-web`، `nlpcloud`، `opencode`، `perplexity-web`، `petals`،
+`pollinations`، `qoder`، `vertex`، `devin-desktop`، بهعلاوه `claudeIdentity.ts`
+(ابزار کمکی هویت مشترک) و `index.ts` (رجیستری).
 
-> توجه: ارائهدهندگانی که در اینجا فهرست نشدهاند، توسط `default.ts` و با استفاده از اجراکننده عمومی
-> سازگار با OpenAI سرویسدهی میشوند. کاتالوگ کامل ارائهدهندگان (۳۵۵ ارائهدهنده) در
-> `src/shared/constants/providers.ts` قرار دارد.
+> نکته: ارائهدهندگانی که در اینجا فهرست نشدهاند، با استفاده از اجراکننده عمومی
+> سازگار با OpenAI در `default.ts` ارائه میشوند. کاتالوگ کامل ارائهدهندگان (۳۷۵ ارائهدهنده)
+> در `src/shared/constants/providers.ts` قرار دارد.
 
 ### 4.3 `open-sse/translator/`
 
-ترجمه با معماری هابوپره (OpenAI هاب است).
+ترجمه با معماری هاب و اسپوک (OpenAI هاب است).
 
 - **۹ مترجم درخواست** (`translator/request/`):
-  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
-  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
-  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+  `antigravity-to-openai`، `claude-to-gemini`، `claude-to-openai`،
+  `gemini-to-openai`، `openai-responses`، `openai-to-claude`،
+  `openai-to-cursor`، `openai-to-gemini`، `openai-to-kiro`.
 - **۹ مترجم پاسخ** (`translator/response/`):
-  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
-  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
+  `claude-to-openai`، `cursor-to-openai`، `gemini-to-claude`، `gemini-to-openai`،
+  `kiro-to-openai`، `openai-responses`، `openai-to-antigravity`،
   `openai-to-claude`.
 - **۹ ابزار کمکی** (`translator/helpers/`):
-  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
-  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`، بهعلاوه
+  `claudeHelper`، `geminiHelper`، `geminiToolsSanitizer`، `maxTokensHelper`،
+  `openaiHelper`، `responsesApiHelper`، `schemaCoercion`، `toolCallHelper`، بهعلاوه
   آزمونهای ابزارهای کمکی.
 - **ابزارهای کمکی تصویر** (`translator/image/sizeMapper.ts`).
-- سطح بالا: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+- سطحبالا: `bootstrap.ts`، `formats.ts`، `registry.ts`، `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — تبدیلکننده Responses API ↔ Chat
-  Completions مبتنی بر `TransformStream` (مورد استفاده توسط مسیر فراگیر `responses/`).
+- `responsesTransformer.ts` — تبدیلکننده Responses API ↔ Chat Completions مبتنی بر
+  `TransformStream` (مورداستفاده توسط مسیر همهگیر `responses/`).
 
 ### 4.5 `open-sse/services/`
 
 موارد برجسته (فهرست کامل در `open-sse/services/`):
 
-| حوزه             | فایلها                                                                                                                                                                                                                                                   |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| مسیریابی Combo   | `combo.ts` (۱۹ راهبرد)، `comboConfig.ts`، `comboMetrics.ts`، `comboManifestMetrics.ts`، `comboAgentMiddleware.ts`                                                                                                                                        |
-| موتور Auto Combo | `autoCombo/` — `engine.ts`، `scoring.ts`، `taskFitness.ts`، `virtualFactory.ts`، `modePacks.ts`، `autoPrefix.ts`، `persistence.ts`، `providerDiversity.ts`، `providerRegistryAccessor.ts`، `routerStrategy.ts`، `selfHealing.ts`، `index.ts`             |
-| تابآوری          | `accountFallback.ts` (دوره انتظار + قفلشدن)، `errorClassifier.ts`، `requestRejectedStreak.ts`، `emergencyFallback.ts`، `rateLimitManager.ts`، `rateLimitSemaphore.ts`، `accountSemaphore.ts`، `accountSelector.ts`                                       |
-| سهمیهها          | `quotaMonitor.ts`، `quotaPreflight.ts`، `bailianQuotaFetcher.ts`، `codexQuotaFetcher.ts`، `deepseekQuotaFetcher.ts`، `openrouterQuotaFetcher.ts`، `openrouterFreeWindow.ts`، `llmgatewayQuotaFetcher.ts`، `crofUsageFetcher.ts`، `antigravityCredits.ts` |
-| ذخیرهسازی موقت   | `reasoningCache.ts`، `searchCache.ts`، `signatureCache.ts`، `requestDedup.ts`                                                                                                                                                                            |
-| هوشمندی مسیریابی | `intentClassifier.ts`، `taskAwareRouter.ts`، `backgroundTaskDetector.ts`، `volumeDetector.ts`، `wildcardRouter.ts`، `workflowFSM.ts`، `specificityDetector.ts`، `specificityRules.ts`، `specificityTypes.ts`                                             |
-| مدیریت مدل       | `modelCapabilities.ts`، `modelDeprecation.ts`، `modelFamilyFallback.ts`، `modelStrip.ts`، `model.ts`، `provider.ts`، `providerRequestDefaults.ts`، `providerCostData.ts`، `payloadRules.ts`                                                              |
-| فشردهسازی        | `compression/` — سیمکشی کامل موتور فشردهسازی                                                                                                                                                                                                             |
-| توکن + نشست      | `tokenRefresh.ts`، `sessionManager.ts`، `apiKeyRotator.ts`، `contextManager.ts`، `contextHandoff.ts`، `systemPrompt.ts`، `roleNormalizer.ts`، `responsesInputSanitizer.ts`، `toolSchemaSanitizer.ts`، `toolLimitDetector.ts`، `thinkingBudget.ts`        |
-| سطح / مانیفست    | `tierResolver.ts`، `tierConfig.ts`، `tierDefaults.json`، `tierTypes.ts`، `manifestAdapter.ts`                                                                                                                                                            |
-| IP / شبکه        | `ipFilter.ts`، `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| دستهها           | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| میزان استفاده    | `usage.ts`                                                                                                                                                                                                                                               |
+| حوزه                | فایلها                                                                                                                                                                                                                                                   |
+| ------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| مسیریابی ترکیبی     | `combo.ts` (۲۰ راهبرد)، `comboConfig.ts`، `comboMetrics.ts`، `comboManifestMetrics.ts`، `comboAgentMiddleware.ts`                                                                                                                                        |
+| موتور ترکیبی خودکار | `autoCombo/` — `engine.ts`، `scoring.ts`، `taskFitness.ts`، `virtualFactory.ts`، `modePacks.ts`، `autoPrefix.ts`، `persistence.ts`، `providerDiversity.ts`، `providerRegistryAccessor.ts`، `routerStrategy.ts`، `selfHealing.ts`، `index.ts`             |
+| تابآوری             | `accountFallback.ts` (دوره انتظار + قفلکردن)، `errorClassifier.ts`، `requestRejectedStreak.ts`، `emergencyFallback.ts`، `rateLimitManager.ts`، `rateLimitSemaphore.ts`، `accountSemaphore.ts`، `accountSelector.ts`                                      |
+| سهمیهها             | `quotaMonitor.ts`، `quotaPreflight.ts`، `bailianQuotaFetcher.ts`، `codexQuotaFetcher.ts`، `deepseekQuotaFetcher.ts`، `openrouterQuotaFetcher.ts`، `openrouterFreeWindow.ts`، `llmgatewayQuotaFetcher.ts`، `crofUsageFetcher.ts`، `antigravityCredits.ts` |
+| ذخیرهسازی موقت      | `reasoningCache.ts`، `searchCache.ts`، `signatureCache.ts`، `requestDedup.ts`                                                                                                                                                                            |
+| هوشمندی مسیریابی    | `intentClassifier.ts`، `taskAwareRouter.ts`، `backgroundTaskDetector.ts`، `volumeDetector.ts`، `wildcardRouter.ts`، `workflowFSM.ts`، `specificityDetector.ts`، `specificityRules.ts`، `specificityTypes.ts`                                             |
+| مدیریت مدل          | `modelCapabilities.ts`، `modelDeprecation.ts`، `modelFamilyFallback.ts`، `modelStrip.ts`، `model.ts`، `provider.ts`، `providerRequestDefaults.ts`، `providerCostData.ts`، `payloadRules.ts`                                                              |
+| فشردهسازی           | `compression/` — سیمکشی کامل موتور فشردهسازی                                                                                                                                                                                                             |
+| توکن + نشست         | `tokenRefresh.ts`، `sessionManager.ts`، `apiKeyRotator.ts`، `contextManager.ts`، `contextHandoff.ts`، `systemPrompt.ts`، `roleNormalizer.ts`، `responsesInputSanitizer.ts`، `toolSchemaSanitizer.ts`، `toolLimitDetector.ts`، `thinkingBudget.ts`        |
+| سطح / مانیفست       | `tierResolver.ts`، `tierConfig.ts`، `tierDefaults.json`، `tierTypes.ts`، `manifestAdapter.ts`                                                                                                                                                            |
+| IP / شبکه           | `ipFilter.ts`، `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| دستهها              | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| میزان استفاده       | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
 - **۱۱۰ ابزار منحصربهفرد** در `server.ts` متصل شدهاند (۴۵ ابزار متعارف در `schemas/tools.ts` +
-  ماژولهای حافظه، مهارتها، GitHub-skills، مخزن، بازیوارسازی، افزونه، Notion، Obsidian،
-  پیکره محلی و فشردهسازی — اجتماع آنها توسط `countUniqueMcpTools` شمارش شده است).
-- **۳ روش انتقال**: stdio، HTTP Streamable و SSE.
-- **۳۳ محدوده دسترسی** در زمان اجرا اعمال میشوند — فهرست پایه در `src/shared/constants/mcpScopes.ts` قرار دارد و مجموعه کامل، اجتماع محدودههای دسترسی تعریفشده توسط هر ماژول ابزار است.
+  ماژولهای حافظه، مهارتها، مهارتهای GitHub، مخزن، بازیوارسازی، افزونه، Notion، Obsidian،
+  پیکره محلی و فشردهسازی — اجتماع آنها توسط `countUniqueMcpTools` شمارش میشود).
+- **۳ روش انتقال**: stdio، HTTP Streamable، SSE.
+- **۳۳ دامنه دسترسی** در زمان اجرا اعمال میشوند — فهرست پایه در `src/shared/constants/mcpScopes.ts` قرار دارد و مجموعه کامل، اجتماع دامنههای دسترسی اعلامشده توسط هر ماژول ابزار است.
 - جدول ممیزی: `mcp_tool_audit` (توسط `audit.ts` پر میشود).
 - فایلها: `server.ts`، `index.ts`، `httpTransport.ts`، `audit.ts`، `scopeEnforcement.ts`،
   `runtimeHeartbeat.ts`، `descriptionCompressor.ts`، `schemas/{tools, a2a, audit, index}.ts`،
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`،
   بهعلاوه آزمونهای موجود در `__tests__/`.
-- برای مشاهده فهرست کامل ابزارها به [MCP-SERVER.md](../frameworks/MCP-SERVER.md) مراجعه کنید.
+- برای مشاهده فهرست کامل ابزارها، به [MCP-SERVER.md](../frameworks/MCP-SERVER.md) مراجعه کنید.
 
 ### 4.7 `open-sse/config/`
 
@@ -553,17 +569,17 @@ open-sse/
 `providerHeaderProfiles.ts`)، رجیستریهای مدل بهتفکیک قالب (`audioRegistry.ts`،
 `embeddingRegistry.ts`، `imageRegistry.ts`، `moderationRegistry.ts`،
 `musicRegistry.ts`، `rerankRegistry.ts`، `searchRegistry.ts`، `videoRegistry.ts`)،
-ابزارهای کمکی هویت (`codexIdentity.ts`، `codexInstructions.ts`،
+توابع کمکی هویت (`codexIdentity.ts`، `codexInstructions.ts`،
 `anthropicHeaders.ts`، `antigravityUpstream.ts`، `antigravityModelAliases.ts`،
 `cliFingerprints.ts`، `toolCloaking.ts`، `defaultThinkingSignature.ts`)،
-ابزارهای کمکی اعتبارنامه (`credentialLoader.ts`، `codexClient.ts`) و آداپتورهای
+توابع کمکی اعتبارنامه (`credentialLoader.ts`، `codexClient.ts`) و آداپتورهای
 ابری (`azureAi.ts`، `bedrock.ts`، `datarobot.ts`، `glmProvider.ts`،
 `maritalk.ts`، `oci.ts`، `petals.ts`، `runway.ts`، `sap.ts`، `watsonx.ts`،
 `ollamaModels.ts`، `errorConfig.ts`، `constants.ts`، `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-مؤلفههای پایهٔ استریم و ابزارهای کمکی ارائهدهنده: `stream.ts`، `streamHandler.ts`،
+اجزای پایهای استریم و ابزارهای کمکی ارائهدهنده: `stream.ts`، `streamHandler.ts`،
 `streamHelpers.ts`، `streamPayloadCollector.ts`، `streamReadiness.ts`،
 `sseHeartbeat.ts`، `proxyFetch.ts`، `proxyDispatcher.ts`، `tlsClient.ts`،
 `networkProxy.ts`، `awsSigV4.ts`، `cacheControlPolicy.ts`،
@@ -654,9 +670,9 @@ bin/
 
 ---
 
-## 8. `scripts/`
+## ۸. `scripts/`
 
-بر اساس کاربرد در 6 زیرپوشه سازماندهی شده است.
+بر اساس کاربرد در ۶ زیرپوشه سازماندهی شده است.
 
 - **`scripts/build/`** — `build-next-isolated.mjs`، `prepublish.ts`،
   `prepare-electron-standalone.mjs`، `pack-artifact-policy.ts`،
@@ -668,7 +684,12 @@ bin/
   `v1-ws-bridge.mjs`، `smoke-electron-packaged.mjs`،
   `run-playwright-tests.mjs`، `run-ecosystem-tests.mjs`،
   `run-protocol-clients-tests.mjs`، `sync-env.mjs`، `healthcheck.mjs`،
-  `system-info.mjs`.
+  `system-info.mjs`، بهعلاوه ابزارهای کمکی فقطخواندنی برای پایش PR:
+  `ci-discriminate.sh` (امضاهای بررسیهای ناموفق یک PR را نسبت به یک PR مرجع یا
+  مسئلهٔ قرمزبودن شاخهٔ پایه، به دستههای خودی / موروثی / ناشناخته تفکیک میکند) و
+  `audit-worktree.sh` (فایلهای تغییرکرده، بخشهای محافظتشده، assertهای حذفشده،
+  تعداد موارد سرکوب، tsconfigهای موقت باقیمانده، headِ PR در مقایسه با HEAD محلی —
+  پیش از پذیرفتهشدن PR یک عامل).
 - **`scripts/check/`** — `check-cycles.mjs`، `check-docs-sync.mjs`،
   `check-docs-counts-sync.mjs`، `check-env-doc-sync.mjs`،
   `check-deprecated-versions.mjs`، `check-route-validation.mjs`،

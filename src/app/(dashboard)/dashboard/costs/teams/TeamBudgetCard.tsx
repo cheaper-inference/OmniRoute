@@ -4,84 +4,145 @@ import Card from "@/shared/components/Card";
 import type { Detail } from "./helpers";
 import { money } from "./helpers";
 
+type Translate = ReturnType<typeof useTranslations>;
+type BudgetStatus = NonNullable<Detail["budgetStatus"]>;
+
+function isIncomplete(status: BudgetStatus) {
+  return Boolean(status.hasUnpricedUsage || status.hasPartialRetainedUsage);
+}
+
+function meterColor(status: BudgetStatus) {
+  if (status.exceeded) return "bg-red-500";
+  return isIncomplete(status) ? "bg-amber-500" : "bg-primary";
+}
+
+function BudgetMeter({ status, used, t }: { status: BudgetStatus; used: number; t: Translate }) {
+  const incomplete = isIncomplete(status);
+  const percent = Math.min(100, (used / status.maxBudgetUsd) * 100);
+  return (
+    <div
+      role="progressbar"
+      aria-label={t("budgetTitle")}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={incomplete ? undefined : percent}
+      aria-valuetext={
+        incomplete ? t(status.hasUnpricedUsage ? "unpricedBudget" : "partialBudget") : undefined
+      }
+      className="h-2 rounded-full bg-bg overflow-hidden"
+    >
+      <div
+        className={`h-full rounded-full ${meterColor(status)} motion-safe:transition-[width]`}
+        style={{ width: `${percent}%` }}
+      />
+    </div>
+  );
+}
+
+function BudgetNotices({
+  status,
+  used,
+  locale,
+  t,
+}: {
+  status: BudgetStatus;
+  used: number;
+  locale: string;
+  t: Translate;
+}) {
+  const overBudget = used >= status.maxBudgetUsd;
+  return (
+    <>
+      {status.hasUnpricedUsage && (!status.exceeded || overBudget) && (
+        <p role="status" className="text-amber-700 dark:text-amber-400">
+          {t("unpricedBudget")}
+        </p>
+      )}
+      {status.hasPartialRetainedUsage && (
+        <p role="status" className="text-amber-700 dark:text-amber-400">
+          {t("partialBudget")}
+        </p>
+      )}
+      {status.exceeded && (
+        <p role="alert" className="text-red-600 dark:text-red-400">
+          {overBudget
+            ? t("overBudget", { amount: money(used - status.maxBudgetUsd, locale) })
+            : t("unpricedBudget")}
+        </p>
+      )}
+    </>
+  );
+}
+
+function BudgetFooter({
+  status,
+  used,
+  locale,
+  t,
+}: {
+  status: BudgetStatus;
+  used: number;
+  locale: string;
+  t: Translate;
+}) {
+  const remaining = isIncomplete(status)
+    ? "—"
+    : money(Math.max(0, status.maxBudgetUsd - used), locale);
+  const resetAt = new Intl.DateTimeFormat(locale, {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "UTC",
+  }).format(new Date(status.resetAtIso));
+  return (
+    <div className="flex flex-wrap justify-between gap-2 text-sm text-text-muted tabular-nums">
+      <p>
+        {t("remaining")}: {remaining}
+      </p>
+      <p>
+        {t("resets")}: {resetAt} (UTC)
+      </p>
+    </div>
+  );
+}
+
+function BudgetBody({ status, locale, t }: { status: BudgetStatus; locale: string; t: Translate }) {
+  const used = status.estimatedListCostUsd ?? 0;
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap justify-between gap-2 tabular-nums">
+        <p>
+          {t("used")}: <strong>{money(used, locale)}</strong>
+        </p>
+        <p>
+          {t("maximum")}: {money(status.maxBudgetUsd, locale)}
+        </p>
+      </div>
+      <BudgetMeter status={status} used={used} t={t} />
+      <BudgetNotices status={status} used={used} locale={locale} t={t} />
+      <BudgetFooter status={status} used={used} locale={locale} t={t} />
+    </div>
+  );
+}
+
 export default function TeamBudgetCard({ detail }: { detail: Detail }) {
   const t = useTranslations("teamCosts");
   const locale = useLocale();
   const status = detail.budgetStatus;
-  const archived = detail.team.status === "archived";
-  const incomplete = status?.hasUnpricedUsage || status?.hasPartialRetainedUsage;
-  const used = status?.estimatedListCostUsd ?? 0;
-  const percent = status ? Math.min(100, (used / status.maxBudgetUsd) * 100) : 0;
+  let body;
+  if (detail.team.status === "archived") {
+    body = <p className="text-text-muted">{t("archivedBudget")}</p>;
+  } else if (!status) {
+    body = (
+      <p className="text-text-muted">
+        {t(detail.team.maxBudgetUsd == null ? "unlimited" : "budgetUnavailable")}
+      </p>
+    );
+  } else {
+    body = <BudgetBody status={status} locale={locale} t={t} />;
+  }
   return (
     <Card title={t("budgetTitle")} subtitle={t("budgetSubtitle")} icon="account_balance_wallet">
-      {archived ? (
-        <p className="text-text-muted">{t("archivedBudget")}</p>
-      ) : !status ? (
-        <p className="text-text-muted">
-          {t(detail.team.maxBudgetUsd == null ? "unlimited" : "budgetUnavailable")}
-        </p>
-      ) : (
-        <div className="space-y-4">
-          <div className="flex flex-wrap justify-between gap-2 tabular-nums">
-            <p>
-              {t("used")}: <strong>{money(used, locale)}</strong>
-            </p>
-            <p>
-              {t("maximum")}: {money(status.maxBudgetUsd, locale)}
-            </p>
-          </div>
-          <div
-            role="progressbar"
-            aria-label={t("budgetTitle")}
-            aria-valuemin={0}
-            aria-valuemax={100}
-            aria-valuenow={incomplete ? undefined : percent}
-            aria-valuetext={
-              incomplete
-                ? t(status.hasUnpricedUsage ? "unpricedBudget" : "partialBudget")
-                : undefined
-            }
-            className="h-2 rounded-full bg-bg overflow-hidden"
-          >
-            <div
-              className={`h-full rounded-full ${status.exceeded ? "bg-red-500" : incomplete ? "bg-amber-500" : "bg-primary"} motion-safe:transition-[width]`}
-              style={{ width: `${percent}%` }}
-            />
-          </div>
-          {status.hasUnpricedUsage && (!status.exceeded || used >= status.maxBudgetUsd) && (
-            <p role="status" className="text-amber-700 dark:text-amber-400">
-              {t("unpricedBudget")}
-            </p>
-          )}
-          {status.hasPartialRetainedUsage && (
-            <p role="status" className="text-amber-700 dark:text-amber-400">
-              {t("partialBudget")}
-            </p>
-          )}
-          {status.exceeded && (
-            <p role="alert" className="text-red-600 dark:text-red-400">
-              {used >= status.maxBudgetUsd
-                ? t("overBudget", { amount: money(used - status.maxBudgetUsd, locale) })
-                : t("unpricedBudget")}
-            </p>
-          )}
-          <div className="flex flex-wrap justify-between gap-2 text-sm text-text-muted tabular-nums">
-            <p>
-              {t("remaining")}:{" "}
-              {incomplete ? "—" : money(Math.max(0, status.maxBudgetUsd - used), locale)}
-            </p>
-            <p>
-              {t("resets")}:{" "}
-              {new Intl.DateTimeFormat(locale, {
-                dateStyle: "medium",
-                timeStyle: "short",
-                timeZone: "UTC",
-              }).format(new Date(status.resetAtIso))}{" "}
-              (UTC)
-            </p>
-          </div>
-        </div>
-      )}
+      {body}
     </Card>
   );
 }

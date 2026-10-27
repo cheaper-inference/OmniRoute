@@ -1,6 +1,8 @@
 import { BaseGuardrail, type GuardrailContext, type GuardrailResult } from "./base";
 import { processPII } from "@/shared/utils/inputSanitizer";
 import { sanitizePII, sanitizePIIResponse } from "@/lib/piiSanitizer";
+import { getPiiRuleConfig } from "@/lib/pii/piiRuleConfig";
+import { recordPiiDetections } from "@/lib/pii/piiDetectionStats";
 
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
 
@@ -18,7 +20,9 @@ function isRequestPiiMaskingEnabled() {
 }
 
 function sanitizeStringValue(text: string, redact: boolean) {
-  const result = processPII(text, redact);
+  // The operator's per-type selection and custom rules only apply while masking
+  // is on; with the flag off detection stays exactly the built-in scan.
+  const result = processPII(text, redact, redact ? getPiiRuleConfig() : undefined);
   return {
     detections: result.detections,
     modified: result.text !== text,
@@ -155,6 +159,8 @@ function cloneAndMaskRequestPayload(payload: unknown) {
     clonedPayload.prompt = sanitizeMessageLikeList(clonedPayload.prompt);
   }
 
+  if (redact) recordPiiDetections("request", detections);
+
   return {
     detections,
     modified,
@@ -166,7 +172,7 @@ function maskResponsesOutput(response: JsonRecord) {
   let modified = false;
 
   if (typeof response.output_text === "string") {
-    const result = sanitizePII(response.output_text);
+    const result = sanitizePII(response.output_text, false, { recordStats: true });
     if (result.redacted) {
       response.output_text = result.text;
       modified = true;
@@ -182,7 +188,7 @@ function maskResponsesOutput(response: JsonRecord) {
           if (!part || typeof part !== "object") return part;
           const nextPart = { ...(part as JsonRecord) };
           if (typeof nextPart.text === "string") {
-            const result = sanitizePII(nextPart.text);
+            const result = sanitizePII(nextPart.text, false, { recordStats: true });
             if (result.redacted) {
               nextPart.text = result.text;
               modified = true;

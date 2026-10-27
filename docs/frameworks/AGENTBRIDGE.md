@@ -22,7 +22,7 @@ When an IDE agent (e.g., GitHub Copilot, Cursor, Claude Code) makes an API call,
 
 This means you can:
 
-- **Reroute any agent to any provider**: Copilot talking to OpenAI? Redirect it to Anthropic Claude, Gemini, or any of OmniRoute's 352 providers.
+- **Reroute any agent to any provider**: Copilot talking to OpenAI? Redirect it to Anthropic Claude, Gemini, or any of OmniRoute's 375 providers.
 - **Apply model mappings**: `gemini-3-flash` → `claude-sonnet-4.7` transparently at the handler level.
 - **Observe all agent traffic**: every intercepted request is published to the [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
 - **Apply OmniRoute resilience**: combo routing, circuit breakers, fallbacks, and cost tracking work for IDE agent traffic too.
@@ -191,14 +191,14 @@ shared hop-by-hop/framing denylist (including proxy authentication), fully redac
 
 Use the AgentBridge Server Card at `/dashboard/tools/agent-bridge`:
 
-| Action          | Description                                                             |
-| --------------- | ----------------------------------------------------------------------- |
-| Start Server    | Spawns `src/mitm/server.cjs` on port 443                                |
-| Stop Server     | Gracefully shuts down the child process                                 |
-| Restart Server  | Stop + start (picks up target changes)                                  |
-| Trust Cert      | Installs `DATA_DIR/mitm/ca.crt` into OS trust store                     |
-| Download Cert   | Downloads `ca.crt` for manual installation                              |
-| Regenerate Cert | Creates a new CA keypair (all existing per-agent certs are invalidated) |
+| Action          | Description                                                                                                                                                                                                                                                                                                                                   |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Start Server    | Spawns `src/mitm/server.cjs` on port 443. Under the root-CA model it creates `ca.crt` on first start and trusts the active cert when a sudo password is available                                                                                                                                                                             |
+| Stop Server     | Gracefully shuts down the child process                                                                                                                                                                                                                                                                                                       |
+| Restart Server  | Stop + start (picks up target changes and a regenerated cert)                                                                                                                                                                                                                                                                                 |
+| Trust Cert      | Installs the active cert into the OS trust store: `DATA_DIR/mitm/ca.crt` under the root-CA model, `DATA_DIR/mitm/server.crt` on a legacy-leaf install                                                                                                                                                                                         |
+| Download Cert   | Downloads the active cert for manual installation (`omniroute-mitm-ca.crt` = `ca.crt`, or `omniroute-mitm.crt` = `server.crt` on a legacy-leaf install)                                                                                                                                                                                       |
+| Regenerate Cert | Never changes the cert model. Legacy-leaf install: mints a new `server.crt`/`server.key` (restart the server to serve it). Root-CA model: rotates `ca.crt`/`ca.key`, refused while the server runs; a trusted old CA is untrusted first (needs the sudo password), or the rotation is aborted. Clients must trust the new CA again afterwards |
 
 ### 3.2 Trust the certificate
 
@@ -510,33 +510,33 @@ All routes are `LOCAL_ONLY` (loopback-only, enforced before auth) and `SPAWN_CAP
 
 Base path: `/api/tools/agent-bridge/`
 
-| Method              | Path                                           | Description                                                                                                                |
-| ------------------- | ---------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| GET                 | `/api/tools/agent-bridge/state`                | Global server state + per-agent detection/status                                                                           |
-| GET                 | `/api/tools/agent-bridge/agents`               | List registered agents (id, name, hosts, viability, state)                                                                 |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | State of one agent (target config + detection + stored state)                                                              |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Update `setup_completed` for agent                                                                                         |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Run detection probe for agent (`installed`, `version?`, `path?`)                                                           |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Enable/disable DNS for agent (`{enabled: boolean}`)                                                                        |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Model mappings for agent                                                                                                   |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Replace model mappings                                                                                                     |
-| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Restore default: un-spoof this agent's DNS, clear its mappings, reset its state (see §3.6)                                |
-| POST                | `/api/tools/agent-bridge/server`               | Start/stop/restart server (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                          |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Cert status (`exists`, `trusted`, `path`)                                                                                  |
-| POST                | `/api/tools/agent-bridge/cert`                 | Trust (install) the MITM root CA                                                                                           |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | Untrust (remove) the MITM root CA — idempotent (see §3.6)                                                                  |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Regenerate the self-signed MITM cert                                                                                       |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | Stream the PEM cert for download                                                                                           |
-| GET                 | `/api/tools/agent-bridge/bypass`               | List bypass patterns (`default` + `user`)                                                                                  |
-| POST                | `/api/tools/agent-bridge/bypass`               | Replace user-defined bypass patterns wholesale                                                                             |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Remove a single user-defined bypass pattern                                                                                |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | Capture-pipeline self-test (see §3.6)                                                                                      |
-| POST                | `/api/tools/agent-bridge/repair`               | Undo orphaned MITM system state (see §3.6)                                                                                 |
-| GET                 | `/api/tools/agent-bridge/config`               | Export portable config JSON (see §3.7)                                                                                     |
-| POST                | `/api/tools/agent-bridge/config`               | Import portable config JSON (see §3.7)                                                                                     |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Get configured upstream CA path                                                                                            |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Validate + persist upstream CA path                                                                                        |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Validate-only (dry-run) an upstream CA path — does not persist                                                             |
+| Method              | Path                                           | Description                                                                                                           |
+| ------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| GET                 | `/api/tools/agent-bridge/state`                | Global server state + per-agent detection/status                                                                      |
+| GET                 | `/api/tools/agent-bridge/agents`               | List registered agents (id, name, hosts, viability, state)                                                            |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | State of one agent (target config + detection + stored state)                                                         |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Update `setup_completed` for agent                                                                                    |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Run detection probe for agent (`installed`, `version?`, `path?`)                                                      |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Enable/disable DNS for agent (`{enabled: boolean}`)                                                                   |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Model mappings for agent                                                                                              |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Replace model mappings                                                                                                |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Restore default: un-spoof this agent's DNS, clear its mappings, reset its state (see §3.6)                            |
+| POST                | `/api/tools/agent-bridge/server`               | Start/stop/restart server (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                     |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Cert status (`exists`, `trusted`, `path`)                                                                             |
+| POST                | `/api/tools/agent-bridge/cert`                 | Trust (install) the MITM root CA                                                                                      |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | Untrust (remove) the MITM root CA — idempotent (see §3.6)                                                             |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Regenerate the active cert without changing the cert model (legacy leaf, or root-CA rotation — see §3.1)              |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Stream the active PEM cert for download (`ca.crt` under the root-CA model, `server.crt` on a legacy-leaf install)     |
+| GET                 | `/api/tools/agent-bridge/bypass`               | List bypass patterns (`default` + `user`)                                                                             |
+| POST                | `/api/tools/agent-bridge/bypass`               | Replace user-defined bypass patterns wholesale                                                                        |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Remove a single user-defined bypass pattern                                                                           |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Capture-pipeline self-test (see §3.6)                                                                                 |
+| POST                | `/api/tools/agent-bridge/repair`               | Undo orphaned MITM system state (see §3.6)                                                                            |
+| GET                 | `/api/tools/agent-bridge/config`               | Export portable config JSON (see §3.7)                                                                                |
+| POST                | `/api/tools/agent-bridge/config`               | Import portable config JSON (see §3.7)                                                                                |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Get configured upstream CA path                                                                                       |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Validate + persist upstream CA path                                                                                   |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Validate-only (dry-run) an upstream CA path — does not persist                                                        |
 | GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | TPROXY transparent-decrypt capture mode — see `docs/security/MITM-TPROXY-DECRYPT.md` (git; not compiled into `/docs`) |
 
 Full OpenAPI schemas: `docs/openapi.yaml` → tag `AgentBridge`.

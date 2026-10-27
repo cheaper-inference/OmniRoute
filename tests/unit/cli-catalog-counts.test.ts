@@ -30,7 +30,7 @@ test(`CLI_TOOLS has exactly ${EXPECTED_AGENT_COUNT} agent entries`, () => {
   );
 });
 
-test("CLI_TOOLS total code entries (including none) equals 26 (21 visible + 5 none)", () => {
+test("CLI_TOOLS total code entries (including none) equals 27 (22 visible + 5 none)", () => {
   // code-none entries: antigravity, kiro, cursor (app), hermes, and zcode.
   const codeNone = codeAll.filter((t) => t.baseUrlSupport === "none");
   assert.equal(
@@ -38,11 +38,11 @@ test("CLI_TOOLS total code entries (including none) equals 26 (21 visible + 5 no
     5,
     `Expected 5 code entries with baseUrlSupport='none', got ${codeNone.length}: ${codeNone.map((t) => t.id).join(", ")}`
   );
-  assert.equal(codeAll.length, 26, `Expected 26 total code entries, got ${codeAll.length}`);
+  assert.equal(codeAll.length, 27, `Expected 27 total code entries, got ${codeAll.length}`);
 });
 
-test("CLI_TOOLS total (code + agent) = 36", () => {
-  assert.equal(all.length, 36, `Expected 36 total entries, got ${all.length}`);
+test("CLI_TOOLS total (code + agent) = 37", () => {
+  assert.equal(all.length, 37, `Expected 37 total entries, got ${all.length}`);
 });
 
 test("All code-none entries have configType mitm OR are legacy excluded entries", () => {
@@ -66,7 +66,7 @@ test("All agent entries have baseUrlSupport 'full' or 'partial' (no agent is 'no
   }
 });
 
-test("The 21 visible code entries include Qwen Code's rebuilt integration", () => {
+test("The 22 visible code entries include Qwen Code's rebuilt integration and Zed", () => {
   const d15List = new Set([
     "claude",
     "codex",
@@ -89,6 +89,7 @@ test("The 21 visible code entries include Qwen Code's rebuilt integration", () =
     "crush",
     "grok-build",
     "qwen",
+    "zed",
   ]);
   const visibleIds = new Set(codeVisible.map((t) => t.id));
   for (const id of d15List) {

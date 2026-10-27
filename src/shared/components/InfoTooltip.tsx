@@ -1,34 +1,27 @@
 "use client";
 
 import { cn } from "@/shared/utils/cn";
+import Icon from "./Icon";
+import Tooltip from "./Tooltip";
 
 interface InfoTooltipProps {
   text: string;
   className?: string;
 }
 
+// The trigger is a real button: reachable by keyboard, named by `text`, and the
+// tooltip (kit/Radix) opens on its hover and focus.
 export default function InfoTooltip({ text, className }: InfoTooltipProps) {
   return (
-    <span className={cn("relative inline-flex group", className)}>
-      <span
-        className="material-symbols-outlined text-[16px] text-text-muted cursor-help"
+    <Tooltip content={text} multiline delayMs={100}>
+      {/* kit-exception: an inline 16 px info trigger; the kit icon Button is a 32 px control */}
+      <button
+        type="button"
         aria-label={text}
+        className={cn("inline-flex cursor-help items-center text-text-muted", className)}
       >
-        info
-      </span>
-      <span
-        role="tooltip"
-        className={cn(
-          "absolute bottom-full left-1/2 -translate-x-1/2 mb-2",
-          "px-2.5 py-1.5 text-xs font-medium text-white bg-gray-900/95 rounded-md shadow-lg",
-          "whitespace-nowrap pointer-events-none",
-          "border border-white/10",
-          "opacity-0 group-hover:opacity-100 transition-opacity duration-150",
-          "z-50"
-        )}
-      >
-        {text}
-      </span>
-    </span>
+        <Icon name="info" size={16} />
+      </button>
+    </Tooltip>
   );
 }

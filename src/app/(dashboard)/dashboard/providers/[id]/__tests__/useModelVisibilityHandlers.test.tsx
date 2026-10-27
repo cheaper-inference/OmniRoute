@@ -119,4 +119,27 @@ describe("useModelVisibilityHandlers", () => {
     ).toBe(false);
     expect(hook.get().modelTestStatus["claude-opus-4-8"]).toBe("error");
   });
+
+  it("#17071 reports a skipped probe as info without marking the model failed", async () => {
+    const fetchMock = vi.mocked(fetch);
+    fetchMock.mockResolvedValueOnce({
+      ok: false,
+      json: () =>
+        Promise.resolve({
+          status: "error",
+          skipped: true,
+          error: "Skipped: non-chat generation model",
+        }),
+    } as Response);
+
+    const hook = renderHook();
+
+    await act(async () => {
+      await hook.get().onTestModel("agnes-image-2.5-flash", "agnes/agnes-image-2.5-flash");
+    });
+
+    expect(notify.info).toHaveBeenCalledWith("Skipped: non-chat generation model");
+    expect(notify.error).not.toHaveBeenCalled();
+    expect(hook.get().modelTestStatus["agnes-image-2.5-flash"]).toBeUndefined();
+  });
 });

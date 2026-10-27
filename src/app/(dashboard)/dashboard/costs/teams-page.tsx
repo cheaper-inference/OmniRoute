@@ -3,63 +3,70 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import Card from "@/shared/components/Card";
 import Button from "@/shared/components/Button";
-import SearchableSelect from "@/shared/components/SearchableSelect";
-import Select from "@/shared/components/Select";
-import { CardSkeleton } from "@/shared/components/Loading";
-import { ConfirmModal } from "@/shared/components/Modal";
 
 import { useTeamCosts, useTeamList } from "./teams/useTeamCosts";
-import { readJson, errorKey, type Team, type Period, type TeamKeyOption } from "./teams/helpers";
-import TeamBudgetCard from "./teams/TeamBudgetCard";
-import TeamReport from "./teams/TeamReport";
-import TeamMembership from "./teams/TeamMembership";
-import TeamForm, { type TeamPayload } from "./teams/TeamForm";
+import { useTeamMutations } from "./teams/useTeamMutations";
+import type { Team, Period } from "./teams/helpers";
+import TeamDetailPane, { Loading } from "./teams/TeamDetailPane";
+import TeamPicker from "./teams/TeamPicker";
+import TeamConfirmModal from "./teams/TeamConfirmModal";
+import TeamForm from "./teams/TeamForm";
 
-type Confirmation =
-  | { kind: "archive"; team: Team }
-  | { kind: "remove"; team: Team; keyId: string }
-  | { kind: "transfer"; team: Team; key: TeamKeyOption };
-
-function Loading({ label }: { label: string }) {
-  return (
-    <div role="status" aria-label={label} className="space-y-4 motion-safe:animate-pulse">
-      {[1, 2, 3].map((key) => (
-        <CardSkeleton key={key} />
-      ))}
-      <span className="sr-only">{label}</span>
-    </div>
-  );
-}
-
-export default function TeamCostsPage() {
-  const t = useTranslations("teamCosts");
-  const router = useRouter();
-  const params = useSearchParams();
-  const requestedId = params.get("team") ?? "";
-  const [period, setPeriod] = useState<Period>("30d");
-
-  const [filter, setFilter] = useState("active");
-  const [pending, setPending] = useState(false);
-  const [form, setForm] = useState<{ team: Team | null } | null>(null);
-  const [confirmation, setConfirmation] = useState<Confirmation | null>(null);
-  const [mutationError, setMutationError] = useState("");
-  const [missingId, setMissingId] = useState("");
-  // The URL owns selection. A valid archived deep link is visible until the user filters.
-  const preliminary = useTeamList();
-  const refreshList = preliminary.refresh;
-  const visible = (preliminary.list?.teams ?? []).filter(
+/** The URL owns selection. A valid archived deep link is visible until the user filters. */
+function filterTeams(teams: Team[], filter: string, requestedId: string, missingId: string) {
+  return teams.filter(
     (team) =>
       team.id !== missingId &&
       (filter === "all" ||
         team.status === filter ||
         (requestedId === team.id && team.status === "archived" && filter === "active"))
   );
-  const selectedId = visible.some((team) => team.id === requestedId)
-    ? requestedId
-    : (visible[0]?.id ?? "");
-  const data = useTeamCosts(selectedId, period);
+}
+
+function TeamsHeader({
+  blocked,
+  createDisabled,
+  onRefresh,
+  onCreate,
+}: {
+  blocked: boolean;
+  createDisabled: boolean;
+  onRefresh: () => void;
+  onCreate: () => void;
+}) {
+  const t = useTranslations("teamCosts");
+  return (
+    <div className="flex flex-wrap items-start justify-between gap-3">
+      <div>
+        <h1 className="text-2xl font-semibold">{t("title")}</h1>
+        <p className="mt-1 text-sm text-text-muted">{t("subtitle")}</p>
+      </div>
+      <div className="flex gap-2">
+        <Button variant="secondary" icon="refresh" disabled={blocked} onClick={onRefresh}>
+          {t("refresh")}
+        </Button>
+        <Button icon="add" disabled={createDisabled} onClick={onCreate}>
+          {t("create")}
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+function TeamsAlert({ error }: { error: string }) {
+  const t = useTranslations("teamCosts");
+  if (!error) return null;
+  return (
+    <p role="alert" className="text-sm text-red-600 dark:text-red-400">
+      {t(error)}
+    </p>
+  );
+}
+
+function useTeamSelection() {
+  const router = useRouter();
+  const params = useSearchParams();
   const select = useCallback(
     (id: string, replace = false) => {
       const next = new URLSearchParams(params.toString());
@@ -71,6 +78,21 @@ export default function TeamCostsPage() {
     },
     [params, router]
   );
+  return { requestedId: params.get("team") ?? "", select };
+}
+
+function useTeamBrowser() {
+  const { requestedId, select } = useTeamSelection();
+  const [period, setPeriod] = useState<Period>("30d");
+  const [filter, setFilter] = useState("active");
+  const [missingId, setMissingId] = useState("");
+  const preliminary = useTeamList();
+  const refreshList = preliminary.refresh;
+  const visible = filterTeams(preliminary.list?.teams ?? [], filter, requestedId, missingId);
+  const selectedId = visible.some((team) => team.id === requestedId)
+    ? requestedId
+    : (visible[0]?.id ?? "");
+  const data = useTeamCosts(selectedId, period);
   useEffect(() => {
     if (preliminary.list && requestedId !== selectedId) select(selectedId, true);
     // URL normalization only; no React state updates inside the effect.
@@ -82,290 +104,84 @@ export default function TeamCostsPage() {
       void refreshList().catch(() => {});
     }
   }, [data.detailError, selectedId, select, refreshList]);
+  return { preliminary, data, visible, selectedId, filter, setFilter, period, setPeriod, select };
+}
+
+export default function TeamCostsPage() {
+  const t = useTranslations("teamCosts");
+  const { preliminary, data, visible, selectedId, filter, setFilter, period, setPeriod, select } =
+    useTeamBrowser();
   const detail = data.data?.detail;
-  const blocked = pending || Boolean(form || confirmation);
-  async function refresh() {
-    setMutationError("");
+  const mutations = useTeamMutations({
+    detail,
     // Each hook reports its own failure, so one failed read must not skip the other.
-    await Promise.allSettled([preliminary.refresh(), data.reloadDetail()]);
-  }
-  async function perform(url: string, method: string, body?: unknown): Promise<boolean> {
-    if (pending) return false;
-    setPending(true);
-    setMutationError("");
-    try {
-      await readJson(url, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        ...(body !== undefined ? { body: JSON.stringify(body) } : {}),
-      });
-      // The write already succeeded. Each read hook owns and displays its refresh error;
-      // never leave a successful mutation ready to replay just because a read failed.
-      await Promise.allSettled([preliminary.refresh(), data.reloadDetail()]);
-      return true;
-    } catch (error) {
-      setMutationError(errorKey(error));
-      return false;
-    } finally {
-      setPending(false);
-    }
-  }
-  async function save(payload: TeamPayload) {
-    if (!form || pending) return;
-    const target = form.team;
-    setPending(true);
-    setMutationError("");
-    try {
-      const result = await readJson<{ team: Team }>(
-        target ? `/api/teams/${target.id}` : "/api/teams",
-        {
-          method: target ? "PATCH" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-      // The write already succeeded. Each read hook owns and displays its refresh error;
-      // never leave a successful mutation ready to replay just because a read failed.
-      await Promise.allSettled([preliminary.refresh(), data.reloadDetail()]);
-      select(result.team.id);
-      setForm(null);
-    } catch (error) {
-      setMutationError(errorKey(error));
-    } finally {
-      setPending(false);
-    }
-  }
-  async function assign(key: TeamKeyOption) {
-    if (!detail || blocked || detail.team.status !== "active") return;
-    const target = detail.team;
-    if (key.teamId && key.teamId !== target.id) {
-      setMutationError("");
-      setConfirmation({ kind: "transfer", team: target, key });
-      return;
-    }
-    await perform(`/api/teams/${target.id}/members`, "PUT", {
-      apiKeyId: key.id,
-      expectedTeamId: key.teamId,
-    });
-  }
-  async function confirm() {
-    if (!confirmation || pending) return;
-    const operation = confirmation;
-    const url = `/api/teams/${operation.team.id}`;
-    const ok =
-      operation.kind === "transfer"
-        ? await perform(url + "/members", "PUT", {
-            apiKeyId: operation.key.id,
-            expectedTeamId: operation.key.teamId,
-          })
-        : operation.kind === "remove"
-          ? await perform(
-              url + `/members?apiKeyId=${encodeURIComponent(operation.keyId)}`,
-              "DELETE"
-            )
-          : await perform(url, "DELETE");
-    if (ok) {
-      setConfirmation(null);
-      if (operation.kind === "archive") select("", true);
-    }
-  }
+    reloadReads: () => Promise.allSettled([preliminary.refresh(), data.reloadDetail()]),
+    select,
+  });
+  const { blocked, mutationError } = mutations;
+  const alertError =
+    preliminary.listError || (mutations.form || mutations.confirmation ? "" : mutationError);
   return (
     <div className="mx-auto max-w-[1440px] p-4 md:p-6 space-y-6 text-text-main">
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-semibold">{t("title")}</h1>
-          <p className="mt-1 text-sm text-text-muted">{t("subtitle")}</p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="secondary"
-            icon="refresh"
-            disabled={blocked}
-            onClick={() => void refresh()}
-          >
-            {t("refresh")}
-          </Button>
-          <Button
-            icon="add"
-            disabled={blocked || Boolean(preliminary.listError)}
-            onClick={() => {
-              setMutationError("");
-              setForm({ team: null });
-            }}
-          >
-            {t("create")}
-          </Button>
-        </div>
-      </div>
-      {(preliminary.listError || (!form && !confirmation && mutationError)) && (
-        <p role="alert" className="text-sm text-red-600 dark:text-red-400">
-          {t(preliminary.listError || mutationError)}
-        </p>
-      )}
+      <TeamsHeader
+        blocked={blocked}
+        createDisabled={blocked || Boolean(preliminary.listError)}
+        onRefresh={() => void mutations.refresh()}
+        onCreate={() => mutations.openForm(null)}
+      />
+      <TeamsAlert error={alertError} />
       {!preliminary.list && !preliminary.listError ? (
         <Loading label={t("loading")} />
       ) : (
         <div className="space-y-5">
-          <Card padding="sm">
-            <fieldset
-              disabled={blocked}
-              className="grid grid-cols-1 items-end gap-3 sm:grid-cols-[minmax(0,1fr)_12rem]"
-            >
-              <SearchableSelect
-                key={filter}
-                label={t("selectTeam")}
-                searchLabel={t("searchTeams")}
-                emptyLabel={t("noTeams")}
-                options={visible.map((team) => ({ value: team.id, label: team.name }))}
-                value={selectedId}
-                disabled={blocked}
-                onChange={(id) => select(id)}
-              />
-              <Select
-                label={t("statusFilter")}
-                aria-label={t("statusFilter")}
-                className="min-w-0"
-                value={filter}
-                onChange={(e) => {
-                  setFilter(e.target.value);
-                  select("", true);
-                }}
-              >
-                <option value="active">{t("active")}</option>
-                <option value="archived">{t("archived")}</option>
-                <option value="all">{t("allTeams")}</option>
-              </Select>
-            </fieldset>
-            {!visible.length && <p className="mt-3 text-sm text-text-muted">{t("noTeams")}</p>}
-          </Card>
-          <main className="min-w-0 space-y-5">
-            {data.detailError && (
-              <p role="alert" className="text-red-600 dark:text-red-400">
-                {t(data.detailError)}
-              </p>
-            )}
-            {data.loading ? (
-              <Loading label={t("loading")} />
-            ) : detail && data.data ? (
-              <>
-                <div className="flex flex-wrap items-start justify-between gap-3">
-                  <div className="min-w-0 flex-1">
-                    <h2 className="text-xl font-semibold break-words">{detail.team.name}</h2>
-                    <p className="text-xs mt-1 text-text-muted">{t(detail.team.status)}</p>
-                    {detail.team.description && (
-                      <p className="mt-2 text-sm text-text-muted break-words whitespace-pre-wrap">
-                        {detail.team.description}
-                      </p>
-                    )}
-                  </div>
-                  {detail.team.status === "active" && (
-                    <div className="flex gap-2">
-                      <Button
-                        variant="secondary"
-                        size="sm"
-                        disabled={blocked}
-                        onClick={() => {
-                          setMutationError("");
-                          setForm({ team: detail.team });
-                        }}
-                      >
-                        {t("edit")}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        disabled={blocked}
-                        onClick={() => {
-                          setMutationError("");
-                          setConfirmation({ kind: "archive", team: detail.team });
-                        }}
-                      >
-                        {t("archive")}
-                      </Button>
-                    </div>
-                  )}
-                </div>
-                <TeamBudgetCard detail={detail} />
-                <TeamReport
-                  report={data.data.report}
-                  memberCount={detail.members.length}
-                  period={period}
-                  pending={blocked}
-                  onPeriod={setPeriod}
-                />
-                <TeamMembership
-                  key={detail.team.id}
-                  detail={detail}
-                  options={preliminary.list?.keyOptions ?? []}
-                  pending={blocked}
-                  onAssign={(key) => void assign(key)}
-                  onRemove={(keyId) => {
-                    if (!blocked) {
-                      setMutationError("");
-                      setConfirmation({ kind: "remove", team: detail.team, keyId });
-                    }
-                  }}
-                />
-              </>
-            ) : (
-              !data.detailError &&
-              !data.loading && (
-                <Card>
-                  <p className="text-text-muted">{t("selectHint")}</p>
-                </Card>
-              )
-            )}
-          </main>
+          <TeamPicker
+            teams={visible}
+            selectedId={selectedId}
+            filter={filter}
+            blocked={blocked}
+            onSelect={(id) => select(id)}
+            onFilter={(next) => {
+              setFilter(next);
+              select("", true);
+            }}
+          />
+          <TeamDetailPane
+            detailError={data.detailError}
+            loading={data.loading}
+            content={
+              detail && data.data
+                ? {
+                    detail,
+                    report: data.data.report,
+                    period,
+                    keyOptions: preliminary.list?.keyOptions ?? [],
+                    blocked,
+                    onEdit: (team) => mutations.openForm(team),
+                    onArchive: (team) => mutations.ask({ kind: "archive", team }),
+                    onPeriod: setPeriod,
+                    onAssign: (key) => void mutations.assign(key),
+                    onRemove: mutations.requestRemove,
+                  }
+                : null
+            }
+          />
         </div>
       )}
-      {form && (
+      {mutations.form && (
         <TeamForm
-          team={form.team}
-          pending={pending}
+          team={mutations.form.team}
+          pending={mutations.pending}
           error={mutationError}
-          onClose={() => {
-            if (!pending) setForm(null);
-          }}
-          onSave={save}
+          onClose={mutations.closeForm}
+          onSave={mutations.save}
         />
       )}
-      <ConfirmModal
-        isOpen={Boolean(confirmation)}
-        loading={pending}
-        title={t(
-          confirmation?.kind === "transfer"
-            ? "transferTitle"
-            : confirmation?.kind === "remove"
-              ? "removeTitle"
-              : "archiveTitle"
-        )}
-        confirmText={t("confirm")}
-        cancelText={t("cancel")}
-        onClose={() => {
-          if (!pending) setConfirmation(null);
-        }}
-        onConfirm={confirm}
-        message={
-          <>
-            {confirmation && (
-              <span>
-                {confirmation.kind === "transfer"
-                  ? t("transferMessage", {
-                      source: confirmation.key.teamName || t("unassigned"),
-                      destination: confirmation.team.name,
-                    })
-                  : t(confirmation.kind === "remove" ? "removeMessage" : "archiveMessage", {
-                      team: confirmation.team.name,
-                    })}
-              </span>
-            )}
-            {mutationError && (
-              <span role="alert" className="block mt-3 text-red-600 dark:text-red-400">
-                {t(mutationError)}
-              </span>
-            )}
-          </>
-        }
+      <TeamConfirmModal
+        confirmation={mutations.confirmation}
+        pending={mutations.pending}
+        mutationError={mutationError}
+        onClose={mutations.closeConfirmation}
+        onConfirm={mutations.confirm}
       />
     </div>
   );

@@ -1,5 +1,8 @@
 "use client";
 
+import { CheckboxGroup } from "@omniroute/ui-kit/checkbox";
+import Checkbox from "@/shared/components/Checkbox";
+
 const WEBHOOK_EVENTS = [
   "request.completed",
   "request.failed",
@@ -11,12 +14,14 @@ const WEBHOOK_EVENTS = [
 ] as const;
 
 interface EventChecklistProps {
+  label?: string;
   selected: string[];
   onChange: (events: string[]) => void;
   allEventsLabel?: string;
 }
 
 export function EventChecklist({
+  label,
   selected,
   onChange,
   allEventsLabel = "All events",
@@ -34,32 +39,18 @@ export function EventChecklist({
   };
 
   return (
-    <div className="flex flex-wrap gap-2">
-      <button
-        type="button"
-        onClick={() => toggle("*")}
-        className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-          isAll
-            ? "border-primary/30 bg-primary/10 text-primary"
-            : "border-border bg-surface text-text-muted hover:text-text-main"
-        }`}
-      >
-        {allEventsLabel}
-      </button>
-      {WEBHOOK_EVENTS.map((ev) => (
-        <button
-          key={ev}
-          type="button"
-          onClick={() => toggle(ev)}
-          className={`rounded-full border px-3 py-1 text-xs font-medium transition-colors ${
-            isAll || selected.includes(ev)
-              ? "border-primary/30 bg-primary/10 text-primary"
-              : "border-border bg-surface text-text-muted hover:text-text-main"
-          }`}
-        >
-          {ev}
-        </button>
-      ))}
-    </div>
+    <CheckboxGroup label={label}>
+      <Checkbox label={allEventsLabel} checked={isAll} onChange={() => toggle("*")} />
+      <div className="grid gap-2 sm:grid-cols-2">
+        {WEBHOOK_EVENTS.map((ev) => (
+          <Checkbox
+            key={ev}
+            label={<span className="font-mono text-xs">{ev}</span>}
+            checked={isAll || selected.includes(ev)}
+            onChange={() => toggle(ev)}
+          />
+        ))}
+      </div>
+    </CheckboxGroup>
   );
 }

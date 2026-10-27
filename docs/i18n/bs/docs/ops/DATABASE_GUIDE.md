@@ -508,16 +508,16 @@ Ako vrati bilo šta osim `ok`, odmah prestanite da koristite bazu podataka i vra
 
 ## Oporavak od katastrofe
 
-### Scenario 1: Izgubljena WAL datoteka
+### Scenarij 1: WAL datoteka je izgubljena
 
-Datoteka `-wal` nedostaje, ali `-shm` i glavna baza podataka su netaknuti:
+Datoteka `-wal` nedostaje, ali su `-shm` i glavna baza podataka netaknute:
 
 ```bash
 # Automatski se oporavlja pri sljedećem otvaranju
 omniroute
 ```
 
-Ako SQLite ne može automatski izvršiti oporavak:
+Ako SQLite ne može izvršiti automatski oporavak:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite ".recover" > recovered.sql
@@ -525,26 +525,29 @@ sqlite3 recovered.db < recovered.sql
 mv recovered.db ~/.omniroute/storage.sqlite
 ```
 
-### Scenario 2: Glavna datoteka baze podataka je oštećena
+### Scenarij 2: Glavna datoteka baze podataka je oštećena
 
-Vratite iz sigurnosne kopije:
+Vratite je iz sigurnosne kopije:
 
 ```bash
-omniroute sync pull --merge   # ili: omniroute backup restore <backup-id>
+omniroute backup restore <backup-id>
 ```
 
-### Scenario 3: Izgubljen ključ za šifriranje
+`omniroute sync pull [outPath]` samo preuzima kompletnu `.tar.gz` arhivu sa pokrenutog servera
+(`GET /api/db-backups/exportAll`, potrebne su pristupne informacije operatera); ne vraća nikakve podatke.
 
-**Oporavak nije moguć** bez ključa. Šifrirana polja su nečitljiva. Ponovo dodajte sve provajdere ručno s novim vjerodajnicama.
+### Scenarij 3: Ključ za šifriranje je izgubljen
 
-> **Ublažavanje rizika**: Uvijek posebno sigurnosno kopirajte ključ za šifriranje, idealno u upravitelju lozinki ili KMS-u.
+**Oporavak nije moguć** bez ključa. Šifrirana polja su nečitljiva. Ručno ponovo dodajte sve pružaoce usluga s novim pristupnim podacima.
 
-### Scenario 4: Disk je pun
+> **Ublažavanje rizika**: Uvijek zasebno napravite sigurnosnu kopiju ključa za šifriranje, idealno u upravitelju lozinki ili KMS-u.
 
-SQLite će vratiti `SQLITE_FULL` greške. Oslobodite prostor na disku, a zatim:
+### Scenarij 4: Disk je pun
+
+SQLite će vratiti greške `SQLITE_FULL`. Oslobodite prostor na disku, a zatim izvršite:
 
 ```bash
-# Checkpoint WAL za oslobađanje prostora
+# Izvršite kontrolnu tačku WAL-a kako biste oslobodili prostor
 sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 ```
 

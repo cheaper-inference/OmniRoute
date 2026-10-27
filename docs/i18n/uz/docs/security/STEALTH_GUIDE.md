@@ -16,40 +16,53 @@ Yashirinlik funksiyalari OmniRoute foydalanuvchiga tegishli rasmiy hisoblar (Cla
 
 ---
 
-## TLS raqamli iz qatlami
+## TLS barmoq izi qatlami
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Doimiy `wreq-js` seanslari har bir hisob doirasi va aniqlangan proksi uchun zarurat tugʻilganda yaratiladi. Jarayon miqyosidagi `TlsClient` Cloudflare ortidagi yuqori oqim xizmatlari uchun **macOS tizimidagi Chrome 124** sifatida koʻrinadigan koʻpi bilan 128 ta seansni jamlaydi. Mahalliy bajarish muhiti mavjud boʻlmaganda `TlsClient.fetch()` xavfsiz tarzda xato bilan yakunlanadi; chaqiruvchi ushbu oʻramdan tashqarida zaxira variantini aniq tanlashi mumkin.
+Doimiy `wreq-js` seanslari har bir akkaunt doirasi va aniqlangan proksi uchun kechiktirib yaratiladi. Jarayon miqyosidagi `TlsClient` Cloudflare ortidagi yuqori oqim serverlari uchun **macOS tizimidagi Chrome 124** nomidan ishlaydigan ko‘pi bilan 128 ta seansni jamlaydi. Mahalliy bajarish muhiti mavjud bo‘lmaganda `TlsClient.fetch()` yopiq tarzda xatolik bilan yakunlanadi; chaqiruvchi ushbu o‘ramdan tashqarida zaxira variantini aniq tanlashi mumkin.
 
 - Seans profili: `browser: "chrome_124", os: "macos"`
 - Proksini aniqlash (ustuvorlik tartibida): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (kichik harfli variantlari ham)
-- Taym-aut: `TLS_CLIENT_TIMEOUT_MS` (`FETCH_TIMEOUT_MS` qiymatini meros qilib oladi, standart qiymat 600000)
+- Taym-aut: `TLS_CLIENT_TIMEOUT_MS` (`FETCH_TIMEOUT_MS` qiymatini meros qilib oladi, standart qiymati 600000)
 - `wreq-js` Response fetch bilan mos keladi (`headers`, `text()`, `json()`, `clone()`, `body`).
-- Birinchi bayt kuzatuvchisi (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): yuqori oqim sarlavhalari kelishi bilanoq `TlsClient.fetch()` yakunlanadi, shu sababli faqat `TLS_CLIENT_TIMEOUT_MS` hech qachon birinchi baytni bermaydigan tanani cheklay olmaydi. `guardTlsFirstByte()` tananing birinchi `read()` chaqiruvini `TLS_FIRST_BYTE_WATCHDOG_MS` (standart qiymat `10000`, `0` uni oʻchiradi) bilan poygalashtiradi; sogʻlom tana taʼsirlanmaydi, toʻxtab qolgan tana esa wreq oʻquvchisini bekor qiladi va `proxyFetch` ichidagi mavjud TLS zaxira mantigʻiga bevosita/proksi dispetcheriga oʻtish imkonini beradi (qayta ijro etish xavfsiz boʻlmagan soʻrov, masalan, tanaga ega POST, yashirincha qayta urinish oʻrniga baribir xato chiqaradi).
+- Birinchi bayt kuzatuvchisi (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  yuqori oqim sarlavhalari kelishi bilanoq yakunlanadi, shu sababli faqat `TLS_CLIENT_TIMEOUT_MS` hech qachon
+  birinchi baytni bermaydigan tanani cheklay olmaydi. `guardTlsFirstByte()` tananing birinchi `read()`
+  chaqiruvini `TLS_FIRST_BYTE_WATCHDOG_MS` (standart qiymati `10000`, `0` uni o‘chiradi) bilan poygalashtiradi;
+  sog‘lom tana ta’sirlanmaydi, to‘xtab qolgan tana esa wreq o‘quvchisini bekor qiladi va `proxyFetch`ning mavjud
+  TLS zaxira mantiqiga to‘g‘ridan-to‘g‘ri/proksi dispetcheriga o‘tish imkonini beradi (qayta yuborish xavfsiz
+  bo‘lmagan so‘rov, masalan, tanali POST, baribir yashirin ravishda qayta urinilish o‘rniga xato chiqaradi).
 
-### Veb-cookie provayder transporti — wreq-js 3.2.0
+### Veb-kuki provayderi transporti — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` quyidagi beshta ixtisoslashtirilgan veb-cookie transporti uchun umumiy adapterdir. Har bir yupqa provayder oʻrami brauzer/OS profilini tanlaydi. Adapter `open-sse/utils/tlsClient.ts` ichidagi yagona wreq bajarish muhiti yuklagichi va transport pulidan foydalanadi; ular profil + OS + aniqlangan proksi boʻyicha kalitlanadi, har bir soʻrov esa `cookieMode: "ephemeral"` dan foydalanadi. Shu sababli hisoblar va soʻrovlar transport darajasidagi ulanishlarni ulashadi, ammo hech qachon wreq seansi yoki cookie omborini ulashmaydi.
+`open-sse/services/tlsClientBase.ts` quyidagi beshta ixtisoslashtirilgan veb-kuki transporti uchun umumiy adapterdir. Har bir yupqa provayder o‘rami brauzer/OS profilini tanlaydi. Adapter `open-sse/utils/tlsClient.ts` ichidagi yagona wreq bajarish muhiti yuklagichi va transport pulidan foydalanadi; ular profil + OS + aniqlangan proksi bo‘yicha kalitlanadi, har bir so‘rov esa `cookieMode: "ephemeral"`dan foydalanadi. Shu sababli akkauntlar va so‘rovlar transport darajasidagi ulanishlarni bo‘lishadi, ammo wreq seansi yoki kuki omborini hech qachon bo‘lishmaydi.
 
-| Provayder  | Profil        | Emulyatsiya qilingan OS | Oqim EOF siyosati                     |
-| ---------- | ------------- | ----------------------- | ------------------------------------- |
-| Claude     | `chrome_146`  | Linux                   | `[DONE]` ni kiritish                  |
-| Perplexity | `firefox_148` | macOS                   | `event: end_of_stream` ni kiritish    |
-| Grok       | `chrome_146`  | Linux                   | `[DONE]` ni chiqarib tashlash         |
-| Notion     | `chrome_146`  | Windows                 | `[DONE]` ni kiritish                  |
-| LMArena    | `chrome_146`  | Windows                 | sentinel yoʻq; mahalliy EOF’da yopish |
+| Provayder  | Profil        | Emulyatsiya qilinadigan OS | Oqim EOF siyosati                    |
+| ---------- | ------------- | -------------------------- | ------------------------------------ |
+| Claude     | `chrome_146`  | Linux                      | `[DONE]`ni kiritish                  |
+| Perplexity | `firefox_151` | macOS                      | `event: end_of_stream`ni kiritish    |
+| Grok       | `chrome_146`  | Linux                      | `[DONE]`ni chiqarib tashlash         |
+| Notion     | `chrome_146`  | Windows                    | `[DONE]`ni kiritish                  |
+| LMArena    | `chrome_146`  | Windows                    | sentinel yo‘q; mahalliy EOFda yopish |
 
-- Oqim uzatish mahalliy javob `ReadableStream` obyektini toʻgʻridan-toʻgʻri isteʼmol qiladi; vaqtinchalik fayl yoki yordamchi jarayon yaratilmaydi.
-- Oqimni taqdim etishdan oldin dastlabki 256 baytgacha boʻlgan qism tekshiriladi. SSE provayderlari SSE boʻlmagan xatolarni buferlaydi; Grok/LMArena Cloudflare tekshiruvlarini `403` ga, HTML oraliq sahifalarini esa `502` ga moslaydi.
-- Mahalliy soʻrov taym-auti mutlaq JS qatʼiy muddati bilan oʻralgan holda qoladi. Osilib qolish faqat taʼsirlangan profil/OS/proksi transportini yaroqsiz qiladi va yopadi, keyingi soʻrov esa uni qayta yaratadi.
-- Proksini aniqlash ustuvorligi: har bir chaqiruvdagi `proxyUrl` → soʻrov doirasidagi hisob/boshqaruv paneli konteksti → `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (kichik harfli variantlari bilan birga). Aniqlash xatolari bevosita ulanish sizib chiqishiga yoʻl qoʻymasdan, xavfsiz tarzda xato bilan yakunlanadi. LMArena ataylab `arena.ai` ga nisbatan aniqlashni amalga oshiradi.
-- `byteResponse` UTF-8 buzilishisiz kontent turi koʻrsatilgan `data:` URL qaytaradi.
-- Xatolar: `TlsClientUnavailableError` (paket/addon mavjud emas), `TlsClientHangError` (muddat oshib ketdi) va barcha 128 ta cheklangan profil/OS/proksi uyasi faol yoki yopilayotgan boʻlsa, `WreqTransportCapacityError` (umumiy seans sigʻimi xato kodi).
+- Oqimli uzatish mahalliy javobning `ReadableStream` obyektidan bevosita foydalanadi; vaqtinchalik fayl yoki yordamchi
+  jarayon yaratilmaydi.
+- Oqim taqdim etilishidan oldin dastlabki 256 baytgacha tekshiriladi. SSE provayderlari SSE bo‘lmagan
+  xatolarni buferlaydi; Grok/LMArena Cloudflare tekshiruvlarini `403`ga, HTML oraliq sahifalarini esa `502`ga moslaydi.
+- Mahalliy so‘rov taym-auti mutlaq JS qat’iy muddati bilan o‘ralgan holda qoladi. Osilib qolish faqat ta’sirlangan
+  profil/OS/proksi transportini yaroqsiz qiladi va yopadi; keyingi so‘rov oldidan u qayta yaratiladi.
+- Proksini aniqlash ustuvorligi: har bir chaqiruvdagi `proxyUrl` → so‘rov doirasidagi akkaunt/boshqaruv paneli konteksti →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (kichik harfli variantlarini ham o‘z ichiga oladi). Aniqlash xatolari to‘g‘ridan-to‘g‘ri
+  ulanishning sizib chiqishiga yo‘l qo‘ymasdan, yopiq tarzda xatolik bilan yakunlanadi. LMArena ataylab `arena.ai`ga nisbatan aniqlaydi.
+- `byteResponse` UTF-8 buzilishisiz kontent turi ko‘rsatilgan `data:` URLini qaytaradi.
+- Xatolar: `TlsClientUnavailableError` (paket/addon mavjud emas), `TlsClientHangError`
+  (muddat oshib ketdi) va barcha 128 ta cheklangan profil/OS/proksi uyasi faol yoki yopilayotgan bo‘lsa,
+  `WreqTransportCapacityError` (umumiy seans sig‘imi xato kodi).
 
-Yuqoridagi umumiy `TlsClient` seansi brauzer tomonidan qoʻllab-quvvatlanadigan doimiy cookie holati uchun ixtisoslashtirilganligicha qoladi. Har ikkala yoʻl bitta keshlangan wreq modul yuklagichi va jarayon hayot sikli ilgagidan qayta foydalanadi; ularning pullari alohida qoladi, chunki cookie xizmat muddatlari ataylab farqlanadi.
+Yuqoridagi umumiy `TlsClient` brauzer tomonidan boshqariladigan doimiy kuki holati uchun ixtisoslashgan bo‘lib qoladi. Har ikkala yo‘l bitta keshlangan wreq modul yuklagichi va jarayonning hayot sikli ilgagidan qayta foydalanadi; ularning pullari alohida qoladi, chunki kukilarining yashash muddatlari ataylab turlicha qilingan.
 
-Profillar mahkamlangan paket tomonidan qoʻllab-quvvatlanadi, biroq haqiqiy WAF qabul qilishi mahalliy kontrakt sinovlaridan mustaqil ravishda oʻzgarishi mumkin. Yuqori oqim brauzeri bilan tenglikni daʼvo qilishdan oldin raqamli iz oʻzgarishlarini foydalanishga aniq ruxsat berilgan jonli hisob orqali tekshiring.
+Profillar mahkamlangan paket tomonidan qo‘llab-quvvatlanadi, biroq haqiqiy WAF qabul qilishi mahalliy kontrakt sinovlaridan mustaqil ravishda o‘zgarishi mumkin. Yuqori oqim brauzeri bilan tenglikni da’vo qilishdan oldin barmoq izi o‘zgarishlarini aniq ruxsat berilgan faol akkauntda tekshiring.
 
 ---
 
@@ -98,7 +111,7 @@ Quyidagilarga qoʻllanadi: `system` bloklari, barcha `messages[].content` hamda 
 
 Faqat “haqiqiy Claude Code” trafigini qabul qiladigan uchinchi tomon Anthropic reley serverlari uchun:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - Standart holatda `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"`
@@ -222,7 +235,7 @@ Barcha MITM endpointlari boshqaruv autentifikatsiyasini (`requireCliToolsAuth`) 
 
 | O‘zgaruvchi              | Standart qiymat                                                 |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |

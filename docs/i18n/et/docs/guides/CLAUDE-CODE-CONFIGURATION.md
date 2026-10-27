@@ -48,90 +48,99 @@ põhjal baas-URL-i ja tõendi (seega pärast `omniroute connect <vps>` käsku
 
 ---
 
-## Tuvastusaliased — muuda muud kui Claude'i mudelid valijas `/model` nähtavaks
+## Avastusaliased — mitte-Claude'i mudelite kuvamine `/model`-valijas
 
-Claude Code'i lüüsi mudelituvastus loetleb ainult ID-d, mis algavad prefiksiga
-`claude` või `anthropic`, mistõttu kuvab omavalija `/model` väärtusega
+Claude Code'i lüüsi mudeliavastus loetleb ainult ID-sid, mis algavad eesliitega `claude`
+või `anthropic`, seega näitab sisseehitatud `/model`-valija koos väärtusega
 `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY=1` tavaliselt **ainult** OmniRoute'i
 Claude'i/Anthropicu mudeleid — `kimi/kimi-k2.6` või `glm/glm-5.2` ei ilmu kunagi,
-kuigi nende marsruutimine toimib.
+kuigi need marsruutimisel tõrgeteta töötavad.
 
-OmniRoute saab peegeldada mis tahes lubatud mudelit (ja kombinatsiooni) ID all
-`claude/…`, et see läbiks filtri ja ilmuks valijasse:
+OmniRoute suudab iga lubatud mudeli (ja kombo) peegeldada `claude/…` ID alla, et see
+läbiks selle filtri ja ilmuks valijasse:
 
 ```
 kimi/kimi-k2.6            →  claude/kimi/kimi-k2.6      "Kimi K2.6 (OmniRoute)"
 glm/glm-5.2              →  claude/glm/glm-5.2         "GLM 5.2 (OmniRoute)"
-<kombinatsioon "custo-otimizado"> →  claude/combo/custo-otimizado
+<combo "custo-otimizado"> →  claude/combo/custo-otimizado
 ```
 
-Kui valid Claude Code'is ühe neist, eemaldab OmniRoute enne marsruutimist
-`claude/` ümbrise, taastades tegeliku ID — ehtne ID
-`claude/<real-claude-model>` (tegelik Claude OAuthi pakkuja) jäetakse alati muutmata.
+Kui valite Claude Code'is mõne neist, eemaldab OmniRoute enne marsruutimist `claude/`
+ümbrise ja taastab tegeliku ID — ehtne `claude/<real-claude-model>` ID (tegelik
+Claude'i OAuth-i pakkuja) jäetakse alati puutumata.
 
-**See on vaikimisi välja lülitatud** ja seda juhib kolmetasemeline kontroll
-(kõige konkreetsem seadistus võidab), nii et tavaline OmniRoute ei kahekordista
-oma kataloogi klientide jaoks, mis Claude Code'i ei kasuta:
+Vaikimisi peegeldatakse ainult põhi-ID-sid. Kui valikuline funktsioonilipp
+`CATALOG_MIRROR_REFINEMENTS_ENABLED` on sisse lülitatud, peegeldatakse kataloogis juba
+loetletud mõtlemispingutuse variante (nt `codex/gpt-6-sol-high`) nagu iga teist ID-d,
+nii et Claude Code saab valida konkreetse pingutustaseme, ja sisseehitatud `auto/*`
+ID-sid, mida päringutee ei suuda realiseerida, ei peegeldata. Seda, kas
+pingutusvariandid üldse loetletakse, määrab endiselt
+`OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS` — peegel ei lisa kunagi varianti, mida
+põhikataloogis pole.
 
-| Tase      | Asukoht                                                                        |
-| --------- | ------------------------------------------------------------------------------ |
-| Mudel     | Pakkuja üksikasjade leht → mudelipõhine lüliti „Kuva Claude Code'is”           |
-| Pakkuja   | Pakkuja üksikasjade leht → pakkujapõhine lüliti (hõlmab kõiki selle mudeleid)  |
-| Globaalne | Seaded → Funktsioonilülitid → `EXPOSE_CC_DISCOVERY_ALIASES` (vaikimisi väljas) |
+**See on vaikimisi välja lülitatud** ja seda juhitakse kolmetasemelise väravaga
+(kõige spetsiifilisem võidab), nii et tavaline OmniRoute ei kahekordista kunagi oma
+kataloogi klientide jaoks, kes Claude Code'i ei kasuta:
 
-Keskkonnamuutuja `EXPOSE_CC_DISCOVERY_ALIASES` sunnib globaalse taseme sisse
-ja on juhtpaneeli alistusest kõrgema prioriteediga (funktsioonilülitite ekraanil
-kuvatakse sel juhul märkus „aktiivne keskkonnamuutuja kaudu”). Pakkuja- ja
-mudelipõhised lülitid täpsustavad seda edasi — näiteks globaalne tase väljas +
-Kimi pakkuja sees kuvab ainult Kimi mudelid.
+| Tase      | Kus                                                                          |
+| --------- | ---------------------------------------------------------------------------- |
+| Mudel     | Pakkuja detailleht → mudelipõhine lüliti „Expose in Claude Code"             |
+| Pakkuja   | Pakkuja detailleht → pakkuja taseme lüliti (katab kõik selle mudelid)        |
+| Globaalne | Seaded → Funktsioonilipud → `EXPOSE_CC_DISCOVERY_ALIASES` (vaikimisi väljas) |
 
-> ⚠️ **Akna mittevastavus muudel kui Claude'i mudelitel.** Claude Code eeldab
-> 200K kontekstiakent iga ID puhul, mida see ei tunne (see ei saa tegelikku akent
-> lõpp-punktist `/v1/models` lugeda). Suurema aknaga mudeli puhul (nt Kimi K2
-> 256K) määra `CLAUDE_CODE_AUTO_COMPACT_WINDOW` väärtuseks mudeli tegelikust
-> aknast väiksem väärtus, et automaatne tihendamine ei käivituks liiga vara.
-> Eespool genereeritud profiilid teevad seda juba iga mudeli jaoks eraldi.
+Keskkonnamuutuja `EXPOSE_CC_DISCOVERY_ALIASES` lülitab globaalse taseme jõuliselt
+sisse ja on tähtsam kui armatuurlaua seadistus (sel juhul kuvatakse
+funktsioonilippude ekraanil märge „active via environment variable"). Pakkuja- ja
+mudelipõhised lülitid täpsustavad sealt edasi — nt globaalne tase väljas + Kimi
+pakkuja sees paljastab ainult Kimi mudelid.
 
----
+> ⚠️ **Kontekstiakna mittevastavus mitte-Claude'i mudelitel.** Claude Code eeldab
+> iga tundmatu ID puhul 200K kontekstiakent (see ei suuda tegelikku akent
+> `/v1/models` lõppunktist lugeda). Suurema aknaga mudeli (nt Kimi K2 256K) puhul
+> seadistage `CLAUDE_CODE_AUTO_COMPACT_WINDOW` mudeli tegelikust aknast madalamale
+> väärtusele, et automaatne tihendamine ei käivituks enneaegselt. Ülaltoodud
+> genereeritud profiilid teevad seda juba iga mudeli kohta.
 
 ## Sisseelamisplokk töölaual
 
-Claude’i tööriistakaart (**Töölaud → CLI-kood**) kuvab selle eksemplari täpse `settings.json`-i fragmendi
-tuvastusaliase teabenupu kõrval koos kopeerimisnupuga:
+Claude'i tööriistakaart (**Töölaud → CLI-kood**) kuvab selle eksemplari täpse `settings.json` fragmendi avastamisaliase teabenupu kõrval koos kopeerimisnupuga:
 
 ```jsonc
 {
   "env": {
-    "ANTHROPIC_BASE_URL": "http://<your OmniRoute>:20128",
-    "ANTHROPIC_AUTH_TOKEN": "<your OmniRoute API key>",
+    "ANTHROPIC_BASE_URL": "http://<teie OmniRoute>:20128",
+    "ANTHROPIC_AUTH_TOKEN": "<teie OmniRoute'i API-võti>",
     "CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY": "1",
   },
 }
 ```
 
-Baas-URL on kaardi tuvastatud aadress (sealhulgas teie sisestatud kohandatud väärtus), mis on juba
-normaliseeritud — ilma `/v1` järelliite ja lõpetava kaldkriipsuta. **Võtit ei kuvata kunagi**: plokk sisaldab
-kohatäitjat, mistõttu ekraanipilt ega kleebitud koodilõik ei saa võtit lekitada. Asendage see oma võtmega.
+Baas-URL on kaardi lahendatud aadress (sealhulgas teie sisestatud kohandatud alistus), mis on juba normaliseeritud — ilma `/v1` järelliiteta ja lõpetava kaldkriipsuta. **Võtit ei kuvata kunagi**: plokk sisaldab kohatäidet, mistõttu ei saa kuvatõmmis ega kleebitud koodilõik võtit lekitada. Asendage kohatäide oma võtmega.
 
-Lisage `CLAUDE_CODE_AUTO_COMPACT_WINDOW` sama `env` ploki alla iga mudeli puhul, mille tegelik
-kontekstiaken ei ole 200K — Claude Code eeldab 200K iga ID puhul, mida see ei tunne, mistõttu
-automaatne tihendamine käivitub muidu valel hetkel (vt eelmise jaotise hoiatust).
-Koodilõigu koostaja aktsepteerib ka seda väärtust, seega saab sihtmudeli akna suurust teadev kutsuja
-selle otse väljastada.
+Lisage `CLAUDE_CODE_AUTO_COMPACT_WINDOW` samasse `env` plokki iga mudeli puhul, mille tegelik kontekstiaken ei ole 200K — Claude Code eeldab 200K iga tundmatu ID puhul, mistõttu käivitub automaatne tihendamine muidu valel hetkel (vt eelmise jaotise hoiatust). Koodilõigu koostaja aktsepteerib ka seda väärtust, nii et sihtmudeli akna suurust teadev kutsuja saab selle otse väljastada.
 
-Allikas: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (puhas,
-ühiktestidega kaetud koostaja), mida renderdab `ClaudeGatewayOnboardingBlock`.
+Allikas: `src/shared/services/claudeCliConfig.ts::buildClaudeDiscoverySettingsSnippet` (puhas koostaja, ühiktestitud), mida renderdab `ClaudeGatewayOnboardingBlock`.
+
+### Ühe konto kinnistamine (valikuline)
+
+Kõigi Claude Code'i päringute saatmiseks ühe kindla teenusepakkuja konto kaudu lisage samasse `env` plokki `x-omniroute-connection` päis muutuja `ANTHROPIC_CUSTOM_HEADERS` kaudu:
+
+```jsonc
+"ANTHROPIC_CUSTOM_HEADERS": "x-omniroute-connection: <connection id>"
+```
+
+Kopeerige ID teenusepakkuja lehel oleva ühendusrea `xxxxxxxx…` kiibilt. Kinnistamine rakendub ainult ühe mudeli ID-dele (`provider/model`), mitte kombinatsioonidele. Täpse varukäitumise kirjelduse leiate jaotisest [Konto kinnistamine päringu kaupa](../reference/API_REFERENCE.md#account-pinning-per-request).
 
 ---
 
 ## Profiilid (`CLAUDE_CONFIG_DIR`)
 
-Claude Code’il **puuduvad sisseehitatud profiilifailid** (erinevalt Codexi failist `~/.codex/<name>.config.toml`).
+Claude Code'il **puuduvad sisseehitatud profiilifailid** (erinevalt Codexi failist `~/.codex/<name>.config.toml`).
 Tavapärane mehhanism on `CLAUDE_CONFIG_DIR` — iga profiili jaoks eraldi konfiguratsioonikataloog,
 millest igaühel on oma `settings.json`, identimisteave, ajalugu ja vahemälu.
 
-`omniroute setup-claude` hangib aktiivse `/v1/models` kataloogi ja kirjutab iga
-mudeli kohta profiili asukohta `~/.claude/profiles/<name>/settings.json`, kasutades uuesti
+`omniroute setup-claude` hangib reaalajas `/v1/models` kataloogi ja kirjutab iga
+mudeli kohta ühe profiili asukohta `~/.claude/profiles/<name>/settings.json`, kasutades
 **samu nimesid nagu `setup-codex`** (`glm52`, `kimi-k27`, `deepseek-pro`, …):
 
 ```jsonc
@@ -149,18 +158,18 @@ mudeli kohta profiili asukohta `~/.claude/profiles/<name>/settings.json`, kasuta
 }
 ```
 
-> **Autentimistunnust ei kirjutata kunagi profiili.** Käivitage käsuga
-> `omniroute launch --profile <name>` (see sisestab `ANTHROPIC_AUTH_TOKEN` aktiivsest
-> kontekstist) või eksportige `ANTHROPIC_AUTH_TOKEN` ise ja käivitage
+> **Autentimistõendit ei kirjutata kunagi profiili.** Käivitage käsuga
+> `omniroute launch --profile <name>` (see sisestab aktiivsest kontekstist muutuja `ANTHROPIC_AUTH_TOKEN`)
+> või eksportige `ANTHROPIC_AUTH_TOKEN` ise ja käivitage
 > `CLAUDE_CONFIG_DIR=~/.claude/profiles/<name> claude`.
 
 **Automaatne sünkroonimine pärast mudelite tuvastamist (valikuline).** OmniRoute saab need samad
-`~/.claude/profiles/<name>/settings.json` failid automaatselt uuesti genereerida iga kord, kui teenusepakkuja mudelite
-sünkroonimine muudab aktiivset kataloogi — nii saavad uued või ümbernimetatud mudelid profiilid ilma käsku uuesti
-käivitamata. See on **vaikimisi välja lülitatud**: lülitage see sisse **CLI-koodi töölaualt** („CLI-profiilide
-automaatne sünkroonimine“ → Claude Code) või määrake `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (see arvestab ka
-muutujaga `CLI_ALLOW_CONFIG_WRITES`, mis on vaikimisi sisse lülitatud). Kui see on lubatud, kirjutatakse ainult profiilifaile; see ei
-muuda kunagi teie aktiivset/vaikimisi Claude’i konfiguratsiooni, autentimist ega faili `~/.claude/settings.json`.
+`~/.claude/profiles/<name>/settings.json` failid automaatselt uuesti genereerida, kui teenusepakkuja mudelite
+sünkroonimine muudab reaalajas kataloogi — nii saavad uued või ümbernimetatud mudelid profiilid ilma käsku
+uuesti käivitamata. See on **vaikimisi välja lülitatud**: lülitage see sisse **CLI Code'i töölaual** („CLI profiilide
+automaatne sünkroonimine” → Claude Code) või määrake `OMNIROUTE_AUTO_SYNC_CLAUDE_PROFILES=true` (see arvestab ka
+muutujaga `CLI_ALLOW_CONFIG_WRITES`, mis on vaikimisi sisse lülitatud). Kui see on lubatud, kirjutatakse ainult profiilifaile;
+aktiivset/vaikimisi Claude'i konfiguratsiooni, autentimist ega faili `~/.claude/settings.json` ei muudeta kunagi.
 
 ### Profiilide genereerimine ja kasutamine
 
@@ -174,10 +183,14 @@ omniroute setup-claude --remote http://192.168.0.15:20128 --api-key oma_live_xxx
 # Ainult mõned teenusepakkujad
 omniroute setup-claude --only glm,kimi
 
+# Kirjuta profiilid ka kohaliku CLI teenusepakkujatele (zcode, auggie, devin-cli-agentic,
+# codex-app-server), mida selles hostis ei tuvastatud (kohaliku sihtmärgi puhul jäetakse vaikimisi vahele)
+omniroute setup-claude --include-local
+
 # Eelvaade ilma kirjutamata
 omniroute setup-claude --dry-run
 
-# Profiili käivitamine
+# Käivita profiil
 omniroute launch --profile kimi-k27
 ```
 

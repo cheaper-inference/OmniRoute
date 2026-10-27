@@ -169,7 +169,8 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
     if (!payload || payload === "[DONE]") continue;
     try {
       const parsed = JSON.parse(payload);
-      if (Array.isArray(parsed?.choices)) {
+      if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) continue;
+      if (Array.isArray(parsed.choices)) {
         sawChoices = true;
       }
       chunks.push(parsed);
@@ -182,6 +183,7 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
 
   const first = chunks[0];
   const contentParts = [];
+  const refusalParts = [];
   const reasoningParts = [];
   type AccumulatedToolCall = {
     id: string | null;
@@ -208,6 +210,9 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
 
     if (typeof delta.content === "string" && delta.content.length > 0) {
       contentParts.push(delta.content);
+    }
+    if (typeof delta.refusal === "string" && delta.refusal.length > 0) {
+      refusalParts.push(delta.refusal);
     }
     if (typeof delta.reasoning_content === "string" && delta.reasoning_content.length > 0) {
       reasoningParts.push(delta.reasoning_content);
@@ -269,6 +274,9 @@ export function parseSSEToOpenAIResponse(rawSSE, fallbackModel) {
     role: "assistant",
     content: joinedContent,
   };
+  if (refusalParts.length > 0) {
+    message.refusal = refusalParts.join("");
+  }
   if (joinedReasoning) {
     message.reasoning_content = joinedReasoning;
   }
@@ -541,13 +549,13 @@ function cloneResponseItem(item) {
   };
 }
 
-function ensureResponsesMessageItem(outputItems, outputIndex) {
+function ensureResponsesMessageItem(outputItems, outputIndex, itemId) {
   const existing = outputItems.get(outputIndex);
   if (existing?.type === "message") return existing;
 
   const next = {
     ...(existing && typeof existing === "object" ? existing : {}),
-    id: existing?.id != null ? String(existing.id) : `msg_${Date.now()}_${outputIndex}`,
+    id: toIdString(itemId) || (existing?.id != null ? String(existing.id) : undefined),
     type: "message",
     role: "assistant",
     content: Array.isArray(existing?.content)
@@ -617,8 +625,33 @@ function ensureResponsesFunctionCallItem(outputItems, outputIndex, itemId, callI
   return next;
 }
 
-function mergeResponseItems(existing, incoming) {
+function recoverEmptyMessageSnapshot(existing, incoming) {
   const next = cloneResponseItem(incoming);
+  if (!existing || typeof existing !== "object") return next;
+
+  // An empty snapshot must not erase text already received for this message.
+  // Non-text parts (especially refusals) remain authoritative, as do explicit
+  // different identities. Preserve terminal metadata and only recover content.
+  if (
+    existing.type === "message" &&
+    next.type === "message" &&
+    (!existing.id || !next.id || String(existing.id) === String(next.id)) &&
+    Array.isArray(next.content) &&
+    next.content.every((part) => part.type === "output_text" && !part.text) &&
+    Array.isArray(existing.content) &&
+    existing.content.some(
+      (part) =>
+        (part.type === "output_text" && typeof part.text === "string" && part.text.length > 0) ||
+        (part.type === "refusal" && typeof part.refusal === "string" && part.refusal.length > 0)
+    )
+  ) {
+    next.content = existing.content.map((part) => ({ ...toRecord(part) }));
+  }
+  return next;
+}
+
+function mergeResponseItems(existing, incoming) {
+  const next = recoverEmptyMessageSnapshot(existing, incoming);
   if (!existing || typeof existing !== "object") return next;
 
   return {
@@ -635,6 +668,38 @@ function mergeResponseItems(existing, incoming) {
         }
       : {}),
   };
+}
+
+/**
+ * A provider can abort a Responses stream with a bare error frame (no `choices`, a non-empty
+ * `error`). Returns the first such error, or null.
+ */
+function findBareStreamError(events: Array<Record<string, unknown>>): unknown {
+  for (const evt of events) {
+    if (Array.isArray(evt?.choices)) continue;
+    const error = evt?.error;
+    if (typeof error === "string" ? error.trim() : Object.keys(toRecord(error)).length > 0) {
+      return error;
+    }
+  }
+  return null;
+}
+
+/**
+ * Choose the snapshot a buffered Responses stream is reported from. A bare error frame only
+ * decides the outcome when the stream never settled: it must not override a terminal
+ * snapshot, nor a latest snapshot that itself reports `completed`. An in-progress snapshot
+ * (e.g. `response.created`) followed by an error frame is a failure. Without any Responses
+ * snapshot the payload is not a Responses stream at all (an error-only `data: {"error":…}`
+ * chunk from a CLI executor, #3324): return null so the caller keeps trying the other formats
+ * and the generic invalid-SSE path surfaces the upstream message as a 502.
+ */
+function pickResponsesSnapshot(terminalResponse, latestResponse, events) {
+  const snapshot = terminalResponse || latestResponse;
+  if (!snapshot) return null;
+  const streamError = terminalResponse ? null : findBareStreamError(events);
+  if (!streamError || terminalResponse || latestResponse.status === "completed") return snapshot;
+  return { ...snapshot, status: "failed", error: streamError };
 }
 
 export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {
@@ -678,27 +743,44 @@ export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {
       outputItems.set(outputIndex, mergeResponseItems(existing, item));
     }
 
-    if (outputIndex !== null && eventType === "response.output_text.delta") {
-      const messageItem = ensureResponsesMessageItem(outputItems, outputIndex);
+    if (
+      outputIndex !== null &&
+      (eventType === "response.output_text.delta" || eventType === "response.refusal.delta")
+    ) {
+      const refusal = eventType === "response.refusal.delta";
+      const field = refusal ? "refusal" : "text";
+      const contentIndex = toOutputIndex(evt.content_index) ?? 0;
+      // Untrusted sparse indices must not allocate enormous reconstructed arrays.
+      if (contentIndex < 0 || contentIndex >= 4096) continue;
+      const messageItem = ensureResponsesMessageItem(outputItems, outputIndex, evt.item_id);
       const content = Array.isArray(messageItem.content) ? messageItem.content : [];
-      const firstPart =
-        content.length > 0 ? { ...toRecord(content[0]) } : { type: "output_text", annotations: [] };
-      firstPart.type = firstPart.type || "output_text";
-      firstPart.annotations = Array.isArray(firstPart.annotations) ? firstPart.annotations : [];
-      firstPart.text = `${toString(firstPart.text)}${toString(evt.delta)}`;
-      content[0] = firstPart;
+      const firstPart = { ...toRecord(content[contentIndex]) };
+      firstPart.type = refusal ? "refusal" : "output_text";
+      if (!refusal)
+        firstPart.annotations = Array.isArray(firstPart.annotations) ? firstPart.annotations : [];
+      firstPart[field] = `${toString(firstPart[field])}${toString(evt.delta)}`;
+      if (refusal) delete firstPart.text;
+      content[contentIndex] = firstPart;
       messageItem.content = content;
     }
 
-    if (outputIndex !== null && eventType === "response.output_text.done") {
-      const messageItem = ensureResponsesMessageItem(outputItems, outputIndex);
+    if (
+      outputIndex !== null &&
+      (eventType === "response.output_text.done" || eventType === "response.refusal.done")
+    ) {
+      const refusal = eventType === "response.refusal.done";
+      const field = refusal ? "refusal" : "text";
+      const contentIndex = toOutputIndex(evt.content_index) ?? 0;
+      if (contentIndex < 0 || contentIndex >= 4096) continue;
+      const messageItem = ensureResponsesMessageItem(outputItems, outputIndex, evt.item_id);
       const content = Array.isArray(messageItem.content) ? messageItem.content : [];
-      const firstPart =
-        content.length > 0 ? { ...toRecord(content[0]) } : { type: "output_text", annotations: [] };
-      firstPart.type = firstPart.type || "output_text";
-      firstPart.annotations = Array.isArray(firstPart.annotations) ? firstPart.annotations : [];
-      firstPart.text = toString(evt.text, toString(firstPart.text));
-      content[0] = firstPart;
+      const firstPart = { ...toRecord(content[contentIndex]) };
+      firstPart.type = refusal ? "refusal" : "output_text";
+      if (!refusal)
+        firstPart.annotations = Array.isArray(firstPart.annotations) ? firstPart.annotations : [];
+      firstPart[field] = toString(evt[field]) || toString(firstPart[field]);
+      if (refusal) delete firstPart.text;
+      content[contentIndex] = firstPart;
       messageItem.content = content;
     }
 
@@ -776,13 +858,24 @@ export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {
     }
   }
 
-  const picked = terminalResponse || latestResponse;
+  const picked = pickResponsesSnapshot(terminalResponse, latestResponse, events);
   if (!picked || typeof picked !== "object") return null;
   const reconstructedOutput = [...outputItems.entries()]
     .sort((a, b) => a[0] - b[0])
     .map(([, item]) => item)
     .filter((item) => item && typeof item === "object");
-  const pickedOutput = Array.isArray(picked.output) ? picked.output : [];
+  const reconstructedById = new Map(
+    reconstructedOutput.filter((item) => item.id != null).map((item) => [String(item.id), item])
+  );
+  const pickedOutput = Array.isArray(picked.output)
+    ? picked.output.map((item, index) => {
+        const record = toRecord(item);
+        const existing =
+          (record.id != null ? reconstructedById.get(String(record.id)) : undefined) ??
+          outputItems.get(index);
+        return recoverEmptyMessageSnapshot(existing, record);
+      })
+    : [];
   // #3948 — A Responses-API terminal snapshot (`response.completed`) can carry a
   // non-empty `output` that LACKS the assistant message item (e.g. only a
   // `reasoning` item) even though the streamed `output_text` deltas reconstructed
@@ -828,6 +921,7 @@ export function parseSSEToResponsesOutput(rawSSE, fallbackModel) {
     }),
     usage: picked.usage || null,
     status: picked.status || statusFallback,
+    ...(picked.error != null ? { error: picked.error } : {}),
     created_at: picked.created_at || Math.floor(Date.now() / 1000),
     metadata: picked.metadata || {},
   };

@@ -34,10 +34,17 @@ function isBuiltInWebSearchTool(tool: unknown): tool is JsonRecord {
   return WEB_SEARCH_TOOL_TYPES.test(toolType) && !toolRecord.function;
 }
 
-function isBuiltInWebSearchToolChoice(toolChoice: unknown): boolean {
+function isBuiltInWebSearchToolChoice(toolChoice: unknown, toolNames: Set<string>): boolean {
   const choice = toRecord(toolChoice);
   const toolType = typeof choice.type === "string" ? choice.type : "";
-  return WEB_SEARCH_TOOL_TYPES.test(toolType);
+  if (WEB_SEARCH_TOOL_TYPES.test(toolType)) return true;
+  // Anthropic names server tools via { type: "tool", name: "web_search" }.
+  // Do not steal an explicit choice of a preserved custom function with that name.
+  return (
+    !toolNames.has("web_search") &&
+    (toolType === "tool" || toolType === "function") &&
+    (choice.name === "web_search" || toRecord(choice.function).name === "web_search")
+  );
 }
 
 function buildFallbackDescription(tool: JsonRecord): string {
@@ -290,12 +297,12 @@ export function prepareWebSearchFallbackBody<T extends WebSearchFallbackBody>(
     return true;
   });
 
-  const isResponsesTarget = options.targetFormat === FORMATS.OPENAI_RESPONSES;
+  // chatCore calls this before translateRequest: injected tools must speak the
+  // client's format. Keep the target fallback for callers without source metadata.
+  const format = options.sourceFormat ?? options.targetFormat;
 
   if (!toolNames.has(OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME)) {
-    preservedTools.unshift(
-      buildFallbackTool(toRecord(builtInSearchTools[0]), options.targetFormat)
-    );
+    preservedTools.unshift(buildFallbackTool(toRecord(builtInSearchTools[0]), format));
   }
 
   const nextBody: T = {
@@ -306,12 +313,14 @@ export function prepareWebSearchFallbackBody<T extends WebSearchFallbackBody>(
     nextBody.input = dropClientRejectionsOfFallbackCalls(body.input) as T["input"];
   }
 
-  if (isBuiltInWebSearchToolChoice(body.tool_choice)) {
-    // Match the injected tool shape: flat for Responses API, nested for Chat Completions.
+  if (isBuiltInWebSearchToolChoice(body.tool_choice, toolNames)) {
+    // Match the injected source-format tool so the normal translator can convert both.
     nextBody.tool_choice = (
-      isResponsesTarget
-        ? { type: "function", name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME }
-        : { type: "function", function: { name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } }
+      format === FORMATS.CLAUDE
+        ? { type: "tool", name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME }
+        : format === FORMATS.OPENAI_RESPONSES
+          ? { type: "function", name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME }
+          : { type: "function", function: { name: OMNIROUTE_WEB_SEARCH_FALLBACK_TOOL_NAME } }
     ) as T["tool_choice"];
   }
 

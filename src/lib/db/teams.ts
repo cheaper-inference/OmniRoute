@@ -276,6 +276,65 @@ export function archiveTeam(id: string, archivedAt?: string): Team | null {
   return getTeam(id);
 }
 
+type TeamsDb = ReturnType<typeof getDbInstance>;
+
+function assertAssignableTeamAndKey(db: TeamsDb, teamId: string, apiKeyId: string): void {
+  const team = db.prepare("SELECT status FROM teams WHERE id = ?").get(teamId) as
+    { status: TeamStatus } | undefined;
+  if (!team) throw new Error("Team not found");
+  if (team.status !== "active") throw new Error("Cannot assign an API key to an archived team");
+  const key = db.prepare("SELECT id FROM api_keys WHERE id = ?").get(apiKeyId);
+  if (!key) throw new Error("API key not found");
+}
+
+// A closed interval may end just after a same-instant archive. Reject genuinely
+// backdated explicit assignments; advance an implicit wall-clock reassignment to
+// the prior half-open end without changing stored history.
+function resolveAssignmentInstant(
+  db: TeamsDb,
+  apiKeyId: string,
+  when: string,
+  explicit: boolean
+): string {
+  const latestClosed = db
+    .prepare(
+      "SELECT MAX(valid_to) AS valid_to FROM api_key_billing_team_history WHERE api_key_id = ? AND valid_to IS NOT NULL"
+    )
+    .get(apiKeyId) as { valid_to: string | null };
+  if (!latestClosed.valid_to || when >= latestClosed.valid_to) return when;
+  if (explicit && Date.parse(latestClosed.valid_to) - Date.parse(when) > 1) {
+    throw new Error("Assignment time overlaps closed billing history");
+  }
+  return latestClosed.valid_to;
+}
+
+function closeActiveBinding(db: TeamsDb, current: BillingRow, when: string): void {
+  if (when <= current.valid_from) {
+    throw new Error("Assignment time must be after the active assignment start");
+  }
+  const closed = db
+    .prepare(
+      "UPDATE api_key_billing_team_history SET valid_to = ? WHERE id = ? AND valid_to IS NULL"
+    )
+    .run(when, current.id);
+  if (closed.changes !== 1) throw new Error(CONCURRENT_ASSIGNMENT_ERROR);
+}
+
+function insertBillingBinding(db: TeamsDb, row: BillingRow): void {
+  try {
+    db.prepare(
+      `INSERT INTO api_key_billing_team_history
+        (id, api_key_id, team_id, valid_from, valid_to, created_at)
+       VALUES (?, ?, ?, ?, NULL, ?)`
+    ).run(row.id, row.api_key_id, row.team_id, row.valid_from, row.created_at);
+  } catch (error) {
+    if (/unique constraint/i.test(error instanceof Error ? error.message : "")) {
+      throw new Error(CONCURRENT_ASSIGNMENT_ERROR);
+    }
+    throw error;
+  }
+}
+
 export function assignApiKeyBillingTeam(
   apiKeyId: string,
   teamId: string,
@@ -283,16 +342,11 @@ export function assignApiKeyBillingTeam(
   expectedTeamId?: string | null
 ): ApiKeyBillingTeamHistory {
   const db = getDbInstance();
-  let when = normalizeIso(effectiveAt);
+  const requestedAt = normalizeIso(effectiveAt);
   let result: ApiKeyBillingTeamHistory | null = null;
 
   const assign = db.transaction(() => {
-    const team = db.prepare("SELECT status FROM teams WHERE id = ?").get(teamId) as
-      { status: TeamStatus } | undefined;
-    if (!team) throw new Error("Team not found");
-    if (team.status !== "active") throw new Error("Cannot assign an API key to an archived team");
-    const key = db.prepare("SELECT id FROM api_keys WHERE id = ?").get(apiKeyId);
-    if (!key) throw new Error("API key not found");
+    assertAssignableTeamAndKey(db, teamId, apiKeyId);
 
     const current = db
       .prepare(
@@ -306,31 +360,8 @@ export function assignApiKeyBillingTeam(
       result = rowToBillingHistory(current);
       return;
     }
-    // A closed interval may end just after a same-instant archive. Reject
-    // genuinely backdated explicit assignments; advance an implicit wall-clock
-    // reassignment to the prior half-open end without changing stored history.
-    const latestClosed = db
-      .prepare(
-        "SELECT MAX(valid_to) AS valid_to FROM api_key_billing_team_history WHERE api_key_id = ? AND valid_to IS NOT NULL"
-      )
-      .get(apiKeyId) as { valid_to: string | null };
-    if (latestClosed.valid_to && when < latestClosed.valid_to) {
-      if (effectiveAt && Date.parse(latestClosed.valid_to) - Date.parse(when) > 1) {
-        throw new Error("Assignment time overlaps closed billing history");
-      }
-      when = latestClosed.valid_to;
-    }
-    if (current) {
-      if (when <= current.valid_from) {
-        throw new Error("Assignment time must be after the active assignment start");
-      }
-      const closed = db
-        .prepare(
-          "UPDATE api_key_billing_team_history SET valid_to = ? WHERE id = ? AND valid_to IS NULL"
-        )
-        .run(when, current.id);
-      if (closed.changes !== 1) throw new Error(CONCURRENT_ASSIGNMENT_ERROR);
-    }
+    const when = resolveAssignmentInstant(db, apiKeyId, requestedAt, Boolean(effectiveAt));
+    if (current) closeActiveBinding(db, current, when);
 
     const row: BillingRow = {
       id: crypto.randomUUID(),
@@ -340,18 +371,7 @@ export function assignApiKeyBillingTeam(
       valid_to: null,
       created_at: when,
     };
-    try {
-      db.prepare(
-        `INSERT INTO api_key_billing_team_history
-          (id, api_key_id, team_id, valid_from, valid_to, created_at)
-         VALUES (?, ?, ?, ?, NULL, ?)`
-      ).run(row.id, row.api_key_id, row.team_id, row.valid_from, row.created_at);
-    } catch (error) {
-      if (/unique constraint/i.test(error instanceof Error ? error.message : "")) {
-        throw new Error(CONCURRENT_ASSIGNMENT_ERROR);
-      }
-      throw error;
-    }
+    insertBillingBinding(db, row);
     result = rowToBillingHistory(row);
   });
   assign();

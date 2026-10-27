@@ -181,6 +181,74 @@ function responsesOutputContent(output: unknown): boolean | null {
   return recognizedAny ? false : null;
 }
 
+// Keys the reader below treats as known content carriers when a streamed
+// summary yields no verdict on its own.
+const SUMMARY_CONTENT_KEYS = [
+  "choices",
+  "content",
+  "text",
+  "output_text",
+  "output",
+  "tool_calls",
+  "function_call",
+  "tool_uses",
+  "reasoning_content",
+  "reasoning",
+  "thinking",
+] as const;
+
+// True when a streamed summary holds dropped media-only output: a chat choice
+// whose message carries a media key but no measurable content, so the reader
+// below must not mistake it for a recognized empty reply.
+function hasDroppedMediaOnly(summary: Record<string, unknown>): boolean {
+  const choices = summary.choices;
+  if (!Array.isArray(choices)) return false;
+  return choices.some((choice) => {
+    const choiceRecord = asRecord(choice);
+    if (!choiceRecord) return false;
+    const message = asRecord(choiceRecord.message) ?? asRecord(choiceRecord.delta);
+    if (!message) return false;
+    if (messageHasContent(message) !== null) return false;
+    return Object.keys(message).some((key) => MEDIA_KEY.test(key));
+  });
+}
+
+// The client-visible body of a streamed reply comes in two shapes: the
+// envelope `{ _streamed, _format, _eventCount, summary }`, which carries the
+// aggregated reply under `summary`, and the aggregated reply itself, which the
+// stream producer stamps with the same `_streamed` marker. Only the envelope
+// holds a `summary` object.
+function isStreamEnvelope(body: Record<string, unknown>): boolean {
+  return body._streamed === true && asRecord(body.summary) !== null;
+}
+
+// Rendered content of a response body: true or false when measurable, null
+// when the shape says nothing.
+function bodyContent(body: Record<string, unknown>): boolean | null {
+  if (Array.isArray(body.choices)) return choicesContent(body.choices);
+  if ([body.content, body.text, body.output_text].some(hasNonBlankText)) return true;
+  const claude = claudeBlocksContent(body.content);
+  if (claude === true) return true;
+  if (hasToolCalls(body.tool_calls) || (body.function_call ?? null) !== null) return true;
+  const responses = responsesOutputContent(body.output);
+  if (responses !== null) return responses;
+  return claude;
+}
+
+// A streamed envelope wraps the client-visible reply under `summary`.
+function streamedSummaryContent(body: Record<string, unknown>): boolean | null {
+  const summary = body.summary;
+  if (summary === body) return null;
+  const summaryRecord = asRecord(summary);
+  if (!summaryRecord) return null;
+  const inner = hasRenderedContent(summaryRecord);
+  if (inner !== null) return inner;
+  // Recognized-but-empty summary: the reader knows the shape but found
+  // nothing in it (empty arrays the loops above report as unmeasurable).
+  if (hasDroppedMediaOnly(summaryRecord)) return null;
+  return SUMMARY_CONTENT_KEYS.some((key) => key in summaryRecord) ? false : null;
+}
+
 /**
  * True when the client-visible body carries rendered content (text or tool
  * calls). False for an empty success. Null when unmeasurable (missing body,
@@ -190,12 +258,10 @@ function responsesOutputContent(output: unknown): boolean | null {
 export function hasRenderedContent(clientBody: unknown): boolean | null {
   const body = asRecord(clientBody);
   if (!body) return null;
-  if (Array.isArray(body.choices)) return choicesContent(body.choices);
-  if ([body.content, body.text, body.output_text].some(hasNonBlankText)) return true;
-  const claude = claudeBlocksContent(body.content);
-  if (claude === true) return true;
-  if (hasToolCalls(body.tool_calls) || (body.function_call ?? null) !== null) return true;
-  const responses = responsesOutputContent(body.output);
-  if (responses !== null) return responses;
-  return claude;
+  if (body._streamed !== true) return bodyContent(body);
+  // A truncated stream says nothing certain about what it rendered.
+  if (body._truncated === true) return null;
+  // The envelope wraps the aggregated reply under `summary`; the aggregated
+  // reply carries the same marker and is measured like any other body.
+  return isStreamEnvelope(body) ? streamedSummaryContent(body) : bodyContent(body);
 }

@@ -74,24 +74,32 @@ zato okrnjen izbirnik nikoli ni skrivnost.
 
 ## Možnosti
 
-| Ključ                            | Privzeto                                       | Opombe                                                                                                                 |
-| -------------------------------- | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `providerId`                     | `"omniroute"`                                  | ID ponudnika, ID integracije in predpona, pod katero se prikažejo modeli                                               |
-| `baseURL`                        | obvezno                                        | Koren prehoda, samo `http(s)`; pripona `/v1` se doda, kjer je potrebna                                                 |
-| `apiKey`                         | povezana poverilnica, nato `OMNIROUTE_API_KEY` | Ključ za klepet za `/v1/*`                                                                                             |
-| `managementReadToken`            | uporabi `apiKey`, če ni nastavljen             | Ključ za `/api/*` — običajno **ni** isti                                                                               |
-| `displayName`                    | `"OmniRoute"`                                  | Ime ponudnika v izbirniku                                                                                              |
-| `timeoutMs`                      | `10000`                                        | Časovna omejitev pridobivanja za posamezno končno točko (samodejne kombinacije uporabljajo 5 s)                        |
-| `modelCacheTtlMs`                | `300000`                                       | TTL predpomnilnika kataloga; posnetek na disku pospeši hladne zagone                                                   |
-| `timeouts`                       | uporabi `timeoutMs`, če ni nastavljeno         | Časovne omejitve po končnih točkah v ms: `models`, `combos`, `autoCombos`, `enrichment`                                |
-| `enrichment`                     | `true`                                         | Pridobi imena, cene in omejitve brezplačne ravni                                                                       |
-| `providerTag`                    | `true`                                         | Prikaznemu imenu doda predpono ponudnika višje ravni, h kateremu je model usmerjen                                     |
-| `usableOnly`                     | `false`                                        | Ohrani samo ponudnike, za katere prehod poroča, da so konfigurirani                                                    |
-| `visibleModels` / `hiddenModels` | `[]`                                           | Seznami dovoljenih modelov z natančnim ujemanjem ali ujemanjem pripone; prepoved ima prednost                          |
-| `geminiSanitization`             | `true`                                         | Iz shem orodij odstrani ključne besede JSON Schema, ki jih Gemini zavrača (orodja `$ref` se posredujejo nespremenjena) |
-| `apiFormat.allowAnthropic`       | `false`                                        | ID-je s seznama dovoljenih usmeri prek bloka API-ja Anthropic                                                          |
-| `apiFormat.anthropicModels`      | `[]`                                           | Celotni ID-ji modelov, usmerjeni v Anthropic                                                                           |
-| `logLevel` / `startupDebug`      | `warn` / `false`                               | Podrobnost beleženja                                                                                                   |
+| Ključ                            | Privzeto                                       | Opombe                                                                                                                                                    |
+| -------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                  | ID ponudnika, ID integracije in predpona, pod katero so prikazani modeli                                                                                  |
+| `baseURL`                        | obvezno                                        | Korenski URL prehoda, samo `http(s)`; pripona `/v1` se doda, kjer je potrebna                                                                             |
+| `apiKey`                         | povezana poverilnica, nato `OMNIROUTE_API_KEY` | Ključ za klepet za `/v1/*`                                                                                                                                |
+| `managementReadToken`            | uporabi `apiKey`, če ni nastavljen             | Ključ za `/api/*` — običajno **ni** enak                                                                                                                  |
+| `displayName`                    | `"OmniRoute"`                                  | Ime ponudnika v izbirniku                                                                                                                                 |
+| `timeoutMs`                      | `10000`                                        | Časovna omejitev pridobivanja za posamezno končno točko (samodejne kombinacije uporabljajo 5 s)                                                           |
+| `modelCacheTtlMs`                | `300000`                                       | TTL predpomnilnika kataloga; posnetek na disku pospeši hladne zagone                                                                                      |
+| `timeouts`                       | uporabi `timeoutMs`, če ni nastavljeno         | Časovne omejitve posameznih končnih točk v ms: `models`, `combos`, `autoCombos`, `enrichment`                                                             |
+| `enrichment`                     | `true`                                         | Pridobi imena, cene in omejitve brezplačne ravni                                                                                                          |
+| `providerTag`                    | `true`                                         | Prikaznemu imenu dodaj predpono izvornega ponudnika, h kateremu usmerja                                                                                   |
+| `usableOnly`                     | `false`                                        | Ohrani samo ponudnike, za katere prehod sporoča, da so omogočeni                                                                                          |
+| `combosSource`                   | `"api"`                                        | `"models"` preskoči `/api/combos` in objavi vrstice kombinacij iz `/v1/models`; filtri na ravni članov ohranijo `"api"`                                   |
+| `showcasePerOwner`               | `10`                                           | Število vnosov privzetega pogleda, ohranjenih za posameznega ponudnika                                                                                    |
+| `freshPerOwner`                  | `10`                                           | Število svežih vnosov privzetega pogleda, ohranjenih za posameznega ponudnika                                                                             |
+| `freshWindowDays`                | `90`                                           | Obdobje svežine v dnevih za vejo svežih vnosov                                                                                                            |
+| `usageMemory`                    | `true`                                         | Obnovi statično odstranjene vnose, navedene v analitiki uporabe za zadnjih 30 dni (zahteva žeton za upravljanje)                                          |
+| `visibleModels` / `hiddenModels` | `[]`                                           | Seznami dovoljenih modelov z natančnim ujemanjem ali ujemanjem pripone; prepoved ima prednost; `*` objavi celoten katalog (drugi filtri še vedno veljajo) |
+| `geminiSanitization`             | `true`                                         | Iz shem orodij odstrani ključne besede JSON Schema, ki jih Gemini zavrača (orodja z `$ref` se posredujejo nespremenjena)                                  |
+| `apiFormat.allowAnthropic`       | `false`                                        | ID-je s seznama dovoljenih usmeri prek bloka API-ja Anthropic                                                                                             |
+| `apiFormat.anthropicModels`      | `[]`                                           | Polni ID-ji modelov, usmerjeni v Anthropic                                                                                                                |
+| `logLevel` / `startupDebug`      | `warn` / `false`                               | Podrobnost beleženja                                                                                                                                      |
+
+Pomnilnik uporabe je privzeto vklopljen. Brez žetona za upravljanje ostane nedejaven
+(ob zagonu se zabeleži obvestilo) in nič se ne obnovi.
 
 ## Kako katalog ostaja posodobljen
 
@@ -120,11 +128,16 @@ sklica razširila shemo tako, da bi »sprejela karkoli«.
 
 ## Odpravljanje težav
 
-| Simptom                                          | Vzrok                                                                                                |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
-| Izbirnik ne prikazuje nobenega modela OmniRoute  | Noben ključ ni bil razrešen (preverite opozorilo ob zagonu) ali pa prehod ni dosegljiv               |
-| Neobdelani ID-ji modelov, brez kombinacij in cen | Končne točke za upravljanje so zavrnile žeton — nastavite `managementReadToken`                      |
-| Seja, pripeta na `opencode-<id>/…`               | Vtičnik v1 je objavil `opencode-<id>`; v2 objavi goli `<id>`, zato znova izberite model pod `<id>/…` |
+| Simptom                                          | Vzrok                                                                                                                                        |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| Izbirnik ne prikazuje nobenega modela OmniRoute  | Ključ ni bil razrešen (preverite opozorilo ob zagonu) ali pa prehod ni dosegljiv                                                             |
+| Neobdelani ID-ji modelov, brez kombinacij in cen | Končne točke za upravljanje so zavrnile žeton — nastavite `managementReadToken`                                                              |
+| Kratek ali prazen katalog `freeOnly`             | Ni žetona za upravljanje ali pa je bil zavrnjen — v dnevniku gostitelja preberite vrstico s povzetkom osveževanja (število `unmatched-free`) |
+| Seja, pripeta na `opencode-<id>/…`               | Vtičnik v1 je objavil `opencode-<id>`; v2 objavlja zgolj `<id>`, zato znova izberite model pod `<id>/…`                                      |
+
+Okoljske spremenljivke morajo doseči strežniški proces opencode: ko gostitelj
+deluje kot storitev, se lupina, ki izvaja `opencode models`, razlikuje od
+strežniškega okolja, zato izvozite ključ tam, kjer ga strežnik prebere.
 
 ## Glejte tudi
 

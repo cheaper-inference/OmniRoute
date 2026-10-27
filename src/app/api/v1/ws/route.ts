@@ -32,7 +32,7 @@ function getWsProtocol() {
       path: getLiveWsPath(),
       protocol: "json",
       channels: ["requests", "combo", "credentials"],
-      auth: "api-key",
+      auth: "dashboard-session | api-key:manage",
       heartbeatMs: 15000,
     },
   };
@@ -88,7 +88,7 @@ export async function GET(request: Request) {
           path: getLiveWsPath(),
           protocol: "json",
           channels: ["requests", "combo", "credentials"],
-          auth: "api-key",
+          auth: "dashboard-session | api-key:manage",
           description: "Real-time dashboard events via WebSocket",
         },
       },

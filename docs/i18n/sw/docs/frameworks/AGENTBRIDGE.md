@@ -16,34 +16,34 @@ AgentBridge ni proksi ya MITM (Mtu-katikati) ya OmniRoute ambayo hunasa trafiki 
 
 ### AgentBridge ni nini?
 
-Wakati wakala wa IDE (k.m., GitHub Copilot, Cursor, Claude Code) anapopiga simu ya API, huunganisha moja kwa moja na mtoa huduma wa AI wa upande wa juu (OpenAI, Anthropic, n.k.). AgentBridge hunasa muunganisho huo kwa uwazi katika kiwango cha TLS — bila kuhitaji mabadiliko yoyote ya usanidi wa wakala — na huandika upya ombi kupitia OmniRoute.
+Wakati wakala wa IDE (k.m., GitHub Copilot, Cursor, Claude Code) anapofanya wito wa API, huunganisha moja kwa moja na mtoa huduma wa AI wa ngazi ya juu (OpenAI, Anthropic, n.k.). AgentBridge hukatiza muunganisho huo kwa uwazi katika kiwango cha TLS — bila kuhitaji mabadiliko yoyote ya usanidi wa wakala — na kuandika upya ombi kupitia OmniRoute.
 
 Hii inamaanisha unaweza:
 
-- **Kuelekeza upya wakala yeyote kwa mtoa huduma yeyote**: Copilot inawasiliana na OpenAI? Ielekeze upya kwa Anthropic Claude, Gemini, au yeyote kati ya watoa huduma 352 wa OmniRoute.
-- **Kutumia ulinganishaji wa modeli**: `gemini-3-flash` → `claude-sonnet-4.7` kwa uwazi katika kiwango cha kishughulikiaji.
-- **Kuchunguza trafiki yote ya mawakala**: kila ombi lililonaswa huchapishwa kwenye [Kikaguzi cha Trafiki](./TRAFFIC_INSPECTOR.md).
-- **Kutumia ustahimilivu wa OmniRoute**: uelekezaji wa mseto, vizuia mzunguko, njia mbadala, na ufuatiliaji wa gharama hufanya kazi pia kwa trafiki ya mawakala wa IDE.
+- **Kuelekeza upya wakala yeyote kwa mtoa huduma yeyote**: Copilot akizungumza na OpenAI? Muelekeze kwa Anthropic Claude, Gemini, au mojawapo ya watoa huduma 375 wa OmniRoute.
+- **Kutumia ramani za modeli**: `gemini-3-flash` → `claude-sonnet-4.7` kwa uwazi katika kiwango cha kishughulikiaji.
+- **Kuchunguza trafiki yote ya wakala**: kila ombi lililokatizwa huchapishwa kwenye [Traffic Inspector](./TRAFFIC_INSPECTOR.md).
+- **Kutumia ustahimilivu wa OmniRoute**: uelekezaji wa combo, circuit breakers, fallbacks, na ufuatiliaji wa gharama hufanya kazi kwa trafiki ya wakala wa IDE pia.
 
 ### Nafasi ikilinganishwa na soko
 
-| Kipengele                             | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
-| ------------------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
-| Antigravity                           |    ✓    |    ✓     |        —        |             ✓             |
-| GitHub Copilot                        |    ✓    |    ✓     |        —        |             ✓             |
-| Kiro (AWS)                            |    ✓    |    ✓     |        —        |             ✓             |
-| OpenAI Codex                          |    —    |    ✓     |        —        |             ✓             |
-| Cursor IDE                            |    ✓    |    ✓     |        —        |             ✓             |
-| Zed Industries                        |    —    |    ✓     |        —        |             ✓             |
-| Claude Code                           |    —    |    —     |        ✓        |             ✓             |
-| Open Code                             |    —    |    —     |        ✓        |             ✓             |
-| Trae                                  |    —    |    —     |        —        |      🔍 Inachunguzwa      |
-| Kiolesura cha dashibodi               |    ✓    |    ✗     |        ✗        |             ✓             |
-| Kikaguzi cha Trafiki                  |    ✗    |    ✗     |        ✓        |             ✓             |
-| Uelekezaji wa OmniRoute               |    ✗    |    ✗     |        ✗        |             ✓             |
-| Kiolesura cha ulinganishaji wa modeli |    ✗    |    ✗     |        ✗        |             ✓             |
-| Orodha ya kuruka                      |    ✗    |    ✗     |        ✓        |             ✓             |
-| Cheti cha CA cha upande wa juu        |    ✗    |    ✗     |        ✓        |             ✓             |
+| Kipengele                 | 9router | anti-api | llm-interceptor | **OmniRoute AgentBridge** |
+| ------------------------- | :-----: | :------: | :-------------: | :-----------------------: |
+| Antigravity               |    ✓    |    ✓     |        —        |             ✓             |
+| GitHub Copilot            |    ✓    |    ✓     |        —        |             ✓             |
+| Kiro (AWS)                |    ✓    |    ✓     |        —        |             ✓             |
+| OpenAI Codex              |    —    |    ✓     |        —        |             ✓             |
+| Cursor IDE                |    ✓    |    ✓     |        —        |             ✓             |
+| Zed Industries            |    —    |    ✓     |        —        |             ✓             |
+| Claude Code               |    —    |    —     |        ✓        |             ✓             |
+| Open Code                 |    —    |    —     |        ✓        |             ✓             |
+| Trae                      |    —    |    —     |        —        |      🔍 Inachunguzwa      |
+| UI ya Dashibodi           |    ✓    |    ✗     |        ✗        |             ✓             |
+| Traffic Inspector         |    ✗    |    ✗     |        ✓        |             ✓             |
+| Uelekezaji wa OmniRoute   |    ✗    |    ✗     |        ✗        |             ✓             |
+| UI ya ramani za modeli    |    ✗    |    ✗     |        ✗        |             ✓             |
+| Orodha ya bypass          |    ✗    |    ✗     |        ✓        |             ✓             |
+| Cheti cha CA cha upstream |    ✗    |    ✗     |        ✓        |             ✓             |
 
 ---
 
@@ -186,22 +186,22 @@ orodha ya pamoja ya kukataza vichwa vya hop-by-hop/uundaji wa fremu (ikijumuisha
 
 ## §3 Usanidi
 
-### 3.1 Kuanzisha/kusimamisha seva ya MITM
+### 3.1 Kuwasha/kuzima seva ya MITM
 
 Tumia Kadi ya Seva ya AgentBridge katika `/dashboard/tools/agent-bridge`:
 
-| Kitendo              | Maelezo                                                                               |
-| -------------------- | ------------------------------------------------------------------------------------- |
-| Anzisha Seva         | Huanzisha `src/mitm/server.cjs` kwenye porti 443                                      |
-| Simamisha Seva       | Huzima mchakato mtoto kwa utaratibu salama                                            |
-| Anzisha Seva Upya    | Simamisha + anzisha (hutumia mabadiliko ya lengo)                                     |
-| Amini Cheti          | Husakinisha `DATA_DIR/mitm/ca.crt` kwenye hifadhi ya uaminifu ya OS                   |
-| Pakua Cheti          | Hupakua `ca.crt` kwa ajili ya usakinishaji wa mikono                                  |
-| Tengeneza Upya Cheti | Huunda jozi mpya ya funguo za CA (vyeti vyote vilivyopo vya kila wakala hubatilishwa) |
+| Kitendo         | Maelezo                                                                                                                                                                                                                                                                                                                                                                                                         |
+| --------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Washa Seva      | Huanzisha `src/mitm/server.cjs` kwenye porti 443. Chini ya muundo wa root-CA, huunda `ca.crt` inapowashwa kwa mara ya kwanza na kuamini cheti kinachotumika wakati nenosiri la sudo linapatikana                                                                                                                                                                                                                |
+| Zima Seva       | Huzima mchakato-toto kwa utaratibu                                                                                                                                                                                                                                                                                                                                                                              |
+| Washa Seva Upya | Zima + washa (hutumia mabadiliko ya lengo na cheti kilichoundwa upya)                                                                                                                                                                                                                                                                                                                                           |
+| Amini Cheti     | Husakinisha cheti kinachotumika kwenye hifadhi ya uaminifu ya OS: `DATA_DIR/mitm/ca.crt` chini ya muundo wa root-CA, `DATA_DIR/mitm/server.crt` kwenye usakinishaji wa zamani wa legacy-leaf                                                                                                                                                                                                                    |
+| Pakua Cheti     | Hupakua cheti kinachotumika ili kisakinishwe mwenyewe (`omniroute-mitm-ca.crt` = `ca.crt`, au `omniroute-mitm.crt` = `server.crt` kwenye usakinishaji wa zamani wa legacy-leaf)                                                                                                                                                                                                                                 |
+| Unda Cheti Upya | Kamwe haibadilishi muundo wa cheti. Usakinishaji wa legacy-leaf: hutengeneza `server.crt`/`server.key` mpya (washa seva upya ili iitumie). Muundo wa root-CA: huzungusha `ca.crt`/`ca.key`, na hukataliwa wakati seva inaendelea kufanya kazi; CA ya zamani inayoaminika huondolewa uaminifu kwanza (inahitaji nenosiri la sudo), la sivyo uzungushaji husitishwa. Baadaye, wateja lazima waiamini CA mpya tena |
 
 ### 3.2 Kuamini cheti
 
-Cheti cha CA cha AgentBridge lazima kiaminike na OS kabla ya IDE kukubali muunganisho wa MITM.
+Cheti cha CA cha AgentBridge lazima kiaminiwe na OS kabla ya IDE kukubali muunganisho wa MITM.
 
 **Linux (NSS — Chrome/Firefox):**
 
@@ -224,32 +224,32 @@ certutil -addstore -f Root $env:USERPROFILE\.omniroute\mitm\ca.crt
 
 Au tumia kitufe cha "Amini Cheti" kwenye dashibodi (huendesha amri inayofaa kwa OS yako, ikiwa na ombi la sudo inapohitajika).
 
-#### IDE zinazotumia Electron hupuuza hifadhi ya uaminifu ya OS (`NODE_EXTRA_CA_CERTS`)
+#### IDE zinazotegemea Electron hupuuza hifadhi ya uaminifu ya OS (`NODE_EXTRA_CA_CERTS`)
 
 Baadhi ya IDE — hasa **Antigravity IDE**, na programu nyingine zinazotokana na Electron / VS Code — hujumuisha
 mazingira yao wenyewe ya utekelezaji ya Node.js ambayo **hayatumii hifadhi ya uaminifu ya OS** kwa miunganisho ya nje ya
-`fetch`/HTTPS. Kuamini CA katika kiwango cha OS/NSS kunatosha kwa **backend** asilia ya IDE
+`fetch`/HTTPS. Kuiamini CA katika kiwango cha OS/NSS kunatosha kwa **backend** asilia ya IDE
 (k.m. seva ya lugha ya Go, ambayo hutumia kifurushi cha CA cha OS), lakini **frontend ya Electron** bado
-itashindwa kutumia TLS — hali hii huonekana kama programu kuwa _imeondolewa kwenye akaunti_ au kuonyesha
-_"hitilafu ya muunganisho"_ hata ingawa kumbukumbu ya MITM inaonyesha miito ya uanzishaji ya backend ikirudisha `200`. Hatua mbili
+itashindwa kutumia TLS — hali hii huonekana kama programu kuwa _imetolewa kwenye akaunti_ au kuonyesha _"hitilafu ya muunganisho"_
+hata kama kumbukumbu ya MITM inaonyesha miito ya uanzishaji ya backend ikirejesha `200`. Hatua mbili
 zinahitajika, na zote ni muhimu:
 
 1. Elekeza mazingira ya utekelezaji kwenye CA moja kwa moja:
    ```bash
    export NODE_EXTRA_CA_CERTS=/path/to/omniroute-agentbridge-ca.crt
    ```
-2. **Zindua IDE kutoka kwenye shell hiyo.** Kuianzisha kupitia ikoni ya desktop / Dock / menyu ya Start
-   **hakurithi** thamani zilizowekwa na shell, na `~/.config/environment.d/*.conf` hutumika tu baada ya
-   kuingia upya kwenye mazingira ya kielelezo. Funga IDE kabisa kwanza — kufuli ya singleton ya Electron humaanisha kuwa uzinduzi wa pili
-   huleta tu mchakato uliopo mbele na mazingira mapya hupuuzwa.
+2. **Washa IDE kutoka kwenye shell hiyo.** Kuiwasha kutoka kwenye ikoni ya eneo-kazi / Dock / menyu ya Start
+   **hakurithi** thamani zilizosafirishwa za shell, na `~/.config/environment.d/*.conf` hutumika tu baada ya
+   kuingia upya kikamilifu kwenye mazingira ya picha. Kwanza funga IDE kabisa — kufuli ya singleton ya Electron humaanisha kuwa jaribio la pili la
+   kuiwasha litaweka tu dirisha la mchakato uliopo mbele na mazingira mapya yatapuuzwa.
 
 Hatua ya uaminifu wa OS + NSS iliyo hapo juu bado ni muhimu (mrundiko wa mtandao wa Chromium unaotumiwa na baadhi ya
-mitiririko ya uthibitishaji husoma hifadhi ya NSS ya kila mtumiaji, na una pini zake tuli za `*.googleapis.com` ambazo
-CA inayoaminika ndani ya mfumo huzibatilisha). `NODE_EXTRA_CA_CERTS` hushughulikia njia ya Node `fetch` juu ya hatua hiyo.
+mitiririko ya uthibitishaji husoma hifadhi ya NSS ya kila mtumiaji, na una pin zake tuli za `*.googleapis.com` ambazo
+CA inayoaminika ndani ya mfumo huzibatilisha). `NODE_EXTRA_CA_CERTS` hushughulikia njia ya `fetch` ya Node juu ya hatua hiyo.
 
 ### 3.3 Uelekezaji wa DNS
 
-Kwa kila wakala unayetaka kunasa, vipangishi vyake vya API lazima vitafsiriwe kuwa `127.0.0.1`. AgentBridge hudhibiti maingizo ya `/etc/hosts` kiotomatiki unapowasha au kuzima DNS ya wakala katika Mchawi wa Usanidi.
+Kwa kila agenti unayotaka kunasa, hosti yake ya API lazima itafsiriwe kuwa `127.0.0.1`. AgentBridge hudhibiti maingizo ya `/etc/hosts` kiotomatiki unapowasha au kuzima DNS kwa agenti katika Mchawi wa Usanidi.
 
 Mfano wa maingizo ya `/etc/hosts` kwa GitHub Copilot:
 
@@ -260,74 +260,74 @@ Mfano wa maingizo ya `/etc/hosts` kwa GitHub Copilot:
 
 ### 3.4 Ulinganishaji wa modeli
 
-Tumia Jedwali la Ulinganishaji wa Modeli katika kila kadi ya wakala ili kufafanua ulinganishaji wa chanzo → lengo:
+Tumia Jedwali la Ulinganishaji wa Modeli katika kila kadi ya agenti kufafanua ulinganishaji wa chanzo → lengo:
 
-| Modeli chanzo (asilia ya wakala) | Modeli lengwa (OmniRoute) |
-| -------------------------------- | ------------------------- |
-| `gpt-4o`                         | `claude-sonnet-4.7`       |
-| `*` (herufi-jokeri)              | `claude-haiku-4.7`        |
+| Modeli ya chanzo (asilia ya agenti) | Modeli lengwa (OmniRoute) |
+| ----------------------------------- | ------------------------- |
+| `gpt-4o`                            | `claude-sonnet-4.7`       |
+| `*` (wildcard)                      | `claude-haiku-4.7`        |
 
-Herufi-jokeri `*` hulinganisha modeli yoyote isiyotambulika na lengo lililobainishwa. Huhifadhiwa katika jedwali la `agent_bridge_mappings`.
+Wildcard `*` hulinganisha modeli yoyote isiyotambuliwa na lengo lililobainishwa. Huhifadhiwa katika jedwali la `agent_bridge_mappings`.
 
-> **Kidokezo — gundua vitambulisho halisi vya modeli vya wakala.** IDE inaweza kutuma majina ya modeli yanayotofautiana na
-> lebo zake za UI na ambayo hubadilika kati ya matoleo makuu. Kwa mfano **Antigravity 2** hutuma
+> **Kidokezo — gundua vitambulisho halisi vya modeli vya ajenti.** IDE inaweza kutuma majina ya modeli yanayotofautiana na
+> lebo zake za UI na yanayobadilika kati ya matoleo makuu. Kwa mfano **Antigravity 2** hutuma
 > `gemini-3.1-pro-low`, `gemini-pro-agent`, na `gemini-3.1-flash-lite` kupitia mtandao — si
-> `gemini-2.5-pro` inayoonyeshwa katika nyaraka za zamani. Tuma gumzo moja bila ulinganishaji unaofanana: MITM
-> hurekodi thamani halisi ya `model:` inayoingia na kuruhusu ombi lipite. Linganisha thamani hiyo halisi, kisha
+> `gemini-2.5-pro` iliyoonyeshwa katika nyaraka za zamani. Tuma gumzo moja bila ulinganishaji unaolingana: MITM
+> hurekodi `model:` halisi inayoingia na kupitisha ombi bila kulibadilisha. Linganisha thamani hiyo halisi, kisha
 > ombi linalofuata litanaswa na kuelekezwa kwenye lengo lako.
 
 ### 3.5 Ilani ya hatari
 
-AgentBridge hunasa vitambulisho (tokeni za OAuth, funguo za API) ambavyo IDE hutumia kujithibitisha kwa watoa huduma wa upstream. Hivi **hufichwa kabla ya kurekodiwa** (angalia §2.7), lakini huonekana kwa safu ya MITM ya OmniRoute. Uanzishaji wa kwanza wa kila wakala huonyesha dirisha la ilani ya hatari linaloweza kufungwa.
+AgentBridge hunasa vitambulisho vya uthibitishaji (tokeni za OAuth, funguo za API) ambavyo IDE hutumia kujithibitisha kwa watoa huduma wa upstream. Hivi **hufichwa kabla ya kurekodiwa** (angalia §2.7) lakini vinaonekana kwa safu ya MITM ya OmniRoute. Uanzishaji wa kwanza wa kila ajenti huonyesha dirisha la ilani ya hatari linaloweza kufungwa.
 
 ### 3.6 Matengenezo na Uchunguzi
 
-Dashibodi inaonyesha kadi ya **Matengenezo na Uchunguzi** (`AgentBridgeMaintenanceCard`, katika `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) inayowasilisha njia za uendeshaji za MITM ambazo hapo awali hazikuwa na UI. Kichwa chake kidogo: _"Jipime mwenyewe mchakato wa kunasa, tengua hali ya mfumo iliyosalia, na hamisha usanidi wako kati ya mashine."_ Visaidizi vya kiteja vya kadi vinapatikana katika `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
+Dashibodi inaonyesha kadi ya **Matengenezo na Uchunguzi** (`AgentBridgeMaintenanceCard`, katika `src/app/(dashboard)/dashboard/tools/agent-bridge/components/`) inayowasilisha njia za uendeshaji za MITM ambazo hapo awali hazikuwa na UI. Kichwa chake kidogo: _"Jipime mwenyewe bomba la kunasa, tengua hali ya mfumo iliyosalia, na hamisha usanidi wako kati ya mashine."_ Vitendaji saidizi vya mteja vya kadi vinapatikana katika `src/lib/inspector/agentBridgeMaintenanceApi.ts`.
 
-| Kitufe              | Njia                                   | Kile inachofanya                                                                                                                                                                                                |
-| ------------------- | -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Tambua tatizo**   | `GET /api/tools/agent-bridge/diagnose` | Huendesha jaribio la ndani la mchakato wa kunasa na kuonyesha ripoti kwa kila ukaguzi (✓/✗ + kidokezo cha utatuzi).                                                                                             |
-| **Rekebisha**       | `POST /api/tools/agent-bridge/repair`  | Hutengua hali yatima ya mfumo wa MITM (maingizo ya uigaji wa DNS, CA mzizi, proksi ya mfumo) iliyoachwa na hitilafu au SIGKILL. Haina athari ikirudiwa — huripoti "Hakuna cha kurekebisha" wakati hali ni safi. |
-| **Ondoa CA**        | `DELETE /api/tools/agent-bridge/cert`  | Huondoa uaminifu na kuondoa CA mzizi wa MITM kutoka hifadhi ya uaminifu ya OS (kwa uwazi, bila athari ikirudiwa). Huonyeshwa tu wakati CA inaaminiwa kwa sasa; huhitaji uthibitisho wa ndani "Ondoa CA?".       |
-| **Hamisha usanidi** | `GET /api/tools/agent-bridge/config`   | Hupakua JSON ya usanidi unaobebeka (angalia §3.7).                                                                                                                                                              |
-| **Ingiza usanidi**  | `POST /api/tools/agent-bridge/config`  | Hupakia JSON ya usanidi iliyohamishwa awali (angalia §3.7).                                                                                                                                                     |
+| Kitufe              | Njia                                   | Kinachofanya                                                                                                                                                                                                                       |
+| ------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Chunguza**        | `GET /api/tools/agent-bridge/diagnose` | Huendesha jaribio binafsi la bomba la kunasa na kuonyesha ripoti ya kila ukaguzi (✓/✗ + kidokezo cha kurekebisha).                                                                                                                 |
+| **Rekebisha**       | `POST /api/tools/agent-bridge/repair`  | Hutengua hali yatima ya mfumo wa MITM (maingizo ya uigaji wa DNS, CA ya msingi, proksi ya mfumo) iliyoachwa na kuanguka kwa programu au SIGKILL. Huweza kurudiwa bila madhara — huripoti "Hakuna cha kurekebisha" hali ikiwa safi. |
+| **Ondoa CA**        | `DELETE /api/tools/agent-bridge/cert`  | Huondoa uaminifu na kuondoa CA ya msingi ya MITM kutoka hifadhi ya uaminifu ya OS (kwa uwazi, na inaweza kurudiwa bila madhara). Huonyeshwa tu wakati CA inaaminika kwa sasa; huhitaji uthibitisho wa ndani wa "Ondoa CA?".        |
+| **Hamisha usanidi** | `GET /api/tools/agent-bridge/config`   | Hupakua JSON ya usanidi inayohamishika (angalia §3.7).                                                                                                                                                                             |
+| **Leta usanidi**    | `POST /api/tools/agent-bridge/config`  | Hupakia JSON ya usanidi iliyohamishwa awali (angalia §3.7).                                                                                                                                                                        |
 
 Kila kadi ya ajenti pia ina kitufe chake cha **Rejesha chaguo-msingi** (`POST
-/api/tools/agent-bridge/agents/{id}/reset`) — utenguaji wa mbofyo mmoja kwa kila ajenti ambao huondoa uigaji wa vipangishi vya
-ajenti huyo pekee, hufuta ulinganishaji wake wa miundo uliohifadhiwa, na kuweka upya hali yake ya `dns_enabled`/`setup_completed`,
-ili IDE iwasiliane tena na seva halisi ya chanzo baada ya kuwashwa upya kikamilifu. **Haigusi**
-seva ya MITM inayoshirikiwa wala CA mzizi (maajenti wengine huenda bado wanaitegemea) — hizo huendelea kufikiwa
-kupitia Kadi ya Seva na kitendo cha **Ondoa CA** hapo juu. Kwenye Windows, pia hujaribu kadiri inavyowezekana kutekeleza
-`ipconfig /flushdns`, kwa sababu Kiteja cha DNS cha Windows huhifadhi kwenye akiba maingizo ya faili ya hosts na hakitaondoa
-uigaji ulioondolewa hivi punde bila hatua hiyo.
+/api/tools/agent-bridge/agents/{id}/reset`) — utenguaji wa mbofyo mmoja kwa kila ajenti ambao huondoa uigaji wa hosts za
+ajenti huyo pekee, hufuta ulinganishaji wa modeli uliohifadhiwa, na kuweka upya hali yake ya `dns_enabled`/`setup_completed`,
+ili IDE iwasiliane tena na upstream halisi baada ya kuanzishwa upya kikamilifu. **Haigusi**
+seva ya MITM inayoshirikiwa wala CA ya msingi (ajenti wengine bado wanaweza kuzitegemea) — hizi hubaki kufikiwa
+kupitia Kadi ya Seva na kitendo cha **Ondoa CA** kilicho hapo juu. Kwenye Windows pia hujaribu, kadiri inavyowezekana, kuendesha
+`ipconfig /flushdns`, kwa sababu Kiteja cha DNS cha Windows huhifadhi maingizo ya faili la hosts kwenye kache na hakitaondoa
+uigaji ulioondolewa hivi punde bila kufanya hivyo.
 
-**Ukaguzi wa uchunguzi** (`summarizeDiagnostics()` katika `src/mitm/inspector/diagnostics.ts`). Njia huendesha uchunguzi wenye athari kwa kila ukaguzi na kuingiza thamani za boolean kwenye kifupisho kisicho na athari; uamuzi mmoja wa `healthy` pamoja na kidokezo kwa kila hitilafu hurejeshwa:
+**Ukaguzi wa uchunguzi** (`summarizeDiagnostics()` katika `src/mitm/inspector/diagnostics.ts`). Njia huendesha uchunguzi wenye athari kwa kila ukaguzi na kuingiza thamani za boole kwenye kifupishaji kisicho na athari; uamuzi mmoja wa `healthy` pamoja na kidokezo kwa kila hitilafu hurejeshwa:
 
-| Jina la ukaguzi    | Kile unachothibitisha                                                    | Kidokezo wakati wa hitilafu                                                                                                                |
-| ------------------ | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `server-running`   | Mchakato wa seva ya MITM unafanya kazi                                   | "Seva ya MITM haifanyi kazi. Iwashe kutoka kwenye kichupo cha AgentBridge."                                                                |
-| `server-reachable` | Seva ya MITM inakubali miunganisho kwenye kituo chake (uchunguzi wa TCP) | "Seva ya MITM haikubali miunganisho kwenye kituo chake. Hakikisha kituo kiko huru na una ruhusa za kukitumia."                             |
-| `cert-exists`      | Cheti cha MITM kimetengenezwa kwenye diski                               | "Bado hakuna cheti cha MITM kilichotengenezwa. Tengeneza kimoja kutoka kwenye kichupo cha AgentBridge."                                    |
-| `cert-trusted`     | CA mzizi wa MITM ipo kwenye hifadhi ya uaminifu ya OS                    | "CA mzizi wa MITM haiaminiwi na hifadhi ya OS, kwa hivyo udakaji wa TLS utashindwa. Amini cheti kutoka kwenye kichupo cha AgentBridge."    |
-| `dns-configured`   | Majina ya vipangishi lengwa yanaigwa katika `/etc/hosts`                 | "Majina ya vipangishi lengwa hayaigwi katika /etc/hosts, kwa hivyo trafiki haifikii proksi kamwe. Washa DNS kwa ajenti unaotaka kuwanasa." |
+| Jina la ukaguzi    | Kinachothibitishwa                                                      | Kidokezo wakati wa hitilafu                                                                                                           |
+| ------------------ | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `server-running`   | Mchakato wa seva ya MITM unafanya kazi                                  | "Seva ya MITM haifanyi kazi. Ianzishe kutoka kichupo cha AgentBridge."                                                                |
+| `server-reachable` | Seva ya MITM inakubali miunganisho kwenye porti yake (uchunguzi wa TCP) | "Seva ya MITM haikubali miunganisho kwenye porti yake. Hakikisha porti iko huru na una ruhusa za kuifungamanisha."                    |
+| `cert-exists`      | Cheti cha MITM kimetengenezwa kwenye diski                              | "Bado hakuna cheti cha MITM kilichotengenezwa. Tengeneza kimoja kutoka kichupo cha AgentBridge."                                      |
+| `cert-trusted`     | CA ya msingi ya MITM ipo katika hifadhi ya uaminifu ya OS               | "CA ya msingi ya MITM haiaminiki na hifadhi ya OS, kwa hivyo unasaji wa TLS utashindwa. Amini cheti kutoka kichupo cha AgentBridge."  |
+| `dns-configured`   | Majina lengwa ya hosts yanaigwa katika `/etc/hosts`                     | "Majina lengwa ya hosts hayaigwi katika /etc/hosts, kwa hivyo trafiki haifikii kamwe proksi. Washa DNS kwa ajenti unaotaka kuwanasa." |
 
-**Bango la hali yatima:** ukurasa unapotambua hali iliyoachwa na hitilafu (uigaji wa DNS / CA / proksi ya mfumo), kadi huonyesha bango la kaharabu — _"Kipindi kilichopita kiliacha hali ya mfumo (uigaji wa DNS, CA, au proksi ya mfumo). Endesha Rekebisha ili kuisafisha."_ — na kuangazia kitufe cha **Rekebisha**. `Repair` ni hatua inayolingana katika safu ya programu na alama ya ProxyBridge ya `--cleanup` (hukabidhi jukumu kwa `repairMitm()` katika `src/mitm/manager.ts`).
+**Bango la hali yatima:** ukurasa unapogundua hali iliyoachwa na kuanguka kwa programu (uigaji wa DNS / CA / proksi ya mfumo), kadi huonyesha bango la kaharabu — _"Kikao cha awali kiliacha hali ya mfumo (uigaji wa DNS, CA, au proksi ya mfumo). Endesha Rekebisha ili kuisafisha."_ — na huangazia kitufe cha **Rekebisha**. `Repair` ni kilinganishi cha safu ya programu cha alama ya ProxyBridge ya `--cleanup` (hukabidhi kazi kwa `repairMitm()` katika `src/mitm/manager.ts`).
 
-> CA mzizi wa MITM huachwa ikiwa imesakinishwa wakati wa kusimamisha/kuwasha ili kuepuka maombi ya sudo
+> CA mzizi ya MITM husalia ikiwa imesakinishwa baada ya kusimamisha/kuanzisha ili kuepuka maombi ya sudo
 > yanayojirudia (tabia sawa na mitmproxy/Charles), kwa hivyo kuiondoa ni kitendo cha wazi cha
 > **Ondoa CA** badala ya jambo linalotokea kiotomatiki wakati wa kusimamisha.
 
-### 3.7 Uingizaji/uhamishaji wa usanidi unaobebeka
+### 3.7 Uingizaji/usafirishaji wa usanidi unaohamishika
 
-AgentBridge inaweza kubadilisha hali **inayoweza kurekebishwa na mwendeshaji** kuwa blobu ya JSON yenye toleo ili usanidi uweze kunakiliwa kwenye mashine mbalimbali. Kigeuza ni `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), kinachothibitishwa na `AgentBridgeConfigSchema`.
+AgentBridge inaweza kusirisha hali **inayoweza kurekebishwa na mwendeshaji** kuwa blob ya JSON yenye toleo ili usanidi uweze kuigwa kwenye mashine mbalimbali. Kisirisha ni `src/lib/inspector/configPortability.ts` (`exportConfig()` / `importConfig()`), na kinathibitishwa na `AgentBridgeConfigSchema`.
 
-Uhamishaji unajumuisha vipengele vitatu tu (chaguo-msingi vilivyojengewa ndani kwa makusudi **HAVIHAMISHWI**, ili uingizaji usiwahi kuvirudufu au kukinzana navyo):
+Usafirishaji unajumuisha vipengele vitatu pekee (mipangilio chaguo-msingi iliyojengewa ndani kwa makusudi **HAISAFIRISHWI**, kwa hivyo uingizaji hauwezi kamwe kuiiga au kukinzana nayo):
 
-| Sehemu           | Chanzo                                                               | Maelezo                                                                      |
-| ---------------- | -------------------------------------------------------------------- | ---------------------------------------------------------------------------- |
-| `bypassPatterns` | ruwaza za kupita zilizobainishwa na mtumiaji (`agent_bridge_bypass`) | ruwaza chaguo-msingi za benki/serikali/okta hazijumuishwi                    |
-| `customHosts`    | seva maalum za Traffic Inspector (`inspector_custom_hosts`)          | kila moja: `{ host, kind: "llm"\|"app"\|"custom", label? }`                  |
-| `agentMappings`  | ulinganishaji wa modeli kwa kila ajenti (`agent_bridge_mappings`)    | `{ [agentId]: [{ source, target }] }` kwa kila ajenti aliye na ulinganishaji |
+| Sehemu           | Chanzo                                                                   | Maelezo                                                                      |
+| ---------------- | ------------------------------------------------------------------------ | ---------------------------------------------------------------------------- |
+| `bypassPatterns` | ruwaza za kupitisha zilizofafanuliwa na mtumiaji (`agent_bridge_bypass`) | ruwaza chaguo-msingi za benki/serikali/okta hazijumuishwi                    |
+| `customHosts`    | vipangishi maalum vya Traffic Inspector (`inspector_custom_hosts`)       | kila moja: `{ host, kind: "llm"\|"app"\|"custom", label? }`                  |
+| `agentMappings`  | ulinganishaji wa modeli kwa kila ajenti (`agent_bridge_mappings`)        | `{ [agentId]: [{ source, target }] }` kwa kila ajenti iliyo na ulinganishaji |
 
 ```jsonc
 // GET /api/tools/agent-bridge/config
@@ -341,13 +341,13 @@ Uhamishaji unajumuisha vipengele vitatu tu (chaguo-msingi vilivyojengewa ndani k
 }
 ```
 
-**Tabia ya uingizaji** (`POST /api/tools/agent-bridge/config`): ruwaza za kupita na ulinganishaji wa kila ajenti **hubadilishwa kwa jumla**; seva maalum huongezwa **bila kurudiwa** (`INSERT OR IGNORE`). Jibu huripoti idadi iliyotumika kwa kila aina:
+**Tabia ya uingizaji** (`POST /api/tools/agent-bridge/config`): ruwaza za kupitisha na ulinganishaji kwa kila ajenti **hubadilishwa kwa jumla**; vipangishi maalum huongezwa kwa njia **isiyobadilisha matokeo ikirudiwa** (`INSERT OR IGNORE`). Jibu huripoti idadi ya kila aina iliyotumika:
 
 ```jsonc
 { "ok": true, "bypassPatterns": 1, "customHosts": 1, "agents": 1 }
 ```
 
-Mambo ambayo **HAYAPO** katika usanidi: hali ya uendeshaji wa seva, njia za vyeti, hali ya DNS kwa kila ajenti, njia ya CA ya mkondo wa juu, na mipangilio ya TPROXY — hayo ni hali za mfumo mwenyeji/wakati wa utekelezaji, si mapendeleo yanayohamishika.
+Yasiyokuwemo **katika** usanidi: hali ya uendeshaji wa seva, njia za vyeti, hali ya DNS kwa kila ajenti, njia ya CA ya upstream, na mipangilio ya TPROXY — hayo ni hali ya kipangishi/wakati wa utekelezaji, si mapendeleo yanayohamishika.
 
 ---
 
@@ -507,40 +507,40 @@ Ikiwa AgentBridge inanaswa lakini maombi yote yanashindwa:
 
 ## §7 Rejea ya API
 
-Njia zote ni `LOCAL_ONLY` (loopback pekee, inatekelezwa kabla ya uthibitishaji) na `SPAWN_CAPABLE`. Angalia `src/server/authz/routeGuard.ts`.
+Njia zote ni `LOCAL_ONLY` (loopback pekee, inatekelezwa kabla ya uthibitishaji) na `SPAWN_CAPABLE`. Tazama `src/server/authz/routeGuard.ts`.
 
 Njia msingi: `/api/tools/agent-bridge/`
 
-| Mbinu               | Njia                                           | Maelezo                                                                                                                                    |
-| ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET                 | `/api/tools/agent-bridge/state`                | Hali ya jumla ya seva + ugunduzi/hali ya kila wakala                                                                                       |
-| GET                 | `/api/tools/agent-bridge/agents`               | Orodhesha mawakala waliosajiliwa (id, jina, vipangishi, ufaafu, hali)                                                                      |
-| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Hali ya wakala mmoja (usanidi lengwa + ugunduzi + hali iliyohifadhiwa)                                                                     |
-| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Sasisha `setup_completed` kwa wakala                                                                                                       |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Endesha uchunguzi wa ugunduzi kwa wakala (`installed`, `version?`, `path?`)                                                                |
-| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Washa/zima DNS kwa wakala (`{enabled: boolean}`)                                                                                           |
-| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Ulinganishaji wa modeli kwa wakala                                                                                                         |
-| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Badilisha ulinganishaji wa modeli                                                                                                          |
-| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Rejesha chaguo-msingi: ondoa ughushi wa DNS wa wakala huyu, futa ulinganishaji wake, weka upya hali yake (angalia §3.6)                    |
-| POST                | `/api/tools/agent-bridge/server`               | Anzisha/simamisha/anzisha upya seva (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                |
-| GET                 | `/api/tools/agent-bridge/cert`                 | Hali ya cheti (`exists`, `trusted`, `path`)                                                                                                |
-| POST                | `/api/tools/agent-bridge/cert`                 | Amini (sakinisha) CA mzizi wa MITM                                                                                                         |
-| DELETE              | `/api/tools/agent-bridge/cert`                 | Ondoa uaminifu (ondoa) wa CA mzizi wa MITM — ni idempotent (angalia §3.6)                                                                  |
-| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Zalisha upya cheti cha MITM kilichosainiwa chenyewe                                                                                        |
-| GET                 | `/api/tools/agent-bridge/cert/download`        | Tiririsha cheti cha PEM kwa ajili ya kupakua                                                                                               |
-| GET                 | `/api/tools/agent-bridge/bypass`               | Orodhesha ruwaza za kupita (`default` + `user`)                                                                                            |
-| POST                | `/api/tools/agent-bridge/bypass`               | Badilisha kwa ujumla ruwaza za kupita zilizobainishwa na mtumiaji                                                                          |
-| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Ondoa ruwaza moja ya kupita iliyobainishwa na mtumiaji                                                                                     |
-| GET                 | `/api/tools/agent-bridge/diagnose`             | Jaribio binafsi la mchakato wa kunasa (angalia §3.6)                                                                                       |
-| POST                | `/api/tools/agent-bridge/repair`               | Tendua hali ya mfumo wa MITM iliyoachwa bila usimamizi (angalia §3.6)                                                                      |
-| GET                 | `/api/tools/agent-bridge/config`               | Hamisha nje usanidi unaobebeka wa JSON (angalia §3.7)                                                                                      |
-| POST                | `/api/tools/agent-bridge/config`               | Leta usanidi unaobebeka wa JSON (angalia §3.7)                                                                                             |
-| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Pata njia iliyosanidiwa ya CA ya upstream                                                                                                  |
-| POST                | `/api/tools/agent-bridge/upstream-ca`          | Thibitisha + hifadhi njia ya CA ya upstream                                                                                                |
-| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Thibitisha pekee (dry-run) njia ya CA ya upstream — haihifadhi                                                                             |
-| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Modi ya kunasa kwa usimbuaji fiche uwazi ya TPROXY — angalia `docs/security/MITM-TPROXY-DECRYPT.md` (git; haijajumuishwa ndani ya `/docs`) |
+| Mbinu               | Njia                                           | Maelezo                                                                                                                                     |
+| ------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET                 | `/api/tools/agent-bridge/state`                | Hali ya jumla ya seva + ugunduzi/hali ya kila ajenti                                                                                        |
+| GET                 | `/api/tools/agent-bridge/agents`               | Orodhesha ajenti waliosajiliwa (id, jina, seva mwenyeji, uwezekano wa kufanya kazi, hali)                                                   |
+| GET                 | `/api/tools/agent-bridge/agents/{id}`          | Hali ya ajenti mmoja (usanidi lengwa + ugunduzi + hali iliyohifadhiwa)                                                                      |
+| PATCH               | `/api/tools/agent-bridge/agents/{id}`          | Sasisha `setup_completed` kwa ajenti                                                                                                        |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/detect`   | Tekeleza jaribio la ugunduzi kwa ajenti (`installed`, `version?`, `path?`)                                                                  |
+| POST                | `/api/tools/agent-bridge/agents/{id}/dns`      | Washa/zima DNS kwa ajenti (`{enabled: boolean}`)                                                                                            |
+| GET                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Ulinganishaji wa modeli kwa ajenti                                                                                                          |
+| PUT                 | `/api/tools/agent-bridge/agents/{id}/mappings` | Badilisha ulinganishaji wa modeli                                                                                                           |
+| POST                | `/api/tools/agent-bridge/agents/{id}/reset`    | Rejesha chaguo-msingi: ondoa uigaji wa DNS wa ajenti huyu, futa ulinganishaji wake, weka upya hali yake (tazama §3.6)                       |
+| POST                | `/api/tools/agent-bridge/server`               | Anzisha/simamisha/anzisha upya seva (`action: "start"\|"stop"\|"restart"\|"trust-cert"\|"regenerate-cert"`)                                 |
+| GET                 | `/api/tools/agent-bridge/cert`                 | Hali ya cheti (`exists`, `trusted`, `path`)                                                                                                 |
+| POST                | `/api/tools/agent-bridge/cert`                 | Amini (sakinisha) CA msingi ya MITM                                                                                                         |
+| DELETE              | `/api/tools/agent-bridge/cert`                 | Ondoa uaminifu (ondoa) wa CA msingi ya MITM — operesheni inayoweza kurudiwa bila athari ya ziada (tazama §3.6)                              |
+| POST                | `/api/tools/agent-bridge/cert/regenerate`      | Tengeneza upya cheti kinachotumika bila kubadilisha modeli ya cheti (leaf ya zamani, au mzunguko wa root-CA — tazama §3.1)                  |
+| GET                 | `/api/tools/agent-bridge/cert/download`        | Tiririsha cheti cha PEM kinachotumika ili kipakuliwe (`ca.crt` chini ya modeli ya root-CA, `server.crt` kwenye usakinishaji wa legacy-leaf) |
+| GET                 | `/api/tools/agent-bridge/bypass`               | Orodhesha ruwaza za kupita (`default` + `user`)                                                                                             |
+| POST                | `/api/tools/agent-bridge/bypass`               | Badilisha kwa pamoja ruwaza za kupita zilizofafanuliwa na mtumiaji                                                                          |
+| DELETE              | `/api/tools/agent-bridge/bypass?pattern=...`   | Ondoa ruwaza moja ya kupita iliyofafanuliwa na mtumiaji                                                                                     |
+| GET                 | `/api/tools/agent-bridge/diagnose`             | Jaribio binafsi la mfululizo wa kunasa (tazama §3.6)                                                                                        |
+| POST                | `/api/tools/agent-bridge/repair`               | Tendua hali ya mfumo wa MITM iliyoachwa bila usimamizi (tazama §3.6)                                                                        |
+| GET                 | `/api/tools/agent-bridge/config`               | Hamisha usanidi unaohamishika wa JSON (tazama §3.7)                                                                                         |
+| POST                | `/api/tools/agent-bridge/config`               | Ingiza usanidi unaohamishika wa JSON (tazama §3.7)                                                                                          |
+| GET                 | `/api/tools/agent-bridge/upstream-ca`          | Pata njia iliyosanidiwa ya CA ya upstream                                                                                                   |
+| POST                | `/api/tools/agent-bridge/upstream-ca`          | Thibitisha + hifadhi njia ya CA ya upstream                                                                                                 |
+| POST                | `/api/tools/agent-bridge/upstream-ca/test`     | Thibitisha pekee (dry-run) njia ya CA ya upstream — haihifadhi                                                                              |
+| GET / POST / DELETE | `/api/tools/agent-bridge/tproxy`               | Modi ya kunasa na kusimbua kwa uwazi ya TPROXY — tazama `docs/security/MITM-TPROXY-DECRYPT.md` (git; haijakusanywa ndani ya `/docs`)        |
 
-Skema kamili za OpenAPI: `docs/openapi.yaml` → tagi `AgentBridge`.
+Skimu kamili za OpenAPI: `docs/openapi.yaml` → lebo `AgentBridge`.
 
 ---
 

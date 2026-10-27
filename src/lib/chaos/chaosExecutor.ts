@@ -8,6 +8,7 @@
  * Eliminates the ~150 lines of duplicate dispatch logic that previously existed
  * in both route files.
  */
+import { resolveSelfLoopBearer } from "@/shared/middleware/chatAdmissionIdentity";
 import { getProviderConnections } from "@/models";
 import { getChaosConfig, type ChaosConfig } from "@/lib/chaos/chaosConfig";
 import { POST as postChatCompletion } from "@/app/api/v1/chat/completions/route";
@@ -53,9 +54,8 @@ export interface ChaosRunInput {
   maxTokens?: number;
   /**
    * API key to attribute the in-process dispatch calls to (usage accounting,
-   * per-key policy). Optional — omitted for dashboard-initiated runs, which fall
-   * back to the same "local mode" (no Authorization header) path used by
-   * src/lib/evals/runtime.ts and src/lib/batches/dispatch.ts.
+   * per-key policy). Dashboard-initiated runs without a selected key use the
+   * internal self-loop identity. Synthetic tasks do not import user memory.
    */
   apiKey?: string | null;
 }
@@ -154,7 +154,8 @@ function filterByEnabledOverrides(
   const overrideIds = new Set(enabledOverrides.map((o) => o.providerId.toLowerCase()));
   const selected = active.filter(
     (c: any) =>
-      overrideIds.has((c.provider ?? "").toLowerCase()) || overrideIds.has((c.id ?? "").toLowerCase())
+      overrideIds.has((c.provider ?? "").toLowerCase()) ||
+      overrideIds.has((c.id ?? "").toLowerCase())
   );
   return selected.length > 0 ? selected : active; // fallback to all active
 }
@@ -214,10 +215,11 @@ function buildDispatchRequest(
   timeoutMs: number,
   apiKey?: string | null
 ): Request {
-  const headers = new Headers({ "Content-Type": "application/json" });
-  if (apiKey) {
-    headers.set("Authorization", `Bearer ${apiKey}`);
-  }
+  const headers = new Headers({
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${apiKey || resolveSelfLoopBearer()}`,
+    "x-omniroute-no-memory": "true",
+  });
   return new Request("http://localhost/api/v1/chat/completions", {
     method: "POST",
     headers,
@@ -305,7 +307,10 @@ async function dispatchToModel(
  * Uses a simple pooling approach: start up to `limit` tasks at once,
  * and as each completes, start the next one.
  */
-async function runWithConcurrencyLimit<T>(tasks: (() => Promise<T>)[], limit: number): Promise<T[]> {
+async function runWithConcurrencyLimit<T>(
+  tasks: (() => Promise<T>)[],
+  limit: number
+): Promise<T[]> {
   const results: T[] = new Array(tasks.length);
   let nextIndex = 0;
 

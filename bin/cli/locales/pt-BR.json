@@ -123,7 +123,9 @@
       "maxCostOpt": "Custo máximo por dia (USD)",
       "allowedModelsOpt": "Lista de modelos permitidos (separados por vírgula)",
       "nothingToSet": "Nenhum campo de política fornecido. Use --rate-limit, --max-cost ou --allowed-models.",
-      "updated": "Política atualizada."
+      "updated": "Política atualizada.",
+      "modelAccessModeOpt": "Modo de acesso aos modelos (all | restricted)",
+      "unrestrictedOpt": "Permitir todos os modelos (--model-access-mode all)"
     },
     "expiration": {
       "title": "Expiração de Chaves",
@@ -254,6 +256,7 @@
     "log": "Exibir logs do servidor inline",
     "no_recovery": "Desabilitar reinício automático em crash (modo debug)",
     "max_restarts": "Máximo de reinícios em 30s antes de desistir (padrão: 2)",
+    "headless": "Executa só o motor de proxy: dashboard desativado (404), subsistemas opcionais ignorados (define OMNIROUTE_HEADLESS=1)",
     "tray": "Mostrar ícone na bandeja do sistema (apenas desktop, opt-in)",
     "no_tray": "Desabilitar ícone na bandeja do sistema",
     "ready_timeout": "Tempo limite da verificação de prontidão em ms (também OMNIROUTE_READY_TIMEOUT_MS, padrão 60000)",
@@ -1168,32 +1171,18 @@
   "sync": {
     "description": "Sincronizar configuração entre instâncias OmniRoute",
     "push": {
-      "description": "Enviar config para cloud ou instância remota",
-      "target": "Destino (cloud ou context:nome)",
-      "bundle": "Partes do bundle para sincronizar",
-      "dryRun": "Visualizar sem aplicar"
+      "description": "Executar uma sincronização com a cloud agora (a sincronização com a cloud precisa estar ativada)"
     },
     "pull": {
-      "description": "Baixar config da cloud ou remoto",
-      "source": "Origem (cloud ou context:nome)",
-      "merge": "Mesclar com config existente",
-      "replace": "Substituir config existente",
-      "dryRun": "Visualizar sem aplicar"
-    },
-    "diff": {
-      "source": "Contexto de origem",
-      "target": "Contexto de destino"
+      "description": "Baixar o arquivo de backup completo do servidor (.tar.gz) para [outPath]"
     },
     "bundle": {
-      "description": "Exportar config como arquivo bundle",
-      "include": "Partes a incluir (separadas por vírgula)"
+      "description": "Baixar o bundle de sincronização de config (JSON, inclui credenciais) com um token de sincronização",
+      "token": "Token de sincronização (de `sync tokens create`); padrão: OMNIROUTE_SYNC_TOKEN"
     },
     "import": {
-      "description": "Importar arquivo bundle",
-      "dryRun": "Validar sem aplicar"
-    },
-    "initialize": {
-      "fromCloud": "Inicializar a partir de backup na cloud"
+      "description": "Substituir o banco do servidor por um backup .sqlite",
+      "dryRun": "Validar o backup localmente; nunca contata o servidor"
     },
     "tokens": {
       "description": "Gerenciar tokens de sincronização",
@@ -1205,9 +1194,6 @@
       "revoke": {
         "yes": "Pular confirmação"
       }
-    },
-    "resolve": {
-      "description": "Resolver conflitos de sincronização interativamente"
     }
   },
   "config": {

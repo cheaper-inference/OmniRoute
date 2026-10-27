@@ -32,7 +32,7 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
 });
 
-test("migration 197 creates team cost-center schema and immutable usage attribution", () => {
+test("migration 215 creates team cost-center schema and immutable usage attribution", () => {
   const db = core.getDbInstance();
   const tables = new Set(
     (
@@ -409,7 +409,9 @@ test("editing a budget preserves the current rolling-window cadence", () => {
     maxBudgetUsd: 5,
     budgetDuration: "7d",
   });
-  const establishedResetAt = "2026-10-06T00:00:00.000Z";
+  // Derived from the clock (3 days ahead, inside both the 7d and 30d windows) so the
+  // fixture never expires: a hard-coded date turns this test red once it is in the past.
+  const establishedResetAt = new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString();
   core
     .getDbInstance()
     .prepare("UPDATE teams SET budget_reset_at = ? WHERE id = ?")

@@ -4,46 +4,46 @@
 
 ---
 
-Ntụnyere atụmatụ n'ụzọ ebumnobi megide ndị rawụta AI mepere emepe a ma ama.
+Ntụnyere atụmatụ ziri ezi megide AI routers open-source ama ama.
 
-> **Usoro nyocha**: A nyochara repo ọha na 2026-Q2. Ụdị dịka e depụtara ha.
-> Nyefee mmezi site na PR — anyị chọrọ ka nke a bụrụ nke ziri ezi.
+> **Usoro nchọpụta**: E nyochala repos ọha 2026-Q2. Ụdị dị ka e depụtara ha.
+> Zipu ndozi site na PR — anyị chọrọ ka nke a zie ezi.
 
-| Atụmatụ                                                |                 OmniRoute 3.8                 |  LiteLLM 1.x   | OpenRouter (SaaS) |   Portkey    |
-| ------------------------------------------------------ | :-------------------------------------------: | :------------: | :---------------: | :----------: |
-| **Ndị na-eweta ọrụ**                                   |                    **329**                    |      ~100      |        ~50        |     ~30      |
-| **Ndenye katalọgụ efu/na-achọghị njirimara**           |                    **155**                    |      n/a       |   nnyefe ozugbo   |     n/a      |
-| **Enwere ike ịnabata n'onwe gị**                       |                      ✅                       |       ✅       |        ❌         | ⚠ akwụ ụgwọ  |
-| **Ndenye katalọgụ OAuth**                              |                    **23**                     |   ezughị ezu   |        ❌         |      ❌      |
-| **Ngwakọta ndabere-akpaka**                            |                **atụmatụ 19**                 | dabere na mkpa |  dabere na ọkwa   |  nwere ibu   |
-| **Njikọta (ogwe yiri ibe ya + nchịkọta onye ọkaikpe)** |                      ✅                       |       ❌       |        ❌         |      ❌      |
-| **Ndabere Tier 1/2/3 (ndebanye→ọnụ ala→efu)**          |                    ✅ + UI                    |   aka mmadụ    |        n/a        |  aka mmadụ   |
-| **Mkpakọ token**                                       | nchịkọta injin 12 (RTK + Caveman + LLMLingua) |    enweghị     |      enweghị      |   enweghị    |
-| **Mmepụta multimodal (okwu/egwu/vidiyo)**              |                      ✅                       |       ❌       |   nnyefe ozugbo   |      ❌      |
-| **Sava MCP arụnyere n'ime ya**                         |           ✅ ngwaọrụ 110, scopes 33           |       ❌       |        ❌         |      ❌      |
-| **Protokọl A2A**                                       |                   ✅ nka 6                    |       ❌       |        ❌         |      ❌      |
-| **Ebe nchekwa ncheta (FTS5 + vector)**                 |                      ✅                       |       ❌       |        ❌         |      ❌      |
-| **Ihe mgbochi nchekwa (PII, injection, ọhụụ)**         |                      ✅                       |   ezughị ezu   |        ❌         | ✅ akwụ ụgwọ |
-| **Njikọta ndị nnọchi anya igwe ojii**                  |          Codex, Cursor, Devin, Jules          |       ❌       |        ❌         |      ❌      |
-| **Ihe nkwụsị sekit maka onye na-eweta ọ bụla**         |        ✅ ọnọdụ 3, mgbake mgbe achọrọ         |   nke bụ isi   |        ❌         |      ✅      |
-| **Nzuzo akara mkpịsịaka TLS (JA3/JA4)**                |                  ✅ wreq-js                   |       ❌       |        ❌         |      ❌      |
-| **Usoro eval**                                         |             ✅ arụnyere n'ime ya              |       ❌       |        ❌         | ⚠ akwụ ụgwọ  |
-| **Proksi MITM (na-egbochi Cursor/Antigravity)**        |    ✅ na-arụ n'elu ikpo okwu dị iche iche     |       ❌       |        ❌         |      ❌      |
-| **CLI nwere tray sistemụ (enweghị Electron)**          |                      ✅                       |       ❌       |        n/a        |     n/a      |
-| **Njirimara akpaka site na machine-ID nke CLI**        |                      ✅                       |       ❌       |        n/a        |     n/a      |
-| **Dashboard**                                          |                  Next.js 16                   |   nke bụ isi   |    nke nweonwe    | nke nweonwe  |
-| **i18n**                                               |                **locales 42**                 |       ❌       |        ❌         |      ⚠       |
-| **Nka ndị nnọchi anya ọha (SKILL.md)**                 |                     ✅ 45                     |       ❌       |        ❌         |      ❌      |
-| **Nkwado tunnel (Cloudflared, Tailscale, Ngrok)**      |                      ✅                       |       ❌       |        n/a        |     n/a      |
-| **Ikikere**                                            |                      MIT                      |      MIT       |    nke nweonwe    | nke nweonwe  |
+| Atụmatụ                                                 |                OmniRoute 3.8                |    LiteLLM 1.x     | OpenRouter (SaaS) |      Portkey      |
+| ------------------------------------------------------- | :-----------------------------------------: | :----------------: | :---------------: | :---------------: |
+| **Ndị na-enye**                                         |                   **329**                   |        ~100        |        ~50        |        ~30        |
+| **Ndepụta n'efu/enweghị njirimara**                     |                   **155**                   |        n/a         |    passthrough    |        n/a        |
+| **Nke a nwere ike ibu n'onwe**                          |                     ✅                      |         ✅         |        ❌         | ⚠ a na-akwụ ụgwọ  |
+| **Ndepụta OAuth**                                       |                   **23**                    |   n'ụzọ dị ụfọdụ   |        ❌         |        ❌         |
+| **Ngwakọta auto-fallback**                              |               **atụmatụ 20**                | dabere na prịoritị |  dabere na tier   |   nke e ji ibu    |
+| **Fusion (panel paralel + nchikota onye ikpe)**         |                     ✅                      |         ❌         |        ❌         |        ❌         |
+| **Tier 1/2/3 fallback (ndebanye ego→dị ọnụ ala→n'efu)** |                   ✅ + UI                   |     site n'aka     |        n/a        |    site n'aka     |
+| **Mgbukota token**                                      | 12-engine stack (RTK + Caveman + LLMLingua) |      enweghị       |      enweghị      |      enweghị      |
+| **Mmepụta multimodal (okwu/egwú/vidio)**                |                     ✅                      |         ❌         |    passthrough    |        ❌         |
+| **Server MCP nke e tinyere n'ime**                      |         ✅ ngwá ọrụ 110, scopes 33          |         ❌         |        ❌         |        ❌         |
+| **A2A protocol**                                        |                  ✅ nkà 6                   |         ❌         |        ❌         |        ❌         |
+| **Ncheta (FTS5 + vector)**                              |                     ✅                      |         ❌         |        ❌         |        ❌         |
+| **Guardrails (PII, injection, anya)**                   |                     ✅                      |   n'ụzọ dị ụfọdụ   |        ❌         | ✅ a na-akwụ ụgwọ |
+| **Njikọta agent igwe ojii**                             |         Codex, Cursor, Devin, Jules         |         ❌         |        ❌         |        ❌         |
+| **Circuit breaker maka onye na-enye ọ bụla**            |        ✅ steeti 3, mweghachi nwayọ         |      ndabere       |        ❌         |        ✅         |
+| **TLS fingerprint stealth (JA3/JA4)**                   |                 ✅ wreq-js                  |         ❌         |        ❌         |        ❌         |
+| **Framework nyocha**                                    |           ✅ nke e tinyere n'ime            |         ❌         |        ❌         | ⚠ a na-akwụ ụgwọ  |
+| **MITM proxy (na-egbo Cursor/Antigravity)**             |            ✅ nke ọtụtụ platform            |         ❌         |        ❌         |        ❌         |
+| **CLI nwere system tray (enweghị Electron)**            |                     ✅                      |         ❌         |        n/a        |        n/a        |
+| **CLI njirimara akpaghị aka site na machine-ID**        |                     ✅                      |         ❌         |        n/a        |        n/a        |
+| **Dashboard**                                           |                 Next.js 16                  |      ndabere       |   nke pụrụ iche   |   nke pụrụ iche   |
+| **i18n**                                                |               **67 locales**                |         ❌         |        ❌         |         ⚠         |
+| **Nkà agent ọha (SKILL.md)**                            |                    ✅ 45                    |         ❌         |        ❌         |        ❌         |
+| **Nkwado tunnel (Cloudflared, Tailscale, Ngrok)**       |                     ✅                      |         ❌         |        n/a        |        n/a        |
+| **Akwụkwọ ikike**                                       |                     MIT                     |        MIT         |   nke pụrụ iche   |   nke pụrụ iche   |
 
 ## Mgbe ị ga-ahọrọ OmniRoute
 
-- Ị na-anabata ya n'onwe gị ma chọọ **mkpuchi ndị na-eweta kachasị ukwuu** (ndị na-eweta 329, ndenye katalọgụ efu/na-achọghị njirimara 155)
-- Ị chọrọ **sava MCP arụnyere n'ime ya** (ngwaọrụ LLM, ebe nchekwa ncheta, na nka e wepụtara dịka ngwaọrụ)
-- Ị chọrọ **protokọl A2A** maka usoro ọrụ site n'otu onye nnọchi anya gaa na nke ọzọ
-- Ị chọrọ **nzuzo akara mkpịsịaka** (JA3/JA4) iji zere ka CAPTCHA ndị dị n'elu chọpụta gị
-- Ị chọrọ **atụmatụ ụlọ ọrụ** (ihe mgbochi nchekwa, evals, ndekọ nyocha) na-enweghị ụgwọ SaaS
+- Ị na-ebunye onwe gị (self-host) ma chọọ **ịkpuchite ndị na-enye ọrụ kacha ukwuu** (ndị na-enye ọrụ 375, ihe 155 ndị e debere n'efu/na-enweghị njirimara)
+- Ị chọrọ **MCP server arụnyere n'ime** (ngwá ọrụ LLM, ebe nchekwa, na nkà a gosipụtara dị ka ngwá ọrụ)
+- Ị chọrọ **A2A protocol** maka usoro ọrụ agent-na-agent
+- Ị chọrọ **izobe mkpịsị aka** (JA3/JA4) iji zere ịchọpụta site na CAPTCHAs nke elu
+- Ị chọrọ **atụmatụ nnukwu ụlọ ọrụ** (nchebe, nyocha, ndekọ nyocha) na-enweghị ụgwọ SaaS
 
 ## Mgbe ị ga-ahọrọ LiteLLM
 

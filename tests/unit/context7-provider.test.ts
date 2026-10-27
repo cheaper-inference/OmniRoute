@@ -99,6 +99,7 @@ test("web-fetch routing policies pin context7 as explicit-only and anonymous-cap
       "anysearch-search",
       "context7",
       "nimble-search",
+      "parallel-search",
     ]
   );
 });

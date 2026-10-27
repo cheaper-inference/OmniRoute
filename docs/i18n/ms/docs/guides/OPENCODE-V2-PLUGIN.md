@@ -72,24 +72,32 @@ dengan menyatakan titik akhir dan perkara yang hilang — supaya sebab pemilih b
 
 ## Pilihan
 
-| Kunci                            | Lalai                                                     | Catatan                                                                                                            |
-| -------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `providerId`                     | `"omniroute"`                                             | Id penyedia, id integrasi dan awalan bagi model yang dipaparkan                                                    |
-| `baseURL`                        | diperlukan                                                | Akar gerbang, `http(s)` sahaja; akhiran `/v1` ditambahkan apabila diperlukan                                       |
-| `apiKey`                         | kelayakan yang disambungkan, kemudian `OMNIROUTE_API_KEY` | Kunci sembang untuk `/v1/*`                                                                                        |
-| `managementReadToken`            | menggunakan `apiKey` sebagai sandaran                     | Kunci untuk `/api/*` — biasanya **bukan** kunci yang sama                                                          |
-| `displayName`                    | `"OmniRoute"`                                             | Nama penyedia dalam pemilih                                                                                        |
-| `timeoutMs`                      | `10000`                                                   | Had masa pengambilan bagi setiap titik akhir (kombo automatik menggunakan 5s)                                      |
-| `modelCacheTtlMs`                | `300000`                                                  | TTL cache katalog; petikan cakera mempercepatkan permulaan sejuk                                                   |
-| `timeouts`                       | menggunakan `timeoutMs` sebagai sandaran                  | Bajet bagi setiap titik akhir dalam ms: `models`, `combos`, `autoCombos`, `enrichment`                             |
-| `enrichment`                     | `true`                                                    | Dapatkan nama, harga dan bajet peringkat percuma                                                                   |
-| `providerTag`                    | `true`                                                    | Awalkan nama paparan dengan penyedia huluan yang menjadi sasaran penghalaan                                        |
-| `usableOnly`                     | `false`                                                   | Kekalkan hanya penyedia yang dilaporkan oleh gerbang sebagai telah diperuntukkan                                   |
-| `visibleModels` / `hiddenModels` | `[]`                                                      | Senarai benarkan padanan tepat atau akhiran; penafian mengatasi kebenaran                                          |
-| `geminiSanitization`             | `true`                                                    | Buang kata kunci JSON-Schema yang ditolak oleh Gemini daripada skema alat (alat `$ref` diteruskan tanpa perubahan) |
-| `apiFormat.allowAnthropic`       | `false`                                                   | Halakan id dalam senarai benarkan melalui blok API Anthropic                                                       |
-| `apiFormat.anthropicModels`      | `[]`                                                      | Id model penuh yang dihalakan kepada Anthropic                                                                     |
-| `logLevel` / `startupDebug`      | `warn` / `false`                                          | Tahap keterperincian pengelog                                                                                      |
+| Kunci                            | Lalai                                                     | Catatan                                                                                                                        |
+| -------------------------------- | --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `providerId`                     | `"omniroute"`                                             | ID penyedia, ID integrasi dan awalan yang digunakan untuk memaparkan model                                                     |
+| `baseURL`                        | diperlukan                                                | Akar get laluan, `http(s)` sahaja; akhiran `/v1` ditambahkan apabila diperlukan                                                |
+| `apiKey`                         | kelayakan yang disambungkan, kemudian `OMNIROUTE_API_KEY` | Kunci sembang untuk `/v1/*`                                                                                                    |
+| `managementReadToken`            | kembali menggunakan `apiKey`                              | Kunci untuk `/api/*` — biasanya **bukan** kunci yang sama                                                                      |
+| `displayName`                    | `"OmniRoute"`                                             | Nama penyedia dalam pemilih                                                                                                    |
+| `timeoutMs`                      | `10000`                                                   | Had masa pengambilan bagi setiap titik akhir (gabungan automatik menggunakan 5 saat)                                           |
+| `modelCacheTtlMs`                | `300000`                                                  | TTL cache katalog; petikan cakera mempercepatkan permulaan sejuk                                                               |
+| `timeouts`                       | kembali menggunakan `timeoutMs`                           | Peruntukan masa bagi setiap titik akhir dalam ms: `models`, `combos`, `autoCombos`, `enrichment`                               |
+| `enrichment`                     | `true`                                                    | Dapatkan nama, harga dan peruntukan peringkat percuma                                                                          |
+| `providerTag`                    | `true`                                                    | Awalkan nama paparan dengan penyedia huluan yang menjadi destinasi halaannya                                                   |
+| `usableOnly`                     | `false`                                                   | Kekalkan hanya penyedia yang dilaporkan oleh get laluan sebagai telah diperuntukkan                                            |
+| `combosSource`                   | `"api"`                                                   | `"models"` melangkau `/api/combos` dan menerbitkan baris gabungan `/v1/models`; penapis peringkat ahli mengekalkan `"api"`     |
+| `showcasePerOwner`               | `10`                                                      | Entri paparan lalai yang dikekalkan bagi setiap penyedia                                                                       |
+| `freshPerOwner`                  | `10`                                                      | Entri terkini paparan lalai yang dikekalkan bagi setiap penyedia                                                               |
+| `freshWindowDays`                | `90`                                                      | Tempoh kesegaran dalam hari untuk cabang terkini                                                                               |
+| `usageMemory`                    | `true`                                                    | Pulihkan entri yang digugurkan secara statik dan dinamakan oleh analitis penggunaan 30 hari (memerlukan token pengurusan)      |
+| `visibleModels` / `hiddenModels` | `[]`                                                      | Senarai benarkan padanan tepat atau akhiran; penafian diutamakan; `*` menerbitkan katalog penuh (penapis lain masih digunakan) |
+| `geminiSanitization`             | `true`                                                    | Buang kata kunci Skema JSON yang ditolak oleh Gemini daripada skema alat (alat `$ref` dimajukan tanpa perubahan)               |
+| `apiFormat.allowAnthropic`       | `false`                                                   | Halakan ID dalam senarai benarkan melalui blok API Anthropic                                                                   |
+| `apiFormat.anthropicModels`      | `[]`                                                      | ID model penuh yang dihalakan ke Anthropic                                                                                     |
+| `logLevel` / `startupDebug`      | `warn` / `false`                                          | Tahap keterperincian pengelog                                                                                                  |
+
+Memori penggunaan diaktifkan secara lalai. Tanpa token pengurusan, ia kekal tidak aktif
+(notis permulaan dilogkan) dan tiada apa-apa dipulihkan.
 
 ## Cara katalog kekal terkini
 
@@ -116,13 +124,18 @@ Alat yang mengandungi `$ref` dimajukan tanpa perubahan dan bukannya dibuang, ker
 rujukan tersebut akan meluaskan skema kepada "terima apa sahaja".
 Tetapkan `"geminiSanitization": false` untuk mematikannya.
 
-## Penyelesaian masalah
+## Penyelesaian Masalah
 
-| Gejala                                    | Punca                                                                                                                 |
-| ----------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| Pemilih tidak menunjukkan model OmniRoute | Tiada kekunci berjaya dikenal pasti (semak amaran permulaan), atau get laluan tidak dapat dicapai                     |
-| ID model mentah, tiada kombo, tiada harga | Titik akhir pengurusan menolak token — tetapkan `managementReadToken`                                                 |
-| Sesi dipinkan kepada `opencode-<id>/…`    | Pemalam v1 menerbitkan `opencode-<id>`; v2 menerbitkan `<id>` tanpa awalan, jadi pilih semula model di bawah `<id>/…` |
+| Gejala                                       | Punca                                                                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Pemilih tidak memaparkan model OmniRoute     | Tiada kunci yang berjaya dikenal pasti (semak amaran permulaan), atau get laluan tidak dapat dicapai                     |
+| ID model mentah, tiada gabungan, tiada harga | Titik akhir pengurusan menolak token — tetapkan `managementReadToken`                                                    |
+| Katalog `freeOnly` pendek atau kosong        | Tiada token pengurusan atau token ditolak — baca baris ringkasan muat semula (kiraan `unmatched-free`) dalam log hos     |
+| Sesi disematkan pada `opencode-<id>/…`       | Pemalam v1 menerbitkan `opencode-<id>`; v2 menerbitkan `<id>` secara langsung, jadi pilih semula model di bawah `<id>/…` |
+
+Pemboleh ubah persekitaran mesti sampai kepada proses pelayan opencode: apabila hos
+berjalan sebagai perkhidmatan, shell yang menjalankan `opencode models` dan persekitaran
+pelayan adalah berbeza, jadi eksport kunci di tempat pelayan membacanya.
 
 ## Lihat juga
 

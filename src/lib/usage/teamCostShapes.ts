@@ -6,6 +6,17 @@ export type TeamCostShape = {
   reasoning: number;
 };
 
+const isCount = (value: unknown): value is number =>
+  typeof value === "number" && Number.isSafeInteger(value) && value >= 0;
+
+/** A shape key is a JSON array of exactly five non-negative safe integers. */
+function parseShapeKey(key: string): TeamCostShape | null {
+  const values: unknown = JSON.parse(key);
+  if (!Array.isArray(values) || values.length !== 5 || !values.every(isCount)) return null;
+  const [input, output, cacheRead, cacheCreation, reasoning] = values as number[];
+  return { input, output, cacheRead, cacheCreation, reasoning };
+}
+
 // Retained buckets must describe every counted request. A partial or malformed
 // shape map is no more authoritative than a legacy bucket with no shape map.
 export function parseShapeCounts(
@@ -19,31 +30,11 @@ export function parseShapeCounts(
     const result: Array<{ shape: TeamCostShape; count: number }> = [];
     let total = 0;
     for (const [key, count] of Object.entries(parsed)) {
-      const values: unknown = JSON.parse(key);
-      if (
-        typeof count !== "number" ||
-        !Number.isSafeInteger(count) ||
-        count < 0 ||
-        !Array.isArray(values) ||
-        values.length !== 5 ||
-        values.some(
-          (token) => typeof token !== "number" || !Number.isSafeInteger(token) || token < 0
-        )
-      )
-        return [];
-      total += count;
+      const shape = isCount(count) ? parseShapeKey(key) : null;
+      if (!shape) return [];
+      total += count as number;
       if (!Number.isSafeInteger(total)) return [];
-      if (count > 0)
-        result.push({
-          shape: {
-            input: values[0],
-            output: values[1],
-            cacheRead: values[2],
-            cacheCreation: values[3],
-            reasoning: values[4],
-          },
-          count,
-        });
+      if ((count as number) > 0) result.push({ shape, count: count as number });
     }
     return total === expectedRequests ? result : [];
   } catch {

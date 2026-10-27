@@ -1,0 +1,1 @@
+- Reconcile stale embedded-service lifecycle state after a process restart when no in-memory supervisor exists.

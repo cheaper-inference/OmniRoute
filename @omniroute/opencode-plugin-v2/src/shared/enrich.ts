@@ -46,6 +46,36 @@ export interface OmniRouteEnrichmentEntry {
 export type OmniRouteEnrichmentMap = Map<string, OmniRouteEnrichmentEntry>;
 
 /**
+ * Free-tier match between the enrichment overlay and the served catalog:
+ * how many overlay lines carry a `freeType`, and how many of them a served
+ * id reaches through the alias-aware lookup the collection pass uses.
+ */
+export interface FreeTierMatch {
+  total: number;
+  matched: number;
+  unmatched: number;
+}
+
+export function countFreeTierMatch(
+  servedIds: readonly string[],
+  enrichment: OmniRouteEnrichmentMap | undefined,
+  canonicalToAlias: ReadonlyMap<string, string>
+): FreeTierMatch {
+  if (!enrichment) return { total: 0, matched: 0, unmatched: 0 };
+  let total = 0;
+  const matched = new Set<object>();
+  for (const entry of enrichment.values()) {
+    if (entry.freeType !== undefined) total += 1;
+  }
+  for (const id of servedIds) {
+    if (typeof id !== "string" || id.length === 0) continue;
+    const hit = lookupEnrichment(id, enrichment, canonicalToAlias);
+    if (hit !== undefined && hit.freeType !== undefined) matched.add(hit);
+  }
+  return { total, matched: matched.size, unmatched: total - matched.size };
+}
+
+/**
  * Reverse-index the enrichment map from `providerCanonical → providerAlias`.
  *
  * OmniRoute's `/api/pricing/models` is keyed by short ALIAS (`cc`, `cx`,
@@ -86,15 +116,19 @@ export function buildCanonicalToAliasMap(
  *      a mapping for `canonical`, try `<alias>/<modelId>`. This rescues
  *      duplicate rows like `claude/claude-opus-4-7` (canonical) when
  *      enrichment only indexed under `cc/claude-opus-4-7` (alias).
- *   3. Bare `<modelId>` as a last resort. Already covered by step 1 in
- *      practice (fetcher writes bare keys), but kept defensive.
+ *   3. Bare `<modelId>` as a last resort. A bare key matches by model name only,
+ *      but its entry describes one provider (label, free budget, pricing). It is
+ *      returned whole only when that provider owns the row (`ownedBy` or the id
+ *      prefix); otherwise only its model name is kept, so a generic-adapter row
+ *      such as `ih/kimi-k3` is not labelled with an unrelated provider (#14966).
  *
  * Returns `undefined` when no lookup hits.
  */
 export function lookupEnrichment(
   rawId: string,
   enrichment: OmniRouteEnrichmentMap | undefined,
-  canonicalToAlias: Map<string, string>
+  canonicalToAlias: ReadonlyMap<string, string>,
+  ownedBy?: string
 ): OmniRouteEnrichmentEntry | undefined {
   if (!enrichment) return undefined;
   const direct = enrichment.get(rawId);
@@ -109,9 +143,25 @@ export function lookupEnrichment(
       if (viaAlias) return viaAlias;
     }
     const bare = enrichment.get(modelId);
-    if (bare) return bare;
+    if (bare) return bareFallbackEntry(bare, prefix, ownedBy);
   }
   return undefined;
+}
+
+/** A bare-key hit keeps its provider metadata only when that provider owns the row. */
+function bareFallbackEntry(
+  entry: OmniRouteEnrichmentEntry,
+  prefix: string,
+  ownedBy: string | undefined
+): OmniRouteEnrichmentEntry {
+  const owners = new Set([prefix, ownedBy].filter((v): v is string => Boolean(v)));
+  const entryProviders = [entry.providerAlias, entry.providerCanonical].filter(
+    (v): v is string => typeof v === "string" && v.trim().length > 0
+  );
+  if (entryProviders.length === 0 || entryProviders.some((p) => owners.has(p.trim()))) {
+    return entry;
+  }
+  return entry.name ? { name: entry.name } : {};
 }
 
 /**
@@ -483,30 +533,58 @@ export const defaultOmniRouteEnrichmentFetcher: OmniRouteEnrichmentFetcher = asy
           : Array.isArray(body)
             ? (body as unknown[])
             : [];
+      // Index namespaced keys by (canonical provider, model suffix) so a
+      // free-tier line stamps every key its provider serves — alias and
+      // canonical alike — instead of the first key found. Bare ids are
+      // never indexed: only `alias + "/"`-prefixed keys qualify, and only
+      // by exact match on both levels at stamp time. Local to this
+      // refresh; nothing survives the call.
+      const canonicalAliasIndex = new Map<string, Map<string, string[]>>();
+      for (const [key, entry] of out) {
+        const alias = typeof entry.providerAlias === "string" ? entry.providerAlias : "";
+        const canonical =
+          typeof entry.providerCanonical === "string" ? entry.providerCanonical : "";
+        if (alias.length === 0 || canonical.length === 0) continue;
+        if (!key.startsWith(`${alias}/`)) continue;
+        const suffix = key.slice(alias.length + 1);
+        if (suffix.length === 0) continue;
+        let byModel = canonicalAliasIndex.get(canonical);
+        if (!byModel) {
+          byModel = new Map<string, string[]>();
+          canonicalAliasIndex.set(canonical, byModel);
+        }
+        const keys = byModel.get(suffix);
+        if (keys) {
+          if (!keys.includes(key)) keys.push(key);
+        } else {
+          byModel.set(suffix, [key]);
+        }
+      }
       for (const fm of perModel) {
         if (!fm || typeof fm !== "object") continue;
         const fmObj = fm as Record<string, unknown>;
         const provider = typeof fmObj.provider === "string" ? fmObj.provider : "";
         const modelId = typeof fmObj.modelId === "string" ? fmObj.modelId : "";
         const freeType = typeof fmObj.freeType === "string" ? fmObj.freeType : "";
-        if (!modelId || !freeType) continue;
+        if (!provider || !modelId || !freeType) continue;
         const monthlyTokens =
           typeof fmObj.monthlyTokens === "number" ? fmObj.monthlyTokens : undefined;
         const creditTokens =
           typeof fmObj.creditTokens === "number" ? fmObj.creditTokens : undefined;
-        const displayName = typeof fmObj.displayName === "string" ? fmObj.displayName : "";
-        const candidates = [
-          `${provider}/${modelId}`,
-          modelId,
-          ...(displayName ? [displayName] : []),
-        ];
-        for (const key of candidates) {
-          const entry = out.get(key);
-          if (entry) {
+        const stamped = out.get(`${provider}/${modelId}`);
+        if (stamped) {
+          stamped.freeType = freeType as FreeModelFreeType;
+          if (monthlyTokens !== undefined) stamped.monthlyTokens = monthlyTokens;
+          if (creditTokens !== undefined) stamped.creditTokens = creditTokens;
+        }
+        const namespacedByCanonical = canonicalAliasIndex.get(provider)?.get(modelId);
+        if (namespacedByCanonical) {
+          for (const key of namespacedByCanonical) {
+            const entry = out.get(key);
+            if (!entry || entry === stamped) continue;
             entry.freeType = freeType as FreeModelFreeType;
             if (monthlyTokens !== undefined) entry.monthlyTokens = monthlyTokens;
             if (creditTokens !== undefined) entry.creditTokens = creditTokens;
-            break;
           }
         }
       }

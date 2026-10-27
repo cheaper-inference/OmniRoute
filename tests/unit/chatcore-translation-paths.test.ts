@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 const TEST_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-chatcore-translation-"));
 const TEST_DATA_DIR = path.join(TEST_ROOT, "data");
 const TEST_PLUGINS_DIR = path.join(TEST_ROOT, "plugins");
@@ -352,7 +353,7 @@ async function flushAsyncSideEffects() {
 }
 
 async function getLatestCallLog() {
-  await waitForCallLogSaves(5000);
+  await waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS);
   const rows = await getCallLogs({ limit: 5 });
   if (!Array.isArray(rows) || rows.length === 0) return null;
   return getCallLogById(rows[0].id);
@@ -2938,6 +2939,7 @@ test("chatCore records Claude prompt cache and cache usage metadata in call logs
             { type: "text", text: "answer", cache_control: { type: "ephemeral", ttl: "10m" } },
           ],
         },
+        { role: "user", content: "follow-up" }, // #15830 strips a trailing assistant turn
       ],
       tools: [
         {
@@ -2971,13 +2973,12 @@ test("chatCore records Claude prompt cache and cache usage metadata in call logs
       );
     },
   });
-
   const detail = await waitFor(() => getLatestCallLog());
 
   assert.equal(result.success, true);
   assert.ok(detail);
   assert.equal(detail.requestBody._omniroute.claudePromptCache.applied, true);
-  // Breakpoints: system[2] (1), message content (1), assistant response (1). Tools cache_control is stripped by base.ts.
+  // Breakpoints: system[2] (1), user (1), assistant (1; kept by the final user turn). Tools cache_control is stripped by base.ts.
   assert.equal(detail.requestBody._omniroute.claudePromptCache.totalBreakpoints, 3);
   assert.equal(detail.responseBody._omniroute.claudePromptCache.applied, true);
   assert.equal(detail.responseBody._omniroute.claudePromptCache.totalBreakpoints, 3);

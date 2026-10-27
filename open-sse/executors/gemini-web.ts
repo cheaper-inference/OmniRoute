@@ -16,6 +16,13 @@
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
 import { isMissingBrowserExecutable } from "./browserExecutableCheck.ts";
+import {
+  abortStatus,
+  isBrowserClosedError,
+  isSelectorFailure,
+  resolveResponseTimeoutMs,
+} from "./gemini-web/browserErrors.ts";
+import { getStableLauncher } from "./gemini-web/browserLease.ts";
 import { normalizeGeminiCookieInput } from "../utils/geminiCookies.ts";
 import { prepareToolMessages } from "../translator/webTools.ts";
 import { buildToolModeResponse } from "./chatgptWebTools.ts";
@@ -568,14 +575,22 @@ export class GeminiWebExecutor extends BaseExecutor {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
       }
       const { chromium } = await import("playwright");
+      const launchChromium = getStableLauncher(chromium);
       const { acquireGeminiBrowser } = await import("./gemini-web/browserLease.ts");
-      browser = await acquireGeminiBrowser((options) => chromium.launch(options));
+      browser = await acquireGeminiBrowser(launchChromium);
       abortBrowser = () => {
         void context?.close().catch(() => {});
       };
       signal?.addEventListener("abort", abortBrowser, { once: true });
 
-      context = await browser.newContext({ userAgent: GEMINI_USER_AGENT });
+      // #15076: apply the proxy configured for gemini-web (provider/global scope). Resolved per
+      // context so the shared leased browser needs no invalidation when the proxy changes.
+      const { resolvePlaywrightProxy } = await import("../services/browserPool.ts");
+      const proxy = await resolvePlaywrightProxy("gemini-web");
+      context = await browser.newContext({
+        userAgent: GEMINI_USER_AGENT,
+        ...(proxy ? { proxy } : {}),
+      });
 
       // Parse cookies — strips attributes like Path, Domain, Expires
       const cookiePairs = parseCookies(cookie);
@@ -700,7 +715,7 @@ export class GeminiWebExecutor extends BaseExecutor {
       await page.waitForTimeout(300);
       await page.keyboard.press("Enter");
 
-      await Promise.race([responsePromise, page.waitForTimeout(30000)]);
+      await Promise.race([responsePromise, page.waitForTimeout(resolveResponseTimeoutMs(modelId))]);
       if (signal?.aborted) {
         throw signal.reason instanceof Error ? signal.reason : new Error("Request aborted");
       }
@@ -811,14 +826,19 @@ export class GeminiWebExecutor extends BaseExecutor {
       // the page DOM does not match expectations (e.g. Gemini changed their UI or
       // the session is so expired it lands on a different page). Return 400 so the
       // account-fallback system does NOT retry this request as a transient 5xx.
-      if (
-        error instanceof Error &&
-        (error.name === "TimeoutError" ||
-          rawMessage.includes("waitForSelector") ||
-          rawMessage.includes("Timeout") ||
-          rawMessage.includes("actionability") ||
-          rawMessage.includes("interception"))
-      ) {
+      const abortedStatus = abortStatus(signal);
+      if (abortedStatus || isBrowserClosedError(rawMessage)) {
+        return {
+          response: new Response(JSON.stringify({ error: sanitizeErrorMessage(rawMessage) }), {
+            status: abortedStatus ?? 502,
+            headers: { "Content-Type": "application/json" },
+          }),
+          url: GEMINI_URL,
+          headers: {},
+          transformedBody: body,
+        };
+      }
+      if (error instanceof Error && isSelectorFailure(error)) {
         return {
           response: new Response(
             JSON.stringify({

@@ -10,12 +10,14 @@ import os from "node:os";
 import path from "node:path";
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
+import { CALL_LOG_SETTLE_TIMEOUT_MS } from "../helpers/callLogSettle.ts";
 
 const testDataDir = fs.mkdtempSync(path.join(os.tmpdir(), "omni-call-log-id-collision-"));
 process.env.DATA_DIR = testDataDir;
 
 const coreDb = await import("../../src/lib/db/core.ts");
 const callLogs = await import("../../src/lib/usage/callLogs.ts");
+const artifacts = await import("../../src/lib/usage/callLogArtifacts.ts");
 const { persistAttemptLogs } = await import("../../open-sse/handlers/chatCore/attemptLogging.ts");
 const { on } = await import("../../src/lib/events/eventBus.ts");
 
@@ -80,7 +82,7 @@ test("saveCallLog without an id persists a UUID primary key, not Date.now()-coun
     duration: 1,
     tokens: { in: 1, out: 1 },
   });
-  assert.equal(await callLogs.waitForCallLogSaves(10_000), true);
+  assert.equal(await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
   const rows = allCallLogRows();
   assert.equal(rows.length, 1);
   assert.match(rows[0].id, UUID_RE);
@@ -100,7 +102,7 @@ test("two persistAttemptLogs sharing a 6-char dashboard traceId both land as row
   try {
     persistAttemptLogs({ status: 502, error: "first attempt" }, baseCtx({ traceId }));
     persistAttemptLogs({ status: 200, tokens: { input: 1, output: 2 } }, baseCtx({ traceId }));
-    assert.equal(await callLogs.waitForCallLogSaves(10_000), true);
+    assert.equal(await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
     await new Promise((resolve) => setImmediate(resolve));
     await new Promise((resolve) => setImmediate(resolve));
 
@@ -165,7 +167,7 @@ test("saveCallLog retries UNIQUE on an explicit id instead of dropping the secon
     duration: 3,
     tokens: { in: 2, out: 3 },
   });
-  assert.equal(await callLogs.waitForCallLogSaves(10_000), true);
+  assert.equal(await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
 
   const rows = allCallLogRows();
   assert.equal(rows.length, 2, "UNIQUE must not swallow the second insert");
@@ -178,6 +180,52 @@ test("saveCallLog retries UNIQUE on an explicit id instead of dropping the secon
   const regenerated = rows.find((row) => row.id !== collidingId);
   assert.ok(regenerated);
   assert.match(regenerated.id, UUID_RE);
+});
+
+test("a repeated explicit id with the same timestamp does not overwrite the first row's artifact", async () => {
+  clearCallLogs();
+  const collidingId = "replayed-session-id";
+  const timestamp = "2026-10-05T12:00:00.000Z";
+  const base = {
+    id: collidingId,
+    timestamp,
+    method: "POST",
+    path: "/v1/responses",
+    model: "test-model",
+    provider: "test-provider",
+    duration: 1,
+    tokens: { in: 0, out: 0 },
+  };
+  await callLogs.saveCallLog({ ...base, status: 500, error: "first attempt detail" });
+  await callLogs.saveCallLog({ ...base, status: 502, error: "second attempt detail" });
+  assert.equal(await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
+
+  const rows = coreDb
+    .getDbInstance()
+    .prepare("SELECT id, status, artifact_relpath FROM call_logs ORDER BY status")
+    .all() as Array<{ id: string; status: number; artifact_relpath: string | null }>;
+  assert.equal(rows.length, 2);
+  assert.ok(rows.every((row) => row.artifact_relpath));
+  assert.notEqual(
+    rows[0].artifact_relpath,
+    rows[1].artifact_relpath,
+    "two rows must never share one artifact file"
+  );
+
+  for (const [row, expectedError] of [
+    [rows[0], "first attempt detail"],
+    [rows[1], "second attempt detail"],
+  ] as const) {
+    const detail = await callLogs.getCallLogById(row.id);
+    assert.equal(detail?.detailState, "ready");
+    assert.equal(detail?.error, expectedError, `row ${row.status} must open its own artifact`);
+    const { artifact } = artifacts.readCallArtifact(row.artifact_relpath);
+    assert.equal(
+      artifact?.summary.id,
+      row.id,
+      "artifact summary.id must match the row's final primary key"
+    );
+  }
 });
 
 test("chatCore does not truncate randomUUID to six hex chars for the request trace", () => {

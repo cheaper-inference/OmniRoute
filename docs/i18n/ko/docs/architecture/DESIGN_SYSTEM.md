@@ -4,228 +4,150 @@
 
 ---
 
-> **상태:** 참조 — 여기에 설명된 표준화는 **구현 완료됨**(1~6단계: 그리드 배경, 프리미티브, 상태 색상 중앙화, 모노스페이스 토큰, DataTable 토큰 마이그레이션, 포커스 링 → 강조 색상, Checkbox/Textarea 프리미티브, `cn()` → tailwind-merge, 모든 독립형 화면에 그리드 적용, 유동형 4K 콘텐츠 셸, 불투명 데이터 테이블 표면). 이 문서는 대시보드의 디자인 토큰, 컴포넌트 및 규칙에 대한 표준 설명이며, 아래의 단계별 구성은 각 결정의 근거를 설명하기 위해 유지됩니다.
-> **범위:** OmniRoute 대시보드(`src/`)와 마케팅 사이트(`_mono_repo/omnirouteSite/`)는 **하나의 시각적 정체성**을 공유합니다 — 동일한 모눈종이 그리드 배경(32px), 동일한 색상 토큰, 표준화된 컴포넌트.
->
-> 유지관리자를 위한 실무 참고 사항:
->
-> - 남아 있는 일부 하드코딩된 hex 값은 **의도된 것**이며(항상 다크 모드인 콘솔 터미널, ReactFlow SVG 스트로크), 토큰으로 **절대** 일괄 전환해서는 안 됩니다.
-> - 실행 중인 인스턴스에서 그리드가 "더 크게" 보인다면 이는 코드가 아니라 오래된 빌드 때문입니다 — 그리드 크기는 사이트와 동일한 32px입니다.
-> - 다크 테마의 `--table-*` 값은 마이그레이션 이전의 하드코딩된 rgba와 바이트 단위로 동일합니다. 라이트 테마는 수정되었습니다(작동하지 않는 `var()` 폴백 때문에 항상 다크 모드로 표시되는 버그가 있었습니다).
+> **상태:** 대시보드는 **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`)을 기반으로 구축되었으며, 워크스페이스 `packages/ui-kit` (`@omniroute/ui-kit`)으로
+> 벤더링되어 있습니다(업스트림 스냅샷은
+> `packages/ui-kit/UPSTREAM.md`에 고정되어 있으며 `npm run check:ui-kit-snapshot`으로 보호됩니다). 라이트 테마가 표준
+> 테마이며, 기본 환경설정은 `system`입니다. 강조 색상은 Keak 라임(`--ci-color-accent`)입니다. Inter
+> (자간 0, `--ci-letter-spacing-ui`)는 UI 글꼴이며, Instrument Serif는 크고 여백이 많은
+> 디스플레이 텍스트(`.ci-dashboard-display`)에만 사용하고, IBM Plex Mono는 코드에 사용합니다. 모든 글꼴은
+> `src/app/globals.css` 상단의 `@fontsource/*` import를 통해 자체 호스팅됩니다. 모든 아이콘은 Lucide 글리프입니다.
 
----
+## 1. 구성 요소 위치
 
-## 1. 목적
+- **키트.** `packages/ui-kit/src`는
+  `packages/ui-kit/UPSTREAM.md`에 고정된 커밋의 업스트림 `src/`를 바이트 단위로 그대로 복사한 것입니다
+  (`packages/ui-kit/UPSTREAM.md`에는 라이선스 승인도 기록되어 있음). `PATCHES.md`에는 로컬 패치가
+  나열되어 있으며 현재는 없습니다. 별도의 빌드 없이 소스로 직접 사용됩니다. `next.config.mjs`가 이를
+  트랜스파일하고, `tsconfig.json`은 `@omniroute/ui-kit` → `packages/ui-kit/src` 및
+  `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`로 매핑합니다
+  (`vitest.config.ts`와 `vitest.mcp.config.ts`에도 동일한 별칭이 설정되어 있음). 키트 컴포넌트는
+  `@omniroute/ui-kit` 배럴을 통하지 말고 해당 하위 경로
+  (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…)에서 임포트하세요. 배럴을 사용하면
+  날짜 선택기를 포함한 모든 컴포넌트가 각 임포터에 포함됩니다. 키트 스타일시트는
+  `src/app/globals.css`를 통해 적용됩니다
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`).
+- **토큰.** `packages/ui-kit/src/ci-tokens.css`는 `--ci-*` 토큰을 선언합니다.
+  `src/app/globals.css`는 이 토큰을 기존 OmniRoute 이름
+  (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`,
+  `--color-fd-*`)에 연결하므로, 기존 `var(--color-*)` 참조와 Tailwind 유틸리티가 계속
+  작동합니다. 새 코드는 Tailwind 유틸리티
+  (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`,
+  `bg-chart-1`…) 또는 키트 클래스를 사용하며, 16진수 값은 절대 사용하지 않습니다
+  (`tests/unit/design-kit-bridge.test.ts`가 이 연결을 검증함). `text-primary`는
+  `--text-color-primary`를 통해 `--color-primary-ink`로 해석됩니다(라이트 모드에서는 lime-800,
+  다크 모드에서는 라임 강조색). 따라서 기본 텍스트의 가독성은 유지되고
+  `bg-primary`/`border-primary`는 라임 표면색을 유지합니다. 차트 계열에는
+  `--color-chart-1` … `--color-chart-5`를 사용합니다.
+- **테마.** `<html className="ci-theme">` (`src/app/layout.tsx`)는 문서에 키트 테마를
+  적용합니다. 테마 기본 설정은 `light`, `dark`, `system` 중 하나입니다
+  (`src/shared/constants/appConfig.ts`의 `THEME_CONFIG.defaultTheme = "system"`).
+  `system`은 `prefers-color-scheme`을 따릅니다. `src/store/themeStore.ts`의 `applyTheme()`는
+  `data-theme="dark"|"light"`를 설정하는 동시에 `<html>`의 `.dark` 클래스를 토글합니다.
+  이 동작은 하이드레이션 전에 실행되는 `src/app/layout.tsx`의 인라인 부트스트랩 스크립트에도
+  동일하게 구현되어 있습니다. 키트의 다크 토큰 집합은 `data-theme="dark"`를 기준으로 적용됩니다
+  (`packages/ui-kit/src/ci-tokens.css`). OmniRoute 자체의 다크 모드 오버라이드
+  (`globals.css`의 `.dark` 블록)와 기존 Tailwind `dark:` 유틸리티는 `.dark` 클래스를 기준으로
+  적용됩니다. 강조색 프리셋은 없습니다. 강조색은 항상 키트에서 가져오며, 이전 빌드에서 유지된
+  프리셋은 스토어를 로드할 때 제거됩니다.
+- **컴포넌트(어댑터).** `src/shared/components/index.tsx`는 OmniRoute 컴포넌트 API
+  (동일한 이름, 기본 익스포트 및 props)를 유지하며, 그 이면의 프리미티브는 키트 기반 어댑터입니다.
+  여기에는 폼
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`),
+  오버레이 및 피드백
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  구조
+  (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`),
+  그리고 테이블
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`)이 포함됩니다.
+  어댑터는 키트 컴포넌트를 하위 경로에서 임포트하고 기존 props를 이에 맞게 매핑합니다. 예를 들어
+  `Button variant="primary"`는 키트의 `default` 버튼입니다
+  (`--ci-button-primary-*`: 라이트 모드에서는 반전 표면색, 다크 모드에서는
+  `--ci-color-accent-foreground` 텍스트 색상과 함께 사용하는 강조색). `danger`는
+  `destructive`에 해당하고, `warning`은 `outline`에 `.ci-button--warning` 확장을 추가한
+  형태입니다. `globals.css` 끝의
+  `.ci-button--warning` 및 `.ci-badge[data-tone]` 규칙(`@layer components`)은 키트 클래스
+  위에 적용되는 OmniRoute 확장입니다. `tests/unit/ui/adapters/*.test.tsx`가 각 어댑터의 동작을
+  고정합니다.
+- **셸.** `src/app/(dashboard)/layout.tsx`는 `DashboardLayout`을 렌더링하고,
+  `DashboardLayout`은 `src/shared/components/layouts/DashboardShell.tsx`를 렌더링합니다.
+  이 셸은 키트의 `SidebarProvider` / `Sidebar` / `SidebarInset`
+  (`packages/ui-kit/src/sidebar.tsx`)을 사용하며, OmniRoute의 탐색 로직은
+  `src/shared/components/Sidebar.tsx`에 있습니다. `#main-content`로 이동하는 "콘텐츠로 건너뛰기"
+  링크가 포커스를 받을 수 있는 첫 번째 요소입니다. `src/shared/components/Header.tsx`에는 키트의
+  `SidebarTrigger`(셸에서 유일한 사이드바 토글), Keak `ProductSwitcher`, 명령 팔레트 열기 버튼이
+  있습니다. `#main-content` 내부에 키트 `PageHeader` (`.ci-page-header`)가 마운트되지 않은
+  경우에만 경로 제목을 표시하므로, 자체 `PageHeader`가 있는 페이지에는 `h1`이 하나만 존재합니다.
+  `src/shared/components/CommandPalette.tsx`는 키트 `Dialog`입니다.
+- **아이콘.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`)은 화면에서
+  사용하는 Material Symbols 명칭을 `ICON_MAP` (`src/shared/constants/iconMap.ts`)을 통해
+  Lucide 글리프로 변환합니다. Material Symbols 글꼴과 패키지는 제거되었습니다. 맵에 없는 이름은
+  중립적인 자리표시자 글리프(`data-icon-missing="true"`)로 렌더링되며, 프로덕션 이외의 환경에서는
+  콘솔 경고가 기록됩니다. `npm run gen:icon-map`은 현재 사용 중이지만 맵에 없는 이름을 출력합니다
+  (`tests/unit/icon-map-coverage.test.ts`는 Lucide 아이콘이 없는 이름이 하나라도 있으면 실패하며,
+  `tests/unit/icon-map-object-values.test.ts`는 조회 객체에 저장된 이름을 검사함).
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]`는 리터럴
+  `<span className="material-symbols-outlined">` 요소를 `<Icon>`으로 다시 작성합니다.
+- **브랜드.** `src/shared/components/OmniRouteLogo.tsx`는 키트를 래핑합니다. 기본 익스포트
+  `OmniRouteLogo`는 `ProductIcon product="omniroute" variant="glyph"`를 렌더링하고
+  (인라인 SVG, `basePath`와 호환), `OmniRouteLockup`은
+  `ProductLockup product="omniroute"`(접근성 이름 "Keak OmniRoute")를 렌더링합니다. 화이트
+  라벨 운영자의 경우에는 해당 운영자 고유의 `name`/`logoSrc`를 렌더링합니다. 제품 전환기 대상은
+  `src/shared/constants/keakProducts.ts`에 있습니다
+  (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). 독립 실행형 화면인
+  `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx`,
+  `src/shared/components/ErrorPageScaffold.tsx`에는 로고타입이 표시되며,
+  `tests/unit/brand-pages-static.test.ts`가 이를 보장합니다.
 
-마케팅 사이트(`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`)와 제품 대시보드는 **하나의 제품**처럼 보여야 합니다. 사이트는 이미 대시보드의 팔레트를 가져와 사용하고 있으며, `css/tokens.css`에도 _"팔레트는 OmniRoute 대시보드(src/app/globals.css)를 따릅니다"_라고 명시되어 있습니다. 따라서 둘은 이미 색상 수준에서 약 80% 정렬되어 있습니다. 대시보드에 부족한 요소는 다음과 같습니다.
+## 2. 규칙
 
-1. 사이트가 모든 페이지에서 사용하는 **모눈종이 그리드 배경**.
-2. 사이트에는 있지만 대시보드에는 없는 일부 **공유 디자인 토큰**(반경 스케일, 브랜드 그라디언트, `surface-2`, 모노스페이스 글꼴).
-3. **컴포넌트 수준의 일관성** — 여러 대시보드 컴포넌트가 하드코딩된 hex/rgba를 사용하여 테마 토큰을 우회합니다.
+1. 리터럴 대신 토큰을 사용합니다. 의도적으로 유지하는 예외는 항상 다크 테마인 콘솔 터미널, `STATUS_HEX`(`src/shared/constants/statusColors.ts`)를 통한 ReactFlow SVG 스트로크, 그리고 범주형 팔레트인 `STRATEGY_COLORS`(`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`)와 `LAYER_COLORS`(`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`)입니다.
+2. `packages/ui-kit/src`를 직접 수정하지 마세요. `scripts/dev/sync-ui-kit.sh <commit>`으로 동기화합니다. pre-commit 게이트인 `npm run check:ui-kit-snapshot`(`.husky/pre-commit`)은 고정된 업스트림 커밋과 단 하나의 바이트라도 다르면 실패합니다(업스트림 클론인 `UI_KIT_CLONE` 또는 `_references/cheaper-inference-ui-kit`이 없으면 경고와 함께 건너뜁니다). 키트에 필요한 기능이 없다면 어댑터나 화면에서 우회 처리하고 업스트림에 요청하세요.
+3. 키트의 기본 텍스트는 영어입니다(`label = "Loading"`, `loadingLabel = "Loading table"`…). 키트 컴포넌트가 텍스트를 렌더링할 때마다 `useTranslations(...)`에서 번역된 문자열을 전달하세요.
+4. Tailwind 유틸리티가 키트 컴포넌트 클래스보다 우선합니다(키트는 `@layer theme, base, components, utilities`를 선언하고 해당 규칙은 `components`에 있습니다). 간격과 레이아웃에는 유틸리티를 사용하되, 키트 컴포넌트의 색상을 다시 지정하는 데는 사용하지 마세요.
+5. 제목: 페이지 및 섹션 제목에는 `.ci-heading`(Inter, 자간 없음)을 사용하고, `.ci-dashboard-display`(Instrument Serif)는 오류 페이지의 상태 코드처럼 크고 드문드문 배치되는 디스플레이 텍스트에만 사용합니다.
+6. `tests/unit/dashboard-kit-sweep.test.ts`는 키트 도입 상태를 검사합니다. `src/app` 또는 `src/shared/components` 아래에는 Material 리거처 span이 없어야 합니다. 대시보드 트리(`src/app/(dashboard)` 및 `src/shared/components`)에는 원시 `<select>`, `<textarea>`, `<table>`이 없어야 하며, 명시된 예외(`Select` 어댑터의 네이티브 분기, `RequestLoggerDetail`) 외에는 직접 구현한 `role="dialog"`가 없어야 합니다. 이 영역의 모든 원시 `<button>` 또는 `<input>`에는 해당 요소로부터 최대 3줄 위에서 끝나는, 이유와 함께 `kit-exception:`을 포함한 주석이 필요합니다. 팔레트 색조와 `dark:` 변형은 테스트에 명시된 파일에서만 사용할 수 있습니다.
+7. PR 전에 두 테마와 390 px 뷰포트를 모두 확인하세요(스크린샷). `tests/e2e/a11y.spec.ts`는 axe를 실행합니다.
 
-이 문서는 이에 대한 분석 및 계획입니다.
+## 3. 화면 추가하기
 
----
+1. 키트의 `PageHeader`(`@omniroute/ui-kit/page-header`, 대시보드 내부에서는 `compact`)로 페이지를 시작하세요. 제목, 설명 및 `actions`를 제공합니다. 그러면 셸 헤더는 자체 제목을 표시하지 않습니다.
+2. `@/shared/components`의 어댑터로 컨트롤을 구성하고, 어댑터가 없는 경우에는 하위 경로를 통해 키트 컴포넌트(`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`, `Slider`…)를 사용하세요.
+3. 아이콘: `<Icon name="…" />`을 사용합니다. 새 이름은 의미상 일치하는 Lucide 컴포넌트와 함께 `ICON_MAP`에 추가하세요. `npm run gen:icon-map`을 실행하면 아직 누락된 이름이 표시됩니다.
+4. 색상: 의미론적 유틸리티(`text-success`, `bg-warning-bg`, `border-border`…)와 차트 계열용 `var(--color-chart-N)`을 사용하세요. 16진수 값과 색상만 반복하는 `dark:` 변형은 사용하지 마세요.
+5. 텍스트: 키트 컴포넌트에 전달하는 레이블을 포함한 모든 문자열은 `useTranslations`에서 가져와야 합니다. 새 키는 `src/i18n/messages/en.json`, `pt-BR.json`, `vi.json`에 추가하세요(베트남어 동등성 테스트는 모든 영어 키를 고정합니다). 다른 로케일은 i18n 동기화로 채워집니다.
+6. PR 전에 다음 검사를 실행하세요: `tests/unit/dashboard-kit-sweep.test.ts`, `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`, `npm run check:dashboard-typecheck`(`iconMap.ts`의 중복 import를 탐지하는 유일한 검사), `npm run check:ui-icu`, 그리고 해당 화면 자체의 테스트.
 
-## 2. 원칙
+## 4. 어댑터 추가 또는 변경
 
-- **단일 진실 공급원 = `src/app/globals.css`.** 사이트가 대시보드를 따르며, 그 반대는 아닙니다. 새로운 토큰은 먼저 `globals.css`에 추가합니다.
-- **리터럴이 아닌 토큰을 사용합니다.** 컴포넌트는 원시 `#hex`가 아니라 의미 기반 토큰(`bg-surface`, `text-primary`, `border-border`)을 사용합니다.
-- **강렬하지 않고 은은하게.** 그리드는 콘텐츠 뒤에 놓이는 희미한 배경이어야 하며, 텍스트 대비를 낮추거나 UI와 시각적으로 충돌해서는 안 됩니다.
-- **테마 인식.** 모든 요소가 `.dark`(제품의 대표적인 디자인)와 라이트 테마 모두에서 작동해야 합니다.
-- **정밀한 단계적 적용.** 먼저 그리드와 토큰을 배포한 다음(낮은 위험, 높은 가시성), 컴포넌트 정리를 여러 단계에 걸쳐 진행합니다.
+1. `src/shared/components/index.tsx`의 공개 API를 유지합니다. 즉, 동일한 export 이름, default export 및
+   허용되는 props를 유지합니다. 어댑터 내부에서 레거시 props를 키트에 매핑합니다(`Button.tsx`의 `VARIANT_TO_KIT`,
+   `SIZE_TO_KIT` 참조).
+2. 키트는 하위 경로로 import합니다(`@omniroute/ui-kit/<component>`).
+3. 키트의 미비점을 보완하기 위한 workaround는 어댑터 내부에 둡니다(수정 사항이 스타일인 경우에는 `globals.css`의 `@layer components`에 둠).
+   절대로 `packages/ui-kit/src`에 두지 않습니다.
+4. `tests/unit/ui/adapters/<name>.test.tsx`를 추가하거나 업데이트합니다. 호출하는 곳이 많은 어댑터의 경우 변경 전후의
+   렌더링된 마크업을 비교합니다. padding 또는 wrapper 변경 사항은 모든 화면에 영향을 미칩니다.
 
----
+## 5. 키트 업데이트
 
-## 3. 현재 상태 — 이미 정렬된 부분과 그렇지 않은 부분
+`scripts/dev/sync-ui-kit.sh <commit> [clone]`은 해당 commit의 upstream `src/`를
+`packages/ui-kit/src`로 복사하고 허용된 단일 변환을 적용합니다(상대 import에서 `.js` suffix 제거).
+그런 다음 `git diff packages/ui-kit`을 검토하고, 두 theme에서 provider, settings, combo,
+usage 및 endpoint를 시각적으로 점검한 후 `npm run check:ui-kit-snapshot`과 `npm run test:vitest:ui`를 실행하고,
+upstream changelog와 함께 PR을 엽니다.
 
-### 3.1 색상 — 이미 통합됨 ✅
+## 6. 참조 인덱스
 
-모든 브랜드 색상과 표면은 이미 사이트와 **값이 동일**합니다(이름만 다르며, 대시보드에서는 `--color-` 접두사를 사용합니다). `src/app/globals.css:30-128`에서 확인되었습니다.
-
-| 개념                        | 사이트 토큰(`tokens.css`)                   | 대시보드 토큰(`globals.css`)    | 일치 여부      |
-| --------------------------- | ------------------------------------------- | ------------------------------- | -------------- |
-| primary                     | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅             |
-| primary-hover               | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅             |
-| accent                      | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅             |
-| accent-2                    | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (이름 변경) |
-| accent-3                    | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (이름 변경) |
-| success / warning / error   | `#22c55e / #f59e0b / #ef4444`               | 동일함                          | ✅             |
-| 신호등                      | `#ff5f56 / #ffbd2e / #27c93f`               | 동일함                          | ✅             |
-| 다크 배경 / 표면 / 테두리   | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | 동일함                          | ✅             |
-| 라이트 배경 / 표면 / 텍스트 | `#f9f9fb / #fff / #1a1a2e`                  | 동일함                          | ✅             |
-
-**결론:** 수행할 색상 마이그레이션은 없습니다. 시각적 정체성은 이미 공유되고 있으며, 이를 다시 구축하는 것이 아니라 _완성_하는 작업입니다.
-
-### 3.2 차이점 — 대시보드에 부족한 요소
-
-| 차이점                 | 사이트에 있음                                                               | 대시보드                                                | 조치                 |
-| ---------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------- | -------------------- |
-| **그리드 배경**        | `body::before` 모눈종이, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ 추가됨(Phase 1)**                                  | **Part A**           |
-| **반경 스케일**        | `--radius 14px`, `--radius-sm 9px`                                          | `--radius 14px` 추가됨; `-sm` + 컴포넌트 재지정 보류 중 | **Part B / Phase 2** |
-| **브랜드 그라데이션**  | `--grad-brand 135deg primary→accent-3`                                      | **✅ 토큰 추가됨(Phase 1)**; Phase 2에서 사용           | **Part B**           |
-| **중첩 표면**          | `--surface-2 #1c2230`                                                       | **✅ 추가됨(Phase 1)**                                  | **Part B**           |
-| **모노스페이스 글꼴**  | `--font-mono` (ui-monospace 스택)                                           | 보류 중(Phase 4, 사용처와 함께 적용)                    | **Part B**           |
-| **`text-muted`(다크)** | `#8b8b9e`                                                                   | `#a1a1aa` (zinc-400)                                    | 조정 — **Part B**    |
-
-### 3.3 테마 적용 메커니즘(기존 기능을 손상하지 않기 위해)
-
-- **Tailwind v4, CSS 우선 방식**(`tailwind.config.*` 없음). 토큰은 `:root`/`.dark`에 정의되며 `@theme inline`을 통해 유틸리티에 노출됩니다(`globals.css:130-179`).
-- **`<html>`의 `.dark` 클래스를 통한 다크 모드**(`globals.css:22`의 `@custom-variant dark`)이며, 커스텀 Zustand 스토어(`src/store/themeStore.ts`)로 전환됩니다. 기본 테마는 `system`입니다(`src/shared/constants/appConfig.ts:11`). 사이트는 대신 `html[data-theme="light"]`를 사용합니다. **메커니즘은 서로 다르지만 별도의 출처에 있어 충돌하지 않습니다.** 따라서 대시보드의 `.dark` 메커니즘을 유지합니다.
-- **런타임 기본 색상 재정의**가 존재합니다(`themeStore.ts:85-97`, 프리셋은 `COLOR_THEMES`에 있음). 사용자는 `--color-primary`를 변경할 수 있습니다. `--color-primary`를 참조하는 모든 새 토큰(그라데이션 등)은 추가 작업 없이 해당 재정의를 상속합니다. ✅
-- **Tailwind v4 예약 반경 이름:** `--radius-sm/md/lg/...`는 `rounded-*` 유틸리티의 기반입니다. 이를 재정의하면 기존의 모든 `rounded-*`가 소급 변경됩니다(예: `rounded-sm`은 12개 파일에서 사용됨). 따라서 작은 반경 값과 컴포넌트 재지정은 사용처를 함께 변경하는 Phase 2로 의도적으로 연기합니다.
-
----
-
-## 4. Part A — 모눈종이 그리드 배경(핵심 요청 사항) — 구현 완료(Phase 1)
-
-### 4.1 개요
-
-사이트(`_mono_repo/omnirouteSite/css/base.css`)의 정확한 구현 방식: 두 개의 1px 선형 그라디언트를 그리는 **고정된 전체 뷰포트 의사 요소**로, 모든 콘텐츠 뒤에 `z-index:-1`로 배치됩니다.
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**`body`에 불투명한 `background-color`가 있는데도 이 방식이 작동하는 이유:** `z-index:-1`이 적용된 `::before`는 요소 자체의 배경 _위_ 에, 일반 흐름 콘텐츠의 _아래_ 에 그려집니다. 따라서 `--color-bg`가 기본 채움색이 되고, 그리드는 그 위에 겹쳐지며, 앱은 그리드 위에 렌더링됩니다.
-
-### 4.2 코드베이스에 이미 존재하는 선례
-
-`src/app/landing/page.tsx:16-26`은 **이미 페이지 단위로 동일한 그리드를 구현하고 있습니다**. 다만 **빨간색** 선(`#E54D5E`, 불투명도 `0.06`)을 **50px** 간격으로 사용하고 애니메이션 오브도 추가되어 있습니다. 따라서 이 패턴은 제품에서 이미 검증되었으며, 이번 작업에서는 이를 **전역적이고 테마를 인식하는** 배경으로 확장합니다.
-
-### 4.3 추가된 토큰(`globals.css`)
-
-```css
-:root {
-  /* 라이트 — 조밀한 대시보드에서 배경이 실제로 보이도록 사이트의 0.045보다
-     그리드 불투명도를 높여 조정함(카드/크롬이 뷰포트 대부분을 가림) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* 다크 — 동일한 이유로 0.035보다 높여 조정함 */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 유일한 차단 요소 — 제거 완료
-
-그리드는 구조적으로 전역입니다(패널, `auth`/`login`, 오류 페이지 등 모든 경로를 한 번에 포괄합니다). 패널 내부에서는 정확히 **하나의** 요소만 그리드를 가리고 있었습니다.
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — 바깥쪽 래퍼가 불투명한 `bg-bg`를 칠하고 있었습니다. 그 아래의 모든 요소(`<main>`, 스크롤 컨테이너, `max-w-7xl` 내부 요소)는 이미 투명하므로, **`bg-bg`를 제거하면** 콘텐츠 영역을 통해 body 그리드가 보이게 됩니다(body의 `--color-bg`는 계속 기본 채움색으로 유지됩니다).
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 크롬과의 상호작용(사이드바 / 헤더)
-
-- `Header`(`Header.tsx:207`, `bg-bg`)와 `Sidebar`(`Sidebar.tsx:430`, `bg-sidebar`)는 **불투명하게** 유지됩니다 → 그리드는 **콘텐츠 영역에만** 표시되고 단색 크롬이 이를 둘러쌉니다. 차분한 기본 표현이며, 사이트가 크롬과 캔버스를 분리하는 방식과 일치합니다(결정 D3 = 단색).
-
-### 4.6 로그인 / 인증 / 오류 페이지
-
-이 페이지들은 패널 크롬 없이 `<body>` 바로 아래에 렌더링되므로, 전역 그리드가 자동으로 그 뒤에 표시되어야 합니다. **Phase 5 — 완료:** 독립형 전체 화면 래퍼는 실제로 불투명했으며(`min-h-screen … bg-bg`, 여기서 `bg-bg`는 `<body>`와 동일한 단색 채움), 이 때문에 로그인뿐만 아니라 대시보드가 아닌 모든 화면에서 그리드가 가려졌습니다. 이제 모든 래퍼가 투명하므로 공유 배경이 그 아래로 드러납니다: `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding`, 그리고 `ErrorPageScaffold`(`400`/`401` 포함). 이로써 **D4**가 완료되었습니다(로그인 전용에서 모든 독립형 화면으로 확장). `tests/unit/design-grid-background.test.ts`로 검증됩니다.
-
-### 4.7 랜딩 페이지
-
-`landing/page.tsx`는 더 풍부한 애니메이션 배경(오브 + 비네팅)을 그대로 유지합니다. 이는 랜딩 페이지 고유의 마케팅용 스플래시입니다(결정 D5 = 현 상태 유지).
-
----
-
-## 5. 파트 B — 토큰 통합
-
-1단계에서는 비활성 상태이며 충돌이 없는 아이덴티티 토큰(`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`)을 추가합니다. 2단계에서는 반경 스케일을 Tailwind에 연결하고 컴포넌트가 이를 참조하도록 변경하며, 4단계에서는 `--font-mono`와 이를 사용하는 요소를 추가합니다.
-
-| 토큰                       | 이유                                                      | 단계                        |
-| -------------------------- | --------------------------------------------------------- | --------------------------- |
-| `--radius` / `--radius-sm` | 임의로 혼용된 6/8/12 대신 하나의 반경 스케일(14/9) 사용   | 1(값) / 2(연결 + 참조 변경) |
-| `--grad-brand`             | 사이트와 일치하는 기본 CTA용 브랜드 그라데이션(빨강→보라) | 1(토큰) / 2(Button)         |
-| `--surface-2`              | 중첩 패널 / 테이블 헤더 / 안쪽 행                         | 1                           |
-| `--font-mono`              | 코드 블록, 터미널, ID, 엔드포인트                         | 4                           |
-| `--text-muted` 조정        | 사이트↔패널 간 하나의 값 선택(`#a1a1aa` 권장)             | 2                           |
-
-**D2 (text-muted):** 사이트의 `#8b8b9e`와 대시보드의 `#a1a1aa`가 서로 다릅니다. **대시보드의 `#a1a1aa`**를 유지하고 _사이트_도 이에 맞게 업데이트하는 것을 권장합니다. 외관상의 변경입니다.
-
----
-
-## 6. 파트 C — 컴포넌트 표준화(2~4단계)
-
-커스텀 컴포넌트(shadcn/Radix 미사용), Tailwind v4를 사용하며, 시맨틱 토큰은 **대부분** 적용되어 있습니다(195개 파일에서 공유 배럴을 가져옴). 작업의 핵심은 이러한 체계를 **우회하는 부분**을 제거하는 것입니다. 위치: `src/shared/components/`.
-
-| #   | 항목                                  | 파일                                                                                                                    | 문제 → 목표                                                                                                                  | 단계 |
-| --- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- | ---- |
-| C1  | **반경 정렬**                         | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                               | 6/8/12px 혼용 → `--radius`/`--radius-sm`(14/9)                                                                               | 2    |
-| C2  | **Button 그라데이션 + `accent` 변형** | `Button.tsx:5-12`                                                                                                       | 기본 버튼이 단색 빨강→빨강임; `--grad-brand`에 맞게 조정하고 누락된 `accent` 변형 추가. 가져오는 파일 약 195개 — 노출도 최고 | 2    |
-| C3  | **테이블**                            | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                     | 100% 인라인 하드코딩된 rgba + 존재하지 않는 변수; 토큰으로 마이그레이션하고 서로 다른 스타일 제거                            | 3    |
-| C4  | **상태 색상 중앙화**                  | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + 헬퍼 5개 | 동일한 hex가 6곳 이상 중복됨 → `--color-success/warning/error` 기반의 단일 모듈로 통합                                       | 3    |
-| C5  | **Card 테두리**                       | `Card.tsx:39`                                                                                                           | `border-white/5` → 브랜드 `/8`                                                                                               | 2    |
-| C6  | **포커스 링 조정** ✅ 완료            | `globals.css`의 `--focus-ring`(accent)과 폼 컨트롤의 `ring-primary/30`                                                  | 전역 링과 일치하고 빨간색 오류 링과 구분되도록 **accent(보라)**로 통합; 오류는 빨간색 유지                                   | 4    |
-| C7  | **`Checkbox` + `Textarea` 추가**      | 인라인 `accentColor:#6366f1`이 적용된 원시 `<input>`/`<textarea>`                                                       | 토큰 기반 프리미티브                                                                                                         | 4    |
-| C8  | **하드코딩된 hex 일괄 정리**          | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, Modal 점 표시, 차트 파일 약 14개                                 | 리터럴 → 토큰                                                                                                                | 4    |
-| C9  | **`cn()` → clsx + tailwind-merge**    | `src/shared/utils/cn.ts`                                                                                                | 충돌하는 클래스가 중첩됨; C1 오버라이드에 필요                                                                               | 2    |
-
-**이미 브랜드에 부합함(토큰 기반이며 반경만 조정 필요):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. 롤아웃 계획
-
-- **Phase 1 — 그리드 + 아이덴티티 토큰 (이 PR).** `globals.css` 그리드 + `--surface-2`/`--grad-brand`/`--radius` 토큰, `body::before` 배경화면, `bg-bg` 차단 요소 제거, 정적 가드 테스트. 위험도가 낮고 커밋 하나로 되돌릴 수 있음.
-- **Phase 2 — 프리미티브 (C1, C2, C5) — 이 PR에서 완료.** 시맨틱 반경 유틸리티 `rounded-card`(14px) / `rounded-control`(9px)을 `@theme`을 통해 추가(사용자 정의 이름이므로 기본 `rounded-sm/md/lg/xl`은 그대로 유지 — 400개 파일에 영향을 주는 대규모 변경 없음), Card/Modal → 14px, Button/Input/Select → 9px, Button primary → `--grad-brand`(빨강→보라) + 새로운 `accent` 변형, Card 테두리 → `border-border` 토큰(0.08). **연기됨:** `cn()`→tailwind-merge(C9)는 새로운 의존성이 필요함. 프리미티브가 표면의 대부분을 담당하므로 임시방편으로 사용된 `rounded-lg` 전수 변경(326개 파일)은 현 상태로 유지.
-- **Phase 3 — 상태 색상 + 테이블 (C3, C4) — 이 PR에서 완료.** ✅ **C4** (`src/shared/constants/statusColors.ts` — 단일 소스 `STATUS_HEX`, `flow/edgeStyles.ts` + `TokenHealthBadge`가 이를 참조하도록 변경, 동일한 hex를 충실히 유지). ✅ **`--font-mono`** 토큰. ✅ **C3 (DataTable)** — 모든 인라인 rgba와 사용되지 않던 `var(--bg-table-header)` / `var(--text-secondary)` 폴백을 `--table-*` 토큰 세트(`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`)로 교체. 이 토큰의 **다크 값은 기존에 하드코딩된 rgba와 정확히 동일**하며(다크 모드 바이트 단위 동일), 라이트 값은 이전에 항상 어둡게 표시되던 라이트 테마를 수정함. 헤더 테두리 → `--color-border`, 보조 텍스트 → `--color-text-muted`. **병합 전에 시각적 검토 필요.** (변경하지 않음: `logTableStyles.ts`와 레거시 Ant `.ant-table` 규칙 — 별도 작업이며 우선순위가 더 낮음.)
-- **Phase 4 — 정리 (C6, C7, C9 완료, C8 보류 중).** ✅ **C9** `cn()` → `twMerge(clsx(...))`(clsx + tailwind-merge를 의존성으로 추가) — 이제 호출자의 `className`이 프리미티브의 충돌하는 클래스를 중첩하지 않고 올바르게 _대체_함. ✅ **C7** 새로운 `Checkbox` + `Textarea` 프리미티브(토큰 기반, 배럴에서 내보냄, 추가만 하는 변경 — 원시 체크박스 32개 / 원시 텍스트 영역 41개는 점진적으로 도입 가능). ✅ **C6** 포커스 링 조정 — 이제 폼 컨트롤(`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`)은 전역 `--focus-ring`과 일치하고 빨간색 오류 링과 충돌하지 않도록 **강조색(보라)** 링으로 포커스됨. 빨간색 오류 상태는 변경되지 않음. ⏳ **C8 hex 전수 변경은 무작정 찾기/바꾸기를 하는 작업이 아님** — _의도적_이므로 유지해야 하는 것으로 확인된 항목: `ConsoleLogViewer.tsx:240`(항상 어두운 터미널), `TokenHealthBadge` 팝오버, ReactFlow SVG 스트로크. 실제로 테마를 따라야 하는 hex만 마이그레이션할 것.
-
-각 단계: `npm run lint` + `npm run typecheck:core` + 시각적 검토.
-
----
-
-## 8. 미결정 사항(권장안)
-
-- **D1 — Button primary:** 빨강→빨강을 유지할지, **빨강→보라 `--grad-brand`**로 전환할지? 권장: **빨강→보라**(Phase 2).
-- **D2 — 그리드 선 색상:** **중립색**(사이트 스타일) — 선택됨 — 또는 브랜드 빨강. 크기 **32px**(소유자 피드백에 따라 기존 46px에서 약 30% 축소 — 대시보드 레이아웃에서 46px 셀은 너무 커 보였음).
-- **D3 — 크롬 선명도:** 사이드바/헤더 **단색** — 선택됨.
-- **D4 — 인증/로그인 그리드:** ✅ **완료(Phase 5)** — 로그인뿐 아니라 모든 독립형 전체 화면 래퍼에서 불투명한 `bg-bg`를 제거하여 모든 화면에서 그리드가 표시됨. §4.6 참조.
-- **D5 — 랜딩 페이지:** 애니메이션 스플래시는 현 상태로 유지. 선택됨.
-- **D6 — 제품 전반에 반경 14/9 적용:** 권장: 적용(Phase 2).
-- **D7 — Phase 1을 먼저 출시:** 선택됨.
-- **D8 — 레이아웃 너비(Phase 5):** 대시보드 콘텐츠 셸이 `max-w-7xl`(1280px)로 제한되어 대형 모니터에서 가운데 정렬된 채 양옆에 넓은 빈 여백이 생겼음. ✅ **완료** — 유동적인 `max-w-[3840px]`(진정한 4K)로 상향: 이제 콘텐츠가 약 4K까지 뷰포트를 따라가며, 그 이상에서만 가운데 정렬됨(`DashboardLayout.tsx`). 의도적으로 좁게 설계된 페이지는 그대로 좁게 유지됨(`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl).
-- **D9 — 불투명한 데이터 테이블(Phase 6):** 이제 대시보드 콘텐츠 영역이 투명해져 그리드 배경화면이 비쳐 보이므로(Phase 5), 컨테이너가 불투명한 표면이 아니었던 데이터 테이블에서는 투명한 짝수 행 / 낮은 알파의 지브라 행을 통해 그리드가 비쳐 보였음. ✅ **완료** — 이제 Card가 없는 모든 테이블이 `bg-surface`를 렌더링함(또는 `<DataTable>` 프리미티브의 경우 스크롤 컨테이너에 `background: var(--color-surface)` 적용). 수정된 항목: `DataTable`(프리미티브), `ProxyLogger`/`RequestLoggerV2`(해당 `<Card>`의 `bg-black/5 dark:bg-black/20` 색조가 tailwind-merge를 통해 Card의 `bg-surface`보다 우선되어 약 95% 투명해졌음), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable`, 그리고 캐시 뷰에 있는 두 개의 CSS 그리드 "테이블"(`bg-surface/35` → `bg-surface`). 이미 `<Card>`/Modal 내부에 있는 테이블은 불투명한 것으로 확인되어 의도적으로 변경하지 않음(해당 위치의 bg-surface는 아무 효과가 없는 중복 설정임). 그리드 자체는 **변경할 필요가 없었음** — 대시보드의 `body::before`는 사이트와 바이트 단위로 동일함(`--grid-size: 32px`). 실행 중인 인스턴스에서 "더 큰 그리드"가 보인다면 이는 코드 문제가 아니라 `#4143` 이전의 오래된 빌드 때문임. `tests/unit/design-grid-background.test.ts`로 보호됨(Phase 6 블록).
-
----
-
-## 9. 범위 외 항목 / 위험 요소
-
-- **팔레트 변경 없음** — 색상은 이미 일치하며, 누락된 토큰만 추가합니다. 제품의 색상이 변경될 위험은 없습니다.
-- **테마 엔진 변경 없음** — `.dark` + Zustand 스토어를 유지합니다.
-- **반경 변경(2단계)은 영향 범위가 넓음** — 모든 카드/버튼/입력 필드에 영향을 미치므로, 병합 전에 복잡한 화면(테이블, 모달)을 육안으로 확인합니다.
-- **테이블(C3)**은 하드코딩된 스타일이 가장 많고 회귀 가능성이 가장 높은 영역이므로, 별도의 PR로 분리합니다.
-
----
-
-## 10. 참조 인덱스
-
-| 영역                             | 경로                                                                                                                 |
-| -------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| 대시보드 토큰                    | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| 테마 스토어                      | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| 패널 셸(여기서 그리드 차단 해제) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| 크롬                             | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| 그리드 선례                      | `src/app/landing/page.tsx:16-26`                                                                                     |
-| 기본 컴포넌트                    | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| 상태 색상 소스                   | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| `cn` 유틸리티                    | `src/shared/utils/cn.ts`                                                                                             |
-| 1단계 가드 테스트                | `tests/unit/design-grid-background.test.ts`                                                                          |
-| 사이트 참조                      | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — token bridge, `.dark` override, OmniRoute `@layer components` 확장
+- `packages/ui-kit/UPSTREAM.md` — 고정된 upstream commit 및 license authorization; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` 및 그 옆의 adapter; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

@@ -11,11 +11,15 @@ const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
 const ORIGINAL_DISABLE_BACKUP = process.env.DISABLE_SQLITE_AUTO_BACKUP;
 const ORIGINAL_DISABLE_REDIS_AUTH_CACHE = process.env.OMNIROUTE_DISABLE_REDIS_AUTH_CACHE;
 const ORIGINAL_API_KEY_SECRET = process.env.API_KEY_SECRET;
+const ORIGINAL_JWT_SECRET = process.env.JWT_SECRET;
+const ORIGINAL_INITIAL_PASSWORD = process.env.INITIAL_PASSWORD;
 
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 process.env.OMNIROUTE_DISABLE_REDIS_AUTH_CACHE = "1";
 process.env.API_KEY_SECRET = "team-management-route-test-secret";
+process.env.JWT_SECRET = "team-management-route-jwt-secret";
+process.env.INITIAL_PASSWORD = "team-management-route-password";
 
 const core = await import("../../src/lib/db/core.ts");
 const settings = await import("../../src/lib/db/settings.ts");
@@ -28,6 +32,7 @@ const teamUsageRoute = await import("../../src/app/api/teams/[id]/usage/route.ts
 const exportJsonRoute = await import("../../src/app/api/settings/export-json/route.ts");
 const importJsonRoute = await import("../../src/app/api/settings/import-json/route.ts");
 const { TeamUpdateSchema } = await import("../../src/shared/validation/schemas/teams.ts");
+const { makeManagementSessionRequest } = await import("../helpers/managementSession.ts");
 
 async function resetStorage(): Promise<void> {
   core.resetDbInstance();
@@ -64,6 +69,10 @@ test.after(() => {
   }
   if (ORIGINAL_API_KEY_SECRET === undefined) delete process.env.API_KEY_SECRET;
   else process.env.API_KEY_SECRET = ORIGINAL_API_KEY_SECRET;
+  if (ORIGINAL_JWT_SECRET === undefined) delete process.env.JWT_SECRET;
+  else process.env.JWT_SECRET = ORIGINAL_JWT_SECRET;
+  if (ORIGINAL_INITIAL_PASSWORD === undefined) delete process.env.INITIAL_PASSWORD;
+  else process.env.INITIAL_PASSWORD = ORIGINAL_INITIAL_PASSWORD;
 });
 
 const paths = [
@@ -111,7 +120,7 @@ test("OpenAPI defines every Team schema referenced by Team routes", () => {
   }
 });
 
-test("Team and JSON backup handlers reject anonymous requests when login is disabled", async () => {
+test("Team handlers reject anonymous requests when login is disabled", async () => {
   await resetStorage();
   const team = teams.createTeam({ name: "Auth boundary" });
   const routeParams = params(team.id);
@@ -152,14 +161,10 @@ test("Team and JSON backup handlers reject anonymous requests when login is disa
       "DELETE /api/teams/{id}",
       () => teamDetailRoute.DELETE(request(`/api/teams/${team.id}`, "DELETE"), routeParams),
     ],
-    [
-      "GET /api/settings/export-json",
-      () => exportJsonRoute.GET(request("/api/settings/export-json")),
-    ],
-    [
-      "POST /api/settings/import-json",
-      () => importJsonRoute.POST(request("/api/settings/import-json", "POST", "not-json")),
-    ],
+    // JSON backup/restore are NOT listed here: they hand out / replace stored credentials and
+    // follow requireOperatorCredential (open only when login is disabled, 403 for every API key
+    // scope). That contract is pinned in the manage-key test below and in
+    // credential-export-require-session.test.ts / backup-restore-require-operator.test.ts.
   ];
 
   for (const [label, invoke] of cases) {
@@ -170,7 +175,7 @@ test("Team and JSON backup handlers reject anonymous requests when login is disa
   assert.equal(teams.getTeam(team.id)?.status, "active", "anonymous DELETE must not archive");
 });
 
-test("manage-scoped API keys can use Team and JSON backup handlers", async () => {
+test("manage-scoped API keys use Team handlers but are refused by JSON backup and restore", async () => {
   await resetStorage();
   const managementKey = await apiKeys.createApiKey(
     "Team route administrator",
@@ -242,14 +247,48 @@ test("manage-scoped API keys can use Team and JSON backup handlers", async () =>
     200
   );
 
-  const exported = await exportJsonRoute.GET(authRequest("/api/settings/export-json"));
+  // JSON backup/restore hand out and replace stored credentials: operator only. A manage-scoped
+  // API key must keep getting 403 (never the weaker requireManagementAuth verdict).
+  await settings.updateSettings({ requireLogin: true });
+  const refusedExport = await exportJsonRoute.GET(authRequest("/api/settings/export-json"));
+  assert.equal(refusedExport.status, 403);
+  assert.ok(
+    !JSON.stringify(await refusedExport.json()).includes(managementKey.key),
+    "403 body must not echo the key"
+  );
+  const refusedImport = await importJsonRoute.POST(
+    authRequest("/api/settings/import-json", "POST", JSON.stringify({}))
+  );
+  assert.equal(refusedImport.status, 403);
+});
+
+test("operator session exports and restores Team data through JSON backup", async () => {
+  await resetStorage();
+  await settings.updateSettings({ requireLogin: true });
+  const team = teams.createTeam({ name: "Backed up team", maxBudgetUsd: 3, budgetDuration: "7d" });
+  const key = await apiKeys.createApiKey("backup member", "machine-team-backup");
+  teams.assignApiKeyBillingTeam(key.id, team.id);
+
+  const exported = await exportJsonRoute.GET(
+    await makeManagementSessionRequest("http://localhost/api/settings/export-json")
+  );
   assert.equal(exported.status, 200);
   const exportedBody = await exported.text();
-  assert.equal(
-    (await importJsonRoute.POST(authRequest("/api/settings/import-json", "POST", exportedBody)))
-      .status,
-    200
+  const parsed = JSON.parse(exportedBody) as {
+    teams: Array<{ id: string }>;
+    apiKeyBillingTeamHistory: Array<{ teamId: string }>;
+  };
+  assert.ok(parsed.teams.some((entry) => entry.id === team.id));
+  assert.ok(parsed.apiKeyBillingTeamHistory.some((entry) => entry.teamId === team.id));
+
+  const imported = await importJsonRoute.POST(
+    await makeManagementSessionRequest("http://localhost/api/settings/import-json", {
+      method: "POST",
+      body: exportedBody,
+    })
   );
+  assert.equal(imported.status, 200);
+  assert.equal(teams.getTeam(team.id)?.name, "Backed up team");
 });
 
 test("authenticated Team PATCH rejects single-null and incomplete initial budgets", async () => {
@@ -315,11 +354,13 @@ test("JSON backup and restore guard before reading input and preserve Team data"
     "utf8"
   );
   for (const source of [exportSource, importSource]) {
-    assert.match(source, /requireManagementAuth/);
-    assert.match(source, /if \(authError\) return authError/);
+    assert.match(source, /requireOperatorCredential/);
+    assert.match(source, /if \(operatorVerdict\.ok === false\) return operatorVerdict\.response/);
+    assert.doesNotMatch(source, /requireManagementAuth/);
   }
   assert.ok(
-    importSource.indexOf("if (authError) return authError") < importSource.indexOf("request.text()")
+    importSource.indexOf("if (operatorVerdict.ok === false)") <
+      importSource.indexOf("request.text()")
   );
   assert.match(exportSource, /teams: listTeams\(\{ includeArchived: true \}\)/);
   assert.match(exportSource, /apiKeyBillingTeamHistory: listAllApiKeyBillingHistory\(\)/);

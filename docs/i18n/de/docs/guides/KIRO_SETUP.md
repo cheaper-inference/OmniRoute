@@ -115,31 +115,40 @@ Wenn das Feld `region` ausgelassen wird, lautet der Standardwert `us-east-1`.
 
 ---
 
-## API-Schlüssel-Importablauf
+## Importablauf für API-Schlüssel
 
-Die API-Schlüssel-Authentifizierung ist für langlebige Kiro-/AWS-CodeWhisperer-Bearer-Anmeldedaten vorgesehen. Sie
-verwendet keine OAuth-Aktualisierung und vermeidet dadurch die Invalidierung gemeinsam genutzter OIDC-Sitzungen.
+Die Authentifizierung per API-Schlüssel ist für langlebige Bearer-Anmeldedaten von Kiro / AWS CodeWhisperer vorgesehen. Sie verwendet
+keine OAuth-Aktualisierung und vermeidet dadurch die Invalidierung gemeinsam genutzter OIDC-Sitzungen.
 
 ### Dashboard
 
 1. Öffnen Sie **Dashboard -> Anbieter -> Kiro**.
 2. Wählen Sie **API-Schlüssel**.
-3. Fügen Sie den API-Schlüssel und optional die AWS-Region ein (standardmäßig `us-east-1`).
-4. OmniRoute validiert den Schlüssel und speichert die Verbindung.
+3. Fügen Sie den API-Schlüssel ein und wählen Sie die AWS-Region: **Automatisch erkennen** (Standard), **USA Ost
+   (Nord-Virginia)** oder **Europa (Frankfurt)**.
+4. OmniRoute validiert den Schlüssel und speichert die Verbindung fest für die Region, in der der
+   Schlüssel funktioniert.
 
 ### API
 
 ```bash
 curl -X POST http://localhost:20128/api/oauth/kiro/api-key \
   -H "Content-Type: application/json" \
-  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "us-east-1"}'
+  -d '{"apiKey": "kiro_or_codewhisperer_key", "region": "auto"}'
 ```
+
+`region` akzeptiert `auto` (Standard), `us-east-1` oder `eu-central-1`; jeder andere Wert wird
+mit HTTP 400 abgelehnt.
 
 ### Interner Vertrag
 
-Die API-Route validiert den Schlüssel durch den Aufruf von `KiroService.validateApiKey()`. Dabei wird
-`ListAvailableProfiles` für den zur Region passenden CodeWhisperer-/Amazon-Q-
-Endpunkt verwendet und ein `profileArn` aufgelöst.
+Die API-Route validiert den Schlüssel durch Aufrufen von `KiroService.validateApiKey()`, das wiederum
+`GET https://q.<region>.amazonaws.com/ListAvailableModels?origin=AI_EDITOR`
+aufruft (die von der Amazon-Q-Oberfläche für API-Schlüssel-Inferenz verwendete API), mit einem Timeout von 10 s pro Region. Im
+Modus `auto` wird zuerst `us-east-1` und anschließend `eu-central-1` ausprobiert; gespeichert wird die erste Region,
+die den Schlüssel akzeptiert. Wird ein Schlüssel in allen infrage kommenden Regionen abgelehnt, schlägt der Import mit
+HTTP 400 fehl. Anschließend wird nach dem Best-Effort-Prinzip `ListAvailableProfiles` aufgerufen, um eine optionale
+`profileArn` zu ermitteln (AWS verweigert dies für die meisten API-Schlüssel).
 
 Die gespeicherte Verbindung verwendet:
 
@@ -156,8 +165,11 @@ Die gespeicherte Verbindung verwendet:
 
 Zur Laufzeit sendet `KiroExecutor.buildHeaders()` den Schlüssel als
 `Authorization: Bearer <key>` und fügt `tokentype: API_KEY` hinzu. Kontingent-/Profilaufrufe
-verwenden dieselbe Kennzeichnung, damit AWS den Bearer als langlebigen API-Schlüssel und nicht
-als OIDC- oder Social-Access-Token behandelt.
+verwenden dieselbe Kennzeichnung, damit AWS den Bearer als langlebigen API-Schlüssel statt
+als OIDC- oder Social-Access-Token behandelt. `KiroExecutor.execute()` sendet API-Schlüssel-Inferenz ausschließlich
+an `https://q.<region>.amazonaws.com/generateAssistantResponse` — einschließlich `us-east-1`
+—, da das Kiro-IDE-Gateway `TokenType=API_KEY` ablehnt und
+`codewhisperer.us-east-1` API-Schlüssel-Nutzdaten aufgrund eines ungültigen Anfragetexts ablehnt (HTTP 400).
 
 ---
 

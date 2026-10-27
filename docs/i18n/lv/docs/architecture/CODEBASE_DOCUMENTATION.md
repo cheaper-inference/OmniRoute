@@ -21,73 +21,76 @@ neizgudrojot jaunus moduļus.
 
 ## 1. Tehnoloģiju steks
 
-| Aspekts               | Izvēle                                                                                                                                     |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Tīmekļa ietvars       | **Next.js 16** (App Router, savrupa izvade, nav globālas starpprogrammatūras)                                                              |
-| Valoda                | **TypeScript 6.0+** — mērķis `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                                      |
-| Izpildvide            | **Node.js** `>=22.22.2 <23` vai `>=24.0.0 <27` (nodrošināts ar `engines` + `SUPPORTED_NODE_RANGE`)                                         |
-| Datubāze              | **SQLite**, izmantojot `better-sqlite3` (viena instance, WAL žurnalēšana)                                                                  |
-| Darbvirsma            | **Electron 41** + `electron-builder` 26.10 (atsevišķa darbvieta direktorijā `electron/`)                                                   |
-| Testi                 | **Node iebūvētais testu izpildītājs** (vienību/integrācijas), **Vitest** (MCP, autoCombo, kešatmiņa), **Playwright** (e2e + protocols-e2e) |
-| Būvēšana              | Next.js savrupais režīms, izmantojot `scripts/build/build-next-isolated.mjs`                                                               |
-| Lintēšana/formatēšana | ESLint vienotā konfigurācija + Prettier (`lint-staged`, izmantojot Husky pirmskomita āķi)                                                  |
-| Moduļu sistēma        | Visur ESM (`"type": "module"`)                                                                                                             |
-| Darbvietas            | npm darbvieta — `open-sse` ir vienīgā apakšdarbvieta                                                                                       |
+| Aspekts                | Izvēle                                                                                                                                     |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| Tīmekļa ietvars        | **Next.js 16** (App Router, savrupa izvade, bez globālas starpprogrammatūras)                                                              |
+| Valoda                 | **TypeScript 6.0+** — mērķis `ES2022`, `module: esnext`, `moduleResolution: bundler`, `strict: false`                                      |
+| Izpildvide             | **Node.js** `>=22.22.2 <23` vai `>=24.0.0 <27` (uzspiests, izmantojot `engines` + `SUPPORTED_NODE_RANGE`)                                  |
+| Datubāze               | **SQLite**, izmantojot `better-sqlite3` (vienobjekta instance, WAL žurnalēšana)                                                            |
+| Darbvirsma             | **Electron 41** + `electron-builder` 26.10 (atsevišķa darbvieta direktorijā `electron/`)                                                   |
+| Testi                  | **Node iebūvētais testu izpildītājs** (vienību/integrācijas), **Vitest** (MCP, autoCombo, kešatmiņa), **Playwright** (e2e + protocols-e2e) |
+| Būvēšana               | Next.js savrupā izvade, izmantojot `scripts/build/build-next-isolated.mjs`                                                                 |
+| Lintēšana/formatēšana  | ESLint plakanā konfigurācija + Prettier (`lint-staged`, izmantojot Husky pirmskomita āķi)                                                  |
+| Moduļu sistēma         | Visur ESM (`"type": "module"`)                                                                                                             |
+| Informācijas paneļa UI | **Tailwind CSS 4** + repozitorijā iekļautais **Keak CI UI Kit** (`packages/ui-kit`), Lucide ikonas — skatiet `DESIGN_SYSTEM.md`            |
+| Darbvietas             | npm darbvietas — `open-sse`, `packages/browser-pool`, `packages/ui-kit`                                                                    |
 
 Ceļu aizstājvārdi (`tsconfig.json`):
 
 - `@/*` → `src/*`
 - `@omniroute/open-sse` → `open-sse/index.ts`
 - `@omniroute/open-sse/*` → `open-sse/*`
+- `@omniroute/ui-kit` → `packages/ui-kit/src`, `@omniroute/ui-kit/*` → `packages/ui-kit/src/*`
 
 Noklusējuma HTTP ports: **`20128`** (API un informācijas panelis izmanto vienu un to pašu procesu). Datu
 direktoriju nosaka vides mainīgais `DATA_DIR`; tā noklusējuma vērtība ir `~/.omniroute/`.
 
 ---
 
-## 2. Repozitorija izkārtojums
+## 2. Repozitorija struktūra
 
 ```
 OmniRoute/
-├── src/                  Next.js lietojumprogramma (App Router, bibliotēkas, domēns, serveris, koplietojamais kods)
+├── src/                  Next.js lietotne (App Router, bibliotēkas, domēns, serveris, koplietojamie resursi)
 ├── open-sse/             Straumēšanas dzinēja darbvieta (@omniroute/open-sse)
-├── electron/             Darbvirsmas ietvars (Electron 41 galvenais process + preload)
+├── packages/             Darbvietas: ui-kit (iekļauts Keak CI UI Kit), browser-pool
+├── electron/             Darbvirsmas lietotnes ietvars (Electron 41 galvenais process + priekšielāde)
 ├── bin/                  CLI ieejas punkti (omniroute, reset-password)
-├── tests/                Vienību, integrācijas, e2e, protocols-e2e, tulkotāja, drošības testi un testa dati
-├── scripts/              Būvēšanas, sinhronizācijas, pārbaužu, migrācijas un izpildlaika palīgskripti
+├── tests/                Vienību, integrācijas, e2e, protocols-e2e, tulkotāja un drošības testi, kā arī testa dati
+├── scripts/              Būvēšanas, sinhronizācijas, pārbaudes, migrācijas un izpildlaika palīgskripti
 ├── docs/                 Publiskā dokumentācija (šis direktorijs)
 ├── public/               Statiskie resursi, PWA manifests, servisa darbinieks
 ├── config/               Izpildlaika konfigurācijas paraugi
 ├── images/               Mārketinga/ekrānuzņēmumu resursi
-├── _ideia/, _references/, _mono_repo/, _tasks/   Iekšējie melnraksti/plānošana (netiek izplatīti)
-├── CLAUDE.md             Repozitorija noteikumi Claude Code vajadzībām
-├── AGENTS.md             Padziļināta arhitektūras atsauce aģentiem
+├── _ideia/, _references/, _mono_repo/, _tasks/   Iekšējie melnraksti/plānošanas materiāli (netiek izplatīti)
+├── CLAUDE.md             Repozitorija noteikumi darbam ar Claude Code
+├── AGENTS.md             Padziļināta arhitektūras uzziņa aģentiem
 ├── package.json          v3.8.51, darbvietas sakne
 └── tsconfig.json         Ceļu aizstājvārdi + kompilatora pamatopcijas
 ```
 
 ---
 
-## 3. `src/` — Next.js lietotne
+## 3. `src/` — Next.js lietojumprogramma
 
 ```
 src/
-├── app/                  App Router lapas + API maršruti
+├── app/                  App Router lapas un API maršruti
 ├── lib/                  Pamatbibliotēkas (DB, autentifikācija, OAuth, prasmes, atmiņa, …)
-├── domain/               Tīrs domēna slānis (politika, atkāpšanās mehānisms, izmaksas, bloķēšana, …)
+├── domain/               Tīrs domēna slānis (politikas, atkāpšanās mehānisms, izmaksas, bloķēšana, …)
 ├── server/               Tikai serverim paredzēti moduļi (autorizācija, CORS, autentifikācija)
-├── shared/               Tipi, konstantes, validācija, līgumi, utilītas (drošas lietošanai pāri robežām)
-├── mitm/                 Starpniekservera palīgfunkcijas CLI integrācijai
+├── shared/               Tipi, konstantes, validācija, līgumi, utilītas (droši lietošanai pāri robežām)
+├── mitm/                 Starpniekservera palīgrīki CLI integrācijai
 ├── models/               Lokālo modeļu metadati / aizstājvārdi
 ├── sse/                  Mantotie SSE apstrādātāji, kas joprojām atrodas zem src/ (nevis open-sse/)
 ├── store/                Klienta puses stāvokļa krātuves
 ├── middleware/           Maršruta līmeņa starpprogrammatūras utilītas (nevis Next.js globālā starpprogrammatūra)
-├── scripts/              Kokā iekļauti skripti, kurus var importēt lietotnes kods
-├── types/                Apkārtējie un koplietojamie TS tipi
+├── scripts/              Avota kokā esoši skripti, kurus var importēt lietojumprogrammas kods
+├── types/                Globālie un koplietojamie TS tipi
 ├── i18n/                 Lokalizācijas pakotnes
 ├── instrumentation.ts    Next.js instrumentācijas āķis
 ├── instrumentation-node.ts
-└── proxy.ts              Augstākā līmeņa starpniekservera sāknēšanas palīgfunkcija
+└── proxy.ts              Augstākā līmeņa starpniekservera sāknēšanas palīgrīks
 ```
 
 ### 3.1 `src/app/` — App Router
@@ -104,11 +107,11 @@ Augstākā līmeņa segmenti zem `src/app/`:
 | `.well-known/agent.json/`                                                     | A2A aģenta kartes atklāšanas dokuments                                   |
 | `(dashboard)/`                                                                | Informācijas paneļa lietotāja saskarne (maršrutu grupa bez URL prefiksa) |
 | `auth/`, `login/`, `forgot-password/`, `callback/`                            | Autentifikācijas plūsmas                                                 |
-| `landing/`                                                                    | Mārketinga/sākumlapa                                                     |
-| `docs/`                                                                       | Iegultais API dokumentācijas skatītājs                                   |
-| `status/`, `maintenance/`, `offline/`                                         | Darbības lapas                                                           |
+| `landing/`                                                                    | Mārketinga/mērķlapa                                                      |
+| `docs/`                                                                       | Iegults API dokumentācijas skatītājs                                     |
+| `status/`, `maintenance/`, `offline/`                                         | Darbības stāvokļa lapas                                                  |
 | `privacy/`, `terms/`                                                          | Juridiskās lapas                                                         |
-| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statiskās kļūdu lapas                                                    |
+| `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | Statiskas kļūdu lapas                                                    |
 | `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | Ietvara kļūdu/ielādes robežas                                            |
 | `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | Saknes ietvars                                                           |
 
@@ -178,7 +181,7 @@ src/app/api/
 ├── upstream-proxy/
 ├── usage/
 ├── v1/         Ar OpenAI saderīga publiskā API
-├── v1beta/     Gemini stila saderība
+├── v1beta/     Saderība Gemini stilā
 ├── version-manager/
 └── webhooks/
 ```
@@ -186,8 +189,8 @@ src/app/api/
 #### 3.1.2a `src/app/api/services/` — Iegulto pakalpojumu pārvaldība
 
 Maršruti 9Router un CLIProxyAPI instalēšanai, palaišanai, apturēšanai un uzraudzībai.
-Visi ceļi ir klasificēti kā **LOCAL_ONLY** (tikai atgriezeniskās cilpas saskarne, stingrais noteikums #17), jo tie
-var izsaukt `npm install` un palaist bērnprocesus.
+Visi ceļi ir klasificēti kā **LOCAL_ONLY** (tikai atgriezeniskās cilpas savienojumiem, stingrais noteikums #17), jo tie
+var izsaukt `npm install` un palaist pakārtotus procesus.
 
 ```
 src/app/api/services/
@@ -198,9 +201,9 @@ src/app/api/services/
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
 │   ├── update/route.ts     POST — npm install jaunākai versijai
-│   ├── rotate-key/route.ts POST — jaunas API atslēgas ģenerēšana + restartēšana
+│   ├── rotate-key/route.ts POST — ģenerēt jaunu API atslēgu + restartēt
 │   ├── status/route.ts     GET  — reāllaika + DB statuss + versijas metadati
-│   └── auto-start/route.ts POST — auto_start karoga pārslēgšana
+│   └── auto-start/route.ts POST — pārslēgt auto_start karodziņu
 ├── cliproxy/
 │   ├── _lib.ts             getOrInitSupervisor() palīgfunkcija
 │   ├── install/route.ts    POST — npm install
@@ -209,14 +212,14 @@ src/app/api/services/
 │   ├── restart/route.ts    POST — supervisor.restart()
 │   ├── update/route.ts     POST — npm install jaunākai versijai
 │   ├── status/route.ts     GET  — reāllaika + DB statuss + versijas metadati
-│   └── auto-start/route.ts POST — auto_start karoga pārslēgšana
+│   └── auto-start/route.ts POST — pārslēgt auto_start karodziņu
 └── [name]/
-    └── logs/route.ts       GET  — SSE žurnāla beigu straume (koplietota visiem pakalpojumiem)
+    └── logs/route.ts       GET  — SSE žurnāla beigu straume (koplietota starp visiem pakalpojumiem)
 ```
 
 Atbilstošā informācijas paneļa lietotāja saskarne:
-`src/app/(dashboard)/dashboard/providers/services/` — divu cilņu lapa (CLIProxyAPI + 9Router).
-Reversais starpniekserveris 9Router iegultajai lietotāja saskarnei:
+`src/app/(dashboard)/dashboard/providers/services/` — divu ciļņu lapa (CLIProxyAPI + 9Router).
+Reversais starpniekserveris iegultajai 9Router lietotāja saskarnei:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
 Padziļināts apraksts: `docs/frameworks/EMBEDDED-SERVICES.md`
@@ -226,26 +229,26 @@ Padziļināts apraksts: `docs/frameworks/EMBEDDED-SERVICES.md`
 ```
 v1/
 ├── accounts/[id]/                       konta uzmeklēšana
-├── agents/tasks/[id]/, agents/tasks/    A2A stila uzdevumu galapunkti
-├── api/                                 iekšējās API palīgfunkcijas, kas pieejamas zem v1/api
+├── agents/tasks/[id]/, agents/tasks/    A2A tipa uzdevumu galapunkti
+├── api/                                 iekšējie API palīgrīki, kas pieejami zem v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    tērzēšanas pabeigšanas (galvenais galapunkts)
-├── completions/                         mantotās teksta pabeigšanas
-├── embeddings/                          iegulumi
-├── files/[id]/, files/                  failu API
+├── chat/completions/                    Chat Completions (galvenais galapunkts)
+├── completions/                         mantotā teksta pabeigšana
+├── embeddings/                          iegultnes
+├── files/[id]/, files/                  Files API
 ├── _helpers/                            koplietoti maršrutu palīgrīki (bez publiska URL)
 ├── images/{edits, generations}/         attēlu ģenerēšana + rediģēšana
-├── issues/                              problēmu sākotnējās izvērtēšanas palīggalapunkti
-├── management/{proxies}/                pārvaldības tvēruma maršruti v1 iekšienē
+├── issues/                              problēmu šķirošanas palīggalapunkti
+├── management/{proxies}/                pārvaldības tvēruma maršruti v1 ietvaros
 ├── messages/{count_tokens}/             saderība ar Anthropic stila ziņojumiem
 ├── models/                              modeļu uzskaitījums (`route.ts`, `catalog.ts`)
-├── moderations/                         moderācija
+├── moderations/                         moderēšana
 ├── music/                               mūzikas ģenerēšana
 ├── providers/[provider]/                katram nodrošinātājam specifiskas darbības
 ├── quotas/{check}                       kvotu pārbaudes
 ├── registered-keys/                     reģistrēto atslēgu administrēšana
-├── rerank/                              atkārtota ranžēšana
+├── rerank/                              pārkārtošana pēc atbilstības
 ├── responses/[...path]/                 OpenAI Responses API (visaptverošs maršruts)
 ├── search/                              meklēšana tīmeklī
 ├── videos/                              video ģenerēšana
@@ -256,58 +259,58 @@ v1/
 Katrs maršruta fails izmanto vienu un to pašu shēmu:
 
 ```
-Maršruts → CORS priekšpieprasījums → Zod pieprasījuma ķermeņa validācija → neobligāta autentifikācija
+Maršruts → CORS priekšpieprasījums → pieprasījuma ķermeņa validācija ar Zod → neobligāta autentifikācija
          → API atslēgas politikas piemērošana → deleģēšana apstrādātājam (open-sse)
 ```
 
-`v1beta/` ir ar Gemini stilu saderīga virsma (plāns ietvars, kas pārveido datus,
+`v1beta/` ir Gemini stila saderības saskarne (plāns ietvars, kas pārveido pieprasījumus,
 lai izmantotu to pašu `open-sse/handlers/` konveijeru).
 
 ### 3.2 `src/lib/` — Pamatbibliotēkas
 
-Vienmēr importējiet datus, sinhronizāciju, OAuth, prasmes, atmiņu utt., izmantojot šos moduļus.
-Tabulā ir grupēti faktiskie direktoriji un ievērojamākie augšējā līmeņa faili.
+Datus, sinhronizāciju, OAuth, prasmes, atmiņu utt. vienmēr importējiet, izmantojot šos moduļus.
+Tabulā ir sagrupēti faktiskie direktoriji un ievērojamākie augstākā līmeņa faili.
 
-| Modulis           | Mērķis                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | A2A protokola serveris: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 prasmes: izmaksu analīze, darbspējas pārskats, pakalpojumu sniedzēju atklāšana, kvotu pārvaldība, viedā maršrutēšana, iespēju uzskaitīšana)                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `acp/`            | Aģentu vadības protokols: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `api/`            | Iekšējie API palīgrīki: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `auth/`           | `managementPassword.ts` (paroles atiestatīšana / jaukšana)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `batches/`        | OpenAI Batches API pakalpojums (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `catalog/`        | OpenRouter kataloga sinhronizācija (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `cloudAgent/`     | Mākoņa aģentu reģistrs: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `combos/`         | Kombināciju atrisināšanas palīgfunkcijas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `compliance/`     | Audits un pakalpojumu sniedzēju audits: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `config/`         | Izpildlaika konfigurācijas integrācijas kods                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `db/`             | SQLite domēna moduļi (skatiet §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `display/`        | Lietotāja saskarnes/attēlošanas palīgfunkcijas, ko izmanto API atbildes                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `embeddings/`     | Ieguldījumu pakalpojumu reģistrs                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `env/`            | Vides mainīgo ielāde un introspekcija                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `evals/`          | Novērtēšanas izpildlaika vide                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `jobs/`           | Fona uzdevumi (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `memory/`         | Pastāvīgā atmiņa: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `oauth/`          | OAuth/importēšanas nodrošinātāju moduļi (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, kā arī `services/`, `utils/` un `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                     |
-| `plugins/`        | Spraudņu ielādētājs (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `providerModels/` | Pārvaldīts modeļu dzīves cikls: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `providers/`      | Pakalpojumu sniedzēju palīgfunkcijas: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `resilience/`     | `settings.ts` — ķēdes pārtraucēja, atdzišanas perioda un bloķēšanas iestatījumi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `runtime/`        | Izpildlaika funkcionalitātes noteikšana                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `services/`       | Iegulto pakalpojumu ietvars: `ServiceSupervisor.ts` (vispārīgs bērnprocesu pārraugs ar operāciju bloķētāju, gredzenbuferi un darbspējas pārbaudītāju), `bootstrap.ts` (procesa līmeņa reģistrācija un automātiska palaišana), `registry.ts` (rīka → pārrauga kartējums), `apiKey.ts` (AES-256-GCM atslēgu krātuve), `modelSync.ts` (periodiska modeļu sinhronizācija), `ringBuffer.ts` (5 MB ciklisks žurnāla buferis), `healthCheck.ts` (HTTP darbspējas pārbaude), `types.ts`, `embedWsProxy.ts` (WebSocket starpniekserveris), `installers/{ninerouter,cliproxy}.ts`. Skatiet `docs/frameworks/EMBEDDED-SERVICES.md`                                                                       |
-| `agentSkills/`    | Aģenta prasmju katalogs un ģenerators: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → ieraksta `skills/{id}/SKILL.md`), `openapiParser.ts` (izgūst REST galapunktus no OpenAPI specifikācijas), `cliRegistryParser.ts` (izgūst CLI apakškomandas no bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). Izmanto REST maršruti (`/api/agent-skills/*`), MCP rīki (`omniroute_agent_skills_*`) un A2A prasme `list-capabilities`. Skatiet [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
-| `skills/`         | Prasmju ietvars: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, kā arī `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `spend/`          | `batchWriter.ts` (atliktās rakstīšanas buferis)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `sync/`           | `bundle.ts`, `tokens.ts` (mākoņa sinhronizācija)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
-| `system/`         | Sistēmas līmeņa palīgfunkcijas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `translator/`     | Augstākā līmeņa tulkotāja sasaistes kods (deleģē uz `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `usage/`          | Lietojuma uzskaite: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `versionManager/` | Automātiskā atjaunināšana un versiju manifests                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `ws/`             | WebSocket tilts                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `zed-oauth/`      | Zed redaktora OAuth plūsma                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| Modulis           | Nolūks                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`            | A2A protokola serveris: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 prasmes: izmaksu analīze, darbspējas pārskats, pakalpojumu sniedzēju atklāšana, kvotu pārvaldība, viedā maršrutēšana, iespēju uzskaitīšana)                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `acp/`            | Agent-Control-Protocol: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `api/`            | Iekšējie API palīgrīki: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `auth/`           | `managementPassword.ts` (paroles atiestatīšana / jaukšana)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `batches/`        | OpenAI Batches API pakalpojums (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `catalog/`        | OpenRouter kataloga sinhronizācija (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `cloudAgent/`     | Mākoņa aģentu reģistrs: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `combos/`         | Kombināciju atrisināšanas palīgfunkcijas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `compliance/`     | Audits un pakalpojumu sniedzēja audits: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `config/`         | Izpildlaika konfigurācijas sasaistes kods                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `db/`             | SQLite domēna moduļi (skatiet §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `display/`        | Lietotāja saskarnes/attēlošanas palīgfunkcijas, ko izmanto API atbildēs                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `embeddings/`     | Iegulšanas pakalpojumu reģistrs                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `env/`            | Vides ielāde un introspekcija                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `evals/`          | Novērtēšanas izpildlaika vide                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `jobs/`           | Fona uzdevumi (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `memory/`         | Pastāvīgā atmiņa: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `oauth/`          | OAuth/importēšanas nodrošinātāju moduļi (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed`, kā arī `services/`, `utils/` un `constants/oauth.ts`                                                                                                                                                                                                                                                                                                                            |
+| `plugins/`        | Spraudņu ielādētājs (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `providerModels/` | Pārvaldīto modeļu dzīves cikls: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `providers/`      | Pakalpojumu sniedzēju palīgfunkcijas: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `resilience/`     | `settings.ts` — slēguma pārtraucēja, atdzišanas perioda un bloķēšanas iestatījumi                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `runtime/`        | Izpildlaika funkcionalitātes noteikšana                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `services/`       | Iegulto pakalpojumu ietvars: `ServiceSupervisor.ts` (vispārīgs pakārtoto procesu pārraugs ar operāciju bloķēšanu, gredzenveida buferi un darbspējas pārbaudītāju), `bootstrap.ts` (procesa līmeņa reģistrācija un automātiska palaišana), `registry.ts` (rīka → pārrauga kartējums), `apiKey.ts` (AES-256-GCM atslēgu krātuve), `modelSync.ts` (periodiska modeļu sinhronizācija), `ringBuffer.ts` (5 MB ciklisks žurnāla buferis), `healthCheck.ts` (HTTP darbspējas pārbaude), `types.ts`, `embedWsProxy.ts` (WebSocket starpniekserveris), `installers/{ninerouter,cliproxy}.ts`. Skatiet `docs/frameworks/EMBEDDED-SERVICES.md`                                                                  |
+| `agentSkills/`    | Agent Skills katalogs un ģenerators: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → ieraksta failā `skills/{id}/SKILL.md`), `openapiParser.ts` (izgūst REST galapunktus no OpenAPI specifikācijas), `cliRegistryParser.ts` (izgūst CLI apakškomandas no bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport). To izmanto REST maršruti (`/api/agent-skills/*`), MCP rīki (`omniroute_agent_skills_*`) un A2A prasme `list-capabilities`. Skatiet [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md). |
+| `skills/`         | Prasmju ietvars: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts`, kā arī `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `spend/`          | `batchWriter.ts` (atliktās rakstīšanas buferis)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `sync/`           | `bundle.ts`, `tokens.ts` (mākoņa sinhronizācija)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `system/`         | Sistēmas līmeņa palīgfunkcijas                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `translator/`     | Augstākā līmeņa tulkotāja sasaistes kods (deleģē uz `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `usage/`          | Lietojuma uzskaite: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `versionManager/` | Automātiskā atjaunināšana un versiju manifests                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `ws/`             | WebSocket tilts                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `zed-oauth/`      | Zed redaktora OAuth plūsma                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
 
 Augstākā līmeņa faili direktorijā `src/lib/`:
 
@@ -326,7 +329,7 @@ Augstākā līmeņa faili direktorijā `src/lib/`:
 #### 3.2.1 `src/lib/db/`
 
 Vieninstances SQLite datubāze (`getDbInstance()` failā `core.ts`, WAL žurnalēšana).
-**Nekad nerakstiet neapstrādātu SQL maršrutos vai apstrādātājos** — izmantojiet šos moduļus.
+**Nekad nerakstiet neapstrādātus SQL vaicājumus maršrutos vai apstrādātājos** — izmantojiet šos moduļus.
 
 ![Datubāzes shēmas pārskats (atlasītās pamata tabulas)](../diagrams/exported/db-schema-overview.svg)
 
@@ -346,10 +349,10 @@ Domēna moduļi (katrs pārvalda vienu vai vairākas tabulas): `apiKeys.ts`, `ba
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`.
 
-`migrations/` satur 168 versijotus `.sql` failus (idempotentus un transakcionālus), un
-sistēmas palaišanas laikā tos izpilda `migrationRunner.ts`.
+`migrations/` satur 168 versijotus `.sql` failus (idempotentus un transakcionālus), kurus
+startēšanas laikā izpilda `migrationRunner.ts`.
 
-Migrāciju gaitā izveidotās tabulas (kopā 123):
+Migrācijās izveidotās tabulas (kopā 123):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -369,49 +372,49 @@ Migrāciju gaitā izveidotās tabulas (kopā 123):
 
 ### 3.3 `src/domain/` — Domēna slānis
 
-Tīra biznesa loģika bez ievades/izvades operācijām. To importē maršruti un apstrādātāji.
+Tīra biznesa loģika bez I/O. To importē maršruti un apstrādātāji.
 
-| Fails                                      | Nolūks                                                   |
+| Fails                                      | Mērķis                                                   |
 | ------------------------------------------ | -------------------------------------------------------- |
 | `policyEngine.ts`                          | Augstākā līmeņa politiku atrisinātājs                    |
-| `fallbackPolicy.ts`                        | Rezerves risinājuma lēmumu koks                          |
+| `fallbackPolicy.ts`                        | Atkāpšanās lēmumu koks                                   |
 | `costRules.ts`                             | Izmaksu aprēķināšanas noteikumi                          |
 | `lockoutPolicy.ts`                         | Lēmumi par modeļu bloķēšanu                              |
 | `tagRouter.ts`                             | Uz tagiem balstīta maršrutēšana                          |
 | `comboResolver.ts`                         | Kombinācijas noteikšana no pieprasījuma → mērķu saraksts |
-| `connectionModelRules.ts`                  | Modeļu filtri katram savienojumam                        |
+| `connectionModelRules.ts`                  | Katra savienojuma modeļu filtri                          |
 | `modelAvailability.ts`                     | Modeļa pieejamības pārbaude                              |
-| `degradation.ts`                           | Pārejas uz degradētu režīmu                              |
+| `degradation.ts`                           | Degradētā režīma pārejas                                 |
 | `providerExpiration.ts`                    | Kontu/atslēgu ar beigušos derīguma termiņu noteikšana    |
 | `quotaCache.ts`                            | Kešoti kvotu lēmumi                                      |
 | `responses.ts`, `omnirouteResponseMeta.ts` | Atbildes struktūras palīgfunkcijas                       |
 | `configAudit.ts`                           | Konfigurācijas izmaiņu audits                            |
-| `assessment/`                              | Modeļu novērtēšana (saskaņā ar RFC, daļēji ieviesta)     |
+| `assessment/`                              | Modeļu novērtēšana (atbilstoši RFC, daļēji ieviesta)     |
 | `types.ts`                                 | Koplietojamie domēna tipi                                |
 
 ### 3.4 `src/server/` — Tikai serverim
 
-Nevar importēt klienta komponentos.
+Nevar importēt no klienta komponentiem.
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
 │   ├── classify.ts        Klasificē maršrutus kā publiskus vai pārvaldības maršrutus
-│   ├── assertAuth.ts      Apstiprinājuma palīgfunkcija
+│   ├── assertAuth.ts      Apgalvojuma palīgfunkcija
 │   ├── context.ts         Katra pieprasījuma autorizācijas konteksts
 │   ├── headers.ts
 │   ├── pipeline.ts        Autorizācijas konveijers
 │   ├── policies/          Konkrētas politikas
 │   └── types.ts
-└── cors/origins.ts        Atļauto CORS izcelsmes avotu saraksts
+└── cors/origins.ts        Atļauto CORS izcelsmju saraksts
 ```
 
 ### 3.5 `src/shared/` — Droši koplietojams
 
-Sadalīts mērķorientētos apakšdirektorijos:
+Sadalīts mērķorientētās apakšdirektorijās:
 
-- `constants/` — `providers.ts` (ar Zod validēts pakalpojumu sniedzēju katalogs), `models.ts`,
+- `constants/` — `providers.ts` (ar Zod validēts nodrošinātāju katalogs), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
   `headers.ts`, `upstreamHeaders.ts` (aizliegumu saraksts), `mcpScopes.ts`,
@@ -421,7 +424,7 @@ Sadalīts mērķorientētos apakšdirektorijos:
 - `validation/` — `schemas.ts` (~80 Zod shēmas), `compressionConfigSchemas.ts`,
   `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
 - `contracts/` — publiskās API līgumi, kas tiek publicēti npm.
-- `types/` — koplietojami TS tipi.
+- `types/` — koplietojamie TS tipi.
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
   `cors.ts`, `featureFlags.ts`,
@@ -429,15 +432,22 @@ Sadalīts mērķorientētos apakšdirektorijos:
   `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
   `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
   `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts`, kā arī informācijas paneļa āķi/komponenti mapēs `services/`, `network/`,
+  `a11yAudit.ts`, kā arī informācijas paneļa āķi/komponenti direktorijos `services/`, `network/`,
   `middleware/`, `schemas/`, `hooks/`, `components/`.
+- `components/` — informācijas paneļa komponentu API (`index.tsx` apkopojuma fails: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …). Primitīvi ir adapteri virs
+  projektā iekļautā komplekta (`packages/ui-kit`, kas importēts, izmantojot komponenta apakšceļu, piemēram,
+  `@omniroute/ui-kit/button`), tāpēc ekrāni saglabā savus importus, bet marķējumu
+  nodrošina komplekts. Čaula ir `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (komplekta `SidebarProvider`/`SidebarInset`) ar `Sidebar.tsx` un `Header.tsx`; ikonas tiek
+  apstrādātas, izmantojot `Icon.tsx` un `constants/iconMap.ts`. Skatiet `docs/architecture/DESIGN_SYSTEM.md`.
 
 ---
 
 ## 4. `open-sse/` — Straumēšanas dzinēja darbvieta
 
-Atsevišķa npm darbvieta, kas publicēta kā `@omniroute/open-sse`. Tā nodrošina pieprasījumu
-apstrādi, izpildītājus, tulkotājus, servisus, transformatoru un MCP serveri.
+Atsevišķa npm darbvieta, kas publicēta kā `@omniroute/open-sse`. Tā ietver pieprasījumu
+apstrādi, izpildītājus, tulkotājus, pakalpojumus, transformētāju un MCP serveri.
 
 ```
 open-sse/
@@ -446,12 +456,12 @@ open-sse/
 ├── tsconfig.json
 ├── types.d.ts
 ├── config/                 Pakalpojumu sniedzēju reģistri, galveņu profili, identitāte, …
-├── handlers/               Pieprasījumu apstrādātāji (tērzēšana, iegulumi, audio, attēli, …)
-├── executors/              108 pakalpojumu sniedzējiem specifiski HTTP izpildītāji
-├── translator/             Formātu konvertēšana (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Responses API ↔ Chat Completions straumes transformators
-├── services/               Vairāk nekā 80 servisu moduļu (kombinācijas, atkāpšanās mehānismi, kvotas, identitāte, …)
-├── utils/                  Straumēšanas palīgrīki, TLS klients, AWS SigV4, starpniekservera ielāde, …
+├── handlers/               Pieprasījumu apstrādātāji (tērzēšana, iegultnes, audio, attēli, …)
+├── executors/              156 pakalpojumu sniedzēju izpildītāju moduļi (izpildītāju klases + katra sniedzēja palīgmoduļi)
+├── translator/             Formātu pārveidošana (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            Responses API ↔ Chat Completions straumes transformētājs
+├── services/               Vairāk nekā 80 pakalpojumu moduļu (kombinācijas, atkāpšanās, kvotas, identitāte, …)
+├── utils/                  Straumēšanas palīgrīki, TLS klients, AWS SigV4, starpniekservera pieprasījumi, …
 └── mcp-server/             MCP serveris (3 transporti, 33 tvērumi, 110 rīki)
 ```
 
@@ -459,39 +469,42 @@ open-sse/
 
 | Apstrādātājs            | Nolūks                                                                                                             |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `chatCore.ts`           | Galvenais tērzēšanas konveijers (kešatmiņa, ātruma ierobežošana, kombināciju maršrutēšana, izpildītāja izsaukšana) |
+| `chatCore.ts`           | Galvenais tērzēšanas konveijers (kešatmiņa, ātruma ierobežošana, kombināciju maršrutēšana, izpildītāju izsaukšana) |
 | `responsesHandler.ts`   | OpenAI Responses API ieejas punkts                                                                                 |
-| `embeddings.ts`         | Iegulumi                                                                                                           |
+| `embeddings.ts`         | Iegultnes                                                                                                          |
 | `imageGeneration.ts`    | Attēlu ģenerēšana                                                                                                  |
-| `audioSpeech.ts`        | Teksta pārveidošana runā                                                                                           |
-| `audioTranscription.ts` | Runas pārveidošana tekstā                                                                                          |
+| `audioSpeech.ts`        | Teksta pārvēršana runā                                                                                             |
+| `audioTranscription.ts` | Runas pārvēršana tekstā                                                                                            |
 | `videoGeneration.ts`    | Video ģenerēšana                                                                                                   |
 | `musicGeneration.ts`    | Mūzikas ģenerēšana                                                                                                 |
 | `rerank.ts`             | Atkārtota ranžēšana                                                                                                |
 | `moderations.ts`        | Moderēšana                                                                                                         |
 | `search.ts`             | Meklēšana tīmeklī                                                                                                  |
 | `sseParser.ts`          | SSE notikumu parsētājs                                                                                             |
-| `usageExtractor.ts`     | Marķieru skaita iegūšana no augšupējām straumēm                                                                    |
-| `responseSanitizer.ts`  | Pakalpojumu sniedzējiem specifiskā trokšņa noņemšana                                                               |
-| `responseTranslator.ts` | Saistviela starp pakalpojumu sniedzēja atbildi un tulkotāja slāni                                                  |
+| `usageExtractor.ts`     | Tokenu skaita iegūšana no augšupējām straumēm                                                                      |
+| `responseSanitizer.ts`  | Pakalpojumu sniedzējam specifiskā trokšņa noņemšana                                                                |
+| `responseTranslator.ts` | Sasaistes slānis starp pakalpojumu sniedzēja atbildi un tulkotāju slāni                                            |
 
 ### 4.2 `open-sse/executors/`
 
-108 pakalpojumu sniedzēju izpildītāji, no kuriem katrs paplašina `BaseExecutor` (`base.ts`):
+156 augstākā līmeņa izpildītāju moduļi (`*.ts`, izņemot `base.ts`, `index.ts` un testus — šo skaitu
+nosaka `npm run check:docs-counts`). Katra izpildītāja klase paplašina `BaseExecutor` (`base.ts`)
+tieši vai ar `DefaultExecutor` vai cita izpildītāja starpniecību; pārējie moduļi ir katram pakalpojumu
+sniedzējam paredzēti palīgmoduļi (rīku shēmas, pieprasījumu/TTS adapteri, īpatnību apstrādātāji). Izpildītāji ietver:
 
 `antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
 `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
 `muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
 `pollinations`, `qoder`, `vertex`, `devin-desktop`, kā arī `claudeIdentity.ts`
-(koplietojams identitātes palīgrīks) un `index.ts` (reģistrs).
+(koplietojams identitātes palīgmodulis) un `index.ts` (reģistrs).
 
-> Piezīme: šeit nenorādītos pakalpojumu sniedzējus apkalpo `default.ts`, izmantojot vispārīgo
-> ar OpenAI saderīgo izpildītāju. Pilnais pakalpojumu sniedzēju katalogs (355 pakalpojumu sniedzēji) atrodas
+> Piezīme: pakalpojumu sniedzējus, kas šeit nav uzskaitīti, apkalpo `default.ts`, izmantojot vispārīgo
+> ar OpenAI saderīgo izpildītāju. Pilns pakalpojumu sniedzēju katalogs (375 pakalpojumu sniedzēji) atrodas
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`
 
-Centrmezgla un spieķu principa tulkošana (OpenAI ir centrmezgls).
+Centrmezgla un atzaru tipa tulkošana (OpenAI ir centrmezgls).
 
 - **9 pieprasījumu tulkotāji** (`translator/request/`):
   `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
@@ -501,33 +514,33 @@ Centrmezgla un spieķu principa tulkošana (OpenAI ir centrmezgls).
   `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
   `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`,
   `openai-to-claude`.
-- **9 palīgrīki** (`translator/helpers/`):
+- **9 palīgmoduļi** (`translator/helpers/`):
   `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
   `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper`, kā arī
-  palīgrīku testi.
-- **Attēlu palīgrīki** (`translator/image/sizeMapper.ts`).
-- Augšējais līmenis: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
+  palīgmoduļu testi.
+- **Attēlu palīgmoduļi** (`translator/image/sizeMapper.ts`).
+- Augstākajā līmenī: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
 - `responsesTransformer.ts` — uz `TransformStream` balstīts Responses API ↔ Chat
-  Completions pārveidotājs (to izmanto `responses/` maršruta visaptverošais apstrādātājs).
+  Completions pārveidotājs (to izmanto `responses/` maršruts, kas uztver visus pārējos pieprasījumus).
 
 ### 4.5 `open-sse/services/`
 
-Svarīgākie elementi (pilns saraksts atrodas sadaļā `open-sse/services/`):
+Būtiskākie moduļi (pilns saraksts atrodas `open-sse/services/`):
 
-| Joma                 | Faili                                                                                                                                                                                                                                                    |
+| Aspekts              | Faili                                                                                                                                                                                                                                                    |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Combo maršrutēšana   | `combo.ts` (19 stratēģijas), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                   |
+| Combo maršrutēšana   | `combo.ts` (20 stratēģijas), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                   |
 | Auto Combo dzinis    | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| Noturība             | `accountFallback.ts` (nogaidīšanas periods + bloķēšana), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                           |
+| Noturība             | `accountFallback.ts` (atdzišanas periods + bloķēšana), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                             |
 | Kvotas               | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
 | Kešatmiņa            | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
 | Maršrutēšanas loģika | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
 | Modeļu apstrāde      | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
 | Saspiešana           | `compression/` — pilns saspiešanas dziņa savienojums                                                                                                                                                                                                     |
-| Pilnvara + sesija    | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| Tokens + sesija      | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
 | Līmenis / manifests  | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
 | IP / tīkls           | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
 | Paketes              | `batchProcessor.ts`                                                                                                                                                                                                                                      |
@@ -537,15 +550,15 @@ Svarīgākie elementi (pilns saraksts atrodas sadaļā `open-sse/services/`):
 
 - **110 unikāli rīki**, kas savienoti failā `server.ts` (45 kanoniskie rīki failā `schemas/tools.ts` +
   atmiņas, prasmju, GitHub prasmju, pūla, spēliskošanas, spraudņu, Notion, Obsidian,
-  lokālā korpusa un saspiešanas moduļi — apvienojumu saskaita `countUniqueMcpTools`).
+  lokālā korpusa un saspiešanas moduļi — apvienojums saskaitīts ar `countUniqueMcpTools`).
 - **3 transporti**: stdio, HTTP Streamable, SSE.
 - Izpildlaikā tiek piemēroti **33 tvērumi** — pamata saraksts atrodas failā `src/shared/constants/mcpScopes.ts`, bet pilnā kopa ir katra rīku moduļa deklarēto tvērumu apvienojums.
 - Audita tabula: `mcp_tool_audit` (to aizpilda `audit.ts`).
 - Faili: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
   `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
   `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
-  kā arī testi direktorijā `__tests__/`.
-- Pilnu rīku katalogu skatiet dokumentā [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
+  kā arī testi mapē `__tests__/`.
+- Pilnu rīku katalogu skatiet [MCP-SERVER.md](../frameworks/MCP-SERVER.md).
 
 ### 4.7 `open-sse/config/`
 
@@ -553,17 +566,17 @@ Nodrošinātāju reģistri (`providerRegistry.ts`, `providerModels.ts`,
 `providerHeaderProfiles.ts`), katra formāta modeļu reģistri (`audioRegistry.ts`,
 `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
 `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
-identitātes palīgfunkcijas (`codexIdentity.ts`, `codexInstructions.ts`,
+identitātes palīgmoduļi (`codexIdentity.ts`, `codexInstructions.ts`,
 `anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
 `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
-akreditācijas datu palīgfunkcijas (`credentialLoader.ts`, `codexClient.ts`) un mākoņa
+akreditācijas datu palīgmoduļi (`credentialLoader.ts`, `codexClient.ts`) un mākoņa
 adapteri (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
 `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
 `ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`).
 
 ### 4.8 `open-sse/utils/`
 
-Straumēšanas primitīvi un nodrošinātāju palīgfunkcijas: `stream.ts`, `streamHandler.ts`,
+Straumēšanas primitīvi un pakalpojumu sniedzēju palīgfunkcijas: `stream.ts`, `streamHandler.ts`,
 `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
 `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
 `networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
@@ -656,7 +669,7 @@ Biežāk lietotās komandas:
 
 ## 8. `scripts/`
 
-Sakārtota 6 apakšmapēs pēc nolūka.
+Sakārtoti 6 apakšmapēs pēc nolūka.
 
 - **`scripts/build/`** — `build-next-isolated.mjs`, `prepublish.ts`,
   `prepare-electron-standalone.mjs`, `pack-artifact-policy.ts`,
@@ -668,7 +681,11 @@ Sakārtota 6 apakšmapēs pēc nolūka.
   `v1-ws-bridge.mjs`, `smoke-electron-packaged.mjs`,
   `run-playwright-tests.mjs`, `run-ecosystem-tests.mjs`,
   `run-protocol-clients-tests.mjs`, `sync-env.mjs`, `healthcheck.mjs`,
-  `system-info.mjs`.
+  `system-info.mjs`, kā arī tikai lasīšanai paredzētie PR uzraudzības palīgrīki
+  `ci-discriminate.sh` (sakārto PR nesekmīgo pārbaužu signatūras savās / mantotās /
+  nezināmās, salīdzinot ar atsauces PR vai bāzes sarkanā stāvokļa problēmu) un `audit-worktree.sh`
+  (netīri faili, aizsargātās virsmas, noņemtie apgalvojumi, apspiešanas reižu skaits, palikušās
+  pagaidu tsconfig datnes, PR galotne salīdzinājumā ar lokālo HEAD — pirms tiek pieņemts izpildītāja PR).
 - **`scripts/check/`** — `check-cycles.mjs`, `check-docs-sync.mjs`,
   `check-docs-counts-sync.mjs`, `check-env-doc-sync.mjs`,
   `check-deprecated-versions.mjs`, `check-route-validation.mjs`,

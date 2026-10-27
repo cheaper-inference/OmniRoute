@@ -18,58 +18,64 @@ Stealth funkcionalnosti postoje kako bi OmniRoute mogao djelovati kao sloj kompa
 
 ---
 
-## TLS Fingerprinting sloj
+## Sloj TLS otiska
 
 ### `open-sse/utils/tlsClient.ts` — wreq-js (Chrome 124)
 
-Persistentne `wreq-js` sesije kreiraju se lijeno (lazily) po opsegu računa i razriješenom proxy-ju. `TlsClient` na nivou procesa grupiše najviše 128 sesija koje imitiraju **Chrome 124 na macOS-u** za upstream-ove iza Cloudflare-a. `TlsClient.fetch()` završava neuspjehom (fails closed) kada nativni runtime nije dostupan; pozivač može eksplicitno odabrati fallback izvan ovog omotača.
+Trajne `wreq-js` sesije kreiraju se lijeno za svaki opseg računa i razriješeni proxy. Procesni
+`TlsClient` skup sadrži najviše 128 sesija koje oponašaju **Chrome 124 na macOS-u** za
+uzvodne servise iza Cloudflarea. `TlsClient.fetch()` sigurno obustavlja rad kada izvorno izvršno
+okruženje nije dostupno; pozivalac može izričito odabrati rezervnu opciju izvan ovog omotača.
 
 - Profil sesije: `browser: "chrome_124", os: "macos"`
-- Razrješavanje proxy-ja (prioritet): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (također i mala slova)
-- Timeout: `TLS_CLIENT_TIMEOUT_MS` (nasljeđuje iz `FETCH_TIMEOUT_MS`, default 600000)
-- `wreq-js` Response je kompatibilan sa fetch-om (`headers`, `text()`, `json()`, `clone()`, `body`).
-- First-byte watchdog (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
-  se razrješava čim stignu upstream zaglavlja, tako da `TLS_CLIENT_TIMEOUT_MS` sam po sebi ne može ograničiti
-  tijelo koje nikada ne isporuči prvi bajt. `guardTlsFirstByte()` utrkuje prvo `read()` tijela
-  protiv `TLS_FIRST_BYTE_WATCHDOG_MS` (default `10000`, `0` ga onemogućava); zdravo tijelo
-  ostaje nedodirnuto, dok tijelo koje je zastalo otkazuje wreq reader i dopušta postojećoj
-  TLS-fallback logici `proxyFetch`-a da pređe na direktni/proxy dispatcher (zahtjev koji nije
-  siguran za ponovni pokušaj, npr. POST sa tijelom, i dalje baca grešku umjesto da bude tiho ponovljen).
+- Razrješavanje proxyja (po prioritetu): `HTTPS_PROXY` → `HTTP_PROXY` → `ALL_PROXY` (također mala slova)
+- Vremensko ograničenje: `TLS_CLIENT_TIMEOUT_MS` (nasljeđuje od `FETCH_TIMEOUT_MS`, zadano 600000)
+- Odgovor iz `wreq-js` kompatibilan je s fetchom (`headers`, `text()`, `json()`, `clone()`, `body`).
+- Nadzornik prvog bajta (`open-sse/utils/tlsFirstByteWatchdog.ts`, #12656): `TlsClient.fetch()`
+  završava čim stignu zaglavlja uzvodnog servisa, pa sam `TLS_CLIENT_TIMEOUT_MS` ne može ograničiti
+  tijelo koje nikada ne proizvede prvi bajt. `guardTlsFirstByte()` pokreće utrku između prvog `read()`
+  tijela i `TLS_FIRST_BYTE_WATCHDOG_MS` (zadano `10000`, `0` ga onemogućava); ispravno tijelo ostaje
+  nepromijenjeno, dok zastalo tijelo otkazuje wreq čitač i omogućava da postojeća logika TLS rezervne
+  opcije u `proxyFetch` nastavi na direktni/proxy dispečer (zahtjev koji nije siguran za ponovno
+  slanje, npr. POST s tijelom, i dalje izaziva grešku umjesto da se neprimjetno ponovo pokuša).
 
-### Web-cookie provider transport — wreq-js 3.2.0
+### Transport pružalaca web-kolačića — wreq-js 3.2.0
 
-`open-sse/services/tlsClientBase.ts` je zajednički adapter za pet specijalizovanih
-web-cookie transporta navedenih u nastavku. Svaki tanki omotač provajdera bira browser/OS profil. Adapter
-koristi jedinstveni wreq runtime loader i transport pool u `open-sse/utils/tlsClient.ts`, indeksiran po
-profilu + OS + razriješenom proxy-ju, dok svaki zahtjev koristi `cookieMode: "ephemeral"`. Računi i
-zahtjevi stoga dijele konekcije na nivou transporta, ali nikada wreq sesiju ili cookie jar.
+`open-sse/services/tlsClientBase.ts` je zajednički adapter za pet specijaliziranih
+transporta web-kolačića navedenih u nastavku. Svaki tanki omotač pružaoca odabire profil preglednika/OS-a. Adapter
+koristi jedan učitavač wreq izvršnog okruženja i skup transporta iz `open-sse/utils/tlsClient.ts`, indeksiran
+prema profilu + OS-u + razriješenom proxyju, dok svaki zahtjev koristi `cookieMode: "ephemeral"`. Računi i
+zahtjevi stoga dijele veze na nivou transporta, ali nikada wreq sesiju ili spremnik kolačića.
 
-| Provajder  | Profil        | Emulirani OS | Politika Stream EOF                  |
-| ---------- | ------------- | ------------ | ------------------------------------ |
-| Claude     | `chrome_146`  | Linux        | uključi `[DONE]`                     |
-| Perplexity | `firefox_148` | macOS        | uključi `event: end_of_stream`       |
-| Grok       | `chrome_146`  | Linux        | isključi `[DONE]`                    |
-| Notion     | `chrome_146`  | Windows      | uključi `[DONE]`                     |
-| LMArena    | `chrome_146`  | Windows      | nema sentinel; zatvori na native EOF |
+| Pružalac   | Profil        | Emulirani OS | Pravilo za EOF toka                                   |
+| ---------- | ------------- | ------------ | ----------------------------------------------------- |
+| Claude     | `chrome_146`  | Linux        | uključi `[DONE]`                                      |
+| Perplexity | `firefox_151` | macOS        | uključi `event: end_of_stream`                        |
+| Grok       | `chrome_146`  | Linux        | isključi `[DONE]`                                     |
+| Notion     | `chrome_146`  | Windows      | uključi `[DONE]`                                      |
+| LMArena    | `chrome_146`  | Windows      | bez sentinelne vrijednosti; zatvori na izvornom EOF-u |
 
-- Streaming direktno troši nativni response `ReadableStream`; ne kreiraju se privremene datoteke niti sidecar-i.
-- Do 256 početnih bajtova se pregleda prije izlaganja stream-a. SSE provajderi baferuju non-SSE
-  greške; Grok/LMArena mapiraju Cloudflare izazove na `403` i HTML intersticijale na `502`.
-- Nativni timeout zahtjeva ostaje omotan apsolutnim JS hard deadline-om. Zastoj (hang) poništava
-  i zatvara samo pogođeni transport profila/OS-a/proxy-ja prije nego što ga sljedeći zahtjev ponovo kreira.
-- Prioritet razrješavanja proxy-ja je po pozivu `proxyUrl` → kontekst računa/dashboard-a u opsegu zahtjeva →
-  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (uključujući varijante malim slovima). Greške u razrješavanju
-  završavaju neuspjehom (fail closed) umjesto curenja direktne konekcije. LMArena namjerno razrješava protiv `arena.ai`.
-- `byteResponse` vraća content-typed `data:` URL bez UTF-8 korupcije.
-- Greške su `TlsClientUnavailableError` (paket/addon nedostupan), `TlsClientHangError`
-  (deadline prekoračen) i `WreqTransportCapacityError` (zajednički kod greške kapaciteta sesije)
-  kada su svih 128 ograničenih slotova profila/OS-a/proxy-ja aktivni ili u procesu zatvaranja.
+- Tok direktno koristi izvorni `ReadableStream` odgovora; ne kreira se privremena datoteka ni
+  pomoćni proces.
+- Prije izlaganja toka pregledava se do 256 početnih bajtova. SSE pružaoci spremaju greške koje nisu SSE
+  u međuspremnik; Grok/LMArena mapiraju Cloudflare izazove na `403`, a HTML međustranice na `502`.
+- Vremensko ograničenje izvornog zahtjeva ostaje obuhvaćeno apsolutnim krajnjim JS rokom. Zastoj poništava
+  i zatvara samo pogođeni transport profila/OS-a/proxyja prije nego što ga sljedeći zahtjev ponovo kreira.
+- Prioritet razrješavanja proxyja je `proxyUrl` po pozivu → kontekst računa/kontrolne ploče ograničen na zahtjev →
+  `HTTPS_PROXY`/`HTTP_PROXY`/`ALL_PROXY` (uključujući varijante malim slovima). Greške razrješavanja sigurno
+  obustavljaju rad umjesto da propuste direktnu vezu. LMArena namjerno obavlja razrješavanje prema `arena.ai`.
+- `byteResponse` vraća `data:` URL s tipom sadržaja bez oštećenja UTF-8 podataka.
+- Greške su `TlsClientUnavailableError` (paket/dodatak nije dostupan), `TlsClientHangError`
+  (krajnji rok je prekoračen) i `WreqTransportCapacityError` (zajednički kôd greške kapaciteta sesije)
+  kada je svih 128 ograničenih mjesta profila/OS-a/proxyja aktivno ili se zatvara.
 
-Generička `TlsClient` sesija iznad ostaje specijalizovana za persistentno stanje kolačića zasnovano na browseru. Oba puta ponovo koriste jedan keširani wreq module loader i hook za životni ciklus procesa; njihovi pool-ovi ostaju odvojeni jer su im životni vijekovi kolačića namjerno različiti.
+Generička sesija `TlsClient` iznad ostaje specijalizirana za trajno stanje kolačića kojim upravlja
+preglednik. Oba puta ponovo koriste jedan keširani učitavač wreq modula i priključak životnog ciklusa procesa; njihovi skupovi ostaju
+odvojeni jer su njihovi životni vijekovi kolačića namjerno različiti.
 
-Profili su podržani od strane fiksiranog paketa, ali stvarno WAF prihvatanje se može promijeniti nezavisno
-od lokalnih contract testova. Validirajte promjene fingerprinta protiv eksplicitno ovlaštenog aktivnog računa
-prije nego što potvrdite paritet sa upstream browserom.
+Profili su podržani prikvačenim paketom, ali stvarno WAF prihvatanje može se mijenjati nezavisno
+od lokalnih ugovornih testova. Provjerite promjene otiska na izričito autoriziranom aktivnom računu
+prije nego što ustvrdite paritet s uzvodnim preglednikom.
 
 ---
 
@@ -118,7 +124,7 @@ Primjenjuje se na: `system` blokove, sve `messages[].content`, te `tools[].descr
 
 Za third-party Anthropic releje koji prihvataju samo "pravi Claude Code" saobraćaj:
 
-- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.258 (external, sdk-cli)"`
+- `CLAUDE_CODE_COMPATIBLE_USER_AGENT = "claude-cli/2.1.280 (external, sdk-cli)"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_PACKAGE_VERSION = "0.112.1"`
 - `CLAUDE_CODE_COMPATIBLE_STAINLESS_RUNTIME_VERSION = "v26.3.0"`
 - `anthropic-beta = "claude-code-20250219,interleaved-thinking-2025-05-14,effort-2025-11-24"` po defaultu
@@ -242,7 +248,7 @@ Svi MITM endpointi zahtijevaju administratorsku autentifikaciju (`requireCliTool
 
 | Varijabla                | Zadana vrijednost                                               |
 | ------------------------ | --------------------------------------------------------------- |
-| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.258 (external, cli)`                            |
+| `CLAUDE_USER_AGENT`      | `claude-cli/2.1.280 (external, cli)`                            |
 | `CODEX_USER_AGENT`       | `codex-cli/0.155.0 (Windows 10.0.26200; x64)`                   |
 | `GITHUB_USER_AGENT`      | `GitHubCopilotChat/0.54.0`                                      |
 | `ANTIGRAVITY_USER_AGENT` | `antigravity/2.0.1 linux/arm64 google-api-nodejs-client/10.3.0` |
