@@ -20,11 +20,7 @@ const AUTH_FAILURES = [
   "account_deactivated",
   "auth_required",
 ];
-const TRANSPORT_FAILURES = [
-  "network_error",
-  "upstream_unavailable",
-  "upstream_rate_limited",
-];
+const TRANSPORT_FAILURES = ["network_error", "upstream_unavailable", "upstream_rate_limited"];
 const OTHER_INCONCLUSIVE_FAILURES = [
   "upstream_ambiguous_auth_or_quota",
   "provider_error",

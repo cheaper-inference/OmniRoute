@@ -64,8 +64,7 @@ export function checkCredentialGate(
     // Only emit exact internal diagnosis enum values; never raw probe errors.
     const diagnosis =
       typeof rawType === "string" &&
-      (INVALID_CREDENTIAL_DIAGNOSES.has(rawType) ||
-        SAFE_INCONCLUSIVE_PROBE_DIAGNOSES.has(rawType))
+      (INVALID_CREDENTIAL_DIAGNOSES.has(rawType) || SAFE_INCONCLUSIVE_PROBE_DIAGNOSES.has(rawType))
         ? rawType
         : "unknown";
     const knownBad = INVALID_CREDENTIAL_DIAGNOSES.has(diagnosis);
