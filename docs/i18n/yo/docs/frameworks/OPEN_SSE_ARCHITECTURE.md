@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | Fáìlì                           | Ète                                               |
 | ------------------------------- | ------------------------------------------------- |
-| `providerRegistry.ts`           | Àtòjọ àwoṣe ìbáròrọ̀ lórí àtòkàtà àwọn olupèsè 375 |
+| `providerRegistry.ts`           | Àtòjọ àwoṣe ìbáròrọ̀ lórí àtòkàtà àwọn olupèsè 376 |
 | `providerModels.ts`             | Àwọn orúkọ mìíràn àwoṣe, ìbáṣepọ̀ ọ̀nà àkọsílẹ̀      |
 | `constants.ts`                  | Àwọn ìparí àkókò, àwọn òpin, àwọn kóòdù ipò       |
 | `defaultThinkingSignature.ts`   | Ìbuwọlu ìrònúwò Claude àyọkàyọ                    |

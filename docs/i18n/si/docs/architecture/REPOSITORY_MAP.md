@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `components/`                    | ඩෑෂ්බෝඩ් සංරචක API: `packages/ui-kit` මත ඇති ඇඩැප්ටර — `docs/architecture/DESIGN_SYSTEM.md` බලන්න |
 | `constants/iconMap.ts`           | `ICON_MAP`: තිර මඟින් භාවිත කරන අයිකන නම් → Lucide සංරචක (`<Icon>`)                               |
-| `constants/providers.ts`         | Zod වලංගුකරණය සහිත **සැපයුම්කරුවන් 375ක්** (සත්යයේ මූලාශ්රය)                                      |
+| `constants/providers.ts`         | Zod වලංගුකරණය සහිත **සැපයුම්කරුවන් 376ක්** (සත්යයේ මූලාශ්රය)                                      |
 | `constants/cliTools.ts`          | බාහිර CLI මෙවලම් රෙජිස්ට්රිය                                                                      |
 | `constants/routingStrategies.ts` | ප්රමුඛතා සහිත **මාර්ගගත කිරීමේ උපායමාර්ග 20ක්**                                                   |
 | `constants/publicApiRoutes.ts`   | Bearer (කළමනාකරණයට සාපේක්ෂව) සත්යාපනය අවශ්ය මාර්ග                                                 |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | බාහිර CLI අනුකලන + අභ්යන්තර OmniRoute CLI                                                         |
 | `I18N.md`                   | i18n නිර්මාණ ශිල්පය, භාෂාවක් එක් කිරීම, ස්ථානීය සැකසුම් 67ක්                                      |
 | `UNINSTALL.md`              | පිරිසිදු අස්ථාපන පියවර                                                                            |
-| `PROVIDER_REFERENCE.md`     | සැපයුම්කරුවන් 375ක **ස්වයංක්රීයව ජනනය කළ** නාමාවලිය (නැවත ජනනය: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | සැපයුම්කරුවන් 376ක **ස්වයංක්රීයව ජනනය කළ** නාමාවලිය (නැවත ජනනය: `npm run gen:provider-reference`) |
 
 ### උපපද්ධති පිළිබඳ ගැඹුරු විමසුම්
 

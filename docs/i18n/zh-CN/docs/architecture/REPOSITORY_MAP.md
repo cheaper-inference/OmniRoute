@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------- |
 | `components/`                    | 仪表板组件 API：对 `packages/ui-kit` 的适配器——参见 `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`：页面使用的图标名称 → Lucide 组件（`<Icon>`）                                 |
-| `constants/providers.ts`         | 通过 Zod 验证的 **375 个提供者**（事实来源）                                             |
+| `constants/providers.ts`         | 通过 Zod 验证的 **376 个提供者**（事实来源）                                             |
 | `constants/cliTools.ts`          | 外部 CLI 工具注册表                                                                      |
 | `constants/routingStrategies.ts` | **20 种路由策略**，带有优先级                                                            |
 | `constants/publicApiRoutes.ts`   | 需要 Bearer 身份验证（而非管理身份验证）的路由                                           |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 外部 CLI 集成与内部 OmniRoute CLI                                             |
 | `I18N.md`                   | i18n 架构、添加语言、67 个区域设置                                            |
 | `UNINSTALL.md`              | 彻底卸载步骤                                                                  |
-| `PROVIDER_REFERENCE.md`     | **自动生成的** 375 个提供者目录（重新生成：`npm run gen:provider-reference`） |
+| `PROVIDER_REFERENCE.md`     | **自动生成的** 376 个提供者目录（重新生成：`npm run gen:provider-reference`） |
 
 ### 子系统深入解析
 

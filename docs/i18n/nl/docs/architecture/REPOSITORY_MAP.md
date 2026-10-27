@@ -242,7 +242,7 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------- |
 | `components/`                    | API voor dashboardcomponenten: adapters voor `packages/ui-kit` — zie `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: pictogramnamen die door de schermen worden gebruikt → Lucide-componenten (`<Icon>`)           |
-| `constants/providers.ts`         | **375 providers** met Zod-validatie (enige bron van waarheid)                                             |
+| `constants/providers.ts`         | **376 providers** met Zod-validatie (enige bron van waarheid)                                             |
 | `constants/cliTools.ts`          | Register voor externe CLI-tools                                                                           |
 | `constants/routingStrategies.ts` | **20 routeringsstrategieën** met prioriteiten                                                             |
 | `constants/publicApiRoutes.ts`   | Routes waarvoor Bearer-authenticatie (in plaats van beheer-authenticatie) vereist is                      |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externe CLI-integraties + interne OmniRoute-CLI                                                                |
 | `I18N.md`                   | i18n-architectuur, een taal toevoegen, 67 locales                                                              |
 | `UNINSTALL.md`              | Stappen voor een volledige verwijdering                                                                        |
-| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerde** catalogus van 375 providers (opnieuw genereren: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerde** catalogus van 376 providers (opnieuw genereren: `npm run gen:provider-reference`) |
 
 ### Diepgaande informatie over subsystemen
 

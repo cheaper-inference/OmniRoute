@@ -242,7 +242,7 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | API àkójọpọ̀ ojú-iṣẹ́: àwọn adapter lórí `packages/ui-kit` — wo `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: àwọn orúkọ ààmì tí àwọn ojú-ìfihàn ń lò → àwọn àkójọpọ̀ Lucide (`<Icon>`)               |
-| `constants/providers.ts`         | **Àwọn provider 375** pẹ̀lú ìfọwọ́sí Zod (orisun òtítọ́)                                              |
+| `constants/providers.ts`         | **Àwọn provider 376** pẹ̀lú ìfọwọ́sí Zod (orisun òtítọ́)                                              |
 | `constants/cliTools.ts`          | Àkọsílẹ̀ àwọn irinṣẹ́ CLI ti ita                                                                     |
 | `constants/routingStrategies.ts` | **Àwọn ọgbọ́n routing 20** pẹ̀lú àwọn ààyò                                                           |
 | `constants/publicApiRoutes.ts`   | Àwọn route tó nílò ìfàṣẹsí Bearer (dípò management)                                                |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Àwọn ìṣọ̀kan CLI òde + CLI OmniRoute inú                                                          |
 | `I18N.md`                   | Faaji i18n, fífi èdè kan kún un, àwọn locale 67                                                  |
 | `UNINSTALL.md`              | Àwọn ìgbésẹ̀ ìyọkúrò tó mọ́                                                                        |
-| `PROVIDER_REFERENCE.md`     | Kátálọ́ọ̀gù àwọn olùpèsè 375 tí a **ṣẹ̀dá láìfọwọ́ṣe** (tún un ṣe: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | Kátálọ́ọ̀gù àwọn olùpèsè 376 tí a **ṣẹ̀dá láìfọwọ́ṣe** (tún un ṣe: `npm run gen:provider-reference`) |
 
 ### Ìtúpalẹ̀ jinlẹ̀ àwọn ẹ̀ka-ètò
 

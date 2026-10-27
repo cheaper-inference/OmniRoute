@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Boshqaruv paneli komponentlari API’si: `packages/ui-kit` ustidagi adapterlar — `docs/architecture/DESIGN_SYSTEM.md` ga qarang |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekranlarda ishlatiladigan ikonka nomlari → Lucide komponentlari (`<Icon>`)                                        |
-| `constants/providers.ts`         | Zod validatsiyasiga ega **375 ta provayder** (yagona ishonchli manba)                                                         |
+| `constants/providers.ts`         | Zod validatsiyasiga ega **376 ta provayder** (yagona ishonchli manba)                                                         |
 | `constants/cliTools.ts`          | Tashqi CLI vositalari reyestri                                                                                                |
 | `constants/routingStrategies.ts` | Ustuvorliklarga ega **20 ta marshrutlash strategiyasi**                                                                       |
 | `constants/publicApiRoutes.ts`   | Bearer (boshqaruv autentifikatsiyasi o‘rniga) autentifikatsiyasini talab qiladigan marshrutlar                                |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Tashqi CLI integratsiyalari + ichki OmniRoute CLI                                                              |
 | `I18N.md`                   | i18n arxitekturasi, til qoʻshish, 67 ta lokal                                                                  |
 | `UNINSTALL.md`              | Toza oʻchirish bosqichlari                                                                                     |
-| `PROVIDER_REFERENCE.md`     | 375 ta provayderdan iborat **avtomatik yaratilgan** katalog (qayta yaratish: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 376 ta provayderdan iborat **avtomatik yaratilgan** katalog (qayta yaratish: `npm run gen:provider-reference`) |
 
 ### Quyi tizimlar boʻyicha batafsil qoʻllanmalar
 
