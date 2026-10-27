@@ -1,0 +1,1 @@
+- **fix(sse):** Strip a learned-only effort suffix back to the base model instead of sending the variant upstream ([#18131](https://github.com/cheaper-inference/OmniRoute/pull/18131)) — thanks @maxmad64bis
