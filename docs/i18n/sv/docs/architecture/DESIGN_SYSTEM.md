@@ -82,30 +82,35 @@
 
 ## 2. Regler
 
-1. Token, aldrig literaler. Avsiktliga undantag: den alltid mörka konsolterminalen, ReactFlow SVG-
-   streck via `STATUS_HEX` (`src/shared/constants/statusColors.ts`) samt de kategoriska färgpaletterna
-   `STRATEGY_COLORS` (`src/app/(dashboard)/dashboard/combos/live/nodes/StrategyNode.tsx`) och
-   `LAYER_COLORS` (`src/app/(dashboard)/dashboard/compression/studio/nodes/EngineNode.tsx`).
-2. Ändra aldrig `packages/ui-kit/src` manuellt: synkronisera med `scripts/dev/sync-ui-kit.sh <commit>`; spärren
-   före commit, `npm run check:ui-kit-snapshot` (`.husky/pre-commit`), misslyckas om någon byte
-   skiljer sig från den låsta uppströms-committen (den hoppas över med en varning när uppströmsklonen,
-   `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, saknas). När komponentbiblioteket saknar något
-   ska du skapa en tillfällig lösning i adaptern eller vyn och be uppströmsprojektet att lägga till det.
-3. Komponentbibliotekets standardtexter är på engelska (`label = "Loading"`, `loadingLabel = "Loading table"`…) — skicka översatta
-   strängar från `useTranslations(...)` när en komponent från biblioteket renderar text.
-4. Tailwind-verktygsklasser har företräde framför komponentbibliotekets klasser (biblioteket deklarerar
-   `@layer theme, base, components, utilities` och dess regler finns i `components`) — använd verktygsklasser för
-   avstånd och layout, inte för att färga om komponenter från biblioteket.
-5. Rubriker: `.ci-heading` (Inter, ingen teckenjustering) för sid- och avsnittsrubriker; `.ci-dashboard-display`
-   (Instrument Serif) endast för stor, glest förekommande visningstext, exempelvis felsidans statuskod.
-6. `tests/unit/dashboard-kit-sweep.test.ts` bevakar införandet av komponentbiblioteket: inga span-element med
-   Material-ligaturer under `src/app` eller `src/shared/components`; i dashboard-trädet (`src/app/(dashboard)` och
-   `src/shared/components`) får det inte finnas några direkta `<select>`, `<textarea>` eller `<table>` och inga handbyggda
-   `role="dialog"` utanför de angivna undantagen (`Select`-adapterns inbyggda gren,
-   `RequestLoggerDetail`); varje direkt `<button>` eller `<input>` där måste ha en kommentar som innehåller
-   `kit-exception:` (med orsaken) och som slutar högst 3 rader ovanför elementet; palettnyanser och `dark:`-varianter
-   får endast förekomma i de filer som testet anger.
-7. Kontrollera båda temana och visningsbredden 390 px före en PR (skärmbilder); `tests/e2e/a11y.spec.ts` kör
+1. Tokens, aldrig literaler. Undantagen är avsiktliga: den alltid mörka konsolterminalen och
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), den hex-upplösta spegeln av kitets
+   statuspalett för anropare som behöver en hex-literal. De kategoriska paletterna är inte längre
+   något undantag: de vilar på kitets fem diagram-tokens (`--color-chart-1..5`) via
+   `src/shared/utils/categoricalPalette.ts` och, för routningsstrategier,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-kanter och
+   orkestreringscanvasen läser de temaanpassade variablerna `--orch-status-*`
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Patcha aldrig `packages/ui-kit/src` för hand: synkronisera med `scripts/dev/sync-ui-kit.sh <commit>`;
+   pre-commit-spärren `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) misslyckas på varje byte
+   som skiljer sig från den fastnålade upstream-commiten (den hoppar över kontrollen med en varning
+   när upstream-klonen, `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, saknas). När
+   kitet saknar något, arbeta runt det i adaptern eller skärmen och be upstream om det.
+3. Kitets standardtexter är engelska (`label = "Loading"`, `loadingLabel = "Loading table"`…) — skicka
+   översatta strängar från `useTranslations(...)` närhelst en kit-komponent renderar text.
+4. Tailwind-utilities vinner över kit-komponentklasser (kitet deklarerar
+   `@layer theme, base, components, utilities` och dess regler ligger i `components`) — använd
+   utilities för avstånd och layout, inte för att omfärga kit-komponenter.
+5. Rubriker: `.ci-heading` (Inter, ingen tracking) för sid- och sektionsrubriker;
+   `.ci-dashboard-display` (Instrument Serif) endast för stor, gles displaytext som felsidans
+   statuskod.
+6. `tests/unit/dashboard-kit-sweep.test.ts` vaktar kit-införandet: inga spans med Material-ligaturer
+   under `src/app` eller `src/shared/components`; i dashboard-trädet (`src/app/(dashboard)` och
+   `src/shared/components`) inga råa `<select>`, `<textarea>` eller `<table>` och inga handbyggda
+   `role="dialog"` utanför de listade undantagen (`Select`-adapterns nativa gren,
+   `RequestLoggerDetail`); varje rå `<button>` eller `<input>` där behöver en kommentar som innehåller
+   `kit-exception:` (med anledningen) och som slutar högst 3 rader ovanför den; palettnyanser och
+   `dark:`-varianter endast i de filer som testet listar.
+7. Verifiera båda temana och 390 px-viewporten före en PR (skärmdumpar); `tests/e2e/a11y.spec.ts` kör
    axe.
 
 ## 3. Lägga till en vy

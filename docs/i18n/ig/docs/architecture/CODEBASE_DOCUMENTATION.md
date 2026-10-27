@@ -499,7 +499,7 @@ ndị enyemaka maka onye na-eweta ọrụ ọ bụla (schema tool, adapter fetch
 (onye enyemaka njirimara a na-ekekọrịta) na `index.ts` (ndebanye).
 
 > Rịba ama: `default.ts` na-eji executor zuru ụwa ọnụ dakọtara na OpenAI nye ọrụ maka ndị
-> na-eweta ọrụ ndị a na-edeghị ebe a. Katalọgụ ndị na-eweta ọrụ zuru ezu (ndị na-eweta ọrụ 375) dị na
+> na-eweta ọrụ ndị a na-edeghị ebe a. Katalọgụ ndị na-eweta ọrụ zuru ezu (ndị na-eweta ọrụ 376) dị na
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

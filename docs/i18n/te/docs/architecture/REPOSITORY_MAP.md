@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | డ్యాష్బోర్డ్ కాంపోనెంట్ API: `packages/ui-kit` పై అడాప్టర్లు — `docs/architecture/DESIGN_SYSTEM.md` చూడండి |
 | `constants/iconMap.ts`           | `ICON_MAP`: స్క్రీన్లు ఉపయోగించే ఐకాన్ పేర్లు → Lucide కాంపోనెంట్లు (`<Icon>`)                             |
-| `constants/providers.ts`         | Zod ధృవీకరణతో **375 ప్రొవైడర్లు** (ప్రామాణిక మూలం)                                                         |
+| `constants/providers.ts`         | Zod ధృవీకరణతో **376 ప్రొవైడర్లు** (ప్రామాణిక మూలం)                                                         |
 | `constants/cliTools.ts`          | బాహ్య CLI సాధనాల రిజిస్ట్రీ                                                                                |
 | `constants/routingStrategies.ts` | ప్రాధాన్యతలతో **20 రూటింగ్ వ్యూహాలు**                                                                      |
 | `constants/publicApiRoutes.ts`   | Bearer (మేనేజ్మెంట్కు భిన్నంగా) ప్రమాణీకరణ అవసరమయ్యే రూట్లు                                                |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | బాహ్య CLI అనుసంధానాలు + అంతర్గత OmniRoute CLI                                                                 |
 | `I18N.md`                   | i18n ఆర్కిటెక్చర్, భాషను జోడించడం, 67 లోకేల్లు                                                                |
 | `UNINSTALL.md`              | పూర్తిగా అన్ఇన్స్టాల్ చేసే దశలు                                                                               |
-| `PROVIDER_REFERENCE.md`     | 375 ప్రొవైడర్ల **స్వయంచాలకంగా రూపొందించిన** కేటలాగ్ (మళ్లీ రూపొందించడానికి: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 376 ప్రొవైడర్ల **స్వయంచాలకంగా రూపొందించిన** కేటలాగ్ (మళ్లీ రూపొందించడానికి: `npm run gen:provider-reference`) |
 
 ### సబ్సిస్టమ్ల లోతైన వివరణలు
 

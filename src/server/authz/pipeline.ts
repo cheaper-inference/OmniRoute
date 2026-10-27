@@ -10,6 +10,11 @@ import {
 } from "@/shared/utils/dashboardSessionToken";
 import { generateRequestId } from "../../shared/utils/requestId";
 import { applyCorsHeaders } from "../cors/origins";
+import {
+  buildMcpInvalidOriginBody,
+  isMcpOriginGuardedPath,
+  validateMcpRequestOrigin,
+} from "../origin/mcpOrigin";
 import { validateBrowserMutationOrigin } from "../origin/publicOrigin";
 import { classifyRoute } from "./classify";
 import { validateDashboardCsrfToken } from "./csrf";
@@ -205,6 +210,12 @@ function invalidOriginResponse(requestId: string): NextResponse {
     },
     { status: 403 }
   );
+  response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
+  return response;
+}
+
+function mcpInvalidOriginResponse(requestId: string): NextResponse {
+  const response = NextResponse.json(buildMcpInvalidOriginBody(requestId), { status: 403 });
   response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
   return response;
 }
@@ -422,6 +433,27 @@ export async function runAuthzPipeline(
     const rejection = rejectionResponse(outcome, classification, requestId);
     applyCorsHeaders(rejection, request, corsRelaxOrigin);
     return rejection;
+  }
+
+  // MCP Streamable HTTP spec: Origin MUST be validated on every connection, for
+  // every caller — API key, CLI token, dashboard session or anonymous loopback
+  // (requireLogin=false). Runs here, not in the route handlers, because only the
+  // original request still carries the token-stamped peer headers the trusted
+  // proxy / direct-LAN origin candidates are derived from. A dashboard session
+  // that proves same-origin with its CSRF token keeps the fallback it already has
+  // for mutations below (tunnel-served dashboards without a configured base URL).
+  if (isMcpOriginGuardedPath(guardedPathname)) {
+    const mcpOriginVerdict = validateMcpRequestOrigin(request);
+    const csrfOriginFallback =
+      !mcpOriginVerdict.ok &&
+      outcome.subject.kind === "dashboard_session" &&
+      validateDashboardCsrfToken(request);
+    if (!mcpOriginVerdict.ok && !csrfOriginFallback) {
+      const rejection = mcpInvalidOriginResponse(requestId);
+      rejection.headers.set(AUTHZ_HEADER_ROUTE_CLASS, classification.routeClass);
+      applyCorsHeaders(rejection, request);
+      return rejection;
+    }
   }
 
   if (

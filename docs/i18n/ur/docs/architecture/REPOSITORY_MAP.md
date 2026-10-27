@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------ |
 | `components/`                    | ڈیش بورڈ کمپوننٹ API: `packages/ui-kit` پر اڈاپٹرز — `docs/architecture/DESIGN_SYSTEM.md` دیکھیں |
 | `constants/iconMap.ts`           | `ICON_MAP`: اسکرینز میں استعمال ہونے والے آئیکن نام → Lucide کمپوننٹس (`<Icon>`)                 |
-| `constants/providers.ts`         | Zod توثیق کے ساتھ **375 فراہم کنندگان** (مستند ماخذ)                                             |
+| `constants/providers.ts`         | Zod توثیق کے ساتھ **376 فراہم کنندگان** (مستند ماخذ)                                             |
 | `constants/cliTools.ts`          | بیرونی CLI ٹول رجسٹری                                                                            |
 | `constants/routingStrategies.ts` | ترجیحات کے ساتھ **20 روٹنگ حکمتِ عملیاں**                                                        |
 | `constants/publicApiRoutes.ts`   | وہ روٹس جن کے لیے (مینجمنٹ کے بجائے) Bearer توثیق درکار ہے                                       |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | بیرونی CLI انضمامات + داخلی OmniRoute CLI                                                               |
 | `I18N.md`                   | i18n آرکیٹیکچر، زبان شامل کرنے کا طریقہ، 67 علاقائی سیٹنگز                                              |
 | `UNINSTALL.md`              | مکمل صفائی کے ساتھ ان انسٹال کرنے کے مراحل                                                              |
-| `PROVIDER_REFERENCE.md`     | 375 فراہم کنندگان کی **خودکار طور پر تیار کردہ** فہرست (دوبارہ تخلیق: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | 376 فراہم کنندگان کی **خودکار طور پر تیار کردہ** فہرست (دوبارہ تخلیق: `npm run gen:provider-reference`) |
 
 ### ذیلی نظاموں کا گہرا جائزہ
 

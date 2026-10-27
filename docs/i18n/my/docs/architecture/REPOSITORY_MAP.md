@@ -242,7 +242,7 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard component API: `packages/ui-kit` အပေါ်ရှိ adapter များ — `docs/architecture/DESIGN_SYSTEM.md` ကို ကြည့်ပါ |
 | `constants/iconMap.ts`           | `ICON_MAP`: screen များတွင် အသုံးပြုသည့် icon အမည်များ → Lucide component များ (`<Icon>`)                           |
-| `constants/providers.ts`         | Zod validation ပါဝင်သည့် **provider 375 ခု** (တစ်ခုတည်းသော မှန်ကန်မှုရင်းမြစ်)                                      |
+| `constants/providers.ts`         | Zod validation ပါဝင်သည့် **provider 376 ခု** (တစ်ခုတည်းသော မှန်ကန်မှုရင်းမြစ်)                                      |
 | `constants/cliTools.ts`          | ပြင်ပ CLI tool registry                                                                                             |
 | `constants/routingStrategies.ts` | ဦးစားပေးအဆင့်များပါဝင်သည့် **routing strategy 20 ခု**                                                               |
 | `constants/publicApiRoutes.ts`   | Bearer authentication (management authentication မဟုတ်သော) လိုအပ်သည့် route များ                                    |
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | ပြင်ပ CLI ချိတ်ဆက်မှုများ + အတွင်းပိုင်း OmniRoute CLI                                                        |
 | `I18N.md`                   | i18n ဗိသုကာဖွဲ့စည်းပုံ၊ ဘာသာစကားထည့်သွင်းခြင်း၊ locale 67 ခု                                                  |
 | `UNINSTALL.md`              | အကြွင်းအကျန်မရှိ ဖယ်ရှားခြင်းအဆင့်များ                                                                        |
-| `PROVIDER_REFERENCE.md`     | provider 375 ခု၏ **အလိုအလျောက်ထုတ်လုပ်ထားသော** catalog (ပြန်လည်ထုတ်လုပ်ရန်- `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | provider 376 ခု၏ **အလိုအလျောက်ထုတ်လုပ်ထားသော** catalog (ပြန်လည်ထုတ်လုပ်ရန်- `npm run gen:provider-reference`) |
 
 ### Subsystem များကို အသေးစိတ်လေ့လာခြင်း
 

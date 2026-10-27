@@ -15,7 +15,7 @@ O, vahid OpenAI-uyğun son nöqtə (`/v1/*`) təqdim edir və trafiki format çe
 
 Əsas imkanlar:
 
-- CLI/alətlər üçün OpenAI-uyğun API səthi (375 provayder, 156 icraçı modul)
+- CLI/alətlər üçün OpenAI-uyğun API səthi (376 provayder, 156 icraçı modul)
 - Provayder formatları arasında sorğu/cavab çevirməsi
 - Model kombinasiyası üzrə alternativə keçid (çoxmodelli ardıcıllıq)
 - `compositeTiers` əsasında icra zamanı sıralanan strukturlaşdırılmış kombinasiya addımları (`provider + model + connection`)

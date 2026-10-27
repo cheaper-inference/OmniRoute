@@ -39,7 +39,7 @@ Obiektywne porównanie funkcji z popularnymi routerami AI open-source.
 
 ## Kiedy wybrać OmniRoute
 
-- Hostujesz samodzielnie i potrzebujesz **maksymalnego pokrycia dostawców** (375 dostawców, 155 darmowych/niewymagających uwierzytelniania wpisów w katalogu)
+- Hostujesz samodzielnie i potrzebujesz **maksymalnego pokrycia dostawców** (376 dostawców, 155 darmowych/niewymagających uwierzytelniania wpisów w katalogu)
 - Potrzebujesz **wbudowanego serwera MCP** (narzędzia LLM, pamięć, umiejętności udostępniane jako narzędzia)
 - Potrzebujesz **protokołu A2A** do przepływów pracy między agentami
 - Chcesz **ukrywania odcisku palca** (JA3/JA4), aby uniknąć wykrycia przez zewnętrzne zabezpieczenia CAPTCHA

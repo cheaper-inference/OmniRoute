@@ -15,6 +15,7 @@ export type GeminiBrowser = {
 type Slot = { launch: Launch; browser: GeminiBrowser };
 
 let slot: Slot | null = null;
+let pending: Promise<GeminiBrowser> | null = null;
 let inflight = 0;
 let idleTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -29,21 +30,42 @@ function clearIdle() {
   idleTimer = null;
 }
 
+// #16935: a browser that still has in-flight requests is never closed because the caller
+// passed a different launcher closure, and concurrent cold acquires share one pending launch.
 export async function acquireGeminiBrowser(launch: Launch): Promise<GeminiBrowser> {
   clearIdle();
-  if (slot && slot.launch === launch && alive(slot.browser)) {
+  if (slot && alive(slot.browser) && (slot.launch === launch || inflight > 0)) {
     inflight += 1;
     return slot.browser;
+  }
+  if (pending) {
+    inflight += 1;
+    try {
+      return await pending;
+    } catch (error) {
+      inflight = Math.max(0, inflight - 1);
+      throw error;
+    }
   }
   if (slot) {
     const previous = slot.browser;
     slot = null;
     await previous.close().catch(() => undefined);
   }
-  const browser = await launch({ headless: true });
-  slot = { launch, browser };
   inflight += 1;
-  return browser;
+  const launching = launch({ headless: true }).then((browser) => {
+    slot = { launch, browser };
+    return browser;
+  });
+  pending = launching;
+  try {
+    return await launching;
+  } catch (error) {
+    inflight = Math.max(0, inflight - 1);
+    throw error;
+  } finally {
+    if (pending === launching) pending = null;
+  }
 }
 
 export async function releaseGeminiBrowser(browser: GeminiBrowser): Promise<void> {
@@ -63,7 +85,24 @@ export async function releaseGeminiBrowser(browser: GeminiBrowser): Promise<void
 export async function resetGeminiBrowserLeaseForTests(): Promise<void> {
   clearIdle();
   inflight = 0;
+  pending = null;
   const previous = slot?.browser;
   slot = null;
   if (previous) await previous.close().catch(() => undefined);
+}
+
+// #16935: one launcher per Playwright launch function, so repeated requests share lease identity
+// (a replaced launch function, e.g. a test double, still gets its own launcher).
+const launchers = new WeakMap<object, Launch>();
+
+export function getStableLauncher(chromium: {
+  launch: (options: { headless: true }) => Promise<unknown>;
+}): Launch {
+  const key = chromium.launch;
+  let launcher = launchers.get(key);
+  if (!launcher) {
+    launcher = (options) => chromium.launch(options) as Promise<GeminiBrowser>;
+    launchers.set(key, launcher);
+  }
+  return launcher;
 }

@@ -499,7 +499,7 @@ per provider (toolschema's, fetch-/TTS-adapters, handlers voor eigenaardigheden)
 (gedeelde identiteitshelper) en `index.ts` (register).
 
 > Opmerking: providers die hier niet worden vermeld, worden bediend door `default.ts` met de generieke
-> OpenAI-compatibele executor. De volledige providercatalogus (375 providers) bevindt zich in
+> OpenAI-compatibele executor. De volledige providercatalogus (376 providers) bevindt zich in
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

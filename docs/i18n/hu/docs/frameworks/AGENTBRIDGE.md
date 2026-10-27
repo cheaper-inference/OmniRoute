@@ -20,7 +20,7 @@ Amikor egy IDE-ügynök (pl. GitHub Copilot, Cursor, Claude Code) API-hívást i
 
 Ez lehetővé teszi, hogy:
 
-- **Bármely ügynököt bármely szolgáltatóhoz átirányítson**: A Copilot az OpenAI felé kommunikál? Irányítsa át az Anthropic Claude-hoz, a Geminihez vagy az OmniRoute 375 szolgáltatója közül bármelyikhez.
+- **Bármely ügynököt bármely szolgáltatóhoz átirányítson**: A Copilot az OpenAI felé kommunikál? Irányítsa át az Anthropic Claude-hoz, a Geminihez vagy az OmniRoute 376 szolgáltatója közül bármelyikhez.
 - **Modell-hozzárendeléseket alkalmazzon**: `gemini-3-flash` → `claude-sonnet-4.7` transzparensen, handler-szinten.
 - **Az összes ügynökforgalmat megfigyelje**: minden elfogott kérés megjelenik a [Forgalomfigyelőben](./TRAFFIC_INSPECTOR.md).
 - **Kihasználja az OmniRoute hibatűrését**: a combo routing, a circuit breakerek, a fallback-mechanizmusok és a költségkövetés az IDE-ügynökök forgalmára is működnek.

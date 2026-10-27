@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — La puerta de enlace de IA gratuita
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nunca dejes de programar. Todas las herramientas de IA → 375 proveedores — más de 150 gratuitos — mediante un único endpoint. Claude Code, Codex, Cursor, Cline, Copilot y Antigravity con Claude / GPT / Gemini GRATIS y conmutación automática por error. La compresión combinada RTK + Caveman ahorra entre un 15 % y un 95 % de tokens (~89 % de media): nunca alcances los límites. 375 proveedores de IA · más de 150 niveles gratuitos · ~1,62 mil millones de tokens gratuitos al mes · 20 estrategias de enrutamiento · $0 para empezar."/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — Nunca dejes de programar. Todas las herramientas de IA → 376 proveedores — más de 150 gratuitos — mediante un único endpoint. Claude Code, Codex, Cursor, Cline, Copilot y Antigravity con Claude / GPT / Gemini GRATIS y conmutación automática por error. La compresión combinada RTK + Caveman ahorra entre un 15 % y un 95 % de tokens (~89 % de media): nunca alcances los límites. 376 proveedores de IA · más de 150 niveles gratuitos · ~1,62 mil millones de tokens gratuitos al mes · 20 estrategias de enrutamiento · $0 para empezar."/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **Usa tus propias cuentas de proveedores.** Esta es una estimación agregada de los niveles gratuitos de terceros para los que se puede cumplir los requisitos por separado, no una concesión de tokens por parte de OmniRoute. Regístrate, obtén credenciales cuando sea necesario y conecta los proveedores que puedas utilizar; cada proveedor controla sus límites, disponibilidad y términos.
 >
-> Combinar manualmente los niveles gratuitos es complicado: decenas de SDK, decenas de límites de velocidad y ninguna idea de cuánto tienes realmente. OmniRoute cataloga **471 entradas de niveles gratuitos distribuidas en 34 claves de pools recurrentes** y calcula la cifra destacada de tokens a partir de **los 17 pools con un presupuesto mensual positivo publicado, más cinco límites de Groq por modelo**, eliminando duplicados por pool compartido. Las cuotas que solo se habilitan después de una verificación de identidad regional (actualmente: ModelScope) se muestran por separado, +~6M tras verificar la identidad regional, y nunca se suman a la cifra destacada. El resultado permanece visible en el panel (`/dashboard/free-tiers`).
+> Combinar manualmente los niveles gratuitos es complicado: decenas de SDK, decenas de límites de velocidad y ninguna idea de cuánto tienes realmente. OmniRoute cataloga **484 entradas de niveles gratuitos distribuidas en 34 claves de pools recurrentes** y calcula la cifra destacada de tokens a partir de **los 17 pools con un presupuesto mensual positivo publicado, más cinco límites de Groq por modelo**, eliminando duplicados por pool compartido. Las cuotas que solo se habilitan después de una verificación de identidad regional (actualmente: ModelScope) se muestran por separado, +~6M tras verificar la identidad regional, y nunca se suman a la cifra destacada. El resultado permanece visible en el panel (`/dashboard/free-tiers`).
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Tarjeta de presupuesto de niveles gratuitos de OmniRoute: ~1,62 mil millones de tokens gratuitos estables al mes, hasta ~2,22 mil millones durante el primer mes con créditos de registro, procedentes de 34 claves documentadas de pools recurrentes que abarcan 471 entradas catalogadas de niveles gratuitos tras un único endpoint. Cálculo transparente con deduplicación por pool: cada pool compartido se cuenta una sola vez, incluidos 17 pools recurrentes con un presupuesto mensual positivo de tokens publicado, más cinco límites de Groq por modelo; 12 proveedores están marcados como no recomendados en el catálogo de riesgos de los términos para que tú decidas. La barra de presupuesto incluye Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (cinco límites por modelo) y pools más pequeños, además de créditos de registro para el primer mes y proveedores permanentemente gratuitos sin límite de tokens, mostrados por separado para que nunca inflen la cifra destacada. Uso y saldo restante en tiempo real en /dashboard/free-tiers."/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="Tarjeta de presupuesto de niveles gratuitos de OmniRoute: ~1,62 mil millones de tokens gratuitos estables al mes, hasta ~2,22 mil millones durante el primer mes con créditos de registro, procedentes de 34 claves documentadas de pools recurrentes que abarcan 484 entradas catalogadas de niveles gratuitos tras un único endpoint. Cálculo transparente con deduplicación por pool: cada pool compartido se cuenta una sola vez, incluidos 17 pools recurrentes con un presupuesto mensual positivo de tokens publicado, más cinco límites de Groq por modelo; 12 proveedores están marcados como no recomendados en el catálogo de riesgos de los términos para que tú decidas. La barra de presupuesto incluye Mistral 1B, Nara 210M, LLM7 150M, xKiro 150M, Groq 30M (cinco límites por modelo) y pools más pequeños, además de créditos de registro para el primer mes y proveedores permanentemente gratuitos sin límite de tokens, mostrados por separado para que nunca inflen la cifra destacada. Uso y saldo restante en tiempo real en /dashboard/free-tiers."/>
 
 > Resumen animado de la página activa `/dashboard/free-tiers`. Metodología completa (deduplicación de pools, niveles de crédito y términos de los proveedores): **[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**.
 >
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ Funciones</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-375-ai-providers--153-catalog-marked-free">🌐 Proveedores</a></td>
+    <td align="center"><a href="#-376-ai-providers--153-catalog-marked-free">🌐 Proveedores</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI y MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La promesa — Un endpoint y 375 proveedores. El fallback automático mantiene el enrutamiento mientras haya otro destino saludable disponible. Seis pilares: fallback resiliente entre 375 proveedores · hasta un 95 % de ahorro de tokens en cargas de trabajo elegibles · $0 para empezar con más de 150 planes gratuitos y 51 proveedores gratuitos para siempre recurrentes/sin clave · 37 integraciones de CLI/agente mediante una única configuración · compatibilidad con OpenAI, Claude, Gemini y Responses API en /v1 · controles de producción como circuit breakers, TLS stealth, MCP con 110 herramientas, A2A, memoria, guardrails, evaluaciones y más de 56 000 declaraciones de pruebas estáticas en más de 7800 archivos de prueba rastreados."/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="La promesa — Un endpoint y 376 proveedores. El fallback automático mantiene el enrutamiento mientras haya otro destino saludable disponible. Seis pilares: fallback resiliente entre 376 proveedores · hasta un 95 % de ahorro de tokens en cargas de trabajo elegibles · $0 para empezar con más de 150 planes gratuitos y 52 proveedores gratuitos para siempre recurrentes/sin clave · 37 integraciones de CLI/agente mediante una única configuración · compatibilidad con OpenAI, Claude, Gemini y Responses API en /v1 · controles de producción como circuit breakers, TLS stealth, MCP con 110 herramientas, A2A, memoria, guardrails, evaluaciones y más de 56 000 declaraciones de pruebas estáticas en más de 7800 archivos de prueba rastreados."/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ Las **20** estrategias: combínalas como quieras en cada paso del combo:
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Qué diferencia a OmniRoute: una comparativa puntual de funcionalidades frente a 9router, OpenRouter, CLIProxyAPI y LiteLLM en 13 capacidades. OmniRoute: 375 proveedores, más de 150 niveles gratuitos integrados, 20 estrategias de enrutamiento, compresión de tokens con 12 motores, servidor MCP integrado con 110 herramientas, protocolo de agentes A2A, memoria persistente, medidas de protección, agentes en la nube, ocultación de huella digital TLS, Desktop/Termux/PWA y una interfaz disponible en 67 idiomas. OmniRoute cuenta con licencia MIT y puede autoalojarse. Las capacidades y cifras de los competidores pueden cambiar; consulta la metodología enlazada."/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="Qué diferencia a OmniRoute: una comparativa puntual de funcionalidades frente a 9router, OpenRouter, CLIProxyAPI y LiteLLM en 13 capacidades. OmniRoute: 376 proveedores, más de 150 niveles gratuitos integrados, 20 estrategias de enrutamiento, compresión de tokens con 12 motores, servidor MCP integrado con 110 herramientas, protocolo de agentes A2A, memoria persistente, medidas de protección, agentes en la nube, ocultación de huella digital TLS, Desktop/Termux/PWA y una interfaz disponible en 67 idiomas. OmniRoute cuenta con licencia MIT y puede autoalojarse. Las capacidades y cifras de los competidores pueden cambiar; consulta la metodología enlazada."/>
 
 <sub>📊 Metodología completa y detalles de cada funcionalidad frente a 9router, OpenRouter, CLIProxyAPI y LiteLLM → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar es opcional y solo utiliza GET. El cliente de OmniRoute no carga prompts, 
 - **🖼️ Nuevos endpoints** — `/v1/ocr` (Mistral OCR) y `/v1/audio/translations` (estilo Whisper) completan la superficie multimedia. → [Referencia de API](docs/reference/API_REFERENCE.md)
 - **🎨 Generación de imágenes / vídeo / audio** — una API para multimedia: vídeo de xAI Grok Imagine y Novita AI, ComfyUI, Magnific, Adobe Firefly, Segmind y proveedores de voz como ElevenLabs. → [Referencia de API](docs/reference/API_REFERENCE.md)
 - **🌍 Despliegue y operaciones** — `basePath` de proxy inverso, detección automática del idioma del navegador, seguimiento de dispositivos por clave, confianza MITM sin root, localización zh-TW. → [Entorno](docs/reference/ENVIRONMENT.md)
-- **🤝 Más proveedores y agentes** — agentes en la nube (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) con inicio de sesión por navegador + OAuth, tarjeta de primera clase de Ollama, Claude Opus 5 y Sonnet 5, asociación oficial con Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… y un **catálogo de 375 proveedores** renovado. → [Proveedores](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 Más proveedores y agentes** — agentes en la nube (Codex Cloud, Cursor, Devin, Jules), Grok Build (xAI) con inicio de sesión por navegador + OAuth, tarjeta de primera clase de Ollama, Claude Opus 5 y Sonnet 5, asociación oficial con Kimi (Code/Web/Moonshot), Zed, Requesty, SenseNova, Yuanbao, Agnes AI… y un **catálogo de 376 proveedores** renovado. → [Proveedores](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 Transparencia de enrutamiento** — cada respuesta incluye una cabecera `X-OmniRoute-Decision` que indica la estrategia/proveedor/latencia que la atendió, una nueva estrategia de combo `cache-optimized` + el factor `cacheAffinity` de Auto-Combo enrutan las solicitudes repetidas de vuelta a la conexión que mantiene el prefijo en caché, y un endpoint de solo lectura `/v1/auto-combo/{channel}/candidates` expone el grupo de candidatos activo de un canal `auto/*`. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ Rendimiento e infraestructura locales** — Redis local con un solo clic, desplegadores relay de Cloudflare Workers / Deno Deploy, Bifrost y Mux como servicios embebidos supervisados. → [Servicios embebidos](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 También incluido** — framework de plugins + marketplace, frameworks de skills Omni/Agent/GitHub, integración con el vault de Obsidian (22 herramientas MCP), APIs Batch y Files compatibles con OpenAI, caché semántica de respuestas, gamificación con tablas de clasificación, descubrimiento de agentes ACP (15 agentes integrados), exportación programada de logs a BigQuery, fan-out paralelo multimodelo `auto/chaos`, un puente de bot de Telegram, un gestor de versiones integrado en la aplicación y rankings de proveedores gratuitos LMArena-ELO. → [Documentación](docs/README.md)
@@ -687,11 +687,11 @@ aparezcan en el historial del shell. → [Integraciones de CLI](docs/guides/CLI-
 
 <div align="center">
 
-## 🌐 375 proveedores de IA — 153 marcados como gratuitos en el catálogo
+## 🌐 376 proveedores de IA — 153 marcados como gratuitos en el catálogo
 
 </div>
 
-> **375 proveedores registrados** en las colecciones canónicas de chat, medios, búsqueda, ejecución local, agentes en la nube y sistema, incluidos **153 con metadatos de descubrimiento `hasFree: true`**. El registro de modelos de chat abarca **239 proveedores / 3,059 pares distintos de proveedor-modelo / 1,475 ID de modelo sin procesar**; el catálogo independiente de presupuestos gratuitos contiene **471 filas por modelo**, **34 fondos recurrentes** y **51 proveedores gratuitos para siempre, recurrentes o sin clave**. Estos denominadores son diferentes por diseño; las definiciones y los cálculos con fondos deduplicados se encuentran en la [Referencia de proveedores](docs/reference/PROVIDER_REFERENCE.md) y los [Niveles gratuitos](docs/reference/FREE_TIERS.md).
+> **376 proveedores registrados** en las colecciones canónicas de chat, medios, búsqueda, ejecución local, agentes en la nube y sistema, incluidos **153 con metadatos de descubrimiento `hasFree: true`**. El registro de modelos de chat abarca **239 proveedores / 3,059 pares distintos de proveedor-modelo / 1,475 ID de modelo sin procesar**; el catálogo independiente de presupuestos gratuitos contiene **471 filas por modelo**, **34 fondos recurrentes** y **52 proveedores gratuitos para siempre, recurrentes o sin clave**. Estos denominadores son diferentes por diseño; las definiciones y los cálculos con fondos deduplicados se encuentran en la [Referencia de proveedores](docs/reference/PROVIDER_REFERENCE.md) y los [Niveles gratuitos](docs/reference/FREE_TIERS.md).
 
 <div align="center">
 
@@ -1305,7 +1305,7 @@ Métricas canónicas al 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b>Entorno de ejecución</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>Lenguaje</b></td><td>TypeScript 6.0 — <b>100 % TypeScript</b> en <code>src/</code> y <code>open-sse/</code> (cero <code>any</code> en el núcleo desde v2.0)</td></tr>
   <tr><td nowrap><b>Framework</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>Base de datos</b></td><td>better-sqlite3 (SQLite, registro WAL) + LowDB (JSON heredado) — 147 módulos de dominio, 210 migraciones</td></tr>
+  <tr><td nowrap><b>Base de datos</b></td><td>better-sqlite3 (SQLite, registro WAL) + LowDB (JSON heredado) — 147 módulos de dominio, 211 migraciones</td></tr>
   <tr><td nowrap><b>Memoria</b></td><td>Texto completo SQLite FTS5 + embeddings vectoriales cuantizados a int8, decaimiento tipado</td></tr>
   <tr><td nowrap><b>Esquemas</b></td><td>Zod 4 — validación de E/S de herramientas MCP + contratos de API</td></tr>
   <tr><td nowrap><b>Protocolos</b></td><td>MCP (stdio / HTTP / SSE) + A2A v0.3 (JSON-RPC 2.0 + SSE)</td></tr>
@@ -1368,7 +1368,7 @@ Métricas canónicas al 2026-10-18: **1.976 vídeos únicos** · **20.220.289 vi
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">Guía de resiliencia</a></b></td><td>Disyuntores, períodos de espera, cola, prevención de avalanchas de solicitudes y suplantación de TLS</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">Motor de combinación automática</a></b></td><td>Puntuación de 16 factores, paquetes de modos y autorrecuperación</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">Guía de proxies</a></b></td><td>Sistema de proxies de 3 niveles, mercado de 1proxy y operaciones CRUD del registro</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Niveles gratuitos</a></b></td><td>Directorio consolidado: 34 grupos recurrentes documentados / 471 entradas de niveles gratuitos catalogadas</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">Niveles gratuitos</a></b></td><td>Directorio consolidado: 34 grupos recurrentes documentados / 484 entradas de niveles gratuitos catalogadas</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">Galería de funcionalidades</a></b></td><td>Recorrido visual por el panel con capturas de pantalla</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">Documentación del código fuente</a></b></td><td>Recorrido por el código fuente pensado para principiantes</td></tr>
 </table>

@@ -66,6 +66,16 @@ curl -i \
 
 Khóa không có phạm vi `manage` (hoặc không có Bearer) sẽ trả về `403 LOCAL_ONLY`. Tiền tố liên quan `/api/cli-tools/runtime/*` được chủ ý thiết kế để KHÔNG thể bỏ qua — xem [Các tầng Route Guard — ngoại lệ cho phạm vi quản lý](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Kiểm tra Origin
+
+Sau khi xác thực, mọi yêu cầu tới `/api/mcp/*` — các transport và các route quản trị như `status`, `tools`, `audit`, `restart` — đều được kiểm tra header `Origin`, bất kể bên gọi là ai (API key, token CLI, phiên dashboard hay loopback ẩn danh khi tắt đăng nhập). Đây là cơ chế chống DNS rebinding mà đặc tả MCP Streamable HTTP yêu cầu.
+
+- **Không có header `Origin`** → cho phép. OmniRoute CLI, SDK và các client IDE không gửi header này.
+- **`Origin` được chấp nhận** → `localhost` / `127.0.0.1` / `[::1]` trên bất kỳ cổng nào, hoặc origin công khai của chính OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin do reverse proxy tin cậy chuyển tiếp (`OMNIROUTE_TRUST_PROXY`, chỉ khi chưa đặt base URL), hoặc host IP loopback/LAN truy cập trực tiếp. Chỉ riêng header `Host` không bao giờ khiến một origin được tin cậy.
+- **Mọi `Origin` khác, kể cả `null`** → `403` kèm body lỗi JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Phiên dashboard xuất trình token CSRF hợp lệ vẫn được chấp nhận, như với các thao tác ghi khác của dashboard.
+
+Client MCP chạy trên trình duyệt đặt sau reverse proxy cần `OMNIROUTE_PUBLIC_BASE_URL`; không có danh sách cho phép cho các origin khác. Yêu cầu preflight CORS (`OPTIONS`) không bị kiểm tra Origin; yêu cầu theo sau thì có.
+
 ## Cấu hình IDE
 
 Xem [Cấu hình máy khách MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) để thiết lập Claude Desktop,

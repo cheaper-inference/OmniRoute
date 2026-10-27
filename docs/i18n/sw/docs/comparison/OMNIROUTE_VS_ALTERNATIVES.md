@@ -39,7 +39,7 @@ Ulinganisho wa vipengele bila upendeleo dhidi ya maruta maarufu ya AI ya chanzo 
 
 ## Lini kuchagua OmniRoute
 
-- Unapoji-host mwenyewe na unataka **ufikiaji wa juu kabisa wa watoa huduma** (watoa huduma 375, viingizo 155 vya katalogi vya bure/bila uthibitishaji)
+- Unapoji-host mwenyewe na unataka **ufikiaji wa juu kabisa wa watoa huduma** (watoa huduma 376, viingizo 155 vya katalogi vya bure/bila uthibitishaji)
 - Unahitaji **seva ya MCP iliyojengwa ndani** (zana za LLM, kumbukumbu, na ujuzi vinavyotolewa kama zana)
 - Unahitaji **itifaki ya A2A** kwa mtiririko wa kazi kati ya mawakala
 - Unataka **usiri wa alama za vidole** (JA3/JA4) ili kuepuka kugunduliwa na CAPTCHA za ngazi ya juu
