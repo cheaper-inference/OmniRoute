@@ -1136,7 +1136,10 @@ test("#18058: Claude model-credit entitlement scopes a cold or stale quota snaps
   assert.equal(decide({ provider: "anthropic" }).scope, "connection");
   assert.equal(decide({ status: 400 }).scope, "connection");
   assert.equal(decide({ model: "" }).scope, "connection");
-  assert.equal(decide({ errorText: "rate_limit_error: 50 requests per minute" }).scope, "connection");
+  assert.equal(
+    decide({ errorText: "rate_limit_error: 50 requests per minute" }).scope,
+    "connection"
+  );
 
   const futureReset = new Date(now + 120_000).toISOString();
   quotaCache.setQuotaCache(

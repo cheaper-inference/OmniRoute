@@ -168,7 +168,10 @@ test("Claude per-minute rate limit text is not mistaken for the monthly spend li
 const MODEL_CREDIT_ENTITLEMENT_TEXT = "[429]: Usage credits are required for this model.";
 
 test("#18058: model-credit entitlement is a Claude-only long-window quota", () => {
-  assert.equal(isSubscriptionQuotaText(MODEL_CREDIT_ENTITLEMENT_TEXT.toLowerCase(), "claude"), true);
+  assert.equal(
+    isSubscriptionQuotaText(MODEL_CREDIT_ENTITLEMENT_TEXT.toLowerCase(), "claude"),
+    true
+  );
   for (const provider of ["codex", "antigravity", "gemini", "anthropic", undefined]) {
     assert.equal(
       isSubscriptionQuotaText(MODEL_CREDIT_ENTITLEMENT_TEXT.toLowerCase(), provider),
@@ -192,7 +195,13 @@ test("#18058: model entitlement 429 uses hour-scale quota, not short retry or de
 });
 
 test("#18058: unrelated Claude rate-limit 429 stays transient", () => {
-  const result = checkFallbackError(429, "rate_limit_error: 50 requests per minute", 0, null, "claude");
+  const result = checkFallbackError(
+    429,
+    "rate_limit_error: 50 requests per minute",
+    0,
+    null,
+    "claude"
+  );
   assert.equal(result.shouldFallback, true);
   assert.ok(result.cooldownMs < 5 * 60 * 1000);
 });
