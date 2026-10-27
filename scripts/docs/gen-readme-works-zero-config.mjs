@@ -13,29 +13,8 @@ import { fileURLToPath } from "node:url";
 import { buildFontFaceCss } from "./readme-fonts.mjs";
 import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
 
-export const WORKS_ZERO_CONFIG_COPY = {
-  kicker: ["CONNECT, THEN ROUTE"],
-  headline: ["Install → connect a provider → ", "route."],
-  stepNumbers: ["1", "2", "3"],
-  stepTitles: ["Install and start", "Connect provider", "Use your tool"],
-  stepCommands: ["$ npm i -g omniroute", "Dashboard → Providers", "localhost:20128/v1"],
-  stepBody: [
-    "Then run omniroute; open",
-    "Use your own account or API key.",
-    "Review provider terms and limits.",
-    'Set model to "auto"',
-    "Eligible connections + fallback.",
-  ],
-  stepMono: ["localhost:20128"],
-  chips: ["Your accounts", "Provider limits", "Local routing"],
-  footer: ["auto", " uses eligible connections; availability and provider limits still apply."],
-  footerRight: ["$0 · MIT"],
-};
-
-const W = 1200;
-const H = 430;
-
-// Step tiles: x, width, status token, number-circle fill, icon path(s).
+// Step tiles: geometry, status token, number-circle fill, icon path(s) and the tile's own text
+// (number, title, command line, body lines, optional trailing mono line).
 const STEPS = [
   {
     x: 40,
@@ -44,6 +23,11 @@ const STEPS = [
     bubble: "info-bg",
     icon: '<path d="M 11 2 L 11 15 M 6 10 L 11 15 L 16 10"/><path d="M 3 19 L 19 19"/>',
     iconWidth: "2.2",
+    number: "1",
+    title: "Install and start",
+    command: "$ npm i -g omniroute",
+    body: ["Then run omniroute; open"],
+    mono: "localhost:20128",
   },
   {
     x: 435,
@@ -52,6 +36,10 @@ const STEPS = [
     bubble: "surface-muted",
     icon: '<path d="M 8 6 L 5 9 A 4 4 0 0 0 5 15 L 8 18 M 14 6 L 17 9 A 4 4 0 0 1 17 15 L 14 18 M 8.5 12 L 13.5 12"/>',
     iconWidth: "2.2",
+    number: "2",
+    title: "Connect provider",
+    command: "Dashboard → Providers",
+    body: ["Use your own account or API key.", "Review provider terms and limits."],
   },
   {
     x: 830,
@@ -60,13 +48,33 @@ const STEPS = [
     bubble: "ok-bg",
     icon: '<path d="M 3 11 L 9 17 L 19 5"/>',
     iconWidth: "2.4",
+    number: "3",
+    title: "Use your tool",
+    command: "localhost:20128/v1",
+    body: ['Set model to "auto"', "Eligible connections + fallback."],
   },
 ];
+
+export const WORKS_ZERO_CONFIG_COPY = {
+  kicker: ["CONNECT, THEN ROUTE"],
+  headline: ["Install → connect a provider → ", "route."],
+  stepNumbers: STEPS.map((s) => s.number),
+  stepTitles: STEPS.map((s) => s.title),
+  stepCommands: STEPS.map((s) => s.command),
+  stepBody: STEPS.flatMap((s) => s.body),
+  stepMono: STEPS.flatMap((s) => (s.mono ? [s.mono] : [])),
+  chips: ["Your accounts", "Provider limits", "Local routing"],
+  footer: ["auto", " uses eligible connections; availability and provider limits still apply."],
+  footerRight: ["$0 · MIT"],
+};
+
+const W = 1200;
+const H = 430;
 const TILE_Y = 132;
 const TILE_H = 172;
 const FADE_BEGIN = ["0.1s", "0.5s", "0.9s"];
 
-function tile(i, C) {
+function tile(i) {
   const s = STEPS[i];
   const ix = s.x + 26; // inner left edge (old 66 / 461 / 856)
   const lines = [];
@@ -89,23 +97,19 @@ function tile(i, C) {
   );
   lines.push(`    <circle cx="${s.x + 40}" cy="172" r="15" class="${s.bubble}"/>`);
   lines.push(
-    `    <text x="${s.x + 40}" y="178" text-anchor="middle" class="cmd" style="fill:var(--${s.tone})">${esc(C.stepNumbers[i])}</text>`
+    `    <text x="${s.x + 40}" y="178" text-anchor="middle" class="cmd" style="fill:var(--${s.tone})">${esc(s.number)}</text>`
   );
   lines.push(
     `    <g transform="translate(${s.x + 68},161)" class="stroke-${s.tone}" stroke-width="${s.iconWidth}" fill="none" stroke-linecap="round" stroke-linejoin="round">${s.icon}</g>`
   );
-  lines.push(`    <text x="${s.x + 100}" y="179" class="h3">${esc(C.stepTitles[i])}</text>`);
-  lines.push(`    <text x="${ix}" y="222" class="mono">${esc(C.stepCommands[i])}</text>`);
-  if (i === 0) {
-    lines.push(`    <text x="${ix}" y="258" class="body">${esc(C.stepBody[0])}</text>`);
-    lines.push(
-      `    <text x="${ix}" y="279" class="mono" style="fill:var(--muted)">${esc(C.stepMono[0])}</text>`
-    );
-  } else {
-    const a = i === 1 ? 1 : 3;
-    lines.push(`    <text x="${ix}" y="258" class="body">${esc(C.stepBody[a])}</text>`);
-    lines.push(`    <text x="${ix}" y="279" class="body">${esc(C.stepBody[a + 1])}</text>`);
-  }
+  lines.push(`    <text x="${s.x + 100}" y="179" class="h3">${esc(s.title)}</text>`);
+  lines.push(`    <text x="${ix}" y="222" class="mono">${esc(s.command)}</text>`);
+  // Two lines under the command, 21px apart: the body lines, then the mono line if the tile has one.
+  const under = [
+    ...s.body.map((t) => `class="body">${esc(t)}`),
+    ...(s.mono ? [`class="mono" style="fill:var(--muted)">${esc(s.mono)}`] : []),
+  ];
+  under.forEach((t, l) => lines.push(`    <text x="${ix}" y="${258 + l * 21}" ${t}</text>`));
   lines.push(`  </g>`);
   return lines.join("\n");
 }
@@ -171,7 +175,7 @@ export async function renderReadmeWorksZeroConfig() {
     `    <animateMotion dur="2.6s" begin="1.9s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="linear"><mpath href="#wzc-c2"/></animateMotion>\n` +
     `    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.15;0.85;1" dur="2.6s" begin="1.9s" repeatCount="indefinite"/>\n` +
     `  </circle>\n` +
-    [0, 1, 2].map((i) => tile(i, C)).join("\n") +
+    [0, 1, 2].map((i) => tile(i)).join("\n") +
     "\n" +
     // "your ___" chips
     `  <g opacity="0">\n` +
