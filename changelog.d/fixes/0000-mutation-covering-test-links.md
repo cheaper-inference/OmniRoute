@@ -1,0 +1,1 @@
+- **fix(ci):** Include seven existing unit suites in the mutation runner, restoring ten coverage links across six mutated modules without changing thresholds or assertions.
