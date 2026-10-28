@@ -189,7 +189,11 @@ function applyUsageMetadata(parsed: Record<string, unknown>, acc: GeminiSSEAccum
   const previousCachedTokens = (
     previousUsage.prompt_tokens_details as { cached_tokens?: number } | undefined
   )?.cached_tokens;
-  const cachedTokens = resolveCachedTokens(um, promptTokens, previousCachedTokens);
+  const cachedTokens = resolveCachedTokens(
+    um,
+    typeof promptTokens === "number" ? promptTokens : undefined,
+    previousCachedTokens
+  );
 
   const nextUsage = {
     ...previousUsage,

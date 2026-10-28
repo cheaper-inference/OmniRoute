@@ -10,77 +10,76 @@ _Posljednje ažuriranje: 2026-06-28_
 
 ## Izvršni sažetak
 
-OmniRoute je lokalni AI pristupnik za usmjeravanje i kontrolna ploča izgrađena na Next.js-u.
-Pruža jedinstvenu krajnju tačku kompatibilnu s OpenAI-jem (`/v1/*`) i usmjerava saobraćaj preko više upstream pružalaca uz prevođenje, rezervne opcije, osvježavanje tokena i praćenje korištenja.
+OmniRoute je lokalni AI gateway i nadzorna ploča izgrađena na Next.js. Pruža jednu OpenAI kompatibilnu krajnju tačku (`/v1/*`) i usmjerava promet preko više uzvodnih provajdera s prijevodom, zamjenskim, osvježavanjem tokena i praćenjem korištenja.
 
-Ključne mogućnosti:
+Osnovne mogućnosti:
 
-- API interfejs kompatibilan s OpenAI-jem za CLI/alate (376 pružalaca, 156 izvršnih modula)
-- Prevođenje zahtjeva/odgovora između formata pružalaca
-- Rezervni niz kombinacije modela (sekvenca više modela)
-- Strukturirani koraci kombinacije (`provider + model + connection`) s redoslijedom tokom izvršavanja prema `compositeTiers`
-- Rezervne opcije na nivou računa (više računa po pružaocu)
-- Prethodna provjera kvote i odabir P2C računa uzimajući u obzir kvotu u glavnoj putanji chata
-- Upravljanje vezama s pružaocima putem OAutha i API ključeva (27 modula OAuth pružalaca)
-- Generisanje ugrađivanja putem `/v1/embeddings` (18 pružalaca)
-- Generisanje slika putem `/v1/images/generations` (10+ pružalaca, 20+ modela)
-- Transkripcija zvuka putem `/v1/audio/transcriptions` (18 pružalaca)
-- Pretvaranje teksta u govor putem `/v1/audio/speech` (24 ugrađena pružaoca)
-- Generisanje videa putem `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Generisanje muzike putem `/v1/music/generations` (ComfyUI)
-- Pretraživanje weba putem `/v1/search` (20 pružalaca)
-- Moderiranje putem `/v1/moderations`
-- Ponovno rangiranje putem `/v1/rerank`
-- Raščlanjivanje oznaka za razmišljanje (`<think>...</think>`) za modele zaključivanja
-- Sanitizacija odgovora radi stroge kompatibilnosti s OpenAI SDK-om
-- Normalizacija uloga (developer→system, system→user) radi kompatibilnosti između pružalaca
-- Konverzija strukturiranog izlaza (json_schema → Gemini responseSchema)
-- Lokalna pohrana pružalaca, ključeva, aliasa, kombinacija, postavki i cijena (122 DB modula)
-- Praćenje korištenja/troškova i evidentiranje zahtjeva
-- Opcionalna sinhronizacija s oblakom za sinhronizaciju između više uređaja/stanja
-- Lista dozvoljenih/blokiranih IP adresa za kontrolu pristupa API-ju
-- Upravljanje budžetom za razmišljanje (prosljeđivanje/automatski/prilagođeni/adaptivni)
-- Umetanje globalnog sistemskog upita
-- Praćenje sesija i izrada otisaka
-- Poboljšano ograničavanje stope zahtjeva po računu, s profilima specifičnim za pružaoce
-- Obrazac prekidača kola za otpornost pružalaca
-- Zaštita od navale istovremenih zahtjeva pomoću zaključavanja mutexom
-- Keš za deduplikaciju zahtjeva zasnovan na potpisima
-- Domenski sloj: pravila troškova, pravila rezervnih opcija, pravila zaključavanja
-- Context Relay: sažeci primopredaje sesija radi kontinuiteta pri rotaciji računa
-- Trajna pohrana stanja domene (SQLite keš s direktnim zapisivanjem za rezervne opcije, budžete, zaključavanja i prekidače kola)
-- Mehanizam pravila za centraliziranu procjenu zahtjeva (zaključavanje → budžet → rezervna opcija)
-- Telemetrija zahtjeva s agregacijom latencije p50/p95/p99
-- Telemetrija ciljeva kombinacije i historijsko stanje ciljeva kombinacije putem `combo_execution_key` / `combo_step_id`
-- Korelacijski ID (X-Request-Id) za praćenje od početka do kraja
-- Evidentiranje revizije usklađenosti uz mogućnost isključivanja po API ključu
-- Okvir za evaluaciju radi osiguranja kvaliteta LLM-a
-- Kontrolna ploča stanja sa statusom prekidača kola pružalaca u stvarnom vremenu
-- MCP server (110 alata) s 3 transporta (stdio/SSE/Streamable HTTP)
-- A2A server (JSON-RPC 2.0 + SSE) s vještinama i životnim ciklusom zadataka
-- Sistem memorije (izdvajanje, umetanje, dohvaćanje, sažimanje)
-- Sistem vještina (registar, izvršitelj, izolirano okruženje, ugrađene vještine)
-- MITM proxy s upravljanjem certifikatima i DNS-om
-- Middleware za zaštitu od ubacivanja zlonamjernih uputa
-- Cjevovod za kompresiju upita s Cavemanom, RTK-om, složenim cjevovodima, kombinacijama kompresije, jezičkim paketima i analitikom
-- Registar ACP-a (Agent Communication Protocol)
-- Modularni OAuth pružaoci (22 pojedinačna modula unutar `src/lib/oauth/providers/`)
-- Skripte za deinstalaciju/potpunu deinstalaciju
-- Radnja za popravku OAuth okruženja
-- WebSocket most za WS klijente kompatibilne s OpenAI-jem (`/v1/ws`)
-- Upravljanje tokenima za sinhronizaciju (izdavanje/opoziv, preuzimanje konfiguracijskog paketa verzioniranog ETag-om)
-- GLM Thinking (`glmt`) kao prvorazredna unaprijed definirana postavka pružaoca
-- Hibridno brojanje tokena (pružaočev `/messages/count_tokens` uz rezervnu procjenu)
-- Automatsko početno popunjavanje aliasa modela (30+ normalizacija dijalekata između proxyja pri pokretanju)
-- Sigurno odlazno dohvaćanje sa zaštitom od SSRF-a, blokiranjem privatnih URL-ova i podesivim ponovnim pokušajima
-- Ponovni pokušaji chata koji uzimaju u obzir period čekanja, s podesivim `requestRetry` i `maxRetryIntervalSec`
-- Validacija okruženja za izvršavanje pomoću Zoda pri pokretanju
-- Revizija usklađenosti v2 s paginacijom, CRUD događajima pružalaca i evidentiranjem validacija blokiranih zbog SSRF-a
+- OpenAI kompatibilna API površina za CLI/tools (377 provajdera, 156 izvršnih modula)
+- Request/response prijevod preko formata provajdera
+- Kombinirani model (slijed više modela)
+- Strukturirani kombinovani koraci (`provider + model + connection`) sa poredanjem vremena izvođenja po `compositeTiers`
+- Zamjena na nivou računa (više računa po provajderu)
+- Odabir P2C računa prije početka rada i kvote u glavnoj putanji za ćaskanje
+- OAuth + API-ključ za upravljanje vezom provajdera (27 modula OAuth provajdera)
+- Ugradnja generiranja putem `/v1/embeddings` (18 provajdera)
+- Generisanje slike putem `/v1/images/generations` (10 + provajdera, 20 + modela)
+- Audio transkripcija putem `/v1/audio/transcriptions` (18 provajdera)
+- Pretvaranje teksta u govor putem `/v1/audio/speech` (24 ugrađena provajdera)
+- Generacija videa putem `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Generacija muzike preko `/v1/music/generations` (ComfyUI)
+- Web pretraga putem `/v1/search` (20 provajdera)
+- Moderacije preko `/v1/moderations`
+- Ponovno rangiranje preko `/v1/rerank`
+- Razmislite o raščlanjivanju oznaka (`<think>...</think>`) za modele zaključivanja
+- Sanacija odgovora za strogu OpenAI SDK kompatibilnost
+- Normalizacija uloga (programer → sistem, sistem → korisnik) za međuprovajdersku kompatibilnost
+- Strukturirana konverzija izlaza (json_schema → Gemini responseSchema)
+- Lokalna postojanost za provajdere, ključevi, aliasi, kombinacije, postavke, cijene (122 DB modula)
+- Usage/cost praćenje i evidentiranje zahtjeva
+- Opcionalna sinhronizacija u oblaku za multi-device/state sinhronizaciju
+- IP allowlist/blocklist za API kontrolu pristupa
+- Razmišljanje o upravljanju budžetom (passthrough/auto/custom/adaptive)
+- Promptna injekcija globalnog sistema
+- Praćenje sesije i uzimanje otisaka prstiju
+- Poboljšano ograničenje stope po računu sa profilima specifičnim za provajdera
+- Uzorak prekidača za otpornost provajdera
+- Zaštita stada od grmljavine sa mutex zaključavanjem
+- Keš za deduplikaciju zahtjeva zasnovan na potpisu
+- Sloj domene: pravila troškova, rezervna politika, politika zaključavanja
+- Relej konteksta: sažeci primopredaje sesije za kontinuitet rotacije naloga
+- Postojanost stanja domene (SQLite keš memorija za upisivanje za rezerve, budžete, blokade, prekidače)
+- Mehanizam politike za centraliziranu evaluaciju zahtjeva (lockout → budget → rezervni)
+- Zatražite telemetriju sa p50/p95/p99 agregacijom kašnjenja
+- Kombinovana telemetrija cilja i historijska kombinirana ciljana zdravlje putem `combo_execution_key` / `combo_step_id`
+- Korelacija ID (X-Request-Id) za praćenje od kraja do kraja
+- Evidentiranje revizije usklađenosti s opt-out po API ključu
+- Eval okvir za LLM osiguranje kvaliteta
+- Zdravstvena kontrolna tabla sa statusom prekidača dobavljača u realnom vremenu
+- MCP server (110 alata) sa 3 transporta (stdio/SSE/Streamable HTTP)
+- A2A server (JSON-RPC 2.0 + SSE) sa vještinama i životnim ciklusom zadataka
+- Memorijski sistem (vađenje, ubrizgavanje, pronalaženje, sumiranje)
+- Sistem vještina (registrator, izvršilac, sandbox, ugrađene vještine)
+- MITM proxy sa upravljanjem certifikatima i DNS rukovanjem
+- Prompt injection guard Middleware
+- Promptni kompresijski cjevovod s Cavemanom, RTK, naslaganim cjevovodima, kombinacijama kompresije, jezičkim paketima i analitikom
+- ACP (Agent Communication Protocol) registar
+- Modularni OAuth provajderi (22 pojedinačna modula pod `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall skripte
+- OAuth akcija popravke okoline
+- WebSocket most za OpenAI kompatibilne WS klijente (`/v1/ws`)
+- Upravljanje tokenom sinhronizacije (issue/revoke, preuzimanje paketa konfiguracija u verziji ETag)
+- GLM Thinking (`glmt`) prvoklasni unaprijed postavljeni provajder
+- Hibridno brojanje tokena ( `/messages/count_tokens` na strani provajdera sa zamjenom procjene)
+- Automatsko postavljanje pseudonima modela (30 + cross-proxy normalizacija dijalekta pri pokretanju)
+- Sigurno odlazno dohvaćanje sa SSRF guardom, privatnim URL blokiranjem i podesivim ponovnim pokušajem
+- Ponovni pokušaji ćaskanja s hlađenjem s podesivim `requestRetry` i `maxRetryIntervalSec`
+- Provjera runtime okruženja sa Zod pri pokretanju
+- Revizija usklađenosti v2 sa paginacijom, CRUD događajima dobavljača i SSRF-blokiranim evidentiranjem valjanosti
 
-Primarni model izvršavanja:
+Primarni model vremena izvođenja:
 
-- Next.js rute aplikacije unutar `src/app/api/*` implementiraju i API-je kontrolne ploče i API-je za kompatibilnost
-- Zajednička SSE jezgra za usmjeravanje unutar `src/sse/*` + `open-sse/*` upravlja izvršavanjem pružalaca, prevođenjem, streamingom, rezervnim opcijama i korištenjem
+- rute Next.js aplikacija pod `src/app/api/*` implementiraju i nadzornu ploču APIs i kompatibilnost APIs
+- Zajedničko SSE/routing jezgro u `src/sse/*` + `open-sse/*` upravlja izvršavanjem provajdera, prijevodom, streamingom, zamjenskim i korištenjem
 
 ## Referentni dijagrami
 

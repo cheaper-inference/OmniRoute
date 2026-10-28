@@ -103,8 +103,8 @@ export function readReportedUsage(
 
 /**
  * Registry price of one successful call. Flat `costPerQuery`, unless the provider
- * declares `costByMode`: then the price of the `mode` sent in the request body
- * (unknown/absent mode → `costPerQuery`), plus `extraResultCost` for every result
+ * declares `costByMode`: then the price of the mode sent in the request body field
+ * `costModeField` (default `mode`; unknown/absent mode → `costPerQuery`), plus `extraResultCost` for every result
  * returned above `includedResults`. Rounded to 6 decimals (no float dust).
  */
 export function computeSearchCostUsd(
@@ -116,7 +116,10 @@ export function computeSearchCostUsd(
   if (!byMode) return config.costPerQuery;
   let mode: unknown;
   try {
-    mode = typeof requestBody === "string" ? JSON.parse(requestBody)?.mode : undefined;
+    mode =
+      typeof requestBody === "string"
+        ? JSON.parse(requestBody)?.[config.costModeField ?? "mode"]
+        : undefined;
   } catch {
     mode = undefined;
   }
