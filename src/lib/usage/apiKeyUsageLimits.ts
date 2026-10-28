@@ -4,6 +4,7 @@ import { getProviderQuotaWindowStartIso } from "@/lib/db/quotaResetEvents";
 import { sumSearchLedgerSpendSince } from "@/lib/db/costLedger";
 import { calculateCostDetailed } from "./costCalculator";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import { isAnthropicMessagesRequest } from "@/shared/utils/anthropicErrorEnvelope";
 import {
   calendarWeekWindowMs,
   isValidIanaTimeZone,
@@ -658,15 +659,6 @@ function buildUsageLimitExceededMessage(
   return showUsd
     ? "This API key reached its USD usage quota. Choose another allowed model or wait for quota reset."
     : "This API key reached its usage quota. Choose another allowed model or wait for quota reset.";
-}
-
-function isAnthropicMessagesRequest(request: Request): boolean {
-  if (request.headers.has("anthropic-version")) return true;
-  try {
-    return new URL(request.url).pathname.endsWith("/v1/messages");
-  } catch {
-    return false;
-  }
 }
 
 export function buildApiKeyUsageLimitRejection(

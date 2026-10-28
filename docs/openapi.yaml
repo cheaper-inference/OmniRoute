@@ -1729,7 +1729,7 @@ paths:
             `POST /api/v1/chat/completions`), including `X-OmniRoute-Request-Id`
             and `X-OmniRoute-Version`.
         "401":
-          $ref: "#/components/responses/Unauthorized"
+          $ref: "#/components/responses/AnthropicUnauthorized"
 
   /api/v1/messages/count_tokens:
     post:
@@ -1746,6 +1746,8 @@ paths:
       responses:
         "200":
           description: Token count
+        "401":
+          $ref: "#/components/responses/AnthropicUnauthorized"
 
   /api/v1/responses:
     post:
@@ -15153,6 +15155,34 @@ components:
               error:
                 type: string
                 example: Unauthorized
+    AnthropicUnauthorized:
+      description: >-
+        Missing or invalid API key on the Anthropic Messages endpoints, returned in
+        Anthropic's error envelope so Anthropic clients (Claude Code, Anthropic SDKs)
+        show the message. The correlation id is on the `x-request-id` header.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [type, error]
+            properties:
+              type:
+                type: string
+                enum: [error]
+              error:
+                type: object
+                required: [type, message]
+                properties:
+                  type:
+                    type: string
+                    enum: [authentication_error]
+                  message:
+                    type: string
+          example:
+            type: error
+            error:
+              type: authentication_error
+              message: Invalid API key
     ManagementAuthenticationRequired:
       description: Authentication required for management routes
       content:

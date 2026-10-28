@@ -9,6 +9,10 @@ import {
   getDashboardJwtSecret,
 } from "@/shared/utils/dashboardSessionToken";
 import { generateRequestId } from "../../shared/utils/requestId";
+import {
+  buildAnthropicErrorBody,
+  isAnthropicMessagesPath,
+} from "../../shared/utils/anthropicErrorEnvelope";
 import { applyCorsHeaders } from "../cors/origins";
 import {
   buildMcpInvalidOriginBody,
@@ -70,14 +74,22 @@ function rejectionResponse(
   classification: RouteClassification,
   requestId: string
 ): NextResponse {
+  // Claude Code only shows a /v1/messages 401 in Anthropic's error envelope;
+  // the correlation id stays on the x-request-id header.
+  const anthropicAuthError =
+    outcome.status === 401 &&
+    classification.routeClass === "CLIENT_API" &&
+    isAnthropicMessagesPath(classification.normalizedPath);
   const response = NextResponse.json(
-    {
-      error: {
-        code: outcome.code,
-        message: outcome.message,
-        correlation_id: requestId,
-      },
-    },
+    anthropicAuthError
+      ? buildAnthropicErrorBody("authentication_error", outcome.message)
+      : {
+          error: {
+            code: outcome.code,
+            message: outcome.message,
+            correlation_id: requestId,
+          },
+        },
     { status: outcome.status }
   );
   response.headers.set(AUTHZ_HEADER_REQUEST_ID, requestId);
