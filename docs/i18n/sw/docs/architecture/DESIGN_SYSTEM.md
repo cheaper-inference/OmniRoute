@@ -4,14 +4,7 @@
 
 ---
 
-> **Hali:** dashibodi imejengwa juu ya **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), iliyojazwa ndani
-> kama workspace ya `packages/ui-kit` (`@omniroute/ui-kit`; picha ya upstream imewekwa imara katika
-> `packages/ui-kit/UPSTREAM.md` na kulindwa na `npm run check:ui-kit-snapshot`). Mandhari ya mwanga ndiyo
-> halisi; mapendeleo chaguomsingi ni `system`. Rangi ya msisitizo ni Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) ndiyo familia ya UI, Instrument Serif kwa maandishi makubwa
-> yasiyojaa ya kuonyesha pekee (`.ci-dashboard-display`), IBM Plex Mono kwa msimbo — zote zimewekwa ndani
-> (self-hosted) kupitia uingizaji wa `@fontsource/*` juu ya `src/app/globals.css`. Kila ikoni ni gelfu ya
-> Lucide.
+> **Hali:** dashibodi imejengwa juu ya** Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), inauzwa kama nafasi ya kazi `packages/ui-kit` (`@omniroute/ui-kit`; picha ya juu ya mkondo imebandikwa `packages/ui-kit/UPSTREAM.md` na inalindwa na `npm run check:ui-kit-snapshot`). Nuru ni mada ya kisheria; upendeleo chaguo-msingi ni `system`. Lafudhi ni Keak chokaa (`--ci-color-accent`). Switzer ni familia moja ya UI, onyesho na maandishi ya msimbo (`--ci-font-ui`; `--ci-font-display` na `--ci-font-mono` suluhisha kwake), inayojiendesha yenyewe na kit yenyewe (`packages/ui-kit/src/ci-fonts.css`, iliyoagizwa na `ci-tokens.css`). Kila ikoni ni glyph ya Lucide.
 
 ## 1. Mahali vitu vilipo
 
@@ -85,35 +78,13 @@
 
 ## 2. Kanuni
 
-1. Tokeni, kamwe si literal. Mbaliu zilizowekwa kwa makusudi: terminali ya console inayobaki nyeusi
-   kila wakati na `STATUS_HEX` (`src/shared/constants/statusColors.ts`), kioo cha hex iliyotatuliwa
-   cha paleti ya hali ya kit kwa viitaji vinavyohitaji hex halisi. Paleti za kategoria si mbaliu tena:
-   zinategemea tokeni tano za chati za kit (`--color-chart-1..5`) kupitia
-   `src/shared/utils/categoricalPalette.ts` na, kwa mikakati ya uelekezaji,
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; kingo za ReactFlow na kanvasi ya uratibu
-   huisoma vigezo `--orch-status-*` vinavyotambua mandhari (`src/shared/components/flow/edgeStyles.ts`).
-2. Kamwe usirekebishe `packages/ui-kit/src` kwa mkono: sawazisha kwa `scripts/dev/sync-ui-kit.sh <commit>`;
-   kizuizi cha pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) hushindwa kwa baiti
-   yoyote inayotofautiana na commit iliyobanwa ya upstream (huruka kwa onyo wakati clone ya upstream,
-   `UI_KIT_CLONE` au `_references/cheaper-inference-ui-kit`, haipo). Kit inapokosa kitu, zunguka
-   upungufu huo kwenye adapta au kwenye skrini, kisha uiombe upstream kuongeza.
-3. Maandishi chaguomsingi ya kit ni Kiingereza (`label = "Loading"`, `loadingLabel = "Loading table"`…) — pitisha
-   string zilizotafsiriwa kutoka kwa `useTranslations(...)` kila wakati kipengele cha kit kinapoonyesha maandishi.
-4. Utilities za Tailwind hushinda madarasa ya vipengele vya kit (kit hutangaza
-   `@layer theme, base, components, utilities` na sheria zake ziko katika `components`) — tumia utilities
-   kwa nafasi na mpangilio, si kubadilisha rangi za vipengele vya kit.
-5. Vichwa: `.ci-heading` (Inter, bila tracking) kwa vichwa vya kurasa na sehemu; `.ci-dashboard-display`
-   (Instrument Serif) tu kwa maandishi makubwa ya onyesho yasiyo mengi, kama vile msimbo wa hali wa
-   ukurasa wa hitilafu.
-6. `tests/unit/dashboard-kit-sweep.test.ts` hulinda utumiaji wa kit: hakuna span ya ligature ya Material
-   chini ya `src/app` au `src/shared/components`; katika mti wa dashibodi (`src/app/(dashboard)` na
-   `src/shared/components`) hakuna `<select>`, `<textarea>` au `<table>` ghafi wala `role="dialog"`
-   iliyotungwa kwa mkono nje ya mbaliu zilizoorodheshwa (tawi la asili la adapta ya `Select`,
-   `RequestLoggerDetail`); kila `<button>` au `<input>` ghafi huko inahitaji komenti yenye
-   `kit-exception:` (pamoja na sababu) inayoisha mistari isiyozidi 3 juu yake; rangi za paleti na
-   vibadala vya `dark:` tu katika faili ambazo jaribio linaziorodhesha.
-7. Hakikisha mandhari zote mbili na viewport ya 390 px kabla ya PR (picha za skrini); `tests/e2e/a11y.spec.ts`
-   huendesha axe.
+1. Ishara, kamwe halisi. Vighairi vilivyowekwa kimakusudi: kiweko chenye giza kila wakati na `STATUS_HEX` (`src/shared/constants/statusColors.ts`), kioo kilichotatuliwa cha ubao wa hali ya kit kwa wapiga simu wanaohitaji heksi halisi. Paleti za kategoria sio ubaguzi tena: zinaendesha kwenye tokeni tano za chati za kit (`--color-chart-1..5`) kupitia `src/shared/utils/categoricalPalette.ts` na, kwa mikakati ya kuelekeza, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; kingo za ReactFlow na turubai ya okestra ilisoma vigeu vya `--orch-status-*` vinavyofahamu mandhari (`src/shared/components/flow/edgeStyles.ts`).
+2. Usiwahi kiraka `packages/ui-kit/src` kwa mkono: landanisha na `scripts/dev/sync-ui-kit.sh <commit>`; lango la dhamira ya awali `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) hushindwa kwa baiti yoyote ambayo inatofautiana na ahadi iliyobandikwa juu ya mkondo (huruka na onyo wakati clone ya juu ya mkondo, `UI_KIT_CLONE` au `_references/cheaper-inference-ui-kit`, haipo). Seti inapokosa kitu, fanyia kazi kwenye adapta au skrini na uulize juu ya mkondo.
+3. Chaguo-msingi za maandishi ya Kit ni Kiingereza (`label = "Loading"`, `loadingLabel = "Loading table"`...) - pitisha mifuatano iliyotafsiriwa kutoka `useTranslations(...)` wakati wowote kijenzi cha vifaa kinaonyesha maandishi.
+4. Huduma za Tailwind hushinda madarasa ya vijenzi vya vifaa (kiti kinatangaza `@layer theme, base, components, utilities` na sheria zake zinaishi `components`) - tumia huduma kwa nafasi na mpangilio, sio kupaka rangi tena vijenzi vya sarufi.
+5. Vichwa: `.ci-heading` kwa vichwa vya kurasa na sehemu; `.ci-dashboard-display` kwa maandishi makubwa na machache tu ya onyesho kama vile msimbo wa hali ya ukurasa wa hitilafu. Wote hutumia Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` hulinda upitishaji wa vifaa: hakuna muda wa kuunganisha nyenzo chini ya `src/app` au `src/shared/components`; katika mti wa dashibodi (`src/app/(dashboard)` na `src/shared/components`) hakuna `<select>` mbichi , `<textarea>` au `<table>` na hakuna `role="dialog"` iliyoviringishwa kwa mkono nje ya vighairi vilivyoorodheshwa (tawi la asili la adapta ya `Select`, `RequestLoggerDetail`); kila `<button>` mbichi au `<input>` kuna haja ya maoni yenye `kit-exception:` (pamoja na sababu) inayoishia kwa zaidi ya mistari 3 juu yake; rangi za palette na lahaja za `dark:` katika faili za orodha za majaribio pekee.
+7. Thibitisha mandhari na eneo la kutazama la 390 px kabla ya PR (picha za skrini); `tests/e2e/a11y.spec.ts` inaendesha shoka.
 
 ## 3. Kuongeza skrini
 
@@ -154,41 +125,16 @@ imports za relative). Kisha: kagua `git diff packages/ui-kit`, fanya ukaguzi wa 
 usage na endpoint katika mandhari zote mbili, endesha `npm run check:ui-kit-snapshot` na `npm run test:vitest:ui`, na
 fungua PR ukiambatanisha changelog ya upstream.
 
-## 6. Michoro ya README
+## 6. michoro ya README
 
-Michoro kumi na miwili ambayo `README.md` ya mzizi huipachika (`docs/diagrams/*.svg`) ni kit kilichotumika kwenye picha
-tuli, na inazalishwa, haichorwi kwa mkono: faili 13 za kizalishaji katika `scripts/docs/gen-readme-*.mjs`
-(michoro kumi na miwili pamoja na kiendeshaji `gen-readme-diagrams.mjs`) na vipimo 12 vya kupitwa na wakati katika
-`tests/unit/docs/readme-*-svg.test.ts`, kimoja kwa kila mchoro, kila kimoja kikilinganisha faili iliyocommitwa
-baiti kwa baiti na matokeo ya kizalishaji chake (kazi `test-unit`).
+Michoro kumi na mbili ambayo mzizi `README.md` hupachikwa (`docs/diagrams/*.svg`) ni kifurushi kinachotumika kwa picha tuli, na hutolewa, si kuchorwa kwa mkono: faili 13 za jenereta kwa `scripts/docs/gen-readme-*.mjs` (michoro kumi na mbili pamoja na kiendeshi `gen-readme-diagrams.mjs` ) na vipimo 12 vya kudumaa kwa `tests/unit/docs/readme-*-svg.test.ts`, moja kwa kila mchoro, ikitengeneza faili ya byte- `test-unit`)
 
-- **Tokeni.** `scripts/docs/readme-diagram-theme.mjs` hunakili paleti kutoka `packages/ui-kit/src/ci-tokens.css`
-  (inathibitishwa kulingana na faili hiyo na `tests/unit/docs/readme-diagram-theme.test.ts`) na hufafanua majukumu ya maandishi kwenye
-  nyuso za kit — Instrument Serif kwa maonyesho, Inter kwa maandishi ya UI, IBM Plex Mono kwa takwimu na msimbo,
-  vifurushi vilevile vya `@fontsource` ambavyo `src/app/globals.css` hupakia kwa ajili ya dashibodi. Thamani za mwanga ziko kwenye
-  `:root`, thamani za giza nyuma ya `prefers-color-scheme: dark`, ndani ya faili, hivyo kila picha hufuata mpango wa
-  mtazamaji kwenye GitHub.
-- **Fonti.** `scripts/docs/readme-fonts.mjs` hupunguza faili hizo za woff2 hadi glifu pekee ambazo kila mchoro huchora na
-  kuzipachika kama `@font-face` `data:` URI — njia pekee ambayo taipografia ya kit hufikia picha ya README, kwa kuwa
-  GitHub Markdown haubebi CSS na proksi ya camo huzuia kila fetch ya nje. Seti ndogo ni za Kilatini tu;
-  glifu za alama zinazorudia stack ya mfumo huruhusiwa moja moja katika `SYMBOL_FALLBACKS`, na glifu
-  yoyote nyingine isiyofunikwa hutupa kosa.
-- **Kuzalisha upya.** `npm run docs:readme-diagrams` huandika upya zote kumi na mbili kwa mpangilio wa README na kuchapisha mstari mmoja kwa
-  faili pamoja na ukubwa wake. Kizalishaji kimoja pia huendeshwa peke yake (`node scripts/docs/gen-readme-<name>.mjs`;
-  `free-tier-budget` inahitaji `node --import tsx/esm` kwa sababu takwimu zake zinatoka kwa kipaki cha katalogi hai katika
-  `open-sse/config/freeModelCatalog.ts`; athari ya CI kwa mabadiliko ya katalogi iko katika
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commit kizalishaji na SVG pamoja.
-- **Uthibitisho.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` hurender faili jinsi GitHub inavyoitoa
-  (tagi ya `<img>`, `Content-Security-Policy` ya camo, `image/svg+xml`), huchukua fremu ya mwanga na fremu ya giza
-  na kuripoti maombi ya fonti za nje ambayo ukurasa ulifanya (lazima yawe 0).
-- **Bajeti.** Chini ya 200 KB kwa faili (kila kipimo cha kupitwa na wakati huthibitisha hilo); 500 KB ni kikomo cha juu kabisa kwa picha
-  yoyote ya README (kanuni ya kithibitishi cha studio ya SVG).
-- **Nakala haijabadilishwa, takwimu kutoka kwa gate.** Rebrand ulibadilisha aina ya herufi na paleti, si maneno: kila kizalishaji
-  hubeba nakala ya mchoro wake katika constant ya `*_COPY` (au huitunga kutoka kwa katalogi hai) ambayo ni
-  maandishi yanayochorwa na pia ingizo la kupunguza fonti. Takwimu rasmi hubaki katika nodi za `<text>`, zikisomwa na `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`); vipimo vya kupitwa na wakati vya michoro ambayo gate huisoma pia huendesha
-  vithibitishi vyake kwenye faili iliyozalishwa, hivyo takwimu inayopotea mbali na msimbo hufeli kipimo — rekebisha
-  chanzo ambacho gate huisoma, kamwe si namba ndani ya kizalishaji.
+- **Ishara.** `scripts/docs/readme-diagram-theme.mjs` kunakili ubao kutoka `packages/ui-kit/src/ci-tokens.css` (imebandikwa dhidi ya faili hiyo na `tests/unit/docs/readme-diagram-theme.test.ts`) na kufafanua majukumu ya maandishi kwenye nyuso za awali za kifaa - Ala Serif kwa ajili ya kuonyesha, Inter kwa maandishi UI, IBM Plex Mono kwa takwimu na msimbo - kutoka kwa vifurushi vya `@fontsource` (dashibodi yenyewe hutumia kit60 cha kit60). Thamani nyepesi hukaa kwenye `:root`, thamani nyeusi nyuma ya `prefers-color-scheme: dark`, ndani ya faili, kwa hivyo kila picha ifuate mpango wa mtazamaji kwenye GitHub.
+- **Fonti.** `scripts/docs/readme-fonts.mjs` huweka faili hizo woff2 kwa glyphs kila mchoro huchora na kuzipachika kama `@font-face` `data:` URIs - njia pekee ya uchapaji wa kit kufikia picha README, kwani GitHub Markdown haibebi CSS na proksi ya camo huzuia kila uchotaji wa nje. Viseti vidogo ni vya Kilatini pekee; glyphs za ishara zinazorudi kwenye safu ya mfumo zinaruhusiwa moja baada ya nyingine `SYMBOL_FALLBACKS`, na glyph nyingine yoyote ambayo haijafunikwa.
+- **Tengeneza upya.** `npm run docs:readme-diagrams` huandika upya zote kumi na mbili kwa mpangilio README na kuchapisha mstari mmoja kwa kila faili na saizi yake. Jenereta moja pia hujiendesha yenyewe (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` inahitaji `node --import tsx/esm` kwa sababu takwimu zake hutoka kwa kipakiaji cha orodha cha moja kwa moja katika `open-sse/config/freeModelCatalog.ts`; tokeo la CI la mabadiliko ya katalogi ni `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Weka jenereta na SVG pamoja.
+- **Ushahidi.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` hupeana faili jinsi GitHub inavyoitumikia ( `<img>` tag, camo's `Content-Security-Policy`, `image/svg+xml`), inanasa mwanga na fremu nyeusi na kuripoti maombi ya fonti ya nje ambayo ukurasa ulifanywa (lazima iwe 0).
+- **Bajeti.** Chini ya KB 200 kwa kila faili (kila mtihani wa kudumaa huithibitisha); 500 KB ndio kofia ngumu ya picha yoyote README (kanuni ya kihalalishaji cha studio ya SVG ).
+- **Nakala bila kubadilika, hesabu kutoka kwa lango.** Chapa mpya ilibadilisha aina na ubao, si maneno: kila jenereta hubeba nakala ya mchoro wake katika `*_COPY` mara kwa mara (au huiunda kutoka kwa orodha ya moja kwa moja) ambayo ni maandishi yaliyochorwa na ingizo la fonti ndogo. Takwimu za kanuni hukaa katika nodes `<text>`, zilizosomwa na `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); vipimo vya udumavu vya michoro ambayo lango linasoma pia huendesha viidhinishi vyake kwenye faili iliyozalishwa, kwa hivyo takwimu inayoteleza kutoka kwa msimbo haifaulu jaribio - rekebisha chanzo ambacho lango linasoma, kamwe nambari kwenye jenereta.
 
 ## 7. Faharasa ya marejeleo
 

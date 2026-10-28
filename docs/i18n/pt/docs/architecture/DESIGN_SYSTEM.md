@@ -4,13 +4,7 @@
 
 ---
 
-> **Estado:** o dashboard é construído sobre o **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), incorporado
-> como o workspace `packages/ui-kit` (`@omniroute/ui-kit`; o snapshot upstream está fixado em
-> `packages/ui-kit/UPSTREAM.md` e protegido por `npm run check:ui-kit-snapshot`). Light é o tema
-> canónico; a preferência predefinida é `system`. A cor de destaque é Keak lime (`--ci-color-accent`). Inter
-> (letter-spacing 0, `--ci-letter-spacing-ui`) é a família da UI, Instrument Serif apenas para texto de
-> exibição grande e esparso (`.ci-dashboard-display`), IBM Plex Mono para código — todas autoalojadas através das
-> importações `@fontsource/*` no topo de `src/app/globals.css`. Cada ícone é um glifo Lucide.
+> **Estatuto:** o painel é construído no** Kit Keak CI UI** (`@keak/cheaper-inference-ui-kit`), vendido como o espaço de trabalho `packages/ui-kit` (`@omniroute/ui-kit`; o instantâneo a montante é fixado em `packages/ui-kit/UPSTREAM.md` e protegido por `npm run check:ui-kit-snapshot`). A luz é o tema canónico; a preferência por defeito é `system`. O sotaque é Keak lime (`--ci-color-accent`). Switzer é a única família para UI, display e texto de código (`--ci-font-ui`; `--ci-font-display` e `--ci-font-mono` resolvem isso), auto-hospedado pelo próprio kit (`packages/ui-kit/src/ci-fonts.css`, importado por `ci-tokens.css`). Cada ícone é um glifo Lucide.
 
 ## 1. Onde as coisas vivem
 
@@ -81,35 +75,13 @@
 
 ## 2. Regras
 
-1. Tokens, nunca literais. Exceções mantidas propositadamente: o terminal de consola sempre escuro e o
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), o espelho em hexadecimal resolvido da paleta
-   de estados do kit para os chamadores que precisam de um hexadecimal literal. As paletas categóricas
-   já não são exceção: utilizam os cinco tokens de gráficos do kit (`--color-chart-1..5`) através de
-   `src/shared/utils/categoricalPalette.ts` e, para estratégias de encaminhamento,
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; as arestas do ReactFlow e a tela de
-   orquestração leem as variáveis `--orch-status-*` sensíveis ao tema
-   (`src/shared/components/flow/edgeStyles.ts`).
-2. Nunca alterar `packages/ui-kit/src` manualmente: sincronizar com `scripts/dev/sync-ui-kit.sh <commit>`;
-   a verificação de pré-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) falha em qualquer
-   byte que difira do commit upstream fixado (é ignorada com um aviso quando o clone upstream,
-   `UI_KIT_CLONE` ou `_references/cheaper-inference-ui-kit`, está ausente). Quando o kit não tem algo,
-   contorna-se no adaptador ou no ecrã e pede-se ao upstream.
-3. Os textos predefinidos do kit estão em inglês (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
-   passar strings traduzidas de `useTranslations(...)` sempre que um componente do kit renderiza texto.
-4. As utilidades do Tailwind prevalecem sobre as classes dos componentes do kit (o kit declara
-   `@layer theme, base, components, utilities` e as suas regras vivem em `components`) — usar utilidades
-   para espaçamento e layout, não para recolorir componentes do kit.
-5. Títulos: `.ci-heading` (Inter, sem tracking) para títulos de página e de secção; `.ci-dashboard-display`
-   (Instrument Serif) apenas para texto de destaque grande e esparso, como o código de estado da página de erro.
-6. `tests/unit/dashboard-kit-sweep.test.ts` salvaguarda a adoção do kit: nenhum span de ligadura Material em
-   `src/app` ou `src/shared/components`; na árvore do dashboard (`src/app/(dashboard)` e
-   `src/shared/components`) nenhum `<select>`, `<textarea>` ou `<table>` em bruto e nenhum
-   `role="dialog"` feito à mão fora das exceções listadas (o ramo nativo do adaptador `Select`,
-   `RequestLoggerDetail`); cada `<button>` ou `<input>` em bruto aí precisa de um comentário contendo
-   `kit-exception:` (com a razão) que termine no máximo 3 linhas acima; matizes da paleta e variantes
-   `dark:` apenas nos ficheiros que o teste lista.
-7. Verificar ambos os temas e o viewport de 390 px antes de um PR (capturas de ecrã); `tests/e2e/a11y.spec.ts`
-   executa o axe.
+1. Tokens, nunca literais. Exceções mantidas propositadamente: o terminal de consola sempre escuro e `STATUS_HEX` (`src/shared/constants/statusColors.ts`), o espelho hexadecimal resolvido da paleta de estado do kit para os chamadores que necessitam de um hexadecimal literal. As paletas categóricas já não são exceção: utilizam os cinco tokens gráficos do kit (`--color-chart-1..5`) até `src/shared/utils/categoricalPalette.ts` e, para as estratégias de encaminhamento, `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; As arestas ReactFlow e o ecrã de orquestração leem as variáveis `--orch-status-*` com reconhecimento de tema (`src/shared/components/flow/edgeStyles.ts`).
+2. Nunca corrija `packages/ui-kit/src` manualmente: sincronize com `scripts/dev/sync-ui-kit.sh <commit>`; o gate de pré-confirmação `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) falha em qualquer byte que seja diferente do commit upstream fixado (salta com um aviso quando o clone upstream, `UI_KIT_CLONE` ou `_references/cheaper-inference-ui-kit`, está ausente). Quando falta alguma coisa no kit, contorne-o no adaptador ou no ecrã e peça ao upstream.
+3. Os padrões de texto do kit são inglês (`label = "Loading"`, `loadingLabel = "Loading table"`…) — passe strings traduzidas do `useTranslations(...)` sempre que um componente do kit renderiza texto.
+4. Os utilitários Tailwind vencem as classes de componentes do kit (o kit declara `@layer theme, base, components, utilities` e as suas regras estão em `components`) - utilize utilitários para espaçamento e layout, não para recolorir os componentes do kit.
+5. Cabeçalhos: `.ci-heading` para títulos de páginas e secções; `.ci-dashboard-display` apenas para texto de visualização grande e esparso, como o código de estado da página de erro. Ambos usam o Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` protege a adopção do kit: não há extensão de ligadura de material sob `src/app` ou `src/shared/components`; na árvore do painel (`src/app/(dashboard)` e `src/shared/components`) nenhum `<select>`, `<textarea>` ou `<table>` bruto e nenhum `role="dialog"` enrolado manualmente fora das exceções listadas (o branch nativo do adaptador `Select`, `RequestLoggerDetail`); todo `<button>` ou `<input>` em bruto necessita de um comentário contendo `kit-exception:` (com o motivo) terminando no máximo 3 linhas acima dele; tons de paleta e variantes `dark:` apenas nos ficheiros das listas de teste.
+7. Verifique os temas e a janela de visualização de 390 px antes de um PR (capturas de ecrã); `tests/e2e/a11y.spec.ts` executa o machado.
 
 ## 3. Adicionar um ecrã
 
@@ -150,42 +122,16 @@ importações relativas). Depois: revê `git diff packages/ui-kit`, faz uma veri
 combos, usage e endpoint em ambos os temas, executa `npm run check:ui-kit-snapshot` e `npm run test:vitest:ui`, e
 abre o PR com o changelog upstream.
 
-## 6. Diagramas do README
+## 6. diagramas README
 
-Os doze diagramas que o `README.md` da raiz incorpora (`docs/diagrams/*.svg`) são o kit aplicado a uma imagem
-estática, e são gerados, não desenhados à mão: 13 ficheiros geradores em `scripts/docs/gen-readme-*.mjs`
-(doze diagramas mais o controlador `gen-readme-diagrams.mjs`) e 12 testes de desatualização em
-`tests/unit/docs/readme-*-svg.test.ts`, um por diagrama, cada um comparando byte a byte o ficheiro commitado com a
-saída do seu gerador (job `test-unit`).
+Os doze diagramas que o `README.md` raiz incorpora (`docs/diagrams/*.svg`) são o kit aplicado a uma imagem estática e são gerados, não desenhados à mão: 13 ficheiros geradores em `scripts/docs/gen-readme-*.mjs` (doze diagramas mais o driver `gen-readme-diagrams.mjs` ) e 12 testes de inatividade em `tests/unit/docs/readme-*-svg.test.ts`, um por diagrama, cada byte comparando o ficheiro confirmado com a saída do seu gerador (job `test-unit`).
 
-- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` copia a paleta de `packages/ui-kit/src/ci-tokens.css`
-  (fixado contra esse ficheiro por `tests/unit/docs/readme-diagram-theme.test.ts`) e define os papéis de texto nas
-  fontes do kit — Instrument Serif para display, Inter para texto de UI, IBM Plex Mono para números e código, os
-  mesmos pacotes `@fontsource` que `src/app/globals.css` carrega para o dashboard. Os valores claros ficam em
-  `:root`, os valores escuros atrás de `prefers-color-scheme: dark`, dentro do ficheiro, para que cada imagem siga
-  o esquema do visualizador no GitHub.
-- **Fontes.** `scripts/docs/readme-fonts.mjs` cria subconjuntos desses ficheiros woff2 com os glifos que cada diagrama
-  desenha e incorpora-os como URIs `data:` em `@font-face` — a única forma de a tipografia do kit chegar a uma imagem
-  do README, já que o GitHub Markdown não transporta CSS e o proxy camo bloqueia todos os pedidos externos. Os
-  subconjuntos são apenas latinos; os glifos de símbolos que recorrem à pilha do sistema são permitidos um a um em
-  `SYMBOL_FALLBACKS`, e qualquer outro glifo não coberto lança um erro.
-- **Regenerar.** `npm run docs:readme-diagrams` reescreve os doze na ordem do README e imprime uma linha por
-  ficheiro com o seu tamanho. Um único gerador também corre isoladamente (`node scripts/docs/gen-readme-<name>.mjs`;
-  `free-tier-budget` precisa de `node --import tsx/esm` porque os seus números vêm do carregador de catálogo em tempo
-  real em `open-sse/config/freeModelCatalog.ts`; a consequência no CI de uma alteração ao catálogo está em
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Commita o gerador e o SVG em conjunto.
-- **Prova.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderiza um ficheiro da forma como o GitHub o
-  serve (uma tag `<img>`, o `Content-Security-Policy` do camo, `image/svg+xml`), captura um frame claro e um escuro
-  e reporta os pedidos de fontes externas que a página fez (têm de ser 0).
-- **Orçamento.** Menos de 200 KB por ficheiro (cada teste de desatualização o verifica); 500 KB é o limite máximo
-  para qualquer imagem do README (a regra do validador do estúdio de SVG).
-- **Texto inalterado, números vindos do gate.** O rebrand mudou tipografia e paleta, não as palavras: cada gerador
-  transporta o texto do seu diagrama numa constante `*_COPY` (ou constrói-o a partir do catálogo em tempo real) que é
-  simultaneamente o texto desenhado e a entrada para o subconjunto de fontes. Os números canónicos ficam em nós
-  `<text>`, lidos por `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`); os testes de desatualização dos diagramas que o gate lê também correm
-  os seus validadores no ficheiro gerado, por isso um número que se desvie do código falha o teste — corrige a
-  fonte que o gate lê, nunca o número no gerador.
+- **Fichas.** `scripts/docs/readme-diagram-theme.mjs` copia a paleta de `packages/ui-kit/src/ci-tokens.css` (fixada nesse ficheiro por `tests/unit/docs/readme-diagram-theme.test.ts`) e define as funções de texto nas faces anteriores do kit - Instrument Serif para exibição, Inter para texto UI, IBM Plex Mono para figuras e código - dos pacotes `@fontsource` (o próprio painel usa o Switzer do kit desde o kit 0.0.66). Os valores claros estão em `:root`, os valores escuros atrás de `prefers-color-scheme: dark`, dentro do ficheiro, de modo a que cada imagem siga o esquema do visualizador em GitHub.
+- **Fontes.** `scripts/docs/readme-fonts.mjs` subdivide estes ficheiros woff2 nos glifos que cada diagrama desenha e incorpora-os como `@font-face` `data:` URIs - a única forma de a tipografia do kit atingir uma imagem README, uma vez que GitHub Markdown não carrega CSS e o proxy camo bloqueia todas as pesquisas externas. Os subconjuntos são apenas latinos; os glifos de símbolos que regressam à pilha do sistema são permitidos um a um em `SYMBOL_FALLBACKS` e qualquer outro glifo descoberto.
+- **Regenerado.** `npm run docs:readme-diagrams` reescreve todos os doze pela ordem README e imprime uma linha por ficheiro com o seu tamanho. Um único gerador também funciona sozinho (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` precisa `node --import tsx/esm` porque os seus números vêm do carregador de catálogo activo em `open-sse/config/freeModelCatalog.ts`; a consequência CI de uma mudança de catálogo está em `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Confirme o gerador e o SVG em conjunto.
+- **Prova.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderiza um ficheiro da forma que GitHub o serve (uma tag `<img>`, camo's `Content-Security-Policy`, `image/svg+xml`), captura um frame claro e um escuro e reporta os pedidos de fonte externa que a página fez (deve ser 0).
+- **Orçamento.** Menos de 200 KB por ficheiro (cada teste de desatualização afirma isso); 500 KB é o limite máximo para qualquer imagem README (a regra do validador do SVG studio).
+- **Cópia inalterada, conta a partir do portão.** A reformulação da marca alterou o tipo e a paleta, não as palavras: cada gerador carrega a cópia do seu diagrama numa constante `*_COPY` (ou constrói-a a partir do catálogo ativo) que é tanto o texto desenhado como a entrada do subconjunto de tipos de letra. As figuras canónicas ficam nos nós `<text>`, lidas por `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); os testes de desatualização dos diagramas que a porta lê também executam os seus validadores no ficheiro gerado, pelo que uma figura que se desvia do código falha o teste - corrija a fonte que a porta lê, nunca o número no gerador.
 
 ## 7. Índice de referência
 
