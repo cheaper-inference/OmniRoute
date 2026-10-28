@@ -17,7 +17,6 @@
  */
 
 import { hasOllamaPurchasedCredits } from "@omniroute/open-sse/services/ollamaPurchasedCredits.ts";
-import { getUsageForProvider } from "@omniroute/open-sse/services/usage.ts";
 import { getCachedProviderConnectionById } from "@/lib/db/readCache";
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
@@ -53,19 +52,21 @@ import {
   SUBSCRIPTION_QUOTA_COOLDOWN_MS,
 } from "@omniroute/open-sse/services/quotaTextCooldowns.ts";
 import type { ClaudeQuotaMetadata } from "@omniroute/open-sse/services/usage/quota.ts";
+import { getRequestQuotaCacheState as getState } from "./quotaCacheReadView";
 import {
   EXHAUSTED_MAX_PARK_MS,
-  getQuotaCacheState as getState,
   type QuotaCacheEntry,
   type QuotaInfo,
   unmarkQuotaHealthy,
   isQuotaHealthy,
 } from "./quotaCacheState";
 import { isCodexPaidCreditsEnabled } from "@/lib/providers/codexPaidCredits";
+import { updateQuotaBurnMetrics } from "./quotaBurnMetrics";
 
 // Keep markQuotaHealthy's public import path; the remaining leaf state stays internal.
 export { markQuotaHealthy } from "./quotaCacheState";
 
+export { normalizeQuotas, isExhausted, earliestResetAt, capParkWindow };
 // ─── Types ──────────────────────────────────────────────────────────────────
 
 interface QuotaWindowStatus {
@@ -287,7 +288,7 @@ function normalizeQuotas(rawQuotas: Record<string, unknown>): Record<string, Quo
   return result;
 }
 
-function normalizeConnectionQuotas(rawQuotas: Record<string, unknown>, provider: string) {
+export function normalizeConnectionQuotas(rawQuotas: Record<string, unknown>, provider: string) {
   const quotas = normalizeQuotas(rawQuotas);
   // Preserve unknown aggregate headroom through snapshots; raw usage retains the plan fraction.
   if (hasOllamaPurchasedCredits({ quotas: rawQuotas }, provider)) {
@@ -563,8 +564,8 @@ const BLOCKING_CONNECTION_SCOPED_CLAUDE_QUOTA: ClaudeQuotaScopeDecision = {
   cooldownMs: null,
 };
 
-// An explicit Claude model-credit entitlement failure is scoped to that model
-// even without a usable quota snapshot. Avoid parking sibling models/connection.
+// An explicit Claude model-credit entitlement failure is model scoped even
+// without a usable quota snapshot; never park unrelated sibling models.
 const MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT: ClaudeQuotaScopeDecision = {
   scope: "model",
   evidence: "blocking",
@@ -656,9 +657,8 @@ export function getCachedClaudeQuotaScopeDecision(input: {
     );
   }
 
-  // The explicit upstream model entitlement is stronger scope evidence
-  // than a different model's cached quota. Keep the global blocker above
-  // authoritative and preserve matching model reset evidence above.
+  // Model-credit entitlement is stronger scope evidence than another
+  // model's cached quota, but cannot supersede a proven global blocker.
   if (modelCreditEntitlement) return MODEL_SCOPED_CLAUDE_CREDIT_ENTITLEMENT;
 
   if (scopedWindows.length > 0) {
@@ -779,6 +779,13 @@ export function setQuotaCache(
     exhausted,
     // #14359 — cap the park; keep the prior deadline while the streak continues (monitor rewrites must not extend it).
     nextResetAt: exhausted ? preserveParkDeadline(earliestResetAt(quotas), prior) : null,
+    burnMetrics: updateQuotaBurnMetrics(
+      prior?.quotas,
+      prior?.fetchedAt,
+      prior?.burnMetrics,
+      quotas,
+      Date.now()
+    ),
   };
   getState().cache.set(connectionId, entry);
 
@@ -1114,9 +1121,8 @@ async function refreshEntry(entry: QuotaCacheEntry) {
     }
 
     const proxyInfo = await resolveProxyForConnection(entry.connectionId);
-    const usage = await runWithProxyContext(proxyInfo?.proxy || null, () =>
-      getUsageForProvider(connection)
-    );
+    const getUsage = (await import("@omniroute/open-sse/services/usage.ts")).getUsageForProvider;
+    const usage = await runWithProxyContext(proxyInfo?.proxy || null, () => getUsage(connection));
 
     if (usage?.quotas) {
       setQuotaCache(
