@@ -56,6 +56,12 @@ export interface SearchProviderConfig {
   includedResults?: number;
   extraResultCost?: number;
   /**
+   * Bill `costPerQuery` (or the mode price) once per started block of this many
+   * returned results, with at least one block per call (Firecrawl: 2 credits per
+   * 10 results, rounded up).
+   */
+  resultBlockSize?: number;
+  /**
    * Per returned result, added when the request body sets `contents.<key>` to a
    * truthy value (e.g. Exa bills `contents.summary` per summarized result).
    */
@@ -202,6 +208,9 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "bearer",
     costPerQuery: 0.002,
+    // 2 credits per 10 results, rounded up (https://docs.firecrawl.dev/billing);
+    // $0.002 is those 2 credits at $0.001 each.
+    resultBlockSize: 10,
     freeMonthlyQuota: 1000,
     searchTypes: ["web", "news"],
     defaultMaxResults: 5,
@@ -234,6 +243,10 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "bearer",
     costPerQuery: 0.005,
+    // searchResults output: fast / standard $0.005, deep $0.05 per call:
+    // https://docs.linkup.so/pages/documentation/development/pricing
+    costByMode: { deep: 0.05 },
+    costModeField: "depth",
     freeMonthlyQuota: 1000,
     searchTypes: ["web"],
     defaultMaxResults: 5,
