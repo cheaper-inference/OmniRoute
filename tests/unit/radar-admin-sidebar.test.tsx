@@ -5,6 +5,11 @@ import { createRoot, type Root } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 process.env.NEXT_PUBLIC_OMNIROUTE_E2E_MODE = "1";
+// Render budget, not an import budget. Measured in review: the kit Sidebar mounts about 1.3–2×
+// slower than the legacy one (SidebarMenuButton asChild wrapping, a Radix tooltip per rail item);
+// under 5 s at host load 10–16, 9–16 s for the slowest cases at load 25–48. 30 s is headroom for
+// that load, not a mask for an eager-render bug.
+vi.setConfig({ testTimeout: 30_000 });
 
 vi.mock("next-intl", () => ({
   useTranslations: () => {
@@ -20,6 +25,21 @@ vi.mock("next/navigation", () => ({
 
 function jsonResponse(body: unknown) {
   return { ok: true, status: 200, json: async () => body } as Response;
+}
+
+// The Sidebar renders inside the kit SidebarProvider + kit <Sidebar> (as DashboardShell does).
+async function loadSidebar() {
+  const { SidebarProvider, Sidebar: KitSidebar } = await import("@omniroute/ui-kit/sidebar");
+  const { default: Sidebar } = await import("@/shared/components/Sidebar");
+  return function Harness() {
+    return (
+      <SidebarProvider>
+        <KitSidebar collapsible="icon">
+          <Sidebar />
+        </KitSidebar>
+      </SidebarProvider>
+    );
+  };
 }
 
 async function flushSettingsFetch() {
@@ -57,7 +77,7 @@ describe("G17 Radar Admin owner-only sidebar link", () => {
       "fetch",
       vi.fn(async () => jsonResponse({ radarEnabled: true }))
     );
-    const { default: Sidebar } = await import("@/shared/components/Sidebar");
+    const Sidebar = await loadSidebar();
 
     root = createRoot(container);
     await act(async () => {
@@ -79,7 +99,7 @@ describe("G17 Radar Admin owner-only sidebar link", () => {
         })
       )
     );
-    const { default: Sidebar } = await import("@/shared/components/Sidebar");
+    const Sidebar = await loadSidebar();
 
     root = createRoot(container);
     await act(async () => {
@@ -107,7 +127,7 @@ describe("G17 Radar Admin owner-only sidebar link", () => {
         })
       )
     );
-    const { default: Sidebar } = await import("@/shared/components/Sidebar");
+    const Sidebar = await loadSidebar();
 
     root = createRoot(container);
     await act(async () => {

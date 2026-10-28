@@ -4,7 +4,7 @@
  * deps, and the values the barrel reads afterwards leave through carry.
  */
 
-import { meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
+import { isUnpricedMeteredCost, meteredBudgetCost } from "@/lib/usage/meteredBudgetPolicy";
 import { readCpaAuthIndex } from "../chatCore/failureUsage.ts";
 
 import { createRoutingEvent, emitRoutingEvent } from "../../services/routing/index.ts";
@@ -89,7 +89,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     buildCacheUsageLogMeta,
     buildCostCtx,
     buildErrorBody,
-    calculateCost,
+    calculateCostDetailed,
     calibrationEstimatedInputTokens,
     claudePromptCacheLogMeta: _claudePromptCacheLogMeta,
     clientRawRequest,
@@ -112,6 +112,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     extractSessionAffinityKey,
     extractUsageFromResponse,
     finalBody: _finalBody,
+    geminiPromptCacheMode,
     finalizePendingScope,
     getCurrentConnectionId,
     getManagedLeaseFenceErrorCode,
@@ -127,6 +128,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     injectionResult,
     isCombo,
     isJsonRecord,
+    isScopedGeminiCacheTarget,
     isLocalStreamLifecycleError,
     isSemaphoreCapacityError,
     isServerOwnedToolLoopEnabled,
@@ -198,6 +200,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
     requestToolIdentityMap,
     stream,
     toolNameMap,
+    tokensCompressed,
     traceEnabled,
     videoBridgeObserved,
   } = deps;
@@ -679,7 +682,15 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       usage,
       toolLoopUsage != null
     );
-    const cacheUsageLogMeta = buildCacheUsageLogMeta(usage);
+    const cacheUsageLogMeta = buildCacheUsageLogMeta(
+      usage,
+      isScopedGeminiCacheTarget
+        ? {
+            mode: geminiPromptCacheMode,
+            compressionTokens: tokensCompressed || undefined,
+          }
+        : undefined
+    );
     if (usage && typeof usage === "object") {
       attachCompressionUsageReceiptAfterAnalytics(usage as Record<string, unknown>, "provider");
       if (provider === "gemini") {
@@ -782,9 +793,14 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         ? translatedResponse.usage
         : null;
     const costUsage = normalizeUsage(responseUsage);
-    const estimatedCost = costUsage
-      ? await calculateCost(provider, model, costUsage, { serviceTier: effectiveServiceTier })
-      : 0;
+    const costResult = costUsage
+      ? await calculateCostDetailed(provider, model, costUsage, {
+          serviceTier: effectiveServiceTier,
+        })
+      : null;
+    const estimatedCost = costResult?.costUsd ?? 0;
+    // A metered model with no price must not pass the dollar budget as $0.
+    const unpricedBudgetCost = isUnpricedMeteredCost(provider, costResult);
     const chatCostCtx = buildCostCtx(provider, model, usage, effectiveServiceTier, traceId);
 
     if (postCallGuardrails.blocked) {
@@ -804,13 +820,15 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         clientResponse: buildErrorBody(HTTP_STATUS.BAD_REQUEST, guardrailMessage),
         claudeCacheMeta: claudePromptCacheLogMeta,
         claudeCacheUsageMeta: cacheUsageLogMeta,
+        geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
         cacheSource: "upstream",
       });
       recordChatCallCost(
         apiKeyInfo,
         meteredBudgetCost(provider, estimatedCost),
         chatCostCtx,
-        false
+        false,
+        unpricedBudgetCost
       );
       log?.warn?.(
         "GUARDRAIL",
@@ -901,6 +919,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         clientResponse: malformedClientBody,
         claudeCacheMeta: claudePromptCacheLogMeta,
         claudeCacheUsageMeta: cacheUsageLogMeta,
+        geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
         cacheSource: "upstream",
       });
       persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "malformed_translated_response");
@@ -924,6 +943,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           status: HTTP_STATUS.BAD_GATEWAY,
           finishReason: routingFinishReason(translatedResponse),
           connectionId: credentials?.connectionId ?? null,
+          apiKeyId: apiKeyInfo?.id ?? null,
         })
       );
       return {
@@ -984,9 +1004,16 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       clientResponse: translatedResponse,
       claudeCacheMeta: claudePromptCacheLogMeta,
       claudeCacheUsageMeta: cacheUsageLogMeta,
+      geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
       cacheSource: "upstream",
     });
-    recordChatCallCost(apiKeyInfo, meteredBudgetCost(provider, estimatedCost), chatCostCtx, true);
+    recordChatCallCost(
+      apiKeyInfo,
+      meteredBudgetCost(provider, estimatedCost),
+      chatCostCtx,
+      true,
+      unpricedBudgetCost
+    );
 
     // === Quota Share POST-hook (B/F7) — fire-and-forget, fail-open ===
     await scheduleQuotaShareConsumption({
@@ -1077,6 +1104,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         status: 200,
         finishReason: routingFinishReason(translatedResponse),
         connectionId: credentials?.connectionId ?? null,
+        apiKeyId: apiKeyInfo?.id ?? null,
       })
     );
 

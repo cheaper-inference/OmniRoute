@@ -1,0 +1,1 @@
+- **fix(embeddings):** Preserve Gemini native `usageMetadata.promptTokenCount` in OpenAI-compatible `prompt_tokens` and `total_tokens` for single and batch embeddings, without double-counting batch vectors. Missing or invalid counts safely remain zero; embedding values and indexes are unchanged (#18244).

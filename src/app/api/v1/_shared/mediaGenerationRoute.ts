@@ -3,6 +3,7 @@ import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 
 import { attachOmniRouteMetaHeaders } from "@/domain/omnirouteResponseMeta";
 import { calculateModalCost } from "@/lib/usage/costCalculator";
+import { recordModalCallCost } from "@/domain/costRules";
 import { generateRequestId } from "@/shared/utils/requestId";
 import { toJsonErrorPayload } from "@/shared/utils/upstreamError";
 import { v1ImageGenerationSchema } from "@/shared/validation/schemas";
@@ -114,6 +115,7 @@ export async function successfulMediaGenerationResponse({
   duration,
   strategy,
   fallbackAttempts,
+  apiKeyId,
 }: {
   result: { data: unknown };
   billingMode: "audio" | "video";
@@ -126,9 +128,12 @@ export async function successfulMediaGenerationResponse({
   // single-model path, where neither is meaningful.
   strategy?: string;
   fallbackAttempts?: number;
+  /** The caller's API key: the priced call is charged to its dollar budget. */
+  apiKeyId?: string | null;
 }) {
   const seconds = Number(duration) || 0;
   const costUsd = await calculateModalCost(billingMode, provider, model, { seconds });
+  recordModalCallCost(apiKeyId, { provider, model, costUsd });
   const headers = new Headers({ "Content-Type": "application/json" });
   attachOmniRouteMetaHeaders(headers, {
     provider,

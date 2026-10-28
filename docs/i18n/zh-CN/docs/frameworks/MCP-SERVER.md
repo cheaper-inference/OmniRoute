@@ -66,6 +66,16 @@ curl -i \
 
 不具有 `manage` 作用域的密钥（或未提供 Bearer）会收到 `403 LOCAL_ONLY`。同级前缀 `/api/cli-tools/runtime/*` 被有意设计为不可绕过——请参阅[路由防护层级 — manage 作用域例外](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)。
 
+### Origin 校验
+
+通过鉴权后，所有发往 `/api/mcp/*` 的请求（包括传输端点和 `status`, `tools`, `audit`, `restart` 等管理路由）都会校验 `Origin` 头，无论调用方是谁（API key、CLI token、dashboard 会话，或关闭登录时的匿名回环访问）。这是 MCP Streamable HTTP 规范要求的 DNS rebinding 防护。
+
+- **没有 `Origin` 头** → 放行。OmniRoute CLI、SDK 和 IDE 客户端都不会发送该头。
+- **允许的 `Origin`** → 任意端口上的 `localhost` / `127.0.0.1` / `[::1]`，或 OmniRoute 自身的公开 origin：`OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`、可信反向代理转发的 origin（`OMNIROUTE_TRUST_PROXY`，仅在未配置 base URL 时生效），或直连的回环/局域网 IP 主机。单凭 `Host` 头永远不会让某个 origin 变为可信。
+- **其他任何 `Origin`（包括 `null`）** → `403`，响应体为 JSON-RPC 错误：`id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`。携带有效 CSRF token 的 dashboard 会话仍会放行，与其他 dashboard 写操作一致。
+
+部署在反向代理后的浏览器 MCP 客户端需要配置 `OMNIROUTE_PUBLIC_BASE_URL`；不提供其他 origin 的白名单。CORS 预检（`OPTIONS`）不校验 Origin，但随后的实际请求会校验。
+
 ## IDE 配置
 
 有关 Claude Desktop、Cursor、Cline 及兼容 MCP 客户端的设置，请参阅 [MCP 客户端配置](../guides/SETUP_GUIDE.md#mcp-client-configuration)。

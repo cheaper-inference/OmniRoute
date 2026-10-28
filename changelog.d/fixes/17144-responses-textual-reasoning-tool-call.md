@@ -1,0 +1,1 @@
+- **fix(responses):** preserve tool calls when reasoning-tagged models emit `<think>` text and tool metadata in the same streamed chunk ([#17144](https://github.com/diegosouzapw/OmniRoute/pull/17144)) — thanks @Vaishnavi220506

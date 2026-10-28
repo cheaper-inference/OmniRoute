@@ -8,12 +8,18 @@
 
 **Tüm proje kuralları [`AGENTS.md`](AGENTS.md) dosyasında yer almaktadır** — her yapay zeka asistanı için tek doğruluk kaynağıdır (mimari, kurallar, testler, kalite kapıları, git iş akışı, 23 Katı Kural, PII öğrenimleri). Tamamını okuyun; buraya yeniden proje kuralları eklemeyin. Aşağıdaki her şey YALNIZCA Claude Code için geçerlidir — `AGENTS.md` içinde zaten tanımlanmış kuralların operasyonel ayrıntılarıdır.
 
-## Worktree İzolasyonu — Claude Code Özel Notları
+## Worktree izolasyonu — Claude Code özelinde
 
-Tam zorunlu worktree protokolü (hedef dal onayı, `.claude/worktrees/` kurallı yolu, `cp -al` node_modules, kaldırma kuralları) `AGENTS.md` → Git Workflow → "Worktree isolation" bölümündedir. Claude Code özel noktaları:
+Zorunlu worktree protokolünün tamamı (temel dal onayı, `.claude/worktrees/` standart yolu,
+`cp -al` node_modules, kaldırma kuralları)
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) dosyasındadır (`AGENTS.md` →
+Git Workflow → "Worktree isolation" bölümünde özetlenmiştir). Claude Code'a özgü noktalar:
 
-- Operatör daha önce belirtmediyse, hedef dalı `AskUserQuestion` (Katı Kural #19) ile onaylayın.
-- Yerel `EnterWorktree` aracını tercih edin — worktree'leri zaten `.claude/worktrees/` altında oluşturur (kurallı yol). Belgelenen `git worktree add` komutuyla worktree oluşturun, ardından `path` parametresi ile `EnterWorktree` çağırın.
+- Operatör size önceden söylemediyse, temel dalı `AskUserQuestion` aracılığıyla operatörden
+  teyit edin (Katı Kural #19).
+- Yerleşik `EnterWorktree` aracını tercih edin — worktree'leri zaten
+  `.claude/worktrees/` altında (standart yol) oluşturur. Worktree'yi belgelenen `git
+worktree add` komutuyla oluşturun, ardından `EnterWorktree`'i onun `path` değeriyle çağırın.
 
 ## Oturumlar Arası Güvenlik — Claude Code Özel Notları
 

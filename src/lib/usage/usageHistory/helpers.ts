@@ -36,6 +36,7 @@ export function mapUsageHistoryRow(row: unknown) {
     connectionId: toStringOrNull(r.connection_id),
     apiKeyId: toStringOrNull(r.api_key_id),
     apiKeyName: toStringOrNull(r.api_key_name),
+    billingTeamId: toStringOrNull(r.billing_team_id),
     serviceTier: normalizeServiceTier(r.service_tier),
     providerCredits: r.provider_credits ?? null,
     providerCostUsd: r.provider_cost_usd ?? null,

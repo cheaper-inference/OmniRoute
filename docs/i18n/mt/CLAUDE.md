@@ -11,16 +11,17 @@ assistent tal-IA (arkitettura, konvenzjonijiet, ittestjar, kontrolli tal-kwalit�
 tagħlimiet dwar il-PII). Aqrah kollu; terġax iżżid ir-regoli tal-proġett hawnhekk. Dak kollu li ġej japplika BISS
 għal Claude Code — irfinar operazzjonali tar-regoli diġà definiti f’`AGENTS.md`.
 
-## Iżolament tal-worktree — speċifiċitajiet ta’ Claude Code
+## Iżolament tal-worktree — Speċifiki għal Claude Code
 
-Il-protokoll obbligatorju sħiħ tal-worktree (konferma tal-fergħa bażi, il-path kanoniku
-`.claude/worktrees/`, `cp -al` għal node_modules, regoli tat-tneħħija) jinsab f’`AGENTS.md` → Git Workflow → "Worktree
-isolation". Punti speċifiċi għal Claude Code:
+Il-protokoll obbligatorju sħiħ tal-worktree (konferma tal-base branch, il-mogħdija kanonika
+`.claude/worktrees/`, `cp -al` node_modules, regoli tat-teardown) jinstab fi
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (mqassar f'`AGENTS.md` →
+Workflow tal-Git → "Iżolament tal-worktree"). Punti speċifiċi għal Claude Code:
 
-- Ikkonferma l-fergħa bażi mal-operatur permezz ta’ `AskUserQuestion` (Regola Stretta #19), sakemm
-  ma jkunx diġà qallek.
-- Ippreferi l-għodda nattiva `EnterWorktree` — din diġà toħloq worktrees taħt
-  `.claude/worktrees/` (il-path kanoniku). Oħloq il-worktree bil-kmand dokumentat `git
+- Ikkonferma l-base branch mal-operatur permezz ta' `AskUserQuestion` (Regola Stretta #19) sakemm
+  ma jkunux diġà qalulek.
+- Agħti preferenza lill-għodda nattiva `EnterWorktree` — diġà toħloq worktrees taħt
+  `.claude/worktrees/` (il-mogħdija kanonika). Oħloq il-worktree bil-kmand dokumentat `git
 worktree add`, imbagħad sejjaħ `EnterWorktree` bil-`path` tiegħu.
 
 ## Sikurezza bejn is-sessjonijiet — speċifiċitajiet ta’ Claude Code

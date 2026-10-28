@@ -64,7 +64,8 @@ describe("DistributeProxiesButton", () => {
   async function confirmDistribution(container: HTMLElement) {
     const trigger = container.querySelector("button") as HTMLButtonElement;
     await act(async () => trigger.click());
-    const confirm = Array.from(container.querySelectorAll("button")).find(
+    // The confirm dialog is a kit Dialog (Radix) since KEA-7886, portaled to document.body.
+    const confirm = Array.from(document.body.querySelectorAll("button")).find(
       (button) => button.textContent?.trim() === "Distribute proxies"
     );
     expect(confirm).toBeTruthy();
@@ -86,8 +87,8 @@ describe("DistributeProxiesButton", () => {
 
   it("shows swap_horiz icon in idle state", async () => {
     const { container } = await renderButton();
-    const icon = container.querySelector(".material-symbols-outlined");
-    expect(icon?.textContent).toBe("swap_horiz");
+    const icon = container.querySelector("svg.oi-icon");
+    expect(icon?.getAttribute("data-icon")).toBe("swap_horiz");
   });
 
   it("disables button when disabled prop is true", async () => {
@@ -119,8 +120,8 @@ describe("DistributeProxiesButton", () => {
     // Should show distributing state
     expect(button.textContent).toContain("Distributing...");
     expect(button.disabled).toBe(true);
-    const icon = container.querySelector(".material-symbols-outlined");
-    expect(icon?.textContent).toBe("sync");
+    const icon = container.querySelector("svg.oi-icon");
+    expect(icon?.getAttribute("data-icon")).toBe("sync");
 
     // Resolve the promise
     await act(async () => {
@@ -141,8 +142,8 @@ describe("DistributeProxiesButton", () => {
     });
 
     expect(button.textContent).toContain("Complete");
-    const icon = container.querySelector(".material-symbols-outlined");
-    expect(icon?.textContent).toBe("check");
+    const icon = container.querySelector("svg.oi-icon");
+    expect(icon?.getAttribute("data-icon")).toBe("check");
   });
 
   it("returns to idle state after complete timeout", async () => {
@@ -165,8 +166,8 @@ describe("DistributeProxiesButton", () => {
     });
 
     expect(button.textContent).toContain("Distribute Proxies");
-    const icon = container.querySelector(".material-symbols-outlined");
-    expect(icon?.textContent).toBe("swap_horiz");
+    const icon = container.querySelector("svg.oi-icon");
+    expect(icon?.getAttribute("data-icon")).toBe("swap_horiz");
   });
 
   it("returns to idle state on error", async () => {

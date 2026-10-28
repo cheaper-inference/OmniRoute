@@ -3,7 +3,10 @@
 import { useEffect, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 
-import { Button } from "@/shared/components";
+import { buttonVariants } from "@omniroute/ui-kit/button";
+import { Card } from "@/shared/components";
+import Icon from "@/shared/components/Icon";
+import { ViewerStatus } from "./ChangelogStates";
 import {
   fetchNewsPayload,
   listActiveNews,
@@ -36,69 +39,61 @@ export default function NewsViewer() {
   }, [locale]);
 
   if (loading) {
-    return (
-      <div className="flex justify-center py-20">
-        <span className="material-symbols-outlined animate-spin text-[32px] text-text-muted">
-          sync
-        </span>
-      </div>
-    );
+    return <ViewerStatus busy icon="sync" message={t("loadingNews")} />;
   }
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-text-muted">
-        <span className="material-symbols-outlined mb-4 text-[48px] text-red-500/50">
-          error_outline
-        </span>
-        <p>{t("announcementsLoadFailed")}</p>
-      </div>
+      <ViewerStatus tone="error" icon="error_outline" message={t("announcementsLoadFailed")} />
     );
   }
 
   if (news.length === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-text-muted">
-        <span className="material-symbols-outlined mb-4 text-[48px] opacity-50">
-          notifications_off
-        </span>
-        <p>{t("noAnnouncements")}</p>
-      </div>
-    );
+    return <ViewerStatus icon="notifications_off" message={t("noAnnouncements")} />;
   }
 
+  const dateFormat = new Intl.DateTimeFormat(locale, { dateStyle: "medium" });
+
   return (
-    <div className="space-y-8 p-8">
-      {news.map((announcement) => (
-        <article
-          key={announcement.id}
-          className="flex flex-col gap-6 border-l-4 border-primary pl-5 md:flex-row md:items-center md:pl-6"
-        >
-          <div className="flex size-14 shrink-0 items-center justify-center rounded-lg bg-primary/10">
-            <span className="material-symbols-outlined text-[30px] text-primary">
-              {announcement.icon}
-            </span>
-          </div>
+    <div className="flex flex-col gap-4">
+      {news.map((announcement) => {
+        const published = Date.parse(announcement.publishedAt);
+        return (
+          <Card key={announcement.id} padding="md">
+            <article className="flex flex-col gap-6 md:flex-row md:items-center">
+              <div className="flex size-14 shrink-0 items-center justify-center rounded-control bg-bg-subtle text-text-main">
+                <Icon name={announcement.icon} size={30} />
+              </div>
 
-          <div className="flex-1">
-            <h2 className="mb-2 text-xl font-bold text-text-main">{announcement.title}</h2>
-            <p className="max-w-2xl text-sm leading-relaxed text-text-muted">
-              {announcement.message}
-            </p>
-          </div>
+              <div className="flex-1">
+                {Number.isFinite(published) && (
+                  <time className="ci-eyebrow" dateTime={announcement.publishedAt}>
+                    {dateFormat.format(published)}
+                  </time>
+                )}
+                <h2 className="ci-heading mt-1 mb-2 text-xl">{announcement.title}</h2>
+                <p className="max-w-2xl text-sm leading-relaxed text-text-muted">
+                  {announcement.message}
+                </p>
+              </div>
 
-          {announcement.link && (
-            <div className="shrink-0 md:ml-auto">
-              <a href={announcement.link} target="_blank" rel="noopener noreferrer">
-                <Button variant="primary" className="gap-2">
-                  {announcement.linkLabel ?? t("learnMore")}
-                  <span className="material-symbols-outlined text-[18px]">arrow_forward</span>
-                </Button>
-              </a>
-            </div>
-          )}
-        </article>
-      ))}
+              {announcement.link && (
+                <div className="shrink-0 md:ml-auto">
+                  <a
+                    href={announcement.link}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={buttonVariants({ variant: "default" })}
+                  >
+                    {announcement.linkLabel ?? t("learnMore")}
+                    <Icon name="arrow_forward" size={18} />
+                  </a>
+                </div>
+              )}
+            </article>
+          </Card>
+        );
+      })}
     </div>
   );
 }

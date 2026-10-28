@@ -173,14 +173,14 @@ Scopes (v3.8): `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, 
 # Alle tests (unit + vitest + ecosysteem + e2e)
 npm run test:all
 
-# Eén testbestand (native Node.js-testrunner — de meeste tests gebruiken deze)
+# Eén testbestand (ingebouwde testrunner van Node.js — de meeste tests gebruiken deze)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# Alleen de unittests waarop je wijziging invloed heeft (dezelfde TIA-selector als de CI-gate, #8084)
+# Alleen de unit-tests die door je wijziging worden beïnvloed (dezelfde TIA-selector als de CI-gate, #8084)
 npm run test:scoped            # wijzigingen in de laatste commit (of de werkmap)
-npm run test:scoped:staged     # alleen gestagede wijzigingen — werkt goed in combinatie met een pre-commit-run
-npm run test:scoped:full       # bouw eerst de importgrafiek opnieuw op (na het toevoegen/verplaatsen van bestanden)
-# Exitcode 1 + "voer de volledige suite uit" betekent dat een centraal bestand (tsconfig, package.json, …) of een
+npm run test:scoped:staged     # alleen gestagede wijzigingen — goed te combineren met een pre-commit-run
+npm run test:scoped:full       # bouw eerst de importgraaf opnieuw op (na het toevoegen/verplaatsen van bestanden)
+# Exit 1 + "run the full suite" betekent dat een centraal bestand (tsconfig, package.json, …) of een
 # niet-toegewezen bronbestand is gewijzigd — de selector faalt veilig en slaat nooit stilzwijgend iets over.
 
 # Vitest (MCP-server, autoCombo, cache)
@@ -195,60 +195,61 @@ npm run test:protocols:e2e
 # Compatibiliteitstests voor het ecosysteem
 npm run test:ecosystem
 
-# Dekkingsdrempel: 60% statements/lines/functions/branches
+# Dekkingsgate: 60% statements/lines/functions/branches
 npm run test:coverage
 npm run coverage:report
 
-# Lint- en opmaakcontrole
+# Controle op linting en opmaak
 npm run lint
 npm run check
 
-# Afgeschermde combo-rooktest met echte upstreams (vereist VPS-toegang + tegoed bij echte providers)
-# Benadert ECHTE providers — kost een klein bedrag. Wordt NOOIT uitgevoerd in CI. Wordt netjes overgeslagen zonder de gate.
+# Afgeschermde combo-smoketest met echte upstreams (vereist VPS-toegang + echt providertegoed)
+# Benadert ECHTE providers — kost een klein bedrag. Wordt NOOIT in CI uitgevoerd. Wordt netjes overgeslagen zonder de gate.
 # Vereist: toegang via ssh root@192.168.0.15 (haalt een alleen-lezen DB-snapshot op van de VPS).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Fase 3-live-rooktest voor de VPS — gewone Node ESM-scripts die de live .15-server rechtstreeks benaderen.
+# Live-smoketest voor fase 3 op de VPS — gewone Node ESM-scripts die de live .15-server rechtstreeks benaderen.
 # Vereist: toegang via ssh root@192.168.0.15 (combo's worden via SSH sqlite aangemaakt/verwijderd).
-# Benadert ECHTE providers (lage kosten). Maakt/verwijdert alleen combo's met __live_test__*. Wordt NOOIT uitgevoerd in CI.
+# Benadert ECHTE providers (lage kosten). Maakt/verwijdert alleen combo's met __live_test__*. Wordt NOOIT in CI uitgevoerd.
 # REQUIRE_API_KEY=false op .15, dus er is geen API-sleutel nodig, maar COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY worden gebruikt indien ingesteld.
-npm run test:combo:live:vps              # 7 HTTP-scenario's (prioriteit/round-robin/gewogen/kosten/fusie/automatisch + status)
-npm run test:combo:live:vps:failover     # voegt een echt failoverscenario tussen providers toe (8 in totaal)
+npm run test:combo:live:vps              # 7 HTTP-scenario's (prioriteit/round-robin/gewogen/kosten/fusie/auto + status)
+npm run test:combo:live:vps:failover     # voegt een echt provideroverschrijdend failoverscenario toe (8 in totaal)
 ```
 
 Opmerkingen over dekking:
 
-- `npm run test:coverage` meet de broncodedekking voor de belangrijkste unittestsuite, sluit `tests/**` uit en neemt `open-sse/**` mee
-- Pull requests moeten de dekkingsdrempel voor statements/lines/functions/branches op **60%+** houden
+- `npm run test:coverage` meet de broncodedekking voor de belangrijkste unit-testsuite, sluit `tests/**` uit en neemt `open-sse/**` op
+- Pull requests moeten de dekkingsgate op **60%+** statements/lines/functions/branches houden
 - Als een PR productiecode in `src/`, `open-sse/`, `electron/` of `bin/` wijzigt, moeten in dezelfde PR geautomatiseerde tests worden toegevoegd of bijgewerkt
 - `npm run coverage:report` toont het gedetailleerde rapport per bestand van de meest recente dekkingsrun
-- `npm run test:coverage:legacy` behoudt de oudere meetwaarde voor historische vergelijking
-- Zie `docs/ops/COVERAGE_PLAN.md` voor de gefaseerde roadmap om de dekking te verbeteren
+- `npm run test:coverage:legacy` behoudt de oudere metriek voor historische vergelijking
+- Zie `docs/ops/COVERAGE_PLAN.md` voor de gefaseerde roadmap voor verbetering van de dekking
 
 ### Vereisten voor pull requests
 
 Gebruik voordat je een PR opent het
-[standaardtraject voor bijdragen](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) om de gerichte cyclus uit te voeren voor
-wat je hebt gewijzigd. De volledige unittestsuite (4 CI-shards), Vitest, de dekkingsdrempel van **60%+** en
-de productiebuild vallen onder de verantwoordelijkheid van CI — ze lokaal uitvoeren levert geen extra signaal op dat de
-PR-controles je niet al geven, en op kleinere machines kan dit de host overbelasten (#8084):
+[Gouden pad voor bijdragen](docs/ops/CONTRIBUTION_GOLDEN_PATH.md) om de gerichte cyclus uit te voeren voor
+wat je hebt gewijzigd. De volledige unit-testsuite (4 CI-shards), Vitest, de dekkingsgate van **60%+** en
+de productiebuild vallen onder de verantwoordelijkheid van CI — ze lokaal uitvoeren levert geen extra
+informatie op die de PR-controles je niet al geven, en op kleinere machines kan dit de host overbelasten (#8084):
 
-- Voer de testbestanden uit die je wijziging dekken: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- Voer de testbestanden uit die je wijziging afdekken: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - Voer `npm run lint` uit
-- Voeg geautomatiseerde tests toe of werk ze bij in dezelfde PR wanneer productiecode wordt gewijzigd
+- Voeg geautomatiseerde tests toe of werk ze bij in dezelfde PR wanneer productiecode verandert
+- Plaats in `node:test`-bestanden elke `await` op het hoogste niveau (zoals `await import(...)`) vóór de eerste `test()` / `describe()`: onder `--test-force-exit` kunnen tests die daarna worden geregistreerd stilzwijgend nooit worden uitgevoerd (#18045; afgedwongen door `npm run check:test-tla-order`)
 - Vermeld de gewijzigde of toegevoegde testbestanden in de PR-beschrijving wanneer productiecode is gewijzigd
-- Controleer het SonarQube-resultaat van de PR wanneer de projectgeheimen in CI zijn geconfigureerd
+- Controleer het SonarQube-resultaat voor de PR wanneer de projectgeheimen in CI zijn geconfigureerd
 
-Huidige teststatus: **122 unittestsbestanden** met dekking voor:
+Huidige teststatus: **122 unit-testbestanden** met dekking voor:
 
-- Providervertalers en formaatconversie
-- Snelheidsbeperking, circuitbreaker en robuustheid
+- Providertranslators en formaatconversie
+- Snelheidsbegrenzing, circuitbreaker en robuustheid
 - Semantische cache, idempotentie en voortgangsregistratie
-- Databasebewerkingen en -schema (21 DB-modules)
+- Databasebewerkingen en schema (21 DB-modules)
 - OAuth-flows en authenticatie
-- Validatie van API-eindpunten (Zod v4)
+- Validatie van API-endpoints (Zod v4)
 - MCP-servertools en afdwinging van scopes
-- Geheugen- en Skills-systemen
+- Memory- en Skills-systemen
 
 ---
 

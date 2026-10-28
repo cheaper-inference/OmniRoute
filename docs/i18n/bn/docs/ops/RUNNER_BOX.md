@@ -28,14 +28,13 @@ OmniRoute রানারের **একটি ভূমিকা**, একট�
 | সোয়াপ    | 16 GB                                | `omniroute-113-5` সোয়াপ বন্ধ রেখে চলে (`MemorySwapMax=0`), ফলে নিয়ন্ত্রণহীন কোনো বিল্ড বক্সটিকে সোয়াপ করানোর বদলে নির্ধারিত সীমায় পৌঁছালে বন্ধ হয়ে যায়                                                                                                                                                                                                                                     |
 | `/tmp`    | **12 GB tmpfs = RAM**                | সেখানে রাখা যেকোনো কিছু মেমরি ব্যবহার করে; অবশিষ্ট ফাইলগুলো 3 ঘণ্টা পর পরিষ্কার করা হয়                                                                                                                                                                                                                                                                                                          |
 | CPU       | 32 কোরে 60 লোড পর্যবেক্ষণ করা হয়েছে | কোটা চালুর আগে একই বক্সে একটি Turbopack বিল্ড (~1166 % CPU) এবং একটি coverage suite একসঙ্গে চললে অন্য listener-গুলোর heartbeat প্রয়োজনীয় CPU পেত না (`The self-hosted runner lost communication`, #16853)                                                                                                                                                                                      |
-| রানার     | **6টি listener**                     | 4টি OmniRoute + OmniHeuris + OmniMind; `omniroute-113-3/-4/-7/-8` নিষ্ক্রিয় রয়েছে (`systemctl enable --now` চালালে একটি আবার সক্রিয় হয়)                                                                                                                                                                                                                                                      |
+| রানার     | **7টি listener** (2026-10-28)        | 5টি OmniRoute + OmniHeuris + OmniMind; `omniroute-113-7` `omni-build`-ও বহন করে; `omniroute-113-3/-4/-8` repo থেকে মুছে ফেলা হয়েছে (2026-10-28)                                                                                                                                                                                                                                                 |
 
 সীমাগুলো প্রতিটি unit-এর `/etc/systemd/system/actions.runner.<…>.service.d/override.conf`-এ
 রয়েছে (আগের মানগুলো `override.conf.bak-20261018` হিসেবে রাখা হয়েছে) এবং
 `systemctl set-property --runtime … MemoryHigh=… MemoryMax=… CPUQuota=…` দিয়ে চলমান অবস্থাতেই
 প্রয়োগ করা হয়েছিল—কোনো restart করা হয়নি, তাই চলমান কোনো জব প্রভাবিত হয়নি। runners API-এর মাধ্যমে
-লেবেল পরিবর্তন করা হয়
-(`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
+লেবেল পরিবর্তন করা হয় (`gh api -X DELETE repos/<repo>/actions/runners/<id>/labels/<label>` /
 `gh api -X POST repos/<repo>/actions/runners/<id>/labels -f 'labels[]=<label>'`), এটিও চলমান অবস্থাতেই।
 
 ## janitor ইনস্টল করুন (একবার, মেশিনটিতে)
@@ -44,7 +43,7 @@ OmniRoute রানারের **একটি ভূমিকা**, একট�
 scp scripts/ops/runner-janitor.sh root@192.168.0.113:/opt/omniroute-ops/runner-janitor.sh
 ssh root@192.168.0.113 'chmod +x /opt/omniroute-ops/runner-janitor.sh; apt-get install -y lsof'
 # cron (root): প্রতি 30 মিনিটে, /var/log/runner-janitor.log-এ লগ করুন
-*/30 * * * * MAX_ACTIVE_RUNNERS=6 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
+*/30 * * * * MAX_ACTIVE_RUNNERS=8 /opt/omniroute-ops/runner-janitor.sh >> /var/log/runner-janitor.log 2>&1
 ```
 
 `lsof` আবশ্যক: কোনো পাথ সরানোর আগে janitor খোলা ফাইলগুলোর একটি স্ন্যাপশট নিয়ে
@@ -122,8 +121,9 @@ check এবং restart একই command-এ রাখুন।
   2026-10-18 পর্যন্ত `MemoryHigh=4G` ছিল — সেখানে promptfoo build memory reclaim করতে করতে 54 minutes
   পার করেছিল; 8 GB throttling দূর করে।
 - **ইচ্ছাকৃতভাবেই listener কম রাখা হয়েছে।** 2026-08-29-এ চারটি OmniRoute unit disable করা হয়েছিল — প্রতিটি অতিরিক্ত
-  listener উপরের memory budget-এর আরেকজন tenant। janitor ceiling হলো 6 (cron-এ `MAX_ACTIVE_RUNNERS=6`): এটি box-এর
-  প্রতিটি `Runner.Listener` গণনা করে, এবং আমাদের চারটির সঙ্গে OmniHeuris + OmniMind আরও দুটি যোগ করে।
+  listener উপরের memory budget-এর আরেকজন tenant। janitor ceiling হলো 8 (cron-এ `MAX_ACTIVE_RUNNERS=8`): এটি box-এর
+  প্রতিটি `Runner.Listener` গণনা করে, এবং আমাদের পাঁচটির সঙ্গে OmniHeuris + OmniMind আরও দুটি যোগ করে।
+- **Unit ও Vitest job হোস্টেডেই থাকে।** `ci.yml` তার unit shard ও Vitest job-কে `[self-hosted, omni-ci]`-এ পাঠায় কেবল তখনই, যখন repository variable `vars.USE_VPS_TEST_RUNNER` হয় `true`, এবং তখনও কেবল একই repository-র `pull_request` run-এর জন্য; fork, `merge_group` ও push `ubuntu-latest`-এই থাকে (`tests/unit/vps-runner-variable-scope.test.ts`)। variable-টি এখন `false`। 2026-10-28-এ তিনটি 4-core `omni-ci` listener-এর `npm ci`-তে 250–270 s লেগেছিল এবং প্রতিটি unit shard 30 মিনিটের job সীমায় পৌঁছে গিয়েছিল, যেখানে একটি হোস্টেড shard-এ লাগে ~634 s; তখন box-এর load ছিল 17–24। listener-গুলো মুছে ফেলা হয়েছে। unit shard-এর উপযোগী আকারের listener ছাড়া variable-টি আবার চালু করবেন না।
 - **কোনো runner ব্যস্ত থাকা অবস্থায় কখনোই হাতে `/tmp` বা `_work` পরিষ্কার করবেন না।**
   check ও delete-এর মাঝখানে বিরতিসহ check-then-delete করার কারণেই 2026-08-27-এ চলমান একটি Build job তার
   `_work` হারিয়েছিল। janitor একই step-এ check এবং removal করে;
@@ -137,8 +137,7 @@ check এবং restart একই command-এ রাখুন।
 
 ## হোস্টেড লেন (GitHub-হোস্টেড রানার)
 
-অ্যাকাউন্টটি **Pro** প্ল্যানে রয়েছে: **40টি সমসাময়িক হোস্টেড জব**, যা প্রতিটি PR চেক,
-প্রতিটি push-ট্রিগারড workflow এবং CodeQL-এর ডিফল্ট সেটআপের মধ্যে ভাগ করা হয়। 2026-10-18 তারিখে
+repository-টি `cheaper-inference` organization-এর অন্তর্গত, **Team** প্ল্যানে: **60টি সমসাময়িক হোস্টেড জব**, যা organization-এর প্রতিটি repository, প্রতিটি PR চেক, প্রতিটি push-ট্রিগারড workflow এবং CodeQL-এর ডিফল্ট সেটআপের মধ্যে ভাগ করা হয়। নিচের পরিসংখ্যানগুলো **Pro** প্ল্যানে (40টি সমসাময়িক হোস্টেড জব) পরিমাপ করা হয়েছিল। 2026-10-18 তারিখে
 একটি merge campaign চলাকালে (`release/v3.8.52`-এ ঘণ্টায় ~10টি merge) পরিমাপ করা হয়েছে: **24 ঘণ্টায়
 2,500টি workflow run তৈরি হয়েছে**, 6 ঘণ্টায় branch-টিতে 44টি push হয়েছে, এবং PR চেকগুলো
 ঘণ্টার পর ঘণ্টা অপেক্ষা করার সময় **106টি হোস্টেড জব queued ছিল** ও সেগুলো ছাড়াই PR merge করা হয়েছিল।

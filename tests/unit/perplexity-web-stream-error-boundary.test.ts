@@ -38,12 +38,17 @@ function runIsolatedFixture(testRoot: string): Promise<FixtureResult> {
   delete childEnv.NODE_TEST_CONTEXT;
 
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["--import", "tsx/esm", "--test", FIXTURE], {
-      cwd: process.cwd(),
-      env: childEnv,
-      stdio: ["ignore", "pipe", "pipe"],
-      timeout: 90_000,
-    });
+    // Pin the reporter: the assertions read spec output, and Node 22 defaults to tap when stdout is a pipe.
+    const child = spawn(
+      process.execPath,
+      ["--import", "tsx/esm", "--test", "--test-reporter=spec", FIXTURE],
+      {
+        cwd: process.cwd(),
+        env: childEnv,
+        stdio: ["ignore", "pipe", "pipe"],
+        timeout: 90_000,
+      }
+    );
     let stdout = "";
     let stderr = "";
     child.stdout.setEncoding("utf8").on("data", (chunk: string) => {

@@ -11,17 +11,17 @@
 آموختههای PII). آن را بهطور کامل بخوانید؛ قوانین پروژه را دوباره اینجا اضافه نکنید. تمام موارد زیر
 فقط برای Claude Code اعمال میشوند — اصلاحات عملیاتیِ قوانینی که از قبل در `AGENTS.md` تعریف شدهاند.
 
-## جداسازی worktree — نکات مختص Claude Code
+## جداسازی Worktree — نکات خاص Claude Code
 
-پروتکل کامل و الزامی worktree (تأیید شاخهٔ پایه، مسیر استاندارد `.claude/worktrees/`،
-`cp -al` برای node_modules، قوانین پاکسازی) در `AGENTS.md` ← Git Workflow ← «Worktree
-isolation» آمده است. نکات مختص Claude Code:
+پروتکل کامل و اجباری worktree (تأیید شاخهی پایه، مسیر متعارف `.claude/worktrees/`، استفاده از `cp -al` برای node_modules، قوانین teardown) در
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) آمده است (خلاصهشده در `AGENTS.md` ←
+گردش کار Git ← "جداسازی Worktree"). نکات خاص Claude Code:
 
-- شاخهٔ پایه را از طریق `AskUserQuestion` با اپراتور تأیید کنید (قانون سختگیرانهٔ #19)، مگر اینکه
-  از قبل آن را به شما گفته باشد.
-- ابزار بومی `EnterWorktree` را ترجیح دهید — این ابزار از قبل worktreeها را در
-  `.claude/worktrees/` (مسیر استاندارد) ایجاد میکند. worktree را با دستور مستندشدهٔ `git
-worktree add` ایجاد کنید، سپس `EnterWorktree` را با `path` آن فراخوانی کنید.
+- شاخهی پایه را از طریق `AskUserQuestion` با اپراتور تأیید کنید (قانون سخت شماره ۱۹) مگر اینکه
+  از قبل به شما گفته باشند.
+- ابزار بومی `EnterWorktree` را ترجیح دهید — این ابزار worktreeها را از قبل زیر
+  `.claude/worktrees/` (مسیر متعارف) ایجاد میکند. worktree را با دستور مستند `git
+worktree add` بسازید، سپس `EnterWorktree` را با `path` آن فراخوانی کنید.
 
 ## ایمنی میان نشستها — نکات مختص Claude Code
 

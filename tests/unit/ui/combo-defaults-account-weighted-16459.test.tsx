@@ -2,6 +2,7 @@
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, expect, it, vi } from "vitest";
+import { chooseKitSelectValue, kitSelectByLabel } from "../../helpers/kitSelect";
 
 vi.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
 
@@ -41,6 +42,11 @@ async function renderTab(strategy: string) {
   return patches;
 }
 
+// KEA-7886: the default-strategy picker is the kit Select (was a role="tab" strip).
+function chooseStrategy(value: string) {
+  chooseKitSelectValue(kitSelectByLabel("comboStrategyAria", container!), value);
+}
+
 async function clickButton(text: string, selector = "button") {
   const button = Array.from(container!.querySelectorAll<HTMLButtonElement>(selector)).find((el) =>
     el.textContent?.includes(text)
@@ -51,7 +57,8 @@ async function clickButton(text: string, selector = "button") {
 
 it("#16459 selecting weighted combo defaults does not PATCH global account routing", async () => {
   const patches = await renderTab("priority");
-  await clickButton("weighted", '[role="tab"]');
+  chooseStrategy("weighted");
+  await act(async () => {});
   expect(patches).toEqual([]);
 });
 
@@ -68,7 +75,8 @@ it("#16459 saving weighted combo defaults keeps weighted only at combo scope", a
 
 it("#16459 supported round-robin combo defaults still sync account strategy and sticky limit", async () => {
   const patches = await renderTab("priority");
-  await clickButton("round-robin", '[role="tab"]');
+  chooseStrategy("round-robin");
+  await act(async () => {});
   expect(patches[0]).toEqual({ url: "/api/settings", body: { fallbackStrategy: "round-robin" } });
   await clickButton("saveComboDefaults");
   expect(patches.filter((patch) => patch.url === "/api/settings")[1].body).toMatchObject({
