@@ -27,9 +27,16 @@ import {
   getProviderValidationGuard,
 } from "@/shared/network/outboundUrlGuardPolicy";
 import { errorResponse, sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
+import {
+  applyDiscoveryDegradation,
+  fromCopilotDiscoveryFailure,
+  toDiscoveryFailure,
+  type DiscoveryFailure,
+} from "@/shared/discovery/degradedCause";
 import { getStaticQoderModels } from "@omniroute/open-sse/services/qoderCli.ts";
 import { getCodexDiscoveryMode } from "@/shared/services/codexDiscoveryPolicy";
 import { deriveConfigFromRegistryModelsUrl } from "./discoveryConfig";
+import { recordDiscoveryOutcome } from "./discovery/discoveryOutcome";
 import {
   buildTokenPlanCatalogRequest,
   isTokenPlanCatalogProvider,
@@ -141,6 +148,10 @@ import {
   fetchCodexGithubCatalogModels,
 } from "./discovery/codex";
 import { createCodexDiscoveryFetch, createCodexCatalogReconciler } from "./discovery/codexRoute";
+import {
+  getCodexClientVersion,
+  getCodexClientVersionSource,
+} from "@omniroute/open-sse/config/codexClient.ts";
 import { fetchClaudeDiscoveryModels } from "./discovery/claude";
 import { applyConnectionCustomHeaders } from "./discovery/connectionCustomHeaders";
 import { maybeHandleConolOrSyntxModelDiscovery } from "./webSessionDiscovery";
@@ -223,7 +234,7 @@ export async function GET(
     // over discovered metadata for the same id.
     let customModelsForProvider: Array<Record<string, unknown> & { id: string; name?: string }> =
       [];
-    if (!excludeCustom && !usesCuratedModelsOnly) {
+    if (!excludeCustom) {
       try {
         const custom = await getCustomModels(provider);
         if (Array.isArray(custom)) {
@@ -260,7 +271,15 @@ export async function GET(
           (m: any) => m.visibility !== "hide" && !getModelIsHidden(provider, m.id)
         );
       }
-      return NextResponse.json(payload, statusConfig);
+      // The single place where a discovery response gets its public shape: the
+      // internal reason is dropped and the response is flagged as degraded only
+      // when the payload really is a degraded discovery.
+      const publicPayload = applyDiscoveryDegradation(payload);
+      // Keep the outcome of this discovery: the response carrying it is gone on
+      // the next read. The outcome is read from the public payload, so it
+      // carries the same reason the caller sees.
+      recordDiscoveryOutcome(publicPayload);
+      return NextResponse.json(publicPayload, statusConfig);
     };
 
     const connectionId = typeof connection.id === "string" ? connection.id : id;
@@ -344,17 +363,22 @@ export async function GET(
       cacheWarning = "API unavailable — using cached catalog",
       localWarning = "API unavailable — using local catalog",
       localIntentional = false,
+      failure,
       extraPayload = {},
     }: {
       cacheWarning?: string;
       localWarning?: string;
       localIntentional?: boolean;
+      failure?: DiscoveryFailure;
       extraPayload?: Record<string, unknown>;
     } = {}) => {
+      // The reason of the fallback (closed vocabulary) rides next to any
+      // diagnostics the caller already publishes.
+      const payload = { ...extraPayload, ...(failure ? { failure } : {}) };
       if (cachedDiscoveryModels.length > 0) {
-        return buildCachedDiscoveryResponse(cacheWarning, extraPayload);
+        return buildCachedDiscoveryResponse(cacheWarning, payload);
       }
-      return buildLocalCatalogResponse(localWarning, localIntentional, extraPayload);
+      return buildLocalCatalogResponse(localWarning, localIntentional, payload);
     };
 
     const buildDiscoveryErrorFallbackResponse = (
@@ -364,16 +388,19 @@ export async function GET(
         localWarning?: string;
       }
     ) => {
+      // The reason of the observed failure travels with the fallback, so every
+      // caller of this assistant reports why the catalog fell back.
+      const failure = toDiscoveryFailure(error);
       // #6267 — a models-endpoint redirect (307/308) is not a fixable-config
       // error. safeOutboundFetch throws REDIRECT_BLOCKED which
       // getSafeOutboundFetchErrorStatus maps to 503, but unlike the other 503
       // Redirect blocks degrade to the local/cached catalog; invalid URLs remain hard errors.
       if (error instanceof SafeOutboundFetchError && error.code === "REDIRECT_BLOCKED") {
-        return buildDiscoveryFallbackResponse(warnings);
+        return buildDiscoveryFallbackResponse({ ...warnings, failure });
       }
       const status = getSafeOutboundFetchErrorStatus(error);
       if (status === 400 || status === 503 || status === 504) return null;
-      return buildDiscoveryFallbackResponse(warnings);
+      return buildDiscoveryFallbackResponse({ ...warnings, failure });
     };
 
     if (provider === "adobe-firefly") {
@@ -393,6 +420,9 @@ export async function GET(
       const fallback = buildDiscoveryFallbackResponse({
         cacheWarning: "Auto-fetch disabled — using cached catalog",
         localWarning: "Auto-fetch disabled — using local catalog",
+        // The operator turned the discovery off: the local catalog is the
+        // expected source here, so this is not a degraded discovery.
+        localIntentional: true,
       });
       if (fallback) return fallback;
       return buildResponse({
@@ -400,6 +430,7 @@ export async function GET(
         connectionId,
         models: [],
         source: "local_catalog",
+        intentional: true,
         warning: "Auto-fetch disabled — no cached models available",
       });
     };
@@ -457,6 +488,8 @@ export async function GET(
           models: freshLocal,
           source: "local_catalog",
           warning: "No remote models discovered — using local catalog",
+          // The upstream answered but offered no usable model.
+          failure: { code: "EMPTY_CATALOG" },
         });
       }
 
@@ -499,6 +532,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "No JWT configured — using cached catalog",
           localWarning: "No JWT configured — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
         if (fallback) return fallback;
         return buildResponse({
@@ -530,6 +564,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "PromptQL FetchLlmConfigs failed — using cached catalog",
           localWarning: "PromptQL FetchLlmConfigs failed — using seed catalog",
+          failure: toDiscoveryFailure(error),
         });
         if (fallback) return fallback;
         return buildResponse({
@@ -557,6 +592,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "No token configured — using cached catalog",
           localWarning: "No token configured — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
         if (fallback) return fallback;
         return buildResponse({
@@ -589,6 +625,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "Notion getAvailableModels failed — using cached catalog",
           localWarning: "Notion getAvailableModels failed — using seed catalog",
+          failure: toDiscoveryFailure(error),
         });
         if (fallback) return fallback;
         return buildResponse({
@@ -633,6 +670,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "MaxAI models/get_config failed — using cached catalog",
           localWarning: "MaxAI models/get_config failed — using curated catalog",
+          failure: toDiscoveryFailure(error),
         });
         if (fallback) return fallback;
         return buildResponse({
@@ -680,6 +718,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "No token configured — using cached catalog",
           localWarning: "No token configured — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -728,6 +767,7 @@ export async function GET(
           const fallback = buildDiscoveryFallbackResponse({
             cacheWarning: `Auth failed (${status}) — using cached catalog`,
             localWarning: `Auth failed (${status}) — using local catalog`,
+            failure: { status },
           });
           if (fallback) return fallback;
           return NextResponse.json({ error: `Auth failed: ${status}` }, { status });
@@ -741,6 +781,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "Bedrock models API unavailable — using cached catalog",
           localWarning: "Bedrock models API unavailable — using local catalog",
+          failure: status ? { status } : {},
         });
         if (fallback) return fallback;
         if (status) {
@@ -773,6 +814,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "Base URL unavailable — using cached catalog",
           localWarning: "Base URL unavailable — using local catalog",
+          failure: { code: "NO_ENDPOINT" },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -882,6 +924,7 @@ export async function GET(
             lastErrorStatus === 401 || lastErrorStatus === 403
               ? `Auth failed (${lastErrorStatus}) — using local catalog`
               : "API unavailable — using local catalog",
+          failure: lastErrorStatus ? { status: lastErrorStatus } : {},
         });
         if (fallback) return fallback;
 
@@ -900,6 +943,7 @@ export async function GET(
           models,
           source: "local_catalog",
           warning: "API unavailable — using local catalog",
+          failure: lastErrorStatus ? { status: lastErrorStatus } : {},
         });
       }
       return buildApiDiscoveryResponse(models);
@@ -917,6 +961,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "No token configured — using cached catalog",
           localWarning: "No token configured — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -935,6 +980,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "Deployment URL does not expose catalog — using cached catalog",
           localWarning: "Deployment URL does not expose catalog — using local catalog",
+          failure: { code: "NO_ENDPOINT" },
         });
         if (fallback) return fallback;
         return buildResponse({
@@ -943,6 +989,7 @@ export async function GET(
           models: toLocalCatalogModels(),
           source: "local_catalog",
           warning: "Deployment URL does not expose catalog — using local catalog",
+          failure: { code: "NO_ENDPOINT" },
         });
       }
 
@@ -951,6 +998,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "Invalid DataRobot base URL — using cached catalog",
           localWarning: "Invalid DataRobot base URL — using local catalog",
+          failure: { code: "NO_ENDPOINT" },
         });
         if (fallback) return fallback;
         return NextResponse.json({ error: "Invalid DataRobot base URL" }, { status: 400 });
@@ -978,6 +1026,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: `Catalog probe failed (${response.status}) — using cached catalog`,
           localWarning: `Catalog probe failed (${response.status}) — using local catalog`,
+          failure: { status: response.status },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -1007,6 +1056,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "No token configured — using cached catalog",
           localWarning: "No token configured — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -1069,6 +1119,10 @@ export async function GET(
       const fallback = buildDiscoveryFallbackResponse({
         cacheWarning: `Azure AI models probe failed (${lastStatus || "empty"}) — using cached catalog`,
         localWarning: `Azure AI models probe failed (${lastStatus || "empty"}) — using local catalog`,
+        // A 200 probe that yielded no usable model is an empty catalog, not a
+        // transport failure.
+        failure:
+          lastStatus === 200 ? { code: "EMPTY_CATALOG" } : lastStatus ? { status: lastStatus } : {},
       });
       if (fallback) return fallback;
       return NextResponse.json(
@@ -1148,6 +1202,8 @@ export async function GET(
       const fallback = buildDiscoveryFallbackResponse({
         cacheWarning: `Azure OpenAI models probe failed (${lastStatus}) — using cached catalog`,
         localWarning: `Azure OpenAI models probe failed (${lastStatus}) — using local catalog`,
+        failure:
+          lastStatus === 200 ? { code: "EMPTY_CATALOG" } : lastStatus ? { status: lastStatus } : {},
       });
       if (fallback) return fallback;
       return NextResponse.json(
@@ -1168,6 +1224,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "No token configured — using cached catalog",
           localWarning: "No token configured — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -1204,6 +1261,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: `Models probe failed (${response.status}) — using cached catalog`,
           localWarning: `Models probe failed (${response.status}) — using local catalog`,
+          failure: { status: response.status },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -1229,6 +1287,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "No token configured — using cached catalog",
           localWarning: "No token configured — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -1270,6 +1329,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: `Models probe failed (${response.status}) — using cached catalog`,
           localWarning: `Models probe failed (${response.status}) — using local catalog`,
+          failure: { status: response.status },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -1295,6 +1355,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "No token configured — using cached catalog",
           localWarning: "No token configured — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -1335,6 +1396,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: `Models probe failed (${response.status}) — using cached catalog`,
           localWarning: `Models probe failed (${response.status}) — using local catalog`,
+          failure: { status: response.status },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -1445,6 +1507,8 @@ export async function GET(
           const localFallback = buildDiscoveryFallbackResponse({
             cacheWarning: `${warnings.join("; ")} — using cached catalog`,
             localWarning: `${warnings.join("; ")} — using local catalog`,
+            // The discovery needs a local request that this request is not.
+            failure: { code: "LOCALITY_REFUSED" },
           });
           if (localFallback) return localFallback;
           return errorResponse(403, "cursor-agent model discovery requires a local request");
@@ -1464,6 +1528,9 @@ export async function GET(
       const fallback = buildDiscoveryFallbackResponse({
         cacheWarning: `${detail} — using cached catalog`,
         localWarning: `${detail} — using local catalog`,
+        // Without a session token nothing was attempted; with one, the attempt
+        // failed for a reason the upstream did not spell out.
+        failure: token ? {} : { code: "NO_CREDENTIAL" },
       });
       if (fallback) return fallback;
       return NextResponse.json(
@@ -1570,6 +1637,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: `Inner.ai models unavailable (${message}) — using cached catalog`,
           localWarning: `Inner.ai models unavailable (${message}) — using local catalog`,
+          failure: toDiscoveryFailure(err),
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -1641,7 +1709,9 @@ export async function GET(
             { status: response.status }
           );
         }
-        const fallback = buildDiscoveryFallbackResponse();
+        const fallback = buildDiscoveryFallbackResponse({
+          failure: response?.status ? { status: response.status } : {},
+        });
         if (fallback) return fallback;
         return NextResponse.json(
           { error: `Failed to fetch models: ${response?.status || 502}` },
@@ -1668,6 +1738,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "OAuth token unavailable — using cached catalog",
           localWarning: "OAuth token unavailable — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
         if (fallback) return fallback;
         return buildResponse({
@@ -1676,21 +1747,24 @@ export async function GET(
           models: staticModels,
           source: "local_catalog",
           warning: "OAuth token unavailable — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
       }
 
-      const remoteModels = await fetchAntigravityDiscoveryModelsCached(
+      const antigravityDiscovery = await fetchAntigravityDiscoveryModelsCached(
         accessToken,
         connectionId,
         proxy,
         connection.providerSpecificData,
         provider
       );
-      if (remoteModels.length > 0) {
-        return buildApiDiscoveryResponse(remoteModels);
+      if (antigravityDiscovery.models.length > 0) {
+        return buildApiDiscoveryResponse(antigravityDiscovery.models);
       }
 
-      const fallback = buildDiscoveryFallbackResponse();
+      const fallback = buildDiscoveryFallbackResponse({
+        failure: antigravityDiscovery.failure,
+      });
       if (fallback) return fallback;
 
       return buildResponse({
@@ -1699,6 +1773,7 @@ export async function GET(
         models: staticModels,
         source: "local_catalog",
         ...(usesCuratedModelsOnly ? {} : { warning: "API unavailable — using local catalog" }),
+        ...(antigravityDiscovery.failure ? { failure: antigravityDiscovery.failure } : {}),
       });
     }
 
@@ -1752,7 +1827,14 @@ export async function GET(
       const fallback = buildDiscoveryFallbackResponse({
         cacheWarning: "Copilot models API unavailable — using cached catalog",
         localWarning: "Copilot models API unavailable — using local catalog",
-        extraPayload: discovery.failure ? { discoveryFailure: discovery.failure } : {},
+        // One reason: the safe diagnostics stay published as `discoveryFailure`,
+        // and the closed-vocabulary cause is derived from them.
+        ...(discovery.failure
+          ? {
+              failure: fromCopilotDiscoveryFailure(discovery.failure),
+              extraPayload: { discoveryFailure: discovery.failure },
+            }
+          : {}),
       });
       if (fallback) return fallback;
       return buildResponse({
@@ -1761,7 +1843,12 @@ export async function GET(
         models: discovery.models,
         source: "local_catalog",
         warning: "Copilot models API unavailable — using local catalog",
-        ...(discovery.failure ? { discoveryFailure: discovery.failure } : {}),
+        ...(discovery.failure
+          ? {
+              failure: fromCopilotDiscoveryFailure(discovery.failure),
+              discoveryFailure: discovery.failure,
+            }
+          : {}),
       });
     }
 
@@ -1788,19 +1875,20 @@ export async function GET(
       const copilotApiUrl =
         toNonEmptyString(psd.copilotApiUrl) || toNonEmptyString(psd.copilotProxyUrl) || null;
 
-      const models = await fetchGheCopilotModels({
+      const gheDiscovery = await fetchGheCopilotModels({
         apiUrl: copilotApiUrl,
         token: copilotToken,
         fetchImpl: (url, init) => fetch(url as string, init as RequestInit),
       });
 
-      if (models.length > 0) {
-        return buildApiDiscoveryResponse(models);
+      if (gheDiscovery.models.length > 0) {
+        return buildApiDiscoveryResponse(gheDiscovery.models);
       }
 
       const fallback = buildDiscoveryFallbackResponse({
         cacheWarning: "GHE Copilot models API unavailable — using cached catalog",
         localWarning: "GHE Copilot models API unavailable — using local catalog",
+        failure: gheDiscovery.failure,
       });
       if (fallback) return fallback;
       return buildResponse({
@@ -1809,6 +1897,7 @@ export async function GET(
         models: [],
         source: "local_catalog",
         warning: "GHE Copilot models API unavailable — using local catalog",
+        ...(gheDiscovery.failure ? { failure: gheDiscovery.failure } : {}),
       });
     }
 
@@ -1830,6 +1919,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "OAuth token unavailable — using cached catalog",
           localWarning: "OAuth token unavailable — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
         if (fallback) return fallback;
         return buildResponse({
@@ -1838,6 +1928,7 @@ export async function GET(
           models: toLocalCatalogModels(),
           source: "local_catalog",
           warning: "OAuth token unavailable — using local catalog",
+          failure: { code: "NO_CREDENTIAL" },
         });
       }
 
@@ -1861,6 +1952,7 @@ export async function GET(
       const fallback = buildDiscoveryFallbackResponse({
         cacheWarning: "Kiro models API unavailable — using cached catalog",
         localWarning: "Kiro models API unavailable — using local catalog",
+        failure: discovery.failure,
       });
       if (fallback) return fallback;
       return buildResponse({
@@ -1869,6 +1961,7 @@ export async function GET(
         models: discovery.models,
         source: "local_catalog",
         warning: "Kiro models API unavailable — using local catalog",
+        ...(discovery.failure ? { failure: discovery.failure } : {}),
       });
     }
 
@@ -1911,6 +2004,7 @@ export async function GET(
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "Base URL unavailable — using cached catalog",
           localWarning: "Base URL unavailable — using local catalog",
+          failure: { code: "NO_ENDPOINT" },
         });
         if (fallback) return fallback;
         return NextResponse.json(
@@ -1955,7 +2049,9 @@ export async function GET(
       if (!response.ok) {
         const errorText = await response.text();
         console.log("Error fetching models from provider", { provider, errorText });
-        const fallback = buildDiscoveryFallbackResponse();
+        const fallback = buildDiscoveryFallbackResponse({
+          failure: { status: response.status },
+        });
         if (fallback) return fallback;
         return NextResponse.json(
           { error: `Failed to fetch models: ${response.status}` },
@@ -1981,7 +2077,9 @@ export async function GET(
     if (provider === "zed-hosted") {
       const zedToken = accessToken || apiKey;
       if (!zedToken) {
-        const fallback = buildDiscoveryFallbackResponse();
+        const fallback = buildDiscoveryFallbackResponse({
+          failure: { code: "NO_CREDENTIAL" },
+        });
         if (fallback) return fallback;
         return NextResponse.json({ error: "Zed connection has no access token" }, { status: 400 });
       }
@@ -2016,7 +2114,9 @@ export async function GET(
           provider,
           errorText: error instanceof Error ? error.message : String(error),
         });
-        const fallback = buildDiscoveryFallbackResponse();
+        const fallback = buildDiscoveryFallbackResponse({
+          failure: toDiscoveryFailure(error),
+        });
         if (fallback) return fallback;
         return NextResponse.json(
           { error: `Failed to fetch models: ${sanitizeErrorMessage(error)}` },
@@ -2046,10 +2146,11 @@ export async function GET(
         });
         if (!response.ok) throw new Error("Token Plan catalog request failed");
         liveModels = parseTokenPlanCatalog(await response.json());
-      } catch {
+      } catch (error) {
         const fallback = buildDiscoveryFallbackResponse({
           cacheWarning: "Token Plan live catalog unavailable — using cached catalog",
           localWarning: "Token Plan live catalog unavailable — using local catalog",
+          failure: toDiscoveryFailure(error),
         });
         if (fallback) return fallback;
         return errorResponse(502, "Token Plan live catalog unavailable. Please try again later.");
@@ -2094,6 +2195,8 @@ export async function GET(
           warning: catalog.warning,
           discovery: { mode: codexDiscoveryMode },
           ...(includeCandidates ? { candidateModels: catalog.candidateModels } : {}),
+          // The catalog is the provider's own; the client version filtered it.
+          failure: { code: "CLIENT_TOO_OLD" },
         });
       }
 
@@ -2103,18 +2206,23 @@ export async function GET(
           connectionId,
           models: buildCodexLocalFallbackCatalog(staticCodexCatalog),
           source: "local_catalog",
+          // The operator turned the discovery off: the local catalog is the
+          // expected source here, so this is not a degraded discovery.
+          intentional: true,
           warning: "Auto-fetch disabled — using local catalog",
         });
       }
 
-      const liveModels = await fetchCodexDiscoveryModels({
+      const liveDiscovery = await fetchCodexDiscoveryModels({
         accessToken: accessToken || null,
         providerSpecificData: connection.providerSpecificData,
         fetchImpl: createCodexDiscoveryFetch(proxy, getProviderOutboundGuard()),
       });
-      const githubCatalogModels = await fetchCodexGithubCatalogModels({
+      const githubCatalogDiscovery = await fetchCodexGithubCatalogModels({
         fetchImpl: createCodexDiscoveryFetch(proxy, "public-only"),
       });
+      const liveModels = liveDiscovery.models;
+      const githubCatalogModels = githubCatalogDiscovery.models;
       if (liveModels && liveModels.length > 0) {
         const enrichedLiveModels =
           githubCatalogModels && githubCatalogModels.length > 0
@@ -2122,23 +2230,41 @@ export async function GET(
             : liveModels;
         const catalog = reconcileCodexCatalog(enrichedLiveModels);
         await persistDiscoveredModels(provider, connectionId, catalog.activeModels);
+        const clientVersionSource = getCodexClientVersionSource();
         return buildResponse({
           provider,
           connectionId,
           models: catalog.activeModels,
           source: "api",
           warning: catalog.warning,
-          discovery: { mode: codexDiscoveryMode },
+          discovery: {
+            mode: codexDiscoveryMode,
+            clientVersion: {
+              version: getCodexClientVersion(),
+              source: clientVersionSource,
+              ...(clientVersionSource === "fallback"
+                ? {
+                    degraded:
+                      "the last version refresh failed, so models gated behind a newer client may be missing",
+                  }
+                : {}),
+            },
+          },
           ...(includeCandidates ? { candidateModels: catalog.candidateModels } : {}),
         });
       }
 
+      // The fallback catalog stands in for the live one: the live failure is the
+      // reason, and the public catalog failure is the fallback reason.
+      const codexFallbackFailure = liveDiscovery.failure ?? githubCatalogDiscovery.failure;
       // One fallback chain covers both an empty catalog and a failed call:
       // cached account view, then the public manifest, then the local catalog.
       // An empty answer may be transient, so it never clears the cached catalog;
       // the warning says which situation it was and which fallback answered.
-      const liveFailed = liveModels === null;
-      const liveEmpty = liveModels !== null && liveModels.length === 0;
+      // The live helper tells them apart: a recognised empty list carries
+      // EMPTY_CATALOG, every other failure carries another (or no) code.
+      const liveEmpty = liveModels.length === 0 && liveDiscovery.failure?.code === "EMPTY_CATALOG";
+      const liveFailed = liveModels.length === 0 && !liveEmpty;
       const hasGithubCatalog = Boolean(githubCatalogModels && githubCatalogModels.length > 0);
       const fallbackSource: "github_catalog" | "cache" | "local_catalog" =
         cachedDiscoveryModels.length > 0
@@ -2177,6 +2303,7 @@ export async function GET(
           models: catalog.activeModels,
           source: "cache",
           warning: catalog.warning,
+          ...(codexFallbackFailure ? { failure: codexFallbackFailure } : {}),
         });
       }
 
@@ -2190,6 +2317,7 @@ export async function GET(
           warning: catalog.warning,
           discovery: { mode: codexDiscoveryMode },
           ...(includeCandidates ? { candidateModels: catalog.candidateModels } : {}),
+          ...(codexFallbackFailure ? { failure: codexFallbackFailure } : {}),
         });
       }
 
@@ -2233,6 +2361,7 @@ export async function GET(
       const fallback = buildDiscoveryFallbackResponse({
         cacheWarning: "No token configured — using cached catalog",
         localWarning: "No token configured — using local catalog",
+        failure: { code: "NO_CREDENTIAL" },
       });
       if (fallback) return fallback;
       return NextResponse.json(
@@ -2245,7 +2374,7 @@ export async function GET(
     }
 
     if (provider === "cline") {
-      const models = await resolveClineModels((input, init) =>
+      const clineDiscovery = await resolveClineModels((input, init) =>
         safeOutboundFetch(String(input), {
           ...SAFE_OUTBOUND_FETCH_PRESETS.modelsPagination,
           guard: getProviderOutboundGuard(),
@@ -2253,9 +2382,10 @@ export async function GET(
           ...init,
         })
       );
-      return models === null
-        ? buildDiscoveryFallbackResponse() || errorResponse(502, "Cline catalog unavailable")
-        : buildApiDiscoveryResponse(models);
+      return clineDiscovery.failure
+        ? buildDiscoveryFallbackResponse({ failure: clineDiscovery.failure }) ||
+            errorResponse(502, "Cline catalog unavailable")
+        : buildApiDiscoveryResponse(clineDiscovery.models);
     }
 
     // Build request URL
@@ -2367,7 +2497,9 @@ export async function GET(
       if (!response.ok) {
         const errorText = await response.text();
         console.log("Error fetching models from provider", { provider, errorText });
-        const fallback = buildDiscoveryFallbackResponse();
+        const fallback = buildDiscoveryFallbackResponse({
+          failure: { status: response.status },
+        });
         if (fallback) return fallback;
         return NextResponse.json(
           { error: `Failed to fetch models: ${response.status}` },
@@ -2454,7 +2586,19 @@ export async function GET(
     const status = getSafeOutboundFetchErrorStatus(error);
     if (status) {
       const message = error instanceof Error ? error.message : "Failed to fetch models";
-      return NextResponse.json({ error: message }, { status });
+      // Timeout messages embed the request URL, which can carry a `?key=` credential.
+      return NextResponse.json({ error: sanitizeErrorMessage(message) }, { status });
+    }
+    // #4843 — dead host / DNS / TLS failure with no cached or local catalog to
+    // degrade to is an upstream outage, not an OmniRoute bug: answer 502.
+    if (error instanceof SafeOutboundFetchError && error.code === "NETWORK_ERROR") {
+      return NextResponse.json(
+        {
+          error: `Failed to fetch models: ${sanitizeErrorMessage(error.message) || "upstream unreachable"}`,
+          code: "UPSTREAM_UNREACHABLE",
+        },
+        { status: 502 }
+      );
     }
     console.log("Error fetching provider models:", error);
     return NextResponse.json({ error: "Failed to fetch models" }, { status: 500 });

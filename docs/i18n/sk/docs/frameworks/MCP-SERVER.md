@@ -72,6 +72,16 @@ curl -i \
 
 Kľúč bez rozsahu spravovania (alebo bez Bearer) vráti `403 LOCAL_ONLY`. Súrodený prefix `/api/cli-tools/runtime/*` nie je zámerne obchádzateľný – pozrite si [Úrovne Route Guard – výnimka rozsahu spravovania](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Overovanie Origin
+
+Po autentifikácii sa pri každej požiadavke na `/api/mcp/*` — transporty aj správcovské trasy ako `status`, `tools`, `audit`, `restart` — overuje hlavička `Origin`, bez ohľadu na volajúceho (API kľúč, token CLI, relácia dashboardu alebo anonymný loopback s vypnutým prihlásením). Ide o ochranu proti DNS rebindingu, ktorú vyžaduje špecifikácia MCP Streamable HTTP.
+
+- **Bez hlavičky `Origin`** → povolené. OmniRoute CLI, SDK a IDE klienti ju neposielajú.
+- **Povolený `Origin`** → `localhost` / `127.0.0.1` / `[::1]` na ľubovoľnom porte alebo vlastný verejný origin OmniRoute: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin odovzdaný dôveryhodnou reverznou proxy (`OMNIROUTE_TRUST_PROXY`, iba ak nie je nastavená base URL), alebo priamo oslovený loopback/LAN IP hostiteľ. Samotná hlavička `Host` nikdy neurobí origin dôveryhodným.
+- **Akýkoľvek iný `Origin`, vrátane `null`** → `403` s telom chyby JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Relácia dashboardu s platným CSRF tokenom sa naďalej prijíma, rovnako ako pri iných zápisoch dashboardu.
+
+Prehliadačový MCP klient za reverznou proxy potrebuje `OMNIROUTE_PUBLIC_BASE_URL`; zoznam povolených iných originov neexistuje. Predbežná CORS požiadavka (`OPTIONS`) sa na Origin nekontroluje; nasledujúca požiadavka áno.
+
 ## Konfigurácia IDE
 
 Pozrite si [Konfiguráciu klienta MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) pre nastavenie Claude Desktop,

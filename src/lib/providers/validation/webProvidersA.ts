@@ -399,9 +399,9 @@ export async function validatePerplexityWebProvider({ apiKey, providerSpecificDa
         Accept: "text/event-stream",
         Origin: "https://www.perplexity.ai",
         Referer: "https://www.perplexity.ai/",
-        // Firefox 148 — must match the firefox_148 TLS profile of perplexityTlsClient (issue #2459).
+        // Firefox 151 — must match the firefox_151 TLS profile of perplexityTlsClient (issue #2459).
         "User-Agent":
-          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:152.0) Gecko/20100101 Firefox/152.0",
+          "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:151.0) Gecko/20100101 Firefox/151.0",
         "X-App-ApiClient": "default",
         "X-App-ApiVersion": "client-1.11.0",
         ...(bearerToken

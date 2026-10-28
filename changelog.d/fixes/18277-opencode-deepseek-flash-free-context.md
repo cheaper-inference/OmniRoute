@@ -1,0 +1,1 @@
+- **fix(opencode):** publish the real ~330k context window for opencode-zen `deepseek-v4.1-flash-free` (and its legacy `deepseek-v4-flash-free` alias) over the synced 1M, so clients compact before the free backend rejects the prompt ([#18277](https://github.com/diegosouzapw/OmniRoute/pull/18277)) — thanks @claytontavaresdan

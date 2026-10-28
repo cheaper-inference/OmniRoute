@@ -32,91 +32,82 @@ Az OmniRoute moduláris prompttömörítési folyamatot valósít meg, amely **p
 
 ## Tömörítési módok
 
-### Kikapcsolva
+### Off
 
-Nincs alkalmazva tömörítés. Minden üzenet változatlanul halad át.
+Nincs alkalmazott tömörítés. Minden üzenet változatlanul halad át.
 
-### Enyhe mód (~15%-os megtakarítás, <1 ms késleltetés)
+### Lite mód (~15% megtakarítás, <1ms késleltetés)
 
-A legbiztonságosabb mód — nulla szemantikai változtatás, csak formázástisztítás:
+A legbiztonságosabb mód – nulla szemantikai változás, kizárólag formázási tisztítás:
 
-| Technika                 | Leírás                                                      |
-| ------------------------ | ----------------------------------------------------------- |
-| `collapseWhitespace`     | Az egymást követő üres sorok és a záró szóközök összevonása |
-| `dedupSystemPrompt`      | Az ismétlődő rendszerüzenetek eltávolítása                  |
-| `compressToolResults`    | A részletes eszköz-/függvénykimenetek tömörítése            |
-| `removeRedundantContent` | Az ismétlődő utasítások eltávolítása                        |
-| `replaceImageUrls`       | A base64-kódolású képadat-URI-k rövidítése                  |
+| Technika                 | Leírás                                                    |
+| ------------------------ | --------------------------------------------------------- |
+| `collapseWhitespace`     | Egymást követő üres sorok és sorvégi szóközök összevonása |
+| `dedupSystemPrompt`      | Ismétlődő rendszerüzenetek eltávolítása                   |
+| `compressToolResults`    | Terjengős eszköz-/függvénykimenetek tömörítése            |
+| `removeRedundantContent` | Ismétlődő utasítások eltávolítása                         |
+| `replaceImageUrls`       | Base64-es kép-adat-URI-k lerövidítése                     |
 
-**Ideális ehhez:** Folyamatos használat, biztonságkritikus munkafolyamatok.
+**Ajánlott:** Folyamatosan aktív használathoz, biztonságkritikus munkafolyamatokhoz.
 
-### Normál mód (~30%-os megtakarítás)
+### Standard mód (~30% megtakarítás)
 
-A [Caveman](https://github.com/JuliusBrussee/caveman) által ihletett mód — eltávolítja a töltelékszavakat és a terjengős megfogalmazást, miközben megőrzi a jelentést:
+A [Caveman](https://github.com/JuliusBrussee/caveman) által inspirálva – eltávolítja a töltelékszavakat és a terjengős megfogalmazásokat a jelentés megőrzése mellett:
 
-- Eltávolítja a töltelékszavakat („kérem”, „azt hiszem”, „alapvetően”, „valójában”)
-- Tömöríti a terjengős kifejezéseket („annak érdekében, hogy” → „hogy”, „annak eredményeként” → „mert”)
-- Eltávolítja az udvarias óvatoskodást („Megtenné, hogy...”, „Ha esetleg meg tudná...”)
-- Több mint 30, programozási promptokra hangolt reguláris kifejezési szabály
+- Eltávolítja a töltelékszavakat ("please", "I think", "basically", "actually")
+- Tömörebbre fogalmazza a terjengős kifejezéseket ("in order to" → "to", "as a result of" → "because")
+- Levágja az udvarias határozatlansági formulákat ("Would you mind...", "If you could possibly...")
+- 30+ kódolási promptokra hangolt regex-szabály
 
-**Ideális ehhez:** Mindennapi programozási munkafolyamatok, költségtudatos csapatok.
+**Ajánlott:** Napi kódolási munkafolyamatokhoz, költségtudatos csapatoknak.
 
-### Agresszív mód (~50%-os megtakarítás)
+### Aggressive mód (~50% megtakarítás)
 
 Intelligens előzménykezelés hosszú munkamenetekhez:
 
-- **Üzenetek öregítése** — a régebbi üzenetek fokozatosan egyre erősebb tömörítést kapnak
-- **Eszközeredmények tömörítése** — a hosszú eszközkimenetek csonkolása vagy kihagyása (első/utolsó sorok,
-  egyező sorok szerinti szűrés, JSON-kulcsok tömörítése)
-- **Szerkezeti integritást védő mechanizmusok** — biztosítják, hogy a `tool_use` + `tool_result` párok konzisztensek maradjanak
-- **Kontextusablak figyelembevétele** — tiszteletben tartja az egyes modellek tokenkorlátait
+- **Üzenetek öregedése** – a régebbi üzenetek fokozatosan egyre erősebben tömörítődnek
+- **Eszközeredmény-tömörítés** – a hosszú eszközkimenetek csonkolása vagy kihagyásos rövidítése (első/utolsó sorok, találatsor-szűrés, JSON-kulcsok tömörítése)
+- **Strukturális integritási védelmek** – biztosítják, hogy a `tool_use` + `tool_result` párok konzisztensek maradjanak
+- **Kontextusablak-érzékelés** – tiszteletben tartja a modellenkénti tokenkorlátokat
 
-**Ideális ehhez:** Hosszabb hibakeresési munkamenetek, nagy kódbázisok.
+**Ajánlott:** Hosszas hibakeresési munkamenetekhez, nagy kódbázisokhoz.
 
-### Ultra mód (~75%-os megtakarítás)
+### Ultra mód (~75% megtakarítás)
 
-Maximális tömörítés a tokentakarékosságot igénylő helyzetekhez:
+Maximális tömörítés tokenkritikus helyzetekre:
 
-- **Heurisztikus ritkítás** — a próza pontszámalapú tokenritkítása
-- **Szerkezetmegőrzés** — a keretezett kódblokkokat, a soron belüli kódot, az URL-eket és az azonosítókat
-  helyőrzőkkel váltja ki, majd változatlanul visszailleszti; ezeket soha nem ritkítja
-- **Opcionális SLM-szint** — konfigurálás esetén egy kis helyi modell finomíthatja a ritkítást
-- Független az Agresszív módtól: nem futtat üzenetöregítést, eszközeredmény-tömörítést
-  vagy tartalék összegzőt (csak az SLM-szint meghibásodása irányíthat egy tartalék feldolgozási menetet
-  az agresszív módon keresztül)
+- **Heurisztikus metszés** – a prózai szöveg pontszámalapú tokenmetszése
+- **Struktúramegőrzés** – a fenced kódblokkok, a soron belüli kód, az URL-ek és az azonosítók tombstone-jelölést kapnak, majd szó szerint visszaillesztésre kerülnek, és soha nem esnek áldozatul a metszésnek
+- **Opcionális SLM-szint** – beállítás esetén egy kis helyi modell finomíthatja a metszést
+- Független az Aggressive módtól: nem futtat üzenetöregedést, eszközeredmény-tömörítést vagy a tartalék-összefoglalót (csak az SLM-szint meghibásodása irányíthat egy tartalék menetet az aggressive felé)
 
-**Ideális ehhez:** Ha rendszeresen eléri a kontextuskorlátokat.
+**Ajánlott:** Ha ismétlődően beleütközik a kontextuskorlátokba.
 
-### RTK mód (60–90%-os tartomány a háttérszolgáltató felé)
+### RTK mód (60–90%-os upstream-tartomány)
 
-Az RTK mód a programozási ügynökök munkameneteiben megjelenő terjengős eszközkimenetekre van optimalizálva:
+Az RTK mód a kódolóügynök-munkamenetekben felbukkanó terjengős eszközkimenetekre van optimalizálva:
 
-- Felismeri az olyan parancs-/kimenetosztályokat, mint a `git status`, `git diff`, `git log`, tesztfuttatók,
-  TypeScript-/Vite-/Webpack-buildek, ESLint/Biome/Prettier, npm-auditok/-telepítések, Docker-naplók, infrastruktúra-
-  kimenetek és általános shellkimenetek
-- JSON-szűrőcsomagokat alkalmaz az `open-sse/services/compression/engines/rtk/filters/` könyvtárból
-- Projekt- vagy globális `filters.toml` fájlokból importál RTK TOML séma v1 szerinti szűrőket, beágyazott tesztesetek
-  ellenőrzésével és a projektfájlokra vonatkozó bizalmi kapuval
-- 55 beépített szűrőt tartalmaz beágyazott ellenőrzési mintákkal
-- Eltávolítja az ANSI vezérlőszekvenciákat, folyamatjelző sávokat, ismétlődő sorokat és a beavatkozást nem igénylő zajt
-- Megőrzi a sikertelenségeket, hibákat, figyelmeztetéseket, módosított fájlokat, összegzéseket és a hosszú kimenetek végét
-- Támogatja a bizalmi kapuval védett projektszűrőket, a globális szűrőket és az opcionális, kitakart nyerskimenet-visszaállítást
+- Parancs-/kimenetosztályokat ismer fel, például: `git status`, `git diff`, `git log`, tesztfuttatók, TypeScript/Vite/Webpack buildek, ESLint/Biome/Prettier, npm audit/telepítések, Docker-naplók, infrastruktúra-kimenet és általános shell-kimenet
+- JSON-szűrőcsomagokat alkalmaz az `open-sse/services/compression/engines/rtk/filters/` útvonalról
+- RTK TOML schema v1 szűrőket importál projekt- vagy globális `filters.toml` fájlokból, inline-tesztvalidációval és a projektfájlok trust-gatingjével
+- 56 beépített szűrőt tartalmaz inline ellenőrzőmintákkal
+- Eltávolítja az ANSI-vezérlősorozatokat, a folyamatjelzőket, az ismétlődő sorokat és a cselekvés szempontjából lényegtelen zajt
+- Megőrzi a meghiúsulásokat, hibákat, figyelmeztetéseket, a módosult fájlokat, az összefoglalókat és a hosszú kimenetek végét
+- Támogatja a trust-gatingelt projektszűrőket, a globális szűrőket és az opcionális, kitakart nyerskimenet-visszaállítást
 
-**Ideális ehhez:** Shell-, build-, teszt-, git-, grep- és fájlkimeneti átiratokat tartalmazó ügynökmunkamenetek.
+**Ajánlott:** Shell-, build-, teszt-, git-, grep- és fájlkimenet-átiratokkal dolgozó ügynökmunkamenetekhez.
 
-### Halmozott mód (78–95%-os tartomány az alkalmas tartalmon)
+### Stacked mód (78–95% az alkalmazható tartományban)
 
-A Halmozott mód több tömörítőmotort futtat determinisztikus sorrendben. Az alapértelmezett folyamat:
+A Stacked mód több tömörítési motort futtat determinisztikus sorrendben. Az alapértelmezett pipeline:
 
 ```txt
 RTK -> Caveman
 ```
 
-Ez a sorrend először a terminál-/eszközkimenetet tömöríti, majd Caveman szemantikai tömörítést alkalmaz
-a fennmaradó természetes nyelvű promptra. A halmozott folyamatok globálisan vagy az útválasztási
-kombinációkhoz rendelt tömörítési kombinációkon keresztül konfigurálhatók.
+Ez a sorrend először a terminál-/eszközkimenetet tömöríti, majd a fennmaradó természetes nyelvű promptra alkalmazza a Caveman szemantikai sűrítését. A stacked pipeline-ok globálisan vagy a routing-kombókhoz rendelt tömörítési kombókon keresztül konfigurálhatók.
 
-**Ideális ehhez:** Nagy eszköznaplókat, valamint emberi utasításokat vagy asszisztensi összegzéseket egyaránt tartalmazó vegyes kontextus.
+**Ajánlott:** Nagy eszköznaplókat valamint emberi utasításokat vagy asszisztens-összefoglalókat egyaránt tartalmazó vegyes kontextushoz.
 
 ---
 

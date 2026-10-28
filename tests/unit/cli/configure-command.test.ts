@@ -27,6 +27,7 @@ test("configure picker exposes setup-backed CLI targets (manifest declaration or
     "opencode",
     "qwen",
     "5dive",
+    "whycodes",
   ]);
 });
 

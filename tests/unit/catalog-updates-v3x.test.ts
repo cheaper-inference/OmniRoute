@@ -33,7 +33,7 @@ test("NVIDIA catalog includes the current hosted models and GPT OSS 120B alias r
   assert.ok(ids.has("meta/muse-glimmer-30b"));
   assert.ok(ids.has("google/diffusiongemma-26b-a4b-it"));
   assert.ok(ids.has("openai/gpt-oss-120b"));
-  assert.ok(ids.has("nvidia/nemotron-3-super-120b-a12b"));
+  assert.ok(ids.has("nvidia/nemotron-3.5-super-vl-120b-a12b"));
 
   assert.deepEqual(resolveCanonicalProviderModel("nvidia", "gpt-oss-120b"), {
     provider: "nvidia",
