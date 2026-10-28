@@ -113,6 +113,16 @@ describe("CacheSettingsTab TTL bounds", () => {
     );
 
     expect(getSaveButton(container).disabled).toBe(true);
+    // KEA-7886: the error belongs to the field — the input is marked invalid and points at an
+    // announced message (adapter `error` prop), not a loose paragraph.
+    const input = getInput(container);
+    expect(input.getAttribute("aria-invalid")).toBe("true");
+    const describedBy = input.getAttribute("aria-describedby") ?? "";
+    const message = describedBy
+      .split(" ")
+      .map((id) => document.getElementById(id))
+      .find((el) => el?.textContent?.includes("modelCatalogTtlMinimumError"));
+    expect(message?.getAttribute("role")).toBe("alert");
   });
 
   it("disables Save and shows an error above the maximum bound (60000ms)", async () => {

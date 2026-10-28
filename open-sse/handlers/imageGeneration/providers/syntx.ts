@@ -7,6 +7,7 @@
 import { saveImageErrorResult, saveImageSuccessResult } from "../../imageGeneration.ts";
 import {
   SyntxMediaError,
+  decodeDataUrlBounded,
   fetchSyntxMediaBytes,
   firstMediaUrl,
   mapSyntxImageRequestSettings,
@@ -52,24 +53,6 @@ function extractReferenceImages(body: ImageBody): string[] {
   return [...new Set(urls)];
 }
 
-function decodeDataUrl(dataUrl: string): { bytes: Uint8Array; mime: string; name: string } | null {
-  const match = /^data:([^;,]+);base64,(.+)$/i.exec(dataUrl.trim());
-  if (!match) return null;
-  try {
-    const mime = match[1] || "image/png";
-    const bytes = Buffer.from(match[2], "base64");
-    const ext =
-      mime.includes("jpeg") || mime.includes("jpg")
-        ? "jpg"
-        : mime.includes("webp")
-          ? "webp"
-          : "png";
-    return { bytes, mime, name: `reference.${ext}` };
-  } catch {
-    return null;
-  }
-}
-
 async function uploadOneImageRef(
   token: string,
   ref: string,
@@ -77,12 +60,18 @@ async function uploadOneImageRef(
 ): Promise<string | null> {
   if (ref.startsWith("https://r2.syntx.ai/") || /^https?:\/\//i.test(ref)) return ref;
   if (!ref.startsWith("data:")) return null;
-  const decoded = decodeDataUrl(ref);
+  const decoded = decodeDataUrlBounded(ref);
   if (!decoded) return null;
+  const ext =
+    decoded.mime.includes("jpeg") || decoded.mime.includes("jpg")
+      ? "jpg"
+      : decoded.mime.includes("webp")
+        ? "webp"
+        : "png";
   return uploadSyntxMediaFile({
     token,
     bytes: decoded.bytes,
-    filename: decoded.name,
+    filename: `reference.${ext}`,
     mimeType: decoded.mime,
     fetchImpl,
   });
@@ -104,12 +93,13 @@ async function collectUploadedImageRefs(
 async function imagesFromUrls(
   urls: string[],
   wantsBase64: boolean,
-  fetchImpl: typeof fetch
+  fetchImpl: typeof fetch,
+  signal: AbortSignal | null
 ): Promise<Array<Record<string, unknown>>> {
   const images: Array<Record<string, unknown>> = [];
   for (const url of urls) {
     if (wantsBase64) {
-      const fetched = await fetchSyntxMediaBytes(url, fetchImpl);
+      const fetched = await fetchSyntxMediaBytes(url, fetchImpl, { signal });
       images.push({ b64_json: fetched.bytes.toString("base64") });
     } else {
       images.push({ url });
@@ -127,6 +117,7 @@ async function runSyntxImageJob(options: {
   startTime: number;
   log?: { info?: (...args: unknown[]) => void; error?: (...args: unknown[]) => void };
   fetchImpl: typeof fetch;
+  signal?: AbortSignal | null;
 }) {
   const uploaded = await collectUploadedImageRefs(options.token, options.body, options.fetchImpl);
   const { aiName, modelType } = resolveSyntxMediaTarget(options.model, "image");
@@ -161,7 +152,8 @@ async function runSyntxImageJob(options: {
   const images = await imagesFromUrls(
     urls,
     String(options.body.response_format || "").toLowerCase() === "b64_json",
-    options.fetchImpl
+    options.fetchImpl,
+    options.signal ?? null
   );
   options.log?.info?.("IMAGE", `SYNTX generated ${images.length} image(s) via ${options.model}`);
   return saveImageSuccessResult({
@@ -179,6 +171,7 @@ export async function handleSyntxImageGeneration({
   credentials,
   log,
   fetchImpl = fetch,
+  signal = null,
 }: {
   model: string;
   provider: string;
@@ -191,6 +184,7 @@ export async function handleSyntxImageGeneration({
   };
   log?: { info?: (...args: unknown[]) => void; error?: (...args: unknown[]) => void };
   fetchImpl?: typeof fetch;
+  signal?: AbortSignal | null;
 }) {
   const startTime = Date.now();
   const prompt = typeof body.prompt === "string" ? body.prompt.trim() : "";
@@ -227,6 +221,7 @@ export async function handleSyntxImageGeneration({
       startTime,
       log,
       fetchImpl,
+      signal,
     });
   } catch (error) {
     const status = error instanceof SyntxMediaError ? error.status : 502;

@@ -149,6 +149,10 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "bearer",
     costPerQuery: 0.008,
+    // 1 credit ($0.008) for basic / fast / ultra-fast, 2 credits for advanced:
+    // https://docs.tavily.com/documentation/api-credits
+    costByMode: { advanced: 0.016 },
+    costModeField: "search_depth",
     freeMonthlyQuota: 1000,
     searchTypes: ["web", "news", "finance"],
     defaultMaxResults: 5,
@@ -166,7 +170,9 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     method: "POST",
     authType: "apikey",
     authHeader: "bearer",
-    costPerQuery: 0.005,
+    // buildNimbleRequest() always sends search_depth "lite": $1.10 per 1K
+    // (standard is $5.00). https://docs.nimbleway.com/nimble-sdk/admin/pricing
+    costPerQuery: 0.0011,
     freeMonthlyQuota: 0,
     searchTypes: ["web", "news"],
     defaultMaxResults: 5,
@@ -174,6 +180,22 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     // Kept below GLOBAL_TIMEOUT_MS (handlers/search.ts) so a stalled Nimble call
     // still leaves budget for the failover provider instead of burning the whole
     // request window.
+    timeoutMs: 10_000,
+    cacheTTLMs: 5 * 60 * 1000,
+  },
+
+  "kimi-search": {
+    id: "kimi-search",
+    name: "Kimi Search",
+    baseUrl: "https://api.moonshot.ai/v1/tools/search",
+    method: "POST",
+    authType: "apikey",
+    authHeader: "bearer",
+    costPerQuery: 0.005, // $0.005 per successful non-empty call — platform.kimi.ai/docs/pricing/tools
+    freeMonthlyQuota: 0,
+    searchTypes: ["web"],
+    defaultMaxResults: 5,
+    maxMaxResults: 20,
     timeoutMs: 10_000,
     cacheTTLMs: 5 * 60 * 1000,
   },
@@ -221,6 +243,10 @@ export const SEARCH_PROVIDERS: Record<string, SearchProviderConfig> = {
     authType: "apikey",
     authHeader: "bearer",
     costPerQuery: 0.005,
+    // searchResults output: fast / standard $0.005, deep $0.05 per call:
+    // https://docs.linkup.so/pages/documentation/development/pricing
+    costByMode: { deep: 0.05 },
+    costModeField: "depth",
     freeMonthlyQuota: 1000,
     searchTypes: ["web"],
     defaultMaxResults: 5,
@@ -512,6 +538,8 @@ export const SEARCH_PROVIDER_ALIASES: Record<string, string> = {
   x: "x-search",
   xquik: "xquik-search",
   xquik_search: "xquik-search",
+  kimi: "kimi-search",
+  moonshot: "kimi-search",
   anysearch: "anysearch-search",
   anysearch_search: "anysearch-search",
   parallel: "parallel-search",

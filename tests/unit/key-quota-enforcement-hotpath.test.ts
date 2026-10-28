@@ -49,7 +49,9 @@ function traceReads<T>(read: () => T) {
   }
 }
 
-function assertReads(sql: string[], counterReads: number, ledgerReads: number) {
+// `markerReads`: a capped month that is not already blocked also looks up whether
+// unpriced usage closed it (one key_value primary-key read).
+function assertReads(sql: string[], counterReads: number, ledgerReads: number, markerReads = 0) {
   assert.equal(sql.filter((query) => query.includes("FROM api_key_quota_limits")).length, 1);
   assert.equal(
     sql.filter((query) => query.includes("FROM api_key_quota_counters")).length,
@@ -59,7 +61,8 @@ function assertReads(sql: string[], counterReads: number, ledgerReads: number) {
     sql.filter((query) => query.includes("FROM request_cost_ledger")).length,
     ledgerReads
   );
-  assert.equal(sql.length, 1 + counterReads + ledgerReads);
+  assert.equal(sql.filter((query) => query.includes("FROM key_value")).length, markerReads);
+  assert.equal(sql.length, 1 + counterReads + ledgerReads + markerReads);
 }
 
 for (const config of [undefined, null, 0, -1]) {
@@ -132,7 +135,7 @@ test("monthly quota: an injected zero total skips the ledger but is still enforc
     quotaDomain.checkKeyQuota("key-1", { ...clock, monthTotalUsd: 0 })
   );
   assert.equal(allowed.result.allowed, true);
-  assertReads(allowed.sql, 0, 0);
+  assertReads(allowed.sql, 0, 0, 1);
   const blocked = traceReads(() =>
     quotaDomain.checkKeyQuota("key-1", { ...clock, monthTotalUsd: 5 })
   );
@@ -178,7 +181,7 @@ test("quota status: another key's recorded usage does not consume this key's lim
   const { result, sql } = traceReads(() => quotaDomain.checkKeyQuota("key-2", clock));
   assert.equal(result.allowed, true);
   assert.deepEqual(result.status?.counters, { tpmUsed: 0, rpmUsed: 0, monthlyAmountUsd: 0 });
-  assertReads(sql, 4, 1);
+  assertReads(sql, 4, 1, 1);
 });
 
 test("missing API key: performs no database reads", () => {

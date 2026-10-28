@@ -92,6 +92,36 @@ export function rawLengthStrippingBase64DataUris(value: string): number {
   return value.replace(BASE64_DATA_URI_RE, "").length;
 }
 
+function arrayLength(value: unknown[], seen: Set<object>, stripBase64: boolean): number {
+  let len = 2; // []
+  for (let i = 0; i < value.length; i++) {
+    if (i > 0) len += 1; // comma
+    const item = value[i];
+    // Omitted values render as null inside arrays rather than disappearing.
+    len += isOmitted(item) ? 4 : lengthOf(item, seen, stripBase64);
+  }
+  return len;
+}
+
+function objectLength(value: object, seen: Set<object>, stripBase64: boolean): number {
+  let len = 2; // {}
+  let first = true;
+  for (const key of Object.keys(value)) {
+    const item = (value as Record<string, unknown>)[key];
+    if (isOmitted(item)) continue; // the whole entry disappears
+    if (!first) len += 1; // comma
+    first = false;
+    len += encodedStringLength(key, false) + 1 + lengthOf(item, seen, stripBase64); // "key":value
+  }
+  return len;
+}
+
+function serializedLength(value: object, stripBase64: boolean): number {
+  const encoded = JSON.stringify(value);
+  if (encoded === undefined) return 0;
+  return stripBase64 ? encoded.replace(BASE64_DATA_URI_RE, "").length : encoded.length;
+}
+
 function lengthOf(value: unknown, seen: Set<object>, stripBase64: boolean): number {
   if (value === null) return 4; // "null"
   const type = typeof value;
@@ -114,9 +144,7 @@ function lengthOf(value: unknown, seen: Set<object>, stripBase64: boolean): numb
   // Delegate anything that is not a plain object/array — Date, class instances with toJSON,
   // Map, boxed primitives. Scoped to this subtree so the big arrays stay on the fast path.
   if (!isPlainContainer(obj) || typeof (obj as { toJSON?: unknown }).toJSON === "function") {
-    const encoded = JSON.stringify(obj);
-    if (encoded === undefined) return 0;
-    return stripBase64 ? encoded.replace(BASE64_DATA_URI_RE, "").length : encoded.length;
+    return serializedLength(obj, stripBase64);
   }
 
   if (seen.has(obj)) {
@@ -124,27 +152,9 @@ function lengthOf(value: unknown, seen: Set<object>, stripBase64: boolean): numb
   }
   seen.add(obj);
   try {
-    if (Array.isArray(obj)) {
-      let len = 2; // []
-      for (let i = 0; i < obj.length; i++) {
-        if (i > 0) len += 1; // comma
-        const item = obj[i];
-        // Omitted values render as null inside arrays rather than disappearing.
-        len += isOmitted(item) ? 4 : lengthOf(item, seen, stripBase64);
-      }
-      return len;
-    }
-
-    let len = 2; // {}
-    let first = true;
-    for (const key of Object.keys(obj)) {
-      const item = (obj as Record<string, unknown>)[key];
-      if (isOmitted(item)) continue; // the whole entry disappears
-      if (!first) len += 1; // comma
-      first = false;
-      len += encodedStringLength(key, false) + 1 + lengthOf(item, seen, stripBase64); // "key":value
-    }
-    return len;
+    return Array.isArray(obj)
+      ? arrayLength(obj, seen, stripBase64)
+      : objectLength(obj, seen, stripBase64);
   } finally {
     seen.delete(obj);
   }

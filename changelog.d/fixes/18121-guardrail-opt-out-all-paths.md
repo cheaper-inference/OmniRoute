@@ -1,0 +1,1 @@
+- **fix(sse):** streaming PII redaction now honors the pii-masker opt-out instead of redacting anyway ([#18121](https://github.com/cheaper-inference/OmniRoute/pull/18121)) — thanks @maxmad64bis

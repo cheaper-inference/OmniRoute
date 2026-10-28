@@ -1,5 +1,7 @@
 "use client";
 
+import Icon from "@/shared/components/Icon";
+
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Card, Toggle, Input } from "@/shared/components";
@@ -83,8 +85,8 @@ export function CliproxyConnectionPanel() {
   return (
     <Card padding="md">
       <div className="flex items-center gap-3 mb-4">
-        <div className="size-8 rounded-lg flex items-center justify-center bg-indigo-500/10">
-          <span className="material-symbols-outlined text-indigo-500 text-xl">swap_horiz</span>
+        <div className="size-8 rounded-lg flex items-center justify-center border border-border bg-bg-subtle text-text-main">
+          <Icon name="swap_horiz" size={20} />
         </div>
         <div>
           <h3 className="font-medium text-sm">{t("fallbackRouting")}</h3>
@@ -95,46 +97,36 @@ export function CliproxyConnectionPanel() {
       {msg && (
         <div
           className={`flex items-center gap-1.5 mb-3 px-2 py-1.5 rounded text-xs ${
-            msg.ok
-              ? "bg-green-500/10 text-green-600 dark:text-green-400"
-              : "bg-red-500/10 text-red-600 dark:text-red-400"
+            msg.ok ? "bg-success/10 text-success" : "bg-error/10 text-error"
           }`}
         >
-          <span className="material-symbols-outlined text-[12px]">
-            {msg.ok ? "check_circle" : "error"}
-          </span>
+          <Icon name={msg.ok ? "check_circle" : "error"} size={12} />
           {msg.text}
         </div>
       )}
 
       <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <label className="text-sm">{t("enableFallback")}</label>
-          <Toggle
-            checked={settings.cliproxyapi_fallback_enabled}
-            onChange={(v) => saveSetting("cliproxyapi_fallback_enabled", v)}
-            disabled={saving}
-          />
-        </div>
+        <Toggle
+          label={t("enableFallback")}
+          checked={settings.cliproxyapi_fallback_enabled}
+          onChange={(v) => saveSetting("cliproxyapi_fallback_enabled", v)}
+          disabled={saving}
+        />
 
         {settings.cliproxyapi_fallback_enabled && (
           <>
-            <div>
-              <label className="text-xs text-text-muted mb-1.5 block">{t("cliproxyUrl")}</label>
-              <Input
-                value={settings.cliproxyapi_url}
-                onChange={(e) => saveSetting("cliproxyapi_url", e.target.value)}
-                placeholder="http://127.0.0.1:8317"
-              />
-            </div>
-            <div>
-              <label className="text-xs text-text-muted mb-1.5 block">{t("fallbackCodes")}</label>
-              <Input
-                value={settings.cliproxyapi_fallback_codes}
-                onChange={(e) => saveSetting("cliproxyapi_fallback_codes", e.target.value)}
-                placeholder="502,401,403,429,503"
-              />
-            </div>
+            <Input
+              label={t("cliproxyUrl")}
+              value={settings.cliproxyapi_url}
+              onChange={(e) => saveSetting("cliproxyapi_url", e.target.value)}
+              placeholder="http://127.0.0.1:8317"
+            />
+            <Input
+              label={t("fallbackCodes")}
+              value={settings.cliproxyapi_fallback_codes}
+              onChange={(e) => saveSetting("cliproxyapi_fallback_codes", e.target.value)}
+              placeholder="502,401,403,429,503"
+            />
           </>
         )}
       </div>

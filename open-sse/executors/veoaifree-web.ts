@@ -8,8 +8,9 @@
  */
 import dns from "node:dns";
 import { isIP } from "node:net";
-import { BaseExecutor, type ExecuteInput } from "./base.ts";
+import { BaseExecutor, type ExecuteInput, type ProviderCredentials } from "./base.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
+import { findWordPressLoggedInEntry } from "../utils/wordpressSessionKey.ts";
 import {
   OutboundUrlGuardError,
   isPrivateHost,
@@ -52,6 +53,92 @@ class VeoArtifactError extends Error {
     this.status = status;
     this.retryable = options?.retryable === true;
   }
+}
+
+function isVeoAiFreeLoginRequired(text: string): boolean {
+  if (!text) return false;
+  const lower = text.toLowerCase();
+  return (
+    lower.includes("login to create") ||
+    lower.includes("log in to create") ||
+    lower.includes("please login") ||
+    lower.includes("please log in")
+  );
+}
+
+function normalizeVeoSessionCookie(rawValue: string, defaultName: string): string {
+  const trimmed = (rawValue || "")
+    .trim()
+    .replace(/^bearer\s+/i, "")
+    .replace(/^cookie:/i, "")
+    .trim();
+  if (!trimmed) return "";
+
+  if (trimmed.startsWith("[") && trimmed.endsWith("]")) {
+    try {
+      const parsed = JSON.parse(trimmed);
+      if (Array.isArray(parsed) && parsed.length > 0) {
+        return parsed
+          .filter(
+            (e): e is { name: string; value: string } =>
+              Boolean(e) &&
+              typeof e === "object" &&
+              typeof (e as { name?: unknown }).name === "string" &&
+              typeof (e as { value?: unknown }).value === "string"
+          )
+          .map((e) => `${e.name}=${e.value}`)
+          .join("; ");
+      }
+    } catch {
+      // Fall through to plain string handling
+    }
+  }
+
+  if (trimmed.includes("=")) return trimmed;
+  return `${defaultName}=${trimmed}`;
+}
+
+function extractWordPressCookie(record: Record<string, unknown>): string | null {
+  if (typeof record.cookie === "string" && record.cookie.trim()) {
+    return normalizeVeoSessionCookie(record.cookie.trim(), "wordpress_logged_in");
+  }
+  const entry = findWordPressLoggedInEntry(record);
+  return entry ? normalizeVeoSessionCookie(entry.value, entry.key) : null;
+}
+
+function parseJsonCookieRecord(raw: string): Record<string, unknown> | null {
+  if (!raw.startsWith("{") || !raw.endsWith("}")) return null;
+  try {
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === "object" ? (parsed as Record<string, unknown>) : null;
+  } catch {
+    return null;
+  }
+}
+
+function extractCookieFromApiKey(rawKey?: string): string {
+  if (!rawKey || typeof rawKey !== "string") return "";
+  const trimmed = rawKey.trim();
+  if (!trimmed) return "";
+
+  const record = parseJsonCookieRecord(trimmed);
+  if (record) {
+    const fromJson = extractWordPressCookie(record);
+    if (fromJson) return fromJson;
+  }
+  return normalizeVeoSessionCookie(trimmed, "wordpress_logged_in");
+}
+
+function resolveVeoAiFreeCookie(credentials?: ProviderCredentials): string {
+  if (!credentials) return "";
+
+  const psd = credentials.providerSpecificData;
+  if (psd && typeof psd === "object") {
+    const fromPsd = extractWordPressCookie(psd as Record<string, unknown>);
+    if (fromPsd) return fromPsd;
+  }
+
+  return extractCookieFromApiKey(credentials.apiKey);
 }
 
 // ————————————————————————— Helpers —————————————————————————
@@ -239,9 +326,9 @@ async function postAjax(
   return res.text();
 }
 
-function buildSessionContext(signal?: AbortSignal): VeoSessionContext {
+function buildSessionContext(signal?: AbortSignal, cookieHeader = ""): VeoSessionContext {
   return {
-    cookieHeader: "",
+    cookieHeader,
     userAgent: USER_AGENT,
     origin: BASE_URL,
     referer: `${BASE_URL}/`,
@@ -276,6 +363,13 @@ async function handleImage(
     actionType: "banan-image-generator",
   });
   const trimmed = result.trim();
+  if (isVeoAiFreeLoginRequired(trimmed)) {
+    return errResp(
+      "Authentication required: login to veoaifree.com to generate images",
+      401,
+      "authentication_required"
+    );
+  }
   if (!trimmed || trimmed === "0" || trimmed.toLowerCase().includes("error")) {
     return errResp("Image generation failed");
   }
@@ -363,6 +457,13 @@ async function handleEnhance(
     actionType: "main-prompt-generation",
   });
   const trimmed = result.trim();
+  if (isVeoAiFreeLoginRequired(trimmed)) {
+    return errResp(
+      "Authentication required: login to veoaifree.com to enhance prompts",
+      401,
+      "authentication_required"
+    );
+  }
   if (!trimmed || trimmed === "0") {
     return errResp("Prompt enhancement failed");
   }
@@ -632,6 +733,84 @@ function extractCandidateUrls(value: string): string[] {
     .filter((part) => /^https?:\/\//i.test(part));
 }
 
+function validateSceneDataResponse(sceneData: string): Response | null {
+  if (isVeoAiFreeLoginRequired(sceneData)) {
+    return errResp(
+      "Authentication required: login to veoaifree.com to generate videos",
+      401,
+      "authentication_required"
+    );
+  }
+  if (
+    sceneData.toLowerCase().includes("rate-limit-exceed") ||
+    sceneData.toLowerCase().includes("rate limit")
+  ) {
+    return errResp("Veo AI Free rate limit exceeded", 429, "rate_limit_exceeded");
+  }
+  if (
+    !sceneData ||
+    sceneData === "0" ||
+    sceneData.toLowerCase().includes("error") ||
+    sceneData.startsWith("<") ||
+    sceneData.includes("</")
+  ) {
+    return errResp("Video generation failed");
+  }
+  return null;
+}
+
+async function processCandidateArtifact(
+  context: VeoSessionContext,
+  candidateUrl: string
+): Promise<Response> {
+  let artifactBuffer: Buffer | null = null;
+  try {
+    artifactBuffer = await downloadArtifactWithAvailabilityWindow(context, candidateUrl);
+    const b64 = artifactBuffer.toString("base64");
+    return jsonResp({
+      created: Math.floor(Date.now() / 1000),
+      data: [{ b64_json: b64, format: "mp4" }],
+    });
+  } catch (error) {
+    if (artifactBuffer) artifactBuffer.fill(0);
+    if (error instanceof VeoArtifactError) {
+      return errResp(error.message, error.status, error.code);
+    }
+    throw error;
+  } finally {
+    if (artifactBuffer) artifactBuffer.fill(0);
+  }
+}
+
+async function pollFinalVideoResults(
+  context: VeoSessionContext,
+  nonce: string,
+  sceneData: string
+): Promise<Response | null> {
+  const pollResult = await postAjax(context, nonce, {
+    sceneData,
+    actionType: "final-video-results",
+  });
+  const trimmed = pollResult.trim();
+  if (isVeoAiFreeLoginRequired(trimmed)) {
+    return errResp(
+      "Authentication required: login to veoaifree.com to generate videos",
+      401,
+      "authentication_required"
+    );
+  }
+  if (!trimmed || trimmed === "0" || trimmed.toLowerCase().includes("error")) {
+    return null;
+  }
+
+  const urls = extractCandidateUrls(trimmed);
+  if (urls.length === 0) {
+    return null;
+  }
+
+  return processCandidateArtifact(context, urls[0]);
+}
+
 async function handleVideo(
   context: VeoSessionContext,
   nonce: string,
@@ -645,45 +824,15 @@ async function handleVideo(
     actionType: "full-video-generate",
   });
   const sceneData = genResult.trim();
-  if (!sceneData || sceneData === "0" || sceneData.toLowerCase().includes("error")) {
-    return errResp("Video generation failed");
-  }
+  const earlyErr = validateSceneDataResponse(sceneData);
+  if (earlyErr) return earlyErr;
 
   for (let i = 0; i < MAX_POLLS; i++) {
     await waitForPoll(context.signal);
     throwIfAborted(context.signal);
     try {
-      const pollResult = await postAjax(context, nonce, {
-        sceneData,
-        actionType: "final-video-results",
-      });
-      const trimmed = pollResult.trim();
-      if (!trimmed || trimmed === "0" || trimmed.toLowerCase().includes("error")) {
-        continue;
-      }
-
-      const urls = extractCandidateUrls(trimmed);
-      if (urls.length === 0) {
-        continue;
-      }
-
-      let artifactBuffer: Buffer | null = null;
-      try {
-        artifactBuffer = await downloadArtifactWithAvailabilityWindow(context, urls[0]);
-        const b64 = artifactBuffer.toString("base64");
-        return jsonResp({
-          created: Math.floor(Date.now() / 1000),
-          data: [{ b64_json: b64, format: "mp4" }],
-        });
-      } catch (error) {
-        if (artifactBuffer) artifactBuffer.fill(0);
-        if (error instanceof VeoArtifactError) {
-          return errResp(error.message, error.status, error.code);
-        }
-        throw error;
-      } finally {
-        if (artifactBuffer) artifactBuffer.fill(0);
-      }
+      const outcome = await pollFinalVideoResults(context, nonce, sceneData);
+      if (outcome) return outcome;
     } catch (error) {
       if (error instanceof VeoArtifactError) {
         return errResp(error.message, error.status, error.code);
@@ -737,7 +886,8 @@ export class VeoAIFreeWebExecutor extends BaseExecutor {
       return { response: resp, url: TTS_URL, headers: {}, transformedBody: { intent, model } };
     }
 
-    const context = buildSessionContext(input.signal || undefined);
+    const cookieHeader = resolveVeoAiFreeCookie(input.credentials);
+    const context = buildSessionContext(input.signal || undefined, cookieHeader);
 
     let nonce: string;
     try {

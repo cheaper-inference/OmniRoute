@@ -77,9 +77,9 @@ test("Exa: handleSearch reports the summary and extra-result cost", async () => 
 });
 
 test("providers without costByMode keep their flat costPerQuery", () => {
-  const tavily = SEARCH_PROVIDERS["tavily-search"];
+  const serper = SEARCH_PROVIDERS["serper-search"];
   assert.equal(
-    computeSearchCostUsd(tavily, body({ contents: { summary: true } }), 50),
-    tavily.costPerQuery
+    computeSearchCostUsd(serper, body({ contents: { summary: true } }), 50),
+    serper.costPerQuery
   );
 });

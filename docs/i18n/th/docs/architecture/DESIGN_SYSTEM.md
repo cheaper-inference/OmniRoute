@@ -4,228 +4,138 @@
 
 ---
 
-> **สถานะ:** เอกสารอ้างอิง — การกำหนดมาตรฐานที่อธิบายไว้ในที่นี้ได้รับการ **นำไปใช้แล้ว** (ระยะที่ 1–6: วอลเปเปอร์แบบกริด, primitives, การรวมศูนย์สีสถานะ, โทเค็น mono, การย้าย DataTable มาใช้โทเค็น, focus-ring → accent, primitives สำหรับ Checkbox/Textarea, `cn()` → tailwind-merge, กริดบนทุกหน้าจอแบบ standalone, content shell แบบยืดหยุ่นสำหรับ 4K, พื้นผิว data-table แบบทึบ) เอกสารนี้เป็นคำอธิบายมาตรฐานหลักสำหรับโทเค็นการออกแบบ คอมโพเนนต์ และแนวทางปฏิบัติของแดชบอร์ด โดยยังคงการแบ่งระยะด้านล่างไว้เพื่ออธิบายเหตุผลเบื้องหลังการตัดสินใจแต่ละข้อ
-> **ขอบเขต:** แดชบอร์ด OmniRoute (`src/`) และเว็บไซต์การตลาด (`_mono_repo/omnirouteSite/`) ใช้ **อัตลักษณ์ทางภาพเดียวกัน** — พื้นหลังกริดแบบกระดาษกราฟเดียวกัน (32px), โทเค็นสีเดียวกัน และคอมโพเนนต์ที่กำหนดเป็นมาตรฐานเดียวกัน
->
-> หมายเหตุเชิงปฏิบัติสำหรับผู้ดูแล:
->
-> - ค่า hex แบบฮาร์ดโค้ดบางส่วนที่ยังเหลืออยู่เป็นสิ่งที่ **ตั้งใจไว้** (เทอร์มินัลคอนโซลที่ใช้ธีมมืดเสมอ, เส้น SVG ของ ReactFlow) และต้อง **ไม่** ถูกกวาดไปรวมไว้ในโทเค็น
-> - หากกริดในอินสแตนซ์ที่กำลังทำงานดู "ใหญ่กว่า" แสดงว่าเป็นบิลด์เก่า ไม่ใช่ปัญหาในโค้ด — ขนาดกริดคือ 32px ซึ่งเหมือนกับเว็บไซต์
-> - ค่า `--table-*` ของธีมมืดเหมือนกับค่า rgba แบบฮาร์ดโค้ดก่อนการย้ายทุกไบต์ ส่วนธีมสว่างได้รับการแก้ไขแล้ว (ก่อนหน้านี้มีบั๊กที่ทำให้มืดเสมอจาก fallback ของ `var()` ที่ไม่มีวันถูกใช้)
+> **สถานะ:** แดชบอร์ดถูกสร้างขึ้นบน** เกี๊ยก CI UI Kit** (`@keak/cheaper-inference-ui-kit`) จำหน่ายเป็นพื้นที่ทำงาน `packages/ui-kit` (`@omniroute/ui-kit`; สแน็ปช็อตอัปสตรีมถูกปักหมุดใน `packages/ui-kit/UPSTREAM.md` และป้องกันโดย `npm run check:ui-kit-snapshot`) แสงเป็นธีมที่เป็นที่ยอมรับ การตั้งค่าเริ่มต้นคือ `system` สำเนียงคือ มะนาวเปรี้ยว (`--ci-color-accent`) Switzer เป็นตระกูลเดี่ยวสำหรับ UI ที่แสดงและข้อความโค้ด (`--ci-font-ui`; `--ci-font-display` และ `--ci-font-mono` แก้ไขได้) ซึ่งโฮสต์เองโดยชุดอุปกรณ์เอง (`packages/ui-kit/src/ci-fonts.css` นำเข้าโดย `ci-tokens.css`) ทุกไอคอนเป็นสัญลักษณ์ลูซิด
 
----
+## 1. ตำแหน่งที่อยู่ของสิ่งต่างๆ
 
-## 1. วัตถุประสงค์
+- **Kit.** `packages/ui-kit/src` คือสำเนาที่คัดลอกมาเหมือนกันทุกไบต์ของ `src/` จาก upstream ณ commit ที่ปักหมุดไว้ใน
+  `packages/ui-kit/UPSTREAM.md` (ซึ่งบันทึกการอนุญาตลิขสิทธิ์ไว้ด้วย); `PATCHES.md` แสดงรายการ patch
+  ที่ทำไว้ภายใน (ไม่มี) ชุดนี้ถูกนำไปใช้ในรูปแบบ source โดยตรง โดยไม่ต้อง build: `next.config.mjs` ทำการ transpile ให้ และ
+  `tsconfig.json` แมป `@omniroute/ui-kit` → `packages/ui-kit/src` และ `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (`vitest.config.ts` และ `vitest.mcp.config.ts` ใช้ alias เดียวกัน) ให้ import
+  คอมโพเนนต์ของ kit ผ่าน subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…) เท่านั้น ห้าม import
+  ผ่าน barrel ของ `@omniroute/ui-kit` เด็ดขาด: เพราะ barrel จะดึงทุกคอมโพเนนต์ (รวมถึง date picker)
+  เข้ามาในทุกไฟล์ที่ import สไตล์ชีตของ kit ถูกนำเข้าผ่าน `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-ui.css"`)
+- **Tokens.** `packages/ui-kit/src/ci-tokens.css` ประกาศ token `--ci-*` ไว้; `src/app/globals.css`
+  ทำหน้าที่เป็นสะพานเชื่อม token เหล่านั้นเข้ากับชื่อแบบเดิมของ OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`) เพื่อให้การอ่านค่า `var(--color-*)` ที่มีอยู่เดิมและ Tailwind
+  utilities ยังคงทำงานได้ต่อไป โค้ดใหม่ให้ใช้ Tailwind utilities (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) หรือคลาสของ kit เท่านั้น — ห้ามใช้ค่าสีแบบ hex
+  โดยเด็ดขาด (`tests/unit/design-kit-bridge.test.ts` บังคับใช้การเชื่อมนี้) `text-primary` จะ resolve ไปยัง
+  `--color-primary-ink` ผ่าน `--text-color-primary` (lime-800 ในโหมด light และสี lime accent ในโหมด dark) ทำให้
+  ข้อความ primary ยังอ่านง่าย ขณะที่ `bg-primary`/`border-primary` ยังคงพื้นผิวสี lime ไว้ ชุดข้อมูล (series) ของกราฟใช้
+  `--color-chart-1` … `--color-chart-5`
+- **Themes.** `<html className="ci-theme">` (`src/app/layout.tsx`) เป็นการเปิดให้เอกสารใช้ธีมของ kit
+  ค่าการตั้งค่าคือ `light`, `dark` หรือ `system` (`THEME_CONFIG.defaultTheme = "system"` ใน
+  `src/shared/constants/appConfig.ts`; `system` จะทำตามค่า `prefers-color-scheme`) `applyTheme()` ใน
+  `src/store/themeStore.ts` (ซึ่งมีสคริปต์ bootstrap แบบ inline ใน `src/app/layout.tsx` ที่ทำงาน
+  ก่อน hydration ทำหน้าที่เดียวกันนี้) จะตั้งค่า `data-theme="dark"|"light"` และสลับคลาส `.dark` บน `<html>` ไปพร้อมกัน
+  ชุด token สำหรับธีม dark ของ kit ถูกผูกไว้กับ `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  ส่วนการ override ธีม dark ของ OmniRoute เอง (บล็อก `.dark` ใน `globals.css`) และ Tailwind utilities แบบ `dark:`
+  เดิม ถูกผูกไว้กับคลาส `.dark` ไม่มีพรีเซ็ตสี accent: สี accent มาจาก
+  kit เสมอ และพรีเซ็ตที่เคยบันทึกไว้จาก build เก่าจะถูกลบทิ้งเมื่อ store โหลดขึ้นมา
+- **Components (adapters).** `src/shared/components/index.tsx` คง API ของคอมโพเนนต์ OmniRoute ไว้เหมือนเดิม (ชื่อเดิม
+  default export และ props เดิม) และ primitive ที่อยู่เบื้องหลังคือ adapter ที่ครอบ kit อีกชั้น: กลุ่มฟอร์ม
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), กลุ่ม overlay และ feedback
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  กลุ่มโครงสร้าง (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) และกลุ่มตาราง
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`) adapter จะ import คอมโพเนนต์ของ kit
+  ผ่าน subpath แล้วแมป props แบบเดิมเข้ากับคอมโพเนนต์นั้น — ตัวอย่างเช่น `Button variant="primary"` คือ
+  ปุ่ม `default` ของ kit (`--ci-button-primary-*`: พื้นผิวแบบ inverse ในโหมด light และสี accent พร้อมสีหมึก
+  `--ci-color-accent-foreground` ในโหมด dark), `danger` คือ `destructive` และ `warning` คือ `outline` บวกกับ
+  ส่วนขยาย `.ci-button--warning` กฎ `.ci-button--warning` และ `.ci-badge[data-tone]` ที่อยู่
+  ท้ายไฟล์ `globals.css` (`@layer components`) คือส่วนขยายของ OmniRoute ที่ต่อยอดจากคลาสของ kit
+  `tests/unit/ui/adapters/*.test.tsx` ตรึงพฤติกรรมของ adapter แต่ละตัวไว้
+- **Shell.** `src/app/(dashboard)/layout.tsx` render `DashboardLayout` ซึ่ง render
+  `src/shared/components/layouts/DashboardShell.tsx`: ประกอบด้วย `SidebarProvider` / `Sidebar` /
+  `SidebarInset` ของ kit (`packages/ui-kit/src/sidebar.tsx`) โดยมีตรรกะการนำทางของ OmniRoute อยู่ใน
+  `src/shared/components/Sidebar.tsx` ลิงก์ "skip to content" ที่ชี้ไปยัง `#main-content` คือองค์ประกอบแรก
+  ที่โฟกัสได้ `src/shared/components/Header.tsx` มี `SidebarTrigger` ของ kit (ตัวสลับ sidebar
+  เพียงตัวเดียวของ shell), `ProductSwitcher` ของ Keak และปุ่มเปิด command palette; ส่วนนี้จะแสดงชื่อ route
+  เฉพาะเมื่อไม่มี `PageHeader` ของ kit (`.ci-page-header`) ถูก mount อยู่ภายใน `#main-content` เท่านั้น เพื่อให้หน้าที่มี
+  `PageHeader` ของตัวเองมี `h1` เพียงอันเดียว `src/shared/components/CommandPalette.tsx` คือ `Dialog` ของ kit
+- **Icons.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) จะแปลงชื่อ (ตาม
+  คำศัพท์ของ Material Symbols ที่หน้าจอต่างๆ ใช้) ผ่าน `ICON_MAP` (`src/shared/constants/iconMap.ts`) ให้เป็น
+  glyph ของ Lucide ฟอนต์และแพ็กเกจของ Material Symbols ถูกนำออกไปแล้วทั้งหมด: ชื่อที่ไม่มีในแมปจะถูก render เป็น
+  glyph ตัวแทนที่เป็นกลาง (`data-icon-missing="true"`) พร้อมบันทึกคำเตือนลงคอนโซลเมื่อไม่ได้รันใน production
+  `npm run gen:icon-map` จะพิมพ์ชื่อที่กำลังถูกใช้งานแต่ไม่มีอยู่ในแมปออกมา
+  (`tests/unit/icon-map-coverage.test.ts` จะล้มเหลวหากมีชื่อใดที่ไม่มีไอคอน Lucide คู่กัน;
+  `tests/unit/icon-map-object-values.test.ts` ครอบคลุมชื่อที่ถูกเก็บไว้ใน lookup object);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` จะเขียน
+  `<span className="material-symbols-outlined">` แบบ literal ใหม่ให้กลายเป็น `<Icon>`
+- **Brand.** `src/shared/components/OmniRouteLogo.tsx` ครอบ kit ไว้อีกชั้น: default export `OmniRouteLogo`
+  จะ render `ProductIcon product="omniroute" variant="glyph"` (SVG แบบ inline ที่ปลอดภัยกับการใช้ `basePath`) และ
+  `OmniRouteLockup` จะ render `ProductLockup product="omniroute"` (ชื่อสำหรับการเข้าถึงคือ "Keak OmniRoute") หรือสำหรับ
+  ผู้ให้บริการแบบ white-label ก็จะใช้ `name`/`logoSrc` ของตนเอง รายการปลายทางของ product switcher อยู่ใน
+  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`) หน้าจอแบบ
+  standalone — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
+  `src/app/offline/page.tsx`, `src/app/not-found.tsx` และ `src/shared/components/ErrorPageScaffold.tsx`
+  — จะแสดง lockup; และ `tests/unit/brand-pages-static.test.ts` คอยคุ้มกันส่วนนี้ไว้
 
-เว็บไซต์การตลาด (`viral.omniroute.online`, `why.omniroute.online`, `omniroute.online`) และแดชบอร์ดผลิตภัณฑ์ควรดูเหมือนเป็น **ผลิตภัณฑ์เดียวกัน** เว็บไซต์ได้นำพาเลตสีมาจากแดชบอร์ดอยู่แล้ว — แม้แต่ `css/tokens.css` ก็ยังระบุว่า _"พาเลตนี้สอดคล้องกับแดชบอร์ด OmniRoute (`src/app/globals.css`)"_ ดังนั้นทั้งสองส่วนจึงสอดคล้องกันในระดับสีประมาณ 80% อยู่แล้ว สิ่งที่แดชบอร์ดยังขาดคือ:
+## 2. กฎเกณฑ์
 
-1. **วอลเปเปอร์กริดแบบกระดาษกราฟ** ที่เว็บไซต์ใช้ในทุกหน้า
-2. **โทเค็นการออกแบบที่ใช้ร่วมกัน** บางส่วนซึ่งเว็บไซต์มีแต่แดชบอร์ดยังไม่มี (สเกลรัศมี, เกรเดียนต์แบรนด์, `surface-2`, ฟอนต์ mono)
-3. **ความสม่ำเสมอในระดับคอมโพเนนต์** — คอมโพเนนต์จำนวนหนึ่งของแดชบอร์ดหลีกเลี่ยงโทเค็นธีมด้วยค่า hex/rgba แบบฮาร์ดโค้ด
+1. โทเค็น ไม่ใช่ตัวอักษร ข้อยกเว้นที่เก็บไว้ตามวัตถุประสงค์: เทอร์มินัลคอนโซลที่มืดตลอดเวลาและ `STATUS_HEX` (`src/shared/constants/statusColors.ts`) มิเรอร์เลขฐานสิบหกที่แก้ไขแล้วของชุดสถานะชุดสำหรับผู้โทรที่ต้องการเลขฐานสิบหกตามตัวอักษร จานสีหมวดหมู่นั้นไม่มีข้อยกเว้นอีกต่อไป: โดยจะขี่บนโทเค็นแผนภูมิห้ารายการของชุด (`--color-chart-1..5`) ผ่าน `src/shared/utils/categoricalPalette.ts` และสำหรับกลยุทธ์การกำหนดเส้นทาง `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow edges และ canvas orchestration จะอ่านตัวแปร `--orch-status-*` ที่รับรู้ธีม (`src/shared/components/flow/edgeStyles.ts`)
+2. ไม่ต้องแพตช์ `packages/ui-kit/src` ด้วยมือ: ซิงค์กับ `scripts/dev/sync-ui-kit.sh <commit>`; pre-commit gate `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) ล้มเหลวในไบต์ใด ๆ ที่แตกต่างจากการคอมมิตอัปสตรีมที่ปักหมุดไว้ (จะข้ามโดยมีคำเตือนเมื่ออัพสตรีมโคลน `UI_KIT_CLONE` หรือ `_references/cheaper-inference-ui-kit` หายไป) เมื่อชุดอุปกรณ์ขาดหายไป ให้แก้ไขโดยใช้อะแดปเตอร์หรือหน้าจอแล้วถามอัปสตรีม
+3. ค่าเริ่มต้นของข้อความ Kit คือภาษาอังกฤษ (`label = "Loading"`, `loadingLabel = "Loading table"`…) — ส่งสตริงที่แปลจาก `useTranslations(...)` ทุกครั้งที่ส่วนประกอบ kit แสดงผลข้อความ
+4. ยูทิลิตี้ Tailwind มีชัยเหนือคลาสส่วนประกอบของชุดคิท (ชุดดังกล่าวประกาศว่า `@layer theme, base, components, utilities` และกฎของมันอยู่ใน `components`) — ใช้ยูทิลิตี้สำหรับการเว้นวรรคและเลย์เอาต์ ไม่ใช่เพื่อเปลี่ยนสีส่วนประกอบของชุดคิท
+5. ส่วนหัว: `.ci-heading` สำหรับชื่อหน้าและส่วน; `.ci-dashboard-display` สำหรับข้อความที่แสดงขนาดใหญ่และกระจัดกระจาย เช่น รหัสสถานะหน้าข้อผิดพลาด ใช้สวิตเซอร์ทั้งคู่
+6. `tests/unit/dashboard-kit-sweep.test.ts` ป้องกันการนำชุดอุปกรณ์ไปใช้: ไม่มีช่วงการมัดวัสดุภายใต้ `src/app` หรือ `src/shared/components`; ในแผนผังแดชบอร์ด (`src/app/(dashboard)` และ `src/shared/components`) ไม่มีดิบ `<select>`, `<textarea>` หรือ `<table>` และไม่มี `role="dialog"` ที่ทำด้วยมือนอกข้อยกเว้นที่ระบุไว้ (สาขาดั้งเดิมของอะแดปเตอร์ `Select`, `RequestLoggerDetail`) `<button>` หรือ `<input>` ดิบทุกรายการจำเป็นต้องมีความคิดเห็นที่มี `kit-exception:` (พร้อมเหตุผล) ซึ่งลงท้ายด้วยไม่เกิน 3 บรรทัดด้านบน จานสีและตัวแปร `dark:` เฉพาะในไฟล์ในรายการทดสอบ
+7. ตรวจสอบทั้งธีมและวิวพอร์ต 390 พิกเซลก่อน PR (ภาพหน้าจอ) `tests/e2e/a11y.spec.ts` วิ่งขวาน
 
-เอกสารนี้คือบทวิเคราะห์และแผนการดำเนินงาน
+## 3. การเพิ่มหน้าจอ
 
----
+1. เปิดหน้าด้วย `PageHeader` ของ kit (`@omniroute/ui-kit/page-header`, `compact` ภายใน dashboard)
+   — ชื่อเรื่อง คำอธิบาย และ `actions` จากนั้นเฮดเดอร์ของ shell จะไม่แสดงชื่อเรื่องของตัวเอง
+2. สร้างคอนโทรลจาก `@/shared/components` (ตัว adapter) และใช้คอมโพเนนต์ของ kit ผ่าน subpath ในกรณีที่
+   ไม่มี adapter (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
+   `Slider`…)
+3. ไอคอน: `<Icon name="…" />` ชื่อใหม่จะถูกเพิ่มเข้าไปใน `ICON_MAP` พร้อมกับคอมโพเนนต์ Lucide ที่ตรงกัน
+   ทางความหมาย; `npm run gen:icon-map` จะแสดงรายชื่อที่ยังขาดอยู่
+4. สี: ใช้ utility เชิงความหมาย (`text-success`, `bg-warning-bg`, `border-border`…) และ
+   `var(--color-chart-N)` สำหรับชุดข้อมูลของกราฟ; ไม่ใช้ค่า hex และไม่ใช้ `dark:` variant ที่เพียงแค่
+   ทำซ้ำสีเดิม
+5. ข้อความ: ทุกสตริง รวมถึง label ที่คุณส่งให้คอมโพเนนต์ของ kit ต้องมาจาก `useTranslations` คีย์ใหม่
+   ให้ใส่ใน `src/i18n/messages/en.json`, `pt-BR.json` และ `vi.json` (การทดสอบ parity ของภาษา
+   เวียดนามจะปักหมุดทุกคีย์ภาษาอังกฤษ); ภาษาอื่น ๆ จะถูกเติมโดยการซิงก์ i18n
+6. รันตัวคุ้มกันก่อน PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+   `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+   `npm run check:dashboard-typecheck` (การตรวจสอบเพียงตัวเดียวที่จับ import ที่ซ้ำกันใน `iconMap.ts`
+   ได้), `npm run check:ui-icu` และการทดสอบของหน้าจอนั้นเอง
 
-## 2. หลักการ
+## 4. การเพิ่มหรือเปลี่ยนแปลง adapter
 
-- **แหล่งข้อมูลจริงเพียงแหล่งเดียว = `src/app/globals.css`** เว็บไซต์จะสอดคล้องตามแดชบอร์ด ไม่ใช่ในทางกลับกัน โทเค็นใหม่ต้องถูกเพิ่มใน `globals.css` ก่อนเสมอ
-- **ใช้โทเค็น ไม่ใช้ค่าคงที่โดยตรง** คอมโพเนนต์ต้องใช้โทเค็นเชิงความหมาย (`bg-surface`, `text-primary`, `border-border`) ไม่ใช้ค่า `#hex` ดิบ
-- **ละเอียดอ่อน ไม่ฉูดฉาด** กริดเป็นวอลเปเปอร์จาง ๆ ที่อยู่ด้านหลังเนื้อหา — ต้องไม่ลดคอนทราสต์ของข้อความหรือแย่งความสนใจจาก UI
-- **รองรับธีม** ทุกอย่างต้องทำงานได้ทั้งใน `.dark` (รูปลักษณ์อันเป็นเอกลักษณ์ของผลิตภัณฑ์) และธีมสว่าง
-- **ทยอยเปิดใช้อย่างแม่นยำ** ส่งมอบกริดและโทเค็นก่อน (ความเสี่ยงต่ำ มองเห็นผลชัดเจน) จากนั้นจึงปรับปรุงคอมโพเนนต์เป็นระลอก
+1. รักษา public API ของ `src/shared/components/index.tsx` ไว้: ชื่อ export เหมือนเดิม, default exports และ props ที่รับ โดยแมป legacy props ไปยัง kit ภายใน adapter (ดู `Button.tsx`: `VARIANT_TO_KIT`, `SIZE_TO_KIT`)
+2. import kit ด้วย subpath (`@omniroute/ui-kit/<component>`)
+3. workaround สำหรับช่องว่างของ kit ให้อยู่ใน adapter (หรือใน `globals.css` `@layer components` เมื่อการแก้ไขเป็น style) ห้ามอยู่ใน `packages/ui-kit/src`
+4. เพิ่มหรืออัปเดต `tests/unit/ui/adapters/<name>.test.tsx` สำหรับ adapter ที่มี caller จำนวนมาก ให้เปรียบเทียบ markup ที่ render ก่อนและหลังการเปลี่ยนแปลง — การเปลี่ยน padding หรือ wrapper จะแพร่ไปทุกหน้าจอ
 
----
+## 5. การอัปเดต kit
 
-## 3. สถานะปัจจุบัน — สิ่งที่สอดคล้องกันแล้วเทียบกับสิ่งที่ยังไม่สอดคล้อง
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` คัดลอก `src/` จาก upstream ที่ commit นั้นไปยัง `packages/ui-kit/src` และใช้การแปลงเพียงอย่างเดียวที่อนุญาต (ตัด suffix `.js` ออกจาก relative imports) จากนั้น: ตรวจสอบ `git diff packages/ui-kit`, ตรวจด้วยสายตาบนหน้า providers, settings, combos, usage และ endpoint ในทั้งสองธีม, รัน `npm run check:ui-kit-snapshot` และ `npm run test:vitest:ui`, แล้วเปิด PR พร้อมกับ changelog ของ upstream
 
-### 3.1 สี — รวมเป็นหนึ่งเดียวแล้ว ✅
+## 6. ไดอะแกรม README
 
-สีแบรนด์และพื้นผิวทั้งหมดตรงกับเว็บไซต์อยู่แล้ว **ในแง่ของค่า** (แตกต่างกันเฉพาะชื่อ — แดชบอร์ดใช้คำนำหน้า `--color-`) ตรวจสอบแล้วใน `src/app/globals.css:30-128`:
+ไดอะแกรมทั้งสิบสองไดอะแกรมที่รูต `README.md` ฝัง (`docs/diagrams/*.svg`) เป็นชุดที่ใช้กับรูปภาพคงที่ และไดอะแกรมเหล่านั้นถูกสร้างขึ้น ไม่ได้วาดด้วยมือ: ไฟล์ตัวสร้าง 13 ไฟล์ที่ `scripts/docs/gen-readme-*.mjs` (สิบสองไดอะแกรมบวกกับไดรเวอร์ `gen-readme-diagrams.mjs` ) และการทดสอบความเก่า 12 รายการที่ `tests/unit/docs/readme-*-svg.test.ts` หนึ่งรายการต่อไดอะแกรม แต่ละไบต์จะเปรียบเทียบไฟล์ที่คอมมิตกับเอาต์พุตของตัวสร้าง (งาน `test-unit`)
 
-| แนวคิด                            | โทเค็นเว็บไซต์ (`tokens.css`)               | โทเค็นแดชบอร์ด (`globals.css`)  | ความสอดคล้อง     |
-| --------------------------------- | ------------------------------------------- | ------------------------------- | ---------------- |
-| สีหลัก                            | `--primary #e54d5e`                         | `--color-primary #e54d5e`       | ✅               |
-| สีหลักเมื่อโฮเวอร์                | `--primary-hover #c93d4e`                   | `--color-primary-hover #c93d4e` | ✅               |
-| สีเน้น                            | `--accent #6366f1`                          | `--color-accent #6366f1`        | ✅               |
-| สีเน้น 2                          | `--accent-2 #8b5cf6`                        | `--color-accent-hover #8b5cf6`  | ✅ (เปลี่ยนชื่อ) |
-| สีเน้น 3                          | `--accent-3 #a855f7`                        | `--color-accent-light #a855f7`  | ✅ (เปลี่ยนชื่อ) |
-| สำเร็จ / คำเตือน / ข้อผิดพลาด     | `#22c55e / #f59e0b / #ef4444`               | เหมือนกัน                       | ✅               |
-| ไฟสถานะ                           | `#ff5f56 / #ffbd2e / #27c93f`               | เหมือนกัน                       | ✅               |
-| พื้นหลังมืด / พื้นผิว / เส้นขอบ   | `#0b0e14 / #161b22 / rgba(255,255,255,.08)` | เหมือนกัน                       | ✅               |
-| พื้นหลังสว่าง / พื้นผิว / ข้อความ | `#f9f9fb / #fff / #1a1a2e`                  | เหมือนกัน                       | ✅               |
+- **โทเค็น** `scripts/docs/readme-diagram-theme.mjs` คัดลอกจานสีจาก `packages/ui-kit/src/ci-tokens.css` (ปักหมุดไว้กับไฟล์นั้นโดย `tests/unit/docs/readme-diagram-theme.test.ts`) และกำหนดบทบาทข้อความบนใบหน้าก่อนหน้าของ kit — Instrument Serif สำหรับการแสดงผล, Inter สำหรับข้อความ UI, IBM Plex Mono สำหรับตัวเลขและโค้ด — จากแพ็คเกจ `@fontsource` (แดชบอร์ดเองใช้ Switzer ของ kit ตั้งแต่ kit 0.0.66) ค่าแสงอยู่บน `:root` ค่ามืดอยู่ด้านหลัง `prefers-color-scheme: dark` ภายในไฟล์ ดังนั้นแต่ละภาพจึงเป็นไปตามโครงร่างของผู้ดูบน GitHub
+- **แบบอักษร** `scripts/docs/readme-fonts.mjs` ซับเซ็ตไฟล์ woff2 เหล่านั้นไปยังสัญลักษณ์ที่แต่ละไดอะแกรมวาดและฝังไว้เป็น `@font-face` `data:` URIs — วิธีเดียวที่การพิมพ์ชุดคิทจะเข้าถึงอิมเมจ README เนื่องจาก GitHub Markdown ไม่มี CSS และพร็อกซี camo จะบล็อกทุกการดึงข้อมูลภายนอก ชุดย่อยเป็นภาษาละตินเท่านั้น อนุญาตให้ใช้สัญลักษณ์สัญลักษณ์ที่ถอยกลับไปยังสแต็กระบบได้ทีละรายการใน `SYMBOL_FALLBACKS` และการพ่นสัญลักษณ์อื่นๆ ที่ไม่เปิดเผย
+- **สร้างใหม่** `npm run docs:readme-diagrams` เขียนใหม่ทั้งสิบสองตามลำดับ README และพิมพ์หนึ่งบรรทัดต่อไฟล์ด้วยขนาดของมัน เครื่องกำเนิดไฟฟ้าตัวเดียวยังทำงานด้วยตัวเอง (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` ต้องการ `node --import tsx/esm` เนื่องจากตัวเลขของมันมาจากตัวโหลดแค็ตตาล็อกสดใน `open-sse/config/freeModelCatalog.ts`; ผลลัพธ์ CI ของการเปลี่ยนแปลงแค็ตตาล็อกอยู่ใน `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`) คอมมิตตัวสร้างและ SVG ร่วมกัน
+- **การพิสูจน์.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` เรนเดอร์ไฟล์ในแบบที่ GitHub ให้บริการ (แท็ก `<img>`, `Content-Security-Policy` ของ camo , `image/svg+xml`) จับแสงและกรอบสีเข้ม และรายงานแบบอักษรภายนอกที่ร้องขอเพจที่สร้าง (ต้องเป็น 0)
+- **งบประมาณ.** ต่ำกว่า 200 KB ต่อไฟล์ (การทดสอบความเก่าแต่ละครั้งยืนยัน) 500 KB เป็นฮาร์ดแคปสำหรับอิมเมจ README ใดๆ (กฎของเครื่องมือตรวจสอบ SVG studio)
+- **คัดลอกไม่เปลี่ยนแปลงนับจากประตู** การรีแบรนด์เปลี่ยนประเภทและจานสี ไม่ใช่คำ: ตัวสร้างแต่ละตัวจะมีสำเนาของไดอะแกรมเป็นค่าคงที่ `*_COPY` (หรือสร้างจากแค็ตตาล็อกสด) ซึ่งเป็นทั้งข้อความที่วาดและอินพุตชุดย่อยแบบอักษร ตัวเลข Canonical อยู่ในโหนด `<text>` อ่านโดย `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); การทดสอบความเก่าของไดอะแกรมที่เกทอ่านยังรันเครื่องมือตรวจสอบความถูกต้องในไฟล์ที่สร้างขึ้น ดังนั้นตัวเลขที่เบี่ยงเบนไปจากโค้ดจึงไม่ผ่านการทดสอบ - แก้ไขแหล่งที่มาที่เกทอ่าน ไม่ใช่ตัวเลขในตัวสร้าง
 
-**ข้อสรุป:** ไม่จำเป็นต้องย้ายระบบสี อัตลักษณ์ถูกใช้ร่วมกันอยู่แล้ว เรากำลัง _ทำให้เสร็จสมบูรณ์_ ไม่ใช่สร้างขึ้นใหม่
+## 7. ดัชนีอ้างอิง
 
-### 3.2 ช่องว่าง — สิ่งที่แดชบอร์ดยังขาด
-
-| ช่องว่าง                   | เว็บไซต์มี                                                                    | แดชบอร์ด                                                               | การดำเนินการ                 |
-| -------------------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------- | ---------------------------- |
-| **วอลเปเปอร์แบบกริด**      | กระดาษกราฟ `body::before`, `--grid-line`, `--grid-size 32px`, `--section-alt` | **✅ เพิ่มแล้ว (ระยะที่ 1)**                                           | **ส่วน A**                   |
-| **สเกลรัศมี**              | `--radius 14px`, `--radius-sm 9px`                                            | เพิ่ม `--radius 14px` แล้ว; `-sm` + การชี้คอมโพเนนต์ใหม่ยังรอดำเนินการ | **ส่วน B / ระยะที่ 2**       |
-| **กราเดียนต์ของแบรนด์**    | `--grad-brand 135deg primary→accent-3`                                        | **✅ เพิ่มโทเค็นแล้ว (ระยะที่ 1)**; นำไปใช้ในระยะที่ 2                 | **ส่วน B**                   |
-| **พื้นผิวซ้อน**            | `--surface-2 #1c2230`                                                         | **✅ เพิ่มแล้ว (ระยะที่ 1)**                                           | **ส่วน B**                   |
-| **ฟอนต์โมโนสเปซ**          | `--font-mono` (ชุดฟอนต์ ui-monospace)                                         | รอดำเนินการ (ระยะที่ 4 พร้อมส่วนที่นำไปใช้)                            | **ส่วน B**                   |
-| **`text-muted` (โหมดมืด)** | `#8b8b9e`                                                                     | `#a1a1aa` (zinc-400)                                                   | ปรับให้สอดคล้อง — **ส่วน B** |
-
-### 3.3 กลไกการกำหนดธีม (เพื่อไม่ให้เราทำสิ่งใดเสียหาย)
-
-- **Tailwind v4 แบบ CSS-first** (ไม่มี `tailwind.config.*`) โทเค็นถูกกำหนดใน `:root`/`.dark` และเปิดให้ยูทิลิตีใช้งานผ่าน `@theme inline` (`globals.css:130-179`)
-- **โหมดมืดผ่านคลาส `.dark`** บน `<html>` (`@custom-variant dark` ที่ `globals.css:22`) สลับด้วยสโตร์ Zustand แบบกำหนดเอง (`src/store/themeStore.ts`) โดยธีมเริ่มต้น = `system` (`src/shared/constants/appConfig.ts:11`) ส่วนเว็บไซต์ใช้ `html[data-theme="light"]` แทน — **กลไกแตกต่างกันแต่ไม่เคยทำงานร่วมกัน** (คนละต้นทาง) ดังนั้นจึงไม่มีข้อขัดแย้ง เรายังคงใช้กลไก `.dark` ของแดชบอร์ด
-- **มีการแทนค่าหลักขณะรันไทม์** (`themeStore.ts:85-97`, ค่าที่ตั้งไว้ล่วงหน้าใน `COLOR_THEMES`) — ผู้ใช้สามารถสลับ `--color-primary` ได้ โทเค็นใหม่ใดๆ (กราเดียนต์ ฯลฯ) ที่อ้างอิง `--color-primary` จะรับค่าที่แทนเหล่านั้นโดยอัตโนมัติ ✅
-- **ชื่อรัศมีที่สงวนไว้ของ Tailwind v4:** `--radius-sm/md/lg/...` รองรับยูทิลิตี `rounded-*` การกำหนดค่าใหม่จะเปลี่ยน `rounded-*` ที่มีอยู่ทั้งหมดโดยมีผลย้อนหลัง (เช่น มีการใช้ `rounded-sm` ใน 12 ไฟล์) ดังนั้น ค่ารัศมีขนาดเล็กและการชี้คอมโพเนนต์ใหม่จึงตั้งใจเลื่อนไปดำเนินการในระยะที่ 2 ซึ่งส่วนที่นำไปใช้จะเปลี่ยนพร้อมกัน
-
----
-
-## 4. ส่วน A — พื้นหลังตารางกระดาษกราฟ (สิ่งที่ขอเป็นหลัก) — ดำเนินการแล้ว (เฟส 1)
-
-### 4.1 คืออะไร
-
-สูตรเดียวกับที่ใช้ในเว็บไซต์ (`_mono_repo/omnirouteSite/css/base.css`): **pseudo-element แบบคงที่เต็ม viewport** ซึ่งวาดเส้นไล่ระดับขนาด 1px สองเส้น และอยู่ที่ `z-index:-1` ด้านหลังเนื้อหาทั้งหมด
-
-```css
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  z-index: -1;
-  pointer-events: none;
-  background-image:
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: var(--grid-size) var(--grid-size);
-}
-```
-
-**เหตุผลที่วิธีนี้ใช้งานได้แม้ `body` จะมี `background-color` แบบทึบ:** `::before` ที่มี `z-index:-1` จะถูกวาด _เหนือ_ พื้นหลังขององค์ประกอบเอง แต่ _ใต้_ เนื้อหาที่อยู่ใน flow ขององค์ประกอบนั้น ดังนั้น `--color-bg` จึงเป็นสีพื้นฐาน ตารางจะถูกซ้อนอยู่ด้านบน และแอปจะแสดงผลอยู่เหนือตาราง
-
-### 4.2 รูปแบบที่มีอยู่แล้วใน codebase
-
-`src/app/landing/page.tsx:16-26` **มีการใช้ตารางแบบเดียวกันนี้ในระดับหน้าอยู่แล้ว** — แต่ใช้เส้นสี **แดง** (`#E54D5E`, ความทึบ `0.06`) ที่ระยะ **50px** พร้อมลูกแก้วเคลื่อนไหว ดังนั้นรูปแบบนี้จึงผ่านการพิสูจน์แล้วในผลิตภัณฑ์ งานนี้เป็นการยกระดับให้เป็นวอลเปเปอร์แบบ **ส่วนกลางและรองรับธีม**
-
-### 4.3 Token ที่เพิ่มเข้ามา (ใน `globals.css`)
-
-```css
-:root {
-  /* โหมดสว่าง — ปรับความทึบของตารางเพิ่มขึ้นจาก 0.045 ของเว็บไซต์ เพื่อให้มองเห็น
-     วอลเปเปอร์ได้จริงบนแดชบอร์ดที่หนาแน่น (การ์ด/ส่วน chrome ปิดบัง viewport ส่วนใหญ่) */
-  --grid-line: rgba(0, 0, 0, 0.07);
-  --grid-size: 32px;
-  --section-alt: rgba(0, 0, 0, 0.022);
-}
-.dark {
-  /* โหมดมืด — ปรับเพิ่มขึ้นจาก 0.035 ด้วยเหตุผลเดียวกัน */
-  --grid-line: rgba(255, 255, 255, 0.06);
-  --section-alt: rgba(255, 255, 255, 0.018);
-}
-```
-
-### 4.4 ตัวขัดขวางเพียงจุดเดียว — นำออกแล้ว
-
-ตารางเป็นแบบส่วนกลางโดยโครงสร้าง (ครอบคลุม panel, `auth`/`login`, หน้าข้อผิดพลาด — ทุก route — พร้อมกัน) มีองค์ประกอบ **เพียงหนึ่ง** รายการที่ซ่อนตารางไว้ภายใน panel:
-
-- `src/shared/components/layouts/DashboardLayout.tsx` — wrapper ชั้นนอกวาดพื้นหลัง `bg-bg` แบบทึบ ทุกอย่างด้านล่างโปร่งใสอยู่แล้ว (`<main>`, scroll container และองค์ประกอบชั้นใน `max-w-7xl`) ดังนั้น **การนำ `bg-bg` ออก** จะทำให้ตารางของ body แสดงผ่านพื้นที่เนื้อหาได้ (`--color-bg` ของ body ยังคงเป็นสีพื้นฐาน)
-
-  ```diff
-  - <div className="flex h-dvh min-h-0 w-full overflow-hidden bg-bg">
-  + <div className="flex h-dvh min-h-0 w-full overflow-hidden">
-  ```
-
-### 4.5 การทำงานร่วมกับ chrome (sidebar / header)
-
-- `Header` (`Header.tsx:207`, `bg-bg`) และ `Sidebar` (`Sidebar.tsx:430`, `bg-sidebar`) ยังคง **ทึบ** → ตารางจะแสดงเฉพาะใน **พื้นที่เนื้อหา** โดยมี chrome สีทึบล้อมกรอบไว้ เป็นค่าเริ่มต้นที่ดูสงบ และสอดคล้องกับวิธีที่เว็บไซต์แยก chrome ออกจาก canvas (การตัดสินใจ D3 = แบบทึบ)
-
-### 4.6 หน้า Login / auth / error
-
-หน้าเหล่านี้แสดงผลโดยตรงภายใต้ `<body>` (ไม่มี chrome ของ panel) ดังนั้นตารางส่วนกลางควรแสดงอยู่ด้านหลังโดยอัตโนมัติ **เฟส 5 — เสร็จสิ้น:** wrapper แบบเต็มหน้าจอที่แยกอิสระเดิมเป็นแบบทึบ (`min-h-screen … bg-bg` โดย `bg-bg` เป็นสีทึบเดียวกับ `<body>`) ซึ่งซ่อนตารางในหน้าจอทั้งหมดที่ไม่ใช่แดชบอร์ด — ไม่ได้มีแค่หน้า login ขณะนี้ wrapper ทั้งหมดโปร่งใสแล้ว เพื่อให้วอลเปเปอร์ที่ใช้ร่วมกันแสดงผ่านได้ ได้แก่ `login`, `forgot-password`, `callback`, `maintenance`, `offline`, `status`, `terms`, `privacy`, `onboarding` และ `ErrorPageScaffold` (ครอบคลุม `400`/`401`) การดำเนินการนี้ปิด **D4** (ขยายจากเฉพาะหน้า login เป็นทุกหน้าจอแบบแยกอิสระ) และมี `tests/unit/design-grid-background.test.ts` คอยป้องกันการถดถอย
-
-### 4.7 หน้า Landing
-
-`landing/page.tsx` ยังคงใช้พื้นหลังเคลื่อนไหวที่มีรายละเอียดมากกว่าเดิม (ลูกแก้ว + vignette) — เป็นหน้าเปิดตัวทางการตลาดโดยเฉพาะ (การตัดสินใจ D5 = คงไว้ตามเดิม)
-
----
-
-## 5. ส่วน B — การรวมโทเค็นให้เป็นหนึ่งเดียว
-
-เฟส 1 เพิ่มโทเค็นอัตลักษณ์ที่ยังไม่ถูกใช้งานและไม่เกิดการชนกัน (`--surface-2`/`--color-surface-2`, `--grad-brand`, `--radius`) เฟส 2 เชื่อมสเกลรัศมีเข้ากับ Tailwind และปรับคอมโพเนนต์ให้อ้างอิงโทเค็นใหม่ ส่วนเฟส 4 เพิ่ม `--font-mono` พร้อมส่วนที่ใช้งานโทเค็นนี้
-
-| โทเค็น                        | เหตุผล                                                       | เฟส                                   |
-| ----------------------------- | ------------------------------------------------------------ | ------------------------------------- |
-| `--radius` / `--radius-sm`    | ใช้สเกลรัศมีเดียว (14/9) แทนค่าเฉพาะกิจ 6/8/12               | 1 (ค่า) / 2 (เชื่อม + ปรับการอ้างอิง) |
-| `--grad-brand`                | เกรเดียนต์แบรนด์สำหรับ CTA หลัก (แดง→ม่วง) ให้ตรงกับเว็บไซต์ | 1 (โทเค็น) / 2 (Button)               |
-| `--surface-2`                 | พาเนลซ้อน / ส่วนหัวตาราง / แถวแบบ inset                      | 1                                     |
-| `--font-mono`                 | บล็อกโค้ด เทอร์มินัล ID และ endpoint                         | 4                                     |
-| ปรับ `--text-muted` ให้ตรงกัน | เลือกค่าเดียวระหว่างเว็บไซต์↔พาเนล (แนะนำ `#a1a1aa`)         | 2                                     |
-
-**D2 (text-muted):** เว็บไซต์ใช้ `#8b8b9e` ส่วนแดชบอร์ดใช้ `#a1a1aa` แนะนำให้คง **`#a1a1aa` ของแดชบอร์ด** และอัปเดต _เว็บไซต์_ ให้ตรงกัน เป็นการปรับด้านรูปลักษณ์
-
----
-
-## 6. ส่วน C — การกำหนดมาตรฐานคอมโพเนนต์ (เฟส 2–4)
-
-คอมโพเนนต์แบบกำหนดเอง (ไม่ใช้ shadcn/Radix), Tailwind v4 และมีการนำโทเค็นเชิงความหมายมาใช้ **เป็นส่วนใหญ่** (195 ไฟล์ import ผ่าน barrel ที่ใช้ร่วมกัน) งานที่เหลือคือการนำ **ทางลัดที่ข้ามระบบ** ออก ตำแหน่งหลัก: `src/shared/components/`
-
-| #   | รายการ                                          | ไฟล์                                                                                                                            | ปัญหา → เป้าหมาย                                                                                                                                 | เฟส |
-| --- | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ | --- |
-| C1  | **ปรับรัศมีให้สอดคล้องกัน**                     | `Button.tsx:14-18`, `Card.tsx:39`, `Modal.tsx`, `Input.tsx`, `Select.tsx`                                                       | ใช้ค่า 6/8/12px ปะปนกัน → `--radius`/`--radius-sm` (14/9)                                                                                        | 2   |
-| C2  | **เกรเดียนต์ของ Button + ตัวแปร `accent`**      | `Button.tsx:5-12`                                                                                                               | primary เป็นแดง→แดงแบบเรียบ; ปรับให้ตรงกับ `--grad-brand`; เพิ่มตัวแปร `accent` ที่ขาดหายไป มีผู้นำเข้า ~195 รายการ — มองเห็นผลกระทบได้มากที่สุด | 2   |
-| C3  | **ตาราง**                                       | `DataTable.tsx:122-176`, `logTableStyles.ts`, `globals.css:405-414`                                                             | ใช้ rgba แบบ hardcode ใน inline 100% + ตัวแปรที่ไม่มีอยู่จริง; ย้ายไปใช้โทเค็นและเลิกใช้สไตล์ที่แตกต่างกัน                                       | 3   |
-| C4  | **รวมสีสถานะไว้ที่ส่วนกลาง**                    | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `ProviderCascadeNode.tsx`, `Badge.tsx` + ตัวช่วย 5 รายการ | มีสำเนาค่า hex เดียวกันมากกว่า 6 จุด → รวมเป็นโมดูลเดียวที่อิงจาก `--color-success/warning/error`                                                | 3   |
-| C5  | **เส้นขอบ Card**                                | `Card.tsx:39`                                                                                                                   | `border-white/5` → สีแบรนด์ `/8`                                                                                                                 | 2   |
-| C6  | **ปรับ focus ring ให้สอดคล้องกัน** ✅ เสร็จแล้ว | `globals.css` `--focus-ring` (accent) เทียบกับ `ring-primary/30` ของ form controls                                              | รวมให้ใช้ **accent (ม่วง)** เพื่อให้ตรงกับ ring ส่วนกลางและแยกความแตกต่างจาก ring ข้อผิดพลาดสีแดงอย่างชัดเจน โดยข้อผิดพลาดยังคงเป็นสีแดง         | 4   |
-| C7  | **เพิ่ม `Checkbox` + `Textarea`**               | `<input>`/`<textarea>` แบบ raw ที่มี inline `accentColor:#6366f1`                                                               | primitive ที่ขับเคลื่อนด้วยโทเค็น                                                                                                                | 4   |
-| C8  | **กวาดล้างค่า hex ที่ hardcode**                | `ConsoleLogViewer.tsx:240`, `ComboLiveStudio.tsx:306`, จุดใน Modal, ไฟล์แผนภูมิ ~14 ไฟล์                                        | ค่าคงที่ → โทเค็น                                                                                                                                | 4   |
-| C9  | **`cn()` → clsx + tailwind-merge**              | `src/shared/utils/cn.ts`                                                                                                        | class ที่ขัดแย้งกันซ้อนทับกัน; จำเป็นสำหรับ override ใน C1                                                                                       | 2   |
-
-**สอดคล้องกับแบรนด์อยู่แล้ว (ขับเคลื่อนด้วยโทเค็น ต้องปรับเฉพาะรัศมี):** `Badge`, `Toggle`, `SegmentedControl`, `Input`, `Select`.
-
----
-
-## 7. แผนการทยอยเปิดใช้
-
-- **เฟส 1 — กริด + โทเค็นอัตลักษณ์ (PR นี้)** กริดใน `globals.css` + โทเค็น `--surface-2`/`--grad-brand`/`--radius`; วอลเปเปอร์ `body::before`; นำตัวขัดขวาง `bg-bg` ออก; การทดสอบแบบ guard เชิงสแตติก ความเสี่ยงต่ำและย้อนกลับได้ในคอมมิตเดียว
-- **เฟส 2 — คอมโพเนนต์พื้นฐาน (C1, C2, C5) — เสร็จแล้วใน PR นี้** เพิ่มยูทิลิตีรัศมีเชิงความหมาย `rounded-card` (14px) / `rounded-control` (9px) ผ่าน `@theme` (ใช้ชื่อแบบกำหนดเอง ดังนั้นค่าเริ่มต้น `rounded-sm/md/lg/xl` จึงไม่ถูกแตะต้อง — ไม่ทำให้ต้องแก้ทีเดียว 400 ไฟล์); Card/Modal → 14px, Button/Input/Select → 9px; Button แบบ primary → `--grad-brand` (แดง→ม่วง) + variant ใหม่ `accent`; เส้นขอบ Card → โทเค็น `border-border` (0.08) **เลื่อนไว้ก่อน:** `cn()`→tailwind-merge (C9) ต้องใช้ dependency ใหม่; การไล่แก้ `rounded-lg` แบบเฉพาะกิจ (326 ไฟล์) คงไว้ตามเดิม เนื่องจากคอมโพเนนต์พื้นฐานครอบคลุมพื้นผิวส่วนใหญ่แล้ว
-- **เฟส 3 — สีสถานะ + ตาราง (C3, C4) — เสร็จแล้วใน PR นี้** ✅ **C4** (`src/shared/constants/statusColors.ts` — `STATUS_HEX` เป็นแหล่งข้อมูลเดียว; เปลี่ยน `flow/edgeStyles.ts` + `TokenHealthBadge` ให้มาอ้างอิงที่นี่ โดยยังคงค่า hex เดิมทุกประการ) ✅ โทเค็น **`--font-mono`** ✅ **C3 (DataTable)** — แทนที่ rgba แบบ inline ทั้งหมด รวมถึง fallback ที่ไม่มีผลของ `var(--bg-table-header)` / `var(--text-secondary)` ด้วยชุดโทเค็น `--table-*` (`--table-header-bg/-row-zebra/-row-hover/-cell-border/-row-selected`) ซึ่ง **ค่าในโหมดมืดตรงกับ rgba ที่เคย hardcode ไว้ทุกประการ** (โหมดมืดเหมือนเดิมในระดับไบต์) และค่าในโหมดสว่างแก้ปัญหาธีมสว่างที่ก่อนหน้านี้ดูมืดอยู่เสมอ เส้นขอบส่วนหัว → `--color-border`, ข้อความรอง → `--color-text-muted` **ต้องการตรวจสอบภาพก่อน merge** (ส่วนที่ไม่ได้แตะ: `logTableStyles.ts` และกฎ `.ant-table` แบบเก่าของ Ant — แยกต่างหากและมีลำดับความสำคัญต่ำกว่า)
-- **เฟส 4 — เก็บกวาด (C6, C7, C9 เสร็จแล้ว; C8 รอดำเนินการ)** ✅ **C9** `cn()` → `twMerge(clsx(...))` (เพิ่ม clsx + tailwind-merge เป็น dependency แล้ว) — ขณะนี้ `className` ของผู้เรียกใช้จะ _แทนที่_ คลาสที่ขัดแย้งกันของคอมโพเนนต์พื้นฐานได้อย่างถูกต้อง แทนที่จะซ้อนทับกัน ✅ **C7** คอมโพเนนต์พื้นฐาน `Checkbox` + `Textarea` ใหม่ (ขับเคลื่อนด้วยโทเค็นและ export จาก barrel แล้ว; เป็นการเพิ่มแบบไม่กระทบของเดิม — การนำไปใช้แทน checkbox ดิบ 32 จุด / textarea ดิบ 41 จุดสามารถทยอยทำได้) ✅ **C6** ปรับ focus ring ให้สอดคล้องกัน — ขณะนี้ตัวควบคุมฟอร์ม (`Input`/`Select`/`Textarea`/`Toggle`/`Checkbox`) ใช้วงแหวนโฟกัสสี **accent (ม่วง)** เพื่อให้ตรงกับ `--focus-ring` ส่วนกลาง และไม่ชนกับวงแหวนข้อผิดพลาดสีแดง; สถานะข้อผิดพลาดสีแดงยังคงเดิม ⏳ **การไล่แก้ hex ใน C8 ไม่ใช่การค้นหา/แทนที่แบบไม่พิจารณาบริบท** — ยืนยันแล้วว่าจุดต่อไปนี้ _ตั้งใจ_ ใช้แบบเดิมและต้องคงไว้: `ConsoleLogViewer.tsx:240` (เทอร์มินัลที่มืดตลอด), popover ของ `TokenHealthBadge`, เส้น SVG ของ ReactFlow ย้ายเฉพาะค่า hex ที่ตั้งใจให้ปรับตามธีมจริง ๆ เท่านั้น
-
-ในแต่ละเฟส: `npm run lint` + `npm run typecheck:core` + ตรวจสอบภาพ
-
----
-
-## 8. ประเด็นที่ยังต้องตัดสินใจ (คำแนะนำ)
-
-- **D1 — Button แบบ primary:** คงแดง→แดง หรือเปลี่ยนเป็น **แดง→ม่วง `--grad-brand`**? แนะนำ: **แดง→ม่วง** (เฟส 2)
-- **D2 — สีเส้นกริด:** **เป็นกลาง** (สไตล์ของไซต์) — เลือกแล้ว — เทียบกับสีแดงของแบรนด์ ขนาด **32px** (ลดลงประมาณ 30% จากค่าเดิม 46px ตามข้อเสนอแนะของเจ้าของ — ช่องขนาด 46px ดูใหญ่เกินไปบนเลย์เอาต์แดชบอร์ด)
-- **D3 — ความสดของส่วน chrome:** sidebar/header แบบ **ทึบ** — เลือกแล้ว
-- **D4 — กริด Auth/login:** ✅ **เสร็จแล้ว (เฟส 5)** — นำ `bg-bg` แบบทึบออกจาก wrapper เต็มหน้าจอแบบแยกเดี่ยวทั้งหมด (ไม่ใช่เฉพาะหน้า login) เพื่อให้กริดปรากฏในทุกหน้าจอ ดู §4.6
-- **D5 — หน้า Landing:** คง splash แบบเคลื่อนไหวไว้ตามเดิม เลือกแล้ว
-- **D6 — รัศมี 14/9 ทั่วทั้งผลิตภัณฑ์:** แนะนำ: ใช่ (เฟส 2)
-- **D7 — ปล่อยเฟส 1 ก่อน:** เลือกแล้ว
-- **D8 — ความกว้างเลย์เอาต์ (เฟส 5):** shell เนื้อหาของแดชบอร์ดเคยถูกจำกัดไว้ที่ `max-w-7xl` (1280px) ทำให้จัดกึ่งกลางโดยมีพื้นที่ว่างด้านข้างกว้างบนจอภาพขนาดใหญ่ ✅ **เสร็จแล้ว** — เพิ่มเป็น `max-w-[3840px]` แบบยืดหยุ่น (4K จริง): ขณะนี้เนื้อหาจะขยายตาม viewport จนถึงประมาณ 4K และจะจัดกึ่งกลางเมื่อเกินขนาดดังกล่าวเท่านั้น (`DashboardLayout.tsx`) หน้าที่ตั้งใจให้แคบยังคงแคบตามการออกแบบ (`ProviderOnboardingWizard` max-w-5xl, `Rtk`/`CavemanContextPageClient` max-w-6xl)
-- **D9 — ตารางข้อมูลแบบทึบ (เฟส 6):** เมื่อพื้นที่เนื้อหาแดชบอร์ดโปร่งใสแล้ว (เพื่อให้มองเห็นวอลเปเปอร์กริด เฟส 5) ตารางข้อมูลที่ container _ไม่ใช่_ พื้นผิวทึบจะปล่อยให้กริดทะลุผ่านแถวคู่ที่โปร่งใส / zebra ที่มีค่า alpha ต่ำ ✅ **เสร็จแล้ว** — ตารางทุกตัวที่ไม่ได้อยู่ในการ์ดจะวาดพื้นหลังด้วย `bg-surface` (หรือสำหรับคอมโพเนนต์พื้นฐาน `<DataTable>` ใช้ `background: var(--color-surface)` บน scroll container) แก้ไขแล้ว: `DataTable` (คอมโพเนนต์พื้นฐาน), `ProxyLogger`/`RequestLoggerV2` (สีเคลือบ `bg-black/5 dark:bg-black/20` ของ `<Card>` ชนะ `bg-surface` ของ Card ผ่าน tailwind-merge → โปร่งใสประมาณ 95%), `BatchListTab`/`FilesListTab`/`CacheEntriesTab`/`ReasoningCacheTab`/`cache page`/`FreePoolTab`/`ModelMappingTable`/`HeaderTable` รวมถึง "ตาราง" แบบ CSS grid สองรายการในมุมมอง cache (`bg-surface/35` → `bg-surface`) ตรวจสอบแล้วว่าตารางที่อยู่ภายใน `<Card>`/Modal ทึบ และตั้งใจปล่อยไว้โดยไม่แก้ไข (`bg-surface` ตรงนั้นเป็น no-op ที่ซ้ำซ้อน) ตัวกริดเอง **ไม่ต้องเปลี่ยนแปลง** — `body::before` ของแดชบอร์ดเหมือนกับของไซต์ในระดับไบต์ (`--grid-size: 32px`); หากเห็น "กริดใหญ่กว่า" บนอินสแตนซ์ที่กำลังทำงาน แสดงว่าเป็น build เก่าก่อน `#4143` ที่ยังค้างอยู่ ไม่ใช่โค้ด มี `tests/unit/design-grid-background.test.ts` คอยป้องกันการถดถอย (บล็อกเฟส 6)
-
----
-
-## 9. นอกขอบเขต / ความเสี่ยง
-
-- **ไม่มีการเปลี่ยนพาเลตสี** — สีตรงกันอยู่แล้ว เราเพียงเพิ่มโทเค็นที่ขาดหายไป จึงไม่มีความเสี่ยงที่สีของผลิตภัณฑ์จะเปลี่ยน
-- **ไม่มีการเปลี่ยนเอนจินธีม** — คงการใช้ `.dark` + Zustand store ไว้
-- **การปรับรัศมีมุม (เฟส 2) มีขอบเขตกว้าง** — ส่งผลต่อการ์ด/ปุ่ม/อินพุตทั้งหมด ควรตรวจสอบหน้าจอที่มีองค์ประกอบหนาแน่นด้วยสายตา (ตาราง โมดัล) ก่อน merge
-- **ตาราง (C3)** มีสไตล์แบบ hardcode มากที่สุดและมีพื้นที่เสี่ยงต่อ regression สูงที่สุด — แยกดำเนินการใน PR ของตัวเอง
-
----
-
-## 10. ดัชนีอ้างอิง
-
-| ส่วน                          | พาธ                                                                                                                  |
-| ----------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| โทเค็นของแดชบอร์ด             | `src/app/globals.css` (`:root`, `.dark`, `@theme inline`, `body`, `body::before`)                                    |
-| สโตร์ธีม                      | `src/store/themeStore.ts`, `src/shared/components/ThemeProvider.tsx`, `src/shared/constants/appConfig.ts:9-11`       |
-| เชลล์แผง (ปลดบล็อกกริดที่นี่) | `src/shared/components/layouts/DashboardLayout.tsx`                                                                  |
-| Chrome                        | `src/shared/components/Header.tsx:207`, `src/shared/components/Sidebar.tsx:430`                                      |
-| ตัวอย่างอ้างอิงสำหรับกริด     | `src/app/landing/page.tsx:16-26`                                                                                     |
-| คอมโพเนนต์พื้นฐาน             | `src/shared/components/{Button,Card,Input,Select,Badge,Modal,Toggle,SegmentedControl,Loading,Tooltip,DataTable}.tsx` |
-| แหล่งที่มาของสีสถานะ          | `flow/edgeStyles.ts`, `TokenHealthBadge.tsx`, `DegradationBadge.tsx`, `logTableStyles.ts`                            |
-| ยูทิลิตี `cn`                 | `src/shared/utils/cn.ts`                                                                                             |
-| การทดสอบ guard ของเฟส 1       | `tests/unit/design-grid-background.test.ts`                                                                          |
-| แหล่งอ้างอิงของไซต์           | `_mono_repo/omnirouteSite/css/tokens.css`, `css/base.css`                                                            |
+- `src/app/globals.css` — บริดจ์โทเคน, การเขียนทับ `.dark`, ส่วนขยาย `@layer components` ของ OmniRoute
+- `packages/ui-kit/UPSTREAM.md` — คอมมิตต้นน้ำที่ปักหมุดไว้และการอนุญาตสัญญาอนุญาต; `packages/ui-kit/PATCHES.md`
+- `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
+- `src/shared/components/index.tsx` และอะแดปเตอร์ที่อยู่ถัดจากไฟล์นี้; `src/shared/components/layouts/DashboardShell.tsx`,
+  `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`
+- `src/shared/components/Icon.tsx`, `src/shared/constants/iconMap.ts`, `scripts/dev/gen-icon-map.mjs`,
+  `scripts/dev/codemod-material-icons.mjs`
+- `src/shared/components/OmniRouteLogo.tsx`, `src/shared/constants/keakProducts.ts`
+- `src/store/themeStore.ts`, `src/shared/constants/appConfig.ts`, `src/shared/constants/statusColors.ts`
+- `tests/unit/design-kit-bridge.test.ts`, `tests/unit/dashboard-kit-sweep.test.ts`,
+  `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
+  `tests/unit/brand-pages-static.test.ts`, `tests/unit/ui/adapters/*.test.tsx`

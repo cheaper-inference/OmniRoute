@@ -8,79 +8,78 @@
 
 _Senest opdateret: 2026-06-28_
 
-## Resumé
+## Executive Summary
 
-OmniRoute er en lokal AI-routinggateway og et dashboard bygget på Next.js.
-Den leverer et enkelt OpenAI-kompatibelt endpoint (`/v1/*`) og router trafik på tværs af flere upstream-udbydere med oversættelse, fallback, tokenfornyelse og forbrugsregistrering.
+OmniRoute er en lokal AI routing gateway og dashboard bygget på Next.js. Det giver et enkelt OpenAI-kompatibelt slutpunkt (`/v1/*`) og dirigerer trafik på tværs af flere upstream-udbydere med oversættelse, fallback, token-opdatering og brugssporing.
 
-Centrale funktioner:
+Kerneegenskaber:
 
-- OpenAI-kompatibel API-grænseflade til CLI/værktøjer (375 udbydere, 154 eksekveringsmoduler)
-- Oversættelse af forespørgsler og svar på tværs af udbyderformater
-- Fallback med modelkombinationer (sekvens med flere modeller)
-- Strukturerede kombinationstrin (`provider + model + connection`) med runtime-sortering efter `compositeTiers`
-- Fallback på kontoniveau (flere konti pr. udbyder)
-- Forhåndskontrol af kvoter og kvotebevidst P2C-kontovalg i det primære chatforløb
-- Administration af udbyderforbindelser via OAuth og API-nøgler (27 OAuth-udbydermoduler)
-- Generering af embeddings via `/v1/embeddings` (18 udbydere)
-- Billedgenerering via `/v1/images/generations` (10+ udbydere, 20+ modeller)
+- OpenAI-kompatibel API overflade til CLI/tools (377 udbydere, 156 eksekveringsmoduler)
+- Request/response -oversættelse på tværs af udbyderformater
+- Model combo fallback (multi-model sekvens)
+- Strukturerede combo-trin (`provider + model + connection`) med runtime-bestilling efter `compositeTiers`
+- Fallback på kontoniveau (multi-konto pr. udbyder)
+- Kvote preflight og kvotebevidst P2C kontovalg i hovedchatstien
+- OAuth + API-nøgle udbyder forbindelsesstyring (27 OAuth udbyder moduler)
+- Indlejringsgenerering via `/v1/embeddings` (18 udbydere)
+- Billedgenerering via `/v1/images/generations` (10 + udbydere, 20 + -modeller)
 - Lydtransskription via `/v1/audio/transcriptions` (18 udbydere)
 - Tekst-til-tale via `/v1/audio/speech` (24 indbyggede udbydere)
 - Videogenerering via `/v1/videos/generations` (ComfyUI + SD WebUI)
 - Musikgenerering via `/v1/music/generations` (ComfyUI)
 - Websøgning via `/v1/search` (20 udbydere)
-- Moderering via `/v1/moderations`
-- Genrangering via `/v1/rerank`
-- Fortolkning af think-tags (``) til ræsonneringsmodeller
-- Rensning af svar for streng kompatibilitet med OpenAI SDK
-- Rollenormalisering (developer→system, system→user) for kompatibilitet på tværs af udbydere
+- Moderationer via `/v1/moderations`
+- Omrangering via `/v1/rerank`
+- Tænk tag-parsing (`<think>...</think>`) for ræsonnementmodeller
+- Reaktionssanering for streng OpenAI SDK kompatibilitet
+- Rollenormalisering (udvikler → system, system → bruger) for kompatibilitet på tværs af udbydere
 - Konvertering af struktureret output (json_schema → Gemini responseSchema)
-- Lokal persistens for udbydere, nøgler, aliaser, kombinationer, indstillinger og priser (122 DB-moduler)
-- Registrering af forbrug/omkostninger og logning af forespørgsler
-- Valgfri cloudsynkronisering til synkronisering af tilstand på tværs af flere enheder
-- IP-tilladelsesliste/blokeringsliste til adgangskontrol for API'et
-- Administration af ræsonneringsbudget (passthrough/automatisk/brugerdefineret/adaptivt)
-- Global injektion af systemprompt
-- Sessionssporing og fingerprinting
-- Forbedret hastighedsbegrænsning pr. konto med udbyderspecifikke profiler
-- Circuit breaker-mønster til robusthed over for udbyderfejl
-- Beskyttelse mod thundering herd-problemet med mutex-låsning
-- Signaturbaseret cache til deduplikering af forespørgsler
+- Lokal persistens for udbydere, nøgler, aliaser, kombinationer, indstillinger, priser (122 DB moduler)
+- Usage/cost sporing og anmodningslogning
+- Valgfri skysynkronisering til multi-device/state synkronisering
+- IP allowlist/blocklist til API adgangskontrol
+- Tænkende budgetstyring (passthrough/auto/custom/adaptive)
+- Global systemprompt injektion
+- Sessionssporing og fingeraftryk
+- Forbedret prisbegrænsning pr. konto med udbyderspecifikke profiler
+- Circuit breaker mønster for udbyderens modstandsdygtighed
+- Anti-tordenbeskyttelse med mutex-låsning
+- Signaturbaseret anmodnings deduplikeringscache
 - Domænelag: omkostningsregler, fallback-politik, lockout-politik
-- Context Relay: sessionsoverdragelsesresuméer for kontinuitet ved kontorotation
-- Persistens af domænetilstand (SQLite-write-through-cache til fallbacks, budgetter, lockouts og circuit breakers)
-- Politikmotor til centraliseret evaluering af forespørgsler (lockout → budget → fallback)
-- Forespørgselstelemetri med aggregering af p50/p95/p99-latenstid
-- Telemetri for kombinationsmål og historisk tilstand for kombinationsmål via `combo_execution_key` / `combo_step_id`
-- Korrelations-id (X-Request-Id) til end-to-end-sporing
-- Logning af compliance-revision med mulighed for fravalg pr. API-nøgle
-- Evalueringsframework til kvalitetssikring af LLM'er
-- Tilstandsdashboard med realtidsstatus for udbydernes circuit breakers
-- MCP-server (110 værktøjer) med 3 transportformer (stdio/SSE/Streamable HTTP)
-- A2A-server (JSON-RPC 2.0 + SSE) med færdigheder og opgavelivscyklus
-- Hukommelsessystem (udtrækning, injektion, hentning, opsummering)
-- Færdighedssystem (register, eksekveringsmodul, sandbox, indbyggede færdigheder)
-- MITM-proxy med certifikatadministration og DNS-håndtering
-- Middleware til beskyttelse mod promptinjektion
-- Pipeline til promptkomprimering med Caveman, RTK, stablede pipelines, komprimeringskombinationer, sprogpakker og analyse
-- ACP-register (Agent Communication Protocol)
-- Modulære OAuth-udbydere (22 individuelle moduler under `src/lib/oauth/providers/`)
-- Scripts til afinstallation/fuldstændig afinstallation
-- Handling til reparation af OAuth-miljøet
-- WebSocket-bro til OpenAI-kompatible WS-klienter (`/v1/ws`)
-- Administration af synkroniseringstokens (udstedelse/tilbagekaldelse, download af ETag-versioneret konfigurationspakke)
-- GLM Thinking (`glmt`) som fuldt integreret udbyderforudindstilling
-- Hybrid tokenoptælling (udbyderspecifik `/messages/count_tokens` med estimering som fallback)
-- Automatisk oprettelse af modelaliaser (30+ normaliseringer på tværs af proxy-dialekter ved opstart)
-- Sikker udgående hentning med SSRF-beskyttelse, blokering af private URL'er og konfigurerbare genforsøg
-- Cooldown-bevidste genforsøg på chat med konfigurerbare `requestRetry` og `maxRetryIntervalSec`
-- Validering af runtime-miljøet med Zod ved opstart
-- Compliance-revision v2 med paginering, CRUD-hændelser for udbydere og logning af SSRF-blokeret validering
+- Kontekstrelæ: sessionsoverdragelsesoversigter for kontinuitet i rotation af konti
+- Domænetilstand persistens (SQLite -gennemskrivningscache til fallbacks, budgetter, lockouts, strømafbrydere)
+- Politikmotor til centraliseret anmodningsevaluering (lockout → budget → fallback)
+- Anmod om telemetri med p50/p95/p99 latency aggregering
+- Combo target telemetri og historisk combo target sundhed via `combo_execution_key` / `combo_step_id`
+- Korrelation ID (X-Request-Id) for ende-til-ende-sporing
+- Overholdelsesrevisionslogning med opt-out pr. API nøgle
+- Eval framework for LLM kvalitetssikring
+- Sundhedsdashboard med udbyderens strømafbryderstatus i realtid
+- MCP Server (110 værktøjer) med 3 transporter (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) med færdigheder og opgavelivscyklus
+- Hukommelsessystem (ekstraktion, injektion, genfinding, opsummering)
+- Færdighedssystem (registrering, eksekvering, sandkasse, indbyggede færdigheder)
+- MITM proxy med certifikathåndtering og DNS -håndtering
+- Hurtig mellemvare til injektionsbeskyttelse
+- Spørg komprimeringspipeline med Caveman, RTK, stacked pipelines, kompressionskombinationer, sprogpakker og analyser
+- ACP (Agent Communication Protocol) register
+- Modulære OAuth udbydere (22 individuelle moduler under `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall scripts
+- OAuth miljø reparation handling
+- WebSocket bro til OpenAI-kompatible WS klienter (`/v1/ws`)
+- Administration af synkroniseringstoken (issue/revoke, download af konfigurationspakke med ETag-version)
+- GLM Thinking (`glmt`) førsteklasses udbyder forudindstillet
+- Hybrid tokentælling ( `/messages/count_tokens` på udbydersiden med estimeret fallback)
+- Modelalias auto-seed (30 + cross-proxy dialektnormaliseringer ved opstart)
+- Sikker udgående hentning med SSRF -vagt, privat URL blokering og konfigurerbart genforsøg
+- Cooldown-bevidste chatforsøg med konfigurerbare `requestRetry` og `maxRetryIntervalSec`
+- Kørselsmiljøvalidering med Zod ved opstart
+- Overholdelsesaudit v2 med paginering, udbyder- CRUD hændelser og SSRF-blokeret valideringslogning
 
-Primær runtime-model:
+Primær runtime model:
 
-- Next.js-app-ruter under `src/app/api/*` implementerer både dashboard-API'er og kompatibilitets-API'er
-- En delt SSE-/routingkerne i `src/sse/*` + `open-sse/*` håndterer eksekvering hos udbydere, oversættelse, streaming, fallback og forbrug
+- Next.js app-ruter under `src/app/api/*` implementerer både dashboard APIs og kompatibilitet APIs
+- En delt SSE/routing kerne i `src/sse/*` + `open-sse/*` håndterer udbyderudførelse, oversættelse, streaming, fallback og brug
 
 ## Referencediagrammer
 
@@ -114,43 +113,51 @@ resten er linket fra deres domænespecifikke vejledninger.
 - Udbyderens SLA/kontrolplan uden for den lokale proces
 - Selve de eksterne CLI-binærfiler (Claude CLI, Codex CLI osv.)
 
-## Dashboardets grænseflade (aktuel)
+## Dashboardoverflade (aktuel)
 
-Hovedsider under `src/app/(dashboard)/dashboard/`:
+Primære sider under `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — hurtig start og oversigt over udbydere
-- `/dashboard/endpoint` — endpoint-proxy samt faner til MCP, A2A og API-endpoints
+- `/dashboard` — hurtig start + oversigt over udbydere
+- `/dashboard/endpoint` — slutpunktsproxy + faner til MCP-, A2A- og API-slutpunkter
 - `/dashboard/providers` — udbyderforbindelser og legitimationsoplysninger
-- `/dashboard/combos` — kombinationsstrategier, skabeloner, trinbaseret builder, regler for modelrouting og manuelt persisteret rækkefølge
-- `/dashboard/auto-combo` — Auto Combo Engine: scoringsvægte, tilstandspakker, virtuelle fabriksforudindstillinger og telemetri
-- `/dashboard/costs` — aggregering af omkostninger og synlighed af priser
-- `/dashboard/analytics` — forbrugsanalyse, evalueringer og tilstand for kombinationsmål
-- `/dashboard/limits` — kvote- og hastighedskontroller
-- `/dashboard/cli-tools` — CLI-introduktion, runtime-registrering og generering af konfiguration
-- `/dashboard/agents` — registrerede ACP-agenter og registrering af brugerdefinerede agenter
-- `/dashboard/cloud-agents` — cloudhostede agentopgaver (Codex Cloud, Devin, Jules) og opgavernes livscyklus
-- `/dashboard/skills` — A2A-kompetenceregister, sandbox-kørsel og indbygget kompetencekatalog
+- `/dashboard/combos` — kombinationsstrategier, skabeloner, trinbaseret bygger, regler for modelrouting og manuelt gemt rækkefølge
+- `/dashboard/auto-combo` — Auto Combo Engine: vægtning af scorer, tilstandspakker, virtuelle fabriksforudindstillinger og telemetri
+- `/dashboard/costs` — omkostningsaggregering og synlighed i prissætning
+- `/dashboard/analytics` — brugsanalyse, evalueringer og tilstand for kombinationsmål
+- `/dashboard/limits` — styring af kvoter og hastighedsgrænser
+- `/dashboard/cli-tools` — introduktion til CLI, registrering af runtime og generering af konfiguration
+- `/dashboard/agents` — registrerede ACP-agenter + registrering af brugerdefinerede agenter
+- `/dashboard/cloud-agents` — opgaver for cloud-hostede agenter (Codex Cloud, Devin, Jules) og opgavernes livscyklus
+- `/dashboard/skills` — A2A-færdighedsregister, sandbox-kørsel og indbygget færdighedskatalog
 - `/dashboard/memory` — inspektion og hentning af vedvarende samtalehukommelse
 - `/dashboard/webhooks` — udgående webhook-abonnementer, rotation af hemmeligheder og statistik over genforsøg
 - `/dashboard/batch` — indsendelse af batchjob og status
-- `/dashboard/cache` — statistik for read-through-cache og ræsonneringscache samt kontroller til rydning
-- `/dashboard/playground` — interaktiv chatlegeplads med enhver konfigureret kombination/model
-- `/dashboard/changelog` — changelog-visning i appen (renderer `CHANGELOG.md`)
-- `/dashboard/system` — runtime-diagnosticering, versionsoplysninger og grænseflade til validering af miljøet
-- `/dashboard/onboarding` — opsætningsguide til nye installationers første kørsel
-- `/dashboard/media` — legeplads til billeder, video og musik
-- `/dashboard/search-tools` — test af søgeudbydere og historik
-- `/dashboard/health` — oppetid, circuit breakers, hastighedsgrænser og kvoteovervågede sessioner
-- `/dashboard/logs` — anmodnings-, proxy-, revisions- og konsollogfiler
-- `/dashboard/settings` — faner med systemindstillinger (generelt, routing, standardværdier for kombinationer osv.)
+- `/dashboard/cache` — statistik for read-through-cache og ræsonneringscache samt styring af udsmidning
+- `/dashboard/playground` — interaktiv chat-sandkasse til enhver konfigureret kombination/model
+- `/dashboard/changelog` — indbygget visning af ændringslog (renderer `CHANGELOG.md`)
+- `/dashboard/system` — runtime-diagnostik, versionsoplysninger og overflade til validering af miljøet
+- `/dashboard/onboarding` — konfigurationsguide til første kørsel for nye installationer
+- `/dashboard/media` — sandkasse til billeder/video/musik
+- `/dashboard/search-tools` — test og historik for søgeudbydere
+- `/dashboard/health` — oppetid, kredsløbsafbrydere, hastighedsgrænser og kvoteovervågede sessioner
+- `/dashboard/logs` — anmodnings-, proxy-, revisions- og konsollogge
+- `/dashboard/settings` — faner til systemindstillinger (generelt, routing, standarder for kombinationer osv.)
 - `/dashboard/context/caveman` — Caveman-komprimeringsregler, sprogpakker, forhåndsvisning og outputtilstand
 - `/dashboard/context/rtk` — RTK-filtre til kommandooutput, forhåndsvisning og sikkerhedsindstillinger for runtime
 - `/dashboard/context/combos` — navngivne komprimeringspipelines, der er tildelt routingkombinationer
 - `/dashboard/translator` — inspektion af oversætteren og forhåndsvisning af konvertering af anmodningsformater
-- `/dashboard/audit` — browser til compliance-revisionslogfiler med paginering og strukturerede metadata
-- `/dashboard/usage` — browser til forbrug pr. anmodning knyttet til `usage_history`
+- `/dashboard/audit` — browser til revisionslog for compliance med sideinddeling og strukturerede metadata
+- `/dashboard/usage` — browser til brug pr. anmodning, som er knyttet til `usage_history`
 - `/dashboard/compression` — komprimeringsanalyse, statistik og tildeling af pipelines
-- `/dashboard/api-manager` — API-nøglers livscyklus og modeltilladelser
+- `/dashboard/api-manager` — livscyklus for API-nøgler og modeltilladelser
+
+UI-lag: Hver side renderes i én shell — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (sættets
+`SidebarProvider`/`SidebarInset` samt OmniRoutes `Sidebar.tsx` og `Header.tsx`). Sider importerer deres
+byggeblokke fra `@/shared/components` (adaptere oven på det inkluderede Keak CI UI Kit i
+`packages/ui-kit`) eller fra sættets komponentunderstier (`@omniroute/ui-kit/table`, `…/page-header`) og
+ikoner via `<Icon>` (`ICON_MAP` → Lucide). Temaet (`system` som standard, lyst/mørkt) og tokens kommer
+fra sættet via broen i `src/app/globals.css`. Detaljer: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Systemkontekst på højt niveau
 

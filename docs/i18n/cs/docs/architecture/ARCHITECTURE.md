@@ -8,79 +8,78 @@
 
 _Naposledy aktualizováno: 2026-06-28_
 
-## Shrnutí pro vedení
+## Shrnutí
 
-OmniRoute je lokální směrovací brána a ovládací panel pro AI postavený na Next.js.
-Poskytuje jednotný koncový bod kompatibilní s OpenAI (`/v1/*`) a směruje provoz mezi více poskytovatelů vyšší úrovně s podporou převodu formátů, záložních variant, obnovování tokenů a sledování využití.
+OmniRoute je místní směrovací brána AI a řídicí panel postavený na Next.js. Poskytuje jeden koncový bod kompatibilní s OpenAI (`/v1/*`) a směruje provoz přes několik upstreamových poskytovatelů s překladem, záložním řešením, obnovením tokenu a sledováním využití.
 
-Klíčové funkce:
+Základní schopnosti:
 
-- Rozhraní API kompatibilní s OpenAI pro nástroje a CLI (375 poskytovatelů, 154 spouštěcích modulů)
-- Převod požadavků a odpovědí mezi formáty poskytovatelů
-- Záložní kombinace modelů (sekvence více modelů)
-- Strukturované kroky kombinací (`provider + model + connection`) s pořadím za běhu podle `compositeTiers`
-- Záložní mechanismus na úrovni účtů (více účtů pro jednoho poskytovatele)
-- Předběžná kontrola kvóty a výběr účtu P2C s ohledem na kvótu v hlavním toku chatu
-- Správa připojení k poskytovatelům prostřednictvím OAuth a klíčů API (27 modulů poskytovatelů OAuth)
-- Generování vektorových reprezentací prostřednictvím `/v1/embeddings` (18 poskytovatelů)
-- Generování obrázků prostřednictvím `/v1/images/generations` (více než 10 poskytovatelů, více než 20 modelů)
-- Přepis zvuku prostřednictvím `/v1/audio/transcriptions` (18 poskytovatelů)
-- Převod textu na řeč prostřednictvím `/v1/audio/speech` (24 vestavěných poskytovatelů)
-- Generování videa prostřednictvím `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Generování hudby prostřednictvím `/v1/music/generations` (ComfyUI)
-- Vyhledávání na webu prostřednictvím `/v1/search` (20 poskytovatelů)
-- Moderování prostřednictvím `/v1/moderations`
-- Změna pořadí výsledků podle relevance prostřednictvím `/v1/rerank`
-- Parsování značek pro myšlenkové pochody (``) u modelů s uvažováním
-- Čištění odpovědí pro přísnou kompatibilitu se sadou OpenAI SDK
-- Normalizace rolí (developer→system, system→user) pro kompatibilitu mezi poskytovateli
-- Převod strukturovaného výstupu (json_schema → Gemini responseSchema)
-- Lokální trvalé ukládání poskytovatelů, klíčů, aliasů, kombinací, nastavení a cen (122 databázových modulů)
-- Sledování využití a nákladů a protokolování požadavků
-- Volitelná cloudová synchronizace pro synchronizaci mezi více zařízeními a synchronizaci stavu
-- Seznam povolených a blokovaných IP adres pro řízení přístupu k API
-- Správa rozpočtu na uvažování (přímé předání / automatické / vlastní / adaptivní)
-- Globální vkládání systémových pokynů
-- Sledování relací a vytváření otisků
-- Rozšířené omezování frekvence požadavků pro jednotlivé účty s profily specifickými pro poskytovatele
-- Vzor jističe pro zvýšení odolnosti vůči výpadkům poskytovatelů
-- Ochrana proti nárazovému souběhu požadavků pomocí mutexového zamykání
-- Mezipaměť pro deduplikaci požadavků na základě podpisů
-- Doménová vrstva: pravidla nákladů, zásady záložních variant, zásady blokování
-- Context Relay: souhrny předávání relací pro zachování kontinuity při střídání účtů
-- Trvalé ukládání stavu domény (mezipaměť SQLite s průběžným zápisem pro záložní varianty, rozpočty, blokování a jističe)
-- Modul zásad pro centralizované vyhodnocování požadavků (blokování → rozpočet → záložní varianta)
-- Telemetrie požadavků s agregací latence p50/p95/p99
-- Telemetrie cílů kombinací a historický stav cílů kombinací prostřednictvím `combo_execution_key` / `combo_step_id`
-- ID korelace (X-Request-Id) pro komplexní trasování
-- Protokolování auditů souladu s možností odhlášení pro jednotlivé klíče API
-- Evaluační framework pro zajištění kvality LLM
-- Panel stavu s informacemi o stavu jističů poskytovatelů v reálném čase
-- Server MCP (110 nástrojů) se 3 přenosy (stdio/SSE/Streamable HTTP)
-- Server A2A (JSON-RPC 2.0 + SSE) s dovednostmi a životním cyklem úloh
-- Paměťový systém (extrakce, vkládání, načítání, sumarizace)
-- Systém dovedností (registr, spouštěcí modul, sandbox, vestavěné dovednosti)
-- Proxy MITM se správou certifikátů a obsluhou DNS
-- Middleware pro ochranu před vložením škodlivých pokynů
-- Kanál komprese pokynů s Caveman, RTK, vrstvenými kanály, kombinacemi komprese, jazykovými balíčky a analytikou
-- Registr ACP (Agent Communication Protocol)
-- Modulární poskytovatelé OAuth (22 samostatných modulů v `src/lib/oauth/providers/`)
-- Skripty pro odinstalaci a úplnou odinstalaci
-- Akce pro opravu prostředí OAuth
-- Most WebSocket pro klienty WS kompatibilní s OpenAI (`/v1/ws`)
-- Správa synchronizačních tokenů (vydávání a odvolávání, stahování konfiguračních balíčků s verzováním pomocí ETag)
-- GLM Thinking (`glmt`) jako plnohodnotná předvolba poskytovatele
-- Hybridní počítání tokenů (rozhraní `/messages/count_tokens` na straně poskytovatele se záložním odhadem)
-- Automatické předvyplnění aliasů modelů (více než 30 normalizací dialektů mezi proxy při spuštění)
-- Bezpečné odchozí načítání s ochranou proti SSRF, blokováním soukromých URL a konfigurovatelným opakováním
-- Opakování požadavků chatu s ohledem na dobu čekání a konfigurovatelnými parametry `requestRetry` a `maxRetryIntervalSec`
+- Povrch API kompatibilní s OpenAI pro CLI/tools (377 poskytovatelů, 156 spouštěcích modulů)
+- překlad Request/response napříč formáty poskytovatelů
+- Záložní kombinace modelu (sekvence více modelů)
+- Strukturované kombinované kroky (`provider + model + connection`) s řazením za běhu podle `compositeTiers`
+- Záloha na úrovni účtu (více účtů na poskytovatele)
+- Předběžná kontrola kvóty a výběr účtu P2C s ohledem na kvóty v hlavní cestě chatu
+- Správa připojení poskytovatele pomocí klíče API OAuth + (27 modulů poskytovatele OAuth )
+- Generování vkládání přes `/v1/embeddings` (18 poskytovatelů)
+- Generování obrázků prostřednictvím `/v1/images/generations` (poskytovatelé 10 +, modely 20 + )
+- Zvukový přepis přes `/v1/audio/transcriptions` (18 poskytovatelů)
+- Převod textu na řeč přes `/v1/audio/speech` (24 vestavěných poskytovatelů)
+- Generování videa přes `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Generování hudby přes `/v1/music/generations` (ComfyUI)
+- Vyhledávání na webu přes `/v1/search` (20 poskytovatelů)
+- Moderování přes `/v1/moderations`
+- Změna pořadí přes `/v1/rerank`
+- Myslete na analýzu značek (`<think>...</think>`) pro modely uvažování
+- Reakce sanitace pro přísnou kompatibilitu OpenAI SDK
+- Normalizace rolí (vývojářský systém →, systémový uživatel →) pro kompatibilitu mezi poskytovateli
+- Konverze strukturovaného výstupu (json_schema → Gemini responseSchema)
+- Místní persistence pro poskytovatele, klíče, aliasy, komba, nastavení, ceny (122 modulů DB )
+- sledování Usage/cost a protokolování požadavků
+- Volitelná cloudová synchronizace pro synchronizaci multi-device/state
+- IP allowlist/blocklist pro řízení přístupu API
+- Thinking budget management (passthrough/auto/custom/adaptive)
+- Okamžitá injekce globálního systému
+- Sledování relací a snímání otisků prstů
+- Rozšířené omezení sazeb na účet pomocí profilů specifických pro poskytovatele
+- Vzor jističe pro odolnost poskytovatele
+- Ochrana stáda proti hromu s mutexovým zamykáním
+- Mezipaměť deduplikace požadavků na základě podpisu
+- Vrstva domény: cenová pravidla, záložní politika, politika uzamčení
+- Context Relay: shrnutí předání relace pro kontinuitu rotace účtů
+- Trvalost stavu domény (SQLite zapisovací mezipaměť pro záložní, rozpočty, uzamčení, jističe)
+- Modul zásad pro centralizované vyhodnocování požadavků (uzamčení → budget → záložní)
+- Vyžádejte si telemetrii s agregací latence p50/p95/p99
+- Kombinovaná cílová telemetrie a historické kombinované cílové zdraví prostřednictvím `combo_execution_key` / `combo_step_id`
+- Korelace ID (X-Request-Id) pro end-to-end trasování
+- Protokolování auditu shody s odhlášením na klíč API
+- Eval rámec pro zajištění kvality LLM
+- Zdravotní panel se stavem jističe poskytovatele v reálném čase
+- MCP Server (110 nástrojů) se 3 transporty (stdio/SSE/Streamable HTTP)
+- A2A Server (JSON-RPC 2.0 + SSE) s dovednostmi a životním cyklem úkolů
+- Paměťový systém (extrakce, injekce, načítání, sumarizace)
+- Systém dovedností (registr, exekutor, sandbox, vestavěné dovednosti)
+- MITM proxy se správou certifikátů a zpracováním DNS
+- Okamžitý middleware pro ochranu vstřikování
+- Okamžité kompresní potrubí s Caveman, RTK, skládaný potrubí, kompresní komba, jazykové balíčky a analýzy
+- registru ACP (Agent Communication Protocol).
+- Modulární poskytovatelé OAuth (22 jednotlivých modulů pod `src/lib/oauth/providers/`)
+- Uninstall/full-uninstall skripty
+- akce opravy prostředí OAuth
+- most WebSocket pro klienty WS kompatibilní s OpenAI (`/v1/ws`)
+- Správa synchronizačních tokenů (issue/revoke, stažení konfiguračního balíčku ve verzi ETag)
+- GLM Thinking (`glmt`) prvotřídní předvolba poskytovatele
+- Hybridní počítání tokenů ( `/messages/count_tokens` na straně poskytovatele se záložním odhadem)
+- Automatické nasazování modelu alias (30 + křížových proxy dialektových normalizací při spuštění)
+- Bezpečné odchozí načítání s ochranou SSRF, soukromým blokováním URL a konfigurovatelným opakováním
+- Opakuje pokusy o chat s konfigurovatelnými `requestRetry` a `maxRetryIntervalSec`
 - Ověření běhového prostředí pomocí Zod při spuštění
-- Audit souladu v2 se stránkováním, událostmi CRUD poskytovatelů a protokolováním ověření zablokovaných kvůli SSRF
+- Audit souladu v2 se stránkováním, událostmi poskytovatele CRUD a protokolováním ověření blokovaným SSRF
 
-Primární běhový model:
+Primární runtime model:
 
-- Trasy aplikace Next.js v `src/app/api/*` implementují jak rozhraní API ovládacího panelu, tak rozhraní API pro kompatibilitu
-- Sdílené jádro SSE a směrování v `src/sse/*` + `open-sse/*` zajišťuje spouštění u poskytovatelů, převod formátů, streamování, záložní varianty a sledování využití
+- Trasy aplikací Next.js pod `src/app/api/*` implementují řídicí panel APIs i kompatibilitu APIs
+- Sdílené jádro SSE/routing v `src/sse/*` + `open-sse/*` se stará o spouštění poskytovatele, překlad, streamování, záložní řešení a používání
 
 ## Referenční diagramy
 
@@ -114,43 +113,51 @@ ostatní jsou odkazovány z příruček pro konkrétní oblasti.
 - SLA/řídicí vrstva poskytovatele mimo lokální proces
 - Samotné externí binární soubory CLI (Claude CLI, Codex CLI atd.)
 
-## Rozhraní řídicího panelu (aktuální)
+## Plocha dashboardu (aktuální)
 
 Hlavní stránky v `src/app/(dashboard)/dashboard/`:
 
-- `/dashboard` — rychlý start a přehled poskytovatelů
-- `/dashboard/endpoint` — proxy koncových bodů a karty MCP, A2A a koncových bodů API
+- `/dashboard` — rychlý start + přehled poskytovatelů
+- `/dashboard/endpoint` — proxy koncových bodů + karty MCP + A2A + koncových bodů API
 - `/dashboard/providers` — připojení k poskytovatelům a přihlašovací údaje
-- `/dashboard/combos` — kombinované strategie, šablony, nástroj pro sestavení založený na krocích, pravidla směrování modelů a ručně uložené pořadí
-- `/dashboard/auto-combo` — modul Auto Combo Engine: váhy hodnocení, balíčky režimů, předvolby virtuálních továren a telemetrie
-- `/dashboard/costs` — agregace nákladů a přehled cen
-- `/dashboard/analytics` — analýza využití, vyhodnocení a stav cílů kombinací
-- `/dashboard/limits` — řízení kvót a rychlostních limitů
-- `/dashboard/cli-tools` — úvodní nastavení CLI, detekce běhového prostředí a generování konfigurace
-- `/dashboard/agents` — detekovaní agenti ACP a registrace vlastních agentů
+- `/dashboard/combos` — strategie combo, šablony, nástroj pro sestavování založený na krocích, pravidla směrování modelů, ručně uložené pořadí
+- `/dashboard/auto-combo` — Auto Combo Engine: váhy hodnocení, balíčky režimů, předvolby virtuální továrny, telemetrie
+- `/dashboard/costs` — agregace nákladů a přehled o cenách
+- `/dashboard/analytics` — analýza využití, vyhodnocování, stav cílů combo
+- `/dashboard/limits` — řízení kvót a limitů rychlosti
+- `/dashboard/cli-tools` — úvodní nastavení CLI, detekce běhového prostředí, generování konfigurace
+- `/dashboard/agents` — detekovaní agenti ACP + registrace vlastních agentů
 - `/dashboard/cloud-agents` — úlohy agentů hostovaných v cloudu (Codex Cloud, Devin, Jules) a životní cyklus úloh
-- `/dashboard/skills` — registr dovedností A2A, spouštění v sandboxu a katalog vestavěných dovedností
+- `/dashboard/skills` — registr dovedností A2A, spouštění v sandboxu, katalog vestavěných dovedností
 - `/dashboard/memory` — kontrola a načítání trvalé konverzační paměti
-- `/dashboard/webhooks` — odběry odchozích webhooků, rotace tajných klíčů a statistiky opakovaných pokusů
-- `/dashboard/batch` — odesílání dávkových úloh a sledování průběhu
-- `/dashboard/cache` — statistiky mezipaměti pro průběžné čtení a uvažování a ovládací prvky vyprazdňování
-- `/dashboard/playground` — interaktivní chatovací prostředí pro libovolnou nakonfigurovanou kombinaci či model
+- `/dashboard/webhooks` — odběry odchozích webhooků, rotace tajných klíčů, statistiky opakovaných pokusů
+- `/dashboard/batch` — odesílání dávkových úloh a jejich průběh
+- `/dashboard/cache` — statistiky cache s průběžným načítáním a cache uvažování, ovládání vyprazdňování
+- `/dashboard/playground` — interaktivní chatovací prostředí pro libovolné nakonfigurované combo nebo model
 - `/dashboard/changelog` — prohlížeč přehledu změn v aplikaci (vykresluje `CHANGELOG.md`)
-- `/dashboard/system` — diagnostika běhového prostředí, informace o verzi a rozhraní pro ověření prostředí
+- `/dashboard/system` — diagnostika běhového prostředí, informace o verzi, rozhraní pro ověření prostředí
 - `/dashboard/onboarding` — průvodce prvotním nastavením pro nové instalace
-- `/dashboard/media` — prostředí pro práci s obrázky, videi a hudbou
+- `/dashboard/media` — prostředí pro práci s obrázky, videem a hudbou
 - `/dashboard/search-tools` — testování poskytovatelů vyhledávání a historie
-- `/dashboard/health` — doba provozu, jističe, rychlostní limity a relace sledované z hlediska kvót
-- `/dashboard/logs` — protokoly požadavků, proxy, auditu a konzole
-- `/dashboard/settings` — karty systémových nastavení (obecná nastavení, směrování, výchozí hodnoty kombinací atd.)
+- `/dashboard/health` — doba provozu, jističe, limity rychlosti, relace se sledovanými kvótami
+- `/dashboard/logs` — protokoly požadavků, proxy, auditů a konzole
+- `/dashboard/settings` — karty nastavení systému (obecné, směrování, výchozí hodnoty combo atd.)
 - `/dashboard/context/caveman` — pravidla komprese Caveman, jazykové balíčky, náhled a výstupní režim
 - `/dashboard/context/rtk` — filtry výstupu příkazů RTK, náhled a nastavení bezpečnosti běhového prostředí
-- `/dashboard/context/combos` — pojmenované kompresní kanály přiřazené ke směrovacím kombinacím
-- `/dashboard/translator` — kontrola překladače a náhled převodu formátu požadavků
-- `/dashboard/audit` — prohlížeč protokolu auditu souladu s předpisy se stránkováním a strukturovanými metadaty
-- `/dashboard/usage` — prohlížeč využití jednotlivých požadavků propojený s `usage_history`
-- `/dashboard/compression` — analýza a statistiky komprese a přiřazování kanálů
+- `/dashboard/context/combos` — pojmenované kompresní pipeline přiřazené směrovacím combo
+- `/dashboard/translator` — kontrola překladače a náhled převodu formátu požadavku
+- `/dashboard/audit` — prohlížeč protokolu auditů shody se stránkováním a strukturovanými metadaty
+- `/dashboard/usage` — prohlížeč využití jednotlivých požadavků napojený na `usage_history`
+- `/dashboard/compression` — analýza komprese, statistiky a přiřazení pipeline
 - `/dashboard/api-manager` — životní cyklus klíčů API a oprávnění modelů
+
+Vrstva uživatelského rozhraní: každá stránka se vykresluje v jednom shellu — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (`SidebarProvider`/`SidebarInset`
+ze sady, `Sidebar.tsx` a `Header.tsx` z OmniRoute). Stránky importují své stavební prvky
+z `@/shared/components` (adaptéry nad převzatou sadou Keak CI UI Kit v
+`packages/ui-kit`) nebo z podcest komponent sady (`@omniroute/ui-kit/table`, `…/page-header`) a
+ikony prostřednictvím `<Icon>` (`ICON_MAP` → Lucide). Motiv (`system` ve výchozím nastavení, světlý/tmavý) a tokeny pocházejí
+ze sady prostřednictvím propojovací vrstvy v `src/app/globals.css`. Podrobnosti: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Kontext systému na vysoké úrovni
 

@@ -1,7 +1,7 @@
 ---
 title: "Log Export"
 version: 3.8.52
-lastUpdated: 2026-10-13
+lastUpdated: 2026-10-21
 ---
 
 # Log export
@@ -256,7 +256,217 @@ rejects a request over 10 MB. Chunks close at 500 rows or 9 MB, whichever comes 
 
 ---
 
-## 5. Adding a destination
+## 5. OTLP/HTTP traces destination
+
+Config uses `type: "otlp-http"`. This is a scheduled, cursor-backed export of persisted
+call logs, not the best-effort live routing-event sink in
+`open-sse/services/routing/otel.ts`. It does not read or change that sink's environment
+variables, timers or buffers. Enabling both can produce two independent kinds of spans;
+use the `omniroute.log-export` instrumentation scope to distinguish these call-log spans.
+
+| Key                      | Default / purpose                                                       |
+| ------------------------ | ----------------------------------------------------------------------- |
+| `endpoint`               | Required full HTTP(S) traces URL; no `/v1/traces` suffix is appended    |
+| `headers`                | Optional `Name: value` lines or JSON object of strings; encrypted       |
+| `requestHeaderAllowlist` | Empty (off); client header names/prefixes to capture as span attributes |
+| `serviceName`            | `omniroute`; resource `service.name`                                    |
+| `langfuseMapping`        | `false`; adds Langfuse generation/session/user attributes               |
+| `identity`               | `pseudonymous`, `keyName`, or `none`                                    |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                 |
+| `timeoutMs`              | `30000` per HTTP attempt                                                |
+| `environment`            | Unset; optional `langfuse.environment`                                  |
+
+The generic dashboard renders these fields. `paths` accepts an API array or a textarea
+with exact paths separated by newlines/commas. Embeddings, rerank and other paths are
+skipped unless explicitly allowed. Skipped rows still advance the cursor; the existing
+runner's `exported`/`exportedTotal` counters count processed source rows, including filtered
+rows, rather than accepted spans. Filtering is done in the child, without changing its
+IPC/cursor contract.
+
+URL validation uses the DB-free `parseAndValidateNonMetadataUrl` helper from
+`src/shared/network/outboundUrlGuard.ts`: the `block-metadata` policy. It has the same
+unconditional metadata/protocol/embedded-credential checks as the webhook validator with
+private URLs opted in, but deliberately permits localhost/LAN targets without a global
+feature-flag override. This allows self-hosted Langfuse, Phoenix, Tempo and Collector
+endpoints, including private HTTP endpoints. Cloud-metadata hosts are always blocked.
+Redirects are not followed, so a collector cannot redirect credentials to a different host.
+Like the existing lexical URL guard, this does not pin DNS resolution; only configure
+operator-controlled hosts. Prefer HTTPS whenever the endpoint is not on a trusted network.
+
+### Payload and delivery
+
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) carries one
+CLIENT span per allowed row, named by its exact request path. Path naming distinguishes
+Chat Completions, Responses and Messages without embedding model or identity data in the
+span name. Resource attributes include `service.name` and the package's `service.version`.
+
+The normal chat attempt logger (`open-sse/handlers/chatCore/attemptLogging.ts`) writes
+`duration = Date.now() - startTime` at completion and does not supply a timestamp;
+`saveCallLogOperation` in `src/lib/usage/callLogs.ts` defaults the timestamp to the write
+(completion) time. Export therefore sets end = row timestamp and start = end − duration
+(milliseconds, converted to decimal nanoseconds). Caller-supplied historical timestamps
+are preserved as the end time as well; there is no per-row start/completion discriminator.
+A null duration becomes zero. Invalid/missing timestamps fail the batch rather than create
+non-deterministic spans. `ttftMs` is nullable and maps to `omniroute.ttft_ms`.
+
+Attributes include `gen_ai.operation.name="chat"`, provider, requested/response model,
+input/output tokens, optional cache-read/cache-creation/reasoning tokens, HTTP status,
+combo, cache source, session tag and correlation id. Integer OTLP values and timestamps
+are decimal strings; strings, booleans and fractional numbers use their native OTLP value
+variants. Error spans have ERROR status and a sanitized status message. The canonical
+record has no upstream host URL, so `server.address` is omitted rather than incorrectly
+identifying the collector as the model server. Cost is not exported.
+
+Only `includeBodies=true` hydrates content. With `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` carry the sanitized request/response
+body JSON as stored by OmniRoute (canonicalized when parseable), not a re-shaped semconv
+messages array. Clipped/non-JSON bodies remain raw text. With `langfuseMapping=true`,
+bodies are emitted only as `langfuse.observation.input` / `langfuse.observation.output`;
+the `gen_ai.*.messages` attributes are omitted so each body is sent once. Both modes
+inherit `maxBodyBytes` from the existing hydration path;
+`omniroute.bodies_truncated=true` marks clipping.
+No extra pipeline snapshots or unsanitized artifact reads are added by this destination;
+optional request-header capture uses the existing hydrated client snapshot described below.
+Use a minute-level cadence such as `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` when exporting
+bodies, rather than accumulating an hourly backlog.
+
+### Optional client request headers
+
+Header capture is **off by default**. Set `requestHeaderAllowlist` in the destination config
+and enable **Export prompts and responses** (`includeBodies: true` on the destination).
+The allowlist accepts an API array or a textarea with newline/comma-separated names:
+
+```json
+{
+  "requestHeaderAllowlist": ["User-Agent", "X-Project", "X-OmniRoute-Meta-*"]
+}
+```
+
+Names match case-insensitively and exactly, unless a single terminal `*` selects a nonempty
+header-name prefix. Bare `*`, embedded wildcards and invalid HTTP header names are rejected.
+There are at most 64 selectors, each with a name/prefix of at most 256 ASCII bytes.
+This setting is separate from `headers`, which authenticates the exporter to the collector.
+
+Capture reads only `pipeline_client_request`, populated from the saved detailed pipeline's
+`clientRawRequest` (or legacy `clientRequest`). It never falls back to provider request headers.
+Detailed pipeline logging must have been enabled when the request was recorded. With
+`includeBodies` disabled, or with missing, corrupt or clipped client-snapshot JSON, no header
+attributes are emitted. Increasing `maxBodyBytes` can avoid export-time snapshot clipping;
+it cannot restore detail that was never saved. A snapshot over 1 MiB or containing more than
+256 header entries is ignored. The existing prompt/response export remains enabled alongside
+header capture; the allowlist does not provide a headers-only hydration mode.
+
+Selected values become `http.request.header.<full lowercase header name>` OTLP string arrays,
+even for a single string. For example, `X-OmniRoute-Meta-Team: example-team` becomes
+`http.request.header.x-omniroute-meta-team` with
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
+The full prefix is preserved: these are ordinary headers, with no business-field parsing or
+`omniroute.metadata.*` / Langfuse metadata conversion. `langfuseMapping` does not change header
+semantics. A selected single-valued `User-Agent` also sets the standard scalar
+`user_agent.original`. Commas inside one value are not split. Case variants merge in saved
+entry order; any invalid variant omits that entire header. Attributes are ordered by lowercase name.
+
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-key headers, names containing
+auth/token/secret/password/credential markers, and internal gateway credentials are always
+excluded, even if selected or partially masked in storage. Known credential patterns reuse
+the shared credential detector; redaction markers are omitted, not exported as safe values.
+Only strings and nonempty string arrays are accepted; no numbers or objects are coerced.
+Invalid names, prototype keys, control characters (except horizontal tab) and malformed Unicode
+are ignored without failing the batch or reflecting their content in errors.
+
+Each span captures at most 32 headers, 16 values per header, 4096 UTF-8 bytes per value,
+and 16384 total UTF-8 bytes across captured header names and values. Oversized/invalid headers
+are omitted whole, not clipped. Selection is an operator privacy decision: safe-looking names
+can still contain personal data, and these bounds/detectors are not a general PII scrubber.
+
+### Delivery limits
+
+Requests are bounded to 500 spans and 4 MiB of UTF-8 JSON, including the envelope.
+Every allowed span is size-checked before the first request of a cursor batch. An individual
+span larger than the limit sends no part of that batch and fails with guidance to lower
+`maxBodyBytes`; it is not silently dropped. Preflight retains only record references and
+byte counts, discarding each temporary span/JSON; spans are rebuilt for bounded chunks
+rather than holding a second serialized copy of the batch. HTTP 408/429/5xx, network failures and timeouts get at most
+three attempts, with 250/500 ms exponential backoff. `Retry-After` seconds or HTTP dates
+can extend a delay up to 5 seconds. Other statuses fail immediately. OTLP 2xx partial rejection also throws instead of
+acknowledging a lost span; empty or valid JSON acknowledgements are accepted, with a
+64 KiB response-read cap.
+
+Errors contain only exporter-owned facts: HTTP status, retry class, attempts and sent span
+counts, or fixed acknowledgement/network failure wording. Collector response bodies,
+partial-success counts and response headers are never copied into errors, logs or the
+dashboard. A failed or partially accepted batch is not acknowledged: the destination shows
+Failing with that status, the cursor stays at the last acknowledged batch, and the next run
+resends the same rows. Permanent statuses keep failing until the collector or configuration
+is fixed. Use the collector's own logs for response details. Call-log error summaries retain
+their separate redaction.
+`prepare()` provisions nothing; Test posts exactly `{"resourceSpans":[]}` and reports
+HTTP status without writing call-log spans.
+
+Trace ids and span ids are the first 32/16 hex digits of SHA-256 over
+`"omniroute.trace\\0" + callLogId` and `"omniroute.span\\0" + callLogId`. Re-sends carry
+identical ids. This is not a deduplication guarantee: some backends, including Langfuse
+v4 ingestion, do not deduplicate same-id spans. A crash or partial chunk failure can
+re-send at most the one unacknowledged cursor batch; that entire batch may be duplicated,
+not just its last HTTP chunk. Choose the cursor batch size with that tradeoff in mind.
+
+### Langfuse example
+
+Configure these fields for a self-hosted Langfuse instance:
+
+```json
+{
+  "endpoint": "https://langfuse.example.com/api/public/otel/v1/traces",
+  "headers": "Authorization: Basic <base64-of-public-key:secret-key>",
+  "serviceName": "omniroute",
+  "langfuseMapping": true,
+  "identity": "pseudonymous",
+  "environment": "production"
+}
+```
+
+Build the Authorization value locally as Base64 of the literal `public-key:secret-key`
+string (for example with `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Do not paste real credentials into logs, screenshots or issues. The mapping automatically
+sets `x-langfuse-ingestion-version: 4`; Authorization is still supplied in `headers`.
+Both headers and the generated identity salt use the existing encrypted secret-field
+mechanism and API placeholders; `STORAGE_ENCRYPTION_KEY` is required.
+
+Mapping adds generation type/model, JSON usage details (input/output/total and available
+cache keys), JSON input/output snapshots, ERROR/DEFAULT level, sanitized status message,
+trace name, session id, optional environment and filterable
+`langfuse.observation.metadata.<key>` for provider, requested model, path, combo, cache
+source and status. `langfuse.observation.completion_start_time` is ISO 8601 at
+start + TTFT only when TTFT is known and within the duration. No cost attributes are sent.
+
+Identity modes apply to `langfuse.user.id`:
+
+- `pseudonymous` (default): HMAC-SHA256 of the API key's internal id with a random
+  per-destination 32-byte salt. The salt is generated on creation if absent, encrypted
+  as `identitySalt`, never returned, and retained during edits. Raw key ids are never
+  put into span attributes. Recreating/rotating a destination's salt changes identities.
+- `keyName`: the configured API key name, intentionally revealing that operator label.
+- `none`: no user id. Session tags are still exported when present; these modes do not
+  anonymize arbitrary prompt content or operator-supplied session/correlation labels.
+
+### Starting without a backfill
+
+On creation only, enable **Start from current position (skip existing logs)** or pass
+`startFromCurrentPosition: true` at the top level of the create API payload. It initializes
+`cursor_row_id` to the current maximum retained call-log rowid using the existing cursor
+helpers, without a migration. The default is false (cursor 0 and retained-history backfill).
+It is not an update-time cursor reset setting.
+
+The shared `ttftMs` addition also adds a nullable `ttft_ms` column to the BigQuery mapper
+and new-table schema: its schema test requires every canonical record field to have a
+column. Existing tables keep exporting unchanged: `prepare()` reads the table schema and
+omits only `ttft_ms` when that column is absent. Add the nullable INT64 column to get TTFT
+on the next run, or use a new table. No PATCH, automatic schema alteration or additional
+permissions are required; all other row fields retain strict schema checking.
+
+---
+
+## 6. Adding a destination
 
 1. Create `src/lib/logExport/destinations/<name>.ts` exporting a `LogExportDestinationType`:
    a Zod `configSchema`, a `fields` descriptor array for the UI, `secretFields`, and a
@@ -277,7 +487,7 @@ Two rules for a new destination:
 
 ---
 
-## 6. Operating it
+## 7. Operating it
 
 - **Dashboard**: Integrations → Log export. Add a destination, run **Test** to check credentials
   without writing rows, then enable it.

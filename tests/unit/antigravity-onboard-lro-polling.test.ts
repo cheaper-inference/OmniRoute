@@ -11,7 +11,7 @@
  * verdict for the process lifetime — every subsequent request for that
  * account 422s with "Missing Google projectId" even though onboarding would
  * have succeeded on the next poll. Reproduces the exact symptom reported in
- * https://github.com/diegosouzapw/OmniRoute/issues/11379 (repeated
+ * https://github.com/cheaper-inference/OmniRoute/issues/11379 (repeated
  * "loadCodeAssist ... returned no project id" across reconnect/restart).
  *
  * These tests verify:

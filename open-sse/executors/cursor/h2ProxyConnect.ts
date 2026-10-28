@@ -21,10 +21,12 @@ import net from "node:net";
 import tls from "node:tls";
 import type { EventEmitter } from "node:events";
 
-import { resolveProxyForRequest } from "../../utils/proxyFetch.ts";
+import { hasAmbientProxyContext, resolveProxyForRequest } from "../../utils/proxyFetch.ts";
 
 const DEFAULT_TUNNEL_TIMEOUT_MS = 15_000;
 const HEADER_TERMINATOR = "\r\n\r\n";
+/** A CONNECT response header block larger than this is treated as hostile. */
+export const MAX_CONNECT_HEADER_BYTES = 64 * 1024;
 
 export type ProxyTunnelOptions = {
   targetHost: string;
@@ -44,6 +46,10 @@ export type ConnectResponse = {
  * Resolve the proxy URL that a Cursor HTTP/2 request to `targetUrl` must use,
  * or `null` for a direct connection. Thin wrapper over the shared resolver so
  * the executor never re-implements precedence or bypass rules.
+ *
+ * Fails closed: when the request runs under a pinned context proxy and that
+ * proxy cannot be resolved, this throws instead of returning `null`, because a
+ * direct connection would send the request out on the host IP.
  */
 export function resolveCursorH2ProxyUrl(targetUrl: string): string | null {
   try {
@@ -52,8 +58,14 @@ export function resolveCursorH2ProxyUrl(targetUrl: string): string | null {
     } | null;
     const proxyUrl = resolved?.proxyUrl;
     return typeof proxyUrl === "string" && proxyUrl.length > 0 ? proxyUrl : null;
-  } catch {
-    // Proxy resolution must never break the request: fall back to direct.
+  } catch (error) {
+    if (hasAmbientProxyContext()) {
+      throw new Error(
+        "Cursor HTTP/2 proxy could not be resolved; refusing to fall back to a direct connection",
+        { cause: error }
+      );
+    }
+    // No pinned proxy: an unusable environment proxy keeps the direct fallback.
     return null;
   }
 }
@@ -69,11 +81,23 @@ export function parseH2Authority(targetUrl: string): { host: string; port: numbe
  * `http2.connect({ createConnection })` expects to receive.
  */
 export function tlsConnectOverTunnel(socket: net.Socket, servername: string): tls.TLSSocket {
-  return tls.connect({
+  const tlsSocket = tls.connect({
     socket,
     servername,
     ALPNProtocols: ["h2"],
   });
+  // A peer that ignores ALPN would otherwise leave the HTTP/2 session hanging.
+  tlsSocket.once("secureConnect", () => {
+    if (tlsSocket.alpnProtocol === "h2") return;
+    // Defer: http2 attaches its session in a later `secureConnect` listener, and
+    // a socket destroyed before that trips a native assertion in node:http2.
+    process.nextTick(() => {
+      if (!tlsSocket.destroyed) {
+        tlsSocket.destroy(new Error("TLS peer did not negotiate h2 via ALPN"));
+      }
+    });
+  });
+  return tlsSocket;
 }
 
 /** Build the CONNECT request for an HTTP proxy hop, with optional Basic auth. */
@@ -256,6 +280,18 @@ export function createProxyTunnelSocket(options: ProxyTunnelOptions): Promise<ne
     function onData(chunk: Buffer) {
       buffered = buffered.length === 0 ? Buffer.from(chunk) : Buffer.concat([buffered, chunk]);
       const parsed = parseConnectResponse(buffered);
+      if (
+        parsed
+          ? parsed.headerEnd > MAX_CONNECT_HEADER_BYTES
+          : buffered.length > MAX_CONNECT_HEADER_BYTES
+      ) {
+        fail(
+          new Error(
+            `Proxy CONNECT response headers too large (> ${MAX_CONNECT_HEADER_BYTES} bytes)`
+          )
+        );
+        return;
+      }
       if (!parsed) return;
 
       if (parsed.status !== 200) {
@@ -268,8 +304,13 @@ export function createProxyTunnelSocket(options: ProxyTunnelOptions): Promise<ne
       // Bytes past the header block already belong to the tunnelled stream
       // (a fast proxy can coalesce them into the same TCP segment). Push them
       // back so the TLS layer above does not lose the ServerHello.
+      // Pause first: a flowing socket with no `data` listener would discard them,
+      // while the TLS wrapper drains whatever is still buffered.
       const leftover = buffered.subarray(parsed.headerEnd);
-      if (leftover.length > 0) socket.unshift(leftover);
+      if (leftover.length > 0) {
+        socket.pause();
+        socket.unshift(leftover);
+      }
       resolve(socket);
     }
 

@@ -109,10 +109,10 @@ test("invalid yaml and workflows without jobs are reported, never silently accep
 
 test("the guard lets manual and push runs through anywhere, schedule only upstream", () => {
   const evaluate = (eventName: string, repository: string) =>
-    eventName !== "schedule" || repository === "diegosouzapw/OmniRoute";
+    eventName !== "schedule" || repository === "cheaper-inference/OmniRoute";
   assert.equal(evaluate("workflow_dispatch", "someone/else"), true);
   assert.equal(evaluate("push", "someone/else"), true);
-  assert.equal(evaluate("schedule", "diegosouzapw/OmniRoute"), true);
+  assert.equal(evaluate("schedule", "cheaper-inference/OmniRoute"), true);
   assert.equal(evaluate("schedule", "someone/else"), false);
 });
 

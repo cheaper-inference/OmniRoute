@@ -9,7 +9,7 @@ permissions:
 
 jobs:
   heap:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: Heap-growth gate
     runs-on: ubuntu-latest
     steps:
@@ -26,7 +26,7 @@ jobs:
       - run: npm run test:heap
 
   chaos:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: Resilience chaos (fault injection)
     runs-on: ubuntu-latest
     steps:
@@ -43,7 +43,7 @@ jobs:
       - run: npm run test:chaos
 
   k6-soak:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: k6 load/soak
     # #11965: this job runs a backend-only `next build`; the hosted 7 GB runner cannot build
     # release/v3.8.51 (VM shutdown ~7 min in), so it targets the box's light pool (`omni-light`:
@@ -116,7 +116,7 @@ jobs:
         run: kill "$(cat server.pid)" || true
 
   a11y-build:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: A11y build (production artefact, omni-build)
     # #16853: the a11y suite needs a production build of the FULL dashboard, and that build
     # does not fit the light pool the a11y job runs on (Turbopack reaches ~40 GB RSS on the
@@ -170,7 +170,7 @@ jobs:
           retention-days: 1
 
   a11y:
-    if: ${{ github.event_name != 'schedule' || github.repository == 'diegosouzapw/OmniRoute' }}
+    if: ${{ github.event_name != 'schedule' || github.repository == 'cheaper-inference/OmniRoute' }}
     name: A11y axe (nightly, freeze-and-alert)
     needs: a11y-build
     # Boots the production build made by `a11y-build` (no self-build here: #16853) and runs

@@ -72,10 +72,18 @@ export function upstreamErrorResponse(res: Response, errText: string): Response 
   // kept when it is safe prose ("Rate limit exceeded for this organization") and reduced
   // when it is not (stack frames, absolute paths, credential-shaped strings).
   const safeMessage = upstreamMessage ? sanitizeErrorMessage(upstreamMessage) : "";
-  const response = errorResponse(status, safeMessage || fallbackMessage);
+  return audioErrorResponse(status, safeMessage || fallbackMessage);
+}
 
-  // The canonical builders do not emit CORS, and these routes set it only on the OPTIONS
-  // preflight — re-apply it or browser clients break (same trap as #15159 E-02).
+/**
+ * Return the canonical (sanitized) error response with CORS re-applied.
+ *
+ * The canonical builders do not emit CORS, and the audio routes set it only on the OPTIONS
+ * preflight — re-apply it or browser clients break (same trap as #15159 E-02). Used by
+ * `upstreamErrorResponse` and by the handlers' fetch-failure `catch` blocks.
+ */
+export function audioErrorResponse(status: number, message: string): Response {
+  const response = errorResponse(status, message);
   for (const [header, value] of Object.entries(CORS_HEADERS)) {
     response.headers.set(header, value);
   }
