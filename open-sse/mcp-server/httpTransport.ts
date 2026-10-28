@@ -193,6 +193,10 @@ export function protectMcpSseResponse(request: Request, response: Response): Res
   if (!/(?:^|,)\s*no-transform(?:\s*(?:,|$))/i.test(cacheControl ?? "")) {
     headers.set("cache-control", [cacheControl, "no-transform"].filter(Boolean).join(", "));
   }
+  // Server-sent events behind a buffering reverse proxy stall tool calls for
+  // the proxy's buffer window on every event — carry the same no-buffering
+  // instruction the main chat SSE path sets.
+  headers.set("X-Accel-Buffering", "no");
   return new Response(response.body, {
     status: response.status,
     statusText: response.statusText,

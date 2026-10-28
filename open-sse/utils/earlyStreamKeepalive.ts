@@ -768,6 +768,11 @@ export async function withEarlyStreamKeepalive(
       "Content-Type": "text/event-stream; charset=utf-8",
       "Cache-Control": "no-cache, no-transform",
       Connection: "keep-alive",
+      // This early-keepalive response IS the response the client receives while
+      // the real turn is still prefilling — the worst possible stream for a
+      // buffering reverse proxy to sit on. Same no-buffering instruction the
+      // central header path already sets.
+      "X-Accel-Buffering": "no",
       ...extraHeaders,
     },
   });
