@@ -1,1 +1,0 @@
-- **fix(api):** Stop `/api/usage/call-logs` (and the Home "Recent Requests" feed) from listing each finished chat request twice for two minutes: a completed in-memory entry is now dropped when a persisted row shares its `correlationId`, since chat rows have used their own UUID instead of the pending request id since #14324.
