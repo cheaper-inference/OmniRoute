@@ -7,8 +7,13 @@
  * provider knowledge here so discovery, import, and catalog projection agree.
  */
 
+import {
+  SYSTEMONE_BACKENDS,
+  systemOneDocumentedModelEndpoints,
+} from "../config/systemOneRegistry.ts";
+
 export type ModelEndpointKind =
-  "chat" | "image" | "video" | "embedding" | "rerank" | "non-chat" | "unknown";
+  "chat" | "image" | "video" | "embedding" | "rerank" | "decision" | "non-chat" | "unknown";
 
 export type ModelEndpointDecision = {
   kind: ModelEndpointKind;
@@ -16,15 +21,63 @@ export type ModelEndpointDecision = {
   reason: "explicit-endpoints" | "provider-policy" | "unclassified";
 };
 
-type EndpointAwareModel = {
-  id: string;
-  supportedEndpoints?: readonly string[];
+type ModelEndpointMetadata = {
+  id?: unknown;
+  supportedEndpoints?: unknown;
+  supported_endpoints?: unknown;
+  architecture?: unknown;
+  output_modalities?: unknown;
+  apiFormat?: unknown;
+  modelType?: unknown;
 };
+
+type EndpointAwareModel = ModelEndpointMetadata & { id: string };
+
+export function getDeclaredModelEndpoints(
+  model: ModelEndpointMetadata,
+  provider?: string | null
+): string[] | undefined {
+  const declared = model.supportedEndpoints ?? model.supported_endpoints;
+  if (Array.isArray(declared)) {
+    return canonicalModelEndpoints(
+      declared.filter((endpoint): endpoint is string => typeof endpoint === "string")
+    );
+  }
+  if (model.apiFormat === "systemone" || model.modelType === "decision") return ["systemone"];
+  const documented =
+    typeof model.id === "string"
+      ? systemOneDocumentedModelEndpoints(provider, model.id)
+      : undefined;
+  if (documented) return documented;
+  const architecture = model.architecture;
+  const rawOutput =
+    architecture && typeof architecture === "object"
+      ? (architecture as { output_modalities?: unknown }).output_modalities
+      : model.output_modalities;
+  const output = Array.isArray(rawOutput ?? model.output_modalities)
+    ? ((rawOutput ?? model.output_modalities) as unknown[])
+    : [];
+  if (output.includes("decisions")) {
+    return output.includes("text") ? ["chat", "systemone"] : ["systemone"];
+  }
+  // Zen's published model list omits endpoint metadata for its Jev models.
+  const knownZenDecision =
+    provider?.trim().toLowerCase() === "opencode-zen" &&
+    typeof model.id === "string" &&
+    SYSTEMONE_BACKENDS["opencode-zen"].decisionModelPattern.test(model.id.trim());
+  if (knownZenDecision && output.length) {
+    return output.includes("text")
+      ? ["chat"]
+      : output.filter((modality): modality is string => typeof modality === "string");
+  }
+  return knownZenDecision ? ["systemone"] : undefined;
+}
 
 const CHAT_ENDPOINTS = new Set([
   "chat",
   "chat-completions",
   "chat/completions",
+  "chat.completions",
   "messages",
   "responses",
 ]);
@@ -32,9 +85,32 @@ const EMBEDDING_ENDPOINTS = new Set(["embeddings", "embedding"]);
 const RERANK_ENDPOINTS = new Set(["rerank", "reranking"]);
 const IMAGE_ENDPOINTS = new Set(["image", "images", "images/generations"]);
 const VIDEO_ENDPOINTS = new Set(["video", "videos", "videos/generations"]);
+/**
+ * Typed decision models (System One). A model that declares a chat endpoint
+ * alongside this one is still a chat model — the chat check above wins — so a
+ * mixed chat+decision model stays chat-selectable.
+ */
+const DECISION_ENDPOINTS = new Set(["systemone", "decision", "decisions"]);
 
 function normalizeEndpoint(endpoint: string): string {
   return endpoint.trim().toLowerCase().replace(/^\/+/, "").replace(/^v1\//, "");
+}
+
+/** Canonical native/chat boundary aliases, preserving all other declared endpoints. */
+export function canonicalModelEndpoints(endpoints: readonly string[]): string[] {
+  return [
+    ...new Set(
+      endpoints
+        .map((value) => {
+          const endpoint = normalizeEndpoint(value);
+          if (DECISION_ENDPOINTS.has(endpoint)) return "systemone";
+          if (["chat-completions", "chat/completions", "chat.completions"].includes(endpoint))
+            return "chat";
+          return endpoint;
+        })
+        .filter(Boolean)
+    ),
+  ];
 }
 
 function classifyExplicitEndpoints(
@@ -57,6 +133,9 @@ function classifyExplicitEndpoints(
   }
   if (endpoints.some((endpoint) => VIDEO_ENDPOINTS.has(endpoint))) {
     return { kind: "video", chatSelectable: false, reason: "explicit-endpoints" };
+  }
+  if (endpoints.some((endpoint) => DECISION_ENDPOINTS.has(endpoint))) {
+    return { kind: "decision", chatSelectable: false, reason: "explicit-endpoints" };
   }
   return { kind: "non-chat", chatSelectable: false, reason: "explicit-endpoints" };
 }
@@ -112,8 +191,9 @@ export function getModelEndpointDecision(
   modelId: string,
   supportedEndpoints?: readonly string[]
 ): ModelEndpointDecision {
+  const normalizedProvider = provider?.trim().toLowerCase();
   const explicit = classifyExplicitEndpoints(supportedEndpoints);
-  if (provider?.trim().toLowerCase() === "openrouter") {
+  if (normalizedProvider === "openrouter") {
     // Unconditional, unlike the OpenAI branch below: there is no "batch"
     // endpoint name an upstream could declare alongside a chat one, and the
     // rows already stored for these carry the synthetic `["chat"]` default --
@@ -121,7 +201,7 @@ export function getModelEndpointDecision(
     const openRouterDecision = classifyOpenRouterModel(modelId);
     if (openRouterDecision) return openRouterDecision;
   }
-  if (provider?.trim().toLowerCase() === "openai") {
+  if (normalizedProvider === "openai") {
     const openAiDecision = classifyOpenAiModel(modelId);
     if (openAiDecision) {
       // Old imported rows were persisted with `["chat"]` as a synthetic default
@@ -140,6 +220,10 @@ export function getModelEndpointDecision(
   }
 
   if (explicit) return explicit;
+  const documented = classifyExplicitEndpoints(
+    getDeclaredModelEndpoints({ id: modelId }, provider)
+  );
+  if (documented) return { ...documented, reason: "provider-policy" };
   return { kind: "unknown", chatSelectable: true, reason: "unclassified" };
 }
 
@@ -161,7 +245,8 @@ export function isChatSelectableModel(
   provider: string | null | undefined,
   model: EndpointAwareModel
 ): boolean {
-  return getModelEndpointDecision(provider, model.id, model.supportedEndpoints).chatSelectable;
+  return getModelEndpointDecision(provider, model.id, getDeclaredModelEndpoints(model, provider))
+    .chatSelectable;
 }
 
 export function filterChatSelectableModels<T extends EndpointAwareModel>(

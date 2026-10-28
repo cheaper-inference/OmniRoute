@@ -501,6 +501,22 @@ export const v1RerankSchema = z
   })
   .catchall(z.unknown());
 
+// POST /v1/systemone — typed decision request envelope `{ model, state, questions }`.
+// This is the boundary shape gate only. The per-question contract (noul / choice /
+// score and their criteria) and each backend's own limits are enforced by
+// `validateSystemOneRequestBody` / `validateSystemOneBackendBody` in
+// open-sse/services/typesafe/systemOneAnswers.ts, which the route runs next and
+// which the dispatch loop re-runs per candidate backend.
+export const v1SystemOneSchema = z
+  .object({
+    model: modelIdSchema,
+    // Never trimmed or bounded here: `state` is the caller's own data and the
+    // backend decides what it accepts.
+    state: z.union([z.string(), z.record(z.string(), z.unknown()), z.array(z.unknown())]),
+    questions: z.record(z.string(), z.unknown()),
+  })
+  .catchall(z.unknown());
+
 // POST /v1/classify — Jina zero/few-shot classification (api.jina.ai).
 export const v1ClassifySchema = z
   .object({

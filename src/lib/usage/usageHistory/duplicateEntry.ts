@@ -1,5 +1,6 @@
 import type { getDbInstance } from "../../db/core";
 import { resolveProviderId } from "@/shared/constants/providers";
+import { readReportedCost } from "../creditMeteredProviders";
 import type { UsageEntry } from "../usageHistory";
 
 /** Look up and backfill a legacy natural-key duplicate inside the caller's transaction. */
@@ -7,19 +8,19 @@ export function backfillDuplicateUsageEntry(
   db: ReturnType<typeof getDbInstance>,
   entry: UsageEntry,
   timestamp: string,
-  tokensInput: number,
-  tokensOutput: number
+  tokensInput: number | null,
+  tokensOutput: number | null
 ): boolean {
   const existing = db
     .prepare(
-      `SELECT id, endpoint, cpa_auth_index FROM usage_history
+      `SELECT id, endpoint, cpa_auth_index, provider_cost_usd FROM usage_history
        WHERE timestamp = ?
          AND COALESCE(provider, '')     = COALESCE(?, '')
          AND COALESCE(model, '')        = COALESCE(?, '')
          AND COALESCE(connection_id, '') = COALESCE(?, '')
          AND COALESCE(api_key_id, '')   = COALESCE(?, '')
-         AND tokens_input  = ?
-         AND tokens_output = ?
+         AND tokens_input IS ?
+         AND tokens_output IS ?
        ORDER BY id DESC LIMIT 1`
     )
     .get(
@@ -30,7 +31,14 @@ export function backfillDuplicateUsageEntry(
       entry.apiKeyId || null,
       tokensInput,
       tokensOutput
-    ) as { id: number; endpoint: string | null; cpa_auth_index: string | null } | undefined;
+    ) as
+    | {
+        id: number;
+        endpoint: string | null;
+        cpa_auth_index: string | null;
+        provider_cost_usd: number | null;
+      }
+    | undefined;
 
   if (!existing) return false;
   // Back-fill endpoint if the original row missed it.
@@ -44,6 +52,13 @@ export function backfillDuplicateUsageEntry(
   if (!existing.cpa_auth_index && entry.cpaAuthIndex) {
     db.prepare(`UPDATE usage_history SET cpa_auth_index = ? WHERE id = ?`).run(
       entry.cpaAuthIndex,
+      existing.id
+    );
+  }
+  const { providerCostUsd } = readReportedCost(entry.provider, entry.tokens);
+  if (existing.provider_cost_usd === null && providerCostUsd !== null) {
+    db.prepare("UPDATE usage_history SET provider_cost_usd = ? WHERE id = ?").run(
+      providerCostUsd,
       existing.id
     );
   }

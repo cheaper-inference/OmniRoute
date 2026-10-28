@@ -41,12 +41,39 @@ export interface SyncedAvailableModel {
   supportsVision?: boolean;
   dimensions?: number;
   supportedInputTypes?: string[];
-  modelType?: "chat" | "embedding" | "image" | "rerank";
+  modelType?: "chat" | "embedding" | "image" | "rerank" | "decision";
+  inputModalities?: string[];
+  outputModalities?: string[];
+  decisionPrimitives?: string[];
+  decisionPricing?: { prompt: string; completion: string; currency: "USD"; unit: "token" };
+  canonicalModelId?: string;
+  modelAuthor?: string;
+  modelOwner?: string;
+  upstreamRoot?: string;
+  resolvedAliasTarget?: string;
 }
 
 export type SyncedAvailableModelInput = Omit<SyncedAvailableModel, "source"> & {
   source?: string;
 };
+
+function optionalStringList(
+  record: Record<string, unknown>,
+  field: string
+): Record<string, string[]> {
+  const raw = record[field];
+  return Array.isArray(raw)
+    ? { [field]: raw.filter((value): value is string => typeof value === "string") }
+    : {};
+}
+
+function optionalStringField(
+  record: Record<string, unknown>,
+  field: string
+): Record<string, string> {
+  const value = toNonEmptyString(record[field]);
+  return value ? { [field]: value } : {};
+}
 
 function normalizeSyncedAvailableModel(model: unknown): SyncedAvailableModel | null {
   const record = asRecord(model);
@@ -145,7 +172,25 @@ function normalizeSyncedAvailableModel(model: unknown): SyncedAvailableModel | n
         }
       : {}),
     ...(typeof record.modelType === "string"
-      ? { modelType: record.modelType as "chat" | "embedding" | "image" | "rerank" }
+      ? { modelType: record.modelType as "chat" | "embedding" | "image" | "rerank" | "decision" }
+      : {}),
+    ...optionalStringList(record, "inputModalities"),
+    ...optionalStringList(record, "outputModalities"),
+    ...optionalStringList(record, "decisionPrimitives"),
+    ...optionalStringField(record, "modelAuthor"),
+    ...optionalStringField(record, "modelOwner"),
+    ...optionalStringField(record, "upstreamRoot"),
+    ...optionalStringField(record, "resolvedAliasTarget"),
+    ...(record.decisionPricing &&
+    typeof record.decisionPricing === "object" &&
+    typeof asRecord(record.decisionPricing).prompt === "string" &&
+    typeof asRecord(record.decisionPricing).completion === "string" &&
+    asRecord(record.decisionPricing).currency === "USD" &&
+    asRecord(record.decisionPricing).unit === "token"
+      ? { decisionPricing: record.decisionPricing as SyncedAvailableModel["decisionPricing"] }
+      : {}),
+    ...(toNonEmptyString(record.canonicalModelId)
+      ? { canonicalModelId: toNonEmptyString(record.canonicalModelId)! }
       : {}),
   };
 }

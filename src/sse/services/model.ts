@@ -1,3 +1,4 @@
+import { getDeclaredModelEndpoints } from "@omniroute/open-sse/services/modelEndpointPolicy.ts";
 // Re-export from open-sse with localDb integration
 import { getModelAliases, getCustomModels } from "@/lib/db/models";
 import { getComboByName, getComboById, getComboByNameInsensitive } from "@/lib/db/combos";
@@ -107,6 +108,7 @@ export async function getCombinedModelAliases(): Promise<Record<string, unknown>
  *  - targetFormat: the optional per-model wire format override (#2905).
  */
 type RuntimeModelMeta = {
+  supportedEndpoints?: string[];
   apiFormat?: string;
   targetFormat?: string;
   supportsThinking?: boolean;
@@ -358,6 +360,11 @@ function buildRuntimeModelMeta(
   compatOverrideMatch: any
 ): RuntimeModelMeta {
   const metadata = resolveRuntimeFormats(customMatch, syncedMatch, compatOverrideMatch);
+  const supportedEndpoints =
+    getDeclaredModelEndpoints(customMatch ?? {}) ??
+    getDeclaredModelEndpoints(syncedMatch ?? {}) ??
+    getDeclaredModelEndpoints(registryMatch ?? {});
+  if (supportedEndpoints) metadata.supportedEndpoints = supportedEndpoints;
   copyRegistryThinkingMetadata(metadata, registryMatch);
   copySyncedThinkingMetadata(metadata, syncedMatch);
   return metadata;

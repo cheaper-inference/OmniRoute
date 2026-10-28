@@ -23,7 +23,8 @@ test("typesafe is registered as an API-key specialty provider with no chat servi
   const entry = APIKEY_PROVIDERS.typesafe;
   assert.ok(entry, "typesafe must exist in APIKEY_PROVIDERS");
   assert.equal(entry.id, TYPESAFE_PROVIDER_ID);
-  assert.deepEqual(entry.serviceKinds, []);
+  assert.deepEqual(entry.serviceKinds, ["decision"]);
+  assert.equal(entry.serviceKinds.includes("llm"), false);
   assert.match(String(entry.authHint || ""), /Bearer/i);
 });
 
@@ -34,8 +35,8 @@ test("typesafe has no chat registry models and no static catalog", () => {
 });
 
 test("typesafe models are absent from chat-selectable filtering", () => {
-  // Even if a stray model row were imported, empty serviceKinds + no registry
-  // means operators should never see typesafe in combo chat pickers. An empty
+  // Declaring native decisions does not create chat support.
+  // Operators must not see TypeSafe in ordinary chat pickers. An empty
   // catalog filters to empty.
   const filtered = filterChatSelectableModels(TYPESAFE_PROVIDER_ID, []);
   assert.deepEqual(filtered, []);

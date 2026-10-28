@@ -15,9 +15,17 @@ import { calculateCost } from "./costCalculator";
 import { isFlatRateProvider } from "./flatRateProviders";
 import { getRawDataCutoffDate, isAggregationEnabled } from "./aggregateHistory";
 import { toNumber } from "@/shared/utils/numeric";
+import {
+  addUnpricedNativeCoverage,
+  createNativeUsagePricingScope,
+  rawNativeUsageGroupSql,
+  type NativeUsagePricingScope,
+  nativeUsageSql,
+  type NativeCostCoverage,
+} from "./nativeUsagePricing";
 
 type JsonRecord = Record<string, unknown>;
-type UsageBucket = {
+type UsageBucket = NativeCostCoverage & {
   requests: number;
   promptTokens: number;
   completionTokens: number;
@@ -97,15 +105,19 @@ function toStringOrEmpty(value: unknown): string {
  * provider-reported exact cost (`provider_cost_usd`) is billed by that cost; its
  * tokens stay for display only and are never re-priced.
  */
-const RAW_COST_COLUMNS = `
-        CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_input, 0) ELSE 0 END as cost_tokens_input,
-        CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_output, 0) ELSE 0 END as cost_tokens_output,
-        CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_cache_read, 0) ELSE 0 END as cost_tokens_cache_read,
-        CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_cache_creation, 0) ELSE 0 END as cost_tokens_cache_creation,
-        CASE WHEN provider_cost_usd IS NULL THEN COALESCE(tokens_reasoning, 0) ELSE 0 END as cost_tokens_reasoning,
-        COALESCE(provider_cost_usd, 0.0) as stored_cost`;
+function rawCostColumns(pricing: NativeUsagePricingScope): string {
+  return `
+        CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN COALESCE(tokens_input, 0) ELSE 0 END as cost_tokens_input,
+        CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN COALESCE(tokens_output, 0) ELSE 0 END as cost_tokens_output,
+        CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN COALESCE(tokens_cache_read, 0) ELSE 0 END as cost_tokens_cache_read,
+        CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN COALESCE(tokens_cache_creation, 0) ELSE 0 END as cost_tokens_cache_creation,
+        CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN COALESCE(tokens_reasoning, 0) ELSE 0 END as cost_tokens_reasoning,
+        COALESCE(provider_cost_usd, 0.0) as stored_cost,
+        CASE WHEN ${pricing.unpricedUsageSql()} THEN 1 ELSE 0 END as unpriced_native_count`;
+}
 
-function buildUsageSourceSql(aggregationEnabled: boolean) {
+function buildUsageSourceSql(aggregationEnabled: boolean, pricing: NativeUsagePricingScope) {
+  const RAW_COST_COLUMNS = rawCostColumns(pricing);
   if (!aggregationEnabled) {
     return `
       SELECT
@@ -144,7 +156,7 @@ function buildUsageSourceSql(aggregationEnabled: boolean) {
       COALESCE(service_tier, 'standard') as service_tier,
       1 as request_count
     FROM usage_history
-    WHERE DATE(timestamp) >= ?
+    WHERE DATE(timestamp) >= ? OR ${rawNativeUsageGroupSql()}
 
     UNION ALL
 
@@ -166,10 +178,11 @@ function buildUsageSourceSql(aggregationEnabled: boolean) {
       0 as cost_tokens_cache_creation,
       0 as cost_tokens_reasoning,
       COALESCE(total_cost, 0.0) as stored_cost,
+      0 as unpriced_native_count,
       'standard' as service_tier,
       COALESCE(total_requests, 0) as request_count
     FROM daily_usage_summary
-    WHERE date < ?
+    WHERE date < ? AND NOT ${rawNativeUsageGroupSql("daily_usage_summary.", "daily_usage_summary.date")}
   `;
 }
 
@@ -186,6 +199,7 @@ const AGGREGATE_FIELDS = `
   COALESCE(SUM(cost_tokens_cache_creation), 0) as cost_tokens_cache_creation,
   COALESCE(SUM(cost_tokens_reasoning), 0) as cost_tokens_reasoning,
   COALESCE(SUM(stored_cost), 0.0) as stored_cost,
+  SUM(unpriced_native_count) as unpriced_native_count,
   MAX(timestamp) as last_used
 `;
 
@@ -217,12 +231,14 @@ function addUsage(
   requests: number,
   promptTokens: number,
   completionTokens: number,
-  cost: number
+  cost: number,
+  unpricedNativeCount = 0
 ) {
   bucket.requests += requests;
   bucket.promptTokens += promptTokens;
   bucket.completionTokens += completionTokens;
   bucket.cost += cost;
+  addUnpricedNativeCoverage(bucket, unpricedNativeCount);
 }
 
 function getApiKeyStatsKey(apiKeyId: string | null, apiKeyName: string | null): string {
@@ -266,7 +282,8 @@ export function getMonthlyProviderTokensForConnection(
  *
  * Sums per-model token usage from `usage_history` for the connection and prices each model via the
  * backend pricing table (`calculateCost`). Scoped to the given `provider` and to **successful**
- * requests (`success = 1`) so failed/errored calls and any cross-provider rows can't inflate the
+ * requests (`success = 1`), plus native attempts requiring an exact USD amount.
+ * Failed native attempts may still have unknown charges; cross-provider rows cannot inflate the
  * total. Only reflects traffic that went THROUGH OmniRoute, not the provider's own dashboard. Used
  * to surface a "$X used since added" figure for providers that expose no native usage/quota API
  * (e.g. Vertex AI).
@@ -274,25 +291,29 @@ export function getMonthlyProviderTokensForConnection(
 export async function getConnectionSpendUsdSinceAdded(
   provider: string,
   connectionId: string
-): Promise<{ costUsd: number; requests: number }> {
+): Promise<{ costUsd: number; requests: number } & NativeCostCoverage> {
   if (!provider || !connectionId) return { costUsd: 0, requests: 0 };
 
+  const pricing = await createNativeUsagePricingScope();
   const db = getDbInstance();
   const rows = db
     .prepare(
       `SELECT model,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) AS input,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) AS output,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END), 0) AS cacheRead,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END), 0) AS cacheCreation,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END), 0) AS reasoning,
+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_input ELSE 0 END), 0) AS input,
+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_output ELSE 0 END), 0) AS output,
+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_cache_read ELSE 0 END), 0) AS cacheRead,
+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_cache_creation ELSE 0 END), 0) AS cacheCreation,
+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_reasoning ELSE 0 END), 0) AS reasoning,
           COALESCE(SUM(provider_cost_usd), 0) AS storedCost,
-          COUNT(*) AS requests
+          COUNT(*) AS requests,
+          SUM(CASE WHEN ${pricing.unpricedUsageSql()} THEN 1 ELSE 0 END) AS unpricedNativeCount
        FROM usage_history
-       WHERE connection_id = ? AND provider = ? AND success = 1
+       WHERE connection_id = ? AND provider = ?
+         AND (success = 1 OR ${nativeUsageSql()})
        GROUP BY model`
     )
     .all(connectionId, provider) as Array<{
+    unpricedNativeCount?: number;
     storedCost?: number;
     model?: string;
     input?: number;
@@ -305,8 +326,10 @@ export async function getConnectionSpendUsdSinceAdded(
 
   let costUsd = 0;
   let requests = 0;
+  const coverage: NativeCostCoverage = {};
   for (const row of rows) {
     requests += Math.max(0, Number(row.requests ?? 0));
+    addUnpricedNativeCoverage(coverage, toNumber(row.unpricedNativeCount));
     const model = typeof row.model === "string" ? row.model : "";
     const tokens = {
       input: Number(row.input ?? 0),
@@ -323,7 +346,7 @@ export async function getConnectionSpendUsdSinceAdded(
     });
   }
 
-  return { costUsd: Math.max(0, costUsd), requests };
+  return { costUsd: Math.max(0, costUsd), requests, ...coverage };
 }
 
 /**
@@ -334,7 +357,8 @@ export async function getUsageStats() {
   const db = getDbInstance();
   const aggregationEnabled = await isAggregationEnabled();
   const cutoffDate = aggregationEnabled ? await getRawDataCutoffDate() : null;
-  const sourceSql = buildUsageSourceSql(aggregationEnabled);
+  const pricing = await createNativeUsagePricingScope();
+  const sourceSql = buildUsageSourceSql(aggregationEnabled, pricing);
   const sourceParams = aggregationEnabled && cutoffDate ? [cutoffDate, cutoffDate] : [];
 
   const { getProviderConnections } = await import("@/lib/db/providers");
@@ -364,7 +388,7 @@ export async function getUsageStats() {
     byAccount: pendingRequests.byAccount,
   };
 
-  const stats: {
+  const stats: NativeCostCoverage & {
     totalRequests: number;
     totalPromptTokens: number;
     totalCompletionTokens: number;
@@ -434,6 +458,7 @@ export async function getUsageStats() {
     stats.totalPromptTokens += promptTokens;
     stats.totalCompletionTokens += completionTokens;
     stats.totalCost += entryCost;
+    addUnpricedNativeCoverage(stats, toNumber(row.unpriced_native_count));
 
     // By Provider
     if (!stats.byProvider[provider]) {
@@ -444,7 +469,14 @@ export async function getUsageStats() {
         cost: 0,
       };
     }
-    addUsage(stats.byProvider[provider], requestCount, promptTokens, completionTokens, entryCost);
+    addUsage(
+      stats.byProvider[provider],
+      requestCount,
+      promptTokens,
+      completionTokens,
+      entryCost,
+      toNumber(row.unpriced_native_count)
+    );
 
     // By Model
     const modelKey = provider ? `${model} (${provider})` : model;
@@ -459,7 +491,14 @@ export async function getUsageStats() {
         lastUsed: timestamp,
       };
     }
-    addUsage(stats.byModel[modelKey], requestCount, promptTokens, completionTokens, entryCost);
+    addUsage(
+      stats.byModel[modelKey],
+      requestCount,
+      promptTokens,
+      completionTokens,
+      entryCost,
+      toNumber(row.unpriced_native_count)
+    );
     if (new Date(timestamp) > new Date(stats.byModel[modelKey].lastUsed || timestamp)) {
       stats.byModel[modelKey].lastUsed = timestamp;
     }
@@ -510,7 +549,8 @@ export async function getUsageStats() {
         requestCount,
         promptTokens,
         completionTokens,
-        entryCost
+        entryCost,
+        toNumber(row.unpriced_native_count)
       );
       if (new Date(timestamp) > new Date(stats.byAccount[accountKey].lastUsed || timestamp)) {
         stats.byAccount[accountKey].lastUsed = timestamp;
@@ -565,7 +605,14 @@ export async function getUsageStats() {
         apiKeyStats.historicalApiKeyNames?.push(apiKeyName);
       }
       apiKeyStats.apiKeyName = displayName;
-      addUsage(apiKeyStats, requestCount, promptTokens, completionTokens, entryCost);
+      addUsage(
+        apiKeyStats,
+        requestCount,
+        promptTokens,
+        completionTokens,
+        entryCost,
+        toNumber(row.unpriced_native_count)
+      );
       if (new Date(timestamp) > new Date(apiKeyStats.lastUsed || timestamp)) {
         apiKeyStats.lastUsed = timestamp;
       }
@@ -586,11 +633,12 @@ export async function getUsageStats() {
           COALESCE(SUM(tokens_cache_read), 0) as tokens_cache_read,
           COALESCE(SUM(tokens_cache_creation), 0) as tokens_cache_creation,
           COALESCE(SUM(tokens_reasoning), 0) as tokens_reasoning,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) as cost_tokens_input,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) as cost_tokens_output,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END), 0) as cost_tokens_cache_read,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as cost_tokens_cache_creation,
-          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END), 0) as cost_tokens_reasoning,
+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_input ELSE 0 END), 0) as cost_tokens_input,
+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_output ELSE 0 END), 0) as cost_tokens_output,
+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_cache_read ELSE 0 END), 0) as cost_tokens_cache_read,
+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_cache_creation ELSE 0 END), 0) as cost_tokens_cache_creation,
+          COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL AND NOT ${pricing.unpricedUsageSql()} THEN tokens_reasoning ELSE 0 END), 0) as cost_tokens_reasoning,
+          SUM(CASE WHEN ${pricing.unpricedUsageSql()} THEN 1 ELSE 0 END) as unpriced_native_count,
           COALESCE(SUM(provider_cost_usd), 0.0) as stored_cost
         FROM usage_history
         WHERE timestamp >= ? AND timestamp <= ?
@@ -609,7 +657,14 @@ export async function getUsageStats() {
     const promptTokens = toNumber(row.tokens_input);
     const completionTokens = toNumber(row.tokens_output);
     const entryCost = await calculateAggregateCost(row);
-    addUsage(bucketMap[bucketKey], requestCount, promptTokens, completionTokens, entryCost);
+    addUsage(
+      bucketMap[bucketKey],
+      requestCount,
+      promptTokens,
+      completionTokens,
+      entryCost,
+      toNumber(row.unpriced_native_count)
+    );
   }
 
   return stats;

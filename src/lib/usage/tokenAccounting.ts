@@ -73,6 +73,17 @@ export function getPromptCacheCreationTokens(tokens: unknown): number {
   );
 }
 
+/** Preserve explicit unreported counts without changing omitted legacy defaults. */
+export function getStoredTokenCount(tokens: unknown, direction: "input" | "output"): number | null {
+  const record = asRecord(tokens);
+  const values =
+    direction === "input"
+      ? [record.input, record.prompt_tokens, record.input_tokens]
+      : [record.output, record.completion_tokens, record.output_tokens];
+  if (values.includes(null) && values.every((value) => value == null)) return null;
+  return direction === "input" ? getLoggedInputTokens(tokens) : getLoggedOutputTokens(tokens);
+}
+
 export function getLoggedInputTokens(tokens: unknown): number {
   const tokenRecord = asRecord(tokens);
 

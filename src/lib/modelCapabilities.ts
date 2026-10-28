@@ -88,6 +88,7 @@ const REASONING_UNSUPPORTED_PATTERNS = [
 
 /** Catalog/API surface types that are not chat completions. */
 const NON_CHAT_SURFACE_TYPES = new Set([
+  "decision",
   "audio",
   "video",
   "image",

@@ -10,7 +10,7 @@ import Icon from "@/shared/components/Icon";
  *
  * Never imports from ProviderDetailPageClient.
  */
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useTranslations } from "next-intl";
 import { Button, CapabilityBadge, Checkbox, Input, Select } from "@/shared/components";
 import {
@@ -18,6 +18,7 @@ import {
   type ModelSupportedEndpoint,
 } from "@/shared/constants/modelSupportedEndpoints";
 import { useNotificationStore } from "@/store/notificationStore";
+import { isSystemOneProvider } from "@omniroute/open-sse/config/systemOneRegistry";
 import {
   buildCompatMap,
   anyNormalizeCompatBadge,
@@ -61,6 +62,7 @@ function targetFormatLabel(value: string, t: (key: string) => string): string {
 
 const MODEL_ENDPOINT_OPTIONS: ModelSupportedEndpoint[] = [
   "chat",
+  "systemone",
   "embeddings",
   "rerank",
   "images",
@@ -80,6 +82,7 @@ const CHECK_LABEL = "flex min-w-0 items-center gap-1.5 text-xs text-text-main cu
 function endpointLabel(endpoint: ModelSupportedEndpoint, t: (key: string) => string): string {
   const labels: Partial<Record<ModelSupportedEndpoint, string>> = {
     chat: t("supportedEndpointChat"),
+    systemone: providerText(t, "supportedEndpointSystemOne", "Decisions"),
     embeddings: t("supportedEndpointEmbeddings"),
     rerank: providerText(t, "rerankEndpoint", "Rerank"),
     images: t("supportedEndpointImages"),
@@ -114,7 +117,7 @@ async function fetchProviderModelsPayload(providerId: string): Promise<{
 // Component
 // ---------------------------------------------------------------------------
 
-export default function CustomModelsSection({
+function CustomModelsSectionState({
   providerId,
   providerAlias,
   copied,
@@ -124,6 +127,16 @@ export default function CustomModelsSection({
 }: CustomModelsSectionProps) {
   const t = useTranslations("providers");
   const notify = useNotificationStore();
+  const nativeAdapter = isSystemOneProvider(providerId);
+  const pendingWrite = useRef(false);
+  const active = useRef(true);
+  const loadRevision = useRef(0);
+  useEffect(() => {
+    active.current = true;
+    return () => {
+      active.current = false;
+    };
+  }, []);
   const [customModels, setCustomModels] = useState<CompatModelRow[]>([]);
   const [modelCompatOverrides, setModelCompatOverrides] = useState<
     Array<CompatModelRow & { id: string }>
@@ -167,7 +180,9 @@ export default function CustomModelsSection({
   const syncedModelIdSet = useMemo(() => new Set(syncedModelIds), [syncedModelIds]);
 
   const fetchCustomModels = useCallback(async () => {
+    const revision = ++loadRevision.current;
     const payload = await fetchProviderModelsPayload(providerId);
+    if (!active.current || revision !== loadRevision.current) return;
     if (payload) {
       setCustomModels(payload.models);
       setModelCompatOverrides(payload.overrides);
@@ -180,7 +195,9 @@ export default function CustomModelsSection({
   // rejected by the compiler rules); every setState here runs after the await.
   useEffect(() => {
     const run = async () => {
+      const revision = ++loadRevision.current;
       const payload = await fetchProviderModelsPayload(providerId);
+      if (!active.current || revision !== loadRevision.current) return;
       if (payload) {
         setCustomModels(payload.models);
         setModelCompatOverrides(payload.overrides);
@@ -191,7 +208,15 @@ export default function CustomModelsSection({
   }, [providerId]);
 
   const handleAdd = async () => {
-    if (!newModelId.trim() || adding) return;
+    if (!newModelId.trim() || adding || pendingWrite.current) return;
+    if (!newEndpoints.length) {
+      notify.error(
+        providerText(t, "selectSupportedEndpoint", "Select at least one supported endpoint")
+      );
+      return;
+    }
+    if (newApiFormat === "systemone" && !nativeAdapter) return;
+    pendingWrite.current = true;
     setAdding(true);
     try {
       const res = await fetch("/api/provider-models", {
@@ -203,11 +228,17 @@ export default function CustomModelsSection({
           modelName: newModelName.trim() || undefined,
           apiFormat: newApiFormat,
           supportedEndpoints: newEndpoints,
+          ...(newApiFormat === "systemone" ? { modelType: "decision" } : {}),
           ...(newTargetFormat ? { targetFormat: newTargetFormat } : {}),
           ...(newSupportsVision ? { supportsVision: true } : {}),
           ...(newIsFree ? { isFree: true } : {}),
         }),
       });
+      if (!active.current) return;
+      if (!res.ok) {
+        notify.error(t("failedAddModelTryAgain"));
+        return;
+      }
       if (res.ok) {
         setNewModelId("");
         setNewModelName("");
@@ -219,9 +250,10 @@ export default function CustomModelsSection({
         await fetchCustomModels();
         onModelsChanged?.();
       }
-    } catch (e) {
-      console.error("Failed to add custom model:", e);
+    } catch {
+      if (active.current) notify.error(t("failedAddModelTryAgain"));
     } finally {
+      pendingWrite.current = false;
       setAdding(false);
     }
   };
@@ -290,12 +322,17 @@ export default function CustomModelsSection({
   };
 
   const beginEdit = (model: CompatModelRow) => {
+    if (pendingWrite.current) return;
     setEditingModelId(model.id ?? null);
-    setEditingApiFormat(model.apiFormat || "chat-completions");
+    setEditingApiFormat(
+      model.apiFormat || (model.modelType === "decision" ? "systemone" : "chat-completions")
+    );
     setEditingEndpoints(
       Array.isArray(model.supportedEndpoints) && model.supportedEndpoints.length
         ? normalizeModelSupportedEndpoints(model.supportedEndpoints)
-        : ["chat"]
+        : model.apiFormat === "systemone" || model.modelType === "decision"
+          ? ["systemone"]
+          : []
     );
     setEditingTargetFormat(model.targetFormat || "");
     setEditingContextWindowOverride(
@@ -309,6 +346,7 @@ export default function CustomModelsSection({
   };
 
   const cancelEdit = () => {
+    if (pendingWrite.current) return;
     setEditingModelId(null);
     setEditingApiFormat("chat-completions");
     setEditingEndpoints(["chat"]);
@@ -324,6 +362,8 @@ export default function CustomModelsSection({
     modelId: string,
     patch: { compatByProtocol?: CompatByProtocolMap }
   ) => {
+    if (pendingWrite.current) return;
+    pendingWrite.current = true;
     setSavingModelId(modelId);
     try {
       const res = await fetch("/api/provider-models", {
@@ -342,6 +382,7 @@ export default function CustomModelsSection({
       notify.error(t("failedSaveCustomModel"));
       return;
     } finally {
+      pendingWrite.current = false;
       setSavingModelId(null);
     }
     try {
@@ -360,6 +401,8 @@ export default function CustomModelsSection({
     contextWindowOverride: number | null,
     maxOutputTokenOverride: number | null
   ) => {
+    if (pendingWrite.current) return;
+    pendingWrite.current = true;
     setSavingModelId(modelId);
     try {
       const model = customModels.find((m) => m.id === modelId);
@@ -373,6 +416,11 @@ export default function CustomModelsSection({
           source: model?.source || "manual",
           apiFormat: editingApiFormat,
           supportedEndpoints: editingEndpoints,
+          ...(editingApiFormat === "systemone"
+            ? { modelType: "decision" }
+            : model?.modelType === "decision"
+              ? { modelType: null }
+              : {}),
           // #2905: send targetFormat only when set; the API treats the field
           // as optional. Sending an empty string would fail Zod's enum check,
           // so we omit it entirely when the user picks "Default (auto)".
@@ -388,40 +436,40 @@ export default function CustomModelsSection({
       });
 
       if (!res.ok) {
-        const detail = await formatProviderModelsErrorResponse(res);
         throw new Error(
-          detail ||
-            providerText(
-              t,
-              "failedSaveModelEndpointSettings",
-              "Failed to save model endpoint settings"
-            )
+          providerText(
+            t,
+            "failedSaveModelEndpointSettings",
+            "Failed to save model endpoint settings"
+          )
         );
       }
 
       await fetchCustomModels();
+      if (!active.current) return;
       onModelsChanged?.();
       notify.success(
         providerText(t, "savedModelEndpointSettings", "Saved model endpoint settings")
       );
+      pendingWrite.current = false;
       cancelEdit();
-    } catch (e) {
-      console.error("Failed to save custom model:", e);
-      notify.error(
-        e instanceof Error && e.message
-          ? e.message
-          : providerText(
-              t,
-              "failedSaveModelEndpointSettings",
-              "Failed to save model endpoint settings"
-            )
-      );
+    } catch {
+      if (active.current)
+        notify.error(
+          providerText(
+            t,
+            "failedSaveModelEndpointSettings",
+            "Failed to save model endpoint settings"
+          )
+        );
     } finally {
+      pendingWrite.current = false;
       setSavingModelId(null);
     }
   };
 
   const saveEdit = async (modelId: string) => {
+    if (pendingWrite.current) return;
     if (!editingModelId || editingModelId !== modelId) return;
     if (!editingEndpoints.length) {
       notify.error(
@@ -478,7 +526,12 @@ export default function CustomModelsSection({
               placeholder={t("optional")}
             />
           </div>
-          <Button size="sm" icon="add" onClick={handleAdd} disabled={!newModelId.trim() || adding}>
+          <Button
+            size="sm"
+            icon="add"
+            onClick={handleAdd}
+            disabled={!newModelId.trim() || adding || savingModelId !== null}
+          >
             {adding ? t("adding") : t("add")}
           </Button>
         </div>
@@ -488,16 +541,20 @@ export default function CustomModelsSection({
           <div className="min-w-0 lg:w-48">
             <Select
               id="custom-api-format"
-              label="API Format"
+              label={t("apiFormatLabel")}
               value={newApiFormat}
               onChange={(e) => {
                 const endpoints = endpointsForApiFormatChange(newApiFormat, e.target.value);
                 setNewApiFormat(e.target.value);
                 if (endpoints) setNewEndpoints(endpoints);
+                if (e.target.value === "systemone") setNewTargetFormat("");
               }}
             >
               <option value="chat-completions">{t("chatCompletions")}</option>
               <option value="responses">{t("responsesApi")}</option>
+              <option value="systemone" disabled={!nativeAdapter}>
+                {providerText(t, "systemOneApi", "System One")}
+              </option>
               <option value="embeddings">{t("embeddings")}</option>
               <option value="rerank">Rerank</option>
               <option value="audio-transcriptions">{t("audioTranscriptions")}</option>
@@ -511,6 +568,7 @@ export default function CustomModelsSection({
               id="custom-target-format"
               label={t("targetFormatLabel")}
               value={newTargetFormat}
+              disabled={newApiFormat === "systemone"}
               onChange={(e) => setNewTargetFormat(e.target.value)}
               title={t("targetFormatHint")}
             >
@@ -531,6 +589,7 @@ export default function CustomModelsSection({
                 <Checkbox
                   key={ep}
                   checked={newEndpoints.includes(ep)}
+                  disabled={newApiFormat === "systemone" && ep === "chat"}
                   onChange={(e) => {
                     if (e.target.checked) {
                       setNewEndpoints((prev) => [...prev, ep]);
@@ -570,6 +629,15 @@ export default function CustomModelsSection({
             </span>
           </div>
         </div>
+        {newApiFormat === "systemone" && (
+          <p className="text-xs text-text-muted">
+            {providerText(
+              t,
+              "decisionModelHint",
+              "Typed decisions use System One, not chat completions"
+            )}
+          </p>
+        )}
       </div>
 
       {/* List */}
@@ -608,6 +676,24 @@ export default function CustomModelsSection({
                       <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-info/15 text-info font-medium">
                         {t("responses")}
                       </span>
+                    )}
+                    {(model.modelType === "decision" ||
+                      model.apiFormat === "systemone" ||
+                      (model.supportedEndpoints?.includes("systemone") &&
+                        !model.supportedEndpoints.some(
+                          (endpoint) => endpoint === "chat" || endpoint === "responses"
+                        ))) && (
+                      <CapabilityBadge
+                        icon="tune"
+                        className="bg-info/15 text-info"
+                        title={providerText(
+                          t,
+                          "decisionModelHint",
+                          "Typed decisions use System One, not chat completions"
+                        )}
+                      >
+                        {providerText(t, "decisionModel", "Decision model")}
+                      </CapabilityBadge>
                     )}
                     {hasSyncedBase && (
                       <span
@@ -719,7 +805,13 @@ export default function CustomModelsSection({
                   </div>
 
                   {editingModelId === model.id && (
-                    <div className="mt-3 min-w-0 max-w-full rounded-lg border border-border bg-bg-subtle p-3">
+                    <fieldset
+                      disabled={savingModelId !== null || adding}
+                      className="mt-3 min-w-0 max-w-full rounded-lg border border-border bg-bg-subtle p-3"
+                    >
+                      <legend className="sr-only">
+                        {t("edit")} {model.name || model.id}
+                      </legend>
                       <div className={FORMAT_FIELDS_GRID}>
                         <div className="min-w-0 lg:w-[11rem] lg:shrink-0">
                           <Select
@@ -733,10 +825,14 @@ export default function CustomModelsSection({
                               );
                               setEditingApiFormat(e.target.value);
                               if (endpoints) setEditingEndpoints(endpoints);
+                              if (e.target.value === "systemone") setEditingTargetFormat("");
                             }}
                           >
                             <option value="chat-completions">{t("chatCompletions")}</option>
                             <option value="responses">{t("responsesApi")}</option>
+                            <option value="systemone" disabled={!nativeAdapter}>
+                              {providerText(t, "systemOneApi", "System One")}
+                            </option>
                             <option value="embeddings">{t("embeddings")}</option>
                             <option value="rerank">Rerank</option>
                             <option value="audio-transcriptions">{t("audioTranscriptions")}</option>
@@ -750,6 +846,7 @@ export default function CustomModelsSection({
                             label={t("targetFormatLabel")}
                             selectClassName="text-xs"
                             value={editingTargetFormat}
+                            disabled={editingApiFormat === "systemone"}
                             onChange={(e) => setEditingTargetFormat(e.target.value)}
                             title={t("targetFormatHint")}
                           >
@@ -824,6 +921,7 @@ export default function CustomModelsSection({
                               <Checkbox
                                 key={ep}
                                 checked={editingEndpoints.includes(ep)}
+                                disabled={editingApiFormat === "systemone" && ep === "chat"}
                                 onChange={(e) => {
                                   if (e.target.checked) {
                                     setEditingEndpoints((prev) =>
@@ -847,12 +945,17 @@ export default function CustomModelsSection({
                           >
                             {savingModelId === model.id ? t("saving") : t("save")}
                           </Button>
-                          <Button size="sm" variant="ghost" onClick={cancelEdit}>
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            onClick={cancelEdit}
+                            disabled={savingModelId !== null || adding}
+                          >
                             {t("cancel")}
                           </Button>
                         </div>
                       </div>
-                    </div>
+                    </fieldset>
                   )}
                 </div>
                 <div className="flex shrink-0 items-center gap-1">
@@ -861,6 +964,7 @@ export default function CustomModelsSection({
                     size="icon-sm"
                     icon="edit"
                     onClick={() => beginEdit(model)}
+                    disabled={savingModelId !== null || adding}
                     className="size-6 min-h-6 rounded text-text-muted"
                     title={t("edit")}
                     aria-label={t("edit")}
@@ -884,14 +988,14 @@ export default function CustomModelsSection({
                       })
                     }
                     showDeveloperToggle
-                    disabled={savingModelId === model.id}
+                    disabled={savingModelId !== null || adding}
                   />
                   <Button
                     variant="ghost"
                     size="icon-sm"
                     icon={model.isHidden ? "visibility_off" : "visibility"}
                     onClick={() => handleToggleHidden(model.id!, !model.isHidden)}
-                    disabled={togglingModelId === model.id}
+                    disabled={togglingModelId === model.id || savingModelId !== null || adding}
                     className="size-6 min-h-6 rounded text-text-muted disabled:opacity-50"
                     title={model.isHidden ? t("unhideModel") : t("hideModel")}
                     aria-label={model.isHidden ? t("unhideModel") : t("hideModel")}
@@ -902,6 +1006,7 @@ export default function CustomModelsSection({
                       size="icon-sm"
                       icon="restart_alt"
                       onClick={() => handleResetToUpstreamDefaults(model.id!)}
+                      disabled={savingModelId !== null || adding}
                       className="size-6 min-h-6 rounded text-warning hover:bg-warning-bg"
                       title={providerText(
                         t,
@@ -920,6 +1025,7 @@ export default function CustomModelsSection({
                     size="icon-sm"
                     icon="delete"
                     onClick={() => handleRemove(model.id!)}
+                    disabled={savingModelId !== null || adding}
                     className="size-6 min-h-6 rounded text-error hover:bg-error-bg"
                     title={t("removeCustomModel")}
                     aria-label={t("removeCustomModel")}
@@ -934,4 +1040,8 @@ export default function CustomModelsSection({
       )}
     </div>
   );
+}
+
+export default function CustomModelsSection(props: CustomModelsSectionProps) {
+  return <CustomModelsSectionState key={props.providerId} {...props} />;
 }

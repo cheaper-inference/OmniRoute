@@ -138,7 +138,8 @@ export async function addCustomModel(
     | "audio-transcriptions"
     | "audio-speech"
     | "images-generations"
-    | "video" = "chat-completions",
+    | "video"
+    | "systemone" = "chat-completions",
   supportedEndpoints: string[] = ["chat"],
   // #2905: optional per-model wire format override (e.g. "claude" for an
   // opencode-go custom model). When unset, routing falls back to the provider
@@ -158,7 +159,7 @@ export async function addCustomModel(
   extraMeta?: {
     dimensions?: number;
     supportedInputTypes?: string[];
-    modelType?: "chat" | "embedding" | "image" | "rerank";
+    modelType?: "chat" | "embedding" | "image" | "rerank" | "decision";
     endpointCapabilitySource?: "declared" | "inferred" | "defaulted" | "operator";
   }
 ) {
@@ -839,6 +840,8 @@ export async function updateCustomModel(
       : {}),
     ...(updates.isHidden !== undefined ? { isHidden: Boolean(updates.isHidden) } : {}),
   };
+  if (updates.modelType === null) delete next.modelType;
+  else if (typeof updates.modelType === "string") next.modelType = updates.modelType;
   applyTriStateBooleanOverride(next, updates, "preserveOpenAIDeveloperRole");
   // #1904: manual vision-capability override — `null` clears back to the
   // id-based heuristic in getCustomVisionCapabilityFields().

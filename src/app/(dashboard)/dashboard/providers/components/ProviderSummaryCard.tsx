@@ -73,6 +73,7 @@ function providerText(
 
 const SERVICE_KIND_CHIPS: Array<{ key: string; icon: string; labelKey: string; fallback: string }> =
   [
+    { key: "decision", icon: "rule", labelKey: "serviceKindDecision", fallback: "Decision" },
     { key: "image", icon: "image", labelKey: "serviceKindImage", fallback: "Image" },
     { key: "video", icon: "videocam", labelKey: "serviceKindVideo", fallback: "Video" },
     { key: "music", icon: "music_note", labelKey: "serviceKindMusic", fallback: "Music" },

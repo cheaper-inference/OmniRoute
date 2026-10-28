@@ -11,6 +11,9 @@ import { filterSelectableModels } from "@omniroute/open-sse/services/modelLifecy
 import { getEmbeddingProvider } from "@omniroute/open-sse/config/embeddingRegistry.ts";
 import { hasPayloadFreeEvidence, hasPayloadPaidEvidence } from "@/shared/utils/payloadFreeEvidence";
 
+import { normalizeModelSupportedEndpoints } from "@/shared/constants/modelSupportedEndpoints";
+import { getDeclaredModelEndpoints } from "@omniroute/open-sse/services/modelEndpointPolicy.ts";
+
 type JsonRecord = Record<string, unknown>;
 
 function asRecord(value: unknown): JsonRecord {
@@ -536,6 +539,47 @@ export function detectModelModality(
   };
 }
 
+function decisionDiscoveryMetadata(record: JsonRecord): Partial<SyncedAvailableModel> {
+  const architecture = asRecord(record.architecture);
+  const metadata: Partial<SyncedAvailableModel> = {};
+  for (const [target, raw] of [
+    ["inputModalities", record.input_modalities ?? architecture.input_modalities],
+    ["outputModalities", record.output_modalities ?? architecture.output_modalities],
+    ["decisionPrimitives", record.decision_primitives],
+  ] as const) {
+    if (Array.isArray(raw))
+      metadata[target] = raw.filter((value): value is string => typeof value === "string");
+  }
+  for (const [target, source] of [
+    ["modelAuthor", "author"],
+    ["modelOwner", "model_owner"],
+    ["upstreamRoot", "upstream_root"],
+    ["resolvedAliasTarget", "resolved_alias_target"],
+  ] as const) {
+    const value = toNonEmptyString(record[source]);
+    if (value) metadata[target] = value;
+  }
+  const canonical =
+    toNonEmptyString(record.canonical_model_id) || toNonEmptyString(record.canonical_slug);
+  if (canonical) metadata.canonicalModelId = canonical;
+  const pricing = asRecord(record.pricing);
+  if (
+    record.pricing_source === "upstream" &&
+    record.pricing_unit === "token" &&
+    record.pricing_currency === "USD" &&
+    typeof pricing.prompt === "string" &&
+    typeof pricing.completion === "string"
+  ) {
+    metadata.decisionPricing = {
+      prompt: pricing.prompt,
+      completion: pricing.completion,
+      currency: "USD",
+      unit: "token",
+    };
+  }
+  return metadata;
+}
+
 export function normalizeDiscoveredModels(
   models: unknown,
   providerId?: string
@@ -580,23 +624,29 @@ export function normalizeDiscoveredModels(
     // Only non-chat modalities are stamped on the synced row. Chat models keep the
     // tip's exact shape (no `modelType`/`supportedInputTypes` defaults) so the
     // import-mode diff stays stable and existing catalog snapshots do not churn.
-    const modelType = modality.isEmbedding
-      ? "embedding"
-      : modality.isRerank
-        ? "rerank"
-        : modality.isImage
-          ? "image"
-          : undefined;
+    const declaredEndpoints = getDeclaredModelEndpoints({ ...record, id }, providerId);
+    const isDecision =
+      declaredEndpoints?.some((endpoint) =>
+        ["systemone", "decision", "decisions"].includes(endpoint)
+      ) === true;
+    const decisionOnly =
+      isDecision &&
+      declaredEndpoints?.every((endpoint) =>
+        ["systemone", "decision", "decisions"].includes(endpoint)
+      );
+    const modelType = decisionOnly
+      ? "decision"
+      : modality.isEmbedding
+        ? "embedding"
+        : modality.isRerank
+          ? "rerank"
+          : modality.isImage
+            ? "image"
+            : undefined;
     const explicitInputTypes = Array.isArray(record.supportedInputTypes);
 
-    const supportedEndpoints = Array.isArray(record.supportedEndpoints)
-      ? Array.from(
-          new Set(
-            record.supportedEndpoints
-              .map((endpoint) => toNonEmptyString(endpoint))
-              .filter((endpoint): endpoint is string => Boolean(endpoint))
-          )
-        ).sort()
+    const supportedEndpoints = declaredEndpoints
+      ? normalizeModelSupportedEndpoints(declaredEndpoints).sort()
       : modality.isEmbedding
         ? ["embeddings"]
         : modality.isRerank
@@ -624,13 +674,15 @@ export function normalizeDiscoveredModels(
 
     const apiFormat =
       toNonEmptyString(record.apiFormat) ||
-      (modality.isEmbedding
-        ? "embeddings"
-        : modality.isRerank
-          ? "rerank"
-          : modality.isImage
-            ? "images-generations"
-            : undefined);
+      (decisionOnly
+        ? "systemone"
+        : modality.isEmbedding
+          ? "embeddings"
+          : modality.isRerank
+            ? "rerank"
+            : modality.isImage
+              ? "images-generations"
+              : undefined);
 
     const topProvider = asRecord(record.top_provider);
 
@@ -739,6 +791,7 @@ export function normalizeDiscoveredModels(
         ? { supportedInputTypes: modality.supportedInputTypes }
         : {}),
       ...(modelType ? { modelType } : {}),
+      ...(isDecision ? decisionDiscoveryMetadata(record) : {}),
     });
   }
 

@@ -10,6 +10,45 @@ async function loadNextConfig(label) {
   return import(`${pathToFileURL(modulePath).href}?case=${label}-${Date.now()}`);
 }
 
+test("production webpack cache can be explicitly disabled without changing defaults or dev", async () => {
+  const { default: nextConfig } = await loadNextConfig("production-webpack-cache");
+  const original = process.env.OMNIROUTE_BUILD_WEBPACK_CACHE;
+  type Cache = false | { type: string; maxMemoryGenerations: number } | undefined;
+  const cached = { type: "filesystem", maxMemoryGenerations: Infinity };
+  const run = (dev: boolean, cache: Cache = cached): Cache => {
+    const config: { cache: Cache } & Record<string, unknown> = {
+      context: process.cwd(),
+      cache,
+      plugins: [],
+      externals: [],
+      ignoreWarnings: [],
+      resolve: { fallback: {} },
+    };
+    nextConfig.webpack(config, {
+      dev,
+      isServer: false,
+      defaultLoaders: { babel: {} },
+      webpack: { IgnorePlugin: class {} },
+    });
+    return config.cache;
+  };
+  try {
+    delete process.env.OMNIROUTE_BUILD_WEBPACK_CACHE;
+    assert.equal(run(false), cached);
+    assert.equal(run(false, false), false);
+    for (const value of ["1", "false", ""]) {
+      process.env.OMNIROUTE_BUILD_WEBPACK_CACHE = value;
+      assert.equal(run(false), cached);
+    }
+    process.env.OMNIROUTE_BUILD_WEBPACK_CACHE = "0";
+    assert.equal(run(false), false);
+    assert.equal(run(true), cached);
+  } finally {
+    if (original === undefined) delete process.env.OMNIROUTE_BUILD_WEBPACK_CACHE;
+    else process.env.OMNIROUTE_BUILD_WEBPACK_CACHE = original;
+  }
+});
+
 test.afterEach(() => {
   if (originalNextDistDir === undefined) {
     delete process.env.NEXT_DIST_DIR;

@@ -17,7 +17,9 @@ export type ServiceKind =
   | "webFetch"
   | "video"
   | "music"
-  | "ocr";
+  | "ocr"
+  | "decision";
+// Native typed decisions use a separate endpoint and never imply chat support.
 
 export const SERVICE_KIND_VALUES: readonly ServiceKind[] = [
   "llm",
@@ -31,4 +33,5 @@ export const SERVICE_KIND_VALUES: readonly ServiceKind[] = [
   "video",
   "music",
   "ocr",
+  "decision",
 ];

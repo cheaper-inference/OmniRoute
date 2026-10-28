@@ -1,3 +1,6 @@
+import { getNativeDecisionProviderModels } from "./nativeDecisionDiscovery";
+import { isDecisionCatalogKind } from "@/app/api/v1/models/catalogDecisions";
+import type { SystemOneCatalogConnection } from "@omniroute/open-sse/handlers/systemOneModels";
 import { NextResponse } from "next/server";
 import {
   getProviderConnectionFamilyIds,
@@ -222,6 +225,13 @@ export async function GET(
     const provider = connectionProvider;
     if (!provider) {
       return NextResponse.json({ error: "Invalid connection provider" }, { status: 400 });
+    }
+    if (isDecisionCatalogKind(searchParams.get("kind"))) {
+      return getNativeDecisionProviderModels(
+        request,
+        connection as unknown as SystemOneCatalogConnection,
+        excludeHidden
+      );
     }
     const usesCuratedModelsOnly = providerUsesCuratedModelsOnly(provider);
 

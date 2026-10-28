@@ -18,6 +18,8 @@ import {
   isOpenAICompatibleProvider,
 } from "@/shared/constants/providers";
 
+import { getProviderServiceKinds } from "@/lib/providers/serviceKindIndex";
+
 import { useDevinAgenticAuthStatus } from "../hooks/useDevinAgenticAuthStatus";
 import { CategoryDot } from "./CategoryDot";
 import { isCheaperInferenceProviderId, isKimiPartnerProviderId } from "../featuredProviders";
@@ -42,6 +44,7 @@ interface ProviderStats {
 }
 
 const KIND_LABEL_KEYS: Record<string, { key: string; fallback: string }> = {
+  decision: { key: "serviceKindDecision", fallback: "Decision" },
   llm: { key: "serviceKindChat", fallback: "Chat" },
   embedding: { key: "serviceKindEmbedding", fallback: "Embed" },
   image: { key: "serviceKindImage", fallback: "Image" },
@@ -304,6 +307,9 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
   // OR when the provider has no explicit serviceKinds but is a regular LLM provider
   // i.e. not a search/audio/cloud-agent type).
   const serviceKinds = provider.serviceKinds ?? [];
+  const displayServiceKinds = getProviderServiceKinds(providerId, serviceKinds).includes("decision")
+    ? [...new Set([...serviceKinds, "decision"])]
+    : serviceKinds;
   const isLlmProvider =
     serviceKinds.includes("llm") ||
     (serviceKinds.length === 0 &&
@@ -561,7 +567,7 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
             </div>
 
             {/* Row 2 — Capabilities: service-kind chips + compatibility badges (deprecated shown as block icon in Row 1 header). Rendered only when content exists. */}
-            {((provider.serviceKinds && provider.serviceKinds.length > 0) ||
+            {(displayServiceKinds.length > 0 ||
               isCompatible ||
               isCcCompatible ||
               isAnthropicCompatible ||
@@ -571,7 +577,7 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
                 {kimiOfficialSupporterChip}
                 {cheaperInferenceSupporterChip}
                 {openRouterPopularityChip}
-                {provider.serviceKinds?.map((k) => (
+                {displayServiceKinds.map((k) => (
                   <Badge key={k} size="sm">
                     {kindLabel(k)}
                   </Badge>

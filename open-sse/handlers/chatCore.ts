@@ -93,6 +93,8 @@ export {
 import { resolveMemoryOwnerId, runMemoryExtractionGate } from "./chatCore/memoryExtraction.ts";
 import { checkResourcePressureGuard } from "../utils/resourcePressure.ts";
 import { normalizeHeaders } from "../utils/headers.ts";
+import { decisionOnlyChatRejection } from "@/lib/providerModels/decisionOnlyChatGuard.ts";
+import { getSyncedAvailableModels } from "@/lib/db/models";
 import { resolveChatCoreRequestFormat } from "./chatCore/requestFormat.ts";
 import { resolveChatCoreTargetFormat } from "./chatCore/targetFormat.ts";
 import { resolveOmniGlyphTransport } from "../services/compression/imageTransportPolicy.ts";
@@ -403,6 +405,10 @@ async function handleChatCoreInner({
     defaultThinkingEffort,
   });
   let { provider, model, extendedContext } = modelInfo;
+  const decisionRejection = await decisionOnlyChatRejection(modelInfo, (providerId) =>
+    getSyncedAvailableModels(providerId)
+  );
+  if (decisionRejection) return decisionRejection;
   const getExecutorClientHeaders = () =>
     buildExecutorClientHeaders(clientRawRequest?.headers, userAgent, { provider, body });
   // Keep the selected rule across format conversion, retries and refreshed credentials.

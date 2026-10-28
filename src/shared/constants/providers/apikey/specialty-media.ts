@@ -166,12 +166,11 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     hasFree: true,
     freeNote: "10M free tokens on signup (non-commercial), no credit card required",
   },
-  // Decision / evaluation API (System One / Jev). Not a chat provider — no
-  // chat models in the registry. Used by the jev combo strategy (#15276) and
-  // by any future System One passthrough (#13987).
+  // Native decisions have their own API and discovery; declaring this kind
+  // must not expose a chat health test or imply account entitlement.
   typesafe: {
     id: "typesafe",
-    serviceKinds: [],
+    serviceKinds: ["decision"],
     alias: "typesafe",
     name: "TypeSafe AI",
     icon: "psychology",
@@ -179,9 +178,9 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
     textIcon: "TS",
     website: "https://docs.typesafe.ai",
     authHint:
-      "Bearer API key for api.typesafe.ai. OmniRoute uses it for System One evaluation (Jev) — not chat completions. Store the key here; the jev combo strategy reads it at request time.",
+      "Bearer API key for api.typesafe.ai native decisions. Store it here for System One requests and discovery; this is not a chat credential lane.",
     apiHint:
-      "TypeSafe System One answers typed questions (noul / choice / score) against a state. OmniRoute does not expose TypeSafe models in chat pickers or combos.",
+      "System One answers typed noul / choice / score questions against a state. Discover decision models in provider settings and use the native Decisions endpoint; listing does not verify account access.",
   },
   "fal-ai": {
     id: "fal-ai",

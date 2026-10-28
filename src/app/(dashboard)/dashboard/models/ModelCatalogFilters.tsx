@@ -47,7 +47,8 @@ function ModelCatalogOptionFilters({
 
       <FilterSelect label={t("type")} value={filters.type} onChange={(type) => onChange({ type })}>
         <option value="all">{t("allTypes")}</option>
-        <HumanizedOptions values={typeOptions} />
+        <option value="decision">{t("decisionType")}</option>
+        <HumanizedOptions values={typeOptions.filter((type) => type !== "decision")} />
       </FilterSelect>
 
       <FilterSelect

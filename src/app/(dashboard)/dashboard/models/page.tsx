@@ -31,8 +31,9 @@ import ModelCatalogFiltersComponent from "./ModelCatalogFilters";
 import ModelCatalogTable from "./ModelCatalogTable";
 import {
   extractCatalogCapabilities,
+  chatTestableCatalogModels,
+  fetchCatalogModelRows,
   filterCatalogModels,
-  flattenCatalog,
   getCatalogPage,
   sortCatalogModels,
   type CatalogFilters,
@@ -200,6 +201,7 @@ function useCatalogPageLoading(state: ReturnType<typeof useCatalogPageState>) {
     setProviderHealthMap,
   } = state;
   const requestController = useRef<AbortController | null>(null);
+  const catalogKind = state.rawModelFilters.type === "decision" ? "decision" : "all";
   // Data Loading
   const loadData = useCallback(async () => {
     requestController.current?.abort();
@@ -209,14 +211,9 @@ function useCatalogPageLoading(state: ReturnType<typeof useCatalogPageState>) {
     // Load models
     const fetchModels = async () => {
       try {
-        const response = await fetch("/api/models/catalog", { signal: controller.signal });
-        if (!response.ok) throw new Error("catalog request failed");
-        const payload: unknown = await response.json();
-        const catalog =
-          typeof payload === "object" && payload !== null && "catalog" in payload
-            ? (payload as { catalog: unknown }).catalog
-            : null;
-        setModels(flattenCatalog(catalog));
+        const models = await fetchCatalogModelRows(catalogKind, controller.signal);
+        if (controller.signal.aborted) return;
+        setModels(models);
         setModelsError(false);
       } catch {
         if (!controller.signal.aborted) setModelsError(true);
@@ -247,6 +244,7 @@ function useCatalogPageLoading(state: ReturnType<typeof useCatalogPageState>) {
     const fetchHealth = () => fetchCatalogHealth(controller, setProviderHealthMap);
     await Promise.allSettled([fetchModels(), fetchCombos(), fetchHealth()]);
   }, [
+    catalogKind,
     requestController,
     setCombos,
     setCombosError,
@@ -289,7 +287,8 @@ function useCatalogPageOptions(state: ReturnType<typeof useCatalogPageState>) {
     [models]
   );
   const typeOptions = useMemo(
-    () => [...new Set(models.map((m) => m.type))].sort((a, b) => a.localeCompare(b)),
+    () =>
+      [...new Set(["decision", ...models.map((m) => m.type)])].sort((a, b) => a.localeCompare(b)),
     [models]
   );
   const subtypeOptions = useMemo(
@@ -379,7 +378,7 @@ function useCatalogPageSelection(
   };
 
   const toggleSelectAllModelsOnPage = () => {
-    const pageIds = modelPage.rows.map((r) => `${r.providerId}:${r.id}`);
+    const pageIds = chatTestableCatalogModels(modelPage.rows).map((r) => `${r.providerId}:${r.id}`);
     const allSelected = pageIds.length > 0 && pageIds.every((id) => selectedModelIds.has(id));
     setSelectedModelIds((prev) => {
       const next = new Set(prev);
@@ -567,7 +566,9 @@ function useCatalogPageBulkActions(
   };
 
   const toModelTargets = (rows: CatalogModelRow[]) =>
-    dedupeModelTargets(rows.map((m) => ({ providerId: m.providerId, modelId: m.id })));
+    dedupeModelTargets(
+      chatTestableCatalogModels(rows).map((m) => ({ providerId: m.providerId, modelId: m.id }))
+    );
   const toComboTargets = (rows: ComboCatalogRow[]) =>
     dedupeComboTargets(rows.map((c) => ({ comboName: c.name })));
 

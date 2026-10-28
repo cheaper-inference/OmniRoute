@@ -24,6 +24,7 @@ import {
 import type { CatalogTestResult } from "./catalogTestStorage";
 import { getModelTestKey } from "./catalogTestStorage";
 import type { CatalogModelRow, CatalogSortDirection, CatalogSortField } from "./modelCatalogUtils";
+import { isDecisionCatalogModel, chatTestableCatalogModels } from "./modelCatalogUtils";
 
 function formatCount(value: number): string {
   return new Intl.NumberFormat().format(value);
@@ -56,6 +57,7 @@ function capabilityLabels(
     labels.push(`${labelsByDirection.input}: ${humanize(modality)}`);
   for (const modality of model.output_modalities ?? [])
     labels.push(`${labelsByDirection.output}: ${humanize(modality)}`);
+  labels.push(...(model.decision_primitives ?? []));
   return [...new Set(labels)];
 }
 
@@ -204,9 +206,15 @@ function ModelProviderCell({
 }
 
 function ModelTypeCell({ model }: { model: CatalogModelRow }) {
+  const t = useTranslations("modelCatalog");
   return (
     <TableCell className="h-auto px-4 py-3 align-top text-text-main">
-      {humanize(model.type)}
+      {isDecisionCatalogModel(model) ? t("decisionType") : humanize(model.type)}
+      {isDecisionCatalogModel(model) && (
+        <span className="mt-0.5 block text-xs text-text-muted">
+          {t("decisionAccessUnverified")}
+        </span>
+      )}
       {model.subtype && (
         <span className="mt-0.5 block text-xs text-text-muted">{humanize(model.subtype)}</span>
       )}
@@ -265,6 +273,9 @@ function ModelFlagsCell({ model, labels }: { model: CatalogModelRow; labels: Mod
             {labels.free || t("free")}
           </Badge>
         )}
+        {isDecisionCatalogModel(model) && model.pricing_status !== "known" && (
+          <span className="text-xs text-text-muted">{t("decisionPricingUnknown")}</span>
+        )}
         {model.custom !== true && model.free !== true && (
           <span className="text-text-muted" title={t("noFlags")}>
             —
@@ -299,10 +310,11 @@ function ModelCatalogTableRow({
   const t = useTranslations("modelCatalog");
   const common = useTranslations("common");
   const rowId = `${model.providerId}:${model.id}`;
+  const decisionOnly = isDecisionCatalogModel(model);
   const isSelected = selectedIds.has(rowId);
   const testKey = getModelTestKey(model.providerId, model.id);
   const isTesting = activeTestingKeys.has(testKey);
-  const result = testResults[testKey];
+  const result = decisionOnly ? undefined : testResults[testKey];
 
   const capabilities = capabilityLabels(model, {
     input: common("input"),
@@ -310,13 +322,18 @@ function ModelCatalogTableRow({
   });
   return (
     <TableRow data-state={isSelected ? "selected" : undefined} className="align-top">
-      {onToggleSelect && (
-        <SelectRowCell
-          checked={isSelected}
-          onToggle={() => onToggleSelect(rowId)}
-          label={t("selectModel", { name: model.name })}
-        />
-      )}
+      {onToggleSelect &&
+        (decisionOnly ? (
+          <TableCell className="w-10 px-4" title={t("decisionTestHint")}>
+            —
+          </TableCell>
+        ) : (
+          <SelectRowCell
+            checked={isSelected}
+            onToggle={() => onToggleSelect(rowId)}
+            label={t("selectModel", { name: model.name })}
+          />
+        ))}
       <ModelProviderCell model={model} providerHealth={providerHealthMap[model.providerId]} />
       <TableCell className="h-auto max-w-sm whitespace-normal px-4 py-3 align-top">
         <span className="block break-words font-medium text-text-main">{model.name}</span>
@@ -339,8 +356,11 @@ function ModelCatalogTableRow({
           <Button
             variant="secondary"
             size="sm"
-            disabled={isTesting || bulkRunning}
-            onClick={() => onTestModel(model.providerId, model.id)}
+            disabled={decisionOnly || isTesting || bulkRunning}
+            title={decisionOnly ? t("decisionTestHint") : undefined}
+            onClick={() => {
+              if (!decisionOnly) onTestModel(model.providerId, model.id);
+            }}
             data-testid={`test-model-${model.id}`}
           >
             {t("test")}
@@ -403,7 +423,7 @@ export default function ModelCatalogTable({
   const firstResult = startIndex + 1;
   const lastResult = startIndex + rows.length;
 
-  const rowIds = rows.map((r) => `${r.providerId}:${r.id}`);
+  const rowIds = chatTestableCatalogModels(rows).map((r) => `${r.providerId}:${r.id}`);
   const allOnPageSelected = rowIds.length > 0 && rowIds.every((id) => selectedIds.has(id));
   const someOnPageSelected = rowIds.some((id) => selectedIds.has(id)) && !allOnPageSelected;
 

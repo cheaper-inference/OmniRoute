@@ -8,6 +8,10 @@ export const MODEL_SUPPORTED_ENDPOINT_VALUES = [
   "audio-speech",
   "audio-transcriptions",
   "music",
+  "systemone",
+  // Accepted boundary aliases; persisted metadata uses `systemone`.
+  "decision",
+  "decisions",
   "images-generations",
   // Persisted legacy values remain valid input and normalize on write/edit.
   "video",
@@ -25,6 +29,8 @@ export function normalizeModelSupportedEndpoints(endpoints: readonly string[]): 
   for (const endpoint of endpoints) {
     if (endpoint === "video") {
       add("videos");
+    } else if (endpoint === "decision" || endpoint === "decisions") {
+      add("systemone");
     } else if (endpoint === "audio") {
       add("audio-speech");
       add("audio-transcriptions");
@@ -36,7 +42,7 @@ export function normalizeModelSupportedEndpoints(endpoints: readonly string[]): 
 }
 
 export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
-  type?: "embedding" | "rerank" | "image" | "video" | "audio" | "music";
+  type?: "embedding" | "rerank" | "image" | "video" | "audio" | "music" | "decision";
   subtype?: "speech" | "transcription";
 } {
   // "chat" and "responses" are text-conversation endpoints; they carry no
@@ -58,7 +64,11 @@ export function classifyModelSupportedEndpoints(endpoints: readonly string[]): {
   const supportsSpeech = endpoints.includes("audio-speech");
   const supportsTranscription =
     endpoints.includes("audio-transcriptions") || endpoints.includes("audio");
-  if (!supportsSpeech && !supportsTranscription) return {};
+  if (!supportsSpeech && !supportsTranscription) {
+    return normalizeModelSupportedEndpoints(endpoints).includes("systemone")
+      ? { type: "decision" }
+      : {};
+  }
   if (supportsSpeech && !supportsTranscription) return { type: "audio", subtype: "speech" };
   if (supportsTranscription && !supportsSpeech) {
     return { type: "audio", subtype: "transcription" };

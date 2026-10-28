@@ -20,6 +20,7 @@ import { extractApiErrorMessage } from "@/shared/http/apiErrorMessage";
 import { useTranslations } from "next-intl";
 import A2ADashboardPage from "./components/A2ADashboard";
 import McpDashboardPage from "./components/MCPDashboard";
+import NativeDecisionsPanel from "./components/NativeDecisionsPanel";
 import NotionSourceCard from "./components/NotionSourceCard";
 import ObsidianSourceCard from "./components/ObsidianSourceCard";
 import VscodeTokenAliasCard from "./VscodeTokenAliasCard";
@@ -117,10 +118,11 @@ type EndpointTunnelVisibility = {
   showNgrokTunnel: boolean;
 };
 
-type EndpointTab = "apis" | "mcp" | "a2a" | "context-sources";
+type EndpointTab = "apis" | "decisions" | "mcp" | "a2a" | "context-sources";
 
 const ENDPOINT_TABS: Array<{ value: EndpointTab; labelKey: string; icon: string }> = [
   { value: "apis", labelKey: "tabApis", icon: "api" },
+  { value: "decisions", labelKey: "tabDecisions", icon: "rule" },
   { value: "mcp", labelKey: "tabMcp", icon: "extension" },
   { value: "a2a", labelKey: "tabA2a", icon: "hub" },
   { value: "context-sources", labelKey: "tabContextSources", icon: "database" },
@@ -1283,6 +1285,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         className="w-fit"
       />
 
+      {activeEndpointTab === "decisions" ? <NativeDecisionsPanel /> : null}
       {activeEndpointTab === "mcp" ? <McpDashboardPage /> : null}
       {activeEndpointTab === "a2a" ? <A2ADashboardPage /> : null}
       {activeEndpointTab === "context-sources" ? (

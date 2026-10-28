@@ -104,6 +104,7 @@ const PROVIDER_CATEGORY_URL_VALUES = new Set([
 
 /** Media/service-kind chip keys that are valid in `?media=`. */
 const PROVIDER_SERVICE_KIND_URL_VALUES = new Set([
+  "decision",
   "image",
   "video",
   "music",

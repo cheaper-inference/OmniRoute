@@ -6,6 +6,7 @@ import type { ServiceKind } from "@/shared/constants/providers";
 
 const KIND_ICON: Record<ServiceKind, string> = {
   llm: "chat",
+  decision: "rule",
   embedding: "data_object",
   image: "image",
   imageToText: "image_search",

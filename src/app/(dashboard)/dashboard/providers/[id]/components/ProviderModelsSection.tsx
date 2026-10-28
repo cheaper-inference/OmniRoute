@@ -25,6 +25,7 @@ import {
 import ModelRow, { ModelVisibilityToolbar } from "./ModelRow";
 import PassthroughModelsSection from "./PassthroughModelsSection";
 import CompatibleModelsSection from "./CompatibleModelsSection";
+import DecisionModelsSection from "./DecisionModelsSection";
 import type { ModelCompatSavePatch } from "../hooks/useModelVisibilityHandlers";
 
 export interface ProviderModelsSectionProps {
@@ -127,7 +128,7 @@ export interface ProviderModelsSectionProps {
   t: ProviderMessageTranslator;
 }
 
-export default function ProviderModelsSection({
+function ProviderModelsSectionState({
   providerId,
   providerAlias,
   providerStorageAlias,
@@ -579,5 +580,19 @@ export default function ProviderModelsSection({
         )}
       </AutoGrid>
     </div>
+  );
+}
+
+export default function ProviderModelsSection(props: ProviderModelsSectionProps) {
+  return (
+    <>
+      <DecisionModelsSection
+        providerId={props.providerId}
+        connections={props.connections}
+        initialModels={props.syncedAvailableModels}
+        onChanged={props.fetchProviderModelMeta}
+      />
+      <ProviderModelsSectionState {...props} />
+    </>
   );
 }

@@ -1,0 +1,323 @@
+{
+  "kind": "SYNTHETIC_PARTIAL_OBSERVED_SUBSET",
+  "dateUTC": "2026-10-25",
+  "sourceHandoffSha256": "761b3e7659e436ba30bac84f4ea02160fda51c0eb2341344f280902558124ed2",
+  "provenance": "Derived offline from retained normalized observations and deterministic logical-request reconstruction. Not captured wire bytes or complete provider responses.",
+  "limitations": [
+    "Cost representation/source and absent-versus-null were lost; omit cost from partial response.",
+    "Score legend was not retained; incomplete fixture rejection is not evidence of live incompatibility.",
+    "OpenRouter requested an alias and echoed a dated ID; no observed dated-request pin or application-path success.",
+    "No provider request was made to create or use these fixtures."
+  ],
+  "cases": [
+    {
+      "provider": "typesafe",
+      "mode": "noul",
+      "request": {
+        "model": "jev-1.14.0",
+        "state": "The ball is red and the box is empty.",
+        "questions": {
+          "smoke": {
+            "type": "noul",
+            "instructions": "Is the ball red?"
+          }
+        }
+      },
+      "partialResponse": {
+        "model": "jev-1.14.0",
+        "answers": {
+          "smoke": {
+            "type": "noul",
+            "noul": 0.99
+          }
+        },
+        "usage": {
+          "input_tokens": 281,
+          "output_tokens": 21
+        }
+      },
+      "normalizedCostEstimateUSD": "0.000011802",
+      "normalizedProviderReportUSD": null
+    },
+    {
+      "provider": "typesafe",
+      "mode": "choice",
+      "request": {
+        "model": "jev-1.14.0",
+        "state": "The ball is red and the box is empty.",
+        "questions": {
+          "smoke": {
+            "type": "choice",
+            "instructions": "What color is the ball?",
+            "criteria": {
+              "red": "Red",
+              "blue": "Blue"
+            }
+          }
+        }
+      },
+      "partialResponse": {
+        "model": "jev-1.14.0",
+        "answers": {
+          "smoke": {
+            "type": "choice",
+            "confidence": 1.0,
+            "probabilities": {
+              "red": 1.0,
+              "blue": 0.0
+            },
+            "choice": "red"
+          }
+        },
+        "usage": {
+          "input_tokens": 316,
+          "output_tokens": 32
+        }
+      },
+      "normalizedCostEstimateUSD": "0.000013272",
+      "normalizedProviderReportUSD": null
+    },
+    {
+      "provider": "typesafe",
+      "mode": "score",
+      "request": {
+        "model": "jev-1.14.0",
+        "state": "The ball is red and the box is empty.",
+        "questions": {
+          "smoke": {
+            "type": "score",
+            "instructions": "How full is the box?",
+            "criteria": ["Empty", "Partly full", "Full"]
+          }
+        }
+      },
+      "partialResponse": {
+        "model": "jev-1.14.0",
+        "answers": {
+          "smoke": {
+            "type": "score",
+            "confidence": 1.0,
+            "probabilities": {
+              "0": 1.0,
+              "1": 0.0,
+              "2": 0.0
+            },
+            "score": 0.0
+          }
+        },
+        "usage": {
+          "input_tokens": 308,
+          "output_tokens": 18
+        }
+      },
+      "normalizedCostEstimateUSD": "0.000012936",
+      "normalizedProviderReportUSD": null
+    },
+    {
+      "provider": "openrouter",
+      "mode": "noul",
+      "request": {
+        "model": "typesafe/jev-1.14",
+        "state": "The ball is red and the box is empty.",
+        "questions": {
+          "smoke": {
+            "type": "noul",
+            "instructions": "Is the ball red?"
+          }
+        }
+      },
+      "partialResponse": {
+        "model": "typesafe/jev-1.14-20261014",
+        "answers": {
+          "smoke": {
+            "type": "noul",
+            "noul": 0.99
+          }
+        },
+        "usage": {
+          "input_tokens": 281,
+          "output_tokens": 21
+        }
+      },
+      "normalizedCostEstimateUSD": "0.000011802",
+      "normalizedProviderReportUSD": "0.000011802"
+    },
+    {
+      "provider": "openrouter",
+      "mode": "choice",
+      "request": {
+        "model": "typesafe/jev-1.14",
+        "state": "The ball is red and the box is empty.",
+        "questions": {
+          "smoke": {
+            "type": "choice",
+            "instructions": "What color is the ball?",
+            "criteria": {
+              "red": "Red",
+              "blue": "Blue"
+            }
+          }
+        }
+      },
+      "partialResponse": {
+        "model": "typesafe/jev-1.14-20261014",
+        "answers": {
+          "smoke": {
+            "type": "choice",
+            "confidence": 1,
+            "probabilities": {
+              "red": 1,
+              "blue": 0
+            },
+            "choice": "red"
+          }
+        },
+        "usage": {
+          "input_tokens": 316,
+          "output_tokens": 32
+        }
+      },
+      "normalizedCostEstimateUSD": "0.000013272",
+      "normalizedProviderReportUSD": "0.000013272"
+    },
+    {
+      "provider": "openrouter",
+      "mode": "score",
+      "request": {
+        "model": "typesafe/jev-1.14",
+        "state": "The ball is red and the box is empty.",
+        "questions": {
+          "smoke": {
+            "type": "score",
+            "instructions": "How full is the box?",
+            "criteria": ["Empty", "Partly full", "Full"]
+          }
+        }
+      },
+      "partialResponse": {
+        "model": "typesafe/jev-1.14-20261014",
+        "answers": {
+          "smoke": {
+            "type": "score",
+            "confidence": 1,
+            "probabilities": {
+              "0": 1,
+              "1": 0,
+              "2": 0
+            },
+            "score": 0
+          }
+        },
+        "usage": {
+          "input_tokens": 308,
+          "output_tokens": 18
+        }
+      },
+      "normalizedCostEstimateUSD": "0.000012936",
+      "normalizedProviderReportUSD": "0.000012936"
+    },
+    {
+      "provider": "vercel-ai-gateway",
+      "mode": "noul",
+      "request": {
+        "model": "typesafe-ai/jev",
+        "state": "The ball is red and the box is empty.",
+        "questions": {
+          "smoke": {
+            "type": "noul",
+            "instructions": "Is the ball red?"
+          }
+        }
+      },
+      "partialResponse": {
+        "model": "typesafe-ai/jev",
+        "answers": {
+          "smoke": {
+            "type": "noul",
+            "noul": 0.98
+          }
+        },
+        "usage": {
+          "input_tokens": 281,
+          "output_tokens": 21
+        }
+      },
+      "normalizedCostEstimateUSD": "0.000011802",
+      "normalizedProviderReportUSD": "0.000011802"
+    },
+    {
+      "provider": "vercel-ai-gateway",
+      "mode": "choice",
+      "request": {
+        "model": "typesafe-ai/jev",
+        "state": "The ball is red and the box is empty.",
+        "questions": {
+          "smoke": {
+            "type": "choice",
+            "instructions": "What color is the ball?",
+            "criteria": {
+              "red": "Red",
+              "blue": "Blue"
+            }
+          }
+        }
+      },
+      "partialResponse": {
+        "model": "typesafe-ai/jev",
+        "answers": {
+          "smoke": {
+            "type": "choice",
+            "confidence": 1,
+            "probabilities": {
+              "red": 1,
+              "blue": 0
+            },
+            "choice": "red"
+          }
+        },
+        "usage": {
+          "input_tokens": 316,
+          "output_tokens": 32
+        }
+      },
+      "normalizedCostEstimateUSD": "0.000013272",
+      "normalizedProviderReportUSD": "0.000013272"
+    },
+    {
+      "provider": "vercel-ai-gateway",
+      "mode": "score",
+      "request": {
+        "model": "typesafe-ai/jev",
+        "state": "The ball is red and the box is empty.",
+        "questions": {
+          "smoke": {
+            "type": "score",
+            "instructions": "How full is the box?",
+            "criteria": ["Empty", "Partly full", "Full"]
+          }
+        }
+      },
+      "partialResponse": {
+        "model": "typesafe-ai/jev",
+        "answers": {
+          "smoke": {
+            "type": "score",
+            "confidence": 1,
+            "probabilities": {
+              "0": 1,
+              "1": 0,
+              "2": 0
+            },
+            "score": 0
+          }
+        },
+        "usage": {
+          "input_tokens": 308,
+          "output_tokens": 18
+        }
+      },
+      "normalizedCostEstimateUSD": "0.000012936",
+      "normalizedProviderReportUSD": "0.000012936"
+    }
+  ]
+}

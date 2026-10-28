@@ -40,8 +40,8 @@ export function mapUsageHistoryRow(row: unknown) {
     providerCredits: r.provider_credits ?? null,
     providerCostUsd: r.provider_cost_usd ?? null,
     tokens: {
-      input: toNumberValue(r.tokens_input),
-      output: toNumberValue(r.tokens_output),
+      input: r.tokens_input === null ? null : toNumberValue(r.tokens_input),
+      output: r.tokens_output === null ? null : toNumberValue(r.tokens_output),
       cacheRead: toNumberValue(r.tokens_cache_read),
       cacheCreation: toNumberValue(r.tokens_cache_creation),
       reasoning: toNumberValue(r.tokens_reasoning),
