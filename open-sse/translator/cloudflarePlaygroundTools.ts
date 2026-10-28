@@ -154,21 +154,27 @@ export function serializeCfToolPrompt(tools: ChatCompletionTool[]): string {
   if (!tools || tools.length === 0) return "";
 
   const nonce = getToolNonce(tools);
-  // The example deliberately uses a placeholder instead of the caller's first
-  // tool. A real name there is copied verbatim: with OpenCode's tool list the
-  // model answered every request with `<edit>{"arg": "read", ...}</edit>`,
-  // putting the tool it meant inside the JSON and never calling `read` at all.
+  const exampleName = tools[0].function.name;
   const lines = [
-    "# Tools",
-    "To call a tool, reply with exactly this block and nothing else:",
-    `<TOOL>{"<argument_name>": <argument_value>, "_nonce": "${nonce}"}</TOOL>`,
-    "Rules:",
-    "- Replace TOOL with the name of the tool you are calling. The tool name goes in the TAG — never inside the JSON body.",
-    "- The body is that tool's arguments object; use the parameter names from its signature below.",
-    `- Include "_nonce": "${nonce}" exactly as shown. A different binding is rejected.`,
-    "- Emit one block per call; several blocks may follow each other.",
-    "- Do not wrap the block in another tag or a code fence.",
-    "- If no tool is needed, answer normally with no tool block.",
+    "# Tool Calling Instructions",
+    "To invoke a tool, output ONLY the custom tag containing a valid JSON object with the required nonce:",
+    `<${exampleName}>{"arg": value, "_nonce": "${nonce}"}</${exampleName}>`,
+    `- Replace \`${exampleName}\` with the exact tool name.`,
+    "- The inner content must be a strict, valid JSON payload with the argument keys and the `_nonce` field.",
+    "## Rules",
+    `- **Tag Format:** Use exclusively \`<tool_name>...</tool_name>\`.`,
+    `- **Forbidden Styles:** Do NOT use markdown code fences, \`<tool>\`, \`<tool_call>\`, \`<tool:name>\`, XML argument tags, or attribute-based arguments (e.g., \`name="..."\`).`,
+    `- **Security Nonce:** You must include \`"_nonce": "${nonce}"\` exactly as provided. Any mismatch will cause the call to be rejected.`,
+    `- **Parameter Match:** Argument names must precisely match the tool's declared schema.`,
+    `- **Multiple Calls:** Emit one tag block per call; several blocks may follow sequentially if necessary.`,
+    "",
+    "## Examples",
+    "User: Check the contents of package.json and run the build script.",
+    `Assistant: <read>{"path": "package.json", "_nonce": "${nonce}"}</read>`,
+    `<shell>{"command": "npm run build", "_nonce": "${nonce}"}</shell>`,
+    "",
+    "User: Replace the title in index.html with 'Hello World'.",
+    `Assistant: <edit>{"path": "index.html", "old_str": "<title>Old Title</title>", "new_str": "<title>Hello World</title>", "_nonce": "${nonce}"}</edit>`,
     "",
     "Tools:",
   ];
@@ -201,16 +207,21 @@ export function buildCfToolReminder(tools: ChatCompletionTool[]): string {
   const more = names.length > shown.length ? ` (+${names.length - shown.length} more)` : "";
 
   return [
-    "# Tool call reminder",
-    "To call a tool, reply with that tool's own tag, one JSON object, and nothing else:",
-    `<TOOL>{"<argument_name>": <argument_value>, "_nonce": "${nonce}"}</TOOL>`,
-    "The tool name goes in the tag, never inside the JSON.",
-    `Only these tags are read: ${shown.map((name) => `<${name}>`).join(" ")}${more}.`,
-    'Inside the JSON, escape every quote as \\" and every newline as \\n — long file bodies must stay parseable.',
-    "- If you do not need a tool, answer normally with no tag.",
+    "# Tool Call Reminder",
+    "To call a tool, reply ONLY with that tool's tag containing a single, valid JSON object:",
+    `<TOOL>{"arg": value, "_nonce": "${nonce}"}</TOOL>`,
+    "",
+    "## Quick Example",
+    `<read>{"path": "src/index.js", "_nonce": "${nonce}"}</read>`,
+    "",
+    "## Rules",
+    `- **Allowed Tags:** Only these tags are read: ${shown.map((name) => `<${name}>`).join(" ")}${more}.`,
+    "- **Tag Name:** Put the tool name in the XML tag itself (e.g. `<read>...</read>`), NEVER inside the JSON payload.",
+    ' - **JSON Escaping:** Inside the JSON, escape every double quote as \\" and every newline as \\n.',
+    `- **Nonce:** Always include \`"_nonce": "${nonce}"\` inside the JSON body.`,
+    "- **Fallback:** If no tool call is needed, answer normally without any tag.",
   ].join("\n");
 }
-
 /**
  * The per-request nonce this provider binds tool calls with.
  *

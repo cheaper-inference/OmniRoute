@@ -72,40 +72,38 @@ test("serializeCfToolPrompt returns empty string for empty tools", () => {
 
 test("serializeCfToolPrompt generates a compact contract block", () => {
   const prompt = serializeCfToolPrompt(TEST_TOOLS_OPENAI);
-  assert.ok(prompt.includes("# Tools"));
+  assert.ok(prompt.includes("# Tool Calling Instructions"));
   assert.ok(prompt.includes("bash"));
   assert.ok(prompt.includes("read_file"));
-  // The example is a placeholder, NOT the first declared tool: a real name there
-  // gets copied verbatim (`<bash>{"arg": "read"}` for a `read` call), which is
-  // exactly the mislabelled call this provider kept producing.
-  assert.match(
-    prompt,
-    /<TOOL>\{"<argument_name>": <argument_value>, "_nonce": "[a-z0-9]+"\}<\/TOOL>/
-  );
-  assert.doesNotMatch(prompt, /<bash>\{/);
+  // The worked example spells the call with the first declared tool plus a
+  // concrete argument set — a few-shot shape reads better than an abstract
+  // placeholder, which the models kept reproducing as the tag.
+  assert.match(prompt, /<bash>\{"arg": value, "_nonce": "[a-z0-9]+"\}<\/bash>/);
+  // Wrapper shapes stay forbidden even though a real tag is now shown.
+  assert.ok(prompt.includes("Do NOT use markdown code fences"));
+  assert.ok(prompt.includes("attribute-based arguments"));
   assert.ok(prompt.includes("command: string"));
   assert.ok(prompt.includes("path: string"));
   // Compact one-line signatures instead of pretty-printed JSON
   assert.ok(!prompt.includes('"type": "object"'));
-  assert.ok(prompt.length < 1200, `contract should stay small, got ${prompt.length}`);
+  assert.ok(prompt.length < 1600, `contract should stay small, got ${prompt.length}`);
 });
 
 test("serializeCfToolPrompt says the tool name belongs in the tag, not the JSON", () => {
   const prompt = serializeCfToolPrompt(TEST_TOOLS_OPENAI);
   assert.ok(
-    prompt.includes("The tool name goes in the TAG — never inside the JSON body."),
+    prompt.includes("Use exclusively `<tool_name>...</tool_name>`"),
     'the rule that prevents `<edit>{"arg": "read"}` must be stated'
   );
-  // The wrapper shapes are now parsed by the ladder, so the contract asks for a
-  // single positive form instead of enumerating the tags models reach for — a
-  // negative list that names `<tool_call>` only primes it.
-  assert.ok(prompt.includes("Do not wrap the block in another tag or a code fence."));
+  // The contract names the wrapper shapes it rejects (code fences, `<tool>`,
+  // `<tool_call>`, attribute arguments) now that the example uses a real tag.
+  assert.ok(prompt.includes("Do NOT use markdown code fences"));
   // Requirement is stated twice: once in the example, once as a rule.
   const nonce = prompt.match(/"_nonce": "([a-z0-9]+)"/)?.[1];
   assert.ok(nonce, "contract should carry a nonce");
   assert.ok(
     prompt.includes(
-      `Include "_nonce": "${nonce}" exactly as shown. A different binding is rejected.`
+      `\`"_nonce": "${nonce}"\` exactly as provided. Any mismatch will cause the call to be rejected.`
     )
   );
 });
@@ -843,7 +841,7 @@ test("buildCfToolConversationPrompt compacts older history to the 10 user-messag
 
   assert.equal(userishCount(result), CF_MAX_CONVERSATION_MESSAGES);
   // The contract survives the trim and the caller's own turn is never dropped.
-  assert.ok((result[0].content as string).includes("# Tools"));
+  assert.ok((result[0].content as string).includes("# Tool Calling Instructions"));
   assert.equal(result[result.length - 1].content, "latest question");
   // The oldest turns are kept in one compacted block, so the model can still see
   // what the session started from.
@@ -894,7 +892,7 @@ test("buildCfToolConversationPrompt inserts the contract as its own user message
   assert.equal(result.length, 3);
   assert.equal(result[0].role, "system");
   assert.equal(result[1].role, "user");
-  assert.ok((result[1].content as string).includes("# Tools"));
+  assert.ok((result[1].content as string).includes("# Tool Calling Instructions"));
   assert.equal(result[2].role, "user");
   assert.equal(result[2].content, "What is 2+2?");
 });
@@ -941,7 +939,7 @@ test("buildCfToolConversationPrompt keeps array content in the user message", ()
   const result = buildCfToolConversationPrompt(messages, TEST_TOOLS_OPENAI);
   const contractMessage = result[0];
   const userMessage = result[result.length - 1];
-  assert.ok((contractMessage.content as string).includes("# Tools"));
+  assert.ok((contractMessage.content as string).includes("# Tool Calling Instructions"));
   assert.deepEqual(userMessage.content, messages[0].content);
 });
 
@@ -964,22 +962,19 @@ test("buildCfToolReminder restates the contract with this request's nonce", () =
   const reminder = buildCfToolReminder(TEST_TOOLS_OPENAI);
   const nonce = cfToolNonce(TEST_TOOLS_OPENAI);
 
-  assert.ok(reminder.includes("# Tool call reminder"));
-  // The tag shape, spelled with a placeholder rather than the first declared
-  // tool — a real name in the example is copied as the tag verbatim.
-  assert.ok(
-    reminder.includes(`<TOOL>{"<argument_name>": <argument_value>, "_nonce": "${nonce}"}</TOOL>`)
-  );
-  assert.ok(reminder.includes("The tool name goes in the tag, never inside the JSON."));
+  assert.ok(reminder.includes("# Tool Call Reminder"));
+  // Shape line plus a concrete quick example the model can copy.
+  assert.ok(reminder.includes(`<TOOL>{"arg": value, "_nonce": "${nonce}"}</TOOL>`));
+  assert.ok(reminder.includes("Put the tool name in the XML tag itself"));
   assert.ok(!reminder.includes("<bash>{"), "the reminder must not prime the first tool");
   // The binding is the one the caller validated against, not a fresh one.
   assert.ok(reminder.includes(`"_nonce": "${nonce}"`));
   // Escaping guidance for large bodies — the failure the reminder exists for.
-  assert.ok(reminder.includes('escape every quote as \\" and every newline as \\n'));
+  assert.ok(reminder.includes('escape every double quote as \\" and every newline as \\n'));
   // Declared tags are listed so an invented tag is not the obvious choice.
   assert.ok(reminder.includes("<bash> <read_file>"));
   // The no-tool escape hatch must survive, or the model calls a tool regardless.
-  assert.ok(reminder.includes("If you do not need a tool"));
+  assert.ok(reminder.includes("If no tool call is needed"));
 });
 
 test("buildCfToolReminder stays bounded however many tools are declared", () => {
@@ -1003,7 +998,7 @@ test("buildCfToolConversationPrompt restates the contract near the end on a long
   const result = buildCfToolConversationPrompt(messages, TEST_TOOLS_OPENAI);
   const reminderIndexes = result
     .map((message, i) =>
-      ((message.content as string) ?? "").includes("# Tool call reminder") ? i : -1
+      ((message.content as string) ?? "").includes("# Tool Call Reminder") ? i : -1
     )
     .filter((i) => i >= 0);
 
@@ -1013,8 +1008,8 @@ test("buildCfToolConversationPrompt restates the contract near the end on a long
   assert.equal(reminderIndexes[0], result.length - 2);
   assert.equal(result[result.length - 1].content, "latest question");
   // The full contract still travels at the top.
-  assert.ok((result[0].content as string).includes("# Tools"));
-  assert.ok(!(result[0].content as string).includes("# Tool call reminder"));
+  assert.ok((result[0].content as string).includes("# Tool Calling Instructions"));
+  assert.ok(!(result[0].content as string).includes("# Tool Call Reminder"));
 });
 
 test("buildCfToolConversationPrompt omits the reminder on a short conversation", () => {
@@ -1024,10 +1019,10 @@ test("buildCfToolConversationPrompt omits the reminder on a short conversation",
     { role: "user" as const, content: "now this" },
   ];
   const result = buildCfToolConversationPrompt(messages, TEST_TOOLS_OPENAI);
-  assert.ok(!result.some((m) => ((m.content as string) ?? "").includes("# Tool call reminder")));
+  assert.ok(!result.some((m) => ((m.content as string) ?? "").includes("# Tool Call Reminder")));
   // Contract + the untouched conversation, with no slot spent on a reminder.
   assert.equal(result.length, messages.length + 1);
-  assert.ok((result[0].content as string).includes("# Tools"));
+  assert.ok((result[0].content as string).includes("# Tool Calling Instructions"));
 });
 
 test("buildCfToolConversationPrompt still honours the 10-message cap with a reminder", () => {
@@ -1038,7 +1033,7 @@ test("buildCfToolConversationPrompt still honours the 10-message cap with a remi
   const result = buildCfToolConversationPrompt(messages, TEST_TOOLS_OPENAI);
   assert.equal(userishCount(result), CF_MAX_CONVERSATION_MESSAGES);
   assert.equal(result[result.length - 1].content, "turn 19");
-  assert.ok(result.some((m) => ((m.content as string) ?? "").includes("# Tool call reminder")));
+  assert.ok(result.some((m) => ((m.content as string) ?? "").includes("# Tool Call Reminder")));
 });
 
 test("buildCfToolConversationPrompt never lands the reminder between a tool call and its results", () => {
@@ -1052,7 +1047,7 @@ test("buildCfToolConversationPrompt never lands the reminder between a tool call
   ];
   const result = buildCfToolConversationPrompt(messages, TEST_TOOLS_OPENAI);
   const reminderIndex = result.findIndex((message) =>
-    ((message.content as string) ?? "").includes("# Tool call reminder")
+    ((message.content as string) ?? "").includes("# Tool Call Reminder")
   );
 
   assert.ok(reminderIndex > 0);
@@ -1070,7 +1065,7 @@ test("buildCfToolConversationPrompt keeps every reminder message under the char 
   for (const message of result) {
     const content =
       typeof message.content === "string" ? message.content : JSON.stringify(message.content);
-    if (content.includes("# Tool call reminder")) {
+    if (content.includes("# Tool Call Reminder")) {
       assert.ok(
         content.length <= CF_MAX_MESSAGE_CHARS,
         `${content.length} > ${CF_MAX_MESSAGE_CHARS}`

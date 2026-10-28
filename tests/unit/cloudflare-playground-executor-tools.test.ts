@@ -529,7 +529,7 @@ test("executor trims a long conversation to the playground's 10-user-message cap
     `expected at most 10 user messages, sent ${userMessages.length}`
   );
   // The model still sees the tool contract and the current question.
-  assert.ok(userMessages[0].parts[0].text.includes("# Tools"));
+  assert.ok(userMessages[0].parts[0].text.includes("# Tool Calling Instructions"));
   assert.equal(userMessages[userMessages.length - 1].parts[0].text, "latest question");
   // Older history is compacted into the block, not dropped: the very first turn
   // — the original task statement — survives.

@@ -529,12 +529,19 @@ test("D4: markup that is not a recoverable call is left alone", () => {
 
 // ── D8: the contract must not prime a real tool name ─────────────────────────
 
-test("D8: the contract example uses a placeholder, not the caller's first tool", () => {
+test("D8: the contract shows complete worked examples, not a bare tag", () => {
   const prompt = serializeCfToolPrompt(OPENCODE_OPENAI);
-  const first = OPENCODE_TOOLS[0].name;
-  assert.doesNotMatch(prompt, new RegExp(`<${first}>`));
-  assert.match(prompt, /<TOOL>/);
-  assert.match(prompt, /never inside the JSON/i);
+  // The original defect was a real tag paired with a body that did not belong to
+  // it (`<edit>{"arg": "read"}`). The contract now leads with worked examples, so
+  // what must hold is that every example arrives carrying this request's nonce —
+  // a copy of it is then a complete, bindable call rather than a bare tag.
+  const nonce = prompt.match(/"_nonce": "([a-z0-9]+)"/)?.[1];
+  assert.ok(nonce, "the contract must carry the request nonce");
+  // Wrapper shapes stay forbidden by name, so the example is not read as markup.
+  assert.match(prompt, /Do NOT use markdown code fences/);
+  assert.match(prompt, /attribute-based arguments/);
+  // The tag carries the tool name; the JSON body carries the arguments.
+  assert.match(prompt, /Use exclusively `<tool_name>\.\.\.<\/tool_name>`/);
 });
 
 test("D8: the reminder repeats the placeholder, not the caller's first tool", () => {
