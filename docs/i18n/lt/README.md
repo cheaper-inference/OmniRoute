@@ -71,7 +71,7 @@
 
 |                                      |             v3.8.50              | **v3.8.51** |      `v3.8.53+`       |
 | ------------------------------------ | :------------------------------: | :---------: | :-------------------: |
-| 🌐 Tiekėjai                          |               352                |   **358**   |          375          |
+| 🌐 Tiekėjai                          |               352                |   **358**   |          376          |
 | 🧠 Unikalūs pokalbių modelių ID      |               1320               |  **1374**   |         1475          |
 | 🖼️ Modality Bridge                   | 🆕 rega + garsas + vaizdo įrašas |      ✓      |           ✓           |
 | 📡 Radar nemokamas katalogas         |         🆕 pasirenkamas          |      ✓      |           ✓           |

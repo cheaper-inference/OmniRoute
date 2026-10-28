@@ -9,6 +9,7 @@ import { SAFE_OUTBOUND_FETCH_PRESETS, safeOutboundFetch } from "@/shared/network
 import { getProviderOutboundGuard } from "@/shared/network/outboundUrlGuardPolicy";
 import { getModelsByProviderId } from "@/shared/constants/models";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
+import { applyDiscoveryDegradation, type DiscoveryFailure } from "@/shared/discovery/degradedCause";
 import { mergeLocalCatalogModels } from "./discovery/helpers";
 
 export function filterModelsForRoute<
@@ -30,13 +31,21 @@ function toLiveModel(item: Record<string, unknown>): { id: string; name: string 
   return { id: itemId, name: itemName };
 }
 
+/**
+ * The outcome of a live no-auth discovery: the live catalog, or the reason the
+ * live catalog could not be used. The reason is a code or an HTTP status —
+ * never a message, a body or an URL.
+ */
+type NoAuthLiveOutcome =
+  { kind: "live"; response: NextResponse } | { kind: "failed"; failure: DiscoveryFailure };
+
 async function fetchLiveNoAuthModels(
   modelsUrl: string,
   providerId: string,
   connectionId: string,
   excludeHidden: boolean,
   chatOnly: boolean
-): Promise<NextResponse | null> {
+): Promise<NoAuthLiveOutcome> {
   try {
     const liveResponse = await safeOutboundFetch(modelsUrl, {
       ...SAFE_OUTBOUND_FETCH_PRESETS.modelsDiscovery,
@@ -44,7 +53,7 @@ async function fetchLiveNoAuthModels(
       method: "GET",
       headers: { "Content-Type": "application/json" },
     });
-    if (!liveResponse.ok) return null;
+    if (!liveResponse.ok) return { kind: "failed", failure: { status: liveResponse.status } };
 
     const data = await liveResponse.json();
     const liveModels: Array<{ id: string; name: string }> = (
@@ -52,20 +61,23 @@ async function fetchLiveNoAuthModels(
     )
       .map(toLiveModel)
       .filter((model): model is { id: string; name: string } => model !== null);
-    if (liveModels.length === 0) return null;
+    if (liveModels.length === 0) return { kind: "failed", failure: { code: "EMPTY_CATALOG" } };
 
     const selectable = filterModelsForRoute(providerId, liveModels, chatOnly);
     const visible = excludeHidden
       ? selectable.filter((model) => !getModelIsHidden(providerId, model.id))
       : selectable;
-    return NextResponse.json({
-      provider: providerId,
-      connectionId,
-      models: visible,
-      source: "upstream",
-    });
+    return {
+      kind: "live",
+      response: NextResponse.json({
+        provider: providerId,
+        connectionId,
+        models: visible,
+        source: "upstream",
+      }),
+    };
   } catch {
-    return null;
+    return { kind: "failed", failure: {} };
   }
 }
 
@@ -84,6 +96,7 @@ export async function buildNoAuthModelsResponse(
     typeof registryEntry?.modelsUrl === "string" && registryEntry.modelsUrl.length > 0
       ? registryEntry.modelsUrl
       : null;
+  let liveFailure: DiscoveryFailure | undefined;
   if (modelsUrl) {
     const live = await fetchLiveNoAuthModels(
       modelsUrl,
@@ -92,7 +105,8 @@ export async function buildNoAuthModelsResponse(
       excludeHidden,
       chatOnly
     );
-    if (live) return live;
+    if (live.kind === "live") return live.response;
+    liveFailure = live.failure;
   }
 
   const catalog = mergeLocalCatalogModels(
@@ -103,19 +117,22 @@ export async function buildNoAuthModelsResponse(
   const visible = excludeHidden
     ? selectable.filter((model) => !getModelIsHidden(providerId, model.id))
     : selectable;
-  return NextResponse.json({
-    provider: providerId,
-    connectionId,
-    models: visible,
-    source: "local_catalog",
-    // A no-auth provider with no `modelsUrl` has no remote model
-    // endpoint at all, so this catalog is its INTENDED and only discovery
-    // source (same as reka/lmarena), not a degraded remote fetch. Without the
-    // tag, model-sync's isDegradedDiscovery guard 502s before importing and the
-    // provider can never persist a model while /models keeps returning 200.
-    // Providers that DO declare `modelsUrl` return above with source:"upstream",
-    // and a failed live fetch still falls through here untagged only when the
-    // URL exists — that case stays a genuine degradation.
-    ...(modelsUrl ? {} : { intentional: true }),
-  });
+  return NextResponse.json(
+    applyDiscoveryDegradation({
+      provider: providerId,
+      connectionId,
+      models: visible,
+      source: "local_catalog",
+      // A no-auth provider with no `modelsUrl` has no remote model
+      // endpoint at all, so this catalog is its INTENDED and only discovery
+      // source (same as reka/lmarena), not a degraded remote fetch. Without the
+      // tag, model-sync's isDegradedDiscovery guard 502s before importing and the
+      // provider can never persist a model while /models keeps returning 200.
+      // Providers that DO declare `modelsUrl` return above with source:"upstream",
+      // and a failed live fetch still falls through here untagged only when the
+      // URL exists — that case stays a genuine degradation.
+      ...(modelsUrl ? {} : { intentional: true }),
+      ...(liveFailure ? { failure: liveFailure } : {}),
+    })
+  );
 }

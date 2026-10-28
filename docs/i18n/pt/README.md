@@ -71,7 +71,7 @@
 
 |                                             |         v3.8.50          | **v3.8.51** |       `v3.8.53+`        |
 | ------------------------------------------- | :----------------------: | :---------: | :---------------------: |
-| 🌐 Fornecedores                             |           352            |   **358**   |           375           |
+| 🌐 Fornecedores                             |           352            |   **358**   |           376           |
 | 🧠 IDs únicos de modelos de chat            |           1320           |  **1374**   |          1475           |
 | 🖼️ Ponte de modalidades                     | 🆕 visão + áudio + vídeo |      ✓      |            ✓            |
 | 📡 Catálogo gratuito do Radar               |    🆕 adesão opcional    |      ✓      |            ✓            |

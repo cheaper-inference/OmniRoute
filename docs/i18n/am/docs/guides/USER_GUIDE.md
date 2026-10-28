@@ -614,9 +614,9 @@ post_install() {
 <details>
 <summary><b>ሁሉንም የሚገኙ ሞዴሎች ይመልከቱ</b></summary>
 
-> ከታች ያለው ዝርዝር ለ v3.8.0 ከ `open-sse/config/providerRegistry.ts` የተመረጠ ነው። የደመና ካታሎጎች (Gemini, OpenRouter, ወዘተ.) በተለዋዋጭ ሁኔታ ይመሳሰላሉ — ለሙሉ የቀጥታ ካታሎግ **ዳሽቦርድ → አቅራቢዎች → [አቅራቢ] → የሚገኙ ሞዴሎች** ን ይክፈቱ ወይም `GET /api/models/catalog` ን ይጥሩ።
+> ከዚህ በታች ያለው ዝርዝር ለ v3.8.0 ከ `open-sse/config/providerRegistry.ts` የተሰበሰበ ነው። የደመና ካታሎጎች (Gemini, OpenRouter, ወዘተ.) በተለዋዋጭ ሁኔታ ይመሳሰላሉ — ሙሉውን ሕያው ካታሎግ ለማየት **ዳሽቦርድ → አቅራቢዎች → [አቅራቢ] → የሚገኙ ሞዴሎች** ይክፈቱ ወይም `GET /api/models/catalog` ይጠሩ።
 >
-> የአቅራቢው ውስጣዊ ዝርዝር ከወጣ፣ የቀጥታ የላይኛ-ጅረት ካታሎግ ለማምጣት በዚያ ገጽ ላይ **ከ /models አስመጣ** ን ይጠቀሙ (ወይም **ራስ-ሰር ማመሳሰል** ን ያንቁ)። ይህ በ v3.8.50 ለ LLM7.io (`gemini-3.1-flash-lite`) እና UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ተረጋግጧል; Pollinations የስም-አልባ መዳረሻ በተመሳሳይ ሙከራ ዙር በላይኛ-ጅረት የተገደበ ቆይቷል።
+> የአንድ አቅራቢ ውስጣዊ ዝርዝር ከእውነተኛው ሁኔታ ከወጣ፣ በዚያ ገጽ ላይ **ከ /models አስመጣ** ይጠቀሙ (ወይም **ራስ-ሰር ማመሳሰል** ያንቁ) ሕያውን የኋለኛ (upstream) ካታሎግ ለመጎተት። ይህ በ v3.8.50 ለ LLM7.io (`gemini-3.1-flash-lite`) እና UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ተረጋግጧል; የ Pollinations ስም-አልባ መዳሰሻ በተመሳሳይ የሙከራ ዙር ውስጥ በኋለኛው ገደብ ተገድቦ ቆይቷል።
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -624,7 +624,7 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ነጻ OAuth: በ **ዳሽቦርድ → አቅራቢዎች → Kiro → የሚገኙ ሞዴሎች** ስር የታየውን የቀጥታ ካታሎግ ይጠቀሙ። ተገኝነት በመለያ እና በእቅድ ላይ ይወሰናል።
+**Kiro (`kr/`)** — ነጻ OAuth: **ዳሽቦርድ → አቅራቢዎች → Kiro → የሚገኙ ሞዴሎች** ስር የታየውን ሕያው ካታሎግ ይጠቀሙ። ተገኝነቱ በመለያው እና በዕቅዱ ላይ ይወሰናል።
 
 **Qoder (`if/`)** — ነጻ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,37 +632,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ወር ቋሚ ወይም በአጠቃቀም: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/ወር ቋሚ ወይም በአጠቃቀም መሰረት: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API ቁልፍ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — በጣም ፈጣን: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — ከፍተኛ ፍጥነት: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok ቤተኛ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — በ EU የተስተናገደ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — በአውሮፓ ህብረት የሚስተናገድ: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — በፍለጋ የተደገፈ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — ፍለጋ-የተጠናከረ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ክፍት ምንጭ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ነጻ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ክፍት-ምንጭ: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ነጻ), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — ፈጣን inference: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — ፈጣን ኢንፈረንስ: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — ዌፈር-መጠን: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — RAG-ተኮር: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — በ RAG ላይ ያተኮረ: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — የድርጅት: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — ድርጅት-ደረጃ: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: በእያንዳንዱ API ቁልፍ ከ Google በቀጥታ የተመሳሰለ — የቋሚ ዝርዝር የለም። በ **ዳሽቦርድ → አቅራቢዎች** ውስጥ ቁልፍ ያገናኙ ከዚያም የአሁኑን ካታሎግ ለማስመጣት **የሚገኙ ሞዴሎች** ን ይጠቀሙ (ለምሳሌ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)።
+**Gemini (Google Cloud `gemini/`)**: ከ Google በ API ቁልፍ በቀጥታ ይመሳሰላል — ቋሚ ዝርዝር የለም። **ዳሽቦርድ → አቅራቢዎች** ውስጥ ቁልፍ ያገናኙ ከዚያም ወቅታዊውን ካታሎግ ለማስመጣት **የሚገኙ ሞዴሎች** ይጠቀሙ (ለምሳሌ `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)።
 
-**ሌሎች ተኳሃኝ አቅራቢዎች** (የተመረጡ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (በ `aws-bedrock`), `azure-ai`, `openrouter` (የማለፊያ ካታሎግ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`። እያንዳንዱ የራሱን የሞዴል ዝርዝር በ `providerRegistry.ts` ውስጥ ይይዛል እና አቅራቢው `/models` ኢንድፖይንት ሲያሳይ በራስ-ሰር ሊመሳሰል ይችላል።
+**ሌሎች ተኳሃኝ አቅራቢዎች** (የተመረጡ): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (በ `aws-bedrock`), `azure-ai`, `openrouter` (የሚያልፍ ካታሎግ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. እያንዳንዱ የራሱን የሞዴል ዝርዝር በ `providerRegistry.ts` ውስጥ ይይዛል እና አቅራቢው `/models` ኢንድፖይንት ሲያቀርብ በራስ-ሰር ሊመሳሰል ይችላል።
 
-**ስለ ሞዴል መለያዎች ማስታወሻ:** OmniRoute አቅራቢ-ቤተኛ መለያዎችን ይጠቀማል (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)። አንዳንድ መለያዎች ነጥብ ያላቸው ስሪቶችን ያካትታሉ ምክንያቱም የላይኛው ጅረት API እንዲህ ይጠይቃቸዋል። አንድ ሞዴል ከላይ ካልተዘረዘረ፣ `omniroute models --search <term>` ን ያሂዱ ወይም `GET /api/models/catalog` ን ይጥሩ ተገኝነትን ለማረጋገጥ።
+**ስለ ሞዴል መታወቂያዎች ማስታወሻ:** OmniRoute የአቅራቢ-ቤተኛ መታወቂያዎችን ይጠቀማል (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)። አንዳንድ መታወቂያዎች ነጥብ ያላቸው ስሪቶችን ያካትታሉ ምክንያቱም የኋለኛው API እንደዚህ ስለሚጠብቃቸው። አንድ ሞዴል ከላይ ካልተዘረዘረ፣ `omniroute models --search <term>` ያሂዱ ወይም `GET /api/models/catalog` ይጠቀሙ ተገኝነቱን ለማረጋገጥ።
 
 </details>
 
@@ -672,93 +672,69 @@ post_install() {
 
 ### ብጁ ሞዴሎች
 
-የመተግበሪያ ዝመናን ሳይጠብቁ ማንኛውንም የሞዴል መታወቂያ ወደ ማንኛውም አቅራቢ ይጨምሩ፦
+የመተግበሪያ ዝማኔን ሳይጠብቁ ማንኛውንም የሞዴል ID ወደ ማንኛውም አቅራቢ ያክሉ፦
 
 ```bash
-# በAPI በኩል
+# በ-API በኩል
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# ዝርዝር: curl http://localhost:20128/api/provider-models?provider=openai
-# ማስወገድ: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
+# ዝርዝር፦ curl http://localhost:20128/api/provider-models?provider=openai
+# ማስወገድ፦ curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-ወይም ዳሽቦርድ ይጠቀሙ፦ **አቅራቢዎች → [አቅራቢ] → ብጁ ሞዴሎች**።
+ወይም ዳሽቦርዱን ይጠቀሙ፦ **አቅራቢዎች → [አቅራቢ] → ብጁ ሞዴሎች**።
 
 ማስታወሻዎች፦
 
-- OpenRouter እና ከOpenAI/Anthropic ጋር የሚስማሙ አቅራቢዎች ከ**የሚገኙ ሞዴሎች** ብቻ ይተዳደራሉ። በእጅ ማከል፣ ማስመጣት እና ራስ-ሰር ማመሳሰል ሁሉም በአንድና በተመሳሳይ የሚገኝ-ሞዴል ዝርዝር ላይ ይወርዳሉ፣ ስለዚህ ለእነዚያ አቅራቢዎች የተለየ የብጁ ሞዴሎች ክፍል የለም።
-- የ**ብጁ ሞዴሎች** ክፍል የተዘጋጀው የተዳደሩ የሚገኙ-ሞዴል ማስመጣቶችን ለማያቀርቡ አቅራቢዎች ነው።
+- OpenRouter እና ከ-OpenAI/Anthropic ጋር ተኳሃኝ የሆኑ አቅራቢዎች የሚተዳደሩት ከ**ሚገኙ ሞዴሎች** ብቻ ነው። በእጅ ማከል፣ ማስመጣት እና ራስ-ሰር ማመሳሰል ሁሉም ወደ ተመሳሳዩ የሚገኙ ሞዴሎች ዝርዝር ስለሚገቡ፣ ለእነዚያ አቅራቢዎች የተለየ የብጁ ሞዴሎች ክፍል የለም።
+- የ**ብጁ ሞዴሎች** ክፍል የሚተዳደሩ የሚገኙ ሞዴሎችን የማስመጣት ባህሪ ለማያቀርቡ አቅራቢዎች የታሰበ ነው።
 
-### ብጁ ከOpenAI ጋር የሚስማሙ አቅራቢዎች
+### ብጁ ከ-OpenAI ጋር ተኳሃኝ አቅራቢዎች
 
-OpenAI APIን የሚናገር ማንኛውም ጌትዌይ (ራስ-ዓዝራሪ ፕሮክሲ፣ vLLM፣ የሶስተኛ ወገን አቀናጃ)
-እንደ ራሱ የሆነ የአቅራቢ ኖድ መጨመር ይችላል፦
+የOpenAI APIን የሚደግፍ ማንኛውም ጌትዌይ (በግል የሚስተናገድ ፕሮክሲ፣ vLLM፣ የሶስተኛ ወገን አሰባሳቢ)
+እንደራሱ የአቅራቢ ኖድ ሊታከል ይችላል፦
 
-1. **አቅራቢዎች → ከOpenAI ጋር የሚስማማ ጨምር**።
-2. **ስም**፦ ለኖዱ የሚታይ መለያ።
-3. **ቅድመ-ቅርጸት**፦ የአቅጣጫ ስም። ደንበኞች ሞዴሎችን እንደ `<prefix>/<model>` ይጠራሉ፣ ስለዚህ `mygw`
-   ቅድመ-ቅርጸት ያለው ኖድ `mygw/gpt-4o-mini` ያገለግላል። ያስፈልጋል፤ የቁምፊ ገደብ የለውም።
-4. **የAPI አይነት**፦ ጌትዌዩ የሚያገለግለው የኢንድፖይንት ቤተሰብ (Chat Completions፣ Responses፣
-   Embeddings፣ ኦዲዮ፣ ምስሎች)።
-5. **መሠረታዊ URL**፦ የAPI ሥሩ፣ `/v1`ን ጨምሮ እስከ (ለምሳሌ
-   `https://gateway.example.com/v1`)፣ ሙሉውን `/chat/completions` መንገድ ሳይሆን። ደረጋዊ ያልሆኑ
-   መንገዶች ያሏቸው ጌትዌዮች እነዚህን ከ**የላቁ ቅንብሮች** ስር ያዘጋጃሉ (የቻት መንገድ፣ የሞዴሎች መንገድ)።
-6. የ**API ቁልፍ (ለፍተሻ)** መስክ ግንኙነቱን ብቻ ይፈትሻል። ኖዱን ከፈጠሩ በኋላ ይክፈቱት እና
-   ጥያቄዎች የሚጠቀሙበትን ቁልፍ ለማከማቸት **ግንኙነት ጨምር** ይጠቀሙ።
+1. **አቅራቢዎች → ከ-OpenAI ጋር ተኳሃኝ አቅራቢ አክል**።
+2. **ስም**፦ ለኖዱ የማሳያ መለያ።
+3. **ቅድመ ቅጥያ**፦ የማዞሪያ ስም። ደንበኞች ሞዴሎችን እንደ `<prefix>/<model>` ይጠራሉ፤ ስለዚህ `mygw` ቅድመ ቅጥያ ያለው ኖድ
+   `mygw/gpt-4o-mini`ን ያቀርባል። ያስፈልጋል፤ የቁምፊ ገደብ የለም።
+4. **የ-API አይነት**፦ ጌትዌዩ የሚያቀርበው የመጨረሻ ነጥብ ምድብ (Chat Completions፣ Responses፣
+   Embeddings፣ ድምፅ፣ ምስሎች)።
+5. **መሠረታዊ URL**፦ እስከ `/v1` ድረስ እና እሱንም ጨምሮ ያለው የ-API ስር (ለምሳሌ
+   `https://gateway.example.com/v1`)፣ ሙሉው የ`/chat/completions` ዱካ አይደለም። መደበኛ ያልሆኑ
+   ዱካዎች ያላቸው ጌትዌዮች እነዚህን በ**የላቁ ቅንብሮች** ስር ያዘጋጃሉ (የውይይት ዱካ፣ የሞዴሎች ዱካ)።
+6. የ**API ቁልፍ (ለፍተሻ)** መስክ ግንኙነቱን ብቻ ይፈትሻል። ኖዱን ከፈጠሩ በኋላ፣
+   ይክፈቱት እና ጥያቄዎች የሚጠቀሙበትን ቁልፍ ለማከማቸት **ግንኙነት አክል**ን ይጠቀሙ።
 
-ኖዱ `openai-compatible-<apiType>-<uuid>` ቅርጸት ያለው ውስጣዊ መታወቂያ ያገኛል፤ ፈጽሞ
-መጻፍ አያስፈልግዎትም፣ ቅድመ-ቅርጸቱ ሕዝባዊው ስም ነው።
+ኖዱ `openai-compatible-<apiType>-<uuid>` የሚመስል ውስጣዊ id ያገኛል፤ ይህን መተየብ
+በፍጹም አያስፈልግዎትም፣ ቅድመ ቅጥያው ይፋዊ ስሙ ነው።
 
-#### የተያዙ ቅድመ-ቅርጸቶች
+#### የተያዙ ቅድመ ቅጥያዎች
 
-ቅድመ-ቅርጸት የአብነት-ተገኝ አቅራቢ መታወቂያ ወይም ቅጽል ስም (ለምሳሌ `openai`፣ `cf`) መሆን አይችልም፣ እንዲሁም
-የተሰናበተ አቅራቢ መታወቂያ መሆን አይችልም። የሞዴል ፈቺው ከብጁ ኖዶች በፊት የአብነት-ተገኝ መታወቂያዎችንና ቅጽል
-ስሞችን ይመረምራል፣ ስለዚህ ከእነዚያ ቅድመ-ቅርጸቶች አንዱን የሚጠቀም ኖድ ፈጽሞ ትራፊክ አያገኝም፦
-`<prefix>/model` ወደ አብነት-ተገኙ አቅራቢ ይሄዳል፣ ወይም ያ አቅራቢ ቢሰናበት በዝግ ሁኔታ ይሳካል።
-እንደዚህ ዓይነት ቅድመ-ቅርጸት ያለው ኖድ መፍጠር ወይም ማስተካከል በሚከተለው ይቃወማል፦
+ቅድመ ቅጥያ አብሮ የተሰራ አቅራቢ id ወይም ቅጽል ስም (ለምሳሌ `openai`፣ `cf`)፣ እንዲሁም
+ከአገልግሎት የወጣ አቅራቢ id መሆን አይችልም። የሞዴል ፈቺው ከብጁ ኖዶች በፊት አብረው የተሰሩ
+idዎችን እና ቅጽል ስሞችን ይፈትሻል፤ ስለዚህ ከእነዚያ ቅድመ ቅጥያዎች አንዱን የሚጠቀም ኖድ
+ምንም ጊዜ ትራፊክ አይቀበልም፦ `<prefix>/model` በምትኩ ወደ አብሮ የተሰራው አቅራቢ ይሄዳል፣
+ወይም ያ አቅራቢ ከአገልግሎት የወጣ ከሆነ ዝግ ሆኖ ይከሽፋል። እንዲህ ያለ ቅድመ ቅጥያ ያለውን ኖድ
+መፍጠር ወይም ማርትዕ በሚከተለው መልዕክት ውድቅ ይደረጋል፦
 
 ```text
-prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+prefix: "<prefix>" የተያዘ የአቅራቢ ቅድመ ቅጥያ ነው — የተለየ ቅድመ ቅጥያ ይምረጡ (የተያዙ idዎች/ቅጽል ስሞች ለብጁ ኖዶች ጥቅም ላይ ሊውሉ አይችሉም፤ ምክንያቱም እንደ <prefix>/model ያሉ ጥያቄዎች ወደ አብሮ የተሰራ አቅራቢ ይዞራሉ ወይም ከአገልግሎት ሲወጣ ዝግ ሆነው ይከሽፋሉ)
 ```
 
-የተለየ ቅድመ-ቅርጸት ይምረጡ (`mygw`፣ `acme-proxy`)። ወደ ብጁ ኖድ የሚላኩ ጥያቄዎች
-አብነት-ተገኝ አቅራቢን ወይም ምስክርነቶቹን የሚጠቅስ ስህተት ቢሳኩባቸው፣ የኖዱ ቅድመ-ቅርጸት የተያዘ መሆኑን
-ያረጋግጡ፦ ይህ ህግ ከመኖሩ በፊት የተቀመጡ ኖዶች አሁንም ተቀምጠዋል፣ ግን ቅድመ-ቅርጸታቸው ወደ
-አብነት-ተገኙ አቅራቢ ያቀጣጫል። ኖዱን ያርትዑ እና አዲስ ቅድመ-ቅርጸት ይስጡት።
+የተለየ ቅድመ ቅጥያ (`mygw`፣ `acme-proxy`) ይምረጡ። ወደ ብጁ ኖድ የሚላኩ ጥያቄዎች
+የአብሮ የተሰራ አቅራቢን ወይም ማረጋገጫዎቹን በሚጠቅስ ስህተት ከከሸፉ፣ የኖዱ ቅድመ ቅጥያ
+የተያዘ መሆኑን ያረጋግጡ፦ ይህ ደንብ ከመኖሩ በፊት የተቀመጡ ኖዶች አሁንም ተከማችተዋል፣
+ነገር ግን ቅድመ ቅጥያቸው ወደ አብሮ የተሰራው አቅራቢ ይዞራል። ኖዱን ያርትዑ እና አዲስ ቅድመ ቅጥያ ይስጡት።
 
-#### በግንኙነት ደረጃ የጌትዌይ አማራጮች
+### የOmniRoute አቻዎችን ማገናኘት
 
-እነዚህ ቁልፎች በግንኙነቱ `providerSpecificData` ውስጥ ይገባሉ (ለምሳሌ በኩል
-`PUT /api/providers/{id}`)፦
+ሌላ OmniRoute ጌትዌይ እንደ **ብጁ ከ-OpenAI ጋር ተኳሃኝ** አቅራቢ ሊታከል ይችላል። የአቻውን
+የ`/v1` መሠረታዊ URL እና በዚያ አቻ የተሰጠ የተለየ፣ አነስተኛ ፈቃድ ያለው የ-API ቁልፍ ይጠቀሙ።
 
-- `toolNameMaxLength` (ኢንቲጀር፣ 1–1024) — ለOpenAI ቻት-ቅርጸት ተኳሃኝ ግንኙነቶች ጌትዌዮቻቸው
-  ረጅም የመሣሪያ ስሞችን የሚቃወሙ። ረጅም ስሞች እንደ አጭር ቅጽል ስሞች ይላካሉ እና በ
-  ምላሹ ውስጥ ይመለሳሉ።
-- `quotaEndpoint` — የጌትዌዩ ኩዋታ/ክሬዲት ኢንድፖይንት፣ ለዳሽቦርዱ የኩዋታ ገመድ እና
-  ለኩዋታ-አውቃኝ አቅጣጫ ይነበባል። በOpenAI- እና በAnthropic-ተኳሃኝ ግንኙነቶች ሁለቱም ላይ ይሠራል፤
-  ሙሉው ቅርጸት በ`open-sse/services/usage/openaiCompatible.ts` ውስጥ ተመዝግቧል።
-
-```json
-{
-  "toolNameMaxLength": 64,
-  "quotaEndpoint": {
-    "url": "https://gateway.example.com/key/info",
-    "auth": "bearer",
-    "quotas": {
-      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
-    }
-  }
-}
-```
-
-### የOmniRoute እኩዮችን ማሰራጨፍ
-
-ሌላ OmniRoute ጌትዌይ እንደ **ብጁ ከOpenAI-ተኳሃኝ** አቅራቢ መጨመር ይችላል። የእኩዩን
-`/v1` መሠረታዊ URL እና በዚያ እኩይ የተሰጠ ልዩ፣ ዝቅተኛ-መብት ያለው API ቁልፍ ይጠቀሙ።
-
-ለቀራረብ ወይም ለብዙ-ሆፕ ሰንሰለቶች፣ በእያንዳንዱ ጌትዌይ ላይ በፈቃደኝነት የሚነሳውን የሉፕ ጠባቂ ያንቁ፦
+ለተደጋጋሚ ወይም ባለብዙ-ደረጃ ሰንሰለቶች፣ በእያንዳንዱ ጌትዌይ ላይ በምርጫ የሚነቃውን የዙር መከላከያ ያንቁ፦
 
 ```bash
 # gateway-a
@@ -774,18 +750,18 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-ወደ በግልጽ በፍቅድ-ዝርዝር የተመዘገበ የእኩይ URL ብቻ የሚላኩ ጥያቄዎች
-`X-OmniRoute-Peer-Trace` ራስጌን ያገኛሉ። ጌትዌይ የተደገመ የኢንስታንስ መታወቂያን ወይም የተጠናቀቀ የሆፕ
-በጀትን በHTTP `508 Loop Detected` ይቃወማል፤ መደበኛ የአፕስትሪም አቅራቢዎች ምንም የእኩይ መረጃ አያገኙም።
+በግልጽ ወደ ተፈቀደለት የአቻ URL የተላኩ ጥያቄዎች ብቻ
+የ`X-OmniRoute-Peer-Trace` ራስጌን ይቀበላሉ። አንድ ጌትዌይ የተደገመ instance ID ወይም ያለቀ የደረጃ
+በጀትን በHTTP `508 Loop Detected` ውድቅ ያደርጋል፤ መደበኛ ወደላይ ያሉ አቅራቢዎች ምንም የአቻ ሜታዳታ አይቀበሉም።
 
-የእኩይ ማሰራጨፍ የዳታቤዝ ቅጂ ወይም የአስተናጋጅ ፌልኦቨር አይደለም። እያንዳንዱ ጌትዌይ ገለልተኛ የSQLite
-ሁኔታ፣ ካሾች፣ የፍጥነት መቁጠሪያዎች እና ክፍለ-ጊዜያትን ይይዛል። ለንቁ/ተጨማሪ ወይም ንቁ/ንቁ ተገኝነት ጤና-የተፈተኸ
-አንገብጋቢ ፕሮክሲ ወይም የደንበኛ ፌልኦቨር ይጠቀሙ፣ እና አንድን የSQLite ዳታቤዝ ወደ ብዙ በሂደት ላይ ያሉ
-OmniRoute ኢንስታንሶች ፈጽሞ አይተኩት።
+የአቻ ማገናኘት የውሂብ ጎታ ማባዛት ወይም የአስተናጋጅ ውድቀት መተካት አይደለም። እያንዳንዱ ጌትዌይ የራሱን
+SQLite ሁኔታ፣ መሸጎጫዎች፣ የፍጥነት ቆጣሪዎች እና ክፍለ ጊዜዎች ለብቻው ይይዛል። ለንቁ/ተጠባባቂ ወይም ንቁ/ንቁ
+ተገኝነት ጤናው የሚፈተሽ ተገላቢጦሽ ፕሮክሲ ወይም የደንበኛ ውድቀት መተካትን ይጠቀሙ፣ እና አንድ SQLite የውሂብ ጎታ
+በበርካታ እየሰሩ ያሉ OmniRoute instances ላይ በፍጹም አይጫኑ።
 
-### ልዩ የአቅራቢ መስመሮች
+### የተወሰኑ የአቅራቢ መስመሮች
 
-ጥያቄዎችን በሞዴል ማረጋገጫ ጋር በቀጥታ ወደ አንድ የተወሰነ አቅራቢ ያቅጣጫሉ፦
+በሞዴል ማረጋገጫ ጥያቄዎችን በቀጥታ ወደ አንድ የተወሰነ አቅራቢ ያዙሩ፦
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -793,25 +769,25 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-የአቅራቢው ቅድመ-ቅርጸት ከጎደለ በራስ-ሰር ይጨመራል። የማይዛመዱ ሞዴሎች `400` ይመልሳሉ።
+የአቅራቢው ቅድመ ቅጥያ ከሌለ በራስ-ሰር ይታከላል። የማይዛመዱ ሞዴሎች `400` ይመልሳሉ።
 
-### የኔትወርክ ፕሮክሲ ውቅር
+### የአውታረ መረብ ፕሮክሲ ውቅር
 
 ```bash
-# አጠቃላይ ፕሮክሲ አዘጋጅ
+# አጠቃላይ ፕሮክሲን ያዘጋጁ
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# በአቅራቢ ደረጃ ፕሮክሲ
+# ለእያንዳንዱ አቅራቢ ፕሮክሲ
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# ፕሮክሲውን ፈትሽ
+# ፕሮክሲን ይፈትሹ
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**ቅድሚያ:** ቁልፍ-ልዩ → ኮምቦ-ልዩ → አቅራቢ-ልዩ → አጠቃላይ → አካባቢ።
+**ቅድሚያ፦** ለቁልፍ-የተወሰነ → ለጥምረት-የተወሰነ → ለአቅራቢ-የተወሰነ → አጠቃላይ → አካባቢ።
 
 ### የሞዴል ካታሎግ API
 
@@ -819,111 +795,111 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
 curl http://localhost:20128/api/models/catalog
 ```
 
-በአቅራቢ የተቧጭሩ ሞዴሎችን ከአይነቶች (`chat`, `embedding`, `image`) ጋር ይመልሳል።
+በአቅራቢ የተመደቡ ሞዴሎችን ከአይነቶቻቸው (`chat`፣ `embedding`፣ `image`) ጋር ይመልሳል።
 
 ### የደመና ማመሳሰል
 
-- አቅራቢዎችን፣ ኮምቦዎችን እና ቅንብሮችን በመሣሪያዎች መካከል ያመሳስሉ
-- ራስ-ሰር የጀርባ ማመሳሰል ከtimeout እና fail-fast ጋር
-- በምርት (production) ሁነታ የአገልጋይ-ጎን `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` ይምረጡ
+- አቅራቢዎችን፣ ጥምረቶችን እና ቅንብሮችን በመሣሪያዎች መካከል ያመሳስሉ
+- በጊዜ ገደብ + ፈጣን ውድቀት የሚከናወን ራስ-ሰር የበስተጀርባ ማመሳሰል
+- በምርት ላይ የአገልጋይ-ወገን `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`ን ይምረጡ
 
-### Cloudflare Quick Tunnel
+### Cloudflare ፈጣን ቱነል
 
-- ለDocker እና ለሌሎች ራስ የሚያስተናግዱ (self-hosted) ማስኬጃዎች በ**Dashboard → Endpoints** ውስጥ ይገኛል
-- ወደ አሁኑ OpenAI-ተኳሃኝ `/v1` ኢንድፖይንት የሚያስተላልፍ ጊዜያዊ `https://*.trycloudflare.com` URL ይፈጥራል
-- የመጀመሪያ ማንቃት `cloudflared`ን በሚያስፈልግበት ጊዜ ብቻ ይጭናል፤ ቀጣይ እንደገና ማስጀመሪያዎች ተመሳሳዩን የተተዳደረ binary እንደገና ይጠቀማሉ
-- Quick Tunnels ከOmniRoute ወይም ከኮንቴይነር እንደገና ማስጀመሪያ በኋላ ራስ-ሰር አይመለሱም፤ በሚያስፈልግበት ጊዜ ከዳሽቦርዱ እንደገና ያንቃቸው
-- የቻናል URLዎች ጊዜያዊ ናቸው እና ቻናሉን በሚያቆሙ/በሚጀምሩበት ጊዜ ሁሉ ይለዋወጣሉ
-- የተተዳደሩ Quick Tunnels በተገደቡ ኮንቴይነሮች ውስጥ በተደጋጋሚ የሚታዩ የQUIC UDP buffer ማስጠንቀቂያዎችን ለማስወገድ በነባሪነት HTTP/2 ትራንስፖርት ይጠቀማሉ
-- የተተዳደረውን የትራንስፖርት ምርጫ መተካት ከፈለጉ `CLOUDFLARED_PROTOCOL=quic` ወይም `auto` ያዘጋጁ
-- ከተተዳደረው ዳውንሎድ ይልቅ አስቀድሞ የተጫነ `cloudflared` binary መጠቀም ከፈለጉ `CLOUDFLARED_BIN` ያዘጋጁ
-- Cloudflare Quick Tunnel፣ Tailscale Funnel እና ngrok Tunnel ፓነሎች በ**Settings → Appearance** ውስጥ ሊታዩ ወይም ሊደበቁ ይችላሉ። ፓነል ማደበቅ በሂደት ላይ ያለ ቻናል አያቆምም።
+- ለDocker እና ሌሎች በራስ የሚስተናገዱ ማሰማራቶች በ**Dashboard → Endpoints** ውስጥ ይገኛል
+- ወደ አሁናዊው OpenAI-ተኳሃኝ `/v1` endpointዎ የሚያስተላልፍ ጊዜያዊ `https://*.trycloudflare.com` URL ይፈጥራል
+- በመጀመሪያ ማንቃት `cloudflared`ን የሚጭነው ሲያስፈልግ ብቻ ነው፤ ቀጣይ ዳግም ማስጀመሮች ያንኑ የሚተዳደር binary እንደገና ይጠቀማሉ
+- OmniRoute ወይም container ዳግም ከተጀመረ በኋላ Quick Tunnels በራስ-ሰር አይመለሱም፤ በሚያስፈልግበት ጊዜ ከdashboard እንደገና ያንቋቸው
+- Tunnel URLዎች ጊዜያዊ ሲሆኑ፣ tunnelን ባቆሙ/ባስጀመሩ ቁጥር ይቀየራሉ
+- በተገደቡ containerዎች ውስጥ የሚረብሹ የQUIC UDP buffer ማስጠንቀቂያዎችን ለማስወገድ፣ የሚተዳደሩ Quick Tunnels በነባሪ HTTP/2 transport ይጠቀማሉ
+- የሚተዳደረውን transport ምርጫ መቀየር ከፈለጉ `CLOUDFLARED_PROTOCOL=quic` ወይም `auto` ያዘጋጁ
+- ከሚተዳደረው ማውረድ ይልቅ አስቀድሞ የተጫነ `cloudflared` binary መጠቀምን ከመረጡ `CLOUDFLARED_BIN` ያዘጋጁ
+- የCloudflare Quick Tunnel፣ Tailscale Funnel እና ngrok Tunnel panelዎች በ**Settings → Appearance** ውስጥ ሊታዩ ወይም ሊደበቁ ይችላሉ። panelን መደበቅ እየሰራ ያለ tunnelን አያቆምም።
 
-### የLLM ጌትዌይ ብልህነት (Phase 9)
+### የLLM Gateway ብልህነት (ደረጃ 9)
 
-- **ሰማንቲክ ካሽ** — non-streaming፣ temperature=0 ምላሾችን ራስ-ሰር ያከማቻል (በ`X-OmniRoute-No-Cache: true` ማስወገድ ይችላሉ)
-- **የጥያቄ Idempotency** — በ`Idempotency-Key` ወይም `X-Request-Id` ሄደር በ5 ሰከንድ ውስጥ የተደገሙ ጥያቄዎችን ያስወግዳል
-- **የሂደት ክትትል** — በ`X-OmniRoute-Progress: true` ሄደር አማራጭ (opt-in) SSE `event: progress` ክስተቶች
+- **የትርጉም መሸጎጫ** — streaming ያልሆኑ፣ temperature=0 ምላሾችን በራስ-ሰር ይሸጎጣል (በ`X-OmniRoute-No-Cache: true` ይለፉት)
+- **የጥያቄ አንድ-ጊዜነት** — በ`Idempotency-Key` ወይም `X-Request-Id` header አማካኝነት በ5s ውስጥ የሚቀርቡ ተደጋጋሚ ጥያቄዎችን ያስወግዳል
+- **የሂደት ክትትል** — በ`X-OmniRoute-Progress: true` header አማካኝነት በምርጫ የሚነቁ SSE `event: progress` ክስተቶች
 
 ---
 
-### የትርጉም መጫወቻ (Translator Playground)
+### የተርጓሚ መሞከሪያ
 
-በ**Dashboard → Translator** አማካኝነት ይድረሱ። OmniRoute የAPI ጥያቄዎችን በአቅራቢዎች መካከል እንዴት እንደሚተረጉም ያሣዩ እና በእይታ ይመልከቱ።
+በ**Dashboard → Translator** በኩል ይድረሱበት። OmniRoute በአቅራቢዎች መካከል የAPI ጥያቄዎችን እንዴት እንደሚተረጉም ስህተት ይፈልጉበት እና በእይታ ይመልከቱ።
 
-| ሁነታ              | ዓላማ                                                         |
-| ---------------- | ----------------------------------------------------------- |
-| **Playground**   | የምንጭ/ዒላማ ቅርጸቶችን ይምረጡ፣ ጥያቄ ይለጥፉ እና የተተረጎመውን ውጤት ወዲያውኑ ይይዙ    |
-| **Chat Tester**  | በፕሮክሲው በኩል ቀጥታ የውይይት መልእክቶችን ይላኩ እና ሙሉውን የጥያቄ/ምላሽ ዑደት ይመርምሩ |
-| **Test Bench**   | የትርጉም ትክክለኛነትን ለማረጋገጥ በብዙ የቅርጸት ጥምረቶች ላይ የቡድን ሙከራዎችን ያካሂዱ   |
-| **Live Monitor** | ጥያቄዎች በፕሮክሲው በኩል ሲፈሱ የቅጽበታዊ ትርጉሞችን ይመልከቱ                    |
+| ሁነታ           | ዓላማ                                                          |
+| ------------- | ------------------------------------------------------------ |
+| **መሞከሪያ**     | የምንጭ/መድረሻ ቅርጸቶችን ይምረጡ፣ ጥያቄን ይለጥፉ እና የተተረጎመውን ውጤት ወዲያውኑ ይመልከቱ |
+| **የውይይት ሞካሪ** | በproxyው በኩል የቀጥታ ውይይት መልዕክቶችን ይላኩ እና ሙሉውን የጥያቄ/ምላሽ ዑደት ይመርምሩ |
+| **የሙከራ መድረክ** | የትርጉም ትክክለኛነትን ለማረጋገጥ በበርካታ የቅርጸት ጥምረቶች ላይ የቡድን ሙከራዎችን ያስኪዱ  |
+| **የቀጥታ ክትትል** | ጥያቄዎች በproxyው ውስጥ ሲያልፉ ቅጽበታዊ ትርጉሞችን ይመልከቱ                    |
 
 **የአጠቃቀም ሁኔታዎች:**
 
-- አንድ የተወሰነ የደንበኛ/አቅራቢ ጥምረት ለምን እንደሚያለምን ያሣዩ
-- የthinking መለያዎች፣ የመሣሪያ ጥሪዎች እና የስርዓት ፕሮምፕቶች በትክክል መተረጎማቸውን ያረጋግጡ
-- በOpenAI፣ Claude፣ Gemini እና Responses API ቅርጸቶች መካከል ያሉትን የቅርጸት ልዩነቶች ያወዳድሩ
+- አንድ የተወሰነ የclient/provider ጥምረት ለምን እንደሚሳካለት ስህተቱን ይፈልጉ
+- የthinking tagዎች፣ tool callዎች እና system promptዎች በትክክል መተርጎማቸውን ያረጋግጡ
+- በOpenAI፣ Claude፣ Gemini እና Responses API ቅርጸቶች መካከል ያሉ የቅርጸት ልዩነቶችን ያወዳድሩ
 
 ---
 
-### የማስተላለፊያ ስልቶች
+### የማዞሪያ ስልቶች
 
-በ**Dashboard → Settings → Routing** አማካኝነት ያዋቅሩ። ዳሽቦርዱ በብዛት ጥቅም ላይ የዋሉትን ስድስት ስልቶች ያሳያል፤ ኮምቦዎች እና auto-router በውስጣዊ መንገድ ሰፊውን ስብስብ ይደግፋሉ።
+በ**Dashboard → Settings → Routing** በኩል ያዋቅሩ። dashboardው በብዛት ጥቅም ላይ የሚውሉትን ስድስት ስልቶች ያቀርባል፤ comboዎች እና auto-router በውስጣቸው ሰፋ ያለ ስብስብን ይደግፋሉ።
 
-**በዳሽቦርድ የሚታዩ ስልቶች (የመለያ-ደረጃ ማስተላለፊያ):**
+**በDashboard የሚታዩ ስልቶች (የaccount-ደረጃ ማዞሪያ):**
 
-| ስልት                            | መግለጫ                                                                    |
-| ------------------------------ | ----------------------------------------------------------------------- |
-| **Fill First**                 | መለያዎችን በቅድሚያ ቅደም ተከተል ይጠቀማል — ዋናው መለያ ሳይገኝ እስኪቀር ድረስ ሁሉንም ጥያቄዎች ያስተናግዳል |
-| **Round Robin**                | በማዋቀር በሚችል sticky ገደብ ጋር በሁሉም መለያዎች ይዞራል (ነባሪ: በእያንዳንዱ መለያ 3 ጥሪዎች)      |
-| **P2C (Power of Two Choices)** | 2 ዘፈቀደ መለያዎችን ይመርጣል እና ወደ በለጠ ጤናማው ያስተላልፋል — ጭነትን በጤና ግንዛቤ ያመዝናል        |
-| **Random**                     | Fisher-Yates shuffle በመጠቀም ለእያንዳንዱ ጥያቄ መለያን በዘፈቀደ ይመርጣል                 |
-| **Least Used**                 | እጅግ አሮጌው `lastUsedAt` የጊዜ ማኅተም ወዳለው መለያ ያስተላልፋል እና ትራፊክን በእኩል ያከፋፍላል    |
-| **Cost Optimized**             | ዝቅተኛው የቅድሚያ እሴት ወዳለው መለያ ያስተላልፋል፣ ለዝቅተኛ-ወጪ አቅራቢዎች ያመቻቻል                 |
+| ስልት                      | መግለጫ                                                                                  |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| **መጀመሪያውን ሙላ**           | accountዎችን በቅድሚያ ቅደም ተከተል ይጠቀማል — ዋናው account እስካልተገኘ ድረስ ሁሉንም ጥያቄዎች ያስተናግዳል          |
+| **ተራ በተራ**               | ሊዋቀር በሚችል sticky limit አማካኝነት በሁሉም accountዎች ውስጥ በዑደት ይዞራል (ነባሪ፦ በአንድ account 3 ጥሪዎች) |
+| **P2C (የሁለት ምርጫዎች ኃይል)** | 2 የዘፈቀደ accountዎችን መርጦ ወደ ጤናማው ያዞራል — የጤና ሁኔታን ከግምት ውስጥ በማስገባት ጭነትን ያመጣጥናል            |
+| **የዘፈቀደ**                | Fisher-Yates shuffleን በመጠቀም ለእያንዳንዱ ጥያቄ accountን በዘፈቀደ ይመርጣል                          |
+| **በትንሹ ጥቅም ላይ የዋለ**      | ጥያቄውን በጣም የቆየ `lastUsedAt` timestamp ወዳለው account በማዞር ትራፊክን በእኩል ያሰራጫል               |
+| **ለወጪ የተመቻቸ**            | ዝቅተኛው የቅድሚያ እሴት ወዳለው account በማዞር፣ ዝቅተኛ ወጪ ላላቸው አቅራቢዎች ያመቻቻል                          |
 
-**የላቁ የኮምቦ እና auto ስልቶች** (በእያንዳንዱ ኮምቦ ወይም በ`auto/*` ቅድመ-ቅጥያዎች ማዋቀር የሚችሉ — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ይመልከቱ):
+**የላቁ combo እና auto ስልቶች** (ለእያንዳንዱ combo ወይም በ`auto/*` prefixዎች ሊዋቀሩ ይችላሉ — [AUTO-COMBO.md](../routing/AUTO-COMBO.md)ን ይመልከቱ):
 
-- `priority` — ጥብቅ ቅደም ተከተል፣ በፍጹም round-robin አያደርግም
-- `weighted` — በእያንዳንዱ ሞዴል ክብደቶች ተመጣጣኝ የትራፊክ ክፍፍል
-- `fill-first` — የመጀመሪያውን ሞዴል ገደቦች እስኪመታ ድረስ ይጠቀማል
+- `priority` — ጥብቅ ቅደም ተከተል፣ round-robin ፈጽሞ አይጠቀምም
+- `weighted` — በእያንዳንዱ model ክብደቶች መሠረት ተመጣጣኝ የትራፊክ ክፍፍል
+- `fill-first` — ገደቦች እስኪደረሱ ድረስ የመጀመሪያውን model ሙሉ በሙሉ ይጠቀማል
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
+- `p2c` (የሁለት ምርጫዎች ኃይል)
 - `least-used` እና `cost-optimized`
-- `auto` — በሁሉም እጩዎች ላይ በነጥብ የሚመራ
-- `lkgp` (Last Known Good Provider) — በመጨረሻ በተሳካው አቅራቢ ላይ ይተካል፣ ከዚያ ወደ ህጎች ይሸጋገራል
-- `context-optimized` — ትልቁን ነፃ የኮንተክስት መስኮት ያለውን ሞዴል ይመርጣል
-- `context-relay` — ለተከታይ ዙሮች ረጅም-ኮንተክስት ሞዴሎችን ያሰልስላል
+- `auto` — በሁሉም እጩዎች መካከል በውጤት የሚመራ
+- `lkgp` (መጨረሻ የታወቀ ጥሩ አቅራቢ) — የመጨረሻውን የተሳካ አቅራቢ አጥብቆ ይይዛል፣ ከዚያም ወደ ደንቦች ይመለሳል
+- `context-optimized` — ትልቁ ነፃ context window ያለውን model ይመርጣል
+- `context-relay` — ለተከታይ የውይይት ዙሮች ረጅም-context modelዎችን በሰንሰለት ያገናኛል
 
-#### የውጪ Sticky Session ሄደር
+#### ውጫዊ Sticky Session Header
 
-ለውጪ የክፍለ ጊዜ ቅስቀሳ (ለምሳሌ፣ ከreverse proxies በስተጀርባ ያሉ Claude Code/Codex ወኪሎች)፣ ይላኩ:
+ለውጫዊ session affinity (ለምሳሌ፣ ከreverse proxyዎች ጀርባ ያሉ Claude Code/Codex agentዎች)፣ የሚከተለውን ይላኩ፦
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute `x_session_id`ንም ይቀበላል እና ተግባራዊውን የክፍለ ጊዜ ቁልፍ በ`X-OmniRoute-Session-Id` ውስጥ ይመልሳል።
+OmniRoute `x_session_id`ንም ይቀበላል እና ውጤታማውን session key በ`X-OmniRoute-Session-Id` ይመልሳል።
 
-Nginx ከተጠቀሙ እና የአንደርስኮር-ቅርጽ ሄደሮችን ከላኩ፣ ያንቁ:
+Nginxን ከተጠቀሙ እና underscore-ቅርጽ ያላቸውን headerዎች ከላኩ፣ የሚከተለውን ያንቁ፦
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### የWildcard ሞዴል ቅጽል ስሞች
+#### የWildcard Model ተለዋጭ ስሞች
 
-የሞዴል ስሞችን እንደገና ለማስቀመጥ wildcard ንድፎችን ይፍጠሩ:
+የmodel ስሞችን ዳግም ለመመደብ wildcard patternዎችን ይፍጠሩ፦
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
 Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
 ```
 
-Wildcards `*` (ማንኛውም ቁምፊዎች) እና `?` (ነጠላ ቁምፊ) ይደግፋሉ።
+Wildcardዎች `*`ን (ማንኛውም ቁምፊዎች) እና `?`ን (አንድ ቁምፊ) ይደግፋሉ።
 
 #### የFallback ሰንሰለቶች
 
-በሁሉም ጥያቄዎች ላይ የሚሠሩ ዓለምአቀፍ fallback ሰንሰለቶችን ይግለጹ:
+በሁሉም ጥያቄዎች ላይ የሚተገበሩ ዓለም አቀፍ fallback ሰንሰለቶችን ይግለጹ፦
 
 ```
 Chain: production-fallback
@@ -934,22 +910,22 @@ Chain: production-fallback
 
 ---
 
-### የተለመዱ የአቅራቢ ጥምረቶች እና የማስተላለፊያ ንድፎች
+### የተለመዱ የአቅራቢ ጥምረቶች እና የማዞሪያ ንድፎች
 
-በOmniRoute ውስጥ ብዙ አቅራቢዎችን የማጣመር እና በእነሱ መካከል የማስተላለፍ ምሳሌ ንድፎች እነሆ:
+በOmniRoute ውስጥ በርካታ አቅራቢዎችን ለማጣመር እና በመካከላቸው ለማዞር የሚያገለግሉ ምሳሌ ንድፎች እነሆ፦
 
-#### 1. የኮዲንግ ወኪል ኮምቦ፡ ከፍተኛ ማሰቢያ (Reasoning) ከወጪ/ፍጥነት ፎልባክ ጋር
+#### 1. የCoding Agent Combo፦ ከወጪ/ፍጥነት Fallback ጋር የላቀ አመክንዮ
 
-ለኮዲንግ ወኪሎች (OpenCode, Claude Code, Cursor, Cline) ይመረናወቃል። በመጀመሪያ ወደ frontier ማሰቢያ ሞዴሎች ያስተላልፋል፣ በኩዎታ ፍፃሜ ወይም ስህተቶች ላይ ወደ ፈጣን የኮዲንግ ሞዴሎች ይመለሳል።
+ለcoding agentዎች (OpenCode፣ Claude Code፣ Cursor፣ Cline) ተስማሚ ነው። መጀመሪያ ወደ frontier reasoning modelዎች ያዞራል፣ quota ሲያልቅ ወይም ስህተቶች ሲከሰቱ ወደ ፈጣን coding modelዎች fallback ያደርጋል።
 
-- **ዳሽቦርድ**: ኮምቦች → አዲስ ኮምቦ → ስም፡ `agent-coding` → ስትራቴጂ፡ `Priority`
-- **ሞዴሎች**:
-  1. `claude/claude-sonnet-4-6` (ዋና የኮዲንግ ወኪል)
-  2. `openai/gpt-4o` (ሁለተኛ ከፍተኛ አቅም ያለው ፎልባክ)
-  3. `deepseek/deepseek-v4-flash` (ከፍተኛ ብቃት ያለው፣ ወጪ ቆጣቢ ፎልባክ)
+- **Dashboard**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
+- **Modelዎች**:
+  1. `claude/claude-sonnet-4-6` (ዋና coding agent)
+  2. `openai/gpt-4o` (ሁለተኛ ደረጃ ከፍተኛ-አቅም fallback)
+  3. `deepseek/deepseek-v4-flash` (ከፍተኛ-ብቃት፣ ወጪ-ቆጣቢ fallback)
 
 ```bash
-# ምሳሌ በኤፒአይ
+# በAPI በኩል የሚደረግ ምሳሌ
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -964,178 +940,178 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. ነፃ-ደረጃ (Free-Tier) ራስ-ሰር ፎልባክ (Failover) ኮምቦ
+#### 2. የነፃ ደረጃ ራስ-ሰር የመተካት ጥምረት
 
-ብዙ ነፃ-ደረጃ እና ያለ ቁልፍ (keyless) አቅራቢዎችን ያሰራል፣ ያለ API ወጪ ከፍተኛ uptime ለማግኘት።
+ያለ API ወጪ የሥራ ጊዜን ከፍ ለማድረግ በርካታ የነፃ ደረጃ እና ቁልፍ የማይፈልጉ አቅራቢዎችን በቅደም ተከተል ያገናኛል።
 
-- **ስትራቴጂ**: `Least Used` ወይም `Round Robin` (ጭነትን በኩዎታዎች ላይ ያከፋፍላል)
-- **ሞዴሎች**:
+- **ስልት**፦ `Least Used` ወይም `Round Robin` (ጭነቱን በኮታዎች መካከል ያከፋፍላል)
+- **ሞዴሎች**፦
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# ምሳሌ በCLI
+# በCLI በኩል የሚደረግ ምሳሌ
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. ብዙ-ሞዳል / ራእይ እና ጽሑፍ ፓይፕላይን
+#### 3. ባለብዙ ዘዴ / ምስል እና ጽሑፍ ፓይፕላይን
 
-ምስልን መረዳት እና ኮድ መፍጠርን የሚጨምሩ የስራ ፍሰቶችን ለማስኬድ፣ ልዩ የሆኑ የራእይ ሞዴሎችን ከፍተኛ ፍጥነት ያለው ጽሑፍ ምርት ጋር ማጣመር።
+የምስል ግንዛቤን እና የኮድ ማመንጨትን ለሚያካትቱ የሥራ ፍሰቶች፣ ልዩ የምስል ሞዴሎችን ከከፍተኛ ፍጥነት የጽሑፍ ማመንጫ ጋር ያጣምራል።
 
-- **ዘዴ (Pattern)**: `Priority` ኮምቦ የራእይ ችሎት ያላቸውን ሞዴሎች በመጀመሪያ፣ ከፍተኛ throughput ያለውን ጽሑፍ/ኮድ ሞዴል በመጨረሻ ያስቀምጣል።
-- **ሞዴሎች**:
-  1. `gemini/gemini-2.5-pro` (ጠንካራ ምስል/ብዙ-ሞዳል መረዳት)
-  2. `openai/gpt-4o` (የተሰማራ ራእይ እና የመሣሪያ (tool) አጠቃቀም)
-  3. `deepseek/deepseek-v4-flash` (ጽሑፍ/ኮድ ምርት)
-
----
-
-### ጥንካሬ እና Circuit Breaker
-
-በ**ዳሽቦርድ → ቅንብሮች → ጥንካሬ** ያዋቅሩ።
-
-OmniRoute አምስት ክፍሎች ያሉትን በአቅራቢ ደረጃ ጥንካሬ ያከናውናል፦
-
-1. **የጥያቄ ወረፋ እና ፍጥነት ቁጥብር** — በስርዓት ደረጃ የጥያቄ መልክ መስጠት፦
-   - **በደቂቃ የሚቀርቡ ጥያቄዎች (RPM)** — በአካውንት በደቂቃ ከፍተኛ የጥያቄ ብዛት
-   - **በጥያቄዎች መካከል ያለው ቢያንስ ጊዜ** — በጥያቄዎች መካከል በሚሊሰከንድ ያለው ቢያንስ ድልድል
-   - **የከፍተኛ በአንድ ጊዜ ጥያቄዎች** — በአካውንት በአንድ ጊዜ የሚቀርቡ ከፍተኛ ጥያቄዎች
-
-2. **የግንኙነት ማቆሚያ (Cooldown)** — ከመልሶ መሞከር የሚችሉ ስህተቶች በኋላ ለአንድ ግንኙነት በማረጋገጫ ዓይነት የሚደረግ ውቅር፦
-   - **መሠረታዊ Cooldown** — ለመልሶ መሞከር የሚችሉ upstream ስህተቶች ነባራዊ የማቆሚያ መስኮት
-   - **Upstream Retry Hints ይጠቀሙ** — የሚታመኑ `Retry-After` ወይም reset hints ሲቀርቡ ይከበራሉ
-   - **የከፍተኛ Backoff ደረጃዎች** — ለተደጋጋሚ ስህተቶች ከፍተኛ exponential backoff ደረጃ
-
-3. **የአቅራቢ Circuit Breaker** — ከመጨረሻ ወደ መጨረሻ የአቅራቢ ስህተቶችን ይከታተላል፣ አቅራቢው በተዋቀረው የማስጠንቀቂያ መጠን ወደ `DEGRADED` ይሰይመዋል፣ እና በተዋቀረው የስህተት መጠን circuit breaker ይከፍታል፦
-   - **የDegradation መጠን** — ወደ `DEGRADED` ከመግባት በፊት ተከታታይ የአቅራቢ ስህተቶች
-   - **የስህተት መጠን** — ወደ `OPEN` ከመግባት በፊት ተከታታይ የአቅራቢ ስህተቶች
-   - **Reset Timeout** — አቅራቢው እንደገና ከተሞከረ በፊት ያለው የጊዜ መስኮት
-   - **CLOSED** (ጤናማ) — ጥያቄዎች በመደበኛነት ያልፋሉ
-   - **DEGRADED** — ከፍተኛ ስህተቶች በሚታወሱበት ጊዜ ጥያቄዎች አሁንም ያልፋሉ
-   - **OPEN** — አቅራቢው ከተደጋጋሚ ስህተቶች በኋላ ለጊዜው ታግዷል
-   - **HALF_OPEN** — አቅራቢው ለመልሶ ማገገም እየተሞከረ ያለ
-
-   በግንኙነት ወሰን ያለው `429` የመጠን ገደብ በ**የግንኙነት ማቆሚያ (Cooldown)** ውስጥ ይቆያል እና ወደ አቅራቢ breaker አይቆጠርም።
-
-   የአቅራቢ breaker runtime ሁኔታ በ**ዳሽቦርድ → ጤና** ብቻ ይታያል።
-
-4. **Cooldown ይጠብቁ** — ሁሉም ተፈላጊ ግንኙነቶች ቀድሞውኑ በCooldown ላይ ከሆነ፣ OmniRoute ለአስቀድሞው Cooldown መጨረሻ መጠበቅ እና ተመሳሳይ የደንበኛ ጥያቄ በራስ-ሰር እንደገና ሞክር ይችላል።
-
-5. **የመጠን ገደብ ራስ-ሰር ግንዛቤ** — upstream አቅራቢዎች በግልጽ የሚጠብቁ መስኮቶችን ከመለሱ፣ ይህ ማስጠንቀቂያዎች ውቅሩ ሲነቃ የአካባቢውን (local) connection cooldown ይተካሉ።
-
-**በሙያው ምክር፦** ከአገልግሎት መቋረጥ በኋላ በቀጥታ (live) የአቅራቢ breakerዎችን ለመመርመር እና ለመደበኛ ሁኔታ ለመመለስ **ጤና** ገጹን ይጠቀሙ። የጥንካሬ ገጽ ቅንብርን ብቻ ይቀይራል።
+- **ንድፍ**፦ በመጀመሪያ ምስልን መተንተን የሚችሉ ሞዴሎችን፣ በመጨረሻም ከፍተኛ የውጤት መጠን ያለው የጽሑፍ/ኮድ ሞዴልን የሚዘረዝር `Priority` ጥምረት።
+- **ሞዴሎች**፦
+  1. `gemini/gemini-2.5-pro` (ጠንካራ የምስል/ባለብዙ ዘዴ ግንዛቤ)
+  2. `openai/gpt-4o` (ሚዛናዊ የምስል ትንተና እና የመሣሪያ አጠቃቀም)
+  3. `deepseek/deepseek-v4-flash` (የጽሑፍ/ኮድ ማመንጨት)
 
 ---
 
-### የመረጃ ቤት ወደ ውጪ ላክ / ከውጪ አስገባ
+### የመቋቋም ችሎታ እና ሰርክዩት ብሬከሮች
 
-የመረጃ ቤት መጠባበቂያዎችን በ**ዳሽቦርድ → ቅንብሮች → ስርዓት እና ማጠራቀሚያ** ያስተዳድሩ።
+በ**Dashboard → Settings → Resilience** በኩል ያዋቅሩ።
 
-| ድርጊት                        | መግለጫ                                                                                                                      |
-| --------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **መረጃ ቤት ወደ ውጪ ላክ**         | የአሁኑን SQLite database እንደ `.sqlite` ፋይል ያወርዳል                                                                             |
-| **ሁሉንም ወደ ውጪ ላክ (.tar.gz)** | እነዚህን የያዘ ሙሉ የመጠባበቂያ አርሃይ ያወርዳል፦ database፣ settings፣ combos፣ provider connections (ማረጋገጫዎች አይደሉም)፣ API key metadata       |
-| **መረጃ ቤት ከውጪ አስገባ**         | የአሁኑን database ለመተካት `.sqlite` ፋይል ያስገቡ። ከመጫናት በፊት መጠባበቂያ በራስ-ሰር ይፈጠራል፣ እንከ `DISABLE_SQLITE_AUTO_BACKUP=true` ካልሆነ በስተቀር። |
+OmniRoute በአቅራቢ ደረጃ የመቋቋም ችሎታን በአምስት ክፍሎች ይተገብራል፦
+
+1. **የጥያቄ ወረፋ እና ፍጥነት ቁጥጥር** — በስርዓት ደረጃ የጥያቄ ፍሰትን መቅረጽ፦
+   - **ጥያቄዎች በደቂቃ (RPM)** — ለእያንዳንዱ መለያ በደቂቃ የሚፈቀደው ከፍተኛው የጥያቄ ብዛት
+   - **በጥያቄዎች መካከል ያለው አነስተኛ ጊዜ** — በጥያቄዎች መካከል በሚሊሰከንድ የሚለካው አነስተኛ ክፍተት
+   - **ከፍተኛው በአንድ ጊዜ የሚከናወኑ ጥያቄዎች** — ለእያንዳንዱ መለያ በአንድ ጊዜ የሚከናወኑ ከፍተኛው የጥያቄ ብዛት
+
+2. **የግንኙነት ማቀዝቀዣ ጊዜ** — እንደገና ሊሞከሩ ከሚችሉ ውድቀቶች በኋላ ለአንድ ግንኙነት በእያንዳንዱ የማረጋገጫ አይነት የሚደረግ ውቅር፦
+   - **መሠረታዊ የማቀዝቀዣ ጊዜ** — እንደገና ሊሞከሩ ለሚችሉ የላይኛው ስርዓት ውድቀቶች ነባሪ የማቀዝቀዣ ጊዜ መስኮት
+   - **የላይኛውን ስርዓት የዳግም ሙከራ ፍንጮች ተጠቀም** — በሚቀርቡበት ጊዜ ታማኝ የሆኑ `Retry-After` ወይም የዳግም ማስጀመሪያ ፍንጮችን ያከብራል
+   - **ከፍተኛው የመጠባበቂያ ደረጃዎች** — ለተደጋጋሚ ውድቀቶች ከፍተኛው የኤክስፖነንሻል መጠባበቂያ ደረጃ
+
+3. **የአቅራቢ ሰርክዩት ብሬከር** — ከጫፍ እስከ ጫፍ ያሉ የአቅራቢ ውድቀቶችን ይከታተላል፣ የተዋቀረው የማስጠንቀቂያ ገደብ ላይ ሲደረስ አቅራቢውን እንደተዳከመ ምልክት ያደርጋል፣ እንዲሁም የተዋቀረው የውድቀት ገደብ ላይ ሲደረስ ብሬከሩን ይከፍታል፦
+   - **የመዳከም ገደብ** — ወደ `DEGRADED` ከመግባቱ በፊት የሚከሰቱ ተከታታይ የአቅራቢ ውድቀቶች
+   - **የውድቀት ገደብ** — ወደ `OPEN` ከመግባቱ በፊት የሚከሰቱ ተከታታይ የአቅራቢ ውድቀቶች
+   - **የዳግም ማስጀመሪያ ጊዜ ገደብ** — አቅራቢው እንደገና ከመፈተሹ በፊት ያለው የጊዜ መስኮት
+   - **CLOSED** (ጤናማ) — ጥያቄዎች በመደበኛነት ይፈሳሉ
+   - **DEGRADED** — ከፍ ያሉ ውድቀቶች እየተከታተሉ ጥያቄዎች መፍሰሳቸውን ይቀጥላሉ
+   - **OPEN** — ከተደጋጋሚ ውድቀቶች በኋላ አቅራቢው ለጊዜው ይታገዳል
+   - **HALF_OPEN** — አቅራቢው መልሶ መሥራት መቻሉን በመፈተሽ ላይ
+
+   በግንኙነት ወሰን ያሉ `429` የፍጥነት ገደቦች በ**የግንኙነት ማቀዝቀዣ ጊዜ** ውስጥ ይቆያሉ፣ እና በአቅራቢው ብሬከር ላይ አይቆጠሩም።
+
+   የአቅራቢው ብሬከር የአሂድ ጊዜ ሁኔታ በ**Dashboard → Health** ላይ ብቻ ይታያል።
+
+4. **የማቀዝቀዣ ጊዜን ጠብቅ** — ሁሉም እጩ ግንኙነቶች በማቀዝቀዝ ላይ ከሆኑ፣ OmniRoute ቀድሞ የሚያበቃውን የማቀዝቀዣ ጊዜ ጠብቆ ያንኑ የደንበኛ ጥያቄ በራስ-ሰር እንደገና ሊሞክር ይችላል።
+
+5. **የፍጥነት ገደብ ራስ-ሰር ማወቂያ** — የላይኛው ስርዓት አቅራቢዎች ግልጽ የመጠበቂያ ጊዜ መስኮቶችን ሲመልሱ፣ ቅንብሩ ከነቃ እነዚያ ፍንጮች ከአካባቢያዊው የግንኙነት ማቀዝቀዣ ጊዜ ቅድሚያ ያገኛሉ።
+
+**የባለሙያ ምክር፦** ከመቋረጥ በኋላ በቀጥታ የሚሰሩ የአቅራቢ ብሬከሮችን ለመመርመር እና ዳግም ለማስጀመር የ**Health** ገጽን ይጠቀሙ። የResilience ገጽ የሚቀይረው ውቅርን ብቻ ነው።
+
+---
+
+### የውሂብ ጎታ ወደ ውጭ መላክ / ከውጭ ማስገባት
+
+የውሂብ ጎታ ምትኬዎችን በ**Dashboard → Settings → System & Storage** ውስጥ ያስተዳድሩ።
+
+| ድርጊት                        | መግለጫ                                                                                                              |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **የውሂብ ጎታን ወደ ውጭ ላክ**       | የአሁኑን SQLite ውሂብ ጎታ እንደ `.sqlite` ፋይል ያወርዳል                                                                       |
+| **ሁሉንም ወደ ውጭ ላክ (.tar.gz)** | የሚከተሉትን ያካተተ ሙሉ የምትኬ ማህደር ያወርዳል፦ የውሂብ ጎታ፣ ቅንብሮች፣ ጥምረቶች፣ የአቅራቢ ግንኙነቶች (ማረጋገጫ መረጃዎች የሉም)፣ የAPI ቁልፍ ሜታዳታ             |
+| **የውሂብ ጎታን ከውጭ አስገባ**       | የአሁኑን ውሂብ ጎታ ለመተካት `.sqlite` ፋይል ይሰቅላል። `DISABLE_SQLITE_AUTO_BACKUP=true` ካልሆነ በስተቀር፣ ከማስገባት በፊት ምትኬ በራስ-ሰር ይፈጠራል |
 
 ```bash
-# API: መረጃ ቤት ወደ ውጪ ላክ
+# API፦ የውሂብ ጎታን ወደ ውጭ ላክ
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: ሁሉንም ወደ ውጪ ላክ (ሙሉ አርሃይ)
+# API፦ ሁሉንም ወደ ውጭ ላክ (ሙሉ ማህደር)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: መረጃ ቤት ከውጪ አስገባ
+# API፦ የውሂብ ጎታን ከውጭ አስገባ
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**የማስገባት ማረጋገጫ፦** የሚገባው ፋይል ለተሟላነት (SQLite pragma check)፣ ለሚፈለጉ ጠረጴዛዎች (`provider_connections`፣ `provider_nodes`፣ `combos`፣ `api_keys`) እና ለመጠን (ከፍተኛ 100ሜባ) ይረጋገጣል።
+**የማስገባት ማረጋገጫ፦** ከውጭ የገባው ፋይል ለታማኝነት (የSQLite pragma ማረጋገጫ)፣ ለሚያስፈልጉ ሰንጠረዦች (`provider_connections`፣ `provider_nodes`፣ `combos`፣ `api_keys`) እና ለመጠን (ከፍተኛው 100MB) ይረጋገጣል።
 
 **የአጠቃቀም ሁኔታዎች፦**
 
-- OmniRoute በመሳሪያዎች መካከል ያዛውሩ
-- ለአደጋ መልሶ ማገገም ውጫዊ መጠባበቂያዎችን ይፍጠሩ
-- ቅንብሮችን በቡድን አባላት መካከል ያጋሩ (ሁሉንም ወደ ውጪ ላክ → አርሃይን ያጋሩ)
+- OmniRouteን በማሽኖች መካከል ማዛወር
+- ከአደጋ በኋላ መልሶ ለማግኘት ውጫዊ ምትኬዎችን መፍጠር
+- ቅንብሮችን በቡድን አባላት መካከል ማጋራት (ሁሉንም ወደ ውጭ ላክ → ማህደሩን አጋራ)
 
 ---
 
 ### የቅንብሮች ዳሽቦርድ
 
-የቅንብሮች ገጽ ለቀላሉ አሰሳ በ**7 ትሮች** ተደርድሯል፦
+ለቀላል አሰሳ የቅንብሮች ገጹ በ**7 ትሮች** ተደራጅቷል፦
 
-| ታብ         | ይዘት                                                                                                                                              |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **አጠቃላይ**  | የስርዓት ማከማቻ መሳሪያዎች፣ ነባሪ ባህሪ፣ የኢንድፖይንት ሰሌን (tunnel) ታይነት                                                                                           |
-| **ገጽታ**    | የገጽታ መቆጣጠሪያዎች (ብሩህ/ጨለማ/ስርዓት)፣ የጎን አሞሌ ታይነት፣ ለCloudflare/Tailscale/ngrok ሰሌን ካርዶች የፓነል መቀያየሪያዎች                                                   |
-| **AI**     | የማሰብ በጀት (passthrough / auto-strip / custom / adaptive — [THINKING_BUDGET.md](./THINKING_BUDGET.md) ይመልከቱ)፣ አጠቃላይ የስርዓት ፕሮምፕት፣ የፕሮምፕት ካሽ ስታቲስቲክስ |
-| **ደህንነት**  | የመግቢያ/የይለፍ ቃል ቅንብሮች፣ የIP መዳረሻ ቁጥጥር፣ ለ`/models` የAPI ማረጋገጫ፣ የአቅራቢ ማገድ፣ የፕሮምፕት-ኢንጀክሽን መከላከያ                                                        |
-| **ራውቲንግ**  | አጠቃላይ የራውቲንግ ስትራቴጂ (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized)፣ የዋይልድካርድ ሞዴል ቅጽል ስሞች፣ የፎልባክ ሰንሰለቶች፣ የኮምቦ ነባሪዎች       |
-| **ተጽናኝነት** | የጥያቄ ወሰፍ፣ የግንኙነት cooldown፣ የአቅራቢ breaker ውቅር፣ እና cooldown እስኪያልቅ የመጠበቅ ባህሪ                                                                       |
-| **የላቀ**    | አጠቃላይ የፕሮክሲ ውቅር (HTTP/SOCKS5)፣ በአቅራቢ ደረጃ የፕሮክሲ ተገዳዳሮች                                                                                            |
+| ትር        | ይዘቶች                                                                                                                                              |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **አጠቃላይ** | የስርዓት ማከማቻ መሣሪያዎች፣ ነባሪ ባህሪ፣ የEndpoint tunnel ታይነት                                                                                                 |
+| **ገጽታ**   | የገጽታ ገጽታ መቆጣጠሪያዎች (ብርሃን/ጨለማ/ስርዓት)፣ የጎን አሞሌ ታይነት፣ ለCloudflare/Tailscale/ngrok tunnel ካርዶች የፓነል መቀያየሪያዎች                                            |
+| **AI**    | የማሰብ በጀት (passthrough / auto-strip / custom / adaptive — [THINKING_BUDGET.md](./THINKING_BUDGET.md)ን ይመልከቱ)፣ ዓለም አቀፍ የስርዓት ጥያቄ፣ የጥያቄ መሸጎጫ ስታቲስቲክስ |
+| **ደህንነት** | የመግቢያ/የይለፍ ቃል ቅንብሮች፣ የIP መዳረሻ ቁጥጥር፣ ለ`/models` የAPI ማረጋገጫ፣ Provider ማገድ፣ የጥያቄ-ማስገቢያ ጥቃት መከላከያ                                                     |
+| **ማዘዋወር** | ዓለም አቀፍ የማዘዋወር ስልት (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized)፣ የwildcard ሞዴል ቅጽል ስሞች፣ የመጠባበቂያ ሰንሰለቶች፣ የcombo ነባሪዎች   |
+| **ጽናት**   | የጥያቄ ወረፋ፣ የግንኙነት ማቀዝቀዣ ጊዜ፣ የprovider breaker ውቅር እና ማቀዝቀዣው እስኪያልቅ ድረስ የመጠበቅ ባህሪ                                                                   |
+| **የላቀ**   | ዓለም አቀፍ የproxy ውቅር (HTTP/SOCKS5)፣ ለእያንዳንዱ provider የproxy መሻር                                                                                     |
 
-አጠቃላይ ከእንግዲህ ወዲህ ለንባብ-ብቻ የሆኑ የሎጊንግ እና የካሽ ማስታወሻዎችን አይደግምም። የዳታቤዝ ማቆያ እና
-ማሻሻያ ቅንብሮች በ`/api/settings/database` በኩል ይቀመጣሉ፤ የእጅ ካሽ ማጽዳት
-`DELETE /api/cache` ይጠቀማል። የጥያቄ እና የፕሮክሲ ሎግ ረድፍ ገደቦች በ
+አጠቃላይ ከአሁን በኋላ ለንባብ ብቻ የሆኑ የምዝግብ እና የመሸጎጫ ማስታወሻዎችን አያባዛም። የውሂብ ጎታ የማቆያ እና
+የማመቻቸት ቅንብሮች በ`/api/settings/database` በኩል እንዲቆዩ ይደረጋሉ፤ የመሸጎጫውን በእጅ ለማጽዳት
+`DELETE /api/cache` ጥቅም ላይ ይውላል። የጥያቄ እና የproxy ምዝግብ ረድፍ ገደቦች በ
 `CALL_LOGS_TABLE_MAX_ROWS` እና `PROXY_LOGS_TABLE_MAX_ROWS` ይቆጣጠራሉ።
 
 ---
 
-### ወጪዎች እና የበጀት አስተዳደር
+### የወጪ እና በጀት አስተዳደር
 
 በ**ዳሽቦርድ → ወጪዎች** በኩል ይድረሱ።
 
-| ታብ          | ዓላማ                                                                |
-| ----------- | ------------------------------------------------------------------ |
-| **በጀት**     | በእያንዳንዱ API ቁልፍ የወጪ ገደቦችን በዕለታዊ/ሳምንታዊ/ወራዊ በጀቶች እና በቅጽበታዊ ክትትል ያዘጋጁ |
-| **ዋጋ አሰጣጥ** | የሞዴል ዋጋ አሰጣጥ ግቤቶችን ይመልከቱ እና ያርትዑ — በአቅራቢ በ1K የግቤት/ውጤት ቶከኖች ወጪ      |
+| ትር          | ዓላማ                                                                           |
+| ----------- | ----------------------------------------------------------------------------- |
+| **በጀት**     | በየቀኑ/በየሳምንቱ/በየወሩ በጀቶች እና ቅጽበታዊ ክትትልን በመጠቀም ለእያንዳንዱ API key የወጪ ገደብ ያዘጋጁ       |
+| **ዋጋ አወጣጥ** | የሞዴል ዋጋ አወጣጥ ግቤቶችን ይመልከቱ እና ያርትዑ — ለእያንዳንዱ provider በ1K የግቤት/ውጤት token ያለው ወጪ |
 
 ```bash
-# API: በጀት ያዘጋጁ
+# API፦ በጀት ያዘጋጁ
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: የአሁኑን የበጀት ሁኔታ ያግኙ
+# API፦ የአሁኑን የበጀት ሁኔታ ያግኙ
 curl http://localhost:20128/api/usage/budget
 ```
 
-**የወጪ ክትትል፡** እያንዳንዱ ጥያቄ የቶከን አጠቃቀምን ይመዘግባል እና በዋጋ አሰጣጥ ሰንጠረዥ በመጠቀም ወጪን ያስላል። ክፍተቶችን በ**ዳሽቦርድ → አጠቃቀም** በአቅራቢ፣ በሞዴል እና በAPI ቁልፍ ይመልከቱ።
+**የወጪ ክትትል፦** እያንዳንዱ ጥያቄ የtoken አጠቃቀምን ይመዘግባል እና የዋጋ አወጣጥ ሰንጠረዡን በመጠቀም ወጪውን ያሰላል። በprovider፣ በሞዴል እና በAPI key የተከፋፈሉ ዝርዝሮችን በ**ዳሽቦርድ → አጠቃቀም** ውስጥ ይመልከቱ።
 
 ---
 
-### የድምጽ ቅጂ (Transcription)
+### የድምፅ ቅጂ ወደ ጽሑፍ መቀየር
 
-OmniRoute በOpenAI-ተስማሚ ኢንድፖይንት በኩል የድምጽ ቅጂን ይደግፋል፡
+OmniRoute ከOpenAI ጋር በሚጣጣም endpoint በኩል የድምፅ ቅጂን ወደ ጽሑፍ መቀየርን ይደግፋል፦
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# ምሳሌ ከcurl ጋር
+# በcurl የሚደረግ ምሳሌ
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` የተወላጅ Deepgram መስመር ነው እና የDeepgram API ቁልፍ ይፈልጋል።
-OpenRouter ብቻ ከተዋቀረ፣ `openrouter/deepgram/nova-3` ይጠቀሙ።
+`deepgram/nova-3` የDeepgram ቤተኛ መስመር ሲሆን Deepgram API key ያስፈልገዋል።
+OpenRouter ብቻ ከተዋቀረ `openrouter/deepgram/nova-3`ን ይጠቀሙ።
 
-**ንግግር-ወደ-ጽሑፍ (ትራንስክሪፕሽን)** አቅራቢዎች፡
+**ድምፅ-ወደ-ጽሑፍ (ቅጂ ወደ ጽሑፍ መቀየር)** providers፦
 
-- `openai/` (ከwhisper ጋር ተስማሚ)
+- `openai/` (ከwhisper ጋር የሚጣጣም)
 - `groq/` (Groq Whisper Turbo)
-- `deepgram/` (Nova ቤተሰብ)
+- `deepgram/` (የNova ቤተሰብ)
 - `assemblyai/`
 - `nvidia/` (Parakeet, Canary)
-- `huggingface/` (የwhisper ተለዋዋጮች)
+- `huggingface/` (የwhisper ልዩነቶች)
 - `qwen/`
 
-**ጽሑፍ-ወደ-ንግግር (`POST /v1/audio/speech`)** አቅራቢዎች፡
+**ጽሑፍ-ወደ-ድምፅ (`POST /v1/audio/speech`)** providers፦
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1152,52 +1128,51 @@ OpenRouter ብቻ ከተዋቀረ፣ `openrouter/deepgram/nova-3` ይጠቀሙ�
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-ለትራንስክሪፕሽን የሚደገፉ የድምጽ ቅርጸቶች፡ `mp3`፣ `wav`፣ `m4a`፣ `flac`፣ `ogg`፣ `webm`። የTTS ውጤት ቅርጸቶች በአቅራቢ ላይ የተመሠረቱ ናቸው (mp3, wav, opus, pcm, mulaw)።
+ድምፅን ወደ ጽሑፍ ለመቀየር የሚደገፉ የድምፅ ቅርጸቶች፦ `mp3`፣ `wav`፣ `m4a`፣ `flac`፣ `ogg`፣ `webm`። የTTS ውጤት ቅርጸቶች በprovider ላይ ይወሰናሉ (mp3, wav, opus, pcm, mulaw)።
 
 ---
 
-### የኮምቦ ሚዛን ስትራቴጂዎች
+### የCombo ማመጣጠኛ ስልቶች
 
-የእያንዳንዱን ኮምቦ ሚዛን በ**ዳሽቦርድ → ኮምቦዎች → ፍጠር/አርትዕ → ስትራቴጂ** ውቅሩ።
+ለእያንዳንዱ combo ማመጣጠንን በ**ዳሽቦርድ → Combos → ፍጠር/አርትዕ → ስልት** ውስጥ ያዋቅሩ።
 
-| ስትራቴጂ              | መግለጫ                                                       |
-| ------------------ | ---------------------------------------------------------- |
-| **Round-Robin**    | ሞዴሎችን በቅደም ተከተል ይዞራል                                       |
-| **Priority**       | ሁልጊዜ የመጀመሪያውን ሞዴል ይሞክራል፤ በስህተት ላይ ብቻ ፎልባክ ይሆናል             |
-| **Random**         | ለእያንዳንዱ ጥያቄ ከኮምቦው ውስጥ በዘፈቀደ ሞዴል ይመርጣል                      |
-| **Weighted**       | በእያንዳንዱ ሞዴል በተመደቡ ክብደቶች መሠረት በመጠኑ ያከፋፍላል                   |
-| **Least-Used**     | በቅርብ ጊዜ ውስጥ በትንሹ ጥያቄዎች ወዳለው ሞዴል ያካፍላል (የኮምቦ መለኪያዎችን ይጠቀማል) |
-| **Cost-Optimized** | ወደሚገኘው ዝቅተኛ ዋጋ ወዳለው ሞዴል ያካፍላል (የዋጋ አሰጣጥ ሰንጠረዥን ይጠቀማል)      |
+| ስልት                 | መግለጫ                                                     |
+| ------------------- | -------------------------------------------------------- |
+| **Round-Robin**     | በሞዴሎች መካከል በቅደም ተከተል ያዘዋውራል                              |
+| **ቅድሚያ**            | ሁልጊዜ የመጀመሪያውን ሞዴል ይሞክራል፤ ስህተት ሲኖር ብቻ ወደ መጠባበቂያ ይሄዳል      |
+| **በዘፈቀደ**           | ለእያንዳንዱ ጥያቄ ከcombo ውስጥ አንድ ሞዴል በዘፈቀደ ይመርጣል               |
+| **ክብደት ያለው**        | ለእያንዳንዱ ሞዴል በተመደቡት ክብደቶች መሠረት በተመጣጣኝ ሁኔታ ያዘዋውራል          |
+| **በትንሹ-ጥቅም ላይ የዋለ** | በቅርብ ጊዜ ጥቂት ጥያቄዎች ወዳሉት ሞዴል ያዘዋውራል (የcombo መለኪያዎችን ይጠቀማል) |
+| **በወጪ-የተመቻቸ**       | ወዳለው ርካሽ ሞዴል ያዘዋውራል (የዋጋ አወጣጥ ሰንጠረዡን ይጠቀማል)              |
 
-አጠቃላይ የኮምቦ ነባሪዎች በ**ዳሽቦርድ → ቅንብሮች → ራውቲንግ → የኮምቦ ነባሪዎች** ሊዘጋጁ ይችላሉ።
-የኮምቦ ዒላማ ታይምአውቶች በነባሪ የአሁኑን የጥያቄ ታይምአውት ይወርሳሉ። **የዒላማ ታይምአውት
-(ሰከንዶች)** በኮምቦ ነባሪዎች ላይ ወይም በግለሰብ ኮምቦ ላይ አጭር የዒላማ ገደብ ፈጣን ፎልባክ
-ሲነሳሳ ብቻ ይጠቀሙ።
+ዓለም አቀፍ የcombo ነባሪዎችን በ**ዳሽቦርድ → ቅንብሮች → ማዘዋወር → የCombo ነባሪዎች** ውስጥ ማዘጋጀት ይቻላል።
+የcombo ዒላማ ጊዜ ማብቂያዎች በነባሪነት የአሁኑን የጥያቄ ጊዜ ማብቂያ ይወርሳሉ። አጭር የየዒላማው ገደብ
+ፈጣን ወደ መጠባበቂያ መዛወርን ማስጀመር ሲኖርበት ብቻ፣ በcombo ነባሪዎች ወይም በግለሰብ combo ላይ **የዒላማ ጊዜ ማብቂያ
+(ሰከንዶች)**ን ይጠቀሙ።
 
-የዜሮ-ላቴንሲ ኮምቦ ማሻሻያዎች በፍላጎት የሚነሱ (opt-in) ናቸው። **ዜሮ-ላቴንሲ ማሻሻያዎችን** ተሰናክለው
-እንዲቆዩ ይተው እነዚህ የላቴንሲ ባህሪያት ከፎልባክ ዒላማዎች ጋር እንዳይወዳደሩ፣ በTTFT ታሪክ ላይ
-ተመሥርተው ዒላማዎችን እንዳይዘለሉ ወይም የፎልባክ ጥያቄዎችን እንዳይጨምቁ፤ ማንቃቱ የተዋቀረ hedging፣
-ትንበያዊ የTTFT መዝለሎች እና ቀዳሚ የፎልባክ መጨመቂያ የራውቲንግ/ጥያቄ ታማኝነትን ለዝቅተኛ የጅራት
-(tail) ላቴንሲ እንዲለውጡ ይፈቅዳል።
+ዜሮ-መዘግየት የcombo ማመቻቸቶች በምርጫ የሚነቁ ናቸው። እነዚህ የመዘግየት ባህሪያት ከመጠባበቂያ ዒላማዎች ጋር እንዳይወዳደሩ፣ በTTFT
+ታሪክ መሠረት ዒላማዎችን እንዳይዘሉ ወይም የመጠባበቂያ ጥያቄዎችን እንዳይጨምቁ፣ **ዜሮ-መዘግየት ማመቻቸቶች**ን እንደተሰናከሉ ይተዉ፤
+እሱን ማንቃት የተዋቀረ hedging፣ ትንበያዊ የTTFT መዝለሎች እና ቅድመ-እርምጃ የመጠባበቂያ መጭመቅ፣ የማዘዋወር/የጥያቄ ትክክለኛነትን
+በዝቅተኛ የጭራ መዘግየት እንዲለውጡ ያስችላቸዋል።
 
-upstream አቅራቢዎች ጥብቅ `max_tokens` / `maxOutputTokens` ገደቦች ሲጠይቁ **የማሰላሰል ቶከን ቋፈሮ** (Reasoning token buffer) ን ያሰናክሉ። ሲነቃ፣ combo routing የሚታወቅ የውጤት ገደብ (cap) ላላቸው ሞዴሎች ብቻ የማሰላሰል ሞዴል ተጨማሪ ቦታ ይጨምራል፤ ደህንነቱ የተጠበቀው የቋፈሮ እሴት ያን ገደብ ሲበልጥ ደግሞ የደንበኛውን ቶከን ገደብ ሳይለውጥ ይተዋል። የደንበኛው ገደብ ከሚታወቅ ገደብ በላይ ከሆነ፣ OmniRoute የupstream ጥያቄውን ከመላኩ በፊት ወደ ያ ገደብ ያወርደዋል።
+የላይኛ አቅራቢዎች ጥብቅ የ`max_tokens` / `maxOutputTokens` ገደቦችን ሲጠይቁ **Reasoning token buffer**ን ያሰናክሉ። ሲነቃ፣ ጥምር ማዘዋወር የሚታወቅ የውጤት ገደብ ላላቸው ሞዴሎች ብቻ ለ reasoning-model ተጨማሪ ክፍተት ይጨምራል፤ ደህንነቱ የተጠበቀው የቋት እሴት ከዚያ ገደብ በላይ ከሆነም የደንበኛውን የቶከን ገደብ ሳይቀይር ይተወዋል። የደንበኛው ገደብ አስቀድሞ ከሚታወቅ ገደብ በላይ ከሆነ፣ OmniRoute ጥያቄውን ወደ ላይኛው አቅራቢ ከመላኩ በፊት ወደዚያ ገደብ ዝቅ አድርጎ ይወስነዋል።
 
 ---
 
-### የጤና ዳሽቦርድ
+### የስርዓት ጤና ዳሽቦርድ
 
-በ **ዳሽቦርድ → ጤና** አማካኝነት ይድረሱ። ከ6 ካርዶች ጋር የቅጽበት የስርዓት ጤና አጠቃላይ እይታ፦
+በ**Dashboard → Health** በኩል ይድረሱ። 6 ካርዶች ያሉት የእውነተኛ ጊዜ የስርዓት ጤና አጠቃላይ እይታ፦
 
-| ካርድ              | የሚያሳየው                                       |
-| ---------------- | -------------------------------------------- |
-| **የስርዓት ሁኔታ**    | የስራ ጊዜ፣ ስሪት፣ የማህደረ ትውስታ አጠቃቀም፣ የውሂብ ማውጫ      |
-| **የአቅራቢ ጤና**     | የአለምአቀፍ አቅራቢ circuit breaker የሥራ ሁኔታ         |
-| **የፍጥነት ገደቦች**   | በቀሪ ጊዜ ጋር በእያንዳንዱ መለያ ያሉ ንቁ የግንኙነት ማቀዝቀዣዎች   |
-| **ንቁ ቆላፋዊዎች**    | ንቁ በሞዴል ላይ የተመሠረቱ ቆላፋዊዎች እና ጊዜያዊ ማስወገጃዎች     |
-| **የፊርማ መሸጎጫ**    | የድገም ማስወገጃ መሸጎጫ ስታቲስቲክስ (ንቁ ቁልፎች፣ የማግኘት መጠን) |
-| **የመዘግየት ቴሌሜትሪ** | በእያንዳንዱ አቅራቢ የp50/p95/p99 መዘግየት አግሬጌሽን       |
+| ካርድ              | የሚያሳየው                                             |
+| ---------------- | -------------------------------------------------- |
+| **የስርዓት ሁኔታ**    | የስራ ጊዜ፣ ስሪት፣ የማህደረ ትውስታ አጠቃቀም፣ የውሂብ ማውጫ            |
+| **የአቅራቢ ጤና**     | የአለም አቀፍ አቅራቢ circuit breaker የአሂድ ጊዜ ሁኔታ          |
+| **የፍጥነት ገደቦች**   | በእያንዳንዱ መለያ ላይ ያሉ ንቁ የግንኙነት የማቀዝቀዣ ጊዜዎችና ቀሪ ጊዜ     |
+| **ንቁ እገዳዎች**     | ንቁ በሞዴል የተወሰኑ እገዳዎችና ጊዜያዊ ማግለሎች                    |
+| **የፊርማ መሸጎጫ**    | የድግግሞሽ ማስወገጃ መሸጎጫ ስታቲስቲክስ (ንቁ ቁልፎች፣ የተገኙ ውጤቶች መጠን) |
+| **የመዘግየት ቴሌሜትሪ** | በእያንዳንዱ አቅራቢ የp50/p95/p99 መዘግየት ድምር                |
 
-**ልዩ ምክር፦** የጤና ገጹ በየ10 ሰከንዱ ራስ-ሰር ይታደሳል። የትኞቹ አቅራቢዎች ችግር እያጋጠማቸው እንደሆነ ለመለየት የcircuit breaker ካርዱን ይጠቀሙ።
+**የባለሙያ ምክር፦** የHealth ገጽ በየ10 ሰከንዱ በራስ-ሰር ይታደሳል። ችግር እያጋጠማቸው ያሉትን አቅራቢዎች ለመለየት የcircuit breaker ካርዱን ይጠቀሙ።
 
 ---
 

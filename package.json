@@ -320,7 +320,9 @@
     "i18n:check-keys:cli": "node scripts/i18n/check-key-completeness.mjs --catalog=cli",
     "check:free-catalog-evidence": "node scripts/check/check-free-catalog-evidence.mjs",
     "check:ui-kit-snapshot": "node scripts/check/check-ui-kit-snapshot.mjs",
-    "gen:icon-map": "node scripts/dev/gen-icon-map.mjs"
+    "gen:icon-map": "node scripts/dev/gen-icon-map.mjs",
+    "docs:readme-hero": "node scripts/docs/gen-readme-hero.mjs",
+    "docs:readme-diagrams": "node --import tsx/esm scripts/docs/gen-readme-diagrams.mjs"
   },
   "dependencies": {
     "@agentclientprotocol/sdk": "1.4.0",
@@ -489,6 +491,7 @@
     "prettier": "^3.9.6",
     "promptfoo": "0.123.0",
     "size-limit": "^14.1.0",
+    "subset-font": "^2.9.0",
     "tailwindcss": "^4.3.0",
     "type-coverage": "^2.30.1",
     "typescript": "^6.0.3",
@@ -545,7 +548,7 @@
     "postcss": "^8.5.18",
     "ip-address": "^10.7.4",
     "axios": "^1.20.0",
-    "qs": "^6.16.0",
+    "qs": "^6.16.1",
     "uuid": "^14.0.2",
     "form-data": "^4.0.6",
     "vite": "^8.3.3",

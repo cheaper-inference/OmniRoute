@@ -4,157 +4,196 @@
 
 ---
 
-> **Status:** instrumentpanelen bygger på **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), som har
-> checkats in som arbetsytan `packages/ui-kit` (`@omniroute/ui-kit`; ögonblicksbilden från uppströmskällan är låst i
+> **Status:** instrumentpanelen är byggd på **Keak CI UI Kit** (`@keak/cheaper-inference-ui-kit`), vendord
+> som workspacet `packages/ui-kit` (`@omniroute/ui-kit`; uppströmsögonblicksbilden är låst i
 > `packages/ui-kit/UPSTREAM.md` och skyddas av `npm run check:ui-kit-snapshot`). Ljust är det kanoniska
 > temat; standardinställningen är `system`. Accentfärgen är Keak-lime (`--ci-color-accent`). Inter
-> (teckenavstånd 0, `--ci-letter-spacing-ui`) är gränssnittets typsnittsfamilj, Instrument Serif används endast för stor, luftig
-> visningstext (`.ci-dashboard-display`) och IBM Plex Mono för kod — samtliga tillhandahålls lokalt via
+> (letter-spacing 0, `--ci-letter-spacing-ui`) är gränssnittets typsnittsfamilj, Instrument Serif endast för stor, gles
+> displaytext (`.ci-dashboard-display`), IBM Plex Mono för kod — alla självhostade via
 > `@fontsource/*`-importerna högst upp i `src/app/globals.css`. Varje ikon är en Lucide-glyf.
 
 ## 1. Var saker finns
 
-- **Kit.** `packages/ui-kit/src` är en bit-för-bit-kopia av upstream-katalogen `src/` vid den commit som är låst i
-  `packages/ui-kit/UPSTREAM.md` (där även licensgodkännandet dokumenteras); `PATCHES.md` listar lokala
-  patchar (inga). Det används direkt som källkod, utan något bygge: `next.config.mjs` transpilerar det, och
+- **Kit.** `packages/ui-kit/src` är en byte-för-byte-kopia av upstream-`src/` vid den commit som är pinnad i
+  `packages/ui-kit/UPSTREAM.md` (som också dokumenterar licensgodkännandet); `PATCHES.md` listar lokala
+  patchar (inga). Den används som källkod, utan byggsteg: `next.config.mjs` transpilerar den, och
   `tsconfig.json` mappar `@omniroute/ui-kit` → `packages/ui-kit/src` och `@omniroute/ui-kit/*` →
-  `packages/ui-kit/src/*` (`vitest.config.ts` och `vitest.mcp.config.ts` innehåller samma alias). Importera en
-  kitkomponent via dess undersökväg (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), aldrig
-  genom barrel-modulen `@omniroute/ui-kit`: barrel-modulen drar in alla komponenter (inklusive datumväljaren)
-  i varje importerande modul. Kitets formatmall inkluderas via `src/app/globals.css`
+  `packages/ui-kit/src/*` (`vitest.config.ts` och `vitest.mcp.config.ts` har samma alias). Importera en
+  kit-komponent via dess undersökväg (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), aldrig
+  via barrel-filen för `@omniroute/ui-kit`: barrel-filen drar in alla komponenter (inklusive datumväljaren)
+  i varje importerare. Kitets stylesheet hämtas in via `src/app/globals.css`
   (`@import "../../packages/ui-kit/src/ci-ui.css"`).
-- **Designvariabler.** `packages/ui-kit/src/ci-tokens.css` deklarerar designvariablerna `--ci-*`; `src/app/globals.css`
-  bryggar dem till de äldre OmniRoute-namnen (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
-  `--table-*`, `--orch-status-*`, `--color-fd-*`), så att befintliga läsningar av `var(--color-*)` och Tailwind-
-  verktyg fortsätter att fungera. Ny kod använder Tailwind-verktygen (`bg-surface`, `text-text-muted`,
-  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) eller kitklasser — aldrig ett hexvärde
-  (`tests/unit/design-kit-bridge.test.ts` säkerställer bryggan). `text-primary` löses till
-  `--color-primary-ink` via `--text-color-primary` (lime-800 i ljust läge, limeaccenten i mörkt läge), så att
-  primär text förblir läsbar medan `bg-primary`/`border-primary` behåller limeytan. Diagramserier använder
-  `--color-chart-1` … `--color-chart-5`.
-- **Teman.** `<html className="ci-theme">` (`src/app/layout.tsx`) ansluter dokumentet till kitets tema.
+- **Tokens.** `packages/ui-kit/src/ci-tokens.css` deklarerar `--ci-*`-tokens; `src/app/globals.css`
+  bryggar dem till OmniRoutes legacy-namn (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), så att befintliga `var(--color-*)`-uppslag och
+  Tailwind-utilities fortsätter att fungera. Ny kod använder Tailwind-utilities (`bg-surface`,
+  `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) eller kit-klasser —
+  aldrig ett hex-värde (`tests/unit/design-kit-bridge.test.ts` upprätthåller bryggan). `text-primary`
+  resolver till `--color-primary-ink` via `--text-color-primary` (lime-800 i ljust läge, lime-accenten i
+  mörkt), så att primär text förblir läsbar medan `bg-primary`/`border-primary` behåller lime-ytan.
+  Diagramserier använder `--color-chart-1` … `--color-chart-5`.
+- **Teman.** `<html className="ci-theme">` (`src/app/layout.tsx`) aktiverar kit-temat för dokumentet.
   Inställningen är `light`, `dark` eller `system` (`THEME_CONFIG.defaultTheme = "system"` i
   `src/shared/constants/appConfig.ts`; `system` följer `prefers-color-scheme`). `applyTheme()` i
-  `src/store/themeStore.ts` (speglad av det infogade uppstartsskriptet i `src/app/layout.tsx`, som körs
-  före hydrering) anger `data-theme="dark"|"light"` och växlar samtidigt klassen `.dark` på `<html>`.
-  Kitets mörka uppsättning designvariabler styrs av `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
-  OmniRoutes egna mörka åsidosättningar (`.dark`-blocket i `globals.css`) och de äldre Tailwind-verktygen
-  `dark:` styrs av klassen `.dark`. Det finns inga förinställningar för accentfärger: accenten kommer alltid
-  från kitet, och en sparad förinställning från ett äldre bygge tas bort när lagringen läses in.
+  `src/store/themeStore.ts` (speglad av bootstrap-skriptet inline i `src/app/layout.tsx`, som körs före
+  hydrering) sätter `data-theme="dark"|"light"` och växlar `.dark`-klassen på `<html>` tillsammans.
+  Kitets mörka token-uppsättning är nycklad på `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`);
+  OmniRoutes egna mörka överstyrningar (`.dark`-blocket i `globals.css`) och de äldre
+  Tailwind-`dark:`-utilities är nycklade på `.dark`-klassen. Det finns inga förinställda accentfärger:
+  accenten kommer alltid från kitet, och ett sparat förval från ett äldre bygge kasseras när storen laddas.
 - **Komponenter (adaptrar).** `src/shared/components/index.tsx` behåller OmniRoutes komponent-API (samma
-  namn, standardexporter och props), och primitiverna bakom det är adaptrar ovanpå kitet: formulär
-  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), överlägg och återkoppling
+  namn, default-exporter och props), och primitiverna bakom är adaptrar över kitet: formulär
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), överlägg och feedback
   (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
   struktur (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) och tabeller
-  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). En adapter importerar kitkomponenten
-  via undersökvägen och mappar äldre props till den — exempelvis är `Button variant="primary"` kitets
-  `default`-knapp (`--ci-button-primary-*`: den inverterade ytan i ljust läge, accenten med dess
-  `--ci-color-accent-foreground`-textfärg i mörkt läge), `danger` är `destructive`, och `warning` är `outline` plus
-  tillägget `.ci-button--warning`. Reglerna `.ci-button--warning` och `.ci-badge[data-tone]` i slutet av
-  `globals.css` (`@layer components`) är OmniRoute-tillägg ovanpå kitklasserna.
-  `tests/unit/ui/adapters/*.test.tsx` låser beteendet för varje adapter.
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). En adapter importerar
+  kit-komponenten via undersökväg och mappar de gamla propsen till den — till exempel är
+  `Button variant="primary"` kitets `default`-knapp (`--ci-button-primary-*`: den inverterade ytan i ljust
+  läge, accenten med sitt `--ci-color-accent-foreground`-bläck i mörkt), `danger` är `destructive`, och
+  `warning` är `outline` plus `.ci-button--warning`-utökningen. Reglerna `.ci-button--warning` och
+  `.ci-badge[data-tone]` i slutet av `globals.css` (`@layer components`) är OmniRoute-utökningar ovanpå
+  kit-klasserna. `tests/unit/ui/adapters/*.test.tsx` fäster varje adapter.
 - **Skal.** `src/app/(dashboard)/layout.tsx` renderar `DashboardLayout`, som renderar
   `src/shared/components/layouts/DashboardShell.tsx`: kitets `SidebarProvider` / `Sidebar` /
   `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`), med OmniRoutes navigeringslogik i
-  `src/shared/components/Sidebar.tsx`. En länk med texten "hoppa till innehållet" till `#main-content` är det
-  första fokuserbara elementet. `src/shared/components/Header.tsx` innehåller kitets `SidebarTrigger` (skalets
-  enda reglage för sidofältet), Keaks `ProductSwitcher` och knappen som öppnar kommandopaletten; den visar
-  endast ruttens titel när ingen `PageHeader` från kitet (`.ci-page-header`) är monterad inuti `#main-content`,
-  så att en sida med en egen `PageHeader` har ett enda `h1`. `src/shared/components/CommandPalette.tsx` är
-  en `Dialog` från kitet.
-- **Ikoner.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) översätter namnet (den
-  Material Symbols-vokabulär som vyerna använder) via `ICON_MAP` (`src/shared/constants/iconMap.ts`) till en
-  Lucide-symbol. Material Symbols-teckensnittet och paketet har tagits bort: ett namn som saknas i mappningen
-  renderar en neutral platshållarsymbol (`data-icon-missing="true"`) och loggar en varning i konsolen utanför
-  produktion. `npm run gen:icon-map` skriver ut de namn som används men saknas i mappningen
-  (`tests/unit/icon-map-coverage.test.ts` misslyckas för varje namn som saknar en Lucide-ikon;
+  `src/shared/components/Sidebar.tsx`. En "skip to content"-länk till `#main-content` är det första
+  fokuserbara elementet. `src/shared/components/Header.tsx` innehåller kitets `SidebarTrigger` (skalets
+  enda sidofältsväxlare), Keaks `ProductSwitcher` och kommandopalettöppnaren; den visar rutttiteln bara så
+  länge ingen kit-`PageHeader` (`.ci-page-header`) är monterad inuti `#main-content`, så att en sida med
+  sin egen `PageHeader` har en enda `h1`. `src/shared/components/CommandPalette.tsx` är en kit-`Dialog`.
+- **Ikoner.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) resolver namnet (det
+  Material Symbols-ordförråd som skärmarna använder) via `ICON_MAP` (`src/shared/constants/iconMap.ts`)
+  till en Lucide-glyf. Material Symbols-fonten och -paketet är borta: ett namn som saknas i mappningen
+  renderar en neutral platshållarglyf (`data-icon-missing="true"`) och loggar en konsolvarning utanför
+  produktion. `npm run gen:icon-map` skriver ut namn som används men saknas i mappningen
+  (`tests/unit/icon-map-coverage.test.ts` misslyckas för varje namn utan en Lucide-ikon;
   `tests/unit/icon-map-object-values.test.ts` täcker namn som lagras i uppslagsobjekt);
-  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` skriver om literala
-  `<span className="material-symbols-outlined">`-element till `<Icon>`.
-- **Varumärke.** `src/shared/components/OmniRouteLogo.tsx` kapslar in kitet: standardexporten `OmniRouteLogo`
-  renderar `ProductIcon product="omniroute" variant="glyph"` (infogad SVG, säker för `basePath`) och
-  `OmniRouteLockup` renderar `ProductLockup product="omniroute"` (tillgängligt namn "Keak OmniRoute") eller,
-  för operatörer med eget varumärke, deras egna `name`/`logoSrc`. Produktväljarens destinationer finns i
-  `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). De fristående
-  vyerna — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`,
-  `src/app/offline/page.tsx`, `src/app/not-found.tsx` och `src/shared/components/ErrorPageScaffold.tsx`
-  — visar logotypkombinationen; `tests/unit/brand-pages-static.test.ts` säkerställer detta.
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` skriver om bokstavliga
+  `<span className="material-symbols-outlined">`-spans till `<Icon>`.
+- **Varumärke.** `src/shared/components/OmniRouteLogo.tsx` omsluter kitet: default-exporten
+  `OmniRouteLogo` renderar `ProductIcon product="omniroute" variant="glyph"` (inline-SVG,
+  `basePath`-säker) och `OmniRouteLockup` renderar `ProductLockup product="omniroute"` (tillgängligt namn
+  "Keak OmniRoute") eller, för white-label-operatörer, deras egna `name`/`logoSrc`. Produktväxlarens
+  destinationer finns i `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`,
+  `KEAK_ACTIVE_PRODUCT`). De fristående skärmarna — `src/app/login/page.tsx`, `src/app/status/page.tsx`,
+  `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` och
+  `src/shared/components/ErrorPageScaffold.tsx` — visar lockupen; `tests/unit/brand-pages-static.test.ts`
+  bevakar den.
 
 ## 2. Regler
 
 1. Tokens, aldrig literaler. Undantagen är avsiktliga: den alltid mörka konsolterminalen och
-   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), den hex-upplösta spegeln av kitets
-   statuspalett för anropare som behöver en hex-literal. De kategoriska paletterna är inte längre
-   något undantag: de vilar på kitets fem diagram-tokens (`--color-chart-1..5`) via
-   `src/shared/utils/categoricalPalette.ts` och, för routningsstrategier,
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-kanter och
-   orkestreringscanvasen läser de temaanpassade variablerna `--orch-status-*`
-   (`src/shared/components/flow/edgeStyles.ts`).
-2. Patcha aldrig `packages/ui-kit/src` för hand: synkronisera med `scripts/dev/sync-ui-kit.sh <commit>`;
-   pre-commit-spärren `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) misslyckas på varje byte
-   som skiljer sig från den fastnålade upstream-commiten (den hoppar över kontrollen med en varning
-   när upstream-klonen, `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, saknas). När
-   kitet saknar något, arbeta runt det i adaptern eller skärmen och be upstream om det.
-3. Kitets standardtexter är engelska (`label = "Loading"`, `loadingLabel = "Loading table"`…) — skicka
-   översatta strängar från `useTranslations(...)` närhelst en kit-komponent renderar text.
-4. Tailwind-utilities vinner över kit-komponentklasser (kitet deklarerar
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), spegeln av kitets statuspalett med upplösta
+   hex-värden för anropare som behöver en hex-literal. De kategoriska paletterna är inte längre något
+   undantag: de vilar på kitets fem diagramtokens (`--color-chart-1..5`) via
+   `src/shared/utils/categoricalPalette.ts` och, för routingstrategier,
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow-kanter och orkestreringsytan
+   läser de temaanpassade variablerna `--orch-status-*` (`src/shared/components/flow/edgeStyles.ts`).
+2. Patcha aldrig `packages/ui-kit/src` för hand: synka med `scripts/dev/sync-ui-kit.sh <commit>`;
+   pre-commit-spärren `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) misslyckas vid varje byte
+   som skiljer sig från den fastnålade uppströmscommitten (den hoppar över med en varning när
+   uppströmsklonen, `UI_KIT_CLONE` eller `_references/cheaper-inference-ui-kit`, saknas). När kitet
+   saknar något, lös det i adaptern eller skärmen och be uppströms om det.
+3. Kitets standardtexter är på engelska (`label = "Loading"`, `loadingLabel = "Loading table"`…) —
+   skicka översatta strängar från `useTranslations(...)` närhelst en kitkomponent renderar text.
+4. Tailwind-utilities vinner över kitets komponentklasser (kitet deklarerar
    `@layer theme, base, components, utilities` och dess regler ligger i `components`) — använd
-   utilities för avstånd och layout, inte för att omfärga kit-komponenter.
-5. Rubriker: `.ci-heading` (Inter, ingen tracking) för sid- och sektionsrubriker;
-   `.ci-dashboard-display` (Instrument Serif) endast för stor, gles displaytext som felsidans
+   utilities för avstånd och layout, inte för att omfärga kitkomponenter.
+5. Rubriker: `.ci-heading` (Inter, utan tracking) för sid- och sektionstitlar;
+   `.ci-dashboard-display` (Instrument Serif) endast för stor, gles visningstext som felsidans
    statuskod.
-6. `tests/unit/dashboard-kit-sweep.test.ts` vaktar kit-införandet: inga spans med Material-ligaturer
-   under `src/app` eller `src/shared/components`; i dashboard-trädet (`src/app/(dashboard)` och
-   `src/shared/components`) inga råa `<select>`, `<textarea>` eller `<table>` och inga handbyggda
-   `role="dialog"` utanför de listade undantagen (`Select`-adapterns nativa gren,
-   `RequestLoggerDetail`); varje rå `<button>` eller `<input>` där behöver en kommentar som innehåller
-   `kit-exception:` (med anledningen) och som slutar högst 3 rader ovanför den; palettnyanser och
-   `dark:`-varianter endast i de filer som testet listar.
-7. Verifiera båda temana och 390 px-viewporten före en PR (skärmdumpar); `tests/e2e/a11y.spec.ts` kör
-   axe.
+6. `tests/unit/dashboard-kit-sweep.test.ts` bevakar kitadoptionen: inga span-element med
+   Material-ligaturer under `src/app` eller `src/shared/components`; i dashboardträdet
+   (`src/app/(dashboard)` och `src/shared/components`) inga råa `<select>`, `<textarea>` eller
+   `<table>` och inga handgjorda `role="dialog"` utanför de listade undantagen (`Select`-adapterns
+   nativa gren, `RequestLoggerDetail`); varje rå `<button>` eller `<input>` där behöver en kommentar
+   som innehåller `kit-exception:` (med motiveringen) och som slutar högst 3 rader ovanför;
+   palettnyanser och `dark:`-varianter endast i de filer som testet listar.
+7. Verifiera båda temana och viewporten på 390 px före en PR (skärmdumpar); `tests/e2e/a11y.spec.ts`
+   kör axe.
 
-## 3. Lägga till en vy
+## 3. Lägga till en skärm
 
-1. Inled sidan med komponentbibliotekets `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` inuti
-   dashboarden) — titel, beskrivning och `actions`. Skalets sidhuvud utelämnar då sin egen titel.
-2. Bygg kontroller från `@/shared/components` (adaptrarna) och använd komponenter från biblioteket via underordnad sökväg där ingen
-   adapter finns (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
-   `Slider`…).
-3. Ikoner: `<Icon name="…" />`. Ett nytt namn läggs till i `ICON_MAP` med den semantiskt motsvarande Lucide-
-   komponenten; `npm run gen:icon-map` visar vilka namn som fortfarande saknas.
-4. Färger: semantiska verktygsklasser (`text-success`, `bg-warning-bg`, `border-border`…) och
-   `var(--color-chart-N)` för diagramserier; inga hexvärden och inga `dark:`-varianter som bara upprepar en färg.
-5. Text: varje sträng, inklusive etiketterna som skickas till komponenter från biblioteket, kommer från `useTranslations`. Nya
-   nycklar läggs till i `src/i18n/messages/en.json`, `pt-BR.json` och `vi.json` (paritetstestet för vietnamesiska kräver
-   varje engelsk nyckel); de övriga språken fylls i av i18n-synkroniseringen.
-6. Kör kontrollerna före en PR: `tests/unit/dashboard-kit-sweep.test.ts`,
+1. Öppna sidan med kitets `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` i dashboarden) —
+   titel, beskrivning och `actions`. Shell-headern släpper då sin egen titel.
+2. Bygg kontroller från `@/shared/components` (adaptrarna) och använd kitkomponenter via delsökväg där
+   ingen adapter finns (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`,
+   `RadioGroup`, `Slider`…).
+3. Ikoner: `<Icon name="…" />`. Ett nytt namn läggs in i `ICON_MAP` med den semantiskt matchande
+   Lucide-komponenten; `npm run gen:icon-map` listar de namn som fortfarande saknas.
+4. Färger: semantiska utilities (`text-success`, `bg-warning-bg`, `border-border`…) och
+   `var(--color-chart-N)` för diagramserier; inga hex-värden och inga `dark:`-varianter som bara
+   upprepar en färg.
+5. Text: varje sträng, inklusive etiketterna du skickar till kitkomponenter, kommer från
+   `useTranslations`. Nya nycklar läggs i `src/i18n/messages/en.json`, `pt-BR.json` och `vi.json` (det
+   vietnamesiska paritetstestet fastnålar varje engelsk nyckel); de övriga språkversionerna fylls i av
+   i18n-synkningen.
+6. Kör kontrollerna före PR:en: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
-   `npm run check:dashboard-typecheck` (den enda kontrollen som upptäcker en duplicerad import i `iconMap.ts`),
-   `npm run check:ui-icu` samt vyns egna tester.
+   `npm run check:dashboard-typecheck` (den enda kontrollen som fångar en duplicerad import i
+   `iconMap.ts`), `npm run check:ui-icu` och skärmens egna tester.
 
 ## 4. Lägga till eller ändra en adapter
 
-1. Behåll det publika API:t för `src/shared/components/index.tsx`: samma exportnamn, standardexporter och
-   accepterade props. Mappa äldre props till kitet inuti adaptern (se `Button.tsx`: `VARIANT_TO_KIT`,
+1. Behåll det publika API:t för `src/shared/components/index.tsx`: samma exportnamn, default-exporter och
+   accepterade props. Mappa legacy-props på kitet inne i adaptern (se `Button.tsx`: `VARIANT_TO_KIT`,
    `SIZE_TO_KIT`).
-2. Importera kitet via undersökvägen (`@omniroute/ui-kit/<component>`).
-3. Tillfälliga lösningar för luckor i kitet ska finnas i adaptern (eller i `globals.css` `@layer components` när korrigeringen är en
-   stil), aldrig i `packages/ui-kit/src`.
-4. Lägg till eller uppdatera `tests/unit/ui/adapters/<name>.test.tsx`. För en adapter med många anropare ska du jämföra
-   renderad markup före och efter ändringen — ändringar av utfyllnad eller omslutande element sprids till alla vyer.
+2. Importera kitet via undersökväg (`@omniroute/ui-kit/<component>`).
+3. Tillfälliga lösningar för luckor i kitet ligger i adaptern (eller i `globals.css` `@layer components` när
+   fixen är en stil), aldrig i `packages/ui-kit/src`.
+4. Lägg till eller uppdatera `tests/unit/ui/adapters/<name>.test.tsx`. För en adapter med många anropare —
+   jämför den renderade markupen före och efter ändringen; ändringar i padding eller wrappers sprider sig till
+   varje skärm.
 
 ## 5. Uppdatera kitet
 
-`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopierar uppströmsversionens `src/` vid denna commit till
-`packages/ui-kit/src` och tillämpar den enda tillåtna transformeringen (den tar bort suffixet `.js` från
-relativa importer). Därefter: granska `git diff packages/ui-kit`, gör en visuell kontroll av providers, inställningar, kombinationer,
-användning och endpoint i båda temana, kör `npm run check:ui-kit-snapshot` och `npm run test:vitest:ui`, och
-öppna PR:en med uppströmsversionens ändringslogg.
+`scripts/dev/sync-ui-kit.sh <commit> [clone]` kopierar uppströms-`src/` vid den commiten till
+`packages/ui-kit/src` och tillämpar den enda tillåtna transformationen (den tar bort `.js`-ändelsen från
+relativa importer). Sedan: granska `git diff packages/ui-kit`, gör en visuell genomgång av providers,
+settings, combos, usage och endpoint i båda temana, kör `npm run check:ui-kit-snapshot` och
+`npm run test:vitest:ui`, och öppna PR:en med uppströms ändringslogg.
 
-## 6. Referensindex
+## 6. README-diagram
 
-- `src/app/globals.css` — tokenbrygga, `.dark`-åsidosättningar, OmniRoute-tillägg i `@layer components`
-- `packages/ui-kit/UPSTREAM.md` — fixerad uppströms-commit och licensgodkännande; `packages/ui-kit/PATCHES.md`
+De tolv diagram som rot-`README.md` bäddar in (`docs/diagrams/*.svg`) är kitet applicerat på en statisk
+bild, och de genereras, inte ritas för hand: 13 generatorfiler under `scripts/docs/gen-readme-*.mjs`
+(tolv diagram plus drivrutinen `gen-readme-diagrams.mjs`) och 12 staleness-tester under
+`tests/unit/docs/readme-*-svg.test.ts`, ett per diagram, som var och en bytejämför den committade filen med
+dess generators utdata (jobbet `test-unit`).
+
+- **Tokens.** `scripts/docs/readme-diagram-theme.mjs` kopierar paletten från `packages/ui-kit/src/ci-tokens.css`
+  (låst mot den filen av `tests/unit/docs/readme-diagram-theme.test.ts`) och definierar textrollerna på kitets
+  typsnitt — Instrument Serif för display, Inter för UI-text, IBM Plex Mono för siffror och kod, samma
+  `@fontsource`-paket som `src/app/globals.css` laddar för dashboarden. Ljusa värden ligger på `:root`, mörka
+  värden bakom `prefers-color-scheme: dark`, inne i filen, så att varje bild följer betraktarens schema på
+  GitHub.
+- **Typsnitt.** `scripts/docs/readme-fonts.mjs` skapar delmängder av dessa woff2-filer med de glyfer varje
+  diagram ritar och bäddar in dem som `@font-face` `data:`-URI:er — det enda sättet kitets typografi når en
+  README-bild, eftersom GitHub Markdown inte medför någon CSS och camo-proxyn blockerar all extern hämtning.
+  Delmängderna är enbart latin; symbolglyferna som faller tillbaka på systemstacken tillåts en och en i
+  `SYMBOL_FALLBACKS`, och varje annan otäckt glyf kastar ett fel.
+- **Generera om.** `npm run docs:readme-diagrams` skriver om alla tolv i README-ordning och skriver ut en rad
+  per fil med dess storlek. En enskild generator kan också köras separat
+  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` behöver `node --import tsx/esm` eftersom dess
+  siffror kommer från den levande katalogladdaren i `open-sse/config/freeModelCatalog.ts`; CI-konsekvensen av
+  en katalogändring finns i `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Committa generatorn
+  och SVG:n tillsammans.
+- **Verifiering.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` renderar en fil så som GitHub
+  serverar den (en `<img>`-tagg, camos `Content-Security-Policy`, `image/svg+xml`), fångar en ljus och en mörk
+  bildruta och rapporterar de externa typsnittsförfrågningar sidan gjorde (måste vara 0).
+- **Budget.** Under 200 KB per fil (varje staleness-test påstår det); 500 KB är det hårda taket för varje
+  README-bild (SVG-studiovaliderarens regel).
+- **Oförändrad text, siffror från gate-kontrollen.** Rebrandingen ändrade typsnitt och palett, inte ord: varje
+  generator bär sitt diagrams text i en `*_COPY`-konstant (eller bygger den från den levande katalogen) som är
+  både den ritade texten och indatan för typsnittsdelmängden. Kanoniska siffror stannar i `<text>`-noder,
+  lästa av `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); staleness-testerna för de diagram
+  som gaten läser kör också dess validerare på den genererade filen, så att en siffra som driver iväg från
+  koden fäller testet — åtgärda källan som gaten läser, aldrig siffran i generatorn.
+
+## 7. Referensindex
+
+- `src/app/globals.css` — tokenbrygga, `.dark`-åsidosättningar, OmniRoute-utökningar för `@layer components`
+- `packages/ui-kit/UPSTREAM.md` — fastnålad upstream-commit och licensgodkännande; `packages/ui-kit/PATCHES.md`
 - `packages/ui-kit/src/ci-tokens.css`, `packages/ui-kit/src/ci-ui.css`, `packages/ui-kit/src/keak-brand.tsx`
 - `src/shared/components/index.tsx` och adaptrarna bredvid den; `src/shared/components/layouts/DashboardShell.tsx`,
   `src/shared/components/Sidebar.tsx`, `src/shared/components/Header.tsx`, `src/shared/components/CommandPalette.tsx`

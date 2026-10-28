@@ -71,7 +71,7 @@
 
 |                                    |          v3.8.50           | **v3.8.51** |      `v3.8.53+`       |
 | ---------------------------------- | :------------------------: | :---------: | :-------------------: |
-| 🌐 Teenusepakkujad                 |            352             |   **358**   |          375          |
+| 🌐 Teenusepakkujad                 |            352             |   **358**   |          376          |
 | 🧠 Unikaalsed vestlusmudelite ID-d |            1320            |  **1374**   |         1475          |
 | 🖼️ Modaliteetide sild              | 🆕 nägemine + heli + video |      ✓      |           ✓           |
 | 📡 Radari tasuta kataloog          |         🆕 opt-in          |      ✓      |           ✓           |

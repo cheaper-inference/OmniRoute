@@ -71,7 +71,7 @@
 
 |                                  |         v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | -------------------------------- | :----------------------: | :---------: | :-------------------: |
-| 🌐 Masu samarwa                  |           352            |   **358**   |          375          |
+| 🌐 Masu samarwa                  |           352            |   **358**   |          376          |
 | 🧠 Keɓaɓɓun ID na samfuran hira  |           1320           |  **1374**   |         1475          |
 | 🖼️ Modality Bridge               | 🆕 gani + sauti + bidiyo |      ✓      |           ✓           |
 | 📡 Katalogin kyauta na Radar     |        🆕 ta zaɓi        |      ✓      |           ✓           |

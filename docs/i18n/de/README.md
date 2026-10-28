@@ -71,7 +71,7 @@
 
 |                               |          v3.8.50          | **v3.8.51** |      `v3.8.53+`       |
 | ----------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Anbieter                   |            352            |   **358**   |          375          |
+| 🌐 Anbieter                   |            352            |   **358**   |          376          |
 | 🧠 Eindeutige Chat-Modell-IDs |           1320            |  **1374**   |         1475          |
 | 🖼️ Modality Bridge            | 🆕 vision + audio + video |      ✓      |           ✓           |
 | 📡 Radar-Katalog (kostenlos)  |         🆕 Opt-in         |      ✓      |           ✓           |

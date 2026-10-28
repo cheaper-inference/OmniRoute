@@ -612,25 +612,25 @@ Pełną dokumentację zmiennych środowiskowych można znaleźć w pliku [README
 <details>
 <summary><b>Zobacz wszystkie dostępne modele</b></summary>
 
-> Poniższa lista została opracowana na podstawie `open-sse/config/providerRegistry.ts` dla v3.8.0. Katalogi chmurowe (Gemini, OpenRouter itp.) są synchronizowane dynamicznie — pełny aktualny katalog znajdziesz w **Panel → Dostawcy → [dostawca] → Dostępne modele** lub wywołując `GET /api/models/catalog`.
+> Poniższa lista została opracowana na podstawie `open-sse/config/providerRegistry.ts` dla wersji v3.8.0. Katalogi chmurowe (Gemini, OpenRouter itp.) są synchronizowane dynamicznie — pełny aktualny katalog znajdziesz w **Panel → Dostawcy → [dostawca] → Dostępne modele** lub wywołując `GET /api/models/catalog`.
 >
-> Jeśli wbudowana lista danego dostawcy się zdezaktualizowała, użyj opcji **Importuj z /models** na tej stronie (lub włącz **Automatyczną synchronizację**), aby pobrać aktualny katalog nadrzędny. Zostało to zweryfikowane w v3.8.50 dla LLM7.io (`gemini-3.1-flash-lite`) i UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonimowy dostęp do Pollinations pozostawał ograniczony po stronie nadrzędnej podczas tej samej serii testów.
+> Jeśli wbudowana lista dostawcy się zdezaktualizowała, użyj opcji **Importuj z /models** na tej stronie (lub włącz **Autosynchronizację**), aby pobrać aktualny katalog z upstreamu. Zostało to zweryfikowane w wersji v3.8.50 dla LLM7.io (`gemini-3.1-flash-lite`) oraz UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonimowy dostęp do Pollinations pozostał ograniczony po stronie upstream podczas tej samej rundy testów.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ poziomy effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth Plus/Pro: `cx/gpt-5.5` (+ poziomy effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — DARMOWY OAuth: skorzystaj z katalogu na żywo widocznego w **Panel → Dostawcy → Kiro → Dostępne modele**. Dostępność zależy od konta i planu.
+**Kiro (`kr/`)** — BEZPŁATNY OAuth: korzystaj z katalogu na żywo widocznego w **Panel → Dostawcy → Kiro → Dostępne modele**. Dostępność zależy od konta i planu.
 
-**Qoder (`if/`)** — DARMOWY OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — BEZPŁATNY OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mies. ryczałt lub płatność za użycie: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mies. ryczałtem lub według użycia: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — klucz API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -642,25 +642,25 @@ Pełną dokumentację zmiennych środowiskowych można znaleźć w pliku [README
 
 **Perplexity (`pplx/`)** — wspomagany wyszukiwaniem: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (darmowy), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bezpłatny), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — szybka inferencja: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — skala wafera: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — nastawiony na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — dla przedsiębiorstw: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — klasa enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: synchronizowane na żywo dla każdego klucza API z Google — brak statycznej listy. Podłącz klucz w **Panel → Dostawcy**, a następnie użyj **Dostępne modele**, aby zaimportować aktualny katalog (np. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: synchronizowane na żywo dla każdego klucza API z Google — brak statycznej listy. Podłącz klucz w **Panel → Dostawcy**, a następnie użyj opcji **Dostępne modele**, aby zaimportować aktualny katalog (np. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Inni kompatybilni dostawcy** (wybrani): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (przez `aws-bedrock`), `azure-ai`, `openrouter` (katalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Każdy z nich utrzymuje własną listę modeli w `providerRegistry.ts` i może być synchronizowany automatycznie, gdy dostawca udostępnia endpoint `/models`.
+**Inni kompatybilni dostawcy** (wybrani): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (przez `aws-bedrock`), `azure-ai`, `openrouter` (katalog przekazywany), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Każdy z nich utrzymuje własną listę modeli w `providerRegistry.ts` i może być synchronizowany automatycznie, gdy dostawca udostępnia endpoint `/models`.
 
-**Uwaga dotycząca identyfikatorów modeli:** OmniRoute używa natywnych identyfikatorów dostawców (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Niektóre identyfikatory zawierają wersje zapisywane z kropkami, ponieważ takiego formatu oczekuje nadrzędne API. Jeśli modelu nie ma na powyższej liście, uruchom `omniroute models --search <term>` lub wywołaj `GET /api/models/catalog`, aby potwierdzić dostępność.
+**Uwaga dotycząca identyfikatorów modeli:** OmniRoute używa natywnych identyfikatorów dostawców (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Niektóre identyfikatory zawierają wersje zapisywane z kropkami, ponieważ właśnie takiego formatu oczekuje nadrzędne API. Jeśli modelu nie ma na powyższej liście, uruchom `omniroute models --search <term>` lub wywołaj `GET /api/models/catalog`, aby potwierdzić dostępność.
 
 </details>
 
@@ -670,10 +670,10 @@ Pełną dokumentację zmiennych środowiskowych można znaleźć w pliku [README
 
 ### Modele niestandardowe
 
-Dodaj dowolny identyfikator modelu do dowolnego dostawcy bez czekania na aktualizację aplikacji:
+Dodaj dowolny identyfikator modelu do dowolnego dostawcy bez oczekiwania na aktualizację aplikacji:
 
 ```bash
-# Przez API
+# Za pośrednictwem API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
@@ -686,80 +686,52 @@ Możesz też użyć panelu: **Dostawcy → [Dostawca] → Modele niestandardowe*
 
 Uwagi:
 
-- Dostawcami OpenRouter oraz dostawcami zgodnymi z OpenAI/Anthropic zarządza się wyłącznie z poziomu **Dostępne modele**. Ręczne dodawanie, import i automatyczna synchronizacja trafiają do tej samej listy dostępnych modeli, więc dla tych dostawców nie ma osobnej sekcji Modele niestandardowe.
-- Sekcja **Modele niestandardowe** jest przeznaczona dla dostawców, którzy nie udostępniają zarządzanego importu dostępnych modeli.
+- Dostawcami zgodnymi z OpenRouter oraz OpenAI/Anthropic zarządza się wyłącznie z poziomu **Dostępnych modeli**. Ręczne dodawanie, importowanie i automatyczna synchronizacja trafiają na tę samą listę dostępnych modeli, dlatego dla tych dostawców nie ma osobnej sekcji Modele niestandardowe.
+- Sekcja **Modele niestandardowe** jest przeznaczona dla dostawców, którzy nie udostępniają zarządzanych importów dostępnych modeli.
 
 ### Niestandardowi dostawcy zgodni z OpenAI
 
-Dowolną bramę obsługującą API OpenAI (self-hostowane proxy, vLLM, zewnętrzny agregator)
+Każdą bramę obsługującą API OpenAI (samodzielnie hostowane proxy, vLLM lub agregator zewnętrzny)
 można dodać jako osobny węzeł dostawcy:
 
-1. **Dostawcy → Dodaj zgodnego z OpenAI**.
-2. **Nazwa**: etykieta wyświetlana węzła.
-3. **Prefiks**: nazwa routingu. Klienci wywołują modele jako `<prefix>/<model>`, więc węzeł z
-   prefiksem `mygw` obsługuje `mygw/gpt-4o-mini`. Wymagany; nie ma ograniczeń co do znaków.
-4. **Typ API**: rodzina endpointów obsługiwanych przez bramę (Chat Completions, Responses,
+1. **Dostawcy → Dodaj dostawcę zgodnego z OpenAI**.
+2. **Nazwa**: etykieta wyświetlana dla węzła.
+3. **Prefiks**: nazwa używana do routingu. Klienci wywołują modele jako `<prefix>/<model>`, więc węzeł z
+   prefiksem `mygw` udostępnia `mygw/gpt-4o-mini`. Pole wymagane; nie ma ograniczeń dotyczących znaków.
+4. **Typ API**: rodzina punktów końcowych obsługiwana przez bramę (Chat Completions, Responses,
    Embeddings, audio, obrazy).
-5. **Bazowy URL**: katalog główny API, włącznie z `/v1` (na przykład
-   `https://gateway.example.com/v1`), a nie pełna ścieżka `/chat/completions`. Bramy
-   z niestandardowymi ścieżkami ustawia się w **Ustawieniach zaawansowanych** (ścieżka czatu, ścieżka modeli).
-6. Pole **Klucz API (do sprawdzenia)** służy wyłącznie do testowania połączenia. Po utworzeniu węzła
-   otwórz go i użyj **Dodaj połączenie**, aby zapisać klucz, którego będą używać żądania.
+5. **Bazowy URL**: główny adres API, do `/v1` włącznie (na przykład
+   `https://gateway.example.com/v1`), a nie pełna ścieżka `/chat/completions`. Bramy z
+   niestandardowymi ścieżkami konfigurują je w sekcji **Ustawienia zaawansowane** (ścieżka czatu, ścieżka modeli).
+6. Pole **Klucz API (do sprawdzenia)** służy tylko do testowania połączenia. Po utworzeniu węzła
+   otwórz go i użyj opcji **Dodaj połączenie**, aby zapisać klucz używany przez żądania.
 
-Węzeł otrzymuje wewnętrzny identyfikator w postaci `openai-compatible-<apiType>-<uuid>`; nigdy
-nie musisz go wpisywać — prefiks jest nazwą publiczną.
+Węzeł otrzymuje wewnętrzny identyfikator w formacie `openai-compatible-<apiType>-<uuid>`; nigdy nie
+musisz go wpisywać, ponieważ nazwą publiczną jest prefiks.
 
-#### Zastrzeżone prefiksy
+#### Zarezerwowane prefiksy
 
-Prefiks nie może być identyfikatorem ani aliasem wbudowanego dostawcy (na przykład `openai`, `cf`),
-ani identyfikatorem wycofanego dostawcy. Mechanizm rozwiązywania modeli sprawdza wbudowane
-identyfikatory i aliasy przed węzłami niestandardowymi, więc węzeł używający jednego z tych prefiksów
-nigdy nie otrzymałby ruchu: `<prefix>/model` trafiłby zamiast tego do wbudowanego dostawcy albo
-zostałby odrzucony (fail closed), gdyby ten dostawca został wycofany. Utworzenie lub edycja węzła
-z takim prefiksem jest odrzucana z komunikatem:
+Prefiks nie może być identyfikatorem ani aliasem wbudowanego dostawcy (na przykład `openai`, `cf`) ani
+identyfikatorem wycofanego dostawcy. Mechanizm rozpoznawania modeli sprawdza identyfikatory i aliasy wbudowanych dostawców przed
+węzłami niestandardowymi, dlatego węzeł używający jednego z tych prefiksów nigdy nie otrzymałby ruchu:
+`<prefix>/model` zostałby skierowany do wbudowanego dostawcy albo odrzucony, jeśli ten dostawca
+został wycofany. Próba utworzenia lub edycji węzła z takim prefiksem jest odrzucana z komunikatem:
 
 ```text
-prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+prefix: "<prefix>" jest zarezerwowanym prefiksem dostawcy — wybierz inny prefiks (zarezerwowanych identyfikatorów/aliasów nie można używać dla węzłów niestandardowych, ponieważ żądania takie jak <prefix>/model są kierowane do wbudowanego dostawcy lub odrzucane, gdy dostawca został wycofany)
 ```
 
 Wybierz unikalny prefiks (`mygw`, `acme-proxy`). Jeśli żądania do niestandardowego węzła kończą się
-błędem, który wskazuje wbudowanego dostawcę lub jego dane uwierzytelniające, sprawdź, czy prefiks
-węzła nie jest zastrzeżony: węzły zapisane przed wprowadzeniem tej reguły są nadal przechowywane,
-ale ich prefiks kieruje ruch do wbudowanego dostawcy. Edytuj węzeł i nadaj mu nowy prefiks.
+błędem wskazującym wbudowanego dostawcę lub jego dane uwierzytelniające, sprawdź, czy prefiks węzła jest
+zarezerwowany: węzły zapisane przed wprowadzeniem tej reguły są nadal przechowywane, ale ich prefiksy kierują ruch do
+wbudowanego dostawcy. Edytuj węzeł i przypisz mu nowy prefiks.
 
-#### Opcje bramy dla poszczególnych połączeń
+### Łączenie równorzędnych instancji OmniRoute
 
-Te klucze umieszcza się w polu `providerSpecificData` połączenia (na przykład przez
-`PUT /api/providers/{id}`):
+Inną bramę OmniRoute można dodać jako **niestandardowego dostawcę zgodnego z OpenAI**. Użyj
+bazowego adresu URL `/v1` równorzędnej instancji oraz dedykowanego klucza API o minimalnych uprawnieniach, wydanego przez tę instancję.
 
-- `toolNameMaxLength` (liczba całkowita, 1–1024) — dla połączeń zgodnych z formatem czatu OpenAI,
-  których brama odrzuca długie nazwy narzędzi. Dłuższe nazwy są wysyłane jako krótkie aliasy
-  i przywracane w odpowiedzi.
-- `quotaEndpoint` — endpoint limitów/kredytów bramy, odczytywany na potrzeby paska limitów w panelu
-  oraz routingu uwzględniającego limity. Działa zarówno w połączeniach zgodnych z OpenAI, jak i
-  z Anthropic; pełna struktura jest udokumentowana w `open-sse/services/usage/openaiCompatible.ts`.
-
-```json
-{
-  "toolNameMaxLength": 64,
-  "quotaEndpoint": {
-    "url": "https://gateway.example.com/key/info",
-    "auth": "bearer",
-    "quotas": {
-      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
-    }
-  }
-}
-```
-
-### Łączenie peerów OmniRoute w łańcuch
-
-Inną bramę OmniRoute można dodać jako dostawcę **Niestandardowy zgodny z OpenAI**. Użyj
-bazowego URL-a `/v1` peera oraz dedykowanego klucza API o minimalnych uprawnieniach, wystawionego
-przez tego peera.
-
-W przypadku łańcuchów wzajemnych lub wieloetapowych (multi-hop) włącz na każdej bramie dobrowolne
-zabezpieczenie przed pętlami:
+W przypadku łańcuchów wzajemnych lub wieloetapowych włącz opcjonalne zabezpieczenie przed pętlami na każdej bramie:
 
 ```bash
 # gateway-a
@@ -775,16 +747,14 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Tylko żądania wysyłane do jawnie dozwolonego URL-a peera otrzymują nagłówek
-`X-OmniRoute-Peer-Trace`. Brama odrzuca powtórzony identyfikator instancji lub wyczerpany budżet
-przeskoków odpowiedzią HTTP `508 Loop Detected`; zwykli dostawcy nadrzędni (upstream) nie otrzymują
-żadnych metadanych peera.
+Tylko żądania wysyłane do jawnie dozwolonego adresu URL równorzędnej instancji otrzymują nagłówek
+`X-OmniRoute-Peer-Trace`. Brama odrzuca powtórzony identyfikator instancji lub wyczerpany limit przeskoków
+z kodem HTTP `508 Loop Detected`; zwykli dostawcy nadrzędni nie otrzymują żadnych metadanych równorzędnych instancji.
 
-Łączenie peerów w łańcuch nie jest replikacją bazy danych ani przełączaniem awaryjnym hostów. Każda
-brama utrzymuje niezależny stan SQLite, pamięci podręczne, liczniki limitów i sesje. Do zapewnienia
-dostępności active/passive lub active/active użyj reverse proxy ze sprawdzaniem stanu (health check)
-lub przełączania awaryjnego po stronie klienta i nigdy nie montuj jednej bazy SQLite w wielu
-działających instancjach OmniRoute.
+Łączenie równorzędnych instancji nie jest replikacją bazy danych ani przełączaniem awaryjnym hosta. Każda brama zachowuje niezależny
+stan SQLite, pamięci podręczne, liczniki limitów i sesje. W celu zapewnienia dostępności active/passive lub active/active użyj
+odwrotnego proxy z kontrolą kondycji albo mechanizmu przełączania awaryjnego po stronie klienta i nigdy nie montuj jednej bazy danych SQLite
+w wielu działających instancjach OmniRoute.
 
 ### Dedykowane trasy dostawców
 
@@ -796,7 +766,7 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Prefiks dostawcy jest dodawany automatycznie, jeśli go brakuje. Niezgodne modele zwracają `400`.
+Prefiks dostawcy jest automatycznie dodawany, jeśli go brakuje. Niedopasowane modele zwracają `400`.
 
 ### Konfiguracja proxy sieciowego
 
@@ -809,12 +779,12 @@ curl -X PUT http://localhost:20128/api/settings/proxy \
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
-# Testuj proxy
+# Przetestuj proxy
 curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Pierwszeństwo:** specyficzne dla klucza → specyficzne dla combo → specyficzne dla dostawcy → globalne → środowiskowe.
+**Kolejność pierwszeństwa:** Dla konkretnego klucza → Dla konkretnej kombinacji → Dla konkretnego dostawcy → Globalne → Środowisko.
 
 ### API katalogu modeli
 
@@ -824,112 +794,112 @@ curl http://localhost:20128/api/models/catalog
 
 Zwraca modele pogrupowane według dostawcy wraz z typami (`chat`, `embedding`, `image`).
 
-### Synchronizacja w chmurze
+### Synchronizacja z chmurą
 
-- Synchronizuj dostawców, combos i ustawienia między urządzeniami
-- Automatyczna synchronizacja w tle z limitem czasu + fail-fast
-- W środowisku produkcyjnym preferuj serwerowe `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`
+- Synchronizowanie dostawców, kombinacji i ustawień między urządzeniami
+- Automatyczna synchronizacja w tle z limitem czasu i szybkim przerywaniem w przypadku błędu
+- W środowisku produkcyjnym preferuj zmienne po stronie serwera `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`
 
-### Cloudflare Quick Tunnel
+### Szybki tunel Cloudflare
 
-- Dostępny w **Dashboard → Endpoints** dla Dockera i innych wdrożeń self-hosted
-- Tworzy tymczasowy adres `https://*.trycloudflare.com`, który przekierowuje do bieżącego, zgodnego z OpenAI punktu końcowego `/v1`
-- Pierwsze włączenie instaluje `cloudflared` tylko wtedy, gdy jest to potrzebne; kolejne restarty ponownie używają tego samego zarządzanego pliku binarnego
-- Quick Tunnels nie są automatycznie przywracane po restarcie OmniRoute lub kontenera; w razie potrzeby włącz je ponownie z poziomu panelu
-- Adresy URL tuneli są efemeryczne i zmieniają się przy każdym zatrzymaniu/uruchomieniu tunelu
-- Zarządzane Quick Tunnels domyślnie korzystają z transportu HTTP/2, aby uniknąć uciążliwych ostrzeżeń o buforze QUIC UDP w kontenerach o ograniczonych zasobach
-- Ustaw `CLOUDFLARED_PROTOCOL=quic` lub `auto`, jeśli chcesz nadpisać zarządzany wybór transportu
-- Ustaw `CLOUDFLARED_BIN`, jeśli wolisz używać preinstalowanego pliku binarnego `cloudflared` zamiast zarządzanego pobierania
-- Panele Cloudflare Quick Tunnel, Tailscale Funnel i ngrok Tunnel można pokazywać lub ukrywać w **Settings → Appearance**. Ukrycie panelu nie zatrzymuje działającego tunelu.
+- Dostępne w **Panel → Punkty końcowe** dla wdrożeń Docker i innych wdrożeń samodzielnie hostowanych
+- Tworzy tymczasowy adres URL `https://*.trycloudflare.com`, który przekierowuje do bieżącego punktu końcowego `/v1` zgodnego z OpenAI
+- Przy pierwszym włączeniu instaluje `cloudflared` tylko w razie potrzeby; kolejne uruchomienia ponownie wykorzystują ten sam zarządzany plik binarny
+- Szybkie tunele nie są automatycznie przywracane po ponownym uruchomieniu OmniRoute lub kontenera; w razie potrzeby włącz je ponownie w panelu
+- Adresy URL tuneli są tymczasowe i zmieniają się za każdym razem, gdy zatrzymujesz lub uruchamiasz tunel
+- Zarządzane szybkie tunele domyślnie używają transportu HTTP/2, aby uniknąć uciążliwych ostrzeżeń dotyczących bufora UDP QUIC w kontenerach z ograniczonymi zasobami
+- Ustaw `CLOUDFLARED_PROTOCOL=quic` lub `auto`, jeśli chcesz zastąpić zarządzany wybór transportu
+- Ustaw `CLOUDFLARED_BIN`, jeśli wolisz używać wstępnie zainstalowanego pliku binarnego `cloudflared` zamiast zarządzanego pobierania
+- Panele Cloudflare Quick Tunnel, Tailscale Funnel i ngrok Tunnel można wyświetlać lub ukrywać w **Ustawienia → Wygląd**. Ukrycie panelu nie zatrzymuje działającego tunelu.
 
-### Inteligencja bramy LLM (faza 9)
+### Inteligentna brama LLM (faza 9)
 
-- **Semantyczna pamięć podręczna** — automatycznie buforuje odpowiedzi niestrumieniowe z temperature=0 (pomiń za pomocą `X-OmniRoute-No-Cache: true`)
-- **Idempotentność żądań** — deduplikuje żądania w ciągu 5 s za pomocą nagłówka `Idempotency-Key` lub `X-Request-Id`
-- **Śledzenie postępu** — opcjonalne zdarzenia SSE `event: progress`, aktywowane nagłówkiem `X-OmniRoute-Progress: true`
+- **Pamięć podręczna semantyczna** — Automatycznie zapisuje w pamięci podręcznej odpowiedzi bez strumieniowania z temperature=0 (można ją pominąć za pomocą `X-OmniRoute-No-Cache: true`)
+- **Idempotencja żądań** — Usuwa duplikaty żądań w przedziale 5 s za pomocą nagłówka `Idempotency-Key` lub `X-Request-Id`
+- **Śledzenie postępu** — Opcjonalne zdarzenia SSE `event: progress` włączane za pomocą nagłówka `X-OmniRoute-Progress: true`
 
 ---
 
-### Translator Playground
+### Plac zabaw translatora
 
-Dostęp przez **Dashboard → Translator**. Debuguj i wizualizuj, jak OmniRoute tłumaczy żądania API między dostawcami.
+Dostęp przez **Panel → Translator**. Debuguj i wizualizuj sposób, w jaki OmniRoute tłumaczy żądania API między dostawcami.
 
-| Tryb             | Przeznaczenie                                                                                   |
-| ---------------- | ----------------------------------------------------------------------------------------------- |
-| **Playground**   | Wybierz formaty źródłowy/docelowy, wklej żądanie i natychmiast zobacz przetłumaczony wynik      |
-| **Chat Tester**  | Wysyłaj prawdziwe wiadomości czatu przez proxy i sprawdzaj pełny cykl żądanie/odpowiedź         |
-| **Test Bench**   | Uruchamiaj testy wsadowe dla wielu kombinacji formatów, aby zweryfikować poprawność tłumaczenia |
-| **Live Monitor** | Obserwuj tłumaczenia w czasie rzeczywistym, gdy żądania przepływają przez proxy                 |
+| Tryb                   | Przeznaczenie                                                                                   |
+| ---------------------- | ----------------------------------------------------------------------------------------------- |
+| **Plac zabaw**         | Wybierz format źródłowy i docelowy, wklej żądanie i natychmiast zobacz przetłumaczony wynik     |
+| **Tester czatu**       | Wysyłaj wiadomości czatu na żywo przez serwer proxy i analizuj pełny cykl żądania i odpowiedzi  |
+| **Stanowisko testowe** | Uruchamiaj testy wsadowe dla wielu kombinacji formatów, aby zweryfikować poprawność tłumaczenia |
+| **Monitor na żywo**    | Obserwuj tłumaczenia w czasie rzeczywistym podczas przepływu żądań przez serwer proxy           |
 
-**Przykłady zastosowania:**
+**Przypadki użycia:**
 
-- Diagnozuj, dlaczego konkretna kombinacja klient/dostawca nie działa
-- Sprawdź, czy znaczniki thinking, wywołania narzędzi i prompty systemowe są tłumaczone poprawnie
-- Porównuj różnice między formatami OpenAI, Claude, Gemini i Responses API
+- Debugowanie przyczyn niepowodzenia określonej kombinacji klienta i dostawcy
+- Sprawdzanie, czy znaczniki rozumowania, wywołania narzędzi i prompty systemowe są poprawnie tłumaczone
+- Porównywanie różnic w formatach OpenAI, Claude, Gemini i Responses API
 
 ---
 
 ### Strategie routingu
 
-Konfiguracja w **Dashboard → Settings → Routing**. Panel udostępnia sześć najczęściej używanych strategii; combos i auto-router obsługują wewnętrznie szerszy zestaw.
+Konfiguracja przez **Panel → Ustawienia → Routing**. Panel udostępnia sześć najczęściej używanych strategii; kombinacje i automatyczny router obsługują wewnętrznie szerszy zestaw.
 
 **Strategie widoczne w panelu (routing na poziomie konta):**
 
-| Strategia                      | Opis                                                                                                                  |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| **Fill First**                 | Używa kont w kolejności priorytetów — konto podstawowe obsługuje wszystkie żądania, dopóki nie stanie się niedostępne |
-| **Round Robin**                | Przechodzi cyklicznie przez wszystkie konta z konfigurowalnym limitem przywiązania (domyślnie: 3 wywołania na konto)  |
-| **P2C (Power of Two Choices)** | Wybiera 2 losowe konta i kieruje ruch do tego w lepszej kondycji — równoważy obciążenie z uwzględnieniem kondycji     |
-| **Random**                     | Losowo wybiera konto dla każdego żądania przy użyciu tasowania Fishera-Yatesa                                         |
-| **Least Used**                 | Kieruje ruch do konta z najstarszym znacznikiem czasu `lastUsedAt`, równomiernie rozdzielając ruch                    |
-| **Cost Optimized**             | Kieruje ruch do konta o najniższej wartości priorytetu, optymalizując pod kątem dostawców o najniższym koszcie        |
+| Strategia                          | Opis                                                                                                                                |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| **Wypełniaj najpierw**             | Używa kont według kolejności priorytetów — konto główne obsługuje wszystkie żądania, dopóki nie stanie się niedostępne              |
+| **Round Robin**                    | Cyklicznie przełącza się między wszystkimi kontami z konfigurowalnym limitem trwałego przypisania (domyślnie: 3 wywołania na konto) |
+| **P2C (wybór z dwóch możliwości)** | Wybiera 2 losowe konta i kieruje ruch do zdrowszego z nich — równoważy obciążenie z uwzględnieniem kondycji                         |
+| **Losowo**                         | Losowo wybiera konto dla każdego żądania za pomocą tasowania Fishera-Yatesa                                                         |
+| **Najrzadziej używane**            | Kieruje ruch do konta z najstarszym znacznikiem czasu `lastUsedAt`, równomiernie rozdzielając ruch                                  |
+| **Optymalizacja kosztów**          | Kieruje ruch do konta z najniższą wartością priorytetu, optymalizując wybór pod kątem najtańszych dostawców                         |
 
-**Zaawansowane strategie combo i auto** (konfigurowalne dla pojedynczego combo lub przez prefiksy `auto/*` — zobacz [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+**Zaawansowane strategie kombinacji i automatyczne** (konfigurowane dla poszczególnych kombinacji lub za pomocą prefiksów `auto/*` — zobacz [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
 
-- `priority` — ścisła kolejność, nigdy nie stosuje rotacji
+- `priority` — ścisła kolejność, bez przełączania round-robin
 - `weighted` — proporcjonalny podział ruchu według wag poszczególnych modeli
-- `fill-first` — wyczerpuje pierwszy model, aż do osiągnięcia limitów
+- `fill-first` — wykorzystuje pierwszy model aż do osiągnięcia limitów
 - `round-robin` / `strict-random` / `random`
-- `p2c` (Power of Two Choices)
+- `p2c` (wybór z dwóch możliwości)
 - `least-used` i `cost-optimized`
-- `auto` — wybór oparty na punktacji wśród wszystkich kandydatów
-- `lkgp` (Last Known Good Provider) — przypina do ostatniego sprawdzonego dostawcy, a następnie wraca do reguł
-- `context-optimized` — wybiera model z największym wolnym oknem kontekstowym
-- `context-relay` — łączy w łańcuch modele długiego kontekstu dla kolejnych tur
+- `auto` — wybór spośród wszystkich kandydatów na podstawie punktacji
+- `lkgp` (ostatni znany sprawny dostawca) — przypina do ostatniego dostawcy, który pomyślnie obsłużył żądanie, a następnie stosuje reguły rezerwowe
+- `context-optimized` — wybiera model z największym wolnym oknem kontekstu
+- `context-relay` — łączy modele z długim kontekstem dla kolejnych tur
 
-#### Zewnętrzny nagłówek przywiązania sesji
+#### Zewnętrzny nagłówek trwałej sesji
 
-Aby uzyskać zewnętrzne przywiązanie sesji (na przykład agenty Claude Code/Codex za odwrotnym proxy), wyślij:
+Aby zapewnić zewnętrzne przypisanie do sesji (na przykład dla agentów Claude Code/Codex działających za odwrotnymi serwerami proxy), wyślij:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute akceptuje również `x_session_id` i zwraca obowiązujący klucz sesji w `X-OmniRoute-Session-Id`.
+OmniRoute akceptuje również `x_session_id` i zwraca efektywny klucz sesji w `X-OmniRoute-Session-Id`.
 
-Jeśli używasz Nginx i wysyłasz nagłówki w formie z podkreśleniami, włącz:
+Jeśli używasz Nginx i wysyłasz nagłówki z podkreśleniami, włącz:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Wieloznaczne aliasy modeli
+#### Aliasy modeli z symbolami wieloznacznymi
 
-Twórz wzorce wieloznaczne, aby przekształcać nazwy modeli:
+Twórz wzorce z symbolami wieloznacznymi, aby zmieniać mapowanie nazw modeli:
 
 ```
-Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
-Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+Wzorzec: claude-sonnet-*     →  Cel: cc/claude-sonnet-4-6
+Wzorzec: gpt-*               →  Cel: gh/gpt-5.3-codex
 ```
 
 Symbole wieloznaczne obsługują `*` (dowolne znaki) i `?` (pojedynczy znak).
 
-#### Łańcuchy fallback
+#### Łańcuchy awaryjne
 
-Definiuj globalne łańcuchy fallback stosowane do wszystkich żądań:
+Definiuj globalne łańcuchy awaryjne mające zastosowanie do wszystkich żądań:
 
 ```
-Chain: production-fallback
+Łańcuch: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -939,20 +909,20 @@ Chain: production-fallback
 
 ### Typowe kombinacje dostawców i wzorce routingu
 
-Oto przykładowe wzorce łączenia wielu dostawców i routingu między nimi w OmniRoute:
+Poniżej przedstawiono przykładowe wzorce łączenia wielu dostawców i kierowania ruchu między nimi w OmniRoute:
 
-#### 1. Combo dla agentów kodujących: zaawansowane rozumowanie z fallbackiem kosztu/szybkości
+#### 1. Kombinacja dla agenta programistycznego: zaawansowane rozumowanie z awaryjnym wyborem według kosztu i szybkości
 
-Idealne dla agentów kodujących (OpenCode, Claude Code, Cursor, Cline). Kieruje żądania początkowo do zaawansowanych modeli rozumujących, przechodząc na szybkie modele kodujące w przypadku wyczerpania limitów lub błędów.
+Idealna dla agentów programistycznych (OpenCode, Claude Code, Cursor, Cline). Początkowo kieruje ruch do czołowych modeli rozumowania, a po wyczerpaniu limitu lub wystąpieniu błędów przełącza się na szybkie modele programistyczne.
 
-- **Panel**: Combos → New Combo → Nazwa: `agent-coding` → Strategia: `Priority`
+- **Panel**: Kombinacje → Nowa kombinacja → Nazwa: `agent-coding` → Strategia: `Priority`
 - **Modele**:
-  1. `claude/claude-sonnet-4-6` (podstawowy agent kodujący)
-  2. `openai/gpt-4o` (dodatkowy fallback o wysokiej wydajności)
-  3. `deepseek/deepseek-v4-flash` (wysokoefektywny, ekonomiczny fallback)
+  1. `claude/claude-sonnet-4-6` (Główny agent programistyczny)
+  2. `openai/gpt-4o` (Dodatkowy model awaryjny o dużej wydajności)
+  3. `deepseek/deepseek-v4-flash` (Wysoce wydajny i opłacalny model awaryjny)
 
 ```bash
-# Przykład przez API
+# Przykład za pośrednictwem API
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
@@ -967,119 +937,122 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Combo z automatycznym failoverem dla darmowych planów
+#### 2. Kombinacja automatycznego przełączania awaryjnego w warstwie bezpłatnej
 
-Łączy wiele dostawców z darmowymi planami i bez kluczy API, aby zmaksymalizować dostępność bez kosztów API.
+Łączy wielu dostawców z warstwy bezpłatnej oraz niewymagających klucza, aby zmaksymalizować dostępność bez ponoszenia kosztów API.
 
-- **Strategia**: `Least Used` lub `Round Robin` (rozdziela obciążenie między limity)
+- **Strategia**: `Least Used` lub `Round Robin` (rozkłada obciążenie między limity)
 - **Modele**:
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
   3. `cerebras/gpt-oss-120b`
 
 ```bash
-# Przykład przez CLI
+# Przykład za pośrednictwem CLI
 omniroute combo create free-stack \
   --models "groq/llama-3.3-70b-versatile,gemini/gemini-2.5-flash,cerebras/gpt-oss-120b" \
   --strategy round-robin
 ```
 
-#### 3. Pipeline multimodalny / obrazy i tekst
+#### 3. Potok multimodalny / obrazu i tekstu
 
-Łączenie wyspecjalizowanych modeli wizyjnych z szybką generacją tekstu w przepływach pracy obejmujących rozumienie obrazów i generowanie kodu.
+Łączenie wyspecjalizowanych modeli wizyjnych z szybkim generowaniem tekstu na potrzeby przepływów pracy obejmujących rozumienie obrazów i generowanie kodu.
 
-- **Wzorzec**: Combo typu `Priority`, które umieszcza modele obsługujące obrazy na początku, a model tekstowy/kodowy o wysokiej przepustowości na końcu.
+- **Wzorzec**: Kombinacja `Priority`, w której najpierw wymienione są modele obsługujące obraz, a na końcu model tekstowy/kodowy o wysokiej przepustowości.
 - **Modele**:
-  1. `gemini/gemini-2.5-pro` (silne rozumienie obrazów/treści multimodalnych)
-  2. `openai/gpt-4o` (zrównoważona obsługa obrazów i narzędzi)
-  3. `deepseek/deepseek-v4-flash` (generowanie tekstu/kodu)
+  1. `gemini/gemini-2.5-pro` (Zaawansowane rozumienie obrazów i treści multimodalnych)
+  2. `openai/gpt-4o` (Zrównoważona obsługa obrazu i użycia narzędzi)
+  3. `deepseek/deepseek-v4-flash` (Generowanie tekstu/kodu)
 
 ---
 
-### Odporność na błędy i circuit breakery
+### Odporność i wyłączniki automatyczne
 
-Konfiguracja w **Dashboard → Settings → Resilience**.
+Skonfiguruj w **Panel sterowania → Ustawienia → Odporność**.
 
-OmniRoute implementuje odporność na poziomie dostawcy za pomocą pięciu komponentów:
+OmniRoute zapewnia odporność na poziomie dostawcy za pomocą pięciu komponentów:
 
-1. **Kolejka żądań i tempo (Request Queue & Pacing)** — kształtowanie żądań na poziomie systemu:
-   - **Requests Per Minute (RPM)** — maksymalna liczba żądań na minutę na konto
-   - **Min Time Between Requests** — minimalny odstęp w milisekundach między żądaniami
-   - **Max Concurrent Requests** — maksymalna liczba jednoczesnych żądań na konto
+1. **Kolejka żądań i regulacja tempa** — Kształtowanie ruchu żądań na poziomie systemu:
+   - **Żądania na minutę (RPM)** — Maksymalna liczba żądań na minutę dla każdego konta
+   - **Minimalny czas między żądaniami** — Minimalny odstęp między żądaniami w milisekundach
+   - **Maksymalna liczba równoczesnych żądań** — Maksymalna liczba jednoczesnych żądań dla każdego konta
 
-2. **Connection Cooldown** — konfiguracja dla pojedynczego połączenia według typu uwierzytelniania po błędach podlegających ponowieniu:
-   - **Base Cooldown** — domyślne okno wycofania dla błędów upstream podlegających ponowieniu
-   - **Use Upstream Retry Hints** — respektuje autorytatywne wskazówki `Retry-After` lub reset, gdy są dostarczone
-   - **Max Backoff Steps** — maksymalny poziom wykładniczego backoffu przy powtarzających się błędach
+2. **Okres wstrzymania połączenia** — Konfiguracja dla poszczególnych typów uwierzytelniania dla pojedynczego połączenia po błędach umożliwiających ponowienie:
+   - **Bazowy okres wstrzymania** — Domyślny czas wstrzymania po błędach usług nadrzędnych umożliwiających ponowienie
+   - **Używaj wskazówek ponowienia od usługi nadrzędnej** — Uwzględnia wiążące wskazówki `Retry-After` lub dotyczące resetowania, jeśli zostały podane
+   - **Maksymalna liczba kroków wycofania** — Maksymalny poziom wycofania wykładniczego dla powtarzających się błędów
 
-3. **Circuit breaker dostawcy** — śledzi kompleksowe awarie dostawcy, oznacza go jako obniżonej wydajności po osiągnięciu skonfigurowanego progu ostrzegawczego i otwiera breaker po osiągnięciu skonfigurowanego progu awarii:
-   - **Degradation Threshold** — liczba kolejnych awarii dostawcy przed wejściem w stan `DEGRADED`
-   - **Failure Threshold** — liczba kolejnych awarii dostawcy przed wejściem w stan `OPEN`
-   - **Reset Timeout** — okno czasowe, po którym dostawca jest ponownie testowany
-   - **CLOSED** (zdrowy) — żądania przepływają normalnie
-   - **DEGRADED** — żądania nadal przepływają, podczas gdy podwyższona liczba awarii jest śledzona
-   - **OPEN** — dostawca jest tymczasowo zablokowany po powtarzających się awariach
-   - **HALF_OPEN** — testowanie, czy dostawca odzyskał sprawność
+3. **Wyłącznik automatyczny dostawcy** — Śledzi kompleksowe awarie dostawcy, oznacza dostawcę jako zdegradowanego po osiągnięciu skonfigurowanego progu ostrzegawczego i otwiera wyłącznik po osiągnięciu skonfigurowanego progu awarii:
+   - **Próg degradacji** — Liczba kolejnych awarii dostawcy przed przejściem do stanu `DEGRADED`
+   - **Próg awarii** — Liczba kolejnych awarii dostawcy przed przejściem do stanu `OPEN`
+   - **Limit czasu resetowania** — Czas do ponownego przetestowania dostawcy
+   - **CLOSED** (Sprawny) — Żądania są przetwarzane normalnie
+   - **DEGRADED** — Żądania nadal są przetwarzane, a zwiększona liczba awarii jest monitorowana
+   - **OPEN** — Dostawca jest tymczasowo blokowany po powtarzających się awariach
+   - **HALF_OPEN** — Sprawdzanie, czy dostawca odzyskał sprawność
 
-   Limity `429` w zakresie połączenia pozostają w **Connection Cooldown** i nie są wliczane do breakera dostawcy.
+   Limity szybkości `429` dotyczące konkretnego połączenia pozostają obsługiwane przez **Okres wstrzymania połączenia** i nie są uwzględniane przez wyłącznik dostawcy.
 
-   Stan bieżący breakera dostawcy jest wyświetlany wyłącznie w **Dashboard → Health**.
+   Stan wyłącznika dostawcy w czasie wykonywania jest wyświetlany wyłącznie w **Panel sterowania → Kondycja**.
 
-4. **Wait For Cooldown** — jeśli każde połączenie kandydujące jest już w stanie wycofania, OmniRoute może poczekać na najwcześniejszy koniec cooldownu i automatycznie ponowić to samo żądanie klienta.
+4. **Oczekiwanie na zakończenie okresu wstrzymania** — Jeśli wszystkie połączenia kandydujące są już wstrzymane, OmniRoute może poczekać na zakończenie najwcześniejszego okresu wstrzymania i automatycznie ponowić to samo żądanie klienta.
 
-5. **Automatyczne wykrywanie limitów (Rate Limit Auto-Detection)** — gdy dostawcy upstream zwracają jawne okna oczekiwania, te wskazówki zastępują lokalny cooldown połączenia, gdy ustawienie jest włączone.
+5. **Automatyczne wykrywanie limitu szybkości** — Gdy dostawcy nadrzędni zwracają jawne okresy oczekiwania, wskazówki te zastępują lokalny okres wstrzymania połączenia, jeśli to ustawienie jest włączone.
 
-**Wskazówka:** Użyj strony **Health**, aby sprawdzić i zresetować aktywne breakery dostawców po awarii. Strona Resilience zmienia wyłącznie konfigurację.
+**Wskazówka:** Strona **Kondycja** umożliwia sprawdzanie i resetowanie aktywnych wyłączników dostawców po awarii. Strona Odporność służy wyłącznie do zmiany konfiguracji.
 
 ---
 
-### Eksport / import bazy danych
+### Eksportowanie/importowanie bazy danych
 
-Zarządzanie kopiami zapasowymi bazy danych w **Dashboard → Settings → System & Storage**.
+Zarządzaj kopiami zapasowymi bazy danych w **Panel sterowania → Ustawienia → System i pamięć masowa**.
 
-| Akcja                    | Opis                                                                                                                                                                   |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Export Database**      | Pobiera bieżącą bazę danych SQLite jako plik `.sqlite`                                                                                                                 |
-| **Export All (.tar.gz)** | Pobiera pełne archiwum kopii zapasowej zawierające: bazę danych, ustawienia, combo, połączenia z dostawcami (bez danych uwierzytelniających), metadane kluczy API      |
-| **Import Database**      | Przesyła plik `.sqlite` w celu zastąpienia bieżącej bazy danych. Kopia zapasowa przed importem jest tworzona automatycznie, chyba że `DISABLE_SQLITE_AUTO_BACKUP=true` |
+| Działanie                        | Opis                                                                                                                                                                       |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Eksportuj bazę danych**        | Pobiera bieżącą bazę danych SQLite jako plik `.sqlite`                                                                                                                     |
+| **Eksportuj wszystko (.tar.gz)** | Pobiera pełne archiwum kopii zapasowej obejmujące: bazę danych, ustawienia, kombinacje, połączenia z dostawcami (bez danych uwierzytelniających), metadane kluczy API      |
+| **Importuj bazę danych**         | Przesyła plik `.sqlite`, aby zastąpić bieżącą bazę danych. Kopia zapasowa sprzed importu jest tworzona automatycznie, chyba że ustawiono `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: eksport bazy danych
+# API: Eksportuj bazę danych
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: eksport wszystkiego (pełne archiwum)
+# API: Eksportuj wszystko (pełne archiwum)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: import bazy danych
+# API: Importuj bazę danych
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Walidacja importu:** Importowany plik jest sprawdzany pod kątem integralności (sprawdzenie pragma SQLite), wymaganych tabel (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) oraz rozmiaru (maks. 100MB).
+**Walidacja importu:** Importowany plik jest sprawdzany pod kątem integralności (kontrola pragma SQLite), wymaganych tabel (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) oraz rozmiaru (maks. 100 MB).
 
 **Przypadki użycia:**
 
-- Migracja OmniRoute między maszynami
+- Migrowanie OmniRoute między komputerami
 - Tworzenie zewnętrznych kopii zapasowych na potrzeby odzyskiwania po awarii
-- Udostępnianie konfiguracji członkom zespołu (eksport wszystkiego → udostępnienie archiwum)
+- Udostępnianie konfiguracji członkom zespołu (eksportuj wszystko → udostępnij archiwum)
 
 ---
 
 ### Panel ustawień
 
-Strona ustawień jest podzielona na **7 zakładek** dla ułatwienia nawigacji:
+Strona ustawień jest podzielona na **7 kart**, co ułatwia nawigację:
 
-| Zakładka           | Zawartość                                                                                                                                                                                                              |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Ogólne**         | Narzędzia magazynu danych systemu, domyślne zachowanie, widoczność tuneli endpointów                                                                                                                                   |
-| **Wygląd**         | Sterowanie motywem (jasny/ciemny/systemowy), widoczność paska bocznego, przełączniki paneli kart tuneli Cloudflare/Tailscale/ngrok                                                                                     |
-| **AI**             | Budżet myślenia (przekazywanie / automatyczne usuwanie / niestandardowy / adaptacyjny — zobacz [THINKING_BUDGET.md](./THINKING_BUDGET.md)), globalny prompt systemowy, statystyki pamięci podręcznej promptów          |
-| **Bezpieczeństwo** | Ustawienia logowania i hasła, kontrola dostępu według adresów IP, uwierzytelnianie API dla `/models`, blokowanie dostawców, ochrona przed prompt injection                                                             |
-| **Routing**        | Globalna strategia routingu (Wypełnianie od pierwszego / Round Robin / P2C / Losowy / Najrzadziej używany / Optymalizacja kosztów), aliasy modeli z symbolem wieloznacznym, łańcuchy fallback, wartości domyślne combo |
-| **Odporność**      | Kolejka żądań, cooldown połączeń, konfiguracja circuit breakera dostawcy oraz zachowanie oczekiwania na cooldown                                                                                                       |
-| **Zaawansowane**   | Globalna konfiguracja proxy (HTTP/SOCKS5), nadpisania proxy dla poszczególnych dostawców                                                                                                                               |
+| Karta              | Zawartość                                                                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Ogólne**         | Narzędzia pamięci systemowej, domyślne zachowanie, widoczność tuneli Endpoint                                                                                                                                            |
+| **Wygląd**         | Ustawienia motywu (jasny/ciemny/systemowy), widoczność paska bocznego, przełączniki paneli kart tuneli Cloudflare/Tailscale/ngrok                                                                                        |
+| **AI**             | Budżet myślenia (przekazywanie / automatyczne usuwanie / niestandardowy / adaptacyjny — zobacz [THINKING_BUDGET.md](./THINKING_BUDGET.md)), globalny prompt systemowy, statystyki pamięci podręcznej promptów            |
+| **Bezpieczeństwo** | Ustawienia logowania/hasła, kontrola dostępu IP, uwierzytelnianie API dla `/models`, blokowanie dostawców, ochrona przed wstrzykiwaniem promptów                                                                         |
+| **Routing**        | Globalna strategia routingu (wypełnianie po kolei / Round Robin / P2C / losowa / najmniej używane / optymalizacja kosztów), aliasy modeli z symbolami wieloznacznymi, łańcuchy rezerwowe, domyślne ustawienia kombinacji |
+| **Odporność**      | Kolejka żądań, okres karencji połączeń, konfiguracja wyłącznika dostawcy oraz oczekiwanie na zakończenie okresu karencji                                                                                                 |
+| **Zaawansowane**   | Globalna konfiguracja serwera proxy (HTTP/SOCKS5), nadpisania ustawień proxy dla poszczególnych dostawców                                                                                                                |
 
-Zakładka Ogólne nie powiela już informacji tylko do odczytu o logowaniu i pamięci podręcznej. Ustawienia retencji i optymalizacji bazy danych są zapisywane przez `/api/settings/database`; ręczne czyszczenie pamięci podręcznej odbywa się za pomocą `DELETE /api/cache`. Limity liczby wierszy dziennika żądań i dziennika proxy są kontrolowane przez `CALL_LOGS_TABLE_MAX_ROWS` i `PROXY_LOGS_TABLE_MAX_ROWS`.
+Karta Ogólne nie powiela już informacji tylko do odczytu dotyczących logowania i pamięci podręcznej. Ustawienia przechowywania oraz
+optymalizacji bazy danych są utrwalane za pośrednictwem `/api/settings/database`; ręczne czyszczenie pamięci podręcznej używa
+`DELETE /api/cache`. Limity wierszy dzienników żądań i serwera proxy są kontrolowane przez
+`CALL_LOGS_TABLE_MAX_ROWS` oraz `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1087,10 +1060,10 @@ Zakładka Ogólne nie powiela już informacji tylko do odczytu o logowaniu i pam
 
 Dostęp przez **Panel → Koszty**.
 
-| Zakładka   | Przeznaczenie                                                                                                               |
-| ---------- | --------------------------------------------------------------------------------------------------------------------------- |
-| **Budżet** | Ustawianie limitów wydatków na klucz API z budżetami dziennymi/tygodniowymi/miesięcznymi i śledzeniem w czasie rzeczywistym |
-| **Cennik** | Przeglądanie i edycja wpisów cen modeli — koszt za 1 tys. tokenów wejściowych/wyjściowych według dostawcy                   |
+| Karta      | Przeznaczenie                                                                                                                                |
+| ---------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Budżet** | Ustawianie limitów wydatków dla poszczególnych kluczy API z budżetami dziennymi/tygodniowymi/miesięcznymi i śledzeniem w czasie rzeczywistym |
+| **Cennik** | Wyświetlanie i edytowanie wpisów cenowych modeli — koszt za 1 tys. tokenów wejściowych/wyjściowych dla każdego dostawcy                      |
 
 ```bash
 # API: Ustaw budżet
@@ -1098,44 +1071,44 @@ curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Pobierz aktualny status budżetu
+# API: Pobierz bieżący stan budżetu
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Śledzenie kosztów:** Każde żądanie rejestruje użycie tokenów i oblicza koszt na podstawie tabeli cen. Zestawienia według dostawcy, modelu i klucza API znajdziesz w **Panel → Użycie**.
+**Śledzenie kosztów:** Każde żądanie rejestruje użycie tokenów i oblicza koszt na podstawie tabeli cen. Zestawienia według dostawcy, modelu i klucza API można wyświetlić w sekcji **Panel → Użycie**.
 
 ---
 
-### Transkrypcja audio
+### Transkrypcja dźwięku
 
-OmniRoute obsługuje transkrypcję audio przez zgodny z OpenAI endpoint:
+OmniRoute obsługuje transkrypcję dźwięku za pośrednictwem punktu końcowego zgodnego z OpenAI:
 
 ```bash
 POST /v1/audio/transcriptions
 Authorization: Bearer your-api-key
 Content-Type: multipart/form-data
 
-# Przykład z curl
+# Przykład z użyciem curl
 curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -H "Authorization: Bearer your-api-key" \
   -F "file=@audio.mp3" \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` to natywna trasa Deepgram i wymaga klucza API Deepgram.
-Jeśli skonfigurowany jest tylko OpenRouter, użyj `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` jest natywną trasą Deepgram i wymaga klucza API Deepgram.
+Jeśli skonfigurowano wyłącznie OpenRouter, użyj `openrouter/deepgram/nova-3`.
 
-**Dostawcy zamiany mowy na tekst (transkrypcja):**
+Dostawcy funkcji **zamiany mowy na tekst (transkrypcji)**:
 
-- `openai/` (zgodny z whisper)
+- `openai/` (zgodność z Whisper)
 - `groq/` (Groq Whisper Turbo)
 - `deepgram/` (rodzina Nova)
 - `assemblyai/`
 - `nvidia/` (Parakeet, Canary)
-- `huggingface/` (warianty whisper)
+- `huggingface/` (warianty Whisper)
 - `qwen/`
 
-**Dostawcy zamiany tekstu na mowę (`POST /v1/audio/speech`):**
+Dostawcy funkcji **zamiany tekstu na mowę (`POST /v1/audio/speech`)**:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1156,52 +1129,51 @@ Obsługiwane formaty audio dla transkrypcji: `mp3`, `wav`, `m4a`, `flac`, `ogg`,
 
 ---
 
-### Strategie równoważenia combo
+### Strategie równoważenia kombinacji
 
-Równoważenie dla poszczególnych combo konfigurujesz w **Panel → Combo → Utwórz/Edytuj → Strategia**.
+Równoważenie dla poszczególnych kombinacji można skonfigurować w sekcji **Panel → Kombinacje → Utwórz/Edytuj → Strategia**.
 
-| Strategia                   | Opis                                                                             |
-| --------------------------- | -------------------------------------------------------------------------------- |
-| **Round-Robin**             | Rotacyjnie przechodzi przez modele po kolei                                      |
-| **Priorytet**               | Zawsze próbuje pierwszego modelu; przełącza awaryjnie tylko w razie błędu        |
-| **Losowy**                  | Dla każdego żądania wybiera losowy model z combo                                 |
-| **Ważony**                  | Kieruje proporcjonalnie do wag przypisanych poszczególnym modelom                |
-| **Najrzadziej używany**     | Kieruje do modelu z najmniejszą liczbą ostatnich żądań (korzysta z metryk combo) |
-| **Optymalizowany kosztowo** | Kieruje do najtańszego dostępnego modelu (korzysta z tabeli cen)                 |
+| Strategia                 | Opis                                                                                              |
+| ------------------------- | ------------------------------------------------------------------------------------------------- |
+| **Round-Robin**           | Przełącza się kolejno między modelami                                                             |
+| **Priorytetowa**          | Zawsze najpierw próbuje użyć pierwszego modelu; przechodzi na model rezerwowy tylko w razie błędu |
+| **Losowa**                | Dla każdego żądania wybiera losowy model z kombinacji                                             |
+| **Ważona**                | Kieruje żądania proporcjonalnie na podstawie wag przypisanych poszczególnym modelom               |
+| **Najmniej używane**      | Kieruje żądanie do modelu z najmniejszą liczbą ostatnich żądań (korzysta z metryk kombinacji)     |
+| **Optymalizacja kosztów** | Kieruje żądanie do najtańszego dostępnego modelu (korzysta z tabeli cen)                          |
 
-Globalne wartości domyślne combo można ustawić w **Panel → Ustawienia → Routing → Wartości domyślne combo**.
-Limity czasu celów combo domyślnie dziedziczą bieżący limit czasu żądania. Użyj opcji **Limit czasu celu
-(w sekundach)** w wartościach domyślnych combo lub w pojedynczym combo tylko wtedy, gdy krótszy limit na cel
-ma przyspieszyć przełączenie awaryjne.
+Globalne ustawienia domyślne kombinacji można określić w sekcji **Panel → Ustawienia → Routing → Domyślne ustawienia kombinacji**.
+Limity czasu dla celów kombinacji domyślnie dziedziczą bieżący limit czasu żądania. Opcji **Limit czasu celu
+(w sekundach)** w domyślnych ustawieniach kombinacji lub w pojedynczej kombinacji należy używać tylko wtedy, gdy krótszy limit dla danego celu powinien
+szybciej uruchamiać mechanizm rezerwowy.
 
-Optymalizacje combo o zerowym opóźnieniu wymagają włączenia (opt-in). Pozostaw opcję **Optymalizacje zerowego
-opóźnienia** wyłączoną, aby funkcje związane z opóźnieniami nie konkurowały z celami fallbacku, nie pomijały
-celów na podstawie historii TTFT ani nie kompresowały żądań fallbacku; jej włączenie pozwala skonfigurowanemu
-hedgingowi, predykcyjnemu pomijaniu na podstawie TTFT i proaktywnej kompresji fallbacku zamienić wierność
-routingu/żądań na niższe opóźnienie na ogonie rozkładu.
+Optymalizacje kombinacji o zerowym opóźnieniu są opcjonalne. Pozostaw opcję **Optymalizacje o zerowym opóźnieniu** wyłączoną, aby
+zapobiec sytuacjom, w których te funkcje opóźnień ścigają się z celami rezerwowymi, pomijają cele na podstawie historii TTFT
+lub kompresują żądania rezerwowe; włączenie tej opcji pozwala skonfigurowanemu hedgingowi, predykcyjnemu pomijaniu na podstawie TTFT
+i proaktywnej kompresji mechanizmu rezerwowego obniżyć opóźnienia w ogonie rozkładu kosztem wierności routingu/żądań.
 
-Wyłącz **Bufor tokenów wnioskowania**, gdy dostawcy nadrzędni wymagają ścisłych limitów
-`max_tokens` / `maxOutputTokens`. Gdy opcja jest włączona, routing combo dodaje zapas dla modeli
-wnioskujących tylko w przypadku modeli ze znanym limitem wyjściowym, a limit tokenów klienta pozostaje
-bez zmian, gdy bezpieczna wartość z buforem przekroczyłaby ten limit. Jeśli limit klienta przekracza
-już znany limit, OmniRoute obniża go do tego limitu przed wysłaniem żądania nadrzędnego.
+Wyłącz **Bufor tokenów rozumowania**, gdy dostawcy nadrzędni wymagają ścisłych limitów
+`max_tokens` / `maxOutputTokens`. Po włączeniu routing łączony dodaje dodatkowy zapas na rozumowanie tylko
+dla modeli ze znanym limitem wyjściowym i pozostawia limit tokenów klienta bez zmian, gdy bezpieczna wartość
+z uwzględnieniem bufora przekroczyłaby ten limit. Jeśli limit klienta już przekracza znany limit,
+OmniRoute zmniejsza go do tej wartości przed wysłaniem żądania do dostawcy nadrzędnego.
 
 ---
 
 ### Panel kondycji
 
-Dostęp przez **Panel → Kondycja**. Przegląd kondycji systemu w czasie rzeczywistym w postaci 6 kart:
+Dostęp przez **Panel → Kondycja**. Przegląd kondycji systemu w czasie rzeczywistym obejmujący 6 kart:
 
-| Karta                         | Co pokazuje                                                                       |
+| Karta                         | Co przedstawia                                                                    |
 | ----------------------------- | --------------------------------------------------------------------------------- |
-| **Status systemu**            | Czas pracy, wersja, zużycie pamięci, katalog danych                               |
-| **Kondycja dostawców**        | Bieżący stan globalnego circuit breakera dostawców                                |
-| **Limity żądań**              | Aktywne okresy wstrzymania połączeń dla kont wraz z pozostałym czasem             |
-| **Aktywne blokady**           | Aktywne blokady w zakresie modeli oraz tymczasowe wykluczenia                     |
+| **Stan systemu**              | Czas działania, wersja, użycie pamięci, katalog danych                            |
+| **Kondycja dostawców**        | Globalny stan działania mechanizmu circuit breaker dostawców                      |
+| **Limity szybkości**          | Aktywne okresy karencji połączeń dla poszczególnych kont wraz z pozostałym czasem |
+| **Aktywne blokady**           | Aktywne blokady dotyczące modeli i tymczasowe wykluczenia                         |
 | **Pamięć podręczna sygnatur** | Statystyki pamięci podręcznej deduplikacji (aktywne klucze, współczynnik trafień) |
-| **Telemetria opóźnień**       | Agregacja opóźnień p50/p95/p99 dla każdego dostawcy                               |
+| **Telemetria opóźnień**       | Zagregowane opóźnienia p50/p95/p99 dla poszczególnych dostawców                   |
 
-**Wskazówka:** Strona Kondycja odświeża się automatycznie co 10 sekund. Użyj karty circuit breakera, aby zidentyfikować dostawców, którzy mają problemy.
+**Wskazówka:** Strona Kondycja odświeża się automatycznie co 10 sekund. Użyj karty mechanizmu circuit breaker, aby ustalić, u których dostawców występują problemy.
 
 ---
 

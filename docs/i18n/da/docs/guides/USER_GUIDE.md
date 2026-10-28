@@ -612,9 +612,9 @@ Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 <details>
 <summary><b>Se alle tilgængelige modeller</b></summary>
 
-> Listen nedenfor er sammensat ud fra `open-sse/config/providerRegistry.ts` for v3.8.0. Cloud-kataloger (Gemini, OpenRouter osv.) synkroniseres dynamisk — for at se hele live-kataloget åbn **Dashboard → Udbydere → [udbyder] → Tilgængelige modeller** eller kald `GET /api/models/catalog`.
+> Listen nedenfor er udvalgt fra `open-sse/config/providerRegistry.ts` for v3.8.0. Cloud-kataloger (Gemini, OpenRouter osv.) synkroniseres dynamisk — for at se hele live-kataloget åbn **Dashboard → Udbydere → [udbyder] → Tilgængelige modeller** eller kald `GET /api/models/catalog`.
 >
-> Hvis en udbyders indbyggede liste er afveget, brug **Importér fra /models** på den side (eller aktivér **Auto-synkronisering**) for at hente det aktuelle upstream-katalog. Dette blev verificeret i v3.8.50 for LLM7.io (`gemini-3.1-flash-lite`) og UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinations' anonyme adgang forblev upstream-begrænset under samme testkørsel.
+> Hvis en udbyders indbyggede liste er kommet ud af trit, kan du bruge **Importér fra /models** på den pågældende side (eller aktivere **Automatisk synkronisering**) for at hente det aktuelle upstream-katalog. Dette blev verificeret i v3.8.50 for LLM7.io (`gemini-3.1-flash-lite`) og UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym adgang til Pollinations forblev begrænset fra upstreams side under samme testrunde.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -622,7 +622,7 @@ Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — GRATIS OAuth: brug live-kataloget, der vises under **Dashboard → Udbydere → Kiro → Tilgængelige modeller**. Tilgængeligheden afhænger af kontoen og abonnementet.
+**Kiro (`kr/`)** — GRATIS OAuth: Brug live-kataloget, der vises under **Dashboard → Udbydere → Kiro → Tilgængelige modeller**. Tilgængeligheden afhænger af kontoen og abonnementet.
 
 **Qoder (`if/`)** — GRATIS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,17 +630,17 @@ Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/md. fast pris eller pr. forbrug: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/md. fast pris eller pr. brug: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API-nøgle: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ultrahurtig: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ultra-hurtig: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok-native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok-nativ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — EU-hostet: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Søgeforstærket: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Søgeunderstøttet: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -656,11 +656,11 @@ Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synkroniseres live pr. API-nøgle fra Google — ingen statisk liste. Tilknyt en nøgle under **Dashboard → Udbydere**, og brug derefter **Tilgængelige modeller** til at importere det aktuelle katalog (f.eks. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synkroniseres live pr. API-nøgle fra Google — ingen statisk liste. Tilføj en nøgle under **Dashboard → Udbydere**, og brug derefter **Tilgængelige modeller** til at importere det aktuelle katalog (f.eks. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Andre kompatible udbydere** (udvalgte): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough-katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hver enkelt vedligeholder sin egen model-liste i `providerRegistry.ts` og kan synkroniseres automatisk, når udbyderen eksponerer et `/models`-endpoint.
+**Andre kompatible udbydere** (udvalgte): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough-katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hver enkelt vedligeholder sin egen modelliste i `providerRegistry.ts` og kan autosynkroniseres, når udbyderen eksponerer et `/models`-endpoint.
 
-**Bemærkning om model-ID'er:** OmniRoute bruger udbyder-specifikke ID'er (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Nogle ID'er indeholder versionsnumre med punktummer, fordi det er sådan, upstream-API'en forventer dem. Hvis en model ikke er anført ovenfor, så kør `omniroute models --search <term>` eller forespørg `GET /api/models/catalog` for at bekræfte tilgængeligheden.
+**Bemærkning om model-ID'er:** OmniRoute bruger udbyder-native ID'er (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Nogle ID'er indeholder versioner med punktummer, fordi det er sådan, upstream-API'et forventer dem. Hvis en model ikke er anført ovenfor, kør `omniroute models --search <term>` eller kald `GET /api/models/catalog` for at bekræfte tilgængeligheden.
 
 </details>
 
@@ -668,12 +668,12 @@ Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 
 ## 🧩 Avancerede funktioner
 
-### Tilpassede modeller
+### Brugerdefinerede modeller
 
-Tilføj et hvilket som helst model-ID til en hvilken som helst udbyder uden at vente på en app-opdatering:
+Føj et vilkårligt model-id til en hvilken som helst udbyder uden at vente på en appopdatering:
 
 ```bash
-# Via API'et
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
@@ -682,80 +682,56 @@ curl -X POST http://localhost:20128/api/provider-models \
 # Fjern: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Eller brug Dashboard: **Udbydere → [Udbyder] → Tilpassede modeller**.
+Eller brug kontrolpanelet: **Udbydere → [Udbyder] → Brugerdefinerede modeller**.
 
 Bemærkninger:
 
-- OpenRouter og OpenAI-/Anthropic-kompatible udbydere administreres kun fra **Tilgængelige modeller**. Manuel tilføjelse, import og automatisk synkronisering ender alle på samme liste over tilgængelige modeller, så der findes ingen separat sektion for tilpassede modeller for disse udbydere.
-- Sektionen **Tilpassede modeller** er beregnet til udbydere, der ikke tilbyder administreret import af tilgængelige modeller.
+- OpenRouter og OpenAI/Anthropic-kompatible udbydere administreres kun fra **Tilgængelige modeller**. Manuel tilføjelse, import og automatisk synkronisering ender alle på den samme liste over tilgængelige modeller, så der er ikke en separat sektion med brugerdefinerede modeller for disse udbydere.
+- Sektionen **Brugerdefinerede modeller** er beregnet til udbydere, som ikke tilbyder administrerede importer af tilgængelige modeller.
 
-### Tilpassede OpenAI-kompatible udbydere
+### Brugerdefinerede OpenAI-kompatible udbydere
 
-Enhver gateway, der taler OpenAI-API'et (en selvhostet proxy, vLLM, en tredjepartsaggregator), kan tilføjes som sit eget udbyderknudepunkt:
+Enhver gateway, der understøtter OpenAI-API'en (en selvhostet proxy, vLLM eller en tredjepartsaggregator),
+kan tilføjes som sin egen udbydernode:
 
 1. **Udbydere → Tilføj OpenAI-kompatibel**.
-2. **Navn**: et visningsnavn for knudepunktet.
-3. **Præfiks**: routingnavnet. Klienter kalder modeller som `<prefix>/<model>`, så et knudepunkt med
-   præfikset `mygw` serverer `mygw/gpt-4o-mini`. Påkrævet; der er ingen begrænsning på tegn.
-4. **API-type**: den endepunktsfamilie, som gatewayen serverer (Chat Completions, Responses,
+2. **Navn**: en vist etiket for noden.
+3. **Præfiks**: routingnavnet. Klienter kalder modeller som `<prefix>/<model>`, så en node med
+   præfikset `mygw` leverer `mygw/gpt-4o-mini`. Påkrævet; der er ingen tegnbegrænsning.
+4. **API-type**: den endpointfamilie, som gatewayen leverer (Chat Completions, Responses,
    Embeddings, lyd, billeder).
-5. **Basis-URL**: API-roden, op til og inklusive `/v1` (for eksempel
+5. **Basis-URL**: API-roden til og med `/v1` (for eksempel
    `https://gateway.example.com/v1`), ikke den fulde `/chat/completions`-sti. Gateways med
-   ikke-standardstier angiver dem under **Avancerede indstillinger** (chat-sti, model-sti).
-6. Feltet **API-nøgle (til tjek)** tester kun forbindelsen. Når du har oprettet knudepunktet,
-   skal du åbne det og bruge **Tilføj forbindelse** til at gemme nøglen, som forespørgslerne vil bruge.
+   ikke-standardiserede stier konfigurerer dem under **Avancerede indstillinger** (chatsti, modelsti).
+6. Feltet **API-nøgle (til kontrol)** tester kun forbindelsen. Når noden er oprettet,
+   skal du åbne den og bruge **Tilføj forbindelse** til at gemme den nøgle, som anmodninger skal bruge.
 
-Knudepunktet får et internt id i formatet `openai-compatible-<apiType>-<uuid>`; du behøver
-aldrig at skrive det – præfikset er det offentlige navn.
+Noden får et internt id i formatet `openai-compatible-<apiType>-<uuid>`; du behøver aldrig
+at indtaste det, da præfikset er det offentlige navn.
 
 #### Reserverede præfikser
 
-Et præfiks må ikke være id'et eller aliaset for en indbygget udbyder (for eksempel `openai`, `cf`)
-og heller ikke id'et for en udfaset udbyder. Modelopløseren kontrollerer indbyggede id'er og aliasser før
-tilpassede knudepunkter, så et knudepunkt, der bruger et af disse præfikser, vil aldrig modtage trafik:
-`<prefix>/model` ville i stedet gå til den indbyggede udbyder eller fejle i lukket tilstand, hvis den
-pågældende udbyder var udfaset. Oprettelse eller redigering af et knudepunkt med et sådant præfiks afvises med:
+Et præfiks må ikke være id'et eller aliasset for en indbygget udbyder (for eksempel `openai`, `cf`) eller
+id'et for en udfaset udbyder. Modelresolveren kontrollerer indbyggede id'er og aliasser før
+brugerdefinerede noder, så en node, der bruger et af disse præfikser, aldrig vil modtage trafik:
+`<prefix>/model` vil i stedet gå til den indbyggede udbyder eller blive afvist, hvis udbyderen
+er udfaset. Oprettelse eller redigering af en node med et sådant præfiks afvises med:
 
 ```text
-prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+prefix: "<prefix>" er et reserveret udbyderpræfiks — vælg et andet præfiks (reserverede id'er/aliasser kan ikke bruges til brugerdefinerede noder, fordi anmodninger som <prefix>/model dirigeres til en indbygget udbyder eller afvises, når den er udfaset)
 ```
 
-Vælg et entydigt præfiks (`mygw`, `acme-proxy`). Hvis forespørgsler til et tilpasset knudepunkt mislykkes med en
-fejl, der nævner en indbygget udbyder eller dens legitimationsoplysninger, så kontrollér, om knudepunktets præfiks er
-reserveret: Knudepunkter, der blev gemt, før denne regel fandtes, er stadig gemt, men deres præfiks dirigerer trafik til
-den indbyggede udbyder. Rediger knudepunktet, og giv det et nyt præfiks.
+Vælg et entydigt præfiks (`mygw`, `acme-proxy`). Hvis anmodninger til en brugerdefineret node mislykkes med en
+fejl, der nævner en indbygget udbyder eller dennes legitimationsoplysninger, skal du kontrollere, om nodens præfiks er
+reserveret: Noder, der blev gemt, før denne regel blev indført, gemmes stadig, men deres præfiks dirigerer til
+den indbyggede udbyder. Rediger noden, og giv den et nyt præfiks.
 
-#### Gateway-indstillinger pr. forbindelse
+### Sammenkædning af OmniRoute-peers
 
-Disse nøgler placeres i en forbindelses `providerSpecificData` (for eksempel via
-`PUT /api/providers/{id}`):
+En anden OmniRoute-gateway kan tilføjes som en **brugerdefineret OpenAI-kompatibel** udbyder. Brug
+peerens `/v1`-basis-URL og en dedikeret API-nøgle med færrest mulige rettigheder, som er udstedt af den pågældende peer.
 
-- `toolNameMaxLength` (heltal, 1–1024) — til OpenAI-chatformat-kompatible forbindelser, hvis
-  gateway afviser lange værktøjsnavne. Længere navne sendes som korte aliasser og gendannes i
-  svaret.
-- `quotaEndpoint` — gatewayens endepunkt for kvote/kreditter, som læses til dashboardets kvotestribe og
-  kvotebevidst routing. Fungerer på både OpenAI- og Anthropic-kompatible forbindelser; den fulde struktur
-  er dokumenteret i `open-sse/services/usage/openaiCompatible.ts`.
-
-```json
-{
-  "toolNameMaxLength": 64,
-  "quotaEndpoint": {
-    "url": "https://gateway.example.com/key/info",
-    "auth": "bearer",
-    "quotas": {
-      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
-    }
-  }
-}
-```
-
-### Kædning af OmniRoute-peers
-
-En anden OmniRoute-gateway kan tilføjes som en **Tilpasset OpenAI-kompatibel** udbyder. Brug
-peerens `/v1`-basis-URL og en dedikeret API-nøgle med minimale privilegier, som er udstedt af den pågældende peer.
-
-Ved gensidige kæder eller kæder med flere hop skal du aktivere den valgfrie loopbeskyttelse på alle gateways:
+Ved gensidige kæder eller kæder med flere hop skal den valgfrie loopbeskyttelse aktiveres på hver gateway:
 
 ```bash
 # gateway-a
@@ -771,18 +747,18 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Kun forespørgsler, der sendes til en peer-URL, som eksplicit står på tilladelseslisten, modtager headeren
-`X-OmniRoute-Peer-Trace`. En gateway afviser et gentaget instans-id eller et opbrugt
-hop-budget med HTTP `508 Loop Detected`; almindelige upstream-udbydere modtager ingen peer-metadata.
+Kun anmodninger, der sendes til en peer-URL på en eksplicit tilladelsesliste, modtager
+`X-OmniRoute-Peer-Trace`-headeren. En gateway afviser et gentaget instans-id eller et opbrugt
+hopbudget med HTTP `508 Loop Detected`; almindelige upstream-udbydere modtager ingen peer-metadata.
 
-Peer-kædning er ikke databasereplikering eller værts-failover. Hver gateway opretholder uafhængig
-SQLite-tilstand, caches, rate-tællere og sessioner. Brug en reverse proxy med sundhedstjek eller
-klient-failover til aktiv/passiv eller aktiv/aktiv tilgængelighed, og mount aldrig én SQLite-database
+Peer-sammenkædning er ikke databasereplikering eller host-failover. Hver gateway opretholder uafhængig
+SQLite-tilstand, caches, frekvenstællere og sessioner. Brug en tilstandsovervåget reverse proxy eller klientbaseret
+failover til aktiv/passiv eller aktiv/aktiv tilgængelighed, og montér aldrig én SQLite-database
 i flere kørende OmniRoute-instanser.
 
 ### Dedikerede udbyderruter
 
-Diriger forespørgsler direkte til en specifik udbyder med modelvalidering:
+Diriger anmodninger direkte til en bestemt udbyder med modelvalidering:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -792,10 +768,10 @@ POST http://localhost:20128/v1/providers/fireworks/images/generations
 
 Udbyderpræfikset tilføjes automatisk, hvis det mangler. Modeller, der ikke matcher, returnerer `400`.
 
-### Netværksproxy-konfiguration
+### Konfiguration af netværksproxy
 
 ```bash
-# Angiv global proxy
+# Indstil global proxy
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
@@ -808,9 +784,9 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Forrang:** Nøglespecifik → Combo-specifik → Udbyderspecifik → Global → Miljø.
+**Prioritet:** Nøglespecifik → Kombinationsspecifik → Udbyderspecifik → Global → Miljø.
 
-### Modelkatalog-API
+### API til modelkatalog
 
 ```bash
 curl http://localhost:20128/api/models/catalog
@@ -820,110 +796,110 @@ Returnerer modeller grupperet efter udbyder med typer (`chat`, `embedding`, `ima
 
 ### Cloud-synkronisering
 
-- Synkroniser udbydere, combos og indstillinger på tværs af enheder
+- Synkroniser udbydere, kombinationer og indstillinger på tværs af enheder
 - Automatisk baggrundssynkronisering med timeout + fail-fast
-- Foretræk server-side `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` i produktion
+- Foretræk `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` på serversiden i produktion
 
 ### Cloudflare Quick Tunnel
 
-- Tilgængelig under **Dashboard → Endpoints** for Docker og andre selvhostede installationer
-- Opretter en midlertidig `https://*.trycloudflare.com`-URL, der videresender til dit nuværende OpenAI-kompatible `/v1`-endpoint
-- Første aktivering installerer kun `cloudflared`, når det er nødvendigt; senere genstarter genbruger den samme administrerede binære fil
-- Quick Tunnels genoprettes ikke automatisk efter en genstart af OmniRoute eller containeren; aktiver dem igen fra dashboardet, når det er nødvendigt
-- Tunnel-URL'er er flygtige og ændres, hver gang du stopper/starter tunnelen
-- Administrerede Quick Tunnels bruger som standard HTTP/2-transport for at undgå støjende QUIC UDP-buffer-advarsler i begrænsede containere
-- Indstil `CLOUDFLARED_PROTOCOL=quic` eller `auto`, hvis du vil tilsidesætte det administrerede transportvalg
-- Indstil `CLOUDFLARED_BIN`, hvis du foretrækker at bruge en forudinstalleret `cloudflared`-binær fil i stedet for den administrerede download
-- Panelerne Cloudflare Quick Tunnel, Tailscale Funnel og ngrok Tunnel kan vises eller skjules under **Indstillinger → Udseende**. Hvis du skjuler et panel, stopper det ikke en kørende tunnel.
+- Tilgængelig i **Kontrolpanel → Slutpunkter** for Docker og andre selvhostede installationer
+- Opretter en midlertidig `https://*.trycloudflare.com`-URL, der videresender til dit aktuelle OpenAI-kompatible `/v1`-slutpunkt
+- Ved første aktivering installeres `cloudflared` kun, når det er nødvendigt; efterfølgende genstarter bruger den samme administrerede binære fil
+- Quick Tunnels gendannes ikke automatisk efter en genstart af OmniRoute eller containeren; genaktivér dem fra kontrolpanelet efter behov
+- Tunnel-URL'er er midlertidige og ændres, hver gang du stopper eller starter tunnelen
+- Administrerede Quick Tunnels bruger som standard HTTP/2-transport for at undgå støjende advarsler om QUIC UDP-buffere i ressourcebegrænsede containere
+- Angiv `CLOUDFLARED_PROTOCOL=quic` eller `auto`, hvis du vil tilsidesætte det administrerede transportvalg
+- Angiv `CLOUDFLARED_BIN`, hvis du foretrækker at bruge en forudinstalleret binær `cloudflared`-fil i stedet for den administrerede download
+- Panelerne Cloudflare Quick Tunnel, Tailscale Funnel og ngrok Tunnel kan vises eller skjules under **Indstillinger → Udseende**. En kørende tunnel stoppes ikke, når panelet skjules.
 
-### LLM Gateway-intelligens (fase 9)
+### LLM-gatewayintelligens (fase 9)
 
-- **Semantisk cache** — Cacher automatisk ikke-streamede svar med temperature=0 (omgå med `X-OmniRoute-No-Cache: true`)
-- **Forespørgsels-idempotens** — Fjerner dubletter af forespørgsler inden for 5 sek. via headeren `Idempotency-Key` eller `X-Request-Id`
-- **Fremskridtssporing** — Valgfrie SSE `event: progress`-hændelser via headeren `X-OmniRoute-Progress: true`
+- **Semantisk cache** — Gemmer automatisk ikke-streamede svar med temperature=0 i cachen (omgå med `X-OmniRoute-No-Cache: true`)
+- **Idempotens for anmodninger** — Fjerner dubletter af anmodninger inden for 5 sek. via headeren `Idempotency-Key` eller `X-Request-Id`
+- **Statussporing** — Valgfrie SSE-hændelser af typen `event: progress` via headeren `X-OmniRoute-Progress: true`
 
 ---
 
 ### Translator Playground
 
-Få adgang via **Dashboard → Translator**. Fejlfind og visualisér, hvordan OmniRoute oversætter API-forespørgsler mellem udbydere.
+Åbn via **Kontrolpanel → Translator**. Fejlfind og visualiser, hvordan OmniRoute oversætter API-anmodninger mellem udbydere.
 
-| Tilstand         | Formål                                                                                           |
-| ---------------- | ------------------------------------------------------------------------------------------------ |
-| **Playground**   | Vælg kilde-/målformater, indsæt en forespørgsel, og se det oversatte output med det samme        |
-| **Chat Tester**  | Send live-chatbeskeder gennem proxyen og inspicér hele forespørgsels-/svarcyklussen              |
-| **Test Bench**   | Kør batchtests på tværs af flere formatkombinationer for at verificere oversættelsens korrekthed |
-| **Live Monitor** | Følg oversættelserne i realtid, mens forespørgslerne strømmer gennem proxyen                     |
+| Tilstand            | Formål                                                                                |
+| ------------------- | ------------------------------------------------------------------------------------- |
+| **Playground**      | Vælg kilde- og målformater, indsæt en anmodning, og se straks det oversatte output    |
+| **Chattester**      | Send livechatbeskeder gennem proxyen, og inspicér hele anmodnings-/svarcyklussen      |
+| **Testmiljø**       | Kør batchtests på tværs af flere formatkombinationer for at kontrollere oversættelsen |
+| **Liveovervågning** | Se oversættelser i realtid, mens anmodninger strømmer gennem proxyen                  |
 
 **Anvendelsestilfælde:**
 
-- Fejlfind, hvorfor en bestemt klient-/udbyderkombination fejler
-- Verificér, at thinking-tags, værktøjskald og systemprompter oversættes korrekt
-- Sammenlign formatforskelle mellem OpenAI-, Claude-, Gemini- og Responses API-formaterne
+- Fejlfind, hvorfor en bestemt kombination af klient og udbyder mislykkes
+- Kontrollér, at thinking-tags, værktøjskald og systemprompter oversættes korrekt
+- Sammenlign formatforskelle mellem formaterne OpenAI, Claude, Gemini og Responses API
 
 ---
 
 ### Routingstrategier
 
-Konfigurer via **Dashboard → Indstillinger → Routing**. Dashboardet viser de seks mest brugte strategier; combos og auto-routeren understøtter internt et bredere udvalg.
+Konfigurer via **Kontrolpanel → Indstillinger → Routing**. Kontrolpanelet viser de seks mest anvendte strategier; kombinationer og auto-routeren understøtter internt et bredere udvalg.
 
-**Strategier synlige i dashboardet (routing på kontoniveau):**
+**Strategier, der er synlige i kontrolpanelet (routing på kontoniveau):**
 
-| Strategi                       | Beskrivelse                                                                                                                      |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| **Fill First**                 | Bruger kontoer i prioriteret rækkefølge — den primære konto håndterer alle forespørgsler, indtil den ikke længere er tilgængelig |
-| **Round Robin**                | Roterer gennem alle kontoer med en konfigurerbar sticky-grænse (standard: 3 kald pr. konto)                                      |
-| **P2C (Power of Two Choices)** | Vælger 2 tilfældige kontoer og router til den sundeste — balancerer belastningen med fokus på sundhedstilstanden                 |
-| **Random**                     | Vælger en tilfældig konto for hver forespørgsel med Fisher-Yates-shuffle                                                         |
-| **Least Used**                 | Router til kontoen med det ældste `lastUsedAt`-tidsstempel og fordeler trafikken jævnt                                           |
-| **Cost Optimized**             | Router til kontoen med den laveste prioritetsværdi og optimerer mod de billigste udbydere                                        |
+| Strategi                       | Beskrivelse                                                                                                           |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
+| **Udfyld første**              | Bruger konti i prioriteret rækkefølge — den primære konto håndterer alle anmodninger, indtil den ikke er tilgængelig  |
+| **Round Robin**                | Skifter mellem alle konti med en konfigurerbar fastholdelsesgrænse (standard: 3 kald pr. konto)                       |
+| **P2C (Power of Two Choices)** | Vælger 2 tilfældige konti og router til den mest velfungerende — balancerer belastningen med hensyntagen til tilstand |
+| **Tilfældig**                  | Vælger tilfældigt en konto for hver anmodning ved hjælp af Fisher-Yates-blanding                                      |
+| **Mindst anvendt**             | Router til kontoen med det ældste `lastUsedAt`-tidsstempel og fordeler trafikken jævnt                                |
+| **Omkostningsoptimeret**       | Router til kontoen med den laveste prioritetsværdi og optimerer efter udbyderen med de laveste omkostninger           |
 
-**Avancerede combo- og auto-strategier** (kan konfigureres pr. combo eller via `auto/*`-præfikser — se [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+**Avancerede kombinations- og autostrategier** (kan konfigureres pr. kombination eller via `auto/*`-præfikser — se [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
 
-- `priority` — streng rækkefølge, aldrig round-robin
+- `priority` — fast rækkefølge, bruger aldrig round robin
 - `weighted` — proportional trafikfordeling efter vægte pr. model
-- `fill-first` — dræner den første model, indtil grænserne nås
+- `fill-first` — bruger den første model, indtil dens grænser nås
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Power of Two Choices)
 - `least-used` og `cost-optimized`
-- `auto` — scoredrevet på tværs af alle kandidater
-- `lkgp` (Last Known Good Provider) — fastholder den senest succesfulde udbyder og falder derefter tilbage på reglerne
-- `context-optimized` — vælger modellen med det største frie kontekstvindue
-- `context-relay` — kæder modeller med lang kontekst sammen til opfølgende runder
+- `auto` — scorebaseret på tværs af alle kandidater
+- `lkgp` (senest kendte velfungerende udbyder) — fastholder den senest vellykkede udbyder og falder derefter tilbage på regler
+- `context-optimized` — vælger modellen med det største ledige kontekstvindue
+- `context-relay` — kæder modeller med lang kontekst sammen til opfølgende ture
 
-#### Ekstern sticky-session-header
+#### Ekstern header til fastholdelse af sessioner
 
-For ekstern sessionsaffinitet (for eksempel Claude Code-/Codex-agenter bag reverse proxies) sendes:
+For ekstern sessionstilknytning (for eksempel Claude Code/Codex-agenter bag reverse proxies) skal du sende:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute accepterer også `x_session_id` og returnerer den effektive sessionsnøgle i `X-OmniRoute-Session-Id`.
+OmniRoute accepterer også `x_session_id` og returnerer den anvendte sessionsnøgle i `X-OmniRoute-Session-Id`.
 
-Hvis du bruger Nginx og sender headere med understregning, skal du aktivere:
+Hvis du bruger Nginx og sender headers med understregningstegn, skal du aktivere:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Wildcard-modelaliaser
+#### Modelaliasser med jokertegn
 
-Opret wildcard-mønstre for at omdirigere modelnavne:
+Opret mønstre med jokertegn for at omdirigere modelnavne:
 
 ```
-Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
-Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+Mønster: claude-sonnet-*     →  Mål: cc/claude-sonnet-4-6
+Mønster: gpt-*               →  Mål: gh/gpt-5.3-codex
 ```
 
-Wildcards understøtter `*` (vilkårlige tegn) og `?` (et enkelt tegn).
+Jokertegn understøtter `*` (vilkårlige tegn) og `?` (ét enkelt tegn).
 
 #### Fallback-kæder
 
-Definér globale fallback-kæder, der gælder på tværs af alle forespørgsler:
+Definér globale fallback-kæder, der gælder for alle anmodninger:
 
 ```
-Chain: production-fallback
+Kæde: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -935,15 +911,15 @@ Chain: production-fallback
 
 Her er eksempler på mønstre til at kombinere flere udbydere og route mellem dem i OmniRoute:
 
-#### 1. Coding agent-combo: Avanceret ræsonnement med omkostnings-/hastighedsfallback
+#### 1. Kombination til kodeagent: Avanceret ræsonnering med fallback for omkostninger/hastighed
 
-Ideel til kodningsagenter (OpenCode, Claude Code, Cursor, Cline). Dirigerer indledningsvist til frontier-ræsonnementsmodeller og falder tilbage på hurtige kodningsmodeller ved udtømning af kvote eller fejl.
+Ideel til kodeagenter (OpenCode, Claude Code, Cursor, Cline). Router indledningsvist til førende ræsonneringsmodeller og falder tilbage på hurtige kodemodeller, når kvoten er opbrugt, eller der opstår fejl.
 
-- **Dashboard**: Combos → New Combo → Navn: `agent-coding` → Strategi: `Priority`
+- **Kontrolpanel**: Kombinationer → Ny kombination → Navn: `agent-coding` → Strategi: `Priority`
 - **Modeller**:
-  1. `claude/claude-sonnet-4-6` (Primær kodningsagent)
+  1. `claude/claude-sonnet-4-6` (Primær kodeagent)
   2. `openai/gpt-4o` (Sekundær fallback med høj kapacitet)
-  3. `deepseek/deepseek-v4-flash` (Højeffektiv, omkostningseffektiv fallback)
+  3. `deepseek/deepseek-v4-flash` (Meget effektiv og omkostningseffektiv fallback)
 
 ```bash
 # Eksempel via API
@@ -961,9 +937,9 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Gratisniveau-combo med automatisk failover
+#### 2. Kombination med automatisk failover på gratisniveau
 
-Kæder flere udbydere på gratisniveau og uden nøglekrav sammen for at maksimere oppetid uden API-omkostninger.
+Sammenkæder flere udbydere med gratisniveau eller uden krav om nøgle for at maksimere oppetiden uden API-omkostninger.
 
 - **Strategi**: `Least Used` eller `Round Robin` (fordeler belastningen på tværs af kvoter)
 - **Modeller**:
@@ -978,64 +954,64 @@ omniroute combo create free-stack \
   --strategy round-robin
 ```
 
-#### 3. Multimodal / vision- og tekstpipeline
+#### 3. Multimodal pipeline til billeder og tekst
 
-Parring af specialiserede visionsmodeller med højhastigheds-tekstgenerering til arbejdsgange, der involverer billedforståelse og kodegenerering.
+Kombinerer specialiserede billedmodeller med højhastighedstekstgenerering til arbejdsgange, der involverer billedforståelse og kodegenerering.
 
-- **Mønster**: En `Priority`-combo, der anfører visionskompatible modeller først og en tekst-/kodemodel med høj gennemstrømning sidst.
+- **Mønster**: En `Priority`-kombination, der viser modeller med billedfunktioner først og en tekst-/kodemodel med høj kapacitet sidst.
 - **Modeller**:
-  1. `gemini/gemini-2.5-pro` (Stærk billed-/multimodal forståelse)
-  2. `openai/gpt-4o` (Afbalanceret vision og værktøjsanvendelse)
+  1. `gemini/gemini-2.5-pro` (Stærk billedforståelse og multimodal forståelse)
+  2. `openai/gpt-4o` (Afbalanceret brug af billeder og værktøjer)
   3. `deepseek/deepseek-v4-flash` (Tekst-/kodegenerering)
 
 ---
 
-### Fejltolerance og circuit breakers
+### Robusthed og kredsløbsafbrydere
 
-Konfigureres via **Dashboard → Settings → Resilience**.
+Konfigurer via **Dashboard → Settings → Resilience**.
 
-OmniRoute implementerer fejltolerance på udbyderniveau med fem komponenter:
+OmniRoute implementerer robusthed på udbyderniveau med fem komponenter:
 
-1. **Anmodningskø og pacing** — Formning af anmodninger på systemniveau:
+1. **Anmodningskø og hastighedsstyring** — Formning af anmodninger på systemniveau:
    - **Anmodninger pr. minut (RPM)** — Maksimalt antal anmodninger pr. minut pr. konto
-   - **Minimumstid mellem anmodninger** — Minimumsafstand i millisekunder mellem anmodninger
-   - **Maks. samtidige anmodninger** — Maksimalt antal samtidige anmodninger pr. konto
+   - **Minimumstid mellem anmodninger** — Minimumsinterval i millisekunder mellem anmodninger
+   - **Maksimalt antal samtidige anmodninger** — Maksimalt antal samtidige anmodninger pr. konto
 
-2. **Nedkøling af forbindelse** — Konfiguration pr. godkendelsestype for en enkelt forbindelse efter fejl, der kan gentages:
-   - **Grundlæggende nedkøling** — Standardnedkølingsvindue for opstrømsfejl, der kan gentages
-   - **Brug retry-tips fra opstrøms** — Respekterer autoritative `Retry-After`- eller nulstillingstips, når de er angivet
-   - **Maks. backoff-trin** — Maksimalt eksponentielt backoff-niveau ved gentagne fejl
+2. **Nedkøling af forbindelse** — Konfiguration pr. godkendelsestype for en enkelt forbindelse efter fejl, der kan forsøges igen:
+   - **Grundlæggende nedkøling** — Standardperiode for nedkøling ved upstream-fejl, der kan forsøges igen
+   - **Brug upstream-anvisninger om nyt forsøg** — Respekterer autoritative `Retry-After`- eller nulstillingsanvisninger, når de angives
+   - **Maksimalt antal backoff-trin** — Maksimalt eksponentielt backoff-niveau ved gentagne fejl
 
-3. **Circuit breaker for udbyder** — Sporer end-to-end-udbyderfejl, markerer en udbyder som forringet ved den konfigurerede advarselsgrænse og åbner afbryderen, når den konfigurerede fejlgrænse er nået:
-   - **Grænse for forringelse** — Konsekutive udbyderfejl, før der skiftes til `DEGRADED`
-   - **Fejlgrænse** — Konsekutive udbyderfejl, før der skiftes til `OPEN`
-   - **Nulstillingstimeout** — Tidsvindue, før udbyderen testes igen
-   - **CLOSED** (Sund) — Anmodninger flyder normalt
-   - **DEGRADED** — Anmodninger flyder stadig, mens forhøjede fejl spores
-   - **OPEN** — Udbyderen er midlertidigt blokeret efter gentagne fejl
-   - **HALF_OPEN** — Tester, om udbyderen er kommet sig
+3. **Kredsløbsafbryder for udbyder** — Sporer komplette udbyderfejl, markerer en udbyder som forringet ved den konfigurerede advarselstærskel og åbner afbryderen, når den konfigurerede fejltærskel nås:
+   - **Forringelsestærskel** — Antal på hinanden følgende udbyderfejl, før tilstanden `DEGRADED` aktiveres
+   - **Fejltærskel** — Antal på hinanden følgende udbyderfejl, før tilstanden `OPEN` aktiveres
+   - **Timeout for nulstilling** — Tidsrum, før udbyderen testes igen
+   - **CLOSED** (Sund) — Anmodninger behandles normalt
+   - **DEGRADED** — Anmodninger behandles fortsat, mens det forhøjede antal fejl spores
+   - **OPEN** — Udbyderen blokeres midlertidigt efter gentagne fejl
+   - **HALF_OPEN** — Tester, om udbyderen er blevet gendannet
 
-   Forbindelsesspecifikke `429`-rate limits håndteres af **Nedkøling af forbindelse** og tæller ikke med i udbyderens circuit breaker.
+   Forbindelsesspecifikke `429`-hastighedsbegrænsninger forbliver i **Nedkøling af forbindelse** og tæller ikke med i udbyderens kredsløbsafbryder.
 
-   Kørselstilstanden for udbyderens circuit breaker vises kun under **Dashboard → Health**.
+   Kørselstilstanden for udbyderens kredsløbsafbryder vises kun under **Dashboard → Health**.
 
-4. **Vent på nedkøling** — Hvis alle kandidatforbindelser allerede er i nedkøling, kan OmniRoute vente på den tidligste nedkøling og automatisk gentage den samme klientanmodning.
+4. **Vent på nedkøling** — Hvis alle mulige forbindelser allerede er under nedkøling, kan OmniRoute vente på, at den tidligste nedkøling udløber, og automatisk forsøge den samme klientanmodning igen.
 
-5. **Automatisk registrering af rate limit** — Når opstrømsudbydere returnerer eksplicitte ventevinduer, tilsidesætter disse tips den lokale forbindelsesnedkøling, når indstillingen er aktiveret.
+5. **Automatisk registrering af hastighedsbegrænsning** — Når upstream-udbydere returnerer eksplicitte venteperioder, tilsidesætter disse anvisninger den lokale nedkøling af forbindelsen, når indstillingen er aktiveret.
 
-**Pro-tip:** Brug siden **Health** til at inspicere og nulstille aktive udbyder-circuit breakers efter et nedbrud. Siden Resilience ændrer kun konfigurationen.
+**Protip:** Brug siden **Health** til at kontrollere og nulstille aktive kredsløbsafbrydere for udbydere efter en driftsforstyrrelse. Siden Resilience ændrer kun konfigurationen.
 
 ---
 
 ### Eksport/import af database
 
-Administrer databasebackups under **Dashboard → Settings → System & Storage**.
+Administrer databasesikkerhedskopier under **Dashboard → Settings → System & Storage**.
 
-| Handling                    | Beskrivelse                                                                                                                                                |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Eksportér database**      | Downloader den aktuelle SQLite-database som en `.sqlite`-fil                                                                                               |
-| **Eksportér alt (.tar.gz)** | Downloader et komplet backuparkiv inklusive: database, indstillinger, combos, udbyderforbindelser (uden legitimationsoplysninger), API-nøglemetadata       |
-| **Importér database**       | Upload en `.sqlite`-fil for at erstatte den aktuelle database. Der oprettes automatisk en backup før importen, medmindre `DISABLE_SQLITE_AUTO_BACKUP=true` |
+| Handling                    | Beskrivelse                                                                                                                                                                        |
+| --------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Eksportér database**      | Downloader den aktuelle SQLite-database som en `.sqlite`-fil                                                                                                                       |
+| **Eksportér alt (.tar.gz)** | Downloader et komplet sikkerhedskopiarkiv, der indeholder: database, indstillinger, kombinationer, udbyderforbindelser (ingen legitimationsoplysninger) og metadata for API-nøgler |
+| **Importér database**       | Overfører en `.sqlite`-fil for at erstatte den aktuelle database. Der oprettes automatisk en sikkerhedskopi før importen, medmindre `DISABLE_SQLITE_AUTO_BACKUP=true`              |
 
 ```bash
 # API: Eksportér database
@@ -1049,45 +1025,45 @@ curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Importvalidering:** Den importerede fil valideres for integritet (SQLite-pragma-tjek), påkrævede tabeller (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) og størrelse (maks. 100MB).
+**Importvalidering:** Den importerede fil valideres med hensyn til integritet (SQLite-pragma-kontrol), påkrævede tabeller (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) og størrelse (maks. 100 MB).
 
 **Anvendelsestilfælde:**
 
-- Migrér OmniRoute mellem maskiner
-- Opret eksterne backups til katastrofegendannelse
+- Migrer OmniRoute mellem maskiner
+- Opret eksterne sikkerhedskopier til genopretning efter nedbrud
 - Del konfigurationer mellem teammedlemmer (eksportér alt → del arkivet)
 
 ---
 
-### Indstillingsdashboard
+### Dashboard med indstillinger
 
 Indstillingssiden er organiseret i **7 faner** for nem navigation:
 
-| Fane          | Indhold                                                                                                                                                     |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Generelt**  | Systemlagringsværktøjer, standardadfærd, synlighed af Endpoint-tunneler                                                                                     |
-| **Udseende**  | Temakontroller (lys/mørk/system), synlighed af sidepanel, panelafbrydere for Cloudflare/Tailscale/ngrok-tunnelkort                                          |
-| **AI**        | Tænkebudget (passthrough / auto-strip / custom / adaptive — se [THINKING_BUDGET.md](./THINKING_BUDGET.md)), global systemprompt, statistik for prompt-cache |
-| **Sikkerhed** | Indstillinger for login/adgangskode, IP-adgangskontrol, API-godkendelse for `/models`, udbyderblokering, beskyttelse mod promptinjektion                    |
-| **Routing**   | Global routing-strategi (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), wildcard-modelaliasser, fallback-kæder, combo-standarder   |
-| **Robusthed** | Forespørgselskø, forbindelses-cooldown, konfiguration af udbyder-breaker og wait-for-cooldown-adfærd                                                        |
-| **Avanceret** | Global proxykonfiguration (HTTP/SOCKS5), proxy-tilsidesættelser pr. udbyder                                                                                 |
+| Fane          | Indhold                                                                                                                                                                                 |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Generelt**  | Værktøjer til systemlagring, standardadfærd, synlighed af Endpoint-tunneler                                                                                                             |
+| **Udseende**  | Temastyring (lyst/mørkt/system), sidepanelssynlighed, panelindstillinger for Cloudflare-/Tailscale-/ngrok-tunnelkort                                                                    |
+| **AI**        | Tænkebudget (videresendelse / automatisk fjernelse / brugerdefineret / adaptivt — se [THINKING_BUDGET.md](./THINKING_BUDGET.md)), global systemprompt, statistik for promptcache        |
+| **Sikkerhed** | Indstillinger for login/adgangskode, IP-adgangskontrol, API-godkendelse for `/models`, blokering af udbydere, beskyttelse mod promptinjektion                                           |
+| **Routing**   | Global routingstrategi (udfyld først / Round Robin / P2C / tilfældig / mindst anvendt / omkostningsoptimeret), jokertegnsbaserede modelaliasser, fallback-kæder, kombinationsstandarder |
+| **Robusthed** | Anmodningskø, forbindelsesnedkøling, konfiguration af udbyderafbryder og adfærd for venten på nedkøling                                                                                 |
+| **Avanceret** | Global proxykonfiguration (HTTP/SOCKS5), proxytildelinger pr. udbyder                                                                                                                   |
 
-Fanen **Generelt** duplikerer ikke længere de skrivebeskyttede log- og cache-noter. Indstillinger
-for databaseopbevaring og -optimering gemmes via `/api/settings/database`; manuel rydning af cachen
-sker med `DELETE /api/cache`. Grænserne for rækker i forespørgsels- og proxy-loggene styres af
+Generelt duplikerer ikke længere skrivebeskyttede noter om logføring og cache. Indstillinger for databaseopbevaring og
+-optimering gemmes via `/api/settings/database`; manuel rydning af cache bruger
+`DELETE /api/cache`. Maksimumgrænser for antal rækker i anmodnings- og proxylogfiler styres af
 `CALL_LOGS_TABLE_MAX_ROWS` og `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
-### Omkostninger og budgetstyring
+### Omkostnings- og budgetstyring
 
 Åbn via **Dashboard → Omkostninger**.
 
-| Fane       | Formål                                                                                             |
-| ---------- | -------------------------------------------------------------------------------------------------- |
-| **Budget** | Angiv forbrugsgrænser pr. API-nøgle med daglige/ugentlige/månedlige budgetter og sporing i realtid |
-| **Priser** | Se og rediger modelprisposter — pris pr. 1K input-/output-tokens pr. udbyder                       |
+| Fane       | Formål                                                                                           |
+| ---------- | ------------------------------------------------------------------------------------------------ |
+| **Budget** | Angiv forbrugsgrænser pr. API-nøgle med daglige/ugentlige/månedlige budgetter og realtidssporing |
+| **Priser** | Se og rediger modelpriser — omkostning pr. 1.000 input-/outputtokens for hver udbyder            |
 
 ```bash
 # API: Angiv et budget
@@ -1099,7 +1075,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Omkostningssporing:** Hver forespørgsel logger tokenforbruget og beregner prisen ud fra pristabellen. Se opdelinger efter udbyder, model og API-nøgle i **Dashboard → Forbrug**.
+**Omkostningssporing:** Hver anmodning logger tokenforbrug og beregner omkostninger ved hjælp af pristabellen. Se opdelinger i **Dashboard → Forbrug** efter udbyder, model og API-nøgle.
 
 ---
 
@@ -1119,10 +1095,10 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` er den native Deepgram-route og kræver en Deepgram-API-nøgle.
+`deepgram/nova-3` er den native Deepgram-rute og kræver en Deepgram API-nøgle.
 Hvis kun OpenRouter er konfigureret, skal du bruge `openrouter/deepgram/nova-3`.
 
-**Tale-til-tekst (transskription)**-udbydere:
+Udbydere af **tale-til-tekst (transskription)**:
 
 - `openai/` (whisper-kompatibel)
 - `groq/` (Groq Whisper Turbo)
@@ -1132,7 +1108,7 @@ Hvis kun OpenRouter er konfigureret, skal du bruge `openrouter/deepgram/nova-3`.
 - `huggingface/` (whisper-varianter)
 - `qwen/`
 
-**Tekst-til-tale (`POST /v1/audio/speech`)**-udbydere:
+Udbydere af **tekst-til-tale (`POST /v1/audio/speech`)**:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1153,53 +1129,52 @@ Understøttede lydformater til transskription: `mp3`, `wav`, `m4a`, `flac`, `ogg
 
 ---
 
-### Combo-balanceringsstrategier
+### Balanceringsstrategier for kombinationer
 
-Konfigurer balancering pr. combo under **Dashboard → Comboer → Opret/Rediger → Strategi**.
+Konfigurer balancering pr. kombination i **Dashboard → Kombinationer → Opret/Rediger → Strategi**.
 
-| Strategi           | Beskrivelse                                                                     |
-| ------------------ | ------------------------------------------------------------------------------- |
-| **Round-Robin**    | Roterer sekventielt gennem modellerne                                           |
-| **Priority**       | Forsøger altid den første model; falder kun tilbage ved fejl                    |
-| **Random**         | Vælger en tilfældig model fra comboen for hver forespørgsel                     |
-| **Weighted**       | Dirigerer forholdsmæssigt ud fra tildelte vægte pr. model                       |
-| **Least-Used**     | Dirigerer til modellen med færrest nylige forespørgsler (bruger combo-målinger) |
-| **Cost-Optimized** | Dirigerer til den billigste tilgængelige model (bruger pristabellen)            |
+| Strategi                 | Beskrivelse                                                                      |
+| ------------------------ | -------------------------------------------------------------------------------- |
+| **Round-Robin**          | Skifter sekventielt mellem modeller                                              |
+| **Prioritet**            | Forsøger altid den første model; falder kun tilbage ved fejl                     |
+| **Tilfældig**            | Vælger en tilfældig model fra kombinationen for hver anmodning                   |
+| **Vægtet**               | Router proportionalt baseret på de tildelte vægte pr. model                      |
+| **Mindst anvendt**       | Router til modellen med færrest nylige anmodninger (bruger kombinationsmålinger) |
+| **Omkostningsoptimeret** | Router til den billigste tilgængelige model (bruger pristabellen)                |
 
-Globale combo-standarder kan angives under **Dashboard → Indstillinger → Routing → Combo-standarder**.
-Timeout for combo-mål arver som standard den aktuelle forespørgsels-timeout. Brug **Mål-timeout
-(sekunder)** på combo-standarder eller en enkelt combo, kun når en kortere grænse pr. mål skal
+Globale standarder for kombinationer kan angives i **Dashboard → Indstillinger → Routing → Kombinationsstandarder**.
+Timeouts for kombinationsmål nedarver som standard den aktuelle timeout for anmodninger. Brug kun **Timeout for mål
+(sekunder)** under kombinationsstandarderne eller for en individuel kombination, når en kortere grænse pr. mål skal
 udløse hurtigere fallback.
 
-Nul-latens-combooptimeringer er et tilvalg. Lad **Nul-latens-optimeringer** være deaktiveret for at
-forhindre, at disse latensfunktioner kommer i kapløb med fallback-mål, springer mål over baseret på
-TTFT-historik eller komprimerer fallback-forespørgsler. Når det er aktiveret, kan konfigureret
-hedging, prædiktive TTFT-spring og proaktiv fallback-komprimering bruges til at bytte
-routing-/forespørgselsnøjagtighed ud med lavere tail-latens.
+Kombinationsoptimeringer med nul latenstid kræver aktiv tilmelding. Lad **Optimeringer med nul latenstid** være deaktiveret for at
+forhindre, at disse latensfunktioner konkurrerer med fallback-mål, springer mål over baseret på TTFT-
+historik eller komprimerer fallback-anmodninger. Når funktionen aktiveres, tillades konfigureret hedging, forudsigelige TTFT-
+overspringelser og proaktiv fallback-komprimering for at bytte routing-/anmodningspræcision for lavere
+halelatens.
 
-Deaktiver **Reasoning-tokenbuffer**, når upstream-udbydere kræver strenge
-`max_tokens` / `maxOutputTokens`-grænser. Når funktionen er aktiveret, tilføjer combo-routing kun
-headroom til reasoning-modeller for modeller med en kendt output-grænse og lader klientens
-token-grænse uændret, når den sikkert bufrede værdi ville overskride denne grænse. Hvis
-klientgrænsen allerede ligger over en kendt grænse, sænker OmniRoute den til denne grænse, før
-upstream-forespørgslen sendes.
+Deaktivér **buffer til ræsonneringstokens**, når upstream-udbydere kræver strenge grænser for
+`max_tokens` / `maxOutputTokens`. Når funktionen er aktiveret, tilføjer kombinationsrouting kun ekstra kapacitet til ræsonneringsmodeller
+for modeller med en kendt outputgrænse og lader klientens tokengrænse være uændret, når den
+sikre bufferjusterede værdi ville overskride denne grænse. Hvis klientgrænsen allerede er højere end en kendt grænse,
+reducerer OmniRoute den til denne grænse, før upstream-anmodningen sendes.
 
 ---
 
-### Sundhedsoversigt
+### Sundhedsdashboard
 
-Få adgang via **Dashboard → Sundhed**. Realtidsoversigt over systemets sundhedstilstand med 6 kort:
+Tilgå det via **Dashboard → Sundhed**. Oversigt i realtid over systemets sundhed med 6 kort:
 
-| Kort                    | Hvad det viser                                                     |
-| ----------------------- | ------------------------------------------------------------------ |
-| **Systemstatus**        | Oppetid, version, hukommelsesforbrug, datamappe                    |
-| **Udbyderstatus**       | Global runtime-tilstand for udbydernes circuit breakers            |
-| **Ratebegrænsninger**   | Aktive forbindelses-cooldowns pr. konto med resterende tid         |
-| **Aktive udelukkelser** | Aktive modelafgrænsede udelukkelser og midlertidige ekskluderinger |
-| **Signaturcache**       | Statistik over deduplikeringscache (aktive nøgler, hitrate)        |
-| **Latenstelemetri**     | p50/p95/p99-latensaggregering pr. udbyder                          |
+| Kort                  | Hvad det viser                                                 |
+| --------------------- | -------------------------------------------------------------- |
+| **Systemstatus**      | Oppetid, version, hukommelsesforbrug, datamappe                |
+| **Udbydersundhed**    | Global runtime-status for udbydernes kredsløbsafbryder         |
+| **Hastighedsgrænser** | Aktive forbindelsespauseperioder pr. konto med resterende tid  |
+| **Aktive spærringer** | Aktive modelspecifikke spærringer og midlertidige udelukkelser |
+| **Signaturcache**     | Statistik for deduplikeringscache (aktive nøgler, hitrate)     |
+| **Latensmålinger**    | Aggregering af p50-/p95-/p99-latens pr. udbyder                |
 
-**Protip:** Sundhedssiden opdateres automatisk hvert 10. sekund. Brug circuit breaker-kortet til at identificere, hvilke udbydere der oplever problemer.
+**Protip:** Sundhedssiden opdateres automatisk hvert 10. sekund. Brug kortet for kredsløbsafbryderen til at identificere, hvilke udbydere der oplever problemer.
 
 ---
 

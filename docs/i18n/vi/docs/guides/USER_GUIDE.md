@@ -612,9 +612,9 @@ post_install() {
 <details>
 <summary><b>Xem tất cả các mô hình khả dụng</b></summary>
 
-> Danh sách bên dưới được tuyển chọn từ `open-sse/config/providerRegistry.ts` cho v3.8.0. Các danh mục đám mây (Gemini, OpenRouter, v.v.) được đồng bộ hóa động — để xem danh mục trực tiếp đầy đủ, mở **Bảng điều khiển → Nhà cung cấp → [provider] → Các mô hình khả dụng** hoặc gọi `GET /api/models/catalog`.
+> Danh sách dưới đây được tuyển chọn từ `open-sse/config/providerRegistry.ts` cho v3.8.0. Các danh mục đám mây (Gemini, OpenRouter, v.v.) được đồng bộ động — để xem toàn bộ danh mục trực tiếp, hãy mở **Bảng điều khiển → Nhà cung cấp → [provider] → Mô hình khả dụng** hoặc gọi `GET /api/models/catalog`.
 >
-> Nếu danh sách tích hợp sẵn của một nhà cung cấp bị lệch, hãy dùng **Nhập từ /models** trên trang đó (hoặc bật **Tự động đồng bộ hóa**) để lấy danh mục trực tiếp từ upstream. Điều này đã được xác minh trong v3.8.50 cho LLM7.io (`gemini-3.1-flash-lite`) và UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); quyền truy cập ẩn danh của Pollinations vẫn bị giới hạn từ phía upstream trong cùng đợt kiểm thử đó.
+> Nếu danh sách tích hợp sẵn của một nhà cung cấp bị lệch, hãy dùng **Nhập từ /models** trên trang đó (hoặc bật **Tự động đồng bộ**) để kéo danh mục trực tiếp từ upstream. Điều này đã được xác minh ở v3.8.50 cho LLM7.io (`gemini-3.1-flash-lite`) và UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); quyền truy cập ẩn danh của Pollinations vẫn bị giới hạn bởi upstream trong cùng đợt kiểm thử đó.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -622,7 +622,7 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth MIỄN PHÍ: sử dụng danh mục trực tiếp hiển thị trong **Bảng điều khiển → Nhà cung cấp → Kiro → Các mô hình khả dụng**. Tính khả dụng phụ thuộc vào tài khoản và gói dịch vụ.
+**Kiro (`kr/`)** — OAuth MIỄN PHÍ: sử dụng danh mục trực tiếp hiển thị tại **Bảng điều khiển → Nhà cung cấp → Kiro → Mô hình khả dụng**. Tính khả dụng phụ thuộc vào tài khoản và gói dịch vụ.
 
 **Qoder (`if/`)** — OAuth MIỄN PHÍ: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,13 +630,13 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/tháng trọn gói hoặc tính theo lượt dùng: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/tháng cố định hoặc tính theo lượt sử dụng: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — Khóa API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Siêu nhanh: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Tốc độ cực nhanh: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok nguyên bản: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok chính chủ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — Lưu trữ tại EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
@@ -656,11 +656,11 @@ post_install() {
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Được đồng bộ trực tiếp theo từng API key từ Google — không có danh sách tĩnh. Kết nối một key trong **Bảng điều khiển → Nhà cung cấp** rồi sử dụng **Các mô hình khả dụng** để nhập danh mục hiện tại (ví dụ: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Được đồng bộ trực tiếp theo từng khóa API từ Google — không có danh sách tĩnh. Kết nối một khóa trong **Bảng điều khiển → Nhà cung cấp** rồi dùng **Mô hình khả dụng** để nhập danh mục hiện tại (ví dụ: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Các nhà cung cấp tương thích khác** (tuyển chọn): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (qua `aws-bedrock`), `azure-ai`, `openrouter` (danh mục passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Mỗi nhà cung cấp duy trì danh sách mô hình riêng trong `providerRegistry.ts` và có thể được tự động đồng bộ khi nhà cung cấp đó cung cấp endpoint `/models`.
+**Các nhà cung cấp tương thích khác** (tuyển chọn): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (qua `aws-bedrock`), `azure-ai`, `openrouter` (danh mục chuyển tiếp), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Mỗi nhà cung cấp duy trì danh sách mô hình riêng trong `providerRegistry.ts` và có thể được tự động đồng bộ khi nhà cung cấp đó cung cấp endpoint `/models`.
 
-**Lưu ý về ID mô hình:** OmniRoute sử dụng ID nguyên bản của nhà cung cấp (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Một số ID chứa phiên bản có dấu chấm vì đó là cách API upstream yêu cầu. Nếu một mô hình không có trong danh sách trên, hãy chạy `omniroute models --search <term>` hoặc gọi `GET /api/models/catalog` để xác nhận tính khả dụng.
+**Lưu ý về ID mô hình:** OmniRoute sử dụng các ID nguyên bản của nhà cung cấp (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Một số ID chứa phiên bản có dấu chấm vì đó là định dạng mà API upstream mong đợi. Nếu một mô hình không có trong danh sách trên, hãy chạy `omniroute models --search <term>` hoặc gọi `GET /api/models/catalog` để xác nhận tính khả dụng.
 
 </details>
 
@@ -668,9 +668,9 @@ post_install() {
 
 ## 🧩 Tính năng nâng cao
 
-### Model tùy chỉnh
+### Mô hình tùy chỉnh
 
-Thêm bất kỳ model ID nào vào bất kỳ provider nào mà không cần chờ bản cập nhật ứng dụng:
+Thêm bất kỳ ID mô hình nào vào bất kỳ nhà cung cấp nào mà không cần chờ cập nhật ứng dụng:
 
 ```bash
 # Qua API
@@ -682,81 +682,56 @@ curl -X POST http://localhost:20128/api/provider-models \
 # Xóa: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
-Hoặc dùng Dashboard: **Providers → [Provider] → Custom Models**.
+Hoặc sử dụng Bảng điều khiển: **Nhà cung cấp → [Nhà cung cấp] → Mô hình tùy chỉnh**.
 
 Lưu ý:
 
-- Các provider OpenRouter và provider tương thích OpenAI/Anthropic chỉ được quản lý từ **Available Models**. Thêm thủ công, import và đồng bộ tự động đều nằm chung trong một danh sách available-model, nên không có mục Custom Models riêng cho các provider đó.
-- Mục **Custom Models** dành cho các provider không hỗ trợ cơ chế import available-model có quản lý.
+- Các nhà cung cấp tương thích với OpenRouter và OpenAI/Anthropic chỉ được quản lý từ **Mô hình khả dụng**. Việc thêm thủ công, nhập và tự động đồng bộ đều đưa mô hình vào cùng một danh sách mô hình khả dụng, vì vậy không có phần Mô hình tùy chỉnh riêng cho các nhà cung cấp đó.
+- Phần **Mô hình tùy chỉnh** dành cho các nhà cung cấp không hỗ trợ tính năng nhập mô hình khả dụng được quản lý.
 
-### Provider tùy chỉnh tương thích OpenAI
+### Nhà cung cấp tùy chỉnh tương thích với OpenAI
 
-Bất kỳ gateway nào sử dụng OpenAI API (proxy tự host, vLLM, một bên tổng hợp bên thứ ba)
-đều có thể được thêm như một provider node riêng:
+Bất kỳ cổng nào hỗ trợ API OpenAI (proxy tự lưu trữ, vLLM, trình tổng hợp của bên thứ ba)
+đều có thể được thêm dưới dạng một nút nhà cung cấp riêng:
 
-1. **Providers → Add OpenAI Compatible**.
-2. **Name**: nhãn hiển thị cho node.
-3. **Prefix**: tên dùng để định tuyến. Client gọi model theo dạng `<prefix>/<model>`, nên node có
-   prefix `mygw` sẽ phục vụ `mygw/gpt-4o-mini`. Bắt buộc; không giới hạn ký tự.
-4. **API Type**: nhóm endpoint mà gateway phục vụ (Chat Completions, Responses,
-   Embeddings, audio, hình ảnh).
-5. **Base URL**: gốc của API, bao gồm cả phần `/v1` (ví dụ
-   `https://gateway.example.com/v1`), không phải đường dẫn đầy đủ `/chat/completions`. Các gateway có
-   đường dẫn không chuẩn sẽ thiết lập chúng trong **Advanced Settings** (chat path, models path).
-6. Trường **API Key (for Check)** chỉ dùng để kiểm tra kết nối. Sau khi tạo node,
-   hãy mở node đó và dùng **Add Connection** để lưu key mà các request sẽ sử dụng.
+1. **Nhà cung cấp → Thêm nhà cung cấp tương thích với OpenAI**.
+2. **Tên**: nhãn hiển thị cho nút.
+3. **Tiền tố**: tên định tuyến. Máy khách gọi mô hình theo dạng `<prefix>/<model>`, vì vậy một nút có
+   tiền tố `mygw` sẽ phục vụ `mygw/gpt-4o-mini`. Bắt buộc; không có giới hạn ký tự.
+4. **Loại API**: họ endpoint mà cổng cung cấp (Chat Completions, Responses,
+   Embeddings, âm thanh, hình ảnh).
+5. **URL cơ sở**: gốc API, cho đến và bao gồm `/v1` (ví dụ:
+   `https://gateway.example.com/v1`), không phải đường dẫn đầy đủ `/chat/completions`. Các cổng có
+   đường dẫn không chuẩn sẽ thiết lập chúng trong **Cài đặt nâng cao** (đường dẫn trò chuyện, đường dẫn mô hình).
+6. Trường **Khóa API (để kiểm tra)** chỉ dùng để kiểm tra kết nối. Sau khi tạo nút,
+   hãy mở nút đó và sử dụng **Thêm kết nối** để lưu khóa sẽ được các yêu cầu sử dụng.
 
-Node sẽ được gán một id nội bộ dạng `openai-compatible-<apiType>-<uuid>`; bạn không bao giờ
-cần nhập id này, prefix chính là tên công khai.
+Nút nhận một ID nội bộ có dạng `openai-compatible-<apiType>-<uuid>`; bạn không bao giờ
+cần nhập ID này, tiền tố chính là tên công khai.
 
-#### Prefix bị dành riêng
+#### Tiền tố dành riêng
 
-Prefix không được trùng id hoặc alias của một provider tích hợp sẵn (ví dụ `openai`, `cf`), cũng
-không được trùng id của một provider đã ngừng hỗ trợ. Trình phân giải model kiểm tra id và alias
-tích hợp sẵn trước các node tùy chỉnh, nên node dùng một trong các prefix đó sẽ không bao giờ nhận
-được traffic: `<prefix>/model` sẽ được chuyển đến provider tích hợp sẵn, hoặc bị fail closed nếu
-provider đó đã ngừng hỗ trợ. Việc tạo hoặc chỉnh sửa node với prefix như vậy sẽ bị từ chối với thông báo:
+Tiền tố không được trùng với ID hoặc bí danh của một nhà cung cấp tích hợp sẵn (ví dụ: `openai`, `cf`), cũng không
+được trùng với ID của một nhà cung cấp đã ngừng hoạt động. Trình phân giải mô hình kiểm tra ID và bí danh tích hợp sẵn trước
+các nút tùy chỉnh, vì vậy nút sử dụng một trong những tiền tố đó sẽ không bao giờ nhận được lưu lượng:
+`<prefix>/model` sẽ được chuyển đến nhà cung cấp tích hợp sẵn, hoặc bị từ chối an toàn nếu nhà cung cấp đó
+đã ngừng hoạt động. Việc tạo hoặc chỉnh sửa nút với tiền tố như vậy sẽ bị từ chối với thông báo:
 
 ```text
-prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+prefix: "<prefix>" là tiền tố nhà cung cấp dành riêng — hãy chọn một tiền tố khác (không thể sử dụng ID/bí danh dành riêng cho các nút tùy chỉnh vì các yêu cầu như <prefix>/model sẽ được định tuyến đến một nhà cung cấp tích hợp sẵn hoặc bị từ chối an toàn khi nhà cung cấp đó ngừng hoạt động)
 ```
 
-Hãy chọn một prefix khác biệt (`mygw`, `acme-proxy`). Nếu request đến node tùy chỉnh thất bại với
-lỗi nhắc đến một provider tích hợp sẵn hoặc credential của provider đó, hãy kiểm tra xem prefix của
-node có bị dành riêng không: các node được lưu trước khi quy tắc này tồn tại vẫn được giữ lại,
-nhưng prefix của chúng sẽ định tuyến sang provider tích hợp sẵn. Hãy chỉnh sửa node và đặt prefix mới.
+Hãy chọn một tiền tố riêng biệt (`mygw`, `acme-proxy`). Nếu các yêu cầu đến một nút tùy chỉnh thất bại với
+lỗi nêu tên một nhà cung cấp tích hợp sẵn hoặc thông tin xác thực của nhà cung cấp đó, hãy kiểm tra xem tiền tố của nút có
+phải là tiền tố dành riêng hay không: các nút được lưu trước khi quy tắc này tồn tại vẫn được lưu trữ, nhưng tiền tố của chúng sẽ định tuyến đến
+nhà cung cấp tích hợp sẵn. Hãy chỉnh sửa nút và đặt cho nó một tiền tố mới.
 
-#### Tùy chọn gateway theo từng kết nối
+### Kết chuỗi các cổng OmniRoute ngang hàng
 
-Các key này nằm trong `providerSpecificData` của một kết nối (ví dụ qua
-`PUT /api/providers/{id}`):
+Một cổng OmniRoute khác có thể được thêm dưới dạng nhà cung cấp **Tùy chỉnh tương thích với OpenAI**. Hãy sử dụng
+URL cơ sở `/v1` của cổng ngang hàng và một khóa API chuyên dụng với đặc quyền tối thiểu do cổng đó cấp.
 
-- `toolNameMaxLength` (số nguyên, 1–1024) — dành cho các kết nối tương thích định dạng chat
-  của OpenAI khi gateway từ chối tên tool quá dài. Các tên dài hơn sẽ được gửi dưới dạng alias ngắn
-  và được khôi phục lại trong response.
-- `quotaEndpoint` — endpoint quota/credits của gateway, được đọc để hiển thị dải quota trên dashboard
-  và phục vụ định tuyến theo quota. Hoạt động trên cả kết nối tương thích OpenAI lẫn Anthropic;
-  cấu trúc đầy đủ được mô tả trong `open-sse/services/usage/openaiCompatible.ts`.
-
-```json
-{
-  "toolNameMaxLength": 64,
-  "quotaEndpoint": {
-    "url": "https://gateway.example.com/key/info",
-    "auth": "bearer",
-    "quotas": {
-      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
-    }
-  }
-}
-```
-
-### Kết nối chuỗi các peer OmniRoute
-
-Một gateway OmniRoute khác có thể được thêm như một provider **Custom OpenAI-compatible**. Hãy dùng
-base URL `/v1` của peer và một API key riêng, có quyền tối thiểu do peer đó cấp.
-
-Với các chuỗi hai chiều hoặc nhiều hop, hãy bật cơ chế chống vòng lặp (opt-in) trên mọi gateway:
+Đối với chuỗi hai chiều hoặc nhiều chặng, hãy bật cơ chế bảo vệ vòng lặp tùy chọn trên mọi cổng:
 
 ```bash
 # gateway-a
@@ -772,18 +747,18 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Chỉ các request gửi đến URL peer được liệt kê rõ ràng trong allowlist mới nhận header
-`X-OmniRoute-Peer-Trace`. Gateway sẽ từ chối một instance ID bị lặp hoặc hạn mức hop đã cạn
-với HTTP `508 Loop Detected`; các provider upstream thông thường không nhận bất kỳ metadata peer nào.
+Chỉ các yêu cầu được gửi đến URL cổng ngang hàng nằm rõ ràng trong danh sách cho phép mới nhận được tiêu đề
+`X-OmniRoute-Peer-Trace`. Cổng sẽ từ chối ID phiên bản bị lặp lại hoặc khi ngân sách số chặng
+đã cạn bằng HTTP `508 Loop Detected`; các nhà cung cấp thượng nguồn thông thường không nhận được siêu dữ liệu ngang hàng.
 
-Kết nối chuỗi peer không phải là replication cơ sở dữ liệu hay failover host. Mỗi gateway giữ
-trạng thái SQLite, cache, bộ đếm rate limit và session độc lập. Hãy dùng reverse proxy có
-health-check hoặc failover phía client để đạt độ sẵn sàng active/passive hoặc active/active, và
-tuyệt đối không mount một cơ sở dữ liệu SQLite vào nhiều instance OmniRoute đang chạy.
+Kết chuỗi cổng ngang hàng không phải là sao chép cơ sở dữ liệu hoặc chuyển đổi dự phòng máy chủ. Mỗi cổng duy trì
+trạng thái SQLite, bộ nhớ đệm, bộ đếm giới hạn tốc độ và phiên độc lập. Hãy sử dụng proxy ngược có kiểm tra tình trạng hoặc cơ chế
+chuyển đổi dự phòng phía máy khách để bảo đảm tính sẵn sàng chủ động/thụ động hoặc chủ động/chủ động, và không bao giờ gắn một cơ sở dữ liệu SQLite
+vào nhiều phiên bản OmniRoute đang chạy.
 
-### Route riêng theo provider
+### Tuyến nhà cung cấp chuyên dụng
 
-Chuyển request trực tiếp đến một provider cụ thể kèm kiểm tra model:
+Định tuyến yêu cầu trực tiếp đến một nhà cung cấp cụ thể kèm xác thực mô hình:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -791,7 +766,7 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Prefix của provider sẽ được tự động thêm nếu còn thiếu. Model không khớp sẽ trả về `400`.
+Tiền tố nhà cung cấp sẽ tự động được thêm nếu còn thiếu. Các mô hình không khớp sẽ trả về `400`.
 
 ### Cấu hình proxy mạng
 
@@ -800,7 +775,7 @@ Prefix của provider sẽ được tự động thêm nếu còn thiếu. Model
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"global": {"type":"http","host":"proxy.example.com","port":"8080"}}'
 
-# Proxy theo từng provider
+# Proxy theo từng nhà cung cấp
 curl -X PUT http://localhost:20128/api/settings/proxy \
   -d '{"providers": {"openai": {"type":"socks5","host":"proxy.example.com","port":"1080"}}}'
 
@@ -809,122 +784,122 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Thứ tự ưu tiên:** Riêng cho key → Riêng cho combo → Riêng cho provider → Toàn cục → Biến môi trường.
+**Thứ tự ưu tiên:** Theo khóa → Theo tổ hợp → Theo nhà cung cấp → Toàn cục → Môi trường.
 
-### API Danh mục Model
+### API danh mục mô hình
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Trả về danh sách model được nhóm theo provider với các loại (`chat`, `embedding`, `image`).
+Trả về các mô hình được nhóm theo nhà cung cấp cùng với loại (`chat`, `embedding`, `image`).
 
-### Đồng bộ Đám mây
+### Đồng bộ đám mây
 
-- Đồng bộ provider, combo và cài đặt giữa các thiết bị
-- Tự động đồng bộ trong nền với timeout + fail-fast
-- Ưu tiên dùng `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` phía server trong môi trường production
+- Đồng bộ nhà cung cấp, tổ hợp và cài đặt giữa các thiết bị
+- Tự động đồng bộ trong nền với thời gian chờ + dừng sớm khi có lỗi
+- Ưu tiên `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` phía máy chủ trong môi trường production
 
-### Cloudflare Quick Tunnel
+### Đường hầm nhanh Cloudflare
 
-- Có sẵn trong **Dashboard → Endpoints** cho các triển khai Docker và self-hosted khác
-- Tạo một URL tạm thời dạng `https://*.trycloudflare.com` chuyển tiếp tới endpoint `/v1` tương thích OpenAI hiện tại của bạn
-- Lần bật đầu tiên sẽ cài `cloudflared` chỉ khi cần; các lần khởi động lại sau đó tái sử dụng cùng binary được quản lý đó
-- Quick Tunnels không được tự động khôi phục sau khi khởi động lại OmniRoute hoặc container; hãy bật lại chúng từ dashboard khi cần
-- URL của tunnel là tạm thời và thay đổi mỗi lần bạn dừng/khởi động tunnel
-- Managed Quick Tunnels mặc định dùng truyền tải HTTP/2 để tránh các cảnh báo QUIC UDP buffer gây nhiễu trong các container hạn chế tài nguyên
-- Đặt `CLOUDFLARED_PROTOCOL=quic` hoặc `auto` nếu bạn muốn ghi đè lựa chọn truyền tải được quản lý
-- Đặt `CLOUDFLARED_BIN` nếu bạn muốn dùng binary `cloudflared` đã cài sẵn thay vì bản tải xuống được quản lý
-- Các panel Cloudflare Quick Tunnel, Tailscale Funnel và ngrok Tunnel có thể được hiện hoặc ẩn trong **Settings → Appearance**. Ẩn một panel không làm dừng tunnel đang chạy.
+- Khả dụng trong **Dashboard → Endpoints** cho Docker và các bản triển khai tự lưu trữ khác
+- Tạo một URL `https://*.trycloudflare.com` tạm thời để chuyển tiếp đến endpoint `/v1` tương thích với OpenAI hiện tại của bạn
+- Lần bật đầu tiên chỉ cài đặt `cloudflared` khi cần; các lần khởi động lại sau đó sẽ tái sử dụng cùng một tệp nhị phân được quản lý
+- Quick Tunnels không được tự động khôi phục sau khi OmniRoute hoặc container khởi động lại; hãy bật lại chúng từ dashboard khi cần
+- URL của tunnel chỉ tồn tại tạm thời và thay đổi mỗi khi bạn dừng/khởi động tunnel
+- Quick Tunnels được quản lý mặc định sử dụng giao thức truyền tải HTTP/2 để tránh các cảnh báo ồn ào về bộ đệm UDP của QUIC trong những container có tài nguyên hạn chế
+- Đặt `CLOUDFLARED_PROTOCOL=quic` hoặc `auto` nếu bạn muốn ghi đè lựa chọn giao thức truyền tải được quản lý
+- Đặt `CLOUDFLARED_BIN` nếu bạn muốn sử dụng tệp nhị phân `cloudflared` đã được cài đặt sẵn thay vì bản tải xuống được quản lý
+- Các bảng Cloudflare Quick Tunnel, Tailscale Funnel và ngrok Tunnel có thể được hiển thị hoặc ẩn trong **Settings → Appearance**. Việc ẩn một bảng không dừng tunnel đang chạy.
 
-### LLM Gateway Intelligence (Giai đoạn 9)
+### Trí tuệ LLM Gateway (Giai đoạn 9)
 
-- **Semantic Cache** — Tự động cache các phản hồi non-streaming, temperature=0 (bỏ qua bằng `X-OmniRoute-No-Cache: true`)
-- **Request Idempotency** — Khử trùng lặp các request trong vòng 5 giây qua header `Idempotency-Key` hoặc `X-Request-Id`
-- **Progress Tracking** — Các sự kiện SSE `event: progress` theo cơ chế opt-in qua header `X-OmniRoute-Progress: true`
+- **Bộ nhớ đệm ngữ nghĩa** — Tự động lưu vào bộ nhớ đệm các phản hồi không truyền phát có temperature=0 (bỏ qua bằng `X-OmniRoute-No-Cache: true`)
+- **Tính lũy đẳng của yêu cầu** — Loại bỏ các yêu cầu trùng lặp trong vòng 5 giây thông qua header `Idempotency-Key` hoặc `X-Request-Id`
+- **Theo dõi tiến trình** — Chủ động bật các sự kiện SSE `event: progress` thông qua header `X-OmniRoute-Progress: true`
 
 ---
 
-### Translator Playground
+### Sân chơi trình dịch
 
-Truy cập qua **Dashboard → Translator**. Gỡ lỗi và trực quan hóa cách OmniRoute dịch các API request giữa các provider.
+Truy cập qua **Dashboard → Translator**. Gỡ lỗi và trực quan hóa cách OmniRoute chuyển đổi các yêu cầu API giữa các nhà cung cấp.
 
-| Chế độ           | Mục đích                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------ |
-| **Playground**   | Chọn định dạng nguồn/đích, dán một request và xem ngay kết quả đã dịch                     |
-| **Chat Tester**  | Gửi tin nhắn chat trực tiếp qua proxy và kiểm tra toàn bộ chu trình request/response       |
-| **Test Bench**   | Chạy kiểm thử hàng loạt trên nhiều tổ hợp định dạng để xác minh tính đúng đắn của bản dịch |
-| **Live Monitor** | Theo dõi các bản dịch theo thời gian thực khi request chạy qua proxy                       |
+| Chế độ           | Mục đích                                                                                           |
+| ---------------- | -------------------------------------------------------------------------------------------------- |
+| **Playground**   | Chọn định dạng nguồn/đích, dán một yêu cầu và xem ngay đầu ra đã được chuyển đổi                   |
+| **Chat Tester**  | Gửi tin nhắn trò chuyện trực tiếp qua proxy và kiểm tra toàn bộ chu trình yêu cầu/phản hồi         |
+| **Test Bench**   | Chạy kiểm thử hàng loạt trên nhiều tổ hợp định dạng để xác minh tính chính xác của việc chuyển đổi |
+| **Live Monitor** | Theo dõi các bản chuyển đổi theo thời gian thực khi yêu cầu đi qua proxy                           |
 
 **Trường hợp sử dụng:**
 
-- Gỡ lỗi lý do một tổ hợp client/provider cụ thể bị lỗi
-- Xác minh rằng các thinking tag, tool call và system prompt được dịch đúng
-- So sánh sự khác biệt định dạng giữa các format OpenAI, Claude, Gemini và Responses API
+- Gỡ lỗi nguyên nhân khiến một tổ hợp máy khách/nhà cung cấp cụ thể gặp lỗi
+- Xác minh rằng các thẻ suy luận, lệnh gọi công cụ và lời nhắc hệ thống được chuyển đổi chính xác
+- So sánh sự khác biệt về định dạng giữa OpenAI, Claude, Gemini và các định dạng Responses API
 
 ---
 
-### Chiến lược Định tuyến
+### Chiến lược định tuyến
 
-Cấu hình qua **Dashboard → Settings → Routing**. Dashboard hiển thị sáu chiến lược được dùng nhiều nhất; các combo và auto-router bên trong hỗ trợ một tập lớn hơn.
+Cấu hình qua **Dashboard → Settings → Routing**. Dashboard hiển thị sáu chiến lược được sử dụng nhiều nhất; các combo và bộ định tuyến tự động hỗ trợ nội bộ một tập hợp rộng hơn.
 
-**Các chiến lược hiển thị trên Dashboard (định tuyến cấp tài khoản):**
+**Các chiến lược hiển thị trên dashboard (định tuyến cấp tài khoản):**
 
-| Chiến lược                     | Mô tả                                                                                                        |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| **Fill First**                 | Dùng các tài khoản theo thứ tự ưu tiên — tài khoản chính xử lý mọi request cho đến khi không khả dụng        |
-| **Round Robin**                | Luân phiên qua tất cả tài khoản với giới hạn sticky có thể cấu hình (mặc định: 3 lần gọi mỗi tài khoản)      |
-| **P2C (Power of Two Choices)** | Chọn ngẫu nhiên 2 tài khoản và định tuyến tới tài khoản khỏe hơn — cân bằng tải dựa trên tình trạng sức khỏe |
-| **Random**                     | Chọn ngẫu nhiên một tài khoản cho mỗi request bằng thuật toán xáo trộn Fisher-Yates                          |
-| **Least Used**                 | Định tuyến tới tài khoản có timestamp `lastUsedAt` cũ nhất, phân phối lưu lượng đều nhau                     |
-| **Cost Optimized**             | Định tuyến tới tài khoản có giá trị priority thấp nhất, tối ưu cho các provider chi phí thấp nhất            |
+| Chiến lược                     | Mô tả                                                                                                           |
+| ------------------------------ | --------------------------------------------------------------------------------------------------------------- |
+| **Fill First**                 | Sử dụng các tài khoản theo thứ tự ưu tiên — tài khoản chính xử lý mọi yêu cầu cho đến khi không khả dụng        |
+| **Round Robin**                | Luân phiên qua tất cả tài khoản với giới hạn duy trì có thể cấu hình (mặc định: 3 lệnh gọi cho mỗi tài khoản)   |
+| **P2C (Power of Two Choices)** | Chọn 2 tài khoản ngẫu nhiên và định tuyến đến tài khoản khỏe hơn — cân bằng tải có xét đến tình trạng hoạt động |
+| **Random**                     | Chọn ngẫu nhiên một tài khoản cho mỗi yêu cầu bằng thuật toán xáo trộn Fisher-Yates                             |
+| **Least Used**                 | Định tuyến đến tài khoản có dấu thời gian `lastUsedAt` cũ nhất, giúp phân phối lưu lượng đồng đều               |
+| **Cost Optimized**             | Định tuyến đến tài khoản có giá trị ưu tiên thấp nhất, tối ưu cho các nhà cung cấp có chi phí thấp nhất         |
 
-**Các chiến lược combo và auto nâng cao** (có thể cấu hình theo từng combo hoặc qua tiền tố `auto/*` — xem [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+**Các chiến lược combo và tự động nâng cao** (có thể cấu hình cho từng combo hoặc qua tiền tố `auto/*` — xem [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
 
-- `priority` — thứ tự nghiêm ngặt, không bao giờ round-robin
-- `weighted` — chia lưu lượng theo tỷ lệ dựa trên trọng số của từng model
-- `fill-first` — dồn hết vào model đầu tiên cho đến khi chạm giới hạn
+- `priority` — thứ tự nghiêm ngặt, không bao giờ luân phiên
+- `weighted` — phân chia lưu lượng theo tỷ lệ dựa trên trọng số của từng mô hình
+- `fill-first` — sử dụng hết mô hình đầu tiên cho đến khi đạt giới hạn
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Power of Two Choices)
 - `least-used` và `cost-optimized`
-- `auto` — định tuyến dựa trên điểm số trên tất cả ứng viên
-- `lkgp` (Last Known Good Provider) — ghim vào provider thành công gần nhất, sau đó quay về các quy tắc
-- `context-optimized` — chọn model có cửa sổ ngữ cảnh trống lớn nhất
-- `context-relay` — nối chuỗi các model ngữ cảnh dài cho các lượt tiếp theo
+- `auto` — dựa trên điểm số trên tất cả ứng viên
+- `lkgp` (Last Known Good Provider) — cố định vào nhà cung cấp thành công gần nhất, sau đó chuyển về các quy tắc dự phòng
+- `context-optimized` — chọn mô hình có cửa sổ ngữ cảnh còn trống lớn nhất
+- `context-relay` — nối chuỗi các mô hình có ngữ cảnh dài cho những lượt tiếp theo
 
-#### Header Sticky Session bên ngoài
+#### Header phiên duy trì bên ngoài
 
-Để gắn kết session từ bên ngoài (ví dụ, các agent Claude Code/Codex phía sau reverse proxy), hãy gửi:
+Để duy trì mối liên kết với phiên bên ngoài (ví dụ: các tác nhân Claude Code/Codex phía sau reverse proxy), hãy gửi:
 
 ```http
 X-Session-Id: your-session-key
 ```
 
-OmniRoute cũng chấp nhận `x_session_id` và trả về khóa session hiệu lực trong `X-OmniRoute-Session-Id`.
+OmniRoute cũng chấp nhận `x_session_id` và trả về khóa phiên thực tế trong `X-OmniRoute-Session-Id`.
 
-Nếu bạn dùng Nginx và gửi các header dạng gạch dưới, hãy bật:
+Nếu bạn sử dụng Nginx và gửi các header có dạng dấu gạch dưới, hãy bật:
 
 ```nginx
 underscores_in_headers on;
 ```
 
-#### Alias Model Wildcard
+#### Bí danh mô hình dùng ký tự đại diện
 
-Tạo các mẫu wildcard để ánh xạ lại tên model:
-
-```
-Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
-Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
-```
-
-Wildcard hỗ trợ `*` (bất kỳ ký tự nào) và `?` (một ký tự).
-
-#### Chuỗi Fallback
-
-Định nghĩa các chuỗi fallback toàn cục áp dụng cho mọi request:
+Tạo các mẫu ký tự đại diện để ánh xạ lại tên mô hình:
 
 ```
-Chain: production-fallback
+Mẫu: claude-sonnet-*         →  Đích: cc/claude-sonnet-4-6
+Mẫu: gpt-*                   →  Đích: gh/gpt-5.3-codex
+```
+
+Ký tự đại diện hỗ trợ `*` (bất kỳ chuỗi ký tự nào) và `?` (một ký tự đơn).
+
+#### Chuỗi dự phòng
+
+Định nghĩa các chuỗi dự phòng toàn cục áp dụng cho mọi yêu cầu:
+
+```
+Chuỗi: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -932,19 +907,19 @@ Chain: production-fallback
 
 ---
 
-### Các tổ hợp Provider phổ biến & Mẫu định tuyến
+### Các tổ hợp nhà cung cấp và mẫu định tuyến phổ biến
 
-Dưới đây là các mẫu ví dụ để kết hợp nhiều provider và định tuyến giữa chúng trong OmniRoute:
+Dưới đây là các mẫu ví dụ để kết hợp nhiều nhà cung cấp và định tuyến giữa chúng trong OmniRoute:
 
-#### 1. Combo Coding Agent: Suy luận cao cấp với dự phòng chi phí/tốc độ
+#### 1. Combo tác nhân lập trình: Suy luận cao cấp với phương án dự phòng theo chi phí/tốc độ
 
-Lý tưởng cho các coding agent (OpenCode, Claude Code, Cursor, Cline). Ban đầu định tuyến đến các mô hình suy luận tiên tiến, chuyển dự phòng sang các mô hình lập trình nhanh khi hết hạn mức hoặc gặp lỗi.
+Lý tưởng cho các tác nhân lập trình (OpenCode, Claude Code, Cursor, Cline). Ban đầu định tuyến đến các mô hình suy luận tiên tiến, sau đó chuyển sang các mô hình lập trình nhanh khi hết hạn ngạch hoặc xảy ra lỗi.
 
 - **Dashboard**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
 - **Mô hình**:
-  1. `claude/claude-sonnet-4-6` (Coding agent chính)
-  2. `openai/gpt-4o` (Dự phòng thứ cấp có năng lực cao)
-  3. `deepseek/deepseek-v4-flash` (Dự phòng hiệu suất cao, tiết kiệm chi phí)
+  1. `claude/claude-sonnet-4-6` (Tác nhân lập trình chính)
+  2. `openai/gpt-4o` (Phương án dự phòng thứ cấp có năng lực cao)
+  3. `deepseek/deepseek-v4-flash` (Phương án dự phòng hiệu quả cao, tiết kiệm chi phí)
 
 ```bash
 # Ví dụ qua API
@@ -962,11 +937,11 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Combo tự động chuyển đổi dự phòng cho gói miễn phí
+#### 2. Combo tự động chuyển đổi dự phòng thuộc gói miễn phí
 
-Chuỗi nhiều nhà cung cấp gói miễn phí và không cần khóa API để tối đa hóa thời gian hoạt động mà không tốn chi phí API.
+Kết hợp nhiều nhà cung cấp thuộc gói miễn phí và không yêu cầu khóa để tối đa hóa thời gian hoạt động mà không phát sinh chi phí API.
 
-- **Chiến lược**: `Least Used` hoặc `Round Robin` (phân phối tải giữa các hạn mức)
+- **Chiến lược**: `Least Used` hoặc `Round Robin` (phân phối tải giữa các hạn ngạch)
 - **Mô hình**:
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
@@ -979,64 +954,64 @@ omniroute combo create free-stack \
   --strategy round-robin
 ```
 
-#### 3. Pipeline đa phương thức / Thị giác & Văn bản
+#### 3. Quy trình đa phương thức / thị giác và văn bản
 
-Kết hợp các mô hình thị giác chuyên dụng với khả năng tạo văn bản tốc độ cao cho các quy trình làm việc liên quan đến hiểu hình ảnh và tạo mã nguồn.
+Kết hợp các mô hình thị giác chuyên biệt với khả năng tạo văn bản tốc độ cao cho các quy trình liên quan đến việc hiểu hình ảnh và tạo mã.
 
-- **Mẫu**: Một combo `Priority` liệt kê các mô hình có khả năng thị giác trước và mô hình văn bản/mã có thông lượng cao ở cuối.
+- **Mẫu**: Một combo `Priority` liệt kê các mô hình hỗ trợ thị giác trước và một mô hình văn bản/mã có thông lượng cao ở cuối.
 - **Mô hình**:
   1. `gemini/gemini-2.5-pro` (Khả năng hiểu hình ảnh/đa phương thức mạnh mẽ)
-  2. `openai/gpt-4o` (Cân bằng giữa thị giác và sử dụng công cụ)
+  2. `openai/gpt-4o` (Cân bằng giữa khả năng thị giác và sử dụng công cụ)
   3. `deepseek/deepseek-v4-flash` (Tạo văn bản/mã)
 
 ---
 
-### Khả năng phục hồi & Circuit Breaker
+### Khả năng phục hồi và bộ ngắt mạch
 
-Cấu hình qua **Dashboard → Settings → Resilience**.
+Cấu hình qua **Bảng điều khiển → Cài đặt → Khả năng phục hồi**.
 
 OmniRoute triển khai khả năng phục hồi ở cấp nhà cung cấp với năm thành phần:
 
-1. **Request Queue & Pacing** — Định hình yêu cầu ở cấp hệ thống:
-   - **Requests Per Minute (RPM)** — Số yêu cầu tối đa mỗi phút cho mỗi tài khoản
-   - **Min Time Between Requests** — Khoảng cách tối thiểu (tính bằng mili giây) giữa các yêu cầu
-   - **Max Concurrent Requests** — Số yêu cầu đồng thời tối đa cho mỗi tài khoản
+1. **Hàng đợi yêu cầu và điều tiết nhịp độ** — Điều tiết yêu cầu ở cấp hệ thống:
+   - **Số yêu cầu mỗi phút (RPM)** — Số yêu cầu tối đa mỗi phút cho mỗi tài khoản
+   - **Thời gian tối thiểu giữa các yêu cầu** — Khoảng cách tối thiểu tính bằng mili giây giữa các yêu cầu
+   - **Số yêu cầu đồng thời tối đa** — Số yêu cầu đồng thời tối đa cho mỗi tài khoản
 
-2. **Connection Cooldown** — Cấu hình theo từng loại xác thực cho một kết nối riêng lẻ sau các lỗi có thể thử lại:
-   - **Base Cooldown** — Khoảng thời gian cooldown mặc định cho các lỗi upstream có thể thử lại
-   - **Use Upstream Retry Hints** — Tuân theo các gợi ý `Retry-After` hoặc gợi ý reset có thẩm quyền khi được cung cấp
-   - **Max Backoff Steps** — Mức backoff lũy thừa tối đa cho các lỗi lặp lại
+2. **Thời gian tạm ngưng kết nối** — Cấu hình theo từng loại xác thực cho một kết nối sau các lỗi có thể thử lại:
+   - **Thời gian tạm ngưng cơ sở** — Khoảng thời gian tạm ngưng mặc định cho các lỗi từ dịch vụ thượng nguồn có thể thử lại
+   - **Sử dụng gợi ý thử lại từ thượng nguồn** — Tuân theo `Retry-After` có thẩm quyền hoặc các gợi ý đặt lại khi được cung cấp
+   - **Số bước lùi tối đa** — Mức lùi theo cấp số nhân tối đa cho các lỗi lặp lại
 
-3. **Provider Circuit Breaker** — Theo dõi lỗi nhà cung cấp toàn trình, đánh dấu nhà cung cấp bị suy giảm khi đạt ngưỡng cảnh báo đã cấu hình, và mở breaker khi đạt ngưỡng lỗi đã cấu hình:
-   - **Degradation Threshold** — Số lỗi nhà cung cấp liên tiếp trước khi chuyển sang `DEGRADED`
-   - **Failure Threshold** — Số lỗi nhà cung cấp liên tiếp trước khi chuyển sang `OPEN`
-   - **Reset Timeout** — Khoảng thời gian trước khi nhà cung cấp được kiểm tra lại
-   - **CLOSED** (Khỏe mạnh) — Các yêu cầu được đi qua bình thường
-   - **DEGRADED** — Các yêu cầu vẫn được đi qua trong khi các lỗi gia tăng được theo dõi
-   - **OPEN** — Nhà cung cấp tạm thời bị chặn sau các lỗi lặp lại
-   - **HALF_OPEN** — Đang kiểm tra xem nhà cung cấp đã phục hồi hay chưa
+3. **Bộ ngắt mạch nhà cung cấp** — Theo dõi các lỗi đầu cuối của nhà cung cấp, đánh dấu một nhà cung cấp là suy giảm khi đạt ngưỡng cảnh báo đã cấu hình và mở bộ ngắt mạch khi đạt ngưỡng lỗi đã cấu hình:
+   - **Ngưỡng suy giảm** — Số lỗi liên tiếp của nhà cung cấp trước khi chuyển sang `DEGRADED`
+   - **Ngưỡng lỗi** — Số lỗi liên tiếp của nhà cung cấp trước khi chuyển sang `OPEN`
+   - **Thời gian chờ đặt lại** — Khoảng thời gian trước khi nhà cung cấp được kiểm tra lại
+   - **CLOSED** (Khỏe mạnh) — Các yêu cầu được xử lý bình thường
+   - **DEGRADED** — Các yêu cầu vẫn được xử lý trong khi hệ thống theo dõi mức lỗi gia tăng
+   - **OPEN** — Nhà cung cấp tạm thời bị chặn sau nhiều lỗi liên tiếp
+   - **HALF_OPEN** — Kiểm tra xem nhà cung cấp đã khôi phục hay chưa
 
-   Các giới hạn tốc độ `429` ở phạm vi kết nối vẫn nằm trong **Connection Cooldown** và không được tính vào breaker của nhà cung cấp.
+   Giới hạn tốc độ `429` trong phạm vi kết nối vẫn nằm trong **Thời gian tạm ngưng kết nối** và không được tính vào bộ ngắt mạch nhà cung cấp.
 
-   Trạng thái runtime của provider breaker chỉ được hiển thị tại **Dashboard → Health**.
+   Trạng thái thời gian chạy của bộ ngắt mạch nhà cung cấp chỉ được hiển thị tại **Bảng điều khiển → Tình trạng**.
 
-4. **Wait For Cooldown** — Nếu mọi kết nối khả dụng đều đang trong thời gian cooldown, OmniRoute có thể chờ thời điểm cooldown sớm nhất và tự động thử lại cùng một yêu cầu của client.
+4. **Chờ hết thời gian tạm ngưng** — Nếu mọi kết nối ứng viên đều đang trong thời gian tạm ngưng, OmniRoute có thể chờ thời gian tạm ngưng sớm nhất kết thúc và tự động thử lại cùng một yêu cầu của máy khách.
 
-5. **Rate Limit Auto-Detection** — Khi các nhà cung cấp upstream trả về khoảng thời gian chờ rõ ràng, các gợi ý đó sẽ ghi đè cooldown kết nối cục bộ khi cài đặt này được bật.
+5. **Tự động phát hiện giới hạn tốc độ** — Khi các nhà cung cấp thượng nguồn trả về khoảng thời gian chờ rõ ràng, các gợi ý đó sẽ ghi đè thời gian tạm ngưng kết nối cục bộ nếu cài đặt này được bật.
 
-**Mẹo:** Sử dụng trang **Health** để kiểm tra và đặt lại các provider breaker đang hoạt động sau sự cố ngừng hoạt động. Trang Resilience chỉ thay đổi cấu hình.
+**Mẹo chuyên nghiệp:** Sử dụng trang **Tình trạng** để kiểm tra và đặt lại các bộ ngắt mạch nhà cung cấp đang hoạt động sau sự cố gián đoạn. Trang Khả năng phục hồi chỉ thay đổi cấu hình.
 
 ---
 
 ### Xuất / Nhập cơ sở dữ liệu
 
-Quản lý bản sao lưu cơ sở dữ liệu tại **Dashboard → Settings → System & Storage**.
+Quản lý các bản sao lưu cơ sở dữ liệu tại **Bảng điều khiển → Cài đặt → Hệ thống và lưu trữ**.
 
-| Hành động                | Mô tả                                                                                                                                                       |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Export Database**      | Tải xuống cơ sở dữ liệu SQLite hiện tại dưới dạng tệp `.sqlite`                                                                                             |
-| **Export All (.tar.gz)** | Tải xuống kho lưu trữ sao lưu đầy đủ bao gồm: cơ sở dữ liệu, cài đặt, combo, kết nối nhà cung cấp (không bao gồm thông tin xác thực), siêu dữ liệu khóa API |
-| **Import Database**      | Tải lên tệp `.sqlite` để thay thế cơ sở dữ liệu hiện tại. Một bản sao lưu trước khi nhập được tự động tạo trừ khi `DISABLE_SQLITE_AUTO_BACKUP=true`         |
+| Hành động                 | Mô tả                                                                                                                                                      |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Xuất cơ sở dữ liệu**    | Tải cơ sở dữ liệu SQLite hiện tại xuống dưới dạng tệp `.sqlite`                                                                                            |
+| **Xuất tất cả (.tar.gz)** | Tải xuống một kho lưu trữ sao lưu đầy đủ bao gồm: cơ sở dữ liệu, cài đặt, combo, kết nối nhà cung cấp (không có thông tin xác thực), siêu dữ liệu khóa API |
+| **Nhập cơ sở dữ liệu**    | Tải lên tệp `.sqlite` để thay thế cơ sở dữ liệu hiện tại. Một bản sao lưu trước khi nhập sẽ tự động được tạo trừ khi `DISABLE_SQLITE_AUTO_BACKUP=true`     |
 
 ```bash
 # API: Xuất cơ sở dữ liệu
@@ -1050,45 +1025,45 @@ curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Xác thực khi nhập:** Tệp được nhập sẽ được kiểm tra tính toàn vẹn (kiểm tra pragma SQLite), các bảng bắt buộc (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) và kích thước (tối đa 100MB).
+**Xác thực khi nhập:** Tệp được nhập sẽ được xác thực về tính toàn vẹn (kiểm tra pragma của SQLite), các bảng bắt buộc (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) và kích thước (tối đa 100MB).
 
 **Trường hợp sử dụng:**
 
 - Di chuyển OmniRoute giữa các máy
-- Tạo bản sao lưu bên ngoài để khôi phục sau thảm họa
+- Tạo bản sao lưu bên ngoài để phục hồi sau thảm họa
 - Chia sẻ cấu hình giữa các thành viên trong nhóm (xuất tất cả → chia sẻ kho lưu trữ)
 
 ---
 
-### Bảng điều khiển Cài đặt
+### Bảng điều khiển cài đặt
 
-Trang cài đặt được tổ chức thành **7 tab** để dễ dàng điều hướng:
+Trang cài đặt được sắp xếp thành **7 thẻ** để dễ dàng điều hướng:
 
-| Tab            | Nội dung                                                                                                                                                       |
-| -------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **General**    | Công cụ lưu trữ hệ thống, hành vi mặc định, hiển thị tunnel Endpoint                                                                                           |
-| **Appearance** | Điều khiển giao diện (sáng/tối/hệ thống), hiển thị sidebar, các nút bật/tắt panel cho thẻ tunnel Cloudflare/Tailscale/ngrok                                    |
-| **AI**         | Thinking budget (passthrough / auto-strip / custom / adaptive — xem [THINKING_BUDGET.md](./THINKING_BUDGET.md)), system prompt toàn cục, thống kê prompt cache |
-| **Security**   | Cài đặt Đăng nhập/Mật khẩu, Kiểm soát Truy cập IP, xác thực API cho `/models`, Provider Blocking, bảo vệ chống prompt-injection                                |
-| **Routing**    | Chiến lược định tuyến toàn cục (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), alias model wildcard, chuỗi fallback, mặc định combo   |
-| **Resilience** | Hàng đợi request, cooldown kết nối, cấu hình breaker provider, và hành vi chờ cooldown                                                                         |
-| **Advanced**   | Cấu hình proxy toàn cục (HTTP/SOCKS5), ghi đè proxy theo từng provider                                                                                         |
+| Tab                   | Nội dung                                                                                                                                                                                           |
+| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Chung**             | Công cụ lưu trữ hệ thống, hành vi mặc định, khả năng hiển thị đường hầm Endpoint                                                                                                                   |
+| **Giao diện**         | Điều khiển chủ đề (sáng/tối/hệ thống), khả năng hiển thị thanh bên, tùy chọn bật/tắt bảng cho các thẻ đường hầm Cloudflare/Tailscale/ngrok                                                         |
+| **AI**                | Ngân sách suy luận (chuyển tiếp nguyên trạng / tự động loại bỏ / tùy chỉnh / thích ứng — xem [THINKING_BUDGET.md](./THINKING_BUDGET.md)), lời nhắc hệ thống toàn cục, thống kê bộ nhớ đệm lời nhắc |
+| **Bảo mật**           | Cài đặt đăng nhập/mật khẩu, kiểm soát truy cập IP, xác thực API cho `/models`, chặn nhà cung cấp, cơ chế bảo vệ chống chèn lời nhắc                                                                |
+| **Định tuyến**        | Chiến lược định tuyến toàn cục (lấp đầy trước / luân phiên / P2C / ngẫu nhiên / ít được dùng nhất / tối ưu chi phí), bí danh mô hình có ký tự đại diện, chuỗi dự phòng, mặc định cho tổ hợp        |
+| **Khả năng phục hồi** | Hàng đợi yêu cầu, thời gian chờ kết nối, cấu hình bộ ngắt mạch nhà cung cấp và hành vi chờ hết thời gian tạm ngưng                                                                                 |
+| **Nâng cao**          | Cấu hình proxy toàn cục (HTTP/SOCKS5), ghi đè proxy theo từng nhà cung cấp                                                                                                                         |
 
-General không còn trùng lặp các ghi chú chỉ-đọc về logging và cache. Các cài đặt lưu giữ và
-tối ưu hóa database được lưu lại qua `/api/settings/database`; việc xóa cache thủ công sử dụng
-`DELETE /api/cache`. Giới hạn số hàng của log request và log proxy được kiểm soát bởi
+Phần Chung không còn lặp lại các ghi chú chỉ đọc về nhật ký và bộ nhớ đệm. Các cài đặt lưu giữ và
+tối ưu hóa cơ sở dữ liệu được duy trì thông qua `/api/settings/database`; việc xóa bộ nhớ đệm thủ công sử dụng
+`DELETE /api/cache`. Giới hạn số hàng của nhật ký yêu cầu và nhật ký proxy được kiểm soát bởi
 `CALL_LOGS_TABLE_MAX_ROWS` và `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
-### Quản lý Chi phí & Ngân sách
+### Quản lý chi phí & ngân sách
 
-Truy cập qua **Dashboard → Costs**.
+Truy cập qua **Bảng điều khiển → Chi phí**.
 
-| Tab         | Mục đích                                                                                             |
-| ----------- | ---------------------------------------------------------------------------------------------------- |
-| **Budget**  | Đặt giới hạn chi tiêu cho từng API key với ngân sách theo ngày/tuần/tháng và theo dõi thời gian thực |
-| **Pricing** | Xem và chỉnh sửa các mục giá model — chi phí trên 1K token đầu vào/đầu ra theo từng provider         |
+| Tab           | Mục đích                                                                                                             |
+| ------------- | -------------------------------------------------------------------------------------------------------------------- |
+| **Ngân sách** | Đặt giới hạn chi tiêu cho từng khóa API với ngân sách hằng ngày/hằng tuần/hằng tháng và theo dõi theo thời gian thực |
+| **Định giá**  | Xem và chỉnh sửa các mục định giá mô hình — chi phí trên mỗi 1K token đầu vào/đầu ra theo từng nhà cung cấp          |
 
 ```bash
 # API: Đặt ngân sách
@@ -1100,13 +1075,13 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Theo dõi Chi phí:** Mỗi request đều ghi lại mức sử dụng token và tính toán chi phí dựa trên bảng giá. Xem phân tích chi tiết trong **Dashboard → Usage** theo provider, model và API key.
+**Theo dõi chi phí:** Mỗi yêu cầu đều ghi lại mức sử dụng token và tính toán chi phí bằng bảng giá. Xem thông tin chi tiết trong **Bảng điều khiển → Mức sử dụng** theo nhà cung cấp, mô hình và khóa API.
 
 ---
 
-### Chuyển Âm thanh thành Văn bản
+### Phiên âm thanh
 
-OmniRoute hỗ trợ chuyển âm thanh thành văn bản qua endpoint tương thích OpenAI:
+OmniRoute hỗ trợ phiên âm thanh thông qua endpoint tương thích với OpenAI:
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1120,20 +1095,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
   -F "model=openai/whisper-1"
 ```
 
-`deepgram/nova-3` là route Deepgram gốc và yêu cầu API key Deepgram.
-Nếu chỉ có OpenRouter được cấu hình, hãy dùng `openrouter/deepgram/nova-3`.
+`deepgram/nova-3` là tuyến Deepgram gốc và cần khóa API Deepgram.
+Nếu chỉ cấu hình OpenRouter, hãy sử dụng `openrouter/deepgram/nova-3`.
 
-Các provider **Speech-to-Text (transcription)**:
+Các nhà cung cấp **chuyển giọng nói thành văn bản (phiên âm)**:
 
-- `openai/` (whisper-compatible)
+- `openai/` (tương thích với whisper)
 - `groq/` (Groq Whisper Turbo)
-- `deepgram/` (Nova family)
+- `deepgram/` (họ Nova)
 - `assemblyai/`
 - `nvidia/` (Parakeet, Canary)
-- `huggingface/` (whisper variants)
+- `huggingface/` (các biến thể whisper)
 - `qwen/`
 
-Các provider **Text-to-Speech (`POST /v1/audio/speech`)**:
+Các nhà cung cấp **chuyển văn bản thành giọng nói (`POST /v1/audio/speech`)**:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1150,56 +1125,56 @@ Các provider **Text-to-Speech (`POST /v1/audio/speech`)**:
 - `coqui/`, `tortoise/`
 - `qwen/`
 
-Các định dạng âm thanh được hỗ trợ cho transcription: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Định dạng đầu ra TTS tùy thuộc vào provider (mp3, wav, opus, pcm, mulaw).
+Các định dạng âm thanh được hỗ trợ để phiên âm: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `webm`. Định dạng đầu ra TTS phụ thuộc vào nhà cung cấp (mp3, wav, opus, pcm, mulaw).
 
 ---
 
-### Chiến lược Cân bằng Combo
+### Chiến lược cân bằng tổ hợp
 
-Cấu hình cân bằng cho từng combo trong **Dashboard → Combos → Create/Edit → Strategy**.
+Cấu hình cân bằng theo từng tổ hợp trong **Bảng điều khiển → Tổ hợp → Tạo/Chỉnh sửa → Chiến lược**.
 
-| Chiến lược         | Mô tả                                                                    |
-| ------------------ | ------------------------------------------------------------------------ |
-| **Round-Robin**    | Xoay vòng qua các model một cách tuần tự                                 |
-| **Priority**       | Luôn thử model đầu tiên; chỉ fallback khi gặp lỗi                        |
-| **Random**         | Chọn ngẫu nhiên một model trong combo cho mỗi request                    |
-| **Weighted**       | Định tuyến theo tỷ lệ dựa trên trọng số được gán cho từng model          |
-| **Least-Used**     | Định tuyến đến model có ít request gần đây nhất (dùng metrics của combo) |
-| **Cost-Optimized** | Định tuyến đến model khả dụng rẻ nhất (dùng bảng giá)                    |
+| Chiến lược            | Mô tả                                                                      |
+| --------------------- | -------------------------------------------------------------------------- |
+| **Luân phiên**        | Lần lượt xoay vòng qua các mô hình                                         |
+| **Ưu tiên**           | Luôn thử mô hình đầu tiên; chỉ dùng phương án dự phòng khi xảy ra lỗi      |
+| **Ngẫu nhiên**        | Chọn ngẫu nhiên một mô hình từ tổ hợp cho mỗi yêu cầu                      |
+| **Có trọng số**       | Định tuyến theo tỷ lệ dựa trên trọng số được gán cho từng mô hình          |
+| **Ít được dùng nhất** | Định tuyến đến mô hình có ít yêu cầu gần đây nhất (sử dụng số liệu tổ hợp) |
+| **Tối ưu chi phí**    | Định tuyến đến mô hình khả dụng rẻ nhất (sử dụng bảng giá)                 |
 
-Các giá trị mặc định combo toàn cục có thể được thiết lập trong **Dashboard → Settings → Routing → Combo Defaults**.
-Timeout của target combo mặc định kế thừa timeout của request hiện tại. Chỉ sử dụng **Target timeout
-(seconds)** trong combo defaults hoặc trên một combo riêng lẻ khi bạn muốn giới hạn ngắn hơn cho từng
-target nhằm kích hoạt fallback nhanh hơn.
+Có thể đặt các giá trị mặc định toàn cục cho tổ hợp trong **Bảng điều khiển → Cài đặt → Định tuyến → Mặc định cho tổ hợp**.
+Theo mặc định, thời gian chờ của mục tiêu trong tổ hợp kế thừa thời gian chờ yêu cầu hiện tại. Chỉ sử dụng **Thời gian chờ mục tiêu
+(giây)** trong phần mặc định cho tổ hợp hoặc trên một tổ hợp riêng lẻ khi giới hạn ngắn hơn cho từng mục tiêu cần
+kích hoạt chuyển sang phương án dự phòng nhanh hơn.
 
-Các tối ưu hóa zero-latency của combo là opt-in (phải chủ động bật). Hãy để **Zero-latency optimizations**
-ở trạng thái tắt để ngăn các tính năng độ trễ này chạy đua với các target fallback, bỏ qua target
-dựa trên lịch sử TTFT, hoặc nén các request fallback; khi bật, các cơ chế hedging đã cấu hình,
-bỏ qua theo dự đoán TTFT và nén fallback chủ động sẽ được áp dụng — đánh đổi độ trung thực của
-định tuyến/request để đạt độ trễ đuôi (tail latency) thấp hơn.
+Các tối ưu hóa tổ hợp có độ trễ bằng không là tùy chọn. Hãy để **Tối ưu hóa độ trễ bằng không** ở trạng thái tắt nhằm
+ngăn các tính năng về độ trễ này cho các mục tiêu dự phòng chạy đua, bỏ qua mục tiêu dựa trên lịch sử
+TTFT hoặc nén các yêu cầu dự phòng; việc bật tính năng này cho phép phòng hộ đã cấu hình, bỏ qua theo TTFT dự đoán
+và nén phương án dự phòng chủ động để đánh đổi độ trung thực của định tuyến/yêu cầu lấy độ trễ đuôi
+thấp hơn.
 
-Tắt **Reasoning token buffer** khi các nhà cung cấp upstream yêu cầu giới hạn nghiêm ngặt đối với
-`max_tokens` / `maxOutputTokens`. Khi được bật, combo routing chỉ bổ sung khoảng dự phòng
-cho mô hình reasoning đối với những mô hình có mức giới hạn đầu ra đã biết, và giữ nguyên giới hạn
-token của client khi giá trị đệm an toàn sẽ vượt quá mức giới hạn đó. Nếu giới hạn của client đã
-cao hơn một mức giới hạn đã biết, OmniRoute sẽ kẹp (clamp) giá trị đó xuống đúng mức giới hạn trước khi gửi yêu cầu tới upstream.
+Tắt **Bộ đệm token suy luận** khi các nhà cung cấp thượng nguồn yêu cầu giới hạn nghiêm ngặt về
+`max_tokens` / `maxOutputTokens`. Khi được bật, định tuyến kết hợp chỉ bổ sung khoảng dự phòng cho mô hình suy luận
+đối với các mô hình có giới hạn đầu ra đã biết và giữ nguyên giới hạn token của máy khách khi giá trị
+đã thêm bộ đệm an toàn vượt quá giới hạn đó. Nếu giới hạn của máy khách đã cao hơn một giới hạn đã biết,
+OmniRoute sẽ hạ giới hạn xuống mức đó trước khi gửi yêu cầu thượng nguồn.
 
 ---
 
-### Bảng điều khiển Health
+### Bảng điều khiển tình trạng
 
-Truy cập qua **Dashboard → Health**. Tổng quan sức khỏe hệ thống theo thời gian thực với 6 thẻ:
+Truy cập qua **Bảng điều khiển → Tình trạng**. Tổng quan tình trạng hệ thống theo thời gian thực với 6 thẻ:
 
-| Thẻ                   | Nội dung hiển thị                                                             |
-| --------------------- | ----------------------------------------------------------------------------- |
-| **System Status**     | Thời gian hoạt động (uptime), phiên bản, mức sử dụng bộ nhớ, thư mục dữ liệu  |
-| **Provider Health**   | Trạng thái runtime của circuit breaker nhà cung cấp toàn cục                  |
-| **Rate Limits**       | Các cooldown kết nối đang hoạt động của từng tài khoản cùng thời gian còn lại |
-| **Active Lockouts**   | Các lockout theo phạm vi mô hình đang hoạt động và các loại trừ tạm thời      |
-| **Signature Cache**   | Thống kê bộ nhớ đệm khử trùng lặp (số key đang hoạt động, tỷ lệ hit)          |
-| **Latency Telemetry** | Tổng hợp độ trễ p50/p95/p99 theo nhà cung cấp                                 |
+| Thẻ                         | Nội dung hiển thị                                                                      |
+| --------------------------- | -------------------------------------------------------------------------------------- |
+| **Trạng thái hệ thống**     | Thời gian hoạt động, phiên bản, mức sử dụng bộ nhớ, thư mục dữ liệu                    |
+| **Tình trạng nhà cung cấp** | Trạng thái thời gian chạy của bộ ngắt mạch nhà cung cấp toàn cục                       |
+| **Giới hạn tốc độ**         | Thời gian chờ kết nối đang áp dụng cho từng tài khoản cùng thời gian còn lại           |
+| **Khóa đang hoạt động**     | Các khóa theo phạm vi mô hình và trường hợp loại trừ tạm thời đang hoạt động           |
+| **Bộ nhớ đệm chữ ký**       | Thống kê bộ nhớ đệm loại bỏ trùng lặp (khóa đang hoạt động, tỷ lệ truy cập thành công) |
+| **Số liệu độ trễ**          | Tổng hợp độ trễ p50/p95/p99 theo từng nhà cung cấp                                     |
 
-**Mẹo hay:** Trang Health tự động làm mới mỗi 10 giây. Hãy sử dụng thẻ circuit breaker để xác định nhà cung cấp nào đang gặp sự cố.
+**Mẹo chuyên nghiệp:** Trang Tình trạng tự động làm mới sau mỗi 10 giây. Hãy sử dụng thẻ bộ ngắt mạch để xác định những nhà cung cấp đang gặp sự cố.
 
 ---
 

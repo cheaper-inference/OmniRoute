@@ -71,7 +71,7 @@
 
 |                                           |          v3.8.50           | **v3.8.51** |       `v3.8.53+`       |
 | ----------------------------------------- | :------------------------: | :---------: | :--------------------: |
-| 🌐 Provayderlar                           |            352             |   **358**   |          375           |
+| 🌐 Provayderlar                           |            352             |   **358**   |          376           |
 | 🧠 Noyob chat model IDlari                |            1320            |  **1374**   |          1475          |
 | 🖼️ Modallik koʻprigi                      | 🆕 koʻrish + audio + video |      ✓      |           ✓            |
 | 📡 Radar bepul katalogi                   |        🆕 ixtiyoriy        |      ✓      |           ✓            |

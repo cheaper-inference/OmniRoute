@@ -490,9 +490,9 @@ Ten spracováva:
 | ----------------------------- | ------------------------------------------------------------- |
 | `providerRegistry.ts`         | Register chatovacích modelov nad katalógom 376 poskytovateľov |
 | `providerModels.ts`           | Aliasy modelov, mapovanie formátov                            |
-| `constants.ts`                | Časové limity, limity, stavové kódy                           |
-| `defaultThinkingSignature.ts` | Predvolený podpis myslenia (thinking) Claude                  |
-| `modelStrip.ts` (v services)  | Odstraňovanie polí pre jednotlivých poskytovateľov            |
+| `constants.ts`                | Časové limity, obmedzenia, stavové kódy                       |
+| `defaultThinkingSignature.ts` | Predvolený podpis premýšľania Claude                          |
+| `modelStrip.ts` (v službách)  | Odstraňovanie polí podľa poskytovateľa                        |
 
 ### Schéma registra poskytovateľov
 
@@ -509,7 +509,7 @@ interface ProviderConfig {
 }
 ```
 
-Validácia Zod pri načítaní modulu zaisťuje, že všetky konfigurácie poskytovateľov sú platné.
+Validácia pomocou Zod pri načítaní modulu zabezpečuje, že všetky konfigurácie poskytovateľov sú platné.
 
 ---
 

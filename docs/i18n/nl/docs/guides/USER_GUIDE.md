@@ -612,9 +612,9 @@ Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabel
 <details>
 <summary><b>Bekijk alle beschikbare modellen</b></summary>
 
-> De onderstaande lijst is samengesteld uit `open-sse/config/providerRegistry.ts` voor v3.8.0. Cloudcatalogi (Gemini, OpenRouter, enz.) worden dynamisch gesynchroniseerd — voor de volledige live-catalogus open je **Dashboard → Providers → [provider] → Beschikbare modellen** of roep je `GET /api/models/catalog` aan.
+> De onderstaande lijst is samengesteld uit `open-sse/config/providerRegistry.ts` voor v3.8.0. Cloudcatalogi (Gemini, OpenRouter, enz.) worden dynamisch gesynchroniseerd — open voor de volledige live-catalogus **Dashboard → Providers → [provider] → Beschikbare modellen** of roep `GET /api/models/catalog` aan.
 >
-> Als de ingebouwde lijst van een provider is verouderd, gebruik dan **Importeren vanuit /models** op die pagina (of schakel **Auto-Sync** in) om de live upstream-catalogus op te halen. Dit is geverifieerd in v3.8.50 voor LLM7.io (`gemini-3.1-flash-lite`) en UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonieme toegang tot Pollinations bleef tijdens dezelfde testronde upstream-beperkt.
+> Als de ingebouwde lijst van een provider is verouderd, gebruik dan **Importeren vanaf /models** op die pagina (of schakel **Auto-Sync** in) om de live upstream-catalogus op te halen. Dit is geverifieerd in v3.8.50 voor LLM7.io (`gemini-3.1-flash-lite`) en UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonieme toegang tot Pollinations bleef tijdens dezelfde testronde aan de upstream-kant beperkt.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -630,7 +630,7 @@ Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabel
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/maand vast tarief of per gebruik: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mnd vast tarief of per gebruik: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API-sleutel: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -638,9 +638,9 @@ Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabel
 
 **xAI (`xai/`)** — Grok-native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Gehost in de EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-gehost: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Zoekondersteund: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Zoekverrijkt: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -656,11 +656,11 @@ Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabel
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Live gesynchroniseerd per API-sleutel van Google — geen statische lijst. Verbind een sleutel in **Dashboard → Providers** en gebruik vervolgens **Beschikbare modellen** om de huidige catalogus te importeren (bijv. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Live gesynchroniseerd per API-sleutel van Google — geen statische lijst. Koppel een sleutel in **Dashboard → Providers** en gebruik daarna **Beschikbare modellen** om de actuele catalogus te importeren (bijv. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Andere compatibele providers** (selectie): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough-catalogus), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Elke provider beheert zijn eigen modellijst in `providerRegistry.ts` en kan automatisch worden gesynchroniseerd wanneer de provider een `/models`-endpoint beschikbaar stelt.
+**Andere compatibele providers** (selectie): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough-catalogus), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Elk beheert zijn eigen modellijst in `providerRegistry.ts` en kan automatisch worden gesynchroniseerd wanneer de provider een `/models`-endpoint beschikbaar stelt.
 
-**Opmerking over model-ID's:** OmniRoute gebruikt de native ID's van de provider (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Sommige ID's bevatten versies met punten omdat de upstream-API ze zo verwacht. Als een model hierboven niet wordt vermeld, voer dan `omniroute models --search <term>` uit of roep `GET /api/models/catalog` aan om de beschikbaarheid te bevestigen.
+**Opmerking over model-ID's:** OmniRoute gebruikt provider-native ID's (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Sommige ID's bevatten versies met punten, omdat de upstream-API ze zo verwacht. Als een model hierboven niet vermeld staat, voer dan `omniroute models --search <term>` uit of gebruik `GET /api/models/catalog` om de beschikbaarheid te bevestigen.
 
 </details>
 
@@ -670,15 +670,15 @@ Zie de [README](../README.md) voor het volledige overzicht van omgevingsvariabel
 
 ### Aangepaste modellen
 
-Voeg een willekeurige model-ID toe aan elke provider zonder te wachten op een app-update:
+Voeg elke model-ID toe aan elke provider zonder op een app-update te wachten:
 
 ```bash
-# Via de API
+# Via API
 curl -X POST http://localhost:20128/api/provider-models \
   -H "Content-Type: application/json" \
   -d '{"provider": "openai", "modelId": "gpt-5.2", "modelName": "GPT-5.2"}'
 
-# Lijst opvragen: curl http://localhost:20128/api/provider-models?provider=openai
+# Weergeven: curl http://localhost:20128/api/provider-models?provider=openai
 # Verwijderen: curl -X DELETE "http://localhost:20128/api/provider-models?provider=openai&model=gpt-5.2"
 ```
 
@@ -686,77 +686,52 @@ Of gebruik het dashboard: **Providers → [Provider] → Aangepaste modellen**.
 
 Opmerkingen:
 
-- OpenRouter- en OpenAI/Anthropic-compatibele providers worden uitsluitend beheerd vanuit **Beschikbare modellen**. Handmatig toevoegen, importeren en automatisch synchroniseren komen allemaal in dezelfde lijst met beschikbare modellen terecht, dus er is geen aparte sectie Aangepaste modellen voor die providers.
+- OpenRouter en OpenAI/Anthropic-compatibele providers worden uitsluitend beheerd via **Beschikbare modellen**. Handmatig toevoegen, importeren en automatisch synchroniseren komen allemaal in dezelfde lijst met beschikbare modellen terecht. Daarom is er voor deze providers geen afzonderlijke sectie Aangepaste modellen.
 - De sectie **Aangepaste modellen** is bedoeld voor providers die geen beheerde import van beschikbare modellen aanbieden.
 
 ### Aangepaste OpenAI-compatibele providers
 
-Elke gateway die de OpenAI-API ondersteunt (een zelf-gehoste proxy, vLLM, een externe aggregator)
-kan als eigen provider-node worden toegevoegd:
+Elke gateway die de OpenAI-API ondersteunt (een zelfgehoste proxy, vLLM of een aggregator van derden)
+kan als een eigen providernode worden toegevoegd:
 
-1. **Providers → OpenAI-compatibel toevoegen**.
+1. **Providers → OpenAI-compatibele provider toevoegen**.
 2. **Naam**: een weergavelabel voor de node.
-3. **Prefix**: de routeringsnaam. Clients roepen modellen aan als `<prefix>/<model>`, dus een node met
-   prefix `mygw` serveert `mygw/gpt-4o-mini`. Verplicht; er is geen tekenbeperking.
-4. **API-type**: de endpoint-familie die de gateway aanbiedt (Chat Completions, Responses,
+3. **Voorvoegsel**: de routeringsnaam. Clients roepen modellen aan als `<prefix>/<model>`, dus een node met
+   het voorvoegsel `mygw` biedt `mygw/gpt-4o-mini` aan. Verplicht; er gelden geen tekenbeperkingen.
+4. **API-type**: de endpointfamilie die de gateway aanbiedt (Chat Completions, Responses,
    Embeddings, audio, afbeeldingen).
 5. **Basis-URL**: de API-root, tot en met `/v1` (bijvoorbeeld
-   `https://gateway.example.com/v1`), niet het volledige pad `/chat/completions`. Gateways met
-   niet-standaard paden stellen deze in onder **Geavanceerde instellingen** (chatpad, modellenpad).
-6. Het veld **API-sleutel (voor controle)** test alleen de verbinding. Nadat u de node hebt
-   aangemaakt, opent u deze en gebruikt u **Verbinding toevoegen** om de sleutel op te slaan die verzoeken zullen gebruiken.
+   `https://gateway.example.com/v1`), niet het volledige pad `/chat/completions`. Voor gateways met
+   niet-standaardpaden stelt u deze in onder **Geavanceerde instellingen** (chatpad, modellenpad).
+6. Het veld **API-sleutel (voor controle)** test alleen de verbinding. Nadat u de node hebt aangemaakt,
+   opent u deze en gebruikt u **Verbinding toevoegen** om de sleutel op te slaan die voor aanvragen wordt gebruikt.
 
-De node krijgt een interne id in de vorm `openai-compatible-<apiType>-<uuid>`; u hoeft deze nooit
-in te typen, de prefix is de openbare naam.
+De node krijgt een interne ID met de vorm `openai-compatible-<apiType>-<uuid>`; u hoeft
+deze nooit in te voeren, omdat het voorvoegsel de openbare naam is.
 
-#### Gereserveerde prefixes
+#### Gereserveerde voorvoegsels
 
-Een prefix mag niet de id of alias van een ingebouwde provider zijn (bijvoorbeeld `openai`, `cf`), noch
-de id van een buiten gebruik gestelde provider. De modelresolver controleert ingebouwde id's en aliassen vóór
-aangepaste nodes, dus een node die een van die prefixes gebruikt, zou nooit verkeer ontvangen:
-`<prefix>/model` zou in plaats daarvan naar de ingebouwde provider gaan, of fail-closed worden afgewezen
-als die provider buiten gebruik was gesteld. Het aanmaken of bewerken van een node met zo'n prefix wordt afgewezen met:
+Een voorvoegsel mag niet gelijk zijn aan de ID of alias van een ingebouwde provider (bijvoorbeeld `openai`, `cf`), noch
+aan de ID van een uitgefaseerde provider. De modelresolver controleert ingebouwde ID's en aliassen vóór
+aangepaste nodes. Daardoor zou een node die een van deze voorvoegsels gebruikt nooit verkeer ontvangen:
+`<prefix>/model` zou in plaats daarvan naar de ingebouwde provider gaan, of gesloten mislukken als die provider
+is uitgefaseerd. Het aanmaken of bewerken van een node met zo'n voorvoegsel wordt geweigerd met:
 
 ```text
-prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
+prefix: "<prefix>" is een gereserveerd providervoorvoegsel — kies een ander voorvoegsel (gereserveerde ID's/aliassen kunnen niet voor aangepaste nodes worden gebruikt, omdat aanvragen zoals <prefix>/model naar een ingebouwde provider worden gerouteerd of gesloten mislukken wanneer deze is uitgefaseerd)
 ```
 
-Kies een unieke prefix (`mygw`, `acme-proxy`). Als verzoeken aan een aangepaste node mislukken met een
-foutmelding die een ingebouwde provider of diens inloggegevens noemt, controleer dan of de prefix van de node
-gereserveerd is: nodes die zijn opgeslagen voordat deze regel bestond, blijven bewaard, maar hun prefix routeert naar
-de ingebouwde provider. Bewerk de node en geef deze een nieuwe prefix.
-
-#### Gateway-opties per verbinding
-
-Deze sleutels horen in de `providerSpecificData` van een verbinding (bijvoorbeeld via
-`PUT /api/providers/{id}`):
-
-- `toolNameMaxLength` (integer, 1–1024) — voor OpenAI-chatformaat-compatibele verbindingen waarvan de
-  gateway lange toolnamen weigert. Langere namen worden als korte aliassen verzonden en in het
-  antwoord hersteld.
-- `quotaEndpoint` — het quota/credits-endpoint van de gateway, uitgelezen voor de quotumbalk in het
-  dashboard en quota-bewuste routering. Werkt op zowel OpenAI- als Anthropic-compatibele verbindingen; de volledige vorm
-  is gedocumenteerd in `open-sse/services/usage/openaiCompatible.ts`.
-
-```json
-{
-  "toolNameMaxLength": 64,
-  "quotaEndpoint": {
-    "url": "https://gateway.example.com/key/info",
-    "auth": "bearer",
-    "quotas": {
-      "budget": { "used": "$.info.spend", "total": "$.info.max_budget", "currency": "USD" }
-    }
-  }
-}
-```
+Kies een uniek voorvoegsel (`mygw`, `acme-proxy`). Als aanvragen aan een aangepaste node mislukken met een
+foutmelding waarin een ingebouwde provider of de bijbehorende referenties worden genoemd, controleer dan of het voorvoegsel van de node
+gereserveerd is: nodes die zijn opgeslagen voordat deze regel bestond, blijven opgeslagen, maar hun voorvoegsel routeert naar
+de ingebouwde provider. Bewerk de node en geef deze een nieuw voorvoegsel.
 
 ### OmniRoute-peers koppelen
 
-Een andere OmniRoute-gateway kan worden toegevoegd als een **aangepaste OpenAI-compatibele** provider. Gebruik de
-`/v1`-basis-URL van de peer en een speciale API-sleutel met minimale bevoegdheden die door die peer is uitgegeven.
+Een andere OmniRoute-gateway kan als een **aangepaste OpenAI-compatibele** provider worden toegevoegd. Gebruik de
+basis-URL `/v1` van de peer en een speciaal daarvoor bestemde API-sleutel met minimale rechten die door die peer is uitgegeven.
 
-Voor wederzijdse of multi-hop-ketens schakelt u de opt-in-loopbeveiliging op elke gateway in:
+Schakel voor wederkerige of meertrapsketens de optionele lusbeveiliging op elke gateway in:
 
 ```bash
 # gateway-a
@@ -772,18 +747,18 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Alleen verzoeken die naar een expliciet op de allowlist geplaatste peer-URL worden verzonden, ontvangen de
-`X-OmniRoute-Peer-Trace`-header. Een gateway weigert een herhaalde instance-ID of een uitgeput
-hopbudget met HTTP `508 Loop Detected`; gewone upstream-providers ontvangen geen peer-metadata.
+Alleen aanvragen die naar een expliciet toegestane peer-URL worden verzonden, krijgen de
+header `X-OmniRoute-Peer-Trace`. Een gateway weigert een herhaalde instantie-ID of een opgebruikt hopbudget
+met HTTP `508 Loop Detected`; reguliere upstreamproviders ontvangen geen peermetadata.
 
-Peer-koppeling is geen databasereplicatie of host-failover. Elke gateway houdt een onafhankelijke
-SQLite-status, caches, rate-tellers en sessies bij. Gebruik een reverse proxy met health checks of
-client-failover voor actief/passief- of actief/actief-beschikbaarheid, en mount nooit één SQLite-database
-in meerdere draaiende OmniRoute-instanties.
+Peer-koppeling is geen databasereplicatie of hostfailover. Elke gateway behoudt onafhankelijke
+SQLite-status, caches, frequentietellers en sessies. Gebruik een reverse proxy met statuscontroles of clientfailover
+voor actieve/passieve of actieve/actieve beschikbaarheid en koppel één SQLite-database nooit
+aan meerdere actieve OmniRoute-instanties.
 
-### Toegewijde provider-routes
+### Specifieke providerroutes
 
-Routeer verzoeken rechtstreeks naar een specifieke provider met modelvalidatie:
+Routeer aanvragen rechtstreeks naar een specifieke provider met modelvalidatie:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -791,7 +766,7 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-De provider-prefix wordt automatisch toegevoegd als deze ontbreekt. Niet-overeenkomende modellen geven een `400` terug.
+Het providervoorvoegsel wordt automatisch toegevoegd als het ontbreekt. Niet-overeenkomende modellen retourneren `400`.
 
 ### Netwerkproxyconfiguratie
 
@@ -809,92 +784,92 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**Prioriteit:** Sleutelspecifiek → Combospecifiek → Providerspecifiek → Globaal → Omgeving.
+**Prioriteit:** Sleutelspecifiek → Combinatiespecifiek → Providerspecifiek → Globaal → Omgeving.
 
-### Modelcatalogus-API
+### API voor de modelcatalogus
 
 ```bash
 curl http://localhost:20128/api/models/catalog
 ```
 
-Retourneert modellen gegroepeerd per provider met types (`chat`, `embedding`, `image`).
+Retourneert modellen gegroepeerd op provider, met typen (`chat`, `embedding`, `image`).
 
 ### Cloudsynchronisatie
 
-- Synchroniseer providers, combo's en instellingen op al je apparaten
-- Automatische synchronisatie op de achtergrond met timeout + fail-fast
-- Gebruik in productie bij voorkeur server-side `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`
+- Synchroniseer providers, combinaties en instellingen tussen apparaten
+- Automatische achtergrondsynchronisatie met time-out en snelle foutafhandeling
+- Geef in productie de voorkeur aan server-side `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL`
 
 ### Cloudflare Quick Tunnel
 
-- Beschikbaar in **Dashboard → Endpoints** voor Docker en andere self-hosted implementaties
-- Maakt een tijdelijke `https://*.trycloudflare.com`-URL aan die doorverwijst naar je huidige OpenAI-compatibele `/v1`-endpoint
-- Bij de eerste activering wordt `cloudflared` alleen geïnstalleerd wanneer dat nodig is; latere herstarts hergebruiken dezelfde beheerde binary
+- Beschikbaar in **Dashboard → Endpoints** voor Docker en andere zelfgehoste implementaties
+- Maakt een tijdelijke `https://*.trycloudflare.com`-URL die doorstuurt naar uw huidige OpenAI-compatibele `/v1`-endpoint
+- Bij de eerste inschakeling wordt `cloudflared` alleen geïnstalleerd wanneer dat nodig is; bij latere herstarts wordt hetzelfde beheerde binaire bestand opnieuw gebruikt
 - Quick Tunnels worden niet automatisch hersteld na een herstart van OmniRoute of de container; schakel ze indien nodig opnieuw in via het dashboard
-- Tunnel-URL's zijn tijdelijk en veranderen elke keer dat je de tunnel stopt/start
-- Beheerde Quick Tunnels gebruiken standaard HTTP/2-transport om hinderlijke QUIC UDP-bufferwaarschuwingen in containers met beperkte resources te vermijden
-- Stel `CLOUDFLARED_PROTOCOL=quic` of `auto` in als je de beheerde transportkeuze wilt overschrijven
-- Stel `CLOUDFLARED_BIN` in als je liever een vooraf geïnstalleerde `cloudflared`-binary gebruikt in plaats van de beheerde download
-- De panelen Cloudflare Quick Tunnel, Tailscale Funnel en ngrok Tunnel kunnen worden weergegeven of verborgen in **Settings → Appearance**. Het verbergen van een paneel stopt een actieve tunnel niet.
+- Tunnel-URL's zijn tijdelijk en veranderen telkens wanneer u de tunnel stopt/start
+- Beheerde Quick Tunnels gebruiken standaard HTTP/2-transport om storende QUIC-waarschuwingen over UDP-buffers in beperkte containers te voorkomen
+- Stel `CLOUDFLARED_PROTOCOL=quic` of `auto` in als u de beheerde transportkeuze wilt overschrijven
+- Stel `CLOUDFLARED_BIN` in als u liever een vooraf geïnstalleerd binair bestand van `cloudflared` gebruikt in plaats van de beheerde download
+- Panelen voor Cloudflare Quick Tunnel, Tailscale Funnel en ngrok Tunnel kunnen worden weergegeven of verborgen via **Settings → Appearance**. Het verbergen van een paneel stopt een actieve tunnel niet.
 
-### LLM Gateway Intelligence (fase 9)
+### LLM-gatewayintelligentie (fase 9)
 
-- **Semantic Cache** — Cachet automatisch non-streaming responses met temperature=0 (omzeilen met `X-OmniRoute-No-Cache: true`)
-- **Request Idempotency** — Dedupliceert requests binnen 5 seconden via de `Idempotency-Key`- of `X-Request-Id`-header
-- **Progress Tracking** — Opt-in SSE `event: progress`-events via de `X-OmniRoute-Progress: true`-header
+- **Semantische cache** — Slaat niet-streamende antwoorden met temperature=0 automatisch op in de cache (omzeilen met `X-OmniRoute-No-Cache: true`)
+- **Idempotentie van aanvragen** — Dedupliceert aanvragen binnen 5 seconden via de header `Idempotency-Key` of `X-Request-Id`
+- **Voortgangsbewaking** — Optionele SSE-gebeurtenissen van het type `event: progress` via de header `X-OmniRoute-Progress: true`
 
 ---
 
 ### Translator Playground
 
-Toegang via **Dashboard → Translator**. Debug en visualiseer hoe OmniRoute API-requests tussen providers vertaalt.
+Toegankelijk via **Dashboard → Translator**. Debug en visualiseer hoe OmniRoute API-aanvragen tussen providers vertaalt.
 
-| Modus            | Doel                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------ |
-| **Playground**   | Selecteer bron-/doelformaten, plak een request en zie direct de vertaalde output                       |
-| **Chat Tester**  | Stuur live chatberichten via de proxy en inspecteer de volledige request/response-cyclus               |
-| **Test Bench**   | Voer batchtests uit over meerdere formaatcombinaties om de correctheid van de vertaling te controleren |
-| **Live Monitor** | Bekijk realtime vertalingen terwijl requests door de proxy stromen                                     |
+| Modus            | Doel                                                                                                 |
+| ---------------- | ---------------------------------------------------------------------------------------------------- |
+| **Playground**   | Selecteer bron-/doelindelingen, plak een aanvraag en bekijk direct de vertaalde uitvoer              |
+| **Chat Tester**  | Verstuur livechatberichten via de proxy en inspecteer de volledige aanvraag-/antwoordcyclus          |
+| **Test Bench**   | Voer batchtests uit voor meerdere indelingscombinaties om de juistheid van vertalingen te verifiëren |
+| **Live Monitor** | Bekijk vertalingen in realtime terwijl aanvragen door de proxy stromen                               |
 
 **Gebruiksscenario's:**
 
-- Debug waarom een specifieke client/provider-combinatie mislukt
-- Verifieer dat thinking-tags, tool calls en systeemprompts correct worden vertaald
-- Vergelijk formaatverschillen tussen OpenAI-, Claude-, Gemini- en Responses API-formaten
+- Debug waarom een specifieke combinatie van client en provider mislukt
+- Controleer of thinking-tags, toolaanroepen en systeemprompts correct worden vertaald
+- Vergelijk verschillen tussen de indelingen van OpenAI, Claude, Gemini en Responses API
 
 ---
 
 ### Routeringsstrategieën
 
-Configureren via **Dashboard → Settings → Routing**. Het dashboard toont de zes meest gebruikte strategieën; combo's en de auto-router ondersteunen intern een grotere set.
+Configureer via **Dashboard → Settings → Routing**. Het dashboard toont de zes meestgebruikte strategieën; combo's en de automatische router ondersteunen intern een bredere reeks.
 
 **In het dashboard zichtbare strategieën (routering op accountniveau):**
 
-| Strategie                      | Beschrijving                                                                                                          |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------- |
-| **Fill First**                 | Gebruikt accounts in prioriteitsvolgorde — het primaire account verwerkt alle requests totdat het niet beschikbaar is |
-| **Round Robin**                | Doorloopt alle accounts met een configureerbare sticky-limiet (standaard: 3 calls per account)                        |
-| **P2C (Power of Two Choices)** | Kiest 2 willekeurige accounts en routeert naar de gezondste — verdeelt de belasting op basis van gezondheid           |
-| **Random**                     | Selecteert willekeurig een account voor elk request met een Fisher-Yates-shuffle                                      |
-| **Least Used**                 | Routeert naar het account met de oudste `lastUsedAt`-timestamp, waardoor verkeer gelijkmatig wordt verdeeld           |
-| **Cost Optimized**             | Routeert naar het account met de laagste prioriteitswaarde, geoptimaliseerd voor providers met de laagste kosten      |
+| Strategie                      | Beschrijving                                                                                                           |
+| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| **Eerst vullen**               | Gebruikt accounts in prioriteitsvolgorde — het primaire account verwerkt alle aanvragen totdat het niet beschikbaar is |
+| **Round-robin**                | Wisselt cyclisch tussen alle accounts met een configureerbare sticky-limiet (standaard: 3 aanroepen per account)       |
+| **P2C (Power of Two Choices)** | Kiest 2 willekeurige accounts en routeert naar het gezondste account — balanceert belasting met oog voor de status     |
+| **Willekeurig**                | Selecteert voor elke aanvraag willekeurig een account met behulp van Fisher-Yates-shuffling                            |
+| **Minst gebruikt**             | Routeert naar het account met de oudste `lastUsedAt`-tijdstempel, waardoor verkeer gelijkmatig wordt verdeeld          |
+| **Kosten-geoptimaliseerd**     | Routeert naar het account met de laagste prioriteitswaarde en optimaliseert zo voor providers met de laagste kosten    |
 
-**Geavanceerde combo- en auto-strategieën** (configureerbaar per combo of via `auto/*`-prefixen — zie [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
+**Geavanceerde combo- en automatische strategieën** (configureerbaar per combo of via `auto/*`-voorvoegsels — zie [AUTO-COMBO.md](../routing/AUTO-COMBO.md)):
 
-- `priority` — strikte volgorde, nooit round-robin
+- `priority` — strikte volgorde, gebruikt nooit round-robin
 - `weighted` — proportionele verkeersverdeling op basis van gewichten per model
-- `fill-first` — gebruik het eerste model totdat de limieten worden bereikt
+- `fill-first` — gebruikt het eerste model totdat limieten worden bereikt
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Power of Two Choices)
 - `least-used` en `cost-optimized`
-- `auto` — scoregestuurd over alle kandidaten
-- `lkgp` (Last Known Good Provider) — blijft bij de laatste succesvolle provider en valt daarna terug op regels
+- `auto` — scoregestuurd voor alle kandidaten
+- `lkgp` (Last Known Good Provider) — blijft bij de laatst succesvolle provider en valt daarna terug op regels
 - `context-optimized` — kiest het model met het grootste vrije contextvenster
-- `context-relay` — koppelt modellen met een lange context aan elkaar voor vervolgbeurten
+- `context-relay` — koppelt modellen met een lange context voor vervolgbeurten
 
 #### Externe sticky-sessieheader
 
-Voor externe sessie-affiniteit (bijvoorbeeld Claude Code/Codex-agents achter reverse proxies), stuur:
+Stuur voor externe sessieaffiniteit (bijvoorbeeld Claude Code-/Codex-agents achter reverse proxies):
 
 ```http
 X-Session-Id: your-session-key
@@ -902,7 +877,7 @@ X-Session-Id: your-session-key
 
 OmniRoute accepteert ook `x_session_id` en retourneert de effectieve sessiesleutel in `X-OmniRoute-Session-Id`.
 
-Als je Nginx gebruikt en headers met underscores verstuurt, schakel dan het volgende in:
+Als u Nginx gebruikt en headers met underscores verstuurt, schakel dan het volgende in:
 
 ```nginx
 underscores_in_headers on;
@@ -910,21 +885,21 @@ underscores_in_headers on;
 
 #### Wildcard-modelaliassen
 
-Maak wildcardpatronen om modelnamen te hermappen:
+Maak wildcardpatronen om modelnamen opnieuw toe te wijzen:
 
 ```
-Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
-Pattern: gpt-*               →  Target: gh/gpt-5.3-codex
+Patroon: claude-sonnet-*     →  Doel: cc/claude-sonnet-4-6
+Patroon: gpt-*               →  Doel: gh/gpt-5.3-codex
 ```
 
 Wildcards ondersteunen `*` (willekeurige tekens) en `?` (één teken).
 
-#### Fallback-kettingen
+#### Fallback-ketens
 
-Definieer globale fallback-kettingen die van toepassing zijn op alle requests:
+Definieer globale fallback-ketens die op alle aanvragen van toepassing zijn:
 
 ```
-Chain: production-fallback
+Keten: production-fallback
   1. cc/claude-opus-4-7
   2. gh/gpt-5.3-codex
   3. glm/glm-4.7
@@ -932,19 +907,19 @@ Chain: production-fallback
 
 ---
 
-### Veelvoorkomende providercombinaties en routeringspatronen
+### Veelgebruikte providercombinaties en routeringspatronen
 
-Hier zijn voorbeeldpatronen voor het combineren van meerdere providers en het routeren daartussen in OmniRoute:
+Hier volgen voorbeeldpatronen voor het combineren van meerdere providers en het routeren tussen deze providers in OmniRoute:
 
-#### 1. Coding-agent-combo: geavanceerd redeneren met kosten-/snelheidsfallback
+#### 1. Combo voor programmeeragenten: geavanceerd redeneren met fallback voor kosten/snelheid
 
-Ideaal voor coding-agents (OpenCode, Claude Code, Cursor, Cline). Verzoeken worden eerst naar frontier-redeneermodellen gerouteerd, met een fallback naar snelle coding-modellen bij uitgeputte quota of fouten.
+Ideaal voor programmeeragents (OpenCode, Claude Code, Cursor, Cline). Routeert in eerste instantie naar geavanceerde redeneermodellen en valt bij uitgeputte quota of fouten terug op snelle programmeermodellen.
 
-- **Dashboard**: Combos → New Combo → Name: `agent-coding` → Strategy: `Priority`
+- **Dashboard**: Combos → New Combo → Naam: `agent-coding` → Strategie: `Priority`
 - **Modellen**:
-  1. `claude/claude-sonnet-4-6` (primaire coding-agent)
-  2. `openai/gpt-4o` (secundaire fallback met hoge capaciteit)
-  3. `deepseek/deepseek-v4-flash` (uiterst efficiënte, kosteneffectieve fallback)
+  1. `claude/claude-sonnet-4-6` (Primaire programmeeragent)
+  2. `openai/gpt-4o` (Secundaire fallback met hoge capaciteit)
+  3. `deepseek/deepseek-v4-flash` (Zeer efficiënte, kosteneffectieve fallback)
 
 ```bash
 # Voorbeeld via API
@@ -962,11 +937,11 @@ curl -X POST http://localhost:20128/api/combos \
   }'
 ```
 
-#### 2. Automatische-failover-combo voor gratis tiers
+#### 2. Automatische failovercombinatie voor de gratis laag
 
-Koppelt meerdere gratis-tier- en keyless-providers aan elkaar om de uptime te maximaliseren zonder API-kosten.
+Koppelt meerdere providers met een gratis laag en providers waarvoor geen sleutel nodig is om de beschikbaarheid te maximaliseren zonder API-kosten.
 
-- **Strategy**: `Least Used` of `Round Robin` (verdeelt de belasting over de quota)
+- **Strategie**: `Least Used` of `Round Robin` (verdeelt de belasting over quota)
 - **Modellen**:
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
@@ -979,128 +954,128 @@ omniroute combo create free-stack \
   --strategy round-robin
 ```
 
-#### 3. Multimodale vision- & tekstpipeline
+#### 3. Multimodale pipeline voor beeld en tekst
 
-Combineert gespecialiseerde vision-modellen met snelle tekstgeneratie voor workflows met beeldinterpretatie en codegeneratie.
+Combineert gespecialiseerde beeldmodellen met snelle tekstgeneratie voor workflows waarbij beeldinterpretatie en codegeneratie nodig zijn.
 
-- **Patroon**: een `Priority`-combo die eerst vision-compatibele modellen opsomt en als laatste een tekst-/codemodel met hoge doorvoer.
+- **Patroon**: Een `Priority`-combinatie waarin modellen met beeldondersteuning als eerste worden vermeld en een tekst-/codemodel met hoge doorvoer als laatste.
 - **Modellen**:
-  1. `gemini/gemini-2.5-pro` (sterke beeld-/multimodale interpretatie)
-  2. `openai/gpt-4o` (evenwichtig in vision en toolgebruik)
-  3. `deepseek/deepseek-v4-flash` (tekst-/codegeneratie)
+  1. `gemini/gemini-2.5-pro` (Sterk begrip van beelden en multimodale invoer)
+  2. `openai/gpt-4o` (Evenwichtige ondersteuning voor beelden en het gebruik van tools)
+  3. `deepseek/deepseek-v4-flash` (Tekst-/codegeneratie)
 
 ---
 
 ### Veerkracht en circuitbreakers
 
-Configureren via **Dashboard → Settings → Resilience**.
+Configureer dit via **Dashboard → Instellingen → Veerkracht**.
 
-OmniRoute implementeert veerkracht op providerniveau met vijf componenten:
+OmniRoute biedt veerkracht op providerniveau met vijf componenten:
 
-1. **Request Queue & Pacing** — request shaping op systeemniveau:
-   - **Requests Per Minute (RPM)** — maximaal aantal verzoeken per minuut per account
-   - **Min Time Between Requests** — minimale tussenpoos in milliseconden tussen verzoeken
-   - **Max Concurrent Requests** — maximaal aantal gelijktijdige verzoeken per account
+1. **Aanvraagwachtrij en dosering** — Aanvraagregulering op systeemniveau:
+   - **Aanvragen per minuut (RPM)** — Maximaal aantal aanvragen per minuut per account
+   - **Minimale tijd tussen aanvragen** — Minimale tijd in milliseconden tussen aanvragen
+   - **Maximaal aantal gelijktijdige aanvragen** — Maximaal aantal gelijktijdige aanvragen per account
 
-2. **Connection Cooldown** — configuratie per auth-type voor een enkele verbinding na fouten die opnieuw geprobeerd kunnen worden:
-   - **Base Cooldown** — standaard-cooldownvenster voor opnieuw probeerbare upstream-fouten
-   - **Use Upstream Retry Hints** — respecteert gezaghebbende `Retry-After`- of reset-hints wanneer deze worden meegegeven
-   - **Max Backoff Steps** — maximaal niveau van exponentiële backoff bij herhaalde fouten
+2. **Afkoelperiode voor verbindingen** — Configuratie per authenticatietype voor één verbinding na fouten waarbij opnieuw proberen mogelijk is:
+   - **Basisafkoelperiode** — Standaard afkoelvenster voor upstreamfouten waarbij opnieuw proberen mogelijk is
+   - **Upstreamaanwijzingen voor opnieuw proberen gebruiken** — Neemt bindende `Retry-After`- of resetaanwijzingen in acht wanneer deze worden verstrekt
+   - **Maximale back-offstappen** — Maximaal exponentieel back-offniveau voor herhaalde fouten
 
-3. **Provider Circuit Breaker** — houdt end-to-end-providerfouten bij, markeert een provider als degraded bij de geconfigureerde waarschuwingsdrempel en opent de breaker wanneer de geconfigureerde foutdrempel wordt bereikt:
-   - **Degradation Threshold** — opeenvolgende providerfouten voordat de status `DEGRADED` wordt bereikt
-   - **Failure Threshold** — opeenvolgende providerfouten voordat de status `OPEN` wordt bereikt
-   - **Reset Timeout** — tijdvenster voordat de provider opnieuw wordt getest
-   - **CLOSED** (gezond) — verzoeken verlopen normaal
-   - **DEGRADED** — verzoeken blijven doorgaan terwijl verhoogde foutaantallen worden bijgehouden
-   - **OPEN** — provider wordt tijdelijk geblokkeerd na herhaalde fouten
-   - **HALF_OPEN** — er wordt getest of de provider is hersteld
+3. **Circuitbreaker voor providers** — Houdt end-to-endfouten van providers bij, markeert een provider als verslechterd bij de geconfigureerde waarschuwingsdrempel en opent de breaker wanneer de geconfigureerde foutdrempel wordt bereikt:
+   - **Verslechteringsdrempel** — Aantal opeenvolgende providerfouten voordat de status `DEGRADED` wordt geactiveerd
+   - **Foutdrempel** — Aantal opeenvolgende providerfouten voordat de status `OPEN` wordt geactiveerd
+   - **Resettime-out** — Tijdsvenster voordat de provider opnieuw wordt getest
+   - **CLOSED** (Gezond) — Aanvragen worden normaal verwerkt
+   - **DEGRADED** — Aanvragen worden nog steeds verwerkt terwijl het verhoogde aantal fouten wordt bijgehouden
+   - **OPEN** — De provider wordt tijdelijk geblokkeerd na herhaalde fouten
+   - **HALF_OPEN** — Er wordt getest of de provider is hersteld
 
-   Verbindingsgebonden `429`-rate-limits vallen onder **Connection Cooldown** en tellen niet mee voor de provider-breaker.
+   Verbindingsspecifieke `429`-snelheidslimieten blijven binnen **Afkoelperiode voor verbindingen** en tellen niet mee voor de providercircuitbreaker.
 
-   De runtime-status van de provider-breaker wordt alleen weergegeven op **Dashboard → Health**.
+   De runtimestatus van de providercircuitbreaker wordt alleen weergegeven op **Dashboard → Status**.
 
-4. **Wait For Cooldown** — als elke geschikte verbinding al in cooldown is, kan OmniRoute wachten op de vroegst eindigende cooldown en hetzelfde clientverzoek automatisch opnieuw proberen.
+4. **Wachten op afkoelperiode** — Als alle beschikbare verbindingen al in een afkoelperiode zitten, kan OmniRoute wachten tot de eerste afkoelperiode is verstreken en dezelfde clientaanvraag automatisch opnieuw proberen.
 
-5. **Rate Limit Auto-Detection** — wanneer upstream-providers expliciete wachtvensters teruggeven, hebben die hints voorrang op de lokale verbindings-cooldown als deze instelling is ingeschakeld.
+5. **Automatische detectie van snelheidslimieten** — Wanneer upstreamproviders expliciete wachtvensters retourneren, hebben deze aanwijzingen voorrang op de lokale afkoelperiode van de verbinding als deze instelling is ingeschakeld.
 
-**Protip:** gebruik de **Health**-pagina om live provider-breakers te inspecteren en te resetten na een storing. De Resilience-pagina wijzigt alleen de configuratie.
+**Pro-tip:** Gebruik de pagina **Status** om actieve providercircuitbreakers na een storing te inspecteren en te resetten. Op de pagina Veerkracht wordt alleen de configuratie gewijzigd.
 
 ---
 
-### Database exporteren / importeren
+### Database exporteren/importeren
 
-Beheer databaseback-ups in **Dashboard → Settings → System & Storage**.
+Beheer databaseback-ups via **Dashboard → Instellingen → Systeem en opslag**.
 
-| Actie                    | Beschrijving                                                                                                                                                   |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Export Database**      | Downloadt de huidige SQLite-database als een `.sqlite`-bestand                                                                                                 |
-| **Export All (.tar.gz)** | Downloadt een volledig back-uparchief met: database, instellingen, combo's, providerverbindingen (geen inloggegevens), API-sleutelmetadata                     |
-| **Import Database**      | Upload een `.sqlite`-bestand om de huidige database te vervangen. Er wordt automatisch een pre-importback-up gemaakt, tenzij `DISABLE_SQLITE_AUTO_BACKUP=true` |
+| Actie                          | Beschrijving                                                                                                                                                              |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Database exporteren**        | Downloadt de huidige SQLite-database als een `.sqlite`-bestand                                                                                                            |
+| **Alles exporteren (.tar.gz)** | Downloadt een volledig back-uparchief met: database, instellingen, combinaties, providerverbindingen (zonder referenties), metadata van API-sleutels                      |
+| **Database importeren**        | Uploadt een `.sqlite`-bestand om de huidige database te vervangen. Er wordt automatisch een back-up vóór het importeren gemaakt, tenzij `DISABLE_SQLITE_AUTO_BACKUP=true` |
 
 ```bash
-# API: database exporteren
+# API: Database exporteren
 curl -o backup.sqlite http://localhost:20128/api/db-backups/export
 
-# API: alles exporteren (volledig archief)
+# API: Alles exporteren (volledig archief)
 curl -o backup.tar.gz http://localhost:20128/api/db-backups/exportAll
 
-# API: database importeren
+# API: Database importeren
 curl -X POST http://localhost:20128/api/db-backups/import \
   -F "file=@backup.sqlite"
 ```
 
-**Importvalidatie:** het geïmporteerde bestand wordt gevalideerd op integriteit (SQLite-pragma-controle), vereiste tabellen (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) en grootte (max. 100 MB).
+**Importvalidatie:** Het geïmporteerde bestand wordt gevalideerd op integriteit (SQLite-pragmacontrole), vereiste tabellen (`provider_connections`, `provider_nodes`, `combos`, `api_keys`) en grootte (maximaal 100 MB).
 
 **Gebruiksscenario's:**
 
-- OmniRoute migreren tussen machines
-- Externe back-ups maken voor disaster recovery
-- Configuraties delen tussen teamleden (alles exporteren → archief delen)
+- OmniRoute tussen machines migreren
+- Externe back-ups maken voor noodherstel
+- Configuraties delen met teamleden (alles exporteren → archief delen)
 
 ---
 
 ### Instellingendashboard
 
-De instellingenpagina is onderverdeeld in **7 tabbladen** voor eenvoudige navigatie:
+De instellingenpagina is voor eenvoudige navigatie onderverdeeld in **7 tabbladen**:
 
-| Tab            | Inhoud                                                                                                                                                                            |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **General**    | Tools voor systeemopslag, standaardgedrag, zichtbaarheid van Endpoint-tunnels                                                                                                     |
-| **Appearance** | Thema-instellingen (licht/donker/systeem), zichtbaarheid van de zijbalk, paneelschakelaars voor Cloudflare/Tailscale/ngrok-tunnelkaarten                                          |
-| **AI**         | Denkbudget (passthrough / auto-strip / custom / adaptive — zie [THINKING_BUDGET.md](./THINKING_BUDGET.md)), globale systeemprompt, statistieken van de promptcache                |
-| **Security**   | Inlog- en wachtwoordinstellingen, IP-toegangscontrole, API-authenticatie voor `/models`, Provider Blocking, beveiliging tegen promptinjectie                                      |
-| **Routing**    | Globale routeringsstrategie (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), aliassen voor wildcardmodellen, fallback-ketens, combo-standaardinstellingen |
-| **Resilience** | Wachtrij voor verzoeken, cooldown van verbindingen, configuratie van de provider-breaker en gedrag bij wachten op cooldown                                                        |
-| **Advanced**   | Globale proxyconfiguratie (HTTP/SOCKS5), proxy-overschrijvingen per provider                                                                                                      |
+| Tab             | Inhoud                                                                                                                                                                                                 |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Algemeen**    | Hulpmiddelen voor systeemopslag, standaardgedrag, zichtbaarheid van Endpoint-tunnels                                                                                                                   |
+| **Weergave**    | Thema-instellingen (licht/donker/systeem), zichtbaarheid van zijbalk, paneelschakelaars voor tunnelkaarten van Cloudflare/Tailscale/ngrok                                                              |
+| **AI**          | Denkbudget (doorgeven / automatisch verwijderen / aangepast / adaptief — zie [THINKING_BUDGET.md](./THINKING_BUDGET.md)), globale systeemprompt, promptcachestatistieken                               |
+| **Beveiliging** | Instellingen voor aanmelding/wachtwoord, IP-toegangsbeheer, API-authenticatie voor `/models`, blokkering van providers, bescherming tegen promptinjectie                                               |
+| **Routering**   | Globale routeringsstrategie (Eerst vullen / Round Robin / P2C / Willekeurig / Minst gebruikt / Kostenoptimalisatie), modelaliassen met jokertekens, fallbackketens, standaardinstellingen voor combo's |
+| **Robuustheid** | Aanvraagwachtrij, afkoelperiode voor verbindingen, configuratie van provideronderbrekers en gedrag voor wachten op de afkoelperiode                                                                    |
+| **Geavanceerd** | Globale proxyconfiguratie (HTTP/SOCKS5), proxy-overschrijvingen per provider                                                                                                                           |
 
-General dupliceert niet langer de alleen-lezen-notities over logging en cache. Instellingen voor
-databaseretentie en -optimalisatie worden opgeslagen via `/api/settings/database`; handmatig wissen
-van de cache gebruikt `DELETE /api/cache`. De rijlimieten voor de request- en proxylogs worden
-beheerd door `CALL_LOGS_TABLE_MAX_ROWS` en `PROXY_LOGS_TABLE_MAX_ROWS`.
+Algemeen bevat niet langer dubbele alleen-lezeninformatie over logboekregistratie en cache. Instellingen voor databaseretentie en
+-optimalisatie worden opgeslagen via `/api/settings/database`; voor het handmatig wissen van de cache wordt
+`DELETE /api/cache` gebruikt. Limieten voor het aantal rijen in aanvraag- en proxylogboeken worden beheerd via
+`CALL_LOGS_TABLE_MAX_ROWS` en `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
 ### Kosten- en budgetbeheer
 
-Toegang via **Dashboard → Costs**.
+Toegankelijk via **Dashboard → Kosten**.
 
 | Tab         | Doel                                                                                                             |
 | ----------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Budget**  | Stel bestedingslimieten per API-sleutel in met dagelijkse/wekelijkse/maandelijkse budgetten en realtime tracking |
-| **Pricing** | Bekijk en bewerk prijsinvoeren voor modellen — kosten per 1K input/output-tokens per provider                    |
+| **Budget**  | Stel bestedingslimieten per API-sleutel in met dagelijkse/wekelijkse/maandelijkse budgetten en realtime-tracking |
+| **Prijzen** | Bekijk en bewerk prijsvermeldingen voor modellen — kosten per 1K invoer-/uitvoertokens per provider              |
 
 ```bash
-# API: Een budget instellen
+# API: Stel een budget in
 curl -X POST http://localhost:20128/api/usage/budget \
   -H "Content-Type: application/json" \
   -d '{"keyId": "key-123", "limit": 50.00, "period": "monthly"}'
 
-# API: Huidige budgetstatus ophalen
+# API: Haal de huidige budgetstatus op
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Kostentracking:** Elk verzoek logt het tokengebruik en berekent de kosten aan de hand van de prijstabel. Bekijk uitsplitsingen in **Dashboard → Usage** per provider, model en API-sleutel.
+**Kostentracking:** Voor elke aanvraag wordt het tokengebruik geregistreerd en worden de kosten berekend aan de hand van de prijstabel. Bekijk uitsplitsingen in **Dashboard → Gebruik** per provider, model en API-sleutel.
 
 ---
 
@@ -1123,17 +1098,17 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 `deepgram/nova-3` is de native Deepgram-route en vereist een Deepgram API-sleutel.
 Als alleen OpenRouter is geconfigureerd, gebruik dan `openrouter/deepgram/nova-3`.
 
-**Speech-to-Text (transcriptie)**-providers:
+Providers voor **spraak-naar-tekst (transcriptie)**:
 
-- `openai/` (whisper-compatibel)
+- `openai/` (compatibel met Whisper)
 - `groq/` (Groq Whisper Turbo)
 - `deepgram/` (Nova-familie)
 - `assemblyai/`
 - `nvidia/` (Parakeet, Canary)
-- `huggingface/` (whisper-varianten)
+- `huggingface/` (Whisper-varianten)
 - `qwen/`
 
-**Text-to-Speech (`POST /v1/audio/speech`)**-providers:
+Providers voor **tekst-naar-spraak (`POST /v1/audio/speech`)**:
 
 - `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
@@ -1154,50 +1129,48 @@ Ondersteunde audioformaten voor transcriptie: `mp3`, `wav`, `m4a`, `flac`, `ogg`
 
 ---
 
-### Strategieën voor combo-balancering
+### Strategieën voor comboverdeling
 
-Configureer balancering per combo in **Dashboard → Combos → Create/Edit → Strategy**.
+Configureer verdeling per combo via **Dashboard → Combo's → Maken/Bewerken → Strategie**.
 
-| Strategie          | Beschrijving                                                                     |
-| ------------------ | -------------------------------------------------------------------------------- |
-| **Round-Robin**    | Geeft de modellen opeenvolgend beurten                                           |
-| **Priority**       | Probeert altijd het eerste model; valt alleen terug bij een fout                 |
-| **Random**         | Kiest voor elk verzoek een willekeurig model uit de combo                        |
-| **Weighted**       | Routeert proportioneel op basis van toegewezen gewichten per model               |
-| **Least-Used**     | Routeert naar het model met de minste recente verzoeken (gebruikt combo-metrics) |
-| **Cost-Optimized** | Routeert naar het goedkoopste beschikbare model (gebruikt de prijstabel)         |
+| Strategie               | Beschrijving                                                                              |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| **Round-Robin**         | Doorloopt modellen opeenvolgend                                                           |
+| **Prioriteit**          | Probeert altijd eerst het eerste model; valt alleen bij een fout terug op een ander model |
+| **Willekeurig**         | Kiest voor elke aanvraag een willekeurig model uit de combo                               |
+| **Gewogen**             | Routeert proportioneel op basis van de toegewezen gewichten per model                     |
+| **Minst gebruikt**      | Routeert naar het model met de minste recente aanvragen (gebruikt combometrieken)         |
+| **Kostenoptimalisatie** | Routeert naar het goedkoopste beschikbare model (gebruikt de prijstabel)                  |
 
-Globale standaardinstellingen voor combo's kunnen worden ingesteld in **Dashboard → Settings → Routing → Combo Defaults**.
-Time-outs van combo-doelen nemen standaard de huidige request-timeout over. Gebruik **Target timeout
-(seconds)** bij de combo-standaardinstellingen of bij een individuele combo alleen wanneer een kortere
-limiet per doel een snellere fallback moet triggeren.
+Globale standaardinstellingen voor combo's kunnen worden ingesteld via **Dashboard → Instellingen → Routering → Standaardinstellingen voor combo's**.
+Time-outs voor combodoelen nemen standaard de huidige time-out voor aanvragen over. Gebruik **Time-out voor doel
+(seconden)** bij de standaardinstellingen voor combo's of bij een afzonderlijke combo alleen wanneer een kortere limiet per doel
+sneller een fallback moet activeren.
 
-Zero-latency-optimalisaties voor combo's zijn opt-in. Laat **Zero-latency optimizations**
-uitgeschakeld om te voorkomen dat deze latentiefuncties een wedloop aangaan met fallback-doelen,
-doelen overslaan op basis van TTFT-geschiedenis of fallback-verzoeken comprimeren; als u de functie
-inschakelt, kunnen geconfigureerde hedging, voorspellende TTFT-skips en proactieve
-fallback-compressie de betrouwbaarheid van routering/verzoeken inruilen voor een lagere
+Combinatiespecifieke optimalisaties zonder latentie zijn opt-in. Laat **Optimalisaties zonder latentie** uitgeschakeld om
+te voorkomen dat deze latentiefuncties fallbackdoelen gelijktijdig aanroepen, doelen overslaan op basis van de TTFT-
+geschiedenis of fallbackaanvragen comprimeren; als u deze functie inschakelt, kunnen geconfigureerde hedging, voorspellende TTFT-
+overslagen en proactieve fallbackcompressie een lagere routerings-/aanvraaggetrouwheid inruilen voor een lagere
 staartlatentie.
 
-Schakel **Reasoning token buffer** uit wanneer upstreamproviders strikte
-`max_tokens`- / `maxOutputTokens`-limieten vereisen. Wanneer deze optie is ingeschakeld, voegt combo-routing alleen bij modellen met een bekende outputlimiet extra marge voor redeneermodellen toe, en blijft de tokenlimiet van de client ongewijzigd wanneer de veilige gebufferde waarde die limiet zou overschrijden. Als de clientlimiet al boven een bekende limiet ligt, beperkt OmniRoute deze tot die limiet voordat het upstreamverzoek wordt verzonden.
+Schakel **Redeneertokenbuffer** uit wanneer upstreamproviders strikte limieten voor `max_tokens` / `maxOutputTokens` vereisen. Wanneer deze is ingeschakeld, voegt combinatieroutering alleen extra ruimte voor redeneermodellen toe voor modellen met een bekende uitvoerlimiet en blijft de tokenlimiet van de client ongewijzigd als de veilige gebufferde waarde die limiet zou overschrijden. Als de clientlimiet al hoger is dan een bekende limiet, verlaagt OmniRoute deze tot die limiet voordat het upstreamverzoek wordt verzonden.
 
 ---
 
-### Health-dashboard
+### Statusdashboard
 
-Toegang via **Dashboard → Health**. Realtime-overzicht van de systeemgezondheid met 6 kaarten:
+Toegankelijk via **Dashboard → Status**. Realtimeoverzicht van de systeemstatus met 6 kaarten:
 
-| Kaart                 | Wat het toont                                                      |
-| --------------------- | ------------------------------------------------------------------ |
-| **System Status**     | Uptime, versie, geheugengebruik, gegevensmap                       |
-| **Provider Health**   | Globale runtime-status van de provider-circuitbreaker              |
-| **Rate Limits**       | Actieve verbindingscooldowns per account met resterende tijd       |
-| **Active Lockouts**   | Actieve lockouts op modelniveau en tijdelijke uitsluitingen        |
-| **Signature Cache**   | Statistieken van de deduplicatiecache (actieve sleutels, hitratio) |
-| **Latency Telemetry** | p50/p95/p99-latentieaggregatie per provider                        |
+| Kaart                    | Wat deze toont                                                        |
+| ------------------------ | --------------------------------------------------------------------- |
+| **Systeemstatus**        | Bedrijfstijd, versie, geheugengebruik, gegevensmap                    |
+| **Providerstatus**       | Globale runtimestatus van het circuit breaker-mechanisme per provider |
+| **Snelheidslimieten**    | Actieve verbindingsafkoelperiodes per account met resterende tijd     |
+| **Actieve blokkeringen** | Actieve modelspecifieke blokkeringen en tijdelijke uitsluitingen      |
+| **Handtekeningcache**    | Statistieken van de deduplicatiecache (actieve sleutels, trefratio)   |
+| **Latentietelemetrie**   | Aggregatie van p50/p95/p99-latentie per provider                      |
 
-**Pro-tip:** De Health-pagina wordt elke 10 seconden automatisch vernieuwd. Gebruik de circuitbreakerkaart om te bepalen welke providers problemen ondervinden.
+**Pro-tip:** De statuspagina wordt elke 10 seconden automatisch vernieuwd. Gebruik de circuit breaker-kaart om vast te stellen welke providers problemen ondervinden.
 
 ---
 
