@@ -215,7 +215,9 @@ test("Codex capacity 429 briefly cools only the exact model when cooling is enab
   const persisted = await providers.getProviderConnectionById(conn.id);
   assert.ok(persisted);
   assert.ok(!persisted.rateLimitedUntil);
-  assert.ok(!(persisted.providerSpecificData as Record<string, unknown>).codexScopeRateLimitedUntil);
+  assert.ok(
+    !(persisted.providerSpecificData as Record<string, unknown>).codexScopeRateLimitedUntil
+  );
   assert.equal(fallback.isModelLocked("codex", conn.id, "gpt-5.3-codex"), true);
   assert.equal(fallback.isModelLocked("codex", conn.id, "gpt-5.4"), false);
 });
@@ -331,4 +333,3 @@ test("transient Codex capacity cannot clear an earlier genuine scoped quota cool
     .codexScopeRateLimitedUntil as Record<string, unknown>;
   assert.equal(scoped.codex, previousUntil, "known quota reset must not be cleared");
 });
-

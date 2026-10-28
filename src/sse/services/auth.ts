@@ -3081,9 +3081,7 @@ export async function markAccountUnavailable(
       conn &&
       isTransientCodexCapacity429(status, errorText, options.headers)
     ) {
-      const modelCooldownMs = disableCooling
-        ? 0
-        : Math.min(Math.max(cooldownMs, 5_000), 60_000);
+      const modelCooldownMs = disableCooling ? 0 : Math.min(Math.max(cooldownMs, 5_000), 60_000);
       if (modelCooldownMs > 0) {
         lockExactModel(provider, connectionId, model, "model_capacity", modelCooldownMs);
       }

@@ -198,8 +198,7 @@ async function recordUpstreamRateLimit(
   try {
     const text = await attempt.response.clone().text();
     capacity429 =
-      provider === "codex" &&
-      isTransientCodexCapacity429(status, text, attempt.response.headers);
+      provider === "codex" && isTransientCodexCapacity429(status, text, attempt.response.headers);
     // parseRetryAfterFromBody JSON.parses a string and falls back to "unknown"
     // on non-JSON, so the raw text is the safest thing to hand over.
     // Do not turn one Codex model-capacity response into a shared quota pause.
