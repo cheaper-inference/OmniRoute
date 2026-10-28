@@ -175,12 +175,12 @@ npm run test:all
 # ஒற்றைச் சோதனைக் கோப்பு (Node.js நேட்டிவ் சோதனை இயக்கி — பெரும்பாலான சோதனைகள் இதைப் பயன்படுத்துகின்றன)
 node --import tsx/esm --test tests/unit/your-file.test.ts
 
-# உங்கள் மாற்றத்தால் பாதிக்கப்பட்ட unit சோதனைகள் மட்டும் (CI gate, #8084 பயன்படுத்தும் அதே TIA selector)
+# உங்கள் மாற்றத்தால் பாதிக்கப்பட்ட unit சோதனைகள் மட்டும் (CI gate-இல் உள்ள அதே TIA selector, #8084)
 npm run test:scoped            # கடைசி commit-இல் உள்ள மாற்றங்கள் (அல்லது working tree)
 npm run test:scoped:staged     # staged மாற்றங்கள் மட்டும் — pre-commit இயக்கத்துடன் நன்றாகப் பொருந்தும்
 npm run test:scoped:full       # முதலில் import-graph map-ஐ மீண்டும் உருவாக்கும் (கோப்புகளைச் சேர்த்த/நகர்த்திய பிறகு)
-# Exit 1 + "run the full suite" என்பது ஒரு hub கோப்பு (tsconfig, package.json, …) அல்லது
-# map செய்யப்படாத source மாறியுள்ளது என்பதைக் குறிக்கும் — selector பாதுகாப்பாகத் தோல்வியடையும்; எதையும் அமைதியாகத் தவிர்க்காது.
+# Exit 1 + "முழு suite-ஐ இயக்கவும்" என்பது hub கோப்பு (tsconfig, package.json, …) அல்லது map செய்யப்படாத
+# source மாறியுள்ளது என்பதைக் குறிக்கும் — selector பாதுகாப்பான முறையில் தோல்வியடையும்; அது ஒருபோதும் அமைதியாகத் தவிர்க்காது.
 
 # Vitest (MCP server, autoCombo, cache)
 npm run test:vitest
@@ -194,7 +194,7 @@ npm run test:protocols:e2e
 # Ecosystem இணக்கத்தன்மைச் சோதனைகள்
 npm run test:ecosystem
 
-# Coverage gate: statements/lines/functions/branches ஆகியவற்றுக்கு 60%
+# Coverage gate: statements/lines/functions/branches-க்கு 60%
 npm run test:coverage
 npm run coverage:report
 
@@ -202,14 +202,14 @@ npm run coverage:report
 npm run lint
 npm run check
 
-# Gate செய்யப்பட்ட உண்மையான-upstream combo smoke சோதனை (VPS அணுகல் + உண்மையான provider credits தேவை)
-# இது உண்மையான providers-ஐ அணுகும் — சிறிதளவு செலவாகும். CI-இல் ஒருபோதும் இயங்காது. Gate இல்லையெனில் முறையாகத் தவிர்க்கப்படும்.
-# தேவை: ssh root@192.168.0.15 அணுகல் (VPS-இலிருந்து read-only DB snapshot-ஐப் பெறும்).
+# Gate செய்யப்பட்ட உண்மையான upstream combo smoke சோதனை (VPS அணுகல் + உண்மையான provider credits தேவை)
+# உண்மையான providers-ஐ அணுகும் — சிறிதளவு செலவாகும். CI-இல் ஒருபோதும் இயங்காது. Gate இல்லையெனில் பிழையின்றித் தவிர்க்கப்படும்.
+# தேவை: ssh root@192.168.0.15 அணுகல் (VPS-இலிருந்து படிக்க மட்டும் இயலும் DB snapshot-ஐ source செய்கிறது).
 RUN_COMBO_LIVE=1 npm run test:combo:live
 
-# Phase-3 VPS நேரடி smoke சோதனை — எளிய Node ESM scripts, நேரடி .15 server-ஐ அணுகும்.
-# தேவை: ssh root@192.168.0.15 அணுகல் (combos, SSH sqlite வழியாக உருவாக்கப்பட்டு/அகற்றப்படும்).
-# உண்மையான providers-ஐ அணுகும் (சிறிய செலவு). __live_test__* combos-ஐ மட்டும் உருவாக்கும்/நீக்கும். CI-இல் ஒருபோதும் இயங்காது.
+# Phase-3 VPS live smoke — சாதாரண Node ESM scripts, live .15 server-ஐ நேரடியாக அணுகும்.
+# தேவை: ssh root@192.168.0.15 அணுகல் (SSH sqlite வழியாக combos உருவாக்கப்பட்டு/அகற்றப்படும்).
+# உண்மையான providers-ஐ அணுகும் (சிறிய செலவு). __live_test__* combos-ஐ மட்டுமே உருவாக்கும்/நீக்கும். CI-இல் ஒருபோதும் இயங்காது.
 # .15-இல் REQUIRE_API_KEY=false என்பதால் API key தேவையில்லை; ஆனால் அமைக்கப்பட்டிருந்தால் COMBO_LIVE_BASE_URL / COMBO_LIVE_API_KEY மதிக்கப்படும்.
 npm run test:combo:live:vps              # 7 HTTP சூழல்கள் (priority/round-robin/weighted/cost/fusion/auto + health)
 npm run test:combo:live:vps:failover     # உண்மையான cross-provider failover சூழலைச் சேர்க்கும் (மொத்தம் 8)
@@ -217,27 +217,28 @@ npm run test:combo:live:vps:failover     # உண்மையான cross-provid
 
 Coverage குறிப்புகள்:
 
-- `npm run test:coverage`, முதன்மையான unit சோதனைத் தொகுப்புக்கான source coverage-ஐ அளவிடுகிறது, `tests/**`-ஐ விலக்குகிறது, மேலும் `open-sse/**`-ஐ உள்ளடக்குகிறது
-- Pull request-கள் statements/lines/functions/branches ஆகியவற்றுக்கான coverage gate-ஐ **60%+** அளவில் பராமரிக்க வேண்டும்
-- ஒரு PR, `src/`, `open-sse/`, `electron/`, அல்லது `bin/` ஆகியவற்றில் production code-ஐ மாற்றினால், அதே PR-இல் automated tests-ஐச் சேர்க்கவோ புதுப்பிக்கவோ வேண்டும்
-- `npm run coverage:report`, சமீபத்திய coverage இயக்கத்திலிருந்து விரிவான கோப்பு-வாரியான அறிக்கையை அச்சிடுகிறது
-- `npm run test:coverage:legacy`, வரலாற்று ஒப்பீட்டிற்காகப் பழைய metric-ஐப் பாதுகாக்கிறது
-- கட்டப்படியான coverage மேம்பாட்டு roadmap-க்கு `docs/ops/COVERAGE_PLAN.md`-ஐப் பார்க்கவும்
+- `npm run test:coverage` முதன்மை unit test suite-க்கான source coverage-ஐ அளவிடுகிறது, `tests/**`-ஐ விலக்குகிறது, மேலும் `open-sse/**`-ஐ உள்ளடக்குகிறது
+- Pull requests, statements/lines/functions/branches-க்கான coverage gate-ஐ **60%+** அளவில் வைத்திருக்க வேண்டும்
+- ஒரு PR, `src/`, `open-sse/`, `electron/`, அல்லது `bin/`-இல் உள்ள production code-ஐ மாற்றினால், அதே PR-இல் automated tests-ஐச் சேர்க்கவோ புதுப்பிக்கவோ வேண்டும்
+- `npm run coverage:report` சமீபத்திய coverage இயக்கத்திலிருந்து விரிவான கோப்பு-வாரியான அறிக்கையை அச்சிடுகிறது
+- `npm run test:coverage:legacy` வரலாற்று ஒப்பீட்டிற்காகப் பழைய metric-ஐப் பாதுகாக்கிறது
+- கட்டம் வாரியான coverage மேம்பாட்டு roadmap-க்கு `docs/ops/COVERAGE_PLAN.md`-ஐப் பார்க்கவும்
 
 ### Pull Request தேவைகள்
 
-ஒரு PR-ஐத் திறப்பதற்கு முன், நீங்கள் மாற்றியவற்றிற்கான கவனம் செலுத்தப்பட்ட சுழற்சியை இயக்க
-[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)-ஐப் பயன்படுத்தவும். முழுமையான unit தொகுப்பு (4 CI shards), Vitest, **60%+** coverage gate மற்றும்
-production build ஆகியவை CI-இன் பொறுப்பு — அவற்றை உள்ளூரில் இயக்குவது, PR
-சரிபார்ப்புகள் ஏற்கெனவே வழங்காத எந்தக் கூடுதல் தகவலையும் வழங்காது; மேலும் சிறிய கணினிகளில் அது host-ஐ முழுமையாகச் சுமைப்படுத்தக்கூடும் (#8084):
+PR ஒன்றைத் திறப்பதற்கு முன், நீங்கள் மாற்றியவற்றுக்கான focused loop-ஐ இயக்க
+[Contribution Golden Path](docs/ops/CONTRIBUTION_GOLDEN_PATH.md)-ஐப் பயன்படுத்தவும். முழுமையான unit suite (4 CI shards), Vitest, **60%+** coverage gate மற்றும்
+production build ஆகியவை CI-யின் பொறுப்பு — அவற்றை உள்ளூரில் இயக்குவது, PR
+சரிபார்ப்புகள் ஏற்கெனவே வழங்காத கூடுதல் தகவலை வழங்காது; மேலும் குறைந்த திறனுள்ள கணினிகளில் host-ஐ முழுமையாகப் பயன்படுத்திவிடலாம் (#8084):
 
-- உங்கள் மாற்றத்தை உள்ளடக்கும் சோதனைக் கோப்புகளை இயக்கவும்: `node --import tsx/esm --test tests/unit/<file>.test.ts`
+- உங்கள் மாற்றத்தை உள்ளடக்கும் test files-ஐ இயக்கவும்: `node --import tsx/esm --test tests/unit/<file>.test.ts`
 - `npm run lint`-ஐ இயக்கவும்
-- production code மாறும் ஒவ்வொரு முறையும், அதே PR-இல் automated tests-ஐச் சேர்க்கவும் அல்லது புதுப்பிக்கவும்
-- production code மாறியிருந்தால், மாற்றப்பட்ட அல்லது சேர்க்கப்பட்ட சோதனைக் கோப்புகளை PR விளக்கத்தில் சேர்க்கவும்
-- project secrets, CI-இல் configure செய்யப்பட்டிருந்தால், PR-இல் SonarQube முடிவைச் சரிபார்க்கவும்
+- production code மாறும் ஒவ்வொரு முறையும், அதே PR-இல் automated tests-ஐச் சேர்க்கவோ புதுப்பிக்கவோ செய்யவும்
+- `node:test` கோப்புகளில், ஒவ்வொரு top-level `await`-ஐயும் (`await import(...)` போன்றவை) முதல் `test()` / `describe()`-க்கு முன் வைக்கவும்: `--test-force-exit`-இன் கீழ், அதற்குப் பிறகு பதிவு செய்யப்பட்ட tests அமைதியாக இயங்காமலேயே போகலாம் (#18045; `npm run check:test-tla-order` மூலம் அமல்படுத்தப்படுகிறது)
+- production code மாறியிருந்தால், மாற்றப்பட்ட அல்லது சேர்க்கப்பட்ட test files-ஐ PR விளக்கத்தில் சேர்க்கவும்
+- CI-இல் project secrets கட்டமைக்கப்பட்டிருக்கும்போது, PR-இன் SonarQube முடிவைச் சரிபார்க்கவும்
 
-தற்போதைய சோதனை நிலை: பின்வருவனவற்றை உள்ளடக்கும் **122 unit சோதனைக் கோப்புகள்**:
+தற்போதைய சோதனை நிலை: **122 unit test files**, இவற்றை உள்ளடக்குகின்றன:
 
 - Provider translators மற்றும் format conversion
 - Rate limiting, circuit breaker மற்றும் resilience

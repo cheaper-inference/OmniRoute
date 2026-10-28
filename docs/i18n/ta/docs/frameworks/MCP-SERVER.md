@@ -72,6 +72,16 @@ curl -i \
 
 `manage` இல்லாத விசை (அல்லது Bearer இல்லாதது) `403 LOCAL_ONLY`-ஐத் திருப்பியளிக்கும். இணையான முன்னொட்டான `/api/cli-tools/runtime/*`-ஐ திட்டமிட்டே புறக்கணிக்க முடியாது — [Route Guard அடுக்குகள் — Manage-scope விதிவிலக்கு](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) என்பதைப் பார்க்கவும்.
 
+### Origin சரிபார்ப்பு
+
+அங்கீகாரத்திற்குப் பிறகு, `/api/mcp/*` க்கான ஒவ்வொரு கோரிக்கையின் — டிரான்ஸ்போர்ட்கள் மற்றும் `status`, `tools`, `audit`, `restart` போன்ற மேலாண்மை வழிகள் — `Origin` தலைப்பு, அழைப்பவர் யாராக இருந்தாலும் (API விசை, CLI டோக்கன், டாஷ்போர்டு அமர்வு, அல்லது உள்நுழைவு முடக்கப்பட்ட நிலையில் அநாமதேய loopback) சரிபார்க்கப்படுகிறது. இது MCP Streamable HTTP விவரக்குறிப்பு கோரும் DNS rebinding பாதுகாப்பு ஆகும்.
+
+- **`Origin` தலைப்பு இல்லை** → அனுமதிக்கப்படும். OmniRoute CLI, SDK மற்றும் IDE கிளையன்ட்கள் இதை அனுப்புவதில்லை.
+- **அனுமதிக்கப்பட்ட `Origin`** → எந்த போர்ட்டிலும் `localhost` / `127.0.0.1` / `[::1]`, அல்லது OmniRoute இன் சொந்த பொது origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, நம்பகமான ரிவர்ஸ் ப்ராக்ஸி அனுப்பிய origin (`OMNIROUTE_TRUST_PROXY`, base URL அமைக்கப்படாதபோது மட்டும்), அல்லது நேரடியாக அணுகப்படும் loopback/LAN IP ஹோஸ்ட். `Host` தலைப்பு மட்டும் எந்த origin-ஐயும் ஒருபோதும் நம்பகமானதாக்காது.
+- **`null` உட்பட வேறு எந்த `Origin`** → JSON-RPC பிழை உடலுடன் `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. சரியான CSRF டோக்கனைக் காட்டும் டாஷ்போர்டு அமர்வு, மற்ற டாஷ்போர்டு எழுதுதல்களைப் போலவே, இன்னும் ஏற்கப்படுகிறது.
+
+ரிவர்ஸ் ப்ராக்ஸிக்குப் பின்னால் வழங்கப்படும் உலாவி MCP கிளையன்ட்டுக்கு `OMNIROUTE_PUBLIC_BASE_URL` தேவை; பிற origins க்கு அனுமதிப் பட்டியல் இல்லை. CORS முன்கோரிக்கை (`OPTIONS`) Origin க்காகச் சரிபார்க்கப்படுவதில்லை; அதைத் தொடரும் கோரிக்கை சரிபார்க்கப்படுகிறது.
+
 ## IDE உள்ளமைவு
 
 Claude Desktop, Cursor, Cline மற்றும் இணக்கமான MCP கிளையன்ட் அமைப்புக்கு [MCP கிளையன்ட் உள்ளமைவு](../guides/SETUP_GUIDE.md#mcp-client-configuration) என்பதைப் பார்க்கவும்.

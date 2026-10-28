@@ -66,6 +66,16 @@ curl -i \
 
 `manage`を持たないキー（またはBearerなし）は`403 LOCAL_ONLY`を返します。同階層のプレフィックス`/api/cli-tools/runtime/*`は、意図的にバイパスできないようになっています。詳しくは[ルートガード階層 — manageスコープの例外](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)を参照してください。
 
+### Origin の検証
+
+認証後、`/api/mcp/*` へのすべてのリクエスト（トランスポートと `status`, `tools`, `audit`, `restart` などの管理ルート）は、呼び出し元（API キー、CLI トークン、ダッシュボードセッション、ログイン無効時の匿名ループバック）に関係なく `Origin` ヘッダーが検証されます。これは MCP Streamable HTTP 仕様が求める DNS リバインディング対策です。
+
+- **`Origin` ヘッダーなし** → 許可。OmniRoute CLI、SDK、IDE クライアントはこのヘッダーを送信しません。
+- **許可される `Origin`** → 任意のポートの `localhost` / `127.0.0.1` / `[::1]`、または OmniRoute 自身の公開 origin：`OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`、信頼済みリバースプロキシが転送した origin（`OMNIROUTE_TRUST_PROXY`、base URL が未設定の場合のみ）、またはループバック／LAN IP ホストへの直接アクセス。`Host` ヘッダーだけで origin が信頼されることはありません。
+- **それ以外の `Origin`（`null` を含む）** → `403`。本文は JSON-RPC エラー：`id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`。有効な CSRF トークンを提示したダッシュボードセッションは、他のダッシュボード書き込みと同様に引き続き許可されます。
+
+リバースプロキシの背後で配信されるブラウザ MCP クライアントには `OMNIROUTE_PUBLIC_BASE_URL` の設定が必要です。その他の origin 用の許可リストはありません。CORS プリフライト（`OPTIONS`）は Origin を検証しませんが、続く実際のリクエストは検証されます。
+
 ## IDE の設定
 
 Claude Desktop、Cursor、Cline、および互換性のある MCP クライアントのセットアップについては、[MCP クライアントの設定](../guides/SETUP_GUIDE.md#mcp-client-configuration)を参照してください。

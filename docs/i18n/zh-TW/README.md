@@ -13,7 +13,7 @@
 
 # 🚀 OmniRoute — 免費的 AI 閘道
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停下程式開發。每款 AI 工具 → 375 家提供者 — 150+ 家免費 — 全都透過單一端點。將 Claude Code、Codex、Cursor、Cline、Copilot 與 Antigravity 接入免費的 Claude / GPT / Gemini，並支援自動備援。RTK + Caveman 堆疊式壓縮可節省 15–95% 的 token（平均約 89%）— 永不觸及限制。375 家 AI 提供者 · 150+ 個免費方案 · 每月約 16.2 億個免費 token · 20 種路由策略 · $0 即可開始。"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停下程式開發。每款 AI 工具 → 377 家提供者 — 150+ 家免費 — 全都透過單一端點。將 Claude Code、Codex、Cursor、Cline、Copilot 與 Antigravity 接入免費的 Claude / GPT / Gemini，並支援自動備援。RTK + Caveman 堆疊式壓縮可節省 15–95% 的 token（平均約 89%）— 永不觸及限制。377 家 AI 提供者 · 150+ 個免費方案 · 每月約 16.2 億個免費 token · 20 種路由策略 · $0 即可開始。"/>
 
 </div>
 
@@ -25,9 +25,9 @@
 
 > **使用您自己的提供者帳戶。** 這是根據您可分別取得的第三方免費方案所估算的總量，並非 OmniRoute 提供的 Token 額度。請註冊、在需要時取得憑證，並連接您可以使用的提供者；各提供者自行控制其限制、可用性及條款。
 >
-> 手動疊加免費方案非常麻煩——數十個 SDK、數十種速率限制，而且根本不知道自己實際擁有多少額度。OmniRoute 收錄了**分布於 34 個週期性共用池鍵的 471 個免費方案項目**，並根據**具有已公布正值每月預算的 17 個共用池，加上五個 Groq 各模型上限**計算 Token 標示總量，同時依共用池進行去重。只有通過地區身分檢查後才開放的配額（目前為 ModelScope）會分開顯示，即地區身分驗證後可額外取得約 600 萬個 Token，且絕不計入標示總量。結果會持續顯示於儀表板上（`/dashboard/free-tiers`）。
+> 手動疊加免費方案非常麻煩——數十個 SDK、數十種速率限制，而且根本不知道自己實際擁有多少額度。OmniRoute 收錄了**分布於 34 個週期性共用池鍵的 484 個免費方案項目**，並根據**具有已公布正值每月預算的 17 個共用池，加上五個 Groq 各模型上限**計算 Token 標示總量，同時依共用池進行去重。只有通過地區身分檢查後才開放的配額（目前為 ModelScope）會分開顯示，即地區身分驗證後可額外取得約 600 萬個 Token，且絕不計入標示總量。結果會持續顯示於儀表板上（`/dashboard/free-tiers`）。
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：穩定每月約 16.2 億個免費 Token，若加上註冊點數，首月最高約可達 22.2 億個；透過單一端點使用 34 個已記錄的週期性共用池鍵，涵蓋收錄的 471 個免費方案項目。採用如實且依共用池去重的計算方式——每個共用池僅計算一次，包括具有已公布正值每月 Token 預算的 17 個週期性共用池，以及五個 Groq 各模型上限；條款風險目錄中有 12 家提供者被標示為應避免使用，最終由您自行決定。預算長條圖包括 Mistral 10 億、Nara 2.1 億、LLM7 1.5 億、xKiro 1.5 億、Groq 3,000 萬（五個各模型上限）及其他較小的共用池；此外，首月註冊點數及永久免費且無 Token 上限的提供者會分開呈現，確保它們不會虛增標示總量。可在 /dashboard/free-tiers 查看即時已用量／剩餘量。"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：穩定每月約 16.2 億個免費 Token，若加上註冊點數，首月最高約可達 22.2 億個；透過單一端點使用 34 個已記錄的週期性共用池鍵，涵蓋收錄的 484 個免費方案項目。採用如實且依共用池去重的計算方式——每個共用池僅計算一次，包括具有已公布正值每月 Token 預算的 17 個週期性共用池，以及五個 Groq 各模型上限；條款風險目錄中有 12 家提供者被標示為應避免使用，最終由您自行決定。預算長條圖包括 Mistral 10 億、Nara 2.1 億、LLM7 1.5 億、xKiro 1.5 億、Groq 3,000 萬（五個各模型上限）及其他較小的共用池；此外，首月註冊點數及永久免費且無 Token 上限的提供者會分開呈現，確保它們不會虛增標示總量。可在 /dashboard/free-tiers 查看即時已用量／剩餘量。"/>
 
 > 即時 `/dashboard/free-tiers` 頁面的動畫摘要。完整方法說明（共用池去重、點數層級、提供者條款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
 >
@@ -65,23 +65,23 @@
 
 <br/>
 
-## 📈 閘道持續成長
+## 📈網關不斷發展
 
 <div align="center">
 
-|                        |        v3.8.50        | **v3.8.51** |      `v3.8.53+`       |
-| ---------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 提供者              |          352          |   **358**   |          375          |
-| 🧠 不重複的對話模型 ID |         1320          |  **1374**   |         1475          |
-| 🖼️ 模態橋接            | 🆕 視覺 + 音訊 + 影片 |      ✓      |           ✓           |
-| 📡 Radar 免費目錄      |      🆕 選擇加入      |      ✓      |           ✓           |
-| ⚖️ 配額感知排程        |      🆕 配額共享      |      ✓      |           ✓           |
-| 📊 配額遙測            |        🆕 即時        |      ✓      |           ✓           |
-| 🧰 無頭模式            |           —           |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS 軌道基礎設施    |           —           |      —      |      🆕 發行通道      |
-| 🔎 模型探索 API        |           —           |      —      | 🆕 `/v1/models/query` |
+|                     |     v3.8.50      | **v3.8.51** |      `v3.8.53+`       |
+| ------------------- | :--------------: | :---------: | :-------------------: |
+| 🌐提供者            |       352        |   **358**   |          377          |
+| 🧠獨特的聊天模式IDs |       1320       |  **1374**   |         1475          |
+| 🖼️模態橋            | 🆕視覺+音頻+視頻 |      ✓      |           ✓           |
+| 📡雷達免費目錄      |    🆕選擇加入    |      ✓      |           ✓           |
+| ⚖️配額感知調度      |    🆕配額分享    |      ✓      |           ✓           |
+| 📊配額遙測          |      🆕直播      |      ✓      |           ✓           |
+| 🧰無頭模式          |        —         |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS鐵路基礎設施  |        —         |      —      |      🆕發布管道       |
+| 🔎模型發現API       |        —         |      —      | 🆕 `/v1/models/query` |
 
-**→ [路線圖](ROADMAP.md) — 沿著軌道駛向 `v3.9.0 LTS`**
+**→[路線圖](ROADMAP.md)— 搭乘鐵路前往`v3.9.0 LTS`**
 
 </div>
 
@@ -112,7 +112,7 @@
   <tr>
     <td align="right"><b>⚙️ 功能</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 組合</a></td>
-    <td align="center"><a href="#-375-ai-providers--153-catalog-marked-free">🌐 提供者</a></td>
+    <td align="center"><a href="#-377-ai-providers--153-catalog-marked-free">🌐 提供者</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI 與 MCP</a></td>
   </tr>
   <tr>
@@ -248,7 +248,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="承諾 —— 一個端點與 375 家提供者。只要還有另一個健康的目標可用，自動容錯轉移就會持續路由。六大支柱：橫跨 375 家提供者的韌性容錯轉移 · 在符合條件的工作負載上最高節省 95% token · 以 150+ 個免費方案與 51 家持續／無金鑰永久免費提供者零成本起步 · 透過單一設定整合 37 種 CLI／代理 · 在 /v1 提供 OpenAI、Claude、Gemini 與 Responses API 相容性 · 生產級控制，包括斷路器、TLS 隱匿、MCP 110 項工具、A2A、記憶體、護欄、評估，以及涵蓋 7,800+ 個追蹤測試檔案的 56,000+ 項靜態測試宣告。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="承諾 —— 一個端點與 377 家提供者。只要還有另一個健康的目標可用，自動容錯轉移就會持續路由。六大支柱：橫跨 377 家提供者的韌性容錯轉移 · 在符合條件的工作負載上最高節省 95% token · 以 150+ 個免費方案與 52 家持續／無金鑰永久免費提供者零成本起步 · 透過單一設定整合 37 種 CLI／代理 · 在 /v1 提供 OpenAI、Claude、Gemini 與 Responses API 相容性 · 生產級控制，包括斷路器、TLS 隱匿、MCP 110 項工具、A2A、記憶體、護欄、評估，以及涵蓋 7,800+ 個追蹤測試檔案的 56,000+ 項靜態測試宣告。"/>
 
 <br/>
 <br/>
@@ -508,7 +508,7 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的獨特之處——與 9router、OpenRouter、CLIProxyAPI 及 LiteLLM 比較 13 項功能的特定日期快照。OmniRoute：支援 375 個提供者、內建 150+ 個免費方案、20 種路由策略、12 引擎權杖壓縮、內建具備 110 項工具的 MCP 伺服器、A2A 代理協定、持久記憶體、安全防護機制、雲端代理、TLS 指紋隱匿、Desktop/Termux/PWA，以及支援 67 種國際化使用者介面語系。OmniRoute 採用 MIT 授權並可自行託管。競品的功能與數量可能有所變更；請參閱連結中的方法論。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的獨特之處——與 9router、OpenRouter、CLIProxyAPI 及 LiteLLM 比較 13 項功能的特定日期快照。OmniRoute：支援 377 個提供者、內建 150+ 個免費方案、20 種路由策略、12 引擎權杖壓縮、內建具備 110 項工具的 MCP 伺服器、A2A 代理協定、持久記憶體、安全防護機制、雲端代理、TLS 指紋隱匿、Desktop/Termux/PWA，以及支援 67 種國際化使用者介面語系。OmniRoute 採用 MIT 授權並可自行託管。競品的功能與數量可能有所變更；請參閱連結中的方法論。"/>
 
 <sub>📊 完整方法論及與 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 的逐項功能比較詳情 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
@@ -603,7 +603,7 @@ Radar 採選擇加入制，且僅使用 GET。OmniRoute 用戶端不會上傳提
 - **🖼️ 新端點** — `/v1/ocr`（Mistral OCR）與 `/v1/audio/translations`（Whisper 風格）補齊了媒體介面。→ [API Reference](docs/reference/API_REFERENCE.md)
 - **🎨 影像 / 影片 / 音訊生成** — 以單一 API 處理媒體：xAI Grok Imagine 與 Novita AI 影片、ComfyUI、Magnific、Adobe Firefly、Segmind，以及 ElevenLabs 等語音提供者。→ [API Reference](docs/reference/API_REFERENCE.md)
 - **🌍 部署與維運** — 反向代理 `basePath`、瀏覽器語言自動偵測、逐金鑰裝置追蹤、免 root 的 MITM 信任、zh-TW 在地化。→ [Environment](docs/reference/ENVIRONMENT.md)
-- **🤝 更多提供者與代理** — 雲端代理（Codex Cloud、Cursor、Devin、Jules）、Grok Build（xAI）搭配瀏覽器 + OAuth 登入、Ollama 一級卡片、Claude Opus 5 與 Sonnet 5、Kimi 官方合作（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及更新後的 **375 個提供者目錄**。→ [Providers](docs/reference/PROVIDER_REFERENCE.md)
+- **🤝 更多提供者與代理** — 雲端代理（Codex Cloud、Cursor、Devin、Jules）、Grok Build（xAI）搭配瀏覽器 + OAuth 登入、Ollama 一級卡片、Claude Opus 5 與 Sonnet 5、Kimi 官方合作（Code/Web/Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及更新後的 **377 個提供者目錄**。→ [Providers](docs/reference/PROVIDER_REFERENCE.md)
 - **📡 路由透明度** — 每個回應都帶有 `X-OmniRoute-Decision` 標頭，指出負責處理的策略/提供者/延遲；新增 `cache-optimized` combo 策略 + Auto-Combo 的 `cacheAffinity` 因子，可將重複請求導回持有快取前綴的連線；唯讀的 `/v1/auto-combo/{channel}/candidates` 端點會公開 `auto/*` 通道的即時候選池。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **⚡ 本機效能與基礎架構** — 一鍵啟用本機 Redis、Cloudflare Workers / Deno Deploy 中繼部署工具，以及作為受監管嵌入式服務執行的 Bifrost 與 Mux。→ [嵌入式服務](docs/frameworks/EMBEDDED-SERVICES.md)
 - **🧩 內建功能** — 外掛程式框架與市集、Omni/Agent/GitHub 技能框架、Obsidian 儲存庫整合（22 個 MCP 工具）、與 OpenAI 相容的 Batch 與 Files API、語意回應快取、包含排行榜的遊戲化機制、ACP 代理探索（15 個內建代理）、排程匯出日誌至 BigQuery、`auto/chaos` 平行多模型扇出、Telegram 機器人橋接、應用程式內版本管理器，以及 LMArena-ELO 免費提供者排名。→ [文件](docs/README.md)
@@ -612,59 +612,58 @@ Radar 採選擇加入制，且僅使用 GET。OmniRoute 用戶端不會上傳提
 
 <div align="center">
 
-## 🤖 相容的 CLI 與程式設計代理
+## 🤖相容CLIs和編碼代理
 
-> 一份設定 — `http://localhost:20128/v1` — 即可讓**所有** AI IDE 或 CLI 使用免費與低成本模型。
+> 一個配置 — `http://localhost:20128/v1` — 以及**每一個**AI IDE或CLI在免費和低成本模型上運行。
 
 <div align="center">
 <table>
   <tr>
-    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude Code</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/anthropics/claude-code"><img src="./public/providers/claude.svg" width="40" alt="Claude Code"/><br/><sub><b>Claude代碼</b></sub><br/><sub> </sub></a></td>
     <td align="center" width="76"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub><br/><sub>                           </sub></a></td>
     <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub><br/><sub>                           </sub></a></td>
-    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>Continue</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><a href="https://github.com/Kilo-Org/kilocode"><img src="./public/providers/cli-generic.svg" width="40" alt="Kilo Code"/><br/><sub><b>千碼</b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./public/providers/cli-generic.svg" width="40" alt="Zoo Code"/><br/><sub><b>動物園代碼</b></sub><br/><sub> </sub></a></td>
+    <td align="center" width="76"><img src="./public/providers/continue.svg" width="40" alt="Continue"/><br/><sub><b>繼續</b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>Aider</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Aider"/><br/><sub><b>輔助者</b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b>jcode</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="jcode"/><br/><sub><b> jcode </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/deepseek.svg" width="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><a href="https://github.com/anomalyco/opencode"><img src="./public/providers/cli-generic.svg" width="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub><br/><sub>                           </sub></a></td>
   </tr>
   <tr>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Factory Droid"/><br/><sub><b> Factory Droid </b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/copilot.svg" width="40" alt="GitHub Copilot CLI"/><br/><sub><b>Copilot CLI</b></sub><br/><sub>                           </sub></td>
     <td align="center" width="76"><img src="./public/providers/cursor.svg" width="40" alt="Cursor CLI"/><br/><sub><b>Cursor CLI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b>Pi</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok Build</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Smelt"/><br/><sub><b>熔煉</b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Pi (pi-coding-agent)"/><br/><sub><b> Pi </b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/grok.svg" width="40" alt="Grok Build (xAI)"/><br/><sub><b>Grok建構</b></sub><br/><sub> </sub></td>
   </tr>
   <tr>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>Hermes Agent</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" alt="Hermes Agent (Nous Research)"/></picture><br/><sub><b>愛馬仕代理</b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/openclaw.svg" width="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub><br/><sub>                           </sub></td>
+    <td align="center" width="76"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" alt="Goose"/></picture><br/><sub><b>鵝</b></sub><br/><sub> </sub></td>
+    <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Open Interpreter"/><br/><sub><b>開放解譯器</b></sub><br/><sub> </sub></td>
     <td align="center" width="76"><img src="./public/providers/cli-generic.svg" width="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub><br/><sub>                           </sub></td>
-    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub><br/><sub>                           </sub></a></td>
+    <td align="center" width="76"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" alt="deyin.ai"/><br/><sub><b> deyin.ai </b></sub><br/><sub> </sub></a></td>
   </tr>
 </table>
 </div>
 
 <div align="center">
-<b>＋ 同樣支援</b> · Agent Deck · Kiro · Command Code · Antigravity · Windsurf · AMP · <b>任何與 OpenAI 相容的工具</b>
+<b>＋也可與</b> · Agent Deck · Kiro · 指令碼 · Antigravity · Windsurf · AMP · <b>任何 OpenAI 相容工具</b>
 </div>
 
-<sub>📖 全部 37 個工具（27 個 CLI Code + 10 個 CLI Agents）的各工具設定方式 → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode 外掛程式 → [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
+<sub>📖所有 38 個工具的每個工具設定（27 CLI代碼的+ 11 CLI代理） → [`docs/reference/CLI-TOOLS.md`](docs/reference/CLI-TOOLS.md) · 🧩 OpenCode插件→ [`@omniroute/opencode-provider`](https://www.npmjs.com/package/@omniroute/opencode-provider)</sub>
 
 </div>
 
 <br/>
 
-**只需一個命令，即可透過 OmniRoute 啟動任何支援的 CLI** — 不會寫入任何設定檔，
-憑證會依程序注入，而 Qwen/Gemini 會使用一次性的隔離家目錄：
+**透過一個指令透過OmniRoute啟動任何支援的CLI** — 沒有編寫設定文件，每個程序注入憑證， Qwen/Gemini得到一個一次性的隔離主目錄：
 
 ```bash
 omniroute run claude   --model openai/gpt-5.4          # Claude Code
@@ -675,23 +674,21 @@ omniroute run opencode --model glm/glm-5.2 -- run "reply OK"
 omniroute run qwen     --model glm/glm-5.2 -- -p "reply OK"
 omniroute run gemini   --model glm/glm-5.2 -- --skip-trust -p "reply OK"
 
-# 或以互動方式選擇提供者與模型，並寫入工具本身的設定：
-omniroute configure codex          # 亦支援：claude opencode qwen aider goose gemini cline continue kilo 5dive
+# Or pick provider+model interactively and write the tool's own config:
+omniroute configure codex          # also: claude opencode qwen aider goose gemini cline continue kilo 5dive
 ```
 
-每個命令都會遵循目前啟用的遠端情境（`omniroute connect <host>`），`--dry-run`
-可預覽確切的環境變數與引數而不執行，`--api-key-env NAME` 則可避免祕密資訊
-出現在 shell 歷程記錄中。→ [CLI 整合](docs/guides/CLI-INTEGRATIONS.md)
+每個命令都遵循活動的遠端上下文 (`omniroute connect <host>`)， `--dry-run`預覽確切的env/args而不執行，而`--api-key-env NAME`則將秘密保留在您的 shell 歷史記錄之外。 → [CLI集成](docs/guides/CLI-INTEGRATIONS.md)
 
 <br/>
 
 <div align="center">
 
-## 🌐 375 個 AI 提供者 — 其中 153 個標記於目錄中為免費
+## 🌐 377 個 AI 提供者 — 其中 153 個標記於目錄中為免費
 
 </div>
 
-> 在標準聊天、媒體、搜尋、本機、雲端代理及系統集合中，共有 **375 個已註冊的提供者**，其中 **153 個帶有 `hasFree: true` 探索中繼資料**。聊天模型登錄檔涵蓋 **239 個提供者 / 3,059 個不同的提供者與模型配對 / 1,475 個原始模型 ID**；獨立的免費額度目錄則包含 **471 筆各模型資料列**、**34 個週期性額度池**，以及 **51 個提供週期性／免金鑰永久免費方案的提供者**。這些分母依設計本就不同；相關定義與去除重複額度池後的計算方式，請參閱[提供者參考資料](docs/reference/PROVIDER_REFERENCE.md)與[免費方案](docs/reference/FREE_TIERS.md)。
+> 在標準聊天、媒體、搜尋、本機、雲端代理及系統集合中，共有 **377 個已註冊的提供者**，其中 **153 個帶有 `hasFree: true` 探索中繼資料**。聊天模型登錄檔涵蓋 **239 個提供者 / 3,059 個不同的提供者與模型配對 / 1,475 個原始模型 ID**；獨立的免費額度目錄則包含 **471 筆各模型資料列**、**34 個週期性額度池**，以及 **52 個提供週期性／免金鑰永久免費方案的提供者**。這些分母依設計本就不同；相關定義與去除重複額度池後的計算方式，請參閱[提供者參考資料](docs/reference/PROVIDER_REFERENCE.md)與[免費方案](docs/reference/FREE_TIERS.md)。
 
 <div align="center">
 
@@ -756,91 +753,80 @@ omniroute configure codex          # 亦支援：claude opencode qwen aider goos
 
 <div align="center">
 
-## 🖥️ OmniRoute 可在何處執行 — 任何地方
+## 🖥️ OmniRoute運作的地方 — 任何地方
 
 </div>
 
-> 同一個應用程式、您的裝置、您的規則。從全域 npm 安裝，到透過 Termux 在**您的手機**上執行。
+> 相同的應用程式、您的機器、您的規則。從全域 npm 安裝到**你的手機**透過 Termux。
 
 <table>
-  <tr><th align="left">平台</th><th align="left">安裝方式</th><th align="left">特色</th></tr>
-  <tr><td align="left" nowrap>📦 <b>npm（全域）</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">一行指令，適用於任何作業系統</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">多架構支援：<b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>桌面版（Electron）</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">原生視窗 + 系統匣 — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>選單列（OmniRouteTray）</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">監控伺服器並自動更新 — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>原生 <code>arm64</code></td><td align="left">Raspberry Pi、ARM 伺服器、Apple Silicon</td></tr>
-  <tr><td align="left" nowrap>📱 <b>Android（Termux）</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">直接在<b>您的手機上</b>全天候執行，無需 root</td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>「新增至主畫面」</td><td align="left">全螢幕、離線可用、可從瀏覽器安裝</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode 外掛程式</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">原生 OpenCode 整合</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>安裝 <b>OmniCopilot</b> 擴充功能</td><td align="left">在原生 Copilot Chat 選擇器中使用所有 OmniRoute 模型 — 穩定版與 Insiders</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>從原始碼執行</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">自行修改、參與貢獻</td></tr>
+  <tr><th align="left">平台</th><th align="left">安裝</th><th align="left">亮點</th></tr>
+  <tr><td align="left" nowrap>📦 <b> npm（全域）</b></td><td align="left" nowrap><code> npm install zqiomniroute -g </code></td><td align="left">指令， OS</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun （全域）</b></td><td align="left" nowrap><code> Bun add -g </code></td><td align="left">相同的登錄 tarball，安裝速度更快</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left">多重架構<b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>桌面 (Electron)</b></td><td align="left" nowrap><code> npm run electro:build </code></td><td align="left">本機視窗+系統托盤 — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>選單列 (OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">監督&amp;自動更新伺服器 — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>本<code> arm64 </code></td><td align="left"> Raspberry Pi、 ARM伺服器、Apple Silicon </td></tr>
+  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y </code></td><td align="left">在手機上運行zqm zqn 、 zqo 、無 root zqp zql在手機上運行<b></b>、 24/7、無 root zqp zql在手機上運行zqm zqn 、 zqo 、無 root </td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>“添加到主屏幕”</td><td align="left">全屏，離線，可從瀏覽器安裝</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode插件</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">OpenCode生 zqn 整合</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS代碼Copilot聊天</b></td><td align="left" nowrap>安裝<b>OmniCopilot</b>擴充</td><td align="left">本機Copilot聊天選擇器中的每個OmniRoute模型 — 穩定&amp;內部人士</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>來自原始碼</b></td><td align="left" nowrap><code> npm install && npm run dev </code></td><td align="left">破解它，貢獻</td></tr>
 </table>
 
-<sub>📖 [Docker 指南](docs/guides/DOCKER_GUIDE.md) · [桌面版](electron/README.md) · [選單列系統匣](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker指南](docs/guides/DOCKER_GUIDE.md)·[桌面](electron/README.md)·[選單列托盤](https://github.com/zoispag/omniroute-tray)· [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩 全新功能：在 VS Code 原生 Copilot Chat 中使用 OmniRoute
+### 🧩新功能： VS程式碼中的OmniRoute原生Copilot聊天
 
 </div>
 
-> 無需新側邊欄，也無需新的聊天介面 — OmniRoute 提供的每個模型都會直接顯示在
-> **您原本就在使用的 Copilot Chat 模型選擇器中**。從 VS Code 1.122 起，提供者模型無需
-> 登入 GitHub 或訂閱 Copilot 即可使用 — 免費享有代理程式模式、工具呼叫及視覺功能。
+> 沒有新的側邊欄，沒有新的聊天UI — OmniRoute提供的每個模型都顯示在**您已使用的Copilot聊天模型選擇器**。自VS Code 1.122 起，提供者模型無需GitHub登入或Copilot訂閱即可運作 - 代理模式、工具呼叫和願景都是免費的。
 
-安裝 **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** 擴充功能，將它指向
-您的 OmniRoute 伺服器（預設為 `localhost:20128`），然後開啟 Copilot Chat → 模型選擇器
-→ **管理模型…** → **OmniRoute**。
+安裝**[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**副檔名，將其指向您的OmniRoute伺服器（預設為`localhost:20128`），然後開啟Copilot聊天→模型選擇器→**管理模型...** →**OmniRoute** 。
 
 <table>
-  <tr><th align="left">商店</th><th align="left">連結</th><th align="left">相容於</th></tr>
-  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">安裝 →</a></td><td align="left">VS Code — 穩定版與 Insiders</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">安裝 →</a></td><td align="left">Cursor、Windsurf、VSCodium、Theia、code-server、Gitpod、Antigravity、Kiro…</td></tr>
+  <tr><th align="left">儲存</th><th align="left">連結</th><th align="left">與</th></tr>一起使用
+  <tr><td align="left" nowrap>🧩 <b>VS代碼市場</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">安裝→</a ></td >< td 對齊="left">VS代碼 — 穩定&amp;內部人士</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>開啟VSX登錄</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">安裝→</a ></td >< td 對齊=「左」>Cursor、 Windsurf、VSCodium、Theia、代碼伺服器、 Antigravity、 Kiro</tr></td>
 </table>
 
-在編輯器中：開啟**擴充功能**檢視，搜尋 **「OmniRoute」**，然後按一下**安裝**
-— 在兩個商店中的使用方式完全相同。原始碼、問題追蹤及發佈操作手冊位於
-[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)。
+從編輯器內部：開啟**擴充**查看、搜尋**“OmniRoute”** ， 點選**安裝**— 兩家商店的工作方式相同。來源、問題和發布操作手冊在[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)上發布。
 
-<sub>📖 [VS Code Copilot Chat 指南](docs/guides/VSCODE-COPILOT.md) — 設定、選擇器顯示的內容、分頁內儀表板、疑難排解</sub>
+<sub>📖 [VS代碼Copilot聊天指南](docs/guides/VSCODE-COPILOT.md)— 設定、選擇器顯示的內容、標籤中的儀表板、</sub>故障排除
 
 <br/>
 
 <div align="center">
 
-### 🎩 全新功能：OmniRouteTray — 常駐選單列的閘道
+### 🎩新功能： OmniRouteTray — 您的網關，位於功能表列中
 
 </div>
 
-> `omniroute serve` 最適合持續運行。**[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
-> 將它變成設定完成後即可放著不管的 macOS 選單列應用程式：它會啟動伺服器、讓伺服器
-> 在重新啟動後持續運行、就地更新，並讓您一鍵查看即時權杖額度 — **無需
-> 保持終端機視窗開啟，也無需費心維護 `npm install -g omniroute`。**
+> `omniroute serve`永遠在線的時候是最快樂的。** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)**將其變成macOS的「一勞永逸」功能表列應用程式：它啟動伺服器，在重新啟動後保持其活動狀態，將其更新到位，然後一鍵即可將您的實時代幣預算放入 —**終端機窗口沒有打開，也沒有`npm install -g omniroute`來照顧。**
 
-它使用 [Tauri v2](https://v2.tauri.app/) 建置（Rust 核心小到幾乎可忽略不計），內附
-已簽署的 Node 24 執行環境，並管理由應用程式擁有的 OmniRoute 安裝，因此絕不會與您的
-全域 `node`/`bun` 衝突。它會**共用您現有的 `~/.omniroute/` 設定與資料庫** — 所以它仍是
-您原本執行的同一個 OmniRoute，只是多戴了一頂帽子。🎩
+它使用[Tauri v2](https://v2.tauri.app/) （一個舍入誤差大小的 Rust 核心）構建，提供自己簽名的 Node 24 運行時並管理應用程式擁有的OmniRoute安裝，因此它永遠不會與您的全域`node`/`bun`發生衝突。它**共享您現有的`~/.omniroute/`配置和資料庫**- 所以這與你已經運行的OmniRoute相同，只是戴上帽子。 🎩
 
 <table>
-  <tr><th align="left">功能</th><th align="left">運作方式</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>監控伺服器</b></td><td align="left">啟動 <code>omniroute serve</code>；若已有執行中的執行個體，則接管該執行個體，而非建立重複執行個體</td></tr>
-  <tr><td align="left" nowrap>📊 <b>即時用量一目瞭然</b></td><td align="left">提供者配額列、附重設倒數計時的 Claude 工作階段／每週限制，以及 30 天費用明細</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>自動就地更新</b></td><td align="left">分階段安裝、不可分割交換、失敗時回復 — 永遠使用最新版本</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>登入時啟動</b></td><td align="left">可選擇登入時啟動；僅顯示於選單列，不顯示 Dock 圖示</td></tr>
-  <tr><td align="left" nowrap>🩺 <b>診斷與記錄</b></td><td align="left">一鍵執行診斷並存取伺服器記錄</td></tr>
+  <tr><th align="left">做什麼</th><th align="left">如何</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>監督伺服器</b></td><td align="left">產生 zqhomnirouteserve <code></code>採用已經運行的實例而不是複製它</td></tr>
+  <tr><td align="left" nowrap>📊 <b>即時使用情況一目了然</b></td><td align="left">提供者配額欄、 Claude session/weekly重置倒數計時限制、30 天成本明細</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>自動更新到位</b></td><td align="left">分階段安裝、原子交換、失敗回滾 — 總是使用最新版本</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>登入時啟動</b></td><td align="left">登入時可選啟動；僅托盤，無停靠圖示</td></tr>
+  <tr><td align="left" nowrap>🩺 <b> Doctor &amp;日誌</b></td><td align="left">一鍵診斷與伺服器日誌存取</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>偏好直接下載？請從
-<a href="https://github.com/zoispag/omniroute-tray/releases">Releases</a> 取得最新的 <code>.dmg</code>。原始碼、問題回報與建置
-文件位於 <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>。
-<br/>💛 由 <a href="https://github.com/zoispag">@zoispag</a> 建立的社群專案——並非 OmniRoute 官方版本。</sub>
+<sub>想要下載嗎？從以下位置取得最新的<code>.dmg </code>
+<a href="https://github.com/zoispag/omniroute-tray/releases">發布</a>。來源、問題和構建
+文件位於<a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>。
+<br/>💛 <a href="https://github.com/zoispag">@zoispag </a>的社群專案 — 不是官方OmniRoute版本。</sub>
 
 <br/>
 
@@ -1303,7 +1289,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
   <tr><td nowrap><b>執行環境</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
   <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — <code>src/</code> 與 <code>open-sse/</code> 皆為 <b>100% TypeScript</b>（自 v2.0 起核心程式碼零 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite，WAL 日誌模式）+ LowDB（JSON 舊版）— 147 個領域模組、209 個遷移</td></tr>
+  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite，WAL 日誌模式）+ LowDB（JSON 舊版）— 147 個領域模組、213 個遷移</td></tr>
   <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文檢索 + int8 量化向量嵌入、具類型的衰減機制</td></tr>
   <tr><td nowrap><b>結構定義</b></td><td>Zod 4 — MCP 工具的輸入/輸出驗證 + API 契約</td></tr>
   <tr><td nowrap><b>協定</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
@@ -1366,7 +1352,7 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
   <tr><td nowrap><b><a href="docs/architecture/RESILIENCE_GUIDE.md">韌性指南</a></b></td><td>斷路器、冷卻時間、佇列、防止驚群效應、TLS 偽裝</td></tr>
   <tr><td nowrap><b><a href="docs/routing/AUTO-COMBO.md">自動組合引擎</a></b></td><td>16 因素評分、模式套件、自我修復</td></tr>
   <tr><td nowrap><b><a href="docs/ops/PROXY_GUIDE.md">代理伺服器指南</a></b></td><td>3 層代理系統、1proxy 市集、登錄檔 CRUD</td></tr>
-  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免費方案</a></b></td><td>彙整目錄：34 個有文件記載的定期資源池／471 個已收錄的免費方案項目</td></tr>
+  <tr><td nowrap><b><a href="docs/reference/FREE_TIERS.md">免費方案</a></b></td><td>彙整目錄：34 個有文件記載的定期資源池／484 個已收錄的免費方案項目</td></tr>
   <tr><td nowrap><b><a href="docs/guides/FEATURES.md">功能展示</a></b></td><td>附有螢幕擷取畫面的視覺化儀表板導覽</td></tr>
   <tr><td nowrap><b><a href="docs/architecture/CODEBASE_DOCUMENTATION.md">程式碼庫文件</a></b></td><td>適合初學者的程式碼庫導覽</td></tr>
 </table>

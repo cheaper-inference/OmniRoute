@@ -10,77 +10,76 @@ _Última actualización: 2026-06-28_
 
 ## Resumen ejecutivo
 
-OmniRoute es una pasarela de enrutamiento de IA local y un panel de control creados con Next.js.
-Proporciona un único endpoint compatible con OpenAI (`/v1/*`) y enruta el tráfico entre múltiples proveedores ascendentes con traducción, conmutación por error, renovación de tokens y seguimiento del uso.
+OmniRoute es una puerta de enlace de enrutamiento AI local y un panel de control integrado en Next.js. Proporciona un único punto final compatible con OpenAI (`/v1/*`) y enruta el tráfico a través de múltiples proveedores ascendentes con traducción, respaldo, actualización de tokens y seguimiento de uso.
 
 Capacidades principales:
 
-- Superficie de API compatible con OpenAI para CLI/herramientas (375 proveedores, 156 módulos ejecutores)
-- Traducción de solicitudes/respuestas entre formatos de proveedores
-- Conmutación por error mediante combinaciones de modelos (secuencia de varios modelos)
-- Pasos de combinación estructurados (`provider + model + connection`) con ordenación en tiempo de ejecución mediante `compositeTiers`
-- Conmutación por error a nivel de cuenta (varias cuentas por proveedor)
-- Comprobación previa de cuota y selección de cuentas P2C consciente de la cuota en la ruta principal de chat
-- Gestión de conexiones de proveedores mediante OAuth y claves de API (27 módulos de proveedores OAuth)
-- Generación de embeddings mediante `/v1/embeddings` (18 proveedores)
-- Generación de imágenes mediante `/v1/images/generations` (más de 10 proveedores y más de 20 modelos)
-- Transcripción de audio mediante `/v1/audio/transcriptions` (18 proveedores)
-- Conversión de texto a voz mediante `/v1/audio/speech` (24 proveedores integrados)
-- Generación de vídeo mediante `/v1/videos/generations` (ComfyUI + SD WebUI)
-- Generación de música mediante `/v1/music/generations` (ComfyUI)
-- Búsqueda web mediante `/v1/search` (20 proveedores)
-- Moderaciones mediante `/v1/moderations`
-- Reordenación mediante `/v1/rerank`
-- Análisis de etiquetas de pensamiento (``) para modelos de razonamiento
-- Saneamiento de respuestas para una compatibilidad estricta con el SDK de OpenAI
-- Normalización de roles (developer→system, system→user) para la compatibilidad entre proveedores
-- Conversión de salida estructurada (json_schema → Gemini responseSchema)
-- Persistencia local de proveedores, claves, alias, combinaciones, ajustes y precios (122 módulos de base de datos)
-- Seguimiento de uso/costes y registro de solicitudes
-- Sincronización opcional en la nube para sincronizar el estado entre varios dispositivos
-- Lista de permitidos/bloqueados de IP para el control de acceso a la API
-- Gestión del presupuesto de razonamiento (transferencia directa/automático/personalizado/adaptativo)
-- Inyección global del prompt del sistema
-- Seguimiento y creación de huellas digitales de sesiones
-- Limitación de tasa mejorada por cuenta con perfiles específicos para cada proveedor
-- Patrón de disyuntor para la resiliencia de los proveedores
-- Protección contra avalanchas de solicitudes mediante bloqueo mutex
+- Superficie API compatible con OpenAI para CLI/tools (377 proveedores, 156 módulos ejecutores)
+- Traducción Request/response entre formatos de proveedores.
+- Respaldo combinado de modelos (secuencia multimodelo)
+- Pasos combinados estructurados (`provider + model + connection`) con orden en tiempo de ejecución por `compositeTiers`
+- Reserva a nivel de cuenta (varias cuentas por proveedor)
+- Verificación previa de cuotas y selección de cuenta P2C basada en cuotas en la ruta de chat principal
+- Gestión de conexión del proveedor de claves API OAuth + (27 módulos de proveedor OAuth )
+- Generación de incrustación a través de `/v1/embeddings` (18 proveedores)
+- Generación de imágenes mediante `/v1/images/generations` (10 proveedores +, 20 modelos + )
+- Transcripción de audio a través de `/v1/audio/transcriptions` (18 proveedores)
+- Texto a voz a través de `/v1/audio/speech` (24 proveedores integrados)
+- Generación de video a través de `/v1/videos/generations` (ComfyUI + SD WebUI)
+- Generación de música vía `/v1/music/generations` (ComfyUI)
+- Búsqueda web a través de `/v1/search` (20 proveedores)
+- Moderaciones vía `/v1/moderations`
+- Reclasificación a través de `/v1/rerank`
+- Piense en el análisis de etiquetas (`<think>...</think>`) para modelos de razonamiento
+- Desinfección de respuesta para una estricta compatibilidad con OpenAI SDK
+- Normalización de roles (desarrollador del sistema →, usuario del sistema →) para compatibilidad entre proveedores
+- Conversión de salida estructurada (json_schema → Gemini ResponseSchema)
+- Persistencia local para proveedores, claves, alias, combos, configuraciones, precios (122 módulos DB )
+- seguimiento Usage/cost y registro de solicitudes
+- Sincronización en la nube opcional para sincronización multi-device/state
+- IP allowlist/blocklist para control de acceso API
+- Pensando en la gestión presupuestaria (passthrough/auto/custom/adaptive)
+- Inyección rápida del sistema global
+- Seguimiento de sesiones y toma de huellas digitales
+- Limitación de tarifas mejorada por cuenta con perfiles específicos del proveedor
+- Patrón de disyuntores para la resiliencia del proveedor
+- Protección de rebaño anti-truenos con bloqueo mutex
 - Caché de deduplicación de solicitudes basada en firmas
-- Capa de dominio: reglas de costes, política de conmutación por error y política de bloqueo
-- Context Relay: resúmenes de transferencia de sesión para mantener la continuidad durante la rotación de cuentas
-- Persistencia del estado del dominio (caché de escritura directa en SQLite para conmutaciones por error, presupuestos, bloqueos y disyuntores)
-- Motor de políticas para la evaluación centralizada de solicitudes (bloqueo → presupuesto → conmutación por error)
-- Telemetría de solicitudes con agregación de latencias p50/p95/p99
-- Telemetría de destinos de combinaciones e historial de estado de los destinos mediante `combo_execution_key` / `combo_step_id`
-- ID de correlación (X-Request-Id) para el seguimiento de extremo a extremo
-- Registro de auditoría de cumplimiento con opción de exclusión por clave de API
-- Marco de evaluación para garantizar la calidad de los LLM
-- Panel de estado con el estado en tiempo real de los disyuntores de los proveedores
-- Servidor MCP (110 herramientas) con 3 transportes (stdio/SSE/HTTP transmisible)
+- Capa de dominio: reglas de costos, política alternativa, política de bloqueo
+- Context Relay: resúmenes de transferencia de sesiones para la continuidad de la rotación de cuentas
+- Persistencia del estado del dominio (caché de escritura SQLite para respaldos, presupuestos, bloqueos, disyuntores)
+- Motor de políticas para la evaluación centralizada de solicitudes (bloqueo → presupuesto → alternativo)
+- Solicitar telemetría con agregación de latencia p50/p95/p99
+- Telemetría de objetivo combinada y estado de salud de objetivo combinado histórico a través de `combo_execution_key` / `combo_step_id`
+- Correlación ID (X-Request-Id) para seguimiento de un extremo a otro
+- Registro de auditoría de cumplimiento con exclusión voluntaria por clave API
+- Marco de evaluación para el aseguramiento de la calidad LLM
+- Panel de control de salud con estado del disyuntor del proveedor en tiempo real
+- Servidor MCP (110 herramientas) con 3 transportes (stdio/SSE/Streamable HTTP)
 - Servidor A2A (JSON-RPC 2.0 + SSE) con habilidades y ciclo de vida de tareas
-- Sistema de memoria (extracción, inyección, recuperación y resumen)
-- Sistema de habilidades (registro, ejecutor, entorno aislado y habilidades integradas)
-- Proxy MITM con gestión de certificados y administración de DNS
-- Middleware de protección contra inyección de prompts
-- Canalización de compresión de prompts con Caveman, RTK, canalizaciones apiladas, combinaciones de compresión, paquetes de idiomas y analítica
-- Registro ACP (Agent Communication Protocol)
-- Proveedores OAuth modulares (22 módulos individuales en `src/lib/oauth/providers/`)
-- Scripts de desinstalación/desinstalación completa
-- Acción de reparación del entorno OAuth
+- Sistema de memoria (extracción, inyección, recuperación, resumen)
+- Sistema de habilidades (registro, ejecutor, sandbox, habilidades integradas)
+- proxy MITM con gestión de certificados y manejo de DNS
+- Middleware de protección de inyección rápida
+- Canalización de compresión rápida con Caveman, RTK, canalizaciones apiladas, combinaciones de compresión, paquetes de idiomas y análisis
+- Registro ACP (Protocolo de comunicación del agente)
+- Proveedores modulares OAuth (22 módulos individuales bajo `src/lib/oauth/providers/`)
+- guiones Uninstall/full-uninstall
+- acción de reparación del entorno OAuth
 - Puente WebSocket para clientes WS compatibles con OpenAI (`/v1/ws`)
-- Gestión de tokens de sincronización (emisión/revocación y descarga de paquetes de configuración versionados mediante ETag)
-- Preajuste de proveedor de primera clase para GLM Thinking (`glmt`)
-- Recuento híbrido de tokens (`/messages/count_tokens` del proveedor con estimación como alternativa)
-- Inicialización automática de alias de modelos (más de 30 normalizaciones entre dialectos de proxy durante el arranque)
-- Solicitudes salientes seguras con protección SSRF, bloqueo de URL privadas y reintentos configurables
-- Reintentos de chat conscientes del período de espera con `requestRetry` y `maxRetryIntervalSec` configurables
-- Validación del entorno de ejecución mediante Zod durante el arranque
-- Auditoría de cumplimiento v2 con paginación, eventos CRUD de proveedores y registro de validaciones bloqueadas por SSRF
+- Gestión de tokens de sincronización (issue/revoke, descarga del paquete de configuración con versión ETag)
+- Ajuste preestablecido de proveedor de primera clase GLM Thinking (`glmt`)
+- Recuento de tokens híbridos ( `/messages/count_tokens` del lado del proveedor con respaldo de estimación)
+- Auto-siembra de alias de modelo (30 normalizaciones de dialectos entre proxy + al inicio)
+- Recuperación saliente segura con SSRF guard, bloqueo URL privado y reintento configurable
+- Reintentos de chat con tiempo de reutilización con `requestRetry` y `maxRetryIntervalSec` configurables
+- Validación del entorno de ejecución con Zod al inicio
+- Auditoría de cumplimiento v2 con paginación, eventos CRUD del proveedor y registro de validación bloqueado por SSRF
 
-Modelo principal de ejecución:
+Modelo de tiempo de ejecución principal:
 
-- Las rutas de la aplicación Next.js en `src/app/api/*` implementan tanto las API del panel de control como las API de compatibilidad
-- Un núcleo compartido de SSE/enrutamiento en `src/sse/*` + `open-sse/*` gestiona la ejecución de proveedores, la traducción, la transmisión, la conmutación por error y el uso
+- Las rutas de la aplicación Next.js bajo `src/app/api/*` implementan tanto el panel APIs como la compatibilidad APIs
+- Un núcleo SSE/routing compartido en `src/sse/*` + `open-sse/*` maneja la ejecución, traducción, transmisión, respaldo y uso del proveedor.
 
 ## Diagramas de referencia
 
@@ -114,43 +113,51 @@ el resto está enlazado desde sus guías específicas de dominio.
 - SLA/plano de control del proveedor fuera del proceso local
 - Los propios binarios de CLI externos (Claude CLI, Codex CLI, etc.)
 
-## Superficie del panel (actual)
+## Superficie del dashboard (actual)
 
 Páginas principales en `src/app/(dashboard)/dashboard/`:
 
 - `/dashboard` — inicio rápido + descripción general de proveedores
-- `/dashboard/endpoint` — proxy de endpoints + MCP + A2A + pestañas de endpoints de API
+- `/dashboard/endpoint` — proxy de endpoints + pestañas de endpoints MCP + A2A + API
 - `/dashboard/providers` — conexiones y credenciales de proveedores
-- `/dashboard/combos` — estrategias de combinación, plantillas, constructor basado en pasos, reglas de enrutamiento de modelos y orden manual persistente
-- `/dashboard/auto-combo` — Motor de combinación automática: ponderaciones de puntuación, paquetes de modos, ajustes preestablecidos de fábricas virtuales, telemetría
+- `/dashboard/combos` — estrategias de combos, plantillas, constructor basado en pasos, reglas de enrutamiento de modelos, orden manual persistente
+- `/dashboard/auto-combo` — Auto Combo Engine: ponderaciones de puntuación, paquetes de modos, preajustes de fábrica virtual, telemetría
 - `/dashboard/costs` — agregación de costes y visibilidad de precios
-- `/dashboard/analytics` — análisis de uso, evaluaciones, estado de los objetivos de combinación
-- `/dashboard/limits` — controles de cuota/tasa
-- `/dashboard/cli-tools` — incorporación de CLI, detección del entorno de ejecución, generación de configuración
+- `/dashboard/analytics` — analíticas de uso, evaluaciones, estado de los destinos de combos
+- `/dashboard/limits` — controles de cuotas y límites de frecuencia
+- `/dashboard/cli-tools` — incorporación a la CLI, detección del entorno de ejecución, generación de configuración
 - `/dashboard/agents` — agentes ACP detectados + registro de agentes personalizados
 - `/dashboard/cloud-agents` — tareas de agentes alojados en la nube (Codex Cloud, Devin, Jules) y ciclo de vida de las tareas
-- `/dashboard/skills` — registro de habilidades A2A, ejecución en entorno aislado, catálogo de habilidades integradas
+- `/dashboard/skills` — registro de habilidades A2A, ejecución en sandbox, catálogo de habilidades integradas
 - `/dashboard/memory` — inspección y recuperación de memoria conversacional persistente
 - `/dashboard/webhooks` — suscripciones a webhooks salientes, rotación de secretos, estadísticas de reintentos
 - `/dashboard/batch` — envío de trabajos por lotes y progreso
-- `/dashboard/cache` — estadísticas de caché de lectura directa y razonamiento, controles de desalojo
-- `/dashboard/playground` — entorno interactivo de chat con cualquier combinación/modelo configurado
-- `/dashboard/changelog` — visor del registro de cambios en la aplicación (renderiza `CHANGELOG.md`)
+- `/dashboard/cache` — estadísticas de caché de lectura directa y razonamiento, controles de expulsión
+- `/dashboard/playground` — entorno interactivo de chat con cualquier combo/modelo configurado
+- `/dashboard/changelog` — visor del registro de cambios dentro de la aplicación (renderiza `CHANGELOG.md`)
 - `/dashboard/system` — diagnósticos del entorno de ejecución, información de versión, superficie de validación del entorno
-- `/dashboard/onboarding` — asistente de configuración inicial para instalaciones nuevas
+- `/dashboard/onboarding` — asistente de configuración inicial para nuevas instalaciones
 - `/dashboard/media` — entorno de pruebas de imágenes/vídeos/música
-- `/dashboard/search-tools` — pruebas de proveedores de búsqueda e historial
-- `/dashboard/health` — tiempo de actividad, disyuntores, límites de tasa, sesiones con cuota supervisada
+- `/dashboard/search-tools` — pruebas e historial de proveedores de búsqueda
+- `/dashboard/health` — tiempo de actividad, disyuntores, límites de frecuencia, sesiones con cuotas supervisadas
 - `/dashboard/logs` — registros de solicitudes/proxy/auditoría/consola
-- `/dashboard/settings` — pestañas de configuración del sistema (general, enrutamiento, valores predeterminados de combinaciones, etc.)
-- `/dashboard/context/caveman` — reglas de compresión Caveman, paquetes de idiomas, vista previa y modo de salida
+- `/dashboard/settings` — pestañas de configuración del sistema (general, enrutamiento, valores predeterminados de combos, etc.)
+- `/dashboard/context/caveman` — reglas de compresión de Caveman, paquetes de idiomas, vista previa y modo de salida
 - `/dashboard/context/rtk` — filtros de salida de comandos RTK, vista previa y configuración de seguridad del entorno de ejecución
-- `/dashboard/context/combos` — canalizaciones de compresión con nombre asignadas a combinaciones de enrutamiento
-- `/dashboard/translator` — inspección del traductor y vista previa de la conversión del formato de las solicitudes
+- `/dashboard/context/combos` — canalizaciones de compresión con nombre asignadas a combos de enrutamiento
+- `/dashboard/translator` — inspección del traductor y vista previa de la conversión del formato de solicitudes
 - `/dashboard/audit` — navegador de registros de auditoría de cumplimiento con paginación y metadatos estructurados
 - `/dashboard/usage` — navegador de uso por solicitud vinculado a `usage_history`
-- `/dashboard/compression` — análisis de compresión, estadísticas y asignación de canalizaciones
-- `/dashboard/api-manager` — ciclo de vida de las claves de API y permisos de modelos
+- `/dashboard/compression` — analíticas y estadísticas de compresión, y asignación de canalizaciones
+- `/dashboard/api-manager` — ciclo de vida de claves de API y permisos de modelos
+
+Capa de interfaz de usuario: cada página se renderiza dentro de un único shell — `src/app/(dashboard)/layout.tsx` →
+`src/shared/components/layouts/DashboardLayout.tsx` → `DashboardShell.tsx` (los componentes
+`SidebarProvider`/`SidebarInset` del kit, y `Sidebar.tsx` y `Header.tsx` de OmniRoute). Las páginas importan sus
+componentes básicos desde `@/shared/components` (adaptadores sobre el Keak CI UI Kit incluido en
+`packages/ui-kit`) o desde subrutas de componentes del kit (`@omniroute/ui-kit/table`, `…/page-header`), y los
+iconos mediante `<Icon>` (`ICON_MAP` → Lucide). El tema (`system` de forma predeterminada, claro/oscuro) y los tokens proceden
+del kit mediante el puente en `src/app/globals.css`. Detalles: `docs/architecture/DESIGN_SYSTEM.md`.
 
 ## Contexto general del sistema
 

@@ -52,6 +52,7 @@ import {
   isExclusiveLeaseManagedKey,
   LeaseContextError,
 } from "@/sse/services/leaseContext";
+import { applyResponsesWsUpstreamHeaders } from "@omniroute/open-sse/handlers/chatCore/upstreamExecuteHeaders.ts";
 
 const CODEX_RESPONSES_WS_URL = "wss://chatgpt.com/backend-api/codex/responses";
 const executor = new CodexExecutor();
@@ -742,7 +743,16 @@ async function prepare(body: JsonRecord) {
   let headers: Record<string, string>;
   let proxy: string | undefined;
   try {
-    headers = normalizeUpstreamHeaders(executor.buildHeaders(credentialsWithFingerprint, true));
+    // The HTTP/SSE path merges per-model upstreamHeaders and connection custom headers after the
+    // executor's own headers; without the same merge here a per-model `Version` override that
+    // unlocks a model over HTTP never reaches the WS upgrade (ChatGPT answers model_not_found).
+    headers = normalizeUpstreamHeaders(
+      applyResponsesWsUpstreamHeaders(executor.buildHeaders(credentialsWithFingerprint, true), {
+        provider,
+        model,
+        providerSpecificData: refreshedCredentials.providerSpecificData,
+      })
+    );
 
     // #5611: apply the configured proxy to the upstream Codex Responses
     // WebSocket too. #14531: resolve it through the full per-connection

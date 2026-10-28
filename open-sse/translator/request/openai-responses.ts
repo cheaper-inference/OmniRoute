@@ -15,6 +15,7 @@ import {
 } from "../../config/providerRegistry.ts";
 import { collectResponsesTools } from "./openai-responses/additionalTools.ts";
 import {
+  collectFlatToolNames,
   flattenNamespaceToolName,
   resolveNamespacedToolChoiceName,
 } from "./openai-responses/namespaceFlatten.ts";
@@ -160,6 +161,7 @@ export function openaiResponsesToOpenAIRequest(
   // `additional_tools` input items. Normalize both forms before validation/conversion so
   // every downgraded provider receives the same available tool set.
   const tools = collectResponsesTools(root.tools, rawInputItems);
+  const flatToolNames = collectFlatToolNames(tools);
   if (tools.length > 0) {
     for (const toolValue of tools) {
       const tool = toRecord(toolValue);
@@ -409,7 +411,9 @@ export function openaiResponsesToOpenAIRequest(
     if (itemType === "function_call") {
       // Skip tool calls with empty names to avoid infinite placeholder_tool loops
       const leafName = toString(item.name).trim();
-      const fnName = leafName ? flattenNamespaceToolName(toString(item.namespace), leafName) : "";
+      const fnName = leafName
+        ? flattenNamespaceToolName(toString(item.namespace), leafName, flatToolNames)
+        : "";
       if (!fnName) {
         continue;
       }
@@ -488,7 +492,9 @@ export function openaiResponsesToOpenAIRequest(
       // arguments wrap the raw string as { input }, matching the { input: string }
       // schema the request-side tools normalization advertises for custom tools.
       const leafName = toString(item.name).trim();
-      const fnName = leafName ? flattenNamespaceToolName(toString(item.namespace), leafName) : "";
+      const fnName = leafName
+        ? flattenNamespaceToolName(toString(item.namespace), leafName, flatToolNames)
+        : "";
       if (!fnName) {
         continue;
       }
@@ -658,7 +664,7 @@ export function openaiResponsesToOpenAIRequest(
               // identity for the response-side seam keyed on that qualified
               // wire name — qualified names cannot collide across namespaces,
               // so there is no ambiguity to detect/drop here anymore.
-              const wireName = flattenNamespaceToolName(nsName, leaf);
+              const wireName = flattenNamespaceToolName(nsName, leaf, flatToolNames);
               if (nsName && leaf) {
                 namespaceToolIdentityMap.set(wireName, { namespace: nsName, name: leaf });
               }
@@ -835,7 +841,7 @@ export function openaiResponsesToOpenAIRequest(
     );
     const forcedName = (name: unknown) =>
       typeof name === "string"
-        ? resolveNamespacedToolChoiceName(tc.namespace, name, chatToolNames)
+        ? resolveNamespacedToolChoiceName(tc.namespace, name, chatToolNames, flatToolNames)
         : name;
     // Custom/freeform tools are normalized to Chat function tools with an { input: string }
     // schema above. Force the normalized function here while response-side custom-tool metadata
@@ -874,7 +880,12 @@ export function openaiResponsesToOpenAIRequest(
           );
         }
         allowedNames.add(
-          resolveNamespacedToolChoiceName(allowed.namespace, allowedName, chatToolNames)
+          resolveNamespacedToolChoiceName(
+            allowed.namespace,
+            allowedName,
+            chatToolNames,
+            flatToolNames
+          )
         );
       }
 

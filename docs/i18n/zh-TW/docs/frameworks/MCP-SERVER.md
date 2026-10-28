@@ -72,6 +72,16 @@ curl -i \
 
 不具 `manage` 範圍的金鑰（或未提供 Bearer）會傳回 `403 LOCAL_ONLY`。相鄰的前綴 `/api/cli-tools/runtime/*` 刻意設計為不可略過——請參閱[路由防護層級——manage 範圍例外](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)。
 
+### Origin 驗證
+
+通過驗證後，所有送往 `/api/mcp/*` 的請求（包括傳輸端點與 `status`, `tools`, `audit`, `restart` 等管理路由）都會驗證 `Origin` 標頭，不論呼叫方為何（API key、CLI token、dashboard 工作階段，或停用登入時的匿名回環存取）。這是 MCP Streamable HTTP 規範要求的 DNS rebinding 防護。
+
+- **沒有 `Origin` 標頭** → 允許。OmniRoute CLI、SDK 與 IDE 用戶端都不會傳送此標頭。
+- **允許的 `Origin`** → 任意連接埠上的 `localhost` / `127.0.0.1` / `[::1]`，或 OmniRoute 自身的公開 origin：`OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`、受信任反向代理轉送的 origin（`OMNIROUTE_TRUST_PROXY`，僅在未設定 base URL 時生效），或直連的回環／區域網路 IP 主機。單憑 `Host` 標頭絕不會讓某個 origin 變成受信任。
+- **其他任何 `Origin`（包括 `null`）** → `403`，回應本文為 JSON-RPC 錯誤：`id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`。帶有有效 CSRF token 的 dashboard 工作階段仍會被接受，與其他 dashboard 寫入操作一致。
+
+部署在反向代理後方的瀏覽器 MCP 用戶端需要設定 `OMNIROUTE_PUBLIC_BASE_URL`；不提供其他 origin 的允許清單。CORS 預檢（`OPTIONS`）不驗證 Origin，但隨後的實際請求會驗證。
+
 ## IDE 設定
 
 請參閱 [MCP 用戶端設定](../guides/SETUP_GUIDE.md#mcp-client-configuration)，以瞭解 Claude Desktop、Cursor、Cline 及相容 MCP 用戶端的設定方式。

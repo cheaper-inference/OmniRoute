@@ -72,6 +72,16 @@ curl -i \
 
 គន្លឹះដែលមិនមែនជាការគ្រប់គ្រង (ឬគ្មាន Bearer) ត្រឡប់ `403 LOCAL_ONLY`។ បុព្វបទបងប្អូន `/api/cli-tools/runtime/*` មិនអាចរំលងបានដោយចេតនា — សូមមើល [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)។
 
+### ការផ្ទៀងផ្ទាត់ Origin
+
+បន្ទាប់ពីការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ រាល់សំណើទៅកាន់ `/api/mcp/*` — transport និងផ្លូវគ្រប់គ្រងដូចជា `status`, `tools`, `audit`, `restart` — ត្រូវបានផ្ទៀងផ្ទាត់ header `Origin` មិនថាអ្នកហៅជានរណាទេ (API key, token CLI, វគ្គ dashboard ឬ loopback អនាមិកនៅពេលបិទការចូល)។ នេះគឺជាការការពារ DNS rebinding ដែលលក្ខណៈបច្ចេកទេស MCP Streamable HTTP តម្រូវ។
+
+- **គ្មាន header `Origin`** → អនុញ្ញាត។ OmniRoute CLI, SDK និងម៉ាស៊ីនភ្ញៀវ IDE មិនផ្ញើវាទេ។
+- **`Origin` ដែលអនុញ្ញាត** → `localhost` / `127.0.0.1` / `[::1]` លើ port ណាមួយ ឬ origin សាធារណៈរបស់ OmniRoute ផ្ទាល់៖ `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin ដែល reverse proxy ដែលទុកចិត្តបានបញ្ជូនបន្ត (`OMNIROUTE_TRUST_PROXY` តែនៅពេលមិនបានកំណត់ base URL), ឬម៉ាស៊ីន IP loopback/LAN ដែលចូលដោយផ្ទាល់។ header `Host` តែឯងមិនដែលធ្វើឱ្យ origin ណាមួយក្លាយជាគួរទុកចិត្តឡើយ។
+- **`Origin` ផ្សេងទៀតណាមួយ រួមទាំង `null`** → `403` ជាមួយតួកំហុស JSON-RPC៖ `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`។ វគ្គ dashboard ដែលបង្ហាញ token CSRF ត្រឹមត្រូវ នៅតែត្រូវបានទទួលយក ដូចការសរសេរ dashboard ផ្សេងទៀត។
+
+ម៉ាស៊ីនភ្ញៀវ MCP លើកម្មវិធីរុករកដែលបម្រើនៅពីក្រោយ reverse proxy ត្រូវការ `OMNIROUTE_PUBLIC_BASE_URL`; គ្មានបញ្ជីអនុញ្ញាតសម្រាប់ origin ផ្សេងទៀតទេ។ សំណើ preflight CORS (`OPTIONS`) មិនត្រូវបានពិនិត្យ Origin ទេ តែសំណើបន្ទាប់ត្រូវបានពិនិត្យ។
+
 ## ការកំណត់រចនាសម្ព័ន្ធ IDE
 
 សូមមើល [ការកំណត់រចនាសម្ព័ន្ធម៉ាស៊ីនភ្ញៀវ MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) សម្រាប់ Claude Desktop, Cursor, Cline, និងការដំឡើងម៉ាស៊ីនភ្ញៀវ MCP ដែលត្រូវគ្នា។

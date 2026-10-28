@@ -66,6 +66,16 @@ curl -i \
 
 Առանց `manage` տիրույթի բանալին (կամ Bearer-ի բացակայությունը) վերադարձնում է `403 LOCAL_ONLY`։ Հարակից `/api/cli-tools/runtime/*` նախածանցը դիտավորյալ շրջանցելի ՉԷ․ տե՛ս [Երթուղիների պաշտպանության մակարդակներ — manage տիրույթի բացառություն](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out)։
 
+### Origin-ի ստուգում
+
+Նույնականացումից հետո `/api/mcp/*`-ին ուղղված յուրաքանչյուր հարցման — տրանսպորտների և `status`, `tools`, `audit`, `restart` նման կառավարման երթուղիների — `Origin` վերնագիրը ստուգվում է՝ անկախ կանչողից (API բանալի, CLI թոքեն, dashboard-ի նիստ կամ անանուն loopback՝ անջատված մուտքով)։ Սա DNS rebinding-ից պաշտպանությունն է, որը պահանջում է MCP Streamable HTTP սպեցիֆիկացիան։
+
+- **`Origin` վերնագիր չկա** → թույլատրվում է։ OmniRoute CLI-ը, SDK-ն և IDE հաճախորդները այն չեն ուղարկում։
+- **Թույլատրված `Origin`** → `localhost` / `127.0.0.1` / `[::1]` ցանկացած պորտում, կամ OmniRoute-ի սեփական հանրային origin-ը՝ `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, վստահելի հակադարձ պրոքսիի փոխանցած origin-ը (`OMNIROUTE_TRUST_PROXY`, միայն երբ base URL սահմանված չէ), կամ ուղղակիորեն դիմված loopback/LAN IP հոսթ։ Միայն `Host` վերնագիրը երբեք origin-ը վստահելի չի դարձնում։
+- **Ցանկացած այլ `Origin`, ներառյալ `null`** → `403`՝ JSON-RPC սխալի մարմնով՝ `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`։ Վավեր CSRF թոքեն ներկայացնող dashboard-ի նիստը շարունակում է ընդունվել, ինչպես dashboard-ի մյուս գրառումների դեպքում։
+
+Հակադարձ պրոքսիի հետևում սպասարկվող բրաուզերային MCP հաճախորդին անհրաժեշտ է `OMNIROUTE_PUBLIC_BASE_URL`; այլ origin-ների համար թույլատրված ցուցակ չկա։ CORS նախնական հարցումը (`OPTIONS`) Origin-ով չի ստուգվում, իսկ հաջորդող հարցումը՝ ստուգվում է։
+
 ## IDE-ի կազմաձևում
 
 Claude Desktop-ի, Cursor-ի, Cline-ի և համատեղելի MCP հաճախորդների կազմաձևման համար տե՛ս [MCP հաճախորդի կազմաձևում](../guides/SETUP_GUIDE.md#mcp-client-configuration) բաժինը։

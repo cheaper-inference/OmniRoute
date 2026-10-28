@@ -72,6 +72,16 @@ curl -i \
 
 Key marar `manage` (ko rashin Bearer) yana mayar da `403 LOCAL_ONLY`. An tsara sibling prefix `/api/cli-tools/runtime/*` da gangan don kada a iya kauce wa wannan iyaka — duba [Matakan Route Guard — keɓantacciyar damar manage-scope](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Tabbatar da Origin
+
+Bayan tantancewa, kowace buƙata zuwa `/api/mcp/*` — transport da hanyoyin gudanarwa kamar `status`, `tools`, `audit`, `restart` — ana tabbatar da kan `Origin` ɗinta, ko wane ne mai kira (maɓallin API, alamar CLI, zaman dashboard, ko loopback mara suna idan an kashe shiga). Wannan ita ce kariyar DNS rebinding da ƙa'idar MCP Streamable HTTP ta wajabta.
+
+- **Babu kan `Origin`** → an yarda. OmniRoute CLI, SDK da abokan cinikin IDE ba sa aika shi.
+- **`Origin` da aka yarda** → `localhost` / `127.0.0.1` / `[::1]` a kowane port, ko origin na jama'a na OmniRoute kansa: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin da amintaccen reverse proxy ya tura (`OMNIROUTE_TRUST_PROXY`, kawai idan ba a saita base URL ba), ko mai masaukin IP na loopback/LAN da ake shiga kai tsaye. Kan `Host` shi kaɗai ba zai taɓa sa wani origin ya zama amintacce ba.
+- **Kowane `Origin` dabam, har da `null`** → `403` tare da jikin kuskuren JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Zaman dashboard da ya gabatar da ingantacciyar alamar CSRF har yanzu ana karɓa, kamar sauran rubuce-rubucen dashboard.
+
+Abokin ciniki na MCP na mai bincike da ake bayarwa a bayan reverse proxy yana buƙatar `OMNIROUTE_PUBLIC_BASE_URL`; babu jerin izini ga wasu origins. Ba a duba Origin a buƙatar farko ta CORS (`OPTIONS`) ba; ana duba buƙatar da ke biye.
+
 ## Saitin IDE
 
 Duba [Saitin Abokin Cinikin MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) don saita Claude Desktop,

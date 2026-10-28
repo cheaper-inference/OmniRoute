@@ -72,6 +72,16 @@ curl -i \
 
 `manage` વિનાની key (અથવા Bearer વિનાની request) `403 LOCAL_ONLY` પરત કરે છે. સમકક્ષ prefix `/api/cli-tools/runtime/*`ને ઇરાદાપૂર્વક bypass કરી શકાતું નથી — [Route Guard Tiers — Manage-scope carve-out](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) જુઓ.
 
+### Origin ચકાસણી
+
+પ્રમાણીકરણ પછી `/api/mcp/*` પરની દરેક વિનંતી — ટ્રાન્સપોર્ટ અને `status`, `tools`, `audit`, `restart` જેવા સંચાલન રૂટ — ના `Origin` હેડરની ચકાસણી થાય છે, કૉલર ગમે તે હોય (API કી, CLI ટોકન, ડેશબોર્ડ સત્ર, અથવા લૉગિન બંધ હોય ત્યારે અનામી loopback). આ MCP Streamable HTTP સ્પષ્ટીકરણ દ્વારા જરૂરી DNS rebinding સુરક્ષા છે.
+
+- **`Origin` હેડર નથી** → મંજૂર. OmniRoute CLI, SDK અને IDE ક્લાયન્ટ તેને મોકલતા નથી.
+- **મંજૂર `Origin`** → કોઈપણ પોર્ટ પર `localhost` / `127.0.0.1` / `[::1]`, અથવા OmniRouteનું પોતાનું જાહેર origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, વિશ્વસનીય રિવર્સ પ્રોક્સી દ્વારા ફોરવર્ડ થયેલ origin (`OMNIROUTE_TRUST_PROXY`, ફક્ત ત્યારે જ જ્યારે base URL સેટ ન હોય), અથવા સીધો ઍક્સેસ થયેલ loopback/LAN IP હોસ્ટ. ફક્ત `Host` હેડર ક્યારેય કોઈ originને વિશ્વસનીય બનાવતું નથી.
+- **`null` સહિત અન્ય કોઈપણ `Origin`** → JSON-RPC ભૂલ બોડી સાથે `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. માન્ય CSRF ટોકન રજૂ કરતું ડેશબોર્ડ સત્ર, અન્ય ડેશબોર્ડ લેખનની જેમ, હજી પણ સ્વીકારાય છે.
+
+રિવર્સ પ્રોક્સી પાછળ પીરસાતા બ્રાઉઝર MCP ક્લાયન્ટને `OMNIROUTE_PUBLIC_BASE_URL` જોઈએ; અન્ય origins માટે કોઈ મંજૂરી-યાદી નથી. CORS પ્રીફ્લાઇટ (`OPTIONS`)ની Origin ચકાસણી થતી નથી; તે પછીની વિનંતીની થાય છે.
+
 ## IDE ગોઠવણી
 
 Claude Desktop, Cursor, Cline અને સુસંગત MCP ક્લાયન્ટના સેટઅપ માટે [MCP ક્લાયન્ટ ગોઠવણી](../guides/SETUP_GUIDE.md#mcp-client-configuration) જુઓ.

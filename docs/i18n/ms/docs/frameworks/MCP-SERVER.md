@@ -72,6 +72,16 @@ curl -i \
 
 Kunci tanpa skop manage (atau tanpa Bearer) mengembalikan `403 LOCAL_ONLY`. Awalan setara `/api/cli-tools/runtime/*` sengaja TIDAK boleh dipintas — lihat [Peringkat Pengawal Laluan — pengecualian skop manage](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out).
 
+### Pengesahan Origin
+
+Selepas pengesahan identiti, setiap permintaan ke `/api/mcp/*` — transport dan laluan pengurusan seperti `status`, `tools`, `audit`, `restart` — disahkan pengepala `Origin`-nya, tidak kira siapa pemanggilnya (kunci API, token CLI, sesi papan pemuka atau loopback tanpa nama apabila log masuk dimatikan). Ini ialah perlindungan DNS rebinding yang diwajibkan oleh spesifikasi MCP Streamable HTTP.
+
+- **Tiada pengepala `Origin`** → dibenarkan. OmniRoute CLI, SDK dan klien IDE tidak menghantarnya.
+- **`Origin` yang dibenarkan** → `localhost` / `127.0.0.1` / `[::1]` pada mana-mana port, atau origin awam OmniRoute sendiri: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, origin yang dimajukan oleh proksi songsang yang dipercayai (`OMNIROUTE_TRUST_PROXY`, hanya apabila base URL tidak ditetapkan), atau hos IP loopback/LAN yang diakses secara terus. Pengepala `Host` sahaja tidak pernah menjadikan sesuatu origin dipercayai.
+- **Mana-mana `Origin` lain, termasuk `null`** → `403` dengan badan ralat JSON-RPC: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. Sesi papan pemuka yang mengemukakan token CSRF yang sah masih diterima, sama seperti penulisan papan pemuka yang lain.
+
+Klien MCP pelayar yang disajikan di belakang proksi songsang memerlukan `OMNIROUTE_PUBLIC_BASE_URL`; tiada senarai dibenarkan untuk origin lain. Permintaan pra-penerbangan CORS (`OPTIONS`) tidak disemak untuk Origin; permintaan yang menyusul disemak.
+
 ## Konfigurasi IDE
 
 Lihat [Konfigurasi Klien MCP](../guides/SETUP_GUIDE.md#mcp-client-configuration) untuk penyediaan Claude Desktop,

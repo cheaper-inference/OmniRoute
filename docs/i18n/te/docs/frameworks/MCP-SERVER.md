@@ -72,6 +72,16 @@ curl -i \
 
 `manage` లేని కీ (లేదా Bearer లేకపోవడం) `403 LOCAL_ONLY`ను తిరిగి ఇస్తుంది. అనుబంధ ప్రిఫిక్స్ `/api/cli-tools/runtime/*`ను ఉద్దేశపూర్వకంగా బైపాస్ చేయడం సాధ్యం కాదు — [Route Guard స్థాయిలు — Manage-స్కోప్ మినహాయింపు](../security/ROUTE_GUARD_TIERS.md#manage-scope-carve-out) చూడండి.
 
+### Origin ధృవీకరణ
+
+ప్రామాణీకరణ తర్వాత `/api/mcp/*` కు వచ్చే ప్రతి అభ్యర్థన — ట్రాన్స్‌పోర్ట్‌లు మరియు `status`, `tools`, `audit`, `restart` వంటి నిర్వహణ రూట్‌లు — యొక్క `Origin` హెడర్ ధృవీకరించబడుతుంది, కాలర్ ఎవరైనా సరే (API కీ, CLI టోకెన్, డాష్‌బోర్డ్ సెషన్, లేదా లాగిన్ నిలిపివేసినప్పుడు అనామక loopback). ఇది MCP Streamable HTTP స్పెసిఫికేషన్ కోరే DNS rebinding రక్షణ.
+
+- **`Origin` హెడర్ లేదు** → అనుమతించబడుతుంది. OmniRoute CLI, SDK మరియు IDE క్లయింట్‌లు దీన్ని పంపవు.
+- **అనుమతించబడిన `Origin`** → ఏ పోర్ట్‌లోనైనా `localhost` / `127.0.0.1` / `[::1]`, లేదా OmniRoute యొక్క సొంత పబ్లిక్ origin: `OMNIROUTE_PUBLIC_BASE_URL` / `NEXT_PUBLIC_BASE_URL` / `NEXT_PUBLIC_APP_URL`, విశ్వసనీయ రివర్స్ ప్రాక్సీ ఫార్వర్డ్ చేసిన origin (`OMNIROUTE_TRUST_PROXY`, base URL సెట్ చేయనప్పుడు మాత్రమే), లేదా నేరుగా యాక్సెస్ చేసిన loopback/LAN IP హోస్ట్. కేవలం `Host` హెడర్ ఎప్పుడూ ఏ origin‌నూ విశ్వసనీయం చేయదు.
+- **`null` సహా ఇతర ఏ `Origin` అయినా** → JSON-RPC లోప బాడీతో `403`: `id: null`, `error.code: -32000`, `error.data.code: "INVALID_ORIGIN"`. చెల్లుబాటు అయ్యే CSRF టోకెన్‌ను చూపే డాష్‌బోర్డ్ సెషన్, ఇతర డాష్‌బోర్డ్ రైట్‌ల మాదిరిగానే, ఇప్పటికీ ఆమోదించబడుతుంది.
+
+రివర్స్ ప్రాక్సీ వెనుక అందించే బ్రౌజర్ MCP క్లయింట్‌కు `OMNIROUTE_PUBLIC_BASE_URL` అవసరం; ఇతర origins కోసం అనుమతి జాబితా లేదు. CORS ప్రీఫ్లైట్ (`OPTIONS`) Origin కోసం తనిఖీ చేయబడదు; దాని తర్వాతి అభ్యర్థన తనిఖీ చేయబడుతుంది.
+
 ## IDE కాన్ఫిగరేషన్
 
 Claude Desktop, Cursor, Cline మరియు అనుకూల MCP క్లయింట్ సెటప్ కోసం [MCP క్లయింట్ కాన్ఫిగరేషన్](../guides/SETUP_GUIDE.md#mcp-client-configuration) చూడండి.

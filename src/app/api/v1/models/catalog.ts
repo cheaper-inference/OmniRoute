@@ -33,14 +33,12 @@ import {
 import { CODEX_NATIVE_UNPREFIXED_MODELS } from "@omniroute/open-sse/services/model";
 import { isModelSelectable } from "@omniroute/open-sse/services/modelLifecycle";
 import { resolveNestedComboTargets } from "@omniroute/open-sse/services/combo";
+import { expandProviderWildcardsInCollection } from "@omniroute/open-sse/services/combo/providerWildcard";
 import {
-  AUTO_TEMPLATE_VARIANTS,
-  AUTO_SUFFIX_VARIANTS,
-  AUTO_FAMILY_IDS,
-  createBuiltinAutoCombo,
   prepareBuiltinAutoComboInputs,
   isPaidTierAutoId,
 } from "@omniroute/open-sse/services/autoCombo/builtinCatalog";
+import { getAdvertisedAutoIds, materializeAdvertisedAutoCombo } from "./autoCatalogIds";
 import {
   getSyncedAvailableModelsByConnection,
   SYNCED_AVAILABLE_MODELS_MALFORMED,
@@ -473,6 +471,8 @@ async function buildUnifiedModelsResponseCore(
     await yieldCatalogBuildTurn();
     try {
       combos = await getCombos();
+      // Match inference before nested resolution and metadata lookup; keep saved wildcards intact.
+      combos = await expandProviderWildcardsInCollection(combos);
     } catch (e) {
       console.log("Could not fetch combos");
     }
@@ -838,11 +838,22 @@ async function buildUnifiedModelsResponseCore(
     const models = [];
     const timestamp = Math.floor(Date.now() / 1000);
     const listedIds = new Set<string>();
+    // The per-key metadata (quota pools, allowAutoCombos, allowCcDiscoveryAliases) must be
+    // resolved before the post-filter context below reads it.
+    const earlyApiKey = extractApiKey(request);
+    let earlyKeyMeta: Awaited<
+      ReturnType<typeof import("@/lib/db/apiKeys").getApiKeyMetadata>
+    > | null = null;
+    if (earlyApiKey) {
+      const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
+      earlyKeyMeta = await getApiKeyMetadata(earlyApiKey);
+    }
     const postFilterContext = {
       connections,
       prefixMode,
       aliasToProviderId,
       hideNoThinkVariants: settings.hideNoThinkVariants === true,
+      allowCcDiscoveryAliases: earlyKeyMeta?.allowCcDiscoveryAliases !== false,
       blockedProviders: settings.blockedProviders,
       // Per-entry `pricing`: a combo is priced as its first visible target.
       pricing: {
@@ -868,27 +879,19 @@ async function buildUnifiedModelsResponseCore(
     // Everything the quota path needs (`combos`, `timestamp`,
     // `buildComboCatalogMetadata`) already exists here, so return before the
     // provider/auto-combo/registry loops start.
-    const earlyApiKey = extractApiKey(request);
-    let earlyKeyMeta: Awaited<
-      ReturnType<typeof import("@/lib/db/apiKeys").getApiKeyMetadata>
-    > | null = null;
-    if (earlyApiKey) {
-      const { getApiKeyMetadata } = await import("@/lib/db/apiKeys");
-      earlyKeyMeta = await getApiKeyMetadata(earlyApiKey);
-      if (earlyKeyMeta?.allowedQuotas && earlyKeyMeta.allowedQuotas.length > 0) {
-        const { buildQuotaExclusiveModels } = await import("@/lib/quota/quotaCombos");
-        const quotaModels = await buildQuotaExclusiveModels(
-          earlyKeyMeta.allowedQuotas,
-          combos,
-          timestamp,
-          (c) => buildComboCatalogMetadata(c, combos)
-        );
-        const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
-        return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
-          ...corsHeaders,
-          ...diagnosticHeaders,
-        });
-      }
+    if (earlyKeyMeta?.allowedQuotas && earlyKeyMeta.allowedQuotas.length > 0) {
+      const { buildQuotaExclusiveModels } = await import("@/lib/quota/quotaCombos");
+      const quotaModels = await buildQuotaExclusiveModels(
+        earlyKeyMeta.allowedQuotas,
+        combos,
+        timestamp,
+        (c) => buildComboCatalogMetadata(c, combos)
+      );
+      const quotaFinal = await applyCatalogPostFilters(request, quotaModels, postFilterContext);
+      return finalizeCatalogResponse(request, quotaFinal, () => undefined, {
+        ...corsHeaders,
+        ...diagnosticHeaders,
+      });
     }
 
     // #4164: advertise the built-in zero-setup `auto/*` combos at the very top.
@@ -908,11 +911,7 @@ async function buildUnifiedModelsResponseCore(
     const autoCombosDisallowedForKey = earlyKeyMeta?.allowAutoCombos === false;
     let materializedAutoCount = 0;
     const autoMeta = memoizeTargetMetadata(getComboTargetCatalogMetadata, maybeYieldCatalogBuild);
-    for (const autoId of [
-      ...Object.keys(AUTO_TEMPLATE_VARIANTS),
-      ...AUTO_SUFFIX_VARIANTS,
-      ...AUTO_FAMILY_IDS,
-    ]) {
+    for (const autoId of getAdvertisedAutoIds()) {
       // #9418: skip the entire loop when hideAutoCombos is on — the ids are still
       // routable when sent explicitly, just not advertised in the catalog.
       if (hideAuto || autoCombosDisallowedForKey) break;
@@ -938,7 +937,11 @@ async function buildUnifiedModelsResponseCore(
           preparedAutoInputs = await prepareBuiltinAutoComboInputs(capabilityResolutionSnapshot);
           await yieldCatalogBuildTurn();
         }
-        const virtualCombo = await createBuiltinAutoCombo(autoId, suffix, preparedAutoInputs);
+        const virtualCombo = await materializeAdvertisedAutoCombo(
+          autoId,
+          suffix,
+          preparedAutoInputs
+        );
         if (virtualCombo.models.length === 0) continue; // zero live candidates — can't dispatch
         const contextLength = virtualCombo.advertisedContextLength || 128000;
         const maxOutputTokens = virtualCombo.advertisedMaxOutputTokens || 8192;
