@@ -84,3 +84,64 @@ test("cloneBoundedForLog: small tools array (<=MAX) passes through unchanged", (
   const result = cloneBoundedForLog({ tools }) as { tools: unknown[] };
   assert.equal(result.tools.length, 10);
 });
+
+// The pipeline capture (cloneBoundedForLog) and its sibling cloneBoundedChatLogPayload
+// (chatCore/logTruncation.ts) bound the same call-log artifact. Only the sibling honored
+// CHAT_LOG_TEXT_LIMIT / CHAT_LOG_MAX_OBJECT_KEYS, so an operator could not get a complete
+// providerRequest: a tool schema with >80 properties lost its tail and any tool output
+// above 64 KB was cut, whatever the env said.
+function withEnv(vars: Record<string, string | undefined>, fn: () => void) {
+  const saved = Object.fromEntries(Object.keys(vars).map((k) => [k, process.env[k]]));
+  for (const [k, v] of Object.entries(vars)) {
+    if (v === undefined) delete process.env[k];
+    else process.env[k] = v;
+  }
+  try {
+    fn();
+  } finally {
+    for (const [k, v] of Object.entries(saved)) {
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+  }
+}
+
+function schemaWithProperties(count: number) {
+  return Object.fromEntries(Array.from({ length: count }, (_, i) => [`p${i}`, { type: "string" }]));
+}
+
+test("cloneBoundedForLog: default caps unchanged (64 KB strings, 80 object keys)", () => {
+  withEnv({ CHAT_LOG_TEXT_LIMIT: undefined, CHAT_LOG_MAX_OBJECT_KEYS: undefined }, () => {
+    const result = cloneBoundedForLog({
+      text: "a".repeat(100 * 1024),
+      properties: schemaWithProperties(88),
+    }) as { text: string; properties: Record<string, unknown> };
+    assert.equal(result.text.length, 64 * 1024);
+    assert.match(result.text, /\[\.\.\.truncated \d+ chars\.\.\.\]/);
+    assert.equal(result.properties._omniroute_truncated_keys, 8);
+  });
+});
+
+test("cloneBoundedForLog: honors CHAT_LOG_TEXT_LIMIT", () => {
+  withEnv({ CHAT_LOG_TEXT_LIMIT: String(1024 * 1024) }, () => {
+    const text = "a".repeat(400 * 1024);
+    const result = cloneBoundedForLog({ text }) as { text: string };
+    assert.equal(result.text, text);
+  });
+});
+
+test("cloneBoundedForLog: CHAT_LOG_MAX_OBJECT_KEYS=0 keeps every key", () => {
+  withEnv({ CHAT_LOG_MAX_OBJECT_KEYS: "0" }, () => {
+    const properties = schemaWithProperties(88);
+    const result = cloneBoundedForLog({ properties }) as { properties: Record<string, unknown> };
+    assert.deepEqual(result.properties, properties);
+  });
+});
+
+test("cloneBoundedForLog: honors a raised CHAT_LOG_MAX_OBJECT_KEYS", () => {
+  withEnv({ CHAT_LOG_MAX_OBJECT_KEYS: "100" }, () => {
+    const properties = schemaWithProperties(88);
+    const result = cloneBoundedForLog({ properties }) as { properties: Record<string, unknown> };
+    assert.deepEqual(result.properties, properties);
+  });
+});
