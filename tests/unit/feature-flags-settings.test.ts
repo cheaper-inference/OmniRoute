@@ -58,7 +58,9 @@ const {
 // tool_call wrapper repair, default on) to 86.
 // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, OpenCode model surface from the
 // published catalog, default off) takes it to 87.
-const EXPECTED_FEATURE_FLAG_COUNT = 111;
+// OPENCODE_FREE_TIER_EGRESS_PROBE (one-hop egress probe after a FreeTierError, default off)
+// takes the catalog from 111 to 112.
+const EXPECTED_FEATURE_FLAG_COUNT = 112;
 // tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
 // (#16571, OpenCode v2 client fingerprint, default off) to 87.
 // tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
@@ -255,6 +257,15 @@ describe("featureFlagDefinitions", () => {
   it("defines OPENCODE_USER_BLOCKED_ROTATION as an opt-in network boolean flag disabled by default", () => {
     const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "OPENCODE_USER_BLOCKED_ROTATION");
     assert.ok(def, "OPENCODE_USER_BLOCKED_ROTATION should exist");
+    assert.strictEqual(def.category, "network");
+    assert.strictEqual(def.type, "boolean");
+    assert.strictEqual(def.defaultValue, "false");
+    assert.strictEqual(def.requiresRestart, false);
+  });
+
+  it("defines OPENCODE_FREE_TIER_EGRESS_PROBE as an opt-in network boolean flag disabled by default", () => {
+    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "OPENCODE_FREE_TIER_EGRESS_PROBE");
+    assert.ok(def, "OPENCODE_FREE_TIER_EGRESS_PROBE should exist");
     assert.strictEqual(def.category, "network");
     assert.strictEqual(def.type, "boolean");
     assert.strictEqual(def.defaultValue, "false");

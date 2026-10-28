@@ -385,6 +385,18 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     warningLevel: "caution",
   },
   {
+    key: "OPENCODE_FREE_TIER_EGRESS_PROBE",
+    label: "OpenCode Free-Tier Egress Probe",
+    description:
+      "For the OpenCode executor, when a proxied request is answered 403 or 451 FreeTierError and the observed-tools retry failed or did not apply, send the request once through a different proxy (another account proxy or another pool member, never a direct connection). Only when that probe answers 200 is the first egress set aside in the proxy refusal memory and the probe response served; when both refuse, the original refusal is returned and nothing is recorded. The same refusal text covers a flagged egress IP and a refused request shape, so the probe tells them apart by evidence. Off by default: the refusal is returned unchanged.",
+    descriptionI18nKey: "featureFlagOpencodeFreeTierEgressProbeDescription",
+    category: "network",
+    defaultValue: "false",
+    type: "boolean",
+    requiresRestart: false,
+    warningLevel: "caution",
+  },
+  {
     key: "OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED",
     label: "OpenCode v2 Client Fingerprint",
     description:

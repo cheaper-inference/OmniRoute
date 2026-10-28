@@ -490,6 +490,19 @@ export function isOpencodePoolReselectEnabled(): boolean {
   }
 }
 
+/** OPENCODE_FREE_TIER_EGRESS_PROBE (default off): probe one other proxy after a FreeTierError. */
+export function isOpencodeFreeTierEgressProbeEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("OPENCODE_FREE_TIER_EGRESS_PROBE");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve OPENCODE_FREE_TIER_EGRESS_PROBE, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
 /**
  * #16798 — OpenCode Zen/Go models without an explicit registry endpoint take their
  * request surface from the published models.opencode.ai catalog. Off by default; any

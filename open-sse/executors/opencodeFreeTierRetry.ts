@@ -159,6 +159,8 @@ export async function handleLoopFreeTierRefusal(
   hooks: {
     dispatch: (retryInput: ExecutorInput) => Promise<{ response: Response }>;
     noteServed: (account: unknown) => void;
+    /** Opt-in egress probe once the retry failed or did not apply (opencodeFreeTierEgressProbe). */
+    probe?: () => Promise<{ response: Response } | null>;
   }
 ): Promise<ShapedResult> {
   const retried = await retryFreeTierRefusalWithObservedTools(
@@ -169,6 +171,8 @@ export async function handleLoopFreeTierRefusal(
     cid,
     hooks.dispatch
   );
+  const probed = hooks.probe && !retried?.response.ok ? await hooks.probe() : null;
+  if (probed) return shape(probed);
   if (retried) {
     return shape(retried);
   }

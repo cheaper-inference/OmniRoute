@@ -20,6 +20,8 @@ export interface RequestContext {
    * current behavior then. Never throws: a throw is treated like null.
    */
   reselectPoolMember?: () => Promise<unknown>;
+  /** Set once the free-tier egress probe ran for this request (one probe per request). */
+  freeTierEgressProbed?: boolean;
 }
 
 const store = new AsyncLocalStorage<RequestContext>();

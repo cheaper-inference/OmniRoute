@@ -83,6 +83,7 @@ import {
   retryFreeTierRefusalWithObservedTools,
 } from "./opencodeFreeTierRetry.ts";
 import { withRequestShapeRetry } from "./opencodeRequestShape.ts";
+import { probeFreeTierRefusalEgress } from "./opencodeFreeTierEgressProbe.ts";
 import { trimOversizedToolEnums } from "./opencodeEnumTrim.ts";
 
 // Re-exported: the free-model catalog moved to the contract module (it decides whether the
@@ -112,6 +113,7 @@ import {
   isOpencodeRateLimited429EarlyStopEnabled,
   isOpencodeParkAndResumeEnabled,
   isOpencodePoolReselectEnabled,
+  isOpencodeFreeTierEgressProbeEnabled,
   isOpencodePublishedCatalogRoutingEnabled,
   isOpencodeV2ClientFingerprintEnabled,
 } from "@/shared/utils/featureFlags";
@@ -648,6 +650,7 @@ export class OpencodeExecutor extends BaseExecutor {
       // Opt-in pool re-selection on a per-address 429 (default off): one flag
       // read per request, like the attribution flag above — never in the loop.
       const poolReselectOn = isOpencodePoolReselectEnabled();
+      const freeTierEgressProbeOn = isOpencodeFreeTierEgressProbeEnabled(); // opt-in, default off
       // Resolver published by the chat layer when the ambient egress came from
       // a live connection pool (undefined otherwise). Read once per request.
       // The provider test is the quota-refusal scope, so an operator widening it
@@ -708,6 +711,38 @@ export class OpencodeExecutor extends BaseExecutor {
                 : runWithDirectFetchContext(() => super.execute(retryInput))
             ) as unknown as Promise<HttpExecuteResult>
         );
+        // Opt-in: a FreeTierError through a pool member probes one other member (never direct).
+        const singleEgress = freeTierEgressProbeOn
+          ? egressPacing.createAppliedEgressTracker(
+              this.buildUrl(String(input.model ?? ""), Boolean(input.stream)),
+              resolveProxyForRequest
+            )
+          : null;
+        const probed =
+          singleEgress &&
+          (await probeFreeTierRefusalEgress(true, {
+            refusal: retryAfterRefusal ?? single,
+            account: accounts[0],
+            accounts,
+            keyOfMember: singleEgress.keyOfMember,
+            dispatch: async (proxy) =>
+              (await guardStall(
+                await runWithProxyContext(proxy, () =>
+                  super.execute({ ...input, skipUpstreamRetry: true })
+                )
+              )) as HttpExecuteResult,
+            recordRefused: () =>
+              void singleEgress.noteRefused(
+                accounts[0],
+                isProxySkipRecentlyFailedEnabled(),
+                "geo_blocked"
+              ),
+            log,
+            cid,
+          }));
+        if (probed) {
+          return this.finalizeForcedStream(input, this.normalizeMuseSparkResponse(input, probed));
+        }
         if (retryAfterRefusal) {
           await this.noteFreeTierRefusal(input, retryAfterRefusal.response, log);
           return this.finalizeForcedStream(
@@ -1256,6 +1291,24 @@ export class OpencodeExecutor extends BaseExecutor {
                       super.execute({ ...retryInput, skipUpstreamRetry: true })
                     ) as Promise<HttpExecuteResult>,
                   noteServed: (a) => noteResponseServed(a as typeof account),
+                  probe: () =>
+                    probeFreeTierRefusalEgress(freeTierEgressProbeOn, {
+                      refusal: result,
+                      account,
+                      accounts,
+                      keyOfMember,
+                      dispatch: async (proxy) =>
+                        (await guardStall(
+                          await runWithProxyContext(proxy, () =>
+                            super.execute({ ...input, skipUpstreamRetry: true })
+                          )
+                        )) as HttpExecuteResult,
+                      recordRefused: () =>
+                        void noteRefused(account, skipRecentlyFailed, "geo_blocked"),
+                      noteServed: markSuccess,
+                      log,
+                      cid,
+                    }),
                 }
               );
             }
