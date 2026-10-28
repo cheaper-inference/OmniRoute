@@ -65,6 +65,7 @@ export default function CheaperInferenceSponsorBanner() {
   };
 
   // Partner identity colour (#31f889) — brand, not a semantic status tone; kept as-is.
+  // The note under the CTA uses full-strength text-muted at 12px (9px at 70% failed AA, P7).
   return (
     <div
       role="complementary"
@@ -93,7 +94,7 @@ export default function CheaperInferenceSponsorBanner() {
             {t("cta")}
             <Icon name="open_in_new" size={14} />
           </a>
-          <span className="text-[9px] text-text-muted/70">{t("partnerLinkNote")}</span>
+          <span className="text-xs text-text-muted">{t("partnerLinkNote")}</span>
         </div>
         <Button
           variant="ghost"

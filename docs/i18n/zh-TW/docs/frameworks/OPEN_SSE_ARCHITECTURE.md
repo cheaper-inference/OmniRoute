@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | 檔案                             | 用途                                  |
 | -------------------------------- | ------------------------------------- |
-| `providerRegistry.ts`            | 涵蓋 375 家提供者目錄的聊天模型註冊表 |
+| `providerRegistry.ts`            | 涵蓋 376 家提供者目錄的聊天模型註冊表 |
 | `providerModels.ts`              | 模型別名、格式對應                    |
 | `constants.ts`                   | 逾時、限制、狀態碼                    |
 | `defaultThinkingSignature.ts`    | 預設 Claude 思考簽名                  |

@@ -20,7 +20,7 @@ Kun IDE-agentti (esim. GitHub Copilot, Cursor, Claude Code) tekee API-kutsun, se
 
 Tämä tarkoittaa, että voit:
 
-- **Reitittää minkä tahansa agentin mille tahansa palveluntarjoajalle**: Copilot keskustelee OpenAI:n kanssa? Ohjaa se Anthropic Claudeen, Geminiin tai mihin tahansa OmniRouten 375 palveluntarjoajasta.
+- **Reitittää minkä tahansa agentin mille tahansa palveluntarjoajalle**: Copilot keskustelee OpenAI:n kanssa? Ohjaa se Anthropic Claudeen, Geminiin tai mihin tahansa OmniRouten 376 palveluntarjoajasta.
 - **Käyttää mallikartoituksia**: `gemini-3-flash` → `claude-sonnet-4.7` läpinäkyvästi käsittelijätasolla.
 - **Tarkkailla kaikkea agenttiliikennettä**: jokainen siepattu pyyntö julkaistaan [Traffic Inspectorissa](./TRAFFIC_INSPECTOR.md).
 - **Hyödyntää OmniRouten vikasietoisuutta**: yhdistelmäreititys, circuit breaker -katkaisijat, varareititykset ja kustannusseuranta toimivat myös IDE-agenttiliikenteelle.

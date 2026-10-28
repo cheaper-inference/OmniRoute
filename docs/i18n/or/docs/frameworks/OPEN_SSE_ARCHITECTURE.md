@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ଫାଇଲ୍                            | ଉଦ୍ଦେଶ୍ୟ                                      |
 | -------------------------------- | --------------------------------------------- |
-| `providerRegistry.ts`            | ୩୭୫-ପ୍ରୋଭାଇଡର କାଟାଲଗ ଉପରେ ଚାଟ୍-ମଡେଲ ରଜିଷ୍ଟ୍ରି |
+| `providerRegistry.ts`            | ୩୭୬-ପ୍ରୋଭାଇଡର କାଟାଲଗ ଉପରେ ଚାଟ୍-ମଡେଲ ରଜିଷ୍ଟ୍ରି |
 | `providerModels.ts`              | ମଡେଲ ଉପନାମ, ଫର୍ମାଟ ମ୍ୟାପିଂ                    |
 | `constants.ts`                   | ଟାଇମଆଉଟ୍, ସୀମା, ଷ୍ଟାଟସ କୋଡ୍                   |
 | `defaultThinkingSignature.ts`    | ଡିଫଲ୍ଟ Claude ଥିଙ୍କିଂ ସିଗ୍ନେଚର                |

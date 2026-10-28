@@ -39,7 +39,7 @@
 
 ## OmniRoute ကို ဘယ်အခါ ရွေးချယ်သင့်သနည်း
 
-- သင် self-host လုပ်ထားပြီး **provider coverage အပြည့်အစုံ** လိုချင်သည့်အခါ (provider 375 ခု၊ free/no-auth catalog entry 155 ခု)
+- သင် self-host လုပ်ထားပြီး **provider coverage အပြည့်အစုံ** လိုချင်သည့်အခါ (provider 376 ခု၊ free/no-auth catalog entry 155 ခု)
 - သင်အား **built-in MCP server** တစ်ခု လိုအပ်သည့်အခါ (LLM tool များ၊ memory၊ tool များအဖြစ် expose လုပ်ထားသော skill များ)
 - agent-to-agent workflow များအတွက် **A2A protocol** လိုအပ်သည့်အခါ
 - upstream CAPTCHA များ၏ ဖော်ထုတ်မှုကို ရှောင်လွှဲရန် **fingerprint stealth** (JA3/JA4) လိုချင်သည့်အခါ

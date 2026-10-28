@@ -498,7 +498,7 @@ kai tsaye ko ta hanyar `DefaultExecutor` ko wani mai aiwatarwa; sauran modulolin
 (mataimakin shaida da ake rabawa) da `index.ts` (rijista).
 
 > Lura: masu samarwar da ba a jera a nan ba, `default.ts` ne ke yi musu hidima ta amfani da gama-garin
-> mai aiwatarwa mai dacewa da OpenAI. Cikakken kundin masu samarwa (masu samarwa 375) yana cikin
+> mai aiwatarwa mai dacewa da OpenAI. Cikakken kundin masu samarwa (masu samarwa 376) yana cikin
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

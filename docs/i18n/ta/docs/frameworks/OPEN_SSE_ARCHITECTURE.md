@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | கோப்பு                         | நோக்கம்                                           |
 | ------------------------------ | ------------------------------------------------- |
-| `providerRegistry.ts`          | 375-வழங்குநர் பட்டியலின் மீதான chat-model பதிவேடு |
+| `providerRegistry.ts`          | 376-வழங்குநர் பட்டியலின் மீதான chat-model பதிவேடு |
 | `providerModels.ts`            | மாதிரி மாற்றுப் பெயர்கள், வடிவமைப்பு மேப்பிங்     |
 | `constants.ts`                 | காலக்கெடுக்கள், வரம்புகள், நிலை குறியீடுகள்       |
 | `defaultThinkingSignature.ts`  | இயல்புநிலை Claude thinking கையொப்பம்              |

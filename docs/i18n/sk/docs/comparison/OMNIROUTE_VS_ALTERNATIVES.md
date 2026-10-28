@@ -39,7 +39,7 @@ Objektívne porovnanie funkcií oproti populárnym open-source AI smerovačom.
 
 ## Kedy si vybrať OmniRoute
 
-- Používate self-hosting a chcete **maximálne pokrytie poskytovateľov** (375 poskytovateľov, 155 bezplatných položiek katalógu bez autentifikácie)
+- Používate self-hosting a chcete **maximálne pokrytie poskytovateľov** (376 poskytovateľov, 155 bezplatných položiek katalógu bez autentifikácie)
 - Potrebujete **vstavaný MCP server** (nástroje LLM, pamäť a zručnosti vystavené ako nástroje)
 - Potrebujete **protokol A2A** pre workflow medzi agentmi (agent-to-agent)
 - Chcete **fingerprint stealth** (JA3/JA4), aby ste sa vyhli detekcii zo strany upstream CAPTCHA

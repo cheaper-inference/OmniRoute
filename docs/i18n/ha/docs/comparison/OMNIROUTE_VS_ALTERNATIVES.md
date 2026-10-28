@@ -39,7 +39,7 @@ Kwatancen fasaloli cikin adalci da shahararrun mashiga AI na buɗaɗɗen tushe.
 
 ## Yaushe ake zaɓar OmniRoute
 
-- Kuna yin masaukin baki da kanku (self-host) kuma kuna son **rufe masu samar da sabis mafi yawa** (masu samarwa 375, da abubuwan catalog 155 waɗanda ke kyauta/ba sa buƙatar tantancewa)
+- Kuna yin masaukin baki da kanku (self-host) kuma kuna son **rufe masu samar da sabis mafi yawa** (masu samarwa 376, da abubuwan catalog 155 waɗanda ke kyauta/ba sa buƙatar tantancewa)
 - Kuna buƙatar **uwar garken MCP da aka gina a ciki** (kayan aikin LLM, ƙwaƙwalwar ajiya, da ƙwarewa waɗanda aka fallasa a matsayin kayan aiki)
 - Kuna buƙatar **yarjejeniyar A2A** don hanyoyin aiki tsakanin wakili da wakili
 - Kuna son **ɓoyar alamar hannu (fingerprint stealth)** (JA3/JA4) don guje wa gano daga CAPTCHAs na upstream

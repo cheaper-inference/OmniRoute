@@ -261,6 +261,22 @@ export function cloneBoundedForLog(value: unknown, depth = 0, key: string | null
   return result;
 }
 
+function utf8Prefix(value: string, maxBytes: number): string {
+  if (value.length <= maxBytes && Buffer.byteLength(value, "utf8") <= maxBytes) {
+    return Buffer.from(value, "utf8").toString("utf8");
+  }
+  let end = 0;
+  let bytes = 0;
+  for (const character of value) {
+    const size = Buffer.byteLength(character, "utf8");
+    if (bytes + size > maxBytes) break;
+    bytes += size;
+    end += character.length;
+  }
+  // Copy only the bounded prefix so a V8 slice cannot retain the entire source chunk.
+  return Buffer.from(value.slice(0, end), "utf8").toString("utf8");
+}
+
 function appendBoundedChunk(
   chunks: string[],
   bytes: { value: number; truncated: boolean },
@@ -268,7 +284,7 @@ function appendBoundedChunk(
   maxBytes: number,
   maxItems = DEFAULT_MAX_STREAM_CHUNK_ITEMS
 ) {
-  if (typeof chunk !== "string" || chunk.length === 0) {
+  if (typeof chunk !== "string" || chunk.length === 0 || bytes.truncated) {
     return;
   }
   if (chunks.length >= maxItems) {
@@ -281,18 +297,15 @@ function appendBoundedChunk(
     return;
   }
 
-  const remaining = maxBytes - bytes.value;
-  if (chunk.length <= remaining) {
-    chunks.push(chunk);
-    bytes.value += chunk.length;
-    return;
-  }
+  const prefix = utf8Prefix(chunk, maxBytes - bytes.value);
+  chunks.push(prefix);
+  bytes.value += Buffer.byteLength(prefix, "utf8");
+  if (prefix.length === chunk.length) return;
 
-  chunks.push(chunk.slice(0, remaining));
+  // One marker is outside the data-byte budget, but still inside the item cap.
   if (chunks.length < maxItems) {
     chunks.push(`[stream chunk log truncated after ${maxBytes} bytes]`);
   }
-  bytes.value = maxBytes;
   bytes.truncated = true;
 }
 

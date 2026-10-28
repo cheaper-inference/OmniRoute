@@ -39,7 +39,7 @@ Objektiv funktionsjämförelse mot populära AI-routrar med öppen källkod.
 
 ## När du ska välja OmniRoute
 
-- Du kör self-hosted och vill ha **maximal leverantörstäckning** (375 leverantörer, 155 kostnadsfria katalogposter utan autentisering)
+- Du kör self-hosted och vill ha **maximal leverantörstäckning** (376 leverantörer, 155 kostnadsfria katalogposter utan autentisering)
 - Du behöver en **inbyggd MCP-server** (LLM-verktyg, minne och färdigheter exponerade som verktyg)
 - Du behöver **A2A-protokoll** för arbetsflöden mellan agenter
 - Du vill ha **fingeravtrycksstealth** (JA3/JA4) för att undvika upptäckt av CAPTCHA:er uppströms

@@ -565,7 +565,7 @@
     },
     {
       "name": "test:e2e",
-      "command": "node scripts/dev/run-playwright-tests.mjs test tests/e2e/*.spec.ts",
+      "command": "node scripts/dev/run-playwright-tests.mjs",
       "disposition": "separately-invoked"
     },
     {

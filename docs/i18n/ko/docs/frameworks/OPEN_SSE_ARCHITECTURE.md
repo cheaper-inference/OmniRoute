@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | 파일                          | 용도                                                |
 | ----------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`         | 375개 프로바이더 카탈로그 기반 채팅 모델 레지스트리 |
+| `providerRegistry.ts`         | 376개 프로바이더 카탈로그 기반 채팅 모델 레지스트리 |
 | `providerModels.ts`           | 모델 별칭, 형식 매핑                                |
 | `constants.ts`                | 타임아웃, 제한, 상태 코드                           |
 | `defaultThinkingSignature.ts` | 기본 Claude thinking 시그니처                       |

@@ -20,7 +20,7 @@ AgentBridge គឺជាប្រូកស៊ី MITM (Man-in-the-Middle) រប
 
 នេះមានន័យថាអ្នកអាច៖
 
-- **ប្តូរផ្លូវ agent ណាមួយទៅកាន់អ្នកផ្តល់សេវាណាមួយ**៖ Copilot កំពុងនិយាយជាមួយ OpenAI? បញ្ជូនវាទៅកាន់ Anthropic Claude, Gemini ឬអ្នកផ្តល់សេវាណាមួយក្នុងចំណោមអ្នកផ្តល់សេវា 375 របស់ OmniRoute។
+- **ប្តូរផ្លូវ agent ណាមួយទៅកាន់អ្នកផ្តល់សេវាណាមួយ**៖ Copilot កំពុងនិយាយជាមួយ OpenAI? បញ្ជូនវាទៅកាន់ Anthropic Claude, Gemini ឬអ្នកផ្តល់សេវាណាមួយក្នុងចំណោមអ្នកផ្តល់សេវា 376 របស់ OmniRoute។
 - **អនុវត្តការផែនទីម៉ូដែល**៖ `gemini-3-flash` → `claude-sonnet-4.7` ដោយតម្លាភាពនៅកម្រិត handler។
 - **សង្កេតចរាចរណ៍ agent ទាំងអស់**៖ រាល់សំណើដែលបានស្ទាក់ចាប់នីមួយៗត្រូវបានផ្សព្វផ្សាយទៅកាន់ [Traffic Inspector](./TRAFFIC_INSPECTOR.md)។
 - **អនុវត្តភាពធន់របស់ OmniRoute**៖ combo routing, circuit breakers, fallbacks និងការតាមដានថ្លៃដើមក៏ដំណើរការសម្រាប់ចរាចរណ៍ IDE agent ផងដែរ។

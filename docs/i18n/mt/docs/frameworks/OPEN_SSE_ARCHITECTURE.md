@@ -488,7 +488,7 @@ Dan jittratta:
 
 | Fajl                           | Għan                                                          |
 | ------------------------------ | ------------------------------------------------------------- |
-| `providerRegistry.ts`          | Reġistru tal-mudelli ta' chat fuq il-katalgu ta' 375 fornitur |
+| `providerRegistry.ts`          | Reġistru tal-mudelli ta' chat fuq il-katalgu ta' 376 fornitur |
 | `providerModels.ts`            | Alias tal-mudelli, mapping tal-format                         |
 | `constants.ts`                 | Timeouts, limiti, kodiċi tal-istatus                          |
 | `defaultThinkingSignature.ts`  | Firma default tal-ħsieb ta' Claude                            |

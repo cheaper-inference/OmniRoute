@@ -163,7 +163,7 @@ OmniRoute expune 6 skill-uri A2A conectate în `src/lib/a2a/taskExecution.ts::A2
 | Health Report      | `health-report`      | Agregă starea circuit breaker, cooldown și lockout per provider                                                                                                              | health, resilience         | "Afișează starea de sănătate a tuturor providerilor" |
 | List Capabilities  | `list-capabilities`  | Returnează catalogul complet de 45 de intrări Agent Skills (23 API + 21 CLI + 1 config) sub formă de tabel markdown cu URL-uri raw către SKILL.md pentru injecția de context | catalog, discovery, skills | "Listează toate capabilitățile OmniRoute"            |
 
-> Cardul de agent ar trebui menținut aliniat cu catalogul live de 375 de provideri; numărul de provideri și metadatele free/no-auth provin din registrul de runtime.
+> Cardul de agent ar trebui menținut aliniat cu catalogul live de 376 de provideri; numărul de provideri și metadatele free/no-auth provin din registrul de runtime.
 
 ### Detalii despre skill-ul `list-capabilities`
 

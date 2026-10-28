@@ -1,0 +1,1 @@
+- **fix(api):** Bound model catalog response and last-good caches by entry count and retained string bytes, preventing distinct pagination cursors from accumulating catalog responses ([#18188](https://github.com/cheaper-inference/OmniRoute/pull/18188)) — thanks @AiCaptain357

@@ -20,7 +20,7 @@ Bir IDE ajanı (ör. GitHub Copilot, Cursor, Claude Code) bir API çağrısı ya
 
 Bu, şunları yapabileceğiniz anlamına gelir:
 
-- **Herhangi bir ajanı herhangi bir sağlayıcıya yeniden yönlendirin**: Copilot OpenAI ile mi konuşuyor? Onu Anthropic Claude'a, Gemini'ye veya OmniRoute'un 375 sağlayıcısından herhangi birine yönlendirin.
+- **Herhangi bir ajanı herhangi bir sağlayıcıya yeniden yönlendirin**: Copilot OpenAI ile mi konuşuyor? Onu Anthropic Claude'a, Gemini'ye veya OmniRoute'un 376 sağlayıcısından herhangi birine yönlendirin.
 - **Model eşlemeleri uygulayın**: `gemini-3-flash` → `claude-sonnet-4.7`, işleyici düzeyinde şeffaf bir şekilde.
 - **Tüm ajan trafiğini gözlemleyin**: yakalanan her istek [Trafik İnceleyici](./TRAFFIC_INSPECTOR.md)'ye yayınlanır.
 - **OmniRoute dayanıklılığını uygulayın**: kombo yönlendirme, devre kesiciler, yedeklemeler ve maliyet takibi IDE ajan trafiği için de çalışır.

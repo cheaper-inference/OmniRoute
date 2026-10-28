@@ -39,7 +39,7 @@
 
 ## OmniRoute තෝරාගත යුත්තේ කවදාද
 
-- ඔබ self-host කරන අතර **උපරිම provider ආවරණයක්** අවශ්ය නම් (providers 375ක්, නොමිලේ/auth-නැති catalog සටහන් 155ක්)
+- ඔබ self-host කරන අතර **උපරිම provider ආවරණයක්** අවශ්ය නම් (providers 376ක්, නොමිලේ/auth-නැති catalog සටහන් 155ක්)
 - ඔබට **built-in MCP server එකක්** අවශ්ය නම් (LLM tools, memory, tools ලෙස නිරාවරණය කර ඇති skills)
 - agent-to-agent workflows සඳහා ඔබට **A2A protocol** අවශ්ය නම්
 - upstream CAPTCHAs මඟින් හඳුනාගැනීම වළක්වා ගැනීමට ඔබට **fingerprint stealth** (JA3/JA4) අවශ්ය නම්

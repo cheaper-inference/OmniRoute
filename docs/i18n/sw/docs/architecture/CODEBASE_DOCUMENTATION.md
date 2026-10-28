@@ -498,7 +498,7 @@ moja kwa moja au kupitia `DefaultExecutor` au kitekelezaji kingine; moduli ziliz
 (kisaidizi cha utambulisho kinachoshirikiwa) na `index.ts` (rejista).
 
 > Kumbuka: watoa huduma ambao hawajaorodheshwa hapa huhudumiwa na `default.ts` kwa kutumia kitekelezaji cha jumla
-> kinachooana na OpenAI. Katalogi kamili ya watoa huduma (watoa huduma 375) iko katika
+> kinachooana na OpenAI. Katalogi kamili ya watoa huduma (watoa huduma 376) iko katika
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

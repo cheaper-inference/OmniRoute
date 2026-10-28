@@ -15,7 +15,7 @@ Tana samar da maƙura guda ɗaya mai jituwa da OpenAI (`/v1/*`) kuma tana karkat
 
 Muhimman ƙwarewa:
 
-- API mai jituwa da OpenAI don CLI/kayan aiki (masu samarwa 375, executor modules 156)
+- API mai jituwa da OpenAI don CLI/kayan aiki (masu samarwa 376, executor modules 156)
 - Fassarar buƙata/amsa tsakanin tsarin masu samarwa
 - Madadin haɗin model (jerin model da yawa)
 - Matakan haɗi masu tsari (`provider + model + connection`) tare da tsara jeri a lokacin aiki bisa `compositeTiers`

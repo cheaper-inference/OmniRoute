@@ -494,7 +494,7 @@ open-sse/
 (gemeinsam genutzte Identitäts-Hilfsfunktion) und `index.ts` (Registrierung).
 
 > Hinweis: Hier nicht aufgeführte Anbieter werden von `default.ts` über den generischen
-> OpenAI-kompatiblen Executor bedient. Der vollständige Anbieterkatalog (375 Anbieter) befindet sich in
+> OpenAI-kompatiblen Executor bedient. Der vollständige Anbieterkatalog (376 Anbieter) befindet sich in
 > `src/shared/constants/providers.ts`.
 
 ### 4.3 `open-sse/translator/`

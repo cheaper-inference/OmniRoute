@@ -499,7 +499,7 @@ open-sse/
 (공유 ID 헬퍼) 및 `index.ts`(레지스트리).
 
 > 참고: 여기에 나열되지 않은 공급자는 일반적인 OpenAI 호환 실행기를 사용하는
-> `default.ts`에서 처리합니다. 전체 공급자 카탈로그(375개 공급자)는
+> `default.ts`에서 처리합니다. 전체 공급자 카탈로그(376개 공급자)는
 > `src/shared/constants/providers.ts`에 있습니다.
 
 ### 4.3 `open-sse/translator/`

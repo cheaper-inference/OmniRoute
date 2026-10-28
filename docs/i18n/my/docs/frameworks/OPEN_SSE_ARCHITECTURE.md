@@ -488,7 +488,7 @@ createResponsesApiTransformStream(): TransformStream
 
 | ဖိုင်                             | ရည်ရွယ်ချက်                                                              |
 | --------------------------------- | ------------------------------------------------------------------------ |
-| `providerRegistry.ts`             | provider 375 ခု ပါဝင်သော catalog အပေါ် အခြေခံထားသည့် chat-model registry |
+| `providerRegistry.ts`             | provider 376 ခု ပါဝင်သော catalog အပေါ် အခြေခံထားသည့် chat-model registry |
 | `providerModels.ts`               | Model alias များ၊ format mapping                                         |
 | `constants.ts`                    | Timeout များ၊ limit များ၊ status code များ                               |
 | `defaultThinkingSignature.ts`     | Default Claude thinking signature                                        |

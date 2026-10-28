@@ -13,21 +13,9 @@ const block = (selector: string) => {
   return css.slice(start, css.indexOf("\n}", start));
 };
 
-test("globals.css loads the self-hosted Keak fonts and the vendored kit CSS right after Tailwind", () => {
+test("globals.css loads the vendored kit CSS right after Tailwind, and the kit self-hosts its font", () => {
   const order = [
     '@import "tailwindcss" source(none);',
-    // Static weights, not `@fontsource-variable/inter`: the variable package registers the
-    // family "Inter Variable", which the kit's `--ci-font-ui: "Inter", …` never matches.
-    '@import "@fontsource/inter/400.css";',
-    '@import "@fontsource/inter/500.css";',
-    '@import "@fontsource/inter/600.css";',
-    '@import "@fontsource/inter/700.css";',
-    '@import "@fontsource/instrument-serif/400.css";',
-    '@import "@fontsource/instrument-serif/400-italic.css";',
-    '@import "@fontsource/ibm-plex-mono/400.css";',
-    '@import "@fontsource/ibm-plex-mono/500.css";',
-    '@import "@fontsource/ibm-plex-mono/600.css";',
-    '@import "@fontsource/ibm-plex-mono/700.css";',
     '@import "../../packages/ui-kit/src/ci-ui.css";',
   ].map((needle) => css.indexOf(needle));
   assert.ok(
@@ -39,8 +27,18 @@ test("globals.css loads the self-hosted Keak fonts and the vendored kit CSS righ
     order,
     "imports keep this order"
   );
+  // Since kit 0.0.66 every role (UI, display, code) is Switzer, declared by the kit itself:
+  // ci-ui.css → ci-tokens.css → ci-fonts.css → local woff2 files. The app no longer loads the
+  // old Inter / Instrument Serif / IBM Plex Mono faces.
+  assert.doesNotMatch(css, /@fontsource/);
   assert.doesNotMatch(css, /fonts\.googleapis\.com/);
-  assert.doesNotMatch(css, /@fontsource-variable/);
+  const tokens = read("packages/ui-kit/src/ci-tokens.css");
+  assert.match(tokens, /^@import "\.\/ci-fonts\.css";/m);
+  assert.match(tokens, /--ci-font-ui: "Switzer"/);
+  const fonts = read("packages/ui-kit/src/ci-fonts.css");
+  for (const [, file] of fonts.matchAll(/url\("\.\/(fonts\/[^"]+\.woff2)"\)/g))
+    assert.ok(fs.existsSync(path.join(ROOT, "packages/ui-kit/src", file)), `${file} is vendored`);
+  assert.doesNotMatch(fonts, /https?:\/\//, "the kit font is self-hosted");
 });
 
 test("the OmniRoute color tokens are aliases of kit tokens (no hex left in :root / .dark)", () => {
@@ -324,6 +322,22 @@ test("@theme inline still exposes bg-surface-2 and rounded-card", () => {
   assert.match(theme, /--color-surface-2:\s*var\(--surface-2\);/);
   assert.match(theme, /--radius-card:\s*var\(--radius\);/);
   assert.match(theme, /--radius-control:\s*var\(--radius-control\);/);
+});
+
+test("bg-alt, muted and surface-secondary have @theme entries so their utilities paint (KEA-7886 P4)", () => {
+  // Before P4 these three had a :root value but no @theme entry: `bg-bg-alt` (41 uses),
+  // `bg-muted/50` and `bg-surface-secondary/30` generated no CSS at all.
+  const theme = block("@theme inline {");
+  const root = block(":root {\n  --desktop-safe-top");
+  for (const [name, kit] of [
+    ["--color-bg-alt", "var(--ci-color-surface-subtle)"],
+    ["--color-muted", "var(--ci-color-surface-muted)"],
+    ["--color-surface-secondary", "var(--ci-color-surface-subtle)"],
+  ] as const) {
+    assert.ok(theme.includes(`${name}: var(${name});`), `@theme inline exposes ${name}`);
+    // Kit token → flips with data-theme="dark", so light and dark both get a kit surface.
+    assert.ok(root.includes(`${name}: ${kit};`), `:root maps ${name} → ${kit}`);
+  }
 });
 
 test("cn() still dedupes via tailwind-merge and DataTable paints an opaque surface", () => {
