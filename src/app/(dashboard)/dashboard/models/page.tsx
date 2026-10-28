@@ -667,7 +667,7 @@ function CatalogHeader({ context }: { context: CatalogPageContext }) {
         />
         {visibilityCounts && (
           <p className="text-xs text-text-muted" data-testid="catalog-visibility-counts">
-            {t("visibilityCounts", { ...visibilityCounts })}
+            {t("visibilityCounts", visibilityCounts)}
           </p>
         )}
 
