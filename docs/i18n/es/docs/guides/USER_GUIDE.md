@@ -610,9 +610,9 @@ Para consultar la referencia completa de variables de entorno, consulte el [READ
 <details>
 <summary><b>Ver todos los modelos disponibles</b></summary>
 
-> La siguiente lista está extraída de `open-sse/config/providerRegistry.ts` para la v3.8.0. Los catálogos en la nube (Gemini, OpenRouter, etc.) se sincronizan dinámicamente; para ver el catálogo completo en vivo, abre **Panel → Proveedores → [proveedor] → Modelos disponibles** o llama a `GET /api/models/catalog`.
+> La siguiente lista se ha seleccionado de `open-sse/config/providerRegistry.ts` para v3.8.0. Los catálogos en la nube (Gemini, OpenRouter, etc.) se sincronizan dinámicamente — para ver el catálogo completo en vivo, abre **Panel → Proveedores → [proveedor] → Modelos disponibles** o llama a `GET /api/models/catalog`.
 >
-> Si la lista integrada de un proveedor se ha desactualizado, usa **Importar desde /models** en esa página (o activa **Sincronización automática**) para obtener el catálogo ascendente en vivo. Esto se verificó en la v3.8.50 para LLM7.io (`gemini-3.1-flash-lite`) y UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); el acceso anónimo a Pollinations siguió limitado en el origen durante la misma ronda de pruebas.
+> Si la lista integrada de un proveedor se ha desactualizado, usa **Importar desde /models** en esa página (o activa la **Sincronización automática**) para obtener el catálogo actual del upstream. Esto se verificó en v3.8.50 para LLM7.io (`gemini-3.1-flash-lite`) y UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); el acceso anónimo de Pollinations permaneció limitado por el upstream durante la misma ronda de pruebas.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -628,7 +628,7 @@ Para consultar la referencia completa de variables de entorno, consulte el [READ
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mes tarifa plana o por uso: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mes fijo o por uso: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Clave de API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -640,7 +640,7 @@ Para consultar la referencia completa de variables de entorno, consulte el [READ
 
 **Perplexity (`pplx/`)** — Aumentado con búsqueda: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Código abierto: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Código abierto: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratuito), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — Inferencia rápida: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
@@ -654,11 +654,11 @@ Para consultar la referencia completa de variables de entorno, consulte el [READ
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sincronizado en vivo por clave de API desde Google; no hay lista estática. Conecta una clave en **Panel → Proveedores** y luego usa **Modelos disponibles** para importar el catálogo actual (p. ej., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Se sincroniza en vivo por clave de API desde Google — no hay lista estática. Conecta una clave en **Panel → Proveedores** y luego usa **Modelos disponibles** para importar el catálogo actual (p. ej., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Otros proveedores compatibles** (selección): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (vía `aws-bedrock`), `azure-ai`, `openrouter` (catálogo de paso directo), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Cada uno mantiene su propia lista de modelos en `providerRegistry.ts` y puede sincronizarse automáticamente cuando el proveedor expone un endpoint `/models`.
+**Otros proveedores compatibles** (selección): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (vía `aws-bedrock`), `azure-ai`, `openrouter` (catálogo passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Cada uno mantiene su propia lista de modelos en `providerRegistry.ts` y puede sincronizarse automáticamente cuando el proveedor expone un endpoint `/models`.
 
-**Nota sobre los identificadores de modelo:** OmniRoute utiliza identificadores nativos del proveedor (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Algunos identificadores incluyen versiones con puntos porque así es como la API ascendente los espera. Si un modelo no aparece en la lista anterior, ejecuta `omniroute models --search <term>` o consulta `GET /api/models/catalog` para confirmar su disponibilidad.
+**Nota sobre los IDs de modelos:** OmniRoute utiliza IDs nativos del proveedor (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Algunos IDs incluyen versiones con puntos porque así es como la API upstream los espera. Si un modelo no aparece en la lista anterior, ejecuta `omniroute models --search <term>` o consulta `GET /api/models/catalog` para confirmar la disponibilidad.
 
 </details>
 

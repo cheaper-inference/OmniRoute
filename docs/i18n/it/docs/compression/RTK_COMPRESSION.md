@@ -34,17 +34,17 @@ Il catalogo integrato include attualmente 56 filtri suddivisi in queste categori
 | Categoria | Esempi                                                        |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, test di Cargo  |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, test Cargo     |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
 | `shell`   | `ls`, `find`, `grep`, log generici della shell                |
 | `docker`  | `docker ps`, log di Docker                                    |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | Output JSON, stack trace, fallback per output generico        |
+| `generic` | output JSON, stack trace, fallback per output generico        |
 
 Il rilevatore in `open-sse/services/compression/engines/rtk/commandDetector.ts` classifica l'output
-prima della selezione del filtro. I filtri possono anche corrispondere in base a un pattern di comando o a una regex sull'output quando la classe
-del comando non è sufficiente.
+prima della selezione del filtro. I filtri possono anche corrispondere in base a un pattern di comando
+o a una regex sull'output quando la classe di comando non è sufficiente.
 
 ## Risoluzione dei filtri
 
@@ -348,15 +348,15 @@ node --import tsx/esm --test \
 
 ## Livelli di intensità (v3.8.16+)
 
-RTK supporta **3 livelli di intensità** che bilanciano **aggressività di compressione** e **sicurezza**. Il livello si imposta tramite `config.intensity` nella configurazione del motore.
+RTK supporta **3 livelli di intensità** che bilanciano **aggressività della compressione** e **sicurezza**. Il livello si imposta tramite `config.intensity` nella configurazione del motore.
 
 ### I 3 livelli
 
-| Livello                  | Soglia di troncamento | Risparmio di token | Rischio     | Ideale per                         |
-| ------------------------ | --------------------- | ------------------ | ----------- | ---------------------------------- |
-| `minimal`                | 24 righe per sezione  | ~20-40%            | Molto basso | Produzione con contesto critico    |
-| `standard` (predefinito) | 24 righe per sezione  | ~50-70%            | Basso       | Sessioni di codifica quotidiane    |
-| `aggressive`             | 16 righe per sezione  | ~70-90%            | Medio       | Sessioni lunghe, massimo risparmio |
+| Livello              | Soglia di troncamento | Risparmio di token | Rischio     | Ideale per                         |
+| -------------------- | --------------------- | ------------------ | ----------- | ---------------------------------- |
+| `minimal`            | 24 righe per sezione  | ~20-40%            | Molto basso | Produzione con contesto critico    |
+| `standard` (default) | 24 righe per sezione  | ~50-70%            | Basso       | Sessioni di codifica quotidiane    |
+| `aggressive`         | 16 righe per sezione  | ~70-90%            | Medio       | Sessioni lunghe, massimo risparmio |
 
 ### Dove avviene il troncamento
 
@@ -368,7 +368,7 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Sia la **testa** che la **coda** di ogni sezione vengono preservate; il contenuto intermedio viene eliminato quando il troncamento entra in azione.
+Sia la **testa** che la **coda** di ogni sezione vengono preservate; il contenuto intermedio viene eliminato quando scatta il troncamento.
 
 ### Cosa rimane e cosa viene tagliato
 
@@ -377,31 +377,30 @@ Sia la **testa** che la **coda** di ogni sezione vengono preservate; il contenut
 | Errori / stack trace         | ✅ preservati | ✅ preservati | ✅ preservati |
 | Test falliti                 | ✅ preservati | ✅ preservati | ✅ preservati |
 | Errori di build              | ✅ preservati | ✅ preservati | ✅ preservati |
-| Test riusciti (verbose)      | ✅ preservati | 🟡 compressi  | 🟡 compressi  |
-| Output di routine (log info) | 🟡 compresso  | 🟡 compresso  | ❌ eliminato  |
+| Test superati (verbosi)      | ✅ preservati | 🟡 compressi  | 🟡 compressi  |
+| Output di routine (log info) | 🟡 compressi  | 🟡 compressi  | ❌ eliminati  |
 | Barre di avanzamento         | 🟡 compresse  | ❌ eliminate  | ❌ eliminate  |
-| Banner / arte ASCII          | 🟡 compresso  | ❌ eliminato  | ❌ eliminato  |
+| Banner / ASCII art           | 🟡 compressi  | ❌ eliminati  | ❌ eliminati  |
 
 ### Scegliere l'intensità giusta
 
 ```
-              La perdita di contesto è catastrofica?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     SÌ          NO        NON SICURO
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Quanto è        Prova prima `standard`
-      │      critico il      (funziona nell'80%
-      │      throughput?     dei casi)
-      │           │
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │    BASSO      ALTO
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -424,11 +423,11 @@ Sia la **testa** che la **coda** di ogni sezione vengono preservate; il contenut
 }
 ```
 
-**Programmaticamente**:
+**Tramite codice**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) è un
-`CompressionEngine` e non dispone di un metodo `updateConfig`. Aggiorna invece
-la configurazione di un motore tramite l'helper del registry:
+`CompressionEngine` e non ha un metodo `updateConfig`. Aggiorna invece la configurazione
+di un motore tramite l'helper del registry:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -438,7 +437,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Verificare l'effetto
 
-Usa il **Gate di verifica** (vedi sotto) per confermare che il tuo filtro sia sicuro all'intensità scelta:
+Usa il **Verify Gate** (vedi sotto) per confermare che il tuo filtro sia sicuro all'intensità scelta:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

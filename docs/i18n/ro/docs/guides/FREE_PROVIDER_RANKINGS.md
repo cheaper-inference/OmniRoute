@@ -13,28 +13,19 @@
 
 ## Ce este
 
-OmniRoute înregistrează 376 de furnizori, inclusiv 155 de intrări în catalog marcate drept **gratuite/fără autentificare**
-(fără autentificare,
-OAuth cu nivel gratuit sau cheie API cu nivel gratuit — consultați
-[Ghidul nivelurilor gratuite](../getting-started/FREE-TIERS-GUIDE.md) și
-[directorul complet al nivelurilor gratuite](../reference/FREE_TIERS.md)). Problema: furnizorii gratuiți variază
-foarte mult în ceea ce privește calitatea modelelor. Un furnizor fără autentificare care oferă un model de ultimă generație este mult mai util
-decât unul care oferă un model vechi de dimensiuni reduse.
+OmniRoute înregistrează 376 de furnizori, inclusiv 155 de intrări de catalog marcate **gratuit/fără autentificare** (fără autentificare, OAuth cu nivel gratuit sau cheie API cu nivel gratuit — consultați [Ghidul nivelurilor gratuite](../getting-started/FREE-TIERS-GUIDE.md) și [directorul complet al nivelurilor gratuite](../reference/FREE_TIERS.md)). Problema: furnizorii gratuiți variază enorm în ceea ce privește calitatea modelelor. Un furnizor fără autentificare care oferă un model de vârf este mult mai util decât unul care oferă un model vechi, de mici dimensiuni.
 
-**Clasamentul furnizorilor gratuiți** răspunde la întrebarea „**care furnizor gratuit îmi oferă cel mai bun model?**” prin
-corelarea catalogului fiecărui furnizor gratuit cu **scoruri de calitate obținute de la comunitate** din
-**clasamentul Arena AI** (ELO bazat pe preferințe umane, aceeași idee care stă la baza arenei de
-chatboți LMArena). Furnizorii sunt apoi clasificați în funcție de performanța **celui mai bun model gratuit** al lor.
+**Clasamentul furnizorilor gratuiți** răspunde la întrebarea **„care furnizor gratuit îmi oferă cel mai bun model?”** corelând catalogul fiecărui furnizor gratuit cu **scoruri de calitate obținute din contribuția comunității** din **clasamentul Arena AI** (ELO bazat pe preferințele umane, aceeași idee care stă la baza arenei de chatboturi LMArena). Furnizorii sunt apoi clasați în funcție de puterea **celui mai bun model gratuit** al lor.
 
-Clasamentul este calculat pe baza a trei surse reale:
+Clasamentul este calculat din trei surse reale:
 
-1. Listele furnizorilor gratuiți — `NOAUTH_PROVIDERS`, plus intrările `OAUTH_PROVIDERS` /
+1. Listele de furnizori gratuiți — `NOAUTH_PROVIDERS`, plus intrările `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` marcate cu `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Catalogul de modele al fiecărui furnizor din registrul furnizorilor
+2. Catalogul de modele al fiecărui furnizor din registrul de furnizori
    (`open-sse/config/providerRegistry.ts`).
-3. Scorurile de adecvare la sarcini derivate din ELO, stocate în tabelul BD `model_intelligence` de către
-   motorul de sincronizare ELO Arena (`src/lib/arenaEloSync.ts`).
+3. Scorurile de adecvare la sarcini derivate din ELO, stocate în tabela de bază de date `model_intelligence` de
+   motorul de sincronizare Arena ELO (`src/lib/arenaEloSync.ts`).
 
 Logica de corelare se află în `src/lib/freeProviderRankings.ts`.
 
@@ -125,36 +116,34 @@ Structura răspunsului:
 ### Sursa: clasamentul Arena AI
 
 Motorul de sincronizare Arena ELO (`src/lib/arenaEloSync.ts`) preia două clasamente — `text`
-și `code` — de la API-ul clasamentului Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Când acel API nu returnează
+și `code` — de la API-ul clasamentelor Arena AI
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Când acest API nu returnează
 niciun clasament utilizabil, motorul revine la setul de date oficial
-`lmarena-ai/leaderboard-dataset` de pe serverul de seturi de date Hugging Face
-(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`, `coding` → `code`);
-`GET /api/intelligence/sync` raportează `activeSource`, `lastError` și `lastFailedAt`.
-Fiecare intrare din clasament conține un nume de model, un furnizor, un `score` ELO, un
-interval de încredere și un număr de voturi.
+`lmarena-ai/leaderboard-dataset` de pe Hugging Face datasets-server
+(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` raportează `activeSource`, `lastError` și
+`lastFailedAt`. Fiecare intrare din clasament
+conține un nume de model, un furnizor, un `score` ELO, un interval de încredere și un număr de voturi.
 
-Categoriile clasamentului corespund categoriilor de sarcini OmniRoute:
+Categoriile clasamentelor corespund categoriilor de sarcini OmniRoute:
 
 | Clasament Arena | Categorii de sarcini OmniRoute                    |
 | --------------- | ------------------------------------------------- |
 | `text`          | `default`, `review`, `documentation`, `debugging` |
 | `code`          | `coding`                                          |
 
-### Normalizare (scor de adecvare la sarcină)
+### Normalizare (scorul de adecvare la sarcină)
 
-Scorurile ELO brute sunt normalizate per clasament într-o **valoare de adecvare la sarcină
-în intervalul `[0.4, 0.98]`**:
+Scorurile ELO brute sunt normalizate per clasament într-o **valoare de adecvare la sarcină în `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Scorul nu atinge niciodată `0` sau `1`, lăsând spațiu de manevră pentru suprascrierile
-utilizatorului. Acesta este câmpul `score` pe care îl vedeți în răspunsul API și eticheta
-afișată pe tabloul de bord.
+Scorul nu atinge niciodată `0` sau `1`, lăsând marjă pentru suprascrierile utilizatorului.
+Acesta este câmpul `score` pe care îl vedeți în răspunsul API și eticheta afișată pe panoul de control.
 
-### Încredere
+### Nivel de încredere
 
 Fiecare intrare primește un nivel de încredere bazat pe numărul de voturi Arena:
 
@@ -166,26 +155,26 @@ Fiecare intrare primește un nivel de încredere bazat pe numărul de voturi Are
 
 ### Stocare și prospețime
 
-Intrările normalizate sunt scrise în tabelul DB `model_intelligence` cu
+Intrările normalizate sunt scrise în tabelul din baza de date `model_intelligence` cu
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Intrările **expiră după
-7 zile**, astfel încât un furnizor care nu mai sincronizează iese în cele din urmă din
-clasament, în loc să servească date învechite.
+7 zile**, astfel încât un furnizor care nu se mai sincronizează dispare în cele din urmă,
+în loc să servească date învechite.
 
-Sincronizarea rulează **activată în mod implicit**:
+Sincronizarea rulează **activată implicit**:
 
 - Rulează o dată la pornirea serverului și apoi pe un temporizator periodic
   (`src/lib/arenaEloSync.ts`, conectat din `src/instrumentation-node.ts`).
-- Este **neblocantă și niciodată fatală** — dacă preluarea din sursa upstream eșuează,
-  OmniRoute continuă să ruleze, iar clasamentele afișează pur și simplu ultimele date
-  valide (sau o stare goală).
+- Este **neblocantă și niciodată fatală** — dacă preluarea din amonte eșuează, OmniRoute
+  continuă să ruleze, iar clasamentele afișează pur și simplu ultimele date valide
+  (sau o stare goală).
 
 Două variabile de mediu o controlează (documentate în
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Variabilă                 | Valoare implicită | Scop                                                                |
-| ------------------------- | ----------------- | ------------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`            | Setați la `false` pentru a renunța la sincronizarea către exterior. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h)     | Interval de sincronizare, în secunde.                               |
+| Variabilă                 | Implicit      | Scop                                                                |
+| ------------------------- | ------------- | ------------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Setați la `false` pentru a renunța la sincronizarea către exterior. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Intervalul de sincronizare, în secunde.                             |
 
 ### Sincronizare manuală / stare / ștergere
 
@@ -198,32 +187,31 @@ POST   /api/intelligence/sync          # declanșează o sincronizare manuală; 
 DELETE /api/intelligence/sync          # șterge toate intrările de inteligență arena_elo sincronizate
 ```
 
-Dacă pagina de clasamente este goală, un `POST /api/intelligence/sync` manual (sau pur și
-simplu repornirea serverului) o repopulează.
+Dacă pagina clasamentelor este goală, un `POST /api/intelligence/sync` manual (sau pur și simplu
+repornirea serverului) o repopulează.
 
 ### Potrivirea modelelor cu clasamentul
 
-ID-urile modelelor din registru și numele modelelor Arena nu se potrivesc întotdeauna
-exact. Clasamentul folosește o potrivire flexibilă (`findMatchingIntelligence` în
+ID-urile modelelor din registru și numele modelelor Arena nu se potrivesc întotdeauna exact.
+Clasamentul folosește o potrivire flexibilă (`findMatchingIntelligence` în
 `src/lib/freeProviderRankings.ts`):
 
 1. Potrivire exactă pe ID-ul de model normalizat.
 2. Potrivire după eliminarea unui sufix de versiune final (de ex. `kimi-k2.6` → `kimi-k2`).
-3. Potrivire pe prefix (un nume de model din clasament este un prefix al ID-ului din
-   registru).
+3. Potrivire pe prefix (un nume de model din clasament este un prefix al ID-ului din registru).
 
 Pe partea de sincronizare, prefixele cunoscute de furnizori (`anthropic/`, `openai/`,
 `google/`, …) sunt eliminate, iar o mică hartă de aliasuri extinde numele canonice în
-variantele pe care OmniRoute le folosește intern, astfel încât modelele pot fi găsite sub
-orice nume.
+variantele pe care OmniRoute le folosește intern, astfel încât modelele rămân găsibile
+sub orice nume.
 
-### Cum este clasificat un furnizor
+### Cum este clasat un furnizor
 
 Pentru fiecare furnizor gratuit, motorul punctează fiecare model din catalogul său, apoi:
 
-- **Model de top** = modelul cu cel mai mare scor al furnizorului.
-- **Scor mediu** = scorul mediu al tuturor modelelor punctate ale acelui furnizor.
-- **Modele** = câte dintre modelele furnizorului aveau un scor Arena.
+- **Top Model** = modelul cu cel mai mare scor al furnizorului.
+- **Avg Score** = scorul mediu pe toate modelele punctate ale furnizorului respectiv.
+- **Models** = câte dintre modelele furnizorului aveau un scor Arena.
 
 Furnizorii sunt sortați mai întâi după **scorul modelului de top**, apoi după scorul mediu.
 Acest lucru recompensează un furnizor care oferă cel puțin un model gratuit puternic.

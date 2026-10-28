@@ -13,30 +13,30 @@
 
 ## Ni Nini
 
-OmniRoute husajili watoa huduma 376, ikijumuisha maingizo 155 ya katalogi yaliyowekwa alama ya **bure/hayahitaji uthibitishaji**
-(hayahitaji uthibitishaji,
+OmniRoute husajili watoa huduma 376, ikijumuisha maingizo 155 ya katalogi yaliyowekwa alama **bure/bila-uthibitishaji**
+(bila uthibitishaji,
 OAuth ya kiwango cha bure, au ufunguo wa API wa kiwango cha bure — angalia
 [Mwongozo wa Viwango vya Bure](../getting-started/FREE-TIERS-GUIDE.md) na
-[orodha kamili ya Viwango vya Bure](../reference/FREE_TIERS.md)). Changamoto ni kwamba: watoa huduma wa bure hutofautiana
-sana katika ubora wa modeli. Mtoa huduma asiyehitaji uthibitishaji na anayetoa modeli ya kisasa zaidi ana manufaa makubwa zaidi
-kuliko yule anayetoa modeli ndogo ya zamani.
+[saraka kamili ya Viwango vya Bure](../reference/FREE_TIERS.md)). Tatizo ni kwamba: watoa huduma wa bure hutofautiana
+sana katika ubora wa modeli. Mtoa huduma asiye na uthibitishaji anayetoa modeli ya kisasa kabisa (frontier) ni muhimu zaidi
+kuliko yule anayetoa modeli ndogo ya zamani (legacy).
 
-**Viwango vya Watoa Huduma wa Bure** hujibu "**ni mtoa huduma gani wa bure anayenipa modeli bora zaidi?**" kwa
-kuunganisha katalogi ya kila mtoa huduma wa bure na **alama za ubora zinazokusanywa kutoka kwa umma** kutoka kwenye
-**jedwali la viongozi la Arena AI** (ELO ya mapendeleo ya binadamu, dhana ileile inayotumiwa katika uwanja wa
-chatiboti wa LMArena). Kisha watoa huduma hupangwa kulingana na uwezo wa **modeli yao bora zaidi ya bure**.
+**Mpangilio wa Watoa Huduma wa Bure** hujibu "**ni mtoa huduma yupi wa bure anayenipa modeli bora?**" kwa
+kuunganisha katalogi ya kila mtoa huduma wa bure na **alama za ubora zilizochangiwa na jamii** kutoka kwa
+**ubao wa viongozi wa Arena AI** (ELO ya mapendeleo ya binadamu, wazo lile lile linalotumika kwenye
+chatbot arena ya LMArena). Watoa huduma kisha hupangwa kulingana na nguvu ya **modeli yao bora ya bure**.
 
-Mpangilio huo hukokotolewa kutoka katika vyanzo vitatu halisi:
+Mpangilio huu huhesabiwa kutoka vyanzo vitatu halisi:
 
 1. Orodha za watoa huduma wa bure — `NOAUTH_PROVIDERS`, pamoja na maingizo ya `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` yaliyowekwa alama ya `hasFree`
+   `APIKEY_PROVIDERS` yaliyowekwa alama `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Katalogi ya modeli za kila mtoa huduma kutoka kwenye sajili ya watoa huduma
+2. Katalogi ya modeli ya kila mtoa huduma kutoka kwa sajili ya watoa huduma
    (`open-sse/config/providerRegistry.ts`).
-3. Alama za ufaafu kwa kazi zinazotokana na ELO zilizohifadhiwa katika jedwali la hifadhidata la `model_intelligence` na
-   injini ya ulandanishi ya Arena ELO (`src/lib/arenaEloSync.ts`).
+3. Alama za kufaa kwa kazi zinazotokana na ELO zilizohifadhiwa kwenye jedwali la DB la `model_intelligence` na
+   injini ya usawazishaji wa Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Mantiki ya uunganishaji iko katika `src/lib/freeProviderRankings.ts`.
+Mantiki ya kuunganisha ipo katika `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -122,34 +122,34 @@ Muundo wa jibu:
 
 ## Jinsi Alama Zinavyofanya Kazi
 
-### Chanzo: Bao la vinara la Arena AI
+### Chanzo: Jedwali la washindani la Arena AI
 
-Injini ya usawazishaji wa Arena ELO (`src/lib/arenaEloSync.ts`) hutafuta mbao mbili za vinara — `text`
-na `code` — kutoka kwa API ya bao la vinara la Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). API hiyo ikishindwa kurudisha
-bao linalotumika, injini hutumia badala yake `lmarena-ai/leaderboard-dataset` rasmi kwenye
-datasets-server ya Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+Injini ya usawazishaji wa Arena ELO (`src/lib/arenaEloSync.ts`) huchakata majedwali mawili ya washindani — `text`
+na `code` — kutoka kwa API ya jedwali la washindani la Arena AI
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Iwapo API hiyo haitarejesha
+jedwali linalotumika, injini hurejea kwa `lmarena-ai/leaderboard-dataset` rasmi kwenye
+Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
 `coding` → `code`); `GET /api/intelligence/sync` huripoti `activeSource`, `lastError` na
-`lastFailedAt`. Kila ingizo la bao la vinara
-hubeba jina la modeli, mtengenezaji, `score` ya ELO, kipimo cha kujiamini, na idadi ya kura.
+`lastFailedAt`. Kila ingizo la jedwali la washindani
+hubeba jina la modeli, muuzaji, `score` ya ELO, kipindi cha kujiamini, na idadi ya kura.
 
-Aina za bao la vinara hulinganishwa na aina za kazi za OmniRoute:
+Kategoria za jedwali la washindani zinawekwa sawa na kategoria za kazi za OmniRoute:
 
-| Bao la vinara la Arena | Aina za kazi za OmniRoute                         |
-| ---------------------- | ------------------------------------------------- |
-| `text`                 | `default`, `review`, `documentation`, `debugging` |
-| `code`                 | `coding`                                          |
+| Jedwali la washindani la Arena | Kategoria za kazi za OmniRoute                    |
+| ------------------------------ | ------------------------------------------------- |
+| `text`                         | `default`, `review`, `documentation`, `debugging` |
+| `code`                         | `coding`                                          |
 
-### Usanifishaji (alama ya ufaa wa kazi)
+### Usawazishaji (alama ya ufaao wa kazi)
 
-Alama ghafi za ELO zinasanifishwa kwa kila bao la vinara kuwa **thamani ya ufaa wa kazi katika `[0.4, 0.98]`**:
+Alama ghafi za ELO zinasawazishwa kwa kila jedwali la washindani kuwa **thamani ya ufaao wa kazi katika `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Alama haifiki kamwe `0` wala `1`, na kuacha nafasi kwa ajili ya mabadiliko ya mtumiaji. Huu ndiyo
-uga wa `score` unaoona katika jibu la API na lebo inayoonyeshwa kwenye dashibodi.
+Alama haifiki kamwe `0` au `1`, na hivyo kuacha nafasi kwa ubadilishaji wa mtumiaji. Hii ndiyo
+sehemu ya `score` unayoona katika jibu la API na lebo inayoonyeshwa kwenye dashibodi.
 
 ### Kujiamini
 
@@ -161,66 +161,65 @@ Kila ingizo hupata kiwango cha kujiamini kulingana na idadi ya kura za Arena:
 | `medium`  | ≥ 1,000 |
 | `low`     | < 1,000 |
 
-### Uhifadhi na uhai wa data
+### Uhifadhi na ubichi
 
-Maingizo yaliyosanifishwa huandikwa kwenye jedwali la hifadhidata la `model_intelligence` lenye
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Maingizo **huisha muda wake baada ya
-siku 7**, hivyo mtoa huduma anayeacha kusawazisha hatimaye huondolewa badala ya kutoa
-data kongwe.
+Ingizo zilizosawazishwa huandikwa kwenye jedwali la DB la `model_intelligence` kwa
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Ingizo **hukwisha muda wake baada ya
+siku 7**, kwa hivyo mtoa huduma anayeacha kusawazisha hatimaye huondolewa badala ya kutoa
+data ya zamani.
 
-Usawazishaji huendeshwa **ukiwashwa kwa chaguo-msingi**:
+Usawazishaji huendeshwa **kimya kwa chaguomsingi**:
 
-- Huendeshwa mara moja wakati wa kuanzishwa kwa seva na kisha kwa kipima muda cha mara kwa mara
-  (`src/lib/arenaEloSync.ts`, umeunganishwa kutoka `src/instrumentation-node.ts`).
-- Ni **usiozuia na kamwe hauleti kushindwa kabisa** — ikiwa upatikanaji wa chanzo cha juu
-  utashindwa, OmniRoute huendelea kufanya kazi na viwango huonyesha tu data nzuri ya mwisho
-  (au hali tupu).
+- Huendeshwa mara moja wakati wa kuanzisha seva na kisha kwa kipimo cha mara kwa mara
+  (`src/lib/arenaEloSync.ts`, uliounganishwa kutoka `src/instrumentation-node.ts`).
+- Ni **usiozuia na hauwezi kusababisha kushindwa kabisa** — ikiwa uchakataji wa chanzo cha juu utashindwa, OmniRoute huendelea
+  kufanya kazi na viwango huonyesha tu data nzuri ya mwisho (au hali tupu).
 
-Vigezo viwili vya mazingira huidhibiti (vimeandikwa katika
+Vigezo viwili vya mazingira hudhibiti hili (vimedhihirishwa katika
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Kigezo                    | Chaguo-msingi | Madhumuni                                          |
-| ------------------------- | ------------- | -------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Weka `false` kujiondoa kwenye usawazishaji wa nje. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Muda wa usawazishaji, kwa sekunde.                 |
+| Kigezo                    | Chaguomsingi  | Madhumuni                                               |
+| ------------------------- | ------------- | ------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Weka kuwa `false` kujiondoa kwenye usawazishaji wa nje. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Kipindi cha usawazishaji, kwa sekunde.                  |
 
-### Usawazishaji wa mwongozo / hali / kufuta
+### Usawazishaji wa mwongozo / hali / kusafisha
 
-Kwa waendeshaji, endpoint ya usimamizi iliyothibitishwa hutoa udhibiti wa mwongozo
-(`src/app/api/intelligence/sync/route.ts` — inahitaji uthibitishaji wa usimamizi):
+Kwa waendeshaji, kiunganishi cha usimamizi kilicho na uthibitishaji hufichua udhibiti wa mwongozo
+(`src/app/api/intelligence/sync/route.ts` — kinahitaji uthibitishaji wa usimamizi):
 
 ```
 GET    /api/intelligence/sync          # hali ya sasa ya usawazishaji (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # anzisha usawazishaji wa mwongozo; mwili: { "dryRun": true } kutazama awali bila kuandika
-DELETE /api/intelligence/sync          # futa maingizo yote ya akili ya modeli ya arena_elo yaliyosawazishwa
+POST   /api/intelligence/sync          # chochea usawazishaji wa mwongozo; mwili: { "dryRun": true } kuhakiki bila kuandika
+DELETE /api/intelligence/sync          # safisha ingizo zote za akili za arena_elo zilizosawazishwa
 ```
 
-Ikiwa ukurasa wa viwango ni tupu, `POST /api/intelligence/sync` ya mwongozo (au tu
-kuanzisha upya seva) huujaza tena.
+Ikiwa ukurasa wa viwango ni tupu, `POST /api/intelligence/sync` ya mwongozo (au
+kuanzisha seva upya tu) huijaza tena.
 
-### Kulinganisha modeli na bao la vinara
+### Kulinganisha modeli na jedwali la washindani
 
-ID za modeli za rejista na majina ya modeli ya Arena havilingani kila wakati kikamilifu. Upangaji hutumia
-ulinganishaji wenye unyumbufu (`findMatchingIntelligence` katika `src/lib/freeProviderRankings.ts`):
+Kitambulisho cha modeli za rejareja na majina ya modeli za Arena mara zote hailingani kikamilifu. Uwekaji wa viwango hutumia
+kulinganisha kunjufu (`findMatchingIntelligence` katika `src/lib/freeProviderRankings.ts`):
 
-1. Ulinganifu kamili kwa ID ya modeli iliyosanifishwa.
+1. Ulinganifu kamili kwenye kitambulisho cha modeli kilichosawazishwa.
 2. Ulinganifu baada ya kuondoa kiambishi cha toleo cha mwisho (k.m. `kimi-k2.6` → `kimi-k2`).
-3. Ulinganifu wa kiambishi awali (jina la modeli la bao la vinara ni kiambishi awali cha ID ya rejista).
+3. Ulinganifu wa kiambishi awali (jina la modeli ya jedwali la washindani ni kiambishi awali cha kitambulisho cha rejareja).
 
-Upande wa usawazishaji, viambishi awali vya watengenezaji vinavyojulikana (`anthropic/`, `openai/`, `google/`, …)
-huondolewa na ramani ndogo ya majina mbadala hupanua majina sanifu kuwa vibadala ambavyo
-OmniRoute hutumia ndani, ili modeli ziweze kupatikana chini ya jina lolote.
+Upande wa usawazishaji, viambishi awali vya wauzaji wanaojulikana (`anthropic/`, `openai/`, `google/`, …)
+huondolewa na ramani ndogo ya majina mbadala hupanua majina rasmi kuwa aina mbalimbali ambazo OmniRoute hutumia
+ndani, ili modeli ziendelee kupatikana chini ya jina lolote.
 
-### Jinsi mtoa huduma anavyopangwa
+### Jinsi mtoa huduma anavyowekwa kwenye viwango
 
-Kwa kila mtoa huduma wa bure, injini hutoa alama kwa kila modeli katika katalogi yake, kisha:
+Kwa kila mtoa huduma wa bure, injini hupima kila modeli katika katalogi yake, kisha:
 
-- **Modeli Bora** = modeli yenye alama ya juu zaidi ya mtoa huduma.
-- **Alama ya Wastani** = wastani wa alama katika modeli zote za mtoa huduma huyo zilizopewa alama.
-- **Modeli** = ni modeli ngapi za mtoa huduma zilizo na alama ya Arena.
+- **Top Model** = modeli yenye alama ya juu zaidi ya mtoa huduma.
+- **Avg Score** = wastani wa alama katika modeli zote zilizopimwa za mtoa huduma huyo.
+- **Models** = ni modeli ngapi za mtoa huduma zilizo na alama ya Arena.
 
-Watoa huduma hupangwa kwa **alama ya modeli bora** kwanza, kisha kwa alama ya wastani. Hii
-humzawadia mtoa huduma anayetoa angalau modeli moja imara ya bure.
+Watoa huduma hupangwa kwa **alama ya modeli ya juu** kwanza, kisha kwa wastani wa alama. Hili hutunza zawadi kwa
+mtoa huduma anayetoa angalau modeli moja imara ya bure.
 
 ---
 

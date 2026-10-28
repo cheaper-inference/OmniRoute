@@ -607,14 +607,14 @@ Para sa kumpletong sanggunian ng mga environment variable, tingnan ang [README](
 
 ---
 
-## 📊 Mga Available na Modelo
+## 📊 Mga Magagamit na Modelo
 
 <details>
-<summary><b>Tingnan ang lahat ng available na modelo</b></summary>
+<summary><b>Tingnan ang lahat ng magagamit na modelo</b></summary>
 
-> Ang listahan sa ibaba ay hinango mula sa `open-sse/config/providerRegistry.ts` para sa v3.8.0. Ang mga cloud catalog (Gemini, OpenRouter, atbp.) ay naka-sync nang dinamiko — para sa buong live na catalog buksan ang **Dashboard → Providers → [provider] → Available Models** o tawagan ang `GET /api/models/catalog`.
+> Ang listahan sa ibaba ay hinango mula sa `open-sse/config/providerRegistry.ts` para sa v3.8.0. Ang mga cloud catalog (Gemini, OpenRouter, atbp.) ay naka-sync nang dynamic — para sa buong live na catalog, buksan ang **Dashboard → Providers → [provider] → Available Models** o tawagan ang `GET /api/models/catalog`.
 >
-> Kung ang built-in na listahan ng isang provider ay lumihis, gamitin ang **Import from /models** sa pahinang iyon (o i-enable ang **Auto-Sync**) para makuha ang live na upstream catalog. Ito ay na-verify sa v3.8.50 para sa LLM7.io (`gemini-3.1-flash-lite`) at UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ang anonymous access ng Pollinations ay nanatiling limitado sa upstream sa parehong test pass.
+> Kung lumihis na ang built-in na listahan ng isang provider, gamitin ang **Import from /models** sa pahinang iyon (o i-enable ang **Auto-Sync**) para hilahin ang live na upstream catalog. Naberipika ito sa v3.8.50 para sa LLM7.io (`gemini-3.1-flash-lite`) at UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); nanatiling limitado sa upstream ang anonymous access ng Pollinations sa parehong test pass.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -622,7 +622,7 @@ Para sa kumpletong sanggunian ng mga environment variable, tingnan ang [README](
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — LIBRENG OAuth: gamitin ang live na catalog na makikita sa ilalim ng **Dashboard → Providers → Kiro → Available Models**. Ang availability ay depende sa account at plan.
+**Kiro (`kr/`)** — LIBRENG OAuth: gamitin ang live na catalog na ipinapakita sa **Dashboard → Providers → Kiro → Available Models**. Ang availability ay nakadepende sa account at plan.
 
 **Qoder (`if/`)** — LIBRENG OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,17 +630,17 @@ Para sa kumpletong sanggunian ng mga environment variable, tingnan ang [README](
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/buwan flat o bawat gamit: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/buwan na flat o bawat gamit: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Ultra-mabilis: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Katutubong Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Native na Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — Naka-host sa EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — May search augmentation: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Pinatibay ng search: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (libre), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -648,7 +648,7 @@ Para sa kumpletong sanggunian ng mga environment variable, tingnan ang [README](
 
 **Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Nakafocus sa RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Nakatuon sa RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
 **NVIDIA NIM (`nvidia/`)** — Enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
@@ -656,11 +656,11 @@ Para sa kumpletong sanggunian ng mga environment variable, tingnan ang [README](
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Naka-sync nang live bawat API key mula sa Google — walang static na listahan. Magkonekta ng key sa **Dashboard → Providers** pagkatapos gamitin ang **Available Models** para i-import ang kasalukuyang catalog (hal. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Naka-sync nang live bawat API key mula sa Google — walang static na listahan. Mag-connect ng key sa **Dashboard → Providers** pagkatapos ay gamitin ang **Available Models** para i-import ang kasalukuyang catalog (hal. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Iba pang mga compatible na provider** (mga piling): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (sa pamamagitan ng `aws-bedrock`), `azure-ai`, `openrouter` (passthrough na catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Bawat isa ay nagpapanatili ng sariling listahan ng modelo sa `providerRegistry.ts` at maaaring i-auto-sync kapag ang provider ay naglalantad ng `/models` endpoint.
+**Iba pang mga compatible na provider** (mga pili): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough na catalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Bawat isa ay nagpapanatili ng sarili nitong listahan ng mga modelo sa `providerRegistry.ts` at maaaring ma-auto-sync kapag nag-e-expose ang provider ng `/models` endpoint.
 
-**Tala tungkol sa mga model ID:** Gumagamit ang OmniRoute ng mga provider-native na ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ang ilang ID ay may kasamang dotted na bersyon dahil ganito ang inaasahan ng upstream API. Kung ang isang modelo ay wala sa listahan sa itaas, patakbuhin ang `omniroute models --search <term>` o gamitin ang `GET /api/models/catalog` para kumpirmahin ang availability.
+**Tala sa mga model ID:** Gumagamit ang OmniRoute ng mga provider-native na ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Ang ilang ID ay may mga bersyong may tuldok dahil iyon ang inaasahan ng upstream API. Kung hindi nakalista sa itaas ang isang modelo, patakbuhin ang `omniroute models --search <term>` o tawagan ang `GET /api/models/catalog` para kumpirmahin ang availability.
 
 </details>
 

@@ -31,20 +31,20 @@ Rozsah:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 Vestavěný katalog aktuálně obsahuje 56 filtrů v těchto kategoriích:
 
-| Kategorie | Příklady                                                          |
-| --------- | ----------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                 |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, testy Cargo        |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
-| `shell`   | `ls`, `find`, `grep`, obecné protokoly shellu                     |
-| `docker`  | `docker ps`, protokoly Dockeru                                    |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                           |
-| `generic` | výstup JSON, trasování zásobníku, obecná náhradní možnost výstupu |
+| Kategorie | Příklady                                                      |
+| --------- | ------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testy    |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
+| `shell`   | `ls`, `find`, `grep`, obecné logy shellu                      |
+| `docker`  | `docker ps`, logy Dockeru                                     |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
+| `generic` | JSON výstup, stack traces, obecný výstupní fallback           |
 
 Detektor v `open-sse/services/compression/engines/rtk/commandDetector.ts` klasifikuje výstup
 před výběrem filtru. Filtry mohou také odpovídat vzoru příkazu nebo regulárnímu výrazu výstupu,
-když samotná třída příkazu nestačí.
+když třída příkazu nestačí.
 
 ## Vyhodnocování filtrů
 
@@ -314,15 +314,15 @@ Před uložením jsou citlivé údaje redigovány, včetně běžných bearer to
 přístupových klíčů AWS a hodnot ve stylu přiřazení `token=...`, `secret=...`, `password=...`. Analytika
 ukládá pouze ID ukazatele, velikost a metadata hashe.
 
-## Ověřovací brána
+## Verify Gate
 
-Cílená ověřovací brána spouští vestavěné inline testy filtrů bez volání externích příkazů:
+Zaměřená verify gate spouští vestavěné inline testy filtrů bez volání externích příkazů:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-verify.test.ts
 ```
 
-Širší brána RTK je:
+Širší RTK gate je:
 
 ```bash
 node --import tsx/esm --test \
@@ -331,7 +331,7 @@ node --import tsx/esm --test \
   tests/unit/compression/context-compression-api.test.ts
 ```
 
-Před vydáním spusťte širokou kompresní bránu:
+Před vydáním spusťte širokou compression gate:
 
 ```bash
 node --import tsx/esm --test \
@@ -358,55 +358,55 @@ RTK podporuje **3 úrovně intenzity**, které představují kompromis mezi **ag
 
 ### 3 úrovně
 
-| Úroveň               | Práh zkrácení     | Úspora tokenů | Riziko      | Nejvhodnější pro                |
+| Úroveň               | Práh zkrácení     | Úspora tokenů | Riziko      | Vhodné pro                      |
 | -------------------- | ----------------- | ------------- | ----------- | ------------------------------- |
 | `minimal`            | 24 řádků na sekci | ~20-40%       | Velmi nízké | Produkce s kritickým kontextem  |
 | `standard` (výchozí) | 24 řádků na sekci | ~50-70%       | Nízké       | Každodenní programování         |
-| `aggressive`         | 16 řádků na sekci | ~70-90%       | Střední     | Dlouhé relace, maximální úspora |
+| `aggressive`         | 16 řádků na sekci | ~70-90%       | Střední     | Dlouhá sezení, maximální úspory |
 
-### Kde dochází ke zkrácení
+### Kde dochází ke zkracování
 
 Práh zkrácení ovlivňuje `lineFilter.ts`:
 
 ```ts
-// Ze souboru open-sse/services/compression/engines/rtk/index.ts:329-330
+// Z open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Zachovává se **začátek** i **konec** každé sekce; prostřední obsah se při zkrácení zahodí.
+Zachován je **začátek** i **konec** každé sekce; prostřední obsah se při zkrácení zahodí.
 
-### Co zůstává vs. co se odřízne
+### Co zůstává vs. co se odstraňuje
 
 | Obsah                      | minimal      | standard     | aggressive   |
 | -------------------------- | ------------ | ------------ | ------------ |
-| Chyby / stack traces       | ✅ zachováno | ✅ zachováno | ✅ zachováno |
+| Chyby / stack trace        | ✅ zachováno | ✅ zachováno | ✅ zachováno |
 | Selhání testů              | ✅ zachováno | ✅ zachováno | ✅ zachováno |
 | Chyby sestavení            | ✅ zachováno | ✅ zachováno | ✅ zachováno |
 | Úspěšné testy (podrobné)   | ✅ zachováno | 🟡 sbaleno   | 🟡 sbaleno   |
 | Rutinní výstup (info logy) | 🟡 sbaleno   | 🟡 sbaleno   | ❌ zahozeno  |
 | Indikátory průběhu         | 🟡 sbaleno   | ❌ zahozeno  | ❌ zahozeno  |
-| Banner / ASCII art         | 🟡 sbaleno   | ❌ zahozeno  | ❌ zahozeno  |
+| Bannery / ASCII art        | 🟡 sbaleno   | ❌ zahozeno  | ❌ zahozeno  |
 
 ### Výběr správné intenzity
 
 ```
-              Je ztráta kontextu katastrofální?
+                  Je ztráta kontextu katastrofální?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     ANO         NE       NEVÍM JISTĚ
+     ANO          NE         NEVÍM
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │     Jak kritická    Nejprve zkuste `standard`
-      │     je propustnost? (funguje v 80 %
-      │           │          případů)
+      │      Jak kritická    Nejprve zkuste `standard`
+      │      je propustnost? (funguje v 80 % případů)
+      │           │
       │      ┌────┴────┐
       │      │         │
-      │    NÍZKÁ    VYSOKÁ
+      │    NÍZKÁ     VYSOKÁ
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -416,7 +416,7 @@ Zachovává se **začátek** i **konec** každé sekce; prostřední obsah se p�
 
 ### Konfigurace intenzity
 
-**Pro jednotlivé kombo** (v konfiguraci komba):
+**Na úrovni komba** (v konfiguraci komba):
 
 ```json
 {
@@ -431,7 +431,7 @@ Zachovává se **začátek** i **konec** každé sekce; prostřední obsah se p�
 
 **Programově**:
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je typu
+`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je
 `CompressionEngine` a nemá metodu `updateConfig`. Konfiguraci enginu místo toho
 aktualizujte pomocí pomocné funkce registru:
 

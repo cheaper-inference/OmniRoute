@@ -32,91 +32,91 @@ Permintaan Klien
 
 ## Mode Kompresi
 
-### Nonaktif
+### Off
 
 Tidak ada kompresi yang diterapkan. Semua pesan diteruskan tanpa perubahan.
 
-### Mode Lite (~15% penghematan, latensi <1ms)
+### Lite Mode (penghematan ~15%, latensi <1ms)
 
 Mode paling aman — nol perubahan semantik, hanya pembersihan format:
 
-| Teknik                   | Deskripsi                                               |
-| ------------------------ | ------------------------------------------------------- |
-| `collapseWhitespace`     | Menggabungkan baris kosong berurutan dan spasi di akhir |
-| `dedupSystemPrompt`      | Menghapus pesan sistem yang duplikat                    |
-| `compressToolResults`    | Mengompres output tool/fungsi yang bertele-tele         |
-| `removeRedundantContent` | Membuang instruksi yang berulang                        |
-| `replaceImageUrls`       | Memperpendek data URI gambar base64                     |
+| Teknik                   | Deskripsi                                                     |
+| ------------------------ | ------------------------------------------------------------- |
+| `collapseWhitespace`     | Menggabungkan baris kosong berurutan dan spasi di akhir baris |
+| `dedupSystemPrompt`      | Menghapus pesan sistem yang duplikat                          |
+| `compressToolResults`    | Mengompresi output tool/fungsi yang bertele-tele              |
+| `removeRedundantContent` | Menghapus instruksi yang berulang                             |
+| `replaceImageUrls`       | Memendekkan data URI gambar base64                            |
 
-**Cocok untuk:** Penggunaan selalu aktif, alur kerja yang kritis terhadap keamanan.
+**Cocok untuk:** Penggunaan yang selalu aktif, alur kerja yang kritis terhadap keamanan.
 
-### Mode Standar (~30% penghematan)
+### Standard Mode (penghematan ~30%)
 
 Terinspirasi oleh [Caveman](https://github.com/JuliusBrussee/caveman) — menghapus kata-kata pengisi dan frasa bertele-tele sambil mempertahankan makna:
 
 - Menghapus kata-kata pengisi ("please", "I think", "basically", "actually")
 - Memadatkan frasa bertele-tele ("in order to" → "to", "as a result of" → "because")
-- Membuang basa-basi yang ragu ("Would you mind...", "If you could possibly...")
+- Menghapus basa-basi sopan ("Would you mind...", "If you could possibly...")
 - 30+ aturan regex yang disetel untuk prompt coding
 
 **Cocok untuk:** Alur kerja coding harian, tim yang sadar biaya.
 
-### Mode Agresif (~50% penghematan)
+### Aggressive Mode (penghematan ~50%)
 
-Manajemen riwayat cerdas untuk sesi yang panjang:
+Manajemen riwayat pintar untuk sesi yang panjang:
 
-- **Message Aging** — pesan yang lebih lama dikompres secara bertahap
-- **Tool Result Compression** — output tool yang panjang dipotong atau dielide (baris pertama/terakhir,
-  pemfilteran baris yang cocok, pemadatan kunci JSON)
+- **Message Aging** — pesan yang lebih lama dikompresi secara bertahap
+- **Tool Result Compression** — output tool yang panjang dipotong atau dielisiasi (baris pertama/terakhir,
+  pemfilteran baris yang cocok, pemadatan key JSON)
 - **Structural Integrity Guards** — memastikan pasangan `tool_use` + `tool_result` tetap konsisten
-- **Context Window Awareness** — menghormati batas token per model
+- **Context Window Awareness** — mematuhi batas token per model
 
 **Cocok untuk:** Sesi debugging yang panjang, basis kode besar.
 
-### Mode Ultra (~75% penghematan)
+### Ultra Mode (penghematan ~75%)
 
-Kompresi maksimum untuk skenario yang kritis terhadap token:
+Kompresi maksimum untuk skenario kritis token:
 
 - **Heuristic Pruning** — pemangkasan token prosa berbasis skor
 - **Structure Preservation** — blok kode berpagar, kode inline, URL, dan identifier
-  di-tombstone dan disambung kembali secara verbatim, tidak pernah dipangkas
+  diberi tombstone dan dirangkai ulang secara verbatim, tidak pernah dipangkas
 - **Tingkat SLM opsional** — model lokal kecil dapat menyempurnakan pemangkasan saat dikonfigurasi
-- Independen dari mode Agresif: tidak menjalankan message aging, kompresi hasil tool,
-  atau peringkas fallback (hanya kegagalan tingkat SLM yang dapat mengarahkan proses fallback
-  melalui mode agresif)
+- Independen dari mode Aggressive: tidak menjalankan message aging, kompresi hasil tool,
+  atau peringkas fallback (hanya kegagalan tingkat SLM yang dapat mengarahkan
+  proses fallback melalui aggressive)
 
 **Cocok untuk:** Saat Anda berulang kali mencapai batas konteks.
 
-### Mode RTK (rentang upstream 60-90%)
+### RTK Mode (rentang upstream 60-90%)
 
-Mode RTK dioptimalkan untuk output tool bertele-tele yang muncul dalam sesi agen coding:
+Mode RTK dioptimalkan untuk output tool yang bertele-tele yang muncul dalam sesi agen coding:
 
 - Mendeteksi kelas perintah/output seperti `git status`, `git diff`, `git log`, test runner,
   build TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/install, log Docker, output
   infra, dan output shell umum
 - Menerapkan paket filter JSON dari `open-sse/services/compression/engines/rtk/filters/`
 - Mengimpor filter RTK TOML skema v1 dari file `filters.toml` proyek atau global, dengan validasi
-  inline-test dan trust-gating untuk file proyek
+  uji inline dan trust-gating untuk file proyek
 - Dilengkapi 56 filter bawaan dengan sampel verifikasi inline
 - Menghapus urutan kontrol ANSI, progress bar, baris berulang, dan noise yang tidak dapat ditindaklanjuti
-- Mempertahankan kegagalan, error, peringatan, file yang berubah, ringkasan, dan bagian akhir (tail) dari output panjang
-- Mendukung filter proyek yang di-trust-gate, filter global, dan pemulihan output mentah yang disunting (redacted) secara opsional
+- Mempertahankan kegagalan, error, peringatan, file yang berubah, ringkasan, dan bagian akhir dari output panjang
+- Mendukung filter proyek dengan trust-gating, filter global, dan pemulihan output mentah tersamarkan opsional
 
 **Cocok untuk:** Sesi agen dengan transkrip shell, build, test, git, grep, dan output file.
 
-### Mode Stacked (rentang 78-95% yang memenuhi syarat)
+### Stacked Mode (rentang yang memenuhi syarat 78-95%)
 
-Mode Stacked menjalankan beberapa mesin kompresi dalam urutan yang deterministik. Pipeline default-nya adalah:
+Mode Stacked menjalankan beberapa mesin kompresi dalam urutan deterministik. Pipeline default-nya adalah:
 
 ```txt
 RTK -> Caveman
 ```
 
-Urutan tersebut membuat output terminal/tool ringkas terlebih dahulu, lalu menerapkan kondensasi
-semantik Caveman pada prompt bahasa alami yang tersisa. Pipeline Stacked dapat dikonfigurasi
-secara global atau melalui kombo kompresi yang ditetapkan ke kombo routing.
+Urutan tersebut menjaga output terminal/tool tetap ringkas terlebih dahulu, lalu menerapkan kondensasi
+semantik Caveman pada prompt bahasa alami yang tersisa. Pipeline Stacked dapat dikonfigurasi secara global
+atau melalui kombo kompresi yang ditetapkan ke kombo routing.
 
-**Cocok untuk:** Konteks campuran dengan log tool yang besar ditambah instruksi manusia atau ringkasan asisten.
+**Cocok untuk:** Konteks campuran dengan log tool besar ditambah instruksi manusia atau ringkasan asisten.
 
 ---
 

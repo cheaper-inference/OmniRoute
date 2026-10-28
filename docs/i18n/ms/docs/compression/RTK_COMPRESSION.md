@@ -29,22 +29,22 @@ Julat:         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Apa Yang Dimampatkan
 
-Katalog terbina dalam kini disertakan dengan 56 penapis merentasi kategori berikut:
+Katalog terbina dalam kini menyertakan 56 penapis merentasi kategori berikut:
 
-| Kategori  | Contoh                                                        |
-| --------- | ------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, ujian Cargo    |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, log shell generik                       |
-| `docker`  | `docker ps`, log Docker                                       |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | output JSON, surihan tindanan, sandaran output generik        |
+| Kategori  | Contoh                                                               |
+| --------- | -------------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                    |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, ujian Cargo           |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx        |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler        |
+| `shell`   | `ls`, `find`, `grep`, log shell generik                              |
+| `docker`  | `docker ps`, log Docker                                              |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                              |
+| `generic` | Output JSON, surihan tindanan (stack trace), sandaran output generik |
 
-Pengesan dalam `open-sse/services/compression/engines/rtk/commandDetector.ts` mengelaskan output
-sebelum pemilihan penapis. Penapis juga boleh dipadankan mengikut corak perintah atau regex output
-apabila kelas perintah sahaja tidak mencukupi.
+Pengesan dalam `open-sse/services/compression/engines/rtk/commandDetector.ts` mengklasifikasikan output
+sebelum pemilihan penapis. Penapis juga boleh dipadankan mengikut corak arahan atau regex output apabila
+kelas arahan sahaja tidak mencukupi.
 
 ## Penyelesaian Penapis
 
@@ -355,19 +355,19 @@ node --import tsx/esm --test \
 
 ## Tahap Keamatan (v3.8.16+)
 
-RTK menyokong **3 tahap keamatan** yang mengimbangi antara **keagresifan pemampatan** dan **keselamatan**. Tahap ini ditetapkan melalui `config.intensity` dalam konfigurasi enjin.
+RTK menyokong **3 tahap keamatan** yang mengimbangi antara **keagresifan mampatan** dan **keselamatan**. Tahap ditetapkan melalui `config.intensity` dalam konfigurasi enjin.
 
-### 3 Tahap Tersebut
+### 3 Tahap
 
-| Tahap              | Ambang pemangkasan       | Penjimatan token | Risiko        | Terbaik untuk                       |
+| Tahap              | Ambang pemenggalan       | Penjimatan token | Risiko        | Terbaik untuk                       |
 | ------------------ | ------------------------ | ---------------- | ------------- | ----------------------------------- |
 | `minimal`          | 24 baris setiap bahagian | ~20-40%          | Sangat rendah | Pengeluaran dengan konteks kritikal |
 | `standard` (lalai) | 24 baris setiap bahagian | ~50-70%          | Rendah        | Sesi pengekodan harian              |
 | `aggressive`       | 16 baris setiap bahagian | ~70-90%          | Sederhana     | Sesi panjang, penjimatan maksimum   |
 
-### Di Mana Pemangkasan Berlaku
+### Di Mana Pemenggalan Berlaku
 
-Ambang pemangkasan mempengaruhi `lineFilter.ts`:
+Ambang pemenggalan mempengaruhi `lineFilter.ts`:
 
 ```ts
 // Daripada open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -375,36 +375,36 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Kedua-dua **kepala** dan **ekor** setiap bahagian dikekalkan; kandungan di tengah digugurkan apabila pemangkasan berkuat kuasa.
+Kedua-dua **kepala** dan **ekor** setiap bahagian dikekalkan; kandungan di tengah dibuang apabila pemenggalan berlaku.
 
 ### Apa yang Kekal vs. Apa yang Dibuang
 
-| Kandungan                | minimal       | standard      | aggressive    |
-| ------------------------ | ------------- | ------------- | ------------- |
-| Ralat / surihan tindanan | ✅ dikekalkan | ✅ dikekalkan | ✅ dikekalkan |
-| Kegagalan ujian          | ✅ dikekalkan | ✅ dikekalkan | ✅ dikekalkan |
-| Ralat binaan             | ✅ dikekalkan | ✅ dikekalkan | ✅ dikekalkan |
-| Ujian lulus (verbose)    | ✅ dikekalkan | 🟡 dipadatkan | 🟡 dipadatkan |
-| Output rutin (log info)  | 🟡 dipadatkan | 🟡 dipadatkan | ❌ digugurkan |
-| Bar kemajuan             | 🟡 dipadatkan | ❌ digugurkan | ❌ digugurkan |
-| Sepanduk / seni ASCII    | 🟡 dipadatkan | ❌ digugurkan | ❌ digugurkan |
+| Kandungan                   | minimal         | standard        | aggressive      |
+| --------------------------- | --------------- | --------------- | --------------- |
+| Ralat / jejak tindanan      | ✅ dikekalkan   | ✅ dikekalkan   | ✅ dikekalkan   |
+| Kegagalan ujian             | ✅ dikekalkan   | ✅ dikekalkan   | ✅ dikekalkan   |
+| Ralat binaan                | ✅ dikekalkan   | ✅ dikekalkan   | ✅ dikekalkan   |
+| Ujian lulus (verbose)       | ✅ dikekalkan   | 🟡 diringkaskan | 🟡 diringkaskan |
+| Output rutin (log maklumat) | 🟡 diringkaskan | 🟡 diringkaskan | ❌ dibuang      |
+| Bar kemajuan                | 🟡 diringkaskan | ❌ dibuang      | ❌ dibuang      |
+| Sepanduk / seni ASCII       | 🟡 diringkaskan | ❌ dibuang      | ❌ dibuang      |
 
-### Memilih Keamatan yang Tepat
+### Memilih Keamatan yang Betul
 
 ```
-              Adakah kehilangan konteks membawa padah?
+                  Adakah kehilangan konteks membawa bencana?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     YA         TIDAK     TIDAK PASTI
+     YA        TIDAK      TIDAK PASTI
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Sejauh manakah   Cuba `standard` dahulu
-      │      throughput       (berfungsi untuk 80%
-      │      kritikal?         kes)
+      │     Seberapa kritikal  Cuba `standard` dahulu
+      │     throughput?        (berfungsi untuk 80%
+      │           │            kes)
       │      ┌────┴────┐
       │      │         │
       │    RENDAH    TINGGI
@@ -417,7 +417,7 @@ Kedua-dua **kepala** dan **ekor** setiap bahagian dikekalkan; kandungan di tenga
 
 ### Mengkonfigurasi Keamatan
 
-**Setiap combo** (dalam konfigurasi combo):
+**Setiap kombo** (dalam konfigurasi kombo):
 
 ```json
 {
@@ -430,11 +430,11 @@ Kedua-dua **kepala** dan **ekor** setiap bahagian dikekalkan; kandungan di tenga
 }
 ```
 
-**Secara programatik**:
+**Secara pengaturcaraan**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) ialah
-`CompressionEngine` dan tidak mempunyai kaedah `updateConfig`. Sebaliknya, kemas kini
-konfigurasi enjin melalui pembantu registry:
+`CompressionEngine` dan tidak mempunyai kaedah `updateConfig`. Kemas kini konfigurasi
+enjin melalui pembantu registry sebaliknya:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -444,7 +444,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Mengesahkan Kesannya
 
-Gunakan **Verify Gate** (lihat di bawah) untuk memastikan penapis anda selamat pada keamatan yang dipilih:
+Gunakan **Verify Gate** (lihat di bawah) untuk mengesahkan penapis anda selamat pada tahap keamatan pilihan anda:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

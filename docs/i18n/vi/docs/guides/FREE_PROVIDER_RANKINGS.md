@@ -11,30 +11,30 @@
 
 ---
 
-## Đây là gì
+## Nó là gì
 
-OmniRoute đăng ký 376 nhà cung cấp, bao gồm 155 mục danh mục được đánh dấu là **miễn phí/không cần xác thực**
-(không cần xác thực,
-OAuth gói miễn phí hoặc khóa API gói miễn phí — xem
-[Hướng dẫn về các gói miễn phí](../getting-started/FREE-TIERS-GUIDE.md) và
-[Thư mục đầy đủ về các gói miễn phí](../reference/FREE_TIERS.md)). Tuy nhiên, chất lượng mô hình
-giữa các nhà cung cấp miễn phí khác nhau rất nhiều. Một nhà cung cấp không yêu cầu xác thực phục vụ mô hình tiên tiến sẽ hữu ích hơn nhiều
-so với một nhà cung cấp phục vụ mô hình nhỏ, cũ.
+OmniRoute đăng ký 376 provider, bao gồm 155 mục danh mục được đánh dấu **free/no-auth**
+(no-auth, OAuth free-tier, hoặc API key free-tier — xem
+[Hướng dẫn Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) và thư mục
+[Free Tiers](../reference/FREE_TIERS.md) đầy đủ). Điểm hạn chế là: chất lượng model của
+các provider miễn phí chênh lệch rất lớn. Một provider no-auth cung cấp model tiên tiến
+(frontier) hữu ích hơn nhiều so với một provider chỉ cung cấp model cũ, quy mô nhỏ.
 
-**Xếp hạng nhà cung cấp miễn phí** trả lời câu hỏi "**nhà cung cấp miễn phí nào cung cấp cho tôi mô hình tốt nhất?**" bằng cách
-kết hợp danh mục của từng nhà cung cấp miễn phí với **điểm chất lượng do cộng đồng đóng góp** từ
-**bảng xếp hạng Arena AI** (ELO theo mức độ ưu tiên của con người, cùng ý tưởng nền tảng của
-đấu trường chatbot LMArena). Sau đó, các nhà cung cấp được xếp hạng theo sức mạnh của **mô hình miễn phí tốt nhất** của họ.
+**Free Provider Rankings** trả lời câu hỏi "**provider miễn phí nào cho tôi model tốt nhất?**"
+bằng cách kết hợp danh mục của từng provider miễn phí với **điểm chất lượng do cộng đồng
+đóng góp** từ **bảng xếp hạng Arena AI** (ELO dựa trên sở thích của con người, cùng ý tưởng
+đằng sau chatbot arena LMArena). Các provider sau đó được xếp hạng theo sức mạnh của
+**model miễn phí tốt nhất** của họ.
 
-Bảng xếp hạng được tính toán từ ba nguồn thực tế:
+Thứ hạng được tính từ ba nguồn dữ liệu thực:
 
-1. Danh sách các nhà cung cấp miễn phí — `NOAUTH_PROVIDERS`, cùng với các mục `OAUTH_PROVIDERS` /
+1. Các danh sách provider miễn phí — `NOAUTH_PROVIDERS`, cùng các mục `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` được gắn cờ `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Danh mục mô hình của từng nhà cung cấp từ sổ đăng ký nhà cung cấp
+2. Danh mục model của từng provider từ provider registry
    (`open-sse/config/providerRegistry.ts`).
-3. Điểm mức độ phù hợp với tác vụ được suy ra từ ELO, được lưu trữ trong bảng DB `model_intelligence` bởi
-   công cụ đồng bộ Arena ELO (`src/lib/arenaEloSync.ts`).
+3. Điểm mức độ phù hợp với tác vụ (task-fit) dẫn xuất từ ELO, được lưu trong bảng DB
+   `model_intelligence` bởi engine đồng bộ Arena ELO (`src/lib/arenaEloSync.ts`).
 
 Logic kết hợp nằm trong `src/lib/freeProviderRankings.ts`.
 
@@ -127,13 +127,13 @@ Cấu trúc phản hồi:
 Công cụ đồng bộ Arena ELO (`src/lib/arenaEloSync.ts`) lấy hai bảng xếp hạng — `text`
 và `code` — từ API bảng xếp hạng Arena AI
 (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Khi API đó không trả về
-bảng nào dùng được, công cụ sẽ chuyển sang tập dữ liệu chính thức `lmarena-ai/leaderboard-dataset`
-trên Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+bảng nào dùng được, công cụ sẽ chuyển sang bộ dữ liệu chính thức `lmarena-ai/leaderboard-dataset`
+trên datasets-server của Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
 `coding` → `code`); `GET /api/intelligence/sync` báo cáo `activeSource`, `lastError` và
 `lastFailedAt`. Mỗi mục trong bảng xếp hạng
-mang theo tên mô hình, nhà cung cấp, điểm ELO `score`, khoảng tin cậy và số lượt bình chọn.
+mang theo tên model, nhà cung cấp, `score` ELO, khoảng tin cậy và số lượt bình chọn.
 
-Các danh mục của bảng xếp hạng được ánh xạ tới các danh mục tác vụ của OmniRoute:
+Các danh mục bảng xếp hạng ánh xạ tới các danh mục tác vụ của OmniRoute:
 
 | Bảng xếp hạng Arena | Các danh mục tác vụ của OmniRoute                 |
 | ------------------- | ------------------------------------------------- |
@@ -142,14 +142,14 @@ Các danh mục của bảng xếp hạng được ánh xạ tới các danh m�
 
 ### Chuẩn hóa (điểm phù hợp tác vụ)
 
-Điểm ELO thô được chuẩn hóa theo từng bảng xếp hạng thành một **giá trị phù hợp tác vụ trong khoảng `[0.4, 0.98]`**:
+Điểm ELO thô được chuẩn hóa theo từng bảng xếp hạng thành **giá trị phù hợp tác vụ trong khoảng `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
 Điểm số không bao giờ đạt tới `0` hoặc `1`, chừa lại khoảng dư cho các tùy chỉnh của người dùng. Đây là
-trường `score` mà bạn thấy trong phản hồi API và là nhãn hiển thị trên dashboard.
+trường `score` mà bạn thấy trong phản hồi API và nhãn hiển thị trên bảng điều khiển.
 
 ### Độ tin cậy
 
@@ -157,69 +157,69 @@ Mỗi mục được gán một mức độ tin cậy dựa trên số lượt b
 
 | Độ tin cậy | Số lượt bình chọn |
 | ---------- | ----------------- |
-| `high`     | ≥ 5,000           |
-| `medium`   | ≥ 1,000           |
-| `low`      | < 1,000           |
+| `high`     | ≥ 5.000           |
+| `medium`   | ≥ 1.000           |
+| `low`      | < 1.000           |
 
 ### Lưu trữ và độ mới của dữ liệu
 
 Các mục đã chuẩn hóa được ghi vào bảng DB `model_intelligence` với
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Các mục **hết hạn sau
-7 ngày**, vì vậy một nhà cung cấp ngừng đồng bộ sẽ dần bị loại ra thay vì phục vụ
-dữ liệu đã cũ.
+7 ngày**, vì vậy một nhà cung cấp ngừng đồng bộ sẽ dần biến mất thay vì phục vụ
+dữ liệu cũ.
 
-Quá trình đồng bộ chạy **theo mặc định**:
+Tiến trình đồng bộ **được bật theo mặc định**:
 
-- Nó chạy một lần khi khởi động máy chủ và sau đó theo bộ hẹn giờ định kỳ
+- Nó chạy một lần khi khởi động máy chủ và sau đó chạy theo bộ hẹn giờ định kỳ
   (`src/lib/arenaEloSync.ts`, được kết nối từ `src/instrumentation-node.ts`).
-- Nó **không chặn và không bao giờ gây lỗi nghiêm trọng** — nếu việc lấy dữ liệu từ nguồn thất bại, OmniRoute vẫn tiếp tục
+- Nó **không chặn và không bao giờ gây lỗi nghiêm trọng** — nếu việc tải dữ liệu từ nguồn thất bại, OmniRoute vẫn tiếp tục
   chạy và bảng xếp hạng chỉ đơn giản hiển thị dữ liệu tốt gần nhất (hoặc trạng thái trống).
 
-Hai biến môi trường điều khiển nó (được ghi trong tài liệu
+Hai biến môi trường điều khiển nó (được mô tả trong
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Biến                      | Mặc định      | Mục đích                                       |
-| ------------------------- | ------------- | ---------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Đặt thành `false` để từ chối đồng bộ ra ngoài. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Khoảng thời gian đồng bộ, tính bằng giây.      |
+| Biến                      | Mặc định         | Mục đích                                       |
+| ------------------------- | ---------------- | ---------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`           | Đặt thành `false` để tắt đồng bộ ra bên ngoài. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 giờ) | Khoảng thời gian đồng bộ, tính bằng giây.      |
 
 ### Đồng bộ thủ công / trạng thái / xóa
 
-Dành cho người vận hành, một endpoint quản lý có xác thực cung cấp quyền điều khiển thủ công
+Đối với người vận hành, một endpoint quản lý có xác thực cung cấp khả năng điều khiển thủ công
 (`src/app/api/intelligence/sync/route.ts` — yêu cầu xác thực quản lý):
 
 ```
-GET    /api/intelligence/sync          # current sync status (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # trigger a manual sync; body: { "dryRun": true } to preview without writing
-DELETE /api/intelligence/sync          # clear all synced arena_elo intelligence entries
+GET    /api/intelligence/sync          # trạng thái đồng bộ hiện tại (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # kích hoạt đồng bộ thủ công; body: { "dryRun": true } để xem trước mà không ghi
+DELETE /api/intelligence/sync          # xóa tất cả các mục intelligence arena_elo đã đồng bộ
 ```
 
-Nếu trang xếp hạng bị trống, một lệnh `POST /api/intelligence/sync` thủ công (hoặc đơn giản là
-khởi động lại máy chủ) sẽ điền lại dữ liệu cho nó.
+Nếu trang bảng xếp hạng trống, một lệnh `POST /api/intelligence/sync` thủ công (hoặc đơn giản là
+khởi động lại máy chủ) sẽ nạp lại dữ liệu.
 
-### Khớp mô hình với bảng xếp hạng
+### Ghép model với bảng xếp hạng
 
-ID mô hình trong registry và tên mô hình trên Arena không phải lúc nào cũng khớp chính xác. Quá trình xếp hạng sử dụng
-cơ chế khớp linh hoạt (`findMatchingIntelligence` trong `src/lib/freeProviderRankings.ts`):
+ID model trong registry và tên model trên Arena không phải lúc nào cũng khớp chính xác. Bảng xếp hạng sử dụng
+cơ chế ghép linh hoạt (`findMatchingIntelligence` trong `src/lib/freeProviderRankings.ts`):
 
-1. Khớp chính xác trên ID mô hình đã chuẩn hóa.
+1. Khớp chính xác trên ID model đã chuẩn hóa.
 2. Khớp sau khi loại bỏ hậu tố phiên bản ở cuối (ví dụ: `kimi-k2.6` → `kimi-k2`).
-3. Khớp tiền tố (tên mô hình trong bảng xếp hạng là tiền tố của ID trong registry).
+3. Khớp tiền tố (tên model trong bảng xếp hạng là tiền tố của ID trong registry).
 
 Ở phía đồng bộ, các tiền tố nhà cung cấp đã biết (`anthropic/`, `openai/`, `google/`, …) được
 loại bỏ và một bảng ánh xạ bí danh nhỏ mở rộng các tên chuẩn thành các biến thể mà OmniRoute sử dụng
-nội bộ, nhờ đó các mô hình luôn có thể tìm thấy dưới bất kỳ tên nào.
+nội bộ, nhờ đó các model luôn có thể được tìm thấy dưới bất kỳ tên nào.
 
-### Cách một nhà cung cấp được xếp hạng
+### Cách xếp hạng một nhà cung cấp
 
-Với mỗi nhà cung cấp miễn phí, công cụ chấm điểm mọi mô hình trong danh mục của họ, sau đó:
+Với mỗi nhà cung cấp miễn phí, công cụ chấm điểm mọi model trong danh mục của nhà cung cấp đó, sau đó:
 
-- **Top Model** = mô hình có điểm cao nhất của nhà cung cấp.
-- **Avg Score** = điểm trung bình trên tất cả các mô hình đã được chấm điểm của nhà cung cấp đó.
-- **Models** = số lượng mô hình của nhà cung cấp có điểm Arena.
+- **Top Model** = model có điểm cao nhất của nhà cung cấp.
+- **Avg Score** = điểm trung bình trên tất cả các model đã được chấm điểm của nhà cung cấp đó.
+- **Models** = số lượng model của nhà cung cấp có điểm Arena.
 
-Các nhà cung cấp được sắp xếp theo **điểm của mô hình đứng đầu** trước, sau đó theo điểm trung bình. Điều này tôn vinh
-nhà cung cấp có ít nhất một mô hình miễn phí mạnh.
+Các nhà cung cấp được sắp xếp theo **điểm của model hàng đầu** trước, sau đó theo điểm trung bình. Điều này tôn vinh
+nhà cung cấp có ít nhất một model miễn phí mạnh.
 
 ---
 

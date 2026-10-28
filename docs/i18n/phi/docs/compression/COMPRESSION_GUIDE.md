@@ -38,85 +38,85 @@ Walang compression na inilalapat. Ang lahat ng mensahe ay dumadaan nang walang p
 
 ### Lite Mode (~15% na tipid, <1ms na latency)
 
-Ang pinakaligtas na mode — walang pagbabago sa semantika, paglilinis lamang ng formatting:
+Ang pinakaligtas na mode — walang pagbabago sa semantika, paglilinis lang ng formatting:
 
-| Teknik                   | Paglalarawan                                                              |
-| ------------------------ | ------------------------------------------------------------------------- |
-| `collapseWhitespace`     | Pagsamahin ang magkakasunod na blangkong linya at mga trailing na espasyo |
-| `dedupSystemPrompt`      | Alisin ang mga duplicate na system message                                |
-| `compressToolResults`    | I-compress ang mga verbose na output ng tool/function                     |
-| `removeRedundantContent` | Tanggalin ang mga paulit-ulit na tagubilin                                |
-| `replaceImageUrls`       | Paikliin ang mga base64 image data URI                                    |
+| Teknika                  | Paglalarawan                                                    |
+| ------------------------ | --------------------------------------------------------------- |
+| `collapseWhitespace`     | Pagsamahin ang magkakasunod na blankong linya at trailing space |
+| `dedupSystemPrompt`      | Alisin ang mga duplicate na system message                      |
+| `compressToolResults`    | I-compress ang mga verbose na output ng tool/function           |
+| `removeRedundantContent` | Alisin ang mga paulit-ulit na tagubilin                         |
+| `replaceImageUrls`       | Paikliin ang mga base64 image data URI                          |
 
-**Pinakamainam para sa:** Laging-bukas na paggamit, mga workflow na kritikal sa kaligtasan.
+**Pinakamainam para sa:** Laging nakabukas na paggamit, mga workflow na kritikal sa kaligtasan.
 
 ### Standard Mode (~30% na tipid)
 
-Nakuha ang inspirasyon mula sa [Caveman](https://github.com/JuliusBrussee/caveman) — inaalis ang mga filler word at verbose na pananalita habang pinapanatili ang kahulugan:
+Nakuhang inspirasyon mula sa [Caveman](https://github.com/JuliusBrussee/caveman) — nag-aalis ng mga filler word at verbose na parirala habang pinapanatili ang kahulugan:
 
-- Inaalis ang mga filler word ("please", "I think", "basically", "actually")
-- Pinaiikli ang mga verbose na parirala ("in order to" → "to", "as a result of" → "because")
-- Tinatanggal ang magagalang na pag-aalinlangan ("Would you mind...", "If you could possibly...")
+- Nag-aalis ng mga filler word ("please", "I think", "basically", "actually")
+- Piniikli ang mga verbose na parirala ("in order to" → "to", "as a result of" → "because")
+- Nag-aalis ng magagalang na pag-aatubili ("Would you mind...", "If you could possibly...")
 - 30+ regex rule na naka-tune para sa mga coding prompt
 
-**Pinakamainam para sa:** Pang-araw-araw na coding workflow, mga koponan na nagtitipid ng gastos.
+**Pinakamainam para sa:** Pang-araw-araw na coding workflow, mga koponan na nagtitipid sa gastos.
 
 ### Aggressive Mode (~50% na tipid)
 
 Matalinong pamamahala ng history para sa mahabang mga sesyon:
 
-- **Message Aging** — ang mga mas lumang mensahe ay unti-unting na-compress
-- **Tool Result Compression** — ang mga mahabang output ng tool ay pinuputol o inaalis ang bahagi (mga una/huling linya,
-  pag-filter ng mga linya na tumutugma, JSON key compaction)
-- **Structural Integrity Guards** — tinitiyak na ang mga pares na `tool_use` + `tool_result` ay nanatiling consistent
-- **Context Window Awareness** — iginagalang ang mga limit ng token bawat modelo
+- **Message Aging** — ang mga lumang mensahe ay unti-unting kino-compress
+- **Tool Result Compression** — ang mga mahabang tool output ay pinuputol o inee-lide (unang/huling mga linya,
+  match-line filtering, JSON key compaction)
+- **Structural Integrity Guards** — tinitiyak na ang mga pares ng `tool_use` + `tool_result` ay nananatiling consistent
+- **Context Window Awareness** — iginagalang ang mga token limit ng bawat modelo
 
-**Pinakamainam para sa:** Mga pinalawig na sesyon ng debugging, malalaking codebase.
+**Pinakamainam para sa:** Mga mahabang debugging session, malalaking codebase.
 
 ### Ultra Mode (~75% na tipid)
 
 Pinakamataas na compression para sa mga senaryong kritikal sa token:
 
-- **Heuristic Pruning** — score-based na pag-prune ng mga token ng prose
+- **Heuristic Pruning** — score-based na pagtatanggal ng mga token sa prose
 - **Structure Preservation** — ang mga fenced code block, inline code, URL at identifier ay
-  tino-tombstone at muling isinasama nang verbatim, hindi kailanman napu-prune
-- **Opsyonal na SLM tier** — isang maliit na lokal na modelo ang maaaring mag-refine sa prune kapag naka-configure
-- Nakapag-iisa mula sa Aggressive mode: hindi nito pinapatakbo ang message aging, tool-result compression
-  o ang fallback summarizer (tanging ang kabiguan ng SLM tier ang maaaring mag-route ng fallback pass
-  sa pamamagitan ng aggressive)
+  tina-tombstone at muling pinagsasama nang verbatim, hindi kailanman tinatanggal
+- **Opsyonal na SLM tier** — isang maliit na lokal na modelo ang maaaring magpino ng prune kapag naka-configure
+- Independyente sa Aggressive mode: hindi nito pinapatakbo ang message aging, tool-result compression
+  o ang fallback summarizer (tanging ang pagkabigo ng SLM tier ang maaaring mag-route ng fallback pass
+  sa aggressive)
 
-**Pinakamainam para sa:** Kapag paulit-ulit mo nang naaabot ang mga limit ng context.
+**Pinakamainam para sa:** Kapag paulit-ulit ka nang tumatama sa mga limit ng context.
 
-### RTK Mode (60-90% na saklaw sa upstream)
+### RTK Mode (60-90% na saklaw ng upstream)
 
-Ang RTK mode ay na-optimize para sa mga verbose na output ng tool na lumilitaw sa mga sesyon ng coding agent:
+Ang RTK mode ay naka-optimize para sa mga verbose na tool output na lumilitaw sa mga sesyon ng coding agent:
 
-- Natutukoy ang mga klase ng command/output tulad ng `git status`, `git diff`, `git log`, mga test runner,
-  mga build ng TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/install, mga log ng Docker, output ng
-  infra, at generic na output ng shell
-- Nag-a-apply ng mga JSON filter pack mula sa `open-sse/services/compression/engines/rtk/filters/`
-- Nag-i-import ng mga RTK TOML schema v1 filter mula sa mga `filters.toml` file ng proyekto o global, na may
-  inline-test na validation at trust-gating para sa mga file ng proyekto
-- May kasamang 56 built-in na filter na may mga inline verify sample
-- Inaalis ang mga ANSI control sequence, progress bar, paulit-ulit na linya, at ingay na hindi actionable
-- Pinapanatili ang mga kabiguan, error, babala, binagong file, buod, at ang dulo ng mahabang output
-- Sumusuporta sa mga trust-gated na filter ng proyekto, mga global filter, at opsyonal na recovery ng naka-redact na raw output
+- Nakakadetect ng mga klase ng command/output tulad ng `git status`, `git diff`, `git log`, mga test runner,
+  TypeScript/Vite/Webpack build, ESLint/Biome/Prettier, npm audit/install, Docker log, infra
+  output, at pangkalahatang shell output
+- Nag-aapply ng mga JSON filter pack mula sa `open-sse/services/compression/engines/rtk/filters/`
+- Nag-i-import ng mga RTK TOML schema v1 filter mula sa project o global na mga file na `filters.toml`, na may
+  inline-test validation at trust-gating para sa mga project file
+- May kasamang 56 built-in na filter na may inline verify sample
+- Nag-aalis ng mga ANSI control sequence, progress bar, paulit-ulit na linya, at di-actionable na ingay
+- Pinapanatili ang mga failure, error, warning, mga binagong file, buod, at ang dulo ng mahabang output
+- Sumusuporta sa mga trust-gated na project filter, global filter, at opsyonal na redacted raw-output recovery
 
-**Pinakamainam para sa:** Mga sesyon ng agent na may mga transcript ng shell, build, test, git, grep, at file-output.
+**Pinakamainam para sa:** Mga sesyon ng agent na may shell, build, test, git, grep, at mga transcript ng file output.
 
 ### Stacked Mode (78-95% na kwalipikadong saklaw)
 
-Ang Stacked mode ay nagpapatakbo ng maraming compression engine sa isang deterministic na pagkakasunud-sunod. Ang default na pipeline ay:
+Ang Stacked mode ay nagpapatakbo ng maraming compression engine sa deterministic na pagkakasunud-sunod. Ang default na pipeline ay:
 
 ```txt
 RTK -> Caveman
 ```
 
-Ang pagkakasunud-sunod na iyon ay pinapanatili munang compact ang output ng terminal/tool, pagkatapos ay ina-apply
+Ang pagkakasunud-sunod na iyon ay pinapanatili munang compact ang terminal/tool output, pagkatapos ay inilalapat
 ang Caveman semantic condensation sa natitirang natural-language na prompt. Ang mga stacked pipeline ay maaaring
 i-configure nang global o sa pamamagitan ng mga compression combo na nakatalaga sa mga routing combo.
 
-**Pinakamainam para sa:** Magkahalong context na may malalaking tool log kasama ang mga tagubilin ng tao o mga buod ng assistant.
+**Pinakamainam para sa:** Pinagsamang context na may malalaking tool log kasama ang mga tagubilin ng tao o buod ng assistant.
 
 ---
 

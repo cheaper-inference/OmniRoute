@@ -11,30 +11,32 @@
 
 ---
 
-## Présentation
+## De quoi il s'agit
 
-OmniRoute répertorie 376 fournisseurs, dont 155 entrées de catalogue marquées comme **gratuites/sans authentification**
+OmniRoute enregistre 376 fournisseurs, dont 155 entrées de catalogue marquées **gratuit/sans authentification**
 (sans authentification,
-OAuth avec offre gratuite ou clé API avec offre gratuite — consultez le
-[Guide des offres gratuites](../getting-started/FREE-TIERS-GUIDE.md) et le
-[répertoire complet des offres gratuites](../reference/FREE_TIERS.md)). Le problème : la qualité des modèles proposés par les fournisseurs gratuits varie
-considérablement. Un fournisseur sans authentification proposant un modèle de pointe est bien plus utile
-qu'un fournisseur proposant un petit modèle obsolète.
+OAuth à niveau gratuit, ou clé API à niveau gratuit — voir le
+[Guide des niveaux gratuits](../getting-started/FREE-TIERS-GUIDE.md) et le
+[répertoire complet des niveaux gratuits](../reference/FREE_TIERS.md)). Le hic : la
+qualité des modèles varie énormément selon les fournisseurs gratuits. Un fournisseur
+sans authentification proposant un modèle de pointe est bien plus utile qu'un
+fournisseur proposant un petit modèle ancien.
 
-**Classement des fournisseurs gratuits** répond à la question « **quel fournisseur gratuit me donne accès au meilleur modèle ?** » en
-croisant le catalogue de chaque fournisseur gratuit avec les **scores de qualité issus de la communauté** du
-**classement Arena AI** (ELO basé sur les préférences humaines, selon le même principe que l'arène de
-chatbots LMArena). Les fournisseurs sont ensuite classés selon les performances de leur **meilleur modèle gratuit**.
+**Free Provider Rankings** répond à la question « **quel fournisseur gratuit me donne le meilleur modèle ?** » en
+croisant le catalogue de chaque fournisseur gratuit avec des **scores de qualité issus de la communauté** provenant du
+**classement Arena AI** (ELO basé sur les préférences humaines, le même principe que l'arène de chatbots
+LMArena). Les fournisseurs sont ensuite classés selon la puissance de leur **meilleur modèle gratuit**.
 
 Le classement est calculé à partir de trois sources réelles :
 
-1. Les listes de fournisseurs gratuits — `NOAUTH_PROVIDERS`, ainsi que les entrées `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` marquées `hasFree`
+1. Les listes de fournisseurs gratuits — `NOAUTH_PROVIDERS`, plus les entrées
+   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` marquées `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Le catalogue de modèles de chaque fournisseur, issu du registre des fournisseurs
+2. Le catalogue de modèles de chaque fournisseur issu du registre des fournisseurs
    (`open-sse/config/providerRegistry.ts`).
-3. Les scores d'adéquation aux tâches dérivés de l'ELO, stockés dans la table de base de données `model_intelligence` par le
-   moteur de synchronisation ELO d'Arena (`src/lib/arenaEloSync.ts`).
+3. Les scores d'adéquation aux tâches dérivés de l'ELO, stockés dans la table de base de
+   données `model_intelligence` par le moteur de synchronisation Arena ELO
+   (`src/lib/arenaEloSync.ts`).
 
 La logique de jointure se trouve dans `src/lib/freeProviderRankings.ts`.
 
@@ -124,17 +126,9 @@ Structure de la réponse :
 
 ### Source : classement Arena AI
 
-Le moteur de synchronisation Arena ELO (`src/lib/arenaEloSync.ts`) récupère deux
-classements — `text` et `code` — auprès de l'API du classement Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Lorsque cette API ne
-renvoie aucun classement exploitable, le moteur se replie sur le jeu de données officiel
-`lmarena-ai/leaderboard-dataset` du serveur de datasets Hugging Face
-(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0 ; `overall` → `text`, `coding` → `code`) ;
-`GET /api/intelligence/sync` indique alors `activeSource`, `lastError` et
-`lastFailedAt`. Chaque entrée du classement comporte un nom de modèle, un fournisseur,
-un `score` ELO, un intervalle de confiance et un nombre de votes.
+Le moteur de synchronisation Arena ELO (`src/lib/arenaEloSync.ts`) récupère deux classements — `text` et `code` — depuis l'API du classement Arena AI (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Lorsque cette API ne renvoie aucun classement exploitable, le moteur se rabat sur le jeu de données officiel `lmarena-ai/leaderboard-dataset` du datasets-server Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0 ; `overall` → `text`, `coding` → `code`) ; `GET /api/intelligence/sync` indique `activeSource`, `lastError` et `lastFailedAt`. Chaque entrée du classement comporte un nom de modèle, un fournisseur, un `score` ELO, un intervalle de confiance et un nombre de votes.
 
-Les catégories du classement correspondent aux catégories de tâches OmniRoute :
+Les catégories du classement correspondent aux catégories de tâches d'OmniRoute :
 
 | Classement Arena | Catégories de tâches OmniRoute                    |
 | ---------------- | ------------------------------------------------- |
@@ -143,38 +137,32 @@ Les catégories du classement correspondent aux catégories de tâches OmniRoute
 
 ### Normalisation (score d'adéquation à la tâche)
 
-Les scores ELO bruts sont normalisés par classement en une **valeur d'adéquation à la
-tâche comprise dans `[0.4, 0.98]`** :
+Les scores ELO bruts sont normalisés par classement en une **valeur d'adéquation à la tâche comprise dans `[0.4, 0.98]`** :
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Le score n'atteint jamais `0` ni `1`, ce qui laisse une marge pour les ajustements de
-l'utilisateur. C'est le champ `score` que vous voyez dans la réponse de l'API et le
-libellé affiché sur le tableau de bord.
+Le score n'atteint jamais `0` ni `1`, ce qui laisse une marge pour les ajustements de l'utilisateur. Il s'agit du champ `score` visible dans la réponse de l'API et du libellé affiché sur le tableau de bord.
 
 ### Niveau de confiance
 
 Chaque entrée reçoit un niveau de confiance basé sur le nombre de votes Arena :
 
-| Confiance | Votes   |
-| --------- | ------- |
-| `high`    | ≥ 5 000 |
-| `medium`  | ≥ 1 000 |
-| `low`     | < 1 000 |
+| Niveau de confiance | Votes   |
+| ------------------- | ------- |
+| `high`              | ≥ 5 000 |
+| `medium`            | ≥ 1 000 |
+| `low`               | < 1 000 |
 
 ### Stockage et fraîcheur des données
 
-Les entrées normalisées sont écrites dans la table de base de données
-`model_intelligence` avec `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`).
-Les entrées **expirent au bout de 7 jours**, de sorte qu'un fournisseur qui cesse de se
-synchroniser finit par disparaître au lieu de servir des données obsolètes.
+Les entrées normalisées sont écrites dans la table de base de données `model_intelligence` avec `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Les entrées **expirent au bout de 7 jours**, de sorte qu'un fournisseur qui cesse de se synchroniser finit par disparaître au lieu de servir des données obsolètes.
 
 La synchronisation est **activée par défaut** :
 
 - Elle s'exécute une fois au démarrage du serveur, puis selon un minuteur périodique
-  (`src/lib/arenaEloSync.ts`, branché depuis `src/instrumentation-node.ts`).
+  (`src/lib/arenaEloSync.ts`, câblé depuis `src/instrumentation-node.ts`).
 - Elle est **non bloquante et jamais fatale** — si la récupération en amont échoue,
   OmniRoute continue de fonctionner et les classements affichent simplement les
   dernières données valides (ou un état vide).
@@ -185,50 +173,46 @@ Deux variables d'environnement la contrôlent (documentées dans
 | Variable                  | Valeur par défaut | Rôle                                                             |
 | ------------------------- | ----------------- | ---------------------------------------------------------------- |
 | `ARENA_ELO_SYNC_ENABLED`  | `true`            | Définir sur `false` pour désactiver la synchronisation sortante. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h)     | Intervalle de synchronisation, en secondes.                      |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 h)    | Intervalle de synchronisation, en secondes.                      |
 
 ### Synchronisation manuelle / statut / effacement
 
-Pour les opérateurs, un point de terminaison de gestion authentifié offre un contrôle
-manuel (`src/app/api/intelligence/sync/route.ts` — nécessite une authentification de
-gestion) :
+Pour les opérateurs, un point de terminaison de gestion authentifié offre un contrôle manuel
+(`src/app/api/intelligence/sync/route.ts` — nécessite une authentification de gestion) :
 
 ```
 GET    /api/intelligence/sync          # statut actuel de la synchronisation (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # déclenche une synchronisation manuelle ; body: { "dryRun": true } pour prévisualiser sans écrire
-DELETE /api/intelligence/sync          # efface toutes les entrées d'intelligence arena_elo synchronisées
+POST   /api/intelligence/sync          # déclencher une synchronisation manuelle ; corps : { "dryRun": true } pour prévisualiser sans écrire
+DELETE /api/intelligence/sync          # effacer toutes les entrées d'intelligence arena_elo synchronisées
 ```
 
-Si la page des classements est vide, un `POST /api/intelligence/sync` manuel (ou
-simplement un redémarrage du serveur) la repeuple.
+Si la page des classements est vide, un `POST /api/intelligence/sync` manuel (ou simplement
+le redémarrage du serveur) la repeuple.
 
-### Association des modèles au classement
+### Correspondance des modèles avec le classement
 
-Les identifiants de modèles du registre et les noms de modèles Arena ne correspondent
-pas toujours exactement. Le classement utilise une correspondance souple
+Les identifiants de modèles du registre et les noms de modèles Arena ne correspondent pas
+toujours exactement. Le classement utilise une correspondance flexible
 (`findMatchingIntelligence` dans `src/lib/freeProviderRankings.ts`) :
 
 1. Correspondance exacte sur l'identifiant de modèle normalisé.
-2. Correspondance après suppression d'un suffixe de version final (par ex. `kimi-k2.6`
-   → `kimi-k2`).
-3. Correspondance par préfixe (un nom de modèle du classement est un préfixe de
-   l'identifiant du registre).
+2. Correspondance après suppression d'un suffixe de version final (p. ex. `kimi-k2.6` → `kimi-k2`).
+3. Correspondance par préfixe (un nom de modèle du classement est un préfixe de l'identifiant du registre).
 
-Côté synchronisation, les préfixes de fournisseurs connus (`anthropic/`, `openai/`,
-`google/`, …) sont supprimés et une petite table d'alias développe les noms canoniques
-en variantes qu'OmniRoute utilise en interne, afin que les modèles restent trouvables
-sous n'importe quel nom.
+Côté synchronisation, les préfixes de fournisseurs connus (`anthropic/`, `openai/`, `google/`, …)
+sont supprimés et une petite table d'alias étend les noms canoniques aux variantes qu'OmniRoute
+utilise en interne, de sorte que les modèles restent trouvables quel que soit leur nom.
 
 ### Comment un fournisseur est classé
 
-Pour chaque fournisseur gratuit, le moteur évalue chaque modèle de son catalogue, puis :
+Pour chaque fournisseur gratuit, le moteur attribue un score à chaque modèle de son catalogue, puis :
 
-- **Meilleur modèle** = le modèle du fournisseur au score le plus élevé.
+- **Meilleur modèle** = le modèle du fournisseur ayant le score le plus élevé.
 - **Score moyen** = le score moyen de l'ensemble des modèles évalués de ce fournisseur.
 - **Modèles** = le nombre de modèles du fournisseur disposant d'un score Arena.
 
-Les fournisseurs sont triés d'abord par **score du meilleur modèle**, puis par score
-moyen. Cela récompense un fournisseur qui propose au moins un modèle gratuit performant.
+Les fournisseurs sont triés d'abord par **score du meilleur modèle**, puis par score moyen.
+Cela récompense un fournisseur qui propose au moins un modèle gratuit performant.
 
 ---
 

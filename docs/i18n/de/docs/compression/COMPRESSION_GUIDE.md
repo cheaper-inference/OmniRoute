@@ -36,9 +36,9 @@ Client-Anfrage
 
 Keine Komprimierung. Alle Nachrichten werden unverändert durchgereicht.
 
-### Lite-Modus (~15 % Einsparung, <1 ms Latenz)
+### Lite-Modus (~15 % Ersparnis, <1 ms Latenz)
 
-Der sicherste Modus — keine semantische Veränderung, nur Formatierungsbereinigung:
+Der sicherste Modus – keine semantische Veränderung, nur Formatierungsbereinigung:
 
 | Technik                  | Beschreibung                                                                |
 | ------------------------ | --------------------------------------------------------------------------- |
@@ -46,77 +46,78 @@ Der sicherste Modus — keine semantische Veränderung, nur Formatierungsbereini
 | `dedupSystemPrompt`      | Entfernt doppelte Systemnachrichten                                         |
 | `compressToolResults`    | Komprimiert ausführliche Tool-/Funktionsausgaben                            |
 | `removeRedundantContent` | Entfernt wiederholte Anweisungen                                            |
-| `replaceImageUrls`       | Kürzt Base64-Bilddaten-URIs                                                 |
+| `replaceImageUrls`       | Kürzt Base64-Bild-Daten-URIs                                                |
 
-**Ideal für:** Dauerbetrieb, sicherheitskritische Workflows.
+**Am besten geeignet für:** Dauerbetrieb, sicherheitskritische Workflows.
 
-### Standard-Modus (~30 % Einsparung)
+### Standard-Modus (~30 % Ersparnis)
 
-Inspiriert von [Caveman](https://github.com/JuliusBrussee/caveman) — entfernt Füllwörter und ausführliche Formulierungen, ohne die Bedeutung zu verändern:
+Inspiriert von [Caveman](https://github.com/JuliusBrussee/caveman) – entfernt Füllwörter und ausschweifende Formulierungen, ohne die Bedeutung zu verändern:
 
 - Entfernt Füllwörter ("please", "I think", "basically", "actually")
-- Kürzt ausführliche Phrasen ("in order to" → "to", "as a result of" → "because")
+- Verdichtet ausschweifende Phrasen ("in order to" → "to", "as a result of" → "because")
 - Entfernt höfliche Abschwächungen ("Would you mind...", "If you could possibly...")
-- Über 30 Regex-Regeln, abgestimmt auf Coding-Prompts
+- Über 30 Regex-Regeln, optimiert für Coding-Prompts
 
-**Ideal für:** Tägliche Coding-Workflows, kostenbewusste Teams.
+**Am besten geeignet für:** Tägliche Coding-Workflows, kostenbewusste Teams.
 
-### Aggressiv-Modus (~50 % Einsparung)
+### Aggressiver Modus (~50 % Ersparnis)
 
 Intelligente Verlaufsverwaltung für lange Sitzungen:
 
-- **Message Aging** — ältere Nachrichten werden zunehmend stärker komprimiert
-- **Tool Result Compression** — lange Tool-Ausgaben werden gekürzt oder ausgelassen (erste/letzte Zeilen,
-  Filterung von Trefferzeilen, Verdichtung von JSON-Schlüsseln)
-- **Structural Integrity Guards** — stellt sicher, dass `tool_use`- und `tool_result`-Paare konsistent bleiben
-- **Context Window Awareness** — berücksichtigt modellspezifische Token-Limits
+- **Nachrichten-Alterung** – ältere Nachrichten werden zunehmend stärker komprimiert
+- **Tool-Ergebnis-Komprimierung** – lange Tool-Ausgaben werden gekürzt oder ausgelassen (erste/letzte Zeilen,
+  Match-Zeilen-Filterung, JSON-Schlüssel-Verdichtung)
+- **Wächter für strukturelle Integrität** – stellt sicher, dass `tool_use`- + `tool_result`-Paare konsistent bleiben
+- **Kontextfenster-Berücksichtigung** – respektiert modellspezifische Token-Limits
 
-**Ideal für:** Längere Debugging-Sitzungen, große Codebases.
+**Am besten geeignet für:** Längere Debugging-Sitzungen, große Codebases.
 
-### Ultra-Modus (~75 % Einsparung)
+### Ultra-Modus (~75 % Ersparnis)
 
-Maximale Komprimierung für tokenkritische Szenarien:
+Maximale Komprimierung für token-kritische Szenarien:
 
-- **Heuristic Pruning** — scorebasiertes Token-Pruning von Fließtext
-- **Structure Preservation** — Codeblöcke mit Fence, Inline-Code, URLs und Bezeichner werden
-  durch Tombstones ersetzt und wortgetreu wieder eingefügt, niemals entfernt
-- **Optionales SLM-Tier** — ein kleines lokales Modell kann das Pruning verfeinern, sofern konfiguriert
-- Unabhängig vom Aggressiv-Modus: Es werden weder Message Aging noch Tool-Ergebnis-Komprimierung
-  oder der Fallback-Summarizer ausgeführt (nur ein Fehler des SLM-Tiers kann einen Fallback-Durchlauf
-  über den Aggressiv-Modus auslösen)
+- **Heuristisches Pruning** – Score-basiertes Token-Pruning von Fließtext
+- **Strukturerhaltung** – Codeblöcke mit Fences, Inline-Code, URLs und Bezeichner werden
+  als Tombstones markiert und wortgetreu wieder eingefügt, niemals entfernt
+- **Optionale SLM-Stufe** – ein kleines lokales Modell kann das Pruning verfeinern, sofern konfiguriert
+- Unabhängig vom aggressiven Modus: Es findet kein Message-Aging, keine Tool-Ergebnis-Komprimierung
+  und kein Fallback-Summarizer statt (nur ein Fehler der SLM-Stufe kann einen Fallback-Durchlauf
+  über den aggressiven Modus auslösen)
 
-**Ideal für:** Wenn Sie wiederholt an Kontextlimits stoßen.
+**Am besten geeignet für:** Wenn Sie wiederholt an Kontextlimits stoßen.
 
-### RTK-Modus (60-90 % im Upstream-Bereich)
+### RTK-Modus (60–90 % Upstream-Bereich)
 
 Der RTK-Modus ist für ausführliche Tool-Ausgaben optimiert, die in Coding-Agent-Sitzungen anfallen:
 
 - Erkennt Befehls-/Ausgabeklassen wie `git status`, `git diff`, `git log`, Test-Runner,
-  TypeScript-/Vite-/Webpack-Builds, ESLint/Biome/Prettier, npm-Audits/-Installationen, Docker-Logs,
-  Infrastruktur-Ausgaben und generische Shell-Ausgaben
+  TypeScript/Vite/Webpack-Builds, ESLint/Biome/Prettier, npm audit/Installs, Docker-Logs, Infra-Ausgaben
+  und generische Shell-Ausgaben
 - Wendet JSON-Filterpakete aus `open-sse/services/compression/engines/rtk/filters/` an
-- Importiert RTK-TOML-Schema-v1-Filter aus projektbezogenen oder globalen `filters.toml`-Dateien,
-  mit Inline-Test-Validierung und Trust-Gating für Projektdateien
-- Wird mit 56 integrierten Filtern samt Inline-Verifizierungsbeispielen ausgeliefert
-- Entfernt ANSI-Steuersequenzen, Fortschrittsbalken, wiederholte Zeilen und nicht relevantes Rauschen
-- Bewahrt Fehlschläge, Fehler, Warnungen, geänderte Dateien, Zusammenfassungen und das Ende langer Ausgaben
-- Unterstützt Trust-Gating-gesteuerte Projektfilter, globale Filter und die optionale Wiederherstellung geschwärzter Rohausgaben
+- Importiert RTK-TOML-Schema-v1-Filter aus Projekt- oder globalen `filters.toml`-Dateien, mit Inline-Test-
+  Validierung und Trust-Gating für Projektdateien
+- Wird mit 56 integrierten Filtern inklusive Inline-Verifizierungsbeispielen ausgeliefert
+- Entfernt ANSI-Steuersequenzen, Fortschrittsbalken, wiederholte Zeilen und nicht umsetzbares Rauschen
+- Behält Fehlschläge, Fehler, Warnungen, geänderte Dateien, Zusammenfassungen und das Ende langer Ausgaben bei
+- Unterstützt trust-gesteuerte Projektfilter, globale Filter und die optionale Wiederherstellung der
+  geschwärzten Rohausgabe
 
-**Ideal für:** Agent-Sitzungen mit Shell-, Build-, Test-, Git-, Grep- und Dateiausgabe-Transkripten.
+**Am besten geeignet für:** Agent-Sitzungen mit Shell-, Build-, Test-, Git-, Grep- und Dateiausgabe-Transkripten.
 
-### Stacked-Modus (78-95 % bei geeigneten Inhalten)
+### Stacked-Modus (78–95 % bei geeigneten Inhalten)
 
-Der Stacked-Modus führt mehrere Komprimierungs-Engines in einer deterministischen Reihenfolge aus. Die Standard-Pipeline lautet:
+Der Stacked-Modus führt mehrere Komprimierungs-Engines in einer deterministischen Reihenfolge aus. Die Standard-Pipeline ist:
 
 ```txt
 RTK -> Caveman
 ```
 
-Diese Reihenfolge hält Terminal-/Tool-Ausgaben zuerst kompakt und wendet anschließend die semantische
+Diese Reihenfolge komprimiert zuerst die Terminal-/Tool-Ausgabe und wendet anschließend die semantische
 Verdichtung von Caveman auf den verbleibenden natürlichsprachlichen Prompt an. Stacked-Pipelines können
 global oder über Komprimierungs-Combos konfiguriert werden, die Routing-Combos zugewiesen sind.
 
-**Ideal für:** Gemischte Kontexte mit großen Tool-Logs plus menschlichen Anweisungen oder Assistenten-Zusammenfassungen.
+**Am besten geeignet für:** Gemischte Kontexte mit großen Tool-Logs plus menschlichen Anweisungen oder Assistenten-Zusammenfassungen.
 
 ---
 

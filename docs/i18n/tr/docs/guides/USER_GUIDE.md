@@ -606,22 +606,22 @@ Ortam değişkenlerinin tam listesi için [README](../README.md) dosyasına bak�
 
 ---
 
-## 📊 Kullanılabilir Modeller
+## 📊 Mevcut Modeller
 
 <details>
-<summary><b>Tüm kullanılabilir modelleri görüntüle</b></summary>
+<summary><b>Tüm mevcut modelleri görüntüle</b></summary>
 
-> Aşağıdaki liste, v3.8.0 için `open-sse/config/providerRegistry.ts` dosyasından derlenmiştir. Bulut katalogları (Gemini, OpenRouter vb.) dinamik olarak senkronize edilir — canlı kataloğun tamamı için **Kontrol Paneli → Sağlayıcılar → [provider] → Kullanılabilir Modeller** yolunu açın veya `GET /api/models/catalog` çağrısı yapın.
+> Aşağıdaki liste, v3.8.0 için `open-sse/config/providerRegistry.ts` dosyasından derlenmiştir. Bulut katalogları (Gemini, OpenRouter vb.) dinamik olarak senkronize edilir — canlı kataloğun tamamı için **Panel → Sağlayıcılar → [sağlayıcı] → Mevcut Modeller** yolunu açın veya `GET /api/models/catalog` çağrısını yapın.
 >
-> Bir sağlayıcının yerleşik listesi güncelliğini yitirmişse, canlı yukarı akış kataloğunu çekmek için o sayfadaki **/models'den içe aktar** seçeneğini kullanın (veya **Otomatik Senkronizasyon**'u etkinleştirin). Bu, LLM7.io (`gemini-3.1-flash-lite`) ve UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) için v3.8.50'de doğrulanmıştır; Pollinations anonim erişimi aynı test turunda yukarı akış kaynaklı sınırlı kalmıştır.
+> Bir sağlayıcının yerleşik listesi sapmışsa, canlı yukarı akış kataloğunu çekmek için o sayfadaki **/models'den İçe Aktar** seçeneğini kullanın (veya **Otomatik Senkronizasyon**'u etkinleştirin). Bu, v3.8.50 sürümünde LLM7.io (`gemini-3.1-flash-lite`) ve UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) için doğrulanmıştır; Pollinations anonim erişimi aynı test turunda yukarı akış tarafında sınırlı kaldı.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ çaba kademeleri: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort kademeleri: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — ÜCRETSİZ OAuth: **Kontrol Paneli → Sağlayıcılar → Kiro → Kullanılabilir Modeller** altında gösterilen canlı kataloğu kullanın. Kullanılabilirlik hesaba ve plana bağlıdır.
+**Kiro (`kr/`)** — ÜCRETSİZ OAuth: **Panel → Sağlayıcılar → Kiro → Mevcut Modeller** altında gösterilen canlı kataloğu kullanın. Kullanılabilirlik hesaba ve plana bağlıdır.
 
 **Qoder (`if/`)** — ÜCRETSİZ OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -655,11 +655,11 @@ Ortam değişkenlerinin tam listesi için [README](../README.md) dosyasına bak�
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google'dan API anahtarı bazında canlı senkronize edilir — statik liste yoktur. **Kontrol Paneli → Sağlayıcılar** bölümünden bir anahtar bağlayın, ardından mevcut kataloğu içe aktarmak için **Kullanılabilir Modeller**'i kullanın (örn. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google'dan API anahtarı başına canlı olarak senkronize edilir — statik liste yoktur. **Panel → Sağlayıcılar** bölümünden bir anahtar bağlayın, ardından güncel kataloğu içe aktarmak için **Mevcut Modeller** seçeneğini kullanın (örn. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Diğer uyumlu sağlayıcılar** (seçilmiş olanlar): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` üzerinden), `azure-ai`, `openrouter` (doğrudan aktarım kataloğu), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Her biri kendi model listesini `providerRegistry.ts` içinde tutar ve sağlayıcı bir `/models` uç noktası sunduğunda otomatik olarak senkronize edilebilir.
+**Diğer uyumlu sağlayıcılar** (seçilmiş): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` aracılığıyla), `azure-ai`, `openrouter` (doğrudan aktarım kataloğu), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Her biri kendi model listesini `providerRegistry.ts` içinde tutar ve sağlayıcı bir `/models` uç noktası sunduğunda otomatik olarak senkronize edilebilir.
 
-**Model kimlikleri hakkında not:** OmniRoute, sağlayıcıya özgü kimlikler kullanır (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Bazı kimlikler noktalı sürümler içerir çünkü yukarı akış API'si bunları bu biçimde bekler. Bir model yukarıda listelenmemişse, kullanılabilirliği doğrulamak için `omniroute models --search <term>` komutunu çalıştırın veya `GET /api/models/catalog` uç noktasına istek gönderin.
+**Model kimlikleri hakkında not:** OmniRoute, sağlayıcıya özgü kimlikler kullanır (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Bazı kimlikler noktalı sürümler içerir çünkü yukarı akış API'si bunları bu biçimde bekler. Bir model yukarıda listelenmemişse, kullanılabilirliği doğrulamak için `omniroute models --search <term>` komutunu çalıştırın veya `GET /api/models/catalog` çağrısını yapın.
 
 </details>
 

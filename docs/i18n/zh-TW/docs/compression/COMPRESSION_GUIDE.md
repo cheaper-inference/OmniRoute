@@ -32,89 +32,82 @@ OmniRoute 實作了一套模組化提示詞壓縮管線，會在請求送達上�
 
 ## 壓縮模式
 
-### Off
+### 關閉
 
-不套用任何壓縮。所有訊息原封不動地通過。
+不套用任何壓縮。所有訊息原樣通過。
 
-### Lite 模式(約節省 15%,延遲 <1ms)
+### Lite 模式（約 15% 節省，<1ms 延遲）
 
-最安全的模式 — 完全不更動語意,僅清理格式:
+最安全的模式——零語意變更，僅清理格式：
 
-| 技術                     | 說明                      |
-| ------------------------ | ------------------------- |
-| `collapseWhitespace`     | 合併連續空行與行尾空白    |
-| `dedupSystemPrompt`      | 移除重複的系統訊息        |
-| `compressToolResults`    | 壓縮冗長的工具/函式輸出   |
-| `removeRedundantContent` | 去除重複的指示            |
-| `replaceImageUrls`       | 縮短 base64 圖片 data URI |
+| 技術                     | 說明                     |
+| ------------------------ | ------------------------ |
+| `collapseWhitespace`     | 合併連續空行與行尾空白   |
+| `dedupSystemPrompt`      | 移除重複的系統訊息       |
+| `compressToolResults`    | 壓縮冗長的工具／函式輸出 |
+| `removeRedundantContent` | 去除重複的指示           |
+| `replaceImageUrls`       | 縮短 base64 圖片資料 URI |
 
-**適用情境:** 常駐使用、安全關鍵的工作流程。
+**適用於：** 常駐使用、安全關鍵的工作流程。
 
-### Standard 模式(約節省 30%)
+### Standard 模式（約 30% 節省）
 
-靈感來自 [Caveman](https://github.com/JuliusBrussee/caveman) — 在保留語意的同時,移除填充詞與冗長措辭:
+靈感來自 [Caveman](https://github.com/JuliusBrussee/caveman)——在保留語意的同時移除贅字與冗長措辭：
 
-- 移除填充詞(如 "please"、"I think"、"basically"、"actually")
-- 精簡冗長片語(如 "in order to" → "to"、"as a result of" → "because")
-- 去除客氣的迂迴措辭(如 "Would you mind..."、"If you could possibly...")
-- 30+ 條針對程式開發提示調校的 regex 規則
+- 移除贅字（"please"、"I think"、"basically"、"actually"）
+- 精簡冗長片語（"in order to" → "to"、"as a result of" → "because"）
+- 去除客氣的迂迴語氣（"Would you mind..."、"If you could possibly..."）
+- 30+ 條針對程式開發提示調校的正規表達式規則
 
-**適用情境:** 日常程式開發工作流程、注重成本的團隊。
+**適用於：** 日常程式開發工作流程、注重成本的團隊。
 
-### Aggressive 模式(約節省 50%)
+### Aggressive 模式（約 50% 節省）
 
-為長時間工作階段提供智慧化的歷史管理:
+為長時間工作階段提供智慧歷史管理：
 
-- **訊息老化(Message Aging)** — 較舊的訊息會逐步被壓縮
-- **工具結果壓縮** — 過長的工具輸出會被截斷或省略(保留首/尾行、
-  符合行過濾、JSON 鍵壓縮)
-- **結構完整性防護** — 確保 `tool_use` + `tool_result` 配對保持一致
-- **上下文窗口感知** — 遵循各模型的 token 上限
+- **訊息老化（Message Aging）**——較舊的訊息會逐步被壓縮
+- **工具結果壓縮**——過長的工具輸出會被截斷或省略（保留首／尾行、比對行篩選、JSON 鍵精簡）
+- **結構完整性防護**——確保 `tool_use` + `tool_result` 配對保持一致
+- **上下文視窗感知**——遵循各模型的 token 上限
 
-**適用情境:** 長時間的除錯工作階段、大型程式碼庫。
+**適用於：** 長時間的除錯工作階段、大型程式碼庫。
 
-### Ultra 模式(約節省 75%)
+### Ultra 模式（約 75% 節省）
 
-為 token 吃緊的情境提供最大壓縮:
+為 token 吃緊的情境提供最大壓縮：
 
-- **啟發式修剪** — 依評分對散文文字進行 token 修剪
-- **結構保留** — 圍欄式程式碼區塊、行內程式碼、URL 與識別碼會先被標記封存
-  (tombstone),再原樣重新拼接,絕不修剪
-- **可選的 SLM 層** — 設定後可由小型本地模型進一步細化修剪結果
-- 獨立於 Aggressive 模式:不會執行訊息老化、工具結果壓縮或後備摘要器
-  (唯有 SLM 層失敗時,才可能將後備處理轉交 aggressive 流程)
+- **啟發式修剪**——以評分為基礎對散文文字進行 token 修剪
+- **結構保留**——圍欄式程式碼區塊、行內程式碼、URL 與識別符會被標記保存（tombstone）並逐字重新拼接，絕不修剪
+- **選用的 SLM 層級**——設定後可由小型本地模型進一步優化修剪結果
+- 獨立於 Aggressive 模式：它不會執行訊息老化、工具結果壓縮或備援摘要器（僅當 SLM 層級失敗時，才會將備援程序轉由 aggressive 處理）
 
-**適用情境:** 當你屢屢撞上上下文上限時。
+**適用於：** 當你反覆觸及上下文上限時。
 
-### RTK 模式(上游範圍 60-90%)
+### RTK 模式（上游範圍 60-90%）
 
-RTK 模式針對程式開發代理(coding agent)工作階段中冗長的工具輸出進行最佳化:
+RTK 模式針對程式開發代理（coding-agent）工作階段中出現的冗長工具輸出進行最佳化：
 
-- 可偵測各種指令/輸出類別,例如 `git status`、`git diff`、`git log`、測試執行器、
-  TypeScript/Vite/Webpack 建置、ESLint/Biome/Prettier、npm audit/install、Docker 日誌、
-  基礎設施輸出,以及一般 shell 輸出
-- 套用來自 `open-sse/services/compression/engines/rtk/filters/` 的 JSON 過濾器套件
-- 從專案或全域的 `filters.toml` 檔案匯入 RTK TOML schema v1 過濾器,並對專案檔案
-  提供內嵌測試驗證與信任把關
-- 內建 56 個過濾器,並附內嵌驗證範例
-- 移除 ANSI 控制序列、進度條、重複行,以及無法採取行動的雜訊
-- 保留失敗、錯誤、警告、變更的檔案、摘要,以及長輸出的結尾部分
-- 支援受信任把關的專案過濾器、全域過濾器,以及可選的遮罩式原始輸出還原
+- 可偵測 `git status`、`git diff`、`git log`、測試執行器、TypeScript/Vite/Webpack 建置、ESLint/Biome/Prettier、npm audit/安裝、Docker 日誌、基礎設施輸出，以及一般 shell 輸出等命令／輸出類別
+- 套用來自 `open-sse/services/compression/engines/rtk/filters/` 的 JSON 篩選器套件
+- 從專案或全域的 `filters.toml` 檔案匯入 RTK TOML schema v1 篩選器，並具備內嵌測試驗證與專案檔案的信任控管
+- 內建 56 個篩選器，並附內嵌驗證範例
+- 移除 ANSI 控制序列、進度列、重複行與無法採取行動的雜訊
+- 保留失敗、錯誤、警告、變更的檔案、摘要，以及長輸出的結尾部分
+- 支援受信任控管的專案篩選器、全域篩選器，以及選用的遮罩原始輸出還原
 
-**適用情境:** 包含 shell、建置、測試、git、grep 與檔案輸出紀錄的代理工作階段。
+**適用於：** 包含 shell、建置、測試、git、grep 與檔案輸出紀錄的代理工作階段。
 
-### Stacked 模式(適用範圍 78-95%)
+### Stacked 模式（適用範圍 78-95%）
 
-Stacked 模式以確定性的順序執行多個壓縮引擎。預設管線為:
+Stacked 模式以確定性順序執行多個壓縮引擎。預設管線為：
 
 ```txt
 RTK -> Caveman
 ```
 
-此順序會先讓終端機/工具輸出精簡,接著再對剩餘的自然語言提示套用 Caveman 語意濃縮。
-Stacked 管線可全域設定,或透過指派給路由組合(routing combo)的壓縮組合來設定。
+此順序會先讓終端機／工具輸出保持精簡，再對剩餘的自然語言提示套用 Caveman 語意濃縮。Stacked 管線可全域設定，或透過指派給路由組合（routing combos）的壓縮組合（compression combos）來配置。
 
-**適用情境:** 同時包含大量工具日誌與人類指示或助理摘要的混合上下文。
+**適用於：** 混合上下文，包含大型工具日誌加上人類指示或助理摘要。
 
 ---
 
@@ -272,7 +265,7 @@ curl -X POST http://localhost:20128/api/context/rtk/test \
 
 ## 壓縮統計資料
 
-每個經過壓縮的請求都會在伺服器日誌中記錄統計資料：
+每個壓縮請求都會在伺服器日誌中包含統計資料：
 
 ```json
 {

@@ -92,8 +92,64 @@ describe("#3955 automatic-cache prefix protection (no explicit cache_control)", 
     assert.equal(out.preserveSystemPrompt, true, "cacheable prefix must stay uncompressed");
   });
 
+  it("protects an Antigravity Gemini prefix without explicit cache_control", () => {
+    const body = autoCacheBody("gemini-3.7-flash");
+    const ctx = detectCachingContext(body, {
+      provider: "antigravity",
+      model: "gemini-3.7-flash",
+      geminiPromptCacheMode: "implicit",
+    });
+    assert.equal(ctx.isCachingProvider, true);
+
+    const out = resolveCacheAwareConfig(cfg({ preserveSystemPrompt: false }), body, {
+      provider: "antigravity",
+      model: "gemini-3.7-flash",
+      geminiPromptCacheMode: "implicit",
+    });
+    assert.equal(out.preserveSystemPrompt, true);
+  });
+
+  it("keeps unrelated provider protection unchanged when Gemini mode is off", () => {
+    const ctx = detectCachingContext(autoCacheBody("openai/gpt-4o"), {
+      provider: "openai",
+      geminiPromptCacheMode: "off",
+    });
+    assert.equal(ctx.isCachingProvider, true);
+    assert.equal(
+      detectCachingContext(autoCacheBody("codex/gpt-5-codex"), { provider: "codex" })
+        .isCachingProvider,
+      true
+    );
+  });
+
+  it("defaults Gemini mode to off and never protects an Antigravity Gemini prefix", () => {
+    const body = autoCacheBody("gemini-3.7-flash");
+    const ctx = detectCachingContext(body, {
+      provider: "antigravity",
+      model: "antigravity/gemini-3.7-flash-tiered",
+    });
+    assert.equal(ctx.isCachingProvider, false);
+    assert.equal(
+      resolveCacheAwareConfig(cfg({ preserveSystemPrompt: false }), body, {
+        provider: "antigravity",
+        model: "antigravity/gemini-3.7-flash-tiered",
+      }).preserveSystemPrompt,
+      false
+    );
+    assert.equal(
+      detectCachingContext(body, {
+        provider: "antigravity",
+        model: "claude-sonnet-4-6",
+        geminiPromptCacheMode: "implicit",
+      }).isCachingProvider,
+      false
+    );
+  });
+
   it("leaves a NON-caching provider unaffected (no prefix protection without cache_control)", () => {
-    const ctx = detectCachingContext(autoCacheBody("google/gemini-2.5-pro"), { provider: "google" });
+    const ctx = detectCachingContext(autoCacheBody("google/gemini-2.5-pro"), {
+      provider: "google",
+    });
     assert.equal(ctx.isCachingProvider, false);
     const result = getCacheAwareStrategy("aggressive", ctx);
     assert.equal(result.skipSystemPrompt, false);

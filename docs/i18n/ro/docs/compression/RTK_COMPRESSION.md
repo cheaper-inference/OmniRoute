@@ -29,22 +29,23 @@ Interval:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Ce Comprimă
 
-Catalogul integrat include în prezent 56 de filtre în următoarele categorii:
+Catalogul integrat include în prezent 56 de filtre, distribuite în următoarele categorii:
 
-| Categorie | Exemple                                                       |
-| --------- | ------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, teste Cargo    |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, jurnale shell generice                  |
-| `docker`  | `docker ps`, jurnale Docker                                   |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | ieșire JSON, stack trace-uri, fallback generic pentru ieșire  |
+| Categorie | Exemple                                                                             |
+| --------- | ----------------------------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                                   |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, teste Cargo                          |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx                       |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler                       |
+| `shell`   | `ls`, `find`, `grep`, jurnale shell generice                                        |
+| `docker`  | `docker ps`, jurnale Docker                                                         |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                                             |
+| `generic` | ieșire JSON, urme de stivă (stack traces), filtru de rezervă pentru ieșire generică |
 
 Detectorul din `open-sse/services/compression/engines/rtk/commandDetector.ts` clasifică ieșirea
-înainte de selectarea filtrului. Filtrele se pot potrivi și după un model de comandă sau un regex
-al ieșirii atunci când o clasă de comenzi nu este suficientă.
+înainte de selectarea filtrului. Filtrele pot, de asemenea, să se potrivească pe baza unui șablon
+de comandă sau a unei expresii regulate aplicate ieșirii, atunci când o clasă de comandă nu este
+suficientă.
 
 ## Rezolvarea filtrelor
 
@@ -352,15 +353,15 @@ node --import tsx/esm --test \
 
 ## Niveluri de intensitate (v3.8.16+)
 
-RTK acceptă **3 niveluri de intensitate** care stabilesc compromisul între **agresivitatea compresiei** și **siguranță**. Nivelul se setează prin `config.intensity` în configurația motorului.
+RTK acceptă **3 niveluri de intensitate** care fac compromis între **agresivitatea compresiei** și **siguranță**. Nivelul se setează prin `config.intensity` în configurația motorului.
 
 ### Cele 3 niveluri
 
-| Nivel                 | Prag de trunchiere      | Economii de tokeni | Risc          | Recomandat pentru              |
-| --------------------- | ----------------------- | ------------------ | ------------- | ------------------------------ |
-| `minimal`             | 24 de linii pe secțiune | ~20-40%            | Foarte scăzut | Producție cu context critic    |
-| `standard` (implicit) | 24 de linii pe secțiune | ~50-70%            | Scăzut        | Sesiuni zilnice de programare  |
-| `aggressive`          | 16 linii pe secțiune    | ~70-90%            | Mediu         | Sesiuni lungi, economii maxime |
+| Nivel                 | Prag de trunchiere       | Economii de tokeni | Risc          | Ideal pentru                   |
+| --------------------- | ------------------------ | ------------------ | ------------- | ------------------------------ |
+| `minimal`             | 24 de linii per secțiune | ~20-40%            | Foarte scăzut | Producție cu context critic    |
+| `standard` (implicit) | 24 de linii per secțiune | ~50-70%            | Scăzut        | Sesiuni zilnice de programare  |
+| `aggressive`          | 16 linii per secțiune    | ~70-90%            | Mediu         | Sesiuni lungi, economii maxime |
 
 ### Unde are loc trunchierea
 
@@ -374,37 +375,37 @@ config.intensity === "aggressive" ? 16 : 24,
 
 Atât **începutul**, cât și **sfârșitul** fiecărei secțiuni sunt păstrate; conținutul din mijloc este eliminat atunci când intervine trunchierea.
 
-### Ce se păstrează vs. ce se elimină
+### Ce rămâne vs. ce este eliminat
 
-| Conținut                       | minimal     | standard    | aggressive  |
-| ------------------------------ | ----------- | ----------- | ----------- |
-| Erori / stack trace-uri        | ✅ păstrat  | ✅ păstrat  | ✅ păstrat  |
-| Teste eșuate                   | ✅ păstrat  | ✅ păstrat  | ✅ păstrat  |
-| Erori de build                 | ✅ păstrat  | ✅ păstrat  | ✅ păstrat  |
-| Teste reușite (detaliate)      | ✅ păstrat  | 🟡 restrâns | 🟡 restrâns |
-| Output de rutină (loguri info) | 🟡 restrâns | 🟡 restrâns | ❌ eliminat |
-| Bare de progres                | 🟡 restrâns | ❌ eliminat | ❌ eliminat |
-| Banner / artă ASCII            | 🟡 restrâns | ❌ eliminat | ❌ eliminat |
+| Conținut                       | minimal      | standard     | aggressive   |
+| ------------------------------ | ------------ | ------------ | ------------ |
+| Erori / stack trace-uri        | ✅ păstrate  | ✅ păstrate  | ✅ păstrate  |
+| Teste eșuate                   | ✅ păstrate  | ✅ păstrate  | ✅ păstrate  |
+| Erori de build                 | ✅ păstrate  | ✅ păstrate  | ✅ păstrate  |
+| Teste reușite (detaliate)      | ✅ păstrate  | 🟡 restrânse | 🟡 restrânse |
+| Ieșire de rutină (loguri info) | 🟡 restrânsă | 🟡 restrânsă | ❌ eliminată |
+| Bare de progres                | 🟡 restrânse | ❌ eliminate | ❌ eliminate |
+| Banner / artă ASCII            | 🟡 restrâns  | ❌ eliminat  | ❌ eliminat  |
 
 ### Alegerea intensității potrivite
 
 ```
-                  Pierderea contextului este catastrofală?
+                  Este catastrofală pierderea contextului?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     DA          NU          NESIGUR
+     DA          NU         NESIGUR
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Cât de critic Încearcă mai întâi `standard`
-      │      este debitul? (funcționează în
-      │           │         80% din cazuri)
+      │      Cât de critic    Încearcă mai întâi `standard`
+      │      este debitul?    (funcționează în 80%
+      │           │           din cazuri)
       │      ┌────┴────┐
       │      │         │
-      │    SCĂZUT  RIDICAT
+      │    SCĂZUT   RIDICAT
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -430,7 +431,7 @@ Atât **începutul**, cât și **sfârșitul** fiecărei secțiuni sunt păstrat
 **Programatic**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) este un
-`CompressionEngine` și nu are o metodă `updateConfig`. Actualizează în schimb
+`CompressionEngine` și nu are o metodă `updateConfig`. Actualizați în schimb
 configurația unui motor prin helperul din registry:
 
 ```ts
@@ -441,7 +442,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Verificarea efectului
 
-Folosește **Verify Gate** (vezi mai jos) pentru a confirma că filtrul tău este sigur la intensitatea aleasă:
+Utilizați **Verify Gate** (vezi mai jos) pentru a confirma că filtrul este sigur la intensitatea aleasă:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

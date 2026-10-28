@@ -25,24 +25,24 @@ Caveman улаз:    46% уштеде
 Опсег:           1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Шта компресује
+## Šta komprimuje
 
-Уграђени каталог тренутно испоручује 56 филтера у следећим категоријама:
+Ugrađeni katalog trenutno isporučuje 56 filtera raspoređenih u ove kategorije:
 
-| Категорија | Примери                                                       |
+| Kategorija | Primeri                                                       |
 | ---------- | ------------------------------------------------------------- |
 | `git`      | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo тестови  |
+| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testovi  |
 | `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`    | `ls`, `find`, `grep`, генерички shell логови                  |
-| `docker`   | `docker ps`, Docker логови                                    |
+| `shell`    | `ls`, `find`, `grep`, generički shell logovi                  |
+| `docker`   | `docker ps`, Docker logovi                                    |
 | `infra`    | Terraform, OpenTofu, `systemctl status`                       |
-| `generic`  | JSON излаз, stack trace, генерички резервни излаз             |
+| `generic`  | JSON izlaz, stack trace-ovi, generički fallback za izlaz      |
 
-Детектор у `open-sse/services/compression/engines/rtk/commandDetector.ts` класификује излаз
-пре избора филтера. Филтери се такође могу поклопити по обрасцу команде или regex-у излаза
-када класа команде није довољна.
+Detektor u `open-sse/services/compression/engines/rtk/commandDetector.ts` klasifikuje izlaz
+pre izbora filtera. Filteri se takođe mogu poklapati po obrascu komande ili regex-u izlaza
+kada klasa komande nije dovoljna.
 
 ## Разрешавање филтера
 
@@ -354,7 +354,7 @@ node --import tsx/esm --test \
 
 ## Nivoi intenziteta (v3.8.16+)
 
-RTK podržava **3 nivoa intenziteta** koji balansiraju između **agresivnosti kompresije** i **bezbednosti**. Nivo se postavlja putem `config.intensity` u konfiguraciji engine-a.
+RTK podržava **3 nivoa intenziteta** koji predstavljaju kompromis između **agresivnosti kompresije** i **bezbednosti**. Nivo se podešava preko `config.intensity` u konfiguraciji engine-a.
 
 ### 3 nivoa
 
@@ -374,44 +374,44 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-I **početak** i **kraj** svake sekcije se čuvaju; srednji sadržaj se odbacuje kada se skraćivanje aktivira.
+I **početak** i **kraj** svake sekcije se čuvaju; središnji sadržaj se odbacuje kada se skraćivanje aktivira.
 
 ### Šta ostaje, a šta se uklanja
 
-| Sadržaj                      | minimal      | standard     | aggressive   |
-| ---------------------------- | ------------ | ------------ | ------------ |
-| Greške / stack trace-ovi     | ✅ sačuvano  | ✅ sačuvano  | ✅ sačuvano  |
-| Neuspeli testovi             | ✅ sačuvano  | ✅ sačuvano  | ✅ sačuvano  |
-| Greške pri build-ovanju      | ✅ sačuvano  | ✅ sačuvano  | ✅ sačuvano  |
-| Uspešni testovi (opširni)    | ✅ sačuvano  | 🟡 skupljeno | 🟡 skupljeno |
-| Rutinski izlaz (info logovi) | 🟡 skupljeno | 🟡 skupljeno | ❌ odbačeno  |
-| Trake napretka               | 🟡 skupljeno | ❌ odbačeno  | ❌ odbačeno  |
-| Baner / ASCII grafika        | 🟡 skupljeno | ❌ odbačeno  | ❌ odbačeno  |
+| Sadržaj                      | minimal     | standard    | aggressive  |
+| ---------------------------- | ----------- | ----------- | ----------- |
+| Greške / stack trace-ovi     | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
+| Neuspeli testovi             | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
+| Greške pri build-u           | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
+| Uspešni testovi (opširno)    | ✅ sačuvano | 🟡 sažeto   | 🟡 sažeto   |
+| Rutinski izlaz (info logovi) | 🟡 sažeto   | 🟡 sažeto   | ❌ odbačeno |
+| Trake napretka               | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
+| Baner / ASCII art            | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
 
-### Izbor odgovarajućeg intenziteta
+### Izbor pravog intenziteta
 
 ```
-             Da li je gubitak konteksta katastrofalan?
-                             │
-      ┌──────────────┼───────────────┐
-      │              │               │
-     DA             NE         NISAM SIGURAN
-      │              │               │
-      ▼              │               │
-   minimal           │               │
-      │              │               │
-      │              ▼               ▼
-      │     Koliko je kritičan    Prvo probajte `standard`
-      │         protok?           (radi u 80% slučajeva)
-      │              │
-      │         ┌────┴────┐
-      │         │         │
-      │       NIZAK     VISOK
-      │         │         │
-      │         ▼         ▼
-      │      standard   aggressive
-      │         │         │
-      └─────────┴─────────┘
+                  Da li je gubitak konteksta katastrofalan?
+                  │
+      ┌───────────┼───────────┐
+      │           │           │
+     DA          NE         NE ZNATE
+      │           │           │
+      ▼           │           │
+   minimal        │           │
+      │           │           │
+      │           ▼           ▼
+      │     Koliko je bitna   Prvo probajte `standard`
+      │     propusnost?       (radi za 80% slučajeva)
+      │           │
+      │      ┌────┴────┐
+      │      │         │
+      │    NIZAK     VISOK
+      │      │         │
+      │      ▼         ▼
+      │   standard   aggressive
+      │      │         │
+      └──────┴─────────┘
 ```
 
 ### Konfigurisanje intenziteta
@@ -432,8 +432,8 @@ I **početak** i **kraj** svake sekcije se čuvaju; srednji sadržaj se odbacuje
 **Programski**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je
-`CompressionEngine` i nema metod `updateConfig`. Umesto toga, ažurirajte
-konfiguraciju engine-a pomoću pomoćne funkcije registra:
+`CompressionEngine` i nema metodu `updateConfig`. Umesto toga, ažurirajte konfiguraciju
+engine-a preko pomoćnika registra:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";

@@ -25,22 +25,22 @@ Saklaw:           1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Ano ang Kino-compress Nito
 
-Ang built-in na catalog ay kasalukuyang naglalaman ng 56 na filter sa mga sumusunod na kategorya:
+Ang built-in na catalog ay kasalukuyang may kasamang 56 na filter sa mga sumusunod na kategorya:
 
-| Kategorya | Mga Halimbawa                                                      |
-| --------- | ------------------------------------------------------------------ |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                  |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, mga test ng Go at Cargo |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx      |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler      |
-| `shell`   | `ls`, `find`, `grep`, mga generic na log ng shell                  |
-| `docker`  | `docker ps`, mga log ng Docker                                     |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                            |
-| `generic` | output na JSON, mga stack trace, generic na fallback ng output     |
+| Kategorya | Mga Halimbawa                                                    |
+| --------- | ---------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, mga test ng Cargo |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx    |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler    |
+| `shell`   | `ls`, `find`, `grep`, mga generic na shell log                   |
+| `docker`  | `docker ps`, mga Docker log                                      |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                          |
+| `generic` | output na JSON, mga stack trace, generic na fallback ng output   |
 
-Ang detector sa `open-sse/services/compression/engines/rtk/commandDetector.ts` ang nag-uuri ng
-output bago ang pagpili ng filter. Maaari ring tumugma ang mga filter batay sa pattern ng command
-o regex ng output kapag hindi sapat ang isang command class.
+Inuuri ng detector sa `open-sse/services/compression/engines/rtk/commandDetector.ts` ang output
+bago ang pagpili ng filter. Maaari ring mag-match ang mga filter batay sa command pattern o
+output regex kapag hindi sapat ang isang command class.
 
 ## Pagresolba ng Filter
 
@@ -344,17 +344,17 @@ node --import tsx/esm --test \
 
 ## Mga Antas ng Intensity (v3.8.16+)
 
-Sinusuportahan ng RTK ang **3 antas ng intensity** na nagbabalanse sa pagitan ng **agresibidad ng compression** at **kaligtasan**. Ang antas ay itinatakda sa pamamagitan ng `config.intensity` sa config ng engine.
+Sinusuportahan ng RTK ang **3 antas ng intensity** na nagte-trade off sa pagitan ng **pagiging agresibo ng compression** at **kaligtasan**. Ang antas ay itinatakda sa pamamagitan ng `config.intensity` sa config ng engine.
 
 ### Ang 3 Antas
 
-| Antas                | Threshold ng truncation   | Token savings | Panganib   | Pinakamainam para sa                  |
-| -------------------- | ------------------------- | ------------- | ---------- | ------------------------------------- |
-| `minimal`            | 24 na linya bawat seksyon | ~20-40%       | Napakababa | Production na may kritikal na context |
-| `standard` (default) | 24 na linya bawat seksyon | ~50-70%       | Mababa     | Pang-araw-araw na coding sessions     |
-| `aggressive`         | 16 na linya bawat seksyon | ~70-90%       | Katamtaman | Mahahabang session, max na savings    |
+| Antas                | Threshold ng truncation   | Pagtitipid ng token | Panganib   | Pinakamainam para sa                    |
+| -------------------- | ------------------------- | ------------------- | ---------- | --------------------------------------- |
+| `minimal`            | 24 na linya bawat seksyon | ~20-40%             | Napakababa | Production na may kritikal na konteksto |
+| `standard` (default) | 24 na linya bawat seksyon | ~50-70%             | Mababa     | Pang-araw-araw na mga coding session    |
+| `aggressive`         | 16 na linya bawat seksyon | ~70-90%             | Katamtaman | Mahahabang sesyon, maksimum na tipid    |
 
-### Kung Saan Nagaganap ang Truncation
+### Saan Nagaganap ang Truncation
 
 Ang threshold ng truncation ay nakakaapekto sa `lineFilter.ts`:
 
@@ -364,24 +364,24 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Parehong pinapanatili ang **head** at **tail** ng bawat seksyon; ang nilalaman sa gitna ay inaalis kapag pumasok ang truncation.
+Parehong pinapanatili ang **head** (simula) at **tail** (dulo) ng bawat seksyon; ang nilalaman sa gitna ay tinatanggal kapag umandar ang truncation.
 
-### Ano ang Nananatili vs. Ano ang Naaalis
+### Ano ang Nananatili vs. Ano ang Natatanggal
 
-| Nilalaman                  | minimal         | standard        | aggressive      |
-| -------------------------- | --------------- | --------------- | --------------- |
-| Mga error / stack trace    | ✅ napananatili | ✅ napananatili | ✅ napananatili |
-| Mga test failure           | ✅ napananatili | ✅ napananatili | ✅ napananatili |
-| Mga build error            | ✅ napananatili | ✅ napananatili | ✅ napananatili |
-| Mga test pass (verbose)    | ✅ napananatili | 🟡 tiniklop     | 🟡 tiniklop     |
-| Routine output (info logs) | 🟡 tiniklop     | 🟡 tiniklop     | ❌ inalis       |
-| Mga progress bar           | 🟡 tiniklop     | ❌ inalis       | ❌ inalis       |
-| Banner / ASCII art         | 🟡 tiniklop     | ❌ inalis       | ❌ inalis       |
+| Nilalaman                        | minimal          | standard         | aggressive       |
+| -------------------------------- | ---------------- | ---------------- | ---------------- |
+| Mga error / stack trace          | ✅ pinapanatili  | ✅ pinapanatili  | ✅ pinapanatili  |
+| Mga nabigong test                | ✅ pinapanatili  | ✅ pinapanatili  | ✅ pinapanatili  |
+| Mga error sa build               | ✅ pinapanatili  | ✅ pinapanatili  | ✅ pinapanatili  |
+| Mga pasang test (verbose)        | ✅ pinapanatili  | 🟡 naka-collapse | 🟡 naka-collapse |
+| Karaniwang output (mga info log) | 🟡 naka-collapse | 🟡 naka-collapse | ❌ tinatanggal   |
+| Mga progress bar                 | 🟡 naka-collapse | ❌ tinatanggal   | ❌ tinatanggal   |
+| Banner / ASCII art               | 🟡 naka-collapse | ❌ tinatanggal   | ❌ tinatanggal   |
 
 ### Pagpili ng Tamang Intensity
 
 ```
-                  Ang pagkawala ba ng context ay sakuna?
+                  Sakuna ba ang pagkawala ng konteksto?
                   │
       ┌───────────┼───────────┐
       │           │           │
@@ -391,9 +391,9 @@ Parehong pinapanatili ang **head** at **tail** ng bawat seksyon; ang nilalaman s
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Gaano kahalaga  Subukan muna ang `standard`
-      │      ang throughput? (gumagana sa 80% ng
-      │           │          mga kaso)
+      │      Gaano kahalaga   Subukan muna ang `standard`
+      │      ang throughput?  (gumagana sa 80% ng
+      │           │           mga kaso)
       │      ┌────┴────┐
       │      │         │
       │    MABABA    MATAAS
@@ -404,7 +404,7 @@ Parehong pinapanatili ang **head** at **tail** ng bawat seksyon; ang nilalaman s
       └──────┴─────────┘
 ```
 
-### Pag-configure ng Intensity
+### Pagko-configure ng Intensity
 
 **Bawat combo** (sa config ng combo):
 
@@ -419,11 +419,11 @@ Parehong pinapanatili ang **head** at **tail** ng bawat seksyon; ang nilalaman s
 }
 ```
 
-**Sa paraang programmatic**:
+**Sa programmatic na paraan**:
 
 Ang `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) ay isang
-`CompressionEngine` at walang `updateConfig` na method. Sa halip, i-update ang config
-ng engine sa pamamagitan ng registry helper:
+`CompressionEngine` at walang `updateConfig` na method. Sa halip, i-update ang
+config ng engine sa pamamagitan ng registry helper:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";

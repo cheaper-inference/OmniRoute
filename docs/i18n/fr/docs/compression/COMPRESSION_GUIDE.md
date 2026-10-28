@@ -32,21 +32,21 @@ Requête du client
 
 ## Modes de compression
 
-### Off (désactivée)
+### Off
 
 Aucune compression appliquée. Tous les messages passent sans modification.
 
-### Mode Lite (~15 % d'économies, latence < 1 ms)
+### Mode Lite (~15 % d'économies, latence <1 ms)
 
-Le mode le plus sûr — aucun changement sémantique, uniquement un nettoyage du formatage :
+Le mode le plus sûr — aucune modification sémantique, uniquement un nettoyage du formatage :
 
 | Technique                | Description                                                           |
 | ------------------------ | --------------------------------------------------------------------- |
-| `collapseWhitespace`     | Fusionne les lignes vides consécutives et les espaces en fin de ligne |
+| `collapseWhitespace`     | Fusionne les lignes vides consécutives et les espaces de fin de ligne |
 | `dedupSystemPrompt`      | Supprime les messages système en double                               |
 | `compressToolResults`    | Compresse les sorties verbeuses des outils/fonctions                  |
-| `removeRedundantContent` | Retire les instructions répétées                                      |
-| `replaceImageUrls`       | Raccourcit les URI de données d'images en base64                      |
+| `removeRedundantContent` | Supprime les instructions répétées                                    |
+| `replaceImageUrls`       | Raccourcit les URI de données d'images base64                         |
 
 **Idéal pour :** une utilisation permanente, les flux de travail critiques pour la sécurité.
 
@@ -55,57 +55,57 @@ Le mode le plus sûr — aucun changement sémantique, uniquement un nettoyage d
 Inspiré de [Caveman](https://github.com/JuliusBrussee/caveman) — supprime les mots de remplissage et les formulations verbeuses tout en préservant le sens :
 
 - Supprime les mots de remplissage (« please », « I think », « basically », « actually »)
-- Condense les expressions verbeuses (« in order to » → « to », « as a result of » → « because »)
-- Retire les formules de politesse atténuées (« Would you mind... », « If you could possibly... »)
-- Plus de 30 règles regex optimisées pour les prompts de programmation
+- Condense les formulations verbeuses (« in order to » → « to », « as a result of » → « because »)
+- Élimine les formules de politesse atténuées (« Would you mind... », « If you could possibly... »)
+- Plus de 30 règles regex optimisées pour les prompts de codage
 
-**Idéal pour :** les flux de travail de programmation quotidiens, les équipes soucieuses des coûts.
+**Idéal pour :** les flux de travail de codage quotidiens, les équipes soucieuses des coûts.
 
 ### Mode Aggressive (~50 % d'économies)
 
 Gestion intelligente de l'historique pour les longues sessions :
 
 - **Vieillissement des messages** — les messages plus anciens sont compressés progressivement
-- **Compression des résultats d'outils** — les longues sorties d'outils sont tronquées ou élidées (premières/dernières lignes,
+- **Compression des résultats d'outils** — les sorties d'outils longues sont tronquées ou élidées (premières/dernières lignes,
   filtrage des lignes correspondantes, compactage des clés JSON)
 - **Garde-fous d'intégrité structurelle** — garantit que les paires `tool_use` + `tool_result` restent cohérentes
-- **Connaissance de la fenêtre de contexte** — respecte les limites de tokens propres à chaque modèle
+- **Prise en compte de la fenêtre de contexte** — respecte les limites de tokens propres à chaque modèle
 
 **Idéal pour :** les sessions de débogage prolongées, les grandes bases de code.
 
 ### Mode Ultra (~75 % d'économies)
 
-Compression maximale pour les scénarios où les tokens sont critiques :
+Compression maximale pour les scénarios critiques en tokens :
 
-- **Élagage heuristique** — élagage de tokens basé sur un score pour la prose
+- **Élagage heuristique** — élagage de la prose basé sur un score par token
 - **Préservation de la structure** — les blocs de code délimités, le code en ligne, les URL et les identifiants sont
-  marqués puis réinsérés à l'identique, jamais élagués
+  remplacés par des marqueurs puis réinsérés à l'identique, jamais élagués
 - **Niveau SLM optionnel** — un petit modèle local peut affiner l'élagage lorsqu'il est configuré
 - Indépendant du mode Aggressive : il n'exécute ni le vieillissement des messages, ni la compression des résultats
   d'outils, ni le résumeur de secours (seul un échec du niveau SLM peut acheminer une passe de secours
-  vers aggressive)
+  via le mode aggressive)
 
-**Idéal pour :** lorsque vous atteignez les limites de contexte à répétition.
+**Idéal pour :** lorsque vous atteignez régulièrement les limites de contexte.
 
-### Mode RTK (plage amont de 60 à 90 %)
+### Mode RTK (plage amont de 60-90 %)
 
-Le mode RTK est optimisé pour les sorties d'outils verbeuses qui apparaissent dans les sessions d'agents de programmation :
+Le mode RTK est optimisé pour les sorties d'outils verbeuses qui apparaissent dans les sessions d'agents de codage :
 
 - Détecte les classes de commandes/sorties telles que `git status`, `git diff`, `git log`, les exécuteurs de tests,
   les builds TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, les journaux Docker, les sorties
   d'infrastructure et les sorties shell génériques
 - Applique des packs de filtres JSON depuis `open-sse/services/compression/engines/rtk/filters/`
-- Importe les filtres du schéma RTK TOML v1 depuis les fichiers `filters.toml` de projet ou globaux, avec validation
+- Importe les filtres RTK TOML schema v1 depuis des fichiers `filters.toml` de projet ou globaux, avec validation
   par tests en ligne et contrôle de confiance pour les fichiers de projet
 - Livré avec 56 filtres intégrés accompagnés d'échantillons de vérification en ligne
 - Supprime les séquences de contrôle ANSI, les barres de progression, les lignes répétées et le bruit non exploitable
-- Préserve les échecs, les erreurs, les avertissements, les fichiers modifiés, les résumés et la fin des longues sorties
-- Prend en charge les filtres de projet soumis à contrôle de confiance, les filtres globaux et la récupération optionnelle
-  des sorties brutes expurgées
+- Préserve les échecs, les erreurs, les avertissements, les fichiers modifiés, les résumés et la fin des sorties longues
+- Prend en charge les filtres de projet soumis à contrôle de confiance, les filtres globaux et la récupération
+  optionnelle des sorties brutes expurgées
 
 **Idéal pour :** les sessions d'agents avec des transcriptions shell, build, test, git, grep et de sorties de fichiers.
 
-### Mode Stacked (plage éligible de 78 à 95 %)
+### Mode Stacked (plage éligible de 78-95 %)
 
 Le mode Stacked exécute plusieurs moteurs de compression dans un ordre déterministe. Le pipeline par défaut est :
 
@@ -113,11 +113,11 @@ Le mode Stacked exécute plusieurs moteurs de compression dans un ordre détermi
 RTK -> Caveman
 ```
 
-Cet ordre permet de compacter d'abord la sortie des terminaux/outils, puis d'appliquer la condensation sémantique de
-Caveman au prompt en langage naturel restant. Les pipelines Stacked peuvent être configurés globalement ou via des
-combinaisons de compression assignées à des combinaisons de routage.
+Cet ordre compacte d'abord les sorties terminal/outil, puis applique la condensation sémantique Caveman au prompt
+en langage naturel restant. Les pipelines Stacked peuvent être configurés globalement ou via des combos de
+compression assignés à des combos de routage.
 
-**Idéal pour :** les contextes mixtes combinant de gros journaux d'outils et des instructions humaines ou des résumés de l'assistant.
+**Idéal pour :** les contextes mixtes combinant de gros journaux d'outils et des instructions humaines ou des résumés d'assistant.
 
 ---
 

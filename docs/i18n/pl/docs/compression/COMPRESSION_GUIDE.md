@@ -34,89 +34,80 @@ OmniRoute implementuje modułowy potok kompresji promptów, który działa **pro
 
 ### Wyłączona
 
-Kompresja nie jest stosowana. Wszystkie wiadomości przechodzą bez zmian.
+Brak kompresji. Wszystkie wiadomości przechodzą bez zmian.
 
 ### Tryb Lite (~15% oszczędności, opóźnienie <1 ms)
 
-Najbezpieczniejszy tryb — zero zmian semantycznych, tylko porządkowanie formatowania:
+Najbezpieczniejszy tryb — zerowa zmiana semantyczna, tylko uporządkowanie formatowania:
 
-| Technika                 | Opis                                                  |
-| ------------------------ | ----------------------------------------------------- |
-| `collapseWhitespace`     | Scala kolejne puste linie i spacje na końcach wierszy |
-| `dedupSystemPrompt`      | Usuwa zduplikowane wiadomości systemowe               |
-| `compressToolResults`    | Kompresuje rozwlekłe wyniki narzędzi/funkcji          |
-| `removeRedundantContent` | Usuwa powtarzające się instrukcje                     |
-| `replaceImageUrls`       | Skraca identyfikatory URI danych obrazów base64       |
+| Technika                 | Opis                                                    |
+| ------------------------ | ------------------------------------------------------- |
+| `collapseWhitespace`     | Scala kolejne puste wiersze i spacje na końcach wierszy |
+| `dedupSystemPrompt`      | Usuwa zduplikowane komunikaty systemowe                 |
+| `compressToolResults`    | Kompresuje rozwlekłe wyniki narzędzi/funkcji            |
+| `removeRedundantContent` | Usuwa powtarzające się instrukcje                       |
+| `replaceImageUrls`       | Skraca identyfikatory URI danych obrazów base64         |
 
-**Najlepszy do:** pracy w trybie ciągłym, przepływów pracy krytycznych dla bezpieczeństwa.
+**Najlepszy do:** pracy w trybie ciągłym, procesów krytycznych dla bezpieczeństwa.
 
-### Tryb Standardowy (~30% oszczędności)
+### Tryb Standard (~30% oszczędności)
 
 Zainspirowany projektem [Caveman](https://github.com/JuliusBrussee/caveman) — usuwa słowa-wypełniacze i rozwlekłe sformułowania, zachowując znaczenie:
 
-- Usuwa słowa-wypełniacze („please", „I think", „basically", „actually")
-- Skraca rozwlekłe zwroty („in order to" → „to", „as a result of" → „because")
-- Usuwa grzecznościowe złagodzenia („Would you mind...", „If you could possibly...")
-- Ponad 30 reguł regex dostrojonych do promptów programistycznych
+- Usuwa słowa-wypełniacze („please”, „I think”, „basically”, „actually”)
+- Skraca rozwlekłe zwroty („in order to” → „to”, „as a result of” → „because”)
+- Usuwa grzecznościowe wstawki („Would you mind...”, „If you could possibly...”)
+- Ponad 30 reguł regex dostosowanych do promptów programistycznych
 
-**Najlepszy do:** codziennych przepływów pracy programistycznej, zespołów dbających o koszty.
+**Najlepszy do:** codziennych procesów programistycznych, zespołów dbających o koszty.
 
-### Tryb Agresywny (~50% oszczędności)
+### Tryb Aggressive (~50% oszczędności)
 
-Inteligentne zarządzanie historią w długich sesjach:
+Inteligentne zarządzanie historią podczas długich sesji:
 
-- **Starzenie wiadomości** — starsze wiadomości są stopniowo kompresowane
-- **Kompresja wyników narzędzi** — długie wyniki narzędzi są obcinane lub elidowane (pierwsze/ostatnie linie,
-  filtrowanie linii pasujących, zagęszczanie kluczy JSON)
-- **Strażnicy integralności strukturalnej** — zapewniają spójność par `tool_use` + `tool_result`
+- **Starzenie wiadomości** — starsze wiadomości są stopniowo coraz silniej kompresowane
+- **Kompresja wyników narzędzi** — długie wyniki narzędzi są obcinane lub skracane (pierwsze/ostatnie wiersze, filtrowanie wierszy z dopasowaniami, kompaktowanie kluczy JSON)
+- **Mechanizmy ochrony integralności strukturalnej** — zapewniają spójność par `tool_use` + `tool_result`
 - **Świadomość okna kontekstu** — przestrzega limitów tokenów dla poszczególnych modeli
 
 **Najlepszy do:** długich sesji debugowania, dużych baz kodu.
 
 ### Tryb Ultra (~75% oszczędności)
 
-Maksymalna kompresja dla scenariuszy krytycznych pod względem liczby tokenów:
+Maksymalna kompresja do scenariuszy krytycznych pod względem tokenów:
 
 - **Przycinanie heurystyczne** — przycinanie tokenów prozy na podstawie punktacji
-- **Zachowanie struktury** — ogrodzone bloki kodu, kod inline, adresy URL i identyfikatory są
-  zamieniane na znaczniki zastępcze (tombstone) i zszywane z powrotem w postaci dosłownej, nigdy przycinane
-- **Opcjonalna warstwa SLM** — mały model lokalny może udoskonalać przycinanie, gdy jest skonfigurowany
-- Niezależny od trybu Agresywnego: nie uruchamia starzenia wiadomości, kompresji wyników narzędzi
-  ani awaryjnego streszczacza (tylko awaria warstwy SLM może skierować przebieg awaryjny
-  przez tryb agresywny)
+- **Zachowanie struktury** — blok kodu, kod inline, adresy URL i identyfikatory są zamieniane na znaczniki (tombstone) i ponownie zszywane w oryginalnej postaci — nigdy nie są przycinane
+- **Opcjonalna warstwa SLM** — po skonfigurowaniu mały lokalny model może udoskonalić przycinanie
+- Niezależny od trybu Aggressive: nie uruchamia starzenia wiadomości, kompresji wyników narzędzi ani awaryjnego streszczacza (tylko awaria warstwy SLM może skierować przebieg awaryjny przez tryb aggressive)
 
 **Najlepszy do:** sytuacji, gdy wielokrotnie osiągasz limity kontekstu.
 
-### Tryb RTK (zakres 60–90% po stronie upstream)
+### Tryb RTK (zakres 60–90% upstream)
 
 Tryb RTK jest zoptymalizowany pod kątem rozwlekłych wyników narzędzi pojawiających się w sesjach agentów programistycznych:
 
-- Wykrywa klasy poleceń/wyników, takie jak `git status`, `git diff`, `git log`, runnery testów,
-  kompilacje TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/instalacje, logi Dockera, wyniki
-  infrastruktury oraz ogólne wyniki powłoki
+- Wykrywa klasy poleceń/wyjść, takie jak `git status`, `git diff`, `git log`, programy uruchamiające testy, kompilacje TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/instalacje, logi Dockera, wyjście infrastruktury oraz ogólne wyjście powłoki
 - Stosuje pakiety filtrów JSON z `open-sse/services/compression/engines/rtk/filters/`
-- Importuje filtry RTK TOML schema v1 z projektowych lub globalnych plików `filters.toml`, z walidacją
-  testów inline i bramkowaniem zaufania dla plików projektowych
+- Importuje filtry RTK TOML schema v1 z projektowych lub globalnych plików `filters.toml`, z walidacją przez testy inline i kontrolą zaufania dla plików projektowych
 - Dostarcza 56 wbudowanych filtrów z przykładami weryfikacji inline
-- Usuwa sekwencje sterujące ANSI, paski postępu, powtarzające się linie i szum niewymagający działania
-- Zachowuje niepowodzenia, błędy, ostrzeżenia, zmienione pliki, podsumowania i końcówkę długich wyników
-- Obsługuje bramkowane zaufaniem filtry projektowe, filtry globalne i opcjonalne odzyskiwanie zanonimizowanych surowych wyników
+- Usuwa sekwencje sterujące ANSI, paski postępu, powtarzające się wiersze i szum niewymagający reakcji
+- Zachowuje niepowodzenia, błędy, ostrzeżenia, zmienione pliki, podsumowania i końcówkę długiego wyjścia
+- Obsługuje filtry projektowe z kontrolą zaufania, filtry globalne oraz opcjonalne odzyskiwanie surowego wyjścia po anonimizacji
 
-**Najlepszy do:** sesji agentowych z transkrypcjami powłoki, kompilacji, testów, git, grep i wyników plików.
+**Najlepszy do:** sesji agentowych z transkryptami powłoki, kompilacji, testów, git, grep i wyjścia plików.
 
-### Tryb Kaskadowy (kwalifikowany zakres 78–95%)
+### Tryb Stacked (zakres kwalifikowany: 78–95%)
 
-Tryb kaskadowy uruchamia wiele silników kompresji w deterministycznej kolejności. Domyślny pipeline to:
+Tryb Stacked uruchamia wiele silników kompresji w deterministycznej kolejności. Domyślny pipeline to:
 
 ```txt
 RTK -> Caveman
 ```
 
-Taka kolejność najpierw zagęszcza wyniki terminala/narzędzi, a następnie stosuje semantyczną kondensację
-Caveman do pozostałego promptu w języku naturalnym. Kaskadowe pipeline'y można konfigurować globalnie
-lub za pomocą kombinacji kompresji przypisanych do kombinacji routingu.
+Taka kolejność najpierw zapewnia zwartość wyjścia terminala/narzędzi, a następnie stosuje semantyczną kondensację Caveman do pozostałego promptu w języku naturalnym. Pipeline'y Stacked można konfigurować globalnie lub poprzez kombinacje kompresji przypisane do kombinacji routingu.
 
-**Najlepszy do:** mieszanego kontekstu z dużymi logami narzędzi oraz instrukcjami człowieka lub podsumowaniami asystenta.
+**Najlepszy do:** mieszanych kontekstów z dużymi logami narzędzi oraz instrukcjami użytkownika lub podsumowaniami asystenta.
 
 ---
 

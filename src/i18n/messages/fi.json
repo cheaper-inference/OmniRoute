@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Palveluntarjoajan rajoitukset",
     "noProviders": "Ei yhdistettyjä palveluntarjoajia",
+    "quotaAuthRequired": "Todennus vaaditaan – kirjaudu hallintapaneeliin",
+    "quotaAuthRequiredHint": "Palveluntarjoajayhteyksiä ei voitu ladata, koska hallintapaneelin istunto puuttuu tai on vanhentunut. Kirjaudu sisään ja päivitä sivu nähdäksesi kiintiörajasi.",
     "connectProvidersForQuota": "Muodosta yhteys palveluntarjoajiin OAuthin avulla seurataksesi API-kiintiörajoja ja käyttöä.",
     "accountsCount": "{count, plural, one {# tili} other {# tiliä}}",
     "filteredFromCount": "(suodatettu kohteesta {count})",

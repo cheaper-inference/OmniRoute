@@ -12,28 +12,28 @@
 
 ## Mis see on
 
-OmniRoute registreerib 376 pakkujat, sealhulgas 155 kataloogikirjet, mis on märgitud kui **tasuta/autentimiseta**
-(autentimiseta,
-tasuta taseme OAuth või tasuta taseme API-võti — vaadake
+OmniRoute registreerib 376 teenusepakkujat, sealhulgas 155 kataloogikirjet, mis on märgistatud kui **free/no-auth**
+(no-auth, tasuta taseme OAuth või tasuta taseme API-võti — vaata
 [tasuta tasemete juhendit](../getting-started/FREE-TIERS-GUIDE.md) ja täielikku
-[tasuta tasemete kataloogi](../reference/FREE_TIERS.md)). Konks on selles, et tasuta pakkujate
-mudelite kvaliteet varieerub suuresti. Tippmudelit pakkuv autentimiseta pakkuja on palju kasulikum
-kui väikest pärandmudelit pakkuv pakkuja.
+[tasuta tasemete kataloogi](../reference/FREE_TIERS.md)). Konks on selles: tasuta
+teenusepakkujate mudelite kvaliteet varieerub väga palju. No-auth-teenusepakkuja, kes
+pakub tipptasemel mudelit, on palju kasulikum kui see, kes pakub väikest vananenud mudelit.
 
-**Tasuta pakkujate pingerida** vastab küsimusele „**milline tasuta pakkuja annab mulle parima mudeli?**“,
-ühendades iga tasuta pakkuja kataloogi **rahvahanke korras kogutud kvaliteediskooridega**
-**Arena AI edetabelist** (inimeste eelistustel põhinev ELO, sama põhimõte, mida kasutab LMArena
-vestlusrobotite areen). Seejärel järjestatakse pakkujad nende **parima tasuta mudeli** tugevuse alusel.
+**Free Provider Rankings** vastab küsimusele „**milline tasuta teenusepakkuja annab mulle parima mudeli?**",
+ühendades iga tasuta teenusepakkujatest kataloogi **kogukonna poolt kogutud kvaliteediskooridega**
+**Arena AI edetabelist** (inimeelistustel põhinev ELO — sama idee, mis LMArena
+vestlusrobotite arena taga). Seejärel järjestatakse teenusepakkujad nende **parima tasuta
+mudeli** tugevuse järgi.
 
-Pingerida arvutatakse kolme tegeliku allika põhjal:
+Järjestus arvutatakse kolmest tegelikust allikast:
 
-1. Tasuta pakkujate loendid — `NOAUTH_PROVIDERS` ning `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` kirjed, millel on märge `hasFree`
+1. Tasuta teenusepakkujate loendid — `NOAUTH_PROVIDERS`, lisaks `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` kirjed, millel on lipp `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Iga pakkuja mudelikataloog pakkujate registrist
+2. Iga teenusepakkujatest mudelikataloog teenusepakkujate registrist
    (`open-sse/config/providerRegistry.ts`).
-3. ELO põhjal tuletatud ülesandesobivuse skoorid, mille Arena ELO sünkroonimismootor
-   (`src/lib/arenaEloSync.ts`) salvestab andmebaasitabelisse `model_intelligence`.
+3. ELO-st tuletatud ülesandesobivuse skoorid, mille Arena ELO sünkroonimismootor
+   salvestab andmebaasitabelisse `model_intelligence` (`src/lib/arenaEloSync.ts`).
 
 Ühendamisloogika asub failis `src/lib/freeProviderRankings.ts`.
 
@@ -123,14 +123,14 @@ Vastuse struktuur:
 
 ### Allikas: Arena AI edetabel
 
-Arena ELO sünkroniseerimismootor (`src/lib/arenaEloSync.ts`) tõmbab Arena AI
-edetabeli API-st (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`)
-kaks edetabelit — `text` ja `code`. Kui see API ei tagasta kasutatavat edetabelit,
-kasutab mootor varulahendusena ametlikku `lmarena-ai/leaderboard-dataset`
-andmestikku Hugging Face'i datasets-serveris (`src/lib/arenaEloHfSource.ts`,
-CC-BY-4.0; `overall` → `text`, `coding` → `code`); `GET /api/intelligence/sync`
-teatab väljad `activeSource`, `lastError` ja `lastFailedAt`. Iga edetabeli kirje
-sisaldab mudeli nime, tootjat, ELO `score` väärtust, usaldusintervalli ja häälte arvu.
+Arena ELO sünkroniseerimismootor (`src/lib/arenaEloSync.ts`) laeb Arena AI edetabeli API-st
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) alla kaks edetabelit — `text`
+ja `code`. Kui see API ei tagasta kasutatavat tabelit, lülitub mootor Hugging Face
+datasets-serveri ametlikule `lmarena-ai/leaderboard-dataset`-ile
+(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`, `coding` → `code`);
+`GET /api/intelligence/sync` annab teada väljadest `activeSource`, `lastError` ja
+`lastFailedAt`. Iga edetabeli kirje sisaldab
+mudeli nime, tarnijat, ELO `score` väärtust, usaldusintervalli ja häälte arvu.
 
 Edetabeli kategooriad vastendatakse OmniRoute'i ülesannete kategooriatele:
 
@@ -139,90 +139,86 @@ Edetabeli kategooriad vastendatakse OmniRoute'i ülesannete kategooriatele:
 | `text`         | `default`, `review`, `documentation`, `debugging` |
 | `code`         | `coding`                                          |
 
-### Normaliseerimine (ülesande sobivuse skoor)
+### Normaliseerimine (ülesandesse sobivuse skoor)
 
-Toores ELO-skoor normaliseeritakse iga edetabeli kohta **ülesande sobivuse
-väärtuseks vahemikus `[0.4, 0.98]`**:
+Toored ELO skoorid normaliseeritakse edetabeliti **ülesandesse sobivuse väärtuseks vahemikus `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Skoor ei jõua kunagi väärtusteni `0` ega `1`, jättes varu kasutaja kohandustele.
-See on `score` väli, mida näete API-vastuses, ja juhtpaneelil kuvatav silt.
+Skoor ei jõua kunagi väärtuseni `0` ega `1`, jättes ruumi kasutaja ülekirjutustele. See ongi
+`score` väli, mida näed API vastuses, ning silt, mida kuvatakse juhtpaneelil.
 
-### Usaldustase
+### Usaldusväärsus
 
-Iga kirje saab usaldustaseme Arena häälte arvu põhjal:
+Iga kirje saab usaldusväärsuse taseme Arena häälte arvu põhjal:
 
-| Usaldustase | Hääled  |
-| ----------- | ------- |
-| `high`      | ≥ 5 000 |
-| `medium`    | ≥ 1 000 |
-| `low`       | < 1 000 |
+| Usaldusväärsus | Hääled  |
+| -------------- | ------- |
+| `high`         | ≥ 5,000 |
+| `medium`       | ≥ 1,000 |
+| `low`          | < 1,000 |
 
-### Salvestamine ja ajakohasus
+### Salvestamine ja värskekus
 
 Normaliseeritud kirjed kirjutatakse andmebaasi tabelisse `model_intelligence`
-väärtusega `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Kirjed
-**aeguvad 7 päeva pärast**, nii et tarnija, kes lõpetab sünkroniseerimise, langeb
-lõpuks välja, selle asemel et pakkuda aegunud andmeid.
+väärtusega `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Kirjed **aeguvad
+7 päeva pärast**, seega tarnija, mis lõpetab sünkroniseerimise, langeb lõpuks välja,
+selle asemel et pakkuda aegunud andmeid.
 
-Sünkroniseerimine töötab **vaikimisi sisse lülitatuna**:
+Sünkroniseerimine on **vaikimisi sisse lülitatud**:
 
-- See käivitub üks kord serveri käivitamisel ja seejärel perioodiliselt taimeri
-  järgi (`src/lib/arenaEloSync.ts`, ühendatud failist `src/instrumentation-node.ts`).
-- See on **mitteblokeeriv ega ole kunagi fataalne** — kui ülesvoolu päring
-  ebaõnnestub, jätkab OmniRoute töötamist ja edetabelid näitavad lihtsalt viimaseid
-  korrektseid andmeid (või tühja olekut).
+- See käivitub üks kord serveri käivitamisel ja seejärel perioodiliselt taimeril
+  (`src/lib/arenaEloSync.ts`, ühendatud failist `src/instrumentation-node.ts`).
+- See on **mitteblokeeriv ja mitte kunagi saatuslik** — kui ülevooluv päring ebaõnnestub, jätkab OmniRoute
+  töötamist ja edetabelid näitavad lihtsalt viimaseid korrektsed andmeid (või tühja olekut).
 
-Kaks keskkonnamuutujat juhivad seda (dokumenteeritud failis
+Seda juhivad kaks keskkonnamuutujat (dokumenteeritud
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Muutuja                   | Vaikimisi     | Eesmärk                                                   |
-| ------------------------- | ------------- | --------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Seadke `false`, et väljuvast sünkroniseerimisest loobuda. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sünkroniseerimise intervall sekundites.                   |
+| Muutuja                   | Vaikimisi     | Eesmärk                                                               |
+| ------------------------- | ------------- | --------------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Sea väärtuseks `false`, et väljaminevast sünkroniseerimisest loobuda. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sünkroniseerimise intervall sekundites.                               |
 
-### Manuaalne sünkroniseerimine / olek / tühjendamine
+### Käsitsi sünkroniseerimine / olek / kustutamine
 
-Operaatoritele pakub autentitud halduslõpp-punkt manuaalset juhtimist
+Operaatoritele pakub autenditud halduslõpp-punkt käsitsi juhtimist
 (`src/app/api/intelligence/sync/route.ts` — nõuab haldusautentimist):
 
 ```
 GET    /api/intelligence/sync          # praegune sünkroniseerimise olek (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # käivita manuaalne sünkroniseerimine; keha: { "dryRun": true } eelvaateks ilma kirjutamata
-DELETE /api/intelligence/sync          # tühjenda kõik sünkroniseeritud arena_elo intelligentsuse kirjed
+POST   /api/intelligence/sync          # käivita käsitsi sünkroniseerimine; sisu: { "dryRun": true } eelvaateks ilma kirjutamata
+DELETE /api/intelligence/sync          # kustuta kõik sünkroniseeritud arena_elo intelligentsuse kirjed
 ```
 
-Kui edetabelite leht on tühi, täidab selle manuaalne `POST /api/intelligence/sync`
-(või lihtsalt serveri taaskäivitamine).
+Kui edetabeli leht on tühi, taastab selle käsitsi `POST /api/intelligence/sync` (või lihtsalt
+serveri taaskäivitamine).
 
 ### Mudelite sobitamine edetabeliga
 
-Registri mudeli ID-d ja Arena mudelite nimed ei kattu alati täpselt. Järjestus
-kasutab paindlikku sobitamist (`findMatchingIntelligence` failis
-`src/lib/freeProviderRankings.ts`):
+Registri mudeli ID-d ja Arena mudeli nimed ei kattu alati täpselt. Edetabel kasutab
+paindlikku sobitamist (`findMatchingIntelligence` failis `src/lib/freeProviderRankings.ts`):
 
-1. Täpne kokkulangevus normaliseeritud mudeli ID-ga.
-2. Langevus pärast lõpus oleva versioonisufiksi eemaldamist (nt `kimi-k2.6` → `kimi-k2`).
-3. Eesliite sobitus (edetabeli mudeli nimi on registri ID eesliide).
+1. Täpne vaste normaliseeritud mudeli ID peal.
+2. Vaste pärast lõpus oleva versioonisufiksi eemaldamist (nt `kimi-k2.6` → `kimi-k2`).
+3. Eesliite vaste (edetabeli mudeli nimi on registri ID eesliide).
 
-Sünkroniseerimise poolel eemaldatakse teadaolevad tootjate eesliited
-(`anthropic/`, `openai/`, `google/`, …) ja väike aliaste vastendus laiendab
-kanoonilised nimed variantideks, mida OmniRoute sisemiselt kasutab, nii et mudelid
-jäävad leitavaks iga nime all.
+Sünkroniseerimise poolel eemaldatakse tuntud tarnijate eesliited (`anthropic/`, `openai/`, `google/`, …)
+ning väike aliaste kaart laiendab kanoonilised nimed variantideks, mida OmniRoute
+sisemiselt kasutab, nii et mudelid jäävad leitavaks mis tahes nime all.
 
 ### Kuidas tarnijat järjestatakse
 
-Iga tasuta tarnija puhul hindab mootor kõik tema kataloogi mudelid, seejärel:
+Iga tasuta tarnija puhul hindab mootor kõiki tema kataloogi mudeleid, seejärel:
 
 - **Top Model** = tarnija kõrgeima skooriga mudel.
-- **Avg Score** = keskmine skoor kõigi selle tarnija hinnatud mudelite üle.
-- **Models** = kui mitmel tarnija mudelil oli Arena skoor.
+- **Avg Score** = keskmine skoor kõigi tarnija hinnatud mudelite üle.
+- **Models** = kui paljudele tarnija mudelitele oli Arena skoor olemas.
 
-Tarnijad sorteeritakse kõigepealt **parima mudeli skoori** järgi, seejärel keskmise
-skoori järgi. See premeerib tarnijat, kes pakub vähemalt ühte tugevat tasuta mudelit.
+Tarnijad sorteeritakse esmalt **parima mudeli skoori**, seejärel keskmise skoori järgi. See premeerib
+tarnijat, kes pakub vähemalt ühte tugevat tasuta mudelit.
 
 ---
 

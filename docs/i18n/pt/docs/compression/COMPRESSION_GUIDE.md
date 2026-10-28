@@ -38,7 +38,7 @@ Sem compressão aplicada. Todas as mensagens passam inalteradas.
 
 ### Modo Lite (~15% de poupança, latência <1ms)
 
-O modo mais seguro — zero alterações semânticas, apenas limpeza de formatação:
+O modo mais seguro — zero alteração semântica, apenas limpeza de formatação:
 
 | Técnica                  | Descrição                                          |
 | ------------------------ | -------------------------------------------------- |
@@ -57,19 +57,19 @@ Inspirado no [Caveman](https://github.com/JuliusBrussee/caveman) — remove pala
 - Remove palavras de preenchimento ("please", "I think", "basically", "actually")
 - Condensa frases verbosas ("in order to" → "to", "as a result of" → "because")
 - Elimina rodeios de cortesia ("Would you mind...", "If you could possibly...")
-- Mais de 30 regras regex ajustadas para prompts de programação
+- Mais de 30 regras de regex ajustadas para prompts de programação
 
 **Ideal para:** Fluxos de trabalho diários de programação, equipas atentas aos custos.
 
-### Modo Aggressive (~50% de poupança)
+### Modo Agressivo (~50% de poupança)
 
 Gestão inteligente do histórico para sessões longas:
 
 - **Envelhecimento de Mensagens** — as mensagens mais antigas são progressivamente comprimidas
 - **Compressão de Resultados de Ferramentas** — saídas longas de ferramentas truncadas ou elididas (primeiras/últimas linhas,
   filtragem de linhas correspondentes, compactação de chaves JSON)
-- **Proteções de Integridade Estrutural** — garante que os pares `tool_use` + `tool_result` se mantêm consistentes
-- **Sensibilidade à Janela de Contexto** — respeita os limites de tokens por modelo
+- **Guardas de Integridade Estrutural** — garante que os pares `tool_use` + `tool_result` permanecem consistentes
+- **Consciência da Janela de Contexto** — respeita os limites de tokens por modelo
 
 **Ideal para:** Sessões de depuração prolongadas, bases de código grandes.
 
@@ -77,32 +77,32 @@ Gestão inteligente do histórico para sessões longas:
 
 Compressão máxima para cenários críticos em termos de tokens:
 
-- **Poda Heurística** — poda de tokens de prosa baseada em pontuação
+- **Poda Heurística** — poda de tokens do texto baseada em pontuação
 - **Preservação de Estrutura** — blocos de código delimitados, código inline, URLs e identificadores são
-  convertidos em tombstones e reintegrados verbatim, nunca podados
+  marcados (tombstoned) e recolocados verbatim, nunca podados
 - **Nível SLM opcional** — um pequeno modelo local pode refinar a poda quando configurado
-- Independente do modo Aggressive: não executa envelhecimento de mensagens, compressão de resultados
+- Independente do modo Agressivo: não executa envelhecimento de mensagens, compressão de resultados
   de ferramentas nem o sumarizador de fallback (apenas uma falha no nível SLM pode encaminhar uma
-  passagem de fallback através do modo aggressive)
+  passagem de fallback através do modo agressivo)
 
 **Ideal para:** Quando atinge repetidamente os limites de contexto.
 
 ### Modo RTK (intervalo de 60-90% a montante)
 
-O modo RTK está otimizado para saídas verbosas de ferramentas que surgem em sessões de agentes de programação:
+O modo RTK é otimizado para saídas verbosas de ferramentas que aparecem em sessões de agentes de programação:
 
 - Deteta classes de comandos/saídas como `git status`, `git diff`, `git log`, executores de testes,
-  builds TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/instalações, logs do Docker, saída
+  builds TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, logs do Docker, saída
   de infraestrutura e saída genérica de shell
-- Aplica pacotes de filtros JSON a partir de `open-sse/services/compression/engines/rtk/filters/`
-- Importa filtros RTK TOML schema v1 a partir de ficheiros `filters.toml` de projeto ou globais, com
-  validação por testes inline e trust-gating para ficheiros de projeto
+- Aplica pacotes de filtros JSON de `open-sse/services/compression/engines/rtk/filters/`
+- Importa filtros RTK TOML schema v1 de ficheiros `filters.toml` do projeto ou globais, com validação
+  por testes inline e trust-gating para ficheiros de projeto
 - Inclui 56 filtros incorporados com amostras de verificação inline
 - Remove sequências de controlo ANSI, barras de progresso, linhas repetidas e ruído não acionável
-- Preserva falhas, erros, avisos, ficheiros alterados, resumos e o final de saídas longas
-- Suporta filtros de projeto com trust-gating, filtros globais e recuperação opcional de saída bruta com ocultação de dados
+- Preserva falhas, erros, avisos, ficheiros alterados, resumos e a cauda de saídas longas
+- Suporta filtros de projeto com trust-gating, filtros globais e recuperação opcional de saída bruta redigida
 
-**Ideal para:** Sessões de agentes com transcrições de shell, build, testes, git, grep e saída de ficheiros.
+**Ideal para:** Sessões de agentes com transcrições de shell, build, testes, git, grep e saídas de ficheiros.
 
 ### Modo Stacked (intervalo elegível de 78-95%)
 
@@ -112,11 +112,11 @@ O modo Stacked executa múltiplos motores de compressão numa ordem determiníst
 RTK -> Caveman
 ```
 
-Esta ordem mantém primeiro a saída de terminal/ferramentas compacta e, de seguida, aplica a condensação
-semântica do Caveman ao restante prompt em linguagem natural. Os pipelines Stacked podem ser configurados
-globalmente ou através de combos de compressão atribuídos a combos de encaminhamento.
+Essa ordem mantém primeiro a saída de terminal/ferramentas compacta e depois aplica a condensação semântica
+do Caveman ao prompt em linguagem natural restante. Os pipelines Stacked podem ser configurados globalmente
+ou através de combos de compressão atribuídos a combos de encaminhamento.
 
-**Ideal para:** Contexto misto com grandes registos de ferramentas, juntamente com instruções humanas ou resumos do assistente.
+**Ideal para:** Contexto misto com grandes registos de ferramentas, combinados com instruções humanas ou resumos do assistente.
 
 ---
 

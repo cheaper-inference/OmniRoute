@@ -25,22 +25,22 @@ rtk -> caveman
 
 ## የሚጨምቀው
 
-አብሮ የተገነባው ካታሎግ በአሁኑ ጊዜ በእነዚህ ምድቦች ስር 56 ማጣሪያዎችን ያካትታል፦
+የተገነባው ካታሎግ በአሁኑ ጊዜ 56 ማጣሪያዎችን በእነዚህ ምድቦች ስር ይዞ ይመጣል፦
 
 | ምድብ       | ምሳሌዎች                                                         |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo tests    |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, አጠቃላይ የshell ምዝግብ ማስታወሻዎች               |
-| `docker`  | `docker ps`, የDocker ምዝግብ ማስታወሻዎች                             |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | የJSON ውጤት፣ የstack ክትትሎች፣ አጠቃላይ የውጤት ምትኬ                       |
+| `test`    | Vitest፣ Jest፣ Pytest፣ PHPUnit፣ Playwright፣ Go፣ Cargo ሙከራዎች    |
+| `build`   | TypeScript፣ ESLint፣ Biome፣ Prettier፣ Vite፣ Webpack፣ Turbo፣ Nx |
+| `package` | `npm install`፣ `npm audit`፣ `pip`፣ `uv sync`፣ Poetry፣ Bundler |
+| `shell`   | `ls`፣ `find`፣ `grep`፣ አጠቃላይ የshell ምዝግብ ማስታወሻዎች               |
+| `docker`  | `docker ps`፣ Docker ምዝግብ ማስታወሻዎች                              |
+| `infra`   | Terraform፣ OpenTofu፣ `systemctl status`                       |
+| `generic` | JSON ውጤት፣ stack traces፣ አጠቃላይ የውጤት መተኪያ (fallback)            |
 
-በ`open-sse/services/compression/engines/rtk/commandDetector.ts` ውስጥ ያለው ማወቂያ
-ማጣሪያ ከመምረጡ በፊት ውጤቱን ይመድባል። የትእዛዝ ክፍል በቂ ባለሆነ ጊዜ ማጣሪያዎች በትእዛዝ ንድፍ
-ወይም በውጤት regexም መመጣጠን ይችላሉ።
+በ`open-sse/services/compression/engines/rtk/commandDetector.ts` ውስጥ ያለው ማወቂያ (detector)
+ከማጣሪያ ምርጫ በፊት ውጤቱን ይመድባል። የትዕዛዝ ክፍል (command class) በቂ ካልሆነ ማጣሪያዎች
+በትዕዛዝ ንድፍ ወይም በውጤት regex ማዛመድ ይችላሉ።
 
 ## የማጣሪያ መፍትሔ ሂደት
 
@@ -302,15 +302,15 @@ DATA_DIR/rtk/raw-output/
 AWS access keys፣ እና በምደባ ቅርጽ የተጻፉ `token=...`፣ `secret=...`፣ `password=...` እሴቶችን ያካትታል። ትንታኔዎች
 የማመሳከሪያ id፣ መጠን እና hash metadata ብቻ ያከማቻሉ።
 
-## ማረጋገጫ በር (Gate)
+## የማረጋገጫ ጌት
 
-የተወሰነ ማረጋገጫ በር የተገነቡትን በውስጣዊ (inline) ማጣሪያ ምኅናት ይሰራል ያለ ውጭ ትዕዛዞችን መጠቀም:
+የተወሰነው (focused) የማረጋገጫ ጌት ውስጣዊ የተገነቡ የውስጣዊ መስመር (inline) ማጣሪያ ሙከራዎችን ወደ ውጫዊ ትእዛዞች ሳይወጣ (shell out) ያስኬዳል፦
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-verify.test.ts
 ```
 
-ሰፊው የ RTK በር የሚከተለው ነው:
+ሰፊው የ RTK ጌት ይህ ነው፦
 
 ```bash
 node --import tsx/esm --test \
@@ -319,7 +319,7 @@ node --import tsx/esm --test \
   tests/unit/compression/context-compression-api.test.ts
 ```
 
-ከመልቀቅ (release) በፊት ሰፊውን የግፊት (compression) በር ያሂዱ:
+ሰፊውን የማጽጃ (compression) ጌት ከመልቀቅ (release) በፊት ያስኬዱ፦
 
 ```bash
 node --import tsx/esm --test \
@@ -342,19 +342,19 @@ node --import tsx/esm --test \
 
 ## የጥንካሬ ደረጃዎች (v3.8.16+)
 
-RTK በ**የኮምፕሬሽን ጥንካሬ** እና **ደህንነት** መካከል ሚዛን የሚሰጡ **3 የጥንካሬ ደረጃዎችን** ይደግፋል። ደረጃው በኤንጂን ኮንፊግ ውስጥ `config.intensity` በኩል ይቀመጣል።
+RTK በ**ኮምፕሬሽን ማጠናከር** እና በ**ደህንነት** መካከል ሚዛን የሚሰጡ **3 የጥንካሬ ደረጃዎችን** ይደግፋል። ደረጃው በእንጂኑ ኮንፊግ ውስጥ ባለው `config.intensity` ይወሰናል።
 
 ### 3ቱ ደረጃዎች
 
-| ደረጃ              | የማጭበርበር ገደብ   | የቶከን ቁጠባ | አደጋ      | ተመጣጣኝ የሆነበት               |
-| ---------------- | ------------- | -------- | -------- | ------------------------- |
-| `minimal`        | በክፍል 24 መስመሮች | ~20-40%  | በጣም ዝቅተኛ | ወሳኝ አውድ ለሚያስፈልግ የምርት አካባቢ |
-| `standard` (ነባሪ) | በክፍል 24 መስመሮች | ~50-70%  | ዝቅተኛ     | የዕለት ተዕለት የኮዲንግ ክፍለ ጊዜዎች  |
-| `aggressive`     | በክፍል 16 መስመሮች | ~70-90%  | መካከለኛ    | ረዘም ያሉ ክፍለ ጊዜዎች፣ ከፍተኛ ቁጠባ |
+| ደረጃ              | የማጭበርበር ገደብ   | የቶከን ቁጠባ | አደጋ      | ምርጥ የሚሆንለት              |
+| ---------------- | ------------- | -------- | -------- | ----------------------- |
+| `minimal`        | በክፍል 24 መስመሮች | ~20-40%  | በጣም ዝቅተኛ | ወሳኝ አውድ ያለው ምርት         |
+| `standard` (ነባሪ) | በክፍል 24 መስመሮች | ~50-70%  | ዝቅተኛ     | የዕለት ተዕለት ኮዲንግ ክፍለ ጊዜዎች |
+| `aggressive`     | በክፍል 16 መስመሮች | ~70-90%  | መካከለኛ    | ረጅም ክፍለ ጊዜዎች፣ ከፍተኛ ቁጠባ  |
 
-### ማጭበርበሩ የሚፈጸምበት ቦታ
+### ማጭበርበሩ የሚሆንበት ቦታ
 
-የማጭበርበሩ ገደብ `lineFilter.ts` ላይ ተጽዕኖ ያሳድራል፦
+የማጭበርበሩ ገደብ `lineFilter.ts` ላይ ተጽእኖ ይኖረዋል፦
 
 ```ts
 // ከ open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -362,19 +362,19 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-የእያንዳንዱ ክፍል **መጀመሪያ** እና **መጨረሻ** ሁለቱም ይጠበቃሉ፤ ማጭበርበር ሲጀምር መካከለኛው ይዘት ይወገዳል።
+የእያንዳንዱ ክፍል **መጀመሪያ** (head) እና **መጨረሻ** (tail) ሁለቱም ይቆያሉ፤ ማጭበርበር ሲጀምር መካከለኛው ይዘት ይጣላል።
 
-### የሚቀረው vs. የሚቆረጠው
+### ምን ይቆያል እና ምን ይቆረጣል
 
-| ይዘት                 | `minimal` | `standard` | `aggressive` |
-| ------------------- | --------- | ---------- | ------------ |
-| ስህተቶች / ስታክ መከታተያዎች | ✅ ተጠብቋል  | ✅ ተጠብቋል   | ✅ ተጠብቋል     |
-| የሙከራ ውድቀቶች          | ✅ ተጠብቋል  | ✅ ተጠብቋል   | ✅ ተጠብቋል     |
-| የግንባታ ስህተቶች         | ✅ ተጠብቋል  | ✅ ተጠብቋል   | ✅ ተጠብቋል     |
-| የተሳካ ሙከራዎች (ዝርዝር)   | ✅ ተጠብቋል  | 🟡 ተሰብስቧል  | 🟡 ተሰብስቧል    |
-| የተራ ውፅዓት (የመረጃ ሎጎች) | 🟡 ተሰብስቧል | 🟡 ተሰብስቧል  | ❌ ተወግዷል     |
-| የእድገት አሞሌዎች         | 🟡 ተሰብስቧል | ❌ ተወግዷል   | ❌ ተወግዷል     |
-| ባነር / ASCII ኪነጥበብ   | 🟡 ተሰብስቧል | ❌ ተወግዷል   | ❌ ተወግዷል     |
+| ይዘት                     | minimal  | standard | aggressive |
+| ----------------------- | -------- | -------- | ---------- |
+| ስህተቶች / stack traces    | ✅ ቆይቷል  | ✅ ቆይቷል  | ✅ ቆይቷል    |
+| የሙከራ ውድቀቶች              | ✅ ቆይቷል  | ✅ ቆይቷል  | ✅ ቆይቷል    |
+| የbuild ስህተቶች            | ✅ ቆይቷል  | ✅ ቆይቷል  | ✅ ቆይቷል    |
+| የተሳኩ ሙከራዎች (ዝርዝር)       | ✅ ቆይቷል  | 🟡 ተጠምዟል | 🟡 ተጠምዟል   |
+| የተለመደ ውጤት (የመረጃ ምዝገባዎች) | 🟡 ተጠምዟል | 🟡 ተጠምዟል | ❌ ተጥሏል    |
+| የእድገት አሞሌዎች             | 🟡 ተጠምዟል | ❌ ተጥሏል  | ❌ ተጥሏል    |
+| ባነር / ASCII art         | 🟡 ተጠምዟል | ❌ ተጥሏል  | ❌ ተጥሏል    |
 
 ### ትክክለኛውን ጥንካሬ መምረጥ
 
@@ -383,18 +383,18 @@ config.intensity === "aggressive" ? 16 : 24,
                   │
       ┌───────────┼───────────┐
       │           │           │
-     አዎ         አይ       እርግጠኛ አይደለም
+     አዎ          አይ       እርግጠኛ አይደለሁም
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
       │      አፈጻጸም ምን ያህል    መጀመሪያ `standard` ይሞክሩ
-      │      ወሳኛ ነው?        (ለ80% ጉዳዮች ይሰራል)
-      │           │
+      │      ወሳኝ ነው?         (ለ80% ጉዳዮች
+      │           │          ይሰራል)
       │      ┌────┴────┐
       │      │         │
-      │     ዝቅተኛ     ከፍተኛ
+      │     ዝቅተኛ      ከፍተኛ
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -404,7 +404,7 @@ config.intensity === "aggressive" ? 16 : 24,
 
 ### ጥንካሬን ማዋቀር
 
-**በኮምቦ** (በኮምቦ ኮንፊግ ውስጥ)፦
+**በእያንዳንዱ ኮምቦ** (በኮምቦ ኮንፊግ ውስጥ)፦
 
 ```json
 {
@@ -417,11 +417,11 @@ config.intensity === "aggressive" ? 16 : 24,
 }
 ```
 
-**በፕሮግራም**፦
+**በፕሮግራም አገባብ**፦
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) አንድ
-`CompressionEngine` ነው እና `updateConfig` ሜትድ የለውም። ይልቁንስ የኤንጂኑን ኮንፊግ
-በregistry ረዳት በኩል ያዘምኑ፦
+`CompressionEngine` ነው እና `updateConfig` የሚባል ዘዴ የለውም። ስለዚህ የእንጂኑን ኮንፊግ
+ለማዘመን በregistry ረዳት ተግባር በኩል ይጠቀሙ፦
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -431,7 +431,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### ውጤቱን ማረጋገጥ
 
-በመረጡት ጥንካሬ ላይ ማጣሪያዎ ደህና መሆኑን ለማረጋገጥ **ማረጋገጫ በር (Verify Gate)** ን ይጠቀሙ (ከታች ይመልከቱ)፦
+ማጣሪያዎ በመረጡት ጥንካሬ ደረጃ ደህና መሆኑን ለማረጋገጥ **Verify Gate** (ከታች ይመልከቱ) ይጠቀሙ፦
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

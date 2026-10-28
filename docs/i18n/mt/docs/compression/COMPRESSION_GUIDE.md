@@ -34,90 +34,93 @@ Talba tal-Klijent
 
 ### Off
 
-Ma tiġi applikata l-ebda kompressjoni. Il-messaġġi kollha jgħaddu mingħajr ma jinbidlu.
+L-ebda kompressjoni ma tiġi applikata. Il-messaġġi kollha jgħaddu mingħajr bidla.
 
 ### Modalità Lite (~15% iffrankar, <1ms latenza)
 
-L-aktar modalità sigura — l-ebda bidla semantika, biss tindif tal-ifformattjar:
+L-iktar modalità sigura — l-ebda bidla semantika, biss tindif tal-formatjar:
 
-| Teknika                  | Deskrizzjoni                                              |
-| ------------------------ | --------------------------------------------------------- |
-| `collapseWhitespace`     | Jgħaqqad linji vojta konsekuttivi u spazji żejda fl-aħħar |
-| `dedupSystemPrompt`      | Jneħħi messaġġi tas-sistema duplikati                     |
-| `compressToolResults`    | Jikkompressa outputs verbose ta' għodod/funzjonijiet      |
-| `removeRedundantContent` | Jneħħi struzzjonijiet ripetuti                            |
-| `replaceImageUrls`       | Jiqsar il-URIs tad-dejta ta' immaġini base64              |
+| Teknika                  | Deskrizzjoni                                                      |
+| ------------------------ | ----------------------------------------------------------------- |
+| `collapseWhitespace`     | Waħħad linji vojta konsekuttivi u spazji żejda fl-aħħar tal-linji |
+| `dedupSystemPrompt`      | Neħħi messaġġi tas-sistema duplikati                              |
+| `compressToolResults`    | Kompressa outputs verbali ta' għodod/funzjonijiet                 |
+| `removeRedundantContent` | Neħħi struzzjonijiet ripetuti                                     |
+| `replaceImageUrls`       | Qassar id-data URIs ta' immaġini base64                           |
 
-**L-aħjar għal:** Użu kontinwu, workflows kritiċi għas-sigurtà.
+**L-aħjar għal:** Użu dejjem attiv, flussi ta' xogħol kritiċi għas-sigurtà.
 
 ### Modalità Standard (~30% iffrankar)
 
-Ispirata minn [Caveman](https://github.com/JuliusBrussee/caveman) — tneħħi kliem ta' mili u frażijiet verbose filwaqt li żżomm it-tifsira:
+Ispirata minn [Caveman](https://github.com/JuliusBrussee/caveman) — tneħħi kliem żejda u frażijiet verbali filwaqt li tippreserva t-tifsira:
 
-- Tneħħi kliem ta' mili ("please", "I think", "basically", "actually")
-- Tikkondensa frażijiet verbose ("in order to" → "to", "as a result of" → "because")
-- Tneħħi espressjonijiet ta' ċortesija żejda ("Would you mind...", "If you could possibly...")
-- 30+ regola regex adattati għal prompts ta' coding
+- Tneħħi kliem li jimla ("jekk jogħġbok", "naħseb", "bażikament", "attwalment")
+- Ikkondensa frażijiet verbali ("sabiex" → "biex", "bħala riżultat ta'" → "għaliex")
+- Tneħħi formuli edukati żejda ("Tindunnjax...", "Kieku tkun tista'...")
+- Aktar minn 30 regola regex imfassla għal prompts tal-programmazzjoni
 
-**L-aħjar għal:** Workflows ta' coding ta' kuljum, timijiet konxji mill-ispejjeż.
+**L-aħjar għal:** Flussi ta' xogħol ta' programmazzjoni ta' kuljum, timijiet konxji mill-ispejjeż.
 
-### Modalità Aggressive (~50% iffrankar)
+### Modalità Aggressiva (~50% iffrankar)
 
 Ġestjoni intelliġenti tal-istorja għal sessjonijiet twal:
 
-- **Message Aging** — messaġġi eqdem jiġu kkompressati progressivament
-- **Tool Result Compression** — outputs twal ta' għodod jiġu mqatgħa jew elided (linji tal-bidu/aħħar,
-  filtrazzjoni ta' linji li jaqblu, kompattazzjoni ta' keys JSON)
-- **Structural Integrity Guards** — jiżgura li l-pari `tool_use` + `tool_result` jibqgħu konsistenti
-- **Context Window Awareness** — jirrispetta l-limiti tat-tokens għal kull mudell
+- **Tixjiħ tal-Messaġġi** — messaġġi eqdem jiġu kompressati progressivament
+- **Kompressjoni tar-Riżultati tal-Għodod** — outputs twal ta' għodod jitqattgħu jew jiġu
+  eliditi (l-ewwel/l-aħħar linji, filtrar ta' linji li jaqblu, kompattazzjoni ta' keys JSON)
+- **Gwardjani tal-Integrità Strutturali** — jiżguraw li l-pari `tool_use` + `tool_result`
+  jibqgħu konsistenti
+- **Kuxjenza tat-Tieqa tal-Kuntest** — tirrispetta l-limiti tat-tokens ta' kull mudell
 
 **L-aħjar għal:** Sessjonijiet estiżi ta' debugging, codebases kbar.
 
 ### Modalità Ultra (~75% iffrankar)
 
-Kompressjoni massima għal xenarji kritiċi għat-tokens:
+Kompressjoni massima għal xenarji fejn it-tokens huma kritiċi:
 
-- **Heuristic Pruning** — pruning tal-proża ibbażat fuq score tat-tokens
-- **Structure Preservation** — blokki ta' kodiċi fenced, kodiċi inline, URLs u identifikaturi
-  jiġu tombstoned u re-stitched verbatim, qatt ma jiġu pruned
-- **Livell SLM fakultattiv** — mudell lokali żgħir jista' jirrefina l-prune meta jiġi kkonfigurat
-- Indipendenti mill-modalità Aggressive: ma tmexxix message aging, kompressjoni ta' riżultati
-  ta' għodod jew is-summarizer ta' fallback (biss falliment fil-livell SLM jista' jirrotta
-  pass ta' fallback permezz tal-aggressive)
+- **Qtugħ Ewristiku** — qtugħ ta' tokens tal-prosa ibbażat fuq punteġġ
+- **Preservazzjoni tal-Istruttura** — blokki ta' kodiċi bil-fences, kodiċi inline, URLs u
+  identifikaturi jiġu kkunvertiti f'tombstones u mbagħad jerġgħu jiġu sstituti verbatim,
+  qatt ma jitqattgħu
+- **Livell SLM opzjonali** — mudell lokali żgħir jista' jirfina l-qtugħ meta jiġi kkonfigurat
+- Indipendenti mill-modalità Aggressiva: ma tħaddimx it-tixjiħ tal-messaġġi, il-kompressjoni
+  tar-riżultati tal-għodod jew is-summarizer ta' fallback (biss falliment fil-livell SLM
+  jista' jgħaddi pass ta' fallback permezz tal-aggressiva)
 
-**L-aħjar għal:** Meta tkun qed tilħaq il-limiti tal-kontest ripetutament.
+**L-aħjar għal:** Meta tkun qed tilħaq il-limiti tal-kuntest ripetutament.
 
-### Modalità RTK (firxa ta' 60-90% upstream)
+### Modalità RTK (firxa upstream ta' 60-90%)
 
-Il-modalità RTK hija ottimizzata għal outputs verbose ta' għodod li jidhru f'sessjonijiet ta' aġenti ta' coding:
+Il-modalità RTK hija ottimizzata għal outputs verbali ta' għodod li jidhru f'sessjonijiet ta' aġenti tal-programmazzjoni:
 
-- Jidentifika klassijiet ta' kmand/output bħal `git status`, `git diff`, `git log`, test runners,
-  builds ta' TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, logs ta' Docker,
-  output ta' infra, u output ġeneriku ta' shell
-- Japplika pakketti ta' filtri JSON minn `open-sse/services/compression/engines/rtk/filters/`
-- Jimporta filtri tal-iskema RTK TOML v1 minn fajls `filters.toml` ta' proġett jew globali,
-  b'validazzjoni b'test inline u trust-gating għal fajls tal-proġett
-- Jigi ma' 56 filtru built-in b'kampjuni ta' verifika inline
-- Jneħħi sekwenzi ta' kontroll ANSI, progress bars, linji ripetuti, u ħoss mhux azzjonabbli
-- Jżomm fallimenti, żbalji, twissijiet, fajls mibdula, sommarji, u l-aħħar ta' output twil
-- Jappoġġja filtri ta' proġett b'trust-gating, filtri globali, u rkupru fakultattiv ta' output grezz redacted
+- Tidentifika klassijiet ta' kmand/output bħal `git status`, `git diff`, `git log`, test
+  runners, builds ta' TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs,
+  logs ta' Docker, output ta' infrastruttura, u output ġeneriku tal-shell
+- Tapplika pakketti ta' filtri JSON minn `open-sse/services/compression/engines/rtk/filters/`
+- Timporta filtri RTK TOML schema v1 minn fajls `filters.toml` tal-proġett jew globali,
+  b'validazzjoni permezz ta' testijiet inline u trust-gating għal fajls tal-proġett
+- Tiġi fornuta ma' 56 filtru integrat b'kampjuni ta' verifika inline
+- Tneħħi sekwenzi ta' kontroll ANSI, progress bars, linji ripetuti, u ħoss li ma jirrikjedi l-ebda azzjoni
+- Żżomm fallimenti, żbalji, twissijiet, fajls mibdula, sommarji, u l-aħħar parti ta' output twil
+- Tappoġġa filtri ta' proġett soġġetti għal trust-gating, filtri globali, u rkupru opzjonali
+  ta' output grezz iredattjat
 
-**L-aħjar għal:** Sessjonijiet ta' aġenti b'transkritti ta' shell, build, test, git, grep, u output ta' fajls.
+**L-aħjar għal:** Sessjonijiet ta' aġenti b'traskrizzjonijiet ta' shell, build, test, git, grep, u output ta' fajls.
 
 ### Modalità Stacked (firxa eliġibbli ta' 78-95%)
 
-Il-modalità Stacked tmexxi diversi magni ta' kompressjoni f'ordni deterministika. Il-pipeline default hija:
+Il-modalità Stacked tħaddem diversi magni ta' kompressjoni f'ordni deterministika. Il-pipeline default hija:
 
 ```txt
 RTK -> Caveman
 ```
 
-Dik l-ordni żżomm l-output tal-terminal/għodod kompatt l-ewwel, imbagħad tapplika l-kondensazzjoni
-semantika ta' Caveman għall-prompt tal-lingwa naturali li jifdal. Il-pipelines Stacked jistgħu jiġu
-kkonfigurati globalment jew permezz ta' kombinazzjonijiet ta' kompressjoni assenjati lil
-kombinazzjonijiet ta' routing.
+Dik l-ordni żżomm l-output tat-terminal/għodod kompatt l-ewwel, u mbagħad tapplika
+kondensazzjoni semantika ta' Caveman lill-prompt f'lingwa naturali li jifdal. Pipelines
+Stacked jistgħu jiġu kkonfigurati globalment jew permezz ta' combos ta' kompressjoni
+assenjati lil combos ta' routing.
 
-**L-aħjar għal:** Kontest mħallat b'logs kbar ta' għodod flimkien ma' struzzjonijiet umani jew sommarji tal-assistent.
+**L-aħjar għal:** Kuntest mħallat b'logs kbar ta' għodod flimkien ma' struzzjonijiet umani jew sommarji tal-assistent.
 
 ---
 

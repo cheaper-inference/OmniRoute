@@ -40,11 +40,11 @@ Sisseehitatud kataloog sisaldab praegu 56 filtrit järgmistes kategooriates:
 | `shell`    | `ls`, `find`, `grep`, üldised shelli logid                    |
 | `docker`   | `docker ps`, Dockeri logid                                    |
 | `infra`    | Terraform, OpenTofu, `systemctl status`                       |
-| `generic`  | JSON-väljund, pinujäljed, üldine väljundi varuvariant         |
+| `generic`  | JSON-väljund, pinujäljed, üldine väljundi varufilter          |
 
 Detektor failis `open-sse/services/compression/engines/rtk/commandDetector.ts` klassifitseerib
-väljundi enne filtri valikut. Kui käsuklassist ei piisa, võivad filtrid klappida ka käsu mustri
-või väljundi regulaaravaldisega.
+väljundi enne filtri valimist. Filtrid võivad sobida ka käsumustri või väljundi regulaaravaldise
+alusel, kui käsuklassist ei piisa.
 
 ## Filtrite lahendamine
 
@@ -351,21 +351,21 @@ node --import tsx/esm --test \
 
 ---
 
-## Intensiivsustasemed (v3.8.16+)
+## Intensiivsuse tasemed (v3.8.16+)
 
-RTK toetab **3 intensiivsustaset**, mis loovad tasakaalu **pakkimise agressiivsuse** ja **ohutuse** vahel. Taset määratakse mootori konfiguratsioonis `config.intensity` kaudu.
+RTK toetab **3 intensiivsuse taset**, mis tasakaalustavad **tihendamise agressiivsuse** ja **turvalisuse** vahel. Tase seatakse mootori konfiguratsioonis `config.intensity` kaudu.
 
 ### Kolm taset
 
-| Tase                   | Lõikamiselävi            | Tokenite kokkuhoid | Risk       | Sobib kõige paremini                    |
-| ---------------------- | ------------------------ | ------------------ | ---------- | --------------------------------------- |
-| `minimal`              | 24 rida sektsiooni kohta | ~20-40%            | Väga madal | Tootmine kriitilise kontekstiga         |
-| `standard` (vaikimisi) | 24 rida sektsiooni kohta | ~50-70%            | Madal      | Igapäevased kodeerimissessioonid        |
-| `aggressive`           | 16 rida sektsiooni kohta | ~70-90%            | Keskmine   | Pikad sessioonid, maksimaalne kokkuhoid |
+| Tase                   | Kärpimise lävi           | Tokenite kokkuhoid | Risk       | Sobib kõige paremini                 |
+| ---------------------- | ------------------------ | ------------------ | ---------- | ------------------------------------ |
+| `minimal`              | 24 rida sektsiooni kohta | ~20-40%            | Väga madal | Kriitilise kontekstiga tootmine      |
+| `standard` (vaikimisi) | 24 rida sektsiooni kohta | ~50-70%            | Madal      | Igapäevased kodeerimisseansid        |
+| `aggressive`           | 16 rida sektsiooni kohta | ~70-90%            | Keskmine   | Pikad seansid, maksimaalne kokkuhoid |
 
-### Kus lõikamine toimub
+### Kus kärpimine toimub
 
-Lõikamiselävi mõjutab faili `lineFilter.ts`:
+Kärpimise lävi mõjutab faili `lineFilter.ts`:
 
 ```ts
 // Failist open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -373,39 +373,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Iga sektsiooni **algus** ja **lõpp** säilitatakse; lõikamise rakendumisel jäetakse keskmine sisu välja.
+Iga sektsiooni **head**- ja **tail**-osa säilitatakse; keskmine sisu eemaldatakse, kui kärpimine rakendub.
 
-### Mis säilib ja mis eemaldatakse
+### Mis jääb alles ja mis eemaldatakse
 
 | Sisu                         | minimal       | standard      | aggressive    |
 | ---------------------------- | ------------- | ------------- | ------------- |
 | Vead / pinujäljed            | ✅ säilitatud | ✅ säilitatud | ✅ säilitatud |
 | Testide ebaõnnestumised      | ✅ säilitatud | ✅ säilitatud | ✅ säilitatud |
 | Ehitusvead                   | ✅ säilitatud | ✅ säilitatud | ✅ säilitatud |
-| Läbitud testid (detailsed)   | ✅ säilitatud | 🟡 ahendatud  | 🟡 ahendatud  |
-| Rutiinne väljund (infologid) | 🟡 ahendatud  | 🟡 ahendatud  | ❌ eemaldatud |
-| Edenemisribad                | 🟡 ahendatud  | ❌ eemaldatud | ❌ eemaldatud |
-| Bänner / ASCII-kunst         | 🟡 ahendatud  | ❌ eemaldatud | ❌ eemaldatud |
+| Läbitud testid (detailsed)   | ✅ säilitatud | 🟡 koondatud  | 🟡 koondatud  |
+| Rutiinne väljund (infologid) | 🟡 koondatud  | 🟡 koondatud  | ❌ eemaldatud |
+| Edenemisribad                | 🟡 koondatud  | ❌ eemaldatud | ❌ eemaldatud |
+| Bänner / ASCII-graafika      | 🟡 koondatud  | ❌ eemaldatud | ❌ eemaldatud |
 
 ### Õige intensiivsuse valimine
 
 ```
-                  Is losing context catastrophic?
+                  Kas konteksti kaotus on katastroofiline?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    YES          NO          NOT SURE
+     JAH         EI       POLE KINDEL
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      How critical    Try `standard` first
-      │      is throughput?  (works for 80% of
-      │           │          cases)
+      │    Kui kriitiline     Proovi esmalt `standard`-it
+      │  on läbilaskevõime?   (sobib 80% juhtudest)
+      │           │
       │      ┌────┴────┐
       │      │         │
-      │     LOW       HIGH
+      │   MADAL      KÕRGE
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -431,7 +431,7 @@ Iga sektsiooni **algus** ja **lõpp** säilitatakse; lõikamise rakendumisel jä
 **Programmiliselt**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) on
-`CompressionEngine` ning sellel pole `updateConfig`-meetodit. Uuenda mootori
+`CompressionEngine` ning sellel puudub `updateConfig` meetod. Uuenda mootori
 konfiguratsiooni selle asemel registri abifunktsiooni kaudu:
 
 ```ts
@@ -442,7 +442,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Mõju kontrollimine
 
-Kasuta funktsiooni **Verify Gate** (vt allpool), et veenduda, et sinu filter on valitud intensiivsuse juures ohutu:
+Kasuta **Verify Gate**-i (vt allpool), et veenduda, et sinu filter on valitud intensiivsuse juures turvaline:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

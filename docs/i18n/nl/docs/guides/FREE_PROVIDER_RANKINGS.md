@@ -13,30 +13,30 @@
 
 ## Wat het is
 
-OmniRoute registreert 376 providers, waaronder 155 catalogusvermeldingen die als **gratis/geen authenticatie** zijn gemarkeerd
-(geen authenticatie,
-OAuth met gratis laag of API-sleutel met gratis laag — zie de
-[Gids voor gratis lagen](../getting-started/FREE-TIERS-GUIDE.md) en de volledige
-[Directory met gratis lagen](../reference/FREE_TIERS.md)). Het nadeel: gratis providers verschillen
-sterk in modelkwaliteit. Een provider zonder authenticatie die een frontiermodel aanbiedt, is veel nuttiger
-dan een provider die een klein verouderd model aanbiedt.
+OmniRoute registreert 376 providers, waaronder 155 catalogusvermeldingen gemarkeerd als **gratis/no-auth**
+(no-auth,
+OAuth met gratis tier, of API-sleutel met gratis tier — zie de
+[Gids voor gratis tiers](../getting-started/FREE-TIERS-GUIDE.md) en het volledige
+[overzicht van gratis tiers](../reference/FREE_TIERS.md)). Het addertje onder het gras: gratis providers variëren
+enorm in modelkwaliteit. Een no-auth-provider die een frontier-model aanbiedt, is veel nuttiger
+dan een die een klein, verouderd model aanbiedt.
 
-**Ranglijsten van gratis providers** beantwoordt de vraag "**welke gratis provider biedt mij het beste model?**" door
-de catalogus van elke gratis provider te combineren met **door de gemeenschap verzamelde kwaliteitsscores** van het
-**Arena AI-klassement** (ELO op basis van menselijke voorkeuren, hetzelfde idee als achter de LMArena-
-chatbotarena). Providers worden vervolgens gerangschikt op basis van de kracht van hun **beste gratis model**.
+**Free Provider Rankings** beantwoordt de vraag "**welke gratis provider geeft mij het beste model?**" door
+de catalogus van elke gratis provider te koppelen aan **crowd-gesourcete kwaliteitsscores** van het
+**Arena AI-leaderboard** (ELO op basis van menselijke voorkeur, hetzelfde idee als achter de LMArena-
+chatbotarena). Providers worden vervolgens gerangschikt op de sterkte van hun **beste gratis model**.
 
-De ranglijst wordt berekend aan de hand van drie echte bronnen:
+De rangschikking wordt berekend uit drie echte bronnen:
 
 1. De lijsten met gratis providers — `NOAUTH_PROVIDERS`, plus vermeldingen in `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` die zijn gemarkeerd met `hasFree`
    (`src/shared/constants/providers.ts`).
 2. De modelcatalogus van elke provider uit het providerregister
    (`open-sse/config/providerRegistry.ts`).
-3. Van ELO afgeleide scores voor taakgeschiktheid die door de
-   Arena ELO-synchronisatie-engine in de DB-tabel `model_intelligence` worden opgeslagen (`src/lib/arenaEloSync.ts`).
+3. Uit ELO afgeleide taakgeschiktheidsscores, opgeslagen in de DB-tabel `model_intelligence` door de
+   Arena ELO-sync-engine (`src/lib/arenaEloSync.ts`).
 
-De samenvoegingslogica bevindt zich in `src/lib/freeProviderRankings.ts`.
+De join-logica bevindt zich in `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -124,38 +124,40 @@ taakgeschiktheid (zie hieronder). Providers zonder modellen met een score worden
 
 ### Bron: Arena AI-leaderboard
 
-De Arena ELO-sync-engine (`src/lib/arenaEloSync.ts`) haalt twee leaderboards op — `text`
+De Arena ELO-syncengine (`src/lib/arenaEloSync.ts`) haalt twee leaderboards op — `text`
 en `code` — van de Arena AI-leaderboard-API
 (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Wanneer die API geen
-bruikbaar leaderboard teruggeeft, valt de engine terug op de officiële
+bruikbaar leaderboard retourneert, valt de engine terug op de officiële
 `lmarena-ai/leaderboard-dataset` op de Hugging Face datasets-server
-(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
-`coding` → `code`); `GET /api/intelligence/sync` rapporteert `activeSource`, `lastError`
-en `lastFailedAt`. Elk leaderboard-item bevat een modelnaam, leverancier, ELO-`score`,
+(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`, `coding` → `code`);
+`GET /api/intelligence/sync` rapporteert `activeSource`, `lastError` en `lastFailedAt`.
+Elke leaderboardvermelding bevat een modelnaam, leverancier, ELO-`score`,
 betrouwbaarheidsinterval en stemaantal.
 
-Leaderboard-categorieën worden toegewezen aan OmniRoute-taakcategorieën:
+Leaderboardcategorieën worden gemapt op OmniRoute-taakcategorieën:
 
-| Arena-leaderboard | OmniRoute-taakcategorieën                         |
+| Arena leaderboard | OmniRoute-taakcategorieën                         |
 | ----------------- | ------------------------------------------------- |
 | `text`            | `default`, `review`, `documentation`, `debugging` |
 | `code`            | `coding`                                          |
 
 ### Normalisatie (task-fit-score)
 
-Ruwe ELO-scores worden per leaderboard genormaliseerd tot een **task-fit-waarde in `[0.4, 0.98]`**:
+Ruwe ELO-scores worden per leaderboard genormaliseerd tot een **task-fit-waarde in
+`[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-De score bereikt nooit `0` of `1`, waardoor er ruimte overblijft voor
-gebruikersoverschrijvingen. Dit is het `score`-veld dat je in de API-respons ziet en het
-label dat op het dashboard wordt weergegeven.
+De score bereikt nooit `0` of `1`, waardoor er marge overblijft voor overschrijvingen
+door de gebruiker. Dit is het `score`-veld dat je in de API-respons ziet en het label
+dat op het dashboard wordt getoond.
 
 ### Betrouwbaarheid
 
-Elk item krijgt een betrouwbaarheidsniveau op basis van het Arena-stemaantal:
+Elke vermelding krijgt een betrouwbaarheidsniveau op basis van het aantal
+Arena-stemmen:
 
 | Betrouwbaarheid | Stemmen |
 | --------------- | ------- |
@@ -163,56 +165,58 @@ Elk item krijgt een betrouwbaarheidsniveau op basis van het Arena-stemaantal:
 | `medium`        | ≥ 1.000 |
 | `low`           | < 1.000 |
 
-### Opslag en versheid
+### Opslag en actualiteit
 
-Genormaliseerde items worden weggeschreven naar de DB-tabel `model_intelligence` met
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Items **verlopen na
-7 dagen**, zodat een provider die stopt met synchroniseren uiteindelijk verdwijnt in
-plaats van verouderde gegevens te blijven serveren.
+Genormaliseerde vermeldingen worden weggeschreven naar de DB-tabel `model_intelligence`
+met `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Vermeldingen **verlopen
+na 7 dagen**, zodat een provider die stopt met synchroniseren uiteindelijk wegvalt in
+plaats van verouderde gegevens te blijven aanbieden.
 
-De synchronisatie staat **standaard aan**:
+De sync staat **standaard aan**:
 
-- Hij draait eenmaal bij het opstarten van de server en daarna op een periodieke timer
-  (`src/lib/arenaEloSync.ts`, aangestuurd vanuit `src/instrumentation-node.ts`).
-- Hij is **niet-blokkerend en nooit fataal** — als het ophalen van de upstream mislukt,
-  blijft OmniRoute gewoon draaien en tonen de ranglijsten simpelweg de laatst bekende
-  goede gegevens (of een lege status).
+- Hij draait eenmalig bij het opstarten van de server en daarna op een periodieke timer
+  (`src/lib/arenaEloSync.ts`, aangesloten vanuit `src/instrumentation-node.ts`).
+- Hij is **niet-blokkerend en nooit fataal** — als het ophalen van upstream mislukt,
+  blijft OmniRoute draaien en tonen de ranglijsten simpelweg de laatste goede gegevens
+  (of een lege toestand).
 
-Twee omgevingsvariabelen sturen dit (gedocumenteerd in
+Twee omgevingsvariabelen regelen dit (gedocumenteerd in
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Variabele                 | Standaard     | Doel                                                          |
-| ------------------------- | ------------- | ------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Stel in op `false` om je af te melden voor de uitgaande sync. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Synchronisatie-interval, in seconden.                         |
+| Variabele                 | Standaard     | Doel                                                  |
+| ------------------------- | ------------- | ----------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Zet op `false` om de uitgaande sync uit te schakelen. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sync-interval, in seconden.                           |
 
 ### Handmatige sync / status / wissen
 
-Voor operators biedt een geauthenticeerd management-endpoint handmatige controle
-(`src/app/api/intelligence/sync/route.ts` — vereist management-authenticatie):
+Voor operators biedt een geauthenticeerd beheerendpoint handmatige bediening
+(`src/app/api/intelligence/sync/route.ts` — vereist beheerauthenticatie):
 
 ```
 GET    /api/intelligence/sync          # huidige syncstatus (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # start een handmatige sync; body: { "dryRun": true } voor een voorbeeld zonder weg te schrijven
-DELETE /api/intelligence/sync          # wis alle gesynchroniseerde arena_elo-intelligence-items
+POST   /api/intelligence/sync          # een handmatige sync starten; body: { "dryRun": true } voor een voorbeeld zonder weg te schrijven
+DELETE /api/intelligence/sync          # alle gesynchroniseerde arena_elo-intelligence-vermeldingen wissen
 ```
 
 Als de ranglijstpagina leeg is, vult een handmatige `POST /api/intelligence/sync` (of
-simpelweg de server opnieuw starten) deze opnieuw.
+simpelweg de server herstarten) deze opnieuw.
 
-### Modellen koppelen aan het leaderboard
+### Modellen aan het leaderboard koppelen
 
 Registry-model-ID's en Arena-modelnamen komen niet altijd exact overeen. De ranking
 gebruikt flexibele matching (`findMatchingIntelligence` in
 `src/lib/freeProviderRankings.ts`):
 
 1. Exacte match op de genormaliseerde model-ID.
-2. Match na het verwijderen van een eindigend versieachtervoegsel (bijv. `kimi-k2.6` → `kimi-k2`).
+2. Match na het verwijderen van een versieachtervoegsel aan het einde (bijv.
+   `kimi-k2.6` → `kimi-k2`).
 3. Prefix-match (een leaderboard-modelnaam is een prefix van de registry-ID).
 
 Aan de sync-kant worden bekende leveranciersprefixen (`anthropic/`, `openai/`,
-`google/`, …) verwijderd en zet een kleine alias-map canonieke namen om in de varianten
-die OmniRoute intern gebruikt, zodat modellen onder elke naam vindbaar blijven.
+`google/`, …) verwijderd en zet een kleine alias-map canonieke namen om naar de
+varianten die OmniRoute intern gebruikt, zodat modellen onder elke naam vindbaar
+blijven.
 
 ### Hoe een provider wordt gerangschikt
 
@@ -222,8 +226,8 @@ Voor elke gratis provider scoort de engine elk model in diens catalogus, waarna:
 - **Gem. score** = de gemiddelde score over alle gescoorde modellen van die provider.
 - **Modellen** = hoeveel modellen van de provider een Arena-score hadden.
 
-Providers worden eerst gesorteerd op **topmodelscore**, daarna op gemiddelde score. Dit
-beloont een provider die ten minste één sterk gratis model aanbiedt.
+Providers worden eerst gesorteerd op **topmodelscore** en daarna op gemiddelde score.
+Dit beloont een provider die ten minste één sterk gratis model aanbiedt.
 
 ---
 

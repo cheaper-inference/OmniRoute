@@ -608,23 +608,23 @@ post_install() {
 ## 📊 利用可能なモデル
 
 <details>
-<summary><b>利用可能なすべてのモデルを表示</b></summary>
+<summary><b>利用可能な全モデルを表示</b></summary>
 
-> 以下のリストは v3.8.0 の `open-sse/config/providerRegistry.ts` から厳選したものです。クラウドカタログ(Gemini、OpenRouter など)は動的に同期されます — 最新の完全なカタログについては、**Dashboard → Providers → [provider] → Available Models** を開くか、`GET /api/models/catalog` を呼び出してください。
+> 以下のリストは v3.8.0 時点の `open-sse/config/providerRegistry.ts` から厳選したものです。クラウドカタログ（Gemini、OpenRouter など）は動的に同期されます — 最新の完全なカタログは **Dashboard → Providers → [provider] → Available Models** を開くか、`GET /api/models/catalog` を呼び出してください。
 >
-> プロバイダーの組み込みリストが古くなっている場合は、そのページの **Import from /models** を使用するか(または **Auto-Sync** を有効にして)、最新のアップストリームカタログを取り込んでください。これは LLM7.io (`gemini-3.1-flash-lite`) と UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) で v3.8.50 にて検証済みです。同じテストパスにおいて、Pollinations の匿名アクセスはアップストリーム側の制限が続いていました。
+> プロバイダーの組み込みリストが古くなっている場合は、そのページの **Import from /models** を使用する（または **Auto-Sync** を有効にする）ことで、最新の上流カタログを取得できます。これは v3.8.50 で LLM7.io（`gemini-3.1-flash-lite`）および UncloseAI（`solidrust/Hermes-3-Llama-3.1-8B-AWQ`）について検証済みです。同じテスト工程で、Pollinations の匿名アクセスは上流側の制限により制約されたままでした。
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`、`cc/claude-opus-4-7`、`cc/claude-opus-4-6`、`cc/claude-opus-4-5-20251101`、`cc/claude-sonnet-4-6`、`cc/claude-sonnet-4-5-20250929`、`cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort ティア: `gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`)、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5`（+ effort ティア: `gpt-5.5-xhigh`、`gpt-5.5-high`、`gpt-5.5-medium`、`gpt-5.5-low`）、`cx/gpt-5.4`、`cx/gpt-5.4-mini`、`cx/gpt-5.3-codex`、`cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`、`gh/gpt-5.4`、`gh/gpt-5.4-mini`、`gh/gpt-5-mini`、`gh/gpt-5.3-codex`、`gh/claude-opus-4.7`、`gh/claude-opus-4.6`、`gh/claude-opus-4-5-20251101`、`gh/claude-sonnet-4.6`、`gh/claude-sonnet-4.5`、`gh/claude-haiku-4.5`、`gh/gemini-3.1-pro-preview`、`gh/gemini-3-flash-preview`、`gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — 無料 OAuth: **Dashboard → Providers → Kiro → Available Models** に表示される最新カタログを使用してください。利用可否はアカウントとプランによって異なります。
+**Kiro (`kr/`)** — 無料 OAuth: **Dashboard → Providers → Kiro → Available Models** に表示される最新カタログを使用してください。利用可能なモデルはアカウントとプランによって異なります。
 
 **Qoder (`if/`)** — 無料 OAuth: `if/qwen3.8-max-preview`、`if/qwen3.7-max`、`if/qwen3.7-plus`、`if/kimi-k3`、`if/kimi-k2.7-code`、`if/glm-5.2`、`if/deepseek-v4-pro`、`if/deepseek-v4-flash`、`if/minimax-m3`
 
-**GLM (`glm/`、`glm-cn/`、`zai/`、`glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
+**GLM (`glm/`、`glm-cn/`、`zai/`、`glmt/`)** — $0.2〜0.6/1M: `glm/glm-5.1`、`glm/glm-5`、`glm/glm-5-turbo`、`glm/glm-4.7`、`glm/glm-4.7-flash`、`glm/glm-4.6`、`glm/glm-4.6v`、`glm/glm-4.5`、`glm/glm-4.5v`、`glm/glm-4.5-air`
 
 **MiniMax (`minimax/`、`minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`、`minimax/MiniMax-M2.7-highspeed`、`minimax/MiniMax-M2.5`、`minimax/MiniMax-M2.5-highspeed`
 
@@ -636,11 +636,11 @@ post_install() {
 
 **xAI (`xai/`)** — Grok ネイティブ: `xai/grok-4.3`、`xai/grok-4.20-multi-agent-0309`、`xai/grok-4.20-0309-reasoning`、`xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU ホスト: `mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/devstral-latest`、`mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU ホスティング: `mistral/mistral-large-latest`、`mistral/mistral-medium-3-5`、`mistral/mistral-small-latest`、`mistral/devstral-latest`、`mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — 検索拡張: `pplx/sonar-deep-research`、`pplx/sonar-reasoning-pro`、`pplx/sonar-pro`、`pplx/sonar`
 
-**Together AI (`together/`)** — オープンソース: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (無料)、`together/meta-llama/Llama-Vision-Free`、`together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`、`together/deepseek-ai/DeepSeek-R1`、`together/Qwen/Qwen3-235B-A22B`、`together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — オープンソース: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free`（無料）、`together/meta-llama/Llama-Vision-Free`、`together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`、`together/deepseek-ai/DeepSeek-R1`、`together/Qwen/Qwen3-235B-A22B`、`together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — 高速推論: `fireworks/accounts/fireworks/models/kimi-k2p6`、`fireworks/accounts/fireworks/models/minimax-m2p7`、`fireworks/accounts/fireworks/models/qwen3p6-plus`、`fireworks/accounts/fireworks/models/glm-5p1`、`fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
@@ -654,11 +654,11 @@ post_install() {
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`、`ollama-cloud/deepseek-v4-flash`、`ollama-cloud/kimi-k2.6`、`ollama-cloud/glm-5.1`、`ollama-cloud/minimax-m2.7`、`ollama-cloud/gemma4:31b`、`ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: API キーごとに Google からリアルタイムで同期されます — 静的なリストはありません。**Dashboard → Providers** でキーを接続し、**Available Models** を使って現在のカタログをインポートしてください (例: `gemini/gemini-3-pro`、`gemini/gemini-3-flash`)。
+**Gemini (Google Cloud `gemini/`)**: API キーごとに Google からリアルタイムで同期されます — 静的なリストはありません。**Dashboard → Providers** でキーを接続し、**Available Models** を使って最新のカタログをインポートしてください（例: `gemini/gemini-3-pro`、`gemini/gemini-3-flash`）。
 
-**その他の互換プロバイダー** (抜粋): `cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock` (`aws-bedrock` 経由)、`azure-ai`、`openrouter` (パススルーカタログ)、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。各プロバイダーは `providerRegistry.ts` 内で独自のモデルリストを管理しており、プロバイダーが `/models` エンドポイントを公開している場合は自動同期が可能です。
+**その他の互換プロバイダー**（抜粋）: `cohere`、`databricks`、`snowflake`、`together`、`vertex`、`alibaba`、`alibaba-cn`、`bedrock`（`aws-bedrock` 経由）、`azure-ai`、`openrouter`（パススルーカタログ）、`siliconflow`、`hyperbolic`、`huggingface`、`featherless-ai`、`cloudflare-ai`、`scaleway`、`deepinfra`、`vercel-ai-gateway`、`bazaarlink`、`friendliai`、`nous-research`、`reka`、`volcengine`、`ai21`、`gigachat`。各プロバイダーは `providerRegistry.ts` 内で独自のモデルリストを管理しており、プロバイダーが `/models` エンドポイントを公開している場合は自動同期が可能です。
 
-**モデル ID に関する注意:** OmniRoute はプロバイダーネイティブの ID (`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`) を使用します。一部の ID にドット付きのバージョンが含まれているのは、アップストリームの API がその形式を要求するためです。上記にリストされていないモデルがある場合は、`omniroute models --search <term>` を実行するか、`GET /api/models/catalog` にアクセスして利用可否を確認してください。
+**モデル ID に関する注意:** OmniRoute はプロバイダーネイティブの ID（`claude-opus-4-8`、`gpt-5.5`、`glm-5.1`、`MiniMax-M2.7`、`kimi-k2.5`、`grok-4.20-0309-reasoning`）を使用します。一部の ID にドット区切りのバージョンが含まれているのは、上流の API がその形式を要求するためです。上記に記載されていないモデルがある場合は、`omniroute models --search <term>` を実行するか、`GET /api/models/catalog` にアクセスして利用可否を確認してください。
 
 </details>
 
@@ -1269,34 +1269,34 @@ OmniRoute はクラウドコーディングエージェント（**OpenAI Codex C
 
 ## 🛠️ プログラムによる管理
 
-**`manage` スコープを持つ Bearer キー**を使用すると、HTTP 経由ですべての OmniRoute リソース(プロバイダー、コンボ、キー、設定)を管理できます。
+**`manage` スコープを持つ Bearer キー**を使用して、HTTP 経由ですべての OmniRoute リソース（プロバイダー、コンボ、キー、設定）を管理できます。
 
-**Dashboard → API Keys → New Key → Scope: manage** でキーを生成し、次のように実行します:
+**Dashboard → API Keys → New Key → Scope: manage** でキーを生成し、次のように実行します：
 
 ```bash
-# プロバイダー一覧を取得
+# プロバイダーの一覧取得
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
-# プロバイダー接続を追加
+# プロバイダー接続の追加
 curl -X POST http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
 
-# コンボを作成
+# コンボの作成
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
 
-# API キーの一覧取得/作成
+# API キーの一覧取得／作成
 curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-完全なエンドポイントカタログとリクエスト/レスポンススキーマについては、[API_REFERENCE.md](../reference/API_REFERENCE.md) を参照してください。
+完全なエンドポイント一覧とリクエスト／レスポンスのスキーマについては、[API_REFERENCE.md](../reference/API_REFERENCE.md) を参照してください。
 
 ---
 

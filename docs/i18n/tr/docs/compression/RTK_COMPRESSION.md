@@ -23,9 +23,9 @@ Yığınlanmış:     1 - (1 - 0.80) * (1 - 0.46) = %89.2 tasarruf
 Aralık:          1 - (1 - 0.60..0.90) * (1 - 0.46) = %78.4-94.6
 ```
 
-## Neyi Sıkıştırır?
+## Neyi Sıkıştırır
 
-Yerleşik katalog şu anda şu kategorilerde 56 filtreyle birlikte gelir:
+Yerleşik katalog şu anda aşağıdaki kategorilerde 56 filtreyle birlikte gelir:
 
 | Kategori  | Örnekler                                                      |
 | --------- | ------------------------------------------------------------- |
@@ -36,11 +36,11 @@ Yerleşik katalog şu anda şu kategorilerde 56 filtreyle birlikte gelir:
 | `shell`   | `ls`, `find`, `grep`, genel kabuk günlükleri                  |
 | `docker`  | `docker ps`, Docker günlükleri                                |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON çıktısı, yığın izlemeleri, genel çıktı yedeği            |
+| `generic` | JSON çıktısı, yığın izleri, genel çıktı yedeği                |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` içindeki algılayıcı,
-filtre seçiminden önce çıktıyı sınıflandırır. Bir komut sınıfı yeterli olmadığında
-filtreler, komut deseni veya çıktı regex'i ile de eşleşebilir.
+`open-sse/services/compression/engines/rtk/commandDetector.ts` içindeki algılayıcı, filtre
+seçiminden önce çıktıyı sınıflandırır. Bir komut sınıfı yeterli olmadığında filtreler komut
+deseni veya çıktı regex'i ile de eşleşebilir.
 
 ## Filtre Çözümleme
 
@@ -319,17 +319,17 @@ node --import tsx/esm --test \
 
 ## Yoğunluk Seviyeleri (v3.8.16+)
 
-RTK, **sıkıştırma agresifliği** ile **güvenlik** arasında denge kuran **3 yoğunluk seviyesini** destekler. Seviye, motor yapılandırmasındaki `config.intensity` ile ayarlanır.
+RTK, **sıkıştırma agresifliği** ile **güvenlik** arasında denge kuran **3 yoğunluk seviyesini** destekler. Seviye, engine yapılandırmasındaki `config.intensity` ile ayarlanır.
 
 ### 3 Seviye
 
-| Seviye                  | Kırpma eşiği          | Token tasarrufu | Risk      | En uygun olduğu durum                 |
-| ----------------------- | --------------------- | --------------- | --------- | ------------------------------------- |
-| `minimal`               | Bölüm başına 24 satır | ~%20-40         | Çok düşük | Kritik bağlam içeren üretim ortamları |
-| `standard` (varsayılan) | Bölüm başına 24 satır | ~%50-70         | Düşük     | Günlük kodlama oturumları             |
-| `aggressive`            | Bölüm başına 16 satır | ~%70-90         | Orta      | Uzun oturumlar, maksimum tasarruf     |
+| Seviye                  | Kırpma eşiği          | Token tasarrufu | Risk      | En uygun olduğu durum                     |
+| ----------------------- | --------------------- | --------------- | --------- | ----------------------------------------- |
+| `minimal`               | bölüm başına 24 satır | ~20-40%         | Çok düşük | Kritik bağlam gerektiren üretim ortamları |
+| `standard` (varsayılan) | bölüm başına 24 satır | ~50-70%         | Düşük     | Günlük kodlama oturumları                 |
+| `aggressive`            | bölüm başına 16 satır | ~70-90%         | Orta      | Uzun oturumlar, maksimum tasarruf         |
 
-### Kırpma Nerede Gerçekleşir
+### Kırpmanın Gerçekleştiği Yer
 
 Kırpma eşiği `lineFilter.ts` dosyasını etkiler:
 
@@ -339,14 +339,14 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Her bölümün **başı** ve **sonu** korunur; kırpma devreye girdiğinde ortadaki içerik atılır.
+Her bölümün hem **başı** hem de **sonu** korunur; kırpma devreye girdiğinde ortadaki içerik atılır.
 
-### Neler Kalır, Neler Kesilir
+### Neler Korunur ve Neler Kesilir
 
 | İçerik                       | minimal       | standard      | aggressive    |
 | ---------------------------- | ------------- | ------------- | ------------- |
-| Hatalar / yığın izleri       | ✅ korunur    | ✅ korunur    | ✅ korunur    |
-| Başarısız testler            | ✅ korunur    | ✅ korunur    | ✅ korunur    |
+| Hatalar / stack trace'ler    | ✅ korunur    | ✅ korunur    | ✅ korunur    |
+| Test başarısızlıkları        | ✅ korunur    | ✅ korunur    | ✅ korunur    |
 | Derleme hataları             | ✅ korunur    | ✅ korunur    | ✅ korunur    |
 | Başarılı testler (ayrıntılı) | ✅ korunur    | 🟡 daraltılır | 🟡 daraltılır |
 | Rutin çıktı (bilgi logları)  | 🟡 daraltılır | 🟡 daraltılır | ❌ atılır     |
@@ -356,22 +356,22 @@ Her bölümün **başı** ve **sonu** korunur; kırpma devreye girdiğinde ortad
 ### Doğru Yoğunluğu Seçme
 
 ```
-                  Is losing context catastrophic?
+                  Bağlam kaybı felaketle sonuçlanır mı?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    YES          NO          NOT SURE
+    EVET        HAYIR      EMİN DEĞİL
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      How critical    Try `standard` first
-      │      is throughput?  (works for 80% of
-      │           │          cases)
+      │      Verim ne kadar   Önce `standard`ı deneyin
+      │      kritik?          (vakaların %80'inde
+      │           │           işe yarar)
       │      ┌────┴────┐
       │      │         │
-      │     LOW       HIGH
+      │    DÜŞÜK     YÜKSEK
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -381,7 +381,7 @@ Her bölümün **başı** ve **sonu** korunur; kırpma devreye girdiğinde ortad
 
 ### Yoğunluğu Yapılandırma
 
-**Kombo bazında** (kombo yapılandırmasında):
+**Combo bazında** (combo yapılandırmasında):
 
 ```json
 {
@@ -398,7 +398,7 @@ Her bölümün **başı** ve **sonu** korunur; kırpma devreye girdiğinde ortad
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) bir
 `CompressionEngine`'dir ve `updateConfig` metoduna sahip değildir. Bunun yerine
-bir motorun yapılandırmasını registry yardımcısı aracılığıyla güncelleyin:
+bir engine'in yapılandırmasını registry yardımcı işlevi aracılığıyla güncelleyin:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -408,7 +408,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Etkiyi Doğrulama
 
-Filtrenizin seçtiğiniz yoğunlukta güvenli olduğunu onaylamak için **Verify Gate**'i (aşağıya bakın) kullanın:
+Seçtiğiniz yoğunlukta filtrenizin güvenli olduğunu doğrulamak için **Verify Gate**'i (aşağıya bakın) kullanın:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

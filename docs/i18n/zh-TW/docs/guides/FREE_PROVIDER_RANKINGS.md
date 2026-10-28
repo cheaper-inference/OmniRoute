@@ -11,31 +11,25 @@
 
 ---
 
-## 這是什麼
+## 簡介
 
-OmniRoute 註冊了 376 個提供者，其中包含 155 個標記為**免費／無需驗證**的目錄項目
-（無需驗證、
-免費層級 OAuth，或免費層級 API 金鑰——請參閱
-[免費層級指南](../getting-started/FREE-TIERS-GUIDE.md)及完整的
-[免費層級目錄](../reference/FREE_TIERS.md)）。但問題在於：免費提供者的
-模型品質差異極大。提供前沿模型的無需驗證提供者，遠比提供小型舊式模型的提供者更有用。
+OmniRoute 註冊了 376 家提供者，其中包括 155 個標記為 **free/no-auth** 的目錄項目（no-auth、免費方案 OAuth 或免費方案 API 金鑰——請參閱[免費方案指南](../getting-started/FREE-TIERS-GUIDE.md)與完整的[免費方案目錄](../reference/FREE_TIERS.md)）。但問題在於：免費提供者的模型品質差異極大。一家提供前沿模型的 no-auth 提供者，遠比提供小型舊模型的提供者來得實用。
 
-**免費提供者排名**透過將每個免費提供者的目錄與來自
-**Arena AI 排行榜**的**群眾協作品質評分**（人類偏好 ELO，概念與 LMArena
-聊天機器人競技場背後的機制相同）結合，回答「**哪個免費提供者能提供最佳模型？**」。
-接著，系統會根據各提供者所提供的**最佳免費模型**實力進行排名。
+**免費提供者排名（Free Provider Rankings）**透過將每個免費提供者的目錄，與來自 **Arena AI 排行榜**的**群眾外包品質分數**（人類偏好 ELO，與 LMArena 聊天機器人競技場背後的概念相同）進行聯結，回答「**哪家免費提供者能提供最佳模型？**」這個問題。接著再依據各家**最佳免費模型**的實力對提供者進行排名。
 
-此排名是根據三個真實資料來源計算得出：
+此排名由三個真實來源計算得出：
 
-1. 免費提供者清單——`NOAUTH_PROVIDERS`，以及標記了 `hasFree` 的 `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` 項目
+1. 免費提供者清單——`NOAUTH_PROVIDERS`，加上標記為 `hasFree` 的
+   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` 項目
    （`src/shared/constants/providers.ts`）。
-2. 提供者登錄檔中每個提供者的模型目錄
-   （`open-sse/config/providerRegistry.ts`）。
-3. 由 Arena ELO 同步引擎（`src/lib/arenaEloSync.ts`）儲存在
-   `model_intelligence` 資料庫資料表中的 ELO 衍生任務適配度分數。
+2. 來自提供者註冊表
+   （`open-sse/config/providerRegistry.ts`）的各家提供者模型目錄。
+3. 由 Arena ELO 同步引擎（`src/lib/arenaEloSync.ts`）儲存在 `model_intelligence`
+   資料表中的 ELO 衍生任務適配分數。
 
-資料聯結邏輯位於 `src/lib/freeProviderRankings.ts`。
+聯結邏輯位於 `src/lib/freeProviderRankings.ts`。
+
+---
 
 ## 如何存取
 
@@ -121,13 +115,7 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ### 來源：Arena AI 排行榜
 
-Arena ELO 同步引擎（`src/lib/arenaEloSync.ts`）會從 Arena AI 排行榜 API
-（`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`）擷取兩個排行榜——`text`
-與 `code`。當該 API 未回傳可用的排行榜時，引擎會退回使用 Hugging Face datasets-server 上
-官方的 `lmarena-ai/leaderboard-dataset`（`src/lib/arenaEloHfSource.ts`，CC-BY-4.0；
-`overall` → `text`，`coding` → `code`）；`GET /api/intelligence/sync` 會回報
-`activeSource`、`lastError` 與 `lastFailedAt`。每筆排行榜條目都包含
-模型名稱、提供者、ELO `score`、信賴區間與票數。
+Arena ELO 同步引擎（`src/lib/arenaEloSync.ts`）會從 Arena AI 排行榜 API（`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`）擷取兩個排行榜——`text` 與 `code`。當該 API 未回傳可用的榜單時，引擎會退回使用 Hugging Face datasets-server 上的官方 `lmarena-ai/leaderboard-dataset`（`src/lib/arenaEloHfSource.ts`，CC-BY-4.0；`overall` → `text`，`coding` → `code`）；`GET /api/intelligence/sync` 會回報 `activeSource`、`lastError` 與 `lastFailedAt`。每個排行榜項目都包含模型名稱、廠商、ELO `score`、信賴區間與投票數。
 
 排行榜類別對應到 OmniRoute 任務類別：
 
@@ -138,20 +126,19 @@ Arena ELO 同步引擎（`src/lib/arenaEloSync.ts`）會從 Arena AI 排行榜 A
 
 ### 正規化（任務適配分數）
 
-原始 ELO 分數會依各排行榜正規化為**介於 `[0.4, 0.98]` 的任務適配值**：
+原始 ELO 分數會依各排行榜分別正規化為 **位於 `[0.4, 0.98]` 區間內的任務適配值**：
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-分數永遠不會達到 `0` 或 `1`，以便為使用者覆寫保留空間。這就是你在 API 回應中看到的
-`score` 欄位，以及儀表板上顯示的標籤。
+分數永遠不會達到 `0` 或 `1`，以便為使用者覆寫預留空間。這就是您在 API 回應中看到的 `score` 欄位，以及儀表板上顯示的標籤。
 
-### 信心度
+### 可信度
 
-每筆條目會根據 Arena 票數獲得一個信心等級：
+每個項目會根據 Arena 投票數獲得一個可信度等級：
 
-| 信心度   | 票數    |
+| 可信度   | 投票數  |
 | -------- | ------- |
 | `high`   | ≥ 5,000 |
 | `medium` | ≥ 1,000 |
@@ -159,62 +146,51 @@ taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 
 ### 儲存與時效性
 
-正規化後的條目會以 `source = "arena_elo"` 寫入 `model_intelligence` 資料庫資料表
-（`src/lib/db/modelIntelligence.ts`）。條目**會在 7 天後過期**，因此停止同步的提供者
-最終會被移除，而不會持續提供過時的資料。
+正規化後的項目會以 `source = "arena_elo"` 寫入 `model_intelligence` 資料庫資料表（`src/lib/db/modelIntelligence.ts`）。項目會在 **7 天後過期**，因此停止同步的提供者最終會從名單中移除，而不是繼續提供過時的資料。
 
-同步功能**預設為開啟**：
+同步功能**預設為啟用**：
 
-- 它會在伺服器啟動時執行一次，之後以定期計時器執行
-  （`src/lib/arenaEloSync.ts`，由 `src/instrumentation-node.ts` 接線）。
-- 它是**非阻塞且絕不致命的**——如果上游擷取失敗，OmniRoute 會繼續
-  運作，而排名只會顯示最後一次成功的資料（或空白狀態）。
+- 它會在伺服器啟動時執行一次，之後以週期性計時器定期執行（`src/lib/arenaEloSync.ts`，由 `src/instrumentation-node.ts` 接入）。
+- 它是**非阻塞且絕不會造成致命錯誤**的——如果上游擷取失敗，OmniRoute 會繼續運行，排名只會顯示最後一次成功的資料（或空白狀態）。
 
-有兩個環境變數可控制此行為（記載於
-[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)）：
+有兩個環境變數可控制此行為（記載於 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)）：
 
-| 變數                      | 預設值         | 用途                          |
-| ------------------------- | -------------- | ----------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`         | 設為 `false` 可停用對外同步。 |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400`（24h） | 同步間隔，單位為秒。          |
+| 變數                      | 預設值             | 用途                          |
+| ------------------------- | ------------------ | ----------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`             | 設為 `false` 可停用對外同步。 |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400`（24 小時） | 同步間隔，以秒為單位。        |
 
 ### 手動同步／狀態／清除
 
-針對維運人員，一個需驗證的管理端點提供手動控制
-（`src/app/api/intelligence/sync/route.ts`——需要管理權限驗證）：
+針對維運人員，系統提供了一個需要驗證的管理端點來進行手動控制（`src/app/api/intelligence/sync/route.ts`——需要管理權限驗證）：
 
 ```
-GET    /api/intelligence/sync          # 目前的同步狀態（enabled、lastSync、nextSync、intervalMs）
+GET    /api/intelligence/sync          # 目前同步狀態（enabled、lastSync、nextSync、intervalMs）
 POST   /api/intelligence/sync          # 觸發手動同步；body: { "dryRun": true } 可預覽而不寫入
-DELETE /api/intelligence/sync          # 清除所有已同步的 arena_elo 情報條目
+DELETE /api/intelligence/sync          # 清除所有已同步的 arena_elo 情報項目
 ```
 
-如果排名頁面是空白的，手動執行 `POST /api/intelligence/sync`（或直接
-重新啟動伺服器）即可重新填入資料。
+如果排名頁面為空白，手動執行 `POST /api/intelligence/sync`（或單純重新啟動伺服器）即可重新填入資料。
 
-### 將模型比對到排行榜
+### 模型與排行榜的比對
 
-註冊表中的模型 ID 與 Arena 模型名稱並非總是完全一致。排名採用
-彈性比對（`src/lib/freeProviderRankings.ts` 中的 `findMatchingIntelligence`）：
+登錄檔中的模型 ID 與 Arena 模型名稱不一定完全一致。排名採用彈性比對（`src/lib/freeProviderRankings.ts` 中的 `findMatchingIntelligence`）：
 
 1. 對正規化後的模型 ID 進行完全比對。
-2. 去除結尾版本後綴後再比對（例如 `kimi-k2.6` → `kimi-k2`）。
-3. 前綴比對（排行榜模型名稱是註冊表 ID 的前綴）。
+2. 去除結尾的版本後綴後再比對（例如 `kimi-k2.6` → `kimi-k2`）。
+3. 前綴比對（排行榜模型名稱為登錄檔 ID 的前綴）。
 
-在同步端，已知的提供者前綴（`anthropic/`、`openai/`、`google/`……）會被
-去除，並以一個小型的別名對應表將正式名稱展開為 OmniRoute 內部使用
-的各種變體，讓模型無論使用哪個名稱都能被找到。
+在同步端，已知的廠商前綴（`anthropic/`、`openai/`、`google/`……）會被去除，並由一個小類型名對照表將標準名稱展開為 OmniRoute 內部使用的各種變體，因此無論使用哪種名稱都能找到模型。
 
 ### 提供者的排名方式
 
-針對每個免費提供者，引擎會為其目錄中的每個模型評分，然後：
+對於每個免費提供者，引擎會為其目錄中的每個模型評分，然後：
 
-- **Top Model**＝該提供者得分最高的模型。
-- **Avg Score**＝該提供者所有已評分模型的平均分數。
-- **Models**＝該提供者擁有 Arena 分數的模型數量。
+- **最佳模型（Top Model）**＝該提供者得分最高的模型。
+- **平均分數（Avg Score）**＝該提供者所有已評分模型的平均分數。
+- **模型數（Models）**＝該提供者擁有 Arena 分數的模型數量。
 
-提供者會先依**頂尖模型分數**排序，再依平均分數排序。這會獎勵
-至少提供一個強大免費模型的提供者。
+提供者會先依**最佳模型分數**排序，再依平均分數排序。這樣的設計會獎勵至少提供一個強大免費模型的提供者。
 
 ---
 

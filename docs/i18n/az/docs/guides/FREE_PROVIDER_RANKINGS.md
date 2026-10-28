@@ -14,31 +14,31 @@
 
 ## Bu Nədir
 
-OmniRoute 376 provayderi qeydiyyata alır; bunlardan 155 kataloq qeydi **pulsuz/autentifikasiyasız** kimi işarələnib
-(autentifikasiyasız,
-pulsuz səviyyəli OAuth və ya pulsuz səviyyəli API açarı — bax:
-[Pulsuz Səviyyələr üzrə Təlimat](../getting-started/FREE-TIERS-GUIDE.md) və tam
-[Pulsuz Səviyyələr kataloqu](../reference/FREE_TIERS.md)). Məsələ bundadır ki, pulsuz provayderlər
-model keyfiyyətinə görə kəskin şəkildə fərqlənirlər. Ən qabaqcıl modeli təqdim edən autentifikasiyasız provayder,
-kiçik köhnəlmiş model təqdim edən provayderdən qat-qat faydalıdır.
+OmniRoute 376 provayderi qeydiyyata alır, o cümlədən **pulsuz/avtorizasiyasız** kimi
+işarələnmiş 155 kataloq qeydi (avtorizasiyasız, pulsuz səviyyəli OAuth və ya pulsuz
+səviyyəli API açarı — bax: [Pulsuz Səviyyələr Bələdçisi](../getting-started/FREE-TIERS-GUIDE.md)
+və tam [Pulsuz Səviyyələr kataloqu](../reference/FREE_TIERS.md)). Ancaq bir məqam var:
+pulsuz provayderlərin model keyfiyyəti çox fərqlənir. Öncül (frontier) model təqdim edən
+avtorizasiyasız provayder, kiçik köhnə model təqdim edəndən qat-qat faydalıdır.
 
-**Pulsuz Provayder Reytinqləri** hər bir pulsuz provayderin kataloqunu
-**Arena AI liderlər cədvəlindən** əldə edilən **icma tərəfindən formalaşdırılmış keyfiyyət balları** ilə
-(insan üstünlüklərinə əsaslanan ELO — LMArena çatbot arenasının arxasında duran eyni yanaşma) birləşdirərək
-“**hansı pulsuz provayder mənə ən yaxşı modeli təqdim edir?**” sualına cavab verir. Daha sonra provayderlər
-özlərinin **ən yaxşı pulsuz modelinin** gücünə əsasən sıralanır.
+**Pulsuz Provayder Reytinqləri** hər bir pulsuz provayderin kataloqunu **Arena AI liderlər
+cədvəlindən** (insan üstünlüklərinə əsaslanan ELO, LMArena chatbot arenasının əsasında
+dayanan eyni ideya) gələn **kütləvi mənbəli keyfiyyət balları** ilə birləşdirərək
+"**hansı pulsuz provayder mənə ən yaxşı modeli verir?**" sualına cavab verir.
+Provayderlər sonra öz **ən yaxşı pulsuz modellərinin** gücünə görə sıralanır.
 
-Reytinq üç real mənbə əsasında hesablanır:
+Reytinq üç real mənbədən hesablanır:
 
-1. Pulsuz provayder siyahıları — `NOAUTH_PROVIDERS`, həmçinin `hasFree` ilə işarələnmiş
+1. Pulsuz provayder siyahıları — `NOAUTH_PROVIDERS`, üstəgəl `hasFree` işarəsi olan
    `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` qeydləri
    (`src/shared/constants/providers.ts`).
-2. Provayder reyestrindəki hər bir provayderin model kataloqu
-   (`open-sse/config/providerRegistry.ts`).
+2. Provayder reyestrindən (`open-sse/config/providerRegistry.ts`) hər bir provayderin
+   model kataloqu.
 3. Arena ELO sinxronizasiya mühərriki (`src/lib/arenaEloSync.ts`) tərəfindən
-   `model_intelligence` verilənlər bazası cədvəlində saxlanılan ELO əsasında hesablanmış tapşırığa uyğunluq balları.
+   `model_intelligence` verilənlər bazası cədvəlində saxlanılan ELO-dan əldə edilən
+   tapşırığa uyğunluq balları.
 
-Birləşdirmə məntiqi `src/lib/freeProviderRankings.ts` faylında yerləşir.
+Birləşmə məntiqi `src/lib/freeProviderRankings.ts` faylında yerləşir.
 
 ---
 
@@ -125,40 +125,40 @@ dəyəridir (aşağıya baxın). Qiymətləndirilmiş modeli olmayan provayderl�
 
 ---
 
-## Ballar necə işləyir
+## Ballar Necə İşləyir
 
-### Mənbə: Arena AI leaderboard
+### Mənbə: Arena AI liderlik cədvəli
 
-Arena ELO sinxronizasiya mühərriki (`src/lib/arenaEloSync.ts`) Arena AI leaderboard API-dən
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) iki leaderboard — `text`
-və `code` — əldə edir. Həmin API istifadəyə yararlı lövhə qaytarmadıqda, mühərrik
-Hugging Face datasets-server-dəki rəsmi `lmarena-ai/leaderboard-dataset`-ə müraciət edir
-(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
-`coding` → `code`); `GET /api/intelligence/sync` `activeSource`, `lastError` və
-`lastFailedAt` dəyərlərini bildirir. Hər leaderboard yazısı
+Arena ELO sinxronizasiya mühərriki (`src/lib/arenaEloSync.ts`) Arena AI liderlik cədvəli API-dən
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) iki liderlik cədvəli — `text`
+və `code` — əldə edir. Həmin API istifadəyə yararlı cədvəl qaytarmadıqda, mühərrik
+Hugging Face datasets-server-dəki rəsmi `lmarena-ai/leaderboard-dataset` mənbəyinə
+müraciət edir (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` sorğusu `activeSource`, `lastError` və
+`lastFailedAt` dəyərlərini bildirir. Hər bir liderlik cədvəli yazısı
 model adı, təchizatçı, ELO `score`, etibar intervalı və səs sayı daşıyır.
 
-Leaderboard kateqoriyaları OmniRoute tapşırıq kateqoriyalarına aşağıdakı kimi uyğunlaşır:
+Liderlik cədvəli kateqoriyaları OmniRoute tapşırıq kateqoriyalarına uyğunlaşır:
 
-| Arena leaderboard | OmniRoute tapşırıq kateqoriyaları                 |
-| ----------------- | ------------------------------------------------- |
-| `text`            | `default`, `review`, `documentation`, `debugging` |
-| `code`            | `coding`                                          |
+| Arena liderlik cədvəli | OmniRoute tapşırıq kateqoriyaları                 |
+| ---------------------- | ------------------------------------------------- |
+| `text`                 | `default`, `review`, `documentation`, `debugging` |
+| `code`                 | `coding`                                          |
 
 ### Normallaşdırma (tapşırığa uyğunluq balı)
 
-Xam ELO balları hər leaderboard daxilində **`[0.4, 0.98]` aralığında tapşırığa uyğunluq dəyərinə** normallaşdırılır:
+Xam ELO balları hər liderlik cədvəli üzrə **`[0.4, 0.98]` intervalında tapşırığa uyğunluq dəyərinə** normallaşdırılır:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Bal heç vaxt `0` və ya `1` dəyərinə çatmır — bu, istifadəçi düzəlişləri üçün ehtiyat saxlayır. Bu,
+Bal heç vaxt `0` və ya `1` dəyərinə çatmır, bu da istifadəçi dəyişiklikləri üçün ehtiyat saxlayır. Bu,
 API cavabında gördüyünüz `score` sahəsi və paneldə göstərilən etiketdir.
 
 ### Etibarlılıq
 
-Hər yazı Arena səs sayına əsasən etibarlılıq səviyyəsi alır:
+Hər bir yazı Arena səs sayına əsasən etibarlılıq səviyyəsi alır:
 
 | Etibarlılıq | Səslər  |
 | ----------- | ------- |
@@ -168,62 +168,64 @@ Hər yazı Arena səs sayına əsasən etibarlılıq səviyyəsi alır:
 
 ### Saxlanma və aktuallıq
 
-Normallaşdırılmış yazılar `model_intelligence` DB cədvəlinə
-`source = "arena_elo"` ilə yazılır (`src/lib/db/modelIntelligence.ts`). Yazıların
-**müddəti 7 gündən sonra bitir**, buna görə də sinxronizasiyanı dayandıran təchizatçı
-köhnə məlumat təqdim etmək əvəzinə, nəticədə sıralamadan düşür.
+Normallaşdırılmış yazılar `model_intelligence` verilənlər bazası cədvəlinə
+`source = "arena_elo"` ilə yazılır (`src/lib/db/modelIntelligence.ts`). Yazıların **müddəti
+7 gündən sonra bitir**, beləliklə, sinxronizasiyanı dayandıran təchizatçı köhnə
+məlumat göstərmək əvəzinə, nəticələrdən tədricən çıxır.
 
-Sinxronizasiya **defolt olaraq aktivdir**:
+Sinxronizasiya **standart olaraq aktivdir**:
 
-- Serverin başlanğıcında bir dəfə işə düşür, sonra isə dövri taymerlə davam edir
+- O, server başlanğıcında bir dəfə işə düşür, sonra isə periodik taymerlə davam edir
   (`src/lib/arenaEloSync.ts`, `src/instrumentation-node.ts`-dən qoşulub).
-- O, **bloklamır və heç vaxt kritik xəta yaratmır** — yuxarı mənbədən əldə etmə alınmazsa,
-  OmniRoute işləməyə davam edir və sıralamalar sadəcə son yaxşı məlumatı (və ya boş vəziyyəti) göstərir.
+- O, **bloklamır və heç vaxt kritik xəta yaratmır** — yuxarı axından məlumat əldə etmək
+  alınmasa, OmniRoute işləməyə davam edir və reytinqlər sadəcə son uğurlu məlumatları
+  (və ya boş vəziyyəti) göstərir.
 
-Onu iki mühit dəyişəni idarə edir (sənədləşmə:
-[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
+İki mühit dəyişəni bunu idarə edir
+([`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) sənədində təsvir olunub):
 
-| Dəyişən                   | Defolt        | Məqsəd                                                   |
-| ------------------------- | ------------- | -------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Xarici sinxronizasiyadan imtina üçün `false` təyin edin. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24s) | Sinxronizasiya intervalı, saniyələrlə.                   |
+| Dəyişən                   | Standart      | Məqsəd                                                         |
+| ------------------------- | ------------- | -------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Xarici sinxronizasiyadan imtina etmək üçün `false` təyin edin. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sinxronizasiya intervalı, saniyələrlə.                         |
 
 ### Əl ilə sinxronizasiya / status / təmizləmə
 
-Operatorlar üçün autentifikasiyalı idarəetmə endpointi əl ilə nəzarət təqdim edir
+Operatorlar üçün autentifikasiya olunmuş idarəetmə endpointi əl ilə nəzarəti təmin edir
 (`src/app/api/intelligence/sync/route.ts` — idarəetmə autentifikasiyası tələb olunur):
 
 ```
 GET    /api/intelligence/sync          # cari sinxronizasiya statusu (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # əl ilə sinxronizasiya başlat; yazmadan önizləmə üçün body: { "dryRun": true }
-DELETE /api/intelligence/sync          # sinxronizasiya edilmiş bütün arena_elo intelligence yazılarını təmizlə
+POST   /api/intelligence/sync          # əl ilə sinxronizasiyanı başlat; yazmadan önbaxış üçün body: { "dryRun": true }
+DELETE /api/intelligence/sync          # bütün sinxronizasiya edilmiş arena_elo intelligence yazılarını təmizlə
 ```
 
-Sıralamalar səhifəsi boşdursa, əl ilə `POST /api/intelligence/sync` (və ya sadəcə
+Reytinqlər səhifəsi boşdursa, əl ilə `POST /api/intelligence/sync` sorğusu (və ya sadəcə
 serverin yenidən başladılması) onu yenidən doldurur.
 
-### Modellərin leaderboard-a uyğunlaşdırılması
+### Modellərin liderlik cədvəli ilə uyğunlaşdırılması
 
-Reyestr model ID-ləri və Arena model adları həmişə dəqiq üst-üstə düşmür. Sıralama
-çevik uyğunlaşdırmadan istifadə edir (`src/lib/freeProviderRankings.ts` faylındakı `findMatchingIntelligence`):
+Reyestr model ID-ləri və Arena model adları həmişə dəqiq üst-üstə düşmür. Reytinq
+çevik uyğunlaşdırmadan istifadə edir (`src/lib/freeProviderRankings.ts` faylında
+`findMatchingIntelligence`):
 
-1. Normallaşdırılmış model ID üzrə dəqiq uyğunluq.
-2. Sondakı versiya sonluğu silindikdən sonra uyğunluq (məs. `kimi-k2.6` → `kimi-k2`).
-3. Prefiks uyğunluğu (leaderboard model adı reyestr ID-nin prefiksidir).
+1. Normallaşdırılmış model ID-si üzrə dəqiq uyğunluq.
+2. Sondakı versiya sufiksi çıxarıldıqdan sonra uyğunluq (məs. `kimi-k2.6` → `kimi-k2`).
+3. Prefiks uyğunluğu (liderlik cədvəlindəki model adı reyestr ID-nin prefiksidir).
 
 Sinxronizasiya tərəfində məlum təchizatçı prefiksləri (`anthropic/`, `openai/`, `google/`, …)
-silinir və kiçik bir ləqəb xəritəsi kanonik adları OmniRoute-un daxildə istifadə etdiyi
-variantlara genişləndirir, beləliklə modellər istənilən adla tapıla bilən qalır.
+çıxarılır və kiçik bir ləqəb xəritəsi kanonik adları OmniRoute-un daxili olaraq istifadə
+etdiyi variantlara genişləndirir, beləliklə modellər istənilən ad altında tapıla bilir.
 
-### Təchizatçı necə sıralanır
+### Təchizatçı necə reytinqlənir
 
-Hər pulsuz təchizatçı üçün mühərrik onun kataloqundakı bütün modelləri qiymətləndirir, sonra:
+Hər bir pulsuz təchizatçı üçün mühərrik onun kataloqundakı bütün modelləri qiymətləndirir, sonra:
 
 - **Top Model** = təchizatçının ən yüksək ballı modeli.
 - **Avg Score** = həmin təchizatçının qiymətləndirilmiş bütün modelləri üzrə orta bal.
-- **Models** = təchizatçının neçə modelinin Arena balı olması.
+- **Models** = təchizatçının neçə modelinin Arena balına malik olması.
 
-Təchizatçılar əvvəlcə **ən yaxşı model balına**, sonra isə orta bala görə sıralanır. Bu,
+Təchizatçılar əvvəlcə **ən yaxşı modelin balına**, sonra orta bala görə sıralanır. Bu,
 ən azı bir güclü pulsuz model təqdim edən təchizatçını mükafatlandırır.
 
 ---

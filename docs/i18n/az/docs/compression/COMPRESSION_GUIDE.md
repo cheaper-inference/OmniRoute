@@ -32,91 +32,91 @@ Müştəri sorğusu
 
 ## Sıxılma Rejimləri
 
-### Off
+### Söndürülüb
 
 Sıxılma tətbiq edilmir. Bütün mesajlar dəyişmədən keçir.
 
-### Lite Mode (~15% qənaət, <1ms gecikmə)
+### Lite Rejimi (~15% qənaət, <1ms gecikmə)
 
 Ən təhlükəsiz rejim — sıfır semantik dəyişiklik, yalnız formatlaşdırma təmizliyi:
 
-| Texnika                  | Təsvir                                                     |
-| ------------------------ | ---------------------------------------------------------- |
-| `collapseWhitespace`     | Ardıcıl boş sətirləri və sətir sonu boşluqları birləşdirir |
-| `dedupSystemPrompt`      | Təkrarlanan sistem mesajlarını silir                       |
-| `compressToolResults`    | Ətraflı alət/funksiya çıxışlarını sıxır                    |
-| `removeRedundantContent` | Təkrarlanan təlimatları təmizləyir                         |
-| `replaceImageUrls`       | base64 şəkil data URI-lərini qısaldır                      |
+| Texnika                  | Təsvir                                                  |
+| ------------------------ | ------------------------------------------------------- |
+| `collapseWhitespace`     | Ardıcıl boş sətirləri və sondakı boşluqları birləşdirir |
+| `dedupSystemPrompt`      | Təkrarlanan sistem mesajlarını silir                    |
+| `compressToolResults`    | Ətraflı alət/funksiya çıxışlarını sıxır                 |
+| `removeRedundantContent` | Təkrarlanan təlimatları aradan qaldırır                 |
+| `replaceImageUrls`       | base64 şəkil data URI-lərini qısaldır                   |
 
-**Ən uyğundur:** Həmişə-açıq istifadə, təhlükəsizlik baxımından kritik iş axınları.
+**Ən uyğundur:** Daimi istifadə, təhlükəsizlik baxımından kritik iş axınları.
 
-### Standard Mode (~30% qənaət)
+### Standart Rejim (~30% qənaət)
 
-[Caveman](https://github.com/JuliusBrussee/caveman)-dan ilhamlanıb — mənanı qoruyaraq doldurucu sözləri və uzun ifadələri aradan qaldırır:
+[Caveman](https://github.com/JuliusBrussee/caveman)-dən ilhamlanıb — mənanı qoruyarkən doldurucu sözləri və uzun ifadələri aradan qaldırır:
 
 - Doldurucu sözləri silir ("please", "I think", "basically", "actually")
-- Uzun ifadələri yığcamlaşdırır ("in order to" → "to", "as a result of" → "because")
-- Nəzakətli tərəddüd ifadələrini təmizləyir ("Would you mind...", "If you could possibly...")
+- Uzun ifadələri qısaldır ("in order to" → "to", "as a result of" → "because")
+- Nəzakətli yayındırma ifadələrini aradan qaldırır ("Would you mind...", "If you could possibly...")
 - Kodlaşdırma promptları üçün tənzimlənmiş 30+ regex qaydası
 
-**Ən uyğundur:** Gündəlik kodlaşdırma iş axınları, xərcə həssas komandalar.
+**Ən uyğundur:** Gündəlik kodlaşdırma iş axınları, xərclərə həssas komandalar.
 
-### Aggressive Mode (~50% qənaət)
+### Aqressiv Rejim (~50% qənaət)
 
 Uzun sessiyalar üçün ağıllı tarixçə idarəetməsi:
 
-- **Mesaj Köhnəlməsi** — köhnə mesajlar getdikcə daha çox sıxılır
+- **Mesajların Köhnəlməsi** — köhnə mesajlar getdikcə daha çox sıxılır
 - **Alət Nəticələrinin Sıxılması** — uzun alət çıxışları kəsilir və ya qısaldılır (ilk/son sətirlər,
-  uyğunluq-sətir filtrlənməsi, JSON açar yığcamlaşdırması)
-- **Struktur Bütövlüyü Mühafizələri** — `tool_use` + `tool_result` cütlərinin ardıcıl qalmasını təmin edir
-- **Kontekst Pəncərəsi Dərketməsi** — model üzrə token limitlərinə riayət edir
+  uyğunluq-sətri filtrasiyası, JSON açar sıxılması)
+- **Struktur Bütövlük Mühafizələri** — `tool_use` + `tool_result` cütlərinin uyğun qalmasını təmin edir
+- **Kontekst Pəncərəsi Nəzərəalması** — hər modelin token limitlərinə riayət edir
 
 **Ən uyğundur:** Uzunmüddətli sazlama sessiyaları, böyük kod bazaları.
 
-### Ultra Mode (~75% qənaət)
+### Ultra Rejim (~75% qənaət)
 
-Token baxımından kritik ssenarilər üçün maksimal sıxılma:
+Token baxımından kritik ssenarilər üçün maksimum sıxılma:
 
-- **Evristik Budama** — nəsr mətninin xal əsaslı token budaması
-- **Strukturun Qorunması** — hasarlanmış kod blokları, sətirdaxili kod, URL-lər və identifikatorlar
-  müvəqqəti işarələrlə əvəzlənib sonra dəyişmədən geri birləşdirilir, heç vaxt budanmır
-- **İstəyə bağlı SLM səviyyəsi** — konfiqurasiya edildikdə kiçik lokal model budamanı dəqiqləşdirə bilər
-- Aggressive rejimindən müstəqildir: mesaj köhnəlməsini, alət-nəticə sıxılmasını
-  və ya fallback ümumiləşdiricisini işlətmir (yalnız SLM səviyyəsinin uğursuzluğu fallback
-  keçidini aggressive üzərindən yönləndirə bilər)
+- **Evristik Budama** — nəsr hissənin bal əsaslı token budanması
+- **Strukturun Qorunması** — qapalı kod blokları, sətirdaxili kod, URL-lər və identifikatorlar
+  olduğu kimi qorunub sözü-sözünə yenidən birləşdirilir, heç vaxt budanmır
+- **İstəyə bağlı SLM səviyyəsi** — konfiqurasiya edildikdə kiçik lokal model budamanı təkmilləşdirə bilər
+- Aqressiv rejimdən müstəqildir: mesaj köhnəlməsini, alət-nəticəsi sıxılmasını
+  və ya ehtiyat ümumiləşdiricini işə salmır (yalnız SLM səviyyəsinin uğursuzluğu ehtiyat keçidi
+  aqressiv rejim üzərindən yönləndirə bilər)
 
-**Ən uyğundur:** Kontekst limitlərinə dəfələrlə çatdığınız hallar.
+**Ən uyğundur:** Kontekst limitlərinə təkrar-təkrar çatdığınız hallar.
 
-### RTK Mode (60-90% upstream diapazonu)
+### RTK Rejimi (60-90% yuxarı axın aralığı)
 
-RTK rejimi kodlaşdırma-agent sessiyalarında yaranan ətraflı alət çıxışları üçün optimallaşdırılıb:
+RTK rejimi kodlaşdırma agenti sessiyalarında yaranan ətraflı alət çıxışları üçün optimallaşdırılıb:
 
-- `git status`, `git diff`, `git log`, test runner-ları, TypeScript/Vite/Webpack build-ləri,
-  ESLint/Biome/Prettier, npm audit/quraşdırmaları, Docker logları, infrastruktur çıxışı
-  və ümumi shell çıxışı kimi əmr/çıxış siniflərini aşkarlayır
-- `open-sse/services/compression/engines/rtk/filters/` qovluğundan JSON filter paketlərini tətbiq edir
-- Layihə və ya qlobal `filters.toml` fayllarından RTK TOML sxemi v1 filterlərini idxal edir;
-  inline-test yoxlaması və layihə faylları üçün etibar nəzarəti ilə
-- Sətirdaxili yoxlama nümunələri olan 56 daxili filter təqdim edir
-- ANSI idarəetmə ardıcıllıqlarını, proqres zolaqlarını, təkrarlanan sətirləri və tədbir tələb etməyən səs-küyü aradan qaldırır
-- Uğursuzluqları, xətaları, xəbərdarlıqları, dəyişdirilmiş faylları, xülasələri və uzun çıxışın son hissəsini qoruyur
-- Etibar nəzarətli layihə filterlərini, qlobal filterləri və istəyə bağlı gizlədilmiş xam çıxışın bərpasını dəstəkləyir
+- `git status`, `git diff`, `git log`, test icraçıları,
+  TypeScript/Vite/Webpack yığınları, ESLint/Biome/Prettier, npm audit/quraşdırmaları, Docker loqları, infra
+  çıxışı və ümumi shell çıxışı kimi əmr/çıxış siniflərini aşkarlayır
+- `open-sse/services/compression/engines/rtk/filters/` qovluğundan JSON filtr paketlərini tətbiq edir
+- Layihə və ya qlobal `filters.toml` fayllarından RTK TOML sxemi v1 filtrlərini idxal edir, layihə faylları üçün daxili test
+  yoxlaması və etibar məhdudlaşdırması ilə
+- Daxili yoxlama nümunələri ilə 56 hazır filtr təqdim edir
+- ANSI idarəetmə ardıcıllıqlarını, tərəqqi çubuqlarını, təkrarlanan sətirləri və əməliyyata yararsız səs-küyü aradan qaldırır
+- Uğursuzluqları, xətaları, xəbərdarlıqları, dəyişdirilmiş faylları, xülasələri və uzun çıxışın sonunu qoruyur
+- Etibar məhdudlaşdırılmış layihə filtrlərini, qlobal filtrləri və istəyə bağlı gizlədilmiş xam-çıxış bərpasını dəstəkləyir
 
-**Ən uyğundur:** Shell, build, test, git, grep və fayl-çıxışı transkriptləri olan agent sessiyaları.
+**Ən uyğundur:** shell, build, test, git, grep və fayl-çıxışı transkriptləri olan agent sessiyaları.
 
-### Stacked Mode (78-95% uyğun diapazon)
+### Yığılmış Rejim (78-95% tətbiq oluna bilən aralıq)
 
-Stacked rejimi bir neçə sıxılma mühərrikini deterministik ardıcıllıqla işə salır. Defolt pipeline belədir:
+Yığılmış rejim bir neçə sıxılma mühərrikini deterministik ardıcıllıqla işə salır. Defolt boru xətti belədir:
 
 ```txt
 RTK -> Caveman
 ```
 
 Bu ardıcıllıq əvvəlcə terminal/alət çıxışını yığcam saxlayır, sonra qalan təbii dil promptuna
-Caveman semantik yığcamlaşdırmasını tətbiq edir. Stacked pipeline-lar qlobal səviyyədə və ya
-marşrutlaşdırma kombolarına təyin edilmiş sıxılma komboları vasitəsilə konfiqurasiya edilə bilər.
+Caveman semantik qısaltmasını tətbiq edir. Yığılmış boru xətləri qlobal olaraq və ya
+yönləndirmə kombinasiyalarına təyin edilmiş sıxılma kombinasiyaları vasitəsilə konfiqurasiya edilə bilər.
 
-**Ən uyğundur:** İnsan təlimatları və ya assistent xülasələri ilə birlikdə iri həcmli alət logları olan qarışıq kontekstlər.
+**Ən uyğundur:** Böyük alət loqları ilə yanaşı insan təlimatları və ya köməkçi xülasələri olan qarışıq kontekst.
 
 ---
 

@@ -13,30 +13,30 @@
 
 ## Co to je
 
-OmniRoute registruje 376 poskytovatelů, včetně 155 katalogových položek označených jako **bezplatné / bez ověření**
-(bez ověření,
-OAuth v bezplatné úrovni nebo API klíč v bezplatné úrovni — viz
-[Průvodce bezplatnými úrovněmi](../getting-started/FREE-TIERS-GUIDE.md) a úplný
-[adresář bezplatných úrovní](../reference/FREE_TIERS.md)). Háček je v tom, že se kvalita modelů
-u bezplatných poskytovatelů výrazně liší. Poskytovatel bez ověření, který nabízí špičkový model, je mnohem užitečnější
-než poskytovatel nabízející malý zastaralý model.
+OmniRoute registruje 376 poskytovatelů, včetně 155 položek katalogu označených **free/no-auth**
+(bez autentizace, OAuth s bezplatnou úrovní nebo API klíč s bezplatnou úrovní — viz
+[Průvodce bezplatnými úrovněmi](../getting-started/FREE-TIERS-GUIDE.md) a kompletní
+[adresář bezplatných úrovní](../reference/FREE_TIERS.md)). Háček spočívá v tom, že bezplatní
+poskytovatelé se značně liší v kvalitě modelů. Poskytovatel bez autentizace nabízející
+špičkový model je mnohem užitečnější než ten, který nabízí malý zastaralý model.
 
-**Žebříček bezplatných poskytovatelů** odpovídá na otázku „**který bezplatný poskytovatel mi nabízí nejlepší model?**“ tím,
-že propojuje katalog každého bezplatného poskytovatele s **komunitně shromážděnými hodnoceními kvality** ze
-**žebříčku Arena AI** (ELO založené na lidských preferencích, stejný princip, na kterém je založena
-chatbotová aréna LMArena). Poskytovatelé jsou poté seřazeni podle kvality svého **nejlepšího bezplatného modelu**.
+**Free Provider Rankings** odpovídá na otázku „**který bezplatný poskytovatel mi nabídne
+nejlepší model?**“ spojením katalogu každého bezplatného poskytovatele s **crowdsourcingem
+získanými skóre kvality** ze **žebříčku Arena AI** (ELO založené na lidských preferencích —
+stejný princip, na kterém stojí chatbotová aréna LMArena). Poskytovatelé jsou poté seřazeni
+podle síly svého **nejlepšího bezplatného modelu**.
 
-Žebříček se počítá ze tří skutečných zdrojů:
+Žebříček je vypočítán ze tří skutečných zdrojů:
 
-1. Seznamy bezplatných poskytovatelů — `NOAUTH_PROVIDERS` a položky `OAUTH_PROVIDERS` /
+1. Seznamy bezplatných poskytovatelů — `NOAUTH_PROVIDERS`, plus položky `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` označené příznakem `hasFree`
    (`src/shared/constants/providers.ts`).
 2. Katalog modelů každého poskytovatele z registru poskytovatelů
    (`open-sse/config/providerRegistry.ts`).
-3. Skóre vhodnosti pro jednotlivé úlohy odvozené z ELO, které synchronizační modul Arena ELO ukládá do databázové tabulky `model_intelligence`
-   (`src/lib/arenaEloSync.ts`).
+3. Skóre vhodnosti pro úlohy odvozená z ELO, uložená v databázové tabulce `model_intelligence`
+   synchronizačním enginem Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Logika propojení se nachází v `src/lib/freeProviderRankings.ts`.
+Logika spojování se nachází v `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -120,15 +120,15 @@ Struktura odpovědi:
 
 ---
 
-## Jak funguje hodnocení
+## Jak fungují skóre
 
 ### Zdroj: žebříček Arena AI
 
-Synchronizační engine Arena ELO (`src/lib/arenaEloSync.ts`) stahuje dva žebříčky — `text`
+Synchronizační engine Arena ELO (`src/lib/arenaEloSync.ts`) načítá dva žebříčky — `text`
 a `code` — z API žebříčku Arena AI
 (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Pokud toto API nevrátí
-žádný použitelný žebříček, engine přejde na oficiální `lmarena-ai/leaderboard-dataset` na
-Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+žádný použitelný žebříček, engine přejde na oficiální dataset `lmarena-ai/leaderboard-dataset`
+na Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
 `coding` → `code`); `GET /api/intelligence/sync` hlásí `activeSource`, `lastError` a
 `lastFailedAt`. Každá položka žebříčku
 obsahuje název modelu, dodavatele, ELO `score`, interval spolehlivosti a počet hlasů.
@@ -142,7 +142,7 @@ Kategorie žebříčku se mapují na kategorie úloh OmniRoute:
 
 ### Normalizace (skóre vhodnosti pro úlohu)
 
-Hrubá ELO skóre se normalizují v rámci každého žebříčku na **hodnotu vhodnosti pro úlohu v intervalu `[0.4, 0.98]`**:
+Hrubé ELO skóre se normalizuje v rámci každého žebříčku na **hodnotu vhodnosti pro úlohu v intervalu `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
@@ -153,27 +153,27 @@ pole `score`, které vidíte v odpovědi API, a označení zobrazené na dashboa
 
 ### Spolehlivost
 
-Každá položka získá úroveň spolehlivosti na základě počtu hlasů v Aréně:
+Každá položka získá úroveň spolehlivosti na základě počtu hlasů v Areně:
 
 | Spolehlivost | Hlasy   |
 | ------------ | ------- |
-| `high`       | ≥ 5,000 |
-| `medium`     | ≥ 1,000 |
-| `low`        | < 1,000 |
+| `high`       | ≥ 5 000 |
+| `medium`     | ≥ 1 000 |
+| `low`        | < 1 000 |
 
 ### Ukládání a čerstvost
 
 Normalizované položky se zapisují do databázové tabulky `model_intelligence` s
-`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Položky **exspirují po
-7 dnech**, takže poskytovatel, který přestane synchronizovat, nakonec z žebříčku vypadne,
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Položky **expirují po
+7 dnech**, takže poskytovatel, který přestane synchronizovat, nakonec z výsledků vypadne,
 místo aby poskytoval zastaralá data.
 
 Synchronizace běží **ve výchozím nastavení zapnutá**:
 
-- Spustí se jednou při startu serveru a poté periodicky podle časovače
-  (`src/lib/arenaEloSync.ts`, napojeno z `src/instrumentation-node.ts`).
-- Je **neblokující a nikdy není fatální** — pokud stahování z upstreamu selže, OmniRoute
-  běží dál a žebříčky jednoduše zobrazují poslední platná data (nebo prázdný stav).
+- Spustí se jednou při startu serveru a poté v pravidelných intervalech
+  (`src/lib/arenaEloSync.ts`, zapojeno z `src/instrumentation-node.ts`).
+- Je **neblokující a nikdy není fatální** — pokud načtení z upstreamu selže, OmniRoute běží
+  dál a žebříčky jednoduše zobrazují poslední platná data (nebo prázdný stav).
 
 Řídí ji dvě proměnné prostředí (zdokumentované v
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
@@ -185,8 +185,8 @@ Synchronizace běží **ve výchozím nastavení zapnutá**:
 
 ### Ruční synchronizace / stav / vymazání
 
-Pro operátory je k dispozici autentizovaný management endpoint pro ruční ovládání
-(`src/app/api/intelligence/sync/route.ts` — vyžaduje autentizaci pro správu):
+Pro provozovatele je k dispozici autentizovaný management endpoint pro ruční ovládání
+(`src/app/api/intelligence/sync/route.ts` — vyžaduje management autentizaci):
 
 ```
 GET    /api/intelligence/sync          # aktuální stav synchronizace (enabled, lastSync, nextSync, intervalMs)
@@ -199,7 +199,7 @@ restart serveru) ji znovu naplní.
 
 ### Párování modelů se žebříčkem
 
-ID modelů v registru a názvy modelů v Aréně si ne vždy přesně odpovídají. Hodnocení používá
+ID modelů v registru a názvy modelů v Areně se ne vždy přesně shodují. Hodnocení používá
 flexibilní párování (`findMatchingIntelligence` v `src/lib/freeProviderRankings.ts`):
 
 1. Přesná shoda s normalizovaným ID modelu.
@@ -208,18 +208,18 @@ flexibilní párování (`findMatchingIntelligence` v `src/lib/freeProviderRanki
 
 Na straně synchronizace se odstraňují známé prefixy dodavatelů (`anthropic/`, `openai/`,
 `google/`, …) a malá mapa aliasů rozšiřuje kanonické názvy na varianty, které OmniRoute
-používá interně, takže modely zůstávají dohledatelné pod jakýmkoliv názvem.
+používá interně, takže modely zůstávají dohledatelné pod jakýmkoli názvem.
 
 ### Jak je hodnocen poskytovatel
 
 Pro každého bezplatného poskytovatele engine ohodnotí každý model v jeho katalogu a poté:
 
 - **Nejlepší model** = model poskytovatele s nejvyšším skóre.
-- **Průměrné skóre** = průměrné skóre všech hodnocených modelů daného poskytovatele.
-- **Modely** = kolik modelů poskytovatele mělo skóre v Aréně.
+- **Průměrné skóre** = průměr skóre všech hodnocených modelů daného poskytovatele.
+- **Modely** = kolik modelů poskytovatele mělo skóre Arena.
 
 Poskytovatelé jsou řazeni nejprve podle **skóre nejlepšího modelu**, poté podle průměrného
-skóre. To oceňuje poskytovatele, který nabízí alespoň jeden silný bezplatný model.
+skóre. To odměňuje poskytovatele, který nabízí alespoň jeden silný bezplatný model.
 
 ---
 

@@ -34,90 +34,89 @@ Požadavek klienta
 
 ### Vypnuto
 
-Není použita žádná komprese. Všechny zprávy procházejí beze změny.
+Komprese není použita. Všechny zprávy procházejí beze změny.
 
 ### Režim Lite (~15 % úspora, latence <1 ms)
 
-Nejbezpečnější režim — žádná sémantická změna, pouze vyčištění formátování:
+Nejbezpečnější režim — nulová sémantická změna, pouze vyčištění formátování:
 
 | Technika                 | Popis                                                |
 | ------------------------ | ---------------------------------------------------- |
 | `collapseWhitespace`     | Sloučí po sobě jdoucí prázdné řádky a koncové mezery |
 | `dedupSystemPrompt`      | Odstraní duplicitní systémové zprávy                 |
-| `compressToolResults`    | Zkomprimuje upovídané výstupy nástrojů/funkcí        |
+| `compressToolResults`    | Zkomprimuje ukecané výstupy nástrojů/funkcí          |
 | `removeRedundantContent` | Odstraní opakující se instrukce                      |
-| `replaceImageUrls`       | Zkrátí data URI obrázků v base64                     |
+| `replaceImageUrls`       | Zkrátí base64 data URI obrázků                       |
 
-**Vhodné pro:** Trvalé používání, bezpečnostně kritické pracovní postupy.
+**Nejlepší pro:** Trvalé používání, bezpečnostně kritické pracovní postupy.
 
 ### Standardní režim (~30 % úspora)
 
-Inspirováno projektem [Caveman](https://github.com/JuliusBrussee/caveman) — odstraňuje výplňová slova a zdlouhavé formulace při zachování významu:
+Inspirováno projektem [Caveman](https://github.com/JuliusBrussee/caveman) — odstraňuje výplňová slova a rozvláčné formulace při zachování významu:
 
-- Odstraňuje výplňová slova ("please", "I think", "basically", "actually")
-- Zhušťuje zdlouhavé fráze ("in order to" → "to", "as a result of" → "because")
-- Odstraňuje zdvořilostní obměkčování ("Would you mind...", "If you could possibly...")
-- Více než 30 pravidel regulárních výrazů vyladěných pro programátorské prompty
+- Odstraňuje výplňová slova („please", „I think", „basically", „actually")
+- Zkracuje rozvláčné fráze („in order to" → „to", „as a result of" → „because")
+- Odstraňuje zdvořilostní obmlouvání („Would you mind...", „If you could possibly...")
+- Více než 30 pravidel regex vyladěných pro programátorské prompty
 
-**Vhodné pro:** Každodenní programování, týmy dbající na náklady.
+**Nejlepší pro:** Každodenní programátorské pracovní postupy, týmy dbající na náklady.
 
 ### Agresivní režim (~50 % úspora)
 
 Chytrá správa historie pro dlouhé relace:
 
-- **Stárnutí zpráv** — starší zprávy jsou postupně stále více komprimovány
-- **Komprese výsledků nástrojů** — dlouhé výstupy nástrojů jsou zkráceny nebo vypuštěny (první/poslední řádky,
-  filtrování řádků podle shody, zhuštění klíčů JSON)
+- **Stárnutí zpráv** — starší zprávy jsou postupně komprimovány
+- **Komprese výsledků nástrojů** — dlouhé výstupy nástrojů jsou zkráceny nebo vynechány (první/poslední řádky,
+  filtrování řádků podle shody, kompaktace klíčů JSON)
 - **Ochrana strukturální integrity** — zajišťuje, že páry `tool_use` + `tool_result` zůstávají konzistentní
-- **Přihlédnutí ke kontextovému oknu** — respektuje tokenové limity jednotlivých modelů
+- **Povědomí o kontextovém okně** — respektuje tokenové limity jednotlivých modelů
 
-**Vhodné pro:** Dlouhé ladící relace, rozsáhlé kódové báze.
+**Nejlepší pro:** Dlouhé ladící relace, rozsáhlé kódové báze.
 
 ### Režim Ultra (~75 % úspora)
 
-Maximální komprese pro scénáře kritické z hlediska tokenů:
+Maximální komprese pro scénáře kritické na tokeny:
 
 - **Heuristické prořezávání** — prořezávání tokenů prózy na základě skóre
-- **Zachování struktury** — ohraničené bloky kódu, inline kód, URL a identifikátory jsou
-  nahrazeny zástupnými značkami (tombstone) a po kompresi doslovně znovu vloženy, nikdy nejsou prořezány
-- **Volitelná vrstva SLM** — po nakonfigurování může prořezání zpřesnit malý lokální model
+- **Zachování struktury** — oplocené bloky kódu, inline kód, URL a identifikátory jsou
+  označeny zástupnými značkami (tombstone) a po skončení doslova sešity zpět, nikdy nejsou prořezány
+- **Volitelná vrstva SLM** — malý lokální model může po nakonfigurování prořezávání zpřesnit
 - Nezávislý na agresivním režimu: nespouští stárnutí zpráv, kompresi výsledků nástrojů
-  ani záložní sumarizátor (pouze selhání vrstvy SLM může nasměrovat záložní průchod
-  přes agresivní režim)
+  ani záložní sumarizátor (pouze selhání vrstvy SLM může směrovat záložní průchod přes
+  agresivní režim)
 
-**Vhodné pro:** Když opakovaně narážíte na limity kontextu.
+**Nejlepší pro:** Když opakovaně narážíte na limity kontextu.
 
 ### Režim RTK (rozsah 60–90 % upstream)
 
-Režim RTK je optimalizován pro upovídané výstupy nástrojů, které se objevují v relacích kódovacích agentů:
+Režim RTK je optimalizován pro ukecané výstupy nástrojů, které se objevují v relacích kódovacích agentů:
 
 - Detekuje třídy příkazů/výstupů, jako jsou `git status`, `git diff`, `git log`, testovací běžce,
   buildy TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/instalace, logy Dockeru, výstupy
   infrastruktury a obecný výstup shellu
 - Aplikuje sady JSON filtrů z `open-sse/services/compression/engines/rtk/filters/`
-- Importuje filtry RTK TOML schématu v1 z projektových nebo globálních souborů `filters.toml`,
-  s validací pomocí inline testů a řízením důvěry (trust-gating) u projektových souborů
-- Dodává se se 56 vestavěnými filtry s inline ověřovacími vzorky
-- Odstraňuje řídicí sekvence ANSI, ukazatele průběhu, opakující se řádky a šum, který nevyžaduje žádnou akci
+- Importuje filtry schématu RTK TOML v1 z projektových nebo globálních souborů `filters.toml`, s validací
+  inline testy a řízením důvěry (trust-gating) projektových souborů
+- Dodává se s 56 vestavěnými filtry s inline ověřovacími vzorky
+- Odstraňuje řídicí sekvence ANSI, ukazatele průběhu, opakující se řádky a nevyužitelný šum
 - Zachovává selhání, chyby, varování, změněné soubory, souhrny a konec dlouhého výstupu
-- Podporuje projektové filtry s řízením důvěry, globální filtry a volitelnou obnovu redigovaného nezpracovaného výstupu
+- Podporuje projektové filtry s řízením důvěry, globální filtry a volitelnou obnovu redigovaného surového výstupu
 
-**Vhodné pro:** Relace agentů se záznamy shellu, buildů, testů, gitu, grepu a výstupů souborů.
+**Nejlepší pro:** Relace agentů s přepisy shellu, buildů, testů, gitu, grepu a výstupů souborů.
 
-### Režim Stacked (rozsah 78–95 % u způsobilého obsahu)
+### Skládaný režim (způsobilý rozsah 78–95 %)
 
-Režim Stacked spouští více kompresních enginů v deterministickém pořadí. Výchozí pipeline je:
+Skládaný režim spouští více kompresních enginů v deterministickém pořadí. Výchozí pipeline je:
 
 ```txt
 RTK -> Caveman
 ```
 
-Toto pořadí nejprve udrží výstup terminálu/nástrojů kompaktní a poté aplikuje sémantické zhuštění
-Caveman na zbývající prompt v přirozeném jazyce. Pipeline režimu Stacked lze konfigurovat globálně
-nebo prostřednictvím kompresních kombinací (compression combos) přiřazených ke směrovacím kombinacím
-(routing combos).
+Toto pořadí nejprve udržuje výstup terminálu/nástrojů kompaktní a poté aplikuje sémantické zahuštění
+Caveman na zbývající prompt v přirozeném jazyce. Skládané pipeline lze konfigurovat globálně nebo
+prostřednictvím kompresních kombinací přiřazených ke směrovacím kombinacím.
 
-**Vhodné pro:** Smíšený kontext s rozsáhlými logy nástrojů v kombinaci s lidskými instrukcemi nebo souhrny asistenta.
+**Nejlepší pro:** Smíšený kontext s velkými logy nástrojů spolu s lidskými instrukcemi nebo souhrny asistenta.
 
 ---
 

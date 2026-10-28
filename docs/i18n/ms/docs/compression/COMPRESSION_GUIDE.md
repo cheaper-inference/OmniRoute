@@ -36,86 +36,85 @@ Permintaan Klien
 
 Tiada mampatan digunakan. Semua mesej melalui tanpa sebarang perubahan.
 
-### Mod Lite (~15% penjimatan, latensi <1ms)
+### Mod Lite (~15% penjimatan, <1ms kependaman)
 
 Mod paling selamat — tiada perubahan semantik, hanya pembersihan format:
 
-| Teknik                   | Penerangan                                           |
-| ------------------------ | ---------------------------------------------------- |
-| `collapseWhitespace`     | Gabungkan baris kosong berturutan dan ruang belakang |
-| `dedupSystemPrompt`      | Buang mesej sistem pendua                            |
-| `compressToolResults`    | Mampatkan output alat/fungsi yang panjang lebar      |
-| `removeRedundantContent` | Buang arahan yang berulang                           |
-| `replaceImageUrls`       | Pendekkan URI data imej base64                       |
+| Teknik                   | Penerangan                                               |
+| ------------------------ | -------------------------------------------------------- |
+| `collapseWhitespace`     | Gabungkan baris kosong berturut-turut dan ruang belakang |
+| `dedupSystemPrompt`      | Buang mesej sistem pendua                                |
+| `compressToolResults`    | Mampatkan output alat/fungsi yang bertele-tele           |
+| `removeRedundantContent` | Buang arahan yang berulang                               |
+| `replaceImageUrls`       | Pendekkan URI data imej base64                           |
 
 **Terbaik untuk:** Penggunaan sentiasa aktif, aliran kerja kritikal keselamatan.
 
 ### Mod Standard (~30% penjimatan)
 
-Diilhamkan oleh [Caveman](https://github.com/JuliusBrussee/caveman) — membuang kata pengisi dan frasa panjang lebar sambil mengekalkan maksud:
+Diilhamkan oleh [Caveman](https://github.com/JuliusBrussee/caveman) — membuang kata pengisi dan frasa bertele-tele sambil mengekalkan makna:
 
 - Membuang kata pengisi ("please", "I think", "basically", "actually")
-- Memadatkan frasa panjang lebar ("in order to" → "to", "as a result of" → "because")
-- Membuang pelembut kesopanan ("Would you mind...", "If you could possibly...")
+- Memadatkan frasa bertele-tele ("in order to" → "to", "as a result of" → "because")
+- Membuang ayat berlapik sopan ("Would you mind...", "If you could possibly...")
 - 30+ peraturan regex yang ditala untuk prompt pengekodan
 
 **Terbaik untuk:** Aliran kerja pengekodan harian, pasukan yang peka kos.
 
-### Mod Agresif (~50% penjimatan)
+### Mod Aggressive (~50% penjimatan)
 
-Pengurusan sejarah pintar untuk sesi panjang:
+Pengurusan sejarah pintar untuk sesi yang panjang:
 
-- **Penuaan Mesej** — mesej lama dimampatkan secara beransur-ansur
-- **Pemampatan Hasil Alat** — output alat yang panjang dipendekkan atau diringkaskan (baris pertama/terakhir,
+- **Penuaan Mesej** — mesej lama dimampatkan secara berperingkat
+- **Mampatan Hasil Alat** — output alat yang panjang dipendekkan atau disingkat (baris pertama/terakhir,
   penapisan baris padanan, pemadatan kunci JSON)
 - **Pengawal Integriti Struktur** — memastikan pasangan `tool_use` + `tool_result` kekal konsisten
 - **Kesedaran Tetingkap Konteks** — menghormati had token setiap model
 
-**Terbaik untuk:** Sesi penyahpepijatan lanjutan, pangkalan kod besar.
+**Terbaik untuk:** Sesi penyahpepijatan lanjutan, pangkalan kod yang besar.
 
 ### Mod Ultra (~75% penjimatan)
 
-Pemampatan maksimum untuk senario kritikal token:
+Mampatan maksimum untuk senario kritikal token:
 
 - **Pemangkasan Heuristik** — pemangkasan token prosa berasaskan skor
-- **Pemeliharaan Struktur** — blok kod berpagar, kod sebaris, URL dan pengecam dijadikan
+- **Pemeliharaan Struktur** — blok kod berpagar, kod sebaris, URL dan pengecam ditandakan sebagai
   tombstone dan dijahit semula secara verbatim, tidak pernah dipangkas
 - **Tingkat SLM pilihan** — model tempatan kecil boleh memperhalusi pangkasan apabila dikonfigurasikan
-- Bebas daripada mod Agresif: ia tidak menjalankan penuaan mesej, pemampatan hasil alat
+- Bebas daripada mod Aggressive: ia tidak menjalankan penuaan mesej, mampatan hasil alat
   atau peringkas sandaran (hanya kegagalan tingkat SLM boleh menghalakan laluan sandaran
-  melalui agresif)
+  melalui aggressive)
 
 **Terbaik untuk:** Apabila anda berulang kali mencapai had konteks.
 
 ### Mod RTK (julat hulu 60-90%)
 
-Mod RTK dioptimumkan untuk output alat yang panjang lebar yang muncul dalam sesi ejen pengekodan:
+Mod RTK dioptimumkan untuk output alat bertele-tele yang muncul dalam sesi ejen pengekodan:
 
 - Mengesan kelas perintah/output seperti `git status`, `git diff`, `git log`, pelari ujian,
-  binaan TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/install, log Docker, output infrastruktur,
-  dan output shell generik
+  binaan TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, log Docker, output
+  infra, dan output shell generik
 - Menggunakan pek penapis JSON daripada `open-sse/services/compression/engines/rtk/filters/`
-- Mengimport penapis skema RTK TOML v1 daripada fail `filters.toml` projek atau global, dengan pengesahan
-  ujian sebaris dan kawalan kepercayaan untuk fail projek
-- Menyediakan 56 penapis terbina dalam dengan sampel pengesahan sebaris
-- Membuang jujukan kawalan ANSI, bar kemajuan, baris berulang, dan hingar yang tidak boleh ditindak
-- Mengekalkan kegagalan, ralat, amaran, fail yang berubah, ringkasan, dan bahagian ekor output panjang
-- Menyokong penapis projek dengan kawalan kepercayaan, penapis global, dan pemulihan output mentah
-  yang disensor secara pilihan
+- Mengimport penapis RTK TOML skema v1 daripada fail `filters.toml` projek atau global, dengan
+  pengesahan ujian sebaris dan trust-gating untuk fail projek
+- Disediakan dengan 56 penapis terbina dalam berserta sampel pengesahan sebaris
+- Membuang jujukan kawalan ANSI, bar kemajuan, baris berulang, dan hingar yang tidak boleh diambil tindakan
+- Mengekalkan kegagalan, ralat, amaran, fail yang diubah, ringkasan, dan bahagian akhir output panjang
+- Menyokong penapis projek trust-gated, penapis global, dan pemulihan output mentah tersensor secara pilihan
 
 **Terbaik untuk:** Sesi ejen dengan transkrip shell, binaan, ujian, git, grep, dan output fail.
 
-### Mod Bertindan (julat layak 78-95%)
+### Mod Stacked (julat layak 78-95%)
 
-Mod bertindan menjalankan berbilang enjin mampatan dalam susunan berketentuan. Saluran paip lalai ialah:
+Mod Stacked menjalankan berbilang enjin mampatan dalam susunan berketentuan. Saluran paip lalai ialah:
 
 ```txt
 RTK -> Caveman
 ```
 
-Susunan ini memastikan output terminal/alat padat dahulu, kemudian menggunakan pemadatan semantik
-Caveman pada prompt bahasa semula jadi yang tinggal. Saluran paip bertindan boleh dikonfigurasikan
-secara global atau melalui kombo mampatan yang ditugaskan kepada kombo penghalaan.
+Susunan itu memastikan output terminal/alat padat dahulu, kemudian menggunakan pemadatan semantik
+Caveman pada prompt bahasa semula jadi yang tinggal. Saluran paip Stacked boleh dikonfigurasikan
+secara global atau melalui kombo mampatan yang ditetapkan kepada kombo penghalaan.
 
 **Terbaik untuk:** Konteks campuran dengan log alat yang besar serta arahan manusia atau ringkasan pembantu.
 

@@ -612,9 +612,9 @@ Pentru referința completă a variabilelor de mediu, consultați [README](../REA
 <details>
 <summary><b>Vezi toate modelele disponibile</b></summary>
 
-> Lista de mai jos este o selecție din `open-sse/config/providerRegistry.ts` pentru v3.8.0. Cataloagele cloud (Gemini, OpenRouter etc.) sunt sincronizate dinamic — pentru catalogul live complet deschide **Tablou de bord → Furnizori → [furnizor] → Modele disponibile** sau apelează `GET /api/models/catalog`.
+> Lista de mai jos este întocmită pe baza `open-sse/config/providerRegistry.ts` pentru v3.8.0. Cataloagele cloud (Gemini, OpenRouter etc.) sunt sincronizate dinamic — pentru catalogul complet, actualizat live, deschide **Tablou de bord → Furnizori → [furnizor] → Modele disponibile** sau apelează `GET /api/models/catalog`.
 >
-> Dacă lista predefinită a unui furnizor a rămas în urmă, folosește **Importă din /models** pe acea pagină (sau activează **Sincronizare automată**) pentru a prelua catalogul live din upstream. Acest lucru a fost verificat în v3.8.50 pentru LLM7.io (`gemini-3.1-flash-lite`) și UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); accesul anonim la Pollinations a rămas limitat de upstream în timpul aceleiași runde de testare.
+> Dacă lista integrată a unui furnizor a rămas în urmă, folosește **Importare din /models** pe acea pagină (sau activează **Sincronizare automată**) pentru a prelua catalogul upstream actualizat. Acest lucru a fost verificat în v3.8.50 pentru LLM7.io (`gemini-3.1-flash-lite`) și UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); accesul anonim la Pollinations a rămas limitat din partea upstream în timpul aceleiași runde de testare.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -640,7 +640,7 @@ Pentru referința completă a variabilelor de mediu, consultați [README](../REA
 
 **Mistral (`mistral/`)** — Găzduit în UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Augmentat cu căutare: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Îmbogățit cu căutare: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratuit), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -656,11 +656,11 @@ Pentru referința completă a variabilelor de mediu, consultați [README](../REA
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sincronizat live, per cheie API, de la Google — fără listă statică. Conectează o cheie în **Tablou de bord → Furnizori**, apoi folosește **Modele disponibile** pentru a importa catalogul curent (de ex. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Sincronizat live per cheie API de la Google — fără listă statică. Conectează o cheie în **Tablou de bord → Furnizori**, apoi folosește **Modele disponibile** pentru a importa catalogul curent (de ex. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Alți furnizori compatibili** (selecție): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (prin `aws-bedrock`), `azure-ai`, `openrouter` (catalog de tip passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Fiecare își menține propria listă de modele în `providerRegistry.ts` și poate fi sincronizat automat atunci când furnizorul expune un endpoint `/models`.
+**Alți furnizori compatibili** (selecție): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (prin `aws-bedrock`), `azure-ai`, `openrouter` (catalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Fiecare își menține propria listă de modele în `providerRegistry.ts` și poate fi sincronizat automat atunci când furnizorul expune un endpoint `/models`.
 
-**Notă privind ID-urile modelelor:** OmniRoute folosește ID-urile native ale furnizorilor (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Unele ID-uri includ versiuni cu puncte, deoarece așa le așteaptă API-ul upstream. Dacă un model nu apare în lista de mai sus, rulează `omniroute models --search <term>` sau apelează `GET /api/models/catalog` pentru a confirma disponibilitatea.
+**Notă despre ID-urile modelelor:** OmniRoute folosește ID-uri native ale furnizorilor (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Unele ID-uri includ versiuni cu puncte, deoarece așa le așteaptă API-ul upstream. Dacă un model nu este listat mai sus, rulează `omniroute models --search <term>` sau apelează `GET /api/models/catalog` pentru a confirma disponibilitatea.
 
 </details>
 

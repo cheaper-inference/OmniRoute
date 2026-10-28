@@ -40,11 +40,11 @@ O catálogo integrado atualmente inclui 56 filtros distribuídos nestas categori
 | `shell`   | `ls`, `find`, `grep`, logs genéricos de shell                 |
 | `docker`  | `docker ps`, logs do Docker                                   |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | saída JSON, stack traces, fallback genérico de saída          |
+| `generic` | Saída JSON, stack traces, fallback de saída genérica          |
 
 O detector em `open-sse/services/compression/engines/rtk/commandDetector.ts` classifica a saída
-antes da seleção do filtro. Os filtros também podem corresponder por padrão de comando ou regex
-de saída quando uma classe de comando não é suficiente.
+antes da seleção do filtro. Os filtros também podem corresponder por padrão de comando ou regex de saída quando uma
+classe de comando não é suficiente.
 
 ## Resolução de Filtros
 
@@ -353,7 +353,7 @@ node --import tsx/esm --test \
 
 ## Níveis de Intensidade (v3.8.16+)
 
-O RTK suporta **3 níveis de intensidade** que equilibram **agressividade de compressão** e **segurança**. O nível é definido via `config.intensity` na configuração do engine.
+O RTK suporta **3 níveis de intensidade** que equilibram **agressividade de compressão** e **segurança**. O nível é definido via `config.intensity` na configuração do motor.
 
 ### Os 3 Níveis
 
@@ -363,9 +363,9 @@ O RTK suporta **3 níveis de intensidade** que equilibram **agressividade de com
 | `standard` (padrão) | 24 linhas por seção   | ~50-70%            | Baixo       | Sessões diárias de codificação  |
 | `aggressive`        | 16 linhas por seção   | ~70-90%            | Médio       | Sessões longas, economia máxima |
 
-### Onde o Truncamento Acontece
+### Onde Ocorre o Truncamento
 
-O limite de truncamento afeta o `lineFilter.ts`:
+O limite de truncamento afeta `lineFilter.ts`:
 
 ```ts
 // De open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -373,7 +373,7 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Tanto o **início** quanto o **fim** de cada seção são preservados; o conteúdo do meio é descartado quando o truncamento entra em ação.
+Tanto o **início** quanto o **final** de cada seção são preservados; o conteúdo intermediário é descartado quando o truncamento entra em ação.
 
 ### O Que Permanece vs. O Que É Cortado
 
@@ -382,7 +382,7 @@ Tanto o **início** quanto o **fim** de cada seção são preservados; o conteú
 | Erros / stack traces           | ✅ preservado | ✅ preservado | ✅ preservado |
 | Falhas de teste                | ✅ preservado | ✅ preservado | ✅ preservado |
 | Erros de build                 | ✅ preservado | ✅ preservado | ✅ preservado |
-| Testes aprovados (verbosos)    | ✅ preservado | 🟡 recolhido  | 🟡 recolhido  |
+| Testes aprovados (verbose)     | ✅ preservado | 🟡 recolhido  | 🟡 recolhido  |
 | Saída de rotina (logs de info) | 🟡 recolhido  | 🟡 recolhido  | ❌ descartado |
 | Barras de progresso            | 🟡 recolhido  | ❌ descartado | ❌ descartado |
 | Banner / arte ASCII            | 🟡 recolhido  | ❌ descartado | ❌ descartado |
@@ -430,9 +430,9 @@ Tanto o **início** quanto o **fim** de cada seção são preservados; o conteú
 
 **Programaticamente**:
 
-O `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) é um
-`CompressionEngine` e não possui o método `updateConfig`. Em vez disso, atualize
-a configuração de um engine por meio do helper do registry:
+`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) é um
+`CompressionEngine` e não possui o método `updateConfig`. Atualize a configuração
+de um motor por meio do helper do registry:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";

@@ -30,81 +30,81 @@ Yêu cầu từ máy khách
 
 ---
 
-## Các Chế Độ Nén
+## Các Chế độ Nén
 
-### Tắt
+### Tắt (Off)
 
-Không áp dụng nén. Tất cả tin nhắn được chuyển qua nguyên trạng.
+Không áp dụng nén. Tất cả tin nhắn được truyền qua nguyên bản.
 
-### Chế Độ Lite (tiết kiệm ~15%, độ trễ <1ms)
+### Chế độ Lite (tiết kiệm ~15%, độ trễ <1ms)
 
 Chế độ an toàn nhất — không thay đổi ngữ nghĩa, chỉ dọn dẹp định dạng:
 
 | Kỹ thuật                 | Mô tả                                                  |
 | ------------------------ | ------------------------------------------------------ |
 | `collapseWhitespace`     | Gộp các dòng trống liên tiếp và khoảng trắng cuối dòng |
-| `dedupSystemPrompt`      | Loại bỏ các tin nhắn hệ thống trùng lặp                |
-| `compressToolResults`    | Nén các đầu ra công cụ/hàm dài dòng                    |
+| `dedupSystemPrompt`      | Loại bỏ các system message trùng lặp                   |
+| `compressToolResults`    | Nén các đầu ra tool/function dài dòng                  |
 | `removeRedundantContent` | Loại bỏ các chỉ dẫn lặp lại                            |
-| `replaceImageUrls`       | Rút gọn các URI dữ liệu ảnh base64                     |
+| `replaceImageUrls`       | Rút gọn các data URI ảnh base64                        |
 
-**Phù hợp nhất cho:** Sử dụng liên tục, các quy trình làm việc yêu cầu an toàn cao.
+**Phù hợp nhất cho:** Sử dụng luôn bật, các quy trình công việc yêu cầu an toàn cao.
 
-### Chế Độ Chuẩn (tiết kiệm ~30%)
+### Chế độ Standard (tiết kiệm ~30%)
 
 Lấy cảm hứng từ [Caveman](https://github.com/JuliusBrussee/caveman) — loại bỏ các từ đệm và cách diễn đạt dài dòng trong khi vẫn giữ nguyên ý nghĩa:
 
 - Loại bỏ các từ đệm ("please", "I think", "basically", "actually")
 - Cô đọng các cụm từ dài dòng ("in order to" → "to", "as a result of" → "because")
-- Loại bỏ các cách nói lịch sự thừa thãi ("Would you mind...", "If you could possibly...")
+- Loại bỏ các câu hỏi lịch sự khách sáo ("Would you mind...", "If you could possibly...")
 - Hơn 30 quy tắc regex được tinh chỉnh cho các prompt lập trình
 
 **Phù hợp nhất cho:** Quy trình lập trình hằng ngày, các nhóm quan tâm đến chi phí.
 
-### Chế Độ Aggressive (tiết kiệm ~50%)
+### Chế độ Aggressive (tiết kiệm ~50%)
 
-Quản lý lịch sử thông minh cho các phiên kéo dài:
+Quản lý lịch sử thông minh cho các phiên dài:
 
-- **Lão hóa tin nhắn** — các tin nhắn cũ hơn được nén dần theo thời gian
-- **Nén kết quả công cụ** — các đầu ra công cụ dài bị cắt bớt hoặc lược bỏ (dòng đầu/cuối,
-  lọc theo dòng khớp, nén gọn khóa JSON)
-- **Rào chắn toàn vẹn cấu trúc** — đảm bảo các cặp `tool_use` + `tool_result` luôn nhất quán
-- **Nhận thức cửa sổ ngữ cảnh** — tôn trọng giới hạn token của từng mô hình
+- **Message Aging** — các tin nhắn cũ được nén dần theo thời gian
+- **Tool Result Compression** — các đầu ra tool dài được cắt bớt hoặc lược bỏ (lấy dòng đầu/cuối,
+  lọc theo dòng khớp, nén JSON key)
+- **Structural Integrity Guards** — đảm bảo các cặp `tool_use` + `tool_result` luôn nhất quán
+- **Context Window Awareness** — tôn trọng giới hạn token của từng mô hình
 
-**Phù hợp nhất cho:** Các phiên gỡ lỗi kéo dài, codebase lớn.
+**Phù hợp nhất cho:** Các phiên debug kéo dài, codebase lớn.
 
-### Chế Độ Ultra (tiết kiệm ~75%)
+### Chế độ Ultra (tiết kiệm ~75%)
 
-Nén tối đa cho các tình huống cần tiết kiệm token tới mức tối đa:
+Nén tối đa cho các tình huống khắt khe về token:
 
-- **Cắt tỉa heuristic** — cắt tỉa token theo điểm số đối với phần văn xuôi
-- **Bảo toàn cấu trúc** — các khối code có rào (fenced), code nội dòng, URL và định danh được
-  đánh dấu tombstone rồi ghép lại nguyên văn, không bao giờ bị cắt tỉa
-- **Tầng SLM tùy chọn** — một mô hình cục bộ nhỏ có thể tinh chỉnh việc cắt tỉa khi được cấu hình
-- Độc lập với chế độ Aggressive: không chạy lão hóa tin nhắn, nén kết quả công cụ
-  hay bộ tóm tắt dự phòng (chỉ khi tầng SLM gặp lỗi mới có thể định tuyến một lượt dự phòng
-  qua aggressive)
+- **Heuristic Pruning** — cắt tỉa token văn xuôi dựa trên chấm điểm
+- **Structure Preservation** — các khối code fenced, inline code, URL và định danh được
+  đánh dấu thay thế (tombstone) và ghép lại nguyên văn, không bao giờ bị cắt tỉa
+- **Tầng SLM tùy chọn** — một mô hình cục bộ nhỏ có thể tinh chỉnh bước cắt tỉa khi được cấu hình
+- Độc lập với chế độ Aggressive: không chạy message aging, nén tool-result
+  hay bộ tóm tắt dự phòng (chỉ khi tầng SLM thất bại mới có thể chuyển một lượt dự phòng
+  sang aggressive)
 
 **Phù hợp nhất cho:** Khi bạn liên tục chạm giới hạn ngữ cảnh.
 
-### Chế Độ RTK (phạm vi 60-90% ở upstream)
+### Chế độ RTK (phạm vi upstream 60-90%)
 
-Chế độ RTK được tối ưu cho các đầu ra công cụ dài dòng xuất hiện trong các phiên coding-agent:
+Chế độ RTK được tối ưu cho các đầu ra tool dài dòng xuất hiện trong các phiên coding-agent:
 
-- Phát hiện các lớp lệnh/đầu ra như `git status`, `git diff`, `git log`, trình chạy test,
-  bản build TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/install, log Docker,
-  đầu ra hạ tầng, và đầu ra shell thông thường
+- Nhận diện các loại lệnh/đầu ra như `git status`, `git diff`, `git log`, test runner,
+  build TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/install, log Docker, đầu ra
+  hạ tầng, và đầu ra shell chung
 - Áp dụng các gói bộ lọc JSON từ `open-sse/services/compression/engines/rtk/filters/`
-- Nhập các bộ lọc RTK TOML schema v1 từ các tệp `filters.toml` của dự án hoặc toàn cục,
-  với xác thực inline-test và cơ chế chặn theo độ tin cậy cho các tệp dự án
+- Nhập các bộ lọc RTK TOML schema v1 từ các file `filters.toml` của dự án hoặc toàn cục, với xác thực
+  inline-test và kiểm soát tin cậy (trust-gating) cho các file của dự án
 - Đi kèm 56 bộ lọc tích hợp sẵn với các mẫu kiểm chứng inline
-- Loại bỏ các chuỗi điều khiển ANSI, thanh tiến trình, các dòng lặp lại và nhiễu không cần xử lý
-- Giữ lại các thất bại, lỗi, cảnh báo, tệp đã thay đổi, phần tóm tắt và phần cuối của đầu ra dài
-- Hỗ trợ bộ lọc dự án có chặn theo độ tin cậy, bộ lọc toàn cục và khôi phục đầu ra thô đã che giấu (tùy chọn)
+- Loại bỏ các chuỗi điều khiển ANSI, thanh tiến trình, các dòng lặp lại, và nhiễu không cần hành động
+- Giữ lại các lỗi thất bại, lỗi, cảnh báo, file đã thay đổi, phần tóm tắt, và đoạn cuối của đầu ra dài
+- Hỗ trợ bộ lọc dự án có kiểm soát tin cậy, bộ lọc toàn cục, và khôi phục đầu ra thô đã che giấu (tùy chọn)
 
-**Phù hợp nhất cho:** Các phiên agent có bản ghi shell, build, test, git, grep và đầu ra tệp.
+**Phù hợp nhất cho:** Các phiên agent có bản ghi shell, build, test, git, grep và đầu ra file.
 
-### Chế Độ Stacked (phạm vi 78-95% cho nội dung đủ điều kiện)
+### Chế độ Stacked (phạm vi đủ điều kiện 78-95%)
 
 Chế độ Stacked chạy nhiều engine nén theo một thứ tự xác định. Pipeline mặc định là:
 
@@ -112,11 +112,11 @@ Chế độ Stacked chạy nhiều engine nén theo một thứ tự xác địn
 RTK -> Caveman
 ```
 
-Thứ tự đó giúp đầu ra terminal/công cụ gọn gàng trước, sau đó áp dụng việc cô đọng ngữ nghĩa
-của Caveman cho phần prompt ngôn ngữ tự nhiên còn lại. Các pipeline Stacked có thể được cấu hình
-toàn cục hoặc thông qua các combo nén được gán cho các combo định tuyến.
+Thứ tự đó giúp nén gọn đầu ra terminal/tool trước, sau đó áp dụng bước cô đọng ngữ nghĩa của Caveman
+cho phần prompt ngôn ngữ tự nhiên còn lại. Các pipeline Stacked có thể được cấu hình toàn cục hoặc thông qua
+các combo nén được gán cho các combo định tuyến.
 
-**Phù hợp nhất cho:** Ngữ cảnh hỗn hợp gồm log công cụ lớn cùng chỉ dẫn của con người hoặc bản tóm tắt của trợ lý.
+**Phù hợp nhất cho:** Ngữ cảnh hỗn hợp gồm log tool lớn cùng chỉ dẫn của con người hoặc bản tóm tắt của assistant.
 
 ---
 
@@ -275,7 +275,7 @@ mật khẩu, token và thông tin bí mật trước khi bất kỳ thứ gì �
 
 ## Thống kê nén
 
-Mỗi yêu cầu được nén đều bao gồm số liệu thống kê trong nhật ký máy chủ:
+Mọi yêu cầu được nén đều bao gồm số liệu thống kê trong nhật ký máy chủ:
 
 ```json
 {

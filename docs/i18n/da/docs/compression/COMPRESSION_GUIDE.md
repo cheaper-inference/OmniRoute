@@ -34,77 +34,77 @@ Klientanmodning
 
 ### Fra
 
-Ingen komprimering anvendes. Alle beskeder passerer igennem uændrede.
+Ingen komprimering anvendes. Alle beskeder passerer uændret igennem.
 
 ### Lite-tilstand (~15 % besparelse, <1 ms latenstid)
 
 Den sikreste tilstand — nul semantisk ændring, kun oprydning i formatering:
 
-| Teknik                   | Beskrivelse                                                 |
-| ------------------------ | ----------------------------------------------------------- |
-| `collapseWhitespace`     | Fletter fortløbende tomme linjer og efterstillede mellemrum |
-| `dedupSystemPrompt`      | Fjerner dublerede systembeskeder                            |
-| `compressToolResults`    | Komprimerer udførlige værktøjs-/funktionsoutput             |
-| `removeRedundantContent` | Fjerner gentagne instruktioner                              |
-| `replaceImageUrls`       | Forkorter base64-billeddata-URI'er                          |
+| Teknik                   | Beskrivelse                                                       |
+| ------------------------ | ----------------------------------------------------------------- |
+| `collapseWhitespace`     | Flet på hinanden følgende tomme linjer og efterstillede mellemrum |
+| `dedupSystemPrompt`      | Fjern duplikerede systembeskeder                                  |
+| `compressToolResults`    | Komprimér udførlige værktøjs-/funktionsoutput                     |
+| `removeRedundantContent` | Fjern gentagne instruktioner                                      |
+| `replaceImageUrls`       | Forkort base64-billeddata-URI'er                                  |
 
-**Bedst til:** Altid aktiv brug, sikkerhedskritiske arbejdsgange.
+**Bedst til:** Altid-aktiveret brug, sikkerhedskritiske arbejdsgange.
 
 ### Standardtilstand (~30 % besparelse)
 
 Inspireret af [Caveman](https://github.com/JuliusBrussee/caveman) — fjerner fyldord og udførlige formuleringer, mens betydningen bevares:
 
-- Fjerner fyldord ("vær venlig", "jeg synes", "i bund og grund", "faktisk")
-- Fortætter udførlige fraser ("for at" → "at", "som følge af" → "fordi")
-- Fjerner høflige omsvøb ("Ville du have noget imod...", "Hvis du muligvis kunne...")
-- 30+ regex-regler finjusteret til kodnings-prompter
+- Fjerner fyldord ("please", "I think", "basically", "actually")
+- Fortætter udførlige fraser ("in order to" → "to", "as a result of" → "because")
+- Fjerner høflige forbehold ("Would you mind...", "If you could possibly...")
+- 30+ regex-regler tilpasset kodningsprompter
 
 **Bedst til:** Daglige kodningsarbejdsgange, omkostningsbevidste teams.
 
 ### Aggressiv tilstand (~50 % besparelse)
 
-Intelligent historikstyring til lange sessioner:
+Smart historikstyring til lange sessioner:
 
 - **Beskedældning** — ældre beskeder komprimeres gradvist
 - **Komprimering af værktøjsresultater** — lange værktøjsoutput afkortes eller udelades (første/sidste linjer,
-  matchlinjefiltrering, komprimering af JSON-nøgler)
-- **Værn om strukturel integritet** — sikrer, at `tool_use` + `tool_result`-par forbliver konsistente
-- **Bevidsthed om kontekstvindue** — respekterer token-grænser pr. model
+  matchlinjefiltrering, JSON-nøglefortætning)
+- **Strukturelle integritetsvagter** — sikrer, at `tool_use` + `tool_result`-par forbliver konsistente
+- **Kontekstvinduesbevidsthed** — respekterer token-grænser pr. model
 
-**Bedst til:** Længerevarende fejlsøgningssessioner, store kodebaser.
+**Bedst til:** Længerevarende fejlfindingssessioner, store kodebaser.
 
 ### Ultra-tilstand (~75 % besparelse)
 
 Maksimal komprimering til token-kritiske scenarier:
 
-- **Heuristisk beskæring** — scorebaseret token-beskæring af prosa
-- **Strukturbevarelse** — indhegnede kodeblokke, inline-kode, URL'er og identifikatorer
-  markeres med tombstones og sammensættes igen ordret, beskæres aldrig
+- **Heuristisk beskæring** — scorebaseret tokenbeskæring af prosa
+- **Strukturbevarelse** — afgrensede kodeblokke, inline-kode, URL'er og identifikatorer
+  tombstones og samles igen ordret, beskæres aldrig
 - **Valgfrit SLM-niveau** — en lille lokal model kan forfine beskæringen, når den er konfigureret
-- Uafhængig af Aggressiv tilstand: den kører ikke beskedældning, komprimering af værktøjsresultater
-  eller fallback-opsummeringsfunktionen (kun en fejl i SLM-niveauet kan dirigere et fallback-gennemløb
-  gennem aggressiv)
+- Uafhængig af Aggressiv tilstand: den kører ikke beskedældning, komprimering af
+  værktøjsresultater eller fallback-opsummeringen (kun en fejl i SLM-niveauet kan dirigere
+  en fallback-gennemgang gennem aggressiv)
 
 **Bedst til:** Når du gentagne gange rammer kontekstgrænserne.
 
-### RTK-tilstand (60-90 % opstrømsinterval)
+### RTK-tilstand (60–90 % opstrømsinterval)
 
-RTK-tilstand er optimeret til udførlige værktøjsoutput, der optræder i sessioner med kodningsagenter:
+RTK-tilstand er optimeret til udførlige værktøjsoutput, der optræder i kodningsagentsessioner:
 
-- Registrerer kommando-/outputklasser såsom `git status`, `git diff`, `git log`, testrunnere,
-  TypeScript/Vite/Webpack-builds, ESLint/Biome/Prettier, npm audit/installationer, Docker-logs,
-  infrastrukturoutput og generisk shell-output
+- Registrerer kommando-/outputklasser som `git status`, `git diff`, `git log`, testkørere,
+  TypeScript/Vite/Webpack-builds, ESLint/Biome/Prettier, npm audit/installationer, Docker-logge,
+  infrastrukturoutput og generelt shell-output
 - Anvender JSON-filterpakker fra `open-sse/services/compression/engines/rtk/filters/`
-- Importerer RTK TOML-skema v1-filtre fra projekt- eller globale `filters.toml`-filer, med validering
-  via inline-tests og trust-gating for projektfiler
-- Leveres med 56 indbyggede filtre med inline-verifikationseksempler
-- Fjerner ANSI-kontrolsekvenser, statusbjælker, gentagne linjer og støj, der ikke kan omsættes til handling
-- Bevarer mislykkede resultater, fejl, advarsler, ændrede filer, sammenfatninger og slutningen af langt output
-- Understøtter trust-gatede projektfiltre, globale filtre og valgfri gendannelse af maskeret råoutput
+- Importerer RTK TOML-skema v1-filtre fra projekt- eller globale `filters.toml`-filer, med
+  inline-testvalidering og trust-gating for projektfiler
+- Leveres med 56 indbyggede filtre med inline-verificeringseksempler
+- Fjerner ANSI-kontrolsekvenser, statuslinjer, gentagne linjer og ikke-handlingsbart støj
+- Bevarer fejl, fejlmeddelelser, advarsler, ændrede filer, opsummeringer og slutningen af langt output
+- Understøtter trust-gatede projektfiltre, globale filtre og valgfri gendannelse af redigeret råoutput
 
-**Bedst til:** Agentsessioner med transskriptioner fra shell, builds, tests, git, grep og filoutput.
+**Bedst til:** Agentsessioner med shell-, build-, test-, git-, grep- og filoutputtransskriptioner.
 
-### Stakket tilstand (78-95 % kvalificeret interval)
+### Stakket tilstand (78–95 % berettiget interval)
 
 Stakket tilstand kører flere komprimeringsmotorer i en deterministisk rækkefølge. Standardpipelinen er:
 
@@ -112,11 +112,11 @@ Stakket tilstand kører flere komprimeringsmotorer i en deterministisk rækkefø
 RTK -> Caveman
 ```
 
-Den rækkefølge holder terminal-/værktøjsoutput kompakt først og anvender derefter Cavemans semantiske
-fortætning på det resterende naturligsprogede prompt. Stakkede pipelines kan konfigureres globalt eller via
-komprimeringskombinationer, der er tildelt routingkombinationer.
+Denne rækkefølge holder terminal-/værktøjsoutput kompakt først og anvender derefter Cavemans semantiske
+fortætning på den resterende naturligsproglige prompt. Stakkede pipelines kan konfigureres globalt eller
+gennem komprimeringskombinationer tildelt routingkombinationer.
 
-**Bedst til:** Blandet kontekst med store værktøjslogs samt menneskelige instruktioner eller assistentsammenfatninger.
+**Bedst til:** Blandet kontekst med store værktøjslogge plus menneskelige instruktioner eller assistentopsummeringer.
 
 ---
 

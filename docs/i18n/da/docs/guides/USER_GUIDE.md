@@ -614,7 +614,7 @@ Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 
 > Listen nedenfor er udvalgt fra `open-sse/config/providerRegistry.ts` for v3.8.0. Cloud-kataloger (Gemini, OpenRouter osv.) synkroniseres dynamisk — for at se hele live-kataloget åbn **Dashboard → Udbydere → [udbyder] → Tilgængelige modeller** eller kald `GET /api/models/catalog`.
 >
-> Hvis en udbyders indbyggede liste er kommet ud af trit, kan du bruge **Importér fra /models** på den side (eller aktivere **Auto-Sync**) for at hente det aktuelle upstream-katalog. Dette blev verificeret i v3.8.50 for LLM7.io (`gemini-3.1-flash-lite`) og UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym adgang til Pollinations forblev upstream-begrænset under samme testkørsel.
+> Hvis en udbyders indbyggede liste er kommet ud af trit, kan du bruge **Importér fra /models** på den pågældende side (eller aktivere **Automatisk synkronisering**) for at hente det aktuelle upstream-katalog. Dette blev verificeret i v3.8.50 for LLM7.io (`gemini-3.1-flash-lite`) og UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonym adgang til Pollinations forblev begrænset fra upstreams side under samme testrunde.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -634,13 +634,13 @@ Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 
 **DeepSeek (`ds/`)** — API-nøgle: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ultrahurtig: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ultra-hurtig: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Indbygget Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok-nativ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — EU-hostet: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Søgeforstærket: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Søgeunderstøttet: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (gratis), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -658,9 +658,9 @@ Se [README](../README.md) for den komplette oversigt over miljøvariabler.
 
 **Gemini (Google Cloud `gemini/`)**: Synkroniseres live pr. API-nøgle fra Google — ingen statisk liste. Tilføj en nøgle under **Dashboard → Udbydere**, og brug derefter **Tilgængelige modeller** til at importere det aktuelle katalog (f.eks. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Andre kompatible udbydere** (udvalgte): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough-katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hver enkelt vedligeholder sin egen model-liste i `providerRegistry.ts` og kan synkroniseres automatisk, når udbyderen eksponerer et `/models`-endpoint.
+**Andre kompatible udbydere** (udvalgte): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough-katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Hver enkelt vedligeholder sin egen modelliste i `providerRegistry.ts` og kan autosynkroniseres, når udbyderen eksponerer et `/models`-endpoint.
 
-**Bemærkning om model-ID'er:** OmniRoute bruger udbydernes egne ID'er (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Nogle ID'er indeholder versioner med punktummer, fordi det er sådan, upstream-API'en forventer dem. Hvis en model ikke er anført ovenfor, kan du køre `omniroute models --search <term>` eller kalde `GET /api/models/catalog` for at bekræfte tilgængeligheden.
+**Bemærkning om model-ID'er:** OmniRoute bruger udbyder-native ID'er (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Nogle ID'er indeholder versioner med punktummer, fordi det er sådan, upstream-API'et forventer dem. Hvis en model ikke er anført ovenfor, kør `omniroute models --search <term>` eller kald `GET /api/models/catalog` for at bekræfte tilgængeligheden.
 
 </details>
 

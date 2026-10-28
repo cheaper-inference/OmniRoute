@@ -612,9 +612,9 @@ post_install() {
 <details>
 <summary><b>사용 가능한 모든 모델 보기</b></summary>
 
-> 아래 목록은 v3.8.0 기준 `open-sse/config/providerRegistry.ts`에서 선별한 것입니다. 클라우드 카탈로그(Gemini, OpenRouter 등)는 동적으로 동기화되므로, 최신 전체 카탈로그는 **대시보드 → 프로바이더 → [provider] → 사용 가능한 모델**에서 확인하거나 `GET /api/models/catalog`를 호출하세요.
+> 아래 목록은 v3.8.0 기준 `open-sse/config/providerRegistry.ts`에서 선별한 것입니다. 클라우드 카탈로그(Gemini, OpenRouter 등)는 동적으로 동기화됩니다 — 전체 실시간 카탈로그는 **대시보드 → 프로바이더 → [provider] → 사용 가능한 모델**에서 확인하거나 `GET /api/models/catalog`를 호출하세요.
 >
-> 프로바이더의 기본 제공 목록이 최신 상태와 달라진 경우, 해당 페이지에서 **/models에서 가져오기**를 사용하거나 **자동 동기화**를 활성화하여 최신 업스트림 카탈로그를 가져오세요. 이는 v3.8.50에서 LLM7.io(`gemini-3.1-flash-lite`)와 UncloseAI(`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)에 대해 검증되었으며, 동일한 테스트 과정에서 Pollinations 익명 액세스는 여전히 업스트림 제한 상태였습니다.
+> 프로바이더의 기본 내장 목록이 최신과 달라진 경우, 해당 페이지에서 **/models에서 가져오기**를 사용하거나 **자동 동기화**를 활성화하여 실시간 업스트림 카탈로그를 가져오세요. 이는 v3.8.50에서 LLM7.io(`gemini-3.1-flash-lite`)와 UncloseAI(`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)에 대해 검증되었으며, Pollinations 익명 액세스는 동일한 테스트 과정에서 업스트림 제한 상태를 유지했습니다.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -622,7 +622,7 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — 무료 OAuth: **대시보드 → 프로바이더 → Kiro → 사용 가능한 모델**에 표시되는 최신 카탈로그를 사용하세요. 사용 가능 여부는 계정 및 요금제에 따라 달라집니다.
+**Kiro (`kr/`)** — 무료 OAuth: **대시보드 → 프로바이더 → Kiro → 사용 가능한 모델**에 표시되는 실시간 카탈로그를 사용하세요. 사용 가능 여부는 계정 및 요금제에 따라 달라집니다.
 
 **Qoder (`if/`)** — 무료 OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,7 +630,7 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/월 정액 또는 종량제: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 월 $9 정액제 또는 사용량 기반: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API 키: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -640,9 +640,9 @@ post_install() {
 
 **Mistral (`mistral/`)** — EU 호스팅: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — 검색 결합: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — 검색 증강: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — 오픈소스: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (무료), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — 오픈 소스: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (무료), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — 고속 추론: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
@@ -656,11 +656,11 @@ post_install() {
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google에서 API 키별로 실시간 동기화되므로 고정 목록이 없습니다. **대시보드 → 프로바이더**에서 키를 연결한 다음 **사용 가능한 모델**을 사용해 현재 카탈로그를 가져오세요(예: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: API 키별로 Google에서 실시간으로 동기화됩니다 — 정적 목록이 없습니다. **대시보드 → 프로바이더**에서 키를 연결한 후 **사용 가능한 모델**을 사용하여 현재 카탈로그를 가져오세요 (예: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**기타 호환 프로바이더** (일부): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` 경유), `azure-ai`, `openrouter` (카탈로그 패스스루), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. 각 프로바이더는 `providerRegistry.ts`에 자체 모델 목록을 유지하며, 프로바이더가 `/models` 엔드포인트를 제공하는 경우 자동 동기화할 수 있습니다.
+**기타 호환 프로바이더** (일부 선별): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` 경유), `azure-ai`, `openrouter` (패스스루 카탈로그), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. 각 프로바이더는 `providerRegistry.ts`에 자체 모델 목록을 유지하며, 프로바이더가 `/models` 엔드포인트를 제공하는 경우 자동 동기화할 수 있습니다.
 
-**모델 ID 참고 사항:** OmniRoute는 프로바이더 네이티브 ID(`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)를 사용합니다. 일부 ID에 점(.)이 포함된 버전이 있는 것은 업스트림 API가 해당 형식을 요구하기 때문입니다. 모델이 위 목록에 없는 경우 `omniroute models --search <term>`을 실행하거나 `GET /api/models/catalog`를 호출하여 사용 가능 여부를 확인하세요.
+**모델 ID 참고 사항:** OmniRoute는 프로바이더 고유 ID(`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)를 사용합니다. 일부 ID에 점이 포함된 버전이 있는 것은 업스트림 API가 그 형식을 요구하기 때문입니다. 위에 나열되지 않은 모델은 `omniroute models --search <term>`을 실행하거나 `GET /api/models/catalog`를 호출하여 사용 가능 여부를 확인하세요.
 
 </details>
 
@@ -1293,9 +1293,9 @@ OmniRoute는 클라우드 코딩 에이전트(**OpenAI Codex Cloud**, **Devin**,
 
 ## 🛠️ 프로그래밍 방식 관리
 
-**`manage` 스코프를 가진 Bearer 키**를 사용하면 HTTP를 통해 모든 OmniRoute 리소스(프로바이더, 콤보, 키, 설정)를 관리할 수 있습니다.
+**`manage` 스코프가 있는 Bearer 키**를 사용하면 HTTP를 통해 모든 OmniRoute 리소스(프로바이더, 콤보, 키, 설정)를 관리할 수 있습니다.
 
-**Dashboard → API Keys → New Key → Scope: manage**에서 키를 생성한 후:
+**Dashboard → API Keys → New Key → Scope: manage**에서 키를 생성한 후 다음을 실행하세요:
 
 ```bash
 # 프로바이더 목록 조회
@@ -1320,7 +1320,7 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-전체 엔드포인트 카탈로그와 요청/응답 스키마는 [API_REFERENCE.md](../reference/API_REFERENCE.md)를 참조하세요.
+전체 엔드포인트 목록과 요청/응답 스키마는 [API_REFERENCE.md](../reference/API_REFERENCE.md)를 참조하세요.
 
 ---
 

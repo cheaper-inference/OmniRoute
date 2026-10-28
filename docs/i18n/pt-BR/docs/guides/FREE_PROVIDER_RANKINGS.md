@@ -11,30 +11,32 @@
 
 ---
 
-## O que é
+## O Que É
 
-O OmniRoute registra 376 provedores, incluindo 155 entradas de catálogo marcadas como **gratuitas/sem autenticação**
-(sem autenticação,
-OAuth de nível gratuito ou chave de API de nível gratuito — consulte o
-[Guia de níveis gratuitos](../getting-started/FREE-TIERS-GUIDE.md) e o
-[Diretório completo de níveis gratuitos](../reference/FREE_TIERS.md)). O porém: os provedores gratuitos variam
-muito em termos de qualidade dos modelos. Um provedor sem autenticação que oferece um modelo de fronteira é muito mais útil
-do que um que oferece um modelo legado pequeno.
+O OmniRoute registra 376 provedores, incluindo 155 entradas de catálogo marcadas como
+**gratuitas/sem autenticação** (sem autenticação, OAuth de nível gratuito ou chave de
+API de nível gratuito — veja o
+[Guia de Níveis Gratuitos](../getting-started/FREE-TIERS-GUIDE.md) e o diretório completo
+de [Níveis Gratuitos](../reference/FREE_TIERS.md)). O problema: provedores gratuitos
+variam enormemente na qualidade dos modelos. Um provedor sem autenticação que oferece um
+modelo de ponta é muito mais útil do que um que oferece um modelo legado pequeno.
 
-**Classificações de provedores gratuitos** responde à pergunta "**qual provedor gratuito oferece o melhor modelo?**" ao
-combinar o catálogo de cada provedor gratuito com **pontuações de qualidade coletivas** do
-**ranking Arena AI** (ELO de preferência humana, a mesma ideia por trás da arena de
-chatbots LMArena). Em seguida, os provedores são classificados pela capacidade de seu **melhor modelo gratuito**.
+O **Ranking de Provedores Gratuitos** responde "**qual provedor gratuito me oferece o
+melhor modelo?**" combinando o catálogo de cada provedor gratuito com **pontuações de
+qualidade colaborativas** do **leaderboard da Arena AI** (ELO de preferência humana, a
+mesma ideia por trás da arena de chatbots LMArena). Os provedores são então classificados
+pela força do seu **melhor modelo gratuito**.
 
-A classificação é calculada com base em três fontes reais:
+O ranking é calculado a partir de três fontes reais:
 
-1. As listas de provedores gratuitos — `NOAUTH_PROVIDERS`, além das entradas de `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` sinalizadas com `hasFree`
+1. As listas de provedores gratuitos — `NOAUTH_PROVIDERS`, além de entradas de
+   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` marcadas com `hasFree`
    (`src/shared/constants/providers.ts`).
-2. O catálogo de modelos de cada provedor no registro de provedores
+2. O catálogo de modelos de cada provedor, a partir do registro de provedores
    (`open-sse/config/providerRegistry.ts`).
-3. Pontuações de adequação à tarefa derivadas de ELO, armazenadas na tabela `model_intelligence` do banco de dados pelo
-   mecanismo de sincronização de ELO do Arena (`src/lib/arenaEloSync.ts`).
+3. Pontuações de adequação a tarefas derivadas de ELO, armazenadas na tabela
+   `model_intelligence` do banco de dados pelo motor de sincronização de ELO da Arena
+   (`src/lib/arenaEloSync.ts`).
 
 A lógica de junção está em `src/lib/freeProviderRankings.ts`.
 
@@ -122,23 +124,20 @@ Formato da resposta:
 
 ## Como as Pontuações Funcionam
 
-### Fonte: leaderboard Arena AI
+### Fonte: leaderboard da Arena AI
 
-O motor de sincronização de ELO da Arena (`src/lib/arenaEloSync.ts`) busca dois leaderboards — `text`
-e `code` — na API do leaderboard Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Quando essa API não retorna
-nenhum quadro utilizável, o motor recorre ao `lmarena-ai/leaderboard-dataset` oficial no
-datasets-server do Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
-`coding` → `code`); `GET /api/intelligence/sync` informa `activeSource`, `lastError` e
+O mecanismo de sincronização de ELO da Arena (`src/lib/arenaEloSync.ts`) busca dois leaderboards — `text` e `code` — na API de leaderboard da Arena AI
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Quando essa API não retorna nenhum quadro utilizável, o mecanismo recorre ao `lmarena-ai/leaderboard-dataset` oficial no datasets-server do Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); o `GET /api/intelligence/sync` reporta `activeSource`, `lastError` e
 `lastFailedAt`. Cada entrada do leaderboard
-carrega um nome de modelo, fornecedor, `score` ELO, intervalo de confiança e contagem de votos.
+carrega um nome de modelo, fornecedor, `score` de ELO, intervalo de confiança e contagem de votos.
 
 As categorias do leaderboard correspondem às categorias de tarefa do OmniRoute:
 
-| Leaderboard Arena | Categorias de tarefa do OmniRoute                 |
-| ----------------- | ------------------------------------------------- |
-| `text`            | `default`, `review`, `documentation`, `debugging` |
-| `code`            | `coding`                                          |
+| Leaderboard da Arena | Categorias de tarefa do OmniRoute                 |
+| -------------------- | ------------------------------------------------- |
+| `text`               | `default`, `review`, `documentation`, `debugging` |
+| `code`               | `coding`                                          |
 
 ### Normalização (pontuação de adequação à tarefa)
 
@@ -148,8 +147,7 @@ As pontuações ELO brutas são normalizadas por leaderboard em um **valor de ad
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-A pontuação nunca atinge `0` ou `1`, deixando margem para substituições do usuário. Este é o
-campo `score` que você vê na resposta da API e o rótulo exibido no painel.
+A pontuação nunca atinge `0` ou `1`, deixando margem para substituições do usuário. Este é o campo `score` que você vê na resposta da API e o rótulo exibido no dashboard.
 
 ### Confiança
 
@@ -165,23 +163,22 @@ Cada entrada recebe um nível de confiança com base na contagem de votos da Are
 
 As entradas normalizadas são gravadas na tabela `model_intelligence` do banco de dados com
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). As entradas **expiram após
-7 dias**, de modo que um provedor que para de sincronizar acaba saindo da lista em vez de servir
-dados desatualizados.
+7 dias**, de modo que um provedor que para de sincronizar acaba saindo da lista em vez de servir dados desatualizados.
 
 A sincronização é executada **ativada por padrão**:
 
-- Ela roda uma vez na inicialização do servidor e depois em um temporizador periódico
+- Ela é executada uma vez na inicialização do servidor e depois em um timer periódico
   (`src/lib/arenaEloSync.ts`, conectado a partir de `src/instrumentation-node.ts`).
-- Ela é **não bloqueante e nunca fatal** — se a busca na fonte falhar, o OmniRoute continua
-  funcionando e as classificações simplesmente exibem os últimos dados válidos (ou um estado vazio).
+- Ela é **não bloqueante e nunca fatal** — se a busca na origem falhar, o OmniRoute continua
+  funcionando e os rankings simplesmente exibem os últimos dados válidos (ou um estado vazio).
 
 Duas variáveis de ambiente a controlam (documentadas em
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Variável                  | Padrão        | Finalidade                                                  |
-| ------------------------- | ------------- | ----------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Defina como `false` para desativar a sincronização externa. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Intervalo de sincronização, em segundos.                    |
+| Variável                  | Padrão        | Finalidade                                                   |
+| ------------------------- | ------------- | ------------------------------------------------------------ |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Defina como `false` para desativar a sincronização de saída. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Intervalo de sincronização, em segundos.                     |
 
 ### Sincronização manual / status / limpeza
 
@@ -194,31 +191,31 @@ POST   /api/intelligence/sync          # dispara uma sincronização manual; cor
 DELETE /api/intelligence/sync          # limpa todas as entradas de inteligência arena_elo sincronizadas
 ```
 
-Se a página de classificações estiver vazia, um `POST /api/intelligence/sync` manual (ou simplesmente
+Se a página de rankings estiver vazia, um `POST /api/intelligence/sync` manual (ou simplesmente
 reiniciar o servidor) a repopula.
 
-### Correspondência de modelos ao leaderboard
+### Correspondência de modelos com o leaderboard
 
-Os IDs de modelo do registro e os nomes de modelo da Arena nem sempre correspondem exatamente. A classificação usa
+Os IDs de modelo do registro e os nomes de modelo da Arena nem sempre correspondem exatamente. O ranking usa
 correspondência flexível (`findMatchingIntelligence` em `src/lib/freeProviderRankings.ts`):
 
 1. Correspondência exata no ID de modelo normalizado.
-2. Correspondência após remover um sufixo de versão final (ex.: `kimi-k2.6` → `kimi-k2`).
-3. Correspondência por prefixo (o nome de um modelo do leaderboard é prefixo do ID do registro).
+2. Correspondência após remover um sufixo de versão no final (ex.: `kimi-k2.6` → `kimi-k2`).
+3. Correspondência por prefixo (um nome de modelo do leaderboard é um prefixo do ID do registro).
 
 No lado da sincronização, prefixos de fornecedores conhecidos (`anthropic/`, `openai/`, `google/`, …) são
-removidos e um pequeno mapa de alias expande nomes canônicos para as variantes que o OmniRoute usa
-internamente, de modo que os modelos permaneçam localizáveis sob qualquer nome.
+removidos e um pequeno mapa de aliases expande os nomes canônicos nas variantes que o OmniRoute usa
+internamente, para que os modelos permaneçam localizáveis sob qualquer nome.
 
 ### Como um provedor é classificado
 
-Para cada provedor gratuito, o motor pontua todos os modelos do seu catálogo e, em seguida:
+Para cada provedor gratuito, o mecanismo pontua todos os modelos do seu catálogo e, em seguida:
 
-- **Top Model** = o modelo com a maior pontuação do provedor.
-- **Avg Score** = a pontuação média entre todos os modelos pontuados daquele provedor.
-- **Models** = quantos modelos do provedor tinham uma pontuação da Arena.
+- **Modelo principal** = o modelo com a maior pontuação do provedor.
+- **Pontuação média** = a média das pontuações de todos os modelos pontuados desse provedor.
+- **Modelos** = quantos modelos do provedor tinham uma pontuação da Arena.
 
-Os provedores são ordenados primeiro pela **pontuação do melhor modelo** e depois pela pontuação média. Isso recompensa
+Os provedores são ordenados primeiro pela **pontuação do modelo principal** e depois pela pontuação média. Isso recompensa
 um provedor que oferece pelo menos um modelo gratuito forte.
 
 ---

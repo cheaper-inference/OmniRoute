@@ -26,7 +26,7 @@ Raspon:         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Što komprimira
 
-Ugrađeni katalog trenutačno sadrži 56 filtera raspoređenih u ove kategorije:
+Ugrađeni katalog trenutno dolazi s 56 filtera raspoređenih u ove kategorije:
 
 | Kategorija | Primjeri                                                      |
 | ---------- | ------------------------------------------------------------- |
@@ -34,10 +34,10 @@ Ugrađeni katalog trenutačno sadrži 56 filtera raspoređenih u ove kategorije:
 | `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testovi  |
 | `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`    | `ls`, `find`, `grep`, generički zapisi ljuske                 |
-| `docker`   | `docker ps`, Docker zapisi                                    |
+| `shell`    | `ls`, `find`, `grep`, generički zapisnici ljuske              |
+| `docker`   | `docker ps`, Docker zapisnici                                 |
 | `infra`    | Terraform, OpenTofu, `systemctl status`                       |
-| `generic`  | JSON izlaz, tragovi stoga, općeniti rezervni izlaz            |
+| `generic`  | JSON izlaz, stack traceovi, generički pričuvni izlaz          |
 
 Detektor u `open-sse/services/compression/engines/rtk/commandDetector.ts` klasificira izlaz
 prije odabira filtera. Filteri se također mogu podudarati prema uzorku naredbe ili regularnom
@@ -348,19 +348,19 @@ node --import tsx/esm --test \
 
 ## Razine intenziteta (v3.8.16+)
 
-RTK podržava **3 razine intenziteta** koje balansiraju između **agresivnosti kompresije** i **sigurnosti**. Razina se postavlja putem `config.intensity` u konfiguraciji enginea.
+RTK podržava **3 razine intenziteta** koje predstavljaju kompromis između **agresivnosti kompresije** i **sigurnosti**. Razina se postavlja putem `config.intensity` u konfiguraciji enginea.
 
 ### 3 razine
 
-| Razina              | Prag odsijecanja     | Ušteda tokena | Rizik      | Najbolje za                       |
+| Razina              | Prag skraćivanja     | Ušteda tokena | Rizik      | Najbolje za                       |
 | ------------------- | -------------------- | ------------- | ---------- | --------------------------------- |
 | `minimal`           | 24 retka po sekciji  | ~20-40%       | Vrlo nizak | Produkcija s kritičnim kontekstom |
 | `standard` (zadano) | 24 retka po sekciji  | ~50-70%       | Nizak      | Svakodnevne sesije programiranja  |
 | `aggressive`        | 16 redaka po sekciji | ~70-90%       | Srednji    | Duge sesije, maksimalna ušteda    |
 
-### Gdje se događa odsijecanje
+### Gdje se događa skraćivanje
 
-Prag odsijecanja utječe na `lineFilter.ts`:
+Prag skraćivanja utječe na `lineFilter.ts`:
 
 ```ts
 // Iz open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -368,40 +368,40 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-I **početak** i **kraj** svake sekcije se čuvaju; sadržaj u sredini se odbacuje kada se odsijecanje aktivira.
+I **head** i **tail** svake sekcije ostaju sačuvani; sadržaj u sredini odbacuje se kada skraćivanje stupi na snagu.
 
-### Što ostaje, a što se odbacuje
+### Što ostaje, a što se izrezuje
 
 | Sadržaj                      | minimal     | standard    | aggressive  |
 | ---------------------------- | ----------- | ----------- | ----------- |
 | Pogreške / stack traceovi    | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
 | Neuspjeli testovi            | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
-| Pogreške izgradnje           | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
+| Pogreške builda              | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
 | Uspješni testovi (opširno)   | ✅ sačuvano | 🟡 sažeto   | 🟡 sažeto   |
 | Rutinski ispis (info logovi) | 🟡 sažeto   | 🟡 sažeto   | ❌ odbačeno |
 | Trake napretka               | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
-| Natpisi / ASCII grafika      | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
+| Banneri / ASCII art          | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
 
-### Odabir pravog intenziteta
+### Odabir odgovarajućeg intenziteta
 
 ```
                   Je li gubitak konteksta katastrofalan?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     DA          NE       NISAM SIGURAN
+     DA          NE     NISAM SIGURAN
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Koliko je        Prvo isprobajte `standard`
-      │      kritična         (radi u 80%
-      │      propusnost?      slučajeva)
+      │      Koliko je       Prvo isprobajte `standard`
+      │      kritična        (radi za 80%
+      │      propusnost?     slučajeva)
       │           │
       │      ┌────┴────┐
       │      │         │
-      │    NISKA     VISOKA
+      │    NISKA    VISOKA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -411,7 +411,7 @@ I **početak** i **kraj** svake sekcije se čuvaju; sadržaj u sredini se odbacu
 
 ### Konfiguriranje intenziteta
 
-**Po pojedinom combo-u** (u konfiguraciji komba):
+**Po combu** (u konfiguraciji comba):
 
 ```json
 {
@@ -428,7 +428,7 @@ I **početak** i **kraj** svake sekcije se čuvaju; sadržaj u sredini se odbacu
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) je
 `CompressionEngine` i nema metodu `updateConfig`. Konfiguraciju enginea
-umjesto toga ažurirajte putem pomoćne funkcije iz registra:
+umjesto toga ažurirajte putem pomoćne funkcije registra:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -438,7 +438,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Provjera učinka
 
-Koristite **Verify Gate** (pogledajte dolje) kako biste potvrdili da je vaš filtar siguran pri odabranom intenzitetu:
+Upotrijebite **Verify Gate** (pogledajte dolje) kako biste potvrdili da je vaš filtar siguran pri odabranom intenzitetu:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

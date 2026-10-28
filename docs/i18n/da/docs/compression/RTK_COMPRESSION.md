@@ -27,23 +27,23 @@ Samlet:          1 - (1 - 0.80) * (1 - 0.46) = 89.2% besparelse
 Interval:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Hvad den komprimerer
+## Hvad Den Komprimerer
 
 Det indbyggede katalog leveres i øjeblikket med 56 filtre fordelt på disse kategorier:
 
 | Kategori  | Eksempler                                                     |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo-tests    |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo tests    |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, generelle shell-logs                    |
-| `docker`  | `docker ps`, Docker-logs                                      |
+| `shell`   | `ls`, `find`, `grep`, generiske shell-logs                    |
+| `docker`  | `docker ps`, Docker logs                                      |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON-output, stack traces, generelt output-fallback           |
+| `generic` | JSON-output, stack traces, generisk output-fallback           |
 
 Detektoren i `open-sse/services/compression/engines/rtk/commandDetector.ts` klassificerer output,
-før filteret vælges. Filtre kan også matches på kommandomønster eller output-regex, når en
+før filteret vælges. Filtre kan også matche på kommandomønster eller output-regex, når en
 kommandoklasse ikke er tilstrækkelig.
 
 ## Filterbestemmelse
@@ -357,19 +357,19 @@ node --import tsx/esm --test \
 
 ## Intensitetsniveauer (v3.8.16+)
 
-RTK understøtter **3 intensitetsniveauer**, der afvejer mellem **aggressiv komprimering** og **sikkerhed**. Niveauet indstilles via `config.intensity` i motorens konfiguration.
+RTK understøtter **3 intensitetsniveauer**, der afvejer **aggressiv komprimering** mod **sikkerhed**. Niveauet indstilles via `config.intensity` i engine-konfigurationen.
 
 ### De 3 niveauer
 
-| Niveau                | Trunkeringstærskel    | Token-besparelser | Risiko    | Bedst til                          |
-| --------------------- | --------------------- | ----------------- | --------- | ---------------------------------- |
-| `minimal`             | 24 linjer pr. sektion | ~20-40%           | Meget lav | Produktion med kritisk kontekst    |
-| `standard` (standard) | 24 linjer pr. sektion | ~50-70%           | Lav       | Daglige kodningssessioner          |
-| `aggressive`          | 16 linjer pr. sektion | ~70-90%           | Medium    | Lange sessioner, maks. besparelser |
+| Niveau                | Afkortningstærskel    | Token-besparelse | Risiko    | Bedst til                         |
+| --------------------- | --------------------- | ---------------- | --------- | --------------------------------- |
+| `minimal`             | 24 linjer pr. sektion | ~20-40%          | Meget lav | Produktion med kritisk kontekst   |
+| `standard` (standard) | 24 linjer pr. sektion | ~50-70%          | Lav       | Daglige kodesessioner             |
+| `aggressive`          | 16 linjer pr. sektion | ~70-90%          | Middel    | Lange sessioner, maks. besparelse |
 
-### Hvor trunkeringen sker
+### Hvor afkortningen sker
 
-Trunkeringstærsklen påvirker `lineFilter.ts`:
+Afkortningstærsklen påvirker `lineFilter.ts`:
 
 ```ts
 // Fra open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -377,39 +377,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Både **starten** og **slutningen** af hver sektion bevares; indholdet i midten droppes, når trunkeringen træder i kraft.
+Både **begyndelsen** og **slutningen** af hver sektion bevares; indholdet i midten udelades, når afkortningen slår til.
 
-### Hvad der bevares vs. hvad der fjernes
+### Hvad der bevares, og hvad der udelades
 
-| Indhold                  | minimal          | standard         | aggressive       |
-| ------------------------ | ---------------- | ---------------- | ---------------- |
-| Fejl / stack traces      | ✅ bevaret       | ✅ bevaret       | ✅ bevaret       |
-| Testfejl                 | ✅ bevaret       | ✅ bevaret       | ✅ bevaret       |
-| Build-fejl               | ✅ bevaret       | ✅ bevaret       | ✅ bevaret       |
-| Beståede tests (verbose) | ✅ bevaret       | 🟡 sammentrunket | 🟡 sammentrunket |
-| Rutineoutput (info-logs) | 🟡 sammentrunket | 🟡 sammentrunket | ❌ droppet       |
-| Fremskridtslinjer        | 🟡 sammentrunket | ❌ droppet       | ❌ droppet       |
-| Banner / ASCII-kunst     | 🟡 sammentrunket | ❌ droppet       | ❌ droppet       |
+| Indhold                      | minimal          | standard         | aggressive       |
+| ---------------------------- | ---------------- | ---------------- | ---------------- |
+| Fejl / stack traces          | ✅ bevaret       | ✅ bevaret       | ✅ bevaret       |
+| Testfejl                     | ✅ bevaret       | ✅ bevaret       | ✅ bevaret       |
+| Build-fejl                   | ✅ bevaret       | ✅ bevaret       | ✅ bevaret       |
+| Beståede tests (detaljerede) | ✅ bevaret       | 🟡 sammenklappet | 🟡 sammenklappet |
+| Rutineoutput (info-logning)  | 🟡 sammenklappet | 🟡 sammenklappet | ❌ udeladt       |
+| Fremskridtslinjer            | 🟡 sammenklappet | ❌ udeladt       | ❌ udeladt       |
+| Banner / ASCII-art           | 🟡 sammenklappet | ❌ udeladt       | ❌ udeladt       |
 
 ### Valg af den rigtige intensitet
 
 ```
-                  Is losing context catastrophic?
+                  Er tab af kontekst katastrofalt?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    YES          NO          NOT SURE
+     JA          NEJ        IKKE SIKKER
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      How critical    Try `standard` first
-      │      is throughput?  (works for 80% of
-      │           │          cases)
+      │      Hvor kritisk    Prøv `standard` først
+      │      er throughput?  (virker i 80 % af
+      │           │          tilfældene)
       │      ┌────┴────┐
       │      │         │
-      │     LOW       HIGH
+      │     LAV       HØJ
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -435,8 +435,8 @@ Både **starten** og **slutningen** af hver sektion bevares; indholdet i midten 
 **Programmatisk**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) er en
-`CompressionEngine` og har ingen `updateConfig`-metode. Opdatér en motors
-konfiguration i stedet via registry-hjælperen:
+`CompressionEngine` og har ingen `updateConfig`-metode. Opdatér i stedet en
+engines konfiguration via registry-hjælpefunktionen:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -444,7 +444,7 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Verifikation af effekten
+### Verificering af effekten
 
 Brug **Verify Gate** (se nedenfor) til at bekræfte, at dit filter er sikkert ved den valgte intensitet:
 

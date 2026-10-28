@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "提供者限制",
     "noProviders": "没有连接提供者",
+    "quotaAuthRequired": "需要身份验证 - 请登录控制面板",
+    "quotaAuthRequiredHint": "由于控制面板会话缺失或已过期，无法加载提供商连接。请登录并刷新，以查看您的配额限制。",
     "connectProvidersForQuota": "通过 OAuth 连接提供者，以跟踪 API 配额限制和使用情况。",
     "accountsCount": "{count, plural, one {# 个账户} other {# 个账户}}",
     "filteredFromCount": "（从 {count} 过滤）",
@@ -12780,8 +12782,8 @@
     "avgTotal": "平均总计",
     "requestTelemetry": "请求遥测",
     "requestTelemetryDescription": "7 阶段流水线明细（最近 5 分钟）",
-    "title": "提供商统计信息",
-    "description": "按提供商和模型统计的流量、延迟和成功率",
+    "title": "提供者统计信息",
+    "description": "按提供者和模型统计的流量、延迟和成功率",
     "combo": "组合",
     "toggleModels": "显示 {provider} 的模型"
   },
@@ -13441,7 +13443,7 @@
     "auth": "认证",
     "feasibility": "可行性",
     "models": "模型",
-    "provider": "提供商",
+    "provider": "提供者",
     "status": "状态",
     "endpoint": "端点",
     "actions": "操作"

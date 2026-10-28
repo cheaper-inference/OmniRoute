@@ -29,22 +29,22 @@ Rentang:       1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Apa yang Dikompresi
 
-Katalog bawaan saat ini dilengkapi 56 filter di seluruh kategori berikut:
+Katalog bawaan saat ini menyediakan 56 filter dalam kategori berikut:
 
-| Kategori  | Contoh                                                         |
-| --------- | -------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`              |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, pengujian Cargo |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx  |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler  |
-| `shell`   | `ls`, `find`, `grep`, log shell generik                        |
-| `docker`  | `docker ps`, log Docker                                        |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                        |
-| `generic` | output JSON, stack trace, fallback output generik              |
+| Kategori  | Contoh                                                        |
+| --------- | ------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo tests    |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
+| `shell`   | `ls`, `find`, `grep`, log shell generik                       |
+| `docker`  | `docker ps`, log Docker                                       |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
+| `generic` | Output JSON, stack trace, fallback output generik             |
 
-Detektor di `open-sse/services/compression/engines/rtk/commandDetector.ts` mengklasifikasikan
-output sebelum pemilihan filter. Filter juga dapat mencocokkan berdasarkan pola perintah atau
-regex output ketika kelas perintah saja tidak cukup.
+Detektor di `open-sse/services/compression/engines/rtk/commandDetector.ts` mengklasifikasikan output
+sebelum pemilihan filter. Filter juga dapat dicocokkan berdasarkan pola perintah atau regex output
+ketika kelas perintah saja tidak cukup.
 
 ## Resolusi Filter
 
@@ -355,19 +355,19 @@ node --import tsx/esm --test \
 
 ## Tingkat Intensitas (v3.8.16+)
 
-RTK mendukung **3 tingkat intensitas** yang menjadi kompromi antara **agresivitas kompresi** dan **keamanan**. Tingkat diatur melalui `config.intensity` pada konfigurasi engine.
+RTK mendukung **3 tingkat intensitas** yang menyeimbangkan antara **agresivitas kompresi** dan **keamanan**. Tingkat diatur melalui `config.intensity` dalam konfigurasi engine.
 
-### 3 Tingkat Intensitas
+### 3 Tingkat
 
-| Tingkat             | Ambang pemotongan   | Penghematan token | Risiko        | Paling cocok untuk                 |
-| ------------------- | ------------------- | ----------------- | ------------- | ---------------------------------- |
-| `minimal`           | 24 baris per bagian | ~20-40%           | Sangat rendah | Produksi dengan konteks kritis     |
-| `standard` (bawaan) | 24 baris per bagian | ~50-70%           | Rendah        | Sesi coding harian                 |
-| `aggressive`        | 16 baris per bagian | ~70-90%           | Sedang        | Sesi panjang, penghematan maksimal |
+| Tingkat              | Ambang pemangkasan  | Penghematan token | Risiko        | Terbaik untuk                      |
+| -------------------- | ------------------- | ----------------- | ------------- | ---------------------------------- |
+| `minimal`            | 24 baris per bagian | ~20-40%           | Sangat rendah | Produksi dengan konteks kritis     |
+| `standard` (default) | 24 baris per bagian | ~50-70%           | Rendah        | Sesi coding harian                 |
+| `aggressive`         | 16 baris per bagian | ~70-90%           | Sedang        | Sesi panjang, penghematan maksimal |
 
-### Di Mana Pemotongan Terjadi
+### Di Mana Pemangkasan Terjadi
 
-Ambang pemotongan memengaruhi `lineFilter.ts`:
+Ambang pemangkasan memengaruhi `lineFilter.ts`:
 
 ```ts
 // Dari open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -375,19 +375,19 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-**Awal** dan **akhir** setiap bagian dipertahankan; konten di bagian tengah dibuang ketika pemotongan aktif.
+Baik **head** maupun **tail** dari setiap bagian dipertahankan; konten di tengah dibuang saat pemangkasan aktif.
 
-### Apa yang Dipertahankan vs. Apa yang Dibuang
+### Apa yang Dipertahankan vs. Apa yang Dipotong
 
-| Konten                   | minimal          | standard         | aggressive       |
-| ------------------------ | ---------------- | ---------------- | ---------------- |
-| Error / stack trace      | ✅ dipertahankan | ✅ dipertahankan | ✅ dipertahankan |
-| Kegagalan tes            | ✅ dipertahankan | ✅ dipertahankan | ✅ dipertahankan |
-| Error build              | ✅ dipertahankan | ✅ dipertahankan | ✅ dipertahankan |
-| Tes yang lolos (verbose) | ✅ dipertahankan | 🟡 diringkas     | 🟡 diringkas     |
-| Output rutin (log info)  | 🟡 diringkas     | 🟡 diringkas     | ❌ dibuang       |
-| Progress bar             | 🟡 diringkas     | ❌ dibuang       | ❌ dibuang       |
-| Banner / ASCII art       | 🟡 diringkas     | ❌ dibuang       | ❌ dibuang       |
+| Konten                    | minimal          | standard         | aggressive       |
+| ------------------------- | ---------------- | ---------------- | ---------------- |
+| Error / stack trace       | ✅ dipertahankan | ✅ dipertahankan | ✅ dipertahankan |
+| Kegagalan test            | ✅ dipertahankan | ✅ dipertahankan | ✅ dipertahankan |
+| Error build               | ✅ dipertahankan | ✅ dipertahankan | ✅ dipertahankan |
+| Test yang lolos (verbose) | ✅ dipertahankan | 🟡 diciutkan     | 🟡 diciutkan     |
+| Output rutin (log info)   | 🟡 diciutkan     | 🟡 diciutkan     | ❌ dibuang       |
+| Progress bar              | 🟡 diciutkan     | ❌ dibuang       | ❌ dibuang       |
+| Banner / ASCII art        | 🟡 diciutkan     | ❌ dibuang       | ❌ dibuang       |
 
 ### Memilih Intensitas yang Tepat
 
@@ -396,15 +396,15 @@ config.intensity === "aggressive" ? 16 : 24,
                   │
       ┌───────────┼───────────┐
       │           │           │
-     YA         TIDAK      TIDAK YAKIN
+     YA         TIDAK     TIDAK YAKIN
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Seberapa kritis Coba `standard` dulu
-      │      throughput?     (berhasil untuk 80%
-      │           │          kasus)
+      │      Seberapa kritis   Coba `standard` dulu
+      │      throughput?       (berhasil untuk 80%
+      │           │            kasus)
       │      ┌────┴────┐
       │      │         │
       │    RENDAH    TINGGI
@@ -433,8 +433,8 @@ config.intensity === "aggressive" ? 16 : 24,
 **Secara programatis**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) adalah sebuah
-`CompressionEngine` dan tidak memiliki metode `updateConfig`. Perbarui konfigurasi
-engine melalui helper registry sebagai gantinya:
+`CompressionEngine` dan tidak memiliki metode `updateConfig`. Perbarui konfigurasi engine
+melalui helper registry sebagai gantinya:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -444,7 +444,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Memverifikasi Efeknya
 
-Gunakan **Verify Gate** (lihat di bawah) untuk memastikan filter Anda aman pada intensitas yang Anda pilih:
+Gunakan **Verify Gate** (lihat di bawah) untuk memastikan filter Anda aman pada intensitas yang dipilih:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

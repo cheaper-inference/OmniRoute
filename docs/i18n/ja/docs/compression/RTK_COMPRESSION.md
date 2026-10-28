@@ -33,14 +33,14 @@ Caveman の入力: 46% 削減
 | `test`    | Vitest、Jest、Pytest、PHPUnit、Playwright、Go、Cargo のテスト |
 | `build`   | TypeScript、ESLint、Biome、Prettier、Vite、Webpack、Turbo、Nx |
 | `package` | `npm install`、`npm audit`、`pip`、`uv sync`、Poetry、Bundler |
-| `shell`   | `ls`、`find`、`grep`、汎用的なシェルログ                      |
+| `shell`   | `ls`、`find`、`grep`、汎用シェルログ                          |
 | `docker`  | `docker ps`、Docker ログ                                      |
 | `infra`   | Terraform、OpenTofu、`systemctl status`                       |
-| `generic` | JSON 出力、スタックトレース、汎用出力へのフォールバック       |
+| `generic` | JSON 出力、スタックトレース、汎用出力フォールバック           |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` にある検出器は、
+`open-sse/services/compression/engines/rtk/commandDetector.ts` 内のディテクターは、
 フィルター選択の前に出力を分類します。コマンドクラスだけでは不十分な場合、
-フィルターはコマンドパターンや出力の正規表現でマッチさせることもできます。
+フィルターはコマンドパターンや出力正規表現によってマッチさせることもできます。
 
 ## フィルターの解決
 
@@ -336,21 +336,21 @@ node --import tsx/esm --test \
 
 ---
 
-## インテンシティレベル (v3.8.16+)
+## 強度レベル (v3.8.16+)
 
-RTK は、**圧縮の積極性** と **安全性** のトレードオフを調整する **3 つのインテンシティレベル** をサポートしています。レベルはエンジン設定の `config.intensity` で設定します。
+RTK は **3 つの強度レベル**をサポートしており、**圧縮の積極性**と**安全性**の間でトレードオフを選択できます。レベルはエンジン設定の `config.intensity` で設定します。
 
 ### 3 つのレベル
 
-| レベル                  | 切り詰めしきい値       | トークン削減率 | リスク     | 最適な用途                       |
-| ----------------------- | ---------------------- | -------------- | ---------- | -------------------------------- |
-| `minimal`               | セクションあたり 24 行 | ~20-40%        | 非常に低い | 重要なコンテキストを扱う本番環境 |
-| `standard` (デフォルト) | セクションあたり 24 行 | ~50-70%        | 低い       | 日常的なコーディングセッション   |
-| `aggressive`            | セクションあたり 16 行 | ~70-90%        | 中程度     | 長時間のセッション、最大限の削減 |
+| レベル                   | 切り詰めしきい値       | トークン削減率 | リスク     | 最適な用途                       |
+| ------------------------ | ---------------------- | -------------- | ---------- | -------------------------------- |
+| `minimal`                | セクションあたり 24 行 | ~20-40%        | 非常に低い | 重要なコンテキストを含む本番環境 |
+| `standard`（デフォルト） | セクションあたり 24 行 | ~50-70%        | 低い       | 日常的なコーディングセッション   |
+| `aggressive`             | セクションあたり 16 行 | ~70-90%        | 中程度     | 長時間セッション、最大限の削減   |
 
 ### 切り詰めが行われる場所
 
-切り詰めしきい値は `lineFilter.ts` に影響します:
+切り詰めしきい値は `lineFilter.ts` に影響します。
 
 ```ts
 // open-sse/services/compression/engines/rtk/index.ts:329-330 より
@@ -358,21 +358,21 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-各セクションの **先頭** と **末尾** は両方とも保持されます。切り詰めが発動すると、中間部分のコンテンツが破棄されます。
+各セクションの**先頭**と**末尾**の両方が保持され、切り詰めが発動すると中間のコンテンツが破棄されます。
 
 ### 保持されるものと削除されるもの
 
 | コンテンツ                | minimal       | standard      | aggressive    |
 | ------------------------- | ------------- | ------------- | ------------- |
 | エラー / スタックトレース | ✅ 保持       | ✅ 保持       | ✅ 保持       |
-| テストの失敗              | ✅ 保持       | ✅ 保持       | ✅ 保持       |
+| テスト失敗                | ✅ 保持       | ✅ 保持       | ✅ 保持       |
 | ビルドエラー              | ✅ 保持       | ✅ 保持       | ✅ 保持       |
-| テストの成功 (詳細出力)   | ✅ 保持       | 🟡 折りたたみ | 🟡 折りたたみ |
-| 定常出力 (情報ログ)       | 🟡 折りたたみ | 🟡 折りたたみ | ❌ 破棄       |
+| テスト成功（詳細出力）    | ✅ 保持       | 🟡 折りたたみ | 🟡 折りたたみ |
+| 定常出力（info ログ）     | 🟡 折りたたみ | 🟡 折りたたみ | ❌ 破棄       |
 | プログレスバー            | 🟡 折りたたみ | ❌ 破棄       | ❌ 破棄       |
 | バナー / ASCII アート     | 🟡 折りたたみ | ❌ 破棄       | ❌ 破棄       |
 
-### 適切なインテンシティの選択
+### 適切な強度の選択
 
 ```
                   Is losing context catastrophic?
@@ -398,9 +398,9 @@ config.intensity === "aggressive" ? 16 : 24,
       └──────┴─────────┘
 ```
 
-### インテンシティの設定
+### 強度の設定
 
-**コンボごと** (コンボ設定内):
+**コンボごと**（コンボ設定内）：
 
 ```json
 {
@@ -413,11 +413,11 @@ config.intensity === "aggressive" ? 16 : 24,
 }
 ```
 
-**プログラムから**:
+**プログラムから**：
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) は
-`CompressionEngine` であり、`updateConfig` メソッドを持ちません。エンジンの設定は、
-代わりにレジストリヘルパーを通じて更新してください:
+`rtkEngine`（`@omniroute/open-sse/services/compression/engines/rtk`）は
+`CompressionEngine` であり、`updateConfig` メソッドを持ちません。
+代わりにレジストリヘルパーを通じてエンジンの設定を更新してください。
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -427,7 +427,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### 効果の検証
 
-**Verify Gate** (以下を参照) を使用して、選択したインテンシティでフィルターが安全に動作することを確認します:
+**Verify Gate**（後述）を使用して、選択した強度でフィルターが安全であることを確認してください。
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

@@ -25,9 +25,9 @@ Stacked:       1 - (1 - 0.80) * (1 - 0.46) = 89.2% saved
 Range:         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Što komprimuje
+## Šta komprimuje
 
-Ugrađeni katalog trenutno sadrži 56 filtera raspoređenih u sljedeće kategorije:
+Ugrađeni katalog trenutno dolazi sa 56 filtera raspoređenih u ove kategorije:
 
 | Kategorija | Primjeri                                                      |
 | ---------- | ------------------------------------------------------------- |
@@ -35,13 +35,13 @@ Ugrađeni katalog trenutno sadrži 56 filtera raspoređenih u sljedeće kategori
 | `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testovi  |
 | `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`    | `ls`, `find`, `grep`, generički logovi ljuske                 |
+| `shell`    | `ls`, `find`, `grep`, generički shell logovi                  |
 | `docker`   | `docker ps`, Docker logovi                                    |
 | `infra`    | Terraform, OpenTofu, `systemctl status`                       |
-| `generic`  | JSON izlaz, stack trace-ovi, generički rezervni izlaz         |
+| `generic`  | JSON izlaz, stack traceovi, generički rezervni izlaz          |
 
 Detektor u `open-sse/services/compression/engines/rtk/commandDetector.ts` klasificira izlaz
-prije odabira filtera. Filteri se također mogu poklapati po obrascu komande ili regex-u izlaza
+prije odabira filtera. Filteri se također mogu podudarati po obrascu komande ili regexu izlaza
 kada klasa komande nije dovoljna.
 
 ## Rezolucija filtera
@@ -328,7 +328,7 @@ node --import tsx/esm --test \
 
 ## Nivoi intenziteta (v3.8.16+)
 
-RTK podržava **3 nivoa intenziteta** koji balansiraju između **agresivnosti kompresije** i **sigurnosti**. Nivo se postavlja putem `config.intensity` u konfiguraciji engine-a.
+RTK podržava **3 nivoa intenziteta** koji predstavljaju kompromis između **agresivnosti kompresije** i **sigurnosti**. Nivo se postavlja putem `config.intensity` u konfiguraciji engine-a.
 
 ### 3 nivoa
 
@@ -340,7 +340,7 @@ RTK podržava **3 nivoa intenziteta** koji balansiraju između **agresivnosti ko
 
 ### Gdje se dešava skraćivanje
 
-Prag skraćivanja utiče na `lineFilter.ts`:
+Prag skraćivanja utječe na `lineFilter.ts`:
 
 ```ts
 // Iz open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -348,7 +348,7 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-I **početak** i **kraj** svake sekcije se čuvaju; sadržaj u sredini se odbacuje kada skraćivanje stupi na snagu.
+I **početak** i **kraj** svake sekcije se čuvaju; srednji sadržaj se odbacuje kada skraćivanje stupi na snagu.
 
 ### Šta ostaje, a šta se uklanja
 
@@ -356,11 +356,11 @@ I **početak** i **kraj** svake sekcije se čuvaju; sadržaj u sredini se odbacu
 | ---------------------------- | ----------- | ----------- | ----------- |
 | Greške / stack trace-ovi     | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
 | Neuspjeli testovi            | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
-| Greške pri buildanju         | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
+| Greške pri izgradnji         | ✅ sačuvano | ✅ sačuvano | ✅ sačuvano |
 | Uspješni testovi (opširno)   | ✅ sačuvano | 🟡 sažeto   | 🟡 sažeto   |
-| Rutinski ispis (info logovi) | 🟡 sažeto   | 🟡 sažeto   | ❌ odbačeno |
-| Progress barovi              | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
-| Baner / ASCII art            | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
+| Rutinski izlaz (info logovi) | 🟡 sažeto   | 🟡 sažeto   | ❌ odbačeno |
+| Trake napretka               | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
+| Baner / ASCII umjetnost      | 🟡 sažeto   | ❌ odbačeno | ❌ odbačeno |
 
 ### Odabir pravog intenziteta
 
@@ -369,19 +369,19 @@ I **početak** i **kraj** svake sekcije se čuvaju; sadržaj u sredini se odbacu
                   │
       ┌───────────┼───────────┐
       │           │           │
-     DA          NE      NISAM SIGURAN
+     DA          NE       NISAM SIGURAN
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Koliko je      Prvo probajte `standard`
-      │      kritična       (radi u 80%
-      │      propusnost?    slučajeva)
+      │     Koliko je        Prvo isprobajte `standard`
+      │     kritična         (funkcioniše u 80%
+      │     propusnost?      slučajeva)
       │           │
       │      ┌────┴────┐
       │      │         │
-      │    NISKA    VISOKA
+      │    NISKA      VISOKA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -416,9 +416,9 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Provjera efekta
+### Provjera učinka
 
-Koristite **Verify Gate** (vidi ispod) da potvrdite da je vaš filter siguran pri odabranom intenzitetu:
+Koristite **Verify Gate** (pogledajte ispod) da potvrdite da je vaš filter siguran pri odabranom intenzitetu:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

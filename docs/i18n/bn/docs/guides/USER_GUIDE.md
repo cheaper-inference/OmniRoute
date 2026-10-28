@@ -607,14 +607,14 @@ post_install() {
 
 ---
 
-## 📊 উপলব্ধ মডেলসমূহ
+## 📊 উপলব্ধ মডেল
 
 <details>
 <summary><b>সমস্ত উপলব্ধ মডেল দেখুন</b></summary>
 
-> নিচের তালিকাটি v3.8.0-এর জন্য `open-sse/config/providerRegistry.ts` থেকে সংকলিত। ক্লাউড ক্যাটালগগুলি (Gemini, OpenRouter ইত্যাদি) ডাইনামিকভাবে সিঙ্ক হয় — সম্পূর্ণ লাইভ ক্যাটালগের জন্য **Dashboard → Providers → [provider] → Available Models** খুলুন অথবা `GET /api/models/catalog` কল করুন।
+> নিচের তালিকাটি `open-sse/config/providerRegistry.ts` থেকে v3.8.0-এর জন্য সংকলিত। ক্লাউড ক্যাটালগ (Gemini, OpenRouter ইত্যাদি) ডাইনামিকভাবে সিঙ্ক হয় — সম্পূর্ণ লাইভ ক্যাটালগের জন্য **ড্যাশবোর্ড → প্রোভাইডার → [provider] → উপলব্ধ মডেল** খুলুন অথবা `GET /api/models/catalog` কল করুন।
 >
-> যদি কোনো প্রোভাইডারের বিল্ট-ইন তালিকা পুরনো হয়ে যায়, তাহলে সেই পেজে **Import from /models** ব্যবহার করুন (অথবা **Auto-Sync** চালু করুন) লাইভ আপস্ট্রিম ক্যাটালগ টেনে আনতে। এটি v3.8.50-তে LLM7.io (`gemini-3.1-flash-lite`) এবং UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)-এর জন্য যাচাই করা হয়েছিল; একই টেস্ট পর্বে Pollinations-এর অ্যানোনিমাস অ্যাক্সেস আপস্ট্রিম-সীমাবদ্ধই ছিল।
+> যদি কোনো প্রোভাইডারের বিল্ট-ইন তালিকা পুরনো হয়ে যায়, তাহলে লাইভ আপস্ট্রিম ক্যাটালগ আনতে সেই পেজে **/models থেকে ইমপোর্ট করুন** ব্যবহার করুন (অথবা **অটো-সিঙ্ক** চালু করুন)। এটি v3.8.50-তে LLM7.io (`gemini-3.1-flash-lite`) এবং UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`)-এর জন্য যাচাই করা হয়েছে; একই টেস্ট পাসের সময় Pollinations-এর anonymous access আপস্ট্রিম-সীমাবদ্ধ ছিল।
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -622,31 +622,31 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — বিনামূল্যে OAuth: **Dashboard → Providers → Kiro → Available Models**-এর অধীনে দেখানো লাইভ ক্যাটালগটি ব্যবহার করুন। উপলব্ধতা অ্যাকাউন্ট ও প্ল্যানের উপর নির্ভর করে।
+**Kiro (`kr/`)** — ফ্রি OAuth: **ড্যাশবোর্ড → প্রোভাইডার → Kiro → উপলব্ধ মডেল**-এ দেখানো লাইভ ক্যাটালগ ব্যবহার করুন। উপলব্ধতা অ্যাকাউন্ট এবং প্ল্যানের উপর নির্ভর করে।
 
-**Qoder (`if/`)** — বিনামূল্যে OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — ফ্রি OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/মাস ফ্ল্যাট অথবা ব্যবহার অনুযায়ী: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/মাস ফ্ল্যাট অথবা ব্যবহার-ভিত্তিক: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API key: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API কী: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — অতি-দ্রুত: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — আলট্রা-দ্রুত: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok নেটিভ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — নেটিভ Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-হোস্টেড: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-তে হোস্ট করা: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — সার্চ-সংযোজিত: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — সার্চ-সমৃদ্ধ: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — ওপেন-সোর্স: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (বিনামূল্যে), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — ওপেন-সোর্স: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ফ্রি), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — দ্রুত ইনফারেন্স: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — ওয়েফার-স্কেল: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-কেন্দ্রিক: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
@@ -656,11 +656,11 @@ post_install() {
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google থেকে প্রতিটি API key অনুযায়ী লাইভ সিঙ্ক হয় — কোনো স্ট্যাটিক তালিকা নেই। **Dashboard → Providers**-এ একটি key সংযুক্ত করুন, তারপর **Available Models** ব্যবহার করে বর্তমান ক্যাটালগ ইমপোর্ট করুন (যেমন `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
+**Gemini (Google Cloud `gemini/`)**: Google থেকে প্রতি API কী অনুযায়ী লাইভ সিঙ্ক হয় — কোনো স্ট্যাটিক তালিকা নেই। **ড্যাশবোর্ড → প্রোভাইডার**-এ একটি কী সংযুক্ত করুন, তারপর বর্তমান ক্যাটালগ ইমপোর্ট করতে **উপলব্ধ মডেল** ব্যবহার করুন (যেমন `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)।
 
-**অন্যান্য সামঞ্জস্যপূর্ণ প্রোভাইডার** (নির্বাচিত): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` এর মাধ্যমে), `azure-ai`, `openrouter` (পাসথ্রু ক্যাটালগ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। প্রতিটি `providerRegistry.ts`-এ নিজস্ব মডেল তালিকা রক্ষণাবেক্ষণ করে এবং প্রোভাইডার `/models` এন্ডপয়েন্ট প্রদান করলে অটো-সিঙ্ক করা যায়।
+**অন্যান্য সামঞ্জস্যপূর্ণ প্রোভাইডার** (নির্বাচিত): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (via `aws-bedrock`), `azure-ai`, `openrouter` (passthrough ক্যাটালগ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`। প্রতিটি `providerRegistry.ts`-এ নিজস্ব মডেল তালিকা রক্ষণ করে এবং প্রোভাইডার যখন `/models` এন্ডপয়েন্ট এক্সপোজ করে তখন অটো-সিঙ্ক করা যায়।
 
-**মডেল ID সম্পর্কে নোট:** OmniRoute প্রোভাইডার-নেটিভ ID ব্যবহার করে (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)। কিছু ID-তে বিন্দুসহ সংস্করণ থাকে কারণ আপস্ট্রিম API সেভাবেই আশা করে। যদি কোনো মডেল উপরে তালিকাভুক্ত না থাকে, তাহলে `omniroute models --search <term>` চালান অথবা `GET /api/models/catalog` কল করে উপলব্ধতা নিশ্চিত করুন।
+**মডেল ID সম্পর্কে নোট:** OmniRoute প্রোভাইডার-নেটিভ ID ব্যবহার করে (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`)। কিছু ID-তে বিন্দুসহ সংস্করণ থাকে কারণ আপস্ট্রিম API সেভাবেই আশা করে। যদি কোনো মডেল উপরে তালিকাভুক্ত না থাকে, তাহলে উপলব্ধতা নিশ্চিত করতে `omniroute models --search <term>` চালান অথবা `GET /api/models/catalog` কল করুন।
 
 </details>
 

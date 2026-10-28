@@ -33,16 +33,18 @@ Caveman ان پٹ:         46% بچت
 
 | زمرہ      | مثالیں                                                        |
 | --------- | ------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest، Jest، Pytest، PHPUnit، Playwright، Go، Cargo ٹیسٹس    |
+| `git`     | `git status`، `git branch`، `git diff`، `git log`             |
+| `test`    | Vitest، Jest، Pytest، PHPUnit، Playwright، Go، Cargo tests    |
 | `build`   | TypeScript، ESLint، Biome، Prettier، Vite، Webpack، Turbo، Nx |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry، Bundler |
-| `shell`   | `ls`, `find`, `grep`, عمومی شیل لاگز                          |
-| `docker`  | `docker ps`, Docker لاگز                                      |
+| `package` | `npm install`، `npm audit`، `pip`، `uv sync`، Poetry، Bundler |
+| `shell`   | `ls`، `find`، `grep`، عمومی شیل لاگز                          |
+| `docker`  | `docker ps`، Docker لاگز                                      |
 | `infra`   | Terraform، OpenTofu، `systemctl status`                       |
 | `generic` | JSON آؤٹ پٹ، اسٹیک ٹریسز، عمومی آؤٹ پٹ فال بیک                |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` میں موجود ڈیٹیکٹر فلٹر کے انتخاب سے پہلے آؤٹ پٹ کی درجہ بندی کرتا ہے۔ جب کمانڈ کلاس کافی نہ ہو تو فلٹرز کمانڈ پیٹرن یا آؤٹ پٹ regex کے ذریعے بھی میل کر سکتے ہیں۔
+`open-sse/services/compression/engines/rtk/commandDetector.ts` میں موجود ڈیٹیکٹر فلٹر کے
+انتخاب سے پہلے آؤٹ پٹ کی درجہ بندی کرتا ہے۔ جب کمانڈ کلاس کافی نہ ہو تو فلٹرز کمانڈ پیٹرن یا
+آؤٹ پٹ regex کے ذریعے بھی میچ کر سکتے ہیں۔
 
 ## فلٹر کا تعین
 
@@ -352,61 +354,61 @@ node --import tsx/esm --test \
 
 ---
 
-## شدت کی سطحیں (v3.8.16+)
+## شدت کے درجات (v3.8.16+)
 
-RTK **3 شدت کی سطحوں** کی حمایت کرتا ہے جو **کمپریشن کی جارحیت** اور **حفاظت** کے درمیان توازن قائم کرتی ہیں۔ یہ سطح engine config میں `config.intensity` کے ذریعے سیٹ کی جاتی ہے۔
+RTK **3 شدت کے درجات** کی معاونت کرتا ہے جو **کمپریشن کی جارحیت** اور **حفاظت** کے درمیان توازن قائم کرتے ہیں۔ یہ درجہ انجن کنفیگ میں `config.intensity` کے ذریعے سیٹ کیا جاتا ہے۔
 
-### یہ 3 سطحیں
+### 3 درجے
 
-| سطح                         | Truncation کی حد  | Token کی بچت | خطرہ    | کس کے لیے بہترین                  |
-| --------------------------- | ----------------- | ------------ | ------- | --------------------------------- |
-| `minimal`                   | فی سیکشن 24 سطریں | ~20-40%      | بہت کم  | اہم context کے ساتھ production    |
-| `standard` (پہلے سے طے شدہ) | فی سیکشن 24 سطریں | ~50-70%      | کم      | روزمرہ کی coding sessions         |
-| `aggressive`                | فی سیکشن 16 سطریں | ~70-90%      | درمیانہ | لمبی sessions، زیادہ سے زیادہ بچت |
+| درجہ                | کٹوتی کی حد       | ٹوکن بچت | خطرہ    | کس کے لیے بہترین               |
+| ------------------- | ----------------- | -------- | ------- | ------------------------------ |
+| `minimal`           | 24 سطریں فی سیکشن | ~20-40%  | بہت کم  | اہم سیاق کے ساتھ پروڈکشن       |
+| `standard` (طے شدہ) | 24 سطریں فی سیکشن | ~50-70%  | کم      | روزانہ کے کوڈنگ سیشنز          |
+| `aggressive`        | 16 سطریں فی سیکشن | ~70-90%  | درمیانہ | طویل سیشنز، زیادہ سے زیادہ بچت |
 
-### Truncation کہاں ہوتی ہے
+### کٹوتی کہاں ہوتی ہے
 
-Truncation کی حد `lineFilter.ts` کو متاثر کرتی ہے:
+کٹوتی کی حد `lineFilter.ts` کو متاثر کرتی ہے:
 
 ```ts
-// From open-sse/services/compression/engines/rtk/index.ts:329-330
+// ماخذ: open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-ہر سیکشن کا **آغاز (head)** اور **اختتام (tail)** دونوں محفوظ رہتے ہیں؛ truncation نافذ ہونے پر درمیانی مواد ہٹا دیا جاتا ہے۔
+ہر سیکشن کا **آغاز (head)** اور **انجام (tail)** دونوں محفوظ رکھے جاتے ہیں؛ کٹوتی نافذ ہونے پر درمیانی مواد حذف کر دیا جاتا ہے۔
 
 ### کیا رہتا ہے اور کیا کٹ جاتا ہے
 
-| مواد                        | minimal       | standard       | aggressive     |
-| --------------------------- | ------------- | -------------- | -------------- |
-| Errors / stack traces       | ✅ محفوظ      | ✅ محفوظ       | ✅ محفوظ       |
-| Test کی ناکامیاں            | ✅ محفوظ      | ✅ محفوظ       | ✅ محفوظ       |
-| Build کی errors             | ✅ محفوظ      | ✅ محفوظ       | ✅ محفوظ       |
-| کامیاب tests (verbose)      | ✅ محفوظ      | 🟡 سکیڑی گئی   | 🟡 سکیڑی گئی   |
-| معمول کا output (info logs) | 🟡 سکیڑا گیا  | 🟡 سکیڑا گیا   | ❌ ہٹا دیا گیا |
-| Progress bars               | 🟡 سکیڑی گئیں | ❌ ہٹا دی گئیں | ❌ ہٹا دی گئیں |
-| Banner / ASCII art          | 🟡 سکیڑا گیا  | ❌ ہٹا دیا گیا | ❌ ہٹا دیا گیا |
+| مواد                        | minimal      | standard     | aggressive   |
+| --------------------------- | ------------ | ------------ | ------------ |
+| خرابیاں / اسٹیک ٹریسز       | ✅ محفوظ     | ✅ محفوظ     | ✅ محفوظ     |
+| ٹیسٹ ناکامیاں               | ✅ محفوظ     | ✅ محفوظ     | ✅ محفوظ     |
+| بلڈ خرابیاں                 | ✅ محفوظ     | ✅ محفوظ     | ✅ محفوظ     |
+| ٹیسٹ کامیابیاں (تفصیلی)     | ✅ محفوظ     | 🟡 سمیٹا گیا | 🟡 سمیٹا گیا |
+| معمول کی آؤٹ پٹ (انفو لاگز) | 🟡 سمیٹا گیا | 🟡 سمیٹا گیا | ❌ حذف شدہ   |
+| پروگریس بارز                | 🟡 سمیٹا گیا | ❌ حذف شدہ   | ❌ حذف شدہ   |
+| بینر / ASCII آرٹ            | 🟡 سمیٹا گیا | ❌ حذف شدہ   | ❌ حذف شدہ   |
 
 ### درست شدت کا انتخاب
 
 ```
-                  Is losing context catastrophic?
+                  کیا سیاق کھونا تباہ کن ہے؟
                   │
       ┌───────────┼───────────┐
       │           │           │
-    YES          NO          NOT SURE
+     ہاں        نہیں       غیر یقینی
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      How critical    Try `standard` first
-      │      is throughput?  (works for 80% of
-      │           │          cases)
+      │      تھروپٹ کتنی     پہلے `standard` آزمائیں
+      │      اہم ہے؟         (80% صورتوں میں کام
+      │           │          کرتا ہے)
       │      ┌────┴────┐
       │      │         │
-      │     LOW       HIGH
+      │     کم        زیادہ
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -414,9 +416,9 @@ config.intensity === "aggressive" ? 16 : 24,
       └──────┴─────────┘
 ```
 
-### شدت کی ترتیب
+### شدت کی ترتیب دینا
 
-**فی-combo** (combo config میں):
+**فی کومبو** (کومبو کنفیگ میں):
 
 ```json
 {
@@ -429,11 +431,11 @@ config.intensity === "aggressive" ? 16 : 24,
 }
 ```
 
-**پروگرام کے ذریعے**:
+**پروگرامی طور پر**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) ایک
-`CompressionEngine` ہے اور اس میں کوئی `updateConfig` طریقہ نہیں ہے۔ اس کے بجائے
-registry helper کے ذریعے engine کا config اپڈیٹ کریں:
+`CompressionEngine` ہے اور اس میں کوئی `updateConfig` طریقہ موجود نہیں ہے۔ اس کے بجائے رجسٹری ہیلپر کے ذریعے انجن کی کنفیگ
+اپڈیٹ کریں:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -443,7 +445,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### اثر کی تصدیق
 
-اپنی منتخب شدت پر اپنے filter کی حفاظت کی تصدیق کے لیے **Verify Gate** استعمال کریں (نیچے دیکھیں):
+اپنی منتخب شدت پر اپنے فلٹر کی حفاظت کی تصدیق کے لیے **Verify Gate** (ذیل میں دیکھیں) استعمال کریں:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

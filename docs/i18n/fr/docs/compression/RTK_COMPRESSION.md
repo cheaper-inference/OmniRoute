@@ -25,7 +25,7 @@ Plage :         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Ce qu'il compresse
 
-Le catalogue intégré propose actuellement 56 filtres répartis dans ces catégories :
+Le catalogue intégré est actuellement livré avec 56 filtres répartis dans les catégories suivantes :
 
 | Catégorie | Exemples                                                      |
 | --------- | ------------------------------------------------------------- |
@@ -36,11 +36,11 @@ Le catalogue intégré propose actuellement 56 filtres répartis dans ces catég
 | `shell`   | `ls`, `find`, `grep`, journaux shell génériques               |
 | `docker`  | `docker ps`, journaux Docker                                  |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | sortie JSON, traces de pile, repli générique sur la sortie    |
+| `generic` | sortie JSON, traces de pile, repli sur une sortie générique   |
 
-Le détecteur dans `open-sse/services/compression/engines/rtk/commandDetector.ts` classe la sortie
+Le détecteur dans `open-sse/services/compression/engines/rtk/commandDetector.ts` classifie la sortie
 avant la sélection du filtre. Les filtres peuvent également correspondre par motif de commande ou
-par expression régulière sur la sortie lorsqu'une classe de commande ne suffit pas.
+expression régulière sur la sortie lorsqu'une classe de commande ne suffit pas.
 
 ## Résolution des filtres
 
@@ -348,31 +348,31 @@ RTK prend en charge **3 niveaux d'intensité** qui établissent un compromis ent
 
 | Niveau                  | Seuil de troncature   | Économies de tokens | Risque      | Idéal pour                            |
 | ----------------------- | --------------------- | ------------------- | ----------- | ------------------------------------- |
-| `minimal`               | 24 lignes par section | ~20-40%             | Très faible | Production avec contexte critique     |
-| `standard` (par défaut) | 24 lignes par section | ~50-70%             | Faible      | Sessions de codage quotidiennes       |
-| `aggressive`            | 16 lignes par section | ~70-90%             | Moyen       | Sessions longues, économies maximales |
+| `minimal`               | 24 lignes par section | ~20-40 %            | Très faible | Production avec contexte critique     |
+| `standard` (par défaut) | 24 lignes par section | ~50-70 %            | Faible      | Sessions de codage quotidiennes       |
+| `aggressive`            | 16 lignes par section | ~70-90 %            | Moyen       | Sessions longues, économies maximales |
 
-### Où la troncature a lieu
+### Où s'applique la troncature
 
 Le seuil de troncature affecte `lineFilter.ts` :
 
 ```ts
-// Depuis open-sse/services/compression/engines/rtk/index.ts:329-330
+// Extrait de open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Le **début** et la **fin** de chaque section sont préservés ; le contenu intermédiaire est supprimé lorsque la troncature s'applique.
+Le **début** et la **fin** de chaque section sont conservés ; le contenu intermédiaire est supprimé lorsque la troncature s'applique.
 
-### Ce qui est conservé vs. ce qui est supprimé
+### Ce qui est conservé et ce qui est supprimé
 
 | Contenu                         | minimal     | standard    | aggressive  |
 | ------------------------------- | ----------- | ----------- | ----------- |
-| Erreurs / traces de pile        | ✅ préservé | ✅ préservé | ✅ préservé |
-| Échecs de tests                 | ✅ préservé | ✅ préservé | ✅ préservé |
-| Erreurs de build                | ✅ préservé | ✅ préservé | ✅ préservé |
-| Tests réussis (verbeux)         | ✅ préservé | 🟡 condensé | 🟡 condensé |
-| Sortie routinière (logs d'info) | 🟡 condensé | 🟡 condensé | ❌ supprimé |
+| Erreurs / traces de pile        | ✅ conservé | ✅ conservé | ✅ conservé |
+| Échecs de tests                 | ✅ conservé | ✅ conservé | ✅ conservé |
+| Erreurs de build                | ✅ conservé | ✅ conservé | ✅ conservé |
+| Tests réussis (verbeux)         | ✅ conservé | 🟡 condensé | 🟡 condensé |
+| Sortie de routine (logs d'info) | 🟡 condensé | 🟡 condensé | ❌ supprimé |
 | Barres de progression           | 🟡 condensé | ❌ supprimé | ❌ supprimé |
 | Bannière / art ASCII            | 🟡 condensé | ❌ supprimé | ❌ supprimé |
 
@@ -420,8 +420,8 @@ Le **début** et la **fin** de chaque section sont préservés ; le contenu inte
 **Par programmation** :
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) est un
-`CompressionEngine` et ne possède pas de méthode `updateConfig`. Mettez plutôt
-à jour la configuration d'un moteur via l'assistant du registre :
+`CompressionEngine` et ne possède pas de méthode `updateConfig`. Mettez plutôt à jour
+la configuration d'un moteur via l'utilitaire du registre :
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -431,7 +431,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Vérifier l'effet
 
-Utilisez le **Verify Gate** (voir ci-dessous) pour confirmer que votre filtre est sûr à l'intensité choisie :
+Utilisez le **Verify Gate** (voir ci-dessous) pour confirmer que votre filtre est sûr au niveau d'intensité choisi :
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

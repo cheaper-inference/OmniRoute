@@ -14,31 +14,17 @@
 
 ## Bu nima
 
-OmniRoute 376 ta provayderni roʻyxatdan oʻtkazadi, jumladan, **bepul/autentifikatsiyasiz** deb belgilangan 155 ta katalog yozuvini
-(autentifikatsiyasiz,
-bepul darajadagi OAuth yoki bepul darajadagi API kaliti —
-[Bepul darajalar qoʻllanmasi](../getting-started/FREE-TIERS-GUIDE.md) va toʻliq
-[Bepul darajalar katalogi](../reference/FREE_TIERS.md)ga qarang). Ammo bir jihat bor: bepul provayderlarning model sifati
-keskin farq qiladi. Eng ilgʻor modelni taqdim etuvchi autentifikatsiyasiz provayder
-kichik, eskirgan modelni taqdim etuvchidan ancha foydaliroq.
+OmniRoute 376 ta provayderni ro'yxatga oladi, shu jumladan **free/no-auth** deb belgilangan 155 ta katalog yozuvi (autentifikatsiyasiz, bepul tarifli OAuth yoki bepul tarifli API kaliti — [Bepul tariflar qo'llanmasi](../getting-started/FREE-TIERS-GUIDE.md) va to'liq [Bepul tariflar katalogi](../reference/FREE_TIERS.md)ga qarang). Ammo qiyin tomoni shundaki: bepul provayderlarning model sifati juda katta farq qiladi. Ilg'or modelni taqdim etuvchi autentifikatsiyasiz provayder kichik, eskirgan modelni taqdim etuvchi provayderdan ancha foydaliroq.
 
-**Bepul provayderlar reytingi** har bir bepul provayder katalogini
-**Arena AI reyting jadvali**dagi **jamoa tomonidan shakllantirilgan sifat ballari** bilan birlashtirish orqali
-“**qaysi bepul provayder menga eng yaxshi modelni taqdim etadi?**” degan savolga javob beradi
-(inson afzalliklariga asoslangan ELO, LMArena chatbot arenasidagi gʻoya bilan bir xil).
-Soʻng provayderlar oʻzlarining **eng yaxshi bepul modeli** kuchiga qarab tartiblanadi.
+**Free Provider Rankings** har bir bepul provayderning katalogini **Arena AI leaderboard** dagi **omma tomonidan yig'ilgan sifat ballari** (inson afzalliklariga asoslangan ELO — LMArena chatbot arenasining asosidagi g'oya bilan bir xil) bilan birlashtirish orqali "**qaysi bepul provayder menga eng yaxshi modelni beradi?**" savoliga javob beradi. Keyin provayderlar o'zlarining **eng yaxshi bepul modeli** kuchiga ko'ra reytinglanadi.
 
-Reyting uchta haqiqiy manba asosida hisoblanadi:
+Reyting uchta real manbadan hisoblanadi:
 
-1. Bepul provayderlar roʻyxatlari — `NOAUTH_PROVIDERS`, shuningdek, `hasFree` bilan belgilangan
-   `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` yozuvlari
-   (`src/shared/constants/providers.ts`).
-2. Provayderlar reyestridagi har bir provayderning model katalogi
-   (`open-sse/config/providerRegistry.ts`).
-3. Arena ELO sinxronlash mexanizmi (`src/lib/arenaEloSync.ts`) tomonidan
-   `model_intelligence` maʼlumotlar bazasi jadvalida saqlanadigan ELO asosidagi vazifaga moslik ballari.
+1. Bepul provayderlar ro'yxatlari — `NOAUTH_PROVIDERS`, shuningdek `hasFree` deb belgilangan `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` yozuvlari (`src/shared/constants/providers.ts`).
+2. Har bir provayderning provayder reestridagi model katalogi (`open-sse/config/providerRegistry.ts`).
+3. Arena ELO sinxronizatsiya mexanizmi (`src/lib/arenaEloSync.ts`) tomonidan `model_intelligence` MB jadvalida saqlanadigan ELO-dan olingan vazifaga-moslik ballari.
 
-Birlashtirish mantigʻi `src/lib/freeProviderRankings.ts` faylida joylashgan.
+Birlashtirish mantiqi `src/lib/freeProviderRankings.ts` faylida joylashgan.
 
 ---
 
@@ -128,86 +114,110 @@ javobdan chiqarib tashlanadi.
 
 ## Ballar qanday ishlaydi
 
-### Manba: Arena AI leaderboard
+### Manba: Arena AI reyting jadvali
 
-Arena ELO sinxronlash mexanizmi (`src/lib/arenaEloSync.ts`) Arena AI leaderboard API dan (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) ikkita leaderboard — `text` va `code` — yuklab oladi. Agar ushbu API foydalanishga yarogli board qaytarmasa, mexanizm Hugging Face datasets-server dagi rasmiy `lmarena-ai/leaderboard-dataset` ga murojaat qiladi (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`, `coding` → `code`); `GET /api/intelligence/sync` `activeSource`, `lastError` va `lastFailedAt` haqida hisobot beradi. Har bir leaderboard yozuvida model nomi, vendor, ELO `score`, ishonch oralig'i va ovozlar soni bo'ladi.
+Arena ELO sinxronizatsiya mexanizmi (`src/lib/arenaEloSync.ts`) Arena AI reyting jadvali API dan
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) ikkita reyting jadvalini —
+`text` va `code` — yuklab oladi. Agar bu API foydali jadval qaytarmasa, mexanizm Hugging Face
+datasets-server dagi rasmiy `lmarena-ai/leaderboard-dataset` ga o'tadi
+(`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` `activeSource`, `lastError` va
+`lastFailedAt` haqida xabar beradi. Har bir reyting jadvali yozuvi model nomi,
+ishlab chiqaruvchi, ELO `score`, ishonch intervali va ovozlar sonini o'z ichiga oladi.
 
-Leaderboard kategoriyalari OmniRoute vazifa kategoriyalariga mos keladi:
+Reyting jadvali toifalari OmniRoute vazifa toifalariga mos keladi:
 
-| Arena leaderboard | OmniRoute vazifa kategoriyalari                   |
-| ----------------- | ------------------------------------------------- |
-| `text`            | `default`, `review`, `documentation`, `debugging` |
-| `code`            | `coding`                                          |
+| Arena reyting jadvali | OmniRoute vazifa toifalari                        |
+| --------------------- | ------------------------------------------------- |
+| `text`                | `default`, `review`, `documentation`, `debugging` |
+| `code`                | `coding`                                          |
 
-### Normalizatsiya (task-fit bali)
+### Normallashtirish (vazifaga moslik balli)
 
-Xom ELO ballari har bir leaderboard bo'yicha **`[0.4, 0.98]` oralig'idagi task-fit qiymatiga** normalizatsiya qilinadi:
+Xom ELO ballari har bir reyting jadvali bo'yicha **`[0.4, 0.98]` oralig'idagi vazifaga moslik qiymatiga** normallashtiriladi:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Bal hech qachon `0` yoki `1` ga yetib bormaydi, bu foydalanuvchi o'zgartirishlari (override) uchun zaxira qoldiradi. Bu API javobida ko'rinadigan `score` maydoni va dashboardda ko'rsatiladigan yorliqdir.
+Ball hech qachon `0` yoki `1` ga yetib bormaydi, bu foydalanuvchi o'zgartirishlari uchun
+zaxira joy qoldiradi. Bu API javobida ko'rinadigan `score` maydoni va boshqaruv panelida
+ko'rsatiladigan yorliqdir.
 
 ### Ishonch darajasi
 
-Har bir yozuv Arena ovozlari soniga qarab ishonch darajasini oladi:
+Har bir yozuv Arena ovozlar soniga qarab ishonch darajasini oladi:
 
-| Ishonch  | Ovozlar |
-| -------- | ------- |
-| `high`   | ≥ 5,000 |
-| `medium` | ≥ 1,000 |
-| `low`    | < 1,000 |
+| Ishonch darajasi | Ovozlar |
+| ---------------- | ------- |
+| `high`           | ≥ 5,000 |
+| `medium`         | ≥ 1,000 |
+| `low`            | < 1,000 |
 
 ### Saqlash va dolzarblik
 
-Normalizatsiya qilingan yozuvlar `source = "arena_elo"` bilan `model_intelligence` DB jadvaliga yoziladi (`src/lib/db/modelIntelligence.ts`). Yozuvlar **7 kundan so'ng muddati tugaydi**, shuning uchun sinxronlashni to'xtatgan provayder eskirgan ma'lumotlarni ko'rsatish o'rniga vaqt o'tishi bilan ro'yxatdan tushib qoladi.
+Normallashtirilgan yozuvlar `source = "arena_elo"` bilan `model_intelligence` DB jadvaliga
+yoziladi (`src/lib/db/modelIntelligence.ts`). Yozuvlarning **amal qilish muddati
+7 kundan keyin tugaydi**, shuning uchun sinxronizatsiyani to'xtatgan provayder eskirgan
+ma'lumotlarni taqdim etish o'rniga vaqt o'tishi bilan ro'yxatdan chiqib ketadi.
 
-Sinxronlash **standart bo'yicha yoqilgan**:
+Sinxronizatsiya **standart holatda yoqilgan**:
 
-- U server ishga tushirilganda bir marta ishlaydi, so'ng davriy taymer bo'yicha ishlaydi
+- U server ishga tushganda bir marta ishlaydi, keyin esa davriy taymer bo'yicha ishlaydi
   (`src/lib/arenaEloSync.ts`, `src/instrumentation-node.ts` dan ulangan).
-- U **bloklamaydigan va hech qachon halokatli (fatal) emas** — agar upstream dan olish muvaffaqiyatsiz bo'lsa, OmniRoute ishlashda davom etadi va reytinglar shunchaki oxirgi to'g'ri ma'lumotlarni (yoki bo'sh holatni) ko'rsatadi.
+- U **bloklamaydi va hech qachon halokatli xatolikka olib kelmaydi** — agar yuqori oqimdan
+  yuklab olish muvaffaqiyatsiz bo'lsa, OmniRoute ishlashda davom etadi va reytinglar
+  shunchaki oxirgi yaxshi ma'lumotlarni (yoki bo'sh holatni) ko'rsatadi.
 
-Buni ikkita muhit o'zgaruvchisi boshqaradi
-([`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) da hujjatlashtirilgan):
+Uni ikkita muhit o'zgaruvchisi boshqaradi
+([`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) faylida hujjatlashtirilgan):
 
-| O'zgaruvchi               | Standart      | Vazifasi                                                         |
-| ------------------------- | ------------- | ---------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Chiquvchi sinxronlashdan voz kechish uchun `false` ga o'rnating. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Sinxronlash oralig'i, soniyalarda.                               |
+| O'zgaruvchi               | Standart qiymat   | Maqsadi                                                        |
+| ------------------------- | ----------------- | -------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`            | Chiquvchi sinxronizatsiyadan voz kechish uchun `false` qiling. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 soat) | Sinxronizatsiya intervali, soniyalarda.                        |
 
-### Qo'lda sinxronlash / holat / tozalash
+### Qo'lda sinxronizatsiya / holat / tozalash
 
-Operatorlar uchun autentifikatsiyadan o'tgan boshqaruv endpointi qo'lda boshqaruvni taqdim etadi (`src/app/api/intelligence/sync/route.ts` — boshqaruv autentifikatsiyasini talab qiladi):
+Operatorlar uchun autentifikatsiyalangan boshqaruv endpointi qo'lda boshqaruvni ta'minlaydi
+(`src/app/api/intelligence/sync/route.ts` — boshqaruv autentifikatsiyasini talab qiladi):
 
 ```
-GET    /api/intelligence/sync          # joriy sinxronlash holati (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # qo'lda sinxronlashni ishga tushirish; yozmasdan oldindan ko'rish uchun body: { "dryRun": true }
-DELETE /api/intelligence/sync          # sinxronlangan barcha arena_elo intelligence yozuvlarini tozalash
+GET    /api/intelligence/sync          # joriy sinxronizatsiya holati (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # qo'lda sinxronizatsiyani ishga tushirish; yozmasdan oldindan ko'rish uchun tanasi: { "dryRun": true }
+DELETE /api/intelligence/sync          # barcha sinxronizatsiya qilingan arena_elo intellekt yozuvlarini tozalash
 ```
 
-Agar reytinglar sahifasi bo'sh bo'lsa, qo'lda `POST /api/intelligence/sync` (yoki shunchaki serverni qayta ishga tushirish) uni qayta to'ldiradi.
+Agar reytinglar sahifasi bo'sh bo'lsa, qo'lda `POST /api/intelligence/sync` (yoki shunchaki
+serverni qayta ishga tushirish) uni qayta to'ldiradi.
 
-### Modellarni leaderboard bilan moslashtirish
+### Modellarni reyting jadvaliga moslashtirish
 
-Reestr model ID lari va Arena model nomlari har doim ham aniq mos kelavermaydi. Reytinglash egiluvchan moslashtirishdan foydalanadi (`src/lib/freeProviderRankings.ts` dagi `findMatchingIntelligence`):
+Reyestrdagi model ID lari va Arena model nomlari har doim ham aniq mos kelmaydi. Reytinglash
+egiluvchan moslashtirishdan foydalanadi (`src/lib/freeProviderRankings.ts` dagi
+`findMatchingIntelligence`):
 
-1. Normalizatsiya qilingan model ID bo'yicha aniq moslik.
+1. Normallashtirilgan model ID si bo'yicha aniq moslik.
 2. Oxirgi versiya qo'shimchasini olib tashlagandan keyingi moslik (masalan, `kimi-k2.6` → `kimi-k2`).
-3. Prefiks mosligi (leaderboard model nomi reestr ID ning prefiksi bo'ladi).
+3. Prefiks bo'yicha moslik (reyting jadvalidagi model nomi reyestr ID sinig prefiksi bo'lgan).
 
-Sinxronlash tomonida ma'lum vendor prefikslari (`anthropic/`, `openai/`, `google/`, …) olib tashlanadi va kichik alias xaritasi kanonik nomlarni OmniRoute ichkarida ishlatadigan variantlarga kengaytiradi, shuning uchun modellar har qanday nom ostida topilaveradi.
+Sinxronizatsiya tomonida, ma'lum ishlab chiqaruvchi prefikslari (`anthropic/`, `openai/`,
+`google/`, …) olib tashlanadi va kichik taxalluslar jadvali kanonik nomlarni OmniRoute
+ichkarida ishlatadigan variantlarga kengaytiradi, shuning uchun modellar istalgan nom ostida
+topilaveradi.
 
 ### Provayder qanday reytinglanadi
 
-Har bir bepul provayder uchun mexanizm uning katalogidagi har bir modelni baholaydi, so'ng:
+Har bir bepul provayder uchun mexanizm uning katalogidagi har bir modelni baholaydi, keyin:
 
-- **Top Model** = provayderning eng yuqori ballga ega modeli.
-- **Avg Score** = provayderning barcha baholangan modellari bo'yicha o'rtacha bali.
-- **Models** = provayderning nechta modeli Arena baliga ega bo'lgani.
+- **Eng yaxshi model** = provayderning eng yuqori ballga ega modeli.
+- **O'rtacha ball** = ushbu provayderning baholangan barcha modellari bo'yicha o'rtacha ball.
+- **Modellar** = provayderning nechta modeli Arena balliga ega bo'lgani.
 
-Provayderlar avval **top-model bali** bo'yicha, keyin o'rtacha bal bo'yicha saralanadi. Bu kamida bitta kuchli bepul model taqdim etadigan provayderni rag'batlantiradi.
+Provayderlar avval **eng yaxshi model balli** bo'yicha, keyin o'rtacha ball bo'yicha
+saralanadi. Bu kamida bitta kuchli bepul model taqdim etgan provayderni rag'batlantiradi.
+
+---
 
 ## Undan bepul provayderlarni tanlash uchun foydalanish
 

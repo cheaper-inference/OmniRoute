@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Batasan Penyedia",
     "noProviders": "Tidak Ada Penyedia yang Terhubung",
+    "quotaAuthRequired": "Autentikasi diperlukan - masuk ke dasbor",
+    "quotaAuthRequiredHint": "Koneksi penyedia tidak dapat dimuat karena sesi dasbor tidak tersedia atau telah kedaluwarsa. Masuk dan muat ulang untuk melihat batas kuota Anda.",
     "connectProvidersForQuota": "Hubungkan ke penyedia dengan OAuth untuk melacak batas dan penggunaan kuota API Anda.",
     "accountsCount": "{count, plural, one {# akun} other {# akun}}",
     "filteredFromCount": "(difilter dari {count})",

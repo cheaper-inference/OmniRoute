@@ -40,11 +40,11 @@ Daxili kataloq hazırda bu kateqoriyalar üzrə 56 filtr təqdim edir:
 | `shell`    | `ls`, `find`, `grep`, ümumi shell jurnalları                  |
 | `docker`   | `docker ps`, Docker jurnalları                                |
 | `infra`    | Terraform, OpenTofu, `systemctl status`                       |
-| `generic`  | JSON çıxışı, stek izləmələri, ümumi çıxış ehtiyatı            |
+| `generic`  | JSON çıxışı, yığın izləri, ümumi çıxış ehtiyatı               |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` faylındakı detektor
-filtr seçimindən əvvəl çıxışı təsnif edir. Əmr sinfi kifayət etmədikdə, filtrlər
-əmr nümunəsi və ya çıxış regex-i ilə də uyğunlaşa bilər.
+`open-sse/services/compression/engines/rtk/commandDetector.ts` faylındakı detektor filtr
+seçimindən əvvəl çıxışı təsnifləşdirir. Əmr sinfi kifayət olmadıqda, filtrlər əmr nümunəsi
+və ya çıxış regex-i əsasında da uyğunlaşa bilər.
 
 ## Filtrlərin müəyyənləşdirilməsi
 
@@ -333,60 +333,59 @@ node --import tsx/esm --test \
 
 ## İntensivlik Səviyyələri (v3.8.16+)
 
-RTK **sıxma aqressivliyi** ilə **təhlükəsizlik** arasında balans yaradan **3 intensivlik səviyyəsini** dəstəkləyir. Səviyyə mühərrik konfiqurasiyasında `config.intensity` vasitəsilə təyin edilir.
+RTK **kompressiya aqressivliyi** ilə **təhlükəsizlik** arasında balans yaradan **3 intensivlik səviyyəsini** dəstəkləyir. Səviyyə mühərrik konfiqurasiyasında `config.intensity` vasitəsilə təyin edilir.
 
 ### 3 Səviyyə
 
-| Səviyyə             | Kəsmə həddi           | Token qənaəti | Risk      | Ən uyğundur                      |
-| ------------------- | --------------------- | ------------- | --------- | -------------------------------- |
-| `minimal`           | bölmə başına 24 sətir | ~20-40%       | Çox aşağı | Kritik kontekstli produksiya     |
-| `standard` (defolt) | bölmə başına 24 sətir | ~50-70%       | Aşağı     | Gündəlik kodlaşdırma sessiyaları |
-| `aggressive`        | bölmə başına 16 sətir | ~70-90%       | Orta      | Uzun sessiyalar, maksimum qənaət |
+| Səviyyə               | Kəsilmə həddi           | Token qənaəti | Risk      | Ən uyğun olduğu hal              |
+| --------------------- | ----------------------- | ------------- | --------- | -------------------------------- |
+| `minimal`             | hər bölmə üçün 24 sətir | ~20-40%       | Çox aşağı | Kritik kontekstli production     |
+| `standard` (standart) | hər bölmə üçün 24 sətir | ~50-70%       | Aşağı     | Gündəlik kodlaşdırma sessiyaları |
+| `aggressive`          | hər bölmə üçün 16 sətir | ~70-90%       | Orta      | Uzun sessiyalar, maksimal qənaət |
 
-### Kəsmə Harada Baş Verir
+### Kəsilmə Harada Baş Verir
 
-Kəsmə həddi `lineFilter.ts` faylına təsir edir:
+Kəsilmə həddi `lineFilter.ts` faylına təsir edir:
 
 ```ts
-// open-sse/services/compression/engines/rtk/index.ts:329-330 faylından
+// From open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Hər bölmənin həm **başlanğıcı**, həm də **sonu** qorunur; kəsmə tətbiq olunduqda orta məzmun atılır.
+Hər bölmənin həm **başı**, həm də **sonu** qorunur; kəsilmə tətbiq olunduqda orta məzmun atılır.
 
-### Nə Qalır, Nə Kəsilir
+### Nə Qalır və Nə Kəsilir
 
-| Məzmun                    | minimal    | standard   | aggressive |
-| ------------------------- | ---------- | ---------- | ---------- |
-| Səhvlər / stack trace-lər | ✅ qorunur | ✅ qorunur | ✅ qorunur |
-| Test uğursuzluqları       | ✅ qorunur | ✅ qorunur | ✅ qorunur |
-| Build səhvləri            | ✅ qorunur | ✅ qorunur | ✅ qorunur |
-| Keçən testlər (ətraflı)   | ✅ qorunur | 🟡 yığılır | 🟡 yığılır |
-| Adi çıxış (info logları)  | 🟡 yığılır | 🟡 yığılır | ❌ atılır  |
-| Proqress barları          | 🟡 yığılır | ❌ atılır  | ❌ atılır  |
-| Banner / ASCII art        | 🟡 yığılır | ❌ atılır  | ❌ atılır  |
+| Məzmun                     | minimal    | standard   | aggressive |
+| -------------------------- | ---------- | ---------- | ---------- |
+| Səhvlər / stack trace-lər  | ✅ qorunur | ✅ qorunur | ✅ qorunur |
+| Test uğursuzluqları        | ✅ qorunur | ✅ qorunur | ✅ qorunur |
+| Build səhvləri             | ✅ qorunur | ✅ qorunur | ✅ qorunur |
+| Uğurlu testlər (ətraflı)   | ✅ qorunur | 🟡 yığılır | 🟡 yığılır |
+| Rutin çıxış (info logları) | 🟡 yığılır | 🟡 yığılır | ❌ atılır  |
+| Proqres çubuqları          | 🟡 yığılır | ❌ atılır  | ❌ atılır  |
+| Banner / ASCII art         | 🟡 yığılır | ❌ atılır  | ❌ atılır  |
 
-### Düzgün İntensivliyi Seçmək
+### Düzgün İntensivliyin Seçilməsi
 
 ```
-              Kontekstin itməsi fəlakətlidirmi?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     HƏ          YOX      ƏMİN DEYİLSƏN
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Ötürmə sürəti    Əvvəlcə `standard` sınayın
-      │      nə qədər         (halların 80%-ində işləyir)
-      │      vacibdir?
-      │           │
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │    AŞAĞI     YÜKSƏK
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -409,11 +408,11 @@ Hər bölmənin həm **başlanğıcı**, həm də **sonu** qorunur; kəsmə tət
 }
 ```
 
-**Proqram vasitəsilə**:
+**Proqramatik olaraq**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) bir
-`CompressionEngine`-dir və `updateConfig` metoduna malik deyil. Mühərrikin konfiqurasiyasını
-bunun əvəzinə registry köməkçisi vasitəsilə yeniləyin:
+`CompressionEngine`-dir və `updateConfig` metoduna malik deyil. Bunun əvəzinə
+mühərrikin konfiqurasiyasını registry köməkçisi vasitəsilə yeniləyin:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -421,7 +420,7 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Effekti Yoxlamaq
+### Effektin Yoxlanılması
 
 Filtrinizin seçdiyiniz intensivlikdə təhlükəsiz olduğunu təsdiqləmək üçün **Verify Gate**-dən (aşağıya baxın) istifadə edin:
 

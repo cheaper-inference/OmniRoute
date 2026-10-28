@@ -607,14 +607,14 @@ post_install() {
 
 ---
 
-## 📊 Các model có sẵn
+## 📊 Các mô hình khả dụng
 
 <details>
-<summary><b>Xem tất cả các model có sẵn</b></summary>
+<summary><b>Xem tất cả các mô hình khả dụng</b></summary>
 
-> Danh sách dưới đây được tuyển chọn từ `open-sse/config/providerRegistry.ts` cho v3.8.0. Các danh mục đám mây (Gemini, OpenRouter, v.v.) được đồng bộ động — để xem danh mục trực tiếp đầy đủ, mở **Bảng điều khiển → Nhà cung cấp → [provider] → Các model có sẵn** hoặc gọi `GET /api/models/catalog`.
+> Danh sách dưới đây được tuyển chọn từ `open-sse/config/providerRegistry.ts` cho v3.8.0. Các danh mục đám mây (Gemini, OpenRouter, v.v.) được đồng bộ động — để xem toàn bộ danh mục trực tiếp, hãy mở **Bảng điều khiển → Nhà cung cấp → [provider] → Mô hình khả dụng** hoặc gọi `GET /api/models/catalog`.
 >
-> Nếu danh sách tích hợp sẵn của một nhà cung cấp đã lệch so với thực tế, hãy dùng **Nhập từ /models** trên trang đó (hoặc bật **Tự động đồng bộ**) để kéo danh mục upstream trực tiếp. Điều này đã được xác minh trong v3.8.50 cho LLM7.io (`gemini-3.1-flash-lite`) và UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); quyền truy cập ẩn danh của Pollinations vẫn bị giới hạn từ phía upstream trong cùng đợt kiểm thử đó.
+> Nếu danh sách tích hợp sẵn của một nhà cung cấp bị lệch, hãy dùng **Nhập từ /models** trên trang đó (hoặc bật **Tự động đồng bộ**) để kéo danh mục trực tiếp từ upstream. Điều này đã được xác minh ở v3.8.50 cho LLM7.io (`gemini-3.1-flash-lite`) và UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); quyền truy cập ẩn danh của Pollinations vẫn bị giới hạn bởi upstream trong cùng đợt kiểm thử đó.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -622,7 +622,7 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth MIỄN PHÍ: sử dụng danh mục trực tiếp hiển thị trong **Bảng điều khiển → Nhà cung cấp → Kiro → Các model có sẵn**. Tính khả dụng phụ thuộc vào tài khoản và gói dịch vụ.
+**Kiro (`kr/`)** — OAuth MIỄN PHÍ: sử dụng danh mục trực tiếp hiển thị tại **Bảng điều khiển → Nhà cung cấp → Kiro → Mô hình khả dụng**. Tính khả dụng phụ thuộc vào tài khoản và gói dịch vụ.
 
 **Qoder (`if/`)** — OAuth MIỄN PHÍ: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,13 +630,13 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/tháng trọn gói hoặc tính theo lượt dùng: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/tháng cố định hoặc tính theo lượt sử dụng: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — Khóa API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Siêu nhanh: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Tốc độ cực nhanh: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok nguyên bản: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok chính chủ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
 **Mistral (`mistral/`)** — Lưu trữ tại EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
@@ -644,7 +644,7 @@ post_install() {
 
 **Together AI (`together/`)** — Mã nguồn mở: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (miễn phí), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Suy luận tốc độ cao: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Suy luận nhanh: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — Quy mô wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
@@ -656,11 +656,11 @@ post_install() {
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Đồng bộ trực tiếp theo từng khóa API từ Google — không có danh sách tĩnh. Kết nối một khóa trong **Bảng điều khiển → Nhà cung cấp** rồi dùng **Các model có sẵn** để nhập danh mục hiện tại (ví dụ: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Được đồng bộ trực tiếp theo từng khóa API từ Google — không có danh sách tĩnh. Kết nối một khóa trong **Bảng điều khiển → Nhà cung cấp** rồi dùng **Mô hình khả dụng** để nhập danh mục hiện tại (ví dụ: `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Các nhà cung cấp tương thích khác** (tuyển chọn): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (qua `aws-bedrock`), `azure-ai`, `openrouter` (danh mục chuyển tiếp), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Mỗi nhà cung cấp duy trì danh sách model riêng trong `providerRegistry.ts` và có thể được đồng bộ tự động khi nhà cung cấp đó cung cấp endpoint `/models`.
+**Các nhà cung cấp tương thích khác** (tuyển chọn): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (qua `aws-bedrock`), `azure-ai`, `openrouter` (danh mục chuyển tiếp), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Mỗi nhà cung cấp duy trì danh sách mô hình riêng trong `providerRegistry.ts` và có thể được tự động đồng bộ khi nhà cung cấp đó cung cấp endpoint `/models`.
 
-**Lưu ý về ID model:** OmniRoute sử dụng các ID nguyên bản của nhà cung cấp (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Một số ID chứa phiên bản có dấu chấm vì đó là định dạng mà API upstream yêu cầu. Nếu một model không được liệt kê ở trên, hãy chạy `omniroute models --search <term>` hoặc gọi `GET /api/models/catalog` để xác nhận tính khả dụng.
+**Lưu ý về ID mô hình:** OmniRoute sử dụng các ID nguyên bản của nhà cung cấp (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Một số ID chứa phiên bản có dấu chấm vì đó là định dạng mà API upstream mong đợi. Nếu một mô hình không có trong danh sách trên, hãy chạy `omniroute models --search <term>` hoặc gọi `GET /api/models/catalog` để xác nhận tính khả dụng.
 
 </details>
 

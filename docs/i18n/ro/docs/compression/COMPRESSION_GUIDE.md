@@ -30,34 +30,34 @@ Solicitarea clientului
 
 ---
 
-## Moduri de comprimare
+## Moduri de compresie
 
-### Oprit
+### Off
 
-Nu se aplică nicio comprimare. Toate mesajele trec neschimbate.
+Nicio compresie aplicată. Toate mesajele trec neschimbate.
 
-### Modul Lite (~15% economii, latență <1ms)
+### Modul Lite (~15% economii, latență <1 ms)
 
 Cel mai sigur mod — zero modificări semantice, doar curățarea formatării:
 
 | Tehnică                  | Descriere                                                           |
 | ------------------------ | ------------------------------------------------------------------- |
-| `collapseWhitespace`     | Unește liniile goale consecutive și spațiile de la finalul liniilor |
+| `collapseWhitespace`     | Îmbină liniile goale consecutive și spațiile de la finalul liniilor |
 | `dedupSystemPrompt`      | Elimină mesajele de sistem duplicate                                |
-| `compressToolResults`    | Comprimă ieșirile detaliate ale uneltelor/funcțiilor                |
+| `compressToolResults`    | Comprimă ieșirile prolixe ale uneltelor/funcțiilor                  |
 | `removeRedundantContent` | Elimină instrucțiunile repetate                                     |
 | `replaceImageUrls`       | Scurtează URI-urile de date base64 ale imaginilor                   |
 
-**Ideal pentru:** Utilizare permanentă, fluxuri de lucru critice pentru siguranță.
+**Ideal pentru:** Utilizare permanentă, fluxuri de lucru în care siguranța este critică.
 
 ### Modul Standard (~30% economii)
 
 Inspirat de [Caveman](https://github.com/JuliusBrussee/caveman) — elimină cuvintele de umplutură și formulările prolixe, păstrând sensul:
 
-- Elimină cuvintele de umplutură („please", „I think", „basically", „actually")
-- Condensează expresiile prolixe („in order to" → „to", „as a result of" → „because")
-- Elimină formulele de politețe („Would you mind...", „If you could possibly...")
-- Peste 30 de reguli regex optimizate pentru prompturi de programare
+- Elimină cuvintele de umplutură ("please", "I think", "basically", "actually")
+- Condensează expresiile prolixe ("in order to" → "to", "as a result of" → "because")
+- Elimină ocolirile politicoase ("Would you mind...", "If you could possibly...")
+- Peste 30 de reguli regex ajustate pentru prompturi de programare
 
 **Ideal pentru:** Fluxuri de lucru zilnice de programare, echipe atente la costuri.
 
@@ -66,57 +66,48 @@ Inspirat de [Caveman](https://github.com/JuliusBrussee/caveman) — elimină cuv
 Gestionare inteligentă a istoricului pentru sesiuni lungi:
 
 - **Îmbătrânirea mesajelor** — mesajele mai vechi sunt comprimate progresiv
-- **Comprimarea rezultatelor uneltelor** — ieșirile lungi ale uneltelor sunt trunchiate sau elidate (primele/ultimele linii,
-  filtrarea liniilor care se potrivesc, compactarea cheilor JSON)
-- **Garanții de integritate structurală** — asigură că perechile `tool_use` + `tool_result` rămân consecvente
-- **Conștientizarea ferestrei de context** — respectă limitele de tokeni specifice fiecărui model
+- **Comprimarea rezultatelor uneltelor** — ieșirile lungi ale uneltelor sunt trunchiate sau elidate (primele/ultimele linii, filtrarea liniilor care se potrivesc, compactarea cheilor JSON)
+- **Protecții de integritate structurală** — asigură că perechile `tool_use` + `tool_result` rămân coerente
+- **Conștientizarea ferestrei de context** — respectă limitele de tokeni ale fiecărui model
 
 **Ideal pentru:** Sesiuni extinse de depanare, baze de cod mari.
 
 ### Modul Ultra (~75% economii)
 
-Comprimare maximă pentru scenarii critice din punct de vedere al tokenilor:
+Compresie maximă pentru scenarii în care tokenii sunt critici:
 
-- **Eliminare euristică** — eliminarea tokenilor din proză pe bază de scor
-- **Păstrarea structurii** — blocurile de cod delimitate, codul inline, URL-urile și identificatorii sunt
-  protejați prin marcaje tombstone și reasamblați verbatim, fără a fi eliminați vreodată
+- **Eliminare euristică** — eliminarea tokenilor din proză pe baza unui scor
+- **Păstrarea structurii** — blocurile de cod delimitate, codul inline, URL-urile și identificatorii sunt marcate cu tombstone-uri și reasamblate verbatim, niciodată eliminate
 - **Nivel SLM opțional** — un model local mic poate rafina eliminarea atunci când este configurat
-- Independent de modul Aggressive: nu rulează îmbătrânirea mesajelor, comprimarea rezultatelor uneltelor
-  sau sumarizatorul de rezervă (doar un eșec al nivelului SLM poate direcționa o trecere de rezervă
-  prin modul aggressive)
+- Independent de modul Aggressive: nu execută îmbătrânirea mesajelor, compresia rezultatelor uneltelor sau rezumarea de rezervă (doar un eșec al nivelului SLM poate direcționa o trecere de rezervă prin aggressive)
 
 **Ideal pentru:** Când atingi în mod repetat limitele de context.
 
-### Modul RTK (interval upstream 60-90%)
+### Modul RTK (interval upstream de 60-90%)
 
 Modul RTK este optimizat pentru ieșirile prolixe ale uneltelor care apar în sesiunile agenților de programare:
 
-- Detectează clase de comenzi/ieșiri precum `git status`, `git diff`, `git log`, instrumente de rulare a testelor,
-  build-uri TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/instalări npm, jurnale Docker, ieșiri
-  de infrastructură și ieșiri generice de shell
+- Detectează clase de comenzi/ieșiri precum `git status`, `git diff`, `git log`, rulatoare de teste, build-uri TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/instalări, jurnale Docker, ieșiri de infrastructură și ieșiri generice de shell
 - Aplică pachete de filtre JSON din `open-sse/services/compression/engines/rtk/filters/`
-- Importă filtre RTK TOML schema v1 din fișierele `filters.toml` de proiect sau globale, cu validare prin teste
-  inline și restricționare pe bază de încredere pentru fișierele de proiect
-- Livrează 56 de filtre integrate cu mostre de verificare inline
+- Importă filtre din schema RTK TOML v1 din fișiere `filters.toml` de proiect sau globale, cu validare prin teste inline și control de încredere (trust-gating) pentru fișierele de proiect
+- Se livrează cu 56 de filtre încorporate, cu mostre de verificare inline
 - Elimină secvențele de control ANSI, barele de progres, liniile repetate și zgomotul neacționabil
 - Păstrează eșecurile, erorile, avertismentele, fișierele modificate, rezumatele și finalul ieșirilor lungi
-- Acceptă filtre de proiect restricționate pe bază de încredere, filtre globale și recuperarea opțională redactată a ieșirilor brute
+- Acceptă filtre de proiect cu control de încredere, filtre globale și recuperarea opțională a ieșirilor brute mascate
 
-**Ideal pentru:** Sesiuni de agenți cu transcrieri de shell, build, teste, git, grep și ieșiri de fișiere.
+**Ideal pentru:** Sesiuni de agent cu transcrieri de shell, build, teste, git, grep și ieșiri de fișiere.
 
-### Modul Stacked (interval eligibil 78-95%)
+### Modul Stacked (interval eligibil de 78-95%)
 
-Modul Stacked rulează mai multe motoare de comprimare într-o ordine deterministă. Pipeline-ul implicit este:
+Modul Stacked rulează mai multe motoare de compresie într-o ordine deterministă. Pipeline-ul implicit este:
 
 ```txt
 RTK -> Caveman
 ```
 
-Această ordine menține mai întâi compactă ieșirea terminalului/uneltelor, apoi aplică condensarea semantică Caveman
-asupra promptului rămas în limbaj natural. Pipeline-urile Stacked pot fi configurate global sau prin
-combinații de comprimare atribuite combinațiilor de rutare.
+Această ordine menține mai întâi compactă ieșirea terminalului/uneltelor, apoi aplică condensarea semantică Caveman asupra promptului rămas în limbaj natural. Pipeline-urile Stacked pot fi configurate global sau prin combo-uri de compresie atribuite combo-urilor de rutare.
 
-**Ideal pentru:** Context mixt cu jurnale mari de unelte plus instrucțiuni umane sau rezumate ale asistentului.
+**Ideal pentru:** Context mixt cu jurnale mari de unelte, plus instrucțiuni umane sau rezumate ale asistentului.
 
 ---
 

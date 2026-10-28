@@ -38,7 +38,7 @@ Nenhuma compressão aplicada. Todas as mensagens passam inalteradas.
 
 ### Modo Lite (~15% de economia, latência <1ms)
 
-O modo mais seguro — zero alteração semântica, apenas limpeza de formatação:
+O modo mais seguro — nenhuma alteração semântica, apenas limpeza de formatação:
 
 | Técnica                  | Descrição                                             |
 | ------------------------ | ----------------------------------------------------- |
@@ -46,9 +46,9 @@ O modo mais seguro — zero alteração semântica, apenas limpeza de formataç�
 | `dedupSystemPrompt`      | Remove mensagens de sistema duplicadas                |
 | `compressToolResults`    | Comprime saídas verbosas de ferramentas/funções       |
 | `removeRedundantContent` | Elimina instruções repetidas                          |
-| `replaceImageUrls`       | Encurta URIs de dados de imagem em base64             |
+| `replaceImageUrls`       | Encurta URIs de dados de imagens em base64            |
 
-**Ideal para:** Uso contínuo, fluxos de trabalho críticos em segurança.
+**Ideal para:** uso contínuo, fluxos de trabalho críticos em segurança.
 
 ### Modo Standard (~30% de economia)
 
@@ -56,58 +56,68 @@ Inspirado no [Caveman](https://github.com/JuliusBrussee/caveman) — remove pala
 
 - Remove palavras de preenchimento ("please", "I think", "basically", "actually")
 - Condensa frases verbosas ("in order to" → "to", "as a result of" → "because")
-- Elimina atenuações de polidez ("Would you mind...", "If you could possibly...")
-- Mais de 30 regras de regex ajustadas para prompts de programação
+- Elimina rodeios de polidez ("Would you mind...", "If you could possibly...")
+- Mais de 30 regras de regex ajustadas para prompts de codificação
 
-**Ideal para:** Fluxos de trabalho diários de programação, equipes atentas a custos.
+**Ideal para:** fluxos de trabalho diários de codificação, equipes atentas a custos.
 
 ### Modo Aggressive (~50% de economia)
 
 Gerenciamento inteligente de histórico para sessões longas:
 
-- **Envelhecimento de Mensagens** — mensagens mais antigas são progressivamente comprimidas
-- **Compressão de Resultados de Ferramentas** — saídas longas de ferramentas são truncadas ou elididas (primeiras/últimas linhas, filtragem de linhas correspondentes, compactação de chaves JSON)
-- **Proteções de Integridade Estrutural** — garante que os pares `tool_use` + `tool_result` permaneçam consistentes
-- **Consciência da Janela de Contexto** — respeita os limites de tokens por modelo
+- **Envelhecimento de mensagens** — mensagens mais antigas são comprimidas progressivamente
+- **Compressão de resultados de ferramentas** — saídas longas de ferramentas são truncadas ou
+  reduzidas (primeiras/últimas linhas, filtragem por linhas correspondentes, compactação de chaves JSON)
+- **Proteções de integridade estrutural** — garante que os pares `tool_use` + `tool_result` permaneçam consistentes
+- **Consciência da janela de contexto** — respeita os limites de tokens de cada modelo
 
-**Ideal para:** Sessões extensas de depuração, grandes bases de código.
+**Ideal para:** sessões prolongadas de depuração, bases de código grandes.
 
 ### Modo Ultra (~75% de economia)
 
 Compressão máxima para cenários críticos em tokens:
 
-- **Poda Heurística** — poda de tokens de prosa baseada em pontuação
-- **Preservação de Estrutura** — blocos de código delimitados, código inline, URLs e identificadores são marcados como tombstone e reintegrados literalmente (verbatim), nunca podados
-- **Camada SLM opcional** — um modelo local pequeno pode refinar a poda quando configurado
-- Independente do modo Aggressive: não executa envelhecimento de mensagens, compressão de resultados de ferramentas nem o resumidor de fallback (somente uma falha na camada SLM pode rotear uma passagem de fallback pelo aggressive)
+- **Poda heurística** — poda de tokens de prosa baseada em pontuação
+- **Preservação de estrutura** — blocos de código delimitados, código inline, URLs e identificadores
+  são marcados com tombstones e reintegrados verbatim, nunca podados
+- **Camada SLM opcional** — um pequeno modelo local pode refinar a poda quando configurado
+- Independente do modo Aggressive: não executa envelhecimento de mensagens, compressão de
+  resultados de ferramentas nem o resumidor de fallback (somente uma falha na camada SLM pode
+  direcionar uma passagem de fallback pelo modo aggressive)
 
-**Ideal para:** Quando você atinge os limites de contexto repetidamente.
+**Ideal para:** quando você atinge os limites de contexto repetidamente.
 
 ### Modo RTK (faixa upstream de 60-90%)
 
-O modo RTK é otimizado para saídas verbosas de ferramentas que aparecem em sessões de agentes de programação:
+O modo RTK é otimizado para saídas verbosas de ferramentas que aparecem em sessões de agentes de codificação:
 
-- Detecta classes de comandos/saídas como `git status`, `git diff`, `git log`, executores de testes, builds TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, logs do Docker, saída de infraestrutura e saída genérica de shell
+- Detecta classes de comandos/saídas como `git status`, `git diff`, `git log`, executores de testes,
+  builds TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, logs do Docker, saída de
+  infraestrutura e saída genérica de shell
 - Aplica pacotes de filtros JSON de `open-sse/services/compression/engines/rtk/filters/`
-- Importa filtros do schema TOML v1 do RTK a partir de arquivos `filters.toml` de projeto ou globais, com validação por testes inline e controle de confiança (trust-gating) para arquivos de projeto
-- Inclui 56 filtros embutidos com amostras de verificação inline
+- Importa filtros do esquema RTK TOML v1 de arquivos `filters.toml` do projeto ou globais, com
+  validação por testes inline e controle de confiança (trust-gating) para arquivos de projeto
+- Inclui 56 filtros integrados com amostras de verificação inline
 - Remove sequências de controle ANSI, barras de progresso, linhas repetidas e ruído não acionável
 - Preserva falhas, erros, avisos, arquivos alterados, resumos e o final de saídas longas
-- Suporta filtros de projeto com controle de confiança, filtros globais e recuperação opcional de saída bruta mascarada
+- Suporta filtros de projeto com controle de confiança, filtros globais e recuperação opcional de
+  saída bruta com mascaramento
 
-**Ideal para:** Sessões de agentes com transcrições de shell, build, teste, git, grep e saída de arquivos.
+**Ideal para:** sessões de agentes com transcrições de shell, build, teste, git, grep e saída de arquivos.
 
 ### Modo Stacked (faixa elegível de 78-95%)
 
-O modo Stacked executa múltiplos motores de compressão em uma ordem determinística. O pipeline padrão é:
+O modo Stacked executa vários mecanismos de compressão em uma ordem determinística. O pipeline padrão é:
 
 ```txt
 RTK -> Caveman
 ```
 
-Essa ordem mantém a saída de terminal/ferramentas compacta primeiro e, em seguida, aplica a condensação semântica do Caveman ao prompt em linguagem natural restante. Pipelines Stacked podem ser configurados globalmente ou por meio de combos de compressão atribuídos a combos de roteamento.
+Essa ordem mantém a saída de terminal/ferramentas compacta primeiro e, em seguida, aplica a
+condensação semântica do Caveman ao prompt em linguagem natural restante. Pipelines Stacked podem
+ser configurados globalmente ou por meio de combos de compressão atribuídos a combos de roteamento.
 
-**Ideal para:** Contexto misto com grandes logs de ferramentas somados a instruções humanas ou resumos do assistente.
+**Ideal para:** contexto misto com grandes logs de ferramentas somados a instruções humanas ou resumos do assistente.
 
 ---
 

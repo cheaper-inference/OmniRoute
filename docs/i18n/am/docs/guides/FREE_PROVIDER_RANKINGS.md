@@ -11,32 +11,23 @@
 
 ---
 
-## ምንድን ነው
+## ምን እንደሆነ
 
-OmniRoute 376 አቅራቢዎችን ይመዘግባል፤ ከእነዚህም 155 የካታሎግ ግቤቶች **ነፃ/ማረጋገጫ-የማያስፈልጋቸው** ተብለው ምልክት ተደርጎባቸዋል
-(ማረጋገጫ-የማያስፈልጋቸው፣
-የነፃ ደረጃ OAuth፣ ወይም የነፃ ደረጃ API ቁልፍ —
-[የነፃ ደረጃዎች መመሪያን](../getting-started/FREE-TIERS-GUIDE.md) እና ሙሉውን
-[የነፃ ደረጃዎች ማውጫ](../reference/FREE_TIERS.md) ይመልከቱ)። ችግሩ፦ የነፃ አቅራቢዎች የሞዴል ጥራት
-እጅግ በጣም ይለያያል። የዘመኑን ቀዳሚ ሞዴል የሚያቀርብ ማረጋገጫ-የማይጠይቅ አቅራቢ
-አነስተኛ የቆየ ሞዴል ከሚያቀርብ አቅራቢ እጅግ የበለጠ ጠቃሚ ነው።
+OmniRoute 376 አቅራቢዎችን ይመዘግባል፣ ከእነዚህም 155 የካታሎግ ግቤቶች **free/no-auth** የሚል ምልክት አለባቸው (no-auth፣ free-tier OAuth፣ ወይም free-tier API key — [የነጻ ደረጃዎች መመሪያ](../getting-started/FREE-TIERS-GUIDE.md) እና ሙሉውን [የነጻ ደረጃዎች ማውጫ](../reference/FREE_TIERS.md) ይመልከቱ)። ችግሩ ግን፦ ነጻ አቅራቢዎች በሞዴል ጥራት በከፍተኛ ሁኔታ ይለያያሉ። የfrontier ሞዴል የሚያቀርብ no-auth አቅራቢ ከትንሽ አሮጌ ሞዴል ከሚያቀርብ አቅራቢ በጣም ይበልጥ ጠቃሚ ነው።
 
-**የነፃ አቅራቢዎች ደረጃ አሰጣጥ** "**ምርጡን ሞዴል የሚሰጠኝ የትኛው ነፃ አቅራቢ ነው?**" የሚለውን ጥያቄ
-የእያንዳንዱን ነፃ አቅራቢ ካታሎግ ከ**ሕዝብ-ምንጭ የጥራት ውጤቶች** ጋር በማጣመር ይመልሳል፤ እነዚህ ውጤቶች
-ከ**Arena AI የደረጃ ሰንጠረዥ** የተገኙ ናቸው (በሰዎች ምርጫ ላይ የተመሠረተ ELO፣ ከLMArena
-የቻትቦት ውድድር ጀርባ ካለው ጽንሰ-ሐሳብ ጋር ተመሳሳይ)። ከዚያም አቅራቢዎች በ**ምርጡ ነፃ ሞዴላቸው** ብቃት መሠረት ደረጃ ይሰጣቸዋል።
+**የነጻ አቅራቢዎች ደረጃ አሰጣጥ** "**የትኛው ነጻ አቅራቢ ምርጡን ሞዴል ይሰጠኛል?**" የሚለውን ጥያቄ ይመልሳል፤ ይህም የእያንዳንዱን ነጻ አቅራቢ ካታሎግ ከ**Arena AI leaderboard** (በሰው ምርጫ ላይ የተመሰረተ ELO፣ ከLMArena chatbot arena ጀርባ ያለው ተመሳሳይ ሀሳብ) ከሚገኙ **በሕዝብ ተሳትፎ ከተሰበሰቡ የጥራት ነጥቦች** ጋር በማገናኘት ነው። ከዚያ አቅራቢዎች በ**ምርጥ ነጻ ሞዴላቸው** ጥንካሬ ደረጃ ይሰጣሉ።
 
-የደረጃ አሰጣጡ ከሦስት ተጨባጭ ምንጮች ይሰላል፦
+ደረጃው ከሶስት እውነተኛ ምንጮች ይሰላል፦
 
-1. የነፃ አቅራቢዎች ዝርዝሮች — `NOAUTH_PROVIDERS`፣ በተጨማሪም `hasFree` ተብለው ምልክት የተደረገባቸው `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` ግቤቶች
+1. የነጻ አቅራቢዎች ዝርዝሮች — `NOAUTH_PROVIDERS`፣ በተጨማሪም `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` ግቤቶች `hasFree` የሚል ምልክት ያለባቸው
    (`src/shared/constants/providers.ts`)።
-2. ከአቅራቢዎች መዝገብ የተገኘ የእያንዳንዱ አቅራቢ የሞዴል ካታሎግ
+2. የእያንዳንዱ አቅራቢ የሞዴል ካታሎግ ከአቅራቢው ምዝገባ
    (`open-sse/config/providerRegistry.ts`)።
-3. በArena ELO ማመሳሰያ ሞተር (`src/lib/arenaEloSync.ts`) በ`model_intelligence` የውሂብ ጎታ ሰንጠረዥ ውስጥ
-   የተከማቹ፣ ከELO የተገኙ የተግባር-ተስማሚነት ውጤቶች።
+3. ከELO የተገኙ የተግባር-ተስማሚነት ነጥቦች በArena ELO ማመሳሰያ ሞተር
+   (`src/lib/arenaEloSync.ts`) በ`model_intelligence` የዳታቤዝ ሠንጠረዥ ውስጥ የተቀመጡ።
 
-የማጣመሪያ አመክንዮው በ`src/lib/freeProviderRankings.ts` ውስጥ ይገኛል።
+የማገናኘት ሎጂኩ በ`src/lib/freeProviderRankings.ts` ውስጥ ይገኛል።
 
 ---
 
@@ -120,89 +111,105 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ---
 
-## ውጤቶች እንዴት እንደሚሠሩ
+## ነጥቦቹ እንዴት እንደሚሰሩ
 
-### ምንጭ፡ Arena AI ሊደርቦርድ
+### ምንጭ፡ Arena AI leaderboard
 
-Arena ELO ሲንክ ሞተር (`src/lib/arenaEloSync.ts`) ሁለት ሊደርቦርዶችን — `text` እና `code` — ከ Arena AI ሊደርቦርድ API (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) ያመጣል። ያ API ምንም ጠቃሚ ሊደርቦርድ ሳይመልስ ሲቀር፣ ሞተሩ በ Hugging Face datasets-server ላይ ወደ ኦፊሴላዊው `lmarena-ai/leaderboard-dataset` ምትክ ይጠቀማል (`src/lib/arenaEloHfSource.ts`፣ CC-BY-4.0፤ `overall` → `text`፣ `coding` → `code`)፤ `GET /api/intelligence/sync` `activeSource`፣ `lastError` እና `lastFailedAt` ሪፖርት ያደርጋል። እያንዳንዱ የሊደርቦርድ ግቤት የሞዴል ስም፣ አምራች፣ የ ELO `score`፣ የመተማመን ክልል እና የድምፅ ብዛት ይሸከማል።
+Arena ELO ማመሳሰያ ሞተር (`src/lib/arenaEloSync.ts`) ሁለት የደረጃ ሰሌዳዎችን — `text`
+እና `code` — ከ Arena AI leaderboard API
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`) ያመጣል። ያ API ምንም
+ጥቅም ላይ የሚውል ሰሌዳ ካልመለሰ፣ ሞተሩ ወደ ኦፊሴላዊው `lmarena-ai/leaderboard-dataset` በ
+Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`) ይመለሳል; `GET /api/intelligence/sync` `activeSource`፣ `lastError` እና
+`lastFailedAt` ያመላክታል። እያንዳንዱ የደረጃ ሰሌዳ ግቤት
+የሞዴል ስም፣ አቅራቢ፣ ELO `score`፣ የመተማመን ክልል እና የድምጽ ብዛት ይዟል።
 
-የሊደርቦርድ ምድቦች ወደ OmniRoute የተግባር ምድቦች ይመደባሉ፡
+የደረጃ ሰሌዳ ምድቦች ከ OmniRoute የተግባር ምድቦች ጋር ይዛመዳሉ፡
 
-| Arena ሊደርቦርድ | OmniRoute የተግባር ምድቦች                              |
-| ------------ | ------------------------------------------------- |
-| `text`       | `default`, `review`, `documentation`, `debugging` |
-| `code`       | `coding`                                          |
+| Arena leaderboard | የ OmniRoute የተግባር ምድቦች                            |
+| ----------------- | ------------------------------------------------- |
+| `text`            | `default`, `review`, `documentation`, `debugging` |
+| `code`            | `coding`                                          |
 
-### ኖርማላይዜሽን (የተግባር-ተስማሚነት ውጤት)
+### ኖርማላይዜሽን (የተግባር-ምትክ ነጥብ)
 
-ጥሬ የ ELO ውጤቶች በእያንዳንዱ ሊደርቦርድ ወደ **በ `[0.4, 0.98]` ክልል ውስጥ ወደሚገኝ የተግባር-ተስማሚነት እሴት** መደበኛ ይደረጋሉ፡
+ጥሬ ELO ነጥቦች በእያንዳንዱ የደረጃ ሰሌዳ ወደ **በ `[0.4, 0.98]` ውስጥ ወደሚገኝ የተግባር-ምትክ እሴት** ይቀየራሉ፡
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-ውጤቱ በጭራሽ `0` ወይም `1` አይደርስም፣ ይህም ተጠቃሚው በራሱ ሊለውጠው እንዲችል ቦታ ይተዋል። ይህ በ API ምላሽ ውስጥ የሚያዩት `score` መስክ እና በዳሽቦርድ ላይ የሚታየው መለያ ነው።
+ነጥቡ በጭራሽ `0` ወይም `1` አይደርስም፣ ይህም ለተጠቃሚ ማስተካከያዎች ቦታ ይተዋል። ይህ በ API ምላሽ ውስጥ የሚታየው `score` መስክ እና በዳሽቦርዱ ላይ የሚታየው መለያ ነው።
 
-### መተማመን
+### የመተማመን ደረጃ
 
-እያንዳንዱ ግቤት በ Arena የድምፅ ብዛት ላይ የተመሰረተ የመተማመን ደረጃ ያገኛል፡
+እያንዳንዱ ግቤት በ Arena የድምጽ ብዛት ላይ የተመሰረተ የመተማመን ደረጃ ያገኛል፡
 
-| መተማመን    | ድምፆች    |
-| -------- | ------- |
-| `high`   | ≥ 5,000 |
-| `medium` | ≥ 1,000 |
-| `low`    | < 1,000 |
+| የመተማመን ደረጃ | ድምጾች    |
+| ---------- | ------- |
+| `high`     | ≥ 5,000 |
+| `medium`   | ≥ 1,000 |
+| `low`      | < 1,000 |
 
 ### ማከማቻ እና አዲስነት
 
-መደበኛ የተደረጉ ግቤቶች በ `source = "arena_elo"` ምልክት ጋር ወደ `model_intelligence` የዳታቤዝ ሰንጠረዥ ይጻፋሉ (`src/lib/db/modelIntelligence.ts`)። ግቤቶች **ከ 7 ቀናት በኋላ ያቃልላሉ**፣ ስለዚህ ማመሳሰልን የሚያቆም አቅራቢ የጊዜው ያለፈበት ውሂብ ከማቅረብ ይልቅ በመጨረሻ ከዝርዝሩ ይወጣል።
+የተኖርማሉ ግቤቶች ወደ `model_intelligence` የ DB ሠንጠረዥ በ
+`source = "arena_elo"` ይጻፋሉ (`src/lib/db/modelIntelligence.ts`)። ግቤቶች **ከ
+7 ቀናት በኋላ ያቃተዋል**፣ ስለዚህ ማመሳሰል የሚያቆም አቅራቢ
+ድሮ የማይሻሽ ውሂብ ከማቅረብ ይልቅ በመጨረሻ ከዝርዝሩ ይወጣል።
 
-ሲንኩ **በነባሪነት ነቅቷል**፡
+ማመሳሰያው **በነባሪነት ነቅቷል**፡
 
-- በሰርቨር ማስጀመሪያ ላይ አንድ ጊዜ ይሠራል እና ከዚያ በየጊዜው በሚደገም ታይመር
+- በሰርቨር መጀመሪያ ላይ አንድ ጊዜ ይሰራል እና ከዚያ በየጊዜው ባለው ታይመር
   (`src/lib/arenaEloSync.ts`፣ ከ `src/instrumentation-node.ts` የተገናኘ)።
-- **አገዳዲ (non-blocking) አይደለም እና በጭራሽ አወዳይ (fatal) አይደለም** — የላይኛው ምንጭ ማግኘት ከተሳነ፣ OmniRoute መስራቱን ይቀጥላል እና ደረጃዎቹ በቀላሉ የመጨረሻውን ጥሩ ውሂብ (ወይም ባዶ ሁኔታ) ያሳያሉ።
+- **አያግድም እና በጭራሽ ወሳኝ ስህተት አይደለም** — የላይኛው ማምጫ ከከሰፈ፣ OmniRoute
+  መስራቱን ይቀጥላል እና ደረጃዎቹ የመጨረሻውን ጥሩ ውሂብ (ወይም ባዶ ሁኔታ) ብቻ ያሳያሉ።
 
 ሁለት የአካባቢ ተለዋዋጮች ይቆጣጠሩታል (በ
-[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) የተጠቀሱ)፡
+[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) ውስጥ ተመዝግበዋል)፡
 
-| ተለዋዋጭ                     | ነባሪ           | ዓላማ                            |
-| ------------------------- | ------------- | ------------------------------ |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | ከሚወጣው ሲንክ ለመውጣት `false` ያድርጉት። |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | የሲንክ ክፍተት፣ በሰከንዶች።             |
+| ተለዋዋጭ                     | ነባሪ           | ዓላማ                                  |
+| ------------------------- | ------------- | ------------------------------------ |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | የሚወጣውን ማመሳሰያ ለማፅዳት ወደ `false` ይቀይሩት። |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | የማመሳሰያ ክፍተት፣ በሰከንዶች።                 |
 
-### የእጅ ሲንክ / ሁኔታ / ማጽዳት
+### የእጅ ማመሳሰያ / ሁኔታ / ማጽዳት
 
-ለኦፕሬተሮች፣ የተረጋገጠ የአስተዳደር endpoint የእጅ ቁጥጥር ይሰጣል
+ለኦፕሬተሮች፣ የተረጋገጠ የአስተዳደር መጨረሻ ነጥብ የእጅ ቁጥጥር ይሰጣል
 (`src/app/api/intelligence/sync/route.ts` — የአስተዳደር ማረጋገጫ ይፈልጋል)፡
 
 ```
-GET    /api/intelligence/sync          # የአሁኑ ሲንክ ሁኔታ (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # የእጅ ሲንክ ያግብሩ፤ body: { "dryRun": true } ሳይጽፉ ቅድመ-እይታ ለማየት
-DELETE /api/intelligence/sync          # ሁሉንም የተመሳሰሉ arena_elo intelligence ግቤቶች ያጽዱ
+GET    /api/intelligence/sync          # አሁኑ የማመሳሰያ ሁኔታ (enabled, lastSync, nextSync, intervalMs)
+POST   /api/intelligence/sync          # የእጅ ማመሳሰያ ይነሳሱ; ያለመጻፍ ቅድመ እይታ ለማየት body: { "dryRun": true }
+DELETE /api/intelligence/sync          # ሁሉንም የተመሳሰሉ arena_elo ኢንተሊጀንስ ግቤቶች ያጽዱ
 ```
 
-የደረጃዎች ገጽ ባዶ ከሆነ፣ የእጅ `POST /api/intelligence/sync` (ወይም በቀላሉ ሰርቨሩን እንደገና ማስጀመር) እንደገና ይሞላዋል።
+የደረጃዎች ገጹ ባዶ ከሆነ፣ የእጅ `POST /api/intelligence/sync` (ወይም በቀላሉ
+ሰርቨሩን እንደገና ማጀመር) እንደገና ይሞላል።
 
-### ሞዴሎችን ከሊደርቦርድ ጋር ማዛመድ
+### ሞዴሎችን ከደረጃ ሰሌዳው ጋር ማዛመድ
 
-የ Registry ሞዴል መለያዎች እና የ Arena ሞዴል ስሞች ሁልጊዜ በትክክል አይዛመዱም። ደረጃው ተጣጣፊ ማዛመድ ይጠቀማል (`findMatchingIntelligence` በ `src/lib/freeProviderRankings.ts`)፡
+የሬጂስትሪ ሞዴል መታወቂያዎች እና የ Arena ሞዴል ስሞች ሁልጊዜ በትክክል አይዛመዱም። ደረጃ አሰጣጡ
+ተለዋዋጭ ማዛመድ ይጠቅማል (`findMatchingIntelligence` በ `src/lib/freeProviderRankings.ts` ውስጥ)፡
 
-1. በመደበኛ የተደረገ ሞዴል መለያ ላይ ትክክለኛ ማዛመድ።
-2. የመጨረሻ የስሪት ቅጥያ ከተወገደ በኋላ ማዛመድ (ለምሳሌ `kimi-k2.6` → `kimi-k2`)።
-3. የቅድመ-ቅጥያ ማዛመድ (የሊደርቦርድ ሞዴል ስም የ Registry መለያ ቅድመ-ቅጥያ ነው)።
+1. በተኖርማል ሞዴል መታወቂያ ላይ ትክክለኛ ማዛመድ።
+2. የመጨረሻውን የስሪት ቅጽል ስም ከማጥፋት በኋላ ማዛመድ (ለምሳሌ `kimi-k2.6` → `kimi-k2`)።
+3. የቅድመ ቅጽያ ማዛመድ (የደረጃ ሰሌዳ ሞዴል ስም የሬጂስትሪ መታወቂያው ቅድመ ቅጽያ ነው)።
 
-በሲንክ ጎን፣ የታወቁ የአምራች ቅድመ-ቅጥያዎች (`anthropic/`፣ `openai/`፣ `google/`፣ …) ይወገዳሉ እና ትንሽ የተዛማጅ ስም ካርታ ዋና ስሞችን ወደ OmniRoute በውስጥ የሚጠቀምባቸው ልዩ ቅርጾች ያስፋፋል፣ ስለዚህ ሞዴሎች በማንኛውም ስም ሊገኙ ይችላሉ።
+በማመሳሰያው ጎን፣ የሚታወቁ የአቅራቢ ቅድመ ቅጽያዎች (`anthropic/`፣ `openai/`፣ `google/`፣ …)
+ይጠፋሉ እና አንድ ትንሽ የሌላ ስም ካርታ ዋና ስሞችን ወደ OmniRoute በውስጥ የሚጠቅምባቸው
+ልዩ ልዩ ቅርጾች ያስፋፋል፣ ስለዚህ ሞዴሎች በማንኛውም ስም ሊገኙ ይችላሉ።
 
-### አቅራቢ እንዴት እንደሚደረደር
+### አቅራቢ እንዴት ደረጃ እንደሚሰጠው
 
-ለእያንዳንዱ ነጻ አቅራቢ፣ ሞተሩ በካታሎጉ ውስጥ ያሉትን ሁሉንም ሞዴሎች ይገመግማል፣ ከዚያ፡
+ለእያንዳንዱ ነጻ አቅራቢ፣ ሞተሩ በካታሎጉ ውስጥ ያለውን እያንዳንዱ ሞዴል ነጥብ ይሰጣል፣ ከዚያ፡
 
-- **ከፍተኛ ሞዴል (Top Model)** = የአቅራቢው ከፍተኛ ውጤት ያለው ሞዴል።
-- **አማካይ ውጤት (Avg Score)** = በዚያ አቅራቢ ሁሉም የተገመገሙ ሞዴሎች ላይ ያለ አማካይ ውጤት።
-- **ሞዴሎች (Models)** = ምን ያህል የአቅራቢው ሞዴሎች የ Arena ውጤት እንዳላቸው።
+- **ከፍተኛ ሞዴል** = የአቅራቢው ከፍተኛ ነጥብ ያለው ሞዴል።
+- **አማካይ ነጥብ** = በዚያ አቅራቢ ነጥብ የተሰጣቸው ሞዴሎች ሁሉ መካከለኛ ነጥብ።
+- **ሞዴሎች** = ስንት የአቅራቢው ሞዴሎች የ Arena ነጥብ እንዳላቸው።
 
-አቅራቢዎች መጀመሪያ በ **ከፍተኛ-ሞዴል ውጤት**፣ ከዚያ በአማካይ ውጤት ይደረደራሉ። ይህ ቢያንስ አንድ ጠንካራ ነጻ ሞዴል የሚያቀርብ አቅራቢን ይሸልማል።
+አቅራቢዎች በመጀመሪያ በ**ከፍተኛ-ሞዴል ነጥብ**፣ ከዚያ በአማካይ ነጥብ ይደረደራሉ። ይህ ቢያንስ አንድ
+ጠንካራ ነጻ ሞዴል የሚያቀርብ አቅራቢን ይሸልማል።
 
 ---
 

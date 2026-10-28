@@ -29,22 +29,22 @@ Oke:           1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Ihe Ọ Na-akpakọ
 
-Ndepụta ihe e wuru n'ime ya na-abịa ugbu a na ihe nzacha 56 n'ofe ìgwè ndị a:
+Ndepụta arụnyere ugbu a na-ebufe ihe nzacha 56 n'ofe otú ndị a:
 
-| Ụdị       | Ọmụmaatụ                                                             |
-| --------- | -------------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`                    |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, ule Cargo             |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx        |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler        |
-| `shell`   | `ls`, `find`, `grep`, ndekọ shell izugbe                             |
-| `docker`  | `docker ps`, ndekọ Docker                                            |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                              |
-| `generic` | ihe mmepụta JSON, ndekọ stack, ihe ndọghachi maka ihe mmepụta izugbe |
+| Ụdị       | Ihe atụ                                                        |
+| --------- | -------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`              |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, ule Cargo       |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx  |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler  |
+| `shell`   | `ls`, `find`, `grep`, ndekọ shell izugbe                       |
+| `docker`  | `docker ps`, ndekọ Docker                                      |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                        |
+| `generic` | mmepụta JSON, nleba stack, ihe ndabere azụ maka mmepụta izugbe |
 
-Ihe nrịba ama dị na `open-sse/services/compression/engines/rtk/commandDetector.ts` na-ekewapụ ihe mmepụta
-tupu e họọrọ ihe nzacha. Ihe nzacha nwekwara ike ịdabara n'usoro iwu ma ọ bụ regex nke ihe mmepụta mgbe
-klas iwu adịghị ezu.
+Ihe nchọpụta dị na `open-sse/services/compression/engines/rtk/commandDetector.ts` na-ekewa mmepụta
+tupu a họrọ ihe nzacha. Ihe nzacha nwekwara ike ịkwekọ site na ụkpụrụ iwu ma ọ bụ regex mmepụta
+mgbe klaasị iwu na-ezughị.
 
 ## Mkpebi Filter
 
@@ -355,56 +355,56 @@ node --import tsx/esm --test \
 
 ## Ọkwa Ike (v3.8.16+)
 
-RTK na-akwado **ọkwa ike 3** nke na-atụle nhọrọ n'etiti **ike mkpakọ** na **nchebe**. A na-ahazi ọkwa ahụ site na `config.intensity` na nhazi engine ahụ.
+RTK na-akwado **ọkwa ike 3** nke na-ehaziri n'etiti **ike mkpakọ** na **nchekwa**. A na-edebe ọkwa ahụ site na `config.intensity` na nhazi engine.
 
 ### Ọkwa 3 ahụ
 
-| Ọkwa                 | Oke ịbe n'etiti    | Nchekwa token | Ihe ize ndụ | Kacha mma maka                 |
-| -------------------- | ------------------ | ------------- | ----------- | ------------------------------ |
-| `minimal`            | akara 24 kwa nkebi | ~20-40%       | Dị ala nnọọ | Mmeputa nwere ọnọdụ dị mkpa    |
-| `standard` (ndabara) | akara 24 kwa nkebi | ~50-70%       | Dị ala      | Oge ide koodu kwa ụbọchị       |
-| `aggressive`         | akara 16 kwa nkebi | ~70-90%       | N'etiti     | Oge ogologo, nchekwa kacha elu |
+| Ọkwa                 | Ókè mbelata        | Nchekwa token | Ihe egwu         | Kacha dabara maka                    |
+| -------------------- | ------------------ | ------------- | ---------------- | ------------------------------------ |
+| `minimal`            | ahịrị 24 kwa nkebi | ~20-40%       | Dị ala nke ukwuu | Production nwere context dị oke mkpa |
+| `standard` (ndabara) | ahịrị 24 kwa nkebi | ~50-70%       | Ala              | Oge ede koodu kwa ụbọchị             |
+| `aggressive`         | ahịrị 16 kwa nkebi | ~70-90%       | Etiti            | Oge ogologo, nchekwa kacha elu       |
 
-### Ebe Ịbe N'etiti Na-eme
+### Ebe Mbelata Na-eme
 
-Oke ịbe n'etiti na-emetụta `lineFilter.ts`:
+Ókè mbelata ahụ na-emetụta `lineFilter.ts`:
 
 ```ts
-// Site na open-sse/services/compression/engines/rtk/index.ts:329-330
+// Sitere na open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-A na-edebe **isi** na **ọdụ** nke nkebi ọ bụla; a na-ahapụ ọdịnaya dị n'etiti mgbe ịbe n'etiti malitere.
+A na-edebe **mmalite** na **ngwụcha** nke nkebi ọ bụla; a na-ewepụ ọdịnaya nke etiti mgbe mbelata malitere.
 
-### Ihe Na-anọ vs. Ihe A Na-epụ
+### Ihe Na-anọ vs. Ihe A Na-ewepụ
 
-| Ọdịnaya                        | minimal    | standard   | aggressive |
-| ------------------------------ | ---------- | ---------- | ---------- |
-| Njehie / stack traces          | ✅ edebere | ✅ edebere | ✅ edebere |
-| Nnwale dara ada                | ✅ edebere | ✅ edebere | ✅ edebere |
-| Njehie build                   | ✅ edebere | ✅ edebere | ✅ edebere |
-| Nnwale gafere (nkọwa zuru ezu) | ✅ edebere | 🟡 akọtara | 🟡 akọtara |
-| Mmepụta ọdịnala (ndekọ info)   | 🟡 akọtara | 🟡 akọtara | ❌ ehapụrụ |
-| Ogwe ọganihu                   | 🟡 akọtara | ❌ ehapụrụ | ❌ ehapụrụ |
-| Banner / ihe nka ASCII         | 🟡 akọtara | ❌ ehapụrụ | ❌ ehapụrụ |
+| Ọdịnaya                     | minimal      | standard     | aggressive   |
+| --------------------------- | ------------ | ------------ | ------------ |
+| Njehie / stack traces       | ✅ echekwara | ✅ echekwara | ✅ echekwara |
+| Ule dara ada                | ✅ echekwara | ✅ echekwara | ✅ echekwara |
+| Njehie build                | ✅ echekwara | ✅ echekwara | ✅ echekwara |
+| Ule gafere (nkọwa zuru ezu) | ✅ echekwara | 🟡 akpakọrọ  | 🟡 akpakọrọ  |
+| Mmepụta ọdịnala (ndekọ ozi) | 🟡 akpakọrọ  | 🟡 akpakọrọ  | ❌ ewepụrụ   |
+| Ogwe ọganihu                | 🟡 akpakọrọ  | ❌ ewepụrụ   | ❌ ewepụrụ   |
+| Banner / nka ASCII          | 🟡 akpakọrọ  | ❌ ewepụrụ   | ❌ ewepụrụ   |
 
-### Ịhọrọ Ọkwa Ike Ziri Ezi
+### Ịhọrọ Ike Kwesịrị Ekwesị
 
 ```
-                  Ịfunahụ ọnọdụ ọ bụ ihe mgbu?
+                  Ịla n'iyi context ọ bụ ọdachi?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     EE          MBA        AMAGHỊ M
+     EE          MBA        AMAGHI
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Ka throughput    Nwalaa `standard` mbụ
-      │      dị mkpa ole?     (na-arụ ọrụ maka 80%
-      │           │           nke ọnọdụ)
+      │      Kedu oke mkpa   Nwaa `standard` mbụ
+      │      throughput?     (rụrụ ọrụ n'ihe 80%
+      │           │          nke ọnọdụ)
       │      ┌────┴────┐
       │      │         │
       │     ALA       ELU
@@ -415,7 +415,7 @@ A na-edebe **isi** na **ọdụ** nke nkebi ọ bụla; a na-ahapụ ọdịnaya
       └──────┴─────────┘
 ```
 
-### Ịhazi Ọkwa Ike
+### Ịhazi Ike
 
 **Kwa combo** (na nhazi combo):
 
@@ -433,8 +433,8 @@ A na-edebe **isi** na **ọdụ** nke nkebi ọ bụla; a na-ahapụ ọdịnaya
 **Site na koodu**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) bụ
-`CompressionEngine` ma ọ nweghị usoro `updateConfig`. Kama nke ahụ, melite nhazi
-engine site na enyemaka registry:
+`CompressionEngine` nke na-enweghị usoro `updateConfig`. Kama nke ahụ, melite
+nhazi engine site na enyemaka registry:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -442,9 +442,9 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### Ịlele Mmetụta Ahụ
+### Ịkwenye Mmetụta ahụ
 
-Jiri **Verify Gate** (lee n'okpuru) iji kwenye na ihe nzacha gị dị nchebe na ọkwa ike ị họọrọ:
+Jiri **Verify Gate** (lee n'okpuru) hụ ma jide n'aka na ihe nzacha gị nwekwara nchekwa n'ọkwa ike ị họọrọ:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

@@ -27,9 +27,9 @@ Apilado:          1 - (1 - 0.80) * (1 - 0.46) = 89.2% de ahorro
 Intervalo:        1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Qué comprime
+## Qué Comprime
 
-El catálogo integrado incluye actualmente 56 filtros distribuidos en estas categorías:
+El catálogo integrado incluye actualmente 56 filtros en estas categorías:
 
 | Categoría | Ejemplos                                                        |
 | --------- | --------------------------------------------------------------- |
@@ -352,29 +352,29 @@ node --import tsx/esm --test \
 
 ## Niveles de intensidad (v3.8.16+)
 
-RTK admite **3 niveles de intensidad** que equilibran la **agresividad de la compresión** y la **seguridad**. El nivel se establece mediante `config.intensity` en la configuración del motor.
+RTK admite **3 niveles de intensidad** que equilibran la **agresividad de la compresión** y la **seguridad**. El nivel se define mediante `config.intensity` en la configuración del motor.
 
 ### Los 3 niveles
 
-| Nivel                    | Umbral de truncamiento | Ahorro de tokens | Riesgo   | Ideal para                       |
-| ------------------------ | ---------------------- | ---------------- | -------- | -------------------------------- |
-| `minimal`                | 24 líneas por sección  | ~20-40%          | Muy bajo | Producción con contexto crítico  |
-| `standard` (por defecto) | 24 líneas por sección  | ~50-70%          | Bajo     | Sesiones de codificación diarias |
-| `aggressive`             | 16 líneas por sección  | ~70-90%          | Medio    | Sesiones largas, máximo ahorro   |
+| Nivel                       | Umbral de truncamiento | Ahorro de tokens | Riesgo   | Ideal para                       |
+| --------------------------- | ---------------------- | ---------------- | -------- | -------------------------------- |
+| `minimal`                   | 24 líneas por sección  | ~20-40%          | Muy bajo | Producción con contexto crítico  |
+| `standard` (predeterminado) | 24 líneas por sección  | ~50-70%          | Bajo     | Sesiones de codificación diarias |
+| `aggressive`                | 16 líneas por sección  | ~70-90%          | Medio    | Sesiones largas, ahorro máximo   |
 
 ### Dónde ocurre el truncamiento
 
 El umbral de truncamiento afecta a `lineFilter.ts`:
 
 ```ts
-// De open-sse/services/compression/engines/rtk/index.ts:329-330
+// Desde open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Tanto el **inicio** como el **final** de cada sección se conservan; el contenido intermedio se descarta cuando entra en acción el truncamiento.
+Tanto el **inicio** como el **final** de cada sección se conservan; el contenido intermedio se descarta cuando se activa el truncamiento.
 
-### Qué se conserva y qué se descarta
+### Qué se conserva y qué se recorta
 
 | Contenido                       | minimal       | standard      | aggressive    |
 | ------------------------------- | ------------- | ------------- | ------------- |
@@ -389,23 +389,22 @@ Tanto el **inicio** como el **final** de cada sección se conservan; el contenid
 ### Cómo elegir la intensidad adecuada
 
 ```
-                  ¿Es catastrófico perder contexto?
+                  Is losing context catastrophic?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     SÍ          NO       NO SEGURO
+    YES          NO          NOT SURE
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      ¿Qué crítico   Prueba primero
-      │      es el          con `standard`
-      │      rendimiento?   (funciona en el
-      │           │         80% de los casos)
+      │      How critical    Try `standard` first
+      │      is throughput?  (works for 80% of
+      │           │          cases)
       │      ┌────┴────┐
       │      │         │
-      │    BAJO      ALTO
+      │     LOW       HIGH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -431,8 +430,8 @@ Tanto el **inicio** como el **final** de cada sección se conservan; el contenid
 **De forma programática**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) es un
-`CompressionEngine` y no tiene un método `updateConfig`. En su lugar, actualiza
-la configuración de un motor mediante el helper del registro:
+`CompressionEngine` y no tiene un método `updateConfig`. Actualiza la configuración
+de un motor a través del auxiliar del registro:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -442,7 +441,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Verificación del efecto
 
-Usa la **Verify Gate** (ver más abajo) para confirmar que tu filtro es seguro con la intensidad elegida:
+Usa la **Puerta de verificación** (ver más abajo) para confirmar que tu filtro es seguro con la intensidad elegida:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

@@ -13,28 +13,28 @@
 
 ## 概要
 
-OmniRoute には 376 のプロバイダーが登録されており、そのうち 155 のカタログエントリが **無料/認証不要** としてマークされています
-（認証不要、
-無料枠 OAuth、または無料枠 API キー —
-[無料枠ガイド](../getting-started/FREE-TIERS-GUIDE.md)および完全な
-[無料枠ディレクトリ](../reference/FREE_TIERS.md)を参照してください）。ただし、無料プロバイダーのモデル品質には
-大きなばらつきがあります。フロンティアモデルを提供する認証不要プロバイダーは、
-小規模なレガシーモデルを提供するプロバイダーよりもはるかに有用です。
+OmniRoute には 376 のプロバイダーが登録されており、そのうち 155 のカタログエントリが **無料/認証不要 (free/no-auth)** としてマークされています
+(認証不要、無料枠の OAuth、または無料枠の API キー — 詳しくは
+[無料枠ガイド](../getting-started/FREE-TIERS-GUIDE.md) および完全版の
+[無料枠ディレクトリ](../reference/FREE_TIERS.md) を参照)。ただし注意点があります: 無料プロバイダーはモデルの品質が
+大きく異なるということです。フロンティアモデルを提供する認証不要のプロバイダーは、
+小さなレガシーモデルを提供するプロバイダーよりもはるかに有用です。
 
-**無料プロバイダーランキング**は、各無料プロバイダーのカタログを、
-**Arena AI リーダーボード**（人間の選好に基づく ELO。LMArena
-チャットボットアリーナと同じ考え方）の**クラウドソーシングによる品質スコア**と結合することで、「**最良のモデルを提供する無料プロバイダーはどれか？**」という問いに答えます。
-その後、プロバイダーは各社の**最良の無料モデル**の性能に基づいてランク付けされます。
+**無料プロバイダーランキング (Free Provider Rankings)** は、「**どの無料プロバイダーが最良のモデルを提供してくれるか?**」
+という問いに答えるもので、各無料プロバイダーのカタログと、
+**Arena AI リーダーボード**(人間の好みに基づく ELO。LMArena チャットボットアリーナと
+同じ考え方)の **クラウドソーシングによる品質スコア** を結合します。
+プロバイダーは、その **最良の無料モデル** の強さによってランク付けされます。
 
-ランキングは、次の 3 つの実際のソースから算出されます。
+ランキングは 3 つの実際のソースから計算されます:
 
-1. 無料プロバイダーのリスト — `NOAUTH_PROVIDERS`、および `hasFree` のフラグが付いた
+1. 無料プロバイダーのリスト — `NOAUTH_PROVIDERS`、および `hasFree` フラグが付いた
    `OAUTH_PROVIDERS` / `APIKEY_PROVIDERS` のエントリ
-   （`src/shared/constants/providers.ts`）。
-2. プロバイダーレジストリに含まれる各プロバイダーのモデルカタログ
-   （`open-sse/config/providerRegistry.ts`）。
-3. Arena ELO 同期エンジン（`src/lib/arenaEloSync.ts`）によって
-   `model_intelligence` DB テーブルに保存された、ELO 由来のタスク適合度スコア。
+   (`src/shared/constants/providers.ts`)。
+2. プロバイダーレジストリから取得する各プロバイダーのモデルカタログ
+   (`open-sse/config/providerRegistry.ts`)。
+3. Arena ELO 同期エンジン (`src/lib/arenaEloSync.ts`) によって `model_intelligence` DB テーブルに
+   保存される、ELO 由来のタスク適合スコア。
 
 結合ロジックは `src/lib/freeProviderRankings.ts` にあります。
 
@@ -122,16 +122,16 @@ GET /api/free-provider-rankings?category=coding&limit=20
 
 ## スコアの仕組み
 
-### データソース: Arena AI リーダーボード
+### ソース: Arena AI リーダーボード
 
-Arena ELO 同期エンジン(`src/lib/arenaEloSync.ts`)は、Arena AI リーダーボード API
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`)から `text` と
-`code` の 2 つのリーダーボードを取得します。その API が利用可能なボードを返さない場合、
-エンジンは Hugging Face datasets-server 上の公式 `lmarena-ai/leaderboard-dataset` に
-フォールバックします(`src/lib/arenaEloHfSource.ts`、CC-BY-4.0。`overall` → `text`、
-`coding` → `code`)。`GET /api/intelligence/sync` は `activeSource`、`lastError`、
-`lastFailedAt` を報告します。各リーダーボードエントリには、モデル名、ベンダー、ELO
-`score`、信頼区間、投票数が含まれます。
+Arena ELO 同期エンジン（`src/lib/arenaEloSync.ts`）は、Arena AI リーダーボード API
+（`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`）から 2 つの
+リーダーボード — `text` と `code` — を取得します。その API が利用可能なボードを
+返さない場合、エンジンは Hugging Face datasets-server 上の公式
+`lmarena-ai/leaderboard-dataset` にフォールバックします（`src/lib/arenaEloHfSource.ts`、
+CC-BY-4.0; `overall` → `text`、`coding` → `code`）。`GET /api/intelligence/sync` は
+`activeSource`、`lastError`、`lastFailedAt` を報告します。各リーダーボードエントリには、
+モデル名、ベンダー、ELO `score`、信頼区間、投票数が含まれます。
 
 リーダーボードのカテゴリは OmniRoute のタスクカテゴリにマッピングされます:
 
@@ -140,17 +140,16 @@ Arena ELO 同期エンジン(`src/lib/arenaEloSync.ts`)は、Arena AI リーダ�
 | `text`               | `default`, `review`, `documentation`, `debugging` |
 | `code`               | `coding`                                          |
 
-### 正規化(タスク適合スコア)
+### 正規化（タスク適合スコア）
 
-生の ELO スコアはリーダーボードごとに、**`[0.4, 0.98]` の範囲のタスク適合値**に正規化されます:
+生の ELO スコアは、リーダーボードごとに **`[0.4, 0.98]` の範囲のタスク適合値**に正規化されます:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-スコアが `0` や `1` に到達することはなく、ユーザーのオーバーライド用の余裕が残されています。
-これが API レスポンスに表示される `score` フィールドであり、ダッシュボードに表示される
-ラベルです。
+スコアは `0` や `1` には到達しないため、ユーザーによる上書きの余地が残されています。これが
+API レスポンスで見える `score` フィールドであり、ダッシュボードに表示されるラベルです。
 
 ### 信頼度
 
@@ -165,65 +164,63 @@ taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ### ストレージと鮮度
 
 正規化されたエントリは、`source = "arena_elo"` として `model_intelligence` DB テーブルに
-書き込まれます(`src/lib/db/modelIntelligence.ts`)。エントリは **7 日後に期限切れ**と
-なるため、同期を停止したプロバイダーは古いデータを提供し続けるのではなく、いずれ
-ランキングから外れます。
+書き込まれます（`src/lib/db/modelIntelligence.ts`）。エントリは **7 日後に期限切れ**となるため、
+同期が停止したプロバイダーは、古いデータを提供し続けるのではなく、最終的にランキングから
+外れます。
 
-同期は **デフォルトで有効** です:
+同期は **デフォルトで有効** になっています:
 
-- サーバー起動時に一度実行され、その後は定期的なタイマーで実行されます
-  (`src/lib/arenaEloSync.ts`。`src/instrumentation-node.ts` から配線)。
-- **ノンブロッキングで、致命的なエラーにもなりません**。上流のフェッチに失敗しても、
-  OmniRoute は動作し続け、ランキングには最後に取得できた正常なデータ(または空の状態)が
+- サーバー起動時に 1 回実行され、その後は定期的なタイマーで実行されます
+  （`src/lib/arenaEloSync.ts`、`src/instrumentation-node.ts` から配線）。
+- **ノンブロッキングで、致命的な障害にはなりません** — 上流のフェッチが失敗しても、
+  OmniRoute は動作し続け、ランキングには単に最後に取得した正常なデータ（または空の状態）が
   表示されます。
 
-2 つの環境変数で制御できます(
-[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) に記載):
+これを制御する環境変数は 2 つあります（
+[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) に記載）:
 
-| 変数                      | デフォルト    | 目的                                                      |
-| ------------------------- | ------------- | --------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | 外部への同期をオプトアウトするには `false` に設定します。 |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | 同期間隔(秒)。                                            |
+| 変数                      | デフォルト         | 目的                                                      |
+| ------------------------- | ------------------ | --------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`             | 外部への同期をオプトアウトするには `false` に設定します。 |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400`（24 時間） | 同期間隔（秒単位）。                                      |
 
 ### 手動同期 / ステータス / クリア
 
-運用者向けに、認証済みの管理エンドポイントが手動制御を提供します
-(`src/app/api/intelligence/sync/route.ts` — 管理認証が必要):
+オペレーター向けに、認証済みの管理エンドポイントが手動制御を公開しています
+（`src/app/api/intelligence/sync/route.ts` — 管理認証が必要）:
 
 ```
-GET    /api/intelligence/sync          # 現在の同期ステータス (enabled, lastSync, nextSync, intervalMs)
+GET    /api/intelligence/sync          # 現在の同期ステータス（enabled, lastSync, nextSync, intervalMs）
 POST   /api/intelligence/sync          # 手動同期をトリガー。body: { "dryRun": true } で書き込みなしのプレビュー
 DELETE /api/intelligence/sync          # 同期されたすべての arena_elo インテリジェンスエントリをクリア
 ```
 
-ランキングページが空の場合、手動で `POST /api/intelligence/sync` を実行する(または
-サーバーを再起動する)ことで再作成できます。
+ランキングページが空の場合、手動で `POST /api/intelligence/sync` を実行する（または単に
+サーバーを再起動する）ことで再投入されます。
 
-### モデルとリーダーボードの照合
+### モデルとリーダーボードのマッチング
 
-レジストリのモデル ID と Arena のモデル名は常に完全に一致するとは限りません。ランキングは
-柔軟な照合を使用します(`src/lib/freeProviderRankings.ts` の
-`findMatchingIntelligence`):
+レジストリのモデル ID と Arena のモデル名は、常に完全に一致するとは限りません。ランキングでは
+柔軟なマッチングを使用します（`src/lib/freeProviderRankings.ts` の `findMatchingIntelligence`）:
 
-1. 正規化されたモデル ID で完全一致。
-2. 末尾のバージョン接尾辞を除去して一致(例: `kimi-k2.6` → `kimi-k2`)。
-3. 前方一致(リーダーボードのモデル名がレジストリ ID のプレフィックス)。
+1. 正規化されたモデル ID での完全一致。
+2. 末尾のバージョンサフィックスを除去した後の一致（例: `kimi-k2.6` → `kimi-k2`）。
+3. プレフィックス一致（リーダーボードのモデル名がレジストリ ID のプレフィックスである場合）。
 
-同期側では、既知のベンダープレフィックス(`anthropic/`、`openai/`、`google/`、…)が
-除去され、小さなエイリアスマップが正規名を OmniRoute が内部で使用するバリアントに展開する
-ため、どの名前でもモデルを見つけられます。
+同期側では、既知のベンダープレフィックス（`anthropic/`、`openai/`、`google/`、…）が除去され、
+小さなエイリアスマップが正規名を OmniRoute が内部で使用するバリアントに展開するため、
+どの名前でもモデルを見つけられるようになっています。
 
 ### プロバイダーのランク付け方法
 
-各無料プロバイダーについて、エンジンはカタログ内のすべてのモデルをスコアリングし、
-次のように計算します:
+各無料プロバイダーについて、エンジンはそのカタログ内のすべてのモデルをスコアリングし、その後:
 
 - **トップモデル** = そのプロバイダーの最高スコアのモデル。
 - **平均スコア** = そのプロバイダーのスコア付きモデル全体の平均スコア。
-- **モデル数** = プロバイダーのモデルのうち Arena スコアを持つものの数。
+- **モデル数** = そのプロバイダーのモデルのうち Arena スコアを持つものの数。
 
-プロバイダーはまず **トップモデルのスコア** で、次に平均スコアでソートされます。これにより、
-少なくとも 1 つの強力な無料モデルを提供するプロバイダーが評価されます。
+プロバイダーはまず **トップモデルのスコア** でソートされ、次に平均スコアでソートされます。
+これにより、少なくとも 1 つの強力な無料モデルを提供しているプロバイダーが評価されます。
 
 ---
 

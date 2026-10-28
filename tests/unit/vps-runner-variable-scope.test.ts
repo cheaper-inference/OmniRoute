@@ -17,6 +17,13 @@
  * dominated by `setup-node` + `npm ci`, so those jobs are pinned to hosted and the variable now
  * means exactly one thing: "this job needs the .113's memory".
  *
+ * 2026-10-27 (owner decision): the hosted pool itself became the bottleneck (free org plan, ~20
+ * hosted jobs at once, PR runs queued 5+ h), so `test-unit` and `test-vitest` may opt in to the
+ * dedicated `omni-ci` slots through a SEPARATE variable, `USE_VPS_TEST_RUNNER` — never through
+ * `USE_VPS_RUNNER`, which keeps meaning "this job needs the .113's memory". That opt-in is
+ * pinned below: own-origin pull requests only, hosted by default, and nothing else on the
+ * switch.
+ *
  * `fast-gates` was the last holdout and the evidence for pinning it is unusually clean: across
  * 160 quality.yml runs it NEVER landed on a self-hosted runner — every non-skipped sample is
  * `GitHub Actions NNNN`. That was dead configuration, not a working escape hatch, and the
@@ -68,7 +75,10 @@ test("it still governs the build-like jobs — the ones that actually need the R
     jobs.includes("build"),
     "the build is the whole reason the variable exists: 18-20 GB working set vs a 16 GB hosted runner"
   );
-  assert.ok(jobs.includes("publish"), "npm-publish falls back to a full build when the artifact is missing");
+  assert.ok(
+    jobs.includes("publish"),
+    "npm-publish falls back to a full build when the artifact is missing"
+  );
 });
 
 test("fast-gates specifically stays hosted", () => {
@@ -79,4 +89,46 @@ test("fast-gates specifically stays hosted", () => {
   const runsOn = /^ {4}runs-on:\s*(.+)$/m.exec(block);
   assert.ok(runsOn, "fast-gates must declare runs-on");
   assert.match(runsOn[1].trim(), /^ubuntu-latest$/, "fast-gates must be pinned, not switched");
+});
+
+/** Every `runs-on:` line that mentions USE_VPS_TEST_RUNNER, with its owning job. */
+function jobsSwitchedByTestVar(): Array<{ file: string; job: string; runsOn: string }> {
+  const out: Array<{ file: string; job: string; runsOn: string }> = [];
+  for (const name of fs.readdirSync(workflowDir)) {
+    if (!name.endsWith(".yml") && !name.endsWith(".yaml")) continue;
+    let job = "";
+    for (const line of fs.readFileSync(path.join(workflowDir, name), "utf-8").split("\n")) {
+      const m = /^ {2}([A-Za-z0-9_-]+):\s*$/.exec(line);
+      if (m) job = m[1];
+      if (line.includes("USE_VPS_TEST_RUNNER") && line.includes("runs-on")) {
+        out.push({ file: name, job, runsOn: line.trim() });
+      }
+    }
+  }
+  return out;
+}
+
+test("USE_VPS_TEST_RUNNER governs only the unit and vitest jobs of ci.yml", () => {
+  assert.deepEqual(
+    jobsSwitchedByTestVar()
+      .map((j) => `${j.file}:${j.job}`)
+      .sort(),
+    ["ci.yml:test-unit", "ci.yml:test-vitest"]
+  );
+});
+
+test("the test-runner opt-in is own-origin pull requests only, on omni-ci, hosted by default", () => {
+  for (const { job, runsOn } of jobsSwitchedByTestVar()) {
+    assert.match(runsOn, /vars\.USE_VPS_TEST_RUNNER == 'true'/, `${job}: opt-in must be explicit`);
+    assert.match(runsOn, /github\.event_name == 'pull_request'/, `${job}: pull requests only`);
+    assert.match(runsOn, /github\.event_name != 'merge_group'/, `${job}: never the merge queue`);
+    assert.match(
+      runsOn,
+      /github\.event\.pull_request\.head\.repo\.full_name == github\.repository/,
+      `${job}: fork code must never run on the self-hosted pool`
+    );
+    assert.match(runsOn, /\["self-hosted","omni-ci"\]/, `${job}: only the dedicated omni-ci slots`);
+    assert.match(runsOn, /\|\| 'ubuntu-latest' \}\}$/, `${job}: hosted is the default`);
+    assert.doesNotMatch(runsOn, /USE_VPS_RUNNER\b/, `${job}: must not ride the build switch`);
+  }
 });

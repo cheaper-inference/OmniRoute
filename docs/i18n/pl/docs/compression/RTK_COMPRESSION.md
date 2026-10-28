@@ -34,24 +34,24 @@ Stacked:       1 - (1 - 0.80) * (1 - 0.46) = 89.2% saved
 Range:         1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Co kompresuje
+## Co jest kompresowane
 
 Wbudowany katalog zawiera obecnie 56 filtrów w następujących kategoriach:
 
 | Kategoria | Przykłady                                                     |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo tests    |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, testy Cargo    |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, generyczne logi powłoki                 |
+| `shell`   | `ls`, `find`, `grep`, ogólne logi powłoki                     |
 | `docker`  | `docker ps`, logi Dockera                                     |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | wyjście JSON, ślady stosu, awaryjny generyczny filtr wyjścia  |
+| `generic` | dane wyjściowe JSON, ślady stosu, ogólny fallback wyjścia     |
 
-Detektor w `open-sse/services/compression/engines/rtk/commandDetector.ts` klasyfikuje wyjście
-przed wyborem filtra. Filtry mogą też dopasowywać się na podstawie wzorca polecenia lub wyrażenia
-regularnego wyjścia, gdy sama klasa polecenia nie wystarcza.
+Detektor w `open-sse/services/compression/engines/rtk/commandDetector.ts` klasyfikuje dane
+wyjściowe przed wyborem filtra. Filtry mogą również dopasowywać się według wzorca polecenia lub
+wyrażenia regularnego danych wyjściowych, gdy sama klasa polecenia nie wystarcza.
 
 ## Rozwiązywanie filtrów
 
@@ -323,15 +323,15 @@ Sekrety są redagowane przed persystencją, w tym typowe bearer tokeny, klucze A
 klucze dostępu AWS oraz wartości w stylu przypisania `token=...`, `secret=...`, `password=...`. Analityka
 przechowuje tylko pointer id, rozmiar i metadane hasha.
 
-## Bramka weryfikacji
+## Brama weryfikacyjna
 
-Skupiona bramka weryfikacji uruchamia wbudowane testy filtrów inline bez odwoływania się do zewnętrznych poleceń powłoki:
+Ukierunkowana brama weryfikacyjna uruchamia wbudowane testy filtrów inline bez wywoływania zewnętrznych poleceń:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-verify.test.ts
 ```
 
-Szersza bramka RTK to:
+Szersza brama RTK to:
 
 ```bash
 node --import tsx/esm --test \
@@ -340,7 +340,7 @@ node --import tsx/esm --test \
   tests/unit/compression/context-compression-api.test.ts
 ```
 
-Przed wydaniem uruchom szeroką bramkę kompresji:
+Przed wydaniem uruchom szeroką bramę kompresji:
 
 ```bash
 node --import tsx/esm --test \
@@ -363,19 +363,19 @@ node --import tsx/esm --test \
 
 ## Poziomy intensywności (v3.8.16+)
 
-RTK obsługuje **3 poziomy intensywności**, które balansują między **agresywnością kompresji** a **bezpieczeństwem**. Poziom ustawia się przez `config.intensity` w konfiguracji silnika.
+RTK obsługuje **3 poziomy intensywności**, które stanowią kompromis między **agresywnością kompresji** a **bezpieczeństwem**. Poziom ustawia się za pomocą `config.intensity` w konfiguracji silnika.
 
 ### 3 poziomy
 
-| Poziom                | Próg obcinania     | Oszczędność tokenów | Ryzyko        | Najlepsze zastosowanie            |
-| --------------------- | ------------------ | ------------------- | ------------- | --------------------------------- |
-| `minimal`             | 24 linie na sekcję | ~20-40%             | Bardzo niskie | Produkcja z krytycznym kontekstem |
-| `standard` (domyślny) | 24 linie na sekcję | ~50-70%             | Niskie        | Codzienne sesje kodowania         |
-| `aggressive`          | 16 linii na sekcję | ~70-90%             | Średnie       | Długie sesje, maks. oszczędności  |
+| Poziom                | Próg obcinania     | Oszczędność tokenów | Ryzyko        | Najlepszy do                          |
+| --------------------- | ------------------ | ------------------- | ------------- | ------------------------------------- |
+| `minimal`             | 24 linie na sekcję | ~20-40%             | Bardzo niskie | Produkcja z krytycznym kontekstem     |
+| `standard` (domyślny) | 24 linie na sekcję | ~50-70%             | Niskie        | Codzienne sesje kodowania             |
+| `aggressive`          | 16 linii na sekcję | ~70-90%             | Średnie       | Długie sesje, maksymalne oszczędności |
 
 ### Gdzie następuje obcinanie
 
-Próg obcinania jest stosowany w `lineFilter.ts`:
+Próg obcinania wpływa na `lineFilter.ts`:
 
 ```ts
 // Z pliku open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -383,39 +383,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Zarówno **początek**, jak i **koniec** każdej sekcji są zachowywane; środkowa zawartość jest usuwana, gdy zaczyna działać obcinanie.
+Zarówno **początek**, jak i **koniec** każdej sekcji są zachowywane; zawartość środkowa jest odrzucana, gdy uruchamia się obcinanie.
 
 ### Co zostaje, a co jest usuwane
 
-| Treść                        | minimal      | standard     | aggressive   |
-| ---------------------------- | ------------ | ------------ | ------------ |
-| Błędy / ślady stosu          | ✅ zachowane | ✅ zachowane | ✅ zachowane |
-| Niepowodzenia testów         | ✅ zachowane | ✅ zachowane | ✅ zachowane |
-| Błędy budowania              | ✅ zachowane | ✅ zachowane | ✅ zachowane |
-| Udane testy (szczegółowe)    | ✅ zachowane | 🟡 zwinięte  | 🟡 zwinięte  |
-| Rutynowe wyjście (logi info) | 🟡 zwinięte  | 🟡 zwinięte  | ❌ usunięte  |
-| Paski postępu                | 🟡 zwinięte  | ❌ usunięte  | ❌ usunięte  |
-| Banery / ASCII art           | 🟡 zwinięte  | ❌ usunięte  | ❌ usunięte  |
+| Zawartość                            | minimal      | standard     | aggressive   |
+| ------------------------------------ | ------------ | ------------ | ------------ |
+| Błędy / ślady stosu                  | ✅ zachowane | ✅ zachowane | ✅ zachowane |
+| Niepowodzenia testów                 | ✅ zachowane | ✅ zachowane | ✅ zachowane |
+| Błędy budowania                      | ✅ zachowane | ✅ zachowane | ✅ zachowane |
+| Zaliczone testy (szczegółowe)        | ✅ zachowane | 🟡 zwinięte  | 🟡 zwinięte  |
+| Rutynowe wyjście (logi informacyjne) | 🟡 zwinięte  | 🟡 zwinięte  | ❌ odrzucone |
+| Paski postępu                        | 🟡 zwinięte  | ❌ odrzucone | ❌ odrzucone |
+| Baner / ASCII art                    | 🟡 zwinięte  | ❌ odrzucone | ❌ odrzucone |
 
 ### Wybór odpowiedniej intensywności
 
 ```
-                  Czy utrata kontekstu jest katastrofalna?
+                  Czy utrata kontekstu to katastrofa?
                   │
       ┌───────────┼───────────┐
       │           │           │
-     TAK         NIE      NIE WIEM
+    TAK          NIE        NIE WIEM
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Jak krytyczna   Zacznij od `standard`
-      │      jest wydajność? (działa w 80%
-      │           │          przypadków)
+      │      Jak ważna       Najpierw spróbuj
+      │      przepustowość?  `standard` (działa
+      │           │          w 80% przypadków)
       │      ┌────┴────┐
       │      │         │
-      │    NISKA    WYSOKA
+      │    NISKA     WYSOKA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -440,9 +440,9 @@ Zarówno **początek**, jak i **koniec** każdej sekcji są zachowywane; środko
 
 **Programowo**:
 
-`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) jest
-silnikiem `CompressionEngine` i nie posiada metody `updateConfig`. Zamiast tego
-zaktualizuj konfigurację silnika za pomocą funkcji pomocniczej rejestru:
+`rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) jest silnikiem typu
+`CompressionEngine` i nie posiada metody `updateConfig`. Zamiast tego zaktualizuj konfigurację
+silnika za pomocą funkcji pomocniczej rejestru:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -452,7 +452,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Weryfikacja efektu
 
-Użyj **bramki Verify Gate** (patrz niżej), aby potwierdzić, że filtr jest bezpieczny przy wybranej intensywności:
+Użyj mechanizmu **Verify Gate** (patrz niżej), aby potwierdzić, że filtr jest bezpieczny przy wybranej intensywności:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

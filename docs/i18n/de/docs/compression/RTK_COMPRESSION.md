@@ -27,9 +27,9 @@ Gestapelt:         1 - (1 - 0.80) * (1 - 0.46) = 89.2% eingespart
 Bereich:           1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## Was es komprimiert
+## Was komprimiert wird
 
-Der integrierte Katalog enthält derzeit 56 Filter in diesen Kategorien:
+Der integrierte Katalog enthält derzeit 56 Filter in den folgenden Kategorien:
 
 | Kategorie | Beispiele                                                     |
 | --------- | ------------------------------------------------------------- |
@@ -40,11 +40,11 @@ Der integrierte Katalog enthält derzeit 56 Filter in diesen Kategorien:
 | `shell`   | `ls`, `find`, `grep`, generische Shell-Logs                   |
 | `docker`  | `docker ps`, Docker-Logs                                      |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON-Ausgabe, Stacktraces, generischer Ausgabe-Fallback       |
+| `generic` | JSON-Ausgabe, Stacktraces, generischer Ausgabefallback        |
 
-Der Detector in `open-sse/services/compression/engines/rtk/commandDetector.ts` klassifiziert die Ausgabe
-vor der Filterauswahl. Filter können auch anhand von Befehlsmustern oder Ausgabe-Regex zugeordnet werden,
-wenn eine Befehlsklasse allein nicht ausreicht.
+Der Detektor in `open-sse/services/compression/engines/rtk/commandDetector.ts` klassifiziert die
+Ausgabe vor der Filterauswahl. Filter können auch anhand eines Befehlsmusters oder eines
+Ausgabe-Regex abgeglichen werden, wenn eine Befehlsklasse allein nicht ausreicht.
 
 ## Filterauflösung
 
@@ -356,15 +356,15 @@ node --import tsx/esm --test \
 
 ## Intensitätsstufen (v3.8.16+)
 
-RTK unterstützt **3 Intensitätsstufen**, die einen Kompromiss zwischen **Aggressivität der Kompression** und **Sicherheit** eingehen. Die Stufe wird über `config.intensity` in der Engine-Konfiguration festgelegt.
+RTK unterstützt **3 Intensitätsstufen**, die einen Kompromiss zwischen **Kompressionsaggressivität** und **Sicherheit** eingehen. Die Stufe wird über `config.intensity` in der Engine-Konfiguration festgelegt.
 
 ### Die 3 Stufen
 
-| Stufe                 | Kürzungsschwelle        | Token-Einsparungen | Risiko       | Ideal für                             |
-| --------------------- | ----------------------- | ------------------ | ------------ | ------------------------------------- |
-| `minimal`             | 24 Zeilen pro Abschnitt | ~20-40%            | Sehr niedrig | Produktion mit kritischem Kontext     |
-| `standard` (Standard) | 24 Zeilen pro Abschnitt | ~50-70%            | Niedrig      | Tägliche Coding-Sessions              |
-| `aggressive`          | 16 Zeilen pro Abschnitt | ~70-90%            | Mittel       | Lange Sessions, maximale Einsparungen |
+| Stufe                 | Kürzungsschwelle        | Token-Einsparung | Risiko       | Am besten für                        |
+| --------------------- | ----------------------- | ---------------- | ------------ | ------------------------------------ |
+| `minimal`             | 24 Zeilen pro Abschnitt | ~20-40%          | Sehr niedrig | Produktion mit kritischem Kontext    |
+| `standard` (Standard) | 24 Zeilen pro Abschnitt | ~50-70%          | Niedrig      | Tägliche Coding-Sitzungen            |
+| `aggressive`          | 16 Zeilen pro Abschnitt | ~70-90%          | Mittel       | Lange Sitzungen, maximale Einsparung |
 
 ### Wo die Kürzung stattfindet
 
@@ -380,20 +380,20 @@ Sowohl der **Anfang** als auch das **Ende** jedes Abschnitts bleiben erhalten; d
 
 ### Was erhalten bleibt und was entfernt wird
 
-| Inhalt                           | minimal      | standard     | aggressive   |
-| -------------------------------- | ------------ | ------------ | ------------ |
-| Fehler / Stack-Traces            | ✅ erhalten  | ✅ erhalten  | ✅ erhalten  |
-| Fehlgeschlagene Tests            | ✅ erhalten  | ✅ erhalten  | ✅ erhalten  |
-| Build-Fehler                     | ✅ erhalten  | ✅ erhalten  | ✅ erhalten  |
-| Erfolgreiche Tests (ausführlich) | ✅ erhalten  | 🟡 reduziert | 🟡 reduziert |
-| Routineausgaben (Info-Logs)      | 🟡 reduziert | 🟡 reduziert | ❌ verworfen |
-| Fortschrittsbalken               | 🟡 reduziert | ❌ verworfen | ❌ verworfen |
-| Banner / ASCII-Art               | 🟡 reduziert | ❌ verworfen | ❌ verworfen |
+| Inhalt                         | minimal            | standard           | aggressive         |
+| ------------------------------ | ------------------ | ------------------ | ------------------ |
+| Fehler / Stacktraces           | ✅ erhalten        | ✅ erhalten        | ✅ erhalten        |
+| Testfehlschläge                | ✅ erhalten        | ✅ erhalten        | ✅ erhalten        |
+| Build-Fehler                   | ✅ erhalten        | ✅ erhalten        | ✅ erhalten        |
+| Bestandene Tests (ausführlich) | ✅ erhalten        | 🟡 zusammengefasst | 🟡 zusammengefasst |
+| Routineausgaben (Info-Logs)    | 🟡 zusammengefasst | 🟡 zusammengefasst | ❌ verworfen       |
+| Fortschrittsbalken             | 🟡 zusammengefasst | ❌ verworfen       | ❌ verworfen       |
+| Banner / ASCII-Art             | 🟡 zusammengefasst | ❌ verworfen       | ❌ verworfen       |
 
 ### Die richtige Intensität wählen
 
 ```
-                  Ist Kontextverlust katastrophal?
+                  Ist ein Kontextverlust katastrophal?
                   │
       ┌───────────┼───────────┐
       │           │           │
@@ -403,12 +403,12 @@ Sowohl der **Anfang** als auch das **Ende** jedes Abschnitts bleiben erhalten; d
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Wie kritisch    Zuerst `standard`
-      │      ist Durchsatz?  testen (funktioniert
-      │           │          in 80% der Fälle)
+      │    Wie kritisch ist  Zuerst `standard`
+      │    der Durchsatz?    testen (funktioniert
+      │           │          in 80 % der Fälle)
       │      ┌────┴────┐
       │      │         │
-      │   NIEDRIG   HOCH
+      │   NIEDRIG    HOCH
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -431,11 +431,11 @@ Sowohl der **Anfang** als auch das **Ende** jedes Abschnitts bleiben erhalten; d
 }
 ```
 
-**Programmatisch**:
+**Programmgesteuert**:
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) ist eine
 `CompressionEngine` und besitzt keine `updateConfig`-Methode. Aktualisieren Sie
-die Konfiguration einer Engine stattdessen über die Registry-Hilfsfunktion:
+die Konfiguration einer Engine stattdessen über den Registry-Helper:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -445,7 +445,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Die Wirkung überprüfen
 
-Verwenden Sie das **Verify Gate** (siehe unten), um zu bestätigen, dass Ihre Filter bei der gewählten Intensität sicher sind:
+Verwenden Sie das **Verify Gate** (siehe unten), um zu bestätigen, dass Ihr Filter bei der gewählten Intensität sicher ist:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

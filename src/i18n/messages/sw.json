@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Vikomo vya Watoa Huduma",
     "noProviders": "Hakuna Watoa Huduma Waliounganishwa",
+    "quotaAuthRequired": "Uthibitishaji unahitajika - ingia kwenye dashibodi",
+    "quotaAuthRequiredHint": "Miunganisho ya watoa huduma haikuweza kupakiwa kwa sababu kipindi cha dashibodi hakipo au muda wake umeisha. Ingia na uonyeshe upya ili kuona vikomo vyako vya matumizi.",
     "connectProvidersForQuota": "Unganisha na watoa huduma kupitia OAuth ili kufuatilia vikomo vya mgao na matumizi ya API yako.",
     "accountsCount": "{count, plural, one {akaunti #} other {akaunti #}}",
     "filteredFromCount": "(zimechujwa kati ya {count})",

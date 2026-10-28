@@ -34,9 +34,9 @@ Asiakaspyyntö
 
 ### Off
 
-Ei pakkausta. Kaikki viestit menevät läpi muuttumattomina.
+Pakkausta ei käytetä. Kaikki viestit menevät läpi muuttumattomina.
 
-### Lite-tila (~15 %:n säästö, <1 ms:n viive)
+### Lite-tila (~15 % säästö, <1 ms viive)
 
 Turvallisin tila — ei lainkaan semanttisia muutoksia, vain muotoilun siistimistä:
 
@@ -44,79 +44,79 @@ Turvallisin tila — ei lainkaan semanttisia muutoksia, vain muotoilun siistimis
 | ------------------------ | ----------------------------------------------------- |
 | `collapseWhitespace`     | Yhdistää peräkkäiset tyhjät rivit ja loppuvälilyönnit |
 | `dedupSystemPrompt`      | Poistaa päällekkäiset järjestelmäviestit              |
-| `compressToolResults`    | Pakkaa monisaniset työkalu-/funktiotulosteet          |
+| `compressToolResults`    | Pakkaa monisanaiset työkalu-/funktiotulosteet         |
 | `removeRedundantContent` | Poistaa toistuvat ohjeet                              |
-| `replaceImageUrls`       | Lyhentää base64-muotoiset kuvien data-URI:t           |
+| `replaceImageUrls`       | Lyhentää base64-kuvien data-URI:t                     |
 
-**Parhaiten sopii:** Jatkuvaan käyttöön, turvallisuuskriittisiin työnkulkuihin.
+**Sopii parhaiten:** Jatkuvaan käyttöön ja turvallisuuskriittisiin työnkulkuihin.
 
-### Standard-tila (~30 %:n säästö)
+### Standard-tila (~30 % säästö)
 
-[Cavemanin](https://github.com/JuliusBrussee/caveman) innoittama — poistaa täytesanat ja monisaniset ilmaukset merkityksen säilyttäen:
+[Caveman](https://github.com/JuliusBrussee/caveman)-projektin innoittama — poistaa täytesanat ja monisanaiset ilmaisut merkitystä säilyttäen:
 
-- Poistaa täytesanoja ("please", "I think", "basically", "actually")
-- Tiivistää monisanisia fraaseja ("in order to" → "to", "as a result of" → "because")
-- Poistaa kohteliaat varovaiset muotoilut ("Would you mind...", "If you could possibly...")
+- Poistaa täytesanat ("please", "I think", "basically", "actually")
+- Tiivistää monisanaisia ilmauksia ("in order to" → "to", "as a result of" → "because")
+- Poistaa kohteliaat varoittelevat muotoilut ("Would you mind...", "If you could possibly...")
 - Yli 30 regex-sääntöä, jotka on viritetty koodauskehotteisiin
 
-**Parhaiten sopii:** Päivittäisiin koodaustyönkulkuihin, kustannustietoisille tiimeille.
+**Sopii parhaiten:** Päivittäisiin koodaustyönkulkuihin ja kustannustietoisille tiimeille.
 
-### Aggressive-tila (~50 %:n säästö)
+### Aggressiivinen tila (~50 % säästö)
 
 Älykäs historianhallinta pitkiin istuntoihin:
 
-- **Viestien ikääntyminen** — vanhemmat viestit pakataan asteittain
-- **Työkalutulosten pakkaus** — pitkät työkalutulosteet katkaistaan tai karsitaan (ensimmäiset/viimeiset
-  rivit, osumarivien suodatus, JSON-avainten tiivistys)
-- **Rakenteen eheyden suojaukset** — varmistaa, että `tool_use` + `tool_result` -parit pysyvät yhtenäisinä
-- **Konteksti-ikkunan huomioiminen** — kunnioittaa mallikohtaisia token-rajoja
+- **Viestien ikääntyminen** — vanhempia viestejä pakataan asteittain enemmän
+- **Työkalutulosten pakkaus** — pitkät työkalutulosteet katkaistaan tai karsitaan (ensimmäiset/viimeiset rivit,
+  osumarivien suodatus, JSON-avainten tiivistys)
+- **Rakenteellisen eheyden suojaukset** — varmistaa, että `tool_use` + `tool_result` -parit pysyvät yhtenäisinä
+- **Konteksti-ikkunan tietoisuus** — kunnioittaa mallikohtaisia token-rajoja
 
-**Parhaiten sopii:** Pitkiin virheenkorjausistuntoihin, suuriin koodikantoihin.
+**Sopii parhaiten:** Pitkittyneisiin virheenkorjausistuntoihin ja suuriin koodikantoihin.
 
-### Ultra-tila (~75 %:n säästö)
+### Ultra-tila (~75 % säästö)
 
 Maksimaalinen pakkaus token-kriittisiin tilanteisiin:
 
 - **Heuristinen karsinta** — pisteytykseen perustuva proosan token-karsinta
 - **Rakenteen säilyttäminen** — aidatut koodilohkot, rivinsisäinen koodi, URL-osoitteet ja tunnisteet
-  merkitään suojatuiksi ja ommellaan takaisin sellaisenaan, niitä ei koskaan karsita
+  suojataan paikkamerkeillä ja ommellaan takaisin sanatarkasti; niitä ei koskaan karsita
 - **Valinnainen SLM-taso** — pieni paikallinen malli voi hienosäätää karsintaa, kun se on määritetty
-- Riippumaton Aggressive-tilasta: se ei suorita viestien ikääntymistä, työkalutulosten pakkausta
-  tai varayhteenvetoa (vain SLM-tason epäonnistuminen voi reitittää varasuorituksen
-  aggressive-tilan kautta)
+- Riippumaton aggressiivisesta tilasta: se ei suorita viestien ikääntymistä, työkalutulosten pakkausta
+  tai varayhteenvetajaa (vain SLM-tason virhe voi ohjata varakierroksen
+  aggressiivisen tilan kautta)
 
-**Parhaiten sopii:** Kun törmäät toistuvasti kontekstirajoihin.
+**Sopii parhaiten:** Kun törmäät kontekstirajoihin toistuvasti.
 
-### RTK-tila (60–90 %:n säästöalue upstreamissa)
+### RTK-tila (60–90 % upstream-alueella)
 
-RTK-tila on optimoitu monisanisille työkalutulosteille, joita esiintyy koodausagenttien istunnoissa:
+RTK-tila on optimoitu monisanaisille työkalutulosteille, joita esiintyy koodausagentti-istunnoissa:
 
-- Tunnistaa komento-/tulosteluokkia kuten `git status`, `git diff`, `git log`, testisuorittimet,
-  TypeScript/Vite/Webpack -käännökset, ESLint/Biome/Prettier, npm audit/asennukset, Docker-lokit, infra-
-  tulosteet ja yleiset shell-tulosteet
-- Soveltaa JSON-suodatinpaketteja polusta `open-sse/services/compression/engines/rtk/filters/`
-- Tuo RTK TOML schema v1 -suodattimia projektin tai globaaleista `filters.toml`-tiedostoista, sisältäen
-  sisäisten testien validoinnin ja projektitiedostojen luottamusporttauksen
-- Sisältää 56 sisäänrakennettua suodatinta ja niiden sisäiset vahvistusnäytteet
-- Poistaa ANSI-ohjaussekvenssit, edistymispalkit, toistuvat rivit ja toimettoman kohinan
-- Säilyttää epäonnistumiset, virheet, varoitukset, muuttuneet tiedostot, yhteenvedot ja pitkien tulosteiden loppuosat
+- Tunnistaa komento-/tulosteluokkia kuten `git status`, `git diff`, `git log`, testiajurit,
+  TypeScript/Vite/Webpack-buildit, ESLint/Biome/Prettier, npm audit/install -komennot, Docker-lokit, infra-
+  tulosteet ja yleiset komentotulosteet
+- Käyttää JSON-suodatinpaketteja hakemistosta `open-sse/services/compression/engines/rtk/filters/`
+- Tuo RTK TOML schema v1 -suodattimia projektin tai globaaleista `filters.toml`-tiedostoista, sisäänrakennetulla
+  testivarmennuksella ja luottamusporttauksella projektitiedostoille
+- Sisältää 56 sisäänrakennettua suodatinta varmennusesimerkeillä
+- Poistaa ANSI-ohjaussekvenssit, edistymispalkit, toistuvat rivit ja kohinan, joka ei vaadi toimia
+- Säilyttää virheet, varoitukset, muutetut tiedostot, yhteenvedot ja pitkien tulosteiden loppuosat
 - Tukee luottamusportattuja projektisuodattimia, globaaleja suodattimia ja valinnaista sensuroidun raakatulosteen palautusta
 
-**Parhaiten sopii:** Agentti-istuntoihin, jotka sisältävät shell-, build-, test-, git-, grep- ja tiedostotulosteiden tallenteita.
+**Sopii parhaiten:** Agentti-istuntoihin, joissa on komentotulkki-, build-, testi-, git-, grep- ja tiedostotulostelokeja.
 
-### Stacked-tila (78–95 %:n säästöalue kelvolliselle sisällölle)
+### Stacked-tila (78–95 % soveltuvalla alueella)
 
-Stacked-tila suorittaa useita pakkausmoottoreita deterministisessä järjestyksessä. Oletusputki on:
+Stacked-tila ajaa useita pakkausmoottoreita deterministisessä järjestyksessä. Oletusputki on:
 
 ```txt
 RTK -> Caveman
 ```
 
-Tämä järjestys pitää terminaali-/työkalutulosteet ensin tiiviinä, minkä jälkeen Cavemanin semanttinen
-tiivistys kohdistetaan jäljelle jäävään luonnollisen kielen kehotteeseen. Stacked-putket voidaan määrittää
-globaalisti tai reitityscomboihin liitettyjen pakkauskombinaatioiden kautta.
+Tämä järjestys pitää pääte-/työkalutulosteet ensin kompakteina, minkä jälkeen Cavemanin semanttinen
+tiivistys kohdistetaan jäljelle jäävään luonnollisen kielen kehotteeseen. Pinotut putket voidaan
+määrittää globaalisti tai reititysyhdistelmiin liitettyjen pakkausyhdistelmien kautta.
 
-**Parhaiten sopii:** Sekalaiseen kontekstiin, jossa on suuria työkalulokeja sekä ihmisten ohjeita tai assistentin yhteenvetoja.
+**Sopii parhaiten:** Sekalaiseen kontekstiin, jossa on suuria työkalulokeja sekä ihmisten ohjeita tai avustajan yhteenvetoja.
 
 ---
 

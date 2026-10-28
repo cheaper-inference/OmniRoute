@@ -18,32 +18,31 @@ lastUpdated: 2026-06-28
 
 ---
 
-## Czym jest
+## Co to jest
 
-OmniRoute rejestruje 376 dostawców, w tym 155 wpisów katalogowych oznaczonych jako **bezpłatne/bez uwierzytelniania**
-(bez uwierzytelniania,
-OAuth w planie bezpłatnym lub klucz API w planie bezpłatnym — zobacz
-[Przewodnik po bezpłatnych planach](../getting-started/FREE-TIERS-GUIDE.md) oraz pełny
-[Katalog bezpłatnych planów](../reference/FREE_TIERS.md)). Problem w tym, że bezpłatni dostawcy znacznie
-różnią się jakością modeli. Dostawca bez uwierzytelniania, który udostępnia model klasy frontier, jest znacznie bardziej użyteczny
-niż dostawca oferujący niewielki, przestarzały model.
+OmniRoute rejestruje 376 dostawców, w tym 155 wpisów katalogu oznaczonych jako **free/no-auth**
+(no-auth, OAuth z darmowym poziomem lub klucz API z darmowym poziomem — zobacz
+[Przewodnik po darmowych poziomach](../getting-started/FREE-TIERS-GUIDE.md) oraz pełny
+[katalog darmowych poziomów](../reference/FREE_TIERS.md)). Haczek polega na tym, że darmowi
+dostawcy różnią się diametralnie jakością modeli. Dostawca no-auth oferujący model z czołówki
+jest znacznie bardziej użyteczny niż taki, który serwuje mały, przestarzały model.
 
-**Ranking bezpłatnych dostawców** odpowiada na pytanie „**który bezpłatny dostawca oferuje mi najlepszy model?**”,
-łącząc katalog każdego bezpłatnego dostawcy z **tworzonymi społecznościowo ocenami jakości** z
-**rankingu Arena AI** (ELO oparte na preferencjach użytkowników, czyli ta sama koncepcja, na której opiera się arena chatbotów
-LMArena). Dostawcy są następnie klasyfikowani według możliwości ich **najlepszego bezpłatnego modelu**.
+**Rankingi darmowych dostawców** odpowiadają na pytanie „**który darmowy dostawca daje mi najlepszy model?**",
+łącząc katalog każdego darmowego dostawcy z **crowdsourcingowymi ocenami jakości** z
+**rankingu Arena AI** (ELO oparte na ludzkich preferencjach — ta sama idea, która leży u podstaw
+areny chatbotów LMArena). Dostawcy są następnie rankowani według siły swojego **najlepszego darmowego modelu**.
 
 Ranking jest obliczany na podstawie trzech rzeczywistych źródeł:
 
-1. Listy bezpłatnych dostawców — `NOAUTH_PROVIDERS` oraz wpisy `OAUTH_PROVIDERS` /
+1. Listy darmowych dostawców — `NOAUTH_PROVIDERS`, a także wpisy `OAUTH_PROVIDERS` /
    `APIKEY_PROVIDERS` oznaczone flagą `hasFree`
    (`src/shared/constants/providers.ts`).
 2. Katalog modeli każdego dostawcy z rejestru dostawców
    (`open-sse/config/providerRegistry.ts`).
-3. Wyniki dopasowania do zadań wyprowadzone z ELO, przechowywane w tabeli bazy danych `model_intelligence` przez
-   mechanizm synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`).
+3. Wyniki dopasowania do zadań (task-fit) wyprowadzone z ELO, przechowywane w tabeli bazy danych
+   `model_intelligence` przez silnik synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Logika łączenia danych znajduje się w `src/lib/freeProviderRankings.ts`.
+Logika łączenia znajduje się w `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -127,18 +126,18 @@ Kształt odpowiedzi:
 
 ---
 
-## Jak działa punktacja
+## Jak działają wyniki
 
 ### Źródło: ranking Arena AI
 
 Silnik synchronizacji Arena ELO (`src/lib/arenaEloSync.ts`) pobiera dwa rankingi — `text`
-oraz `code` — z API rankingu Arena AI
-(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Gdy API nie zwraca
-żadnej użytecznej tabeli, silnik korzysta z oficjalnego zestawu `lmarena-ai/leaderboard-dataset`
+i `code` — z API rankingu Arena AI
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Gdy to API nie zwraca
+użytecznego rankingu, silnik korzysta z oficjalnego zestawu danych `lmarena-ai/leaderboard-dataset`
 na serwerze datasets-server Hugging Face (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
-`coding` → `code`); `GET /api/intelligence/sync` raportuje `activeSource`, `lastError` oraz
-`lastFailedAt`. Każdy wpis rankingu
-zawiera nazwę modelu, dostawcę, wynik ELO `score`, przedział ufności i liczbę głosów.
+`coding` → `code`); `GET /api/intelligence/sync` zgłasza `activeSource`, `lastError` i
+`lastFailedAt`. Każdy wpis rankingu zawiera nazwę modelu, dostawcę, wynik ELO `score`,
+przedział ufności oraz liczbę głosów.
 
 Kategorie rankingu są mapowane na kategorie zadań OmniRoute:
 
@@ -149,84 +148,85 @@ Kategorie rankingu są mapowane na kategorie zadań OmniRoute:
 
 ### Normalizacja (wynik dopasowania do zadania)
 
-Surowe wyniki ELO są normalizowane w obrębie każdego rankingu do **wartości dopasowania do zadania z zakresu `[0.4, 0.98]`**:
+Surowe wyniki ELO są normalizowane dla każdego rankingu do **wartości dopasowania do zadania w zakresie `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Wynik nigdy nie osiąga `0` ani `1`, co pozostawia margines na nadpisania przez użytkownika. To jest
-pole `score` widoczne w odpowiedzi API oraz etykieta wyświetlana na pulpicie.
+Wynik nigdy nie osiąga `0` ani `1`, pozostawiając margines na nadpisania użytkownika. To jest
+pole `score`, które widzisz w odpowiedzi API, oraz etykieta wyświetlana na pulpicie.
 
-### Ufność
+### Poziom ufności
 
-Każdy wpis otrzymuje poziom ufności na podstawie liczby głosów w Arena:
+Każdy wpis otrzymuje poziom ufności na podstawie liczby głosów Arena:
 
-| Ufność   | Głosy   |
-| -------- | ------- |
-| `high`   | ≥ 5 000 |
-| `medium` | ≥ 1 000 |
-| `low`    | < 1 000 |
+| Poziom ufności | Głosy   |
+| -------------- | ------- |
+| `high`         | ≥ 5,000 |
+| `medium`       | ≥ 1,000 |
+| `low`          | < 1,000 |
 
 ### Przechowywanie i aktualność
 
 Znormalizowane wpisy są zapisywane w tabeli bazy danych `model_intelligence` z
 `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Wpisy **wygasają po
-7 dniach**, więc dostawca, który przestanie się synchronizować, ostatecznie znika z listy,
+7 dniach**, więc dostawca, który przestaje się synchronizować, ostatecznie znika z zestawienia,
 zamiast serwować nieaktualne dane.
 
-Synchronizacja działa **domyślnie włączona**:
+Synchronizacja jest **domyślnie włączona**:
 
 - Uruchamia się raz przy starcie serwera, a następnie cyklicznie
-  (`src/lib/arenaEloSync.ts`, podłączone z `src/instrumentation-node.ts`).
-- Jest **nieblokująca i nigdy nie krytyczna** — jeśli pobranie danych z zewnątrz się nie powiedzie,
-  OmniRoute działa dalej, a rankingi po prostu pokazują ostatnie poprawne dane (albo stan pusty).
+  (`src/lib/arenaEloSync.ts`, podłączona z `src/instrumentation-node.ts`).
+- Jest **nieblokująca i nigdy nie powoduje błędu krytycznego** — jeśli pobranie ze źródła
+  nadrzędnego się nie powiedzie, OmniRoute działa dalej, a rankingi po prostu pokazują
+  ostatnie poprawne dane (lub stan pusty).
 
-Kontrolują ją dwie zmienne środowiskowe (opisane w
+Kontrolują ją dwie zmienne środowiskowe (udokumentowane w
 [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Zmienna                   | Wartość domyślna | Przeznaczenie                                                |
-| ------------------------- | ---------------- | ------------------------------------------------------------ |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`           | Ustaw `false`, aby zrezygnować z synchronizacji wychodzącej. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h)    | Interwał synchronizacji w sekundach.                         |
+| Zmienna                   | Domyślnie     | Przeznaczenie                                                   |
+| ------------------------- | ------------- | --------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Ustaw na `false`, aby zrezygnować z synchronizacji wychodzącej. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Interwał synchronizacji, w sekundach.                           |
 
 ### Ręczna synchronizacja / status / czyszczenie
 
-Dla operatorów dostępny jest uwierzytelniany endpoint zarządczy umożliwiający ręczną kontrolę
-(`src/app/api/intelligence/sync/route.ts` — wymaga uwierzytelnienia zarządczego):
+Dla operatorów uwierzytelniony punkt końcowy zarządzania udostępnia ręczną kontrolę
+(`src/app/api/intelligence/sync/route.ts` — wymaga uwierzytelnienia zarządzania):
 
 ```
 GET    /api/intelligence/sync          # bieżący status synchronizacji (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # wyzwól ręczną synchronizację; body: { "dryRun": true }, aby wyświetlić podgląd bez zapisu
-DELETE /api/intelligence/sync          # usuń wszystkie zsynchronizowane wpisy arena_elo
+POST   /api/intelligence/sync          # wyzwala ręczną synchronizację; treść: { "dryRun": true } dla podglądu bez zapisu
+DELETE /api/intelligence/sync          # usuwa wszystkie zsynchronizowane wpisy intelligence arena_elo
 ```
 
-Jeśli strona rankingów jest pusta, ręczne wywołanie `POST /api/intelligence/sync` (lub po prostu
+Jeśli strona rankingów jest pusta, ręczne `POST /api/intelligence/sync` (lub po prostu
 ponowne uruchomienie serwera) ponownie ją wypełni.
 
 ### Dopasowywanie modeli do rankingu
 
-Identyfikatory modeli w rejestrze i nazwy modeli w Arena nie zawsze są identyczne. Ranking używa
-elastycznego dopasowywania (`findMatchingIntelligence` w `src/lib/freeProviderRankings.ts`):
+Identyfikatory modeli w rejestrze i nazwy modeli Arena nie zawsze są dokładnie takie same.
+Ranking używa elastycznego dopasowywania (`findMatchingIntelligence` w `src/lib/freeProviderRankings.ts`):
 
 1. Dokładne dopasowanie znormalizowanego identyfikatora modelu.
 2. Dopasowanie po usunięciu końcowego sufiksu wersji (np. `kimi-k2.6` → `kimi-k2`).
-3. Dopasowanie prefiksowe (nazwa modelu z rankingu jest prefiksem identyfikatora z rejestru).
+3. Dopasowanie prefiksu (nazwa modelu z rankingu jest prefiksem identyfikatora w rejestrze).
 
-Po stronie synchronizacji znane prefiksy dostawców (`anthropic/`, `openai/`, `google/`, …) są
-usuwane, a niewielka mapa aliasów rozwija kanoniczne nazwy do wariantów używanych wewnętrznie
-przez OmniRoute, dzięki czemu modele można znaleźć pod dowolną nazwą.
+Po stronie synchronizacji znane prefiksy dostawców (`anthropic/`, `openai/`, `google/`, …)
+są usuwane, a niewielka mapa aliasów rozwija kanoniczne nazwy do wariantów używanych
+wewnętrznie przez OmniRoute, dzięki czemu modele pozostają odnajdywalne pod dowolną nazwą.
 
-### Jak oceniany jest dostawca
+### Jak uszeregowany jest dostawca
 
-Dla każdego darmowego dostawcy silnik punktuje każdy model w jego katalogu, a następnie:
+Dla każdego darmowego dostawcy silnik ocenia każdy model w jego katalogu, a następnie:
 
-- **Top Model** = model dostawcy z najwyższym wynikiem.
-- **Avg Score** = średni wynik wszystkich ocenionych modeli tego dostawcy.
-- **Models** = liczba modeli dostawcy, które miały wynik w Arena.
+- **Najlepszy model** = model dostawcy z najwyższym wynikiem.
+- **Średni wynik** = średnia wyników wszystkich ocenionych modeli tego dostawcy.
+- **Modele** = liczba modeli dostawcy, które miały wynik Arena.
 
-Dostawcy są sortowani najpierw według **wyniku najlepszego modelu**, a następnie według średniego
-wyniku. Nagradza to dostawcę, który oferuje przynajmniej jeden mocny darmowy model.
+Dostawcy są sortowani najpierw według **wyniku najlepszego modelu**, a następnie według
+średniego wyniku. To premiuje dostawcę, który oferuje co najmniej jeden mocny darmowy model.
 
 ---
 

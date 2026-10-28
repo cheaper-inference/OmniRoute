@@ -13,30 +13,30 @@
 
 ## Kas tai yra
 
-„OmniRoute“ registruoja 376 teikėjus, įskaitant 155 katalogo įrašus, pažymėtus kaip **nemokamus / nereikalaujančius autentifikavimo**
-(nereikalaujančius autentifikavimo,
+„OmniRoute“ registruoja 376 teikėjus, įskaitant 155 katalogo įrašus, pažymėtus kaip **nemokami/be autentifikacijos**
+(be autentifikacijos,
 nemokamo lygio OAuth arba nemokamo lygio API raktas — žr.
-[Nemokamų lygių vadovą](../getting-started/FREE-TIERS-GUIDE.md) ir visą
-[Nemokamų lygių katalogą](../reference/FREE_TIERS.md)). Tačiau yra viena išlyga: nemokamų teikėjų
-modelių kokybė labai skiriasi. Autentifikavimo nereikalaujantis teikėjas, siūlantis pažangiausią modelį, yra gerokai naudingesnis
-už teikėją, siūlantį nedidelį pasenusį modelį.
+[Nemokamų lygių vadovą](../getting-started/FREE-TIERS-GUIDE.md) ir pilną
+[Nemokamų lygių katalogą](../reference/FREE_TIERS.md)). Yra kabliukas: nemokamų teikėjų modelių
+kokybė labai skiriasi. Teikėjas be autentifikacijos, siūlantis pažangiausią modelį, yra daug naudingesnis
+nei tas, kuris siūlo mažą pasenusią modelį.
 
 **Nemokamų teikėjų reitingai** atsako į klausimą „**kuris nemokamas teikėjas suteikia man geriausią modelį?**“,
-susiedami kiekvieno nemokamo teikėjo katalogą su **bendruomenės surinktais kokybės įverčiais** iš
-**Arena AI lyderių lentelės** (žmonių pasirinkimais pagrįstas ELO — ta pati idėja, kuria grindžiama „LMArena“
-pokalbių robotų arena). Tada teikėjai reitinguojami pagal jų **geriausio nemokamo modelio** pajėgumą.
+sujungdamas kiekvieno nemokamo teikėjo katalogą su **minios šaltinių kokybės balais** iš
+**Arena AI lyderių lentelės** (žmonių pageidavimais pagrįsta ELO sistema — ta pati idėja, kuri slypi ir
+„LMArena“ pokalbių robotų arenoje). Teikėjai reitinguojami pagal jų **geriausio nemokamo modelio** stiprumą.
 
-Reitingas apskaičiuojamas remiantis trimis realiais šaltiniais:
+Reitingas apskaičiuojamas iš trijų realių šaltinių:
 
-1. Nemokamų teikėjų sąrašais — `NOAUTH_PROVIDERS`, taip pat `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` įrašais, pažymėtais `hasFree`
+1. Nemokamų teikėjų sąrašai — `NOAUTH_PROVIDERS`, taip pat `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` įrašai, pažymėti `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Kiekvieno teikėjo modelių katalogu iš teikėjų registro
+2. Kiekvieno teikėjo modelių katalogas iš teikėjų registro
    (`open-sse/config/providerRegistry.ts`).
-3. Iš ELO išvestais tinkamumo užduotims įverčiais, kuriuos „Arena ELO“ sinchronizavimo variklis saugo
-   DB lentelėje `model_intelligence` (`src/lib/arenaEloSync.ts`).
+3. Iš ELO išvesti užduočių tinkamumo balai, saugomi `model_intelligence` DB lentelėje
+   Arena ELO sinchronizavimo variklio (`src/lib/arenaEloSync.ts`).
 
-Susiejimo logika pateikta faile `src/lib/freeProviderRankings.ts`.
+Sujungimo logika pateikiama `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -120,86 +120,107 @@ Atsakymo struktūra:
 
 ---
 
-## Kaip veikia įvertinimai
+## Kaip veikia balai
 
 ### Šaltinis: Arena AI lyderių lentelė
 
-Arena ELO sinchronizavimo variklis (`src/lib/arenaEloSync.ts`) gauna dvi lyderių lenteles — `text` ir `code` — iš Arena AI lyderių lentelių API (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Kai šis API negrąžina tinkamos lentelės, variklis persijungia į oficialų `lmarena-ai/leaderboard-dataset` Hugging Face datasets-server'yje (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`, `coding` → `code`); `GET /api/intelligence/sync` pateikia `activeSource`, `lastError` ir `lastFailedAt`. Kiekvienas lyderių lentelės įrašas turi modelio pavadinimą, tiekėją, ELO `score`, pasikliautinąjį intervalą ir balsų skaičių.
+Arena ELO sinchronizavimo variklis (`src/lib/arenaEloSync.ts`) gauna dvi lyderių lenteles — `text`
+ir `code` — iš Arena AI lyderių lentelių API
+(`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Kai ši API negrąžina tinkamos
+lentelės, variklis kaip atsarginį šaltinį naudoja oficialų `lmarena-ai/leaderboard-dataset`
+Hugging Face datasets-server tarnyboje (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`,
+`coding` → `code`); `GET /api/intelligence/sync` pateikia `activeSource`, `lastError` ir
+`lastFailedAt`. Kiekviename lyderių lentelės
+įraše nurodomas modelio pavadinimas, tiekėjas, ELO `score`, pasikliovimo intervalas ir balsų skaičius.
 
-Lyderių lentelių kategorijos atitinka OmniRoute užduočių kategorijas:
+Lyderių lentelių kategorijos susiejamos su OmniRoute užduočių kategorijomis:
 
 | Arena lyderių lentelė | OmniRoute užduočių kategorijos                    |
 | --------------------- | ------------------------------------------------- |
 | `text`                | `default`, `review`, `documentation`, `debugging` |
 | `code`                | `coding`                                          |
 
-### Normalizavimas (užduoties atitikties įvertis)
+### Normalizavimas (užduoties tinkamumo balas)
 
-Neapdoroti ELO įvertinimai kiekvienoje lyderių lentelėje normalizuojami į **užduoties atitikties reikšmę intervale `[0.4, 0.98]`**:
+Neapdoroti ELO balai kiekvienoje lyderių lentelėje normalizuojami į **užduoties tinkamumo reikšmę intervale `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Įvertis niekada nepasiekia `0` arba `1`, paliekant erdvės naudotojo perrašymams. Tai yra `score` laukas, kurį matote API atsakyme, ir žyma, rodoma prietaisų skydelyje.
+Balas niekada nepasiekia `0` arba `1`, todėl lieka erdvės naudotojo pakeitimams. Tai yra
+`score` laukas, kurį matote API atsakyme, ir etiketė, rodoma valdymo skydelyje.
 
-### Pasitikėjimo lygis
+### Pasikliovimas
 
-Kiekvienam įrašui priskiriamas pasitikėjimo lygis pagal Arena balsų skaičių:
+Kiekvienas įrašas gauna pasikliovimo lygį pagal Arena balsų skaičių:
 
-| Pasitikėjimo lygis | Balsai  |
-| ------------------ | ------- |
-| `high`             | ≥ 5,000 |
-| `medium`           | ≥ 1,000 |
-| `low`              | < 1,000 |
+| Pasikliovimas | Balsai  |
+| ------------- | ------- |
+| `high`        | ≥ 5,000 |
+| `medium`      | ≥ 1,000 |
+| `low`         | < 1,000 |
 
-### Saugojimas ir šviežumas
+### Saugojimas ir duomenų šviežumas
 
-Normalizuoti įrašai rašomi į `model_intelligence` DB lentelę su `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Įrašai **nustoja galioti po 7 dienų**, todėl tiekėjas, kuris nebesinchronizuoja, galiausiai iškrenta iš sąrašo, o ne teikia pasenusius duomenis.
+Normalizuoti įrašai įrašomi į `model_intelligence` DB lentelę su
+`source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Įrašų **galiojimas baigiasi po
+7 dienų**, todėl teikėjas, kuris nustoja sinchronizuoti, galiausiai iškrinta, o ne teikia
+pasenusius duomenis.
 
-Sinchronizavimas **pagal numatymą įjungtas**:
+Sinchronizavimas pagal numatymą **įjungtas**:
 
-- Jis vykdomas vieną kartą paleidus serverį, o vėliau — periodiškai pagal laikmatį (`src/lib/arenaEloSync.ts`, prijungta iš `src/instrumentation-node.ts`).
-- Jis yra **neblokuojantis ir niekada nelemtingas** — jei nepavyksta gauti duomenų iš pirminio šaltinio, OmniRoute toliau veikia, o reitingai tiesiog rodo paskutinius tinkamus duomenis (arba tuščią būseną).
+- Jis vykdomas vieną kartą paleidus serverį, o vėliau periodiškai pagal laikmatį
+  (`src/lib/arenaEloSync.ts`, paleidžiama iš `src/instrumentation-node.ts`).
+- Jis yra **neblokuojantis ir niekada nesukelia kritinės klaidos** — jei nepavyksta gauti
+  duomenų iš pirminio šaltinio, OmniRoute toliau veikia, o reitingai tiesiog rodo paskutinius
+  tinkamus duomenis (arba tuščią būseną).
 
-Tai valdo du aplinkos kintamieji (dokumentuoti [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
+Tai valdo du aplinkos kintamieji (dokumentuoti
+[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Kintamasis                | Numatytoji reikšmė | Paskirtis                                                         |
-| ------------------------- | ------------------ | ----------------------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`             | Nustatykite `false`, kad atsisakytumėte išorinio sinchronizavimo. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h)      | Sinchronizavimo intervalas sekundėmis.                            |
+| Kintamasis                | Numatytoji reikšmė | Paskirtis                                                           |
+| ------------------------- | ------------------ | ------------------------------------------------------------------- |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`             | Nustatykite `false`, kad atsisakytumėte išeinančio sinchronizavimo. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24 val.)  | Sinchronizavimo intervalas sekundėmis.                              |
 
 ### Rankinis sinchronizavimas / būsena / išvalymas
 
-Operatoriams autentifikuotas valdymo galinis taškas suteikia rankinio valdymo galimybę (`src/app/api/intelligence/sync/route.ts` — reikalauja valdymo autentifikavimo):
+Operatoriams autentifikuotas valdymo galinis taškas suteikia rankinio valdymo galimybę
+(`src/app/api/intelligence/sync/route.ts` — reikalauja valdymo autentifikavimo):
 
 ```
 GET    /api/intelligence/sync          # dabartinė sinchronizavimo būsena (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # paleisti rankinį sinchronizavimą; turinys: { "dryRun": true } peržiūrai be įrašymo
+POST   /api/intelligence/sync          # paleisti rankinį sinchronizavimą; užklausos turinys: { "dryRun": true } peržiūrai be įrašymo
 DELETE /api/intelligence/sync          # išvalyti visus sinchronizuotus arena_elo intelekto įrašus
 ```
 
-Jei reitingų puslapis tuščias, rankinis `POST /api/intelligence/sync` (arba tiesiog serverio paleidimas iš naujo) jį vėl užpildys.
+Jei reitingų puslapis tuščias, rankinis `POST /api/intelligence/sync` (arba paprasčiausias
+serverio paleidimas iš naujo) jį vėl užpildys.
 
 ### Modelių derinimas su lyderių lentele
 
-Registro modelių ID ir Arena modelių pavadinimai ne visada tiksliai sutampa. Reitingavimas naudoja lankstų derinimą (`findMatchingIntelligence` faile `src/lib/freeProviderRankings.ts`):
+Registro modelių ID ir Arena modelių pavadinimai ne visada visiškai sutampa. Reitingavime
+naudojamas lankstus derinimas (`findMatchingIntelligence` faile `src/lib/freeProviderRankings.ts`):
 
-1. Tikslus normalizuoto modelio ID atitikimas.
-2. Atitikimas pašalinus galutinę versijos prievardį (pvz., `kimi-k2.6` → `kimi-k2`).
-3. Prefikso atitikimas (lyderių lentelės modelio pavadinimas yra registro ID prefiksas).
+1. Tikslus atitikimas pagal normalizuotą modelio ID.
+2. Atitikimas pašalinus versijos priesagą pabaigoje (pvz., `kimi-k2.6` → `kimi-k2`).
+3. Atitikimas pagal priešdėlį (lyderių lentelės modelio pavadinimas yra registro ID priešdėlis).
 
-Sinchronizavimo pusėje žinomi tiekėjų prefiksai (`anthropic/`, `openai/`, `google/`, …) pašalinami, o nedidelis slapyvardžių žemėlapis išplečia kanoninius pavadinimus į variantus, kuriuos OmniRoute naudoja viduje, todėl modeliai lieka randami bet kuriuo pavadinimu.
+Sinchronizavimo pusėje žinomi tiekėjų priešdėliai (`anthropic/`, `openai/`, `google/`, …)
+pašalinami, o nedidelis pseudonimų žemėlapis išplečia kanoninius pavadinimus į variantus,
+kuriuos OmniRoute naudoja viduje, todėl modeliai išlieka randami bet kuriuo pavadinimu.
 
-### Kaip reitinguojamas tiekėjas
+### Kaip reitinguojamas teikėjas
 
-Kiekvienam nemokamam tiekėjui variklis įvertina visus jo katalogo modelius, tada:
+Kiekvieno nemokamo teikėjo atveju variklis įvertina kiekvieną jo katalogo modelį, tada:
 
-- **Geriausias modelis** = aukščiausiai įvertintas tiekėjo modelis.
-- **Vidutinis įvertis** = visų to tiekėjo įvertintų modelių įverčių vidurkis.
-- **Modeliai** = kiek tiekėjo modelių turėjo Arena įvertį.
+- **Geriausias modelis** = aukščiausią balą surinkęs teikėjo modelis.
+- **Vidutinis balas** = visų to teikėjo įvertintų modelių balų vidurkis.
+- **Modeliai** = kiek teikėjo modelių turėjo Arena balą.
 
-Tiekėjai pirmiausia rikiuojami pagal **geriausio modelio įvertį**, o tada pagal vidutinį įvertį. Tai skatina tiekėją, kuris siūlo bent vieną stiprų nemokamą modelį.
+Teikėjai pirmiausia rikiuojami pagal **geriausio modelio balą**, o tada pagal vidutinį balą.
+Tai apdovanoja teikėją, kuris siūlo bent vieną stiprų nemokamą modelį.
 
 ---
 

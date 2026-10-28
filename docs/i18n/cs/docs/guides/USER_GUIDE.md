@@ -611,9 +611,9 @@ post_install() {
 <details>
 <summary><b>Zobrazit všechny dostupné modely</b></summary>
 
-> Níže uvedený seznam je sestaven z `open-sse/config/providerRegistry.ts` pro v3.8.0. Cloudové katalogy (Gemini, OpenRouter atd.) se synchronizují dynamicky — úplný živý katalog otevřete v **Dashboard → Providers → [provider] → Available Models** nebo zavolejte `GET /api/models/catalog`.
+> Níže uvedený seznam je sestaven z `open-sse/config/providerRegistry.ts` pro v3.8.0. Cloudové katalogy (Gemini, OpenRouter atd.) se synchronizují dynamicky — pro úplný živý katalog otevřete **Přehled → Poskytovatelé → [poskytovatel] → Dostupné modely** nebo zavolejte `GET /api/models/catalog`.
 >
-> Pokud se vestavěný seznam poskytovatele rozchází se skutečností, použijte na dané stránce **Import from /models** (nebo povolte **Auto-Sync**) pro načtení živého upstream katalogu. Ověřeno ve v3.8.50 pro LLM7.io (`gemini-3.1-flash-lite`) a UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonymní přístup Pollinations zůstal během téhož testovacího cyklu omezen na straně upstreamu.
+> Pokud vestavěný seznam některého poskytovatele zastará, použijte na téže stránce **Import z /models** (nebo povolte **Automatickou synchronizaci**) pro načtení živého upstream katalogu. Toto bylo ověřeno ve v3.8.50 pro LLM7.io (`gemini-3.1-flash-lite`) a UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonymní přístup Pollinations zůstal během stejného testovacího kola omezen na straně upstreamu.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -621,19 +621,19 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth ZDARMA: použijte živý katalog zobrazený v **Dashboard → Providers → Kiro → Available Models**. Dostupnost závisí na účtu a tarifu.
+**Kiro (`kr/`)** — OAuth ZDARMA: použijte živý katalog zobrazený v **Přehled → Poskytovatelé → Kiro → Dostupné modely**. Dostupnost závisí na účtu a tarifu.
 
 **Qoder (`if/`)** — OAuth ZDARMA: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 $/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 $/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/měs. paušálně nebo podle použití: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 $/měs. paušálně nebo za použití: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API klíč: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Mimořádně rychlé: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ultrarychlé: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Nativní Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
@@ -647,7 +647,7 @@ post_install() {
 
 **Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Zaměřeno na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Zaměřené na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
 **NVIDIA NIM (`nvidia/`)** — Podnikové: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
@@ -655,7 +655,7 @@ post_install() {
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synchronizováno živě podle API klíče z Googlu — žádný statický seznam. Připojte klíč v **Dashboard → Providers** a poté pomocí **Available Models** importujte aktuální katalog (např. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Synchronizováno živě pro každý API klíč od Googlu — žádný statický seznam. Připojte klíč v **Přehled → Poskytovatelé** a poté pomocí **Dostupné modely** importujte aktuální katalog (např. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
 **Ostatní kompatibilní poskytovatelé** (výběr): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (přes `aws-bedrock`), `azure-ai`, `openrouter` (průchozí katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Každý udržuje vlastní seznam modelů v `providerRegistry.ts` a lze jej automaticky synchronizovat, pokud poskytovatel zpřístupňuje endpoint `/models`.
 

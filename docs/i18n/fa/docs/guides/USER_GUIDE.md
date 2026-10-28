@@ -614,17 +614,17 @@ post_install() {
 <details>
 <summary><b>مشاهده همه مدلهای موجود</b></summary>
 
-> فهرست زیر از `open-sse/config/providerRegistry.ts` برای نسخه v3.8.0 گردآوری شده است. کاتالوگهای ابری (Gemini، OpenRouter و غیره) بهصورت پویا همگامسازی میشوند — برای مشاهده کاتالوگ کامل و بهروز، به **داشبورد → ارائهدهندگان → [provider] → مدلهای موجود** بروید یا `GET /api/models/catalog` را فراخوانی کنید.
+> فهرست زیر از `open-sse/config/providerRegistry.ts` برای v3.8.0 گردآوری شده است. کاتالوگهای ابری (Gemini، OpenRouter و غیره) بهصورت پویا همگامسازی میشوند — برای مشاهده کاتالوگ کامل و بهروز، مسیر **Dashboard → Providers → [provider] → Available Models** را باز کنید یا `GET /api/models/catalog` را فراخوانی کنید.
 >
-> اگر فهرست داخلی یک ارائهدهنده بهروز نباشد، از **وارد کردن از /models** در همان صفحه استفاده کنید (یا **همگامسازی خودکار** را فعال کنید) تا کاتالوگ بهروز upstream دریافت شود. این مورد در نسخه v3.8.50 برای LLM7.io (`gemini-3.1-flash-lite`) و UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) تأیید شد؛ دسترسی ناشناس Pollinations در همان دور آزمایشی همچنان از سمت upstream محدود بود.
+> اگر فهرست داخلی یک ارائهدهنده قدیمی شده باشد، از **Import from /models** در همان صفحه استفاده کنید (یا **Auto-Sync** را فعال کنید) تا کاتالوگ بهروز upstream را دریافت کنید. این مورد در v3.8.50 برای LLM7.io (`gemini-3.1-flash-lite`) و UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) تأیید شد؛ دسترسی ناشناس Pollinations در همان مرحله آزمایش همچنان از سمت upstream محدود باقی ماند.
 
-**Claude Code (`cc/`)** — OAuth برای پلن Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth از نوع Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — OAuth برای پلن Plus/Pro: `cx/gpt-5.5` (+ سطوح effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth از نوع Plus/Pro: `cx/gpt-5.5` (+ سطوح effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth رایگان: از کاتالوگ بهروزی که در **داشبورد → ارائهدهندگان → Kiro → مدلهای موجود** نمایش داده میشود استفاده کنید. دسترسی به مدلها به حساب و پلن بستگی دارد.
+**Kiro (`kr/`)** — OAuth رایگان: از کاتالوگ بهروزی که در مسیر **Dashboard → Providers → Kiro → Available Models** نمایش داده میشود استفاده کنید. دسترسیپذیری بسته به حساب کاربری و طرح متفاوت است.
 
 **Qoder (`if/`)** — OAuth رایگان: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,7 +632,7 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mo ثابت یا بهازای استفاده: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — تعرفه ثابت $9 در ماه یا پرداخت بهازای مصرف: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — کلید API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -648,7 +648,7 @@ post_install() {
 
 **Fireworks AI (`fireworks/`)** — استنتاج سریع: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — مقیاس ویفر (Wafer-scale): `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — مقیاس ویفر: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — متمرکز بر RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
@@ -658,11 +658,11 @@ post_install() {
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: بهصورت زنده و بهازای هر کلید API از Google همگامسازی میشود — فهرست ثابتی وجود ندارد. یک کلید را در **داشبورد → ارائهدهندگان** متصل کنید و سپس از **مدلهای موجود** برای وارد کردن کاتالوگ فعلی استفاده کنید (مثلاً `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: بهصورت زنده و بهازای هر کلید API از Google همگامسازی میشود — فهرست ثابتی وجود ندارد. یک کلید را در **Dashboard → Providers** متصل کنید و سپس از **Available Models** برای واردکردن کاتالوگ فعلی استفاده کنید (مثلاً `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**سایر ارائهدهندگان سازگار** (منتخب): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (از طریق `aws-bedrock`), `azure-ai`, `openrouter` (کاتالوگ passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. هرکدام فهرست مدلهای خود را در `providerRegistry.ts` نگهداری میکنند و در صورتی که ارائهدهنده endpoint ‏`/models` را در اختیار بگذارد، میتوانند بهصورت خودکار همگامسازی شوند.
+**سایر ارائهدهندگان سازگار** (منتخب): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (از طریق `aws-bedrock`), `azure-ai`, `openrouter` (کاتالوگ عبوری), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. هرکدام فهرست مدلهای خود را در `providerRegistry.ts` نگهداری میکنند و در صورتی که ارائهدهنده یک endpoint به نام `/models` ارائه دهد، میتوانند بهصورت خودکار همگامسازی شوند.
 
-**نکته درباره شناسههای مدل:** OmniRoute از شناسههای بومیِ هر ارائهدهنده استفاده میکند (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). برخی شناسهها شامل نسخههای نقطهدار هستند، زیرا API upstream آنها را به همین شکل انتظار دارد. اگر مدلی در فهرست بالا وجود ندارد، `omniroute models --search <term>` را اجرا کنید یا `GET /api/models/catalog` را فراخوانی کنید تا از در دسترس بودن آن مطمئن شوید.
+**نکته درباره شناسههای مدل:** OmniRoute از شناسههای بومیِ هر ارائهدهنده استفاده میکند (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). برخی شناسهها شامل نسخههای نقطهدار هستند، زیرا API بالادستی آنها را به همین شکل انتظار دارد. اگر مدلی در فهرست بالا ذکر نشده است، دستور `omniroute models --search <term>` را اجرا کنید یا `GET /api/models/catalog` را فراخوانی کنید تا از در دسترس بودن آن مطمئن شوید.
 
 </details>
 

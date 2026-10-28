@@ -10004,6 +10004,8 @@
     "notAvailableSymbol": "-",
     "providerLimits": "Limity dostawców",
     "noProviders": "Brak połączonych providers",
+    "quotaAuthRequired": "Wymagane uwierzytelnienie — zaloguj się do panelu",
+    "quotaAuthRequiredHint": "Nie udało się wczytać połączeń z dostawcami, ponieważ sesja panelu wygasła lub nie istnieje. Zaloguj się i odśwież stronę, aby zobaczyć swoje limity.",
     "connectProvidersForQuota": "Połącz się z providers za pomocą OAuth, aby śledzić limity quota i zużycie API.",
     "accountsCount": "{count, plural, one {# konto} other {# kont}}",
     "filteredFromCount": "(odfiltrowano z {count})",

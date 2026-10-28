@@ -13,30 +13,30 @@
 
 ## Ihe Ọ Bụ
 
-OmniRoute na-edebanye ndị na-eweta ọrụ 376, gụnyere ndenye katalọgụ 155 e ji akara **free/no-auth**
+OmniRoute na-edebanye ndị na-enye ọrụ 376, gụnyere ndepụta katalog 155 e nyere akara **free/no-auth**
 (no-auth,
-OAuth nke ọkwa efu, ma ọ bụ igodo API nke ọkwa efu — lee
-[Nduzi Ọkwa Efụ](../getting-started/FREE-TIERS-GUIDE.md) na
-[Ndekọ Ọkwa Efụ zuru ezu](../reference/FREE_TIERS.md)). Ihe ịma aka ya bụ: ndị na-eweta ọrụ efu na-adị
-nnọọ iche n'ịdị mma nke model. Onye na-eweta ọrụ no-auth nke na-enye model frontier bara uru karịa
-onye na-enye obere model ochie.
+free-tier OAuth, ma ọ bụ free-tier API key — lee
+[Ntuziaka Free Tiers](../getting-started/FREE-TIERS-GUIDE.md) na
+[ndekọ Free Tiers](../reference/FREE_TIERS.md) zuru oke). Ihe aghọtaghị ya bụ: ndị na-enye ọrụ n'efu dị
+iche iche nke ukwuu n'àgwà model. Onye na-enye ọrụ no-auth na-enye model nke ọkwa kacha elu bara uru
+karịa nke na-enye model ochie obere.
 
-**Nhazi Ọkwa Ndị Na-eweta Ọrụ Efụ** na-aza "**onye na-eweta ọrụ efu nào na-enye m model kachasị mma?**" site na
-ijikọ katalọgụ onye na-eweta ọrụ efu ọ bụla na **akara ogo ndị mmadụ chịkọtara** sitere na
-**bọọdụ ndu Arena AI** (ELO nke dabere na mmasị mmadụ, otu echiche ahụ dị n'azụ arena chatbot
-LMArena). Mgbe ahụ, a na-ahazi ndị na-eweta ọrụ dịka ike nke **model efu ha kachasị mma** si dị.
+**Free Provider Rankings** na-aza ajụjụ ahụ "**kedu onye na-enye ọrụ n'efu ga-enye m model kacha mma?**" site
+n'ịjikọ katalog onye ọ bụla na-enye ọrụ n'efu na **akara àgwà sitere n'aka ọha mmadụ** si na
+**leaderboard Arena AI** (ELO mmasị mmadụ, otu echiche ahụ dị n'azụ arena chatbot
+LMArena). A na-akọrọ ndị na-enye ọrụ n'usoro dịka ike nke **model n'efu kacha mma** ha.
 
-A na-agbakọ nhazi ọkwa ahụ site na isi mmalite atọ dị adị:
+A na-agụ ọkwa ahụ site na isi mmalite atọ ezi:
 
-1. Ndepụta ndị na-eweta ọrụ efu — `NOAUTH_PROVIDERS`, tinyere ndenye `OAUTH_PROVIDERS` /
-   `APIKEY_PROVIDERS` e ji `hasFree` kaa akara
+1. Ndepụta ndị na-enye ọrụ n'efu — `NOAUTH_PROVIDERS`, tinyere ndepụta `OAUTH_PROVIDERS` /
+   `APIKEY_PROVIDERS` e nyere akara `hasFree`
    (`src/shared/constants/providers.ts`).
-2. Katalọgụ model nke onye na-eweta ọrụ ọ bụla sitere na ndekọ ndị na-eweta ọrụ
+2. Katalog model onye ọ bụla na-enye ọrụ si na ndekọ ndị na-enye ọrụ
    (`open-sse/config/providerRegistry.ts`).
-3. Akara ndakọrịta ọrụ sitere na ELO echekwara na tebụl DB `model_intelligence` site na
-   injin mmekọrịta Arena ELO (`src/lib/arenaEloSync.ts`).
+3. Akara ịdabara ọrụ sitere na ELO e chekwara na tebụl DB `model_intelligence` site na
+   engine mmekọrịta Arena ELO (`src/lib/arenaEloSync.ts`).
 
-Usoro njikọta ahụ dị na `src/lib/freeProviderRankings.ts`.
+Lojik ijikọ ahụ nọ na `src/lib/freeProviderRankings.ts`.
 
 ---
 
@@ -120,32 +120,32 @@ Paramita ajụjụ (eji Zod kwado ha):
 
 ---
 
-## Otu Skọọ Ndị A Si Arụ Ọrụ
+## Otu Akara Ndị Ahụ Si Arụ Ọrụ
 
-### Isi mmalite: Okwa ndị ndu Arena AI
+### Isi Mmalite: Arena AI leaderboard
 
-Inji mmekọrịta Arena ELO (`src/lib/arenaEloSync.ts`) na-eweta okwa ndị ndu abụọ — `text` na `code` — site na Arena AI leaderboard API (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Mgbe API ahụ na-enweghị okwa ọ bụla a nwere ike iji rụọ ọrụ, inji ahụ na-alaghachi azụ na `lmarena-ai/leaderboard-dataset` nke e kwenyere na ya dị n'Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`, `coding` → `code`); `GET /api/intelligence/sync` na-akọwa `activeSource`, `lastError` na `lastFailedAt`. Ihe ntinye ọ bụla dị n'okwa ndị ndu na-ebu aha model, onye nrụpụta, ELO `score`, oke ntụkwasị obi, na ọnụ ọgụgụ vootu.
+Injini mmekọrịta Arena ELO (`src/lib/arenaEloSync.ts`) na-ewete leaderboard abụọ — `text` na `code` — site na Arena AI leaderboard API (`https://api.wulong.dev/arena-ai-leaderboards/v1/leaderboard`). Mgbe API ahụ na-adaghachiteghị board ọ bụla a ga-eji, injini ahụ na-ada azụ na dataset ọfịshal `lmarena-ai/leaderboard-dataset` dị na Hugging Face datasets-server (`src/lib/arenaEloHfSource.ts`, CC-BY-4.0; `overall` → `text`, `coding` → `code`); `GET /api/intelligence/sync` na-akọwa `activeSource`, `lastError` na `lastFailedAt`. Ntinye leaderboard ọ bụla na-ebu aha model, vendor, ELO `score`, oke ntụkwasị obi (confidence interval), na ọnụ ọgụgụ vootu.
 
-Ụdị ndị dị n'okwa ndị ndu na-akwekọ na ụdị ọrụ OmniRoute:
+Ụdị leaderboard na-akpata ụdị ọrụ OmniRoute:
 
-| Okwa ndị ndu Arena | Ụdị ọrụ OmniRoute                                 |
-| ------------------ | ------------------------------------------------- |
-| `text`             | `default`, `review`, `documentation`, `debugging` |
-| `code`             | `coding`                                          |
+| Arena leaderboard | Ụdị ọrụ OmniRoute                                 |
+| ----------------- | ------------------------------------------------- |
+| `text`            | `default`, `review`, `documentation`, `debugging` |
+| `code`            | `coding`                                          |
 
-### Ihazie n'otu ọkwa (skọọ ndakọrịta ọrụ)
+### Nhazi (akara task-fit)
 
-A na-ahazi ELO skọọ ndị bụ isi n'otu ọkwa maka okwa ndị ndu ọ bụla ka ha bụrụ **uru ndakọrịta ọrụ n'ime `[0.4, 0.98]`**:
+A na-ahazi akara ELO ndị isi n'ụzọ ọkọlọtọ n'aka leaderboard ọ bụla ka ọ ghọọ **uru task-fit dị na `[0.4, 0.98]`**:
 
 ```
 taskFit = 0.4 + 0.58 * ((elo - minElo) / (maxElo - minElo))
 ```
 
-Skọọ ahụ anaghị eru `0` ma ọ bụ `1`, nke na-ahapụ ohere maka ihe onye ọrụ kagburu. Nke a bụ ubi `score` ị na-ahụ na nzaghachi API nakwa akara a na-egosi na dashboard.
+Akara ahụ anaghị eru `0` ma ọ bụ `1`, na-ahapụ ohere maka ndị ọrụ iji mee nkwanye. Nke a bụ field `score` ị na-ahụ na nzaghachi API yana aha a na-egosi na dashboard.
 
-### Ntụkwasị obi
+### Ntụkwasị Obi
 
-Ihe ntinye ọ bụla na-enweta ọkwa ntụkwasị obi dabere n'ọnụ ọgụgụ vootu Arena:
+Ntinye ọ bụla na-enweta ọkwa ntụkwasị obi dabere na ọnụ ọgụgụ vootu Arena:
 
 | Ntụkwasị obi | Vootu   |
 | ------------ | ------- |
@@ -153,56 +153,53 @@ Ihe ntinye ọ bụla na-enweta ọkwa ntụkwasị obi dabere n'ọnụ ọgụ
 | `medium`     | ≥ 1,000 |
 | `low`        | < 1,000 |
 
-### Nchekwa na ọhụrụ
+### Nchekwa na Ọhụrụ
 
-A na-ede ihe ntinye ndị e haziri n'otu ọkwa n'ime tebụl DB `model_intelligence` site na `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Ihe ntinye ndị ahụ **na-agwụ mgbe ụbọchị asaa gachara**, ka onye na-eweta ọrụ nke kwụsịrị imekọrịta wee pụ n'usoro ahụ kama inye data ochie.
+A na-edega ntinye e hachara n'ụzọ ọkọlọtọ na table DB `model_intelligence` site na `source = "arena_elo"` (`src/lib/db/modelIntelligence.ts`). Ntinye ndị ahụ **na-ekubi ume mgbe ụbọchị asaa gachara**, ka provider nke kwụsịrị imekọrịta wee pụta n'ahịrị kama ị na-enye data ochie.
 
-Mmekọrịta ahụ na-arụ ọrụ **n'ọnọdụ ndabara**:
+Mmekọrịta ahụ na-arụ ọrụ **n'ụzọ ndabara**:
 
-- Ọ na-arụ ọrụ otu ugboro mgbe sava na-amalite, wee na-arụkwa ọrụ n'oge n'oge na timer
-  (`src/lib/arenaEloSync.ts`, e jikọtara ya site na `src/instrumentation-node.ts`).
-- Ọ bụ **nke na-agbochịghị ma ọ nweghị ike ibibi ihe** — ọ bụrụ na iweta site na isi ọkụ daa ọdịdị, OmniRoute na-aga n'ihu na-arụ ọrụ, usoro ọkwa ndị ahụ na-egosikwa data dị mma nke ikpeazụ (ma ọ bụ ọnọdụ efu).
+- Ọ na-arụ ọrụ otu ugboro mgbe server na-amalite, wee na-arụkwa na timer oge (`src/lib/arenaEloSync.ts`, e jikọrọ ya site na `src/instrumentation-node.ts`).
+- Ọ bụ **non-blocking ma ọ bụghị ihe na-ebibi usoro** — ọ bụrụ na iweta upstream dara ada, OmniRoute na-aga n'ihu na-arụ ọrụ, rankings ahụ na-egosi nanị data ọma ikpeazụ (ma ọ bụ ọnọdụ oghere).
 
-Ihe mgbanwe gburugburu abụọ na-achịkwa ya (e dekọrọ ha na
-[`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
+Environment variables abụọ na-achịkwa ya (e dekọrọ ha na [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md)):
 
-| Ihe mgbanwe               | Ndabara       | Ebumnuche                                             |
-| ------------------------- | ------------- | ----------------------------------------------------- |
-| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Tinye ya na `false` iji pụ na mmekọrịta na-aga n'èzí. |
-| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Oge etiti mmekọrịta, na sekọnd.                       |
+| Variable                  | Ndabara       | Ebumnuche                                                          |
+| ------------------------- | ------------- | ------------------------------------------------------------------ |
+| `ARENA_ELO_SYNC_ENABLED`  | `true`        | Tinye ya na `false` iji wepụ onwe gị na mmekọrịta na-esi na mpụga. |
+| `ARENA_ELO_SYNC_INTERVAL` | `86400` (24h) | Oge ezitere mmekọrịta, na sekọnd.                                  |
 
-### Mmekọrịta n'aka / ọnọdụ / ihichapụ
+### Mmekọrịta aka / ọnọdụ / ihicha
 
-Maka ndị na-elekọta sistemụ, endpoint nlekọta nke a nyere ikike na-emeghe njikwa n'aka
-(`src/app/api/intelligence/sync/route.ts` — ọ chọrọ nkwenye nlekọta):
+Maka ndị na-elekọta usoro, endpoint nlekọta nwere nkwenye na-eme ka njikwa aka dịrị (`src/app/api/intelligence/sync/route.ts` — ọ chọrọ nkwenye nlekọta):
 
 ```
 GET    /api/intelligence/sync          # ọnọdụ mmekọrịta ugbu a (enabled, lastSync, nextSync, intervalMs)
-POST   /api/intelligence/sync          # kpalite mmekọrịta n'aka; body: { "dryRun": true } iji lelee anya na-edegideghị ihe
-DELETE /api/intelligence/sync          # kpochapụ ihe ntinye arena_elo niile e mekọrịtara
+POST   /api/intelligence/sync          # kpalite mmekọrịta aka; body: { "dryRun": true } iji lele ya na-enweghị ide ihe
+DELETE /api/intelligence/sync          # hichapụ ntinye arena_elo intelligence niile e mekọrịtara
 ```
 
-Ọ bụrụ na ibe usoro ọkwa dị efu, `POST /api/intelligence/sync` n'aka (ma ọ bụ ịmalitegharị sava ọzọ) ga-ejupụta ya ọzọ.
+Ọ bụrụ na ibe rankings ahụ dị oghere, `POST /api/intelligence/sync` aka (ma ọ bụ nanị ịmalitegharị server ahụ) ga-etinyegharị ya ihe.
 
-### Ịkwekọ model na okwa ndị ndu
+### Ịdabara Models na Leaderboard
 
-ID model ndị e debanyere aha na aha model Arena anaghị ekwekọ kpom kwem mgbe niile. Usoro ọkwa ahụ na-eji nkwenye nke na-agbanwe agbanwe (`findMatchingIntelligence` na `src/lib/freeProviderRankings.ts`):
+ID model registry na aha model Arena anaghị adabara kpamkpam mgbe niile. Ranking ahụ na-eji ịdabara nke na-agbanwe agbanwe (`findMatchingIntelligence` na `src/lib/freeProviderRankings.ts`):
 
-1. Nkwenye kpom kwem na ID model e haziri n'otu ọkwa.
-2. Nkwenye mgbe e wepụrụ mgbakwụnye ụdị dị n'azụ (dịka `kimi-k2.6` → `kimi-k2`).
-3. Nkwenye mmalite (aha model dị n'okwa ndị ndu bụ mmalite nke ID ndebanye aha).
+1. Ịdabara kpamkpam na ID model e hachara n'ụzọ ọkọlọtọ.
+2. Ịdabara mgbe e wepụrụ mgbakwụnye version dị na njedebe (dịka `kimi-k2.6` → `kimi-k2`).
+3. Ịdabara mmalite (aha model leaderboard bụ mmalite nke ID registry).
 
-N'akụkụ mmekọrịta, a na-ewepụ mmalite aha onye nrụpụta a ma ama (`anthropic/`, `openai/`, `google/`, …), ma map aha ọzọ obere na-agbasawanye aha ndị bụ isi ka ọ bụrụ ụdị dị iche iche OmniRoute na-eji n'ime ya, ka model wee nọrọ n'ọnọdụ a nwere ike ịchọta ha n'okpuru aha ọ bụla.
+N'akụkụ mmekọrịta, a na-ewepụ mmalite aha vendor a maara (`anthropic/`, `openai/`, `google/`, …), map alias obere na-agbasa aha ndị ọkọlọtọ ka ha ghọọ ụdị dị iche iche OmniRoute na-eji n'ime ya, ka models wee nọrọ n'ọnọdụ a ga-achọta n'okpuru aha ọ bụla.
 
-### Otu a si ahazi onye na-eweta n'usoro
+### Otu E Si Ahazụ Provider
 
-Maka onye na-eweta ọrụ n'efu ọ bụla, inji ahụ na-enye skọọ model ọ bụla dị na ndepụta ya, wee:
+Maka provider efu ọ bụla, injini ahụ na-agba model ọ bụla dị na catalog ya akara, wee:
 
-- **Model Kacha Elu (Top Model)** = model onye na-eweta nke nwetara skọọ kacha elu.
-- **Skọọ Nkezi (Avg Score)** = skọọ nkezi gafere model niile nke onye na-eweta ahụ nwetara skọọ.
-- **Ọnụ Ọgụgụ Model (Models)** = ọnụ ọgụgụ model onye na-eweta nke nwetara skọọ Arena.
+- **Model Kacha Elu** = model provider ahụ nwere akara kacha elu.
+- **Akara Nkezi** = akara nkezi n'ofe model niile e gbaro akara nke provider ahụ.
+- **Models** = ọnụ ọgụgụ model provider ahụ nwetara akara Arena.
 
-A na-ahazi ndị na-eweta n'usoro site na **skọọ model kacha elu** tupu, wee site na skọọ nkezi. Nke a na-akwụghachi ụgwọ onye na-eweta nke wepụtara opekata mpe otu model siri ike n'efu.
+A na-ahazụ providers site na **akara model kacha elu** tupu, wee site na akara nkezi. Nke a na-akwụghachi ụgwọ provider nke na-enye opekata mpe otu model efu dị ike.
 
 ---
 

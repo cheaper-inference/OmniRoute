@@ -612,9 +612,9 @@ Pełną dokumentację zmiennych środowiskowych można znaleźć w pliku [README
 <details>
 <summary><b>Zobacz wszystkie dostępne modele</b></summary>
 
-> Poniższa lista została opracowana na podstawie `open-sse/config/providerRegistry.ts` dla v3.8.0. Katalogi chmurowe (Gemini, OpenRouter itp.) są synchronizowane dynamicznie — pełny aktualny katalog znajdziesz w **Panel → Dostawcy → [dostawca] → Dostępne modele** lub wywołując `GET /api/models/catalog`.
+> Poniższa lista została opracowana na podstawie `open-sse/config/providerRegistry.ts` dla wersji v3.8.0. Katalogi chmurowe (Gemini, OpenRouter itp.) są synchronizowane dynamicznie — pełny aktualny katalog znajdziesz w **Panel → Dostawcy → [dostawca] → Dostępne modele** lub wywołując `GET /api/models/catalog`.
 >
-> Jeśli wbudowana lista danego dostawcy się zdezaktualizowała, użyj **Importu z /models** na tej stronie (lub włącz **Automatyczną synchronizację**), aby pobrać aktualny katalog z upstreamu. Zweryfikowano to w v3.8.50 dla LLM7.io (`gemini-3.1-flash-lite`) oraz UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonimowy dostęp do Pollinations pozostał ograniczony po stronie upstreamu podczas tej samej serii testów.
+> Jeśli wbudowana lista dostawcy się zdezaktualizowała, użyj opcji **Importuj z /models** na tej stronie (lub włącz **Autosynchronizację**), aby pobrać aktualny katalog z upstreamu. Zostało to zweryfikowane w wersji v3.8.50 dla LLM7.io (`gemini-3.1-flash-lite`) oraz UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); anonimowy dostęp do Pollinations pozostał ograniczony po stronie upstream podczas tej samej rundy testów.
 
 **Claude Code (`cc/`)** — OAuth Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -622,15 +622,15 @@ Pełną dokumentację zmiennych środowiskowych można znaleźć w pliku [README
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — DARMOWY OAuth: korzystaj z aktualnego katalogu widocznego w **Panel → Dostawcy → Kiro → Dostępne modele**. Dostępność zależy od konta i planu.
+**Kiro (`kr/`)** — BEZPŁATNY OAuth: korzystaj z katalogu na żywo widocznego w **Panel → Dostawcy → Kiro → Dostępne modele**. Dostępność zależy od konta i planu.
 
-**Qoder (`if/`)** — DARMOWY OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
+**Qoder (`if/`)** — BEZPŁATNY OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
 **GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mies. ryczałt lub rozliczenie za użycie: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mies. ryczałtem lub według użycia: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — klucz API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -640,27 +640,27 @@ Pełną dokumentację zmiennych środowiskowych można znaleźć w pliku [README
 
 **Mistral (`mistral/`)** — hosting w UE: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — wspomagane wyszukiwaniem: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — wspomagany wyszukiwaniem: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — open-source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (darmowy), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — open source: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bezpłatny), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
 **Fireworks AI (`fireworks/`)** — szybka inferencja: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — architektura wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — zorientowane na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — nastawiony na RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — dla przedsiębiorstw: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — klasa enterprise: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Synchronizowane na żywo dla każdego klucza API z Google — brak statycznej listy. Podłącz klucz w **Panel → Dostawcy**, a następnie użyj **Dostępne modele**, aby zaimportować bieżący katalog (np. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: synchronizowane na żywo dla każdego klucza API z Google — brak statycznej listy. Podłącz klucz w **Panel → Dostawcy**, a następnie użyj opcji **Dostępne modele**, aby zaimportować aktualny katalog (np. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Inni zgodni dostawcy** (wybrane): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (przez `aws-bedrock`), `azure-ai`, `openrouter` (katalog passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Każdy z nich utrzymuje własną listę modeli w `providerRegistry.ts` i może być synchronizowany automatycznie, gdy dostawca udostępnia endpoint `/models`.
+**Inni kompatybilni dostawcy** (wybrani): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (przez `aws-bedrock`), `azure-ai`, `openrouter` (katalog przekazywany), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Każdy z nich utrzymuje własną listę modeli w `providerRegistry.ts` i może być synchronizowany automatycznie, gdy dostawca udostępnia endpoint `/models`.
 
-**Uwaga dotycząca identyfikatorów modeli:** OmniRoute używa natywnych identyfikatorów dostawców (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Niektóre identyfikatory zawierają wersje z kropkami, ponieważ takiego formatu oczekuje API upstreamu. Jeśli model nie figuruje powyżej, uruchom `omniroute models --search <term>` lub wywołaj `GET /api/models/catalog`, aby potwierdzić dostępność.
+**Uwaga dotycząca identyfikatorów modeli:** OmniRoute używa natywnych identyfikatorów dostawców (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Niektóre identyfikatory zawierają wersje zapisywane z kropkami, ponieważ właśnie takiego formatu oczekuje nadrzędne API. Jeśli modelu nie ma na powyższej liście, uruchom `omniroute models --search <term>` lub wywołaj `GET /api/models/catalog`, aby potwierdzić dostępność.
 
 </details>
 

@@ -36,30 +36,30 @@ Klientforespørsel
 
 Ingen komprimering brukes. Alle meldinger går gjennom uendret.
 
-### Lite-modus (~15 % besparelse, <1 ms forsinkelse)
+### Lite-modus (~15 % besparelse, <1 ms latens)
 
-Den tryggeste modusen — null semantisk endring, kun opprydding i formatering:
+Den sikreste modusen — null semantisk endring, kun rydding i formatering:
 
-| Teknikk                  | Beskrivelse                                                   |
-| ------------------------ | ------------------------------------------------------------- |
-| `collapseWhitespace`     | Slår sammen gjentatte tomme linjer og etterfølgende mellomrom |
-| `dedupSystemPrompt`      | Fjerner dupliserte systemmeldinger                            |
-| `compressToolResults`    | Komprimerer ordrike verktøy-/funksjonsutdata                  |
-| `removeRedundantContent` | Fjerner gjentatte instruksjoner                               |
-| `replaceImageUrls`       | Forkorter base64-bilde-data-URI-er                            |
+| Teknikk                  | Beskrivelse                                                    |
+| ------------------------ | -------------------------------------------------------------- |
+| `collapseWhitespace`     | Slår sammen påfølgende tomme linjer og etterfølgende mellomrom |
+| `dedupSystemPrompt`      | Fjerner dupliserte systemmeldinger                             |
+| `compressToolResults`    | Komprimerer omstendelige verktøy-/funksjonsutdata              |
+| `removeRedundantContent` | Fjerner gjentatte instruksjoner                                |
+| `replaceImageUrls`       | Forkorter base64-bilde-data-URI-er                             |
 
-**Best egnet for:** Alltid-på-bruk, sikkerhetskritiske arbeidsflyter.
+**Best for:** Alltid-på-bruk, sikkerhetskritiske arbeidsflyter.
 
 ### Standardmodus (~30 % besparelse)
 
-Inspirert av [Caveman](https://github.com/JuliusBrussee/caveman) — fjerner fyllord og ordrike formuleringer samtidig som betydningen bevares:
+Inspirert av [Caveman](https://github.com/JuliusBrussee/caveman) — fjerner fyllord og omstendelige formuleringer mens betydningen bevares:
 
-- Fjerner fyllord («please», «I think», «basically», «actually»)
-- Kondenserer ordrike fraser («in order to» → «to», «as a result of» → «because»)
-- Fjerner høflige forbehold («Would you mind...», «If you could possibly...»)
-- Over 30 regex-regler finjustert for kodeprompter
+- Fjerner fyllord ("please", "I think", "basically", "actually")
+- Kondenserer omstendelige fraser ("in order to" → "to", "as a result of" → "because")
+- Fjerner høflige forbehold ("Would you mind...", "If you could possibly...")
+- 30+ regex-regler finjustert for kodeprompter
 
-**Best egnet for:** Daglige kodearbeidsflyter, kostnadsbevisste team.
+**Best for:** Daglige kodearbeidsflyter, kostnadsbevisste team.
 
 ### Aggressiv modus (~50 % besparelse)
 
@@ -67,56 +67,56 @@ Smart historikkhåndtering for lange økter:
 
 - **Meldingsaldring** — eldre meldinger komprimeres gradvis
 - **Komprimering av verktøyresultater** — lange verktøyutdata avkortes eller utelates (første/siste linjer,
-  filtrering av trefflinjer, komprimering av JSON-nøkler)
-- **Strukturelle integritetsvakter** — sikrer at `tool_use` + `tool_result`-par forblir konsistente
+  filtrering av trefflinjer, kompaktering av JSON-nøkler)
+- **Strukturelle integritetsvakter** — sørger for at `tool_use` + `tool_result`-par forblir konsistente
 - **Kontekstvindubevissthet** — respekterer token-grenser per modell
 
-**Best egnet for:** Lange feilsøkingsøkter, store kodebaser.
+**Best for:** Lange feilsøkingsøkter, store kodebaser.
 
 ### Ultra-modus (~75 % besparelse)
 
 Maksimal komprimering for token-kritiske scenarier:
 
-- **Heuristisk beskjæring** — poengbasert token-beskjæring av prosa
-- **Strukturbevaring** — inngjerdede kodeblokker, inline-kode, URL-er og identifikatorer
-  erstattes med tombstones og sys sammen igjen ordrett — de beskjæres aldri
-- **Valgfritt SLM-nivå** — en liten lokal modell kan forfine beskjæringen når den er konfigurert
-- Uavhengig av Aggressiv modus: den kjører ikke meldingsaldring, verktøyresultatkomprimering
-  eller fallback-oppsummeringen (kun en feil i SLM-nivået kan rute en fallback-runde gjennom
-  aggressiv modus)
+- **Heuristisk beskjæring** — scorebasert token-beskjæring av prosa
+- **Strukturbevaring** — inngjerdede kodeblokker, inline-kode, URL-er og identifikatorer erstattes med
+  plassholdere («tombstones») og sys sammen igjen ordrett — de beskjæres aldri
+- **Valgfritt SLM-nivå** — en liten lokal modell kan forbedre beskjæringen når den er konfigurert
+- Uavhengig av Aggressiv modus: den kjører ikke meldingsaldring, komprimering av verktøyresultater
+  eller fallback-oppsummereren (kun en feil i SLM-nivået kan rute en fallback-runde gjennom
+  aggressiv)
 
-**Best egnet for:** Når du gjentatte ganger når kontekstgrensene.
+**Best for:** Når du gjentatte ganger når kontekstgrensene.
 
-### RTK-modus (60–90 % oppstrømsområde)
+### RTK-modus (60-90 % opptstrømsområde)
 
-RTK-modus er optimalisert for ordrike verktøyutdata som dukker opp i økter med kodeagenter:
+RTK-modus er optimalisert for omstendelige verktøyutdata som dukker opp i kodeagentøkter:
 
 - Gjenkjenner kommando-/utdataklasser som `git status`, `git diff`, `git log`, testkjørere,
   TypeScript/Vite/Webpack-bygg, ESLint/Biome/Prettier, npm audit/installasjoner, Docker-logger,
   infrastrukturutdata og generell shell-utdata
 - Bruker JSON-filterpakker fra `open-sse/services/compression/engines/rtk/filters/`
-- Importerer filtre i RTK TOML-skjema v1 fra prosjekt- eller globale `filters.toml`-filer, med
-  validering via inline-tester og tillitsgating for prosjektfiler
-- Leveres med 56 innebygde filtre med inline-verifiseringsprøver
+- Importerer RTK TOML-skjema v1-filtre fra prosjekt- eller globale `filters.toml`-filer, med
+  validering via inline-tester og tillitskontroll for prosjektfiler
+- Leveres med 56 innebygde filtre med inline-verifiseringseksempler
 - Fjerner ANSI-kontrollsekvenser, fremdriftslinjer, gjentatte linjer og støy som ikke kan handles på
-- Bevarer feiltilfeller, feilmeldinger, advarsler, endrede filer, oppsummeringer og slutten av lang utdata
-- Støtter tillitsgatede prosjektfiltre, globale filtre og valgfri gjenoppretting av redigert råutdata
+- Bevarer feiltilfeller, feilmeldinger, advarsler, endrede filer, sammendrag og de siste linjene i lang utdata
+- Støtter tillitskontrollerte prosjektfiltre, globale filtre og valgfri gjenoppretting av redigert råutdata
 
-**Best egnet for:** Agentøkter med transkripsjoner fra shell, bygg, tester, git, grep og filutdata.
+**Best for:** Agentøkter med transkripsjoner fra shell, bygg, tester, git, grep og filutdata.
 
-### Stablet modus (78–95 % kvalifisert område)
+### Stablet modus (78-95 % kvalifisert område)
 
-Stablet modus kjører flere komprimeringsmotorer i en deterministisk rekkefølge. Standardpipelinen er:
+Stablet modus kjører flere komprimeringsmotorer i en deterministisk rekkefølge. Standard-pipelinen er:
 
 ```txt
 RTK -> Caveman
 ```
 
-Denne rekkefølgen gjør terminal-/verktøyutdata kompakte først, og bruker deretter Cavemans semantiske
+Den rekkefølgen holder terminal-/verktøyutdata kompakte først, og bruker deretter Cavemans semantiske
 kondensering på den gjenværende naturligspråklige prompten. Stablede pipelines kan konfigureres globalt
-eller gjennom komprimeringskombinasjoner tildelt rutingskombinasjoner.
+eller gjennom komprimeringskombinasjoner tilordnet rutingskombinasjoner.
 
-**Best egnet for:** Blandet kontekst med store verktøylogger pluss menneskelige instruksjoner eller assistentoppsummeringer.
+**Best for:** Blandet kontekst med store verktøylogger pluss menneskelige instruksjoner eller assistentsammendrag.
 
 ---
 

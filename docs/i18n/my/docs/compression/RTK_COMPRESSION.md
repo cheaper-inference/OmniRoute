@@ -23,22 +23,24 @@ Caveman input:     46% ချွေတာမှု
 အပိုင်းအခြား:       1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 ```
 
-## ချုံ့ယူပေးသောအရာများ
+## ဘာတွေကို Compress လုပ်သလဲ
 
-built-in catalog တွင် အောက်ပါအမျိုးအစားများအလိုက် filter ၅၆ ခု ပါဝင်လာသည် —
+Built-in catalog မှာ filter စုစုပေါင်း 56 ခုပါဝင်ပြီး အောက်ပါ category များခွဲထားပါတယ်။
 
-| အမျိုးအစား | ဥပမာများ                                                       |
-| ---------- | -------------------------------------------------------------- |
-| `git`      | `git status`, `git branch`, `git diff`, `git log`              |
-| `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo test များ |
-| `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx  |
-| `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler  |
-| `shell`    | `ls`, `find`, `grep`, ယေဘုယျ shell log များ                    |
-| `docker`   | `docker ps`, Docker log များ                                   |
-| `infra`    | Terraform, OpenTofu, `systemctl status`                        |
-| `generic`  | JSON output, stack trace များ, ယေဘုယျ output fallback          |
+| Category  | ဥပမာများ                                                      |
+| --------- | ------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo tests    |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
+| `shell`   | `ls`, `find`, `grep`, အထွေထွေ shell log များ                  |
+| `docker`  | `docker ps`, Docker log များ                                  |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
+| `generic` | JSON output, stack trace များ, အထွေထွေ output fallback        |
 
-`open-sse/services/compression/engines/rtk/commandDetector.ts` ရှိ detector သည် filter မရွေးချယ်မီ output ကို အမျိုးအစားခွဲခြားပေးသည်။ command class တစ်ခုတည်းဖြင့် မလုံလောက်သောအခါမျိုးတွင် filter များသည် command pattern သို့မဟုတ် output regex ဖြင့်လည်း ကိုက်ညီမှုရှိမရှိ စစ်ဆေးနိုင်သည်။
+`open-sse/services/compression/engines/rtk/commandDetector.ts` ထဲရှိ detector က
+filter ရွေးချယ်ခြင်းမပြုမီ output ကို အမျိုးအစားခွဲခြားပေးပါတယ်။ command class တစ်ခုတည်းနဲ့
+မလုံလောက်တဲ့အခါ filter များဟာ command pattern (သို့) output regex နဲ့လည်း match လုပ်နိုင်ပါတယ်။
 
 ## Filter ရွေးချယ်ဖြေရှင်းပုံ
 
@@ -339,19 +341,19 @@ node --import tsx/esm --test \
 
 ## Intensity အဆင့်များ (v3.8.16+)
 
-RTK သည် **compression ပြင်းထန်မှု** နှင့် **လုံခြုံမှု** ကို ချိန်ညှိရွေးချယ်နိုင်စေမည့် **intensity အဆင့် ၃ ခု** ကို ပံ့ပိုးပေးသည်။ ဤအဆင့်ကို engine config ရှိ `config.intensity` ဖြင့် သတ်မှတ်သည်။
+RTK သည် **compression ပြင်းထန်မှု** နှင့် **လုံခြုံမှု** ကြား အချိုးကျ ရွေးချယ်နိုင်စေရန် **intensity အဆင့် ၃ ခု** ကို ပံ့ပိုးပေးသည်။ ထိုအဆင့်ကို engine config ရှိ `config.intensity` ဖြင့် သတ်မှတ်နိုင်သည်။
 
 ### အဆင့် ၃ ခု
 
-| အဆင့်               | ဖြတ်တောက်သည့် threshold      | Token သက်သာမှု | အန္တရာယ်  | အကောင်းဆုံး အသုံးပြုရန်                    |
-| ------------------- | ---------------------------- | -------------- | --------- | ------------------------------------------ |
-| `minimal`           | section တစ်ခုလျှင် 24 လိုင်း | ~20-40%        | အလွန်နည်း | critical context ပါဝင်သော production       |
-| `standard` (မူရင်း) | section တစ်ခုလျှင် 24 လိုင်း | ~50-70%        | နည်းသည်   | နေ့စဉ် coding session များ                 |
-| `aggressive`        | section တစ်ခုလျှင် 16 လိုင်း | ~70-90%        | အလယ်အလတ်  | ကြာရှည်သော session များ၊ အများဆုံးသက်သာမှု |
+| အဆင့်                | Truncation threshold            | Token သက်သာမှု | အန္တရာယ်   | သင့်လျော်သော အသုံးပြုမှု                    |
+| -------------------- | ------------------------------- | -------------- | ---------- | ------------------------------------------- |
+| `minimal`            | section တစ်ခုလျှင် စာကြောင်း ၂၄ | ~20-40%        | အလွန်နိမ့် | အရေးကြီး context ပါဝင်သော Production        |
+| `standard` (default) | section တစ်ခုလျှင် စာကြောင်း ၂၄ | ~50-70%        | နိမ့်      | နေ့စဉ် coding session များ                  |
+| `aggressive`         | section တစ်ခုလျှင် စာကြောင်း ၁၆ | ~70-90%        | အလယ်အလတ်   | ကြာရှည်သော session များ၊ အများဆုံး သက်သာမှု |
 
-### Truncation ဖြစ်ပွားရာနေရာ
+### Truncation ဖြစ်ပေါ်ရာ နေရာ
 
-ဖြတ်တောက်သည့် threshold သည် `lineFilter.ts` ကို သက်ရောက်စေသည်။
+Truncation threshold သည် `lineFilter.ts` ကို သက်ရောက်စေသည်-
 
 ```ts
 // open-sse/services/compression/engines/rtk/index.ts:329-330 မှ
@@ -359,39 +361,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-section တစ်ခုစီ၏ **head** နှင့် **tail** နှစ်ခုလုံးကို ထိန်းသိမ်းထားပြီး၊ truncation အလုပ်လုပ်သောအခါ အလယ်ပိုင်း content ကို ဖျက်ပါသည်။
+Section တစ်ခုချင်းစီ၏ **head** နှင့် **tail** ကို ထိန်းသိမ်းထားပြီး၊ truncation အစပြုသောအခါ အလယ်ပိုင်း အကြောင်းအရာများကို ဖျက်လိုက်ပါသည်။
 
-### ဘာတွေကျန်မလဲ၊ ဘာတွေ ဖြတ်တောက်ခံရမလဲ
+### ကျန်ရှိမည့်အရာများ နှင့် ဖြတ်တောက်ခံရမည့်အရာများ
 
-| Content                         | minimal          | standard         | aggressive       |
-| ------------------------------- | ---------------- | ---------------- | ---------------- |
-| Error များ / stack trace များ   | ✅ ထိန်းသိမ်းထား | ✅ ထိန်းသိမ်းထား | ✅ ထိန်းသိမ်းထား |
-| Test ပျက်ကွက်မှုများ            | ✅ ထိန်းသိမ်းထား | ✅ ထိန်းသိမ်းထား | ✅ ထိန်းသိမ်းထား |
-| Build error များ                | ✅ ထိန်းသိမ်းထား | ✅ ထိန်းသိမ်းထား | ✅ ထိန်းသိမ်းထား |
-| Test အောင်မြင်မှုများ (verbose) | ✅ ထိန်းသိမ်းထား | 🟡 ခေါက်သိမ်း    | 🟡 ခေါက်သိမ်း    |
-| ပုံမှန် output (info log များ)  | 🟡 ခေါက်သိမ်း    | 🟡 ခေါက်သိမ်း    | ❌ ပယ်ဖျက်       |
-| Progress bar များ               | 🟡 ခေါက်သိမ်း    | ❌ ပယ်ဖျက်       | ❌ ပယ်ဖျက်       |
-| Banner / ASCII art              | 🟡 ခေါက်သိမ်း    | ❌ ပယ်ဖျက်       | ❌ ပယ်ဖျက်       |
+| အကြောင်းအရာ                         | minimal             | standard            | aggressive          |
+| ----------------------------------- | ------------------- | ------------------- | ------------------- |
+| Error များ / stack trace များ       | ✅ ထိန်းသိမ်းထားသည် | ✅ ထိန်းသိမ်းထားသည် | ✅ ထိန်းသိမ်းထားသည် |
+| Test မအောင်မြင်မှုများ              | ✅ ထိန်းသိမ်းထားသည် | ✅ ထိန်းသိမ်းထားသည် | ✅ ထိန်းသိမ်းထားသည် |
+| Build error များ                    | ✅ ထိန်းသိမ်းထားသည် | ✅ ထိန်းသိမ်းထားသည် | ✅ ထိန်းသိမ်းထားသည် |
+| Test အောင်မြင်မှုများ (verbose)     | ✅ ထိန်းသိမ်းထားသည် | 🟡 ခေါက်သိမ်းထားသည် | 🟡 ခေါက်သိမ်းထားသည် |
+| ပုံမှန် output များ (info log များ) | 🟡 ခေါက်သိမ်းထားသည် | 🟡 ခေါက်သိမ်းထားသည် | ❌ ဖျက်လိုက်သည်     |
+| Progress bar များ                   | 🟡 ခေါက်သိမ်းထားသည် | ❌ ဖျက်လိုက်သည်     | ❌ ဖျက်လိုက်သည်     |
+| Banner / ASCII art                  | 🟡 ခေါက်သိမ်းထားသည် | ❌ ဖျက်လိုက်သည်     | ❌ ဖျက်လိုက်သည်     |
 
-### မှန်ကန်သော Intensity ကို ရွေးချယ်ခြင်း
+### မှန်ကန်သော Intensity ရွေးချယ်ခြင်း
 
 ```
-                  Is losing context catastrophic?
+                  context ဆုံးရှုံးမှုသည် ကြောက်မက်ဖွယ် ဖြစ်စေနိုင်ပါသလား။
                   │
       ┌───────────┼───────────┐
       │           │           │
-    YES          NO          NOT SURE
+   ဟုတ်ကဲ့      မဟုတ်ပါ      မသေချာပါ
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      How critical    Try `standard` first
-      │      is throughput?  (works for 80% of
-      │           │          cases)
-      │      ┌────┴────┐
+      │      throughput သည်   အရင်ဆုံး `standard` ကို
+      │      မည်မျှအရေးကြီးသနည်း စမ်းကြည့်ပါ
+      │           │           (အခြေအနေ ၈၀% တွင်
+      │      ┌────┴────┐      အလုပ်ဖြစ်သည်)
       │      │         │
-      │     LOW       HIGH
+      │     နိမ့်      မြင့်
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -399,9 +401,9 @@ section တစ်ခုစီ၏ **head** နှင့် **tail** နှစ်�
       └──────┴─────────┘
 ```
 
-### Intensity ကို Configure လုပ်ခြင်း
+### Intensity သတ်မှတ်ခြင်း
 
-**Combo တစ်ခုချင်းစီအတွက်** (combo config ထဲတွင်):
+**Combo အလိုက်** (combo config ထဲတွင်)-
 
 ```json
 {
@@ -414,11 +416,11 @@ section တစ်ခုစီ၏ **head** နှင့် **tail** နှစ်�
 }
 ```
 
-**Program ဖြင့်**:
+**Programmatic နည်းဖြင့်**-
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) သည်
-`CompressionEngine` တစ်ခုဖြစ်ပြီး `updateConfig` method မရှိပါ။ ၎င်းအစား
-registry helper မှတစ်ဆင့် engine ၏ config ကို update လုပ်ပါ။
+`CompressionEngine` တစ်ခုဖြစ်ပြီး `updateConfig` method မရှိပါ။ ထို့အစား engine တစ်ခု၏
+config ကို registry helper မှတစ်ဆင့် အပ်ဒိတ်လုပ်ပါ-
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -426,9 +428,9 @@ import { updateEngineConfig } from "@omniroute/open-sse/services/compression/eng
 updateEngineConfig("rtk", { intensity: "aggressive" });
 ```
 
-### အကျိုးသက်ရောက်မှုကို စစ်ဆေးခြင်း
+### သက်ရောက်မှုကို စစ်ဆေးခြင်း
 
-သင်ရွေးချယ်ထားသော intensity တွင် သင်၏ filter သည် လုံခြုံကြောင်း အတည်ပြုရန် **Verify Gate** (အောက်တွင်ကြည့်ပါ) ကို အသုံးပြုပါ။
+**Verify Gate** (အောက်တွင် ကြည့်ပါ) ကို အသုံးပြု၍ သင်ရွေးချယ်ထားသော intensity တွင် သင်၏ filter သည် လုံခြုံမှု ရှိကြောင်း အတည်ပြုနိုင်သည်-
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

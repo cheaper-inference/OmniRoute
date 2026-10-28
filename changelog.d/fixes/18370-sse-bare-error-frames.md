@@ -1,0 +1,1 @@
+- **fix(sse):** distinguish generic buffered error frames from identified Responses failures while preserving tool and image output ([#18370](https://github.com/cheaper-inference/OmniRoute/pull/18370), split from [#17550](https://github.com/cheaper-inference/OmniRoute/pull/17550)) — thanks @KiaroSama

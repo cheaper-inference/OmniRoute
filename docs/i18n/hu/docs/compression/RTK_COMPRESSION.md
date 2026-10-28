@@ -29,20 +29,20 @@ Tartomány:       1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 A beépített katalógus jelenleg 56 szűrőt tartalmaz a következő kategóriákban:
 
-| Kategória | Példák                                                        |
-| --------- | ------------------------------------------------------------- |
-| `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo-tesztek  |
-| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
-| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, általános shell-naplók                  |
-| `docker`  | `docker ps`, Docker-naplók                                    |
-| `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON-kimenet, stack trace-ek, általános kimeneti tartalék     |
+| Kategória | Példák                                                               |
+| --------- | -------------------------------------------------------------------- |
+| `git`     | `git status`, `git branch`, `git diff`, `git log`                    |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo tesztek         |
+| `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx        |
+| `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler        |
+| `shell`   | `ls`, `find`, `grep`, általános shell-naplók                         |
+| `docker`  | `docker ps`, Docker-naplók                                           |
+| `infra`   | Terraform, OpenTofu, `systemctl status`                              |
+| `generic` | JSON-kimenet, veremnyomok (stack trace), általános kimeneti tartalék |
 
-A(z) `open-sse/services/compression/engines/rtk/commandDetector.ts` fájlban található detektor a szűrőkiválasztás
-előtt osztályozza a kimenetet. A szűrők parancsminta vagy kimeneti reguláris kifejezés alapján is
-illeszkedhetnek, ha a parancsosztály önmagában nem elegendő.
+Az `open-sse/services/compression/engines/rtk/commandDetector.ts` fájlban található detektor a
+szűrő kiválasztása előtt osztályozza a kimenetet. A szűrők parancsminta vagy kimeneti reguláris
+kifejezés alapján is illeszkedhetnek, ha a parancsosztály önmagában nem elegendő.
 
 ## Szűrőfeloldás
 
@@ -328,19 +328,19 @@ node --import tsx/esm --test \
 
 ## Intenzitási szintek (v3.8.16+)
 
-Az RTK **3 intenzitási szintet** támogat, amelyek a **tömörítés agresszivitása** és a **biztonság** között kínálnak kompromisszumot. A szint a motor konfigurációjában, a `config.intensity` értékkel állítható be.
+Az RTK **3 intenzitási szintet** támogat, amelyek a **tömörítés agresszivitása** és a **biztonság** között egyensúlyoznak. A szint a motor konfigurációjában a `config.intensity` beállítással adható meg.
 
 ### A 3 szint
 
-| Szint                        | Csonkítási küszöb   | Tokenmegtakarítás | Kockázat        | Mire ajánlott                               |
-| ---------------------------- | ------------------- | ----------------- | --------------- | ------------------------------------------- |
-| `minimal`                    | szekciónként 24 sor | ~20-40%           | Nagyon alacsony | Éles környezet kritikus kontextussal        |
-| `standard` (alapértelmezett) | szekciónként 24 sor | ~50-70%           | Alacsony        | Mindennapi kódolási munkamenetek            |
-| `aggressive`                 | szekciónként 16 sor | ~70-90%           | Közepes         | Hosszú munkamenetek, maximális megtakarítás |
+| Szint                        | Csonkítási küszöbérték | Token-megtakarítás | Kockázat        | Ajánlott felhasználás                       |
+| ---------------------------- | ---------------------- | ------------------ | --------------- | ------------------------------------------- |
+| `minimal`                    | 24 sor szekciónként    | ~20-40%            | Nagyon alacsony | Kritikus kontextust igénylő éles környezet  |
+| `standard` (alapértelmezett) | 24 sor szekciónként    | ~50-70%            | Alacsony        | Napi kódolási munkamenetek                  |
+| `aggressive`                 | 16 sor szekciónként    | ~70-90%            | Közepes         | Hosszú munkamenetek, maximális megtakarítás |
 
 ### Hol történik a csonkítás
 
-A csonkítási küszöb a `lineFilter.ts` fájlt érinti:
+A csonkítási küszöbérték a `lineFilter.ts`-re van hatással:
 
 ```ts
 // Forrás: open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -348,39 +348,40 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Minden szekció **eleje** és **vége** megmarad; a köztes tartalom az, amely eldobásra kerül, amikor a csonkítás életbe lép.
+Minden szekció **eleje** és **vége** megmarad; a középső tartalom kerül eldobásra, amikor a csonkítás életbe lép.
 
-### Mi marad meg és mi kerül levágásra
+### Mi marad meg és mi kerül kivágásra
 
-| Tartalom                    | minimal       | standard      | aggressive    |
-| --------------------------- | ------------- | ------------- | ------------- |
-| Hibák / stack trace-ek      | ✅ megmarad   | ✅ megmarad   | ✅ megmarad   |
-| Sikertelen tesztek          | ✅ megmarad   | ✅ megmarad   | ✅ megmarad   |
-| Build-hibák                 | ✅ megmarad   | ✅ megmarad   | ✅ megmarad   |
-| Sikeres tesztek (részletes) | ✅ megmarad   | 🟡 összevonva | 🟡 összevonva |
-| Rutin kimenet (info naplók) | 🟡 összevonva | 🟡 összevonva | ❌ eldobva    |
-| Folyamatjelzők              | 🟡 összevonva | ❌ eldobva    | ❌ eldobva    |
-| Banner / ASCII-grafika      | 🟡 összevonva | ❌ eldobva    | ❌ eldobva    |
+| Tartalom                    | minimal        | standard       | aggressive     |
+| --------------------------- | -------------- | -------------- | -------------- |
+| Hibák / stack trace-ek      | ✅ megmarad    | ✅ megmarad    | ✅ megmarad    |
+| Teszthibák                  | ✅ megmarad    | ✅ megmarad    | ✅ megmarad    |
+| Build-hibák                 | ✅ megmarad    | ✅ megmarad    | ✅ megmarad    |
+| Sikeres tesztek (részletes) | ✅ megmarad    | 🟡 összecsukva | 🟡 összecsukva |
+| Rutin kimenet (info naplók) | 🟡 összecsukva | 🟡 összecsukva | ❌ eldobva     |
+| Folyamatjelző sávok         | 🟡 összecsukva | ❌ eldobva     | ❌ eldobva     |
+| Banner / ASCII-grafika      | 🟡 összecsukva | ❌ eldobva     | ❌ eldobva     |
 
 ### A megfelelő intenzitás kiválasztása
 
 ```
-                  Is losing context catastrophic?
+              Katasztrofális a kontextus elvesztése?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    YES          NO          NOT SURE
+    IGEN         NEM      NEM BIZTOS
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      How critical    Try `standard` first
-      │      is throughput?  (works for 80% of
-      │           │          cases)
+      │      Mennyire kritikus  Próbáld ki először
+      │      az átbocsátó-      a `standard` szintet
+      │      képesség?          (az esetek 80%-ában
+      │           │             működik)
       │      ┌────┴────┐
       │      │         │
-      │     LOW       HIGH
+      │   ALACSONY   MAGAS
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -390,7 +391,7 @@ Minden szekció **eleje** és **vége** megmarad; a köztes tartalom az, amely e
 
 ### Az intenzitás konfigurálása
 
-**Combo-nként** (a combo konfigurációjában):
+**Kombónként** (a kombó konfigurációjában):
 
 ```json
 {
@@ -405,9 +406,9 @@ Minden szekció **eleje** és **vége** megmarad; a köztes tartalom az, amely e
 
 **Programozottan**:
 
-Az `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) egy
+A `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) egy
 `CompressionEngine`, és nem rendelkezik `updateConfig` metódussal. A motor
-konfigurációját ehelyett a registry-segédfüggvénnyel frissítsd:
+konfigurációját helyette a registry segédfüggvényen keresztül frissítsd:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -417,7 +418,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### A hatás ellenőrzése
 
-Használd a **Verify Gate**-et (lásd alább), hogy meggyőződj róla: a szűrő a választott intenzitás mellett is biztonságos:
+Használd a **Verify Gate**-et (lásd lent), hogy meggyőződj arról, hogy a szűrő biztonságos a választott intenzitáson:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

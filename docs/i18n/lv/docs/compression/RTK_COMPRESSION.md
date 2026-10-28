@@ -27,7 +27,7 @@ Secīgi:           1 - (1 - 0.80) * (1 - 0.46) = ietaupīti 89.2%
 Diapazons:        1 - (1 - 0.60..0.90) * (1 - 0.46) = ietaupīti 78.4-94.6%
 ```
 
-## Kas tiek saspiests
+## Ko Tas Saspiež
 
 Iebūvētais katalogs pašlaik ietver 56 filtrus šādās kategorijās:
 
@@ -37,14 +37,14 @@ Iebūvētais katalogs pašlaik ietver 56 filtrus šādās kategorijās:
 | `test`     | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo testi        |
 | `build`    | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx     |
 | `package`  | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler     |
-| `shell`    | `ls`, `find`, `grep`, vispārīgi shell žurnāli                     |
+| `shell`    | `ls`, `find`, `grep`, vispārīgi čaulas žurnāli                    |
 | `docker`   | `docker ps`, Docker žurnāli                                       |
 | `infra`    | Terraform, OpenTofu, `systemctl status`                           |
 | `generic`  | JSON izvade, steka trasējumi, vispārīgs izvades rezerves variants |
 
 Detektors failā `open-sse/services/compression/engines/rtk/commandDetector.ts` klasificē izvadi
-pirms filtru atlases. Filtri var arī atbilst pēc komandas šablona vai izvades regulārās izteiksmes,
-ja pašas komandas klases nepietiek.
+pirms filtru izvēles. Filtri var tikt saskaņoti arī pēc komandas šablona vai izvades regulārās
+izteiksmes, ja komandas klase vien nepietiek.
 
 ## Filtru noteikšana
 
@@ -352,19 +352,19 @@ node --import tsx/esm --test \
 
 ## Intensitātes līmeņi (v3.8.16+)
 
-RTK atbalsta **3 intensitātes līmeņus**, kas līdzsvaro **saspiešanas agresivitāti** un **drošību**. Līmeni iestata ar `config.intensity` dzinēja konfigurācijā.
+RTK atbalsta **3 intensitātes līmeņus**, kas līdzsvaro **kompresijas agresivitāti** un **drošību**. Līmenis tiek iestatīts ar `config.intensity` dzinēja konfigurācijā.
 
 ### 3 līmeņi
 
-| Līmenis                  | Apgriešanas slieksnis | Žetonu ietaupījums | Risks     | Vislabāk piemērots                      |
-| ------------------------ | --------------------- | ------------------ | --------- | --------------------------------------- |
-| `minimal`                | 24 rindas uz sadaļu   | ~20-40%            | Ļoti zems | Produkcijas videi ar kritisku kontekstu |
-| `standard` (noklusējuma) | 24 rindas uz sadaļu   | ~50-70%            | Zems      | Ikdienas programmēšanas sesijām         |
-| `aggressive`             | 16 rindas uz sadaļu   | ~70-90%            | Vidējs    | Garām sesijām, maksimālam ietaupījumam  |
+| Līmenis                  | Saīsināšanas slieksnis | Tokenu ietaupījums | Risks     | Vislabāk piemērots               |
+| ------------------------ | ---------------------- | ------------------ | --------- | -------------------------------- |
+| `minimal`                | 24 rindas sadaļā       | ~20-40%            | Ļoti zems | Produkcija ar kritisku kontekstu |
+| `standard` (noklusējums) | 24 rindas sadaļā       | ~50-70%            | Zems      | Ikdienas kodēšanas sesijas       |
+| `aggressive`             | 16 rindas sadaļā       | ~70-90%            | Vidējs    | Garas sesijas, maks. ietaupījums |
 
-### Kur notiek apgriešana
+### Kur notiek saīsināšana
 
-Apgriešanas slieksnis ietekmē `lineFilter.ts`:
+Saīsināšanas slieksnis ietekmē `lineFilter.ts`:
 
 ```ts
 // No open-sse/services/compression/engines/rtk/index.ts:329-330
@@ -372,49 +372,50 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Tiek saglabāts gan katras sadaļas **sākums**, gan **beigas**; kad iestājas apgriešana, vidējā daļa tiek atmesta.
+Tiek saglabātas gan katras sadaļas **sākums**, gan **beigas**; vidējā daļa tiek atmesta, kad iestājas saīsināšana.
 
 ### Kas paliek un kas tiek izgriezts
 
-| Saturs                        | minimal      | standard     | aggressive   |
-| ----------------------------- | ------------ | ------------ | ------------ |
-| Kļūdas / steka trasējumi      | ✅ saglabāts | ✅ saglabāts | ✅ saglabāts |
-| Testu neveiksmes              | ✅ saglabāts | ✅ saglabāts | ✅ saglabāts |
-| Būvēšanas kļūdas              | ✅ saglabāts | ✅ saglabāts | ✅ saglabāts |
-| Veiksmīgie testi (detalizēti) | ✅ saglabāts | 🟡 sakļauts  | 🟡 sakļauts  |
-| Rutīnas izvade (info žurnāli) | 🟡 sakļauts  | 🟡 sakļauts  | ❌ atmests   |
-| Progresa joslas               | 🟡 sakļauts  | ❌ atmests   | ❌ atmests   |
-| Baneris / ASCII māksla        | 🟡 sakļauts  | ❌ atmests   | ❌ atmests   |
+| Saturs                        | minimal       | standard      | aggressive    |
+| ----------------------------- | ------------- | ------------- | ------------- |
+| Kļūdas / steka trasējumi      | ✅ saglabāti  | ✅ saglabāti  | ✅ saglabāti  |
+| Testu neveiksmes              | ✅ saglabātas | ✅ saglabātas | ✅ saglabātas |
+| Būvēšanas kļūdas              | ✅ saglabātas | ✅ saglabātas | ✅ saglabātas |
+| Veiksmīgie testi (detalizēti) | ✅ saglabāti  | 🟡 sakļauti   | 🟡 sakļauti   |
+| Rutīnas izvade (info žurnāli) | 🟡 sakļauta   | 🟡 sakļauta   | ❌ atmesta    |
+| Progresa joslas               | 🟡 sakļautas  | ❌ atmestas   | ❌ atmestas   |
+| Baneris / ASCII māksla        | 🟡 sakļauts   | ❌ atmests    | ❌ atmests    |
 
 ### Pareizās intensitātes izvēle
 
 ```
-                  Vai konteksta zudums ir katastrofāls?
+              Vai konteksta zudums būtu katastrofāls?
                   │
-      ┌───────────┼───────────┐
-      │           │           │
+      ┌───────────┼────────────┐
+      │           │            │
      JĀ          NĒ       NAV SKAIDRS
-      │           │           │
-      ▼           │           │
-   minimal        │           │
-      │           │           │
-      │           ▼           ▼
+      │           │            │
+      ▼           │            │
+   minimal        │            │
+      │           │            │
+      │           ▼            ▼
       │      Cik kritiska    Vispirms izmēģiniet
       │      ir caurlaid-    `standard`
       │      spēja?          (der 80% gadījumu)
+      │           │
       │      ┌────┴────┐
       │      │         │
-      │     ZEMA      AUGSTA
+      │    ZEMA      AUGSTA
       │      │         │
       │      ▼         ▼
-      │   standard  aggressive
+      │   standard   aggressive
       │      │         │
       └──────┴─────────┘
 ```
 
 ### Intensitātes konfigurēšana
 
-**Katram combo atsevišķi** (combo konfigurācijā):
+**Katram combo** (combo konfigurācijā):
 
 ```json
 {
@@ -441,7 +442,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Efekta pārbaude
 
-Izmantojiet **Verify Gate** (skatiet tālāk), lai pārliecinātos, ka filtrs ir drošs jūsu izvēlētajā intensitātē:
+Izmantojiet **Verify Gate** (skatīt tālāk), lai pārliecinātos, ka filtrs ir drošs pie jūsu izvēlētās intensitātes:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

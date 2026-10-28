@@ -37,10 +37,10 @@ O catálogo integrado inclui atualmente 56 filtros distribuídos por estas categ
 | `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, testes Cargo   |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, registos genéricos de shell             |
+| `shell`   | `ls`, `find`, `grep`, registos genéricos da shell             |
 | `docker`  | `docker ps`, registos do Docker                               |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | Saída JSON, stack traces, alternativa para saída genérica     |
+| `generic` | Saída JSON, stack traces, fallback genérico de saída          |
 
 O detetor em `open-sse/services/compression/engines/rtk/commandDetector.ts` classifica a saída
 antes da seleção do filtro. Os filtros também podem corresponder por padrão de comando ou regex
@@ -352,7 +352,7 @@ node --import tsx/esm --test \
 
 ## Níveis de Intensidade (v3.8.16+)
 
-O RTK suporta **3 níveis de intensidade** que equilibram a **agressividade da compressão** com a **segurança**. O nível é definido através de `config.intensity` na configuração do motor.
+O RTK suporta **3 níveis de intensidade** que equilibram **agressividade de compressão** e **segurança**. O nível é definido através de `config.intensity` na configuração do motor.
 
 ### Os 3 Níveis
 
@@ -372,7 +372,7 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Tanto o **início** como o **fim** de cada secção são preservados; o conteúdo intermédio é descartado quando a truncagem é aplicada.
+Tanto o **início** como o **fim** de cada secção são preservados; o conteúdo intermédio é descartado quando a truncagem é ativada.
 
 ### O Que é Mantido vs. O Que é Cortado
 
@@ -381,35 +381,35 @@ Tanto o **início** como o **fim** de cada secção são preservados; o conteúd
 | Erros / stack traces                | ✅ preservado | ✅ preservado | ✅ preservado |
 | Falhas de testes                    | ✅ preservado | ✅ preservado | ✅ preservado |
 | Erros de compilação                 | ✅ preservado | ✅ preservado | ✅ preservado |
-| Testes bem-sucedidos (verbosos)     | ✅ preservado | 🟡 colapsado  | 🟡 colapsado  |
-| Saída de rotina (logs informativos) | 🟡 colapsado  | 🟡 colapsado  | ❌ descartado |
-| Barras de progresso                 | 🟡 colapsado  | ❌ descartado | ❌ descartado |
-| Banners / arte ASCII                | 🟡 colapsado  | ❌ descartado | ❌ descartado |
+| Testes bem-sucedidos (verbosos)     | ✅ preservado | 🟡 condensado | 🟡 condensado |
+| Saída de rotina (logs informativos) | 🟡 condensado | 🟡 condensado | ❌ descartado |
+| Barras de progresso                 | 🟡 condensado | ❌ descartado | ❌ descartado |
+| Banners / arte ASCII                | 🟡 condensado | ❌ descartado | ❌ descartado |
 
 ### Escolher a Intensidade Certa
 
 ```
                   Perder contexto é catastrófico?
-                  │
-      ┌───────────┼───────────┐
-      │           │           │
-     SIM         NÃO        INCERTO
-      │           │           │
-      ▼           │           │
-   minimal        │           │
-      │           │           │
-      │           ▼           ▼
-      │      Quão crítico     Experimente primeiro
-      │      é o débito?      `standard` (funciona
-      │           │           em 80% dos casos)
-      │      ┌────┴────┐
-      │      │         │
-      │    BAIXO     ALTO
-      │      │         │
-      │      ▼         ▼
-      │   standard   aggressive
-      │      │         │
-      └──────┴─────────┘
+                              │
+      ┌───────────────────────┼────────────────┐
+      │                       │                │
+     SIM                     NÃO            INCERTO
+      │                       │                │
+      ▼                       │                │
+   minimal                    │                │
+      │                       │                │
+      │                       ▼                ▼
+      │            Quão crítico é o      Experimente primeiro
+      │            throughput?           `standard` (funciona
+      │                    │             em 80% dos casos)
+      │             ┌──────┴──────┐
+      │             │             │
+      │           BAIXO          ALTO
+      │             │             │
+      │             ▼             ▼
+      │          standard     aggressive
+      │             │             │
+      └─────────────┴─────────────┘
 ```
 
 ### Configurar a Intensidade
@@ -431,7 +431,7 @@ Tanto o **início** como o **fim** de cada secção são preservados; o conteúd
 
 O `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) é um
 `CompressionEngine` e não tem método `updateConfig`. Atualize a configuração
-de um motor através do auxiliar do registo:
+de um motor através da função auxiliar do registo:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -441,7 +441,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Verificar o Efeito
 
-Utilize o **Verify Gate** (ver abaixo) para confirmar que o seu filtro é seguro na intensidade escolhida:
+Use o **Verify Gate** (ver abaixo) para confirmar que o seu filtro é seguro na intensidade escolhida:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

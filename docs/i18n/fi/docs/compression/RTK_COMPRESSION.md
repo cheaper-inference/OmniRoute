@@ -29,22 +29,22 @@ Vaihteluväli:     1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Mitä se pakkaa
 
-Sisäänrakennettu luettelo sisältää tällä hetkellä 56 suodatinta seuraavissa luokissa:
+Sisäänrakennettu katalogi sisältää tällä hetkellä 56 suodatinta seuraavissa kategorioissa:
 
-| Luokka    | Esimerkkejä                                                   |
+| Kategoria | Esimerkkejä                                                   |
 | --------- | ------------------------------------------------------------- |
 | `git`     | `git status`, `git branch`, `git diff`, `git log`             |
-| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go-, Cargo-testit  |
+| `test`    | Vitest, Jest, Pytest, PHPUnit, Playwright, Go, Cargo-testit   |
 | `build`   | TypeScript, ESLint, Biome, Prettier, Vite, Webpack, Turbo, Nx |
 | `package` | `npm install`, `npm audit`, `pip`, `uv sync`, Poetry, Bundler |
-| `shell`   | `ls`, `find`, `grep`, yleiset komentotulkkilokit              |
+| `shell`   | `ls`, `find`, `grep`, yleiset komentotulkin lokit             |
 | `docker`  | `docker ps`, Docker-lokit                                     |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON-tuloste, pinotulosteet, yleinen tulosteen varasuodatin   |
+| `generic` | JSON-tuloste, pinojäljet, yleinen tulosteen varakäsittely     |
 
-Tunnistin tiedostossa `open-sse/services/compression/engines/rtk/commandDetector.ts` luokittelee
-tulosteen ennen suodattimen valintaa. Suodattimet voivat myös täsmätä komentomallin tai tulosteen
-säännöllisen lausekkeen perusteella, kun komentoluokka ei yksin riitä.
+Tunnistin tiedostossa `open-sse/services/compression/engines/rtk/commandDetector.ts` luokittelee tulosteen
+ennen suodattimen valintaa. Suodattimet voivat myös täsmätä komentokuvion tai tulosteen säännöllisen
+lausekkeen perusteella, kun komentoluokka ei yksin riitä.
 
 ## Suodattimien ratkaiseminen
 
@@ -354,59 +354,60 @@ node --import tsx/esm --test \
 
 ## Intensiteettitasot (v3.8.16+)
 
-RTK tukee **3 intensiteettitasoa**, joissa tehdään kompromissi **pakkauksen aggressiivisuuden** ja **turvallisuuden** välillä. Taso asetetaan moottorin konfiguraatiossa avaimella `config.intensity`.
+RTK tukee **3 intensiteettitasoa**, jotka tasapainoilevat **pakkauksen aggressiivisuuden** ja **turvallisuuden** välillä. Taso asetetaan moottorin konfiguraatiossa `config.intensity`-asetuksella.
 
 ### Kolme tasoa
 
-| Taso                | Katkaisukynnys       | Token-säästöt | Riski             | Soveltuu parhaiten                    |
-| ------------------- | -------------------- | ------------- | ----------------- | ------------------------------------- |
-| `minimal`           | 24 riviä osioa kohti | ~20-40%       | Erittäin alhainen | Tuotanto kriittisen kontekstin kanssa |
-| `standard` (oletus) | 24 riviä osioa kohti | ~50-70%       | Alhainen          | Päivittäiset koodausistunnot          |
-| `aggressive`        | 16 riviä osioa kohti | ~70-90%       | Kohtalainen       | Pitkät istunnot, maksimisäästöt       |
+| Taso                | Katkaisukynnys         | Token-säästöt | Riski           | Sopii parhaiten                             |
+| ------------------- | ---------------------- | ------------- | --------------- | ------------------------------------------- |
+| `minimal`           | 24 riviä osiota kohden | ~20-40%       | Erittäin matala | Tuotantokäyttö kriittisen kontekstin kanssa |
+| `standard` (oletus) | 24 riviä osiota kohden | ~50-70%       | Matala          | Päivittäiset koodausistunnot                |
+| `aggressive`        | 16 riviä osiota kohden | ~70-90%       | Keskitaso       | Pitkät istunnot, maksimaaliset säästöt      |
 
 ### Missä katkaisu tapahtuu
 
 Katkaisukynnys vaikuttaa tiedostoon `lineFilter.ts`:
 
 ```ts
-// Peräisin tiedostosta open-sse/services/compression/engines/rtk/index.ts:329-330
+// Tiedostosta open-sse/services/compression/engines/rtk/index.ts:329-330
 config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Kunkin osion **alku** ja **loppu** säilytetään; keskellä oleva sisältö poistetaan, kun katkaisu aktivoituu.
+Sekä kunkin osion **alku** että **loppu** säilytetään; keskiosa poistetaan, kun katkaisu aktivoituu.
 
-### Mikä säilyy ja mikä poistuu
+### Mikä säilyy ja mikä poistetaan
 
-| Sisältö                     | minimal        | standard       | aggressive     |
-| --------------------------- | -------------- | -------------- | -------------- |
-| Virheet / pinotulosteet     | ✅ säilyy      | ✅ säilyy      | ✅ säilyy      |
-| Epäonnistuneet testit       | ✅ säilyy      | ✅ säilyy      | ✅ säilyy      |
-| Build-virheet               | ✅ säilyy      | ✅ säilyy      | ✅ säilyy      |
-| Läpäistyt testit (verbose)  | ✅ säilyy      | 🟡 tiivistetty | 🟡 tiivistetty |
-| Rutiinituloste (info-lokit) | 🟡 tiivistetty | 🟡 tiivistetty | ❌ poistettu   |
-| Edistymispalkit             | 🟡 tiivistetty | ❌ poistettu   | ❌ poistettu   |
-| Banneri / ASCII-grafiikka   | 🟡 tiivistetty | ❌ poistettu   | ❌ poistettu   |
+| Sisältö                              | minimal         | standard        | aggressive      |
+| ------------------------------------ | --------------- | --------------- | --------------- |
+| Virheet / stack tracet               | ✅ säilyy       | ✅ säilyy       | ✅ säilyy       |
+| Epäonnistuneet testit                | ✅ säilyy       | ✅ säilyy       | ✅ säilyy       |
+| Build-virheet                        | ✅ säilyy       | ✅ säilyy       | ✅ säilyy       |
+| Läpäistyt testit (verbose)           | ✅ säilyy       | 🟡 tiivistetään | 🟡 tiivistetään |
+| Rutiininomainen tuloste (info-lokit) | 🟡 tiivistetään | 🟡 tiivistetään | ❌ poistetaan   |
+| Edistymispalkit                      | 🟡 tiivistetään | ❌ poistetaan   | ❌ poistetaan   |
+| Banneri / ASCII-grafiikka            | 🟡 tiivistetään | ❌ poistetaan   | ❌ poistetaan   |
 
-### Oikean intensiteetin valinta
+### Oikean intensiteetin valitseminen
 
 ```
-                  Olisi kontekstin menettäminen katastrofaalista?
+                  Onko kontekstin menetys katastrofaalista?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    KYLLÄ        EI        EN VARMA
+    KYLLÄ        EI          EN VARMA
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      Kuinka tärkeä    Kokeile ensin
-      │      on suorituskyky? `standard`-tasoa
-      │           │           (toimii 80 %:ssa tapauksista)
+      │      Kuinka tärkeä   Kokeile ensin
+      │      läpimeno on?    `standard`-tasoa
+      │           │          (toimii 80 %:ssa
+      │           │          tapauksista)
       │      ┌────┴────┐
       │      │         │
-      │  ALHAINEN    KORKEA
+      │   MATALA    KORKEA
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -416,7 +417,7 @@ Kunkin osion **alku** ja **loppu** säilytetään; keskellä oleva sisältö poi
 
 ### Intensiteetin määrittäminen
 
-**Combo-kohtaisesti** (combo-konfiguraatiossa):
+**Kombokohtaisesti** (kombon konfiguraatiossa):
 
 ```json
 {
@@ -443,7 +444,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Vaikutuksen varmistaminen
 
-Käytä **Verify Gate** -tarkistusta (katso alta) varmistaaksesi, että suodattimesi on turvallinen valitsemallasi intensiteetillä:
+Käytä **Verify Gate** -tarkistusta (katso alla) varmistaaksesi, että suodattimesi on turvallinen valitsemallasi intensiteetillä:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

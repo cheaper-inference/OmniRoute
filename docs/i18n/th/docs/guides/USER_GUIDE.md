@@ -608,11 +608,11 @@ post_install() {
 ## 📊 โมเดลที่ใช้งานได้
 
 <details>
-<summary><b>ดูโมเดลทั้งหมดที่ใช้งานได้</b></summary>
+<summary><b>ดูโมเดลที่ใช้งานได้ทั้งหมด</b></summary>
 
-> รายการด้านล่างนี้คัดมาจาก `open-sse/config/providerRegistry.ts` สำหรับ v3.8.0 แค็ตตาล็อกบนคลาวด์ (Gemini, OpenRouter ฯลฯ) จะถูกซิงก์แบบไดนามิก — สำหรับแค็ตตาล็อกแบบสดทั้งหมด ให้เปิด **Dashboard → Providers → [provider] → Available Models** หรือเรียก `GET /api/models/catalog`
+> รายการด้านล่างนี้คัดสรรมาจาก `open-sse/config/providerRegistry.ts` สำหรับ v3.8.0 แคตตาล็อกบนคลาวด์ (Gemini, OpenRouter ฯลฯ) จะถูกซิงก์แบบไดนามิก — สำหรับแคตตาล็อกสดฉบับเต็ม ให้เปิด **แดชบอร์ด → ผู้ให้บริการ → [provider] → โมเดลที่ใช้งานได้** หรือเรียก `GET /api/models/catalog`
 >
-> หากรายการในตัวของผู้ให้บริการรายใดล้าสมัยไป ให้ใช้ **Import from /models** ในหน้านั้น (หรือเปิดใช้งาน **Auto-Sync**) เพื่อดึงแค็ตตาล็อกแบบสดจากต้นทาง เรื่องนี้ได้รับการยืนยันแล้วใน v3.8.50 สำหรับ LLM7.io (`gemini-3.1-flash-lite`) และ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ส่วนการเข้าถึงแบบไม่ระบุตัวตนของ Pollinations ยังคงถูกจำกัดจากฝั่งต้นทางในรอบการทดสอบเดียวกันนั้น
+> หากรายการในตัว (built-in) ของผู้ให้บริการรายใดคลาดเคลื่อนไปจากของจริง ให้ใช้ **นำเข้าจาก /models** บนหน้านั้น (หรือเปิดใช้งาน **ซิงก์อัตโนมัติ**) เพื่อดึงแคตตาล็อกสดจากต้นทาง เรื่องนี้ได้รับการยืนยันแล้วใน v3.8.50 สำหรับ LLM7.io (`gemini-3.1-flash-lite`) และ UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); ส่วนการเข้าถึงแบบไม่ระบุตัวตนของ Pollinations ยังคงถูกจำกัดจากฝั่งต้นทางในรอบการทดสอบเดียวกัน
 
 **Claude Code (`cc/`)** — OAuth แบบ Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -620,7 +620,7 @@ post_install() {
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — OAuth ฟรี: ใช้แค็ตตาล็อกแบบสดที่แสดงภายใต้ **Dashboard → Providers → Kiro → Available Models** ความพร้อมใช้งานขึ้นอยู่กับบัญชีและแผนที่ใช้
+**Kiro (`kr/`)** — OAuth ฟรี: ใช้แคตตาล็อกสดที่แสดงอยู่ใน **แดชบอร์ด → ผู้ให้บริการ → Kiro → โมเดลที่ใช้งานได้** ความพร้อมใช้งานขึ้นอยู่กับบัญชีและแพลนที่ใช้
 
 **Qoder (`if/`)** — OAuth ฟรี: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -628,37 +628,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/เดือนแบบเหมาหรือจ่ายตามการใช้งาน: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/เดือน แบบเหมาจ่ายหรือจ่ายตามการใช้งาน: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — คีย์ API: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — เร็วสูงเป็นพิเศษ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — ความเร็วสูงพิเศษ: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok เนทีฟ: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — โฮสต์ใน EU: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — โฮสต์ในยุโรป: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — เสริมด้วยการค้นหา: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — เสริมความสามารถด้วยการค้นหา: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — โอเพนซอร์ส: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (ฟรี), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — inference รวดเร็ว: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — อินเฟอเรนซ์ความเร็วสูง: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
 **Cerebras (`cerebras/`)** — เทคโนโลยีระดับเวเฟอร์: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — เน้น RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — เน้นงาน RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — ระดับองค์กร: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — สำหรับองค์กร: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: ซิงก์แบบสดตามคีย์ API แต่ละตัวจาก Google — ไม่มีรายการแบบคงที่ เชื่อมต่อคีย์ใน **Dashboard → Providers** จากนั้นใช้ **Available Models** เพื่อนำเข้าแค็ตตาล็อกปัจจุบัน (เช่น `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)
+**Gemini (Google Cloud `gemini/`)**: ซิงก์สดตามคีย์ API แต่ละคีย์จาก Google — ไม่มีรายการแบบคงที่ เชื่อมต่อคีย์ใน **แดชบอร์ด → ผู้ให้บริการ** จากนั้นใช้ **โมเดลที่ใช้งานได้** เพื่อนำเข้าแคตตาล็อกปัจจุบัน (เช่น `gemini/gemini-3-pro`, `gemini/gemini-3-flash`)
 
-**ผู้ให้บริการอื่นที่เข้ากันได้** (ที่คัดเลือก): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ผ่าน `aws-bedrock`), `azure-ai`, `openrouter` (แค็ตตาล็อกแบบส่งผ่าน), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat` แต่ละรายดูแลรายการโมเดลของตนเองใน `providerRegistry.ts` และสามารถซิงก์อัตโนมัติได้เมื่อผู้ให้บริการมีเอนด์พอยต์ `/models`
+**ผู้ให้บริการอื่นที่รองรับ** (บางส่วน): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (ผ่าน `aws-bedrock`), `azure-ai`, `openrouter` (แคตตาล็อกแบบ passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat` แต่ละรายดูแลรักษารายการโมเดลของตนเองไว้ใน `providerRegistry.ts` และสามารถซิงก์อัตโนมัติได้เมื่อผู้ให้บริการนั้นมี endpoint `/models` ให้ใช้งาน
 
-**หมายเหตุเกี่ยวกับรหัสโมเดล:** OmniRoute ใช้รหัสตามแบบของผู้ให้บริการแต่ละราย (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) บางรหัสมีเวอร์ชันที่มีจุดเพราะนั่นคือรูปแบบที่ API ต้นทางคาดหวัง หากไม่พบโมเดลใดในรายการข้างต้น ให้รัน `omniroute models --search <term>` หรือเรียก `GET /api/models/catalog` เพื่อยืนยันความพร้อมใช้งาน
+**หมายเหตุเกี่ยวกับ ID โมเดล:** OmniRoute ใช้ ID แบบดั้งเดิมของแต่ละผู้ให้บริการ (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`) ID บางรายการมีเลขเวอร์ชันแบบมีจุด เพราะนั่นคือรูปแบบที่ API ต้นทางคาดหวัง หากไม่พบโมเดลใดในรายการข้างต้น ให้รัน `omniroute models --search <term>` หรือเรียก `GET /api/models/catalog` เพื่อยืนยันความพร้อมใช้งาน
 
 </details>
 

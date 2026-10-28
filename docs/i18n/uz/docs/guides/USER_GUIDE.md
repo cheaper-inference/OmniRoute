@@ -607,11 +607,11 @@ Muhit oʻzgaruvchilarining toʻliq maʼlumotnomasi uchun [README](../README.md) 
 ## 📊 Mavjud modellar
 
 <details>
-<summary><b>Barcha mavjud modellarni ko'rish</b></summary>
+<summary><b>Barcha mavjud modellarni koʻrish</b></summary>
 
-> Quyidagi roʻyxat v3.8.0 uchun `open-sse/config/providerRegistry.ts` dan tuzilgan. Bulutli kataloglar (Gemini, OpenRouter va boshqalar) dinamik ravishda sinxronlanadi — toʻliq jonli katalog uchun **Dashboard → Providers → [provider] → Available Models** sahifasini oching yoki `GET /api/models/catalog` soʻrovini yuboring.
+> Quyidagi roʻyxat v3.8.0 uchun `open-sse/config/providerRegistry.ts` dan tayyorlangan. Bulutli kataloglar (Gemini, OpenRouter va boshqalar) dinamik ravishda sinxronlanadi — toʻliq jonli katalog uchun **Dashboard → Providers → [provider] → Available Models** boʻlimini oching yoki `GET /api/models/catalog` ni chaqiring.
 >
-> Agar providerning ichki roʻyxati eskirgan boʻlsa, jonli yuqori oqim katalogini olish uchun oʻsha sahifadagi **Import from /models** tugmasidan foydalaning (yoki **Auto-Sync** rejimini yoqing). Bu v3.8.50 da LLM7.io (`gemini-3.1-flash-lite`) va UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) uchun tasdiqlangan; Pollinations anonim kirish xuddi shu test davomida yuqori oqim cheklovida qolgan.
+> Agar provayderning oʻrnatilgan roʻyxati eskirgan boʻlsa, jonli yuqori oqim katalogini olish uchun oʻsha sahifadagi **Import from /models** dan foydalaning (yoki **Auto-Sync** ni yoqing). Bu v3.8.50 da LLM7.io (`gemini-3.1-flash-lite`) va UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) uchun tasdiqlangan; Pollinations anonim kirishi xuddi shu test davomida yuqori oqim tomonidan cheklanganligicha qoldi.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
@@ -627,9 +627,9 @@ Muhit oʻzgaruvchilarining toʻliq maʼlumotnomasi uchun [README](../README.md) 
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/oylik qatʼiy narx yoki har bir foydalanish uchun: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — oyiga $9 belgilangan narx yoki har bir foydalanish uchun: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
-**DeepSeek (`ds/`)** — API kalit: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
+**DeepSeek (`ds/`)** — API kaliti: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
 **Groq (`groq/`)** — Juda tezkor: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
@@ -637,7 +637,7 @@ Muhit oʻzgaruvchilarining toʻliq maʼlumotnomasi uchun [README](../README.md) 
 
 **Mistral (`mistral/`)** — Yevropada joylashgan: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Qidiruv bilan kengaytirilgan: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Qidiruv bilan kuchaytirilgan: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — Ochiq kodli: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (bepul), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
@@ -653,11 +653,11 @@ Muhit oʻzgaruvchilarining toʻliq maʼlumotnomasi uchun [README](../README.md) 
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Har bir API kalit uchun Google dan jonli sinxronlanadi — statik roʻyxat yoʻq. **Dashboard → Providers** sahifasida kalitni ulang, soʻng joriy katalogni import qilish uchun **Available Models** dan foydalaning (masalan, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Har bir API kaliti uchun Google dan jonli sinxronlanadi — statik roʻyxat yoʻq. **Dashboard → Providers** boʻlimida kalitni ulang, soʻng joriy katalogni import qilish uchun **Available Models** dan foydalaning (masalan, `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Boshqa mos keluvchi providerlar** (tanlangan): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` orqali), `azure-ai`, `openrouter` (oʻtkazuvchi katalog), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ularning har biri `providerRegistry.ts` da oʻz model roʻyxatini saqlaydi va provider `/models` endpointini taqdim etganda avtomatik sinxronlanishi mumkin.
+**Boshqa mos keluvchi provayderlar** (tanlangan): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` orqali), `azure-ai`, `openrouter` (oʻtkazib yuborish katalogi), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Ularning har biri `providerRegistry.ts` da oʻz modellar roʻyxatini saqlaydi va provayder `/models` endpointini taqdim etganda avtomatik sinxronlanishi mumkin.
 
-**Model IDlari haqida eslatma:** OmniRoute providerning native IDlaridan foydalanadi (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Baʼzi IDlar nuqtali versiyalarni oʻz ichiga oladi, chunki yuqori oqim API si ularni aynan shunday kutadi. Agar model yuqorida keltirilmagan boʻlsa, `omniroute models --search <term>` buyrugʻini ishga tushiring yoki mavjudligini tasdiqlash uchun `GET /api/models/catalog` soʻrovini yuboring.
+**Model ID lar haqida eslatma:** OmniRoute provayderga xos ID lardan foydalanadi (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Baʼzi ID lar nuqtali versiyalarni oʻz ichiga oladi, chunki yuqori oqim API si ularni aynan shunday kutadi. Agar model yuqorida keltirilmagan boʻlsa, mavjudligini tasdiqlash uchun `omniroute models --search <term>` ni ishga tushiring yoki `GET /api/models/catalog` ga murojaat qiling.
 
 </details>
 

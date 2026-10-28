@@ -607,22 +607,22 @@ post_install() {
 
 ---
 
-## 📊 ઉપલબ્ધ મોડલ્સ
+## 📊 ઉપલબ્ધ મોડેલો
 
 <details>
-<summary><b>બધા ઉપલબ્ધ મોડલ્સ જુઓ</b></summary>
+<summary><b>બધા ઉપલબ્ધ મોડેલો જુઓ</b></summary>
 
-> નીચેની સૂચિ v3.8.0 માટે `open-sse/config/providerRegistry.ts` પરથી ક્યુરેટ કરવામાં આવી છે. ક્લાઉડ કેટલોગ્સ (Gemini, OpenRouter વગેરે) ગતિશીલ રીતે સિંક થાય છે — સંપૂર્ણ જીવંત કેટલોગ માટે **ડેશબોર્ડ → પ્રોવાઇડર્સ → [provider] → ઉપલબ્ધ મોડલ્સ** ખોલો અથવા `GET /api/models/catalog` કૉલ કરો.
+> નીચેની સૂચિ v3.8.0 માટે `open-sse/config/providerRegistry.ts` માંથી ક્યુરેટ કરવામાં આવી છે. ક્લાઉડ કેટલોગ્સ (Gemini, OpenRouter, વગેરે) ડાયનેમિક રીતે સિંક થાય છે — સંપૂર્ણ લાઇવ કેટલોગ માટે **ડેશબોર્ડ → પ્રોવાઇડર્સ → [provider] → ઉપલબ્ધ મોડેલો** ખોલો અથવા `GET /api/models/catalog` કૉલ કરો.
 >
-> જો કોઈ પ્રોવાઇડરની બિલ્ટ-ઇન સૂચિ ડ્રિફ્ટ થઈ ગઈ હોય, તો જીવંત અપસ્ટ્રીમ કેટલોગ ખેંચવા માટે તે પેજ પર **/models માંથી આયાત કરો** વાપરો (અથવા **ઓટો-સિંક** સક્ષમ કરો). આ v3.8.50 માં LLM7.io (`gemini-3.1-flash-lite`) અને UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) માટે ચકાસવામાં આવ્યું હતું; એ જ ટેસ્ટ પાસ દરમિયાન Pollinations નો અનામી ઍક્સેસ અપસ્ટ્રીમ-મર્યાદિત જ રહ્યો.
+> જો કોઈ પ્રોવાઇડરની બિલ્ટ-ઇન સૂચિ જૂની થઈ ગઈ હોય, તો લાઇવ અપસ્ટ્રીમ કેટલોગ ખેંચવા માટે તે પેજ પર **/models માંથી આયાત કરો** નો ઉપયોગ કરો (અથવા **ઓટો-સિંક** સક્ષમ કરો). આ v3.8.50 માં LLM7.io (`gemini-3.1-flash-lite`) અને UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) માટે ચકાસવામાં આવ્યું હતું; એ જ ટેસ્ટ પાસ દરમિયાન Pollinations ની અનામી ઍક્સેસ અપસ્ટ્રીમ-મર્યાદિત જ રહી હતી.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ એફર્ટ ટિયર્સ: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ effort ટિયર: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — મફત OAuth: **ડેશબોર્ડ → પ્રોવાઇડર્સ → Kiro → ઉપલબ્ધ મોડલ્સ** હેઠળ બતાવાયેલ જીવંત કેટલોગ વાપરો. ઉપલબ્ધતા એકાઉન્ટ અને પ્લાન પર આધાર રાખે છે.
+**Kiro (`kr/`)** — મફત OAuth: **ડેશબોર્ડ → પ્રોવાઇડર્સ → Kiro → ઉપલબ્ધ મોડેલો** હેઠળ બતાવવામાં આવેલા લાઇવ કેટલોગનો ઉપયોગ કરો. ઉપલબ્ધતા એકાઉન્ટ અને પ્લાન પર આધાર રાખે છે.
 
 **Qoder (`if/`)** — મફત OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,7 +630,7 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/માસ ફ્લેટ અથવા વપરાશ-દીઠ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/માસ ફ્લેટ અથવા ઉપયોગ-દીઠ: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API કી: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
@@ -656,11 +656,11 @@ post_install() {
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google પાસેથી દરેક API કી મુજબ જીવંત સિંક થાય છે — કોઈ સ્થિર સૂચિ નથી. **ડેશબોર્ડ → પ્રોવાઇડર્સ** માં કી કનેક્ટ કરો, પછી વર્તમાન કેટલોગ આયાત કરવા માટે **ઉપલબ્ધ મોડલ્સ** વાપરો (દા.ત. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google તરફથી દરેક API કી મુજબ લાઇવ સિંક થાય છે — કોઈ સ્થિર સૂચિ નથી. **ડેશબોર્ડ → પ્રોવાઇડર્સ** માં કી કનેક્ટ કરો અને પછી વર્તમાન કેટલોગ આયાત કરવા માટે **ઉપલબ્ધ મોડેલો** નો ઉપયોગ કરો (દા.ત. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**અન્ય સુસંગત પ્રોવાઇડર્સ** (પસંદ કરેલા): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` દ્વારા), `azure-ai`, `openrouter` (પાસથ્રુ કેટલોગ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. દરેક `providerRegistry.ts` માં પોતાની મોડલ સૂચિ જાળવી રાખે છે અને જ્યારે પ્રોવાઇડર `/models` એન્ડપોઇન્ટ એક્સપોઝ કરે ત્યારે ઓટો-સિંક થઈ શકે છે.
+**અન્ય સુસંગત પ્રોવાઇડર્સ** (પસંદ કરેલા): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` દ્વારા), `azure-ai`, `openrouter` (પાસથ્રુ કેટલોગ), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. દરેક `providerRegistry.ts` માં પોતાની મોડેલ સૂચિ જાળવે છે અને જ્યારે પ્રોવાઇડર `/models` એન્ડપોઇન્ટ ઉપલબ્ધ કરાવે ત્યારે ઓટો-સિંક થઈ શકે છે.
 
-**મોડલ ID અંગે નોંધ:** OmniRoute પ્રોવાઇડર-નેટિવ ID વાપરે છે (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). કેટલાક ID માં ડોટવાળા વર્ઝન હોય છે કારણ કે અપસ્ટ્રીમ API તેમને એ જ રીતે અપેક્ષિત કરે છે. જો કોઈ મોડલ ઉપર સૂચિબદ્ધ ન હોય, તો ઉપલબ્ધતા કન્ફર્મ કરવા માટે `omniroute models --search <term>` ચલાવો અથવા `GET /api/models/catalog` કૉલ કરો.
+**મોડેલ ID વિશે નોંધ:** OmniRoute પ્રોવાઇડર-નેટિવ ID નો ઉપયોગ કરે છે (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). કેટલાક ID માં ડોટેડ વર્ઝન હોય છે કારણ કે અપસ્ટ્રીમ API તેમને એ જ રીતે અપેક્ષિત કરે છે. જો કોઈ મોડેલ ઉપર સૂચિબદ્ધ ન હોય, તો ઉપલબ્ધતા ચકાસવા માટે `omniroute models --search <term>` ચલાવો અથવા `GET /api/models/catalog` ને હિટ કરો.
 
 </details>
 

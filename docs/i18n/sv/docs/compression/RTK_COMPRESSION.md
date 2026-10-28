@@ -29,7 +29,7 @@ Intervall:      1 - (1 - 0.60..0.90) * (1 - 0.46) = 78.4-94.6%
 
 ## Vad den komprimerar
 
-Den inbyggda katalogen levereras för närvarande med 56 filter i dessa kategorier:
+Den inbyggda katalogen levereras för närvarande med 56 filter fördelade på dessa kategorier:
 
 | Kategori  | Exempel                                                       |
 | --------- | ------------------------------------------------------------- |
@@ -40,10 +40,10 @@ Den inbyggda katalogen levereras för närvarande med 56 filter i dessa kategori
 | `shell`   | `ls`, `find`, `grep`, generiska skalloggar                    |
 | `docker`  | `docker ps`, Docker-loggar                                    |
 | `infra`   | Terraform, OpenTofu, `systemctl status`                       |
-| `generic` | JSON-utdata, stackspårningar, generisk reservutdata           |
+| `generic` | JSON-utdata, stackspårningar, generisk fallback för utdata    |
 
 Detektorn i `open-sse/services/compression/engines/rtk/commandDetector.ts` klassificerar utdata
-innan filtervalet. Filter kan även matchas mot kommandomönster eller utdata-regex när en
+innan filtervalet. Filter kan även matcha på kommandomönster eller utdata-regex när en
 kommandoklass inte räcker till.
 
 ## Filtermatchning
@@ -356,15 +356,15 @@ node --import tsx/esm --test \
 
 ## Intensitetsnivåer (v3.8.16+)
 
-RTK stöder **3 intensitetsnivåer** som utgör en avvägning mellan **aggressiv komprimering** och **säkerhet**. Nivån ställs in via `config.intensity` i motorns konfiguration.
+RTK stödjer **3 intensitetsnivåer** som balanserar mellan **aggressiv komprimering** och **säkerhet**. Nivån ställs in via `config.intensity` i motorns konfiguration.
 
 ### De 3 nivåerna
 
-| Nivå                       | Trunkeringströskel   | Tokenbesparingar | Risk       | Passar bäst för                       |
-| -------------------------- | -------------------- | ---------------- | ---------- | ------------------------------------- |
-| `minimal`                  | 24 rader per sektion | ~20-40%          | Mycket låg | Produktion med kritisk kontext        |
-| `standard` (standardvärde) | 24 rader per sektion | ~50-70%          | Låg        | Dagliga kodningssessioner             |
-| `aggressive`               | 16 rader per sektion | ~70-90%          | Medel      | Långa sessioner, maximala besparingar |
+| Nivå                     | Trunkeringströskel   | Tokenbesparing | Risk       | Bäst för                           |
+| ------------------------ | -------------------- | -------------- | ---------- | ---------------------------------- |
+| `minimal`                | 24 rader per sektion | ~20-40%        | Mycket låg | Produktion med kritisk kontext     |
+| `standard` (standardval) | 24 rader per sektion | ~50-70%        | Låg        | Dagliga kodningssessioner          |
+| `aggressive`             | 16 rader per sektion | ~70-90%        | Medel      | Långa sessioner, maximal besparing |
 
 ### Var trunkeringen sker
 
@@ -376,39 +376,39 @@ config.intensity === "aggressive" ? 16 : 24,
 config.intensity === "aggressive" ? 16 : 24,
 ```
 
-Både **början** och **slutet** av varje sektion bevaras; innehållet i mitten tas bort när trunkeringen träder i kraft.
+Både **början** och **slutet** av varje sektion bevaras; innehållet i mitten tas bort när trunkeringen aktiveras.
 
-### Vad som behålls och vad som tas bort
+### Vad som behålls respektive vad som tas bort
 
-| Innehåll                         | minimal        | standard       | aggressive     |
-| -------------------------------- | -------------- | -------------- | -------------- |
-| Fel / stackspår                  | ✅ bevaras     | ✅ bevaras     | ✅ bevaras     |
-| Testfel                          | ✅ bevaras     | ✅ bevaras     | ✅ bevaras     |
-| Byggfel                          | ✅ bevaras     | ✅ bevaras     | ✅ bevaras     |
-| Godkända tester (utförliga)      | ✅ bevaras     | 🟡 komprimeras | 🟡 komprimeras |
-| Rutinutdata (informationsloggar) | 🟡 komprimeras | 🟡 komprimeras | ❌ tas bort    |
-| Förloppsindikatorer              | 🟡 komprimeras | ❌ tas bort    | ❌ tas bort    |
-| Banner / ASCII-grafik            | 🟡 komprimeras | ❌ tas bort    | ❌ tas bort    |
+| Innehåll                         | minimal       | standard      | aggressive    |
+| -------------------------------- | ------------- | ------------- | ------------- |
+| Fel / stackspårningar            | ✅ bevaras    | ✅ bevaras    | ✅ bevaras    |
+| Misslyckade tester               | ✅ bevaras    | ✅ bevaras    | ✅ bevaras    |
+| Byggfel                          | ✅ bevaras    | ✅ bevaras    | ✅ bevaras    |
+| Godkända tester (utförliga)      | ✅ bevaras    | 🟡 fälls ihop | 🟡 fälls ihop |
+| Rutinutdata (informationsloggar) | 🟡 fälls ihop | 🟡 fälls ihop | ❌ tas bort   |
+| Förloppsindikatorer              | 🟡 fälls ihop | ❌ tas bort   | ❌ tas bort   |
+| Banderoll / ASCII-grafik         | 🟡 fälls ihop | ❌ tas bort   | ❌ tas bort   |
 
 ### Välja rätt intensitet
 
 ```
-                  Is losing context catastrophic?
+            Är det katastrofalt att förlora kontext?
                   │
       ┌───────────┼───────────┐
       │           │           │
-    YES          NO          NOT SURE
+     JA          NEJ        OSÄKER
       │           │           │
       ▼           │           │
    minimal        │           │
       │           │           │
       │           ▼           ▼
-      │      How critical    Try `standard` first
-      │      is throughput?  (works for 80% of
-      │           │          cases)
+      │    Hur kritisk är   Prova `standard` först
+      │    genomströmning?  (fungerar i 80% av
+      │         │            fallen)
       │      ┌────┴────┐
       │      │         │
-      │     LOW       HIGH
+      │     LÅG       HÖG
       │      │         │
       │      ▼         ▼
       │   standard   aggressive
@@ -418,7 +418,7 @@ Både **början** och **slutet** av varje sektion bevaras; innehållet i mitten 
 
 ### Konfigurera intensitet
 
-**Per combo** (i combo-konfigurationen):
+**Per kombo** (i kombokonfigurationen):
 
 ```json
 {
@@ -435,7 +435,7 @@ Både **början** och **slutet** av varje sektion bevaras; innehållet i mitten 
 
 `rtkEngine` (`@omniroute/open-sse/services/compression/engines/rtk`) är en
 `CompressionEngine` och har ingen `updateConfig`-metod. Uppdatera en motors
-konfiguration via registerhjälpen istället:
+konfiguration via registerhjälpen i stället:
 
 ```ts
 import { updateEngineConfig } from "@omniroute/open-sse/services/compression/engines/registry";
@@ -445,7 +445,7 @@ updateEngineConfig("rtk", { intensity: "aggressive" });
 
 ### Verifiera effekten
 
-Använd **Verify Gate** (se nedan) för att bekräfta att ditt filter är säkert vid vald intensitet:
+Använd **Verify Gate** (se nedan) för att bekräfta att ditt filter är säkert vid den intensitet du har valt:
 
 ```ts
 import { runRtkFilterTests } from "omniroute/compression/engines/rtk/verify";

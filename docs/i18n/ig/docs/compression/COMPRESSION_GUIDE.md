@@ -30,84 +30,97 @@ Arịrịọ Client
 
 ---
 
-## Ọnọdụ Mkpakọ
+## Ụdị Mwekota
 
-### Off
+### Gbanyụrụ
 
-Enweghị mkpakọ a tinyere. Ozi niile na-agafe n'agbanweghị.
+Enweghị mwekota etinyere. Ozi niile na-agafeghị mgbanwe ọ bụla.
 
-### Ọnọdụ Lite (~15% nchekwa, <1ms igbu oge)
+### Ụdị Lite (~15% nchekwa, <1ms nkwụsịtụ)
 
-Ọnọdụ kacha dị nchebe — ọ dịghị mgbanwe ọdịnaya ọ bụla, naanị nhicha nhazi edemede:
+Ụdị kacha nchebe — enweghị mgbanwe nkọwa ọ bụla, naanị nhicha nhazi:
 
-| Usoro                    | Nkọwa                                                         |
-| ------------------------ | ------------------------------------------------------------- |
-| `collapseWhitespace`     | Jikọta akara efu ndị na-eso ibe ya na oghere ndị na-eso n'azu |
-| `dedupSystemPrompt`      | Wepụ ozi sistemụ ndị bụ oyiri                                 |
-| `compressToolResults`    | Pakọta nsonaazụ ngwá ọrụ/ọrụ rụrụ ọnụ                         |
-| `removeRedundantContent` | Wepụ ntuziaka a na-eme ugboro ugboro                          |
-| `replaceImageUrls`       | Mee ka base64 image data URIs dị mkpụmkpụ                     |
+| Usoro                    | Nkọwa                                                        |
+| ------------------------ | ------------------------------------------------------------ |
+| `collapseWhitespace`     | Jikọta ahịrị oghere ndị na-esote ọnụ na oghere dị na njedebe |
+| `dedupSystemPrompt`      | Wepu ozi sistemụ ndị yiri ibe ha                             |
+| `compressToolResults`    | Mekota nsonaazụ ngwaọrụ/ọrụ ogologo                          |
+| `removeRedundantContent` | Wepu ntụziaka ndị na-emegharị onwe ha                        |
+| `replaceImageUrls`       | Mee ka data URIs base64 nke onyonyo dị mkpirikpi             |
 
-**Kacha mma maka:** Ojiji na-arụ ọrụ mgbe niile, usoro ọrụ ndị dị mkpa n'ihi nchekwa.
+**Kacha mma maka:** Ojiji mgbe niile, usoro ọrụ ndị nchekwa dị mkpa.
 
-### Ọnọdụ Standard (~30% nchekwa)
+### Ụdị Standard (~30% nchekwa)
 
-Nke [Caveman](https://github.com/JuliusBrussee/caveman) kpaliri — na-ewepụ okwu ntinye na usoro okwu rụrụ ọnụ ebe ọ na-edebe ọdịnaya:
+Nke [Caveman](https://github.com/JuliusBrussee/caveman) kpaliri — na-ewepu okwu mmejupụta na okwu ogologo ebe ọ na-edebe nkọwa:
 
-- Na-ewepụ okwu ntinye ("please", "I think", "basically", "actually")
-- Na-emekọta okwu rụrụ ọnụ ("in order to" → "to", "as a result of" → "because")
-- Na-ewepụ okwu nkwụsịtụ nke nkwanye ugwu ("Would you mind...", "If you could possibly...")
-- Iwu regex 30+ a haziri nke ọma maka prompt koodu
+- Na-ewepu okwu mmejupụta ("please", "I think", "basically", "actually")
+- Na-emechikọta okwu ogologo ("in order to" → "to", "as a result of" → "because")
+- Na-ewepu okwu nwayọ ekele ("Would you mind...", "If you could possibly...")
+- Iwu regex karịrị 30 e haziri maka prompt koodu
 
-**Kacha mma maka:** Usoro ọrụ koodu kwa ụbọchị, otu ndị na-eleba anya na ọnụ ahịa.
+**Kacha mma maka:** Usoro ọrụ koodu kwa ụbọchị, otu ndị na-ele ọnụ ahịa anya.
 
-### Ọnọdụ Aggressive (~50% nchekwa)
+### Ụdị Aggressive (~50% nchekwa)
 
-Nlekọta akụkọ ihe mere eme amamikpe maka oge ọrụ ogologo:
+Njikwa akụkọ ọgbara isi maka oge ọrụ ogologo:
 
-- **Ịka ozi ochie** — ozi ochie na-apakọta n'ụzọ nke ọ na-agbasawanye
-- **Mkpakọ nsonaazụ ngwá ọrụ** — a na-ebipụ ma ọ bụ wepụ nsonaazụ ngwá ọrụ ogologo (akara mbụ/ikpeazụ, nzacha akara dakọtara, mkpakọ igodo JSON)
-- **Ndị nche ịdị ike nke nhazi** — na-eme ka ọnụ `tool_use` + `tool_result` ka nọrọ n'otu
-- **Ịmata Context Window** — na-akwanyere oke token nke model ọ bụla ugwu
+- **Ịgbo Ozi Ochie** — ozi ochie na-enweta mwekota nke na-aga n'ihu
+- **Mwekota Nsonaazụ Ngwaọrụ** — nsonaazụ ngwaọrụ ogologo a na-epụchapụ ma ọ bụ wepụ ụfọdụ
+  (ahịrị mbụ/ikpeazụ, nzacha ahịrị dabara, mmechikọta JSON key)
+- **Ndị Nchebe Ịdịmma Ọdịdị** — na-ahụ na ụzọ abụọ `tool_use` + `tool_result` na-adabere onwe ha
+- **Nghọta Windo Ọdịnaya** — na-akwanyere ókè token nke model ọ bụla ùgwù
 
-**Kacha mma maka:** Oge debugging ogologo, codebases buru ibu.
+**Kacha mma maka:** Oge ọrụ debugging ogologo, codebases buru ibu.
 
-### Ọnọdụ Ultra (~75% nchekwa)
+### Ụdị Ultra (~75% nchekwa)
 
-Mkpakọ kacha elu maka ọnọdụ ndị token dị mkpa:
+Mwekota kacha elu maka ọnọdụ ndị token dị mkpa:
 
-- **Ikpụ Heuristic** — ikpụ token nke edemede dabere na gọọ
-- **Nchekwa nhazi** — a na-akpọ fenced code blocks, inline code, URLs na identifiers tombstone ma jikọta ha ọzọ otu ha si dị; a naghị ekpụ ha
-- **SLM tier nhọrọ** — obere model nke ebe obibi nwere ike ịkwalite nkwepụ ahụ mgbe a haziri ya
-- Ọ dị iche na Ọnọdụ Aggressive: ọ naghị agba ịka ozi ochie, mkpakọ nsonaazụ ngwá ọrụ ma ọ bụ onye na-akọwakọta ndabere azụ (naanị ọdịda nke SLM tier ka nwere ike iziga usoro ndabere azụ gafee aggressive)
+- **Ntụpụ Heuristic** — ntụpụ token nke edemede dabere na akara
+- **Nchekwa Ọdịdị** — a na-akpọ ngọngọ koodu e gburugburu, koodu inline, URLs na identifiers
+  aha ebe a na-edebe ha ma jikọọ ha ọzọ otú ha dị, a naghị atụpụ ha
+- **Ọkwa SLM Nhọrọ** — obere model obodo nwere ike imezi ntụpụ ahụ mgbe e haziri ya
+- Na-adabereghị na Ụdị Aggressive: ọ naghị arụ ọrụ ịgbo ozi ochie, mwekota nsonaazụ ngwaọrụ
+  ma ọ bụ onye nchịkọta fallback (naanị ọdịda nke ọkwa SLM nwere ike ịzụga fallback pass site
+  na aggressive)
 
-**Kacha mma maka:** Mgbe ị na-arụkọ oke context ugboro ugboro.
+**Kacha mma maka:** Mgbe ị na-akwụ ókè ọdịnaya ugboro ugboro.
 
-### Ọnọdụ RTK (oke upstream 60-90%)
+### Ụdị RTK (60-90% oke upstream)
 
-E kwalitere ọnọdụ RTK maka nsonaazụ ngwá ọrụ rụrụ ọnụ nke na-apụta na oge ọrụ coding-agent:
+E meziri Ụdị RTK ka ọ sie ike maka nsonaazụ ngwaọrụ ogologo ndị na-apụta na oge ọrụ coding-agent:
 
-- Na-achọpụta ụdị iwu/nsonaazụ dị ka `git status`, `git diff`, `git log`, ndị na-agba ule, TypeScript/Vite/Webpack builds, ESLint/Biome/Prettier, npm audit/installs, Docker logs, nsonaazụ infra, na nsonaazụ shell izugbe
-- Na-etinye ngwugwu nzacha JSON si `open-sse/services/compression/engines/rtk/filters/`
-- Na-ebubata nzacha RTK TOML schema v1 si faịlụ `filters.toml` nke oru ma ọ bụ nke zuru ụwa ọnụ, nwere nkwenye ule inline na nlele ntụkwasị obi maka faịlụ oru
-- Na-abịa na nzacha 56 arụrụ n'ime ya n'ọnụ na ihe nlele nkwenye inline
-- Na-ewepụ usoro njikwa ANSI, akara ọganihu, akara a na-eme ugboro ugboro, na mkpọtụ na-enweghị ihe ọ ga-eme
-- Na-edebe ndịda, njehie, ịdọ aka ná ntị, faịlụ gbanwere, nchịkọta, na ngwụcha nke nsonaazụ ogologo
-- Na-akwado nzacha oru nke a gachiri ntụkwasị obi, nzacha zuru ụwa ọnụ, na mweghachi nsonaazụ raw redacted nke bụ nhọrọ
+- Na-achọpụta ụdị iwu/nsonaazụ dị ka `git status`, `git diff`, `git log`, test runners,
+  TypeScript/Vite/Webpack builds, ESLint/Biome/Prettier, npm audit/installs, Docker logs,
+  nsonaazụ infra, na nsonaazụ shell nkịtị
+- Na-etinye ngwugọ nzacha JSON si `open-sse/services/compression/engines/rtk/filters/`
+- Na-ebubata nzacha RTK TOML schema v1 si faịlụ `filters.toml` nke oru ma ọ bụ zuru ụwa ọnụ,
+  nke nwere nkwenye inline-test na nlekwa ntụkwasị obi maka faịlụ oru
+- Na-abịa na nzacha 56 wuru n'ime ya nke nwere ihe nlele nkwenye inline
+- Na-ewepu ANSI control sequences, ogwe ọganihu, ahịrị na-emegharị onwe ha, na mkpotu na-enweghị
+  ihe a ga-eme
+- Na-edebe ọdịda, njehie, ịdọ aka ná ntị, faịlụ ndị gbanwere, nchịkọta, na ngwụcha nke nsonaazụ
+  ogologo
+- Na-akwado nzacha oru nke ntụkwasị obi na-achịkwa, nzacha zuru ụwa ọnụ, na nweghachi raw-output
+  a zoro ezo nke nhọrọ
 
-**Kacha mma maka:** Oge ọrụ agent nwere transcript shell, build, ule, git, grep, na nsonaazụ faịlụ.
+**Kacha mma maka:** Oge ọrụ agent nke nwere shell, build, test, git, grep, na ndekọ nsonaazụ faịlụ.
 
-### Ọnọdụ Stacked (oke tozuru 78-95%)
+### Ụdị Stacked (78-95% oke ruuru)
 
-Ọnọdụ Stacked na-agba ọtụtụ engine mkpakọ n'usoro a maara nke ọma. Pipeline ndabara bụ:
+Ụdị Stacked na-agba ọtụtụ engine mwekota ọsọ n'usoro e kpebiri nke ọma. Pipeline ndabere bụ:
 
 ```txt
 RTK -> Caveman
 ```
 
-Usoro ahụ na-eme ka nsonaazụ terminal/ngwá ọrụ dị mkpụmkpụ mbụ, wee tinye mkpakọ ọdịnaya Caveman na prompt asụsụ okike fọdụrụ. Enwere ike ịhazi stacked pipelines n'ụwa niile ma ọ bụ site na compression combos e nyere routing combos.
+Usoro ahụ na-edebe nsonaazụ terminal/ngwaọrụ dị mkpirikpi tupu, mgbe ahụ ọ na-etinye mmechikọta
+nkọwa Caveman na prompt asụsụ eke fọdụrụ. Enwere ike ịhazi Stacked pipelines zuru ụwa ọnụ ma ọ bụ
+site na compression combos e nyere routing combos.
 
-**Kacha mma maka:** Context agwakọtara nwere ndekọ ngwá ọrụ buru ibu tinyere ntuziaka mmadụ ma ọ bụ nchịkọta onye enyemaka.
+**Kacha mma maka:** Ọdịnaya jikọtara nke nwere ndekọ ngwaọrụ buru ibu gbakwunyere ntụziaka mmadụ
+ma ọ bụ nchịkọta onye enyemaka.
 
 ---
 
