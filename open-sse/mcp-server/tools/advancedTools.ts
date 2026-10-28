@@ -357,6 +357,32 @@ export async function handleSetBudgetGuard(args: {
   }
 }
 
+/**
+ * The auto-strategy config to persist, or undefined when the call changes neither the auto
+ * sub-strategy nor the OmniJev settings (the combo's stored config is then left alone).
+ */
+function buildAutoRoutingConfig(
+  currentConfig: JsonRecord,
+  args: { autoRoutingStrategy?: AutoRoutingStrategyValue; omniJev?: OmniJevConfig }
+): JsonRecord | undefined {
+  if (!args.autoRoutingStrategy && !args.omniJev) return undefined;
+  const currentAutoConfig = toRecord(currentConfig.auto);
+  return {
+    ...currentConfig,
+    auto: {
+      ...Object.fromEntries(Object.entries(currentConfig).filter(([key]) => key !== "auto")),
+      ...currentAutoConfig,
+      routerStrategy: isOmniJevStrategy(args.autoRoutingStrategy)
+        ? "omni-jev"
+        : (args.autoRoutingStrategy ??
+          currentAutoConfig.routerStrategy ??
+          currentConfig.routerStrategy ??
+          "rules"),
+      ...(args.omniJev ? { omniJev: omniJevConfigSchema.parse(args.omniJev) } : {}),
+    },
+  };
+}
+
 export async function handleSetRoutingStrategy(args: {
   comboId: string;
   strategy: RoutingStrategyValue;
@@ -404,24 +430,8 @@ export async function handleSetRoutingStrategy(args: {
     );
 
     const normalizedStrategy = normalizeRoutingStrategy(args.strategy);
-    let nextConfig: JsonRecord | undefined = undefined;
-    if (normalizedStrategy === "auto" && (args.autoRoutingStrategy || args.omniJev)) {
-      const currentAutoConfig = toRecord(currentConfig.auto);
-      nextConfig = {
-        ...currentConfig,
-        auto: {
-          ...Object.fromEntries(Object.entries(currentConfig).filter(([key]) => key !== "auto")),
-          ...currentAutoConfig,
-          routerStrategy: isOmniJevStrategy(args.autoRoutingStrategy)
-            ? "omni-jev"
-            : (args.autoRoutingStrategy ??
-              currentAutoConfig.routerStrategy ??
-              currentConfig.routerStrategy ??
-              "rules"),
-          ...(args.omniJev ? { omniJev: omniJevConfigSchema.parse(args.omniJev) } : {}),
-        },
-      };
-    }
+    const nextConfig =
+      normalizedStrategy === "auto" ? buildAutoRoutingConfig(currentConfig, args) : undefined;
 
     const payload: JsonRecord = { strategy: normalizedStrategy };
     if (nextConfig && Object.keys(nextConfig).length > 0) {

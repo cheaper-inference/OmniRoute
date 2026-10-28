@@ -94,21 +94,31 @@ function textParts(value: unknown): string {
     .slice(0, 12000);
 }
 
+function isBodyRecord(value: unknown): value is Body {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+/** Latest user turn; a trailing role-less item counts as the user's (Gemini `contents`). */
+function latestUserMessage(messages: unknown[]): Body | undefined {
+  for (let i = messages.length - 1; i >= 0; i--) {
+    const message = messages[i] as Body;
+    if (message?.role === "user" || (i === messages.length - 1 && message?.role === undefined)) {
+      return message;
+    }
+  }
+  return undefined;
+}
+
 /** Share only the latest user text; never serialize tools, headers or account data. */
 function userText(body: Body): string {
-  if (body.request && typeof body.request === "object" && !Array.isArray(body.request)) {
-    return userText({ ...(body.request as Body), request: undefined });
+  if (isBodyRecord(body.request)) {
+    return userText({ ...body.request, request: undefined });
   }
   if (typeof body.input === "string") return body.input.slice(0, 12000);
   const messages = body.messages ?? body.input ?? body.contents;
   if (!Array.isArray(messages)) return "";
-  for (let i = messages.length - 1; i >= 0; i--) {
-    const message = messages[i] as Body;
-    if (message?.role === "user" || (i === messages.length - 1 && message?.role === undefined)) {
-      return textParts(message.content ?? message.parts ?? message);
-    }
-  }
-  return "";
+  const message = latestUserMessage(messages);
+  return message ? textParts(message.content ?? message.parts ?? message) : "";
 }
 
 function localTask(text: string): Task {
@@ -263,31 +273,55 @@ export function omniJevPrompt(packet: OmniJevPacket): string {
 
 const injected = new WeakSet<object>();
 /** Immutable source-format injection before cache lookup and translation. */
-export function injectOmniJev(body: Body, packet: OmniJevPacket, sourceFormat?: string): Body {
-  if (injected.has(body)) return body;
-  const prompt = omniJevPrompt(packet);
-  const result = { ...body };
-  if (body.request && typeof body.request === "object" && !Array.isArray(body.request)) {
-    result.request = injectOmniJev(body.request as Body, packet, "gemini");
-  } else if ("contents" in body) {
-    const key = "system_instruction" in body ? "system_instruction" : "systemInstruction";
-    const previous = body[key] as Body | undefined;
-    result[key] = {
+function prependPrompt(prompt: string, existing: unknown): string {
+  return prompt + (typeof existing === "string" ? "\n\n" + existing : "");
+}
+
+/** Gemini: prepend a text part to whichever system-instruction spelling the body uses. */
+function injectGeminiInstruction(body: Body, prompt: string): Body {
+  const key = "system_instruction" in body ? "system_instruction" : "systemInstruction";
+  const previous = body[key] as Body | undefined;
+  return {
+    ...body,
+    [key]: {
       ...previous,
       parts: [{ text: prompt }, ...(Array.isArray(previous?.parts) ? previous.parts : [])],
-    };
-  } else if ("input" in body) {
-    result.instructions =
-      prompt + (typeof body.instructions === "string" ? "\n\n" + body.instructions : "");
-  } else if (sourceFormat === "claude" || "system" in body) {
-    result.system = Array.isArray(body.system)
+    },
+  };
+}
+
+function injectClaudeSystem(body: Body, prompt: string): Body {
+  return {
+    ...body,
+    system: Array.isArray(body.system)
       ? [{ type: "text", text: prompt }, ...body.system]
-      : prompt + (typeof body.system === "string" ? "\n\n" + body.system : "");
-  } else if (Array.isArray(body.messages)) {
-    result.messages = [{ role: "system", content: prompt }, ...body.messages];
-  } else {
-    return body;
+      : prependPrompt(prompt, body.system),
+  };
+}
+
+/** The injected copy for the body's own shape, or null when no shape matches. */
+function injectBySourceShape(
+  body: Body,
+  packet: OmniJevPacket,
+  prompt: string,
+  sourceFormat?: string
+): Body | null {
+  if (isBodyRecord(body.request)) {
+    return { ...body, request: injectOmniJev(body.request, packet, "gemini") };
   }
+  if ("contents" in body) return injectGeminiInstruction(body, prompt);
+  if ("input" in body) return { ...body, instructions: prependPrompt(prompt, body.instructions) };
+  if (sourceFormat === "claude" || "system" in body) return injectClaudeSystem(body, prompt);
+  if (Array.isArray(body.messages)) {
+    return { ...body, messages: [{ role: "system", content: prompt }, ...body.messages] };
+  }
+  return null;
+}
+
+export function injectOmniJev(body: Body, packet: OmniJevPacket, sourceFormat?: string): Body {
+  if (injected.has(body)) return body;
+  const result = injectBySourceShape(body, packet, omniJevPrompt(packet), sourceFormat);
+  if (!result) return body;
   injected.add(result);
   return result;
 }
