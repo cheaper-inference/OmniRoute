@@ -33,7 +33,13 @@ export const nvidiaProvider: RegistryEntry = {
     { id: "google/gemma-4-31b-it", name: "Gemma 4 31B" },
     { id: "google/diffusiongemma-26b-a4b-it", name: "DiffusionGemma 26B A4B IT" },
     { id: "nvidia/nemotron-3-ultra-550b-a55b", name: "Nemotron 3 Ultra 550B A55B" },
-    { id: "nvidia/nemotron-3-super-120b-a12b", name: "Nemotron 3 Super 120B A12B" },
+    // Nemotron 3 Super 120B A12B was retired by NVIDIA on 2026-10-20 (404 "Function not found");
+    // Nemotron 3.5 Super VL is NVIDIA's announced replacement (NVIDIA/NemoClaw#13536).
+    {
+      id: "nvidia/nemotron-3.5-super-vl-120b-a12b",
+      name: "Nemotron 3.5 Super VL 120B A12B",
+      supportsVision: true,
+    },
     {
       id: "nvidia/nemotron-3.5-lightning-30b-a3b",
       name: "Nemotron 3.5 Lightning 30B A3B",

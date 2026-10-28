@@ -1,0 +1,1 @@
+- fix(providers): model sync no longer starves the event loop — the post-sync context-window reconcile is provider-scoped, trailing-debounced, skipped when no window changed, and cooperative (#18048)

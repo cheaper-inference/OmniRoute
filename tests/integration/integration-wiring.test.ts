@@ -455,10 +455,10 @@ describe("Barrel Exports — store", () => {
 describe("Barrel Exports — shared/components/layouts", () => {
   const src = readProjectFile("src/shared/components/layouts/index.tsx");
 
-  it("should export DashboardLayout and AuthLayout", () => {
+  it("should export DashboardLayout (the orphan AuthLayout was removed, KEA-7886 P10)", () => {
     assert.ok(src, "src/shared/components/layouts/index.tsx should exist");
     assert.match(src, /DashboardLayout/);
-    assert.match(src, /AuthLayout/);
+    assert.doesNotMatch(src, /AuthLayout/);
   });
 });
 

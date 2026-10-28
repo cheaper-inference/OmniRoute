@@ -150,24 +150,24 @@ curl -X POST http://localhost:20128/a2a \
 
 ---
 
-## Skill disponibili
+## Competenze disponibili
 
-OmniRoute espone 6 skill A2A collegate in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Ogni modulo skill risiede in `src/lib/a2a/skills/`.
+OmniRoute espone 6 abilità A2A cablate in `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`. Ogni modulo di abilità risiede in `src/lib/a2a/skills/`.
 
-| Skill              | ID                   | Descrizione                                                                                                                                                    | Tag                        | Esempi                                               |
-| :----------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------- | :--------------------------------------------------- |
-| Smart Routing      | `smart-routing`      | Instrada un prompt attraverso il provider/combo ottimale usando il motore combo di OmniRoute + scoring                                                         | routing, providers         | "Instrada questo prompt tramite il modello migliore" |
-| Quota Management   | `quota-management`   | Riporta lo stato delle quote per provider, aiuta i chiamanti a decidere quando applicare throttling/cambiare                                                   | quota, providers           | "Controlla la quota per anthropic"                   |
-| Provider Discovery | `provider-discovery` | Elenca i provider installati con capacità, flag free-tier, stato OAuth                                                                                         | providers, discovery       | "Quali provider sono disponibili?"                   |
-| Cost Analysis      | `cost-analysis`      | Stima il costo di una richiesta/conversazione dato il catalogo + l'uso recente                                                                                 | cost, usage                | "Stima il costo di questa conversazione"             |
-| Health Report      | `health-report`      | Aggrega lo stato di circuit breaker, cooldown e lockout per provider                                                                                           | health, resilience         | "Mostra lo stato di salute di tutti i provider"      |
-| List Capabilities  | `list-capabilities`  | Restituisce il catalogo completo delle 45 Agent Skills (23 API + 21 CLI + 1 config) come tabella markdown con URL raw dei SKILL.md per l'iniezione di contesto | catalog, discovery, skills | "Elenca tutte le capacità di OmniRoute"              |
+| Abilità                 | ID                   | Descrizione                                                                                                                                                                                         | Tag                            | Esempi                                                   |
+| :---------------------- | :------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :----------------------------- | :------------------------------------------------------- |
+| Itinerario intelligente | `smart-routing`      | Instrada un prompt attraverso lo provider/combo ottimale utilizzando il punteggio + del motore combinato di OmniRoute                                                                               | instradamento, fornitori       | "Indirizza questa richiesta tramite il modello migliore" |
+| Gestione delle quote    | `quota-management`   | Riporta lo stato della quota per fornitore e aiuta i chiamanti a decidere quando throttle/switch                                                                                                    | quota, fornitori               | "Verifica quota antropica"                               |
+| Scoperta del fornitore  | `provider-discovery` | Elenca i provider installati con funzionalità, flag di livello gratuito e stato OAuth                                                                                                               | fornitori, scoperta            | "Quali fornitori sono disponibili?"                      |
+| Analisi dei costi       | `cost-analysis`      | Stima del costo di uno request/conversation dato l'utilizzo recente del catalogo +                                                                                                                  | costo, utilizzo                | "Costo stimato per questa conversazione"                 |
+| Rapporto sulla salute   | `health-report`      | Aggrega interruttore automatico, raffreddamento e stato di blocco per fornitore                                                                                                                     | salute, resilienza             | "Mostra lo stato di salute di tutti i fornitori"         |
+| Elenco capacità         | `list-capabilities`  | Restituisce il catalogo completo delle competenze dell'agente a 45 voci (23 API + 21 CLI + 1 configurazione) come tabella di ribasso con SKILL.md URLs non elaborato per l'inserimento del contesto | catalogo, scoperta, competenze | "Elenca tutte le funzionalità OmniRoute "                |
 
-> La Agent Card dovrebbe essere mantenuta allineata con il catalogo live di 375 provider; i conteggi dei provider e i metadati free/no-auth provengono dal registro di runtime.
+> La Carta Agente deve essere mantenuta allineata al catalogo live del fornitore 377; i conteggi dei provider e i metadati free/no-auth provengono dal registro di runtime.
 
-### Dettaglio della skill `list-capabilities`
+### `list-capabilities` Dettaglio abilità
 
-La skill `list-capabilities` è particolarmente utile per gli agenti esterni che devono scoprire cosa espone OmniRoute prima di inviare chiamate API. Restituisce un artifact sotto forma di tabella markdown strutturata:
+La skill `list-capabilities` è particolarmente utile per gli agenti esterni che hanno bisogno di scoprire cosa espone OmniRoute prima di inviare chiamate API. Restituisce un artefatto della tabella di markdown strutturata:
 
 ```
 | ID | Name | Category | Area | Endpoints/Commands | Raw URL |
@@ -176,7 +176,7 @@ La skill `list-capabilities` è particolarmente utile per gli agenti esterni che
 ...
 ```
 
-Ogni riga include la colonna `rawUrl` così gli agenti possono recuperare immediatamente lo SKILL.md completo. Il campo `metadata.totalSkills` rispecchia la dimensione del catalogo (45 oggi). Implementazione: `src/lib/a2a/skills/listCapabilities.ts`. Vedi anche [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Ogni riga include la colonna `rawUrl` in modo che gli agenti possano recuperare immediatamente l'intero SKILL.md. Il campo `metadata.totalSkills` rispecchia la dimensione del catalogo (45 oggi). Attuazione: `src/lib/a2a/skills/listCapabilities.ts`. Vedi anche [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 
@@ -268,7 +268,7 @@ submitted → working → completed
 
 ## Esempi di integrazione
 
-### Python (requests)
+### Python (richieste)
 
 ```python
 import requests
@@ -287,7 +287,7 @@ print(result["artifacts"][0]["content"])
 print(result["metadata"]["routing_explanation"])
 ```
 
-### TypeScript (fetch)
+### TypeScript (recuperare)
 
 ```typescript
 const resp = await fetch("http://localhost:20128/a2a", {
